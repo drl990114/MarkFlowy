@@ -1,35 +1,19 @@
-import { Routes, Route } from "react-router-dom";
-import Dialog from "./pages/dialog";
-import { Button } from "@mui/material";
-import {
-  isPermissionGranted,
-  requestPermission,
-  sendNotification,
-} from "@tauri-apps/api/notification";
-import { invoke } from "@tauri-apps/api";
+import { Editor } from '@toast-ui/react-editor';
+import { Explorer } from "@components";
+import '@toast-ui/editor/dist/toastui-editor.css';
+
 const App = () => {
-  const send = async () => {
-    let permissionGranted = await isPermissionGranted();
-    if (!permissionGranted) {
-      const permission = await requestPermission();
-      permissionGranted = permission === "granted";
-    }
-    if (permissionGranted) {
-      sendNotification("Hello world");
-      sendNotification({ title: "TAURI", body: "Tauri is awesome!" });
-    }
-  };
-  const inv = () => {
-    invoke("greet", { name: "world" }).then((resp) => {
-      console.log(resp);
-      // sendNotification(resp)
-    });
-  };
+  const content = [
+    '# Markdown Editor!',
+    '',
+  ].join('\n');
+
   return (
-    <div>
-      <Button variant="contained" color="primary"onClick={send}>Send</Button>
-      <Button onClick={inv}>Invoke</Button>
+    <div style={{ height: '100vh' }}>
+      <Explorer />
+      <Editor previewStyle="vertical" initialValue={content} height="100%"/>
     </div>
   );
 };
+
 export default App;
