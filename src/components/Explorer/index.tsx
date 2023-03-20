@@ -1,13 +1,16 @@
 import { Fs } from "@services"
+import classnames from 'classnames'
 
-const Explorer = () => {
+const Explorer = (props) => {
 
   const handleOpenFileClick = async () => {
     Fs.selectMdFileAndRead()
   }
 
-  return <div>
-     <button className="btn" onClick={handleOpenFileClick}>open file</button>
+  const containerCls = classnames(props.className)
+
+  return <div className={containerCls}>
+     <button className="btn" onClick={handleOpenFileClick}>open markdown file</button>
   </div>
 }
 
