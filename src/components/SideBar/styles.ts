@@ -15,19 +15,6 @@ export const Container = styled.div`
     z-index: 2;
   }
 
-  .app-frame {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    background: white;
-    height: 100vh;
-    max-height: 100%;
-    background: #ffffff;
-    box-shadow: 8px 2px 32px -2px rgba(0, 0, 0, 0.25);
-    border-radius: 0px 10px 10px 0px;
-    z-index: 1;
-  }
-
   .app-sidebar .app-sidebar-content {
     flex: 1;
   }

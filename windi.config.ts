@@ -7,7 +7,7 @@ export default defineConfig({
   },
   attributify: true,
   shortcuts: {
-    btn: 'rounded-lg text-gray-100 bg-primary px-4 py-2 m-2 inline-block hover:shadow',
+    btn: 'rounded-lg text-gray-100 bg-primary px-4 py-2 m-2 w-auto hover:shadow',
   },
   theme: {
     extend: {

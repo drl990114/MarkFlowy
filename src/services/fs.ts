@@ -19,8 +19,9 @@ const selectMdFile = async (opt?: OpenDialogOptions) => {
 const selectMdFileAndRead = async () => {
   const selectedPath = await selectMdFile()
   if (!selectedPath) return
-  const content = readTextFile(selectedPath as string)
+  const content = await readTextFile(selectedPath as string)
   console.log('selectMdFileAndRead', content)
+  return content
 }
 
 export default {

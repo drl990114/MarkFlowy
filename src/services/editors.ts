@@ -1,11 +1,19 @@
-// cache
-const editors = new Map()
+import Editor from '@toast-ui/editor'
 
-const setMarkDownById = (id: string, mdContent: string) => {
-  editors.set(id, mdContent)
+let editor: { current: null | Editor } = { current: null }
+
+const setMarkDown = (mdContent: string) => {
+  if (editor.current === null) {
+    return
+  }
+  editor.current.setMarkdown(mdContent)
 }
 
+const setEditor = (EditorInstance: Editor) => {
+  editor.current = EditorInstance
+}
 export default {
-  editors,
-  setMarkDownById
+  editor,
+  setEditor,
+  setMarkDown,
 }

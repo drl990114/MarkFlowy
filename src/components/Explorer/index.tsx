@@ -1,17 +1,23 @@
-import { Fs } from "@services"
+import { EditorsService, Fs } from "@services"
 import classnames from 'classnames'
+import { FC } from "react"
 
-const Explorer = (props) => {
+const Explorer: FC<ExplorerProps> = (props) => {
 
   const handleOpenFileClick = async () => {
-    Fs.selectMdFileAndRead()
+    const mdContent = await Fs.selectMdFileAndRead() || ''
+    EditorsService.setMarkDown(mdContent)
   }
 
-  const containerCls = classnames(props.className)
+  const containerCls = classnames(props.className, '')
 
   return <div className={containerCls}>
      <button className="btn" onClick={handleOpenFileClick}>open markdown file</button>
   </div>
+}
+
+interface ExplorerProps {
+  className?: string
 }
 
 export default Explorer
