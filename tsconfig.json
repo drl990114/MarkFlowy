@@ -22,9 +22,11 @@
       "@hooks": ["hooks"],
       "@services": ["services"],
       "@constants": ["constants"],
-      "@stores": ["stores"]
+      "@utils": ["utils"],
+      "@stores": ["stores"],
+      "@icons": ["icons"],
     }
   },
-  "include": ["src", "vite.config.ts"],
+  "include": ["src", "vite.config.ts", "src/types"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

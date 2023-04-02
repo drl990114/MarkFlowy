@@ -10,18 +10,20 @@ const selectMdFile = async (opt?: OpenDialogOptions) => {
         extensions: ['md'],
       },
     ],
-    ...opt
+    ...opt,
   })
 
   return selectedPath
 }
 
-const selectMdFileAndRead = async () => {
-  const selectedPath = await selectMdFile()
+const selectMdFileAndRead = async (): Promise<{ content: string; selectedPath: string } | undefined> => {
+  const selectedPath = await selectMdFile() as string
   if (!selectedPath) return
   const content = await readTextFile(selectedPath as string)
-  console.log('selectMdFileAndRead', content)
-  return content
+  return {
+    content,
+    selectedPath,
+  }
 }
 
 export default {
