@@ -1,7 +1,7 @@
-import { useState, useRef, useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Explorer } from '@components'
 
-const SideBar = () => {
+function SideBar() {
   const [isResizing, setIsResizing] = useState(false)
   const [sidebarWidth, setSidebarWidth] = useState(268)
   const sidebarRef = useRef<HTMLDivElement>(null)
@@ -16,11 +16,10 @@ const SideBar = () => {
 
   const resize = useCallback(
     (mouseMoveEvent: MouseEvent) => {
-      if (isResizing && sidebarRef.current) {
+      if (isResizing && sidebarRef.current)
         setSidebarWidth(mouseMoveEvent.clientX - sidebarRef.current.getBoundingClientRect().left)
-      }
     },
-    [isResizing]
+    [isResizing],
   )
 
   useEffect(() => {
@@ -33,7 +32,7 @@ const SideBar = () => {
   }, [resize, stopResizing])
 
   return (
-    <div ref={sidebarRef} className="app-sidebar" style={{ width: sidebarWidth }} onMouseDown={(e) => e.preventDefault()}>
+    <div ref={sidebarRef} className="app-sidebar" style={{ width: sidebarWidth }} onMouseDown={e => e.preventDefault()}>
       <Explorer className="app-sidebar-content" />
       <div className="app-sidebar-resizer" onMouseDown={startResizing} />
     </div>

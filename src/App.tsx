@@ -1,10 +1,10 @@
 import { Editor } from '@toast-ui/react-editor'
 import { SideBar } from '@components'
 import '@toast-ui/editor/dist/toastui-editor.css'
-import { AppContainer } from './styles'
 import { Editors } from '@utils'
+import { AppContainer } from './styles'
 
-const App = () => {
+function App() {
   const content = ['# Markdown Editor!', ''].join('\n')
 
   return (

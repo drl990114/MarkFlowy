@@ -1,4 +1,4 @@
-import { Event } from '@types'
+import type { Event } from '@types'
 import { createUid, once } from './common'
 
 class EventBus {
@@ -17,9 +17,8 @@ class EventBus {
 
     const index = events.findIndex(event => event.name === name)
 
-    if (index === -1) {
+    if (index === -1)
       return this
-    }
 
     if (!eventId) {
       events.splice(index, 1)
@@ -29,9 +28,8 @@ class EventBus {
 
     const executeIndex = events[index].executes.findIndex(item => item.id === eventId)
 
-    if (executeIndex !== -1) {
+    if (executeIndex !== -1)
       events[index].executes.splice(executeIndex, 1)
-    }
 
     return this
   }
@@ -39,15 +37,15 @@ class EventBus {
   emit(name: string, ...args: any[]): EventBus {
     const event = this.find(name)
 
-    if (!event) {
+    if (!event)
       return this
-    }
+
     const funcs = event.executes
 
-    funcs.forEach(func => {
-      if (func.ctx) {
+    funcs.forEach((func) => {
+      if (func.ctx)
         return func.execute.apply(func.ctx, args)
-      }
+
       func.execute(...args)
     })
 
@@ -58,9 +56,8 @@ class EventBus {
     const events = this.events
 
     for (let i = 0; i < events.length; i++) {
-      if (name === events[i].name) {
+      if (name === events[i].name)
         return events[i]
-      }
     }
 
     return null
@@ -91,9 +88,9 @@ class EventBus {
         {
           id: eventId,
           execute,
-          ctx
-        }
-      ]
+          ctx,
+        },
+      ],
     })
 
     return eventId
