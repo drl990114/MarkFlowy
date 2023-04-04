@@ -21,7 +21,7 @@ const FileNode: FC<FileNodeProps> = ({ item, level = 0, selectedPath, onSelect }
     (e) => {
       onSelect(item)
     },
-    [onSelect],
+    [item, onSelect],
   )
 
   const nodeWrapperCls = classNames('flex label-hover cursor-pointer', {
