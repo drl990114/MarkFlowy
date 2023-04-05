@@ -12,6 +12,7 @@ function setMarkDown(mdContent: string) {
 function setEditor(EditorInstance: Editor) {
   editor.current = EditorInstance
 }
+
 export default {
   editor,
   setEditor,

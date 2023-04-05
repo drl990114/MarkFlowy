@@ -51,12 +51,11 @@ const Explorer: FC<ExplorerProps> = (props) => {
 
   return (
     <div className={containerCls}>
-      <button className="btn" onClick={handleOpenFileClick}>
-        open markdown file
-      </button>
-      <button className="btn" onClick={handleOpenDirClick}>
-        open dir
-      </button>
+      <div className="w-full p-0.5rem border-b-1 border-gray-500">
+        <button className="btn w-full" onClick={handleOpenDirClick}>
+          open dir
+        </button>
+      </div>
       <FileTree data={folderData} selectedPath={selectedPath} onSelect={handleSelect}></FileTree>
     </div>
   )

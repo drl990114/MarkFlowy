@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Explorer } from '@components'
-
+import { Container } from './styles'
 function SideBar() {
   const [isResizing, setIsResizing] = useState(false)
   const [sidebarWidth, setSidebarWidth] = useState(268)
@@ -25,6 +25,7 @@ function SideBar() {
   useEffect(() => {
     window.addEventListener('mousemove', resize)
     window.addEventListener('mouseup', stopResizing)
+
     return () => {
       window.removeEventListener('mousemove', resize)
       window.removeEventListener('mouseup', stopResizing)
@@ -32,10 +33,10 @@ function SideBar() {
   }, [resize, stopResizing])
 
   return (
-    <div ref={sidebarRef} className="app-sidebar" style={{ width: sidebarWidth }} onMouseDown={e => e.preventDefault()}>
+    <Container ref={sidebarRef} className="app-sidebar" style={{ width: sidebarWidth }} onMouseDown={e => e.preventDefault()}>
       <Explorer className="app-sidebar-content" />
-      <div className="app-sidebar-resizer" onMouseDown={startResizing} />
-    </div>
+      <div className="app-sidebar-resizer bg-borderDefault" onMouseDown={startResizing} />
+    </Container>
   )
 }
 
