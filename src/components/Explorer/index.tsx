@@ -1,5 +1,4 @@
 import { Editors, EventBus, Fs } from '@utils'
-import classnames from 'classnames'
 import type { FC } from 'react'
 import { useEffect, useState } from 'react'
 import { useEditorStore } from '@stores'
@@ -9,6 +8,7 @@ import { readDir, readTextFile } from '@tauri-apps/api/fs'
 import { open } from '@tauri-apps/api/dialog'
 import { FileTree } from '@components'
 import { appWindow } from '@tauri-apps/api/window'
+import { ExplorerBottomBar, ExplorerContainer, ExplorerTopBar } from './styles'
 
 const Explorer: FC<ExplorerProps> = (props) => {
   const { editors, folderData, setFolderData } = useEditorStore()
@@ -48,22 +48,26 @@ const Explorer: FC<ExplorerProps> = (props) => {
 
   const handleOpenDirClick = async () => {
     const dir = await open({ directory: true, recursive: true })
+
     if (!dir)
       return
-    const res = await readDir(dir, { recursive: true })
-    setFolderData(res)
+    try {
+      const res = await readDir(dir, { recursive: true })
+      setFolderData(res)
+    }
+    catch (error) {
+      console.log('error', error)
+    }
   }
-  const containerCls = classnames(props.className, '')
 
   return (
-    <div className={containerCls}>
-      <div className="w-full p-0.5rem border-b-1 border-gray-500">
-        <button className="btn w-full" onClick={handleOpenDirClick}>
-          open dir
-        </button>
-      </div>
-      <FileTree data={folderData} selectedPath={selectedPath} onSelect={handleSelect}></FileTree>
-    </div>
+    <ExplorerContainer className="w-full flex flex-col">
+      <ExplorerTopBar className="border-b-1 border-gray-500">top</ExplorerTopBar>
+      <FileTree className="flex-1" data={folderData} selectedPath={selectedPath} onSelect={handleSelect}></FileTree>
+      <ExplorerBottomBar className="border-t-1 border-gray-500" onClick={handleOpenDirClick}>
+        open dir
+      </ExplorerBottomBar>
+    </ExplorerContainer>
   )
 }
 
