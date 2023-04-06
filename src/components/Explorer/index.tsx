@@ -8,10 +8,16 @@ import type { FileEntry } from '@tauri-apps/api/fs'
 import { readDir, readTextFile } from '@tauri-apps/api/fs'
 import { open } from '@tauri-apps/api/dialog'
 import { FileTree } from '@components'
+import { appWindow } from '@tauri-apps/api/window'
 
 const Explorer: FC<ExplorerProps> = (props) => {
   const { editors, folderData, setFolderData } = useEditorStore()
   const [selectedPath, setSelectedPath] = useState<string>()
+
+  useEffect(() => {
+    if (selectedPath)
+      appWindow.setTitle(selectedPath)
+  }, [selectedPath])
 
   const handleSelect = async (item: FileEntry) => {
     if (item.children)
