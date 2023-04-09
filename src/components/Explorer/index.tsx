@@ -62,9 +62,9 @@ const Explorer: FC<ExplorerProps> = (props) => {
 
   return (
     <ExplorerContainer className="w-full flex flex-col">
-      <ExplorerTopBar className="border-b-1 border-gray-500">top</ExplorerTopBar>
+      <ExplorerTopBar className="border-b-1">top</ExplorerTopBar>
       <FileTree className="flex-1" data={folderData} selectedPath={selectedPath} onSelect={handleSelect}></FileTree>
-      <ExplorerBottomBar className="border-t-1 border-gray-500" onClick={handleOpenDirClick}>
+      <ExplorerBottomBar className="border-t-1" onClick={handleOpenDirClick}>
         open dir
       </ExplorerBottomBar>
     </ExplorerContainer>

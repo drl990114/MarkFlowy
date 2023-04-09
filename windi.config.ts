@@ -11,6 +11,7 @@ export default defineConfig({
     'btn': 'rounded-lg text-sky-700 bg-primary px-4 py-2 w-auto hover:shadow',
     'detail': 'text-sky-700 bg-hoverDefault',
     'label-hover': 'hover:detail',
+    'fjic': 'flex justify-center items-center',
   },
   theme: {
     extend: {

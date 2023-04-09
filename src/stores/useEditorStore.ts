@@ -1,10 +1,10 @@
-import { FileEntry } from '@tauri-apps/api/fs'
+import type { FileEntry } from '@tauri-apps/api/fs'
 import { create } from 'zustand'
 
-const useEditorStore = create<EditorStore>((set) => ({
+const useEditorStore = create<EditorStore>(set => ({
   editors: null,
   folderData: null,
-  setFolderData: (folderData) => set((state) => ({ folderData })),
+  setFolderData: folderData => set(state => ({ folderData })),
 }))
 
 interface EditorStore {

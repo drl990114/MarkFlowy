@@ -4,7 +4,7 @@ export const Container = styled.div`
   flex-grow: 0;
   flex-shrink: 0;
   min-width: 150px;
-  max-width: 300px;
+  max-width: 400px;
   position: relative;
   display: flex;
   border-right: #e9e9e9 1px solid;
@@ -21,13 +21,14 @@ export const Container = styled.div`
   .app-sidebar-resizer {
     flex-grow: 0;
     flex-shrink: 0;
-    flex-basis: 3px;
+    flex-basis: 1px;
     justify-self: flex-end;
     cursor: col-resize;
     resize: horizontal;
   }
 
   .app-sidebar-resizer:hover {
+    flex-basis: 3px;
     background: #c1c3c5b4;
   }
 `

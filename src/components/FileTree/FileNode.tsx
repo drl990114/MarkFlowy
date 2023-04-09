@@ -1,9 +1,9 @@
 import type { FileEntry } from '@tauri-apps/api/fs'
 import classNames from 'classnames'
-import { FileIcon, FolderIcon } from '@icons'
 import type { FC, MouseEventHandler } from 'react'
 import { memo, useCallback, useState } from 'react'
 import './index.css'
+import { Icon } from '@components'
 
 const FileNode: FC<FileNodeProps> = ({ item, level = 0, selectedPath, onSelect }) => {
   const [isOpen, setIsOpen] = useState(false)
@@ -32,10 +32,8 @@ const FileNode: FC<FileNodeProps> = ({ item, level = 0, selectedPath, onSelect }
   return (
     <div onClick={handleClick}>
       <div className={nodeWrapperCls} style={{ paddingLeft: level * 16 + 6 }} onClick={handleSelect}>
-         {isFolder ? <FolderIcon className={'file-icon w-20px m-2px'}/> : <FileIcon className={'file-icon w-20px m-2px'}/> }
-        <div className="name">
-          {item.name}
-        </div>
+        {isFolder ? <Icon name="folder" iconProps={{ className: 'file-icon w-20px m-2px' }} /> : <Icon name="file" iconProps={{ className: 'file-icon w-20px m-2px' }} />}
+        <div className="name">{item.name}</div>
       </div>
       {isOpen && item.children && item.children.map(child => <FileNode key={child.name} item={child} level={level + 1} selectedPath={selectedPath} onSelect={onSelect} />)}
     </div>
