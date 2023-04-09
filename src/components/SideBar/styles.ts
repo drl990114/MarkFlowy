@@ -32,3 +32,21 @@ export const Container = styled.div`
     background: #c1c3c5b4;
   }
 `
+
+export const SettingRightBarContainer = styled.div`
+  position: relative;
+
+  &:hover {
+    .menu {
+      display: inline-block;
+    }
+  }
+
+  .menu {
+    position: absolute;
+    right: -200px;
+    bottom: 10px;
+    width: 200px;
+    display: none;
+  }
+`

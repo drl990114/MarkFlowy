@@ -2,8 +2,8 @@ import type { FileEntry } from '@tauri-apps/api/fs'
 import classNames from 'classnames'
 import type { FC, MouseEventHandler } from 'react'
 import { memo, useCallback, useState } from 'react'
-import './index.css'
 import { Icon } from '@components'
+import './index.css'
 
 const FileNode: FC<FileNodeProps> = ({ item, level = 0, selectedPath, onSelect }) => {
   const [isOpen, setIsOpen] = useState(false)
@@ -26,7 +26,7 @@ const FileNode: FC<FileNodeProps> = ({ item, level = 0, selectedPath, onSelect }
   )
 
   const nodeWrapperCls = classNames('file-node flex items-center label-hover cursor-pointer', {
-    'bg-primary': isSelected,
+    'bg-bgColor': isSelected,
   })
 
   return (

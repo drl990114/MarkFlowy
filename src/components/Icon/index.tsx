@@ -1,5 +1,6 @@
 import type { ICONSNAME } from '@constants'
 import { ICONSMAP } from '@constants'
+import classNames from 'classnames'
 import type { FC } from 'react'
 
 const Icon: FC<IconProps> = (props) => {
@@ -8,7 +9,8 @@ const Icon: FC<IconProps> = (props) => {
   if (!IconComponent)
     throw new Error(`could not find icon ${props.name}`)
 
-  return <IconComponent {...props.iconProps}></IconComponent>
+  const cls = classNames('', props.iconProps?.className)
+  return <IconComponent className={cls} {...props.iconProps}></IconComponent>
 }
 
 interface IconProps {

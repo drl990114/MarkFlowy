@@ -1,3 +1,6 @@
 export { default as FileIcon } from './file.svg'
 export { default as FolderIcon } from './folder.svg'
 export { default as CopyIcon } from './copy.svg'
+export { default as MoreVerticalIcon } from './more-vertical.svg'
+export { default as MoreIcon } from './more.svg'
+export { default as SettingIcon } from './settings.svg'

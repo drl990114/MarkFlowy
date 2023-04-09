@@ -4,6 +4,9 @@ const ICONSMAP = {
   file: Icons.FileIcon,
   folder: Icons.FolderIcon,
   copy: Icons.CopyIcon,
+  more: Icons.MoreIcon,
+  moreVertical: Icons.MoreVerticalIcon,
+  setting: Icons.SettingIcon,
 }
 
 export type ICONSNAME = keyof typeof ICONSMAP

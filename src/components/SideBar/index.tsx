@@ -1,13 +1,13 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Explorer, Icon } from '@components'
+import { Explorer, Icon, Menu } from '@components'
 import type { ICONSNAME } from '@constants'
 import { RIGHTBARITEMKEYS } from '@constants'
 import classNames from 'classnames'
-import { Container } from './styles'
+import { Container, SettingRightBarContainer } from './styles'
 
 function SideBar() {
   const [isResizing, setIsResizing] = useState(false)
-  const [sidebarWidth, setSidebarWidth] = useState(268)
+  const [sidebarWidth, setSidebarWidth] = useState(300)
   const [activeRightBarItemKey, setActiveRightBarItemKey] = useState(RIGHTBARITEMKEYS.Explorer)
   const sidebarRef = useRef<HTMLDivElement>(null)
 
@@ -55,18 +55,21 @@ function SideBar() {
 
   return (
     <Container ref={sidebarRef} style={{ width: sidebarWidth }} onMouseDown={e => e.preventDefault()}>
-      <div className="w-48px border-r-1px flex flex-shrink-0">
+      <div className="w-48px border-r-1px flex flex-col flex-shrink-0 justify-between">
         {rightBarDataSource.map((item) => {
-          const cls = classNames('w-48px h-48px fjic', {
-            'border-l-4px border-sky-700': activeRightBarItemKey === item.key,
+          const cls = classNames('w-48px h-48px fjic cursor-pointer', {
+            'border-l-4px border-accentColor': activeRightBarItemKey === item.key,
           })
 
           const handleRightBarItemClick = () => setActiveRightBarItemKey(item.key)
-
-          return <div key={item.key} data-set={item.key} className={cls} onClick={handleRightBarItemClick}>
+          return <div key={item.key} className={cls} onClick={handleRightBarItemClick}>
             <Icon name={item.icon} />
           </div>
         })}
+        <SettingRightBarContainer className="w-48px h-48px fjic cursor-pointer">
+          <Icon name="setting" />
+          <Menu className="menu shadow-md  " menuGroup={[[{ title: 'setting', key: 'setting' }]]} />
+        </SettingRightBarContainer>
       </div>
       {activeRightBarItem?.components ? <activeRightBarItem.components /> : null}
       <div className="app-sidebar-resizer" onMouseDown={startResizing} />

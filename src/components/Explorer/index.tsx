@@ -6,9 +6,8 @@ import { EVENT } from '@constants'
 import type { FileEntry } from '@tauri-apps/api/fs'
 import { readDir, readTextFile } from '@tauri-apps/api/fs'
 import { open } from '@tauri-apps/api/dialog'
-import { FileTree } from '@components'
+import { FileTree, Icon } from '@components'
 import { appWindow } from '@tauri-apps/api/window'
-import { ExplorerBottomBar, ExplorerContainer, ExplorerTopBar } from './styles'
 
 const Explorer: FC<ExplorerProps> = (props) => {
   const { editors, folderData, setFolderData } = useEditorStore()
@@ -61,13 +60,18 @@ const Explorer: FC<ExplorerProps> = (props) => {
   }
 
   return (
-    <ExplorerContainer className="w-full flex flex-col">
-      <ExplorerTopBar className="border-b-1">top</ExplorerTopBar>
+    <div className="w-full flex flex-col">
+      <div className="border-b-1 flex justify-between items-center px-4 py-1">
+        <small>EXPLORER</small>
+        <div className="flex">
+        </div>
+      </div>
       <FileTree className="flex-1" data={folderData} selectedPath={selectedPath} onSelect={handleSelect}></FileTree>
-      <ExplorerBottomBar className="border-t-1" onClick={handleOpenDirClick}>
-        open dir
-      </ExplorerBottomBar>
-    </ExplorerContainer>
+      <div className="border-t-1 flex justify-between items-center px-4 py-1" >
+        <small className="flex-1" onClick={handleOpenDirClick}>open dir</small>
+        <Icon name="moreVertical" iconProps={{ className: 'w-20px h-20px icon-hover cursor-pointer' }}/>
+      </div>
+    </div>
   )
 }
 
