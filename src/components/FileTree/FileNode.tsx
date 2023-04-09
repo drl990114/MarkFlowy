@@ -29,10 +29,11 @@ const FileNode: FC<FileNodeProps> = ({ item, level = 0, selectedPath, onSelect }
     'bg-bgColor': isSelected,
   })
 
+  const iconCls = 'file-icon w-20px m-2px flex-shrink-0'
   return (
     <div onClick={handleClick}>
       <div className={nodeWrapperCls} style={{ paddingLeft: level * 16 + 6 }} onClick={handleSelect}>
-        {isFolder ? <Icon name="folder" iconProps={{ className: 'file-icon w-20px m-2px' }} /> : <Icon name="file" iconProps={{ className: 'file-icon w-20px m-2px' }} />}
+        {isFolder ? <Icon name="folder" iconProps={{ className: iconCls }} /> : <Icon name="file" iconProps={{ className: iconCls }} />}
         <div className="truncate">{item.name}</div>
       </div>
       {isOpen && item.children && item.children.map(child => <FileNode key={child.name} item={child} level={level + 1} selectedPath={selectedPath} onSelect={onSelect} />)}

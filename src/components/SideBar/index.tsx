@@ -71,7 +71,7 @@ function SideBar() {
           <Menu className="menu shadow-md  " menuGroup={[[{ title: 'setting', key: 'setting' }]]} />
         </SettingRightBarContainer>
       </div>
-      {activeRightBarItem?.components ? <activeRightBarItem.components /> : null}
+      {activeRightBarItem?.components ? <activeRightBarItem.components className="app-sidebar-content"/> : null}
       <div className="app-sidebar-resizer" onMouseDown={startResizing} />
     </Container>
   )

@@ -8,7 +8,7 @@ import FileNode from './FileNode'
 const FileTree: FC<FileTreeProps> = (props) => {
   const { data, selectedPath, onSelect, className } = props
 
-  const containerCls = classNames('file-tree', className)
+  const containerCls = classNames('w-full overflow-hidden truncate', className)
 
   return (
     <div className={containerCls}>

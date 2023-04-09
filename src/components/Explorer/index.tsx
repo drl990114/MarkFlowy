@@ -8,6 +8,7 @@ import { readDir, readTextFile } from '@tauri-apps/api/fs'
 import { open } from '@tauri-apps/api/dialog'
 import { FileTree, Icon } from '@components'
 import { appWindow } from '@tauri-apps/api/window'
+import classNames from 'classnames'
 
 const Explorer: FC<ExplorerProps> = (props) => {
   const { editors, folderData, setFolderData } = useEditorStore()
@@ -55,8 +56,10 @@ const Explorer: FC<ExplorerProps> = (props) => {
     }
   }
 
+  const containerCLs = classNames('w-full flex flex-col', props.className)
+
   return (
-    <div className="w-full flex flex-col">
+    <div className={containerCLs}>
       <div className="border-b-1 flex justify-between items-center px-4 py-1">
         <small>EXPLORER</small>
         <div className="flex">

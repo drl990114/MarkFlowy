@@ -15,7 +15,7 @@ export const Container = styled.div`
   z-index: 2;
 
   .app-sidebar-content {
-    flex: 1;
+    min-width: calc(100% - 48px)
   }
 
   .app-sidebar-resizer {
