@@ -1,8 +1,8 @@
-import { Editors, EventBus, Fs } from '@utils'
+import { Editors, Fs } from '@utils'
 import type { FC } from 'react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useEditorStore } from '@stores'
-import { APP_NAME, EVENT } from '@constants'
+import { APP_NAME } from '@constants'
 import type { FileEntry } from '@tauri-apps/api/fs'
 import { readDir, readTextFile } from '@tauri-apps/api/fs'
 import { open } from '@tauri-apps/api/dialog'
@@ -24,22 +24,10 @@ const Explorer: FC<ExplorerProps> = (props) => {
     Editors.setMarkDown(text)
   }
 
-  useEffect(() => {
-    const handleOpenFile = ({ path, content }) => {}
-
-    const eventId = EventBus.on(EVENT.open_file, handleOpenFile)
-
-    return () => {
-      EventBus.remove(EVENT.open_file, eventId)
-    }
-  }, [])
-
   const handleOpenFileClick = async () => {
     const res = await Fs.selectMdFileAndRead()
-    if (res !== undefined) {
+    if (res !== undefined)
       Editors.setMarkDown(res.content)
-      EventBus.emit(EVENT.open_file, res)
-    }
   }
 
   const handleOpenDirClick = async () => {
