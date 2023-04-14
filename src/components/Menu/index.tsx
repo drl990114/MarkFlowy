@@ -1,6 +1,6 @@
 import type { BaseComponentProps } from '@types'
 import classNames from 'classnames'
-import { memo, useCallback } from 'react'
+import { Fragment, memo, useCallback } from 'react'
 import type { FC } from 'react'
 
 const Menu: FC<MenuProps> = (props) => {
@@ -18,10 +18,10 @@ const Menu: FC<MenuProps> = (props) => {
 
   const renderMenuGroup = useCallback(() => {
     return menuGroup.map((group, index) => {
-      return <>
+      return <Fragment key={index}>
       {renderMenuGroupItems(group)}
       {index !== menuGroup.length - 1 && <div className="split" />}
-      </>
+      </Fragment>
     })
   }, [menuGroup, renderMenuGroupItems])
 

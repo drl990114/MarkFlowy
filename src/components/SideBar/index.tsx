@@ -81,7 +81,7 @@ interface RightBarItem {
   title: RIGHTBARITEMKEYS
   key: RIGHTBARITEMKEYS
   icon: ICONSNAME
-  components: React.FC
+  components: React.FC<any>
 }
 
 export default memo(SideBar)
