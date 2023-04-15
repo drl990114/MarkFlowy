@@ -9,13 +9,9 @@
     "tauri:dev": "tauri dev"
   },
   "dependencies": {
-    "@emotion/react": "^11.9.3",
-    "@emotion/styled": "^11.9.3",
-    "@mui/icons-material": "^5.8.4",
-    "@mui/material": "^5.8.5",
     "@tauri-apps/api": "^1.0.1",
-    "@toast-ui/editor": "^3.2.2",
-    "@toast-ui/react-editor": "^3.2.3",
+    "@linebyline/editor": "^0.0.3",
+    "@linebyline/react-editor": "^0.0.4",
     "classnames": "^2.3.2",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",

@@ -1,4 +1,4 @@
-import type Editor from '@toast-ui/editor'
+import type Editor from '@linebyline/editor'
 
 const editor: { current: null | Editor } = { current: null }
 
