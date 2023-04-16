@@ -1,18 +1,42 @@
 import { Editors, Fs } from '@utils'
 import type { FC } from 'react'
-import { useState } from 'react'
+import { memo, useEffect, useState } from 'react'
 import { useEditorStore } from '@stores'
-import { APP_NAME } from '@constants'
+import { APP_NAME, EVENT } from '@constants'
 import type { FileEntry } from '@tauri-apps/api/fs'
-import { readDir, readTextFile } from '@tauri-apps/api/fs'
+import { readDir, readTextFile, writeTextFile } from '@tauri-apps/api/fs'
 import { open } from '@tauri-apps/api/dialog'
 import { FileTree, Icon } from '@components'
 import { appWindow } from '@tauri-apps/api/window'
 import classNames from 'classnames'
+import type { UnlistenFn } from '@tauri-apps/api/event'
+import { emit } from '@tauri-apps/api/event'
 
 const Explorer: FC<ExplorerProps> = (props) => {
-  const { editors, folderData, setFolderData } = useEditorStore()
+  const { folderData, setFolderData } = useEditorStore()
   const [selectedPath, setSelectedPath] = useState<string>()
+
+  useEffect(() => {
+    let unListen: undefined | UnlistenFn
+    const init = async () => {
+      unListen = await appWindow.listen('file_save', () => {
+        const content = Editors.editor.current?.getMarkdown()
+        if (selectedPath && content)
+          writeTextFile(selectedPath, content)
+      })
+    }
+
+    init()
+
+    return () => {
+      if (unListen)
+        unListen()
+    }
+  }, [selectedPath])
+
+  useEffect(() => {
+    emit(EVENT.selected_file, selectedPath)
+  }, [selectedPath])
 
   const handleSelect = async (item: FileEntry) => {
     if (item.children)
@@ -33,14 +57,14 @@ const Explorer: FC<ExplorerProps> = (props) => {
   const handleOpenDirClick = async () => {
     const dir = await open({ directory: true, recursive: true })
 
-    if (!dir)
+    if (typeof dir !== 'string')
       return
     try {
       const res = await readDir(dir, { recursive: true })
       setFolderData(res)
     }
     catch (error) {
-      console.log('error', error)
+      console.error('error', error)
     }
   }
 
@@ -66,4 +90,4 @@ interface ExplorerProps {
   className?: string
 }
 
-export default Explorer
+export default memo(Explorer)

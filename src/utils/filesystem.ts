@@ -18,7 +18,7 @@ async function selectMdFile(opt?: OpenDialogOptions) {
 }
 
 async function selectMdFileAndRead(): Promise<{ content: string; selectedPath: string } | undefined> {
-  const selectedPath = await selectMdFile() as string
+  const selectedPath = (await selectMdFile()) as string
   if (!selectedPath)
     return
   const content = await readTextFile(selectedPath as string)

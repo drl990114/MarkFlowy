@@ -46,7 +46,7 @@ fn main() {
         .menu(menu)
         .on_menu_event(|event| match event.menu_item_id() {
             "Save" => {
-                // TODO
+                event.window().emit("file_save", {}).map_err(|err| println!("{:?}", err)).ok();
             }
             _ => {}
         })
