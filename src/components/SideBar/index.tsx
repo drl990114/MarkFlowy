@@ -3,9 +3,11 @@ import { Explorer, Icon, Menu } from '@components'
 import type { ICONSNAME } from '@constants'
 import { RIGHTBARITEMKEYS } from '@constants'
 import classNames from 'classnames'
+import { useTranslation } from 'react-i18next'
 import { Container, SettingRightBarContainer } from './styles'
 
 function SideBar() {
+  const { t } = useTranslation()
   const [isResizing, setIsResizing] = useState(false)
   const [sidebarWidth, setSidebarWidth] = useState(300)
   const [activeRightBarItemKey, setActiveRightBarItemKey] = useState(RIGHTBARITEMKEYS.Explorer)
@@ -68,7 +70,7 @@ function SideBar() {
         })}
         <SettingRightBarContainer className="w-48px h-48px fjic cursor-pointer">
           <Icon name="setting" />
-          <Menu className="menu shadow-md  " menuGroup={[[{ title: 'setting', key: 'setting' }]]} />
+          <Menu className="menu shadow-md" menuGroup={[[{ title: t('menu.setting'), key: 'setting' }]]} />
         </SettingRightBarContainer>
       </div>
       {activeRightBarItem?.components ? <activeRightBarItem.components className="app-sidebar-content"/> : null}
