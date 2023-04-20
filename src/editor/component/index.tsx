@@ -4,15 +4,15 @@ import {
   HeadingLevelButtonGroup,
   HistoryButtonGroup,
   Remirror,
-  ThemeProvider,
   ToggleCodeBlockButton,
   ToggleStrikeButton,
   Toolbar,
   VerticalDivider,
 } from '@remirror/react'
-import { AllStyledComponent } from '@remirror/styles/emotion'
 import { useGlobalRemirror } from '@hooks'
-import Bridge from './bridge'
+import Wrapper from './Wrapper'
+import Text from './Text'
+
 function EditorToolbar() {
   return (
     <Toolbar>
@@ -36,13 +36,10 @@ export default function Editor() {
   const { manager, state, onChange } = remirror
 
   return (
-    <AllStyledComponent>
-      <ThemeProvider>
-        <Remirror manager={manager} onChange={onChange} initialContent={state} autoFocus autoRender="end">
-          <EditorToolbar />
-          <Bridge />
-        </Remirror>
-      </ThemeProvider>
-    </AllStyledComponent>
+    <Wrapper>
+      <Remirror manager={manager} onChange={onChange} initialContent={state} >
+        <Text />
+      </Remirror>
+    </Wrapper>
   )
 }
