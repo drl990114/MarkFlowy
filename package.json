@@ -9,10 +9,13 @@
     "tauri:dev": "tauri dev"
   },
   "dependencies": {
-    "@linebyline/editor": "^0.0.3",
-    "@linebyline/react-editor": "^0.0.4",
+    "@remirror/pm": "^2.0.4",
+    "@remirror/react": "^2.0.27",
+    "@remirror/styles": "^2.0.4",
     "@tauri-apps/api": "^1.0.1",
+    "remirror": "^2.0.26",
     "classnames": "^2.3.2",
+    "hox": "^2.1.0",
     "i18next": "^22.4.14",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",

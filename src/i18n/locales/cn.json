@@ -1,5 +1,8 @@
 {
     "menu": {
         "setting": "设置"
+    },
+    "file": {
+        "untitled": "未命名"
     }
 }

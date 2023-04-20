@@ -1,38 +1,48 @@
-import { Editors, Fs } from '@utils'
 import type { FC } from 'react'
 import { memo, useEffect, useState } from 'react'
 import { useEditorStore } from '@stores'
 import { APP_NAME, EVENT } from '@constants'
 import type { FileEntry } from '@tauri-apps/api/fs'
 import { readDir, readTextFile, writeTextFile } from '@tauri-apps/api/fs'
-import { open } from '@tauri-apps/api/dialog'
+import { open, save } from '@tauri-apps/api/dialog'
 import { FileTree, Icon } from '@components'
 import { appWindow } from '@tauri-apps/api/window'
 import classNames from 'classnames'
-import type { UnlistenFn } from '@tauri-apps/api/event'
 import { emit } from '@tauri-apps/api/event'
+import { useGlobalRemirror } from '@hooks'
+import { DataCenter } from '@utils'
+import { useTranslation } from 'react-i18next'
 
 const Explorer: FC<ExplorerProps> = (props) => {
+  const { operater } = useGlobalRemirror()
+  const { t } = useTranslation()
   const { folderData, setFolderData } = useEditorStore()
   const [selectedPath, setSelectedPath] = useState<string>()
 
   useEffect(() => {
-    let unListen: undefined | UnlistenFn
-    const init = async () => {
-      unListen = await appWindow.listen('file_save', () => {
-        const content = Editors.editor.current?.getMarkdown()
-        if (selectedPath && content)
-          writeTextFile(selectedPath, content)
-      })
-    }
-
-    init()
-
+    const unListen = appWindow.listen('file_save', async () => {
+      const content = DataCenter.getData('markdownContent')
+      if (!selectedPath) {
+        save({
+          title: 'My wonderful save dialog',
+          defaultPath: `${t('file.untitled')}.md`,
+        }).then((path) => {
+          if (path === null)
+            return
+          writeTextFile(path, content)
+        })
+      }
+      try {
+        writeTextFile(selectedPath!, content)
+      }
+      catch (error) {
+        console.error(error)
+      }
+    })
     return () => {
-      if (unListen)
-        unListen()
+      unListen.then(fn => fn())
     }
-  }, [selectedPath])
+  }, [selectedPath, t])
 
   useEffect(() => {
     emit(EVENT.selected_file, selectedPath)
@@ -45,13 +55,7 @@ const Explorer: FC<ExplorerProps> = (props) => {
     setSelectedPath(item?.path)
     appWindow.setTitle(item?.name || APP_NAME)
     const text = await readTextFile(item.path)
-    Editors.setMarkDown(text)
-  }
-
-  const handleOpenFileClick = async () => {
-    const res = await Fs.selectMdFileAndRead()
-    if (res !== undefined)
-      Editors.setMarkDown(res.content)
+    operater.setMarkdown(text)
   }
 
   const handleOpenDirClick = async () => {
@@ -73,14 +77,17 @@ const Explorer: FC<ExplorerProps> = (props) => {
   return (
     <div className={containerCLs}>
       <div className="border-b-1 flex justify-between items-center px-4 py-1">
-        <small>EXPLORER</small>
-        <div className="flex">
-        </div>
+        <small onClick={() => {
+          save()
+        }}>EXPLORER</small>
+        <div className="flex"></div>
       </div>
       <FileTree className="flex-1" data={folderData} selectedPath={selectedPath} onSelect={handleSelect}></FileTree>
-      <div className="border-t-1 flex justify-between items-center px-4 py-1" >
-        <small className="flex-1" onClick={handleOpenDirClick}>open dir</small>
-        <Icon name="moreVertical" iconProps={{ className: 'w-20px h-20px icon-hover cursor-pointer' }}/>
+      <div className="border-t-1 flex justify-between items-center px-4 py-1">
+        <small className="flex-1" onClick={handleOpenDirClick}>
+          open dir
+        </small>
+        <Icon name="moreVertical" iconProps={{ className: 'w-20px h-20px icon-hover cursor-pointer' }} />
       </div>
     </div>
   )

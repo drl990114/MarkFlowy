@@ -6,9 +6,13 @@ import svgr from 'vite-plugin-svgr'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react(), WindiCSS(), svgr({
-    exportAsDefault: true,
-  })],
+  plugins: [
+    react(),
+    WindiCSS(),
+    svgr({
+      exportAsDefault: true,
+    }),
+  ],
   resolve: {
     alias: [
       { find: '@components', replacement: path.resolve(__dirname, 'src/components') },
@@ -18,6 +22,7 @@ export default defineConfig({
       { find: '@types', replacement: path.resolve(__dirname, 'src/types') },
       { find: '@constants', replacement: path.resolve(__dirname, 'src/constants') },
       { find: '@icons', replacement: path.resolve(__dirname, 'src/icons') },
+      { find: '@hooks', replacement: path.resolve(__dirname, 'src/hooks') },
     ],
   },
 })

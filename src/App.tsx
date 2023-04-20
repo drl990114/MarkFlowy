@@ -1,6 +1,5 @@
-import { Editor } from '@linebyline/react-editor'
 import { SideBar } from '@components'
-import { Editors } from '@utils'
+import { Editor } from './editor'
 import '@linebyline/editor/dist/toastui-editor.css'
 import { AppContainer } from './styles'
 import { i18nInit } from './i18n'
@@ -13,9 +12,7 @@ function App() {
   return (
     <AppContainer>
       <SideBar />
-      <div style={{ width: '100%' }}>
-          {<Editor onLoad={Editors.setEditor} previewStyle="vertical" initialValue={content} height="100%" />}
-      </div>
+      <div style={{ width: '100%', height: '100%', overflow: 'scroll' }}>{<Editor initialValue={content} />}</div>
     </AppContainer>
   )
 }

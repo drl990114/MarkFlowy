@@ -1,5 +1,5 @@
 enum EVENT {
-  open_file = 'open_file',
+  selected_file = 'selected_file',
 }
 
 export default EVENT
