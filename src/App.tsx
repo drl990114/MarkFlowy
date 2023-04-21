@@ -1,6 +1,5 @@
 import { SideBar } from '@components'
 import { Editor } from './editor'
-import '@linebyline/editor/dist/toastui-editor.css'
 import { AppContainer } from './styles'
 import { i18nInit } from './i18n'
 
