@@ -8,6 +8,9 @@ export default defineConfig({
     exclude: ['node_modules', '.git', '.next/**/*'],
   },
   attributify: true,
+  plugins: [
+    require('windicss/plugin/scroll-snap'),
+  ],
   shortcuts: {
     // element
     'btn': 'rounded-lg text-accentColor px-4 py-2 w-auto hover:shadow',

@@ -36,9 +36,9 @@ export default function Editor() {
   const { manager, state, onChange } = remirror
 
   return (
-    <Wrapper>
+    <Wrapper >
       <Remirror manager={manager} onChange={onChange} initialContent={state} >
-        <Text />
+        <Text className="h-full w-full overflow-scroll scrollbar-hide"/>
       </Remirror>
     </Wrapper>
   )
