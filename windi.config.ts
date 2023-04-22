@@ -25,6 +25,8 @@ export default defineConfig({
   theme: {
     extend: {
       colors: {
+        primarFontColor: 'black',
+        labelFontColor: colors.gray[400],
         accentColor: colors.sky[700],
         borderColor: colors.zinc[200],
         bgColor: colors.neutral[100],

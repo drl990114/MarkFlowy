@@ -1,8 +1,19 @@
 import { createGlobalStore } from 'hox'
 import { useRemirror } from '@remirror/react'
 
-import { BoldExtension, CodeBlockExtension, HeadingExtension, HistoryExtension, ItalicExtension, MarkdownExtension, StrikeExtension, UnderlineExtension } from 'remirror/extensions'
+import {
+  BoldExtension,
+  CodeBlockExtension,
+  HeadingExtension,
+  HistoryExtension,
+  ItalicExtension,
+  MarkdownExtension,
+  ShortcutsExtension,
+  StrikeExtension,
+  UnderlineExtension,
+} from 'remirror/extensions'
 import { useCallback, useMemo } from 'react'
+import { DataCenter } from '@utils'
 
 function extensions() {
   return [
@@ -14,13 +25,14 @@ function extensions() {
     new UnderlineExtension(),
     new StrikeExtension(),
     new CodeBlockExtension(),
+    new ShortcutsExtension(),
   ]
 }
 
 function useRemirrorEditor() {
   const remirror = useRemirror({
     extensions,
-    content: '# test',
+    content: DataCenter.getData('markdownContent'),
     selection: 'end',
     stringHandler: 'markdown',
   })

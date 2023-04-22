@@ -1,8 +1,10 @@
 {
+  "none": "None",
   "menu": {
       "setting": "setting"
   },
   "file": {
-    "untitled": "untitled"
+    "untitled": "untitled",
+    "openDir": "Open Folder"
 }
 }
