@@ -6,7 +6,7 @@
     "withGlobalTauri": true
   },
   "package": {
-    "productName": "tauri-app",
+    "productName": "LineByLine",
     "version": "0.1.0"
   },
   "tauri": {
@@ -44,7 +44,7 @@
         "fullscreen": false,
         "height": 600,
         "resizable": true,
-        "title": "Tauri App",
+        "title": "LineByLine",
         "width": 800
       }
     ]
