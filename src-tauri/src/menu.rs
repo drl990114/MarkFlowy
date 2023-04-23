@@ -1,6 +1,6 @@
 use tauri::Menu;
 
-use tauri::{MenuItem, Submenu, CustomMenuItem};
+use tauri::{CustomMenuItem, MenuItem, Submenu};
 
 pub fn generate_menu() -> Menu {
     let file_submenu = Submenu::new(
@@ -24,18 +24,20 @@ pub fn generate_menu() -> Menu {
             MenuItem::SelectAll.into(),
         ]),
     );
-    let view_submenu = Submenu::new("View", Menu::with_items([MenuItem::EnterFullScreen.into()]));
+    let view_submenu = Submenu::new(
+        "View",
+        Menu::with_items([MenuItem::EnterFullScreen.into(), MenuItem::Separator.into()])
+            .add_item(CustomMenuItem::new("DualView".to_string(), "Dual"))
+            .add_item(CustomMenuItem::new("WysiwygView".to_string(), "Wysiwyg")),
+    );
 
     let window_submenu = Submenu::new(
         "Window",
         Menu::with_items([MenuItem::Minimize.into(), MenuItem::Zoom.into()]),
     );
 
-    let hide = CustomMenuItem::new("test".to_string(), "Test");
     let menu = Menu::new()
-        // let menu = Menu::os_default("test")
         .add_native_item(MenuItem::Copy)
-        .add_item(hide)
         .add_submenu(file_submenu)
         .add_submenu(edit_submenu)
         .add_submenu(view_submenu)

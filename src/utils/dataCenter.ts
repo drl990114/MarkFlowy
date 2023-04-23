@@ -1,6 +1,18 @@
+import type { ReactFrameworkOutput } from '@remirror/react'
+import { listen } from '@tauri-apps/api/event'
+import { isArray } from '@utils'
+
 class DataCenter {
   private data: DataCenterData = {
-    markdownContent: '# Welcome linebyline',
+    markdownContent: '# welcome linebyline',
+  }
+
+  editorCtx?: ReactFrameworkOutput<any> | ReactFrameworkOutput<any>[] | undefined
+
+  constructor() {
+    listen<{ content: string }>('editor_content_change', (event) => {
+      this.data.markdownContent = event.payload.content
+    })
   }
 
   setData = (key: DataCenterDataKeys, value: any) => {
@@ -9,6 +21,21 @@ class DataCenter {
 
   getData = (key: DataCenterDataKeys) => {
     return this.data[key]
+  }
+
+  setRenderEditorContent = (content: string) => {
+    if (isArray(this.editorCtx)) {
+      this.editorCtx.forEach((ctx) => {
+        ctx.setContent(content)
+      })
+    }
+    else {
+      this.editorCtx?.setContent(content)
+    }
+  }
+
+  setRenderEditorCtx = (ctx: ReactFrameworkOutput<any>, dualIndex?: 0 | 1) => {
+    this.editorCtx = ctx
   }
 }
 

@@ -9,12 +9,10 @@ import { Empty, FileTree, Icon } from '@components'
 import { appWindow } from '@tauri-apps/api/window'
 import classNames from 'classnames'
 import { emit } from '@tauri-apps/api/event'
-import { useGlobalRemirror } from '@hooks'
 import { DataCenter } from '@utils'
 import { useTranslation } from 'react-i18next'
 
 const Explorer: FC<ExplorerProps> = (props) => {
-  const { operater } = useGlobalRemirror()
   const { t } = useTranslation()
   const { folderData, setFolderData } = useEditorStore()
   const [selectedPath, setSelectedPath] = useState<string>()
@@ -55,7 +53,7 @@ const Explorer: FC<ExplorerProps> = (props) => {
     setSelectedPath(item?.path)
     appWindow.setTitle(item?.name || APP_NAME)
     const text = await readTextFile(item.path)
-    operater.setMarkdown(text)
+    DataCenter.setRenderEditorContent(text)
   }
 
   const handleOpenDirClick = async () => {

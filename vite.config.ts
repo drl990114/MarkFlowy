@@ -23,6 +23,7 @@ export default defineConfig({
       { find: '@constants', replacement: path.resolve(__dirname, 'src/constants') },
       { find: '@icons', replacement: path.resolve(__dirname, 'src/icons') },
       { find: '@hooks', replacement: path.resolve(__dirname, 'src/hooks') },
+      { find: '@editor', replacement: path.resolve(__dirname, 'src/editor') },
     ],
   },
 })

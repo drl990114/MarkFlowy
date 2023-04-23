@@ -1,7 +1,5 @@
 export function createUid(): string {
-  return Math.random()
-    .toString()
-    .substr(2)
+  return Math.random().toString().substr(2)
 }
 
 export function once(fn: Function): Function {
@@ -13,4 +11,8 @@ export function once(fn: Function): Function {
       fn.apply(this, args)
     }
   }
+}
+
+export function isArray(tar: any): tar is any[] {
+  return Array.isArray(tar)
 }

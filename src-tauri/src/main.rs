@@ -8,7 +8,25 @@ fn main() {
         .menu(menu::generate_menu())
         .on_menu_event(|event| match event.menu_item_id() {
             "Save" => {
-                event.window().emit("file_save", {}).map_err(|err| println!("{:?}", err)).ok();
+                event
+                    .window()
+                    .emit("file_save", {})
+                    .map_err(|err| println!("{:?}", err))
+                    .ok();
+            }
+            "DualView" => {
+                event
+                    .window()
+                    .emit("editor_toggle_type", "dual")
+                    .map_err(|err| println!("{:?}", err))
+                    .ok();
+            }
+            "WysiwygView" => {
+                event
+                    .window()
+                    .emit("editor_toggle_type", "wysiwyg")
+                    .map_err(|err| println!("{:?}", err))
+                    .ok();
             }
             _ => {}
         })

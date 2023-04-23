@@ -1,18 +1,12 @@
 import styled, { css } from 'styled-components'
-import {
-  useHelpers,
-  useRemirrorContext,
-} from '@remirror/react'
+import { useRemirrorContext } from '@remirror/react'
 import type { FC } from 'react'
 import React from 'react'
-import { DataCenter } from '@utils'
-import { adjustColorOpacity, colors } from '../theme'
+import { adjustColorOpacity, colors } from '../../theme'
 
 const Container = styled.div<{ codeEditor?: boolean }>`
   position: relative;
   background-color: ${colors.white};
-  border: 1px solid ${colors.grey4};
-  border-radius: 4px;
   color: ${colors.dark};
   padding: 0 1em;
   white-space: pre-wrap;
@@ -38,6 +32,7 @@ const Container = styled.div<{ codeEditor?: boolean }>`
     outline: none;
 
     pre {
+      color: ${colors.dark};
       background-color: ${adjustColorOpacity(colors.grey6, 0.5)};
       padding: 1em;
     }
@@ -67,14 +62,9 @@ interface ITextProps {
 
 const Text: FC<ITextProps> = ({ children, ...props }) => {
   const { getRootProps } = useRemirrorContext()
-  const { getMarkdown } = useHelpers(false)
-  DataCenter.setData('markdownContent', getMarkdown())
 
   return (
-    <Container
-      {...props}
-      {...getRootProps()}
-    >
+    <Container {...props} {...getRootProps()}>
       {children}
     </Container>
   )

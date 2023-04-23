@@ -9,19 +9,27 @@
     "tauri:dev": "tauri dev"
   },
   "dependencies": {
+    "@emotion/styled": "^11.10.6",
+    "@remirror/core": "^2.0.12",
+    "@remirror/extension-list": "^2.0.15",
     "@remirror/pm": "^2.0.4",
     "@remirror/react": "^2.0.27",
+    "@remirror/react-editors": "^1.0.27",
     "@remirror/styles": "^2.0.4",
     "@tauri-apps/api": "^1.0.1",
-    "remirror": "^2.0.26",
     "classnames": "^2.3.2",
+    "create-context-state": "^2.0.0",
     "hox": "^2.1.0",
     "i18next": "^22.4.14",
+    "marked": "^4.3.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-i18next": "^12.2.0",
     "react-router-dom": "^6.3.0",
+    "refractor": "^4.8.1",
+    "remirror": "^2.0.26",
     "styled-components": "^5.3.9",
+    "turndown": "^7.1.2",
     "zustand": "^4.3.6"
   },
   "devDependencies": {
