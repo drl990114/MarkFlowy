@@ -74,7 +74,7 @@ function VisualEditor() {
         return setMarkdown(helpers.getMarkdown(state))
       }}
     >
-      <Text className="h-full w-full overflow-scroll" />
+      <Text className="h-full w-full overflow-scroll markdown-body" />
     </Remirror>
   )
 }
@@ -86,6 +86,7 @@ export const DualEditor: React.FC = () => {
   const visual = useRemirror({
     extensions: EditorExtensions,
     stringHandler: 'markdown',
+    selection: 'start',
     content: '**Markdown** content is the _best_',
   })
   const markdown = useRemirror({

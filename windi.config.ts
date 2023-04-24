@@ -2,12 +2,12 @@ import { defineConfig } from 'windicss/helpers'
 import colors from 'windicss/colors'
 
 export default defineConfig({
+  preflight: false,
   darkMode: 'class',
   extract: {
-    include: ['**/*.{tsx,jsx,css}'],
-    exclude: ['node_modules', '.git', '.next/**/*'],
+    include: ['./src/*.{tsx,jsx,css}'],
+    exclude: ['node_modules', '.git'],
   },
-  attributify: true,
   plugins: [
     require('windicss/plugin/scroll-snap'),
   ],

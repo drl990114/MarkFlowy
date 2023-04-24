@@ -4,7 +4,23 @@ import { isArray } from '@utils'
 
 class DataCenter {
   private data: DataCenterData = {
-    markdownContent: '# welcome linebyline',
+    markdownContent: `
+# welcome linebyline
+    
+- list 
+- [[GitHub](https://github.com/vuejs/jsx-next)\]
+
+### Other Projects
+
+| Project | NPM | Repo |
+| --- | --- | --- |
+| @vue/babel-plugin-jsx |  | \[[GitHub](https://github.com/vuejs/jsx-next)\] |
+| eslint-plugin-vue |  | \[[GitHub](https://github.com/vuejs/eslint-plugin-vue)\] |
+| @vue/test-utils |  | \[[GitHub](https://github.com/vuejs/vue-test-utils-next)\] |
+| vue-class-component |  | \[[GitHub](https://github.com/vuejs/vue-class-component/tree/next)\] |
+| vue-loader |  | \[[GitHub](https://github.com/vuejs/vue-loader/tree/next)\] |
+| rollup-plugin-vue |  | \[[GitHub](https://github.com/vuejs/rollup-plugin-vue/tree/next)\] |
+`,
   }
 
   editorCtx?: ReactFrameworkOutput<any> | ReactFrameworkOutput<any>[] | undefined
@@ -34,7 +50,7 @@ class DataCenter {
     }
   }
 
-  setRenderEditorCtx = (ctx: ReactFrameworkOutput<any>, dualIndex?: 0 | 1) => {
+  setRenderEditorCtx = (ctx: ReactFrameworkOutput<any>) => {
     this.editorCtx = ctx
   }
 }

@@ -11,6 +11,7 @@ import classNames from 'classnames'
 import { emit } from '@tauri-apps/api/event'
 import { DataCenter } from '@utils'
 import { useTranslation } from 'react-i18next'
+import { Container } from './styles'
 
 const Explorer: FC<ExplorerProps> = (props) => {
   const { t } = useTranslation()
@@ -73,19 +74,19 @@ const Explorer: FC<ExplorerProps> = (props) => {
   const containerCLs = classNames('w-full flex flex-col', props.className)
 
   return (
-    <div className={containerCLs}>
-      <div className="border-b-1 flex justify-between items-center px-4 py-1">
+    <Container className={containerCLs}>
+      <div className="border-b-1-solid flex justify-between items-center px-4 py-1">
         <small>EXPLORER</small>
         <div className="flex"></div>
       </div>
       <div className="h-full w-full">{folderData ? <FileTree className="flex-1" data={folderData} selectedPath={selectedPath} onSelect={handleSelect}></FileTree> : <Empty />}</div>
-      <div className="border-t-1 flex justify-between items-center px-4 py-1">
+      <div className="border-t-1-solid flex justify-between items-center px-4 py-1">
         <small className="flex-1 cursor-pointer" onClick={handleOpenDirClick}>
           {t('file.openDir')}
         </small>
         <Icon name="moreVertical" iconProps={{ className: 'w-20px h-20px icon-hover cursor-pointer' }} />
       </div>
-    </div>
+    </Container>
   )
 }
 

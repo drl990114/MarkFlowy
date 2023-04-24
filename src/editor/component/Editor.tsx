@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { appWindow } from '@tauri-apps/api/window'
 import BasicEditor from './BasicEditor'
 import { DualEditor } from './DualEditor'
+import '../theme/github-light.css'
 
 type EditorViewType = 'wysiwyg' | 'dual'
 function Editor() {

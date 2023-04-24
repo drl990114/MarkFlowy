@@ -30,7 +30,7 @@ export default function Editor() {
         }}
         initialContent={state}
       >
-        <Text className="h-full w-full overflow-scroll scrollbar-hide" />
+        <Text className="h-full w-full overflow-scroll scrollbar-hide markdown-body" />
       </Remirror>
     </Wrapper>
   )

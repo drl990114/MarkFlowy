@@ -57,10 +57,10 @@ function SideBar() {
 
   return (
     <Container ref={sidebarRef} style={{ width: sidebarWidth }} onMouseDown={e => e.preventDefault()}>
-      <div className="w-48px border-r-1px flex flex-col flex-shrink-0 justify-between">
+      <div className="app-sidebar w-48px flex flex-col flex-shrink-0 justify-between">
         {rightBarDataSource.map((item) => {
           const cls = classNames('w-48px h-48px fjic cursor-pointer', {
-            'border-l-4px border-accentColor': activeRightBarItemKey === item.key,
+            'app-sidebar-active': activeRightBarItemKey === item.key,
           })
 
           const handleRightBarItemClick = () => setActiveRightBarItemKey(item.key)
