@@ -39,7 +39,9 @@ function extensions() {
     new TableExtension(),
     new TableCellExtension(),
     new TaskListExtension(),
-    new LinkExtension(),
+    new LinkExtension({
+      autoLink: true,
+    }),
     new OrderedListExtension(),
     new BulletListExtension(),
     new ListItemExtension(),

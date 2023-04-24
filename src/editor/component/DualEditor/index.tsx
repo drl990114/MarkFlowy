@@ -7,7 +7,7 @@ import { Remirror, useRemirror } from '@remirror/react'
 import { EditorExtensions } from '@editor'
 import { DataCenter } from '@utils'
 import { emit } from '@tauri-apps/api/event'
-import Text from '../BasicEditor/Text'
+import Text from '../Text'
 
 interface Context extends Props {
   setMarkdown: (content: string) => void

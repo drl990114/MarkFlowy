@@ -28,6 +28,32 @@ const Container = styled.div<{ codeEditor?: boolean }>`
     outline: none;
   }
 
+  .remirror-floating-popover {
+    /* padding: var(--rmr-space-2); */
+    padding: 0;
+    border: none;
+    max-height: calc(100vh - 56px);
+  }
+
+  .remirror-positioner {
+    position: absolute;
+    min-width: 1px;
+    min-height: 1px;
+    pointer-events: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    cursor: none;
+    z-index: -1;
+  }
+
+  .remirror-positioner-widget {
+    width: 0;
+    height: 0;
+    position: absolute;
+  }
+
   ${props =>
     props.codeEditor
     && css`

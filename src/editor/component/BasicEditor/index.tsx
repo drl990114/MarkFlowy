@@ -4,7 +4,8 @@ import { EditorExtensions } from '@editor'
 import { DataCenter } from '@utils'
 import { useEffect } from 'react'
 import Wrapper from '../Wrapper'
-import Text from './Text'
+import FloatingLinkToolbar from '../../toolbar/FloatingLinkToolbar'
+import Text from '../Text'
 
 export default function Editor() {
   const remirror = useRemirror({
@@ -21,7 +22,7 @@ export default function Editor() {
   }, [getContext])
 
   return (
-    <Wrapper>
+    <Wrapper className="remirror-wrapper">
       <Remirror
         manager={manager}
         onChange={(event) => {
@@ -31,6 +32,7 @@ export default function Editor() {
         initialContent={state}
       >
         <Text className="h-full w-full overflow-scroll scrollbar-hide markdown-body" />
+        <FloatingLinkToolbar />
       </Remirror>
     </Wrapper>
   )
