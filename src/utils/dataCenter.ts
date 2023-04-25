@@ -7,21 +7,15 @@ class DataCenter {
     markdownContent: `
 # welcome linebyline
 
-[[GitHub](https://github.com/vuejs/jsx-next)\]
+## Feature
+- **Super lightweight**. linebyline is based on tauri, which ensures ultra-lightweight and fast performance experience.
+- **High availability**. linebyline uses the remirror editor, which not only provides high scalability, but also has a great editing experience. And, linebyline supports multiple editing modes, such as dual, wysiyg.
 
-- list 
-- [[GitHub](https://github.com/vuejs/jsx-next)\]
+## Table
 
-### Other Projects
-
-| Project | NPM | Repo |
+| Project | LICENSE | Repo |
 | --- | --- | --- |
-| @vue/babel-plugin-jsx |  | \[[GitHub](https://github.com/vuejs/jsx-next)\] |
-| eslint-plugin-vue |  | \[[GitHub](https://github.com/vuejs/eslint-plugin-vue)\] |
-| @vue/test-utils |  | \[[GitHub](https://github.com/vuejs/vue-test-utils-next)\] |
-| vue-class-component |  | \[[GitHub](https://github.com/vuejs/vue-class-component/tree/next)\] |
-| vue-loader |  | \[[GitHub](https://github.com/vuejs/vue-loader/tree/next)\] |
-| rollup-plugin-vue |  | \[[GitHub](https://github.com/vuejs/rollup-plugin-vue/tree/next)\] |
+| linebyline | ![LICENSE](https://img.shields.io/github/license/halodong/recept?style=flat-square) | \[[GitHub](https://github.com/vuejs/rollup-plugin-vue/tree/next)\] |
 `,
   }
 

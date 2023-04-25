@@ -2,11 +2,13 @@ import {
   BoldExtension,
   BulletListExtension,
   CodeBlockExtension,
+  DropCursorExtension,
   EmojiExtension,
   GapCursorExtension,
   HardBreakExtension,
   HeadingExtension,
   HistoryExtension,
+  ImageExtension,
   ItalicExtension,
   LinkExtension,
   ListItemExtension,
@@ -42,11 +44,13 @@ function extensions() {
     new LinkExtension({
       autoLink: true,
     }),
+    new DropCursorExtension(),
     new OrderedListExtension(),
     new BulletListExtension(),
     new ListItemExtension(),
     new ListItemSharedExtension(),
     new EmojiExtension(),
+    new ImageExtension({}),
   ]
 }
 
