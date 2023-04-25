@@ -5,7 +5,7 @@ export default defineConfig({
   preflight: false,
   darkMode: 'class',
   extract: {
-    include: ['./src/*.{tsx,jsx,css}'],
+    include: ['**/*.{tsx,jsx,css}'],
     exclude: ['node_modules', '.git'],
   },
   plugins: [
