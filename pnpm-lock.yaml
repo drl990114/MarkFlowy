@@ -22,7 +22,6 @@ specifiers:
   eslint: ^8.37.0
   hox: ^2.1.0
   i18next: ^22.4.14
-  marked: ^4.3.0
   react: ^18.0.0
   react-dom: ^18.0.0
   react-i18next: ^12.2.0
@@ -30,7 +29,6 @@ specifiers:
   refractor: ^4.8.1
   remirror: ^2.0.26
   styled-components: ^5.3.9
-  turndown: ^7.1.2
   typescript: ^4.6.3
   vite: ^2.9.9
   vite-plugin-svgr: ^2.4.0
@@ -52,7 +50,6 @@ dependencies:
   create-context-state: 2.0.0_pmekkgnqduwlme35zpnqhenc34
   hox: 2.1.0_react@18.2.0
   i18next: 22.4.14
-  marked: 4.3.0
   react: 18.2.0
   react-dom: 18.2.0_react@18.2.0
   react-i18next: 12.2.0_57ubdvajp6562okxygabugvlve
@@ -60,7 +57,6 @@ dependencies:
   refractor: 4.8.1
   remirror: 2.0.26_b26u7ws7gibcwhwdgobfu6bmhe
   styled-components: 5.3.9_biqbaboplfbrettd7655fr4n2y
-  turndown: 7.1.2
   zustand: 4.3.6_react@18.2.0
 
 devDependencies:

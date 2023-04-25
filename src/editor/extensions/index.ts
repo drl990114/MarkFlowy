@@ -11,6 +11,7 @@ import {
   LinkExtension,
   ListItemExtension,
   ListItemSharedExtension,
+  MarkdownExtension,
   OrderedListExtension,
   ShortcutsExtension,
   StrikeExtension,
@@ -20,7 +21,6 @@ import {
   TaskListExtension,
   UnderlineExtension,
 } from 'remirror/extensions'
-import { MarkdownExtension } from './markdown'
 
 function extensions() {
   return [
