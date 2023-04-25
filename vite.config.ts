@@ -13,6 +13,20 @@ export default defineConfig({
       exportAsDefault: true,
     }),
   ],
+  build: {
+    minify: 'esbuild',
+    rollupOptions: {
+      external: [
+        'codemirror',
+        'codemirror/addon/mode/simple.js',
+        'codemirror/lib/codemirror.js',
+        'codemirror/mode/css/css.js',
+        'codemirror/lib/codemirror.css',
+        'codemirror/addon/merge/merge.css',
+        'codemirror/addon/merge/merge.js',
+      ],
+    },
+  },
   resolve: {
     alias: [
       { find: '@components', replacement: path.resolve(__dirname, 'src/components') },

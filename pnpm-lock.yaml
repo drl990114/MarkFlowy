@@ -12,12 +12,14 @@ specifiers:
   '@remirror/styles': ^2.0.4
   '@tauri-apps/api': ^1.0.1
   '@tauri-apps/cli': ^1.0.0
+  '@types/codemirror': ^5.60.7
   '@types/node': ^18.15.3
   '@types/react': ^18.0.0
   '@types/react-dom': ^18.0.0
   '@types/styled-components': ^5.1.26
   '@vitejs/plugin-react': ^1.3.0
   classnames: ^2.3.2
+  codemirror: ^5.65.12
   create-context-state: ^2.0.0
   eslint: ^8.37.0
   hox: ^2.1.0
@@ -47,6 +49,7 @@ dependencies:
   '@remirror/styles': 2.0.4_ooug37hswndwrowtqhg6gau5pi
   '@tauri-apps/api': 1.2.0
   classnames: 2.3.2
+  codemirror: 5.65.12
   create-context-state: 2.0.0_pmekkgnqduwlme35zpnqhenc34
   hox: 2.1.0_react@18.2.0
   i18next: 22.4.14
@@ -63,6 +66,7 @@ devDependencies:
   '@halodong/eslint-config-react': 0.38.14_ip5up2nocltd47wbnuyybe5dxu
   '@halodong/eslint-config-ts': 0.38.14_ip5up2nocltd47wbnuyybe5dxu
   '@tauri-apps/cli': 1.2.3
+  '@types/codemirror': 5.60.7
   '@types/node': 18.15.3
   '@types/react': 18.0.28
   '@types/react-dom': 18.0.11
@@ -2652,7 +2656,6 @@ packages:
     resolution: {integrity: sha512-QXIC+RPzt/1BGSuD6iFn6UMC9TDp+9hkOANYNPVsjjrDdzKphfRkwQDKGp2YaC54Yhz0g6P5uYTCCibZZEiMAA==}
     dependencies:
       '@types/tern': 0.23.4
-    dev: false
 
   /@types/direction/1.0.0:
     resolution: {integrity: sha512-et1wmqXm/5smJ8lTJfBnwD12/2Y7eVJLKbuaRT0h2xaKAoo1h8Dz2Io22GObDLFwxY1ddXRTLH3Gq5v44Fl/2w==}
@@ -2793,7 +2796,6 @@ packages:
     resolution: {integrity: sha512-JAUw1iXGO1qaWwEOzxTKJZ/5JxVeON9kvGZ/osgZaJImBnyjyn0cjovPsf6FNLmyGY8Vw9DoXZCMlfMkMwHRWg==}
     dependencies:
       '@types/estree': 1.0.0
-    dev: false
 
   /@types/throttle-debounce/2.1.0:
     resolution: {integrity: sha512-5eQEtSCoESnh2FsiLTxE121IiE60hnMqcb435fShf4bpLRjEu1Eoekht23y6zXS9Ts3l+Szu3TARnTsA0GkOkQ==}

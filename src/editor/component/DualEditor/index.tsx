@@ -1,78 +1,104 @@
 import { createContextState } from 'create-context-state'
-import React, { useEffect, useMemo, useState } from 'react'
-import type { CodeBlockExtension, DocExtension } from 'remirror/extensions'
-import { HardBreakExtension, MarkdownExtension } from 'remirror/extensions'
+import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react'
 import type { ReactExtensions, UseRemirrorReturn } from '@remirror/react'
 import { Remirror, useRemirror } from '@remirror/react'
 import { EditorExtensions } from '@editor'
 import { DataCenter } from '@utils'
+import type { Editor } from 'codemirror'
+import CodeMirror from 'codemirror'
+import 'codemirror/lib/codemirror.css'
+import styled from 'styled-components'
 import { emit } from '@tauri-apps/api/event'
 import Text from '../Text'
+// const CodeMirror = await import('codemirror')
 
-interface Context extends Props {
-  setMarkdown: (content: string) => void
-  setVisual: (markdown: string) => void
-}
+interface Context extends Props {}
 
 interface Props {
   visual: UseRemirrorReturn<ReactExtensions<ReturnType<typeof EditorExtensions>[number]>>
-  markdown: UseRemirrorReturn<ReactExtensions<DocExtension | CodeBlockExtension>>
 }
 
 const [DualEditorProvider, useDualEditor] = createContextState<Context, Props>(({ props }) => {
   return {
     ...props,
-    setMarkdown: (content: string) => {
-      const ctx = props.markdown.getContext()
-      DataCenter.setRenderEditorCtx(ctx, 0)
-      return ctx?.setContent(content)
-    },
   }
 })
 
-function MarkdownTextEditor() {
+const Container = styled.div`
+  .CodeMirror {
+    height: 100%;
+    width: 100%;
+  }
+`
+// eslint-disable-next-line react/display-name
+const MarkdownTextEditor = memo(() => {
   const { visual } = useDualEditor()
-  const [value, setValue] = useState(DataCenter.getData('markdownContent'))
-
-  const ctx = useMemo(() => {
-    return {
+  const codemirrorRef = useRef<CodeMirror.EditorFromTextArea>()
+  const ctx = useMemo(
+    () => ({
       setContent: (content: string) => {
-        setValue(content)
+        codemirrorRef.current?.setValue(content)
       },
+    }),
+    [],
+  )
+
+  const handleChange = useCallback(
+    (instance: Editor) => {
+      const value = instance.getValue()
+      const visualCtx = visual.getContext()
+      visualCtx?.setContent(value)
+      DataCenter.setRenderEditorCtx([ctx, visualCtx])
+      emit('editor_content_change', { content: value })
+    },
+    [ctx, visual],
+  )
+
+  useEffect(() => {
+    const el = document.getElementById('editTextArea')
+
+    if (!el)
+      return
+
+    if (codemirrorRef.current) {
+      codemirrorRef.current.on('change', handleChange)
     }
-  }, [])
+    else {
+      codemirrorRef.current = CodeMirror.fromTextArea(el as HTMLTextAreaElement, {
+        mode: 'gfm', // github-flavored-markdown
+        theme: 'default',
+        indentUnit: 2,
+        tabSize: 2,
+        lineWrapping: true,
+      })
+      codemirrorRef.current.setValue(DataCenter.getData('markdownContent'))
+    }
+    return () => {
+      codemirrorRef.current?.off('change', handleChange)
+    }
+  }, [handleChange])
 
   useEffect(() => {
     setTimeout(() => {
-      console.log('effect', visual.getContext()?.setContent(value))
+      const value = codemirrorRef.current?.getValue() || ''
+      visual.getContext()?.setContent(value)
     })
-  }, [value, visual])
+  }, [visual])
 
   return (
-    <textarea
-      className="flex-1 border-r-1 px-4"
-      value={value}
-      onChange={(e) => {
-        const visualCtx = visual.getContext()
-        visualCtx?.setContent(value)
-        DataCenter.setRenderEditorCtx([ctx, visualCtx])
-        emit('editor_content_change', { content: e.target.value })
-        setValue(e.target.value)
-      }}
-    />
+    <Container className="flex-1 border-r-1 px-4">
+      <textarea id="editTextArea" />
+    </Container>
   )
-}
+})
 
 function VisualEditor() {
-  const { visual, setMarkdown } = useDualEditor()
+  const { visual } = useDualEditor()
 
   return (
     <Remirror
       manager={visual.manager}
       editable={false}
-      onChange={({ helpers, state }) => {
-        return setMarkdown(helpers.getMarkdown(state))
-      }}
     >
       <Text className="h-full w-full overflow-scroll markdown-body" />
     </Remirror>
@@ -89,17 +115,9 @@ export const DualEditor: React.FC = () => {
     selection: 'start',
     content: '**Markdown** content is the _best_',
   })
-  const markdown = useRemirror({
-    extensions: () => [new HardBreakExtension(), new MarkdownExtension()],
-    content: '**Markdown** content is the _best_',
-    builtin: {
-      exitMarksOnArrowPress: false,
-    },
-    stringHandler: 'html',
-  })
 
   return (
-    <DualEditorProvider visual={visual} markdown={markdown}>
+    <DualEditorProvider visual={visual}>
       <MarkdownTextEditor />
       <VisualEditor />
     </DualEditorProvider>
