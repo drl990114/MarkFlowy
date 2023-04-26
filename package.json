@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@emotion/styled": "^11.10.6",
+    "@mui/icons-material": "^5.11.16",
+    "@mui/material": "^5.12.2",
     "@remirror/core": "^2.0.12",
     "@remirror/extension-list": "^2.0.15",
     "@remirror/pm": "^2.0.4",
@@ -22,6 +24,7 @@
     "create-context-state": "^2.0.0",
     "hox": "^2.1.0",
     "i18next": "^22.4.14",
+    "rc-dialog": "^9.1.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-i18next": "^12.2.0",
