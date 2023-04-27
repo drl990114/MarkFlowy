@@ -7,7 +7,7 @@ import CN from './locales/cn.json'
 export const locales = {
   en: 'English',
   cn: '简体中文',
-} as const
+}
 
 export const resources = {
   en: { translation: { ...EN } },
@@ -20,6 +20,7 @@ export async function i18nInit(options?: InitOptions) {
     interpolation: {
       escapeValue: false, // react already safes from xss
     },
+    fallbackLng: 'en',
     ...options,
   })
 }

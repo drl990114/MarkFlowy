@@ -1,16 +1,20 @@
-import { SettingDialog, SideBar } from '@components'
+import { AppInfoDialog, SideBar } from '@components'
+import { Cache } from '@utils'
 import { Editor } from './editor'
 import { AppContainer } from './styles'
-import { i18nInit } from './i18n'
+import { changeLng, i18nInit } from './i18n'
+
+i18nInit()
+Cache.readCache().then(() => {
+  changeLng(Cache.settingData.language)
+})
 
 function App() {
-  i18nInit({ lng: 'cn' })
-
   return (
     <AppContainer>
       <SideBar />
-      {<Editor />}
-      <SettingDialog />
+      <Editor />
+      <AppInfoDialog />
     </AppContainer>
   )
 }

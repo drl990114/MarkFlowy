@@ -1,10 +1,9 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Explorer, Icon } from '@components'
+import { Explorer, Icon, Setting } from '@components'
 import type { ICONSNAME } from '@constants'
 import { RIGHTBARITEMKEYS } from '@constants'
 import classNames from 'classnames'
 import { useTranslation } from 'react-i18next'
-import { emit } from '@tauri-apps/api/event'
 import { Container, SettingRightBarContainer } from './styles'
 
 function SideBar() {
@@ -69,8 +68,8 @@ function SideBar() {
             <Icon name={item.icon} />
           </div>
         })}
-        <SettingRightBarContainer className="w-48px h-48px fjic cursor-pointer" onClick={() => emit('dialog_setting')}>
-          <Icon name="setting" />
+        <SettingRightBarContainer className="w-48px h-48px fjic cursor-pointer">
+          <Setting />
         </SettingRightBarContainer>
       </div>
       {activeRightBarItem?.components ? <activeRightBarItem.components className="app-sidebar-content"/> : null}

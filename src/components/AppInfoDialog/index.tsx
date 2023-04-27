@@ -17,7 +17,7 @@ export interface DialogTitleProps {
   onClose: () => void
 }
 
-function BootstrapDialogTitle(props: DialogTitleProps) {
+export function BootstrapDialogTitle(props: DialogTitleProps) {
   const { children, onClose, ...other } = props
 
   return (
@@ -52,7 +52,6 @@ const SettingDialog: FC = () => {
   })
 
   useEffect(() => {
-    const unlisten = listen('dialog_setting', () => setOpen(true))
     Promise.all([getName(), getVersion(), getTauriVersion()]).then(([name, version, tauriVersion]) => {
       setAppInfo({
         name,
@@ -61,6 +60,7 @@ const SettingDialog: FC = () => {
       })
     })
 
+    const unlisten = listen('dialog_setting_about', () => setOpen(true))
     return () => {
       unlisten.then(fn => fn())
     }
@@ -84,7 +84,7 @@ TauriVersion: ${appInfo.tauriVersion}
   return (
     <Dialog open={open}>
       <BootstrapDialogTitle onClose={handleClose}>{appInfo.name}</BootstrapDialogTitle>
-      <DialogContent style={{ width: 500 }}>
+      <DialogContent style={{ width: 600 }}>
         <DialogContentText>{`Version: ${appInfo.version}`}</DialogContentText>
         <DialogContentText>{`Tauri Version: ${appInfo.tauriVersion}`}</DialogContentText>
       </DialogContent>
