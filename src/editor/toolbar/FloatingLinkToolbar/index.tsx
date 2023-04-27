@@ -1,6 +1,6 @@
 import { useFloatingLinkState } from '@hooks'
 import { CommandButton, FloatingToolbar, FloatingWrapper, useActive, useCurrentSelection } from '@remirror/react'
-import type { ChangeEvent, HTMLProps } from 'react'
+import type { ChangeEvent, HTMLProps, KeyboardEvent } from 'react'
 import { useCallback, useEffect, useRef } from 'react'
 
 function DelayAutoFocusInput({ autoFocus, ...rest }: HTMLProps<HTMLInputElement>) {
@@ -56,7 +56,7 @@ export default function FloatingLinkToolbar() {
           onChange={(event: ChangeEvent<HTMLInputElement>) => setHref(event.target.value)}
           value={href}
           onBlur={cancelHref}
-          onKeyPress={(event: KeyboardEvent<HTMLInputElement>) => {
+          onKeyDown={(event: KeyboardEvent<HTMLInputElement>) => {
             const { code } = event
 
             if (code === 'Enter')
