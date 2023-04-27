@@ -15,7 +15,7 @@ class DataCenter {
 
 | Project | LICENSE | Repo |
 | --- | --- | --- |
-| linebyline | ![LICENSE](https://img.shields.io/github/license/halodong/recept?style=flat-square) | \[[GitHub](https://github.com/vuejs/rollup-plugin-vue/tree/next)\] |
+| linebyline | ![LICENSE](https://img.shields.io/github/license/halodong/recept?style=flat-square) | \[[GitHub](https://github.com/halodong/linebyline)\] |
 `,
   }
 
