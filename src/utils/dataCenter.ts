@@ -46,7 +46,7 @@ class DataCenter {
     }
   }
 
-  setRenderEditorCtx = (ctx: ReactFrameworkOutput<any>) => {
+  setRenderEditorCtx = (ctx: any) => {
     this.editorCtx = ctx
   }
 }

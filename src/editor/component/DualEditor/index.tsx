@@ -6,11 +6,9 @@ import { EditorExtensions } from '@editor'
 import { DataCenter } from '@utils'
 import type { Editor } from 'codemirror'
 import CodeMirror from 'codemirror'
-import 'codemirror/lib/codemirror.css'
 import styled from 'styled-components'
 import { emit } from '@tauri-apps/api/event'
 import Text from '../Text'
-// const CodeMirror = await import('codemirror')
 
 interface Context extends Props {}
 
