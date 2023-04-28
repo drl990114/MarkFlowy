@@ -35,11 +35,11 @@ jobs:
           workspaces: './src-tauri -> target'
 
       - uses: pnpm/action-setup@v2
-          name: Install pnpm
-          id: pnpm-install
-          with:
-            version: 7
-            run_install: false
+        name: Install pnpm
+        id: pnpm-install
+        with:
+          version: 7
+          run_install: false
 
       - name: Install frontend dependencies
         # If you don't have `beforeBuildCommand` configured you may want to build your frontend here too.
