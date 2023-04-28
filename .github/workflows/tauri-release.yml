@@ -34,8 +34,8 @@ jobs:
         with:
           workspaces: './src-tauri -> target'
 
-      -  name: Install pnpm
-          uses: pnpm/action-setup@v2
+      - uses: pnpm/action-setup@v2
+          name: Install pnpm
           id: pnpm-install
           with:
             version: 7
