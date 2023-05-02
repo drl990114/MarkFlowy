@@ -12,6 +12,9 @@
   "tauri": {
     "allowlist": {
       "all": true,
+      "path": {
+        "all": true
+      },
       "fs": {
         "all": true,
         "scope": ["$APPDATA/*", "$APPCACHE/*"]
@@ -20,21 +23,14 @@
     "bundle": {
       "active": true,
       "category": "DeveloperTool",
-      "copyright": "",
-      "deb": {
-        "depends": []
-      },
-      "externalBin": [],
       "icon": ["icons/icon.icns", "icons/icon.ico", "icons/icon.png"],
       "identifier": "com.tauri.test",
-      "longDescription": "",
-      "resources": [],
-      "shortDescription": "",
       "targets": "all",
       "windows": {
-        "certificateThumbprint": null,
-        "digestAlgorithm": "sha256",
-        "timestampUrl": ""
+        "webviewInstallMode": {
+          "type": "embedBootstrapper"
+        },
+        "digestAlgorithm": "sha256"
       }
     },
     "security": {

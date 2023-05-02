@@ -34,17 +34,25 @@ jobs:
         with:
           workspaces: './src-tauri -> target'
 
-      -  name: Install pnpm
-          uses: pnpm/action-setup@v2
-          id: pnpm-install
-          with:
-            version: 7
-            run_install: false
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        id: pnpm-install
+        with:
+          version: 7
+          run_install: false
+        
+      - name: Pnpm Cache
+        uses: actions/setup-node@v3
+        with:
+          node-version: 'lts/*'
+          cache: 'pnpm'
 
-      - name: Install frontend dependencies
-        # If you don't have `beforeBuildCommand` configured you may want to build your frontend here too.
-        run: yarn install # Change this to npm, yarn or pnpm.
+      - name: Install Frontend Dependencies
+        run: pnpm i --frozen-lockfile
 
+      - name: Build the web
+        run: pnpm build
+      
       - name: Build the app
         uses: tauri-apps/tauri-action@v0
 
