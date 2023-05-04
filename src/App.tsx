@@ -1,5 +1,7 @@
 import { AppInfoDialog, SideBar } from '@components'
 import { Cache } from '@utils'
+import { checkUpdate, installUpdate } from '@tauri-apps/api/updater'
+import { useEffect } from 'react'
 import { Editor } from './editor'
 import { AppContainer } from './styles'
 import { changeLng, i18nInit } from './i18n'
@@ -10,6 +12,15 @@ Cache.readCache().then(() => {
 })
 
 function App() {
+  useEffect(() => {
+    const updaterinit = async () => {
+      const update = await checkUpdate()
+      if (update.shouldUpdate)
+        await installUpdate()
+    }
+    updaterinit()
+  }, [])
+
   return (
     <AppContainer>
       <SideBar />
