@@ -1,17 +1,9 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use tauri_build::{try_build, Attributes, WindowsAttributes};
 mod menu;
 
 fn main() {
-    if let Err(error) = try_build(
-        Attributes::new()
-            .windows_attributes(WindowsAttributes::new().window_icon_path("res/icon.ico")),
-    ) {
-        panic!("Error: {}", error);
-    }
-
     let context = tauri::generate_context!();
 
     tauri::Builder::default()
