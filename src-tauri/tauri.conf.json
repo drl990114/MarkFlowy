@@ -17,7 +17,7 @@
       },
       "fs": {
         "all": true,
-        "scope": ["$APPDATA/*", "$APPCACHE/*"]
+        "scope": ["$APPDATA/*", "$APPCACHE/*", "$APPCONFIG/*"]
       }
     },
     "bundle": {

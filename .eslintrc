@@ -1,3 +1,8 @@
 {
-  "extends": ["@halodong/eslint-config-ts", "@halodong/eslint-config-react"]
+  "extends": ["@halodong/eslint-config-ts", "@halodong/eslint-config-react"],
+  "rules": {
+    "react/prop-types": {
+      "ignore": true
+    }
+  }
 }

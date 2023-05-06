@@ -60,7 +60,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         with:
           tagName: ${{ github.ref_name }} # This only works if your workflow triggers on new tags.
-          releaseName: 'App Name v__VERSION__' # tauri-action replaces \_\_VERSION\_\_ with the app version.
+          releaseName: 'LineByLine v__VERSION__' # tauri-action replaces \_\_VERSION\_\_ with the app version.
           releaseBody: 'See the assets to download and install this version.'
           releaseDraft: true
           prerelease: false
