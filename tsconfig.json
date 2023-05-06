@@ -26,6 +26,7 @@
       "@stores": ["stores"],
       "@icons": ["icons"],
       "@editor": ["editor"],
+      "@i18n": ["i18n"]
     }
   },
   "include": ["src", "vite.config.ts", "src/types"],

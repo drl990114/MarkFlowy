@@ -6,6 +6,9 @@ import svgr from 'vite-plugin-svgr'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  server: {
+    port: 3000,
+  },
   plugins: [
     react(),
     WindiCSS(),
@@ -28,6 +31,7 @@ export default defineConfig({
       { find: '@icons', replacement: path.resolve(__dirname, 'src/icons') },
       { find: '@hooks', replacement: path.resolve(__dirname, 'src/hooks') },
       { find: '@editor', replacement: path.resolve(__dirname, 'src/editor') },
+      { find: '@i18n', replacement: path.resolve(__dirname, 'src/i18n') },
     ],
   },
 })
