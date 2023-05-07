@@ -26,6 +26,7 @@
       "@stores": ["stores"],
       "@icons": ["icons"],
       "@editor": ["editor"],
+      "@router": ["router"],
       "@i18n": ["i18n"]
     }
   },

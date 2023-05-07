@@ -3,7 +3,7 @@ import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import { Icon } from '@components'
 import { emit } from '@tauri-apps/api/event'
-import SettingDialog from './SettingDialog'
+import { EVENT } from '@constants'
 
 export default function Setting() {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
@@ -37,7 +37,7 @@ export default function Setting() {
       >
         <MenuItem
           onClick={() => {
-            emit('dialog_setting')
+            emit(EVENT.open_window_setting)
             handleClose()
           }}
         >
@@ -45,14 +45,13 @@ export default function Setting() {
         </MenuItem>
         <MenuItem
           onClick={() => {
-            emit('dialog_setting_about')
+            emit(EVENT.dialog_setting_about)
             handleClose()
           }}
         >
           About
         </MenuItem>
       </Menu>
-      <SettingDialog />
     </div>
   )
 }
