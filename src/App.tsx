@@ -10,7 +10,7 @@ import { APP_NAME, EVENT } from '@constants'
 function App() {
   useEffect(() => {
     eventInit()
-    updaterinit()
+    // updaterinit()
   }, [])
 
   const eventInit = useCallback(() => {
