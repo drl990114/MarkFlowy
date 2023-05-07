@@ -27,6 +27,7 @@
       "@icons": ["icons"],
       "@editor": ["editor"],
       "@router": ["router"],
+      "@colors": ["colors"],
       "@i18n": ["i18n"]
     }
   },

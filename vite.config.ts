@@ -33,6 +33,7 @@ export default defineConfig({
       { find: '@editor', replacement: resolve(__dirname, 'src/editor') },
       { find: '@i18n', replacement: resolve(__dirname, 'src/i18n') },
       { find: '@router', replacement: resolve(__dirname, 'src/router') },
+      { find: '@colors', replacement: resolve(__dirname, 'src/colors') },
     ],
   },
 })
