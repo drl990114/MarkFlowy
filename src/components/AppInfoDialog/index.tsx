@@ -11,6 +11,7 @@ import IconButton from '@mui/material/IconButton'
 import { listen } from '@tauri-apps/api/event'
 import { getName, getTauriVersion, getVersion } from '@tauri-apps/api/app'
 import { writeText } from '@tauri-apps/api/clipboard'
+import { EVENT } from '@constants'
 
 export interface DialogTitleProps {
   children?: React.ReactNode
@@ -60,7 +61,7 @@ const SettingDialog: FC = () => {
       })
     })
 
-    const unlisten = listen('dialog_setting_about', () => setOpen(true))
+    const unlisten = listen(EVENT.dialog_setting_about, () => setOpen(true))
     return () => {
       unlisten.then(fn => fn())
     }

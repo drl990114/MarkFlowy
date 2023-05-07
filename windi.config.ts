@@ -1,5 +1,5 @@
+import customColors from './src/colors'
 import { defineConfig } from 'windicss/helpers'
-import colors from 'windicss/colors'
 
 export default defineConfig({
   preflight: false,
@@ -24,14 +24,7 @@ export default defineConfig({
   },
   theme: {
     extend: {
-      colors: {
-        primarFontColor: 'black',
-        labelFontColor: colors.gray[400],
-        accentColor: colors.sky[700],
-        borderColor: colors.zinc[200],
-        bgColor: colors.neutral[100],
-        tipsBgColor: '#f6f7f9',
-      },
+      colors: customColors,
     },
   },
 })

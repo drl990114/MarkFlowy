@@ -1,5 +1,5 @@
 import { createContextState } from 'create-context-state'
-import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react'
+import React, { memo, useEffect, useMemo, useRef } from 'react'
 import type { ReactExtensions, UseRemirrorReturn } from '@remirror/react'
 import { Remirror, useRemirror } from '@remirror/react'
 import { EditorExtensions } from '@editor'
@@ -9,6 +9,7 @@ import CodeMirror from 'codemirror'
 import styled from 'styled-components'
 import { emit } from '@tauri-apps/api/event'
 import Text from '../Text'
+import 'codemirror/lib/codemirror.css'
 
 interface Context extends Props {}
 
@@ -38,30 +39,25 @@ const MarkdownTextEditor = memo(() => {
         codemirrorRef.current?.setValue(content)
       },
     }),
-    [],
+    []
   )
 
-  const handleChange = useCallback(
-    (instance: Editor) => {
-      const value = instance.getValue()
-      const visualCtx = visual.getContext()
-      visualCtx?.setContent(value)
-      DataCenter.setRenderEditorCtx([ctx, visualCtx])
-      emit('editor_content_change', { content: value })
-    },
-    [ctx, visual],
-  )
+  const handleChange = (instance: Editor) => {
+    const value = instance.getValue()
+    const visualCtx = visual.getContext()
+    visualCtx?.setContent(value)
+    DataCenter.setRenderEditorCtx([ctx, visualCtx])
+    emit('editor_content_change', { content: value })
+  }
 
   useEffect(() => {
     const el = document.getElementById('editTextArea')
 
-    if (!el)
-      return
+    if (!el) return
 
     if (codemirrorRef.current) {
       codemirrorRef.current.on('change', handleChange)
-    }
-    else {
+    } else {
       codemirrorRef.current = CodeMirror.fromTextArea(el as HTMLTextAreaElement, {
         mode: 'gfm', // github-flavored-markdown
         theme: 'default',
@@ -94,10 +90,7 @@ function VisualEditor() {
   const { visual } = useDualEditor()
 
   return (
-    <Remirror
-      manager={visual.manager}
-      editable={false}
-    >
+    <Remirror manager={visual.manager} editable={false}>
       <Text className="h-full w-full overflow-scroll markdown-body" />
     </Remirror>
   )
