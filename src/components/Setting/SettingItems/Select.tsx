@@ -1,12 +1,24 @@
 import Autocomplete from '@mui/material/Autocomplete'
 import { CacheManager } from '@utils'
+import { useGlobalSettingData } from '@hooks'
 import { useTranslation } from 'react-i18next'
 import { SettingItemProps } from '.'
+import { useEffect, useState } from 'react'
 
 const SelectSettingItem: React.FC<SettingItemProps> = (props) => {
   const { item, itemKey, itemParentKey, categoryKey } = props
-  const { t } = useTranslation()
+  const [settingData] = useGlobalSettingData()
   const options = item.options
+  const curValue = options.find((option) => option.value === settingData[categoryKey][itemParentKey][itemKey].value)
+  const [value, setValue] = useState(curValue)
+
+  useEffect(() => {
+    if (curValue !== value) {
+      setValue(curValue)
+    }
+  }, [curValue])
+
+  const { t } = useTranslation()
 
   return (
     <label>
@@ -20,7 +32,7 @@ const SelectSettingItem: React.FC<SettingItemProps> = (props) => {
             color: (theme) => theme.palette.getContrastText(theme.palette.background.paper),
           },
         }}
-        value={options.find((option) => option.value === CacheManager.settingData[categoryKey][itemParentKey][itemKey].value)}
+        value={value}
         options={options}
         getOptionLabel={(option) => {
           // Value selected with enter, right from the input
@@ -31,8 +43,9 @@ const SelectSettingItem: React.FC<SettingItemProps> = (props) => {
         }}
         renderOption={(props, option) => <li {...props}>{option.title}</li>}
         onChange={(_, value) => {
-          if (!value) return 
+          if (!value) return
           CacheManager.writeSetting(categoryKey, itemParentKey, itemKey, value)
+          setValue(value)
         }}
         renderInput={(params) => (
           <div ref={params.InputProps.ref}>

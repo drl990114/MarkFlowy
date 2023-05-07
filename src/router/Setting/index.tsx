@@ -1,13 +1,9 @@
 import { memo } from 'react'
 import * as React from 'react'
-import Tabs from '@mui/material/Tabs'
-import Tab from '@mui/material/Tab'
-import Typography from '@mui/material/Typography'
-import Box from '@mui/material/Box'
-import { CacheManager } from '@utils'
 import SettingGroup from '../../components/Setting/SettingGroup'
 import { Container } from './styles'
 import classNames from 'classnames'
+import { useGlobalSettingData } from '@hooks'
 
 export interface DialogTitleProps {
   children?: React.ReactNode
@@ -21,30 +17,11 @@ function a11yProps(index: number) {
   }
 }
 
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props
-
-  return (
-    <div role="tabpanel" hidden={value !== index} id={`vertical-tabpanel-${index}`} aria-labelledby={`vertical-tab-${index}`} {...other}>
-      {value === index && (
-        <Box sx={{ p: 3 }}>
-          <Typography>{children}</Typography>
-        </Box>
-      )}
-    </div>
-  )
-}
-
 function Setting() {
+  const [settingData] = useGlobalSettingData()
   const [value, setValue] = React.useState(0)
 
-  const settingData = CacheManager.settingData
   const settingDataGroups = Object.keys(settingData)
-
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    setValue(newValue)
-  }
-
   const curGroupKey = settingDataGroups[value]
   const curGroup = settingData[curGroupKey]
   const curGroupKeys = Object.keys(curGroup)

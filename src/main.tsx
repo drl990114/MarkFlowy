@@ -1,6 +1,6 @@
-import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
+import { HoxRoot } from 'hox'
 import App from './App'
 import { CacheManager } from '@utils'
 import { i18nInit } from './i18n'
@@ -12,7 +12,9 @@ i18nInit()
 CacheManager.init()
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <BrowserRouter>
-    <App />
-  </BrowserRouter>
+  <HoxRoot>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  </HoxRoot>
 )
