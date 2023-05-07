@@ -1,15 +1,11 @@
-import { CacheManager } from '@utils'
 import { checkUpdate, installUpdate } from '@tauri-apps/api/updater'
 import { useCallback, useEffect } from 'react'
-import { i18nInit } from './i18n'
 import { Routes, Route } from 'react-router-dom'
 import { Root, Setting } from '@router'
 import { listen } from '@tauri-apps/api/event'
 import { WebviewWindow } from '@tauri-apps/api/window'
 import { APP_NAME, EVENT } from '@constants'
 
-i18nInit()
-CacheManager.init()
 
 function App() {
   useEffect(() => {
