@@ -2,6 +2,8 @@ import { exists, readTextFile, writeFile } from '@tauri-apps/api/fs'
 import { BaseDirectory, appConfigDir } from '@tauri-apps/api/path'
 import defaultSetting from './default.setting'
 import { changeLng } from '@i18n'
+import { emit } from '@tauri-apps/api/event'
+import { EVENT } from '@constants'
 
 const SETTING_FILE_NAME = 'linebyline.setting.json'
 class CacheManager {
@@ -19,6 +21,7 @@ class CacheManager {
     }
     const setting = await readTextFile(SETTING_FILE_NAME, { dir: BaseDirectory.AppCache })
     this.settingData = JSON.parse(setting)
+    emit(EVENT.setting_data_loaded, this.settingData)
     return setting
   }
 
@@ -28,7 +31,9 @@ class CacheManager {
   }
 
   saveSetting = () => {
-    writeFile(SETTING_FILE_NAME, JSON.stringify(this.settingData), { dir: BaseDirectory.AppCache })
+    writeFile(SETTING_FILE_NAME, JSON.stringify(this.settingData), { dir: BaseDirectory.AppCache }).then(() => {
+      emit(EVENT.setting_data_change, this.settingData)
+    })
   }
 }
 
