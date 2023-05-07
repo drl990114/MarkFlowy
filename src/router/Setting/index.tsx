@@ -39,6 +39,7 @@ function Setting() {
             {settingDataGroups.map((group, index) => {
               return (
                 <li
+                  key={group}
                   className={classNames({
                     active: index === value,
                   })}
@@ -53,7 +54,7 @@ function Setting() {
       </div>
       <div id="detail">
         {curGroupKeys.map((key) => {
-          return <SettingGroup group={curGroup[key]} groupKey={key} categoryKey={curGroupKey} />
+          return <SettingGroup key={key} group={curGroup[key]} groupKey={key} categoryKey={curGroupKey} />
         })}
       </div>
       {/* <Box sx={{ flexGrow: 1, bgcolor: 'background.paper', display: 'flex', height: 224 }}>
