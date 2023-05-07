@@ -1,31 +1,47 @@
-import { AppInfoDialog, SideBar } from '@components'
 import { CacheManager } from '@utils'
 import { checkUpdate, installUpdate } from '@tauri-apps/api/updater'
-import { useEffect } from 'react'
-import { Editor } from './editor'
-import { AppContainer } from './styles'
-import { changeLng, i18nInit } from './i18n'
+import { useCallback, useEffect } from 'react'
+import { i18nInit } from './i18n'
+import { Routes, Route } from 'react-router-dom'
+import { Root, Setting } from '@router'
+import { listen } from '@tauri-apps/api/event'
+import { WebviewWindow } from '@tauri-apps/api/window'
+import { APP_NAME, EVENT } from '@constants'
 
 i18nInit()
 CacheManager.init()
 
 function App() {
   useEffect(() => {
-    const updaterinit = async () => {
-      // TODO 更新默认的 setting
-      const update = await checkUpdate()
-      if (update.shouldUpdate)
-        await installUpdate()
-    }
+    eventInit()
     updaterinit()
   }, [])
 
+  const eventInit = useCallback(() => {
+    listen(EVENT.open_window_setting, () => {
+      new WebviewWindow(`setting`, {
+        url: './setting',
+        title: `${APP_NAME} Setting`,
+        width: 1000,
+        height: 600,
+        minWidth: 500,
+        minHeight: 500,
+        focus: true,
+      })
+    })
+  }, [])
+
+  const updaterinit = useCallback(async () => {
+    // TODO 更新默认的 setting
+    const update = await checkUpdate()
+    if (update.shouldUpdate) await installUpdate()
+  }, [])
+
   return (
-    <AppContainer>
-      <SideBar />
-      <Editor />
-      <AppInfoDialog />
-    </AppContainer>
+    <Routes>
+      <Route index path="/" element={<Root />} />
+      <Route path="/setting" element={<Setting />} />
+    </Routes>
   )
 }
 

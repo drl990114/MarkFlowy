@@ -1,17 +1,11 @@
-import type { FC } from 'react'
-import { memo, useCallback, useEffect, useState } from 'react'
-import Dialog from '@mui/material/Dialog'
-import DialogContent from '@mui/material/DialogContent'
-import { listen } from '@tauri-apps/api/event'
-
+import { memo } from 'react'
 import * as React from 'react'
 import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
 import Typography from '@mui/material/Typography'
 import Box from '@mui/material/Box'
-import { BootstrapDialogTitle } from '../AppInfoDialog'
 import { CacheManager } from '@utils'
-import SettingGroup from './SettingGroup'
+import SettingGroup from '../../components/Setting/SettingGroup'
 
 export interface DialogTitleProps {
   children?: React.ReactNode
@@ -39,7 +33,7 @@ function TabPanel(props: TabPanelProps) {
   )
 }
 
-export function VerticalTabs() {
+export function Setting() {
   const [value, setValue] = React.useState(0)
 
   const settingData = CacheManager.settingData
@@ -69,30 +63,7 @@ export function VerticalTabs() {
   )
 }
 
-const SettingDialog: FC = () => {
-  const [open, setOpen] = useState(false)
-
-  useEffect(() => {
-    const unlisten = listen('dialog_setting', () => setOpen(true))
-
-    return () => {
-      unlisten.then((fn) => fn())
-    }
-  }, [])
-
-  const handleClose = useCallback(() => setOpen(false), [])
-
-  return (
-    <Dialog open={open}>
-      <BootstrapDialogTitle onClose={handleClose}>{'Setting'}</BootstrapDialogTitle>
-      <DialogContent style={{ width: 600 }}>
-        <VerticalTabs />
-      </DialogContent>
-    </Dialog>
-  )
-}
-
-export default memo(SettingDialog)
+export default memo(Setting)
 
 interface TabPanelProps {
   children?: React.ReactNode
