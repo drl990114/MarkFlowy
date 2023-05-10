@@ -39,7 +39,7 @@
     "@halodong/eslint-config-ts": "^0.38.14",
     "@tauri-apps/cli": "^1.0.0",
     "@types/codemirror": "^5.60.7",
-    "@types/node": "^18.15.3",
+    "@types/node": "^20.1.2",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
     "@types/styled-components": "^5.1.26",
