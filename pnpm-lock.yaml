@@ -35,6 +35,7 @@ specifiers:
   refractor: ^4.8.1
   remirror: ^2.0.26
   styled-components: ^5.3.9
+  svgmoji: ^3.2.0
   typescript: ^5.0.4
   vite: ^4.3.3
   vite-plugin-svgr: ^2.4.0
@@ -68,6 +69,7 @@ dependencies:
   refractor: 4.8.1
   remirror: 2.0.26_b26u7ws7gibcwhwdgobfu6bmhe
   styled-components: 5.3.9_biqbaboplfbrettd7655fr4n2y
+  svgmoji: 3.2.0
   zustand: 4.3.6_react@18.2.0
 
 devDependencies:

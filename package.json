@@ -33,6 +33,7 @@
     "refractor": "^4.8.1",
     "remirror": "^2.0.26",
     "styled-components": "^5.3.9",
+    "svgmoji": "^3.2.0",
     "zustand": "^4.3.6"
   },
   "devDependencies": {
