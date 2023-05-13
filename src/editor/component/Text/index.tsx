@@ -54,6 +54,12 @@ const Container = styled.div<{ codeEditor?: boolean }>`
     position: absolute;
   }
 
+  .remirror-emoji-wrapper img {
+    width: 1em;
+    vertical-align: middle;
+    background-color: transparent;
+  }
+
   ${props =>
     props.codeEditor
     && css`
