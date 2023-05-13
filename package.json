@@ -47,7 +47,7 @@
     "eslint": "^8.37.0",
     "typescript": "^5.0.4",
     "vite": "^4.3.3",
-    "vite-plugin-svgr": "^2.4.0",
+    "vite-plugin-svgr": "^3.2.0",
     "vite-plugin-svgr-component": "^1.0.1",
     "vite-plugin-windicss": "^1.8.10",
     "windicss": "^3.5.6"
