@@ -1,8 +1,10 @@
+import { Langs } from './../../i18n/index';
+
 const defaultSetting = {
   general: {
     misc: {
       language: {
-        value: 'en',
+        value: 'en' as Langs,
         type: 'select',
         options: [
           {
@@ -19,4 +21,8 @@ const defaultSetting = {
   },
 }
 
+export const SETTING_VERSION = '0.0.1'
+
 export default defaultSetting
+
+export type SettingData = typeof defaultSetting

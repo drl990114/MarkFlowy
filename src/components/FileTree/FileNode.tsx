@@ -1,8 +1,8 @@
-import type { FileEntry } from '@tauri-apps/api/fs'
 import classNames from 'classnames'
 import type { FC, MouseEventHandler } from 'react'
 import { memo, useCallback, useState } from 'react'
 import { Icon } from '@components'
+import type { IFile } from '@/utils/filesys'
 import './index.css'
 
 const FileNode: FC<FileNodeProps> = ({ item, level = 0, selectedPath, onSelect }) => {
@@ -42,10 +42,10 @@ const FileNode: FC<FileNodeProps> = ({ item, level = 0, selectedPath, onSelect }
 }
 
 interface FileNodeProps {
-  item: FileEntry
+  item: IFile
   level: number
   selectedPath?: string
-  onSelect: (file: FileEntry) => void
+  onSelect: (file: IFile) => void
 }
 
 export default memo(FileNode)

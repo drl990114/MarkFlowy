@@ -22,6 +22,7 @@
     "classnames": "^2.3.2",
     "codemirror": "^5.65.12",
     "create-context-state": "^2.0.0",
+    "dayjs": "^1.11.7",
     "hox": "^2.1.0",
     "i18next": "^22.4.14",
     "rc-dialog": "^9.1.0",

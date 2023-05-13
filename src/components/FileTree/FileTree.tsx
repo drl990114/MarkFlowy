@@ -4,6 +4,7 @@ import { memo } from 'react'
 import type { BaseComponentProps } from '@types'
 import classNames from 'classnames'
 import FileNode from './FileNode'
+import { IFile } from '../../utils/filesys'
 
 const FileTree: FC<FileTreeProps> = (props) => {
   const { data, selectedPath, onSelect, className } = props
@@ -20,9 +21,9 @@ const FileTree: FC<FileTreeProps> = (props) => {
 }
 
 interface FileTreeProps extends BaseComponentProps {
-  data: FileEntry[] | null
+  data: IFile[] | null
   selectedPath?: string
-  onSelect: (file: FileEntry) => void
+  onSelect: (file: IFile) => void
 }
 
 export default memo(FileTree)
