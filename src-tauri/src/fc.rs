@@ -43,6 +43,7 @@ pub fn read_directory(dir_path: &str) -> Vec<FileInfo> {
             Err(error) => String::from("ERROR"),
         };
 
+        // TODO path.join ?
         let file_path = dir_path.to_owned() + "/" + &filename;
 
         if meta_unwrap.is_dir() {

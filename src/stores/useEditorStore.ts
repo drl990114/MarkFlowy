@@ -1,4 +1,4 @@
-import type { FileEntry } from '@tauri-apps/api/fs'
+import { IFile } from '@/utils/filesys'
 import { create } from 'zustand'
 
 const useEditorStore = create<EditorStore>(set => ({
@@ -7,8 +7,8 @@ const useEditorStore = create<EditorStore>(set => ({
 }))
 
 interface EditorStore {
-  folderData: null | FileEntry[]
-  setFolderData: (folderData: FileEntry[]) => void
+  folderData: null | IFile[]
+  setFolderData: (folderData: IFile[]) => void
 }
 
 export default useEditorStore

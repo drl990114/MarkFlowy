@@ -8,12 +8,11 @@ const useSettingData = () => {
   const [setting, setSetting] = useState(CacheManager.settingData)
 
   useEffect(() => {
-    const handleSettingData = ({ payload }: any) => {
-      setSetting({...payload})
+    const handleSettingDataChange = ({ payload }: any) => {
+      setSetting({ ...payload })
     }
 
-    listen(EVENT.setting_data_loaded, handleSettingData)
-    listen(EVENT.setting_data_change, handleSettingData)
+    listen(EVENT.setting_data_change, handleSettingDataChange)
   }, [])
 
   return [setting]
