@@ -1,38 +1,46 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/schema.json",
   "build": {
-    "beforeDevCommand": "pnpm dev",
     "beforeBuildCommand": "pnpm build",
+    "beforeDevCommand": "pnpm dev",
     "devPath": "http://localhost:3000",
     "distDir": "../dist",
     "withGlobalTauri": true
   },
   "package": {
     "productName": "LineByLine",
-    "version": "0.0.1"
+    "version": "0.0.2"
   },
   "tauri": {
     "allowlist": {
       "all": true,
-      "path": {
-        "all": true
-      },
       "fs": {
         "all": true,
-        "scope": ["$APPDATA/*", "$APPCACHE/*", "$APPCONFIG/*"]
+        "scope": [
+          "$APPDATA/*",
+          "$APPCACHE/*",
+          "$APPCONFIG/*"
+        ]
+      },
+      "path": {
+        "all": true
       }
     },
     "bundle": {
       "active": true,
       "category": "DeveloperTool",
-      "icon": ["icons/icon.icns", "icons/icon.ico", "icons/icon.png"],
+      "icon": [
+        "icons/icon.icns",
+        "icons/icon.ico",
+        "icons/icon.png"
+      ],
       "identifier": "com.tauri.test",
       "targets": "all",
       "windows": {
+        "digestAlgorithm": "sha256",
         "webviewInstallMode": {
           "type": "embedBootstrapper"
-        },
-        "digestAlgorithm": "sha256"
+        }
       }
     },
     "security": {
@@ -40,14 +48,14 @@
     },
     "updater": {
       "active": false,
-      "windows": {
-        "installMode": "passive"
-      },
+      "dialog": true,
       "endpoints": [
         "https://releases.myapp.com/{{target}}/{{arch}}/{{current_version}}"
       ],
-      "dialog": true,
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEY3NjFEN0QxOEZBQjBDMjYKUldRbURLdVAwZGRoOTJjUHZVbWM1elVJcXNpVU5rSHBvbmNWbU5WZXdoUE51RXRKMFRTVTZCZlcK"
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEY3NjFEN0QxOEZBQjBDMjYKUldRbURLdVAwZGRoOTJjUHZVbWM1elVJcXNpVU5rSHBvbmNWbU5WZXdoUE51RXRKMFRTVTZCZlcK",
+      "windows": {
+        "installMode": "passive"
+      }
     },
     "windows": [
       {
