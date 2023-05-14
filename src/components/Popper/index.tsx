@@ -1,6 +1,6 @@
 import customColors from '@colors'
 import { Box, ClickAwayListener, Fade, Popper, PopperProps } from '@mui/material'
-import { createUid } from '@utils'
+import { nanoid } from 'nanoid'
 import React, { memo, useEffect, useMemo, useState } from 'react'
 
 interface RePopperProps extends Partial<PopperProps> {
@@ -29,7 +29,7 @@ const Tooltip: React.FC<RePopperProps> = (props) => {
     setAnchorEl(event.currentTarget)
   }
 
-  const id = useMemo(() => createUid(), [])
+  const id = useMemo(() => nanoid(), [])
   return (
     <>
       <div onClick={handleClick}>{children}</div>

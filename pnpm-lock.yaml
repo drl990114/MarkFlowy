@@ -27,6 +27,7 @@ specifiers:
   eslint: ^8.37.0
   hox: ^2.1.0
   i18next: ^22.4.14
+  nanoid: ^4.0.2
   rc-dialog: ^9.1.0
   react: ^18.0.0
   react-dom: ^18.0.0
@@ -61,6 +62,7 @@ dependencies:
   dayjs: 1.11.7
   hox: 2.1.0_react@18.2.0
   i18next: 22.4.14
+  nanoid: 4.0.2
   rc-dialog: 9.1.0_biqbaboplfbrettd7655fr4n2y
   react: 18.2.0
   react-dom: 18.2.0_react@18.2.0
@@ -5312,6 +5314,12 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
     dev: true
+
+  /nanoid/4.0.2:
+    resolution: {integrity: sha512-7ZtY5KTCNheRGfEFxnedV5zFiORN1+Y1N6zvPTnHQd8ENUvfaDBeuJDZb2bN/oXwXxu3qkTXDzy57W5vAmDTBw==}
+    engines: {node: ^14 || ^16 || >=18}
+    hasBin: true
+    dev: false
 
   /natural-compare-lite/1.4.0:
     resolution: {integrity: sha512-Tj+HTDSJJKaZnfiuw+iaF9skdPpTo2GtEly5JHnWV/hfv2Qj/9RKsGISQtLh2ox3l5EAGw487hnBee0sIJ6v2g==}

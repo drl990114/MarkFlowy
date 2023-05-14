@@ -7,14 +7,14 @@ import FileNode from './FileNode'
 import { IFile } from '../../utils/filesys'
 
 const FileTree: FC<FileTreeProps> = (props) => {
-  const { data, selectedPath, onSelect, className } = props
+  const { data, activeId, onSelect, className } = props
 
   const containerCls = classNames('w-full overflow-hidden truncate', className)
 
   return (
     <div className={containerCls}>
       {data?.map(item => (
-        <FileNode key={item.name} item={item} level={0} selectedPath={selectedPath} onSelect={onSelect} />
+        <FileNode key={item.name} item={item} level={0} activeId={activeId} onSelect={onSelect} />
       ))}
     </div>
   )
@@ -22,7 +22,7 @@ const FileTree: FC<FileTreeProps> = (props) => {
 
 interface FileTreeProps extends BaseComponentProps {
   data: IFile[] | null
-  selectedPath?: string
+  activeId?: string
   onSelect: (file: IFile) => void
 }
 
