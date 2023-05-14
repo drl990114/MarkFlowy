@@ -7,14 +7,16 @@ import { WebviewWindow } from '@tauri-apps/api/window'
 import { APP_NAME, EVENT } from '@constants'
 import { CacheManager } from '@utils'
 import { i18nInit } from './i18n'
+import { use, loadTask } from './utils/schedule'
+
 
 function App() {
-  i18nInit()
+  use(loadTask('i18n', i18nInit()))
+  use(loadTask('cache', CacheManager.init()))
 
   useEffect(() => {
     eventInit()
     // updaterinit()
-    CacheManager.init()
   }, [])
 
   const eventInit = useCallback(() => {

@@ -17,9 +17,13 @@ function Editor(props: EditorProps) {
   useEffect(() => {
     const init = async () => {
       const file = getFileObject(id)
-      console.log('id', id, file)
-      const text = await readTextFile(file.path)
-      setContent(text)
+
+      if (file.path) {
+        const text = await readTextFile(file.path)
+        setContent(text)
+      } else if (file.content) {
+        setContent(file.content)
+      }
     }
     init()
   }, [id])
