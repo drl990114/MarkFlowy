@@ -27,17 +27,23 @@ const Explorer: FC<ExplorerProps> = (props) => {
       const content = activeId ? getEditorContent(activeId) : ''
 
       if (!activeId) {
-        save({
-          title: 'My wonderful save dialog',
-          defaultPath: `${t('file.untitled')}.md`,
-        }).then((path) => {
-          if (path === null) return
-          writeTextFile(path, content)
-        })
         return
       }
+  
       try {
         const file = getFileObject(activeId)
+
+        if (!file.path) {
+          save({
+            title: 'Save File',
+            defaultPath: file.name ?? `${t('file.untitled')}.md`,
+          }).then((path) => {
+            if (path === null) return
+            writeTextFile(path, content)
+          })
+          return
+        }
+
         writeTextFile(file.path!, content)
       } catch (error) {
         console.error(error)
