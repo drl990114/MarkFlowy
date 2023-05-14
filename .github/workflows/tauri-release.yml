@@ -39,16 +39,7 @@ jobs:
         id: pnpm-install
         with:
           version: 7
-          run_install: false
-        
-      - name: Pnpm Cache
-        uses: actions/setup-node@v3
-        with:
-          node-version: 'lts/*'
-          cache: 'pnpm'
-
-      - name: Install Frontend Dependencies
-        run: pnpm i --frozen-lockfile
+          run_install: true
 
       - name: Build the web
         run: pnpm build
