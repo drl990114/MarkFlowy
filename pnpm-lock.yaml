@@ -23,9 +23,11 @@ specifiers:
   classnames: ^2.3.2
   codemirror: ^5.65.12
   create-context-state: ^2.0.0
+  dayjs: ^1.11.7
   eslint: ^8.37.0
   hox: ^2.1.0
   i18next: ^22.4.14
+  nanoid: ^4.0.2
   rc-dialog: ^9.1.0
   react: ^18.0.0
   react-dom: ^18.0.0
@@ -34,6 +36,7 @@ specifiers:
   refractor: ^4.8.1
   remirror: ^2.0.26
   styled-components: ^5.3.9
+  svgmoji: ^3.2.0
   typescript: ^5.0.4
   vite: ^4.3.3
   vite-plugin-svgr: ^2.4.0
@@ -56,8 +59,10 @@ dependencies:
   classnames: 2.3.2
   codemirror: 5.65.12
   create-context-state: 2.0.0_pmekkgnqduwlme35zpnqhenc34
+  dayjs: 1.11.7
   hox: 2.1.0_react@18.2.0
   i18next: 22.4.14
+  nanoid: 4.0.2
   rc-dialog: 9.1.0_biqbaboplfbrettd7655fr4n2y
   react: 18.2.0
   react-dom: 18.2.0_react@18.2.0
@@ -66,6 +71,7 @@ dependencies:
   refractor: 4.8.1
   remirror: 2.0.26_b26u7ws7gibcwhwdgobfu6bmhe
   styled-components: 5.3.9_biqbaboplfbrettd7655fr4n2y
+  svgmoji: 3.2.0
   zustand: 4.3.6_react@18.2.0
 
 devDependencies:
@@ -3729,6 +3735,10 @@ packages:
     resolution: {integrity: sha512-4FbVrHDwfOASx7uQVxeiCTo7ggSdYZbqs8lH+WU6ViypPlDbe9y6IP5VVUDQBv9DcnyaiPT5XT0UWHgJ64zLeQ==}
     dev: false
 
+  /dayjs/1.11.7:
+    resolution: {integrity: sha512-+Yw9U6YO5TQohxLcIkrXBeY73WP3ejHWVvx8XCk3gxvQDCTEmS48ZrSZCKciI7Bhl/uCMyxYtE9UqRILmFphkQ==}
+    dev: false
+
   /debug/3.2.7:
     resolution: {integrity: sha512-CFjzYYAi4ThfiQvizrFQevTTXHtnCqWfe7x1AhgEscTz6ZbLbfoLRLPugTQyBth6f8ZERVUSyWHFD/7Wu4t1XQ==}
     peerDependencies:
@@ -5304,6 +5314,12 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
     dev: true
+
+  /nanoid/4.0.2:
+    resolution: {integrity: sha512-7ZtY5KTCNheRGfEFxnedV5zFiORN1+Y1N6zvPTnHQd8ENUvfaDBeuJDZb2bN/oXwXxu3qkTXDzy57W5vAmDTBw==}
+    engines: {node: ^14 || ^16 || >=18}
+    hasBin: true
+    dev: false
 
   /natural-compare-lite/1.4.0:
     resolution: {integrity: sha512-Tj+HTDSJJKaZnfiuw+iaF9skdPpTo2GtEly5JHnWV/hfv2Qj/9RKsGISQtLh2ox3l5EAGw487hnBee0sIJ6v2g==}
