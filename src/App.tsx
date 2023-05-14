@@ -5,12 +5,16 @@ import { Root, Setting } from '@router'
 import { listen } from '@tauri-apps/api/event'
 import { WebviewWindow } from '@tauri-apps/api/window'
 import { APP_NAME, EVENT } from '@constants'
-
+import { CacheManager } from '@utils'
+import { i18nInit } from './i18n'
 
 function App() {
+  i18nInit()
+
   useEffect(() => {
     eventInit()
     // updaterinit()
+    CacheManager.init()
   }, [])
 
   const eventInit = useCallback(() => {
