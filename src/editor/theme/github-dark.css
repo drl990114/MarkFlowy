@@ -587,12 +587,6 @@
   padding-right: 20px;
 }
 
-.markdown-body .emoji {
-  max-width: none;
-  vertical-align: text-top;
-  background-color: transparent;
-}
-
 .markdown-body span.frame {
   display: block;
   overflow: hidden;

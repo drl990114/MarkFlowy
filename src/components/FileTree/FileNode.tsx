@@ -1,32 +1,32 @@
-import type { FileEntry } from '@tauri-apps/api/fs'
 import classNames from 'classnames'
 import type { FC, MouseEventHandler } from 'react'
 import { memo, useCallback, useState } from 'react'
 import { Icon } from '@components'
+import type { IFile } from '@/utils/filesys'
 import './index.css'
 
-const FileNode: FC<FileNodeProps> = ({ item, level = 0, selectedPath, onSelect }) => {
+const FileNode: FC<FileNodeProps> = ({ item, level = 0, activeId, onSelect }) => {
   const [isOpen, setIsOpen] = useState(false)
-  const isSelected = selectedPath === item.path
-  const isFolder = !!item.children
+  const isActived = activeId === item.id
+  const isFolder = item.kind === 'dir'
 
   const handleClick: MouseEventHandler = useCallback(
     (e) => {
       e.stopPropagation()
       setIsOpen(!isOpen)
     },
-    [isOpen],
+    [isOpen]
   )
 
   const handleSelect: MouseEventHandler = useCallback(
     (e) => {
       onSelect(item)
     },
-    [item, onSelect],
+    [item, onSelect]
   )
 
   const nodeWrapperCls = classNames('file-node w-full flex items-center label-hover cursor-pointer', {
-    'bg-bgColor': isSelected,
+    'bg-bgColor': isActived,
   })
 
   const iconCls = 'file-icon w-20px m-2px flex-shrink-0'
@@ -36,16 +36,16 @@ const FileNode: FC<FileNodeProps> = ({ item, level = 0, selectedPath, onSelect }
         {isFolder ? <Icon name="folder" iconProps={{ className: iconCls }} /> : <Icon name="file" iconProps={{ className: iconCls }} />}
         <div className="truncate">{item.name}</div>
       </div>
-      {isOpen && item.children && item.children.map(child => <FileNode key={child.name} item={child} level={level + 1} selectedPath={selectedPath} onSelect={onSelect} />)}
+      {isOpen && item.children && item.children.map((child) => <FileNode key={child.name} item={child} level={level + 1} activeId={activeId} onSelect={onSelect} />)}
     </div>
   )
 }
 
 interface FileNodeProps {
-  item: FileEntry
+  item: IFile
   level: number
-  selectedPath?: string
-  onSelect: (file: FileEntry) => void
+  activeId?: string
+  onSelect: (file: IFile) => void
 }
 
 export default memo(FileNode)

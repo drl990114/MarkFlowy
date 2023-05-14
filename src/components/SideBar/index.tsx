@@ -10,7 +10,7 @@ function SideBar() {
   const { t } = useTranslation()
   const [isResizing, setIsResizing] = useState(false)
   const [sidebarWidth, setSidebarWidth] = useState(300)
-  const [activeRightBarItemKey, setActiveRightBarItemKey] = useState(RIGHTBARITEMKEYS.Explorer)
+  const [activeRightBarItemKey, setActiveRightBarItemKey] = useState<RIGHTBARITEMKEYS | undefined>(RIGHTBARITEMKEYS.Explorer)
   const sidebarRef = useRef<HTMLDivElement>(null)
 
   const rightBarDataSource: RightBarItem[] = useMemo(() => {
@@ -55,15 +55,24 @@ function SideBar() {
     }
   }, [resize, stopResizing])
 
+  const noActiveItem = !activeRightBarItemKey
+
   return (
-    <Container ref={sidebarRef} style={{ width: sidebarWidth }} onMouseDown={e => e.preventDefault()}>
+    <Container ref={sidebarRef} noActiveItem={noActiveItem} style={{ width: noActiveItem ? '48px' : sidebarWidth }} onMouseDown={e => e.preventDefault()}>
       <div className="app-sidebar w-48px flex flex-col flex-shrink-0 justify-between">
         {rightBarDataSource.map((item) => {
           const cls = classNames('w-48px h-48px fjic cursor-pointer', {
             'app-sidebar-active': activeRightBarItemKey === item.key,
           })
 
-          const handleRightBarItemClick = () => setActiveRightBarItemKey(item.key)
+          const handleRightBarItemClick = () => {
+            if (activeRightBarItemKey === item.key) {
+              setActiveRightBarItemKey(undefined)
+            } else {
+              setActiveRightBarItemKey(item.key)
+            }
+          }
+
           return <div key={item.key} className={cls} onClick={handleRightBarItemClick}>
             <Icon name={item.icon} />
           </div>

@@ -1,34 +1,32 @@
 import { Remirror, useRemirror } from '@remirror/react'
-import { emit } from '@tauri-apps/api/event'
 import { EditorExtensions } from '@editor'
-import { DataCenter } from '@utils'
-import { useEffect } from 'react'
+import { FC, useEffect } from 'react'
+import { IFile } from '@/utils/filesys'
+import { useEditorStore } from '@/stores'
 import Wrapper from '../Wrapper'
 import FloatingLinkToolbar from '../../toolbar/FloatingLinkToolbar'
 import Text from '../Text'
 
-export default function Editor() {
+ const WysiwygEditor: FC<WysiwygEditorProps> = (props) => {
+  const { file, content } = props
+  const {setEditorCtx} = useEditorStore()
   const remirror = useRemirror({
     extensions: EditorExtensions,
-    content: DataCenter.getData('markdownContent'),
+    content,
     selection: 'start',
     stringHandler: 'markdown',
   })
 
-  const { manager, state, onChange, getContext } = remirror
+  const { manager, state, getContext } = remirror
 
   useEffect(() => {
-    DataCenter.setRenderEditorCtx(getContext())
+    setEditorCtx(file.id, getContext())
   }, [getContext])
 
   return (
     <Wrapper className="remirror-wrapper">
       <Remirror
         manager={manager}
-        onChange={(event) => {
-          emit('editor_content_change', { content: event.helpers.getMarkdown() })
-          onChange(event)
-        }}
         initialContent={state}
       >
         <Text className="h-full w-full overflow-scroll scrollbar-hide markdown-body" />
@@ -36,4 +34,12 @@ export default function Editor() {
       </Remirror>
     </Wrapper>
   )
+}
+
+
+export default WysiwygEditor
+
+interface WysiwygEditorProps {
+  file: IFile
+  content: string
 }

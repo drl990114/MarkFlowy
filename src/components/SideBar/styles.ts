@@ -1,10 +1,9 @@
 import styled from 'styled-components'
 import colors from 'windicss/colors'
 
-export const Container = styled.div`
+export const Container = styled.div<ContainerProps>`
   flex-grow: 0;
   flex-shrink: 0;
-  min-width: 150px;
   max-width: 400px;
   position: relative;
   display: flex;
@@ -18,12 +17,13 @@ export const Container = styled.div`
   .app-sidebar {
     border-right: 1px solid ${colors.zinc[200]};
   }
+
   .app-sidebar-active {
     border-left: 4px solid ${colors.sky[700]};
   }
 
   .app-sidebar-content {
-    min-width: calc(100% - 48px)
+    min-width: calc(100% - 48px);
   }
 
   .app-sidebar-resizer {
@@ -39,7 +39,13 @@ export const Container = styled.div`
     flex-basis: 3px;
     background: #c1c3c5b4;
   }
+
+  ${(props) => (props.noActiveItem ? 'width: 48px' : 'min-width: 150px')}
 `
+
+interface ContainerProps {
+  noActiveItem: boolean
+}
 
 export const SettingRightBarContainer = styled.div`
   position: relative;

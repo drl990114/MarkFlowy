@@ -23,6 +23,7 @@ import {
   TaskListExtension,
   UnderlineExtension,
 } from 'remirror/extensions'
+import data from 'svgmoji/emoji.json';
 
 function extensions() {
   return [
@@ -49,7 +50,7 @@ function extensions() {
     new BulletListExtension(),
     new ListItemExtension(),
     new ListItemSharedExtension(),
-    new EmojiExtension(),
+    new EmojiExtension({ data }),
     new ImageExtension({}),
   ]
 }

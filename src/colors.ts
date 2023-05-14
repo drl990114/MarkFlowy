@@ -5,7 +5,7 @@ const customColors = {
   labelFontColor: colors.gray[400],
   accentColor: colors.sky[700],
   borderColor: colors.zinc[200],
-  bgColor: colors.neutral[100],
+  bgColor: colors.light[50],
   tipsBgColor: '#f6f7f9',
 }
 
