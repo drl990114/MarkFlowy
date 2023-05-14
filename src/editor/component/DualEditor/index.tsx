@@ -3,17 +3,19 @@ import React, { memo, useEffect, useMemo, useRef } from 'react'
 import type { ReactExtensions, UseRemirrorReturn } from '@remirror/react'
 import { Remirror, useRemirror } from '@remirror/react'
 import { EditorExtensions } from '@editor'
-import { DataCenter } from '@utils'
 import type { Editor } from 'codemirror'
 import CodeMirror from 'codemirror'
 import styled from 'styled-components'
-import { emit } from '@tauri-apps/api/event'
 import Text from '../Text'
 import 'codemirror/lib/codemirror.css'
+import { useEditorStore } from '@/stores'
+import { IFile } from '@/utils/filesys'
 
 interface Context extends Props {}
 
 interface Props {
+  file: IFile
+  content: string
   visual: UseRemirrorReturn<ReactExtensions<ReturnType<typeof EditorExtensions>[number]>>
 }
 
@@ -30,13 +32,25 @@ const Container = styled.div`
   }
 `
 // eslint-disable-next-line react/display-name
-const MarkdownTextEditor = memo(() => {
-  const { visual } = useDualEditor()
+const MarkdownTextEditor = memo((props) => {
+  const { visual, file, content } = useDualEditor()
+  const { setEditorCtx } = useEditorStore()
   const codemirrorRef = useRef<CodeMirror.EditorFromTextArea>()
+
+  const setContent =  (content: string) => {
+    const visualCtx = visual.getContext()
+    visualCtx?.setContent(content)
+    codemirrorRef.current?.setValue(content)
+  }
+
   const ctx = useMemo(
     () => ({
-      setContent: (content: string) => {
-        codemirrorRef.current?.setValue(content)
+      setContent,
+      helpers: {
+        setContent,
+        getMarkdown: () => {
+          return codemirrorRef.current?.getValue() || ''
+        }
       },
     }),
     []
@@ -46,8 +60,7 @@ const MarkdownTextEditor = memo(() => {
     const value = instance.getValue()
     const visualCtx = visual.getContext()
     visualCtx?.setContent(value)
-    DataCenter.setRenderEditorCtx([ctx, visualCtx])
-    emit('editor_content_change', { content: value })
+    setEditorCtx(file.id, ctx)
   }
 
   useEffect(() => {
@@ -65,7 +78,6 @@ const MarkdownTextEditor = memo(() => {
         tabSize: 2,
         lineWrapping: true,
       })
-      codemirrorRef.current.setValue(DataCenter.getData('markdownContent'))
     }
     return () => {
       codemirrorRef.current?.off('change', handleChange)
@@ -81,7 +93,7 @@ const MarkdownTextEditor = memo(() => {
 
   return (
     <Container className="flex-1 border-r-1 px-4">
-      <textarea id="editTextArea" />
+      <textarea id="editTextArea" defaultValue={content} />
     </Container>
   )
 })
@@ -99,7 +111,8 @@ function VisualEditor() {
 /**
  * The editor which is used to create the annotation. Supports formatting.
  */
-export const DualEditor: React.FC = () => {
+export const DualEditor: React.FC<DualEditorProps> = (props) => {
+  const { file, content } = props
   const visual = useRemirror({
     extensions: EditorExtensions,
     stringHandler: 'markdown',
@@ -108,9 +121,14 @@ export const DualEditor: React.FC = () => {
   })
 
   return (
-    <DualEditorProvider visual={visual}>
+    <DualEditorProvider content={content} file={file} visual={visual}>
       <MarkdownTextEditor />
       <VisualEditor />
     </DualEditorProvider>
   )
+}
+
+interface DualEditorProps {
+  file: IFile
+  content: string
 }

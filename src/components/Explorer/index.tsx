@@ -7,26 +7,26 @@ import { open, save } from '@tauri-apps/api/dialog'
 import { Empty, FileTree, Icon, List, Popper } from '@components'
 import { appWindow } from '@tauri-apps/api/window'
 import classNames from 'classnames'
-import { emit } from '@tauri-apps/api/event'
-import { CacheManager, DataCenter } from '@utils'
+import { CacheManager } from '@utils'
 import { useTranslation } from 'react-i18next'
 import { useGlobalCacheData } from '@hooks'
 import dayjs from 'dayjs'
 import { Container } from './styles'
 import { ListDataItem } from '../List'
 import { IFile, readDirectory } from '../../utils/filesys'
+import { getFileObject } from '@/utils/files'
 
 const Explorer: FC<ExplorerProps> = (props) => {
   const { t } = useTranslation()
-  const { folderData, setFolderData } = useEditorStore()
-  const [selectedPath, setSelectedPath] = useState<string>()
+  const { folderData, activeId, setFolderData, addOpenedFile, setActiveId, getEditorContent } = useEditorStore()
   const [popperOpen, setPopperOpen] = useState(false)
   const [cache] = useGlobalCacheData()
 
   useEffect(() => {
     const unListen = appWindow.listen('file_save', async () => {
-      const content = DataCenter.getData('markdownContent')
-      if (!selectedPath) {
+      const content = activeId ? getEditorContent(activeId) : ''
+
+      if (!activeId) {
         save({
           title: 'My wonderful save dialog',
           defaultPath: `${t('file.untitled')}.md`,
@@ -34,9 +34,11 @@ const Explorer: FC<ExplorerProps> = (props) => {
           if (path === null) return
           writeTextFile(path, content)
         })
+        return
       }
       try {
-        writeTextFile(selectedPath!, content)
+        const file = getFileObject(activeId)
+        writeTextFile(file.path!, content)
       } catch (error) {
         console.error(error)
       }
@@ -44,24 +46,18 @@ const Explorer: FC<ExplorerProps> = (props) => {
     return () => {
       unListen.then((fn) => fn())
     }
-  }, [selectedPath, t])
+  }, [activeId, t])
 
-  useEffect(() => {
-    emit(EVENT.selected_file, selectedPath)
-  }, [selectedPath])
-
-  const handleSelect = async (item: IFile) => {
+  const handleSelect = (item: IFile) => {
     if (item.kind === 'dir') return
 
-    setSelectedPath(item?.path)
+    addOpenedFile(item.id)
+    setActiveId(item.id)
     appWindow.setTitle(item?.name || APP_NAME)
-    const text = await readTextFile(item.path)
-    DataCenter.setRenderEditorContent(text)
   }
 
   const openRir = async (dir: string) => {
     try {
-      // const res = await readDir(dir, { recursive: true})
       const res = await readDirectory(dir)
       CacheManager.writeCache('openFolderHistory', { path: dir, time: dayjs() })
       setFolderData(res)
@@ -91,7 +87,7 @@ const Explorer: FC<ExplorerProps> = (props) => {
         <small>EXPLORER</small>
         <div className="flex"></div>
       </div>
-      <div className="h-full w-full">{folderData ? <FileTree className="flex-1" data={folderData} selectedPath={selectedPath} onSelect={handleSelect}></FileTree> : <Empty />}</div>
+      <div className="h-full w-full">{folderData ? <FileTree className="flex-1" data={folderData} activeId={activeId} onSelect={handleSelect}></FileTree> : <Empty />}</div>
       <div className="border-t-1-solid flex justify-between items-center px-4 py-1">
         <small className="flex-1 cursor-pointer" onClick={handleOpenDirClick}>
           {t('file.openDir')}
