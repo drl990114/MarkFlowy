@@ -83,7 +83,7 @@ const Explorer: FC<ExplorerProps> = (props) => {
     openRir(item.title)
   }, [])
 
-  const listData = useMemo(() => cache.openFolderHistory.map((history) => ({ key: history.time, title: history.path, iconName: 'folder' })), [cache])
+  const listData = useMemo(() => cache.openFolderHistory.map((history: { time: string; path: string }) => ({ key: history.time, title: history.path, iconName: 'folder' })), [cache])
 
   const containerCLs = classNames('w-full flex flex-col', props.className)
 
