@@ -27,7 +27,7 @@ export default function EditorArea() {
   }
 
   return (
-    <Container id="code-area" className="w-full h-full">
+    <Container className="w-full h-full overflow-y-scroll">
       <div className="tab-items flex">
         {opened.map((id) => {
           const file = getFileObject(id) as IFile
