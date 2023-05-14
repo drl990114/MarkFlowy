@@ -20,7 +20,7 @@
     "@remirror/styles": "^2.0.4",
     "@tauri-apps/api": "^1.0.1",
     "classnames": "^2.3.2",
-    "codemirror": "^5.65.12",
+    "codemirror": "^6.0.1",
     "create-context-state": "^2.0.0",
     "dayjs": "^1.11.7",
     "hox": "^2.1.0",
