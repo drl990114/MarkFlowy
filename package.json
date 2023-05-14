@@ -31,8 +31,10 @@
     "react-dom": "^18.0.0",
     "react-i18next": "^12.2.0",
     "react-router-dom": "^6.9.0",
+    "readline-promise": "^1.0.5",
     "refractor": "^4.8.1",
     "remirror": "^2.0.26",
+    "remixicon": "^3.2.0",
     "styled-components": "^5.3.9",
     "svgmoji": "^3.2.0",
     "zustand": "^4.3.6"
