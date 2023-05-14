@@ -16,7 +16,7 @@ class CacheManager {
   init = async () => {
     await Promise.all([this.readSetting(), this.readCache()])
 
-    changeLng(this.settingData.general.misc.language.value)
+    await changeLng(this.settingData.general.misc.language.value)
   }
 
   readData: (opt: ReadDataParams) => Record<string, any> = async ({ fileName, dataKey, onSuccess, onSaved }) => {
@@ -90,7 +90,7 @@ class CacheManager {
         this.cacheData.openFolderHistory.pop()
       }
 
-      const index = this.cacheData.openFolderHistory.findIndex((his) => his.path === value.path)
+      const index = this.cacheData.openFolderHistory.findIndex((his: { path: string }) => his.path === value.path)
       if (index >= 0) {
         this.cacheData.openFolderHistory.splice(index, 1)
       }
