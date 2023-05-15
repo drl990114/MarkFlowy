@@ -1,10 +1,9 @@
-import type { FileEntry } from '@tauri-apps/api/fs'
-import type { FC } from 'react'
-import { memo } from 'react'
 import type { BaseComponentProps } from '@types'
 import classNames from 'classnames'
-import FileNode from './FileNode'
+import type { FC } from 'react'
+import { memo } from 'react'
 import { IFile } from '../../utils/filesys'
+import FileNode from './FileNode'
 
 const FileTree: FC<FileTreeProps> = (props) => {
   const { data, activeId, onSelect, className } = props

@@ -1,8 +1,8 @@
+import type { IFile } from '@/utils/filesys'
+import { Icon } from '@components'
 import classNames from 'classnames'
 import type { FC, MouseEventHandler } from 'react'
 import { memo, useCallback, useState } from 'react'
-import { Icon } from '@components'
-import type { IFile } from '@/utils/filesys'
 import './index.css'
 
 const FileNode: FC<FileNodeProps> = ({ item, level = 0, activeId, onSelect }) => {

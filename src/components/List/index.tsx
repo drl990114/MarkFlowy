@@ -1,13 +1,13 @@
-import { FC, memo } from 'react'
-import ListItem from '@mui/material/ListItem'
-import ListItemText from '@mui/material/ListItemText'
-import MuiList from '@mui/material/List'
-import ListItemAvatar from '@mui/material/ListItemAvatar'
-import { ListContainer } from './styles'
 import { Icon } from '@components'
 import { ICONSNAME } from '@constants'
-import Tooltip from '@mui/material/Tooltip/Tooltip'
+import MuiList from '@mui/material/List'
+import ListItem from '@mui/material/ListItem'
+import ListItemAvatar from '@mui/material/ListItemAvatar'
+import ListItemText from '@mui/material/ListItemText'
 import { TooltipProps } from '@mui/material/Tooltip'
+import Tooltip from '@mui/material/Tooltip/Tooltip'
+import { FC, memo } from 'react'
+import { ListContainer } from './styles'
 
 const List: FC<ListProps> = (props) => {
   const { title, data, tip, onItemClick } = props

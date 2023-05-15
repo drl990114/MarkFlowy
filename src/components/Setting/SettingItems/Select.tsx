@@ -1,9 +1,9 @@
+import { useGlobalSettingData } from '@hooks'
 import Autocomplete from '@mui/material/Autocomplete'
 import { CacheManager } from '@utils'
-import { useGlobalSettingData } from '@hooks'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { SettingItemProps } from '.'
-import { useEffect, useState } from 'react'
 
 const SelectSettingItem: React.FC<SettingItemProps> = (props) => {
   const { item, itemKey, itemParentKey, categoryKey } = props
