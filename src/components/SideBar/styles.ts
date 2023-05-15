@@ -24,6 +24,7 @@ export const Container = styled.div<ContainerProps>`
 
   .app-sidebar-content {
     min-width: calc(100% - 48px);
+    overflow: hidden;
   }
 
   .app-sidebar-resizer {

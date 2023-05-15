@@ -1,7 +1,7 @@
 import type { BaseComponentProps } from '@types'
 import classNames from 'classnames'
-import { Fragment, memo, useCallback } from 'react'
 import type { FC } from 'react'
+import { Fragment, memo, useCallback } from 'react'
 
 const Menu: FC<MenuProps> = (props) => {
   const { menuGroup, onMenuItemClick, className } = props
