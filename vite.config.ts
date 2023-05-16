@@ -1,8 +1,9 @@
-import { resolve } from 'node:path'
-import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import WindiCSS from 'vite-plugin-windicss'
+import { resolve } from 'node:path'
+import { fileURLToPath, URL } from "url"
+import { defineConfig } from 'vite'
 import svgr from 'vite-plugin-svgr'
+import WindiCSS from 'vite-plugin-windicss'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -22,7 +23,7 @@ export default defineConfig({
   },
   resolve: {
     alias: [
-      { find: '@', replacement: resolve(__dirname, './src') },
+      { find: '@', replacement: fileURLToPath(new URL('./src', import.meta.url)) },
       { find: '@components', replacement: resolve(__dirname, 'src/components') },
       { find: '@services', replacement: resolve(__dirname, 'src/services') },
       { find: '@stores', replacement: resolve(__dirname, 'src/stores') },

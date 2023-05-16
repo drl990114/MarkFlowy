@@ -1,8 +1,14 @@
+import InputSettingItem from './Input'
 import SelectSettingItem from './Select'
 
 const SettingItem: React.FC<SettingItemProps> = (props) => {
-  if (props.item.type === 'select') {
+  const { item } = props
+  if (item.type === 'select') {
     return <SelectSettingItem {...props} />
+  }
+
+  if (item.type === 'input') {
+    return <InputSettingItem {...props} />
   }
 
   return <></>
