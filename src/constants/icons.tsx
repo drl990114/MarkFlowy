@@ -8,6 +8,8 @@ const ICONSMAP = {
   moreVertical: Icons.MoreVerticalIcon,
   setting: Icons.SettingIcon,
   close: Icons.CloseIcon,
+  chatgpt: Icons.ChatGPTIcon,
+  user: Icons.UserIcon
 }
 
 export type ICONSNAME = keyof typeof ICONSMAP

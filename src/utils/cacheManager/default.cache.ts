@@ -1,4 +1,4 @@
-import { SETTING_VERSION } from "./default.setting"
+import { SETTING_VERSION } from "./settingMap"
 
 const defaultCache = {
   settingVersion: SETTING_VERSION, // Determine whether the default setting needs to be updated

@@ -8,7 +8,7 @@ import { APP_NAME, EVENT } from '@constants'
 import { CacheManager } from '@utils'
 import { i18nInit } from './i18n'
 import { use, loadTask } from './utils/schedule'
-
+import 'remixicon/fonts/remixicon.css'
 
 function App() {
   use(loadTask('i18n', i18nInit()))
