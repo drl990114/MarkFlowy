@@ -1,9 +1,9 @@
-import { memo } from 'react'
+import settingMap from '@/utils/cacheManager/settingMap'
+import classNames from 'classnames'
 import * as React from 'react'
+import { memo } from 'react'
 import SettingGroup from '../../components/Setting/SettingGroup'
 import { Container } from './styles'
-import classNames from 'classnames'
-import { useGlobalSettingData } from '@hooks'
 
 export interface DialogTitleProps {
   children?: React.ReactNode
@@ -12,24 +12,22 @@ export interface DialogTitleProps {
 
 function a11yProps(index: number) {
   return {
-    id: `vertical-tab-${index}`,
-    'aria-controls': `vertical-tabpanel-${index}`,
+    id: `tab-${index}`,
+    'aria-controls': `tabpanel-${index}`,
   }
 }
 
 function Setting() {
-  const [settingData] = useGlobalSettingData()
   const [value, setValue] = React.useState(0)
-
-  const settingDataGroups = Object.keys(settingData)
-  const curGroupKey = settingDataGroups[value]
-  const curGroup = settingData[curGroupKey]
+  const settingDataGroups = Object.keys(settingMap)
+  const curGroupKey = settingDataGroups[value] as keyof (typeof settingMap)
+  const curGroup = settingMap[curGroupKey]
   const curGroupKeys = Object.keys(curGroup)
 
   return (
     <Container>
       <div id="sidebar">
-        <h5 className='title'>Setting</h5>
+        <h5 className="title">Setting</h5>
         {/* TODO search */}
         {/* <div id="search-form" role="search">
           <input id="q" aria-label="Search contacts" placeholder="Search" type="search" name="q" />
@@ -44,6 +42,9 @@ function Setting() {
                     active: index === value,
                   })}
                   {...a11yProps(index)}
+                  onClick={() => {
+                    setValue(index)
+                  }}
                 >
                   {group}
                 </li>

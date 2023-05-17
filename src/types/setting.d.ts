@@ -3,6 +3,7 @@ declare namespace Setting {
 
   interface SettingItem<T = { title: string; value: any }> {
     type: 'select'
+    key: string
     value: T
     options: ReadonlyArray<T>
   }
