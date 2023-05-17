@@ -1,10 +1,11 @@
-import { exists, readTextFile, writeFile } from '@tauri-apps/api/fs'
-import { BaseDirectory } from '@tauri-apps/api/path'
-import defaultSetting from './default.setting'
-import defaultCache from './default.cache'
+import { EVENT } from '@constants'
 import { changeLng } from '@i18n'
 import { emit } from '@tauri-apps/api/event'
-import { EVENT } from '@constants'
+import { exists, readTextFile, writeFile } from '@tauri-apps/api/fs'
+import { BaseDirectory } from '@tauri-apps/api/path'
+import defaultCache from './default.cache'
+import defaultSetting from './default.setting.json'
+import { SettingKeys } from './settingMap'
 
 const SETTING_FILE_NAME = 'linebyline.setting.json'
 const CACHE_FILE_NAME = 'linebyline.cache.json'
@@ -16,7 +17,7 @@ class CacheManager {
   init = async () => {
     await Promise.all([this.readSetting(), this.readCache()])
 
-    await changeLng(this.settingData.general.misc.language.value)
+    await changeLng(this.settingData[SettingKeys.language])
   }
 
   readData: (opt: ReadDataParams) => Record<string, any> = async ({ fileName, dataKey, onSuccess, onSaved }) => {
@@ -57,8 +58,8 @@ class CacheManager {
     return setting
   }
 
-  writeSetting = (categoryKey: string, parentKey: string, key: string, item: Pick<Setting.SettingItem, 'value'>) => {
-    this.settingData[categoryKey][parentKey][key].value = item.value
+  writeSetting = (item: Pick<Setting.SettingItem, 'value' | 'key'>, value: any) => {
+    this.settingData[item.key] = value
     this.saveSetting()
   }
 

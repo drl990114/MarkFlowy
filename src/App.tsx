@@ -1,26 +1,31 @@
-import { checkUpdate, installUpdate } from '@tauri-apps/api/updater'
-import { useCallback, useEffect } from 'react'
-import { Routes, Route } from 'react-router-dom'
+import { APP_NAME, EVENT } from '@constants'
 import { Root, Setting } from '@router'
 import { listen } from '@tauri-apps/api/event'
+import { checkUpdate, installUpdate } from '@tauri-apps/api/updater'
 import { WebviewWindow } from '@tauri-apps/api/window'
-import { APP_NAME, EVENT } from '@constants'
 import { CacheManager } from '@utils'
+import { useCallback, useEffect } from 'react'
+import { Route, Routes } from 'react-router-dom'
+import 'remixicon/fonts/remixicon.css'
 import { i18nInit } from './i18n'
-import { use, loadTask } from './utils/schedule'
-
+import { loadTask, use } from './utils/schedule'
 
 function App() {
   use(loadTask('i18n', i18nInit()))
   use(loadTask('cache', CacheManager.init()))
 
   useEffect(() => {
-    eventInit()
+    const unlisten = eventInit()
     // updaterinit()
+
+    return () => {
+      unlisten()
+    }
   }, [])
 
+
   const eventInit = useCallback(() => {
-    listen(EVENT.open_window_setting, () => {
+    const unListenOpenSetting = listen(EVENT.open_window_setting, () => {
       new WebviewWindow(`setting`, {
         url: './setting',
         title: `${APP_NAME} Setting`,
@@ -31,6 +36,11 @@ function App() {
         focus: true,
       })
     })
+
+    
+    return () => {
+      unListenOpenSetting.then(fn => fn())
+    }
   }, [])
 
   const updaterinit = useCallback(async () => {
