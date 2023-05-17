@@ -3,11 +3,11 @@ import { nanoid } from 'nanoid'
 import { create } from 'zustand'
 
 const useChatGPTStore = create<ChatGPTStore>((set, get) => ({
-  historyList: [],
+  chatList: [],
 
   setChatStatus: (id, status) => {
     set((state) => {
-      const curChat = state.historyList.find((history) => history.id === id)
+      const curChat = state.chatList.find((history) => history.id === id)
       if (curChat) {
         curChat.status = status
         return { ...state }
@@ -38,14 +38,14 @@ const useChatGPTStore = create<ChatGPTStore>((set, get) => ({
   addChatQuestion: (question: string) => {
     const chat = { id: nanoid(), question: question, status: 'pending' as const }
     set((state) => {
-      return { ...state, historyList: [...state.historyList, chat] }
+      return { ...state, chatList: [...state.chatList, chat] }
     })
     return chat
   },
 
   addChatAnswer: (id: string, answer: string) => {
     set((state) => {
-      const curChat = state.historyList.find((history) => history.id === id)
+      const curChat = state.chatList.find((history) => history.id === id)
       if (curChat) {
         curChat.answer = answer
         curChat.status = 'done'
@@ -57,14 +57,15 @@ const useChatGPTStore = create<ChatGPTStore>((set, get) => ({
 
   delChat: (id: string) => {
     set((state) => {
-      return { ...state, historyList: state.historyList.filter((history) => history.id !== id) }
+      return { ...state, chatList: state.chatList.filter((history) => history.id !== id) }
     })
   },
+
 }))
 
 type ChatStatus = 'pending' | 'done' | 'error'
 
-interface ChatGPTHistory {
+export interface ChatGPTHistory {
   id: string
   question: string
   answer?: string
@@ -72,7 +73,7 @@ interface ChatGPTHistory {
 }
 
 interface ChatGPTStore {
-  historyList: ChatGPTHistory[]
+  chatList: ChatGPTHistory[]
   setChatStatus: (id: string, status: ChatStatus) => void
   addChat: (question: string, apiKey: string) => ChatGPTHistory
   addChatQuestion: (question: string) => ChatGPTHistory

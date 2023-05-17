@@ -9,9 +9,11 @@ export const Container = styled.div`
   line-height: 1.25rem;
 
   .header {
-    height: 2rem;
+    display: flex;
+    justify-content: space-between;
+    height: 2.5rem;
     padding: 0 8px;
-    line-height: 2rem;
+    line-height: 2.5rem;
     border-bottom: 1px solid ${customColors.borderColor};
   }
 
