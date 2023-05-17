@@ -8,10 +8,42 @@ export const Container = styled.div`
   font-size: 0.8rem;
   line-height: 1.25rem;
 
-  .content {
-    height: calc(100% - 60px);
-    overflow: auto;
+  .header {
+    height: 2rem;
+    padding: 0 8px;
+    line-height: 2rem;
+    border-bottom: 1px solid ${customColors.borderColor};
   }
+
+  .content {
+    height: calc(100% - 60px - 2rem);
+    overflow: auto;
+
+    a {
+      cursor: pointer;
+      color: ${customColors.accentColor};
+    }
+
+    .introduction {
+      height: 100%;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      
+      &-title {
+        text-align: center;
+      }
+
+      &-item {
+        margin: 0.875rem 0.875rem 0;
+        padding: 0.875rem;
+        background-color: ${customColors.tipsBgColor};
+      }
+    }
+  }
+
 `
 
 export const ListContainer = styled.div`

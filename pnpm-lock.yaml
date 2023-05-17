@@ -32,6 +32,7 @@ specifiers:
   react: ^18.0.0
   react-dom: ^18.0.0
   react-i18next: ^12.2.0
+  react-loading: ^2.0.3
   react-router-dom: ^6.9.0
   refractor: ^4.8.1
   remirror: ^2.0.26
@@ -69,6 +70,7 @@ dependencies:
   react: 18.2.0
   react-dom: 18.2.0_react@18.2.0
   react-i18next: 12.2.0_57ubdvajp6562okxygabugvlve
+  react-loading: 2.0.3_react@18.2.0
   react-router-dom: 6.9.0_biqbaboplfbrettd7655fr4n2y
   refractor: 4.8.1
   remirror: 2.0.26_rmdslsmhffxx4bhmxbxnqp5mfy
@@ -5982,6 +5984,15 @@ packages:
 
   /react-is/18.2.0:
     resolution: {integrity: sha512-xWGDIW6x921xtzPkhiULtthJHoJvBbF3q26fzloPCK0hsvxtPVelvftw3zjbHWSkR2km9Z+4uxbDDK/6Zw9B8w==}
+    dev: false
+
+  /react-loading/2.0.3_react@18.2.0:
+    resolution: {integrity: sha512-Vdqy79zq+bpeWJqC+xjltUjuGApyoItPgL0vgVfcJHhqwU7bAMKzysfGW/ADu6i0z0JiOCRJjo+IkFNkRNbA3A==}
+    peerDependencies:
+      prop-types: ^15.6.0
+      react: '>=0.14.0'
+    dependencies:
+      react: 18.2.0
     dev: false
 
   /react-refresh/0.14.0:
