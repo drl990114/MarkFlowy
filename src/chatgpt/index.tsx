@@ -3,19 +3,22 @@ import { Icon } from '@/components'
 import { RightBarItem } from '@/components/SideBar'
 import { EVENT, RIGHTBARITEMKEYS } from '@/constants'
 import { useGlobalSettingData } from '@/hooks'
-import { useChatGPTStore } from '@/stores'
+import { useChatGPTStore, useEditorStore } from '@/stores'
 import { SettingKeys } from '@/utils/cacheManager/settingMap'
+import { createFile } from '@/utils/filesys'
 import Button from '@mui/material/Button'
 import { emit } from '@tauri-apps/api/event'
 import { useCallback, useState } from 'react'
 import ReactLoading from 'react-loading'
+import { parseChatList } from './parseChatList'
 import { BottomBar, Container, ListContainer } from './styles'
 
 const ChatList: React.FC<ChatListProps> = (props) => {
-  const { historyList, addChat } = useChatGPTStore()
+  const { chatList, addChat, delChat } = useChatGPTStore()
   const [settingData] = useGlobalSettingData()
   const apiKey = settingData[SettingKeys.chatgpt]
   const [askInput, setAskInput] = useState('')
+  const { addOpenedFile, setActiveId } = useEditorStore()
 
   const handleSubmit = useCallback(() => {
     if (!apiKey) {
@@ -24,37 +27,55 @@ const ChatList: React.FC<ChatListProps> = (props) => {
     addChat(askInput, apiKey)
   }, [askInput, apiKey])
 
+  const exportChats = useCallback(() => {
+    const content = parseChatList(chatList)
+    const gptNotesFile = createFile({ name: "notes.md", content })
+    addOpenedFile(gptNotesFile.id)
+    setActiveId(gptNotesFile.id)
+    return
+  }, [chatList, addOpenedFile, setActiveId])
+
   const openSettingWindow = useCallback(() => emit(EVENT.open_window_setting), [])
 
   return (
     <Container {...props}>
-      <div className="header">ChatGPT</div>
+      <div className="header">
+        ChatGPT
+        <div>
+          <i className="icon ri-file-download-line" onClick={exportChats}></i>
+        </div>
+      </div>
       <div className="content">
-        {historyList.length > 0 ? (
+        {chatList.length > 0 ? (
           <ListContainer>
-            {historyList.map((history) => {
+            {chatList.map((chat) => {
               return (
-                <div key={history.id}>
+                <div key={chat.id}>
                   <div className="question item w-full h-full">
-                    <div className="flex items-center">
-                      <Icon name="user" iconProps={{ className: 'w-18px h-18px' }} />
-                      <span>You</span>
+                    <div className="flex justify-between">
+                      <div className="flex items-center">
+                        <Icon name="user" iconProps={{ className: 'w-18px h-18px' }} />
+                        <span>You</span>
+                      </div>
+                      <div>
+                        <i className="icon ri-delete-bin-line" onClick={() => delChat(chat.id)} />
+                      </div>
                     </div>
-                    <p>{history.question}</p>
+                    <p>{chat.question}</p>
                   </div>
                   <div className="answer item w-full h-full">
                     <div className="flex items-center">
                       <Icon name="chatgpt" iconProps={{ className: 'w-18px h-18px' }} />
                       <span>ChatGPT</span>
                     </div>
-                    {history.status === 'pending' ? (
+                    {chat.status === 'pending' ? (
                       <ReactLoading type="bubbles" width={35} height={35} color={customColors.accentColor} />
-                    ) : history.status === 'error' ? (
+                    ) : chat.status === 'error' ? (
                       <div>
                         request error, please check your ApiKey is it right or not <a onClick={openSettingWindow}>setting</a>
                       </div>
                     ) : (
-                      <p>{history.answer}</p>
+                      <p>{chat.answer}</p>
                     )}
                   </div>
                 </div>
