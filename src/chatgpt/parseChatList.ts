@@ -15,10 +15,10 @@ export const parseChatList = (chatList: ChatGPTHistory[]): string => {
 }
 
 const questionToMarkdownText = (question: string): string => {
-  return `Q: ${question} \n`
+  return `Q: ${question} \n\n`
 }
 
 const answerToMarkdownText = (answer: string): string => {
   
-  return `A: ${answer} \n`
+  return `A: ${answer} \n\n`
 }
