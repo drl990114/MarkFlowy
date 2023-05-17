@@ -1,10 +1,11 @@
+import CircularProgress from '@mui/material/CircularProgress'
+import { HoxRoot } from 'hox'
+import { Suspense } from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
-import { HoxRoot } from 'hox'
-import CircularProgress from '@mui/material/CircularProgress'
-import App from './App'
-import { Suspense } from 'react'
 import 'virtual:windi.css'
+import App from './App'
+import { GlobalStyles } from './globalStyles'
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
@@ -17,7 +18,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           </div>
         }
       >
-        <App />
+        <GlobalStyles>
+          <App />
+        </GlobalStyles>
       </Suspense>
     </BrowserRouter>
   </HoxRoot>
