@@ -56,7 +56,7 @@ type ErrorResponse = {
   }
 }
 
-type Status = { status: 'pending'; lastToken: string } | { status: 'done'; result: string } | { status: 'error'; message: string }
+export type Status = { status: 'pending'; lastToken: string } | { status: 'done'; result: string } | { status: 'error'; message: string }
 
 type ApiStreamResponse = {
   id: string
