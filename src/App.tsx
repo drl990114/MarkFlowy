@@ -1,3 +1,4 @@
+import { TitleBar } from '@/components'
 import { APP_NAME, EVENT } from '@constants'
 import { Root, Setting } from '@router'
 import { listen } from '@tauri-apps/api/event'
@@ -7,6 +8,7 @@ import { CacheManager } from '@utils'
 import { useCallback, useEffect } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import 'remixicon/fonts/remixicon.css'
+import useGlobalOSInfo from './hooks/useOSInfo'
 import { i18nInit } from './i18n'
 import { loadTask, use } from './utils/schedule'
 
@@ -14,6 +16,7 @@ function App() {
   use(loadTask('i18n', i18nInit()))
   use(loadTask('cache', CacheManager.init()))
 
+  useGlobalOSInfo()
   useEffect(() => {
     const unlisten = eventInit()
     // updaterinit()
@@ -22,7 +25,6 @@ function App() {
       unlisten()
     }
   }, [])
-
 
   const eventInit = useCallback(() => {
     const unListenOpenSetting = listen(EVENT.open_window_setting, () => {
@@ -34,12 +36,12 @@ function App() {
         minWidth: 500,
         minHeight: 500,
         focus: true,
+        decorations: false,
       })
     })
 
-    
     return () => {
-      unListenOpenSetting.then(fn => fn())
+      unListenOpenSetting.then((fn) => fn())
     }
   }, [])
 
@@ -50,10 +52,13 @@ function App() {
   }, [])
 
   return (
-    <Routes>
-      <Route index path="/" element={<Root />} />
-      <Route path="/setting" element={<Setting />} />
-    </Routes>
+    <>
+      <TitleBar />
+      <Routes>
+        <Route index path="/" element={<Root />} />
+        <Route path="/setting" element={<Setting />} />
+      </Routes>
+    </>
   )
 }
 
