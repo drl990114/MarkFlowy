@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { SettingItemProps } from '.'
 
-const SelectSettingItem: React.FC<SettingItemProps> = (props) => {
+const SelectSettingItem: React.FC<SettingItemProps<Setting.SelectSettingItem>> = (props) => {
   const { item, itemKey } = props
   const [settingData] = useGlobalSettingData()
   const options = item.options
