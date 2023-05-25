@@ -2,8 +2,7 @@ import customColors from '@colors'
 import styled from 'styled-components'
 
 export const Container = styled.div`
-  height: calc(100vh - 30px);
-  margin-top: 30px;
+  height: 100vh;
   display: flex;
 
   #sidebar {
