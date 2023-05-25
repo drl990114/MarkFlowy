@@ -1,15 +1,13 @@
-import { getFileObject } from '@/utils/files'
 import { Empty, FileTree, Icon, List, Popper } from '@components'
 import { APP_NAME } from '@constants'
 import { useGlobalCacheData } from '@hooks'
 import { useEditorStore } from '@stores'
-import { open, save } from '@tauri-apps/api/dialog'
-import { writeTextFile } from '@tauri-apps/api/fs'
+import { open } from '@tauri-apps/api/dialog'
 import { appWindow } from '@tauri-apps/api/window'
 import { CacheManager } from '@utils'
 import classNames from 'classnames'
 import dayjs from 'dayjs'
-import { FC, memo, useCallback, useEffect, useMemo, useState } from 'react'
+import { FC, memo, useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { IFile, readDirectory } from '../../utils/filesys'
 import { ListDataItem } from '../List'
@@ -17,41 +15,9 @@ import { Container } from './styles'
 
 const Explorer: FC<ExplorerProps> = (props) => {
   const { t } = useTranslation()
-  const { folderData, activeId, setFolderData, addOpenedFile, setActiveId, getEditorContent } = useEditorStore()
+  const { folderData, activeId, setFolderData, addOpenedFile, setActiveId } = useEditorStore()
   const [popperOpen, setPopperOpen] = useState(false)
   const [cache] = useGlobalCacheData()
-
-  useEffect(() => {
-    const unListen = appWindow.listen('file_save', async () => {
-      const content = activeId ? getEditorContent(activeId) : ''
-
-      if (!activeId) {
-        return
-      }
-  
-      try {
-        const file = getFileObject(activeId)
-
-        if (!file.path) {
-          save({
-            title: 'Save File',
-            defaultPath: file.name ?? `${t('file.untitled')}.md`,
-          }).then((path) => {
-            if (path === null) return
-            writeTextFile(path, content)
-          })
-          return
-        }
-
-        writeTextFile(file.path!, content)
-      } catch (error) {
-        console.error(error)
-      }
-    })
-    return () => {
-      unListen.then((fn) => fn())
-    }
-  }, [activeId, t])
 
   const handleSelect = (item: IFile) => {
     if (item.kind === 'dir') return
