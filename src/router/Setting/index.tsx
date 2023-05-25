@@ -20,8 +20,8 @@ function a11yProps(index: number) {
 function Setting() {
   const [value, setValue] = React.useState(0)
   const settingDataGroups = Object.keys(settingMap)
-  const curGroupKey = settingDataGroups[value] as keyof (typeof settingMap)
-  const curGroup = settingMap[curGroupKey]
+  const curGroupKey = settingDataGroups[value] as keyof typeof settingMap
+  const curGroup = settingMap[curGroupKey] as Setting.SettingData
   const curGroupKeys = Object.keys(curGroup)
 
   return (

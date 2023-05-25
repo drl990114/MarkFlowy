@@ -3,7 +3,7 @@ import { CacheManager } from '@/utils'
 import { useCallback, useEffect, useState } from 'react'
 import { SettingItemProps } from '.'
 
-const InputSettingItem: React.FC<SettingItemProps> = (props) => {
+const InputSettingItem: React.FC<SettingItemProps<Setting.InputSettingItem>> = (props) => {
   const { item, itemKey } = props
   const [settingData] = useGlobalSettingData()
   const curValue = settingData[item.key] as unknown as string
