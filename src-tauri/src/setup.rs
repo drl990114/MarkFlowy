@@ -1,4 +1,4 @@
-use tauri::{utils::config::WindowUrl, window::WindowBuilder, App, TitleBarStyle};
+use tauri::{utils::config::WindowUrl, window::WindowBuilder, App, TitleBarStyle, Theme};
 
 pub fn init(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
     let app = app.handle();
@@ -8,6 +8,7 @@ pub fn init(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
             .title("linebyline")
             .resizable(true)
             .fullscreen(false)
+            .theme(Theme::Light.into()) // TODO theme selected and setting
             .hidden_title(false)
             .inner_size(800.0, 600.0);
 
