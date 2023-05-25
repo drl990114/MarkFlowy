@@ -1,4 +1,3 @@
-import { TitleBar } from '@/components'
 import { APP_NAME, EVENT } from '@constants'
 import { Root, Setting } from '@router'
 import { listen } from '@tauri-apps/api/event'
@@ -52,13 +51,10 @@ function App() {
   }, [])
 
   return (
-    <>
-      <TitleBar />
-      <Routes>
-        <Route index path="/" element={<Root />} />
-        <Route path="/setting" element={<Setting />} />
-      </Routes>
-    </>
+    <Routes>
+      <Route index path="/" element={<Root />} />
+      <Route path="/setting" element={<Setting />} />
+    </Routes>
   )
 }
 
