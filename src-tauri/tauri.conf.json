@@ -56,16 +56,6 @@
       "windows": {
         "installMode": "passive"
       }
-    },
-    "windows": [
-      {
-        "decorations": false,
-        "fullscreen": false,
-        "height": 600,
-        "resizable": true,
-        "title": "LineByLine",
-        "width": 800
-      }
-    ]
+    }
   }
 }
