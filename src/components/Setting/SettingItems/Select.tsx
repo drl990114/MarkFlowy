@@ -5,11 +5,11 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { SettingItemProps } from '.'
 
-const SelectSettingItem: React.FC<SettingItemProps> = (props) => {
-  const { item, itemKey, itemParentKey, categoryKey } = props
+const SelectSettingItem: React.FC<SettingItemProps<Setting.SelectSettingItem>> = (props) => {
+  const { item, itemKey } = props
   const [settingData] = useGlobalSettingData()
   const options = item.options
-  const curValue = options.find((option) => option.value === settingData[categoryKey][itemParentKey][itemKey].value)
+  const curValue = options.find((option) => option.value === settingData[item.key])
   const [value, setValue] = useState(curValue)
 
   useEffect(() => {
@@ -20,6 +20,7 @@ const SelectSettingItem: React.FC<SettingItemProps> = (props) => {
 
   const { t } = useTranslation()
 
+  console.log('settingData', settingData)
   return (
     <label>
       {itemKey}
@@ -44,7 +45,7 @@ const SelectSettingItem: React.FC<SettingItemProps> = (props) => {
         renderOption={(props, option) => <li {...props}>{option.title}</li>}
         onChange={(_, value) => {
           if (!value) return
-          CacheManager.writeSetting(categoryKey, itemParentKey, itemKey, value)
+          CacheManager.writeSetting(item, value.value)
           setValue(value)
         }}
         renderInput={(params) => (

@@ -6,6 +6,7 @@ const customColors = {
   accentColor: colors.sky[700],
   borderColor: colors.zinc[200],
   bgColor: colors.light[50],
+  warnColor: colors.red[600],
   tipsBgColor: '#f6f7f9',
 }
 
