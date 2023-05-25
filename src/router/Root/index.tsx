@@ -40,7 +40,7 @@ function Root() {
     return () => {
       unListenFileSave.then(fn => fn())
     }
-  }, [])
+  }, [activeId])
 
   return (
     <Container>
