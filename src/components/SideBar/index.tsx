@@ -9,7 +9,7 @@ import { Container, SettingRightBarContainer } from './styles'
 function SideBar() {
   const [isResizing, setIsResizing] = useState(false)
   const [sidebarWidth, setSidebarWidth] = useState(300)
-  const [activeRightBarItemKey, setActiveRightBarItemKey] = useState<RIGHTBARITEMKEYS | undefined>(RIGHTBARITEMKEYS.Explorer)
+  const [activeRightBarItemKey, setActiveRightBarItemKey] = useState<RIGHTBARITEMKEYS | undefined>()
   const sidebarRef = useRef<HTMLDivElement>(null)
 
   const rightBarDataSource: RightBarItem[] = useMemo(() => {
