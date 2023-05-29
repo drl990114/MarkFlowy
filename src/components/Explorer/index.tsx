@@ -1,9 +1,7 @@
 import { Empty, FileTree, Icon, List, Popper } from '@components'
-import { APP_NAME } from '@constants'
 import { useGlobalCacheData } from '@hooks'
 import { useEditorStore } from '@stores'
 import { open } from '@tauri-apps/api/dialog'
-import { appWindow } from '@tauri-apps/api/window'
 import { CacheManager } from '@utils'
 import classNames from 'classnames'
 import dayjs from 'dayjs'
@@ -24,7 +22,6 @@ const Explorer: FC<ExplorerProps> = (props) => {
 
     addOpenedFile(item.id)
     setActiveId(item.id)
-    appWindow.setTitle(item?.name || APP_NAME)
   }
 
   const openRir = async (dir: string) => {
