@@ -27,6 +27,8 @@ specifiers:
   eslint: ^8.37.0
   hox: ^2.1.0
   i18next: ^22.4.14
+  immer: ^10.0.2
+  is-promise: ^4.0.0
   nanoid: ^4.0.2
   rc-dialog: ^9.1.0
   react: ^18.0.0
@@ -65,6 +67,8 @@ dependencies:
   dayjs: 1.11.7
   hox: 2.1.0_react@18.2.0
   i18next: 22.4.14
+  immer: 10.0.2
+  is-promise: 4.0.0
   nanoid: 4.0.2
   rc-dialog: 9.1.0_biqbaboplfbrettd7655fr4n2y
   react: 18.2.0
@@ -77,7 +81,7 @@ dependencies:
   remixicon: 3.2.0
   styled-components: 5.3.9_biqbaboplfbrettd7655fr4n2y
   svgmoji: 3.2.0
-  zustand: 4.3.6_react@18.2.0
+  zustand: 4.3.6_immer@10.0.2+react@18.2.0
 
 devDependencies:
   '@halodong/eslint-config-react': 0.38.14_bzbbflj65ga2lrhzlpvelbzcnq
@@ -4874,6 +4878,10 @@ packages:
     engines: {node: '>= 4'}
     dev: true
 
+  /immer/10.0.2:
+    resolution: {integrity: sha512-Rx3CqeqQ19sxUtYV9CU911Vhy8/721wRFnJv3REVGWUmoAcIwzifTsdmJte/MV+0/XpM35LZdQMBGkRIoLPwQA==}
+    dev: false
+
   /import-fresh/3.3.0:
     resolution: {integrity: sha512-veYYhQa+D1QBKznvhUHxb8faxlrwUnxseDAbAp457E0wLNio2bOSKnjYDhMj+YiAq61xrMGhQk9iXVk5FzgQMw==}
     engines: {node: '>=6'}
@@ -5052,6 +5060,10 @@ packages:
     engines: {node: '>=0.10.0'}
     dependencies:
       isobject: 3.0.1
+    dev: false
+
+  /is-promise/4.0.0:
+    resolution: {integrity: sha512-hvpoI6korhJMnej285dSg6nu1+e6uxs7zG3BYAm5byqDsgJNWwxzM6z6iZiAgQR4TJ30JmBTOwqZUw3WlyH3AQ==}
     dev: false
 
   /is-regex/1.1.4:
@@ -6983,7 +6995,7 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  /zustand/4.3.6_react@18.2.0:
+  /zustand/4.3.6_immer@10.0.2+react@18.2.0:
     resolution: {integrity: sha512-6J5zDxjxLE+yukC2XZWf/IyWVKnXT9b9HUv09VJ/bwGCpKNcaTqp7Ws28Xr8jnbvnZcdRaidztAPsXFBIqufiw==}
     engines: {node: '>=12.7.0'}
     peerDependencies:
@@ -6995,6 +7007,7 @@ packages:
       react:
         optional: true
     dependencies:
+      immer: 10.0.2
       react: 18.2.0
       use-sync-external-store: 1.2.0_react@18.2.0
     dev: false

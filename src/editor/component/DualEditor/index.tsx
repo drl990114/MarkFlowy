@@ -1,21 +1,23 @@
-import { createContextState } from 'create-context-state'
-import React, { memo, useEffect, useMemo, useRef } from 'react'
-import type { ReactExtensions, UseRemirrorReturn } from '@remirror/react'
-import { Remirror, useRemirror } from '@remirror/react'
-import { EditorExtensions } from '@editor'
-import type { Editor } from 'codemirror'
-import CodeMirror from 'codemirror'
-import styled from 'styled-components'
-import Text from '../Text'
-import 'codemirror/lib/codemirror.css'
+import { EditorState } from '@/editor/extensions/EditorState'
 import { useEditorStore } from '@/stores'
 import { IFile } from '@/utils/filesys'
+import { EditorExtensions } from '@editor'
+import type { ReactExtensions, UseRemirrorReturn } from '@remirror/react'
+import { Remirror, useRemirror } from '@remirror/react'
+import type { Editor } from 'codemirror'
+import CodeMirror from 'codemirror'
+import 'codemirror/lib/codemirror.css'
+import { createContextState } from 'create-context-state'
+import React, { memo, useEffect, useMemo, useRef } from 'react'
+import styled from 'styled-components'
+import Text from '../Text'
 
 interface Context extends Props {}
 
 interface Props {
   file: IFile
   content: string
+  active: boolean
   visual: UseRemirrorReturn<ReactExtensions<ReturnType<typeof EditorExtensions>[number]>>
 }
 
@@ -99,11 +101,12 @@ const MarkdownTextEditor = memo((props) => {
 })
 
 function VisualEditor() {
-  const { visual } = useDualEditor()
+  const { visual, active, file } = useDualEditor()
 
   return (
     <Remirror manager={visual.manager} editable={false}>
       <Text className="h-full w-full overflow-scroll markdown-body" />
+      <EditorState manager={visual.manager} active={active} file={file}/>
     </Remirror>
   )
 }
@@ -112,7 +115,7 @@ function VisualEditor() {
  * The editor which is used to create the annotation. Supports formatting.
  */
 export const DualEditor: React.FC<DualEditorProps> = (props) => {
-  const { file, content } = props
+  const { file, content, active } = props
   const visual = useRemirror({
     extensions: EditorExtensions,
     stringHandler: 'markdown',
@@ -121,7 +124,7 @@ export const DualEditor: React.FC<DualEditorProps> = (props) => {
   })
 
   return (
-    <DualEditorProvider content={content} file={file} visual={visual}>
+    <DualEditorProvider content={content} file={file} visual={visual} active={active}>
       <MarkdownTextEditor />
       <VisualEditor />
     </DualEditorProvider>
@@ -130,5 +133,6 @@ export const DualEditor: React.FC<DualEditorProps> = (props) => {
 
 interface DualEditorProps {
   file: IFile
+  active: boolean
   content: string
 }

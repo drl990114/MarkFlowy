@@ -12,3 +12,16 @@ export function once(fn: Function): Function {
 export function isArray(tar: any): tar is any[] {
   return Array.isArray(tar)
 }
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+async function sleepBeforeError(timeout: number): Promise<never> {
+  await sleep(timeout)
+  throw new Error(`timed out after ${timeout} milliseconds`)
+}
+
+export async function createTimeoutPromise<T>(promise: Promise<T>, delay: number): Promise<T> {
+  return await Promise.race([promise, sleepBeforeError(delay)])
+}

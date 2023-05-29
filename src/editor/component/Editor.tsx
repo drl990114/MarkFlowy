@@ -1,23 +1,23 @@
-import { useEffect, useState } from 'react'
-import { appWindow } from '@tauri-apps/api/window'
 import { getFileObject } from '@/utils/files'
 import { readTextFile } from '@tauri-apps/api/fs'
+import { appWindow } from '@tauri-apps/api/window'
+import { useEffect, useMemo, useState } from 'react'
 import styled, { css } from 'styled-components'
+import '../theme/github-light.css'
+import { EditorViewType } from '../types'
 import BasicEditor from './BasicEditor'
 import { DualEditor } from './DualEditor'
-import '../theme/github-light.css'
-
-type EditorViewType = 'wysiwyg' | 'dual'
 
 function Editor(props: EditorProps) {
   const { id, active } = props
+  const curFile = getFileObject(id)
   const [type, setType] = useState<EditorViewType>('wysiwyg')
-  const [content, setContent] = useState<undefined | string>()
+  const [content, setContent] = useState<string>()
+
 
   useEffect(() => {
     const init = async () => {
       const file = getFileObject(id)
-
       if (file.path) {
         const text = await readTextFile(file.path)
         setContent(text)
@@ -40,11 +40,11 @@ function Editor(props: EditorProps) {
     }
   }, [active])
 
-  const file = getFileObject(props.id)
+  const editorProps = useMemo(() => ({ file: curFile, content: content!, active }), [curFile, content, active])
 
   return typeof content === 'string' ? (
     <EditorWrapper active={active} type={type}>
-      {type === 'dual' ? <DualEditor file={file} content={content} /> : <BasicEditor file={file} content={content} />}
+      {type === 'dual' ? <DualEditor {...editorProps} /> : <BasicEditor {...editorProps} />}
     </EditorWrapper>
   ) : null
 }

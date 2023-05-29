@@ -1,15 +1,16 @@
-import { Remirror, useRemirror } from '@remirror/react'
-import { EditorExtensions } from '@editor'
-import { FC, useEffect } from 'react'
-import { IFile } from '@/utils/filesys'
+import { EditorState } from '@/editor/extensions/EditorState'
 import { useEditorStore } from '@/stores'
-import Wrapper from '../Wrapper'
+import { IFile } from '@/utils/filesys'
+import { EditorExtensions } from '@editor'
+import { Remirror, useRemirror } from '@remirror/react'
+import { FC, useEffect } from 'react'
 import FloatingLinkToolbar from '../../toolbar/FloatingLinkToolbar'
 import Text from '../Text'
+import Wrapper from '../Wrapper'
 
- const WysiwygEditor: FC<WysiwygEditorProps> = (props) => {
-  const { file, content } = props
-  const {setEditorCtx} = useEditorStore()
+const WysiwygEditor: FC<WysiwygEditorProps> = (props) => {
+  const { file, content, active } = props
+  const { setEditorCtx } = useEditorStore()
   const remirror = useRemirror({
     extensions: EditorExtensions,
     content,
@@ -31,15 +32,18 @@ import Text from '../Text'
       >
         <Text className="h-full w-full overflow-scroll scrollbar-hide markdown-body" />
         <FloatingLinkToolbar />
+        <EditorState active={active} file={file} manager={manager}/>
       </Remirror>
     </Wrapper>
   )
 }
 
-
 export default WysiwygEditor
+
+export type EditorChangeHandler = (params: { undoDepth: number }) => void
 
 interface WysiwygEditorProps {
   file: IFile
   content: string
+  active: boolean
 }

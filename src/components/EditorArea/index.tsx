@@ -1,9 +1,9 @@
+import customColors from '@/colors'
+import { Icon } from '@/components'
+import { Editor } from '@/editor'
 import { useEditorStore } from '@/stores'
 import { getFileObject } from '@/utils/files'
 import { IFile } from '@/utils/filesys'
-import { Icon } from '@/components'
-import { Editor } from '@/editor'
-import customColors from '@/colors'
 import { Container, TabItem } from './styles'
 
 export default function EditorArea() {
@@ -14,7 +14,7 @@ export default function EditorArea() {
 
   const close = (ev: React.MouseEvent<HTMLElement, MouseEvent>, id: string) => {
     ev.stopPropagation()
-    const curIndex = opened.findIndex(openedId => openedId === id)
+    const curIndex = opened.findIndex((openedId) => openedId === id)
     if (curIndex < 0) return
 
     if (activeId === id) {
@@ -37,7 +37,7 @@ export default function EditorArea() {
             <TabItem active={active} onClick={() => onSelectItem(file.id)} className={`tab-item`} key={id}>
               <Icon name="file" iconProps={{ className: 'w-20px' }} />
               <span style={{ color: active ? customColors.accentColor : '' }}>{file.name}</span>
-              <Icon name="close" iconProps={{ className: 'w-20px close' , onClick: (ev: React.MouseEvent<HTMLElement, MouseEvent>) => close(ev, id) }} />
+              <Icon name="close" iconProps={{ className: 'w-20px close', onClick: (ev: React.MouseEvent<HTMLElement, MouseEvent>) => close(ev, id) }} />
             </TabItem>
           )
         })}
