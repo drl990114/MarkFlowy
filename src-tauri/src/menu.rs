@@ -3,6 +3,20 @@ use tauri::Menu;
 use tauri::{CustomMenuItem, MenuItem, Submenu};
 
 pub fn generate_menu() -> Menu {
+    let name = "LineByLine";
+    let app_menu = Submenu::new(
+        name,
+        Menu::with_items([
+            CustomMenuItem::new("About", "About LineByLine").into(),
+            MenuItem::Services.into(),
+            MenuItem::Hide.into(),
+            MenuItem::HideOthers.into(),
+            MenuItem::ShowAll.into(),
+            MenuItem::Separator.into(),
+            MenuItem::Quit.into(),
+        ]),
+    );
+
     let file_submenu = Submenu::new(
         "File",
         Menu::new().add_item(
@@ -37,7 +51,7 @@ pub fn generate_menu() -> Menu {
     );
 
     let menu = Menu::new()
-        .add_native_item(MenuItem::Copy)
+        .add_submenu(app_menu)
         .add_submenu(file_submenu)
         .add_submenu(edit_submenu)
         .add_submenu(view_submenu)

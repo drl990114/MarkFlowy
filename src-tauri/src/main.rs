@@ -6,8 +6,6 @@ mod fc;
 mod menu;
 mod setup;
 
-use fc as file_extra;
-
 fn main() {
     let context = tauri::generate_context!();
 
@@ -24,6 +22,13 @@ fn main() {
                 event
                     .window()
                     .emit("file_save", {})
+                    .map_err(|err| println!("{:?}", err))
+                    .ok();
+            }
+            "About" => {
+                event
+                    .window()
+                    .emit("dialog_setting_about", {})
                     .map_err(|err| println!("{:?}", err))
                     .ok();
             }
