@@ -1,23 +1,25 @@
-import { useEffect, useState } from 'react'
-import { appWindow } from '@tauri-apps/api/window'
+import { useEditorStore } from '@/stores'
 import { getFileObject } from '@/utils/files'
+import { emit } from '@tauri-apps/api/event'
 import { readTextFile } from '@tauri-apps/api/fs'
+import { appWindow } from '@tauri-apps/api/window'
+import { useEffect, useMemo, useState } from 'react'
 import styled, { css } from 'styled-components'
+import '../theme/github-light.css'
+import { EditorViewType } from '../types'
 import BasicEditor from './BasicEditor'
 import { DualEditor } from './DualEditor'
-import '../theme/github-light.css'
-
-type EditorViewType = 'wysiwyg' | 'dual'
 
 function Editor(props: EditorProps) {
   const { id, active } = props
+  const curFile = getFileObject(id)
   const [type, setType] = useState<EditorViewType>('wysiwyg')
-  const [content, setContent] = useState<undefined | string>()
+  const [content, setContent] = useState<string>()
+  const { getEditorContent } = useEditorStore()
 
   useEffect(() => {
     const init = async () => {
       const file = getFileObject(id)
-
       if (file.path) {
         const text = await readTextFile(file.path)
         setContent(text)
@@ -29,8 +31,13 @@ function Editor(props: EditorProps) {
   }, [id])
 
   useEffect(() => {
-    const unListen = appWindow.listen<EditorViewType>('editor_toggle_type', ({ payload }) => {
+    const unListen = appWindow.listen<EditorViewType>('editor_toggle_type', async ({ payload }) => {
       if (active) {
+        if (curFile.path) {
+          emit('file_save')
+        }
+        const content = getEditorContent(curFile.id)
+        setContent(content)
         setType(payload)
       }
     })
@@ -38,18 +45,21 @@ function Editor(props: EditorProps) {
     return () => {
       unListen.then((fn) => fn())
     }
-  }, [active])
+  }, [active, curFile])
 
-  const file = getFileObject(props.id)
+  const editorProps = useMemo(() => ({ file: curFile, content: content!, active }), [curFile, content, active])
 
   return typeof content === 'string' ? (
     <EditorWrapper active={active} type={type}>
-      {type === 'dual' ? <DualEditor file={file} content={content} /> : <BasicEditor file={file} content={content} />}
+      {type === 'dual' ? <DualEditor {...editorProps} /> : <BasicEditor {...editorProps} />}
     </EditorWrapper>
   ) : null
 }
 
 const EditorWrapper = styled.div<{ active: boolean; type: EditorViewType }>`
+  height: 100%;
+  overflow: hidden;
+
   ${(props) =>
     props.active
       ? css({
@@ -62,6 +72,7 @@ const EditorWrapper = styled.div<{ active: boolean; type: EditorViewType }>`
 export interface EditorProps {
   id: string
   active: boolean
+  onSave?: () => void
 }
 
 export default Editor

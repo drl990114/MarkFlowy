@@ -1,7 +1,7 @@
-import styled, { css } from 'styled-components'
 import { useRemirrorContext } from '@remirror/react'
-import type { FC } from 'react'
+import type { CSSProperties, FC } from 'react'
 import React from 'react'
+import styled, { css } from 'styled-components'
 
 const Container = styled.div<{ codeEditor?: boolean }>`
   position: relative;
@@ -25,7 +25,12 @@ const Container = styled.div<{ codeEditor?: boolean }>`
   }
 
   .remirror-editor {
+    height: 100%;
     outline: none;
+  }
+
+  .cm-editor {
+    height: 100%;
   }
 
   .remirror-floating-popover {
@@ -60,9 +65,9 @@ const Container = styled.div<{ codeEditor?: boolean }>`
     background-color: transparent;
   }
 
-  ${props =>
-    props.codeEditor
-    && css`
+  ${(props) =>
+    props.codeEditor &&
+    css`
       padding: 0;
       min-height: unset;
 
@@ -75,6 +80,7 @@ const Container = styled.div<{ codeEditor?: boolean }>`
 interface ITextProps {
   children?: React.ReactNode
   className?: string
+  style?: CSSProperties
   codeEditor?: boolean
 }
 

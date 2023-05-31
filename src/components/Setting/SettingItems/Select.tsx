@@ -20,7 +20,6 @@ const SelectSettingItem: React.FC<SettingItemProps<Setting.SelectSettingItem>> =
 
   const { t } = useTranslation()
 
-  console.log('settingData', settingData)
   return (
     <label>
       {itemKey}
