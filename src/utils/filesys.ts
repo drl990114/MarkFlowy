@@ -1,7 +1,7 @@
+import WELCOMECONTENT from '@/constants/welcomeContent'
 import { invoke } from '@tauri-apps/api'
 import { nanoid } from 'nanoid'
 import { setFileObject } from './files'
-import WELCOMECONTENT from '@/constants/welcomeContent'
 
 interface FileEntry {
   name: string
@@ -76,7 +76,7 @@ export const readDirectory = (folderPath: string): Promise<IFile[]> => {
       }
 
       wrapFiles(entries)
-      console.log('files', entries)
+
       resolve(entries)
     })
   })

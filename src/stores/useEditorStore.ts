@@ -1,6 +1,6 @@
-import { CacheManager, isArray } from '@/utils'
+import { isArray } from '@/utils'
 import { IFile, createWelcomeFile } from '@/utils/filesys'
-import { ReactFrameworkOutput, ReactExtensions } from '@remirror/react'
+import { ReactExtensions, ReactFrameworkOutput } from '@remirror/react'
 import { create } from 'zustand'
 
 const useEditorStore = create<EditorStore>((set, get) => {
@@ -48,9 +48,9 @@ const useEditorStore = create<EditorStore>((set, get) => {
       const curCtx = editorCtxMap.get(id)
 
       if (isArray(curCtx)) {
-        return curCtx[0].helpers.getMarkdown()
+        return curCtx[0].getContent()
       }
-      return curCtx?.helpers.getMarkdown()
+      return curCtx?.getContent()
     },
 
     setEditorCtx: (id, ctx) =>
