@@ -12,7 +12,7 @@ const WysiwygEditor: FC<WysiwygEditorProps> = (props) => {
   const { file, content, active } = props
   const { setEditorCtx } = useEditorStore()
   const remirror = useRemirror({
-    extensions: EditorExtensions,
+    extensions: EditorExtensions as any,
     content,
     selection: 'start',
     stringHandler: 'markdown',
