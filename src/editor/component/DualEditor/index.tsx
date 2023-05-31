@@ -74,6 +74,15 @@ function VisualEditor() {
   )
 }
 
+const markTextExtensions = () => {
+  return [
+    new CodeMirrorExtension({
+      languages,
+      extensions: [oneDark],
+    }),
+  ]
+}
+
 /**
  * The editor which is used to create the annotation. Supports formatting.
  */
@@ -81,14 +90,7 @@ export const DualEditor: React.FC<DualEditorProps> = (props) => {
   const { file, content, active } = props
 
   const markText = useRemirror({
-    extensions: () => {
-      return [
-        new CodeMirrorExtension({
-          languages,
-          extensions: [oneDark]
-        }),
-      ]
-    },
+    extensions: markTextExtensions as any,
     content: {
       type: 'doc',
       content: [
@@ -109,7 +111,7 @@ export const DualEditor: React.FC<DualEditorProps> = (props) => {
   })
 
   const visual = useRemirror({
-    extensions: EditorExtensions,
+    extensions: EditorExtensions as any,
     stringHandler: 'markdown',
     selection: 'start',
     content: '**Markdown** content is the _best_',
