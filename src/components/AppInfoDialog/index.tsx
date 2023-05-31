@@ -1,17 +1,17 @@
-import type { FC } from 'react'
-import { memo, useCallback, useEffect, useState } from 'react'
+import { EVENT } from '@constants'
+import CloseIcon from '@mui/icons-material/Close'
+import Button from '@mui/material/Button'
 import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
 import DialogTitle from '@mui/material/DialogTitle'
-import Button from '@mui/material/Button'
-import CloseIcon from '@mui/icons-material/Close'
 import IconButton from '@mui/material/IconButton'
-import { listen } from '@tauri-apps/api/event'
 import { getName, getTauriVersion, getVersion } from '@tauri-apps/api/app'
 import { writeText } from '@tauri-apps/api/clipboard'
-import { EVENT } from '@constants'
+import { listen } from '@tauri-apps/api/event'
+import type { FC } from 'react'
+import { memo, useCallback, useEffect, useState } from 'react'
 
 export interface DialogTitleProps {
   children?: React.ReactNode
@@ -44,7 +44,7 @@ export function BootstrapDialogTitle(props: DialogTitleProps) {
   )
 }
 
-const SettingDialog: FC = () => {
+const AboutDialog: FC = () => {
   const [open, setOpen] = useState(false)
   const [appInfo, setAppInfo] = useState({
     name: 'LineByLine',
@@ -99,4 +99,4 @@ TauriVersion: ${appInfo.tauriVersion}
   )
 }
 
-export default memo(SettingDialog)
+export default memo(AboutDialog)
