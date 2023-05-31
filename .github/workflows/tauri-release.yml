@@ -72,6 +72,6 @@ jobs:
         with:
           tagName: ${{ github.ref_name }} # This only works if your workflow triggers on new tags.
           releaseName: 'LineByLine-alpha v__VERSION__' # tauri-action replaces \_\_VERSION\_\_ with the app version.
-          releaseBody: 'See the assets to download and install this version. \n Notice: The current version does not have a built-in updater'
-          releaseDraft: true
+          releaseBody: 'See the assets to download and install this version. Notice: The current version does not have a built-in updater'
+          releaseDraft: false
           prerelease: false
