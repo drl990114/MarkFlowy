@@ -21,7 +21,8 @@ const WysiwygEditor: FC<WysiwygEditorProps> = (props) => {
   const { manager, state, getContext } = remirror
 
   useEffect(() => {
-    setEditorCtx(file.id, getContext())
+    const ctx = getContext()
+    setEditorCtx(file.id, {...ctx, getContent: () => ctx?.helpers?.getMarkdown() })
   }, [getContext])
 
   return (

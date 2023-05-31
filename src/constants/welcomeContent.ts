@@ -12,7 +12,14 @@ const WELCOMECONTENT = `
 
 ## Contribute
 
-Working In Process.
+The current linebyline is still in its infancy, and there may be some bad experiences or bugs, for which I am sorry. All partners who are interested or encounter usage problems are welcome to submit [issues](https://github.com/linebyline-group/linebyline/issues/new) or [PR](https://github.com/linebyline-group/linebyline/compare) to participate in this project.
+
+## Table
+
+| table1       | table2       |
+| ------------ | ------------ |
+| table cell   | table cell   |
+
 
 `
 

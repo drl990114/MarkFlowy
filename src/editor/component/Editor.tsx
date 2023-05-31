@@ -1,4 +1,6 @@
+import { useEditorStore } from '@/stores'
 import { getFileObject } from '@/utils/files'
+import { emit } from '@tauri-apps/api/event'
 import { readTextFile } from '@tauri-apps/api/fs'
 import { appWindow } from '@tauri-apps/api/window'
 import { useEffect, useMemo, useState } from 'react'
@@ -13,7 +15,7 @@ function Editor(props: EditorProps) {
   const curFile = getFileObject(id)
   const [type, setType] = useState<EditorViewType>('wysiwyg')
   const [content, setContent] = useState<string>()
-
+  const { getEditorContent } = useEditorStore()
 
   useEffect(() => {
     const init = async () => {
@@ -29,8 +31,13 @@ function Editor(props: EditorProps) {
   }, [id])
 
   useEffect(() => {
-    const unListen = appWindow.listen<EditorViewType>('editor_toggle_type', ({ payload }) => {
+    const unListen = appWindow.listen<EditorViewType>('editor_toggle_type', async ({ payload }) => {
       if (active) {
+        if (curFile.path) {
+          emit('file_save')
+        }
+        const content = getEditorContent(curFile.id)
+        setContent(content)
         setType(payload)
       }
     })
@@ -38,7 +45,7 @@ function Editor(props: EditorProps) {
     return () => {
       unListen.then((fn) => fn())
     }
-  }, [active])
+  }, [active, curFile])
 
   const editorProps = useMemo(() => ({ file: curFile, content: content!, active }), [curFile, content, active])
 
@@ -50,6 +57,9 @@ function Editor(props: EditorProps) {
 }
 
 const EditorWrapper = styled.div<{ active: boolean; type: EditorViewType }>`
+  height: 100%;
+  overflow: hidden;
+
   ${(props) =>
     props.active
       ? css({
@@ -62,6 +72,7 @@ const EditorWrapper = styled.div<{ active: boolean; type: EditorViewType }>`
 export interface EditorProps {
   id: string
   active: boolean
+  onSave?: () => void
 }
 
 export default Editor
