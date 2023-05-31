@@ -62,7 +62,6 @@ export const EditorState: FC<EditorStateProps> = ({ active, file, manager }) => 
     }
   }, [active, file, dispatch, helpers])
 
-  console.log('state', state)
   return null
 }
 
