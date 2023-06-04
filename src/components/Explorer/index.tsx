@@ -55,7 +55,7 @@ const Explorer: FC<ExplorerProps> = (props) => {
         <small>EXPLORER</small>
         <div className="flex"></div>
       </div>
-      <div className="h-full w-full">{folderData ? <FileTree className="flex-1" data={folderData} activeId={activeId} onSelect={handleSelect}></FileTree> : <Empty />}</div>
+      <div className="h-full w-full overflow-auto">{folderData ? <FileTree className="flex-1" data={folderData} activeId={activeId} onSelect={handleSelect}></FileTree> : <Empty />}</div>
       <div className="border-t-1-solid flex justify-between items-center px-4 py-1">
         <small className="flex-1 cursor-pointer" onClick={handleOpenDirClick}>
           {t('file.openDir')}
