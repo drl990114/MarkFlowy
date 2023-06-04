@@ -6,16 +6,14 @@ declare namespace Setting {
 
   type SettingItem = SelectSettingItem | InputSettingItem
   
-  type SelectSettingItem<T = { title: string; value: any }>= {
+  type SelectSettingItem = {
     type: 'select'
     key: string
-    value: T
     options: ReadonlyArray<T>
   }
 
   type InputSettingItem =  {
     type: 'input'
     key: string;
-    value: string;
   }
 }
