@@ -5,6 +5,9 @@ mod cmd;
 mod fc;
 mod menu;
 mod setup;
+mod app;
+
+use app::conf;
 
 fn main() {
     let context = tauri::generate_context!();
@@ -13,7 +16,10 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             cmd::open_folder,
             cmd::get_file_content,
-            cmd::write_file
+            cmd::write_file,
+            conf::cmd::get_app_conf,
+            conf::cmd::reset_app_conf,
+            conf::cmd::save_app_conf,
         ])
         .setup(setup::init)
         .menu(menu::generate_menu())

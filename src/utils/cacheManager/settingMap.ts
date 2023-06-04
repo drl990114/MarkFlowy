@@ -1,11 +1,9 @@
-import { Langs } from '../../i18n/index';
 
 const settingMap = {
   general: {
     misc: {
       language: {
-        key: "general.misc.language",
-        value: 'en' as Langs,
+        key: "language",
         type: 'select',
         options: [
           {
@@ -21,10 +19,9 @@ const settingMap = {
     },
   },
   extensions: {
-    ChatGPT: {
-      ApiKey: {
-        key: "extensions.ChatGPT.ApiKey",
-        value: '',
+    chatgpt: {
+      apikey: {
+        key: "extensions_chatgpt_apikey",
         type: 'input',
       }
     }

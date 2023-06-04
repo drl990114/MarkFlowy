@@ -1,11 +1,11 @@
 import { useGlobalSettingData } from '@/hooks'
-import { CacheManager } from '@/utils'
 import { useCallback, useEffect, useState } from 'react'
 import { SettingItemProps } from '.'
 
 const InputSettingItem: React.FC<SettingItemProps<Setting.InputSettingItem>> = (props) => {
   const { item, itemKey } = props
-  const [settingData] = useGlobalSettingData()
+  const [settingData, handler] = useGlobalSettingData()
+  const { writeSettingData } = handler
   const curValue = settingData[item.key] as unknown as string
   const [value, setValue] = useState(curValue)
 
@@ -17,13 +17,13 @@ const InputSettingItem: React.FC<SettingItemProps<Setting.InputSettingItem>> = (
 
   const handleChange = useCallback((e: { target: { value: any } }) => {
     const value = e.target.value
-    CacheManager.writeSetting(item, value)
+    writeSettingData(item, value)
   }, [item])
 
   return (
     <label>
-      {itemKey}
-      <input value={value} onChange={handleChange}></input>
+      <label className='setting-item__label'>{itemKey}:</label>
+      <input className='setting-item__form' value={value} onChange={handleChange}></input>
     </label>
   )
 }

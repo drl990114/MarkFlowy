@@ -1,23 +1,16 @@
 import { EVENT } from '@constants'
-import { changeLng } from '@i18n'
 import { emit } from '@tauri-apps/api/event'
 import { exists, readTextFile, writeFile } from '@tauri-apps/api/fs'
 import { BaseDirectory } from '@tauri-apps/api/path'
 import defaultCache from './default.cache'
-import defaultSetting from './default.setting.json'
-import { SettingKeys } from './settingMap'
 
-const SETTING_FILE_NAME = 'linebyline.setting.json'
 const CACHE_FILE_NAME = 'linebyline.cache.json'
 
 class CacheManager {
-  settingData: Record<string, any> = defaultSetting
   cacheData: Record<string, any> = defaultCache
 
   init = async () => {
-    await Promise.all([this.readSetting(), this.readCache()])
-
-    await changeLng(this.settingData[SettingKeys.language])
+    await Promise.all([this.readCache()])
   }
 
   readData: (opt: ReadDataParams) => Record<string, any> = async ({ fileName, dataKey, onSuccess, onSaved }) => {
@@ -43,33 +36,6 @@ class CacheManager {
       if (onSuccess) {
         onSuccess(data)
       }
-    })
-  }
-
-  readSetting = async () => {
-    const setting = await this.readData({
-      fileName: SETTING_FILE_NAME,
-      dataKey: 'settingData',
-      onSuccess: (data) => {
-        emit(EVENT.setting_data_change, data)
-      },
-    })
-
-    return setting
-  }
-
-  writeSetting = (item: Pick<Setting.SettingItem, 'value' | 'key'>, value: any) => {
-    this.settingData[item.key] = value
-    this.saveSetting()
-  }
-
-  saveSetting = () => {
-    this.writeData({
-      fileName: SETTING_FILE_NAME,
-      data: this.settingData,
-      onSuccess: (data) => {
-        emit(EVENT.setting_data_change, data)
-      },
     })
   }
 
@@ -115,12 +81,12 @@ class CacheManager {
 }
 
 interface ModDataParams {
-  fileName: typeof SETTING_FILE_NAME | typeof CACHE_FILE_NAME
+  fileName: typeof CACHE_FILE_NAME
   onSuccess?: (data: Record<string, any>) => void
 }
 
 interface ReadDataParams extends ModDataParams {
-  dataKey: 'settingData' | 'cacheData'
+  dataKey: 'cacheData'
   onSaved?: () => void // if file not exist, it was triggered
 }
 
