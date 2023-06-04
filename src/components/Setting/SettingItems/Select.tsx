@@ -1,13 +1,13 @@
 import { useGlobalSettingData } from '@hooks'
 import Autocomplete from '@mui/material/Autocomplete'
-import { CacheManager } from '@utils'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { SettingItemProps } from '.'
 
 const SelectSettingItem: React.FC<SettingItemProps<Setting.SelectSettingItem>> = (props) => {
   const { item, itemKey } = props
-  const [settingData] = useGlobalSettingData()
+  const [settingData, handler] = useGlobalSettingData()
+  const { writeSettingData } = handler
   const options = item.options
   const curValue = options.find((option) => option.value === settingData[item.key])
   const [value, setValue] = useState(curValue)
@@ -22,8 +22,9 @@ const SelectSettingItem: React.FC<SettingItemProps<Setting.SelectSettingItem>> =
 
   return (
     <label>
-      {itemKey}
+      <label className='setting-item__label'>{itemKey}:</label>
       <Autocomplete
+        className='setting-item__form'
         sx={{
           display: 'inline-block',
           '& input': {
@@ -44,7 +45,7 @@ const SelectSettingItem: React.FC<SettingItemProps<Setting.SelectSettingItem>> =
         renderOption={(props, option) => <li {...props}>{option.title}</li>}
         onChange={(_, value) => {
           if (!value) return
-          CacheManager.writeSetting(item, value.value)
+          writeSettingData(item, value.value)
           setValue(value)
         }}
         renderInput={(params) => (

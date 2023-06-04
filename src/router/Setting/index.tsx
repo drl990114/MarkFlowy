@@ -2,6 +2,7 @@ import settingMap from '@/utils/cacheManager/settingMap'
 import classNames from 'classnames'
 import * as React from 'react'
 import { memo } from 'react'
+import LOGO from '../../../public/logo.svg'
 import SettingGroup from '../../components/Setting/SettingGroup'
 import { Container } from './styles'
 
@@ -27,7 +28,9 @@ function Setting() {
   return (
     <Container>
       <div id="sidebar">
-        <h5 className="title">Setting</h5>
+        <div className="title">
+          <LOGO />
+        </div>
         {/* TODO search */}
         {/* <div id="search-form" role="search">
           <input id="q" aria-label="Search contacts" placeholder="Search" type="search" name="q" />
