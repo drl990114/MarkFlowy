@@ -12,17 +12,39 @@
   },
   "tauri": {
     "allowlist": {
-      "all": true,
+      "all": false,
       "fs": {
-        "all": true,
+        "readFile": true,
+        "writeFile": true,
+        "exists": true,
         "scope": [
           "$APPDATA/*",
           "$APPCACHE/*",
-          "$APPCONFIG/*"
+          "$APPCONFIG/*",
+          "$HOME/*",
+          "$DESKTOP/*"
         ]
+      },
+      "clipboard": {
+        "writeText": true
+      },
+      "dialog": {
+        "open": true,
+        "save": true 
+      },
+      "os": {
+        "all": true
+      },
+      "globalShortcut": {
+        "all": true
       },
       "path": {
         "all": true
+      },
+      "window": {
+        "close": true,
+        "create": true,
+        "setTitle": true
       }
     },
     "bundle": {
