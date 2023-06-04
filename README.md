@@ -26,3 +26,7 @@ Please look [releases page](https://github.com/linebyline-group/linebyline/relea
 ## Contribute
 
 The current linebyline is still in its infancy, and there may be some bad experiences or bugs, for which I am sorry. All partners who are interested or encounter usage problems are welcome to submit [issues](https://github.com/linebyline-group/linebyline/issues/new) or [PR](https://github.com/linebyline-group/linebyline/compare) to participate in this project.
+
+### How to Contribute
+
+You can read [CONTRIBUTING](./CONTRIBUTING.md) to know how to start the project and modify the code, Welcome to participate in code contribution.
