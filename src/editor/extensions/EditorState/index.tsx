@@ -33,6 +33,10 @@ export const EditorState: FC<EditorStateProps> = ({ active, file, manager }) => 
 
   useEffect(() => {
     const unListenFileSave = listen('file_save', async () => {
+      if (!active) {
+        return
+      }
+
       const content = active ? getEditorContent(file.id) : ''
 
       if (!file) {
