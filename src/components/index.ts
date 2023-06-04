@@ -8,7 +8,6 @@ export { default as Menu } from './Menu'
 export { default as Popper } from './Popper'
 export { default as Setting } from './Setting'
 export { default as SideBar } from './SideBar'
-export { default as TitleBar } from './TitleBar'
 
 
 
