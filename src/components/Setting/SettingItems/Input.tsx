@@ -22,8 +22,8 @@ const InputSettingItem: React.FC<SettingItemProps<Setting.InputSettingItem>> = (
 
   return (
     <label>
-      {itemKey}
-      <input value={value} onChange={handleChange}></input>
+      <label className='setting-item__label'>{itemKey}:</label>
+      <input className='setting-item__form' value={value} onChange={handleChange}></input>
     </label>
   )
 }

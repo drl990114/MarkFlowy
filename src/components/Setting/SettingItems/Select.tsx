@@ -22,8 +22,9 @@ const SelectSettingItem: React.FC<SettingItemProps<Setting.SelectSettingItem>> =
 
   return (
     <label>
-      {itemKey}
+      <label className='setting-item__label'>{itemKey}:</label>
       <Autocomplete
+        className='setting-item__form'
         sx={{
           display: 'inline-block',
           '& input': {
