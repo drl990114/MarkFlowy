@@ -1,5 +1,6 @@
 import { APP_NAME, EVENT } from '@constants'
 import { Root, Setting } from '@router'
+import { invoke } from '@tauri-apps/api'
 import { listen } from '@tauri-apps/api/event'
 import { checkUpdate, installUpdate } from '@tauri-apps/api/updater'
 import { WebviewWindow } from '@tauri-apps/api/window'
@@ -7,15 +8,33 @@ import { CacheManager } from '@utils'
 import { useCallback, useEffect } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import 'remixicon/fonts/remixicon.css'
+import { useGlobalSettingData } from './hooks'
 import useGlobalOSInfo from './hooks/useOSInfo'
 import { i18nInit } from './i18n'
 import { loadTask, use } from './utils/schedule'
 
 function App() {
-  use(loadTask('i18n', i18nInit()))
-  use(loadTask('cache', CacheManager.init()))
+  const [_, handler] = useGlobalSettingData()
+  const { setSetting } = handler
+
+  use(
+    loadTask(
+      'i18n',
+      () =>
+        new Promise((resolve) => {
+          invoke<Record<string, any>>('get_app_conf').then((res) => {
+            setSetting(res)
+            i18nInit({ lng: res.language })
+            resolve(res)
+          })
+        })
+    )
+  )
+
+  use(loadTask('cache', () => CacheManager.init()))
 
   useGlobalOSInfo()
+
   useEffect(() => {
     const unlisten = eventInit()
     // updaterinit()
@@ -35,7 +54,6 @@ function App() {
         minWidth: 500,
         minHeight: 500,
         focus: true,
-        decorations: false,
       })
     })
 

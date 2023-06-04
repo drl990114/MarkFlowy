@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use serde_json::Result;
+use anyhow::Result as AnyResult;
 use std::fs;
 use std::path::Path;
 
@@ -43,7 +43,6 @@ pub fn read_directory(dir_path: &str) -> Vec<FileInfo> {
             Err(error) => String::from("ERROR"),
         };
 
-        // TODO path.join ?
         let file_path = dir_path.to_owned() + "/" + &filename;
 
         if meta_unwrap.is_dir() {
@@ -55,7 +54,7 @@ pub fn read_directory(dir_path: &str) -> Vec<FileInfo> {
             name: filename,
             kind,
             path: file_path,
-            children
+            children,
         };
 
         files.push(new_file_info);
@@ -89,20 +88,35 @@ pub fn write_file(path: &str, content: &str) -> String {
     result
 }
 
-pub fn create_directory(path: &str) -> Result<()> {
-    let dir_path = Path::new(path);
-    fs::create_dir(dir_path);
+pub fn exists(path: &Path) -> bool {
+    Path::new(path).exists()
+}
+
+pub fn create_file<P: AsRef<Path>>(filename: P) -> AnyResult<()> {
+    let filename = filename.as_ref();
+    if let Some(parent) = filename.parent() {
+        if !parent.exists() {
+            fs::create_dir_all(parent)?;
+        }
+    }
+    fs::File::create(filename)?;
     Ok(())
 }
 
-pub fn remove_file(path: &str) -> Result<()> {
-    let file_path = Path::new(path);
-    fs::remove_file(file_path);
-    Ok(())
-}
+// pub fn create_directory(path: &str) -> SerdeResult<()> {
+//     let dir_path = Path::new(path);
+//     fs::create_dir(dir_path);
+//     Ok(())
+// }
 
-pub fn remove_folder(path: &str) -> Result<()> {
-    let folder_path = Path::new(path);
-    fs::remove_dir_all(folder_path);
-    Ok(())
-}
+// pub fn remove_file(path: &str) -> SerdeResult<()> {
+//     let file_path = Path::new(path);
+//     fs::remove_file(file_path);
+//     Ok(())
+// }
+
+// pub fn remove_folder(path: &str) -> SerdeResult<()> {
+//     let folder_path = Path::new(path);
+//     fs::remove_dir_all(folder_path);
+//     Ok(())
+// }

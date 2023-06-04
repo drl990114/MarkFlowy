@@ -1,21 +1,35 @@
-import { EVENT } from '@constants'
-import { listen } from '@tauri-apps/api/event'
-import { CacheManager } from '@utils'
+import { invoke } from '@tauri-apps/api'
 import { createGlobalStore } from 'hox'
-import { useEffect, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 
-const useSettingData = () => {
-  const [setting, setSetting] = useState(CacheManager.settingData)
+interface Handler {
+  writeSettingData: (item: Pick<Setting.SettingItem, 'value' | 'key'>, value: any) => void
+  setSetting: React.Dispatch<React.SetStateAction<Record<string, any>>>
+}
 
-  useEffect(() => {
-    const handleSettingDataChange = ({ payload }: any) => {
-      setSetting({ ...payload })
-    }
+const useSettingData = (): [Record<string, any>, Handler] => {
+  const [setting, setSetting] = useState<Record<string, any>>({})
 
-    listen(EVENT.setting_data_change, handleSettingDataChange)
+  const writeSettingData = useCallback((item: Pick<Setting.SettingItem, 'value' | 'key'>, value: any) => {
+    setSetting((prev) => {
+      const newState = {
+        ...prev,
+        [item.key]: value,
+      }
+      invoke('save_app_conf', { data: newState, label: 'main'})
+      return newState
+    })
   }, [])
 
-  return [setting]
+  const handler = useMemo(
+    () => ({
+      writeSettingData,
+      setSetting
+    }),
+    [writeSettingData, setSetting]
+  )
+
+  return [setting, handler]
 }
 
 const [useGlobalSettingData] = createGlobalStore(useSettingData)
