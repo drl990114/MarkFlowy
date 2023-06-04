@@ -12,9 +12,14 @@ export const Container = styled.div`
   }
 
   #sidebar .title {
-    padding-bottom: 10px;
-    margin-bottom: 0;
-    border-bottom: 1px solid ${customColors.borderColor};
+    height: 60px;
+    width: 60px;
+    margin: 0 auto;
+    margin-top: 2rem;
+    padding: 0;
+    box-shadow: 0px 0px 10px 2px #dcdcdc;
+    --webkit-box-shadow: 0px 0px 10px 2px #dcdcdc;
+    --moz-box-shadow: 0px 0px 10px 2px #dcdcdc;
   }
 
   #sidebar > * {
@@ -78,13 +83,12 @@ export const Container = styled.div`
     align-items: center;
     justify-content: space-between;
     overflow: hidden;
-
     white-space: pre;
     padding: 0.5rem;
     border-radius: 8px;
     color: inherit;
-    text-decoration: none;
     gap: 1rem;
+    user-select: none;
     cursor: pointer;
   }
 
@@ -97,13 +101,10 @@ export const Container = styled.div`
     color: white;
   }
 
-  #sidebar nav li.pending {
-    color: ${customColors.accentColor};
-  }
-
   #detail {
     flex: 1;
-    padding: 2rem 4rem;
+    padding: 1rem 2rem;
     width: 100%;
+    background: ${customColors.bgColor};
   }
 `
