@@ -12,8 +12,12 @@ async function getData(promise: Promise<any>) {
   return await promise
 }
 
-export function loadTask(id: string, promise: Promise<any>) {
+type FnPromise = () => Promise<any>
+export function loadTask(id: string, promise: Promise<any> | FnPromise) {
   if (!asyncFinishMap.has(id)) {
+    if (typeof promise === 'function') {
+      promise = promise()
+    }
     asyncFinishMap.set(id, getData(promise))
   }
   return asyncFinishMap.get(id)
