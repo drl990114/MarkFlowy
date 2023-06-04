@@ -1,7 +1,7 @@
 import { useEditorStore } from '@/stores'
 import { getFileObject } from '@/utils/files'
+import { invoke } from '@tauri-apps/api'
 import { emit } from '@tauri-apps/api/event'
-import { readTextFile } from '@tauri-apps/api/fs'
 import { appWindow } from '@tauri-apps/api/window'
 import { useEffect, useMemo, useState } from 'react'
 import styled, { css } from 'styled-components'
@@ -21,7 +21,7 @@ function Editor(props: EditorProps) {
     const init = async () => {
       const file = getFileObject(id)
       if (file.path) {
-        const text = await readTextFile(file.path)
+        const text = await invoke('get_file_content', { filePath: file.path}) as string
         setContent(text)
       } else if (file.content) {
         setContent(file.content)
