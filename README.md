@@ -4,13 +4,13 @@
 
 <h1 align="center">LineByLine</h1>
 
-<h2 align="center">A Modren Markdown Editor.(WIP)</h2>
+<h2 align="center">A Modern Markdown Editor.(WIP)</h2>
 
 <p align="center">Available for Linux, macOS and Windows.</p>
 
 ## Feature
 
-- **Built-in chatGpt**. Currently supports one-click export of conversations, making chatgpt your smart assistant.
+- **Built-in ChatGpt**. Currently supports one-click export of conversations, making chatgpt your smart assistant.
 - **Super lightweight**. linebyline is based on tauri, which ensures ultra-lightweight and fast performance experience.
 - **High availability**. linebyline uses the remirror editor, which not only provides high scalability, but also has a great editing experience. And, linebyline supports multiple editing modes, such as `dual`, `wysiyg`.
 
