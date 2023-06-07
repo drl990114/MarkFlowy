@@ -29,8 +29,8 @@ const settingMap = {
 }
 
 export enum SettingKeys {
-  language = 'general.misc.language',
-  chatgpt = 'extensions.ChatGPT.ApiKey'
+  language = 'language',
+  chatgpt = 'extensions_chatgpt_apikey'
 }
 
 export const SETTING_VERSION = '0.0.2'

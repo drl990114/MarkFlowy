@@ -1,5 +1,4 @@
 import customColors from '@/colors'
-import { Icon } from '@/components'
 import { Editor } from '@/editor'
 import { useEditorStore } from '@/stores'
 import { getFileObject } from '@/utils/files'
@@ -27,7 +26,7 @@ export default function EditorArea() {
   }
 
   return (
-    <Container className="w-full h-full overflow-y-scroll">
+    <Container className="w-full h-full">
       <div className="tab-items flex">
         {opened.map((id) => {
           const file = getFileObject(id) as IFile
@@ -35,9 +34,9 @@ export default function EditorArea() {
 
           return (
             <TabItem active={active} onClick={() => onSelectItem(file.id)} className={`tab-item`} key={id}>
-              <Icon name="file" iconProps={{ className: 'w-20px' }} />
+              <i className={`ri-file-3-line m-2`} /> 
               <span style={{ color: active ? customColors.accentColor : '' }}>{file.name}</span>
-              <Icon name="close" iconProps={{ className: 'w-20px close', onClick: (ev: React.MouseEvent<HTMLElement, MouseEvent>) => close(ev, id) }} />
+              <i className="ri-close-line  m-2 close" onClick={(ev: React.MouseEvent<HTMLElement, MouseEvent>) => close(ev, id)}/>
             </TabItem>
           )
         })}
