@@ -1,5 +1,3 @@
-import { Icon } from '@components'
-import { ICONSNAME } from '@constants'
 import MuiList from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
 import ListItemAvatar from '@mui/material/ListItemAvatar'
@@ -18,10 +16,10 @@ const List: FC<ListProps> = (props) => {
         <h5 className="list-title">{title}</h5>
         {data.map((item) => {
           return (
-            <ListItem key={item.key} className="list-item label-hover" onClick={() => onItemClick?.(item)}>
-              {item.iconName ? (
+            <ListItem key={item.key} className="list-item label-default" onClick={() => onItemClick?.(item)}>
+              {item.iconCls ? (
                 <ListItemAvatar className="list-item__avatar">
-                  <Icon iconProps={{ className: 'list-item__avatar' }} name={item.iconName} />
+                  <i className={item.iconCls} />
                 </ListItemAvatar>
               ) : null}
               {tip === false ? (
@@ -64,7 +62,7 @@ const List: FC<ListProps> = (props) => {
 export interface ListDataItem {
   key: React.Key
   title: string
-  iconName?: ICONSNAME
+  iconCls?: string
 }
 
 interface ListProps {

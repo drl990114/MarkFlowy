@@ -5,7 +5,6 @@ import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import 'virtual:windi.css'
 import App from './App'
-import { GlobalStyles } from './globalStyles'
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
@@ -19,9 +18,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             </div>
           }
         >
-          <GlobalStyles>
             <App />
-          </GlobalStyles>
         </Suspense>
       </BrowserRouter>
     </HoxRoot>
