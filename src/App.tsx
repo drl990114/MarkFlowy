@@ -1,4 +1,5 @@
 import { APP_NAME, EVENT } from '@constants'
+import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles'
 import { Root, Setting } from '@router'
 import { invoke } from '@tauri-apps/api'
 import { listen } from '@tauri-apps/api/event'
@@ -16,8 +17,9 @@ import { i18nInit } from './i18n'
 import { loadTask, use } from './utils/schedule'
 
 function App() {
+  useGlobalOSInfo()
   const [_, handler] = useGlobalSettingData()
-  const { themeColors, setTheme } = useGlobalTheme()
+  const { themeColors, muiTheme ,setTheme } = useGlobalTheme()
   const { setSetting } = handler
 
   use(
@@ -35,10 +37,7 @@ function App() {
         })
     )
   )
-
   use(loadTask('cache', () => CacheManager.init()))
-
-  useGlobalOSInfo()
 
   useEffect(() => {
     const unlisten = eventInit()
@@ -81,11 +80,13 @@ function App() {
 
   return (
     <ThemeProvider theme={themeColors}>
-      <GlobalStyles />
-      <Routes>
-        <Route index path="/" element={<Root />} />
-        <Route path="/setting" element={<Setting />} />
-      </Routes>
+      <MuiThemeProvider theme={muiTheme}>
+        <GlobalStyles />
+        <Routes>
+          <Route index path="/" element={<Root />} />
+          <Route path="/setting" element={<Setting />} />
+        </Routes>
+      </MuiThemeProvider>
     </ThemeProvider>
   )
 }
