@@ -1,4 +1,5 @@
 import { loadTheme } from '@/editor/theme/theme'
+import { createTheme } from '@mui/material'
 import { createGlobalStore } from 'hox'
 import { useEffect, useState } from 'react'
 import { ThemeProps } from 'styled-components'
@@ -32,6 +33,18 @@ const useTheme = () => {
   const [theme, setTheme] = useState<Theme>('light')
   const [themeColors, setThemeColors] = useState(lightThemeColors)
 
+  const muiDarkTheme = createTheme({
+    palette: {
+      mode: 'dark',
+    },
+  });
+
+  const muiLightTheme = createTheme({
+    palette: {
+      mode: 'light',
+    },
+  });
+
   useEffect(() => {
     loadTheme(theme)
     if (theme === 'light') {
@@ -41,7 +54,7 @@ const useTheme = () => {
     }
   }, [theme])
 
-  return { theme, themeColors, setTheme }
+  return { theme, themeColors, setTheme, muiTheme: theme === 'light' ? muiLightTheme : muiDarkTheme }
 }
 
 const [useGlobalTheme] = createGlobalStore(useTheme)
