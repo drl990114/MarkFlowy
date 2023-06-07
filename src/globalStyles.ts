@@ -1,15 +1,38 @@
-import styled from 'styled-components'
-import customColors from './colors'
+import { createGlobalStyle } from 'styled-components'
+import { MThemeProps } from './hooks/useTheme'
 
-export const GlobalStyles = styled.div`
+export const GlobalStyles = createGlobalStyle<MThemeProps>`
+  body {
+    background-color: ${(props) => props.theme.bgColor};
+    color: ${(props) => props.theme.primaryFontColor};
+  }
+
   .icon {
     padding: 8px;
     font-size: 1rem;
     cursor: pointer;
 
+    &-border {
+      border: 2px solid transparent;
+      box-sizing: border-box;
+
+      &:hover {
+        border: 2px solid ${(props) => props.theme.borderColor};
+      }
+    }
     &:hover {
-      color: ${customColors.accentColor};
-      background-color: ${customColors.tipsBgColor};
+      color: ${(props) => props.theme.accentColor};
+      background-color: ${(props) => props.theme.tipsBgColor};
+    }
+  }
+
+  .label-default {
+    color: ${(props) => props.theme.primaryFontColor};
+    background-color: ${(props) => props.theme.bgColor};
+
+    &:hover {
+      color: ${(props) => props.theme.accentColor};
+      background-color: ${(props) => props.theme.tipsBgColor};
     }
   }
 
@@ -21,14 +44,14 @@ export const GlobalStyles = styled.div`
   }
 
   ::-webkit-scrollbar-track {
-    background: #222426;
+    background: ${(props) => props.theme.borderColor};
   }
 
   ::-webkit-scrollbar-thumb {
-    background: #465056;
+    background: ${(props) => props.theme.labelFontColor};
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: #555;
+    background: ${(props) => props.theme.labelFontColor};
   }
 `

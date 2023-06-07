@@ -1,5 +1,5 @@
-import customColors from './src/colors'
 import { defineConfig } from 'windicss/helpers'
+import customColors from './src/colors'
 
 export default defineConfig({
   preflight: false,
@@ -13,11 +13,7 @@ export default defineConfig({
   ],
   shortcuts: {
     // element
-    'btn': 'rounded-lg text-accentColor px-4 py-2 w-auto hover:shadow',
     'split': 'h-1px w-full bg-neutral-300',
-    'detail': 'text-accentColor bg-tipsBgColor',
-    'label-hover': 'hover:detail',
-    'icon-hover': 'hover:border-1',
 
     // layout
     'fjic': 'flex justify-center items-center',

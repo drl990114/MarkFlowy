@@ -1,4 +1,4 @@
-import { Empty, FileTree, Icon, List, Popper } from '@components'
+import { Empty, FileTree, List, Popper } from '@components'
 import { useGlobalCacheData } from '@hooks'
 import { useEditorStore } from '@stores'
 import { open } from '@tauri-apps/api/dialog'
@@ -45,7 +45,7 @@ const Explorer: FC<ExplorerProps> = (props) => {
     openRir(item.title)
   }, [])
 
-  const listData = useMemo(() => cache.openFolderHistory.map((history: { time: string; path: string }) => ({ key: history.time, title: history.path, iconName: 'folder' })), [cache])
+  const listData = useMemo(() => cache.openFolderHistory.map((history: { time: string; path: string }) => ({ key: history.time, title: history.path, iconCls: "ri-folder-5-line" })), [cache])
 
   const containerCLs = classNames('w-full flex flex-col', props.className)
 
@@ -61,7 +61,7 @@ const Explorer: FC<ExplorerProps> = (props) => {
           {t('file.openDir')}
         </small>
         <Popper placement="top-end" onClickAway={() => setPopperOpen(false)} open={popperOpen} content={<List title="最近打开的文件夹" data={listData} onItemClick={handleOpenHistoryListItemClick} />}>
-          <Icon name="moreVertical" iconProps={{ className: 'w-20px h-20px icon-hover cursor-pointer', onClick: () => setPopperOpen(true) }} />
+          <i className="ri-more-2-fill icon-border cursor-pointer"  onClick={() => setPopperOpen(true)}></i>
         </Popper>
       </div>
     </Container>
