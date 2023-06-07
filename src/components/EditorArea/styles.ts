@@ -1,11 +1,10 @@
-import customColors from '@/colors'
 import styled from 'styled-components'
 
 export const Container = styled.div`
   .tab-items {
     height: 2rem;
     line-height: 2rem;
-    border-bottom: 1px solid ${customColors.borderColor};
+    border-bottom: 1px solid ${(props) => props.theme.borderColor};
     overflow-x: auto;
     overflow-y: hidden;
   }
@@ -19,15 +18,15 @@ export const TabItem = styled.div<TabItemProps>`
   display: flex;
   justify-content: center;
   align-items: center;
-  border-left: 1px solid ${customColors.borderColor};
-  border-top: 1px solid ${customColors.borderColor};
+  border-left: 1px solid ${(props) => props.theme.borderColor};
+  border-top: 1px solid ${(props) => props.theme.borderColor};
   font-size: 0.75rem;
   height: 100%;
   box-sizing: border-box;
   white-space: nowrap;
 
   &:last-child {
-    border-right: 1px solid ${customColors.borderColor};
+    border-right: 1px solid ${(props) => props.theme.borderColor};
   }
 
   .close {
@@ -41,9 +40,9 @@ export const TabItem = styled.div<TabItemProps>`
     }
   }
 
-  ${({ active }) => {
+  ${({ active, theme }) => {
     return `
-      background-color: ${active ? customColors.bgColor : customColors.tipsBgColor};
+      background-color: ${active ? theme.bgColor :  theme.tipsBgColor};
     `
   }}
 `

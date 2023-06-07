@@ -5,7 +5,7 @@ import styled, { css } from 'styled-components'
 
 const Container = styled.div<{ codeEditor?: boolean }>`
   position: relative;
-  padding: 0 1em;
+  padding: 0.5em 1em 1em;
   white-space: pre-wrap;
   min-height: 100px;
   flex: 1;

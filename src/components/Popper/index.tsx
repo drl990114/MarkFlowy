@@ -1,4 +1,4 @@
-import customColors from '@colors'
+import { useGlobalTheme } from '@/hooks'
 import { Box, ClickAwayListener, Fade, Popper, PopperProps } from '@mui/material'
 import { nanoid } from 'nanoid'
 import React, { memo, useEffect, useMemo, useState } from 'react'
@@ -10,8 +10,8 @@ interface RePopperProps extends Partial<PopperProps> {
   children?: React.ReactNode
 }
 const Tooltip: React.FC<RePopperProps> = (props) => {
-  const { children, content,onClickAway,  ...otherProps } = props
-
+  const { children, content, onClickAway, ...otherProps } = props
+  const { themeColors } = useGlobalTheme()
   const [open, setOpen] = useState(props.open || false)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
 
@@ -37,7 +37,7 @@ const Tooltip: React.FC<RePopperProps> = (props) => {
         <Popper {...otherProps} style={{ zIndex: 10 }} id={id} open={open} anchorEl={anchorEl} transition>
           {({ TransitionProps }) => (
             <Fade {...TransitionProps}>
-              <Box sx={{ border: 1, bgcolor: customColors.bgColor, borderColor: customColors.borderColor }}>{content}</Box>
+              <Box sx={{ border: 1, bgcolor: themeColors.bgColor, borderColor: themeColors.borderColor }}>{content}</Box>
             </Fade>
           )}
         </Popper>

@@ -1,5 +1,6 @@
 use serde_json::Value;
 use std::{collections::BTreeMap, path::PathBuf};
+use tauri::{Manager, Theme};
 use crate::fc::{create_file, exists};
 
 macro_rules! pub_struct {
@@ -12,6 +13,7 @@ macro_rules! pub_struct {
 }
 
 pub_struct!(AppConf {
+  theme: String,
   language: String,
   extensions_chatgpt_apikey: String,
 });
@@ -25,6 +27,7 @@ pub fn app_root() -> PathBuf {
 impl AppConf {
   pub fn new() -> Self {
     Self {
+      theme: "light".to_string(),
       language: "en".to_string(),
       extensions_chatgpt_apikey: "".to_string(),
     }
@@ -83,6 +86,26 @@ impl AppConf {
         self
       }
     }
+  }
+
+  pub fn get_theme() -> String {
+    Self::read().theme.to_lowercase()
+  }
+
+  pub fn theme_mode() -> Theme {
+    match Self::get_theme().as_str() {
+      "system" => match dark_light::detect() {
+        dark_light::Mode::Dark => Theme::Dark,
+        dark_light::Mode::Light => Theme::Light,
+        dark_light::Mode::Default => Theme::Light,
+      },
+      "dark" => Theme::Dark,
+      _ => Theme::Light,
+    }
+  }
+
+  pub fn theme_check(self, mode: &str) -> bool {
+    self.theme.to_lowercase() == mode
   }
 }
 

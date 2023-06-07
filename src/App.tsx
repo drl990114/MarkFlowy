@@ -1,39 +1,43 @@
 import { APP_NAME, EVENT } from '@constants'
+import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles'
 import { Root, Setting } from '@router'
 import { invoke } from '@tauri-apps/api'
 import { listen } from '@tauri-apps/api/event'
 import { checkUpdate, installUpdate } from '@tauri-apps/api/updater'
-import { WebviewWindow } from '@tauri-apps/api/window'
+import { Theme, WebviewWindow } from '@tauri-apps/api/window'
 import { CacheManager } from '@utils'
 import { useCallback, useEffect } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import 'remixicon/fonts/remixicon.css'
-import { useGlobalSettingData } from './hooks'
+import { ThemeProvider } from 'styled-components'
+import { GlobalStyles } from './globalStyles'
+import { useGlobalSettingData, useGlobalTheme } from './hooks'
 import useGlobalOSInfo from './hooks/useOSInfo'
 import { i18nInit } from './i18n'
 import { loadTask, use } from './utils/schedule'
 
 function App() {
+  useGlobalOSInfo()
   const [_, handler] = useGlobalSettingData()
+  const { themeColors, muiTheme ,setTheme } = useGlobalTheme()
   const { setSetting } = handler
 
   use(
     loadTask(
-      'i18n',
+      'confInit',
       () =>
         new Promise((resolve) => {
           invoke<Record<string, any>>('get_app_conf').then((res) => {
+            console.log('conf', res)
             setSetting(res)
+            setTheme(res.theme)
             i18nInit({ lng: res.language })
             resolve(res)
           })
         })
     )
   )
-
   use(loadTask('cache', () => CacheManager.init()))
-
-  useGlobalOSInfo()
 
   useEffect(() => {
     const unlisten = eventInit()
@@ -57,8 +61,14 @@ function App() {
       })
     })
 
+    const unListenChangeTheme = listen('change_theme', ({ payload }) => {
+      console.log('theme', payload)
+      setTheme(payload as Theme)
+    })
+
     return () => {
       unListenOpenSetting.then((fn) => fn())
+      unListenChangeTheme.then((fn) => fn())
     }
   }, [])
 
@@ -69,10 +79,15 @@ function App() {
   }, [])
 
   return (
-    <Routes>
-      <Route index path="/" element={<Root />} />
-      <Route path="/setting" element={<Setting />} />
-    </Routes>
+    <ThemeProvider theme={themeColors}>
+      <MuiThemeProvider theme={muiTheme}>
+        <GlobalStyles />
+        <Routes>
+          <Route index path="/" element={<Root />} />
+          <Route path="/setting" element={<Setting />} />
+        </Routes>
+      </MuiThemeProvider>
+    </ThemeProvider>
   )
 }
 
