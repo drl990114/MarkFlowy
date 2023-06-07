@@ -1,4 +1,3 @@
-import type { BaseComponentProps } from '@types'
 import classNames from 'classnames'
 import type { FC } from 'react'
 import { Fragment, memo, useCallback } from 'react'
@@ -30,7 +29,7 @@ const Menu: FC<MenuProps> = (props) => {
   return <ul className={cls}>{renderMenuGroup()}</ul>
 }
 
-interface MenuProps extends BaseComponentProps {
+interface MenuProps extends Global.BaseComponentProps {
   menuGroup: MenuGroup[]
   onMenuItemClick?: (item: MenuGroupItem) => void
 }

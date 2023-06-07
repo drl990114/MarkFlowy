@@ -1,4 +1,3 @@
-import type { BaseComponentProps } from '@types'
 import classNames from 'classnames'
 import type { FC } from 'react'
 import { memo } from 'react'
@@ -19,7 +18,7 @@ const FileTree: FC<FileTreeProps> = (props) => {
   )
 }
 
-interface FileTreeProps extends BaseComponentProps {
+interface FileTreeProps extends Global.BaseComponentProps {
   data: IFile[] | null
   activeId?: string
   onSelect: (file: IFile) => void

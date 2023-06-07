@@ -1,4 +1,3 @@
-
 declare namespace Setting {
   type SettingData = Record<string, SettingGroup>
   
