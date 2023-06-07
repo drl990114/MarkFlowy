@@ -1,6 +1,5 @@
 import chatgpt from '@/chatgpt'
-import { Explorer, Icon, Setting } from '@components'
-import type { ICONSNAME } from '@constants'
+import { Explorer, Setting } from '@components'
 import { RIGHTBARITEMKEYS } from '@constants'
 import classNames from 'classnames'
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -17,7 +16,7 @@ function SideBar() {
       {
         title: RIGHTBARITEMKEYS.Explorer,
         key: RIGHTBARITEMKEYS.Explorer,
-        icon: 'copy',
+        icon: <i className="ri-file-list-3-line"></i>,
         components: <Explorer />,
       },
       chatgpt,
@@ -62,7 +61,7 @@ function SideBar() {
       <div className="app-sidebar w-48px flex flex-col flex-shrink-0 justify-between">
         <div>
           {rightBarDataSource.map((item) => {
-            const cls = classNames('w-48px h-48px fjic cursor-pointer', {
+            const cls = classNames('w-48px h-48px fjic cursor-pointer text-24px', {
               'app-sidebar-active': activeRightBarItemKey === item.key,
             })
 
@@ -76,7 +75,7 @@ function SideBar() {
 
             return (
               <div key={item.key} className={cls} onClick={handleRightBarItemClick}>
-                <Icon name={item.icon} />
+                {item.icon}
               </div>
             )
           })}
@@ -94,7 +93,7 @@ function SideBar() {
 export interface RightBarItem {
   title: RIGHTBARITEMKEYS
   key: RIGHTBARITEMKEYS
-  icon: ICONSNAME
+  icon: React.ReactNode
   components: any
 }
 

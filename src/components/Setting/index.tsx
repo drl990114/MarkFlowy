@@ -1,9 +1,8 @@
-import * as React from 'react'
+import { EVENT } from '@constants'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
-import { Icon } from '@components'
 import { emit } from '@tauri-apps/api/event'
-import { EVENT } from '@constants'
+import * as React from 'react'
 
 export default function Setting() {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
@@ -18,7 +17,7 @@ export default function Setting() {
   return (
     <div>
       <div id="demo-positioned-button" aria-controls={open ? 'demo-positioned-menu' : undefined} aria-haspopup="true" aria-expanded={open ? 'true' : undefined} onClick={handleClick}>
-        <Icon name="setting" />
+        <i className="ri-settings-line text-24px"></i>
       </div>
       <Menu
         id="demo-positioned-menu"

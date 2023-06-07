@@ -1,5 +1,4 @@
-import styled from 'styled-components'
-import colors from 'windicss/colors'
+import styled from 'styled-components';
 
 export const Container = styled.div<ContainerProps>`
   flex-grow: 0;
@@ -9,17 +8,18 @@ export const Container = styled.div<ContainerProps>`
   display: flex;
   border-right: #e9e9e9 1px solid;
   flex-direction: row;
-  background: #ffffff;
+  background: ${(props) => props.theme.bgColor};
+  color: ${(props) => props.theme.primaryFontColor};
   box-shadow: -8px 2px 22px -7px rgba(0, 0, 0, 0.25);
   border-radius: 10px 0px 0px 10px;
   z-index: 2;
 
   .app-sidebar {
-    border-right: 1px solid ${colors.zinc[200]};
+    border-right: 1px solid ${(props) => props.theme.borderColor};
   }
 
   .app-sidebar-active {
-    border-left: 4px solid ${colors.sky[700]};
+    border-left: 4px solid ${(props) => props.theme.accentColor};
   }
 
   .app-sidebar-content {
@@ -33,11 +33,12 @@ export const Container = styled.div<ContainerProps>`
     justify-self: flex-end;
     cursor: col-resize;
     resize: horizontal;
+    background: ${props => props.theme.borderColor};
   }
 
   .app-sidebar-resizer:hover {
     flex-basis: 3px;
-    background: #c1c3c5b4;
+    background: ${props => props.theme.labelFontColor};
   }
 
   ${(props) => (props.noActiveItem ? 'width: 48px' : 'min-width: 150px')}

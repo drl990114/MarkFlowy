@@ -1,5 +1,4 @@
 import customColors from '@/colors'
-import { Icon } from '@/components'
 import { RightBarItem } from '@/components/SideBar'
 import { EVENT, RIGHTBARITEMKEYS } from '@/constants'
 import { useGlobalSettingData } from '@/hooks'
@@ -29,7 +28,7 @@ const ChatList: React.FC<ChatListProps> = (props) => {
 
   const exportChats = useCallback(() => {
     const content = parseChatList(chatList)
-    const gptNotesFile = createFile({ name: "notes.md", content })
+    const gptNotesFile = createFile({ name: 'notes.md', content })
     addOpenedFile(gptNotesFile.id)
     setActiveId(gptNotesFile.id)
     return
@@ -54,7 +53,7 @@ const ChatList: React.FC<ChatListProps> = (props) => {
                   <div className="question item w-full h-full">
                     <div className="flex justify-between">
                       <div className="flex items-center">
-                        <Icon name="user" iconProps={{ className: 'w-18px h-18px' }} />
+                        <i className="ri-user-4-line mr-1 text-18px" />
                         <span>You</span>
                       </div>
                       <div>
@@ -65,7 +64,7 @@ const ChatList: React.FC<ChatListProps> = (props) => {
                   </div>
                   <div className="answer item w-full h-full">
                     <div className="flex items-center">
-                      <Icon name="chatgpt" iconProps={{ className: 'w-18px h-18px' }} />
+                      <i className="ri-openai-fill mr-1 text-18px" />
                       <span>ChatGPT</span>
                     </div>
                     {chat.status === 'pending' ? (
@@ -115,7 +114,7 @@ interface ChatListProps {
 const ChatGPT = {
   title: RIGHTBARITEMKEYS.ChatGPT,
   key: RIGHTBARITEMKEYS.ChatGPT,
-  icon: 'chatgpt',
+  icon: <i className="ri-openai-fill" />,
   components: <ChatList />,
 } as RightBarItem
 

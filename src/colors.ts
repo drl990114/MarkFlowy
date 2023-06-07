@@ -1,7 +1,7 @@
 import colors from 'windicss/colors'
 
 const customColors = {
-  primarFontColor: 'black',
+  primaryFontColor: 'black',
   labelFontColor: colors.gray[400],
   accentColor: colors.sky[700],
   borderColor: colors.zinc[200],
@@ -10,4 +10,14 @@ const customColors = {
   tipsBgColor: '#f6f7f9',
 }
 
-export default customColors
+let darkColors = {
+  primaryFontColor:  'rgba(255, 255, 255, 0.9)',
+  labelFontColor: 'rgba(255, 255, 255, 0.9)',
+  accentColor: colors.sky[700],
+  borderColor: '#eee',
+  bgColor: '#11191f',
+  warnColor: colors.red[600],
+  tipsBgColor: '#eee'
+}
+
+export default darkColors
