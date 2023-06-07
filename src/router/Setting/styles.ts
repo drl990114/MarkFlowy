@@ -1,4 +1,3 @@
-import customColors from '@colors'
 import styled from 'styled-components'
 
 export const Container = styled.div`
@@ -7,8 +6,8 @@ export const Container = styled.div`
 
   #sidebar {
     width: 250px;
-    background-color: ${customColors.bgColor};
-    border-right: 1px solid ${customColors.borderColor};
+    background-color: ${(props) => props.theme.bgColor};
+    border-right: 1px solid ${(props) => props.theme.borderColor};
   }
 
   #sidebar .title {
@@ -33,7 +32,7 @@ export const Container = styled.div`
     gap: 0.5rem;
     padding-top: 1rem;
     padding-bottom: 1rem;
-    border-bottom: 1px solid ${customColors.borderColor};
+    border-bottom: 1px solid ${(props) => props.theme.borderColor};
   }
 
   #sidebar > div .search-form {
@@ -93,11 +92,11 @@ export const Container = styled.div`
   }
 
   #sidebar nav li:hover {
-    background: ${customColors.tipsBgColor};
+    background: ${(props) => props.theme.tipsBgColor};
   }
 
   #sidebar nav li.active {
-    background: ${customColors.accentColor};
+    background: ${(props) => props.theme.accentColor};
     color: white;
   }
 
@@ -105,6 +104,6 @@ export const Container = styled.div`
     flex: 1;
     padding: 1rem 2rem;
     width: 100%;
-    background: ${customColors.bgColor};
+    background: ${(props) => props.theme.bgColor};
   }
 `

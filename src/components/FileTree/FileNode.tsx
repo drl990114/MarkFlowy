@@ -1,5 +1,4 @@
 import type { IFile } from '@/utils/filesys'
-import { Icon } from '@components'
 import classNames from 'classnames'
 import type { FC, MouseEventHandler } from 'react'
 import { memo, useCallback, useState } from 'react'
@@ -25,7 +24,7 @@ const FileNode: FC<FileNodeProps> = ({ item, level = 0, activeId, onSelect }) =>
     [item, onSelect]
   )
 
-  const nodeWrapperCls = classNames('file-node w-full flex items-center label-hover cursor-pointer', {
+  const nodeWrapperCls = classNames('file-node w-full flex items-center label-default cursor-pointer', {
     'bg-bgColor': isActived,
   })
 
@@ -33,7 +32,7 @@ const FileNode: FC<FileNodeProps> = ({ item, level = 0, activeId, onSelect }) =>
   return (
     <div onClick={handleClick}>
       <div className={nodeWrapperCls} style={{ paddingLeft: level * 16 + 6 }} onClick={handleSelect}>
-        {isFolder ? <Icon name="folder" iconProps={{ className: iconCls }} /> : <Icon name="file" iconProps={{ className: iconCls }} />}
+        {isFolder ? <i className={`ri-file-3-line ${iconCls}`} /> : <i className={`ri-folder-3-line ${iconCls}`} />}
         <div className="truncate">{item.name}</div>
       </div>
       {isOpen && item.children && item.children.map((child) => <FileNode key={child.name} item={child} level={level + 1} activeId={activeId} onSelect={onSelect} />)}

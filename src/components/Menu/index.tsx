@@ -12,7 +12,7 @@ const Menu: FC<MenuProps> = (props) => {
         if (typeof onMenuItemClick === 'function')
           onMenuItemClick(i)
       }
-      return <li className="label-hover" key={i.key} onClick={handleCLick}>{i.title}</li>
+      return <li className="label-default" key={i.key} onClick={handleCLick}>{i.title}</li>
     })
   }, [onMenuItemClick])
 

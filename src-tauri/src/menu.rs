@@ -1,8 +1,9 @@
-use tauri::Menu;
-
-use tauri::{CustomMenuItem, MenuItem, Submenu};
+use crate::app::conf::AppConf;
+use tauri::{CustomMenuItem, MenuItem, Submenu, Menu, WindowMenuEvent, Manager};
 
 pub fn generate_menu() -> Menu {
+    let app_conf = AppConf::read();
+
     let name = "LineByLine";
     let app_menu = Submenu::new(
         name,
@@ -38,6 +39,27 @@ pub fn generate_menu() -> Menu {
             MenuItem::SelectAll.into(),
         ]),
     );
+
+    let theme_light = CustomMenuItem::new("theme_light", "Light");
+    let theme_dark = CustomMenuItem::new("theme_dark", "Dark");
+    let is_dark = app_conf.clone().theme_check("dark");
+    let is_system = app_conf.clone().theme_check("system");
+
+    let theme_submenu = Submenu::new(
+        "Theme",
+        Menu::new()
+            .add_item(if is_dark || is_system {
+                theme_light
+            } else {
+                theme_light.selected()
+            })
+            .add_item(if is_dark {
+                theme_dark.selected()
+            } else {
+                theme_dark
+            }),
+    );
+
     let view_submenu = Submenu::new(
         "View",
         Menu::with_items([MenuItem::EnterFullScreen.into(), MenuItem::Separator.into()])
@@ -54,8 +76,59 @@ pub fn generate_menu() -> Menu {
         .add_submenu(app_menu)
         .add_submenu(file_submenu)
         .add_submenu(edit_submenu)
+        .add_submenu(theme_submenu)
         .add_submenu(view_submenu)
         .add_submenu(window_submenu);
 
     menu
+}
+
+pub fn menu_handler(event: WindowMenuEvent<tauri::Wry>) {
+    let menu_id = event.menu_item_id();
+
+    match menu_id {
+        "Save" => {
+            event
+                .window()
+                .emit("file_save", {})
+                .map_err(|err| println!("{:?}", err))
+                .ok();
+        }
+        "theme_light" | "theme_dark" => {
+            let theme = match menu_id {
+                "theme_dark" => "dark",
+                _ => "light",
+            };
+            AppConf::read()
+                .amend(serde_json::json!({ "theme": theme }))
+                .write();
+            event
+                .window()
+                .emit("change_theme", theme)
+                .map_err(|err| println!("{:?}", err))
+                .ok();
+        }
+        "About" => {
+            event
+                .window()
+                .emit("dialog_setting_about", {})
+                .map_err(|err| println!("{:?}", err))
+                .ok();
+        }
+        "DualView" => {
+            event
+                .window()
+                .emit("editor_toggle_type", "dual")
+                .map_err(|err| println!("{:?}", err))
+                .ok();
+        }
+        "WysiwygView" => {
+            event
+                .window()
+                .emit("editor_toggle_type", "wysiwyg")
+                .map_err(|err| println!("{:?}", err))
+                .ok();
+        }
+        _ => {}
+    }
 }
