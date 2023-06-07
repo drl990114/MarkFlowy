@@ -34,7 +34,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3
 
       - name: Install dependencies (ubuntu only)
         if: matrix.os == 'ubuntu-latest'
@@ -46,7 +46,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@988c164c3d0e93c4dbab36aaf5bbeb77425b2894 # v2
         with:
           key: ${{ matrix.target }}
 
@@ -64,7 +64,7 @@ jobs:
         run: rustup target add ${{ matrix.target }}
 
       - name: Build the app
-        uses: tauri-apps/tauri-action@v0
+        uses: tauri-apps/tauri-action@6944c9def9846b8d222828ce5f4dfc9588904dc5 # v0
 
         env:
           TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
