@@ -1,7 +1,42 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:base"
+    "config:base",
+    ":maintainLockFilesWeekly",
+    ":rebaseStalePrs",
+    ":semanticCommits",
+    ":semanticCommitScope(deps)",
+    "group:linters",
+    "helpers:pinGitHubActionDigests"
   ],
-  "schedule": ["before 5am"]
+  "assignees": ["halodong"],
+  "semanticCommitScope": "deps",
+  "automergeType": "pr",
+  "prCreation": "immediate",
+  "dockerfile": {
+    "semanticCommitType": "build"
+  },
+  "schedule": ["before 5am"],
+  "packageRules": [
+    {
+      "matchPackageNames": ["containerbase/node"],
+      "versioning": "node"
+    },
+    {
+      "matchDepTypes": ["dependencies"],
+      "semanticCommitType": "build"
+    },
+    {
+      "matchPackageNames": ["semantic-release"],
+      "semanticCommitType": "build"
+    },
+    {
+      "matchPackageNames": ["@types/jest"],
+      "groupName": "jest monorepo"
+    },
+    {
+      "matchPaths": ["**/__fixtures__/**"],
+      "enabled": false
+    }
+  ]
 }
