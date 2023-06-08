@@ -4,6 +4,7 @@ import { StrictMode, Suspense } from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import App from './App'
+import { FallBackContainer } from './components/FallBack'
 import './normalize.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
@@ -12,9 +13,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <BrowserRouter>
         <Suspense
           fallback={
-            <div className="w-screen h-screen fjic">
+            <FallBackContainer>
               <CircularProgress />
-            </div>
+            </FallBackContainer>
           }
         >
             <App />
