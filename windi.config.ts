@@ -1,5 +1,4 @@
 import { defineConfig } from 'windicss/helpers'
-import customColors from './src/colors'
 
 export default defineConfig({
   preflight: false,
@@ -17,10 +16,5 @@ export default defineConfig({
 
     // layout
     'fjic': 'flex justify-center items-center',
-  },
-  theme: {
-    extend: {
-      colors: customColors,
-    },
   },
 })
