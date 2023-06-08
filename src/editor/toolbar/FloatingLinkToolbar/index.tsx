@@ -1,4 +1,4 @@
-import { useFloatingLinkState } from '@hooks'
+import { useFloatingLinkState } from '@/renderer/hooks'
 import { CommandButton, FloatingToolbar, FloatingWrapper, useActive, useCurrentSelection } from '@remirror/react'
 import type { ChangeEvent, HTMLProps, KeyboardEvent } from 'react'
 import { useCallback, useEffect, useRef } from 'react'
