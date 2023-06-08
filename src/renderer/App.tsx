@@ -1,11 +1,12 @@
+import { CacheManager } from '@/helper'
+import { loadTask, use } from '@/helper/schedule'
+import { Root, Setting } from '@/renderer/router'
 import { APP_NAME, EVENT } from '@constants'
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles'
-import { Root, Setting } from '@router'
 import { invoke } from '@tauri-apps/api'
 import { listen } from '@tauri-apps/api/event'
 import { checkUpdate, installUpdate } from '@tauri-apps/api/updater'
 import { Theme, WebviewWindow } from '@tauri-apps/api/window'
-import { CacheManager } from '@utils'
 import { useCallback, useEffect } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import 'remixicon/fonts/remixicon.css'
@@ -14,7 +15,6 @@ import { GlobalStyles } from './globalStyles'
 import { useGlobalSettingData, useGlobalTheme } from './hooks'
 import useGlobalOSInfo from './hooks/useOSInfo'
 import { i18nInit } from './i18n'
-import { loadTask, use } from './utils/schedule'
 
 function App() {
   useGlobalOSInfo()

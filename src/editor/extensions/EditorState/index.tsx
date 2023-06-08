@@ -2,13 +2,13 @@
 // This extension is responsible for managing the state of the editor.
 // TODO It will be split later and passed in through props expansion. instead of built in editor.
 
-import { useTitleEffect } from '@/hooks/useTitleEffect'
-import { useEditorStore } from '@/stores'
-import { IFile } from '@/utils/filesys'
+import { IFile } from '@/helper/filesys'
+import { useTitleEffect } from '@/renderer/hooks/useTitleEffect'
+import { useEditorStore } from '@/renderer/stores'
 import { useHelpers } from '@remirror/react'
+import { invoke } from '@tauri-apps/api'
 import { save } from '@tauri-apps/api/dialog'
 import { listen } from '@tauri-apps/api/event'
-import { writeTextFile } from '@tauri-apps/api/fs'
 import { t } from 'i18next'
 import { FC, useEffect, useReducer } from 'react'
 import { RemirrorManager } from 'remirror'
@@ -37,11 +37,12 @@ export const EditorState: FC<EditorStateProps> = ({ active, file, manager }) => 
         return
       }
 
-      const content = active ? getEditorContent(file.id) : ''
+      const content = getEditorContent(file.id)
 
       if (!file) {
         return
       }
+
       try {
         if (!file.path) {
           save({
@@ -49,14 +50,14 @@ export const EditorState: FC<EditorStateProps> = ({ active, file, manager }) => 
             defaultPath: file.name ?? `${t('file.untitled')}.md`,
           }).then((path) => {
             if (path === null) return
-            writeTextFile(path, content)
+            invoke('write_file', { filePath: file.path, content })
             dispatch({ type: 'SAVE_CONTENT', payload: { content, undoDepth: helpers.undoDepth() } })
           })
           return
+        } else {
+          invoke('write_file', { filePath: file.path, content })
+          dispatch({ type: 'SAVE_CONTENT', payload: { content, undoDepth: helpers.undoDepth() } })
         }
-
-        writeTextFile(file.path!, content)
-        dispatch({ type: 'SAVE_CONTENT', payload: { content, undoDepth: helpers.undoDepth() } })
       } catch (error) {
         console.error(error)
       }

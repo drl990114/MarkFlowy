@@ -1,4 +1,4 @@
-import { useGlobalSettingData } from '@/hooks'
+import { useGlobalSettingData } from '@/renderer/hooks'
 import { useCallback, useEffect, useState } from 'react'
 import { SettingItemProps } from '.'
 

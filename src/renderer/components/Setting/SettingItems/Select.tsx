@@ -1,4 +1,4 @@
-import { useGlobalSettingData } from '@hooks'
+import { useGlobalSettingData } from '@/renderer/hooks'
 import Autocomplete from '@mui/material/Autocomplete'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'

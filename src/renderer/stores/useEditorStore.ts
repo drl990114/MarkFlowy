@@ -1,5 +1,5 @@
-import { isArray } from '@/utils'
-import { IFile, createWelcomeFile } from '@/utils/filesys'
+import { isArray } from '@/helper'
+import { IFile, createWelcomeFile } from '@/helper/filesys'
 import { ReactExtensions, ReactFrameworkOutput } from '@remirror/react'
 import { create } from 'zustand'
 

@@ -1,5 +1,5 @@
-import { useEditorStore } from '@/stores'
-import { getFileObject } from '@/utils/files'
+import { getFileObject } from '@/helper/files'
+import { useEditorStore } from '@/renderer/stores'
 import { invoke } from '@tauri-apps/api'
 import { emit } from '@tauri-apps/api/event'
 import { appWindow } from '@tauri-apps/api/window'

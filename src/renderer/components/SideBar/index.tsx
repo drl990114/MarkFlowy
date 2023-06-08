@@ -1,5 +1,5 @@
 import chatgpt from '@/chatgpt'
-import { Explorer, Setting } from '@components'
+import { Explorer, Setting } from '@/renderer/components'
 import { RIGHTBARITEMKEYS } from '@constants'
 import classNames from 'classnames'
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
