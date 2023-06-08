@@ -1,8 +1,8 @@
-import settingMap from '@/utils/cacheManager/settingMap'
+import settingMap from '@/helper/cacheManager/settingMap'
 import classNames from 'classnames'
 import * as React from 'react'
 import { memo } from 'react'
-import LOGO from '../../../public/logo.svg'
+import LOGO from '../../../../public/logo.svg'
 import SettingGroup from '../../components/Setting/SettingGroup'
 import { Container } from './styles'
 

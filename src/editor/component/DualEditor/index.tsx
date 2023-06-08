@@ -1,6 +1,6 @@
 import { EditorState } from '@/editor/extensions/EditorState'
-import { useEditorStore } from '@/stores'
-import { IFile } from '@/utils/filesys'
+import { IFile } from '@/helper/filesys'
+import { useEditorStore } from '@/renderer/stores'
 import { languages } from '@codemirror/language-data'
 import { oneDark } from '@codemirror/theme-one-dark'
 import { EditorExtensions } from '@editor'

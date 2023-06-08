@@ -1,4 +1,4 @@
-import { useGlobalTheme } from '@/hooks'
+import { useGlobalTheme } from '@/renderer/hooks'
 import { Box, ClickAwayListener, Fade, Popper, PopperProps } from '@mui/material'
 import { nanoid } from 'nanoid'
 import React, { memo, useEffect, useMemo, useState } from 'react'

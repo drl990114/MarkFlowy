@@ -1,4 +1,4 @@
-import type { IFile } from '@/utils/filesys'
+import type { IFile } from '@/helper/filesys'
 import classNames from 'classnames'
 import type { FC, MouseEventHandler } from 'react'
 import { memo, useCallback, useState } from 'react'

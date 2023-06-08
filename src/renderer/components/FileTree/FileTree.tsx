@@ -1,7 +1,7 @@
 import classNames from 'classnames'
 import type { FC } from 'react'
 import { memo } from 'react'
-import { IFile } from '../../utils/filesys'
+import { IFile } from '../../../helper/utils/filesys'
 import FileNode from './FileNode'
 
 const FileTree: FC<FileTreeProps> = (props) => {

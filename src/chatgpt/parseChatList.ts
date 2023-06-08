@@ -1,4 +1,4 @@
-import { ChatGPTHistory } from "@/stores/useChatGPTStore";
+import { ChatGPTHistory } from "@/chatgpt/useChatGPTStore";
 
 export const parseChatList = (chatList: ChatGPTHistory[]): string => {
   let markdownContent = ''

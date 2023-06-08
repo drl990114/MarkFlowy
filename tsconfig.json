@@ -18,18 +18,18 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@components": ["./src/components"],
+      "@components": ["src/renderer/components"],
       "@types": ["./src/types"],
-      "@hooks": ["./src/hooks"],
+      "@hooks": ["src/renderer/hooks"],
       "@services": ["./src/services"],
       "@constants": ["./src/constants"],
-      "@utils": ["./src/utils"],
-      "@stores": ["./src/stores"],
+      "@utils": ["src/helper/utils"],
+      "@stores": ["src/renderer/stores"],
       "@icons": ["./src/icons"],
       "@editor": ["./src/editor"],
-      "@router": ["./src/router"],
+      "@router": ["src/renderer/router"],
       "@colors": ["./src/colors"],
-      "@i18n": ["./src/i18n"]
+      "@i18n": ["src/renderer/i18n"]
     }
   },
   "include": ["src", "vite.config.ts", "src/types"],
