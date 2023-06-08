@@ -1,7 +1,7 @@
+import { APP_NAME, EVENT } from '@/constants'
 import { CacheManager } from '@/helper'
 import { loadTask, use } from '@/helper/schedule'
 import { Root, Setting } from '@/renderer/router'
-import { APP_NAME, EVENT } from '@constants'
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles'
 import { invoke } from '@tauri-apps/api'
 import { listen } from '@tauri-apps/api/event'

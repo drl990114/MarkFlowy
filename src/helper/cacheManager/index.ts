@@ -1,4 +1,4 @@
-import { EVENT } from '@constants'
+import { EVENT } from '@/constants'
 import { emit } from '@tauri-apps/api/event'
 import { exists, readTextFile, writeFile } from '@tauri-apps/api/fs'
 import { BaseDirectory } from '@tauri-apps/api/path'

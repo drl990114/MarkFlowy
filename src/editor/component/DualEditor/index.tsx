@@ -1,9 +1,9 @@
+import { EditorExtensions } from '@/editor'
 import { EditorState } from '@/editor/extensions/EditorState'
 import { IFile } from '@/helper/filesys'
 import { useEditorStore } from '@/renderer/stores'
 import { languages } from '@codemirror/language-data'
 import { oneDark } from '@codemirror/theme-one-dark'
-import { EditorExtensions } from '@editor'
 import { CodeMirrorExtension } from '@remirror/extension-codemirror6'
 import type { UseRemirrorReturn } from '@remirror/react'
 import { Remirror, useRemirror } from '@remirror/react'
@@ -11,7 +11,7 @@ import { createContextState } from 'create-context-state'
 import React, { memo, useEffect } from 'react'
 import styled from 'styled-components'
 import Text from '../Text'
-
+ 
 interface Context extends Props {}
 
 interface Props {

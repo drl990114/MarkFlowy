@@ -1,5 +1,5 @@
+import { EVENT } from '@/constants'
 import { CacheManager } from '@/helper'
-import { EVENT } from '@constants'
 import { listen } from '@tauri-apps/api/event'
 import { createGlobalStore } from 'hox'
 import { useEffect, useState } from 'react'

@@ -1,7 +1,7 @@
+import { EditorExtensions } from '@/editor'
 import { EditorState } from '@/editor/extensions/EditorState'
 import { IFile } from '@/helper/filesys'
 import { useEditorStore } from '@/renderer/stores'
-import { EditorExtensions } from '@editor'
 import { Remirror, useRemirror } from '@remirror/react'
 import { FC, useEffect } from 'react'
 import FloatingLinkToolbar from '../../toolbar/FloatingLinkToolbar'
