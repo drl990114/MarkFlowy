@@ -1,20 +1,21 @@
-import customColors from '@/colors'
-import { RightBarItem } from '@/components/SideBar'
 import { EVENT, RIGHTBARITEMKEYS } from '@/constants'
-import { useGlobalSettingData } from '@/hooks'
-import { useChatGPTStore, useEditorStore } from '@/stores'
-import { SettingKeys } from '@/utils/cacheManager/settingMap'
-import { createFile } from '@/utils/filesys'
+import { SettingKeys } from '@/helper/cacheManager/settingMap'
+import { createFile } from '@/helper/filesys'
+import { RightBarItem } from '@/renderer/components/SideBar'
+import { useGlobalSettingData, useGlobalTheme } from '@/renderer/hooks'
+import { useEditorStore } from '@/renderer/stores'
 import Button from '@mui/material/Button'
 import { emit } from '@tauri-apps/api/event'
 import { useCallback, useState } from 'react'
 import ReactLoading from 'react-loading'
 import { parseChatList } from './parseChatList'
 import { BottomBar, Container, ListContainer } from './styles'
+import useChatGPTStore from './useChatGPTStore'
 
 const ChatList: React.FC<ChatListProps> = (props) => {
   const { chatList, addChat, delChat } = useChatGPTStore()
   const [settingData] = useGlobalSettingData()
+  const { themeColors } = useGlobalTheme()
   const apiKey = settingData[SettingKeys.chatgpt]
   const [askInput, setAskInput] = useState('')
   const { addOpenedFile, setActiveId } = useEditorStore()
@@ -68,7 +69,7 @@ const ChatList: React.FC<ChatListProps> = (props) => {
                       <span>ChatGPT</span>
                     </div>
                     {chat.status === 'pending' ? (
-                      <ReactLoading type="bubbles" width={35} height={35} color={customColors.accentColor} />
+                      <ReactLoading type="bubbles" width={35} height={35} color={themeColors.accentColor} />
                     ) : chat.status === 'error' ? (
                       <div>
                         request error, please check your ApiKey is it right or not <a onClick={openSettingWindow}>setting</a>

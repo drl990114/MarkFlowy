@@ -1,4 +1,4 @@
-import { IFile } from "@/utils/filesys"
+import { IFile } from "@/helper/filesys"
 import { AnyExtension, ProsemirrorNode, RemirrorManager } from "@remirror/core"
 
 

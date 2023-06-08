@@ -1,7 +1,7 @@
+import { EditorExtensions } from '@/editor'
 import { EditorState } from '@/editor/extensions/EditorState'
-import { useEditorStore } from '@/stores'
-import { IFile } from '@/utils/filesys'
-import { EditorExtensions } from '@editor'
+import { IFile } from '@/helper/filesys'
+import { useEditorStore } from '@/renderer/stores'
 import { Remirror, useRemirror } from '@remirror/react'
 import { FC, useEffect } from 'react'
 import FloatingLinkToolbar from '../../toolbar/FloatingLinkToolbar'
@@ -31,7 +31,7 @@ const WysiwygEditor: FC<WysiwygEditorProps> = (props) => {
         manager={manager}
         initialContent={state}
       >
-        <Text className="h-full w-full overflow-scroll scrollbar-auto markdown-body" />
+        <Text className="h-full w-full overflow-auto markdown-body" />
         <FloatingLinkToolbar />
         <EditorState active={active} file={file} manager={manager}/>
       </Remirror>

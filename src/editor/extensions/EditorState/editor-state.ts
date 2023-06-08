@@ -1,4 +1,4 @@
-import { IFile } from "@/utils/filesys"
+import { IFile } from "@/helper/filesys"
 import { EditorState, Note } from "../../types"
 import { EditContentAction, editContent } from "./reducers/edit-content"
 import { EditorInitAction, initEditor } from "./reducers/init-content"
