@@ -58,10 +58,10 @@ function SideBar() {
 
   return (
     <Container ref={sidebarRef} noActiveItem={noActiveItem} style={{ width: noActiveItem ? '48px' : sidebarWidth }}>
-      <div className="app-sidebar w-48px flex flex-col flex-shrink-0 justify-between">
+      <div className="app-sidebar">
         <div>
           {rightBarDataSource.map((item) => {
-            const cls = classNames('w-48px h-48px fjic cursor-pointer text-24px', {
+            const cls = classNames('app-sidebar__item fjic', {
               'app-sidebar-active': activeRightBarItemKey === item.key,
             })
 
@@ -80,7 +80,7 @@ function SideBar() {
             )
           })}
         </div>
-        <SettingRightBarContainer className="w-48px h-48px fjic cursor-pointer">
+        <SettingRightBarContainer className="app-sidebar__item fjic">
           <Setting />
         </SettingRightBarContainer>
       </div>

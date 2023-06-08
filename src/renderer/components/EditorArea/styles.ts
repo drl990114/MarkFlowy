@@ -1,16 +1,24 @@
 import styled from 'styled-components'
 
 export const Container = styled.div`
+  overflow-x: auto;
+  overflow-y: hidden;
+
   .tab-items {
+    display: flex;
     height: 2rem;
     line-height: 2rem;
     border-bottom: 1px solid ${(props) => props.theme.borderColor};
     overflow-x: auto;
     overflow-y: hidden;
+
+    &__icon {
+      margin: 0 2px;
+    }
   }
 
   .code-contents {
-    height: calc(100% - 2rem)
+    height: calc(100% - 2rem);
   }
 `
 
@@ -42,7 +50,7 @@ export const TabItem = styled.div<TabItemProps>`
 
   ${({ active, theme }) => {
     return `
-      background-color: ${active ? theme.bgColor :  theme.tipsBgColor};
+      background-color: ${active ? theme.bgColor : theme.tipsBgColor};
     `
   }}
 `

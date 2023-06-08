@@ -28,16 +28,16 @@ export default function EditorArea() {
 
   return (
     <Container className="w-full h-full">
-      <div className="tab-items flex">
+      <div className="tab-items">
         {opened.map((id) => {
           const file = getFileObject(id) as IFile
           const active = activeId === id
 
           return (
             <TabItem active={active} onClick={() => onSelectItem(file.id)} className={`tab-item`} key={id}>
-              <i className={`ri-file-3-line m-2`} /> 
+              <i className={`ri-file-3-line tab-items__icon`} /> 
               <span style={{ color: active ? themeColors.accentColor : '' }}>{file.name}</span>
-              <i className="ri-close-line  m-2 close" onClick={(ev: React.MouseEvent<HTMLElement, MouseEvent>) => close(ev, id)}/>
+              <i className="ri-close-line tab-items__icon close" onClick={(ev: React.MouseEvent<HTMLElement, MouseEvent>) => close(ev, id)}/>
             </TabItem>
           )
         })}

@@ -3,29 +3,28 @@ import { createTheme } from '@mui/material'
 import { createGlobalStore } from 'hox'
 import { useEffect, useState } from 'react'
 import { ThemeProps } from 'styled-components'
-import colors from 'windicss/colors'
 
 type Theme = 'light' | 'dark'
 
 export type MThemeProps = ThemeProps<typeof lightThemeColors>
 
 const lightThemeColors = {
-  primaryFontColor: 'black',
-  labelFontColor: colors.gray[400],
-  accentColor: colors.sky[700],
-  borderColor: colors.zinc[200],
-  bgColor: colors.light[50],
-  warnColor: colors.red[600],
+  primaryFontColor: '#000000',
+  labelFontColor: '#9ca3af',
+  accentColor: '#0369a1',
+  borderColor: '#e4e4e7',
+  bgColor: '#fdfdfd',
+  warnColor: '#dc2626',
   tipsBgColor: '#f6f7f9',
 }
 
 const darkThemeColors = {
   primaryFontColor: 'rgba(255, 255, 255, 0.9)',
   labelFontColor: 'rgba(255, 255, 255, 0.9)',
-  accentColor: colors.sky[700],
+  accentColor: '#0369a1',
   borderColor: '#30363d',
   bgColor: '#02040a',
-  warnColor: colors.red[600],
+  warnColor: '#dc2626',
   tipsBgColor: '#11191f',
 }
 
