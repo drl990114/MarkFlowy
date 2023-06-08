@@ -31,7 +31,7 @@ const WysiwygEditor: FC<WysiwygEditorProps> = (props) => {
         manager={manager}
         initialContent={state}
       >
-        <Text className="h-full w-full overflow-scroll scrollbar-auto markdown-body" />
+        <Text className="h-full w-full overflow-auto markdown-body" />
         <FloatingLinkToolbar />
         <EditorState active={active} file={file} manager={manager}/>
       </Remirror>

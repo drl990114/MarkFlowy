@@ -15,7 +15,19 @@ export const Container = styled.div<ContainerProps>`
   z-index: 2;
 
   .app-sidebar {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    justify-content: space-between;
+    width: 48px;
     border-right: 1px solid ${(props) => props.theme.borderColor};
+
+    &__item {
+      width: 48px;
+      height: 48px;
+      cursor: pointer;
+      font-size: 26px;
+    }
   }
 
   .app-sidebar-active {

@@ -2,7 +2,7 @@ import type { IFile } from '@/helper/filesys'
 import classNames from 'classnames'
 import type { FC, MouseEventHandler } from 'react'
 import { memo, useCallback, useState } from 'react'
-import './index.css'
+import { FileNodeStyled } from './styles'
 
 const FileNode: FC<FileNodeProps> = ({ item, level = 0, activeId, onSelect }) => {
   const [isOpen, setIsOpen] = useState(false)
@@ -24,20 +24,20 @@ const FileNode: FC<FileNodeProps> = ({ item, level = 0, activeId, onSelect }) =>
     [item, onSelect]
   )
 
-  const nodeWrapperCls = classNames('file-node w-full flex items-center label-default cursor-pointer', {
-    'bg-bgColor': isActived,
+  const nodeWrapperCls = classNames('file-node', {
+    'file-node--active': isActived,
   })
 
-  const iconCls = 'file-icon w-20px m-2px flex-shrink-0'
+  const iconCls = 'file-icon'
 
   return (
-    <div onClick={handleClick}>
+    <FileNodeStyled onClick={handleClick}>
       <div className={nodeWrapperCls} style={{ paddingLeft: level * 16 + 6 }} onClick={handleSelect}>
         {isFolder ? <i className={`ri-folder-3-line ${iconCls}`} /> : <i className={`ri-file-3-line ${iconCls}`} />}
-        <div className="truncate">{item.name}</div>
+        <div>{item.name}</div>
       </div>
       {isOpen && item.children && item.children.map((child) => <FileNode key={child.name} item={child} level={level + 1} activeId={activeId} onSelect={onSelect} />)}
-    </div>
+    </FileNodeStyled>
   )
 }
 

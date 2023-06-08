@@ -3,7 +3,6 @@ import { HoxRoot } from 'hox'
 import { StrictMode, Suspense } from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
-import 'virtual:windi.css'
 import App from './App'
 import './normalize.css'
 

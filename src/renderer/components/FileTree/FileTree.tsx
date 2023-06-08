@@ -1,13 +1,13 @@
+import { IFile } from '@/helper/filesys'
 import classNames from 'classnames'
 import type { FC } from 'react'
 import { memo } from 'react'
-import { IFile } from '../../../helper/utils/filesys'
 import FileNode from './FileNode'
 
 const FileTree: FC<FileTreeProps> = (props) => {
   const { data, activeId, onSelect, className } = props
 
-  const containerCls = classNames('w-full overflow-hidden truncate', className)
+  const containerCls = classNames('w-full overflow-hidden', className)
 
   return (
     <div className={containerCls}>

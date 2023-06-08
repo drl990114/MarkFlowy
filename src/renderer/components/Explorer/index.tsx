@@ -47,16 +47,16 @@ const Explorer: FC<ExplorerProps> = (props) => {
 
   const listData = useMemo(() => cache.openFolderHistory.map((history: { time: string; path: string }) => ({ key: history.time, title: history.path, iconCls: "ri-folder-5-line" })), [cache])
 
-  const containerCLs = classNames('w-full flex flex-col', props.className)
+  const containerCLs = classNames(props.className)
 
   return (
     <Container className={containerCLs}>
-      <div className="border-b-1-solid flex justify-between items-center px-4 py-1">
+      <div className="explorer-header">
         <small>EXPLORER</small>
         <div className="flex"></div>
       </div>
       <div className="h-full w-full overflow-auto">{folderData ? <FileTree className="flex-1" data={folderData} activeId={activeId} onSelect={handleSelect}></FileTree> : <Empty />}</div>
-      <div className="border-t-1-solid flex justify-between items-center px-4 py-1">
+      <div className="explorer-bottom">
         <small className="flex-1 cursor-pointer" onClick={handleOpenDirClick}>
           {t('file.openDir')}
         </small>
