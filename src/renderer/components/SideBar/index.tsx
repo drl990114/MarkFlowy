@@ -1,6 +1,6 @@
 import chatgpt from '@/chatgpt'
+import { RIGHTBARITEMKEYS } from '@/constants'
 import { Explorer, Setting } from '@/renderer/components'
-import { RIGHTBARITEMKEYS } from '@constants'
 import classNames from 'classnames'
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Container, SettingRightBarContainer } from './styles'

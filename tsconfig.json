@@ -17,19 +17,7 @@
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"],
-      "@components": ["src/renderer/components"],
-      "@types": ["./src/types"],
-      "@hooks": ["src/renderer/hooks"],
-      "@services": ["./src/services"],
-      "@constants": ["./src/constants"],
-      "@utils": ["src/helper/utils"],
-      "@stores": ["src/renderer/stores"],
-      "@icons": ["./src/icons"],
-      "@editor": ["./src/editor"],
-      "@router": ["src/renderer/router"],
-      "@colors": ["./src/colors"],
-      "@i18n": ["src/renderer/i18n"]
+      "@/*": ["./src/*"]
     }
   },
   "include": ["src", "vite.config.ts", "src/types"],

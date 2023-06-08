@@ -1,4 +1,4 @@
-import { EVENT } from '@constants'
+import { EVENT } from '@/constants'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import { emit } from '@tauri-apps/api/event'
