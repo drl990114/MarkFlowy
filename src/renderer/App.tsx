@@ -19,34 +19,38 @@ import { i18nInit } from './i18n'
 function App() {
   useGlobalOSInfo()
   const [_, handler] = useGlobalSettingData()
-  const { themeColors, muiTheme ,setTheme } = useGlobalTheme()
+  const { themeColors, muiTheme, setTheme } = useGlobalTheme()
   const { setSetting } = handler
+  const isWeb = (window as any).__TAURI_IPC__ === undefined
 
-  use(
-    loadTask(
-      'confInit',
-      () =>
-        new Promise((resolve) => {
-          invoke<Record<string, any>>('get_app_conf').then((res) => {
-            console.log('conf', res)
-            setSetting(res)
-            setTheme(res.theme)
-            i18nInit({ lng: res.language })
-            resolve(res)
+  if (!isWeb) {
+    use(
+      loadTask(
+        'confInit',
+        () =>
+          new Promise((resolve) => {
+            invoke<Record<string, any>>('get_app_conf').then((res) => {
+              console.log('conf', res)
+              setSetting(res)
+              setTheme(res.theme)
+              i18nInit({ lng: res.language })
+              resolve(res)
+            })
           })
-        })
+      )
     )
-  )
-  use(loadTask('cache', () => CacheManager.init()))
+    use(loadTask('cache', () => CacheManager.init()))
+  }
 
   useEffect(() => {
+    if (isWeb) return
     const unlisten = eventInit()
     // updaterinit()
 
     return () => {
       unlisten()
     }
-  }, [])
+  }, [isWeb])
 
   const eventInit = useCallback(() => {
     const unListenOpenSetting = listen(EVENT.open_window_setting, () => {
