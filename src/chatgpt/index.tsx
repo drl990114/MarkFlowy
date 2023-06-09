@@ -4,6 +4,7 @@ import { createFile } from '@/helper/filesys'
 import { RightBarItem } from '@/renderer/components/SideBar'
 import { useGlobalSettingData, useGlobalTheme } from '@/renderer/hooks'
 import { useEditorStore } from '@/renderer/stores'
+import { Input } from '@mui/material'
 import Button from '@mui/material/Button'
 import { emit } from '@tauri-apps/api/event'
 import { useCallback, useState } from 'react'
@@ -92,7 +93,7 @@ const ChatList: React.FC<ChatListProps> = (props) => {
         )}
       </div>
       <BottomBar>
-        <input
+        <Input
           className="input"
           value={askInput}
           placeholder="input question"
