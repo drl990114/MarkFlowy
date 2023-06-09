@@ -51,10 +51,10 @@ const ChatList: React.FC<ChatListProps> = (props) => {
             {chatList.map((chat) => {
               return (
                 <div key={chat.id}>
-                  <div className="question item w-full h-full">
-                    <div className="flex justify-between">
-                      <div className="flex items-center">
-                        <i className="ri-user-4-line mr-1 text-18px" />
+                  <div className="question item">
+                    <div className="item-header">
+                      <div className="item-title">
+                        <i className="ri-user-4-line item-icon" />
                         <span>You</span>
                       </div>
                       <div>
@@ -63,9 +63,9 @@ const ChatList: React.FC<ChatListProps> = (props) => {
                     </div>
                     <p>{chat.question}</p>
                   </div>
-                  <div className="answer item w-full h-full">
-                    <div className="flex items-center">
-                      <i className="ri-openai-fill mr-1 text-18px" />
+                  <div className="answer item">
+                    <div className="item-title">
+                      <i className="ri-openai-fill item-icon" />
                       <span>ChatGPT</span>
                     </div>
                     {chat.status === 'pending' ? (
