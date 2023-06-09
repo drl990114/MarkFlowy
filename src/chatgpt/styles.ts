@@ -32,7 +32,7 @@ export const Container = styled.div`
       justify-content: center;
       align-items: center;
       flex-direction: column;
-      
+
       &-title {
         text-align: center;
       }
@@ -50,6 +50,7 @@ export const Container = styled.div`
 export const ListContainer = styled.div`
   .item {
     padding: 8px;
+    box-sizing: border-box;
 
     &-header {
       display: flex;
@@ -63,6 +64,7 @@ export const ListContainer = styled.div`
 
     &-icon {
       margin-right: 2px;
+      font-size: 18px;
     }
   }
 
@@ -70,7 +72,6 @@ export const ListContainer = styled.div`
     height: 100%;
     width: 100%;
     background: ${(props) => props.theme.bgColor};
-    font-size: 18px;
   }
 
   .answer {

@@ -1,4 +1,5 @@
 import { useGlobalSettingData } from '@/renderer/hooks'
+import { Input } from '@mui/material'
 import { useCallback, useEffect, useState } from 'react'
 import { SettingItemProps } from '.'
 
@@ -23,7 +24,7 @@ const InputSettingItem: React.FC<SettingItemProps<Setting.InputSettingItem>> = (
   return (
     <label>
       <label className='setting-item__label'>{itemKey}:</label>
-      <input className='setting-item__form' value={value} onChange={handleChange}></input>
+      <Input className='setting-item__form' value={value} onChange={handleChange} />
     </label>
   )
 }
