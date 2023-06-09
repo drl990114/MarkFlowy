@@ -50,13 +50,32 @@ export const Container = styled.div`
 export const ListContainer = styled.div`
   .item {
     padding: 8px;
+
+    &-header {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    &-title {
+      display: flex;
+      align-items: center;
+    }
+
+    &-icon {
+      margin-right: 2px;
+    }
   }
 
   .question {
-    background: ${(props) => props.theme.bgColor}
+    height: 100%;
+    width: 100%;
+    background: ${(props) => props.theme.bgColor};
+    font-size: 18px;
   }
 
   .answer {
+    height: 100%;
+    width: 100%;
     background: ${(props) => props.theme.tipsBgColor}
   }
 `
@@ -66,6 +85,7 @@ export const BottomBar = styled.div`
   width: 100%;
   height: 46px;
   padding: 8px;
+  box-sizing: border-box;
   position: sticky;
   bottom: 0;
   background-color: ${(props) => props.theme.bgColor};
