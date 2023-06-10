@@ -23,6 +23,7 @@ function App() {
   const { setSetting } = handler
   const isWeb = (window as any).__TAURI_IPC__ === undefined
 
+  // TODO web need return a editor
   if (!isWeb) {
     use(
       loadTask(
