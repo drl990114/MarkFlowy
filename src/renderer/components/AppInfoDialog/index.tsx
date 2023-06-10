@@ -85,7 +85,7 @@ TauriVersion: ${appInfo.tauriVersion}
   return (
     <Dialog open={open}>
       <BootstrapDialogTitle onClose={handleClose}>{appInfo.name}</BootstrapDialogTitle>
-      <DialogContent style={{ width: 600 }}>
+      <DialogContent style={{ width: 450 }}>
         <DialogContentText>{`Version: ${appInfo.version}`}</DialogContentText>
         <DialogContentText>{`Tauri Version: ${appInfo.tauriVersion}`}</DialogContentText>
       </DialogContent>
