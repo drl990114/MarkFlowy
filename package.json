@@ -12,7 +12,7 @@
     "@codemirror/language": "^6.7.0",
     "@codemirror/language-data": "^6.3.1",
     "@codemirror/theme-one-dark": "^6.1.2",
-    "@emotion/styled": "^11.10.6",
+    "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.11.16",
     "@mui/material": "^5.12.2",
     "@remirror/core": "^2.0.12",
