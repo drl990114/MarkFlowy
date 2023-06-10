@@ -6,10 +6,14 @@ export const FileNodeStyled = styled.div`
     align-items: center;
     padding: 0 8px;
     height: 32px;
-    width: 100%;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    box-sizing: border-box;
     cursor: pointer;
+
+    &__text {
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+    }
 
     &:hover {
       color: ${(props) => props.theme.accentColor};
