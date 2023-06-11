@@ -59,6 +59,7 @@ const MarkdownTextEditor = memo((props) => {
       }}
     >
       <Text className="h-full w-full overflow-auto px-0" style={{ padding: 0 }} />
+      {/* @ts-ignore */}
       <EditorState manager={markText.manager} active={active} file={file} />
     </Remirror>
   )

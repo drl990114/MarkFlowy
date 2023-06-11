@@ -38,14 +38,14 @@ export const callChatGptApi = async (text: string, model: string, onStatus: (sta
   }
 }
 
-const resolveModelShorthand = (model: string): string => {
-  const shorthands: { [key: string]: string } = {
-    '4': 'gpt-4',
-    '4large': 'gpt-4-32k',
-    '3': 'gpt-3.5-turbo',
-  }
-  return shorthands[model] ?? model
-}
+// const resolveModelShorthand = (model: string): string => {
+//   const shorthands: { [key: string]: string } = {
+//     '4': 'gpt-4',
+//     '4large': 'gpt-4-32k',
+//     '3': 'gpt-3.5-turbo',
+//   }
+//   return shorthands[model] ?? model
+// }
 
 type ErrorResponse = {
   error: {
