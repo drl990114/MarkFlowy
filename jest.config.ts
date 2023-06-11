@@ -31,6 +31,8 @@ const config = {
   coveragePathIgnorePatterns: [
     '/node_modules/',
     'config/tests',
+    'dist',
+    'dist-types/'
   ],
 
   // Indicates which provider should be used to instrument code for coverage
@@ -124,7 +126,7 @@ const config = {
   // rootDir: undefined,
 
   // A list of paths to directories that Jest should use to search for files in
-  roots: ['<rootDir>'],
+  roots: ['src'],
 
   // Allows you to use a custom runner instead of Jest's default test runner
   // runner: 'jest-runner',
