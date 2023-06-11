@@ -5,13 +5,14 @@
 import { IFile } from '@/helper/filesys'
 import { useTitleEffect } from '@/renderer/hooks/useTitleEffect'
 import { useEditorStore } from '@/renderer/stores'
+import { RemirrorManager } from '@remirror/core'
 import { useHelpers } from '@remirror/react'
 import { invoke } from '@tauri-apps/api'
 import { save } from '@tauri-apps/api/dialog'
 import { listen } from '@tauri-apps/api/event'
 import { t } from 'i18next'
 import { FC, useEffect, useReducer } from 'react'
-import { RemirrorManager } from 'remirror'
+
 import { editorReducer, initializeState } from './editor-state'
 
 export const EditorState: FC<EditorStateProps> = ({ active, file, manager }) => {
@@ -73,5 +74,9 @@ export const EditorState: FC<EditorStateProps> = ({ active, file, manager }) => 
 interface EditorStateProps {
   active: boolean
   file: IFile
+  /**
+   * import { RemirrorManager } from '@remirror/core', 
+   * The type introduced here will have a private attribute error, you need to understand the reason. 
+   */
   manager: RemirrorManager<any>
 }
