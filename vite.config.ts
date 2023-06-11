@@ -9,7 +9,14 @@ export default defineConfig({
     port: 3000,
   },
   plugins: [
-    react(),
+    react({
+      babel: {
+        plugins: [
+          ['@babel/plugin-proposal-decorators', { legacy: true }],
+          ['@babel/plugin-proposal-class-properties', { loose: true }],
+        ],
+      },
+    }),
     svgr({
       exportAsDefault: true,
     }),

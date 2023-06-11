@@ -5,7 +5,7 @@
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "allowJs": false,
     "skipLibCheck": true,
-    "esModuleInterop": false,
+    "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
@@ -13,13 +13,25 @@
     "moduleResolution": "Node",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noEmit": true,
+    "declaration": true,
+    "preserveWatchOutput": true,
+    "experimentalDecorators": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "allowUnreachableCode": true,
+    "pretty": true,
+    "types": [],
+    "composite": true,
+    "noEmit": false,
+    "emitDeclarationOnly": true,
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src", "vite.config.ts", "src/types"],
+  "include": ["src", "vite.config.ts", "src/types", "./jest.config.ts", "./jest.setup.ts"],
+  "exclude": ["node_modules", "dist", "dist-types", ".next", "coverage", "out", ".cache", "**/node_modules", "**/dist", "**/dist-types", "**/.next", "**/coverage", "**/out", "**/.cache"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
