@@ -1,5 +1,5 @@
 <div align="center">
-  <img align="center" src="./public/logo.svg" width="200 " height="182" />
+  <img align="center" src="./public/logo.svg" width="120 " height="130" />
 </div>
 
 <h1 align="center">LineByLine</h1>
@@ -7,6 +7,12 @@
 <h2 align="center">A Modern Markdown Editor.(WIP)</h2>
 
 <p align="center">Available for Linux, macOS and Windows.</p>
+
+<p align="center">
+  <a href="https://github.com/linebyline-group/linebyline" target="__blank"><img alt="GitHub" src="https://img.shields.io/github/license/linebyline-group/linebyline?color=%230369a1"></a>
+  <a href="https://github.com/linebyline-group/linebyline/releases" target="__blank"><img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/linebyline-group/linebyline?label=Version&color=%230369a1"></a>
+  <a href="https://github.com/linebyline-group/linebyline" target="__blank"><img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/linebyline-group/linebyline?style=social"></a>
+</p>
 
 ## Feature
 
@@ -21,6 +27,7 @@ Please look [releases page](https://github.com/linebyline-group/linebyline/relea
 ## ScreenShot
 
 ### One-click export chatgpt conversation
+
 ![chatgpt](./public/screenshots/chatgpt.png)
 
 ## Contribute
