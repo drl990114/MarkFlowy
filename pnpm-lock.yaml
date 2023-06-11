@@ -28,7 +28,7 @@ specifiers:
   '@remirror/react-hooks': ^2.0.24
   '@remirror/styles': ^2.0.4
   '@remirror/theme': ^2.0.8
-  '@tauri-apps/api': ^1.0.1
+  '@tauri-apps/api': ^1.3.0
   '@tauri-apps/cli': ^1.0.0
   '@testing-library/jest-dom': ^5.16.5
   '@types/codemirror': ^5.60.7
@@ -43,7 +43,7 @@ specifiers:
   dayjs: ^1.11.7
   eslint: ^8.37.0
   hox: ^2.1.0
-  i18next: ^22.4.14
+  i18next: ^22.5.1
   immer: ^10.0.2
   is-promise: ^4.0.0
   jest: ^29.5.0
@@ -53,7 +53,7 @@ specifiers:
   nanoid: ^4.0.2
   react: ^18.0.0
   react-dom: ^18.0.0
-  react-i18next: ^12.2.0
+  react-i18next: ^12.3.1
   react-loading: ^2.0.3
   react-router-dom: ^6.9.0
   refractor: ^4.8.1
@@ -94,19 +94,19 @@ dependencies:
   '@remirror/react-hooks': 2.0.24_vsbens2afojskzodzn6mihmvbe
   '@remirror/styles': 2.0.4_gzqpyr6ynbrcirqrhagxfqncuu
   '@remirror/theme': 2.0.8_@remirror+pm@2.0.4
-  '@tauri-apps/api': 1.2.0
+  '@tauri-apps/api': 1.3.0
   classnames: 2.3.2
   create-context-state: 2.0.0_pmekkgnqduwlme35zpnqhenc34
   dayjs: 1.11.7
   hox: 2.1.0_react@18.2.0
-  i18next: 22.4.14
+  i18next: 22.5.1
   immer: 10.0.2
   is-promise: 4.0.0
   jsx-dom-cjs: 8.0.6
   nanoid: 4.0.2
   react: 18.2.0
   react-dom: 18.2.0_react@18.2.0
-  react-i18next: 12.2.0_57ubdvajp6562okxygabugvlve
+  react-i18next: 12.3.1_spyi3zqm3bqfobczid2f6jym6y
   react-loading: 2.0.3_react@18.2.0
   react-router-dom: 6.9.0_biqbaboplfbrettd7655fr4n2y
   refractor: 4.8.1
@@ -4936,14 +4936,14 @@ packages:
   /@svgmoji/blob/3.2.0:
     resolution: {integrity: sha512-N96WOrH9GxPSPZ/FuvZl6T9Rh54stAEuUcBppIRFh9/WwkU7Hczrjabw4uunwxFLX5TgR+rHlKJl3/jaTnXJrQ==}
     dependencies:
-      '@babel/runtime': 7.21.0
+      '@babel/runtime': 7.22.5
       '@svgmoji/core': 3.2.0
     dev: false
 
   /@svgmoji/core/3.2.0:
     resolution: {integrity: sha512-QsD78Op3S/5kUVsa5ierr4Wu/xwAdYuMI3Zmc/Y2ekYBEMGEUY8QxilXQRSAQ4ku4PnNV4xlB9e7xhD5hy113A==}
     dependencies:
-      '@babel/runtime': 7.21.0
+      '@babel/runtime': 7.22.5
       emojibase: 5.2.0
       emojibase-regex: 5.1.3
       idb-keyval: 5.1.5
@@ -4954,21 +4954,21 @@ packages:
   /@svgmoji/noto/3.2.0:
     resolution: {integrity: sha512-JgtNciB06hMDI1Pb1N2IgLh44XRMZUUNwBANzjY5jXTPqOCu1A1VA35ENvUsRhEUZOm8I+hbdAEHkwMVqxLeIQ==}
     dependencies:
-      '@babel/runtime': 7.21.0
+      '@babel/runtime': 7.22.5
       '@svgmoji/core': 3.2.0
     dev: false
 
   /@svgmoji/openmoji/3.2.0:
     resolution: {integrity: sha512-USHbG+O80HfmdoNAHbOnlO+2gppXJfHFWKSRFj53Th4aimWEx4/9MB3cFbC3KZ1NOqXaLBq9jDaw4vFuGDVTUQ==}
     dependencies:
-      '@babel/runtime': 7.21.0
+      '@babel/runtime': 7.22.5
       '@svgmoji/core': 3.2.0
     dev: false
 
   /@svgmoji/twemoji/3.2.0:
     resolution: {integrity: sha512-6xqZgh9viFDKf5wvrxw56ImCR3Ni84IqwK45lxojOe1Gc1Mni1GpPfr4gb7WHDKjumfx+K7BHSvX0KXt3Nr3CQ==}
     dependencies:
-      '@babel/runtime': 7.21.0
+      '@babel/runtime': 7.22.5
       '@svgmoji/core': 3.2.0
     dev: false
 
@@ -5216,8 +5216,8 @@ packages:
       - supports-color
     dev: true
 
-  /@tauri-apps/api/1.2.0:
-    resolution: {integrity: sha512-lsI54KI6HGf7VImuf/T9pnoejfgkNoXveP14pVV7XarrQ46rOejIVJLFqHI9sRReJMGdh2YuCoI3cc/yCWCsrw==}
+  /@tauri-apps/api/1.3.0:
+    resolution: {integrity: sha512-AH+3FonkKZNtfRtGrObY38PrzEj4d+1emCbwNGu0V2ENbXjlLHMZQlUh+Bhu/CRmjaIwZMGJ3yFvWaZZgTHoog==}
     engines: {node: '>= 14.6.0', npm: '>= 6.6.0', yarn: '>= 1.19.1'}
     dev: false
 
@@ -7629,10 +7629,10 @@ packages:
   /hyphenate-style-name/1.0.4:
     resolution: {integrity: sha512-ygGZLjmXfPHj+ZWh6LwbC37l43MhfztxetbFCoYTM2VjkIUpeHgSNn7QIyVFj7YQ1Wl9Cbw5sholVJPzWvC2MQ==}
 
-  /i18next/22.4.14:
-    resolution: {integrity: sha512-VtLPtbdwGn0+DAeE00YkiKKXadkwg+rBUV+0v8v0ikEjwdiJ0gmYChVE4GIa9HXymY6wKapkL93vGT7xpq6aTw==}
+  /i18next/22.5.1:
+    resolution: {integrity: sha512-8TGPgM3pAD+VRsMtUMNknRz3kzqwp/gPALrWMsDnmC1mKqJwpWyooQRLMcbTwq8z8YwSmuj+ZYvc+xCuEpkssA==}
     dependencies:
-      '@babel/runtime': 7.21.0
+      '@babel/runtime': 7.22.5
     dev: false
 
   /iconv-lite/0.6.3:
@@ -9621,8 +9621,8 @@ packages:
       scheduler: 0.23.0
     dev: false
 
-  /react-i18next/12.2.0_57ubdvajp6562okxygabugvlve:
-    resolution: {integrity: sha512-5XeVgSygaGfyFmDd2WcXvINRw2WEC1XviW1LXY/xLOEMzsCFRwKqfnHN+hUjla8ZipbVJR27GCMSuTr0BhBBBQ==}
+  /react-i18next/12.3.1_spyi3zqm3bqfobczid2f6jym6y:
+    resolution: {integrity: sha512-5v8E2XjZDFzK7K87eSwC7AJcAkcLt5xYZ4+yTPDAW1i7C93oOY1dnr4BaQM7un4Hm+GmghuiPvevWwlca5PwDA==}
     peerDependencies:
       i18next: '>= 19.0.0'
       react: '>= 16.8.0'
@@ -9634,9 +9634,9 @@ packages:
       react-native:
         optional: true
     dependencies:
-      '@babel/runtime': 7.21.0
+      '@babel/runtime': 7.22.5
       html-parse-stringify: 3.0.1
-      i18next: 22.4.14
+      i18next: 22.5.1
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
     dev: false
