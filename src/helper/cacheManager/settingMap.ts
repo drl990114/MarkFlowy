@@ -19,8 +19,8 @@ const settingMap = {
     },
   },
   extensions: {
-    chatgpt: {
-      apikey: {
+    ChatGPT: {
+      ApiKey: {
         key: "extensions_chatgpt_apikey",
         type: 'input',
       }

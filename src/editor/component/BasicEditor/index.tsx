@@ -1,5 +1,6 @@
 import { EditorExtensions } from '@/editor'
 import { EditorState } from '@/editor/extensions/EditorState'
+import { TableComponents } from '@/editor/extensions/ReactTables'
 import { IFile } from '@/helper/filesys'
 import { useEditorStore } from '@/renderer/stores'
 import { Remirror, useRemirror } from '@remirror/react'
@@ -33,7 +34,9 @@ const WysiwygEditor: FC<WysiwygEditorProps> = (props) => {
       >
         <Text className="h-full w-full overflow-auto markdown-body" />
         <FloatingLinkToolbar />
-        <EditorState active={active} file={file} manager={manager}/>
+        {/* @ts-ignore */}
+        <EditorState active={active} file={file} manager={manager} />
+        <TableComponents />
       </Remirror>
     </Wrapper>
   )

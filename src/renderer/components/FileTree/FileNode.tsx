@@ -34,7 +34,7 @@ const FileNode: FC<FileNodeProps> = ({ item, level = 0, activeId, onSelect }) =>
     <FileNodeStyled onClick={handleClick}>
       <div className={nodeWrapperCls} style={{ paddingLeft: level * 16 + 6 }} onClick={handleSelect}>
         {isFolder ? <i className={`ri-folder-3-line ${iconCls}`} /> : <i className={`ri-file-3-line ${iconCls}`} />}
-        <div>{item.name}</div>
+        <div className='file-node__text'>{item.name}</div>
       </div>
       {isOpen && item.children && item.children.map((child) => <FileNode key={child.name} item={child} level={level + 1} activeId={activeId} onSelect={onSelect} />)}
     </FileNodeStyled>

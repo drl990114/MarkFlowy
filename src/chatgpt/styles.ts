@@ -32,7 +32,7 @@ export const Container = styled.div`
       justify-content: center;
       align-items: center;
       flex-direction: column;
-      
+
       &-title {
         text-align: center;
       }
@@ -50,13 +50,33 @@ export const Container = styled.div`
 export const ListContainer = styled.div`
   .item {
     padding: 8px;
+    box-sizing: border-box;
+
+    &-header {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    &-title {
+      display: flex;
+      align-items: center;
+    }
+
+    &-icon {
+      margin-right: 2px;
+      font-size: 18px;
+    }
   }
 
   .question {
-    background: ${(props) => props.theme.bgColor}
+    height: 100%;
+    width: 100%;
+    background: ${(props) => props.theme.bgColor};
   }
 
   .answer {
+    height: 100%;
+    width: 100%;
     background: ${(props) => props.theme.tipsBgColor}
   }
 `
@@ -66,6 +86,7 @@ export const BottomBar = styled.div`
   width: 100%;
   height: 46px;
   padding: 8px;
+  box-sizing: border-box;
   position: sticky;
   bottom: 0;
   background-color: ${(props) => props.theme.bgColor};

@@ -6,7 +6,8 @@ import { ThemeProps } from 'styled-components'
 
 type Theme = 'light' | 'dark'
 
-export type MThemeProps = ThemeProps<typeof lightThemeColors>
+export type ThemeColors = typeof lightThemeColors
+export type MThemeProps = ThemeProps<ThemeColors>
 
 const lightThemeColors = {
   primaryFontColor: '#000000',
