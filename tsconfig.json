@@ -13,13 +13,18 @@
     "moduleResolution": "Node",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noEmit": true,
+    "experimentalDecorators": true,
+    "allowUnreachableCode": true,
+    "pretty": true,
+    "noEmit": false,
     "jsx": "react-jsx",
     "baseUrl": ".",
+    "outDir": "./dist-types/",
     "paths": {
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src", "vite.config.ts", "src/types"],
+  "include": ["src", "vite.config.ts", "jest.config.ts", "jest.setup.ts", "jest"],
+  "exclude": ["node_modules", "dist", "dist-types", ".next", "coverage", "out", ".cache", "**/node_modules", "**/dist", "**/dist-types", "**/.next", "**/coverage", "**/out", "**/.cache"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

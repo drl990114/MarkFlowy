@@ -6,7 +6,7 @@ export const Container = styled.div<ContainerProps>`
   max-width: 400px;
   position: relative;
   display: flex;
-  border-right: #e9e9e9 1px solid;
+  border-right: 1px solid ${(props) => props.theme.borderColor};
   flex-direction: row;
   background: ${(props) => props.theme.bgColor};
   color: ${(props) => props.theme.primaryFontColor};
