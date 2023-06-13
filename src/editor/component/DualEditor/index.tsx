@@ -87,7 +87,7 @@ const markTextExtensions = () => {
 /**
  * The editor which is used to create the annotation. Supports formatting.
  */
-export const DualEditor: React.FC<DualEditorProps> = (props) => {
+const DualEditor: React.FC<DualEditorProps> = (props) => {
   const { file, content, active } = props
 
   const markText = useRemirror({
@@ -126,6 +126,8 @@ export const DualEditor: React.FC<DualEditorProps> = (props) => {
     </DualEditorProvider>
   )
 }
+
+export default DualEditor
 
 const Devider = styled.div`
   height: 100%;

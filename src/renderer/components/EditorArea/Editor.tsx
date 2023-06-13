@@ -1,3 +1,5 @@
+import { BasicEditor, DualEditor } from '@/editor'
+import { EditorViewType } from '@/editor/types'
 import { getFileObject } from '@/helper/files'
 import { useEditorStore } from '@/renderer/stores'
 import { invoke } from '@tauri-apps/api'
@@ -5,10 +7,6 @@ import { emit } from '@tauri-apps/api/event'
 import { appWindow } from '@tauri-apps/api/window'
 import { useEffect, useMemo, useState } from 'react'
 import styled, { css } from 'styled-components'
-import '../theme/base.css'
-import { EditorViewType } from '../types'
-import BasicEditor from './BasicEditor'
-import { DualEditor } from './DualEditor'
 
 function Editor(props: EditorProps) {
   const { id, active } = props
@@ -21,7 +19,9 @@ function Editor(props: EditorProps) {
     const init = async () => {
       const file = getFileObject(id)
       if (file.path) {
-        const text = await invoke('get_file_content', { filePath: file.path}) as string
+        const text = (await invoke('get_file_content', {
+          filePath: file.path,
+        })) as string
         setContent(text)
       } else if (file.content) {
         setContent(file.content)
@@ -31,27 +31,37 @@ function Editor(props: EditorProps) {
   }, [id])
 
   useEffect(() => {
-    const unListen = appWindow.listen<EditorViewType>('editor_toggle_type', async ({ payload }) => {
-      if (active) {
-        if (curFile.path) {
-          emit('file_save')
+    const unListen = appWindow.listen<EditorViewType>(
+      'editor_toggle_type',
+      async ({ payload }) => {
+        if (active) {
+          if (curFile.path) {
+            emit('file_save')
+          }
+          const content = getEditorContent(curFile.id)
+          setContent(content)
+          setType(payload)
         }
-        const content = getEditorContent(curFile.id)
-        setContent(content)
-        setType(payload)
       }
-    })
+    )
 
     return () => {
       unListen.then((fn) => fn())
     }
   }, [active, curFile])
 
-  const editorProps = useMemo(() => ({ file: curFile, content: content!, active }), [curFile, content, active])
+  const editorProps = useMemo(
+    () => ({ file: curFile, content: content!, active }),
+    [curFile, content, active]
+  )
 
   return typeof content === 'string' ? (
     <EditorWrapper active={active} type={type}>
-      {type === 'dual' ? <DualEditor {...editorProps} /> : <BasicEditor {...editorProps} />}
+      {type === 'dual' ? (
+        <DualEditor {...editorProps} />
+      ) : (
+        <BasicEditor {...editorProps} />
+      )}
     </EditorWrapper>
   ) : null
 }
