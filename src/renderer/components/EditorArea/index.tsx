@@ -1,8 +1,8 @@
-import { Editor } from '@/editor'
 import { getFileObject } from '@/helper/files'
 import { IFile } from '@/helper/filesys'
 import { useGlobalTheme } from '@/renderer/hooks'
 import { useEditorStore } from '@/renderer/stores'
+import Editor from './Editor'
 import { Container, TabItem } from './styles'
 
 export default function EditorArea() {
