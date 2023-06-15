@@ -7,6 +7,9 @@
     },
     {
       "path": "apps/linebeline/tsconfig.json"
+    },
+    {
+      "path": "apps/home/tsconfig.json"
     }
   ]
 }
