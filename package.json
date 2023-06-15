@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "dev": "pnpm -r --reverse run dev",
-    "build": "pnpm -r --reverse run build",
+    "build": "pnpm --filter=@linebyline/editor build && pnpm -r --reverse run build",
     "test": "jest",
     "preview": "vite preview",
     "tauri:build": "tauri build",
