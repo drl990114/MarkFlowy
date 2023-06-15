@@ -1,30 +1,12 @@
 {
-  "compilerOptions": {
-    "target": "ESNext",
-    "useDefineForClassFields": true,
-    "lib": ["DOM", "DOM.Iterable", "ESNext"],
-    "allowJs": false,
-    "skipLibCheck": true,
-    "esModuleInterop": false,
-    "allowSyntheticDefaultImports": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "module": "ESNext",
-    "moduleResolution": "Node",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "experimentalDecorators": true,
-    "allowUnreachableCode": true,
-    "pretty": true,
-    "noEmit": false,
-    "jsx": "react-jsx",
-    "baseUrl": ".",
-    "outDir": "./dist-types/",
-    "paths": {
-      "@/*": ["./src/*"]
+  "include": [],
+  "files": [],
+  "references": [
+    {
+      "path": "packages/editor/tsconfig.json"
+    },
+    {
+      "path": "apps/linebeline/tsconfig.json"
     }
-  },
-  "include": ["src", "vite.config.ts", "jest.config.ts", "jest.setup.ts", "jest"],
-  "exclude": ["node_modules", "dist", "dist-types", ".next", "coverage", "out", ".cache", "**/node_modules", "**/dist", "**/dist-types", "**/.next", "**/coverage", "**/out", "**/.cache"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  ]
 }
