@@ -1,0 +1,55 @@
+import { EditorView, findParentNodeOfType, FindProsemirrorNodeResult } from '@remirror/core';
+import { ExtensionTablesTheme } from '@remirror/theme';
+
+import { createControllerEvents } from '../utils/controller';
+import { h } from '../utils/dom';
+import TableInsertButtonTrigger from './table-insert-button-trigger';
+import TableInsertMark from './table-insert-mark';
+
+export interface TableControllerCellProps {
+  view: EditorView;
+  getPos: () => number;
+  contentDOM: HTMLElement;
+}
+
+const TableControllerCell = ({
+  view,
+  getPos,
+  contentDOM,
+}: TableControllerCellProps): HTMLElement => {
+  const findTable = (): FindProsemirrorNodeResult | undefined => {
+    return findParentNodeOfType({
+      types: 'table',
+      // @ts-ignore
+      selection: view.state.doc.resolve(getPos()),
+    });
+  };
+
+  const events = createControllerEvents({ view, findTable });
+
+  const childNodes = view.editable
+    ? [...TableInsertButtonTrigger({ view, findTable }), ...TableInsertMark()]
+    : [];
+
+  const wrapper = h(
+    'div',
+    { contentEditable: 'false', className: ExtensionTablesTheme.TABLE_CONTROLLER_WRAPPER },
+    contentDOM,
+    ...childNodes,
+  );
+
+  return h(
+    'th',
+    {
+      contentEditable: 'false',
+      className: `${ExtensionTablesTheme.TABLE_CONTROLLER} ${ExtensionTablesTheme.CONTROLLERS_TOGGLE}`,
+      dataset: {
+        controllerCell: '',
+      },
+      ...events,
+    },
+    wrapper,
+  );
+};
+
+export default TableControllerCell;
