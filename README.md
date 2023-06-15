@@ -4,9 +4,7 @@
 
 <h1 align="center">LineByLine</h1>
 
-<h2 align="center">A Modern Markdown Editor.(WIP)</h2>
-
-<p align="center">Available for Linux, macOS and Windows.</p>
+<h2 align="center">Modern markdown editor.(WIP)</h2>
 
 <p align="center">
   <a href="https://github.com/linebyline-group/linebyline" target="__blank"><img alt="GitHub" src="https://img.shields.io/github/license/linebyline-group/linebyline?color=%230369a1"></a>
@@ -21,6 +19,8 @@
 - **High availability**. linebyline uses the remirror editor, which not only provides high scalability, but also has a great editing experience. And, linebyline supports multiple editing modes, such as `dual`, `wysiyg`.
 
 ## Download
+
+Available for Linux, macOS and Windows.
 
 Please look [releases page](https://github.com/linebyline-group/linebyline/releases)
 
