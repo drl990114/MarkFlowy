@@ -1,0 +1,24 @@
+{
+  "desc": "Modern markdown editor application with built-in ChatGPT extension.",
+  "download": "Download",
+  "features": {
+    "title": "Features",
+    "desc": "Many features make your writing easier.",
+    "feature1": {
+      "title": "Built-in ChatGpt",
+      "desc": "Currently supports one-click export of conversations, making chatgpt your smart assistant."
+    },
+    "feature2": {
+      "title": "Super lightweight",
+      "desc": "linebyline is based on tauri, which ensures ultra-lightweight and fast performance experience."
+    },
+    "feature3": {
+      "title": "High availability",
+      "desc": " linebyline uses the remirror editor, which not only provides high scalability, but also has a great editing experience. And, linebyline supports multiple editing modes, such as dual, wysiyg."
+    }
+  },
+  "summary": {
+    "title": "Try the Alpha version",
+    "desc": "Currently linebyline is in Alpha version, welcome to experience it."
+  }
+}
