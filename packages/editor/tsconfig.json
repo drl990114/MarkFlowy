@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "rootDir": "src",
+    "skipLibCheck": true,
+    "composite": true,
+    "outDir": "./dist-types",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["./src", "./types.d.ts"]
+}
