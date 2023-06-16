@@ -6,27 +6,27 @@ import Text from '../Text'
 import Wrapper from '../Wrapper'
 
 const WysiwygEditor: FC<WysiwygEditorProps> = (props) => {
-  const { file, content, active, setEditorCtx } = props
+  const { file, content, active, setEditorCtx, hooks } = props
   const remirror = useRemirror({
     extensions: EditorExtensions,
     content,
     selection: 'start',
-    stringHandler: 'markdown'
+    stringHandler: 'markdown',
   })
 
   const { manager, state, getContext } = remirror
 
   useEffect(() => {
     const ctx = getContext()
-    setEditorCtx(file.id, {...ctx, getContent: () => ctx?.helpers?.getMarkdown() })
+    setEditorCtx(file.id, {
+      ...ctx,
+      getContent: () => ctx?.helpers?.getMarkdown(),
+    })
   }, [getContext])
 
   return (
     <Wrapper className="remirror-wrapper">
-      <Remirror
-        manager={manager}
-        initialContent={state}
-      >
+      <Remirror manager={manager} initialContent={state} hooks={hooks}>
         <Text className="h-full w-full overflow-auto markdown-body" />
         <FloatingLinkToolbar />
       </Remirror>
@@ -42,5 +42,6 @@ interface WysiwygEditorProps {
   file: Global.IFile
   content: string
   active: boolean
+  hooks?: Array<() => void>
   setEditorCtx: (id: string, ctx: any) => void
 }

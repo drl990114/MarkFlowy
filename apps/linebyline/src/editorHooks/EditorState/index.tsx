@@ -1,35 +1,35 @@
 // EditorState
 // This extension is responsible for managing the state of the editor.
-// TODO It will be split later and passed in through props expansion. instead of built in editor.
-// @ts-nocheck
 import { useTitleEffect } from '@/hooks/useTitleEffect'
 import { useEditorStore } from '@/stores'
-import { RemirrorManager } from '@remirror/core'
-import { useHelpers } from '@remirror/react'
+import { useHelpers, useRemirrorContext } from '@remirror/react'
 import { invoke } from '@tauri-apps/api'
 import { save } from '@tauri-apps/api/dialog'
 import { listen } from '@tauri-apps/api/event'
 import { t } from 'i18next'
 import { FC, useEffect, useReducer } from 'react'
 
+import { IFile } from '@/helper/filesys'
 import { editorReducer, initializeState } from './editor-state'
 
-export const EditorState: FC<EditorStateProps> = ({ active, file, manager }) => {
+export const useEditorState: FC<EditorStateProps> = ({ active, file }) => {
+  console.log('useEditorState', active, file)
+  const ctx = useRemirrorContext()
   const helpers = useHelpers()
   const { getEditorContent } = useEditorStore()
   const [state, dispatch] = useReducer(editorReducer, { note: { content: '', deleted: false }, file }, initializeState)
 
-  useTitleEffect(state, active)
+  useTitleEffect(state, true)
 
   useEffect(() => {
-    manager.addHandler('stateUpdate', (params) => {
+    ctx.manager.addHandler('stateUpdate', (params) => {
       const { tr } = params
 
       if (tr?.docChanged && !tr.getMeta('RINO_APPLY_MARKS')) {
         dispatch({ type: 'EDIT_CONTENT', payload: { undoDepth: helpers.undoDepth() } })
       }
     })
-  }, [manager])
+  }, [ctx])
 
   useEffect(() => {
     const unListenFileSave = listen('file_save', async () => {
@@ -50,7 +50,8 @@ export const EditorState: FC<EditorStateProps> = ({ active, file, manager }) => 
             defaultPath: file.name ?? `${t('file.untitled')}.md`,
           }).then((path) => {
             if (path === null) return
-            invoke('write_file', { filePath: file.path, content })
+            console.log('save', path)
+            invoke('write_file', { filePath: path, content })
             dispatch({ type: 'SAVE_CONTENT', payload: { content, undoDepth: helpers.undoDepth() } })
           })
           return
@@ -72,10 +73,5 @@ export const EditorState: FC<EditorStateProps> = ({ active, file, manager }) => 
 
 interface EditorStateProps {
   active: boolean
-  file: Global.IFile
-  /**
-   * import { RemirrorManager } from '@remirror/core', 
-   * The type introduced here will have a private attribute error, you need to understand the reason. 
-   */
-  manager: RemirrorManager<any>
+  file: IFile
 }
