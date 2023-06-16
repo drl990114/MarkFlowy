@@ -1,4 +1,4 @@
-import { EditorState } from '../../../../types'
+import { EditorState } from '@linebyline/editor/types'
 
 export type SaveContentAction = {
   type: 'SAVE_CONTENT'
