@@ -10,5 +10,5 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["./src", "./types.d.ts"]
+  "include": ["./src", "./types.d.ts", "../../apps/linebyline/src/editorHooks/EditorState"]
 }
