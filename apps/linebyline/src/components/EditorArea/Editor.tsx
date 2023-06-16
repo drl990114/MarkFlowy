@@ -1,3 +1,4 @@
+import { useEditorState } from '@/editorHooks/EditorState'
 import { getFileObject } from '@/helper/files'
 import { useEditorStore } from '@/stores'
 import { DualEditor, WysiwygEditor } from '@linebyline/editor'
@@ -51,7 +52,17 @@ function Editor(props: EditorProps) {
   }, [active, curFile])
 
   const editorProps = useMemo(
-    () => ({ file: curFile, content: content!, active, setEditorCtx }),
+    () => ({
+      file: curFile,
+      content: content!,
+      active,
+      setEditorCtx,
+      hooks: [
+        () => {
+          useEditorState({ active, file: curFile })
+        },
+      ],
+    }),
     [curFile, content, active]
   )
 
