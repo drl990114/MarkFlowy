@@ -276,8 +276,8 @@ importers:
         specifier: ^2.0.24
         version: 2.0.24(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
       '@remirror/styles':
-        specifier: ^2.0.4
-        version: 2.0.4(@emotion/css@11.11.0)(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(@types/react@18.0.28)(@types/styled-components@5.1.26)(react@18.2.0)(styled-components@5.3.11)
+        specifier: ^2.0.5
+        version: 2.0.5(@emotion/css@11.11.0)(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(@types/react@18.0.28)(@types/styled-components@5.1.26)(react@18.2.0)(styled-components@5.3.11)
       '@remirror/theme':
         specifier: ^2.0.8
         version: 2.0.8(@remirror/pm@2.0.6)
@@ -542,11 +542,6 @@ packages:
   /@babel/helper-string-parser@7.22.5:
     resolution: {integrity: sha512-mM4COjgZox8U+JcXQwPijIZLElkgEpO5rsERVDJTc2qfCDfERyob6k5WegS14SX18IIjv+XD+GrqNumY5JRCDw==}
     engines: {node: '>=6.9.0'}
-
-  /@babel/helper-validator-identifier@7.19.1:
-    resolution: {integrity: sha512-awrNfaMtnHUr653GgGEs++LlAvW6w+DcPrOliSMXWCKo597CwL5Acf/wWdNkf/tfEQE3mjkeD1YOVZOUV/od1w==}
-    engines: {node: '>=6.9.0'}
-    dev: true
 
   /@babel/helper-validator-identifier@7.22.5:
     resolution: {integrity: sha512-aJXu+6lErq8ltp+JhkJUfk1MTGyuA4v7f3pA+BJ5HLfNC6nAQ0Cpi9uOquUj8Hehg0aUiHzWQbOVJGao6ztBAQ==}
@@ -2585,7 +2580,7 @@ packages:
   /@remirror/core-constants@2.0.0:
     resolution: {integrity: sha512-vpePPMecHJllBqCWXl6+FIcZqS+tRUM2kSCCKFeEo1H3XUEv3ocijBIPhnlSAa7g6maX+12ATTgxrOsLpWVr2g==}
     dependencies:
-      '@babel/runtime': 7.21.0
+      '@babel/runtime': 7.22.5
     dev: false
 
   /@remirror/core-constants@2.0.1:
@@ -2596,9 +2591,9 @@ packages:
   /@remirror/core-helpers@2.0.1:
     resolution: {integrity: sha512-s8M1pn33aBUhduvD1QR02uUQMegnFkGaTr4c1iBzxTTyg0rbQstzuQ7Q8TkL6n64JtgCdJS9jLz2dONb2meBKQ==}
     dependencies:
-      '@babel/runtime': 7.21.0
+      '@babel/runtime': 7.22.5
       '@linaria/core': 3.0.0-beta.13
-      '@remirror/core-constants': 2.0.0
+      '@remirror/core-constants': 2.0.1
       '@remirror/types': 1.0.1
       '@types/object.omit': 3.0.0
       '@types/object.pick': 1.3.2
@@ -4028,9 +4023,9 @@ packages:
   /@remirror/pm@2.0.4:
     resolution: {integrity: sha512-rPtXxOIC62nIXK1MbVZvMGdyhW8w685uHJjKYcKu0NA8TViBTUKZr5Ou7yrye2+vLUkkXWJ9JZJHMoNwxF6onA==}
     dependencies:
-      '@babel/runtime': 7.21.0
-      '@remirror/core-constants': 2.0.0
-      '@remirror/core-helpers': 2.0.1
+      '@babel/runtime': 7.22.5
+      '@remirror/core-constants': 2.0.1
+      '@remirror/core-helpers': 2.0.3
       prosemirror-collab: 1.3.0
       prosemirror-commands: 1.5.1
       prosemirror-dropcursor: 1.8.0
@@ -4047,6 +4042,8 @@ packages:
       prosemirror-trailing-node: 2.0.3(prosemirror-model@1.19.0)(prosemirror-state@1.4.2)(prosemirror-view@1.30.2)
       prosemirror-transform: 1.7.1
       prosemirror-view: 1.30.2
+    transitivePeerDependencies:
+      - supports-color
     dev: false
 
   /@remirror/pm@2.0.6:
@@ -4411,7 +4408,7 @@ packages:
       '@remirror/extension-react-tables': 2.2.16(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
       '@remirror/pm': 2.0.4
       '@remirror/react': 2.0.27(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
-      '@remirror/styles': 2.0.4(@emotion/css@11.11.0)(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(@types/react@18.0.28)(@types/styled-components@5.1.26)(react@18.2.0)(styled-components@5.3.11)
+      '@remirror/styles': 2.0.5(@emotion/css@11.11.0)(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(@types/react@18.0.28)(@types/styled-components@5.1.26)(react@18.2.0)(styled-components@5.3.11)
       '@svgmoji/noto': 3.2.0
       '@types/react': 18.0.28
       '@types/react-dom': 18.0.11
@@ -4529,12 +4526,13 @@ packages:
     dependencies:
       '@babel/runtime': 7.22.5
       '@remirror/core-constants': 2.0.0
-      '@remirror/core-helpers': 2.0.1
+      '@remirror/core-helpers': 2.0.3
       '@remirror/core-types': 2.0.5(@remirror/pm@2.0.6)
       '@types/react': 18.0.28
       react: 18.2.0
     transitivePeerDependencies:
       - '@remirror/pm'
+      - supports-color
     dev: false
 
   /@remirror/react-utils@2.0.5(@remirror/pm@2.0.6)(@types/react@18.0.28)(react@18.2.0):
@@ -4594,16 +4592,16 @@ packages:
       - supports-color
     dev: false
 
-  /@remirror/styles@2.0.4(@emotion/css@11.11.0)(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(@types/react@18.0.28)(@types/styled-components@5.1.26)(react@18.2.0)(styled-components@5.3.11):
-    resolution: {integrity: sha512-ZMJ72MDMRSq9V6ese8knDCmf0yHPiiSE80+wcd45u9cCH8J2j4Xm+QECsPgYGnRQTMHwCgACg9ZXVQtdVKXGoQ==}
+  /@remirror/styles@2.0.5(@emotion/css@11.11.0)(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(@types/react@18.0.28)(@types/styled-components@5.1.26)(react@18.2.0)(styled-components@5.3.11):
+    resolution: {integrity: sha512-F9gvQkNGP5kBKasNZwX+dgajQQGwqrbocGD4zaL3mghVtpY8DnMK2685WSMxlh/zxEyVRSxjhqQxqJGoJGHp9g==}
     peerDependencies:
-      '@emotion/css': ^11
-      '@emotion/react': ^11
-      '@emotion/styled': ^11
-      '@types/react': '>= 16.8.0'
-      '@types/styled-components': ^5
-      react: '>= 16.8.0'
-      styled-components: ^5
+      '@emotion/css': ^11.10.6
+      '@emotion/react': ^11.10.6
+      '@emotion/styled': ^11.10.6
+      '@types/react': '>= 16.14.40'
+      '@types/styled-components': ^5.1.26
+      react: '>= 16.14.0'
+      styled-components: ^5.3.10
     peerDependenciesMeta:
       '@emotion/css':
         optional: true
@@ -4618,15 +4616,17 @@ packages:
       styled-components:
         optional: true
     dependencies:
-      '@babel/runtime': 7.21.0
+      '@babel/runtime': 7.22.5
       '@emotion/css': 11.11.0
       '@emotion/react': 11.11.1(@types/react@18.0.28)(react@18.2.0)
       '@emotion/styled': 11.11.0(@emotion/react@11.11.1)(@types/react@18.0.28)(react@18.2.0)
-      '@remirror/core-helpers': 2.0.1
+      '@remirror/core-helpers': 2.0.3
       '@types/react': 18.0.28
       '@types/styled-components': 5.1.26
       react: 18.2.0
       styled-components: 5.3.11(react-dom@18.2.0)(react-is@18.2.0)(react@18.2.0)
+    transitivePeerDependencies:
+      - supports-color
     dev: false
 
   /@remirror/theme@2.0.8(@remirror/pm@2.0.4):
@@ -7235,7 +7235,7 @@ packages:
     peerDependencies:
       eslint: '>=8.28.0'
     dependencies:
-      '@babel/helper-validator-identifier': 7.19.1
+      '@babel/helper-validator-identifier': 7.22.5
       '@eslint-community/eslint-utils': 4.4.0(eslint@8.37.0)
       ci-info: 3.8.0
       clean-regexp: 1.0.0
@@ -9907,13 +9907,15 @@ packages:
       prosemirror-state: ^1
       prosemirror-view: ^1
     dependencies:
-      '@babel/runtime': 7.21.0
-      '@remirror/core-constants': 2.0.0
-      '@remirror/core-helpers': 2.0.1
+      '@babel/runtime': 7.22.5
+      '@remirror/core-constants': 2.0.1
+      '@remirror/core-helpers': 2.0.3
       escape-string-regexp: 4.0.0
       prosemirror-model: 1.19.0
       prosemirror-state: 1.4.2
       prosemirror-view: 1.30.2
+    transitivePeerDependencies:
+      - supports-color
     dev: false
 
   /prosemirror-paste-rules@2.0.5(prosemirror-model@1.19.2)(prosemirror-state@1.4.3)(prosemirror-view@1.31.3):
@@ -10006,14 +10008,16 @@ packages:
       prosemirror-state: ^1
       prosemirror-view: ^1
     dependencies:
-      '@babel/runtime': 7.21.0
-      '@remirror/core-constants': 2.0.0
-      '@remirror/core-helpers': 2.0.1
+      '@babel/runtime': 7.22.5
+      '@remirror/core-constants': 2.0.1
+      '@remirror/core-helpers': 2.0.3
       '@remirror/types': 1.0.1
       escape-string-regexp: 4.0.0
       prosemirror-model: 1.19.0
       prosemirror-state: 1.4.2
       prosemirror-view: 1.30.2
+    transitivePeerDependencies:
+      - supports-color
     dev: false
 
   /prosemirror-suggest@2.0.4(prosemirror-model@1.19.2)(prosemirror-state@1.4.3)(prosemirror-view@1.31.3):
@@ -10058,13 +10062,15 @@ packages:
       prosemirror-state: ^1
       prosemirror-view: ^1
     dependencies:
-      '@babel/runtime': 7.21.0
-      '@remirror/core-constants': 2.0.0
-      '@remirror/core-helpers': 2.0.1
+      '@babel/runtime': 7.22.5
+      '@remirror/core-constants': 2.0.1
+      '@remirror/core-helpers': 2.0.3
       escape-string-regexp: 4.0.0
       prosemirror-model: 1.19.0
       prosemirror-state: 1.4.2
       prosemirror-view: 1.30.2
+    transitivePeerDependencies:
+      - supports-color
     dev: false
 
   /prosemirror-trailing-node@2.0.4(prosemirror-model@1.19.2)(prosemirror-state@1.4.3)(prosemirror-view@1.31.3):
