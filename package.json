@@ -2,8 +2,8 @@
   "name": "tauri-app",
   "version": "0.0.0",
   "scripts": {
-    "dev": "pnpm -r --reverse run dev",
-    "build": "pnpm --filter=@linebyline/editor build && pnpm -r --reverse run build",
+    "dev": "pnpm --filter=@linebyline/editor dev & pnpm --filter=@linebyline/linebyline dev",
+    "build": "pnpm --filter=@linebyline/editor build",
     "test": "jest",
     "preview": "vite preview",
     "tauri:build": "tauri build",
