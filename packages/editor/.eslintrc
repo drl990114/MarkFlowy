@@ -1,0 +1,3 @@
+{
+  "extends": ["@halodong/eslint-config-ts", "@halodong/eslint-config-react"]
+}

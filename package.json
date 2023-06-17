@@ -9,7 +9,17 @@
     "tauri:dev": "tauri dev"
   },
   "devDependencies": {
+    "@halodong/eslint-config-react": "^0.38.19",
     "@tauri-apps/cli": "^1.0.0",
+    "eslint": "8.42.0",
+    "eslint-plugin-halodong": "^0.38.19",
+    "prettier": "^2.8.8",
     "typescript": "^5.0.4"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "pnpm lint-staged"
+  },
+  "lint-staged": {
+    "*": "eslint --fix"
   }
 }
