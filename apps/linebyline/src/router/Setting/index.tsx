@@ -1,9 +1,9 @@
-import settingMap from '@/helper/cacheManager/settingMap'
 import classNames from 'classnames'
 import * as React from 'react'
 import { memo } from 'react'
 import SettingGroup from '../../components/Setting/SettingGroup'
 import { Container } from './styles'
+import settingMap from '@/helper/cacheManager/settingMap'
 
 export interface DialogTitleProps {
   children?: React.ReactNode
@@ -12,7 +12,7 @@ export interface DialogTitleProps {
 
 function a11yProps(index: number) {
   return {
-    id: `tab-${index}`,
+    'id': `tab-${index}`,
     'aria-controls': `tabpanel-${index}`,
   }
 }
@@ -27,8 +27,7 @@ function Setting() {
   return (
     <Container>
       <div id="sidebar">
-        <div className="title">
-        </div>
+        <div className="title"></div>
         {/* TODO search */}
         {/* <div id="search-form" role="search">
           <input id="q" aria-label="Search contacts" placeholder="Search" type="search" name="q" />
@@ -56,7 +55,14 @@ function Setting() {
       </div>
       <div id="detail">
         {curGroupKeys.map((key) => {
-          return <SettingGroup key={key} group={curGroup[key]} groupKey={key} categoryKey={curGroupKey} />
+          return (
+            <SettingGroup
+              key={key}
+              group={curGroup[key]}
+              groupKey={key}
+              categoryKey={curGroupKey}
+            />
+          )
         })}
       </div>
       {/* <Box sx={{ flexGrow: 1, bgcolor: 'background.paper', display: 'flex', height: 224 }}>

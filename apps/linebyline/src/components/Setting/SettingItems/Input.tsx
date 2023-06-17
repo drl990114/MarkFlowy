@@ -1,9 +1,11 @@
-import { useGlobalSettingData } from '@/hooks'
 import { Input } from '@mui/material'
 import { useCallback, useEffect, useState } from 'react'
-import { SettingItemProps } from '.'
+import type { SettingItemProps } from '.'
+import { useGlobalSettingData } from '@/hooks'
 
-const InputSettingItem: React.FC<SettingItemProps<Setting.InputSettingItem>> = (props) => {
+const InputSettingItem: React.FC<SettingItemProps<Setting.InputSettingItem>> = (
+  props,
+) => {
   const { item, itemKey } = props
   const [settingData, handler] = useGlobalSettingData()
   const { writeSettingData } = handler
@@ -11,20 +13,26 @@ const InputSettingItem: React.FC<SettingItemProps<Setting.InputSettingItem>> = (
   const [value, setValue] = useState(curValue)
 
   useEffect(() => {
-    if (curValue !== value) {
+    if (curValue !== value)
       setValue(curValue)
-    }
-  }, [curValue])
+  }, [curValue, value])
 
-  const handleChange = useCallback((e: { target: { value: any } }) => {
-    const value = e.target.value
-    writeSettingData(item, value)
-  }, [item])
+  const handleChange = useCallback(
+    (e: { target: { value: any } }) => {
+      const value = e.target.value
+      writeSettingData(item, value)
+    },
+    [item, writeSettingData],
+  )
 
   return (
     <label>
-      <label className='setting-item__label'>{itemKey}:</label>
-      <Input className='setting-item__form' value={value} onChange={handleChange} />
+      <label className="setting-item__label">{itemKey}:</label>
+      <Input
+        className="setting-item__form"
+        value={value}
+        onChange={handleChange}
+      />
     </label>
   )
 }

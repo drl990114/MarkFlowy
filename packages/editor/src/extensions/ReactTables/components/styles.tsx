@@ -24,19 +24,19 @@ export const TableStyled = createGlobalStyle<any>`
     border-radius: 4px;
     transition: background-color 150ms ease;
 
-    background-color: ${(props) => props.theme.tipsBgColor};
+    background-color: ${props => props.theme.tipsBgColor};
   }
 
   .remirror-table-insert-button svg {
-    fill: ${(props) => props.theme.borderColor};
+    fill: ${props => props.theme.borderColor};
   }
 
   .remirror-table-insert-button:hover {
-    background-color: ${(props) => props.theme.borderColor};
+    background-color: ${props => props.theme.borderColor};
   }
 
   .remirror-table-insert-button:hover svg {
-    fill: ${(props) => props.theme.borderColor};
+    fill: ${props => props.theme.borderColor};
   }
 
   .remirror-table-delete-inner-button {
@@ -49,11 +49,11 @@ export const TableStyled = createGlobalStyle<any>`
     z-index: 30;
     cursor: pointer;
     border-radius: 4px;
-    background-color: ${(props) => props.theme.borderColor};
+    background-color: ${props => props.theme.borderColor};
     transition: background-color 150ms ease;
 
     &:hover {
-      background-color: ${(props) => props.theme.warnColor};
+      background-color: ${props => props.theme.warnColor};
     }
   }
 
@@ -115,7 +115,7 @@ export const TableStyled = createGlobalStyle<any>`
     height: 0px;
     border-radius: 50%;
     border-style: solid;
-    border-color: ${(props) => props.theme.borderColor};
+    border-color: ${props => props.theme.borderColor};
     border-width: 2px;
   }
 
@@ -125,7 +125,7 @@ export const TableStyled = createGlobalStyle<any>`
     height: 0px;
     border-radius: 50%;
     border-style: solid;
-    border-color: ${(props) => props.theme.borderColor};
+    border-color: ${props => props.theme.borderColor};
     border-width: 2px;
     right: -2px;
     top: -12px;
@@ -169,7 +169,7 @@ export const TableStyled = createGlobalStyle<any>`
     height: 0px;
     border-radius: 50%;
     border-style: solid;
-    border-color: ${(props) => props.theme.borderColor};
+    border-color: ${props => props.theme.borderColor};
     border-width: 2px;
     right: -2px;
     top: -12px;
@@ -213,7 +213,7 @@ export const TableStyled = createGlobalStyle<any>`
     height: 0px;
     border-radius: 50%;
     border-style: solid;
-    border-color: ${(props) => props.theme.borderColor};
+    border-color: ${props => props.theme.borderColor};
     border-width: 2px;
   }
 
@@ -225,35 +225,35 @@ export const TableStyled = createGlobalStyle<any>`
 
   .remirror-editor.ProseMirror th.selectedCell,
   .remirror-editor.ProseMirror td.selectedCell {
-    border-color: ${(props) => props.theme.borderColor} !important;
-    background-color: ${(props) => props.theme.accentColor} !important;
+    border-color: ${props => props.theme.borderColor} !important;
+    background-color: ${props => props.theme.accentColor} !important;
   }
 
   .remirror-table-tbody-with-controllers th.remirror-table-controller {
-    background-color: ${(props) => props.theme.tipsBgColor};
+    background-color: ${props => props.theme.tipsBgColor};
   }
 
   /* Styles for selected */
   .remirror-table-tbody-with-controllers th.selectedCell.remirror-table-controller {
-    background-color: ${(props) => props.theme.tipsBgColor};
+    background-color: ${props => props.theme.tipsBgColor};
   }
 
   /* Styles for predelete */
 
   .remirror-table-show-predelete.remirror-table-preselect-all th.selectedCell,
   .remirror-table-show-predelete.remirror-table-preselect-all td.selectedCell {
-    border-color: ${(props) => props.theme.borderColor} !important;
-    background-color: ${(props) => props.theme.warnColor} !important;
+    border-color: ${props => props.theme.borderColor} !important;
+    background-color: ${props => props.theme.warnColor} !important;
   }
 
   .remirror-table-show-predelete th.selectedCell {
-    background-color: ${(props) => props.theme.warnColor} !important;
+    background-color: ${props => props.theme.warnColor} !important;
   }
 
   .remirror-table-show-predelete.remirror-table-preselect-all th,
   .remirror-table-show-predelete.remirror-table-preselect-all td {
-    border-color: ${(props) => props.theme.borderColor} !important;
-    background-color: ${(props) => props.theme.warnColor} !important;
+    border-color: ${props => props.theme.borderColor} !important;
+    background-color: ${props => props.theme.warnColor} !important;
   }
 
   .remirror-menu-item {

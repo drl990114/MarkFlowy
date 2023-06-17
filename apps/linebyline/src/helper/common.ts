@@ -14,7 +14,7 @@ export function isArray(tar: any): tar is any[] {
 }
 
 function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms))
+  return new Promise(resolve => setTimeout(resolve, ms))
 }
 
 async function sleepBeforeError(timeout: number): Promise<never> {
@@ -22,6 +22,9 @@ async function sleepBeforeError(timeout: number): Promise<never> {
   throw new Error(`timed out after ${timeout} milliseconds`)
 }
 
-export async function createTimeoutPromise<T>(promise: Promise<T>, delay: number): Promise<T> {
+export async function createTimeoutPromise<T>(
+  promise: Promise<T>,
+  delay: number,
+): Promise<T> {
   return await Promise.race([promise, sleepBeforeError(delay)])
 }

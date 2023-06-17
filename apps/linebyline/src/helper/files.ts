@@ -1,4 +1,4 @@
-import { IFile } from "./filesys"
+import type { IFile } from './filesys'
 
 interface IEntries {
   [key: string]: IFile
@@ -6,11 +6,10 @@ interface IEntries {
 
 const entries: IEntries = {}
 
-export const setFileObject = (id: string, file: IFile): void => {
+export function setFileObject(id: string, file: IFile): void {
   entries[id] = file
 }
 
-export const getFileObject = (id: string): IFile => {
+export function getFileObject(id: string): IFile {
   return entries[id]
 }
-

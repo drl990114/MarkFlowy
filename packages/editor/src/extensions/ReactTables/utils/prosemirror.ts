@@ -1,10 +1,11 @@
-import { ProsemirrorNode } from '@remirror/pm';
-import { Fragment, Slice } from '@remirror/pm/model';
-import { Selection } from '@remirror/pm/state';
-import { CellSelection } from '@remirror/pm/tables';
-import { ReplaceAroundStep, Transform } from '@remirror/pm/transform';
+import type { ProsemirrorNode } from '@remirror/pm'
+import { Fragment, Slice } from '@remirror/pm/model'
+import type { Selection } from '@remirror/pm/state'
+import type { CellSelection } from '@remirror/pm/tables'
+import type { Transform } from '@remirror/pm/transform'
+import { ReplaceAroundStep } from '@remirror/pm/transform'
 
-type Attrs = Record<string, any>;
+type Attrs = Record<string, any>
 
 // Change the attributes of the node at `pos`.
 //
@@ -15,22 +16,23 @@ export function setNodeAttrs<T extends Transform>(
   attrs: Attrs,
   node?: ProsemirrorNode | null | undefined,
 ): T {
-  node = node || tr.doc.nodeAt(pos);
+  node = node || tr.doc.nodeAt(pos)
 
-  if (!node) {
-    throw new RangeError('No node at given position');
-  }
+  if (!node)
+    throw new RangeError('No node at given position')
 
-  const type = node.type;
-  const newNode = type.create({ ...node.attrs, ...attrs }, undefined, node.marks);
+  const type = node.type
+  const newNode = type.create(
+    { ...node.attrs, ...attrs },
+    undefined,
+    node.marks,
+  )
 
-  if (node.isLeaf) {
-    return tr.replaceWith(pos, pos + node.nodeSize, newNode);
-  }
+  if (node.isLeaf)
+    return tr.replaceWith(pos, pos + node.nodeSize, newNode)
 
-  if (!type.validContent(node.content)) {
-    throw new RangeError(`Invalid content for node type ${type.name}`);
-  }
+  if (!type.validContent(node.content))
+    throw new RangeError(`Invalid content for node type ${type.name}`)
 
   return tr.step(
     new ReplaceAroundStep(
@@ -42,14 +44,14 @@ export function setNodeAttrs<T extends Transform>(
       1,
       true,
     ),
-  );
+  )
 }
 
 // TODO: https://github.com/ProseMirror/prosemirror-tables/pull/126
 export function selectionToCellSelection(selection: Selection): CellSelection {
-  return selection as unknown as CellSelection;
+  return selection as unknown as CellSelection
 }
 
 export function cellSelectionToSelection(selection: CellSelection): Selection {
-  return selection as unknown as Selection;
+  return selection as unknown as Selection
 }

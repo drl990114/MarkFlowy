@@ -1,4 +1,3 @@
-import { EVENT } from '@/constants'
 import CloseIcon from '@mui/icons-material/Close'
 import Button from '@mui/material/Button'
 import Dialog from '@mui/material/Dialog'
@@ -12,6 +11,7 @@ import { writeText } from '@tauri-apps/api/clipboard'
 import { listen } from '@tauri-apps/api/event'
 import type { FC } from 'react'
 import { memo, useCallback, useEffect, useState } from 'react'
+import { EVENT } from '@/constants'
 
 export interface DialogTitleProps {
   children?: React.ReactNode
@@ -53,13 +53,15 @@ const AboutDialog: FC = () => {
   })
 
   useEffect(() => {
-    Promise.all([getName(), getVersion(), getTauriVersion()]).then(([name, version, tauriVersion]) => {
-      setAppInfo({
-        name,
-        version,
-        tauriVersion,
-      })
-    })
+    Promise.all([getName(), getVersion(), getTauriVersion()]).then(
+      ([name, version, tauriVersion]) => {
+        setAppInfo({
+          name,
+          version,
+          tauriVersion,
+        })
+      },
+    )
 
     const unlisten = listen(EVENT.dialog_setting_about, () => setOpen(true))
     return () => {
@@ -84,7 +86,9 @@ TauriVersion: ${appInfo.tauriVersion}
 
   return (
     <Dialog open={open}>
-      <BootstrapDialogTitle onClose={handleClose}>{appInfo.name}</BootstrapDialogTitle>
+      <BootstrapDialogTitle onClose={handleClose}>
+        {appInfo.name}
+      </BootstrapDialogTitle>
       <DialogContent style={{ width: 450 }}>
         <DialogContentText>{`Version: ${appInfo.version}`}</DialogContentText>
         <DialogContentText>{`Tauri Version: ${appInfo.tauriVersion}`}</DialogContentText>

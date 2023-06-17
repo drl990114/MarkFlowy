@@ -1,10 +1,24 @@
-import { useAttrs, useChainedCommands, useCurrentSelection, useExtensionEvent, useUpdateReason } from '@remirror/react'
-import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react'
+import {
+  useAttrs,
+  useChainedCommands,
+  useCurrentSelection,
+  useExtensionEvent,
+  useUpdateReason,
+} from '@remirror/react'
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useState,
+} from 'react'
 import type { ShortcutHandlerProps } from 'remirror/extensions'
 import { LinkExtension, createMarkPositioner } from 'remirror/extensions'
 
 function useLinkShortcut() {
-  const [linkShortcut, setLinkShortcut] = useState<ShortcutHandlerProps | undefined>()
+  const [linkShortcut, setLinkShortcut] = useState<
+    ShortcutHandlerProps | undefined
+  >()
   const [isEditing, setIsEditing] = useState(false)
 
   useExtensionEvent(
@@ -24,7 +38,7 @@ function useLinkShortcut() {
   return { linkShortcut, isEditing, setIsEditing }
 }
 
-const useFloatingLinkState = () => {
+function useFloatingLinkState() {
   const chain = useChainedCommands()
   const { isEditing, linkShortcut, setIsEditing } = useLinkShortcut()
   const { to, empty } = useCurrentSelection()
@@ -33,7 +47,10 @@ const useFloatingLinkState = () => {
   const [href, setHref] = useState<string>(url)
 
   // A positioner which only shows for links.
-  const linkPositioner = useMemo(() => createMarkPositioner({ type: 'link' }), []) as any
+  const linkPositioner = useMemo(
+    () => createMarkPositioner({ type: 'link' }),
+    [],
+  ) as any
 
   const onRemove = useCallback(() => {
     return chain.removeLink().focus().run()
@@ -59,9 +76,7 @@ const useFloatingLinkState = () => {
 
     if (href === '')
       chain.removeLink()
-
-    else
-      chain.updateLink({ href, auto: false }, range)
+    else chain.updateLink({ href, auto: false }, range)
 
     chain.focus(range?.to ?? to).run()
   }, [setIsEditing, linkShortcut, chain, href, to])
@@ -89,7 +104,16 @@ const useFloatingLinkState = () => {
       submitHref,
       cancelHref,
     }),
-    [href, linkShortcut, linkPositioner, isEditing, clickEdit, onRemove, submitHref, cancelHref],
+    [
+      href,
+      linkShortcut,
+      linkPositioner,
+      isEditing,
+      clickEdit,
+      onRemove,
+      submitHref,
+      cancelHref,
+    ],
   )
 }
 

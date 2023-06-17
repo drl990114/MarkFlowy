@@ -1,5 +1,9 @@
 import type { ShortcutHandler } from '@tauri-apps/api/globalShortcut'
-import { register, registerAll, unregister } from '@tauri-apps/api/globalShortcut'
+import {
+  register,
+  registerAll,
+  unregister,
+} from '@tauri-apps/api/globalShortcut'
 
 class ShortCutManager {
   shorcuts = new Map()
@@ -9,7 +13,11 @@ class ShortCutManager {
     await register(shorcut, handler)
   }
 
-  registerAll: RegisterFc<RegisterParams<string[]>> = async ({ shorcut, desc, handler }) => {
+  registerAll: RegisterFc<RegisterParams<string[]>> = async ({
+    shorcut,
+    desc,
+    handler,
+  }) => {
     shorcut.forEach((c, index) => this.shorcuts.set(c, desc[index]))
     await registerAll(shorcut, handler)
   }

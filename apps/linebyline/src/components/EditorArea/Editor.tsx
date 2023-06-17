@@ -1,13 +1,27 @@
-import { useEditorState } from '@/editorHooks/EditorState'
-import { getFileObject } from '@/helper/files'
-import { useEditorStore } from '@/stores'
 import { DualEditor, WysiwygEditor } from '@linebyline/editor'
-import { EditorViewType } from '@linebyline/editor/types'
+import type { EditorViewType } from '@linebyline/editor/types'
 import { invoke } from '@tauri-apps/api'
 import { emit } from '@tauri-apps/api/event'
 import { appWindow } from '@tauri-apps/api/window'
 import { useEffect, useMemo, useState } from 'react'
 import styled, { css } from 'styled-components'
+import { useEditorStore } from '@/stores'
+import { getFileObject } from '@/helper/files'
+import { useEditorState } from '@/editorHooks/EditorState'
+
+const EditorWrapper = styled.div<{ active: boolean; type: EditorViewType }>`
+  height: 100%;
+  overflow: hidden;
+
+  ${props =>
+    props.active
+      ? css({
+          display: props.type === 'dual' ? 'flex' : '',
+        })
+      : css({
+          display: 'none',
+        })}
+`
 
 function Editor(props: EditorProps) {
   const { id, active } = props
@@ -24,7 +38,8 @@ function Editor(props: EditorProps) {
           filePath: file.path,
         })) as string
         setContent(text)
-      } else if (file.content) {
+      }
+      else if (file.content) {
         setContent(file.content)
       }
     }
@@ -36,20 +51,20 @@ function Editor(props: EditorProps) {
       'editor_toggle_type',
       async ({ payload }) => {
         if (active) {
-          if (curFile.path) {
+          if (curFile.path)
             emit('file_save')
-          }
+
           const content = getEditorContent(curFile.id)
           setContent(content)
           setType(payload)
         }
-      }
+      },
     )
 
     return () => {
-      unListen.then((fn) => fn())
+      unListen.then(fn => fn())
     }
-  }, [active, curFile])
+  }, [active, curFile, getEditorContent])
 
   const editorProps = useMemo(
     () => ({
@@ -59,37 +74,29 @@ function Editor(props: EditorProps) {
       setEditorCtx,
       hooks: [
         () => {
+          // eslint-disable-next-line react-hooks/rules-of-hooks
           useEditorState({ active, file: curFile })
         },
       ],
     }),
-    [curFile, content, active]
+    [curFile, content, active, setEditorCtx],
   )
 
-  return typeof content === 'string' ? (
+  return typeof content === 'string'
+    ? (
     <EditorWrapper active={active} type={type}>
-      {type === 'dual' ? (
+      {type === 'dual'
+        ? (
         <DualEditor {...editorProps} />
-      ) : (
+          )
+        : (
         <WysiwygEditor {...editorProps} />
-      )}
+          )}
     </EditorWrapper>
-  ) : null
+      )
+    : null
 }
 
-const EditorWrapper = styled.div<{ active: boolean; type: EditorViewType }>`
-  height: 100%;
-  overflow: hidden;
-
-  ${(props) =>
-    props.active
-      ? css({
-          display: props.type === 'dual' ? 'flex' : '',
-        })
-      : css({
-          display: 'none',
-        })}
-`
 export interface EditorProps {
   id: string
   active: boolean

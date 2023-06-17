@@ -1,13 +1,13 @@
-import { callChatGptApi } from '@/chatgpt/api'
 import { nanoid } from 'nanoid'
 import { create } from 'zustand'
+import { callChatGptApi } from '@/chatgpt/api'
 
 const useChatGPTStore = create<ChatGPTStore>((set, get) => ({
   chatList: [],
 
   setChatStatus: (id, status) => {
     set((state) => {
-      const curChat = state.chatList.find((history) => history.id === id)
+      const curChat = state.chatList.find(history => history.id === id)
       if (curChat) {
         curChat.status = status
         return { ...state }
@@ -23,20 +23,24 @@ const useChatGPTStore = create<ChatGPTStore>((set, get) => ({
       question,
       'gpt-3.5-turbo',
       (res) => {
-        if (res.status === 'done') {
+        if (res.status === 'done')
           curStore.addChatAnswer(chat.id, res.result)
-        } else {
+
+        else
           curStore.setChatStatus(chat.id, res.status)
-        }
       },
       5,
-      apiKey
+      apiKey,
     )
     return chat
   },
 
   addChatQuestion: (question: string) => {
-    const chat = { id: nanoid(), question: question, status: 'pending' as const }
+    const chat = {
+      id: nanoid(),
+      question,
+      status: 'pending' as const,
+    }
     set((state) => {
       return { ...state, chatList: [...state.chatList, chat] }
     })
@@ -45,7 +49,7 @@ const useChatGPTStore = create<ChatGPTStore>((set, get) => ({
 
   addChatAnswer: (id: string, answer: string) => {
     set((state) => {
-      const curChat = state.chatList.find((history) => history.id === id)
+      const curChat = state.chatList.find(history => history.id === id)
       if (curChat) {
         curChat.answer = answer
         curChat.status = 'done'
@@ -57,10 +61,12 @@ const useChatGPTStore = create<ChatGPTStore>((set, get) => ({
 
   delChat: (id: string) => {
     set((state) => {
-      return { ...state, chatList: state.chatList.filter((history) => history.id !== id) }
+      return {
+        ...state,
+        chatList: state.chatList.filter(history => history.id !== id),
+      }
     })
   },
-
 }))
 
 type ChatStatus = 'pending' | 'done' | 'error'

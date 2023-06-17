@@ -1,16 +1,19 @@
-import { EditorState } from '@linebyline/editor/types'
+import type { EditorState } from '@linebyline/editor/types'
 
-export type EditContentAction = {
+export interface EditContentAction {
   type: 'EDIT_CONTENT'
   payload: {
     undoDepth: number
   }
 }
 
-export function editContent(state: EditorState, action: EditContentAction): EditorState {
+export function editContent(
+  state: EditorState,
+  action: EditContentAction,
+): EditorState {
   let hasUnsavedChanges = false
-  if (state.saveedUndoDepth - action.payload.undoDepth !== 0) {
+  if (state.saveedUndoDepth - action.payload.undoDepth !== 0)
     hasUnsavedChanges = true
-  }
+
   return { ...state, hasUnsavedChanges }
 }

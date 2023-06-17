@@ -1,6 +1,6 @@
-import { EditorState } from '@linebyline/editor/types'
+import type { EditorState } from '@linebyline/editor/types'
 
-export type SaveContentAction = {
+export interface SaveContentAction {
   type: 'SAVE_CONTENT'
   payload: {
     content: string
@@ -8,6 +8,14 @@ export type SaveContentAction = {
   }
 }
 
-export function saveContent(state: EditorState, action: SaveContentAction): EditorState {
-  return { ...state, note: { content: action.payload.content, deleted: state.note.deleted }, saveedUndoDepth: action.payload.undoDepth, hasUnsavedChanges: false }
+export function saveContent(
+  state: EditorState,
+  action: SaveContentAction,
+): EditorState {
+  return {
+    ...state,
+    note: { content: action.payload.content, deleted: state.note.deleted },
+    saveedUndoDepth: action.payload.undoDepth,
+    hasUnsavedChanges: false,
+  }
 }

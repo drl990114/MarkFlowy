@@ -1,6 +1,6 @@
 enum RIGHTBARITEMKEYS {
   Explorer = 'explorer',
-  ChatGPT = 'ChatGPT'
+  ChatGPT = 'ChatGPT',
 }
 
 export default RIGHTBARITEMKEYS
