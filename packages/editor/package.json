@@ -19,7 +19,7 @@
   },
   "scripts": {
     "build": "tsc --emitDeclarationOnly && node esbuild.mjs",
-    "dev": "node esbuild.mjs --watch",
+    "dev": "tsc --emitDeclarationOnly --watch & node esbuild.mjs --watch",
     "delete": "rimraf node_modules",
     "clear": "rimraf dist"
   },
