@@ -1,13 +1,10 @@
-import { APP_NAME, EVENT } from '@/constants'
-import { CacheManager } from '@/helper'
-import { loadTask, use } from '@/helper/schedule'
-import { Root, Setting } from '@/router'
 import { BaseStyle } from '@linebyline/editor'
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles'
 import { invoke } from '@tauri-apps/api'
 import { listen } from '@tauri-apps/api/event'
 import { checkUpdate, installUpdate } from '@tauri-apps/api/updater'
-import { Theme, WebviewWindow } from '@tauri-apps/api/window'
+import type { Theme } from '@tauri-apps/api/window'
+import { WebviewWindow } from '@tauri-apps/api/window'
 import { useCallback, useEffect } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import 'remixicon/fonts/remixicon.css'
@@ -16,6 +13,10 @@ import { GlobalStyles } from './globalStyles'
 import { useGlobalSettingData, useGlobalTheme } from './hooks'
 import useGlobalOSInfo from './hooks/useOSInfo'
 import { i18nInit } from './i18n'
+import { Root, Setting } from '@/router'
+import { loadTask, use } from '@/helper/schedule'
+import { APP_NAME, EVENT } from '@/constants'
+import { CacheManager } from '@/helper'
 
 function App() {
   useGlobalOSInfo()
@@ -38,14 +39,15 @@ function App() {
               i18nInit({ lng: res.language })
               resolve(res)
             })
-          })
-      )
+          }),
+      ),
     )
     use(loadTask('cache', () => CacheManager.init()))
   }
 
   useEffect(() => {
-    if (isWeb) return
+    if (isWeb)
+      return
     const unlisten = eventInit()
     // updaterinit()
 
@@ -56,7 +58,7 @@ function App() {
 
   const eventInit = useCallback(() => {
     const unListenOpenSetting = listen(EVENT.open_window_setting, () => {
-      new WebviewWindow(`setting`, {
+      new WebviewWindow('setting', {
         url: './setting',
         title: `${APP_NAME} Setting`,
         width: 1000,
@@ -73,15 +75,16 @@ function App() {
     })
 
     return () => {
-      unListenOpenSetting.then((fn) => fn())
-      unListenChangeTheme.then((fn) => fn())
+      unListenOpenSetting.then(fn => fn())
+      unListenChangeTheme.then(fn => fn())
     }
   }, [])
 
   const updaterinit = useCallback(async () => {
     // TODO 更新默认的 setting
     const update = await checkUpdate()
-    if (update.shouldUpdate) await installUpdate()
+    if (update.shouldUpdate)
+      await installUpdate()
   }, [])
 
   return (

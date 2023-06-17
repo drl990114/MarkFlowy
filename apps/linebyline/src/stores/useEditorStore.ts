@@ -1,7 +1,8 @@
-import { isArray } from '@/helper'
-import { IFile, createWelcomeFile } from '@/helper/filesys'
-import { ReactExtensions, ReactFrameworkOutput } from '@remirror/react'
+import type { ReactExtensions, ReactFrameworkOutput } from '@remirror/react'
 import { create } from 'zustand'
+import { isArray } from '@/helper'
+import type { IFile } from '@/helper/filesys'
+import { createWelcomeFile } from '@/helper/filesys'
 
 const useEditorStore = create<EditorStore>((set, get) => {
   // TODO use open history
@@ -14,7 +15,7 @@ const useEditorStore = create<EditorStore>((set, get) => {
     editorCtxMap: new Map(),
 
     setActiveId: (id: string) => {
-      set((state) => ({
+      set(state => ({
         ...state,
         activeId: id,
       }))
@@ -22,17 +23,20 @@ const useEditorStore = create<EditorStore>((set, get) => {
 
     addOpenedFile: (id: string) => {
       set((state) => {
-        if (state.opened.includes(id)) {
+        if (state.opened.includes(id))
           return state
-        } else {
+
+        else
           return { ...state, opened: [...state.opened, id] }
-        }
       })
     },
 
     delOpenedFile: (id: string) => {
       set((state) => {
-        return { ...state, opened: state.opened.filter((opened) => opened !== id) }
+        return {
+          ...state,
+          opened: state.opened.filter(opened => opened !== id),
+        }
       })
     },
 
@@ -47,9 +51,9 @@ const useEditorStore = create<EditorStore>((set, get) => {
       const editorCtxMap = get().editorCtxMap
       const curCtx = editorCtxMap.get(id)
 
-      if (isArray(curCtx)) {
+      if (isArray(curCtx))
         return curCtx[0].getContent()
-      }
+
       return curCtx?.getContent()
     },
 
@@ -59,7 +63,13 @@ const useEditorStore = create<EditorStore>((set, get) => {
         return state
       }),
 
-    setFolderData: (folderData) => set((state) => ({ ...state, folderData, opened: [], activeId: undefined })),
+    setFolderData: folderData =>
+      set(state => ({
+        ...state,
+        folderData,
+        opened: [],
+        activeId: undefined,
+      })),
   }
 })
 
@@ -78,14 +88,14 @@ interface EditorStore {
 
 type Ctx =
   | ({
-      setContent: (content: string) => void
-      helpers: {
-        setContent: (id: string, content: string) => void
-        getMarkdown: () => string
-        [key: string]: any
-      }
+    setContent: (content: string) => void
+    helpers: {
+      setContent: (id: string, content: string) => void
+      getMarkdown: () => string
       [key: string]: any
-    } & ReactFrameworkOutput<ReactExtensions<any>>)
+    }
+    [key: string]: any
+  } & ReactFrameworkOutput<ReactExtensions<any>>)
   | any
 
 export default useEditorStore

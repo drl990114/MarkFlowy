@@ -13,7 +13,7 @@ export const Container = styled.div`
     height: 2.5rem;
     padding: 0 8px;
     line-height: 2.5rem;
-    border-bottom: 1px solid ${(props) => props.theme.borderColor};
+    border-bottom: 1px solid ${props => props.theme.borderColor};
   }
 
   .content {
@@ -22,7 +22,7 @@ export const Container = styled.div`
 
     a {
       cursor: pointer;
-      color: ${(props) => props.theme.accentColor};
+      color: ${props => props.theme.accentColor};
     }
 
     .introduction {
@@ -40,11 +40,10 @@ export const Container = styled.div`
       &-item {
         margin: 0.875rem 0.875rem 0;
         padding: 0.875rem;
-        background-color: ${(props) => props.theme.tipsBgColor};
+        background-color: ${props => props.theme.tipsBgColor};
       }
     }
   }
-
 `
 
 export const ListContainer = styled.div`
@@ -71,13 +70,13 @@ export const ListContainer = styled.div`
   .question {
     height: 100%;
     width: 100%;
-    background: ${(props) => props.theme.bgColor};
+    background: ${props => props.theme.bgColor};
   }
 
   .answer {
     height: 100%;
     width: 100%;
-    background: ${(props) => props.theme.tipsBgColor}
+    background: ${props => props.theme.tipsBgColor};
   }
 `
 
@@ -89,12 +88,12 @@ export const BottomBar = styled.div`
   box-sizing: border-box;
   position: sticky;
   bottom: 0;
-  background-color: ${(props) => props.theme.bgColor};
+  background-color: ${props => props.theme.bgColor};
 
   .input {
     margin: 0 8px;
     flex: 1 1 70px;
-    border: 1px solid ${(props) => props.theme.borderColor};
+    border: 1px solid ${props => props.theme.borderColor};
     min-width: 50px;
   }
 

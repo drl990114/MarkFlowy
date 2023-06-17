@@ -3,8 +3,8 @@ import styled from 'styled-components'
 export const SettingGroupContainer = styled.div`
   padding: 1rem;
   font-size: 0.875rem;
-  background-color: ${(props) => props.theme.tipsBgColor};
-  
+  background-color: ${props => props.theme.tipsBgColor};
+
   .setting-group {
     &__title {
       margin-bottom: 10px;

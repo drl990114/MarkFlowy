@@ -8,9 +8,15 @@ const SettingGroup: React.FC<SettingGroupProps> = (props) => {
 
   return (
     <SettingGroupContainer>
-      <div className='setting-group__title'>{groupKey}</div>
-      {itemKeys.map((key) => (
-        <SettingItem key={key} item={group[key]} itemKey={key} itemParentKey={groupKey} categoryKey={categoryKey} />
+      <div className="setting-group__title">{groupKey}</div>
+      {itemKeys.map(key => (
+        <SettingItem
+          key={key}
+          item={group[key]}
+          itemKey={key}
+          itemParentKey={groupKey}
+          categoryKey={categoryKey}
+        />
       ))}
     </SettingGroupContainer>
   )

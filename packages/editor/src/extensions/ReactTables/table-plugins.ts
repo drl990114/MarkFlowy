@@ -1,32 +1,45 @@
-import { css } from '@emotion/css';
-import {
+import { css } from '@emotion/css'
+import type {
   EditorState,
-  findParentNodeOfType,
   FindProsemirrorNodeResult,
   ProsemirrorPlugin,
-} from '@remirror/core';
-import { Plugin, PluginKey, Transaction } from '@remirror/pm/state';
-import { Decoration, DecorationSet } from '@remirror/pm/view';
-import { ExtensionTablesTheme, getThemeVar } from '@remirror/theme';
+} from '@remirror/core'
+import {
+  findParentNodeOfType,
+} from '@remirror/core'
+import type { Transaction } from '@remirror/pm/state'
+import { Plugin, PluginKey } from '@remirror/pm/state'
+import { Decoration, DecorationSet } from '@remirror/pm/view'
+import { ExtensionTablesTheme, getThemeVar } from '@remirror/theme'
 
-import { InsertButtonAttrs } from './components/table-insert-button';
+import type { InsertButtonAttrs } from './components/table-insert-button'
 
-const preselectBorderColor = getThemeVar('color', 'table', 'preselect', 'border');
-const preselectControllerBackgroundColor = getThemeVar('color', 'table', 'preselect', 'controller');
+const preselectBorderColor = getThemeVar(
+  'color',
+  'table',
+  'preselect',
+  'border',
+)
+const preselectControllerBackgroundColor = getThemeVar(
+  'color',
+  'table',
+  'preselect',
+  'controller',
+)
 
 export function getTableStyle(attrs: ControllerStateValues): string {
   const preselectClass = css`
     /* Make the border-style 'double' instead of 'solid'. This works because 'double' has a higher priority than 'solid' */
     border-style: double;
     border-color: ${preselectBorderColor};
-  `;
+  `
 
   const preselectControllerClass = css`
     ${preselectClass}
     background-color: ${preselectControllerBackgroundColor};
-  `;
+  `
 
-  let classNames = '';
+  let classNames = ''
 
   if (attrs.preselectColumn !== -1) {
     classNames = css`
@@ -38,14 +51,19 @@ export function getTableStyle(attrs: ControllerStateValues): string {
           }
         }
         // @ts-ignore
-        th.${ExtensionTablesTheme.TABLE_CONTROLLER}:nth-child(${attrs.preselectColumn + 1}) {
+        th.${ExtensionTablesTheme.TABLE_CONTROLLER}:nth-child(${attrs.preselectColumn
+          + 1}) {
           ${preselectControllerClass}
         }
       }
-    `;
-  } else if (attrs.preselectRow !== -1) {
+    `
+  }
+  else if (attrs.preselectRow !== -1) {
     classNames = css`
-      & table.${ExtensionTablesTheme.TABLE} tbody tr:nth-child(${attrs.preselectRow + 1}) {
+      &
+        table.${ExtensionTablesTheme.TABLE}
+        tbody
+        tr:nth-child(${attrs.preselectRow + 1}) {
         td,
         th {
           ${preselectClass};
@@ -54,10 +72,14 @@ export function getTableStyle(attrs: ControllerStateValues): string {
           ${preselectControllerClass}
         }
       }
-    `;
-  } else if (attrs.preselectTable) {
+    `
+  }
+  else if (attrs.preselectTable) {
     classNames = css`
-      &.${ExtensionTablesTheme.TABLE_PRESELECT_ALL} table.${ExtensionTablesTheme.TABLE} tbody tr {
+      &.${ExtensionTablesTheme.TABLE_PRESELECT_ALL}
+        table.${ExtensionTablesTheme.TABLE}
+        tbody
+        tr {
         td,
         th {
           ${preselectClass};
@@ -66,78 +88,79 @@ export function getTableStyle(attrs: ControllerStateValues): string {
           ${preselectControllerClass}
         }
       }
-    `;
+    `
   }
 
-  return classNames;
+  return classNames
 }
 
-const key = new PluginKey<ControllerState>('remirrorTableControllerPluginKey');
+const key = new PluginKey<ControllerState>('remirrorTableControllerPluginKey')
 
-export { key as tableControllerPluginKey };
+export { key as tableControllerPluginKey }
 
 export function createTableControllerPlugin(): ProsemirrorPlugin<ControllerState> {
   return new Plugin<ControllerState>({
-    key: key,
+    key,
     state: {
       init() {
-        return new ControllerState({});
+        return new ControllerState({})
       },
       apply(tr, prev: ControllerState) {
-        return prev.apply(tr);
+        return prev.apply(tr)
       },
     },
     props: {
-      // @ts-ignore
+      // @ts-expect-error
       decorations: (state: EditorState) => {
-        const controllerState = key.getState(state);
+        const controllerState = key.getState(state)
 
-        if (!controllerState) {
-          return null;
-        }
+        if (!controllerState)
+          return null
 
-        const { tableNodeResult, predelete, preselectTable } = controllerState.values;
+        const { tableNodeResult, predelete, preselectTable }
+          = controllerState.values
 
         if (tableNodeResult) {
-          const styleClassName = getTableStyle(controllerState.values);
-          let className = `${ExtensionTablesTheme.TABLE_SHOW_CONTROLLERS} ${styleClassName}`;
+          const styleClassName = getTableStyle(controllerState.values)
+          let className = `${ExtensionTablesTheme.TABLE_SHOW_CONTROLLERS} ${styleClassName}`
 
-          if (preselectTable) {
-            className += ` ${ExtensionTablesTheme.TABLE_PRESELECT_ALL}`;
-          }
+          if (preselectTable)
+            className += ` ${ExtensionTablesTheme.TABLE_PRESELECT_ALL}`
 
-          if (predelete) {
-            className += ` ${ExtensionTablesTheme.TABLE_SHOW_PREDELETE}`;
-          }
+          if (predelete)
+            className += ` ${ExtensionTablesTheme.TABLE_SHOW_PREDELETE}`
 
           const decorations = [
             Decoration.node(tableNodeResult.pos, tableNodeResult.end, {
               class: className,
             }),
-          ];
-          // @ts-ignore
-          return DecorationSet.create(state.doc, decorations);
+          ]
+          // @ts-expect-error
+          return DecorationSet.create(state.doc, decorations)
         }
 
-        return null;
+        return null
       },
     },
-  });
+  })
 }
 
 interface ControllerStateValues {
-  tableNodeResult: FindProsemirrorNodeResult | null | undefined; // the table that contains current selection.
-  preselectTable: boolean; // if this value is true, all table cells will have a "preselect" style.
-  preselectColumn: number; // if this value is not -1, all cells in this table column will have a "preselect" style.
-  preselectRow: number; // if this value is not -1, all cells in this table row will have a "preselect" style.
-  predelete: boolean; // if this value is true, all selected cells will have a "predelete" style.
-  insertButtonAttrs: InsertButtonAttrs | null; // if and only if `insertButtonAttrs` exists, InsertButton will show.
+  tableNodeResult: FindProsemirrorNodeResult | null | undefined // the table that contains current selection.
+  preselectTable: boolean // if this value is true, all table cells will have a "preselect" style.
+  preselectColumn: number // if this value is not -1, all cells in this table column will have a "preselect" style.
+  preselectRow: number // if this value is not -1, all cells in this table row will have a "preselect" style.
+  predelete: boolean // if this value is true, all selected cells will have a "predelete" style.
+  insertButtonAttrs: InsertButtonAttrs | null // if and only if `insertButtonAttrs` exists, InsertButton will show.
 }
 
-type ControllerStateProps = Omit<Partial<ControllerStateValues>, 'tableNodeResult'>;
+type ControllerStateProps = Omit<
+  Partial<ControllerStateValues>,
+  'tableNodeResult'
+>
 
 class ControllerState {
-  public values: ControllerStateValues;
+  public values: ControllerStateValues
 
   constructor(public action: ControllerStateProps) {
     this.values = {
@@ -148,27 +171,29 @@ class ControllerState {
       predelete: false,
       insertButtonAttrs: null,
       ...action,
-    };
+    }
   }
 
   apply(tr: Transaction): ControllerState {
     this.values.tableNodeResult = findParentNodeOfType({
       types: 'table',
       selection: tr.selection,
-    });
+    })
 
-    const props: ControllerStateProps | null = tr.getMeta(key);
+    const props: ControllerStateProps | null = tr.getMeta(key)
 
-    if (props) {
-      return new ControllerState({ ...this.values, ...props });
-    }
+    if (props)
+      return new ControllerState({ ...this.values, ...props })
 
-    return this;
+    return this
   }
 }
 
-export function setControllerPluginMeta(tr: Transaction, props: ControllerStateProps): Transaction {
-  return tr.setMeta(key, props);
+export function setControllerPluginMeta(
+  tr: Transaction,
+  props: ControllerStateProps,
+): Transaction {
+  return tr.setMeta(key, props)
 }
 
 export function resetControllerPluginMeta(tr: Transaction): Transaction {
@@ -177,5 +202,5 @@ export function resetControllerPluginMeta(tr: Transaction): Transaction {
     preselectColumn: -1,
     preselectTable: false,
     predelete: false,
-  });
+  })
 }

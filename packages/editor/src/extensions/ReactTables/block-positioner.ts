@@ -1,17 +1,28 @@
-import { findParentNodeOfType, FindProsemirrorNodeResult, Selection } from '@remirror/core';
-import { blockNodePositioner, Positioner } from '@remirror/extension-positioner';
-import { CellSelection } from '@remirror/pm/tables';
+import type {
+  FindProsemirrorNodeResult,
+  Selection,
+} from '@remirror/core'
+import {
+  findParentNodeOfType,
+} from '@remirror/core'
+import { Positioner, blockNodePositioner } from '@remirror/extension-positioner'
+import { CellSelection } from '@remirror/pm/tables'
 
-const cellNodeTypes: string[] = ['tableCell', 'tableHeaderCell'];
+const cellNodeTypes: string[] = ['tableCell', 'tableHeaderCell']
 
 // When the selection is a CellSelection and there is only one cell in the selection, return the cell.
-function findMenuTableCell(selection: Selection): FindProsemirrorNodeResult | undefined | null {
+function findMenuTableCell(
+  selection: Selection,
+): FindProsemirrorNodeResult | undefined | null {
   // If the selection is a CellSelection, then we show the cell menu inside the head cell.
   if (selection instanceof CellSelection) {
-    return findParentNodeOfType({ selection: selection.$head, types: cellNodeTypes });
+    return findParentNodeOfType({
+      selection: selection.$head,
+      types: cellNodeTypes,
+    })
   }
 
-  return findParentNodeOfType({ selection: selection, types: cellNodeTypes });
+  return findParentNodeOfType({ selection, types: cellNodeTypes })
 }
 
 /**
@@ -22,7 +33,7 @@ function findMenuTableCell(selection: Selection): FindProsemirrorNodeResult | un
  */
 export const menuCellPositioner = blockNodePositioner.clone(() => ({
   getActive: (props) => {
-    const result = findMenuTableCell(props.state.selection);
-    return result ? [result] : Positioner.EMPTY;
+    const result = findMenuTableCell(props.state.selection)
+    return result ? [result] : Positioner.EMPTY
   },
-}));
+}))

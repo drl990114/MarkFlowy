@@ -1,8 +1,8 @@
-import { IFile } from '@/helper/filesys'
 import classNames from 'classnames'
 import type { FC } from 'react'
 import { memo } from 'react'
 import FileNode from './FileNode'
+import type { IFile } from '@/helper/filesys'
 
 const FileTree: FC<FileTreeProps> = (props) => {
   const { data, activeId, onSelect, className } = props
@@ -12,7 +12,13 @@ const FileTree: FC<FileTreeProps> = (props) => {
   return (
     <div className={containerCls}>
       {data?.map(item => (
-        <FileNode key={item.name} item={item} level={0} activeId={activeId} onSelect={onSelect} />
+        <FileNode
+          key={item.name}
+          item={item}
+          level={0}
+          activeId={activeId}
+          onSelect={onSelect}
+        />
       ))}
     </div>
   )

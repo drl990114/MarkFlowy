@@ -1,34 +1,44 @@
 // @ts-nocheck
-import { EditorView, NodeView, range, throttle, Transaction } from '@remirror/core';
-import { Node as ProsemirrorNode } from '@remirror/pm/model';
-import { TableMap, updateColumnsOnResize } from '@remirror/pm/tables';
-import { Decoration } from '@remirror/pm/view';
-import { ExtensionTablesTheme } from '@remirror/theme';
+import type {
+  EditorView,
+  NodeView,
+  Transaction,
+} from '@remirror/core'
+import {
+  range,
+  throttle,
+} from '@remirror/core'
+import type { Node as ProsemirrorNode } from '@remirror/pm/model'
+import { TableMap, updateColumnsOnResize } from '@remirror/pm/tables'
+import type { Decoration } from '@remirror/pm/view'
+import { ExtensionTablesTheme } from '@remirror/theme'
 
-import TableInsertButton, { shouldHideInsertButton } from '../components/table-insert-button';
-import { ReactTableNodeAttrs } from '../table-extensions';
-import { h } from '../utils/dom';
-import { setNodeAttrs } from '../utils/prosemirror';
+import TableInsertButton, {
+  shouldHideInsertButton,
+} from '../components/table-insert-button'
+import type { ReactTableNodeAttrs } from '../table-extensions'
+import { h } from '../utils/dom'
+import { setNodeAttrs } from '../utils/prosemirror'
 
 export class TableView implements NodeView {
-  readonly root: HTMLElement;
-  readonly table: HTMLTableElement;
-  readonly colgroup: HTMLTableColElement;
-  readonly tbody: HTMLTableSectionElement;
-  readonly insertButtonWrapper: HTMLElement;
+  readonly root: HTMLElement
+  readonly table: HTMLTableElement
+  readonly colgroup: HTMLTableColElement
+  readonly tbody: HTMLTableSectionElement
+  readonly insertButtonWrapper: HTMLElement
 
-  private readonly handleMouseMove: (e: MouseEvent) => void;
-  private showInsertButton: boolean;
-  private removeInsertButton?: (tr: Transaction) => Transaction;
+  private readonly handleMouseMove: (e: MouseEvent) => void
+  private showInsertButton: boolean
+  private removeInsertButton?: (tr: Transaction) => Transaction
 
-  map: TableMap;
+  map: TableMap
 
   get dom(): HTMLElement {
-    return this.root;
+    return this.root
   }
 
   get contentDOM(): HTMLElement {
-    return this.tbody;
+    return this.tbody
   }
 
   constructor(
@@ -40,15 +50,17 @@ export class TableView implements NodeView {
   ) {
     // console.debug('[TableView] constructor');
 
-    // @ts-ignore
-    this.map = TableMap.get(this.node);
+    // @ts-expect-error
+    this.map = TableMap.get(this.node)
 
-    this.tbody = h('tbody', { className: ExtensionTablesTheme.TABLE_TBODY_WITH_CONTROLLERS });
+    this.tbody = h('tbody', {
+      className: ExtensionTablesTheme.TABLE_TBODY_WITH_CONTROLLERS,
+    })
     this.colgroup = h(
       'colgroup',
       { className: ExtensionTablesTheme.TABLE_COLGROUP },
       ...range(this.map.width).map(() => h('col')),
-    );
+    )
     this.table = h(
       'table',
       {
@@ -57,62 +69,60 @@ export class TableView implements NodeView {
       },
       this.colgroup,
       this.tbody,
-    );
-    this.insertButtonWrapper = h('div');
-    this.root = h('div', null, this.table, this.insertButtonWrapper);
+    )
+    this.insertButtonWrapper = h('div')
+    this.root = h('div', null, this.table, this.insertButtonWrapper)
 
-    this.render();
+    this.render()
 
-    this.showInsertButton = false;
+    this.showInsertButton = false
     this.handleMouseMove = throttle(100, (e: MouseEvent) => {
       if (this.showInsertButton) {
-        const attrs = this.attrs().insertButtonAttrs;
+        const attrs = this.attrs().insertButtonAttrs
 
         if (attrs && shouldHideInsertButton(attrs, e)) {
-          this.showInsertButton = false;
-          replaceChildren(this.insertButtonWrapper, []);
+          this.showInsertButton = false
+          replaceChildren(this.insertButtonWrapper, [])
 
           if (this.removeInsertButton) {
-            // @ts-ignore
-            this.view.dispatch(this.removeInsertButton(this.view.state.tr));
+            // @ts-expect-error
+            this.view.dispatch(this.removeInsertButton(this.view.state.tr))
           }
         }
       }
-    });
+    })
 
-    document.addEventListener('mousemove', this.handleMouseMove);
+    document.addEventListener('mousemove', this.handleMouseMove)
   }
 
   update(node: ProsemirrorNode, decorations: readonly Decoration[]): boolean {
     // console.debug(`[TableView] update`);
 
-    if (node.type !== this.node.type) {
-      return false;
-    }
+    if (node.type !== this.node.type)
+      return false
 
-    this.decorations = decorations;
-    this.node = node;
-    this.map = TableMap.get(this.node);
+    this.decorations = decorations
+    this.node = node
+    this.map = TableMap.get(this.node)
 
-    this.render();
+    this.render()
 
-    return true;
+    return true
   }
 
   private render() {
-    this.renderTable();
+    this.renderTable()
 
-    if (!this.attrs().isControllersInjected) {
-      return;
-    }
+    if (!this.attrs().isControllersInjected)
+      return
 
-    this.renderInsertButton();
+    this.renderInsertButton()
   }
 
   private renderTable() {
     if (this.colgroup.children.length !== this.map.width) {
-      const cols = range(this.map.width).map(() => h('col'));
-      replaceChildren(this.colgroup, cols);
+      const cols = range(this.map.width).map(() => h('col'))
+      replaceChildren(this.colgroup, cols)
     }
 
     const className = [
@@ -122,17 +132,21 @@ export class TableView implements NodeView {
       this.attrs().isControllersInjected
         ? ExtensionTablesTheme.TABLE_WITH_CONTROLLERS
         : ExtensionTablesTheme.TABLE_WAITTING_CONTROLLERS,
-    ].join(' ');
+    ].join(' ')
 
-    if (this.table.className !== className) {
-      this.table.className = className;
-    }
+    if (this.table.className !== className)
+      this.table.className = className
 
-    updateColumnsOnResize(this.node, this.colgroup, this.table, this.cellMinWidth);
+    updateColumnsOnResize(
+      this.node,
+      this.colgroup,
+      this.table,
+      this.cellMinWidth,
+    )
   }
 
   private renderInsertButton() {
-    const attrs = this.attrs().insertButtonAttrs;
+    const attrs = this.attrs().insertButtonAttrs
 
     if (attrs) {
       const tableRect = {
@@ -145,48 +159,52 @@ export class TableView implements NodeView {
         top: 0,
         right: 0,
         bottom: 0,
-      };
+      }
       this.removeInsertButton = (tr: Transaction): Transaction => {
         // Remove insertButtonAttrs from tableNode so that the TableInsertButton won't keep at the origin position.
-        const attrsPatch: Partial<ReactTableNodeAttrs> = { insertButtonAttrs: null };
-        return setNodeAttrs(tr, tableRect.tableStart - 1, attrsPatch);
-      };
+        const attrsPatch: Partial<ReactTableNodeAttrs> = {
+          insertButtonAttrs: null,
+        }
+        return setNodeAttrs(tr, tableRect.tableStart - 1, attrsPatch)
+      }
       const button = TableInsertButton({
         view: this.view,
         attrs,
         tableRect,
         removeInsertButton: this.removeInsertButton,
-      });
-      replaceChildren(this.insertButtonWrapper, [button]);
-      this.showInsertButton = true;
-    } else {
-      replaceChildren(this.insertButtonWrapper, []);
-      this.showInsertButton = false;
+      })
+      replaceChildren(this.insertButtonWrapper, [button])
+      this.showInsertButton = true
+    }
+    else {
+      replaceChildren(this.insertButtonWrapper, [])
+      this.showInsertButton = false
     }
   }
 
   private attrs() {
-    return this.node.attrs as ReactTableNodeAttrs;
+    return this.node.attrs as ReactTableNodeAttrs
   }
 
   ignoreMutation(): boolean {
-    return true;
+    return true
   }
 
   destroy(): void {
     // console.debug('[TableView] destroy');
 
-    document.removeEventListener('mousemove', this.handleMouseMove);
+    document.removeEventListener('mousemove', this.handleMouseMove)
   }
 }
 
 // TODO: this function's performance should be very bad. Maybe we should use some kind of DOM-diff algorithm.
-export function replaceChildren(parent: HTMLElement, children: HTMLElement[]): void {
-  while (parent.firstChild) {
-    parent.firstChild.remove();
-  }
+export function replaceChildren(
+  parent: HTMLElement,
+  children: HTMLElement[],
+): void {
+  while (parent.firstChild)
+    parent.firstChild.remove()
 
-  for (const child of children) {
-    parent.append(child);
-  }
+  for (const child of children)
+    parent.append(child)
 }

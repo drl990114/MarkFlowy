@@ -5,22 +5,31 @@ import { Fragment, memo, useCallback } from 'react'
 const Menu: FC<MenuProps> = (props) => {
   const { menuGroup, onMenuItemClick, className } = props
 
-  const renderMenuGroupItems = useCallback((menu: MenuGroup) => {
-    return menu.map((i) => {
-      const handleCLick = () => {
-        if (typeof onMenuItemClick === 'function')
-          onMenuItemClick(i)
-      }
-      return <li className="label-default" key={i.key} onClick={handleCLick}>{i.title}</li>
-    })
-  }, [onMenuItemClick])
+  const renderMenuGroupItems = useCallback(
+    (menu: MenuGroup) => {
+      return menu.map((i) => {
+        const handleCLick = () => {
+          if (typeof onMenuItemClick === 'function')
+            onMenuItemClick(i)
+        }
+        return (
+          <li className="label-default" key={i.key} onClick={handleCLick}>
+            {i.title}
+          </li>
+        )
+      })
+    },
+    [onMenuItemClick],
+  )
 
   const renderMenuGroup = useCallback(() => {
     return menuGroup.map((group, index) => {
-      return <Fragment key={index}>
-      {renderMenuGroupItems(group)}
-      {index !== menuGroup.length - 1 && <div className="split" />}
-      </Fragment>
+      return (
+        <Fragment key={index}>
+          {renderMenuGroupItems(group)}
+          {index !== menuGroup.length - 1 && <div className="split" />}
+        </Fragment>
+      )
     })
   }, [menuGroup, renderMenuGroupItems])
 

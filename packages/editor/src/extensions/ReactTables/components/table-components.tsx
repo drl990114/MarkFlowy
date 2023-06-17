@@ -1,9 +1,13 @@
-import { useHelpers } from '@remirror/react-core';
-import React from 'react';
+import { useHelpers } from '@remirror/react-core'
+import React from 'react'
 
-import { TableStyled } from './styles';
-import { TableCellMenu, TableCellMenuProps } from './table-cell-menu';
-import { TableDeleteButton, TableDeleteButtonProps } from './table-delete-table-button';
+import { TableStyled } from './styles'
+import type { TableCellMenuProps } from './table-cell-menu'
+import { TableCellMenu } from './table-cell-menu'
+import type { TableDeleteButtonProps } from './table-delete-table-button'
+import {
+  TableDeleteButton,
+} from './table-delete-table-button'
 
 export interface TableComponentsProps {
   /**
@@ -11,31 +15,31 @@ export interface TableComponentsProps {
    *
    * @defaultValue true
    */
-  enableTableCellMenu?: boolean;
+  enableTableCellMenu?: boolean
 
   /**
    * The props that will passed to `TableCellMenu`
    */
-  tableCellMenuProps?: TableCellMenuProps;
+  tableCellMenuProps?: TableCellMenuProps
 
   /**
    * Whether to use `TableDeleteRowColumnButton`.
    *
    * @defaultValue true
    */
-  enableTableDeleteRowColumnButton?: boolean;
-  
+  enableTableDeleteRowColumnButton?: boolean
+
   /**
    * Whether to use `TableDeleteButton`.
    *
    * @defaultValue true
    */
-  enableTableDeleteButton?: boolean;
+  enableTableDeleteButton?: boolean
 
   /**
    * The props that will passed to `TableDeleteButton`
    */
-  tableDeleteButtonProps?: TableDeleteButtonProps;
+  tableDeleteButtonProps?: TableDeleteButtonProps
 }
 
 export const TableComponents: React.FC<TableComponentsProps> = ({
@@ -44,17 +48,18 @@ export const TableComponents: React.FC<TableComponentsProps> = ({
   tableCellMenuProps,
   tableDeleteButtonProps,
 }) => {
-  const { isViewEditable } = useHelpers();
+  const { isViewEditable } = useHelpers()
 
-  if (!isViewEditable()) {
-    return null;
-  }
+  if (!isViewEditable())
+    return null
 
   return (
     <>
       <TableStyled />
       {enableTableCellMenu && <TableCellMenu {...tableCellMenuProps} />}
-      {enableTableDeleteButton && <TableDeleteButton {...tableDeleteButtonProps} />}
+      {enableTableDeleteButton && (
+        <TableDeleteButton {...tableDeleteButtonProps} />
+      )}
     </>
-  );
-};
+  )
+}

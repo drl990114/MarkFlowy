@@ -1,42 +1,51 @@
-import { EditorView, findParentNodeOfType, FindProsemirrorNodeResult } from '@remirror/core';
-import { ExtensionTablesTheme } from '@remirror/theme';
+import type {
+  EditorView,
+  FindProsemirrorNodeResult,
+} from '@remirror/core'
+import {
+  findParentNodeOfType,
+} from '@remirror/core'
+import { ExtensionTablesTheme } from '@remirror/theme'
 
-import { createControllerEvents } from '../utils/controller';
-import { h } from '../utils/dom';
-import TableInsertButtonTrigger from './table-insert-button-trigger';
-import TableInsertMark from './table-insert-mark';
+import { createControllerEvents } from '../utils/controller'
+import { h } from '../utils/dom'
+import TableInsertButtonTrigger from './table-insert-button-trigger'
+import TableInsertMark from './table-insert-mark'
 
 export interface TableControllerCellProps {
-  view: EditorView;
-  getPos: () => number;
-  contentDOM: HTMLElement;
+  view: EditorView
+  getPos: () => number
+  contentDOM: HTMLElement
 }
 
-const TableControllerCell = ({
+function TableControllerCell({
   view,
   getPos,
   contentDOM,
-}: TableControllerCellProps): HTMLElement => {
+}: TableControllerCellProps): HTMLElement {
   const findTable = (): FindProsemirrorNodeResult | undefined => {
     return findParentNodeOfType({
       types: 'table',
-      // @ts-ignore
+      // @ts-expect-error
       selection: view.state.doc.resolve(getPos()),
-    });
-  };
+    })
+  }
 
-  const events = createControllerEvents({ view, findTable });
+  const events = createControllerEvents({ view, findTable })
 
   const childNodes = view.editable
     ? [...TableInsertButtonTrigger({ view, findTable }), ...TableInsertMark()]
-    : [];
+    : []
 
   const wrapper = h(
     'div',
-    { contentEditable: 'false', className: ExtensionTablesTheme.TABLE_CONTROLLER_WRAPPER },
+    {
+      contentEditable: 'false',
+      className: ExtensionTablesTheme.TABLE_CONTROLLER_WRAPPER,
+    },
     contentDOM,
     ...childNodes,
-  );
+  )
 
   return h(
     'th',
@@ -49,7 +58,7 @@ const TableControllerCell = ({
       ...events,
     },
     wrapper,
-  );
-};
+  )
+}
 
-export default TableControllerCell;
+export default TableControllerCell
