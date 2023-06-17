@@ -12,7 +12,7 @@ importers:
 
   apps/home:
     specifiers:
-      '@types/node': 20.3.0
+      '@types/node': 20.3.1
       '@types/react': 18.2.11
       '@types/react-dom': 18.2.4
       autoprefixer: 10.4.14
@@ -33,7 +33,7 @@ importers:
       tailwindcss: 3.3.2
       typescript: 5.1.3
     dependencies:
-      '@types/node': 20.3.0
+      '@types/node': 20.3.1
       '@types/react': 18.2.11
       '@types/react-dom': 18.2.4
       autoprefixer: 10.4.14_postcss@8.4.24
@@ -175,7 +175,7 @@ importers:
       '@remirror/react-core': ^2.0.18
       '@remirror/react-editors': ^1.0.27
       '@remirror/react-hooks': ^2.0.24
-      '@remirror/styles': ^2.0.4
+      '@remirror/styles': ^2.0.5
       '@remirror/theme': ^2.0.8
       '@remirror/types': ^1.0.1
       '@types/codemirror': ^5.60.7
@@ -219,7 +219,7 @@ importers:
       '@remirror/react-core': 2.0.18_h2v3d7fc5nwokclpx3susu5bw4
       '@remirror/react-editors': 1.0.27_dgii7s3lbhfc3ux6t3aneq7fem
       '@remirror/react-hooks': 2.0.24_h2v3d7fc5nwokclpx3susu5bw4
-      '@remirror/styles': 2.0.4_6qjh5dukelw35ctpfhsy3dmk7y
+      '@remirror/styles': 2.0.5_6qjh5dukelw35ctpfhsy3dmk7y
       '@remirror/theme': 2.0.8_@remirror+pm@2.0.6
       '@remirror/types': 1.0.1
       create-context-state: 2.0.2_pmekkgnqduwlme35zpnqhenc34
@@ -6296,7 +6296,7 @@ packages:
       '@remirror/extension-react-tables': 2.2.16_yppanaal57cnbu37eq5pn4ms4i
       '@remirror/pm': 2.0.4
       '@remirror/react': 2.0.27_yppanaal57cnbu37eq5pn4ms4i
-      '@remirror/styles': 2.0.4_6qjh5dukelw35ctpfhsy3dmk7y
+      '@remirror/styles': 2.0.5_6qjh5dukelw35ctpfhsy3dmk7y
       '@svgmoji/noto': 3.2.0
       '@types/react': 18.0.28
       '@types/react-dom': 18.0.11
@@ -6796,16 +6796,16 @@ packages:
       - supports-color
     dev: false
 
-  /@remirror/styles/2.0.4_6qjh5dukelw35ctpfhsy3dmk7y:
-    resolution: {integrity: sha512-ZMJ72MDMRSq9V6ese8knDCmf0yHPiiSE80+wcd45u9cCH8J2j4Xm+QECsPgYGnRQTMHwCgACg9ZXVQtdVKXGoQ==}
+  /@remirror/styles/2.0.5_6qjh5dukelw35ctpfhsy3dmk7y:
+    resolution: {integrity: sha512-F9gvQkNGP5kBKasNZwX+dgajQQGwqrbocGD4zaL3mghVtpY8DnMK2685WSMxlh/zxEyVRSxjhqQxqJGoJGHp9g==}
     peerDependencies:
-      '@emotion/css': ^11
-      '@emotion/react': ^11
-      '@emotion/styled': ^11
-      '@types/react': '>= 16.8.0'
-      '@types/styled-components': ^5
-      react: '>= 16.8.0'
-      styled-components: ^5
+      '@emotion/css': ^11.10.6
+      '@emotion/react': ^11.10.6
+      '@emotion/styled': ^11.10.6
+      '@types/react': '>= 16.14.40'
+      '@types/styled-components': ^5.1.26
+      react: '>= 16.14.0'
+      styled-components: ^5.3.10
     peerDependenciesMeta:
       '@emotion/css':
         optional: true
@@ -6820,14 +6820,16 @@ packages:
       styled-components:
         optional: true
     dependencies:
-      '@babel/runtime': 7.21.0
+      '@babel/runtime': 7.22.5
       '@emotion/css': 11.11.0
       '@emotion/styled': 11.11.0_pmekkgnqduwlme35zpnqhenc34
-      '@remirror/core-helpers': 2.0.1
+      '@remirror/core-helpers': 2.0.3
       '@types/react': 18.0.28
       '@types/styled-components': 5.1.26
       react: 18.2.0
       styled-components: 5.3.11_biqbaboplfbrettd7655fr4n2y
+    transitivePeerDependencies:
+      - supports-color
     dev: false
 
   /@remirror/theme/2.0.8:
@@ -7456,10 +7458,6 @@ packages:
 
   /@types/min-document/2.19.0:
     resolution: {integrity: sha512-lsYeSW1zfNqHTL1RuaOgfAhoiOWV1RAQDKT0BZ26z4Faz8llVIj1r1ablUo5QY6yzHMketuvu4+N0sv0eZpXTg==}
-
-  /@types/node/20.3.0:
-    resolution: {integrity: sha512-cumHmIAf6On83X7yP+LrsEyUOf/YlociZelmpRYaGFydoaPdxdt80MAbu6vWerQT2COCp2nPvHdsbD7tHn/YlQ==}
-    dev: false
 
   /@types/node/20.3.1:
     resolution: {integrity: sha512-EhcH/wvidPy1WeML3TtYFGR83UzjxeWRen9V402T8aUGYsCHOmfoisV3ZSg03gAFIbLq8TnWOJ0f4cALtnSEUg==}
