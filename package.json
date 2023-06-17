@@ -3,9 +3,8 @@
   "version": "0.0.0",
   "scripts": {
     "dev": "pnpm --filter=@linebyline/editor dev & pnpm --filter=@linebyline/linebyline dev",
-    "build": "pnpm --filter=@linebyline/editor build",
+    "build": "pnpm --filter=@linebyline/editor build && pnpm -r build",
     "test": "jest",
-    "preview": "vite preview",
     "tauri:build": "tauri build",
     "tauri:dev": "tauri dev"
   },
