@@ -1,32 +1,34 @@
-import { PositionerPortal } from '@remirror/react-components';
-import { useCommands } from '@remirror/react-core';
-import { useEditorEvent, usePositioner } from '@remirror/react-hooks';
-import React, { useState } from 'react';
+import { PositionerPortal } from '@remirror/react-components'
+import { useCommands } from '@remirror/react-core'
+import { useEditorEvent, usePositioner } from '@remirror/react-hooks'
+import React, { useState } from 'react'
 
-import { menuCellPositioner } from '../block-positioner';
-import { borderWidth } from '../const';
+import { menuCellPositioner } from '../block-positioner'
+import { borderWidth } from '../const'
 
 export interface TableCellMenuComponentProps {
-  popupOpen: boolean;
-  setPopupOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  popupOpen: boolean
+  setPopupOpen: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-type TableCellMenuComponent = React.ComponentType<TableCellMenuComponentProps>;
+type TableCellMenuComponent = React.ComponentType<TableCellMenuComponentProps>
 
 export interface TableCellMenuProps {
-  Component?: TableCellMenuComponent;
+  Component?: TableCellMenuComponent
 }
 
-const DefaultTableCellMenuButton: React.FC<TableCellMenuComponentProps> = ({ setPopupOpen }) => {
+const DefaultTableCellMenuButton: React.FC<TableCellMenuComponentProps> = ({
+  setPopupOpen,
+}) => {
   return (
     <button
       onClick={() => {
-        setPopupOpen(true);
+        setPopupOpen(true)
       }}
       onMouseDown={(event) => {
         // Stop the parent component from listening the onMouseDown event
-        event.preventDefault();
-        event.stopPropagation();
+        event.preventDefault()
+        event.stopPropagation()
       }}
       style={{
         position: 'relative',
@@ -42,33 +44,37 @@ const DefaultTableCellMenuButton: React.FC<TableCellMenuComponentProps> = ({ set
     >
       v
     </button>
-  );
-};
+  )
+}
 
 interface DefaultTableCellMenuItemProps {
-  label: string;
-  onClick: () => void;
-  disabled?: boolean;
+  label: string
+  onClick: () => void
+  disabled?: boolean
 }
-const DefaultTableCellMenuItem: React.FC<DefaultTableCellMenuItemProps> = (props) => (
-  <button disabled={props.disabled} onClick={props.onClick} className='remirror-menu-item'>
+const DefaultTableCellMenuItem: React.FC<DefaultTableCellMenuItemProps> = props => (
+  <button
+    disabled={props.disabled}
+    onClick={props.onClick}
+    className="remirror-menu-item"
+  >
     {props.label}
   </button>
-);
+)
 
 const DefaultTableCellMenuPopup: React.FC<TableCellMenuComponentProps> = ({
   setPopupOpen,
   popupOpen,
 }) => {
-  const commands = useCommands();
+  const commands = useCommands()
 
   // close the popup after clicking
   const handleClick = (command: () => void) => {
     return () => {
-      command();
-      setPopupOpen(false);
-    };
-  };
+      command()
+      setPopupOpen(false)
+    }
+  }
 
   return (
     <div
@@ -80,58 +86,65 @@ const DefaultTableCellMenuPopup: React.FC<TableCellMenuComponentProps> = ({
         display: popupOpen ? 'flex' : 'none',
         flexDirection: 'column',
       }}
-      className='remirror-menu'
+      className="remirror-menu"
     >
       <DefaultTableCellMenuItem
-        label='Add row above'
+        label="Add row above"
         onClick={handleClick(commands.addTableRowBefore)}
       />
       <DefaultTableCellMenuItem
-        label='Add row below'
+        label="Add row below"
         onClick={handleClick(commands.addTableRowAfter)}
       />
       <DefaultTableCellMenuItem
-        label='Add column before'
+        label="Add column before"
         onClick={handleClick(commands.addTableColumnBefore)}
       />
       <DefaultTableCellMenuItem
-        label='Add column after'
+        label="Add column after"
         onClick={handleClick(commands.addTableColumnAfter)}
       />
       <DefaultTableCellMenuItem
-        label='Remove column'
+        label="Remove column"
         onClick={handleClick(commands.deleteTableColumn)}
       />
-      <DefaultTableCellMenuItem label='Remove row' onClick={handleClick(commands.deleteTableRow)} />
-      <DefaultTableCellMenuItem label='Remove table' onClick={handleClick(commands.deleteTable)} />
+      <DefaultTableCellMenuItem
+        label="Remove row"
+        onClick={handleClick(commands.deleteTableRow)}
+      />
+      <DefaultTableCellMenuItem
+        label="Remove table"
+        onClick={handleClick(commands.deleteTable)}
+      />
     </div>
-  );
-};
+  )
+}
 
-const DefaultTableCellMenuComponent: React.FC<TableCellMenuComponentProps> = (props) => {
+const DefaultTableCellMenuComponent: React.FC<TableCellMenuComponentProps> = (
+  props,
+) => {
   return (
     <>
       <DefaultTableCellMenuButton {...props} />
       <DefaultTableCellMenuPopup {...props} />
     </>
-  );
-};
+  )
+}
 
 const TableCellMenu: React.FC<TableCellMenuProps> = ({
   Component = DefaultTableCellMenuComponent,
 }) => {
-  const position = usePositioner(menuCellPositioner, []);
-  const { ref, width, height, x, y } = position;
-  const [popupOpen, setPopupOpen] = useState(false);
+  const position = usePositioner(menuCellPositioner, [])
+  const { ref, width, height, x, y } = position
+  const [popupOpen, setPopupOpen] = useState(false)
 
   // Hide the popup when users click.
   useEditorEvent('mousedown', () => {
-    if (popupOpen) {
-      setPopupOpen(false);
-    }
+    if (popupOpen)
+      setPopupOpen(false)
 
-    return false;
-  });
+    return false
+  })
 
   return (
     <PositionerPortal>
@@ -166,7 +179,7 @@ const TableCellMenu: React.FC<TableCellMenuProps> = ({
         </div>
       </div>
     </PositionerPortal>
-  );
-};
+  )
+}
 
-export { TableCellMenu };
+export { TableCellMenu }

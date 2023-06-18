@@ -1,15 +1,30 @@
 import type { CommandFunction, FindProsemirrorNodeResult } from '@remirror/core'
-import { cx, findParentNodeOfType, isElementDomNode, last, mergeDOMRects } from '@remirror/core'
-import { Positioner, defaultAbsolutePosition, hasStateChanged, isPositionVisible } from '@remirror/extension-positioner'
+import {
+  cx,
+  findParentNodeOfType,
+  isElementDomNode,
+  last,
+  mergeDOMRects,
+} from '@remirror/core'
+import {
+  Positioner,
+  defaultAbsolutePosition,
+  hasStateChanged,
+  isPositionVisible,
+} from '@remirror/extension-positioner'
 import { TableMap } from '@remirror/pm/tables'
 import { Icon, PositionerPortal } from '@remirror/react-components'
 import { useCommands } from '@remirror/react-core'
 import type { UsePositionerReturn } from '@remirror/react-hooks'
 import { usePositioner } from '@remirror/react-hooks'
 import { ExtensionTablesTheme } from '@remirror/theme'
-import React, { MouseEventHandler, useCallback } from 'react'
+import type { MouseEventHandler } from 'react'
+import React, { useCallback } from 'react'
 
-import { resetControllerPluginMeta, setControllerPluginMeta } from '../table-plugins'
+import {
+  resetControllerPluginMeta,
+  setControllerPluginMeta,
+} from '../table-plugins'
 
 interface DeleteTableButtonPositionerData {
   tableResult: FindProsemirrorNodeResult
@@ -21,11 +36,12 @@ const highlightTable: CommandFunction = ({ tr, dispatch }) => {
     selection: tr.selection,
   })
 
-  if (!node) {
+  if (!node)
     return false
-  }
 
-  dispatch?.(setControllerPluginMeta(tr, { preselectTable: true, predelete: true }))
+  dispatch?.(
+    setControllerPluginMeta(tr, { preselectTable: true, predelete: true }),
+  )
   return true
 }
 
@@ -56,17 +72,23 @@ function createDeleteTableButtonPositioner(): Positioner<DeleteTableButtonPositi
       const { view, data } = props
 
       const { node, pos } = data.tableResult
-      // @ts-ignore
       const map = TableMap.get(node)
 
       const firstCellDOM = view.nodeDOM(pos + map.map[0] + 1)
       const lastCellDOM = view.nodeDOM(pos + last(map.map) + 1)
 
-      if (!firstCellDOM || !lastCellDOM || !isElementDomNode(firstCellDOM) || !isElementDomNode(lastCellDOM)) {
+      if (
+        !firstCellDOM
+        || !lastCellDOM
+        || !isElementDomNode(firstCellDOM)
+        || !isElementDomNode(lastCellDOM)
+      )
         return defaultAbsolutePosition
-      }
 
-      const rect = mergeDOMRects(firstCellDOM.getBoundingClientRect(), lastCellDOM.getBoundingClientRect())
+      const rect = mergeDOMRects(
+        firstCellDOM.getBoundingClientRect(),
+        lastCellDOM.getBoundingClientRect(),
+      )
       const editorRect = view.dom.getBoundingClientRect()
 
       // The top and left relative to the parent `editorRect`.
@@ -115,7 +137,13 @@ export interface TableDeleteInnerButtonProps {
   onMouseLeave: MouseEventHandler
 }
 
-export const TableDeleteInnerButton: React.FC<TableDeleteInnerButtonProps> = ({ position, onClick, onMouseDown, onMouseEnter, onMouseLeave }) => {
+export const TableDeleteInnerButton: React.FC<TableDeleteInnerButtonProps> = ({
+  position,
+  onClick,
+  onMouseDown,
+  onMouseEnter,
+  onMouseLeave,
+}) => {
   const size = 18
 
   return (
@@ -129,7 +157,10 @@ export const TableDeleteInnerButton: React.FC<TableDeleteInnerButtonProps> = ({ 
         top: `${position.y + 20}px`,
         left: `${position.x + 16}px`,
       }}
-      className={cx(ExtensionTablesTheme.TABLE_DELETE_INNER_BUTTON, ExtensionTablesTheme.TABLE_DELETE_TABLE_INNER_BUTTON)}
+      className={cx(
+        ExtensionTablesTheme.TABLE_DELETE_INNER_BUTTON,
+        ExtensionTablesTheme.TABLE_DELETE_TABLE_INNER_BUTTON,
+      )}
     >
       <Icon name="deleteBinLine" size={size} color={'#ffffff'} />
     </button>
@@ -147,7 +178,9 @@ function usePosition() {
   return position
 }
 
-export const TableDeleteButton: React.FC<TableDeleteButtonProps> = ({ Component }) => {
+export const TableDeleteButton: React.FC<TableDeleteButtonProps> = ({
+  Component,
+}) => {
   const position = usePosition()
   const { customDispatch, deleteTable } = useCommands()
 
@@ -171,7 +204,13 @@ export const TableDeleteButton: React.FC<TableDeleteButtonProps> = ({ Component 
 
   return (
     <PositionerPortal>
-      <Component position={position} onClick={handleClick} onMouseDown={handleMouseDown} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} />
+      <Component
+        position={position}
+        onClick={handleClick}
+        onMouseDown={handleMouseDown}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      />
     </PositionerPortal>
   )
 }

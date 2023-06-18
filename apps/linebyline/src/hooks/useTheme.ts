@@ -2,7 +2,7 @@ import { loadTheme } from '@linebyline/editor'
 import { createTheme } from '@mui/material'
 import { createGlobalStore } from 'hox'
 import { useEffect, useState } from 'react'
-import { ThemeProps } from 'styled-components'
+import type { ThemeProps } from 'styled-components'
 
 type Theme = 'light' | 'dark'
 
@@ -29,7 +29,7 @@ const darkThemeColors = {
   tipsBgColor: '#11191f',
 }
 
-const useTheme = () => {
+function useTheme() {
   const [theme, setTheme] = useState<Theme>('light')
   const [themeColors, setThemeColors] = useState(lightThemeColors)
 
@@ -37,24 +37,28 @@ const useTheme = () => {
     palette: {
       mode: 'dark',
     },
-  });
+  })
 
   const muiLightTheme = createTheme({
     palette: {
       mode: 'light',
     },
-  });
+  })
 
   useEffect(() => {
     loadTheme(theme)
-    if (theme === 'light') {
+    if (theme === 'light')
       setThemeColors(lightThemeColors)
-    } else {
+    else
       setThemeColors(darkThemeColors)
-    }
   }, [theme])
 
-  return { theme, themeColors, setTheme, muiTheme: theme === 'light' ? muiLightTheme : muiDarkTheme }
+  return {
+    theme,
+    themeColors,
+    setTheme,
+    muiTheme: theme === 'light' ? muiLightTheme : muiDarkTheme,
+  }
 }
 
 const [useGlobalTheme] = createGlobalStore(useTheme)

@@ -8,8 +8,8 @@ import React, { memo, useEffect } from 'react'
 import styled from 'styled-components'
 import EditorExtensions from '../../extensions'
 import Text from '../Text'
- 
-interface Context extends Props {}
+
+type Context = Props
 
 interface Props {
   file: Global.IFile
@@ -19,46 +19,55 @@ interface Props {
   markText: UseRemirrorReturn<any>
 }
 
-const [DualEditorProvider, useDualEditor] = createContextState<Context, Props>(({ props }) => {
-  return {
-    ...props,
-  }
-})
+const [DualEditorProvider, useDualEditor] = createContextState<Context, Props>(
+  ({ props }) => {
+    return {
+      ...props,
+    }
+  },
+)
 
-// eslint-disable-next-line react/display-name
-const MarkdownTextEditor = memo((props: { setEditorCtx: (id: string, ctx: any) => void }) => {
-  const { setEditorCtx } = props
-  const { visual, file, markText, active } = useDualEditor()
+const MarkdownTextEditor = memo(
+  (props: { setEditorCtx: (id: string, ctx: any) => void }) => {
+    const { setEditorCtx } = props
+    const { visual, file, markText} = useDualEditor()
 
-  useEffect(() => {
-    setEditorCtx(file.id, { ...markText.getContext(), getContent: () => markText.manager?.view?.state?.doc.textContent })
-  }, [markText.getContext])
+    useEffect(() => {
+      setEditorCtx(file.id, {
+        ...markText.getContext(),
+        getContent: () => markText.manager?.view?.state?.doc.textContent,
+      })
+    }, [markText.getContext])
 
-  return (
-    <Remirror
-      manager={markText.manager}
-      initialContent={markText.state}
-      onChange={({ helpers, state }) => {
-        const text = helpers.getText({ state })
-        visual.getContext()?.setContent(text)
-        return markText.getContext()?.setContent({
-          type: 'doc',
-          content: [
-            {
-              type: 'codeMirror',
-              attrs: {
-                language: 'markdown',
+    return (
+      <Remirror
+        manager={markText.manager}
+        initialContent={markText.state}
+        onChange={({ helpers, state }) => {
+          const text = helpers.getText({ state })
+          visual.getContext()?.setContent(text)
+          return markText.getContext()?.setContent({
+            type: 'doc',
+            content: [
+              {
+                type: 'codeMirror',
+                attrs: {
+                  language: 'markdown',
+                },
+                content: text ? [{ type: 'text', text }] : undefined,
               },
-              content: text ? [{ type: 'text', text }] : undefined,
-            },
-          ],
-        })
-      }}
-    >
-      <Text className="h-full w-full overflow-auto px-0" style={{ padding: 0 }} />
-    </Remirror>
-  )
-})
+            ],
+          })
+        }}
+      >
+        <Text
+          className="h-full w-full overflow-auto px-0"
+          style={{ padding: 0 }}
+        />
+      </Remirror>
+    )
+  },
+)
 
 function VisualEditor() {
   const { visual } = useDualEditor()
@@ -70,7 +79,7 @@ function VisualEditor() {
   )
 }
 
-const markTextExtensions = () => {
+function markTextExtensions() {
   return [
     new CodeMirrorExtension({
       languages,
@@ -114,8 +123,14 @@ const DualEditor: React.FC<DualEditorProps> = (props) => {
   })
 
   return (
-    <DualEditorProvider content={content} file={file} markText={markText} visual={visual} active={active}>
-      <MarkdownTextEditor setEditorCtx={setEditorCtx}/>
+    <DualEditorProvider
+      content={content}
+      file={file}
+      markText={markText}
+      visual={visual}
+      active={active}
+    >
+      <MarkdownTextEditor setEditorCtx={setEditorCtx} />
       <Devider />
       <VisualEditor />
     </DualEditorProvider>

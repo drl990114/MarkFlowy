@@ -1,8 +1,8 @@
-import { EVENT } from '@/constants'
 import { emit } from '@tauri-apps/api/event'
 import { exists, readTextFile, writeFile } from '@tauri-apps/api/fs'
 import { BaseDirectory } from '@tauri-apps/api/path'
 import defaultCache from './default.cache'
+import { EVENT } from '@/constants'
 
 const CACHE_FILE_NAME = 'linebyline.cache.json'
 
@@ -13,29 +13,42 @@ class CacheManager {
     await Promise.all([this.readCache()])
   }
 
-  readData: (opt: ReadDataParams) => Record<string, any> = async ({ fileName, dataKey, onSuccess, onSaved }) => {
+  readData: (opt: ReadDataParams) => Record<string, any> = async ({
+    fileName,
+    dataKey,
+    onSuccess,
+    onSaved,
+  }) => {
     const isExists = await exists(fileName, { dir: BaseDirectory.AppCache })
 
     if (!isExists) {
-      await this.writeData({ fileName, data: this[dataKey], onSuccess: onSaved })
+      await this.writeData({
+        fileName,
+        data: this[dataKey],
+        onSuccess: onSaved,
+      })
       return this[dataKey]
     }
 
     const data = await readTextFile(fileName, { dir: BaseDirectory.AppCache })
     this[dataKey] = JSON.parse(data)
 
-    if (onSuccess) {
+    if (onSuccess)
       onSuccess(this[dataKey])
-    }
 
     return data
   }
 
-  writeData: (opt: SaveDataParams) => Record<string, any> = async ({ fileName, data, onSuccess }) => {
-    writeFile(fileName, JSON.stringify(data), { dir: BaseDirectory.AppCache }).then(() => {
-      if (onSuccess) {
+  writeData: (opt: SaveDataParams) => Record<string, any> = async ({
+    fileName,
+    data,
+    onSuccess,
+  }) => {
+    writeFile(fileName, JSON.stringify(data), {
+      dir: BaseDirectory.AppCache,
+    }).then(() => {
+      if (onSuccess)
         onSuccess(data)
-      }
     })
   }
 
@@ -53,17 +66,18 @@ class CacheManager {
 
   writeCache = (key: string, value: any) => {
     if (key === 'openFolderHistory') {
-      if (this.cacheData.openFolderHistory.length > 10) {
+      if (this.cacheData.openFolderHistory.length > 10)
         this.cacheData.openFolderHistory.pop()
-      }
 
-      const index = this.cacheData.openFolderHistory.findIndex((his: { path: string }) => his.path === value.path)
-      if (index >= 0) {
+      const index = this.cacheData.openFolderHistory.findIndex(
+        (his: { path: string }) => his.path === value.path,
+      )
+      if (index >= 0)
         this.cacheData.openFolderHistory.splice(index, 1)
-      }
 
       this.cacheData.openFolderHistory.unshift(value)
-    } else {
+    }
+    else {
       this.cacheData[key] = value
     }
     this.saveCache()

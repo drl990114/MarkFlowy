@@ -1,7 +1,13 @@
-import { useGlobalTheme } from '@/hooks'
-import { Box, ClickAwayListener, Fade, Popper, PopperProps } from '@mui/material'
+import type { PopperProps } from '@mui/material'
+import {
+  Box,
+  ClickAwayListener,
+  Fade,
+  Popper,
+} from '@mui/material'
 import { nanoid } from 'nanoid'
 import React, { memo, useEffect, useMemo, useState } from 'react'
+import { useGlobalTheme } from '@/hooks'
 
 interface RePopperProps extends Partial<PopperProps> {
   content: React.ReactNode
@@ -20,9 +26,8 @@ const Tooltip: React.FC<RePopperProps> = (props) => {
   }, [props.open])
 
   const clickAwayHandler = () => {
-    if (onClickAway) {
+    if (onClickAway)
       onClickAway()
-    }
   }
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -34,10 +39,25 @@ const Tooltip: React.FC<RePopperProps> = (props) => {
     <>
       <div onClick={handleClick}>{children}</div>
       <ClickAwayListener onClickAway={clickAwayHandler}>
-        <Popper {...otherProps} style={{ zIndex: 10 }} id={id} open={open} anchorEl={anchorEl} transition>
+        <Popper
+          {...otherProps}
+          style={{ zIndex: 10 }}
+          id={id}
+          open={open}
+          anchorEl={anchorEl}
+          transition
+        >
           {({ TransitionProps }) => (
             <Fade {...TransitionProps}>
-              <Box sx={{ border: 1, bgcolor: themeColors.bgColor, borderColor: themeColors.borderColor }}>{content}</Box>
+              <Box
+                sx={{
+                  border: 1,
+                  bgcolor: themeColors.bgColor,
+                  borderColor: themeColors.borderColor,
+                }}
+              >
+                {content}
+              </Box>
             </Fade>
           )}
         </Popper>

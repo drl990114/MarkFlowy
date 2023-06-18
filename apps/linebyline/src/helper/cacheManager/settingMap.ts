@@ -1,9 +1,8 @@
-
 const settingMap = {
   general: {
     misc: {
       language: {
-        key: "language",
+        key: 'language',
         type: 'select',
         options: [
           {
@@ -21,16 +20,16 @@ const settingMap = {
   extensions: {
     ChatGPT: {
       ApiKey: {
-        key: "extensions_chatgpt_apikey",
+        key: 'extensions_chatgpt_apikey',
         type: 'input',
-      }
-    }
-  }
+      },
+    },
+  },
 }
 
 export enum SettingKeys {
   language = 'language',
-  chatgpt = 'extensions_chatgpt_apikey'
+  chatgpt = 'extensions_chatgpt_apikey',
 }
 
 export const SETTING_VERSION = '0.0.2'

@@ -7,26 +7,29 @@ interface Handler {
   setSetting: React.Dispatch<React.SetStateAction<Record<string, any>>>
 }
 
-const useSettingData = (): [Record<string, any>, Handler] => {
+function useSettingData(): [Record<string, any>, Handler] {
   const [setting, setSetting] = useState<Record<string, any>>({})
 
-  const writeSettingData = useCallback((item: Pick<Setting.SettingItem, 'key'>, value: any) => {
-    setSetting((prev) => {
-      const newState = {
-        ...prev,
-        [item.key]: value,
-      }
-      invoke('save_app_conf', { data: newState, label: 'main'})
-      return newState
-    })
-  }, [])
+  const writeSettingData = useCallback(
+    (item: Pick<Setting.SettingItem, 'key'>, value: any) => {
+      setSetting((prev) => {
+        const newState = {
+          ...prev,
+          [item.key]: value,
+        }
+        invoke('save_app_conf', { data: newState, label: 'main' })
+        return newState
+      })
+    },
+    [],
+  )
 
   const handler = useMemo(
     () => ({
       writeSettingData,
-      setSetting
+      setSetting,
     }),
-    [writeSettingData, setSetting]
+    [writeSettingData, setSetting],
   )
 
   return [setting, handler]

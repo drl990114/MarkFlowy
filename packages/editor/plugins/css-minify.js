@@ -1,5 +1,5 @@
+import { readFile } from 'node:fs/promises'
 import { transform } from 'esbuild'
-import { readFile } from 'fs/promises'
 
 export const CSSMinifyPlugin = {
   name: 'CSSMinifyPlugin',

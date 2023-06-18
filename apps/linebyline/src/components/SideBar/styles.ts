@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled from 'styled-components'
 
 export const Container = styled.div<ContainerProps>`
   flex-grow: 0;
@@ -6,10 +6,10 @@ export const Container = styled.div<ContainerProps>`
   max-width: 400px;
   position: relative;
   display: flex;
-  border-right: 1px solid ${(props) => props.theme.borderColor};
+  border-right: 1px solid ${props => props.theme.borderColor};
   flex-direction: row;
-  background: ${(props) => props.theme.bgColor};
-  color: ${(props) => props.theme.primaryFontColor};
+  background: ${props => props.theme.bgColor};
+  color: ${props => props.theme.primaryFontColor};
   box-shadow: -8px 2px 22px -7px rgba(0, 0, 0, 0.25);
   border-radius: 10px 0px 0px 10px;
   z-index: 2;
@@ -20,7 +20,7 @@ export const Container = styled.div<ContainerProps>`
     flex-shrink: 0;
     justify-content: space-between;
     width: 48px;
-    border-right: 1px solid ${(props) => props.theme.borderColor};
+    border-right: 1px solid ${props => props.theme.borderColor};
 
     &__item {
       width: 48px;
@@ -31,7 +31,7 @@ export const Container = styled.div<ContainerProps>`
   }
 
   .app-sidebar-active {
-    border-left: 4px solid ${(props) => props.theme.accentColor};
+    border-left: 4px solid ${props => props.theme.accentColor};
   }
 
   .app-sidebar-content {
@@ -53,7 +53,7 @@ export const Container = styled.div<ContainerProps>`
     background: ${props => props.theme.labelFontColor};
   }
 
-  ${(props) => (props.noActiveItem ? 'width: 48px' : 'min-width: 150px')}
+  ${props => (props.noActiveItem ? 'width: 48px' : 'min-width: 150px')}
 `
 
 interface ContainerProps {

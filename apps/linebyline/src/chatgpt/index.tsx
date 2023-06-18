@@ -1,9 +1,3 @@
-import { RightBarItem } from '@/components/SideBar'
-import { EVENT, RIGHTBARITEMKEYS } from '@/constants'
-import { SettingKeys } from '@/helper/cacheManager/settingMap'
-import { createFile } from '@/helper/filesys'
-import { useGlobalSettingData, useGlobalTheme } from '@/hooks'
-import { useEditorStore } from '@/stores'
 import { Input } from '@mui/material'
 import Button from '@mui/material/Button'
 import { emit } from '@tauri-apps/api/event'
@@ -12,6 +6,12 @@ import ReactLoading from 'react-loading'
 import { parseChatList } from './parseChatList'
 import { BottomBar, Container, ListContainer } from './styles'
 import useChatGPTStore from './useChatGPTStore'
+import { useEditorStore } from '@/stores'
+import { useGlobalSettingData, useGlobalTheme } from '@/hooks'
+import { createFile } from '@/helper/filesys'
+import { SettingKeys } from '@/helper/cacheManager/settingMap'
+import { EVENT, RIGHTBARITEMKEYS } from '@/constants'
+import type { RightBarItem } from '@/components/SideBar'
 
 const ChatList: React.FC<ChatListProps> = (props) => {
   const { chatList, addChat, delChat } = useChatGPTStore()
@@ -22,9 +22,9 @@ const ChatList: React.FC<ChatListProps> = (props) => {
   const { addOpenedFile, setActiveId } = useEditorStore()
 
   const handleSubmit = useCallback(() => {
-    if (!apiKey) {
+    if (!apiKey)
       return
-    }
+
     addChat(askInput, apiKey)
   }, [askInput, apiKey])
 
@@ -33,21 +33,24 @@ const ChatList: React.FC<ChatListProps> = (props) => {
     const gptNotesFile = createFile({ name: 'notes.md', content })
     addOpenedFile(gptNotesFile.id)
     setActiveId(gptNotesFile.id)
-    return
   }, [chatList, addOpenedFile, setActiveId])
 
-  const openSettingWindow = useCallback(() => emit(EVENT.open_window_setting), [])
+  const openSettingWindow = useCallback(
+    () => emit(EVENT.open_window_setting),
+    [],
+  )
 
   return (
     <Container {...props}>
       <div className="header">
         ChatGPT
         <div>
-          <i className="icon ri-file-download-line" onClick={exportChats}></i>
+          <i className="icon ri-file-download-line" onClick={exportChats} />
         </div>
       </div>
       <div className="content">
-        {chatList.length > 0 ? (
+        {chatList.length > 0
+          ? (
           <ListContainer>
             {chatList.map((chat) => {
               return (
@@ -59,7 +62,10 @@ const ChatList: React.FC<ChatListProps> = (props) => {
                         <span>You</span>
                       </div>
                       <div>
-                        <i className="icon ri-delete-bin-line" onClick={() => delChat(chat.id)} />
+                        <i
+                          className="icon ri-delete-bin-line"
+                          onClick={() => delChat(chat.id)}
+                        />
                       </div>
                     </div>
                     <p>{chat.question}</p>
@@ -69,28 +75,41 @@ const ChatList: React.FC<ChatListProps> = (props) => {
                       <i className="ri-openai-fill item-icon" />
                       <span>ChatGPT</span>
                     </div>
-                    {chat.status === 'pending' ? (
-                      <ReactLoading type="bubbles" width={35} height={35} color={themeColors.accentColor} />
-                    ) : chat.status === 'error' ? (
+                    {chat.status === 'pending'
+                      ? (
+                      <ReactLoading
+                        type="bubbles"
+                        width={35}
+                        height={35}
+                        color={themeColors.accentColor}
+                      />
+                        )
+                      : chat.status === 'error'
+                        ? (
                       <div>
-                        request error, please check your ApiKey is it right or not <a onClick={openSettingWindow}>setting</a>
+                        request error, please check your ApiKey is it right or
+                        not <a onClick={openSettingWindow}>setting</a>
                       </div>
-                    ) : (
+                          )
+                        : (
                       <p>{chat.answer}</p>
-                    )}
+                          )}
                   </div>
                 </div>
               )
             })}
           </ListContainer>
-        ) : (
+            )
+          : (
           <div className="introduction">
             <div className="introduction-title">
-              <i className="ri-flashlight-line"></i>Capabilities
+              <i className="ri-flashlight-line" />Capabilities
             </div>
-            <div className="introduction-item">One-click export of conversation content as md file</div>
+            <div className="introduction-item">
+              One-click export of conversation content as md file
+            </div>
           </div>
-        )}
+            )}
       </div>
       <BottomBar>
         <Input
@@ -101,7 +120,12 @@ const ChatList: React.FC<ChatListProps> = (props) => {
             setAskInput(event.target.value)
           }}
         />
-        <Button className="submit" size="small" variant="contained" onClick={handleSubmit}>
+        <Button
+          className="submit"
+          size="small"
+          variant="contained"
+          onClick={handleSubmit}
+        >
           submit
         </Button>
       </BottomBar>

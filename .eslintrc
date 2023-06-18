@@ -1,8 +1,21 @@
 {
-  "extends": ["@halodong/eslint-config-ts", "@halodong/eslint-config-react"],
-  "rules": {
-    "react/prop-types": {
-      "ignore": true
-    }
+  "extends": ["@halodong/eslint-config-react"],
+  "parserOptions": {
+    "ecmaFeatures": {
+      "jsx": true
+    },
+    "babelOptions": {
+      "presets": [
+        "@babel/preset-env",
+        "@babel/preset-react",
+        "@babel/preset-typescript"
+      ],
+      "plugins": [
+        ["@babel/plugin-proposal-decorators", { "legacy": true }],
+        ["@babel/plugin-proposal-class-properties", { "loose": true }]
+      ]
+    },
+    "requireConfigFile": false,
+    "project": "./tsconfig.eslint.json"
   }
 }

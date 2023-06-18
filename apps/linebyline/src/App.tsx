@@ -1,13 +1,9 @@
-import { APP_NAME, EVENT } from '@/constants'
-import { CacheManager } from '@/helper'
-import { loadTask, use } from '@/helper/schedule'
-import { Root, Setting } from '@/router'
 import { BaseStyle } from '@linebyline/editor'
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles'
 import { invoke } from '@tauri-apps/api'
 import { listen } from '@tauri-apps/api/event'
-import { checkUpdate, installUpdate } from '@tauri-apps/api/updater'
-import { Theme, WebviewWindow } from '@tauri-apps/api/window'
+import type { Theme } from '@tauri-apps/api/window'
+import { WebviewWindow } from '@tauri-apps/api/window'
 import { useCallback, useEffect } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import 'remixicon/fonts/remixicon.css'
@@ -16,14 +12,19 @@ import { GlobalStyles } from './globalStyles'
 import { useGlobalSettingData, useGlobalTheme } from './hooks'
 import useGlobalOSInfo from './hooks/useOSInfo'
 import { i18nInit } from './i18n'
+import { Root, Setting } from '@/router'
+import { loadTask, use } from '@/helper/schedule'
+import { APP_NAME, EVENT } from '@/constants'
+import { CacheManager } from '@/helper'
 
 function App() {
   useGlobalOSInfo()
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, handler] = useGlobalSettingData()
   const { themeColors, muiTheme, setTheme } = useGlobalTheme()
   const { setSetting } = handler
   const isWeb = (window as any).__TAURI_IPC__ === undefined
-
+  console.log('qwe')
   // TODO web need return a editor
   if (!isWeb) {
     use(
@@ -38,8 +39,8 @@ function App() {
               i18nInit({ lng: res.language })
               resolve(res)
             })
-          })
-      )
+          }),
+      ),
     )
     use(loadTask('cache', () => CacheManager.init()))
   }
@@ -56,7 +57,7 @@ function App() {
 
   const eventInit = useCallback(() => {
     const unListenOpenSetting = listen(EVENT.open_window_setting, () => {
-      new WebviewWindow(`setting`, {
+      new WebviewWindow('setting', {
         url: './setting',
         title: `${APP_NAME} Setting`,
         width: 1000,
@@ -78,11 +79,12 @@ function App() {
     }
   }, [])
 
-  const updaterinit = useCallback(async () => {
-    // TODO 更新默认的 setting
-    const update = await checkUpdate()
-    if (update.shouldUpdate) await installUpdate()
-  }, [])
+  // const updaterinit = useCallback(async () => {
+  //   // TODO 更新默认的 setting
+  //   const update = await checkUpdate()
+  //   if (update.shouldUpdate)
+  //     await installUpdate()
+  // }, [])
 
   return (
     <ThemeProvider theme={themeColors}>

@@ -18,9 +18,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             </FallBackContainer>
           }
         >
-            <App />
+          <App />
         </Suspense>
       </BrowserRouter>
     </HoxRoot>
-  </StrictMode>
+  </StrictMode>,
 )

@@ -22,8 +22,8 @@ import {
   TableExtension,
   TaskListExtension,
   UnderlineExtension,
-} from 'remirror/extensions';
-import data from 'svgmoji/emoji.json';
+} from 'remirror/extensions'
+import data from 'svgmoji/emoji.json'
 // import { TableExtension } from './ReactTables';
 
 function extensions() {

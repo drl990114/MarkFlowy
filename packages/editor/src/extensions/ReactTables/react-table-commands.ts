@@ -1,10 +1,16 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
-import { DispatchFunction, EditorState, ProsemirrorNode } from '@remirror/core';
-import { Transaction } from '@remirror/pm/state';
-import { TableMap, addColSpan, isInTable, selectedRect, tableNodeTypes } from '@remirror/pm/tables';
+import type { DispatchFunction, EditorState, ProsemirrorNode } from '@remirror/core'
+import type { Transaction } from '@remirror/pm/state'
+import type { TableMap } from '@remirror/pm/tables'
+import {
+  addColSpan,
+  isInTable,
+  selectedRect,
+  tableNodeTypes,
+} from '@remirror/pm/tables'
 
-import { setAttr } from './table-column-resizing';
+import { setAttr } from './table-column-resizing'
 
 /**
  * Add a column at the given position in a table.
@@ -15,35 +21,40 @@ import { setAttr } from './table-column-resizing';
  */
 export function addColumn(
   tr: Transaction,
-  { map, tableStart, table }: { map: TableMap; tableStart: number; table: ProsemirrorNode },
+  {
+    map,
+    tableStart,
+    table,
+  }: { map: TableMap; tableStart: number; table: ProsemirrorNode },
   col: number,
 ): Transaction {
-  const refColumn: number = col < map.width ? 0 : -1;
+  const refColumn: number = col < map.width ? 0 : -1
 
   for (let row = 0; row < map.height; row++) {
-    const index = row * map.width + col;
+    const index = row * map.width + col
 
     // If this position falls inside a col-spanning cell
     if (col > 0 && col < map.width && map.map[index - 1] === map.map[index]) {
-      const pos = map.map[index]!;
-      const cell = table.nodeAt(pos)!;
+      const pos = map.map[index]!
+      const cell = table.nodeAt(pos)!
       tr.setNodeMarkup(
         tr.mapping.map(tableStart + pos),
         undefined,
         // @ts-expect-error: cell.attrs needs stricter types
         addColSpan(cell.attrs, col - map.colCount(pos)),
-      );
+      )
       // Skip ahead if rowspan > 1
-      row += cell.attrs.rowspan - 1;
-    } else {
-      const type = table.nodeAt(map.map[index + refColumn]!)!.type;
-      // @ts-ignore
-      const pos = map.positionAt(row, col, table);
-      tr.insert(tr.mapping.map(tableStart + pos), type.createAndFill()!);
+      row += cell.attrs.rowspan - 1
+    }
+    else {
+      const type = table.nodeAt(map.map[index + refColumn]!)!.type
+      // @ts-expect-error
+      const pos = map.positionAt(row, col, table)
+      tr.insert(tr.mapping.map(tableStart + pos), type.createAndFill()!)
     }
   }
 
-  return tr;
+  return tr
 }
 
 /**
@@ -53,16 +64,15 @@ export function addColumnBefore(
   state: EditorState,
   dispatch: DispatchFunction | undefined,
 ): boolean {
-  if (!isInTable(state)) {
-    return false;
-  }
+  if (!isInTable(state))
+    return false
 
   if (dispatch) {
-    const rect = selectedRect(state);
-    dispatch(addColumn(state.tr, rect, rect.left));
+    const rect = selectedRect(state)
+    dispatch(addColumn(state.tr, rect, rect.left))
   }
 
-  return true;
+  return true
 }
 
 /**
@@ -72,16 +82,15 @@ export function addColumnAfter(
   state: EditorState,
   dispatch: DispatchFunction | undefined,
 ): boolean {
-  if (!isInTable(state)) {
-    return false;
-  }
+  if (!isInTable(state))
+    return false
 
   if (dispatch) {
-    const rect = selectedRect(state);
-    dispatch(addColumn(state.tr, rect, rect.right));
+    const rect = selectedRect(state)
+    dispatch(addColumn(state.tr, rect, rect.right))
   }
 
-  return true;
+  return true
 }
 
 /**
@@ -93,63 +102,79 @@ export function addColumnAfter(
  */
 export function addRow(
   tr: Transaction,
-  { map, tableStart, table }: { map: TableMap; tableStart: number; table: ProsemirrorNode },
+  {
+    map,
+    tableStart,
+    table,
+  }: { map: TableMap; tableStart: number; table: ProsemirrorNode },
   row: number,
 ): Transaction {
-  let rowPos = tableStart;
+  let rowPos = tableStart
 
-  for (let i = 0; i < row; i++) {
-    rowPos += table.child(i).nodeSize;
-  }
+  for (let i = 0; i < row; i++)
+    rowPos += table.child(i).nodeSize
 
-  const refRow: number = row < map.height - 1 ? 0 : -1;
-  const cells: ProsemirrorNode[] = [];
+  const refRow: number = row < map.height - 1 ? 0 : -1
+  const cells: ProsemirrorNode[] = []
 
   for (let col = 0, index = map.width * row; col < map.width; col++, index++) {
     // Covered by a rowspan cell
-    if (row > 0 && row < map.height && map.map[index] === map.map[index - map.width]) {
-      const pos = map.map[index]!;
-      const attrs = table.nodeAt(pos)!.attrs;
-      tr.setNodeMarkup(tableStart + pos, undefined, setAttr(attrs, 'rowspan', attrs.rowspan + 1));
-      col += attrs.colspan - 1;
-    } else {
-      const type = table.nodeAt(map.map[index + refRow * map.width]!)!.type;
-      cells.push(type.createAndFill()!);
+    if (
+      row > 0
+      && row < map.height
+      && map.map[index] === map.map[index - map.width]
+    ) {
+      const pos = map.map[index]!
+      const attrs = table.nodeAt(pos)!.attrs
+      tr.setNodeMarkup(
+        tableStart + pos,
+        undefined,
+        setAttr(attrs, 'rowspan', attrs.rowspan + 1),
+      )
+      col += attrs.colspan - 1
+    }
+    else {
+      const type = table.nodeAt(map.map[index + refRow * map.width]!)!.type
+      cells.push(type.createAndFill()!)
     }
   }
 
-  tr.insert(rowPos, tableNodeTypes(table.type.schema).row.create(null, cells));
-  return tr;
+  tr.insert(rowPos, tableNodeTypes(table.type.schema).row.create(null, cells))
+  return tr
 }
 
 /**
  * Add a table row before the selection.
  */
-export function addRowBefore(state: EditorState, dispatch: DispatchFunction | undefined): boolean {
-  if (!isInTable(state)) {
-    return false;
-  }
+export function addRowBefore(
+  state: EditorState,
+  dispatch: DispatchFunction | undefined,
+): boolean {
+  if (!isInTable(state))
+    return false
 
   if (dispatch) {
-    const rect = selectedRect(state);
-    dispatch(addRow(state.tr, rect, rect.top));
+    const rect = selectedRect(state)
+    dispatch(addRow(state.tr, rect, rect.top))
   }
 
-  return true;
+  return true
 }
 
 /**
  * Add a table row after the selection.
  */
-export function addRowAfter(state: EditorState, dispatch: DispatchFunction | undefined): boolean {
-  if (!isInTable(state)) {
-    return false;
-  }
+export function addRowAfter(
+  state: EditorState,
+  dispatch: DispatchFunction | undefined,
+): boolean {
+  if (!isInTable(state))
+    return false
 
   if (dispatch) {
-    const rect = selectedRect(state);
-    dispatch(addRow(state.tr, rect, rect.bottom));
+    const rect = selectedRect(state)
+    dispatch(addRow(state.tr, rect, rect.bottom))
   }
 
-  return true;
+  return true
 }
