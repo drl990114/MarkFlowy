@@ -6,7 +6,6 @@ interface MetaProps {
 }
 
 export function Meta({ title }: MetaProps) {
-
   return (
     <Head>
       <>

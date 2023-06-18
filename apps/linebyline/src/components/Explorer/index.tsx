@@ -69,7 +69,7 @@ const Explorer: FC<ExplorerProps> = (props) => {
     <Container className={containerCLs}>
       <div className="explorer-header">
         <small>EXPLORER</small>
-        <div className="flex"></div>
+        <div className="flex" />
       </div>
       <div className="h-full w-full overflow-auto">
         {folderData
@@ -79,7 +79,7 @@ const Explorer: FC<ExplorerProps> = (props) => {
             data={folderData}
             activeId={activeId}
             onSelect={handleSelect}
-          ></FileTree>
+           />
             )
           : (
           <Empty />
@@ -104,7 +104,7 @@ const Explorer: FC<ExplorerProps> = (props) => {
           <i
             className="ri-more-2-fill icon-border cursor-pointer"
             onClick={() => setPopperOpen(true)}
-          ></i>
+           />
         </Popper>
       </div>
     </Container>

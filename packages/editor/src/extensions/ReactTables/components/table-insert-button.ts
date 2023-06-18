@@ -105,19 +105,15 @@ function TableInsertButton({
   const insertRolOrColumn = () => {
     let tr = view.state.tr as any
 
-    if (attrs.col !== -1) {
-      // @ts-expect-error
+    if (attrs.col !== -1)
       tr = addColumn(tr, tableRect, attrs.col)
-    }
-    else if (attrs.row !== -1) {
-      // @ts-expect-error
-      tr = addRow(tr, tableRect, attrs.row)
-    }
-    else {
-      return
-    }
 
-    // @ts-expect-error
+    else if (attrs.row !== -1)
+      tr = addRow(tr, tableRect, attrs.row)
+
+    else
+      return
+
     view.dispatch(removeInsertButton(tr))
   }
 

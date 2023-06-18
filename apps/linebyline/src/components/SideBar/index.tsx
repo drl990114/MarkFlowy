@@ -18,7 +18,7 @@ function SideBar() {
       {
         title: RIGHTBARITEMKEYS.Explorer,
         key: RIGHTBARITEMKEYS.Explorer,
-        icon: <i className="ri-file-list-3-line"></i>,
+        icon: <i className="ri-file-list-3-line" />,
         components: <Explorer />,
       },
       chatgpt,

@@ -9,7 +9,7 @@ import styled from 'styled-components'
 import EditorExtensions from '../../extensions'
 import Text from '../Text'
 
-interface Context extends Props {}
+type Context = Props
 
 interface Props {
   file: Global.IFile
@@ -27,11 +27,10 @@ const [DualEditorProvider, useDualEditor] = createContextState<Context, Props>(
   },
 )
 
-// eslint-disable-next-line react/display-name
 const MarkdownTextEditor = memo(
   (props: { setEditorCtx: (id: string, ctx: any) => void }) => {
     const { setEditorCtx } = props
-    const { visual, file, markText, active } = useDualEditor()
+    const { visual, file, markText} = useDualEditor()
 
     useEffect(() => {
       setEditorCtx(file.id, {

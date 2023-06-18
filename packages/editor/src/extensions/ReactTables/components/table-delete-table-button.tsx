@@ -72,7 +72,6 @@ function createDeleteTableButtonPositioner(): Positioner<DeleteTableButtonPositi
       const { view, data } = props
 
       const { node, pos } = data.tableResult
-      // @ts-expect-error
       const map = TableMap.get(node)
 
       const firstCellDOM = view.nodeDOM(pos + map.map[0] + 1)

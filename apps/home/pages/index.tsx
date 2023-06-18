@@ -1,10 +1,10 @@
-import { Layout } from '@/components/layout'
-import { Meta } from '@/components/meta'
-import { Paragraph } from '@/components/paragraph'
 import type { GetStaticProps } from 'next'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import nextI18NextConfig from '../next-i18next.config.js'
+import { Paragraph } from '@/components/paragraph'
+import { Meta } from '@/components/meta'
+import { Layout } from '@/components/layout'
 
 export default function Home() {
   const { t } = useTranslation('common')
@@ -96,7 +96,7 @@ export const getStaticProps: GetStaticProps<{}> = async ({ locale }) => ({
     ...(await serverSideTranslations(
       locale ?? 'en',
       ['common'],
-      nextI18NextConfig
+      nextI18NextConfig,
     )),
   },
 })

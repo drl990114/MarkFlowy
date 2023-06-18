@@ -15,15 +15,13 @@ export interface ParagraphProps {
 }
 
 export function Paragraph({ paragraph, ...props }: ParagraphProps) {
-  if (!paragraph) {
+  if (!paragraph)
     return null
-  }
 
   const Component = paragraphTypes[paragraph.type]
 
-  if (!Component) {
+  if (!Component)
     return null
-  }
 
   return <Component paragraph={paragraph} {...props} />
 }

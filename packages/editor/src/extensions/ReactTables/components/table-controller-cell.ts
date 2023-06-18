@@ -26,7 +26,6 @@ function TableControllerCell({
   const findTable = (): FindProsemirrorNodeResult | undefined => {
     return findParentNodeOfType({
       types: 'table',
-      // @ts-expect-error
       selection: view.state.doc.resolve(getPos()),
     })
   }

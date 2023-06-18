@@ -23,7 +23,7 @@ const FileNode: FC<FileNodeProps> = ({
   )
 
   const handleSelect: MouseEventHandler = useCallback(
-    (e) => {
+    () => {
       onSelect(item)
     },
     [item, onSelect],

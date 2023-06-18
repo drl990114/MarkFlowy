@@ -23,7 +23,7 @@ export default function Setting() {
         aria-expanded={open ? 'true' : undefined}
         onClick={handleClick}
       >
-        <i className="ri-settings-line text-24px"></i>
+        <i className="ri-settings-line text-24px" />
       </div>
       <Menu
         id="demo-positioned-menu"

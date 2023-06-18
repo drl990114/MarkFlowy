@@ -45,7 +45,7 @@ const ChatList: React.FC<ChatListProps> = (props) => {
       <div className="header">
         ChatGPT
         <div>
-          <i className="icon ri-file-download-line" onClick={exportChats}></i>
+          <i className="icon ri-file-download-line" onClick={exportChats} />
         </div>
       </div>
       <div className="content">
@@ -103,7 +103,7 @@ const ChatList: React.FC<ChatListProps> = (props) => {
           : (
           <div className="introduction">
             <div className="introduction-title">
-              <i className="ri-flashlight-line"></i>Capabilities
+              <i className="ri-flashlight-line" />Capabilities
             </div>
             <div className="introduction-item">
               One-click export of conversation content as md file
