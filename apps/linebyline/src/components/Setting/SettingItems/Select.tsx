@@ -1,6 +1,5 @@
 import Autocomplete from '@mui/material/Autocomplete'
 import { useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import type { SettingItemProps } from '.'
 import { useGlobalSettingData } from '@/hooks'
 
@@ -20,8 +19,6 @@ const SelectSettingItem: React.FC<
     if (curValue !== value)
       setValue(curValue)
   }, [curValue])
-
-  const { t } = useTranslation()
 
   return (
     <label>
@@ -47,12 +44,12 @@ const SelectSettingItem: React.FC<
           // Regular option
           return option.title
         }}
-        renderOption={(props, option) => <li {...props}>{option.title}</li>}
-        onChange={(_, value) => {
-          if (!value)
+        renderOption={(p, option) => <li {...p}>{option.title}</li>}
+        onChange={(_, v) => {
+          if (!v)
             return
-          writeSettingData(item, value.value)
-          setValue(value)
+          writeSettingData(item, v.value)
+          setValue(v)
         }}
         renderInput={params => (
           <div ref={params.InputProps.ref}>

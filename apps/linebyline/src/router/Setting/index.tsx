@@ -27,7 +27,7 @@ function Setting() {
   return (
     <Container>
       <div id="sidebar">
-        <div className="title"></div>
+        <div className="title" />
         {/* TODO search */}
         {/* <div id="search-form" role="search">
           <input id="q" aria-label="Search contacts" placeholder="Search" type="search" name="q" />
@@ -82,9 +82,3 @@ function Setting() {
 }
 
 export default memo(Setting)
-
-interface TabPanelProps {
-  children?: React.ReactNode
-  index: number
-  value: number
-}

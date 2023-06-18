@@ -36,8 +36,8 @@ function Editor(props: EditorProps) {
       if (file.path) {
         const text = (await invoke('get_file_content', {
           filePath: file.path,
-        })) as string
-        setContent(text)
+        }))
+        setContent(text as string)
       }
       else if (file.content) {
         setContent(file.content)
@@ -54,8 +54,8 @@ function Editor(props: EditorProps) {
           if (curFile.path)
             emit('file_save')
 
-          const content = getEditorContent(curFile.id)
-          setContent(content)
+          const text = getEditorContent(curFile.id)
+          setContent(text)
           setType(payload)
         }
       },

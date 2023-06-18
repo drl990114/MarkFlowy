@@ -110,7 +110,6 @@ export function createTableControllerPlugin(): ProsemirrorPlugin<ControllerState
       },
     },
     props: {
-      // @ts-expect-error
       decorations: (state: EditorState) => {
         const controllerState = key.getState(state)
 
@@ -135,7 +134,6 @@ export function createTableControllerPlugin(): ProsemirrorPlugin<ControllerState
               class: className,
             }),
           ]
-          // @ts-expect-error
           return DecorationSet.create(state.doc, decorations)
         }
 

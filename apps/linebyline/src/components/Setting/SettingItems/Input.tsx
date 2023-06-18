@@ -19,8 +19,8 @@ const InputSettingItem: React.FC<SettingItemProps<Setting.InputSettingItem>> = (
 
   const handleChange = useCallback(
     (e: { target: { value: any } }) => {
-      const value = e.target.value
-      writeSettingData(item, value)
+      const settingValue = e.target.value
+      writeSettingData(item, settingValue)
     },
     [item, writeSettingData],
   )

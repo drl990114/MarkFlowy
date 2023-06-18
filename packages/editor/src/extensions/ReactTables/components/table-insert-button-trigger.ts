@@ -83,7 +83,6 @@ function showButton(
     view.dom,
     axis,
   )
-  // @ts-expect-error
   view.dispatch(
     setNodeAttrs(view.state.tr, tableResult.pos, { insertButtonAttrs }),
   )

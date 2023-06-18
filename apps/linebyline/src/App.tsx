@@ -2,7 +2,6 @@ import { BaseStyle } from '@linebyline/editor'
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles'
 import { invoke } from '@tauri-apps/api'
 import { listen } from '@tauri-apps/api/event'
-import { checkUpdate, installUpdate } from '@tauri-apps/api/updater'
 import type { Theme } from '@tauri-apps/api/window'
 import { WebviewWindow } from '@tauri-apps/api/window'
 import { useCallback, useEffect } from 'react'
@@ -20,11 +19,12 @@ import { CacheManager } from '@/helper'
 
 function App() {
   useGlobalOSInfo()
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, handler] = useGlobalSettingData()
   const { themeColors, muiTheme, setTheme } = useGlobalTheme()
   const { setSetting } = handler
   const isWeb = (window as any).__TAURI_IPC__ === undefined
-
+  console.log('qwe')
   // TODO web need return a editor
   if (!isWeb) {
     use(
@@ -46,8 +46,7 @@ function App() {
   }
 
   useEffect(() => {
-    if (isWeb)
-      return
+    if (isWeb) return
     const unlisten = eventInit()
     // updaterinit()
 
@@ -75,17 +74,17 @@ function App() {
     })
 
     return () => {
-      unListenOpenSetting.then(fn => fn())
-      unListenChangeTheme.then(fn => fn())
+      unListenOpenSetting.then((fn) => fn())
+      unListenChangeTheme.then((fn) => fn())
     }
   }, [])
 
-  const updaterinit = useCallback(async () => {
-    // TODO 更新默认的 setting
-    const update = await checkUpdate()
-    if (update.shouldUpdate)
-      await installUpdate()
-  }, [])
+  // const updaterinit = useCallback(async () => {
+  //   // TODO 更新默认的 setting
+  //   const update = await checkUpdate()
+  //   if (update.shouldUpdate)
+  //     await installUpdate()
+  // }, [])
 
   return (
     <ThemeProvider theme={themeColors}>
