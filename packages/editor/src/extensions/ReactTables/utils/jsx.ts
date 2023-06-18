@@ -1,6 +1,6 @@
-import { HTMLAttributes } from './dom';
+import type { HTMLAttributes } from './dom'
 
-export type Events<T = Element> = Pick<HTMLAttributes<T>, EventName>;
+export type Events<T = Element> = Pick<HTMLAttributes<T>, EventName>
 
 export type EventName =
   // Clipboard Events
@@ -191,4 +191,4 @@ export type EventName =
 
   // Transition Events
   | 'onTransitionEnd'
-  | 'onTransitionEndCapture';
+  | 'onTransitionEndCapture'

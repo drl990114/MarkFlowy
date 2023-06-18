@@ -1,8 +1,7 @@
 // @ts-nocheck
-import { CellSelection } from '@remirror/pm/tables';
+import type { CellSelection } from '@remirror/pm/tables'
 
-
-import { CellSelectionType, getCellSelectionType } from '../utils/controller';
+import { CellSelectionType, getCellSelectionType } from '../utils/controller'
 
 describe('getCellSelectionType', () => {
   for (const [isRow, isCol, expected] of [
@@ -15,8 +14,8 @@ describe('getCellSelectionType', () => {
       const selection = {
         isRowSelection: () => isRow,
         isColSelection: () => isCol,
-      } as CellSelection;
-      expect(getCellSelectionType(selection)).toBe(expected);
-    });
+      } as CellSelection
+      expect(getCellSelectionType(selection)).toBe(expected)
+    })
   }
-});
+})

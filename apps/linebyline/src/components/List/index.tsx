@@ -2,9 +2,10 @@ import MuiList from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
 import ListItemAvatar from '@mui/material/ListItemAvatar'
 import ListItemText from '@mui/material/ListItemText'
-import { TooltipProps } from '@mui/material/Tooltip'
+import type { TooltipProps } from '@mui/material/Tooltip'
 import Tooltip from '@mui/material/Tooltip/Tooltip'
-import { FC, memo } from 'react'
+import type { FC } from 'react'
+import { memo } from 'react'
 import { ListContainer } from './styles'
 
 const List: FC<ListProps> = (props) => {
@@ -16,13 +17,20 @@ const List: FC<ListProps> = (props) => {
         <h5 className="list-title">{title}</h5>
         {data.map((item) => {
           return (
-            <ListItem key={item.key} className="list-item label-default" onClick={() => onItemClick?.(item)}>
-              {item.iconCls ? (
+            <ListItem
+              key={item.key}
+              className="list-item label-default"
+              onClick={() => onItemClick?.(item)}
+            >
+              {item.iconCls
+                ? (
                 <ListItemAvatar className="list-item__avatar">
                   <i className={item.iconCls} />
                 </ListItemAvatar>
-              ) : null}
-              {tip === false ? (
+                  )
+                : null}
+              {tip === false
+                ? (
                 <ListItemText
                   className="list-item__text"
                   primaryTypographyProps={{
@@ -35,7 +43,8 @@ const List: FC<ListProps> = (props) => {
                   }}
                   primary={item.title}
                 />
-              ) : (
+                  )
+                : (
                 <Tooltip title={item.title} placement="right" arrow {...tip}>
                   <ListItemText
                     className="list-item__text"
@@ -50,7 +59,7 @@ const List: FC<ListProps> = (props) => {
                     primary={item.title}
                   />
                 </Tooltip>
-              )}
+                  )}
             </ListItem>
           )
         })}

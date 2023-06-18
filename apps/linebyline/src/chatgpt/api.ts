@@ -1,9 +1,15 @@
-export const callChatGptApi = async (text: string, model: string, onStatus: (status: Status) => void, maxRetry = 5, apiKey: string): Promise<Status> => {
+export async function callChatGptApi(
+  text: string,
+  model: string,
+  onStatus: (status: Status) => void,
+  maxRetry = 5,
+  apiKey: string,
+): Promise<Status> {
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`,
+      'Authorization': `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
       model,
@@ -27,13 +33,14 @@ export const callChatGptApi = async (text: string, model: string, onStatus: (sta
     }
     onStatus({ status: 'error', message: res.error.message })
     return { status: 'error', message: res.error.message }
-  } else {
+  }
+  else {
     const res = (await response.json()) as ApiStreamResponse
 
     let resText = ''
-    res.choices.forEach(choice => resText += choice.message.content)
+    res.choices.forEach(choice => (resText += choice.message.content))
 
-    onStatus({ status: 'done', result: resText  })
+    onStatus({ status: 'done', result: resText })
     return { status: 'done', result: resText }
   }
 }
@@ -47,7 +54,7 @@ export const callChatGptApi = async (text: string, model: string, onStatus: (sta
 //   return shorthands[model] ?? model
 // }
 
-type ErrorResponse = {
+interface ErrorResponse {
   error: {
     message: string
     type: string
@@ -56,9 +63,12 @@ type ErrorResponse = {
   }
 }
 
-export type Status = { status: 'pending'; lastToken: string } | { status: 'done'; result: string } | { status: 'error'; message: string }
+export type Status =
+  | { status: 'pending'; lastToken: string }
+  | { status: 'done'; result: string }
+  | { status: 'error'; message: string }
 
-type ApiStreamResponse = {
+interface ApiStreamResponse {
   id: string
   model: string
   choices: {

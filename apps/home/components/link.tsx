@@ -6,12 +6,17 @@ interface LinkProps extends NextLinkProps {
   href: string
 }
 
-export function Link({ href, passHref, as, children, ...props }: PropsWithChildren<LinkProps>) {
+export function Link({
+  href,
+  passHref,
+  as,
+  children,
+  ...props
+}: PropsWithChildren<LinkProps>) {
   const router = useRouter()
 
-  if (!href) {
+  if (!href)
     return null
-  }
 
   const linkProps = router.isPreview ? { prefetch: false, ...props } : props
 

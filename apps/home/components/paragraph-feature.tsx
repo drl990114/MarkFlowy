@@ -2,7 +2,7 @@ import classNames from 'classnames'
 import Image from 'next/image'
 
 import { Links } from '@/components/links'
-import { ParagraphProps } from '@/components/paragraph'
+import type { ParagraphProps } from '@/components/paragraph'
 import { Section } from '@/components/section'
 
 export function ParagraphFeature({ paragraph, ...props }: ParagraphProps) {
@@ -21,7 +21,7 @@ export function ParagraphFeature({ paragraph, ...props }: ParagraphProps) {
               className={classNames(
                 paragraph.field_media_position === 'left'
                   ? 'md:col-start-1'
-                  : 'md:col-start-2'
+                  : 'md:col-start-2',
               )}
             >
               <Image

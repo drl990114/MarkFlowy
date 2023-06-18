@@ -1,7 +1,7 @@
-import { FindProsemirrorNodeResult } from '@remirror/core';
+import type { FindProsemirrorNodeResult } from '@remirror/core'
 
-export type FindTable = () => FindProsemirrorNodeResult | undefined;
+export type FindTable = () => FindProsemirrorNodeResult | undefined
 export interface CellAxis {
-  row: number;
-  col: number;
+  row: number
+  col: number
 }

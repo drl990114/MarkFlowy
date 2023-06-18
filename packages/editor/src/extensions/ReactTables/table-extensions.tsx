@@ -1,25 +1,30 @@
 // @ts-nocheck
-import {
+import type {
   ApplySchemaAttributes,
-  command,
   CommandFunction,
-  composeTransactionSteps,
-  convertCommand,
   CreateExtensionPlugin,
-  Decoration,
   DOMCompatibleAttributes,
+  Decoration,
   EditorView,
-  ExtensionPriority,
-  findChildren,
-  getChangedNodes,
-  isElementDomNode,
   NodeSpecOverride,
   NodeViewMethod,
   ProsemirrorNode,
   ProsemirrorPlugin,
-  replaceNodeAtPosition
-} from '@remirror/core';
-import type { CreateTableCommand, TableSchemaSpec } from '@remirror/extension-tables';
+} from '@remirror/core'
+import {
+  ExtensionPriority,
+  command,
+  composeTransactionSteps,
+  convertCommand,
+  findChildren,
+  getChangedNodes,
+  isElementDomNode,
+  replaceNodeAtPosition,
+} from '@remirror/core'
+import type {
+  CreateTableCommand,
+  TableSchemaSpec,
+} from '@remirror/extension-tables'
 import {
   TableCellExtension as BaseTableCellExtension,
   TableControllerCellExtension as BaseTableControllerCellExtension,
@@ -28,29 +33,36 @@ import {
   TableRowExtension as BaseTableRowExtension,
   createTable,
   createTableOptions,
-} from '@remirror/extension-tables';
-import { TextSelection } from '@remirror/pm/state';
-import { tableEditing, TableMap } from '@remirror/pm/tables';
+} from '@remirror/extension-tables'
+import { TextSelection } from '@remirror/pm/state'
+import { TableMap, tableEditing } from '@remirror/pm/tables'
 
-import { InsertButtonAttrs } from './components/table-insert-button';
-import { addColumnAfter, addColumnBefore, addRowAfter, addRowBefore } from './react-table-commands';
-import { columnResizing } from './table-column-resizing';
-import { createTableControllerPlugin } from './table-plugins';
-import { injectControllers } from './utils/controller';
-import { TableControllerCellView } from './views/table-controller-cell-view';
-import { TableView } from './views/table-view';
+import type { InsertButtonAttrs } from './components/table-insert-button'
+import {
+  addColumnAfter,
+  addColumnBefore,
+  addRowAfter,
+  addRowBefore,
+} from './react-table-commands'
+import { columnResizing } from './table-column-resizing'
+import { createTableControllerPlugin } from './table-plugins'
+import { injectControllers } from './utils/controller'
+import { TableControllerCellView } from './views/table-controller-cell-view'
+import { TableView } from './views/table-view'
 
-export type ReactTableNodeAttrs<T extends Record<string, any> = Record<never, never>> = T & {
-  isControllersInjected: boolean;
+export type ReactTableNodeAttrs<
+  T extends Record<string, any> = Record<never, never>,
+> = T & {
+  isControllersInjected: boolean
 
   // if and only if `insertButtonAttrs` exists, InsertButton will show.
   // TODO: move insertButtonAttrs to ControllerPlugin
-  insertButtonAttrs: InsertButtonAttrs | null;
-};
+  insertButtonAttrs: InsertButtonAttrs | null
+}
 
 export class TableExtension extends BaseTableExtension {
   get name() {
-    return 'table' as const;
+    return 'table' as const
   }
 
   createNodeViews(): NodeViewMethod {
@@ -60,30 +72,34 @@ export class TableExtension extends BaseTableExtension {
       getPos: () => number | undefined,
       decorations: readonly Decoration[],
     ) => {
-      return new TableView(node, 10, decorations, view, getPos as () => number);
-    };
+      return new TableView(node, 10, decorations, view, getPos as () => number)
+    }
   }
 
   /**
    * Add the table plugins to the editor.
    */
   createExternalPlugins(): ProsemirrorPlugin[] {
-    const plugins: ProsemirrorPlugin[] = [];
+    const plugins: ProsemirrorPlugin[] = []
 
-    if (this.store.isMounted() && this.store.helpers.isViewEditable() === false) {
-      return plugins;
-    }
+    if (
+      this.store.isMounted()
+      && this.store.helpers.isViewEditable() === false
+    )
+      return plugins
 
-    const { resizable, resizeableOptions } = this.options;
+    const { resizable, resizeableOptions } = this.options
 
     if (resizable) {
       // Add first to avoid highlighting cells while resizing
-      plugins.push(columnResizing({ ...resizeableOptions, firstResizableColumn: 1 }));
+      plugins.push(
+        columnResizing({ ...resizeableOptions, firstResizableColumn: 1 }),
+      )
     }
 
-    plugins.push(tableEditing(), createTableControllerPlugin());
+    plugins.push(tableEditing(), createTableControllerPlugin())
 
-    return plugins;
+    return plugins
   }
 
   createNodeSpec(extra: ApplySchemaAttributes): TableSchemaSpec {
@@ -100,29 +116,33 @@ export class TableExtension extends BaseTableExtension {
         {
           tag: 'table',
           getAttrs: (node) => {
-            if (!isElementDomNode(node)) {
-              return {};
-            }
+            if (!isElementDomNode(node))
+              return {}
 
             return {
               ...extra.parse(node),
-              isControllersInjected: node.hasAttribute('data-controllers-injected'),
-            };
+              isControllersInjected: node.hasAttribute(
+                'data-controllers-injected',
+              ),
+            }
           },
         },
       ],
       toDOM(node) {
-        const controllerAttrs: DOMCompatibleAttributes = {};
+        const controllerAttrs: DOMCompatibleAttributes = {}
 
-        if (node.attrs.isControllersInjected) {
-          controllerAttrs['data-controllers-injected'] = '';
-        }
+        if (node.attrs.isControllersInjected)
+          controllerAttrs['data-controllers-injected'] = ''
 
-        return ['table', { ...extra.dom(node), ...controllerAttrs }, ['tbody', 0]];
+        return [
+          'table',
+          { ...extra.dom(node), ...controllerAttrs },
+          ['tbody', 0],
+        ]
       },
       allowGapCursor: false,
-    };
-    return spec;
+    }
+    return spec
   }
 
   /**
@@ -130,51 +150,56 @@ export class TableExtension extends BaseTableExtension {
    * lower down in the node list.
    */
   createExtensions() {
-    return [new TableRowExtension({ priority: ExtensionPriority.Low })];
+    return [new TableRowExtension({ priority: ExtensionPriority.Low })]
   }
 
   onView(view: EditorView): void {
-    super.onView(view);
+    super.onView(view)
 
     // We have multiple node types which share a eom table_row in this
     // extension. In order to make the function `tableNodeTypes` from
     // `prosemirror-extension-tables` return the correct node type, we
     // need to overwrite `schema.cached.tableNodeTypes`.
-    const schema = this.store.schema;
+    const schema = this.store.schema
     schema.cached.tableNodeTypes = {
       cell: schema.nodes.tableCell,
       row: schema.nodes.tableRow,
       table: schema.nodes.table,
       header_cell: schema.nodes.tableHeaderCell,
-    };
+    }
 
     const {
       dispatch,
       state: { doc, tr },
-    } = view;
+    } = view
 
     const tableNodes = findChildren({
       node: doc,
       predicate: ({ node: { type, attrs } }) => {
-        return type === schema.nodes.table && attrs.isControllersInjected === false;
+        return (
+          type === schema.nodes.table && attrs.isControllersInjected === false
+        )
       },
-    });
+    })
 
-    if (tableNodes.length === 0) {
-      return;
-    }
+    if (tableNodes.length === 0)
+      return
 
     for (const { node: table, pos } of tableNodes) {
       const controlledTable = injectControllers({
         schema,
         getMap: () => TableMap.get(table),
         table,
-      });
+      })
 
-      replaceNodeAtPosition({ pos: tr.mapping.map(pos), tr, content: controlledTable });
+      replaceNodeAtPosition({
+        pos: tr.mapping.map(pos),
+        tr,
+        content: controlledTable,
+      })
     }
 
-    dispatch(tr.setMeta('addToHistory', false));
+    dispatch(tr.setMeta('addToHistory', false))
   }
 
   /**
@@ -183,31 +208,30 @@ export class TableExtension extends BaseTableExtension {
   @command<any>(createTableOptions)
   createTable(options: CreateTableCommand = {}): CommandFunction {
     return (props) => {
-      const { tr, dispatch, state } = props;
+      const { tr, dispatch, state } = props
 
-      if (!tr.selection.empty) {
-        return false;
-      }
+      if (!tr.selection.empty)
+        return false
 
-      const { schema } = state;
-      const offset = tr.selection.anchor + 1;
+      const { schema } = state
+      const offset = tr.selection.anchor + 1
 
-      const table = createTable({ schema, ...options });
+      const table = createTable({ schema, ...options })
       const controlledTable = injectControllers({
         schema,
         getMap: () => TableMap.get(table),
         table,
-      });
+      })
 
       dispatch?.(
         tr
           .replaceSelectionWith(controlledTable)
           .scrollIntoView()
           .setSelection(TextSelection.near(tr.doc.resolve(offset))),
-      );
+      )
 
-      return true;
-    };
+      return true
+    }
   }
 
   /**
@@ -215,7 +239,7 @@ export class TableExtension extends BaseTableExtension {
    */
   @command<any>()
   addTableColumnBefore(): CommandFunction {
-    return convertCommand(addColumnBefore);
+    return convertCommand(addColumnBefore)
   }
 
   /**
@@ -223,7 +247,7 @@ export class TableExtension extends BaseTableExtension {
    */
   @command<any>()
   addTableColumnAfter(): CommandFunction {
-    return convertCommand(addColumnAfter);
+    return convertCommand(addColumnAfter)
   }
 
   /**
@@ -231,7 +255,7 @@ export class TableExtension extends BaseTableExtension {
    */
   @command<any>()
   addTableRowBefore(): CommandFunction {
-    return convertCommand(addRowBefore);
+    return convertCommand(addRowBefore)
   }
 
   /**
@@ -239,57 +263,65 @@ export class TableExtension extends BaseTableExtension {
    */
   @command<any>()
   addTableRowAfter(): CommandFunction {
-    return convertCommand(addRowAfter);
+    return convertCommand(addRowAfter)
   }
 
   createPlugin(): CreateExtensionPlugin {
     return {
       appendTransaction: (transactions, prevState, state) => {
-        const composedTransaction = composeTransactionSteps(transactions, prevState);
+        const composedTransaction = composeTransactionSteps(
+          transactions,
+          prevState,
+        )
 
-        const { schema, tr } = state;
+        const { schema, tr } = state
 
         const tableNodes = getChangedNodes(composedTransaction, {
           predicate: ({ type }: ProsemirrorNode) => type === schema.nodes.table,
-        });
+        })
 
-        if (tableNodes.length === 0) {
-          return;
-        }
+        if (tableNodes.length === 0)
+          return
 
         for (const { node: table, pos } of tableNodes) {
-          if (table.attrs.isControllersInjected) {
-            continue;
-          }
+          if (table.attrs.isControllersInjected)
+            continue
 
           const controlledTable = injectControllers({
             schema,
             getMap: () => TableMap.get(table),
             table,
-          });
+          })
 
-          replaceNodeAtPosition({ pos: tr.mapping.map(pos), tr, content: controlledTable });
+          replaceNodeAtPosition({
+            pos: tr.mapping.map(pos),
+            tr,
+            content: controlledTable,
+          })
         }
 
-        return tr.steps.length > 0 ? tr : undefined;
+        return tr.steps.length > 0 ? tr : undefined
       },
-    };
+    }
   }
 }
 
 export class TableRowExtension extends BaseTableRowExtension {
   get name() {
-    return 'tableRow' as const;
+    return 'tableRow' as const
   }
 
-  createNodeSpec(extra: ApplySchemaAttributes, override: NodeSpecOverride): TableSchemaSpec {
-    const spec = super.createNodeSpec(extra, override);
-    spec.content = '(tableCell | tableHeaderCell | tableControllerCell)*';
+  createNodeSpec(
+    extra: ApplySchemaAttributes,
+    override: NodeSpecOverride,
+  ): TableSchemaSpec {
+    const spec = super.createNodeSpec(extra, override)
+    spec.content = '(tableCell | tableHeaderCell | tableControllerCell)*'
     spec.toDOM = (node) => {
-      return ['tr', extra.dom(node), 0];
-    };
-    spec.allowGapCursor = false;
-    return spec;
+      return ['tr', extra.dom(node), 0]
+    }
+    spec.allowGapCursor = false
+    return spec
   }
 
   /**
@@ -302,43 +334,49 @@ export class TableRowExtension extends BaseTableRowExtension {
       new TableCellExtension({ priority: ExtensionPriority.Low }),
       new TableControllerCellExtension({ priority: ExtensionPriority.Medium }),
       new TableHeaderCellExtension({ priority: ExtensionPriority.Low }),
-    ];
+    ]
   }
 }
 
 export class TableHeaderCellExtension extends BaseTableHeaderCellExtension {
   get name() {
-    return 'tableHeaderCell' as const;
+    return 'tableHeaderCell' as const
   }
 
-  createNodeSpec(extra: ApplySchemaAttributes, override: NodeSpecOverride): TableSchemaSpec {
-    const spec = super.createNodeSpec(extra, override);
+  createNodeSpec(
+    extra: ApplySchemaAttributes,
+    override: NodeSpecOverride,
+  ): TableSchemaSpec {
+    const spec = super.createNodeSpec(extra, override)
     spec.attrs = {
       ...spec.attrs,
-    };
-    spec.allowGapCursor = false;
+    }
+    spec.allowGapCursor = false
 
-    return spec;
+    return spec
   }
 }
 
 export class TableCellExtension extends BaseTableCellExtension {
   get name() {
-    return 'tableCell' as const;
+    return 'tableCell' as const
   }
 
-  createNodeSpec(extra: ApplySchemaAttributes, override: NodeSpecOverride): TableSchemaSpec {
-    const spec = super.createNodeSpec(extra, override);
-    spec.allowGapCursor = false;
-    return spec;
+  createNodeSpec(
+    extra: ApplySchemaAttributes,
+    override: NodeSpecOverride,
+  ): TableSchemaSpec {
+    const spec = super.createNodeSpec(extra, override)
+    spec.allowGapCursor = false
+    return spec
   }
 }
 
 export interface ReactTableControllerCellAttrs {
-  colspan: number;
-  rowspan: number;
-  colwidth: null | number;
-  background: null | string;
+  colspan: number
+  rowspan: number
+  colwidth: null | number
+  background: null | string
 }
 
 export class TableControllerCellExtension extends BaseTableControllerCellExtension {
@@ -350,7 +388,7 @@ export class TableControllerCellExtension extends BaseTableControllerCellExtensi
       rowspan: { default: 1 },
       colwidth: { default: null },
       background: { default: null },
-    };
+    }
 
     return {
       atom: true,
@@ -360,20 +398,24 @@ export class TableControllerCellExtension extends BaseTableControllerCellExtensi
       tableRole: 'header_cell',
       parseDOM: [{ tag: 'th[data-controller-cell]' }],
       toDOM() {
-        return ['th', { 'data-controller-cell': '' }, 0];
+        return ['th', { 'data-controller-cell': '' }, 0]
       },
       allowGapCursor: false,
-    };
+    }
   }
 
   createNodeViews(): NodeViewMethod {
-    return (node: ProsemirrorNode, view: EditorView, getPos: () => number | undefined) => {
-      return new TableControllerCellView(node, view, getPos as () => number);
-    };
+    return (
+      node: ProsemirrorNode,
+      view: EditorView,
+      getPos: () => number | undefined,
+    ) => {
+      return new TableControllerCellView(node, view, getPos as () => number)
+    }
   }
 
   createExtensions() {
-    return [];
+    return []
   }
 
   createPlugin(): CreateExtensionPlugin {
@@ -382,16 +424,15 @@ export class TableControllerCellExtension extends BaseTableControllerCellExtensi
         const controllerCellsWithContent = getChangedNodes(tr, {
           descend: true,
           predicate: (node: ProsemirrorNode) => {
-            if (node.type !== this.type) {
-              return false;
-            }
+            if (node.type !== this.type)
+              return false
 
-            return node.textContent !== '';
+            return node.textContent !== ''
           },
-        });
+        })
 
-        return controllerCellsWithContent.length === 0;
+        return controllerCellsWithContent.length === 0
       },
-    };
+    }
   }
 }

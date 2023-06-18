@@ -1,12 +1,13 @@
-import EditorExtensions from '@/extensions'
-import FloatingLinkToolbar from '@/toolbar/FloatingLinkToolbar'
 import { Remirror, useRemirror } from '@remirror/react'
-import { FC, useEffect } from 'react'
+import type { FC } from 'react'
+import { useEffect } from 'react'
 import Text from '../Text'
 import Wrapper from '../Wrapper'
+import FloatingLinkToolbar from '@/toolbar/FloatingLinkToolbar'
+import EditorExtensions from '@/extensions'
 
 const WysiwygEditor: FC<WysiwygEditorProps> = (props) => {
-  const { file, content, active, setEditorCtx, hooks } = props
+  const { file, content, setEditorCtx, hooks } = props
   const remirror = useRemirror({
     extensions: EditorExtensions,
     content,
@@ -42,6 +43,6 @@ interface WysiwygEditorProps {
   file: Global.IFile
   content: string
   active: boolean
-  hooks?: Array<() => void>
+  hooks?: (() => void)[]
   setEditorCtx: (id: string, ctx: any) => void
 }

@@ -1,9 +1,18 @@
-import { CommandButton, FloatingToolbar, FloatingWrapper, useActive, useCurrentSelection } from '@remirror/react'
+import {
+  CommandButton,
+  FloatingToolbar,
+  FloatingWrapper,
+  useActive,
+  useCurrentSelection,
+} from '@remirror/react'
 import type { ChangeEvent, HTMLProps, KeyboardEvent } from 'react'
 import { useCallback, useEffect, useRef } from 'react'
 import useFloatingLinkState from '../../hooks/useFloatingLinkState'
 
-function DelayAutoFocusInput({ autoFocus, ...rest }: HTMLProps<HTMLInputElement>) {
+function DelayAutoFocusInput({
+  autoFocus,
+  ...rest
+}: HTMLProps<HTMLInputElement>) {
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -23,7 +32,16 @@ function DelayAutoFocusInput({ autoFocus, ...rest }: HTMLProps<HTMLInputElement>
 }
 
 export default function FloatingLinkToolbar() {
-  const { isEditing, linkPositioner, clickEdit, onRemove, submitHref, href, setHref, cancelHref } = useFloatingLinkState()
+  const {
+    isEditing,
+    linkPositioner,
+    clickEdit,
+    onRemove,
+    submitHref,
+    href,
+    setHref,
+    cancelHref,
+  } = useFloatingLinkState()
   const active = useActive()
   const activeLink = active.link()
   const { empty } = useCurrentSelection()
@@ -35,25 +53,51 @@ export default function FloatingLinkToolbar() {
   const linkEditButtons = activeLink
     ? (
     <>
-      <CommandButton commandName="updateLink" onSelect={handleClickEdit} icon="pencilLine" enabled />
-      <CommandButton commandName="removeLink" onSelect={onRemove} icon="linkUnlink" enabled />
+      <CommandButton
+        commandName="updateLink"
+        onSelect={handleClickEdit}
+        icon="pencilLine"
+        enabled
+      />
+      <CommandButton
+        commandName="removeLink"
+        onSelect={onRemove}
+        icon="linkUnlink"
+        enabled
+      />
     </>
       )
     : (
-    <CommandButton commandName="updateLink" onSelect={handleClickEdit} icon="link" enabled />
+    <CommandButton
+      commandName="updateLink"
+      onSelect={handleClickEdit}
+      icon="link"
+      enabled
+    />
       )
 
   return (
     <>
       {!isEditing && <FloatingToolbar>{linkEditButtons}</FloatingToolbar>}
-      {!isEditing && empty && <FloatingToolbar positioner={linkPositioner}>{linkEditButtons}</FloatingToolbar>}
+      {!isEditing && empty && (
+        <FloatingToolbar positioner={linkPositioner}>
+          {linkEditButtons}
+        </FloatingToolbar>
+      )}
 
-      <FloatingWrapper positioner="always" placement="bottom" enabled={isEditing} renderOutsideEditor>
+      <FloatingWrapper
+        positioner="always"
+        placement="bottom"
+        enabled={isEditing}
+        renderOutsideEditor
+      >
         <DelayAutoFocusInput
           style={{ zIndex: 20 }}
           autoFocus
           placeholder="Enter link..."
-          onChange={(event: ChangeEvent<HTMLInputElement>) => setHref(event.target.value)}
+          onChange={(event: ChangeEvent<HTMLInputElement>) =>
+            setHref(event.target.value)
+          }
           value={href}
           onBlur={cancelHref}
           onKeyDown={(event: KeyboardEvent<HTMLInputElement>) => {

@@ -1,14 +1,16 @@
-import chatgpt from '@/chatgpt'
-import { Explorer, Setting } from '@/components'
-import { RIGHTBARITEMKEYS } from '@/constants'
 import classNames from 'classnames'
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Container, SettingRightBarContainer } from './styles'
+import chatgpt from '@/chatgpt'
+import { Explorer, Setting } from '@/components'
+import { RIGHTBARITEMKEYS } from '@/constants'
 
 function SideBar() {
   const [isResizing, setIsResizing] = useState(false)
   const [sidebarWidth, setSidebarWidth] = useState(300)
-  const [activeRightBarItemKey, setActiveRightBarItemKey] = useState<RIGHTBARITEMKEYS | undefined>()
+  const [activeRightBarItemKey, setActiveRightBarItemKey] = useState<
+    RIGHTBARITEMKEYS | undefined
+  >()
   const sidebarRef = useRef<HTMLDivElement>(null)
 
   const rightBarDataSource: RightBarItem[] = useMemo(() => {
@@ -16,7 +18,7 @@ function SideBar() {
       {
         title: RIGHTBARITEMKEYS.Explorer,
         key: RIGHTBARITEMKEYS.Explorer,
-        icon: <i className="ri-file-list-3-line"></i>,
+        icon: <i className="ri-file-list-3-line" />,
         components: <Explorer />,
       },
       chatgpt,
@@ -24,7 +26,9 @@ function SideBar() {
   }, [])
 
   const activeRightBarItem = useMemo(() => {
-    const activeItem = rightBarDataSource.find((item) => item.key === activeRightBarItemKey)
+    const activeItem = rightBarDataSource.find(
+      item => item.key === activeRightBarItemKey,
+    )
     return activeItem
   }, [activeRightBarItemKey, rightBarDataSource])
 
@@ -39,9 +43,14 @@ function SideBar() {
 
   const resize = useCallback(
     (mouseMoveEvent: MouseEvent) => {
-      if (isResizing && sidebarRef.current) setSidebarWidth(mouseMoveEvent.clientX - sidebarRef.current.getBoundingClientRect().left)
+      if (isResizing && sidebarRef.current) {
+        setSidebarWidth(
+          mouseMoveEvent.clientX
+            - sidebarRef.current.getBoundingClientRect().left,
+        )
+      }
     },
-    [isResizing]
+    [isResizing],
   )
 
   useEffect(() => {
@@ -57,7 +66,11 @@ function SideBar() {
   const noActiveItem = !activeRightBarItemKey
 
   return (
-    <Container ref={sidebarRef} noActiveItem={noActiveItem} style={{ width: noActiveItem ? '48px' : sidebarWidth }}>
+    <Container
+      ref={sidebarRef}
+      noActiveItem={noActiveItem}
+      style={{ width: noActiveItem ? '48px' : sidebarWidth }}
+    >
       <div className="app-sidebar">
         <div>
           {rightBarDataSource.map((item) => {
@@ -66,15 +79,19 @@ function SideBar() {
             })
 
             const handleRightBarItemClick = () => {
-              if (activeRightBarItemKey === item.key) {
+              if (activeRightBarItemKey === item.key)
                 setActiveRightBarItemKey(undefined)
-              } else {
+
+              else
                 setActiveRightBarItemKey(item.key)
-              }
             }
 
             return (
-              <div key={item.key} className={cls} onClick={handleRightBarItemClick}>
+              <div
+                key={item.key}
+                className={cls}
+                onClick={handleRightBarItemClick}
+              >
                 {item.icon}
               </div>
             )
