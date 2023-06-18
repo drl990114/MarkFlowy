@@ -14,6 +14,7 @@ importers:
       '@tauri-apps/cli': ^1.0.0
       babel: ^6.23.0
       eslint: 8.42.0
+      husky: ^8.0.3
       typescript: ^5.0.4
     devDependencies:
       '@babel/core': 7.22.5
@@ -26,6 +27,7 @@ importers:
       '@tauri-apps/cli': 1.2.3
       babel: 6.23.0
       eslint: 8.42.0
+      husky: 8.0.3
       typescript: 5.0.4
 
   apps/home:
@@ -11268,6 +11270,12 @@ packages:
     resolution: {integrity: sha512-nZXjEF2nbo7lIw3mgYjItAfgQXog3OjJogSbKa2CQIIvSGWcKgeJnQlNXip6NglNzYH45nSRiEVimMvYL8DDqQ==}
     engines: {node: '>=14.18.0'}
     dev: false
+
+  /husky/8.0.3:
+    resolution: {integrity: sha512-+dQSyqPh4x1hlO1swXBiNb2HzTDN1I2IGLQx1GrBuiqFJfoMrnZWwVmatvSiO+Iz8fBUnf+lekwNo4c2LlXItg==}
+    engines: {node: '>=14'}
+    hasBin: true
+    dev: true
 
   /hyphenate-style-name/1.0.4:
     resolution: {integrity: sha512-ygGZLjmXfPHj+ZWh6LwbC37l43MhfztxetbFCoYTM2VjkIUpeHgSNn7QIyVFj7YQ1Wl9Cbw5sholVJPzWvC2MQ==}

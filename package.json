@@ -6,7 +6,8 @@
     "build": "pnpm --filter=@linebyline/editor build && pnpm -r build",
     "test": "jest",
     "tauri:build": "tauri build",
-    "tauri:dev": "tauri dev"
+    "tauri:dev": "tauri dev",
+    "lint": "eslint --fix --ext .tsx ./"
   },
   "devDependencies": {
     "@babel/core": "^7.22.5",
@@ -19,12 +20,13 @@
     "@tauri-apps/cli": "^1.0.0",
     "babel": "^6.23.0",
     "eslint": "8.42.0",
+    "husky": "^8.0.3",
     "typescript": "^5.0.4"
   },
   "simple-git-hooks": {
-    "pre-commit": "pnpm lint-staged"
+    "pre-commit": "pnpm lint"
   },
-  "lint-staged": {
+  "lint": {
     "*": "eslint --fix"
   }
 }
