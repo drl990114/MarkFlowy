@@ -337,8 +337,8 @@ importers:
         version: 3.2.0
     devDependencies:
       '@types/codemirror':
-        specifier: ^5.60.7
-        version: 5.60.7
+        specifier: ^5.60.8
+        version: 5.60.8
       '@types/react':
         specifier: ^18.0.0
         version: 18.0.28
@@ -4009,7 +4009,7 @@ packages:
       - supports-color
     dev: false
 
-  /@remirror/extension-codemirror5@2.0.12(@remirror/pm@2.0.4)(@types/codemirror@5.60.7)(codemirror@5.65.12):
+  /@remirror/extension-codemirror5@2.0.12(@remirror/pm@2.0.4)(@types/codemirror@5.60.8)(codemirror@5.65.12):
     resolution: {integrity: sha512-HRMIVhK/YEzx/NbKUPMuKU0UJHQW62ekOSSoznygY68Cy3TkVmQhqTAtfCf15y5+YzJ9nE7/0JSqOLCh1tstvw==}
     peerDependencies:
       '@remirror/pm': ^2.0.4
@@ -4020,7 +4020,7 @@ packages:
       '@remirror/core': 2.0.16(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/messages': 2.0.4
       '@remirror/pm': 2.0.4
-      '@types/codemirror': 5.60.7
+      '@types/codemirror': 5.60.8
       codemirror: 5.65.12
     transitivePeerDependencies:
       - '@types/node'
@@ -4028,7 +4028,7 @@ packages:
       - supports-color
     dev: false
 
-  /@remirror/extension-codemirror5@2.0.12(@remirror/pm@2.0.6)(@types/codemirror@5.60.7)(codemirror@5.65.12):
+  /@remirror/extension-codemirror5@2.0.12(@remirror/pm@2.0.6)(@types/codemirror@5.60.8)(codemirror@5.65.12):
     resolution: {integrity: sha512-HRMIVhK/YEzx/NbKUPMuKU0UJHQW62ekOSSoznygY68Cy3TkVmQhqTAtfCf15y5+YzJ9nE7/0JSqOLCh1tstvw==}
     peerDependencies:
       '@remirror/pm': ^2.0.4
@@ -4039,7 +4039,7 @@ packages:
       '@remirror/core': 2.0.16(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/messages': 2.0.4
       '@remirror/pm': 2.0.6
-      '@types/codemirror': 5.60.7
+      '@types/codemirror': 5.60.8
       codemirror: 5.65.12
     transitivePeerDependencies:
       - '@types/node'
@@ -6305,8 +6305,8 @@ packages:
       '@babel/types': 7.22.5
     dev: true
 
-  /@types/codemirror@5.60.7:
-    resolution: {integrity: sha512-QXIC+RPzt/1BGSuD6iFn6UMC9TDp+9hkOANYNPVsjjrDdzKphfRkwQDKGp2YaC54Yhz0g6P5uYTCCibZZEiMAA==}
+  /@types/codemirror@5.60.8:
+    resolution: {integrity: sha512-VjFgDF/eB+Aklcy15TtOTLQeMjTo07k7KAjql8OK5Dirr7a6sJY4T1uVBDuTVG9VEmn1uUsohOpYnVfgC6/jyw==}
     dependencies:
       '@types/tern': 0.23.4
 
@@ -11564,7 +11564,7 @@ packages:
       '@remirror/extension-callout': 2.0.14(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-code': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-code-block': 2.0.15(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/extension-codemirror5': 2.0.12(@remirror/pm@2.0.4)(@types/codemirror@5.60.7)(codemirror@5.65.12)
+      '@remirror/extension-codemirror5': 2.0.12(@remirror/pm@2.0.4)(@types/codemirror@5.60.8)(codemirror@5.65.12)
       '@remirror/extension-collaboration': 2.0.12(@remirror/pm@2.0.4)
       '@remirror/extension-columns': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-diff': 2.0.12(@remirror/pm@2.0.4)
@@ -11613,7 +11613,7 @@ packages:
       '@remirror/preset-formatting': 2.0.13(@remirror/pm@2.0.4)
       '@remirror/preset-wysiwyg': 2.0.18(@remirror/pm@2.0.4)
       '@remirror/theme': 2.0.8(@remirror/pm@2.0.4)
-      '@types/codemirror': 5.60.7
+      '@types/codemirror': 5.60.8
       '@types/refractor': 3.0.2
       codemirror: 5.65.12
       refractor: 3.6.0
@@ -11650,7 +11650,7 @@ packages:
       '@remirror/extension-callout': 2.0.14(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-code': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-code-block': 2.0.15(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/extension-codemirror5': 2.0.12(@remirror/pm@2.0.6)(@types/codemirror@5.60.7)(codemirror@5.65.12)
+      '@remirror/extension-codemirror5': 2.0.12(@remirror/pm@2.0.6)(@types/codemirror@5.60.8)(codemirror@5.65.12)
       '@remirror/extension-collaboration': 2.0.12(@remirror/pm@2.0.6)
       '@remirror/extension-columns': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-diff': 2.0.12(@remirror/pm@2.0.6)
@@ -11699,7 +11699,7 @@ packages:
       '@remirror/preset-formatting': 2.0.13(@remirror/pm@2.0.6)
       '@remirror/preset-wysiwyg': 2.0.18(@remirror/pm@2.0.6)
       '@remirror/theme': 2.0.8(@remirror/pm@2.0.6)
-      '@types/codemirror': 5.60.7
+      '@types/codemirror': 5.60.8
       '@types/refractor': 3.0.2
       codemirror: 5.65.12
       refractor: 3.6.0
