@@ -63,7 +63,7 @@
     "esbuild": "^0.18.2",
     "esbuild-node-externals": "^1.7.0",
     "esbuild-plugin-alias": "^0.2.1",
-    "eslint": "8.42.0",
+    "eslint": "8.43.0",
     "typescript": "^5.0.4",
     "url": "^0.11.0",
     "vite": "^4.3.3",
