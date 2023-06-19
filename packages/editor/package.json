@@ -65,7 +65,7 @@
     "esbuild-plugin-alias": "^0.2.1",
     "eslint": "8.43.0",
     "typescript": "^5.0.4",
-    "url": "^0.11.0",
+    "url": "^0.11.1",
     "vite": "^4.3.3",
     "vite-plugin-svgr": "^3.2.0",
     "vite-plugin-svgr-component": "^1.0.1"
