@@ -22,7 +22,7 @@
     "create-context-state": "^2.0.0",
     "dayjs": "^1.11.7",
     "hox": "^2.1.0",
-    "i18next": "^22.5.1",
+    "i18next": "^23.2.1",
     "immer": "^10.0.2",
     "is-promise": "^4.0.0",
     "jsx-dom-cjs": "^8.0.6",
