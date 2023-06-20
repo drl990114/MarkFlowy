@@ -40,7 +40,7 @@
     "@remirror/react": "^2.0.27",
     "@remirror/react-components": "^2.1.13",
     "@remirror/react-core": "^2.0.18",
-    "@remirror/react-editors": "^1.0.27",
+    "@remirror/react-editors": "^1.0.34",
     "@remirror/react-hooks": "^2.0.24",
     "@remirror/styles": "^2.0.5",
     "@remirror/theme": "^2.0.8",
