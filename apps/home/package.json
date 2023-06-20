@@ -21,7 +21,7 @@
     "i18next-localstorage-backend": "^4.1.1",
     "mini-css-extract-plugin": "^2.7.6",
     "next": "13.4.5",
-    "next-i18next": "^13.3.0",
+    "next-i18next": "^14.0.0",
     "postcss": "8.4.24",
     "react": "18.2.0",
     "react-dom": "18.2.0",
