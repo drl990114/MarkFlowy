@@ -152,8 +152,8 @@ importers:
         specifier: ^4.0.0
         version: 4.0.0
       jsx-dom-cjs:
-        specifier: ^8.0.6
-        version: 8.0.6
+        specifier: ^8.0.7
+        version: 8.0.7
       nanoid:
         specifier: ^4.0.2
         version: 4.0.2
@@ -315,8 +315,8 @@ importers:
         specifier: ^2.0.0
         version: 2.0.2(@types/react@18.0.28)(react@18.2.0)
       jsx-dom-cjs:
-        specifier: ^8.0.6
-        version: 8.0.6
+        specifier: ^8.0.7
+        version: 8.0.7
       react:
         specifier: ^18.0.0
         version: 18.2.0
@@ -4304,7 +4304,7 @@ packages:
       '@remirror/react-core': 2.0.18(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
       '@remirror/react-hooks': 2.0.24(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
       '@remirror/theme': 2.0.8(@remirror/pm@2.0.6)
-      jsx-dom-cjs: 8.0.6
+      jsx-dom-cjs: 8.0.7
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
     transitivePeerDependencies:
@@ -9342,8 +9342,8 @@ packages:
       array-includes: 3.1.6
       object.assign: 4.1.4
 
-  /jsx-dom-cjs@8.0.6:
-    resolution: {integrity: sha512-pGXrxem+sTHFMBMfD8Mz0bEkd/RqwzI2F1XSWxBWSLEyyYbtlqgtZ8RLo2UKg4wm7Jy6k+Cs43nAImJldKMFxw==}
+  /jsx-dom-cjs@8.0.7:
+    resolution: {integrity: sha512-dQWnuQ+bTm7o72ZlJU4glzeMX8KLxx5U+ZwmEAzVP1+roL7BSM0MrkWdHjdsuNgmxobZCJ+qgiot9EgbJPOoEg==}
     dependencies:
       csstype: 3.1.2
     dev: false
