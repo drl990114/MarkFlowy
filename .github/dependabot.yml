@@ -11,5 +11,14 @@ updates:
     directory: "/"
     # Check the npm registry for updates every day (weekdays)
     schedule:
-      interval: "weekly"
+      interval: daily
+      time: "04:00"
+    open-pull-requests-limit: 5
+
+  # tauri
+  - package-ecosystem: cargo
+    directory: "/src-tauri"
+    schedule:
+      interval: daily
+      time: "04:00"
     open-pull-requests-limit: 5
