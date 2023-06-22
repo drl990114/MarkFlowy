@@ -17,7 +17,7 @@
     "@babel/preset-react": "^7.22.5",
     "@babel/preset-typescript": "^7.22.5",
     "@halodong/eslint-config-react": "^0.38.24",
-    "@tauri-apps/cli": "^1.0.0",
+    "@tauri-apps/cli": "^1.4.0",
     "babel": "^6.23.0",
     "eslint": "8.43.0",
     "husky": "^8.0.3",
