@@ -59,7 +59,7 @@
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
     "@types/styled-components": "^5.1.26",
-    "@vitejs/plugin-react": "^4.0.0",
+    "@vitejs/plugin-react": "^4.0.1",
     "esbuild": "^0.18.2",
     "esbuild-node-externals": "^1.7.0",
     "esbuild-plugin-alias": "^0.2.1",
