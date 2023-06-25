@@ -8,6 +8,7 @@ import styled, { css } from 'styled-components'
 import { useEditorStore } from '@/stores'
 import { getFileObject } from '@/helper/files'
 import { useEditorState } from '@/editorHooks/EditorState'
+import { createWysiwygDelegate } from '@linebyline/editor/src/components/WysiwygEditor/delegate'
 
 const EditorWrapper = styled.div<{ active: boolean; type: EditorViewType }>`
   height: 100%;
@@ -33,6 +34,9 @@ function Editor(props: EditorProps) {
   useEffect(() => {
     const init = async () => {
       const file = getFileObject(id)
+      const delegate = createWysiwygDelegate()
+      setEditorCtx({ id, delegate })
+
       if (file.path) {
         const text = (await invoke('get_file_content', {
           filePath: file.path,
@@ -71,7 +75,6 @@ function Editor(props: EditorProps) {
       file: curFile,
       content: content!,
       active,
-      setEditorCtx,
       hooks: [
         () => {
           // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -79,7 +82,7 @@ function Editor(props: EditorProps) {
         },
       ],
     }),
-    [curFile, content, active, setEditorCtx],
+    [curFile, content, active],
   )
 
   return typeof content === 'string'

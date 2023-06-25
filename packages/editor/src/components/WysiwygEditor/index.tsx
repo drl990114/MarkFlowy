@@ -1,35 +1,17 @@
-import { Remirror, useRemirror } from '@remirror/react'
+import { Remirror } from '@remirror/react'
 import type { FC } from 'react'
-import { useEffect } from 'react'
 import Text from '../Text'
 import Wrapper from '../Wrapper'
-import FloatingLinkToolbar from '@/toolbar/FloatingLinkToolbar'
-import EditorExtensions from '@/extensions'
+import { createWysiwygDelegate } from './delegate'
 
 const WysiwygEditor: FC<WysiwygEditorProps> = (props) => {
-  const { file, content, setEditorCtx, hooks } = props
-  const remirror = useRemirror({
-    extensions: EditorExtensions,
-    content,
-    selection: 'start',
-    stringHandler: 'markdown',
-  })
-
-  const { manager, state, getContext } = remirror
-
-  useEffect(() => {
-    const ctx = getContext()
-    setEditorCtx(file.id, {
-      ...ctx,
-      getContent: () => ctx?.helpers?.getMarkdown(),
-    })
-  }, [getContext])
+  const { content, hooks } = props
+  const { manager, stringToDoc } = createWysiwygDelegate()
 
   return (
     <Wrapper className="remirror-wrapper">
-      <Remirror manager={manager} initialContent={state} hooks={hooks}>
+      <Remirror manager={manager} initialContent={stringToDoc(content)} hooks={hooks}>
         <Text className="h-full w-full overflow-auto markdown-body" />
-        <FloatingLinkToolbar />
       </Remirror>
     </Wrapper>
   )

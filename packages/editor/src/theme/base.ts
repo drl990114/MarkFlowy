@@ -1,12 +1,18 @@
 import { createGlobalStyle } from 'styled-components'
 
-export const BaseStyle = createGlobalStyle`
+/**
+ * To format for createGlobalStyle
+ * @see https://github.com/prettier/prettier/issues/11196
+ */
+const styled = { createGlobalStyle }
+
+export const BaseStyle = styled.createGlobalStyle`
   .markdown-body {
     -ms-text-size-adjust: 100%;
     -webkit-text-size-adjust: 100%;
     margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans',
-      Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial,
+      sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
     font-size: 16px;
     line-height: 1.5;
     word-wrap: break-word;
@@ -219,8 +225,7 @@ export const BaseStyle = createGlobalStyle`
   .markdown-body kbd {
     display: inline-block;
     padding: 3px 5px;
-    font: 11px ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas,
-      Liberation Mono, monospace;
+    font: 11px ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
     line-height: 10px;
     color: #c9d1d9;
     vertical-align: middle;
@@ -309,16 +314,14 @@ export const BaseStyle = createGlobalStyle`
   .markdown-body tt,
   .markdown-body code,
   .markdown-body samp {
-    font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas,
-      Liberation Mono, monospace;
+    font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
     font-size: 12px;
   }
 
   .markdown-body pre {
     margin-top: 0;
     margin-bottom: 0;
-    font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas,
-      Liberation Mono, monospace;
+    font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
     font-size: 12px;
     word-wrap: normal;
   }
@@ -555,5 +558,43 @@ export const BaseStyle = createGlobalStyle`
 
   .remirror-list-item-marker-container {
     margin-right: 0.5em;
+  }
+
+  .markdown-body h1 .show {
+    font-size: 2rem;
+  }
+
+  .markdown-body h2 .show {
+    font-size: 1.5rem;
+  }
+  .markdown-body h3 .show {
+    font-size: 1.25rem;
+  }
+
+  .markdown-body h4 .show {
+    font-size: 1rem;
+  }
+
+  .markdown-body h5 .show {
+    font-size: 0.875rem;
+  }
+
+  .markdown-body h6 .show {
+    font-size: 0.85rem;
+  }
+
+  .markdown-body .md-img-uri,
+  .markdown-body .md-img-text,
+  .markdown-body .md-link {
+    font-size: 0;
+    letter-spacing: 0; // A .md-link element could caontain many characters. Although the font-size is 0, there is still a obvious gap because of the letter-spacing.
+  }
+
+  .md-mark {
+    color: ${props => props.theme.accentColor};
+    font-size: 0;
+  }
+  .show {
+    font-size: 16px;
   }
 `
