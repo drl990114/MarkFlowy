@@ -232,6 +232,7 @@ importers:
       mdast-util-gfm-strikethrough: ^1.0.3
       micromark-extension-gfm-autolink-literal: ^1.0.5
       micromark-extension-gfm-strikethrough: ^1.0.7
+      prosemirror-flat-list: ^0.3.13
       react: ^18.0.0
       react-dom: ^18.0.0
       react-is: ^18.2.0
@@ -287,6 +288,7 @@ importers:
       mdast-util-gfm-strikethrough: 1.0.3
       micromark-extension-gfm-autolink-literal: 1.0.5
       micromark-extension-gfm-strikethrough: 1.0.7
+      prosemirror-flat-list: 0.3.13
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
       react-is: 18.2.0
@@ -13720,8 +13722,8 @@ packages:
       prosemirror-transform: 1.7.3
       prosemirror-view: 1.31.3
 
-  /prosemirror-flat-list/0.3.12:
-    resolution: {integrity: sha512-GUn5TfmWQ8Y8+hWboOV88X+VMsXq0Io49l2xPhP7HTAbHlmLy0bVgf6vENPtDenhBR0F3CrjGaGbcBrxRHkxeQ==}
+  /prosemirror-flat-list/0.3.13:
+    resolution: {integrity: sha512-2PdVofI9I9f6oTj8T0Yl6h1tJhXHckjEWpM0mFaRKl5dUX2DwyHgcDWRtyvRH04OLdbHUuFKSFMrTeLswga6Xw==}
     dependencies:
       prosemirror-commands: 1.5.2
       prosemirror-inputrules: 1.2.1
@@ -14272,7 +14274,7 @@ packages:
     dependencies:
       '@remirror/core': 2.0.16_@remirror+pm@2.0.6
       '@remirror/pm': 2.0.6
-      prosemirror-flat-list: 0.3.12
+      prosemirror-flat-list: 0.3.13
     transitivePeerDependencies:
       - '@types/node'
       - jsdom
