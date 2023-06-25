@@ -65,9 +65,9 @@ const Container = styled.div<{ codeEditor?: boolean }>`
     background-color: transparent;
   }
 
-  ${props =>
-    props.codeEditor
-    && css`
+  ${(props) =>
+    props.codeEditor &&
+    css`
       padding: 0;
       min-height: unset;
 
