@@ -27,7 +27,7 @@ import {
 import { LineInlineDecorationExtension, LineInlineMarkExtension, markExtensions } from './Inline'
 import { LineHeadingExtension } from './Heading'
 import { LineParagraphExtension } from './Paragraph'
-import { LineTextExtension } from './text'
+import { LineTextExtension } from './Text'
 import { LineListExtension } from './List'
 import { corePreset } from "@remirror/preset-core"
 import { LineBlockquoteExtension } from './BlockQuote'
