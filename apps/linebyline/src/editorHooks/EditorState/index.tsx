@@ -1,5 +1,4 @@
-// EditorState
-// This extension is responsible for managing the state of the editor.
+// This extension is responsible for managing the state of the editor and handle save event.
 import { useHelpers, useKeymap, useRemirrorContext } from '@remirror/react'
 import { invoke } from '@tauri-apps/api'
 import { save } from '@tauri-apps/api/dialog'
@@ -17,24 +16,59 @@ import type { KeyBindingProps } from '@remirror/core'
 export const useEditorState: FC<EditorStateProps> = ({ active, file }) => {
   const ctx = useRemirrorContext()
   const helpers = useHelpers()
-  const { getEditorContent } = useEditorStore()
+  const { getEditorDelegate, getEditorContent } = useEditorStore()
+  const curDelegate = getEditorDelegate(file.id)
   const [state, dispatch] = useReducer(
     editorReducer,
     { note: { content: '', deleted: false }, file },
     initializeState,
   )
-
   useTitleEffect(state, true)
 
-  const { } = useHelpers()
+  const saveHandler = useCallback(async (editorContent?: string) => {
+    if (!active) return
+
+    const content = editorContent ?? getEditorContent(file.id)
+
+    console.log('editorContent', content)
+
+    if (!file) return
+
+    try {
+      if (!file.path) {
+        save({
+          title: 'Save File',
+          defaultPath: file.name ?? `${t('file.untitled')}.md`,
+        }).then((path) => {
+          if (path === null) return
+          invoke('write_file', { filePath: path, content })
+          dispatch({
+            type: 'SAVE_CONTENT',
+            payload: { content, undoDepth: helpers.undoDepth() },
+          })
+        })
+      } else {
+        invoke('write_file', { filePath: file.path, content })
+        dispatch({
+          type: 'SAVE_CONTENT',
+          payload: { content, undoDepth: helpers.undoDepth() },
+        })
+      }
+    } catch (error) {
+      console.error(error)
+    }
+  }, [active, file, getEditorContent, helpers])
+
+  const saveEventHandler = useCallback(() => {
+    saveHandler()
+  }, [saveHandler])
 
   const handleSaveShortcut = useCallback(
     (params: KeyBindingProps) => {
-      console.log('save',params)
-
+      saveHandler(curDelegate?.docToString(params.state.doc))
       return true // Prevents any further key handlers from being run.
     },
-    [],
+    [curDelegate, saveHandler],
   )
 
   // "Mod" means platform agnostic modifier key - i.e. Ctrl on Windows, or Cmd on MacOS
@@ -51,45 +85,14 @@ export const useEditorState: FC<EditorStateProps> = ({ active, file }) => {
         })
       }
     })
-  }, [ctx, helpers])
+  }, [ctx, helpers, curDelegate])
 
   useEffect(() => {
-    const unListenFileSave = listen('file_save', async () => {
-      if (!active) return
-
-      const content = getEditorContent(file.id)
-
-      if (!file) return
-
-      try {
-        if (!file.path) {
-          save({
-            title: 'Save File',
-            defaultPath: file.name ?? `${t('file.untitled')}.md`,
-          }).then((path) => {
-            if (path === null) return
-            console.log('save', path)
-            invoke('write_file', { filePath: path, content })
-            dispatch({
-              type: 'SAVE_CONTENT',
-              payload: { content, undoDepth: helpers.undoDepth() },
-            })
-          })
-        } else {
-          invoke('write_file', { filePath: file.path, content })
-          dispatch({
-            type: 'SAVE_CONTENT',
-            payload: { content, undoDepth: helpers.undoDepth() },
-          })
-        }
-      } catch (error) {
-        console.error(error)
-      }
-    })
+    const unListenFileSave = listen('file_save', saveEventHandler)
     return () => {
       unListenFileSave.then((fn) => fn())
     }
-  }, [active, file, dispatch, helpers])
+  }, [saveEventHandler])
 
   return null
 }

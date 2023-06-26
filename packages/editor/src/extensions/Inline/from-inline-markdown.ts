@@ -206,7 +206,6 @@ function flatLink(mdastToken: mdast.Link, depth: number): InlineToken[] {
 
 // Make a tree structural mdast `PhrasingContent` object into a flat `InlineToken` array.
 function flatPhrasingContent(mdastToken: mdast.PhrasingContent, depth: number): InlineToken[] {
-  console.assert(depth >= 1)
   switch (mdastToken.type) {
     case 'text':
       return flatText(mdastToken, depth)

@@ -3,14 +3,16 @@ import type { FC } from 'react'
 import Text from '../Text'
 import Wrapper from '../Wrapper'
 import { createWysiwygDelegate } from './delegate'
+import type { EditorDelegate } from '../../../types'
 
 const WysiwygEditor: FC<WysiwygEditorProps> = (props) => {
-  const { content, hooks } = props
-  const { manager, stringToDoc } = createWysiwygDelegate()
+  const { content, hooks, delegate } = props
+
+  const editorDelegate = delegate ?? createWysiwygDelegate()
 
   return (
     <Wrapper className="remirror-wrapper">
-      <Remirror manager={manager} initialContent={stringToDoc(content)} hooks={hooks}>
+      <Remirror manager={editorDelegate.manager} initialContent={editorDelegate.stringToDoc(content)} hooks={hooks}>
         <Text className="h-full w-full overflow-auto markdown-body" />
       </Remirror>
     </Wrapper>
@@ -26,5 +28,5 @@ interface WysiwygEditorProps {
   content: string
   active: boolean
   hooks?: (() => void)[]
-  setEditorCtx: (id: string, ctx: any) => void
+  delegate?: EditorDelegate
 }

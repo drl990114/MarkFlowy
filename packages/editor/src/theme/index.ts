@@ -18,7 +18,6 @@ function loadThemeCss(url: string) {
 }
 
 export function loadTheme(theme: 'light' | 'dark') {
-  console.log('githubLightCss', githubLightCss)
   if (theme === 'light')
     loadThemeCss(githubLightCss)
   else
