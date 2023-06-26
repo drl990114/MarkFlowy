@@ -69,7 +69,6 @@ function App() {
     })
 
     const unListenChangeTheme = listen('change_theme', ({ payload }) => {
-      console.log('theme', payload)
       setTheme(payload as Theme)
     })
 

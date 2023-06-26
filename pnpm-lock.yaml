@@ -9555,7 +9555,7 @@ packages:
       babel-plugin-syntax-jsx: 6.18.0
       lodash: 4.17.21
       picomatch: 2.3.1
-      styled-components: 5.3.11_7i5myeigehqah43i5u7wbekgba
+      styled-components: 5.3.11_biqbaboplfbrettd7655fr4n2y
     dev: false
 
   /babel-plugin-syntax-jsx/6.18.0:

@@ -1,5 +1,5 @@
 import { createGlobalStyle } from 'styled-components'
-import { MThemeProps } from './hooks/useTheme'
+import type { MThemeProps } from './hooks/useTheme'
 
 export const GlobalStyles = createGlobalStyle<MThemeProps>`
   body {

@@ -1,8 +1,7 @@
-import type { ReactExtensions, ReactFrameworkOutput } from '@remirror/react'
 import { create } from 'zustand'
-import { isArray } from '@/helper'
 import type { IFile } from '@/helper/filesys'
 import { createWelcomeFile } from '@/helper/filesys'
+import type { EditorDelegate } from '@linebyline/editor/types'
 
 const useEditorStore = create<EditorStore>((set, get) => {
   // TODO use open history
@@ -15,7 +14,7 @@ const useEditorStore = create<EditorStore>((set, get) => {
     editorCtxMap: new Map(),
 
     setActiveId: (id: string) => {
-      set(state => ({
+      set((state) => ({
         ...state,
         activeId: id,
       }))
@@ -23,11 +22,8 @@ const useEditorStore = create<EditorStore>((set, get) => {
 
     addOpenedFile: (id: string) => {
       set((state) => {
-        if (state.opened.includes(id))
-          return state
-
-        else
-          return { ...state, opened: [...state.opened, id] }
+        if (state.opened.includes(id)) return state
+        else return { ...state, opened: [...state.opened, id] }
       })
     },
 
@@ -35,36 +31,36 @@ const useEditorStore = create<EditorStore>((set, get) => {
       set((state) => {
         return {
           ...state,
-          opened: state.opened.filter(opened => opened !== id),
+          opened: state.opened.filter((opened) => opened !== id),
         }
       })
     },
 
-    setEditorContent: (id: string, content: string) =>
-      set((state) => {
-        const curEditorCtx = state.editorCtxMap?.get(id)
-        curEditorCtx?.setContent(content)
-        return state
-      }),
-
     getEditorContent: (id: string) => {
+      const curDelegate = get().getEditorDelegate(id)
+      if (!curDelegate) {
+        return ''
+      } else {
+        // @ts-ignore
+        return curDelegate.docToString(curDelegate.manager.getState()?.doc)
+      }
+    },
+
+    getEditorDelegate: (id: string) => {
       const editorCtxMap = get().editorCtxMap
       const curCtx = editorCtxMap.get(id)
 
-      if (isArray(curCtx))
-        return curCtx[0].getContent()
-
-      return curCtx?.getContent()
+      return curCtx
     },
 
-    setEditorCtx: (id, ctx) =>
+    setEditorDelegate: (id, delegate) =>
       set((state) => {
-        state.editorCtxMap.set(id, ctx)
+        state.editorCtxMap.set(id, delegate)
         return state
       }),
 
-    setFolderData: folderData =>
-      set(state => ({
+    setFolderData: (folderData) =>
+      set((state) => ({
         ...state,
         folderData,
         opened: [],
@@ -77,25 +73,14 @@ interface EditorStore {
   opened: string[]
   activeId?: string
   folderData: null | IFile[]
-  editorCtxMap: Map<string, Ctx>
+  editorCtxMap: Map<string, EditorDelegate<any>>
   setActiveId: (id: string) => void
   addOpenedFile: (id: string) => void
   delOpenedFile: (id: string) => void
   setFolderData: (folderData: IFile[]) => void
-  setEditorCtx: (id: string, ctx: Ctx) => void
+  setEditorDelegate: (id: string, delegate: EditorDelegate<any>) => void
   getEditorContent: (id: string) => string
+  getEditorDelegate: (id: string) => EditorDelegate<any> | undefined
 }
-
-type Ctx =
-  | ({
-    setContent: (content: string) => void
-    helpers: {
-      setContent: (id: string, content: string) => void
-      getMarkdown: () => string
-      [key: string]: any
-    }
-    [key: string]: any
-  } & ReactFrameworkOutput<ReactExtensions<any>>)
-  | any
 
 export default useEditorStore

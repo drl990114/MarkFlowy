@@ -6,7 +6,8 @@ import { createGlobalStyle } from 'styled-components'
  */
 const styled = { createGlobalStyle }
 
-export const BaseStyle = styled.createGlobalStyle`
+// BUG type error, need split common types package.
+export const BaseStyle = styled.createGlobalStyle<any>`
   .markdown-body {
     -ms-text-size-adjust: 100%;
     -webkit-text-size-adjust: 100%;
