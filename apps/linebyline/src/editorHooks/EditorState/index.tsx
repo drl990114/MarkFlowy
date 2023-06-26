@@ -23,7 +23,7 @@ export const useEditorState: FC<EditorStateProps> = ({ active, file }) => {
     { note: { content: '', deleted: false }, file },
     initializeState,
   )
-  useTitleEffect(state, true)
+  useTitleEffect(state, active)
 
   const saveHandler = useCallback(async (editorContent?: string) => {
     if (!active) return
