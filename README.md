@@ -4,7 +4,7 @@
 
 <h1 align="center">LineByLine</h1>
 
-<h2 align="center">Modern markdown editor.(WIP)</h2>
+<h4 align="center">Modern markdown editor.(WIP)</h3>
 
 <p align="center">
   <a href="https://github.com/linebyline-group/linebyline" target="__blank"><img alt="GitHub" src="https://img.shields.io/github/license/linebyline-group/linebyline?color=%230369a1"></a>
@@ -37,3 +37,7 @@ The current linebyline is still in its infancy, and there may be some bad experi
 ### How to Contribute
 
 You can read [CONTRIBUTING](./CONTRIBUTING.md) to know how to start the project and modify the code, Welcome to participate in code contribution.
+
+## Support
+
+linebyline is completely and permanently open source, if you want to support line byline, you can `star` this project. This will give me great support and help, love you.
