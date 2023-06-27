@@ -83,7 +83,7 @@
     "@types/markdown-it": "^12.2.3",
     "@types/mdast": "^3.0.11",
     "@types/codemirror": "^5.60.8",
-    "@types/react": "^18.0.0",
+    "@types/react": "^18.2.14",
     "@types/react-dom": "^18.0.0",
     "@types/styled-components": "^5.1.26",
     "@vitejs/plugin-react": "^4.0.1",
