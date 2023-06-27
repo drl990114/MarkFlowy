@@ -35,5 +35,6 @@ main({
   bundle: true,
   format: 'esm',
   sourcemap: true,
+  treeShaking: true,
   logLevel: 'debug',
 })
