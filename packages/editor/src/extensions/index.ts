@@ -33,6 +33,7 @@ import { corePreset } from "@remirror/preset-core"
 import { LineBlockquoteExtension } from './BlockQuote'
 import { LineHardBreakExtension } from './HardBreak'
 import { ReactComponentExtension } from '@remirror/react'
+import { LineCodeMirrorExtension } from './CodeMIrror/codemirror-extension'
 // import { TableExtension } from './ReactTables';
 
 export * from './List'
@@ -71,6 +72,7 @@ function extensions(): any[] {
     new LineBlockquoteExtension(),
     new LineHeadingExtension(),
     new LineListExtension(),
+    new LineCodeMirrorExtension(),
 
     new ReactComponentExtension(),
     new DropCursorExtension(),
