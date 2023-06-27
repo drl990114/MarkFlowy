@@ -592,10 +592,23 @@ export const BaseStyle = styled.createGlobalStyle<any>`
   }
 
   .md-mark {
-    color: ${props => props.theme.accentColor};
+    color: ${(props) => props.theme.accentColor};
     font-size: 0;
   }
   .show {
     font-size: 16px;
+  }
+
+  .markdown-body .cm-editor {
+    height: auto;
+    padding: 8px 12px;
+    overflow: auto;
+    font-size: 85%;
+    line-height: 1.45;
+    background-color: #f6f8fa;
+    border-radius: 6px;
+  }
+  .cm-editor.cm-focused {
+    outline: none; // override the default outline
   }
 `
