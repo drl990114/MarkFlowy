@@ -1,5 +1,5 @@
-import { IFile } from "@/helper/filesys"
-import { AnyExtension, ProsemirrorNode, RemirrorManager } from "@remirror/core"
+import type { IFile } from "@/helper/filesys"
+import type { AnyExtension, ProsemirrorNode, RemirrorManager } from "@remirror/core"
 
 
 export type StringToDoc = (content: string) => ProsemirrorNode
