@@ -1,10 +1,6 @@
 const WELCOMECONTENT = `
 # Welcome linebyline
 
-<h2 align="center">A Modren Markdown Editor.(WIP)</h2>
-
-<p align="center">Available for Linux, macOS and Windows.</p>
-
 ## Feature
 
 - **Super lightweight**. linebyline is based on tauri, which ensures ultra-lightweight and fast performance experience.

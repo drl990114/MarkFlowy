@@ -115,13 +115,9 @@
 }
 
 .markdown-body .highlight pre,
-.markdown-body pre {
-  padding: 16px;
-  overflow: auto;
-  font-size: 85%;
-  line-height: 1.45;
+.markdown-body pre,
+.markdown-body .cm-editor {
   background-color: #f6f8fa;
-  border-radius: 6px;
 }
 
 .markdown-body .csv-data .blob-num {

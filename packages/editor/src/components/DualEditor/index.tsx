@@ -1,14 +1,27 @@
-import { languages } from '@codemirror/language-data'
-import { oneDark } from '@codemirror/theme-one-dark'
-import { CodeMirrorExtension } from '@remirror/extension-codemirror6'
 import type { UseRemirrorReturn } from '@remirror/react'
 import { Remirror, useRemirror } from '@remirror/react'
 import { createContextState } from 'create-context-state'
-import React, { memo, useEffect } from 'react'
+import React, { memo, useCallback } from 'react'
 import styled from 'styled-components'
-import EditorExtensions from '../../extensions'
 import Text from '../Text'
-
+import type { EditorDelegate } from '../../../types'
+import {
+  BlockquoteExtension,
+  BoldExtension,
+  BulletListExtension,
+  CodeBlockExtension,
+  CodeExtension,
+  HardBreakExtension,
+  HeadingExtension,
+  ItalicExtension,
+  LinkExtension,
+  ListItemExtension,
+  MarkdownExtension,
+  OrderedListExtension,
+  StrikeExtension,
+  TrailingNodeExtension,
+  TableExtension
+} from 'remirror/extensions'
 type Context = Props
 
 interface Props {
@@ -16,7 +29,8 @@ interface Props {
   content: string
   active: boolean
   visual: UseRemirrorReturn<any>
-  markText: UseRemirrorReturn<any>
+  markText: EditorDelegate
+  hooks: (() => void)[]
 }
 
 const [DualEditorProvider, useDualEditor] = createContextState<Context, Props>(
@@ -28,37 +42,18 @@ const [DualEditorProvider, useDualEditor] = createContextState<Context, Props>(
 )
 
 const MarkdownTextEditor = memo(
-  (props: { setEditorCtx: (id: string, ctx: any) => void }) => {
-    const { setEditorCtx } = props
-    const { visual, file, markText} = useDualEditor()
-
-    useEffect(() => {
-      setEditorCtx(file.id, {
-        ...markText.getContext(),
-        getContent: () => markText.manager?.view?.state?.doc.textContent,
-      })
-    }, [markText.getContext])
+  () => {
+    const { visual, content, markText, hooks } = useDualEditor()
 
     return (
       <Remirror
         manager={markText.manager}
-        initialContent={markText.state}
-        onChange={({ helpers, state }) => {
-          const text = helpers.getText({ state })
+        initialContent={markText.stringToDoc(content)}
+        onChange={({  state }) => {
+          const text = markText.docToString(state.doc)
           visual.getContext()?.setContent(text)
-          return markText.getContext()?.setContent({
-            type: 'doc',
-            content: [
-              {
-                type: 'codeMirror',
-                attrs: {
-                  language: 'markdown',
-                },
-                content: text ? [{ type: 'text', text }] : undefined,
-              },
-            ],
-          })
         }}
+        hooks={hooks}
       >
         <Text
           className="h-full w-full overflow-auto px-0"
@@ -79,58 +74,50 @@ function VisualEditor() {
   )
 }
 
-function markTextExtensions() {
-  return [
-    new CodeMirrorExtension({
-      languages,
-      extensions: [oneDark],
-    }),
-  ]
-}
-
 /**
  * The editor which is used to create the annotation. Supports formatting.
  */
 const DualEditor: React.FC<DualEditorProps> = (props) => {
-  const { file, content, active, setEditorCtx } = props
+  const { file, content, active, delegate, hooks } = props
 
-  const markText = useRemirror({
-    extensions: markTextExtensions as any,
-    content: {
-      type: 'doc',
-      content: [
-        {
-          type: 'codeMirror',
-          attrs: {
-            language: 'markdown',
-          },
-          content: [
-            {
-              type: 'text',
-              text: content,
-            },
-          ],
-        },
-      ],
-    },
-  })
+  const extensions = useCallback(
+    () => [
+      new LinkExtension({ autoLink: true }),
+      new BoldExtension(),
+      new StrikeExtension(),
+      new ItalicExtension(),
+      new HeadingExtension(),
+      new BlockquoteExtension(),
+      new BulletListExtension({ enableSpine: true }),
+      new OrderedListExtension(),
+      new ListItemExtension({}),
+      new CodeExtension(),
+      new CodeBlockExtension(),
+      new TrailingNodeExtension(),
+      new TableExtension(),
+      new MarkdownExtension({ copyAsMarkdown: false }),
+      new HardBreakExtension(),
+    ],
+    [],
+  )
 
   const visual = useRemirror({
-    extensions: EditorExtensions as any,
+    extensions,
     stringHandler: 'markdown',
     selection: 'start',
-    content: '**Markdown** content is the _best_',
+    content,
   })
-
+  
   return (
     <DualEditorProvider
       content={content}
       file={file}
-      markText={markText}
+      markText={delegate}
       visual={visual}
       active={active}
+      hooks={hooks}
     >
-      <MarkdownTextEditor setEditorCtx={setEditorCtx} />
+      <MarkdownTextEditor />
       <Devider />
       <VisualEditor />
     </DualEditorProvider>
@@ -148,5 +135,6 @@ interface DualEditorProps {
   file: Global.IFile
   active: boolean
   content: string
-  setEditorCtx: (id: string, ctx: any) => void
+  delegate: EditorDelegate
+  hooks: (() => void)[]
 }

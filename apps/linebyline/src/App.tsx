@@ -24,7 +24,7 @@ function App() {
   const { themeColors, muiTheme, setTheme } = useGlobalTheme()
   const { setSetting } = handler
   const isWeb = (window as any).__TAURI_IPC__ === undefined
-  console.log('qwe')
+
   // TODO web need return a editor
   if (!isWeb) {
     use(
@@ -69,7 +69,6 @@ function App() {
     })
 
     const unListenChangeTheme = listen('change_theme', ({ payload }) => {
-      console.log('theme', payload)
       setTheme(payload as Theme)
     })
 
