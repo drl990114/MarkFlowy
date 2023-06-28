@@ -1,3 +1,4 @@
+import { LineTableCellExtension, LineTableHeaderCellExtension } from './Table/table-extension'
 import {
   // BoldExtension,
   // BulletListExtension,
@@ -34,6 +35,7 @@ import { LineBlockquoteExtension } from './BlockQuote'
 import { LineHardBreakExtension } from './HardBreak'
 import { ReactComponentExtension } from '@remirror/react'
 import { LineCodeMirrorExtension } from './CodeMIrror/codemirror-extension'
+import { LineTableExtension, LineTableRowExtension } from './Table'
 // import { TableExtension } from './ReactTables';
 
 export * from './List'
@@ -73,6 +75,10 @@ function extensions(): any[] {
     new LineHeadingExtension(),
     new LineListExtension(),
     new LineCodeMirrorExtension(),
+    new LineTableExtension(),
+    new LineTableRowExtension(),
+    new LineTableCellExtension(),
+    new LineTableHeaderCellExtension(),
 
     new ReactComponentExtension(),
     new DropCursorExtension(),
