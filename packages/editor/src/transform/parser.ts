@@ -213,7 +213,7 @@ export class MarkdownParser {
     this.schema = schema
     this.tokenizer = MarkdownIt('commonmark', { html: true })
       .disable(['emphasis', 'autolink', 'backticks', 'entity', 'html_block'])
-      // .enable(['table'])
+      .enable(['table'])
       .use(markdownItListCheckbox)
     this.tokenHandlers = buildTokenHandlers(schema, parserRules)
   }
