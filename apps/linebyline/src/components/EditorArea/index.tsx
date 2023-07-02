@@ -31,7 +31,7 @@ export default function EditorArea() {
 
   return (
     <Container className="w-full h-full">
-      <div className="tab-items">
+      {opened.length > 1 ? <div className="tab-items">
         {opened.map((id) => {
           const file = getFileObject(id) as IFile
           const active = activeId === id
@@ -56,7 +56,7 @@ export default function EditorArea() {
             </TabItem>
           )
         })}
-      </div>
+      </div> : null}
       <div className="code-contents">
         {opened.map((id) => {
           return <Editor key={id} id={id} active={id === activeId} />
