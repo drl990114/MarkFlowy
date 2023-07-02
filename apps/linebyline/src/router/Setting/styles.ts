@@ -16,9 +16,10 @@ export const Container = styled.div`
     margin: 0 auto;
     margin-top: 2rem;
     padding: 0;
-    box-shadow: 0px 0px 10px 2px #dcdcdc;
-    --webkit-box-shadow: 0px 0px 10px 2px #dcdcdc;
-    --moz-box-shadow: 0px 0px 10px 2px #dcdcdc;
+    box-shadow: 0px 0px 10px 2px ${(props) => props.theme.borderColor};
+    --webkit-box-shadow: 0px 0px 10px 2px ${(props) => props.theme.borderColor};
+    --moz-box-shadow: 0px 0px 10px 2px ${(props) => props.theme.borderColor};
+    overflow: hidden;
   }
 
   #sidebar > * {
@@ -75,6 +76,8 @@ export const Container = styled.div`
 
   #sidebar li {
     margin: 0.25rem 0;
+    text-transform: capitalize;
+    z-index: 1;
   }
 
   #sidebar nav li {
