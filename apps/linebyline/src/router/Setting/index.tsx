@@ -1,34 +1,42 @@
 import classNames from 'classnames'
-import * as React from 'react'
-import { memo } from 'react'
+import type { ReactNode } from 'react'
+import { memo, useEffect, useState } from 'react'
 import SettingGroup from '../../components/Setting/SettingGroup'
 import { Container } from './styles'
 import settingMap from '@/helper/cacheManager/settingMap'
 import Logo from '@/assets/logo.svg'
+import { invoke } from '@tauri-apps/api'
 
 export interface DialogTitleProps {
-  children?: React.ReactNode
+  children?: ReactNode
   onClose: () => void
 }
 
 function a11yProps(index: number) {
   return {
-    'id': `tab-${index}`,
+    id: `tab-${index}`,
     'aria-controls': `tabpanel-${index}`,
   }
 }
 
 function Setting() {
-  const [value, setValue] = React.useState(0)
+  const [value, setValue] = useState(0)
+  const [confPath, setConfPath] = useState('')
   const settingDataGroups = Object.keys(settingMap)
   const curGroupKey = settingDataGroups[value] as keyof typeof settingMap
   const curGroup = settingMap[curGroupKey] as Setting.SettingData
   const curGroupKeys = Object.keys(curGroup)
 
+  useEffect(() => {
+    invoke('get_app_conf_path').then((res: unknown) => {
+      setConfPath(res as string)
+    })
+  }, [])
+
   return (
     <Container>
       <div id="sidebar">
-        <div className="title" >
+        <div className="title">
           <Logo />
         </div>
         {/* TODO search */}
@@ -57,6 +65,7 @@ function Setting() {
         </nav>
       </div>
       <div id="detail">
+        <div className='conf-path'><small>Path: {confPath}</small></div>
         {curGroupKeys.map((key) => {
           return (
             <SettingGroup
