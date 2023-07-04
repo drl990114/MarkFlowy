@@ -5,7 +5,7 @@
     "rootDir": "src",
     "skipLibCheck": true,
     "composite": true,
-    "outDir": "./dist-types",
+    "outDir": "./dist",
     "paths": {
       "@/*": ["./src/*"]
     }
