@@ -1,5 +1,5 @@
 {
-  "name": "tauri-app",
+  "name": "linebyline-monorepo",
   "version": "0.0.0",
   "scripts": {
     "dev": "pnpm --filter=@linebyline/editor dev & pnpm --filter=@linebyline/linebyline dev",
@@ -7,6 +7,7 @@
     "test": "jest",
     "tauri:build": "tauri build",
     "tauri:dev": "tauri dev",
+    "release": "node scripts/release.js",
     "lint": "eslint --fix --ext .tsx ./"
   },
   "devDependencies": {
@@ -19,6 +20,7 @@
     "@halodong/eslint-config-react": "^0.38.24",
     "@tauri-apps/cli": "^1.4.0",
     "babel": "^6.23.0",
+    "child_process": "^1.0.2",
     "eslint": "8.43.0",
     "husky": "^8.0.3",
     "typescript": "^5.1.3"
