@@ -30,12 +30,14 @@ import { LineHeadingExtension } from './Heading'
 import { LineParagraphExtension } from './Paragraph'
 import { LineTextExtension } from './Text'
 import { LineListExtension } from './List'
-import { corePreset } from "@remirror/preset-core"
+import { corePreset } from '@remirror/preset-core'
 import { LineBlockquoteExtension } from './BlockQuote'
 import { LineHardBreakExtension } from './HardBreak'
 import { ReactComponentExtension } from '@remirror/react'
 import { LineCodeMirrorExtension } from './CodeMIrror/codemirror-extension'
 import { LineTableExtension, LineTableRowExtension } from './Table'
+import { languages } from '@codemirror/language-data'
+import { LineHorizontalRuleExtension } from './HorizontalRule'
 // import { TableExtension } from './ReactTables';
 
 export * from './List'
@@ -66,15 +68,16 @@ function extensions(): any[] {
     // new ListItemSharedExtension(),
     // new EmojiExtension({ data }),
     // new ImageExtension({}),
-    ...corePreset({ excludeExtensions: ["paragraph", "text"] }),
+    ...corePreset({ excludeExtensions: ['paragraph', 'text'] }),
     ...markExtensions,
+    new LineHorizontalRuleExtension(),
     new LineParagraphExtension(),
     new LineTextExtension(),
     new LineHardBreakExtension(),
     new LineBlockquoteExtension(),
     new LineHeadingExtension(),
     new LineListExtension(),
-    new LineCodeMirrorExtension(),
+    new LineCodeMirrorExtension({ languages }),
     new LineTableExtension(),
     new LineTableRowExtension(),
     new LineTableCellExtension(),
@@ -82,7 +85,7 @@ function extensions(): any[] {
 
     new ReactComponentExtension(),
     new DropCursorExtension(),
-    
+
     new LineInlineMarkExtension(),
     new LineInlineDecorationExtension(),
   ]
