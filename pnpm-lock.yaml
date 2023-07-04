@@ -5038,8 +5038,6 @@ packages:
       '@remirror/extension-text': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
-      - '@types/node'
-      - jsdom
       - supports-color
 
   /@remirror/preset-formatting@2.0.14(@remirror/pm@2.0.6):

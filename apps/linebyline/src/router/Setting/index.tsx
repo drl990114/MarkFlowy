@@ -4,6 +4,7 @@ import { memo } from 'react'
 import SettingGroup from '../../components/Setting/SettingGroup'
 import { Container } from './styles'
 import settingMap from '@/helper/cacheManager/settingMap'
+import Logo from '@/assets/logo.svg'
 
 export interface DialogTitleProps {
   children?: React.ReactNode
@@ -27,7 +28,9 @@ function Setting() {
   return (
     <Container>
       <div id="sidebar">
-        <div className="title" />
+        <div className="title" >
+          <Logo />
+        </div>
         {/* TODO search */}
         {/* <div id="search-form" role="search">
           <input id="q" aria-label="Search contacts" placeholder="Search" type="search" name="q" />

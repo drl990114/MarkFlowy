@@ -3,10 +3,12 @@ import styled from 'styled-components'
 export const Container = styled.div`
   overflow-x: auto;
   overflow-y: hidden;
+  display: flex;
+  flex-direction: column;
 
   .tab-items {
     display: flex;
-    height: 2rem;
+    flex: 0 0 2rem;
     line-height: 2rem;
     border-bottom: 1px solid ${(props) => props.theme.borderColor};
     overflow-x: auto;
@@ -18,7 +20,9 @@ export const Container = styled.div`
   }
 
   .code-contents {
-    height: calc(100% - 2rem);
+    width: 100%;
+    flex: 1;
+    overflow: auto;
   }
 `
 

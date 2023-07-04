@@ -22,11 +22,11 @@ const lightThemeColors = {
 const darkThemeColors = {
   primaryFontColor: 'rgba(255, 255, 255, 0.9)',
   labelFontColor: 'rgba(255, 255, 255, 0.9)',
-  accentColor: '#0369a1',
-  borderColor: '#30363d',
-  bgColor: '#02040a',
+  accentColor: '#025481',
+  borderColor: '#21313d',
+  bgColor: '#11191f',
   warnColor: '#dc2626',
-  tipsBgColor: '#11191f',
+  tipsBgColor: '#0e1419',
 }
 
 function useTheme() {
