@@ -444,8 +444,8 @@ importers:
         specifier: ^0.18.2
         version: 0.18.2
       esbuild-node-externals:
-        specifier: ^1.7.0
-        version: 1.7.0(esbuild@0.18.2)
+        specifier: ^1.8.0
+        version: 1.8.0(esbuild@0.18.2)
       esbuild-plugin-alias:
         specifier: ^0.2.1
         version: 0.2.1
@@ -7689,11 +7689,11 @@ packages:
       is-date-object: 1.0.5
       is-symbol: 1.0.4
 
-  /esbuild-node-externals@1.7.0(esbuild@0.18.2):
-    resolution: {integrity: sha512-nfY3hxtO2anCTZ87LgfzCTfBuyG6de+NyiCNMF1mgrBufS0NgoYlBwF77HHuOInsJLxsAJf0BfLeV6ekZ3hRuA==}
+  /esbuild-node-externals@1.8.0(esbuild@0.18.2):
+    resolution: {integrity: sha512-pYslmT8Bl383UnfxzHQQRpCgBNIOwAzDaYheuIeI4CODxelsN/eQroVn5STDow5QOpRalMgWUR+R8LfSgUROcw==}
     engines: {node: '>=12'}
     peerDependencies:
-      esbuild: 0.12 - 0.17
+      esbuild: 0.12 - 0.18
     dependencies:
       esbuild: 0.18.2
       find-up: 5.0.0
