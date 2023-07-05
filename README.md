@@ -7,8 +7,9 @@
 <h4 align="center">Modern markdown editor.(WIP)</h3>
 
 <p align="center">
-  <a href="https://github.com/linebyline-group/linebyline" target="__blank"><img alt="GitHub" src="https://img.shields.io/github/license/linebyline-group/linebyline?color=%230369a1"></a>
+  <a href="https://github.com/linebyline-group/linebyline" target="__blank"><img alt="GitHub" src="https://img.shields.io/github/license/linebyline-group/linebyline?color=%230369a1&label=License"></a>
   <a href="https://github.com/linebyline-group/linebyline/releases" target="__blank"><img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/linebyline-group/linebyline?label=Version&color=%230369a1"></a>
+  <a href="https://github.com/linebyline-group/linebyline/releases" target="__blank"><img alt="GitHub Repo stars" src="https://img.shields.io/github/downloads/linebyline-group/linebyline/total?color=%230369a1&label=Downloads"></a>
   <a href="https://github.com/linebyline-group/linebyline" target="__blank"><img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/linebyline-group/linebyline?style=social"></a>
 </p>
 
