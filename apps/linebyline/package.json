@@ -34,7 +34,7 @@
     "react-router-dom": "^6.9.0",
     "remixicon": "^3.2.0",
     "styled-components": "^5.3.11",
-    "zustand": "^4.3.8"
+    "zustand": "^4.3.9"
   },
   "devDependencies": {
     "@babel/plugin-proposal-class-properties": "^7.18.6",
