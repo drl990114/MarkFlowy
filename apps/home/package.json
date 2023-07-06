@@ -14,7 +14,7 @@
     "autoprefixer": "10.4.14",
     "classnames": "^2.3.2",
     "eslint": "8.43.0",
-    "i18next": "^23.2.3",
+    "i18next": "^23.2.7",
     "i18next-chained-backend": "^4.3.0",
     "i18next-http-backend": "^2.2.1",
     "i18next-localstorage-backend": "^4.1.1",
