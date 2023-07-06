@@ -116,8 +116,7 @@
 }
 
 .markdown-body .highlight pre,
-.markdown-body pre,
-.markdown-body .cm-editor {
+.markdown-body pre {
   background-color: #161b22;
 }
 
