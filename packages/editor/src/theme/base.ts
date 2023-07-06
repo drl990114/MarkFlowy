@@ -605,10 +605,63 @@ export const BaseStyle = styled.createGlobalStyle<any>`
     overflow: auto;
     font-size: 85%;
     line-height: 1.45;
-    background-color: #f6f8fa;
-    border-radius: 6px;
+    background-color: ${(props) => props.theme.bgColor};
+    border: 1px solid ${(props) => props.theme.borderColor};
   }
+
   .cm-editor.cm-focused {
     outline: none; // override the default outline
+  }
+
+  & .code-block__reference {
+    padding: 4px 1em;
+    font-size: 0.8em;
+    border: 1px solid ${(props) => props.theme.borderColor};
+    background-color: ${(props) => props.theme.tipsBgColor};
+
+    &--active {
+      border-bottom: none;
+    }
+  }
+
+  & .code-block__languages {
+    font-size: 0.75em;
+    max-height: 180px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 160px;
+    background-color: ${(props) => props.theme.bgColor};
+    border: 1px solid ${(props) => props.theme.borderColor};
+    overflow: auto;
+    box-sizing: border-box;
+    z-index: 100;
+    box-shadow: 0 1px 4px -2px ${props => props.theme.boxShadowColor}, 0 2px 8px 0 ${props => props.theme.boxShadowColor}, 0 8px 16px 4px ${props => props.theme.boxShadowColor};
+
+    &__input {
+      height: 100%;
+      width: 160px;
+      outline: none;
+      color: ${props => props.theme.accentColor};
+      font-weight: 900;
+      background-color: transparent;
+      box-sizing: border-box;
+      border: none;
+    }
+  }
+
+  & .code-block__language {
+    padding: 0.5em 1em;
+    font-size: 1em;
+    cursor: pointer;
+    transition: all .3s;
+
+    &--active {
+      background-color: ${(props) => props.theme.borderColor};
+    }
+
+    &:hover {
+      background-color: ${(props) => props.theme.tipsBgColor};
+    }
   }
 `

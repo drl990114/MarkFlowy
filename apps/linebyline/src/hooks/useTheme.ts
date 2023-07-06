@@ -17,6 +17,7 @@ const lightThemeColors = {
   bgColor: '#fdfdfd',
   warnColor: '#dc2626',
   tipsBgColor: '#f6f7f9',
+  boxShadowColor: 'rgba(0, 0, 0, 0.08)'
 }
 
 const darkThemeColors = {
@@ -27,6 +28,7 @@ const darkThemeColors = {
   bgColor: '#11191f',
   warnColor: '#dc2626',
   tipsBgColor: '#0e1419',
+  boxShadowColor: 'rgba(255, 255, 255, 0.04)'
 }
 
 function useTheme() {
