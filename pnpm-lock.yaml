@@ -361,6 +361,9 @@ importers:
       create-context-state:
         specifier: ^2.0.0
         version: 2.0.2(@types/react@18.0.28)(react@18.2.0)
+      fuse.js:
+        specifier: ^6.6.2
+        version: 6.6.2
       jsx-dom-cjs:
         specifier: ^8.0.7
         version: 8.0.7
@@ -412,6 +415,9 @@ importers:
       svgmoji:
         specifier: ^3.2.0
         version: 3.2.0
+      tether-drop:
+        specifier: ^1.4.2
+        version: 1.4.2
       yjs:
         specifier: ^13.6.5
         version: 13.6.5
@@ -437,6 +443,9 @@ importers:
       '@types/styled-components':
         specifier: ^5.1.26
         version: 5.1.26
+      '@types/tether-drop':
+        specifier: ^1.4.9
+        version: 1.4.9
       '@vitejs/plugin-react':
         specifier: ^4.0.1
         version: 4.0.1(vite@4.3.9)
@@ -6213,6 +6222,16 @@ packages:
       '@types/jest': 29.5.2
     dev: true
 
+  /@types/tether-drop@1.4.9:
+    resolution: {integrity: sha512-3tlD7YXlHAchAvd8YRcKmrqSERwF9MgIWUV/x/uB8zqJpYwQ+1rmCArZurWkc0jnB/hgAsByG1RXd2/8+aLrqg==}
+    dependencies:
+      '@types/tether': 1.4.6
+    dev: true
+
+  /@types/tether@1.4.6:
+    resolution: {integrity: sha512-9nHygDpiN1VPAkTXZyKOmdVK12EPp4KLgc7kj9ji0X6qsHzzQV8e7KYEh1afrF6TTVs5d9oRJXwkmjeSWc+5Cw==}
+    dev: true
+
   /@types/throttle-debounce@2.1.0:
     resolution: {integrity: sha512-5eQEtSCoESnh2FsiLTxE121IiE60hnMqcb435fShf4bpLRjEu1Eoekht23y6zXS9Ts3l+Szu3TARnTsA0GkOkQ==}
 
@@ -8365,6 +8384,11 @@ packages:
 
   /functions-have-names@1.2.3:
     resolution: {integrity: sha512-xckBUXyTIqT97tq2x2AMb+g163b5JFysYk0x4qxNFwbfQkmNZoiRHb6sPzI9/QV33WeuvVYBUIiD4NzNIyqaRQ==}
+
+  /fuse.js@6.6.2:
+    resolution: {integrity: sha512-cJaJkxCCxC8qIIcPBF9yGxY0W/tVZS3uEISDxhYIdtk8OL93pe+6Zj7LjCqVV4dzbqcriOZ+kQ/NE4RXZHsIGA==}
+    engines: {node: '>=10'}
+    dev: false
 
   /gensync@1.0.0-beta.2:
     resolution: {integrity: sha512-3hN7NaskYvMDLQY55gnW3NQ+mesEAepTqlg+VEbj7zzqEMBVNhzcGYYeqFo/TlYz6eQiFcp1HcsCZO+nGgS8zg==}
@@ -11866,6 +11890,16 @@ packages:
       - '@remirror/pm'
       - supports-color
     dev: true
+
+  /tether-drop@1.4.2:
+    resolution: {integrity: sha512-qDxl70AY8xy0dsx+2QOuFxDpE3PbyzukF3LiOwv8IKnSD4lDMW0GohV/P9v+uy6L99/NSjCWNEel3xPPyUxzKQ==}
+    dependencies:
+      tether: 1.4.7
+    dev: false
+
+  /tether@1.4.7:
+    resolution: {integrity: sha512-Z0J1aExjoFU8pybVkQAo/vD2wfSO63r+XOPfWQMC5qtf1bI7IWqNk4MiyBcgvvnY8kqnY06dVdvwTK2S3PU/Fw==}
+    dev: false
 
   /text-table@0.2.0:
     resolution: {integrity: sha512-N+8UisAXDGk8PFXP4HAzVR9nbfmVJ3zYLAWiTIoqC5v5isinhr+r5uaO8+7r3BMfuNIufIsA7RdpVgacC2cSpw==}
