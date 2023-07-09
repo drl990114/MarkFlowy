@@ -11,7 +11,8 @@ pub fn init(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
             .resizable(true)
             .fullscreen(false)
             .theme(Some(theme))
-            .inner_size(800.0, 600.0);
+            .inner_size(1200.0, 800.0)
+            .min_inner_size(400.0, 400.0);
 
         main_win.build().unwrap();
     });
