@@ -25,7 +25,7 @@ const Container = styled.div<{ codeEditor?: boolean }>`
   }
 
   .remirror-editor {
-    height: 100%;
+    /* height: 100%; */
     outline: none;
   }
 
@@ -70,10 +70,6 @@ const Container = styled.div<{ codeEditor?: boolean }>`
     css`
       padding: 0;
       min-height: unset;
-
-      .remirror-editor {
-        height: 100%;
-      }
     `}
 `
 

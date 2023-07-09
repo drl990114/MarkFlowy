@@ -1,13 +1,16 @@
 import { createReactManager } from '@remirror/react'
 import type { StringToDoc, DocToString, EditorDelegate } from '../../../types'
-import { CodeMirrorExtension } from '@remirror/extension-codemirror6'
 import { DocExtension } from 'remirror/extensions'
 import type { RemirrorManager } from 'remirror'
+import { LineCodeMirrorExtension } from '../../extensions/CodeMIrror/codemirror-extension'
+import { lineNumbers, EditorView } from '@codemirror/view'
+import { githubLight } from '@uiw/codemirror-theme-github'
+import { markdown } from '@codemirror/lang-markdown'
 
 export function createSourceCodeManager(): RemirrorManager<any> {
   return createReactManager(() => [
     new DocExtension({ content: 'codeMirror' }),
-    new CodeMirrorExtension(),
+    new LineCodeMirrorExtension({ extensions: [githubLight, lineNumbers(), EditorView.lineWrapping, markdown()]}),
   ])
 }
 

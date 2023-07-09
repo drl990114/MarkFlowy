@@ -12,14 +12,21 @@ import { createWysiwygDelegate } from '@linebyline/editor/src/components/Wysiwyg
 import { createDualDelegate } from '@linebyline/editor/src/components/DualEditor/delegate'
 
 const EditorWrapper = styled.div<{ active: boolean; type: EditorViewType }>`
-  height: 100%;
   overflow: hidden;
 
   ${(props) =>
     props.active
-      ? css({
-          display: props.type === 'dual' ? 'flex' : '',
-        })
+      ? props.type === 'dual'
+        ? css({
+            display: 'flex',
+            width: '100%',
+          })
+        : css({
+            maxWidth: '800px',
+            margin: '0 auto',
+            marginInlineStart: 'auto',
+            marginInlineEnd: 'auto',
+          })
       : css({
           display: 'none',
         })}

@@ -23,6 +23,7 @@ export const Container = styled.div`
     width: 100%;
     flex: 1;
     overflow: auto;
+    height: 100%;
   }
 `
 
