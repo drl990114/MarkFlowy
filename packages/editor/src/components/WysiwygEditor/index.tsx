@@ -11,9 +11,9 @@ const WysiwygEditor: FC<WysiwygEditorProps> = (props) => {
   const editorDelegate = delegate ?? createWysiwygDelegate()
 
   return (
-    <Wrapper className="remirror-wrapper">
+    <Wrapper>
       <Remirror manager={editorDelegate.manager} initialContent={editorDelegate.stringToDoc(content)} hooks={hooks}>
-        <Text className="h-full w-full overflow-auto markdown-body" />
+        <Text className="w-full markdown-body" />
       </Remirror>
     </Wrapper>
   )

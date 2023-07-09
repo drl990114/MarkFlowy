@@ -108,5 +108,14 @@ export const Container = styled.div`
     padding: 1rem 2rem;
     width: 100%;
     background: ${(props) => props.theme.bgColor};
+
+    & .conf-path {
+      margin-bottom: 0.5rem;
+
+      a {
+        color: ${(props) => props.theme.accentColor};
+        cursor: pointer;
+      }
+    }
   }
 `

@@ -58,6 +58,7 @@
     "@remirror/styles": "^2.0.5",
     "@remirror/theme": "^2.0.8",
     "@remirror/types": "^1.0.1",
+    "@uiw/codemirror-theme-github": "^4.21.7",
     "create-context-state": "^2.0.0",
     "fuse.js": "^6.6.2",
     "jsx-dom-cjs": "^8.0.7",
