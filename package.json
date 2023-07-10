@@ -32,6 +32,6 @@
     "*": "eslint --fix"
   },
   "dependencies": {
-    "fast-glob": "^3.2.12"
+    "fast-glob": "^3.3.0"
   }
 }
