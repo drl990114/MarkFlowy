@@ -50,7 +50,7 @@
     "@remirror/icons": "^2.0.2",
     "@remirror/pm": "^2.0.4",
     "@remirror/preset-core": "^2.0.16",
-    "@remirror/react": "^2.0.29",
+    "@remirror/react": "^2.0.32",
     "@remirror/react-components": "^2.1.13",
     "@remirror/react-core": "^2.0.18",
     "@remirror/react-editors": "^1.0.34",

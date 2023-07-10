@@ -133,8 +133,8 @@ importers:
         specifier: ^2.0.17
         version: 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/react':
-        specifier: ^2.0.29
-        version: 2.0.29(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^2.0.32
+        version: 2.0.32(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
       '@tauri-apps/api':
         specifier: ^1.4.0
         version: 1.4.0
@@ -312,7 +312,7 @@ importers:
         version: 1.0.13(@remirror/pm@2.0.6)
       '@remirror/extension-heading':
         specifier: ^2.0.13
-        version: 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
+        version: 2.0.13(@remirror/pm@2.0.6)
       '@remirror/extension-list':
         specifier: ^2.0.15
         version: 2.0.16(@remirror/pm@2.0.6)(@types/node@20.3.1)
@@ -321,7 +321,7 @@ importers:
         version: 2.1.8(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-react-tables':
         specifier: ^2.2.16
-        version: 2.2.16(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
+        version: 2.2.16(@remirror/pm@2.0.6)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
       '@remirror/extension-tables':
         specifier: ^2.2.10
         version: 2.2.10(@remirror/pm@2.0.6)(@types/node@20.3.1)
@@ -335,20 +335,20 @@ importers:
         specifier: ^2.0.16
         version: 2.0.16(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/react':
-        specifier: ^2.0.29
-        version: 2.0.29(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^2.0.32
+        version: 2.0.32(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
       '@remirror/react-components':
         specifier: ^2.1.13
-        version: 2.1.13(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
+        version: 2.1.13(@remirror/pm@2.0.6)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
       '@remirror/react-core':
         specifier: ^2.0.18
-        version: 2.0.18(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
+        version: 2.0.18(@remirror/pm@2.0.6)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
       '@remirror/react-editors':
         specifier: ^1.0.34
         version: 1.0.34(@emotion/css@11.11.0)(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(@types/react-dom@18.0.11)(@types/react@18.0.28)(@types/styled-components@5.1.26)(react-dom@18.2.0)(react@18.2.0)(styled-components@5.3.11)
       '@remirror/react-hooks':
         specifier: ^2.0.24
-        version: 2.0.24(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
+        version: 2.0.24(@remirror/pm@2.0.6)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
       '@remirror/styles':
         specifier: ^2.0.5
         version: 2.0.5(@emotion/css@11.11.0)(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(@types/react@18.0.28)(@types/styled-components@5.1.26)(react@18.2.0)(styled-components@5.3.11)
@@ -3328,9 +3328,28 @@ packages:
       '@messageformat/parser': 5.0.0
       make-plural: 6.2.2
 
+  /@lingui/core@4.3.0:
+    resolution: {integrity: sha512-nx9UM3ndYaK9VG6xQpF0OD/n0W35o5EPbiIzxgNvdNzRFtv9l1Z3pBipHXurRuZX0oDepGhVyXFD0ykPDeF7jA==}
+    engines: {node: '>=16.0.0'}
+    dependencies:
+      '@babel/runtime': 7.22.5
+      '@lingui/message-utils': 4.3.0
+      unraw: 2.0.1
+
   /@lingui/detect-locale@3.17.2:
     resolution: {integrity: sha512-rqyO16lj05WRfBuppo++mPzB1fQBFDhGqEFz5X97CbWXYp6AadOIkrm+pbn114Y2Yumy9QI7Cm4Ptbfk7CXO3Q==}
     engines: {node: '>=14.0.0'}
+
+  /@lingui/detect-locale@4.3.0:
+    resolution: {integrity: sha512-BNTdfabfvETdmhOljJ9jL+wHczrz6KJdEdpm+zqPMbvMA06UqBA7bTk8igW79Z3hN4F+WV7Mro0bDrm8sol0qA==}
+    engines: {node: '>=16.0.0'}
+    dev: false
+
+  /@lingui/message-utils@4.3.0:
+    resolution: {integrity: sha512-UtgO5pm6LpJKqmZctr2R2hT+qicb8UijFDG3dctKGBuwkkwunFZUswOLJ+AxfhaO652Vov/yf5qsymJ6UFXPBA==}
+    engines: {node: '>=16.0.0'}
+    dependencies:
+      '@messageformat/parser': 5.0.0
 
   /@messageformat/parser@5.0.0:
     resolution: {integrity: sha512-WiDKhi8F0zQaFU8cXgqq69eYFarCnTVxKcvhAONufKf0oUxbqLMW6JX6rV4Hqh+BEQWGyKKKHY4g1XA6bCLylA==}
@@ -3351,7 +3370,7 @@ packages:
       '@babel/runtime': 7.22.5
       '@emotion/is-prop-valid': 1.2.1
       '@mui/types': 7.2.4(@types/react@18.0.28)
-      '@mui/utils': 5.13.1(react@18.2.0)
+      '@mui/utils': 5.13.6(react@18.2.0)
       '@popperjs/core': 2.11.8
       '@types/react': 18.0.28
       clsx: 1.2.1
@@ -3428,9 +3447,9 @@ packages:
       '@emotion/styled': 11.11.0(@emotion/react@11.11.1)(@types/react@18.0.28)(react@18.2.0)
       '@mui/base': 5.0.0-beta.4(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
       '@mui/core-downloads-tracker': 5.13.4
-      '@mui/system': 5.13.2(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(@types/react@18.0.28)(react@18.2.0)
+      '@mui/system': 5.13.6(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(@types/react@18.0.28)(react@18.2.0)
       '@mui/types': 7.2.4(@types/react@18.0.28)
-      '@mui/utils': 5.13.1(react@18.2.0)
+      '@mui/utils': 5.13.6(react@18.2.0)
       '@types/react': 18.0.28
       '@types/react-transition-group': 4.4.6
       clsx: 1.2.1
@@ -3489,7 +3508,7 @@ packages:
         optional: true
     dependencies:
       '@babel/runtime': 7.22.5
-      '@mui/utils': 5.13.1(react@18.2.0)
+      '@mui/utils': 5.13.6(react@18.2.0)
       '@types/react': 18.0.28
       prop-types: 15.8.1
       react: 18.2.0
@@ -3512,36 +3531,6 @@ packages:
       '@emotion/cache': 11.11.0
       '@emotion/react': 11.11.1(@types/react@18.0.28)(react@18.2.0)
       '@emotion/styled': 11.11.0(@emotion/react@11.11.1)(@types/react@18.0.28)(react@18.2.0)
-      csstype: 3.1.2
-      prop-types: 15.8.1
-      react: 18.2.0
-    dev: false
-
-  /@mui/system@5.13.2(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(@types/react@18.0.28)(react@18.2.0):
-    resolution: {integrity: sha512-TPyWmRJPt0JPVxacZISI4o070xEJ7ftxpVtu6LWuYVOUOINlhoGOclam4iV8PDT3EMQEHuUrwU49po34UdWLlw==}
-    engines: {node: '>=12.0.0'}
-    peerDependencies:
-      '@emotion/react': ^11.5.0
-      '@emotion/styled': ^11.3.0
-      '@types/react': ^17.0.0 || ^18.0.0
-      react: ^17.0.0 || ^18.0.0
-    peerDependenciesMeta:
-      '@emotion/react':
-        optional: true
-      '@emotion/styled':
-        optional: true
-      '@types/react':
-        optional: true
-    dependencies:
-      '@babel/runtime': 7.22.5
-      '@emotion/react': 11.11.1(@types/react@18.0.28)(react@18.2.0)
-      '@emotion/styled': 11.11.0(@emotion/react@11.11.1)(@types/react@18.0.28)(react@18.2.0)
-      '@mui/private-theming': 5.13.1(@types/react@18.0.28)(react@18.2.0)
-      '@mui/styled-engine': 5.13.2(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(react@18.2.0)
-      '@mui/types': 7.2.4(@types/react@18.0.28)
-      '@mui/utils': 5.13.1(react@18.2.0)
-      '@types/react': 18.0.28
-      clsx: 1.2.1
       csstype: 3.1.2
       prop-types: 15.8.1
       react: 18.2.0
@@ -3586,20 +3575,6 @@ packages:
         optional: true
     dependencies:
       '@types/react': 18.0.28
-    dev: false
-
-  /@mui/utils@5.13.1(react@18.2.0):
-    resolution: {integrity: sha512-6lXdWwmlUbEU2jUI8blw38Kt+3ly7xkmV9ljzY4Q20WhsJMWiNry9CX8M+TaP/HbtuyR8XKsdMgQW7h7MM3n3A==}
-    engines: {node: '>=12.0.0'}
-    peerDependencies:
-      react: ^17.0.0 || ^18.0.0
-    dependencies:
-      '@babel/runtime': 7.22.5
-      '@types/prop-types': 15.7.5
-      '@types/react-is': 18.2.0
-      prop-types: 15.8.1
-      react: 18.2.0
-      react-is: 18.2.0
     dev: false
 
   /@mui/utils@5.13.6(react@18.2.0):
@@ -3783,7 +3758,7 @@ packages:
       '@remirror/core-constants': 2.0.1
       '@remirror/core-helpers': 2.0.3
       '@remirror/core-types': 2.0.5(@remirror/pm@2.0.6)
-      '@remirror/messages': 2.0.4
+      '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
       '@types/min-document': 2.19.0
       '@types/node': 20.3.1
@@ -3839,7 +3814,7 @@ packages:
       '@babel/runtime': 7.22.5
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-positioner': 2.1.8(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/messages': 2.0.4
+      '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
       - '@types/node'
@@ -3854,7 +3829,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.22.5
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/messages': 2.0.4
+      '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
       '@types/direction': 1.0.0
       direction: 1.0.4
@@ -3871,7 +3846,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.22.5
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/messages': 2.0.4
+      '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
       '@remirror/theme': 2.0.8(@remirror/pm@2.0.6)
     transitivePeerDependencies:
@@ -3887,7 +3862,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.22.5
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/messages': 2.0.4
+      '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
       - '@types/node'
@@ -3895,14 +3870,30 @@ packages:
       - supports-color
     dev: false
 
-  /@remirror/extension-callout@2.0.14(@remirror/pm@2.0.6)(@types/node@20.3.1):
+  /@remirror/extension-callout@2.0.14(@remirror/pm@2.0.6):
     resolution: {integrity: sha512-7caMC6nHkspxonmmjxSh2Twdu3pUcXYkI2i5bcqwwMct+MOpr86Lnh0Di3ABSSwWzDBKvHYDhRBS+Hr5omaK8g==}
     peerDependencies:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.5
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/messages': 2.0.4
+      '@remirror/messages': 2.0.5
+      '@remirror/pm': 2.0.6
+      '@remirror/theme': 2.0.8(@remirror/pm@2.0.6)
+    transitivePeerDependencies:
+      - '@types/node'
+      - jsdom
+      - supports-color
+    dev: false
+
+  /@remirror/extension-callout@2.0.15(@remirror/pm@2.0.6)(@types/node@20.3.1):
+    resolution: {integrity: sha512-qn7o1JCy7k0rsybh57EtC8qRoZyEDkncxAtr4Rq1Z2PH/axuOJwwdIgeDadEGITpviRsqrh2L4ddogpDVWVImg==}
+    peerDependencies:
+      '@remirror/pm': ^2.0.5
+    dependencies:
+      '@babel/runtime': 7.22.5
+      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
       '@remirror/theme': 2.0.8(@remirror/pm@2.0.6)
     transitivePeerDependencies:
@@ -3927,7 +3918,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.22.5
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/messages': 2.0.4
+      '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
       '@remirror/theme': 2.0.8(@remirror/pm@2.0.6)
       '@types/refractor': 3.0.2
@@ -3945,7 +3936,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.22.5
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/messages': 2.0.4
+      '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
       - '@types/node'
@@ -3962,7 +3953,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.22.5
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/messages': 2.0.4
+      '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
       '@types/codemirror': 5.60.8
       codemirror: 5.65.13
@@ -3996,7 +3987,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.22.5
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/messages': 2.0.4
+      '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
       - '@types/node'
@@ -4004,14 +3995,29 @@ packages:
       - supports-color
     dev: false
 
-  /@remirror/extension-columns@2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1):
+  /@remirror/extension-columns@2.0.13(@remirror/pm@2.0.6):
     resolution: {integrity: sha512-6g8u0Pw/bHysbakpdGHdQpKkEQjm/5A3V73++Hd88J5gc+ijazEV8nSkJrZ1TaBFr+9OBvLe6L1rmYxdeSCv0Q==}
     peerDependencies:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.5
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/messages': 2.0.4
+      '@remirror/messages': 2.0.5
+      '@remirror/pm': 2.0.6
+    transitivePeerDependencies:
+      - '@types/node'
+      - jsdom
+      - supports-color
+    dev: false
+
+  /@remirror/extension-columns@2.0.14(@remirror/pm@2.0.6)(@types/node@20.3.1):
+    resolution: {integrity: sha512-0WROpbsdCsuoHFTJB5daAIwjO4tGy9hVWx5kQk4P6bkLOW/qo5hSN6iQLi2mQsAG8pi7tn/NZtMNc1awWrRWhQ==}
+    peerDependencies:
+      '@remirror/pm': ^2.0.5
+    dependencies:
+      '@babel/runtime': 7.22.5
+      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
       - '@types/node'
@@ -4026,7 +4032,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.22.5
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/messages': 2.0.4
+      '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
       - '@types/node'
@@ -4041,7 +4047,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.22.5
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/messages': 2.0.4
+      '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
       - '@types/node'
@@ -4055,7 +4061,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.22.5
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/messages': 2.0.4
+      '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
       - '@types/node'
@@ -4070,7 +4076,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.22.5
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/messages': 2.0.4
+      '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
       '@types/querystringify': 2.0.0
       prosemirror-resizable-view: 2.0.12(@remirror/pm@2.0.6)
@@ -4089,7 +4095,7 @@ packages:
       '@babel/runtime': 7.22.5
       '@ocavue/svgmoji-cjs': 0.1.1
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/messages': 2.0.4
+      '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
       '@remirror/theme': 2.0.8(@remirror/pm@2.0.6)
       emojibase: 6.1.0
@@ -4126,7 +4132,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.22.5
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/messages': 2.0.4
+      '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
       - '@types/node'
@@ -4141,7 +4147,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.22.5
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/messages': 2.0.4
+      '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
       - '@types/node'
@@ -4171,7 +4177,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.22.5
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/messages': 2.0.4
+      '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
       - '@types/node'
@@ -4186,7 +4192,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.22.5
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/messages': 2.0.4
+      '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
       round: 2.0.1
     transitivePeerDependencies:
@@ -4202,7 +4208,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.22.5
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/messages': 2.0.4
+      '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
       - '@types/node'
@@ -4216,7 +4222,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.22.5
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/messages': 2.0.4
+      '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
       - '@types/node'
@@ -4224,7 +4230,7 @@ packages:
       - supports-color
     dev: false
 
-  /@remirror/extension-heading@2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1):
+  /@remirror/extension-heading@2.0.13(@remirror/pm@2.0.6):
     resolution: {integrity: sha512-2+CoQxAq4Gkcst1g+H4RXoAYY6XFj8qlbfkSCyjs30Q6JJvtlErODW0jILVRksH7ftfq0ueHCxeuLoseBGiQjw==}
     peerDependencies:
       '@remirror/pm': ^2.0.5
@@ -4239,6 +4245,21 @@ packages:
       - supports-color
     dev: false
 
+  /@remirror/extension-heading@2.0.14(@remirror/pm@2.0.6)(@types/node@20.3.1):
+    resolution: {integrity: sha512-jBBQhLSbEvR/IbSyzBLPN6P69zGoYrW/lxclMPccBxiqr/Rzc1ynJqrbXPQOzj3P43bRLdjXBKiy2VJWzqqO8Q==}
+    peerDependencies:
+      '@remirror/pm': ^2.0.5
+    dependencies:
+      '@babel/runtime': 7.22.5
+      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/messages': 2.0.5
+      '@remirror/pm': 2.0.6
+    transitivePeerDependencies:
+      - '@types/node'
+      - jsdom
+      - supports-color
+    dev: false
+
   /@remirror/extension-history@2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1):
     resolution: {integrity: sha512-LjW60KVpniRawttyhrWxM6ieE8sTYprqpCdMRbc7RuxBhdHaxlcQJGAjJvnBM7078qV/55S616P620YGYaBU4w==}
     peerDependencies:
@@ -4246,7 +4267,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.22.5
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/messages': 2.0.4
+      '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
       - '@types/node'
@@ -4260,7 +4281,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.22.5
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/messages': 2.0.4
+      '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
       - '@types/node'
@@ -4275,7 +4296,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.22.5
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/messages': 2.0.4
+      '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
       '@remirror/theme': 2.0.8(@remirror/pm@2.0.6)
       prosemirror-resizable-view: 2.0.12(@remirror/pm@2.0.6)
@@ -4292,7 +4313,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.22.5
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/messages': 2.0.4
+      '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
       - '@types/node'
@@ -4308,7 +4329,7 @@ packages:
       '@babel/runtime': 7.22.5
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-events': 2.1.15(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/messages': 2.0.4
+      '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
       extract-domain: 2.2.1
     transitivePeerDependencies:
@@ -4341,7 +4362,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.22.5
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/messages': 2.0.4
+      '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
       '@types/marked': 4.0.8
       '@types/turndown': 5.0.1
@@ -4362,7 +4383,7 @@ packages:
       '@babel/runtime': 7.22.5
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-events': 2.1.15(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/messages': 2.0.4
+      '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
       '@remirror/theme': 2.0.8(@remirror/pm@2.0.6)
     transitivePeerDependencies:
@@ -4379,7 +4400,7 @@ packages:
       '@babel/runtime': 7.22.5
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-events': 2.1.15(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/messages': 2.0.4
+      '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
       escape-string-regexp: 4.0.0
     transitivePeerDependencies:
@@ -4395,7 +4416,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.22.5
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/messages': 2.0.4
+      '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
       - '@types/node'
@@ -4410,7 +4431,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.22.5
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/messages': 2.0.4
+      '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
       - '@types/node'
@@ -4424,7 +4445,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.22.5
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/messages': 2.0.4
+      '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
       '@remirror/theme': 2.0.8(@remirror/pm@2.0.6)
     transitivePeerDependencies:
@@ -4466,7 +4487,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.22.5
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/messages': 2.0.4
+      '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
       '@types/react': 18.0.28
       '@types/react-dom': 18.0.11
@@ -4479,7 +4500,7 @@ packages:
       - supports-color
     dev: false
 
-  /@remirror/extension-react-tables@2.2.16(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0):
+  /@remirror/extension-react-tables@2.2.16(@remirror/pm@2.0.6)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-bmKzajU4YadV+s3rQAxz8yS7aX7KGg6mZ/2dZ22FeMb+uMG5279LbAX1zuVSrcKnjR4RDtf0JK7PFWkRV7hkhg==}
     peerDependencies:
       '@remirror/pm': ^2.0.5
@@ -4502,9 +4523,49 @@ packages:
       '@remirror/messages': 2.0.4
       '@remirror/pm': 2.0.6
       '@remirror/preset-core': 2.0.16(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/react-components': 2.1.13(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
-      '@remirror/react-core': 2.0.18(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
-      '@remirror/react-hooks': 2.0.24(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
+      '@remirror/react-components': 2.1.13(@remirror/pm@2.0.6)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
+      '@remirror/react-core': 2.0.18(@remirror/pm@2.0.6)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
+      '@remirror/react-hooks': 2.0.24(@remirror/pm@2.0.6)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
+      '@remirror/theme': 2.0.8(@remirror/pm@2.0.6)
+      jsx-dom-cjs: 8.0.7
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+    transitivePeerDependencies:
+      - '@types/node'
+      - '@types/prettier'
+      - '@types/react'
+      - '@types/react-dom'
+      - jsdom
+      - prettier
+      - supports-color
+    dev: false
+
+  /@remirror/extension-react-tables@2.2.17(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-FVS1EVrujZmembhpTQNuAHsYF/0GblwOGm2GKmgV0ydhjDg0q/nOX/utvFgHr0iY3KBwvR2NIy8iY5p5Kd668g==}
+    peerDependencies:
+      '@remirror/pm': ^2.0.5
+      react: ^16.14.0 || ^17 || ^18
+      react-dom: ^16.14.0 || ^17 || ^18
+    peerDependenciesMeta:
+      react:
+        optional: true
+      react-dom:
+        optional: true
+    dependencies:
+      '@babel/runtime': 7.22.5
+      '@emotion/css': 11.11.0
+      '@linaria/core': 4.2.10
+      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/core-utils': 2.0.12(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/extension-positioner': 2.1.8(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/extension-tables': 2.2.10(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/icons': 2.0.2
+      '@remirror/messages': 2.0.5
+      '@remirror/pm': 2.0.6
+      '@remirror/preset-core': 2.0.16(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/react-components': 2.1.16(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
+      '@remirror/react-core': 2.0.20(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
+      '@remirror/react-hooks': 2.0.25(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
       '@remirror/theme': 2.0.8(@remirror/pm@2.0.6)
       jsx-dom-cjs: 8.0.7
       react: 18.2.0
@@ -4526,7 +4587,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.22.5
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/messages': 2.0.4
+      '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
       '@types/marked': 4.0.8
       '@types/turndown': 5.0.1
@@ -4562,7 +4623,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.22.5
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/messages': 2.0.4
+      '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
       escape-string-regexp: 4.0.0
     transitivePeerDependencies:
@@ -4578,7 +4639,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.22.5
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/messages': 2.0.4
+      '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
       - '@types/node'
@@ -4593,7 +4654,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.22.5
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/messages': 2.0.4
+      '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
       '@remirror/theme': 2.0.8(@remirror/pm@2.0.6)
       nanoevents: 5.1.13
@@ -4611,7 +4672,7 @@ packages:
       '@babel/runtime': 7.22.5
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-positioner': 2.1.8(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/messages': 2.0.4
+      '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
       '@remirror/theme': 2.0.8(@remirror/pm@2.0.6)
     transitivePeerDependencies:
@@ -4627,7 +4688,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.22.5
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/messages': 2.0.4
+      '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
       - '@types/node'
@@ -4635,15 +4696,33 @@ packages:
       - supports-color
     dev: false
 
-  /@remirror/extension-text-color@2.0.14(@remirror/pm@2.0.6)(@types/node@20.3.1):
+  /@remirror/extension-text-color@2.0.14(@remirror/pm@2.0.6):
     resolution: {integrity: sha512-YSHMXwrvNg3gZ2KXX2nm5cqsHGSvGr8LvWgvqwLs5n8etZZ3NJyJT+yWbRfWf4cHQuBqIPoyH85XpUyzQVbNhw==}
     peerDependencies:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.5
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/i18n': 2.0.3
-      '@remirror/messages': 2.0.4
+      '@remirror/i18n': 2.0.4
+      '@remirror/messages': 2.0.5
+      '@remirror/pm': 2.0.6
+      '@remirror/theme': 2.0.8(@remirror/pm@2.0.6)
+      color2k: 2.0.2
+    transitivePeerDependencies:
+      - '@types/node'
+      - jsdom
+      - supports-color
+    dev: false
+
+  /@remirror/extension-text-color@2.0.15(@remirror/pm@2.0.6)(@types/node@20.3.1):
+    resolution: {integrity: sha512-BCcJ2zyt+pu7WGru9D9SfnodtPz0zxRibVqZOsRvNGJQN29Bvxs89e5tV+xTlAoXUz9gwxJrM6cn03umu18mbA==}
+    peerDependencies:
+      '@remirror/pm': ^2.0.5
+    dependencies:
+      '@babel/runtime': 7.22.5
+      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/i18n': 2.0.4
+      '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
       '@remirror/theme': 2.0.8(@remirror/pm@2.0.6)
       color2k: 2.0.2
@@ -4660,8 +4739,8 @@ packages:
     dependencies:
       '@babel/runtime': 7.22.5
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/extension-text-color': 2.0.14(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/messages': 2.0.4
+      '@remirror/extension-text-color': 2.0.15(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
       - '@types/node'
@@ -4676,7 +4755,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.22.5
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/messages': 2.0.4
+      '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
       - '@types/node'
@@ -4690,7 +4769,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.22.5
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/messages': 2.0.4
+      '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
       - '@types/node'
@@ -4705,7 +4784,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.22.5
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/messages': 2.0.4
+      '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
       - '@types/node'
@@ -4720,7 +4799,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.22.5
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/messages': 2.0.4
+      '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
       - '@types/node'
@@ -4736,7 +4815,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.22.5
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/messages': 2.0.4
+      '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
       prosemirror-model: 1.19.2
       prosemirror-state: 1.4.3
@@ -4761,6 +4840,18 @@ packages:
     transitivePeerDependencies:
       - supports-color
 
+  /@remirror/i18n@2.0.4:
+    resolution: {integrity: sha512-XroOfFRW8hvgrGb5GXnOtE1ATuj7FX5zGIXXQouy4gCdXHdbln69diDCG412VjevB8SBRogDdOt+9BMjUEDE4A==}
+    dependencies:
+      '@babel/runtime': 7.22.5
+      '@lingui/core': 4.3.0
+      '@lingui/detect-locale': 4.3.0
+      '@remirror/core-helpers': 2.0.3
+      make-plural: 6.2.2
+    transitivePeerDependencies:
+      - supports-color
+    dev: false
+
   /@remirror/icons@2.0.2:
     resolution: {integrity: sha512-RuuwUuJtUWNZgIQV9JlHzZ+McNP2dIfn/KhZkXuhULCn/pIku12jDJl4GgODyLvrG1lpbkCBOcRFQIAcNl++4A==}
     dependencies:
@@ -4774,6 +4865,15 @@ packages:
     dependencies:
       '@babel/runtime': 7.22.5
       '@lingui/core': 3.17.2
+      '@remirror/core-helpers': 2.0.3
+    transitivePeerDependencies:
+      - supports-color
+
+  /@remirror/messages@2.0.5:
+    resolution: {integrity: sha512-mcTUwSOZqdBxhK93S+H5ntAR6X8mmK1h5s2Ru6SBYQ63R9ssrDtLftNojIRj4CmYrMuiqxl+gePY16rbZpvTkA==}
+    dependencies:
+      '@babel/runtime': 7.22.5
+      '@lingui/core': 4.3.0
       '@remirror/core-helpers': 2.0.3
     transitivePeerDependencies:
       - supports-color
@@ -4831,16 +4931,16 @@ packages:
       '@babel/runtime': 7.22.5
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-bold': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/extension-columns': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/extension-columns': 2.0.14(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-font-size': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/extension-heading': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/extension-heading': 2.0.14(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-italic': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-node-formatting': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-strike': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-sub': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-sup': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-text-case': 2.0.13(@remirror/pm@2.0.6)
-      '@remirror/extension-text-color': 2.0.14(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/extension-text-color': 2.0.15(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-text-highlight': 2.0.14(@remirror/pm@2.0.6)
       '@remirror/extension-underline': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-whitespace': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
@@ -4897,7 +4997,7 @@ packages:
       '@remirror/extension-embed': 2.0.13(@remirror/pm@2.0.6)
       '@remirror/extension-gap-cursor': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-hard-break': 2.0.13(@remirror/pm@2.0.6)
-      '@remirror/extension-heading': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/extension-heading': 2.0.14(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-horizontal-rule': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-image': 2.1.9(@remirror/pm@2.0.6)
       '@remirror/extension-italic': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
@@ -4918,7 +5018,7 @@ packages:
       - supports-color
     dev: false
 
-  /@remirror/react-components@2.1.13(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0):
+  /@remirror/react-components@2.1.13(@remirror/pm@2.0.6)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-2ezGSCUPt8ddJdrT5mUDde3XOZgaX2XCqM4eLXsbXaK0/x3CDyuu9EJJAjwjcC2GypPcwM4d21zIc4r2MXaLEg==}
     peerDependencies:
       '@remirror/pm': ^2.0.5
@@ -4941,13 +5041,13 @@ packages:
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-blockquote': 2.0.14(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-bold': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/extension-callout': 2.0.14(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/extension-callout': 2.0.14(@remirror/pm@2.0.6)
       '@remirror/extension-code': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-code-block': 2.0.15(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/extension-columns': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/extension-columns': 2.0.13(@remirror/pm@2.0.6)
       '@remirror/extension-find': 0.1.6(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-font-size': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/extension-heading': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/extension-heading': 2.0.13(@remirror/pm@2.0.6)
       '@remirror/extension-history': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-horizontal-rule': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-italic': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
@@ -4958,15 +5058,15 @@ packages:
       '@remirror/extension-sub': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-sup': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-tables': 2.2.10(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/extension-text-color': 2.0.14(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/extension-text-color': 2.0.14(@remirror/pm@2.0.6)
       '@remirror/extension-underline': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-whitespace': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/i18n': 2.0.3
       '@remirror/icons': 2.0.2
       '@remirror/messages': 2.0.4
       '@remirror/pm': 2.0.6
-      '@remirror/react-core': 2.0.18(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
-      '@remirror/react-hooks': 2.0.24(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
+      '@remirror/react-core': 2.0.18(@remirror/pm@2.0.6)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
+      '@remirror/react-hooks': 2.0.24(@remirror/pm@2.0.6)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
       '@remirror/react-utils': 2.0.5(@remirror/pm@2.0.6)(@types/react@18.0.28)(react@18.2.0)
       '@remirror/theme': 2.0.8(@remirror/pm@2.0.6)
       '@seznam/compose-react-refs': 1.0.6
@@ -4987,7 +5087,76 @@ packages:
       - supports-color
     dev: false
 
-  /@remirror/react-core@2.0.18(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0):
+  /@remirror/react-components@2.1.16(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-xaim4kpqymmiQO/0FEbbiLnMMhmifpVCOf6KM/gK0FRZGqsSmjwlaedtrZhoA38Zgm3yFkD3Xb7LH2DVeMr2Tw==}
+    peerDependencies:
+      '@remirror/pm': ^2.0.5
+      '@types/react': ^16.14.0 || ^17 || ^18
+      '@types/react-dom': ^16.9.0 || ^17 || ^18
+      react: ^16.14.0 || ^17 || ^18
+      react-dom: ^16.14.0 || ^17 || ^18
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      '@types/react-dom':
+        optional: true
+    dependencies:
+      '@babel/runtime': 7.22.5
+      '@emotion/react': 11.11.1(@types/react@18.0.28)(react@18.2.0)
+      '@emotion/styled': 11.11.0(@emotion/react@11.11.1)(@types/react@18.0.28)(react@18.2.0)
+      '@floating-ui/react': 0.24.5(react-dom@18.2.0)(react@18.2.0)
+      '@lingui/core': 4.3.0
+      '@mui/material': 5.13.6(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
+      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/extension-blockquote': 2.0.14(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/extension-bold': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/extension-callout': 2.0.15(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/extension-code': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/extension-code-block': 2.0.15(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/extension-columns': 2.0.14(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/extension-find': 0.1.6(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/extension-font-size': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/extension-heading': 2.0.14(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/extension-history': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/extension-horizontal-rule': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/extension-italic': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/extension-list': 2.0.16(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/extension-node-formatting': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/extension-positioner': 2.1.8(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/extension-strike': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/extension-sub': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/extension-sup': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/extension-tables': 2.2.10(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/extension-text-color': 2.0.15(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/extension-underline': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/extension-whitespace': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/i18n': 2.0.4
+      '@remirror/icons': 2.0.2
+      '@remirror/messages': 2.0.5
+      '@remirror/pm': 2.0.6
+      '@remirror/react-core': 2.0.20(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
+      '@remirror/react-hooks': 2.0.25(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
+      '@remirror/react-utils': 2.0.5(@remirror/pm@2.0.6)(@types/react@18.0.28)(react@18.2.0)
+      '@remirror/theme': 2.0.8(@remirror/pm@2.0.6)
+      '@seznam/compose-react-refs': 1.0.6
+      '@types/react': 18.0.28
+      '@types/react-color': 3.0.6
+      '@types/react-dom': 18.0.11
+      create-context-state: 2.0.2(@types/react@18.0.28)(react@18.2.0)
+      match-sorter: 6.3.1
+      multishift: 2.0.8(@remirror/pm@2.0.6)(@types/react@18.0.28)(react@18.2.0)
+      react: 18.2.0
+      react-color: 2.19.3(react@18.2.0)
+      react-dom: 18.2.0(react@18.2.0)
+    transitivePeerDependencies:
+      - '@types/node'
+      - '@types/prettier'
+      - jsdom
+      - prettier
+      - supports-color
+    dev: false
+
+  /@remirror/react-core@2.0.18(@remirror/pm@2.0.6)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-IpnZ/UNZkM5z9QN8geWT9jQ9Hd6V4tfTn87FRN9y+HqVgCQFQTsAinl0j47ILZMLo0Eu+u0Se7Jvpr1Jg7htZQ==}
     peerDependencies:
       '@remirror/pm': ^2.0.5
@@ -5027,6 +5196,46 @@ packages:
       - supports-color
     dev: false
 
+  /@remirror/react-core@2.0.20(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-e1PLXtF20AdMw8fl+VtYi68SSUbp6KrSAt8DhA/ZQ4cxWRaDR3PFpADJupf2JC8+NlqnbEUoKZiZ5fVCpHsqUA==}
+    peerDependencies:
+      '@remirror/pm': ^2.0.5
+      '@types/react': ^16.14.0 || ^17 || ^18
+      '@types/react-dom': ^16.9.0 || ^17 || ^18
+      react: ^16.14.0 || ^17 || ^18
+      react-dom: ^16.14.0 || ^17 || ^18
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      '@types/react-dom':
+        optional: true
+    dependencies:
+      '@babel/runtime': 7.22.5
+      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/extension-positioner': 2.1.8(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/extension-react-component': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
+      '@remirror/i18n': 2.0.4
+      '@remirror/pm': 2.0.6
+      '@remirror/preset-core': 2.0.16(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/preset-react': 2.0.14(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
+      '@remirror/react-renderer': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react@18.0.28)(react@18.2.0)
+      '@remirror/react-utils': 2.0.5(@remirror/pm@2.0.6)(@types/react@18.0.28)(react@18.2.0)
+      '@remirror/theme': 2.0.8(@remirror/pm@2.0.6)
+      '@seznam/compose-react-refs': 1.0.6
+      '@types/react': 18.0.28
+      '@types/react-dom': 18.0.11
+      create-context-state: 2.0.2(@types/react@18.0.28)(react@18.2.0)
+      fast-deep-equal: 3.1.3
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+      resize-observer-polyfill: 1.5.1
+      tiny-warning: 1.0.3
+    transitivePeerDependencies:
+      - '@types/node'
+      - jsdom
+      - supports-color
+    dev: false
+
   /@remirror/react-editors@1.0.34(@emotion/css@11.11.0)(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(@types/react-dom@18.0.11)(@types/react@18.0.28)(@types/styled-components@5.1.26)(react-dom@18.2.0)(react@18.2.0)(styled-components@5.3.11):
     resolution: {integrity: sha512-1FhD5lpR9VZjgqyxiA2tGj+3o0tRepud/nb7OZw3948SSko2hT3b3rm9ZcGBP90LF7Wmt8eRvJA7vSKaLKdGiw==}
     peerDependencies:
@@ -5042,9 +5251,9 @@ packages:
     dependencies:
       '@babel/runtime': 7.22.5
       '@remirror/core-helpers': 2.0.3
-      '@remirror/extension-react-tables': 2.2.16(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
+      '@remirror/extension-react-tables': 2.2.16(@remirror/pm@2.0.6)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
       '@remirror/pm': 2.0.6
-      '@remirror/react': 2.0.29(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
+      '@remirror/react': 2.0.32(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
       '@remirror/styles': 2.0.5(@emotion/css@11.11.0)(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(@types/react@18.0.28)(@types/styled-components@5.1.26)(react@18.2.0)(styled-components@5.3.11)
       '@svgmoji/noto': 3.2.0
       '@types/react': 18.0.28
@@ -5069,7 +5278,7 @@ packages:
       - supports-color
     dev: false
 
-  /@remirror/react-hooks@2.0.24(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0):
+  /@remirror/react-hooks@2.0.24(@remirror/pm@2.0.6)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-lBMjtUuHLpXS0JViLeS8jEB8hAcddA6BJosclR/CHsxKxlK7mhNuYsBW/4Sb0y2sd6t1v+JwGrIBp/h8xGXnzA==}
     peerDependencies:
       '@remirror/pm': ^2.0.5
@@ -5097,7 +5306,50 @@ packages:
       '@remirror/extension-positioner': 2.1.8(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/i18n': 2.0.3
       '@remirror/pm': 2.0.6
-      '@remirror/react-core': 2.0.18(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
+      '@remirror/react-core': 2.0.20(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
+      '@remirror/react-utils': 2.0.5(@remirror/pm@2.0.6)(@types/react@18.0.28)(react@18.2.0)
+      '@types/react': 18.0.28
+      '@types/react-dom': 18.0.11
+      multishift: 2.0.8(@remirror/pm@2.0.6)(@types/react@18.0.28)(react@18.2.0)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+      use-isomorphic-layout-effect: 1.1.2(@types/react@18.0.28)(react@18.2.0)
+      use-previous: 1.2.0(@types/react@18.0.28)(react@18.2.0)
+    transitivePeerDependencies:
+      - '@types/node'
+      - jsdom
+      - supports-color
+    dev: false
+
+  /@remirror/react-hooks@2.0.25(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-/qByk9+OSDVBFD5N3CalsXNvbHF0GEfOEhNstsBGvg0xxf0NsuvPj1rYcXnVHk+9mgx2TMh+EiOhfURRR2A9vg==}
+    peerDependencies:
+      '@remirror/pm': ^2.0.5
+      '@types/react': ^16.14.0 || ^17 || ^18
+      '@types/react-dom': ^16.9.0 || ^17 || ^18
+      react: ^16.14.0 || ^17 || ^18
+      react-dom: ^16.14.0 || ^17 || ^18
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      '@types/react-dom':
+        optional: true
+      react:
+        optional: true
+      react-dom:
+        optional: true
+    dependencies:
+      '@babel/runtime': 7.22.5
+      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/extension-emoji': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/extension-events': 2.1.15(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/extension-history': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/extension-mention': 2.0.15(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/extension-mention-atom': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/extension-positioner': 2.1.8(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/i18n': 2.0.4
+      '@remirror/pm': 2.0.6
+      '@remirror/react-core': 2.0.20(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
       '@remirror/react-utils': 2.0.5(@remirror/pm@2.0.6)(@types/react@18.0.28)(react@18.2.0)
       '@types/react': 18.0.28
       '@types/react-dom': 18.0.11
@@ -5152,8 +5404,8 @@ packages:
       - supports-color
     dev: false
 
-  /@remirror/react@2.0.29(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-ZmBweQkTzIijtB1Eog7O0WWw2etmYFdjNH/JvnvEonbJn9oG9uAu22eWNF5kjTRI6d+Q6I6mI7VDH5xj4+PJbw==}
+  /@remirror/react@2.0.32(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-GdGAuMwurc88XRg1/odUziWTilxEp+UiL+Ktr5vdReKlvL6lIPe+lA2XkbTcOY8XVUzilny5uaMko52RKBr+5Q==}
     peerDependencies:
       '@types/react': ^16.14.0 || ^17 || ^18
       '@types/react-dom': ^16.9.0 || ^17 || ^18
@@ -5169,11 +5421,11 @@ packages:
       '@remirror/extension-placeholder': 2.0.14(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-positioner': 2.1.8(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-react-component': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
-      '@remirror/extension-react-tables': 2.2.16(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
+      '@remirror/extension-react-tables': 2.2.17(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
       '@remirror/preset-react': 2.0.14(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
-      '@remirror/react-components': 2.1.13(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
-      '@remirror/react-core': 2.0.18(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
-      '@remirror/react-hooks': 2.0.24(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
+      '@remirror/react-components': 2.1.16(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
+      '@remirror/react-core': 2.0.20(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
+      '@remirror/react-hooks': 2.0.25(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
       '@remirror/react-renderer': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react@18.0.28)(react@18.2.0)
       '@remirror/react-utils': 2.0.5(@remirror/pm@2.0.6)(@types/react@18.0.28)(react@18.2.0)
       '@types/react': 18.0.28
@@ -11025,12 +11277,12 @@ packages:
       '@remirror/extension-bidi': 2.0.13(@remirror/pm@2.0.6)
       '@remirror/extension-blockquote': 2.0.14(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-bold': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/extension-callout': 2.0.14(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/extension-callout': 2.0.14(@remirror/pm@2.0.6)
       '@remirror/extension-code': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-code-block': 2.0.15(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-codemirror5': 2.0.13(@remirror/pm@2.0.6)(@types/codemirror@5.60.8)(codemirror@5.65.13)
       '@remirror/extension-collaboration': 2.0.13(@remirror/pm@2.0.6)
-      '@remirror/extension-columns': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/extension-columns': 2.0.13(@remirror/pm@2.0.6)
       '@remirror/extension-diff': 2.0.13(@remirror/pm@2.0.6)
       '@remirror/extension-doc': 2.1.5(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-drop-cursor': 2.0.13(@remirror/pm@2.0.6)
@@ -11043,7 +11295,7 @@ packages:
       '@remirror/extension-font-size': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-gap-cursor': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-hard-break': 2.0.13(@remirror/pm@2.0.6)
-      '@remirror/extension-heading': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/extension-heading': 2.0.13(@remirror/pm@2.0.6)
       '@remirror/extension-history': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-horizontal-rule': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-image': 2.1.9(@remirror/pm@2.0.6)
@@ -11065,7 +11317,7 @@ packages:
       '@remirror/extension-tables': 2.2.10(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-text': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-text-case': 2.0.13(@remirror/pm@2.0.6)
-      '@remirror/extension-text-color': 2.0.14(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/extension-text-color': 2.0.14(@remirror/pm@2.0.6)
       '@remirror/extension-text-highlight': 2.0.14(@remirror/pm@2.0.6)
       '@remirror/extension-trailing-node': 2.0.13(@remirror/pm@2.0.6)
       '@remirror/extension-underline': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
@@ -12000,6 +12252,9 @@ packages:
     resolution: {integrity: sha512-CJ1QgKmNg3CwvAv/kOFmtnEN05f0D/cn9QntgNOQlQF9dgvVTHj3t+8JPdjqawCHk7V/KA+fbUqzZ9XWhcqPUg==}
     engines: {node: '>= 4.0.0'}
     dev: true
+
+  /unraw@2.0.1:
+    resolution: {integrity: sha512-tdOvLfRzHolwYcHS6HIX860MkK9LQ4+oLuNwFYL7bpgTEO64PZrcQxkisgwJYCfF8sKiWLwwu1c83DvMkbefIQ==}
 
   /update-browserslist-db@1.0.10(browserslist@4.21.5):
     resolution: {integrity: sha512-OztqDenkfFkbSG+tRxBeAnCVPckDBcvibKd35yDONx6OU8N7sqgwc7rCbkJ/WcYtVRZ4ba68d6byhC21GFh7sQ==}
