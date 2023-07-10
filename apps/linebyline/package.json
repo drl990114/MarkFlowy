@@ -15,7 +15,7 @@
     "@linebyline/editor": "workspace:*",
     "@mui/icons-material": "^5.11.16",
     "@mui/material": "^5.13.5",
-    "@remirror/core": "^2.0.16",
+    "@remirror/core": "^2.0.17",
     "@remirror/react": "^2.0.29",
     "@tauri-apps/api": "^1.4.0",
     "classnames": "^2.3.2",
