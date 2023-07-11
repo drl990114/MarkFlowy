@@ -10,7 +10,7 @@ In order to download necessary tools, clone the repository, and install dependen
 You'll need the following tools:
 
 - [Git](https://git-scm.com/)
-- [Node.JS](https://nodejs.org/en) >= 14.x
+- [Node.JS](https://nodejs.org/en) >= 16.x
 - [pnpm](https://pnpm.io/) >= 8.x
 - [rust](https://www.rust-lang.org/)
 
