@@ -102,6 +102,18 @@ pub fn menu_handler(event: WindowMenuEvent<tauri::Wry>) {
             AppConf::read()
                 .amend(serde_json::json!({ "theme": theme }))
                 .write();
+
+            let window = event.window();
+            let menu_handle = window.menu_handle();
+
+            menu_handle.get_item(menu_id).set_selected(true).unwrap();
+
+            if theme == "light" {
+                menu_handle.get_item("theme_dark").set_selected(false).unwrap();
+            } else {
+                menu_handle.get_item("theme_light").set_selected(false).unwrap();
+            }
+
             event
                 .window()
                 .emit("change_theme", theme)
