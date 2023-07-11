@@ -21,7 +21,7 @@
     "@tauri-apps/cli": "^1.4.0",
     "babel": "^6.23.0",
     "child_process": "^1.0.2",
-    "eslint": "8.43.0",
+    "eslint": "8.44.0",
     "husky": "^8.0.3",
     "typescript": "^5.1.3"
   },
