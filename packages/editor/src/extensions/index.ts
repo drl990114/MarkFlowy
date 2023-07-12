@@ -23,6 +23,7 @@ import {
   // TableExtension,
   // TaskListExtension,
   // UnderlineExtension,
+  PlaceholderExtension,
 } from 'remirror/extensions'
 // import data from 'svgmoji/emoji.json'
 import { LineInlineDecorationExtension, LineInlineMarkExtension, markExtensions } from './Inline'
@@ -70,6 +71,7 @@ function extensions(): any[] {
     // new ImageExtension({}),
     ...corePreset({ excludeExtensions: ['paragraph', 'text'] }),
     ...markExtensions,
+    new PlaceholderExtension({ placeholder: 'Type something...' }),
     new LineHorizontalRuleExtension(),
     new LineParagraphExtension(),
     new LineTextExtension(),
