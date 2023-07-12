@@ -272,8 +272,8 @@ importers:
         specifier: ^6.3.1
         version: 6.3.1(@codemirror/state@6.2.1)(@codemirror/view@6.14.0)(@lezer/common@1.0.3)
       '@codemirror/lint':
-        specifier: ^6.3.0
-        version: 6.3.0
+        specifier: ^6.4.0
+        version: 6.4.0
       '@codemirror/search':
         specifier: ^6.5.0
         version: 6.5.0
@@ -315,7 +315,7 @@ importers:
         version: 2.0.14(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-list':
         specifier: ^2.0.15
-        version: 2.0.16(@remirror/pm@2.0.6)
+        version: 2.0.16(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-positioner':
         specifier: ^2.1.8
         version: 2.1.8(@remirror/pm@2.0.6)
@@ -2008,7 +2008,7 @@ packages:
     dependencies:
       '@codemirror/autocomplete': 6.8.1(@codemirror/language@6.8.0)(@codemirror/state@6.2.1)(@codemirror/view@6.14.0)(@lezer/common@1.0.3)
       '@codemirror/language': 6.8.0
-      '@codemirror/lint': 6.3.0
+      '@codemirror/lint': 6.4.0
       '@codemirror/state': 6.2.1
       '@codemirror/view': 6.14.0
       '@lezer/common': 1.0.3
@@ -2175,8 +2175,8 @@ packages:
       '@codemirror/language': 6.8.0
     dev: false
 
-  /@codemirror/lint@6.3.0:
-    resolution: {integrity: sha512-tzxOVQNoDhhwFNfcTO2IB74wQoWarARcH6gv3YufPpiJ9yhcb7zD6JCkO5+FWARskqRFc8GFa6E+wUyOvADl5A==}
+  /@codemirror/lint@6.4.0:
+    resolution: {integrity: sha512-6VZ44Ysh/Zn07xrGkdtNfmHCbGSHZzFBdzWi0pbd7chAQ/iUcpLGX99NYRZTa7Ugqg4kEHCqiHhcZnH0gLIgSg==}
     dependencies:
       '@codemirror/state': 6.2.1
       '@codemirror/view': 6.14.0
@@ -4370,23 +4370,6 @@ packages:
       - supports-color
     dev: false
 
-  /@remirror/extension-list@2.0.16(@remirror/pm@2.0.6):
-    resolution: {integrity: sha512-nqRvlQotHubZxpWxwdt+3FyV6AmEifx5aytKtz0i/jub9cM8AUKHqkRrsQchvw1Y5jaSAjHJr3J7I2sLBiH78w==}
-    peerDependencies:
-      '@remirror/pm': ^2.0.5
-    dependencies:
-      '@babel/runtime': 7.22.5
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/extension-events': 2.1.15(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/messages': 2.0.4
-      '@remirror/pm': 2.0.6
-      '@remirror/theme': 2.0.8(@remirror/pm@2.0.6)
-    transitivePeerDependencies:
-      - '@types/node'
-      - jsdom
-      - supports-color
-    dev: false
-
   /@remirror/extension-list@2.0.16(@remirror/pm@2.0.6)(@types/node@20.3.1):
     resolution: {integrity: sha512-nqRvlQotHubZxpWxwdt+3FyV6AmEifx5aytKtz0i/jub9cM8AUKHqkRrsQchvw1Y5jaSAjHJr3J7I2sLBiH78w==}
     peerDependencies:
@@ -4395,7 +4378,7 @@ packages:
       '@babel/runtime': 7.22.5
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-events': 2.1.15(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/messages': 2.0.5
+      '@remirror/messages': 2.0.4
       '@remirror/pm': 2.0.6
       '@remirror/theme': 2.0.8(@remirror/pm@2.0.6)
     transitivePeerDependencies:
@@ -5147,7 +5130,7 @@ packages:
       '@remirror/extension-image': 2.1.9(@remirror/pm@2.0.6)
       '@remirror/extension-italic': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-link': 2.0.17(@remirror/pm@2.0.6)
-      '@remirror/extension-list': 2.0.16(@remirror/pm@2.0.6)
+      '@remirror/extension-list': 2.0.16(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-search': 2.0.14(@remirror/pm@2.0.6)
       '@remirror/extension-shortcuts': 2.0.13(@remirror/pm@2.0.6)
       '@remirror/extension-strike': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
@@ -5196,7 +5179,7 @@ packages:
       '@remirror/extension-history': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-horizontal-rule': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-italic': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/extension-list': 2.0.16(@remirror/pm@2.0.6)
+      '@remirror/extension-list': 2.0.16(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-node-formatting': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-positioner': 2.1.8(@remirror/pm@2.0.6)
       '@remirror/extension-strike': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
@@ -5334,7 +5317,7 @@ packages:
       '@remirror/extension-history': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-horizontal-rule': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-italic': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/extension-list': 2.0.16(@remirror/pm@2.0.6)
+      '@remirror/extension-list': 2.0.16(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-node-formatting': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-positioner': 2.1.8(@remirror/pm@2.0.6)
       '@remirror/extension-strike': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
@@ -11613,7 +11596,7 @@ packages:
       '@remirror/extension-image': 2.1.9(@remirror/pm@2.0.6)
       '@remirror/extension-italic': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-link': 2.0.17(@remirror/pm@2.0.6)
-      '@remirror/extension-list': 2.0.16(@remirror/pm@2.0.6)
+      '@remirror/extension-list': 2.0.16(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-markdown': 2.0.13(@remirror/pm@2.0.6)
       '@remirror/extension-mention': 2.0.15(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-mention-atom': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
