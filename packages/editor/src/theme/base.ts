@@ -664,4 +664,8 @@ export const BaseStyle = styled.createGlobalStyle<any>`
       background-color: ${(props) => props.theme.tipsBgColor};
     }
   }
+  
+  .remirror-is-empty {
+    color: ${(props) => props.theme.labelFontColor};
+  }
 `
