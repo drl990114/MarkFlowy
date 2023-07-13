@@ -3,7 +3,7 @@ import type { EditorViewType } from '@linebyline/editor/types'
 import { invoke } from '@tauri-apps/api'
 import { emit } from '@tauri-apps/api/event'
 import { appWindow } from '@tauri-apps/api/window'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import styled, { css } from 'styled-components'
 import { useEditorStore } from '@/stores'
 import { getFileObject } from '@/helper/files'
@@ -12,6 +12,7 @@ import { createWysiwygDelegate } from '@linebyline/editor/src/components/Wysiwyg
 import { createDualDelegate } from '@linebyline/editor/src/components/DualEditor/delegate'
 
 const EditorWrapper = styled.div<{ active: boolean; type: EditorViewType }>`
+  min-height: 100%;
   overflow: hidden;
 
   ${(props) =>
@@ -84,6 +85,10 @@ function Editor(props: EditorProps) {
     }
   }, [active, curFile, getEditorContent, setEditorDelegate])
 
+  const handleWrapperClick = useCallback(() => {
+    delegate.manager.view.focus()
+  }, [delegate.manager.view])
+
   const editorProps = useMemo(
     () => ({
       file: curFile,
@@ -101,7 +106,7 @@ function Editor(props: EditorProps) {
   )
 
   return typeof content === 'string' ? (
-    <EditorWrapper active={active} type={type}>
+    <EditorWrapper active={active} type={type} onClick={handleWrapperClick}>
       {type === 'dual' ? <DualEditor {...editorProps} /> : <WysiwygEditor {...editorProps} />}
     </EditorWrapper>
   ) : null
