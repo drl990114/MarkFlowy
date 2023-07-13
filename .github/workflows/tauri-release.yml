@@ -49,6 +49,7 @@ jobs:
         with:
           token: ${{ github.token }}
           tag: ${{ github.ref_name }}
+          excludeTypes: 'chore,docs,style,refactor,test,ci,build'
 
       - name: Commit CHANGELOG.md
         uses: stefanzweifel/git-auto-commit-action@v4
@@ -91,4 +92,4 @@ jobs:
           releaseName: 'LineByLine-alpha v__VERSION__' # tauri-action replaces \_\_VERSION\_\_ with the app version.
           releaseBody: ${{ steps.changelog.outputs.changes }}
           releaseDraft: false
-          prerelease: false
+          prerelease: true
