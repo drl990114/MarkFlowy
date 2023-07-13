@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from 'react'
 
 import type { EditorState } from '@linebyline/editor/types'
-import { appWindow } from '@tauri-apps/api/window'
+import { setTitleBarText } from '@/components/TitleBar'
 
 export function useTitleEffect(state: EditorState, active: boolean): void {
   const title = useMemo(() => {
@@ -15,7 +15,7 @@ export function useTitleEffect(state: EditorState, active: boolean): void {
 
   useEffect(() => {
     if (active) {
-      appWindow.setTitle(title)
+      setTitleBarText(title)
     }
   }, [title, active])
 }
