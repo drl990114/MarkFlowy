@@ -181,8 +181,8 @@ importers:
         specifier: ^6.9.0
         version: 6.9.0(react-dom@18.2.0)(react@18.2.0)
       remixicon:
-        specifier: ^3.2.0
-        version: 3.2.0
+        specifier: ^3.4.0
+        version: 3.4.0
       styled-components:
         specifier: ^5.3.11
         version: 5.3.11(react-dom@18.2.0)(react-is@18.2.0)(react@18.2.0)
@@ -11635,8 +11635,8 @@ packages:
       - supports-color
     dev: false
 
-  /remixicon@3.2.0:
-    resolution: {integrity: sha512-ADh4EQE4UGtm9GHqD+TIfVp1b0zeWso6efaMAnejdB6/7Z1W02Ka5K8khQaz+LNgIqC6dSZxCvXMWNalYWHiNQ==}
+  /remixicon@3.4.0:
+    resolution: {integrity: sha512-T1tJfMVNbmUIYdsrCJ//FOoQ/xgiWPuE3ZZvUeDRl5h/IZWKN2eTcKeUoro1g5aeJ/Rk1mZV6QPdF8qZxIu+3A==}
     dev: false
 
   /remove-accents@0.4.2:
