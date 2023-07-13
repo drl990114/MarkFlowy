@@ -16,6 +16,7 @@ import { Root, Setting } from '@/router'
 import { loadTask, use } from '@/helper/schedule'
 import { APP_NAME, EVENT } from '@/constants'
 import { CacheManager } from '@/helper'
+import TitleBar from './components/TitleBar'
 
 function App() {
   useGlobalOSInfo()
@@ -90,6 +91,7 @@ function App() {
       <MuiThemeProvider theme={muiTheme}>
         <GlobalStyles />
         <BaseStyle />
+        <TitleBar />
         <Routes>
           <Route index path="/" element={<Root />} />
           <Route path="/setting" element={<Setting />} />

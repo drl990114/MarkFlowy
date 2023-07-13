@@ -44,7 +44,7 @@
       "window": {
         "close": true,
         "create": true,
-        "setTitle": true
+        "startDragging": true
       }
     },
     "bundle": {
