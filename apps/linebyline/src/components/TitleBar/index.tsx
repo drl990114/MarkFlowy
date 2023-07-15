@@ -37,6 +37,8 @@ export default function TitleBar() {
 
 // TODO refactor: use file state
 export const setTitleBarText = (text: string) => {
+  appWindow.setTitle(text)
+
   const titleBarEl = document.getElementById('titlebar')
   if (titleBarEl) {
     titleBarEl.innerText = text

@@ -80,7 +80,7 @@ function extensions(): any[] {
     new LineHeadingExtension(),
     new LineListExtension(),
     new LineCodeMirrorExtension({ languages }),
-    new LineTableExtension(),
+    new LineTableExtension({ resizable: false }),
     new LineTableRowExtension(),
     new LineTableCellExtension(),
     new LineTableHeaderCellExtension(),

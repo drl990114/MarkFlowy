@@ -5,6 +5,7 @@ import EditorArea from '@/components/EditorArea'
 import { APP_NAME } from '@/constants'
 import { useEditorStore } from '@/stores'
 import { setTitleBarText } from '@/components/TitleBar'
+import TableDialog from '@/editorToolBar/TableDialog'
 
 function Root() {
   const { activeId } = useEditorStore()
@@ -20,6 +21,7 @@ function Root() {
       <SideBar />
       <EditorArea />
       <AppInfoDialog />
+      <TableDialog />
     </Container>
   )
 }

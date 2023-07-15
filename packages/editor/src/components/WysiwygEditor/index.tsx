@@ -4,6 +4,7 @@ import Text from '../Text'
 import Wrapper from '../Wrapper'
 import { createWysiwygDelegate } from './delegate'
 import type { EditorDelegate } from '../../../types'
+import TableToolbar from '../../toolbar/TableToolbar'
 
 const WysiwygEditor: FC<WysiwygEditorProps> = (props) => {
   const { content, hooks, delegate } = props
@@ -13,6 +14,7 @@ const WysiwygEditor: FC<WysiwygEditorProps> = (props) => {
   return (
     <Wrapper>
       <Remirror manager={editorDelegate.manager} initialContent={editorDelegate.stringToDoc(content)} hooks={hooks}>
+        <TableToolbar />
         <Text className="w-full markdown-body" />
       </Remirror>
     </Wrapper>
