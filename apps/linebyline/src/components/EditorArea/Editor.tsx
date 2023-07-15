@@ -97,6 +97,7 @@ function Editor(props: EditorProps) {
       content: content!,
       active,
       delegate,
+      offset: { top: 32, left: 16 },
       hooks: [
         () => {
           // eslint-disable-next-line react-hooks/rules-of-hooks
