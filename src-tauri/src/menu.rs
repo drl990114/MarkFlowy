@@ -40,6 +40,13 @@ pub fn generate_menu() -> Menu {
         ]),
     );
 
+    let paragraph_submenu = Submenu::new(
+        "Paragraph",
+        Menu::new().add_item(
+            CustomMenuItem::new("editor:dialog_create_table".to_string(), "Table"),
+        ),
+    );
+
     let theme_light = CustomMenuItem::new("theme_light", "Light");
     let theme_dark = CustomMenuItem::new("theme_dark", "Dark");
     let is_dark = app_conf.clone().theme_check("dark");
@@ -76,6 +83,7 @@ pub fn generate_menu() -> Menu {
         .add_submenu(app_menu)
         .add_submenu(file_submenu)
         .add_submenu(edit_submenu)
+        .add_submenu(paragraph_submenu)
         .add_submenu(theme_submenu)
         .add_submenu(view_submenu)
         .add_submenu(window_submenu);
@@ -85,6 +93,10 @@ pub fn generate_menu() -> Menu {
 
 pub fn menu_handler(event: WindowMenuEvent<tauri::Wry>) {
     let menu_id = event.menu_item_id();
+    let window = event.window();
+    let menu_handle = window.menu_handle();
+
+    window.emit("native:menu", menu_id).unwrap();
 
     match menu_id {
         "Save" => {
@@ -102,9 +114,6 @@ pub fn menu_handler(event: WindowMenuEvent<tauri::Wry>) {
             AppConf::read()
                 .amend(serde_json::json!({ "theme": theme }))
                 .write();
-
-            let window = event.window();
-            let menu_handle = window.menu_handle();
 
             menu_handle.get_item(menu_id).set_selected(true).unwrap();
 

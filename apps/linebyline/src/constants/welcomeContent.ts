@@ -21,6 +21,8 @@ The current linebyline is still in its infancy, and there may be some bad experi
 | table1       | table2       |
 | ------------ | ------------ |
 | table cell   | table cell   |
+| table cell   | table cell   |
+| table cell   | table cell   |
 
 ## Tasks
 

@@ -14,7 +14,7 @@ const List: FC<ListProps> = (props) => {
   return (
     <ListContainer>
       <MuiList dense className="list">
-        <h5 className="list-title">{title}</h5>
+        {title ? <h5 className="list-title">{title}</h5> : null}
         {data.map((item) => {
           return (
             <ListItem
@@ -75,7 +75,7 @@ export interface ListDataItem {
 }
 
 interface ListProps {
-  title: string
+  title?: string
   tip?: TooltipProps | false
   data: ListDataItem[]
   onItemClick?: (item: ListDataItem) => void
