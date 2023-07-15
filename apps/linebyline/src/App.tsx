@@ -1,7 +1,7 @@
 import { BaseStyle } from '@linebyline/editor'
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles'
 import { invoke } from '@tauri-apps/api'
-import { listen } from '@tauri-apps/api/event'
+import { emit, listen } from '@tauri-apps/api/event'
 import type { Theme } from '@tauri-apps/api/window'
 import { WebviewWindow } from '@tauri-apps/api/window'
 import { useCallback, useEffect } from 'react'
@@ -57,6 +57,11 @@ function App() {
   }, [isWeb])
 
   const eventInit = useCallback(() => {
+    const unListenMenu =  listen<string>('native:menu', ({ payload }) => {
+      // TODO Refactor: use a eventemitter in pure web runtime
+      emit(payload)
+    })
+  
     const unListenOpenSetting = listen(EVENT.open_window_setting, () => {
       new WebviewWindow('setting', {
         url: './setting',
@@ -76,8 +81,9 @@ function App() {
     return () => {
       unListenOpenSetting.then((fn) => fn())
       unListenChangeTheme.then((fn) => fn())
+      unListenMenu.then((fn) => fn())
     }
-  }, [])
+  }, [setTheme])
 
   // const updaterinit = useCallback(async () => {
   //   // TODO 更新默认的 setting

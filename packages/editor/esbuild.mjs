@@ -37,4 +37,5 @@ main({
   sourcemap: true,
   treeShaking: true,
   logLevel: 'debug',
+  external: ['@emotion/*'],
 })

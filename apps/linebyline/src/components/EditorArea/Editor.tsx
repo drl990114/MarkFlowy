@@ -10,10 +10,12 @@ import { getFileObject } from '@/helper/files'
 import { useEditorState } from '@/editorHooks/EditorState'
 import { createWysiwygDelegate } from '@linebyline/editor/src/components/WysiwygEditor/delegate'
 import { createDualDelegate } from '@linebyline/editor/src/components/DualEditor/delegate'
+import { useCommandEvent } from '@/editorHooks/CommandEvent'
 
 const EditorWrapper = styled.div<{ active: boolean; type: EditorViewType }>`
   min-height: 100%;
   overflow: hidden;
+  padding: 0 20px;
 
   ${(props) =>
     props.active
@@ -100,6 +102,10 @@ function Editor(props: EditorProps) {
           // eslint-disable-next-line react-hooks/rules-of-hooks
           useEditorState({ active, file: curFile })
         },
+        () => {
+          // eslint-disable-next-line react-hooks/rules-of-hooks
+          useCommandEvent({ active })
+        }
       ],
     }),
     [curFile, content, active, delegate],
