@@ -329,8 +329,8 @@ importers:
         specifier: ^2.1.8
         version: 2.1.8(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-react-tables':
-        specifier: ^2.2.16
-        version: 2.2.16(@remirror/pm@2.0.6)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^2.2.17
+        version: 2.2.17(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
       '@remirror/extension-tables':
         specifier: ^2.2.10
         version: 2.2.10(@remirror/pm@2.0.6)(@types/node@20.3.1)
@@ -4465,46 +4465,6 @@ packages:
     transitivePeerDependencies:
       - '@types/node'
       - jsdom
-      - supports-color
-    dev: false
-
-  /@remirror/extension-react-tables@2.2.16(@remirror/pm@2.0.6)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-bmKzajU4YadV+s3rQAxz8yS7aX7KGg6mZ/2dZ22FeMb+uMG5279LbAX1zuVSrcKnjR4RDtf0JK7PFWkRV7hkhg==}
-    peerDependencies:
-      '@remirror/pm': ^2.0.5
-      react: ^16.14.0 || ^17 || ^18
-      react-dom: ^16.14.0 || ^17 || ^18
-    peerDependenciesMeta:
-      react:
-        optional: true
-      react-dom:
-        optional: true
-    dependencies:
-      '@babel/runtime': 7.22.5
-      '@emotion/css': 11.11.0
-      '@linaria/core': 4.2.10
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/core-utils': 2.0.12(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/extension-positioner': 2.1.8(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/extension-tables': 2.2.10(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/icons': 2.0.2
-      '@remirror/messages': 2.0.4
-      '@remirror/pm': 2.0.6
-      '@remirror/preset-core': 2.0.16(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/react-components': 2.1.13(@remirror/pm@2.0.6)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
-      '@remirror/react-core': 2.0.18(@remirror/pm@2.0.6)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
-      '@remirror/react-hooks': 2.0.25(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.0.11)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
-      '@remirror/theme': 2.0.8(@remirror/pm@2.0.6)
-      jsx-dom-cjs: 8.0.7
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-    transitivePeerDependencies:
-      - '@types/node'
-      - '@types/prettier'
-      - '@types/react'
-      - '@types/react-dom'
-      - jsdom
-      - prettier
       - supports-color
     dev: false
 
