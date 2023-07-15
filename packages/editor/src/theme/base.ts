@@ -455,7 +455,8 @@ export const BaseStyle = styled.createGlobalStyle<any>`
 
   .markdown-body table th,
   .markdown-body table td {
-    padding: 6px 13px;
+    min-width: 60px;
+    padding: 6px 20px;
     border: 1px solid #30363d;
   }
 
