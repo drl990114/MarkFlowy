@@ -24,12 +24,12 @@ pub struct Post {
 
 pub fn read_directory(dir_path: &str) -> Vec<FileInfo> {
     let new_path = Path::new(dir_path);
-    println!("new path {:?}", new_path);
     let paths = fs::read_dir(new_path).unwrap();
 
     let mut files: Vec<FileInfo> = Vec::new();
 
     for path in paths {
+        println!("path {:?}", path);
         let path_unwrap = path.unwrap();
         let meta = path_unwrap.metadata();
         let meta_unwrap = meta.unwrap();
@@ -57,7 +57,9 @@ pub fn read_directory(dir_path: &str) -> Vec<FileInfo> {
             children,
         };
 
-        files.push(new_file_info);
+        if new_file_info.name.contains(".md") || meta_unwrap.is_dir() {
+            files.push(new_file_info);
+        }
     }
 
     files
