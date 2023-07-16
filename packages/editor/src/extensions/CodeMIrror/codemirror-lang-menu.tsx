@@ -81,9 +81,8 @@ const createCodeMirrorMenuDecorations = (
 
     const reference = document.createElement('div')
     const langInput = document.createElement('input')
-    reference.classList.add('code-block__reference')
+    reference.classList.add('code-block__reference', 'code-block__reference--active')
     langInput.classList.add('code-block__languages__input')
-    reference.classList.add('code-block__reference--active')
 
     reference.appendChild(langInput)
     langInput.value = currentLanguage
