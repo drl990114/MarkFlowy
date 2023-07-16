@@ -7,10 +7,11 @@
 <h4 align="center">Modern markdown editor.(WIP)</h3>
 
 <p align="center">
-  <a href="https://github.com/linebyline-group/linebyline" target="__blank"><img alt="GitHub" src="https://img.shields.io/github/license/linebyline-group/linebyline?color=%230369a1&label=License"></a>
-  <a href="https://github.com/linebyline-group/linebyline/releases" target="__blank"><img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/linebyline-group/linebyline?label=Version&color=%230369a1"></a>
-  <a href="https://github.com/linebyline-group/linebyline/releases" target="__blank"><img alt="GitHub Repo stars" src="https://img.shields.io/github/downloads/linebyline-group/linebyline/total?color=%230369a1&label=Downloads"></a>
-  <a href="https://github.com/linebyline-group/linebyline" target="__blank"><img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/linebyline-group/linebyline?style=social"></a>
+  <a href="https://github.com/linebyline-group/linebyline" target="__blank"><img alt="GitHub" src="https://img.shields.io/github/license/linebyline-group/linebyline?label=License"></a>
+  <a href="https://github.com/linebyline-group/linebyline/releases" target="__blank"><img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/linebyline-group/linebyline?label=Version"></a>
+  <a href="https://github.com/linebyline-group/linebyline/releases" target="__blank"><img alt="GitHub Repo stars" src="https://img.shields.io/github/downloads/linebyline-group/linebyline/total?label=Downloads&color=%23fe7d37"></a>
+  <a href="https://github.com/linebyline-group/linebyline" target="__blank"><img alt="GitHub" src="https://img.shields.io/github/commit-activity/w/linebyline-group/linebyline?color=%2346bd1b"></a>
+  <a href="https://www.rust-lang.org/" target="__blank"><img alt="GitHub" src="https://img.shields.io/badge/Rust-1.70.0-dea584"></a>
 </p>
 
 ## Feature
@@ -26,6 +27,18 @@ Available for Linux, macOS and Windows.
 Please look [releases page](https://github.com/linebyline-group/linebyline/releases)
 
 ## ScreenShot
+
+### index
+
+![index](./public/screenshots/index.png)
+
+### Dark Mode
+
+![dark mode](./public/screenshots/darkmode.png)
+
+### Dual Mode
+
+![dual mode](./public/screenshots/dualmode.png)
 
 ### One-click export chatgpt conversation
 
