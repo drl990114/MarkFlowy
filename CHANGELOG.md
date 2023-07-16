@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [vv0.1.0-alpha] - 2023-07-16
+### :sparkles: New Features
+- [`7bbb30d`](https://github.com/linebyline-group/linebyline/commit/7bbb30d179cd0b655bf8f22459695d345baf98d8) - chatgpt optimization *(commit by [@halodong](https://github.com/halodong))*
+- [`a2a6571`](https://github.com/linebyline-group/linebyline/commit/a2a65717d2130a412029360493788c9e22152199) - editor placeholder *(commit by [@halodong](https://github.com/halodong))*
+- [`a58ceed`](https://github.com/linebyline-group/linebyline/commit/a58ceed1db7f72a804da03cfa7f5ce13f0cded1f) - titlebar overlay *(commit by [@halodong](https://github.com/halodong))*
+- [`ce59d2c`](https://github.com/linebyline-group/linebyline/commit/ce59d2cd95a0284ec162f91408d8501c4c366275) - more table editing method *(commit by [@halodong](https://github.com/halodong))*
+- [`21cd61b`](https://github.com/linebyline-group/linebyline/commit/21cd61bb7508c4a5256f84171a9381836da8e680) - more table editing method *(PR [#176](https://github.com/linebyline-group/linebyline/pull/176) by [@halodong](https://github.com/halodong))*
+- [`c46754f`](https://github.com/linebyline-group/linebyline/commit/c46754f1b000e057f3f4dc269f66a00720879f69) - codemirror setup *(commit by [@halodong](https://github.com/halodong))*
+- [`594a8ce`](https://github.com/linebyline-group/linebyline/commit/594a8ce442c4e0c895dd1f819dde49f95e652d00) - codemirror dark theme *(commit by [@halodong](https://github.com/halodong))*
+- [`a4d15a3`](https://github.com/linebyline-group/linebyline/commit/a4d15a3d47334781a24b95644f3b3a1d985b33bd) - count status bar *(commit by [@halodong](https://github.com/halodong))*
+- [`ccb8ec9`](https://github.com/linebyline-group/linebyline/commit/ccb8ec99fc793eb367bf86666e5d03efb6e1f7f9) - clear recent open history and ux optimize *(commit by [@halodong](https://github.com/halodong))*
+
+### :bug: Bug Fixes
+- [`bf804c1`](https://github.com/linebyline-group/linebyline/commit/bf804c11fb34fcd1cf52725e27e34118adbb2640) - theme menu selected update *(commit by [@halodong](https://github.com/halodong))*
+- [`895927e`](https://github.com/linebyline-group/linebyline/commit/895927e5363cb7a67d909b992ba0f7201070b860) - editorArea focus regional expansion *(commit by [@halodong](https://github.com/halodong))*
+- [`ac2d779`](https://github.com/linebyline-group/linebyline/commit/ac2d77941ebfe045c0a38b2439978c745c4baecd) - titlebar os limit error *(commit by [@halodong](https://github.com/halodong))*
+- [`cb0adae`](https://github.com/linebyline-group/linebyline/commit/cb0adaef9a22a0f6e1403a4ef5a8a1b51f99cbd3) - file type filter *(commit by [@halodong](https://github.com/halodong))*
+- [`b85a912`](https://github.com/linebyline-group/linebyline/commit/b85a9122b54eb6d2a6f05f41031ddd26ea1c4d7b) - editorarea focus *(commit by [@halodong](https://github.com/halodong))*
+
+
 ## [v0.0.8-alpha] - 2023-07-10
 ### :sparkles: New Features
 - [`f05ba0a`](https://github.com/linebyline-group/linebyline/commit/f05ba0a6a3d7bc4b51bd1908b372db06d1dbd977) - code select menu *(PR [#144](https://github.com/linebyline-group/linebyline/pull/144) by [@halodong](https://github.com/halodong))*
@@ -30,3 +50,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 [v0.0.8-alpha]: https://github.com/linebyline-group/linebyline/compare/v0.0.7-alpha...v0.0.8-alpha
+[vv0.1.0-alpha]: https://github.com/linebyline-group/linebyline/compare/v0.0.8-alpha...vv0.1.0-alpha
