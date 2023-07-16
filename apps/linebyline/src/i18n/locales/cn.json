@@ -5,6 +5,7 @@
     },
     "file": {
         "untitled": "未命名",
-        "openDir": "打开文件夹"
+        "openDir": "打开文件夹",
+        "recentDir": "最近打开的文件"
     }
 }

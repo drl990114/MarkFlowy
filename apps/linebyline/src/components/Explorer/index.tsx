@@ -12,54 +12,65 @@ import type { IFile } from '@/helper/filesys'
 import { useGlobalCacheData } from '@/hooks'
 import { CacheManager } from '@/helper'
 import { Empty, FileTree, List, Popper } from '@/components'
+import styled from 'styled-components'
+
+const RecentListBottom = styled.div`
+  padding: 8px;
+  font-size: 0.7rem;
+  cursor: pointer;
+
+  &:hover {
+    background-color: ${props => props.theme.tipsBgColor};
+  }
+`
 
 const Explorer: FC<ExplorerProps> = (props) => {
   const { t } = useTranslation()
-  const { folderData, activeId, setFolderData, addOpenedFile, setActiveId }
-    = useEditorStore()
+  const { folderData, activeId, setFolderData, addOpenedFile, setActiveId } = useEditorStore()
   const [popperOpen, setPopperOpen] = useState(false)
   const [cache] = useGlobalCacheData()
 
   const handleSelect = (item: IFile) => {
-    if (item.kind === 'dir')
-      return
+    if (item.kind === 'dir') return
 
     addOpenedFile(item.id)
     setActiveId(item.id)
   }
 
-  const openRir = async (dir: string) => {
+  const openRir = useCallback(async (dir: string) => {
     try {
       const res = await readDirectory(dir)
       CacheManager.writeCache('openFolderHistory', { path: dir, time: dayjs() })
       setFolderData(res)
-    }
-    catch (error) {
+    } catch (error) {
       console.error('error', error)
     }
+  }, [setFolderData])
+
+  const handleClearRecent = () => {
+    CacheManager.writeCache('openFolderHistory', [])
+    setPopperOpen(false)
   }
 
   const handleOpenDirClick = async () => {
     const dir = await open({ directory: true, recursive: true })
 
-    if (typeof dir !== 'string')
-      return
+    if (typeof dir !== 'string') return
     openRir(dir)
   }
 
   const handleOpenHistoryListItemClick = useCallback((item: ListDataItem) => {
     openRir(item.title)
-  }, [])
+    setPopperOpen(false)
+  }, [openRir])
 
   const listData = useMemo(
     () =>
-      cache.openFolderHistory.map(
-        (history: { time: string; path: string }) => ({
-          key: history.time,
-          title: history.path,
-          iconCls: 'ri-folder-5-line',
-        }),
-      ),
+      cache.openFolderHistory.map((history: { time: string; path: string }) => ({
+        key: history.time,
+        title: history.path,
+        iconCls: 'ri-folder-5-line',
+      })),
     [cache],
   )
 
@@ -72,18 +83,16 @@ const Explorer: FC<ExplorerProps> = (props) => {
         <div className="flex" />
       </div>
       <div className="h-full w-full overflow-auto">
-        {folderData
-          ? (
+        {folderData ? (
           <FileTree
             className="flex-1"
             data={folderData}
             activeId={activeId}
             onSelect={handleSelect}
-           />
-            )
-          : (
+          />
+        ) : (
           <Empty />
-            )}
+        )}
       </div>
       <div className="explorer-bottom">
         <small className="flex-1 cursor-pointer" onClick={handleOpenDirClick}>
@@ -94,17 +103,20 @@ const Explorer: FC<ExplorerProps> = (props) => {
           onClickAway={() => setPopperOpen(false)}
           open={popperOpen}
           content={
-            <List
-              title="最近打开的文件夹"
-              data={listData}
-              onItemClick={handleOpenHistoryListItemClick}
-            />
+            <>
+              <List
+                title={t('file.recentDir')}
+                data={listData}
+                onItemClick={handleOpenHistoryListItemClick}
+              />
+              <RecentListBottom onClick={handleClearRecent}>Clear Recent</RecentListBottom>
+            </>
           }
         >
-          <i
+         {listData.length > 0 ? <i
             className="ri-more-2-fill icon-border cursor-pointer"
             onClick={() => setPopperOpen(true)}
-           />
+          /> : null}
         </Popper>
       </div>
     </Container>
