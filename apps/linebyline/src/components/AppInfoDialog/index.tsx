@@ -24,8 +24,7 @@ export function BootstrapDialogTitle(props: DialogTitleProps) {
   return (
     <DialogTitle sx={{ m: 0, p: 2 }} {...other}>
       {children}
-      {onClose
-        ? (
+      {onClose ? (
         <IconButton
           aria-label="close"
           onClick={onClose}
@@ -33,13 +32,12 @@ export function BootstrapDialogTitle(props: DialogTitleProps) {
             position: 'absolute',
             right: 8,
             top: 8,
-            color: theme => theme.palette.grey[500],
+            color: (theme) => theme.palette.grey[500],
           }}
         >
           <CloseIcon />
         </IconButton>
-          )
-        : null}
+      ) : null}
     </DialogTitle>
   )
 }
@@ -65,7 +63,7 @@ const AboutDialog: FC = () => {
 
     const unlisten = listen(EVENT.dialog_setting_about, () => setOpen(true))
     return () => {
-      unlisten.then(fn => fn())
+      unlisten.then((fn) => fn())
     }
   }, [])
 
@@ -86,18 +84,14 @@ TauriVersion: ${appInfo.tauriVersion}
 
   return (
     <Dialog open={open}>
-      <BootstrapDialogTitle onClose={handleClose}>
-        {appInfo.name}
-      </BootstrapDialogTitle>
+      <BootstrapDialogTitle onClose={handleClose}>{appInfo.name}</BootstrapDialogTitle>
       <DialogContent style={{ width: 450 }}>
         <DialogContentText>{`Version: ${appInfo.version}`}</DialogContentText>
         <DialogContentText>{`Tauri Version: ${appInfo.tauriVersion}`}</DialogContentText>
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose}>Ok</Button>
-        <Button onClick={handleCopyAppInfo} autoFocus>
-          Copy
-        </Button>
+        <Button onClick={handleCopyAppInfo}>Copy</Button>
       </DialogActions>
     </Dialog>
   )

@@ -18,6 +18,7 @@ const RecentListBottom = styled.div`
   padding: 8px;
   font-size: 0.7rem;
   cursor: pointer;
+  text-align: center;
 
   &:hover {
     background-color: ${props => props.theme.tipsBgColor};
