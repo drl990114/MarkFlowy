@@ -33,8 +33,7 @@ class CacheManager {
     const data = await readTextFile(fileName, { dir: BaseDirectory.AppCache })
     this[dataKey] = JSON.parse(data)
 
-    if (onSuccess)
-      onSuccess(this[dataKey])
+    if (onSuccess) onSuccess(this[dataKey])
 
     return data
   }
@@ -47,8 +46,7 @@ class CacheManager {
     writeFile(fileName, JSON.stringify(data), {
       dir: BaseDirectory.AppCache,
     }).then(() => {
-      if (onSuccess)
-        onSuccess(data)
+      if (onSuccess) onSuccess(data)
     })
   }
 
@@ -66,18 +64,19 @@ class CacheManager {
 
   writeCache = (key: string, value: any) => {
     if (key === 'openFolderHistory') {
-      if (this.cacheData.openFolderHistory.length > 10)
-        this.cacheData.openFolderHistory.pop()
+      if (Array.isArray(value)) {
+        this.cacheData.openFolderHistory = value
+      } else {
+        if (this.cacheData.openFolderHistory.length > 10) this.cacheData.openFolderHistory.pop()
 
-      const index = this.cacheData.openFolderHistory.findIndex(
-        (his: { path: string }) => his.path === value.path,
-      )
-      if (index >= 0)
-        this.cacheData.openFolderHistory.splice(index, 1)
+        const index = this.cacheData.openFolderHistory.findIndex(
+          (his: { path: string }) => his.path === value.path,
+        )
+        if (index >= 0) this.cacheData.openFolderHistory.splice(index, 1)
 
-      this.cacheData.openFolderHistory.unshift(value)
-    }
-    else {
+        this.cacheData.openFolderHistory.unshift(value)
+      }
+    } else {
       this.cacheData[key] = value
     }
     this.saveCache()
