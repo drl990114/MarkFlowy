@@ -13,6 +13,7 @@ import useChangeCodeMirrorTheme from '@/editorHooks/useChangeCodeMirrorTheme'
 import { createWysiwygDelegate } from '@linebyline/editor/src/components/WysiwygEditor/delegate'
 import { createDualDelegate } from '@linebyline/editor/src/components/DualEditor/delegate'
 import { useCommandEvent } from '@/editorHooks/CommandEvent'
+import { EditorCount } from '@/editorToolBar/EditorCount'
 
 const EditorWrapper = styled.div<{ active: boolean; type: EditorViewType }>`
   min-height: 100%;
@@ -111,6 +112,8 @@ function Editor(props: EditorProps) {
           useChangeCodeMirrorTheme()
         }
       ],
+      wysiwygToolBar: [<EditorCount key="editor-count" />],
+      markdownToolBar: [<EditorCount key="editor-count" />],
     }),
     [curFile, content, active, delegate],
   )

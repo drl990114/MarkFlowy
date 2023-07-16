@@ -39,6 +39,7 @@ import { LineCodeMirrorExtension } from './CodeMIrror/codemirror-extension'
 import { LineTableExtension, LineTableRowExtension } from './Table'
 import { languages } from '@codemirror/language-data'
 import { LineHorizontalRuleExtension } from './HorizontalRule'
+import { CountExtension } from '@remirror/extension-count'
 // import { TableExtension } from './ReactTables';
 
 export * from './List'
@@ -71,6 +72,8 @@ function extensions(): any[] {
     // new ImageExtension({}),
     ...corePreset({ excludeExtensions: ['paragraph', 'text'] }),
     ...markExtensions,
+    new CountExtension(),
+
     new PlaceholderExtension({ placeholder: 'Type something...' }),
     new LineHorizontalRuleExtension(),
     new LineParagraphExtension(),

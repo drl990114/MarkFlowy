@@ -9,7 +9,7 @@ import TableToolbar from '../../toolbar/TableToolbar'
 export const OffsetContext = createContext({ top: 0, left: 0 })
 
 const WysiwygEditor: FC<WysiwygEditorProps> = (props) => {
-  const { content, hooks, delegate, offset } = props
+  const { content, hooks, delegate, offset, wysiwygToolBar } = props
 
   const editorDelegate = delegate ?? createWysiwygDelegate()
 
@@ -22,6 +22,7 @@ const WysiwygEditor: FC<WysiwygEditorProps> = (props) => {
           hooks={hooks}
         >
           <TableToolbar />
+          {wysiwygToolBar || null}
           <Text className="w-full markdown-body" />
         </Remirror>
       </OffsetContext.Provider>
@@ -43,4 +44,5 @@ interface WysiwygEditorProps {
   }
   hooks?: (() => void)[]
   delegate?: EditorDelegate
+  wysiwygToolBar?: React.ReactNode[]
 }

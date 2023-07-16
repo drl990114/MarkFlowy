@@ -42,7 +42,8 @@ const [DualEditorProvider, useDualEditor] = createContextState<Context, Props>(
 )
 
 const MarkdownTextEditor = memo(
-  () => {
+  (props: { markdownToolBar?: React.ReactNode[] }) => {
+    const { markdownToolBar } = props
     const { visual, content, markText, hooks } = useDualEditor()
 
     return (
@@ -59,6 +60,7 @@ const MarkdownTextEditor = memo(
           className="h-full w-full overflow-auto px-0"
           style={{ padding: 0 }}
         />
+        {markdownToolBar || null}
       </Remirror>
     )
   },
@@ -78,7 +80,7 @@ function VisualEditor() {
  * The editor which is used to create the annotation. Supports formatting.
  */
 const DualEditor: React.FC<DualEditorProps> = (props) => {
-  const { file, content, active, delegate, hooks } = props
+  const { file, content, active, delegate, hooks, markdownToolBar } = props
 
   const extensions = useCallback(
     () => [
@@ -117,7 +119,7 @@ const DualEditor: React.FC<DualEditorProps> = (props) => {
       active={active}
       hooks={hooks}
     >
-      <MarkdownTextEditor />
+      <MarkdownTextEditor markdownToolBar={markdownToolBar} />
       <Devider />
       <VisualEditor />
     </DualEditorProvider>
@@ -137,4 +139,5 @@ interface DualEditorProps {
   content: string
   delegate: EditorDelegate
   hooks: (() => void)[]
+  markdownToolBar?: React.ReactNode[]
 }
