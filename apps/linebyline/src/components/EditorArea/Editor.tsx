@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import { DualEditor, WysiwygEditor } from '@linebyline/editor'
 import type { EditorViewType } from '@linebyline/editor/types'
 import { invoke } from '@tauri-apps/api'
@@ -8,6 +9,7 @@ import styled, { css } from 'styled-components'
 import { useEditorStore } from '@/stores'
 import { getFileObject } from '@/helper/files'
 import { useEditorState } from '@/editorHooks/EditorState'
+import useChangeCodeMirrorTheme from '@/editorHooks/useChangeCodeMirrorTheme'
 import { createWysiwygDelegate } from '@linebyline/editor/src/components/WysiwygEditor/delegate'
 import { createDualDelegate } from '@linebyline/editor/src/components/DualEditor/delegate'
 import { useCommandEvent } from '@/editorHooks/CommandEvent'
@@ -15,7 +17,6 @@ import { useCommandEvent } from '@/editorHooks/CommandEvent'
 const EditorWrapper = styled.div<{ active: boolean; type: EditorViewType }>`
   min-height: 100%;
   overflow: hidden;
-  padding: 0 20px;
 
   ${(props) =>
     props.active
@@ -27,6 +28,7 @@ const EditorWrapper = styled.div<{ active: boolean; type: EditorViewType }>`
         : css({
             maxWidth: '800px',
             margin: '0 auto',
+            padding: '0 20px',
             marginInlineStart: 'auto',
             marginInlineEnd: 'auto',
           })
@@ -63,6 +65,9 @@ function Editor(props: EditorProps) {
   useEffect(() => {
     const unListen = appWindow.listen<EditorViewType>('editor_toggle_type', async ({ payload }) => {
       if (active) {
+        if (type === payload) {
+          return
+        }
         if (curFile.path) emit('file_save')
 
         const text = getEditorContent(curFile.id)
@@ -77,7 +82,6 @@ function Editor(props: EditorProps) {
           setEditorDelegate(curFile.id, wysiwygDelegate)
           setDelegate(wysiwygDelegate)
         }
-
         setType(payload)
       }
     })
@@ -85,7 +89,7 @@ function Editor(props: EditorProps) {
     return () => {
       unListen.then((fn) => fn())
     }
-  }, [active, curFile, getEditorContent, setEditorDelegate])
+  }, [active, curFile, type, getEditorContent, setEditorDelegate])
 
   const handleWrapperClick: React.MouseEventHandler<HTMLDivElement> = useCallback((e) => {
     if ((e.target as HTMLElement)?.id === 'editorarea-wrapper') {
@@ -102,12 +106,9 @@ function Editor(props: EditorProps) {
       offset: { top: 32, left: 16 },
       hooks: [
         () => {
-          // eslint-disable-next-line react-hooks/rules-of-hooks
           useEditorState({ active, file: curFile })
-        },
-        () => {
-          // eslint-disable-next-line react-hooks/rules-of-hooks
           useCommandEvent({ active })
+          useChangeCodeMirrorTheme()
         }
       ],
     }),

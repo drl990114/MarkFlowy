@@ -3,7 +3,6 @@ import type { StringToDoc, DocToString, EditorDelegate } from '../../../types'
 import { DocExtension } from 'remirror/extensions'
 import type { RemirrorManager } from 'remirror'
 import { LineCodeMirrorExtension } from '../../extensions/CodeMIrror/codemirror-extension'
-import { lineNumbers, EditorView } from '@codemirror/view'
 import { githubLight } from '@uiw/codemirror-theme-github'
 import { markdown } from '@codemirror/lang-markdown'
 import { basicSetup } from '../../extensions/CodeMIrror/setup'
@@ -11,7 +10,7 @@ import { basicSetup } from '../../extensions/CodeMIrror/setup'
 export function createSourceCodeManager(): RemirrorManager<any> {
   return createReactManager(() => [
     new DocExtension({ content: 'codeMirror' }),
-    new LineCodeMirrorExtension({ extensions: [basicSetup, githubLight, lineNumbers(), EditorView.lineWrapping, markdown()]}),
+    new LineCodeMirrorExtension({ extensions: [basicSetup, githubLight, markdown()]}),
   ])
 }
 

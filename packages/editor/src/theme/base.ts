@@ -669,4 +669,15 @@ export const BaseStyle = styled.createGlobalStyle<any>`
   .remirror-is-empty {
     color: ${(props) => props.theme.labelFontColor};
   }
+
+  .cm-content {
+    background-color: ${(props) => props.theme.bgColor};
+  }
+  .cm-scroller .cm-gutters {
+    background-color: ${(props) => props.theme.bgColor};
+  }
+  .cm-lineNumbers .cm-gutterElement {
+    margin: 0;
+    background-color: ${(props) => props.theme.bgColor};
+  }
 `
