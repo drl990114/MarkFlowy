@@ -319,6 +319,9 @@ importers:
       '@remirror/extension-codemirror6':
         specifier: ^1.0.13
         version: 1.0.13(@remirror/pm@2.0.6)
+      '@remirror/extension-count':
+        specifier: ^2.0.13
+        version: 2.0.13(@remirror/pm@2.0.6)
       '@remirror/extension-heading':
         specifier: ^2.0.14
         version: 2.0.14(@remirror/pm@2.0.6)(@types/node@20.3.1)
@@ -4001,6 +4004,20 @@ packages:
       '@babel/runtime': 7.22.5
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/messages': 2.0.5
+      '@remirror/pm': 2.0.6
+    transitivePeerDependencies:
+      - '@types/node'
+      - jsdom
+      - supports-color
+    dev: false
+
+  /@remirror/extension-count@2.0.13(@remirror/pm@2.0.6):
+    resolution: {integrity: sha512-YP8f19k478WC89pJmhbnnI1tzadJpaLyxyXNbvaPIjm3nvVj81JBM/3aRzodV4W7fxd7t4lVyTp8Dl4OeZcfug==}
+    peerDependencies:
+      '@remirror/pm': ^2.0.5
+    dependencies:
+      '@babel/runtime': 7.22.5
+      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
       - '@types/node'

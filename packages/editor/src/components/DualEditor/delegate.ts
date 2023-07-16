@@ -6,9 +6,12 @@ import { LineCodeMirrorExtension } from '../../extensions/CodeMIrror/codemirror-
 import { githubLight } from '@uiw/codemirror-theme-github'
 import { markdown } from '@codemirror/lang-markdown'
 import { basicSetup } from '../../extensions/CodeMIrror/setup'
+import { CountExtension } from '@remirror/extension-count'
 
 export function createSourceCodeManager(): RemirrorManager<any> {
   return createReactManager(() => [
+    new CountExtension(),
+
     new DocExtension({ content: 'codeMirror' }),
     new LineCodeMirrorExtension({ extensions: [basicSetup, githubLight, markdown()]}),
   ])
