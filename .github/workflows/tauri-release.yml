@@ -74,9 +74,6 @@ jobs:
           version: 8
           run_install: true
 
-      - name: Build the web
-        run: pnpm build
-
       - name: Install rust target
         run: rustup target add ${{ matrix.target }}
 
