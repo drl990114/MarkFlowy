@@ -87,8 +87,10 @@ function Editor(props: EditorProps) {
     }
   }, [active, curFile, getEditorContent, setEditorDelegate])
 
-  const handleWrapperClick = useCallback(() => {
-    delegate.manager.view.focus()
+  const handleWrapperClick: React.MouseEventHandler<HTMLDivElement> = useCallback((e) => {
+    if ((e.target as HTMLElement)?.id === 'editorarea-wrapper') {
+      delegate.manager.view.focus()
+    } 
   }, [delegate.manager.view])
 
   const editorProps = useMemo(
@@ -113,7 +115,7 @@ function Editor(props: EditorProps) {
   )
 
   return typeof content === 'string' ? (
-    <EditorWrapper active={active} type={type} onClick={handleWrapperClick}>
+    <EditorWrapper id="editorarea-wrapper" active={active} type={type} onClick={handleWrapperClick}>
       {type === 'dual' ? <DualEditor {...editorProps} /> : <WysiwygEditor {...editorProps} />}
     </EditorWrapper>
   ) : null
