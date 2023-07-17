@@ -434,8 +434,8 @@ importers:
         specifier: ^1.4.2
         version: 1.4.2
       yjs:
-        specifier: ^13.6.5
-        version: 13.6.5
+        specifier: ^13.6.6
+        version: 13.6.6
     devDependencies:
       '@remirror/core-types':
         specifier: ^2.0.5
@@ -4752,7 +4752,7 @@ packages:
       - supports-color
     dev: false
 
-  /@remirror/extension-yjs@3.0.14(@remirror/pm@2.0.6)(yjs@13.6.5):
+  /@remirror/extension-yjs@3.0.14(@remirror/pm@2.0.6)(yjs@13.6.6):
     resolution: {integrity: sha512-25o8OgeS+eKWiml2DngJeMwVbUbWoPcvCS42SUkTdYU1OZVTOLlNwjidMqiBwjRR48ePmrfN21dprWmqr9eAQA==}
     peerDependencies:
       '@remirror/pm': ^2.0.5
@@ -4765,9 +4765,9 @@ packages:
       prosemirror-model: 1.19.2
       prosemirror-state: 1.4.3
       prosemirror-view: 1.31.3
-      y-prosemirror: 1.2.1(prosemirror-model@1.19.2)(prosemirror-state@1.4.3)(prosemirror-view@1.31.3)(y-protocols@1.0.5)(yjs@13.6.5)
+      y-prosemirror: 1.2.1(prosemirror-model@1.19.2)(prosemirror-state@1.4.3)(prosemirror-view@1.31.3)(y-protocols@1.0.5)(yjs@13.6.6)
       y-protocols: 1.0.5
-      yjs: 13.6.5
+      yjs: 13.6.6
     transitivePeerDependencies:
       - '@types/node'
       - jsdom
@@ -11239,7 +11239,7 @@ packages:
       '@remirror/extension-trailing-node': 2.0.13(@remirror/pm@2.0.6)
       '@remirror/extension-underline': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-whitespace': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/extension-yjs': 3.0.14(@remirror/pm@2.0.6)(yjs@13.6.5)
+      '@remirror/extension-yjs': 3.0.14(@remirror/pm@2.0.6)(yjs@13.6.6)
       '@remirror/icons': 2.0.2
       '@remirror/pm': 2.0.6
       '@remirror/preset-core': 2.0.16(@remirror/pm@2.0.6)(@types/node@20.3.1)
@@ -11250,7 +11250,7 @@ packages:
       '@types/refractor': 3.0.2
       codemirror: 5.65.13
       refractor: 3.6.0
-      yjs: 13.6.5
+      yjs: 13.6.6
     transitivePeerDependencies:
       - '@types/node'
       - jsdom
@@ -12540,7 +12540,7 @@ packages:
     engines: {node: '>=0.4'}
     dev: false
 
-  /y-prosemirror@1.2.1(prosemirror-model@1.19.2)(prosemirror-state@1.4.3)(prosemirror-view@1.31.3)(y-protocols@1.0.5)(yjs@13.6.5):
+  /y-prosemirror@1.2.1(prosemirror-model@1.19.2)(prosemirror-state@1.4.3)(prosemirror-view@1.31.3)(y-protocols@1.0.5)(yjs@13.6.6):
     resolution: {integrity: sha512-czMBfB1eL2awqmOSxQM8cS/fsUOGE6fjvyPLInrh4crPxFiw67wDpwIW+EGBYKRa04sYbS0ScGj7ZgvWuDrmBQ==}
     peerDependencies:
       prosemirror-model: ^1.7.1
@@ -12554,7 +12554,7 @@ packages:
       prosemirror-state: 1.4.3
       prosemirror-view: 1.31.3
       y-protocols: 1.0.5
-      yjs: 13.6.5
+      yjs: 13.6.6
     dev: false
 
   /y-protocols@1.0.5:
@@ -12610,8 +12610,8 @@ packages:
       yargs-parser: 21.1.1
     dev: true
 
-  /yjs@13.6.5:
-    resolution: {integrity: sha512-5JdxEzrGpDJxMK99Cf1ICTAaplJf4xIW74ZPvXRzLJJd4PIxVX5ZYjhBsW8cXBPweSghPz95sPIVvyYtS9fHFQ==}
+  /yjs@13.6.6:
+    resolution: {integrity: sha512-VTvezMeMuOra9jKG1Ym5XuQ2H4xXOubIIIupv/B5oygasa9IqDE7Ufv93QTSe9uz69J5VZGMQb2WTEmJv4kJFQ==}
     engines: {node: '>=16.0.0', npm: '>=8.0.0'}
     dependencies:
       lib0: 0.2.78
