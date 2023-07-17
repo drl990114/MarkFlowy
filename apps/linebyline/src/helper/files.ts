@@ -1,8 +1,6 @@
 import type { IFile } from './filesys'
 
-interface IEntries {
-  [key: string]: IFile
-}
+type IEntries = Record<string, IFile>;
 
 const entries: IEntries = {}
 

@@ -44,6 +44,7 @@ export default function Setting() {
         <MenuItem
           onClick={() => {
             invoke('open_conf_window')
+            handleClose()
           }}
         >
           Setting
