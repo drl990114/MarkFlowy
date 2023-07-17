@@ -53,31 +53,29 @@ export const createUntitledFile = (): IFile => {
 
 export const readDirectory = (folderPath: string): Promise<IFile[]> => {
   return new Promise((resolve, reject) => {
-    invoke('open_folder', { folderPath }).then((message: unknown) => {
-      const mess = message as string
-      const files = JSON.parse(mess.replaceAll('\\', '/').replaceAll('//', '/'))
-      const entries: IFile[] = []
+    invoke('open_folder', { folderPath })
+      .then((message: unknown) => {
+        const mess = message as string
+        const files = JSON.parse(mess.replaceAll('\\', '/').replaceAll('//', '/'))
+        const entries: IFile[] = []
 
-      if (!files || !files.length) {
-        resolve(entries)
-        return
-      }
-
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i]
-        const entry: FileEntry = {
-          kind: file.kind,
-          name: file.name,
-          path: file.path,
-          children: file.kind === 'dir' ? file.children : undefined,
+        if (!files || !files.length) {
+          resolve(entries)
+          return
         }
 
-        entries.push(file)
-      }
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i]
 
-      wrapFiles(entries)
+          entries.push(file)
+        }
 
-      resolve(entries)
-    })
+        wrapFiles(entries)
+
+        resolve(entries)
+      })
+      .catch((err) => {
+        reject(err)
+      })
   })
 }
