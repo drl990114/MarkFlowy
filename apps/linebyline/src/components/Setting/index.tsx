@@ -3,6 +3,7 @@ import MenuItem from '@mui/material/MenuItem'
 import { emit } from '@tauri-apps/api/event'
 import * as React from 'react'
 import { EVENT } from '@/constants'
+import { invoke } from '@tauri-apps/api'
 
 export default function Setting() {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
@@ -42,8 +43,7 @@ export default function Setting() {
       >
         <MenuItem
           onClick={() => {
-            emit(EVENT.open_window_setting)
-            handleClose()
+            invoke('open_conf_window')
           }}
         >
           Setting

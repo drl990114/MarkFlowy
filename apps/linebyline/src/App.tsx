@@ -3,7 +3,6 @@ import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles'
 import { invoke } from '@tauri-apps/api'
 import { emit, listen } from '@tauri-apps/api/event'
 import type { Theme } from '@tauri-apps/api/window'
-import { WebviewWindow } from '@tauri-apps/api/window'
 import { useCallback, useEffect } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import 'remixicon/fonts/remixicon.css'
@@ -14,9 +13,7 @@ import useGlobalOSInfo from './hooks/useOSInfo'
 import { i18nInit } from './i18n'
 import { Root, Setting } from '@/router'
 import { loadTask, use } from '@/helper/schedule'
-import { APP_NAME, EVENT } from '@/constants'
 import { CacheManager } from '@/helper'
-import TitleBar from './components/TitleBar'
 
 function App() {
   useGlobalOSInfo()
@@ -61,25 +58,12 @@ function App() {
       // TODO Refactor: use a eventemitter in pure web runtime
       emit(payload)
     })
-  
-    const unListenOpenSetting = listen(EVENT.open_window_setting, () => {
-      new WebviewWindow('setting', {
-        url: './setting',
-        title: `${APP_NAME} Setting`,
-        width: 1000,
-        height: 600,
-        minWidth: 500,
-        minHeight: 500,
-        focus: true,
-      })
-    })
 
     const unListenChangeTheme = listen('change_theme', ({ payload }) => {
       setTheme(payload as Theme)
     })
 
     return () => {
-      unListenOpenSetting.then((fn) => fn())
       unListenChangeTheme.then((fn) => fn())
       unListenMenu.then((fn) => fn())
     }
@@ -97,7 +81,6 @@ function App() {
       <MuiThemeProvider theme={muiTheme}>
         <GlobalStyles />
         <BaseStyle />
-        <TitleBar />
         <Routes>
           <Route index path="/" element={<Root />} />
           <Route path="/setting" element={<Setting />} />

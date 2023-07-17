@@ -20,7 +20,7 @@ export const Container = styled.div`
   height: ${TITLEBAR_HEIGHT};
   padding: 0 3px;
   user-select: none;
-  background: ${(props) => props.theme.bgColor};
+  background: transparent;
   font-size: 0.8rem;
   z-index: 99999;
 

@@ -111,7 +111,10 @@ impl Default for AppConf {
 
 pub mod cmd {
     use super::AppConf;
-    use tauri::{command, AppHandle};
+    use tauri::{command, AppHandle, WindowBuilder, WindowUrl};
+
+    #[cfg(target_os = "macos")]
+    use tauri::TitleBarStyle;
 
     #[command]
     pub fn get_app_conf_path() -> String {
@@ -131,5 +134,30 @@ pub mod cmd {
     #[command]
     pub fn save_app_conf(_app: AppHandle, data: serde_json::Value) {
         AppConf::read().amend(serde_json::json!(data)).write();
+    }
+
+    #[command]
+    pub fn open_conf_window(_app: AppHandle) {
+        let theme = AppConf::theme_mode();
+
+        tauri::async_runtime::spawn(async move {
+            let mut conf_win =
+                WindowBuilder::new(&_app, "conf", WindowUrl::App("./setting".into()))
+                    .title("linebyline setting")
+                    .resizable(true)
+                    .fullscreen(false)
+                    .theme(Some(theme))
+                    .inner_size(1000.0, 600.0)
+                    .min_inner_size(500.0, 500.0);
+
+            #[cfg(target_os = "macos")]
+            {
+                conf_win = conf_win
+                    .title_bar_style(TitleBarStyle::Overlay)
+                    .hidden_title(true);
+            }
+
+            conf_win.build().unwrap();
+        });
     }
 }

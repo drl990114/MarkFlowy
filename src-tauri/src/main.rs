@@ -21,6 +21,7 @@ fn main() {
             conf::cmd::get_app_conf,
             conf::cmd::reset_app_conf,
             conf::cmd::save_app_conf,
+            conf::cmd::open_conf_window
         ])
         .setup(setup::init)
         .menu(menu::generate_menu())

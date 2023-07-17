@@ -6,6 +6,7 @@ import { Container } from './styles'
 import settingMap from '@/helper/cacheManager/settingMap'
 import Logo from '@/assets/logo.svg'
 import { invoke } from '@tauri-apps/api'
+import TitleBar from '@/components/TitleBar'
 
 export interface DialogTitleProps {
   children?: ReactNode
@@ -34,62 +35,55 @@ function Setting() {
   }, [])
 
   return (
-    <Container>
-      <div id="sidebar">
-        <div className="title">
-          <Logo />
-        </div>
-        {/* TODO search */}
-        {/* <div id="search-form" role="search">
+    <>
+      <TitleBar transparent />
+      <Container>
+        <div id="sidebar">
+          <div className="title">
+            <Logo />
+          </div>
+          {/* TODO search */}
+          {/* <div id="search-form" role="search">
           <input id="q" aria-label="Search contacts" placeholder="Search" type="search" name="q" />
         </div> */}
-        <nav>
-          <ul>
-            {settingDataGroups.map((group, index) => {
-              return (
-                <li
-                  key={group}
-                  className={classNames({
-                    active: index === value,
-                  })}
-                  {...a11yProps(index)}
-                  onClick={() => {
-                    setValue(index)
-                  }}
-                >
-                  {group}
-                </li>
-              )
-            })}
-          </ul>
-        </nav>
-      </div>
-      <div id="detail">
-        <div className='conf-path'><small>Path: {confPath}</small></div>
-        {curGroupKeys.map((key) => {
-          return (
-            <SettingGroup
-              key={key}
-              group={curGroup[key]}
-              groupKey={key}
-              categoryKey={curGroupKey}
-            />
-          )
-        })}
-      </div>
-      {/* <Box sx={{ flexGrow: 1, bgcolor: 'background.paper', display: 'flex', height: 224 }}>
-      <Tabs orientation="vertical" variant="scrollable" value={value} onChange={handleChange} aria-label="Vertical tabs example" sx={{ borderRight: 1, borderColor: 'divider' }}>
-        {settingDataGroups.map((group, index) => {
-          return <Tab label="General" {...a11yProps(index)} />
-        })}
-      </Tabs>
-      <TabPanel value={value} index={0}>
-        {curGroupKeys.map((key) => {
-          return <SettingGroup group={curGroup[key]} groupKey={key} categoryKey={curGroupKey} />
-        })}
-      </TabPanel>
-    </Box> */}
-    </Container>
+          <nav>
+            <ul>
+              {settingDataGroups.map((group, index) => {
+                return (
+                  <li
+                    key={group}
+                    className={classNames({
+                      active: index === value,
+                    })}
+                    {...a11yProps(index)}
+                    onClick={() => {
+                      setValue(index)
+                    }}
+                  >
+                    {group}
+                  </li>
+                )
+              })}
+            </ul>
+          </nav>
+        </div>
+        <div id="detail">
+          <div className="conf-path">
+            <small>Path: {confPath}</small>
+          </div>
+          {curGroupKeys.map((key) => {
+            return (
+              <SettingGroup
+                key={key}
+                group={curGroup[key]}
+                groupKey={key}
+                categoryKey={curGroupKey}
+              />
+            )
+          })}
+        </div>
+      </Container>
+    </>
   )
 }
 

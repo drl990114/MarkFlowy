@@ -1,6 +1,5 @@
 import { Input } from '@mui/material'
 import Button from '@mui/material/Button'
-import { emit } from '@tauri-apps/api/event'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import ReactLoading from 'react-loading'
 import { parseChatList } from './parseChatList'
@@ -10,8 +9,9 @@ import { useEditorStore } from '@/stores'
 import { useGlobalSettingData, useGlobalTheme } from '@/hooks'
 import { createFile } from '@/helper/filesys'
 import { SettingKeys } from '@/helper/cacheManager/settingMap'
-import { EVENT, RIGHTBARITEMKEYS } from '@/constants'
+import { RIGHTBARITEMKEYS } from '@/constants'
 import type { RightBarItem } from '@/components/SideBar'
+import { invoke } from '@tauri-apps/api'
 
 const ChatList: React.FC<ChatListProps> = (props) => {
   const { chatList, addChat, delChat } = useChatGPTStore()
@@ -53,7 +53,7 @@ const ChatList: React.FC<ChatListProps> = (props) => {
     setActiveId(gptNotesFile.id)
   }, [chatList, addOpenedFile, setActiveId])
 
-  const openSettingWindow = useCallback(() => emit(EVENT.open_window_setting), [])
+  const openSettingWindow = useCallback(() => invoke('open_conf_window'), [])
 
   return (
     <Container {...props}>
