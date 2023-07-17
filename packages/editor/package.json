@@ -82,7 +82,7 @@
     "styled-components": "^5.3.11",
     "svgmoji": "^3.2.0",
     "tether-drop": "^1.4.2",
-    "yjs": "^13.6.5"
+    "yjs": "^13.6.6"
   },
   "devDependencies": {
     "@remirror/core-types": "^2.0.5",
