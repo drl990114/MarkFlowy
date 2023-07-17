@@ -4,25 +4,26 @@ import { AppInfoDialog, SideBar } from '@/components'
 import EditorArea from '@/components/EditorArea'
 import { APP_NAME } from '@/constants'
 import { useEditorStore } from '@/stores'
-import { setTitleBarText } from '@/components/TitleBar'
+import TitleBar, { setTitleBarText } from '@/components/TitleBar'
 import TableDialog from '@/editorToolBar/TableDialog'
 
 function Root() {
   const { activeId } = useEditorStore()
 
   useEffect(() => {
-    if (!activeId)
-    setTitleBarText(APP_NAME)
-
+    if (!activeId) setTitleBarText(APP_NAME)
   }, [activeId])
 
   return (
-    <Container>
-      <SideBar />
-      <EditorArea />
-      <AppInfoDialog />
-      <TableDialog />
-    </Container>
+    <>
+      <TitleBar />
+      <Container>
+        <SideBar />
+        <EditorArea />
+        <AppInfoDialog />
+        <TableDialog />
+      </Container>
+    </>
   )
 }
 
