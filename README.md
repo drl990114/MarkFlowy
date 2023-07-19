@@ -1,5 +1,7 @@
+<h4 align="right"><strong>English</strong> | <a href="./README_CN.md">简体中文</a></h4>
+
 <div align="center">
-  <img align="center" src="./public/logo.svg" width="120 " height="130" />
+  <img align="center" src="./public/logo.svg" width="120" height="130" />
 </div>
 
 <h1 align="center">LineByLine</h1>
@@ -17,7 +19,7 @@
 ## Feature
 
 - **Built-in ChatGpt**. Currently supports one-click export of conversations, making chatgpt your smart assistant.
-- **Super lightweight**. linebyline is based on tauri, which ensures ultra-lightweight and fast performance experience.
+- **Super lightweight**. The linebyline is based on tauri and has a volume of less than 10MB and better performance.
 - **High availability**. linebyline uses the remirror editor, which not only provides high scalability, but also has a great editing experience. And, linebyline supports multiple editing modes, such as `dual`, `wysiyg`.
 
 ## Download
