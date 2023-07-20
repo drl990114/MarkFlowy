@@ -305,8 +305,8 @@ importers:
         specifier: ^1.0.3
         version: 1.0.3
       '@lezer/lr':
-        specifier: ^1.3.7
-        version: 1.3.7
+        specifier: ^1.3.9
+        version: 1.3.9
       '@mui/material':
         specifier: ^5.13.5
         version: 5.13.6(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
@@ -2049,7 +2049,7 @@ packages:
       '@codemirror/lang-css': 6.2.0(@codemirror/view@6.14.0)
       '@codemirror/language': 6.8.0
       '@lezer/highlight': 1.1.6
-      '@lezer/lr': 1.3.7
+      '@lezer/lr': 1.3.9
     transitivePeerDependencies:
       - '@codemirror/view'
     dev: false
@@ -2114,7 +2114,7 @@ packages:
       '@codemirror/language': 6.8.0
       '@codemirror/state': 6.2.1
       '@lezer/highlight': 1.1.6
-      '@lezer/lr': 1.3.7
+      '@lezer/lr': 1.3.9
     transitivePeerDependencies:
       - '@codemirror/view'
       - '@lezer/common'
@@ -2128,7 +2128,7 @@ packages:
       '@codemirror/language': 6.8.0
       '@lezer/common': 1.0.3
       '@lezer/highlight': 1.1.6
-      '@lezer/lr': 1.3.7
+      '@lezer/lr': 1.3.9
     dev: false
 
   /@codemirror/lang-wast@6.0.1:
@@ -2136,7 +2136,7 @@ packages:
     dependencies:
       '@codemirror/language': 6.8.0
       '@lezer/highlight': 1.1.6
-      '@lezer/lr': 1.3.7
+      '@lezer/lr': 1.3.9
     dev: false
 
   /@codemirror/lang-xml@6.0.2(@codemirror/view@6.14.0):
@@ -2186,7 +2186,7 @@ packages:
       '@codemirror/view': 6.14.0
       '@lezer/common': 1.0.3
       '@lezer/highlight': 1.1.6
-      '@lezer/lr': 1.3.7
+      '@lezer/lr': 1.3.9
       style-mod: 4.0.3
     dev: false
 
@@ -3255,14 +3255,14 @@ packages:
     resolution: {integrity: sha512-zUHrjNFuY/DOZCkOBJ6qItQIkcopHM/Zv/QOE0a4XNG3HDNahxTNu5fQYl8dIuKCpxCqRdMl5cEwl5zekFc7BA==}
     dependencies:
       '@lezer/highlight': 1.1.6
-      '@lezer/lr': 1.3.7
+      '@lezer/lr': 1.3.9
     dev: false
 
   /@lezer/css@1.1.2:
     resolution: {integrity: sha512-5TKMAReXukfEmIiZprDlGfZVfOOCyEStFi1YLzxclm9H3G/HHI49/2wzlRT6bQw5r7PoZVEtjTItEkb/UuZQyg==}
     dependencies:
       '@lezer/highlight': 1.1.6
-      '@lezer/lr': 1.3.7
+      '@lezer/lr': 1.3.9
     dev: false
 
   /@lezer/highlight@1.1.6:
@@ -3276,32 +3276,32 @@ packages:
     dependencies:
       '@lezer/common': 1.0.3
       '@lezer/highlight': 1.1.6
-      '@lezer/lr': 1.3.7
+      '@lezer/lr': 1.3.9
     dev: false
 
   /@lezer/java@1.0.3:
     resolution: {integrity: sha512-kKN17wmgP1cgHb8juR4pwVSPMKkDMzY/lAPbBsZ1fpXwbk2sg3N1kIrf0q+LefxgrANaQb/eNO7+m2QPruTFng==}
     dependencies:
       '@lezer/highlight': 1.1.6
-      '@lezer/lr': 1.3.7
+      '@lezer/lr': 1.3.9
     dev: false
 
   /@lezer/javascript@1.4.3:
     resolution: {integrity: sha512-k7Eo9z9B1supZ5cCD4ilQv/RZVN30eUQL+gGbr6ybrEY3avBAL5MDiYi2aa23Aj0A79ry4rJRvPAwE2TM8bd+A==}
     dependencies:
       '@lezer/highlight': 1.1.6
-      '@lezer/lr': 1.3.7
+      '@lezer/lr': 1.3.9
     dev: false
 
   /@lezer/json@1.0.0:
     resolution: {integrity: sha512-zbAuUY09RBzCoCA3lJ1+ypKw5WSNvLqGMtasdW6HvVOqZoCpPr8eWrsGnOVWGKGn8Rh21FnrKRVlJXrGAVUqRw==}
     dependencies:
       '@lezer/highlight': 1.1.6
-      '@lezer/lr': 1.3.7
+      '@lezer/lr': 1.3.9
     dev: false
 
-  /@lezer/lr@1.3.7:
-    resolution: {integrity: sha512-ssHKb3p0MxhJXT2i7UBmgAY1BIM3Uq/D772Qutu3EVmxWIyNMU12nQ0rL3Fhu+MiFtiTzyTmd3xGwEf3ON5PSA==}
+  /@lezer/lr@1.3.9:
+    resolution: {integrity: sha512-XPz6dzuTHlnsbA5M2DZgjflNQ+9Hi5Swhic0RULdp3oOs3rh6bqGZolosVqN/fQIT8uNiepzINJDnS39oweTHQ==}
     dependencies:
       '@lezer/common': 1.0.3
     dev: false
@@ -3317,35 +3317,35 @@ packages:
     resolution: {integrity: sha512-aqdCQJOXJ66De22vzdwnuC502hIaG9EnPK2rSi+ebXyUd+j7GAX1mRjWZOVOmf3GST1YUfUCu6WXDiEgDGOVwA==}
     dependencies:
       '@lezer/highlight': 1.1.6
-      '@lezer/lr': 1.3.7
+      '@lezer/lr': 1.3.9
     dev: false
 
   /@lezer/python@1.1.7:
     resolution: {integrity: sha512-RbhKQ9+Y/r/Xv6OcJmETEM5tBFdpdAJRqrgi3akJkWBLCuiAaLP/jKdYzu+ICljaSXPCQeznrv+r9HUEnjq3HQ==}
     dependencies:
       '@lezer/highlight': 1.1.6
-      '@lezer/lr': 1.3.7
+      '@lezer/lr': 1.3.9
     dev: false
 
   /@lezer/rust@1.0.0:
     resolution: {integrity: sha512-IpGAxIjNxYmX9ra6GfQTSPegdCAWNeq23WNmrsMMQI7YNSvKtYxO4TX5rgZUmbhEucWn0KTBMeDEPXg99YKtTA==}
     dependencies:
       '@lezer/highlight': 1.1.6
-      '@lezer/lr': 1.3.7
+      '@lezer/lr': 1.3.9
     dev: false
 
   /@lezer/sass@1.0.1:
     resolution: {integrity: sha512-S/aYAzABzMqWLfKKqV89pCWME4yjZYC6xzD02l44wbmb0sHxmN9/8aE4GULrKFzFaGazHdXcGEbPZ4zzB6yqwQ==}
     dependencies:
       '@lezer/highlight': 1.1.6
-      '@lezer/lr': 1.3.7
+      '@lezer/lr': 1.3.9
     dev: false
 
   /@lezer/xml@1.0.1:
     resolution: {integrity: sha512-jMDXrV953sDAUEMI25VNrI9dz94Ai96FfeglytFINhhwQ867HKlCE2jt3AwZTCT7M528WxdDWv/Ty8e9wizwmQ==}
     dependencies:
       '@lezer/highlight': 1.1.6
-      '@lezer/lr': 1.3.7
+      '@lezer/lr': 1.3.9
     dev: false
 
   /@linaria/core@4.2.10:
