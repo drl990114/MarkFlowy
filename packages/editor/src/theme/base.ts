@@ -591,4 +591,20 @@ export const BaseStyle = styled.createGlobalStyle<any>`
     margin: 0;
     background-color: ${(props) => props.theme.bgColor};
   }
+
+  .html-block {
+    white-space: normal;
+
+    &__decoration{
+
+      & input {
+        width: 100%;
+        outline: none;
+      }
+
+      &--focus {
+        border: ${(props) => props.theme.accentColor} 1px solid;
+      }
+    }
+  }
 `
