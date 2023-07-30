@@ -87,7 +87,7 @@ export class LineTableExtension extends TableExtension {
     node.forEach((rowNode, _, rowIndex) => {
       const row: string[] = []
       rowNode.forEach((cellNode, __, colIndex) => {
-        row.push(cellNode.textContent.trim())
+        row.push(replaceNewLines(cellNode.textContent.trim()))
         if (rowIndex === 0) {
           colAligns[colIndex] = TABLE_ALIGEN.DEFAULT
         }
@@ -241,4 +241,9 @@ export class LineTableCellExtension extends TableCellExtension {
   }
 
   public toMarkdown() {}
+}
+
+function replaceNewLines(str: string) {
+  const replacedStr = str.replace(/\n/g, "")
+  return replacedStr
 }
