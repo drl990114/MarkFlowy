@@ -243,7 +243,7 @@ export class LineTableCellExtension extends TableCellExtension {
   public toMarkdown() {}
 }
 
-function replaceNewLines(str: string) {
+export function replaceNewLines(str: string) {
   const replacedStr = str.replace(/\n/g, "")
   return replacedStr
 }

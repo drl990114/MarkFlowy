@@ -4,7 +4,7 @@
   "scripts": {
     "dev": "pnpm --filter=@linebyline/editor dev & pnpm --filter=@linebyline/linebyline dev",
     "build": "pnpm --filter=@linebyline/editor build && pnpm -r build",
-    "test": "jest",
+    "test": "pnpm run -r test",
     "tauri:build": "tauri build",
     "tauri:dev": "tauri dev",
     "release": "node scripts/release.js",
