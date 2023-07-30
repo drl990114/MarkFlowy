@@ -136,8 +136,8 @@ importers:
         specifier: ^2.0.17
         version: 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-tables':
-        specifier: ^2.2.10
-        version: 2.2.10(@remirror/pm@2.0.6)(@types/node@20.3.1)
+        specifier: ^2.3.0
+        version: 2.3.0(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/react':
         specifier: ^2.0.32
         version: 2.0.32(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.2.7)(@types/react@18.0.28)(prettier@3.0.0)(react-dom@18.2.0)(react@18.2.0)
@@ -323,8 +323,8 @@ importers:
         specifier: ^2.2.17
         version: 2.2.17(@remirror/pm@2.0.6)(@types/react-dom@18.2.7)(@types/react@18.0.28)(jsdom@22.1.0)(prettier@3.0.0)(react-dom@18.2.0)(react@18.2.0)
       '@remirror/extension-tables':
-        specifier: ^2.2.10
-        version: 2.2.10(@remirror/pm@2.0.6)(jsdom@22.1.0)
+        specifier: ^2.3.0
+        version: 2.3.0(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/icons':
         specifier: ^2.0.2
         version: 2.0.2
@@ -3190,7 +3190,6 @@ packages:
   /@lingui/detect-locale@4.3.0:
     resolution: {integrity: sha512-BNTdfabfvETdmhOljJ9jL+wHczrz6KJdEdpm+zqPMbvMA06UqBA7bTk8igW79Z3hN4F+WV7Mro0bDrm8sol0qA==}
     engines: {node: '>=16.0.0'}
-    dev: false
 
   /@lingui/message-utils@4.3.0:
     resolution: {integrity: sha512-UtgO5pm6LpJKqmZctr2R2hT+qicb8UijFDG3dctKGBuwkkwunFZUswOLJ+AxfhaO652Vov/yf5qsymJ6UFXPBA==}
@@ -3580,7 +3579,7 @@ packages:
       '@types/node':
         optional: true
     dependencies:
-      '@babel/runtime': 7.22.5
+      '@babel/runtime': 7.22.6
       '@remirror/core-constants': 2.0.1
       '@remirror/core-helpers': 2.0.3
       '@remirror/core-types': 2.0.5(@remirror/pm@2.0.6)
@@ -3605,7 +3604,7 @@ packages:
       '@types/node':
         optional: true
     dependencies:
-      '@babel/runtime': 7.22.5
+      '@babel/runtime': 7.22.6
       '@remirror/core-constants': 2.0.1
       '@remirror/core-helpers': 2.0.3
       '@remirror/core-types': 2.0.5(@remirror/pm@2.0.6)
@@ -3664,13 +3663,57 @@ packages:
       - jsdom
       - supports-color
 
+  /@remirror/core@2.0.18(@remirror/pm@2.0.6)(@types/node@20.3.1):
+    resolution: {integrity: sha512-IzC1/iDttScFmbbqcq1qhY5SET3eEQiZQpMMoO2772AXSwKxi+YSsomin+2lhAbzfFJ9C7tIyJjoEMngDtOHZQ==}
+    peerDependencies:
+      '@remirror/pm': ^2.0.5
+    dependencies:
+      '@babel/runtime': 7.22.6
+      '@linaria/core': 4.2.10
+      '@remirror/core-constants': 2.0.1
+      '@remirror/core-helpers': 2.0.3
+      '@remirror/core-types': 2.0.5(@remirror/pm@2.0.6)
+      '@remirror/core-utils': 2.0.12(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/i18n': 2.0.4
+      '@remirror/icons': 2.0.2
+      '@remirror/messages': 2.0.5
+      '@remirror/pm': 2.0.6
+      nanoevents: 5.1.13
+      tiny-warning: 1.0.3
+    transitivePeerDependencies:
+      - '@types/node'
+      - jsdom
+      - supports-color
+
+  /@remirror/core@2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0):
+    resolution: {integrity: sha512-IzC1/iDttScFmbbqcq1qhY5SET3eEQiZQpMMoO2772AXSwKxi+YSsomin+2lhAbzfFJ9C7tIyJjoEMngDtOHZQ==}
+    peerDependencies:
+      '@remirror/pm': ^2.0.5
+    dependencies:
+      '@babel/runtime': 7.22.6
+      '@linaria/core': 4.2.10
+      '@remirror/core-constants': 2.0.1
+      '@remirror/core-helpers': 2.0.3
+      '@remirror/core-types': 2.0.5(@remirror/pm@2.0.6)
+      '@remirror/core-utils': 2.0.12(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/i18n': 2.0.4
+      '@remirror/icons': 2.0.2
+      '@remirror/messages': 2.0.5
+      '@remirror/pm': 2.0.6
+      nanoevents: 5.1.13
+      tiny-warning: 1.0.3
+    transitivePeerDependencies:
+      - '@types/node'
+      - jsdom
+      - supports-color
+
   /@remirror/dom@2.0.16(@remirror/pm@2.0.6)(@types/node@20.3.1):
     resolution: {integrity: sha512-DxjEFgQc24O93WN/YL7nHUanER/a1FIGQGRgsFoN9Px2t+Op39i2PZ0hm1ZE7ivp9/gE7obaMbgsXnjEJ8RX+A==}
     peerDependencies:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/pm': 2.0.6
       '@remirror/preset-core': 2.0.16(@remirror/pm@2.0.6)(@types/node@20.3.1)
     transitivePeerDependencies:
@@ -3685,7 +3728,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/pm': 2.0.6
       '@remirror/preset-core': 2.0.16(@remirror/pm@2.0.6)(jsdom@22.1.0)
     transitivePeerDependencies:
@@ -3699,7 +3742,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/extension-positioner': 2.1.8(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
@@ -3715,7 +3758,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
       '@types/direction': 1.0.0
@@ -3732,7 +3775,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
       '@remirror/theme': 2.0.8(@remirror/pm@2.0.6)
@@ -3748,7 +3791,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
       '@remirror/theme': 2.0.8(@remirror/pm@2.0.6)
@@ -3764,7 +3807,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
@@ -3779,7 +3822,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
@@ -3794,7 +3837,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
       '@remirror/theme': 2.0.8(@remirror/pm@2.0.6)
@@ -3810,7 +3853,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
       '@remirror/theme': 2.0.8(@remirror/pm@2.0.6)
@@ -3826,7 +3869,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
       '@remirror/theme': 2.0.8(@remirror/pm@2.0.6)
@@ -3851,7 +3894,7 @@ packages:
         optional: true
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
       '@remirror/theme': 2.0.8(@remirror/pm@2.0.6)
@@ -3879,7 +3922,7 @@ packages:
         optional: true
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
       '@remirror/theme': 2.0.8(@remirror/pm@2.0.6)
@@ -3898,7 +3941,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
@@ -3913,7 +3956,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
@@ -3930,7 +3973,7 @@ packages:
       codemirror: ^5.65.12
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
       '@types/codemirror': 5.60.8
@@ -3964,7 +4007,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
@@ -3979,7 +4022,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
@@ -3994,7 +4037,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
@@ -4009,7 +4052,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
@@ -4038,7 +4081,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
@@ -4053,7 +4096,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
@@ -4067,7 +4110,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
@@ -4081,7 +4124,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
@@ -4096,7 +4139,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
       '@types/querystringify': 2.0.0
@@ -4115,7 +4158,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.22.6
       '@ocavue/svgmoji-cjs': 0.1.1
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
       '@remirror/theme': 2.0.8(@remirror/pm@2.0.6)
@@ -4137,7 +4180,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.22.6
       '@ocavue/svgmoji-cjs': 0.1.1
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
       '@remirror/theme': 2.0.8(@remirror/pm@2.0.6)
@@ -4158,7 +4201,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/extension-events': 2.1.15(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/extension-positioner': 2.1.8(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/pm': 2.0.6
@@ -4174,7 +4217,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
@@ -4189,7 +4232,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
@@ -4203,7 +4246,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
@@ -4216,7 +4259,7 @@ packages:
     peerDependencies:
       '@remirror/pm': ^2.0.5
     dependencies:
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/pm': 2.0.6
       '@types/string.prototype.matchall': 4.0.1
       escape-string-regexp: 4.0.0
@@ -4232,7 +4275,7 @@ packages:
     peerDependencies:
       '@remirror/pm': ^2.0.5
     dependencies:
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/pm': 2.0.6
       '@types/string.prototype.matchall': 4.0.1
       escape-string-regexp: 4.0.0
@@ -4249,7 +4292,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
@@ -4264,7 +4307,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
       round: 2.0.1
@@ -4280,7 +4323,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
       round: 2.0.1
@@ -4296,7 +4339,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
@@ -4310,7 +4353,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
@@ -4324,7 +4367,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
@@ -4338,8 +4381,8 @@ packages:
     peerDependencies:
       '@remirror/pm': ^2.0.5
     dependencies:
-      '@babel/runtime': 7.22.5
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@babel/runtime': 7.22.6
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
@@ -4369,7 +4412,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
@@ -4383,7 +4426,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
@@ -4397,7 +4440,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
@@ -4412,7 +4455,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
@@ -4427,7 +4470,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
       '@remirror/theme': 2.0.8(@remirror/pm@2.0.6)
@@ -4444,7 +4487,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
@@ -4459,7 +4502,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
@@ -4474,7 +4517,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/extension-events': 2.1.15(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
@@ -4525,7 +4568,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
       '@types/marked': 4.0.8
@@ -4545,7 +4588,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-events': 2.1.15(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
@@ -4562,7 +4605,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/extension-events': 2.1.15(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
@@ -4579,7 +4622,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-events': 2.1.15(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
@@ -4596,7 +4639,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/extension-events': 2.1.15(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
@@ -4613,7 +4656,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
@@ -4628,7 +4671,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
@@ -4643,7 +4686,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
@@ -4657,7 +4700,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
@@ -4671,7 +4714,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
       '@remirror/theme': 2.0.8(@remirror/pm@2.0.6)
@@ -4687,7 +4730,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
       '@remirror/theme': 2.0.8(@remirror/pm@2.0.6)
@@ -4703,7 +4746,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-events': 2.1.15(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
@@ -4746,7 +4789,7 @@ packages:
         optional: true
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
       '@types/react': 18.0.28
@@ -4775,7 +4818,7 @@ packages:
         optional: true
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
       '@types/react': 18.0.28
@@ -4807,7 +4850,7 @@ packages:
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/core-utils': 2.0.12(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-positioner': 2.1.8(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/extension-tables': 2.2.10(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/extension-tables': 2.3.0(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/icons': 2.0.2
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
@@ -4847,7 +4890,7 @@ packages:
       '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/core-utils': 2.0.12(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/extension-positioner': 2.1.8(@remirror/pm@2.0.6)(jsdom@22.1.0)
-      '@remirror/extension-tables': 2.2.10(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/extension-tables': 2.3.0(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/icons': 2.0.2
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
@@ -4875,7 +4918,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
       escape-string-regexp: 4.0.0
@@ -4891,7 +4934,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
       - '@types/node'
@@ -4905,7 +4948,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
       escape-string-regexp: 4.0.0
@@ -4921,7 +4964,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
@@ -4936,7 +4979,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
@@ -4951,7 +4994,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
@@ -4966,7 +5009,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
       '@remirror/theme': 2.0.8(@remirror/pm@2.0.6)
@@ -4983,7 +5026,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
@@ -4992,13 +5035,13 @@ packages:
       - supports-color
     dev: false
 
-  /@remirror/extension-tables@2.2.10(@remirror/pm@2.0.6)(@types/node@20.3.1):
-    resolution: {integrity: sha512-5NYC7C5YuaLVmrh8w9ifJSZ6UlsX0BrdJjQSgySbahuK+gRb6E1acoQL4hGZMJHz52CwBFQpmAinDZdw9s68qQ==}
+  /@remirror/extension-tables@2.3.0(@remirror/pm@2.0.6)(@types/node@20.3.1):
+    resolution: {integrity: sha512-6GxGvq7C5105MZXvwkN97/qyaJWhtTUhdZeUJal26rBRNEWKXEkCG4Q7qrRsmVJJwOCx9qngpqBm54lzGNoCUw==}
     peerDependencies:
       '@remirror/pm': ^2.0.5
     dependencies:
-      '@babel/runtime': 7.22.5
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@babel/runtime': 7.22.6
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-positioner': 2.1.8(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
@@ -5009,13 +5052,13 @@ packages:
       - supports-color
     dev: false
 
-  /@remirror/extension-tables@2.2.10(@remirror/pm@2.0.6)(jsdom@22.1.0):
-    resolution: {integrity: sha512-5NYC7C5YuaLVmrh8w9ifJSZ6UlsX0BrdJjQSgySbahuK+gRb6E1acoQL4hGZMJHz52CwBFQpmAinDZdw9s68qQ==}
+  /@remirror/extension-tables@2.3.0(@remirror/pm@2.0.6)(jsdom@22.1.0):
+    resolution: {integrity: sha512-6GxGvq7C5105MZXvwkN97/qyaJWhtTUhdZeUJal26rBRNEWKXEkCG4Q7qrRsmVJJwOCx9qngpqBm54lzGNoCUw==}
     peerDependencies:
       '@remirror/pm': ^2.0.5
     dependencies:
-      '@babel/runtime': 7.22.5
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@babel/runtime': 7.22.6
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/extension-positioner': 2.1.8(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
@@ -5032,7 +5075,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
@@ -5047,7 +5090,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/i18n': 2.0.4
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
@@ -5065,7 +5108,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/i18n': 2.0.4
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
@@ -5083,7 +5126,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/i18n': 2.0.4
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
@@ -5101,7 +5144,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/extension-text-color': 2.0.15(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
@@ -5117,7 +5160,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
@@ -5131,7 +5174,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
@@ -5145,7 +5188,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
@@ -5160,7 +5203,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
@@ -5175,7 +5218,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
@@ -5190,7 +5233,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
@@ -5205,7 +5248,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
     transitivePeerDependencies:
@@ -5221,7 +5264,7 @@ packages:
       yjs: ^13.6.0
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/messages': 2.0.5
       '@remirror/pm': 2.0.6
       prosemirror-model: 1.19.2
@@ -5257,7 +5300,6 @@ packages:
       make-plural: 6.2.2
     transitivePeerDependencies:
       - supports-color
-    dev: false
 
   /@remirror/icons@2.0.2:
     resolution: {integrity: sha512-RuuwUuJtUWNZgIQV9JlHzZ+McNP2dIfn/KhZkXuhULCn/pIku12jDJl4GgODyLvrG1lpbkCBOcRFQIAcNl++4A==}
@@ -5288,7 +5330,7 @@ packages:
   /@remirror/pm@2.0.6:
     resolution: {integrity: sha512-0XMaClHTKC6Wb9+h7uOsYFCOJRlbSUqJqoCQj0pTEvkiY7L69zyhZmORVulkZSX9Zodqqr0rR+vPYuT3LipKdg==}
     dependencies:
-      '@babel/runtime': 7.22.5
+      '@babel/runtime': 7.22.6
       '@remirror/core-constants': 2.0.1
       '@remirror/core-helpers': 2.0.3
       prosemirror-collab: 1.3.1
@@ -5356,7 +5398,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/extension-bold': 2.0.13(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/extension-columns': 2.0.14(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/extension-font-size': 2.0.13(@remirror/pm@2.0.6)(jsdom@22.1.0)
@@ -5393,7 +5435,7 @@ packages:
         optional: true
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-placeholder': 2.0.14(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-react-component': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.2.7)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
       '@remirror/pm': 2.0.6
@@ -5423,7 +5465,7 @@ packages:
         optional: true
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/extension-placeholder': 2.0.14(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/extension-react-component': 2.0.13(@remirror/pm@2.0.6)(@types/react-dom@18.2.7)(@types/react@18.0.28)(jsdom@22.1.0)(react-dom@18.2.0)(react@18.2.0)
       '@remirror/pm': 2.0.6
@@ -5444,7 +5486,7 @@ packages:
       '@remirror/pm': ^2.0.5
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/extension-bidi': 2.0.14(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/extension-blockquote': 2.0.14(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/extension-bold': 2.0.13(@remirror/pm@2.0.6)(jsdom@22.1.0)
@@ -5514,7 +5556,7 @@ packages:
       '@remirror/extension-strike': 2.0.13(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/extension-sub': 2.0.13(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/extension-sup': 2.0.13(@remirror/pm@2.0.6)(jsdom@22.1.0)
-      '@remirror/extension-tables': 2.2.10(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/extension-tables': 2.3.0(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/extension-text-color': 2.0.14(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/extension-underline': 2.0.13(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/extension-whitespace': 2.0.13(@remirror/pm@2.0.6)(jsdom@22.1.0)
@@ -5564,7 +5606,7 @@ packages:
       '@floating-ui/react': 0.24.5(react-dom@18.2.0)(react@18.2.0)
       '@lingui/core': 4.3.0
       '@mui/material': 5.14.1(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-blockquote': 2.0.14(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-bold': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-callout': 2.0.15(@remirror/pm@2.0.6)(@types/node@20.3.1)
@@ -5583,7 +5625,7 @@ packages:
       '@remirror/extension-strike': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-sub': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-sup': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
-      '@remirror/extension-tables': 2.2.10(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/extension-tables': 2.3.0(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-text-color': 2.0.15(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-underline': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-whitespace': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
@@ -5633,7 +5675,7 @@ packages:
       '@floating-ui/react': 0.24.5(react-dom@18.2.0)(react@18.2.0)
       '@lingui/core': 4.3.0
       '@mui/material': 5.14.1(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/extension-blockquote': 2.0.14(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/extension-bold': 2.0.13(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/extension-callout': 2.0.15(@remirror/pm@2.0.6)(jsdom@22.1.0)
@@ -5652,7 +5694,7 @@ packages:
       '@remirror/extension-strike': 2.0.13(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/extension-sub': 2.0.13(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/extension-sup': 2.0.13(@remirror/pm@2.0.6)(jsdom@22.1.0)
-      '@remirror/extension-tables': 2.2.10(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/extension-tables': 2.3.0(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/extension-text-color': 2.0.15(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/extension-underline': 2.0.13(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/extension-whitespace': 2.0.13(@remirror/pm@2.0.6)(jsdom@22.1.0)
@@ -5737,7 +5779,7 @@ packages:
         optional: true
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-positioner': 2.1.8(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-react-component': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)(@types/react-dom@18.2.7)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
       '@remirror/i18n': 2.0.4
@@ -5777,7 +5819,7 @@ packages:
         optional: true
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/extension-positioner': 2.1.8(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/extension-react-component': 2.0.13(@remirror/pm@2.0.6)(@types/react-dom@18.2.7)(@types/react@18.0.28)(jsdom@22.1.0)(react-dom@18.2.0)(react@18.2.0)
       '@remirror/i18n': 2.0.4
@@ -5862,8 +5904,8 @@ packages:
       react-dom:
         optional: true
     dependencies:
-      '@babel/runtime': 7.22.5
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@babel/runtime': 7.22.6
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-emoji': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-events': 2.1.15(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@remirror/extension-history': 2.0.13(@remirror/pm@2.0.6)(@types/node@20.3.1)
@@ -5905,8 +5947,8 @@ packages:
       react-dom:
         optional: true
     dependencies:
-      '@babel/runtime': 7.22.5
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@babel/runtime': 7.22.6
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/extension-emoji': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/extension-events': 2.1.15(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/extension-history': 2.0.13(@remirror/pm@2.0.6)(jsdom@22.1.0)
@@ -5940,7 +5982,7 @@ packages:
         optional: true
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(@types/node@20.3.1)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(@types/node@20.3.1)
       '@types/react': 18.0.28
       react: 18.2.0
     transitivePeerDependencies:
@@ -5960,7 +6002,7 @@ packages:
         optional: true
     dependencies:
       '@babel/runtime': 7.22.6
-      '@remirror/core': 2.0.17(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/core': 2.0.18(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@types/react': 18.0.28
       react: 18.2.0
     transitivePeerDependencies:
@@ -6104,7 +6146,7 @@ packages:
   /@remirror/theme@2.0.8(@remirror/pm@2.0.6):
     resolution: {integrity: sha512-uK8TOcZvri1kFOndRfm3o9npNdd0xlJFIaGkSWADAB81ES/nsa+0CN5xTpZPxyLKTRc86FTbIb+zarffKP5M6Q==}
     dependencies:
-      '@babel/runtime': 7.22.5
+      '@babel/runtime': 7.22.6
       '@linaria/core': 4.2.9
       '@remirror/core-types': 2.0.5(@remirror/pm@2.0.6)
       color2k: 2.0.2
@@ -12182,7 +12224,7 @@ packages:
       '@remirror/extension-strike': 2.0.13(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/extension-sub': 2.0.13(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/extension-sup': 2.0.13(@remirror/pm@2.0.6)(jsdom@22.1.0)
-      '@remirror/extension-tables': 2.2.10(@remirror/pm@2.0.6)(jsdom@22.1.0)
+      '@remirror/extension-tables': 2.3.0(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/extension-text': 2.0.13(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/extension-text-case': 2.0.13(@remirror/pm@2.0.6)(jsdom@22.1.0)
       '@remirror/extension-text-color': 2.0.15(@remirror/pm@2.0.6)(jsdom@22.1.0)
