@@ -25,7 +25,7 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src", "vite.config.ts", "jest.config.ts", "jest.setup.ts", "jest"],
+  "include": ["src", "vite.config.ts"],
   "exclude": ["node_modules", "dist", "dist-types", ".next", "coverage", "out", ".cache", "**/node_modules", "**/dist", "**/dist-types", "**/.next", "**/coverage", "**/out", "**/.cache"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
