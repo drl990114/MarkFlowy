@@ -14,12 +14,17 @@ import { i18nInit } from './i18n'
 import { Root, Setting } from '@/router'
 import { loadTask, use } from '@/helper/schedule'
 import { CacheManager } from '@/helper'
+import { useEditorStore } from './stores'
+import { readDirectory } from './helper/filesys'
+import { getFileObject, getFileObjectByPath } from './helper/files'
 
 function App() {
   useGlobalOSInfo()
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, handler] = useGlobalSettingData()
   const { themeColors, muiTheme, setTheme } = useGlobalTheme()
+  const editorStore = useEditorStore()
+  const { setFolderData, addOpenedFile, setActiveId } = editorStore
   const { setSetting } = handler
   const isWeb = (window as any).__TAURI_IPC__ === undefined
 
@@ -40,21 +45,39 @@ function App() {
           }),
       ),
     )
-    use(loadTask('cache', () => CacheManager.init()))
+    use(
+      loadTask('cache', async () => {
+        const cacheData = await CacheManager.init()
+        const history = cacheData[0].openFolderHistory
+
+        if (history.length > 0) {
+          readDirectory(history[0].path).then((res) => {
+            setFolderData(res)
+            const openedFilePaths: string[] = cacheData[0].openedFilePaths
+            const activeFilePath = cacheData[0].activeFilePath
+            if (openedFilePaths) {
+              openedFilePaths.forEach(path => {
+                const cur = getFileObjectByPath(path)
+                if (cur) {
+                  addOpenedFile(cur.id)
+                }
+              })
+            }
+
+            if (activeFilePath) {
+              const activeFile = getFileObjectByPath(activeFilePath)
+              if (activeFile) {
+                setActiveId(activeFile.id)
+              }
+            }
+          })
+        }
+      }),
+    )
   }
 
-  useEffect(() => {
-    if (isWeb) return
-    const unlisten = eventInit()
-    // updaterinit()
-
-    return () => {
-      unlisten()
-    }
-  }, [isWeb])
-
   const eventInit = useCallback(() => {
-    const unListenMenu =  listen<string>('native:menu', ({ payload }) => {
+    const unListenMenu = listen<string>('native:menu', ({ payload }) => {
       // TODO Refactor: use a eventemitter in pure web runtime
       emit(payload)
     })
@@ -69,6 +92,28 @@ function App() {
     }
   }, [setTheme])
 
+  useEffect(() => {
+    if (isWeb) return
+    const unlisten = eventInit()
+    // updaterinit()
+
+    useEditorStore.subscribe((state) => {
+      const openedFiles = state.opened.map((fileId) => {
+        const file = getFileObject(fileId)
+        return file.path
+      })
+      CacheManager.writeCache('openedFilePaths', openedFiles)
+      if (state.activeId) {
+        CacheManager.writeCache('activeFilePath', getFileObject(state.activeId)?.path)
+      }
+    })
+    return () => {
+      unlisten()
+    }
+  }, [eventInit, isWeb])
+
+
+
   // const updaterinit = useCallback(async () => {
   //   // TODO 更新默认的 setting
   //   const update = await checkUpdate()
@@ -82,8 +127,8 @@ function App() {
         <GlobalStyles />
         <BaseStyle />
         <Routes>
-          <Route index path="/" element={<Root />} />
-          <Route path="/setting" element={<Setting />} />
+          <Route index path='/' element={<Root />} />
+          <Route path='/setting' element={<Setting />} />
         </Routes>
       </MuiThemeProvider>
     </ThemeProvider>
