@@ -15,7 +15,7 @@
     "@mui/icons-material": "^5.11.16",
     "@mui/material": "^5.14.1",
     "@remirror/core": "^2.0.17",
-    "@remirror/extension-tables": "^2.2.10",
+    "@remirror/extension-tables": "^2.3.1",
     "@remirror/react": "^2.0.32",
     "@tauri-apps/api": "^1.4.0",
     "classnames": "^2.3.2",
