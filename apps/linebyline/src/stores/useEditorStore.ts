@@ -4,7 +4,6 @@ import { createWelcomeFile } from '@/helper/filesys'
 import type { EditorDelegate } from '@linebyline/editor/types'
 
 const useEditorStore = create<EditorStore>((set, get) => {
-  // TODO use open history
   const welcomeFile = createWelcomeFile()
 
   return {

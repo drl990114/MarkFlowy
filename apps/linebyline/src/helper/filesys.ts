@@ -1,7 +1,7 @@
 import WELCOMECONTENT from '@/constants/welcomeContent'
 import { invoke } from '@tauri-apps/api'
 import { nanoid } from 'nanoid'
-import { setFileObject } from './files'
+import { setFileObject, setFileObjectByPath } from './files'
 
 interface FileEntry {
   name: string
@@ -20,6 +20,7 @@ const wrapFiles = (entries: FileEntry[]) => {
     ;(entry as IFile).id = nanoid()
 
     setFileObject((entry as IFile).id, entry as IFile)
+    setFileObjectByPath(entry.path!, entry as IFile)
 
     if (entry.children) {
       wrapFiles(entry.children)
@@ -38,6 +39,9 @@ export const createFile = (opt?: Partial<IFile>): IFile => {
 
   setFileObject(file.id, file)
 
+  if (file.path) {
+    setFileObjectByPath(file.path, file)
+  }
   return file
 }
 export const createWelcomeFile = (): IFile => {

@@ -10,7 +10,7 @@ class CacheManager {
   cacheData: Record<string, any> = defaultCache
 
   init = async () => {
-    await Promise.all([this.readCache()])
+    return await Promise.all([this.readCache()])
   }
 
   readData: (opt: ReadDataParams) => Record<string, any> = async ({
@@ -35,7 +35,7 @@ class CacheManager {
 
     if (onSuccess) onSuccess(this[dataKey])
 
-    return data
+    return this[dataKey]
   }
 
   writeData: (opt: SaveDataParams) => Record<string, any> = async ({
