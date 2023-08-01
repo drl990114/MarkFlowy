@@ -10,7 +10,7 @@ import React, { memo, useEffect, useMemo, useState } from 'react'
 import { useGlobalTheme } from '@/hooks'
 
 interface RePopperProps extends Partial<PopperProps> {
-  content: React.ReactNode
+  content: any
   open: boolean
   onClickAway?: () => void
   children?: React.ReactNode

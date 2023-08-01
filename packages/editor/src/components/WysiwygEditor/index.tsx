@@ -31,6 +31,7 @@ const WysiwygEditor: FC<WysiwygEditorProps> = (props) => {
 }
 
 export default WysiwygEditor
+export * from './delegate'
 
 export type EditorChangeHandler = (params: { undoDepth: number }) => void
 
