@@ -18,7 +18,7 @@
     "eslint": ">=7.4.0"
   },
   "scripts": {
-    "build": "pnpm clear && tsc --emitDeclarationOnly && node esbuild.mjs",
+    "build": "yarn clear && tsc --emitDeclarationOnly && node esbuild.mjs",
     "dev": "tsc --emitDeclarationOnly --watch & node esbuild.mjs --watch",
     "test": "vitest run",
     "test:dev": "vitest dev",

@@ -67,12 +67,10 @@ jobs:
         with:
           key: ${{ matrix.target }}
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        id: pnpm-install
+      - name: Run install
+        uses: borales/actions-yarn@v4
         with:
-          version: 8
-          run_install: true
+          cmd: install # will run `yarn install` command
 
       - name: Install rust target
         run: rustup target add ${{ matrix.target }}

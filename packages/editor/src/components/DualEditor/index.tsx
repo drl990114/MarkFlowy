@@ -128,6 +128,8 @@ const DualEditor: React.FC<DualEditorProps> = (props) => {
 
 export default DualEditor
 
+export * from './delegate'
+
 const Devider = styled.div`
   height: 100%;
   background-color: #eaecef;
