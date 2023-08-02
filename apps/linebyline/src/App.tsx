@@ -15,7 +15,7 @@ import { Root, Setting } from '@/router'
 import { loadTask, use } from '@/helper/schedule'
 import { CacheManager } from '@/helper'
 import { useEditorStore } from './stores'
-import { readDirectory } from './helper/filesys'
+import { createWelcomeFile, readDirectory } from './helper/filesys'
 import { getFileObject, getFileObjectByPath } from './helper/files'
 
 function App() {
@@ -47,30 +47,57 @@ function App() {
     )
     use(
       loadTask('cache', async () => {
-        const cacheData = await CacheManager.init()
-        const history = cacheData[0].openFolderHistory
+        function pushWelcomeFile () {
+          const welcomeFile = createWelcomeFile()
+          setActiveId(welcomeFile.id)
+          addOpenedFile(welcomeFile.id)
+        }
+        try {
+          const cacheData = await CacheManager.init()
+          const history = cacheData[0].openFolderHistory
+          if (history.length > 0) {
+            readDirectory(history[0].path).then((res) => {
+              setFolderData(res)
+              const openedFilePaths: string[] = cacheData[0].openedFilePaths
+              const activeFilePath = cacheData[0].activeFilePath
 
-        if (history.length > 0) {
-          readDirectory(history[0].path).then((res) => {
-            setFolderData(res)
-            const openedFilePaths: string[] = cacheData[0].openedFilePaths
-            const activeFilePath = cacheData[0].activeFilePath
-            if (openedFilePaths) {
-              openedFilePaths.forEach(path => {
-                const cur = getFileObjectByPath(path)
-                if (cur) {
-                  addOpenedFile(cur.id)
+              if (activeFilePath) {
+                const activeFile = getFileObjectByPath(activeFilePath)
+                if (activeFile) {
+                  setActiveId(activeFile.id)
                 }
-              })
-            }
-
-            if (activeFilePath) {
-              const activeFile = getFileObjectByPath(activeFilePath)
-              if (activeFile) {
-                setActiveId(activeFile.id)
               }
-            }
-          })
+
+              if (openedFilePaths) {
+                openedFilePaths.forEach((path) => {
+                  const cur = getFileObjectByPath(path)
+                  if (cur) {
+                    addOpenedFile(cur.id)
+                  }
+                })
+              } else {
+                pushWelcomeFile()
+              }
+
+              useEditorStore.subscribe((state) => {
+                const openedFiles = state.opened.map((fileId) => {
+                  const file = getFileObject(fileId)
+                  return file.path
+                })
+                CacheManager.cacheData.openedFilePaths = openedFiles
+                if (state.activeId) {
+                  CacheManager.cacheData.activeFilePath = getFileObject(state.activeId)?.path
+                }
+
+                CacheManager.saveCache()
+              })
+            })
+          } else {
+            pushWelcomeFile()
+          }
+
+        } catch (error) {
+          pushWelcomeFile()
         }
       }),
     )
@@ -97,22 +124,10 @@ function App() {
     const unlisten = eventInit()
     // updaterinit()
 
-    useEditorStore.subscribe((state) => {
-      const openedFiles = state.opened.map((fileId) => {
-        const file = getFileObject(fileId)
-        return file.path
-      })
-      CacheManager.writeCache('openedFilePaths', openedFiles)
-      if (state.activeId) {
-        CacheManager.writeCache('activeFilePath', getFileObject(state.activeId)?.path)
-      }
-    })
     return () => {
       unlisten()
     }
   }, [eventInit, isWeb])
-
-
 
   // const updaterinit = useCallback(async () => {
   //   // TODO 更新默认的 setting
