@@ -1,15 +1,12 @@
 import { create } from 'zustand'
 import type { IFile } from '@/helper/filesys'
-import { createWelcomeFile } from '@/helper/filesys'
 import type { EditorDelegate } from '@linebyline/editor/types'
 
 const useEditorStore = create<EditorStore>((set, get) => {
-  const welcomeFile = createWelcomeFile()
-
   return {
-    opened: [welcomeFile.id],
-    activeId: welcomeFile.id,
-    folderData: [welcomeFile],
+    opened: [],
+    activeId: undefined,
+    folderData: null,
     editorCtxMap: new Map(),
 
     setActiveId: (id: string) => {

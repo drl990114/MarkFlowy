@@ -44,10 +44,10 @@ const FileNode: FC<FileNodeProps> = ({
       >
         {isFolder
           ? (
-          <i className={`ri-folder-3-line ${iconCls}`} />
+          <i className={`${isOpen ? 'ri-folder-5-line' : 'ri-folder-3-line'} ${iconCls}`} />
             )
           : (
-          <i className={`ri-file-3-line ${iconCls}`} />
+          <i className={`ri-markdown-fill ${iconCls}`} />
             )}
         <div className="file-node__text">{item.name}</div>
       </div>

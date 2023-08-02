@@ -7,6 +7,7 @@ export const FileNodeStyled = styled.div`
     padding: 0 8px;
     height: 32px;
     box-sizing: border-box;
+    font-size: 0.9rem;
     cursor: pointer;
 
     &__text {

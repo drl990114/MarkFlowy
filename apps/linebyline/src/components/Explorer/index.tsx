@@ -84,7 +84,7 @@ const Explorer: FC<ExplorerProps> = (props) => {
         <div className="flex" />
       </div>
       <div className="h-full w-full overflow-auto">
-        {folderData ? (
+        {folderData && folderData.length > 1 ? (
           <FileTree
             className="flex-1"
             data={folderData}

@@ -7,14 +7,10 @@ const Container = styled.div`
   bottom: 0;
   padding: 8px;
   z-index: 2;
-  font-size: 12px;
-  border-style: solid;
-  border-width: 2px 0 0 2px;
-  border-radius: 8px 0 0 0;
-  border-color: ${props => props.theme.borderColor};
-  color: ${props => props.theme.labelFontColor};
-  background-color: ${props => props.theme.tipsBgColor};
+  opacity: 0.3;
+  font-size: 0.9rem;
   user-select: none;
+  box-sizing: border-box;
   cursor: default;
 `
 
