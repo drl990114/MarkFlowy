@@ -93,7 +93,7 @@
     "@types/lodash": "^4.14.195",
     "@types/markdown-it": "^12.2.3",
     "@types/mdast": "^3.0.11",
-    "@types/react": "^18.0.0",
+    "@types/react": "^18.2.18",
     "@types/react-dom": "^18.2.7",
     "@types/styled-components": "^5.1.26",
     "@types/tether-drop": "^1.4.9",
