@@ -27,4 +27,4 @@ function getNextVersion(version) {
 
 updateVersion()
 
-execSync(`git tag -a v${nextVersion}-alpha -m "v${nextVersion}-alpha" && git push linebyline v${nextVersion}-alpha`)
+execSync(`git tag -a v${nextVersion} -m "v${nextVersion}" && git push linebyline v${nextVersion}`)

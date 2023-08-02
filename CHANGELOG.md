@@ -13,14 +13,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [`f11cb1e`](https://github.com/linebyline-group/linebyline/commit/f11cb1e0067ba5315e564457c68f46bebe2cf756) - some ui optimization *(commit by [@halodong](https://github.com/halodong))*
 
 
-## [v0.1.1-alpha] - 2023-08-02
-### :sparkles: New Features
-- [`411550d`](https://github.com/linebyline-group/linebyline/commit/411550d760a8f1c7987c012ef7a2533a96048af5) - restore openedfiles and activefile when program start *(commit by [@halodong](https://github.com/halodong))*
-
-### :bug: Bug Fixes
-- [`0765bb0`](https://github.com/linebyline-group/linebyline/commit/0765bb0220c74a9b55356971da254346ac90396b) - tablecell break use <br /> *(commit by [@halodong](https://github.com/halodong))*
-
-
 ## [v0.1.0-alpha] - 2023-07-16
 ### :sparkles: New Features
 - [`7bbb30d`](https://github.com/linebyline-group/linebyline/commit/7bbb30d179cd0b655bf8f22459695d345baf98d8) - chatgpt optimization *(commit by [@halodong](https://github.com/halodong))*
