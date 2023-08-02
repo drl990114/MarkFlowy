@@ -4,7 +4,7 @@
   <img align="center" src="./public/logo.svg" width="120" height="130" />
 </div>
 
-<h1 align="center">LineByLine</h1>
+<h1 align="center"/>LineByLine <sup><em>alpha</em></sup></h1>
 
 <h4 align="center">现代 Markdown 编辑器.(WIP)</h3>
 
@@ -15,6 +15,10 @@
   <a href="https://github.com/linebyline-group/linebyline" target="__blank"><img alt="GitHub" src="https://img.shields.io/github/commit-activity/w/linebyline-group/linebyline?color=%2346bd1b"></a>
   <a href="https://www.rust-lang.org/" target="__blank"><img alt="GitHub" src="https://img.shields.io/badge/Rust-1.70.0-dea584"></a>
 </p>
+
+## ⚠️ LineByLine 目前处于 Alpha 阶段
+
+目前 LineByLine还处于alpha阶段，建议在有数据备份的情况下使用。
 
 ## Feature
 
