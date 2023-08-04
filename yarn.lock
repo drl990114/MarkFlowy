@@ -2468,13 +2468,25 @@
     "@remirror/messages" "^2.0.5"
     "@remirror/theme" "^2.0.8"
 
-"@remirror/extension-code-block@^2.0.14", "@remirror/extension-code-block@^2.0.15", "@remirror/extension-code-block@^2.0.17":
+"@remirror/extension-code-block@^2.0.14", "@remirror/extension-code-block@^2.0.15":
   version "2.0.17"
   resolved "https://registry.yarnpkg.com/@remirror/extension-code-block/-/extension-code-block-2.0.17.tgz#5cb6433fde15cf72562116ce87e65bd9095455c4"
   integrity sha512-c5cX8mKwc7lRlsPy5SCxt3fhNO6ir6CRaZxhQHnoyQ8ImiO5A6VFIfy45Duy9jMy8GKT8RyMPWqMuKIJEI3AXg==
   dependencies:
     "@babel/runtime" "^7.22.3"
     "@prettier/sync" "^0.3.0"
+    "@remirror/core" "^2.0.19"
+    "@remirror/messages" "^2.0.6"
+    "@remirror/theme" "^2.0.9"
+    "@types/refractor" "^3.0.2"
+    refractor "^3.6.0"
+
+"@remirror/extension-code-block@^2.0.18":
+  version "2.0.18"
+  resolved "https://registry.yarnpkg.com/@remirror/extension-code-block/-/extension-code-block-2.0.18.tgz#62140479751018f41e863a937281a7672508ae17"
+  integrity sha512-Qu51glo0xQMUlSYiFR20HmYEnOJF1OcbZYLTcF32oa8Uq1JWStv1DacQaACUQEhZ6DKgxFZxFBWbPLonzZ1bmw==
+  dependencies:
+    "@babel/runtime" "^7.22.3"
     "@remirror/core" "^2.0.19"
     "@remirror/messages" "^2.0.6"
     "@remirror/theme" "^2.0.9"
@@ -3179,22 +3191,22 @@
     resize-observer-polyfill "^1.5.1"
     tiny-warning "^1.0.3"
 
-"@remirror/react-editors@^1.0.35":
-  version "1.0.37"
-  resolved "https://registry.yarnpkg.com/@remirror/react-editors/-/react-editors-1.0.37.tgz#2b0671e39cd1bda4048180699df4827f972da721"
-  integrity sha512-zvPlMPMCXoszdj7wuJzsunK4z+u9k7i1xZBZd2Uv1EEl+Q5FRdb1Pznf864EH+DZlwZg5sGylWthR/dquCnwyQ==
+"@remirror/react-editors@^1.0.35", "@remirror/react-editors@^1.0.38":
+  version "1.0.38"
+  resolved "https://registry.yarnpkg.com/@remirror/react-editors/-/react-editors-1.0.38.tgz#29f0f06369095f3866e9927db630f658a76ab9d3"
+  integrity sha512-iNpmd1UXBJuO+pYgLz9PzSoyFe/dyPlwjKcIyW+XhwPw35TGnBRqhv7MzmrlFEj5D11eqaFXBKQM0+ySCRfItA==
   dependencies:
     "@babel/runtime" "^7.22.3"
     "@remirror/core-helpers" "^3.0.0"
     "@remirror/extension-react-tables" "^2.2.18"
     "@remirror/pm" "^2.0.8"
-    "@remirror/react" "^2.0.34"
+    "@remirror/react" "^2.0.35"
     "@remirror/styles" "^2.0.7"
     "@svgmoji/noto" "^3.2.0"
     "@types/refractor" "^3.0.2"
     create-context-state "^2.0.2"
     refractor "^3.6.0"
-    remirror "2.0.35"
+    remirror "2.0.36"
     svgmoji "^3.2.0"
 
 "@remirror/react-hooks@^2.0.25":
@@ -3225,7 +3237,7 @@
     "@babel/runtime" "^7.21.0"
     "@remirror/core" "^2.0.13"
 
-"@remirror/react-utils@^2.0.5":
+"@remirror/react-utils@^2.0.5", "@remirror/react-utils@^2.0.7":
   version "2.0.7"
   resolved "https://registry.yarnpkg.com/@remirror/react-utils/-/react-utils-2.0.7.tgz#487ce2de395a27c089eec4ba67eb1494b90a5c59"
   integrity sha512-FowQ47k0IV+8qVvQZu5OOS014FTPQ1x2BsXgfikvrMlggx5mRgsFkJ5Sf56iieyUUHqBwVXIWHtR2KVanQWbVQ==
@@ -3235,22 +3247,22 @@
     "@remirror/core-helpers" "^3.0.0"
     "@remirror/core-types" "^2.0.5"
 
-"@remirror/react@^2.0.32", "@remirror/react@^2.0.34":
-  version "2.0.34"
-  resolved "https://registry.yarnpkg.com/@remirror/react/-/react-2.0.34.tgz#eb1fdc9adaa9d777784eda742fd3dea0b1a18f44"
-  integrity sha512-OEKfvCIU9T7TBsSR8g4CIme2OglQ1hgj2x0++cKGF2FqsDwS5OQyEVv7+4sN1CjeikkhCB1DYcGnP1a37DvPig==
+"@remirror/react@^2.0.32", "@remirror/react@^2.0.35":
+  version "2.0.35"
+  resolved "https://registry.yarnpkg.com/@remirror/react/-/react-2.0.35.tgz#6fc9a4fcef2ffdb810b6a88cbb81a0a2b5a6f73c"
+  integrity sha512-SFs64SiQoHUatR+guSo9G1EVwBLqZec+tUtxdun11zC/5iiye0qIk+gnvu2h5pl0zwdqpK+b0ZQ/lR7JKzwagA==
   dependencies:
     "@babel/runtime" "^7.22.3"
     "@remirror/extension-placeholder" "^2.0.14"
     "@remirror/extension-positioner" "^2.1.8"
     "@remirror/extension-react-component" "^2.0.13"
-    "@remirror/extension-react-tables" "^2.2.17"
+    "@remirror/extension-react-tables" "^2.2.18"
     "@remirror/preset-react" "^2.0.14"
     "@remirror/react-components" "^2.1.17"
     "@remirror/react-core" "^2.0.21"
     "@remirror/react-hooks" "^2.0.25"
     "@remirror/react-renderer" "^2.0.13"
-    "@remirror/react-utils" "^2.0.5"
+    "@remirror/react-utils" "^2.0.7"
 
 "@remirror/styles@^2.0.5", "@remirror/styles@^2.0.7":
   version "2.0.7"
@@ -9309,10 +9321,10 @@ remirror-extension-flat-list@^0.1.3:
     "@remirror/core" "^2.0.11"
     prosemirror-flat-list "^0.3.0"
 
-remirror@2.0.35, remirror@^2.0.33:
-  version "2.0.35"
-  resolved "https://registry.yarnpkg.com/remirror/-/remirror-2.0.35.tgz#e240e2f023aec71cc4086870bc121a9e57dfcef1"
-  integrity sha512-Z368nIV9n4y5OEf7Wt0A5ufFPPyi2IAtvFIztVNHJbhuR+bF7WKWo5JNNejcYtPVoHzPawDK7bFINHn/X3W/Yg==
+remirror@2.0.36, remirror@^2.0.33:
+  version "2.0.36"
+  resolved "https://registry.yarnpkg.com/remirror/-/remirror-2.0.36.tgz#bafb14d20152c01e53a99621fc0b38f71e1653c5"
+  integrity sha512-oGOeEaYFILgxNrL33qCEJ/kGE+wNhYgcCiHwuTXOHFCmPnHn32+l0aZaQ2FRHeMW602i2wpkwy8HWWsBFz5PXg==
   dependencies:
     "@babel/runtime" "^7.22.3"
     "@remirror/core" "^2.0.19"
@@ -9327,7 +9339,7 @@ remirror@2.0.35, remirror@^2.0.33:
     "@remirror/extension-bold" "^2.0.13"
     "@remirror/extension-callout" "^2.0.15"
     "@remirror/extension-code" "^2.0.13"
-    "@remirror/extension-code-block" "^2.0.17"
+    "@remirror/extension-code-block" "^2.0.18"
     "@remirror/extension-codemirror5" "^2.0.13"
     "@remirror/extension-collaboration" "^2.0.13"
     "@remirror/extension-columns" "^2.0.14"
