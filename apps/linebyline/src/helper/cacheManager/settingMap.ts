@@ -25,6 +25,7 @@ const settingMap = {
       },
     },
   },
+  keyboard: {}
 }
 
 export enum SettingKeys {
