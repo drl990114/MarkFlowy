@@ -1,15 +1,12 @@
-import { open } from '@tauri-apps/api/dialog'
 import classNames from 'classnames'
-import dayjs from 'dayjs'
 import type { FC } from 'react'
 import { memo, useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { ListDataItem } from '../List'
 import { Container } from './styles'
 import { useEditorStore } from '@/stores'
-import { readDirectory } from '@/helper/filesys'
 import type { IFile } from '@/helper/filesys'
-import { useGlobalCacheData } from '@/hooks'
+import { useGlobalCacheData, useOpen } from '@/hooks'
 import { CacheManager } from '@/helper'
 import { Empty, FileTree, List, Popper } from '@/components'
 import styled from 'styled-components'
@@ -21,15 +18,16 @@ const RecentListBottom = styled.div`
   text-align: center;
 
   &:hover {
-    background-color: ${props => props.theme.tipsBgColor};
+    background-color: ${(props) => props.theme.tipsBgColor};
   }
 `
 
 const Explorer: FC<ExplorerProps> = (props) => {
   const { t } = useTranslation()
-  const { folderData, activeId, setFolderData, addOpenedFile, setActiveId } = useEditorStore()
+  const { folderData, activeId, addOpenedFile, setActiveId } = useEditorStore()
   const [popperOpen, setPopperOpen] = useState(false)
   const [cache] = useGlobalCacheData()
+  const { openFolderDialog, openFolder } = useOpen()
 
   const handleSelect = (item: IFile) => {
     if (item.kind === 'dir') return
@@ -38,32 +36,18 @@ const Explorer: FC<ExplorerProps> = (props) => {
     setActiveId(item.id)
   }
 
-  const openRir = useCallback(async (dir: string) => {
-    try {
-      const res = await readDirectory(dir)
-      CacheManager.writeCache('openFolderHistory', { path: dir, time: dayjs() })
-      setFolderData(res)
-    } catch (error) {
-      console.error('error', error)
-    }
-  }, [setFolderData])
-
   const handleClearRecent = () => {
     CacheManager.writeCache('openFolderHistory', [])
     setPopperOpen(false)
   }
 
-  const handleOpenDirClick = async () => {
-    const dir = await open({ directory: true, recursive: true })
-
-    if (typeof dir !== 'string') return
-    openRir(dir)
-  }
-
-  const handleOpenHistoryListItemClick = useCallback((item: ListDataItem) => {
-    openRir(item.title)
-    setPopperOpen(false)
-  }, [openRir])
+  const handleOpenHistoryListItemClick = useCallback(
+    (item: ListDataItem) => {
+      openFolder(item.title)
+      setPopperOpen(false)
+    },
+    [openFolder],
+  )
 
   const listData = useMemo(
     () =>
@@ -79,14 +63,14 @@ const Explorer: FC<ExplorerProps> = (props) => {
 
   return (
     <Container className={containerCLs}>
-      <div className="explorer-header">
+      <div className='explorer-header'>
         <small>EXPLORER</small>
-        <div className="flex" />
+        <div className='flex' />
       </div>
-      <div className="h-full w-full overflow-auto">
+      <div className='h-full w-full overflow-auto'>
         {folderData && folderData.length > 1 ? (
           <FileTree
-            className="flex-1"
+            className='flex-1'
             data={folderData}
             activeId={activeId}
             onSelect={handleSelect}
@@ -95,12 +79,12 @@ const Explorer: FC<ExplorerProps> = (props) => {
           <Empty />
         )}
       </div>
-      <div className="explorer-bottom">
-        <small className="flex-1 cursor-pointer" onClick={handleOpenDirClick}>
+      <div className='explorer-bottom'>
+        <small className='flex-1 cursor-pointer' onClick={openFolderDialog}>
           {t('file.openDir')}
         </small>
         <Popper
-          placement="top-end"
+          placement='top-end'
           onClickAway={() => setPopperOpen(false)}
           open={popperOpen}
           content={
@@ -114,10 +98,12 @@ const Explorer: FC<ExplorerProps> = (props) => {
             </>
           }
         >
-         {listData.length > 0 ? <i
-            className="ri-more-2-fill icon-border cursor-pointer"
-            onClick={() => setPopperOpen(true)}
-          /> : null}
+          {listData.length > 0 ? (
+            <i
+              className='ri-more-2-fill icon-border cursor-pointer'
+              onClick={() => setPopperOpen(true)}
+            />
+          ) : null}
         </Popper>
       </div>
     </Container>
