@@ -7,6 +7,7 @@ import settingMap from '@/helper/cacheManager/settingMap'
 import Logo from '@/assets/logo.svg'
 import { invoke } from '@tauri-apps/api'
 import TitleBar from '@/components/TitleBar'
+import { KeyboardTable } from './KeyboardTable'
 
 export interface DialogTitleProps {
   children?: ReactNode
@@ -33,6 +34,23 @@ function Setting() {
       setConfPath(res as string)
     })
   }, [])
+
+  const renderCurrentSettingData = () => {
+    if (curGroupKey === 'keyboard') {
+      return <KeyboardTable />
+    }
+
+    return curGroupKeys.map((key) => {
+      return (
+        <SettingGroup
+          key={key}
+          group={curGroup[key]}
+          groupKey={key}
+          categoryKey={curGroupKey}
+        />
+      )
+    })
+  }
 
   return (
     <>
@@ -71,16 +89,7 @@ function Setting() {
           <div className="conf-path">
             <small>Path: {confPath}</small>
           </div>
-          {curGroupKeys.map((key) => {
-            return (
-              <SettingGroup
-                key={key}
-                group={curGroup[key]}
-                groupKey={key}
-                categoryKey={curGroupKey}
-              />
-            )
-          })}
+          {renderCurrentSettingData()}
         </div>
       </Container>
     </>

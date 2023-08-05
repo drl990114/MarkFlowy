@@ -8,8 +8,7 @@ import { Route, Routes } from 'react-router-dom'
 import 'remixicon/fonts/remixicon.css'
 import { ThemeProvider } from 'styled-components'
 import { GlobalStyles } from './globalStyles'
-import { useGlobalSettingData, useGlobalTheme } from './hooks'
-import useGlobalOSInfo from './hooks/useOSInfo'
+import { useGlobalSettingData, useGlobalTheme, useGlobalKeyboard, useGlobalOSInfo } from './hooks'
 import { i18nInit } from './i18n'
 import { Root, Setting } from '@/router'
 import { loadTask, use } from '@/helper/schedule'
@@ -20,6 +19,7 @@ import { getFileObject, getFileObjectByPath } from './helper/files'
 
 function App() {
   useGlobalOSInfo()
+  useGlobalKeyboard()
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, handler] = useGlobalSettingData()
   const { themeColors, muiTheme, setTheme } = useGlobalTheme()
