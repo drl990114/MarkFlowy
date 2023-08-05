@@ -33,6 +33,7 @@
     "react-router-dom": "^6.9.0",
     "remixicon": "^3.4.0",
     "styled-components": "^5.3.11",
+    "tinykeys": "^2.1.0",
     "zustand": "^4.3.9"
   },
   "devDependencies": {
