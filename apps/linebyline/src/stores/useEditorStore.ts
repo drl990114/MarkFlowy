@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { IFile } from '@/helper/filesys'
+import { createFile, type IFile } from '@/helper/filesys'
 import type { EditorDelegate } from '@linebyline/editor/types'
 
 const useEditorStore = create<EditorStore>((set, get) => {
@@ -8,6 +8,47 @@ const useEditorStore = create<EditorStore>((set, get) => {
     activeId: undefined,
     folderData: null,
     editorCtxMap: new Map(),
+
+    addFile: () => {
+      const untitledFile = createFile()
+      const { activeId, folderData, setActiveId, addOpenedFile } = get()
+      if (activeId && folderData )  {
+        const dfs = (tree: IFile[]) => {
+          for(let i = 0; i < tree.length; i++) {
+            if (tree[i].id === activeId) {
+              tree.splice(i+1, 0, untitledFile)
+              set(state => {
+                return {
+                  ...state,
+                  folderData: [
+                    ...(state.folderData || []),
+                  ]
+                }
+              })
+              setActiveId(untitledFile.id)
+              addOpenedFile(untitledFile.id)
+              return
+            } else if (tree[i]?.children) {
+              dfs(tree[i].children!)
+            }
+          }
+        }
+        dfs(folderData)
+        
+      }  else {
+        set(state => {
+          return {
+            ...state,
+            folderData: [
+              ...(state.folderData || []),
+              untitledFile
+            ]
+          }
+        })
+        setActiveId(untitledFile.id)
+        addOpenedFile(untitledFile.id)
+      }
+    },
 
     setActiveId: (id: string) => {
       set((state) => ({
@@ -71,6 +112,7 @@ interface EditorStore {
   folderData: null | IFile[]
   editorCtxMap: Map<string, EditorDelegate<any>>
   setActiveId: (id: string) => void
+  addFile: () => void
   addOpenedFile: (id: string) => void
   delOpenedFile: (id: string) => void
   setFolderData: (folderData: IFile[]) => void

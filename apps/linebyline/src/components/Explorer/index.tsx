@@ -10,6 +10,8 @@ import { useGlobalCacheData, useOpen } from '@/hooks'
 import { CacheManager } from '@/helper'
 import { Empty, FileTree, List, Popper } from '@/components'
 import styled from 'styled-components'
+import type { RightNavItem } from '../SideBar/SideBarHeader'
+import SideBarHeader from '../SideBar/SideBarHeader'
 
 const RecentListBottom = styled.div`
   padding: 8px;
@@ -24,7 +26,7 @@ const RecentListBottom = styled.div`
 
 const Explorer: FC<ExplorerProps> = (props) => {
   const { t } = useTranslation()
-  const { folderData, activeId, addOpenedFile, setActiveId } = useEditorStore()
+  const { addFile, folderData, activeId, addOpenedFile, setActiveId } = useEditorStore()
   const [popperOpen, setPopperOpen] = useState(false)
   const [cache] = useGlobalCacheData()
   const { openFolderDialog, openFolder } = useOpen()
@@ -49,6 +51,12 @@ const Explorer: FC<ExplorerProps> = (props) => {
     [openFolder],
   )
 
+  const handleRightNavItemClick = useCallback((item: RightNavItem) => {
+    if (item.key === 'addFile') {
+      addFile()
+    }
+  }, [addFile])
+
   const listData = useMemo(
     () =>
       cache.openFolderHistory.map((history: { time: string; path: string }) => ({
@@ -63,10 +71,11 @@ const Explorer: FC<ExplorerProps> = (props) => {
 
   return (
     <Container className={containerCLs}>
-      <div className='explorer-header'>
-        <small>EXPLORER</small>
-        <div className='flex' />
-      </div>
+      <SideBarHeader
+        name='EXPLORER'
+        onRightNavItemClick={handleRightNavItemClick}
+        rightNavItems={[{ iconCls: 'ri-file-add-line', key: 'addFile' }]}
+      />
       <div className='h-full w-full overflow-auto'>
         {folderData && folderData.length > 1 ? (
           <FileTree

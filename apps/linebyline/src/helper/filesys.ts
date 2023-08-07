@@ -34,6 +34,7 @@ export const createFile = (opt?: Partial<IFile>): IFile => {
     name: 'Untitled.md',
     kind: 'file',
     path: undefined,
+    content: '',
     ...opt,
   }
 
