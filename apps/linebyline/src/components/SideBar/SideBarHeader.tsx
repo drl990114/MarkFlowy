@@ -1,3 +1,5 @@
+import type { TooltipProps } from '@mui/material'
+import { Tooltip } from '@mui/material'
 import type { FC } from 'react'
 import styled from 'styled-components'
 
@@ -9,6 +11,12 @@ const Container = styled.div`
   padding: 0 8px;
   line-height: 2rem;
   border-bottom: 1px solid ${(props) => props.theme.borderColor};
+
+  .sidebar-header {
+    &__name {
+      font-size: 0.75rem;
+    }
+  }
 `
 
 const SideBarHeader: FC<SideBarHeaderProps> = (props) => {
@@ -19,10 +27,18 @@ const SideBarHeader: FC<SideBarHeaderProps> = (props) => {
   }
   return (
     <Container>
-      <small>{props.name}</small>
+      <small className='sidebar-header__name'>{props.name}</small>
       <div className='flex'>
         {props.rightNavItems?.map((item) => {
-          return (
+          return item.tooltip ? (
+            <Tooltip {...item.tooltip}>
+              <i
+                key={item.key}
+                className={`icon ${item.iconCls}`}
+                onClick={() => handleRightNavItemClick(item)}
+              />
+            </Tooltip>
+          ) : (
             <i
               key={item.key}
               className={`icon ${item.iconCls}`}
@@ -40,6 +56,7 @@ export default SideBarHeader
 export interface RightNavItem {
   iconCls: string
   key: React.Key
+  tooltip?: Omit<TooltipProps, 'children'>
   [key: string]: any
 }
 

@@ -12,6 +12,8 @@ import { SettingKeys } from '@/helper/cacheManager/settingMap'
 import { RIGHTBARITEMKEYS } from '@/constants'
 import type { RightBarItem } from '@/components/SideBar'
 import { invoke } from '@tauri-apps/api'
+import type { RightNavItem } from '@/components/SideBar/SideBarHeader'
+import SideBarHeader from '@/components/SideBar/SideBarHeader'
 
 const ChatList: React.FC<ChatListProps> = (props) => {
   const { chatList, addChat, delChat } = useChatGPTStore()
@@ -53,42 +55,55 @@ const ChatList: React.FC<ChatListProps> = (props) => {
     setActiveId(gptNotesFile.id)
   }, [chatList, addOpenedFile, setActiveId])
 
+  const handleRightNavItemClick = useCallback(
+    (item: RightNavItem) => {
+      if (item.key === 'exportChats') {
+        exportChats()
+      }
+    },
+    [exportChats],
+  )
   const openSettingWindow = useCallback(() => invoke('open_conf_window'), [])
 
   return (
     <Container {...props}>
-      <div className="header">
-        ChatGPT
-        <div>
-          <i className="icon ri-file-download-line" onClick={exportChats} />
-        </div>
-      </div>
-      <div className="content" ref={listRef}>
+      <SideBarHeader
+        name='CHATGPT'
+        onRightNavItemClick={handleRightNavItemClick}
+        rightNavItems={[
+          {
+            iconCls: 'ri-file-download-line',
+            key: 'exportChats',
+            tooltip: { title: 'Export Chats', arrow: true },
+          },
+        ]}
+      />
+      <div className='content' ref={listRef}>
         {chatList.length > 0 ? (
           <ListContainer>
             {chatList.map((chat) => {
               return (
                 <div key={chat.id}>
-                  <div className="question item">
-                    <div className="item-header">
-                      <div className="item-title">
-                        <i className="ri-user-4-line item-icon" />
+                  <div className='question item'>
+                    <div className='item-header'>
+                      <div className='item-title'>
+                        <i className='ri-user-4-line item-icon' />
                         <span>You</span>
                       </div>
                       <div>
-                        <i className="icon ri-delete-bin-line" onClick={() => delChat(chat.id)} />
+                        <i className='icon ri-delete-bin-line' onClick={() => delChat(chat.id)} />
                       </div>
                     </div>
                     <p>{chat.question}</p>
                   </div>
-                  <div className="answer item">
-                    <div className="item-title">
-                      <i className="ri-openai-fill item-icon" />
+                  <div className='answer item'>
+                    <div className='item-title'>
+                      <i className='ri-openai-fill item-icon' />
                       <span>ChatGPT</span>
                     </div>
                     {chat.status === 'pending' ? (
                       <ReactLoading
-                        type="bubbles"
+                        type='bubbles'
                         width={35}
                         height={35}
                         color={themeColors.accentColor}
@@ -107,12 +122,12 @@ const ChatList: React.FC<ChatListProps> = (props) => {
             })}
           </ListContainer>
         ) : (
-          <div className="introduction">
-            <div className="introduction-title">
-              <i className="ri-flashlight-line" />
+          <div className='introduction'>
+            <div className='introduction-title'>
+              <i className='ri-flashlight-line' />
               Capabilities
             </div>
-            <div className="introduction-item">
+            <div className='introduction-item'>
               One-click export of conversation content as md file
             </div>
           </div>
@@ -120,15 +135,15 @@ const ChatList: React.FC<ChatListProps> = (props) => {
       </div>
       <BottomBar>
         <Input
-          className="input"
+          className='input'
           value={askInput}
-          placeholder="input question"
+          placeholder='input question'
           onKeyDown={handleKeydown}
           onChange={(event) => {
             setAskInput(event.target.value)
           }}
         />
-        <Button className="submit" size="small" variant="contained" onClick={handleSubmit}>
+        <Button className='submit' size='small' variant='contained' onClick={handleSubmit}>
           submit
         </Button>
       </BottomBar>
@@ -143,7 +158,7 @@ interface ChatListProps {
 const ChatGPT = {
   title: RIGHTBARITEMKEYS.ChatGPT,
   key: RIGHTBARITEMKEYS.ChatGPT,
-  icon: <i className="ri-openai-fill" />,
+  icon: <i className='ri-openai-fill' />,
   components: <ChatList />,
 } as RightBarItem
 
