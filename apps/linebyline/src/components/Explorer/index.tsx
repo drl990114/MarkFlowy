@@ -51,11 +51,14 @@ const Explorer: FC<ExplorerProps> = (props) => {
     [openFolder],
   )
 
-  const handleRightNavItemClick = useCallback((item: RightNavItem) => {
-    if (item.key === 'addFile') {
-      addFile()
-    }
-  }, [addFile])
+  const handleRightNavItemClick = useCallback(
+    (item: RightNavItem) => {
+      if (item.key === 'addFile') {
+        addFile()
+      }
+    },
+    [addFile],
+  )
 
   const listData = useMemo(
     () =>
@@ -74,7 +77,13 @@ const Explorer: FC<ExplorerProps> = (props) => {
       <SideBarHeader
         name='EXPLORER'
         onRightNavItemClick={handleRightNavItemClick}
-        rightNavItems={[{ iconCls: 'ri-file-add-line', key: 'addFile' }]}
+        rightNavItems={[
+          {
+            iconCls: 'ri-file-add-line',
+            key: 'addFile',
+            tooltip: { title: 'Add File', arrow: true },
+          },
+        ]}
       />
       <div className='h-full w-full overflow-auto'>
         {folderData && folderData.length > 1 ? (

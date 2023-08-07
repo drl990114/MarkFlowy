@@ -8,7 +8,7 @@ declare namespace Setting {
   type SelectSettingItem = {
     type: 'select'
     key: string
-    options: ReadonlyArray<T>
+    options: readonly T[]
   }
 
   type InputSettingItem = {
