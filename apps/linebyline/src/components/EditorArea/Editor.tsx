@@ -56,7 +56,7 @@ function Editor(props: EditorProps) {
           filePath: file.path,
         })
         setContent(text as string)
-      } else if (file.content) {
+      } else if (file.content !== undefined) {
         setContent(file.content)
       }
     }
