@@ -10673,10 +10673,10 @@ web-streams-polyfill@^3.0.3:
   resolved "https://registry.yarnpkg.com/web-streams-polyfill/-/web-streams-polyfill-3.2.1.tgz#71c2718c52b45fd49dbeee88634b3a60ceab42a6"
   integrity sha512-e0MO3wdXWKrLbL0DgGnUV7WHVuw9OUvL4hjgnPkIeEvESk74gAITi5G606JtZPp39cd8HA9VQzCIvA49LpPN5Q==
 
-webdriver@8.14.0:
-  version "8.14.0"
-  resolved "https://registry.yarnpkg.com/webdriver/-/webdriver-8.14.0.tgz#cf1b82e07843574c2428ab136fadf05b177a7609"
-  integrity sha512-3ZT26lfM8lrLX9kEY/CUZK4wN/feVjXKKlXZh8GYgVOj/j2zMo9TH0rSmfA8s2s0wBpJgWOPs5RqwGWY5nEgHg==
+webdriver@8.14.3:
+  version "8.14.3"
+  resolved "https://registry.yarnpkg.com/webdriver/-/webdriver-8.14.3.tgz#9b87f62655d422bce54d17b5fca2cde9aa701442"
+  integrity sha512-7hAhzXHuNKkowa2yN0KgNiHVxOOWpBjt0Ql7EBQadlF6wWzSFX8qTdtEBuDk9VcR/ijDE2X9UyptNCU1j83TvQ==
   dependencies:
     "@puppeteer/browsers" "^1.4.6"
     "@types/node" "^20.1.0"
@@ -10698,10 +10698,10 @@ webdriver@8.14.0:
     wait-port "^1.0.4"
     ws "^8.8.0"
 
-webdriverio@^8.13.13:
-  version "8.14.1"
-  resolved "https://registry.yarnpkg.com/webdriverio/-/webdriverio-8.14.1.tgz#9bd8b1f9e569bba93b552a72621d02a0353eb5e4"
-  integrity sha512-nne7nkV8/Y1Bs9ec4B/HHkSnxY+Z7330Qcl1dD1y/HHSv1wL730m7hzae5Z4CokgGwkZtM+KbU0U47gSLxe8dQ==
+webdriverio@^8.14.3:
+  version "8.14.3"
+  resolved "https://registry.yarnpkg.com/webdriverio/-/webdriverio-8.14.3.tgz#490cdd505b6cf57a50d6f67841b8295d6f25c94f"
+  integrity sha512-NMVap664xbbPKrVWpcxyTEVmkUadS8wu2eBtT8uMhesLCtaCZjxTF5andHpIEFitKhgHf22SeP++1ZrQpMoRCA==
   dependencies:
     "@types/node" "^20.1.0"
     "@wdio/config" "8.14.0"
@@ -10726,7 +10726,7 @@ webdriverio@^8.13.13:
     resq "^1.9.1"
     rgb2hex "0.2.5"
     serialize-error "^8.0.0"
-    webdriver "8.14.0"
+    webdriver "8.14.3"
 
 webidl-conversions@^3.0.0:
   version "3.0.1"
