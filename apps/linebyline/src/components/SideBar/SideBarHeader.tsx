@@ -31,12 +31,8 @@ const SideBarHeader: FC<SideBarHeaderProps> = (props) => {
       <div className='flex'>
         {props.rightNavItems?.map((item) => {
           return item.tooltip ? (
-            <Tooltip {...item.tooltip}>
-              <i
-                key={item.key}
-                className={`icon ${item.iconCls}`}
-                onClick={() => handleRightNavItemClick(item)}
-              />
+            <Tooltip {...item.tooltip} key={item.key}>
+              <i className={`icon ${item.iconCls}`} onClick={() => handleRightNavItemClick(item)} />
             </Tooltip>
           ) : (
             <i
