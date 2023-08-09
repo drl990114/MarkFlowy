@@ -3763,12 +3763,19 @@
   resolved "https://registry.yarnpkg.com/@types/marked/-/marked-4.3.1.tgz#45fb6dfd47afb595766c71ed7749ead23f137de3"
   integrity sha512-vSSbKZFbNktrQ15v7o1EaH78EbWV+sPQbPjHG+Cp8CaNcPFUEfjZ0Iml/V0bFDwsTlYe8o6XC5Hfdp91cqPV2g==
 
-"@types/mdast@^3.0.0", "@types/mdast@^3.0.11":
+"@types/mdast@^3.0.0":
   version "3.0.12"
   resolved "https://registry.yarnpkg.com/@types/mdast/-/mdast-3.0.12.tgz#beeb511b977c875a5b0cc92eab6fcac2f0895514"
   integrity sha512-DT+iNIRNX884cx0/Q1ja7NyUPpZuv0KPyL5rGNxm1WC1OtHstl7n4Jb7nk+xacNShQMbczJjt8uFzznpp6kYBg==
   dependencies:
     "@types/unist" "^2"
+
+"@types/mdast@^4.0.0":
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/@types/mdast/-/mdast-4.0.0.tgz#9f9462d4584a8b3e3711ea8bb4a94c485559ab90"
+  integrity sha512-YLeG8CujC9adtj/kuDzq1N4tCDYKoZ5l/bnjq8d74+t/3q/tHquJOJKUQXJrLCflOHpKjXgcI/a929gpmLOEng==
+  dependencies:
+    "@types/unist" "*"
 
 "@types/mdurl@*":
   version "1.0.2"
@@ -3946,6 +3953,11 @@
   version "5.0.1"
   resolved "https://registry.yarnpkg.com/@types/turndown/-/turndown-5.0.1.tgz#fcda7b02cda4c9d445be1440036df20f335b9387"
   integrity sha512-N8Ad4e3oJxh9n9BiZx9cbe/0M3kqDpOTm2wzj13wdDUxDPjfjloWIJaquZzWE1cYTAHpjOH3rcTnXQdpEfS/SQ==
+
+"@types/unist@*":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@types/unist/-/unist-3.0.0.tgz#988ae8af1e5239e89f9fbb1ade4c935f4eeedf9a"
+  integrity sha512-MFETx3tbTjE7Uk6vvnWINA/1iJ7LuMdO4fcq8UfF0pRbj01aGLduVvQcRyswuACJdpnHgg8E3rQLhaRdNEJS0w==
 
 "@types/unist@^2", "@types/unist@^2.0.0", "@types/unist@^2.0.2":
   version "2.0.7"
