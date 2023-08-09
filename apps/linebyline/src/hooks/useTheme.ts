@@ -39,11 +39,17 @@ function useTheme() {
     palette: {
       mode: 'dark',
     },
+    typography: {
+      htmlFontSize: 18,
+    },
   })
 
   const muiLightTheme = createTheme({
     palette: {
       mode: 'light',
+    },
+    typography: {
+      htmlFontSize: 18,
     },
   })
 
