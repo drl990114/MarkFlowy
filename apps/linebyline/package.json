@@ -34,7 +34,7 @@
     "remixicon": "^3.4.0",
     "styled-components": "^5.3.11",
     "tinykeys": "^2.1.0",
-    "zustand": "^4.3.9"
+    "zustand": "^4.4.1"
   },
   "devDependencies": {
     "@babel/plugin-proposal-class-properties": "^7.18.6",
