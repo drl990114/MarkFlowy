@@ -60,6 +60,18 @@ export const TabItem = styled.div<TabItemProps>`
   }}
 `
 
+type DotProps = {
+  color?: string
+}
+
+export const Dot = styled.div<DotProps>`
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background-color: ${(props) => props.color || props.theme.labelFontColor};
+  margin: 0 0.25rem;
+`
+
 interface TabItemProps {
   active: boolean
 }

@@ -4,7 +4,7 @@ import type { EditorViewType } from '@linebyline/editor/types'
 import { invoke } from '@tauri-apps/api'
 import { emit } from '@tauri-apps/api/event'
 import { appWindow } from '@tauri-apps/api/window'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import styled, { css } from 'styled-components'
 import { useEditorStore } from '@/stores'
 import { getFileObject } from '@/helper/files'
@@ -131,4 +131,4 @@ export interface EditorProps {
   onSave?: () => void
 }
 
-export default Editor
+export default memo(Editor)

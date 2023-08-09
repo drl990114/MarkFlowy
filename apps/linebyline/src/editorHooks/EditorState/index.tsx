@@ -9,7 +9,7 @@ import { useCallback, useEffect, useReducer } from 'react'
 
 import { editorReducer, initializeState } from './editor-state'
 import type { IFile } from '@/helper/filesys'
-import { useEditorStore } from '@/stores'
+import { useEditorStateStore, useEditorStore } from '@/stores'
 import { useTitleEffect } from '@/hooks/useTitleEffect'
 import type { KeyBindingProps } from '@remirror/core'
 
@@ -17,6 +17,7 @@ export const useEditorState: FC<EditorStateProps> = ({ active, file }) => {
   const ctx = useRemirrorContext()
   const helpers = useHelpers()
   const { getEditorDelegate, getEditorContent } = useEditorStore()
+  const { setIdStateMap } = useEditorStateStore()
   const curDelegate = getEditorDelegate(file.id)
   const [state, dispatch] = useReducer(
     editorReducer,
@@ -24,6 +25,12 @@ export const useEditorState: FC<EditorStateProps> = ({ active, file }) => {
     initializeState,
   )
   useTitleEffect(state, active)
+
+  useEffect(() => {
+    if (active) {
+      setIdStateMap(file.id, state)
+    }
+  }, [state, file.id, setIdStateMap, active])
 
   const saveHandler = useCallback(async (editorContent?: string) => {
     if (!active) return

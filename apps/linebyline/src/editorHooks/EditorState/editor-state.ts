@@ -1,8 +1,11 @@
-import { IFile } from '@/helper/filesys'
-import { EditorState, Note } from '@linebyline/editor/types'
-import { EditContentAction, editContent } from './reducers/edit-content'
-import { EditorInitAction, initEditor } from './reducers/init-content'
-import { SaveContentAction, saveContent } from './reducers/save-content'
+import type { IFile } from '@/helper/filesys'
+import type { EditorState, Note } from '@linebyline/editor/types'
+import type { EditContentAction} from './reducers/edit-content'
+import { editContent } from './reducers/edit-content'
+import type { EditorInitAction} from './reducers/init-content'
+import { initEditor } from './reducers/init-content'
+import type { SaveContentAction} from './reducers/save-content'
+import { saveContent } from './reducers/save-content'
 
 type EditorAction = EditorInitAction | SaveContentAction | EditContentAction
 
