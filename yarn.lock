@@ -8832,17 +8832,17 @@ prosemirror-flat-list@^0.3.0, prosemirror-flat-list@^0.3.13:
     prosemirror-transform "^1.7.3"
     prosemirror-view "^1.31.5"
 
-prosemirror-flat-list@^0.4.0:
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/prosemirror-flat-list/-/prosemirror-flat-list-0.4.0.tgz#532e23ac2f1ec833ce46248e93a1d322455d46eb"
-  integrity sha512-sCccEPtLpNHrPAz7lr7JS6rZ5WWHz0SCsUY0ACUaSM6o6VN/U/EbFPF3oMlgHLil0Jun4C979Shs44D1YIVo9w==
+prosemirror-flat-list@^0.4.1:
+  version "0.4.1"
+  resolved "https://registry.yarnpkg.com/prosemirror-flat-list/-/prosemirror-flat-list-0.4.1.tgz#c97270c925e383599c2738a14c11441344d57661"
+  integrity sha512-fIgvCghPvqNrKN5gmNNtYx8rTgc6Mz9Yo1caQEeQ530edxNIp0JLnOGImRdrMLZ4PvaKdHkcw0XlZh5l4TNuMg==
   dependencies:
     prosemirror-commands "^1.5.2"
     prosemirror-inputrules "^1.2.1"
     prosemirror-model "^1.19.3"
     prosemirror-state "^1.4.3"
-    prosemirror-transform "^1.7.3"
-    prosemirror-view "^1.31.6"
+    prosemirror-transform "^1.7.4"
+    prosemirror-view "^1.31.7"
 
 prosemirror-gapcursor@^1.3.2:
   version "1.3.2"
@@ -8980,7 +8980,7 @@ prosemirror-transform@^1.0.0, prosemirror-transform@^1.1.0, prosemirror-transfor
   dependencies:
     prosemirror-model "^1.0.0"
 
-prosemirror-view@^1.0.0, prosemirror-view@^1.1.0, prosemirror-view@^1.13.3, prosemirror-view@^1.27.0, prosemirror-view@^1.31.0, prosemirror-view@^1.31.5, prosemirror-view@^1.31.6, prosemirror-view@^1.31.7:
+prosemirror-view@^1.0.0, prosemirror-view@^1.1.0, prosemirror-view@^1.13.3, prosemirror-view@^1.27.0, prosemirror-view@^1.31.0, prosemirror-view@^1.31.5, prosemirror-view@^1.31.7:
   version "1.31.7"
   resolved "https://registry.yarnpkg.com/prosemirror-view/-/prosemirror-view-1.31.7.tgz#dccb2879314e1e1a24d48044c15374754e50ef00"
   integrity sha512-Pr7w93yOYmxQwzGIRSaNLZ/1uM6YjnenASzN2H6fO6kGekuzRbgZ/4bHbBTd1u4sIQmL33/TcGmzxxidyPwCjg==
