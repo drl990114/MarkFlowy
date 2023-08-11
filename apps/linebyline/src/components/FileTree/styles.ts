@@ -9,6 +9,7 @@ export const FileNodeStyled = styled.div`
     box-sizing: border-box;
     font-size: 0.9rem;
     cursor: pointer;
+    user-select: none;
 
     &__text {
       text-overflow: ellipsis;
@@ -29,5 +30,11 @@ export const FileNodeStyled = styled.div`
 
   .file-icon {
     flex-shrink: 0;
+  }
+
+
+  .newfile-input {
+    margin: 0 8px;
+    border: 1px solid ${props => props.theme.accentColor};
   }
 `
