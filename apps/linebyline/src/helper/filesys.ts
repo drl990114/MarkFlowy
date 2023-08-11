@@ -65,7 +65,15 @@ export const readDirectory = (folderPath: string): Promise<IFile[]> => {
         const entries: IFile[] = []
 
         if (!files || !files.length) {
-          resolve(entries)
+          resolve([
+            {
+              id: nanoid(),
+              name: folderPath,
+              path: folderPath,
+              kind: 'dir',
+              children: entries,
+            },
+          ])
           return
         }
 
@@ -77,10 +85,22 @@ export const readDirectory = (folderPath: string): Promise<IFile[]> => {
 
         wrapFiles(entries)
 
-        resolve(entries)
+        resolve([
+          {
+            id: nanoid(),
+            name: folderPath,
+            path: folderPath,
+            kind: 'dir',
+            children: entries,
+          },
+        ])
       })
       .catch((err) => {
         reject(err)
       })
   })
+}
+
+export function isMdFile(fileName: string) {
+  return fileName.endsWith('.md')
 }
