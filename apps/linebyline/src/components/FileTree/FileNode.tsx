@@ -7,11 +7,13 @@ import type { NewInputRef } from './NewFIleInput'
 import NewFileInput from './NewFIleInput'
 import bus from '@/helper/eventBus'
 import useFileTreeContextMenuNode from '@/hooks/useContextMenuNode'
+import { useEditorStore } from '@/stores'
 
 const FileNode: FC<FileNodeProps> = ({ item, level = 0, activeId, onSelect, open = false }) => {
   const [isOpen, setIsOpen] = useState(open)
   const newInputRef = useRef<NewInputRef>(null)
   const { contextMenuNode, setContextMenuNode } = useFileTreeContextMenuNode()
+  const { deleteFile } = useEditorStore()
   const isActived = activeId === item.id
   const isFolder = item.kind === 'dir'
 
@@ -25,12 +27,19 @@ const FileNode: FC<FileNodeProps> = ({ item, level = 0, activeId, onSelect, open
       newInputRef.current?.show({ fileNode: contextMenuNode })
     }
 
+    const delFileHandler = () => {
+      if (!contextMenuNode || contextMenuNode.id !== item.id) return
+      deleteFile(contextMenuNode)
+    }
+
     bus.on('SIDEBAR:show-new-input', newFileHandler)
+    bus.on('SIDEBAR:delete-file', delFileHandler)
 
     return () => {
       bus.detach('SIDEBAR:show-new-input', newFileHandler)
+      bus.detach('SIDEBAR:delete-file', delFileHandler)
     }
-  }, [contextMenuNode, item])
+  }, [contextMenuNode, item, deleteFile])
 
   const handleClick: MouseEventHandler = useCallback(
     (e) => {
@@ -47,8 +56,8 @@ const FileNode: FC<FileNodeProps> = ({ item, level = 0, activeId, onSelect, open
 
   const handleContextMenu = useCallback(
     (e: React.MouseEvent<HTMLDivElement, MouseEvent>, fileNode?: IFile) => {
-      e.stopPropagation()
       const node = fileNode || item
+      e.stopPropagation()
       setContextMenuNode(node)
     },
     [item, setContextMenuNode],

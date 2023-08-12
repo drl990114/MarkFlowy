@@ -17,6 +17,8 @@ fn main() {
             cmd::open_folder,
             cmd::get_file_content,
             cmd::write_file,
+            cmd::delete_file,
+            cmd::delete_folder,
             conf::cmd::get_app_conf_path,
             conf::cmd::get_app_conf,
             conf::cmd::reset_app_conf,

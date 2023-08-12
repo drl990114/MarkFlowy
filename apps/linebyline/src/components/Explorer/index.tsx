@@ -10,7 +10,6 @@ import { useGlobalCacheData, useOpen } from '@/hooks'
 import { CacheManager } from '@/helper'
 import { Empty, FileTree, List, Popper } from '@/components'
 import styled from 'styled-components'
-import SideBarHeader from '../SideBar/SideBarHeader'
 
 const RecentListBottom = styled.div`
   padding: 8px;
@@ -63,8 +62,8 @@ const Explorer: FC<ExplorerProps> = (props) => {
   const containerCLs = classNames(props.className)
 
   return (
-    <Container className={containerCLs}>
-      <SideBarHeader name='EXPLORER' />
+    <Container className={containerCLs} onContextMenu={e => e.preventDefault()}>
+      {/* <SideBarHeader name='EXPLORER' /> */}
       <div className='h-full w-full overflow-auto'>
         {folderData && folderData.length > 0 ? (
           <FileTree

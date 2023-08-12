@@ -114,14 +114,14 @@ pub fn create_file<P: AsRef<Path>>(filename: P) -> AnyResult<()> {
 //     Ok(())
 // }
 
-// pub fn remove_file(path: &str) -> SerdeResult<()> {
-//     let file_path = Path::new(path);
-//     fs::remove_file(file_path);
-//     Ok(())
-// }
+pub fn remove_file(path: &str) -> AnyResult<()> {
+    let file_path = Path::new(path);
+    fs::remove_file(file_path)?;
+    Ok(())
+}
 
-// pub fn remove_folder(path: &str) -> SerdeResult<()> {
-//     let folder_path = Path::new(path);
-//     fs::remove_dir_all(folder_path);
-//     Ok(())
-// }
+pub fn remove_folder(path: &str) -> AnyResult<()> {
+    let folder_path = Path::new(path);
+    fs::remove_dir_all(folder_path)?;
+    Ok(())
+}
