@@ -9,19 +9,26 @@ import {
   useImperativeHandle,
   useRef,
   useEffect,
+  useMemo,
 } from 'react'
+import { Input } from '../Input'
+import { Validity } from '../Validity'
 
 export type NewInputRef = {
   show: (args: { fileNode: IFile }) => void
 }
 
 const NewFileInput = forwardRef<NewInputRef, HTMLAttributes<HTMLInputElement>>((props, ref) => {
+  const { className, style, ...otherProps } = props
   const [visible, setVisible] = useState(false)
   const [inputName, setInputName] = useState('')
   const contextFileNode = useRef<IFile>()
+  const [invalidState, setInvalidState] = useState(false)
   const { addFile } = useEditorStore()
 
-  const hideInput = useCallback( () => {
+  const styleProps = useMemo(() => ({ className, style}), [className, style])
+
+  const hideInput = useCallback(() => {
     setVisible(false)
     setInputName('')
   }, [])
@@ -55,16 +62,21 @@ const NewFileInput = forwardRef<NewInputRef, HTMLAttributes<HTMLInputElement>>((
 
   const handleKeyup: React.KeyboardEventHandler<HTMLInputElement> = useCallback(
     (event) => {
+      event.preventDefault()
       if (!event.shiftKey && event.keyCode === 13) {
         if (!contextFileNode.current) return
         const res = addFile(contextFileNode.current, { name: inputName, kind: 'file' })
 
         if (res === false) {
           // TODO has same file
+          setInvalidState(true)
+          setTimeout(() => {
+            setInvalidState(false)
+          }, 2000)
+          return
         }
 
         hideInput()
-        event.preventDefault()
         return false
       }
     },
@@ -78,13 +90,16 @@ const NewFileInput = forwardRef<NewInputRef, HTMLAttributes<HTMLInputElement>>((
   if (!visible) return null
 
   return (
-    <input
-      className='newfile-input'
-      value={inputName}
-      onChange={handleChange}
-      onKeyUp={handleKeyup}
-      {...props}
-    ></input>
+    <Validity invalidText='has same file' invalidState={invalidState} {...styleProps}>
+      <Input
+        value={inputName}
+        onChange={handleChange}
+        onKeyUp={handleKeyup}
+        onClick={(e) => e.stopPropagation()}
+        aria-invalid={true}
+        {...otherProps}
+      ></Input>
+    </Validity>
   )
 })
 
