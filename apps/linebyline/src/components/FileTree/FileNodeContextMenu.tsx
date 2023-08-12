@@ -28,6 +28,13 @@ export const FileNodeContextMenu = memo((props: ContextMenuProps) => {
         bus.emit('SIDEBAR:show-new-input')
       },
     },
+    {
+      key: 'delete_file',
+      label: 'Delete File',
+      handler: () => {
+        bus.emit("SIDEBAR:delete-file")
+      }
+    }
   ]
 
   return (

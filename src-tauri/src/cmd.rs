@@ -1,6 +1,4 @@
-use crate::{
-  fc,
-};
+use crate::fc;
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
@@ -18,5 +16,17 @@ pub fn get_file_content(file_path: &str) -> String {
 #[tauri::command]
 pub fn write_file(file_path: &str, content: &str) -> String {
     fc::write_file(file_path, content);
+    String::from("OK")
+}
+
+#[tauri::command]
+pub fn delete_file(file_path: &str) -> String {
+    fc::remove_file(file_path);
+    String::from("OK")
+}
+
+#[tauri::command]
+pub fn delete_folder(file_path: &str) -> String {
+    fc::remove_folder(file_path);
     String::from("OK")
 }

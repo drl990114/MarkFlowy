@@ -32,9 +32,28 @@ export const FileNodeStyled = styled.div`
     flex-shrink: 0;
   }
 
-
   .newfile-input {
     margin: 0 8px;
-    border: 1px solid ${props => props.theme.accentColor};
+    border: 1px solid ${(props) => props.theme.accentColor};
+  }
+`
+
+export const RootFolderTab = styled.div`
+  padding: 4px 2px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 1rem;
+  color: ${(props) => props.theme.tipsFontColor};
+
+  .arrow-icon {
+    display: inline-block;
+    font-size: 1.4rem;
+    color: ${(props) => props.theme.primaryFontColor};
+    transition: all 0.3s;
+
+    &__down {
+      transform: rotate(90deg);
+    }
   }
 `

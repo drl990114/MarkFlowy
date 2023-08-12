@@ -5,6 +5,7 @@ export const Container = styled.div`
   display: flex;
   flex-direction: column;
   min-width: calc(100% - 48px);
+  user-select: none;
 
   .explorer-header {
     display: flex;
