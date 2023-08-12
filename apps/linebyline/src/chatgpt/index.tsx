@@ -1,4 +1,4 @@
-import { Input } from '@mui/material'
+import { Input } from '@/components/Input'
 import Button from '@mui/material/Button'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import ReactLoading from 'react-loading'

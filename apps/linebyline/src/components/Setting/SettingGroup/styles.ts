@@ -13,6 +13,7 @@ export const SettingGroupContainer = styled.div`
 
   .setting-item {
     display: flex;
+    align-items: center;
 
     &__label {
       margin-right: 6px;

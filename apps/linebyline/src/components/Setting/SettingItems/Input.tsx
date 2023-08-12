@@ -1,4 +1,4 @@
-import { Input } from '@mui/material'
+import { Input } from '@/components/Input'
 import { useCallback, useEffect, useState } from 'react'
 import type { SettingItemProps } from '.'
 import { useGlobalSettingData } from '@/hooks'
@@ -26,7 +26,7 @@ const InputSettingItem: React.FC<SettingItemProps<Setting.InputSettingItem>> = (
   )
 
   return (
-    <label>
+    <label className='setting-item'>
       <label className="setting-item__label">{itemKey}:</label>
       <Input
         className="setting-item__form"
