@@ -26,8 +26,9 @@ const FileTree: FC<FileTreeProps> = (props) => {
 
   return (
     <div className={containerCls} onContextMenuCapture={handleContextMenu}>
+      {/* Currently, folderData only has root file, so open it. */}
       {data?.map((item) => (
-        <FileNode key={item.name} item={item} level={0} activeId={activeId} onSelect={onSelect} />
+        <FileNode open key={item.name} item={item} level={0} activeId={activeId} onSelect={onSelect} />
       ))}
       <FileNodeContextMenu top={points.y} left={points.x} />
     </div>

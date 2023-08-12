@@ -8,12 +8,16 @@ import NewFileInput from './NewFIleInput'
 import bus from '@/helper/eventBus'
 import useFileTreeContextMenuNode from '@/hooks/useContextMenuNode'
 
-const FileNode: FC<FileNodeProps> = ({ item, level = 0, activeId, onSelect }) => {
-  const [isOpen, setIsOpen] = useState(false)
+const FileNode: FC<FileNodeProps> = ({ item, level = 0, activeId, onSelect, open = false }) => {
+  const [isOpen, setIsOpen] = useState(open)
   const newInputRef = useRef<NewInputRef>(null)
   const { contextMenuNode, setContextMenuNode } = useFileTreeContextMenuNode()
   const isActived = activeId === item.id
   const isFolder = item.kind === 'dir'
+
+  useEffect(() => {
+    setIsOpen(open)
+  }, [open])
 
   useEffect(() => {
     const newFileHandler = () => {
@@ -89,6 +93,7 @@ const FileNode: FC<FileNodeProps> = ({ item, level = 0, activeId, onSelect }) =>
 interface FileNodeProps {
   item: IFile
   level: number
+  open?: boolean
   activeId?: string
   onSelect: (file: IFile) => void
 }

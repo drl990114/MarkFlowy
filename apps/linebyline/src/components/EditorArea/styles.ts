@@ -14,6 +14,10 @@ export const Container = styled.div`
     overflow-x: auto;
     overflow-y: hidden;
 
+    ::-webkit-scrollbar {
+      display: none;
+    }
+
     &__icon {
       margin: 0 2px;
     }
@@ -37,6 +41,10 @@ export const TabItem = styled.div<TabItemProps>`
   height: 100%;
   box-sizing: border-box;
   white-space: nowrap;
+
+  &:first-child {
+    border-left: none;
+  }
 
   &:last-child {
     border-right: 1px solid ${(props) => props.theme.borderColor};
