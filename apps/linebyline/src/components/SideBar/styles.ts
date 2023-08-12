@@ -39,17 +39,17 @@ export const Container = styled.div<ContainerProps>`
   }
 
   .app-sidebar-resizer {
-    flex-grow: 0;
-    flex-shrink: 0;
-    flex-basis: 1px;
-    justify-self: flex-end;
+    position: absolute;
+    height: 100%;
+    width: 1px;
+    right: -1px;
     cursor: col-resize;
     resize: horizontal;
     background: ${props => props.theme.borderColor};
   }
 
   .app-sidebar-resizer:hover {
-    flex-basis: 3px;
+    width: 3px;
     background: ${props => props.theme.labelFontColor};
   }
 

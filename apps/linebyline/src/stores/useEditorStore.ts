@@ -38,11 +38,11 @@ const useEditorStore = create<EditorStore>((set, get) => {
       if (fileNode && target) {
         const parent = fileNode.kind === 'dir' ? fileNode : findParentNode(fileNode, folderData![0])
 
-        if (!parent || hasSameFile(parent.children!, target)) return false
-
         if (!isMdFile(target.name)) {
           target.name = `${target.name}.md`
         }
+
+        if (!parent || hasSameFile(parent.children!, target)) return false
 
         const targetFile = createFile({
           name: target.name,

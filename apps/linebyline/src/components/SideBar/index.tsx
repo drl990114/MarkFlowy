@@ -8,9 +8,7 @@ import { RIGHTBARITEMKEYS } from '@/constants'
 function SideBar() {
   const [isResizing, setIsResizing] = useState(false)
   const [sidebarWidth, setSidebarWidth] = useState(300)
-  const [activeRightBarItemKey, setActiveRightBarItemKey] = useState<
-    RIGHTBARITEMKEYS | undefined
-  >()
+  const [activeRightBarItemKey, setActiveRightBarItemKey] = useState<RIGHTBARITEMKEYS | undefined>()
   const sidebarRef = useRef<HTMLDivElement>(null)
 
   const rightBarDataSource: RightBarItem[] = useMemo(() => {
@@ -18,7 +16,7 @@ function SideBar() {
       {
         title: RIGHTBARITEMKEYS.Explorer,
         key: RIGHTBARITEMKEYS.Explorer,
-        icon: <i className="ri-file-list-3-line" />,
+        icon: <i className='ri-file-list-3-line' />,
         components: <Explorer />,
       },
       chatgpt,
@@ -26,9 +24,7 @@ function SideBar() {
   }, [])
 
   const activeRightBarItem = useMemo(() => {
-    const activeItem = rightBarDataSource.find(
-      item => item.key === activeRightBarItemKey,
-    )
+    const activeItem = rightBarDataSource.find((item) => item.key === activeRightBarItemKey)
     return activeItem
   }, [activeRightBarItemKey, rightBarDataSource])
 
@@ -44,13 +40,25 @@ function SideBar() {
   const resize = useCallback(
     (mouseMoveEvent: MouseEvent) => {
       if (isResizing && sidebarRef.current) {
-        setSidebarWidth(
-          mouseMoveEvent.clientX
-            - sidebarRef.current.getBoundingClientRect().left,
-        )
+        const sideBarClientRect = sidebarRef.current.getBoundingClientRect()
+        if (
+          sideBarClientRect.width > 100 &&
+          mouseMoveEvent.clientX - sideBarClientRect.left <= 100
+        ) {
+          setActiveRightBarItemKey(undefined)
+        } else if (
+          sideBarClientRect.width < 100 &&
+          mouseMoveEvent.clientX - sideBarClientRect.left > 100
+        ) {
+          setActiveRightBarItemKey(rightBarDataSource[0].key)
+        }
+
+        requestAnimationFrame(() => {
+          setSidebarWidth(mouseMoveEvent.clientX - sideBarClientRect.left)
+        })
       }
     },
-    [isResizing],
+    [isResizing, rightBarDataSource],
   )
 
   useEffect(() => {
@@ -71,7 +79,7 @@ function SideBar() {
       noActiveItem={noActiveItem}
       style={{ width: noActiveItem ? '48px' : sidebarWidth }}
     >
-      <div className="app-sidebar">
+      <div className='app-sidebar'>
         <div>
           {rightBarDataSource.map((item) => {
             const cls = classNames('app-sidebar__item fjic', {
@@ -79,30 +87,23 @@ function SideBar() {
             })
 
             const handleRightBarItemClick = () => {
-              if (activeRightBarItemKey === item.key)
-                setActiveRightBarItemKey(undefined)
-
-              else
-                setActiveRightBarItemKey(item.key)
+              if (activeRightBarItemKey === item.key) setActiveRightBarItemKey(undefined)
+              else setActiveRightBarItemKey(item.key)
             }
 
             return (
-              <div
-                key={item.key}
-                className={cls}
-                onClick={handleRightBarItemClick}
-              >
+              <div key={item.key} className={cls} onClick={handleRightBarItemClick}>
                 {item.icon}
               </div>
             )
           })}
         </div>
-        <SettingRightBarContainer className="app-sidebar__item fjic">
+        <SettingRightBarContainer className='app-sidebar__item fjic'>
           <Setting />
         </SettingRightBarContainer>
       </div>
       {activeRightBarItem?.components ?? null}
-      <div className="app-sidebar-resizer" onMouseDown={startResizing} />
+      <div className='app-sidebar-resizer' onMouseDown={startResizing} />
     </Container>
   )
 }

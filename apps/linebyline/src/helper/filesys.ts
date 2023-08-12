@@ -68,7 +68,7 @@ export const readDirectory = (folderPath: string): Promise<IFile[]> => {
           resolve([
             {
               id: nanoid(),
-              name: folderPath,
+              name: getFileNameFromPath(folderPath),
               path: folderPath,
               kind: 'dir',
               children: entries,
@@ -88,7 +88,7 @@ export const readDirectory = (folderPath: string): Promise<IFile[]> => {
         resolve([
           {
             id: nanoid(),
-            name: folderPath,
+            name: getFileNameFromPath(folderPath),
             path: folderPath,
             kind: 'dir',
             children: entries,
@@ -103,4 +103,15 @@ export const readDirectory = (folderPath: string): Promise<IFile[]> => {
 
 export function isMdFile(fileName: string) {
   return fileName.endsWith('.md')
+}
+
+function getFileNameFromPath(filePath: string) {
+  const regex = /[\/\\]([^\/\\]+)$/
+  const match = regex.exec(filePath)
+
+  if (match && match.length > 1) {
+    return match[1]
+  }
+
+  return filePath
 }
