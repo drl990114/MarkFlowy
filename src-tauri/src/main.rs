@@ -2,7 +2,6 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod app;
-mod cmd;
 mod fc;
 mod menu;
 mod setup;
@@ -14,11 +13,11 @@ fn main() {
 
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
-            cmd::open_folder,
-            cmd::get_file_content,
-            cmd::write_file,
-            cmd::delete_file,
-            cmd::delete_folder,
+            fc::cmd::open_folder,
+            fc::cmd::get_file_content,
+            fc::cmd::write_file,
+            fc::cmd::delete_file,
+            fc::cmd::delete_folder,
             conf::cmd::get_app_conf_path,
             conf::cmd::get_app_conf,
             conf::cmd::reset_app_conf,
