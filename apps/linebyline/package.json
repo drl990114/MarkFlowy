@@ -6,7 +6,9 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "tauri:build": "tauri build",
-    "tauri:dev": "tauri dev"
+    "tauri:dev": "tauri dev",
+    "test": "vitest run",
+    "test:dev": "vitest dev"
   },
   "dependencies": {
     "@emotion/css": "^11.11.0",
@@ -52,6 +54,7 @@
     "url": "^0.11.1",
     "vite": "^4.3.9",
     "vite-plugin-svgr": "^3.2.0",
-    "vite-plugin-svgr-component": "^1.0.1"
+    "vite-plugin-svgr-component": "^1.0.1",
+    "vitest": "^0.34.1"
   }
 }
