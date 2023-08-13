@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.1.3] - 2023-08-13
+### :sparkles: New Features
+- [`13a9597`](https://github.com/linebyline-group/linebyline/commit/13a959733a6ee3dbe67b6fba1c6dc8d1d2499f00) - keyboard table *(commit by [@halodong](https://github.com/halodong))*
+- [`61e0a7e`](https://github.com/linebyline-group/linebyline/commit/61e0a7e810ee02af1b4760291d5af38f54ee6932) - openFolder command *(commit by [@halodong](https://github.com/halodong))*
+- [`6c24d61`](https://github.com/linebyline-group/linebyline/commit/6c24d611827a9adbf0e37c859e2b64ea228301e1) - keyboard table *(PR [#210](https://github.com/linebyline-group/linebyline/pull/210) by [@halodong](https://github.com/halodong))*
+- [`1166845`](https://github.com/linebyline-group/linebyline/commit/1166845fe571c678ca72b863f469ee5164f310c4) - add file *(commit by [@halodong](https://github.com/halodong))*
+- [`c49ce0e`](https://github.com/linebyline-group/linebyline/commit/c49ce0ecd39dc34246795d29bb89d6559a56f260) - editor tabs show file save state *(commit by [@halodong](https://github.com/halodong))*
+- [`54ba1ec`](https://github.com/linebyline-group/linebyline/commit/54ba1ecf211bf64c9a215607ada62237073931d6) - file tree context menu *(commit by [@halodong](https://github.com/halodong))*
+- [`844ae2a`](https://github.com/linebyline-group/linebyline/commit/844ae2aabb9b1cfa3d38460945a91a259a24d0ed) - delete file *(commit by [@halodong](https://github.com/halodong))*
+
+### :bug: Bug Fixes
+- [`91300d6`](https://github.com/linebyline-group/linebyline/commit/91300d686fc94f4cd3658650ff0f66e2a447d972) - some ui and interaction optimization *(commit by [@halodong](https://github.com/halodong))*
+
+
 ## [v0.1.2-alpha] - 2023-08-02
 ### :sparkles: New Features
 - [`411550d`](https://github.com/linebyline-group/linebyline/commit/411550d760a8f1c7987c012ef7a2533a96048af5) - restore openedfiles and activefile when program start *(commit by [@halodong](https://github.com/halodong))*
@@ -62,3 +76,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [v0.1.1-alpha]: https://github.com/linebyline-group/linebyline/compare/v0.1.0-alpha...v0.1.1-alpha
 [v0.1.2-alpha]: https://github.com/linebyline-group/linebyline/compare/v0.1.0-alpha...v0.1.2-alpha
+
+[v0.1.3]: https://github.com/linebyline-group/linebyline/compare/v0.1.2-alpha...v0.1.3
