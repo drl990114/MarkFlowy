@@ -8,7 +8,7 @@ import { useCommandStore } from '@/stores'
 const getTinyKeyBinding = (keyMap: string[]) => {
   let keyBinding = ''
   keyMap.forEach((key, index) => {
-    if (key === 'mod') {
+    if (key === 'CommandOrCtrl') {
       keyBinding += '$mod'
     } else {
       keyBinding += key
@@ -26,8 +26,14 @@ function useKeyboard() {
   const { execute } = useCommandStore()
 
   useEffect(() => {
-    invoke<{ cmds: KeyboardInfo[] }>('get_keyboard_infos').then((res) => {
-      setKeyboardInfos(res.cmds)
+    invoke<{ cmds: Record<string, KeyboardInfo> }>('get_keyboard_infos').then((res) => {
+      const cmds: KeyboardInfo[] = []
+
+      Object.keys(res.cmds).forEach((v) => {
+        cmds.push(res.cmds[v])
+      })
+
+      setKeyboardInfos(cmds)
     })
   }, [])
 
@@ -42,7 +48,7 @@ function useKeyboard() {
         }
       }
     })
-    console.log('keybindingMap', keybindingMap)
+
     const handler = createKeybindingsHandler(keybindingMap)
 
     window.addEventListener('keydown', handler)

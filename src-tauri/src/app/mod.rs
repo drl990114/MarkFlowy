@@ -1,2 +1,2 @@
 pub mod conf;
-pub mod keyboard;
+pub mod keybindings;

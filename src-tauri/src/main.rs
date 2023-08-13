@@ -6,7 +6,7 @@ mod fc;
 mod menu;
 mod setup;
 
-use app::{conf, keyboard};
+use app::{conf, keybindings};
 
 fn main() {
     let context = tauri::generate_context!();
@@ -23,7 +23,8 @@ fn main() {
             conf::cmd::reset_app_conf,
             conf::cmd::save_app_conf,
             conf::cmd::open_conf_window,
-            keyboard::cmd::get_keyboard_infos,
+            keybindings::cmd::get_keyboard_infos,
+            keybindings::cmd::amend_cmd,
         ])
         .setup(setup::init)
         .menu(menu::generate_menu())
