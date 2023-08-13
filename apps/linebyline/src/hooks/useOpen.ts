@@ -1,13 +1,12 @@
-import { useCallback, useEffect } from 'react'
+import { useCallback } from 'react'
 import { open } from '@tauri-apps/api/dialog'
 import { readDirectory } from '@/helper/filesys'
 import { CacheManager } from '@/helper'
-import { useCommandStore, useEditorStore } from '@/stores'
+import { useEditorStore } from '@/stores'
 import dayjs from 'dayjs'
 
 const useOpen = () => {
   const { setFolderData } = useEditorStore()
-  const { addCommand } = useCommandStore()
 
   const openFolder = useCallback(
     async (dir: string) => {
@@ -28,11 +27,6 @@ const useOpen = () => {
     if (typeof dir !== 'string') return
     openFolder(dir)
   }, [openFolder])
-
-  
-  useEffect(() => {
-    addCommand({ id: 'app:open_folder', handler: openFolderDialog})
-  }, [addCommand, openFolderDialog])
 
   return {
     openFolderDialog,

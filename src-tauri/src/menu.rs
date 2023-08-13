@@ -1,8 +1,10 @@
-use crate::app::conf::AppConf;
-use tauri::{CustomMenuItem, MenuItem, Submenu, Menu, WindowMenuEvent, Manager};
+use crate::app::keybindings::Keybindings;
+use crate::app::{conf::AppConf, keybindings::KeybindingInfo};
+use tauri::{CustomMenuItem, Manager, Menu, MenuItem, Submenu, WindowMenuEvent};
 
 pub fn generate_menu() -> Menu {
     let app_conf = AppConf::read();
+    let keyboard_infos = Keybindings::read();
 
     let name = "LineByLine";
     let app_menu = Submenu::new(
@@ -21,7 +23,11 @@ pub fn generate_menu() -> Menu {
     let file_submenu = Submenu::new(
         "File",
         Menu::new().add_item(
-            CustomMenuItem::new("Save".to_string(), "Save").accelerator("CommandOrCtrl + S"),
+            CustomMenuItem::new("Save".to_string(), "Save").accelerator(
+                keyboard_infos
+                    .get_accelerator("editor:save".to_string())
+                    .unwrap(),
+            ),
         ),
     );
 
@@ -42,9 +48,10 @@ pub fn generate_menu() -> Menu {
 
     let paragraph_submenu = Submenu::new(
         "Paragraph",
-        Menu::new().add_item(
-            CustomMenuItem::new("editor:dialog_create_table".to_string(), "Table"),
-        ),
+        Menu::new().add_item(CustomMenuItem::new(
+            "editor:dialog_create_table".to_string(),
+            "Table",
+        )),
     );
 
     let theme_light = CustomMenuItem::new("theme_light", "Light");
@@ -118,9 +125,15 @@ pub fn menu_handler(event: WindowMenuEvent<tauri::Wry>) {
             menu_handle.get_item(menu_id).set_selected(true).unwrap();
 
             if theme == "light" {
-                menu_handle.get_item("theme_dark").set_selected(false).unwrap();
+                menu_handle
+                    .get_item("theme_dark")
+                    .set_selected(false)
+                    .unwrap();
             } else {
-                menu_handle.get_item("theme_light").set_selected(false).unwrap();
+                menu_handle
+                    .get_item("theme_light")
+                    .set_selected(false)
+                    .unwrap();
             }
 
             event
