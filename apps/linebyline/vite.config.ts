@@ -1,3 +1,4 @@
+/// <reference types="vitest" />
 import react from '@vitejs/plugin-react'
 import { fileURLToPath, URL } from 'url'
 import { defineConfig } from 'vite'
@@ -27,5 +28,19 @@ export default defineConfig({
   },
   resolve: {
     alias: [{ find: '@', replacement: fileURLToPath(new URL('./src', import.meta.url)) }],
+  },
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    coverage: {
+      reporter: ['json', 'html'],
+      all: true,
+      src: ['./src'],
+      exclude: ['**/*.spec.*'],
+    },
+    deps: {},
+
+    // Limit the resources we used in the CI, to avoid out-of-memory errors.
+    maxConcurrency: process.env.CI ? 1 : 5,
   },
 })

@@ -105,7 +105,7 @@ export function isMdFile(fileName: string) {
   return fileName.endsWith('.md')
 }
 
-function getFileNameFromPath(filePath: string) {
+export function getFileNameFromPath(filePath: string) {
   const regex = /[\/\\]([^\/\\]+)$/
   const match = regex.exec(filePath)
 
