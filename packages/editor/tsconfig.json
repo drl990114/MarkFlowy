@@ -2,7 +2,7 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "experimentalDecorators": true,
-    "rootDir": "src",
+    "rootDir": ".",
     "skipLibCheck": true,
     "composite": true,
     "outDir": "./dist",
@@ -10,6 +10,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["./src", "./types.d.ts"],
+  "include": ["./src", "./types.d.ts", "vite.config.ts"],
   "exclude": ["./src/**/*.spec.ts", "./src/**/*.test.ts"]
 }

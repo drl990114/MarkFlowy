@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "yarn workspace @linebyline/editor dev & yarn workspace @linebyline/linebyline dev",
     "build": "yarn workspace @linebyline/editor build && yarn workspaces run build",
-    "test": "yarn workspace @linebyline/editor test",
+    "test": "yarn workspace @linebyline/editor test && yarn workspace @linebyline/linebyline test",
     "tauri:build": "tauri build",
     "tauri:dev": "tauri dev",
     "release": "node scripts/release.js",

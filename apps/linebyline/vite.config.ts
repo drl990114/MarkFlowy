@@ -30,17 +30,8 @@ export default defineConfig({
     alias: [{ find: '@', replacement: fileURLToPath(new URL('./src', import.meta.url)) }],
   },
   test: {
-    environment: 'jsdom',
+    environment: 'happy-dom',
     globals: true,
-    coverage: {
-      reporter: ['json', 'html'],
-      all: true,
-      src: ['./src'],
-      exclude: ['**/*.spec.*'],
-    },
-    deps: {},
-
-    // Limit the resources we used in the CI, to avoid out-of-memory errors.
-    maxConcurrency: process.env.CI ? 1 : 5,
+    reporters: ['json', 'html'],
   },
 })
