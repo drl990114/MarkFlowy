@@ -1,9 +1,24 @@
+# build
 dist
 dist-types
-node_modules
+target
 
 .DS_Store
 
-coverage
+# dependencies
+node_modules
+/.pnp
+.pnp.js
 
+# vitest
+coverage
 html
+
+# Zero-installs
+.yarn/*
+!.yarn/cache
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions

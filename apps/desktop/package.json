@@ -1,5 +1,5 @@
 {
-  "name": "@linebyline/linebyline",
+  "name": "@linebyline/desktop",
   "version": "0.0.0",
   "scripts": {
     "dev": "vite --host",

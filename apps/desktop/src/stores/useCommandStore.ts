@@ -30,7 +30,7 @@ const useCommandStore = create<CommandStore>((set, get) => {
 
 interface CommandStore {
   commands: Commands
-  addCommand: (command: { id: string; handler: () => any }) => void
+  addCommand: (command: { id: string; handler: () => void }) => void
   execute: (id: string) => void
 }
 
