@@ -13,7 +13,6 @@ const WysiwygEditor: FC<WysiwygEditorProps> = (props) => {
 
   const editorDelegate = delegate ?? createWysiwygDelegate()
 
-  console.error('editor')
   return (
     <Wrapper>
       <OffsetContext.Provider value={offset || { top: 0, left: 0 }}>

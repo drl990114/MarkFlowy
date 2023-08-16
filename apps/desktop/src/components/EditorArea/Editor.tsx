@@ -14,7 +14,6 @@ import { createWysiwygDelegate } from '@linebyline/editor'
 import { createDualDelegate } from '@linebyline/editor'
 import { useCommandEvent } from '@/editorHooks/CommandEvent'
 import { EditorCount } from '@/editorToolBar/EditorCount'
-import { useKeymaps } from '@remirror/react'
 
 const EditorWrapper = styled.div<{ active: boolean; type: EditorViewType }>`
   min-height: 100%;
@@ -111,12 +110,6 @@ function Editor(props: EditorProps) {
           useEditorState({ active, file: curFile })
           useCommandEvent({ active })
           useChangeCodeMirrorTheme()
-          useKeymaps({
-            'Mod + i': () => {
-              console.log('mod = i')
-              return true
-            }
-          })
         }
       ],
       wysiwygToolBar: [<EditorCount key="editor-count" />],

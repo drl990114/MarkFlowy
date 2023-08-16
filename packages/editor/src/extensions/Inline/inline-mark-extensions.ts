@@ -1,5 +1,5 @@
 import type { KeyBindings, MarkExtensionSpec, NodeView, NodeViewMethod } from '@remirror/core'
-import { MarkExtension, keyBinding } from '@remirror/core'
+import { MarkExtension } from '@remirror/core'
 
 import { formatHref } from './format-href'
 import { toggleInlineMark } from './inline-mark-commands'
@@ -45,7 +45,6 @@ class PlainText extends MarkExtension {
     }
   }
 }
-console.log('test')
 
 class Emphasis extends MarkExtension {
   static disableExtraAttributes = true
@@ -59,10 +58,9 @@ class Emphasis extends MarkExtension {
     }
   }
 
-  // @keyBinding({ shortcut: "mod-i", command: 'toggleBold' })
-  // shortcut = (): boolean =>  {
-  //   return toggleInlineMark(this.name)()
-  // }
+  createKeymap(): KeyBindings {
+    return { 'mod-i': toggleInlineMark(this.name) }
+  }
 }
 
 class Strong extends MarkExtension {
