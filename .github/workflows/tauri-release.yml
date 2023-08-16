@@ -67,10 +67,8 @@ jobs:
         with:
           key: ${{ matrix.target }}
 
-      - name: Run install
-        uses: borales/actions-yarn@v4
-        with:
-          cmd: install # will run `yarn install` command
+      - name: Install dependencies
+        run: yarn install --immutable
 
       - name: Install rust target
         run: rustup target add ${{ matrix.target }}

@@ -17,7 +17,7 @@ updates:
 
   # tauri
   - package-ecosystem: cargo
-    directory: "/src-tauri"
+    directory: "/apps/linebyline/tauri"
     schedule:
       interval: daily
       time: "04:00"

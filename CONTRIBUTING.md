@@ -11,7 +11,7 @@ You'll need the following tools:
 
 - [Git](https://git-scm.com/)
 - [Node.JS](https://nodejs.org/en) >= 16.x
-- [yarn](https://yarnpkg.com/)
+- [yarn](https://yarnpkg.com/) 3.6.1
 - [rust](https://www.rust-lang.org/)
 
 ### Steps
@@ -29,7 +29,7 @@ yarn install
 and
 
 ```bash
-cargo install --path ./src-tauri
+cargo install --path apps/desktop/src-tauri
 ```
 
 #### Startup LineByLine
