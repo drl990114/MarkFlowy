@@ -1,5 +1,5 @@
-import type { KeyBindings, MarkExtensionSpec, NodeView, NodeViewMethod } from '@remirror/core'
-import { MarkExtension } from '@remirror/core'
+import type { KeyBindingProps, MarkExtensionSpec, NodeView, NodeViewMethod } from '@remirror/core'
+import { MarkExtension, keyBinding } from '@remirror/core'
 
 import { formatHref } from './format-href'
 import { toggleInlineMark } from './inline-mark-commands'
@@ -58,8 +58,9 @@ class Emphasis extends MarkExtension {
     }
   }
 
-  createKeymap(): KeyBindings {
-    return { 'mod-i': toggleInlineMark(this.name) }
+  @keyBinding({ shortcut: "mod-i", command: 'toggleEmphasis' })
+  shortcut(props: KeyBindingProps): boolean {
+    return toggleInlineMark(this.name)(props)
   }
 }
 
@@ -74,8 +75,10 @@ class Strong extends MarkExtension {
       toDOM: () => ['strong', 0],
     }
   }
-  createKeymap(): KeyBindings {
-    return { 'mod-b': toggleInlineMark(this.name) }
+
+  @keyBinding({ shortcut: "mod-b", command: 'toggleStrong' })
+  shortcut(props: KeyBindingProps): boolean {
+    return toggleInlineMark(this.name)(props)
   }
 }
 
@@ -90,8 +93,10 @@ class CodeText extends MarkExtension {
       toDOM: () => ['code', 0],
     }
   }
-  createKeymap(): KeyBindings {
-    return { 'mod-e': toggleInlineMark(this.name) }
+
+  @keyBinding({ shortcut: "mod-e", command: 'toggleCodeText' })
+  shortcut(props: KeyBindingProps): boolean {
+    return toggleInlineMark(this.name)(props)
   }
 }
 
@@ -119,8 +124,10 @@ class Delete extends MarkExtension {
       toDOM: () => ['del', 0],
     }
   }
-  createKeymap(): KeyBindings {
-    return { 'mod-shift-s': toggleInlineMark(this.name) }
+
+  @keyBinding({ shortcut: "mod-shift-s", command: 'toggleDelete' })
+  shortcut(props: KeyBindingProps): boolean {
+    return toggleInlineMark(this.name)(props)
   }
 }
 
