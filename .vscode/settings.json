@@ -1,5 +1,10 @@
 {
-  "rust-analyzer.linkedProjects": [
-    "./src-tauri/Cargo.toml"
+  "[rust]": {
+		"editor.defaultFormatter": "rust-lang.rust-analyzer"
+	},
+	"rust-analyzer.procMacro.enable": true,
+	"rust-analyzer.diagnostics.experimental.enable": false,
+	"rust-analyzer.linkedProjects": [
+    "apps/desktop/src-tauri/Cargo.toml"
   ]
 }

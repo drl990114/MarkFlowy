@@ -25,6 +25,7 @@ class MetaKey extends MarkExtension {
       toDOM: () => ['span', { class: 'md-mark' }, 0],
     }
   }
+
   createCommands() {
     return {
       toggleInlineMark: toggleInlineMark,
@@ -56,6 +57,7 @@ class Emphasis extends MarkExtension {
       toDOM: () => ['em', 0],
     }
   }
+
   createKeymap(): KeyBindings {
     return { 'mod-i': toggleInlineMark(this.name) }
   }

@@ -1,0 +1,84 @@
+{
+  "$schema": "../../../node_modules/@tauri-apps/cli/schema.json",
+  "build": {
+    "beforeDevCommand": "yarn dev",
+    "beforeBuildCommand": "yarn build",
+    "devPath": "http://localhost:3000",
+    "distDir": "../dist",
+    "withGlobalTauri": true
+  },
+  "package": {
+    "productName": "LineByLine",
+    "version": "0.1.3"
+  },
+  "tauri": {
+    "allowlist": {
+      "all": false,
+      "fs": {
+        "readFile": true,
+        "writeFile": true,
+        "exists": true,
+        "scope": [
+          "$APPDATA/*",
+          "$APPCACHE/*",
+          "$APPCONFIG/*",
+          "$HOME/*",
+          "$DESKTOP/*"
+        ]
+      },
+      "clipboard": {
+        "writeText": true
+      },
+      "dialog": {
+        "open": true,
+        "save": true
+      },
+      "os": {
+        "all": true
+      },
+      "globalShortcut": {
+        "all": true
+      },
+      "path": {
+        "all": true
+      },
+      "window": {
+        "close": true,
+        "create": true,
+        "setTitle": true,
+        "startDragging": true
+      }
+    },
+    "bundle": {
+      "active": true,
+      "category": "DeveloperTool",
+      "icon": [
+        "icons/icon.icns",
+        "icons/icon.ico",
+        "icons/icon.png"
+      ],
+      "identifier": "com.tauri.test",
+      "targets": "all",
+      "windows": {
+        "digestAlgorithm": "sha256",
+        "webviewInstallMode": {
+          "type": "embedBootstrapper"
+        }
+      }
+    },
+    "security": {
+      "csp": null
+    },
+    "updater": {
+      "active": false,
+      "dialog": true,
+      "endpoints": [
+        "https://releases.myapp.com/{{target}}/{{arch}}/{{current_version}}"
+      ],
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEY3NjFEN0QxOEZBQjBDMjYKUldRbURLdVAwZGRoOTJjUHZVbWM1elVJcXNpVU5rSHBvbmNWbU5WZXdoUE51RXRKMFRTVTZCZlcK",
+      "windows": {
+        "installMode": "passive"
+      }
+    }
+  }
+}
