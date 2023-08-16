@@ -50,7 +50,7 @@
     "@vitejs/plugin-react": "^4.0.1",
     "@vitest/ui": "^0.34.1",
     "eslint": "8.44.0",
-    "happy-dom": "^10.9.0",
+    "happy-dom": "^10.10.0",
     "jest-remirror": "^2.1.5",
     "react-test-renderer": "^18.2.0",
     "ts-node": "^10.9.1",
