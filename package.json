@@ -3,12 +3,12 @@
   "version": "0.0.0",
   "private": true,
   "workspaces": [
-    "apps/*",
-    "packages/*"
+    "packages/*",
+    "apps/*"
   ],
   "scripts": {
     "dev": "yarn workspace @linebyline/editor dev & yarn workspace @linebyline/desktop dev",
-    "build": "yarn workspace @linebyline/editor build && yarn workspaces run build",
+    "build": "yarn workspace @linebyline/editor build && yarn workspaces foreach run build",
     "test": "yarn workspace @linebyline/editor test && yarn workspace @linebyline/desktop test",
     "build:desktop": "yarn workspace @linebyline/desktop tauri:build",
     "dev:desktop": "yarn workspace @linebyline/desktop tauri:dev",
