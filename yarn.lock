@@ -122,6 +122,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@babel/eslint-plugin@npm:^7.22.10":
+  version: 7.22.10
+  resolution: "@babel/eslint-plugin@npm:7.22.10"
+  dependencies:
+    eslint-rule-composer: ^0.3.0
+  peerDependencies:
+    "@babel/eslint-parser": ^7.11.0
+    eslint: ^7.5.0 || ^8.0.0
+  checksum: b97d65ff00afdc93906406eae39526f79f422d518605793e9760f64f697c6fb5c4618e10e8ec6ae079edbcda617036233ae7f13415f6ff5e241d5121b83cd2d9
+  languageName: node
+  linkType: hard
+
 "@babel/eslint-plugin@npm:^7.22.5":
   version: 7.22.5
   resolution: "@babel/eslint-plugin@npm:7.22.5"
@@ -10845,6 +10857,7 @@ __metadata:
   resolution: "linebyline-monorepo@workspace:."
   dependencies:
     "@babel/core": ^7.22.10
+    "@babel/eslint-plugin": ^7.22.10
     "@babel/plugin-proposal-class-properties": ^7.18.6
     "@babel/plugin-proposal-decorators": ^7.22.10
     "@babel/preset-env": ^7.22.7
