@@ -3037,7 +3037,7 @@ __metadata:
     react-dom: ^18.2.0
     react-is: ^18.2.0
     remirror: ^2.0.33
-    remirror-extension-flat-list: ^0.1.3
+    remirror-extension-flat-list: ^0.2.0
     rimraf: ^5.0.1
     styled-components: ^5.3.11
     svgmoji: ^3.2.0
@@ -3530,7 +3530,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@remirror/core@npm:^2.0.11, @remirror/core@npm:^2.0.13, @remirror/core@npm:^2.0.16, @remirror/core@npm:^2.0.17, @remirror/core@npm:^2.0.18, @remirror/core@npm:^2.0.19":
+"@remirror/core@npm:^2.0.13, @remirror/core@npm:^2.0.16, @remirror/core@npm:^2.0.17, @remirror/core@npm:^2.0.18, @remirror/core@npm:^2.0.19":
   version: 2.0.19
   resolution: "@remirror/core@npm:2.0.19"
   dependencies:
@@ -12925,21 +12925,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prosemirror-flat-list@npm:^0.3.0":
-  version: 0.3.15
-  resolution: "prosemirror-flat-list@npm:0.3.15"
-  dependencies:
-    prosemirror-commands: ^1.5.2
-    prosemirror-inputrules: ^1.2.1
-    prosemirror-model: ^1.19.2
-    prosemirror-state: ^1.4.3
-    prosemirror-transform: ^1.7.3
-    prosemirror-view: ^1.31.5
-  checksum: e22ffd4e8fc2735cc2c70fb1c25d3733102ec82c40a9572af394ac5fe4576505cf9c2243da2a66fc5aea777653cdc070922bdd9094f121666879d9352b8b5cb9
-  languageName: node
-  linkType: hard
-
-"prosemirror-flat-list@npm:^0.4.1":
+"prosemirror-flat-list@npm:^0.4.0, prosemirror-flat-list@npm:^0.4.1":
   version: 0.4.1
   resolution: "prosemirror-flat-list@npm:0.4.1"
   dependencies:
@@ -12997,7 +12983,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prosemirror-model@npm:^1.0.0, prosemirror-model@npm:^1.16.0, prosemirror-model@npm:^1.19.0, prosemirror-model@npm:^1.19.2, prosemirror-model@npm:^1.19.3, prosemirror-model@npm:^1.8.1":
+"prosemirror-model@npm:^1.0.0, prosemirror-model@npm:^1.16.0, prosemirror-model@npm:^1.19.0, prosemirror-model@npm:^1.19.3, prosemirror-model@npm:^1.8.1":
   version: 1.19.3
   resolution: "prosemirror-model@npm:1.19.3"
   dependencies:
@@ -13131,7 +13117,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prosemirror-view@npm:^1.0.0, prosemirror-view@npm:^1.1.0, prosemirror-view@npm:^1.13.3, prosemirror-view@npm:^1.27.0, prosemirror-view@npm:^1.31.0, prosemirror-view@npm:^1.31.5, prosemirror-view@npm:^1.31.7":
+"prosemirror-view@npm:^1.0.0, prosemirror-view@npm:^1.1.0, prosemirror-view@npm:^1.13.3, prosemirror-view@npm:^1.27.0, prosemirror-view@npm:^1.31.0, prosemirror-view@npm:^1.31.7":
   version: 1.31.7
   resolution: "prosemirror-view@npm:1.31.7"
   dependencies:
@@ -13620,15 +13606,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"remirror-extension-flat-list@npm:^0.1.3":
-  version: 0.1.3
-  resolution: "remirror-extension-flat-list@npm:0.1.3"
+"remirror-extension-flat-list@npm:^0.2.0":
+  version: 0.2.0
+  resolution: "remirror-extension-flat-list@npm:0.2.0"
   dependencies:
-    "@remirror/core": ^2.0.11
-    prosemirror-flat-list: ^0.3.0
+    "@remirror/core": ^2.0.18
+    prosemirror-flat-list: ^0.4.0
   peerDependencies:
-    "@remirror/pm": ^2.0.3
-  checksum: 32c5235b19e4bcb53f720037ad21634e028f56c5f37c818db3f08b50af5ec7048e1a2e673f23f680c7be953f3c24058b47627d88dfb4472ebda0748c78c4820a
+    "@remirror/pm": ^2.0.5
+  checksum: 8e557336063bb65e957d9dbf516e7106c92fcb1a7be402e6a0e529eec96af1c2f5034649cb7a51e7c1cfaf236c8fcc08972ea5ab78318e4f3f46ab885fdf16d3
   languageName: node
   linkType: hard
 
