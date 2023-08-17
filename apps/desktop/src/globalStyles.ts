@@ -72,19 +72,16 @@ export const GlobalStyles = createGlobalStyle<MThemeProps>`
   /* Styles for scrollbar */
 
   ::-webkit-scrollbar {
-    width: 7px;
-    height: 7px;
+    width: 6px;
+    height: 6px;
   }
 
   ::-webkit-scrollbar-track {
-    background: ${(props) => props.theme.borderColor};
+    background: ${(props) => props.theme.scrollbarTrackColor};
   }
 
   ::-webkit-scrollbar-thumb {
-    background: ${(props) => props.theme.labelFontColor};
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background: ${(props) => props.theme.labelFontColor};
+    border-radius: 6px;
+    background: ${(props) => props.theme.scrollbarThumbColor};
   }
 `
