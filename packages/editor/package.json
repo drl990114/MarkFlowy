@@ -98,7 +98,7 @@
     "@types/styled-components": "^5.1.26",
     "@types/tether-drop": "^1.4.9",
     "@vitejs/plugin-react": "^4.0.1",
-    "@vitest/browser": "^0.34.1",
+    "@vitest/browser": "^0.34.2",
     "esbuild": "^0.18.2",
     "esbuild-node-externals": "^1.8.0",
     "esbuild-plugin-alias": "^0.2.1",
