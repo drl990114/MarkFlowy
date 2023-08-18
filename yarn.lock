@@ -3026,7 +3026,7 @@ __metadata:
     "@types/tether-drop": ^1.4.9
     "@uiw/codemirror-theme-github": ^4.21.7
     "@vitejs/plugin-react": ^4.0.1
-    "@vitest/browser": ^0.34.1
+    "@vitest/browser": ^0.34.2
     create-context-state: ^2.0.0
     esbuild: ^0.18.2
     esbuild-node-externals: ^1.8.0
@@ -5982,9 +5982,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vitest/browser@npm:^0.34.1":
-  version: 0.34.1
-  resolution: "@vitest/browser@npm:0.34.1"
+"@vitest/browser@npm:^0.34.2":
+  version: 0.34.2
+  resolution: "@vitest/browser@npm:0.34.2"
   dependencies:
     estree-walker: ^3.0.3
     magic-string: ^0.30.1
@@ -5992,7 +5992,7 @@ __metadata:
     sirv: ^2.0.3
   peerDependencies:
     vitest: ">=0.34.0"
-  checksum: 379885dc13c86ddcf1e219c3e03663cb0e298dcc5b4696b8b08bc5a44ca1e46af85eeb5f6f1ebc049dde07513c4bc9507e80c554a09cc17ef116626bd0bd1cca
+  checksum: c4102963e93437bc61483b2e2161fe1cef2814357e37649fcfd477d1a94ef355356730c7cfe5374ea15d4ca649b61a13ef96bd5574f4a32f80eab0dddaebf5e8
   languageName: node
   linkType: hard
 
