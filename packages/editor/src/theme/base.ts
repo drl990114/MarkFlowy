@@ -21,18 +21,6 @@ export const BaseStyle = styled.createGlobalStyle<any>`
     box-sizing: border-box;
   }
 
-  .markdown-body .octicon {
-    display: inline-block;
-    fill: currentColor;
-    vertical-align: text-bottom;
-  }
-
-  .markdown-body details,
-  .markdown-body figcaption,
-  .markdown-body figure {
-    display: block;
-  }
-
   .markdown-body summary {
     display: list-item;
   }
@@ -43,11 +31,6 @@ export const BaseStyle = styled.createGlobalStyle<any>`
     text-decoration: none;
   }
 
-  .markdown-body abbr[title] {
-    border-bottom: none;
-    text-decoration: underline dotted;
-  }
-
   .markdown-body b,
   .markdown-body strong {
     font-weight: 600;
@@ -55,13 +38,6 @@ export const BaseStyle = styled.createGlobalStyle<any>`
 
   .markdown-body dfn {
     font-style: italic;
-  }
-
-  .markdown-body h1 {
-    margin: 0.67em 0;
-    font-weight: 600;
-    padding-bottom: 0.3em;
-    font-size: 2em;
   }
 
   .markdown-body mark {
@@ -126,38 +102,6 @@ export const BaseStyle = styled.createGlobalStyle<any>`
     font-family: inherit;
     font-size: inherit;
     line-height: inherit;
-  }
-
-  .markdown-body [type='button'],
-  .markdown-body [type='reset'],
-  .markdown-body [type='submit'] {
-    -webkit-appearance: button;
-  }
-
-  .markdown-body [type='checkbox'],
-  .markdown-body [type='radio'] {
-    box-sizing: border-box;
-    padding: 0;
-  }
-
-  .markdown-body [type='number']::-webkit-inner-spin-button,
-  .markdown-body [type='number']::-webkit-outer-spin-button {
-    height: auto;
-  }
-
-  .markdown-body [type='search']::-webkit-search-cancel-button,
-  .markdown-body [type='search']::-webkit-search-decoration {
-    -webkit-appearance: none;
-  }
-
-  .markdown-body ::-webkit-input-placeholder {
-    color: inherit;
-    opacity: 0.54;
-  }
-
-  .markdown-body ::-webkit-file-upload-button {
-    -webkit-appearance: button;
-    font: inherit;
   }
 
   .markdown-body a:hover {
@@ -245,8 +189,14 @@ export const BaseStyle = styled.createGlobalStyle<any>`
   .markdown-body h6 {
     margin-top: 24px;
     margin-bottom: 16px;
-    font-weight: 600;
     line-height: 1.25;
+  }
+
+  .markdown-body h1 {
+    font-weight: 600;
+    margin: 0.67em 0;
+    padding-bottom: 0.3em;
+    font-size: 2em;
   }
 
   .markdown-body h2 {
@@ -327,20 +277,6 @@ export const BaseStyle = styled.createGlobalStyle<any>`
     word-wrap: normal;
   }
 
-  .markdown-body .octicon {
-    display: inline-block;
-    overflow: visible !important;
-    vertical-align: text-bottom;
-    fill: currentColor;
-  }
-
-  .markdown-body input::-webkit-outer-spin-button,
-  .markdown-body input::-webkit-inner-spin-button {
-    margin: 0;
-    -webkit-appearance: none;
-    appearance: none;
-  }
-
   .markdown-body::before {
     display: table;
     content: '';
@@ -399,21 +335,6 @@ export const BaseStyle = styled.createGlobalStyle<any>`
   .markdown-body h6 code {
     padding: 0 0.2em;
     font-size: inherit;
-  }
-
-  .markdown-body summary h1,
-  .markdown-body summary h2,
-  .markdown-body summary h3,
-  .markdown-body summary h4,
-  .markdown-body summary h5,
-  .markdown-body summary h6 {
-    display: inline-block;
-  }
-
-  .markdown-body summary h1,
-  .markdown-body summary h2 {
-    padding-bottom: 0;
-    border-bottom: 0;
   }
 
   .markdown-body ul ul,
@@ -517,16 +438,6 @@ export const BaseStyle = styled.createGlobalStyle<any>`
     border: 0;
   }
 
-  .markdown-body .highlight {
-    margin-bottom: 16px;
-  }
-
-  .markdown-body .highlight pre {
-    margin-bottom: 0;
-    word-break: normal;
-  }
-
-  .markdown-body .highlight pre,
   .markdown-body pre {
     padding: 16px;
     overflow: auto;

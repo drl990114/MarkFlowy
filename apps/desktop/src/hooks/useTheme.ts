@@ -1,4 +1,4 @@
-import { loadTheme } from '@linebyline/editor'
+import { useTheme as useEditorTheme } from '@linebyline/editor'
 import { createTheme } from '@mui/material'
 import { createGlobalStore } from 'hox'
 import { useEffect, useState } from 'react'
@@ -37,6 +37,7 @@ const darkThemeColors = {
 
 function useTheme() {
   const [theme, setTheme] = useState<Theme>('light')
+  const { themeColors: editorThemeColors, setTheme: setEditorTheme } = useEditorTheme('light')
   const [themeColors, setThemeColors] = useState(lightThemeColors)
 
   const muiDarkTheme = createTheme({
@@ -58,16 +59,19 @@ function useTheme() {
   })
 
   useEffect(() => {
-    loadTheme(theme)
-    if (theme === 'light')
+    if (theme === 'light') {
+      setEditorTheme('light')
       setThemeColors(lightThemeColors)
-    else
+    } else {
+      setEditorTheme('dark')
       setThemeColors(darkThemeColors)
-  }, [theme])
+    }
+  }, [setEditorTheme, theme])
 
   return {
     theme,
     themeColors,
+    editorThemeColors,
     setTheme,
     muiTheme: theme === 'light' ? muiLightTheme : muiDarkTheme,
   }

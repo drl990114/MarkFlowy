@@ -1,4 +1,4 @@
-import { BaseStyle } from '@linebyline/editor'
+import { EditorGlobalStyles } from '@linebyline/editor'
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles'
 import { invoke } from '@tauri-apps/api'
 import { emit, listen } from '@tauri-apps/api/event'
@@ -22,7 +22,7 @@ function App() {
   useGlobalKeyboard()
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, handler] = useGlobalSettingData()
-  const { themeColors, muiTheme, setTheme } = useGlobalTheme()
+  const { themeColors, muiTheme, setTheme, editorThemeColors } = useGlobalTheme()
   const editorStore = useEditorStore()
   const { setFolderData, addOpenedFile, setActiveId } = editorStore
   const { setSetting } = handler
@@ -47,7 +47,7 @@ function App() {
     )
     use(
       loadTask('cache', async () => {
-        function pushWelcomeFile () {
+        function pushWelcomeFile() {
           const welcomeFile = createWelcomeFile()
           setActiveId(welcomeFile.id)
           addOpenedFile(welcomeFile.id)
@@ -95,7 +95,6 @@ function App() {
           } else {
             pushWelcomeFile()
           }
-
         } catch (error) {
           pushWelcomeFile()
         }
@@ -137,16 +136,18 @@ function App() {
   // }, [])
 
   return (
-    <ThemeProvider theme={themeColors}>
-      <MuiThemeProvider theme={muiTheme}>
-        <GlobalStyles />
-        <BaseStyle />
-        <Routes>
-          <Route index path='/' element={<Root />} />
-          <Route path='/setting' element={<Setting />} />
-        </Routes>
-      </MuiThemeProvider>
-    </ThemeProvider>
+    <>
+      <EditorGlobalStyles theme={editorThemeColors} />
+      <ThemeProvider theme={themeColors}>
+        <MuiThemeProvider theme={muiTheme}>
+          <GlobalStyles />
+          <Routes>
+            <Route index path='/' element={<Root />} />
+            <Route path='/setting' element={<Setting />} />
+          </Routes>
+        </MuiThemeProvider>
+      </ThemeProvider>
+    </>
   )
 }
 
