@@ -1,7 +1,7 @@
 import { createGlobalStyle } from 'styled-components'
-import type { MThemeProps } from './hooks/useTheme'
+import type { ScThemeProps } from './hooks/useTheme'
 
-export const GlobalStyles = createGlobalStyle<MThemeProps>`
+export const GlobalStyles = createGlobalStyle<ScThemeProps>`
   body {
     background-color: ${(props) => props.theme.bgColor};
     color: ${(props) => props.theme.primaryFontColor};
