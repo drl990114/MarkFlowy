@@ -23,7 +23,10 @@ export type TokenHandler = (state: MarkdownParseState, tok: Token) => void
 export type TokenHandlers = Record<string, TokenHandler>
 
 export class UnknowMarkdownItTokenError extends Error {
-  constructor(public tokenType: string, public supportedTokenTypes: string[]) {
+  constructor(
+    public tokenType: string,
+    public supportedTokenTypes: string[],
+  ) {
     super(`MarkdownIt token type '${tokenType}' not supported. `)
     this.tokenType = tokenType
   }
@@ -215,6 +218,7 @@ export class MarkdownParser {
       .disable(['emphasis', 'autolink', 'backticks', 'entity', 'html_block'])
       .enable(['table'])
       .use(markdownItListCheckbox)
+
     this.tokenHandlers = buildTokenHandlers(schema, parserRules)
   }
 

@@ -5,7 +5,9 @@ import { gfmAutolinkLiteralFromMarkdown } from 'mdast-util-gfm-autolink-literal'
 import { gfmStrikethroughFromMarkdown } from 'mdast-util-gfm-strikethrough'
 import { gfmAutolinkLiteral } from 'micromark-extension-gfm-autolink-literal'
 import { gfmStrikethrough } from 'micromark-extension-gfm-strikethrough'
-
+import type { Node } from 'posthtml-parser'
+import { parser } from 'posthtml-parser'
+import { render } from 'posthtml-render'
 import type { LineMarkName } from './inline-mark-extensions'
 import type { InlineToken } from './inline-types'
 
@@ -270,7 +272,6 @@ const fromMarkdownOptions: FromMarkdownOptions = {
           'definition',
           'headingAtx',
           'htmlFlow',
-          'htmlText',
           'list',
           'thematicBreak',
         ],
@@ -308,18 +309,77 @@ function parseInlineMarkdown(text: string): mdast.PhrasingContent[] {
   return []
 }
 
-export function fromInlineMarkdown(text: string): InlineToken[] {
+function flatHTMLInlineCode(nodes: Node[], originalText: string) {
+  let startOffset = 0
+  const endOffset = originalText.length
   const inlineTokens: InlineToken[] = []
-  for (const phrasingContent of parseInlineMarkdown(text)) {
-    for (const inlineToken of flatPhrasingContent(phrasingContent, 1)) {
-      if (inlineToken.end - inlineToken.start === 0) {
-        continue // Prosemirror doesn't allow empty text node
-      }
-      inlineToken.marks = fixMarkNames(inlineToken.marks)
-      // For debugging:
-      // inlineToken.text = text.slice(inlineToken.start, inlineToken.end)
-      inlineTokens.push(inlineToken)
+  nodes.forEach((node, index) => {
+    const isHtmlNode = typeof node === 'object'
+    const first = index === 0
+    const last = index === nodes.length - 1
+
+    if (!isHtmlNode) {
+      const tokens = parseMdInline(node as string)
+      tokens.forEach((token) => {
+        token.start += startOffset
+        token.end += startOffset
+      })
+      inlineTokens.push(...tokens)
+      startOffset += (tokens?.[tokens.length - 1]?.end - tokens[0]?.start) || 0
+
+    } else {
+      const htmlText = render(node)
+      inlineTokens.push({
+        marks: ['mdHtmlInline'],
+        attrs: {
+          depth: 1,
+          htmlText,
+          first,
+          last,
+        },
+        start: startOffset,
+        end: last ? endOffset : startOffset + htmlText.length,
+      })
+      startOffset += htmlText.length
     }
-  }
+  })
+
   return inlineTokens
+}
+
+
+function fixTokensMarkNames (tokens: InlineToken[]) {
+  for (const inlineToken of tokens) {
+    if (inlineToken.end - inlineToken.start === 0) {
+      continue // Prosemirror doesn't allow empty text node
+    }
+    inlineToken.marks = fixMarkNames(inlineToken.marks)
+  }
+  return tokens
+}
+
+function parseMdInline(text: string) {
+  const inlineTokens: InlineToken[] = []
+  const phrasingContents = parseInlineMarkdown(text)
+
+  for (const phrasingContent of phrasingContents) {
+    const tokens = flatPhrasingContent(phrasingContent, 1)
+    inlineTokens.push(...fixTokensMarkNames(tokens))
+  }
+
+  return inlineTokens
+}
+
+export function fromInlineMarkdown(text: string): InlineToken[] {
+  const parseDoc = parser(text, {
+    sourceLocations: true,
+  })
+
+  const htmlNodes = parseDoc.filter((a) => typeof a === 'object')
+  if (htmlNodes.length > 0) {
+    const tokens = flatHTMLInlineCode(parseDoc, text)
+    return fixTokensMarkNames(tokens)
+  }
+
+  return parseMdInline(text)
 }

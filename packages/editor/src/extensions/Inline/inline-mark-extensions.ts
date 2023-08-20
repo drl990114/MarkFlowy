@@ -3,6 +3,7 @@ import { MarkExtension, keyBinding } from '@remirror/core'
 
 import { formatHref } from './format-href'
 import { toggleInlineMark } from './inline-mark-commands'
+import { LineHtmlInlineExtension } from '../HtmlInline'
 
 const commonAttrs = {
   depth: { default: 0 },
@@ -221,6 +222,7 @@ const autoHideMarks: Record<string, true> = {
   mdLinkUri: true,
   mdImgText: true,
   mdImgUri: true,
+  mdHtmlInline: true
 }
 
 export function isAutoHideMark(name: string): boolean {
@@ -240,14 +242,17 @@ export const markExtensions = [
   new LinkUri(),
   new ImgText(),
   new ImgUri(),
+  new LineHtmlInlineExtension()
 ]
 export type LineMarkExtension = (typeof markExtensions)[number]
 export type LineMarkName = LineMarkExtension['name']
 export type LineMarkAttrs = {
   depth: number
 
-  first?: true
-  last?: true
+  first?: boolean
+  last?: boolean
 
   href?: string
+
+  htmlText?: string
 }

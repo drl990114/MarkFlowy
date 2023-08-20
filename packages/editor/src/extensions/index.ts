@@ -14,7 +14,6 @@ import {
   // LinkExtension,
   // ListItemExtension,
   // ListItemSharedExtension,
-  // MarkdownExtension,
   // OrderedListExtension,
   // ShortcutsExtension,
   // StrikeExtension,
@@ -24,6 +23,7 @@ import {
   // TaskListExtension,
   // UnderlineExtension,
   PlaceholderExtension,
+  MarkdownExtension
 } from 'remirror/extensions'
 // import data from 'svgmoji/emoji.json'
 import { LineInlineDecorationExtension, LineInlineMarkExtension, markExtensions } from './Inline'
@@ -97,3 +97,8 @@ function extensions(): any[] {
 }
 
 export default extensions
+
+export const DualVisualExtensions = () => [
+  ...extensions(),
+  new MarkdownExtension({ copyAsMarkdown: false }),
+]
