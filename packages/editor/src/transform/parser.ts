@@ -23,7 +23,10 @@ export type TokenHandler = (state: MarkdownParseState, tok: Token) => void
 export type TokenHandlers = Record<string, TokenHandler>
 
 export class UnknowMarkdownItTokenError extends Error {
-  constructor(public tokenType: string, public supportedTokenTypes: string[]) {
+  constructor(
+    public tokenType: string,
+    public supportedTokenTypes: string[],
+  ) {
     super(`MarkdownIt token type '${tokenType}' not supported. `)
     this.tokenType = tokenType
   }
@@ -212,9 +215,10 @@ export class MarkdownParser {
   public constructor(schema: Schema, parserRules: ParserRule[]) {
     this.schema = schema
     this.tokenizer = MarkdownIt('commonmark', { html: true })
-      .disable(['emphasis', 'autolink', 'backticks', 'entity'])
+      .disable(['emphasis', 'autolink', 'backticks', 'entity', 'html_block'])
       .enable(['table'])
       .use(markdownItListCheckbox)
+
     this.tokenHandlers = buildTokenHandlers(schema, parserRules)
   }
 

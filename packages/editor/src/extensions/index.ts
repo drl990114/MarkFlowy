@@ -14,7 +14,6 @@ import {
   // LinkExtension,
   // ListItemExtension,
   // ListItemSharedExtension,
-  // MarkdownExtension,
   // OrderedListExtension,
   // ShortcutsExtension,
   // StrikeExtension,
@@ -24,6 +23,7 @@ import {
   // TaskListExtension,
   // UnderlineExtension,
   PlaceholderExtension,
+  MarkdownExtension
 } from 'remirror/extensions'
 // import data from 'svgmoji/emoji.json'
 import { LineInlineDecorationExtension, LineInlineMarkExtension, markExtensions } from './Inline'
@@ -40,7 +40,6 @@ import { LineTableExtension, LineTableRowExtension } from './Table'
 import { languages } from '@codemirror/language-data'
 import { LineHorizontalRuleExtension } from './HorizontalRule'
 import { CountExtension } from '@remirror/extension-count'
-import { LineHtmlBlockExtension } from './HtmlBlock'
 // import { TableExtension } from './ReactTables';
 
 export * from './List'
@@ -88,7 +87,6 @@ function extensions(): any[] {
     new LineTableRowExtension(),
     new LineTableCellExtension(),
     new LineTableHeaderCellExtension(),
-    new LineHtmlBlockExtension(),
 
     new ReactComponentExtension(),
     new DropCursorExtension(),
@@ -99,3 +97,8 @@ function extensions(): any[] {
 }
 
 export default extensions
+
+export const DualVisualExtensions = () => [
+  ...extensions(),
+  new MarkdownExtension({ copyAsMarkdown: false }),
+]

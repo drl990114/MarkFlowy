@@ -498,9 +498,14 @@ export const BaseStyle = styled.createGlobalStyle<any>`
 
   .markdown-body .md-img-uri,
   .markdown-body .md-img-text,
-  .markdown-body .md-link {
+  .markdown-body .md-link,
+  .markdown-body .md-html-inline {
     font-size: 0;
-    letter-spacing: 0; // A .md-link element could caontain many characters. Although the font-size is 0, there is still a obvious gap because of the letter-spacing.
+    letter-spacing: 0;
+  }
+
+  .markdown-body .md-html-inline {
+    color: ${(props) => props.theme.labelFontColor};
   }
 
   .md-mark {
