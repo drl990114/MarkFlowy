@@ -1,4 +1,5 @@
 import { createGlobalStyle } from 'styled-components'
+import type { ScThemeProps } from '.'
 
 /**
  * To format for createGlobalStyle
@@ -6,8 +7,8 @@ import { createGlobalStyle } from 'styled-components'
  */
 const styled = { createGlobalStyle }
 
-// BUG type error, need split common types package.
-export const BaseStyle = styled.createGlobalStyle<any>`
+
+export const BaseStyle = styled.createGlobalStyle<ScThemeProps>`
   .markdown-body {
     -ms-text-size-adjust: 100%;
     -webkit-text-size-adjust: 100%;

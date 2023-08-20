@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import type { ThemeProviderProps } from 'styled-components'
+import type { ThemeProps, ThemeProviderProps } from 'styled-components'
 import { ThemeProvider } from 'styled-components'
 import darkCss from './dark.css'
 import lightCss from './light.css'
@@ -9,6 +9,9 @@ export * from './base'
 const THEME_ID = 'linebyline-markdown-theme'
 
 let themeEl: undefined | HTMLStyleElement
+
+export type ThemeColors = typeof lightThemeColors
+export type ScThemeProps = ThemeProps<ThemeColors>
 
 function loadThemeCss(url: string) {
   if (themeEl)
