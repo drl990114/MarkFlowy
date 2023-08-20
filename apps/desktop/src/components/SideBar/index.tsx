@@ -1,15 +1,23 @@
 import classNames from 'classnames'
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Container, SettingRightBarContainer } from './styles'
+import { Container as SideBarContainer, SettingRightBarContainer, SideBar as SideBarWrapper } from './styles'
 import chatgpt from '@/chatgpt'
 import { Explorer, Setting } from '@/components'
 import { RIGHTBARITEMKEYS } from '@/constants'
+import { useCommandStore } from '@/stores'
 
 function SideBar() {
   const [isResizing, setIsResizing] = useState(false)
   const [sidebarWidth, setSidebarWidth] = useState(300)
   const [activeRightBarItemKey, setActiveRightBarItemKey] = useState<RIGHTBARITEMKEYS | undefined>()
+  // TODO need local cache
+  const [visible, setVisible] = useState(true)
+  const { addCommand } = useCommandStore()
   const sidebarRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    addCommand({ id: 'app:toggle_sidebar', handler: () => setVisible((v) => !v) })
+  }, [addCommand])
 
   const rightBarDataSource: RightBarItem[] = useMemo(() => {
     return [
@@ -74,12 +82,12 @@ function SideBar() {
   const noActiveItem = !activeRightBarItemKey
 
   return (
-    <Container
+    <SideBarContainer
       ref={sidebarRef}
       noActiveItem={noActiveItem}
-      style={{ width: noActiveItem ? '48px' : sidebarWidth }}
+      style={{ width: noActiveItem ? (visible ? '48px' : 0) : sidebarWidth }}
     >
-      <div className='app-sidebar'>
+      <SideBarWrapper visible={visible}>
         <div>
           {rightBarDataSource.map((item) => {
             const cls = classNames('app-sidebar__item fjic', {
@@ -101,10 +109,10 @@ function SideBar() {
         <SettingRightBarContainer className='app-sidebar__item fjic'>
           <Setting />
         </SettingRightBarContainer>
-      </div>
+      </SideBarWrapper>
       {activeRightBarItem?.components ?? null}
       <div className='app-sidebar-resizer' onMouseDown={startResizing} />
-    </Container>
+    </SideBarContainer>
   )
 }
 
