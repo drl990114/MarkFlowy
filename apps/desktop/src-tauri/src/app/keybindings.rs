@@ -37,6 +37,17 @@ impl Keybindings {
                 ),
             ),
             (
+                "app:toggle_sidebar".to_string(),
+                KeybindingInfo::new(
+                    "app:toggle_sidebar".to_string(),
+                    "toggle sideBar visible".to_string(),
+                    vec![
+                        "CommandOrCtrl".to_string(),
+                        "`".to_string(),
+                    ],
+                ),
+            ),
+            (
                 "editor:save".to_string(),
                 KeybindingInfo::new(
                     "editor:save".to_string(),
