@@ -498,9 +498,14 @@ export const BaseStyle = styled.createGlobalStyle<any>`
 
   .markdown-body .md-img-uri,
   .markdown-body .md-img-text,
-  .markdown-body .md-link {
+  .markdown-body .md-link,
+  .markdown-body .md-html-inline {
     font-size: 0;
-    letter-spacing: 0; // A .md-link element could caontain many characters. Although the font-size is 0, there is still a obvious gap because of the letter-spacing.
+    letter-spacing: 0;
+  }
+
+  .markdown-body .md-html-inline {
+    color: ${(props) => props.theme.labelFontColor};
   }
 
   .md-mark {
@@ -590,5 +595,21 @@ export const BaseStyle = styled.createGlobalStyle<any>`
   .cm-lineNumbers .cm-gutterElement {
     margin: 0;
     background-color: ${(props) => props.theme.bgColor};
+  }
+
+  .html-block {
+    white-space: normal;
+
+    &__decoration{
+
+      & input {
+        width: 100%;
+        outline: none;
+      }
+
+      &--focus {
+        border: ${(props) => props.theme.accentColor} 1px solid;
+      }
+    }
   }
 `

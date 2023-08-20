@@ -9,6 +9,8 @@ import { MarkdownParser, MarkdownSerializer } from '../../transform'
 import type { StringToDoc, DocToString, EditorDelegate } from '../../../types'
 import EditorExtensions from '../../extensions'
 import "prosemirror-flat-list/dist/style.css"
+import { parser as htmlParse } from 'posthtml-parser'
+import { render } from 'posthtml-render'
 
 function isMarkdownNodeExtension(extension: unknown): extension is MarkdownNodeExtension {
   return !!(
@@ -48,7 +50,11 @@ export const createWysiwygDelegate = (): EditorDelegate<any>=> {
   const serializer = buildMarkdownSerializer(manager)
 
   const stringToDoc: StringToDoc = (content) => {
-    const doc = parser.parse(content)
+    /**
+     * To prevent string length deviation caused by extra spaces
+     */
+    const formatContent = render(htmlParse(content))
+    const doc = parser.parse(formatContent)
 
     return initDocMarks(doc)
   }

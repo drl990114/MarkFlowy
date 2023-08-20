@@ -1,27 +1,13 @@
 import type { UseRemirrorReturn } from '@remirror/react'
 import { Remirror, useRemirror } from '@remirror/react'
 import { createContextState } from 'create-context-state'
-import React, { memo, useCallback } from 'react'
+import React, { memo } from 'react'
 import styled from 'styled-components'
 import Text from '../Text'
 import type { EditorDelegate } from '../../../types'
-import {
-  BlockquoteExtension,
-  BoldExtension,
-  BulletListExtension,
-  CodeBlockExtension,
-  CodeExtension,
-  HardBreakExtension,
-  HeadingExtension,
-  ItalicExtension,
-  LinkExtension,
-  ListItemExtension,
-  MarkdownExtension,
-  OrderedListExtension,
-  StrikeExtension,
-  TrailingNodeExtension,
-  TableExtension
-} from 'remirror/extensions'
+
+import { DualVisualExtensions } from '../../extensions'
+
 type Context = Props
 
 interface Props {
@@ -82,32 +68,10 @@ function VisualEditor() {
 const DualEditor: React.FC<DualEditorProps> = (props) => {
   const { file, content, active, delegate, hooks, markdownToolBar } = props
 
-  const extensions = useCallback(
-    () => [
-      new LinkExtension({ autoLink: true }),
-      new BoldExtension(),
-      new StrikeExtension(),
-      new ItalicExtension(),
-      new HeadingExtension(),
-      new BlockquoteExtension(),
-      new BulletListExtension({ enableSpine: true }),
-      new OrderedListExtension(),
-      new ListItemExtension({}),
-      new CodeExtension(),
-      new CodeBlockExtension(),
-      new TrailingNodeExtension(),
-      new TableExtension(),
-      new MarkdownExtension({ copyAsMarkdown: false }),
-      new HardBreakExtension(),
-    ],
-    [],
-  )
-
   const visual = useRemirror({
-    extensions,
+    extensions: DualVisualExtensions,
     stringHandler: 'markdown',
     selection: 'start',
-    content,
   })
   
   return (

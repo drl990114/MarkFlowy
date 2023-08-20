@@ -343,7 +343,7 @@ export class CodeMirror6NodeView implements NodeView {
  * It iterates from the start and end of the strings, until it hits a difference, and returns an object
  * giving the change's start, end, and replacement text, or null if there was no change.
  */
-function computeChange(
+export function computeChange(
   oldVal: string,
   newVal: string,
 ): { from: number; to: number; text: string } | null {
