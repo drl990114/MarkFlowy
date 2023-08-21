@@ -59,6 +59,6 @@
     "vite": "^4.3.9",
     "vite-plugin-svgr": "^3.2.0",
     "vite-plugin-svgr-component": "^1.0.1",
-    "vitest": "^0.34.1"
+    "vitest": "^0.34.2"
   }
 }
