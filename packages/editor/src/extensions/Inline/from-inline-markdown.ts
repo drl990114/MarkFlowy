@@ -8,6 +8,7 @@ import { gfmStrikethrough } from 'micromark-extension-gfm-strikethrough'
 import type { Node } from 'posthtml-parser'
 import { parser } from 'posthtml-parser'
 import { render } from 'posthtml-render'
+import { nanoid } from 'nanoid'
 import type { LineMarkName } from './inline-mark-extensions'
 import type { InlineToken } from './inline-types'
 
@@ -131,7 +132,7 @@ function flatImage(mdastToken: mdast.Image, depth: number): InlineToken[] {
   return [
     {
       marks: ['mdImgUri'],
-      attrs: { depth, first: true, last: true, href: mdastToken.url },
+      attrs: { depth, first: true, last: true, href: mdastToken.url, key: nanoid() },
       start: mdastToken.position!.start.offset!,
       end: mdastToken.position!.end.offset!,
     },
@@ -319,14 +320,13 @@ function flatHTMLInlineCode(nodes: Node[], originalText: string) {
     const last = index === nodes.length - 1
 
     if (!isHtmlNode) {
-      const tokens = parseMdInline(node as string)
+      const tokens = parseMdInline(node as string, 2)
       tokens.forEach((token) => {
         token.start += startOffset
         token.end += startOffset
       })
       inlineTokens.push(...tokens)
-      startOffset += (tokens?.[tokens.length - 1]?.end - tokens[0]?.start) || 0
-
+      startOffset += tokens?.[tokens.length - 1]?.end - tokens[0]?.start || 0
     } else {
       const htmlText = render(node)
       inlineTokens.push({
@@ -334,6 +334,7 @@ function flatHTMLInlineCode(nodes: Node[], originalText: string) {
         attrs: {
           depth: 1,
           htmlText,
+          key: nanoid(),
           first,
           last,
         },
@@ -347,8 +348,7 @@ function flatHTMLInlineCode(nodes: Node[], originalText: string) {
   return inlineTokens
 }
 
-
-function fixTokensMarkNames (tokens: InlineToken[]) {
+function fixTokensMarkNames(tokens: InlineToken[]) {
   for (const inlineToken of tokens) {
     if (inlineToken.end - inlineToken.start === 0) {
       continue // Prosemirror doesn't allow empty text node
@@ -358,12 +358,12 @@ function fixTokensMarkNames (tokens: InlineToken[]) {
   return tokens
 }
 
-function parseMdInline(text: string) {
+function parseMdInline(text: string, depth = 1) {
   const inlineTokens: InlineToken[] = []
   const phrasingContents = parseInlineMarkdown(text)
 
   for (const phrasingContent of phrasingContents) {
-    const tokens = flatPhrasingContent(phrasingContent, 1)
+    const tokens = flatPhrasingContent(phrasingContent, depth)
     inlineTokens.push(...fixTokensMarkNames(tokens))
   }
 

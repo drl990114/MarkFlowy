@@ -194,6 +194,9 @@ class ImgUri extends MarkExtension {
       spanning: false,
       attrs: {
         ...commonAttrs,
+        key: {
+          default: "",
+        },
         href: {
           default: '',
         },
@@ -255,4 +258,9 @@ export type LineMarkAttrs = {
   href?: string
 
   htmlText?: string
+
+  /**
+   * to fix same attrs node only render once
+   */
+  key?: string
 }

@@ -10,11 +10,10 @@ export class LineHtmlInlineExtension extends MarkExtension {
 
   createMarkSpec(): MarkExtensionSpec {
     return {
-      spanning: false,
       attrs: {
         depth: { default: 0 },
-        href: {
-          default: '',
+        key: {
+          default: "",
         },
         htmlText: {
           default: '',
