@@ -3122,7 +3122,7 @@ __metadata:
     eslint: 8.44.0
     happy-dom: ^10.10.0
     hox: ^2.1.0
-    i18next: ^23.2.11
+    i18next: ^23.4.4
     immer: ^10.0.2
     is-promise: ^4.0.0
     jest-remirror: ^2.1.5
@@ -3254,7 +3254,7 @@ __metadata:
     autoprefixer: 10.4.15
     classnames: ^2.3.2
     eslint: 8.44.0
-    i18next: ^23.2.11
+    i18next: ^23.4.4
     i18next-chained-backend: ^4.3.0
     i18next-http-backend: ^2.2.1
     i18next-localstorage-backend: ^4.1.1
@@ -10138,12 +10138,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"i18next@npm:^23.2.11":
-  version: 23.4.1
-  resolution: "i18next@npm:23.4.1"
+"i18next@npm:^23.4.4":
+  version: 23.4.4
+  resolution: "i18next@npm:23.4.4"
   dependencies:
     "@babel/runtime": ^7.22.5
-  checksum: d9283d3de5e4ea2e55f61bd8ada98b5aef1b7db35a69c8ccf193367c5cbee6f795a67c5cd8a7af511e56c12b021b91d97253863b6c2336726925d20518fb02cc
+  checksum: faa968dcba328528231e3cd140d5a0f4b9b472b75874b7cbf8415e2dbff48397f1cdcc36a739ea6915f6970c367fdd7f985f120e63e1c30a839c53e366d851fd
   languageName: node
   linkType: hard
 
