@@ -22,7 +22,14 @@ export const Container = styled.div`
     justify-content: space-between;
     align-items: center;
     padding: 4px;
+    padding-left: 8px;
     border-top: 1px solid ${(props) => props.theme.borderColor};
+    opacity: 0;
+    transition: all .3s ease-in-out;
+
+    &:hover {
+      opacity: 1;
+    }
   }
 
   .border-t-1-solid {

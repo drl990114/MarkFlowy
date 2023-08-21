@@ -11,6 +11,21 @@ export const SideBar = styled.div<SideBarProps>`
   justify-content: space-between;
   width: 48px;
   border-right: 1px solid ${(props) => props.theme.borderColor};
+`
+
+export const Container = styled.div<ContainerProps>`
+  flex-grow: 0;
+  flex-shrink: 0;
+  max-width: 400px;
+  position: relative;
+  display: flex;
+  border-right: 1px solid ${(props) => props.theme.borderColor};
+  flex-direction: row;
+  background: ${(props) => props.theme.bgColor};
+  color: ${(props) => props.theme.primaryFontColor};
+  box-shadow: -8px 2px 22px -7px rgba(0, 0, 0, 0.25);
+  border-radius: 10px 0px 0px 10px;
+  z-index: 2;
 
   .app-sidebar {
     &__item {
@@ -42,21 +57,6 @@ export const SideBar = styled.div<SideBarProps>`
       background: ${(props) => props.theme.labelFontColor};
     }
   }
-`
-
-export const Container = styled.div<ContainerProps>`
-  flex-grow: 0;
-  flex-shrink: 0;
-  max-width: 400px;
-  position: relative;
-  display: flex;
-  border-right: 1px solid ${(props) => props.theme.borderColor};
-  flex-direction: row;
-  background: ${(props) => props.theme.bgColor};
-  color: ${(props) => props.theme.primaryFontColor};
-  box-shadow: -8px 2px 22px -7px rgba(0, 0, 0, 0.25);
-  border-radius: 10px 0px 0px 10px;
-  z-index: 2;
 
   ${(props) => (props.noActiveItem ? 'width: 48px' : 'min-width: 150px')}
 `
