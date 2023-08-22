@@ -1,5 +1,7 @@
-import type { MarkExtensionSpec, NodeViewMethod } from 'remirror'
-import { MarkExtension } from 'remirror'
+import type { MarkExtensionSpec, NodeViewMethod, PrioritizedKeyBindings } from 'remirror'
+import { MarkExtension, convertCommand } from 'remirror'
+import type { EditorState, Transaction } from "@remirror/pm/state"
+import { Selection } from '@remirror/pm/state'
 
 export class LineHtmlInlineExtension extends MarkExtension {
   static disableExtraAttributes = true
@@ -42,6 +44,7 @@ export class LineHtmlInlineExtension extends MarkExtension {
 
       const contentDom = document.createElement('span')
       container.appendChild(contentDom)
+      container.setAttribute('key', node.attrs.key)
       contentDom.setAttribute('class', 'md-html-inline')
 
       return {
@@ -49,5 +52,30 @@ export class LineHtmlInlineExtension extends MarkExtension {
         contentDOM: contentDom,
       }
     }
+  }
+
+  createKeymap(): PrioritizedKeyBindings {
+      return {
+        Enter: convertCommand((state: EditorState, dispatch, view) => {
+          if (!view) {
+            return false
+          }
+          const tr: Transaction = state.tr
+          
+          if (!(tr.selection.empty)) {
+            return false
+          }
+      
+          const $head = tr.selection.$head
+          const nextPos = Selection.near(tr.doc.resolve($head.pos), 0)
+          const curMark = nextPos.$head.marksAcross($head)?.[0]
+          if (nextPos.$head && curMark?.type.name === 'mdHtmlInline') {
+            dispatch?.(tr.setSelection(nextPos))
+            return true
+          }
+      
+          return false
+        })
+      }
   }
 }
