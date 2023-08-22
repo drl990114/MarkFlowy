@@ -6,10 +6,10 @@ import type { ListDataItem } from '../List'
 import { Container } from './styles'
 import { useEditorStore } from '@/stores'
 import type { IFile } from '@/helper/filesys'
-import { useGlobalCacheData, useOpen } from '@/hooks'
-import { CacheManager } from '@/helper'
+import { useOpen } from '@/hooks'
 import { Empty, FileTree, List, Popper } from '@/components'
 import styled from 'styled-components'
+import useOpenedCacheStore from '@/stores/useOpenedCacheStore'
 
 const RecentListBottom = styled.div`
   padding: 8px;
@@ -26,7 +26,7 @@ const Explorer: FC<ExplorerProps> = (props) => {
   const { t } = useTranslation()
   const { folderData, activeId, addOpenedFile, setActiveId } = useEditorStore()
   const [popperOpen, setPopperOpen] = useState(false)
-  const [cache] = useGlobalCacheData()
+  const { recentWorkspaces, clearRecentWorkspaces } = useOpenedCacheStore()
   const { openFolderDialog, openFolder } = useOpen()
 
   const handleSelect = (item: IFile) => {
@@ -37,7 +37,7 @@ const Explorer: FC<ExplorerProps> = (props) => {
   }
 
   const handleClearRecent = () => {
-    CacheManager.writeCache('openFolderHistory', [])
+    clearRecentWorkspaces()
     setPopperOpen(false)
   }
 
@@ -51,18 +51,18 @@ const Explorer: FC<ExplorerProps> = (props) => {
 
   const listData = useMemo(
     () =>
-      cache.openFolderHistory.map((history: { time: string; path: string }) => ({
-        key: history.time,
+      recentWorkspaces.map((history: { path: string }) => ({
+        key: history.path,
         title: history.path,
         iconCls: 'ri-folder-5-line',
       })),
-    [cache],
+    [recentWorkspaces],
   )
 
   const containerCLs = classNames(props.className)
 
   return (
-    <Container className={containerCLs} onContextMenu={e => e.preventDefault()}>
+    <Container className={containerCLs} onContextMenu={(e) => e.preventDefault()}>
       {/* <SideBarHeader name='EXPLORER' /> */}
       <div className='h-full w-full overflow-auto'>
         {folderData && folderData.length > 0 ? (

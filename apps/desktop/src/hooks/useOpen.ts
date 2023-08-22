@@ -1,24 +1,24 @@
 import { useCallback } from 'react'
 import { open } from '@tauri-apps/api/dialog'
 import { readDirectory } from '@/helper/filesys'
-import { CacheManager } from '@/helper'
 import { useEditorStore } from '@/stores'
-import dayjs from 'dayjs'
+import useOpenedCacheStore from '@/stores/useOpenedCacheStore'
 
 const useOpen = () => {
   const { setFolderData } = useEditorStore()
+  const { addRecentWorkspaces } = useOpenedCacheStore()
 
   const openFolder = useCallback(
     async (dir: string) => {
       try {
         const res = await readDirectory(dir)
-        CacheManager.writeCache('openFolderHistory', { path: dir, time: dayjs() })
+        addRecentWorkspaces({ path: dir })
         setFolderData(res)
       } catch (error) {
         console.error('error', error)
       }
     },
-    [setFolderData],
+    [addRecentWorkspaces, setFolderData],
   )
 
   const openFolderDialog = useCallback(async () => {
@@ -30,7 +30,7 @@ const useOpen = () => {
 
   return {
     openFolderDialog,
-    openFolder
+    openFolder,
   }
 }
 
