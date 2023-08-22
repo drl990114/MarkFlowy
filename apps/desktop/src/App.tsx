@@ -5,21 +5,24 @@ import { emit, listen } from '@tauri-apps/api/event'
 import type { Theme } from '@tauri-apps/api/window'
 import { useCallback, useEffect } from 'react'
 import { Route, Routes } from 'react-router-dom'
-import 'remixicon/fonts/remixicon.css'
 import { ThemeProvider } from 'styled-components'
 import { GlobalStyles } from './globalStyles'
 import { useGlobalSettingData, useGlobalTheme, useGlobalKeyboard, useGlobalOSInfo } from './hooks'
 import { i18nInit } from './i18n'
 import { Root, Setting } from '@/router'
 import { loadTask, use } from '@/helper/schedule'
-import { CacheManager } from '@/helper'
 import { useEditorStore } from './stores'
 import { createWelcomeFile, readDirectory } from './helper/filesys'
 import { getFileObject, getFileObjectByPath } from './helper/files'
+import type { WorkspaceInfo } from '@/stores/useOpenedCacheStore'
+import useOpenedCacheStore from '@/stores/useOpenedCacheStore'
+import { cacheStore } from './helper/cacheStore'
+import 'remixicon/fonts/remixicon.css'
 
 function App() {
   useGlobalOSInfo()
   useGlobalKeyboard()
+  const { setRecentWorkspaces } = useOpenedCacheStore()
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, handler] = useGlobalSettingData()
   const { themeColors, muiTheme, setTheme, editorThemeColors } = useGlobalTheme()
@@ -53,13 +56,22 @@ function App() {
           addOpenedFile(welcomeFile.id)
         }
         try {
-          const cacheData = await CacheManager.init()
-          const history = cacheData[0].openFolderHistory
-          if (history.length > 0) {
-            readDirectory(history[0].path).then((res) => {
+          const getOpenedCacheRes = await invoke<{ recent_workspaces: WorkspaceInfo[] }>(
+            'get_opened_cache',
+          )
+          const recentWorkspaces = getOpenedCacheRes.recent_workspaces
+          setRecentWorkspaces(recentWorkspaces)
+
+          if (recentWorkspaces.length > 0) {
+            const cacheStoreInitPromises = Promise.all([
+              cacheStore.get<string[]>('openedFilePaths'),
+              cacheStore.get<string>('activeFilePath'),
+            ])
+            const cacheStoreInitPromisesRes = await cacheStoreInitPromises
+            readDirectory(recentWorkspaces[0].path).then((res) => {
               setFolderData(res)
-              const openedFilePaths: string[] = cacheData[0].openedFilePaths
-              const activeFilePath = cacheData[0].activeFilePath
+              const openedFilePaths: string[] = cacheStoreInitPromisesRes[0] || []
+              const activeFilePath = cacheStoreInitPromisesRes[1]
 
               if (activeFilePath) {
                 const activeFile = getFileObjectByPath(activeFilePath)
@@ -84,12 +96,11 @@ function App() {
                   const file = getFileObject(fileId)
                   return file.path
                 })
-                CacheManager.cacheData.openedFilePaths = openedFiles
+                cacheStore.set('openedFilePaths', openedFiles)
                 if (state.activeId) {
-                  CacheManager.cacheData.activeFilePath = getFileObject(state.activeId)?.path
+                  cacheStore.set('activeFilePath', getFileObject(state.activeId)?.path)
                 }
-
-                CacheManager.saveCache()
+                cacheStore.save()
               })
             })
           } else {

@@ -6,12 +6,13 @@ mod fc;
 mod menu;
 mod setup;
 
-use app::{conf, keybindings};
+use app::{conf, keybindings, opened_cache};
 
 fn main() {
     let context = tauri::generate_context!();
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_store::Builder::default().build())
         .invoke_handler(tauri::generate_handler![
             fc::cmd::open_folder,
             fc::cmd::get_file_content,
@@ -25,6 +26,9 @@ fn main() {
             conf::cmd::open_conf_window,
             keybindings::cmd::get_keyboard_infos,
             keybindings::cmd::amend_cmd,
+            opened_cache::cmd::get_opened_cache,
+            opened_cache::cmd::add_recent_workspace,
+            opened_cache::cmd::clear_recent_workspaces,
         ])
         .setup(setup::init)
         .menu(menu::generate_menu())
