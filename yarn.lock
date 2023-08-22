@@ -3115,7 +3115,7 @@ __metadata:
     "@types/react-test-renderer": ^18.0.0
     "@types/styled-components": ^5.1.26
     "@vitejs/plugin-react": ^4.0.1
-    "@vitest/ui": ^0.34.1
+    "@vitest/ui": ^0.34.2
     classnames: ^2.3.2
     create-context-state: ^2.0.0
     dayjs: ^1.11.8
@@ -6216,11 +6216,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vitest/ui@npm:^0.34.1":
-  version: 0.34.1
-  resolution: "@vitest/ui@npm:0.34.1"
+"@vitest/ui@npm:^0.34.2":
+  version: 0.34.2
+  resolution: "@vitest/ui@npm:0.34.2"
   dependencies:
-    "@vitest/utils": 0.34.1
+    "@vitest/utils": 0.34.2
     fast-glob: ^3.3.0
     fflate: ^0.8.0
     flatted: ^3.2.7
@@ -6229,18 +6229,7 @@ __metadata:
     sirv: ^2.0.3
   peerDependencies:
     vitest: ">=0.30.1 <1"
-  checksum: ae707d72bf185e679df7789843884e64cfb461ea07f93b7970351e9d5371a1867fa9f1181883557a5c760fef21fc9be169ff82b1d443f1b2141f4e42ca4f9333
-  languageName: node
-  linkType: hard
-
-"@vitest/utils@npm:0.34.1":
-  version: 0.34.1
-  resolution: "@vitest/utils@npm:0.34.1"
-  dependencies:
-    diff-sequences: ^29.4.3
-    loupe: ^2.3.6
-    pretty-format: ^29.5.0
-  checksum: 0015504f3af725ef84f9759f08bc051071d29b0024d6bbd27276450cdb9dccde367bb86cfede2ccfef803965f29f0ffb76104e92bf569169f87e0e74e5a720f1
+  checksum: 27772824dc78d6b6c4580c4f5a5a7eebcb1f0c2a3744de80381f8b766ed485cc88ae0978a8f28a46b02e35b80ea26a1ad7facf0054ab00c39670dff2e2bb4524
   languageName: node
   linkType: hard
 
