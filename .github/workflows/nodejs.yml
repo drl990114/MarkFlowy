@@ -53,7 +53,7 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
 
-      - name: Build the web
+      - name: Build workspaces
         run: yarn build
 
       - name: Install rust target

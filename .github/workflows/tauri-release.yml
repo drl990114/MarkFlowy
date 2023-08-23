@@ -70,6 +70,9 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
 
+      - name: Build workspaces
+        run: yarn build
+
       - name: Install rust target
         run: rustup target add ${{ matrix.target }}
 
