@@ -9,12 +9,13 @@
 <h4 align="center">Modern markdown editor.(WIP)</h3>
 
 <p align="center">
-  <a href="https://github.com/linebyline-group/linebyline" target="__blank"><img alt="GitHub" src="https://img.shields.io/github/license/linebyline-group/linebyline?label=License"></a>
+  <a href="https://github.com/vitejs/vite/actions/workflows/ci.yml"><img src="https://github.com/linebyline-group/linebyline/actions/workflows/nodejs.yml/badge.svg?branch=main&color=%23fe7d27" alt="build status"></a>
+  <a href="https://github.com/linebyline-group/linebyline/releases" target="__blank"><img alt="GitHub downloads" src="https://img.shields.io/github/downloads/linebyline-group/linebyline/total?label=Downloads&color=%23fe7d37"></a>
   <a href="https://github.com/linebyline-group/linebyline/releases" target="__blank"><img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/linebyline-group/linebyline?label=Version"></a>
-  <a href="https://github.com/linebyline-group/linebyline/releases" target="__blank"><img alt="GitHub Repo stars" src="https://img.shields.io/github/downloads/linebyline-group/linebyline/total?label=Downloads&color=%23fe7d37"></a>
   <a href="https://github.com/linebyline-group/linebyline" target="__blank"><img alt="GitHub" src="https://img.shields.io/github/commit-activity/w/linebyline-group/linebyline?color=%2346bd1b"></a>
   <a href="https://www.rust-lang.org/" target="__blank"><img alt="GitHub" src="https://img.shields.io/badge/Rust-1.70.0-dea584"></a>
 </p>
+
 
 ## ⚠️ LineByLine is in Alpha
 
@@ -31,6 +32,29 @@ Currently, LineByLine is still in the alpha phase, and it is recommended to use 
 Available for Linux, macOS and Windows.
 
 Please look [releases page](https://github.com/linebyline-group/linebyline/releases)
+
+## Why
+At present, I have used many Markdown applications, but I have not encountered one that is very suitable for me. I have always hoped to have a Markdown editor that is efficient, beautiful, lightweight, data-safe, and can be easily combined with various workflows. This It is also the original intention of doing linebyline.
+
+## Contribute
+
+The current linebyline is still in its infancy, and there may be some bad experiences or bugs, for which I am sorry. All partners who are interested or encounter usage problems are welcome to submit [issues](https://github.com/linebyline-group/linebyline/issues/new) or [PR](https://github.com/linebyline-group/linebyline/compare) to participate in this project.
+
+### How to Contribute
+
+You can read [CONTRIBUTING](./CONTRIBUTING.md) to know how to start the project and modify the code, Welcome to participate in code contribution.
+
+## Support
+
+linebyline is completely and permanently open source, if you want to support line byline, you can `star` this project. This will give me great support and help, love you.
+
+## Thanks
+
+- <a href="https://github.com/tauri-apps/tauri" target="_blank">Tauri</a> - A framework for building cross-platform applications that provides linebyline with a solid foundation.
+- <a href="https://github.com/facebook/react" target="_blank">React</a> - Web user interface framework.
+- <a href="https://github.com/remirror/remirror" target="_blank">Remirror</a> - The ProseMirror toolkit for React, on which the linebyline editor is based.
+- <a href="https://github.com/ocavue/rino" target="_blank">Rino</a> - Some initialization codes of package/editor come from here.
+- <a href="https://github.com/vitejs/vite" target="_blank">Vite</a> - front-end build tool.
 
 ## ScreenShot
 
@@ -50,14 +74,3 @@ Please look [releases page](https://github.com/linebyline-group/linebyline/relea
 
 ![chatgpt](./public/screenshots/chatgpt.png)
 
-## Contribute
-
-The current linebyline is still in its infancy, and there may be some bad experiences or bugs, for which I am sorry. All partners who are interested or encounter usage problems are welcome to submit [issues](https://github.com/linebyline-group/linebyline/issues/new) or [PR](https://github.com/linebyline-group/linebyline/compare) to participate in this project.
-
-### How to Contribute
-
-You can read [CONTRIBUTING](./CONTRIBUTING.md) to know how to start the project and modify the code, Welcome to participate in code contribution.
-
-## Support
-
-linebyline is completely and permanently open source, if you want to support line byline, you can `star` this project. This will give me great support and help, love you.
