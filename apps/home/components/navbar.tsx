@@ -9,11 +9,11 @@ interface NavbarProps {
 export function Navbar({ links, ...props }: NavbarProps) {
   return (
     <header
-      className="w-full top-0 z-50 flex-shrink-0 py-4 bg-white fixed"
+      className="w-full top-0 z-50 flex-shrink-0 py-4 bg-white fixed h-20"
       {...props}
     >
       <div className="container flex flex-col items-start justify-between px-6 mx-auto md:flex-row md:items-center">
-        <Link href="/" title="LineByLine" className="font-semibold">
+        <Link href="/" title="LineByLine">
           LineByLine
         </Link>
         {links ? <Menu items={links} /> : null}

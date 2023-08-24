@@ -18,13 +18,13 @@ export function SectionHeader({
   return (
     <div className="container px-6 mx-auto text-center" {...props}>
       {heading && (
-        <HeadingLevel className="text-3xl font-black sm:text-4xl md:text-5xl lg:text-6xl">
+        <HeadingLevel className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl">
           {heading}
         </HeadingLevel>
       )}
       <div
         data-cy="node--body"
-        className="max-w-xl mx-auto mt-2 text-lg font-light leading-tight text-gray-500 sm:text-xl md:text-2xl"
+        className="max-w-xl mx-auto mt-2 text-gray-400 sm:text-xl md:text-xl"
       >
         {text}
       </div>

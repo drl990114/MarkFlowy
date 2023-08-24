@@ -48,7 +48,6 @@ export default function Home() {
         paragraph={{
           type: 'cards',
           field_heading: t('features.title'),
-          field_background_color: 'muted',
           field_items: [
             {
               field_heading: t('features.feature1.title'),
@@ -74,6 +73,7 @@ export default function Home() {
           type: 'feature',
           field_heading: t('summary.title'),
           field_text: t('summary.desc'),
+          field_background_color: 'muted',
           field_link: {
             id: 'download',
             url: 'https://github.com/linebyline-group/linebyline/releases',
@@ -83,6 +83,7 @@ export default function Home() {
             field_media_image: {
               url: 'https://raw.githubusercontent.com/linebyline-group/linebyline/main/public/logo.svg',
               alt: 'logo',
+              width: 200
             },
           },
         }}

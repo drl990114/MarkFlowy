@@ -19,7 +19,7 @@ export function ParagraphCards({ paragraph, ...props }: ParagraphProps) {
           <div className="grid justify-center gap-20 pt-20 lg:grid-cols-3">
             {paragraph.field_items.map(card => (
               <div key={card.id} className="max-w-sm text-center lg:max-w-none">
-                <h3 className="text-2xl font-bold">{card.field_heading}</h3>
+                <h3 className="text-2xl">{card.field_heading}</h3>
                 {card.field_text && (
                   <div className="pt-2 text-lg"> {card.field_text}</div>
                 )}

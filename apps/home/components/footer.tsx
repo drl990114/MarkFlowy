@@ -7,7 +7,7 @@ interface FooterProps {
 export function Footer({ links }: FooterProps) {
   return (
     <footer className="border-t">
-      <div className="container px-6 py-12 mx-auto">
+      <div className="container px-6 py-12 mx-auto text-2xl">
         <div className="flex flex-col items-center justify-between text-sm md:flex-row">
           <p className="mb-6 md:mb-0">
             © {new Date().getFullYear()} linebyline-group
