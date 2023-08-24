@@ -1,5 +1,5 @@
 import { useGlobalTheme } from "@/hooks"
-import { useCommands } from "@remirror/react"
+import { useCommands } from "@linebyline/editor"
 import { useEffect } from "react"
 
 const useChangeCodeMirrorTheme = () => {
