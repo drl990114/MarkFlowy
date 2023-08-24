@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.2.0] - 2023-08-24
+### :sparkles: New Features
+- [`bc2367d`](https://github.com/linebyline-group/linebyline/commit/bc2367da5fe9fc1bdf05810941e25b108c2ecb5c) - html inline extension *(PR [#245](https://github.com/linebyline-group/linebyline/pull/245) by [@halodong](https://github.com/halodong))*
+  - :arrow_lower_right: *addresses issue [#128](undefined) opened by [@yu2chuan](https://github.com/yu2chuan)*
+- [`0ed036a`](https://github.com/linebyline-group/linebyline/commit/0ed036a018fda511a255860a21b195ae3432644c) - add command to toggle sidebar visible *(commit by [@halodong](https://github.com/halodong))*
+
+### :bug: Bug Fixes
+- [`7140012`](https://github.com/linebyline-group/linebyline/commit/7140012d72dea37051e2184195cfd755c89dc441) - scrollbar css *(commit by [@halodong](https://github.com/halodong))*
+- [`23a6ce9`](https://github.com/linebyline-group/linebyline/commit/23a6ce9feed57c75bf6130e765d8256b1b4e3d42) - same attrs node only render once *(commit by [@halodong](https://github.com/halodong))*
+- [`f4bd5fe`](https://github.com/linebyline-group/linebyline/commit/f4bd5fe4ee4c33197a3fc85137dbf2f7d69beabe) - **editor**: only allow hard break in htmlnline *(commit by [@halodong](https://github.com/halodong))*
+
+
 ## [v0.1.3] - 2023-08-13
 ### :sparkles: New Features
 - [`13a9597`](https://github.com/linebyline-group/linebyline/commit/13a959733a6ee3dbe67b6fba1c6dc8d1d2499f00) - keyboard table *(commit by [@halodong](https://github.com/halodong))*
@@ -78,3 +90,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v0.1.2-alpha]: https://github.com/linebyline-group/linebyline/compare/v0.1.0-alpha...v0.1.2-alpha
 
 [v0.1.3]: https://github.com/linebyline-group/linebyline/compare/v0.1.2-alpha...v0.1.3
+[v0.2.0]: https://github.com/linebyline-group/linebyline/compare/v0.1.3...v0.2.0
