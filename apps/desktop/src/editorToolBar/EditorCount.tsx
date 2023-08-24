@@ -1,4 +1,4 @@
-import { useHelpers } from '@remirror/react'
+import { useHelpers } from '@linebyline/editor'
 import styled from 'styled-components'
 
 const Container = styled.div`

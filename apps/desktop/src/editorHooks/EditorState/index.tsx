@@ -1,5 +1,5 @@
 // This extension is responsible for managing the state of the editor and handle save event.
-import { useHelpers, useKeymap, useRemirrorContext } from '@remirror/react'
+import { useHelpers, useKeymap, useRemirrorContext } from '@linebyline/editor'
 import { invoke } from '@tauri-apps/api'
 import { save } from '@tauri-apps/api/dialog'
 import { listen } from '@tauri-apps/api/event'
