@@ -12,7 +12,7 @@ export function ParagraphHero({
     <section
       data-cy="paragraph-hero"
       className={classNames(
-        'min-h-screen flex items-center pt-18 md:pt-20 lg:pt-20 pb-8 md:pb-12 lg:pb-20',
+        'min-h-screen flex  bg-gray-50 items-center pt-18 md:pt-20 lg:pt-20 pb-8 md:pb-12 lg:pb-20',
       )}
       {...props}
     >

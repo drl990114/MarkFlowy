@@ -18,6 +18,13 @@ interface LinksProps {
   links: DefaultLink[]
 }
 
+type FieldMediaImg = {
+  url: string
+  alt: string
+  width?: number
+  height?: number
+}
+
 interface Paragraph {
   type: 'hero' | 'faq' | 'feature' | 'cards'
   field_heading: string
@@ -25,10 +32,7 @@ interface Paragraph {
   field_background_color?: 'muted'
   field_media_position?: 'left' | 'right'
   field_media?: {
-    field_media_image?: {
-      url: string
-      alt: string
-    }
+    field_media_image?: FieldMediaImg
   }
   field_link?: DefaultLink
   field_links?: LinksProps['links']
@@ -42,7 +46,7 @@ interface Paragraph {
 type ReactText = string | number
 type ReactChild = ReactElement | ReactText
 
-interface ReactNodeArray extends Array<ReactNode> {}
+type ReactNodeArray = ReactNode[]
 type ReactFragment = {} | ReactNodeArray
 type ReactNode =
   | ReactChild
