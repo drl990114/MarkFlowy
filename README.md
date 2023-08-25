@@ -9,7 +9,7 @@
 <h4 align="center">Modern markdown editor.(WIP)</h3>
 
 <p align="center">
-  <a href="https://github.com/vitejs/vite/actions/workflows/ci.yml"><img src="https://github.com/linebyline-group/linebyline/actions/workflows/nodejs.yml/badge.svg?branch=main&color=%23fe7d27" alt="build status"></a>
+  <a href="https://github.com/linebyline-group/linebyline/actions/workflows/nodejs.yml"><img src="https://github.com/linebyline-group/linebyline/actions/workflows/nodejs.yml/badge.svg?branch=main&color=%23fe7d27" alt="build status"></a>
   <a href="https://github.com/linebyline-group/linebyline/releases" target="__blank"><img alt="GitHub downloads" src="https://img.shields.io/github/downloads/linebyline-group/linebyline/total?label=Downloads&color=%23fe7d37"></a>
   <a href="https://github.com/linebyline-group/linebyline/releases" target="__blank"><img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/linebyline-group/linebyline?label=Version"></a>
   <a href="https://github.com/linebyline-group/linebyline" target="__blank"><img alt="GitHub" src="https://img.shields.io/github/commit-activity/w/linebyline-group/linebyline?color=%2346bd1b"></a>
