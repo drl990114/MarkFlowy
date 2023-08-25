@@ -15,7 +15,7 @@
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "@linebyline/editor": "workspace:*",
-    "@mui/material": "^5.14.3",
+    "@mui/material": "^5.14.6",
     "@tauri-apps/api": "^1.4.0",
     "classnames": "^2.3.2",
     "create-context-state": "^2.0.0",
