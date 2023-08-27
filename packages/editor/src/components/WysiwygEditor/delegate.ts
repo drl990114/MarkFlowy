@@ -6,9 +6,10 @@ import { isExtension } from '@remirror/core'
 import type { MarkdownNodeExtension } from '../../extensions'
 import type { ParserRule, NodeSerializerSpecs } from '../../transform'
 import { MarkdownParser, MarkdownSerializer } from '../../transform'
-import type { StringToDoc, DocToString, EditorDelegate } from '../../../types'
+import type { StringToDoc, DocToString, EditorDelegate } from '../../types'
 import EditorExtensions from '../../extensions'
 import "prosemirror-flat-list/dist/style.css"
+import type { Node } from '@remirror/pm/model'
 
 function isMarkdownNodeExtension(extension: unknown): extension is MarkdownNodeExtension {
   return !!(
@@ -47,12 +48,12 @@ export const createWysiwygDelegate = (): EditorDelegate<any>=> {
   const parser = buildMarkdownParser(manager)
   const serializer = buildMarkdownSerializer(manager)
 
-  const stringToDoc: StringToDoc = (content) => {
+  const stringToDoc: StringToDoc = (content: string) => {
     const doc = parser.parse(content)
     return initDocMarks(doc)
   }
 
-  const docToString: DocToString = (doc) => {
+  const docToString: DocToString = (doc: Node) => {
     return serializer.serialize(doc)
   }
 

@@ -4,7 +4,7 @@ import { createContextState } from 'create-context-state'
 import React, { memo } from 'react'
 import styled from 'styled-components'
 import Text from '../Text'
-import type { EditorDelegate } from '../../../types'
+import type { EditorDelegate } from '../../types'
 import { ProsemirrorDevTools } from "@remirror/dev"
 import { DualVisualExtensions } from '../../extensions'
 import { createDualDelegate } from './delegate'

@@ -1,4 +1,4 @@
-import type { EditorState } from '@linebyline/editor/types'
+import type { EditorState } from '../editor-state'
 
 export interface EditContentAction {
   type: 'EDIT_CONTENT'

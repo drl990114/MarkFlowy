@@ -1,5 +1,5 @@
 import type { IFile } from '@/helper/filesys'
-import type { EditorState, Note } from '@linebyline/editor/types'
+import type { EditorViewType } from '@linebyline/editor'
 import type { EditContentAction} from './reducers/edit-content'
 import { editContent } from './reducers/edit-content'
 import type { EditorInitAction} from './reducers/init-content'
@@ -37,10 +37,25 @@ export function initializeState({
 }): EditorState {
   return {
     mode: 'wysiwyg',
-    note: note,
     hasUnsavedChanges: false,
+    note,
     file,
     loaded: false,
     saveedUndoDepth: 0,
   }
 }
+
+export interface Note {
+  content: string
+  deleted: boolean
+}
+
+export type EditorState = {
+    mode: EditorViewType
+    file: IFile
+    note: Note
+    hasUnsavedChanges: boolean
+    saveedUndoDepth: number
+    loaded: boolean
+}
+
