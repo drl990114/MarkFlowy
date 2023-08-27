@@ -8,14 +8,10 @@ import TableToolbar from '../../toolbar/TableToolbar'
 import { ProsemirrorDevTools } from "@remirror/dev"
 import React from "react"
 
-const DevTools: React.FC = () => {
-    return <ProsemirrorDevTools />
-}
-
 export const OffsetContext = createContext({ top: 0, left: 0 })
 
 const WysiwygEditor: FC<WysiwygEditorProps> = (props) => {
-  const { content, hooks, delegate, offset, wysiwygToolBar } = props
+  const { content, hooks, delegate, offset, wysiwygToolBar, isTesting } = props
 
   const editorDelegate = delegate ?? createWysiwygDelegate()
 
@@ -30,7 +26,7 @@ const WysiwygEditor: FC<WysiwygEditorProps> = (props) => {
           <TableToolbar />
           {wysiwygToolBar || null}
           <Text className="w-full markdown-body" />
-          <DevTools />
+          {isTesting ? <ProsemirrorDevTools /> : null}
         </Remirror>
       </OffsetContext.Provider>
     </Wrapper>
@@ -44,6 +40,7 @@ export type EditorChangeHandler = (params: { undoDepth: number }) => void
 
 interface WysiwygEditorProps {
   content: string
+  isTesting?: boolean
   offset?: {
     top: number
     left: number
