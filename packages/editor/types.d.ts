@@ -1,4 +1,3 @@
-import type { IFile } from "@/helper/filesys"
 import type { AnyExtension, ProsemirrorNode, RemirrorManager } from "@remirror/core"
 
 
@@ -23,7 +22,6 @@ type BaseEditorState = {
     mode: EditorViewType
     delegate?: EditorDelegate
     note: Note
-    file: IFile
     hasUnsavedChanges: boolean
     saveedUndoDepth: number
     loaded: boolean
