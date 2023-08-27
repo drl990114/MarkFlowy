@@ -5,6 +5,12 @@ import Wrapper from '../Wrapper'
 import { createWysiwygDelegate } from './delegate'
 import type { EditorDelegate } from '../../../types'
 import TableToolbar from '../../toolbar/TableToolbar'
+import { ProsemirrorDevTools } from "@remirror/dev"
+import React from "react"
+
+const DevTools: React.FC = () => {
+    return <ProsemirrorDevTools />
+}
 
 export const OffsetContext = createContext({ top: 0, left: 0 })
 
@@ -24,6 +30,7 @@ const WysiwygEditor: FC<WysiwygEditorProps> = (props) => {
           <TableToolbar />
           {wysiwygToolBar || null}
           <Text className="w-full markdown-body" />
+          <DevTools />
         </Remirror>
       </OffsetContext.Provider>
     </Wrapper>
@@ -36,9 +43,7 @@ export * from './delegate'
 export type EditorChangeHandler = (params: { undoDepth: number }) => void
 
 interface WysiwygEditorProps {
-  file: Global.IFile
   content: string
-  active: boolean
   offset?: {
     top: number
     left: number

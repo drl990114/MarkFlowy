@@ -7,13 +7,12 @@ import Text from '../Text'
 import type { EditorDelegate } from '../../../types'
 
 import { DualVisualExtensions } from '../../extensions'
+import { createDualDelegate } from './delegate'
 
 type Context = Props
 
 interface Props {
-  file: Global.IFile
   content: string
-  active: boolean
   visual: UseRemirrorReturn<any>
   markText: EditorDelegate
   hooks: (() => void)[]
@@ -66,7 +65,7 @@ function VisualEditor() {
  * The editor which is used to create the annotation. Supports formatting.
  */
 const DualEditor: React.FC<DualEditorProps> = (props) => {
-  const { file, content, active, delegate, hooks, markdownToolBar } = props
+  const { content, delegate, hooks, markdownToolBar } = props
 
   const visual = useRemirror({
     extensions: DualVisualExtensions,
@@ -77,10 +76,8 @@ const DualEditor: React.FC<DualEditorProps> = (props) => {
   return (
     <DualEditorProvider
       content={content}
-      file={file}
-      markText={delegate}
+      markText={delegate || createDualDelegate()}
       visual={visual}
-      active={active}
       hooks={hooks}
     >
       <MarkdownTextEditor markdownToolBar={markdownToolBar} />
@@ -100,8 +97,6 @@ const Devider = styled.div`
   width: 1px;
 `
 interface DualEditorProps {
-  file: Global.IFile
-  active: boolean
   content: string
   delegate: EditorDelegate
   hooks: (() => void)[]
