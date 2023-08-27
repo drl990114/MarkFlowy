@@ -78,8 +78,6 @@
     "micromark-extension-gfm-autolink-literal": "^1.0.5",
     "micromark-extension-gfm-strikethrough": "^1.0.7",
     "nanoid": "^4.0.2",
-    "posthtml-parser": "^0.11.0",
-    "posthtml-render": "^3.0.0",
     "prosemirror-flat-list": "^0.4.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -90,6 +88,7 @@
     "styled-components": "^5.3.11",
     "svgmoji": "^3.2.0",
     "tether-drop": "^1.4.2",
+    "void-elements": "^3.1.0",
     "yjs": "^13.6.6"
   },
   "devDependencies": {
@@ -102,8 +101,10 @@
     "@types/react-dom": "^18.2.7",
     "@types/styled-components": "^5.1.26",
     "@types/tether-drop": "^1.4.9",
+    "@types/void-elements": "^3",
     "@vitejs/plugin-react": "^4.0.1",
     "@vitest/browser": "^0.34.2",
+    "@vitest/ui": "^0.34.3",
     "esbuild": "^0.18.2",
     "esbuild-node-externals": "^1.8.0",
     "esbuild-plugin-alias": "^0.2.1",
