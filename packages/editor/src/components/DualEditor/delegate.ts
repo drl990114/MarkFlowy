@@ -1,5 +1,5 @@
 import { createReactManager } from '@remirror/react'
-import type { StringToDoc, DocToString, EditorDelegate } from '../../../types'
+import type { StringToDoc, DocToString, EditorDelegate } from '../../types'
 import { DocExtension } from 'remirror/extensions'
 import type { RemirrorManager } from 'remirror'
 import { LineCodeMirrorExtension } from '../../extensions/CodeMIrror/codemirror-extension'
@@ -20,7 +20,7 @@ export function createSourceCodeManager(): RemirrorManager<any> {
 export const createDualDelegate = (): EditorDelegate<any> => {
   const manager = createSourceCodeManager()
 
-  const stringToDoc: StringToDoc = (content) => {
+  const stringToDoc: StringToDoc = (content: string) => {
     const schema = manager.schema
     const attrs = { language: 'markdown' }
     const child = content ? schema.text(content) : undefined

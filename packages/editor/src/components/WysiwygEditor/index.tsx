@@ -3,7 +3,7 @@ import { type FC, createContext } from 'react'
 import Text from '../Text'
 import Wrapper from '../Wrapper'
 import { createWysiwygDelegate } from './delegate'
-import type { EditorDelegate } from '../../../types'
+import type { EditorDelegate } from '../../types'
 import TableToolbar from '../../toolbar/TableToolbar'
 import { ProsemirrorDevTools } from "@remirror/dev"
 import React from "react"

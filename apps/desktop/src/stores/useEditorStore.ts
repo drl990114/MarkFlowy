@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { createFile, isMdFile, type IFile } from '@/helper/filesys'
-import type { EditorDelegate } from '@linebyline/editor/types'
+import type { EditorDelegate } from '@linebyline/editor'
 import { invoke } from '@tauri-apps/api'
 
 const findParentNode = (fileNode: IFile, rootFile: IFile) => {

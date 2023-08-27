@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import { DualEditor, WysiwygEditor } from '@linebyline/editor'
-import type { EditorViewType } from '@linebyline/editor/types'
+import type { EditorViewType } from '@linebyline/editor'
 import { invoke } from '@tauri-apps/api'
 import { emit } from '@tauri-apps/api/event'
 import { appWindow } from '@tauri-apps/api/window'
