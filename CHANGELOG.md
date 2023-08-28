@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.2.1] - 2023-08-28
+### :sparkles: New Features
+- [`af416a0`](https://github.com/linebyline-group/linebyline/commit/af416a07424645d473b473fe0ad40cc9d682a0f7) - **editor**: add ProsemirrorDevTools *(commit by [@halodong](https://github.com/halodong))*
+
+### :bug: Bug Fixes
+- [`7f83cb0`](https://github.com/linebyline-group/linebyline/commit/7f83cb0880d50185793c0b34e85c196a3139bc98) - **type**: type split *(commit by [@halodong](https://github.com/halodong))*
+- [`0eb7467`](https://github.com/linebyline-group/linebyline/commit/0eb74670ce4e5e1aba78c968efc494838f542c1b) - codemirror theme *(commit by [@halodong](https://github.com/halodong))*
+- [`f37f8bc`](https://github.com/linebyline-group/linebyline/commit/f37f8bc4caedf68271e47f0b4660556304aca651) - changed dual editor to sourceCode editor *(commit by [@halodong](https://github.com/halodong))*
+
+
 ## [v0.2.0] - 2023-08-24
 ### :sparkles: New Features
 - [`bc2367d`](https://github.com/linebyline-group/linebyline/commit/bc2367da5fe9fc1bdf05810941e25b108c2ecb5c) - html inline extension *(PR [#245](https://github.com/linebyline-group/linebyline/pull/245) by [@halodong](https://github.com/halodong))*
@@ -91,3 +101,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [v0.1.3]: https://github.com/linebyline-group/linebyline/compare/v0.1.2-alpha...v0.1.3
 [v0.2.0]: https://github.com/linebyline-group/linebyline/compare/v0.1.3...v0.2.0
+[v0.2.1]: https://github.com/linebyline-group/linebyline/compare/v0.2.0...v0.2.1
