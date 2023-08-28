@@ -13,7 +13,7 @@ import { assertGet, isPromise, replaceNodeAtPosition } from '@remirror/core'
 import type { EditorSchema, EditorView, NodeView, ProsemirrorNode } from '@remirror/pm'
 import { exitCode } from '@remirror/pm/commands'
 import { Selection, TextSelection } from '@remirror/pm/state'
-import { githubLight, githubDark } from '@uiw/codemirror-theme-github'
+import { light, dark } from '../../theme'
 
 type LoadLanguage = (lang: string) => Promise<LanguageSupport> | LanguageSupport | void
 
@@ -72,7 +72,7 @@ export class CodeMirror6NodeView implements NodeView {
         keymap.of(this.codeMirrorKeymap()),
         changeFilter,
         this.languageConf.of([]),
-        this.editorTheme.of(githubLight),
+        this.editorTheme.of(light),
         ...(extensions ?? []),
       ],
     })
@@ -112,7 +112,7 @@ export class CodeMirror6NodeView implements NodeView {
 
   changeTheme(theme: 'light' | 'dark'): void {
     this.cm.dispatch({
-      effects: this.editorTheme.reconfigure(theme === 'light' ? githubLight : githubDark),
+      effects: this.editorTheme.reconfigure(theme === 'light' ? light : dark),
     })
   }
 
