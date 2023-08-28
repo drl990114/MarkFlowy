@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/rules-of-hooks */
-import { DualEditor, WysiwygEditor } from '@linebyline/editor'
+import { SourceEditor, WysiwygEditor } from '@linebyline/editor'
 import type { EditorViewType } from '@linebyline/editor'
 import { invoke } from '@tauri-apps/api'
 import { emit } from '@tauri-apps/api/event'
@@ -11,7 +11,7 @@ import { getFileObject } from '@/helper/files'
 import { useEditorState } from '@/editorHooks/EditorState'
 import useChangeCodeMirrorTheme from '@/editorHooks/useChangeCodeMirrorTheme'
 import { createWysiwygDelegate } from '@linebyline/editor'
-import { createDualDelegate } from '@linebyline/editor'
+import { createSourceCodeDelegate } from '@linebyline/editor'
 import { useCommandEvent } from '@/editorHooks/CommandEvent'
 import { EditorCount } from '@/editorToolBar/EditorCount'
 
@@ -21,18 +21,14 @@ const EditorWrapper = styled.div<{ active: boolean; type: EditorViewType }>`
 
   ${(props) =>
     props.active
-      ? props.type === 'dual'
-        ? css({
-            display: 'flex',
-            width: '100%',
-          })
-        : css({
-            maxWidth: '800px',
-            margin: '0 auto',
-            padding: '0 20px',
-            marginInlineStart: 'auto',
-            marginInlineEnd: 'auto',
-          })
+      ? css({
+          maxWidth: '800px',
+          margin: '0 auto',
+          padding: '0 20px',
+          paddingBottom: '8rem',
+          marginInlineStart: 'auto',
+          marginInlineEnd: 'auto',
+        })
       : css({
           display: 'none',
         })}
@@ -74,10 +70,10 @@ function Editor(props: EditorProps) {
         const text = getEditorContent(curFile.id)
         setContent(text)
 
-        if (payload === 'dual') {
-          const dualDelegate = createDualDelegate()
-          setEditorDelegate(curFile.id, dualDelegate)
-          setDelegate(dualDelegate)
+        if (payload === 'sourceCode') {
+          const sourceCodeDelegate = createSourceCodeDelegate()
+          setEditorDelegate(curFile.id, sourceCodeDelegate)
+          setDelegate(sourceCodeDelegate)
         } else {
           const wysiwygDelegate = createWysiwygDelegate()
           setEditorDelegate(curFile.id, wysiwygDelegate)
@@ -92,11 +88,14 @@ function Editor(props: EditorProps) {
     }
   }, [active, curFile, type, getEditorContent, setEditorDelegate])
 
-  const handleWrapperClick: React.MouseEventHandler<HTMLDivElement> = useCallback((e) => {
-    if ((e.target as HTMLElement)?.id === 'editorarea-wrapper') {
-      delegate.manager.view.focus()
-    } 
-  }, [delegate.manager.view])
+  const handleWrapperClick: React.MouseEventHandler<HTMLDivElement> = useCallback(
+    (e) => {
+      if ((e.target as HTMLElement)?.id === 'editorarea-wrapper') {
+        delegate.manager.view.focus()
+      }
+    },
+    [delegate.manager.view],
+  )
 
   const editorProps = useMemo(
     () => ({
@@ -110,17 +109,21 @@ function Editor(props: EditorProps) {
           useEditorState({ active, file: curFile })
           useCommandEvent({ active })
           useChangeCodeMirrorTheme()
-        }
+        },
       ],
-      wysiwygToolBar: [<EditorCount key="editor-count" />],
-      markdownToolBar: [<EditorCount key="editor-count" />],
+      wysiwygToolBar: [<EditorCount key='editor-count' />],
+      markdownToolBar: [<EditorCount key='editor-count' />],
     }),
     [curFile, content, active, delegate],
   )
 
   return typeof content === 'string' ? (
-    <EditorWrapper id="editorarea-wrapper" active={active} type={type} onClick={handleWrapperClick}>
-      {type === 'dual' ? <DualEditor {...editorProps} /> : <WysiwygEditor {...editorProps} />}
+    <EditorWrapper id='editorarea-wrapper' active={active} type={type} onClick={handleWrapperClick}>
+      {type === 'sourceCode' ? (
+        <SourceEditor {...editorProps} />
+      ) : (
+        <WysiwygEditor {...editorProps} />
+      )}
     </EditorWrapper>
   ) : null
 }

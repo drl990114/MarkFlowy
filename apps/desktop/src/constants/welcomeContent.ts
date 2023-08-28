@@ -8,7 +8,7 @@ console.log('hello world')
 ## Feature
 
 - **Super lightweight**. linebyline is based on tauri, which ensures ultra-lightweight and fast performance experience.
-- **High availability**. linebyline uses the remirror editor, which not only provides high scalability, but also has a great editing experience. And, linebyline supports multiple editing modes, such as dual, wysiyg.
+- **High availability**. linebyline uses the remirror editor, which not only provides high scalability, but also has a great editing experience. And, linebyline supports multiple editing modes, such as sourceCode, wysiyg.
 
 ## Contribute
 

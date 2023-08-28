@@ -77,7 +77,7 @@ pub fn generate_menu() -> Menu {
     let view_submenu = Submenu::new(
         "View",
         Menu::with_items([MenuItem::EnterFullScreen.into(), MenuItem::Separator.into()])
-            .add_item(CustomMenuItem::new("DualView".to_string(), "Dual"))
+            .add_item(CustomMenuItem::new("SourceCodeView".to_string(), "Source Code"))
             .add_item(CustomMenuItem::new("WysiwygView".to_string(), "Wysiwyg")),
     );
 
@@ -149,10 +149,10 @@ pub fn menu_handler(event: WindowMenuEvent<tauri::Wry>) {
                 .map_err(|err| println!("{:?}", err))
                 .ok();
         }
-        "DualView" => {
+        "SourceCodeView" => {
             event
                 .window()
-                .emit("editor_toggle_type", "dual")
+                .emit("editor_toggle_type", "sourceCode")
                 .map_err(|err| println!("{:?}", err))
                 .ok();
         }
