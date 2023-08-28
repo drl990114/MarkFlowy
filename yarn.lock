@@ -2905,17 +2905,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@lezer/common@npm:^1.0.0, @lezer/common@npm:^1.0.2":
+"@lezer/common@npm:1.0.3, @lezer/common@npm:^1.0.0, @lezer/common@npm:^1.0.2":
   version: 1.0.3
   resolution: "@lezer/common@npm:1.0.3"
   checksum: cc90dc2f0aeaebeb3fe886cbd27f8b1e8bee817d8c2efff178604807debd68c5db820fd23afb830962780063d21891afbdf564420221faca2822e77bc6327184
-  languageName: node
-  linkType: hard
-
-"@lezer/common@npm:^1.0.4":
-  version: 1.0.4
-  resolution: "@lezer/common@npm:1.0.4"
-  checksum: 0bea82da76e0b89afad4e5159d3add460022916352c47906ec67b26d6fe5ec9cb8e23df0e2bf0adef765ae78bed1706fc573a11506d01a80112a5b6dd317730c
   languageName: node
   linkType: hard
 
@@ -2939,7 +2932,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@lezer/highlight@npm:^1.0.0, @lezer/highlight@npm:^1.1.3":
+"@lezer/highlight@npm:^1.0.0, @lezer/highlight@npm:^1.1.3, @lezer/highlight@npm:^1.1.6":
   version: 1.1.6
   resolution: "@lezer/highlight@npm:1.1.6"
   dependencies:
@@ -2989,21 +2982,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@lezer/lr@npm:^1.0.0, @lezer/lr@npm:^1.1.0, @lezer/lr@npm:^1.3.0, @lezer/lr@npm:^1.3.1, @lezer/lr@npm:^1.3.3":
+"@lezer/lr@npm:1.3.9, @lezer/lr@npm:^1.0.0, @lezer/lr@npm:^1.1.0, @lezer/lr@npm:^1.3.0, @lezer/lr@npm:^1.3.1, @lezer/lr@npm:^1.3.3":
   version: 1.3.9
   resolution: "@lezer/lr@npm:1.3.9"
   dependencies:
     "@lezer/common": ^1.0.0
   checksum: d10982bae6c0b2f5a3ab8710a41dc689a4f9e81afafd3d2de4f0bec169f5c3fc9a321c0e90010a51682d41a6755ae90e1f3199134ff194b3ff4058ea5bcdf353
-  languageName: node
-  linkType: hard
-
-"@lezer/lr@npm:^1.3.10":
-  version: 1.3.10
-  resolution: "@lezer/lr@npm:1.3.10"
-  dependencies:
-    "@lezer/common": ^1.0.0
-  checksum: 9d3c22bf692561cf7fe2f3d14e821913f87116ff9d73b8b550e7998b6135baae9f504563846a4257e1bb4eae97ae1b60c06c6066450ddeef5e03e8783526b2ae
   languageName: node
   linkType: hard
 
@@ -3191,8 +3175,9 @@ __metadata:
     "@emotion/react": ^11.11.1
     "@emotion/styled": ^11.11.0
     "@floating-ui/react": ^0.25.1
-    "@lezer/common": ^1.0.4
-    "@lezer/lr": ^1.3.10
+    "@lezer/common": 1.0.3
+    "@lezer/highlight": ^1.1.6
+    "@lezer/lr": 1.3.9
     "@mui/material": 5.14.6
     "@remirror/core": ^2.0.17
     "@remirror/core-types": ^2.0.5

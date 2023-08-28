@@ -4,6 +4,7 @@ import { ThemeProvider } from 'styled-components'
 import darkCss from './dark.css'
 import lightCss from './light.css'
 import { BaseStyle } from './base'
+export * from './codemirror'
 export * from './base'
 
 const THEME_ID = 'linebyline-markdown-theme'

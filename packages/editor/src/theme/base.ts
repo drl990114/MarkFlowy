@@ -7,7 +7,6 @@ import type { ScThemeProps } from '.'
  */
 const styled = { createGlobalStyle }
 
-
 export const BaseStyle = styled.createGlobalStyle<ScThemeProps>`
   .markdown-body {
     -ms-text-size-adjust: 100%;
@@ -171,7 +170,14 @@ export const BaseStyle = styled.createGlobalStyle<ScThemeProps>`
   .markdown-body kbd {
     display: inline-block;
     padding: 3px 5px;
-    font: 11px ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+    font:
+      11px ui-monospace,
+      SFMono-Regular,
+      SF Mono,
+      Menlo,
+      Consolas,
+      Liberation Mono,
+      monospace;
     line-height: 10px;
     color: #c9d1d9;
     vertical-align: middle;
@@ -266,14 +272,28 @@ export const BaseStyle = styled.createGlobalStyle<ScThemeProps>`
   .markdown-body tt,
   .markdown-body code,
   .markdown-body samp {
-    font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+    font-family:
+      ui-monospace,
+      SFMono-Regular,
+      SF Mono,
+      Menlo,
+      Consolas,
+      Liberation Mono,
+      monospace;
     font-size: 12px;
   }
 
   .markdown-body pre {
     margin-top: 0;
     margin-bottom: 0;
-    font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+    font-family:
+      ui-monospace,
+      SFMono-Regular,
+      SF Mono,
+      Menlo,
+      Consolas,
+      Liberation Mono,
+      monospace;
     font-size: 12px;
     word-wrap: normal;
   }
@@ -554,13 +574,16 @@ export const BaseStyle = styled.createGlobalStyle<ScThemeProps>`
     overflow: auto;
     box-sizing: border-box;
     z-index: 100;
-    box-shadow: 0 1px 4px -2px ${props => props.theme.boxShadowColor}, 0 2px 8px 0 ${props => props.theme.boxShadowColor}, 0 8px 16px 4px ${props => props.theme.boxShadowColor};
+    box-shadow:
+      0 1px 4px -2px ${(props) => props.theme.boxShadowColor},
+      0 2px 8px 0 ${(props) => props.theme.boxShadowColor},
+      0 8px 16px 4px ${(props) => props.theme.boxShadowColor};
 
     &__input {
       height: 100%;
       width: 160px;
       outline: none;
-      color: ${props => props.theme.accentColor};
+      color: ${(props) => props.theme.accentColor};
       font-weight: 900;
       background-color: transparent;
       box-sizing: border-box;
@@ -572,7 +595,7 @@ export const BaseStyle = styled.createGlobalStyle<ScThemeProps>`
     padding: 0.5em 1em;
     font-size: 1em;
     cursor: pointer;
-    transition: all .3s;
+    transition: all 0.3s;
 
     &--active {
       background-color: ${(props) => props.theme.borderColor};
@@ -582,35 +605,36 @@ export const BaseStyle = styled.createGlobalStyle<ScThemeProps>`
       background-color: ${(props) => props.theme.tipsBgColor};
     }
   }
-  
+
   .remirror-is-empty {
     color: ${(props) => props.theme.labelFontColor};
   }
 
-  .cm-content {
-    background-color: ${(props) => props.theme.bgColor};
-  }
-  .cm-scroller .cm-gutters {
-    background-color: ${(props) => props.theme.bgColor};
-  }
-  .cm-lineNumbers .cm-gutterElement {
-    margin: 0;
-    background-color: ${(props) => props.theme.bgColor};
-  }
+  .cm-editor {
+    font-size: 14px;
+    line-height: 1.5;
 
-  .html-block {
-    white-space: normal;
+    .cm-line {
+      padding: 2px 2px 2px 6px;;
+    }
 
-    &__decoration{
+    .cm-content {
+      background-color: ${(props) => props.theme.bgColor};
+    }
+    .cm-scroller .cm-gutters {
+      background-color: ${(props) => props.theme.bgColor};
+    }
+    .cm-lineNumbers .cm-gutterElement {
+      margin: 0;
+      background-color: ${(props) => props.theme.bgColor};
+    }
 
-      & input {
-        width: 100%;
-        outline: none;
-      }
+    .cm-gutters {
+      border: none;
+    }
 
-      &--focus {
-        border: ${(props) => props.theme.accentColor} 1px solid;
-      }
+    .cm-gutter.cm-lineNumbers {
+      color: ${(props) => props.theme.labelFontColor};
     }
   }
 `
