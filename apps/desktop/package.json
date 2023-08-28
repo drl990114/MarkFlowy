@@ -42,7 +42,7 @@
     "@babel/plugin-proposal-decorators": "^7.22.10",
     "@remirror/core": "^2.0.17",
     "@tauri-apps/cli": "^1.4.0",
-    "@types/node": "^20.5.0",
+    "@types/node": "^20.5.7",
     "@types/react": "^18.2.18",
     "@types/react-dom": "^18.2.7",
     "@types/react-test-renderer": "^18.0.0",
