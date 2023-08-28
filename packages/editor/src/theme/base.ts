@@ -616,6 +616,10 @@ export const BaseStyle = styled.createGlobalStyle<ScThemeProps>`
 
     .cm-line {
       padding: 2px 2px 2px 6px;;
+      
+      span {
+        line-height: 1.75;
+      }
     }
 
     .cm-content {

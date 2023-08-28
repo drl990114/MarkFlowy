@@ -17,7 +17,7 @@ export function createSourceCodeManager(): RemirrorManager<any> {
   ])
 }
 
-export const createDualDelegate = (): EditorDelegate<any> => {
+export const createSourceCodeDelegate = (): EditorDelegate<any> => {
   const manager = createSourceCodeManager()
 
   const stringToDoc: StringToDoc = (content: string) => {

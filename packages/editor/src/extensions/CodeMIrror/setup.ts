@@ -73,7 +73,11 @@ import { lintKeymap } from '@codemirror/lint'
 export const basicSetup: Extension = (() => [
   EditorView.lineWrapping,
 
-  lineNumbers(),
+  lineNumbers({
+    formatNumber: (line: number) => {
+      return line % 10 === 0 || line === 1 ? `${line}` : ''
+    }
+  }),
   highlightActiveLineGutter(),
   highlightSpecialChars(),
   history(),

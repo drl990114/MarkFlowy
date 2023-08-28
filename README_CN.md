@@ -24,7 +24,7 @@
 
 - **内置ChatGpt**. 当前支持一键导出笔记，让ChatGPT成为你的智能助手。
 - **超轻量**. linebyline 基于 tauri, 拥有小于 10MB 的体积和更好的性能。
-- **高可用性**. linebyline 使用 remirror 作为编辑器核心, 不仅扩展性高，编辑体验也很好。并支持多种编辑模式，如`dual`, `wysiyg`.
+- **高可用性**. linebyline 使用 remirror 作为编辑器核心, 不仅扩展性高，编辑体验也很好。并支持多种编辑模式，如`source code`, `wysiyg`.
 
 ## 下载
 
@@ -64,10 +64,6 @@ linebyline是完全永久开源的，如果你想支持linebyline，你可以`st
 ### 暗黑模式
 
 ![dark mode](./public/screenshots/darkmode.png)
-
-### 双屏模式
-
-![dual mode](./public/screenshots/dualmode.png)
 
 ### 一键导出 ChatGPT 记录
 

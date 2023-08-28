@@ -25,7 +25,7 @@ Currently, LineByLine is still in the alpha phase, and it is recommended to use 
 
 - **Built-in ChatGpt**. Currently supports one-click export of conversations, making chatgpt your smart assistant.
 - **Super lightweight**. The linebyline is based on tauri and has a volume of less than 10MB and better performance.
-- **High availability**. linebyline uses the remirror editor, which not only provides high scalability, but also has a great editing experience. And, linebyline supports multiple editing modes, such as `dual`, `wysiyg`.
+- **High availability**. linebyline uses the remirror editor, which not only provides high scalability, but also has a great editing experience. And, linebyline supports multiple editing modes, such as `source code`, `wysiyg`.
 
 ## Download
 
@@ -65,10 +65,6 @@ linebyline is completely and permanently open source, if you want to support lin
 ### Dark Mode
 
 ![dark mode](./public/screenshots/darkmode.png)
-
-### Dual Mode
-
-![dual mode](./public/screenshots/dualmode.png)
 
 ### One-click export chatgpt conversation
 

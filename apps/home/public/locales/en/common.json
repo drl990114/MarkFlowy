@@ -14,7 +14,7 @@
     },
     "feature3": {
       "title": "High availability",
-      "desc": " linebyline uses the remirror editor, which not only provides high scalability, but also has a great editing experience. And, linebyline supports multiple editing modes, such as dual, wysiyg."
+      "desc": " linebyline uses the remirror editor, which not only provides high scalability, but also has a great editing experience. And, linebyline supports multiple editing modes, such as sourceCode, wysiyg."
     }
   },
   "summary": {
