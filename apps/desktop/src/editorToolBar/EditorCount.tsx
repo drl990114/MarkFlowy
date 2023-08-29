@@ -5,7 +5,7 @@ const Container = styled.div`
   position: fixed;
   right: 0;
   bottom: 0;
-  padding: 8px;
+  padding: 8px 12px 8px 8px;
   z-index: 2;
   opacity: 0.3;
   font-size: 0.9rem;
@@ -22,7 +22,7 @@ export const EditorCount = () => {
 
   return (
     <Container>
-      {wordCount} words {characterCount} characters
+      {wordCount} words {characterCount} chars
     </Container>
   )
 }

@@ -18,8 +18,8 @@ const lightThemeColors = {
   warnColor: '#dc2626',
   tipsBgColor: '#f6f7f9',
   boxShadowColor: 'rgba(0, 0, 0, 0.08)',
-  scrollbarThumbColor: '#e4e4e7',
-  scrollbarTrackColor: '#f6f7f9',
+  scrollbarThumbColor: '#C4C4C4 ',
+  scrollbarTrackColor: '#e4e4e7',
 }
 
 const darkThemeColors = {
@@ -31,7 +31,7 @@ const darkThemeColors = {
   warnColor: '#dc2626',
   tipsBgColor: '#0e1419',
   boxShadowColor: 'rgba(255, 255, 255, 0.04)',
-  scrollbarThumbColor: '#21313d',
+  scrollbarThumbColor: '#2C3C52',
   scrollbarTrackColor: '#0e1419',
 }
 
