@@ -1,14 +1,33 @@
-import { getFileObject } from "@/helper/files"
-import type { IFile } from "@/helper/filesys"
-import { useGlobalTheme } from "@/hooks"
-import { useEditorStore, useEditorStateStore } from "@/stores"
-import { memo } from "react"
-import { TabItem, Dot } from "./styles"
+import { getFileObject } from '@/helper/files'
+import type { IFile } from '@/helper/filesys'
+import { useGlobalTheme } from '@/hooks'
+import { useEditorStore, useEditorStateStore } from '@/stores'
+import { memo, useEffect, useRef } from 'react'
+import autoAnimate from '@formkit/auto-animate'
+import { TabItem, Dot } from './styles'
+import styled, { css } from 'styled-components'
 
+type ContainerProps = {
+  visible: boolean
+}
+const Container = styled.div<ContainerProps>`
+  ${(props) =>
+    !props.visible &&
+    css({
+      display: 'none',
+    })}
+`
 const EditorAreaTabs = memo(() => {
   const { opened, activeId, setActiveId, delOpenedFile } = useEditorStore()
   const { idStateMap } = useEditorStateStore()
   const { themeColors } = useGlobalTheme()
+  const parent = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (parent.current) {
+      autoAnimate(parent.current)
+    }
+  }, [])
 
   const onSelectItem = (id: string) => {
     setActiveId(id)
@@ -28,8 +47,8 @@ const EditorAreaTabs = memo(() => {
     delOpenedFile(id)
   }
 
-  return opened.length > 1 ? (
-    <div className='tab-items'>
+  return (
+    <Container className='tab-items' visible={opened.length > 1} ref={parent}>
       {opened.map((id) => {
         const file = getFileObject(id) as IFile
         const active = activeId === id
@@ -56,8 +75,8 @@ const EditorAreaTabs = memo(() => {
           </TabItem>
         )
       })}
-    </div>
-  ) : null
+    </Container>
+  )
 })
 
 export default EditorAreaTabs
