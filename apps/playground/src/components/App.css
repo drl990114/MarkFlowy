@@ -1,0 +1,53 @@
+html,
+body {
+    margin: 0;
+    height: 100%;
+}
+
+#root {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.playground-debug-button-enable,
+.playground-debug-button-disable {
+    position: fixed;
+    box-sizing: border-box;
+    display: block;
+    padding: 5px 12px 5px 12px;
+    border: 3px solid #fff;
+    right: 16px;
+    bottom: 80px;
+    z-index: 9999;
+    color: #fff;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+    border-radius: 100px;
+    cursor: pointer;
+}
+
+.playground-debug-button-enable:hover,
+.playground-debug-button-disable:hover {
+    opacity: 0.85;
+    transition: opacity 0.3s;
+}
+
+.playground-debug-button-enable {
+    background-color: #ab576c;
+}
+
+.playground-debug-button-disable {
+    background-color: #363753;
+}
+
+.playground-box {
+    display: flex;
+    min-height: min-content;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.playground-self-scroll {
+    overflow: hidden;
+    flex: 1;
+}
