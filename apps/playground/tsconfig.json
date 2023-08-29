@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "include": ["./"],
+  "compilerOptions": {
+      "composite": true,
+      "outDir": "../dist-types/"
+  },
+  "references": [
+      {
+          "path": "../../packages/editor/tsconfig.json"
+      }
+  ]
+}
