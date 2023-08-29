@@ -7,6 +7,12 @@ export const Container = styled.div`
   min-width: calc(100% - 48px);
   user-select: none;
 
+  &:hover {
+    .explorer-bottom {
+      opacity: 1;
+    }
+  }
+
   .explorer-header {
     display: flex;
     justify-content: space-between;
@@ -25,11 +31,7 @@ export const Container = styled.div`
     padding-left: 8px;
     border-top: 1px solid ${(props) => props.theme.borderColor};
     opacity: 0;
-    transition: all .3s ease-in-out;
-
-    &:hover {
-      opacity: 1;
-    }
+    transition: all 0.3s ease-in-out;
   }
 
   .border-t-1-solid {
