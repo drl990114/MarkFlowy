@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use anyhow::Result as AnyResult;
 use std::fs;
 use std::path::Path;
-use regex::Regex;
+use mf_utils::is_md_file_name;
 
 // #[warn(dead_code)]
 #[derive(Serialize, Deserialize, Debug)]
@@ -58,9 +58,7 @@ pub fn read_directory(dir_path: &str) -> Vec<FileInfo> {
             children,
         };
 
-        let reg =  Regex::new(r"\.md$").unwrap();
-
-        if reg.is_match(&new_file_info.name) || meta_unwrap.is_dir() {
+        if is_md_file_name(&new_file_info.name) || meta_unwrap.is_dir() {
             files.push(new_file_info);
         }
     }
