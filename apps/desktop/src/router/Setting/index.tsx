@@ -8,6 +8,7 @@ import Logo from '@/assets/logo.svg'
 import { invoke } from '@tauri-apps/api'
 import TitleBar from '@/components/TitleBar'
 import { KeyboardTable } from './KeyboardTable'
+import { CopyBtn } from '@/components/CopyBtn'
 
 export interface DialogTitleProps {
   children?: ReactNode
@@ -87,7 +88,7 @@ function Setting() {
         </div>
         <div id="detail">
           <div className="conf-path">
-            <small>Path: {confPath}</small>
+            <small>Path: {confPath}  <CopyBtn text={confPath}/></small>
           </div>
           {renderCurrentSettingData()}
         </div>
