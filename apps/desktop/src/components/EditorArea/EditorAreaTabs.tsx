@@ -1,9 +1,8 @@
 import { getFileObject } from '@/helper/files'
 import type { IFile } from '@/helper/filesys'
-import { useGlobalTheme } from '@/hooks'
+import { useAutoAnimate, useGlobalTheme } from '@/hooks'
 import { useEditorStore, useEditorStateStore } from '@/stores'
-import { memo, useEffect, useRef } from 'react'
-import autoAnimate from '@formkit/auto-animate'
+import { memo } from 'react'
 import { TabItem, Dot } from './styles'
 import styled, { css } from 'styled-components'
 
@@ -21,13 +20,7 @@ const EditorAreaTabs = memo(() => {
   const { opened, activeId, setActiveId, delOpenedFile } = useEditorStore()
   const { idStateMap } = useEditorStateStore()
   const { themeColors } = useGlobalTheme()
-  const parent = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (parent.current) {
-      autoAnimate(parent.current)
-    }
-  }, [])
+  const { htmlRef } = useAutoAnimate<HTMLDivElement>()
 
   const onSelectItem = (id: string) => {
     setActiveId(id)
@@ -48,7 +41,7 @@ const EditorAreaTabs = memo(() => {
   }
 
   return (
-    <Container className='tab-items' visible={opened.length > 1} ref={parent}>
+    <Container className='tab-items' visible={opened.length > 1} ref={htmlRef}>
       {opened.map((id) => {
         const file = getFileObject(id) as IFile
         const active = activeId === id
