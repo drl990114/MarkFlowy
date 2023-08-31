@@ -3241,7 +3241,7 @@ __metadata:
     "@remirror/styles": ^2.0.5
     "@remirror/theme": ^2.0.8
     "@remirror/types": ^1.0.1
-    "@types/codemirror": ^5.60.8
+    "@types/codemirror": ^5.60.9
     "@types/lodash": ^4.14.197
     "@types/markdown-it": ^12.2.3
     "@types/mdast": ^3.0.11
@@ -5843,12 +5843,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/codemirror@npm:^5.60.7, @types/codemirror@npm:^5.60.8":
+"@types/codemirror@npm:^5.60.7":
   version: 5.60.8
   resolution: "@types/codemirror@npm:5.60.8"
   dependencies:
     "@types/tern": "*"
   checksum: bc3a63eab0308b3ef5ed2ca22afb7f1c0b8acde6477e1d569df7e93f3fe4f78754d28a3e081c72931259fe1bf906a319b54bcdeba74600b989e5558d32478496
+  languageName: node
+  linkType: hard
+
+"@types/codemirror@npm:^5.60.9":
+  version: 5.60.9
+  resolution: "@types/codemirror@npm:5.60.9"
+  dependencies:
+    "@types/tern": "*"
+  checksum: 89da80a8d5c904f573289769098ad7721a4b58e056c1d08168b967bcfb63e30433d9d0bee0c43ff4b6679b0b7b87cfe942cc3f250ca0365ee244c9fb68ac9a70
   languageName: node
   linkType: hard
 
