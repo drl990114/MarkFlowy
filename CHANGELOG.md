@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.2.2] - 2023-08-31
+### :sparkles: New Features
+- [`3072b4c`](https://github.com/linebyline-group/linebyline/commit/3072b4c6a3ecdeb7fa840e2e45e82bcecc1d50b6) - **desktop**: animate editor tabs *(commit by [@halodong](https://github.com/halodong))*
+- [`2ddf092`](https://github.com/linebyline-group/linebyline/commit/2ddf092fbd7575c15a331c150fac1d8e827c36da) - support copy conf path *(commit by [@halodong](https://github.com/halodong))*
+- [`71559c8`](https://github.com/linebyline-group/linebyline/commit/71559c8246351e12ba7305ef25e13a7f440123ab) - add ErrorBoundary *(commit by [@halodong](https://github.com/halodong))*
+
+### :bug: Bug Fixes
+- [`62b5837`](https://github.com/linebyline-group/linebyline/commit/62b5837f0928f130c1034d2bfe3d22a0e49aaaf2) - **desktop**: ui optimization *(commit by [@halodong](https://github.com/halodong))*
+- [`ad13c1d`](https://github.com/linebyline-group/linebyline/commit/ad13c1dae4b22bf3c80c4a96884d85e1bb55af61) - **playground**: tsconfig *(commit by [@halodong](https://github.com/halodong))*
+- [`160c3e7`](https://github.com/linebyline-group/linebyline/commit/160c3e742e0713d4ae839ba985bda8c4170815de) - **editor**: empty link text error *(commit by [@halodong](https://github.com/halodong))*
+
+
 ## [v0.2.1] - 2023-08-28
 ### :sparkles: New Features
 - [`af416a0`](https://github.com/linebyline-group/linebyline/commit/af416a07424645d473b473fe0ad40cc9d682a0f7) - **editor**: add ProsemirrorDevTools *(commit by [@halodong](https://github.com/halodong))*
@@ -102,3 +114,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v0.1.3]: https://github.com/linebyline-group/linebyline/compare/v0.1.2-alpha...v0.1.3
 [v0.2.0]: https://github.com/linebyline-group/linebyline/compare/v0.1.3...v0.2.0
 [v0.2.1]: https://github.com/linebyline-group/linebyline/compare/v0.2.0...v0.2.1
+[v0.2.2]: https://github.com/linebyline-group/linebyline/compare/v0.2.1...v0.2.2
