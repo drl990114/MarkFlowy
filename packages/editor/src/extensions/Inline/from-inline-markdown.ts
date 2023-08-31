@@ -154,6 +154,23 @@ function flatLink(mdastToken: mdast.Link, depth: number): InlineToken[] {
   const parentStartPos = mdastToken.position!.start.offset!
   const parentEndPos = mdastToken.position!.end.offset!
 
+  if (mdastToken.children.length === 0) {
+    // process [](https://example.com)
+    return [
+      {
+      marks: ['mdText'],
+      attrs: { depth, first: true, last: true },
+      start: mdastToken.position!.start.offset!,
+      end: mdastToken.position!.start.offset! + 2,
+      },
+      {
+        marks: ['mdMark'],
+        attrs: { depth },
+        start: mdastToken.position!.start.offset! + 2,
+        end: parentEndPos,
+      }
+    ]
+  }
   const childrenStartPos = mdastToken.children[0].position!.start.offset!
   const childrenEndPos = mdastToken.children[mdastToken.children.length - 1].position!.end.offset!
 
