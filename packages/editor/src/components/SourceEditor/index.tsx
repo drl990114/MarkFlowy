@@ -1,10 +1,11 @@
-import { Remirror} from '@remirror/react'
+import { Remirror } from '@remirror/react'
 import { createContextState } from 'create-context-state'
 import React, { memo } from 'react'
 import Text from '../Text'
 import type { EditorDelegate } from '../../types'
-import { ProsemirrorDevTools } from "@remirror/dev"
+import { ProsemirrorDevTools } from '@remirror/dev'
 import { createSourceCodeDelegate } from './delegate'
+import ErrorBoundary from '../ErrorBoundary'
 
 type Context = Props
 
@@ -12,26 +13,34 @@ type Props = {
   markText: EditorDelegate
 } & Partial<SourceCodeEditorProps>
 
-const [SourceEditorProvider, useSourceCodeEditor] = createContextState<Context, Props>(({ props }) => {
-  return {
-    ...props,
-  }
-})
+const [SourceEditorProvider, useSourceCodeEditor] = createContextState<Context, Props>(
+  ({ props }) => {
+    return {
+      ...props,
+    }
+  },
+)
 
 const SourceCodeEditorCore = memo((props: { markdownToolBar?: React.ReactNode[] }) => {
   const { markdownToolBar } = props
   const { content, markText, hooks, isTesting } = useSourceCodeEditor()
 
+  let initialCntent
+
+  try {
+    initialCntent = markText.stringToDoc(content!)
+  } catch (error) {
+    return <ErrorBoundary hasError error={error} />
+  }
+
   return (
-    <Remirror
-      manager={markText.manager}
-      initialContent={markText.stringToDoc(content!)}
-      hooks={hooks}
-    >
-      <Text className='h-full w-full overflow-auto px-0' style={{ padding: 0 }} />
-      {markdownToolBar || null}
-      {isTesting ? <ProsemirrorDevTools /> : null}
-    </Remirror>
+    <ErrorBoundary>
+      <Remirror manager={markText.manager} initialContent={initialCntent} hooks={hooks}>
+        <Text className='h-full w-full overflow-auto px-0' style={{ padding: 0 }} />
+        {markdownToolBar || null}
+        {isTesting ? <ProsemirrorDevTools /> : null}
+      </Remirror>
+    </ErrorBoundary>
   )
 })
 

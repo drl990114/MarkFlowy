@@ -46,6 +46,9 @@
         "create": true,
         "setTitle": true,
         "startDragging": true
+      },
+      "shell": {
+        "open": true
       }
     },
     "bundle": {
