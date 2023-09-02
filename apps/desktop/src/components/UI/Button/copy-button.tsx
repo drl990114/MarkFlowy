@@ -18,7 +18,7 @@ const Container = styled.span<ContainerProps>`
   color: ${(props) => (props.checking ? props.theme.successColor : props.theme.primaryFontColor)};
 `
 
-export const CopyBtn: FC<CopyBtnProps> = (props) => {
+export const CopyButton: FC<CopyBtnProps> = (props) => {
   const { text } = props
   const [checking, setChecking] = useState(false)
 
