@@ -1,45 +1,12 @@
 import Button from '@mui/material/Button'
-import Dialog from '@mui/material/Dialog'
-import DialogActions from '@mui/material/DialogActions'
-import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
-import DialogTitle from '@mui/material/DialogTitle'
-import IconButton from '@mui/material/IconButton'
 import { getName, getTauriVersion, getVersion } from '@tauri-apps/api/app'
 import { writeText } from '@tauri-apps/api/clipboard'
 import { listen } from '@tauri-apps/api/event'
 import type { FC } from 'react'
 import { memo, useCallback, useEffect, useState } from 'react'
 import { EVENT } from '@/constants'
-
-export interface DialogTitleProps {
-  children?: React.ReactNode
-  onClose: () => void
-}
-
-export function BootstrapDialogTitle(props: DialogTitleProps) {
-  const { children, onClose, ...other } = props
-
-  return (
-    <DialogTitle sx={{ m: 0, p: 2 }} {...other}>
-      {children}
-      {onClose ? (
-        <IconButton
-          aria-label="close"
-          onClick={onClose}
-          sx={{
-            position: 'absolute',
-            right: 8,
-            top: 8,
-            color: (theme) => theme.palette.grey[500],
-          }}
-        >
-          <i className="ri-close-fill" />
-        </IconButton>
-      ) : null}
-    </DialogTitle>
-  )
-}
+import { MfDialog } from '../UI/Dialog'
 
 const AboutDialog: FC = () => {
   const [open, setOpen] = useState(false)
@@ -82,17 +49,18 @@ TauriVersion: ${appInfo.tauriVersion}
   const handleClose = useCallback(() => setOpen(false), [])
 
   return (
-    <Dialog open={open}>
-      <BootstrapDialogTitle onClose={handleClose}>{appInfo.name}</BootstrapDialogTitle>
-      <DialogContent style={{ width: 450 }}>
-        <DialogContentText>{`Version: ${appInfo.version}`}</DialogContentText>
-        <DialogContentText>{`Tauri Version: ${appInfo.tauriVersion}`}</DialogContentText>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={handleClose}>Ok</Button>
-        <Button onClick={handleCopyAppInfo}>Copy</Button>
-      </DialogActions>
-    </Dialog>
+    <MfDialog
+      open={open}
+      title={appInfo.name}
+      onClose={handleClose}
+      actions={[
+        <Button key='ok' onClick={handleClose}>Ok</Button>,
+        <Button key='copy' onClick={handleCopyAppInfo}>Copy</Button>,
+      ]}
+    >
+      <DialogContentText>{`Version: ${appInfo.version}`}</DialogContentText>
+      <DialogContentText>{`Tauri Version: ${appInfo.tauriVersion}`}</DialogContentText>
+    </MfDialog>
   )
 }
 
