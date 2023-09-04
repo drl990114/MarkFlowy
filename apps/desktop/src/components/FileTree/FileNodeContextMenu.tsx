@@ -1,18 +1,7 @@
 import bus from '@/helper/eventBus'
 import useFileTreeContextMenu from '@/hooks/useContextMenu'
-import { MenuList, MenuItem, ListItemText, Paper } from '@mui/material'
 import { memo } from 'react'
-import styled, { css } from 'styled-components'
-
-const ContextMenu = styled(Paper)<ContextMenuProps>`
-  position: fixed;
-  width: 140px;
-
-  ${({ top, left }) => css`
-    top: ${top}px;
-    left: ${left}px;
-  `}
-`
+import { ContextMenu } from '../UI/ContextMenu'
 
 export const FileNodeContextMenu = memo((props: ContextMenuProps) => {
   const { open, setOpen } = useFileTreeContextMenu()
@@ -25,6 +14,7 @@ export const FileNodeContextMenu = memo((props: ContextMenuProps) => {
       key: 'add_file',
       label: 'Add File',
       handler: () => {
+        setOpen(false)
         bus.emit('SIDEBAR:show-new-input')
       },
     },
@@ -32,34 +22,14 @@ export const FileNodeContextMenu = memo((props: ContextMenuProps) => {
       key: 'delete_file',
       label: 'Delete File',
       handler: () => {
+        setOpen(false)
         bus.emit("SIDEBAR:delete-file")
       }
     }
   ]
 
   return (
-    <ContextMenu {...positionProps}>
-      <MenuList sx={{ padding: 0 }}>
-        {ContextMenuItems.map((menuItem) => {
-          const { key, label, handler } = menuItem
-          return (
-            <MenuItem
-              sx={{ padding: 0.7 }}
-              key={key}
-              onClick={(e) => {
-                e.stopPropagation()
-                setOpen(false)
-                handler()
-              }}
-            >
-              <ListItemText>
-                <span style={{ fontSize: 12 }}>{label}</span>
-              </ListItemText>
-            </MenuItem>
-          )
-        })}
-      </MenuList>
-    </ContextMenu>
+    <ContextMenu {...positionProps} menuData={ContextMenuItems}/>
   )
 })
 
