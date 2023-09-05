@@ -40,7 +40,7 @@ export const ContextMenu = memo((props: ContextMenuProps) => {
   )
 })
 
-interface ContextMenuProps {
+export interface ContextMenuProps {
   top: number
   left: number
   menuData: {

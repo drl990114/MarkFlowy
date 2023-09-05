@@ -1,6 +1,7 @@
 import styled from 'styled-components'
 
 export const Container = styled.div`
+  position: relative;
   overflow-x: auto;
   overflow-y: hidden;
   display: flex;
@@ -21,6 +22,17 @@ export const Container = styled.div`
     &__icon {
       margin: 0 2px;
     }
+  }
+
+  .editor-area-header {
+    padding: 8px;
+    position: absolute;
+    right: 6px;
+    top: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    box-sizing: border-box;
   }
 
   .code-contents {
