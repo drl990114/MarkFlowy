@@ -16,11 +16,11 @@ const useCommandStore = create<CommandStore>((set, get) => {
         }
       })
     },
-    execute: (id: string) => {
+    execute: (id: string, ...args) => {
       const { commands } = get()
       const command = commands[id]
       if (command) {
-        command.exec()
+        command.exec(...args)
       } else {
         console.error(`command ${id} not found`)
       }
@@ -30,8 +30,8 @@ const useCommandStore = create<CommandStore>((set, get) => {
 
 interface CommandStore {
   commands: Commands
-  addCommand: (command: { id: string; handler: () => void }) => void
-  execute: (id: string) => void
+  addCommand: (command: { id: string; handler: (args?: any) => void }) => void
+  execute: (id: string, ...args: any) => void
 }
 
 export default useCommandStore
@@ -39,5 +39,5 @@ export default useCommandStore
 type Commands = Record<string, Command>
 
 interface Command {
-  exec: () => void
+  exec: (args?: any) => void 
 }

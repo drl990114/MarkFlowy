@@ -103,7 +103,7 @@ function Editor(props: EditorProps) {
       content: content!,
       active,
       delegate,
-      offset: { top: 32, left: 16 },
+      offset: { top: 10, left: 16 },
       hooks: [
         () => {
           useEditorState({ active, file: curFile })

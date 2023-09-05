@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useContext, useRef, useState } from 'react'
 import {
   ListItemText,
   ClickAwayListener,
@@ -10,6 +10,7 @@ import {
 } from '@mui/material'
 import { useCommands, type UseMultiPositionerReturn } from '@remirror/react'
 import styled from 'styled-components'
+import { OffsetContext } from '@/components/WysiwygEditor'
 
 const Container = styled.div`
   position: absolute;
@@ -24,6 +25,7 @@ const ActiveCellMenu = (props: ActiveCellMenuProps) => {
   const commands = useCommands()
   const [open, setOpen] = useState(false)
   const anchorRef = useRef<HTMLDivElement>(null)
+  const offset = useContext(OffsetContext)
   const options = [
     {
       label: 'insert column after',
@@ -66,8 +68,8 @@ const ActiveCellMenu = (props: ActiveCellMenuProps) => {
       key={key}
       ref={ref}
       style={{
-        left: x + 16,
-        top: y + 32,
+        left: x + offset.left,
+        top: y + offset.top,
         width: 20,
         height: 20,
       }}
@@ -77,7 +79,7 @@ const ActiveCellMenu = (props: ActiveCellMenuProps) => {
       }}
     >
       <div ref={anchorRef}>
-        <i className="ri-equalizer-line"></i>
+        <i className='ri-equalizer-line'></i>
       </div>
       <Popper
         sx={{
@@ -101,14 +103,13 @@ const ActiveCellMenu = (props: ActiveCellMenuProps) => {
                 <MenuList dense autoFocusItem>
                   {options.map((option) => (
                     <MenuItem
-           
                       key={option.label}
                       onClick={() => {
                         option.handler()
                         setOpen(false)
                       }}
                     >
-                      <ListItemText>{option.label}</ListItemText> 
+                      <ListItemText>{option.label}</ListItemText>
                     </MenuItem>
                   ))}
                 </MenuList>

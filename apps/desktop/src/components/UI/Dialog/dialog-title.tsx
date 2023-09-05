@@ -1,4 +1,4 @@
-import { DialogTitle } from "@mui/material"
+import { DialogTitle } from '@mui/material'
 import IconButton from '@mui/material/IconButton'
 
 export interface DialogTitleProps {
@@ -10,11 +10,11 @@ export function BootstrapDialogTitle(props: DialogTitleProps) {
   const { children, onClose, ...other } = props
 
   return (
-    <DialogTitle sx={{ m: 0, p: 2 }} {...other}>
+    <DialogTitle sx={{ m: 0, p: 2, typography: { fontSize: '16px' } }} {...other}>
       {children}
       {onClose ? (
         <IconButton
-          aria-label="close"
+          aria-label='close'
           onClick={onClose}
           sx={{
             position: 'absolute',
@@ -23,7 +23,7 @@ export function BootstrapDialogTitle(props: DialogTitleProps) {
             color: (theme) => theme.palette.grey[500],
           }}
         >
-          <i className="ri-close-fill" />
+          <i className='ri-close-fill' />
         </IconButton>
       ) : null}
     </DialogTitle>
