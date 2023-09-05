@@ -36,7 +36,16 @@ export const Container = styled.div<ContainerProps>`
     }
 
     &-active {
-      border-left: 4px solid ${(props) => props.theme.accentColor};
+      position: relative;
+
+      &::after {
+        content: '';
+        position: absolute;
+        width: 4px;
+        height: 100%;
+        left: 0;
+        background: ${(props) => props.theme.accentColor};
+      }
     }
 
     &-content {

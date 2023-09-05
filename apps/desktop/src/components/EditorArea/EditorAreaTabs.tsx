@@ -51,7 +51,6 @@ const EditorAreaTabs = memo(() => {
           <TabItem
             active={active}
             onClick={() => onSelectItem(file.id)}
-            className={'tab-item'}
             key={id}
           >
             <i className={'ri-file-3-line tab-items__icon'} />
