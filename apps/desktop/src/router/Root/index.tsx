@@ -7,11 +7,18 @@ import { useEditorStore } from '@/stores'
 import TitleBar, { setTitleBarText } from '@/components/TitleBar'
 import TableDialog from '@/editorToolBar/TableDialog'
 import { useCommandInit } from '@/hooks/useCommandInit'
+import { BookMarkDialog } from '@/bookmarks/BookMarkDialog'
+import useBookMarksStore from '@/bookmarks/useBookMarksStore'
 
 function Root() {
   const { activeId } = useEditorStore()
+  const { getBookMarkList }  = useBookMarksStore()
 
   useCommandInit()
+
+  useEffect(() => {
+    getBookMarkList()
+  }, [getBookMarkList])
 
   useEffect(() => {
     if (!activeId) setTitleBarText(APP_NAME)
@@ -25,6 +32,7 @@ function Root() {
         <EditorArea />
         <AppInfoDialog />
         <TableDialog />
+        <BookMarkDialog />
       </Container>
     </>
   )

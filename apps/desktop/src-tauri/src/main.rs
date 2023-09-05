@@ -6,7 +6,7 @@ mod fc;
 mod menu;
 mod setup;
 
-use app::{conf, keybindings, opened_cache};
+use app::{conf, keybindings, opened_cache, bookmarks};
 
 fn main() {
     let context = tauri::generate_context!();
@@ -29,6 +29,10 @@ fn main() {
             opened_cache::cmd::get_opened_cache,
             opened_cache::cmd::add_recent_workspace,
             opened_cache::cmd::clear_recent_workspaces,
+            bookmarks::cmd::get_bookmarks,
+            bookmarks::cmd::add_bookmark,
+            bookmarks::cmd::edit_bookmark,
+            bookmarks::cmd::remove_bookmark,
         ])
         .setup(setup::init)
         .menu(menu::generate_menu())
