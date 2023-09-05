@@ -53,6 +53,8 @@ export const TabItem = styled.div<TabItemProps>`
   height: 100%;
   box-sizing: border-box;
   white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
 
   &:first-child {
     border-left: none;
