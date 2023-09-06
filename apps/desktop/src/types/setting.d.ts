@@ -3,16 +3,29 @@ declare namespace Setting {
 
   type SettingGroup = Record<string, SettingItem>
 
-  type SettingItem = SelectSettingItem | InputSettingItem
+  type SettingItem = SelectSettingItem | InputSettingItem | SwitchSettingItem | SliderSettingItem
+
+  type BaseSettingItem = {
+    key: string
+    title: string
+    desc?: string
+  }
 
   type SelectSettingItem = {
     type: 'select'
-    key: string
     options: readonly T[]
-  }
+  } & BaseSettingItem
 
   type InputSettingItem = {
     type: 'input'
-    key: string
-  }
+  } & BaseSettingItem
+
+  type SwitchSettingItem = {
+    type: 'switch'
+  } & BaseSettingItem
+
+  type SliderSettingItem = {
+    type: 'slider'
+    scope: [number, number]
+  } & BaseSettingItem
 }

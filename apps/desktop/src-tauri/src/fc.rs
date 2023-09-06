@@ -30,7 +30,6 @@ pub fn read_directory(dir_path: &str) -> Vec<FileInfo> {
     let mut files: Vec<FileInfo> = Vec::new();
 
     for path in paths {
-        println!("path {:?}", path);
         let path_unwrap = path.unwrap();
         let meta = path_unwrap.metadata();
         let meta_unwrap = meta.unwrap();

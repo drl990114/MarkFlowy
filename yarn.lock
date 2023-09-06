@@ -3156,6 +3156,7 @@ __metadata:
     "@remirror/core": ^2.0.17
     "@tauri-apps/api": ^1.4.0
     "@tauri-apps/cli": ^1.4.0
+    "@types/lodash": ^4.14.197
     "@types/node": ^20.5.7
     "@types/react": ^18.2.18
     "@types/react-dom": ^18.2.7
@@ -3174,6 +3175,7 @@ __metadata:
     is-promise: ^4.0.0
     jest-remirror: ^2.1.5
     jsx-dom-cjs: ^8.0.7
+    lodash: ^4.17.21
     nanoid: ^4.0.2
     react: ^18.0.0
     react-dom: ^18.0.0
