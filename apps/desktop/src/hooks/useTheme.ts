@@ -25,7 +25,7 @@ const lightThemeColors = {
 
 const darkThemeColors = {
   primaryFontColor: 'rgba(255, 255, 255, 0.9)',
-  labelFontColor: 'rgba(255, 255, 255, 0.9)',
+  labelFontColor: 'rgba(255, 255, 255, 0.5)',
   accentColor: '#1c78aa',
   borderColor: '#21313d',
   bgColor: '#11191f',
