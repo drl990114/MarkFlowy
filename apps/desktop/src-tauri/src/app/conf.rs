@@ -13,9 +13,11 @@ macro_rules! pub_struct {
 }
 
 pub_struct!(AppConf {
-    theme: String,
-    language: String,
-    extensions_chatgpt_apikey: String,
+    theme: Option<String>,
+    language: Option<String>,
+    extensions_chatgpt_apikey: Option<String>,
+    autosave: Option<bool>,
+    autosave_interval: Option<u32>,
 });
 
 pub const APP_CONF_PATH: &str = "linebyline.conf.json";
@@ -27,9 +29,11 @@ pub fn app_root() -> PathBuf {
 impl AppConf {
     pub fn new() -> Self {
         Self {
-            theme: "light".to_string(),
-            language: "en".to_string(),
-            extensions_chatgpt_apikey: "".to_string(),
+            theme: Some("light".to_string()),
+            language: Some("en".to_string()),
+            autosave: Some(false),
+            autosave_interval: Some(2000),
+            extensions_chatgpt_apikey: Some("".to_string()),
         }
     }
 
@@ -37,16 +41,44 @@ impl AppConf {
         app_root().join(APP_CONF_PATH)
     }
 
+    /**
+     * merge old config
+     *
+     * Generally used to be compatible with the original config when versions are different.
+     */
+    pub fn merge_conf(mut self, oldconf: AppConf) -> Self {
+        if oldconf.theme.is_some() {
+            self.theme = oldconf.theme;
+        }
+        if oldconf.language.is_some() {
+            self.language = oldconf.language;
+        }            
+        if oldconf.autosave.is_some() {
+            self.autosave = oldconf.autosave;
+        }
+        if oldconf.autosave_interval.is_some() {
+            self.autosave_interval = oldconf.autosave_interval;
+        }
+        if oldconf.extensions_chatgpt_apikey.is_some() {
+            self.extensions_chatgpt_apikey = oldconf.extensions_chatgpt_apikey;
+        }
+        self.write()
+    }
+
     pub fn read() -> Self {
         match std::fs::read_to_string(Self::file_path()) {
             Ok(v) => {
-                if let Ok(v2) = serde_json::from_str::<AppConf>(&v) {
-                    v2
-                } else {
-                    Self::default()
+                match serde_json::from_str::<AppConf>(&v) {
+                    Ok(v) => return Self::new().merge_conf(v),
+                    Err(err) => {
+                        Self::default().write()
+                    }
                 }
             }
-            Err(err) => Self::default(),
+            Err(err) => {
+                print!("read err,{}", err);
+                Self::default()
+            }
         }
     }
 
@@ -83,7 +115,7 @@ impl AppConf {
     }
 
     pub fn get_theme() -> String {
-        Self::read().theme.to_lowercase()
+        Self::read().theme.unwrap().to_lowercase()
     }
 
     pub fn theme_mode() -> Theme {
@@ -99,7 +131,7 @@ impl AppConf {
     }
 
     pub fn theme_check(self, mode: &str) -> bool {
-        self.theme.to_lowercase() == mode
+        self.theme.unwrap().to_lowercase() == mode
     }
 }
 

@@ -1,6 +1,18 @@
 const settingMap = {
   general: {
-    misc: {
+    "Auto Save": {
+      autosave: {
+        key: 'autosave',
+        desc: 'Enable auto save, Active file will be automatically saved at set intervals.',
+        type: 'switch',
+      },
+      autosaveInterval: {
+        key: 'autosave_interval',
+        type: 'slider',
+        scope: [1000, 10000]
+      }
+    },
+    "Misc": {
       language: {
         key: 'language',
         type: 'select',
@@ -32,8 +44,6 @@ export enum SettingKeys {
   language = 'language',
   chatgpt = 'extensions_chatgpt_apikey',
 }
-
-export const SETTING_VERSION = '0.0.2'
 
 export default settingMap
 

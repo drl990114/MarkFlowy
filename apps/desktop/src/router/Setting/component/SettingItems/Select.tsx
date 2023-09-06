@@ -2,6 +2,7 @@ import Autocomplete from '@mui/material/Autocomplete'
 import { useEffect, useState } from 'react'
 import type { SettingItemProps } from '.'
 import { useGlobalSettingData } from '@/hooks'
+import styled from 'styled-components'
 
 const SelectSettingItem: React.FC<
   SettingItemProps<Setting.SelectSettingItem>
@@ -21,14 +22,13 @@ const SelectSettingItem: React.FC<
   }, [curValue])
 
   return (
-    <label>
-      <label className="setting-item__label">{itemKey}:</label>
+    <Container>
+      <label className="setting-item__label">{itemKey}</label>
       <Autocomplete
         className="setting-item__form"
         sx={{
           'display': 'inline-block',
           '& input': {
-            width: 200,
             bgcolor: 'background.paper',
             color: theme =>
               theme.palette.getContrastText(theme.palette.background.paper),
@@ -57,8 +57,14 @@ const SelectSettingItem: React.FC<
           </div>
         )}
       />
-    </label>
+    </Container>
   )
 }
+
+const Container = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+`
 
 export default SelectSettingItem
