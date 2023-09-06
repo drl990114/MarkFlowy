@@ -2,10 +2,11 @@ import { useCallback, useEffect, useState } from 'react'
 import type { SettingItemProps } from '.'
 import { useGlobalSettingData } from '@/hooks'
 import { Slider } from '@mui/material'
-import styled from 'styled-components'
+import { SettingLabel } from './Label'
+import { SettingItemContainer } from './Container'
 
 const SliderSettingItem: React.FC<SettingItemProps<Setting.SliderSettingItem>> = (props) => {
-  const { item, itemKey } = props
+  const { item } = props
   const [settingData, handler] = useGlobalSettingData()
   const { writeSettingData } = handler
   const curValue = settingData[item.key] as unknown as number
@@ -23,8 +24,8 @@ const SliderSettingItem: React.FC<SettingItemProps<Setting.SliderSettingItem>> =
   )
 
   return (
-    <Container>
-      <label className='setting-item__label'>{itemKey}</label>
+    <SettingItemContainer>
+      <SettingLabel item={item}/>
       <Slider
         className='setting-item__slider'
         value={value}
@@ -33,18 +34,8 @@ const SliderSettingItem: React.FC<SettingItemProps<Setting.SliderSettingItem>> =
         min={item.scope[0]}
         max={item.scope[1]}
       />
-    </Container>
+    </SettingItemContainer>
   )
 }
-
-const Container = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  .setting-item__slider {
-    width: 120px;
-  }
-`
 
 export default SliderSettingItem

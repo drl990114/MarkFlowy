@@ -2,11 +2,13 @@ import { Input } from '@/components/Input'
 import { useCallback, useEffect, useState } from 'react'
 import type { SettingItemProps } from '.'
 import { useGlobalSettingData } from '@/hooks'
+import { SettingLabel } from './Label'
+import { SettingItemContainer } from './Container'
 
 const InputSettingItem: React.FC<SettingItemProps<Setting.InputSettingItem>> = (
   props,
 ) => {
-  const { item, itemKey } = props
+  const { item } = props
   const [settingData, handler] = useGlobalSettingData()
   const { writeSettingData } = handler
   const curValue = settingData[item.key] as unknown as string
@@ -26,14 +28,13 @@ const InputSettingItem: React.FC<SettingItemProps<Setting.InputSettingItem>> = (
   )
 
   return (
-    <label className='setting-item'>
-      <label className="setting-item__label">{itemKey}:</label>
+    <SettingItemContainer>
+      <SettingLabel item={item} />
       <Input
-        className="setting-item__form"
         value={value}
         onChange={handleChange}
       />
-    </label>
+    </SettingItemContainer>
   )
 }
 

@@ -109,6 +109,7 @@ export const Container = styled.div`
     flex: 1;
     padding: 1rem 2rem;
     width: 100%;
+    overflow: auto;
     background: ${(props) => props.theme.bgColor};
 
     & .conf-path {

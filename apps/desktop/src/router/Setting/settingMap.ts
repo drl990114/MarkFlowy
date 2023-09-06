@@ -3,12 +3,15 @@ const settingMap = {
     "Auto Save": {
       autosave: {
         key: 'autosave',
-        desc: 'Enable auto save, Active file will be automatically saved at set intervals.',
+        title: 'Switch auto save',
+        desc: 'Switch auto save, Active file will be automatically saved at set intervals.',
         type: 'switch',
       },
       autosaveInterval: {
         key: 'autosave_interval',
         type: 'slider',
+        title: 'Auto save interval',
+        desc: 'Set the interval of auto save, in milliseconds.',
         scope: [1000, 10000]
       }
     },
@@ -16,6 +19,8 @@ const settingMap = {
       language: {
         key: 'language',
         type: 'select',
+        title: 'Language',
+        desc: 'Set the language of the app.',
         options: [
           {
             title: 'English',
@@ -34,6 +39,8 @@ const settingMap = {
       ApiKey: {
         key: 'extensions_chatgpt_apikey',
         type: 'input',
+        title: 'Api Key',
+        desc: 'Api Key for ChatGPT',
       },
     },
   },

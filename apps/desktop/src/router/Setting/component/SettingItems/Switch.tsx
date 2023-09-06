@@ -2,12 +2,13 @@ import { useCallback, useEffect, useState } from 'react'
 import type { SettingItemProps } from '.'
 import { useGlobalSettingData } from '@/hooks'
 import { Switch } from '@mui/material'
-import styled from 'styled-components'
+import { SettingItemContainer } from './Container'
+import { SettingLabel } from './Label'
 
 const SwitchSettingItem: React.FC<SettingItemProps<Setting.SwitchSettingItem>> = (
   props,
 ) => {
-  const { item, itemKey } = props
+  const { item } = props
   const [settingData, handler] = useGlobalSettingData()
   const { writeSettingData } = handler
   const curValue = settingData[item.key] as unknown as boolean
@@ -19,28 +20,22 @@ const SwitchSettingItem: React.FC<SettingItemProps<Setting.SwitchSettingItem>> =
   }, [curValue, value])
 
   const handleChange = useCallback(
-    (e: { target: { value: any } }) => {
-      const settingValue = e.target.value
+    (e: React.ChangeEvent<HTMLInputElement> ) => {
+      const settingValue = e.target.checked
       writeSettingData(item, settingValue)
     },
     [item, writeSettingData],
   )
 
   return (
-    <Container>
-      <label className="setting-item__label">{itemKey}</label>
+    <SettingItemContainer>
+      <SettingLabel item={item}/>
       <Switch
-        value={value}
+        checked={value}
         onChange={handleChange}
       />
-    </Container>
+    </SettingItemContainer>
   )
 }
-
-const Container = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-`
 
 export default SwitchSettingItem
