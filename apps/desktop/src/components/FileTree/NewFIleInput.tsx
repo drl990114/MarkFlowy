@@ -13,9 +13,16 @@ import {
 } from 'react'
 import { Input } from '../Input'
 import { Validity } from '../Validity'
+import { unVerifiedFileNameChars, verifyFileName } from './verify-file-name'
 
 export type NewInputRef = {
   show: (args: { fileNode: IFile }) => void
+}
+
+const InvalidTextMap = {
+  same: 'has same file',
+  empty: 'file name can not be empty',
+  invalid: `invalid file name, file name can not include ${unVerifiedFileNameChars.join(' ')}`,
 }
 
 const NewFileInput = forwardRef<NewInputRef, HTMLAttributes<HTMLInputElement>>((props, ref) => {
@@ -24,6 +31,7 @@ const NewFileInput = forwardRef<NewInputRef, HTMLAttributes<HTMLInputElement>>((
   const [inputName, setInputName] = useState('')
   const contextFileNode = useRef<IFile>()
   const [invalidState, setInvalidState] = useState(false)
+  const [invalidText, setInvalidText] = useState(InvalidTextMap.same)
   const { addFile } = useEditorStore()
 
   const styleProps = useMemo(() => ({ className, style}), [className, style])
@@ -65,10 +73,26 @@ const NewFileInput = forwardRef<NewInputRef, HTMLAttributes<HTMLInputElement>>((
       event.preventDefault()
       if (!event.shiftKey && event.keyCode === 13) {
         if (!contextFileNode.current) return
+        if (inputName === '') {
+          setInvalidText(InvalidTextMap.empty)
+          setInvalidState(true)
+          setTimeout(() => {
+            setInvalidState(false)
+          }, 2000)
+          return
+        } else if (verifyFileName(inputName) === false) {
+          setInvalidText(InvalidTextMap.invalid)
+          setInvalidState(true)
+          setTimeout(() => {
+            setInvalidState(false)
+          }, 2000)
+          return
+        }
+
         const res = addFile(contextFileNode.current, { name: inputName, kind: 'file' })
 
         if (res === false) {
-          // TODO has same file
+          setInvalidText(InvalidTextMap.same)
           setInvalidState(true)
           setTimeout(() => {
             setInvalidState(false)
@@ -90,7 +114,7 @@ const NewFileInput = forwardRef<NewInputRef, HTMLAttributes<HTMLInputElement>>((
   if (!visible) return null
 
   return (
-    <Validity invalidText='has same file' invalidState={invalidState} {...styleProps}>
+    <Validity invalidText={invalidText} invalidState={invalidState} {...styleProps}>
       <Input
         value={inputName}
         onChange={handleChange}
