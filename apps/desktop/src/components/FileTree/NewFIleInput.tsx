@@ -14,6 +14,7 @@ import {
 import { Input } from '../Input'
 import { Validity } from '../Validity'
 import { unVerifiedFileNameChars, verifyFileName } from './verify-file-name'
+import { EVENT } from '@/constants'
 
 export type NewInputRef = {
   show: (args: { fileNode: IFile }) => void
@@ -54,10 +55,10 @@ const NewFileInput = forwardRef<NewInputRef, HTMLAttributes<HTMLInputElement>>((
   }, [visible, hideInput])
 
   useEffect(() => {
-    bus.on('SIDEBAR:hide-new-input', hideInput)
+    bus.on(EVENT.sidebar_show_new_input, hideInput)
 
     return () => {
-      bus.detach('SIDEBAR:hide-new-input', hideInput)
+      bus.detach(EVENT.sidebar_show_new_input, hideInput)
     }
   }, [hideInput])
 
