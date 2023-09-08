@@ -13,6 +13,10 @@ export function getFileObject(id: string): IFile {
   return entries[id]
 }
 
+export function updateFileObject(id: string, file: IFile): void {
+  entries[id] = file
+}
+
 export function setFileObjectByPath(path: string, file: IFile): void {
   pathEntries[path] = file
 }

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { getFileNameFromPath, isMdFile } from '../filesys'
+import { getFileNameFromPath, getFolderPathFromPath, isMdFile } from '../filesys'
 
 describe('test helper/filesys ', () => {
   it('getFileNameFromPath', () => {
@@ -18,5 +18,13 @@ describe('test helper/filesys ', () => {
     expect(isMdFile(macPath)).toBe(true)
     expect(isMdFile(winPath)).toBe(true)
     expect(isMdFile(otherPath)).toBe(false)
+  })
+
+  it('getFolderPathFromPath', () => {
+    const macPath = '/path/to/myfile.txt'
+    const winPath = 'C:\\path\\to\\myfile.txt'
+
+    expect(getFolderPathFromPath(macPath)).toBe('/path/to')
+    expect(getFolderPathFromPath(winPath)).toBe('C:\\path\\to')
   })
 })
