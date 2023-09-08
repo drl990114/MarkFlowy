@@ -1,7 +1,7 @@
 import { EditorGlobalStyles } from '@linebyline/editor'
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles'
 import { invoke } from '@tauri-apps/api'
-import { emit, listen } from '@tauri-apps/api/event'
+import { listen } from '@tauri-apps/api/event'
 import type { Theme } from '@tauri-apps/api/window'
 import { useCallback, useEffect } from 'react'
 import { Route, Routes } from 'react-router-dom'
@@ -18,6 +18,7 @@ import type { WorkspaceInfo } from '@/stores/useOpenedCacheStore'
 import useOpenedCacheStore from '@/stores/useOpenedCacheStore'
 import { cacheStore } from './helper/cacheStore'
 import 'remixicon/fonts/remixicon.css'
+import bus from './helper/eventBus'
 
 function App() {
   useGlobalOSInfo()
@@ -115,8 +116,7 @@ function App() {
 
   const eventInit = useCallback(() => {
     const unListenMenu = listen<string>('native:menu', ({ payload }) => {
-      // TODO Refactor: use a eventemitter in pure web runtime
-      emit(payload)
+      bus.emit(payload)
     })
 
     const unListenChangeTheme = listen('change_theme', ({ payload }) => {

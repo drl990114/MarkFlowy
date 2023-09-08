@@ -23,7 +23,7 @@ pub fn generate_menu() -> Menu {
     let file_submenu = Submenu::new(
         "File",
         Menu::new().add_item(
-            CustomMenuItem::new("Save".to_string(), "Save").accelerator(
+            CustomMenuItem::new("editor:save".to_string(), "Save").accelerator(
                 keyboard_infos
                     .get_accelerator("editor:save".to_string())
                     .unwrap(),
@@ -77,7 +77,10 @@ pub fn generate_menu() -> Menu {
     let view_submenu = Submenu::new(
         "View",
         Menu::with_items([MenuItem::EnterFullScreen.into(), MenuItem::Separator.into()])
-            .add_item(CustomMenuItem::new("SourceCodeView".to_string(), "Source Code"))
+            .add_item(CustomMenuItem::new(
+                "SourceCodeView".to_string(),
+                "Source Code",
+            ))
             .add_item(CustomMenuItem::new("WysiwygView".to_string(), "Wysiwyg")),
     );
 
@@ -103,16 +106,11 @@ pub fn menu_handler(event: WindowMenuEvent<tauri::Wry>) {
     let window = event.window();
     let menu_handle = window.menu_handle();
 
-    window.emit("native:menu", menu_id).unwrap();
+    window
+        .emit("native:menu", menu_id)
+        .unwrap();
 
     match menu_id {
-        "Save" => {
-            event
-                .window()
-                .emit("file_save", {})
-                .map_err(|err| println!("{:?}", err))
-                .ok();
-        }
         "theme_light" | "theme_dark" => {
             let theme = match menu_id {
                 "theme_dark" => "dark",

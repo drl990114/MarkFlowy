@@ -2,7 +2,6 @@
 import { useHelpers, useKeymap, useRemirrorContext } from '@linebyline/editor'
 import { invoke } from '@tauri-apps/api'
 import { save } from '@tauri-apps/api/dialog'
-import { listen } from '@tauri-apps/api/event'
 import { t } from 'i18next'
 import type { FC } from 'react'
 import { useCallback, useEffect, useMemo, useReducer } from 'react'
@@ -10,10 +9,14 @@ import { editorReducer, initializeState } from './editor-state'
 import { getFileNameFromPath, type IFile } from '@/helper/filesys'
 import { useEditorStateStore, useEditorStore } from '@/stores'
 import { useTitleEffect } from '@/hooks/useTitleEffect'
-import type { KeyBindingProps } from '@remirror/core'
 import { useGlobalSettingData } from '@/hooks'
 import { debounce } from 'lodash'
 import { updateFileObject } from '@/helper/files'
+import bus from '@/helper/eventBus'
+
+type SaveHandlerParams = {
+  onSuccess?: () => void
+}
 
 export const useEditorState: FC<EditorStateProps> = ({ active, file }) => {
   const ctx = useRemirrorContext()
@@ -36,10 +39,10 @@ export const useEditorState: FC<EditorStateProps> = ({ active, file }) => {
   }, [state, file.id, setIdStateMap, active])
 
   const saveHandler = useCallback(
-    async (editorContent?: string) => {
+    async ({ onSuccess }: SaveHandlerParams = {}) => {
       if (!active) return
 
-      const content = editorContent ?? getEditorContent(file.id)
+      const content = getEditorContent(file.id)
 
       console.log('editorContent', content)
 
@@ -54,15 +57,19 @@ export const useEditorState: FC<EditorStateProps> = ({ active, file }) => {
             if (path === null) return
             const filename = getFileNameFromPath(path)
             updateFileObject(file.id, { ...file, path, name: filename })
-            insertNodeToFolderData({...file, name: filename, content, path })
-            invoke('write_file', { filePath: path, content })
+            insertNodeToFolderData({ ...file, name: filename, content, path })
+            invoke('write_file', { filePath: path, content }).then(() => {
+              onSuccess?.()
+            })
             dispatch({
               type: 'SAVE_CONTENT',
               payload: { content, undoDepth: helpers.undoDepth() },
             })
           })
         } else {
-          invoke('write_file', { filePath: file.path, content })
+          invoke('write_file', { filePath: file.path, content }).then(() => {
+            onSuccess?.()
+          })
           dispatch({
             type: 'SAVE_CONTENT',
             payload: { content, undoDepth: helpers.undoDepth() },
@@ -87,20 +94,10 @@ export const useEditorState: FC<EditorStateProps> = ({ active, file }) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const debounceSaveHandler = useCallback(debounceSave, [settingData, debounceSave])
 
-  const saveEventHandler = useCallback(() => {
+  useKeymap('Mod-s', () => {
     saveHandler()
-  }, [saveHandler])
-
-  const handleSaveShortcut = useCallback(
-    (params: KeyBindingProps) => {
-      saveHandler(curDelegate?.docToString(params.state.doc))
-      return true // Prevents any further key handlers from being run.
-    },
-    [curDelegate, saveHandler],
-  )
-
-  // "Mod" means platform agnostic modifier key - i.e. Ctrl on Windows, or Cmd on MacOS
-  useKeymap('Mod-s', handleSaveShortcut)
+    return true
+  })
 
   useEffect(() => {
     ctx.manager.addHandler('stateUpdate', (params) => {
@@ -118,11 +115,16 @@ export const useEditorState: FC<EditorStateProps> = ({ active, file }) => {
   }, [ctx, helpers, curDelegate, settingData, saveHandler, debounceSaveHandler])
 
   useEffect(() => {
-    const unListenFileSave = listen('file_save', saveEventHandler)
-    return () => {
-      unListenFileSave.then((fn) => fn())
+    const callback = (hooks: SaveHandlerParams) => {
+      saveHandler({ onSuccess: hooks?.onSuccess })
     }
-  }, [saveEventHandler])
+
+    bus.on('editor:save', callback)
+
+    return () => {
+      bus.detach('editor:save', callback)
+    }
+  }, [saveHandler])
 
   return null
 }
