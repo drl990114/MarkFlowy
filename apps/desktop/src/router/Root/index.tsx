@@ -3,11 +3,12 @@ import { Container } from './styles'
 import { AppInfoDialog, SideBar } from '@/components'
 import EditorArea from '@/components/EditorArea'
 import { useEditorStore } from '@/stores'
-import TitleBar, { setTitleBarText } from '@/components/TitleBar'
+import { setTitleBarText } from '@/components/TitleBar'
 import TableDialog from '@/editorToolBar/TableDialog'
 import { useCommandInit } from '@/hooks/useCommandInit'
 import { BookMarkDialog } from '@/bookmarks/BookMarkDialog'
 import useBookMarksStore from '@/bookmarks/useBookMarksStore'
+import { PageLayout } from '@/layout/PageLayout'
 
 function Root() {
   const { activeId } = useEditorStore()
@@ -24,8 +25,9 @@ function Root() {
   }, [activeId])
 
   return (
-    <>
-      <TitleBar />
+    <PageLayout>
+      {/* TODO customer titlebar, when tauri 2.0 stable. */}
+      {/* <TitleBar /> */}
       <Container>
         <SideBar />
         <EditorArea />
@@ -33,7 +35,7 @@ function Root() {
         <TableDialog />
         <BookMarkDialog />
       </Container>
-    </>
+    </PageLayout>
   )
 }
 
