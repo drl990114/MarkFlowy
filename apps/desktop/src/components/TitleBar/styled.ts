@@ -1,5 +1,6 @@
-import { TITLEBAR_HEIGHT } from '@/constants/styled'
 import styled from 'styled-components'
+
+const TITLEBAR_HEIGHT = '32px'
 
 export const TitleBarBg = styled.div`
   height: ${TITLEBAR_HEIGHT};

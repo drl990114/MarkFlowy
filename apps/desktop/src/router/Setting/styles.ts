@@ -1,10 +1,9 @@
-import { TITLEBAR_HEIGHT } from '@/constants/styled'
 import styled from 'styled-components'
 
 export const Container = styled.div`
   display: flex;
-  height: calc(100vh - ${TITLEBAR_HEIGHT});
-  margin-top: ${TITLEBAR_HEIGHT};
+  flex: 1;
+  height: 100vh;
 
   #sidebar {
     width: 250px;

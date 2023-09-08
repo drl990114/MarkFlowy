@@ -182,12 +182,12 @@ pub mod cmd {
                     .inner_size(1000.0, 600.0)
                     .min_inner_size(500.0, 500.0);
 
-            #[cfg(target_os = "macos")]
-            {
-                conf_win = conf_win
-                    .title_bar_style(TitleBarStyle::Overlay)
-                    .hidden_title(true);
-            }
+            // #[cfg(target_os = "macos")]
+            // {
+            //     conf_win = conf_win
+            //         .title_bar_style(TitleBarStyle::Overlay)
+            //         .hidden_title(true);
+            // }
 
             conf_win.build().unwrap();
         });

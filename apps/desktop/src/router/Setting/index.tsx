@@ -6,9 +6,9 @@ import { Container } from './styles'
 import settingMap from '@/router/Setting/settingMap'
 import Logo from '@/assets/logo.svg'
 import { invoke } from '@tauri-apps/api'
-import TitleBar from '@/components/TitleBar'
 import { KeyboardTable } from './KeyboardTable'
 import { CopyButton } from '@/components/UI/Button'
+import { PageLayout } from '@/layout/PageLayout'
 
 export interface DialogTitleProps {
   children?: ReactNode
@@ -54,8 +54,8 @@ function Setting() {
   }
 
   return (
-    <>
-      <TitleBar transparent />
+    <PageLayout>
+      {/* <TitleBar transparent /> */}
       <Container>
         <div id="sidebar">
           <div className="title">
@@ -93,7 +93,7 @@ function Setting() {
           {renderCurrentSettingData()}
         </div>
       </Container>
-    </>
+    </PageLayout>
   )
 }
 

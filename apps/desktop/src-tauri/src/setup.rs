@@ -17,12 +17,12 @@ pub fn init(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
             .inner_size(1200.0, 800.0)
             .min_inner_size(400.0, 400.0);
 
-        #[cfg(target_os = "macos")]
-        {
-            main_win = main_win
-                .title_bar_style(TitleBarStyle::Overlay)
-                .hidden_title(true);
-        }
+        // #[cfg(target_os = "macos")]
+        // {
+        //     main_win = main_win
+        //         .title_bar_style(TitleBarStyle::Overlay)
+        //         .hidden_title(true);
+        // }
 
         main_win.build().unwrap();
     });
