@@ -5,7 +5,7 @@ export const GlobalStyles = createGlobalStyle<ScThemeProps>`
   body {
     background-color: ${(props) => props.theme.bgColor};
     color: ${(props) => props.theme.primaryFontColor};
-    font-family: -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji";
+    font-family: "Open Sans", "Clear Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
   }
 
   .icon {
