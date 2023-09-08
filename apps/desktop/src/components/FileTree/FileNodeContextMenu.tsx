@@ -2,6 +2,7 @@ import bus from '@/helper/eventBus'
 import useFileTreeContextMenu from '@/hooks/useContextMenu'
 import { memo } from 'react'
 import { ContextMenu } from '../UI/ContextMenu'
+import { EVENT } from '@/constants'
 
 export const FileNodeContextMenu = memo((props: ContextMenuProps) => {
   const { open, setOpen } = useFileTreeContextMenu()
@@ -15,7 +16,7 @@ export const FileNodeContextMenu = memo((props: ContextMenuProps) => {
       label: 'Add File',
       handler: () => {
         setOpen(false)
-        bus.emit('SIDEBAR:show-new-input')
+        bus.emit(EVENT.sidebar_show_new_input)
       },
     },
     {
@@ -23,7 +24,7 @@ export const FileNodeContextMenu = memo((props: ContextMenuProps) => {
       label: 'Delete File',
       handler: () => {
         setOpen(false)
-        bus.emit("SIDEBAR:delete-file")
+        bus.emit(EVENT.sidebar_delete_file)
       }
     }
   ]

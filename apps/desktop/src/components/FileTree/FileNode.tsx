@@ -8,6 +8,7 @@ import NewFileInput from './NewFIleInput'
 import bus from '@/helper/eventBus'
 import useFileTreeContextMenuNode from '@/hooks/useContextMenuNode'
 import { useEditorStore } from '@/stores'
+import { EVENT } from '@/constants'
 
 const FileNode: FC<FileNodeProps> = ({ item, level = 0, activeId, onSelect, open = false }) => {
   const [isOpen, setIsOpen] = useState(open)
@@ -32,19 +33,19 @@ const FileNode: FC<FileNodeProps> = ({ item, level = 0, activeId, onSelect, open
       deleteFile(contextMenuNode)
     }
 
-    bus.on('SIDEBAR:show-new-input', newFileHandler)
-    bus.on('SIDEBAR:delete-file', delFileHandler)
+    bus.on(EVENT.sidebar_show_new_input, newFileHandler)
+    bus.on(EVENT.sidebar_delete_file, delFileHandler)
 
     return () => {
-      bus.detach('SIDEBAR:show-new-input', newFileHandler)
-      bus.detach('SIDEBAR:delete-file', delFileHandler)
+      bus.detach(EVENT.sidebar_show_new_input, newFileHandler)
+      bus.detach(EVENT.sidebar_delete_file, delFileHandler)
     }
   }, [contextMenuNode, item, deleteFile])
 
   const handleClick: MouseEventHandler = useCallback(
     (e) => {
       e.stopPropagation()
-      bus.emit('SIDEBAR:hide-new-input')
+      bus.emit(EVENT.sidebar_hide_new_input)
       setIsOpen(!isOpen)
     },
     [isOpen],

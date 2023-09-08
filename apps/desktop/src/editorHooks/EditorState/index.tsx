@@ -13,6 +13,7 @@ import { useGlobalSettingData } from '@/hooks'
 import { debounce } from 'lodash'
 import { updateFileObject } from '@/helper/files'
 import bus from '@/helper/eventBus'
+import { EVENT } from '@/constants'
 
 type SaveHandlerParams = {
   onSuccess?: () => void
@@ -119,10 +120,10 @@ export const useEditorState: FC<EditorStateProps> = ({ active, file }) => {
       saveHandler({ onSuccess: hooks?.onSuccess })
     }
 
-    bus.on('editor:save', callback)
+    bus.on(EVENT.editor_save, callback)
 
     return () => {
-      bus.detach('editor:save', callback)
+      bus.detach(EVENT.editor_save, callback)
     }
   }, [saveHandler])
 

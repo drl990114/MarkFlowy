@@ -14,6 +14,7 @@ import { createSourceCodeDelegate } from '@linebyline/editor'
 import { useCommandEvent } from '@/editorHooks/CommandEvent'
 import { EditorCount } from '@/editorToolBar/EditorCount'
 import bus from '@/helper/eventBus'
+import { EVENT } from '@/constants'
 
 const EditorWrapper = styled.div<{ active: boolean }>`
   min-height: 100%;
@@ -67,7 +68,7 @@ function Editor(props: EditorProps) {
           return
         }
 
-        bus.emit('editor:save', {
+        bus.emit(EVENT.editor_save, {
           onSuccess: () => {
             const text = getEditorContent(curFile.id)
             setContent(text)
