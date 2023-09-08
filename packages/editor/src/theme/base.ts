@@ -1,6 +1,18 @@
 import { createGlobalStyle } from 'styled-components'
 import type { ScThemeProps } from '.'
+import OpenSansLight from './fonts/open-sans-v15-latin_latin-ext-300.woff'
+import OpenSansLightItalic from './fonts/open-sans-v15-latin_latin-ext-300italic.woff'
+import OpenSansRegular from './fonts/open-sans-v15-latin_latin-ext-regular.woff'
+import OpenSansItalic from './fonts/open-sans-v15-latin_latin-ext-italic.woff'
+import OpenSansSemiBold from './fonts/open-sans-v15-latin_latin-ext-600.woff'
+import OpenSansSemiBoldItalic from './fonts/open-sans-v15-latin_latin-ext-600italic.woff'
+import OpenSansBold from './fonts/open-sans-v15-latin_latin-ext-700.woff'
+import OpenSansBoldItalic from './fonts/open-sans-v15-latin_latin-ext-700italic.woff'
 
+import DejaVuSansMono from './fonts/DejaVuSansMono.ttf'
+import DejaVuSansMonoBold from './fonts/DejaVuSansMono-Bold.ttf'
+import DejaVuSansMonoBoldOblique from './fonts/DejaVuSansMono-BoldOblique.ttf'
+import DejaVuSansMonoOblique from './fonts/DejaVuSansMono-Oblique.ttf'
 /**
  * To format for createGlobalStyle
  * @see https://github.com/prettier/prettier/issues/11196
@@ -8,12 +20,130 @@ import type { ScThemeProps } from '.'
 const styled = { createGlobalStyle }
 
 export const BaseStyle = styled.createGlobalStyle<ScThemeProps>`
+  /*
+ * Open Sans
+ * https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i&amp;subset=latin-ext
+ */
+  @font-face {
+    font-family: 'Open Sans';
+    font-style: normal;
+    font-weight: 300;
+    src:
+      local('Open Sans Light'),
+      local('OpenSans-Light'),
+      url(${OpenSansLight}) format('woff');
+  }
+  @font-face {
+    font-family: 'Open Sans';
+    font-style: italic;
+    font-weight: 300;
+    src:
+      local('Open Sans Light Italic'),
+      local('OpenSans-LightItalic'),
+      url(${OpenSansLightItalic}) format('woff');
+  }
+  @font-face {
+    font-family: 'Open Sans';
+    font-style: normal;
+    font-weight: 400;
+    src:
+      local('Open Sans Regular'),
+      local('OpenSans-Regular'),
+      url(${OpenSansRegular}) format('woff');
+  }
+  @font-face {
+    font-family: 'Open Sans';
+    font-style: italic;
+    font-weight: 400;
+    src:
+      local('Open Sans Italic'),
+      local('OpenSans-Italic'),
+      url(${OpenSansItalic}) format('woff');
+  }
+  @font-face {
+    font-family: 'Open Sans';
+    font-style: normal;
+    font-weight: 600;
+    src:
+      local('Open Sans SemiBold'),
+      local('OpenSans-SemiBold'),
+      url(${OpenSansSemiBold}) format('woff');
+  }
+  @font-face {
+    font-family: 'Open Sans';
+    font-style: italic;
+    font-weight: 600;
+    src:
+      local('Open Sans SemiBold Italic'),
+      local('OpenSans-SemiBoldItalic'),
+      url(${OpenSansSemiBoldItalic}) format('woff');
+  }
+  @font-face {
+    font-family: 'Open Sans';
+    font-style: normal;
+    font-weight: 700;
+    src:
+      local('Open Sans Bold'),
+      local('OpenSans-Bold'),
+      url(${OpenSansBold}) format('woff');
+  }
+  @font-face {
+    font-family: 'Open Sans';
+    font-style: italic;
+    font-weight: 700;
+    src:
+      local('Open Sans Bold Italic'),
+      local('OpenSans-BoldItalic'),
+      url(${OpenSansBoldItalic}) format('woff');
+  }
+
+  /*
+ * DejaVu Sans Mono
+ */
+  @font-face {
+    font-family: 'DejaVu Sans Mono';
+    src: local('DejaVu Sans Mono'), url(${DejaVuSansMono});
+  }
+  @font-face {
+    font-family: 'DejaVu Sans Mono';
+    font-weight: bold;
+    src: url(${DejaVuSansMonoBold});
+  }
+  @font-face {
+    font-family: 'DejaVu Sans Mono';
+    font-style: oblique;
+    font-weight: bold;
+    src: url(${DejaVuSansMonoBoldOblique});
+  }
+  @font-face {
+    font-family: 'DejaVu Sans Mono';
+    font-style: italic;
+    font-weight: bold;
+    src: url(${DejaVuSansMonoBoldOblique});
+  }
+  @font-face {
+    font-family: 'DejaVu Sans Mono';
+    font-style: italic;
+    src: url(${DejaVuSansMonoOblique});
+  }
+  @font-face {
+    font-family: 'DejaVu Sans Mono';
+    font-style: oblique;
+    src: url(${DejaVuSansMonoOblique});
+  }
+
+  html,
+  body {
+    font-family: 'Open Sans', 'Clear Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
   .markdown-body {
     -ms-text-size-adjust: 100%;
     -webkit-text-size-adjust: 100%;
     margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial,
-      sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+    font-family: 'Open Sans', 'Clear Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-size: 16px;
     line-height: 1.5;
     word-wrap: break-word;
@@ -611,12 +741,13 @@ export const BaseStyle = styled.createGlobalStyle<ScThemeProps>`
   }
 
   .cm-editor {
-    font-size: 14px;
+    font-size: 15px;
     line-height: 1.5;
+    font-family: 'Open Sans', 'Clear Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 
     .cm-line {
-      padding: 2px 2px 2px 6px;;
-      
+      padding: 2px 2px 2px 6px;
+
       span {
         line-height: 1.75;
       }

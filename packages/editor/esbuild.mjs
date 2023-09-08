@@ -28,6 +28,11 @@ main({
     CSSMinifyPlugin,
     nodeExternalsPlugin(),
   ],
+  loader: {
+    '.woff': 'dataurl',
+    '.woff2': 'dataurl',
+    '.ttf': 'dataurl',
+  },
   splitting: true,
   entryPoints: { '': './src/index.ts' },
   outExtension: { '.js': '.mjs' },
