@@ -6,12 +6,13 @@ import type { EditorDelegate } from '../../types'
 import { ProsemirrorDevTools } from '@remirror/dev'
 import { createSourceCodeDelegate } from './delegate'
 import ErrorBoundary from '../ErrorBoundary'
+import type { EditorProps } from '../Editor'
 
 type Context = Props
 
 type Props = {
   markText: EditorDelegate
-} & Partial<SourceCodeEditorProps>
+} & Partial<EditorProps>
 
 const [SourceEditorProvider, useSourceCodeEditor] = createContextState<Context, Props>(
   ({ props }) => {
@@ -47,7 +48,7 @@ const SourceCodeEditorCore = memo((props: { markdownToolBar?: React.ReactNode[] 
 /**
  * The editor which is used to create the annotation. Supports formatting.
  */
-const SourceEditor: React.FC<SourceCodeEditorProps> = (props) => {
+const SourceEditor: React.FC<EditorProps> = (props) => {
   const { content, delegate, isTesting, hooks, markdownToolBar } = props
 
   return (
@@ -65,11 +66,3 @@ const SourceEditor: React.FC<SourceCodeEditorProps> = (props) => {
 export default SourceEditor
 
 export * from './delegate'
-
-interface SourceCodeEditorProps {
-  content: string
-  isTesting?: boolean
-  delegate: EditorDelegate
-  hooks: (() => void)[]
-  markdownToolBar?: React.ReactNode[]
-}

@@ -1,12 +1,11 @@
 /* eslint-disable react-hooks/rules-of-hooks */
-import { SourceEditor, WysiwygEditor } from '@linebyline/editor'
-import type { EditorViewType } from '@linebyline/editor'
+import { Editor as MfEditor } from '@linebyline/editor'
+import type { EditorRef, EditorViewType } from '@linebyline/editor'
 import { invoke } from '@tauri-apps/api'
-import { emit } from '@tauri-apps/api/event'
 import { appWindow } from '@tauri-apps/api/window'
-import { memo, useCallback, useEffect, useMemo, useState } from 'react'
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import styled, { css } from 'styled-components'
-import { useEditorStore } from '@/stores'
+import { useCommandStore, useEditorStore } from '@/stores'
 import { getFileObject } from '@/helper/files'
 import { useEditorState } from '@/editorHooks/EditorState'
 import useChangeCodeMirrorTheme from '@/editorHooks/useChangeCodeMirrorTheme'
@@ -14,8 +13,9 @@ import { createWysiwygDelegate } from '@linebyline/editor'
 import { createSourceCodeDelegate } from '@linebyline/editor'
 import { useCommandEvent } from '@/editorHooks/CommandEvent'
 import { EditorCount } from '@/editorToolBar/EditorCount'
+import bus from '@/helper/eventBus'
 
-const EditorWrapper = styled.div<{ active: boolean; type: EditorViewType }>`
+const EditorWrapper = styled.div<{ active: boolean }>`
   min-height: 100%;
   overflow: hidden;
 
@@ -37,9 +37,10 @@ const EditorWrapper = styled.div<{ active: boolean; type: EditorViewType }>`
 function Editor(props: EditorProps) {
   const { id, active } = props
   const curFile = getFileObject(id)
-  const [type, setType] = useState<EditorViewType>('wysiwyg')
   const [content, setContent] = useState<string>()
   const { setEditorDelegate, getEditorContent } = useEditorStore()
+  const { execute } = useCommandStore()
+  const editorRef = useRef<EditorRef>(null)
   const [delegate, setDelegate] = useState(createWysiwygDelegate())
 
   useEffect(() => {
@@ -62,31 +63,34 @@ function Editor(props: EditorProps) {
   useEffect(() => {
     const unListen = appWindow.listen<EditorViewType>('editor_toggle_type', async ({ payload }) => {
       if (active) {
-        if (type === payload) {
+        if (editorRef.current?.getType() === payload) {
           return
         }
-        if (curFile.path) emit('file_save')
 
-        const text = getEditorContent(curFile.id)
-        setContent(text)
+        bus.emit('editor:save', {
+          onSuccess: () => {
+            const text = getEditorContent(curFile.id)
+            setContent(text)
 
-        if (payload === 'sourceCode') {
-          const sourceCodeDelegate = createSourceCodeDelegate()
-          setEditorDelegate(curFile.id, sourceCodeDelegate)
-          setDelegate(sourceCodeDelegate)
-        } else {
-          const wysiwygDelegate = createWysiwygDelegate()
-          setEditorDelegate(curFile.id, wysiwygDelegate)
-          setDelegate(wysiwygDelegate)
-        }
-        setType(payload)
+            if (payload === 'sourceCode') {
+              const sourceCodeDelegate = createSourceCodeDelegate()
+              setEditorDelegate(curFile.id, sourceCodeDelegate)
+              setDelegate(sourceCodeDelegate)
+            } else {
+              const wysiwygDelegate = createWysiwygDelegate()
+              setEditorDelegate(curFile.id, wysiwygDelegate)
+              setDelegate(wysiwygDelegate)
+            }
+            editorRef.current?.toggleType(payload)
+          },
+        })
       }
     })
 
     return () => {
       unListen.then((fn) => fn())
     }
-  }, [active, curFile, type, getEditorContent, setEditorDelegate])
+  }, [active, curFile, execute, getEditorContent, setEditorDelegate])
 
   const handleWrapperClick: React.MouseEventHandler<HTMLDivElement> = useCallback(
     (e) => {
@@ -99,9 +103,7 @@ function Editor(props: EditorProps) {
 
   const editorProps = useMemo(
     () => ({
-      file: curFile,
       content: content!,
-      active,
       delegate,
       offset: { top: 30, left: 16 },
       hooks: [
@@ -118,12 +120,8 @@ function Editor(props: EditorProps) {
   )
 
   return typeof content === 'string' ? (
-    <EditorWrapper id='editorarea-wrapper' active={active} type={type} onClick={handleWrapperClick}>
-      {type === 'sourceCode' ? (
-        <SourceEditor {...editorProps} />
-      ) : (
-        <WysiwygEditor {...editorProps} />
-      )}
+    <EditorWrapper id='editorarea-wrapper' active={active} onClick={handleWrapperClick}>
+      <MfEditor ref={editorRef} {...editorProps} />
     </EditorWrapper>
   ) : null
 }

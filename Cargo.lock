@@ -1709,6 +1709,7 @@ version = "0.0.1"
 dependencies = [
  "anyhow",
  "dark-light",
+ "lazy_static",
  "log",
  "mf-utils",
  "regex",
