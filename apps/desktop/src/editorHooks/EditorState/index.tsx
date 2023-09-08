@@ -7,18 +7,19 @@ import { t } from 'i18next'
 import type { FC } from 'react'
 import { useCallback, useEffect, useMemo, useReducer } from 'react'
 import { editorReducer, initializeState } from './editor-state'
-import type { IFile } from '@/helper/filesys'
+import { getFileNameFromPath, type IFile } from '@/helper/filesys'
 import { useEditorStateStore, useEditorStore } from '@/stores'
 import { useTitleEffect } from '@/hooks/useTitleEffect'
 import type { KeyBindingProps } from '@remirror/core'
 import { useGlobalSettingData } from '@/hooks'
 import { debounce } from 'lodash'
+import { updateFileObject } from '@/helper/files'
 
 export const useEditorState: FC<EditorStateProps> = ({ active, file }) => {
   const ctx = useRemirrorContext()
   const [settingData] = useGlobalSettingData()
   const helpers = useHelpers()
-  const { getEditorDelegate, getEditorContent } = useEditorStore()
+  const { getEditorDelegate, getEditorContent, insertNodeToFolderData } = useEditorStore()
   const { setIdStateMap } = useEditorStateStore()
   const curDelegate = getEditorDelegate(file.id)
   const [state, dispatch] = useReducer(
@@ -51,6 +52,9 @@ export const useEditorState: FC<EditorStateProps> = ({ active, file }) => {
             defaultPath: file.name ?? `${t('file.untitled')}.md`,
           }).then((path) => {
             if (path === null) return
+            const filename = getFileNameFromPath(path)
+            updateFileObject(file.id, { ...file, path, name: filename })
+            insertNodeToFolderData({...file, name: filename, content, path })
             invoke('write_file', { filePath: path, content })
             dispatch({
               type: 'SAVE_CONTENT',
@@ -68,7 +72,7 @@ export const useEditorState: FC<EditorStateProps> = ({ active, file }) => {
         console.error(error)
       }
     },
-    [active, file, getEditorContent, helpers],
+    [active, file, getEditorContent, helpers, insertNodeToFolderData],
   )
 
   const debounceSave = useMemo(

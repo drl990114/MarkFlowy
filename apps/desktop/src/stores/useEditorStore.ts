@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { createFile, isMdFile, type IFile } from '@/helper/filesys'
+import { createFile, isMdFile, type IFile, getFolderPathFromPath } from '@/helper/filesys'
 import type { EditorDelegate } from '@linebyline/editor'
 import { invoke } from '@tauri-apps/api'
 
@@ -22,14 +22,37 @@ const findParentNode = (fileNode: IFile, rootFile: IFile) => {
   return dfs(rootFile)
 }
 
+const findParentNodeByPath = (path: string, rootFile: IFile) => {
+  const folderPath = getFolderPathFromPath(path)
+
+  if (rootFile.path === folderPath) return rootFile
+
+  const dfs = (file: IFile): undefined | IFile => {
+    if (!file.children) return undefined
+
+    for (let i = 0; i < file.children.length; i++) {
+      if (file.children[i].path === folderPath) {
+        return file.children[i]
+      } else if (file.children[i]) {
+        const res = dfs(file.children[i])
+        if (res) {
+          return res
+        }
+      }
+    }
+  }
+
+  return dfs(rootFile)
+}
+
 type BaseIFile = { name: string; kind: IFile['kind'] }
 
-function sameFile(current: BaseIFile, target: BaseIFile): boolean {
+function isSameFile(current: BaseIFile, target: BaseIFile): boolean {
   return current.name === target.name && current.kind === target.kind
 }
 
 const hasSameFile = (fileNodeList: IFile[], target: BaseIFile) => {
-  return !!fileNodeList.find((file) => sameFile(file, target))
+  return !!fileNodeList.find((file) => isSameFile(file, target))
 }
 
 const useEditorStore = create<EditorStore>((set, get) => {
@@ -72,6 +95,32 @@ const useEditorStore = create<EditorStore>((set, get) => {
       }
     },
 
+    insertNodeToFolderData: (fileNode) => {
+      const { folderData } = get()
+      if (fileNode) {
+        const parent = fileNode.kind === 'dir' ? fileNode : findParentNodeByPath(fileNode.path!, folderData![0])
+
+        if (!parent) return false
+        let sameFile = parent.children?.find((file) => isSameFile(file, fileNode))
+        if (sameFile) {
+          sameFile = {
+            ...sameFile,
+            ...fileNode
+          }
+        } else {
+          parent.children!.push(fileNode)
+        }
+
+        set((state) => {
+          return {
+            ...state,
+            opened: sameFile ? state.opened.filter((id) => id !== sameFile!.id) : state.opened,
+            folderData: [...(state.folderData || [])],
+          }
+        })
+      }
+    },
+
     deleteFile: (fileNode) => {
       const { folderData, activeId, delOpenedFile, opened } = get()
       const parent = findParentNode(fileNode, folderData![0])
@@ -81,7 +130,7 @@ const useEditorStore = create<EditorStore>((set, get) => {
         const newChildren: IFile[] = []
         for (let i = 0; i < parent.children.length; i++) {
           const child = parent.children[i]
-          if (sameFile(child, fileNode)) {
+          if (isSameFile(child, fileNode)) {
             targetFile = child
           } else {
             newChildren.push(child)
@@ -172,6 +221,7 @@ type EditorStore = {
   editorCtxMap: Map<string, EditorDelegate<any>>
   setActiveId: (id: string) => void
   addFile: (file: IFile, target: { name: string; kind: IFile['kind'] }) => boolean | void
+  insertNodeToFolderData: (fileNode: IFile) => void
   deleteFile: (file: IFile) => void
   addOpenedFile: (id: string) => void
   delOpenedFile: (id: string) => void
