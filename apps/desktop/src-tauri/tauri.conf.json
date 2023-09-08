@@ -45,7 +45,11 @@
         "close": true,
         "create": true,
         "setTitle": true,
-        "startDragging": true
+        "startDragging": true,
+        "maximize": true,
+        "minimize": true,
+        "unmaximize": true,
+        "unminimize": true
       },
       "shell": {
         "open": true
