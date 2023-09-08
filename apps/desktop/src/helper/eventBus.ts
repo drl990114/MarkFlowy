@@ -1,10 +1,10 @@
 // copied by https://github.com/bcerati/js-event-bus/blob/main/src/index.ts
-export type EventCallback = (...args: any[]) => void;
+export type EventCallback = (...args: any[]) => void
 
 type Listener = {
-  callback: EventCallback;
-  triggerCapacity?: number;
-};
+  callback: EventCallback
+  triggerCapacity?: number
+}
 
 class EventBus {
   private listeners: Record<string, Listener[]> = {}
@@ -52,7 +52,7 @@ class EventBus {
     this.die(eventName)
   }
 
-  emit(eventName: string, context?: any, ...args: any) {
+  emit(eventName: string, ...args: any) {
     let listeners: Listener[] = []
 
     // name exact match
@@ -71,11 +71,7 @@ class EventBus {
     }
 
     listeners.forEach((listener, k) => {
-      let callback = listener.callback
-
-      if (context) {
-        callback = callback.bind(context)
-      }
+      const callback = listener.callback
 
       callback(...args)
 
@@ -90,11 +86,7 @@ class EventBus {
     })
   }
 
-  private registerListener(
-    eventName: string,
-    callback: EventCallback,
-    triggerCapacity?: number
-  ) {
+  private registerListener(eventName: string, callback: EventCallback, triggerCapacity?: number) {
     if (!this.hasListeners(eventName)) {
       this.listeners[eventName] = []
     }
