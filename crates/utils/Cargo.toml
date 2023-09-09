@@ -5,3 +5,4 @@ edition = "2021"
 
 [dependencies]
 regex = "1.9.5"
+fs_extra = "1.2.0"
