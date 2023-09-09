@@ -26,6 +26,26 @@
     }
   },
   "include": ["src", "vite.config.ts"],
-  "exclude": ["node_modules", "dist", "dist-types", ".next", "coverage", "out", ".cache", "**/node_modules", "**/dist", "**/dist-types", "**/.next", "**/coverage", "**/out", "**/.cache"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "exclude": [
+    "node_modules",
+    "dist",
+    "dist-types",
+    ".next",
+    "coverage",
+    "out",
+    ".cache",
+    "**/node_modules",
+    "**/dist",
+    "**/dist-types",
+    "**/.next",
+    "**/coverage",
+    "**/out",
+    "**/.cache"
+  ],
+  "references": [
+    { "path": "./tsconfig.node.json" },
+    {
+      "path": "../../packages/editor/tsconfig.json"
+    }
+  ]
 }
