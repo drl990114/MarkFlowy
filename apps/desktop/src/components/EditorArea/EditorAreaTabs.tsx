@@ -2,7 +2,7 @@ import { getFileObject } from '@/helper/files'
 import type { IFile } from '@/helper/filesys'
 import { useAutoAnimate, useGlobalTheme } from '@/hooks'
 import { useEditorStore, useEditorStateStore } from '@/stores'
-import { memo } from 'react'
+import { memo, useEffect } from 'react'
 import { TabItem, Dot } from './styles'
 import styled, { css } from 'styled-components'
 
@@ -21,6 +21,14 @@ const EditorAreaTabs = memo(() => {
   const { idStateMap } = useEditorStateStore()
   const { themeColors } = useGlobalTheme()
   const { htmlRef } = useAutoAnimate<HTMLDivElement>()
+
+  useEffect(() => {
+    if (!htmlRef.current) return
+    htmlRef.current.onwheel = (ev) => {
+      ev.preventDefault()
+      htmlRef.current!.scrollLeft += ev.deltaY
+    }
+  }, [])
 
   const onSelectItem = (id: string) => {
     setActiveId(id)
@@ -48,11 +56,7 @@ const EditorAreaTabs = memo(() => {
         const editorState = idStateMap.get(id)
 
         return (
-          <TabItem
-            active={active}
-            onClick={() => onSelectItem(file.id)}
-            key={id}
-          >
+          <TabItem active={active} onClick={() => onSelectItem(file.id)} key={id}>
             <i className={'ri-file-3-line tab-items__icon'} />
             <span style={{ color: active ? themeColors.accentColor : '' }}>{file.name}</span>
 
