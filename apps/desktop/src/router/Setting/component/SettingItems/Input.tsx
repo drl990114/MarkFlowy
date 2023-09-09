@@ -1,4 +1,4 @@
-import { Input } from '@/components/Input'
+import { Input } from '@/components/UI/Input'
 import { useCallback, useEffect, useState } from 'react'
 import type { SettingItemProps } from '.'
 import { useGlobalSettingData } from '@/hooks'

@@ -1,4 +1,4 @@
-import { Input } from '@/components/Input'
+import { Input } from '@/components/UI/Input'
 import { MfDialog } from '@/components/UI/Dialog'
 import { Label } from '@/components/UI/Label'
 import { useCommandStore } from '@/stores'
