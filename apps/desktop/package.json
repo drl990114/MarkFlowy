@@ -1,6 +1,6 @@
 {
   "name": "@linebyline/desktop",
-  "version": "0.2.2",
+  "version": "0.3.6",
   "scripts": {
     "dev": "vite --host",
     "build": "tsc && vite build",
