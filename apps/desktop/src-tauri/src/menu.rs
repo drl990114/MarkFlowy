@@ -23,11 +23,15 @@ pub fn generate_menu() -> Menu {
     let file_submenu = Submenu::new(
         "File",
         Menu::new().add_item(
-            CustomMenuItem::new("editor:save".to_string(), "Save").accelerator(
-                keyboard_infos
-                    .get_accelerator("editor:save".to_string())
-                    .unwrap(),
-            ),
+            // FIXME this will trigger twice, because in web will trigger too
+            // this trigger event need disable, wait for tauri support
+            // https://github.com/tauri-apps/tauri/discussions/7793
+            CustomMenuItem::new("editor:save".to_string(), "Save"),
+            // .accelerator(
+            //     keyboard_infos
+            //         .get_accelerator("editor:save".to_string())
+            //         .unwrap(),
+            // ),
         ),
     );
 
