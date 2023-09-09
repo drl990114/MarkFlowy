@@ -1,5 +1,5 @@
 // This extension is responsible for managing the state of the editor and handle save event.
-import { useHelpers, useKeymap, useRemirrorContext } from '@linebyline/editor'
+import { useHelpers, useRemirrorContext } from '@linebyline/editor'
 import { invoke } from '@tauri-apps/api'
 import { save } from '@tauri-apps/api/dialog'
 import { t } from 'i18next'
@@ -7,7 +7,7 @@ import type { FC } from 'react'
 import { useCallback, useEffect, useMemo, useReducer } from 'react'
 import { editorReducer, initializeState } from './editor-state'
 import { getFileNameFromPath, type IFile } from '@/helper/filesys'
-import { useEditorStateStore, useEditorStore } from '@/stores'
+import { useCommandStore, useEditorStateStore, useEditorStore } from '@/stores'
 import { useTitleEffect } from '@/hooks/useTitleEffect'
 import { useGlobalSettingData } from '@/hooks'
 import { debounce } from 'lodash'
@@ -26,6 +26,7 @@ export const useEditorState: FC<EditorStateProps> = ({ active, file }) => {
   const { getEditorDelegate, getEditorContent, insertNodeToFolderData } = useEditorStore()
   const { setIdStateMap } = useEditorStateStore()
   const curDelegate = getEditorDelegate(file.id)
+  const { addCommand } = useCommandStore()
   const [state, dispatch] = useReducer(
     editorReducer,
     { note: { content: '', deleted: false }, file },
@@ -84,36 +85,42 @@ export const useEditorState: FC<EditorStateProps> = ({ active, file }) => {
   )
 
   const debounceSave = useMemo(
-    () =>
-      debounce(
-        (tr, delegate) => saveHandler(delegate?.docToString(tr?.doc)),
-        settingData.autosave_interval,
-      ),
+    () => debounce(() => saveHandler(), settingData.autosave_interval),
     [settingData.autosave_interval, saveHandler],
   )
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const debounceSaveHandler = useCallback(debounceSave, [settingData, debounceSave])
 
-  useKeymap('Mod-s', () => {
-    saveHandler()
-    return true
-  })
+  useEffect(() => {
+    if (active) {
+      addCommand({
+        id: 'editor:save',
+        handler: () => {
+          saveHandler()
+        },
+      })
+    }
+  }, [active, addCommand, saveHandler])
 
   useEffect(() => {
-    ctx.manager.addHandler('stateUpdate', (params) => {
+    const unsubscribe = ctx.manager.addHandler('stateUpdate', (params) => {
       const { tr } = params
       if (tr?.docChanged && !tr.getMeta('APPLY_MARKS')) {
         dispatch({
           type: 'EDIT_CONTENT',
           payload: { undoDepth: helpers.undoDepth() },
         })
-        if (settingData.autosave) {
-          debounceSaveHandler(tr, curDelegate)
+        if (settingData.autosave && active) {
+          debounceSaveHandler()
         }
       }
     })
-  }, [ctx, helpers, curDelegate, settingData, saveHandler, debounceSaveHandler])
+
+    return () => {
+      unsubscribe()
+    }
+  }, [ctx, helpers, curDelegate, active, settingData, saveHandler, debounceSaveHandler])
 
   useEffect(() => {
     const callback = (hooks: SaveHandlerParams) => {

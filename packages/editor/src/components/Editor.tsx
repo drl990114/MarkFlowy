@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import WysiwygEditor from './WysiwygEditor'
 import SourceEditor from './SourceEditor'
-import { forwardRef, useImperativeHandle, useState } from 'react'
+import { forwardRef, memo, useImperativeHandle, useState } from 'react'
 import type { EditorDelegate, EditorViewType } from '..'
 
 export type EditorRef = {
@@ -9,7 +9,7 @@ export type EditorRef = {
   getType: () => EditorViewType
 }
 
-export const Editor = forwardRef<EditorRef, EditorProps>((props, ref) => {
+export const Editor = memo(forwardRef<EditorRef, EditorProps>((props, ref) => {
   const [type, setType] = useState<EditorViewType>('wysiwyg')
 
   useImperativeHandle(ref, () => ({
@@ -24,7 +24,7 @@ export const Editor = forwardRef<EditorRef, EditorProps>((props, ref) => {
     ) : (
       <WysiwygEditor {...props} />
     )
-})
+}))
 
 export interface EditorProps {
   content: string
