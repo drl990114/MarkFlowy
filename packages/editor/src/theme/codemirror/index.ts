@@ -31,7 +31,7 @@ export const LightInit = (options?: Partial<CreateThemeOptions>) => {
       { tag: [t.emphasis], color: '#24292e', fontStyle: 'italic' },
       { tag: [t.deleted], color: '#b31d28', backgroundColor: 'ffeef0' },
       { tag: [t.atom, t.bool, t.special(t.variableName)], color: '#e36209' },
-      { tag: [t.url, t.escape, t.link], color: '#032f62' },
+      { tag: [t.url, t.escape, t.link], color: '#E06C75' },
       { tag: t.link, textDecoration: 'underline' },
       { tag: t.strikethrough, textDecoration: 'line-through', color: 'red' },
       { tag: t.invalid, color: '#cb2431' },

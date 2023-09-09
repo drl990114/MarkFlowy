@@ -743,7 +743,7 @@ export const BaseStyle = styled.createGlobalStyle<ScThemeProps>`
   .cm-editor {
     font-size: 15px;
     line-height: 1.5;
-    font-family: 'Open Sans', 'Clear Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: "DejaVu Sans Mono", "Source Code Pro", "Droid Sans Mono", Consolas, monospace;
 
     .cm-line {
       padding: 2px 2px 2px 6px;
