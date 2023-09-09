@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.3.6] - 2023-09-09
+### :sparkles: New Features
+- [`df29a30`](https://github.com/linebyline-group/linebyline/commit/df29a302ebf351fbdb722878d2151a4392585e7a) - **component**: icon button component *(commit by [@halodong](https://github.com/halodong))*
+- [`bbc048f`](https://github.com/linebyline-group/linebyline/commit/bbc048f21828ac929f4c87d393612ce2c28f2c15) - **desktop**: bookmark *(PR [#275](https://github.com/linebyline-group/linebyline/pull/275) by [@halodong](https://github.com/halodong))*
+  - :arrow_lower_right: *addresses issue [#244](undefined) opened by [@yu2chuan](https://github.com/yu2chuan)*
+- [`a3d274d`](https://github.com/linebyline-group/linebyline/commit/a3d274d3c707a4d2144509428c4a8124a0d57d81) - **desktop**: auto save *(commit by [@halodong](https://github.com/halodong))*
+- [`e3954bc`](https://github.com/linebyline-group/linebyline/commit/e3954bc29475a0da5c3c574a741787d26d797a0b) - **desktop, editor**: use open sans font *(commit by [@halodong](https://github.com/halodong))*
+
+### :bug: Bug Fixes
+- [`a7ab75f`](https://github.com/linebyline-group/linebyline/commit/a7ab75f7179105d0fb172cf920a25cdbf7c81c37) - **desktop**: some ui optimization *(commit by [@halodong](https://github.com/halodong))*
+- [`f24a8c8`](https://github.com/linebyline-group/linebyline/commit/f24a8c864d333a0812733705a926a65ab5684a75) - **desktop**: editor toolbar offset *(commit by [@halodong](https://github.com/halodong))*
+- [`a85f7b1`](https://github.com/linebyline-group/linebyline/commit/a85f7b1c23e19d392abb24b72208622c74ac46ba) - **desktop**: improve setting ui *(commit by [@halodong](https://github.com/halodong))*
+- [`9d4bad5`](https://github.com/linebyline-group/linebyline/commit/9d4bad59f12049d710b18a981ddedd660ea562cf) - verify add file name *(commit by [@halodong](https://github.com/halodong))*
+- [`f8e0c02`](https://github.com/linebyline-group/linebyline/commit/f8e0c02acd8a75e3d38f2564e667024d7785d203) - **desktop**: insert file save info update *(commit by [@halodong](https://github.com/halodong))*
+- [`05836f3`](https://github.com/linebyline-group/linebyline/commit/05836f357be6fcd6cb87151ac6187849f3396e8c) - **desktop**: file save refactor *(commit by [@halodong](https://github.com/halodong))*
+- [`77067f7`](https://github.com/linebyline-group/linebyline/commit/77067f728bbbe85b914ecb3c41abd8401cea2d3a) - **desktop**: don't use custom titlebar *(commit by [@halodong](https://github.com/halodong))*
+- [`0ce5c6b`](https://github.com/linebyline-group/linebyline/commit/0ce5c6beb42233ac353596da686dda4b84ecd2c4) - **desktop**: event bus.emit params remove context *(commit by [@halodong](https://github.com/halodong))*
+- [`0644098`](https://github.com/linebyline-group/linebyline/commit/0644098eaf1a41badc3069aafea8ca5cb498e9e6) - **desktop**: save not work in windows *(commit by [@halodong](https://github.com/halodong))*
+
+
 ## [v0.2.2] - 2023-08-31
 ### :sparkles: New Features
 - [`3072b4c`](https://github.com/linebyline-group/linebyline/commit/3072b4c6a3ecdeb7fa840e2e45e82bcecc1d50b6) - **desktop**: animate editor tabs *(commit by [@halodong](https://github.com/halodong))*
@@ -115,3 +135,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v0.2.0]: https://github.com/linebyline-group/linebyline/compare/v0.1.3...v0.2.0
 [v0.2.1]: https://github.com/linebyline-group/linebyline/compare/v0.2.0...v0.2.1
 [v0.2.2]: https://github.com/linebyline-group/linebyline/compare/v0.2.1...v0.2.2
+[v0.3.6]: https://github.com/linebyline-group/linebyline/compare/v0.2.2...v0.3.6
