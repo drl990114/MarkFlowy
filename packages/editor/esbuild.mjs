@@ -3,7 +3,7 @@
 import * as esbuild from 'esbuild'
 import { nodeExternalsPlugin } from 'esbuild-node-externals'
 import alias from 'esbuild-plugin-alias'
-import { CSSMinifyPlugin } from './plugins/css-minify.js'
+import { CSSMinifyPlugin } from 'esbuild-plugin-cssminify'
 
 /**
  * @param {import('esbuild').BuildOptions} options

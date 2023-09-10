@@ -1,0 +1,18 @@
+{
+  "name": "esbuild-plugin-cssminify",
+  "version": "0.0.2",
+  "type": "module",
+  "license": "MIT",
+  "homepage": "",
+  "main": "./index.js",
+  "module": "./index.js",
+  "keywords": [
+    "esbuild",
+    "css",
+    "minify",
+    "plugin"
+  ],
+  "devDependencies": {
+    "esbuild": "^0.18.2"
+  }
+}
