@@ -109,6 +109,7 @@
     "esbuild": "^0.18.2",
     "esbuild-node-externals": "^1.8.0",
     "esbuild-plugin-alias": "^0.2.1",
+    "esbuild-plugin-cssminify": "^0.0.2",
     "eslint": "8.44.0",
     "jest-remirror": "^2.1.5",
     "jsdom": "^22.1.0",

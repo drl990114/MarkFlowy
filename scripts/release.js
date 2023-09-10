@@ -7,7 +7,7 @@ const tauriConfFilePath = path.resolve(cwd, './apps/desktop/src-tauri/tauri.conf
 const tauriConf = require(tauriConfFilePath)
 
 const nextVersion = process.argv[2] ? extractVersion(process.argv[2]) : getNextVersion(tauriConf.package.version)
-const allWorkspaces = getWorkspacePackageByDirName('apps').concat(getWorkspacePackageByDirName('packages'))
+const allWorkspaces = getWorkspacePackageByDirName('apps')
 
 allWorkspaces.forEach((workspace) => {
   const packageContent = require(workspace.packageFilePath)
