@@ -36,10 +36,11 @@ export const Container = styled.div`
   }
 
   .code-contents {
-    width: 100%;
     flex: 1;
-    overflow: auto;
+    width: 100%;
     height: 100%;
+    overflow: auto;
+    scroll-behavior: smooth;
   }
 `
 

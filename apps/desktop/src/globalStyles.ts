@@ -57,6 +57,10 @@ export const GlobalStyles = createGlobalStyle<ScThemeProps>`
     align-items: center;
   }
 
+  .display-none {
+    display: none;
+  }
+
   .cursor-pointer {
     cursor: pointer;
   }
