@@ -6,6 +6,7 @@ import { Explorer, Setting } from '@/components'
 import { RIGHTBARITEMKEYS } from '@/constants'
 import { useCommandStore } from '@/stores'
 import BookMarks from '@/bookmarks'
+import { TableOfContent } from '../Toc'
 
 function SideBar() {
   const [isResizing, setIsResizing] = useState(false)
@@ -28,6 +29,7 @@ function SideBar() {
         icon: <i className='ri-file-list-3-line' />,
         components: <Explorer />,
       },
+      TableOfContent,
       BookMarks,
       chatgpt,
     ]
