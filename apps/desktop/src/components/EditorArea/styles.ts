@@ -98,3 +98,9 @@ export const Dot = styled.div<DotProps>`
 interface TabItemProps {
   active: boolean
 }
+
+
+export const WarningHeader = styled.h3`
+  text-align: center;
+  color: ${(props) => props.theme.warnColor};
+`

@@ -126,6 +126,8 @@ pub fn remove_folder(path: &str) -> AnyResult<()> {
 
 
 pub mod cmd {
+    use std::path::Path;
+
     use crate::fc;
 
     // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
@@ -157,6 +159,11 @@ pub mod cmd {
     pub fn delete_folder(file_path: &str) -> String {
         fc::remove_folder(file_path);
         String::from("OK")
+    }
+
+    #[tauri::command]
+    pub fn file_exists(file_path: &str) -> bool {
+        fc::exists(Path::new(file_path))
     }
     
 }

@@ -16,6 +16,7 @@ import { EditorCount } from '@/editorToolBar/EditorCount'
 import bus from '@/helper/eventBus'
 import { EVENT } from '@/constants'
 import classNames from 'classnames'
+import { WarningHeader } from './styles'
 
 const EditorWrapper = styled.div<{ active: boolean }>`
   min-height: 100%;
@@ -44,6 +45,7 @@ function Editor(props: EditorProps) {
   const { execute } = useCommandStore()
   const editorRef = useRef<EditorRef>(null)
   const [delegate, setDelegate] = useState(createWysiwygDelegate())
+  const [notExistFile, setNotExistFile] = useState(false)
 
   useEffect(() => {
     const init = async () => {
@@ -51,10 +53,15 @@ function Editor(props: EditorProps) {
       setEditorDelegate(id, delegate)
 
       if (file.path) {
-        const text = await invoke('get_file_content', {
-          filePath: file.path,
-        })
-        setContent(text as string)
+        const isExists = await invoke('file_exists', { filePath: file.path })
+        if (isExists) {
+          const text = await invoke('get_file_content', {
+            filePath: file.path,
+          })
+          setContent(text as string)
+        } else {
+          setNotExistFile(true)
+        }
       } else if (file.content !== undefined) {
         setContent(file.content)
       }
@@ -120,6 +127,11 @@ function Editor(props: EditorProps) {
     }),
     [curFile, content, active, delegate],
   )
+
+
+  if (notExistFile) {
+    return <WarningHeader>File is not exist</WarningHeader>
+  }
 
   const cls = classNames('code-contents', {
     'editor-active': active,
