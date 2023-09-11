@@ -19,6 +19,7 @@ fn main() {
             fc::cmd::write_file,
             fc::cmd::delete_file,
             fc::cmd::delete_folder,
+            fc::cmd::file_exists,
             conf::cmd::get_app_conf_path,
             conf::cmd::get_app_conf,
             conf::cmd::reset_app_conf,
