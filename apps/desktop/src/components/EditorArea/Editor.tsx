@@ -15,6 +15,7 @@ import { useCommandEvent } from '@/editorHooks/CommandEvent'
 import { EditorCount } from '@/editorToolBar/EditorCount'
 import bus from '@/helper/eventBus'
 import { EVENT } from '@/constants'
+import classNames from 'classnames'
 
 const EditorWrapper = styled.div<{ active: boolean }>`
   min-height: 100%;
@@ -120,11 +121,22 @@ function Editor(props: EditorProps) {
     [curFile, content, active, delegate],
   )
 
-  return typeof content === 'string' ? (
-    <EditorWrapper id='editorarea-wrapper' active={active} onClick={handleWrapperClick}>
-      <MfEditor ref={editorRef} {...editorProps} />
-    </EditorWrapper>
-  ) : null
+  const cls = classNames('code-contents', {
+    'editor-active': active,
+    'display-none': !active,
+  })
+
+  return <div className={cls}>
+    {typeof content === 'string' ? (
+      <EditorWrapper
+        id='editorarea-wrapper'
+        active={active}
+        onClick={handleWrapperClick}
+      >
+        <MfEditor ref={editorRef} {...editorProps} />
+      </EditorWrapper>
+    ) : null}
+  </div>
 }
 
 export interface EditorProps {

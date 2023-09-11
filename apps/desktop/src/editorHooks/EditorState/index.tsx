@@ -26,7 +26,7 @@ export const useEditorState: FC<EditorStateProps> = ({ active, file }) => {
   const { getEditorDelegate, getEditorContent, insertNodeToFolderData } = useEditorStore()
   const { setIdStateMap } = useEditorStateStore()
   const curDelegate = getEditorDelegate(file.id)
-  const { addCommand } = useCommandStore()
+  const { addCommand, execute } = useCommandStore()
   const [state, dispatch] = useReducer(
     editorReducer,
     { note: { content: '', deleted: false }, file },
@@ -107,6 +107,7 @@ export const useEditorState: FC<EditorStateProps> = ({ active, file }) => {
     const unsubscribe = ctx.manager.addHandler('stateUpdate', (params) => {
       const { tr } = params
       if (tr?.docChanged && !tr.getMeta('APPLY_MARKS')) {
+        execute('app:toc_refresh')
         dispatch({
           type: 'EDIT_CONTENT',
           payload: { undoDepth: helpers.undoDepth() },
@@ -116,11 +117,11 @@ export const useEditorState: FC<EditorStateProps> = ({ active, file }) => {
         }
       }
     })
-
+    execute('app:toc_refresh')
     return () => {
       unsubscribe()
     }
-  }, [ctx, helpers, curDelegate, active, settingData, saveHandler, debounceSaveHandler])
+  }, [ctx, helpers, curDelegate, active, settingData, saveHandler, debounceSaveHandler, execute])
 
   useEffect(() => {
     const callback = (hooks: SaveHandlerParams) => {

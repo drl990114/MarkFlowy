@@ -12,11 +12,9 @@ function EditorArea() {
     <Container className='w-full h-full'>
       <EditorAreaTabs />
       <EditorAreaHeader />
-      <div className='code-contents'>
         {opened.map((id) => {
           return <Editor key={id} id={id} active={id === activeId} />
         })}
-      </div>
     </Container>
   )
 }

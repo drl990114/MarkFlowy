@@ -22,7 +22,7 @@ const useCommandStore = create<CommandStore>((set, get) => {
       if (command) {
         command.exec(...args)
       } else {
-        console.error(`command ${id} not found`)
+        console.warn(`command ${id} not found`)
       }
     },
   }
