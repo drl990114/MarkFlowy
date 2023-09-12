@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.4.1] - 2023-09-12
+### :sparkles: New Features
+- [`789a82c`](https://github.com/linebyline-group/linebyline/commit/789a82c1824a30e08ff9f0964209fa67872c5139) - **crates**: npm download *(commit by [@halodong](https://github.com/halodong))*
+- [`0ad82d4`](https://github.com/linebyline-group/linebyline/commit/0ad82d43dabb69d7ce3c28454582d335a35e3e18) - **desktop**: table of contents *(PR [#285](https://github.com/linebyline-group/linebyline/pull/285) by [@halodong](https://github.com/halodong))*
+  - :arrow_lower_right: *addresses issue [#103](undefined) opened by [@yu2chuan](https://github.com/yu2chuan)*
+
+### :bug: Bug Fixes
+- [`6097221`](https://github.com/linebyline-group/linebyline/commit/6097221409cacd249345432e6fdc254838e4d002) - **editor**: codemirror theme optimization *(commit by [@halodong](https://github.com/halodong))*
+- [`525cae4`](https://github.com/linebyline-group/linebyline/commit/525cae475d127a829715d7ccaaaeecf384f2978e) - **desktop**: editor tab scrolling optimization *(commit by [@halodong](https://github.com/halodong))*
+- [`f837ac2`](https://github.com/linebyline-group/linebyline/commit/f837ac2f27dc194bd483aa57106990c95f09637c) - **desktop**: app crashes when file path does not exist *(commit by [@halodong](https://github.com/halodong))*
+
+
 ## [v0.3.6] - 2023-09-09
 ### :sparkles: New Features
 - [`df29a30`](https://github.com/linebyline-group/linebyline/commit/df29a302ebf351fbdb722878d2151a4392585e7a) - **component**: icon button component *(commit by [@halodong](https://github.com/halodong))*
@@ -136,3 +148,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v0.2.1]: https://github.com/linebyline-group/linebyline/compare/v0.2.0...v0.2.1
 [v0.2.2]: https://github.com/linebyline-group/linebyline/compare/v0.2.1...v0.2.2
 [v0.3.6]: https://github.com/linebyline-group/linebyline/compare/v0.2.2...v0.3.6
+[v0.4.1]: https://github.com/linebyline-group/linebyline/compare/v0.3.6...v0.4.1
