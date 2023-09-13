@@ -60,8 +60,7 @@ jobs:
         run: rustup target add ${{ matrix.target }}
 
       - name: Build the app
-        uses: tauri-apps/tauri-action@6944c9def9846b8d222828ce5f4dfc9588904dc5 # v0
-
+        run: yarn build:desktop --target ${{ matrix.target }}
         env:
           TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
