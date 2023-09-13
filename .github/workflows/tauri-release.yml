@@ -1,9 +1,9 @@
 name: Release
+
 on:
   push:
     tags:
       - 'v*'
-  workflow_dispatch:
 
 jobs:
   release:
@@ -77,15 +77,76 @@ jobs:
         run: rustup target add ${{ matrix.target }}
 
       - name: Build the app
-        uses: tauri-apps/tauri-action@6944c9def9846b8d222828ce5f4dfc9588904dc5 # v0
-
+        run: yarn build:desktop --target ${{ matrix.target }}
         env:
           TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+
+      - uses: actions/upload-artifact@v3
+        if: matrix.os == 'ubuntu-latest'
         with:
-          tagName: ${{ github.ref_name }} # This only works if your workflow triggers on new tags.
-          releaseName: 'v__VERSION__' # tauri-action replaces \_\_VERSION\_\_ with the app version.
+          name: artifacts-${{ matrix.arch }}
+          path: |
+            ./target/${{ matrix.target }}/release/bundle/appimage/**.AppImage.*
+            ./target/${{ matrix.target }}/release/bundle/deb/**.deb
+
+      - uses: actions/upload-artifact@v3
+        if: matrix.os == 'macos-latest'
+        with:
+          name: artifacts-${{ matrix.arch }}
+          path: |
+            ./target/${{ matrix.target }}/release/bundle/dmg/**.dmg
+            ./target/${{ matrix.target }}/release/bundle/macos/**.app.*
+
+      - uses: actions/upload-artifact@v3
+        if: matrix.os == 'windows-latest'
+        with:
+          name: artifacts-${{ matrix.arch }}
+          path: |
+            ./target/${{ matrix.target }}/release/bundle/msi/**
+
+      - name: Query version number
+        run: echo "version=${GITHUB_REF:11}" >> $GITHUB_ENV
+
+      - name: Download x86_64 artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: artifacts-x86_64
+          path: artifacts/x86_64
+
+      - name: Download aarch64 artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: artifacts-aarch64
+          path: artifacts/aarch64
+
+      - name: Rename artifacts
+        run: |
+          mv "artifacts/aarch64/dmg/linebyline_${{ env.version }}_aarch64.dmg" "artifacts/linebyline_${{ env.version }}_macos_aarch64.dmg"
+          mv "artifacts/aarch64/macos/linebyline.app.tar.gz" "artifacts/linebyline_${{ env.version }}_macos_aarch64.app.tar.gz"
+          mv "artifacts/aarch64/macos/linebyline.app.tar.gz.sig" "artifacts/linebyline_${{ env.version }}_macos_aarch64.app.tar.gz.sig"
+
+          mv "artifacts/x86_64/dmg/linebyline_${{ env.version }}_x64.dmg" "artifacts/linebyline_${{ env.version }}_macos_x86_64.dmg"
+          mv "artifacts/x86_64/macos/linebyline.app.tar.gz" "artifacts/linebyline_${{ env.version }}_macos_x86_64.app.tar.gz"
+          mv "artifacts/x86_64/macos/linebyline.app.tar.gz.sig" "artifacts/linebyline_${{ env.version }}_macos_x86_64.app.tar.gz.sig"
+
+          mv "artifacts/x86_64/deb/chat-gpt_${{ env.version }}_amd64.deb" "artifacts/x86_64/deb/linebyline_${{ env.version }}_linux_x86_64.deb"
+          mv "artifacts/x86_64/appimage/chat-gpt_${{ env.version }}_amd64.AppImage.tar.gz" "artifacts/linebyline_${{ env.version }}_linux_x86_64.AppImage.tar.gz"
+          mv "artifacts/x86_64/appimage/chat-gpt_${{ env.version }}_amd64.AppImage.tar.gz.sig" "artifacts/linebyline_${{ env.version }}_linux_x86_64.AppImage.tar.gz.sig"
+
+          mv "artifacts/x86_64/linebyline_${{ env.version }}_x64_en-US.msi" "artifacts/linebyline_${{ env.version }}_windows_x86_64.msi"
+          mv "artifacts/x86_64/linebyline_${{ env.version }}_x64_en-US.msi.zip" "artifacts/linebyline_${{ env.version }}_windows_x86_64.msi.zip"
+          mv "artifacts/x86_64/linebyline_${{ env.version }}_x64_en-US.msi.zip.sig" "artifacts/linebyline_${{ env.version }}_windows_x86_64.msi.zip.sig"
+
+      - name: Create Release
+        uses: softprops/action-gh-release@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: ${{ github.ref_name }}
           releaseBody: ${{ steps.changelog.outputs.changes }}
           releaseDraft: false
           prerelease: true
+          files: ./artifacts/**/*
