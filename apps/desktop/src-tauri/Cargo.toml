@@ -22,6 +22,7 @@ tauri = { version = "1.4.1", features = [ "window-minimize", "window-maximize", 
 tauri-plugin-store = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
 regex = "1.9.5"
 mf-utils = { path = "../../../crates/utils" }
+file_search = { path = "../../../crates/file_search" }
 lazy_static = "1.4.0"
 
 [features]

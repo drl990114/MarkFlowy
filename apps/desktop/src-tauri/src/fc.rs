@@ -157,7 +157,7 @@ pub mod cmd {
     
     #[tauri::command]
     pub fn delete_folder(file_path: &str) -> String {
-        fc::remove_folder(file_path);
+        let _ = fc::remove_folder(file_path);
         String::from("OK")
     }
 

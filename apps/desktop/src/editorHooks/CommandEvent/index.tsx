@@ -22,7 +22,6 @@ export const useCommandEvent: FC<EditorStateProps> = ({}: EditorStateProps) => {
 
   useEffect(() => {
     const unListen = listen<CreateTableCommand>('editor:create_table', ({ payload }) => {
-      console.log('create_table', payload)
       commands.createTable(payload)
     })
 

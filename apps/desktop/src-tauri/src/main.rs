@@ -5,6 +5,7 @@ mod app;
 mod fc;
 mod menu;
 mod setup;
+mod search;
 
 use app::{conf, keybindings, opened_cache, bookmarks};
 
@@ -34,6 +35,7 @@ fn main() {
             bookmarks::cmd::add_bookmark,
             bookmarks::cmd::edit_bookmark,
             bookmarks::cmd::remove_bookmark,
+            search::cmd::search_files
         ])
         .setup(setup::init)
         .menu(menu::generate_menu())
