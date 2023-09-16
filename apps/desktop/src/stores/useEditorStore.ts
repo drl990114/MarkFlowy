@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { createFile, isMdFile, type IFile, getFolderPathFromPath } from '@/helper/filesys'
-import type { EditorDelegate } from '@linebyline/editor'
+import type { EditorContext, EditorDelegate } from '@linebyline/editor'
 import { invoke } from '@tauri-apps/api'
 
 const findParentNode = (fileNode: IFile, rootFile: IFile) => {
@@ -60,6 +60,7 @@ const useEditorStore = create<EditorStore>((set, get) => {
     opened: [],
     activeId: undefined,
     folderData: null,
+    editorDelegateMap: new Map(),
     editorCtxMap: new Map(),
 
     addFile: (fileNode, target) => {
@@ -189,15 +190,15 @@ const useEditorStore = create<EditorStore>((set, get) => {
     },
 
     getEditorDelegate: (id: string) => {
-      const editorCtxMap = get().editorCtxMap
-      const curCtx = editorCtxMap.get(id)
+      const editorDelegateMap = get().editorDelegateMap
+      const curCtx = editorDelegateMap.get(id)
 
       return curCtx
     },
 
     setEditorDelegate: (id, delegate) =>
       set((state) => {
-        state.editorCtxMap.set(id, delegate)
+        state.editorDelegateMap.set(id, delegate)
         return state
       }),
 
@@ -208,6 +209,23 @@ const useEditorStore = create<EditorStore>((set, get) => {
         opened: [],
         activeId: undefined,
       })),
+
+    setEditorCtx: (id, ctx) =>
+      set((state) => {
+        state.editorCtxMap.set(id, ctx)
+        return {
+          ...state,
+          editorCtxMap: new Map(state.editorCtxMap),
+        }
+      }
+    ),
+
+    getEditorCtx: (id) => {
+      const editorCtxMap = get().editorCtxMap
+      const curCtx = editorCtxMap.get(id)
+
+      return curCtx
+    }
   }
 })
 
@@ -218,7 +236,8 @@ type EditorStore = {
    * folderData only has root file.
    */
   folderData: null | IFile[]
-  editorCtxMap: Map<string, EditorDelegate<any>>
+  editorCtxMap: Map<string, EditorContext>
+  editorDelegateMap: Map<string, EditorDelegate<any>>
   setActiveId: (id: string) => void
   addFile: (file: IFile, target: { name: string; kind: IFile['kind'] }) => boolean | void
   insertNodeToFolderData: (fileNode: IFile) => void
@@ -229,6 +248,8 @@ type EditorStore = {
   setEditorDelegate: (id: string, delegate: EditorDelegate<any>) => void
   getEditorContent: (id: string) => string
   getEditorDelegate: (id: string) => EditorDelegate<any> | undefined
+  setEditorCtx: (id: string, ctx: EditorContext) => void
+  getEditorCtx: (id: string) => EditorContext | undefined
 }
 
 export default useEditorStore

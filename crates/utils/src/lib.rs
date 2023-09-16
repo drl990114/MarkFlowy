@@ -27,7 +27,21 @@ pub fn move_files(source_paths: &Vec<PathBuf>, dest_path: &Path) {
         .expect(&format!("Failed to move files to {}", dest));
   }
 
-  
+
+pub fn get_relative_path(path: &Path, base_path: &Path) -> PathBuf {
+    let mut relative_path = PathBuf::new();
+
+    for component in path.components() {
+        if component == std::path::Component::Normal("..".as_ref()) {
+            relative_path.pop();
+        } else if component != std::path::Component::Normal(".".as_ref()) {
+            relative_path.push(component);
+        }
+    }
+
+    relative_path.strip_prefix(base_path).unwrap().to_path_buf()
+}
+
 #[cfg(test)]
 mod tests {
     #[test]
@@ -35,5 +49,15 @@ mod tests {
         assert!(super::is_md_file_name("test.md"));
         assert!(!super::is_md_file_name("test.txt"));
         assert!(!super::is_md_file_name("test.mdx"));
+    }
+
+    #[test]
+    fn test_get_relative_path() {
+        let path = std::path::Path::new("/a/b/c/d");
+        let base_path = std::path::Path::new("/a/b");
+
+        let relative_path = super::get_relative_path(path, base_path);
+
+        assert_eq!(relative_path.to_str().unwrap(), "c/d");
     }
 }

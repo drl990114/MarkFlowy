@@ -25,6 +25,11 @@ export const GlobalStyles = createGlobalStyle<ScThemeProps>`
       color: ${(props) => props.theme.accentColor};
       background-color: ${(props) => props.theme.tipsBgColor};
     }
+
+    &--active {
+      color: ${(props) => props.theme.accentColor};
+      font-weight: 1000;
+    }
   }
 
   .label-default {

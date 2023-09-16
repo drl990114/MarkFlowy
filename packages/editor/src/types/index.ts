@@ -1,4 +1,5 @@
 import type { AnyExtension, ProsemirrorNode, RemirrorManager } from "@remirror/core"
+import type { ReactFrameworkOutput } from "@remirror/react-core"
 
 
 export type StringToDoc = (content: string) => ProsemirrorNode
@@ -28,3 +29,5 @@ type BaseEditorState = {
 }
 
 export type EditorState = BaseEditorState
+
+export type EditorContext = ReactFrameworkOutput<Remirror.Extensions>
