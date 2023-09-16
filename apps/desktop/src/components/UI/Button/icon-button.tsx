@@ -5,13 +5,16 @@ import classNames from 'classnames'
 interface MfIconButtonProps {
   icon: string
   onClick: () => void
+  active?: boolean
   tooltipProps?: Omit<TooltipProps, 'children'>
 }
 
 export const MfIconButton = (props: MfIconButtonProps) => {
   const { icon, onClick, tooltipProps } = props
 
-  const iconCls = classNames('icon', icon)
+  const iconCls = classNames('icon', icon, {
+    'icon--active': props.active,
+  })
 
   if (tooltipProps) {
     return (

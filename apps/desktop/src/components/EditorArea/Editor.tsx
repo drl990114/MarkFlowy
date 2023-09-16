@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import { Editor as MfEditor } from '@linebyline/editor'
-import type { EditorRef, EditorViewType } from '@linebyline/editor'
+import type { EditorContext, EditorRef, EditorViewType } from '@linebyline/editor'
 import { invoke } from '@tauri-apps/api'
 import { appWindow } from '@tauri-apps/api/window'
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -41,7 +41,7 @@ function Editor(props: EditorProps) {
   const { id, active } = props
   const curFile = getFileObject(id)
   const [content, setContent] = useState<string>()
-  const { setEditorDelegate, getEditorContent } = useEditorStore()
+  const { setEditorDelegate, getEditorContent, setEditorCtx } = useEditorStore()
   const { execute } = useCommandStore()
   const editorRef = useRef<EditorRef>(null)
   const [delegate, setDelegate] = useState(createWysiwygDelegate())
@@ -115,6 +115,9 @@ function Editor(props: EditorProps) {
       content: content!,
       delegate,
       offset: { top: 30, left: 16 },
+      onContextMounted: (context: EditorContext) => {
+        setEditorCtx(id, context)
+      },
       hooks: [
         () => {
           useEditorState({ active, file: curFile })
@@ -125,9 +128,8 @@ function Editor(props: EditorProps) {
       wysiwygToolBar: [<EditorCount key='editor-count' />],
       markdownToolBar: [<EditorCount key='editor-count' />],
     }),
-    [curFile, content, active, delegate],
+    [content, delegate, setEditorCtx, id, active, curFile],
   )
-
 
   if (notExistFile) {
     return <WarningHeader>File is not exist</WarningHeader>
@@ -138,17 +140,15 @@ function Editor(props: EditorProps) {
     'display-none': !active,
   })
 
-  return <div className={cls}>
-    {typeof content === 'string' ? (
-      <EditorWrapper
-        id='editorarea-wrapper'
-        active={active}
-        onClick={handleWrapperClick}
-      >
-        <MfEditor ref={editorRef} {...editorProps} />
-      </EditorWrapper>
-    ) : null}
-  </div>
+  return (
+    <div className={cls}>
+      {typeof content === 'string' ? (
+        <EditorWrapper id='editorarea-wrapper' active={active} onClick={handleWrapperClick}>
+          <MfEditor ref={editorRef} {...editorProps} />
+        </EditorWrapper>
+      ) : null}
+    </div>
+  )
 }
 
 export interface EditorProps {
