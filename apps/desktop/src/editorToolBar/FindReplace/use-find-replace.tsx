@@ -1,0 +1,121 @@
+/* eslint-disable @typescript-eslint/no-shadow */
+import { useCommandStore } from '@/stores'
+import type { EditorContext } from '@linebyline/editor'
+import { useCallback, useEffect, useState } from 'react'
+
+interface FindReplaceState {
+  query: string
+  replacement: string
+  activeIndex: number | null
+  total: number
+  caseSensitive: boolean
+}
+
+function initialState(): FindReplaceState {
+  return {
+    query: '',
+    replacement: '',
+    activeIndex: null,
+    total: 0,
+    caseSensitive: false,
+  }
+}
+
+type UseFindReplaceReturn = FindReplaceState & {
+  findNext: () => void
+  findPrev: () => void
+  stopFind: () => void
+  replace: () => void
+  replaceAll: () => void
+  toggleCaseSensitive: () => void
+  setQuery: (query: string) => void
+  setReplacement: (replacement: string) => void
+}
+
+export function useFindReplace(ctx: EditorContext): UseFindReplaceReturn {
+  const helpers = ctx.helpers
+  const commands = ctx.commands
+  const { addCommand } = useCommandStore()
+  const [state, setState] = useState<FindReplaceState>(initialState)
+
+  const find = useCallback(
+    (indexDiff = 0): void => {
+      setState((prev): FindReplaceState => {
+        const { query, caseSensitive, activeIndex } = prev
+        const result = helpers.findRanges({
+          query,
+          caseSensitive,
+          activeIndex: activeIndex == null ? 0 : activeIndex + indexDiff,
+        })
+        return { ...prev, total: result.ranges.length, activeIndex: result.activeIndex ?? 0 }
+      })
+    },
+    [helpers],
+  )
+
+  const findNext = useCallback(() => find(+1), [find])
+  const findPrev = useCallback(() => find(-1), [find])
+
+  const stopFind = useCallback(() => {
+    setState(initialState())
+    commands.stopFind()
+  }, [commands])
+
+  const replace = useCallback((): void => {
+    const { query, replacement, caseSensitive, activeIndex } = state
+    commands.findAndReplace({ query, replacement, caseSensitive, index: activeIndex ?? undefined })
+
+    const isQuerySubsetOfReplacement = caseSensitive
+      ? replacement.includes(query)
+      : replacement.toLowerCase().includes(query.toLowerCase())
+
+    if (isQuerySubsetOfReplacement) {
+      findNext()
+    } else {
+      find()
+    }
+  }, [state, commands, findNext, find])
+
+  const replaceAll = useCallback((): void => {
+    const { query, replacement, caseSensitive } = state
+    commands.findAndReplaceAll({ query, replacement, caseSensitive })
+    find()
+  }, [commands, state, find])
+
+  const toggleCaseSensitive = useCallback(() => {
+    setState((state) => ({ ...state, caseSensitive: !state.caseSensitive }))
+  }, [])
+  const setQuery = useCallback((query: string) => {
+    setState((state) => ({ ...state, query }))
+  }, [])
+  const setReplacement = useCallback((replacement: string) => {
+    setState((state) => ({ ...state, replacement }))
+  }, [])
+
+
+  useEffect(() => {
+    addCommand({
+      id: 'editor:stop_find',
+      handler: () => {
+        stopFind()
+      }
+    })
+  }, [addCommand, stopFind])
+
+  useEffect(() => {
+    find()
+  }, [find, state.query, state.caseSensitive])
+
+  return {
+    ...state,
+    findNext,
+    findPrev,
+    stopFind,
+    replace,
+    replaceAll,
+
+    toggleCaseSensitive,
+    setQuery,
+    setReplacement,
+  }
+}

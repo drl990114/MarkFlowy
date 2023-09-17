@@ -56,6 +56,14 @@ impl Keybindings {
                 ),
             ),
             (
+                "editor:find_replace".to_string(),
+                KeybindingInfo::new(
+                    "editor:find_replace".to_string(),
+                    "Find current active edit file".to_string(),
+                    vec!["CommandOrCtrl".to_string(), "f".to_string()],
+                ),
+            ),
+            (
                 "editor:copy".to_string(),
                 KeybindingInfo::new(
                     "editor:copy".to_string(),
