@@ -24,9 +24,15 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
 
-      - name: Run Test
-        run: yarn test
+      - name: Build workspaces
+        run: yarn build
+
+      - name: Build the app
+        run: yarn build:desktop --target x86_64-apple-darwin
         env:
           TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+
+      - name: Run Test
+        run: yarn test
