@@ -7,9 +7,6 @@
     },
     {
       "path": "apps/desktop/tsconfig.json"
-    },
-    {
-      "path": "apps/home/tsconfig.json"
     }
   ]
 }
