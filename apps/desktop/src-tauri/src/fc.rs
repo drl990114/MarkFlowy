@@ -62,7 +62,23 @@ pub fn read_directory(dir_path: &str) -> Vec<FileInfo> {
         }
     }
 
+    sort_files_by_kind_and_name(&mut files);
+
     files
+}
+
+pub fn sort_files_by_kind_and_name(files: &mut Vec<FileInfo>) {
+    files.sort_by(|a, b| {
+        if a.kind == b.kind {
+            a.name.cmp(&b.name)
+        } else {
+            if a.kind == "dir" {
+                std::cmp::Ordering::Less
+            } else {
+                std::cmp::Ordering::Greater
+            }
+        }
+    });
 }
 
 pub fn files_to_json(files: Vec<FileInfo>) -> String {
@@ -122,8 +138,6 @@ pub fn remove_folder(path: &str) -> AnyResult<()> {
     fs::remove_dir_all(folder_path)?;
     Ok(())
 }
-
-
 
 pub mod cmd {
     use std::path::Path;
