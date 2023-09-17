@@ -3173,6 +3173,7 @@ __metadata:
     react: ^18.0.0
     react-dom: ^18.0.0
     react-i18next: ^13.0.1
+    react-keywords: ^1.0.0
     react-loading: ^2.0.3
     react-router-dom: ^6.15.0
     react-test-renderer: ^18.2.0
@@ -13398,6 +13399,16 @@ __metadata:
   version: 17.0.2
   resolution: "react-is@npm:17.0.2"
   checksum: 9d6d111d8990dc98bc5402c1266a808b0459b5d54830bbea24c12d908b536df7883f268a7868cfaedde3dd9d4e0d574db456f84d2e6df9c4526f99bb4b5344d8
+  languageName: node
+  linkType: hard
+
+"react-keywords@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "react-keywords@npm:1.0.0"
+  peerDependencies:
+    react: ">=16.8.0"
+    react-dom: ">=16.8.0"
+  checksum: fc037142637a41e2f42d1821a4d10794e77e940e98c5468838a618b6761252146014b620768f09094bea21d23eded87827089c66b9537c2b6ee8d08a2fc6820b
   languageName: node
   linkType: hard
 

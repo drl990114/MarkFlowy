@@ -28,7 +28,6 @@ export const SearchInput = styled.div`
 `
 
 export const SearchInfoBox = styled.div`
-  flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -49,6 +48,24 @@ export const SearchInfoBox = styled.div`
       background-color: ${({ theme }) => theme.tipsBgColor};
     }
 
+    &__icon {
+      font-size: 18px;
+    }
+
+    &__path {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 0 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+
+      &:hover {
+        background-color: ${({ theme }) => theme.tipsBgColor};
+      }
+    }
+
     &__linenumber {
       color: ${({ theme }) => theme.labelFontColor};
       font-weight: 500;
@@ -58,7 +75,7 @@ export const SearchInfoBox = styled.div`
     &__content {
       flex: 1;
       white-space: pre-wrap;
-      word-break:  break-all;
+      word-break: break-all;
     }
   }
 `
