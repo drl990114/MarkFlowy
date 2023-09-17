@@ -4,6 +4,7 @@ import { useEditorStore } from '@/stores'
 import { memo } from 'react'
 import EditorAreaTabs from './EditorAreaTabs'
 import { EditorAreaHeader } from './EditorAreaHeader'
+import { FindReplace } from '@/editorToolBar/FindReplace'
 
 function EditorArea() {
   const { opened, activeId } = useEditorStore()
@@ -12,9 +13,10 @@ function EditorArea() {
     <Container className='w-full h-full'>
       <EditorAreaTabs />
       <EditorAreaHeader />
-        {opened.map((id) => {
-          return <Editor key={id} id={id} active={id === activeId} />
-        })}
+      <FindReplace />
+      {opened.map((id) => {
+        return <Editor key={id} id={id} active={id === activeId} />
+      })}
     </Container>
   )
 }
