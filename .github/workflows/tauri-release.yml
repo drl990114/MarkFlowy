@@ -6,7 +6,7 @@ on:
       - 'v*'
 
 jobs:
-  release:
+  build:
     permissions:
       contents: write
     strategy:
@@ -88,7 +88,7 @@ jobs:
         with:
           name: artifacts-${{ matrix.arch }}
           path: |
-            ./target/${{ matrix.target }}/release/bundle/appimage/**.AppImage.*
+            ./target/${{ matrix.target }}/release/bundle/appimage/**.AppImage
             ./target/${{ matrix.target }}/release/bundle/deb/**.deb
 
       - uses: actions/upload-artifact@v3
@@ -97,7 +97,7 @@ jobs:
           name: artifacts-${{ matrix.arch }}
           path: |
             ./target/${{ matrix.target }}/release/bundle/dmg/**.dmg
-            ./target/${{ matrix.target }}/release/bundle/macos/**.app.*
+            ./target/${{ matrix.target }}/release/bundle/macos/**.app
 
       - uses: actions/upload-artifact@v3
         if: matrix.os == 'windows-latest'
@@ -106,6 +106,12 @@ jobs:
           path: |
             ./target/${{ matrix.target }}/release/bundle/msi/**
 
+  release:
+    permissions:
+      contents: write
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
       - name: Query version number
         run: echo "version=${GITHUB_REF:11}" >> $GITHUB_ENV
 
@@ -123,30 +129,25 @@ jobs:
 
       - name: Rename artifacts
         run: |
-          mv "artifacts/aarch64/dmg/linebyline_${{ env.version }}_aarch64.dmg" "artifacts/linebyline_${{ env.version }}_macos_aarch64.dmg"
-          mv "artifacts/aarch64/macos/linebyline.app.tar.gz" "artifacts/linebyline_${{ env.version }}_macos_aarch64.app.tar.gz"
-          mv "artifacts/aarch64/macos/linebyline.app.tar.gz.sig" "artifacts/linebyline_${{ env.version }}_macos_aarch64.app.tar.gz.sig"
+          mv "artifacts/aarch64/dmg/LineByLine_${{ env.version }}_aarch64.dmg" "artifacts/linebyline_${{ env.version }}_macos_aarch64.dmg"
+          mv "artifacts/aarch64/macos/LineByLine.app" "artifacts/linebyline_${{ env.version }}_macos_aarch64.app"
 
-          mv "artifacts/x86_64/dmg/linebyline_${{ env.version }}_x64.dmg" "artifacts/linebyline_${{ env.version }}_macos_x86_64.dmg"
-          mv "artifacts/x86_64/macos/linebyline.app.tar.gz" "artifacts/linebyline_${{ env.version }}_macos_x86_64.app.tar.gz"
-          mv "artifacts/x86_64/macos/linebyline.app.tar.gz.sig" "artifacts/linebyline_${{ env.version }}_macos_x86_64.app.tar.gz.sig"
+          mv "artifacts/x86_64/dmg/LineByLine_${{ env.version }}_x64.dmg" "artifacts/linebyline_${{ env.version }}_macos_x86_64.dmg"
+          mv "artifacts/x86_64/macos/LineByLine.app" "artifacts/linebyline_${{ env.version }}_macos_x86_64.app"
 
-          mv "artifacts/x86_64/deb/chat-gpt_${{ env.version }}_amd64.deb" "artifacts/x86_64/deb/linebyline_${{ env.version }}_linux_x86_64.deb"
-          mv "artifacts/x86_64/appimage/chat-gpt_${{ env.version }}_amd64.AppImage.tar.gz" "artifacts/linebyline_${{ env.version }}_linux_x86_64.AppImage.tar.gz"
-          mv "artifacts/x86_64/appimage/chat-gpt_${{ env.version }}_amd64.AppImage.tar.gz.sig" "artifacts/linebyline_${{ env.version }}_linux_x86_64.AppImage.tar.gz.sig"
+          mv "artifacts/x86_64/deb/line-by-line_${{ env.version }}_amd64.deb" "artifacts/x86_64/deb/linebyline_${{ env.version }}_linux_x86_64.deb"
+          mv "artifacts/x86_64/appimage/line-by-line_${{ env.version }}_amd64.AppImage" "artifacts/linebyline_${{ env.version }}_linux_x86_64.AppImage"
 
-          mv "artifacts/x86_64/linebyline_${{ env.version }}_x64_en-US.msi" "artifacts/linebyline_${{ env.version }}_windows_x86_64.msi"
-          mv "artifacts/x86_64/linebyline_${{ env.version }}_x64_en-US.msi.zip" "artifacts/linebyline_${{ env.version }}_windows_x86_64.msi.zip"
-          mv "artifacts/x86_64/linebyline_${{ env.version }}_x64_en-US.msi.zip.sig" "artifacts/linebyline_${{ env.version }}_windows_x86_64.msi.zip.sig"
+          mv "artifacts/x86_64/LineByLine_${{ env.version }}_x64_en-US.msi" "artifacts/linebyline_${{ env.version }}_windows_x86_64.msi"
 
       - name: Create Release
         uses: softprops/action-gh-release@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: ${{ github.ref_name }}
-          releaseName: ${{ github.ref_name }}
-          releaseBody: ${{ steps.changelog.outputs.changes }}
+          tagName: v${{ env.version }}
+          releaseName: v${{ env.version }}
+          releaseBody: v${{ env.version }}
           releaseDraft: false
           prerelease: true
           files: ./artifacts/**/*
