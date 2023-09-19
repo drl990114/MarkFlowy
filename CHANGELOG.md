@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.5.2] - 2023-09-19
+### :sparkles: New Features
+- [`30ec27a`](https://github.com/linebyline-group/linebyline/commit/30ec27a790d567ca79efcd22eb0f6f2ea5a6e3c1) - **desktop**: search text in folder *(PR [#290](https://github.com/linebyline-group/linebyline/pull/290) by [@halodong](https://github.com/halodong))*
+  - :arrow_lower_right: *addresses issue [#100](undefined) opened by [@yu2chuan](https://github.com/yu2chuan)*
+- [`3b61fc5`](https://github.com/linebyline-group/linebyline/commit/3b61fc53bb83c4a45da10d83de4511e144ab5ba2) - **desktop**: sort folderData by name and kind *(commit by [@halodong](https://github.com/halodong))*
+- [`1ccd7f0`](https://github.com/linebyline-group/linebyline/commit/1ccd7f0778ac552a4ee3cd21b20ffd19c7161f45) - **editor**: find and replace *(PR [#291](https://github.com/linebyline-group/linebyline/pull/291) by [@halodong](https://github.com/halodong))*
+  - :arrow_lower_right: *addresses issue [#278](undefined) opened by [@yu2chuan](https://github.com/yu2chuan)*
+- [`c8c9068`](https://github.com/linebyline-group/linebyline/commit/c8c9068cdcce77ff59b96232cb930075e240daf1) - **desktop**: search bar support expand all *(commit by [@halodong](https://github.com/halodong))*
+
+### :bug: Bug Fixes
+- [`ca2c0b1`](https://github.com/linebyline-group/linebyline/commit/ca2c0b186ae4729dafe27a0690eebcc83b427a06) - **desktop**: find match color bright in dark mode *(commit by [@halodong](https://github.com/halodong))*
+
+
 ## [v0.4.1] - 2023-09-12
 ### :sparkles: New Features
 - [`789a82c`](https://github.com/linebyline-group/linebyline/commit/789a82c1824a30e08ff9f0964209fa67872c5139) - **crates**: npm download *(commit by [@halodong](https://github.com/halodong))*
@@ -149,3 +162,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v0.2.2]: https://github.com/linebyline-group/linebyline/compare/v0.2.1...v0.2.2
 [v0.3.6]: https://github.com/linebyline-group/linebyline/compare/v0.2.2...v0.3.6
 [v0.4.1]: https://github.com/linebyline-group/linebyline/compare/v0.3.6...v0.4.1
+[v0.5.2]: https://github.com/linebyline-group/linebyline/compare/v0.4.1...v0.5.2
