@@ -740,10 +740,11 @@ export const BaseStyle = styled.createGlobalStyle<ScThemeProps>`
     color: ${(props) => props.theme.labelFontColor};
   }
 
+  // codemirror ————————————————————
   .cm-editor {
     font-size: 15px;
     line-height: 1.5;
-    font-family: "DejaVu Sans Mono", "Source Code Pro", "Droid Sans Mono", Consolas, monospace;
+    font-family: 'DejaVu Sans Mono', 'Source Code Pro', 'Droid Sans Mono', Consolas, monospace;
 
     .cm-line {
       padding: 2px 2px 2px 6px;

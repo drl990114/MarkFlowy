@@ -39,7 +39,7 @@ import { LineTableExtension, LineTableRowExtension } from './Table'
 import { languages } from '@codemirror/language-data'
 import { LineHorizontalRuleExtension } from './HorizontalRule'
 import { CountExtension } from '@remirror/extension-count'
-import { FindExtension } from "@remirror/extension-find"
+import { FindExtension } from '@remirror/extension-find'
 
 // import { TableExtension } from './ReactTables';
 
@@ -88,7 +88,10 @@ function extensions(): any[] {
     new LineTableRowExtension(),
     new LineTableCellExtension(),
     new LineTableHeaderCellExtension(),
-    new FindExtension(),
+    new FindExtension({
+      decoration: { style: 'background-color: yellow; color: black' },
+      activeDecoration: { style: 'background-color: orange; color: black' },
+    }),
 
     new ReactComponentExtension(),
     new DropCursorExtension(),
