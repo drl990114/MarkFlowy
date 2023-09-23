@@ -40,6 +40,7 @@ import { languages } from '@codemirror/language-data'
 import { LineHorizontalRuleExtension } from './HorizontalRule'
 import { CountExtension } from '@remirror/extension-count'
 import { FindExtension } from "@remirror/extension-find"
+import { LineHtmlBlockExtension } from './HtmlInline/html-node-extension'
 
 // import { TableExtension } from './ReactTables';
 
@@ -88,6 +89,7 @@ function extensions(): any[] {
     new LineTableRowExtension(),
     new LineTableCellExtension(),
     new LineTableHeaderCellExtension(),
+    new LineHtmlBlockExtension(),
     new FindExtension(),
 
     new ReactComponentExtension(),
