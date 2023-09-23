@@ -3,7 +3,7 @@ name: Feature request
 about: Suggest an idea for this project
 title: "[FEATURE]: a feature"
 labels: feature
-assignees: 'halodong'
+assignees: 'drl990114'
 
 ---
 
