@@ -54,7 +54,7 @@ pub mod cmd {
                         .unwrap()
                         .emit("search_channel_final", Some(fi));
                 }
-                SearchResult::InterimResult(fi) => {
+                SearchResult::InterimResult(_fi) => {
                     // let _ = tauri::Manager::get_window(&_app, "linebyline").unwrap().emit("search_channel_unit", Some(fi));
                 }
                 SearchResult::SearchErrors(fi) => {
