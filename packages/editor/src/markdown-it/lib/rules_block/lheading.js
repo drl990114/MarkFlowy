@@ -1,6 +1,6 @@
 // lheading (---, ===)
 
-'use strict';
+
 
 
 module.exports = function lheading(state, startLine, endLine/*, silent*/) {

@@ -4,7 +4,7 @@
  * Top-level rules executor. Glues block/inline parsers and does intermediate
  * transformations.
  **/
-'use strict';
+
 
 
 var Ruler  = require('./ruler');

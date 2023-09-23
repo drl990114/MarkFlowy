@@ -1,6 +1,6 @@
 // Commonmark default options
 
-'use strict';
+
 
 
 module.exports = {

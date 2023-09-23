@@ -1,6 +1,6 @@
 // Token class
 
-'use strict';
+
 
 
 /**

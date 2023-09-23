@@ -1,6 +1,6 @@
 // Core state object
 //
-'use strict';
+
 
 var Token = require('../token');
 

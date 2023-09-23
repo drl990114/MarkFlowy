@@ -15,7 +15,7 @@
  * rules control use [[MarkdownIt.disable]], [[MarkdownIt.enable]] and
  * [[MarkdownIt.use]].
  **/
-'use strict';
+
 
 
 /**

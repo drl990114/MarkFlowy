@@ -1,6 +1,6 @@
 // Process links like https://example.org/
 
-'use strict';
+
 
 
 // RFC3986: scheme = ALPHA *( ALPHA / DIGIT / "+" / "-" / "." )

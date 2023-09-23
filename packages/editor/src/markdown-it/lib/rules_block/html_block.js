@@ -1,6 +1,6 @@
 // HTML block
 
-'use strict';
+
 
 
 var HTML_SEQUENCES = require('./html_block_sequences').HTML_SEQUENCES;

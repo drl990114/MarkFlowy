@@ -1,6 +1,6 @@
 // Regexps to match html elements
 
-'use strict';
+
 
 var attr_name     = '[a-zA-Z_:][a-zA-Z0-9:._-]*';
 

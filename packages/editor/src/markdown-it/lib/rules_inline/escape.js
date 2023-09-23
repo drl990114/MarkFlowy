@@ -1,6 +1,6 @@
 // Process escaped chars and hardbreaks
 
-'use strict';
+
 
 var isSpace = require('../common/utils').isSpace;
 

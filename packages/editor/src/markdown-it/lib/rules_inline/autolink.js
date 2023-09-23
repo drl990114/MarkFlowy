@@ -1,6 +1,6 @@
 // Process autolinks '<protocol:...>'
 
-'use strict';
+
 
 
 /*eslint max-len:0*/

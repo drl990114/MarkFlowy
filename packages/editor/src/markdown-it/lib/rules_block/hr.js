@@ -1,6 +1,6 @@
 // Horizontal rule
 
-'use strict';
+
 
 var isSpace = require('../common/utils').isSpace;
 

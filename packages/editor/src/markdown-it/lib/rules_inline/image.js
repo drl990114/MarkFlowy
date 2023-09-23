@@ -1,6 +1,6 @@
 // Process ![image](<src> "title")
 
-'use strict';
+
 
 var normalizeReference   = require('../common/utils').normalizeReference;
 var isSpace              = require('../common/utils').isSpace;

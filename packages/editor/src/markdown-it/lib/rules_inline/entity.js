@@ -1,6 +1,6 @@
 // Process html entity - &#123;, &#xAF;, &quot;, ...
 
-'use strict';
+
 
 var entities          = require('../common/entities');
 var has               = require('../common/utils').has;

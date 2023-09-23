@@ -3,7 +3,7 @@
  *
  * Tokenizes paragraph content.
  **/
-'use strict';
+
 
 
 var Ruler           = require('./ruler');

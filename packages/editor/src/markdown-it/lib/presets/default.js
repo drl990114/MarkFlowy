@@ -1,6 +1,6 @@
 // markdown-it default options
 
-'use strict';
+
 
 
 module.exports = {

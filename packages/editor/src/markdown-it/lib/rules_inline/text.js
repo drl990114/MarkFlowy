@@ -1,7 +1,7 @@
 // Skip text characters for text token, place those to pending buffer
 // and increment current pos
 
-'use strict';
+
 
 
 // Rule to skip pure text

@@ -1,6 +1,6 @@
 // HTML block
 
-'use strict';
+
 
 
 var block_names = require('../common/html_blocks');

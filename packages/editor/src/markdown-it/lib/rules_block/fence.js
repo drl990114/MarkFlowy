@@ -1,6 +1,6 @@
 // fences (``` lang, ~~~ lang)
 
-'use strict';
+
 
 
 module.exports = function fence(state, startLine, endLine, silent) {
