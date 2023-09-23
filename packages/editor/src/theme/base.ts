@@ -324,15 +324,14 @@ export const BaseStyle = styled.createGlobalStyle<ScThemeProps>`
   .markdown-body h4,
   .markdown-body h5,
   .markdown-body h6 {
-    margin-top: 24px;
-    margin-bottom: 16px;
-    line-height: 1.25;
+    padding: 0.2em 0;
+    margin: 0;
+    line-height: 1;
   }
 
   .markdown-body h1 {
     font-weight: 600;
-    margin: 0.67em 0;
-    padding-bottom: 0.3em;
+    padding: 0.4em 0;
     font-size: 2em;
   }
 
@@ -649,13 +648,15 @@ export const BaseStyle = styled.createGlobalStyle<ScThemeProps>`
 
   .markdown-body .md-img-uri,
   .markdown-body .md-img-text,
-  .markdown-body .md-link,
-  .markdown-body .md-html-inline {
+  .markdown-body .md-link {
     font-size: 0;
     letter-spacing: 0;
   }
 
   .markdown-body .md-html-inline {
+    letter-spacing: 0;
+    font-size: 0;
+    background-color: ${(props) => props.theme.tipsBgColor};
     color: ${(props) => props.theme.labelFontColor};
   }
 
@@ -740,7 +741,54 @@ export const BaseStyle = styled.createGlobalStyle<ScThemeProps>`
     color: ${(props) => props.theme.labelFontColor};
   }
 
-  // codemirror ————————————————————
+  .node-hide {
+    display: none !important;
+  }
+
+  .node-show {
+    display: block;
+    transition: all 0.3s;
+  }
+
+  .html-node {
+    position: relative;
+    min-height: 40px;
+    transition: all 0.3s;
+
+    &:hover {
+      background-color: ${({ theme }) => theme.tipsBgColor};
+    }
+  }
+
+  .html-src {
+    outline: none;
+  }
+
+  .ProseMirror-focused {
+    outline: 2px solid ${(props) => props.theme.accentColor};
+  }
+
+  .html-node-label {
+    position: absolute;
+    right: 0;
+    opacity: 0;
+    transition: all 0.3s;
+    font-size: small;
+    cursor: pointer;
+    color: ${(props) => props.theme.labelFontColor};
+  }
+
+  .node-enter {
+    & .html-node-render {
+      background-color: ${({ theme }) => theme.tipsBgColor};
+    }
+
+    & .html-node-label {
+      opacity: 1;
+      background-color: ${({ theme }) => theme.tipsBgColor};
+    }
+  }
+
   .cm-editor {
     font-size: 15px;
     line-height: 1.5;
