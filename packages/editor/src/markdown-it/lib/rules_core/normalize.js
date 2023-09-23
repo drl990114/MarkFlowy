@@ -1,6 +1,6 @@
 // Normalize input string
 
-'use strict';
+
 
 
 // https://spec.commonmark.org/0.29/#line-ending

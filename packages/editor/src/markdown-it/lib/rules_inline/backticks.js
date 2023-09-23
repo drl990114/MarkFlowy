@@ -1,6 +1,6 @@
 // Parse backticks
 
-'use strict';
+
 
 
 module.exports = function backtick(state, silent) {

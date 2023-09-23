@@ -1,6 +1,6 @@
 // Parse link title
 //
-'use strict';
+
 
 
 var unescapeAll = require('../common/utils').unescapeAll;

@@ -1,6 +1,6 @@
 // Code block (4 spaces padded)
 
-'use strict';
+
 
 
 module.exports = function code(state, startLine, endLine/*, silent*/) {

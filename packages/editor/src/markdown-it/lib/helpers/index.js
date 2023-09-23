@@ -1,5 +1,5 @@
 // Just a shortcut for bulk export
-'use strict';
+
 
 
 exports.parseLinkLabel       = require('./parse_link_label');

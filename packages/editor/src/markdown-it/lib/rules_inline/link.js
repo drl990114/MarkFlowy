@@ -1,6 +1,6 @@
 // Process [link](<to> "stuff")
 
-'use strict';
+
 
 var normalizeReference   = require('../common/utils').normalizeReference;
 var isSpace              = require('../common/utils').isSpace;

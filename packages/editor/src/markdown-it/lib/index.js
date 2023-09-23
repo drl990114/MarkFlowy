@@ -1,7 +1,5 @@
 // Main parser class
 
-'use strict';
-
 
 var utils        = require('./common/utils');
 var helpers      = require('./helpers');

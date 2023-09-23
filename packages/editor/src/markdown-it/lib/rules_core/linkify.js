@@ -2,7 +2,7 @@
 //
 // Currently restricted by `md.validateLink()` to http/https/ftp
 //
-'use strict';
+
 
 
 var arrayReplaceAt = require('../common/utils').arrayReplaceAt;

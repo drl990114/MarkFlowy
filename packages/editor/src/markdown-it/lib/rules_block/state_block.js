@@ -1,6 +1,6 @@
 // Parser state class
 
-'use strict';
+
 
 var Token = require('../token');
 var isSpace = require('../common/utils').isSpace;

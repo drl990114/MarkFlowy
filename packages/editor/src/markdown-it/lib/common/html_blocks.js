@@ -1,7 +1,7 @@
 // List of valid html blocks names, accorting to commonmark spec
 // http://jgm.github.io/CommonMark/spec.html#html-blocks
 
-'use strict';
+
 
 
 module.exports = [

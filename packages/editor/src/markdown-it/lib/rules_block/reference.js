@@ -1,4 +1,4 @@
-'use strict';
+
 
 
 var normalizeReference   = require('../common/utils').normalizeReference;

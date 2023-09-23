@@ -1,7 +1,4 @@
 // Utilities
-//
-'use strict';
-
 
 function _class(obj) { return Object.prototype.toString.call(obj); }
 

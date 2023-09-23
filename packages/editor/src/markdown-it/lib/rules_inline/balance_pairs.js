@@ -1,6 +1,6 @@
 // For each opening emphasis-like marker find a matching closing one
 //
-'use strict';
+
 
 
 function processDelimiters(state, delimiters) {

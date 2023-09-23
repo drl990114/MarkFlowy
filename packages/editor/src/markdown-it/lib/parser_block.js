@@ -3,7 +3,7 @@
  *
  * Block-level tokenizer.
  **/
-'use strict';
+
 
 
 var Ruler           = require('./ruler');

@@ -1,6 +1,6 @@
 // GFM table, https://github.github.com/gfm/#tables-extension-
 
-'use strict';
+
 
 var isSpace = require('../common/utils').isSpace;
 

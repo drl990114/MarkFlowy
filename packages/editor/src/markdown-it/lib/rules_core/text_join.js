@@ -5,7 +5,7 @@
 //
 // For example, `\:)` shouldn't be replaced with an emoji.
 //
-'use strict';
+
 
 
 module.exports = function text_join(state) {

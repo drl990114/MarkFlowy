@@ -1,6 +1,6 @@
 // Process html tags
 
-'use strict';
+
 
 
 var HTML_TAG_RE = require('../common/html_re').HTML_TAG_RE;

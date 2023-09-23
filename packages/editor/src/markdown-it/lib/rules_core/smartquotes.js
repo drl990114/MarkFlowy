@@ -1,6 +1,6 @@
 // Convert straight quotation marks to typographic ones
 //
-'use strict';
+
 
 
 var isWhiteSpace   = require('../common/utils').isWhiteSpace;

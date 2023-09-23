@@ -1,4 +1,4 @@
-'use strict';
+
 
 module.exports = function inline(state) {
   var tokens = state.tokens, tok, i, l;

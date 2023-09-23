@@ -1,6 +1,6 @@
 // Inline parser state
 
-'use strict';
+
 
 
 var Token          = require('../token');

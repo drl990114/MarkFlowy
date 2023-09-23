@@ -5,7 +5,7 @@
  * copy of rules. Those can be rewritten with ease. Also, you can add new
  * rules if you create plugin and adds new token types.
  **/
-'use strict';
+
 
 
 var assign          = require('./common/utils').assign;

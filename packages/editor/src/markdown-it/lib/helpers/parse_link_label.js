@@ -3,7 +3,7 @@
 // this function assumes that first character ("[") already matches;
 // returns the end of the label
 //
-'use strict';
+
 
 module.exports = function parseLinkLabel(state, start, disableNested) {
   var level, found, marker, prevPos,

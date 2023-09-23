@@ -1,6 +1,6 @@
 // Paragraph
 
-'use strict';
+
 
 
 module.exports = function paragraph(state, startLine/*, endLine*/) {

@@ -6,7 +6,7 @@
 // leaves them as text (needed to merge with adjacent text) or turns them
 // into opening/closing tags (which messes up levels inside).
 //
-'use strict';
+
 
 
 module.exports = function fragments_join(state) {

@@ -1,6 +1,6 @@
 // Process *this* and _that_
 //
-'use strict';
+
 
 
 // Insert each marker as a separate text token, and add it to delimiter list
