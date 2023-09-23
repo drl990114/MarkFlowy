@@ -6,9 +6,12 @@ import type {
   NodeSpecOverride,
   NodeViewMethod,
 } from '@remirror/core'
-import { NodeExtension } from '@remirror/core'
+import { NodeExtension, nodeInputRule } from '@remirror/core'
 import type { ProsemirrorNode } from '@remirror/pm'
 import { HtmlNodeView } from './html-node-view'
+import type { InputRule } from '@remirror/pm/inputrules'
+import { TextSelection } from '@remirror/pm/state'
+import { HTML_SEQUENCES } from '@/markdown-it/lib/rules_block/html_block_sequences'
 
 export class LineHtmlBlockExtension extends NodeExtension {
   get name() {
@@ -38,6 +41,22 @@ export class LineHtmlBlockExtension extends NodeExtension {
     return (node: ProsemirrorNode, view, getPos) => {
       return new HtmlNodeView(node, view, getPos as () => number)
     }
+  }
+
+  createInputRules(): InputRule[] {
+    const rules: InputRule[] = HTML_SEQUENCES.map((seq) =>
+      nodeInputRule({
+        regexp: seq[0] as RegExp,
+        type: this.type,
+        beforeDispatch: ({ tr, start, match }) => {
+          const $pos = tr.doc.resolve(start)
+          tr.setSelection(TextSelection.near($pos))
+          tr.insertText(match[0])
+        },
+      }),
+    )
+
+    return rules
   }
 
   public fromMarkdown() {

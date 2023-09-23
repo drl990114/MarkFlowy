@@ -1,8 +1,8 @@
 import type { Node as ProseNode } from 'prosemirror-model'
-import type { EditorState } from '@remirror/pm/state'
+import { TextSelection, type EditorState } from '@remirror/pm/state'
 import type { NodeView } from 'prosemirror-view'
 import type { EditorView } from '@remirror/pm/view'
-import type { EditorSchema } from 'remirror'
+import { replaceNodeAtPosition, type EditorSchema, assertGet } from 'remirror'
 import { exitCode } from '@remirror/pm/commands'
 import type {
   KeyBinding as CodeMirrorKeyBinding,
@@ -105,14 +105,51 @@ export class HtmlNodeView implements NodeView {
       {
         key: 'Ctrl-Enter',
         run: () => {
-          this.closeEditor(true)
-          this._outerView.focus()
           if (exitCode(this._outerView.state, this._outerView.dispatch)) {
             this._outerView.focus()
             return true
           }
 
+          this.closeEditor(true)
+          this._outerView.focus()
           return false
+        },
+      },
+      {
+        key: 'Backspace',
+        run: () => {
+          const ranges = this._innerView?.state.selection.ranges
+
+          if (!this._innerView || !ranges || ranges.length > 1) {
+            return false
+          }
+
+          const selection = ranges[0]
+
+          if (selection && (!selection.empty || selection.anchor > 0)) {
+            return false
+          }
+
+          // We don't want to convert a multi-line code block into a paragraph
+          // because newline characters are invalid in a paragraph node.
+          if (this._innerView.state.doc.lines >= 2) {
+            return false
+          }
+
+          const state = this._outerView.state
+          const toggleNode = assertGet(state.schema.nodes, 'paragraph')
+          const pos = this._getPos()
+          const tr = replaceNodeAtPosition({
+            pos: pos,
+            tr: state.tr,
+            content: toggleNode.createChecked({}, this._node.content),
+          })
+
+          tr.setSelection(TextSelection.near(tr.doc.resolve(pos)))
+
+          this._outerView.dispatch(tr)
+          this._outerView.focus()
+          return true
         },
       },
     ]
