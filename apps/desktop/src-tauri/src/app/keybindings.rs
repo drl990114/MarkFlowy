@@ -172,7 +172,7 @@ impl Keybindings {
                     Self::default()
                 }
             }
-            Err(err) => Self::default(),
+            Err(_err) => Self::default(),
         }
     }
 
@@ -182,7 +182,7 @@ impl Keybindings {
             create_file(path).unwrap();
         }
         if let Ok(v) = serde_json::to_string_pretty(&self) {
-            std::fs::write(path, v).unwrap_or_else(|err| {
+            std::fs::write(path, v).unwrap_or_else(|_err| {
                 Self::default().write();
             });
         } else {
@@ -204,7 +204,7 @@ impl Keybindings {
         let keyboard_infos = Self::new();
         let path = &Self::get_path();
         if let Ok(v) = serde_json::to_string_pretty(&keyboard_infos) {
-            std::fs::write(path, v).unwrap_or_else(|err| {
+            std::fs::write(path, v).unwrap_or_else(|_err| {
                 Self::default().write();
             });
         } else {
@@ -221,7 +221,7 @@ impl Default for Keybindings {
 
 pub mod cmd {
     use super::{KeybindingInfo, Keybindings};
-    use tauri::{command, AppHandle};
+    use tauri::command;
 
     #[command]
     pub fn get_keyboard_infos() -> Keybindings {

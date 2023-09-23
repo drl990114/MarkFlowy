@@ -70,7 +70,7 @@ impl AppConf {
             Ok(v) => {
                 match serde_json::from_str::<AppConf>(&v) {
                     Ok(v) => return Self::new().merge_conf(v),
-                    Err(err) => {
+                    Err(_err) => {
                         Self::default().write()
                     }
                 }
@@ -88,7 +88,7 @@ impl AppConf {
             create_file(path).unwrap();
         }
         if let Ok(v) = serde_json::to_string_pretty(&self) {
-            std::fs::write(path, v).unwrap_or_else(|err| {
+            std::fs::write(path, v).unwrap_or_else(|_err| {
                 Self::default().write();
             });
         } else {
@@ -108,9 +108,9 @@ impl AppConf {
         match serde_json::to_string_pretty(&config) {
             Ok(v) => match serde_json::from_str::<AppConf>(&v) {
                 Ok(v) => v,
-                Err(err) => self,
+                Err(_err) => self,
             },
-            Err(err) => self,
+            Err(_err) => self,
         }
     }
 
@@ -145,8 +145,7 @@ pub mod cmd {
     use super::AppConf;
     use tauri::{command, AppHandle, WindowBuilder, WindowUrl};
 
-    #[cfg(target_os = "macos")]
-    use tauri::TitleBarStyle;
+    
 
     #[command]
     pub fn get_app_conf_path() -> String {
@@ -173,7 +172,7 @@ pub mod cmd {
         let theme = AppConf::theme_mode();
 
         tauri::async_runtime::spawn(async move {
-            let mut conf_win =
+            let conf_win =
                 WindowBuilder::new(&_app, "conf", WindowUrl::App("./setting".into()))
                     .title("linebyline setting")
                     .resizable(true)
