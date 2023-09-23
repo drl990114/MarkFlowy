@@ -4,6 +4,7 @@ import * as esbuild from 'esbuild'
 import { nodeExternalsPlugin } from 'esbuild-node-externals'
 import alias from 'esbuild-plugin-alias'
 import { CSSMinifyPlugin } from 'esbuild-plugin-cssminify'
+import  { commonjs } from "@hyrious/esbuild-plugin-commonjs"
 
 /**
  * @param {import('esbuild').BuildOptions} options
@@ -22,6 +23,7 @@ async function main(options) {
 
 main({
   plugins: [
+    commonjs(),
     alias({
       '@': './src',
     }),
