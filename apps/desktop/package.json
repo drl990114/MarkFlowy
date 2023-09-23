@@ -2,7 +2,7 @@
   "name": "@linebyline/desktop",
   "version": "0.5.2",
   "scripts": {
-    "dev": "vite --host",
+    "dev": "vite --host --force",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "tauri:build": "tauri build",
