@@ -5,13 +5,15 @@ import type {
   NodeExtensionSpec,
   NodeSpecOverride,
   NodeViewMethod,
+  PrioritizedKeyBindings,
 } from '@remirror/core'
 import { NodeExtension, nodeInputRule } from '@remirror/core'
 import type { ProsemirrorNode } from '@remirror/pm'
-import { HtmlNodeView } from './html-node-view'
+import { HtmlNodeView } from './html-block-view'
 import type { InputRule } from '@remirror/pm/inputrules'
 import { TextSelection } from '@remirror/pm/state'
-import { HTML_SEQUENCES } from '@/markdown-it/lib/rules_block/html_block_sequences'
+import block_names from '@/markdown-it/lib/common/html_blocks'
+import { arrowHandler } from '../CodeMIrror/codemirror-utils'
 
 export class LineHtmlBlockExtension extends NodeExtension {
   get name() {
@@ -22,18 +24,21 @@ export class LineHtmlBlockExtension extends NodeExtension {
     return {
       group: 'block',
       content: 'text*',
-      atom: true,
-      code: true,
+      defining: true,
       ...override,
+      code: true,
+      isolating: true,
       attrs: {
         ...extra.defaults(),
       },
-      toDOM: () => ['html_block', { class: 'math-node' }, 0],
       parseDOM: [
         {
-          tag: 'html_block', // important!
+          tag: 'pre',
         },
       ],
+      toDOM() {
+        return ['pre', ['code', 0]]
+      },
     }
   }
 
@@ -44,9 +49,9 @@ export class LineHtmlBlockExtension extends NodeExtension {
   }
 
   createInputRules(): InputRule[] {
-    const rules: InputRule[] = HTML_SEQUENCES.map((seq) =>
+    const rules: InputRule[] = [
       nodeInputRule({
-        regexp: seq[0] as RegExp,
+        regexp: new RegExp('^</?(' + block_names.join('|') + ')(?=(\\s|/?>|$))', 'i'),
         type: this.type,
         beforeDispatch: ({ tr, start, match }) => {
           const $pos = tr.doc.resolve(start)
@@ -54,9 +59,18 @@ export class LineHtmlBlockExtension extends NodeExtension {
           tr.insertText(match[0])
         },
       }),
-    )
+    ]
 
     return rules
+  }
+
+  createKeymap(): PrioritizedKeyBindings {
+    return {
+      ArrowLeft: arrowHandler('left'),
+      ArrowRight: arrowHandler('right'),
+      ArrowUp: arrowHandler('up'),
+      ArrowDown: arrowHandler('down'),
+    }
   }
 
   public fromMarkdown() {

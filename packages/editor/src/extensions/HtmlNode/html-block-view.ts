@@ -4,12 +4,8 @@ import type { NodeView } from 'prosemirror-view'
 import type { EditorView } from '@remirror/pm/view'
 import { replaceNodeAtPosition, type EditorSchema, assertGet } from 'remirror'
 import { exitCode } from '@remirror/pm/commands'
-import type {
-  KeyBinding as CodeMirrorKeyBinding,
-} from '@codemirror/view'
-import type {
-  Transaction as CodeMirrorTransaction,
-} from '@codemirror/state'
+import type { KeyBinding as CodeMirrorKeyBinding } from '@codemirror/view'
+import type { Transaction as CodeMirrorTransaction } from '@codemirror/state'
 import { EditorState as CodeMirrorEditorState, Compartment } from '@codemirror/state'
 import { EditorView as CodeMirrorEditorView, keymap } from '@codemirror/view'
 import { computeChange } from '../CodeMIrror/codemirror-node-view'
@@ -106,12 +102,11 @@ export class HtmlNodeView implements NodeView {
         key: 'Ctrl-Enter',
         run: () => {
           if (exitCode(this._outerView.state, this._outerView.dispatch)) {
+            this.closeEditor()
             this._outerView.focus()
             return true
           }
 
-          this.closeEditor(true)
-          this._outerView.focus()
           return false
         },
       },
@@ -160,8 +155,12 @@ export class HtmlNodeView implements NodeView {
    * This helps to prevent accidental deletions of html blocks.
    */
   ensureFocus() {
-    if (this._innerView && this._outerView.hasFocus()) {
-      this._innerView.focus()
+    if (this._outerView.hasFocus()) {
+      if (this._innerView) {
+        this._innerView.focus()
+      } else {
+        this.openEditor()
+      }
     }
   }
 
@@ -293,10 +292,14 @@ export class HtmlNodeView implements NodeView {
 
   // == Inner Editor ================================== /
   setSelection(anchor: number, head: number): void {
-    this._innerView?.focus()
-    this._isEditing = true
-    this._innerView?.dispatch({ selection: { anchor, head } })
-    this._isEditing = false
+    if (!this._innerView) {
+      this.openEditor()
+    } else {
+      this._innerView?.focus()
+      this._isEditing = true
+      this._innerView?.dispatch({ selection: { anchor, head } })
+      this._isEditing = false
+    }
   }
 
   openEditor() {
@@ -322,10 +325,13 @@ export class HtmlNodeView implements NodeView {
 
     this._innerView.focus()
 
-    const prevCursorPos: number = 0
+    this._innerView.contentDOM.addEventListener('blur', () => {
+      this.closeEditor(true)
+    })
 
-    const innerPos = prevCursorPos <= this._getPos() ? 0 : this._node.nodeSize - 2
-    this.setSelection(innerPos, innerPos)
+    const prevCursorPos: number = this.htmlText?.length || 0
+
+    this.setSelection(prevCursorPos, prevCursorPos)
 
     this._htmlRenderElt?.classList.add('node-hide')
 

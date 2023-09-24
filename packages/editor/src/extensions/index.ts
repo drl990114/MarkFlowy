@@ -40,7 +40,7 @@ import { languages } from '@codemirror/language-data'
 import { LineHorizontalRuleExtension } from './HorizontalRule'
 import { CountExtension } from '@remirror/extension-count'
 import { FindExtension } from '@remirror/extension-find'
-import { LineHtmlBlockExtension } from './HtmlInline/html-node-extension'
+import { LineHtmlBlockExtension } from './HtmlNode/html-block-extension'
 
 // import { TableExtension } from './ReactTables';
 
