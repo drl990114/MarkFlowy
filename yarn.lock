@@ -3270,7 +3270,7 @@ __metadata:
     esbuild: ^0.18.2
     esbuild-node-externals: ^1.8.0
     esbuild-plugin-alias: ^0.2.1
-    esbuild-plugin-cssminify: ^0.0.2
+    esbuild-plugin-cssminify: ^0.0.3
     eslint: 8.44.0
     fuse.js: ^6.6.2
     jest-remirror: ^2.1.5
@@ -8583,7 +8583,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"esbuild-plugin-cssminify@^0.0.2, esbuild-plugin-cssminify@workspace:packages/esbuild-plugin-cssminify":
+"esbuild-plugin-cssminify@^0.0.3, esbuild-plugin-cssminify@workspace:packages/esbuild-plugin-cssminify":
   version: 0.0.0-use.local
   resolution: "esbuild-plugin-cssminify@workspace:packages/esbuild-plugin-cssminify"
   dependencies:

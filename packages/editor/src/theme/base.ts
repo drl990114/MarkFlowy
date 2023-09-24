@@ -528,16 +528,6 @@ export const BaseStyle = styled.createGlobalStyle<ScThemeProps>`
   .markdown-body table td {
     min-width: 60px;
     padding: 6px 20px;
-    border: 1px solid #30363d;
-  }
-
-  .markdown-body table tr {
-    background-color: #0f0f0f;
-    border-top: 1px solid #21262d;
-  }
-
-  .markdown-body table tr:nth-child(2n) {
-    background-color: #161b22;
   }
 
   .markdown-body table img {
