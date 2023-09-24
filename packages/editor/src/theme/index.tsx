@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import type { ThemeProps, ThemeProviderProps } from 'styled-components'
 import { ThemeProvider } from 'styled-components'
-import darkCss from './dark.css?.inline'
-import lightCss from './light.css?.inline'
+import darkCss from './dark.css?inline'
+import lightCss from './light.css?inline'
 import { BaseStyle } from './base'
 export * from './codemirror'
 export * from './base'
@@ -15,8 +15,7 @@ export type ThemeColors = typeof lightThemeColors
 export type ScThemeProps = ThemeProps<ThemeColors>
 
 function loadThemeCss(url: string) {
-  if (themeEl)
-    themeEl.remove()
+  if (themeEl) themeEl.remove()
 
   themeEl = document.createElement('style')
   themeEl.setAttribute('id', THEME_ID)
@@ -25,10 +24,13 @@ function loadThemeCss(url: string) {
 }
 
 export function loadTheme(theme: 'light' | 'dark') {
-  if (theme === 'light')
+  if (theme === 'light') {
+    console.log('loadTheme', theme, lightCss)
+
     loadThemeCss(lightCss)
-  else
+  } else {
     loadThemeCss(darkCss)
+  }
 }
 
 const lightThemeColors = {
@@ -53,7 +55,6 @@ const darkThemeColors = {
   boxShadowColor: 'rgba(255, 255, 255, 0.04)',
 }
 
-
 type Theme = 'light' | 'dark'
 
 export function useTheme(defaultTheme: Theme = 'light') {
@@ -62,10 +63,8 @@ export function useTheme(defaultTheme: Theme = 'light') {
 
   useEffect(() => {
     loadTheme(theme)
-    if (theme === 'light')
-      setThemeColors(lightThemeColors)
-    else
-      setThemeColors(darkThemeColors)
+    if (theme === 'light') setThemeColors(lightThemeColors)
+    else setThemeColors(darkThemeColors)
   }, [theme])
 
   return {
@@ -77,11 +76,13 @@ export function useTheme(defaultTheme: Theme = 'light') {
 
 /**
  * Used to inject global styles, only global references are required once
- * @param props 
- * @returns 
+ * @param props
+ * @returns
  */
-export function EditorGlobalStyles (props: ThemeProviderProps<typeof lightThemeColors>) {
-  return <ThemeProvider theme={props.theme}>
-    <BaseStyle />
-  </ThemeProvider>
+export function EditorGlobalStyles(props: ThemeProviderProps<typeof lightThemeColors>) {
+  return (
+    <ThemeProvider theme={props.theme}>
+      <BaseStyle />
+    </ThemeProvider>
+  )
 }
