@@ -1,32 +1,33 @@
+import bus from '@/helper/eventBus'
 import { useCommands } from '@linebyline/editor'
-import { listen } from '@tauri-apps/api/event'
 import { useEffect, type FC } from 'react'
 
-type CreateTableCommand =  {
+type CreateTableCommand = {
   /**
    * Defines the number of rows to create with.
    *
    * @defaultValue 3
    */
-  rowsCount?: number;
+  rowsCount?: number
   /**
    * Defines the number of columns to create with.
    *
    * @defaultValue 3
    */
-  columnsCount?: number;
+  columnsCount?: number
 }
 
 export const useCommandEvent: FC<EditorStateProps> = ({}: EditorStateProps) => {
   const commands = useCommands()
 
   useEffect(() => {
-    const unListen = listen<CreateTableCommand>('editor:create_table', ({ payload }) => {
+    const handler = (payload: CreateTableCommand) => {
       commands.createTable(payload)
-    })
+    }
+    bus.on('editor:create_table', handler)
 
     return () => {
-      unListen.then((fn) => fn())
+      bus.detach('editor:create_table', handler)
     }
   }, [commands])
 

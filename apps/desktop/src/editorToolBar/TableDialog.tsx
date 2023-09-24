@@ -1,6 +1,6 @@
 import { MfDialog } from '@/components/UI/Dialog'
+import bus from '@/helper/eventBus'
 import { Button, TextField, Grid } from '@mui/material'
-import { emit, listen } from '@tauri-apps/api/event'
 import { useCallback, useEffect, useState } from 'react'
 
 function TableDialog() {
@@ -9,17 +9,19 @@ function TableDialog() {
   const [columnsCount, setColumnsCount] = useState(4)
 
   useEffect(() => {
-    const unlisten = listen('editor:dialog_create_table', () => {
+    const handler = () => {
       setOpen(true)
-    })
+    }
+
+    bus.on('editor:dialog_create_table', handler)
 
     return () => {
-      unlisten.then((fn) => fn())
+      bus.detach('editor:dialog_create_table', handler)
     }
   }, [])
 
   const handleOk = useCallback(() => {
-    emit('editor:create_table', { rowsCount, columnsCount })
+    bus.emit('editor:create_table', { rowsCount, columnsCount })
     setOpen(false)
   }, [columnsCount, rowsCount])
 
