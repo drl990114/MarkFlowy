@@ -2831,6 +2831,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@hyrious/esbuild-plugin-commonjs@npm:^0.2.2":
+  version: 0.2.2
+  resolution: "@hyrious/esbuild-plugin-commonjs@npm:0.2.2"
+  peerDependencies:
+    cjs-module-lexer: "*"
+    esbuild: "*"
+  peerDependenciesMeta:
+    cjs-module-lexer:
+      optional: true
+  checksum: 29f125d1b75ec546adc8b1ba62515b0441558cd0a5f9b50173784081ae9ffefaf2b6e63fa313fe66622680927f7c9dcb66daedbbfab9ccf4f1aac9378c7c7bfa
+  languageName: node
+  linkType: hard
+
 "@icons/material@npm:^0.2.4":
   version: 0.2.4
   resolution: "@icons/material@npm:0.2.4"
@@ -3210,6 +3223,7 @@ __metadata:
     "@emotion/react": ^11.11.1
     "@emotion/styled": ^11.11.0
     "@floating-ui/react": ^0.25.1
+    "@hyrious/esbuild-plugin-commonjs": ^0.2.2
     "@lezer/common": 1.0.3
     "@lezer/highlight": ^1.1.6
     "@lezer/lr": 1.3.9
@@ -3239,8 +3253,9 @@ __metadata:
     "@remirror/types": ^1.0.1
     "@types/codemirror": ^5.60.9
     "@types/lodash": ^4.14.197
-    "@types/markdown-it": ^12.2.3
     "@types/mdast": ^3.0.11
+    "@types/mdurl": ^1
+    "@types/punycode": ^2
     "@types/react": ^18.2.18
     "@types/react-dom": ^18.2.7
     "@types/styled-components": ^5.1.26
@@ -3251,25 +3266,28 @@ __metadata:
     "@vitest/browser": ^0.34.2
     "@vitest/ui": ^0.34.3
     create-context-state: ^2.0.0
+    entities: ~3.0.1
     esbuild: ^0.18.2
     esbuild-node-externals: ^1.8.0
     esbuild-plugin-alias: ^0.2.1
-    esbuild-plugin-cssminify: ^0.0.2
+    esbuild-plugin-cssminify: ^0.0.3
     eslint: 8.44.0
     fuse.js: ^6.6.2
     jest-remirror: ^2.1.5
     jsdom: ^22.1.0
     jsx-dom-cjs: ^8.0.7
+    linkify-it: ^4.0.1
     lodash: ^4.17.21
-    markdown-it: ^13.0.1
     mdast: ^3.0.0
     mdast-util-from-markdown: ^1.3.1
     mdast-util-gfm-autolink-literal: ^1.0.3
     mdast-util-gfm-strikethrough: ^1.0.3
+    mdurl: ^1.0.1
     micromark-extension-gfm-autolink-literal: ^1.0.5
     micromark-extension-gfm-strikethrough: ^1.0.7
     nanoid: ^4.0.2
     prosemirror-flat-list: ^0.4.1
+    punycode: ^2.3.0
     react: ^18.2.0
     react-dom: ^18.2.0
     react-is: ^18.2.0
@@ -5823,27 +5841,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/linkify-it@npm:*":
-  version: 3.0.2
-  resolution: "@types/linkify-it@npm:3.0.2"
-  checksum: dff8f10fafb885422474e456596f12d518ec4cdd6c33cca7a08e7c86b912d301ed91cf5a7613e148c45a12600dc9ab3d85ad16d5b48dc1aaeda151a68f16b536
-  languageName: node
-  linkType: hard
-
 "@types/lodash@npm:^4.14.197":
   version: 4.14.197
   resolution: "@types/lodash@npm:4.14.197"
   checksum: 53d7567d1704de76cf33266c78062e0fd722d4b846e5b1417d0b6ef0ee41c0d9c451b92bc34f73d5f1fcc45c7d36511e92f6f47a9279b48157ba60a92ddaa078
-  languageName: node
-  linkType: hard
-
-"@types/markdown-it@npm:^12.2.3":
-  version: 12.2.3
-  resolution: "@types/markdown-it@npm:12.2.3"
-  dependencies:
-    "@types/linkify-it": "*"
-    "@types/mdurl": "*"
-  checksum: 868824a3e4d00718ba9cd4762cf16694762a670860f4b402e6e9f952b6841a2027488bdc55d05c2b960bf5078df21a9d041270af7e8949514645fe88fdb722ac
   languageName: node
   linkType: hard
 
@@ -5863,7 +5864,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/mdurl@npm:*":
+"@types/mdurl@npm:^1":
   version: 1.0.2
   resolution: "@types/mdurl@npm:1.0.2"
   checksum: 79c7e523b377f53cf1f5a240fe23d0c6cae856667692bd21bf1d064eafe5ccc40ae39a2aa0a9a51e8c94d1307228c8f6b121e847124591a9a828c3baf65e86e2
@@ -5937,6 +5938,13 @@ __metadata:
   version: 15.7.5
   resolution: "@types/prop-types@npm:15.7.5"
   checksum: 5b43b8b15415e1f298243165f1d44390403bb2bd42e662bca3b5b5633fdd39c938e91b7fce3a9483699db0f7a715d08cef220c121f723a634972fdf596aec980
+  languageName: node
+  linkType: hard
+
+"@types/punycode@npm:^2":
+  version: 2.1.0
+  resolution: "@types/punycode@npm:2.1.0"
+  checksum: 6835698becab395eb9ac186970fd7879aeb522ea72d516ef9d681d787989653fcc2439ecc07d48280e1ca11862773b806efeec3fdbd1207528829a83b65d4275
   languageName: node
   linkType: hard
 
@@ -8575,7 +8583,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"esbuild-plugin-cssminify@^0.0.2, esbuild-plugin-cssminify@workspace:packages/esbuild-plugin-cssminify":
+"esbuild-plugin-cssminify@^0.0.3, esbuild-plugin-cssminify@workspace:packages/esbuild-plugin-cssminify":
   version: 0.0.0-use.local
   resolution: "esbuild-plugin-cssminify@workspace:packages/esbuild-plugin-cssminify"
   dependencies:
@@ -11404,21 +11412,6 @@ __metadata:
   version: 6.2.2
   resolution: "make-plural@npm:6.2.2"
   checksum: 3358330c113e4586f8874a37f3ad613cd7c898ff9a0ae61d029dfbdce042ad0f76e88909464c5514be81166b842005913e58341e77f7b6378a2020630dcfc613
-  languageName: node
-  linkType: hard
-
-"markdown-it@npm:^13.0.1":
-  version: 13.0.1
-  resolution: "markdown-it@npm:13.0.1"
-  dependencies:
-    argparse: ^2.0.1
-    entities: ~3.0.1
-    linkify-it: ^4.0.1
-    mdurl: ^1.0.1
-    uc.micro: ^1.0.5
-  bin:
-    markdown-it: bin/markdown-it.js
-  checksum: faf5891d389dc433bcf21d3fbff2009beb044b42b117c92f4848899780ca1a2282a209e3ff4672db4afed726a7248304ec473e6e242a7d6498af7113d31974e7
   languageName: node
   linkType: hard
 
@@ -15132,7 +15125,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"uc.micro@npm:^1.0.1, uc.micro@npm:^1.0.5":
+"uc.micro@npm:^1.0.1":
   version: 1.0.6
   resolution: "uc.micro@npm:1.0.6"
   checksum: 6898bb556319a38e9cf175e3628689347bd26fec15fc6b29fa38e0045af63075ff3fea4cf1fdba9db46c9f0cbf07f2348cd8844889dd31ebd288c29fe0d27e7a

@@ -40,6 +40,7 @@ import { languages } from '@codemirror/language-data'
 import { LineHorizontalRuleExtension } from './HorizontalRule'
 import { CountExtension } from '@remirror/extension-count'
 import { FindExtension } from '@remirror/extension-find'
+import { LineHtmlBlockExtension } from './HtmlNode/html-block-extension'
 
 // import { TableExtension } from './ReactTables';
 
@@ -92,6 +93,7 @@ function extensions(): any[] {
       decoration: { style: 'background-color: yellow; color: black' },
       activeDecoration: { style: 'background-color: orange; color: black' },
     }),
+    new LineHtmlBlockExtension(),
 
     new ReactComponentExtension(),
     new DropCursorExtension(),

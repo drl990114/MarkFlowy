@@ -1,7 +1,7 @@
 use super::conf;
 use crate::fc::{create_file, exists};
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, path::PathBuf, vec};
+use std::{path::PathBuf, vec};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Bookmark {
@@ -35,7 +35,7 @@ impl BookMarks {
                     Self::default()
                 }
             }
-            Err(err) => Self::default(),
+            Err(_err) => Self::default(),
         }
     }
 
@@ -45,7 +45,7 @@ impl BookMarks {
             create_file(path).unwrap();
         }
         if let Ok(v) = serde_json::to_string_pretty(&self) {
-            std::fs::write(path, v).unwrap_or_else(|err| {
+            std::fs::write(path, v).unwrap_or_else(|_err| {
                 Self::default().write();
             });
         } else {
@@ -92,7 +92,7 @@ impl Default for BookMarks {
 
 pub mod cmd {
     use super::{BookMarks, Bookmark};
-    use tauri::{command, AppHandle};
+    use tauri::command;
 
     #[command]
     pub fn get_bookmarks() -> BookMarks {

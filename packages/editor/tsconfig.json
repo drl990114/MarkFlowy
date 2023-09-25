@@ -7,9 +7,9 @@
     "composite": true,
     "outDir": "./dist",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
     }
   },
-  "include": ["./src", "./types.d.ts", "vite.config.ts"],
-  "exclude": ["./src/**/*.spec.ts", "./src/**/*.test.ts"]
+  "include": ["./src", "vitest.config.ts"],
+  "exclude": ["./src/**/*.spec.ts", "./src/**/*.test.ts", "node_modules", "./src/**/*.js"]
 }

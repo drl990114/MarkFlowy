@@ -1,7 +1,7 @@
 import type { Node, NodeType, Schema } from '@remirror/pm/model'
 import { Mark } from '@remirror/pm/model'
-import MarkdownIt from 'markdown-it'
-import type Token from 'markdown-it/lib/token'
+import MarkdownIt from '@/markdown-it'
+import type Token from '@/markdown-it/lib/token'
 
 import markdownItListCheckbox from './markdown-it-list-checkbox'
 import type {
@@ -215,7 +215,7 @@ export class MarkdownParser {
   public constructor(schema: Schema, parserRules: ParserRule[]) {
     this.schema = schema
     this.tokenizer = MarkdownIt('commonmark', { html: true })
-      .disable(['emphasis', 'autolink', 'backticks', 'entity', 'html_block'])
+      .disable(['emphasis', 'autolink', 'backticks', 'entity'])
       .enable(['table'])
       .use(markdownItListCheckbox)
 

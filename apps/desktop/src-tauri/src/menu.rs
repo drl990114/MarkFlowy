@@ -1,10 +1,10 @@
 use crate::app::keybindings::Keybindings;
-use crate::app::{conf::AppConf, keybindings::KeybindingInfo};
-use tauri::{CustomMenuItem, Manager, Menu, MenuItem, Submenu, WindowMenuEvent};
+use crate::app::{conf::AppConf};
+use tauri::{CustomMenuItem, Menu, MenuItem, Submenu, WindowMenuEvent};
 
 pub fn generate_menu() -> Menu {
     let app_conf = AppConf::read();
-    let keyboard_infos = Keybindings::read();
+    let _keyboard_infos = Keybindings::read();
 
     let name = "LineByLine";
     let app_menu = Submenu::new(

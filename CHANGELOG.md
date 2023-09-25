@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.5.3] - 2023-09-24
+### :bug: Bug Fixes
+- [`e5e34b6`](https://github.com/linebyline-group/linebyline/commit/e5e34b608506fa305ce4ae7b5371e253d15ecae6) - html block node edit optimization *(commit by [@drl990114](https://github.com/drl990114))*
+- [`d821705`](https://github.com/linebyline-group/linebyline/commit/d8217051e97cddd41c4f4878b997e8891853568a) - **editor**: html block input rule *(commit by [@drl990114](https://github.com/drl990114))*
+- [`56ff173`](https://github.com/linebyline-group/linebyline/commit/56ff1739fdeb990fb223adfe5d4c48f83298056c) - **editor**: improve html_block node view ux *(commit by [@drl990114](https://github.com/drl990114))*
+- [`14ca3ac`](https://github.com/linebyline-group/linebyline/commit/14ca3ac96a008532557b9a39e858352bf5463989) - **desktop**: menu create table not working *(commit by [@drl990114](https://github.com/drl990114))*
+- [`e1bd5d5`](https://github.com/linebyline-group/linebyline/commit/e1bd5d5af8c000b4231245706bc6b53611e1f92a) - **editor**: load css error *(commit by [@drl990114](https://github.com/drl990114))*
+
+
 ## [v0.5.2] - 2023-09-19
 ### :sparkles: New Features
 - [`30ec27a`](https://github.com/linebyline-group/linebyline/commit/30ec27a790d567ca79efcd22eb0f6f2ea5a6e3c1) - **desktop**: search text in folder *(PR [#290](https://github.com/linebyline-group/linebyline/pull/290) by [@halodong](https://github.com/halodong))*
@@ -163,3 +172,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v0.3.6]: https://github.com/linebyline-group/linebyline/compare/v0.2.2...v0.3.6
 [v0.4.1]: https://github.com/linebyline-group/linebyline/compare/v0.3.6...v0.4.1
 [v0.5.2]: https://github.com/linebyline-group/linebyline/compare/v0.4.1...v0.5.2
+[v0.5.3]: https://github.com/linebyline-group/linebyline/compare/v0.5.2...v0.5.3

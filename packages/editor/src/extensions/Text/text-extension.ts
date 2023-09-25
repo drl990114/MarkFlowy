@@ -1,5 +1,5 @@
 import { TextExtension } from "remirror/extensions"
-import type Token from "markdown-it/lib/token"
+import type Token from "@/markdown-it/lib/token"
 
 import type { NodeSerializerOptions} from "../../transform"
 import { ParserRuleType } from "../../transform"
