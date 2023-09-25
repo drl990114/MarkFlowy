@@ -3197,7 +3197,7 @@ __metadata:
     ts-node: ^10.9.1
     typescript: ^5.1.3
     url: ^0.11.1
-    vite: ^4.3.9
+    vite: ^4.4.9
     vite-plugin-svgr: ^3.2.0
     vite-plugin-svgr-component: ^1.0.1
     vitest: ^0.34.2
@@ -3300,7 +3300,7 @@ __metadata:
     tether-drop: ^1.4.2
     typescript: ^5.1.3
     url: ^0.11.1
-    vite: ^4.3.9
+    vite: ^4.4.9
     vite-plugin-svgr: ^3.2.0
     vite-plugin-svgr-component: ^1.0.1
     vitest: ^0.34.2
@@ -3328,7 +3328,7 @@ __metadata:
     react: ^18.2.0
     react-dom: ^18.2.0
     typescript: ^5.0.2
-    vite: ^4.4.5
+    vite: ^4.4.9
   languageName: unknown
   linkType: soft
 
@@ -15452,7 +15452,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite@npm:^3.0.0 || ^4.0.0, vite@npm:^4.3.9":
+"vite@npm:^3.0.0 || ^4.0.0":
   version: 4.4.8
   resolution: "vite@npm:4.4.8"
   dependencies:
@@ -15492,7 +15492,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite@npm:^4.4.5":
+"vite@npm:^4.4.9":
   version: 4.4.9
   resolution: "vite@npm:4.4.9"
   dependencies:
