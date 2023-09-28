@@ -13,9 +13,9 @@
   "tauri": {
     "allowlist": {
       "all": false,
-      "fs": {
-        "readFile": true,
-        "writeFile": true,
+			"fs": {
+				"readFile": true,
+				"writeFile": true,
         "exists": true,
         "scope": [
           "$APPDATA/*",
@@ -24,7 +24,7 @@
           "$HOME/*",
           "$DESKTOP/*"
         ]
-      },
+			},
       "clipboard": {
         "writeText": true
       },
@@ -41,6 +41,11 @@
       "path": {
         "all": true
       },
+      "protocol": {
+				"all": true,
+				"asset": true,
+				"assetScope": ["*"]
+			},
       "window": {
         "close": true,
         "create": true,
@@ -59,9 +64,11 @@
       "active": true,
       "category": "DeveloperTool",
       "icon": [
+        "icons/32x32.png",
+        "icons/128x128.png",
+        "icons/128x128@2x.png",
         "icons/icon.icns",
-        "icons/icon.ico",
-        "icons/icon.png"
+        "icons/icon.ico"
       ],
       "identifier": "com.tauri.test",
       "targets": "all",
