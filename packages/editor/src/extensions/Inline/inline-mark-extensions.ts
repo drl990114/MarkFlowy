@@ -1,5 +1,5 @@
 import type { KeyBindingProps, MarkExtensionSpec, NodeView, NodeViewMethod } from '@remirror/core'
-import { MarkExtension, keyBinding } from '@remirror/core'
+import { MarkExtension, extension, keyBinding } from '@remirror/core'
 
 import { formatHref } from './format-href'
 import { toggleInlineMark } from './inline-mark-commands'
@@ -59,7 +59,7 @@ class Emphasis extends MarkExtension {
     }
   }
 
-  @keyBinding({ shortcut: "mod-i", command: 'toggleEmphasis' })
+  @keyBinding({ shortcut: 'mod-i', command: 'toggleEmphasis' })
   shortcut(props: KeyBindingProps): boolean {
     return toggleInlineMark(this.name)(props)
   }
@@ -77,7 +77,7 @@ class Strong extends MarkExtension {
     }
   }
 
-  @keyBinding({ shortcut: "mod-b", command: 'toggleStrong' })
+  @keyBinding({ shortcut: 'mod-b', command: 'toggleStrong' })
   shortcut(props: KeyBindingProps): boolean {
     return toggleInlineMark(this.name)(props)
   }
@@ -95,7 +95,7 @@ class CodeText extends MarkExtension {
     }
   }
 
-  @keyBinding({ shortcut: "mod-e", command: 'toggleCodeText' })
+  @keyBinding({ shortcut: 'mod-e', command: 'toggleCodeText' })
   shortcut(props: KeyBindingProps): boolean {
     return toggleInlineMark(this.name)(props)
   }
@@ -126,7 +126,7 @@ class Delete extends MarkExtension {
     }
   }
 
-  @keyBinding({ shortcut: "mod-shift-s", command: 'toggleDelete' })
+  @keyBinding({ shortcut: 'mod-shift-s', command: 'toggleDelete' })
   shortcut(props: KeyBindingProps): boolean {
     return toggleInlineMark(this.name)(props)
   }
@@ -184,7 +184,15 @@ class ImgText extends MarkExtension {
   }
 }
 
-class ImgUri extends MarkExtension {
+type MfImgOptions = {
+  handleViewImgSrcUrl?: (src: string) => Promise<string>
+}
+@extension<MfImgOptions>({
+  defaultOptions: {
+    handleViewImgSrcUrl: async (src: string) => src,
+  },
+})
+class ImgUri extends MarkExtension<MfImgOptions> {
   static disableExtraAttributes = true
   get name() {
     return 'mdImgUri' as const
@@ -195,7 +203,7 @@ class ImgUri extends MarkExtension {
       attrs: {
         ...commonAttrs,
         key: {
-          default: "",
+          default: '',
         },
         href: {
           default: '',
@@ -208,7 +216,13 @@ class ImgUri extends MarkExtension {
       const innerContainer = document.createElement('span')
 
       const img = document.createElement('img')
-      img.setAttribute('src', formatHref(mark.attrs.href))
+      if (this.options.handleViewImgSrcUrl) {
+        this.options.handleViewImgSrcUrl(mark.attrs.href).then((newHref) => {
+          img.setAttribute('src', formatHref(newHref))
+        })
+      } else {
+        img.setAttribute('src', formatHref(mark.attrs.href))
+      }
 
       const outerContainer = document.createElement('span')
       outerContainer.appendChild(img)
@@ -225,7 +239,7 @@ const autoHideMarks: Record<string, true> = {
   mdLinkUri: true,
   mdImgText: true,
   mdImgUri: true,
-  mdHtmlInline: true
+  mdHtmlInline: true,
 }
 
 export function isAutoHideMark(name: string): boolean {
@@ -233,7 +247,11 @@ export function isAutoHideMark(name: string): boolean {
   return autoHideMarks[name]
 }
 
-export const markExtensions = [
+type LineMarkExtensionOptions = {
+  handleViewImgSrcUrl?: (src: string) => Promise<string>
+}
+
+export const markExtensions = (options: LineMarkExtensionOptions = {}) => [
   new MetaKey(),
   new PlainText(),
   new Emphasis(),
@@ -244,10 +262,14 @@ export const markExtensions = [
   new LinkText(),
   new LinkUri(),
   new ImgText(),
-  new ImgUri(),
-  new LineHtmlInlineExtension()
+  new ImgUri({
+    handleViewImgSrcUrl: options.handleViewImgSrcUrl,
+  }),
+  new LineHtmlInlineExtension({
+    handleViewImgSrcUrl: options.handleViewImgSrcUrl,
+  }),
 ]
-export type LineMarkExtension = (typeof markExtensions)[number]
+export type LineMarkExtension = ReturnType<typeof markExtensions>[number]
 export type LineMarkName = LineMarkExtension['name']
 export type LineMarkAttrs = {
   depth: number

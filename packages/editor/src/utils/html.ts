@@ -14,3 +14,7 @@ export function getTagName(str: string) {
 
   return ''
 }
+
+export function isImageElement(el: any): el is HTMLImageElement {
+  return el && (el.tagName as string)?.toLocaleUpperCase() === 'IMG'
+}
