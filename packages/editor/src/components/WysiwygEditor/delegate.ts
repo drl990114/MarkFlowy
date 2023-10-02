@@ -3,7 +3,7 @@ import { initDocMarks } from '../../extensions/Inline'
 import type { AnyExtension } from 'remirror'
 import type { RemirrorManager } from '@remirror/core'
 import { isExtension } from '@remirror/core'
-import type { MarkdownNodeExtension } from '../../extensions'
+import type { ExtensionsOptions, MarkdownNodeExtension } from '../../extensions'
 import type { ParserRule, NodeSerializerSpecs } from '../../transform'
 import { MarkdownParser, MarkdownSerializer } from '../../transform'
 import type { StringToDoc, DocToString, EditorDelegate } from '../../types'
@@ -43,8 +43,19 @@ export function buildMarkdownSerializer<Extension extends AnyExtension>(
   return new MarkdownSerializer(specs)
 }
 
-export const createWysiwygDelegate = (): EditorDelegate<any>=> {
-  const manager = createReactManager(EditorExtensions)
+export type CreateWysiwygDelegateOptions = {
+  handleViewImgSrcUrl?: ExtensionsOptions['handleViewImgSrcUrl']
+}
+
+export const createWysiwygDelegate = ({
+  handleViewImgSrcUrl,
+}: CreateWysiwygDelegateOptions = {}): EditorDelegate<any>=> {
+  const manager = createReactManager(() => {
+    return [
+      ...EditorExtensions({ handleViewImgSrcUrl }),
+    ]
+  })
+
   const parser = buildMarkdownParser(manager)
   const serializer = buildMarkdownSerializer(manager)
 

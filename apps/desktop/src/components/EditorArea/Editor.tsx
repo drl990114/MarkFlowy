@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import { Editor as MfEditor } from '@linebyline/editor'
-import type { EditorContext, EditorRef, EditorViewType } from '@linebyline/editor'
-import { invoke } from '@tauri-apps/api'
+import type { CreateWysiwygDelegateOptions, EditorContext, EditorRef, EditorViewType } from '@linebyline/editor'
+import { invoke, tauri } from '@tauri-apps/api'
 import { appWindow } from '@tauri-apps/api/window'
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import styled, { css } from 'styled-components'
@@ -17,6 +17,7 @@ import bus from '@/helper/eventBus'
 import { EVENT } from '@/constants'
 import classNames from 'classnames'
 import { WarningHeader } from './styles'
+import { join } from '@tauri-apps/api/path'
 
 const EditorWrapper = styled.div<{ active: boolean }>`
   min-height: 100%;
@@ -37,6 +38,22 @@ const EditorWrapper = styled.div<{ active: boolean }>`
         })}
 `
 
+const wysiwygDelegateOptions: CreateWysiwygDelegateOptions = {
+  handleViewImgSrcUrl: async (url) => {
+    if (!url) return url
+    if ((url.startsWith('http') || url.startsWith('https') )&& !url.includes(location.origin)) {
+      return url
+    }
+
+    const dirPath = useEditorStore.getState().folderData?.[0]?.path
+    if (dirPath) {
+      const newUrl = await join(dirPath, url)
+      return tauri.convertFileSrc(newUrl)
+    }
+
+    return tauri.convertFileSrc(url)
+  }
+}
 function Editor(props: EditorProps) {
   const { id, active } = props
   const curFile = getFileObject(id)
@@ -44,7 +61,7 @@ function Editor(props: EditorProps) {
   const { setEditorDelegate, getEditorContent, setEditorCtx } = useEditorStore()
   const { execute } = useCommandStore()
   const editorRef = useRef<EditorRef>(null)
-  const [delegate, setDelegate] = useState(createWysiwygDelegate())
+  const [delegate, setDelegate] = useState(createWysiwygDelegate(wysiwygDelegateOptions))
   const [notExistFile, setNotExistFile] = useState(false)
 
   useEffect(() => {
@@ -86,7 +103,7 @@ function Editor(props: EditorProps) {
               setEditorDelegate(curFile.id, sourceCodeDelegate)
               setDelegate(sourceCodeDelegate)
             } else {
-              const wysiwygDelegate = createWysiwygDelegate()
+              const wysiwygDelegate = createWysiwygDelegate(wysiwygDelegateOptions)
               setEditorDelegate(curFile.id, wysiwygDelegate)
               setDelegate(wysiwygDelegate)
             }

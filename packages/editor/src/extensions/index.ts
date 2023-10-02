@@ -46,7 +46,10 @@ import { LineHtmlBlockExtension } from './HtmlNode/html-block-extension'
 
 export * from './List'
 
-function extensions(): any[] {
+export type ExtensionsOptions = {
+  handleViewImgSrcUrl?: (src: string) => Promise<string>
+}
+function extensions({ handleViewImgSrcUrl }: ExtensionsOptions = {}): any[] {
   return [
     // new BoldExtension(),
     // new CodeBlockExtension(),
@@ -73,7 +76,9 @@ function extensions(): any[] {
     // new EmojiExtension({ data }),
     // new ImageExtension({}),
     ...corePreset({ excludeExtensions: ['paragraph', 'text'] }),
-    ...markExtensions,
+    ...markExtensions({
+      handleViewImgSrcUrl
+    }),
     new CountExtension(),
 
     new PlaceholderExtension({ placeholder: 'Type something...' }),

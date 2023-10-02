@@ -44,7 +44,7 @@
       "protocol": {
 				"all": true,
 				"asset": true,
-				"assetScope": ["*"]
+				"assetScope": ["**"]
 			},
       "window": {
         "close": true,
