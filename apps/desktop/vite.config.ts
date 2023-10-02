@@ -19,7 +19,9 @@ export default defineConfig({
       },
     }),
     svgr({
-      exportAsDefault: true,
+      svgrOptions: {
+        exportType: 'default'
+      }
     }),
   ],
   build: {

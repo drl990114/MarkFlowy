@@ -25,8 +25,6 @@ function loadThemeCss(url: string) {
 
 export function loadTheme(theme: 'light' | 'dark') {
   if (theme === 'light') {
-    console.log('loadTheme', theme, lightCss)
-
     loadThemeCss(lightCss)
   } else {
     loadThemeCss(darkCss)
