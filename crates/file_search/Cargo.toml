@@ -13,5 +13,5 @@ walkdir = "2.4.0" #walker from ripgrep
 clipboard = "0.5.0" #for clipboard
 dirs = "5.0.1" #for getting config file
 serde = { version="1.0.156", features=["derive"]}  #save config
-toml = "0.8.0" #config format
+toml = "0.8.1" #config format
 uuid = { version = "1.4.1", features = ["v4"] }
