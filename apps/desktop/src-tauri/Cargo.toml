@@ -18,7 +18,7 @@ anyhow = "1.0.75"
 dark-light = "1.0.0"
 log = "0.4.19"
 serde = { version = "1.0", features = ["derive"] }
-tauri = { version = "1.4.1", features = [ "window-unmaximize", "window-set-title", "path-all", "window-close", "dialog-save", "window-unminimize", "protocol-all", "window-create", "dialog-open", "clipboard-write-text", "os-all", "global-shortcut-all", "fs-write-file", "window-start-dragging", "fs-read-file", "window-minimize", "window-maximize", "fs-exists", "shell-open", "devtools"] }
+tauri = { version = "1.5.0", features = [ "window-unmaximize", "window-set-title", "path-all", "window-close", "dialog-save", "window-unminimize", "protocol-all", "window-create", "dialog-open", "clipboard-write-text", "os-all", "global-shortcut-all", "fs-write-file", "window-start-dragging", "fs-read-file", "window-minimize", "window-maximize", "fs-exists", "shell-open", "devtools"] }
 tauri-plugin-store = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
 regex = "1.9.6"
 mf-utils = { path = "../../../crates/utils" }
