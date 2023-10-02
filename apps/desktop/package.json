@@ -35,7 +35,7 @@
     "react-loading": "^2.0.3",
     "react-router-dom": "^6.15.0",
     "remixicon": "^3.4.0",
-    "styled-components": "^5.3.11",
+    "styled-components": "^6.0.8",
     "tauri-plugin-store-api": "^0.0.0",
     "tinykeys": "^2.1.0",
     "zustand": "^4.4.1"
