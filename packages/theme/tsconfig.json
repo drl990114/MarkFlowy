@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "rootDir": ".",
+    "skipLibCheck": true,
+    "composite": true,
+    "outDir": "./dist",
+    "paths": {
+      "@/*": ["./src/*"],
+    }
+  },
+  "include": ["./src", "./src/types/*.d.ts"],
+  "exclude": ["./src/**/*.spec.ts", "./src/**/*.test.ts", "node_modules", "./src/**/*.js"]
+}

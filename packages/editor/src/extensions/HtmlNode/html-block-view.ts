@@ -10,7 +10,7 @@ import { EditorState as CodeMirrorEditorState, Compartment } from '@codemirror/s
 import { EditorView as CodeMirrorEditorView, keymap } from '@codemirror/view'
 import { computeChange } from '../CodeMIrror/codemirror-node-view'
 import { html } from '@codemirror/lang-html'
-import { light } from '@/theme/codemirror'
+import { mfCodemirrorLight } from '@/extensions/CodeMIrror'
 
 function removeNewlines(str: string) {
   return str.replace(/\n+|\t/g, '')
@@ -310,7 +310,7 @@ export class HtmlNodeView implements NodeView {
     const htmlLang = html()
     const startState = CodeMirrorEditorState.create({
       doc: this.htmlText,
-      extensions: [keymap.of(this.codeMirrorKeymap()), this.languageConf.of([]), light, htmlLang],
+      extensions: [keymap.of(this.codeMirrorKeymap()), this.languageConf.of([]), mfCodemirrorLight, htmlLang],
     })
 
     this._innerView = new CodeMirrorEditorView({
