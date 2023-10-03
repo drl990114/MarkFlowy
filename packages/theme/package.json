@@ -1,0 +1,46 @@
+{
+  "name": "@markflowy/theme",
+  "version": "0.0.1",
+  "type": "module",
+  "license": "MIT",
+  "homepage": "",
+  "main": "./dist/index.mjs",
+  "module": "./dist/index.mjs",
+  "types": "dist/src/index.d.ts",
+  "keywords": [
+    "markdown",
+    "theme"
+  ],
+  "files": [
+    "dist/*"
+  ],
+  "peerDependencies": {
+    "eslint": ">=7.4.0"
+  },
+  "scripts": {
+    "build": "yarn clear && tsc --emitDeclarationOnly && node esbuild.mjs",
+    "dev": "tsc --emitDeclarationOnly --watch & node esbuild.mjs --watch",
+    "test": "vitest run",
+    "test:dev": "vitest dev",
+    "delete": "rimraf node_modules",
+    "clear": "rimraf dist && rimraf tsconfig.tsbuildinfo"
+  },
+  "dependencies": {
+    "remixicon": "^3.5.0",
+    "styled-components": "^6.0.8"
+  },
+  "devDependencies": {
+    "@types/codemirror": "^5.60.9",
+    "esbuild": "^0.18.2",
+    "esbuild-node-externals": "^1.8.0",
+    "esbuild-plugin-alias": "^0.2.1",
+    "esbuild-plugin-cssminify": "^0.0.3",
+    "eslint": "8.44.0",
+    "rimraf": "^5.0.1",
+    "typescript": "^5.1.3",
+    "url": "^0.11.1",
+    "vite": "^4.4.9",
+    "vitest": "^0.34.2",
+    "webdriverio": "^8.15.0"
+  }
+}

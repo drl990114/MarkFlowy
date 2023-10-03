@@ -1,6 +1,6 @@
 import styled from "styled-components"
 import type { ITocListProps } from "./type"
-import type { ScThemeProps } from "@linebyline/editor"
+import type { ScThemeProps } from "@markflowy/theme"
 
 export const TocDiv = styled.div`
 position: relative;
@@ -20,8 +20,8 @@ position: relative;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: ${(props: ScThemeProps) => props.theme.bgColor};
-    color: ${(props: ScThemeProps) => props.theme.primaryFontColor};
+    background-color: ${(props) => props.theme.bgColor};
+    color: ${(props) => props.theme.primaryFontColor};
     z-index: 1;
   }
 
@@ -38,9 +38,9 @@ position: relative;
     list-style: none;
   }
 `
-export const TocLink = styled.a`
-  color: ${(props: ITocListProps & ScThemeProps) => (props.active ? props.theme.primaryFontColor : props.theme.labelFontColor)};
-  font-weight: ${(props: ITocListProps) => props.active ? `600` : '400'};
+export const TocLink = styled.a<ITocListProps & ScThemeProps>`
+  color: ${(props) => (props.active ? props.theme.primaryFontColor : props.theme.labelFontColor)};
+  font-weight: ${(props) => props.active ? `600` : '400'};
   display: block;
   box-shadow: none;
   text-decoration: none;
@@ -51,13 +51,13 @@ export const TocLink = styled.a`
 
 const listItemShiftWidthEm = 1
 
-export const TocListItem = styled.li`
+export const TocListItem = styled.li<ITocListProps>`
   margin: 0;
   list-style: none;
   position: relative;
   display: flex;
   align-items: center;
-  padding-left: ${(props: ITocListProps) =>
+  padding-left: ${(props) =>
     `${(props.depth + 1) * listItemShiftWidthEm}em`};
   &:hover {
     color: #fff;

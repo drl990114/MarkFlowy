@@ -39,7 +39,7 @@ const SearchView = memo(() => {
   useEffect(() => {
     return () => {
       if (activeId) {
-        editorCtxMap.get(activeId)?.commands.stopFind()
+        editorCtxMap.get(activeId)?.commands?.stopFind?.()
       }
     }
   }, [activeId, editorCtxMap])

@@ -1,5 +1,4 @@
 import { createGlobalStyle } from 'styled-components'
-import type { ScThemeProps } from '.'
 import OpenSansLight from './fonts/open-sans-v15-latin_latin-ext-300.woff'
 import OpenSansLightItalic from './fonts/open-sans-v15-latin_latin-ext-300italic.woff'
 import OpenSansRegular from './fonts/open-sans-v15-latin_latin-ext-regular.woff'
@@ -19,7 +18,7 @@ import DejaVuSansMonoOblique from './fonts/DejaVuSansMono-Oblique.ttf'
  */
 const styled = { createGlobalStyle }
 
-export const BaseStyle = styled.createGlobalStyle<ScThemeProps>`
+export const BaseStyle = styled.createGlobalStyle`
   /*
  * Open Sans
  * https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i&amp;subset=latin-ext

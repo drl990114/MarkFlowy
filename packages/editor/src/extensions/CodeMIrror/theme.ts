@@ -41,7 +41,7 @@ export const LightInit = (options?: Partial<CreateThemeOptions>) => {
   })
 }
 
-export const light = LightInit()
+export const mfCodemirrorLight = LightInit()
 
 export const defaultSettingsDark: CreateThemeOptions['settings'] = {
   background: '#11191f',
@@ -82,4 +82,4 @@ export const darkInit = (options?: Partial<CreateThemeOptions>) => {
   })
 }
 
-export const dark = darkInit()
+export const mfCodemirrorDark = darkInit()

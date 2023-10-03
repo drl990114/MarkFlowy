@@ -12,7 +12,6 @@ export interface CodeMirrorExtensionOptions {
    * You might want to install and add the following two extensions:
    *
    * - [`basicSetup`](https://codemirror.net/6/docs/ref/#basic-setup.basicSetup)
-   * - [`oneDark`](https://github.com/codemirror/theme-one-dark)
    *
    * @defaultValue null
    */

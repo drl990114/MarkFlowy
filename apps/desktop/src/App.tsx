@@ -1,11 +1,11 @@
-import { EditorGlobalStyles } from '@linebyline/editor'
+import { BaseStyle } from '@markflowy/theme'
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles'
 import { invoke } from '@tauri-apps/api'
 import { listen } from '@tauri-apps/api/event'
 import type { Theme } from '@tauri-apps/api/window'
 import { useCallback, useEffect } from 'react'
 import { Route, Routes } from 'react-router-dom'
-import { ThemeProvider } from 'styled-components'
+import { ThemeProvider, StyleSheetManager } from 'styled-components'
 import { GlobalStyles } from './globalStyles'
 import { useGlobalSettingData, useGlobalTheme, useGlobalKeyboard, useGlobalOSInfo } from './hooks'
 import { i18nInit } from './i18n'
@@ -19,14 +19,16 @@ import useOpenedCacheStore from '@/stores/useOpenedCacheStore'
 import { cacheStore } from './helper/cacheStore'
 import 'remixicon/fonts/remixicon.css'
 import bus from './helper/eventBus'
+import isPropValid from '@emotion/is-prop-valid'
+import type { FC } from 'react'
 
-function App() {
+const App: FC = function () {
   useGlobalOSInfo()
   useGlobalKeyboard()
   const { setRecentWorkspaces } = useOpenedCacheStore()
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, handler] = useGlobalSettingData()
-  const { themeColors, muiTheme, setTheme, editorThemeColors } = useGlobalTheme()
+  const { themeColors, muiTheme, setTheme } = useGlobalTheme()
   const editorStore = useEditorStore()
   const { setFolderData, addOpenedFile, setActiveId } = editorStore
   const { setSetting } = handler
@@ -147,8 +149,8 @@ function App() {
   // }, [])
 
   return (
-    <>
-      <EditorGlobalStyles theme={editorThemeColors} />
+    <StyleSheetManager shouldForwardProp={isPropValid}>
+      <BaseStyle theme={themeColors} />
       <ThemeProvider theme={themeColors}>
         <MuiThemeProvider theme={muiTheme}>
           <GlobalStyles />
@@ -158,7 +160,7 @@ function App() {
           </Routes>
         </MuiThemeProvider>
       </ThemeProvider>
-    </>
+    </StyleSheetManager>
   )
 }
 
