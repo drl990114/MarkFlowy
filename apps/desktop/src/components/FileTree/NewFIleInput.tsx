@@ -35,7 +35,7 @@ const NewFileInput = forwardRef<NewInputRef, HTMLAttributes<HTMLInputElement>>((
   const [invalidText, setInvalidText] = useState(InvalidTextMap.same)
   const { addFile } = useEditorStore()
 
-  const styleProps = useMemo(() => ({ className, style}), [className, style])
+  const styleProps = useMemo(() => ({ className, style }), [className, style])
 
   const hideInput = useCallback(() => {
     setVisible(false)
@@ -112,6 +112,10 @@ const NewFileInput = forwardRef<NewInputRef, HTMLAttributes<HTMLInputElement>>((
     setInputName(e.target.value)
   }, [])
 
+  const stopPropagation: React.ChangeEventHandler<HTMLInputElement> = useCallback((e) => {
+    e.stopPropagation()
+  }, [])
+
   if (!visible) return null
 
   return (
@@ -120,7 +124,7 @@ const NewFileInput = forwardRef<NewInputRef, HTMLAttributes<HTMLInputElement>>((
         value={inputName}
         onChange={handleChange}
         onKeyUp={handleKeyup}
-        onClick={(e) => e.stopPropagation()}
+        onClick={stopPropagation}
         aria-invalid={true}
         {...otherProps}
       ></Input>

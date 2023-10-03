@@ -49,6 +49,8 @@ const Explorer: FC<ExplorerProps> = (props) => {
     [openFolder],
   )
 
+  const handleContextMenu = useCallback((e: Event) => e.preventDefault(), [])
+
   const listData = useMemo(
     () =>
       recentWorkspaces.map((history: { path: string }) => ({
@@ -62,7 +64,7 @@ const Explorer: FC<ExplorerProps> = (props) => {
   const containerCLs = classNames(props.className)
 
   return (
-    <Container className={containerCLs} onContextMenu={(e) => e.preventDefault()}>
+    <Container className={containerCLs} onContextMenu={handleContextMenu}>
       {/* <SideBarHeader name='EXPLORER' /> */}
       <div className='h-full w-full overflow-auto'>
         {folderData && folderData.length > 0 ? (

@@ -63,6 +63,11 @@ const ChatList: React.FC<ChatListProps> = (props) => {
     },
     [exportChats],
   )
+
+  const handleChange: React.ChangeEventHandler<HTMLInputElement> = useCallback((event) => {
+    setAskInput(event.target.value)
+  }, [])
+
   const openSettingWindow = useCallback(() => invoke('open_conf_window'), [])
 
   return (
@@ -139,9 +144,7 @@ const ChatList: React.FC<ChatListProps> = (props) => {
           value={askInput}
           placeholder='input question'
           onKeyDown={handleKeydown}
-          onChange={(event) => {
-            setAskInput(event.target.value)
-          }}
+          onChange={handleChange}
         />
         <Button className='submit' size='small' variant='contained' onClick={handleSubmit}>
           submit

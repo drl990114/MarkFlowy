@@ -173,7 +173,7 @@ export const Toc = forwardRef<TocRef, TocProps>((props, ref) => {
             href={`#${h.id}`}
             active={isActive}
             depth={h.depth}
-            onClick={(ev) => handleHeadingClick(ev, h)}
+            onClick={(ev: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => handleHeadingClick(ev, h)}
           >
             {h.title}
           </TocLink>
