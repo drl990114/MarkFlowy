@@ -1,5 +1,5 @@
-import type { OsType } from '@tauri-apps/api/os'
-import { type } from '@tauri-apps/api/os'
+import type { OsType } from '@tauri-apps/plugin-os'
+import { type } from '@tauri-apps/plugin-os'
 import { createGlobalStore } from 'hox'
 import { useEffect, useState } from 'react'
 

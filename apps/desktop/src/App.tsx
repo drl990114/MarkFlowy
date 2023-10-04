@@ -2,7 +2,7 @@ import { BaseStyle } from '@markflowy/theme'
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles'
 import { invoke } from '@tauri-apps/api'
 import { listen } from '@tauri-apps/api/event'
-import type { Theme } from '@tauri-apps/api/window'
+import type { Theme } from '@tauri-apps/plugin-window'
 import { useCallback, useEffect } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import { ThemeProvider, StyleSheetManager } from 'styled-components'
@@ -118,6 +118,7 @@ const App: FC = function () {
 
   const eventInit = useCallback(() => {
     const unListenMenu = listen<string>('native:menu', ({ payload }) => {
+      console.log('menu', payload)
       bus.emit(payload)
     })
 
