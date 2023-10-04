@@ -133,7 +133,7 @@ function Editor(props: EditorProps) {
     () => ({
       content: content!,
       delegate,
-      offset: { top: 30, left: 16 },
+      offset: { top: 10, left: 16 },
       onContextMounted: (context: EditorContext) => {
         setEditorCtx(id, context)
       },

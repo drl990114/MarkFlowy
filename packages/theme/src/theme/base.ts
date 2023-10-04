@@ -336,27 +336,31 @@ export const BaseStyle = styled.createGlobalStyle`
 
   .markdown-body h2 {
     font-weight: 600;
-    padding-bottom: 0.3em;
+    padding: 0.4em 0;
     font-size: ${props => props.theme.fontH2};
   }
 
   .markdown-body h3 {
     font-weight: 600;
+    padding: 0.4em 0;
     font-size: ${props => props.theme.fontH3};
   }
 
   .markdown-body h4 {
     font-weight: 600;
+    padding: 0.4em 0;
     font-size: ${props => props.theme.fontH4};
   }
 
   .markdown-body h5 {
     font-weight: 600;
+    padding: 0.3em 0;
     font-size: ${props => props.theme.fontH5};
   }
 
   .markdown-body h6 {
     font-weight: 600;
+    padding: 0.3em 0;
     font-size: ${props => props.theme.fontH6};
   }
 
