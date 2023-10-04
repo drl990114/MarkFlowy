@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "dev": "yarn workspace @linebyline/editor dev & yarn workspace @linebyline/desktop dev",
-    "build": "yarn workspace @linebyline/editor build && yarn workspaces foreach run build",
+    "build": "yarn workspace @markflowy/theme build && yarn workspace @linebyline/editor build && yarn workspaces foreach run build",
     "test": "yarn workspace @linebyline/editor test && yarn workspace @linebyline/desktop test && cargo test --workspace --exclude line_by_line",
     "build:desktop": "yarn workspace @linebyline/desktop build && yarn workspace @linebyline/desktop tauri:build",
     "dev:desktop": "yarn workspace @linebyline/desktop tauri:dev",
