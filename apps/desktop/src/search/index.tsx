@@ -13,13 +13,14 @@ import { getFileObjectByPath } from '@/helper/files'
 import { nanoid } from 'nanoid'
 import Keywords from 'react-keywords'
 import classNames from 'classnames'
+import { useTranslation } from 'react-i18next'
 
 const SearchView = memo(() => {
   const { resultList, addSearchResult, searchKeyword, caseSensitive, activeIndex, setSearchState } =
     useSearchStore()
   const { addOpenedFile, setActiveId, folderData, editorCtxMap, activeId } = useEditorStore()
   const [expandIdMap, setExpandIdMap] = useState<Record<string, boolean>>({})
-
+  const { t } = useTranslation()
   let indexRef = 0
 
   const isAllExpand = Object.values(expandIdMap).every((v) => v)
@@ -175,7 +176,7 @@ const SearchView = memo(() => {
           className='search-input'
           onKeyDown={handleKeyDown}
           value={searchKeyword}
-          placeholder='Search'
+          placeholder={t('search.text')}
           onChange={handleSearchTextChange}
         />
         <MfIconButton
@@ -183,14 +184,14 @@ const SearchView = memo(() => {
           active={caseSensitive}
           icon='ri-font-size'
           tooltipProps={{
-            title: 'Case Sensitive',
+            title: t('search.caseSensitive'),
           }}
         />
         <MfIconButton
           onClick={toggleAllExpand}
           icon={isAllExpand ? 'ri-contract-up-down-line' : 'ri-expand-up-down-line'}
           tooltipProps={{
-            title: 'Toggle Expand All',
+            title: t('search.toggleExpandAll'),
           }}
         />
       </SearchInput>
