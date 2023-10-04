@@ -3,7 +3,7 @@ import './App.css'
 import { FC } from 'react'
 
 import { WysiwygEditor as Editor } from '@linebyline/editor'
-import { MfGlobalStyles, useMfTheme } from '@markflowy/theme'
+import { BaseStyle, lightThemeColors } from '@markflowy/theme'
 
 import { contentMap } from '../content'
 import useContent from '../hooks/use-content'
@@ -96,7 +96,6 @@ const DebugConsole: FC<{
 const App: FC = () => {
   const { contentId, content, hasUnsavedChanges, setContentId } = useContent()
   const { enableDevTools, setEnableDevTools } = useDevTools()
-  const { themeColors } = useMfTheme()
 
   const editor = (
     <div className='playground-self-scroll'>
@@ -117,7 +116,7 @@ const App: FC = () => {
 
   return (
     <div style={{ width: '100%' }}>
-      <MfGlobalStyles theme={themeColors} />
+      <BaseStyle theme={lightThemeColors} />
       <DebugButton
         enableDevTools={enableDevTools}
         toggleEnableDevTools={() => setEnableDevTools(!enableDevTools)}
