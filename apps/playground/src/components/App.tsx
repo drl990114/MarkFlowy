@@ -3,7 +3,7 @@ import './App.css'
 import { FC } from 'react'
 
 import { WysiwygEditor as Editor } from '@linebyline/editor'
-import { BaseStyle, lightThemeColors } from '@markflowy/theme'
+import { BaseStyle, lightTheme } from '@markflowy/theme'
 
 import { contentMap } from '../content'
 import useContent from '../hooks/use-content'
@@ -116,7 +116,7 @@ const App: FC = () => {
 
   return (
     <div style={{ width: '100%' }}>
-      <BaseStyle theme={lightThemeColors} />
+      <BaseStyle theme={lightTheme} />
       <DebugButton
         enableDevTools={enableDevTools}
         toggleEnableDevTools={() => setEnableDevTools(!enableDevTools)}
