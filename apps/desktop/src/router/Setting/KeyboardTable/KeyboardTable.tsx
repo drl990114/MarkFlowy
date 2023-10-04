@@ -19,7 +19,7 @@ function transferKey(key: string, platform?: Platform) {
 }
 
 export function KeyboardTable() {
-  const { themeColors } = useGlobalTheme()
+  const { themeData } = useGlobalTheme()
   const { keyboardInfos } = useGlobalKeyboard()
   const { platform } = useOSInfo()
 
@@ -28,7 +28,7 @@ export function KeyboardTable() {
       <Table size='small' aria-label='caption table'>
         <TableHead
           sx={{
-            backgroundColor: themeColors.tipsBgColor,
+            backgroundColor: themeData.tipsBgColor,
           }}
         >
           <TableRow>

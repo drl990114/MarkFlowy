@@ -1,4 +1,4 @@
-import { darkThemeColors, lightThemeColors, loadTheme } from '@markflowy/theme'
+import { darkTheme, lightTheme, loadTheme } from '@markflowy/theme'
 import { createTheme } from '@mui/material'
 import { createGlobalStore } from 'hox'
 import { useEffect, useState } from 'react'
@@ -7,7 +7,7 @@ type Theme = 'light' | 'dark'
 
 function useTheme() {
   const [theme, setTheme] = useState<Theme>('light')
-  const [themeColors, setThemeColors] = useState<Record<string, string>>(lightThemeColors)
+  const [themeData, setThemeData] = useState<Record<string, string>>(lightTheme)
 
   const muiDarkTheme = createTheme({
     palette: {
@@ -30,15 +30,15 @@ function useTheme() {
   useEffect(() => {
     loadTheme(theme)
     if (theme === 'light') {
-      setThemeColors(lightThemeColors)
+      setThemeData(lightTheme)
     } else {
-      setThemeColors(darkThemeColors)
+      setThemeData(darkTheme)
     }
   }, [theme])
 
   return {
     theme,
-    themeColors,
+    themeData,
     setTheme,
     muiTheme: theme === 'light' ? muiLightTheme : muiDarkTheme,
   }

@@ -17,7 +17,7 @@ interface RePopperProps extends Partial<PopperProps> {
 }
 const Tooltip: React.FC<RePopperProps> = (props) => {
   const { children, content, onClickAway, ...otherProps } = props
-  const { themeColors } = useGlobalTheme()
+  const { themeData } = useGlobalTheme()
   const [open, setOpen] = useState(props.open || false)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
 
@@ -52,8 +52,8 @@ const Tooltip: React.FC<RePopperProps> = (props) => {
               <Box
                 sx={{
                   border: 1,
-                  bgcolor: themeColors.bgColor,
-                  borderColor: themeColors.borderColor,
+                  bgcolor: themeData.bgColor,
+                  borderColor: themeData.borderColor,
                 }}
               >
                 {content}

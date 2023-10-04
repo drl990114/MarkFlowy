@@ -133,7 +133,7 @@ export const BaseStyle = styled.createGlobalStyle`
 
   html,
   body {
-    font-family: 'Open Sans', 'Clear Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: ${(props) => props.theme.fontFamily};
     font-size: 16px;
     line-height: 1.6;
   }
@@ -142,8 +142,8 @@ export const BaseStyle = styled.createGlobalStyle`
     -ms-text-size-adjust: 100%;
     -webkit-text-size-adjust: 100%;
     margin: 0;
-    font-family: 'Open Sans', 'Clear Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    font-size: 16px;
+    font-family: ${(props) => props.theme.fontFamily};
+    font-size: ${(props) => props.theme.fontBase};
     line-height: 1.5;
     word-wrap: break-word;
     padding-bottom: 1em;
@@ -331,35 +331,33 @@ export const BaseStyle = styled.createGlobalStyle`
   .markdown-body h1 {
     font-weight: 600;
     padding: 0.4em 0;
-    font-size: 2em;
+    font-size: ${props => props.theme.fontH1};
   }
 
   .markdown-body h2 {
     font-weight: 600;
     padding-bottom: 0.3em;
-    font-size: 1.5em;
-    border-bottom: 1px solid #21262d;
+    font-size: ${props => props.theme.fontH2};
   }
 
   .markdown-body h3 {
     font-weight: 600;
-    font-size: 1.25em;
+    font-size: ${props => props.theme.fontH3};
   }
 
   .markdown-body h4 {
     font-weight: 600;
-    font-size: 1em;
+    font-size: ${props => props.theme.fontH4};
   }
 
   .markdown-body h5 {
     font-weight: 600;
-    font-size: 0.875em;
+    font-size: ${props => props.theme.fontH5};
   }
 
   .markdown-body h6 {
     font-weight: 600;
-    font-size: 0.85em;
-    color: #8b949e;
+    font-size: ${props => props.theme.fontH6};
   }
 
   .markdown-body p {
@@ -779,9 +777,10 @@ export const BaseStyle = styled.createGlobalStyle`
   }
 
   .cm-editor {
-    font-size: 15px;
+    margin-bottom: 1em;
     line-height: 1.5;
-    font-family: 'DejaVu Sans Mono', 'Source Code Pro', 'Droid Sans Mono', Consolas, monospace;
+    font-size: ${props => props.theme.fontBase};
+    font-family: ${(props) => props.theme.codemirrorFontFamily} !important;
 
     .cm-line {
       padding: 2px 2px 2px 6px;
