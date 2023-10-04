@@ -2,7 +2,7 @@
 import { Editor as MfEditor } from '@linebyline/editor'
 import type { CreateWysiwygDelegateOptions, EditorContext, EditorRef, EditorViewType } from '@linebyline/editor'
 import { invoke, tauri } from '@tauri-apps/api'
-import { appWindow } from '@tauri-apps/api/window'
+import { getCurrent } from '@tauri-apps/plugin-window'
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import styled, { css } from 'styled-components'
 import { useCommandStore, useEditorStore } from '@/stores'
@@ -18,6 +18,8 @@ import { EVENT } from '@/constants'
 import classNames from 'classnames'
 import { WarningHeader } from './styles'
 import { join } from '@tauri-apps/api/path'
+
+const appWindow = getCurrent()
 
 const EditorWrapper = styled.div<{ active: boolean }>`
   min-height: 100%;

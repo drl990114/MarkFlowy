@@ -7,7 +7,7 @@ import TableRow from '@mui/material/TableRow'
 import Paper from '@mui/material/Paper'
 import { useGlobalKeyboard, useGlobalTheme } from '@/hooks'
 import useOSInfo from '@/hooks/useOSInfo'
-import type { OsType } from '@tauri-apps/api/os'
+import type { OsType } from '@tauri-apps/plugin-os'
 
 function transferKey(key: string, osType?: OsType) {
   if (osType === 'Darwin') {

@@ -1,5 +1,4 @@
 {
-  "$schema": "../../../node_modules/@tauri-apps/cli/schema.json",
   "build": {
     "beforeDevCommand": "yarn dev",
     "devPath": "http://localhost:3000",
@@ -7,59 +6,20 @@
     "withGlobalTauri": true
   },
   "package": {
-    "productName": "LineByLine",
+    "productName": "MarkFlowy",
     "version": "0.5.3"
   },
-  "tauri": {
-    "allowlist": {
-      "all": false,
-			"fs": {
-				"readFile": true,
-				"writeFile": true,
-        "exists": true,
-        "scope": [
-          "$APPDATA/*",
-          "$APPCACHE/*",
-          "$APPCONFIG/*",
-          "$HOME/*",
-          "$DESKTOP/*"
-        ]
-			},
-      "clipboard": {
-        "writeText": true
-      },
-      "dialog": {
-        "open": true,
-        "save": true
-      },
-      "os": {
-        "all": true
-      },
-      "globalShortcut": {
-        "all": true
-      },
-      "path": {
-        "all": true
-      },
-      "protocol": {
-				"all": true,
-				"asset": true,
-				"assetScope": ["**"]
-			},
-      "window": {
-        "close": true,
-        "create": true,
-        "setTitle": true,
-        "startDragging": true,
-        "maximize": true,
-        "minimize": true,
-        "unmaximize": true,
-        "unminimize": true
-      },
-      "shell": {
-        "open": true
-      }
+  "plugins": {
+    "shell": {
+      "open": true
     },
+    "updater": {
+      "endpoints": [
+        "https://releases.myapp.com/{{target}}/{{arch}}/{{current_version}}"
+      ]
+    }
+  },
+  "tauri": {
     "bundle": {
       "active": true,
       "category": "DeveloperTool",
@@ -72,6 +32,13 @@
       ],
       "identifier": "com.tauri.test",
       "targets": "all",
+      "updater": {
+        "active": false,
+        "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEY3NjFEN0QxOEZBQjBDMjYKUldRbURLdVAwZGRoOTJjUHZVbWM1elVJcXNpVU5rSHBvbmNWbU5WZXdoUE51RXRKMFRTVTZCZlcK",
+        "windows": {
+          "installMode": "passive"
+        }
+      },
       "windows": {
         "digestAlgorithm": "sha256",
         "webviewInstallMode": {
@@ -80,18 +47,13 @@
       }
     },
     "security": {
+      "assetProtocol": {
+        "enable": true,
+        "scope": [
+          "**"
+        ]
+      },
       "csp": null
-    },
-    "updater": {
-      "active": false,
-      "dialog": true,
-      "endpoints": [
-        "https://releases.myapp.com/{{target}}/{{arch}}/{{current_version}}"
-      ],
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEY3NjFEN0QxOEZBQjBDMjYKUldRbURLdVAwZGRoOTJjUHZVbWM1elVJcXNpVU5rSHBvbmNWbU5WZXdoUE51RXRKMFRTVTZCZlcK",
-      "windows": {
-        "installMode": "passive"
-      }
     }
   }
 }

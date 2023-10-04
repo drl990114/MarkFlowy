@@ -1,8 +1,8 @@
 [package]
-name = "line_by_line"
+name = "markflowy"
 version = "0.0.1"
 description = "A Markdown Editor App"
-authors = ["you"]
+authors = ["drl990114"]
 license = ""
 repository = ""
 edition = "2021"
@@ -10,7 +10,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [build-dependencies]
-tauri-build = { version = "1.4.0", features = [] }
+tauri-build = { version = "2.0.0-alpha", features = [] }
 
 [dependencies]
 serde_json = "1.0"
@@ -18,8 +18,14 @@ anyhow = "1.0.75"
 dark-light = "1.0.0"
 log = "0.4.19"
 serde = { version = "1.0", features = ["derive"] }
-tauri = { version = "1.4.1", features = [ "window-unmaximize", "window-set-title", "path-all", "window-close", "dialog-save", "window-unminimize", "protocol-all", "window-create", "dialog-open", "clipboard-write-text", "os-all", "global-shortcut-all", "fs-write-file", "window-start-dragging", "fs-read-file", "window-minimize", "window-maximize", "fs-exists", "shell-open", "devtools"] }
-tauri-plugin-store = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
+tauri = { version = "2.0.0-alpha", features = [ "protocol-asset"] }
+tauri-plugin-store = "2.0.0-alpha"
+tauri-plugin-window = "2.0.0-alpha"
+tauri-plugin-os = "2.0.0-alpha"
+tauri-plugin-app = "2.0.0-alpha"
+tauri-plugin-shell = "2.0.0-alpha"
+tauri-plugin-dialog = "2.0.0-alpha"
+tauri-plugin-clipboard-manager = "2.0.0-alpha"
 regex = "1.9.6"
 mf-utils = { path = "../../../crates/utils" }
 file_search = { path = "../../../crates/file_search" }
@@ -32,3 +38,6 @@ default = ["custom-protocol"]
 # this feature is used used for production builds where `devPath` points to the filesystem
 # DO NOT remove this
 custom-protocol = ["tauri/custom-protocol"]
+
+[patch.crates-io]
+tauri = { git = "https://github.com/tauri-apps/tauri", branch = "next" }

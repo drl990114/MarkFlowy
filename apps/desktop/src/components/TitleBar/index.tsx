@@ -1,6 +1,9 @@
-import { appWindow } from '@tauri-apps/api/window'
+import { getCurrent } from '@tauri-apps/plugin-window'
+
 import { useState } from 'react'
 import { TitleBarBg, Container } from './styled'
+
+const appWindow = getCurrent()
 
 export default function TitleBar(props: TitleBarProps) {
   const { transparent } = props
@@ -27,10 +30,12 @@ export default function TitleBar(props: TitleBarProps) {
   return (
     <>
       {transparent ? null : <TitleBarBg data-tauri-drag-region />}
-      <Container  data-tauri-drag-region onDoubleClick={handleTitleBarDoubleClick}>
-        {transparent ? null : <div id="titlebar" className="titlebar-text" data-tauri-drag-region>
-          {'LineByLine'}
-        </div>}
+      <Container data-tauri-drag-region onDoubleClick={handleTitleBarDoubleClick}>
+        {transparent ? null : (
+          <div id='titlebar' className='titlebar-text' data-tauri-drag-region>
+            {'LineByLine'}
+          </div>
+        )}
       </Container>
     </>
   )

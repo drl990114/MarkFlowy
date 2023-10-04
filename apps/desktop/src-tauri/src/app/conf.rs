@@ -1,7 +1,10 @@
-use crate::fc::{create_file, exists};
+use crate::{
+    fc::{create_file, exists},
+    APP_DIR,
+};
 use serde_json::Value;
 use std::{collections::BTreeMap, path::PathBuf};
-use tauri::Theme;
+use tauri::{Manager, Theme};
 
 macro_rules! pub_struct {
   ($name:ident {$($field:ident: $t:ty,)*}) => {
@@ -23,7 +26,7 @@ pub_struct!(AppConf {
 pub const APP_CONF_PATH: &str = "linebyline.conf.json";
 
 pub fn app_root() -> PathBuf {
-    tauri::api::path::home_dir().unwrap().join(".linebyline")
+    APP_DIR.lock().unwrap().get(&0).unwrap().join(".linebyline")
 }
 
 impl AppConf {
@@ -52,7 +55,7 @@ impl AppConf {
         }
         if oldconf.language.is_some() {
             self.language = oldconf.language;
-        }            
+        }
         if oldconf.autosave.is_some() {
             self.autosave = oldconf.autosave;
         }
@@ -67,14 +70,10 @@ impl AppConf {
 
     pub fn read() -> Self {
         match std::fs::read_to_string(Self::file_path()) {
-            Ok(v) => {
-                match serde_json::from_str::<AppConf>(&v) {
-                    Ok(v) => return Self::new().merge_conf(v),
-                    Err(_err) => {
-                        Self::default().write()
-                    }
-                }
-            }
+            Ok(v) => match serde_json::from_str::<AppConf>(&v) {
+                Ok(v) => return Self::new().merge_conf(v),
+                Err(_err) => Self::default().write(),
+            },
             Err(err) => {
                 print!("read err,{}", err);
                 Self::default()
@@ -145,8 +144,6 @@ pub mod cmd {
     use super::AppConf;
     use tauri::{command, AppHandle, WindowBuilder, WindowUrl};
 
-    
-
     #[command]
     pub fn get_app_conf_path() -> String {
         AppConf::file_path().to_str().unwrap().to_string()
@@ -172,14 +169,13 @@ pub mod cmd {
         let theme = AppConf::theme_mode();
 
         tauri::async_runtime::spawn(async move {
-            let conf_win =
-                WindowBuilder::new(&_app, "conf", WindowUrl::App("./setting".into()))
-                    .title("linebyline setting")
-                    .resizable(true)
-                    .fullscreen(false)
-                    .theme(Some(theme))
-                    .inner_size(1000.0, 600.0)
-                    .min_inner_size(500.0, 500.0);
+            let conf_win = WindowBuilder::new(&_app, "conf", WindowUrl::App("./setting".into()))
+                .title("linebyline setting")
+                .resizable(true)
+                .fullscreen(false)
+                .theme(Some(theme))
+                .inner_size(1000.0, 600.0)
+                .min_inner_size(500.0, 500.0);
 
             // #[cfg(target_os = "macos")]
             // {

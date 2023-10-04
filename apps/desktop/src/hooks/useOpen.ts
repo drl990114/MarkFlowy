@@ -1,5 +1,5 @@
 import { useCallback } from 'react'
-import { open } from '@tauri-apps/api/dialog'
+import { open } from '@tauri-apps/plugin-dialog'
 import { readDirectory } from '@/helper/filesys'
 import { useEditorStore } from '@/stores'
 import useOpenedCacheStore from '@/stores/useOpenedCacheStore'

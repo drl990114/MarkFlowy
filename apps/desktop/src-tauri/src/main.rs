@@ -4,16 +4,30 @@
 mod app;
 mod fc;
 mod menu;
-mod setup;
 mod search;
+mod setup;
 
-use app::{conf, keybindings, opened_cache, bookmarks};
+use std::collections::HashMap;
+use std::path::PathBuf;
+use std::sync::Mutex;
+
+use app::{bookmarks, conf, keybindings, opened_cache};
+use lazy_static::lazy_static;
+use tauri::Manager;
+
+lazy_static! {
+    /// FIXME Haven't found a better way to get the home dir yet, and we will optimize it later.
+    /// 0 -> home_dr
+    pub static ref APP_DIR: Mutex<HashMap<u32, PathBuf>> = {
+        let m = HashMap::new();
+        Mutex::new(m)
+    };
+}
 
 fn main() {
     let context = tauri::generate_context!();
 
     tauri::Builder::default()
-        .plugin(tauri_plugin_store::Builder::default().build())
         .invoke_handler(tauri::generate_handler![
             fc::cmd::open_folder,
             fc::cmd::get_file_content,
@@ -37,9 +51,22 @@ fn main() {
             bookmarks::cmd::remove_bookmark,
             search::cmd::search_files
         ])
-        .setup(setup::init)
-        .menu(menu::generate_menu())
-        .on_menu_event(menu::menu_handler)
+        .plugin(tauri_plugin_app::init())
+        .plugin(tauri_plugin_store::Builder::default().build())
+        .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_os::init())
+        .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_window::init())
+        .plugin(tauri_plugin_clipboard_manager::init())
+        .setup(move |app| {
+            let home_dir_path = app.path().home_dir().expect("failed to get home dir");
+            APP_DIR.lock().unwrap().insert(0, home_dir_path);
+            setup::init(app).expect("failed to setup app");
+
+            menu::generate_menu(app).expect("failed to generate menu");
+
+            Ok(())
+        })
         .run(context)
         .expect("error while running tauri application");
 }

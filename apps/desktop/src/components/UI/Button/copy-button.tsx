@@ -2,7 +2,7 @@ import classNames from 'classnames'
 import styled from 'styled-components'
 import type { FC } from 'react'
 import { useCallback, useState } from 'react'
-import { writeText } from '@tauri-apps/api/clipboard'
+import { writeText } from '@tauri-apps/plugin-clipboard-manager'
 
 type CopyBtnProps = {
   text: string

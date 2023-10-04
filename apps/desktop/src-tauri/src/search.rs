@@ -50,7 +50,7 @@ pub mod cmd {
             let mess = mess.unwrap();
             match mess {
                 SearchResult::FinalResults(fi) => {
-                    let _ = tauri::Manager::get_window(&_app, "linebyline")
+                    let _ = tauri::Manager::get_window(&_app, "markflowy")
                         .unwrap()
                         .emit("search_channel_final", Some(fi));
                 }
@@ -58,7 +58,7 @@ pub mod cmd {
                     // let _ = tauri::Manager::get_window(&_app, "linebyline").unwrap().emit("search_channel_unit", Some(fi));
                 }
                 SearchResult::SearchErrors(fi) => {
-                    let _ = tauri::Manager::get_window(&_app, "linebyline")
+                    let _ = tauri::Manager::get_window(&_app, "markflowy")
                         .unwrap()
                         .emit("search_channel_error", Some(fi));
                 }
