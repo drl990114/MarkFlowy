@@ -18,7 +18,7 @@ import SideBarHeader from '@/components/SideBar/SideBarHeader'
 const ChatList: React.FC<ChatListProps> = (props) => {
   const { chatList, addChat, delChat } = useChatGPTStore()
   const [settingData] = useGlobalSettingData()
-  const { themeColors } = useGlobalTheme()
+  const { themeData } = useGlobalTheme()
   const apiKey = settingData[SettingKeys.chatgpt]
   const [askInput, setAskInput] = useState('')
   const { addOpenedFile, setActiveId } = useEditorStore()
@@ -111,7 +111,7 @@ const ChatList: React.FC<ChatListProps> = (props) => {
                         type='bubbles'
                         width={35}
                         height={35}
-                        color={themeColors.accentColor}
+                        color={themeData.accentColor}
                       />
                     ) : chat.status === 'error' ? (
                       <div>

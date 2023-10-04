@@ -19,7 +19,7 @@ const Container = styled.div<ContainerProps>`
 const EditorAreaTabs = memo(() => {
   const { opened, activeId, setActiveId, delOpenedFile } = useEditorStore()
   const { idStateMap } = useEditorStateStore()
-  const { themeColors } = useGlobalTheme()
+  const { themeData } = useGlobalTheme()
   const { htmlRef } = useAutoAnimate<HTMLDivElement>()
 
   useEffect(() => {
@@ -58,7 +58,7 @@ const EditorAreaTabs = memo(() => {
         return (
           <TabItem active={active} onClick={() => onSelectItem(file.id)} key={id}>
             <i className={'ri-file-3-line tab-items__icon'} />
-            <span style={{ color: active ? themeColors.accentColor : '' }}>{file.name}</span>
+            <span style={{ color: active ? themeData.accentColor : '' }}>{file.name}</span>
 
             {editorState?.hasUnsavedChanges ? (
               <Dot />

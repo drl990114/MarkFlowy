@@ -28,7 +28,7 @@ const App: FC = function () {
   const { setRecentWorkspaces } = useOpenedCacheStore()
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, handler] = useGlobalSettingData()
-  const { themeColors, muiTheme, setTheme } = useGlobalTheme()
+  const { themeData, muiTheme, setTheme } = useGlobalTheme()
   const editorStore = useEditorStore()
   const { setFolderData, addOpenedFile, setActiveId } = editorStore
   const { setSetting } = handler
@@ -151,8 +151,8 @@ const App: FC = function () {
 
   return (
     <StyleSheetManager shouldForwardProp={isPropValid}>
-      <BaseStyle theme={themeColors} />
-      <ThemeProvider theme={themeColors}>
+      <BaseStyle theme={themeData} />
+      <ThemeProvider theme={themeData}>
         <MuiThemeProvider theme={muiTheme}>
           <GlobalStyles />
           <Routes>

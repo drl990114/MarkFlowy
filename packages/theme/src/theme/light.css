@@ -3,10 +3,6 @@
   background-color: #fdfdfd;
 }
 
-.markdown-body h1 {
-  border-bottom: 1px solid hsla(210, 18%, 87%, 1);
-}
-
 .markdown-body mark {
   background-color: #fff8c5;
   color: #24292f;
@@ -33,14 +29,6 @@
   border-bottom-color: rgba(175, 184, 193, 0.2);
   border-radius: 6px;
   box-shadow: inset 0 -1px 0 rgba(175, 184, 193, 0.2);
-}
-
-.markdown-body h2 {
-  border-bottom: 1px solid hsla(210, 18%, 87%, 1);
-}
-
-.markdown-body h6 {
-  color: #57606a;
 }
 
 .markdown-body blockquote {
