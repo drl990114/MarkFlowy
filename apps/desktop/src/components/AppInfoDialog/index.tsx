@@ -7,11 +7,13 @@ import type { FC } from 'react'
 import { memo, useCallback, useEffect, useState } from 'react'
 import { EVENT } from '@/constants'
 import { MfDialog } from '../UI/Dialog'
+import { useTranslation } from 'react-i18next'
 
 const AboutDialog: FC = () => {
   const [open, setOpen] = useState(false)
+  const { t }= useTranslation()
   const [appInfo, setAppInfo] = useState({
-    name: 'LineByLine',
+    name: '',
     version: '',
     tauriVersion: '',
   })
@@ -54,12 +56,12 @@ TauriVersion: ${appInfo.tauriVersion}
       title={appInfo.name}
       onClose={handleClose}
       actions={[
-        <Button key='ok' onClick={handleClose}>Ok</Button>,
-        <Button key='copy' onClick={handleCopyAppInfo}>Copy</Button>,
+        <Button key='ok' onClick={handleClose}>{t('ok')}</Button>,
+        <Button key='copy' onClick={handleCopyAppInfo}>{t('copy')}</Button>,
       ]}
     >
-      <DialogContentText>{`Version: ${appInfo.version}`}</DialogContentText>
-      <DialogContentText>{`Tauri Version: ${appInfo.tauriVersion}`}</DialogContentText>
+      <DialogContentText>{`${t('about.version')}: ${appInfo.version}`}</DialogContentText>
+      <DialogContentText>{`Tauri ${t('about.version')}: ${appInfo.tauriVersion}`}</DialogContentText>
     </MfDialog>
   )
 }

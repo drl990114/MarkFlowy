@@ -1,11 +1,28 @@
 {
   "none": "None",
+  "name": "name",
+  "ok": "ok",
+  "copy": "copy",
+  "confirm": "confirm",
   "menu": {
-      "setting": "setting"
+    "setting": "setting"
   },
   "file": {
     "untitled": "untitled",
     "openDir": "Open Folder",
     "recentDir": "Recently opened folders"
-}
+  },
+  "about": {
+    "version": "Version",
+    "author": "Author",
+    "release": "Release",
+    "website": "Website",
+    "issues": "Issues",
+    "license": "License"
+  },
+  "search": {
+    "text": "search",
+    "caseSensitive": "Case sensitive",
+    "toggleExpandAll": "Toggle Expand All"
+  }
 }

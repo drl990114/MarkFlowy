@@ -1,11 +1,29 @@
 {
-    "none": "無",
-    "menu": {
-        "setting": "设置"
-    },
-    "file": {
-        "untitled": "未命名",
-        "openDir": "打开文件夹",
-        "recentDir": "最近打开的文件"
-    }
+  "none": "無",
+  "name": "名称",
+  "ok": "确定",
+  "confirm": "确认",
+  "copy": "复制",
+  "menu": {
+    "setting": "设置"
+  },
+  "file": {
+    "untitled": "未命名",
+    "openDir": "打开文件夹",
+    "recentDir": "最近打开的文件"
+  },
+  "about": {
+    "version": "版本",
+    "author": "作者",
+    "release": "发布日期",
+    "website": "官网",
+    "feedback": "反馈",
+    "license": "许可证",
+    "current": "当前版本"
+  },
+  "search": {
+    "text": "搜索",
+    "caseSensitive": "大小写敏感",
+    "toggleExpandAll": "切换展开全部"
+  }
 }
