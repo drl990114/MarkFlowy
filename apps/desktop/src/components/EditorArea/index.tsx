@@ -4,7 +4,7 @@ import { useEditorStore } from '@/stores'
 import { memo } from 'react'
 import EditorAreaTabs from './EditorAreaTabs'
 import { EditorAreaHeader } from './EditorAreaHeader'
-import { FindReplace } from '@/editorToolBar/FindReplace'
+import { FindReplace } from '@/components/EditorArea/editorToolBar/FindReplace'
 
 function EditorArea() {
   const { opened, activeId } = useEditorStore()

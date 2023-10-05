@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react'
 
-import type { EditorState } from '@/editorHooks/EditorState/editor-state'
+import type { EditorState } from '@/components/EditorArea/editorHooks/EditorState/editor-state'
 import { setTitleBarText } from '@/components/TitleBar'
 
 export function useTitleEffect(state: EditorState, active: boolean): void {
