@@ -1,12 +1,12 @@
 .markdown-body {
   color-scheme: dark;
   color: #ffffffe6;
-  background-color: #11191f;
+  background-color: #05010d;
 }
 
 .markdown-body mark {
   background-color: #fff8c5;
-  color: #24292f;
+  color: #000;
 }
 
 .markdown-body img {

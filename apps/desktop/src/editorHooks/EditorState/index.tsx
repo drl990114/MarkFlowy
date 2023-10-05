@@ -1,5 +1,5 @@
 // This extension is responsible for managing the state of the editor and handle save event.
-import { useHelpers, useRemirrorContext } from '@markflowy/editor'
+import { useRemirrorContext } from '@markflowy/editor'
 import { invoke } from '@tauri-apps/api'
 import { save } from '@tauri-apps/plugin-dialog'
 import { t } from 'i18next'
@@ -16,13 +16,18 @@ import bus from '@/helper/eventBus'
 import { EVENT } from '@/constants'
 
 type SaveHandlerParams = {
+  /**
+   * when active is true, saveHandler will save the file content to disk.
+   * when active is false, saveHandler will save when editor is active.
+   */
+  active?: boolean
   onSuccess?: () => void
 }
 
 export const useEditorState: FC<EditorStateProps> = ({ active, file }) => {
   const ctx = useRemirrorContext()
   const [settingData] = useGlobalSettingData()
-  const helpers = useHelpers()
+  const helpers = ctx.helpers
   const { getEditorDelegate, getEditorContent, insertNodeToFolderData } = useEditorStore()
   const { setIdStateMap } = useEditorStateStore()
   const curDelegate = getEditorDelegate(file.id)
@@ -35,14 +40,13 @@ export const useEditorState: FC<EditorStateProps> = ({ active, file }) => {
   useTitleEffect(state, active)
 
   useEffect(() => {
-    if (active) {
-      setIdStateMap(file.id, state)
-    }
-  }, [state, file.id, setIdStateMap, active])
+    setIdStateMap(file.id, state)
+  }, [state, file.id, setIdStateMap])
 
   const saveHandler = useCallback(
-    async ({ onSuccess }: SaveHandlerParams = {}) => {
-      if (!active) return
+    async (params: SaveHandlerParams = {}) => {
+      const { onSuccess } = params
+      if (!active && !params.active) return
 
       const content = getEditorContent(file.id)
 
@@ -85,7 +89,7 @@ export const useEditorState: FC<EditorStateProps> = ({ active, file }) => {
   )
 
   const debounceSave = useMemo(
-    () => debounce(() => saveHandler(), settingData.autosave_interval),
+    () => debounce(() => saveHandler({ active: true }), settingData.autosave_interval),
     [settingData.autosave_interval, saveHandler],
   )
 
@@ -117,6 +121,7 @@ export const useEditorState: FC<EditorStateProps> = ({ active, file }) => {
         }
       }
     })
+
     execute('app:toc_refresh')
     return () => {
       unsubscribe()
