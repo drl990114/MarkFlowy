@@ -28,6 +28,8 @@ export function loadTheme(theme: 'light' | 'dark') {
 }
 
 const common = {
+  lineHeightBase: '1.6',
+
   fontH1: '28px',
   fontH2: '26px',
   fontH3: '24px',
@@ -44,6 +46,7 @@ const common = {
 
 const lightTheme = {
   ...common,
+
   primaryFontColor: '#000000',
   labelFontColor: '#9ca3af',
   accentColor: '#0369a1',
@@ -59,11 +62,12 @@ const lightTheme = {
 
 const darkTheme = {
   ...common,
+
   primaryFontColor: 'rgba(255, 255, 255, 0.9)',
   labelFontColor: 'rgba(255, 255, 255, 0.5)',
   accentColor: '#1c78aa',
   borderColor: '#21313d',
-  bgColor: '#11191f',
+  bgColor: '#05010d',
   warnColor: '#dc2626',
   tipsBgColor: '#0e1419',
   successColor: '#00c853',

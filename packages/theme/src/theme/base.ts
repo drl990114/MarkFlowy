@@ -135,7 +135,7 @@ export const BaseStyle = styled.createGlobalStyle`
   body {
     font-family: ${(props) => props.theme.fontFamily};
     font-size: 16px;
-    line-height: 1.6;
+    line-height: ${(props) => props.theme.lineHeightBase};
   }
 
   .markdown-body {
@@ -144,7 +144,7 @@ export const BaseStyle = styled.createGlobalStyle`
     margin: 0;
     font-family: ${(props) => props.theme.fontFamily};
     font-size: ${(props) => props.theme.fontBase};
-    line-height: 1.5;
+    line-height: ${(props) => props.theme.lineHeightBase};
     word-wrap: break-word;
     padding-bottom: 1em;
     box-sizing: border-box;
@@ -255,6 +255,7 @@ export const BaseStyle = styled.createGlobalStyle`
     width: max-content;
     max-width: 100%;
     overflow: auto;
+    margin: 1em 0;
   }
 
   .markdown-body td,
@@ -331,37 +332,37 @@ export const BaseStyle = styled.createGlobalStyle`
   .markdown-body h1 {
     font-weight: 600;
     padding: 0.4em 0;
-    font-size: ${props => props.theme.fontH1};
+    font-size: ${(props) => props.theme.fontH1};
   }
 
   .markdown-body h2 {
     font-weight: 600;
     padding: 0.4em 0;
-    font-size: ${props => props.theme.fontH2};
+    font-size: ${(props) => props.theme.fontH2};
   }
 
   .markdown-body h3 {
     font-weight: 600;
     padding: 0.4em 0;
-    font-size: ${props => props.theme.fontH3};
+    font-size: ${(props) => props.theme.fontH3};
   }
 
   .markdown-body h4 {
     font-weight: 600;
     padding: 0.4em 0;
-    font-size: ${props => props.theme.fontH4};
+    font-size: ${(props) => props.theme.fontH4};
   }
 
   .markdown-body h5 {
     font-weight: 600;
     padding: 0.3em 0;
-    font-size: ${props => props.theme.fontH5};
+    font-size: ${(props) => props.theme.fontH5};
   }
 
   .markdown-body h6 {
     font-weight: 600;
     padding: 0.3em 0;
-    font-size: ${props => props.theme.fontH6};
+    font-size: ${(props) => props.theme.fontH6};
   }
 
   .markdown-body p {
@@ -457,7 +458,6 @@ export const BaseStyle = styled.createGlobalStyle`
   .markdown-body ul,
   .markdown-body ol,
   .markdown-body dl,
-  .markdown-body table,
   .markdown-body pre,
   .markdown-body details {
     margin-top: 0;
@@ -782,15 +782,15 @@ export const BaseStyle = styled.createGlobalStyle`
 
   .cm-editor {
     margin-bottom: 1em;
-    line-height: 1.5;
-    font-size: ${props => props.theme.fontBase};
+    line-height: ${(props) => props.theme.lineHeightBase};
+    font-size: ${(props) => props.theme.fontBase};
     font-family: ${(props) => props.theme.codemirrorFontFamily} !important;
 
     .cm-line {
       padding: 2px 2px 2px 6px;
 
       span {
-        line-height: 1.75;
+        line-height: ${(props) => props.theme.lineHeightBase};
       }
     }
 
