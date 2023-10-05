@@ -4,7 +4,8 @@
   "private": true,
   "workspaces": [
     "packages/*",
-    "apps/*"
+    "apps/*",
+    "docs"
   ],
   "scripts": {
     "dev": "yarn workspace @linebyline/editor dev & yarn workspace @linebyline/desktop dev",

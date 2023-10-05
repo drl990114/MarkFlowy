@@ -1,6 +1,6 @@
-# Contributing to LineByLine
+# Contributing to MarkFlowy
 
-Welcome, and thank you for your interest in contributing to LineByLine!
+Welcome, and thank you for your interest in contributing to MarkFlowy!
 
 ## How to Contribute Code
 
@@ -17,7 +17,7 @@ You'll need the following tools:
 ### Steps
 
 #### Fork
-Fork [LineByLine](https://github.com/linebyline-group/linebyline) and `git clone`
+Fork [MarkFlowy](https://github.com/drl990114/MarkFlowy) and `git clone`
 
 
 #### Dependency installation
@@ -32,8 +32,8 @@ and
 cargo install --path apps/desktop/src-tauri
 ```
 
-#### Startup LineByLine
-Execute the following command, you will start LineByLine.
+#### Startup MarkFlowy
+Execute the following command, you will start MarkFlowy.
 ```bash
 yarn dev:desktop
 ```

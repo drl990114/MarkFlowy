@@ -26,7 +26,7 @@
     "clear": "rimraf dist && rimraf tsconfig.tsbuildinfo"
   },
   "dependencies": {
-    "remixicon": "^3.5.0",
+    "react": "^18.2.0",
     "styled-components": "^6.0.8"
   },
   "devDependencies": {

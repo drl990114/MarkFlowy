@@ -1,0 +1,15 @@
+{
+	"name": "MarkFlowy Documentation",
+	"short_name": "MarkFlowy Docs",
+	"theme_color": "#2196f3",
+	"background_color": "#424242",
+	"display": "standalone",
+	"scope": "./",
+	"start_url": "./index.html",
+	"related_applications": [
+		{
+			"platform": "webapp",
+			"url": "https://xplorer.space/manifest.json"
+		}
+	]
+}
