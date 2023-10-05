@@ -5,6 +5,7 @@ Welcome, and thank you for your interest in contributing to MarkFlowy!
 ## How to Contribute Code
 
 ### Prerequisites
+
 In order to download necessary tools, clone the repository, and install dependencies via yarn, you need network access.
 
 You'll need the following tools:
@@ -17,15 +18,17 @@ You'll need the following tools:
 ### Steps
 
 #### Fork
+
 Fork [MarkFlowy](https://github.com/drl990114/MarkFlowy) and `git clone`
 
-
 #### Dependency installation
+
 Execute the following command to install related dependencies.
 
 ```bash
 yarn install
 ```
+
 and
 
 ```bash
@@ -33,7 +36,9 @@ cargo install --path apps/desktop/src-tauri
 ```
 
 #### Startup MarkFlowy
+
 Execute the following command, you will start MarkFlowy.
+
 ```bash
 yarn dev:desktop
 ```

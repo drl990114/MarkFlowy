@@ -90,7 +90,7 @@ module.exports = {
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
           editUrl: ({ locale, docPath }) => {
-            return `https://github.com/drl990114/MarkFlow/edit/main/docs/docs/${docPath}`
+            return `https://github.com/drl990114/MarkFlowy/edit/main/docs/docs/${docPath}`
           },
           showLastUpdateAuthor: true,
           showLastUpdateTime: true,
