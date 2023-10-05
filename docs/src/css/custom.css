@@ -22,7 +22,12 @@
 	--white: rgb(248, 239, 239);
 	--dark: #05010d;
 	--gray-color: rgb(208, 211, 211);
+	--navbarbg: rgba(0, 0, 0, 0.7);
 	background: var(--white);
+}
+
+[data-theme='light']:root {
+	--navbarbg: rgb(248, 239, 239, 0.7);
 }
 
 summary h3 {
@@ -31,6 +36,10 @@ summary h3 {
 ul.contains-task-list {
 	margin-left: 1.5rem;
 	margin-top: 0.25rem;
+}
+
+.navbar {
+	background-color: var(--navbarbg);
 }
 
 .footer {
