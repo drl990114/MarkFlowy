@@ -23,10 +23,10 @@ pub_struct!(AppConf {
     autosave_interval: Option<u32>,
 });
 
-pub const APP_CONF_PATH: &str = "linebyline.conf.json";
+pub const APP_CONF_PATH: &str = "markflowy.conf.json";
 
 pub fn app_root() -> PathBuf {
-    APP_DIR.lock().unwrap().get(&0).unwrap().join(".linebyline")
+    APP_DIR.lock().unwrap().get(&0).unwrap().join(".markflowy")
 }
 
 impl AppConf {
@@ -170,7 +170,7 @@ pub mod cmd {
 
         tauri::async_runtime::spawn(async move {
             let conf_win = WindowBuilder::new(&_app, "conf", WindowUrl::App("./setting".into()))
-                .title("linebyline setting")
+                .title("markflowy setting")
                 .resizable(true)
                 .fullscreen(false)
                 .theme(Some(theme))

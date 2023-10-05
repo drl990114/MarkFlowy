@@ -21,7 +21,7 @@ function Root() {
   }, [getBookMarkList])
 
   useEffect(() => {
-    if (!activeId) setTitleBarText('linebyline')
+    if (!activeId) setTitleBarText('markflowy')
   }, [activeId])
 
   return (

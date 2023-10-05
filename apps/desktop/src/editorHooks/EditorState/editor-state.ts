@@ -1,5 +1,5 @@
 import type { IFile } from '@/helper/filesys'
-import type { EditorViewType } from '@linebyline/editor'
+import type { EditorViewType } from '@markflowy/editor'
 import type { EditContentAction} from './reducers/edit-content'
 import { editContent } from './reducers/edit-content'
 import type { EditorInitAction} from './reducers/init-content'

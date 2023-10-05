@@ -1,5 +1,5 @@
 {
-  "name": "@linebyline/playground",
+  "name": "@markflowy/playground",
   "private": true,
   "version": "0.5.3",
   "type": "module",
@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@linebyline/editor": "workspace:*",
+    "@markflowy/editor": "workspace:*",
     "@markflowy/theme": "workspace:*",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"

@@ -2,7 +2,7 @@ import './App.css'
 
 import { FC } from 'react'
 
-import { WysiwygEditor as Editor } from '@linebyline/editor'
+import { WysiwygEditor as Editor } from '@markflowy/editor'
 import { BaseStyle, lightTheme } from '@markflowy/theme'
 
 import { contentMap } from '../content'

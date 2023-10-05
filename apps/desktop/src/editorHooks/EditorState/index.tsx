@@ -1,5 +1,5 @@
 // This extension is responsible for managing the state of the editor and handle save event.
-import { useHelpers, useRemirrorContext } from '@linebyline/editor'
+import { useHelpers, useRemirrorContext } from '@markflowy/editor'
 import { invoke } from '@tauri-apps/api'
 import { save } from '@tauri-apps/plugin-dialog'
 import { t } from 'i18next'

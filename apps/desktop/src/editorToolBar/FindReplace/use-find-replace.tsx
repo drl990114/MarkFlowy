@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 import { useCommandStore } from '@/stores'
-import type { EditorContext } from '@linebyline/editor'
+import type { EditorContext } from '@markflowy/editor'
 import { useCallback, useEffect, useState } from 'react'
 
 interface FindReplaceState {

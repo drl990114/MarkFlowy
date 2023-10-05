@@ -35,7 +35,7 @@ class ErrorBoundary extends React.Component<
           <Title data-testid='editor_error'>Sorry, something went wrong!</Title>
           <p>{String(this.props.error)}</p>
           <a
-            href='https://github.com/linebyline-group/linebyline/issues/new/choose'
+            href='https://github.com/drl990114/MarkFlowy/issues/new/choose'
             target='_blank'
             rel='noreferrer'
           >
