@@ -17,19 +17,21 @@ type CreateTableCommand = {
   columnsCount?: number
 }
 
-export const useCommandEvent: FC<EditorStateProps> = ({}: EditorStateProps) => {
+export const useCommandEvent: FC<EditorStateProps> = ({ active }: EditorStateProps) => {
   const commands = useCommands()
 
   useEffect(() => {
     const handler = (payload: CreateTableCommand) => {
-      commands.createTable(payload)
+      if (active) {
+        commands.createTable(payload)
+      }
     }
     bus.on('editor:create_table', handler)
 
     return () => {
       bus.detach('editor:create_table', handler)
     }
-  }, [commands])
+  }, [commands, active])
 
   return null
 }
