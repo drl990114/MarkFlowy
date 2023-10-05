@@ -4757,9 +4757,36 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@linebyline/desktop@workspace:apps/desktop":
+"@lingui/core@npm:^4.2.0":
+  version: 4.3.0
+  resolution: "@lingui/core@npm:4.3.0"
+  dependencies:
+    "@babel/runtime": ^7.20.13
+    "@lingui/message-utils": 4.3.0
+    unraw: ^2.0.1
+  checksum: 357782bab503c11b5666578da0e2ac136444b3683a7068850e1587d9e66952221009a3acfdb519f36886ecfb321720e49c2d49c2ed5512fc4f72af6015fcc01d
+  languageName: node
+  linkType: hard
+
+"@lingui/detect-locale@npm:^4.2.0":
+  version: 4.3.0
+  resolution: "@lingui/detect-locale@npm:4.3.0"
+  checksum: 3c03c49a300c28a4623c96a9f18d436ad21300c5ac85ce03d8165696fe7a8ea18d09e8dbf9dd1a7a3bbb3056b98bdb10e02bf036a605d87a5670c3892251ca15
+  languageName: node
+  linkType: hard
+
+"@lingui/message-utils@npm:4.3.0":
+  version: 4.3.0
+  resolution: "@lingui/message-utils@npm:4.3.0"
+  dependencies:
+    "@messageformat/parser": ^5.0.0
+  checksum: df5eb9996260dd38f8a0a43a06f66a2efbb2b2c10ea72aa083f8d7cb4d062bc50c67297faf553d79199317d68a43d7ee7585a8aafb439e08b3033fb80e396608
+  languageName: node
+  linkType: hard
+
+"@markflowy/desktop@workspace:apps/desktop":
   version: 0.0.0-use.local
-  resolution: "@linebyline/desktop@workspace:apps/desktop"
+  resolution: "@markflowy/desktop@workspace:apps/desktop"
   dependencies:
     "@babel/plugin-proposal-class-properties": ^7.18.6
     "@babel/plugin-proposal-decorators": ^7.22.10
@@ -4767,7 +4794,7 @@ __metadata:
     "@emotion/react": ^11.11.1
     "@emotion/styled": ^11.11.0
     "@formkit/auto-animate": ^0.7.0
-    "@linebyline/editor": "workspace:*"
+    "@markflowy/editor": "workspace:*"
     "@markflowy/theme": "workspace:*"
     "@mui/material": ^5.14.6
     "@remirror/core": ^2.0.17
@@ -4821,9 +4848,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@linebyline/editor@workspace:*, @linebyline/editor@workspace:packages/editor":
+"@markflowy/editor@workspace:*, @markflowy/editor@workspace:packages/editor":
   version: 0.0.0-use.local
-  resolution: "@linebyline/editor@workspace:packages/editor"
+  resolution: "@markflowy/editor@workspace:packages/editor"
   dependencies:
     "@codemirror/autocomplete": ^6.8.1
     "@codemirror/commands": ^6.2.4
@@ -4925,11 +4952,11 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@linebyline/playground@workspace:apps/playground":
+"@markflowy/playground@workspace:apps/playground":
   version: 0.0.0-use.local
-  resolution: "@linebyline/playground@workspace:apps/playground"
+  resolution: "@markflowy/playground@workspace:apps/playground"
   dependencies:
-    "@linebyline/editor": "workspace:*"
+    "@markflowy/editor": "workspace:*"
     "@markflowy/theme": "workspace:*"
     "@types/react": ^18.2.15
     "@types/react-dom": ^18.2.7
@@ -4945,33 +4972,6 @@ __metadata:
     vite: ^4.4.9
   languageName: unknown
   linkType: soft
-
-"@lingui/core@npm:^4.2.0":
-  version: 4.3.0
-  resolution: "@lingui/core@npm:4.3.0"
-  dependencies:
-    "@babel/runtime": ^7.20.13
-    "@lingui/message-utils": 4.3.0
-    unraw: ^2.0.1
-  checksum: 357782bab503c11b5666578da0e2ac136444b3683a7068850e1587d9e66952221009a3acfdb519f36886ecfb321720e49c2d49c2ed5512fc4f72af6015fcc01d
-  languageName: node
-  linkType: hard
-
-"@lingui/detect-locale@npm:^4.2.0":
-  version: 4.3.0
-  resolution: "@lingui/detect-locale@npm:4.3.0"
-  checksum: 3c03c49a300c28a4623c96a9f18d436ad21300c5ac85ce03d8165696fe7a8ea18d09e8dbf9dd1a7a3bbb3056b98bdb10e02bf036a605d87a5670c3892251ca15
-  languageName: node
-  linkType: hard
-
-"@lingui/message-utils@npm:4.3.0":
-  version: 4.3.0
-  resolution: "@lingui/message-utils@npm:4.3.0"
-  dependencies:
-    "@messageformat/parser": ^5.0.0
-  checksum: df5eb9996260dd38f8a0a43a06f66a2efbb2b2c10ea72aa083f8d7cb4d062bc50c67297faf553d79199317d68a43d7ee7585a8aafb439e08b3033fb80e396608
-  languageName: node
-  linkType: hard
 
 "@markflowy/theme@workspace:*, @markflowy/theme@workspace:packages/theme":
   version: 0.0.0-use.local
@@ -16411,29 +16411,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"linebyline-monorepo@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "linebyline-monorepo@workspace:."
-  dependencies:
-    "@babel/core": ^7.22.10
-    "@babel/eslint-plugin": ^7.22.10
-    "@babel/plugin-proposal-class-properties": ^7.18.6
-    "@babel/plugin-proposal-decorators": ^7.22.10
-    "@babel/preset-env": ^7.22.10
-    "@babel/preset-react": ^7.22.5
-    "@babel/preset-typescript": ^7.22.5
-    "@halodong/eslint-config-react": ^0.38.24
-    "@tauri-apps/cli": 2.0.0-alpha.14
-    babel: ^6.23.0
-    child_process: ^1.0.2
-    eslint: 8.44.0
-    fast-glob: ^3.3.0
-    husky: ^8.0.3
-    prettier: ^3.0.2
-    typescript: ^5.1.3
-  languageName: unknown
-  linkType: soft
-
 "lines-and-columns@npm:^1.1.6":
   version: 1.2.4
   resolution: "lines-and-columns@npm:1.2.4"
@@ -16874,6 +16851,29 @@ __metadata:
   checksum: 0db6817893952c3ec710eb9ceafb8468bf5ae38cb0f92b7b083baa13d70b19774674be04db5b817681fa7c5c6a088f61300815e4dd75a59696f4716ad69f6260
   languageName: node
   linkType: hard
+
+"markflowy-monorepo@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "markflowy-monorepo@workspace:."
+  dependencies:
+    "@babel/core": ^7.22.10
+    "@babel/eslint-plugin": ^7.22.10
+    "@babel/plugin-proposal-class-properties": ^7.18.6
+    "@babel/plugin-proposal-decorators": ^7.22.10
+    "@babel/preset-env": ^7.22.10
+    "@babel/preset-react": ^7.22.5
+    "@babel/preset-typescript": ^7.22.5
+    "@halodong/eslint-config-react": ^0.38.24
+    "@tauri-apps/cli": 2.0.0-alpha.14
+    babel: ^6.23.0
+    child_process: ^1.0.2
+    eslint: 8.44.0
+    fast-glob: ^3.3.0
+    husky: ^8.0.3
+    prettier: ^3.0.2
+    typescript: ^5.1.3
+  languageName: unknown
+  linkType: soft
 
 "marky@npm:^1.2.2":
   version: 1.2.5

@@ -18,7 +18,7 @@ allWorkspaces.forEach((workspace) => {
 updateVersion()
 
 execSync(`git add . && git commit -m "chore: bump version to ${nextVersion}" && git push`)
-execSync(`git tag -a v${nextVersion} -m "v${nextVersion}" && git push linebyline v${nextVersion}`)
+execSync(`git tag -a v${nextVersion} -m "v${nextVersion}" && git push markflowy v${nextVersion}`)
 
 
 // helpers -----------------------------

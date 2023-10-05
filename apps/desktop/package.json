@@ -1,5 +1,5 @@
 {
-  "name": "@linebyline/desktop",
+  "name": "@markflowy/desktop",
   "version": "0.5.3",
   "scripts": {
     "dev": "vite --host",
@@ -15,7 +15,7 @@
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "@formkit/auto-animate": "^0.7.0",
-    "@linebyline/editor": "workspace:*",
+    "@markflowy/editor": "workspace:*",
     "@markflowy/theme": "workspace:*",
     "@mui/material": "^5.14.6",
     "@tauri-apps/api": "^2.0.0-alpha.8",

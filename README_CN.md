@@ -1,4 +1,4 @@
-<h4 align="right"><strong><a href="https://github.com/linebyline-group/linebyline">English</a></strong> | 简体中文</h4>
+<h4 align="right"><strong><a href="https://github.com/drl990114/MarkFlowy">English</a></strong> | 简体中文</h4>
 
 <div align="center">
   <img align="center" src="./public/logo.png" width="120" height="120" />

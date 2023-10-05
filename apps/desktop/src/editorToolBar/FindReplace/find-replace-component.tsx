@@ -5,7 +5,7 @@ import { FindInput } from './find-input'
 import { ReplaceController } from './replace-controller'
 import { ReplaceInput } from './replace-input'
 import { useFindReplace } from './use-find-replace'
-import type { EditorContext } from '@linebyline/editor'
+import type { EditorContext } from '@markflowy/editor'
 
 export interface FindReplaceComponentProps {
   onDismiss?: () => void;

@@ -1,4 +1,4 @@
-import { useHelpers } from '@linebyline/editor'
+import { useHelpers } from '@markflowy/editor'
 import styled from 'styled-components'
 
 const Container = styled.div`

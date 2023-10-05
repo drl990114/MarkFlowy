@@ -38,7 +38,7 @@ MarkFlowy is completely and permanently open source, if you want to support Mark
 
 - <a href="https://github.com/tauri-apps/tauri" target="_blank">Tauri</a> - A framework for building cross-platform applications that provides MarkFlowy with a solid foundation.
 - <a href="https://github.com/facebook/react" target="_blank">React</a> - Web user interface framework.
-- <a href="https://github.com/remirror/remirror" target="_blank">Remirror</a> - The ProseMirror toolkit for React, on which the linebyline editor is based.
+- <a href="https://github.com/remirror/remirror" target="_blank">Remirror</a> - The ProseMirror toolkit for React, on which the MarkFlowy editor is based.
 - <a href="https://github.com/ocavue/rino" target="_blank">Rino</a> - Some initialization codes of package/editor come from here.
 - <a href="https://github.com/vitejs/vite" target="_blank">Vite</a> - front-end build tool.
 - <a href="https://github.com/kimlimjustin/xplorer" target="_blank">Xplorer</a> - Home page theme from xplorer.

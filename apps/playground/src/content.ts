@@ -21,7 +21,6 @@ hello world!
     `
 
 <h1>html node</h1>
-<a href="https://github.com/linebyline-group/linebyline">github repo</a>
 
 - list item
 - list item
@@ -38,7 +37,6 @@ Table:
 | First Header  | Second Header |
 | ------------- | ------------- |
 | Content Cell  | Content Cell  |
-| **Strong**    | [Link](https://github.com/linebyline-group/linebyline) |
 
 `.trim(),
 ].join("\n")

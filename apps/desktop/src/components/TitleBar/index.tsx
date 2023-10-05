@@ -33,7 +33,7 @@ export default function TitleBar(props: TitleBarProps) {
       <Container data-tauri-drag-region onDoubleClick={handleTitleBarDoubleClick}>
         {transparent ? null : (
           <div id='titlebar' className='titlebar-text' data-tauri-drag-region>
-            {'LineByLine'}
+            {'MarkFlowy'}
           </div>
         )}
       </Container>
