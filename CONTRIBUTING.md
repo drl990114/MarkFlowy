@@ -35,7 +35,7 @@ cargo install --path apps/desktop/src-tauri
 #### Startup LineByLine
 Execute the following command, you will start LineByLine.
 ```bash
-yarn tauri:dev
+yarn dev:desktop
 ```
 
 # Thank You!
