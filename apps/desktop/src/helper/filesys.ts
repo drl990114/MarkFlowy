@@ -61,7 +61,7 @@ export const readDirectory = (folderPath: string): Promise<IFile[]> => {
     invoke('open_folder', { folderPath })
       .then((message: unknown) => {
         const mess = message as string
-        const files = JSON.parse(mess.replaceAll('\\', '/').replaceAll('//', '/'))
+        const files = JSON.parse(mess)
         const entries: IFile[] = []
 
         if (!files || !files.length) {

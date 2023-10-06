@@ -43,17 +43,17 @@ pub fn read_directory(dir_path: &str) -> Vec<FileInfo> {
             Err(_error) => String::from("ERROR"),
         };
 
-        let file_path = dir_path.to_owned() + "/" + &filename;
+        let file_path = new_path.join(filename.clone());
 
         if meta_unwrap.is_dir() {
             kind = String::from("dir");
-            children = read_directory(&file_path);
+            children = read_directory(file_path.to_str().unwrap());
         }
 
         let new_file_info = FileInfo {
             name: filename,
             kind,
-            path: file_path,
+            path: file_path.to_str().unwrap().to_string(),
             children,
         };
 
