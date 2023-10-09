@@ -4828,7 +4828,7 @@ __metadata:
     nanoid: ^4.0.2
     react: ^18.0.0
     react-dom: ^18.0.0
-    react-i18next: ^13.0.1
+    react-i18next: ^13.2.2
     react-keywords: ^1.0.0
     react-loading: ^2.0.3
     react-router-dom: ^6.15.0
@@ -19969,9 +19969,9 @@ plugin-image-zoom@ataft/plugin-image-zoom:
   languageName: node
   linkType: hard
 
-"react-i18next@npm:^13.0.1":
-  version: 13.0.3
-  resolution: "react-i18next@npm:13.0.3"
+"react-i18next@npm:^13.2.2":
+  version: 13.2.2
+  resolution: "react-i18next@npm:13.2.2"
   dependencies:
     "@babel/runtime": ^7.22.5
     html-parse-stringify: ^3.0.1
@@ -19983,7 +19983,7 @@ plugin-image-zoom@ataft/plugin-image-zoom:
       optional: true
     react-native:
       optional: true
-  checksum: 5b23c517204ac7ce66191368b185bb278c34e75778714ffdae84dd4672fdaf8c500c7965cb87508c686de55ac7c8853f05134ee61aa21add1b8c8e02bcc0a0a4
+  checksum: 2b85bfb347af1a00add1c02901025706f7d2037fade4e8aa08159287ddf012e8cf35626eb9f5c578b9d1c24c065c69f2ad4b5a3087fb5cdbea540f8bc18c0f59
   languageName: node
   linkType: hard
 
