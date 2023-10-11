@@ -4,11 +4,12 @@ import type { RightBarItem } from '@/components/SideBar'
 import type { BookMarkItem } from './useBookMarksStore'
 import useBookMarksStore from './useBookMarksStore'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { MfIconButton } from '@/components/UI/Button'
 import { TagsViewItem } from './TagsViewItem'
 import { BookMarkViewItem } from './BookMarkViewItem'
 import type { BookMarkContextMenuRef } from './BookMarkContextMenu'
 import { BookMarkContextMenu } from './BookMarkContextMenu'
+import type { RightNavItem } from '@/components/SideBar/SideBarHeader'
+import SideBarHeader from '@/components/SideBar/SideBarHeader'
 
 type BookMarkViewMode = 'list' | 'tags'
 
@@ -74,16 +75,28 @@ const BookMarksList: React.FC<ChatListProps> = (props) => {
     getTagsViewList()
   }, [getTagsViewList])
 
+  const handleRightNavItemClick = useCallback(
+    (item: RightNavItem) => {
+      if (item.key === 'toggleViewMode') {
+        toggleViewMode()
+      }
+    },
+    [toggleViewMode],
+  )
+
   return (
     <Container {...props}>
-      <div className='bookmark-header'>
-        <span>BookMarks</span>
-        <MfIconButton
-          icon={viewMode === 'list' ? 'ri-price-tag-3-line' : 'ri-list-unordered'}
-          tooltipProps={{ title: 'toogle view mode' }}
-          onClick={toggleViewMode}
-        />
-      </div>
+      <SideBarHeader
+        name='BookMarks'
+        onRightNavItemClick={handleRightNavItemClick}
+        rightNavItems={[
+          {
+            iconCls: viewMode === 'list' ? 'ri-price-tag-3-line' : 'ri-list-unordered',
+            key: 'toggleViewMode',
+            tooltip: { title: 'toogle view mode', arrow: true },
+          },
+        ]}
+      />
       <div className='bookmark-list' onContextMenu={handleContextMenu}>
         {viewMode === 'list'
           ? bookMarkList.map((bookmark) => {

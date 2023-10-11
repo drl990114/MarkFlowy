@@ -7,7 +7,7 @@ export const FileNodeStyled = styled.div`
     padding: 0 8px;
     height: 32px;
     box-sizing: border-box;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     cursor: pointer;
     user-select: none;
 
@@ -24,7 +24,7 @@ export const FileNodeStyled = styled.div`
 
     &--active {
       color: ${(props) => props.theme.accentColor};
-      background-color: ${(props) => props.theme.borderColor};
+      /* background-color: ${(props) => props.theme.borderColor}; */
     }
   }
 

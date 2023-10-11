@@ -21,6 +21,8 @@ import 'remixicon/fonts/remixicon.css'
 import bus from './helper/eventBus'
 import isPropValid from '@emotion/is-prop-valid'
 import type { FC } from 'react'
+import { FlowyContextMenu, FlowyTheme } from '@flowy-ui/react'
+import { FLOWYUI_CONTEXT_MENU_ID, FLOWYUI_THEME_ID } from './constants/flowy-ui'
 
 const App: FC = function () {
   useGlobalOSInfo()
@@ -28,7 +30,7 @@ const App: FC = function () {
   const { setRecentWorkspaces } = useOpenedCacheStore()
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, handler] = useGlobalSettingData()
-  const { themeData, muiTheme, setTheme } = useGlobalTheme()
+  const { themeData, muiTheme, setTheme, theme } = useGlobalTheme()
   const editorStore = useEditorStore()
   const { setFolderData, addOpenedFile, setActiveId } = editorStore
   const { setSetting } = handler
@@ -118,7 +120,6 @@ const App: FC = function () {
 
   const eventInit = useCallback(() => {
     const unListenMenu = listen<string>('native:menu', ({ payload }) => {
-      console.log('menu', payload)
       bus.emit(payload)
     })
 
@@ -151,14 +152,20 @@ const App: FC = function () {
 
   return (
     <StyleSheetManager shouldForwardProp={isPropValid}>
-      <BaseStyle theme={themeData} />
       <ThemeProvider theme={themeData}>
+        <BaseStyle theme={themeData} />
+        <GlobalStyles />
         <MuiThemeProvider theme={muiTheme}>
-          <GlobalStyles />
-          <Routes>
-            <Route index path='/' element={<Root />} />
-            <Route path='/setting' element={<Setting />} />
-          </Routes>
+          <FlowyTheme id={FLOWYUI_THEME_ID} color={theme === 'dark' ? 'darkest' : 'lightest'}>
+            <Routes>
+              <Route index path='/' element={<Root />} />
+              <Route path='/setting' element={<Setting />} />
+            </Routes>
+
+            <FlowyContextMenu id={FLOWYUI_CONTEXT_MENU_ID}  style={{
+              zIndex: 1000000
+            }}/>
+          </FlowyTheme>
         </MuiThemeProvider>
       </ThemeProvider>
     </StyleSheetManager>

@@ -7,15 +7,6 @@ export const Container = styled.div`
   font-size: 0.8rem;
   line-height: 1.25rem;
 
-  .header {
-    display: flex;
-    justify-content: space-between;
-    height: 2.5rem;
-    padding: 0 8px;
-    line-height: 2.5rem;
-    border-bottom: 1px solid ${props => props.theme.borderColor};
-  }
-
   .content {
     height: calc(100% - 60px - 2rem);
     overflow: auto;

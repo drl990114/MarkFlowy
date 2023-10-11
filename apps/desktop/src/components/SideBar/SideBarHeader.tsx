@@ -7,10 +7,9 @@ const Container = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 2rem;
-  padding: 0 8px;
-  line-height: 2rem;
-  border-bottom: 1px solid ${(props) => props.theme.borderColor};
+  height: 40px;
+  padding: 0 1rem;
+  font-size: 0.8rem;
 
   .sidebar-header {
     &__name {

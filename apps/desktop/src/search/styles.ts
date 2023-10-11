@@ -3,11 +3,9 @@ import styled from 'styled-components'
 export const SearchContainer = styled.div`
   display: flex;
   flex-direction: column;
-  height: 100%;
-  width: 100%;
+  flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  box-sizing: border-box;
 `
 
 export const SearchInput = styled.div`
