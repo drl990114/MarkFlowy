@@ -21,12 +21,12 @@ pub fn init(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
         main_win = main_win.title_bar_style(TitleBarStyle::Overlay);
     }
 
-    let window = main_win.build().unwrap();
-
     #[cfg(not(target_os = "macos"))]
     {
         main_win = main_win.decorations(false);
     }
+
+    let window = main_win.build().unwrap();
 
     #[cfg(target_os = "macos")]
     window.set_transparent_titlebar(true, true);

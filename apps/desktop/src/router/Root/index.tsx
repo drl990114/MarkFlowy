@@ -26,7 +26,6 @@ function Root() {
 
   return (
     <PageLayout>
-      {/* TODO customer titlebar, when tauri 2.0 stable. */}
       <TitleBar />
       <Container>
         <SideBar />
