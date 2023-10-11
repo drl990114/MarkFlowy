@@ -30,6 +30,8 @@ export function loadTheme(theme: 'light' | 'dark') {
 const common = {
   lineHeightBase: '1.6',
 
+  titleBarHeight: "30px",
+
   fontH1: '28px',
   fontH2: '26px',
   fontH3: '24px',
@@ -50,12 +52,15 @@ const lightTheme = {
   primaryFontColor: '#000000',
   labelFontColor: '#9ca3af',
   accentColor: '#0369a1',
-  borderColor: '#e4e4e7',
+  borderColor: '#d7d7dc',
   bgColor: '#fdfdfd',
   warnColor: '#dc2626',
   tipsBgColor: '#f6f7f9',
   successColor: '#00c853',
   boxShadowColor: 'rgba(0, 0, 0, 0.08)',
+
+  titleBarDefaultHoverColor: '#bdbdc2',
+
   scrollbarThumbColor: '#C4C4C4',
   scrollbarTrackColor: '#e4e4e7',
 }
@@ -72,6 +77,9 @@ const darkTheme = {
   tipsBgColor: '#0e1419',
   successColor: '#00c853',
   boxShadowColor: 'rgba(255, 255, 255, 0.04)',
+
+  titleBarDefaultHoverColor: '#383838',
+
   scrollbarThumbColor: '#2C3C52',
   scrollbarTrackColor: '#0e1419',
 }

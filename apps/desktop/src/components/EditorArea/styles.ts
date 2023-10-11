@@ -2,6 +2,7 @@ import styled from 'styled-components'
 
 export const Container = styled.div`
   position: relative;
+  flex: 1;
   overflow-x: auto;
   overflow-y: hidden;
   display: flex;
@@ -11,7 +12,6 @@ export const Container = styled.div`
     display: flex;
     flex: 0 0 2rem;
     line-height: 2rem;
-    border-bottom: 1px solid ${(props) => props.theme.borderColor};
     overflow-x: auto;
     overflow-y: hidden;
 
@@ -48,22 +48,12 @@ export const TabItem = styled.div<TabItemProps>`
   display: flex;
   justify-content: center;
   align-items: center;
-  border-left: 1px solid ${(props) => props.theme.borderColor};
-  border-top: 1px solid ${(props) => props.theme.borderColor};
   font-size: 0.75rem;
-  height: 100%;
+  height: calc(100% + 2px);
   box-sizing: border-box;
   white-space: nowrap;
   cursor: pointer;
   user-select: none;
-
-  &:first-child {
-    border-left: none;
-  }
-
-  &:last-child {
-    border-right: 1px solid ${(props) => props.theme.borderColor};
-  }
 
   .close {
     cursor: pointer;
@@ -75,12 +65,6 @@ export const TabItem = styled.div<TabItemProps>`
       opacity: 1;
     }
   }
-
-  ${({ active, theme }) => {
-    return `
-      background-color: ${active ? theme.bgColor : theme.tipsBgColor};
-    `
-  }}
 `
 
 type DotProps = {

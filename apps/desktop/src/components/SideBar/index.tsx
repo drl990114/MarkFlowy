@@ -1,8 +1,8 @@
 import classNames from 'classnames'
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Container as SideBarContainer, SettingRightBarContainer, SideBar as SideBarWrapper } from './styles'
+import { Container as SideBarContainer, SideBarHeader } from './styles'
 import chatgpt from '@/chatgpt'
-import { Explorer, Setting } from '@/components'
+import { Explorer } from '@/components'
 import { RIGHTBARITEMKEYS } from '@/constants'
 import { useCommandStore } from '@/stores'
 import BookMarks from '@/bookmarks'
@@ -12,7 +12,9 @@ import { Search } from '@/search'
 function SideBar() {
   const [isResizing, setIsResizing] = useState(false)
   const [sidebarWidth, setSidebarWidth] = useState(300)
-  const [activeRightBarItemKey, setActiveRightBarItemKey] = useState<RIGHTBARITEMKEYS | undefined>()
+  const [activeRightBarItemKey, setActiveRightBarItemKey] = useState<RIGHTBARITEMKEYS>(
+    RIGHTBARITEMKEYS.Explorer,
+  )
   // TODO need local cache
   const [visible, setVisible] = useState(true)
   const { addCommand } = useCommandStore()
@@ -59,12 +61,12 @@ function SideBar() {
           sideBarClientRect.width > 100 &&
           mouseMoveEvent.clientX - sideBarClientRect.left <= 100
         ) {
-          setActiveRightBarItemKey(undefined)
+          setVisible(false)
         } else if (
           sideBarClientRect.width < 100 &&
           mouseMoveEvent.clientX - sideBarClientRect.left > 100
         ) {
-          setActiveRightBarItemKey(rightBarDataSource[0].key)
+          setVisible(true)
         }
 
         requestAnimationFrame(() => {
@@ -72,7 +74,7 @@ function SideBar() {
         })
       }
     },
-    [isResizing, rightBarDataSource],
+    [isResizing],
   )
 
   useEffect(() => {
@@ -91,18 +93,17 @@ function SideBar() {
     <SideBarContainer
       ref={sidebarRef}
       noActiveItem={noActiveItem}
-      style={{ width: noActiveItem ? (visible ? '48px' : 0) : sidebarWidth }}
+      style={{ width: visible ? Math.max(sidebarWidth, 100) : 0 }}
     >
-      <SideBarWrapper visible={visible}>
-        <div>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <SideBarHeader>
           {rightBarDataSource.map((item) => {
-            const cls = classNames('app-sidebar__item fjic', {
+            const cls = classNames('icon', {
               'app-sidebar-active': activeRightBarItemKey === item.key,
             })
 
             const handleRightBarItemClick = () => {
-              if (activeRightBarItemKey === item.key) setActiveRightBarItemKey(undefined)
-              else setActiveRightBarItemKey(item.key)
+              setActiveRightBarItemKey(item.key)
             }
 
             return (
@@ -111,12 +112,9 @@ function SideBar() {
               </div>
             )
           })}
-        </div>
-        <SettingRightBarContainer className='app-sidebar__item fjic'>
-          <Setting />
-        </SettingRightBarContainer>
-      </SideBarWrapper>
-      {activeRightBarItem?.components ?? null}
+        </SideBarHeader>
+        {activeRightBarItem?.components ?? null}
+      </div>
       <div className='app-sidebar-resizer' onMouseDown={startResizing} />
     </SideBarContainer>
   )

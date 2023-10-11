@@ -1,11 +1,13 @@
 import styled from 'styled-components'
 
 export const Container = styled.div`
-  width: 100%;
+  flex: 1;
   display: flex;
   flex-direction: column;
-  min-width: calc(100% - 48px);
+  padding: 0 8px;
   user-select: none;
+  overflow: auto;
+  font-size: 0.8rem;
 
   &:hover {
     .explorer-bottom {

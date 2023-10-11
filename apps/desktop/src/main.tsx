@@ -10,19 +10,25 @@ import './normalize.css'
 
 enableMapSet()
 
+const Main = () => {
+  return (
+    <Suspense
+      fallback={
+        <FallBackContainer>
+          <CircularProgress />
+        </FallBackContainer>
+      }
+    >
+      <App />
+    </Suspense>
+  )
+}
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <HoxRoot>
       <BrowserRouter>
-        <Suspense
-          fallback={
-            <FallBackContainer>
-              <CircularProgress />
-            </FallBackContainer>
-          }
-        >
-          <App />
-        </Suspense>
+        <Main />
       </BrowserRouter>
     </HoxRoot>
   </StrictMode>,

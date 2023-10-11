@@ -7,13 +7,6 @@ export const Container = styled.div`
   font-size: 0.8rem;
   line-height: 1.25rem;
 
-  .bookmark-header {
-    padding: 0 1rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
   .bookmark-list {
     height: calc(100% - 40px);
     padding: 0.2rem 1rem;

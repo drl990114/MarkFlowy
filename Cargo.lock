@@ -2204,11 +2204,13 @@ name = "markflowy"
 version = "0.0.1"
 dependencies = [
  "anyhow",
+ "cocoa 0.24.1",
  "dark-light",
  "file_search",
  "lazy_static",
  "log",
  "mf-utils",
+ "objc",
  "regex",
  "serde",
  "serde_json",
@@ -2221,6 +2223,8 @@ dependencies = [
  "tauri-plugin-shell",
  "tauri-plugin-store",
  "tauri-plugin-window",
+ "window-shadows",
+ "window-vibrancy",
 ]
 
 [[package]]
@@ -4836,6 +4840,28 @@ name = "winapi-x86_64-pc-windows-gnu"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f"
+
+[[package]]
+name = "window-shadows"
+version = "0.2.1"
+source = "git+https://github.com/tauri-apps/window-shadows#a9f5f1f7725609c71404539befca1f1a98095cd2"
+dependencies = [
+ "cocoa 0.25.0",
+ "objc",
+ "raw-window-handle",
+ "windows-sys 0.48.0",
+]
+
+[[package]]
+name = "window-vibrancy"
+version = "0.4.2"
+source = "git+https://github.com/tauri-apps/window-vibrancy#b86afdc63a51bee3136a1558a2b05f8050aefede"
+dependencies = [
+ "cocoa 0.25.0",
+ "objc",
+ "raw-window-handle",
+ "windows-sys 0.48.0",
+]
 
 [[package]]
 name = "windows"

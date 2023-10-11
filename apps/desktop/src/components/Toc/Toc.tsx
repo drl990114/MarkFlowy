@@ -3,6 +3,7 @@ import type { IHeadingData } from './HeadingTree'
 import { HeadingTree, TraverseResult } from './HeadingTree'
 import { TocDiv, TocLink, TocListItem } from './styles'
 import type HeadingNode from './HeadingTreeNode'
+import SideBarHeader from '@/components/SideBar/SideBarHeader'
 import Empty from '../Empty'
 
 export type TocRef = {
@@ -173,14 +174,18 @@ export const Toc = forwardRef<TocRef, TocProps>((props, ref) => {
             href={`#${h.id}`}
             active={isActive}
             depth={h.depth}
-            onClick={(ev: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => handleHeadingClick(ev, h)}
+            onClick={(ev: React.MouseEvent<HTMLAnchorElement, MouseEvent>) =>
+              handleHeadingClick(ev, h)
+            }
           >
             {h.title}
           </TocLink>
         </TocListItem>,
       )
 
-      return !autoExpand || (activeParentsState?.[h.key] || h.parent?.key === -1) ? TraverseResult.Continue : TraverseResult.NoChildren
+      return !autoExpand || activeParentsState?.[h.key] || h.parent?.key === -1
+        ? TraverseResult.Continue
+        : TraverseResult.NoChildren
     })
 
     return items
@@ -188,14 +193,16 @@ export const Toc = forwardRef<TocRef, TocProps>((props, ref) => {
 
   return (
     <TocDiv>
-      <div className='toc-title'>Table of Contents</div>
-      {headingTree?.getRoot()?.children?.length === 0 ? (
-        <Empty />
-      ) : (
-        <nav>
-          <ul>{renderHeadings()}</ul>
-        </nav>
-      )}
+      <SideBarHeader name='Table of Contents'/>
+      <div className='toc-list'>
+        {headingTree?.getRoot()?.children?.length === 0 ? (
+          <Empty />
+        ) : (
+          <nav>
+            <ul>{renderHeadings()}</ul>
+          </nav>
+        )}
+      </div>
     </TocDiv>
   )
 })

@@ -1,28 +1,23 @@
-import styled from "styled-components"
-import type { ITocListProps } from "./type"
-import type { ScThemeProps } from "@markflowy/theme"
+import styled from 'styled-components'
+import type { ITocListProps } from './type'
+import type { ScThemeProps } from '@markflowy/theme'
 
 export const TocDiv = styled.div`
-position: relative;
+  position: relative;
   height: 100%;
   width: 100%;
   line-height: 2em;
   padding-bottom: 0.5rem;
   overflow-x: hidden;
   text-overflow: ellipsis;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   box-sizing: border-box;
 
-  .toc-title {
-    position: sticky;
-    top: 0;
-    padding: 0.3rem 1rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: ${(props) => props.theme.bgColor};
-    color: ${(props) => props.theme.primaryFontColor};
-    z-index: 1;
+  .toc-list {
+    height: calc(100% - 40px);
+    padding: 0.2rem 1rem;
+    overflow: auto;
+    box-sizing: border-box;
   }
 
   nav {
@@ -40,7 +35,7 @@ position: relative;
 `
 export const TocLink = styled.a<ITocListProps & ScThemeProps>`
   color: ${(props) => (props.active ? props.theme.primaryFontColor : props.theme.labelFontColor)};
-  font-weight: ${(props) => props.active ? `600` : '400'};
+  font-weight: ${(props) => (props.active ? `600` : '400')};
   display: block;
   box-shadow: none;
   text-decoration: none;
@@ -57,8 +52,7 @@ export const TocListItem = styled.li<ITocListProps>`
   position: relative;
   display: flex;
   align-items: center;
-  padding-left: ${(props) =>
-    `${(props.depth + 1) * listItemShiftWidthEm}em`};
+  padding-left: ${(props) => `${(props.depth + 1) * listItemShiftWidthEm}em`};
   &:hover {
     color: #fff;
   }

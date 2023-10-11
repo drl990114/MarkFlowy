@@ -1,12 +1,13 @@
 import { getCurrent } from '@tauri-apps/plugin-window'
 
 import { useState } from 'react'
-import { TitleBarBg, Container } from './styled'
+import { Container } from './styled'
+import { Controls } from './Controls'
+import { CenterMenu } from './CenterMenu'
 
 const appWindow = getCurrent()
 
-export default function TitleBar(props: TitleBarProps) {
-  const { transparent } = props
+export default function TitleBar() {
   const [isScaleup, setScaleup] = useState(false)
 
   const onScaleup = () => {
@@ -28,21 +29,14 @@ export default function TitleBar(props: TitleBarProps) {
   }
 
   return (
-    <>
-      {transparent ? null : <TitleBarBg data-tauri-drag-region />}
-      <Container data-tauri-drag-region onDoubleClick={handleTitleBarDoubleClick}>
-        {transparent ? null : (
-          <div id='titlebar' className='titlebar-text' data-tauri-drag-region>
-            {'MarkFlowy'}
-          </div>
-        )}
-      </Container>
-    </>
+    <Container data-tauri-drag-region onDoubleClick={handleTitleBarDoubleClick}>
+      <CenterMenu />
+      <div id='titlebar' className='titlebar-text' data-tauri-drag-region>
+        {'MarkFlowy'}
+      </div>
+      <Controls />
+    </Container>
   )
-}
-
-interface TitleBarProps {
-  transparent?: boolean
 }
 
 // TODO refactor: use file state
