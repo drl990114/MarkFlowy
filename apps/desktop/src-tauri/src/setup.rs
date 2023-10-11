@@ -1,5 +1,8 @@
 use crate::WindowExt;
-use tauri::{utils::config::WindowUrl, window::WindowBuilder, App, Runtime, TitleBarStyle, Window};
+use tauri::{utils::config::WindowUrl, window::WindowBuilder, App};
+
+#[cfg(target_os = "macos")]
+use tauri::TitleBarStyle;
 
 #[cfg(not(target_os = "linux"))]
 use window_shadows::set_shadow;
