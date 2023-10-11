@@ -39,7 +39,7 @@
     "nanoid": "^4.0.2",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
-    "react-i18next": "^13.0.1",
+    "react-i18next": "^13.2.2",
     "react-keywords": "^1.0.0",
     "react-loading": "^2.0.3",
     "react-router-dom": "^6.15.0",

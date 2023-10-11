@@ -4935,7 +4935,7 @@ __metadata:
     nanoid: ^4.0.2
     react: ^18.0.0
     react-dom: ^18.0.0
-    react-i18next: ^13.0.1
+    react-i18next: ^13.2.2
     react-keywords: ^1.0.0
     react-loading: ^2.0.3
     react-router-dom: ^6.15.0
@@ -5035,7 +5035,7 @@ __metadata:
     micromark-extension-gfm-autolink-literal: ^1.0.5
     micromark-extension-gfm-strikethrough: ^1.0.7
     nanoid: ^4.0.2
-    prosemirror-flat-list: ^0.4.1
+    prosemirror-flat-list: ^0.4.2
     punycode: ^2.3.0
     react: ^18.2.0
     react-dom: ^18.2.0
@@ -19791,7 +19791,7 @@ plugin-image-zoom@ataft/plugin-image-zoom:
   languageName: node
   linkType: hard
 
-"prosemirror-flat-list@npm:^0.4.0, prosemirror-flat-list@npm:^0.4.1":
+"prosemirror-flat-list@npm:^0.4.0":
   version: 0.4.1
   resolution: "prosemirror-flat-list@npm:0.4.1"
   dependencies:
@@ -19802,6 +19802,20 @@ plugin-image-zoom@ataft/plugin-image-zoom:
     prosemirror-transform: ^1.7.4
     prosemirror-view: ^1.31.7
   checksum: ed30fd6beef5dad4afc6e19f4dd8111da2adf64218d3ce1baf549437e042b3ad2a2eb1f5dff347c76de7664e1d57a8543334f91cad8b8a2be43949871cbc4078
+  languageName: node
+  linkType: hard
+
+"prosemirror-flat-list@npm:^0.4.2":
+  version: 0.4.2
+  resolution: "prosemirror-flat-list@npm:0.4.2"
+  dependencies:
+    prosemirror-commands: ^1.5.2
+    prosemirror-inputrules: ^1.2.1
+    prosemirror-model: ^1.19.3
+    prosemirror-state: ^1.4.3
+    prosemirror-transform: ^1.7.5
+    prosemirror-view: ^1.31.7
+  checksum: cac8e0139fc8340e3b904f1aac9b204c25eb3372c981c0908ae6739b901aa016bcb71940292dfbad8f786eac7f26ffbb665dbd1a8358f41fcb075a092d0f18ff
   languageName: node
   linkType: hard
 
@@ -19980,6 +19994,15 @@ plugin-image-zoom@ataft/plugin-image-zoom:
   dependencies:
     prosemirror-model: ^1.0.0
   checksum: c7ac776f10007081686be64e9a6592275974d8802c0818e3ae42a712ba288cce84183ec81b02aa94775868a30221cd80e8249cf4ef93ffc5a11e9ee52b149e7d
+  languageName: node
+  linkType: hard
+
+"prosemirror-transform@npm:^1.7.5":
+  version: 1.8.0
+  resolution: "prosemirror-transform@npm:1.8.0"
+  dependencies:
+    prosemirror-model: ^1.0.0
+  checksum: 6d16ca4f954ad7b040a4adbb5ddfa8c8ad14b0514f15e1ecfd5e32f08eb3f8696492975b9e599b4776e991ab76df114166dcf6ec7b966a67b02b2069a28415f1
   languageName: node
   linkType: hard
 
@@ -20327,9 +20350,9 @@ plugin-image-zoom@ataft/plugin-image-zoom:
   languageName: node
   linkType: hard
 
-"react-i18next@npm:^13.0.1":
-  version: 13.0.3
-  resolution: "react-i18next@npm:13.0.3"
+"react-i18next@npm:^13.2.2":
+  version: 13.2.2
+  resolution: "react-i18next@npm:13.2.2"
   dependencies:
     "@babel/runtime": ^7.22.5
     html-parse-stringify: ^3.0.1
@@ -20341,7 +20364,7 @@ plugin-image-zoom@ataft/plugin-image-zoom:
       optional: true
     react-native:
       optional: true
-  checksum: 5b23c517204ac7ce66191368b185bb278c34e75778714ffdae84dd4672fdaf8c500c7965cb87508c686de55ac7c8853f05134ee61aa21add1b8c8e02bcc0a0a4
+  checksum: 2b85bfb347af1a00add1c02901025706f7d2037fade4e8aa08159287ddf012e8cf35626eb9f5c578b9d1c24c065c69f2ad4b5a3087fb5cdbea540f8bc18c0f59
   languageName: node
   linkType: hard
 
