@@ -77,6 +77,7 @@ fn main() {
 
 #[cfg(target_os = "macos")]
 use cocoa::appkit::{NSWindow, NSWindowStyleMask, NSWindowTitleVisibility};
+#[cfg(target_os = "macos")]
 use objc::runtime::YES;
 
 pub trait WindowExt {
