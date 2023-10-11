@@ -30,6 +30,12 @@ regex = "1.9.6"
 mf-utils = { path = "../../../crates/utils" }
 file_search = { path = "../../../crates/file_search" }
 lazy_static = "1.4.0"
+objc = "0.2.7"
+
+[target."cfg(any(target_os = \"windows\", target_os = \"macos\"))".dependencies]
+window-vibrancy = { git = "https://github.com/tauri-apps/window-vibrancy" }
+window-shadows = { git = "https://github.com/tauri-apps/window-shadows" }
+cocoa = "0.24"
 
 [features]
 # by default Tauri runs in production mode

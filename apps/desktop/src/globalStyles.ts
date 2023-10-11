@@ -1,9 +1,15 @@
 import { createGlobalStyle } from 'styled-components'
 
 export const GlobalStyles = createGlobalStyle`
+  html {
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  
   body {
     background-color: ${(props) => props.theme.bgColor};
     color: ${(props) => props.theme.primaryFontColor};
+    overflow: hidden;
     font-family: "Open Sans", "Clear Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
   }
 

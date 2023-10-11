@@ -1,5 +1,5 @@
 import classNames from 'classnames'
-import type { FC } from 'react'
+import type { FC, MouseEventHandler } from 'react'
 import { memo, useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { ListDataItem } from '../UI/List'
@@ -49,7 +49,7 @@ const Explorer: FC<ExplorerProps> = (props) => {
     [openFolder],
   )
 
-  const handleContextMenu = useCallback((e: Event) => e.preventDefault(), [])
+  const handleContextMenu: MouseEventHandler = useCallback((e) => e.preventDefault(), [])
 
   const listData = useMemo(
     () =>
@@ -65,7 +65,6 @@ const Explorer: FC<ExplorerProps> = (props) => {
 
   return (
     <Container className={containerCLs} onContextMenu={handleContextMenu}>
-      {/* <SideBarHeader name='EXPLORER' /> */}
       <div className='h-full w-full overflow-auto'>
         {folderData && folderData.length > 0 ? (
           <FileTree

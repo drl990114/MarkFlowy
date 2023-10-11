@@ -14,9 +14,7 @@
       "open": true
     },
     "updater": {
-      "endpoints": [
-        "https://releases.myapp.com/{{target}}/{{arch}}/{{current_version}}"
-      ]
+      "endpoints": ["https://releases.myapp.com/{{target}}/{{arch}}/{{current_version}}"]
     }
   },
   "tauri": {
@@ -49,9 +47,7 @@
     "security": {
       "assetProtocol": {
         "enable": true,
-        "scope": [
-          "**"
-        ]
+        "scope": ["**"]
       },
       "csp": null
     }

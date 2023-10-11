@@ -73,7 +73,7 @@ const ChatList: React.FC<ChatListProps> = (props) => {
   return (
     <Container {...props}>
       <SideBarHeader
-        name='CHATGPT'
+        name='ChatGPT'
         onRightNavItemClick={handleRightNavItemClick}
         rightNavItems={[
           {

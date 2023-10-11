@@ -4233,6 +4233,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@floating-ui/core@npm:^1.4.2":
+  version: 1.5.0
+  resolution: "@floating-ui/core@npm:1.5.0"
+  dependencies:
+    "@floating-ui/utils": ^0.1.3
+  checksum: 54b4fe26b3c228746ac5589f97303abf158b80aa5f8b99027259decd68d1c2030c4c637648ebd33dfe78a4212699453bc2bd7537fd5a594d3bd3e63d362f666f
+  languageName: node
+  linkType: hard
+
 "@floating-ui/dom@npm:^1.3.0":
   version: 1.5.1
   resolution: "@floating-ui/dom@npm:1.5.1"
@@ -4240,6 +4249,16 @@ __metadata:
     "@floating-ui/core": ^1.4.1
     "@floating-ui/utils": ^0.1.1
   checksum: ddb509030978536ba7b321cf8c764ae9d0142a3b1fefb7e6bc050a5de7e825e12131fa5089009edabf7c125fb274886da211a5220fe17a71d875a7a96eb1386c
+  languageName: node
+  linkType: hard
+
+"@floating-ui/dom@npm:^1.5.1":
+  version: 1.5.3
+  resolution: "@floating-ui/dom@npm:1.5.3"
+  dependencies:
+    "@floating-ui/core": ^1.4.2
+    "@floating-ui/utils": ^0.1.3
+  checksum: 00053742064aac70957f0bd5c1542caafb3bfe9716588bfe1d409fef72a67ed5e60450d08eb492a77f78c22ed1ce4f7955873cc72bf9f9caf2b0f43ae3561c21
   languageName: node
   linkType: hard
 
@@ -4287,6 +4306,49 @@ __metadata:
   version: 0.1.1
   resolution: "@floating-ui/utils@npm:0.1.1"
   checksum: 548acdda7902f45b0afbe34e2e7f4cbff0696b95bad8c039f80936519de24ef2ec20e79902825b7815294b37f51a7c52ee86288b0688869a57cc229a164d86b4
+  languageName: node
+  linkType: hard
+
+"@floating-ui/utils@npm:^0.1.3":
+  version: 0.1.6
+  resolution: "@floating-ui/utils@npm:0.1.6"
+  checksum: b34d4b5470869727f52e312e08272edef985ba5a450a76de0917ba0a9c6f5df2bdbeb99448e2c60f39b177fb8981c772ff1831424e75123471a27ebd5b52c1eb
+  languageName: node
+  linkType: hard
+
+"@flowy-ui/context-menu@npm:0.0.5, @flowy-ui/context-menu@npm:^0.0.5":
+  version: 0.0.5
+  resolution: "@flowy-ui/context-menu@npm:0.0.5"
+  dependencies:
+    "@spectrum-web-components/menu": ^0.39.1
+    "@spectrum-web-components/popover": ^0.39.1
+    lit: ^3.0.0
+    nanoid: ^5.0.1
+  checksum: e06d4cce9d993ca5e728f1ee674a1eff4e74b0388c091de909d1d3f29c3398b33d037d2fa538a95e3fa1672fe7e78b4f54cec0321d7187cdc6602f731752628a
+  languageName: node
+  linkType: hard
+
+"@flowy-ui/react@npm:^0.0.7":
+  version: 0.0.7
+  resolution: "@flowy-ui/react@npm:0.0.7"
+  dependencies:
+    "@flowy-ui/context-menu": 0.0.5
+    "@flowy-ui/theme": 0.0.4
+    "@lit/react": ^1.0.0
+    lit: ^3.0.0
+    react: ^18.2.0
+  checksum: 5e98c77c90dba844492b9f265305c8bf9fb1d12dbf0b650e44cb7386df91802fec9e12d5887f3c2f190258be1fe896e0913d18802d4bc7efd5377aec8fcc36f6
+  languageName: node
+  linkType: hard
+
+"@flowy-ui/theme@npm:0.0.4":
+  version: 0.0.4
+  resolution: "@flowy-ui/theme@npm:0.0.4"
+  dependencies:
+    "@spectrum-web-components/styles": ^0.39.1
+    "@spectrum-web-components/theme": ^0.39.1
+    lit-element: ^3.3.3
+  checksum: 06a94abd7708e7ef0251d08931f341eb431befed1d2f5c762aa1512a01043f82e2e4d091e8458af3244ddca4a58a83a6e9fe876b143504135175ca122fc6d81d
   languageName: node
   linkType: hard
 
@@ -4784,6 +4846,49 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@lit-labs/observers@npm:^2.0.0":
+  version: 2.0.1
+  resolution: "@lit-labs/observers@npm:2.0.1"
+  dependencies:
+    "@lit/reactive-element": ^2.0.0
+  checksum: 6c4518ee37678d86b263799590edd5c202a9f6800b52b52d2a0fc47e572d029c587fa9722108e449ab6bc7b1b1aee9e780b3e42ca2e91d63a43fc96541a80f98
+  languageName: node
+  linkType: hard
+
+"@lit-labs/ssr-dom-shim@npm:^1.0.0, @lit-labs/ssr-dom-shim@npm:^1.1.0, @lit-labs/ssr-dom-shim@npm:^1.1.2-pre.0":
+  version: 1.1.2
+  resolution: "@lit-labs/ssr-dom-shim@npm:1.1.2"
+  checksum: 73fd787893851d4ec4aaa5c775405ed2aae4ca0891b2dd3c973b32c2f4bf70ada5481dd0224e52b786d037aa8a00052186ad1623c44551affd66f6409cca8da6
+  languageName: node
+  linkType: hard
+
+"@lit/react@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "@lit/react@npm:1.0.0"
+  peerDependencies:
+    "@types/react": 17 || 18
+  checksum: 3b2c2e49c044b4033c20734243452a7262d1044378e361f5fcfe8e2acbd4945945f2c8d812ebb59a8c874c34f467c35b5c9f491199154f03e083ce0bb68b075f
+  languageName: node
+  linkType: hard
+
+"@lit/reactive-element@npm:^1.3.0, @lit/reactive-element@npm:^1.6.0":
+  version: 1.6.3
+  resolution: "@lit/reactive-element@npm:1.6.3"
+  dependencies:
+    "@lit-labs/ssr-dom-shim": ^1.0.0
+  checksum: 79b58631c38effeabad090070324431da8a22cf0ff665f5e4de35e4d791f984742b3d340c9c7fce996d1124a8da95febc582471b4c237236c770b1300b56ef6e
+  languageName: node
+  linkType: hard
+
+"@lit/reactive-element@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "@lit/reactive-element@npm:2.0.0"
+  dependencies:
+    "@lit-labs/ssr-dom-shim": ^1.1.2-pre.0
+  checksum: afa12f1cf72e8735cb7eaa51d428610785ee796882ca52108310e75ac54bbf5690da718c8bf85d042060f98c139ff0d5efd54f677a9d3fc4d794ad2e0f7a12c5
+  languageName: node
+  linkType: hard
+
 "@markflowy/desktop@workspace:apps/desktop":
   version: 0.0.0-use.local
   resolution: "@markflowy/desktop@workspace:apps/desktop"
@@ -4793,6 +4898,8 @@ __metadata:
     "@emotion/css": ^11.11.0
     "@emotion/react": ^11.11.1
     "@emotion/styled": ^11.11.0
+    "@flowy-ui/context-menu": ^0.0.5
+    "@flowy-ui/react": ^0.0.7
     "@formkit/auto-animate": ^0.7.0
     "@markflowy/editor": "workspace:*"
     "@markflowy/theme": "workspace:*"
@@ -7012,6 +7119,179 @@ __metadata:
     p-map: ^4.0.0
     webpack-sources: ^3.2.2
   checksum: a1e1d8b22dd51059524993f3fdd6861db10eb950debc389e5dd650702287fa2004eace03e6bc8f25b977bd7bc01d76a50aa271cbb73c58a8ec558945d728f307
+  languageName: node
+  linkType: hard
+
+"@spectrum-web-components/action-button@npm:^0.39.1":
+  version: 0.39.1
+  resolution: "@spectrum-web-components/action-button@npm:0.39.1"
+  dependencies:
+    "@spectrum-web-components/base": ^0.39.1
+    "@spectrum-web-components/button": ^0.39.1
+    "@spectrum-web-components/icon": ^0.39.1
+    "@spectrum-web-components/icons-ui": ^0.39.1
+    "@spectrum-web-components/shared": ^0.39.1
+  checksum: 9d9d3c3a5ac7a271b8a2042de7f389e415ea5c03f257678694ead78be889902c4d6e19c52055758d9603a4cc3f8201e9ccccc196f35aefd8674898687077cf29
+  languageName: node
+  linkType: hard
+
+"@spectrum-web-components/base@npm:^0.39.1":
+  version: 0.39.1
+  resolution: "@spectrum-web-components/base@npm:0.39.1"
+  dependencies:
+    lit: ^2.5.0
+  checksum: 52e01487bb33d4f78154bbcea13c40d82eb3a4b4046480decdcb3d849f6c3a98c19a92df00abe9cc2b51a82b2c721fd2597f6bfbb103115a76a66227abd82373
+  languageName: node
+  linkType: hard
+
+"@spectrum-web-components/button@npm:^0.39.1":
+  version: 0.39.1
+  resolution: "@spectrum-web-components/button@npm:0.39.1"
+  dependencies:
+    "@spectrum-web-components/base": ^0.39.1
+    "@spectrum-web-components/clear-button": ^0.39.1
+    "@spectrum-web-components/close-button": ^0.39.1
+    "@spectrum-web-components/icon": ^0.39.1
+    "@spectrum-web-components/icons-ui": ^0.39.1
+    "@spectrum-web-components/shared": ^0.39.1
+  checksum: 2d1f74c65c7f5f720c3bd6ec43e66ce56f9ffc4fe64ca415c8bb40b35c9d2a2f3ee585517e68aeaf5a59044a9315803532cae6f28a7923eb8858277853161a36
+  languageName: node
+  linkType: hard
+
+"@spectrum-web-components/clear-button@npm:^0.39.1":
+  version: 0.39.1
+  resolution: "@spectrum-web-components/clear-button@npm:0.39.1"
+  dependencies:
+    "@spectrum-web-components/base": ^0.39.1
+  checksum: 9ea7cae184e1bc5645aabd417ac1bd4de7bf08e8945c3886f7798f1839d2181d29edd56b612c8fc1028915094aaf50ba7613439a7e12f327b3a9939312bcdce3
+  languageName: node
+  linkType: hard
+
+"@spectrum-web-components/close-button@npm:^0.39.1":
+  version: 0.39.1
+  resolution: "@spectrum-web-components/close-button@npm:0.39.1"
+  dependencies:
+    "@spectrum-web-components/base": ^0.39.1
+  checksum: 6c8676038d06b3d31cb550945ec9823c91b045268af811b980e28e156eff1c9b60c2cd87fd2a42a4bb38dfb0cb9f6a74290e392acf089ea403bce8da62be8da7
+  languageName: node
+  linkType: hard
+
+"@spectrum-web-components/divider@npm:^0.39.1":
+  version: 0.39.1
+  resolution: "@spectrum-web-components/divider@npm:0.39.1"
+  dependencies:
+    "@spectrum-web-components/base": ^0.39.1
+  checksum: 681e17669d2808f297621afef681996f4378cce5942c2f7be68df994c437ca8ce93033f85702c8d504cab491e0bcd365a01398fb7eee4423ce826a61382ad38d
+  languageName: node
+  linkType: hard
+
+"@spectrum-web-components/icon@npm:^0.39.1":
+  version: 0.39.1
+  resolution: "@spectrum-web-components/icon@npm:0.39.1"
+  dependencies:
+    "@spectrum-web-components/base": ^0.39.1
+    "@spectrum-web-components/iconset": ^0.39.1
+  checksum: 6c354eb30663e695e184104dd5fd54aba62200bc5d50fc14d0bcac663bed46a542f485bc02a0446f24aa13e071be9df16a703c8b1caf5d4cfe2a416da8439630
+  languageName: node
+  linkType: hard
+
+"@spectrum-web-components/icons-ui@npm:^0.39.1":
+  version: 0.39.1
+  resolution: "@spectrum-web-components/icons-ui@npm:0.39.1"
+  dependencies:
+    "@spectrum-web-components/base": ^0.39.1
+    "@spectrum-web-components/icon": ^0.39.1
+    "@spectrum-web-components/iconset": ^0.39.1
+  checksum: cdee2ea63d2ad9271cbaa1aadf95422291f19aed8c48644e22dd1158c973da1f2dcca4e34055ea45906e15363f721f3e48f5da5041778801c6e263b405870e4f
+  languageName: node
+  linkType: hard
+
+"@spectrum-web-components/iconset@npm:^0.39.1":
+  version: 0.39.1
+  resolution: "@spectrum-web-components/iconset@npm:0.39.1"
+  dependencies:
+    "@spectrum-web-components/base": ^0.39.1
+  checksum: adb0b830e2efd205dce113efa3f020bb408ecd28d3aac2e46d2c98e134528d987344efac4924a2829be030589462020becd10ba67d9a23cbdbd34207997c57ac
+  languageName: node
+  linkType: hard
+
+"@spectrum-web-components/menu@npm:^0.39.1":
+  version: 0.39.1
+  resolution: "@spectrum-web-components/menu@npm:0.39.1"
+  dependencies:
+    "@lit-labs/observers": ^2.0.0
+    "@spectrum-web-components/action-button": ^0.39.1
+    "@spectrum-web-components/base": ^0.39.1
+    "@spectrum-web-components/divider": ^0.39.1
+    "@spectrum-web-components/icon": ^0.39.1
+    "@spectrum-web-components/icons-ui": ^0.39.1
+    "@spectrum-web-components/overlay": ^0.39.1
+    "@spectrum-web-components/shared": ^0.39.1
+  checksum: 46a14e84a0b9383ab84d8b53c814cb54514b7092c2e1871df36054d96ffdaae362224cbe0db0301ae9f4b0545e90ddd75c6c8b00a2df10b80d2941224bb752b6
+  languageName: node
+  linkType: hard
+
+"@spectrum-web-components/overlay@npm:^0.39.1":
+  version: 0.39.1
+  resolution: "@spectrum-web-components/overlay@npm:0.39.1"
+  dependencies:
+    "@floating-ui/dom": ^1.5.1
+    "@floating-ui/utils": ^0.1.1
+    "@spectrum-web-components/action-button": ^0.39.1
+    "@spectrum-web-components/base": ^0.39.1
+    "@spectrum-web-components/reactive-controllers": ^0.39.1
+    "@spectrum-web-components/shared": ^0.39.1
+    "@spectrum-web-components/theme": ^0.39.1
+  checksum: 2d1e7e259be025e8bdb0fc668d78e9cfd907d884bb9c7224f28d1fef6fb30397f3140cc0796bf62f3915138314d080042f4002fa187356413e59639e4c70045b
+  languageName: node
+  linkType: hard
+
+"@spectrum-web-components/popover@npm:^0.39.1":
+  version: 0.39.1
+  resolution: "@spectrum-web-components/popover@npm:0.39.1"
+  dependencies:
+    "@spectrum-web-components/base": ^0.39.1
+    "@spectrum-web-components/overlay": ^0.39.1
+  checksum: 1b9d8d08d51bd5f23ec627f671cf216ff720c3485c393c1d78e2d829b323e5ff977f804badff5ed1c40e7c8f1040cddd72d42923f2b081ae5bd74a1a80d3caa6
+  languageName: node
+  linkType: hard
+
+"@spectrum-web-components/reactive-controllers@npm:^0.39.1":
+  version: 0.39.1
+  resolution: "@spectrum-web-components/reactive-controllers@npm:0.39.1"
+  dependencies:
+    lit: ^2.5.0
+  checksum: 639ac14877bb8bc337b824b24a30ac8a1cd67dae96ef4ecceee1722b855fd8b4943a410202cbf1b62d233a89bd21deaf38374d54a5fdd4efc308bdec4a4e4ae0
+  languageName: node
+  linkType: hard
+
+"@spectrum-web-components/shared@npm:^0.39.1":
+  version: 0.39.1
+  resolution: "@spectrum-web-components/shared@npm:0.39.1"
+  dependencies:
+    "@lit-labs/observers": ^2.0.0
+    "@spectrum-web-components/base": ^0.39.1
+    focus-visible: ^5.1.0
+  checksum: 48e1fdb01d1a8b091f8cee16bd034509fa4fa68cb857bde69cd72da95f589855abfbec3e83ed687d968effedcdefd9cb3ed37aed99ac2c62ef5d593614e5acb3
+  languageName: node
+  linkType: hard
+
+"@spectrum-web-components/styles@npm:^0.39.1":
+  version: 0.39.1
+  resolution: "@spectrum-web-components/styles@npm:0.39.1"
+  dependencies:
+    "@spectrum-web-components/base": ^0.39.1
+  checksum: 5bf797e75d6421ae2a86f117e486ef2f1008a06a68b4b4e5e5e1ae4826f67dc1056ca1322b120b0558ca497f0b98fbd86b5b111b1719d8848f8ce8bd0e29ea64
+  languageName: node
+  linkType: hard
+
+"@spectrum-web-components/theme@npm:^0.39.1":
+  version: 0.39.1
+  resolution: "@spectrum-web-components/theme@npm:0.39.1"
+  dependencies:
+    "@spectrum-web-components/base": ^0.39.1
+    "@spectrum-web-components/styles": ^0.39.1
+  checksum: e0a153592a996623f3b6bf459a38facf36828bd92bb0b086f0a26aa66697f567bb86561fb4896adf358af6fcbff50c266590ac77e7ef3347b8aed2b88ed24daf
   languageName: node
   linkType: hard
 
@@ -13908,6 +14188,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"focus-visible@npm:^5.1.0":
+  version: 5.2.0
+  resolution: "focus-visible@npm:5.2.0"
+  checksum: 876f646ef453680d3d34e9f9b23961527ffd5ccaed8690f423d4fbfa37ff023d98a490972bc1387850e37ec2e44958c81f6096ef95b67462e5c4b5404cf1dbb9
+  languageName: node
+  linkType: hard
+
 "follow-redirects@npm:^1.0.0, follow-redirects@npm:^1.14.7":
   version: 1.15.3
   resolution: "follow-redirects@npm:1.15.3"
@@ -16441,6 +16728,68 @@ __metadata:
   languageName: node
   linkType: hard
 
+"lit-element@npm:^3.3.0, lit-element@npm:^3.3.3":
+  version: 3.3.3
+  resolution: "lit-element@npm:3.3.3"
+  dependencies:
+    "@lit-labs/ssr-dom-shim": ^1.1.0
+    "@lit/reactive-element": ^1.3.0
+    lit-html: ^2.8.0
+  checksum: 29a596fa556e231cce7246ca3e5687ad238f299b0cb374a0934d5e6fe9adf1436e031d4fbd21b280aabfc0e21a66e6c4b52da558a908df2566d09d960f3ca93d
+  languageName: node
+  linkType: hard
+
+"lit-element@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "lit-element@npm:4.0.0"
+  dependencies:
+    "@lit-labs/ssr-dom-shim": ^1.1.2-pre.0
+    "@lit/reactive-element": ^2.0.0
+    lit-html: ^3.0.0
+  checksum: 788ea8ed0883d656583843dc4bbdfcb698f3a4c442a529bf861131e5741239e1076e8809e29b7733dccf6baea72a827aa3cccd444aca2ebe1dd04409608753f9
+  languageName: node
+  linkType: hard
+
+"lit-html@npm:^2.8.0":
+  version: 2.8.0
+  resolution: "lit-html@npm:2.8.0"
+  dependencies:
+    "@types/trusted-types": ^2.0.2
+  checksum: 2d70df07248bcb2f502a3afb1e91d260735024fa669669ffb1417575aa39c3092779725ac1b90f5f39e4ce78c63f431f51176bc67f532389f0285a6991573255
+  languageName: node
+  linkType: hard
+
+"lit-html@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "lit-html@npm:3.0.0"
+  dependencies:
+    "@types/trusted-types": ^2.0.2
+  checksum: 1df6bc84a30b9f848962483f456fe820ddac0f836476af8e2e01e4388def21afc129631acde2ad29c761df724b932ddd4d5be87146d8e98c25bc049076f3e4b8
+  languageName: node
+  linkType: hard
+
+"lit@npm:^2.5.0":
+  version: 2.8.0
+  resolution: "lit@npm:2.8.0"
+  dependencies:
+    "@lit/reactive-element": ^1.6.0
+    lit-element: ^3.3.0
+    lit-html: ^2.8.0
+  checksum: 2480e733f7d022d3ecba91abc58a20968f0ca8f5fa30b3341ecf4bcf4845e674ad27b721a5ae53529cafc6ca603c015b80d0979ceb7a711e268ef20bb6bc7527
+  languageName: node
+  linkType: hard
+
+"lit@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "lit@npm:3.0.0"
+  dependencies:
+    "@lit/reactive-element": ^2.0.0
+    lit-element: ^4.0.0
+    lit-html: ^3.0.0
+  checksum: 562e53d2902112f55949ff92244ab7a198abdd35455657e364f866954958b22f536f79c02f11a12f00f5b69799e28d4e27917fb120d7216491cb2a526b5ee718
+  languageName: node
+  linkType: hard
+
 "loader-runner@npm:^4.2.0":
   version: 4.3.0
   resolution: "loader-runner@npm:4.3.0"
@@ -17787,6 +18136,15 @@ __metadata:
   bin:
     nanoid: bin/nanoid.js
   checksum: 747c399cea4664dd0be1d0ec498ffd1ef8f1f5221676fc8b577e3f46f66d9afcddb9595d63d19a2e78d0bc6cc33984f65e66bf1682c850b9e26288883d96b53f
+  languageName: node
+  linkType: hard
+
+"nanoid@npm:^5.0.1":
+  version: 5.0.1
+  resolution: "nanoid@npm:5.0.1"
+  bin:
+    nanoid: bin/nanoid.js
+  checksum: fb5a57ec0563f12f101129b2f11fe50505e5f1219760c43e6ae30fc0a0d2aa269985f6d07ddea15e3bd4b24751c9ef14fa8117cbc80d410726429e2b37a4b13f
   languageName: node
   linkType: hard
 
