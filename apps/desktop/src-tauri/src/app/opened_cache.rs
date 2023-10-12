@@ -1,7 +1,7 @@
 use super::conf;
 use crate::fc::{create_file, exists};
 use serde::{Deserialize, Serialize};
-use std::path::PathBuf;
+use std::path::{PathBuf, Path};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct WorkspaceInfo {
@@ -56,8 +56,9 @@ impl OpenedCache {
     pub fn read() -> Self {
         match std::fs::read_to_string(Self::get_path()) {
             Ok(v) => {
-                if let Ok(v2) = serde_json::from_str::<OpenedCache>(&v) {
-                    v2
+                if let Ok(mut v2) = serde_json::from_str::<OpenedCache>(&v) {
+                    v2.recent_workspaces.retain(|item| exists(Path::new(&item.path)));
+                    v2.write()
                 } else {
                     Self::default()
                 }

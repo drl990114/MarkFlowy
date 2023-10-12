@@ -1,7 +1,7 @@
 use super::conf;
 use crate::fc::{create_file, exists};
 use serde::{Deserialize, Serialize};
-use std::{path::PathBuf, vec};
+use std::{path::PathBuf, vec, path::Path};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Bookmark {
@@ -29,8 +29,9 @@ impl BookMarks {
     pub fn read() -> Self {
         match std::fs::read_to_string(Self::get_path()) {
             Ok(v) => {
-                if let Ok(v2) = serde_json::from_str::<BookMarks>(&v) {
-                    v2
+                if let Ok(mut v2) = serde_json::from_str::<BookMarks>(&v) {
+                    v2.bookmarks.retain(|item| exists(Path::new(&item.path)));
+                    v2.write()
                 } else {
                     Self::default()
                 }
