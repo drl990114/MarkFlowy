@@ -64,7 +64,7 @@ export const FindReplace: FC = () => {
 
   const editorCtx = editorCtxMap.get(activeId ?? '')
 
-  if (!open || !editorCtx) return null
+  if (!open || !editorCtx || !editorCtx.helpers.findRanges) return null
 
   return (
       <FindReplaceWrapper ref={ref}>
