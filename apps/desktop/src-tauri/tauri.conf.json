@@ -28,7 +28,7 @@
         "icons/icon.icns",
         "icons/icon.ico"
       ],
-      "identifier": "com.tauri.test",
+      "identifier": "com.drl990114.markflowy",
       "targets": "all",
       "updater": {
         "active": false,
@@ -41,7 +41,17 @@
         "digestAlgorithm": "sha256",
         "webviewInstallMode": {
           "type": "embedBootstrapper"
+        },
+        "wix": {
+          "language": ["zh-CN", "en-US"]
         }
+      },
+      "macOS": {
+        "entitlements": null,
+        "exceptionDomain": "",
+        "frameworks": [],
+        "providerShortName": null,
+        "signingIdentity": null
       }
     },
     "security": {
