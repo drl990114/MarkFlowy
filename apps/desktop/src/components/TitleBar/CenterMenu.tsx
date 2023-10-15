@@ -1,13 +1,14 @@
 import styled from 'styled-components'
 import { useRef } from 'react'
 import { showContextMenu } from '@/helper/context-menu'
-import { useGlobalTheme } from '@/hooks'
+import { useGlobalOSInfo, useGlobalTheme } from '@/hooks'
 import { emit } from '@tauri-apps/api/event'
 import { EVENT } from '@/constants'
 import { invoke } from '@tauri-apps/api'
 
 export const CenterMenu = () => {
   const ref = useRef<HTMLDivElement>(null)
+  const { osType } = useGlobalOSInfo()
   const { setTheme } = useGlobalTheme()
 
   const handleClick = () => {
@@ -69,21 +70,21 @@ export const CenterMenu = () => {
   }
 
   return (
-    <Container ref={ref} onClick={handleClick}>
+    <Container ref={ref} isMacOs={osType === 'macos'} onClick={handleClick}>
       <i className='ri-quill-pen-fill'></i>
     </Container>
   )
 }
 
-const Container = styled.div`
+const Container = styled.div<{ isMacOs: boolean }>`
   position: absolute;
-  left: 16;
+  left: ${(props) => (props.isMacOs ? '76px' : '16px')};
   top: 0;
   display: flex;
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  width: 48px;
+  width: 38px;
   height: 100%;
   font-size: 16px;
   cursor: pointer;

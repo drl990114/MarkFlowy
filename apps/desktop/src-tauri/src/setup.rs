@@ -15,6 +15,7 @@ pub fn init(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
         .title("markflowy")
         .resizable(true)
         .fullscreen(false)
+        .hidden_title(true)
         // .theme(Some(theme))
         .inner_size(1200.0, 800.0)
         .min_inner_size(400.0, 400.0);
@@ -31,8 +32,8 @@ pub fn init(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
 
     let window = main_win.build().unwrap();
 
-    #[cfg(target_os = "macos")]
-    window.set_transparent_titlebar(true, true);
+    // #[cfg(target_os = "macos")]
+    // window.set_transparent_titlebar(true, true);
 
     #[cfg(not(target_os = "linux"))]
     set_shadow(window.clone(), true).unwrap();

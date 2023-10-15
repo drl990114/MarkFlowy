@@ -55,8 +55,8 @@ const SearchView = memo(() => {
       }
 
       // findRanges twice to make sure scroll to activeIndex
-      ctx?.helpers.findRanges(searchParams)
-      ctx?.helpers.findRanges(searchParams)
+      ctx?.helpers.findRanges?.(searchParams)
+      ctx?.helpers.findRanges?.(searchParams)
     }
   }, [activeIndex, caseSensitive, activeId, searchKeyword, editorCtxMap, resultList])
 
@@ -147,7 +147,7 @@ const SearchView = memo(() => {
           activeIndex: index,
         }
 
-        editorCtxMap.get(curFile.id)?.helpers.findRanges(searchParams)
+        editorCtxMap.get(curFile.id)?.helpers.findRanges?.(searchParams)
 
         setSearchState({
           activeIndex: index,
