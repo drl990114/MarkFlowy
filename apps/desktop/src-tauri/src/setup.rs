@@ -15,14 +15,13 @@ pub fn init(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
         .title("markflowy")
         .resizable(true)
         .fullscreen(false)
-        .hidden_title(true)
         // .theme(Some(theme))
         .inner_size(1200.0, 800.0)
         .min_inner_size(400.0, 400.0);
 
     #[cfg(target_os = "macos")]
     {
-        main_win = main_win.title_bar_style(TitleBarStyle::Overlay);
+        main_win = main_win.title_bar_style(TitleBarStyle::Overlay).hidden_title(true);
     }
 
     #[cfg(not(target_os = "macos"))]
