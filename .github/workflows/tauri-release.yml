@@ -129,16 +129,19 @@ jobs:
 
       - name: Rename artifacts
         run: |
-          mv "artifacts/aarch64/dmg/LineByLine_${{ env.version }}_aarch64.dmg" "artifacts/linebyline_${{ env.version }}_macos_aarch64.dmg"
-          mv "artifacts/aarch64/macos/LineByLine.app" "artifacts/linebyline_${{ env.version }}_macos_aarch64.app"
+          mkdir -p "artifacts/release"
+          mv "artifacts/aarch64/dmg/MarkFlowy_${{ env.version }}_aarch64.dmg" "artifacts/release"
+          mv "artifacts/aarch64/macos/MarkFlowy.app" "artifacts/release"
 
-          mv "artifacts/x86_64/dmg/LineByLine_${{ env.version }}_x64.dmg" "artifacts/linebyline_${{ env.version }}_macos_x86_64.dmg"
-          mv "artifacts/x86_64/macos/LineByLine.app" "artifacts/linebyline_${{ env.version }}_macos_x86_64.app"
+          mv "artifacts/x86_64/dmg/MarkFlowy${{ env.version }}_x64.dmg" "artifacts/release"
+          mv "artifacts/x86_64/macos/MarkFlowy.app" "artifacts/release"
 
-          mv "artifacts/x86_64/deb/line-by-line_${{ env.version }}_amd64.deb" "artifacts/x86_64/deb/linebyline_${{ env.version }}_linux_x86_64.deb"
-          mv "artifacts/x86_64/appimage/line-by-line_${{ env.version }}_amd64.AppImage" "artifacts/linebyline_${{ env.version }}_linux_x86_64.AppImage"
+          mv "artifacts/x86_64/deb/mark-flowy_${{ env.version }}_amd64.deb" "artifacts/release"
+          mv "artifacts/x86_64/appimage/mark-flowy_${{ env.version }}_amd64.AppImage" "artifacts/release"
 
-          mv "artifacts/x86_64/LineByLine_${{ env.version }}_x64_en-US.msi" "artifacts/linebyline_${{ env.version }}_windows_x86_64.msi"
+          mv "artifacts/x86_64/MarkFlowy_${{ env.version }}_x64_en-US.msi" "artifacts/release"
+
+          mv "artifacts/x86_64/MarkFlowy_${{ env.version }}_x64_zh-CN.msi" "artifacts/release"
 
       - name: Create Release
         uses: softprops/action-gh-release@master
@@ -150,4 +153,4 @@ jobs:
           releaseBody: v${{ env.version }}
           releaseDraft: false
           prerelease: true
-          files: ./artifacts/**/*
+          files: ./artifacts/release/*
