@@ -4,11 +4,13 @@ import { useState } from 'react'
 import { Container } from './styled'
 import { Controls } from './Controls'
 import { CenterMenu } from './CenterMenu'
+import { useGlobalOSInfo } from '@/hooks'
 
 const appWindow = getCurrent()
 
 export default function TitleBar() {
   const [isScaleup, setScaleup] = useState(false)
+  const { osType } = useGlobalOSInfo()
 
   const onScaleup = () => {
     appWindow.toggleMaximize()
@@ -34,7 +36,7 @@ export default function TitleBar() {
       <div id='titlebar' className='titlebar-text' data-tauri-drag-region>
         {'MarkFlowy'}
       </div>
-      <Controls />
+      {osType === 'macos' ? null : <Controls />}
     </Container>
   )
 }
