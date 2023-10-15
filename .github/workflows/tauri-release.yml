@@ -131,10 +131,10 @@ jobs:
         run: |
           mkdir -p "artifacts/release"
           mv "artifacts/aarch64/dmg/MarkFlowy_${{ env.version }}_aarch64.dmg" "artifacts/release"
-          mv "artifacts/aarch64/macos/MarkFlowy.app" "artifacts/release"
+          mv "artifacts/aarch64/macos/MarkFlowy.app" "artifacts/release/MarkFlowy_${{ env.version }}_aarch64.app"
 
-          mv "artifacts/x86_64/dmg/MarkFlowy${{ env.version }}_x64.dmg" "artifacts/release"
-          mv "artifacts/x86_64/macos/MarkFlowy.app" "artifacts/release"
+          mv "artifacts/x86_64/dmg/MarkFlowy_${{ env.version }}_x64.dmg" "artifacts/release"
+          mv "artifacts/x86_64/macos/MarkFlowy.app" "artifacts/release/MarkFlowy_${{ env.version }}_x64.app"
 
           mv "artifacts/x86_64/deb/mark-flowy_${{ env.version }}_amd64.deb" "artifacts/release"
           mv "artifacts/x86_64/appimage/mark-flowy_${{ env.version }}_amd64.AppImage" "artifacts/release"

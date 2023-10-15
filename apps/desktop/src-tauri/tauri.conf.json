@@ -7,14 +7,16 @@
   },
   "package": {
     "productName": "MarkFlowy",
-    "version": "0.5.3"
+    "version": "0.6.0"
   },
   "plugins": {
     "shell": {
       "open": true
     },
     "updater": {
-      "endpoints": ["https://releases.myapp.com/{{target}}/{{arch}}/{{current_version}}"]
+      "endpoints": [
+        "https://releases.myapp.com/{{target}}/{{arch}}/{{current_version}}"
+      ]
     }
   },
   "tauri": {
@@ -43,7 +45,10 @@
           "type": "embedBootstrapper"
         },
         "wix": {
-          "language": ["zh-CN", "en-US"]
+          "language": [
+            "zh-CN",
+            "en-US"
+          ]
         }
       },
       "macOS": {
@@ -57,7 +62,9 @@
     "security": {
       "assetProtocol": {
         "enable": true,
-        "scope": ["**"]
+        "scope": [
+          "**"
+        ]
       },
       "csp": null
     }
