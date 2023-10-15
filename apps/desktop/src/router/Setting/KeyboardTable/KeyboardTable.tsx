@@ -6,11 +6,11 @@ import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 import Paper from '@mui/material/Paper'
 import { useGlobalKeyboard, useGlobalTheme } from '@/hooks'
-import useOSInfo from '@/hooks/useOSInfo'
-import type { Platform } from '@tauri-apps/plugin-os'
+import useGlobalOSInfo from '@/hooks/useOSInfo'
+import type { OsType } from '@tauri-apps/plugin-os'
 
-function transferKey(key: string, platform?: Platform) {
-  if (platform === 'macos') {
+function transferKey(key: string, osType?: OsType) {
+  if (osType === 'macos') {
     return key.replace('CommandOrCtrl', '⌘')
   } else {
     return key.replace('CommandOrCtrl', 'Ctrl')
@@ -21,7 +21,7 @@ function transferKey(key: string, platform?: Platform) {
 export function KeyboardTable() {
   const { themeData } = useGlobalTheme()
   const { keyboardInfos } = useGlobalKeyboard()
-  const { platform } = useOSInfo()
+  const { osType } = useGlobalOSInfo()
 
   return (
     <TableContainer component={Paper}>
@@ -42,7 +42,7 @@ export function KeyboardTable() {
             <TableRow key={row.id}>
               <TableCell>{row.id}</TableCell>
               <TableCell>{row.desc}</TableCell>
-              <TableCell>{row.key_map.map((v) => transferKey(v, platform)).join(' + ')}</TableCell>
+              <TableCell>{row.key_map.map((v) => transferKey(v, osType)).join(' + ')}</TableCell>
             </TableRow>
           ))}
         </TableBody>
