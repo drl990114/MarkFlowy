@@ -4,6 +4,7 @@ export const GlobalStyles = createGlobalStyle`
   html {
     border-radius: 10px;
     overflow: hidden;
+    --mod-popover-background-color:  ${(props) => props.theme.bgColor};
   }
   
   body {

@@ -4,7 +4,7 @@ import { showContextMenu } from '@/helper/context-menu'
 import { useGlobalOSInfo, useGlobalTheme } from '@/hooks'
 import { emit } from '@tauri-apps/api/event'
 import { EVENT } from '@/constants'
-import { invoke } from '@tauri-apps/api'
+import type Dialog from '@flowy-ui/dialog'
 
 export const CenterMenu = () => {
   const ref = useRef<HTMLDivElement>(null)
@@ -61,7 +61,13 @@ export const CenterMenu = () => {
         {
           label: 'Settings',
           value: 'settings',
-          handler: () => invoke('open_conf_window'),
+          handler: () => {
+            const settingDialog = document.getElementById('setting-dialog') as Dialog
+            settingDialog.open()
+
+            // FIXME tauri 2.0 bug in windows https://github.com/tauri-apps/plugins-workspace/issues/656 
+            // invoke('open_conf_window')
+          },
         },
       ],
       x: rect[0]?.left || 12,
