@@ -36,7 +36,7 @@ window-vibrancy = { git = "https://github.com/tauri-apps/window-vibrancy" }
 window-shadows = { git = "https://github.com/tauri-apps/window-shadows" }
 
 [target."cfg(any(target_os = \"macos\"))".dependencies]
-cocoa = "0.24"
+cocoa = "0.25"
 objc = "0.2.7"
 
 
