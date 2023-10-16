@@ -4274,41 +4274,53 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@flowy-ui/context-menu@npm:0.0.6, @flowy-ui/context-menu@npm:^0.0.6":
-  version: 0.0.6
-  resolution: "@flowy-ui/context-menu@npm:0.0.6"
+"@flowy-ui/context-menu@npm:0.0.7, @flowy-ui/context-menu@npm:^0.0.7":
+  version: 0.0.7
+  resolution: "@flowy-ui/context-menu@npm:0.0.7"
   dependencies:
     "@spectrum-web-components/menu": ^0.39.1
     "@spectrum-web-components/popover": ^0.39.1
     lit: ^2.7.0
     nanoid: ^5.0.1
-  checksum: 24540f064ddd16e9dc7e6c895ddb34b6cf2810aef11f5ae462d2ad1cd6a2d0ed3f51fd20ad19f33566a08a5442f2ae3761924c19b42fc5169562fda94543af62
+  checksum: 4a024ee60b931ec55ece24524cddcae797700144443d09c746fb75cd176309a1405e98da757d801f68fb4f034d7546c77cc9369a229232063e96b58bc4483abe
   languageName: node
   linkType: hard
 
-"@flowy-ui/dialog@npm:0.0.1":
-  version: 0.0.1
-  resolution: "@flowy-ui/dialog@npm:0.0.1"
+"@flowy-ui/dialog@npm:0.0.7":
+  version: 0.0.7
+  resolution: "@flowy-ui/dialog@npm:0.0.7"
   dependencies:
     "@spectrum-web-components/dialog": ^0.39.2
     "@spectrum-web-components/overlay": ^0.39.2
     "@spectrum-web-components/popover": ^0.39.1
     lit: ^2.7.0
-  checksum: 7a64ef8fc3eccbc157d5726a64f46647396fee67172a4d8efc03b71849edd40c0f691bed1ebe685d65f331da3f9893f7556f84366300422d60ef2693e9634ea1
+  checksum: b42b150cd13bf0bda6753e25bbd4fb50b4a25a9529635a3fe3dd850096a92f7a114da305935dbc476cc2c39f6a5633ce0485b3b20b84c248647d1094f1bbd1f9
   languageName: node
   linkType: hard
 
-"@flowy-ui/react@npm:^0.0.8":
-  version: 0.0.8
-  resolution: "@flowy-ui/react@npm:0.0.8"
+"@flowy-ui/picker@npm:0.0.2":
+  version: 0.0.2
+  resolution: "@flowy-ui/picker@npm:0.0.2"
   dependencies:
-    "@flowy-ui/context-menu": 0.0.6
-    "@flowy-ui/dialog": 0.0.1
+    "@spectrum-web-components/menu": ^0.39.1
+    "@spectrum-web-components/picker": ^0.39.1
+    lit: ^2.7.0
+  checksum: 5e9e9ee8cf5cbaea985ecb65f36777da9e4daf0b3123dbf0abff931d55dff5485f5be1aa069d8ca00af110a6675014a983aa27ef370e3d699b79ecd61407cb7a
+  languageName: node
+  linkType: hard
+
+"@flowy-ui/react@npm:^0.0.16":
+  version: 0.0.16
+  resolution: "@flowy-ui/react@npm:0.0.16"
+  dependencies:
+    "@flowy-ui/context-menu": 0.0.7
+    "@flowy-ui/dialog": 0.0.7
+    "@flowy-ui/picker": 0.0.2
     "@flowy-ui/theme": 0.0.5
     "@lit/react": ^1.0.0
     lit: ^2.7.0
     react: ^18.2.0
-  checksum: 326901e7cbb9878db47e2bbbbbb91a1034bd12cf185ee4fc4dbce1d18b9dc963fd28516e8e171b57695543ff1f2e548dcf50b494388c5b8a69bc144a3067e9c2
+  checksum: 172eaaebc1c68a32eb1e562e5e22fde2a569a24995bce023c11e0fb7631ba5f39480719aa86c10775d65b8cee541f4ddf087f15ee7f98cf019261fa9a96dc64c
   languageName: node
   linkType: hard
 
@@ -4869,8 +4881,8 @@ __metadata:
     "@emotion/css": ^11.11.0
     "@emotion/react": ^11.11.1
     "@emotion/styled": ^11.11.0
-    "@flowy-ui/context-menu": ^0.0.6
-    "@flowy-ui/react": ^0.0.8
+    "@flowy-ui/context-menu": ^0.0.7
+    "@flowy-ui/react": ^0.0.16
     "@formkit/auto-animate": ^0.7.0
     "@markflowy/editor": "workspace:*"
     "@markflowy/theme": "workspace:*"
@@ -7347,6 +7359,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@spectrum-web-components/menu@npm:^0.39.2":
+  version: 0.39.2
+  resolution: "@spectrum-web-components/menu@npm:0.39.2"
+  dependencies:
+    "@lit-labs/observers": ^2.0.0
+    "@spectrum-web-components/action-button": ^0.39.2
+    "@spectrum-web-components/base": ^0.39.2
+    "@spectrum-web-components/divider": ^0.39.2
+    "@spectrum-web-components/icon": ^0.39.2
+    "@spectrum-web-components/icons-ui": ^0.39.2
+    "@spectrum-web-components/overlay": ^0.39.2
+    "@spectrum-web-components/shared": ^0.39.2
+  checksum: 8997693e238a66501ac8443f9bf37d1fa24b675c9decdb55922e5beb7523862e1af80eb147518aa66d01c409a153629b97f5fe92a24a530d448ed031f66a3110
+  languageName: node
+  linkType: hard
+
 "@spectrum-web-components/modal@npm:^0.39.2":
   version: 0.39.2
   resolution: "@spectrum-web-components/modal@npm:0.39.2"
@@ -7386,6 +7414,25 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@spectrum-web-components/picker@npm:^0.39.1":
+  version: 0.39.2
+  resolution: "@spectrum-web-components/picker@npm:0.39.2"
+  dependencies:
+    "@spectrum-web-components/base": ^0.39.2
+    "@spectrum-web-components/button": ^0.39.2
+    "@spectrum-web-components/icon": ^0.39.2
+    "@spectrum-web-components/icons-ui": ^0.39.2
+    "@spectrum-web-components/icons-workflow": ^0.39.2
+    "@spectrum-web-components/menu": ^0.39.2
+    "@spectrum-web-components/overlay": ^0.39.2
+    "@spectrum-web-components/popover": ^0.39.2
+    "@spectrum-web-components/reactive-controllers": ^0.39.2
+    "@spectrum-web-components/shared": ^0.39.2
+    "@spectrum-web-components/tray": ^0.39.2
+  checksum: cd0f8f79fdf343dfc1c32010b60b520a1be185f8e20180c6d0fb42e0b185000c41b8ad9de0d8538954d2bfde875fd487c4460219429fb560cfe5fa6f02ed5f45
+  languageName: node
+  linkType: hard
+
 "@spectrum-web-components/popover@npm:^0.39.1":
   version: 0.39.1
   resolution: "@spectrum-web-components/popover@npm:0.39.1"
@@ -7393,6 +7440,16 @@ __metadata:
     "@spectrum-web-components/base": ^0.39.1
     "@spectrum-web-components/overlay": ^0.39.1
   checksum: 1b9d8d08d51bd5f23ec627f671cf216ff720c3485c393c1d78e2d829b323e5ff977f804badff5ed1c40e7c8f1040cddd72d42923f2b081ae5bd74a1a80d3caa6
+  languageName: node
+  linkType: hard
+
+"@spectrum-web-components/popover@npm:^0.39.2":
+  version: 0.39.2
+  resolution: "@spectrum-web-components/popover@npm:0.39.2"
+  dependencies:
+    "@spectrum-web-components/base": ^0.39.2
+    "@spectrum-web-components/overlay": ^0.39.2
+  checksum: ab4c4c1791bf0c05e54dfa033f1f79858ec0bb0f5a506909750789790198562bf1c972bc751b3a83d25f0bfcd9ae9cb5dc2763d9aed6141f1066ec120f48105d
   languageName: node
   linkType: hard
 
@@ -7471,6 +7528,19 @@ __metadata:
     "@spectrum-web-components/base": ^0.39.2
     "@spectrum-web-components/styles": ^0.39.2
   checksum: fa4a3053486ef8edb3fdad72f017cd1517512423193197ae2bc24127014192e359e53e258ecc9cb4a4187e221dae3885b816154711dae91c428f740ccc98ec58
+  languageName: node
+  linkType: hard
+
+"@spectrum-web-components/tray@npm:^0.39.2":
+  version: 0.39.2
+  resolution: "@spectrum-web-components/tray@npm:0.39.2"
+  dependencies:
+    "@spectrum-web-components/base": ^0.39.2
+    "@spectrum-web-components/modal": ^0.39.2
+    "@spectrum-web-components/reactive-controllers": ^0.39.2
+    "@spectrum-web-components/shared": ^0.39.2
+    "@spectrum-web-components/underlay": ^0.39.2
+  checksum: bf87041eeaad42df9d76303e432ec0c52d174186cb9c10f2f6ebfc09f42599fb346cef6aa87e3527f1ac8b0fd4ef66f5b75ab08db88006ed9cb601f861b9e580
   languageName: node
   linkType: hard
 
