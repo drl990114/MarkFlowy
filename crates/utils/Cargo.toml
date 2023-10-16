@@ -4,5 +4,5 @@ version = "0.0.1"
 edition = "2021"
 
 [dependencies]
-regex = "1.9.6"
+regex = "1.10.1"
 fs_extra = "1.2.0"
