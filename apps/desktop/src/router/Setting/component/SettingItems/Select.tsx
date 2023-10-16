@@ -4,6 +4,7 @@ import type { SettingItemProps } from '.'
 import { useGlobalSettingData } from '@/hooks'
 import { SettingItemContainer } from './Container'
 import { SettingLabel } from './Label'
+import { Input } from '@/components/UI/Input'
 
 const SelectSettingItem: React.FC<SettingItemProps<Setting.SelectSettingItem>> = (props) => {
   const { item } = props
@@ -21,14 +22,6 @@ const SelectSettingItem: React.FC<SettingItemProps<Setting.SelectSettingItem>> =
     <SettingItemContainer>
       <SettingLabel item={item} />
       <Autocomplete
-        className='setting-item__form'
-        sx={{
-          display: 'inline-block',
-          '& input': {
-            bgcolor: 'background.paper',
-            color: (theme) => theme.palette.getContrastText(theme.palette.background.paper),
-          },
-        }}
         value={value}
         options={options}
         getOptionLabel={(option) => {
@@ -46,7 +39,7 @@ const SelectSettingItem: React.FC<SettingItemProps<Setting.SelectSettingItem>> =
         }}
         renderInput={(params) => (
           <div ref={params.InputProps.ref}>
-            <input type='text' {...params.inputProps} />
+            <Input type='text' {...params.inputProps} />
           </div>
         )}
       />
