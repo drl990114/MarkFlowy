@@ -32,7 +32,8 @@ const SelectSettingItem: React.FC<SettingItemProps<Setting.SelectSettingItem>> =
           return option.title
         }}
         renderOption={(p, option) => <li {...p}>{option.title}</li>}
-        onChange={(_, v) => {
+        onChange={(e, v) => {
+          e.stopPropagation()
           if (!v) return
           writeSettingData(item, v.value)
           setValue(v)
