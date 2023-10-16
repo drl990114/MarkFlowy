@@ -82,6 +82,7 @@ const App: FC = function () {
                 const activeFile = getFileObjectByPath(activeFilePath)
                 if (activeFile) {
                   setActiveId(activeFile.id)
+                  addOpenedFile(activeFile.id)
                 }
               }
 
@@ -102,9 +103,11 @@ const App: FC = function () {
                   return file.path
                 })
                 cacheStore.set('openedFilePaths', openedFiles)
-                if (state.activeId) {
-                  cacheStore.set('activeFilePath', getFileObject(state.activeId)?.path)
-                }
+                cacheStore.set(
+                  'activeFilePath',
+                  state.activeId ? getFileObject(state.activeId)?.path : '',
+                )
+
                 cacheStore.save()
               })
             })
@@ -162,9 +165,12 @@ const App: FC = function () {
               <Route path='/setting' element={<Setting />} />
             </Routes>
 
-            <FlowyContextMenu id={FLOWYUI_CONTEXT_MENU_ID}  style={{
-              zIndex: 1000000
-            }}/>
+            <FlowyContextMenu
+              id={FLOWYUI_CONTEXT_MENU_ID}
+              style={{
+                zIndex: 1000000,
+              }}
+            />
           </FlowyTheme>
         </MuiThemeProvider>
       </ThemeProvider>
