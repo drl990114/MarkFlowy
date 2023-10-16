@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 import { useRef } from 'react'
 import { showContextMenu } from '@/helper/context-menu'
-import { useGlobalOSInfo, useGlobalTheme } from '@/hooks'
+import { useGlobalOSInfo, useGlobalSettingData, useGlobalTheme } from '@/hooks'
 import { emit } from '@tauri-apps/api/event'
 import { EVENT } from '@/constants'
 import type Dialog from '@flowy-ui/dialog'
@@ -10,6 +10,7 @@ export const CenterMenu = () => {
   const ref = useRef<HTMLDivElement>(null)
   const { osType } = useGlobalOSInfo()
   const { setTheme } = useGlobalTheme()
+  const settingDataHandler = useGlobalSettingData()[1]
 
   const handleClick = () => {
     if (!ref.current) {
@@ -49,12 +50,18 @@ export const CenterMenu = () => {
             {
               label: 'Dark',
               value: 'dark',
-              handler: () => setTheme('dark'),
+              handler: () => {
+                settingDataHandler.writeSettingData({ key: 'theme'}, 'dark')
+                setTheme('dark')
+              },
             },
             {
               label: 'Light',
               value: 'light',
-              handler: () => setTheme('light'),
+              handler: () => {
+                settingDataHandler.writeSettingData({ key: 'theme'}, 'light')
+                setTheme('light')
+              },
             },
           ],
         },
