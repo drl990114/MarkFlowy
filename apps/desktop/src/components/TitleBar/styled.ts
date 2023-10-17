@@ -27,6 +27,7 @@ export const Container = styled.div`
   z-index: 99999;
 
   .titlebar-text {
+    margin: 8px 4px 0 4px;
     flex: 1;
     text-align: center;
     line-height: ${TITLEBAR_HEIGHT};

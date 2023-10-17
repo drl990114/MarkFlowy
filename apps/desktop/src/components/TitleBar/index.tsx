@@ -31,7 +31,7 @@ export default function TitleBar() {
   }
 
   return (
-    <Container data-tauri-drag-region onDoubleClick={handleTitleBarDoubleClick}>
+    <Container onDoubleClick={handleTitleBarDoubleClick}>
       <CenterMenu />
       <div id='titlebar' className='titlebar-text' data-tauri-drag-region>
         {'MarkFlowy'}
