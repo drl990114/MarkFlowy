@@ -1,6 +1,11 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import { Editor as MfEditor } from '@markflowy/editor'
-import type { CreateWysiwygDelegateOptions, EditorContext, EditorRef, EditorViewType } from '@markflowy/editor'
+import type {
+  CreateWysiwygDelegateOptions,
+  EditorContext,
+  EditorRef,
+  EditorViewType,
+} from '@markflowy/editor'
 import { invoke, tauri } from '@tauri-apps/api'
 import { getCurrent } from '@tauri-apps/plugin-window'
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -18,6 +23,7 @@ import { EVENT } from '@/constants'
 import classNames from 'classnames'
 import { WarningHeader } from './styles'
 import { join } from '@tauri-apps/api/path'
+import { sleep } from '@/helper'
 
 const appWindow = getCurrent()
 
@@ -42,8 +48,10 @@ const EditorWrapper = styled.div<{ active: boolean }>`
 
 const wysiwygDelegateOptions: CreateWysiwygDelegateOptions = {
   handleViewImgSrcUrl: async (url) => {
+    // Ensure asynchronous, returning directly will cause an infinite loop. about:https://github.com/drl990114/MarkFlowy/issues/340
+    await sleep(1)
     if (!url) return url
-    if ((url.startsWith('http') || url.startsWith('https') )&& !url.includes(location.origin)) {
+    if ((url.startsWith('http') || url.startsWith('https')) && !url.includes(location.origin)) {
       return url
     }
 
@@ -54,7 +62,7 @@ const wysiwygDelegateOptions: CreateWysiwygDelegateOptions = {
     }
 
     return tauri.convertFileSrc(url)
-  }
+  },
 }
 function Editor(props: EditorProps) {
   const { id, active } = props

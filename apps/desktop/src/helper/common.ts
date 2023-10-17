@@ -12,3 +12,7 @@ export function once(fn: Function): Function {
 export function isArray(tar: any): tar is any[] {
   return Array.isArray(tar)
 }
+
+export function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
