@@ -15,7 +15,8 @@ export const Container = styled.div`
     overflow-x: auto;
     overflow-y: hidden;
 
-    ::-webkit-scrollbar {
+    &::-webkit-scrollbar {
+      -webkit-appearance: none;
       display: none;
     }
 
