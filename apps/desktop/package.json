@@ -54,7 +54,7 @@
     "@babel/plugin-proposal-class-properties": "^7.18.6",
     "@babel/plugin-proposal-decorators": "^7.22.10",
     "@remirror/core": "^2.0.17",
-    "@tauri-apps/cli": "2.0.0-alpha.14",
+    "@tauri-apps/cli": "2.0.0-alpha.16",
     "@types/lodash": "^4.14.197",
     "@types/node": "^20.5.7",
     "@types/react": "^18.2.18",
