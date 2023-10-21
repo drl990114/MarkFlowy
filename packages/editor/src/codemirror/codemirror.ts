@@ -12,24 +12,31 @@ import { assertGet, isPromise, replaceNodeAtPosition } from '@remirror/core'
 import type { EditorSchema, EditorView, ProsemirrorNode } from '@remirror/pm'
 import { exitCode } from '@remirror/pm/commands'
 import { Selection, TextSelection } from '@remirror/pm/state'
-import { mfCodemirrorDark, mfCodemirrorLight } from '@/extensions/CodeMIrror'
+import { mfCodemirrorLight } from '@markflowy/theme'
 import type { LanguageDescription, LanguageSupport } from '@codemirror/language'
-import type { LoadLanguage } from '@/extensions/CodeMIrror/codemirror-node-view'
+import type { LoadLanguage } from '@/extensions/CodeMirror/codemirror-node-view'
 import { languages } from '@codemirror/language-data'
+import type { Extension } from '@codemirror/state'
+import { nanoid } from 'nanoid'
+
+const cmInstanceMap = new Map<string, MfCodemirrorView>()
+const themeRef = { current: mfCodemirrorLight }
 
 class MfCodemirrorView {
-  public cm: CodeMirrorEditorView
   private readonly view: EditorView
   private readonly getPos: () => number
-  node: ProsemirrorNode
-  private readonly editorTheme: Compartment
   private readonly languageConf: Compartment
   private readonly toggleName = 'paragraph'
   private readonly schema: EditorSchema
-  public content = ''
+  private languageName: string
+
+  id = nanoid()
+  cm: CodeMirrorEditorView
+  content = ''
+  node: ProsemirrorNode
+  editorTheme: Compartment
   updating = false
   loadLanguage: LoadLanguage
-  private languageName: string
 
   constructor({
     view,
@@ -37,7 +44,7 @@ class MfCodemirrorView {
     node,
     extensions = [],
     languageName,
-    createParams = {}
+    createParams = {},
   }: {
     node: ProsemirrorNode
     view: EditorView
@@ -57,7 +64,6 @@ class MfCodemirrorView {
 
     this.content = this.node.textContent
     const changeFilter = CodeMirrorEditorState.changeFilter.of((tr: CodeMirrorTransaction) => {
-      console.log('changeFilter', tr.docChanged, this.updating)
       if (!tr.docChanged) {
         this.forwardSelection()
       }
@@ -71,7 +77,7 @@ class MfCodemirrorView {
         keymap.of(this.codeMirrorKeymap()),
         changeFilter,
         this.languageConf.of([]),
-        this.editorTheme.of(mfCodemirrorLight),
+        this.editorTheme.of(themeRef.current),
         ...(extensions ?? []),
       ],
     })
@@ -80,22 +86,24 @@ class MfCodemirrorView {
     this.cm = new CodeMirrorEditorView({
       state: startState,
       dispatch: this.valueChanged.bind(this),
-      ...createParams
+      ...createParams,
     })
+
+    cmInstanceMap.set(this.id, this)
 
     this.updateLanguage()
   }
 
-  changeTheme(theme: 'light' | 'dark'): void {
-    this.cm.dispatch({
-      effects: this.editorTheme.reconfigure(
-        theme === 'light' ? mfCodemirrorLight : mfCodemirrorDark,
-      ),
+  changeTheme(theme: Extension): void {
+    themeRef.current = theme
+    cmInstanceMap.forEach((mfCmView) => {
+      mfCmView.cm.dispatch({
+        effects: mfCmView.editorTheme.reconfigure(theme),
+      })
     })
   }
 
   update(node: ProsemirrorNode): boolean {
-    console.log('update', node.type, this.node.type)
     if (node.type !== this.node.type) {
       return false
     }
@@ -147,6 +155,24 @@ class MfCodemirrorView {
     this.languageName = languageName
   }
 
+  destroy() {
+    this.cm.destroy()
+    cmInstanceMap.delete(this.id)
+  }
+
+  forwardSelection() {
+    if (!this.cm.hasFocus) {
+      return
+    }
+
+    const state = this.view.state
+    const selection = this.asProseMirrorSelection(state.doc)
+
+    if (!selection.eq(state.selection)) {
+      this.view.dispatch(state.tr.setSelection(selection))
+    }
+  }
+
   private setLanguage(language: LanguageSupport) {
     this.cm.dispatch({
       effects: this.languageConf.reconfigure(language),
@@ -157,7 +183,6 @@ class MfCodemirrorView {
 
     this.cm.update([tr])
 
-    console.log('valueChanged', tr.docChanged, this.updating)
     if (!tr.docChanged || this.updating) {
       return
     }
@@ -179,21 +204,6 @@ class MfCodemirrorView {
     const start = this.getPos() + 1
     const { anchor, head } = this.cm.state.selection.main
     return TextSelection.between(doc.resolve(anchor + start), doc.resolve(head + start))
-  }
-
-  forwardSelection() {
-    console.log('forwardSelection', this.cm.hasFocus, this.view.hasFocus())
-    if (!this.cm.hasFocus) {
-      return
-    }
-
-    const state = this.view.state
-    const selection = this.asProseMirrorSelection(state.doc)
-    console.log('forwardSelection', selection )
-
-    if (!selection.eq(state.selection)) {
-      this.view.dispatch(state.tr.setSelection(selection))
-    }
   }
 
   private codeMirrorKeymap(): CodeMirrorKeyBinding[] {
@@ -277,7 +287,6 @@ class MfCodemirrorView {
 
       const anchor = state.selection.main.anchor
 
-
       const line = state.doc.lineAt(anchor)
       const lineOffset = anchor - line.from
 
@@ -331,7 +340,6 @@ export function computeChange(
   oldVal: string,
   newVal: string,
 ): { from: number; to: number; text: string } | null {
-
   if (oldVal === newVal) {
     return null
   }

@@ -31,7 +31,7 @@ import {
   setBlockType,
 } from '@remirror/core'
 import { TextSelection } from '@remirror/pm/state'
-
+import type { Extension } from '@codemirror/state'
 import { CodeMirror6NodeView } from './codemirror-node-view'
 import type { CodeMirrorExtensionAttributes, CodeMirrorExtensionOptions } from './codemirror-types'
 import { arrowHandler } from './codemirror-utils'
@@ -212,7 +212,7 @@ export class LineCodeMirrorExtension extends NodeExtension<CodeMirrorExtensionOp
   }
 
   @command()
-  changeCodeMirrorTheme(theme: 'light' | 'dark'): CommandFunction {
+  changeCodeMirrorTheme(theme: Extension): CommandFunction {
     return () => {
       this.nodeview?.changeTheme(theme)
       return true

@@ -6,7 +6,7 @@ import { type EditorSchema } from 'remirror'
 import type { EditorView as CodeMirrorEditorView } from '@codemirror/view'
 import { Compartment } from '@codemirror/state'
 import MfCodemirrorView from '@/codemirror/codemirror'
-import { minimalSetup } from '../CodeMIrror/setup'
+import { minimalSetup } from '../CodeMirror/setup'
 import { html } from '@codemirror/lang-html'
 
 function removeNewlines(str: string) {
@@ -222,6 +222,10 @@ export class HtmlNodeView implements NodeView {
     if (this._innerView) {
       this._innerView.destroy()
       this._innerView = undefined
+    }
+    if (this.mfCodemirrorView) {
+      this.mfCodemirrorView.destroy()
+      this.mfCodemirrorView = undefined
     }
 
     if (render) {
