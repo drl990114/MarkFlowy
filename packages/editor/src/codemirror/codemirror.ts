@@ -12,15 +12,25 @@ import { assertGet, isPromise, replaceNodeAtPosition } from '@remirror/core'
 import type { EditorSchema, EditorView, ProsemirrorNode } from '@remirror/pm'
 import { exitCode } from '@remirror/pm/commands'
 import { Selection, TextSelection } from '@remirror/pm/state'
-import { mfCodemirrorLight } from '@markflowy/theme'
+import type { CreateThemeOptions } from './theme'
+import { createTheme } from './theme'
+import { lightTheme } from '@markflowy/theme'
 import type { LanguageDescription, LanguageSupport } from '@codemirror/language'
 import type { LoadLanguage } from '@/extensions/CodeMirror/codemirror-node-view'
 import { languages } from '@codemirror/language-data'
-import type { Extension } from '@codemirror/state'
 import { nanoid } from 'nanoid'
 
 const cmInstanceMap = new Map<string, MfCodemirrorView>()
-const themeRef = { current: mfCodemirrorLight }
+const themeRef = { current: createTheme(lightTheme.codemirorTheme as CreateThemeOptions)  }
+
+export const changeTheme = (theme: CreateThemeOptions): void => {
+  themeRef.current = createTheme(theme)
+  cmInstanceMap.forEach((mfCmView) => {
+    mfCmView.cm.dispatch({
+      effects: mfCmView.editorTheme.reconfigure(themeRef.current),
+    })
+  })
+}
 
 class MfCodemirrorView {
   private readonly view: EditorView
@@ -92,15 +102,6 @@ class MfCodemirrorView {
     cmInstanceMap.set(this.id, this)
 
     this.updateLanguage()
-  }
-
-  changeTheme(theme: Extension): void {
-    themeRef.current = theme
-    cmInstanceMap.forEach((mfCmView) => {
-      mfCmView.cm.dispatch({
-        effects: mfCmView.editorTheme.reconfigure(theme),
-      })
-    })
   }
 
   update(node: ProsemirrorNode): boolean {

@@ -36,7 +36,6 @@ import { LineHardBreakExtension } from './HardBreak'
 import { ReactComponentExtension } from '@remirror/react'
 import { LineCodeMirrorExtension } from './CodeMirror/codemirror-extension'
 import { LineTableExtension, LineTableRowExtension } from './Table'
-import { languages } from '@codemirror/language-data'
 import { LineHorizontalRuleExtension } from './HorizontalRule'
 import { CountExtension } from '@remirror/extension-count'
 import { FindExtension } from '@remirror/extension-find'
@@ -89,7 +88,7 @@ function extensions({ handleViewImgSrcUrl }: ExtensionsOptions = {}): any[] {
     new LineBlockquoteExtension(),
     new LineHeadingExtension(),
     new LineListExtension(),
-    new LineCodeMirrorExtension({ languages }),
+    new LineCodeMirrorExtension(),
     new LineTableExtension({ resizable: false }),
     new LineTableRowExtension(),
     new LineTableCellExtension(),

@@ -116,7 +116,7 @@ const App: FC = () => {
 
   return (
     <div style={{ width: '100%' }}>
-      <BaseStyle theme={lightTheme} />
+      <BaseStyle theme={lightTheme.styledContants} />
       <DebugButton
         enableDevTools={enableDevTools}
         toggleEnableDevTools={() => setEnableDevTools(!enableDevTools)}

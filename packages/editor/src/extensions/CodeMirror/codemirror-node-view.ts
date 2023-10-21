@@ -3,7 +3,6 @@ import type { Extension as CodeMirrorExtension } from '@codemirror/state'
 import type { EditorView as CodeMirrorEditorView } from '@codemirror/view'
 import type { EditorView, NodeView, ProsemirrorNode } from '@remirror/pm'
 import MfCodemirrorView from '@/codemirror/codemirror'
-import type { Extension } from '@codemirror/state'
 
 export type LoadLanguage = (lang: string) => Promise<LanguageSupport> | LanguageSupport | void
 
@@ -45,17 +44,11 @@ export class CodeMirror6NodeView implements NodeView {
 
     // The editor's outer node is our DOM representation
     this.dom = this.cm.dom
-
-    // Try to find and load the language
   }
 
   update(node: ProsemirrorNode): boolean {
     this.node = node
     return this.mfCodemirrorView.update(node)
-  }
-
-  changeTheme(theme: Extension): void {
-    this.mfCodemirrorView.changeTheme(theme)
   }
 
   /**

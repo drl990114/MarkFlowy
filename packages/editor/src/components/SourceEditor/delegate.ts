@@ -6,14 +6,17 @@ import { LineCodeMirrorExtension } from '../../extensions/CodeMirror/codemirror-
 import { markdown } from '@codemirror/lang-markdown'
 import { basicSetup } from '../../extensions/CodeMirror/setup'
 import { CountExtension } from '@remirror/extension-count'
-import { mfCodemirrorLight } from '@markflowy/theme'
+import type { CreateThemeOptions } from '@uiw/codemirror-themes'
+import { lightTheme } from '@markflowy/theme'
 
 export function createSourceCodeManager(): RemirrorManager<any> {
   return createReactManager(() => [
     new CountExtension(),
-
     new DocExtension({ content: 'codeMirror' }),
-    new LineCodeMirrorExtension({ extensions: [basicSetup, mfCodemirrorLight, markdown()]}),
+    new LineCodeMirrorExtension({
+      extensions: [basicSetup, markdown()],
+      createThemeOptions: lightTheme.codemirorTheme as CreateThemeOptions,
+    }),
   ])
 }
 
