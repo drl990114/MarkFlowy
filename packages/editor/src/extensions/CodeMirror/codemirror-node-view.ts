@@ -1,15 +1,14 @@
 import type { LanguageSupport } from '@codemirror/language'
 import type { Extension as CodeMirrorExtension } from '@codemirror/state'
-import { Compartment } from '@codemirror/state'
 import type { EditorView as CodeMirrorEditorView } from '@codemirror/view'
 import type { EditorView, NodeView, ProsemirrorNode } from '@remirror/pm'
 import MfCodemirrorView from '@/codemirror/codemirror'
+import type { Extension } from '@codemirror/state'
 
 export type LoadLanguage = (lang: string) => Promise<LanguageSupport> | LanguageSupport | void
 
 export class CodeMirror6NodeView implements NodeView {
   public dom: HTMLElement
-  private readonly editorTheme: Compartment
   private node: ProsemirrorNode
   private readonly view: EditorView
   private readonly getPos: () => number
@@ -32,7 +31,6 @@ export class CodeMirror6NodeView implements NodeView {
     this.node = node
     this.view = view
     this.getPos = getPos
-    this.editorTheme = new Compartment()
     this.languageName = ''
 
     this.mfCodemirrorView = new MfCodemirrorView({
@@ -56,7 +54,7 @@ export class CodeMirror6NodeView implements NodeView {
     return this.mfCodemirrorView.update(node)
   }
 
-  changeTheme(theme: 'light' | 'dark'): void {
+  changeTheme(theme: Extension): void {
     this.mfCodemirrorView.changeTheme(theme)
   }
 
@@ -81,6 +79,6 @@ export class CodeMirror6NodeView implements NodeView {
   }
 
   destroy(): void {
-    this.cm.destroy()
+    this.mfCodemirrorView.destroy()
   }
 }

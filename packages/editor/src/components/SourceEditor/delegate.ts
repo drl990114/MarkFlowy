@@ -2,11 +2,11 @@ import { createReactManager } from '@remirror/react'
 import type { StringToDoc, DocToString, EditorDelegate } from '../../types'
 import { DocExtension } from 'remirror/extensions'
 import type { RemirrorManager } from 'remirror'
-import { LineCodeMirrorExtension } from '../../extensions/CodeMIrror/codemirror-extension'
+import { LineCodeMirrorExtension } from '../../extensions/CodeMirror/codemirror-extension'
 import { markdown } from '@codemirror/lang-markdown'
-import { basicSetup } from '../../extensions/CodeMIrror/setup'
+import { basicSetup } from '../../extensions/CodeMirror/setup'
 import { CountExtension } from '@remirror/extension-count'
-import { mfCodemirrorLight } from '@/extensions/CodeMIrror'
+import { mfCodemirrorLight } from '@markflowy/theme'
 
 export function createSourceCodeManager(): RemirrorManager<any> {
   return createReactManager(() => [

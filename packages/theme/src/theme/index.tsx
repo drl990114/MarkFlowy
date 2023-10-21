@@ -1,4 +1,5 @@
 export * from './base'
+export * from './codemirror'
 
 import darkCss from './dark.css'
 import lightCss from './light.css'

@@ -5031,7 +5031,11 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@markflowy/theme@workspace:packages/theme"
   dependencies:
+    "@codemirror/language": ^6.8.0
+    "@codemirror/view": ^6.14.0
+    "@lezer/highlight": ^1.1.6
     "@types/codemirror": ^5.60.9
+    "@uiw/codemirror-themes": ^4.21.18
     esbuild: ^0.18.2
     esbuild-node-externals: ^1.8.0
     esbuild-plugin-alias: ^0.2.1

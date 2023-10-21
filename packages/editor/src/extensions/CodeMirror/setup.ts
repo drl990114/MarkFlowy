@@ -112,11 +112,11 @@ export const basicSetup: Extension = (() => [
 /// drawing](#view.drawSelection), and [default highlight
 /// style](#language.defaultHighlightStyle).
 export const minimalSetup: Extension = (() => [
-  drawSelection(),
   dropCursor(),
   highlightSpecialChars(),
   history(),
   drawSelection(),
+  rectangularSelection(),
   syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
   keymap.of([
     ...closeBracketsKeymap,
