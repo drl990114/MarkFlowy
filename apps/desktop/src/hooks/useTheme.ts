@@ -7,7 +7,7 @@ type Theme = 'light' | 'dark'
 
 function useTheme() {
   const [theme, setTheme] = useState<Theme>('light')
-  const [themeData, setThemeData] = useState<Record<string, string>>(lightTheme)
+  const [themeData, setThemeData] = useState<Record<string, string>>(lightTheme.styledContants)
 
   const muiDarkTheme = createTheme({
     palette: {
@@ -30,9 +30,9 @@ function useTheme() {
   useEffect(() => {
     loadTheme(theme)
     if (theme === 'light') {
-      setThemeData(lightTheme)
+      setThemeData(lightTheme.styledContants)
     } else {
-      setThemeData(darkTheme)
+      setThemeData(darkTheme.styledContants)
     }
   }, [theme])
 

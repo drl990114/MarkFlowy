@@ -1,4 +1,4 @@
-import type { LanguageDescription } from '@codemirror/language'
+import type { CreateThemeOptions } from '@/codemirror'
 import type { Extension as CodeMirrorExtension } from '@codemirror/state'
 import type { ProsemirrorAttributes } from '@remirror/core'
 
@@ -18,22 +18,16 @@ export interface CodeMirrorExtensionOptions {
   extensions?: CodeMirrorExtension[] | null;
 
   /**
-   * The CodeMirror languages to use.
-   *
-   * @remarks
-   *
-   * You can install [`@codemirror/language-data`](https://codemirror.net/6/docs/ref/#language-data) and import languages from there.
-   *
-   * @defaultValue null
-   */
-  languages?: LanguageDescription[] | null;
-
-  /**
    * The name of the node that the codeMirror block should toggle back and forth from.
    *
    * @defaultValue "paragraph"
    */
   toggleName?: string;
+
+  /**
+   * The codemirror theme options to create use.
+   */
+  createThemeOptions?: CreateThemeOptions;
 }
 
 export interface CodeMirrorExtensionAttributes extends ProsemirrorAttributes {

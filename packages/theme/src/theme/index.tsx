@@ -3,6 +3,8 @@ export * from './codemirror'
 
 import darkCss from './dark.css'
 import lightCss from './light.css'
+import { mfCodemirrorDark, mfCodemirrorLight } from './codemirror'
+import type { CreateThemeOptions} from '@uiw/codemirror-themes'
 
 const THEME_ID = 'mf-markdown-theme'
 
@@ -10,6 +12,12 @@ let themeEl: undefined | HTMLStyleElement
 
 export type ThemeColors = typeof lightTheme
 export type ScThemeProps = { theme: ThemeColors }
+
+export type MfTheme = {
+  name: string
+  styledContants: Record<string, string>
+  codemirorTheme: CreateThemeOptions
+}
 
 function loadThemeCss(url: string) {
   if (themeEl) themeEl.remove()
@@ -47,7 +55,7 @@ const common = {
   codemirrorFontFamily: `'DejaVu Sans Mono', 'Source Code Pro', 'Droid Sans Mono', Consolas, monospace`
 }
 
-const lightTheme = {
+const styledLightTheme = {
   ...common,
 
   primaryFontColor: '#000000',
@@ -66,7 +74,7 @@ const lightTheme = {
   scrollbarTrackColor: '#e4e4e7',
 }
 
-const darkTheme = {
+const styledDarkTheme = {
   ...common,
 
   primaryFontColor: 'rgba(255, 255, 255, 0.9)',
@@ -86,7 +94,14 @@ const darkTheme = {
 }
 
 
-export {
-  lightTheme,
-  darkTheme,
+export const lightTheme: MfTheme = {
+  name: "light",
+  styledContants: styledLightTheme,
+  codemirorTheme: mfCodemirrorLight
+}
+
+export const darkTheme: MfTheme = {
+  name: "dark",
+  styledContants: styledDarkTheme,
+  codemirorTheme: mfCodemirrorDark
 }

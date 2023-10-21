@@ -11,5 +11,10 @@
     }
   },
   "include": ["./src", "vitest.config.ts"],
-  "exclude": ["./src/**/*.spec.ts", "./src/**/*.test.ts", "node_modules", "./src/**/*.js"]
+  "exclude": ["./src/**/*.spec.ts", "./src/**/*.test.ts", "node_modules", "./src/**/*.js"],
+  "references": [
+    {
+      "path": "../theme/tsconfig.json"
+    }
+  ]
 }

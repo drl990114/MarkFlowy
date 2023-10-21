@@ -31,17 +31,20 @@ import {
   setBlockType,
 } from '@remirror/core'
 import { TextSelection } from '@remirror/pm/state'
-import type { Extension } from '@codemirror/state'
 import { CodeMirror6NodeView } from './codemirror-node-view'
 import type { CodeMirrorExtensionAttributes, CodeMirrorExtensionOptions } from './codemirror-types'
 import { arrowHandler } from './codemirror-utils'
+import type { CreateThemeOptions} from '@/codemirror'
+import { changeTheme } from '@/codemirror'
+import { lightTheme } from '@markflowy/theme'
+import { languages } from '@codemirror/language-data'
 
 export const fakeIndentedLanguage = 'indent-code'
 
 @extension<CodeMirrorExtensionOptions>({
   defaultOptions: {
     extensions: null,
-    languages: null,
+    createThemeOptions: lightTheme.codemirorTheme as CreateThemeOptions,
     toggleName: 'paragraph',
   },
 })
@@ -212,9 +215,9 @@ export class LineCodeMirrorExtension extends NodeExtension<CodeMirrorExtensionOp
   }
 
   @command()
-  changeCodeMirrorTheme(theme: Extension): CommandFunction {
+  changeCodeMirrorTheme(theme: CreateThemeOptions): CommandFunction {
     return () => {
-      this.nodeview?.changeTheme(theme)
+      changeTheme(theme)
       return true
     }
   }
@@ -267,7 +270,6 @@ export class LineCodeMirrorExtension extends NodeExtension<CodeMirrorExtensionOp
       return DecorationSet.empty
     }
 
-    const languages = this.options.languages
     if (!languages || languages.length <= 1) {
       return DecorationSet.empty
     }
