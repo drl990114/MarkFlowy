@@ -112,11 +112,21 @@ export const basicSetup: Extension = (() => [
 /// drawing](#view.drawSelection), and [default highlight
 /// style](#language.defaultHighlightStyle).
 export const minimalSetup: Extension = (() => [
+  drawSelection(),
+  dropCursor(),
   highlightSpecialChars(),
   history(),
   drawSelection(),
   syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
-  keymap.of([...defaultKeymap, ...historyKeymap]),
+  keymap.of([
+    ...closeBracketsKeymap,
+    ...defaultKeymap,
+    ...searchKeymap,
+    ...historyKeymap,
+    ...foldKeymap,
+    ...completionKeymap,
+    ...lintKeymap,
+  ]),
 ])()
 
 export { EditorView } from '@codemirror/view'
