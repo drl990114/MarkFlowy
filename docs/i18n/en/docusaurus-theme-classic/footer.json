@@ -15,10 +15,6 @@
     "message": "GitHub Discussions",
     "description": "The label of footer link with label=GitHub Discussions linking to https://github.com/kimlimjustin/xplorer/discussions"
   },
-  "link.item.label.Discord": {
-    "message": "Discord",
-    "description": "The label of footer link with label=Discord linking to https://discord.gg/MHGtSWvfUS"
-  },
   "copyright": {
     "message": "Copyright © 2023 drl990114 and <a href=\"https://github.com/drl990114/MarkFlowy/graphs/contributors\" target=\"_blank\">contributors</a>. Website Built with <a href=\"https://docusaurus.io\" target=\"_blank\">Docusaurus</a>.",
     "description": "The footer copyright"

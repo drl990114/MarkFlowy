@@ -41,7 +41,6 @@ module.exports = {
           position: 'left',
           label: 'Docs',
         },
-        { to: 'https://discord.gg/DX3PaqyM', label: 'Discord', position: 'left' },
         {
           href: 'https://github.com/drl990114/MarkFlowy',
           position: 'right',
@@ -67,11 +66,7 @@ module.exports = {
             {
               label: 'GitHub Discussions',
               href: 'https://github.com/drl990114/MarkFlowy/discussions',
-            },
-            {
-              label: 'Discord',
-              href: 'https://discord.gg/DX3PaqyM',
-            },
+            }
           ],
         },
       ],
