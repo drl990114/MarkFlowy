@@ -5,7 +5,6 @@ import { ParserRuleType } from '../../transform'
 import type { EditorState } from 'remirror'
 import { Decoration, DecorationSet } from '@remirror/pm/view'
 import createCodeMirrorMenuDecorations from './codemirror-lang-menu'
-import type { LanguageDescription, LanguageSupport } from '@codemirror/language'
 import type {
   ApplySchemaAttributes,
   CommandFunction,
@@ -17,7 +16,8 @@ import type {
   NodeSpecOverride,
   NodeViewMethod,
   PrioritizedKeyBindings,
-  ProsemirrorNode} from '@remirror/core'
+  ProsemirrorNode,
+} from '@remirror/core'
 import {
   command,
   extension,
@@ -45,13 +45,11 @@ export const fakeIndentedLanguage = 'indent-code'
     toggleName: 'paragraph',
   },
 })
-export class LineCodeMirrorExtension extends NodeExtension<CodeMirrorExtensionOptions>  {
+export class LineCodeMirrorExtension extends NodeExtension<CodeMirrorExtensionOptions> {
   private nodeview: CodeMirror6NodeView | undefined
   get name() {
     return 'codeMirror' as const
   }
-
-  private languageMap: Record<string, LanguageDescription> | null = null
 
   createNodeSpec(extra: ApplySchemaAttributes, override: NodeSpecOverride): NodeExtensionSpec {
     return {
@@ -86,7 +84,6 @@ export class LineCodeMirrorExtension extends NodeExtension<CodeMirrorExtensionOp
         view,
         getPos: getPos as () => number,
         extensions: this.options.extensions,
-        loadLanguage: this.loadLanguage.bind(this),
         toggleName: this.options.toggleName,
       })
 
@@ -171,37 +168,6 @@ export class LineCodeMirrorExtension extends NodeExtension<CodeMirrorExtensionOp
     return true
   }
 
-  private getLanguageMap(): Record<string, LanguageDescription> {
-    if (!this.languageMap) {
-      this.languageMap = {}
-
-      for (const language of this.options.languages ?? []) {
-        for (const alias of language.alias) {
-          this.languageMap[alias] = language
-        }
-      }
-    }
-
-    return this.languageMap
-  }
-
-  private loadLanguage(
-    languageName: string,
-  ): Promise<LanguageSupport> | LanguageSupport | undefined {
-    if (typeof languageName !== 'string') {
-      return undefined
-    }
-
-    const languageMap = this.getLanguageMap()
-    const language = languageMap[languageName.toLowerCase()]
-
-    if (!language) {
-      return undefined
-    }
-
-    return language.support || language.load()
-  }
-
   /**
    * Creates a CodeMirror block at the current position.
    *
@@ -244,7 +210,7 @@ export class LineCodeMirrorExtension extends NodeExtension<CodeMirrorExtensionOp
       return true
     }
   }
-  
+
   @command()
   changeCodeMirrorTheme(theme: 'light' | 'dark'): CommandFunction {
     return () => {

@@ -7,7 +7,7 @@ import type {
   NodeViewMethod,
   PrioritizedKeyBindings,
 } from '@remirror/core'
-import { NodeExtension, nodeInputRule } from '@remirror/core'
+import { NodeExtension, isElementDomNode, nodeInputRule } from '@remirror/core'
 import type { ProsemirrorNode } from '@remirror/pm'
 import { HtmlNodeView } from './html-block-view'
 import type { InputRule } from '@remirror/pm/inputrules'
@@ -27,18 +27,22 @@ export class LineHtmlBlockExtension extends NodeExtension {
       defining: true,
       ...override,
       code: true,
-      isolating: true,
+      marks: '',
       attrs: {
+        language: { default: 'html' },
         ...extra.defaults(),
       },
       parseDOM: [
         {
           tag: 'pre',
+          getAttrs: (node) => (isElementDomNode(node) ? extra.parse(node) : false),
         },
+        ...(override.parseDOM ?? []),
       ],
       toDOM() {
         return ['pre', ['code', 0]]
       },
+      isolating: true,
     }
   }
 

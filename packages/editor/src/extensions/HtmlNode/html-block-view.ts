@@ -1,16 +1,13 @@
 import type { Node as ProseNode } from 'prosemirror-model'
-import { TextSelection, type EditorState } from '@remirror/pm/state'
 import type { NodeView } from 'prosemirror-view'
 import type { EditorView } from '@remirror/pm/view'
-import { replaceNodeAtPosition, type EditorSchema, assertGet } from 'remirror'
-import { exitCode } from '@remirror/pm/commands'
-import type { KeyBinding as CodeMirrorKeyBinding } from '@codemirror/view'
-import type { Transaction as CodeMirrorTransaction } from '@codemirror/state'
-import { EditorState as CodeMirrorEditorState, Compartment } from '@codemirror/state'
-import { EditorView as CodeMirrorEditorView, keymap } from '@codemirror/view'
-import { computeChange } from '../CodeMIrror/codemirror-node-view'
+import type { ProsemirrorNode } from 'remirror'
+import { type EditorSchema } from 'remirror'
+import type { EditorView as CodeMirrorEditorView } from '@codemirror/view'
+import { Compartment } from '@codemirror/state'
+import MfCodemirrorView from '@/codemirror/codemirror'
+import { minimalSetup } from '../CodeMIrror/setup'
 import { html } from '@codemirror/lang-html'
-import { mfCodemirrorLight } from '@/extensions/CodeMIrror'
 
 function removeNewlines(str: string) {
   return str.replace(/\n+|\t/g, '')
@@ -29,11 +26,7 @@ export class HtmlNodeView implements NodeView {
   private _innerView: CodeMirrorEditorView | undefined
   private readonly schema: EditorSchema
   private readonly languageConf: Compartment
-
-  // internal state
-  cursorSide: 'start' | 'end'
-  private _isEditing: boolean
-  private htmlText: string
+  mfCodemirrorView?: MfCodemirrorView
 
   constructor(node: ProseNode, view: EditorView, getPos: () => number) {
     // store arguments
@@ -41,11 +34,6 @@ export class HtmlNodeView implements NodeView {
     this._outerView = view
     this._getPos = getPos
     this.schema = node.type.schema
-
-    this.htmlText = node.textContent
-    // editing state
-    this.cursorSide = 'start'
-    this._isEditing = false
 
     // create dom representation of nodeview
     this.dom = document.createElement('div')
@@ -63,8 +51,8 @@ export class HtmlNodeView implements NodeView {
 
     this.dom.appendChild(this._htmlRenderElt)
 
-    this._htmlSrcElt = document.createElement('div')
-    this._htmlSrcElt.classList.add('html-src')
+    this._htmlSrcElt = document.createElement('span')
+    this._htmlSrcElt.classList.add('html-src', 'node-hide')
 
     this.languageConf = new Compartment()
 
@@ -76,78 +64,6 @@ export class HtmlNodeView implements NodeView {
     this.dom.addEventListener('mouseleave', this.handleMouseLeave)
 
     this.renderHtml()
-  }
-
-  destroy() {
-    // close the inner editor without rendering
-    this.closeEditor(false)
-    // clean up dom elements
-    if (this._htmlRenderElt) {
-      this._htmlRenderElt.remove()
-      delete this._htmlRenderElt
-    }
-    if (this._htmlSrcElt) {
-      this._htmlSrcElt.remove()
-      this._htmlSrcElt = null // fix for the error
-    }
-
-    this.dom.removeEventListener('mouseenter', this.handleMouseEnter)
-    this.dom.removeEventListener('mouseleave', this.handleMouseLeave)
-    this.dom.remove()
-  }
-
-  private codeMirrorKeymap(): CodeMirrorKeyBinding[] {
-    return [
-      {
-        key: 'Ctrl-Enter',
-        run: () => {
-          if (exitCode(this._outerView.state, this._outerView.dispatch)) {
-            this.closeEditor()
-            this._outerView.focus()
-            return true
-          }
-
-          return false
-        },
-      },
-      {
-        key: 'Backspace',
-        run: () => {
-          const ranges = this._innerView?.state.selection.ranges
-
-          if (!this._innerView || !ranges || ranges.length > 1) {
-            return false
-          }
-
-          const selection = ranges[0]
-
-          if (selection && (!selection.empty || selection.anchor > 0)) {
-            return false
-          }
-
-          // We don't want to convert a multi-line code block into a paragraph
-          // because newline characters are invalid in a paragraph node.
-          if (this._innerView.state.doc.lines >= 2) {
-            return false
-          }
-
-          const state = this._outerView.state
-          const toggleNode = assertGet(state.schema.nodes, 'paragraph')
-          const pos = this._getPos()
-          const tr = replaceNodeAtPosition({
-            pos: pos,
-            tr: state.tr,
-            content: toggleNode.createChecked({}, this._node.content),
-          })
-
-          tr.setSelection(TextSelection.near(tr.doc.resolve(pos)))
-
-          this._outerView.dispatch(tr)
-          this._outerView.focus()
-          return true
-        },
-      },
-    ]
   }
 
   /**
@@ -164,76 +80,25 @@ export class HtmlNodeView implements NodeView {
     }
   }
 
-  private valueChanged(tr: CodeMirrorTransaction): void {
-    if (!this._innerView) return
+  ignoreMutation = () => true
 
-    this._innerView.update([tr])
-
-    if (!tr.docChanged) {
-      return
-    }
-
-    const change = computeChange(this.htmlText, tr.state.doc.toString())
-
-    if (change) {
-      const start = this._getPos() + 1
-      const transaction = this._outerView.state.tr.replaceWith(
-        start + change.from,
-        start + change.to,
-        change.text ? this.schema.text(change.text) : [],
-      )
-      this._outerView.dispatch(transaction)
-    }
-  }
-
-  // == Updates ======================================= //
-
-  update(node: ProseNode) {
-    if (node.type !== this._node.type) {
-      return false
-    }
-    if (!this._innerView) return false
+  update(node: ProsemirrorNode): boolean {
     this._node = node
-
-    this.htmlText = node.textContent
-    const change = computeChange(this._innerView.state.doc.toString(), node.textContent)
-
-    if (change) {
-      this._isEditing = true
-      this._innerView.dispatch({
-        changes: { from: change.from, to: change.to, insert: change.text },
-      })
-      this._isEditing = false
-    }
-
-    return true
-  }
-
-  updateCursorPos(state: EditorState): void {
-    const pos = this._getPos()
-    const size = this._node.nodeSize
-    const inPmSelection = state.selection.from < pos + size && pos < state.selection.to
-
-    if (!inPmSelection) {
-      this.cursorSide = pos < state.selection.from ? 'end' : 'start'
-    }
+    return !!this.mfCodemirrorView?.update(node)
   }
 
   // == Events ===================================== //
 
   selectNode() {
-    if (!this._outerView.editable) {
-      return
-    }
     this.dom.classList.add('ProseMirror-selectednode')
-    if (!this._isEditing) {
+    if (!this.mfCodemirrorView?.updating) {
       this.openEditor()
     }
   }
 
   deselectNode() {
     this.dom.classList.remove('ProseMirror-selectednode')
-    if (this._isEditing) {
+    if (this.mfCodemirrorView?.updating) {
       this.closeEditor()
     }
   }
@@ -246,15 +111,7 @@ export class HtmlNodeView implements NodeView {
     this.dom.classList.remove('node-enter')
   }
 
-  stopEvent(event: Event): boolean {
-    return (
-      this._innerView !== undefined &&
-      event.target !== undefined &&
-      this._innerView.dom.contains(event.target as Node)
-    )
-  }
-
-  ignoreMutation() {
+  stopEvent(): boolean {
     return true
   }
 
@@ -266,7 +123,7 @@ export class HtmlNodeView implements NodeView {
     }
 
     // get tex string to render
-    const content = removeNewlines(this.htmlText)
+    const content = removeNewlines(this.mfCodemirrorView?.content || this._node.textContent)
     const texString = content.trim()
 
     if (texString.length < 1) {
@@ -294,11 +151,9 @@ export class HtmlNodeView implements NodeView {
   setSelection(anchor: number, head: number): void {
     if (!this._innerView) {
       this.openEditor()
+      this.mfCodemirrorView!.setSelection(anchor, head)
     } else {
-      this._innerView?.focus()
-      this._isEditing = true
-      this._innerView?.dispatch({ selection: { anchor, head } })
-      this._isEditing = false
+      this.mfCodemirrorView?.setSelection(anchor, head)
     }
   }
 
@@ -308,20 +163,27 @@ export class HtmlNodeView implements NodeView {
     }
 
     const htmlLang = html()
-    const startState = CodeMirrorEditorState.create({
-      doc: this.htmlText,
-      extensions: [keymap.of(this.codeMirrorKeymap()), this.languageConf.of([]), mfCodemirrorLight, htmlLang],
+    this.mfCodemirrorView = new MfCodemirrorView({
+      view: this._outerView,
+      node: this._node,
+      getPos: this._getPos,
+      languageName: 'html',
+      createParams: {
+        parent: this._htmlSrcElt!,
+      },
+      extensions: [
+        minimalSetup,
+        htmlLang
+      ]
     })
 
-    this._innerView = new CodeMirrorEditorView({
-      state: startState,
-      parent: this._htmlSrcElt!,
-      dispatch: this.valueChanged.bind(this),
-    })
+    this._htmlSrcElt!.classList.remove('node-hide')
+    this._innerView = this.mfCodemirrorView.cm
+    this._htmlRenderElt?.classList.add('node-hide')
 
-    this._innerView.dispatch({
-      effects: this.languageConf.reconfigure(htmlLang.support),
-    })
+    const prevCursorPos: number = this._node.textContent.length || 0
+
+    this.setSelection(prevCursorPos, prevCursorPos)
 
     this._innerView.focus()
 
@@ -329,13 +191,25 @@ export class HtmlNodeView implements NodeView {
       this.closeEditor(true)
     })
 
-    const prevCursorPos: number = this.htmlText?.length || 0
+    this.mfCodemirrorView.forwardSelection()
+  }
 
-    this.setSelection(prevCursorPos, prevCursorPos)
+  destroy() {
+    // close the inner editor without rendering
+    this.closeEditor(false)
+    // clean up dom elements
+    if (this._htmlRenderElt) {
+      this._htmlRenderElt.remove()
+      delete this._htmlRenderElt
+    }
+    if (this._htmlSrcElt) {
+      this._htmlSrcElt.remove()
+      this._htmlSrcElt = null // fix for the error
+    }
 
-    this._htmlRenderElt?.classList.add('node-hide')
-
-    this._isEditing = true
+    this.dom.removeEventListener('mouseenter', this.handleMouseEnter)
+    this.dom.removeEventListener('mouseleave', this.handleMouseLeave)
+    this.dom.remove()
   }
 
   /**
@@ -353,6 +227,5 @@ export class HtmlNodeView implements NodeView {
     if (render) {
       this.renderHtml()
     }
-    this._isEditing = false
   }
 }
