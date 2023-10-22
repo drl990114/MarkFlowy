@@ -1,12 +1,13 @@
 import { Remirror } from '@remirror/react'
 import { createContextState } from 'create-context-state'
-import React, { memo } from 'react'
+import React, { memo, useCallback, useMemo } from 'react'
 import Text from '../Text'
 import type { EditorDelegate } from '../../types'
 import { ProsemirrorDevTools } from '@remirror/dev'
 import { createSourceCodeDelegate } from './delegate'
 import ErrorBoundary from '../ErrorBoundary'
 import type { EditorProps } from '../Editor'
+import type { Extension, RemirrorEventListener } from 'remirror'
 
 type Context = Props
 
@@ -51,11 +52,26 @@ const SourceCodeEditorCore = memo((props: { markdownToolBar?: React.ReactNode[] 
 const SourceEditor: React.FC<EditorProps> = (props) => {
   const { content, delegate, isTesting, hooks, markdownToolBar } = props
 
+  const editorDelegate = useMemo(() => delegate ?? createSourceCodeDelegate(), [delegate])
+
+  const handleChange: RemirrorEventListener<Extension> = useCallback(
+    (params) => {
+      try {
+        const textContent = editorDelegate.docToString(params.state.doc)
+        props.onChange?.(params, textContent)
+      } catch (error) {
+        console.error(error)
+      }
+    },
+    [editorDelegate, props],
+  )
+
   return (
     <SourceEditorProvider
       content={content}
       isTesting={isTesting}
-      markText={delegate || createSourceCodeDelegate()}
+      markText={editorDelegate}
+      onChange={handleChange}
       hooks={hooks}
     >
       <SourceCodeEditorCore markdownToolBar={markdownToolBar} />
@@ -63,6 +79,6 @@ const SourceEditor: React.FC<EditorProps> = (props) => {
   )
 }
 
-export default SourceEditor
+export default memo(SourceEditor)
 
 export * from './delegate'

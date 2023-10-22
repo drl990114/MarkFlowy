@@ -1,27 +1,40 @@
 import { Remirror } from '@remirror/react'
-import { type FC, createContext } from 'react'
+import { type FC, createContext, memo, useMemo, useCallback } from 'react'
 import Text from '../Text'
 import Wrapper from '../Wrapper'
 import { createWysiwygDelegate } from './delegate'
-import type { EditorDelegate } from '../../types'
 import TableToolbar from '../../toolbar/TableToolbar'
 import { ProsemirrorDevTools } from '@remirror/dev'
-import React from 'react'
 import ErrorBoundary from '../ErrorBoundary'
+import type { Extension, RemirrorEventListener } from '@remirror/core'
+import type { EditorProps } from '../Editor'
 
 export const OffsetContext = createContext({ top: 0, left: 0 })
 
-const WysiwygEditor: FC<WysiwygEditorProps> = (props) => {
+const WysiwygEditor: FC<EditorProps> = (props) => {
   const { content, hooks, delegate, offset, wysiwygToolBar, isTesting } = props
 
-  const editorDelegate = delegate ?? createWysiwygDelegate()
+  const editorDelegate = useMemo(() => delegate ?? createWysiwygDelegate(), [delegate])
+
+  const handleChange: RemirrorEventListener<Extension> = useCallback(
+    (params) => {
+      try {
+        const textContent = editorDelegate.docToString(params.state.doc)
+        props.onChange?.(params, textContent)
+      } catch (error) {
+        console.error(error)
+      }
+    },
+    [editorDelegate, props],
+  )
 
   let initialContent
   try {
     initialContent = editorDelegate.stringToDoc(content)
   } catch (error) {
-    return <ErrorBoundary hasError error={error}/>
+    return <ErrorBoundary hasError error={error} />
   }
+
 
   return (
     <ErrorBoundary>
@@ -31,6 +44,7 @@ const WysiwygEditor: FC<WysiwygEditorProps> = (props) => {
             manager={editorDelegate.manager}
             initialContent={initialContent}
             hooks={hooks}
+            onChange={handleChange}
           >
             <TableToolbar />
             {wysiwygToolBar || null}
@@ -43,19 +57,5 @@ const WysiwygEditor: FC<WysiwygEditorProps> = (props) => {
   )
 }
 
-export default WysiwygEditor
+export default memo(WysiwygEditor)
 export * from './delegate'
-
-export type EditorChangeHandler = (params: { undoDepth: number }) => void
-
-interface WysiwygEditorProps {
-  content: string
-  isTesting?: boolean
-  offset?: {
-    top: number
-    left: number
-  }
-  hooks?: (() => void)[]
-  delegate?: EditorDelegate
-  wysiwygToolBar?: React.ReactNode[]
-}
