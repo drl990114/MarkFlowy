@@ -4,6 +4,7 @@ import SourceEditor from './SourceEditor'
 import { forwardRef, memo, useImperativeHandle, useMemo, useState } from 'react'
 import type { EditorContext, EditorDelegate, EditorViewType } from '..'
 import { useContextMounted } from './useContextMounted'
+import type { Extension, RemirrorEventListenerProps } from 'remirror'
 
 export type EditorRef = {
   toggleType: (targetType: EditorViewType) => void
@@ -34,11 +35,22 @@ export const Editor = memo(
   }),
 )
 
+export type EditorChangeHandler = (
+  params: RemirrorEventListenerProps<Extension>,
+  content: string,
+) => void
+
 export interface EditorProps {
+  delegate?: EditorDelegate
   content: string
   isTesting?: boolean
-  delegate: EditorDelegate
+  offset?: {
+    top: number
+    left: number
+  }
+  onChange?: EditorChangeHandler
   hooks?: (() => void)[]
   markdownToolBar?: React.ReactNode[]
+  wysiwygToolBar?: React.ReactNode[]
   onContextMounted?: (context: EditorContext) => void
 }
