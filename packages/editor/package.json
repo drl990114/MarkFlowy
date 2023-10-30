@@ -41,7 +41,7 @@
     "@floating-ui/react": "^0.25.1",
     "@lezer/common": "1.0.3",
     "@lezer/highlight": "^1.1.6",
-    "@lezer/lr": "1.3.9",
+    "@lezer/lr": "1.3.13",
     "@markflowy/theme": "workspace:*",
     "@mui/material": "5.14.6",
     "@remirror/core": "^2.0.17",
