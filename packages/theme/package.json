@@ -1,6 +1,6 @@
 {
   "name": "@markflowy/theme",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "type": "module",
   "license": "MIT",
   "homepage": "",
@@ -23,7 +23,8 @@
     "test": "vitest run",
     "test:dev": "vitest dev",
     "delete": "rimraf node_modules",
-    "clear": "rimraf dist && rimraf tsconfig.tsbuildinfo"
+    "clear": "rimraf dist && rimraf tsconfig.tsbuildinfo",
+    "prepublish": "yarn build"
   },
   "dependencies": {
     "@lezer/highlight": "^1.1.6",
@@ -31,8 +32,8 @@
     "styled-components": "^6.1.0"
   },
   "devDependencies": {
+    "@drl990114/codemirror-themes": "^0.0.1",
     "@types/codemirror": "^5.60.9",
-    "@uiw/codemirror-themes": "^4.21.18",
     "esbuild": "^0.18.2",
     "esbuild-node-externals": "^1.8.0",
     "esbuild-plugin-alias": "^0.2.1",

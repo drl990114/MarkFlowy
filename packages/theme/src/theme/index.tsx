@@ -4,7 +4,7 @@ export * from './codemirror'
 import darkCss from './dark.css'
 import lightCss from './light.css'
 import { mfCodemirrorDark, mfCodemirrorLight } from './codemirror'
-import type { CreateThemeOptions} from '@uiw/codemirror-themes'
+import type { CreateThemeOptions} from '@drl990114/codemirror-themes'
 
 const THEME_ID = 'mf-markdown-theme'
 

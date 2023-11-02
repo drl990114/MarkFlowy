@@ -1,0 +1,14 @@
+{
+  "name": "@markflowy/types",
+  "version": "0.0.3",
+  "types": "dist-types/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "prepublish": "yarn build"
+  },
+  "devDependencies": {
+    "@markflowy/theme": "workspace:*",
+    "typescript": "^5.1.3"
+  }
+}

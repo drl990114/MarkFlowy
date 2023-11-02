@@ -1,0 +1,11 @@
+dist
+dist-types
+node_modules
+
+.DS_Store
+
+coverage
+
+tsconfig.tsbuildinfo
+
+.rollup.cache

@@ -1,0 +1,19 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "include": ["./"],
+  "compilerOptions": {
+    "noEmit": false,
+    "composite": true,
+    "emitDeclarationOnly": true,
+    "skipLibCheck": true,
+    "outDir": "./dist-types/"
+  },
+  "references": [
+    {
+      "path": "../../packages/editor/tsconfig.json"
+    },
+    {
+      "path": "../../packages/theme/tsconfig.json"
+    }
+  ]
+}

@@ -40,6 +40,18 @@ const App: FC = function () {
   if (!isWeb) {
     use(
       loadTask(
+        'extensionsInit',
+        () =>
+          new Promise((resolve) => {
+            invoke<Record<string, any>>('extensions_init').then((res) => {
+              console.log('extensions', res)
+              resolve(res)
+            })
+          }),
+      ),
+    )
+    use(
+      loadTask(
         'confInit',
         () =>
           new Promise((resolve) => {

@@ -4,6 +4,7 @@
   "scripts": {
     "dev": "vite --host",
     "build": "tsc && vite build",
+    "build:types": "tsc --tsconfig ./tsconfig.types.json",
     "preview": "vite preview",
     "tauri:build": "tauri build",
     "tauri:dev": "tauri dev",
@@ -19,6 +20,7 @@
     "@formkit/auto-animate": "^0.7.0",
     "@markflowy/editor": "workspace:*",
     "@markflowy/theme": "workspace:*",
+    "@markflowy/types": "workspace:*",
     "@mui/material": "^5.14.6",
     "@tauri-apps/api": "^2.0.0-alpha.8",
     "@tauri-apps/plugin-app": "^2.0.0-alpha.1",

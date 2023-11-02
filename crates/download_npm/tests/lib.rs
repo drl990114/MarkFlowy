@@ -17,12 +17,12 @@ fn test_download() {
 #[test]
 fn test_download_untar() {
   const TEST_FOLDER: &'static str = "./tests/untar";
-  download_npm::download("react", download_npm::DownloadOptions {
+  download_npm::download("markflowy-theme-template", download_npm::DownloadOptions {
     dest_path: TEST_FOLDER.to_string(),
     untar: true,
   }).unwrap();
 
   assert!(std::path::Path::new(TEST_FOLDER).exists());
-  assert!(std::path::Path::new(TEST_FOLDER).join("react").join("package.json").exists());
-  assert!(std::path::Path::new(TEST_FOLDER).join("react").join("index.js").exists());
+  assert!(std::path::Path::new(TEST_FOLDER).join("markflowy-theme-template").join("package.json").exists());
+  assert!(std::path::Path::new(TEST_FOLDER).join("markflowy-theme-template").join("index.js").exists());
 }
