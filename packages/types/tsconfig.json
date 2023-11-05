@@ -11,9 +11,6 @@
   "references": [
     {
       "path": "../../packages/editor/tsconfig.json"
-    },
-    {
-      "path": "../../packages/theme/tsconfig.json"
     }
   ]
 }
