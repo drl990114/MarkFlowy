@@ -5011,20 +5011,36 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@markflowy/theme@^0.0.3, @markflowy/theme@workspace:*, @markflowy/theme@workspace:packages/theme":
+"@markflowy/theme@npm:^0.0.3":
+  version: 0.0.3
+  resolution: "@markflowy/theme@npm:0.0.3"
+  dependencies:
+    "@lezer/highlight": ^1.1.6
+    react: ^18.2.0
+    styled-components: ^6.1.0
+  peerDependencies:
+    eslint: ">=7.4.0"
+  checksum: a1bd5ac81ed3a29ca6540d2a4647e4865baf2fa4cf1f3fd619c62eb052106558ec4fb4f8b012061cb7215978d3093535e4f5d9e387458c843fd95e9f4b7cf27e
+  languageName: node
+  linkType: hard
+
+"@markflowy/theme@workspace:*, @markflowy/theme@workspace:packages/theme":
   version: 0.0.0-use.local
   resolution: "@markflowy/theme@workspace:packages/theme"
   dependencies:
     "@drl990114/codemirror-themes": ^0.0.1
     "@lezer/highlight": ^1.1.6
     "@types/codemirror": ^5.60.9
-    esbuild: ^0.18.2
-    esbuild-node-externals: ^1.8.0
-    esbuild-plugin-alias: ^0.2.1
-    esbuild-plugin-cssminify: ^0.0.3
+    "@types/rollup-plugin-url": ^3
     eslint: 8.44.0
+    postcss: ^8.4.31
+    postcss-import: ^15.1.0
+    postcss-nested: ^6.0.1
     react: ^18.2.0
     rimraf: ^5.0.1
+    rollup: 3.29.4
+    rollup-plugin-postcss: ^4.0.2
+    rollup-plugin-url: ^3.0.1
     styled-components: ^6.1.0
     typescript: ^5.1.3
     url: ^0.11.1
@@ -8936,6 +8952,16 @@ __metadata:
   version: 0.12.0
   resolution: "@types/retry@npm:0.12.0"
   checksum: 61a072c7639f6e8126588bf1eb1ce8835f2cb9c2aba795c4491cf6310e013267b0c8488039857c261c387e9728c1b43205099223f160bb6a76b4374f741b5603
+  languageName: node
+  linkType: hard
+
+"@types/rollup-plugin-url@npm:^3":
+  version: 3.0.3
+  resolution: "@types/rollup-plugin-url@npm:3.0.3"
+  dependencies:
+    "@types/node": "*"
+    rollup: ^0.63.4
+  checksum: 52fa32e003342c6e5560a37c698ea8a230d4824774cd27220c79a1c307bc8df270fdfbc67b7cbb93f683487a4052856e6f9372905732a010ccd9dfa47e5041b5
   languageName: node
   linkType: hard
 
@@ -17628,14 +17654,19 @@ __metadata:
     "@rollup/plugin-terser": 0.4.4
     "@rollup/plugin-typescript": 11.1.5
     "@tauri-apps/cli": 2.0.0-alpha.16
+    "@types/rollup-plugin-url": ^3
     babel: ^6.23.0
     child_process: ^1.0.2
     eslint: 8.44.0
     fast-glob: ^3.3.0
     husky: ^8.0.3
+    postcss: ^8.4.31
+    postcss-import: ^15.1.0
+    postcss-nested: ^6.0.1
     prettier: ^3.0.2
     rollup: 3.29.4
     rollup-plugin-postcss: ^4.0.2
+    rollup-plugin-url: ^3.0.1
     typescript: ^5.1.3
   languageName: unknown
   linkType: soft
@@ -18232,6 +18263,15 @@ __metadata:
   bin:
     mime: cli.js
   checksum: fef25e39263e6d207580bdc629f8872a3f9772c923c7f8c7e793175cee22777bbe8bba95e5d509a40aaa292d8974514ce634ae35769faa45f22d17edda5e8557
+  languageName: node
+  linkType: hard
+
+"mime@npm:^2.4.4":
+  version: 2.6.0
+  resolution: "mime@npm:2.6.0"
+  bin:
+    mime: cli.js
+  checksum: 1497ba7b9f6960694268a557eae24b743fd2923da46ec392b042469f4b901721ba0adcf8b0d3c2677839d0e243b209d76e5edcbd09cfdeffa2dfb6bb4df4b862
   languageName: node
   linkType: hard
 
@@ -21905,6 +21945,18 @@ plugin-image-zoom@ataft/plugin-image-zoom:
   languageName: node
   linkType: hard
 
+"rollup-plugin-url@npm:^3.0.1":
+  version: 3.0.1
+  resolution: "rollup-plugin-url@npm:3.0.1"
+  dependencies:
+    mime: ^2.4.4
+    rollup-pluginutils: ^2.8.2
+  peerDependencies:
+    rollup: ">=0.60.0"
+  checksum: a2e623c3ca2598b5a86d3d3ffd4b71533a10e5530ea640d2c77b1ee5c32786f2bcd0579c4dbae38f990fdb69561ad0a31c513101f7f65bbdd9ad174a7618dd89
+  languageName: node
+  linkType: hard
+
 "rollup-pluginutils@npm:^2.8.2":
   version: 2.8.2
   resolution: "rollup-pluginutils@npm:2.8.2"
@@ -21925,6 +21977,18 @@ plugin-image-zoom@ataft/plugin-image-zoom:
   bin:
     rollup: dist/bin/rollup
   checksum: 8bb20a39c8d91130825159c3823eccf4dc2295c9a0a5c4ed851a5bf2167dbf24d9a29f23461a54c955e5506395e6cc188eafc8ab0e20399d7489fb33793b184e
+  languageName: node
+  linkType: hard
+
+"rollup@npm:^0.63.4":
+  version: 0.63.5
+  resolution: "rollup@npm:0.63.5"
+  dependencies:
+    "@types/estree": 0.0.39
+    "@types/node": "*"
+  bin:
+    rollup: ./bin/rollup
+  checksum: a8af189d03e402b1ea70788c4c8bffc3af7db612e8c1effbea63f411b1d683378b9e8d10c9b2fae81aaf6f12c8a0aad6802ab7e1a7dee006229398b03e92e5e5
   languageName: node
   linkType: hard
 

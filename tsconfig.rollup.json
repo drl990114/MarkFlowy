@@ -14,7 +14,7 @@
     "strict": true,
     "target": "ES2019",
     "declaration": true,
-    "declarationDir": "./dist",
+    "declarationDir": ".",
     "outDir": "./dist",
     "paths": {
       "@/*": ["./src/*"],

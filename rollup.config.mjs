@@ -1,6 +1,10 @@
 import { builtinModules } from 'module'
 import typescript from '@rollup/plugin-typescript'
 import resolve from '@rollup/plugin-node-resolve'
+import postcss from 'rollup-plugin-postcss'
+import postcssImport from 'postcss-import'
+import postcssNested from 'postcss-nested'
+import url from 'rollup-plugin-url'
 
 /**
  * Create a base rollup config
@@ -25,7 +29,23 @@ export function createConfig({ input = 'index.ts', pkg, external = [] }) {
         format: 'es',
         sourcemap: true,
       },
-      plugins: [resolve(), typescript({ sourceMap: true })],
+      plugins: [
+        resolve(),
+        url({
+          // by default, rollup-plugin-url will not handle font files
+          include: ['**/*.woff', '**/*.woff2', '**/*.ttf'],
+          // setting infinite limit will ensure that the files
+          // are always bundled with the code, not copied to /dist
+          limit: Infinity,
+        }),
+        postcss({
+          plugins: [postcssImport(), postcssNested()],
+          extract: false,
+          sourceMap: false,
+          minimize: true,
+        }),
+        typescript({ sourceMap: true }),
+      ],
     },
     {
       input,
@@ -35,11 +55,28 @@ export function createConfig({ input = 'index.ts', pkg, external = [] }) {
       strictDeprecations: true,
       output: {
         file: pkg.browser,
-        format: 'es',
+        format: 'cjs',
         sourcemap: true,
         entryFileNames: '[name].js',
       },
-      plugins: [resolve(), typescript({ sourceMap: true })],
+      external: ['styled-components'],
+      plugins: [
+        resolve(),
+        url({
+          // by default, rollup-plugin-url will not handle font files
+          include: ['**/*.woff', '**/*.woff2', '**/*.ttf'],
+          // setting infinite limit will ensure that the files
+          // are always bundled with the code, not copied to /dist
+          limit: Infinity,
+        }),
+        postcss({
+          plugins: [postcssImport(), postcssNested()],
+          extract: false,
+          sourceMap: false,
+          minimize: true,
+        }),
+        typescript({ sourceMap: true }),
+      ],
     },
   ]
 }

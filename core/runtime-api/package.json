@@ -27,7 +27,7 @@
   },
   "scripts": {
     "build": "yarn clear && rollup -c",
-    "dev": "tsc --emitDeclarationOnly --watch & node esbuild.mjs --watch",
+    "dev": "rollup -cw",
     "test": "vitest run",
     "test:dev": "vitest dev",
     "delete": "rimraf node_modules",
