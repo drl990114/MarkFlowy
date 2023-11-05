@@ -1,22 +1,39 @@
 import styled from 'styled-components'
-import { useRef } from 'react'
+import { useCallback, useRef } from 'react'
 import { showContextMenu } from '@/helper/context-menu'
-import { useGlobalOSInfo, useGlobalSettingData, useGlobalTheme } from '@/hooks'
+import { useGlobalOSInfo, useGlobalSettingData } from '@/hooks'
 import { emit } from '@tauri-apps/api/event'
 import { EVENT } from '@/constants'
 import type Dialog from '@flowy-ui/dialog'
+import useThemeStore from '@/stores/useThemeStore'
 
 export const CenterMenu = () => {
   const ref = useRef<HTMLDivElement>(null)
   const { osType } = useGlobalOSInfo()
-  const { setTheme } = useGlobalTheme()
+  const { themes, setCurThemeByName } = useThemeStore()
+
   const settingDataHandler = useGlobalSettingData()[1]
+
+  const getThemeMenu = useCallback(() => {
+    return themes.map((theme) => {
+      return {
+        label: theme.name,
+        value: theme.name,
+        handler: () => {
+          settingDataHandler.writeSettingData({ key: 'theme' }, theme.name)
+          setCurThemeByName(theme.name)
+        },
+      }
+    })
+  }, [themes, setCurThemeByName, settingDataHandler])
 
   const handleClick = () => {
     if (!ref.current) {
       return
     }
     const rect = ref.current.getClientRects()
+
+    const themeMenu = getThemeMenu()
 
     showContextMenu({
       items: [
@@ -46,24 +63,7 @@ export const CenterMenu = () => {
         {
           label: 'Theme',
           value: 'theme',
-          children: [
-            {
-              label: 'Dark',
-              value: 'dark',
-              handler: () => {
-                settingDataHandler.writeSettingData({ key: 'theme'}, 'dark')
-                setTheme('dark')
-              },
-            },
-            {
-              label: 'Light',
-              value: 'light',
-              handler: () => {
-                settingDataHandler.writeSettingData({ key: 'theme'}, 'light')
-                setTheme('light')
-              },
-            },
-          ],
+          children: themeMenu,
         },
         {
           label: 'Settings',
@@ -72,7 +72,7 @@ export const CenterMenu = () => {
             const settingDialog = document.getElementById('setting-dialog') as Dialog
             settingDialog.open()
 
-            // FIXME tauri 2.0 bug in windows https://github.com/tauri-apps/plugins-workspace/issues/656 
+            // FIXME tauri 2.0 bug in windows https://github.com/tauri-apps/plugins-workspace/issues/656
             // invoke('open_conf_window')
           },
         },

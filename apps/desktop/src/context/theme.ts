@@ -1,6 +1,12 @@
+import useThemeStore from "@/stores/useThemeStore"
 import type { MfTheme } from "@markflowy/theme"
 
+/**
+ * register custom theme
+ * @param theme 
+ */
 export const registerTheme = (theme: MfTheme) => {
-    // TODO need refactor theme
-  
+  const { insertTheme } = useThemeStore.getState()
+
+  insertTheme(theme)
 }

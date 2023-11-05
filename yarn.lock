@@ -5011,7 +5011,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@markflowy/theme@^0.0.2, @markflowy/theme@workspace:*, @markflowy/theme@workspace:packages/theme":
+"@markflowy/theme@^0.0.3, @markflowy/theme@workspace:*, @markflowy/theme@workspace:packages/theme":
   version: 0.0.0-use.local
   resolution: "@markflowy/theme@workspace:packages/theme"
   dependencies:
@@ -17647,22 +17647,19 @@ __metadata:
     "@drl990114/codemirror-themes": ^0.0.1
     "@lezer/highlight": ^1.1.6
     "@markflowy/runtime-api": ^0.0.4
-    "@markflowy/theme": ^0.0.2
+    "@markflowy/theme": ^0.0.3
     "@rollup/plugin-node-resolve": 15.2.3
     "@rollup/plugin-terser": 0.4.4
     "@rollup/plugin-typescript": 11.1.5
     "@types/codemirror": ^5.60.9
     "@typescript-eslint/eslint-plugin": 6.9.0
     "@typescript-eslint/parser": 6.9.0
-    eslint: 8.44.0
+    postcss: ^8.4.31
     postcss-import: ^15.1.0
     postcss-nested: ^6.0.1
-    react: ^18.2.0
     rimraf: ^5.0.1
     rollup: 3.29.4
     rollup-plugin-postcss: ^4.0.2
-    styled-components: ^6.1.0
-    tslib: 2.6.0
     typescript: ^5.1.3
   peerDependencies:
     eslint: ">=7.4.0"
@@ -23671,13 +23668,6 @@ plugin-image-zoom@ataft/plugin-image-zoom:
     minimist: ^1.2.6
     strip-bom: ^3.0.0
   checksum: a6162eaa1aed680537f93621b82399c7856afd10ec299867b13a0675e981acac4e0ec00896860480efc59fc10fd0b16fdc928c0b885865b52be62cadac692447
-  languageName: node
-  linkType: hard
-
-"tslib@npm:2.6.0":
-  version: 2.6.0
-  resolution: "tslib@npm:2.6.0"
-  checksum: c01066038f950016a18106ddeca4649b4d76caa76ec5a31e2a26e10586a59fceb4ee45e96719bf6c715648e7c14085a81fee5c62f7e9ebee68e77a5396e5538f
   languageName: node
   linkType: hard
 

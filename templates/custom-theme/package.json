@@ -35,27 +35,24 @@
     "clear": "rimraf dist && rimraf tsconfig.tsbuildinfo"
   },
   "dependencies": {
-    "@lezer/highlight": "^1.1.6",
-    "react": "^18.2.0",
-    "styled-components": "^6.1.0"
+    "@lezer/highlight": "^1.1.6"
   },
   "devDependencies": {
     "@drl990114/codemirror-themes": "^0.0.1",
     "@markflowy/runtime-api": "^0.0.4",
-    "@markflowy/theme": "^0.0.2",
+    "@markflowy/theme": "^0.0.3",
     "@rollup/plugin-node-resolve": "15.2.3",
     "@rollup/plugin-terser": "0.4.4",
     "@rollup/plugin-typescript": "11.1.5",
     "@types/codemirror": "^5.60.9",
     "@typescript-eslint/eslint-plugin": "6.9.0",
     "@typescript-eslint/parser": "6.9.0",
-    "eslint": "8.44.0",
+    "postcss": "^8.4.31",
     "postcss-import": "^15.1.0",
     "postcss-nested": "^6.0.1",
     "rimraf": "^5.0.1",
     "rollup": "3.29.4",
     "rollup-plugin-postcss": "^4.0.2",
-    "tslib": "2.6.0",
     "typescript": "^5.1.3"
   }
 }

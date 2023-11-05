@@ -2,12 +2,11 @@ import { BaseStyle } from '@markflowy/theme'
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles'
 import { invoke } from '@tauri-apps/api'
 import { listen } from '@tauri-apps/api/event'
-import type { Theme } from '@tauri-apps/plugin-window'
 import { useCallback, useEffect } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import { ThemeProvider, StyleSheetManager } from 'styled-components'
 import { GlobalStyles } from './globalStyles'
-import { useGlobalSettingData, useGlobalTheme, useGlobalKeyboard, useGlobalOSInfo } from './hooks'
+import { useGlobalSettingData, useGlobalKeyboard, useGlobalOSInfo } from './hooks'
 import { i18nInit } from './i18n'
 import { Root, Setting } from '@/router'
 import { loadTask, use } from '@/helper/schedule'
@@ -23,6 +22,28 @@ import isPropValid from '@emotion/is-prop-valid'
 import type { FC } from 'react'
 import { FlowyContextMenu, FlowyTheme } from '@flowy-ui/react'
 import { FLOWYUI_CONTEXT_MENU_ID, FLOWYUI_THEME_ID } from './constants/flowy-ui'
+import useThemeStore from './stores/useThemeStore'
+import { excuteScript, isArray, once } from './helper'
+
+// TODO refactor useGlobalSettingData use zustand
+const confRef: { current: any } = { current: {} }
+
+const onceLoadExtensions = once(() => {
+  invoke<Record<string, any>>('extensions_init').then((res) => {
+    if (isArray(res)) {
+      try {
+        res.map((extension) => {
+          excuteScript(extension.script_text)
+        })
+        const updateCurThemeByName = useThemeStore.getState().setCurThemeByName
+        updateCurThemeByName(confRef.current.theme)
+
+      } catch (error) {
+        // TODO need tips ui
+      }
+    }
+  })
+})
 
 const App: FC = function () {
   useGlobalOSInfo()
@@ -30,7 +51,7 @@ const App: FC = function () {
   const { setRecentWorkspaces } = useOpenedCacheStore()
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, handler] = useGlobalSettingData()
-  const { themeData, muiTheme, setTheme, theme } = useGlobalTheme()
+  const { muiTheme, curTheme } = useThemeStore()
   const editorStore = useEditorStore()
   const { setFolderData, addOpenedFile, setActiveId } = editorStore
   const { setSetting } = handler
@@ -40,25 +61,13 @@ const App: FC = function () {
   if (!isWeb) {
     use(
       loadTask(
-        'extensionsInit',
-        () =>
-          new Promise((resolve) => {
-            invoke<Record<string, any>>('extensions_init').then((res) => {
-              console.log('extensions', res)
-              resolve(res)
-            })
-          }),
-      ),
-    )
-    use(
-      loadTask(
         'confInit',
         () =>
           new Promise((resolve) => {
             invoke<Record<string, any>>('get_app_conf').then((res) => {
               console.log('conf', res)
+              confRef.current = res
               setSetting(res)
-              setTheme(res.theme)
               i18nInit({ lng: res.language })
               resolve(res)
             })
@@ -133,20 +142,19 @@ const App: FC = function () {
     )
   }
 
+  useEffect(() => {
+    onceLoadExtensions()
+  }, [])
+
   const eventInit = useCallback(() => {
     const unListenMenu = listen<string>('native:menu', ({ payload }) => {
       bus.emit(payload)
     })
 
-    const unListenChangeTheme = listen('change_theme', ({ payload }) => {
-      setTheme(payload as Theme)
-    })
-
     return () => {
-      unListenChangeTheme.then((fn) => fn())
       unListenMenu.then((fn) => fn())
     }
-  }, [setTheme])
+  }, [])
 
   useEffect(() => {
     if (isWeb) return
@@ -167,11 +175,11 @@ const App: FC = function () {
 
   return (
     <StyleSheetManager shouldForwardProp={isPropValid}>
-      <ThemeProvider theme={themeData}>
-        <BaseStyle theme={themeData} />
+      <ThemeProvider theme={curTheme?.styledContants || {}}>
+        <BaseStyle theme={curTheme?.styledContants} />
         <GlobalStyles />
         <MuiThemeProvider theme={muiTheme}>
-          <FlowyTheme id={FLOWYUI_THEME_ID} color={theme === 'dark' ? 'darkest' : 'lightest'}>
+          <FlowyTheme id={FLOWYUI_THEME_ID} color={curTheme?.type === 'dark' ? 'darkest' : 'lightest'}>
             <Routes>
               <Route index path='/' element={<Root />} />
               <Route path='/setting' element={<Setting />} />

@@ -7,10 +7,4 @@ const __MF__: MF_CONTEXT = Object.freeze({
   theme
 })
 
-Object.defineProperty(window, '__MF__', {
-  configurable: false,
-  writable: false,
-  value: __MF__,
-})
-
 export default __MF__

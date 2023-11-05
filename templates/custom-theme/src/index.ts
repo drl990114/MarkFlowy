@@ -2,8 +2,9 @@ import { tags as t } from '@lezer/highlight'
 import type { CreateThemeOptions } from '@drl990114/codemirror-themes'
 import type { MfTheme } from '@markflowy/theme'
 import { registerTheme } from '@markflowy/runtime-api'
+import css from './index.css'
 
-export const mfCodemirrorDark: CreateThemeOptions = {
+const mfCodemirrorDark: CreateThemeOptions = {
   theme: 'dark',
   settings: {
     background: '#11191f',
@@ -50,10 +51,12 @@ const styledDarkTheme = {
   scrollbarTrackColor: '#0e1419',
 }
 
-export const darkTheme: MfTheme = {
-  name: 'dark',
+const darkTheme: MfTheme = {
+  name: 'dark+',
+  type: 'dark',
   styledContants: styledDarkTheme,
   codemirorTheme: mfCodemirrorDark,
+  globalStyleText: css
 }
 
 registerTheme(darkTheme)

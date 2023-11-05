@@ -5,9 +5,10 @@ import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 import Paper from '@mui/material/Paper'
-import { useGlobalKeyboard, useGlobalTheme } from '@/hooks'
+import { useGlobalKeyboard } from '@/hooks'
 import useGlobalOSInfo from '@/hooks/useOSInfo'
 import type { OsType } from '@tauri-apps/plugin-os'
+import useThemeStore from '@/stores/useThemeStore'
 
 function transferKey(key: string, osType?: OsType) {
   if (osType === 'macos') {
@@ -19,7 +20,7 @@ function transferKey(key: string, osType?: OsType) {
 }
 
 export function KeyboardTable() {
-  const { themeData } = useGlobalTheme()
+  const { curTheme } = useThemeStore()
   const { keyboardInfos } = useGlobalKeyboard()
   const { osType } = useGlobalOSInfo()
 
@@ -28,7 +29,7 @@ export function KeyboardTable() {
       <Table size='small' aria-label='caption table'>
         <TableHead
           sx={{
-            backgroundColor: themeData.tipsBgColor,
+            backgroundColor: curTheme.styledContants.tipsBgColor,
           }}
         >
           <TableRow>

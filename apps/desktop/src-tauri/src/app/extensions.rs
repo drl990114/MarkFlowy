@@ -4,7 +4,6 @@ use download_npm;
 use serde::{Deserialize, Serialize};
 use std::{
     fs::create_dir,
-    path::Path,
     path::{self, PathBuf},
     vec,
 };
@@ -12,12 +11,10 @@ use std::{
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Extension {
     pub id: String,
-    pub name: String,
     pub path: String,
     // package.json content
     pub pkg: String,
     pub script_text: Option<String>,
-    pub style_text: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -30,7 +27,6 @@ fn build_extension(path: PathBuf) -> Option<Extension> {
     println!("build_extension: {:?}", path);
     let pkg_path = path.join("package.json");
     let script_file_path = path.join("index.js");
-    let style_file_path = path.join("style.css");
 
     if exists(&pkg_path) {
         let pkg = std::fs::read_to_string(pkg_path).unwrap();
@@ -43,19 +39,11 @@ fn build_extension(path: PathBuf) -> Option<Extension> {
             None
         };
 
-        let style_text = if exists(&style_file_path) {
-            Some(std::fs::read_to_string(style_file_path).unwrap())
-        } else {
-            None
-        };
-
         return Some(Extension {
             id: path.file_name().unwrap().to_str().unwrap().to_string(),
-            name: path.file_name().unwrap().to_str().unwrap().to_string(),
             path: path.to_str().unwrap().to_string(),
             pkg,
-            script_text,
-            style_text,
+            script_text
         });
     }
 
@@ -76,7 +64,7 @@ impl AppExtensions {
             create_dir(&Self::dir_path());
         }
 
-        &Self::downloadBuiltInExtensions(self.clone());
+        // &Self::downloadBuiltInExtensions(self.clone());
 
         // load extensions
         let mut extensions = vec![];
