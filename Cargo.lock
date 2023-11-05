@@ -2220,6 +2220,7 @@ dependencies = [
  "anyhow",
  "cocoa 0.25.0",
  "dark-light",
+ "download_npm",
  "file_search",
  "lazy_static",
  "log",

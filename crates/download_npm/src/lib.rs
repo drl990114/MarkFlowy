@@ -60,12 +60,16 @@ pub async fn download(
             let mut entry = entry_result?;
             let path = entry.path()?;
             let mut content = String::new();
-    
+
             // only copy main files
-            if path.clone().ends_with("package.json") || path.ends_with("package/index.js") {
+            if path.clone().ends_with("package.json") || path.ends_with("index.js") || path.ends_with("style.css") {
     
                 let target_dir_path = target_dest_path.parent().unwrap().join(package_name);
-                let target_file_path = target_dir_path.join(path.strip_prefix("package/").unwrap().to_path_buf().clone());
+
+                let file_name = path.file_name().unwrap().to_str().clone().unwrap();
+                let target_file_path = target_dir_path.join(Path::new(file_name));
+
+                // let target_file_path = target_dir_path.join(path.strip_prefix("package/").unwrap().to_path_buf().clone());
     
                 if !target_dir_path.clone().join(path.clone()).exists() {
                     fs::create_dir_all(target_dir_path)?;

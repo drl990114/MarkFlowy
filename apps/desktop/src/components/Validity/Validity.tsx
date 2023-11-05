@@ -3,7 +3,7 @@ import { Container } from './styles'
 type ValidtyProps = {
   invalidText: string
   invalidState: boolean
-} & Global.BaseComponentProps
+} & BaseComponentProps
 
 export const Validity = (props: ValidtyProps) => {
   const { children, invalidText, invalidState, ...otherProps } = props

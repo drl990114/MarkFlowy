@@ -22,3 +22,6 @@ html
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+
+.rollup.cache

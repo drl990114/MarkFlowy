@@ -1,15 +1,14 @@
-import { useGlobalTheme } from "@/hooks"
 import { useCommands } from "@markflowy/editor"
 import { useEffect } from "react"
-import { darkTheme, lightTheme } from '@markflowy/theme'
+import useThemeStore from "@/stores/useThemeStore"
 
 const useChangeCodeMirrorTheme = () => {
-  const { theme } = useGlobalTheme()
+  const { curTheme } = useThemeStore()
   const commands = useCommands()
 
   useEffect(() => {
-    commands.changeCodeMirrorTheme(theme === 'dark' ? darkTheme.codemirorTheme : lightTheme.codemirorTheme)
-  }, [theme, commands])
+    commands.changeCodeMirrorTheme(curTheme.codemirorTheme)
+  }, [curTheme, commands])
 }
 
 export default useChangeCodeMirrorTheme
