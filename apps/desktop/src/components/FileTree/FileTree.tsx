@@ -61,7 +61,7 @@ const FileTree: FC<FileTreeProps> = (props) => {
   )
 }
 
-interface FileTreeProps extends Global.BaseComponentProps {
+interface FileTreeProps extends BaseComponentProps {
   data: IFile[] | null
   activeId?: string
   onSelect: (file: IFile) => void

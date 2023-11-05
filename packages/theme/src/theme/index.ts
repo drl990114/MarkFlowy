@@ -4,7 +4,7 @@ export * from './codemirror'
 import darkCss from './dark.css'
 import lightCss from './light.css'
 import { mfCodemirrorDark, mfCodemirrorLight } from './codemirror'
-import type { CreateThemeOptions} from '@uiw/codemirror-themes'
+import type { CreateThemeOptions } from '@drl990114/codemirror-themes'
 
 const THEME_ID = 'mf-markdown-theme'
 
@@ -14,9 +14,30 @@ export type ThemeColors = typeof lightTheme
 export type ScThemeProps = { theme: ThemeColors }
 
 export type MfTheme = {
+  /**
+   * should be a unique name
+   * @example light
+   */
   name: string
+  /**
+   * light or dark for lib. e.g. mui
+   */
+  type: 'light' | 'dark'
+  /**
+   * Replace styled constants
+   */
   styledContants: Record<string, string>
+  /**
+   * Codemirror theme.
+   */
   codemirorTheme: CreateThemeOptions
+  /**
+   * @example
+   * .example {
+   *    color: blue;
+   * }
+   */
+  globalStyleText?: string
 }
 
 function loadThemeCss(url: string) {
@@ -39,7 +60,7 @@ export function loadTheme(theme: 'light' | 'dark') {
 const common = {
   lineHeightBase: '1.6',
 
-  titleBarHeight: "30px",
+  titleBarHeight: '30px',
 
   fontH1: '28px',
   fontH2: '26px',
@@ -52,7 +73,7 @@ const common = {
   fontXs: '12px',
 
   fontFamily: `'Open Sans', 'Clear Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif`,
-  codemirrorFontFamily: `'DejaVu Sans Mono', 'Source Code Pro', 'Droid Sans Mono', Consolas, monospace`
+  codemirrorFontFamily: `'DejaVu Sans Mono', 'Source Code Pro', 'Droid Sans Mono', Consolas, monospace`,
 }
 
 const styledLightTheme = {
@@ -93,15 +114,16 @@ const styledDarkTheme = {
   scrollbarTrackColor: '#0e1419',
 }
 
-
 export const lightTheme: MfTheme = {
-  name: "light",
+  name: 'MarkFlowy Light',
+  type: 'light',
   styledContants: styledLightTheme,
   codemirorTheme: mfCodemirrorLight
 }
 
 export const darkTheme: MfTheme = {
-  name: "dark",
+  name: 'MarkFlowy Dark',
+  type: 'dark',
   styledContants: styledDarkTheme,
   codemirorTheme: mfCodemirrorDark
 }

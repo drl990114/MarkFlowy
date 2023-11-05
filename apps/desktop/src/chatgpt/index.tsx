@@ -6,7 +6,7 @@ import { parseChatList } from './parseChatList'
 import { BottomBar, Container, ListContainer } from './styles'
 import useChatGPTStore from './useChatGPTStore'
 import { useEditorStore } from '@/stores'
-import { useGlobalSettingData, useGlobalTheme } from '@/hooks'
+import { useGlobalSettingData } from '@/hooks'
 import { createFile } from '@/helper/filesys'
 import { SettingKeys } from '@/router/Setting/settingMap'
 import { RIGHTBARITEMKEYS } from '@/constants'
@@ -14,11 +14,12 @@ import type { RightBarItem } from '@/components/SideBar'
 import { invoke } from '@tauri-apps/api'
 import type { RightNavItem } from '@/components/SideBar/SideBarHeader'
 import SideBarHeader from '@/components/SideBar/SideBarHeader'
+import useThemeStore from '@/stores/useThemeStore'
 
 const ChatList: React.FC<ChatListProps> = (props) => {
   const { chatList, addChat, delChat } = useChatGPTStore()
   const [settingData] = useGlobalSettingData()
-  const { themeData } = useGlobalTheme()
+  const { curTheme } = useThemeStore()
   const apiKey = settingData[SettingKeys.chatgpt]
   const [askInput, setAskInput] = useState('')
   const { addOpenedFile, setActiveId } = useEditorStore()
@@ -111,7 +112,7 @@ const ChatList: React.FC<ChatListProps> = (props) => {
                         type='bubbles'
                         width={35}
                         height={35}
-                        color={themeData.accentColor}
+                        color={curTheme.styledContants.accentColor}
                       />
                     ) : chat.status === 'error' ? (
                       <div>

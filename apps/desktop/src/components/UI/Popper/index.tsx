@@ -7,7 +7,7 @@ import {
 } from '@mui/material'
 import { nanoid } from 'nanoid'
 import React, { memo, useEffect, useMemo, useState } from 'react'
-import { useGlobalTheme } from '@/hooks'
+import useThemeStore from '@/stores/useThemeStore'
 
 interface RePopperProps extends Partial<PopperProps> {
   content: any
@@ -17,7 +17,7 @@ interface RePopperProps extends Partial<PopperProps> {
 }
 const Tooltip: React.FC<RePopperProps> = (props) => {
   const { children, content, onClickAway, ...otherProps } = props
-  const { themeData } = useGlobalTheme()
+  const { curTheme } = useThemeStore()
   const [open, setOpen] = useState(props.open || false)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
 
@@ -52,8 +52,8 @@ const Tooltip: React.FC<RePopperProps> = (props) => {
               <Box
                 sx={{
                   border: 1,
-                  bgcolor: themeData.bgColor,
-                  borderColor: themeData.borderColor,
+                  bgcolor: curTheme.styledContants.bgColor,
+                  borderColor: curTheme.styledContants.borderColor,
                 }}
               >
                 {content}

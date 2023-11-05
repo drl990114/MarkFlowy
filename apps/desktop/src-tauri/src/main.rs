@@ -11,7 +11,7 @@ use std::collections::HashMap;
 use std::path::PathBuf;
 use std::sync::Mutex;
 
-use app::{bookmarks, conf, keybindings, opened_cache};
+use app::{bookmarks, conf, keybindings, opened_cache, extensions};
 use lazy_static::lazy_static;
 use tauri::{Manager, Runtime};
 
@@ -53,7 +53,8 @@ fn main() {
             bookmarks::cmd::add_bookmark,
             bookmarks::cmd::edit_bookmark,
             bookmarks::cmd::remove_bookmark,
-            search::cmd::search_files
+            search::cmd::search_files,
+            extensions::cmd::extensions_init,
         ])
         .plugin(tauri_plugin_app::init())
         .plugin(tauri_plugin_store::Builder::default().build())

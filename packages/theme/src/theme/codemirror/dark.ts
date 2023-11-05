@@ -1,5 +1,5 @@
 import { tags as t } from '@lezer/highlight'
-import type { CreateThemeOptions} from '@uiw/codemirror-themes'
+import type { CreateThemeOptions} from '@drl990114/codemirror-themes'
 
 export const mfCodemirrorDark: CreateThemeOptions = {
   theme: 'dark',

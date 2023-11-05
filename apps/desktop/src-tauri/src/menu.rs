@@ -10,23 +10,23 @@ pub fn generate_menu(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
     let app_conf = AppConf::read();
     let _keyboard_infos = Keybindings::read();
 
-    let is_dark = app_conf.clone().theme_check("dark");
+    // let is_dark = app_conf.clone().theme_check("dark");
 
-    let theme_menu_light_item = CheckMenuItemBuilder::new("Light")
-        .checked(!is_dark)
-        .id("theme_light")
-        .build(app);
-    let theme_menu_dark_item = CheckMenuItemBuilder::new("Dark")
-        .checked(is_dark)
-        .id("theme_dark")
-        .build(app);
+    // let theme_menu_light_item = CheckMenuItemBuilder::new("Light")
+    //     .checked(!is_dark)
+    //     .id("theme_light")
+    //     .build(app);
+    // let theme_menu_dark_item = CheckMenuItemBuilder::new("Dark")
+    //     .checked(is_dark)
+    //     .id("theme_dark")
+    //     .build(app);
 
-    let theme_submenu = &Submenu::with_items(
-        app,
-        "Theme",
-        true,
-        &[&theme_menu_light_item, &theme_menu_dark_item],
-    )?;
+    // let theme_submenu = &Submenu::with_items(
+    //     app,
+    //     "Theme",
+    //     true,
+    //     &[&theme_menu_light_item, &theme_menu_dark_item],
+    // )?;
 
     let menu_handler = move |app: &AppHandle, event: MenuEvent| {
         let menu_id = event.id().as_ref();
@@ -38,27 +38,27 @@ pub fn generate_menu(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
             .expect("failed to emit");
 
         match menu_id {
-            "theme_light" | "theme_dark" => {
-                let theme = match menu_id {
-                    "theme_dark" => "dark",
-                    _ => "light",
-                };
-                AppConf::read()
-                    .amend(serde_json::json!({ "theme": theme }))
-                    .write();
+            // "theme_light" | "theme_dark" => {
+            //     let theme = match menu_id {
+            //         "theme_dark" => "dark",
+            //         _ => "light",
+            //     };
+            //     AppConf::read()
+            //         .amend(serde_json::json!({ "theme": theme }))
+            //         .write();
 
-                if theme == "light" {
-                    let _ = theme_menu_light_item.set_checked(true);
-                    let _ = theme_menu_dark_item.set_checked(false);
-                } else {
-                    let _ = theme_menu_light_item.set_checked(false);
-                    let _ = theme_menu_dark_item.set_checked(true);
-                }
+            //     if theme == "light" {
+            //         let _ = theme_menu_light_item.set_checked(true);
+            //         let _ = theme_menu_dark_item.set_checked(false);
+            //     } else {
+            //         let _ = theme_menu_light_item.set_checked(false);
+            //         let _ = theme_menu_dark_item.set_checked(true);
+            //     }
 
-                app.emit_all("change_theme", theme)
-                    .map_err(|err| println!("{:?}", err))
-                    .ok();
-            }
+            //     app.emit_all("change_theme", theme)
+            //         .map_err(|err| println!("{:?}", err))
+            //         .ok();
+            // }
             "About" => {
                 app.emit_to(focused_window, "dialog_setting_about", {})
                     .map_err(|err| println!("{:?}", err))
@@ -119,7 +119,6 @@ pub fn generate_menu(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
                     .id("editor:dialog_create_table")
                     .build(app)],
             )?,
-            theme_submenu,
             &Submenu::with_items(
                 app,
                 "View",

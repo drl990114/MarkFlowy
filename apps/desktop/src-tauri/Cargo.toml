@@ -29,6 +29,7 @@ tauri-plugin-clipboard-manager = "2.0.0-alpha"
 regex = "1.10.2"
 mf-utils = { path = "../../../crates/utils" }
 file_search = { path = "../../../crates/file_search" }
+download_npm = { path = "../../../crates/download_npm" }
 lazy_static = "1.4.0"
 
 [target."cfg(any(target_os = \"windows\", target_os = \"macos\"))".dependencies]

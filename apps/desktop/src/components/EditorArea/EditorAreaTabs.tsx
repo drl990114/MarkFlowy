@@ -1,10 +1,11 @@
 import { getFileObject } from '@/helper/files'
 import type { IFile } from '@/helper/filesys'
-import { useAutoAnimate, useGlobalTheme } from '@/hooks'
+import { useAutoAnimate } from '@/hooks'
 import { useEditorStore, useEditorStateStore } from '@/stores'
 import { memo, useEffect } from 'react'
 import { TabItem, Dot } from './styles'
 import styled, { css } from 'styled-components'
+import useThemeStore from '@/stores/useThemeStore'
 
 type ContainerProps = {
   visible: boolean
@@ -19,7 +20,7 @@ const Container = styled.div<ContainerProps>`
 const EditorAreaTabs = memo(() => {
   const { opened, activeId, setActiveId, delOpenedFile } = useEditorStore()
   const { idStateMap } = useEditorStateStore()
-  const { themeData } = useGlobalTheme()
+  const { curTheme } = useThemeStore()
   const { htmlRef } = useAutoAnimate<HTMLDivElement>()
 
   useEffect(() => {
@@ -58,7 +59,7 @@ const EditorAreaTabs = memo(() => {
         return (
           <TabItem active={active} onClick={() => onSelectItem(file.id)} key={id}>
             <i className={'ri-file-3-line tab-items__icon'} />
-            <span style={{ color: active ? themeData.accentColor : '' }}>{file.name}</span>
+            <span style={{ color: active ? curTheme.styledContants.accentColor : '' }}>{file.name}</span>
 
             {editorState?.hasUnsavedChanges ? (
               <Dot />
