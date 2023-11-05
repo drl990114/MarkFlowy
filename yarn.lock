@@ -4991,7 +4991,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@markflowy/runtime-api@^0.0.4, @markflowy/runtime-api@workspace:core/runtime-api":
+"@markflowy/runtime-api@workspace:core/runtime-api":
   version: 0.0.0-use.local
   resolution: "@markflowy/runtime-api@workspace:core/runtime-api"
   dependencies:
@@ -5010,19 +5010,6 @@ __metadata:
     eslint: ">=7.4.0"
   languageName: unknown
   linkType: soft
-
-"@markflowy/theme@npm:^0.0.3":
-  version: 0.0.3
-  resolution: "@markflowy/theme@npm:0.0.3"
-  dependencies:
-    "@lezer/highlight": ^1.1.6
-    react: ^18.2.0
-    styled-components: ^6.1.0
-  peerDependencies:
-    eslint: ">=7.4.0"
-  checksum: a1bd5ac81ed3a29ca6540d2a4647e4865baf2fa4cf1f3fd619c62eb052106558ec4fb4f8b012061cb7215978d3093535e4f5d9e387458c843fd95e9f4b7cf27e
-  languageName: node
-  linkType: hard
 
 "@markflowy/theme@workspace:*, @markflowy/theme@workspace:packages/theme":
   version: 0.0.0-use.local
@@ -9181,31 +9168,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/eslint-plugin@npm:6.9.0":
-  version: 6.9.0
-  resolution: "@typescript-eslint/eslint-plugin@npm:6.9.0"
-  dependencies:
-    "@eslint-community/regexpp": ^4.5.1
-    "@typescript-eslint/scope-manager": 6.9.0
-    "@typescript-eslint/type-utils": 6.9.0
-    "@typescript-eslint/utils": 6.9.0
-    "@typescript-eslint/visitor-keys": 6.9.0
-    debug: ^4.3.4
-    graphemer: ^1.4.0
-    ignore: ^5.2.4
-    natural-compare: ^1.4.0
-    semver: ^7.5.4
-    ts-api-utils: ^1.0.1
-  peerDependencies:
-    "@typescript-eslint/parser": ^6.0.0 || ^6.0.0-alpha
-    eslint: ^7.0.0 || ^8.0.0
-  peerDependenciesMeta:
-    typescript:
-      optional: true
-  checksum: 51d7afc18bab711e20147f7163083f05435b6860174169eae56de217ed2cb1b3c08cba01b7d338315c2d8ecb982e83ce8f2ca7d2108c1c7c04faff2001b094d3
-  languageName: node
-  linkType: hard
-
 "@typescript-eslint/eslint-plugin@npm:^5.57.0":
   version: 5.62.0
   resolution: "@typescript-eslint/eslint-plugin@npm:5.62.0"
@@ -9252,24 +9214,6 @@ __metadata:
     typescript:
       optional: true
   checksum: d81525c9a081186ec1ae7d957972065d50bae8fe4b3de111e573adc7267bb830baaec8f1ae47d3b937984ac34324bacc3951868b7986d4f9974bbe480f2261c0
-  languageName: node
-  linkType: hard
-
-"@typescript-eslint/parser@npm:6.9.0":
-  version: 6.9.0
-  resolution: "@typescript-eslint/parser@npm:6.9.0"
-  dependencies:
-    "@typescript-eslint/scope-manager": 6.9.0
-    "@typescript-eslint/types": 6.9.0
-    "@typescript-eslint/typescript-estree": 6.9.0
-    "@typescript-eslint/visitor-keys": 6.9.0
-    debug: ^4.3.4
-  peerDependencies:
-    eslint: ^7.0.0 || ^8.0.0
-  peerDependenciesMeta:
-    typescript:
-      optional: true
-  checksum: d8ff69d236d6495474ab93c67e2785cc94bf9c098f25c33f1c5958a4b2b5af2b70edf1cdd0c23ee3436df454a769e80eb47d2d34df8382a826fcdb79bac4382d
   languageName: node
   linkType: hard
 
@@ -9328,16 +9272,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/scope-manager@npm:6.9.0":
-  version: 6.9.0
-  resolution: "@typescript-eslint/scope-manager@npm:6.9.0"
-  dependencies:
-    "@typescript-eslint/types": 6.9.0
-    "@typescript-eslint/visitor-keys": 6.9.0
-  checksum: b7ddcea11bdb95107659800bdf3b33eae22a4dc5c28dc0f8dc5507aa9affaae0e332b6d8c7d5286a7ec75e7c4abd211eb9fdf9647a9a796689cdcc11f6ab40c6
-  languageName: node
-  linkType: hard
-
 "@typescript-eslint/type-utils@npm:5.62.0":
   version: 5.62.0
   resolution: "@typescript-eslint/type-utils@npm:5.62.0"
@@ -9372,23 +9306,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/type-utils@npm:6.9.0":
-  version: 6.9.0
-  resolution: "@typescript-eslint/type-utils@npm:6.9.0"
-  dependencies:
-    "@typescript-eslint/typescript-estree": 6.9.0
-    "@typescript-eslint/utils": 6.9.0
-    debug: ^4.3.4
-    ts-api-utils: ^1.0.1
-  peerDependencies:
-    eslint: ^7.0.0 || ^8.0.0
-  peerDependenciesMeta:
-    typescript:
-      optional: true
-  checksum: 279b0000cd2fe7ccfbd2f311736b14c8bb9287081f553c9452c95966650c822e67442ba5a62d7fea3ee2f61ccc0fcb218f21e1ee7ccf3984c52e5942d2bbb065
-  languageName: node
-  linkType: hard
-
 "@typescript-eslint/types@npm:5.62.0":
   version: 5.62.0
   resolution: "@typescript-eslint/types@npm:5.62.0"
@@ -9400,13 +9317,6 @@ __metadata:
   version: 6.5.0
   resolution: "@typescript-eslint/types@npm:6.5.0"
   checksum: 950ec16991d71494d10cb752535bbc4395295e3f03a716d53ec55bbb0aaff487aa774cc5002f775ffcc80b9f0e16ac53ecebf7cac1444ca4f7a847b0859ffbfb
-  languageName: node
-  linkType: hard
-
-"@typescript-eslint/types@npm:6.9.0":
-  version: 6.9.0
-  resolution: "@typescript-eslint/types@npm:6.9.0"
-  checksum: e0444afa1f2ebca746c72b3d0bf95982eb1e8b4fb91bcba465c1345c35fa13b36c589bfd91c776b864f223bc50817b2613df5892185c2e34332bf4cc57cc865d
   languageName: node
   linkType: hard
 
@@ -9446,24 +9356,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/typescript-estree@npm:6.9.0":
-  version: 6.9.0
-  resolution: "@typescript-eslint/typescript-estree@npm:6.9.0"
-  dependencies:
-    "@typescript-eslint/types": 6.9.0
-    "@typescript-eslint/visitor-keys": 6.9.0
-    debug: ^4.3.4
-    globby: ^11.1.0
-    is-glob: ^4.0.3
-    semver: ^7.5.4
-    ts-api-utils: ^1.0.1
-  peerDependenciesMeta:
-    typescript:
-      optional: true
-  checksum: 51088c23cca608a6e5c195b0a2d8a17ad00ca47199ba4df0c1013912a80194bff9f5bd4d035d6ab2596788491e9a3e04bbf6cad6494a3b1bbd59fea442750268
-  languageName: node
-  linkType: hard
-
 "@typescript-eslint/utils@npm:5.62.0, @typescript-eslint/utils@npm:^5.10.0, @typescript-eslint/utils@npm:^5.57.0":
   version: 5.62.0
   resolution: "@typescript-eslint/utils@npm:5.62.0"
@@ -9499,23 +9391,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/utils@npm:6.9.0":
-  version: 6.9.0
-  resolution: "@typescript-eslint/utils@npm:6.9.0"
-  dependencies:
-    "@eslint-community/eslint-utils": ^4.4.0
-    "@types/json-schema": ^7.0.12
-    "@types/semver": ^7.5.0
-    "@typescript-eslint/scope-manager": 6.9.0
-    "@typescript-eslint/types": 6.9.0
-    "@typescript-eslint/typescript-estree": 6.9.0
-    semver: ^7.5.4
-  peerDependencies:
-    eslint: ^7.0.0 || ^8.0.0
-  checksum: 973c24d7858f224934958ee58c21ff21dfe54dbb1d0e0c5f889298fadcd7ee2dbfd49cf86ccafab74d428c31de66cd9beee7c39d2b64f9edcc9e941573bac175
-  languageName: node
-  linkType: hard
-
 "@typescript-eslint/visitor-keys@npm:5.62.0":
   version: 5.62.0
   resolution: "@typescript-eslint/visitor-keys@npm:5.62.0"
@@ -9533,16 +9408,6 @@ __metadata:
     "@typescript-eslint/types": 6.5.0
     eslint-visitor-keys: ^3.4.1
   checksum: 768a02dd0d8aae45708646bb0c51e67da09e71dc101bb0a0e55d7e0c8eadfea2f531acd3035d1ec34bf2380b66188f3fc47c6bef0201eae36b2dcc48d1934442
-  languageName: node
-  linkType: hard
-
-"@typescript-eslint/visitor-keys@npm:6.9.0":
-  version: 6.9.0
-  resolution: "@typescript-eslint/visitor-keys@npm:6.9.0"
-  dependencies:
-    "@typescript-eslint/types": 6.9.0
-    eslint-visitor-keys: ^3.4.1
-  checksum: de8e2e363df41e5ae9774a5ebd1c49d29c771ea8b3869917f65a74cd4d14a67417c79916f456ee81ef5b0d947b7b8975385fc6eea3f1812d53a2eaaea832459e
   languageName: node
   linkType: hard
 
@@ -17668,32 +17533,6 @@ __metadata:
     rollup-plugin-postcss: ^4.0.2
     rollup-plugin-url: ^3.0.1
     typescript: ^5.1.3
-  languageName: unknown
-  linkType: soft
-
-"markflowy-theme-template@workspace:templates/custom-theme":
-  version: 0.0.0-use.local
-  resolution: "markflowy-theme-template@workspace:templates/custom-theme"
-  dependencies:
-    "@drl990114/codemirror-themes": ^0.0.1
-    "@lezer/highlight": ^1.1.6
-    "@markflowy/runtime-api": ^0.0.4
-    "@markflowy/theme": ^0.0.3
-    "@rollup/plugin-node-resolve": 15.2.3
-    "@rollup/plugin-terser": 0.4.4
-    "@rollup/plugin-typescript": 11.1.5
-    "@types/codemirror": ^5.60.9
-    "@typescript-eslint/eslint-plugin": 6.9.0
-    "@typescript-eslint/parser": 6.9.0
-    postcss: ^8.4.31
-    postcss-import: ^15.1.0
-    postcss-nested: ^6.0.1
-    rimraf: ^5.0.1
-    rollup: 3.29.4
-    rollup-plugin-postcss: ^4.0.2
-    typescript: ^5.1.3
-  peerDependencies:
-    eslint: ">=7.4.0"
   languageName: unknown
   linkType: soft
 
