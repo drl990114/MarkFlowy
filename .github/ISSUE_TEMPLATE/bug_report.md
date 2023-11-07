@@ -1,8 +1,8 @@
 ---
 name: Bug report
 about: Create a report to help us improve
-title: "[BUG]: a bug"
-labels: bug
+title: "a bug"
+labels: "status: needs triage"
 assignees: 'drl990114'
 
 ---
