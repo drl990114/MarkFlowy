@@ -1,8 +1,13 @@
-import type { CreateThemeOptions } from '@/codemirror'
 import type { Extension as CodeMirrorExtension } from '@codemirror/state'
 import type { ProsemirrorAttributes } from '@remirror/core'
 
 export interface CodeMirrorExtensionOptions {
+  /**
+   * Whether to hide the decoration.
+   *
+   * @defaultValue false
+   */
+  hideDecoration?: boolean;
   /**
    * The CodeMirror extensions to use.
    *
@@ -23,11 +28,6 @@ export interface CodeMirrorExtensionOptions {
    * @defaultValue "paragraph"
    */
   toggleName?: string;
-
-  /**
-   * The codemirror theme options to create use.
-   */
-  createThemeOptions?: CreateThemeOptions;
 }
 
 export interface CodeMirrorExtensionAttributes extends ProsemirrorAttributes {
