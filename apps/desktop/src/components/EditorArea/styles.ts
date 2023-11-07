@@ -26,7 +26,7 @@ export const Container = styled.div`
   }
 
   .editor-area-header {
-    padding: 8px;
+    padding: 0 0.5rem;
     position: absolute;
     right: 6px;
     top: 28px;
@@ -34,6 +34,7 @@ export const Container = styled.div`
     align-items: center;
     justify-content: flex-end;
     box-sizing: border-box;
+    z-index: 10;
   }
 
   .code-contents {

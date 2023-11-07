@@ -29,11 +29,14 @@ export const Container = styled.div`
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 4px;
+    padding: 8px 4px;
     padding-left: 8px;
-    border-top: 1px solid ${(props) => props.theme.borderColor};
     opacity: 0;
     transition: all 0.3s ease-in-out;
+
+    &__action {
+      flex: 1
+    }
   }
 
   .border-t-1-solid {

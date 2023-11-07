@@ -68,7 +68,6 @@ const Explorer: FC<ExplorerProps> = (props) => {
       <div className='h-full w-full overflow-auto'>
         {folderData && folderData.length > 0 ? (
           <FileTree
-            className='flex-1'
             data={folderData}
             activeId={activeId}
             onSelect={handleSelect}
@@ -78,7 +77,7 @@ const Explorer: FC<ExplorerProps> = (props) => {
         )}
       </div>
       <div className='explorer-bottom'>
-        <small className='flex-1 cursor-pointer' onClick={openFolderDialog}>
+        <small className='explorer-bottom__action cursor-pointer' onClick={openFolderDialog}>
           {t('file.openDir')}
         </small>
         <Popper

@@ -15,7 +15,10 @@ export const GlobalStyles = createGlobalStyle`
   }
 
   .icon {
-    padding: 8px;
+    height: 32px;
+    width: 32px;
+    text-align: center;
+    line-height: 32px;
     font-size: 1rem;
     cursor: pointer;
 
