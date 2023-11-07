@@ -36,15 +36,14 @@ import type { CodeMirrorExtensionAttributes, CodeMirrorExtensionOptions } from '
 import { arrowHandler } from './codemirror-utils'
 import type { CreateThemeOptions} from '@/codemirror'
 import { changeTheme } from '@/codemirror'
-import { lightTheme } from '@markflowy/theme'
 import { languages } from '@codemirror/language-data'
 
 export const fakeIndentedLanguage = 'indent-code'
 
 @extension<CodeMirrorExtensionOptions>({
   defaultOptions: {
+    hideDecoration: false,
     extensions: null,
-    createThemeOptions: lightTheme.codemirorTheme as CreateThemeOptions,
     toggleName: 'paragraph',
   },
 })
@@ -265,6 +264,10 @@ export class LineCodeMirrorExtension extends NodeExtension<CodeMirrorExtensionOp
   }
 
   createDecorations(state: EditorState): DecorationSet {
+    if (this.options.hideDecoration) {
+      return DecorationSet.empty
+    }
+
     const found = findParentNodeOfType({ types: this.type, selection: state.selection })
     if (!found) {
       return DecorationSet.empty
