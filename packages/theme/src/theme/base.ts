@@ -324,44 +324,43 @@ export const BaseStyle = styled.createGlobalStyle`
   .markdown-body h4,
   .markdown-body h5,
   .markdown-body h6 {
-    padding: 0.2em 0;
     margin: 0;
     line-height: 1;
   }
 
   .markdown-body h1 {
     font-weight: 600;
-    padding: 0.4em 0;
+    padding: 10px 0 20px 0;
     font-size: ${(props) => props.theme.fontH1};
   }
 
   .markdown-body h2 {
     font-weight: 600;
-    padding: 0.4em 0;
+    padding: 10px 0 20px 0;
     font-size: ${(props) => props.theme.fontH2};
   }
 
   .markdown-body h3 {
     font-weight: 600;
-    padding: 0.4em 0;
+    padding: 10px 0 20px 0;
     font-size: ${(props) => props.theme.fontH3};
   }
 
   .markdown-body h4 {
     font-weight: 600;
-    padding: 0.4em 0;
+    padding: 10px 0 20px 0;
     font-size: ${(props) => props.theme.fontH4};
   }
 
   .markdown-body h5 {
     font-weight: 600;
-    padding: 0.3em 0;
+    padding: 6px 0 16px 0;
     font-size: ${(props) => props.theme.fontH5};
   }
 
   .markdown-body h6 {
     font-weight: 600;
-    padding: 0.3em 0;
+    padding: 6px 0 16px 0;
     font-size: ${(props) => props.theme.fontH6};
   }
 
