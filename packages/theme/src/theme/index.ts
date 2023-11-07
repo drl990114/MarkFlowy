@@ -6,10 +6,6 @@ import lightCss from './light.css'
 import { mfCodemirrorDark, mfCodemirrorLight } from './codemirror'
 import type { CreateThemeOptions } from '@drl990114/codemirror-themes'
 
-const THEME_ID = 'mf-markdown-theme'
-
-let themeEl: undefined | HTMLStyleElement
-
 export type ThemeColors = typeof lightTheme
 export type ScThemeProps = { theme: ThemeColors }
 
@@ -38,23 +34,6 @@ export type MfTheme = {
    * }
    */
   globalStyleText?: string
-}
-
-function loadThemeCss(url: string) {
-  if (themeEl) themeEl.remove()
-
-  themeEl = document.createElement('style')
-  themeEl.setAttribute('id', THEME_ID)
-  themeEl.innerHTML = url
-  document.head.appendChild(themeEl)
-}
-
-export function loadTheme(theme: 'light' | 'dark') {
-  if (theme === 'light') {
-    loadThemeCss(lightCss)
-  } else {
-    loadThemeCss(darkCss)
-  }
 }
 
 const common = {
@@ -118,12 +97,14 @@ export const lightTheme: MfTheme = {
   name: 'MarkFlowy Light',
   type: 'light',
   styledContants: styledLightTheme,
-  codemirorTheme: mfCodemirrorLight
+  codemirorTheme: mfCodemirrorLight,
+  globalStyleText: lightCss
 }
 
 export const darkTheme: MfTheme = {
   name: 'MarkFlowy Dark',
   type: 'dark',
   styledContants: styledDarkTheme,
-  codemirorTheme: mfCodemirrorDark
+  codemirorTheme: mfCodemirrorDark,
+  globalStyleText: darkCss
 }
