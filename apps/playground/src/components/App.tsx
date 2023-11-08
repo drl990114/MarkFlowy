@@ -1,13 +1,15 @@
-import './App.css'
-
 import { FC } from 'react'
 
 import { WysiwygEditor as Editor } from '@markflowy/editor'
-import { BaseStyle, lightTheme } from '@markflowy/theme'
-
+import { BaseStyle, darkTheme } from '@markflowy/theme'
+import { ThemeProvider, StyleSheetManager } from 'styled-components'
 import { contentMap } from '../content'
 import useContent from '../hooks/use-content'
 import useDevTools from '../hooks/use-devtools'
+import isPropValid from '@emotion/is-prop-valid'
+import 'remixicon/fonts/remixicon.css'
+import useChangeCodeMirrorTheme from '../hooks/useChangeCodeMirrorTheme'
+import './App.css'
 
 const DebugButton: FC<{ enableDevTools: boolean; toggleEnableDevTools: () => void }> = ({
   enableDevTools,
@@ -79,7 +81,6 @@ const DebugConsole: FC<{
           whiteSpace: 'pre-wrap',
           fontFamily: 'monospace',
           marginBottom: '16px',
-          backgroundColor: '#f6f8fa',
           fontSize: '85%',
           borderRadius: '3px',
           padding: '16px',
@@ -99,7 +100,7 @@ const App: FC = () => {
 
   const editor = (
     <div className='playground-self-scroll'>
-      <Editor key={contentId} content={content} isTesting/>
+      <Editor key={contentId} content={content} offset={{ top: 10, left: 16 }} hooks={[useChangeCodeMirrorTheme]}/>
     </div>
   )
 
@@ -115,17 +116,21 @@ const App: FC = () => {
   ) : null
 
   return (
-    <div style={{ width: '100%' }}>
-      <BaseStyle theme={lightTheme.styledContants} />
-      <DebugButton
-        enableDevTools={enableDevTools}
-        toggleEnableDevTools={() => setEnableDevTools(!enableDevTools)}
-      />
-      <div className='playground-box'>
-        {editor}
-        {debugConsole}
-      </div>
-      <BlurHelper />
+    <div className='markdown-body' style={{ width: '100%' }}>
+      <StyleSheetManager shouldForwardProp={isPropValid}>
+        <ThemeProvider theme={darkTheme?.styledContants || {}}>
+          <BaseStyle theme={darkTheme.styledContants} />
+          <DebugButton
+            enableDevTools={enableDevTools}
+            toggleEnableDevTools={() => setEnableDevTools(!enableDevTools)}
+          />
+          <div className='playground-box'>
+            {editor}
+            {debugConsole}
+          </div>
+          <BlurHelper />
+        </ThemeProvider>
+      </StyleSheetManager>
     </div>
   )
 }

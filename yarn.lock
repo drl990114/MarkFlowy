@@ -4947,6 +4947,7 @@ __metadata:
     micromark-extension-gfm-strikethrough: ^1.0.7
     nanoid: ^4.0.2
     prosemirror-flat-list: ^0.4.2
+    prosemirror-paste-rules: ^2.0.7
     punycode: ^2.3.0
     react: ^18.2.0
     react-dom: ^18.2.0
@@ -4986,6 +4987,8 @@ __metadata:
     eslint-plugin-react-refresh: ^0.4.3
     react: ^18.2.0
     react-dom: ^18.2.0
+    remixicon: ^3.5.0
+    styled-components: ^6.1.1
     typescript: ^5.0.2
     vite: ^4.4.9
   languageName: unknown
@@ -23066,6 +23069,26 @@ plugin-image-zoom@ataft/plugin-image-zoom:
     react: ">= 16.8.0"
     react-dom: ">= 16.8.0"
   checksum: 989262a2be35f09fc0a277da9ed21280d11e0de90e4160d4c0612faed3f4bf2d1667f227e3ee1393a0bf037869075e5c3b4160627777dc7cc533fed89c6d64e0
+  languageName: node
+  linkType: hard
+
+"styled-components@npm:^6.1.1":
+  version: 6.1.1
+  resolution: "styled-components@npm:6.1.1"
+  dependencies:
+    "@emotion/is-prop-valid": ^1.2.1
+    "@emotion/unitless": ^0.8.0
+    "@types/stylis": ^4.0.2
+    css-to-react-native: ^3.2.0
+    csstype: ^3.1.2
+    postcss: ^8.4.31
+    shallowequal: ^1.1.0
+    stylis: ^4.3.0
+    tslib: ^2.5.0
+  peerDependencies:
+    react: ">= 16.8.0"
+    react-dom: ">= 16.8.0"
+  checksum: d062ba473014a551ed76f4876feaccebc06aaa8dc2849c9d72f67420701dbc7d7c9af1dfa5207b2ad5df9b2e122ddf9e5fe6b6b69ba4d93c4c702abdff19435a
   languageName: node
   linkType: hard
 
