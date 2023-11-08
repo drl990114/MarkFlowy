@@ -38,6 +38,8 @@ Table:
 | ------------- | ------------- |
 | Content Cell  | Content Cell  |
 
+paragraph
+
 `.trim(),
 ].join("\n")
 
