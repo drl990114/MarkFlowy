@@ -239,7 +239,6 @@ const autoHideMarks: Record<string, true> = {
   mdLinkUri: true,
   mdImgText: true,
   mdImgUri: true,
-  mdHtmlInline: true,
 }
 
 export function isAutoHideMark(name: string): boolean {

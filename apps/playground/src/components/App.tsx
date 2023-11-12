@@ -100,7 +100,13 @@ const App: FC = () => {
 
   const editor = (
     <div className='playground-self-scroll'>
-      <Editor key={contentId} content={content} offset={{ top: 10, left: 16 }} hooks={[useChangeCodeMirrorTheme]}/>
+      <Editor
+        key={contentId}
+        content={content}
+        offset={{ top: 10, left: 16 }}
+        hooks={[useChangeCodeMirrorTheme]}
+        isTesting
+      />
     </div>
   )
 

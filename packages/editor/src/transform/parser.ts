@@ -4,9 +4,12 @@ import MarkdownIt from '@/markdown-it'
 import type Token from '@/markdown-it/lib/token'
 
 import markdownItListCheckbox from './markdown-it-list-checkbox'
+import markdownItHtmlInline from './markdown-it-html-inline'
+
 import type {
   BlockParserRule,
   ContextParserRule,
+  InlineParserRule,
   ParserRule,
   ParserRuleContext,
   TextParserRule,
@@ -174,6 +177,24 @@ function buildContextTokenHandler(parserRule: ContextParserRule, handlers: Token
   }
 }
 
+function buildInlineNodeHandler(
+  parserRule: InlineParserRule,
+  handlers: TokenHandlers,
+  schema: Schema,
+) {
+  const nodeType: NodeType = schema.nodes[parserRule.token]
+  if (nodeType === undefined) {
+    throw new RangeError(`Can't find inline type '${parserRule.token}'`)
+  }
+  handlers[parserRule.token] = (state: MarkdownParseState, tok: Token) => {
+    const attrs = parserRule.getAttrs ? parserRule.getAttrs(tok) : null
+    const inlinNode = schema.nodes[tok.type]?.createAndFill(attrs)
+    if (inlinNode) {
+      state.push(inlinNode)
+    }
+  }
+}
+
 function buildTextTokenHandler(parserRule: TextParserRule, handlers: TokenHandlers): void {
   handlers[parserRule.token] = (state: MarkdownParseState, tok: Token) => {
     state.addText(parserRule.getText(tok))
@@ -196,6 +217,9 @@ function buildTokenHandlers(schema: Schema, parserRules: ParserRule[]): TokenHan
       case ParserRuleType.ignore:
         handlers[parserRule.token] = () => {}
         break
+      case ParserRuleType.inline:
+        buildInlineNodeHandler(parserRule, handlers, schema)
+        break
       case ParserRuleType.free:
         handlers[parserRule.token] = parserRule.handler
         break
@@ -217,6 +241,7 @@ export class MarkdownParser {
     this.tokenizer = MarkdownIt('commonmark', { html: true })
       .disable(['emphasis', 'autolink', 'backticks', 'entity'])
       .enable(['table'])
+      .use(markdownItHtmlInline)
       .use(markdownItListCheckbox)
 
     this.tokenHandlers = buildTokenHandlers(schema, parserRules)
@@ -226,6 +251,7 @@ export class MarkdownParser {
     const state = new MarkdownParseState(this.schema, this.tokenHandlers)
     let doc: Node
     const mdTokens: Token[] = this.tokenizer.parse(text, {})
+    console.log('tokens', mdTokens)
     state.parseTokens(mdTokens)
     do {
       doc = state.closeNode()
