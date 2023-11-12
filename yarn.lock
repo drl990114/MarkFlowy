@@ -4608,7 +4608,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@lezer/lr@npm:1.3.9, @lezer/lr@npm:^1.0.0, @lezer/lr@npm:^1.1.0, @lezer/lr@npm:^1.3.0, @lezer/lr@npm:^1.3.1, @lezer/lr@npm:^1.3.3":
+"@lezer/lr@npm:1.3.14":
+  version: 1.3.14
+  resolution: "@lezer/lr@npm:1.3.14"
+  dependencies:
+    "@lezer/common": ^1.0.0
+  checksum: 07be41edcb6c332a3567436d2c626131544181c4d680811baf23f6157db3dce4ebfef325cbd0b88dc8b128b83fbe6363c5dcf3e0a4ff369ddfae05d9f207daee
+  languageName: node
+  linkType: hard
+
+"@lezer/lr@npm:^1.0.0, @lezer/lr@npm:^1.1.0, @lezer/lr@npm:^1.3.0, @lezer/lr@npm:^1.3.1, @lezer/lr@npm:^1.3.3":
   version: 1.3.9
   resolution: "@lezer/lr@npm:1.3.9"
   dependencies:
@@ -4886,7 +4895,7 @@ __metadata:
     "@hyrious/esbuild-plugin-commonjs": ^0.2.2
     "@lezer/common": 1.0.3
     "@lezer/highlight": ^1.1.6
-    "@lezer/lr": 1.3.9
+    "@lezer/lr": 1.3.14
     "@markflowy/theme": "workspace:*"
     "@mui/material": 5.14.6
     "@remirror/core": ^2.0.17
