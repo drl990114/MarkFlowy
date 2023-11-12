@@ -4,7 +4,6 @@ import MarkdownIt from '@/markdown-it'
 import type Token from '@/markdown-it/lib/token'
 
 import markdownItListCheckbox from './markdown-it-list-checkbox'
-import markdownItHtmlInline from './markdown-it-html-inline'
 
 import type {
   BlockParserRule,
@@ -101,6 +100,7 @@ export class MarkdownParseState {
 
   // Add a node at the current position.
   public addNode(type: NodeType, attrs?: Record<string, any>, content?: Node[]): Node {
+    console.log('addNode', type, attrs, content, this.marks)
     const node = type.createAndFill(attrs, content, this.marks)
     if (!node) {
       throw new Error(`unexpected error: node is empty while creating ${type.name} node`)
@@ -241,7 +241,6 @@ export class MarkdownParser {
     this.tokenizer = MarkdownIt('commonmark', { html: true })
       .disable(['emphasis', 'autolink', 'backticks', 'entity'])
       .enable(['table'])
-      .use(markdownItHtmlInline)
       .use(markdownItListCheckbox)
 
     this.tokenHandlers = buildTokenHandlers(schema, parserRules)
