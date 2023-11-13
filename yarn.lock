@@ -17585,7 +17585,7 @@ __metadata:
     postcss: ^8.4.31
     postcss-import: ^15.1.0
     postcss-nested: ^6.0.1
-    prettier: ^3.0.2
+    prettier: ^3.1.0
     rollup: 3.29.4
     rollup-plugin-postcss: ^4.0.2
     rollup-plugin-url: ^3.0.1
@@ -20079,12 +20079,12 @@ plugin-image-zoom@ataft/plugin-image-zoom:
   languageName: node
   linkType: hard
 
-"prettier@npm:^3.0.2":
-  version: 3.0.2
-  resolution: "prettier@npm:3.0.2"
+"prettier@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "prettier@npm:3.1.0"
   bin:
     prettier: bin/prettier.cjs
-  checksum: 118b59ddb6c80abe2315ab6d0f4dd1b253be5cfdb20622fa5b65bb1573dcd362e6dd3dcf2711dd3ebfe64aecf7bdc75de8a69dc2422dcd35bdde7610586b677a
+  checksum: 44b556bd56f74d7410974fbb2418bb4e53a894d3e7b42f6f87779f69f27a6c272fa7fc27cec0118cd11730ef3246478052e002cbd87e9a253f9cd04a56aa7d9b
   languageName: node
   linkType: hard
 
