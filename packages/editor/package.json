@@ -68,7 +68,7 @@
     "@remirror/types": "^1.0.1",
     "@uiw/codemirror-themes": "^4.21.18",
     "create-context-state": "^2.0.0",
-    "entities": "~3.0.1",
+    "entities": "~4.5.0",
     "fuse.js": "^6.6.2",
     "jsx-dom-cjs": "^8.0.7",
     "linkify-it": "^4.0.1",

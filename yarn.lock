@@ -4935,7 +4935,7 @@ __metadata:
     "@vitest/browser": ^0.34.2
     "@vitest/ui": ^0.34.3
     create-context-state: ^2.0.0
-    entities: ~3.0.1
+    entities: ~4.5.0
     esbuild: ^0.18.2
     esbuild-node-externals: ^1.8.0
     esbuild-plugin-alias: ^0.2.1
@@ -13062,17 +13062,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"entities@npm:^4.2.0, entities@npm:^4.4.0, entities@npm:^4.5.0":
+"entities@npm:^4.2.0, entities@npm:^4.4.0, entities@npm:^4.5.0, entities@npm:~4.5.0":
   version: 4.5.0
   resolution: "entities@npm:4.5.0"
   checksum: 853f8ebd5b425d350bffa97dd6958143179a5938352ccae092c62d1267c4e392a039be1bae7d51b6e4ffad25f51f9617531fedf5237f15df302ccfb452cbf2d7
-  languageName: node
-  linkType: hard
-
-"entities@npm:~3.0.1":
-  version: 3.0.1
-  resolution: "entities@npm:3.0.1"
-  checksum: aaf7f12033f0939be91f5161593f853f2da55866db55ccbf72f45430b8977e2b79dbd58c53d0fdd2d00bd7d313b75b0968d09f038df88e308aa97e39f9456572
   languageName: node
   linkType: hard
 
