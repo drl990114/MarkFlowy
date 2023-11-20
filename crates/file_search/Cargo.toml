@@ -14,4 +14,4 @@ clipboard = "0.5.0" #for clipboard
 dirs = "5.0.1" #for getting config file
 serde = { version="1.0.192", features=["derive"]}  #save config
 toml = "0.8.1" #config format
-uuid = { version = "1.5.0", features = ["v4"] }
+uuid = { version = "1.6.0", features = ["v4"] }
