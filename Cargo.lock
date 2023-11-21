@@ -2239,7 +2239,7 @@ dependencies = [
  "tauri-plugin-store",
  "tauri-plugin-window",
  "window-shadows",
- "window-vibrancy 0.4.2 (git+https://github.com/tauri-apps/window-vibrancy)",
+ "window-vibrancy 0.4.3",
 ]
 
 [[package]]
@@ -3932,7 +3932,7 @@ dependencies = [
  "url",
  "webkit2gtk",
  "webview2-com",
- "window-vibrancy 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "window-vibrancy 0.4.2",
  "windows 0.48.0",
 ]
 
@@ -4922,13 +4922,14 @@ dependencies = [
 
 [[package]]
 name = "window-vibrancy"
-version = "0.4.2"
-source = "git+https://github.com/tauri-apps/window-vibrancy#451d9ff420ac31f1c8a5de9327865450d61da117"
+version = "0.4.3"
+source = "git+https://github.com/tauri-apps/window-vibrancy#19250cd256cc6951f63208427a960203e2a22cbb"
 dependencies = [
  "cocoa 0.25.0",
  "objc",
  "raw-window-handle",
- "windows-sys 0.48.0",
+ "windows-sys 0.52.0",
+ "windows-version",
 ]
 
 [[package]]
@@ -5109,6 +5110,15 @@ name = "windows-tokens"
 version = "0.48.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b34c9a3b28cb41db7385546f7f9a8179348dffc89923dde66857b1ba5312f6b4"
+
+[[package]]
+name = "windows-version"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "75aa004c988e080ad34aff5739c39d0312f4684699d6d71fc8a198d057b8b9b4"
+dependencies = [
+ "windows-targets 0.52.0",
+]
 
 [[package]]
 name = "windows_aarch64_gnullvm"
