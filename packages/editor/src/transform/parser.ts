@@ -14,6 +14,7 @@ import type {
   TextParserRule,
 } from './parser-type'
 import { ParserRuleType } from './parser-type'
+import MarkdownItHtmlInline from './markdown-it-html-inline'
 
 interface StackItem {
   type: NodeType
@@ -242,6 +243,7 @@ export class MarkdownParser {
       .disable(['emphasis', 'autolink', 'backticks', 'entity'])
       .enable(['table'])
       .use(markdownItListCheckbox)
+      .use(MarkdownItHtmlInline)
 
     this.tokenHandlers = buildTokenHandlers(schema, parserRules)
   }
