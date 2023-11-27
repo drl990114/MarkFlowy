@@ -1,6 +1,6 @@
 // This extension is responsible for managing the state of the editor and handle save event.
 import { useRemirrorContext } from '@markflowy/editor'
-import { invoke } from '@tauri-apps/api'
+import { invoke } from '@tauri-apps/api/primitives'
 import { save } from '@tauri-apps/plugin-dialog'
 import { t } from 'i18next'
 import type { FC } from 'react'
