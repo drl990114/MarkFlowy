@@ -6,8 +6,8 @@ import type {
   EditorRef,
   EditorViewType,
 } from '@markflowy/editor'
-import { invoke, tauri } from '@tauri-apps/api'
-import { getCurrent } from '@tauri-apps/plugin-window'
+import { invoke, convertFileSrc } from '@tauri-apps/api/primitives'
+import { getCurrent } from '@tauri-apps/api/window'
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import styled, { css } from 'styled-components'
 import { useCommandStore, useEditorStore } from '@/stores'
@@ -58,10 +58,10 @@ const wysiwygDelegateOptions: CreateWysiwygDelegateOptions = {
     const dirPath = useEditorStore.getState().folderData?.[0]?.path
     if (dirPath) {
       const newUrl = await join(dirPath, url)
-      return tauri.convertFileSrc(newUrl)
+      return convertFileSrc(newUrl)
     }
 
-    return tauri.convertFileSrc(url)
+    return convertFileSrc(url)
   },
 }
 function Editor(props: EditorProps) {

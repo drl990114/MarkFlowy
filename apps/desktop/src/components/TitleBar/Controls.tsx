@@ -1,6 +1,6 @@
 import styled from 'styled-components'
 import { memo, useEffect, useState } from 'react'
-import { getCurrent } from '@tauri-apps/plugin-window'
+import { getCurrent } from '@tauri-apps/api/window'
 
 const appWindow = getCurrent()
 

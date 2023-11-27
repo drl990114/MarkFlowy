@@ -1,7 +1,7 @@
 import { getFileObjectByPath } from '@/helper/files'
 import { createFile } from '@/helper/filesys'
 import { useEditorStore } from '@/stores'
-import { invoke } from '@tauri-apps/api'
+import { invoke } from '@tauri-apps/api/primitives'
 import { nanoid } from 'nanoid'
 import { create } from 'zustand'
 

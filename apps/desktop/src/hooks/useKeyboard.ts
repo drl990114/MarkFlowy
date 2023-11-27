@@ -1,4 +1,4 @@
-import { invoke } from '@tauri-apps/api'
+import { invoke } from '@tauri-apps/api/primitives'
 import { createGlobalStore } from 'hox'
 import { useEffect, useState } from 'react'
 import type { KeyBindingMap } from 'tinykeys'

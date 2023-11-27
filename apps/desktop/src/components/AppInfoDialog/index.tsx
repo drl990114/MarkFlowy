@@ -1,6 +1,6 @@
 import Button from '@mui/material/Button'
 import DialogContentText from '@mui/material/DialogContentText'
-import { getName, getTauriVersion, getVersion } from '@tauri-apps/plugin-app'
+import { getName, getTauriVersion, getVersion } from '@tauri-apps/api/app'
 import { writeText } from '@tauri-apps/plugin-clipboard-manager'
 import { listen } from '@tauri-apps/api/event'
 import type { FC } from 'react'

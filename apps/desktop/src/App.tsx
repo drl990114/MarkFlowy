@@ -1,6 +1,6 @@
 import { BaseStyle } from '@markflowy/theme'
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles'
-import { invoke } from '@tauri-apps/api'
+import { invoke } from '@tauri-apps/api/primitives'
 import { listen } from '@tauri-apps/api/event'
 import { useCallback, useEffect } from 'react'
 import { Route, Routes } from 'react-router-dom'
