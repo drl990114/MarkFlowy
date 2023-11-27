@@ -31,7 +31,7 @@
     "@tauri-apps/plugin-window": "^2.0.0-alpha.1",
     "classnames": "^2.3.2",
     "create-context-state": "^2.0.0",
-    "dayjs": "^1.11.8",
+    "dayjs": "^1.11.10",
     "hox": "^2.1.0",
     "i18next": "^23.4.4",
     "immer": "^10.0.3",
