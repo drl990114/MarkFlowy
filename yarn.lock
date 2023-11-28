@@ -4825,9 +4825,8 @@ __metadata:
     "@markflowy/types": "workspace:*"
     "@mui/material": ^5.14.6
     "@remirror/core": ^2.0.17
-    "@tauri-apps/api": ^2.0.0-alpha.11
-    "@tauri-apps/cli": 2.0.0-alpha.18
-    "@tauri-apps/plugin-app": ^2.0.0-alpha.1
+    "@tauri-apps/api": ^2.0.0-alpha.12
+    "@tauri-apps/cli": ^2.0.0-alpha.18
     "@tauri-apps/plugin-clipboard-manager": ^2.0.0-alpha.3
     "@tauri-apps/plugin-dialog": ^2.0.0-alpha.3
     "@tauri-apps/plugin-os": ^2.0.0-alpha.4
@@ -8219,14 +8218,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tauri-apps/api@npm:2.0.0-alpha.6":
-  version: 2.0.0-alpha.6
-  resolution: "@tauri-apps/api@npm:2.0.0-alpha.6"
-  checksum: 69ddae9f2c846cdfd9a0cd060cb2c342dbe33a393006d6c5cc273c943df162388d5fc6fd33e79a238bd44344f28a7f78f34c4a332b4a8cb590a72d3d730f0900
-  languageName: node
-  linkType: hard
-
-"@tauri-apps/api@npm:^2.0.0-alpha.11":
+"@tauri-apps/api@npm:^2.0.0-alpha.12":
   version: 2.0.0-alpha.12
   resolution: "@tauri-apps/api@npm:2.0.0-alpha.12"
   checksum: f3bbc5631157943beff348d9d43ca27d0b196c0701b6af4607d4cce819c85aec3fb8f9fb726fabb989c7be242fe13570c72e5c1de5282a3fd7831347d9b968fc
@@ -8414,7 +8406,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tauri-apps/cli@npm:2.0.0-alpha.18":
+"@tauri-apps/cli@npm:^2.0.0-alpha.18":
   version: 2.0.0-alpha.18
   resolution: "@tauri-apps/cli@npm:2.0.0-alpha.18"
   dependencies:
@@ -8452,15 +8444,6 @@ __metadata:
   bin:
     tauri: tauri.js
   checksum: 433e102f602531746e23e70198d5db6483fd8c35f3de6c957caca332002a5159ce072e525ba8caa66136701aa4714aedcf8c0c6f98ed72c5baace026a184d588
-  languageName: node
-  linkType: hard
-
-"@tauri-apps/plugin-app@npm:^2.0.0-alpha.1":
-  version: 2.0.0-alpha.1
-  resolution: "@tauri-apps/plugin-app@npm:2.0.0-alpha.1"
-  dependencies:
-    "@tauri-apps/api": 2.0.0-alpha.6
-  checksum: 09dce7a3304c692e446d33e166b6298891c409d62cd5239d6fadd728f6807d5841c307c6600e262d142425f6a070da8f11d7f8c6df3dc58e03476209de27f795
   languageName: node
   linkType: hard
 
