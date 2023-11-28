@@ -18,3 +18,27 @@ export function getTagName(str: string) {
 export function isImageElement(el: any): el is HTMLImageElement {
   return el && (el.tagName as string)?.toLocaleUpperCase() === 'IMG'
 }
+
+interface HTMLAst {
+  tag: string
+  attrs: Record<string, string> | undefined
+  voidElement: boolean
+}
+
+export function buildHtmlStringFromAst(ast: HTMLAst) {
+  let attrs = ''
+
+  if (ast.attrs) {
+    const filteredAttrs = Object.entries(ast.attrs).filter(([, value]) => value)
+
+    if (filteredAttrs.length) {
+      attrs = `${filteredAttrs.map(([key, value]) => `${key}="${value}"`).join(' ')}`
+    }
+  }
+
+  if (ast.voidElement) {
+    return `<${ast.tag} ${attrs} />`
+  }
+
+  return `<${ast.tag} ${attrs}></${ast.tag}>`
+}

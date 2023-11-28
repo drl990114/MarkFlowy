@@ -10,35 +10,11 @@ console.log("hello world")
 
 const defaultContent = [
     `
-
-# Title
-
-hello world!
-
-`.trim(),
-    singleRow,
-    justCodeContent,
-    `
+hello world! <a href="https://www.baidu.com">baidu</a>
 
 <h1>html node</h1>
 
-- list item
-- list item
-  - [x] checked
-  - [ ] unchecked
-
-1. first
-1. second
-1. third
-
-
-Table:
-
-| First Header  | Second Header |
-| ------------- | ------------- |
-| Content Cell  | Content Cell  |
-
-paragraph
+paragraph,<img src="https://remixicon.com/img/logo/dark/text.svg"> img inline.
 
 `.trim(),
 ].join("\n")
