@@ -1,4 +1,4 @@
-import { invoke } from '@tauri-apps/api'
+import { invoke } from '@tauri-apps/api/primitives'
 import { listen, emit } from '@tauri-apps/api/event'
 import { createGlobalStore } from 'hox'
 import { useCallback, useEffect, useMemo, useState } from 'react'

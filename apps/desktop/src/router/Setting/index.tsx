@@ -5,7 +5,7 @@ import SettingGroup from './component/SettingGroup'
 import { Container } from './styles'
 import settingMap from '@/router/Setting/settingMap'
 import Logo from '@/assets/logo.svg?react'
-import { invoke } from '@tauri-apps/api'
+import { invoke } from '@tauri-apps/api/primitives'
 import { KeyboardTable } from './KeyboardTable'
 import { CopyButton } from '@/components/UI/Button'
 

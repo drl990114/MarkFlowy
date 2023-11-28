@@ -70,6 +70,7 @@
     "create-context-state": "^2.0.0",
     "entities": "~3.0.1",
     "fuse.js": "^6.6.2",
+    "html-parse-stringify": "^3.0.1",
     "jsx-dom-cjs": "^8.0.7",
     "linkify-it": "^4.0.1",
     "lodash": "^4.17.21",

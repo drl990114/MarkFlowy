@@ -1,4 +1,4 @@
-import { getCurrent } from '@tauri-apps/plugin-window'
+import { getCurrent } from '@tauri-apps/api/window'
 
 import { useState } from 'react'
 import { Container } from './styled'
