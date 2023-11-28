@@ -3,8 +3,8 @@ import type {
   ApplySchemaAttributes,
   CommandFunction,
   DelayedPromiseCreator,
-  EditorState,
   EditorView,
+  InputRule,
   NodeExtensionSpec,
   NodeSpecOverride,
   NodeViewMethod,
@@ -22,16 +22,16 @@ import {
   isElementDomNode,
   isNumber,
   NodeExtension,
+  nodeInputRule,
   omitExtraAttributes,
 } from '@remirror/core'
 import type { PasteRule } from '@remirror/pm/paste-rules'
 import { insertPoint } from '@remirror/pm/transform'
 import { ExtensionImageTheme } from '@remirror/theme'
-import { Decoration, DecorationSet } from '@remirror/pm/view'
-
 import { ResizableImageView } from './resizable-image-view'
 import type { NodeSerializerOptions } from '@/transform'
 import { ParserRuleType } from '@/transform'
+import { buildHtmlStringFromAst } from '@/utils/html'
 
 type DelayedImage = DelayedPromiseCreator<ImageAttributes>
 
@@ -112,7 +112,6 @@ export class MfImageExtension extends NodeExtension<ImageOptions> {
     const { preferPastedTextContent } = this.options
     return {
       inline: true,
-      draggable: true,
       selectable: true,
       atom: true,
       ...override,
@@ -126,8 +125,6 @@ export class MfImageExtension extends NodeExtension<ImageOptions> {
         src: { default: null },
         title: { default: '' },
         fileName: { default: null },
-
-        resizable: { default: false },
       },
       parseDOM: [
         {
@@ -276,37 +273,16 @@ export class MfImageExtension extends NodeExtension<ImageOptions> {
       new ResizableImageView(node, view, getPos as () => number)
   }
 
-  createDecorations(state: EditorState ): DecorationSet {
-    const image = state.doc.nodeAt(state.selection.from)
+  createInputRules(): InputRule[] {
+    const rules: InputRule[] = [
+      nodeInputRule({
+        regexp: new RegExp('<(img)(?=(\\s|/?>|$))'),
+        type: this.type,
+      }),
+    ]
 
-    if (image?.type.name !== 'html_image') {
-      return DecorationSet.empty
-    }
-
-    const pos = state.selection.from
-    // const imageNode = view.nodeDOM(pos)
-
-    // if (!isElementDomNode(imageNode)) {
-    //   return DecorationSet.empty
-    // }
-    const create = () => {
-      const container =  document.createElement('div')
-      container.style.position = 'fixed'
-      container.innerHTML = 'qweqweqwe'
-      return container
-    }
-
-    const destroy = () => {
-
-    }
-    const deco = Decoration.inline(state.selection.from, state.selection.to, {
-      class: 'qwe',
-      style: 'background: red;z-index: 99'
-    })
-
-    return DecorationSet.create(state.doc, [deco])
+    return rules
   }
-  
   public fromMarkdown() {
     return [
       {
@@ -318,7 +294,14 @@ export class MfImageExtension extends NodeExtension<ImageOptions> {
   }
 
   public toMarkdown({ state, node }: NodeSerializerOptions) {
-    // TODO
+    state.text(
+      buildHtmlStringFromAst({
+        tag: 'img',
+        attrs: node.attrs,
+        voidElement: true,
+      }),
+      false,
+    )
   }
 }
 

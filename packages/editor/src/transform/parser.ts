@@ -101,7 +101,6 @@ export class MarkdownParseState {
 
   // Add a node at the current position.
   public addNode(type: NodeType, attrs?: Record<string, any>, content?: Node[]): Node {
-    console.log('addNode', type, attrs, content, this.marks)
     const node = type.createAndFill(attrs, content, this.marks)
     if (!node) {
       throw new Error(`unexpected error: node is empty while creating ${type.name} node`)
@@ -188,7 +187,7 @@ function buildInlineNodeHandler(
     throw new RangeError(`Can't find inline type '${parserRule.token}'`)
   }
   handlers[parserRule.token] = (state: MarkdownParseState, tok: Token) => {
-    const attrs = parserRule.getAttrs ? parserRule.getAttrs(tok) : null
+    const attrs = tok.attrs || null
     const inlinNode = schema.nodes[tok.type]?.createAndFill(attrs)
     if (inlinNode) {
       state.push(inlinNode)

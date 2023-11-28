@@ -95,7 +95,7 @@ const DebugConsole: FC<{
 }
 
 const App: FC = () => {
-  const { contentId, content, hasUnsavedChanges, setContentId } = useContent()
+  const { contentId, content, hasUnsavedChanges, setContentId, setContent } = useContent()
   const { enableDevTools, setEnableDevTools } = useDevTools()
 
   const editor = (
@@ -105,6 +105,7 @@ const App: FC = () => {
         content={content}
         offset={{ top: 10, left: 16 }}
         hooks={[useChangeCodeMirrorTheme]}
+        onChange={(_, content) => setContent(content)}
         isTesting
       />
     </div>

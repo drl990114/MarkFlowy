@@ -762,6 +762,10 @@ export const BaseStyle = styled.createGlobalStyle`
     outline: 2px solid #8cf;
   }
 
+  .img-input__container {
+    display: flex;
+  }
+
   .html-node-label {
     position: absolute;
     right: 0;
