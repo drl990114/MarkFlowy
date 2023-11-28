@@ -11,6 +11,7 @@
   ],
   "scripts": {
     "dev": "yarn workspace @markflowy/editor dev & yarn workspace @markflowy/desktop dev",
+    "dev:editor": "yarn workspace @markflowy/editor dev & yarn workspace @markflowy/playground dev",
     "build": "yarn workspace @markflowy/theme build && yarn workspace @markflowy/editor build && yarn workspaces foreach run build",
     "test": "yarn workspace @markflowy/editor test && yarn workspace @markflowy/desktop test && cargo test --workspace --exclude line_by_line",
     "build:desktop": "yarn workspace @markflowy/desktop build && yarn workspace @markflowy/desktop tauri:build",

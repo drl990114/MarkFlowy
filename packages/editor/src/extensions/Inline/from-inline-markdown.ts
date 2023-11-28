@@ -11,6 +11,7 @@ import type { LineMarkName } from './inline-mark-extensions'
 import type { InlineToken } from './inline-types'
 import { cloneDeep } from 'lodash'
 import { getTagName, isClosingTag } from '../../utils/html'
+import { needSplitInlineHtmlTokenTags } from '@/transform/markdown-it-html-inline'
 
 gfmAutolinkLiteralFromMarkdown.transforms = []
 
@@ -458,7 +459,7 @@ function flatHTMLInlineCode(phrasingContents: MdAstHtml[], depth = 1) {
 
 function hasHtmlToken(mdastToken: mdast.PhrasingContent[]) {
   for (const token of mdastToken) {
-    if (token.type === 'html') {
+    if (token.type === 'html' && !needSplitInlineHtmlTokenTags.includes(getTagName(token.value))) {
       return true
     }
   }

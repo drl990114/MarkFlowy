@@ -9,7 +9,6 @@ import {
   // HardBreakExtension,
   // HeadingExtension,
   // HistoryExtension,
-  // ImageExtension,
   // ItalicExtension,
   // LinkExtension,
   // ListItemExtension,
@@ -40,6 +39,7 @@ import { LineHorizontalRuleExtension } from './HorizontalRule'
 import { CountExtension } from '@remirror/extension-count'
 import { FindExtension } from '@remirror/extension-find'
 import { LineHtmlBlockExtension } from './HtmlNode/html-block-extension'
+import { MfImageExtension } from './Image'
 
 // import { TableExtension } from './ReactTables';
 
@@ -48,7 +48,10 @@ export * from './List'
 export type ExtensionsOptions = {
   handleViewImgSrcUrl?: (src: string) => Promise<string>
 }
-function extensions({ handleViewImgSrcUrl }: ExtensionsOptions = {}): any[] {
+
+function extensions({
+  handleViewImgSrcUrl
+}: ExtensionsOptions): any[] {
   return [
     // new BoldExtension(),
     // new CodeBlockExtension(),
@@ -79,6 +82,7 @@ function extensions({ handleViewImgSrcUrl }: ExtensionsOptions = {}): any[] {
       handleViewImgSrcUrl
     }),
     new CountExtension(),
+    new MfImageExtension(),
 
     new PlaceholderExtension({ placeholder: 'Type something...' }),
     new LineHorizontalRuleExtension(),
