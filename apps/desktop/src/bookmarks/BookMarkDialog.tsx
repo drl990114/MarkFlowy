@@ -83,7 +83,7 @@ export const BookMarkDialog: React.FC = () => {
     setOpen(false)
   }
 
-  const handleTagChange = (event: SyntheticEvent<Element, Event>, newValue: string[]) => {
+  const handleTagChange = (_event: SyntheticEvent<Element, Event>, newValue: string[]) => {
     setTags(newValue as string[])
   }
 

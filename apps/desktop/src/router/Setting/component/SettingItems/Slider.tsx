@@ -17,7 +17,7 @@ const SliderSettingItem: React.FC<SettingItemProps<Setting.SliderSettingItem>> =
   }, [curValue, value])
 
   const handleChange = useCallback(
-    (e: Event, v: number | number[]) => {
+    (_e: Event, v: number | number[]) => {
       writeSettingData(item, v as number)
     },
     [item, writeSettingData],

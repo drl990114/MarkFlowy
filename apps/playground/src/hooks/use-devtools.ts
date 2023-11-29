@@ -1,10 +1,6 @@
 import { useEffect, useState } from "react"
 
-import { getURLParam, setURLParam } from "../utils/update-url"
-
-function getURLDevTools(): boolean {
-    return getURLParam("dev") === "true"
-}
+import { setURLParam } from "../utils/update-url"
 
 function setURLDevTools(enable: boolean): void {
     return setURLParam("dev", enable ? "true" : "")

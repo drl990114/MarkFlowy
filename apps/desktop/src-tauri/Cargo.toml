@@ -9,8 +9,12 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[lib]
+name = "markflowy"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
 [build-dependencies]
-tauri-build = { version = "2.0.0-alpha.11", features = [] }
+tauri-build = { version = "2.0.0-alpha.12", features = [] }
 
 [dependencies]
 serde_json = "1.0"
@@ -18,14 +22,12 @@ anyhow = "1.0.75"
 dark-light = "1.0.0"
 log = "0.4.19"
 serde = { version = "1.0", features = ["derive"] }
-tauri = { version = "2.0.0-alpha.16", features = [ "protocol-asset"] }
-tauri-plugin-store = "2.0.0-alpha.3"
-tauri-plugin-window = "2.0.0-alpha"
-tauri-plugin-os = "2.0.0-alpha.3"
-tauri-plugin-app = "2.0.0-alpha"
-tauri-plugin-shell = "2.0.0-alpha.3"
-tauri-plugin-dialog = "2.0.0-alpha.3"
-tauri-plugin-clipboard-manager = "2.0.0-alpha.3"
+tauri = { version = "2.0.0-alpha.18", features = [ "protocol-asset"] }
+tauri-plugin-store = "2.0.0-alpha.4"
+tauri-plugin-os = "2.0.0-alpha.4"
+tauri-plugin-shell = "2.0.0-alpha.4"
+tauri-plugin-dialog = "2.0.0-alpha.4"
+tauri-plugin-clipboard-manager = "2.0.0-alpha.4"
 regex = "1.10.2"
 mf-utils = { path = "../../../crates/utils" }
 file_search = { path = "../../../crates/file_search" }
@@ -42,12 +44,6 @@ objc = "0.2.7"
 
 
 [features]
-# by default Tauri runs in production mode
-# when `tauri dev` runs it is executed with `cargo run --no-default-features` if `devPath` is an URL
-default = ["custom-protocol"]
 # this feature is used used for production builds where `devPath` points to the filesystem
 # DO NOT remove this
 custom-protocol = ["tauri/custom-protocol"]
-
-[patch.crates-io]
-tauri = { git = "https://github.com/tauri-apps/tauri", branch = "next" }
