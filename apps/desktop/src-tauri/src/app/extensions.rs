@@ -73,6 +73,10 @@ impl AppExtensions {
         for entry in std::fs::read_dir(dir).unwrap() {
             let entry = entry.unwrap();
             let path = entry.path();
+            if !path.is_dir() {
+                continue;
+            }
+
             let extension = build_extension(path);
             // 如果 extension 为 None 则跳过
             if extension.is_none() {

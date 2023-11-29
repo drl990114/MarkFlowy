@@ -1,8 +1,8 @@
 import { getFileObject } from '@/helper/files'
 import type { IFile } from '@/helper/filesys'
-import { useAutoAnimate } from '@/hooks'
+import { useAutoAnimate } from '@formkit/auto-animate/react'
 import { useEditorStore, useEditorStateStore } from '@/stores'
-import { memo, useEffect } from 'react'
+import { memo, useEffect, useRef } from 'react'
 import { TabItem, Dot } from './styles'
 import styled, { css } from 'styled-components'
 import useThemeStore from '@/stores/useThemeStore'
@@ -21,10 +21,12 @@ const EditorAreaTabs = memo(() => {
   const { opened, activeId, setActiveId, delOpenedFile } = useEditorStore()
   const { idStateMap } = useEditorStateStore()
   const { curTheme } = useThemeStore()
-  const { htmlRef } = useAutoAnimate<HTMLDivElement>()
+  const [element] = useAutoAnimate<HTMLDivElement>()
+  const htmlRef = useRef<HTMLDivElement>()
 
   useEffect(() => {
     if (!htmlRef.current) return
+    element(htmlRef.current)
     htmlRef.current.onwheel = (ev) => {
       ev.preventDefault()
       htmlRef.current!.scrollLeft += ev.deltaY

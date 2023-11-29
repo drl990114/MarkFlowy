@@ -1,6 +1,24 @@
 {
-  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "strict": true,
+    "moduleResolution": "node",
+    "allowJs": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "sourceMap": true, // Generates `.js.map` files.
+    "declaration": true, // Generates `.d.ts` files.
+    "declarationMap": true, // Generates `.d.ts.map` files.
+    "forceConsistentCasingInFileNames": true,
+    "jsx": "react-jsx",
+
+    // if we just want incremental checking, we need to set `emitDeclarationOnly` to true.
+    // https://github.com/microsoft/TypeScript/issues/33809#issuecomment-589446027
+    "noEmit": false,
+    "noEmitOnError": true,
+    "emitDeclarationOnly": true,
+    "incremental": true,
     "experimentalDecorators": true,
     "rootDir": ".",
     "skipLibCheck": true,

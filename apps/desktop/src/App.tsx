@@ -55,7 +55,7 @@ const App: FC = function () {
   const editorStore = useEditorStore()
   const { setFolderData, addOpenedFile, setActiveId } = editorStore
   const { setSetting } = handler
-  const isWeb = (window as any).__TAURI_IPC__ === undefined
+  const isWeb = (window as any).__TAURI__ === undefined
 
   // TODO web need return a editor
   if (!isWeb) {

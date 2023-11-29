@@ -1,24 +1,29 @@
 {
   "files": [],
   "compilerOptions": {
-    "target": "ESNext",
+    "target": "ES2020",
+    "useDefineForClassFields": true,
     "module": "ESNext",
-    "strict": true,
-    "moduleResolution": "node",
-    "allowJs": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "sourceMap": true, // Generates `.js.map` files.
-    "declaration": true, // Generates `.d.ts` files.
-    "declarationMap": true, // Generates `.d.ts.map` files.
-    "forceConsistentCasingInFileNames": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
     "jsx": "react-jsx",
 
-    // if we just want incremental checking, we need to set `emitDeclarationOnly` to true.
-    // https://github.com/microsoft/TypeScript/issues/33809#issuecomment-589446027
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+
     "noEmit": false,
     "noEmitOnError": true,
     "emitDeclarationOnly": true,
+    "composite": true,
     "incremental": true
   },
   "exclude": [
