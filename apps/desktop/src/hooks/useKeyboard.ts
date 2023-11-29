@@ -1,9 +1,14 @@
 import { invoke } from '@tauri-apps/api/primitives'
 import { createGlobalStore } from 'hox'
 import { useEffect, useState } from 'react'
-import type { KeyBindingMap } from 'tinykeys'
+// @ts-ignore
 import { createKeybindingsHandler } from 'tinykeys'
 import { useCommandStore } from '@/stores'
+
+/**
+ * A map of keybinding strings to event handlers.
+ */
+export type KeyBindingMap = Record<string, (event: KeyboardEvent) => void>;
 
 const getTinyKeyBinding = (keyMap: string[]) => {
   let keyBinding = ''
