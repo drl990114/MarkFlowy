@@ -1,6 +1,6 @@
 import type { ProsemirrorNode } from '@remirror/core'
 import { isString } from '@remirror/core'
-import type Token from '@/markdown-it/lib/token'
+import type Token from 'markdown-it/lib/token'
 import type { ListAttributes } from 'remirror-extension-flat-list'
 import { ListExtension } from 'remirror-extension-flat-list'
 import type { MarkdownParseState, NodeSerializerOptions } from '../../transform'

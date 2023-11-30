@@ -1,7 +1,7 @@
-import type MarkdownIt from '@/markdown-it'
-import type Core from '@/markdown-it/lib/parser_core'
-import type StateCore from '@/markdown-it/lib/rules_core/state_core'
-import Token from '@/markdown-it/lib/token'
+import type MarkdownIt from 'markdown-it'
+import type Core from 'markdown-it/lib/parser_core'
+import type StateCore from 'markdown-it/lib/rules_core/state_core'
+import Token from 'markdown-it/lib/token'
 import { getTagName } from '@/utils/html'
 // @ts-ignore
 import HTML from 'html-parse-stringify'

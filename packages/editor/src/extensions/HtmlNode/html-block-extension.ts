@@ -12,7 +12,7 @@ import type { ProsemirrorNode } from '@remirror/pm'
 import { HtmlNodeView } from './html-block-view'
 import type { InputRule } from '@remirror/pm/inputrules'
 import { TextSelection } from '@remirror/pm/state'
-import block_names from '@/markdown-it/lib/common/html_blocks'
+import block_names from 'markdown-it/lib/common/html_blocks'
 import { arrowHandler } from '../CodeMirror/codemirror-utils'
 
 export class LineHtmlBlockExtension extends NodeExtension {

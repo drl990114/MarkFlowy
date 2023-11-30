@@ -8,7 +8,7 @@ import { convertCommand, findParentNodeOfType } from '@remirror/core'
 import { HeadingExtension } from 'remirror/extensions'
 import { setBlockType } from '@remirror/pm/commands'
 import type { Schema } from '@remirror/pm/model'
-import type Token from '@/markdown-it/lib/token'
+import type Token from 'markdown-it/lib/token'
 
 import type { NodeSerializerOptions } from '../../transform'
 import { ParserRuleType } from '../../transform'
