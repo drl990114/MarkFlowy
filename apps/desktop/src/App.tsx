@@ -28,6 +28,11 @@ import { excuteScript, isArray, once } from './helper'
 // TODO refactor useGlobalSettingData use zustand
 const confRef: { current: any } = { current: {} }
 
+const themeInit = () => {
+  const updateCurThemeByName = useThemeStore.getState().setCurThemeByName
+  updateCurThemeByName(confRef.current.theme)
+}
+
 const onceLoadExtensions = once(() => {
   invoke<Record<string, any>>('extensions_init').then((res) => {
     if (isArray(res)) {
@@ -35,12 +40,13 @@ const onceLoadExtensions = once(() => {
         res.map((extension) => {
           excuteScript(extension.script_text)
         })
-        const updateCurThemeByName = useThemeStore.getState().setCurThemeByName
-        updateCurThemeByName(confRef.current.theme)
-
       } catch (error) {
         // TODO need tips ui
+      } finally {
+        themeInit()
       }
+    } else {
+      themeInit()
     }
   })
 })
