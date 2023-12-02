@@ -2,20 +2,13 @@ import type MarkdownIt from 'markdown-it'
 import type Core from 'markdown-it/lib/parser_core'
 import type StateCore from 'markdown-it/lib/rules_core/state_core'
 import Token from 'markdown-it/lib/token'
-import { getTagName } from '@/utils/html'
-// @ts-ignore
-import HTML from 'html-parse-stringify'
+import { getAttrsBySignalHtmlContent, getTagName } from '@/utils/html'
 
 export const needSplitInlineHtmlTokenTags = ['img', 'iframe']
 
 const typeMap: Record<string, string> = {
   img: 'html_image',
   iframe: 'iframe_inline',
-}
-
-const getAttrsBySignalHtmlContent = (html: string) => {
-  const ast = HTML.parse(html)
-  return ast[0]?.attrs || {}
 }
 
 function splitHtmlInlineTokens(t: Token) {
@@ -44,15 +37,19 @@ function isHtmlInlineToken(t: Token) {
 }
 
 function hasSplitInlineHtmlToken(t: Token) {
-  return t.children?.some((child) => {
+  let res = false
+
+  t.children?.forEach((child) => {
     if (isHtmlInlineToken(child)) {
       const tag = getTagName(child.content)
       child.tag = tag
-      return needSplitInlineHtmlTokenTags.includes(child.tag)
-    } else {
-      return false
+      if (needSplitInlineHtmlTokenTags.includes(child.tag)) {
+        res = true
+      }
     }
   })
+
+  return res
 }
 
 const rule: Core.RuleCore = (state: StateCore) => {
@@ -63,6 +60,7 @@ const rule: Core.RuleCore = (state: StateCore) => {
     if (isInlineToken(tokens[i])) {
       const curToken = tokens[i]
       if (hasSplitInlineHtmlToken(curToken)) {
+        console.log('inlineinline', curToken)
         tokens.splice(i, 1, ...splitHtmlInlineTokens(curToken))
       }
     }

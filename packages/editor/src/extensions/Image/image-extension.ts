@@ -31,7 +31,7 @@ import { ExtensionImageTheme } from '@remirror/theme'
 import { ResizableImageView } from './resizable-image-view'
 import type { NodeSerializerOptions } from '@/transform'
 import { ParserRuleType } from '@/transform'
-import { buildHtmlStringFromAst } from '@/utils/html'
+import { buildHtmlStringFromAst, getAttrsBySignalHtmlContent } from '@/utils/html'
 
 type DelayedImage = DelayedPromiseCreator<ImageAttributes>
 
@@ -276,8 +276,11 @@ export class MfImageExtension extends NodeExtension<ImageOptions> {
   createInputRules(): InputRule[] {
     const rules: InputRule[] = [
       nodeInputRule({
-        regexp: new RegExp('<(img)(?=(\\s|/?>|$))'),
+        regexp: new RegExp('<img[^>]*>'),
         type: this.type,
+        getAttributes: (match) => {
+          return getAttrsBySignalHtmlContent(match[0])
+        },
       }),
     ]
 
