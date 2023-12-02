@@ -1,18 +1,19 @@
+// @ts-nocheck
+import HTML from 'html-parse-stringify'
+
 export function isClosingTag(str: string) {
   const regex = /^<\/[a-zA-Z0-9]+\s*>$/
   return regex.test(str)
 }
 
+export const getAttrsBySignalHtmlContent = (html: string) => {
+  const ast = HTML.parse(html)
+  return ast[0]?.attrs || {}
+}
+
 export function getTagName(str: string) {
-  const regex = /<\/?([a-zA-Z0-9]+)\b[^>]*>/
-
-  const matches = regex.exec(str)
-
-  if (matches && matches.length > 1) {
-    return matches[1].toLowerCase()
-  }
-
-  return ''
+  const ast = HTML.parse(str)
+  return ast[0]?.name || ''
 }
 
 export function isImageElement(el: any): el is HTMLImageElement {
