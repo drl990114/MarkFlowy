@@ -32,7 +32,10 @@ regex = "1.10.2"
 mf-utils = { path = "../../../crates/utils" }
 file_search = { path = "../../../crates/file_search" }
 download_npm = { path = "../../../crates/download_npm" }
+tokio = { version = "1", features = ["full"] }
 lazy_static = "1.4.0"
+tracing = "0.1.40"
+tracing-subscriber = "0.3.18"
 
 [target."cfg(any(target_os = \"windows\", target_os = \"macos\"))".dependencies]
 window-vibrancy = { git = "https://github.com/tauri-apps/window-vibrancy" }

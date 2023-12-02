@@ -22,7 +22,6 @@ pub struct DownloadOptions {
     pub untar: bool
 }
 
-#[tokio::main]
 pub async fn download(
     package_name: &str,
     opt: DownloadOptions,
