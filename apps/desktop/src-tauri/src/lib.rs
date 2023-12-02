@@ -6,11 +6,12 @@ mod setup;
 
 use std::collections::HashMap;
 use std::path::PathBuf;
-use std::sync::Mutex;
+use std::sync;
 
-use app::{bookmarks, conf, keybindings, opened_cache, extensions};
+use app::{bookmarks, conf, extensions, keybindings, opened_cache};
 use lazy_static::lazy_static;
 use tauri::{Manager, Runtime};
+use tracing_subscriber;
 
 #[cfg(target_os = "macos")]
 #[macro_use]
@@ -19,16 +20,17 @@ extern crate objc;
 lazy_static! {
     /// FIXME Haven't found a better way to get the home dir yet, and we will optimize it later.
     /// 0 -> home_dr
-    pub static ref APP_DIR: Mutex<HashMap<u32, PathBuf>> = {
+    pub static ref APP_DIR: sync::Mutex<HashMap<u32, PathBuf>> = {
         let m = HashMap::new();
-        Mutex::new(m)
+        sync::Mutex::new(m)
     };
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let context = tauri::generate_context!();
+    tracing_subscriber::fmt::init();
 
+    let context = tauri::generate_context!();
     tauri::Builder::default()
         .plugin(tauri_plugin_store::Builder::default().build())
         .plugin(tauri_plugin_dialog::init())
@@ -59,7 +61,7 @@ pub fn run() {
             search::cmd::search_files,
             extensions::cmd::extensions_init,
         ])
-        .setup(move |app| {
+        .setup(|app| {
             let home_dir_path = app.path().home_dir().expect("failed to get home dir");
             APP_DIR.lock().unwrap().insert(0, home_dir_path);
             setup::init(app).expect("failed to setup app");
@@ -71,6 +73,7 @@ pub fn run() {
         .run(context)
         .expect("error while running tauri application");
 }
+
 
 #[cfg(target_os = "macos")]
 use cocoa::appkit::{NSWindow, NSWindowStyleMask, NSWindowTitleVisibility};

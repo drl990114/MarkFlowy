@@ -59,12 +59,12 @@ impl AppExtensions {
         conf::app_root().join(APP_EXTENSIONS_PATH)
     }
 
-    pub fn init(mut self) -> Self {
+    pub async fn init(mut self) -> Self {
         if !exists(&Self::dir_path()) {
             create_dir(&Self::dir_path());
         }
 
-        // &Self::downloadBuiltInExtensions(self.clone());
+        // let _ = &Self::downloadBuiltInExtensions(self.clone()).await;
 
         // load extensions
         let mut extensions = vec![];
@@ -90,25 +90,18 @@ impl AppExtensions {
         self
     }
 
-    pub fn downloadBuiltInExtensions(self) -> Self {
+    pub async fn downloadBuiltInExtensions(self) -> Self {
         if exists(&Self::dir_path().join("markflowy-theme-template")) {
             return self;
         }
 
-        match download_npm::download(
+       let _ = download_npm::download(
             "markflowy-theme-template",
             download_npm::DownloadOptions {
                 untar: true,
                 dest_path: Self::dir_path().to_str().unwrap().to_string(),
             },
-        ) {
-            Ok(v) => {
-                println!("download success: {:?}", v);
-            }
-            Err(err) => {
-                println!("download err,{}", err);
-            }
-        }
+        ).await;
 
         self
     }
@@ -125,7 +118,7 @@ pub mod cmd {
     use tauri::command;
 
     #[command]
-    pub fn extensions_init() -> Vec<Extension> {
-        AppExtensions::default().init().extensions
+    pub async fn extensions_init() -> Vec<Extension> {
+        AppExtensions::default().init().await.extensions
     }
 }
