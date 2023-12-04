@@ -109,7 +109,7 @@
     "@types/punycode": "^2",
     "@types/react": "^18.2.18",
     "@types/react-dom": "^18.2.7",
-    "@types/tether-drop": "^1.4.9",
+    "@types/tether-drop": "^1.4.11",
     "@types/void-elements": "^3",
     "@vitejs/plugin-react": "^4.0.1",
     "@vitest/browser": "^0.34.2",
