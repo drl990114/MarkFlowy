@@ -10,7 +10,7 @@ export type BookMarkContextMenuRef = {
   open: (args: { x: number; y: number, bookmark: BookMarkItem }) => void
 }
 
-export const BookMarkContextMenu = forwardRef<BookMarkContextMenuRef, {}>((_props, ref) => {
+export const BookMarkContextMenu = forwardRef<BookMarkContextMenuRef, object>((_props, ref) => {
   const { points, setPoints, setOpen, open } = useContextMenu()
   const { removeBookMark } = useBookMarksStore()
   const { execute } = useCommandStore()

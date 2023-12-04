@@ -6,6 +6,8 @@ import { getAttrsBySignalHtmlContent, getTagName } from '@/utils/html'
 
 export const needSplitInlineHtmlTokenTags = ['img', 'iframe']
 
+export const excludeHtmlInlineNodes = ['html_image', 'iframe_inline']
+
 const typeMap: Record<string, string> = {
   img: 'html_image',
   iframe: 'iframe_inline',
@@ -60,7 +62,6 @@ const rule: Core.RuleCore = (state: StateCore) => {
     if (isInlineToken(tokens[i])) {
       const curToken = tokens[i]
       if (hasSplitInlineHtmlToken(curToken)) {
-        console.log('inlineinline', curToken)
         tokens.splice(i, 1, ...splitHtmlInlineTokens(curToken))
       }
     }

@@ -12,8 +12,15 @@ export const getAttrsBySignalHtmlContent = (html: string) => {
 }
 
 export function getTagName(str: string) {
-  const ast = HTML.parse(str)
-  return ast[0]?.name || ''
+  const regex = /<\/?([a-zA-Z0-9]+)\b[^>]*>/
+
+  const matches = regex.exec(str)
+
+  if (matches && matches.length > 1) {
+    return matches[1].toLowerCase()
+  }
+
+  return ''
 }
 
 export function isImageElement(el: any): el is HTMLImageElement {
