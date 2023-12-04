@@ -5019,7 +5019,7 @@ __metadata:
     "@types/punycode": ^2
     "@types/react": ^18.2.18
     "@types/react-dom": ^18.2.7
-    "@types/tether-drop": ^1.4.9
+    "@types/tether-drop": ^1.4.11
     "@types/void-elements": ^3
     "@uiw/codemirror-themes": ^4.21.18
     "@vitejs/plugin-react": ^4.0.1
@@ -9359,12 +9359,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/tether-drop@npm:^1.4.9":
-  version: 1.4.9
-  resolution: "@types/tether-drop@npm:1.4.9"
+"@types/tether-drop@npm:^1.4.11":
+  version: 1.4.11
+  resolution: "@types/tether-drop@npm:1.4.11"
   dependencies:
     "@types/tether": "*"
-  checksum: b49e9d84b21b346d6196c10418a2d72d2c858b658c1eae47f51971af163c9ddea8fe7cb3f69b9af3ab211734e1fa61f90eec11322b118f0370614632600597a4
+  checksum: a79d9a843a7faa33f1befeb4edf94c22ec6472b70c24f19e214297dc318247cb4124aebfd27ee0d285d72fe498cff62ed56c2ec6e7368e0a61cc5961b47ff57b
   languageName: node
   linkType: hard
 
