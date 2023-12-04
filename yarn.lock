@@ -3178,7 +3178,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@codemirror/view@npm:^6.0.0, @codemirror/view@npm:^6.10.0, @codemirror/view@npm:^6.14.0, @codemirror/view@npm:^6.2.2, @codemirror/view@npm:^6.6.0":
+"@codemirror/view@npm:^6.0.0, @codemirror/view@npm:^6.10.0, @codemirror/view@npm:^6.2.2, @codemirror/view@npm:^6.6.0":
   version: 6.16.0
   resolution: "@codemirror/view@npm:6.16.0"
   dependencies:
@@ -3186,6 +3186,17 @@ __metadata:
     style-mod: ^4.0.0
     w3c-keyname: ^2.2.4
   checksum: 54d412b5159716c8a1a9c46fa04ff083e68a663cb887e6e2a4ca86fe9c3930d5255200fe84c65620e0a442f62dc2c13df277bcd1d4eef2e11e3c4e124fcf9d38
+  languageName: node
+  linkType: hard
+
+"@codemirror/view@npm:^6.22.1":
+  version: 6.22.1
+  resolution: "@codemirror/view@npm:6.22.1"
+  dependencies:
+    "@codemirror/state": ^6.1.4
+    style-mod: ^4.1.0
+    w3c-keyname: ^2.2.4
+  checksum: 8643d86cf8c34433a410b28b1339c9a333c519e815890bf6494ca35a47d6ed38b51a13480cf4f6bea319ab2a17991e1ba47cd1b4a2c5a99fb76bad014682925a
   languageName: node
   linkType: hard
 
@@ -4977,7 +4988,7 @@ __metadata:
     "@codemirror/lint": ^6.4.0
     "@codemirror/search": ^6.5.1
     "@codemirror/state": ^6.2.1
-    "@codemirror/view": ^6.14.0
+    "@codemirror/view": ^6.22.1
     "@emotion/css": ^11.11.0
     "@emotion/react": ^11.11.1
     "@emotion/styled": ^11.11.0
