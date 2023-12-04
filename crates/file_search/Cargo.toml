@@ -7,7 +7,7 @@ description = "main rusl library"
 [dependencies]
 regex = "1.10.2"
 num_cpus = "1.15.0" # for parallel search
-grep = "0.2.13" #ripgrep
+grep = "0.3.1" #ripgrep
 ignore = "0.4.20" #parallel walker from ripgrep
 walkdir = "2.4.0" #walker from ripgrep
 clipboard = "0.5.0" #for clipboard
