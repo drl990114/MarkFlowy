@@ -3140,6 +3140,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@codemirror/language@npm:^6.9.3":
+  version: 6.9.3
+  resolution: "@codemirror/language@npm:6.9.3"
+  dependencies:
+    "@codemirror/state": ^6.0.0
+    "@codemirror/view": ^6.0.0
+    "@lezer/common": ^1.1.0
+    "@lezer/highlight": ^1.0.0
+    "@lezer/lr": ^1.0.0
+    style-mod: ^4.0.0
+  checksum: 774a40bc91c748d418a9a774161a5b083061124e4439bb753072bc657ec4c4784f595161c10c7c3935154b22291bf6dc74c9abe827033db32e217ac3963478f3
+  languageName: node
+  linkType: hard
+
 "@codemirror/legacy-modes@npm:^6.1.0":
   version: 6.3.3
   resolution: "@codemirror/legacy-modes@npm:6.3.3"
@@ -4631,6 +4645,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@lezer/common@npm:^1.1.0":
+  version: 1.1.1
+  resolution: "@lezer/common@npm:1.1.1"
+  checksum: 1e540c152c5e6000d81aee0d6998dc340f35685d0f3aebf9c83213674b8a84509e0f6a04ea9b28d9d04499f68c2e57b484703bde53eaacf426bc2fac6a9e892c
+  languageName: node
+  linkType: hard
+
 "@lezer/cpp@npm:^1.0.0":
   version: 1.1.1
   resolution: "@lezer/cpp@npm:1.1.1"
@@ -4972,7 +4993,7 @@ __metadata:
     "@codemirror/autocomplete": ^6.8.1
     "@codemirror/commands": ^6.2.4
     "@codemirror/lang-markdown": ^6.2.0
-    "@codemirror/language": ^6.8.0
+    "@codemirror/language": ^6.9.3
     "@codemirror/language-data": ^6.3.1
     "@codemirror/lint": ^6.4.0
     "@codemirror/search": ^6.5.1
