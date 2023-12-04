@@ -18,12 +18,6 @@ const Container = styled.div<{ codeEditor?: boolean }>`
     content: attr(data-placeholder);
   }
 
-  :not(:first-of-type) {
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-    border-top: none;
-  }
-
   .remirror-editor {
     /* height: 100%; */
     outline: none;

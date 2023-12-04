@@ -1,9 +1,9 @@
 import type { Node, Schema } from '@remirror/pm/model'
 import { Fragment, Mark, NodeRange, Slice } from '@remirror/pm/model'
-import type { Mappable } from '@remirror/pm/transform'
 import { Step, StepResult } from '@remirror/pm/transform'
 
 import { ReplaceDocStep } from "./replace-doc-step"
+import { excludeHtmlInlineNodes } from '@/transform/markdown-it-html-inline'
 
 export type MarkChunk = [from: number, to: number, marks: Mark[]]
 
@@ -138,11 +138,11 @@ export class BatchSetMarkStep extends Step {
     return new ReplaceDocStep(doc)
   }
 
-  map(mapping: Mappable): Step | null {
+  map(): Step | null {
     return null
   }
 
-  merge(other: Step): Step | null {
+  merge(): Step | null {
     return null
   }
 
@@ -187,7 +187,8 @@ function mapFragment(
     } else {
       mapped.push(child)
     }
-    offset += child.nodeSize
+
+    offset += excludeHtmlInlineNodes.includes(child.type.name) ? 0 : child.nodeSize
   }
   return Fragment.fromArray(mapped)
 }

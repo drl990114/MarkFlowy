@@ -7,10 +7,8 @@ import type {
   InputRule,
   NodeExtensionSpec,
   NodeSpecOverride,
-  NodeViewMethod,
   PrimitiveSelection,
   ProsemirrorAttributes,
-  ProsemirrorNode,
 } from '@remirror/core'
 import {
   command,
@@ -28,10 +26,12 @@ import {
 import type { PasteRule } from '@remirror/pm/paste-rules'
 import { insertPoint } from '@remirror/pm/transform'
 import { ExtensionImageTheme } from '@remirror/theme'
-import { ResizableImageView } from './resizable-image-view'
 import type { NodeSerializerOptions } from '@/transform'
 import { ParserRuleType } from '@/transform'
 import { buildHtmlStringFromAst, getAttrsBySignalHtmlContent } from '@/utils/html'
+import type { NodeViewComponentProps } from '@remirror/react'
+import type { ComponentType } from 'react'
+import { ImageNodeView } from '../../components/ImageNodeView'
 
 type DelayedImage = DelayedPromiseCreator<ImageAttributes>
 
@@ -102,6 +102,10 @@ type SetProgress = (progress: number) => void
 export class MfImageExtension extends NodeExtension<ImageOptions> {
   get name() {
     return 'html_image' as const
+  }
+
+  ReactComponent: ComponentType<NodeViewComponentProps> | undefined = (props) => {
+    return  <ImageNodeView {...props}/>
   }
 
   createTags() {
@@ -268,10 +272,7 @@ export class MfImageExtension extends NodeExtension<ImageOptions> {
     ]
   }
 
-  createNodeViews(): NodeViewMethod | Record<string, NodeViewMethod> {
-    return (node: ProsemirrorNode, view: EditorView, getPos: () => number | undefined) =>
-      new ResizableImageView(node, view, getPos as () => number)
-  }
+
 
   createInputRules(): InputRule[] {
     const rules: InputRule[] = [
@@ -376,7 +377,7 @@ function getImageAttributes({
   }
 }
 
-function createPlaceholder(_: EditorView, __: number): HTMLElement {
+function createPlaceholder(): HTMLElement {
   const element = document.createElement('div')
   element.classList.add(ExtensionImageTheme.IMAGE_LOADER)
 
@@ -398,6 +399,7 @@ function uploadHandler(files: FileWithProgress[]): DelayedImage[] {
 
   for (const { file, progress } of files) {
     promises.push(
+      // eslint-disable-next-line @typescript-eslint/no-loop-func
       () =>
         new Promise<ImageAttributes>((resolve) => {
           const reader = new FileReader()

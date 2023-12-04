@@ -12,7 +12,6 @@ import { Selection } from '@remirror/pm/state'
  */
 export function arrowHandler(dir: 'left' | 'right' | 'up' | 'down'): CommandFunction {
   return ({ dispatch, view, tr }) => {
-    console.log('arrowHandler', dir, tr.selection.empty, view?.endOfTextblock(dir))
     if (!view) {
       return false
     }
