@@ -5053,7 +5053,7 @@ __metadata:
     ts-node: ^10.9.1
     typescript: ^5.1.3
     url: ^0.11.3
-    vite: ^4.4.9
+    vite: ^4.4.12
     vite-plugin-svgr: ^4.1.0
     vitest: ^0.34.2
     zustand: ^4.4.6
@@ -5159,7 +5159,7 @@ __metadata:
     tether-drop: ^1.4.2
     typescript: ^5.1.3
     url: ^0.11.3
-    vite: ^4.4.9
+    vite: ^4.4.12
     vitest: ^0.34.2
     void-elements: ^3.1.0
     webdriverio: ^8.15.0
@@ -5188,7 +5188,7 @@ __metadata:
     remixicon: ^3.5.0
     styled-components: ^6.1.1
     typescript: ^5.0.2
-    vite: ^4.4.9
+    vite: ^4.4.12
   languageName: unknown
   linkType: soft
 
@@ -5232,7 +5232,7 @@ __metadata:
     styled-components: ^6.1.0
     typescript: ^5.1.3
     url: ^0.11.3
-    vite: ^4.4.9
+    vite: ^4.4.12
     vitest: ^0.34.2
     webdriverio: ^8.15.0
   peerDependencies:
@@ -25766,9 +25766,9 @@ plugin-image-zoom@ataft/plugin-image-zoom:
   languageName: node
   linkType: hard
 
-"vite@npm:^4.4.9":
-  version: 4.4.9
-  resolution: "vite@npm:4.4.9"
+"vite@npm:^4.4.12":
+  version: 4.5.1
+  resolution: "vite@npm:4.5.1"
   dependencies:
     esbuild: ^0.18.10
     fsevents: ~2.3.2
@@ -25802,7 +25802,7 @@ plugin-image-zoom@ataft/plugin-image-zoom:
       optional: true
   bin:
     vite: bin/vite.js
-  checksum: c511024ceae39c68c7dbf2ac4381ee655cd7bb62cf43867a14798bc835d3320b8fa7867a336143c30825c191c1fb4e9aa3348fce831ab617e96203080d3d2908
+  checksum: 72b3584b3d3b8d14e8a37f0248e47fb8b4d02ab35de5b5a8e5ca8ae55c3be2aab73760dc36edac4fa722de182f78cc492eb44888fcb4a9a0712c4605dad644f9
   languageName: node
   linkType: hard
 
