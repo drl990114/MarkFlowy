@@ -1,5 +1,6 @@
 export * from './base'
 export * from './codemirror'
+export * from './darken-colors'
 
 import darkCss from './dark.css'
 import lightCss from './light.css'
@@ -36,7 +37,7 @@ export type MfTheme = {
   globalStyleText?: string
 }
 
-const common = {
+export const common = {
   lineHeightBase: '1.6',
 
   titleBarHeight: '30px',
@@ -50,6 +51,14 @@ const common = {
   fontBase: '15px',
   fontSm: '14px',
   fontXs: '12px',
+
+  smallPadding: '0.25rem',
+  midPadding: '0.5rem',
+  bigPadding: '1rem',
+
+  smallBorderRadius: '0.15rem',
+  midBorderRadius: '0.25rem',
+  bigBorderRadius: '0.5rem',
 
   fontFamily: `'Open Sans', 'Clear Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif`,
   codemirrorFontFamily: `'DejaVu Sans Mono', 'Source Code Pro', 'Droid Sans Mono', Consolas, monospace`,
@@ -67,6 +76,10 @@ const styledLightTheme = {
   tipsBgColor: '#f6f7f9',
   successColor: '#00c853',
   boxShadowColor: 'rgba(0, 0, 0, 0.08)',
+  
+  // components
+  tooltipBgColor: '#f6f7f9',
+  dialogBgColor: '#f6f7f9',
 
   titleBarDefaultHoverColor: '#bdbdc2',
 
@@ -86,6 +99,10 @@ const styledDarkTheme = {
   tipsBgColor: '#0e1419',
   successColor: '#00c853',
   boxShadowColor: 'rgba(255, 255, 255, 0.04)',
+
+  // components
+  tooltipBgColor: '#43414A',
+  dialogBgColor: '#43414A',
 
   titleBarDefaultHoverColor: '#383838',
 

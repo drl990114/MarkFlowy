@@ -7,9 +7,10 @@ import { Container } from './styles'
 import { useEditorStore } from '@/stores'
 import type { IFile } from '@/helper/filesys'
 import { useOpen } from '@/hooks'
-import { Empty, FileTree, List, Popper } from '@/components'
+import { Empty, FileTree, List } from '@/components'
 import styled from 'styled-components'
 import useOpenedCacheStore from '@/stores/useOpenedCacheStore'
+import { Popover } from '@markflowy/components'
 
 const RecentListBottom = styled.div`
   padding: 8px;
@@ -80,11 +81,12 @@ const Explorer: FC<ExplorerProps> = (props) => {
         <small className='explorer-bottom__action cursor-pointer' onClick={openFolderDialog}>
           {t('file.openDir')}
         </small>
-        <Popper
+        <Popover
           placement='top-end'
-          onClickAway={() => setPopperOpen(false)}
           open={popperOpen}
-          content={
+          arrow
+          onClose={() => setPopperOpen(false)}
+          customContent={
             <>
               <List
                 title={t('file.recentDir')}
@@ -97,11 +99,11 @@ const Explorer: FC<ExplorerProps> = (props) => {
         >
           {listData.length > 0 ? (
             <i
-              className='ri-more-2-fill icon-border cursor-pointer'
+              className='ri-more-2-fill cursor-pointer'
               onClick={() => setPopperOpen(true)}
             />
           ) : null}
-        </Popper>
+        </Popover>
       </div>
     </Container>
   )

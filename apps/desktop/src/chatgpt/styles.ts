@@ -74,7 +74,6 @@ export const ListContainer = styled.div`
 export const BottomBar = styled.div`
   display: flex;
   width: 100%;
-  height: 46px;
   padding: 8px;
   box-sizing: border-box;
   position: sticky;

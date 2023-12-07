@@ -3,7 +3,8 @@ import ListItem from '@mui/material/ListItem'
 import ListItemAvatar from '@mui/material/ListItemAvatar'
 import ListItemText from '@mui/material/ListItemText'
 import type { TooltipProps } from '@mui/material/Tooltip'
-import Tooltip from '@mui/material/Tooltip/Tooltip'
+// import Tooltip from '@mui/material/Tooltip/Tooltip'
+import { Tooltip } from '@markflowy/components'
 import type { FC } from 'react'
 import { memo } from 'react'
 import { ListContainer } from './styles'
@@ -13,26 +14,23 @@ const List: FC<ListProps> = (props) => {
 
   return (
     <ListContainer>
-      <MuiList dense className="list">
-        {title ? <h5 className="list-title">{title}</h5> : null}
+      <MuiList dense className='list'>
+        {title ? <h5 className='list-title'>{title}</h5> : null}
         {data.map((item) => {
           return (
             <ListItem
               key={item.key}
-              className="list-item label-default"
+              className='list-item label-default'
               onClick={() => onItemClick?.(item)}
             >
-              {item.iconCls
-                ? (
-                <ListItemAvatar className="list-item__avatar">
+              {item.iconCls ? (
+                <ListItemAvatar className='list-item__avatar'>
                   <i className={item.iconCls} />
                 </ListItemAvatar>
-                  )
-                : null}
-              {tip === false
-                ? (
+              ) : null}
+              {tip === false ? (
                 <ListItemText
-                  className="list-item__text"
+                  className='list-item__text'
                   primaryTypographyProps={{
                     variant: 'subtitle2',
                     style: {
@@ -43,11 +41,10 @@ const List: FC<ListProps> = (props) => {
                   }}
                   primary={item.title}
                 />
-                  )
-                : (
-                <Tooltip title={item.title} placement="right" arrow {...tip}>
+              ) : (
+                <Tooltip title={item.title} placement='right' arrow {...tip}>
                   <ListItemText
-                    className="list-item__text"
+                    className='list-item__text'
                     primaryTypographyProps={{
                       variant: 'subtitle2',
                       style: {
@@ -59,7 +56,7 @@ const List: FC<ListProps> = (props) => {
                     primary={item.title}
                   />
                 </Tooltip>
-                  )}
+              )}
             </ListItem>
           )
         })}

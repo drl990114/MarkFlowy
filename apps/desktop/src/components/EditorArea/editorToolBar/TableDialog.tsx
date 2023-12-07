@@ -1,4 +1,4 @@
-import { MfDialog } from '@/components/UI/Dialog'
+import { Dialog } from '@markflowy/components'
 import bus from '@/helper/eventBus'
 import { Button, TextField, Grid } from '@mui/material'
 import { useCallback, useEffect, useState } from 'react'
@@ -46,14 +46,11 @@ function TableDialog() {
   }
 
   return (
-    <MfDialog
+    <Dialog
       open={open}
       onClose={handleClose}
       title='Insert Table'
-      dialogContentProps={{
-        style: { width: 450, paddingTop: 20 },
-      }}
-      actions={[
+      footer={[
         <Button key='cancel' size='small' onClick={handleClose}>
           Cancel
         </Button>,
@@ -65,7 +62,12 @@ function TableDialog() {
       <Grid
         container
         spacing={2}
-        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around' }}
+        style={{
+          paddingTop: '20px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-around',
+        }}
       >
         <Grid>
           <TextField
@@ -88,7 +90,7 @@ function TableDialog() {
           />
         </Grid>
       </Grid>
-    </MfDialog>
+    </Dialog>
   )
 }
 
