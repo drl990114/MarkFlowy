@@ -18,6 +18,7 @@
     "@flowy-ui/context-menu": "^0.0.7",
     "@flowy-ui/react": "^0.0.16",
     "@formkit/auto-animate": "^0.7.0",
+    "@markflowy/components": "workspace:*",
     "@markflowy/editor": "workspace:*",
     "@markflowy/theme": "workspace:*",
     "@markflowy/types": "workspace:*",

@@ -1,5 +1,4 @@
-import { Input } from '@/components/UI/Input'
-import Button from '@mui/material/Button'
+import { Button, Input } from '@markflowy/components'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import ReactLoading from 'react-loading'
 import { parseChatList } from './parseChatList'
@@ -147,7 +146,7 @@ const ChatList: React.FC<ChatListProps> = (props) => {
           onKeyDown={handleKeydown}
           onChange={handleChange}
         />
-        <Button className='submit' size='small' variant='contained' onClick={handleSubmit}>
+        <Button className='submit' type='primary' size='small' onClick={handleSubmit}>
           submit
         </Button>
       </BottomBar>

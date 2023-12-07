@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 import { Resizable } from '../Resizable'
 import type { NodeViewComponentProps } from '@remirror/react'
-import { Popover } from 'antd'
+import { Popover } from '@markflowy/components'
 import { ImageToolTips } from './ImageToolTips'
 
 const ImageEl = styled.img`
@@ -14,8 +14,8 @@ export function ImageNodeView(props: NodeViewComponentProps) {
 
   return (
     <Popover
-      content={<ImageToolTips node={node} updateAttributes={updateAttributes} />}
-      placement='topLeft'
+      customContent={<ImageToolTips node={node} updateAttributes={updateAttributes} />}
+      placement='top-end'
       open={selected}
       arrow={false}
     >

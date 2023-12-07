@@ -1,5 +1,5 @@
 import { useState, type FC } from 'react'
-import { Input, Space, Tooltip } from 'antd'
+import { Input, Space, Tooltip } from '@markflowy/components'
 import type { NodeViewComponentProps } from '@remirror/react'
 
 interface ImageToolTipsProps {
@@ -26,7 +26,6 @@ export const ImageToolTips: FC<ImageToolTipsProps> = (props) => {
     <Space>
       <Tooltip title='Image URL'>
         <Input
-          size='small'
           placeholder='Image URL'
           value={srcVal}
           onInput={handleSrcInput}

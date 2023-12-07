@@ -1,5 +1,4 @@
 import { Input } from '@/components/UI/Input'
-import { MfDialog } from '@/components/UI/Dialog'
 import { Label } from '@/components/UI/Label'
 import { useCommandStore } from '@/stores'
 import { Autocomplete, Button, TextField } from '@mui/material'
@@ -7,11 +6,12 @@ import type { SyntheticEvent } from 'react'
 import { useEffect, useMemo, useState } from 'react'
 import styled from 'styled-components'
 import useBookMarksStore from './useBookMarksStore'
+import { Dialog } from '@markflowy/components'
 
 const ItemWrapper = styled.div`
   display: flex;
   align-items: center;
-  margin-top: 10px;
+  margin-bottom: 10px;
   font-size: 0.9rem;
 
   label {
@@ -92,9 +92,9 @@ export const BookMarkDialog: React.FC = () => {
   }, [newTag, tagList])
 
   return (
-    <MfDialog
+    <Dialog
       title='bookmark'
-      actions={[
+      footer={[
         <Button key='ok' onClick={handleClose}>
           Cancel
         </Button>,
@@ -125,6 +125,6 @@ export const BookMarkDialog: React.FC = () => {
           )}
         />
       </ItemWrapper>
-    </MfDialog>
+    </Dialog>
   )
 }
