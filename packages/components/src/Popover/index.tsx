@@ -7,7 +7,7 @@ interface PopoverProps extends BaseComponentProps, AkPopoverProps {
   title?: string
   customContent?: React.ReactNode
   placement?: PopoverProviderProps['placement']
-  children?: React.ReactElement
+  children?: BaseComponentProps['children']
 }
 
 const Popover: React.FC<PopoverProps> = (props) => {

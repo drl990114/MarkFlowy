@@ -28,8 +28,6 @@
   "scripts": {
     "build": "yarn clear && rollup -c",
     "dev": "rollup -cw",
-    "test": "vitest run",
-    "test:dev": "vitest dev",
     "delete": "rimraf node_modules",
     "clear": "rimraf dist && rimraf tsconfig.tsbuildinfo",
     "prepublish": "yarn build"
