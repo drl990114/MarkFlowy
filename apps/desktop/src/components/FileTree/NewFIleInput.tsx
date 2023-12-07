@@ -112,7 +112,7 @@ const NewFileInput = forwardRef<NewInputRef, HTMLAttributes<HTMLInputElement>>((
     setInputName(e.target.value)
   }, [])
 
-  const stopPropagation: React.ChangeEventHandler<HTMLInputElement> = useCallback((e) => {
+  const stopPropagation: React.MouseEventHandler = useCallback((e) => {
     e.stopPropagation()
   }, [])
 

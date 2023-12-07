@@ -2,8 +2,7 @@ import MuiList from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
 import ListItemAvatar from '@mui/material/ListItemAvatar'
 import ListItemText from '@mui/material/ListItemText'
-import type { TooltipProps } from '@mui/material/Tooltip'
-// import Tooltip from '@mui/material/Tooltip/Tooltip'
+import type { TooltipProps } from '@markflowy/components'
 import { Tooltip } from '@markflowy/components'
 import type { FC } from 'react'
 import { memo } from 'react'
@@ -42,7 +41,7 @@ const List: FC<ListProps> = (props) => {
                   primary={item.title}
                 />
               ) : (
-                <Tooltip title={item.title} placement='right' arrow {...tip}>
+                <Tooltip title={item.title} placement='right' {...tip}>
                   <ListItemText
                     className='list-item__text'
                     primaryTypographyProps={{

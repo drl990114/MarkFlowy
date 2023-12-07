@@ -2,9 +2,9 @@ import type { TooltipProviderProps } from '@ariakit/react'
 import { TooltipProvider, Tooltip as AkTooltip, TooltipAnchor } from '@ariakit/react'
 import styled from 'styled-components'
 
-interface TooltipProps extends BaseComponentProps, TooltipProviderProps {
+export interface TooltipProps extends BaseComponentProps, TooltipProviderProps {
   title: string
-  children: React.ReactElement
+  children: BaseComponentProps['children']
 }
 
 const TooltipWrapper = styled(AkTooltip)`

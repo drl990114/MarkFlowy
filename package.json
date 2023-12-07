@@ -10,10 +10,10 @@
     "docs"
   ],
   "scripts": {
-    "dev": "yarn workspace @markflowy/editor dev & yarn workspace @markflowy/desktop dev",
+    "dev": "turbo dev",
     "dev:editor": "yarn workspace @markflowy/editor dev & yarn workspace @markflowy/playground dev",
-    "build": "yarn workspace @markflowy/theme build && yarn workspace @markflowy/editor build && yarn workspaces foreach run build",
-    "test": "yarn workspace @markflowy/editor test && yarn workspace @markflowy/desktop test && cargo test --workspace --exclude line_by_line",
+    "test": "turbo test",
+    "build": "turbo build",
     "build:desktop": "yarn workspace @markflowy/desktop build && yarn workspace @markflowy/desktop tauri:build",
     "dev:desktop": "yarn workspace @markflowy/desktop tauri:dev",
     "release": "node scripts/release.js",
@@ -58,5 +58,8 @@
     "peerDependencyRules": {},
     "patchedDependencies": {}
   },
-  "packageManager": "yarn@3.6.1"
+  "packageManager": "yarn@3.6.1",
+  "dependencies": {
+    "turbo": "^1.11.0"
+  }
 }

@@ -20,8 +20,6 @@
   "scripts": {
     "build": "yarn clear && tsc --emitDeclarationOnly && node esbuild.mjs",
     "dev": "tsc --emitDeclarationOnly --watch & node esbuild.mjs --watch",
-    "test": "vitest run",
-    "test:dev": "vitest dev",
     "delete": "rimraf node_modules",
     "clear": "rimraf dist && rimraf tsconfig.tsbuildinfo"
   },
