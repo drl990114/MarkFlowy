@@ -24,17 +24,23 @@ import classNames from 'classnames'
 import { WarningHeader } from './styles'
 import { join } from '@tauri-apps/api/path'
 import { sleep } from '@/helper'
+import { useGlobalSettingData } from '@/hooks'
 
 const appWindow = getCurrent()
 
-const EditorWrapper = styled.div<{ active: boolean }>`
+interface EditorWrapperProps {
+  active: boolean
+  fullWidth: boolean
+}
+
+const EditorWrapper = styled.div.attrs<EditorWrapperProps>(props => props)`
   min-height: 100%;
   overflow: hidden;
 
   ${(props) =>
     props.active
       ? css({
-          maxWidth: '800px',
+          maxWidth: props.fullWidth ? 'auto' : '800px',
           margin: '0 auto',
           padding: '0 20px',
           paddingBottom: '8rem',
@@ -70,6 +76,7 @@ function Editor(props: EditorProps) {
   const [content, setContent] = useState<string>()
   const { setEditorDelegate, getEditorContent, setEditorCtx } = useEditorStore()
   const { execute } = useCommandStore()
+  const [settingData] = useGlobalSettingData()
   const editorRef = useRef<EditorRef>(null)
   const [delegate, setDelegate] = useState(createWysiwygDelegate(wysiwygDelegateOptions))
   const [notExistFile, setNotExistFile] = useState(false)
@@ -170,7 +177,12 @@ function Editor(props: EditorProps) {
   return (
     <div className={cls}>
       {typeof content === 'string' ? (
-        <EditorWrapper id='editorarea-wrapper' active={active} onClick={handleWrapperClick}>
+        <EditorWrapper
+          id='editorarea-wrapper'
+          fullWidth={settingData.editor_full_width}
+          active={active}
+          onClick={handleWrapperClick}
+        >
           <MfEditor ref={editorRef} {...editorProps} />
         </EditorWrapper>
       ) : null}
