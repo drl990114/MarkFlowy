@@ -20,8 +20,6 @@ import 'remixicon/fonts/remixicon.css'
 import bus from './helper/eventBus'
 import isPropValid from '@emotion/is-prop-valid'
 import type { FC } from 'react'
-import { FlowyTheme } from '@flowy-ui/react'
-import { FLOWYUI_THEME_ID } from './constants/flowy-ui'
 import useThemeStore from './stores/useThemeStore'
 import { excuteScript, isArray, once } from './helper'
 import { ContextMenu } from './components/UI/ContextMenu/ContextMenu'
@@ -186,12 +184,10 @@ const App: FC = function () {
         <BaseStyle theme={curTheme?.styledContants} />
         <GlobalStyles />
         <MuiThemeProvider theme={muiTheme}>
-          <FlowyTheme id={FLOWYUI_THEME_ID} color={curTheme?.type === 'dark' ? 'darkest' : 'lightest'}>
-            <Routes>
-              <Route index path='/' element={<Root />} />
-              <Route path='/setting' element={<Setting />} />
-            </Routes>
-          </FlowyTheme>
+          <Routes>
+            <Route index path='/' element={<Root />} />
+            <Route path='/setting' element={<Setting />} />
+          </Routes>
         </MuiThemeProvider>
         <ContextMenu />
       </ThemeProvider>

@@ -9,8 +9,7 @@ import { useCommandInit } from '@/hooks/useCommandInit'
 import { BookMarkDialog } from '@/bookmarks/BookMarkDialog'
 import useBookMarksStore from '@/bookmarks/useBookMarksStore'
 import { PageLayout } from '@/layout/PageLayout'
-import { FlowyDialog } from '@flowy-ui/react'
-import { Setting } from '@/router'
+import { SettingDialog } from '../Setting/component/SettingDialog'
 
 function Root() {
   const { activeId } = useEditorStore()
@@ -35,9 +34,7 @@ function Root() {
         <AppInfoDialog />
         <TableDialog />
         <BookMarkDialog />
-        <FlowyDialog id='setting-dialog' mode='fullscreen'>
-          <Setting />
-        </FlowyDialog>
+        <SettingDialog />
       </Container>
     </PageLayout>
   )
