@@ -57,7 +57,7 @@ TauriVersion: ${appInfo.tauriVersion}
         <Button key='ok' onClick={handleClose}>
           {t('ok')}
         </Button>,
-        <Button key='copy' type='primary' onClick={handleCopyAppInfo}>
+        <Button key='copy' btnType='primary' onClick={handleCopyAppInfo}>
           {t('copy')}
         </Button>,
       ]}

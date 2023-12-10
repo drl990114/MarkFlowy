@@ -3,13 +3,13 @@ import { RIGHTBARITEMKEYS } from '@/constants'
 import type { RightBarItem } from '@/components/SideBar'
 import type { BookMarkItem } from './useBookMarksStore'
 import useBookMarksStore from './useBookMarksStore'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { TagsViewItem } from './TagsViewItem'
 import { BookMarkViewItem } from './BookMarkViewItem'
-import type { BookMarkContextMenuRef } from './BookMarkContextMenu'
-import { BookMarkContextMenu } from './BookMarkContextMenu'
 import type { RightNavItem } from '@/components/SideBar/SideBarHeader'
 import SideBarHeader from '@/components/SideBar/SideBarHeader'
+import { showContextMenu } from '@/components/UI/ContextMenu/ContextMenu'
+import { useCommandStore } from '@/stores'
 
 type BookMarkViewMode = 'list' | 'tags'
 
@@ -21,7 +21,6 @@ export interface TagView {
 const BookMarksList: React.FC<ChatListProps> = (props) => {
   const { bookMarkList, openBookMark } = useBookMarksStore()
   const [tagsViewList, setTagsViewList] = useState<TagView[]>([])
-  const contextMenuRef = useRef<BookMarkContextMenuRef>(null)
   const [viewMode, setViewMode] = useState<BookMarkViewMode>('list')
 
   const getTagsViewList = useCallback(() => {
@@ -56,15 +55,31 @@ const BookMarksList: React.FC<ChatListProps> = (props) => {
       if (bookMarkId) {
         const bookmark = bookMarkList.find((item) => item.id === bookMarkId)
         if (bookmark) {
-          contextMenuRef.current?.open({
+          showContextMenu({
             x: e.clientX,
             y: e.clientY,
-            bookmark,
+            items: [
+              {
+                value: 'edit',
+                label: 'Edit',
+                handler: () => {
+                  useCommandStore.getState().execute('edit_bookmark_dialog', bookmark)
+                }
+              },
+              {
+                value: 'remove',
+                label: 'Remove',
+                handler: () => {
+                  useBookMarksStore.getState().removeBookMark(bookmark.id)
+                  
+                },
+              }
+            ]
           })
         }
       }
     },
-    [bookMarkList, contextMenuRef],
+    [bookMarkList],
   )
   const toggleViewMode = useCallback(() => {
     setViewMode((prev) => (prev === 'list' ? 'tags' : 'list'))
@@ -108,7 +123,6 @@ const BookMarksList: React.FC<ChatListProps> = (props) => {
               return <TagsViewItem tagView={tagView} key={tagView.tag} />
             })}
       </div>
-      <BookMarkContextMenu ref={contextMenuRef} />
     </Container>
   )
 }

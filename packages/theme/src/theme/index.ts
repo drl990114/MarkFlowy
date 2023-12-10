@@ -52,13 +52,18 @@ export const common = {
   fontSm: '14px',
   fontXs: '12px',
 
-  smallPadding: '0.25rem',
-  midPadding: '0.5rem',
-  bigPadding: '1rem',
+  smallPadding: '4px',
+  midPadding: '8px',
+  bigPadding: '12px',
 
-  smallBorderRadius: '0.15rem',
-  midBorderRadius: '0.25rem',
-  bigBorderRadius: '0.5rem',
+  smallBorderRadius: '6px',
+  midBorderRadius: '8px',
+  bigBorderRadius: '12px',
+
+  black: '#74757D',
+  white: '#E0E0E0',
+  gray: '#C0C0C0',
+  blue: '#0359D0',
 
   fontFamily: `'Open Sans', 'Clear Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif`,
   codemirrorFontFamily: `'DejaVu Sans Mono', 'Source Code Pro', 'Droid Sans Mono', Consolas, monospace`,
@@ -80,6 +85,7 @@ const styledLightTheme = {
   // components
   tooltipBgColor: '#f6f7f9',
   dialogBgColor: '#f6f7f9',
+  contextMenuBgColor: '#f6f7f9',
 
   titleBarDefaultHoverColor: '#bdbdc2',
 
@@ -103,6 +109,7 @@ const styledDarkTheme = {
   // components
   tooltipBgColor: '#43414A',
   dialogBgColor: '#43414A',
+  contextMenuBgColor: '#43414A',
 
   titleBarDefaultHoverColor: '#383838',
 

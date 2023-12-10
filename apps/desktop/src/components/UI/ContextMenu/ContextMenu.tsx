@@ -1,51 +1,49 @@
-import { MenuList, MenuItem, ListItemText, Paper } from '@mui/material'
-import { memo } from 'react'
-import styled, { css } from 'styled-components'
+import type { IShowContextMenuParams } from '@/stores/useContextMenuStore'
+import useContextMenuStore from '@/stores/useContextMenuStore'
+import { Menu } from '@markflowy/components'
+import { useEffect } from 'react'
 
-const ContextMenuContainer = styled(Paper)<Pick<ContextMenuProps, 'top' | 'left'>>`
-  position: fixed;
-  width: 140px;
+export const showContextMenu = (params: IShowContextMenuParams) => {
+  useContextMenuStore.getState().show(params)
+}
 
-  ${({ top, left }) => css`
-    top: ${top}px;
-    left: ${left}px;
-  `}
-`
+export const hideContextMenu = () => {
+  useContextMenuStore.getState().hide()
+}
 
-export const ContextMenu = memo((props: ContextMenuProps) => {
-  const { menuData, ...positionProps } = props
+export const ContextMenu = () => {
+  const { x, y, items } = useContextMenuStore()
+  const open = x !== -9999
+
+  useEffect(() => {
+    const handleClick = () => {
+      useContextMenuStore.getState().hide()
+    }
+
+    window.addEventListener('contextmenu', handleClick, true)
+
+    return () => {
+      window.removeEventListener('contextmenu', handleClick)
+    }
+  }, [])
 
   return (
-    <ContextMenuContainer {...positionProps}>
-      <MenuList sx={{ padding: 0 }}>
-        {menuData.map((menuItem) => {
-          const { key, label, handler } = menuItem
-          return (
-            <MenuItem
-              sx={{ padding: 0.7 }}
-              key={key}
-              onClick={(e) => {
-                e.stopPropagation()
-                handler()
-              }}
-            >
-              <ListItemText>
-                <span style={{ fontSize: 12 }}>{label}</span>
-              </ListItemText>
-            </MenuItem>
-          )
-        })}
-      </MenuList>
-    </ContextMenuContainer>
+    <div
+      style={{ position: 'fixed', top: `${y}px`, left: `${x}px`, zIndex: 99 }}
+    >
+      {open ? (
+        <Menu
+          open
+          items={items}
+          style={{
+            position: 'fixed',
+            top: `${y}px`,
+            left: `${x}px`,
+            zIndex: 99,
+          }}
+          onClose={hideContextMenu}
+        ></Menu>
+      ) : null}
+    </div>
   )
-})
-
-export interface ContextMenuProps {
-  top: number
-  left: number
-  menuData: {
-    key: string
-    label: string
-    handler: () => void
-  }[]
 }

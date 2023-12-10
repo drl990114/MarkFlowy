@@ -20,10 +20,11 @@ import 'remixicon/fonts/remixicon.css'
 import bus from './helper/eventBus'
 import isPropValid from '@emotion/is-prop-valid'
 import type { FC } from 'react'
-import { FlowyContextMenu, FlowyTheme } from '@flowy-ui/react'
-import { FLOWYUI_CONTEXT_MENU_ID, FLOWYUI_THEME_ID } from './constants/flowy-ui'
+import { FlowyTheme } from '@flowy-ui/react'
+import { FLOWYUI_THEME_ID } from './constants/flowy-ui'
 import useThemeStore from './stores/useThemeStore'
 import { excuteScript, isArray, once } from './helper'
+import { ContextMenu } from './components/UI/ContextMenu/ContextMenu'
 
 // TODO refactor useGlobalSettingData use zustand
 const confRef: { current: any } = { current: {} }
@@ -190,15 +191,9 @@ const App: FC = function () {
               <Route index path='/' element={<Root />} />
               <Route path='/setting' element={<Setting />} />
             </Routes>
-
-            <FlowyContextMenu
-              id={FLOWYUI_CONTEXT_MENU_ID}
-              style={{
-                zIndex: 1000000,
-              }}
-            />
           </FlowyTheme>
         </MuiThemeProvider>
+        <ContextMenu />
       </ThemeProvider>
     </StyleSheetManager>
   )

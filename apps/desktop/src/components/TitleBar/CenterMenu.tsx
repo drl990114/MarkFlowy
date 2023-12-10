@@ -1,11 +1,12 @@
 import styled from 'styled-components'
 import { useCallback, useRef } from 'react'
-import { showContextMenu } from '@/helper/context-menu'
+// import { showContextMenu } from '@/helper/context-menu'
 import { useGlobalOSInfo, useGlobalSettingData } from '@/hooks'
 import { emit } from '@tauri-apps/api/event'
 import { EVENT } from '@/constants'
 import type Dialog from '@flowy-ui/dialog'
 import useThemeStore from '@/stores/useThemeStore'
+import { showContextMenu } from '../UI/ContextMenu/ContextMenu'
 
 export const CenterMenu = () => {
   const ref = useRef<HTMLDivElement>(null)
