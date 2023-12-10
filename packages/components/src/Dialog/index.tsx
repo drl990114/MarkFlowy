@@ -7,7 +7,7 @@ export interface DialogProps extends AkDialogProps {
   title?: string
   children?: React.ReactNode
   footer?: React.ReactNode
-  width?: number
+  width?: string
 }
 
 const Dialog = (props: DialogProps) => {

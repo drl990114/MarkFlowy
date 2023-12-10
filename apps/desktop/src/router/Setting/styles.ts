@@ -108,7 +108,6 @@ export const Container = styled.div`
     padding: 1rem 2rem;
     width: 100%;
     overflow: auto;
-    background: ${(props) => props.theme.bgColor};
 
     & .conf-path {
       margin-bottom: 0.5rem;

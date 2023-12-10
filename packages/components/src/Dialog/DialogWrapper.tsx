@@ -1,18 +1,17 @@
 import styled from 'styled-components'
 import { Dialog as AkDialog } from '@ariakit/react'
 
-export const DialogWrapper = styled(AkDialog).attrs<{ width: number }>((props) => ({
-  width: props.width || 420,
+export const DialogWrapper = styled(AkDialog).attrs<{ width: string }>((props) => ({
+  width: props.width || `420px`,
 }))`
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: ${(props) => props.width}px;
+  width: ${(props) => props.width};
   z-index: 50;
   margin: auto;
   display: flex;
-  height: fit-content;
   max-height: calc(100vh - 2 * 0.75rem);
   flex-direction: column;
   overflow: auto;
@@ -52,6 +51,7 @@ export const DialogWrapper = styled(AkDialog).attrs<{ width: number }>((props) =
 
     &:hover {
       background-color: ${(props) => props.theme.accentColor};
+      color: ${(props) => props.theme.white};
     }
   }
 

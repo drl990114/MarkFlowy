@@ -4,9 +4,9 @@ import { useCallback, useRef } from 'react'
 import { useGlobalOSInfo, useGlobalSettingData } from '@/hooks'
 import { emit } from '@tauri-apps/api/event'
 import { EVENT } from '@/constants'
-import type Dialog from '@flowy-ui/dialog'
 import useThemeStore from '@/stores/useThemeStore'
 import { showContextMenu } from '../UI/ContextMenu/ContextMenu'
+import { useCommandStore } from '@/stores'
 
 export const CenterMenu = () => {
   const ref = useRef<HTMLDivElement>(null)
@@ -70,9 +70,7 @@ export const CenterMenu = () => {
           label: 'Settings',
           value: 'settings',
           handler: () => {
-            const settingDialog = document.getElementById('setting-dialog') as Dialog
-            settingDialog.open()
-
+            useCommandStore.getState().execute('open_setting_dialog')
             // FIXME tauri 2.0 bug in windows https://github.com/tauri-apps/plugins-workspace/issues/656
             // invoke('open_conf_window')
           },
