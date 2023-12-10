@@ -1,8 +1,13 @@
 import styled from 'styled-components'
+import type { ButtonProps as AkButtonProps } from '@ariakit/react'
 import { Button as AkButton } from '@ariakit/react'
-import { lighten } from '@markflowy/theme'
+import { darken } from '@markflowy/theme'
 
-const Button = styled(AkButton)`
+export interface ButtonProps extends AkButtonProps {
+  btnType?: 'primary'
+}
+
+const Button = styled(AkButton).attrs<ButtonProps>((props) => ({ ...props }))`
   display: flex;
   user-select: none;
   align-items: center;
@@ -10,20 +15,19 @@ const Button = styled(AkButton)`
   margin: 0;
   white-space: nowrap;
   border-radius: ${(props) => props.theme.smallBorderRadius};
-  border-style: none;
-  background-color: ${(props) => props.theme.accentColor};
-  padding-left: ${(props) => props.theme.midPadding};
-  padding-right: ${(props) => props.theme.midPadding};
-  padding-top: ${(props) => props.theme.smallPadding};
-  padding-bottom: ${(props) => props.theme.smallPadding};
-  font-size: 14px;
-  color: ${(props) => props.theme.primaryFontColor};
+  border: 1px solid ${props => props.theme.borderColor};
+  background-color: ${(props) =>
+    props.btnType === 'primary' ? props.theme.accentColor : props.theme.bgColor};
+  color: ${props => props.btnType === 'primary' ? props.theme.white : props.theme.primaryFontColor};
+  padding-left: ${(props) => props.theme.bigPadding};
+  padding-right: ${(props) => props.theme.bigPadding};
+  padding-top: ${(props) => props.theme.midPadding};
+  padding-bottom: ${(props) => props.theme.midPadding};
+  font-size: ${props => props.theme.fontSm};
   text-decoration-line: none;
-  outline-width: 2px;
-  outline-offset: 2px;
 
   &:hover {
-    background-color: ${(props) => lighten(props.theme.accentColor, '0.2')};
+    background-color: ${(props) => darken(props.btnType === 'primary' ? props.theme.accentColor : props.theme.bgColor, 0.2)};
   }
 
   &[aria-disabled='true'] {

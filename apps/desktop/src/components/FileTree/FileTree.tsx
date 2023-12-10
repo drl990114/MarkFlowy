@@ -3,26 +3,41 @@ import type { FC } from 'react'
 import { memo, useCallback, useState } from 'react'
 import FileNode from './FileNode'
 import type { IFile } from '@/helper/filesys'
-import { FileNodeContextMenu } from './FileNodeContextMenu'
-import useFileTreeContextMenu from '@/hooks/useContextMenu'
 import { RootFolderTab } from './styles'
+import { showContextMenu } from '../UI/ContextMenu/ContextMenu'
+import bus from '@/helper/eventBus'
+import { EVENT } from '@/constants'
 
 const FileTree: FC<FileTreeProps> = (props) => {
   const { data, activeId, onSelect, className } = props
-  const { setOpen, points, setPoints } = useFileTreeContextMenu()
   const rootFolderNode = data?.[0]?.kind === 'dir' ? data[0] : null
   const [folderVisible, setFolderVisible] = useState(true)
 
   const handleContextMenu = useCallback(
     (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
       e.preventDefault()
-      setOpen(true)
-      setPoints({
+      showContextMenu({
         x: e.clientX,
         y: e.clientY,
+        items: [
+          {
+            value: 'add_file',
+            label: 'Add File',
+            handler: () => {
+              bus.emit(EVENT.sidebar_show_new_input)
+            },
+          },
+          {
+            value: 'delete_file',
+            label: 'Delete File',
+            handler: () => {
+              bus.emit(EVENT.sidebar_delete_file)
+            }
+          }
+        ]
       })
     },
-    [setOpen, setPoints],
+    [],
   )
 
   const containerCls = classNames('w-full overflow-hidden', className)
@@ -55,8 +70,6 @@ const FileTree: FC<FileTreeProps> = (props) => {
             ))
           : null}
       </div>
-
-      <FileNodeContextMenu top={points.y} left={points.x} />
     </div>
   )
 }

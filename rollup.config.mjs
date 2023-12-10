@@ -59,7 +59,7 @@ export function createConfig({ input = 'index.ts', pkg, external = [] }) {
         sourcemap: true,
         entryFileNames: '[name].js',
       },
-      external: ['styled-components'],
+      external: ['styled-components', 'color'],
       plugins: [
         resolve(),
         url({

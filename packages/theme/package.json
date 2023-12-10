@@ -34,12 +34,14 @@
   },
   "dependencies": {
     "@lezer/highlight": "^1.1.6",
+    "color": "^4.2.3",
     "react": "^18.2.0",
     "styled-components": "^6.1.0"
   },
   "devDependencies": {
     "@drl990114/codemirror-themes": "^0.0.1",
     "@types/codemirror": "^5.60.9",
+    "@types/color": "^3.0.6",
     "@types/rollup-plugin-url": "^3",
     "eslint": "8.44.0",
     "postcss": "^8.4.31",
