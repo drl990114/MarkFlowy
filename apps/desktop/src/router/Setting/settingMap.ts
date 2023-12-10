@@ -34,6 +34,16 @@ const settingMap = {
       },
     },
   },
+  editor: {
+    Style: {
+      fullWidth: {
+        key: 'editor_full_width',
+        type: 'switch',
+        title: 'Full width',
+        desc: 'Set the editor to full width.',
+      }
+    }
+  },
   extensions: {
     ChatGPT: {
       ApiKey: {
