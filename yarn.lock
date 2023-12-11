@@ -5051,7 +5051,7 @@ __metadata:
     "@vitejs/plugin-react": ^4.0.3
     eslint: ^8.45.0
     eslint-plugin-react-hooks: ^4.6.0
-    eslint-plugin-react-refresh: ^0.4.3
+    eslint-plugin-react-refresh: ^0.4.5
     react: ^18.2.0
     react-dom: ^18.2.0
     remixicon: ^3.5.0
@@ -13499,12 +13499,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-react-refresh@npm:^0.4.3":
-  version: 0.4.3
-  resolution: "eslint-plugin-react-refresh@npm:0.4.3"
+"eslint-plugin-react-refresh@npm:^0.4.5":
+  version: 0.4.5
+  resolution: "eslint-plugin-react-refresh@npm:0.4.5"
   peerDependencies:
     eslint: ">=7"
-  checksum: 0332c950bb46c3058fd06acb1dbdc3ea0af05238645f4c0f575e0e367440dc56afb928f855833d321b9e8109e08c63d5f476cc55d507f883a80c289bfcd509cb
+  checksum: 953e665f6aaf097291a2bb07fde05466338aecd169bcd6faa708b50166912e3a757f45a45252cf7738b5e0d986224d363cc227864e98c979fe9978770b2b9f42
   languageName: node
   linkType: hard
 
