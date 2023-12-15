@@ -6,6 +6,11 @@ export function isClosingTag(str: string) {
   return regex.test(str)
 }
 
+export function isSingleNode (html: string) {
+  const ast = HTML.parse(html)
+  return ast && ast.length === 1
+}
+
 export const getAttrsBySignalHtmlContent = (html: string) => {
   const ast = HTML.parse(html)
   return ast[0]?.attrs || {}

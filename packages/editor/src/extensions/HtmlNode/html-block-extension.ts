@@ -1,3 +1,4 @@
+import { arrayExclude } from './../../utils/common'
 import type { NodeSerializerOptions } from '../../transform'
 import { ParserRuleType } from '../../transform'
 import type {
@@ -14,6 +15,7 @@ import type { InputRule } from '@remirror/pm/inputrules'
 import { TextSelection } from '@remirror/pm/state'
 import block_names from 'markdown-it/lib/common/html_blocks'
 import { arrowHandler } from '../CodeMirror/codemirror-utils'
+import { needSplitInlineHtmlTokenTags } from '@/transform/markdown-it-html-inline'
 
 export class LineHtmlBlockExtension extends NodeExtension {
   get name() {
@@ -55,7 +57,12 @@ export class LineHtmlBlockExtension extends NodeExtension {
   createInputRules(): InputRule[] {
     const rules: InputRule[] = [
       nodeInputRule({
-        regexp: new RegExp('^</?(' + block_names.join('|') + ')(?=(\\s|/?>|$))', 'i'),
+        regexp: new RegExp(
+          '^</?(' +
+            arrayExclude(block_names, needSplitInlineHtmlTokenTags).join('|') +
+            ')(?=(\\s|/?>|$))',
+          'i',
+        ),
         type: this.type,
         beforeDispatch: ({ tr, start, match }) => {
           const $pos = tr.doc.resolve(start)

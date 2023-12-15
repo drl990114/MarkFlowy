@@ -1,4 +1,4 @@
-import { Input } from '@/components/UI/Input'
+import { Input } from '@markflowy/components'
 import { Label } from '@/components/UI/Label'
 import { useCommandStore } from '@/stores'
 import { Autocomplete, Button, TextField } from '@mui/material'

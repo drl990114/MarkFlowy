@@ -31,7 +31,7 @@ import { ParserRuleType } from '@/transform'
 import { buildHtmlStringFromAst, getAttrsBySignalHtmlContent } from '@/utils/html'
 import type { NodeViewComponentProps } from '@remirror/react'
 import type { ComponentType } from 'react'
-import { ImageNodeView } from '../../components/ImageNodeView'
+import { ImageNodeView } from './image-nodeview'
 
 type DelayedImage = DelayedPromiseCreator<ImageAttributes>
 
@@ -272,8 +272,6 @@ export class MfImageExtension extends NodeExtension<ImageOptions> {
     ]
   }
 
-
-
   createInputRules(): InputRule[] {
     const rules: InputRule[] = [
       nodeInputRule({
@@ -287,6 +285,7 @@ export class MfImageExtension extends NodeExtension<ImageOptions> {
 
     return rules
   }
+
   public fromMarkdown() {
     return [
       {

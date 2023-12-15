@@ -4991,7 +4991,6 @@ __metadata:
     "@vitest/browser": ^0.34.2
     "@vitest/ui": ^0.34.3
     create-context-state: ^2.0.0
-    entities: ~3.0.1
     esbuild: ^0.18.2
     esbuild-node-externals: ^1.8.0
     esbuild-plugin-alias: ^0.2.1

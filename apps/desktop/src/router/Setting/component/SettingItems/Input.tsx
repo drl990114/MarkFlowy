@@ -1,4 +1,4 @@
-import { Input } from '@/components/UI/Input'
+import { Input } from '@markflowy/components'
 import { useCallback, useEffect, useState } from 'react'
 import type { SettingItemProps } from '.'
 import { useGlobalSettingData } from '@/hooks'
