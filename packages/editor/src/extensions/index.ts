@@ -40,6 +40,7 @@ import { CountExtension } from '@remirror/extension-count'
 import { FindExtension } from '@remirror/extension-find'
 import { LineHtmlBlockExtension } from './HtmlNode/html-block-extension'
 import { MfImageExtension } from './Image'
+import { IframeExtension } from './Iframe'
 
 // import { TableExtension } from './ReactTables';
 
@@ -83,6 +84,7 @@ function extensions({
     }),
     new CountExtension(),
     new MfImageExtension(),
+    new IframeExtension(),
 
     new PlaceholderExtension({ placeholder: 'Type something...' }),
     new LineHorizontalRuleExtension(),

@@ -90,14 +90,12 @@ export class HtmlNodeView implements NodeView {
   // == Events ===================================== //
 
   selectNode() {
-    this.dom.classList.add('ProseMirror-selectednode')
     if (!this.mfCodemirrorView?.updating) {
       this.openEditor()
     }
   }
 
   deselectNode() {
-    this.dom.classList.remove('ProseMirror-selectednode')
     if (this.mfCodemirrorView?.updating) {
       this.closeEditor()
     }

@@ -15,7 +15,9 @@ const Popover: React.FC<PopoverProps> = (props) => {
 
   return (
     <PopoverProvider placement={placement}>
-      <PopoverDisclosure>{children}</PopoverDisclosure>
+      <PopoverDisclosure render={(p) => <div style={{ display: 'inline-block' }} {...p}></div>}>
+        {children}
+      </PopoverDisclosure>
       <PopoverWrapper {...rest}>
         {arrow ? (
           <PopoverArrow style={{ width: '18px', height: '18px' }} className='arrow' />

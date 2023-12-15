@@ -11,6 +11,5 @@ export default defineConfig(() => ({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./__test__/setup-vitest.ts'],
-    reporters: ['json'],
   },
 }))

@@ -758,10 +758,6 @@ export const BaseStyle = styled.createGlobalStyle`
     outline: 2px solid ${(props) => props.theme.accentColor};
   }
 
-  .ProseMirror-selectednode {
-    outline: 2px solid #8cf;
-  }
-
   .img-input__container {
     display: flex;
   }

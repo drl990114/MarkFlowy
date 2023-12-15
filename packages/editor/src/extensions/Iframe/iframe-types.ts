@@ -1,0 +1,24 @@
+import type { Static } from '@remirror/core'
+
+export interface IframeOptions {
+  /**
+   * The default source to use for the iframe.
+   */
+  defaultSource?: Static<string>;
+
+  /**
+   * The class to add to the iframe.
+   *
+   * @defaultValue 'remirror-iframe'
+   */
+  class?: Static<string>;
+
+  /**
+   * Enable resizing.
+   *
+   * If true, the iframe node will be rendered by `nodeView` instead of `toDOM`.
+   *
+   * @defaultValue false
+   */
+  enableResizing: boolean;
+}

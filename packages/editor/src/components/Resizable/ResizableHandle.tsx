@@ -4,6 +4,7 @@ import styled, { css } from 'styled-components'
 export enum ResizableHandleType {
   Right,
   Left,
+  Top,
   Bottom,
   TopRight,
   TopLeft,
@@ -19,22 +20,21 @@ interface ResizableHandleProps extends BaseComponentProps {
 
 const ResizableHandleContainer = styled.span<ResizableHandleProps>`
   position: absolute;
-  width: 6px;
-  height: 6px;
-  background: ${(props) => props.theme.accentColor};
   border-radius: 12px;
   border: 2px solid #fff;
+  background: rgba(0, 0, 0, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 6px;
+  transition: opacity 300ms ease-in 0s;
   z-index: 99;
 
   ${(props) => {
     if (props.visible) {
       return css`
-        display: inline-block;
         opacity: 1;
       `
     } else {
       return css`
-        display: none;
         opacity: 0;
       `
     }
@@ -65,6 +65,38 @@ const ResizableHandleContainer = styled.span<ResizableHandleProps>`
           right: -6px;
           top: -6px;
           cursor: ne-resize;
+        `
+      case ResizableHandleType.Left:
+        return css`
+          left: 6px;
+          top: calc(50% - 20px);
+          height: 40px;
+          width: 10px;
+          cursor: col-resize;
+        `
+      case ResizableHandleType.Right:
+        return css`
+          right: 6px;
+          top: calc(50% - 20px);
+          height: 40px;
+          width: 10px;
+          cursor: col-resize;
+        `
+      case ResizableHandleType.Top:
+        return css`
+          left: calc(50% - 20px);
+          top: 6px;
+          height: 10px;
+          width: 40px;
+          cursor: col-resize;
+        `
+      case ResizableHandleType.Bottom:
+        return css`
+          right: calc(50% - 20px);
+          bottom: 6px;
+          height: 10px;
+          width: 40px;
+          cursor: col-resize;
         `
       default:
         break

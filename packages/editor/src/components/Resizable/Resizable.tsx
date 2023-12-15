@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { useRef, type FC, useEffect, useCallback, memo } from 'react'
+import { useRef, type FC, useEffect, useCallback, memo, useState } from 'react'
 import { throttle } from '@remirror/core-helpers'
 import type { NodeViewComponentProps } from '@remirror/react'
 import { ResizableHandle, ResizableHandleType } from './ResizableHandle'
@@ -21,20 +21,22 @@ const ResizableContainer = styled.div`
 
 interface ResizableProps extends BaseComponentProps, NodeViewComponentProps {
   aspectRatio?: ResizableRatioType
+  defaultSize?: { width: number; height: number }
   onResize?: (e: React.MouseEvent<Element, MouseEvent>, handleType: ResizableHandleType) => void
 }
 
 const MIN_WIDTH = 20
 
 export const Resizable: FC<ResizableProps> = memo((props) => {
-  const { node, aspectRatio = ResizableRatioType.Fixed, getPosition, updateAttributes, selected } = props
+  const { node, aspectRatio = ResizableRatioType.Flexible, updateAttributes, selected } = props
 
+  const [size, setSize] = useState<{ width?: number; height?: number }>({})
+  const [inNode, setInNode] = useState(false)
+  const [hasChanged, setHasChanged] = useState(false)
   const destoryList = useRef<(() => void)[]>([])
   const containerRef = useRef<HTMLDivElement>(null)
   const startWidthRef = useRef(0)
   const startHeightRef = useRef(0)
-  const widthRef = useRef(0)
-  const heightRef = useRef(0)
 
   const startResizing = useCallback(
     (e: React.MouseEvent<Element, MouseEvent>, handleType: ResizableHandleType) => {
@@ -71,6 +73,10 @@ export const Resizable: FC<ResizableProps> = memo((props) => {
               newHeight = startHeight + diffY
               newWidth = (startWidth / startHeight) * newHeight!
               break
+            case ResizableHandleType.Top:
+              newHeight = startHeight - diffY
+              newWidth = (startWidth / startHeight) * newHeight!
+              break
           }
         } else if (aspectRatio === ResizableRatioType.Flexible) {
           switch (handleType) {
@@ -82,6 +88,9 @@ export const Resizable: FC<ResizableProps> = memo((props) => {
               break
             case ResizableHandleType.Bottom:
               newHeight = startHeight + diffY
+              break
+            case ResizableHandleType.Top:
+              newHeight = startHeight - diffY
               break
             case ResizableHandleType.BottomRight:
             case ResizableHandleType.TopRight:
@@ -106,16 +115,11 @@ export const Resizable: FC<ResizableProps> = memo((props) => {
         }
 
         if (newWidth && containerRef.current) {
-          widthRef.current = Math.round(newWidth)
-          containerRef.current.style.width = `${widthRef.current}px`
+          setSize((prev) => ({ ...prev, width: Math.round(newWidth!) }))
         }
 
         if (newHeight) {
-          heightRef.current = Math.round(newHeight)
-        }
-
-        if ((newWidth || newHeight) && containerRef.current) {
-          containerRef.current.style.aspectRatio = `${widthRef.current} / ${heightRef.current}`
+          setSize((prev) => ({ ...prev, height: Math.round(newHeight!) }))
         }
       })
 
@@ -124,15 +128,17 @@ export const Resizable: FC<ResizableProps> = memo((props) => {
 
         document.removeEventListener('mousemove', onMouseMove)
         document.removeEventListener('mouseup', onMouseUp)
-        const pos = getPosition()
-        if (pos) {
-          startHeightRef.current = heightRef.current
-          startWidthRef.current = widthRef.current
+
+        if (containerRef.current) {
+          const { width, height } = containerRef.current.getBoundingClientRect()
+          startWidthRef.current = width
+          startHeightRef.current = height
+          setSize({ width, height })
 
           updateAttributes({
             ...node.attrs,
-            width: widthRef.current,
-            height: heightRef.current,
+            width: startWidthRef.current,
+            height: startHeightRef.current,
           })
         }
       }
@@ -143,11 +149,12 @@ export const Resizable: FC<ResizableProps> = memo((props) => {
       destoryList.current.push(() => document.removeEventListener('mousemove', onMouseMove))
       destoryList.current.push(() => document.removeEventListener('mouseup', onMouseUp))
     },
-    [aspectRatio, getPosition, node.attrs, updateAttributes],
+    [aspectRatio, node.attrs, updateAttributes],
   )
 
   const handleResizing = useCallback(
     (e: React.MouseEvent, handleType: ResizableHandleType) => {
+      setHasChanged(true)
       startResizing(e, handleType)
     },
     [startResizing],
@@ -158,6 +165,7 @@ export const Resizable: FC<ResizableProps> = memo((props) => {
       const { width, height } = containerRef.current.getBoundingClientRect()
       startWidthRef.current = width
       startHeightRef.current = height
+      setSize({ width, height })
     }
 
     return () => {
@@ -166,27 +174,42 @@ export const Resizable: FC<ResizableProps> = memo((props) => {
     }
   }, [])
 
+  const handleVisible = selected || inNode
+
   return (
-    <ResizableContainer ref={containerRef}>
+    <ResizableContainer
+      ref={containerRef}
+      style={
+        hasChanged
+          ? {
+              width: `${size.width}px`,
+              height: `${size.height}px`,
+              aspectRatio: `${size.width} / ${size.height}`,
+            }
+          : undefined
+      }
+      onMouseOver={() => setInNode(true)}
+      onMouseOut={() => setInNode(false)}
+    >
       <ResizableHandle
-        visible={selected}
+        visible={handleVisible}
         onResizing={handleResizing}
-        handleType={ResizableHandleType.BottomLeft}
+        handleType={ResizableHandleType.Top}
       />
       <ResizableHandle
-        visible={selected}
+        visible={handleVisible}
         onResizing={handleResizing}
-        handleType={ResizableHandleType.BottomRight}
+        handleType={ResizableHandleType.Bottom}
       />
       <ResizableHandle
-        visible={selected}
+        visible={handleVisible}
         onResizing={handleResizing}
-        handleType={ResizableHandleType.TopLeft}
+        handleType={ResizableHandleType.Left}
       />
       <ResizableHandle
-        visible={selected}
+        visible={handleVisible}
         onResizing={handleResizing}
-        handleType={ResizableHandleType.TopRight}
+        handleType={ResizableHandleType.Right}
       />
       {props.children}
     </ResizableContainer>
