@@ -15,9 +15,9 @@ const Button = styled(AkButton).attrs<ButtonProps>((props) => ({ ...props }))`
   margin: 0;
   white-space: nowrap;
   border-radius: ${(props) => props.theme.smallBorderRadius};
-  border: 1px solid ${props => props.theme.borderColor};
+  border: 1px solid ${props => props.btnType === 'primary' ? props.theme.accentColor : props.theme.borderColor};
   background-color: ${(props) =>
-    props.btnType === 'primary' ? props.theme.accentColor : props.theme.bgColor};
+    props.btnType === 'primary' ? props.theme.accentColor : props.theme.buttonBgColor};
   color: ${props => props.btnType === 'primary' ? props.theme.white : props.theme.primaryFontColor};
   padding-left: ${(props) => props.theme.bigPadding};
   padding-right: ${(props) => props.theme.bigPadding};
@@ -27,7 +27,7 @@ const Button = styled(AkButton).attrs<ButtonProps>((props) => ({ ...props }))`
   text-decoration-line: none;
 
   &:hover {
-    background-color: ${(props) => darken(props.btnType === 'primary' ? props.theme.accentColor : props.theme.bgColor, 0.2)};
+    background-color: ${(props) => darken(props.btnType === 'primary' ? props.theme.accentColor : props.theme.buttonBgColor, 0.2)};
   }
 
   &[aria-disabled='true'] {

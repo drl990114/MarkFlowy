@@ -11,6 +11,7 @@ import { Empty, FileTree, List } from '@/components'
 import styled from 'styled-components'
 import useOpenedCacheStore from '@/stores/useOpenedCacheStore'
 import { Popover } from '@markflowy/components'
+import { MfIconButton } from '../UI/Button'
 
 const RecentListBottom = styled.div`
   padding: 8px;
@@ -68,11 +69,7 @@ const Explorer: FC<ExplorerProps> = (props) => {
     <Container className={containerCLs} onContextMenu={handleContextMenu}>
       <div className='h-full w-full overflow-auto'>
         {folderData && folderData.length > 0 ? (
-          <FileTree
-            data={folderData}
-            activeId={activeId}
-            onSelect={handleSelect}
-          />
+          <FileTree data={folderData} activeId={activeId} onSelect={handleSelect} />
         ) : (
           <Empty />
         )}
@@ -98,10 +95,7 @@ const Explorer: FC<ExplorerProps> = (props) => {
           }
         >
           {listData.length > 0 ? (
-            <i
-              className='ri-more-2-fill cursor-pointer'
-              onClick={() => setPopperOpen(true)}
-            />
+            <MfIconButton icon='ri-more-2-fill' onClick={() => setPopperOpen(true)} />
           ) : null}
         </Popover>
       </div>

@@ -116,7 +116,9 @@ export function getFileNameFromPath(filePath: string) {
   return filePath
 }
 
-export function getFolderPathFromPath(filePath: string) {
+export function getFolderPathFromPath(filePath?: string) {
+  if (!filePath) return filePath
+
   const regex = /^(.*)[\/\\][^\/\\]+$/
   const match = regex.exec(filePath)
 

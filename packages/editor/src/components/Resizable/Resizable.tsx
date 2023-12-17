@@ -22,13 +22,20 @@ const ResizableContainer = styled.div`
 interface ResizableProps extends BaseComponentProps, NodeViewComponentProps {
   aspectRatio?: ResizableRatioType
   defaultSize?: { width: number; height: number }
+  controlInit?: (init: () => void) => void
   onResize?: (e: React.MouseEvent<Element, MouseEvent>, handleType: ResizableHandleType) => void
 }
 
 const MIN_WIDTH = 20
 
 export const Resizable: FC<ResizableProps> = memo((props) => {
-  const { node, aspectRatio = ResizableRatioType.Flexible, updateAttributes, selected } = props
+  const {
+    node,
+    aspectRatio = ResizableRatioType.Flexible,
+    updateAttributes,
+    selected,
+    controlInit,
+  } = props
 
   const [size, setSize] = useState<{ width?: number; height?: number }>({})
   const [inNode, setInNode] = useState(false)
@@ -154,25 +161,33 @@ export const Resizable: FC<ResizableProps> = memo((props) => {
 
   const handleResizing = useCallback(
     (e: React.MouseEvent, handleType: ResizableHandleType) => {
-      setHasChanged(true)
       startResizing(e, handleType)
     },
     [startResizing],
   )
 
   useEffect(() => {
-    if (containerRef.current) {
-      const { width, height } = containerRef.current.getBoundingClientRect()
-      startWidthRef.current = width
-      startHeightRef.current = height
-      setSize({ width, height })
+    const init = () => {
+      if (containerRef.current) {
+        const { width, height } = containerRef.current.getBoundingClientRect()
+        startWidthRef.current = width
+        startHeightRef.current = height
+        setHasChanged(true)
+        setSize({ width, height })
+      }
+    }
+
+    if (controlInit) {
+      controlInit(init)
+    } else {
+      init()
     }
 
     return () => {
       destoryList.current.forEach((destory) => destory())
       destoryList.current = []
     }
-  }, [])
+  }, [controlInit])
 
   const handleVisible = selected || inNode
 

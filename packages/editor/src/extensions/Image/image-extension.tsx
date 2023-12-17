@@ -29,9 +29,10 @@ import { ExtensionImageTheme } from '@remirror/theme'
 import type { NodeSerializerOptions } from '@/transform'
 import { ParserRuleType } from '@/transform'
 import { buildHtmlStringFromAst, getAttrsBySignalHtmlContent } from '@/utils/html'
-import type { NodeViewComponentProps } from '@remirror/react'
 import type { ComponentType } from 'react'
+import type { ImageNodeViewProps } from './image-nodeview'
 import { ImageNodeView } from './image-nodeview'
+import type { ExtensionsOptions } from '..'
 
 type DelayedImage = DelayedPromiseCreator<ImageAttributes>
 
@@ -43,6 +44,7 @@ export interface ImageOptions {
     element: HTMLElement,
     progress: number,
   ) => void
+  handleViewImgSrcUrl?: ExtensionsOptions['handleViewImgSrcUrl']
   destroyPlaceholder?: (view: EditorView, element: HTMLElement) => void
   /**
    * The upload handler for the image extension.
@@ -93,19 +95,22 @@ type SetProgress = (progress: number) => void
 @extension<ImageOptions>({
   defaultOptions: {
     createPlaceholder,
+    handleViewImgSrcUrl: async (src) => src,
     updatePlaceholder: () => {},
     destroyPlaceholder: () => {},
     uploadHandler,
     preferPastedTextContent: true,
   },
 })
-export class MfImageExtension extends NodeExtension<ImageOptions> {
+export class HtmlImageExtension extends NodeExtension<ImageOptions> {
   get name() {
     return 'html_image' as const
   }
 
-  ReactComponent: ComponentType<NodeViewComponentProps> | undefined = (props) => {
-    return  <ImageNodeView {...props}/>
+  ReactComponent: ComponentType<ImageNodeViewProps> | undefined = (props) => {
+    const { handleViewImgSrcUrl } = this.options
+
+    return <ImageNodeView handleViewImgSrcUrl={handleViewImgSrcUrl} {...props} />
   }
 
   createTags() {

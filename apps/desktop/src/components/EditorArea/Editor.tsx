@@ -25,6 +25,7 @@ import { WarningHeader } from './styles'
 import { join } from '@tauri-apps/api/path'
 import { sleep } from '@/helper'
 import { useGlobalSettingData } from '@/hooks'
+import { getFolderPathFromPath } from '@/helper/filesys'
 
 const appWindow = getCurrent()
 
@@ -33,7 +34,7 @@ interface EditorWrapperProps {
   fullWidth: boolean
 }
 
-const EditorWrapper = styled.div.attrs<EditorWrapperProps>(props => props)`
+const EditorWrapper = styled.div.attrs<EditorWrapperProps>((props) => props)`
   min-height: 100%;
   overflow: hidden;
 
@@ -52,7 +53,7 @@ const EditorWrapper = styled.div.attrs<EditorWrapperProps>(props => props)`
         })}
 `
 
-const wysiwygDelegateOptions: CreateWysiwygDelegateOptions = {
+const createWysiwygDelegateOptions = (filePath?: string): CreateWysiwygDelegateOptions => ({
   handleViewImgSrcUrl: async (url) => {
     // Ensure asynchronous, returning directly will cause an infinite loop. about:https://github.com/drl990114/MarkFlowy/issues/340
     await sleep(1)
@@ -61,7 +62,7 @@ const wysiwygDelegateOptions: CreateWysiwygDelegateOptions = {
       return url
     }
 
-    const dirPath = useEditorStore.getState().folderData?.[0]?.path
+    const dirPath = filePath || useEditorStore.getState().folderData?.[0]?.path
     if (dirPath) {
       const newUrl = await join(dirPath, url)
       return convertFileSrc(newUrl)
@@ -69,7 +70,7 @@ const wysiwygDelegateOptions: CreateWysiwygDelegateOptions = {
 
     return convertFileSrc(url)
   },
-}
+})
 function Editor(props: EditorProps) {
   const { id, active } = props
   const curFile = getFileObject(id)
@@ -78,7 +79,9 @@ function Editor(props: EditorProps) {
   const { execute } = useCommandStore()
   const [settingData] = useGlobalSettingData()
   const editorRef = useRef<EditorRef>(null)
-  const [delegate, setDelegate] = useState(createWysiwygDelegate(wysiwygDelegateOptions))
+  const [delegate, setDelegate] = useState(
+    createWysiwygDelegate(createWysiwygDelegateOptions(getFolderPathFromPath(curFile.path))),
+  )
   const [notExistFile, setNotExistFile] = useState(false)
 
   useEffect(() => {
@@ -120,7 +123,9 @@ function Editor(props: EditorProps) {
               setEditorDelegate(curFile.id, sourceCodeDelegate)
               setDelegate(sourceCodeDelegate)
             } else {
-              const wysiwygDelegate = createWysiwygDelegate(wysiwygDelegateOptions)
+              const wysiwygDelegate = createWysiwygDelegate(
+                createWysiwygDelegateOptions(getFolderPathFromPath(curFile.path)),
+              )
               setEditorDelegate(curFile.id, wysiwygDelegate)
               setDelegate(wysiwygDelegate)
             }
