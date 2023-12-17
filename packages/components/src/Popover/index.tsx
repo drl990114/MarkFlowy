@@ -1,8 +1,12 @@
 import type { PopoverProps as AkPopoverProps, PopoverProviderProps } from '@ariakit/react'
 import { PopoverArrow, PopoverProvider, PopoverDisclosure, PopoverHeading } from '@ariakit/react'
 import { PopoverWrapper } from './PopoverWrapper'
+import { Box } from '../Box'
 
-interface PopoverProps extends BaseComponentProps, AkPopoverProps {
+type PopoverOptions = Pick<PopoverProviderProps, 'placement' | 'open'> &
+  Pick<AkPopoverProps, 'onClose'>
+
+interface PopoverProps extends BaseComponentProps, PopoverOptions {
   arrow?: boolean
   title?: string
   customContent?: React.ReactNode
@@ -15,10 +19,10 @@ const Popover: React.FC<PopoverProps> = (props) => {
 
   return (
     <PopoverProvider placement={placement}>
-      <PopoverDisclosure render={(p) => <div style={{ display: 'inline-block' }} {...p}></div>}>
+      <PopoverDisclosure render={(p) => <Box style={{ display: 'inline-block' }} {...p}></Box>}>
         {children}
       </PopoverDisclosure>
-      <PopoverWrapper {...rest}>
+      <PopoverWrapper render={<Box></Box>} {...rest}>
         {arrow ? (
           <PopoverArrow style={{ width: '18px', height: '18px' }} className='arrow' />
         ) : null}

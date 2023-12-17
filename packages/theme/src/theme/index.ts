@@ -83,6 +83,7 @@ const styledLightTheme = {
   boxShadowColor: 'rgba(0, 0, 0, 0.08)',
   
   // components
+  buttonBgColor: '#f6f7f9',
   tooltipBgColor: '#f6f7f9',
   dialogBgColor: '#f6f7f9',
   contextMenuBgColor: '#f6f7f9',
@@ -96,10 +97,10 @@ const styledLightTheme = {
 const styledDarkTheme = {
   ...common,
 
-  primaryFontColor: 'rgba(255, 255, 255, 0.9)',
+  primaryFontColor: '#c8d1d9',
   labelFontColor: 'rgba(255, 255, 255, 0.5)',
   accentColor: '#1c78aa',
-  borderColor: '#21313d',
+  borderColor: '#363b41',
   bgColor: '#05010d',
   warnColor: '#dc2626',
   tipsBgColor: '#0e1419',
@@ -107,8 +108,9 @@ const styledDarkTheme = {
   boxShadowColor: 'rgba(255, 255, 255, 0.04)',
 
   // components
+  buttonBgColor: '#21262c',
   tooltipBgColor: '#43414A',
-  dialogBgColor: '#43414A',
+  dialogBgColor: 'rgb(13, 17, 23)',
   contextMenuBgColor: '#43414A',
 
   titleBarDefaultHoverColor: '#383838',

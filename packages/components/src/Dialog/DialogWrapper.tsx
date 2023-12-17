@@ -9,7 +9,7 @@ export const DialogWrapper = styled(AkDialog).attrs<{ width: string }>((props) =
   left: 50%;
   transform: translate(-50%, -50%);
   width: ${(props) => props.width};
-  z-index: 50;
+  z-index: 99;
   margin: auto;
   display: flex;
   max-height: calc(100vh - 2 * 0.75rem);
@@ -44,7 +44,7 @@ export const DialogWrapper = styled(AkDialog).attrs<{ width: string }>((props) =
     justify-content: center;
     border-radius: 0.2rem;
     border-style: none;
-    background-color: ${(props) => props.theme.dialogBgColor};
+    background-color: transparent;
     font-size: 1rem;
     color: ${(props) => props.theme.primaryFontColor};
     font-weight: 500;

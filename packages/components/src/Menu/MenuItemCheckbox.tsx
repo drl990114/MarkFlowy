@@ -7,7 +7,9 @@ import { forwardRef } from 'react'
 import clsx from 'clsx'
 import styled from 'styled-components'
 
-interface MenuItemCheckboxProps extends BaseComponentProps, AkMenuItemCheckboxProps {
+type MenuItemOptions = Pick<AkMenuItemCheckboxProps, 'checked' | 'name' | 'value' | 'render'>
+
+interface MenuItemCheckboxProps extends BaseComponentProps, MenuItemOptions {
   children: React.ReactNode
 }
 

@@ -1,5 +1,5 @@
-import type { TooltipProps } from '@mui/material'
-import { Tooltip } from '@mui/material'
+import type { TooltipProps} from '@markflowy/components'
+import { Tooltip } from '@markflowy/components'
 import classNames from 'classnames'
 
 interface MfIconButtonProps {
@@ -18,7 +18,7 @@ export const MfIconButton = (props: MfIconButtonProps) => {
 
   if (tooltipProps) {
     return (
-      <Tooltip arrow {...tooltipProps}>
+      <Tooltip {...tooltipProps}>
         <i className={iconCls} onClick={onClick}></i>
       </Tooltip>
     )
