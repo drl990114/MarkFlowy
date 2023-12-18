@@ -4969,7 +4969,7 @@ dependencies = [
 [[package]]
 name = "window-vibrancy"
 version = "0.4.3"
-source = "git+https://github.com/tauri-apps/window-vibrancy#72e6bb5bae4690a8bb1af5beb6b5d99c4c12a935"
+source = "git+https://github.com/tauri-apps/window-vibrancy#fd1586562868a4b53816a77a25c17c0e3fa354a0"
 dependencies = [
  "cocoa 0.25.0",
  "objc",
