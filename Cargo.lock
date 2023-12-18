@@ -3317,9 +3317,9 @@ dependencies = [
 
 [[package]]
 name = "rfd"
-version = "0.12.1"
+version = "0.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3c9e7b57df6e8472152674607f6cc68aa14a748a3157a857a94f516e11aeacc2"
+checksum = "241a0deb168c88050d872294f7b3106c1dfa8740942bcc97bc91b98e97b5c501"
 dependencies = [
  "block",
  "dispatch",
@@ -4083,9 +4083,9 @@ dependencies = [
 
 [[package]]
 name = "tauri-plugin-dialog"
-version = "2.0.0-alpha.4"
+version = "2.0.0-alpha.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ba998ef0f268e5a5fbc36629f71dc2f4e069812a89eaa1e7a826084ffd6abc2a"
+checksum = "4ead9b1276ed45ffec0a27ff51239614fa9b462a7483f5cb98f0c555a40754e9"
 dependencies = [
  "glib 0.16.9",
  "log",
@@ -4101,9 +4101,9 @@ dependencies = [
 
 [[package]]
 name = "tauri-plugin-fs"
-version = "2.0.0-alpha.4"
+version = "2.0.0-alpha.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "03d163d4478343c26b90b3573980f02c717af5ea482c8d04c64e84a6dadcfc02"
+checksum = "330c81479fdc92bab8609d896249e016404f9fac24a27ddf66e1daafd4db1a35"
 dependencies = [
  "anyhow",
  "glob",
