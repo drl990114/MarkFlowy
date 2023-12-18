@@ -4963,7 +4963,7 @@ __metadata:
     "@remirror/extension-heading": ^2.0.14
     "@remirror/extension-list": ^2.0.15
     "@remirror/extension-positioner": ^2.1.8
-    "@remirror/extension-react-tables": ^2.2.17
+    "@remirror/extension-react-tables": ^2.2.19
     "@remirror/extension-tables": ^2.2.10
     "@remirror/icons": ^2.0.2
     "@remirror/pm": ^2.0.4
@@ -6320,7 +6320,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@remirror/extension-react-tables@npm:^2.2.17, @remirror/extension-react-tables@npm:^2.2.18":
+"@remirror/extension-react-tables@npm:^2.2.18":
   version: 2.2.18
   resolution: "@remirror/extension-react-tables@npm:2.2.18"
   dependencies:
@@ -6349,6 +6349,37 @@ __metadata:
     react-dom:
       optional: true
   checksum: ac53034d470b38a87b32240e368902fab706d18a3bca029c5baa25f7c11f53ec368e9dab6a461e16d553862d69b689114101682915610d7cb08a2a6c84eb2012
+  languageName: node
+  linkType: hard
+
+"@remirror/extension-react-tables@npm:^2.2.19":
+  version: 2.2.19
+  resolution: "@remirror/extension-react-tables@npm:2.2.19"
+  dependencies:
+    "@babel/runtime": ^7.22.3
+    "@emotion/css": ^11.11.0
+    "@linaria/core": 4.2.10
+    "@remirror/core": ^2.0.19
+    "@remirror/core-utils": ^2.0.13
+    "@remirror/extension-positioner": ^2.1.8
+    "@remirror/extension-tables": ^2.3.1
+    "@remirror/icons": ^2.0.3
+    "@remirror/messages": ^2.0.6
+    "@remirror/preset-core": ^2.0.16
+    "@remirror/react-components": ^2.1.17
+    "@remirror/react-core": ^2.0.21
+    "@remirror/react-hooks": ^2.0.25
+    "@remirror/theme": ^2.0.9
+  peerDependencies:
+    "@remirror/pm": ^2.0.7
+    react: ^16.14.0 || ^17 || ^18
+    react-dom: ^16.14.0 || ^17 || ^18
+  peerDependenciesMeta:
+    react:
+      optional: true
+    react-dom:
+      optional: true
+  checksum: 84d45a0f2265cbda33e178083e052459718dfac153e67adea79b4aa08f460e5fddbd55daf92be99eae61bf41703f3a05a4c229683df332f2822bee10e1f6d57f
   languageName: node
   linkType: hard
 
