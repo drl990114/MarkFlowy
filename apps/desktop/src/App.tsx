@@ -23,6 +23,7 @@ import type { FC } from 'react'
 import useThemeStore from './stores/useThemeStore'
 import { excuteScript, isArray, once } from './helper'
 import { ContextMenu } from './components/UI/ContextMenu/ContextMenu'
+import NiceModal from '@ebay/nice-modal-react'
 
 // TODO refactor useGlobalSettingData use zustand
 const confRef: { current: any } = { current: {} }
@@ -183,12 +184,14 @@ const App: FC = function () {
       <ThemeProvider theme={curTheme?.styledContants || {}}>
         <BaseStyle theme={curTheme?.styledContants} />
         <GlobalStyles />
-        <MuiThemeProvider theme={muiTheme}>
-          <Routes>
-            <Route index path='/' element={<Root />} />
-            <Route path='/setting' element={<Setting />} />
-          </Routes>
-        </MuiThemeProvider>
+        <NiceModal.Provider>
+          <MuiThemeProvider theme={muiTheme}>
+            <Routes>
+              <Route index path='/' element={<Root />} />
+              <Route path='/setting' element={<Setting />} />
+            </Routes>
+          </MuiThemeProvider>
+        </NiceModal.Provider>
         <ContextMenu />
       </ThemeProvider>
     </StyleSheetManager>

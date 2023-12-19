@@ -122,7 +122,7 @@ const useEditorStore = create<EditorStore>((set, get) => {
       }
     },
 
-    deleteFile: (fileNode) => {
+    deleteNode: (fileNode) => {
       const { folderData, activeId, delOpenedFile, opened } = get()
       const parent = findParentNode(fileNode, folderData![0])
       let targetFile: IFile | undefined
@@ -241,7 +241,7 @@ type EditorStore = {
   setActiveId: (id: string) => void
   addFile: (file: IFile, target: { name: string; kind: IFile['kind'] }) => boolean | void
   insertNodeToFolderData: (fileNode: IFile) => void
-  deleteFile: (file: IFile) => void
+  deleteNode: (fileNode: IFile) => void
   addOpenedFile: (id: string) => void
   delOpenedFile: (id: string) => void
   setFolderData: (folderData: IFile[]) => void

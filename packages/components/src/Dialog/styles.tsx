@@ -1,7 +1,7 @@
 import styled from 'styled-components'
-import { Dialog as AkDialog } from '@ariakit/react'
 
-export const DialogWrapper = styled(AkDialog).attrs<{ width: string }>((props) => ({
+export const DialogWrapper = styled.div.attrs<{ width?: string }>((props) => ({
+  ...props,
   width: props.width || `420px`,
 }))`
   position: fixed;
@@ -15,11 +15,10 @@ export const DialogWrapper = styled(AkDialog).attrs<{ width: string }>((props) =
   max-height: calc(100vh - 2 * 0.75rem);
   flex-direction: column;
   overflow: auto;
-  border-radius: 0.25rem;
+  border-radius: ${props => props.theme.smallBorderRadius};
   font-size: 14px;
   background-color: ${(props) => props.theme.dialogBgColor};
   color: ${(props) => props.theme.primaryFontColor};
-  border: 1px solid ${(props) => props.theme.borderColor};
   padding: 1rem;
   box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
 
@@ -60,4 +59,14 @@ export const DialogWrapper = styled(AkDialog).attrs<{ width: string }>((props) =
     justify-content: flex-end;
     margin-top: 1rem;
   }
+`
+
+export const DialogBackdrop = styled.div`
+  position: fixed;
+  height: 100vh;
+  width: 100vw;
+  inset: 0px;
+  z-index: 50;
+  overflow: auto;
+  background-color: ${props => props.theme.dialogBackdropColor};
 `

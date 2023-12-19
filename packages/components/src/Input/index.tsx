@@ -1,16 +1,14 @@
-import { useEffect, useRef } from 'react'
+import { forwardRef, useEffect, useRef } from 'react'
 import styled from 'styled-components'
 
 const InputComponent = styled.input`
-  height: unset;
-  min-width: 0;
   line-height: 22px;
   padding: 6px 4px 6px 5px;
   border: 1px solid;
   color: ${(props) => props.theme.primaryFontColor};
   border-color: ${(props) => props.theme.borderColor};
   background-color: ${(props) => props.theme.bgColor};
-  border-radius: 4px;
+  border-radius: ${(props) => props.theme.smallBorderRadius};
 
   &:focus {
     outline: 2px solid ${(props) => props.theme.accentColor};
@@ -26,7 +24,7 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   onPressEnter?: (e: KeyboardEvent) => void
 }
 
-const Input: React.FC<InputProps> = (props) => {
+const Input: React.FC<InputProps> = forwardRef((props) => {
   const { onPressEnter, ...rest } = props
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -44,6 +42,6 @@ const Input: React.FC<InputProps> = (props) => {
   }, [onPressEnter])
 
   return <InputComponent ref={inputRef} {...rest} />
-}
+})
 
 export default Input

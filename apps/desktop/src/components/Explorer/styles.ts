@@ -29,13 +29,30 @@ export const Container = styled.div`
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px 4px;
-    padding-left: 8px;
+    padding-bottom: 12px;
     opacity: 0;
     transition: all 0.3s ease-in-out;
 
     &__action {
-      flex: 1
+      flex: 1;
+      padding: 6px 12px;
+      font-size: ${(props) => props.theme.fontXs};
+      border-radius: ${(props) => props.theme.smallBorderRadius};
+      transition: all 0.3s ease-in-out;
+
+      &:hover {
+        background-color: ${(props) => props.theme.borderColor};
+      }
+
+      &__icon {
+        padding: 8px;
+        margin-left: 8px;
+        border-radius: ${(props) => props.theme.smallBorderRadius};
+
+        &:hover {
+          background-color: ${(props) => props.theme.borderColor};
+        }
+      }
     }
   }
 

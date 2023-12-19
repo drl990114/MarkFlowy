@@ -52,11 +52,13 @@ export const common = {
   fontSm: '14px',
   fontXs: '12px',
 
-  smallPadding: '4px',
-  midPadding: '8px',
-  bigPadding: '12px',
+  spaceXs: '4px',
+  spaceSm: '8px',
+  spaceBase: '10px',
+  spaceL: '12px',
+  spaceXl: '16px',
 
-  smallBorderRadius: '6px',
+  smallBorderRadius: '4px',
   midBorderRadius: '8px',
   bigBorderRadius: '12px',
 
@@ -86,6 +88,7 @@ const styledLightTheme = {
   buttonBgColor: '#f6f7f9',
   tooltipBgColor: '#f6f7f9',
   dialogBgColor: '#f6f7f9',
+  dialogBackdropColor: 'rgba(0, 0, 0, 0.5)',
   contextMenuBgColor: '#f6f7f9',
 
   titleBarDefaultHoverColor: '#bdbdc2',
@@ -110,7 +113,8 @@ const styledDarkTheme = {
   // components
   buttonBgColor: '#21262c',
   tooltipBgColor: '#43414A',
-  dialogBgColor: 'rgb(13, 17, 23)',
+  dialogBgColor: '#05010d',
+  dialogBackdropColor: 'rgb(18, 18, 18, 0.7)',
   contextMenuBgColor: '#43414A',
 
   titleBarDefaultHoverColor: '#383838',

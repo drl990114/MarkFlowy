@@ -6,41 +6,23 @@ import type { IFile } from '@/helper/filesys'
 import type { NewInputRef } from './NewFIleInput'
 import NewFileInput from './NewFIleInput'
 import bus from '@/helper/eventBus'
-import useFileTreeContextMenuNode from '@/hooks/useContextMenuNode'
 import { useEditorStore } from '@/stores'
 import { EVENT } from '@/constants'
+import { showContextMenu } from '../UI/ContextMenu'
+import { useModal } from '@ebay/nice-modal-react'
+import { Modal } from '..'
 
 const FileNode: FC<FileNodeProps> = ({ item, level = 0, activeId, onSelect, open = false }) => {
   const [isOpen, setIsOpen] = useState(open)
   const newInputRef = useRef<NewInputRef>(null)
-  const { contextMenuNode, setContextMenuNode } = useFileTreeContextMenuNode()
-  const { deleteFile } = useEditorStore()
+  const { deleteNode } = useEditorStore()
+  const modal = useModal(Modal.Confirm)
   const isActived = activeId === item.id
   const isFolder = item.kind === 'dir'
 
   useEffect(() => {
     setIsOpen(open)
   }, [open])
-
-  useEffect(() => {
-    const newFileHandler = () => {
-      if (!contextMenuNode || contextMenuNode.id !== item.id) return
-      newInputRef.current?.show({ fileNode: contextMenuNode })
-    }
-
-    const delFileHandler = () => {
-      if (!contextMenuNode || contextMenuNode.id !== item.id) return
-      deleteFile(contextMenuNode)
-    }
-
-    bus.on(EVENT.sidebar_show_new_input, newFileHandler)
-    bus.on(EVENT.sidebar_delete_file, delFileHandler)
-
-    return () => {
-      bus.detach(EVENT.sidebar_show_new_input, newFileHandler)
-      bus.detach(EVENT.sidebar_delete_file, delFileHandler)
-    }
-  }, [contextMenuNode, item, deleteFile])
 
   const handleClick: MouseEventHandler = useCallback(
     (e) => {
@@ -56,12 +38,49 @@ const FileNode: FC<FileNodeProps> = ({ item, level = 0, activeId, onSelect, open
   }, [item, onSelect])
 
   const handleContextMenu = useCallback(
-    (e: React.MouseEvent<HTMLDivElement, MouseEvent>, fileNode?: IFile) => {
-      const node = fileNode || item
+    (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+      e.preventDefault()
       e.stopPropagation()
-      setContextMenuNode(node)
+      const contextMenuNode = item
+
+      const newFileHandler = () => {
+        newInputRef.current?.show({ fileNode: contextMenuNode })
+      }
+
+      const delFileHandler = () => {
+        deleteNode(contextMenuNode)
+      }
+
+      const contextMenuItems = [
+        {
+          value: 'add_file',
+          label: 'Add File',
+          handler: () => {
+            newFileHandler()
+          },
+        },
+      ]
+
+      if (level !== 0) {
+        contextMenuItems.push({
+          value: item.kind === 'dir' ? 'delete_folder' : 'delete_file',
+          label: item.kind === 'dir' ? 'Delete Folder' : 'Delete File',
+          handler: () => {
+            modal.show({
+              title: `Are you sure you want to permanently delete ${item.name}`,
+              onConfirm: delFileHandler,
+            })
+          },
+        })
+      }
+
+      showContextMenu({
+        x: e.clientX,
+        y: e.clientY,
+        items: contextMenuItems,
+      })
     },
-    [item, setContextMenuNode],
+    [deleteNode, modal, item, level],
   )
 
   const nodeWrapperCls = classNames('file-node', {

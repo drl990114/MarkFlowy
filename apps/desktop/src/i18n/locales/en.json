@@ -4,6 +4,7 @@
   "ok": "ok",
   "copy": "copy",
   "confirm": "confirm",
+  "cancel": "cancel",
   "menu": {
     "setting": "setting"
   },
@@ -17,6 +18,7 @@
     "author": "Author",
     "release": "Release",
     "website": "Website",
+    "feedback": "feedback",
     "issues": "Issues",
     "license": "License"
   },

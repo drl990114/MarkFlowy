@@ -19,11 +19,11 @@ const Button = styled(AkButton).attrs<ButtonProps>((props) => ({ ...props }))`
   background-color: ${(props) =>
     props.btnType === 'primary' ? props.theme.accentColor : props.theme.buttonBgColor};
   color: ${props => props.btnType === 'primary' ? props.theme.white : props.theme.primaryFontColor};
-  padding-left: ${(props) => props.theme.bigPadding};
-  padding-right: ${(props) => props.theme.bigPadding};
-  padding-top: ${(props) => props.theme.midPadding};
-  padding-bottom: ${(props) => props.theme.midPadding};
-  font-size: ${props => props.theme.fontSm};
+  padding-left: ${(props) => props.theme.spaceXl};
+  padding-right: ${(props) => props.theme.spaceXl};
+  padding-top: ${(props) => props.theme.spaceSm};
+  padding-bottom: ${(props) => props.theme.spaceSm};
+  font-size: ${props => props.theme.fontXs};
   text-decoration-line: none;
 
   &:hover {
