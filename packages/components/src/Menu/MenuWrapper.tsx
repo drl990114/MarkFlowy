@@ -13,7 +13,7 @@ export const MenuWrapper = styled(AkMenu)`
   border-style: solid;
   border-color: ${props => props.theme.borderColor};
   background-color: ${props => props.theme.contextMenuBgColor};
-  padding: ${props => props.theme.smallPadding};
+  padding: ${props => props.theme.spaceXs};
   color: ${props => props.theme.primaryFontColor};
   font-size: ${props => props.theme.fontXs};
   outline: none;
@@ -33,8 +33,8 @@ export const MenuWrapper = styled(AkMenu)`
     cursor: default;
     align-items: center;
     border-radius: ${props => props.theme.smallBorderRadius};
-    padding: ${props => props.theme.smallPadding};
-    padding-left: ${(props) => props.theme.midPadding};
+    padding: ${props => props.theme.spaceXs};
+    padding-left: ${(props) => props.theme.spaceSm};
     outline: none !important;
   }
 

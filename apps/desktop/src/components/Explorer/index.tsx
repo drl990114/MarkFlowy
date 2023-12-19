@@ -75,9 +75,9 @@ const Explorer: FC<ExplorerProps> = (props) => {
         )}
       </div>
       <div className='explorer-bottom'>
-        <small className='explorer-bottom__action cursor-pointer' onClick={openFolderDialog}>
+        <span className='explorer-bottom__action cursor-pointer' onClick={openFolderDialog}>
           {t('file.openDir')}
-        </small>
+        </span>
         <Popover
           placement='top-end'
           open={popperOpen}
@@ -95,7 +95,7 @@ const Explorer: FC<ExplorerProps> = (props) => {
           }
         >
           {listData.length > 0 ? (
-            <MfIconButton icon='ri-more-2-fill' onClick={() => setPopperOpen(true)} />
+            <MfIconButton icon='ri-more-2-fill explorer-bottom__action__icon' onClick={() => setPopperOpen(true)} />
           ) : null}
         </Popover>
       </div>

@@ -10,11 +10,14 @@ export const FileNodeStyled = styled.div`
     font-size: 0.8rem;
     cursor: pointer;
     user-select: none;
+    -webkit-user-select: none; /* Safari */
 
     &__text {
       text-overflow: ellipsis;
       white-space: nowrap;
       overflow: hidden;
+      user-select: none;
+      -webkit-user-select: none; /* Safari */
     }
 
     &:hover {
@@ -24,7 +27,6 @@ export const FileNodeStyled = styled.div`
 
     &--active {
       color: ${(props) => props.theme.accentColor};
-      /* background-color: ${(props) => props.theme.borderColor}; */
     }
   }
 

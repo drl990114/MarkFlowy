@@ -10,7 +10,7 @@ export const PopoverWrapper = styled(AkPopover)`
   border-style: solid;
   border-color: ${(props) => props.theme.borderColor};
   background-color: ${(props) => props.theme.bgColor};
-  padding: ${props => props.theme.smallPadding};
+  padding: ${props => props.theme.spaceXs};
   color: ${(props) => props.theme.primaryFontColor};
   outline: none;
 
