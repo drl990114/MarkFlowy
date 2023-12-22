@@ -70,33 +70,33 @@ const ResizableHandleContainer = styled.span<ResizableHandleProps>`
         return css`
           left: 6px;
           top: calc(50% - 20px);
-          height: 40px;
-          width: 10px;
+          height: 30px;
+          width: 6px;
           cursor: col-resize;
         `
       case ResizableHandleType.Right:
         return css`
           right: 6px;
           top: calc(50% - 20px);
-          height: 40px;
-          width: 10px;
+          height: 30px;
+          width: 6px;
           cursor: col-resize;
         `
       case ResizableHandleType.Top:
         return css`
           left: calc(50% - 20px);
           top: 6px;
-          height: 10px;
-          width: 40px;
-          cursor: col-resize;
+          height: 6px;
+          width: 30px;
+          cursor: row-resize;
         `
       case ResizableHandleType.Bottom:
         return css`
           right: calc(50% - 20px);
           bottom: 6px;
-          height: 10px;
-          width: 40px;
-          cursor: col-resize;
+          height: 6px;
+          width: 30px;
+          cursor: row-resize;
         `
       default:
         break

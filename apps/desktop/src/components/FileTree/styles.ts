@@ -7,7 +7,7 @@ export const FileNodeStyled = styled.div`
     padding: 0 8px;
     height: 32px;
     box-sizing: border-box;
-    font-size: 0.8rem;
+    font-size: ${props => props.theme.fontSm};
     cursor: pointer;
     user-select: none;
     -webkit-user-select: none; /* Safari */

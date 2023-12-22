@@ -15,7 +15,7 @@ export const DialogWrapper = styled.div.attrs<{ width?: string }>((props) => ({
   max-height: calc(100vh - 2 * 0.75rem);
   flex-direction: column;
   overflow: auto;
-  border-radius: ${props => props.theme.smallBorderRadius};
+  border-radius: ${(props) => props.theme.smallBorderRadius};
   font-size: 14px;
   background-color: ${(props) => props.theme.dialogBgColor};
   color: ${(props) => props.theme.primaryFontColor};
@@ -68,5 +68,7 @@ export const DialogBackdrop = styled.div`
   inset: 0px;
   z-index: 50;
   overflow: auto;
-  background-color: ${props => props.theme.dialogBackdropColor};
+  background-color: ${(props) => props.theme.dialogBackdropColor};
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 `

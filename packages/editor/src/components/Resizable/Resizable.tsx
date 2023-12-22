@@ -31,7 +31,7 @@ const MIN_WIDTH = 20
 export const Resizable: FC<ResizableProps> = memo((props) => {
   const {
     node,
-    aspectRatio = ResizableRatioType.Flexible,
+    aspectRatio = ResizableRatioType.Fixed,
     updateAttributes,
     selected,
     controlInit,
