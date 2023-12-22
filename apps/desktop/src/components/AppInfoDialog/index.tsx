@@ -63,6 +63,7 @@ TauriVersion: ${appInfo.tauriVersion}
       ]}
     >
       <Space>{`${t('about.version')}: ${appInfo.version}`}</Space>
+      <br />
       <Space>{`Tauri ${t('about.version')}: ${appInfo.tauriVersion}`}</Space>
     </Dialog>
   )

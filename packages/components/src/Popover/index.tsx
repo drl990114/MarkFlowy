@@ -19,7 +19,7 @@ const Popover: React.FC<PopoverProps> = (props) => {
 
   return (
     <PopoverProvider placement={placement}>
-      <PopoverDisclosure render={(p) => <Box style={{ display: 'inline-block' }} {...p}></Box>}>
+      <PopoverDisclosure toggleOnClick={false} render={(p) => <Box style={{ display: 'inline-block' }} {...p}></Box>}>
         {children}
       </PopoverDisclosure>
       <PopoverWrapper render={<Box></Box>} {...rest}>
