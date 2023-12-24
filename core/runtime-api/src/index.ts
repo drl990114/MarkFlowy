@@ -1,6 +1,9 @@
 import type { MfTheme } from '@markflowy/theme'
+import communicate from './communicate'
 
-// TODO use wasm to improve safety
 export function registerTheme(theme: MfTheme) {
-  window.__MF__?.theme.registerTheme(theme)
+  communicate.sendMessage({
+    key: 'registerTheme',
+    payload: theme
+  })
 }

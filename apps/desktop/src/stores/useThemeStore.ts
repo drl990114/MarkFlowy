@@ -3,6 +3,7 @@ import { darkTheme, lightTheme, type MfTheme } from '@markflowy/theme'
 import { create } from 'zustand'
 import type { Theme } from '@mui/material'
 import { createTheme } from '@mui/material'
+import { confRef } from '@/App'
 
 const muiDarkTheme = createTheme({
   palette: {
@@ -51,10 +52,14 @@ const useThemeStore = create<ThemeStore>((set, get) => {
     },
 
     insertTheme: (targetTheme) => {
-      const { themes } = get()
+      const { themes, setCurThemeByName } = get()
 
       if (!themes.find((theme) => theme.name === targetTheme.name)) {
         set((prev) => ({ ...prev, themes: [...themes, targetTheme] }))
+
+        if (confRef.current.theme === targetTheme.name) {
+          setCurThemeByName(targetTheme.name)
+        }
       }
     },
 
