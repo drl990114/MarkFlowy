@@ -19,7 +19,7 @@ export type MfTheme = {
   /**
    * light or dark for lib. e.g. mui
    */
-  type: 'light' | 'dark'
+  mode: 'light' | 'dark'
   /**
    * Replace styled constants
    */
@@ -125,7 +125,7 @@ const styledDarkTheme = {
 
 export const lightTheme: MfTheme = {
   name: 'MarkFlowy Light',
-  type: 'light',
+  mode: 'light',
   styledContants: styledLightTheme,
   codemirorTheme: mfCodemirrorLight,
   globalStyleText: lightCss
@@ -133,7 +133,7 @@ export const lightTheme: MfTheme = {
 
 export const darkTheme: MfTheme = {
   name: 'MarkFlowy Dark',
-  type: 'dark',
+  mode: 'dark',
   styledContants: styledDarkTheme,
   codemirorTheme: mfCodemirrorDark,
   globalStyleText: darkCss

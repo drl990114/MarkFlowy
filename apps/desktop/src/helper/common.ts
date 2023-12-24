@@ -16,8 +16,3 @@ export function isArray(tar: any): tar is any[] {
 export function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
-
-export function excuteScript (scriptText: string) {
-  const fn = new Function(scriptText)
-  fn()
-}

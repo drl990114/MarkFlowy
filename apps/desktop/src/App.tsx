@@ -21,12 +21,14 @@ import bus from './helper/eventBus'
 import isPropValid from '@emotion/is-prop-valid'
 import type { FC } from 'react'
 import useThemeStore from './stores/useThemeStore'
-import { excuteScript, isArray, once } from './helper'
+import { isArray, once } from './helper'
 import { ContextMenu } from './components/UI/ContextMenu/ContextMenu'
 import NiceModal from '@ebay/nice-modal-react'
+import useExtensionsManagerStore from './stores/useExtensionsManagerStore'
+import __MF__ from './context'
 
 // TODO refactor useGlobalSettingData use zustand
-const confRef: { current: any } = { current: {} }
+export const confRef: { current: any } = { current: {} }
 
 const themeInit = () => {
   const updateCurThemeByName = useThemeStore.getState().setCurThemeByName
@@ -38,7 +40,7 @@ const onceLoadExtensions = once(() => {
     if (isArray(res)) {
       try {
         res.map((extension) => {
-          excuteScript(extension.script_text)
+          useExtensionsManagerStore.getState().loadExtension(extension)
         })
       } catch (error) {
         // TODO need tips ui
@@ -150,6 +152,26 @@ const App: FC = function () {
 
   useEffect(() => {
     onceLoadExtensions()
+    const listener = (event: MessageEvent) => {
+
+      if (event.origin !== window.location.origin) {
+        return
+      }
+
+      const { key, payload } = event.data
+
+      switch (key) {
+        case 'registerTheme':
+          __MF__.theme.registerTheme(payload)
+          break
+      }
+    }
+
+    window.addEventListener('message', listener)
+
+    return () => {
+      window.removeEventListener('message', listener)
+    }
   }, [])
 
   const eventInit = useCallback(() => {
