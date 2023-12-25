@@ -5746,7 +5746,7 @@ __metadata:
     "@ariakit/react": ^0.3.8
     "@hyrious/esbuild-plugin-commonjs": ^0.2.2
     "@markflowy/theme": "workspace:*"
-    "@types/lodash": ^4.14.197
+    "@types/lodash": ^4.14.202
     "@types/react": ^18.2.18
     "@types/react-dom": ^18.2.7
     "@vitejs/plugin-react": ^4.0.1
@@ -5798,7 +5798,7 @@ __metadata:
     "@tauri-apps/plugin-dialog": ^2.0.0-alpha.3
     "@tauri-apps/plugin-os": ^2.0.0-alpha.4
     "@tauri-apps/plugin-store": ^2.0.0-alpha.3
-    "@types/lodash": ^4.14.197
+    "@types/lodash": ^4.14.202
     "@types/node": ^20.5.7
     "@types/react": ^18.2.18
     "@types/react-dom": ^18.2.7
@@ -5887,7 +5887,7 @@ __metadata:
     "@remirror/theme": ^2.0.8
     "@remirror/types": ^1.0.1
     "@types/codemirror": ^5.60.9
-    "@types/lodash": ^4.14.197
+    "@types/lodash": ^4.14.202
     "@types/markdown-it": ^13
     "@types/mdast": ^3.0.11
     "@types/mdurl": ^1
@@ -9175,10 +9175,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/lodash@npm:^4.14.197":
-  version: 4.14.197
-  resolution: "@types/lodash@npm:4.14.197"
-  checksum: 53d7567d1704de76cf33266c78062e0fd722d4b846e5b1417d0b6ef0ee41c0d9c451b92bc34f73d5f1fcc45c7d36511e92f6f47a9279b48157ba60a92ddaa078
+"@types/lodash@npm:^4.14.202":
+  version: 4.14.202
+  resolution: "@types/lodash@npm:4.14.202"
+  checksum: a91acf3564a568c6f199912f3eb2c76c99c5a0d7e219394294213b3f2d54f672619f0fde4da22b29dc5d4c31457cd799acc2e5cb6bd90f9af04a1578483b6ff7
   languageName: node
   linkType: hard
 

@@ -102,7 +102,7 @@
     "@hyrious/esbuild-plugin-commonjs": "^0.2.2",
     "@remirror/core-types": "^2.0.5",
     "@types/codemirror": "^5.60.9",
-    "@types/lodash": "^4.14.197",
+    "@types/lodash": "^4.14.202",
     "@types/markdown-it": "^13",
     "@types/mdast": "^3.0.11",
     "@types/mdurl": "^1",
