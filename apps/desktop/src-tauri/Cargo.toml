@@ -26,7 +26,7 @@ tauri = { version = "2.0.0-alpha.18", features = [ "protocol-asset"] }
 tauri-plugin-store = "2.0.0-alpha.4"
 tauri-plugin-os = "2.0.0-alpha.5"
 tauri-plugin-shell = "2.0.0-alpha.5"
-tauri-plugin-dialog = "2.0.0-alpha.5"
+tauri-plugin-dialog = "2.0.0-alpha.6"
 tauri-plugin-clipboard-manager = "2.0.0-alpha.5"
 regex = "1.10.2"
 mf-utils = { path = "../../../crates/utils" }
