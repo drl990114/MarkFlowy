@@ -9540,12 +9540,12 @@ __metadata:
   linkType: hard
 
 "@types/rollup-plugin-url@npm:^3":
-  version: 3.0.3
-  resolution: "@types/rollup-plugin-url@npm:3.0.3"
+  version: 3.0.4
+  resolution: "@types/rollup-plugin-url@npm:3.0.4"
   dependencies:
     "@types/node": "*"
     rollup: ^0.63.4
-  checksum: 52fa32e003342c6e5560a37c698ea8a230d4824774cd27220c79a1c307bc8df270fdfbc67b7cbb93f683487a4052856e6f9372905732a010ccd9dfa47e5041b5
+  checksum: 7988dd0730377b71d0f5e5032d2f686e7330aa5388ca5af704544f047a726f31cc8047ff70cd7300500b47e6e23291502e4c598daee7ddfb1731c60f166c861c
   languageName: node
   linkType: hard
 
