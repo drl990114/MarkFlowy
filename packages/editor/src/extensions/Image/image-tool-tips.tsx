@@ -1,16 +1,11 @@
 import { useState, type FC } from 'react'
 import { Input, Space, Tooltip } from '@markflowy/components'
 import type { NodeViewComponentProps } from '@remirror/react'
-import styled from 'styled-components'
 
 interface ImageToolTipsProps {
   node: NodeViewComponentProps['node']
   updateAttributes?: NodeViewComponentProps['updateAttributes']
 }
-
-const InputStyle = styled(Input)`
-  font-size: ${(props) => props.theme.fontSm} !important;
-`
 
 export const ImageToolTips: FC<ImageToolTipsProps> = (props) => {
   const { node } = props
@@ -30,9 +25,10 @@ export const ImageToolTips: FC<ImageToolTipsProps> = (props) => {
   return (
     <Space>
       <Tooltip title='Image URL [Enter]' placement='top'>
-        <InputStyle
+        <Input
           placeholder='Image URL'
           value={srcVal}
+          style={{ fontSize: '14px' }}
           onInput={handleSrcInput}
           onPressEnter={updateSrc}
         />
