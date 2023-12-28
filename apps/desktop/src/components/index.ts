@@ -4,5 +4,6 @@ export { default as Explorer } from './Explorer'
 export { default as List } from './UI/List'
 export { default as SideBar } from './SideBar'
 export { default as Modal } from './Modal'
+export { default as Loading } from './Loading'
 
 export * from './FileTree'

@@ -1,5 +1,6 @@
 import { BaseStyle } from '@markflowy/theme'
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles'
+import { ThemeProvider as MfThemeProvider } from '@markflowy/components'
 import { invoke } from '@tauri-apps/api/primitives'
 import { listen } from '@tauri-apps/api/event'
 import { useCallback, useEffect } from 'react'
@@ -53,18 +54,34 @@ const onceLoadExtensions = once(() => {
   })
 })
 
+const AppThemeProvider: FC<BaseComponentProps> = function ({ children }) {
+  const { muiTheme, curTheme } = useThemeStore()
+
+  return (
+    <StyleSheetManager shouldForwardProp={isPropValid}>
+      <MfThemeProvider theme={curTheme?.styledContants || {}}>
+        <ThemeProvider theme={curTheme?.styledContants || {}}>
+          <BaseStyle theme={curTheme?.styledContants} />
+          <GlobalStyles />
+          <NiceModal.Provider>
+            <MuiThemeProvider theme={muiTheme}>{children}</MuiThemeProvider>
+          </NiceModal.Provider>
+        </ThemeProvider>
+      </MfThemeProvider>
+    </StyleSheetManager>
+  )
+}
+
 const App: FC = function () {
   useGlobalOSInfo()
   useGlobalKeyboard()
   const { setRecentWorkspaces } = useOpenedCacheStore()
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, handler] = useGlobalSettingData()
-  const { muiTheme, curTheme } = useThemeStore()
   const editorStore = useEditorStore()
   const { setFolderData, addOpenedFile, setActiveId } = editorStore
   const { setSetting } = handler
   const isWeb = (window as any).__TAURI__ === undefined
-
   // TODO web need return a editor
   if (!isWeb) {
     use(
@@ -153,7 +170,6 @@ const App: FC = function () {
   useEffect(() => {
     onceLoadExtensions()
     const listener = (event: MessageEvent) => {
-
       if (event.origin !== window.location.origin) {
         return
       }
@@ -202,21 +218,13 @@ const App: FC = function () {
   // }, [])
 
   return (
-    <StyleSheetManager shouldForwardProp={isPropValid}>
-      <ThemeProvider theme={curTheme?.styledContants || {}}>
-        <BaseStyle theme={curTheme?.styledContants} />
-        <GlobalStyles />
-        <NiceModal.Provider>
-          <MuiThemeProvider theme={muiTheme}>
-            <Routes>
-              <Route index path='/' element={<Root />} />
-              <Route path='/setting' element={<Setting />} />
-            </Routes>
-          </MuiThemeProvider>
-        </NiceModal.Provider>
-        <ContextMenu />
-      </ThemeProvider>
-    </StyleSheetManager>
+    <AppThemeProvider>
+      <Routes>
+        <Route index path='/' element={<Root />} />
+        <Route path='/setting' element={<Setting />} />
+      </Routes>
+      <ContextMenu />
+    </AppThemeProvider>
   )
 }
 

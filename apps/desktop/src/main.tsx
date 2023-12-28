@@ -1,4 +1,3 @@
-import CircularProgress from '@mui/material/CircularProgress'
 import { HoxRoot } from 'hox'
 import { StrictMode, Suspense } from 'react'
 import ReactDOM from 'react-dom/client'
@@ -7,6 +6,7 @@ import App from './App'
 import { FallBackContainer } from './components/FallBack'
 import { enableMapSet } from 'immer'
 import './normalize.css'
+import { Loading } from './components'
 
 enableMapSet()
 
@@ -15,7 +15,7 @@ const Main = () => {
     <Suspense
       fallback={
         <FallBackContainer>
-          <CircularProgress />
+          <Loading />
         </FallBackContainer>
       }
     >
