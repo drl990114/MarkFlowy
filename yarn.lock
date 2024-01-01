@@ -6090,12 +6090,24 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mdx-js/react@npm:^1.6.21, @mdx-js/react@npm:^1.6.22":
+"@mdx-js/react@npm:^1.6.22":
   version: 1.6.22
   resolution: "@mdx-js/react@npm:1.6.22"
   peerDependencies:
     react: ^16.13.1 || ^17.0.0
   checksum: bc84bd514bc127f898819a0c6f1a6915d9541011bd8aefa1fcc1c9bea8939f31051409e546bdec92babfa5b56092a16d05ef6d318304ac029299df5181dc94c8
+  languageName: node
+  linkType: hard
+
+"@mdx-js/react@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "@mdx-js/react@npm:3.0.0"
+  dependencies:
+    "@types/mdx": ^2.0.0
+  peerDependencies:
+    "@types/react": ">=16"
+    react: ">=16"
+  checksum: a780cff9d7f7639d6fc21c9d4e0a6ac1370c3209ea0db176923df7f9145785309591cf871f227f5135d1fe2accce0d5df9a22fc0530e5dda0c7b4b105705f20d
   languageName: node
   linkType: hard
 
@@ -9260,6 +9272,13 @@ __metadata:
   version: 1.0.2
   resolution: "@types/mdurl@npm:1.0.2"
   checksum: 79c7e523b377f53cf1f5a240fe23d0c6cae856667692bd21bf1d064eafe5ccc40ae39a2aa0a9a51e8c94d1307228c8f6b121e847124591a9a828c3baf65e86e2
+  languageName: node
+  linkType: hard
+
+"@types/mdx@npm:^2.0.0":
+  version: 2.0.10
+  resolution: "@types/mdx@npm:2.0.10"
+  checksum: 3e2fb24b7bfae739a59573344171292b6c31256ad9afddc00232e9de4fbc97b270e1a11d13cb935cba0d9bbb9bc7348793eda82ee752233c5d2289f4b897f719
   languageName: node
   linkType: hard
 
@@ -13225,7 +13244,7 @@ __metadata:
     "@docusaurus/plugin-content-docs": ^2.0.0-beta.15
     "@docusaurus/plugin-pwa": ^2.0.0-beta.15
     "@docusaurus/preset-classic": ^2.0.0-beta.15
-    "@mdx-js/react": ^1.6.21
+    "@mdx-js/react": ^3.0.0
     "@supabase/supabase-js": ^1.29.1
     "@svgr/webpack": ^8.1.0
     animate.css: ^4.1.1
