@@ -104,7 +104,7 @@
     "@types/codemirror": "^5.60.9",
     "@types/lodash": "^4.14.202",
     "@types/markdown-it": "^13",
-    "@types/mdast": "^3.0.11",
+    "@types/mdast": "^4.0.3",
     "@types/mdurl": "^1",
     "@types/punycode": "^2",
     "@types/react": "^18.2.18",
