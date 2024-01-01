@@ -23,7 +23,7 @@
     "@markflowy/types": "workspace:*",
     "@mui/material": "^5.14.6",
     "@tauri-apps/api": "^2.0.0-alpha.12",
-    "@tauri-apps/plugin-clipboard-manager": "^2.0.0-alpha.3",
+    "@tauri-apps/plugin-clipboard-manager": "^2.0.0-alpha.5",
     "@tauri-apps/plugin-dialog": "^2.0.0-alpha.3",
     "@tauri-apps/plugin-os": "^2.0.0-alpha.4",
     "@tauri-apps/plugin-store": "^2.0.0-alpha.3",
