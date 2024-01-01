@@ -5828,7 +5828,7 @@ __metadata:
     "@remirror/core": ^2.0.17
     "@tauri-apps/api": ^2.0.0-alpha.12
     "@tauri-apps/cli": ^2.0.0-alpha.18
-    "@tauri-apps/plugin-clipboard-manager": ^2.0.0-alpha.3
+    "@tauri-apps/plugin-clipboard-manager": ^2.0.0-alpha.5
     "@tauri-apps/plugin-dialog": ^2.0.0-alpha.3
     "@tauri-apps/plugin-os": ^2.0.0-alpha.4
     "@tauri-apps/plugin-store": ^2.0.0-alpha.3
@@ -8704,6 +8704,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tauri-apps/api@npm:2.0.0-alpha.13":
+  version: 2.0.0-alpha.13
+  resolution: "@tauri-apps/api@npm:2.0.0-alpha.13"
+  checksum: d25737db9ebc68986ecd00cb69c2484c8f4357ff934a9eaf586ed3c2640900f13ad175876d9ff21960ff5b46f07c91dede09fbf79aed3f08f136177c060aad1a
+  languageName: node
+  linkType: hard
+
 "@tauri-apps/api@npm:^2.0.0-alpha.12":
   version: 2.0.0-alpha.12
   resolution: "@tauri-apps/api@npm:2.0.0-alpha.12"
@@ -8822,12 +8829,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tauri-apps/plugin-clipboard-manager@npm:^2.0.0-alpha.3":
-  version: 2.0.0-alpha.3
-  resolution: "@tauri-apps/plugin-clipboard-manager@npm:2.0.0-alpha.3"
+"@tauri-apps/plugin-clipboard-manager@npm:^2.0.0-alpha.5":
+  version: 2.0.0-alpha.5
+  resolution: "@tauri-apps/plugin-clipboard-manager@npm:2.0.0-alpha.5"
   dependencies:
-    "@tauri-apps/api": 2.0.0-alpha.11
-  checksum: 6919963f527a0dee702495fda46e3a87117722429ce5452183dcd6ea2a241387b3b2316715018c02f4c8157ad20036072463e42457b6acd13cb0807e7478e79c
+    "@tauri-apps/api": 2.0.0-alpha.13
+  checksum: e92f252713e06565d9b448035a8ffdbee6ee078cf464f8b04727790e822a211f251c7a419b6ea6c55d9b629e678198d1f9030f0cea3f52c9537ea6f5a842b09b
   languageName: node
   linkType: hard
 
