@@ -51,4 +51,8 @@ export const MenuWrapper = styled(AkMenu)`
   .menu-item[data-active] {
     background-color: ${props => darken(props.theme.blue, 0.2)};
   }
+  
+  .menu-label {
+    flex: 1 1 0%;
+  }
 `
