@@ -13,10 +13,11 @@
     "shell": {
       "open": true
     },
+    "http": {
+      "scope": ["*"]
+    },
     "updater": {
-      "endpoints": [
-        "https://releases.myapp.com/{{target}}/{{arch}}/{{current_version}}"
-      ]
+      "endpoints": ["https://releases.myapp.com/{{target}}/{{arch}}/{{current_version}}"]
     }
   },
   "tauri": {
@@ -45,10 +46,7 @@
           "type": "embedBootstrapper"
         },
         "wix": {
-          "language": [
-            "zh-CN",
-            "en-US"
-          ]
+          "language": ["zh-CN", "en-US"]
         }
       },
       "macOS": {
@@ -62,9 +60,7 @@
     "security": {
       "assetProtocol": {
         "enable": true,
-        "scope": [
-          "**"
-        ]
+        "scope": ["**"]
       },
       "csp": null
     }

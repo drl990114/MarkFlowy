@@ -26,6 +26,7 @@ import { join } from '@tauri-apps/api/path'
 import { sleep } from '@/helper'
 import { useGlobalSettingData } from '@/hooks'
 import { getFolderPathFromPath } from '@/helper/filesys'
+import { fetch } from '@tauri-apps/plugin-http'
 
 const appWindow = getCurrent()
 
@@ -59,7 +60,18 @@ const createWysiwygDelegateOptions = (filePath?: string): CreateWysiwygDelegateO
     await sleep(1)
     if (!url) return url
     if ((url.startsWith('http') || url.startsWith('https')) && !url.includes(location.origin)) {
-      return url
+      try {
+        const response = await fetch(url, {
+          method: 'GET',
+        })
+
+        const blob = await response.blob()
+        const objectURL = URL.createObjectURL(blob)
+
+        return objectURL
+      } catch (error) {
+        return url
+      }
     }
 
     const dirPath = filePath || useEditorStore.getState().folderData?.[0]?.path

@@ -5830,6 +5830,7 @@ __metadata:
     "@tauri-apps/cli": ^2.0.0-alpha.18
     "@tauri-apps/plugin-clipboard-manager": ^2.0.0-alpha.5
     "@tauri-apps/plugin-dialog": ^2.0.0-alpha.3
+    "@tauri-apps/plugin-http": ^2.0.0-alpha.6
     "@tauri-apps/plugin-os": ^2.0.0-alpha.4
     "@tauri-apps/plugin-store": ^2.0.0-alpha.3
     "@types/lodash": ^4.14.202
@@ -8844,6 +8845,15 @@ __metadata:
   dependencies:
     "@tauri-apps/api": 2.0.0-alpha.11
   checksum: 14e46963bf8cdc205ba1367b5d88fc72901e251dc1a4d3629791b42b9082df15aefe0dcc614ad111243dba301bc755cec7583c41f143ea098c95de2586abba97
+  languageName: node
+  linkType: hard
+
+"@tauri-apps/plugin-http@npm:^2.0.0-alpha.6":
+  version: 2.0.0-alpha.6
+  resolution: "@tauri-apps/plugin-http@npm:2.0.0-alpha.6"
+  dependencies:
+    "@tauri-apps/api": 2.0.0-alpha.13
+  checksum: d7e5422104d923f3fcfea7410466a7123b163402cf3e7af406de22d6a20f1248fb5d59359f4d7c5b80e6bfcc2ef7f3ed7f7479df2c8ae03d6f899cf34c3f368a
   languageName: node
   linkType: hard
 

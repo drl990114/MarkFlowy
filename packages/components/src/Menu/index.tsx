@@ -1,6 +1,6 @@
 import { MenuWrapper } from './MenuWrapper'
 import type { MenuProps as AkMenuProps } from '@ariakit/react'
-import { MenuButton, MenuItem, MenuProvider } from '@ariakit/react'
+import { MenuButton, MenuItem, MenuProvider, MenuButtonArrow } from '@ariakit/react'
 import { MenuItemCheckbox } from './MenuItemCheckbox'
 
 export type MenuItemData = {
@@ -37,7 +37,8 @@ const Menu = (props: MenuProps) => {
               className='menu-item'
               render={<MenuButton />}
             >
-              {item.label}
+              <span className="menu-label">{item.label}</span>
+              <MenuButtonArrow />
             </ItemRender>
             <MenuWrapper>{renderItems(item.children)}</MenuWrapper>
           </MenuProvider>
