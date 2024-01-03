@@ -20,11 +20,12 @@
 
 Currently, MarkFlowy is still in the alpha phase,This means there may be incompatible version updates, and it is recommended to use it when there is data backup available. 
 
-## Feature
+## Features
 
 - **Built-in ChatGpt**. Currently supports one-click export of conversations, making chatgpt your smart assistant.
 - **Super lightweight**. The MarkFlowy is based on tauri and has a volume of less than 10MB and better performance.
 - **High availability**. MarkFlowy uses the remirror editor, which not only provides high scalability, but also has a great editing experience. And, MarkFlowy supports multiple editing modes, such as `source code`, `wysiyg`.
+- **Custom Theme**. MarkFlowy supports custom themes, and you can also share your themes with others.
 
 ## Download
 
