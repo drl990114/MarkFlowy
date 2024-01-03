@@ -5,8 +5,8 @@ import { useCommandStore } from '@/stores'
 import styled from 'styled-components'
 
 const SettingDialogWrapper = styled(Dialog)`
-  width: 90vw;
   height: 80vh;
+  overflow: hidden;
   background-color: ${(props) => props.theme.bgColor};
 `
 
@@ -25,7 +25,7 @@ export const SettingDialog = memo(() => {
   const handleClose = useCallback(() => setOpen(false), [])
 
   return (
-    <SettingDialogWrapper title='Setting' open={open} onClose={handleClose}>
+    <SettingDialogWrapper width="90vw" title='Setting' open={open} onClose={handleClose}>
       <Setting />
     </SettingDialogWrapper>
   )

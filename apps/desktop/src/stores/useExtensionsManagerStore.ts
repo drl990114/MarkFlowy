@@ -6,6 +6,7 @@ const useExtensionsManagerStore = create<ExtensionsManagerStore>(() => {
       const sandbox = (document.getElementById(extension.id) ||
         document.createElement('iframe')) as HTMLIFrameElement
       sandbox.id = extension.id
+      sandbox.style.display = 'none'
       document.body.appendChild(sandbox)
 
       const iframeDocument = sandbox.contentDocument!
