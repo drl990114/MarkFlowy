@@ -21,11 +21,11 @@
 
 目前 MarkFlowy还处于alpha阶段，建议在有数据备份的情况下使用。
 
-## Feature
+## Features
 
 - **内置ChatGpt**. 当前支持一键导出笔记，让ChatGPT成为你的智能助手。
 - **超轻量**. MarkFlowy 基于 tauri, 拥有小于 10MB 的体积和更好的性能。
-- **高可用性**. MarkFlowy 使用 remirror 作为编辑器核心, 不仅扩展性高，编辑体验也很好。并支持多种编辑模式，如`source code`, `wysiyg`.
+- **高可用性**. MarkFlowy 使用 remirror 作为编辑器核心, 不仅扩展性高，编辑体验也很好。并支持多种编辑模式，如`source code`, `wysiwyg`.
 - **自定义主题**. MarkFlowy 支持自定义主题，并且你也可以与他人分享你的主题。
 
 ## 下载
