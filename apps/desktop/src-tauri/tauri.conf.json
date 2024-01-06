@@ -7,7 +7,7 @@
   },
   "package": {
     "productName": "MarkFlowy",
-    "version": "0.7.0"
+    "version": "0.6.0"
   },
   "plugins": {
     "shell": {
@@ -20,7 +20,7 @@
     },
     "updater": {
       "endpoints": [
-        "https://releases.myapp.com/{{target}}/{{arch}}/{{current_version}}"
+        "https://drl990114.github.io/MarkFlowy/install.json"
       ]
     }
   },
@@ -38,7 +38,7 @@
       "identifier": "com.drl990114.markflowy",
       "targets": "all",
       "updater": {
-        "active": false,
+        "active": true,
         "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEY3NjFEN0QxOEZBQjBDMjYKUldRbURLdVAwZGRoOTJjUHZVbWM1elVJcXNpVU5rSHBvbmNWbU5WZXdoUE51RXRKMFRTVTZCZlcK",
         "windows": {
           "installMode": "passive"
