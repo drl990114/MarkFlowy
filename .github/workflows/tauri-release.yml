@@ -79,8 +79,8 @@ jobs:
       - name: Build the app
         run: yarn build:desktop --target ${{ matrix.target }}
         env:
-          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
-          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
 
       - uses: actions/upload-artifact@v3
@@ -88,7 +88,7 @@ jobs:
         with:
           name: artifacts-${{ matrix.arch }}
           path: |
-            ./target/${{ matrix.target }}/release/bundle/appimage/**.AppImage
+            ./target/${{ matrix.target }}/release/bundle/appimage/**.AppImage.*
             ./target/${{ matrix.target }}/release/bundle/deb/**.deb
 
       - uses: actions/upload-artifact@v3
@@ -97,7 +97,7 @@ jobs:
           name: artifacts-${{ matrix.arch }}
           path: |
             ./target/${{ matrix.target }}/release/bundle/dmg/**.dmg
-            ./target/${{ matrix.target }}/release/bundle/macos/**.app
+            ./target/${{ matrix.target }}/release/bundle/macos/**.app.*
 
       - uses: actions/upload-artifact@v3
         if: matrix.os == 'windows-latest'
@@ -127,21 +127,27 @@ jobs:
           name: artifacts-aarch64
           path: artifacts/aarch64
 
+      # There are currently no certified Apple developers, but aarch64 will not be installed because of this.
+      # For now, use the x64 version instead of aarch64.
       - name: Rename artifacts
         run: |
-          mkdir -p "artifacts/release"
-          mv "artifacts/aarch64/dmg/MarkFlowy_${{ env.version }}_aarch64.dmg" "artifacts/release"
-          mv "artifacts/aarch64/macos/MarkFlowy.app" "artifacts/release/MarkFlowy_${{ env.version }}_aarch64.app"
+          cp -r  "artifacts/x86_64/dmg/MarkFlowy_${{ env.version }}_x64.dmg" "artifacts/MarkFlowy_${{ env.version }}_macos_aarch64.dmg"
+          cp -r  "artifacts/x86_64/macos/MarkFlowy.app.tar.gz" "artifacts/MarkFlowy_${{ env.version }}_macos_aarch64.app.tar.gz"
+          cp -r  "artifacts/x86_64/macos/MarkFlowy.app.tar.gz.sig" "artifacts/MarkFlowy_${{ env.version }}_macos_aarch64.app.tar.gz.sig"
 
-          mv "artifacts/x86_64/dmg/MarkFlowy_${{ env.version }}_x64.dmg" "artifacts/release"
-          mv "artifacts/x86_64/macos/MarkFlowy.app" "artifacts/release/MarkFlowy_${{ env.version }}_x64.app"
+          rm -rf "artifacts/aarch64/dmg/MarkFlowy_${{ env.version }}_aarch64.dmg"
 
-          mv "artifacts/x86_64/deb/mark-flowy_${{ env.version }}_amd64.deb" "artifacts/release"
-          mv "artifacts/x86_64/appimage/mark-flowy_${{ env.version }}_amd64.AppImage" "artifacts/release"
+          mv "artifacts/x86_64/dmg/MarkFlowy_${{ env.version }}_x64.dmg" "artifacts/MarkFlowy_${{ env.version }}_macos_x86_64.dmg"
+          mv "artifacts/x86_64/macos/MarkFlowy.app.tar.gz" "artifacts/MarkFlowy_${{ env.version }}_macos_x86_64.app.tar.gz"
+          mv "artifacts/x86_64/macos/MarkFlowy.app.tar.gz.sig" "artifacts/MarkFlowy_${{ env.version }}_macos_x86_64.app.tar.gz.sig"
 
-          mv "artifacts/x86_64/MarkFlowy_${{ env.version }}_x64_en-US.msi" "artifacts/release"
+          mv "artifacts/x86_64/deb/mark-flowy_${{ env.version }}_amd64.deb" "artifacts/x86_64/deb/MarkFlowy_${{ env.version }}_linux_x86_64.deb"
+          mv "artifacts/x86_64/appimage/mark-flowy_${{ env.version }}_amd64.AppImage.tar.gz" "artifacts/MarkFlowy_${{ env.version }}_linux_x86_64.AppImage.tar.gz"
+          mv "artifacts/x86_64/appimage/mark-flowy_${{ env.version }}_amd64.AppImage.tar.gz.sig" "artifacts/MarkFlowy_${{ env.version }}_linux_x86_64.AppImage.tar.gz.sig"
 
-          mv "artifacts/x86_64/MarkFlowy_${{ env.version }}_x64_zh-CN.msi" "artifacts/release"
+          mv "artifacts/x86_64/MarkFlowy_${{ env.version }}_x64_en-US.msi" "artifacts/MarkFlowy_${{ env.version }}_windows_x86_64.msi"
+          mv "artifacts/x86_64/MarkFlowy_${{ env.version }}_x64_en-US.msi.zip" "artifacts/MarkFlowy_${{ env.version }}_windows_x86_64.msi.zip"
+          mv "artifacts/x86_64/MarkFlowy_${{ env.version }}_x64_en-US.msi.zip.sig" "artifacts/MarkFlowy_${{ env.version }}_windows_x86_64.msi.zip.sig"
 
       - name: Create Release
         uses: softprops/action-gh-release@master
@@ -153,4 +159,27 @@ jobs:
           releaseBody: v${{ env.version }}
           releaseDraft: false
           prerelease: true
-          files: ./artifacts/release/*
+          files: ./artifacts/**/*
+
+  updater:
+    runs-on: ubuntu-latest
+    needs: release
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Updater JSON
+        run: yarn updater --token=${{ secrets.GITHUB_TOKEN }}
+
+      - name: Deploy install.json
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./apps/desktop/updater
+          # force_orphan: true
+
+      - name: Query version number
+        run: echo "version=${{ env.version }}" >> $GITHUB_ENV

@@ -1,6 +1,6 @@
 import { BaseStyle } from '@markflowy/theme'
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles'
-import { ThemeProvider as MfThemeProvider } from '@markflowy/components'
+import { Button, ThemeProvider as MfThemeProvider } from '@markflowy/components'
 import { invoke } from '@tauri-apps/api/primitives'
 import { listen } from '@tauri-apps/api/event'
 import { useCallback, useEffect } from 'react'
@@ -27,6 +27,8 @@ import { ContextMenu } from './components/UI/ContextMenu/ContextMenu'
 import NiceModal from '@ebay/nice-modal-react'
 import useExtensionsManagerStore from './stores/useExtensionsManagerStore'
 import __MF__ from './context'
+import { check } from '@tauri-apps/plugin-updater'
+import { toast, Notifications } from '@markflowy/components'
 
 // TODO refactor useGlobalSettingData use zustand
 export const confRef: { current: any } = { current: {} }
@@ -36,7 +38,37 @@ const themeInit = () => {
   updateCurThemeByName(confRef.current.theme)
 }
 
-const onceLoadExtensions = once(() => {
+const onceSetup = once(async () => {
+  try {
+    const update = await check()
+    if (update !== null) {
+      console.log('update', update)
+      toast.promise(
+        update.downloadAndInstall(),
+        {
+          loading: 'Downloading new version...',
+          success: (
+            <div>
+              <p> Update new version success!</p>
+              <Button onClick={() => invoke('app_restart')}>Restart</Button>
+            </div>
+          ),
+          error: 'Update new version error',
+        },
+        {
+          position: 'bottom-right',
+        },
+      )
+    }
+  } catch (error) {
+    toast.error('Update new version error', {
+      duration: 5000,
+      position: 'bottom-right',
+    })
+
+    console.log('update error', error)
+  }
+
   invoke<Record<string, any>>('extensions_init').then((res) => {
     if (isArray(res)) {
       try {
@@ -168,7 +200,7 @@ const App: FC = function () {
   }
 
   useEffect(() => {
-    onceLoadExtensions()
+    onceSetup()
     const listener = (event: MessageEvent) => {
       if (event.origin !== window.location.origin) {
         return
@@ -210,13 +242,6 @@ const App: FC = function () {
     }
   }, [eventInit, isWeb])
 
-  // const updaterinit = useCallback(async () => {
-  //   // TODO 更新默认的 setting
-  //   const update = await checkUpdate()
-  //   if (update.shouldUpdate)
-  //     await installUpdate()
-  // }, [])
-
   return (
     <AppThemeProvider>
       <Routes>
@@ -224,6 +249,7 @@ const App: FC = function () {
         <Route path='/setting' element={<Setting />} />
       </Routes>
       <ContextMenu />
+      <Notifications />
     </AppThemeProvider>
   )
 }

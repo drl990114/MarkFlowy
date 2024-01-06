@@ -22,7 +22,7 @@ function Root() {
   }, [getBookMarkList])
 
   useEffect(() => {
-    if (!activeId) setTitleBarText('markflowy')
+    if (!activeId) setTitleBarText('')
   }, [activeId])
 
   return (

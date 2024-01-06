@@ -8,7 +8,7 @@ use std::collections::HashMap;
 use std::path::PathBuf;
 use std::sync;
 
-use app::{bookmarks, conf, extensions, keybindings, opened_cache};
+use app::{bookmarks, conf, extensions, keybindings, opened_cache, process};
 use lazy_static::lazy_static;
 use tauri::{Manager, Runtime};
 use tracing_subscriber;
@@ -33,6 +33,7 @@ pub fn run() {
     let context = tauri::generate_context!();
     tauri::Builder::default()
         .plugin(tauri_plugin_http::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_store::Builder::default().build())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_os::init())
@@ -61,6 +62,8 @@ pub fn run() {
             bookmarks::cmd::remove_bookmark,
             search::cmd::search_files,
             extensions::cmd::extensions_init,
+            process::app_exit,
+            process::app_restart,
         ])
         .setup(|app| {
             let home_dir_path = app.path().home_dir().expect("failed to get home dir");
