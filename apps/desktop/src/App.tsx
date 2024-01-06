@@ -41,8 +41,7 @@ const themeInit = () => {
 const onceSetup = once(async () => {
   try {
     const update = await check()
-    if (update) {
-      // await update.downloadAndInstall()
+    if (update !== null) {
       console.log('update', update)
       toast.promise(
         update.downloadAndInstall(),
