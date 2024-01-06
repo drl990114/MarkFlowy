@@ -1,6 +1,11 @@
 import { BaseStyle } from '@markflowy/theme'
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles'
-import { Button, ThemeProvider as MfThemeProvider } from '@markflowy/components'
+import {
+  Button,
+  ThemeProvider as MfThemeProvider,
+  toast,
+  Notifications,
+} from '@markflowy/components'
 import { invoke } from '@tauri-apps/api/primitives'
 import { listen } from '@tauri-apps/api/event'
 import { useCallback, useEffect } from 'react'
@@ -28,7 +33,6 @@ import NiceModal from '@ebay/nice-modal-react'
 import useExtensionsManagerStore from './stores/useExtensionsManagerStore'
 import __MF__ from './context'
 import { check } from '@tauri-apps/plugin-updater'
-import { toast, Notifications } from '@markflowy/components'
 
 // TODO refactor useGlobalSettingData use zustand
 export const confRef: { current: any } = { current: {} }
@@ -56,14 +60,14 @@ const onceSetup = once(async () => {
           error: 'Update new version error',
         },
         {
-          position: 'bottom-right',
+          position: 'bottom-center',
         },
       )
     }
   } catch (error) {
     toast.error('Update new version error', {
       duration: 5000,
-      position: 'bottom-right',
+      position: 'bottom-center',
     })
 
     console.log('update error', error)

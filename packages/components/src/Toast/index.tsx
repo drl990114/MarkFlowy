@@ -43,8 +43,6 @@ const MfToaster = memo(() => {
 
 export const Notifications = styled(MfToaster)`
   .mf-toast {
-    display: flex;
-    align-items: flex-start;
 
     &__dismiss {
       padding: ${({ theme }) => theme?.spaceXs};
