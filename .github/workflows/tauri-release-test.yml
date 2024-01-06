@@ -2,8 +2,8 @@ name: Release
 
 on:
   push:
-    branches:
-      - 'feat/updater'
+    tags:
+      - 'v*'
 
 jobs:
   build:
@@ -80,7 +80,8 @@ jobs:
         run: yarn build:desktop --target ${{ matrix.target }}
         env:
           TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
-          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
 
       - uses: actions/upload-artifact@v3
@@ -127,12 +128,13 @@ jobs:
           name: artifacts-aarch64
           path: artifacts/aarch64
 
+      # There are currently no certified Apple developers, but aarch64 will not be installed because of this.
+      # For now, use the x64 version instead of aarch64.
       - name: Rename artifacts
         run: |
-          mkdir -p "artifacts/release"
-          mv "artifacts/aarch64/dmg/MarkFlowy_${{ env.version }}_aarch64.dmg" "artifacts/MarkFlowy_${{ env.version }}_macos_aarch64.dmg"
-          mv "artifacts/aarch64/macos/MarkFlowy.app.tar.gz" "artifacts/MarkFlowy_${{ env.version }}_macos_aarch64.app.tar.gz"
-          mv "artifacts/aarch64/macos/MarkFlowy.app.tar.gz.sig" "artifacts/MarkFlowy_${{ env.version }}_macos_aarch64.app.tar.gz.sig"
+          cp -r  "artifacts/x86_64/dmg/MarkFlowy_${{ env.version }}_x64.dmg" "artifacts/MarkFlowy_${{ env.version }}_macos_aarch64.dmg"
+          cp -r  "artifacts/x86_64/macos/MarkFlowy.app.tar.gz" "artifacts/MarkFlowy_${{ env.version }}_macos_aarch64.app.tar.gz"
+          cp -r  "artifacts/x86_64/macos/MarkFlowy.app.tar.gz.sig" "artifacts/MarkFlowy_${{ env.version }}_macos_aarch64.app.tar.gz.sig"
 
           mv "artifacts/x86_64/dmg/MarkFlowy_${{ env.version }}_x64.dmg" "artifacts/MarkFlowy_${{ env.version }}_macos_x86_64.dmg"
           mv "artifacts/x86_64/macos/MarkFlowy.app.tar.gz" "artifacts/MarkFlowy_${{ env.version }}_macos_x86_64.app.tar.gz"
@@ -156,7 +158,7 @@ jobs:
           releaseBody: v${{ env.version }}
           releaseDraft: false
           prerelease: true
-          files: ./artifacts/release/*
+          files: ./artifacts/**/*
 
   updater:
     runs-on: ubuntu-latest

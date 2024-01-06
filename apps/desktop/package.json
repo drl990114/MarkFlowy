@@ -5,6 +5,7 @@
     "dev": "vite --host",
     "build": "tsc && vite build",
     "build:types": "tsc --tsconfig ./tsconfig.types.json",
+    "updater": "tr updater",
     "preview": "vite preview",
     "tauri:build": "tauri build",
     "tauri:dev": "tauri dev",
