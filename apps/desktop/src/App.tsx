@@ -1,6 +1,6 @@
 import { BaseStyle } from '@markflowy/theme'
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles'
-import { ThemeProvider as MfThemeProvider } from '@markflowy/components'
+import { Button, ThemeProvider as MfThemeProvider } from '@markflowy/components'
 import { invoke } from '@tauri-apps/api/primitives'
 import { listen } from '@tauri-apps/api/event'
 import { useCallback, useEffect } from 'react'
@@ -43,16 +43,27 @@ const onceSetup = once(async () => {
     const update = await check()
     if (update) {
       // await update.downloadAndInstall()
+      console.log('update', update)
+      toast.promise(
+        update.downloadAndInstall(),
+        {
+          loading: 'Downloading new version...',
+          success: (
+            <div>
+              <p> Update new version success!</p>
+              <Button onClick={() => invoke('app_restart')}>Restart</Button>
+            </div>
+          ),
+          error: 'Update new version error',
+        },
+        {
+          position: 'bottom-right',
+        },
+      )
     }
-    console.log('update', update)
-    toast.success('Update new version success!', {
-      duration: 7000,
-      position: 'bottom-right',
-    })
-
   } catch (error) {
     toast.error('Update new version error', {
-      duration: 7000,
+      duration: 5000,
       position: 'bottom-right',
     })
 
