@@ -10,3 +10,4 @@ export { default as ThemeProvider } from './Theme'
 
 export * from './Tooltip'
 export * from './Menu'
+export * from './Toast'

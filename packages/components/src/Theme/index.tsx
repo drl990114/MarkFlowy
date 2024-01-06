@@ -1,14 +1,17 @@
-import { ThemeProvider } from "styled-components"
+import { createContext } from 'react'
+import { ThemeProvider } from 'styled-components'
 
 type Props = {
-  children?: React.ReactNode;
-  theme: Record<string, any>;
-};
+  children?: React.ReactNode
+  theme: Record<string, any>
+}
+
+export const ThemeContext = createContext({})
 
 const UiThemeProvider = ({ theme, children }: Props) => {
   return (
     <ThemeProvider theme={theme}>
-      {children}
+      <ThemeContext.Provider value={theme}>{children}</ThemeContext.Provider>
     </ThemeProvider>
   )
 }

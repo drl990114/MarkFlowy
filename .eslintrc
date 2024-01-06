@@ -1,6 +1,6 @@
 {
   "extends": ["@halodong/eslint-config-react"],
-  "ignorePatterns": ["*.js", "*.json"],
+  "ignorePatterns": ["*.js", "*.json", "*.rs"],
   "parserOptions": {
     "ecmaFeatures": {
       "jsx": true
