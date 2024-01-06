@@ -43,21 +43,21 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev librsvg2-dev libxcb-shape0-dev libxcb-xfixes0-dev libsoup-3.0 javascriptcoregtk-4.1 webkit2gtk-4.1
 
-      - name: Update CHANGELOG
-        id: changelog
-        uses: requarks/changelog-action@v1
-        with:
-          token: ${{ github.token }}
-          tag: ${{ github.ref_name }}
-          excludeTypes: 'chore,docs,style,refactor,test,ci,build'
+      # - name: Update CHANGELOG
+      #   id: changelog
+      #   uses: requarks/changelog-action@v1
+      #   with:
+      #     token: ${{ github.token }}
+      #     tag: ${{ github.ref_name }}
+      #     excludeTypes: 'chore,docs,style,refactor,test,ci,build'
 
-      - name: Commit CHANGELOG.md
-        uses: stefanzweifel/git-auto-commit-action@v4
-        if: matrix.os == 'windows-latest'
-        with:
-          branch: main
-          commit_message: 'docs: update CHANGELOG.md for ${{ github.ref_name }} [skip ci]'
-          file_pattern: CHANGELOG.md
+      # - name: Commit CHANGELOG.md
+      #   uses: stefanzweifel/git-auto-commit-action@v4
+      #   if: matrix.os == 'windows-latest'
+      #   with:
+      #     branch: main
+      #     commit_message: 'docs: update CHANGELOG.md for ${{ github.ref_name }} [skip ci]'
+      #     file_pattern: CHANGELOG.md
 
       - name: Rust setup
         uses: dtolnay/rust-toolchain@stable
