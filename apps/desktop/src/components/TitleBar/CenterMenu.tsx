@@ -3,7 +3,7 @@ import { useCallback, useRef } from 'react'
 // import { showContextMenu } from '@/helper/context-menu'
 import { useGlobalOSInfo, useGlobalSettingData } from '@/hooks'
 import { emit } from '@tauri-apps/api/event'
-import { EVENT } from '@/constants'
+import { APP_NAME, EVENT } from '@/constants'
 import useThemeStore from '@/stores/useThemeStore'
 import { showContextMenu } from '../UI/ContextMenu/ContextMenu'
 import { useCommandStore } from '@/stores'
@@ -83,7 +83,7 @@ export const CenterMenu = () => {
 
   return (
     <Container ref={ref} isMacOs={osType === 'macos'} onClick={handleClick}>
-      <i className='ri-quill-pen-fill'></i>
+      <small>{APP_NAME}</small>
     </Container>
   )
 }
@@ -96,10 +96,11 @@ const Container = styled.div<{ isMacOs: boolean }>`
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  width: 38px;
+  width: 74px;
   height: 100%;
   font-size: 16px;
   cursor: pointer;
+  transition: background-color 0.3s ease-in-out;
 
   &:hover {
     background-color: ${(props) => props.theme.accentColor};
