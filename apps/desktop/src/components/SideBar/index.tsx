@@ -1,13 +1,13 @@
 import classNames from 'classnames'
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Container as SideBarContainer, SideBarHeader } from './styles'
-import chatgpt from '@/chatgpt'
 import { Explorer } from '@/components'
 import { RIGHTBARITEMKEYS } from '@/constants'
 import { useCommandStore } from '@/stores'
-import BookMarks from '@/bookmarks'
-import { TableOfContent } from '../Toc'
-import { Search } from '@/search'
+import chatgpt from '@/extensions/chatgpt'
+import BookMarks from '@/extensions/bookmarks'
+import { TableOfContent } from '@/extensions/table-of-content'
+import { Search } from '@/extensions/search'
 
 function SideBar() {
   const [isResizing, setIsResizing] = useState(false)

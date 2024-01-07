@@ -1,7 +1,7 @@
 export * from './Toc'
 
 import { RIGHTBARITEMKEYS } from '@/constants'
-import type { RightBarItem } from '../SideBar'
+import type { RightBarItem } from '../../components/SideBar'
 import type { TocRef } from './Toc'
 import { Toc } from './Toc'
 import { useCommandStore } from '@/stores'

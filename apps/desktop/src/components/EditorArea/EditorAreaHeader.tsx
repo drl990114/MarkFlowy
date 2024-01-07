@@ -2,7 +2,7 @@ import { memo, useCallback } from 'react'
 import { MfIconButton } from '../UI/Button'
 import { useCommandStore, useEditorStore } from '@/stores'
 import { getFileObject } from '@/helper/files'
-import useBookMarksStore from '@/bookmarks/useBookMarksStore'
+import useBookMarksStore from '@/extensions/bookmarks/useBookMarksStore'
 
 export const EditorAreaHeader = memo(() => {
   const { activeId } = useEditorStore()

@@ -1,4 +1,4 @@
-import { loadThemeCss } from '@/services/extensions'
+import { loadThemeCss } from '@/helper/extensions'
 import { darkTheme, lightTheme, type MfTheme } from '@markflowy/theme'
 import { create } from 'zustand'
 import type { Theme } from '@mui/material'
