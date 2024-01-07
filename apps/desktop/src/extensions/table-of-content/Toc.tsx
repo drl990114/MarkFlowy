@@ -4,7 +4,7 @@ import { HeadingTree, TraverseResult } from './HeadingTree'
 import { TocDiv, TocLink, TocListItem } from './styles'
 import type HeadingNode from './HeadingTreeNode'
 import SideBarHeader from '@/components/SideBar/SideBarHeader'
-import Empty from '../Empty'
+import Empty from '../../components/Empty'
 
 export type TocRef = {
   refresh: (args: { newContainer: HTMLElement; newScroll: HTMLElement }) => void

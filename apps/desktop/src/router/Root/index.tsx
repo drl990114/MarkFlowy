@@ -6,9 +6,9 @@ import { useEditorStore } from '@/stores'
 import TitleBar, { setTitleBarText } from '@/components/TitleBar'
 import TableDialog from '@/components/EditorArea/editorToolBar/TableDialog'
 import { useCommandInit } from '@/hooks/useCommandInit'
-import { BookMarkDialog } from '@/bookmarks/BookMarkDialog'
-import useBookMarksStore from '@/bookmarks/useBookMarksStore'
-import { PageLayout } from '@/layout/PageLayout'
+import { BookMarkDialog } from '@/extensions/bookmarks/BookMarkDialog'
+import useBookMarksStore from '@/extensions/bookmarks/useBookMarksStore'
+import { PageLayout } from '@/components/Layout'
 import { SettingDialog } from '../Setting/component/SettingDialog'
 
 function Root() {

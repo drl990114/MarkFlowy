@@ -1,6 +1,6 @@
 import { nanoid } from 'nanoid'
 import { create } from 'zustand'
-import { callChatGptApi } from '@/chatgpt/api'
+import { callChatGptApi } from '@/extensions/chatgpt/api'
 
 const useChatGPTStore = create<ChatGPTStore>((set, get) => ({
   chatList: [],
