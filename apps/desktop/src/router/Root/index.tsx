@@ -2,8 +2,7 @@ import { useEffect } from 'react'
 import { Container } from './styles'
 import { AppInfoDialog, SideBar } from '@/components'
 import EditorArea from '@/components/EditorArea'
-import { useEditorStore } from '@/stores'
-import TitleBar, { setTitleBarText } from '@/components/TitleBar'
+import TitleBar from '@/components/TitleBar'
 import TableDialog from '@/components/EditorArea/editorToolBar/TableDialog'
 import { useCommandInit } from '@/hooks/useCommandInit'
 import { BookMarkDialog } from '@/extensions/bookmarks/BookMarkDialog'
@@ -12,7 +11,6 @@ import { PageLayout } from '@/components/Layout'
 import { SettingDialog } from '../Setting/component/SettingDialog'
 
 function Root() {
-  const { activeId } = useEditorStore()
   const { getBookMarkList } = useBookMarksStore()
 
   useCommandInit()
@@ -20,10 +18,6 @@ function Root() {
   useEffect(() => {
     getBookMarkList()
   }, [getBookMarkList])
-
-  useEffect(() => {
-    if (!activeId) setTitleBarText('')
-  }, [activeId])
 
   return (
     <PageLayout>

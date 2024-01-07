@@ -41,6 +41,7 @@ export const common = {
   lineHeightBase: '1.6',
 
   titleBarHeight: '30px',
+  titleBarControlBtnWidth: '50px',
 
   fontH1: '28px',
   fontH2: '26px',

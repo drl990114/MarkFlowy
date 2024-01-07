@@ -1,5 +1,4 @@
 import { getCurrent } from '@tauri-apps/api/window'
-
 import { useState } from 'react'
 import { Container } from './styled'
 import { Controls } from './Controls'
@@ -33,9 +32,7 @@ export default function TitleBar() {
   return (
     <Container onDoubleClick={handleTitleBarDoubleClick}>
       <CenterMenu />
-      <div id='titlebar' className='titlebar-text' data-tauri-drag-region>
-        {'MarkFlowy'}
-      </div>
+      <div id='titlebar' className='titlebar-text' data-tauri-drag-region />
       {osType === 'macos' ? null : <Controls />}
     </Container>
   )
