@@ -6,6 +6,7 @@ import { memo, useEffect, useRef } from 'react'
 import { TabItem, Dot } from './styles'
 import styled, { css } from 'styled-components'
 import useThemeStore from '@/stores/useThemeStore'
+import { setTitleBarText } from '../TitleBar'
 
 type ContainerProps = {
   visible: boolean
@@ -44,6 +45,10 @@ const EditorAreaTabs = memo(() => {
 
     if (activeId === id) {
       if (opened.length > 0) {
+        if (opened.length === 1) {
+          setTitleBarText('')
+        }
+
         setActiveId(curIndex === 0 ? opened[curIndex + 1] : opened[curIndex - 1])
       }
     }

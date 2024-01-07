@@ -2,10 +2,9 @@ import styled from 'styled-components'
 import { memo, useEffect, useState } from 'react'
 import { getCurrent } from '@tauri-apps/api/window'
 
-const appWindow = getCurrent()
-
 export const Controls = memo(() => {
   const [isScaleup, setScaleup] = useState(false)
+  const appWindow = getCurrent()
 
   useEffect(() => {
     const unlisten = appWindow.onResized(() => {
@@ -17,7 +16,7 @@ export const Controls = memo(() => {
     return () => {
       unlisten.then((f) => f())
     }
-  }, [])
+  }, [appWindow])
 
   const onMinimize = () => appWindow.minimize()
 
@@ -60,8 +59,9 @@ const Container = styled.div`
   align-items: center;
 
   .titlebar-icon {
-    width: ${(props) => props.theme.titleBarHeight};
+    width: ${(props) => props.theme.titleBarControlBtnWidth};
     height: ${(props) => props.theme.titleBarHeight};
+    font-size: ${props => props.theme.fontBase};
     text-align: center;
     line-height: ${(props) => props.theme.titleBarHeight};
     cursor: pointer;

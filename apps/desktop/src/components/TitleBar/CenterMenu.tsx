@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { useCallback, useRef } from 'react'
+import { memo, useCallback, useRef } from 'react'
 // import { showContextMenu } from '@/helper/context-menu'
 import { useGlobalOSInfo, useGlobalSettingData } from '@/hooks'
 import { emit } from '@tauri-apps/api/event'
@@ -8,7 +8,7 @@ import useThemeStore from '@/stores/useThemeStore'
 import { showContextMenu } from '../UI/ContextMenu/ContextMenu'
 import { useCommandStore } from '@/stores'
 
-export const CenterMenu = () => {
+export const CenterMenu = memo(() => {
   const ref = useRef<HTMLDivElement>(null)
   const { osType } = useGlobalOSInfo()
   const { themes, setCurThemeByName } = useThemeStore()
@@ -86,7 +86,7 @@ export const CenterMenu = () => {
       <small>{APP_NAME}</small>
     </Container>
   )
-}
+})
 
 const Container = styled.div<{ isMacOs: boolean }>`
   position: absolute;
