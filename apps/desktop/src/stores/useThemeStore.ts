@@ -41,7 +41,7 @@ const useThemeStore = create<ThemeStore>((set, get) => {
           loadThemeCss(targetTheme.globalStyleText)
         }
 
-        set((prev) => ({ ...prev, curTheme: targetTheme, muiTheme: themeName === 'light' ? muiLightTheme : muiDarkTheme }))
+        set((prev) => ({ ...prev, curTheme: targetTheme, muiTheme: targetTheme.mode === 'light' ? muiLightTheme : muiDarkTheme }))
       }
     },
 
