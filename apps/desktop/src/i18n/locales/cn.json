@@ -15,6 +15,8 @@
   },
   "about": {
     "version": "版本",
+    "newVersion": "新版本",
+    "install": "安装",
     "author": "作者",
     "release": "发布日期",
     "website": "官网",

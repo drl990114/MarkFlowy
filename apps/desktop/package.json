@@ -46,6 +46,7 @@
     "react-keywords": "^1.0.0",
     "react-loading": "^2.0.3",
     "react-router-dom": "^6.15.0",
+    "react-spinners": "^0.13.8",
     "remixicon": "^3.4.0",
     "styled-components": "^6.1.0",
     "stylis": "^4.0.0",

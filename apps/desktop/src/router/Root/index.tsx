@@ -9,11 +9,16 @@ import { BookMarkDialog } from '@/extensions/bookmarks/BookMarkDialog'
 import useBookMarksStore from '@/extensions/bookmarks/useBookMarksStore'
 import { PageLayout } from '@/components/Layout'
 import { SettingDialog } from '../Setting/component/SettingDialog'
+import useAppInfoStore from '@/stores/useAppInfoStore'
 
 function Root() {
   const { getBookMarkList } = useBookMarksStore()
 
   useCommandInit()
+
+  useEffect(() => {
+    useAppInfoStore.getState().setup()
+  }, [])
 
   useEffect(() => {
     getBookMarkList()
