@@ -29,7 +29,7 @@ const Dialog = (props: DialogProps) => {
           <DialogDismiss className='mf-dialog__dismiss' />
         </div>
       ) : null}
-      {children}
+      <div className='mf-dialog__main'>{children}</div>
       {footer ? <Space className='mf-dialog__footer'>{footer}</Space> : null}
     </AkDialog>
   )

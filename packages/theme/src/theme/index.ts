@@ -89,7 +89,7 @@ const styledLightTheme = {
   buttonBgColor: '#f6f7f9',
   tooltipBgColor: '#f6f7f9',
   dialogBgColor: '#f6f7f9',
-  dialogBackdropColor: 'rgba(0, 0, 0, 0.5)',
+  dialogBackdropColor: 'rgba(220, 220, 220, 0.4)',
   contextMenuBgColor: '#f6f7f9',
 
   titleBarDefaultHoverColor: '#bdbdc2',

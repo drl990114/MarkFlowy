@@ -5,8 +5,9 @@ import { BrowserRouter } from 'react-router-dom'
 import App from './App'
 import { FallBackContainer } from './components/FallBack'
 import { enableMapSet } from 'immer'
+import { BarLoader } from 'react-spinners'
+import { lightTheme } from '@markflowy/theme'
 import './normalize.css'
-import { Loading } from './components'
 
 enableMapSet()
 
@@ -15,7 +16,7 @@ const Main = () => {
     <Suspense
       fallback={
         <FallBackContainer>
-          <Loading />
+          <BarLoader color={lightTheme.styledContants.accentColor} width={200}/>
         </FallBackContainer>
       }
     >

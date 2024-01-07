@@ -6,16 +6,29 @@ export const Container = styled.div`
   flex: 1;
 
   #sidebar {
+    display: flex;
+    flex-direction: column;
     width: 250px;
+    height: 100%;
+    overflow: auto;
     background-color: ${(props) => props.theme.bgColor};
     border-right: 1px solid ${(props) => props.theme.borderColor};
+
+    & .sidebar-version {
+      &__container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        font-size: ${(props) => props.theme.fontXs};
+      }
+    }
   }
 
-  #sidebar .title {
-    height: 60px;
-    width: 60px;
+  #sidebar .sidebar-title {
+    display: flex;
+    flex-direction: column;
     margin: 0 auto;
-    margin-top: 2rem;
     padding: 0;
     background-color: transparent;
     overflow: hidden;
@@ -75,7 +88,7 @@ export const Container = styled.div`
   }
 
   #sidebar li {
-    margin: 0.25rem 0;
+    margin: ${(props) => props.theme.spaceXs} 0;
     text-transform: capitalize;
     z-index: 1;
   }
@@ -86,10 +99,9 @@ export const Container = styled.div`
     justify-content: space-between;
     overflow: hidden;
     white-space: pre;
-    padding: 0.5rem;
+    padding: ${(props) => props.theme.spaceSm} ${(props) => props.theme.spaceBase};
     border-radius: 8px;
     color: inherit;
-    gap: 1rem;
     user-select: none;
     cursor: pointer;
   }

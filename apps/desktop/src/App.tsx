@@ -1,11 +1,6 @@
 import { BaseStyle } from '@markflowy/theme'
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles'
-import {
-  Button,
-  ThemeProvider as MfThemeProvider,
-  toast,
-  Notifications,
-} from '@markflowy/components'
+import { ThemeProvider as MfThemeProvider, Notifications } from '@markflowy/components'
 import { invoke } from '@tauri-apps/api/primitives'
 import { listen } from '@tauri-apps/api/event'
 import { useCallback, useEffect } from 'react'
@@ -14,7 +9,7 @@ import { ThemeProvider, StyleSheetManager } from 'styled-components'
 import { GlobalStyles } from './globalStyles'
 import { useGlobalSettingData, useGlobalKeyboard, useGlobalOSInfo } from './hooks'
 import { i18nInit } from './i18n'
-import { Root, Setting } from '@/router'
+import { Root } from '@/router'
 import { loadTask, use } from '@/helper/schedule'
 import { useEditorStore } from './stores'
 import { createWelcomeFile, readDirectory } from './helper/filesys'
@@ -32,7 +27,7 @@ import { ContextMenu } from './components/UI/ContextMenu/ContextMenu'
 import NiceModal from '@ebay/nice-modal-react'
 import useExtensionsManagerStore from './stores/useExtensionsManagerStore'
 import __MF__ from './context'
-import { check } from '@tauri-apps/plugin-updater'
+import { checkUpdate } from './helper/updater'
 
 // TODO refactor useGlobalSettingData use zustand
 export const confRef: { current: any } = { current: {} }
@@ -43,36 +38,6 @@ const themeInit = () => {
 }
 
 const onceSetup = once(async () => {
-  try {
-    const update = await check()
-    if (update !== null) {
-      console.log('update', update)
-      toast.promise(
-        update.downloadAndInstall(),
-        {
-          loading: 'Downloading new version...',
-          success: (
-            <div>
-              <p> Update new version success!</p>
-              <Button onClick={() => invoke('app_restart')}>Restart</Button>
-            </div>
-          ),
-          error: 'Update new version error',
-        },
-        {
-          position: 'bottom-center',
-        },
-      )
-    }
-  } catch (error) {
-    toast.error('Update new version error', {
-      duration: 5000,
-      position: 'bottom-center',
-    })
-
-    console.log('update error', error)
-  }
-
   invoke<Record<string, any>>('extensions_init').then((res) => {
     if (isArray(res)) {
       try {
@@ -130,6 +95,7 @@ const App: FC = function () {
               confRef.current = res
               setSetting(res)
               i18nInit({ lng: res.language })
+              checkUpdate({ install: res.auto_update })
               resolve(res)
             })
           }),
@@ -250,7 +216,7 @@ const App: FC = function () {
     <AppThemeProvider>
       <Routes>
         <Route index path='/' element={<Root />} />
-        <Route path='/setting' element={<Setting />} />
+        {/* <Route path='/setting' element={<Setting />} /> */}
       </Routes>
       <ContextMenu />
       <Notifications />

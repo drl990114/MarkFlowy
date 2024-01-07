@@ -5891,6 +5891,7 @@ __metadata:
     react-keywords: ^1.0.0
     react-loading: ^2.0.3
     react-router-dom: ^6.15.0
+    react-spinners: ^0.13.8
     react-test-renderer: ^18.2.0
     remixicon: ^3.4.0
     styled-components: ^6.1.0
@@ -21804,6 +21805,16 @@ plugin-image-zoom@ataft/plugin-image-zoom:
   peerDependencies:
     react: ^16.0.0 || ^17.0.0 || ^18.0.0
   checksum: 6052c7e3e9627485120ebd8257f128aad8f56386fe8d42374b7743eac1be457c33506d153c7886b4e32923c0c352d402ab805ef9ca02dbcd8393b2bdeb6e5af8
+  languageName: node
+  linkType: hard
+
+"react-spinners@npm:^0.13.8":
+  version: 0.13.8
+  resolution: "react-spinners@npm:0.13.8"
+  peerDependencies:
+    react: ^16.0.0 || ^17.0.0 || ^18.0.0
+    react-dom: ^16.0.0 || ^17.0.0 || ^18.0.0
+  checksum: cb58f916bbf00c4f7fc33c1a75a8c0f91a98a42af26944340a0e29e4b3a97937a03f0292bc444eb5f5f0bea099344b580f9c04a81524246dadbf0571bdb57e62
   languageName: node
   linkType: hard
 

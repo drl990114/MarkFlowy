@@ -1,5 +1,13 @@
 const settingMap = {
   general: {
+    "App": {
+      auto_update: {
+        key: 'auto_update',
+        title: 'Automatic updates',
+        desc: 'Automatically check for updates and install when the app starts.',
+        type: 'switch',
+      }
+    },
     "Auto Save": {
       autosave: {
         key: 'autosave',

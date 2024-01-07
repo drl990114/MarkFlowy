@@ -6,6 +6,9 @@ import styled from 'styled-components'
 
 const SettingDialogWrapper = styled(Dialog)`
   height: 80vh;
+  max-width: 1000px;
+  min-width: 700px;
+  max-height: 700px;
   overflow: hidden;
   background-color: ${(props) => props.theme.bgColor};
 `
@@ -25,7 +28,7 @@ export const SettingDialog = memo(() => {
   const handleClose = useCallback(() => setOpen(false), [])
 
   return (
-    <SettingDialogWrapper width="90vw" title='Setting' open={open} onClose={handleClose}>
+    <SettingDialogWrapper width="80vw" title='Setting' open={open} onClose={handleClose}>
       <Setting />
     </SettingDialogWrapper>
   )

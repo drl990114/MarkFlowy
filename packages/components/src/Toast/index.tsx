@@ -13,25 +13,28 @@ const MfToaster = memo(() => {
       toastOptions={{
         className: 'mf-toast',
         style: {
+          display: 'flex',
+          alignItems: 'flex-start',
           border: `1px solid ${context?.borderColor}`,
           borderRadius: context?.smallBorderRadius,
           color: context?.primaryFontColor,
           fontSize: context?.fontSm,
           background: context?.bgColor,
-          padding: context?.spaceXs,
+          padding: context?.spaceSm,
         },
+        duration: 5000,
+        position: 'bottom-center',
+        custom: {},
       }}
     >
       {(t) => (
         <ToastBar toast={t}>
           {({ icon, message }) => (
             <>
-              {icon}
+              <ToastIcon>{icon}</ToastIcon>
               {message}
               {t.type !== 'loading' && (
-                <ToastDismiss onClick={() => toast.dismiss(t.id)}>
-                  x
-                </ToastDismiss>
+                <ToastDismiss onClick={() => toast.dismiss(t.id)}>x</ToastDismiss>
               )}
             </>
           )}
@@ -43,7 +46,6 @@ const MfToaster = memo(() => {
 
 export const Notifications = styled(MfToaster)`
   .mf-toast {
-
     &__dismiss {
       padding: ${({ theme }) => theme?.spaceXs};
       cursor: pointer;
@@ -53,6 +55,10 @@ export const Notifications = styled(MfToaster)`
       }
     }
   }
+`
+
+const ToastIcon = styled.div`
+  padding-top: ${({ theme }) => theme?.spaceXs};
 `
 
 const ToastDismiss = styled.div`

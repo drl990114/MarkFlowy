@@ -54,6 +54,11 @@ export const DialogWrapper = styled.div.attrs<{ width?: string }>((props) => ({
     }
   }
 
+  .mf-dialog__main {
+    flex: 1;
+    overflow: auto;
+  }
+
   .mf-dialog__footer {
     display: flex;
     justify-content: flex-end;
@@ -69,6 +74,4 @@ export const DialogBackdrop = styled.div`
   z-index: 50;
   overflow: auto;
   background-color: ${(props) => props.theme.dialogBackdropColor};
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
 `

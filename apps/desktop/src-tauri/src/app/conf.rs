@@ -18,6 +18,7 @@ macro_rules! pub_struct {
 pub_struct!(AppConf {
     theme: Option<String>,
     language: Option<String>,
+    auto_update: Option<bool>,
     editor_full_width: Option<bool>,
     extensions_chatgpt_apikey: Option<String>,
     autosave: Option<bool>,
@@ -35,6 +36,7 @@ impl AppConf {
         Self {
             theme: Some("light".to_string()),
             language: Some("en".to_string()),
+            auto_update: Some(false),
             editor_full_width: Some(false),
             autosave: Some(false),
             autosave_interval: Some(2000),
@@ -60,6 +62,9 @@ impl AppConf {
         }
         if oldconf.autosave.is_some() {
             self.autosave = oldconf.autosave;
+        }
+        if oldconf.auto_update.is_some() {
+            self.auto_update = oldconf.auto_update;
         }
         if oldconf.editor_full_width.is_some() {
             self.editor_full_width = oldconf.editor_full_width;
