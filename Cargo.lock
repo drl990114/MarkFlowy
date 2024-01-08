@@ -4192,9 +4192,9 @@ dependencies = [
 
 [[package]]
 name = "tauri-plugin-clipboard-manager"
-version = "2.0.0-alpha.5"
+version = "2.0.0-alpha.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d32d537328bba01bcbbff4fc7daa1175744afdd42e554b6c897d9a1b1f76b023"
+checksum = "9dd33e4675642fc51b5538d42169927e39058e02000baea4651dc47a98bf259b"
 dependencies = [
  "arboard",
  "log",
