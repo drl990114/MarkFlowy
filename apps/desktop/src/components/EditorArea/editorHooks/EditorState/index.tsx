@@ -9,11 +9,11 @@ import { editorReducer, initializeState } from './editor-state'
 import { getFileNameFromPath, type IFile } from '@/helper/filesys'
 import { useCommandStore, useEditorStateStore, useEditorStore } from '@/stores'
 import { useTitleEffect } from '@/hooks/useTitleEffect'
-import { useGlobalSettingData } from '@/hooks'
 import { debounce } from 'lodash'
 import { updateFileObject } from '@/helper/files'
 import bus from '@/helper/eventBus'
 import { EVENT } from '@/constants'
+import useAppSettingStore from '@/stores/useAppSettingStore'
 
 type SaveHandlerParams = {
   /**
@@ -26,7 +26,7 @@ type SaveHandlerParams = {
 
 export const useEditorState: FC<EditorStateProps> = ({ active, file }) => {
   const ctx = useRemirrorContext()
-  const [settingData] = useGlobalSettingData()
+  const { settingData } = useAppSettingStore()
   const helpers = ctx.helpers
   const { getEditorDelegate, getEditorContent, insertNodeToFolderData } = useEditorStore()
   const { setIdStateMap } = useEditorStateStore()

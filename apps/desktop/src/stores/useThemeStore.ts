@@ -23,6 +23,10 @@ const muiLightTheme = createTheme({
   },
 })
 
+export const isOfficialTheme = (themeName: string) => {
+  return themeName === lightTheme.name || themeName === darkTheme.name
+}
+
 const useThemeStore = create<ThemeStore>((set, get) => {
   return {
     curTheme: lightTheme,
@@ -36,12 +40,15 @@ const useThemeStore = create<ThemeStore>((set, get) => {
       const targetTheme = themes.find((theme) => theme.name === themeName)
 
       if (targetTheme) {
-
-        if (targetTheme.globalStyleText)  {
+        if (targetTheme.globalStyleText) {
           loadThemeCss(targetTheme.globalStyleText)
         }
 
-        set((prev) => ({ ...prev, curTheme: targetTheme, muiTheme: targetTheme.mode === 'light' ? muiLightTheme : muiDarkTheme }))
+        set((prev) => ({
+          ...prev,
+          curTheme: targetTheme,
+          muiTheme: targetTheme.mode === 'light' ? muiLightTheme : muiDarkTheme,
+        }))
       }
     },
 

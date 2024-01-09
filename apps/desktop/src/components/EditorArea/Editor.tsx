@@ -24,9 +24,9 @@ import classNames from 'classnames'
 import { WarningHeader } from './styles'
 import { join } from '@tauri-apps/api/path'
 import { sleep } from '@/helper'
-import { useGlobalSettingData } from '@/hooks'
 import { getFolderPathFromPath } from '@/helper/filesys'
 import { fetch } from '@tauri-apps/plugin-http'
+import useAppSettingStore from '@/stores/useAppSettingStore'
 
 const appWindow = getCurrent()
 
@@ -89,7 +89,7 @@ function Editor(props: EditorProps) {
   const [content, setContent] = useState<string>()
   const { setEditorDelegate, getEditorContent, setEditorCtx } = useEditorStore()
   const { execute } = useCommandStore()
-  const [settingData] = useGlobalSettingData()
+  const { settingData } = useAppSettingStore()
   const editorRef = useRef<EditorRef>(null)
   const [delegate, setDelegate] = useState(
     createWysiwygDelegate(createWysiwygDelegateOptions(getFolderPathFromPath(curFile.path))),

@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { SettingItemProps } from '.'
-import { useGlobalSettingData } from '@/hooks'
 import { Slider } from '@mui/material'
 import { SettingLabel } from './Label'
 import { SettingItemContainer } from './Container'
+import useAppSettingStore from '@/stores/useAppSettingStore'
+import appSettingService from '@/services/app-setting'
 
 const SliderSettingItem: React.FC<SettingItemProps<Setting.SliderSettingItem>> = (props) => {
   const { item } = props
-  const [settingData, handler] = useGlobalSettingData()
-  const { writeSettingData } = handler
+  const { settingData } = useAppSettingStore()
   const curValue = settingData[item.key] as unknown as number
   const [value, setValue] = useState(curValue)
 
@@ -18,9 +18,9 @@ const SliderSettingItem: React.FC<SettingItemProps<Setting.SliderSettingItem>> =
 
   const handleChange = useCallback(
     (_e: Event, v: number | number[]) => {
-      writeSettingData(item, v as number)
+      appSettingService.writeSettingData(item, v as number)
     },
-    [item, writeSettingData],
+    [item],
   )
 
   return (

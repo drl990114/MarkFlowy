@@ -3,6 +3,7 @@ import { create } from 'zustand'
 const useCommandStore = create<CommandStore>((set, get) => {
   return {
     commands: {},
+
     addCommand: ({ id, handler }) => {
       set((state) => {
         return {
@@ -16,6 +17,7 @@ const useCommandStore = create<CommandStore>((set, get) => {
         }
       })
     },
+
     execute: (id: string, ...args) => {
       const { commands } = get()
       const command = commands[id]

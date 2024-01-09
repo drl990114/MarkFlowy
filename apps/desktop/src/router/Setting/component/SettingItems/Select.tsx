@@ -1,28 +1,22 @@
 import Autocomplete from '@mui/material/Autocomplete'
-import { useEffect, useState } from 'react'
 import type { SettingItemProps } from '.'
-import { useGlobalSettingData } from '@/hooks'
 import { SettingItemContainer } from './Container'
 import { SettingLabel } from './Label'
 import { Input } from '@/components/UI/Input'
+import useAppSettingStore from '@/stores/useAppSettingStore'
+import appSettingService from '@/services/app-setting'
 
 const SelectSettingItem: React.FC<SettingItemProps<Setting.SelectSettingItem>> = (props) => {
   const { item } = props
-  const [settingData, handler] = useGlobalSettingData()
-  const { writeSettingData } = handler
+  const { settingData } = useAppSettingStore()
   const options = item.options
   const curValue = options.find((option) => option.value === settingData[item.key])
-  const [value, setValue] = useState(curValue)
-
-  useEffect(() => {
-    if (curValue !== value) setValue(curValue)
-  }, [curValue])
 
   return (
     <SettingItemContainer>
       <SettingLabel item={item} />
       <Autocomplete
-        value={value}
+        value={curValue}
         options={options}
         getOptionLabel={(option) => {
           // Value selected with enter, right from the input
@@ -35,8 +29,7 @@ const SelectSettingItem: React.FC<SettingItemProps<Setting.SelectSettingItem>> =
         onChange={(e, v) => {
           e.stopPropagation()
           if (!v) return
-          writeSettingData(item, v.value)
-          setValue(v)
+          appSettingService.writeSettingData(item, v.value)
         }}
         renderInput={(params) => (
           <div ref={params.InputProps.ref}>
