@@ -1,37 +1,31 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback } from 'react'
 import type { SettingItemProps } from '.'
-import { useGlobalSettingData } from '@/hooks'
 import { Switch } from '@mui/material'
 import { SettingItemContainer } from './Container'
 import { SettingLabel } from './Label'
+import appSettingService from '@/services/app-setting'
+import useAppSettingStore from '@/stores/useAppSettingStore'
 
 const SwitchSettingItem: React.FC<SettingItemProps<Setting.SwitchSettingItem>> = (
   props,
 ) => {
   const { item } = props
-  const [settingData, handler] = useGlobalSettingData()
-  const { writeSettingData } = handler
+  const { settingData } = useAppSettingStore()
   const curValue = settingData[item.key] as unknown as boolean
-  const [value, setValue] = useState(curValue)
-
-  useEffect(() => {
-    if (curValue !== value)
-      setValue(curValue)
-  }, [curValue, value])
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement> ) => {
       const settingValue = e.target.checked
-      writeSettingData(item, settingValue)
+      appSettingService.writeSettingData(item, settingValue)
     },
-    [item, writeSettingData],
+    [item],
   )
 
   return (
     <SettingItemContainer>
       <SettingLabel item={item}/>
       <Switch
-        checked={value}
+        checked={curValue}
         onChange={handleChange}
       />
     </SettingItemContainer>

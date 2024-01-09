@@ -1,41 +1,35 @@
 import { Input } from '@markflowy/components'
-import { useCallback, useEffect, useState } from 'react'
+import { memo, useCallback } from 'react'
 import type { SettingItemProps } from '.'
-import { useGlobalSettingData } from '@/hooks'
 import { SettingLabel } from './Label'
 import { SettingItemContainer } from './Container'
+import useAppSettingStore from '@/stores/useAppSettingStore'
+import appSettingService from '@/services/app-setting'
 
-const InputSettingItem: React.FC<SettingItemProps<Setting.InputSettingItem>> = (
+const InputSettingItem: React.FC<SettingItemProps<Setting.InputSettingItem>> = memo((
   props,
 ) => {
   const { item } = props
-  const [settingData, handler] = useGlobalSettingData()
-  const { writeSettingData } = handler
+  const { settingData } = useAppSettingStore()
   const curValue = settingData[item.key] as unknown as string
-  const [value, setValue] = useState(curValue)
-
-  useEffect(() => {
-    if (curValue !== value)
-      setValue(curValue)
-  }, [curValue, value])
 
   const handleChange = useCallback(
     (e: { target: { value: any } }) => {
       const settingValue = e.target.value
-      writeSettingData(item, settingValue)
+      appSettingService.writeSettingData(item, settingValue)
     },
-    [item, writeSettingData],
+    [item],
   )
 
   return (
     <SettingItemContainer>
       <SettingLabel item={item} />
       <Input
-        value={value}
+        value={curValue}
         onChange={handleChange}
       />
     </SettingItemContainer>
   )
-}
+})
 
 export default InputSettingItem

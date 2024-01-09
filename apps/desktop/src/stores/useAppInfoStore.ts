@@ -1,28 +1,11 @@
 import { create } from 'zustand'
-import { getName, getTauriVersion, getVersion } from '@tauri-apps/api/app'
 
-const useAppInfoStore = create<AppInfoStore>((set, get) => {
+const useAppInfoStore = create<AppInfoStore>((set) => {
   return {
     appInfo: {
       name: '',
       version: '',
       tauriVersion: '',
-    },
-
-    setup: async () => {
-      const { setAppInfo } = get()
-
-      const [name, version, tauriVersion] = await Promise.all([
-        getName(),
-        getVersion(),
-        getTauriVersion(),
-      ])
-
-      setAppInfo({
-        name,
-        version,
-        tauriVersion,
-      })
     },
 
     setAppInfo: (appInfo) => {
@@ -43,7 +26,6 @@ type AppInfo = {
 
 interface AppInfoStore {
   appInfo: AppInfo
-  setup: () => void
   setAppInfo: (appInfo: AppInfo) => void
 }
 

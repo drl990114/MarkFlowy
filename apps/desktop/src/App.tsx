@@ -7,7 +7,7 @@ import { useCallback, useEffect } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import { ThemeProvider, StyleSheetManager } from 'styled-components'
 import { GlobalStyles } from './globalStyles'
-import { useGlobalSettingData, useGlobalKeyboard, useGlobalOSInfo } from './hooks'
+import { useGlobalKeyboard, useGlobalOSInfo } from './hooks'
 import { i18nInit } from './i18n'
 import { Root } from '@/router'
 import { loadTask, use } from '@/helper/schedule'
@@ -28,8 +28,8 @@ import NiceModal from '@ebay/nice-modal-react'
 import useExtensionsManagerStore from './stores/useExtensionsManagerStore'
 import __MF__ from './context'
 import { checkUpdate } from './helper/updater'
+import { appSettingStoreSetup } from './services/app-setting'
 
-// TODO refactor useGlobalSettingData use zustand
 export const confRef: { current: any } = { current: {} }
 
 const themeInit = () => {
@@ -73,15 +73,12 @@ const AppThemeProvider: FC<BaseComponentProps> = function ({ children }) {
   )
 }
 
-const App: FC = function () {
+function App () {
   useGlobalOSInfo()
   useGlobalKeyboard()
   const { setRecentWorkspaces } = useOpenedCacheStore()
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [_, handler] = useGlobalSettingData()
   const editorStore = useEditorStore()
   const { setFolderData, addOpenedFile, setActiveId } = editorStore
-  const { setSetting } = handler
   const isWeb = (window as any).__TAURI__ === undefined
   // TODO web need return a editor
   if (!isWeb) {
@@ -90,13 +87,10 @@ const App: FC = function () {
         'confInit',
         () =>
           new Promise((resolve) => {
-            invoke<Record<string, any>>('get_app_conf').then((res) => {
-              console.log('conf', res)
-              confRef.current = res
-              setSetting(res)
-              i18nInit({ lng: res.language })
-              checkUpdate({ install: res.auto_update })
-              resolve(res)
+            appSettingStoreSetup().then((settingData) => {
+              i18nInit({ lng: settingData.language })
+              checkUpdate({ install: settingData.auto_update })
+              resolve(settingData)
             })
           }),
       ),

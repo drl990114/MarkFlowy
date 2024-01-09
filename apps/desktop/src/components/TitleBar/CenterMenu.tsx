@@ -1,19 +1,17 @@
 import styled from 'styled-components'
 import { memo, useCallback, useRef } from 'react'
-// import { showContextMenu } from '@/helper/context-menu'
-import { useGlobalOSInfo, useGlobalSettingData } from '@/hooks'
+import { useGlobalOSInfo } from '@/hooks'
 import { emit } from '@tauri-apps/api/event'
 import { APP_NAME, EVENT } from '@/constants'
 import useThemeStore from '@/stores/useThemeStore'
 import { showContextMenu } from '../UI/ContextMenu/ContextMenu'
 import { useCommandStore } from '@/stores'
+import appSettingService from '@/services/app-setting'
 
 export const CenterMenu = memo(() => {
   const ref = useRef<HTMLDivElement>(null)
   const { osType } = useGlobalOSInfo()
   const { themes, setCurThemeByName } = useThemeStore()
-
-  const settingDataHandler = useGlobalSettingData()[1]
 
   const getThemeMenu = useCallback(() => {
     return themes.map((theme) => {
@@ -21,12 +19,12 @@ export const CenterMenu = memo(() => {
         label: theme.name,
         value: theme.name,
         handler: () => {
-          settingDataHandler.writeSettingData({ key: 'theme' }, theme.name)
+          appSettingService.writeSettingData({ key: 'theme' }, theme.name)
           setCurThemeByName(theme.name)
         },
       }
     })
-  }, [themes, setCurThemeByName, settingDataHandler])
+  }, [themes, setCurThemeByName])
 
   const handleClick = () => {
     if (!ref.current) {
