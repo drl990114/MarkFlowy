@@ -16,7 +16,6 @@ export const Container = styled.div<ContainerProps>`
   flex-direction: row;
   background: ${(props) => props.theme.bgColor};
   color: ${(props) => props.theme.primaryFontColor};
-  box-shadow: -8px 2px 22px -7px rgba(0, 0, 0, 0.25);
   border-radius: 10px 0px 0px 10px;
   z-index: 2;
   overflow: hidden;

@@ -50,12 +50,17 @@ export const TabItem = styled.div<TabItemProps>`
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 0.75rem;
+  padding: 0 ${(props) => props.theme.spaceXs};
+  font-size: ${props => props.theme.fontXs};
   height: calc(100% + 2px);
   box-sizing: border-box;
   white-space: nowrap;
   cursor: pointer;
   user-select: none;
+
+  &:hover {
+    background-color: ${(props) => props.theme.hoverColor};
+  }
 
   .close {
     cursor: pointer;
