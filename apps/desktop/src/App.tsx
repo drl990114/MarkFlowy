@@ -10,6 +10,7 @@ import isPropValid from '@emotion/is-prop-valid'
 import useThemeStore from './stores/useThemeStore'
 import { ContextMenu } from './components/UI/ContextMenu/ContextMenu'
 import NiceModal from '@ebay/nice-modal-react'
+import { InjectFonts } from './injectFonts'
 
 const AppThemeProvider: React.FC<BaseComponentProps> = function ({ children }) {
   const { muiTheme, curTheme } = useThemeStore()
@@ -18,6 +19,7 @@ const AppThemeProvider: React.FC<BaseComponentProps> = function ({ children }) {
     <StyleSheetManager shouldForwardProp={isPropValid}>
       <MfThemeProvider theme={curTheme?.styledContants || {}}>
         <ThemeProvider theme={curTheme?.styledContants || {}}>
+          <InjectFonts />
           <BaseStyle theme={curTheme?.styledContants} />
           <GlobalStyles />
           <NiceModal.Provider>
