@@ -5856,6 +5856,7 @@ __metadata:
     "@markflowy/types": "workspace:*"
     "@mui/material": "npm:^5.14.6"
     "@remirror/core": "npm:^2.0.17"
+    "@tanstack/react-query": "npm:^5.17.9"
     "@tauri-apps/api": "npm:^2.0.0-alpha.12"
     "@tauri-apps/cli": "npm:^2.0.0-alpha.18"
     "@tauri-apps/plugin-clipboard-manager": "npm:^2.0.0-alpha.5"
@@ -8838,6 +8839,24 @@ __metadata:
   dependencies:
     defer-to-connect: "npm:^2.0.1"
   checksum: fc9cb993e808806692e4a3337c90ece0ec00c89f4b67e3652a356b89730da98bc824273a6d67ca84d5f33cd85f317dcd5ce39d8cc0a2f060145a608a7cb8ce92
+  languageName: node
+  linkType: hard
+
+"@tanstack/query-core@npm:5.17.9":
+  version: 5.17.9
+  resolution: "@tanstack/query-core@npm:5.17.9"
+  checksum: 44e300628913a627ce29f300fee4e32a13e8bf7dbbad7b8ce7bd0b8b64b46566dbc666119efaaa42e50afa09f9c92f7d4683c18787ed21b267589d08bce9df54
+  languageName: node
+  linkType: hard
+
+"@tanstack/react-query@npm:^5.17.9":
+  version: 5.17.9
+  resolution: "@tanstack/react-query@npm:5.17.9"
+  dependencies:
+    "@tanstack/query-core": "npm:5.17.9"
+  peerDependencies:
+    react: ^18.0.0
+  checksum: 9670923b8c53b554299a99e66de9a7729ceb3a60f3dfdb5b9cfe3b0b22b6292fb296cde92519abc614ef136ea7dd9f29207e171b3345ce2474e9c3ddbbaf31d7
   languageName: node
   linkType: hard
 

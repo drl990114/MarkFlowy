@@ -3,7 +3,7 @@ import { darkTheme, lightTheme, type MfTheme } from '@markflowy/theme'
 import { create } from 'zustand'
 import type { Theme } from '@mui/material'
 import { createTheme } from '@mui/material'
-import { confRef } from '@/App'
+import useAppSettingStore from './useAppSettingStore'
 
 const muiDarkTheme = createTheme({
   palette: {
@@ -23,7 +23,7 @@ const muiLightTheme = createTheme({
   },
 })
 
-export const isOfficialTheme = (themeName: string) => {
+export const isBuiltInTheme = (themeName: string) => {
   return themeName === lightTheme.name || themeName === darkTheme.name
 }
 
@@ -64,7 +64,8 @@ const useThemeStore = create<ThemeStore>((set, get) => {
       if (!themes.find((theme) => theme.name === targetTheme.name)) {
         set((prev) => ({ ...prev, themes: [...themes, targetTheme] }))
 
-        if (confRef.current.theme === targetTheme.name) {
+        const { settingData } = useAppSettingStore.getState()
+        if (settingData.theme === targetTheme.name) {
           setCurThemeByName(targetTheme.name)
         }
       }
