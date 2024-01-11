@@ -16,8 +16,6 @@ export const Container = styled.div<ContainerProps>`
   flex-direction: row;
   background: ${(props) => props.theme.bgColor};
   color: ${(props) => props.theme.primaryFontColor};
-  border-radius: 10px 0px 0px 10px;
-  z-index: 2;
   overflow: hidden;
 
   .app-sidebar {

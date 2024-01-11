@@ -4,7 +4,7 @@ export const GlobalStyles = createGlobalStyle`
   html {
     border-radius: 10px;
     overflow: hidden;
-    --mod-popover-background-color:  ${(props) => props.theme.bgColor};
+    background-color:  ${(props) => props.theme.bgColor};
   }
   
   body {
@@ -22,17 +22,9 @@ export const GlobalStyles = createGlobalStyle`
     font-size: 1rem;
     cursor: pointer;
 
-    &-border {
-      border: 2px solid transparent;
-      box-sizing: border-box;
-
-      &:hover {
-        border: 2px solid ${(props) => props.theme.borderColor};
-      }
-    }
     &:hover {
       color: ${(props) => props.theme.accentColor};
-      background-color: ${(props) => props.theme.tipsBgColor};
+      background-color: ${(props) => props.theme.hoverColor};
     }
 
     &--active {
