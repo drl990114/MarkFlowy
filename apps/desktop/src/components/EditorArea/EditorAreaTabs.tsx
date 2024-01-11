@@ -7,23 +7,45 @@ import { TabItem, Dot } from './styles'
 import styled, { css } from 'styled-components'
 import useThemeStore from '@/stores/useThemeStore'
 import { setTitleBarText } from '../TitleBar'
+import { EditorAreaHeader } from './EditorAreaHeader'
 
 type ContainerProps = {
   visible: boolean
 }
+
 const Container = styled.div<ContainerProps>`
-  ${(props) =>
-    !props.visible &&
-    css({
-      display: 'none',
-    })}
+  display: flex;
+  justify-content: ${(props) => (props.visible ? 'space-between' : 'flex-end')};
+
+  .tab-items {
+    display: flex;
+    width: 100%;
+    line-height: 2rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    &::-webkit-scrollbar {
+      -webkit-appearance: none;
+      display: none;
+    }
+
+    &__icon {
+      margin: 0 2px;
+    }
+
+    ${(props) =>
+      !props.visible &&
+      css({
+        display: 'none',
+      })}
+  }
 `
 const EditorAreaTabs = memo(() => {
   const { opened, activeId, setActiveId, delOpenedFile } = useEditorStore()
   const { idStateMap } = useEditorStateStore()
   const { curTheme } = useThemeStore()
   const [element] = useAutoAnimate<HTMLDivElement>()
-  const htmlRef = useRef<HTMLDivElement>()
+  const htmlRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (!htmlRef.current) return
@@ -57,28 +79,33 @@ const EditorAreaTabs = memo(() => {
   }
 
   return (
-    <Container className='tab-items' visible={opened.length > 1} ref={htmlRef}>
-      {opened.map((id) => {
-        const file = getFileObject(id) as IFile
-        const active = activeId === id
-        const editorState = idStateMap.get(id)
+    <Container visible={opened.length > 1}>
+      <div className='tab-items' ref={htmlRef}>
+        {opened.map((id) => {
+          const file = getFileObject(id) as IFile
+          const active = activeId === id
+          const editorState = idStateMap.get(id)
 
-        return (
-          <TabItem active={active} onClick={() => onSelectItem(file.id)} key={id}>
-            <i className={'ri-file-3-line tab-items__icon'} />
-            <span style={{ color: active ? curTheme.styledContants.accentColor : '' }}>{file.name}</span>
+          return (
+            <TabItem active={active} onClick={() => onSelectItem(file.id)} key={id}>
+              <i className={'ri-file-3-line tab-items__icon'} />
+              <span style={{ color: active ? curTheme.styledContants.accentColor : '' }}>
+                {file.name}
+              </span>
 
-            {editorState?.hasUnsavedChanges ? (
-              <Dot />
-            ) : (
-              <i
-                className='ri-close-line tab-items__icon close'
-                onClick={(ev: React.MouseEvent<HTMLElement, MouseEvent>) => close(ev, id)}
-              />
-            )}
-          </TabItem>
-        )
-      })}
+              {editorState?.hasUnsavedChanges ? (
+                <Dot />
+              ) : (
+                <i
+                  className='ri-close-line tab-items__icon close'
+                  onClick={(ev: React.MouseEvent<HTMLElement, MouseEvent>) => close(ev, id)}
+                />
+              )}
+            </TabItem>
+          )
+        })}
+      </div>
+      <EditorAreaHeader />
     </Container>
   )
 })

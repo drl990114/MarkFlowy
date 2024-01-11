@@ -8,29 +8,10 @@ export const Container = styled.div`
   display: flex;
   flex-direction: column;
 
-  .tab-items {
-    display: flex;
-    flex: 0 0 2rem;
-    line-height: 2rem;
-    overflow-x: auto;
-    overflow-y: hidden;
-
-    &::-webkit-scrollbar {
-      -webkit-appearance: none;
-      display: none;
-    }
-
-    &__icon {
-      margin: 0 2px;
-    }
-  }
-
   .editor-area-header {
     padding: 0 0.5rem;
-    position: absolute;
-    right: 6px;
-    top: 28px;
     display: flex;
+    flex: initial;
     align-items: center;
     justify-content: flex-end;
     box-sizing: border-box;
