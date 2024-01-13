@@ -11,20 +11,21 @@ import appSettingService from '@/services/app-setting'
 export const CenterMenu = memo(() => {
   const ref = useRef<HTMLDivElement>(null)
   const { osType } = useGlobalOSInfo()
-  const { themes, setCurThemeByName } = useThemeStore()
+  const { themes, curTheme, setCurThemeByName } = useThemeStore()
 
   const getThemeMenu = useCallback(() => {
     return themes.map((theme) => {
       return {
         label: theme.name,
         value: theme.name,
+        checked: curTheme.name === theme.name,
         handler: () => {
           appSettingService.writeSettingData({ key: 'theme' }, theme.name)
           setCurThemeByName(theme.name)
         },
       }
     })
-  }, [themes, setCurThemeByName])
+  }, [themes, curTheme, setCurThemeByName])
 
   const handleClick = () => {
     if (!ref.current) {
