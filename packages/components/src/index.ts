@@ -7,7 +7,9 @@ export { default as Tooltip } from './Tooltip'
 export { default as Menu } from './Menu'
 export { default as ThemeProvider } from './Theme'
 
-
+export * from './Spinner'
 export * from './Tooltip'
 export * from './Menu'
 export * from './Toast'
+
+export * from 'react-spinners'
