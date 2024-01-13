@@ -1,6 +1,6 @@
 {
   "version": "v0.7.1",
-  "notes": "##test\n**big update**: Support updater",
+  "notes": "## test\n**big update**: Support updater",
   "pub_date": "2024-01-06T15:19:19.636Z",
   "platforms": {
     "win64": {
