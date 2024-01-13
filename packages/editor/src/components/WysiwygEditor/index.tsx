@@ -12,7 +12,7 @@ import type { EditorProps } from '../Editor'
 export const OffsetContext = createContext({ top: 0, left: 0 })
 
 const WysiwygEditor: FC<EditorProps> = (props) => {
-  const { content, hooks, delegate, offset, wysiwygToolBar, isTesting } = props
+  const { content, hooks, delegate, offset, wysiwygToolBar, isTesting, editable } = props
 
   const editorDelegate = useMemo(() => delegate ?? createWysiwygDelegate(), [delegate])
 
@@ -35,7 +35,6 @@ const WysiwygEditor: FC<EditorProps> = (props) => {
     return <ErrorBoundary hasError error={error} />
   }
 
-
   return (
     <ErrorBoundary>
       <Wrapper>
@@ -44,6 +43,7 @@ const WysiwygEditor: FC<EditorProps> = (props) => {
             manager={editorDelegate.manager}
             initialContent={initialContent}
             hooks={hooks}
+            editable={editable}
             onChange={handleChange}
           >
             <TableToolbar />
@@ -55,6 +55,10 @@ const WysiwygEditor: FC<EditorProps> = (props) => {
       </Wrapper>
     </ErrorBoundary>
   )
+}
+
+WysiwygEditor.defaultProps = {
+  editable: true,
 }
 
 export default memo(WysiwygEditor)

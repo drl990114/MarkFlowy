@@ -44,6 +44,7 @@ export interface EditorProps {
   delegate?: EditorDelegate
   content: string
   isTesting?: boolean
+  editable?: boolean
   offset?: {
     top: number
     left: number

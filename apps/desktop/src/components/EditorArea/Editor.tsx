@@ -83,6 +83,7 @@ const createWysiwygDelegateOptions = (filePath?: string): CreateWysiwygDelegateO
     return convertFileSrc(url)
   },
 })
+
 function Editor(props: EditorProps) {
   const { id, active } = props
   const curFile = getFileObject(id)

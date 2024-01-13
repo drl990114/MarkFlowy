@@ -3,8 +3,11 @@ import useContextMenuStore from '@/stores/useContextMenuStore'
 import { Menu } from '@markflowy/components'
 import { useEffect } from 'react'
 
+const CONTEXT_MENU_ID = 'mf-context-menu'
+
 export const showContextMenu = (params: IShowContextMenuParams) => {
-  useContextMenuStore.getState().show(params)
+  const { show } = useContextMenuStore.getState()
+  show(params)
 }
 
 export const hideContextMenu = () => {
@@ -12,14 +15,12 @@ export const hideContextMenu = () => {
 }
 
 export const ContextMenu = () => {
-  const { x, y, items } = useContextMenuStore()
-  const open = x !== -9999
+  const { x, y, items, show, open } = useContextMenuStore()
+  const handleClick = () => {
+    useContextMenuStore.getState().hide()
+  }
 
   useEffect(() => {
-    const handleClick = () => {
-      useContextMenuStore.getState().hide()
-    }
-
     window.addEventListener('contextmenu', handleClick, true)
 
     return () => {
@@ -27,23 +28,41 @@ export const ContextMenu = () => {
     }
   }, [])
 
+  useEffect(() => {
+    if (open) {
+      let fixedX = x
+      let fixedY = y
+      const rect = document.getElementById(CONTEXT_MENU_ID)!.getBoundingClientRect()
+      const { width, height } = rect
+
+      if (y + height > window.innerHeight) {
+        fixedY = window.innerHeight - height - 10
+      }
+      if (x + width > window.innerWidth) {
+        fixedX = window.innerWidth - width - 10
+      }
+
+      show({
+        x: fixedX,
+        y: fixedY,
+        items,
+      })
+    }
+  }, [x, y, items, open, show])
+
   return (
-    <div
-      style={{ position: 'fixed', top: `${y}px`, left: `${x}px`, zIndex: 99 }}
-    >
-      {open ? (
-        <Menu
-          open
-          items={items}
-          style={{
-            position: 'fixed',
-            top: `${y}px`,
-            left: `${x}px`,
-            zIndex: 99,
-          }}
-          onClose={hideContextMenu}
-        ></Menu>
-      ) : null}
-    </div>
+    <Menu
+      open
+      id={CONTEXT_MENU_ID}
+      items={items}
+      style={{
+        position: 'fixed',
+        top: `${y}px`,
+        left: `${x}px`,
+        zIndex: 99,
+        minWidth: 140,
+      }}
+      onClose={hideContextMenu}
+    ></Menu>
   )
 }

@@ -5,12 +5,13 @@ const useContextMenuStore = create<ContextMenuStore>((set) => {
   return {
     x: -9999,
     y: -9999,
+    open: false,
     items: [],
     show: ({ x, y, items }) => {
-      set({ x, y, items })
+      set({ x, y, items, open: true })
     },
     hide: () => {
-      set({ x: -9999, y: -9999 })
+      set({ x: -9999, y: -9999, items: [], open: false })
     },
   }
 })
@@ -24,6 +25,7 @@ export interface IShowContextMenuParams {
 interface ContextMenuStore {
   x: number
   y: number
+  open: boolean
   items: MenuItemData[]
   show: (params: IShowContextMenuParams) => void
   hide: () => void

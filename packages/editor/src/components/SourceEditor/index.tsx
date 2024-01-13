@@ -25,7 +25,7 @@ const [SourceEditorProvider, useSourceCodeEditor] = createContextState<Context, 
 
 const SourceCodeEditorCore = memo((props: { markdownToolBar?: React.ReactNode[] }) => {
   const { markdownToolBar } = props
-  const { content, markText, hooks, isTesting } = useSourceCodeEditor()
+  const { content, markText, hooks, isTesting, editable } = useSourceCodeEditor()
 
   let initialCntent
 
@@ -37,7 +37,12 @@ const SourceCodeEditorCore = memo((props: { markdownToolBar?: React.ReactNode[] 
 
   return (
     <ErrorBoundary>
-      <Remirror manager={markText.manager} initialContent={initialCntent} hooks={hooks}>
+      <Remirror
+        manager={markText.manager}
+        initialContent={initialCntent}
+        hooks={hooks}
+        editable={editable}
+      >
         <Text className='h-full w-full overflow-auto px-0' style={{ padding: 0 }} />
         {markdownToolBar || null}
         {isTesting ? <ProsemirrorDevTools /> : null}

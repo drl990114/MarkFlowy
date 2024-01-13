@@ -69,6 +69,7 @@ export const createWysiwygDelegate = ({
   }
 
   return {
+    view: 'Wysiwyg',
     manager,
     stringToDoc,
     docToString,
