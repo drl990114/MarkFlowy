@@ -12,9 +12,9 @@ function EditorArea() {
     <Container className='w-full h-full'>
       <EditorAreaTabs />
       <FindReplace />
-      {opened.map((id) => {
-        return <Editor key={id} id={id} active={id === activeId} />
-      })}
+        {opened.map((id) => {
+          return <Editor key={id} id={id} active={id === activeId} />
+        })}
     </Container>
   )
 }

@@ -8,6 +8,7 @@ import styled, { css } from 'styled-components'
 import useThemeStore from '@/stores/useThemeStore'
 import { setTitleBarText } from '../TitleBar'
 import { EditorAreaHeader } from './EditorAreaHeader'
+import { darken } from '@markflowy/theme'
 
 type ContainerProps = {
   visible: boolean
@@ -20,7 +21,6 @@ const Container = styled.div<ContainerProps>`
   .tab-items {
     display: flex;
     width: 100%;
-    line-height: 2rem;
     overflow-x: auto;
     overflow-y: hidden;
 
@@ -31,6 +31,18 @@ const Container = styled.div<ContainerProps>`
 
     &__icon {
       margin: 0 2px;
+    }
+
+    &__right {
+      margin-left: ${(props) => props.theme.spaceXs};
+    }
+
+    &__close {
+      border-radius: ${(props) => props.theme.smallBorderRadius};
+
+      &:hover {
+        background-color: ${(props) => darken(props.theme.hoverColor, 0.2)};
+      }
     }
 
     ${(props) =>
@@ -79,7 +91,7 @@ const EditorAreaTabs = memo(() => {
   }
 
   return (
-    <Container visible={opened.length > 1}>
+    <Container visible>
       <div className='tab-items' ref={htmlRef}>
         {opened.map((id) => {
           const file = getFileObject(id) as IFile
@@ -93,14 +105,16 @@ const EditorAreaTabs = memo(() => {
                 {file.name}
               </span>
 
-              {editorState?.hasUnsavedChanges ? (
-                <Dot />
-              ) : (
-                <i
-                  className='ri-close-line tab-items__icon close'
-                  onClick={(ev: React.MouseEvent<HTMLElement, MouseEvent>) => close(ev, id)}
-                />
-              )}
+              <div className='tab-items__right'>
+                {editorState?.hasUnsavedChanges ? (
+                  <Dot />
+                ) : (
+                  <i
+                    className='ri-close-line tab-items__icon tab-items__close'
+                    onClick={(ev: React.MouseEvent<HTMLElement, MouseEvent>) => close(ev, id)}
+                  />
+                )}
+              </div>
             </TabItem>
           )
         })}

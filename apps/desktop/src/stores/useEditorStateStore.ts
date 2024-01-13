@@ -1,12 +1,18 @@
 import { create } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
 
+type EditorState = {
+  hasUnsavedChanges: boolean
+  content: string
+  undoDepth?: number
+}
+
 type EditorStateStoreState = {
-  idStateMap: Map<string, any>
+  idStateMap: Map<string, EditorState>
 }
 
 type EditorStateStoreAction = {
-  setIdStateMap: (id: string, editorState: any) => void
+  setIdStateMap: (id: string, editorState: EditorState) => void
 }
 
 const useEditorStateStore = create(
