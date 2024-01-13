@@ -1,5 +1,4 @@
-const lightCodeTheme = require('prism-react-renderer/themes/github')
-const darkCodeTheme = require('prism-react-renderer/themes/dracula')
+import { themes } from "prism-react-renderer"
 require('dotenv').config({ path: '.env.local' })
 
 /** @type {import('@docusaurus/types').DocusaurusConfig} */
@@ -14,6 +13,19 @@ module.exports = {
   organizationName: 'drl990114',
   projectName: 'MarkFlowy',
   trailingSlash: true,
+
+  markdown: {
+    format: 'md',
+    mermaid: true,
+    preprocessor: ({filePath, fileContent}) => {
+      return fileContent.replaceAll('{{MY_VAR}}', 'MY_VALUE');
+    },
+    mdx1Compat: {
+      comments: true,
+      admonitions: true,
+      headingIds: true,
+    },
+  },
 
   themeConfig: {
     docs: {
@@ -73,8 +85,8 @@ module.exports = {
       copyright: `Copyright © ${new Date().getFullYear()} Justin Maximillian drl990114 and <a href="https://github.com/drl990114/MarkFlowy/graphs/contributors" target="_blank">contributors</a>. Website Built with <a href="https://docusaurus.io" target="_blank">Docusaurus</a>.`,
     },
     prism: {
-      theme: lightCodeTheme,
-      darkTheme: darkCodeTheme,
+      theme: themes.vsLight,
+      darkTheme: themes.vsDark,
     },
     zoomSelector: '.markdown :not(em) > img',
   },
