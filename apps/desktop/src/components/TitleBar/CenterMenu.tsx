@@ -44,22 +44,6 @@ export const CenterMenu = memo(() => {
           },
         },
         {
-          label: 'View',
-          value: 'view',
-          children: [
-            {
-              label: 'Source Code',
-              value: 'sourceCode',
-              handler: () => emit('editor_toggle_type', 'sourceCode'),
-            },
-            {
-              label: 'Wysiwyg View',
-              value: 'wysiwyg',
-              handler: () => emit('editor_toggle_type', 'wysiwyg'),
-            },
-          ],
-        },
-        {
           label: 'Theme',
           value: 'theme',
           children: themeMenu,

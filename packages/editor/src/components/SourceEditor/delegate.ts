@@ -9,7 +9,7 @@ import { CountExtension } from '@remirror/extension-count'
 
 export function createSourceCodeManager(): RemirrorManager<any> {
   return createReactManager(() => [
-    new CountExtension(),
+    new CountExtension({}),
     new DocExtension({ content: 'codeMirror' }),
     new LineCodeMirrorExtension({
       hideDecoration: true,
@@ -32,5 +32,5 @@ export const createSourceCodeDelegate = (): EditorDelegate<any> => {
     return doc.textContent
   }
 
-  return { manager, stringToDoc, docToString }
+  return { manager, stringToDoc, docToString, view: 'SourceCode' }
 }

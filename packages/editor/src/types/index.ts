@@ -9,6 +9,7 @@ export type EditorDelegate<E extends AnyExtension = any> = {
     manager: RemirrorManager<E>
     stringToDoc: StringToDoc
     docToString: DocToString
+    view: 'SourceCode' | 'Wysiwyg'
 }
 
 /** @public */

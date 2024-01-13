@@ -1,28 +1,22 @@
 import { MenuWrapper } from './MenuWrapper'
 import type { MenuProps as AkMenuProps } from '@ariakit/react'
 import { MenuButton, MenuItem, MenuProvider, MenuButtonArrow } from '@ariakit/react'
-import { MenuItemCheckbox } from './MenuItemCheckbox'
 
 export type MenuItemData = {
   label: string
   keybinding?: string
   value: string
+  checked?: boolean
   handler?: () => void
-} & {
-  label: string
   children?: MenuItemData[]
 }
 
 interface MenuProps extends AkMenuProps {
-  mode?: 'checkbox'
-  checkValue?: Record<string, string[]>
   items: MenuItemData[]
 }
 
 const Menu = (props: MenuProps) => {
-  const { open, items, mode, style, ...rest } = props
-
-  const ItemRender = mode === 'checkbox' ? MenuItemCheckbox : MenuItem
+  const { open, items, style, ...rest } = props
 
   const renderItems = (menuItems: MenuItemData[]) => {
     return menuItems.map((item) => {
@@ -31,33 +25,30 @@ const Menu = (props: MenuProps) => {
       if (item.children && item.children?.length > 0) {
         return (
           <MenuProvider key={key}>
-            <ItemRender
-              name='watching'
-              value={item.value}
-              className='menu-item'
-              render={<MenuButton />}
-            >
-              <span className="menu-label">{item.label}</span>
+            <MenuItem className='menu-item' render={<MenuButton />}>
+              <div className='menu-item__checkicon' />
+              <span className='menu-label'>{item.label}</span>
               <MenuButtonArrow />
-            </ItemRender>
+            </MenuItem>
             <MenuWrapper>{renderItems(item.children)}</MenuWrapper>
           </MenuProvider>
         )
       } else {
         return (
-          <ItemRender
+          <MenuItem
             key={key}
             className='menu-item'
-            name='watching'
-            value={item.value}
             onClick={() => {
               if (item.handler) {
                 item.handler()
               }
             }}
           >
-            {item.label}
-          </ItemRender>
+            <div className='menu-item__checkicon'>
+              {item.checked ? <i className='ri-check-line'></i> : null}
+            </div>
+            <span className='menu-label'>{item.label}</span>
+          </MenuItem>
         )
       }
     })

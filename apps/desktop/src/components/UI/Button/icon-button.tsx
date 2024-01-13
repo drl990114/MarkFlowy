@@ -1,16 +1,17 @@
-import type { TooltipProps} from '@markflowy/components'
+import type { TooltipProps } from '@markflowy/components'
 import { Tooltip } from '@markflowy/components'
 import classNames from 'classnames'
 
 interface MfIconButtonProps {
   icon: string
   onClick: () => void
+  iconRef?: React.RefObject<any>
   active?: boolean
   tooltipProps?: Omit<TooltipProps, 'children'>
 }
 
 export const MfIconButton = (props: MfIconButtonProps) => {
-  const { icon, onClick, tooltipProps } = props
+  const { icon, onClick, tooltipProps, iconRef } = props
 
   const iconCls = classNames('icon', icon, {
     'icon--active': props.active,
@@ -19,10 +20,10 @@ export const MfIconButton = (props: MfIconButtonProps) => {
   if (tooltipProps) {
     return (
       <Tooltip {...tooltipProps}>
-        <i className={iconCls} onClick={onClick}></i>
+        <i ref={iconRef} className={iconCls} onClick={onClick}></i>
       </Tooltip>
     )
   }
 
-  return <i className={iconCls} onClick={onClick}></i>
+  return <i ref={iconRef} className={iconCls} onClick={onClick}></i>
 }
