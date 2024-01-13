@@ -3,7 +3,7 @@ import React from 'react'
 import styled from 'styled-components'
 
 const Title = styled.h1`
-    color: ${({ theme }) => theme.warnColor};
+    color: ${({ theme }) => theme.dangerColor};
 `
 
 interface ErrorBoundaryProps {

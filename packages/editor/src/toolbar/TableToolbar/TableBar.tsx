@@ -6,7 +6,7 @@ import styled from 'styled-components'
 
 const Container = styled.div`
   position: absolute;
-  color: ${(props) => props.theme.warnColor};
+  color: ${(props) => props.theme.dangerColor};
 `
 
 function TableBar(props: TableBarProps) {

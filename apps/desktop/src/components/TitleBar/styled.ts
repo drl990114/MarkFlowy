@@ -28,6 +28,7 @@ export const Container = styled.div`
 
   .titlebar-text {
     margin: 8px 4px 0 4px;
+    height: ${(props) => props.theme.titleBarHeight};
     flex: 1;
     text-align: center;
     line-height: ${TITLEBAR_HEIGHT};

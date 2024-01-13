@@ -60,10 +60,10 @@ type DotProps = {
 }
 
 export const Dot = styled.div<DotProps>`
-  width: 0.4rem;
-  height: 0.4rem;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  background-color: ${(props) => props.color || props.theme.labelFontColor};
+  background-color: ${(props) => props.color || props.theme.warnColor};
   margin: 0 0.25rem;
 `
 
@@ -74,5 +74,5 @@ interface TabItemProps {
 
 export const WarningHeader = styled.h3`
   text-align: center;
-  color: ${(props) => props.theme.warnColor};
+  color: ${(props) => props.theme.dangerColor};
 `

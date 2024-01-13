@@ -1,18 +1,17 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import { Editor as MfEditor } from '@markflowy/editor'
 import type {
-  CreateWysiwygDelegateOptions,
+  EditorChangeHandler,
   EditorContext,
   EditorRef,
   EditorViewType,
 } from '@markflowy/editor'
-import { invoke, convertFileSrc } from '@tauri-apps/api/primitives'
+import { invoke } from '@tauri-apps/api/primitives'
 import { getCurrent } from '@tauri-apps/api/window'
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import styled, { css } from 'styled-components'
-import { useCommandStore, useEditorStore } from '@/stores'
-import { getFileObject } from '@/helper/files'
-import { useEditorState } from '@/components/EditorArea/editorHooks/EditorState'
+import { useCommandStore, useEditorStateStore, useEditorStore } from '@/stores'
+import { getFileObject, updateFileObject } from '@/helper/files'
 import useChangeCodeMirrorTheme from '@/components/EditorArea/editorHooks/useChangeCodeMirrorTheme'
 import { createWysiwygDelegate } from '@markflowy/editor'
 import { createSourceCodeDelegate } from '@markflowy/editor'
@@ -22,17 +21,27 @@ import bus from '@/helper/eventBus'
 import { EVENT } from '@/constants'
 import classNames from 'classnames'
 import { WarningHeader } from './styles'
-import { join } from '@tauri-apps/api/path'
-import { sleep } from '@/helper'
-import { getFolderPathFromPath } from '@/helper/filesys'
-import { fetch } from '@tauri-apps/plugin-http'
+import { getFileNameFromPath, getFolderPathFromPath } from '@/helper/filesys'
 import useAppSettingStore from '@/stores/useAppSettingStore'
+import { save } from '@tauri-apps/plugin-dialog'
+import { useTranslation } from 'react-i18next'
+import { debounce } from 'lodash'
+import { createWysiwygDelegateOptions } from './createWysiwygDelegateOptions'
 
 const appWindow = getCurrent()
 
 interface EditorWrapperProps {
   active: boolean
   fullWidth: boolean
+}
+
+type SaveHandlerParams = {
+  /**
+   * when active is true, saveHandler will save the file content to disk.
+   * when active is false, saveHandler will save when editor is active.
+   */
+  active?: boolean
+  onSuccess?: () => void
 }
 
 const EditorWrapper = styled.div.attrs<EditorWrapperProps>((props) => props)`
@@ -54,70 +63,48 @@ const EditorWrapper = styled.div.attrs<EditorWrapperProps>((props) => props)`
         })}
 `
 
-const createWysiwygDelegateOptions = (filePath?: string): CreateWysiwygDelegateOptions => ({
-  handleViewImgSrcUrl: async (url) => {
-    // Ensure asynchronous, returning directly will cause an infinite loop. about:https://github.com/drl990114/MarkFlowy/issues/340
-    await sleep(1)
-    if (!url) return url
-    if ((url.startsWith('http') || url.startsWith('https')) && !url.includes(location.origin)) {
-      try {
-        const response = await fetch(url, {
-          method: 'GET',
-        })
-
-        const blob = await response.blob()
-        const objectURL = URL.createObjectURL(blob)
-
-        return objectURL
-      } catch (error) {
-        return url
-      }
-    }
-
-    const dirPath = filePath || useEditorStore.getState().folderData?.[0]?.path
-    if (dirPath) {
-      const newUrl = await join(dirPath, url)
-      return convertFileSrc(newUrl)
-    }
-
-    return convertFileSrc(url)
-  },
-})
-
 function Editor(props: EditorProps) {
   const { id, active } = props
   const curFile = getFileObject(id)
-  const [content, setContent] = useState<string>()
-  const { setEditorDelegate, getEditorContent, setEditorCtx } = useEditorStore()
+  const [notExistFile, setNotExistFile] = useState(false)
+  const { setEditorDelegate, getEditorContent, setEditorCtx, insertNodeToFolderData } =
+    useEditorStore()
   const { execute } = useCommandStore()
+  const { t } = useTranslation()
   const { settingData } = useAppSettingStore()
-  const editorRef = useRef<EditorRef>(null)
+  const [content, setContent] = useState<string>()
   const [delegate, setDelegate] = useState(
     createWysiwygDelegate(createWysiwygDelegateOptions(getFolderPathFromPath(curFile.path))),
   )
-  const [notExistFile, setNotExistFile] = useState(false)
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const init = async () => {
-      const file = getFileObject(id)
-      setEditorDelegate(id, delegate)
+      const file = curFile
 
       if (file.path) {
         const isExists = await invoke('file_exists', { filePath: file.path })
         if (isExists) {
-          const text = await invoke('get_file_content', {
+          const text = await invoke<string>('get_file_content', {
             filePath: file.path,
           })
-          setContent(text as string)
+          setContent(text)
+          contentRef.current = text
         } else {
           setNotExistFile(true)
+          return ''
         }
       } else if (file.content !== undefined) {
         setContent(file.content)
+        contentRef.current = file.content
       }
+
+      return ''
     }
     init()
-  }, [id, delegate, setEditorDelegate])
+  }, [delegate, curFile, setEditorDelegate])
+
+  const editorRef = useRef<EditorRef>(null)
+  const contentRef = useRef<string>('')
 
   useEffect(() => {
     const unListen = appWindow.listen<EditorViewType>('editor_toggle_type', async ({ payload }) => {
@@ -129,7 +116,7 @@ function Editor(props: EditorProps) {
         bus.emit(EVENT.editor_save, {
           onSuccess: () => {
             const text = getEditorContent(curFile.id)
-            setContent(text)
+            contentRef.current = text
 
             if (payload === 'sourceCode') {
               const sourceCodeDelegate = createSourceCodeDelegate()
@@ -153,6 +140,91 @@ function Editor(props: EditorProps) {
     }
   }, [active, curFile, execute, getEditorContent, setEditorDelegate])
 
+  const saveHandler = useCallback(
+    async (params: SaveHandlerParams = {}) => {
+      const { onSuccess } = params
+      if (!active && !params.active) return
+
+      console.log('editorContent', contentRef.current)
+
+      if (!curFile) return
+      const { setIdStateMap } = useEditorStateStore.getState()
+
+      try {
+        if (!curFile.path) {
+          save({
+            title: 'Save File',
+            defaultPath: curFile.name ?? `${t('file.untitled')}.md`,
+          }).then((path) => {
+            if (path === null) return
+            const filename = getFileNameFromPath(path)
+            updateFileObject(curFile.id, { ...curFile, path, name: filename })
+            insertNodeToFolderData({
+              ...curFile,
+              name: filename,
+              content: contentRef.current,
+              path,
+            })
+            invoke('write_file', { filePath: path, content: contentRef.current }).then(() => {
+              onSuccess?.()
+            })
+            setIdStateMap(curFile.id, {
+              content: contentRef.current,
+              hasUnsavedChanges: false,
+            })
+          })
+        } else {
+          invoke('write_file', { filePath: curFile.path, content: contentRef.current }).then(() => {
+            onSuccess?.()
+          })
+
+          setIdStateMap(curFile.id, {
+            content: contentRef.current,
+            hasUnsavedChanges: false,
+          })
+        }
+      } catch (error) {
+        console.error(error)
+      }
+    },
+    [active, curFile, t, insertNodeToFolderData],
+  )
+
+  const debounceSave = useMemo(
+    () => debounce(() => saveHandler({ active: true }), settingData.autosave_interval),
+    [settingData.autosave_interval, saveHandler],
+  )
+  const debounceRefreshToc = useMemo(
+    () => debounce(() => execute('app:toc_refresh'), 1000),
+    [execute],
+  )
+
+  const debounceSaveHandler = useCallback(debounceSave, [settingData, debounceSave])
+
+  useEffect(() => {
+    if (active) {
+      const { addCommand } = useCommandStore.getState()
+      addCommand({
+        id: 'editor:save',
+        handler: () => {
+          saveHandler()
+        },
+      })
+    }
+  }, [active, saveHandler])
+
+  useEffect(() => {
+    const callback = (hooks: SaveHandlerParams) => {
+      saveHandler({ onSuccess: hooks?.onSuccess })
+    }
+
+    bus.on(EVENT.editor_save, callback)
+
+    return () => {
+      bus.detach(EVENT.editor_save, callback)
+    }
+  }, [saveHandler])
+
   const handleWrapperClick: React.MouseEventHandler<HTMLDivElement> = useCallback(
     (e) => {
       if ((e.target as HTMLElement)?.id === 'editorarea-wrapper') {
@@ -172,7 +244,6 @@ function Editor(props: EditorProps) {
       },
       hooks: [
         () => {
-          useEditorState({ active, file: curFile })
           useCommandEvent({ active })
           useChangeCodeMirrorTheme()
         },
@@ -180,7 +251,32 @@ function Editor(props: EditorProps) {
       wysiwygToolBar: [<EditorCount key='editor-count' />],
       markdownToolBar: [<EditorCount key='editor-count' />],
     }),
-    [content, delegate, setEditorCtx, id, active, curFile],
+    [content, delegate, setEditorCtx, id, active],
+  )
+
+  const handleChange: EditorChangeHandler = useCallback(
+    (params, editedContent) => {
+      if (!active) return
+
+      const { tr, helpers } = params
+      if (tr?.docChanged && !tr.getMeta('APPLY_MARKS')) {
+        contentRef.current = editedContent
+        const state = {
+          content: editedContent,
+          hasUnsavedChanges: true,
+          undoDepth: helpers.undoDepth(),
+        }
+        const { setIdStateMap } = useEditorStateStore.getState()
+
+        setIdStateMap(id, state)
+        debounceRefreshToc()
+
+        if (settingData.autosave) {
+          debounceSaveHandler()
+        }
+      }
+    },
+    [id, debounceSaveHandler, active, debounceRefreshToc, settingData],
   )
 
   if (notExistFile) {
@@ -201,7 +297,7 @@ function Editor(props: EditorProps) {
           active={active}
           onClick={handleWrapperClick}
         >
-          <MfEditor ref={editorRef} {...editorProps} />
+          <MfEditor ref={editorRef} onChange={handleChange} {...editorProps} />
         </EditorWrapper>
       ) : null}
     </div>
