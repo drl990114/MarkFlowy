@@ -9,14 +9,13 @@ import bus from '@/helper/eventBus'
 import { useEditorStore } from '@/stores'
 import { EVENT } from '@/constants'
 import { showContextMenu } from '../UI/ContextMenu'
-import { useModal } from '@ebay/nice-modal-react'
-import { Modal } from '..'
+import NiceModal from '@ebay/nice-modal-react'
+import { MODAL_CONFIRM_ID } from '../Modal'
 
 const FileNode: FC<FileNodeProps> = ({ item, level = 0, activeId, onSelect, open = false }) => {
   const [isOpen, setIsOpen] = useState(open)
   const newInputRef = useRef<NewInputRef>(null)
   const { deleteNode } = useEditorStore()
-  const modal = useModal(Modal.Confirm)
   const isActived = activeId === item.id
   const isFolder = item.kind === 'dir'
 
@@ -66,7 +65,7 @@ const FileNode: FC<FileNodeProps> = ({ item, level = 0, activeId, onSelect, open
           value: item.kind === 'dir' ? 'delete_folder' : 'delete_file',
           label: item.kind === 'dir' ? 'Delete Folder' : 'Delete File',
           handler: () => {
-            modal.show({
+            NiceModal.show(MODAL_CONFIRM_ID,{
               title: `Are you sure you want to permanently delete ${item.name}`,
               onConfirm: delFileHandler,
             })
@@ -80,7 +79,7 @@ const FileNode: FC<FileNodeProps> = ({ item, level = 0, activeId, onSelect, open
         items: contextMenuItems,
       })
     },
-    [deleteNode, modal, item, level],
+    [deleteNode, item, level],
   )
 
   const nodeWrapperCls = classNames('file-node', {

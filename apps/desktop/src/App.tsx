@@ -11,6 +11,8 @@ import useThemeStore from './stores/useThemeStore'
 import { ContextMenu } from './components/UI/ContextMenu/ContextMenu'
 import NiceModal from '@ebay/nice-modal-react'
 import { InjectFonts } from './injectFonts'
+import { Modal } from './components'
+import { MODAL_CONFIRM_ID } from './components/Modal'
 
 const AppThemeProvider: React.FC<BaseComponentProps> = function ({ children }) {
   const { muiTheme, curTheme } = useThemeStore()
@@ -41,6 +43,7 @@ function App () {
       </Routes>
       <ContextMenu />
       <Notifications />
+      <Modal.Confirm id={MODAL_CONFIRM_ID}/>
     </AppThemeProvider>
   )
 }
