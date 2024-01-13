@@ -30,6 +30,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hot-toast": "^2.4.1",
+    "react-spinners": "^0.13.8",
     "styled-components": "^6.1.0",
     "stylis": "^4.0.0"
   },

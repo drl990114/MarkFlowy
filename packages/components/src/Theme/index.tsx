@@ -6,7 +6,7 @@ type Props = {
   theme: Record<string, any>
 }
 
-export const ThemeContext = createContext({})
+export const ThemeContext = createContext<Record<string, string>>({})
 
 const UiThemeProvider = ({ theme, children }: Props) => {
   return (

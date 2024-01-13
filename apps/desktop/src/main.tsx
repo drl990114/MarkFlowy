@@ -5,7 +5,7 @@ import { BrowserRouter } from 'react-router-dom'
 import App from './App'
 import { FallBackContainer } from './components/FallBack'
 import { enableMapSet } from 'immer'
-import { BarLoader } from 'react-spinners'
+import { BarLoader } from '@markflowy/components'
 import { lightTheme } from '@markflowy/theme'
 import {
   QueryClient,
