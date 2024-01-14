@@ -23,7 +23,7 @@ const [SourceEditorProvider, useSourceCodeEditor] = createContextState<Context, 
   },
 )
 
-const SourceCodeEditorCore = memo((props: { markdownToolBar?: React.ReactNode[] }) => {
+const SourceCodeEditorCore = memo((props: { markdownToolBar?: React.ReactNode[], onChange: RemirrorEventListener<Extension> }) => {
   const { markdownToolBar } = props
   const { content, markText, hooks, isTesting, editable } = useSourceCodeEditor()
 
@@ -42,6 +42,7 @@ const SourceCodeEditorCore = memo((props: { markdownToolBar?: React.ReactNode[] 
         initialContent={initialCntent}
         hooks={hooks}
         editable={editable}
+        onChange={props.onChange}
       >
         <Text className='h-full w-full overflow-auto px-0' style={{ padding: 0 }} />
         {markdownToolBar || null}
@@ -76,10 +77,9 @@ const SourceEditor: React.FC<EditorProps> = (props) => {
       content={content}
       isTesting={isTesting}
       markText={editorDelegate}
-      onChange={handleChange}
       hooks={hooks}
     >
-      <SourceCodeEditorCore markdownToolBar={markdownToolBar} />
+      <SourceCodeEditorCore markdownToolBar={markdownToolBar} onChange={handleChange} />
     </SourceEditorProvider>
   )
 }
