@@ -13,27 +13,31 @@ import NiceModal from '@ebay/nice-modal-react'
 import { InjectFonts } from './injectFonts'
 import { Modal } from './components'
 import { MODAL_CONFIRM_ID } from './components/Modal'
+import { EditorProvider } from '@markflowy/editor'
 
 const AppThemeProvider: React.FC<BaseComponentProps> = function ({ children }) {
   const { muiTheme, curTheme } = useThemeStore()
 
+  const theme = curTheme?.styledContants || {}
   return (
     <StyleSheetManager shouldForwardProp={isPropValid}>
-      <MfThemeProvider theme={curTheme?.styledContants || {}}>
-        <ThemeProvider theme={curTheme?.styledContants || {}}>
-          <InjectFonts />
-          <BaseStyle theme={curTheme?.styledContants} />
-          <GlobalStyles />
-          <NiceModal.Provider>
-            <MuiThemeProvider theme={muiTheme}>{children}</MuiThemeProvider>
-          </NiceModal.Provider>
+      <MfThemeProvider theme={theme}>
+        <ThemeProvider theme={theme}>
+          <EditorProvider theme={theme}>
+            <InjectFonts />
+            <BaseStyle theme={curTheme?.styledContants} />
+            <GlobalStyles />
+            <NiceModal.Provider>
+              <MuiThemeProvider theme={muiTheme}>{children}</MuiThemeProvider>
+            </NiceModal.Provider>
+          </EditorProvider>
         </ThemeProvider>
       </MfThemeProvider>
     </StyleSheetManager>
   )
 }
 
-function App () {
+function App() {
   useAppSetup()
 
   return (
@@ -43,7 +47,7 @@ function App () {
       </Routes>
       <ContextMenu />
       <Notifications />
-      <Modal.Confirm id={MODAL_CONFIRM_ID}/>
+      <Modal.Confirm id={MODAL_CONFIRM_ID} />
     </AppThemeProvider>
   )
 }
