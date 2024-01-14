@@ -8,7 +8,7 @@ use std::collections::HashMap;
 use std::path::PathBuf;
 use std::sync;
 
-use app::{bookmarks, conf, extensions, keybindings, opened_cache, process};
+use app::{bookmarks, conf, extensions, keybindings, opened_cache, process, themes};
 use lazy_static::lazy_static;
 use tauri::{Manager, Runtime};
 use tracing_subscriber;
@@ -64,6 +64,7 @@ pub fn run() {
             extensions::cmd::extensions_init,
             process::app_exit,
             process::app_restart,
+            themes::cmd::load_themes
         ])
         .setup(|app| {
             let home_dir_path = app.path().home_dir().expect("failed to get home dir");

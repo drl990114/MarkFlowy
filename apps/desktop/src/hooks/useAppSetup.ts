@@ -6,7 +6,7 @@ import { isArray } from '../helper'
 import useExtensionsManagerStore from '../stores/useExtensionsManagerStore'
 import useThemeStore, { isBuiltInTheme } from '../stores/useThemeStore'
 import { toast } from '@markflowy/components'
-import { useCallback, useEffect, useLayoutEffect } from 'react'
+import { useCallback, useEffect } from 'react'
 import __MF__ from '../context'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { listen } from '@tauri-apps/api/event'
@@ -25,7 +25,7 @@ async function appThemeExtensionsSetup(curTheme: string) {
     useThemeStore.getState().setCurThemeByName(curTheme)
   }
 
-  invoke<Record<string, any>>('extensions_init').then((res) => {
+  invoke<Record<string, any>>('load_themes').then((res) => {
     if (isArray(res)) {
       try {
         res.map((extension) => {
@@ -110,9 +110,27 @@ async function appWorkspaceSetup() {
   }
 }
 
+const listener = (event: MessageEvent) => {
+  if (event.origin !== window.location.origin) {
+    return
+  }
+
+  const { key, payload } = event.data
+
+  switch (key) {
+    case 'registerTheme':
+      __MF__.theme.registerTheme(payload)
+      break
+  }
+}
+
 const appSetup = once(async function () {
   const settingData = await appSettingStoreSetup()
   appWorkspaceSetup()
+
+  window.removeEventListener('message', listener)
+  window.addEventListener('message', listener)
+
   appThemeExtensionsSetup(settingData.theme)
   i18nInit({ lng: settingData.language })
   checkUpdate({ install: settingData.auto_update })
@@ -143,29 +161,6 @@ const useAppSetup = () => {
       unlisten()
     }
   }, [eventInit])
-
-  // extension iframe event listener
-  useLayoutEffect(() => {
-    const listener = (event: MessageEvent) => {
-      if (event.origin !== window.location.origin) {
-        return
-      }
-
-      const { key, payload } = event.data
-
-      switch (key) {
-        case 'registerTheme':
-          __MF__.theme.registerTheme(payload)
-          break
-      }
-    }
-
-    window.addEventListener('message', listener)
-
-    return () => {
-      window.removeEventListener('message', listener)
-    }
-  }, [])
 
   useSuspenseQuery({
     queryKey: [],
