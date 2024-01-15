@@ -28,7 +28,7 @@ tauri-plugin-http = "2.0.0-alpha.9"
 tauri-plugin-store = "2.0.0-alpha.5"
 tauri-plugin-os = "2.0.0-alpha.5"
 tauri-plugin-shell = "2.0.0-alpha.6"
-tauri-plugin-dialog = "2.0.0-alpha.5"
+tauri-plugin-dialog = "2.0.0-alpha.7"
 tauri-plugin-clipboard-manager = "2.0.0-alpha.6"
 regex = "1.10.2"
 mf-utils = { path = "../../../crates/utils" }
