@@ -4235,7 +4235,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@codemirror/lang-markdown@npm:^6.0.0, @codemirror/lang-markdown@npm:^6.2.0":
+"@codemirror/lang-markdown@npm:^6.0.0":
   version: 6.2.0
   resolution: "@codemirror/lang-markdown@npm:6.2.0"
   dependencies:
@@ -4247,6 +4247,21 @@ __metadata:
     "@lezer/common": "npm:^1.0.0"
     "@lezer/markdown": "npm:^1.0.0"
   checksum: 0647e9816c9f79e2533abf8385969785d0e80dec75cc247f0ab1ba9aa4a8557aa6bc55a56fba38b797b4c06f8401210c846140defe3953c128db115f21cc0fcd
+  languageName: node
+  linkType: hard
+
+"@codemirror/lang-markdown@npm:^6.2.3":
+  version: 6.2.3
+  resolution: "@codemirror/lang-markdown@npm:6.2.3"
+  dependencies:
+    "@codemirror/autocomplete": "npm:^6.7.1"
+    "@codemirror/lang-html": "npm:^6.0.0"
+    "@codemirror/language": "npm:^6.3.0"
+    "@codemirror/state": "npm:^6.0.0"
+    "@codemirror/view": "npm:^6.0.0"
+    "@lezer/common": "npm:^1.0.0"
+    "@lezer/markdown": "npm:^1.0.0"
+  checksum: 3021554e42ff32d0197edab2ed4d504ea66694762fb36d0771be85a5f0d1f241168937327035e65a75af7cbe772069e7bf4b258eda147a82581b6c03ba961ac0
   languageName: node
   linkType: hard
 
@@ -6230,7 +6245,7 @@ __metadata:
   dependencies:
     "@codemirror/autocomplete": "npm:^6.8.1"
     "@codemirror/commands": "npm:^6.2.4"
-    "@codemirror/lang-markdown": "npm:^6.2.0"
+    "@codemirror/lang-markdown": "npm:^6.2.3"
     "@codemirror/language": "npm:^6.8.0"
     "@codemirror/language-data": "npm:^6.3.1"
     "@codemirror/lint": "npm:^6.4.0"
