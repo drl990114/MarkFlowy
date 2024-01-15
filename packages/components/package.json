@@ -27,6 +27,7 @@
     "@ariakit/react": "^0.3.8",
     "@markflowy/theme": "workspace:*",
     "clsx": "^2.0.0",
+    "rc-image": "^7.5.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hot-toast": "^2.4.1",
