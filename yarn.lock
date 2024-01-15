@@ -567,6 +567,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@babel/eslint-parser@npm:^7.23.3":
+  version: 7.23.3
+  resolution: "@babel/eslint-parser@npm:7.23.3"
+  dependencies:
+    "@nicolo-ribaudo/eslint-scope-5-internals": "npm:5.1.1-v1"
+    eslint-visitor-keys: "npm:^2.1.0"
+    semver: "npm:^6.3.1"
+  peerDependencies:
+    "@babel/core": ^7.11.0
+    eslint: ^7.5.0 || ^8.0.0
+  checksum: bc487f67aac64f1f8b351b8ec5e83bd1de5770e2e39c648d4df486e4079110f8594ef5b60b6e8379a9bb944dbbe5d96295f04fa47ef17901186568875b804b99
+  languageName: node
+  linkType: hard
+
 "@babel/eslint-plugin@npm:^7.22.10":
   version: 7.22.10
   resolution: "@babel/eslint-plugin@npm:7.22.10"
@@ -3956,6 +3970,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@babel/runtime@npm:^7.10.1, @babel/runtime@npm:^7.11.1, @babel/runtime@npm:^7.18.0, @babel/runtime@npm:^7.23.2":
+  version: 7.23.8
+  resolution: "@babel/runtime@npm:7.23.8"
+  dependencies:
+    regenerator-runtime: "npm:^0.14.0"
+  checksum: ec8f1967a36164da6cac868533ffdff97badd76d23d7d820cc84f0818864accef972f22f9c6a710185db1e3810e353fc18c3da721e5bb3ee8bc61bdbabce03ff
+  languageName: node
+  linkType: hard
+
 "@babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.18.3, @babel/runtime@npm:^7.20.13, @babel/runtime@npm:^7.21.0, @babel/runtime@npm:^7.21.5, @babel/runtime@npm:^7.22.3, @babel/runtime@npm:^7.22.5, @babel/runtime@npm:^7.22.6, @babel/runtime@npm:^7.5.5, @babel/runtime@npm:^7.8.4, @babel/runtime@npm:^7.8.7":
   version: 7.22.6
   resolution: "@babel/runtime@npm:7.22.6"
@@ -3971,15 +3994,6 @@ __metadata:
   dependencies:
     regenerator-runtime: "npm:^0.14.0"
   checksum: 789b566482e543819dbef980581fc570a1fe2249e443d5e6b463494e69b73ba4aabfd0493794409fb756c5d36ad894ab2a90c23678017407841b73c641d849d6
-  languageName: node
-  linkType: hard
-
-"@babel/runtime@npm:^7.23.2":
-  version: 7.23.8
-  resolution: "@babel/runtime@npm:7.23.8"
-  dependencies:
-    regenerator-runtime: "npm:^0.14.0"
-  checksum: ec8f1967a36164da6cac868533ffdff97badd76d23d7d820cc84f0818864accef972f22f9c6a710185db1e3810e353fc18c3da721e5bb3ee8bc61bdbabce03ff
   languageName: node
   linkType: hard
 
@@ -6299,6 +6313,7 @@ __metadata:
     eslint: "npm:8.56.0"
     jest-remirror: "npm:^2.1.5"
     jsdom: "npm:^22.1.0"
+    rc-image: "npm:^7.5.1"
     react: "npm:^18.2.0"
     react-dom: "npm:^18.2.0"
     react-hot-toast: "npm:^2.4.1"
@@ -7182,6 +7197,20 @@ __metadata:
   bin:
     browsers: lib/cjs/main-cli.js
   checksum: fa1a0442355f497282612765197cbc5a51e5e3abf43fd4727aeb2a0923fffc0c75064e874f14d268fb83c98cfb29db7c08ea2def91e62515ecdb7e45d953c8af
+  languageName: node
+  linkType: hard
+
+"@rc-component/portal@npm:^1.0.0-8, @rc-component/portal@npm:^1.0.2":
+  version: 1.1.2
+  resolution: "@rc-component/portal@npm:1.1.2"
+  dependencies:
+    "@babel/runtime": "npm:^7.18.0"
+    classnames: "npm:^2.3.2"
+    rc-util: "npm:^5.24.4"
+  peerDependencies:
+    react: ">=16.9.0"
+    react-dom: ">=16.9.0"
+  checksum: ae9d4cdf07647fc4da3944f74ab4d25c16cc7021c5760d4db37c0600461a84f480243e5186f3e5760903041d3a3e0927cb4226f44583fa668d3cacd29245fd69
   languageName: node
   linkType: hard
 
@@ -10262,6 +10291,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/react@npm:^18.2.48":
+  version: 18.2.48
+  resolution: "@types/react@npm:18.2.48"
+  dependencies:
+    "@types/prop-types": "npm:*"
+    "@types/scheduler": "npm:*"
+    csstype: "npm:^3.0.2"
+  checksum: 2e56ea6bd821ae96bd943f727a59d85384eaf5f8a3e6fce4fa1d34453e32d8eedda742432b3857fa0de7a4214bf84ce4239757eb52918e76452c00384731e585
+  languageName: node
+  linkType: hard
+
 "@types/reactcss@npm:*":
   version: 1.2.6
   resolution: "@types/reactcss@npm:1.2.6"
@@ -12655,6 +12695,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"classnames@npm:^2.2.1, classnames@npm:^2.2.6":
+  version: 2.5.1
+  resolution: "classnames@npm:2.5.1"
+  checksum: 58eb394e8817021b153bb6e7d782cfb667e4ab390cb2e9dac2fc7c6b979d1cc2b2a733093955fc5c94aa79ef5c8c89f11ab77780894509be6afbb91dddd79d15
+  languageName: node
+  linkType: hard
+
 "classnames@npm:^2.3.2":
   version: 2.3.2
   resolution: "classnames@npm:2.3.2"
@@ -14009,6 +14056,7 @@ __metadata:
     "@docusaurus/types": "npm:^3.1.0"
     "@mdx-js/react": "npm:^3.0.0"
     "@svgr/webpack": "npm:^8.1.0"
+    "@types/react": "npm:^18.2.48"
     animate.css: "npm:^4.1.1"
     clsx: "npm:^2.0.0"
     dotenv: "npm:^16.3.1"
@@ -19107,6 +19155,7 @@ __metadata:
   resolution: "markflowy-monorepo@workspace:."
   dependencies:
     "@babel/core": "npm:^7.23.5"
+    "@babel/eslint-parser": "npm:^7.23.3"
     "@babel/eslint-plugin": "npm:^7.22.10"
     "@babel/plugin-proposal-class-properties": "npm:^7.18.6"
     "@babel/plugin-proposal-decorators": "npm:^7.22.10"
@@ -22980,6 +23029,66 @@ plugin-image-zoom@ataft/plugin-image-zoom:
     iconv-lite: "npm:0.4.24"
     unpipe: "npm:1.0.0"
   checksum: 280bedc12db3490ecd06f740bdcf66093a07535374b51331242382c0e130bb273ebb611b7bc4cba1b4b4e016cc7b1f4b05a6df885a6af39c2bc3b94c02291c84
+  languageName: node
+  linkType: hard
+
+"rc-dialog@npm:~9.3.4":
+  version: 9.3.4
+  resolution: "rc-dialog@npm:9.3.4"
+  dependencies:
+    "@babel/runtime": "npm:^7.10.1"
+    "@rc-component/portal": "npm:^1.0.0-8"
+    classnames: "npm:^2.2.6"
+    rc-motion: "npm:^2.3.0"
+    rc-util: "npm:^5.21.0"
+  peerDependencies:
+    react: ">=16.9.0"
+    react-dom: ">=16.9.0"
+  checksum: 3b6a322b31cdfe868da727845e0eeed780c293e447d908a2ae61457f987ac192525ad8ca1d082ba174a424fc27ca2732e98a0654ea8d55daeb965fce852c53c5
+  languageName: node
+  linkType: hard
+
+"rc-image@npm:^7.5.1":
+  version: 7.5.1
+  resolution: "rc-image@npm:7.5.1"
+  dependencies:
+    "@babel/runtime": "npm:^7.11.2"
+    "@rc-component/portal": "npm:^1.0.2"
+    classnames: "npm:^2.2.6"
+    rc-dialog: "npm:~9.3.4"
+    rc-motion: "npm:^2.6.2"
+    rc-util: "npm:^5.34.1"
+  peerDependencies:
+    react: ">=16.9.0"
+    react-dom: ">=16.9.0"
+  checksum: c9d5f8fe1ba5db4f51e4dd527a996ec93eb85b970b3fc0e3dc327665edd06fd2ed169161c1276aa1e798dc9d1bcf7a011baf10c5b34445d907922d3ae79bc403
+  languageName: node
+  linkType: hard
+
+"rc-motion@npm:^2.3.0, rc-motion@npm:^2.6.2":
+  version: 2.9.0
+  resolution: "rc-motion@npm:2.9.0"
+  dependencies:
+    "@babel/runtime": "npm:^7.11.1"
+    classnames: "npm:^2.2.1"
+    rc-util: "npm:^5.21.0"
+  peerDependencies:
+    react: ">=16.9.0"
+    react-dom: ">=16.9.0"
+  checksum: 12bb290860865edbc8d08a731d377ccc62936a28bbfa83246cfca5b831843a6bfa8912c5ca3624823b28ab43e0ac46215f67e198729f6f6d91e826f64af514a9
+  languageName: node
+  linkType: hard
+
+"rc-util@npm:^5.21.0, rc-util@npm:^5.24.4, rc-util@npm:^5.34.1":
+  version: 5.38.1
+  resolution: "rc-util@npm:5.38.1"
+  dependencies:
+    "@babel/runtime": "npm:^7.18.3"
+    react-is: "npm:^18.2.0"
+  peerDependencies:
+    react: ">=16.9.0"
+    react-dom: ">=16.9.0"
+  checksum: 77a69fe2bfb497061aa13a221d9af1da7993895f19ddd6561f69415bcca648c206dee9a2d52fa0382329fcc9dcfd88784c54e96014830b364dd16ecf1c396c57
   languageName: node
   linkType: hard
 
