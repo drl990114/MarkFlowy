@@ -3974,6 +3974,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@babel/runtime@npm:^7.23.2":
+  version: 7.23.8
+  resolution: "@babel/runtime@npm:7.23.8"
+  dependencies:
+    regenerator-runtime: "npm:^0.14.0"
+  checksum: ec8f1967a36164da6cac868533ffdff97badd76d23d7d820cc84f0818864accef972f22f9c6a710185db1e3810e353fc18c3da721e5bb3ee8bc61bdbabce03ff
+  languageName: node
+  linkType: hard
+
 "@babel/template@npm:^7.22.15":
   version: 7.22.15
   resolution: "@babel/template@npm:7.22.15"
@@ -6347,7 +6356,7 @@ __metadata:
     eslint: "npm:8.56.0"
     happy-dom: "npm:^10.10.0"
     hox: "npm:^2.1.0"
-    i18next: "npm:^23.4.4"
+    i18next: "npm:^23.7.16"
     immer: "npm:^10.0.3"
     is-promise: "npm:^4.0.0"
     jest-remirror: "npm:^2.1.5"
@@ -17309,12 +17318,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"i18next@npm:^23.4.4":
-  version: 23.4.4
-  resolution: "i18next@npm:23.4.4"
+"i18next@npm:^23.7.16":
+  version: 23.7.16
+  resolution: "i18next@npm:23.7.16"
   dependencies:
-    "@babel/runtime": "npm:^7.22.5"
-  checksum: 4ef07834f77cdbcb056c4d1a9c098477a4ea310026f9f6f304fc8caec70c94dd0b775417b26d7b595938b4a55990a16182cd223577373c066724e09adc09e937
+    "@babel/runtime": "npm:^7.23.2"
+  checksum: 77e74c07a73316f6fb6678a5a3e8ce58a6e66be457dd1ccd23941e9fc57ad8e1da55193fa6328c70b86073337b776cd267f3c13c6309f548b3116f27a1e41787
   languageName: node
   linkType: hard
 
