@@ -1,11 +1,10 @@
-export * from './Toc'
-
 import { RIGHTBARITEMKEYS } from '@/constants'
 import type { RightBarItem } from '../../components/SideBar'
-import type { TocRef } from './Toc'
-import { Toc } from './Toc'
+import type { TocRef } from '@markflowy/components'
+import { Toc } from '@markflowy/components'
 import { useCommandStore } from '@/stores'
 import { useEffect, useRef } from 'react'
+import SideBarHeader from '@/components/SideBar/SideBarHeader'
 
 const TocView = () => {
   const { addCommand } = useCommandStore()
@@ -19,19 +18,18 @@ const TocView = () => {
           newContainer: document.querySelector('.editor-active') as HTMLElement,
           newScroll: document.querySelector('.editor-active') as HTMLElement,
         })
-      }
+      },
     })
-  } , [addCommand])
+  }, [addCommand])
 
   const containerEl = document.querySelector('.editor-active') as HTMLElement
   const scrollEl = document.querySelector('.editor-active') as HTMLElement
 
   return (
-    <Toc
-      ref={tocRef}
-      containerEl={containerEl}
-      scrollEl={scrollEl}
-    />
+    <>
+      <SideBarHeader name='Table of Contents' />
+      <Toc ref={tocRef} containerEl={containerEl} scrollEl={scrollEl} />
+    </>
   )
 }
 

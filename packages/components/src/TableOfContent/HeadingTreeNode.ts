@@ -8,6 +8,7 @@ export default class HeadingNode {
   depth: number // relative depth, starts from 0
   id: string
   key: number // faster comparison than by id
+  chapter: string
 
   constructor(
     htmlNode: HTMLElement | null,
@@ -15,7 +16,8 @@ export default class HeadingNode {
     depth: number,
     id: string,
     key: number,
-    offsetCacheVersion: number
+    offsetCacheVersion: number,
+    chapter: string
   ) {
     this.htmlNode = htmlNode
     this.title = value
@@ -26,6 +28,7 @@ export default class HeadingNode {
     this.key = key
     this.cachedOffsetTop = null
     this.offsetCacheVersion = offsetCacheVersion - 1
+    this.chapter = chapter
   }
 
   lazyLoad(curCacheVersion: number) {

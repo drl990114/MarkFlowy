@@ -1,4 +1,4 @@
-import HeadingNode from "./HeadingTreeNode"
+import HeadingNode from './HeadingTreeNode'
 
 export enum TraverseResult {
   Continue = 1,
@@ -19,21 +19,53 @@ export class HeadingTree {
 
   constructor(headings: IHeadingData[]) {
     // Make depths of nodes relative
-    const minDepth = Math.min(...headings.map(h => h.depth))
+    const minDepth = Math.min(...headings.map((h) => h.depth))
     const offsetCacheVersion = 0
 
     const headingNodes: HeadingNode[] = headings.map((h, i) => {
-      return new HeadingNode(h.htmlNode, h.value, h.depth - minDepth, h.id, i, offsetCacheVersion)
+      return new HeadingNode(
+        h.htmlNode,
+        h.value,
+        h.depth - minDepth,
+        h.id,
+        i,
+        offsetCacheVersion,
+        '0',
+      )
     })
 
-    const nodeStack: HeadingNode[] = [new HeadingNode(null, "", -1, "", -1, offsetCacheVersion)] // init with root node
-    headingNodes.forEach(node => {
+    const nodeStack: HeadingNode[] = [
+      new HeadingNode(null, '', -1, '', -1, offsetCacheVersion, '0'),
+    ] // init with root node
+    headingNodes.forEach((node) => {
       while (nodeStack.length && nodeStack[nodeStack.length - 1].depth >= node.depth) {
         nodeStack.pop()
       }
 
       nodeStack[nodeStack.length - 1].children.push(node)
       node.parent = nodeStack[nodeStack.length - 1]
+
+      const sameDepthSiblings = node.parent.children.filter((n) => n.depth === node.depth)
+
+      let diff = node.depth - Math.max(node.parent.depth, 0)
+      if (diff === 0) {
+        node.chapter = String(sameDepthSiblings.length)
+      } else if (diff === 1) {
+        node.chapter = node.parent.chapter + '.' + sameDepthSiblings.length
+      } else {
+        node.chapter = node.parent.chapter
+
+        while (diff >= 1) {
+          node.chapter += '.'
+          if (diff === 1) {
+            node.chapter += sameDepthSiblings.length
+          } else {
+            node.chapter += 0
+          }
+          diff--
+        }
+      }
+
       nodeStack.push(node)
     })
 

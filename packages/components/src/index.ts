@@ -12,5 +12,6 @@ export * from './Spinner'
 export * from './Tooltip'
 export * from './Menu'
 export * from './Toast'
+export * from './TableOfContent'
 
 export * from 'react-spinners'
