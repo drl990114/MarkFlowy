@@ -3,8 +3,6 @@ import type { IHeadingData } from './HeadingTree'
 import { HeadingTree, TraverseResult } from './HeadingTree'
 import { TocDiv, TocLink, TocListItem } from './styles'
 import type HeadingNode from './HeadingTreeNode'
-import SideBarHeader from '@/components/SideBar/SideBarHeader'
-import Empty from '../../components/Empty'
 
 export type TocRef = {
   refresh: (args: { newContainer: HTMLElement; newScroll: HTMLElement }) => void
@@ -20,10 +18,15 @@ export interface TocProps {
   headingsData?: IHeadingData[]
   containerEl?: HTMLElement
   scrollEl: HTMLElement
+  /**
+   * The component to render when there are no headings
+   * @default null
+   */
+  Empty?: React.ReactNode
 }
 
 export const Toc = forwardRef<TocRef, TocProps>((props, ref) => {
-  const { headingsData, containerEl, scrollEl, autoExpand = false } = props
+  const { headingsData, containerEl, scrollEl, autoExpand = false, Empty = null } = props
   const [headings, setHeadings] = useState(headingsData)
   const [headingTree, setHeadingTree] = useState<HeadingTree>()
   const [activeNodeState, setActiveNodeState] = useState<HeadingNode>()
@@ -178,6 +181,7 @@ export const Toc = forwardRef<TocRef, TocProps>((props, ref) => {
               handleHeadingClick(ev, h)
             }
           >
+            <span className='toc-link__chapter'>{h.chapter}</span>
             {h.title}
           </TocLink>
         </TocListItem>,
@@ -193,10 +197,9 @@ export const Toc = forwardRef<TocRef, TocProps>((props, ref) => {
 
   return (
     <TocDiv>
-      <SideBarHeader name='Table of Contents'/>
       <div className='toc-list'>
         {headingTree?.getRoot()?.children?.length === 0 ? (
-          <Empty />
+          Empty
         ) : (
           <nav>
             <ul>{renderHeadings()}</ul>
