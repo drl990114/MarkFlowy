@@ -1,0 +1,27 @@
+[package]
+name = "mfdev"
+version = "3.0.0"
+edition = "2021"
+author = "drl990114"
+
+[dependencies]
+anyhow = "1.0.79"
+env_logger = "0.10.1"
+log = "0.4.20"
+os_pipe = "1"
+toml = "0.8.8"
+
+[dependencies.clap]
+version = "4.4.17"
+features = [
+    "cargo",
+    "derive",
+]
+
+[dependencies.serde]
+version = "1.0"
+features = ["derive"]
+
+[dependencies.serde_json]
+version = "1.0.111"
+features = ["preserve_order"]
