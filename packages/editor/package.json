@@ -88,6 +88,7 @@
     "punycode": "^2.3.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-popper": "^2.3.0",
     "remirror": "^2.0.33",
     "remirror-extension-flat-list": "^0.2.0",
     "remixicon": "^3.5.0",

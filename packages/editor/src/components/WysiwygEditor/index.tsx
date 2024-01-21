@@ -8,6 +8,7 @@ import { ProsemirrorDevTools } from '@remirror/dev'
 import ErrorBoundary from '../ErrorBoundary'
 import type { Extension, RemirrorEventListener } from '@remirror/core'
 import type { EditorProps } from '../Editor'
+import { SlashMenu } from '@/toolbar/SlashMenu'
 
 export const OffsetContext = createContext({ top: 0, left: 0 })
 
@@ -47,6 +48,7 @@ const WysiwygEditor: FC<EditorProps> = (props) => {
             onChange={handleChange}
           >
             <TableToolbar />
+            <SlashMenu />
             {wysiwygToolBar || null}
             <Text className='w-full markdown-body' />
             {isTesting ? <ProsemirrorDevTools /> : null}

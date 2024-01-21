@@ -4,6 +4,7 @@ import {
   // BulletListExtension,
   // CodeBlockExtension,
   DropCursorExtension,
+  // MentionExtension,
   // EmojiExtension,
   // GapCursorExtension,
   // HardBreakExtension,
@@ -41,6 +42,7 @@ import { FindExtension } from '@remirror/extension-find'
 import { LineHtmlBlockExtension } from './HtmlNode/html-block-extension'
 import { HtmlImageExtension } from './Image'
 import { IframeExtension } from './Iframe'
+import { SlashMenuExtension } from './SlashMenu'
 
 // import { TableExtension } from './ReactTables';
 
@@ -50,53 +52,29 @@ export type ExtensionsOptions = {
   handleViewImgSrcUrl?: (src: string) => Promise<string>
 }
 
-function extensions({
-  handleViewImgSrcUrl
-}: ExtensionsOptions): any[] {
+function extensions({ handleViewImgSrcUrl }: ExtensionsOptions): any[] {
   return [
-    // new BoldExtension(),
-    // new CodeBlockExtension(),
-    // new GapCursorExtension(),
-    // new HardBreakExtension(),
-    // new HistoryExtension(),
-    // new ItalicExtension(),
-    // new MarkdownExtension(),
-    // new ShortcutsExtension(),
-    // new StrikeExtension(),
-    // new SubExtension(),
-    // new UnderlineExtension(),
-    // new TableExtension(),
-    // new TableCellExtension(),
-    // new TaskListExtension(),
-    // new LinkExtension({
-    //   autoLink: true,
-    // }),
-    // new DropCursorExtension(),
-    // new OrderedListExtension(),
-    // new BulletListExtension(),
-    // new ListItemExtension(),
-    // new ListItemSharedExtension(),
-    // new EmojiExtension({ data }),
-    // new ImageExtension({}),
     ...corePreset({ excludeExtensions: ['paragraph', 'text'] }),
     ...markExtensions({
-      handleViewImgSrcUrl
+      handleViewImgSrcUrl,
     }),
-    new CountExtension(),
+    new CountExtension({}),
     new HtmlImageExtension({
-      handleViewImgSrcUrl
+      handleViewImgSrcUrl,
     }),
-    new IframeExtension(),
+    new IframeExtension({
+      enableResizing: true,
+    }),
 
     new PlaceholderExtension({ placeholder: 'Type something...' }),
-    new LineHorizontalRuleExtension(),
+    new LineHorizontalRuleExtension({}),
     new LineParagraphExtension(),
     new LineTextExtension(),
     new LineHardBreakExtension(),
     new LineBlockquoteExtension(),
-    new LineHeadingExtension(),
+    new LineHeadingExtension({}),
     new LineListExtension(),
-    new LineCodeMirrorExtension(),
+    new LineCodeMirrorExtension({}),
     new LineTableExtension({ resizable: false }),
     new LineTableRowExtension(),
     new LineTableCellExtension(),
@@ -107,9 +85,10 @@ function extensions({
     }),
     new LineHtmlBlockExtension(),
 
-    new ReactComponentExtension(),
-    new DropCursorExtension(),
+    new ReactComponentExtension({}),
+    new DropCursorExtension({}),
 
+    new SlashMenuExtension(),
     new LineInlineMarkExtension(),
     new LineInlineDecorationExtension(),
   ]
