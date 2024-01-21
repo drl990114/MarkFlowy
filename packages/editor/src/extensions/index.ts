@@ -22,7 +22,7 @@ import {
   // TableExtension,
   // TaskListExtension,
   // UnderlineExtension,
-  PlaceholderExtension,
+  // PlaceholderExtension,
 } from 'remirror/extensions'
 // import data from 'svgmoji/emoji.json'
 import { LineInlineDecorationExtension, LineInlineMarkExtension, markExtensions } from './Inline'
@@ -43,6 +43,7 @@ import { LineHtmlBlockExtension } from './HtmlNode/html-block-extension'
 import { HtmlImageExtension } from './Image'
 import { IframeExtension } from './Iframe'
 import { SlashMenuExtension } from './SlashMenu'
+import { PlaceholderExtension } from './Placeholder'
 
 // import { TableExtension } from './ReactTables';
 
@@ -66,7 +67,7 @@ function extensions({ handleViewImgSrcUrl }: ExtensionsOptions): any[] {
       enableResizing: true,
     }),
 
-    new PlaceholderExtension({ placeholder: 'Type something...' }),
+    new PlaceholderExtension({ placeholder: 'Type \'/\' for commands' }),
     new LineHorizontalRuleExtension({}),
     new LineParagraphExtension(),
     new LineTextExtension(),

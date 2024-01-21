@@ -10,7 +10,7 @@ const Container = styled.div<{ codeEditor?: boolean }>`
   min-height: 100px;
   flex: 1;
 
-  .remirror-is-empty:first-of-type::before {
+  .remirror-is-empty::before {
     position: absolute;
     pointer-events: none;
     height: 0;
