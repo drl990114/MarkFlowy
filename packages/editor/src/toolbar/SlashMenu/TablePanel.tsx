@@ -30,7 +30,7 @@ const TablePanel = memo(
 
     useImperativeHandle(ref, () => ({
       createTable: () => {
-        commands.createTable({ rowsCount, columnsCount })
+        commands.createTable({ rowsCount, columnsCount, withHeaderRow: false})
       },
       handleKeyDown: (e) => {
         const handleRight = () => {
@@ -90,6 +90,7 @@ const TablePanel = memo(
                       commands.createTable({
                         rowsCount: i,
                         columnsCount: j,
+                        withHeaderRow: false
                       })
                       closeMenu()
                     }}
