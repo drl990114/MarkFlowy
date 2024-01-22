@@ -6435,7 +6435,7 @@ __metadata:
     "@remirror/extension-list": "npm:^2.0.15"
     "@remirror/extension-positioner": "npm:^2.1.8"
     "@remirror/extension-react-tables": "npm:^2.2.19"
-    "@remirror/extension-tables": "npm:^2.2.10"
+    "@remirror/extension-tables": "npm:^2.4.1"
     "@remirror/icons": "npm:^2.0.2"
     "@remirror/pm": "npm:^2.0.4"
     "@remirror/preset-core": "npm:^2.0.16"
@@ -7649,6 +7649,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@remirror/extension-events@npm:^2.1.17":
+  version: 2.1.17
+  resolution: "@remirror/extension-events@npm:2.1.17"
+  dependencies:
+    "@babel/runtime": "npm:^7.22.3"
+    "@remirror/core": "npm:^2.0.19"
+    "@remirror/messages": "npm:^2.0.6"
+  peerDependencies:
+    "@remirror/pm": ^2.0.7
+  checksum: 7faf822dca25252014c8c31fd0b6fc13acb3fecb6a417328758f4fd6dbac0828ceff8010cf334dd701e0b6c77cdadecf4c2856f2eeb2a1a17031e172415b6c35
+  languageName: node
+  linkType: hard
+
 "@remirror/extension-find@npm:^0.1.6":
   version: 0.1.6
   resolution: "@remirror/extension-find@npm:0.1.6"
@@ -8081,6 +8094,22 @@ __metadata:
   peerDependencies:
     "@remirror/pm": ^2.0.7
   checksum: 14f65ce18877d83a295e262b9267edab5e5998186794e376f4e37b1c89746f6468d6f437ec68408b3f7f673dfda9e07f97e55956f178f123e0b65108689cbd4f
+  languageName: node
+  linkType: hard
+
+"@remirror/extension-tables@npm:^2.4.1":
+  version: 2.4.1
+  resolution: "@remirror/extension-tables@npm:2.4.1"
+  dependencies:
+    "@babel/runtime": "npm:^7.22.3"
+    "@remirror/core": "npm:^2.0.19"
+    "@remirror/extension-events": "npm:^2.1.17"
+    "@remirror/extension-positioner": "npm:^2.1.8"
+    "@remirror/messages": "npm:^2.0.6"
+    "@remirror/theme": "npm:^2.0.9"
+  peerDependencies:
+    "@remirror/pm": ^2.0.7
+  checksum: 3d6dc7d86036414daa8631d25b4632c6ca8aef5290a73f4fa54ac5fdc260e1ee83b49c43cb9f2a392bf1242a755744552a7b0c3c07333763a2ccc670b438cc15
   languageName: node
   linkType: hard
 

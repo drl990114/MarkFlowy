@@ -55,7 +55,7 @@
     "@remirror/extension-list": "^2.0.15",
     "@remirror/extension-positioner": "^2.1.8",
     "@remirror/extension-react-tables": "^2.2.19",
-    "@remirror/extension-tables": "^2.2.10",
+    "@remirror/extension-tables": "^2.4.1",
     "@remirror/icons": "^2.0.2",
     "@remirror/pm": "^2.0.4",
     "@remirror/preset-core": "^2.0.16",
