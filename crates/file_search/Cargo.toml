@@ -5,7 +5,7 @@ edition = "2021"
 description = "main rusl library"
 
 [dependencies]
-regex = "1.10.2"
+regex = "1.10.3"
 num_cpus = "1.15.0" # for parallel search
 grep = "0.3.1" #ripgrep
 ignore = "0.4.22" #parallel walker from ripgrep

@@ -30,7 +30,7 @@ tauri-plugin-os = "2.0.0-alpha.5"
 tauri-plugin-shell = "2.0.0-alpha.6"
 tauri-plugin-dialog = "2.0.0-alpha.7"
 tauri-plugin-clipboard-manager = "2.0.0-alpha.6"
-regex = "1.10.2"
+regex = "1.10.3"
 mf-utils = { path = "../../../crates/utils" }
 file_search = { path = "../../../crates/file_search" }
 download_npm = { path = "../../../crates/download_npm" }
