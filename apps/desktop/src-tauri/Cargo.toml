@@ -22,7 +22,7 @@ anyhow = "1.0.79"
 dark-light = "1.0.0"
 log = "0.4.19"
 serde = { version = "1.0", features = ["derive"] }
-tauri = { version = "2.0.0-alpha.20", features = [ "protocol-asset", "devtools"] }
+tauri = { version = "2.0.0-alpha.21", features = [ "protocol-asset", "devtools"] }
 tauri-plugin-updater = "2.0.0-alpha.6"
 tauri-plugin-http = "2.0.0-alpha.9"
 tauri-plugin-store = "2.0.0-alpha.6"
@@ -30,7 +30,7 @@ tauri-plugin-os = "2.0.0-alpha.5"
 tauri-plugin-shell = "2.0.0-alpha.6"
 tauri-plugin-dialog = "2.0.0-alpha.7"
 tauri-plugin-clipboard-manager = "2.0.0-alpha.6"
-regex = "1.10.2"
+regex = "1.10.3"
 mf-utils = { path = "../../../crates/utils" }
 file_search = { path = "../../../crates/file_search" }
 download_npm = { path = "../../../crates/download_npm" }
