@@ -12,7 +12,7 @@ MarkFlowy supports custom themes, and you can also share your themes with others
 
 ### 1. Create theme files
 
-You can fork [MarkFlowy-Theme-Template](https://github.com/markflowy-app/custom-theme-template) to create your theme.
+You can fork [MarkFlowy-Theme-Template](https://github.com/MarkFlowy/custom-theme-template) to create your theme.
 
 ```bash
 pnpm install
