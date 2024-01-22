@@ -31,7 +31,7 @@
     "@tauri-apps/plugin-os": "^2.0.0-alpha.4",
     "@tauri-apps/plugin-store": "^2.0.0-alpha.3",
     "@tauri-apps/plugin-updater": "^2.0.0-alpha.5",
-    "classnames": "^2.3.2",
+    "classnames": "^2.5.1",
     "create-context-state": "^2.0.0",
     "dayjs": "^1.11.10",
     "hox": "^2.1.0",
