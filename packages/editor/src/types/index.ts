@@ -1,9 +1,9 @@
-import type { AnyExtension, ProsemirrorNode, RemirrorManager } from "@remirror/core"
+import type { AnyExtension, RemirrorManager } from "@remirror/core"
 import type { ReactFrameworkOutput } from "@remirror/react-core"
+import type {  Node } from '@remirror/pm/model'
 
-
-export type StringToDoc = (content: string) => ProsemirrorNode
-export type DocToString = (doc: ProsemirrorNode) => string
+export type StringToDoc = (content: string) => Node
+export type DocToString = (doc: Node) => string
 
 export type EditorDelegate<E extends AnyExtension = any> = {
     manager: RemirrorManager<E>

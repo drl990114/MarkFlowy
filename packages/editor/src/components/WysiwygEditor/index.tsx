@@ -9,8 +9,14 @@ import ErrorBoundary from '../ErrorBoundary'
 import type { Extension, RemirrorEventListener } from '@remirror/core'
 import type { EditorProps } from '../Editor'
 import { SlashMenu } from '@/toolbar/SlashMenu'
+import type { DocToString, StringToDoc } from '@/types'
 
 export const OffsetContext = createContext({ top: 0, left: 0 })
+
+export const wysiwygTransformer: {
+  stringToDoc: StringToDoc | null
+  docToString: DocToString | null
+} = { stringToDoc: null, docToString: null }
 
 const WysiwygEditor: FC<EditorProps> = (props) => {
   const { content, hooks, delegate, offset, wysiwygToolBar, isTesting, editable } = props
@@ -28,6 +34,11 @@ const WysiwygEditor: FC<EditorProps> = (props) => {
     },
     [editorDelegate, props],
   )
+
+  if (wysiwygTransformer.stringToDoc === null) { 
+    wysiwygTransformer.stringToDoc = editorDelegate.stringToDoc
+    wysiwygTransformer.docToString = editorDelegate.docToString
+  }
 
   let initialContent
   try {
