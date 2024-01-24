@@ -92,7 +92,6 @@ function createDecorationSet(props: SharedProps) {
       placeholder &&
       state.selection.from - 1 === pos
     ) {
-      console.log('createDecorationSet', node)
       const placeholderDecoration = Decoration.node(pos, pos + node.nodeSize, {
         class: emptyNodeClass,
         'data-placeholder': placeholder,

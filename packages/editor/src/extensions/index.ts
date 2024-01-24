@@ -44,6 +44,7 @@ import { HtmlImageExtension } from './Image'
 import { IframeExtension } from './Iframe'
 import { SlashMenuExtension } from './SlashMenu'
 import { PlaceholderExtension } from './Placeholder'
+import { ClipboardExtension } from './Clipboard'
 
 // import { TableExtension } from './ReactTables';
 
@@ -85,6 +86,7 @@ function extensions({ handleViewImgSrcUrl }: ExtensionsOptions): any[] {
       activeDecoration: { style: 'background-color: orange; color: black' },
     }),
     new LineHtmlBlockExtension(),
+    new ClipboardExtension(),
 
     new ReactComponentExtension({}),
     new DropCursorExtension({}),
