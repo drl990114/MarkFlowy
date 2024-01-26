@@ -139,6 +139,10 @@ export const BaseStyle = styled.createGlobalStyle`
     padding: 0;
   }
 
+  .markdown-body input[type='checkbox'] {
+    accent-color: #58a6ff;
+  }
+
   .markdown-body a:focus,
   .markdown-body [role='button']:focus,
   .markdown-body input[type='radio']:focus,
