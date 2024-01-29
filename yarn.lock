@@ -4436,7 +4436,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@codemirror/lint@npm:^6.0.0, @codemirror/lint@npm:^6.4.0":
+"@codemirror/lint@npm:^6.0.0":
   version: 6.4.0
   resolution: "@codemirror/lint@npm:6.4.0"
   dependencies:
@@ -4444,6 +4444,17 @@ __metadata:
     "@codemirror/view": "npm:^6.0.0"
     crelt: "npm:^1.0.5"
   checksum: dac3dddd9d059fc6cce2cfa0d32aebf246597716703996692dfe6af011f44887e23bd4e7c71598801186761073c79ecec554f9b201c23a5e597916540f360f01
+  languageName: node
+  linkType: hard
+
+"@codemirror/lint@npm:^6.4.2":
+  version: 6.4.2
+  resolution: "@codemirror/lint@npm:6.4.2"
+  dependencies:
+    "@codemirror/state": "npm:^6.0.0"
+    "@codemirror/view": "npm:^6.0.0"
+    crelt: "npm:^1.0.5"
+  checksum: 5e48e4f654c0890fe226fd84dca7fcea716dc72939eb2583151cc8cb6342187a0744b8bffc10b14ad8d8e67d96549c32b054926411c3a5b65de107388cb7ff6b
   languageName: node
   linkType: hard
 
@@ -6409,7 +6420,7 @@ __metadata:
     "@codemirror/lang-markdown": "npm:^6.2.3"
     "@codemirror/language": "npm:^6.8.0"
     "@codemirror/language-data": "npm:^6.3.1"
-    "@codemirror/lint": "npm:^6.4.0"
+    "@codemirror/lint": "npm:^6.4.2"
     "@codemirror/search": "npm:^6.5.1"
     "@codemirror/state": "npm:^6.2.1"
     "@codemirror/view": "npm:^6.14.0"
