@@ -22,7 +22,7 @@
     "@markflowy/editor": "workspace:*",
     "@markflowy/theme": "workspace:*",
     "@markflowy/types": "workspace:*",
-    "@mui/material": "^5.14.6",
+    "@mui/material": "^5.15.6",
     "@tanstack/react-query": "^5.17.9",
     "@tauri-apps/api": "^2.0.0-alpha.12",
     "@tauri-apps/plugin-clipboard-manager": "^2.0.0-alpha.5",
