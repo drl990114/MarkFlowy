@@ -51,14 +51,6 @@ jobs:
           tag: ${{ github.ref_name }}
           excludeTypes: 'chore,docs,style,refactor,test,ci,build'
 
-      - name: Commit CHANGELOG.md
-        uses: stefanzweifel/git-auto-commit-action@v4
-        if: matrix.os == 'windows-latest'
-        with:
-          branch: main
-          commit_message: 'docs: update CHANGELOG.md for ${{ github.ref_name }} [skip ci]'
-          file_pattern: CHANGELOG.md
-
       - name: Rust setup
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -79,6 +71,8 @@ jobs:
       - name: Build the app
         run: yarn build:desktop --target ${{ matrix.target }}
         env:
+          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
@@ -127,15 +121,11 @@ jobs:
           name: artifacts-aarch64
           path: artifacts/aarch64
 
-      # There are currently no certified Apple developers, but aarch64 will not be installed because of this.
-      # For now, use the x64 version instead of aarch64.
       - name: Rename artifacts
         run: |
-          cp -r  "artifacts/x86_64/dmg/MarkFlowy_${{ env.version }}_x64.dmg" "artifacts/MarkFlowy_${{ env.version }}_macos_aarch64.dmg"
-          cp -r  "artifacts/x86_64/macos/MarkFlowy.app.tar.gz" "artifacts/MarkFlowy_${{ env.version }}_macos_aarch64.app.tar.gz"
-          cp -r  "artifacts/x86_64/macos/MarkFlowy.app.tar.gz.sig" "artifacts/MarkFlowy_${{ env.version }}_macos_aarch64.app.tar.gz.sig"
-
-          rm -rf "artifacts/aarch64/dmg/MarkFlowy_${{ env.version }}_aarch64.dmg"
+          mv "artifacts/aarch64/dmg/MarkFlowy_${{ env.version }}_aarch64.dmg" "artifacts/MarkFlowy_${{ env.version }}_macos_aarch64.dmg"
+          mv "artifacts/aarch64/macos/MarkFlowy.app.tar.gz" "artifacts/MarkFlowy_${{ env.version }}_macos_aarch64.app.tar.gz"
+          mv "artifacts/aarch64/macos/MarkFlowy.app.tar.gz.sig" "artifacts/MarkFlowy_${{ env.version }}_macos_aarch64.app.tar.gz.sig"
 
           mv "artifacts/x86_64/dmg/MarkFlowy_${{ env.version }}_x64.dmg" "artifacts/MarkFlowy_${{ env.version }}_macos_x86_64.dmg"
           mv "artifacts/x86_64/macos/MarkFlowy.app.tar.gz" "artifacts/MarkFlowy_${{ env.version }}_macos_x86_64.app.tar.gz"
