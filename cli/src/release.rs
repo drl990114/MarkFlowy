@@ -1,6 +1,6 @@
-use std::process::Command;
 use clap::Parser;
 use serde_json::{Map, Value};
+use std::process::Command;
 use toml;
 
 use crate::utils;
@@ -31,20 +31,20 @@ struct PackageData {
     version: String,
 }
 
+const PACKAGEFILE_URL: &str = "apps/desktop/src-tauri/tauri.conf.json";
+const CRATESFILE_URL: &str = "apps/desktop/src-tauri/Cargo.toml";
+
 fn get_old_version() -> String {
-    let packagefile_url = "tauri.conf.json";
-    let package_str = std::fs::read_to_string(packagefile_url).unwrap();
+    let package_str = std::fs::read_to_string(PACKAGEFILE_URL).unwrap();
     let package: Package = serde_json::from_str::<Package>(&package_str).unwrap();
 
     return package.package.version;
 }
 
 fn write_new_version(new_version: String) {
-    let packagefile_url = "tauri.conf.json";
-    let cratesfile_url = "Cargo.toml";
 
-    let package_str = std::fs::read_to_string(packagefile_url).unwrap();
-    let crates_str = std::fs::read_to_string(cratesfile_url).unwrap();
+    let package_str = std::fs::read_to_string(PACKAGEFILE_URL).unwrap();
+    let crates_str = std::fs::read_to_string(CRATESFILE_URL).unwrap();
 
     let mut package: Map<String, serde_json::Value> =
         serde_json::from_str::<Map<String, serde_json::Value>>(&package_str).unwrap();
@@ -66,26 +66,31 @@ fn write_new_version(new_version: String) {
 
     if input.trim() == "y" {
         println!("Releasing version: {new_version}");
-        std::fs::write(packagefile_url, new_package_str).unwrap();
-        std::fs::write(cratesfile_url, new_crates_str).unwrap();
+        std::fs::write(PACKAGEFILE_URL, new_package_str).unwrap();
+        std::fs::write(CRATESFILE_URL, new_crates_str).unwrap();
         Command::new("git")
             .arg("add")
             .arg(".")
             .spawn()
-            .expect("failed to execute process");
+            .expect("failed to execute process")
+            .wait()
+            .unwrap();
 
         Command::new("git")
             .arg("commit")
             .arg("-m")
             .arg(format!("chore: bump version to v{new_version}"))
             .spawn()
-            .expect("failed to execute process");
+            .expect("failed to execute process")
+            .wait()
+            .unwrap();
 
         Command::new("git")
             .arg("push")
-            .arg("markflowy")
             .spawn()
-            .expect("failed to execute process");
+            .expect("failed to execute process")
+            .wait()
+            .unwrap();
 
         create_git_tag(format!("v{new_version}"));
         push_git_tag(format!("v{new_version}"));
@@ -99,7 +104,9 @@ pub fn create_git_tag(tag_name: String) {
         .arg("tag")
         .arg(tag_name)
         .spawn()
-        .expect("failed to execute process");
+        .expect("failed to execute process")
+        .wait()
+        .unwrap();
 }
 
 pub fn push_git_tag(tag_name: String) {
@@ -108,7 +115,9 @@ pub fn push_git_tag(tag_name: String) {
         .arg("markflowy")
         .arg(tag_name)
         .spawn()
-        .expect("failed to execute process");
+        .expect("failed to execute process")
+        .wait()
+        .unwrap();
 }
 
 pub fn main(major: bool, minor: bool, patch: bool) {
