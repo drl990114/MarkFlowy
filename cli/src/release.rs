@@ -81,6 +81,12 @@ fn write_new_version(new_version: String) {
             .spawn()
             .expect("failed to execute process");
 
+        Command::new("git")
+            .arg("push")
+            .arg("markflowy")
+            .spawn()
+            .expect("failed to execute process");
+
         create_git_tag(format!("v{new_version}"));
         push_git_tag(format!("v{new_version}"));
     } else {
@@ -99,7 +105,7 @@ pub fn create_git_tag(tag_name: String) {
 pub fn push_git_tag(tag_name: String) {
     Command::new("git")
         .arg("push")
-        .arg("origin")
+        .arg("markflowy")
         .arg(tag_name)
         .spawn()
         .expect("failed to execute process");
