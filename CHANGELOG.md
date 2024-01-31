@@ -4,6 +4,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.7.2] - 2024-01-31
+### :sparkles: New Features
+- [`2e22cb7`](https://github.com/drl990114/MarkFlowy/commit/2e22cb7f3e33e7e889c57f832f36ea8d4e6f0e06) - **desktop**: support updater *(PR [#443](https://github.com/drl990114/MarkFlowy/pull/443) by [@drl990114](https://github.com/drl990114))*
+- [`9635563`](https://github.com/drl990114/MarkFlowy/commit/9635563ca61dccbfc463892f88e156a80906a07b) - **desktop**: support auto update configure *(commit by [@drl990114](https://github.com/drl990114))*
+- [`e3e1d29`](https://github.com/drl990114/MarkFlowy/commit/e3e1d2965a0f3da15c174860e682fd8efb2dee5e) - **desktop**: support render markdown update notes and modal reminder *(commit by [@drl990114](https://github.com/drl990114))*
+- [`d8b721d`](https://github.com/drl990114/MarkFlowy/commit/d8b721d3335a87e212b1daee2e45dc97fa4f309d) - **components**: image component support fallback *(commit by [@drl990114](https://github.com/drl990114))*
+- [`3552e7f`](https://github.com/drl990114/MarkFlowy/commit/3552e7f91046941030a536ca5c22e66d8328d1c5) - **desktop**: add table of content chapter view *(commit by [@drl990114](https://github.com/drl990114))*
+- [`1c1b07d`](https://github.com/drl990114/MarkFlowy/commit/1c1b07d40812e5dac4a08da84cc8cb68f96f619d) - add dev cli *(commit by [@drl990114](https://github.com/drl990114))*
+- [`180a89a`](https://github.com/drl990114/MarkFlowy/commit/180a89a56c3eb03398f8709510600bcd12e4b465) - **editor**: slash menu *(commit by [@drl990114](https://github.com/drl990114))*
+- [`7a95a7b`](https://github.com/drl990114/MarkFlowy/commit/7a95a7b3e7983c207124a90a7dbbed2682925938) - **editor**: placeholder extension *(commit by [@drl990114](https://github.com/drl990114))*
+
+### :bug: Bug Fixes
+- [`9dbbb9a`](https://github.com/drl990114/MarkFlowy/commit/9dbbb9a3bd2bb8c95fc19c6fee43a1a3c856530d) - **desktop**: mui theme dark mode *(commit by [@drl990114](https://github.com/drl990114))*
+- [`a37943b`](https://github.com/drl990114/MarkFlowy/commit/a37943b27be5ea6bca52a7fe930146c7ba964db7) - dir path *(commit by [@drl990114](https://github.com/drl990114))*
+- [`9c39593`](https://github.com/drl990114/MarkFlowy/commit/9c39593cf1ae6499c857bd91704f83f1cf3a37aa) - **ui**: show theme checked icon *(commit by [@drl990114](https://github.com/drl990114))*
+- [`a54afa9`](https://github.com/drl990114/MarkFlowy/commit/a54afa9361a4a256cabc8d44fe780c20e097397e) - **editor**: source code editor change event emit *(commit by [@drl990114](https://github.com/drl990114))*
+- [`6bb7670`](https://github.com/drl990114/MarkFlowy/commit/6bb7670d4c2345e9f1d6d96786f288f47b6c9df9) - **editor**: editor provider *(commit by [@drl990114](https://github.com/drl990114))*
+- [`8d491b8`](https://github.com/drl990114/MarkFlowy/commit/8d491b882b405ec22e2617375eabdd2730c7b2bc) - **editor**: clipboard parse *(commit by [@drl990114](https://github.com/drl990114))*
+- [`bbb945a`](https://github.com/drl990114/MarkFlowy/commit/bbb945aaa79641bafa4842917bbc581e0b05a188) - **ui**: input checkbox color error in windows os *(commit by [@drl990114](https://github.com/drl990114))*
+
+
 ## [v0.7.0] - 2024-01-03
 ### :sparkles: New Features
 - [`81785f6`](https://github.com/drl990114/MarkFlowy/commit/81785f6b020d452c99c0b4c2db0718343bbe62ea) - **editor**: support onChange prop *(commit by [@drl990114](https://github.com/drl990114))*
@@ -55,3 +76,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [`391ed46`](https://github.com/drl990114/MarkFlowy/commit/391ed466b3fe81368ca0ade50cced804d9222760) - **desktop**: infinite loop when premature response *(commit by [@drl990114](https://github.com/drl990114))*
 
 [v0.7.0]: https://github.com/drl990114/MarkFlowy/compare/v0.6.2...v0.7.0
+[v0.7.2]: https://github.com/drl990114/MarkFlowy/compare/v0.7.1...v0.7.2
