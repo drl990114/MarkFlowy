@@ -13,7 +13,7 @@ import NiceModal from '@ebay/nice-modal-react'
 import { InjectFonts } from './injectFonts'
 import { Modal } from './components'
 import { MODAL_CONFIRM_ID } from './components/Modal'
-import { EditorProvider } from '@markflowy/editor'
+import { EditorProvider } from 'rme'
 
 const AppThemeProvider: React.FC<BaseComponentProps> = function ({ children }) {
   const { muiTheme, curTheme } = useThemeStore()

@@ -1,11 +1,11 @@
 /* eslint-disable react-hooks/rules-of-hooks */
-import { Editor as MfEditor } from '@markflowy/editor'
+import { Editor as MfEditor } from 'rme'
 import type {
   EditorChangeHandler,
   EditorContext,
   EditorRef,
   EditorViewType,
-} from '@markflowy/editor'
+} from 'rme'
 import { invoke } from '@tauri-apps/api/primitives'
 import { getCurrent } from '@tauri-apps/api/window'
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
@@ -13,8 +13,8 @@ import styled, { css } from 'styled-components'
 import { useCommandStore, useEditorStateStore, useEditorStore } from '@/stores'
 import { getFileObject, updateFileObject } from '@/helper/files'
 import useChangeCodeMirrorTheme from '@/components/EditorArea/editorHooks/useChangeCodeMirrorTheme'
-import { createWysiwygDelegate } from '@markflowy/editor'
-import { createSourceCodeDelegate } from '@markflowy/editor'
+import { createWysiwygDelegate } from 'rme'
+import { createSourceCodeDelegate } from 'rme'
 import { useCommandEvent } from '@/components/EditorArea/editorHooks/CommandEvent'
 import { EditorCount } from '@/components/EditorArea/editorToolBar/EditorCount'
 import bus from '@/helper/eventBus'
