@@ -7,10 +7,5 @@
     "emitDeclarationOnly": true,
     "skipLibCheck": true,
     "outDir": "./dist-types/"
-  },
-  "references": [
-    {
-      "path": "../../packages/editor/tsconfig.json"
-    }
-  ]
+  }
 }

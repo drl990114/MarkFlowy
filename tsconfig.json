@@ -3,9 +3,6 @@
   "files": [],
   "references": [
     {
-      "path": "packages/editor/tsconfig.json"
-    },
-    {
       "path": "apps/desktop/tsconfig.json"
     }
   ]
