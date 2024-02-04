@@ -26,9 +26,6 @@
     "**/.cache"
   ],
   "references": [
-    { "path": "./tsconfig.node.json" },
-    {
-      "path": "../../packages/editor/tsconfig.json"
-    }
+    { "path": "./tsconfig.node.json" }
   ]
 }

@@ -1,6 +1,6 @@
 import { sleep } from "@/helper"
 import { useEditorStore } from "@/stores"
-import type { CreateWysiwygDelegateOptions } from "@markflowy/editor"
+import type { CreateWysiwygDelegateOptions } from "rme"
 import { convertFileSrc } from '@tauri-apps/api/primitives'
 import { join } from '@tauri-apps/api/path'
 import { fetch } from '@tauri-apps/plugin-http'

@@ -1,5 +1,5 @@
 import bus from '@/helper/eventBus'
-import { useCommands } from '@markflowy/editor'
+import { useCommands } from 'rme'
 import { useEffect, type FC } from 'react'
 
 type CreateTableCommand = {
