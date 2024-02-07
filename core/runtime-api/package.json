@@ -39,7 +39,7 @@
     "@rollup/plugin-terser": "0.4.4",
     "@rollup/plugin-typescript": "11.1.5",
     "eslint": "8.56.0",
-    "rimraf": "^5.0.1",
+    "rimraf": "^5.0.5",
     "rollup": "4.5.0",
     "rollup-plugin-postcss": "^4.0.2",
     "typescript": "^5.1.3",
