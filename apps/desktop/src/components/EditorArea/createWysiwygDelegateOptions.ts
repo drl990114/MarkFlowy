@@ -1,7 +1,7 @@
 import { sleep } from "@/helper"
 import { useEditorStore } from "@/stores"
 import type { CreateWysiwygDelegateOptions } from "rme"
-import { convertFileSrc } from '@tauri-apps/api/primitives'
+import { convertFileSrc } from '@tauri-apps/api/core'
 import { join } from '@tauri-apps/api/path'
 import { fetch } from '@tauri-apps/plugin-http'
 

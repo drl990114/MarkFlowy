@@ -30,7 +30,7 @@ pub fn generate_menu(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
 
     let menu_handler = move |app: &AppHandle, event: MenuEvent| {
         let menu_id = event.id().as_ref();
-        let binding = app.get_focused_window().unwrap();
+        let binding = app.get_webview_window("main").unwrap();
         let focused_window: &str = binding.label();
         println!("focused_window: {}", focused_window);
 
@@ -78,7 +78,7 @@ pub fn generate_menu(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
         }
     };
 
-    app.set_menu(Menu::with_items(
+    let menu_items = Menu::with_items(
         app,
         &[
             &Submenu::with_items(
@@ -88,27 +88,27 @@ pub fn generate_menu(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
                 &[
                     &MenuItemBuilder::new("About MarkFlowy")
                         .id("About")
-                        .build(app),
-                    &PredefinedMenuItem::quit(app, Some("Quit")),
+                        .build(app)?,
+                    &PredefinedMenuItem::quit(app, Some("Quit"))?,
                 ],
             )?,
             &Submenu::with_items(
                 app,
                 "File",
                 true,
-                &[&MenuItemBuilder::new("Save").id("editor:save").build(app)],
+                &[&MenuItemBuilder::new("Save").id("editor:save").build(app)?],
             )?,
             &Submenu::with_items(
                 app,
                 "Edit",
                 true,
                 &[
-                    &PredefinedMenuItem::redo(app, None),
-                    &PredefinedMenuItem::undo(app, None),
-                    &PredefinedMenuItem::cut(app, None),
-                    &PredefinedMenuItem::copy(app, None),
-                    &PredefinedMenuItem::paste(app, None),
-                    &PredefinedMenuItem::select_all(app, None),
+                    &PredefinedMenuItem::redo(app, None)?,
+                    &PredefinedMenuItem::undo(app, None)?,
+                    &PredefinedMenuItem::cut(app, None)?,
+                    &PredefinedMenuItem::copy(app, None)?,
+                    &PredefinedMenuItem::paste(app, None)?,
+                    &PredefinedMenuItem::select_all(app, None)?,
                 ],
             )?,
             &Submenu::with_items(
@@ -117,7 +117,7 @@ pub fn generate_menu(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
                 true,
                 &[&MenuItemBuilder::new("Table")
                     .id("editor:dialog_create_table")
-                    .build(app)],
+                    .build(app)?],
             )?,
             &Submenu::with_items(
                 app,
@@ -126,15 +126,16 @@ pub fn generate_menu(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
                 &[
                     &MenuItemBuilder::new("SourceCode View")
                         .id("SourceCodeView")
-                        .build(app),
+                        .build(app)?,
                     &MenuItemBuilder::new("Wysiwyg View")
                         .id("WysiwygView")
-                        .build(app),
+                        .build(app)?,
                 ],
             )?,
         ],
-    )?)
-    .expect("failed to set menu");
+    )?;
+
+    app.set_menu(menu_items).expect("failed to set menu");
 
     app.on_menu_event(menu_handler);
 

@@ -1,5 +1,5 @@
 import WELCOMECONTENT from '@/constants/welcomeContent'
-import { invoke } from '@tauri-apps/api/primitives'
+import { invoke } from '@tauri-apps/api/core'
 import { nanoid } from 'nanoid'
 import { setFileObject, setFileObjectByPath } from './files'
 

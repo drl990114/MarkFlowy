@@ -1,4 +1,4 @@
-import { invoke } from '@tauri-apps/api/primitives'
+import { invoke } from '@tauri-apps/api/core'
 import { create } from 'zustand'
 
 const useOpenedCacheStore = create<OpenedCacheStore>((set) => {

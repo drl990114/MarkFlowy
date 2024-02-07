@@ -43,7 +43,7 @@ fn build_extension(path: PathBuf) -> Option<Extension> {
             id: path.file_name().unwrap().to_str().unwrap().to_string(),
             path: path.to_str().unwrap().to_string(),
             pkg,
-            script_text
+            script_text,
         });
     }
 
@@ -95,13 +95,14 @@ impl AppExtensions {
             return self;
         }
 
-       let _ = download_npm::download(
+        let _ = download_npm::download(
             "markflowy-theme-template",
             download_npm::DownloadOptions {
                 untar: true,
                 dest_path: Self::dir_path().to_str().unwrap().to_string(),
             },
-        ).await;
+        )
+        .await;
 
         self
     }

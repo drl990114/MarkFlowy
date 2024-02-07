@@ -1,11 +1,7 @@
 use super::conf;
 use crate::fc::exists;
 use serde::{Deserialize, Serialize};
-use std::{
-    fs::create_dir,
-    path::PathBuf,
-    vec,
-};
+use std::{fs::create_dir, path::PathBuf, vec};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Theme {
@@ -42,7 +38,7 @@ fn build_theme(path: PathBuf) -> Option<Theme> {
             id: path.file_name().unwrap().to_str().unwrap().to_string(),
             path: path.to_str().unwrap().to_string(),
             pkg,
-            script_text
+            script_text,
         });
     }
 

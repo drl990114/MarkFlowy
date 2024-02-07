@@ -1,7 +1,7 @@
 use super::conf;
 use crate::fc::{create_file, exists};
 use serde::{Deserialize, Serialize};
-use std::path::{PathBuf, Path};
+use std::path::{Path, PathBuf};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct WorkspaceInfo {
@@ -26,7 +26,9 @@ impl OpenedCache {
             create_file(path).unwrap();
         }
 
-        Self { recent_workspaces: vec![] }
+        Self {
+            recent_workspaces: vec![],
+        }
     }
 
     pub fn get_path() -> PathBuf {
@@ -39,7 +41,10 @@ impl OpenedCache {
         if recent_workspaces.len() > 12 {
             recent_workspaces.pop();
         }
-        if let Some(index) = recent_workspaces.iter().position(|his| his.path == workspace_path) {
+        if let Some(index) = recent_workspaces
+            .iter()
+            .position(|his| his.path == workspace_path)
+        {
             recent_workspaces.remove(index);
         }
 
@@ -57,7 +62,8 @@ impl OpenedCache {
         match std::fs::read_to_string(Self::get_path()) {
             Ok(v) => {
                 if let Ok(mut v2) = serde_json::from_str::<OpenedCache>(&v) {
-                    v2.recent_workspaces.retain(|item| exists(Path::new(&item.path)));
+                    v2.recent_workspaces
+                        .retain(|item| exists(Path::new(&item.path)));
                     v2.write()
                 } else {
                     Self::default()
@@ -66,7 +72,7 @@ impl OpenedCache {
             Err(err) => {
                 println!("err: {:?}", err);
                 Self::default()
-            },
+            }
         }
     }
 

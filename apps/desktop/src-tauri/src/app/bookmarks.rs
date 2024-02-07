@@ -1,7 +1,7 @@
 use super::conf;
 use crate::fc::{create_file, exists};
 use serde::{Deserialize, Serialize};
-use std::{path::PathBuf, vec, path::Path};
+use std::{path::Path, path::PathBuf, vec};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Bookmark {
@@ -19,7 +19,10 @@ pub struct BookMarks {
 
 impl BookMarks {
     pub fn new() -> Self {
-        Self { bookmarks: vec![].into_iter().collect(), version: "0.0.1".to_string() }
+        Self {
+            bookmarks: vec![].into_iter().collect(),
+            version: "0.0.1".to_string(),
+        }
     }
 
     pub fn get_path() -> PathBuf {
@@ -80,8 +83,8 @@ impl BookMarks {
     }
 
     pub fn remove_item(mut self, id: String) -> Self {
-       self.bookmarks.retain(|item| item.id != id);
-       self.write()
+        self.bookmarks.retain(|item| item.id != id);
+        self.write()
     }
 }
 
