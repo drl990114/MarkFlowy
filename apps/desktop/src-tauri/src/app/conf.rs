@@ -152,7 +152,7 @@ impl Default for AppConf {
 
 pub mod cmd {
     use super::AppConf;
-    use tauri::{command, AppHandle, WindowBuilder, WindowUrl};
+    use tauri::{command, AppHandle, WebviewUrl, WebviewWindowBuilder};
 
     #[command]
     pub fn get_app_conf_path() -> String {
@@ -179,13 +179,14 @@ pub mod cmd {
         let theme = AppConf::theme_mode();
 
         tauri::async_runtime::spawn(async move {
-            let conf_win = WindowBuilder::new(&_app, "conf", WindowUrl::App("./setting".into()))
-                .title("markflowy setting")
-                .resizable(true)
-                .fullscreen(false)
-                .theme(Some(theme))
-                .inner_size(1000.0, 600.0)
-                .min_inner_size(500.0, 500.0);
+            let conf_win =
+                WebviewWindowBuilder::new(&_app, "conf", WebviewUrl::App("./setting".into()))
+                    .title("markflowy setting")
+                    .resizable(true)
+                    .fullscreen(false)
+                    .theme(Some(theme))
+                    .inner_size(1000.0, 600.0)
+                    .min_inner_size(500.0, 500.0);
 
             // #[cfg(target_os = "macos")]
             // {

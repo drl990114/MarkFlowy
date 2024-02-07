@@ -1,8 +1,8 @@
-use serde::{Deserialize, Serialize};
 use anyhow::Result as AnyResult;
+use mf_utils::is_md_file_name;
+use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::Path;
-use mf_utils::is_md_file_name;
 
 // #[warn(dead_code)]
 #[derive(Serialize, Deserialize, Debug)]
@@ -150,25 +150,25 @@ pub mod cmd {
         let files = fc::files_to_json(fc::read_directory(folder_path));
         files
     }
-    
+
     #[tauri::command]
     pub fn get_file_content(file_path: &str) -> String {
         let content = fc::read_file(file_path);
         content
     }
-    
+
     #[tauri::command]
     pub fn write_file(file_path: &str, content: &str) -> String {
         fc::write_file(file_path, content);
         String::from("OK")
     }
-    
+
     #[tauri::command]
     pub fn delete_file(file_path: &str) -> String {
         fc::remove_file(file_path);
         String::from("OK")
     }
-    
+
     #[tauri::command]
     pub fn delete_folder(file_path: &str) -> String {
         let _ = fc::remove_folder(file_path);
@@ -179,5 +179,4 @@ pub mod cmd {
     pub fn file_exists(file_path: &str) -> bool {
         fc::exists(Path::new(file_path))
     }
-    
 }

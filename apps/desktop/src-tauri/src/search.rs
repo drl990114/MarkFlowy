@@ -15,12 +15,12 @@ impl Default for SearchOptions {
 
 pub mod cmd {
     use file_search::{
-        manager::{Manager, SearchResult},
+        manager,
         options::{ContentOptions, Options},
         search::Search,
     };
     use std::{sync::mpsc::channel, thread::spawn};
-    use tauri::{command, AppHandle};
+    use tauri::{command, AppHandle, EventTarget, Manager};
 
     use super::SearchOptions;
 
@@ -39,7 +39,7 @@ pub mod cmd {
             content_history: default_options.content_history,
         };
 
-        let mut man = Manager::new(s, opts);
+        let mut man = manager::Manager::new(s, opts);
         man.search(query);
 
         spawn(move || loop {
@@ -49,14 +49,22 @@ pub mod cmd {
             }
             let mess = mess.unwrap();
             match mess {
-                SearchResult::FinalResults(fi) => {
-                    let _ = tauri::Manager::emit_to(&_app, "markflowy", "search_channel_final", Some(fi));
+                manager::SearchResult::FinalResults(fi) => {
+                    let _ = _app.emit_to(
+                        EventTarget::any(),
+                        "search_channel_final",
+                        Some(fi),
+                    );
                 }
-                SearchResult::InterimResult(_fi) => {
-                    // let _ = tauri::Manager::get_window(&_app, "markflowy").unwrap().emit("search_channel_unit", Some(fi));
+                manager::SearchResult::InterimResult(_fi) => {
+                    // let _ = tauri::Manager::get_window(&_app, "main").unwrap().emit("search_channel_unit", Some(fi));
                 }
-                SearchResult::SearchErrors(fi) => {
-                    let _ = tauri::Manager::emit_to(&_app, "markflowy", "search_channel_error", Some(fi));
+                manager::SearchResult::SearchErrors(fi) => {
+                    let _ = _app.emit_to(
+                        EventTarget::any(),
+                        "search_channel_error",
+                        Some(fi),
+                    );
                 }
             }
         });

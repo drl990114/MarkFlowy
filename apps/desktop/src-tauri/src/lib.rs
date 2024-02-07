@@ -31,6 +31,7 @@ pub fn run() {
     tracing_subscriber::fmt::init();
 
     let context = tauri::generate_context!();
+
     tauri::Builder::default()
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
@@ -78,7 +79,6 @@ pub fn run() {
         .run(context)
         .expect("error while running tauri application");
 }
-
 
 #[cfg(target_os = "macos")]
 use cocoa::appkit::{NSWindow, NSWindowStyleMask, NSWindowTitleVisibility};

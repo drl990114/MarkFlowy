@@ -41,10 +41,7 @@ impl Keybindings {
                 KeybindingInfo::new(
                     "app:toggle_sidebar".to_string(),
                     "toggle sideBar visible".to_string(),
-                    vec![
-                        "CommandOrCtrl".to_string(),
-                        "`".to_string(),
-                    ],
+                    vec!["CommandOrCtrl".to_string(), "`".to_string()],
                 ),
             ),
             (
@@ -136,7 +133,11 @@ impl Keybindings {
                 KeybindingInfo::new(
                     "editor:toggle_delete_inline".to_string(),
                     "toggle to delete mark".to_string(),
-                    vec!["CommandOrCtrl".to_string(), "Shift".to_string(), "s".to_string()],
+                    vec![
+                        "CommandOrCtrl".to_string(),
+                        "Shift".to_string(),
+                        "s".to_string(),
+                    ],
                 ),
             ),
             (

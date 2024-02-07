@@ -6,7 +6,7 @@ import type {
   EditorRef,
   EditorViewType,
 } from 'rme'
-import { invoke } from '@tauri-apps/api/primitives'
+import { invoke } from '@tauri-apps/api/core'
 import { getCurrent } from '@tauri-apps/api/window'
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import styled, { css } from 'styled-components'

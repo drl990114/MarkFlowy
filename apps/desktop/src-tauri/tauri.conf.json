@@ -1,74 +1,59 @@
 {
+  "productName": "MarkFlowy",
+  "version": "0.7.3",
+  "identifier": "com.drl990114.markflowy",
   "build": {
     "beforeDevCommand": "yarn dev",
-    "devPath": "http://localhost:3000",
-    "distDir": "../dist",
-    "withGlobalTauri": true
-  },
-  "package": {
-    "productName": "MarkFlowy",
-    "version": "0.7.2"
+    "devUrl": "http://localhost:3000",
+    "frontendDist": "../dist"
   },
   "plugins": {
     "shell": {
       "open": true
     },
-    "http": {
-      "scope": [
-        "*"
-      ]
-    },
     "updater": {
-      "endpoints": [
-        "https://drl990114.github.io/MarkFlowy/install.json"
-      ]
+      "endpoints": ["https://drl990114.github.io/MarkFlowy/install.json"],
+      "active": true,
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDg3M0ZEQUYyOEMyNjVCNTIKUldSU1d5YU04dG8vaDFTemY1RVdrTWNNTUdvMlQ3K05nMnJSQzc5cldQZXM4N2N1ejF3UnJsM1kK",
+      "windows": {
+        "installMode": "passive"
+      }
     }
   },
-  "tauri": {
-    "bundle": {
-      "active": true,
-      "category": "DeveloperTool",
-      "icon": [
-        "icons/32x32.png",
-        "icons/128x128.png",
-        "icons/128x128@2x.png",
-        "icons/icon.icns",
-        "icons/icon.ico"
-      ],
-      "identifier": "com.drl990114.markflowy",
-      "targets": "all",
-      "updater": {
-        "active": true,
-        "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDg3M0ZEQUYyOEMyNjVCNTIKUldSU1d5YU04dG8vaDFTemY1RVdrTWNNTUdvMlQ3K05nMnJSQzc5cldQZXM4N2N1ejF3UnJsM1kK",
-        "windows": {
-          "installMode": "passive"
-        }
+  "bundle": {
+    "active": true,
+    "category": "DeveloperTool",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "targets": "all",
+    "windows": {
+      "digestAlgorithm": "sha256",
+      "webviewInstallMode": {
+        "type": "embedBootstrapper"
       },
-      "windows": {
-        "digestAlgorithm": "sha256",
-        "webviewInstallMode": {
-          "type": "embedBootstrapper"
-        },
-        "wix": {
-          "language": [
-            "en-US"
-          ]
-        }
-      },
-      "macOS": {
-        "entitlements": null,
-        "exceptionDomain": "",
-        "frameworks": [],
-        "providerShortName": null,
-        "signingIdentity": null
+      "wix": {
+        "language": ["en-US"]
       }
     },
+    "macOS": {
+      "entitlements": null,
+      "exceptionDomain": "",
+      "frameworks": [],
+      "providerShortName": null,
+      "signingIdentity": null
+    }
+  },
+  "app": {
+    "withGlobalTauri": true,
     "security": {
       "assetProtocol": {
         "enable": true,
-        "scope": [
-          "**"
-        ]
+        "scope": ["**"]
       },
       "csp": null
     }

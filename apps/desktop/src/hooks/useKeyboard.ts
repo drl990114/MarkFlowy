@@ -1,4 +1,4 @@
-import { invoke } from '@tauri-apps/api/primitives'
+import { invoke } from '@tauri-apps/api/core'
 import { createGlobalStore } from 'hox'
 import { useEffect, useState } from 'react'
 // @ts-ignore
