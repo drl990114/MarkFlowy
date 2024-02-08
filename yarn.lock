@@ -6246,7 +6246,7 @@ __metadata:
     eslint: "npm:8.56.0"
     happy-dom: "npm:^10.10.0"
     hox: "npm:^2.1.0"
-    i18next: "npm:^23.7.16"
+    i18next: "npm:^23.8.2"
     immer: "npm:^10.0.3"
     is-promise: "npm:^4.0.0"
     jest-remirror: "npm:^2.1.5"
@@ -15898,12 +15898,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"i18next@npm:^23.7.16":
-  version: 23.7.16
-  resolution: "i18next@npm:23.7.16"
+"i18next@npm:^23.8.2":
+  version: 23.8.2
+  resolution: "i18next@npm:23.8.2"
   dependencies:
     "@babel/runtime": "npm:^7.23.2"
-  checksum: 77e74c07a73316f6fb6678a5a3e8ce58a6e66be457dd1ccd23941e9fc57ad8e1da55193fa6328c70b86073337b776cd267f3c13c6309f548b3116f27a1e41787
+  checksum: 594c4d5bafd9ac0073a5f2c0ccb40b157571857d43f7f22949a5ab6ea07e6e6f7e39058ddee6e7396369b54d5d741e76cba59c0d5c23ce0ab99e06b249c66f5e
   languageName: node
   linkType: hard
 
