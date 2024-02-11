@@ -1,11 +1,6 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import { Editor as MfEditor } from 'rme'
-import type {
-  EditorChangeHandler,
-  EditorContext,
-  EditorRef,
-  EditorViewType,
-} from 'rme'
+import type { EditorChangeHandler, EditorContext, EditorRef, EditorViewType } from 'rme'
 import { invoke } from '@tauri-apps/api/core'
 import { getCurrent } from '@tauri-apps/api/window'
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
@@ -67,8 +62,7 @@ function Editor(props: EditorProps) {
   const { id, active } = props
   const curFile = getFileObject(id)
   const [notExistFile, setNotExistFile] = useState(false)
-  const { setEditorDelegate, getEditorContent, setEditorCtx, insertNodeToFolderData } =
-    useEditorStore()
+  const { setEditorDelegate, setEditorCtx, insertNodeToFolderData } = useEditorStore()
   const { execute } = useCommandStore()
   const { t } = useTranslation()
   const { settingData } = useAppSettingStore()
@@ -115,9 +109,6 @@ function Editor(props: EditorProps) {
 
         bus.emit(EVENT.editor_save, {
           onSuccess: () => {
-            const text = getEditorContent(curFile.id)
-            contentRef.current = text
-
             if (payload === 'sourceCode') {
               const sourceCodeDelegate = createSourceCodeDelegate()
               setEditorDelegate(curFile.id, sourceCodeDelegate)
@@ -138,7 +129,7 @@ function Editor(props: EditorProps) {
     return () => {
       unListen.then((fn) => fn())
     }
-  }, [active, curFile, execute, getEditorContent, setEditorDelegate])
+  }, [active, curFile, execute, setEditorDelegate])
 
   const saveHandler = useCallback(
     async (params: SaveHandlerParams = {}) => {
