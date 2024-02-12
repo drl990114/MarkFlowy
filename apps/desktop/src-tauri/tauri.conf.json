@@ -1,6 +1,6 @@
 {
   "productName": "MarkFlowy",
-  "version": "0.7.3",
+  "version": "0.7.4",
   "identifier": "com.drl990114.markflowy",
   "build": {
     "beforeDevCommand": "yarn dev",
@@ -12,7 +12,9 @@
       "open": true
     },
     "updater": {
-      "endpoints": ["https://drl990114.github.io/MarkFlowy/install.json"],
+      "endpoints": [
+        "https://drl990114.github.io/MarkFlowy/install.json"
+      ],
       "active": true,
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDg3M0ZEQUYyOEMyNjVCNTIKUldSU1d5YU04dG8vaDFTemY1RVdrTWNNTUdvMlQ3K05nMnJSQzc5cldQZXM4N2N1ejF3UnJsM1kK",
       "windows": {
@@ -37,7 +39,9 @@
         "type": "embedBootstrapper"
       },
       "wix": {
-        "language": ["en-US"]
+        "language": [
+          "en-US"
+        ]
       }
     },
     "macOS": {
@@ -53,7 +57,9 @@
     "security": {
       "assetProtocol": {
         "enable": true,
-        "scope": ["**"]
+        "scope": [
+          "**"
+        ]
       },
       "csp": null
     }

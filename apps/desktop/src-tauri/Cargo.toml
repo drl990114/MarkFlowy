@@ -1,6 +1,6 @@
 [package]
 name = "markflowy"
-version = "0.7.2"
+version = "0.7.4"
 description = "A Markdown Editor App"
 authors = ["drl990114"]
 license = ""
