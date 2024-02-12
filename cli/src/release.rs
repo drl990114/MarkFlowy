@@ -23,11 +23,6 @@ pub struct Release {
 
 #[derive(serde::Deserialize, serde::Serialize)]
 struct Package {
-    package: PackageData,
-}
-
-#[derive(serde::Deserialize, serde::Serialize)]
-struct PackageData {
     version: String,
 }
 
@@ -38,7 +33,7 @@ fn get_old_version() -> String {
     let package_str = std::fs::read_to_string(PACKAGEFILE_URL).unwrap();
     let package: Package = serde_json::from_str::<Package>(&package_str).unwrap();
 
-    return package.package.version;
+    return package.version;
 }
 
 fn write_new_version(new_version: String) {
@@ -51,7 +46,7 @@ fn write_new_version(new_version: String) {
     let mut crate_data: Map<String, serde_json::Value> = toml::from_str(&crates_str).unwrap();
 
     crate_data.get_mut("package").unwrap()["version"] = Value::String(new_version.clone());
-    package.get_mut("package").unwrap()["version"] = Value::String(new_version.clone());
+    package["version"] = Value::String(new_version.clone());
 
     let new_package_str =
         serde_json::to_string_pretty::<Map<String, serde_json::Value>>(&package).unwrap();
