@@ -274,7 +274,7 @@ function Editor(props: EditorProps) {
     return <WarningHeader>File is not exist</WarningHeader>
   }
 
-  const cls = classNames('code-contents', {
+  const cls = classNames('code-contents', 'markdown-body', {
     'editor-active': active,
     'display-none': !active,
   })
