@@ -1,22 +1,10 @@
 import { createGlobalStyle } from 'styled-components'
 
 export const GlobalStyles = createGlobalStyle`
-.mention {
-  padding: 2px 4px;
-  border-radius: 4px;
-}
-
-.remirror-theme {
-  /* Provide sufficient space to see the popup */
-  --rmr-space-6: 400px;
-}
-.suggestions {
-  border: 1px solid darkgray;
-  border-radius: 4px;
-}
-.suggestion {
-  padding: 2px 8px;
-}
+  .remirror-theme {
+    /* Provide sufficient space to see the popup */
+    --rmr-space-6: 400px;
+  }
 
   html {
     border-radius: 10px;
