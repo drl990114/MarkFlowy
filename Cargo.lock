@@ -2754,7 +2754,7 @@ dependencies = [
  "tracing",
  "tracing-subscriber",
  "window-shadows",
- "window-vibrancy 0.4.3 (git+https://github.com/tauri-apps/window-vibrancy)",
+ "window-vibrancy 0.5.0",
 ]
 
 [[package]]
@@ -4562,7 +4562,7 @@ dependencies = [
  "url",
  "webkit2gtk",
  "webview2-com",
- "window-vibrancy 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "window-vibrancy 0.4.3",
  "windows 0.52.0",
 ]
 
@@ -5715,12 +5715,12 @@ dependencies = [
 
 [[package]]
 name = "window-vibrancy"
-version = "0.4.3"
-source = "git+https://github.com/tauri-apps/window-vibrancy#e110b9a079e4ae67572fe12a7d1908e1b77da03d"
+version = "0.5.0"
+source = "git+https://github.com/tauri-apps/window-vibrancy#7cf9442ebc977e5454a148d62deb3eabd6acf51f"
 dependencies = [
  "cocoa",
  "objc",
- "raw-window-handle 0.5.2",
+ "raw-window-handle 0.6.0",
  "windows-sys 0.52.0",
  "windows-version",
 ]
