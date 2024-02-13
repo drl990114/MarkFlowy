@@ -31,7 +31,7 @@
     "@halodong/eslint-config-react": "^0.38.24",
     "@rollup/plugin-node-resolve": "15.2.3",
     "@rollup/plugin-terser": "0.4.4",
-    "@rollup/plugin-typescript": "11.1.5",
+    "@rollup/plugin-typescript": "11.1.6",
     "@tauri-apps/cli": "2.0.0-alpha.21",
     "@types/rollup-plugin-url": "^3",
     "babel": "^6.23.0",
