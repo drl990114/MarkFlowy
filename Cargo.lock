@@ -5692,7 +5692,7 @@ checksum = "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f"
 [[package]]
 name = "window-shadows"
 version = "0.2.2"
-source = "git+https://github.com/tauri-apps/window-shadows#0b36ec7b2dfd6d1dfb882249cc07dd270a483508"
+source = "git+https://github.com/tauri-apps/window-shadows#48fa81bbd9553b1b69e61590b4669bfad8b13ec8"
 dependencies = [
  "cocoa",
  "objc",
