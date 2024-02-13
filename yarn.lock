@@ -733,25 +733,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/helper-create-class-features-plugin@npm:^7.22.10":
-  version: 7.22.10
-  resolution: "@babel/helper-create-class-features-plugin@npm:7.22.10"
-  dependencies:
-    "@babel/helper-annotate-as-pure": "npm:^7.22.5"
-    "@babel/helper-environment-visitor": "npm:^7.22.5"
-    "@babel/helper-function-name": "npm:^7.22.5"
-    "@babel/helper-member-expression-to-functions": "npm:^7.22.5"
-    "@babel/helper-optimise-call-expression": "npm:^7.22.5"
-    "@babel/helper-replace-supers": "npm:^7.22.9"
-    "@babel/helper-skip-transparent-expression-wrappers": "npm:^7.22.5"
-    "@babel/helper-split-export-declaration": "npm:^7.22.6"
-    semver: "npm:^6.3.1"
-  peerDependencies:
-    "@babel/core": ^7.0.0
-  checksum: 79e2b199fea23b656cc4b2d018c398b88630e7cb39372f68f4a63055e14a51dd7b05656ac1f02d732815321c9cebfbe7857d7e03da2fb37fee6024769a96caf8
-  languageName: node
-  linkType: hard
-
 "@babel/helper-create-class-features-plugin@npm:^7.22.11, @babel/helper-create-class-features-plugin@npm:^7.22.15":
   version: 7.22.15
   resolution: "@babel/helper-create-class-features-plugin@npm:7.22.15"
@@ -787,6 +768,25 @@ __metadata:
   peerDependencies:
     "@babel/core": ^7.0.0
   checksum: 5e0cff67a6809d2285215057be45de9dd8900b91e3526fad5eac79023c1d6bee32aed1a04fcdf0e4d99ee4bd49ea5459cb98260c13222edf3bb983621bb452f4
+  languageName: node
+  linkType: hard
+
+"@babel/helper-create-class-features-plugin@npm:^7.23.9":
+  version: 7.23.10
+  resolution: "@babel/helper-create-class-features-plugin@npm:7.23.10"
+  dependencies:
+    "@babel/helper-annotate-as-pure": "npm:^7.22.5"
+    "@babel/helper-environment-visitor": "npm:^7.22.20"
+    "@babel/helper-function-name": "npm:^7.23.0"
+    "@babel/helper-member-expression-to-functions": "npm:^7.23.0"
+    "@babel/helper-optimise-call-expression": "npm:^7.22.5"
+    "@babel/helper-replace-supers": "npm:^7.22.20"
+    "@babel/helper-skip-transparent-expression-wrappers": "npm:^7.22.5"
+    "@babel/helper-split-export-declaration": "npm:^7.22.6"
+    semver: "npm:^6.3.1"
+  peerDependencies:
+    "@babel/core": ^7.0.0
+  checksum: 8b9f02526eeb03ef1d2bc89e3554377ae966b33a74078ab1f88168dfa725dc206ea5ecf4cf417c3651d8a6b3c70204f6939a9aa0401be3d0d32ddbf6024ea3c7
   languageName: node
   linkType: hard
 
@@ -1372,21 +1372,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/plugin-proposal-decorators@npm:^7.22.10":
-  version: 7.22.10
-  resolution: "@babel/plugin-proposal-decorators@npm:7.22.10"
-  dependencies:
-    "@babel/helper-create-class-features-plugin": "npm:^7.22.10"
-    "@babel/helper-plugin-utils": "npm:^7.22.5"
-    "@babel/helper-replace-supers": "npm:^7.22.9"
-    "@babel/helper-split-export-declaration": "npm:^7.22.6"
-    "@babel/plugin-syntax-decorators": "npm:^7.22.10"
-  peerDependencies:
-    "@babel/core": ^7.0.0-0
-  checksum: 4ecd18c1c72189a88a904c17816caa6823affd8b6822a4f38111a9b34a0d1fad2dabb7e11effb71b212adf4ec980c8e8b80406f8b3e9c33e88fdce0fb8ad6d7b
-  languageName: node
-  linkType: hard
-
 "@babel/plugin-proposal-decorators@npm:^7.22.5":
   version: 7.22.7
   resolution: "@babel/plugin-proposal-decorators@npm:7.22.7"
@@ -1399,6 +1384,19 @@ __metadata:
   peerDependencies:
     "@babel/core": ^7.0.0-0
   checksum: efbca342d65a155be507c4bd76c264a55a515976ec830653e0bf863d722690a995c49df51130ccf982419726904b8a8e7224b1f1d4c3c15accb01d9965108e09
+  languageName: node
+  linkType: hard
+
+"@babel/plugin-proposal-decorators@npm:^7.23.9":
+  version: 7.23.9
+  resolution: "@babel/plugin-proposal-decorators@npm:7.23.9"
+  dependencies:
+    "@babel/helper-create-class-features-plugin": "npm:^7.23.9"
+    "@babel/helper-plugin-utils": "npm:^7.22.5"
+    "@babel/plugin-syntax-decorators": "npm:^7.23.3"
+  peerDependencies:
+    "@babel/core": ^7.0.0-0
+  checksum: 256a060d2346da10afdcc32d3c4939183bd8865367a64893c739174c4d247b586204dd0b7927d20e90f73714ac7d7a1a5f4740f827ef8e0277697bd626df59dc
   languageName: node
   linkType: hard
 
@@ -1468,17 +1466,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/plugin-syntax-decorators@npm:^7.22.10":
-  version: 7.22.10
-  resolution: "@babel/plugin-syntax-decorators@npm:7.22.10"
-  dependencies:
-    "@babel/helper-plugin-utils": "npm:^7.22.5"
-  peerDependencies:
-    "@babel/core": ^7.0.0-0
-  checksum: 983caa82f5a9cbb55196cd9ff3a6e2cf11e6eba5c11fc5fecb4ef7229ca05af08a5eeab0c668e5cd9fae62c01b038ec1906ced09fd7cb6dde94f0b8824e231c6
-  languageName: node
-  linkType: hard
-
 "@babel/plugin-syntax-decorators@npm:^7.22.5":
   version: 7.22.5
   resolution: "@babel/plugin-syntax-decorators@npm:7.22.5"
@@ -1487,6 +1474,17 @@ __metadata:
   peerDependencies:
     "@babel/core": ^7.0.0-0
   checksum: 2f7bcaf80790bb4abc1d09e07b2c74373c96238961dff2a7bccf741f8261403ab47de997dc6d1735e747a36b299e54a4efac60276158799cbd1353b2cf3f1ed7
+  languageName: node
+  linkType: hard
+
+"@babel/plugin-syntax-decorators@npm:^7.23.3":
+  version: 7.23.3
+  resolution: "@babel/plugin-syntax-decorators@npm:7.23.3"
+  dependencies:
+    "@babel/helper-plugin-utils": "npm:^7.22.5"
+  peerDependencies:
+    "@babel/core": ^7.0.0-0
+  checksum: 5856e236f7ae15a58c839fd40df1aa4df31029048df01191b4870c34b1bff44c77fbee78ca5edd8eb3c81410005d8f9a36a9cf48094f2bb328592304a738648a
   languageName: node
   linkType: hard
 
@@ -6231,7 +6229,7 @@ __metadata:
   resolution: "@markflowy/desktop@workspace:apps/desktop"
   dependencies:
     "@babel/plugin-proposal-class-properties": "npm:^7.18.6"
-    "@babel/plugin-proposal-decorators": "npm:^7.22.10"
+    "@babel/plugin-proposal-decorators": "npm:^7.23.9"
     "@ebay/nice-modal-react": "npm:^1.2.13"
     "@emotion/css": "npm:^11.11.0"
     "@emotion/react": "npm:^11.11.3"
@@ -17598,7 +17596,7 @@ __metadata:
     "@babel/eslint-parser": "npm:^7.23.3"
     "@babel/eslint-plugin": "npm:^7.22.10"
     "@babel/plugin-proposal-class-properties": "npm:^7.18.6"
-    "@babel/plugin-proposal-decorators": "npm:^7.22.10"
+    "@babel/plugin-proposal-decorators": "npm:^7.23.9"
     "@babel/preset-env": "npm:^7.23.9"
     "@babel/preset-react": "npm:^7.23.3"
     "@babel/preset-typescript": "npm:^7.22.5"
