@@ -4697,7 +4697,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@docusaurus/module-type-aliases@npm:3.1.0, @docusaurus/module-type-aliases@npm:^3.1.0":
+"@docusaurus/module-type-aliases@npm:3.1.0":
   version: 3.1.0
   resolution: "@docusaurus/module-type-aliases@npm:3.1.0"
   dependencies:
@@ -4713,6 +4713,25 @@ __metadata:
     react: "*"
     react-dom: "*"
   checksum: 37f586d29871ca68f04386815c3c9b4766413d4e4459eb8538b663967bffff62bb2ac385b0cc74ab985aaabba534ae106eb03191823af7cdbad280c2afbe01f7
+  languageName: node
+  linkType: hard
+
+"@docusaurus/module-type-aliases@npm:^3.1.1":
+  version: 3.1.1
+  resolution: "@docusaurus/module-type-aliases@npm:3.1.1"
+  dependencies:
+    "@docusaurus/react-loadable": "npm:5.5.2"
+    "@docusaurus/types": "npm:3.1.1"
+    "@types/history": "npm:^4.7.11"
+    "@types/react": "npm:*"
+    "@types/react-router-config": "npm:*"
+    "@types/react-router-dom": "npm:*"
+    react-helmet-async: "npm:*"
+    react-loadable: "npm:@docusaurus/react-loadable@5.5.2"
+  peerDependencies:
+    react: "*"
+    react-dom: "*"
+  checksum: 1a52051d4bd166f5e7a8b7ba02439565fcffacdabd9e42ac268c064c9ac24d1b39dea8028a3e40c61ec0d423cfd69441dc647c434ef1bc932372915ebea45a3c
   languageName: node
   linkType: hard
 
@@ -5054,6 +5073,26 @@ __metadata:
     react: ^18.0.0
     react-dom: ^18.0.0
   checksum: 2aa02d4604c402c78bc646aee3278c43f2d64e61275ca3f9ade1cac6f170f5d80bd60d4eee9bb1a1dd4146d3f003ccca137d7060002ec12edf4ce7dd7d54c76c
+  languageName: node
+  linkType: hard
+
+"@docusaurus/types@npm:3.1.1":
+  version: 3.1.1
+  resolution: "@docusaurus/types@npm:3.1.1"
+  dependencies:
+    "@mdx-js/mdx": "npm:^3.0.0"
+    "@types/history": "npm:^4.7.11"
+    "@types/react": "npm:*"
+    commander: "npm:^5.1.0"
+    joi: "npm:^17.9.2"
+    react-helmet-async: "npm:^1.3.0"
+    utility-types: "npm:^3.10.0"
+    webpack: "npm:^5.88.1"
+    webpack-merge: "npm:^5.9.0"
+  peerDependencies:
+    react: ^18.0.0
+    react-dom: ^18.0.0
+  checksum: 55e70d4856391a373991ac4da0ecd836b55ebe690198bb2df33617135c8e3fc2acb0946f41c933cc9226e6b0133697fb297871e5f6b1a23d7a5bcd250c2da715
   languageName: node
   linkType: hard
 
@@ -13203,7 +13242,7 @@ __metadata:
   resolution: "docs@workspace:docs"
   dependencies:
     "@docusaurus/core": "npm:^3.1.0"
-    "@docusaurus/module-type-aliases": "npm:^3.1.0"
+    "@docusaurus/module-type-aliases": "npm:^3.1.1"
     "@docusaurus/plugin-content-docs": "npm:^3.1.0"
     "@docusaurus/plugin-pwa": "npm:^3.1.0"
     "@docusaurus/preset-classic": "npm:^3.1.0"
