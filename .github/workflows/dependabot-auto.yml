@@ -7,18 +7,19 @@ permissions:
 jobs:
   dependabot:
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     if: ${{ github.actor == 'dependabot[bot]' }}
     steps:
       - name: Dependabot metadata
         id: metadata
         uses: dependabot/fetch-metadata@v1
         with:
-          github-token:  ${{ secrets.ACCESS_TOKEN }}
-      - name: Approve a PR
-        run: gh pr review --approve "$PR_URL"
-        env:
-          PR_URL: ${{github.event.pull_request.html_url}}
-          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          github-token:  ${{ secrets.GITHUB_TOKEN }}
+      - uses: hmarr/auto-approve-action@v4
+        with:
+          review-message: "Auto approved automated PR"
+          github-token: ${{ secrets.ACCESS_TOKEN }}
 #       - name: Enable auto-merge for Dependabot PRs
 #         run: gh pr merge --auto --merge "$PR_URL"
 #         env:
