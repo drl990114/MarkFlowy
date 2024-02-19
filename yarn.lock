@@ -3925,7 +3925,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/preset-typescript@npm:^7.21.0":
+"@babel/preset-typescript@npm:^7.21.0, @babel/preset-typescript@npm:^7.23.3":
   version: 7.23.3
   resolution: "@babel/preset-typescript@npm:7.23.3"
   dependencies:
@@ -17823,7 +17823,7 @@ __metadata:
     "@babel/plugin-proposal-decorators": "npm:^7.23.9"
     "@babel/preset-env": "npm:^7.23.9"
     "@babel/preset-react": "npm:^7.23.3"
-    "@babel/preset-typescript": "npm:^7.22.5"
+    "@babel/preset-typescript": "npm:^7.23.3"
     "@halodong/eslint-config-react": "npm:^0.38.24"
     "@rollup/plugin-node-resolve": "npm:15.2.3"
     "@rollup/plugin-terser": "npm:0.4.4"
