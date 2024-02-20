@@ -1,10 +1,5 @@
-export * from './base'
-export * from './codemirror'
 export * from './darken-colors'
 
-import darkCss from './dark.css'
-import lightCss from './light.css'
-import { mfCodemirrorDark, mfCodemirrorLight } from './codemirror'
 import type { CreateThemeOptions } from '@drl990114/codemirror-themes'
 
 export type ThemeColors = typeof lightTheme
@@ -23,11 +18,11 @@ export type MfTheme = {
   /**
    * Replace styled constants
    */
-  styledContants: Record<string, string>
+  styledConstants: Record<string, string>
   /**
    * Codemirror theme.
    */
-  codemirorTheme: CreateThemeOptions
+  codemirrorTheme?: CreateThemeOptions
   /**
    * @example
    * .example {
@@ -131,15 +126,11 @@ const styledDarkTheme = {
 export const lightTheme: MfTheme = {
   name: 'MarkFlowy Light',
   mode: 'light',
-  styledContants: styledLightTheme,
-  codemirorTheme: mfCodemirrorLight,
-  globalStyleText: lightCss
+  styledConstants: styledLightTheme,
 }
 
 export const darkTheme: MfTheme = {
   name: 'MarkFlowy Dark',
   mode: 'dark',
-  styledContants: styledDarkTheme,
-  codemirorTheme: mfCodemirrorDark,
-  globalStyleText: darkCss
+  styledConstants: styledDarkTheme,
 }

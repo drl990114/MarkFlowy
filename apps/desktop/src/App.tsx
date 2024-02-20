@@ -1,4 +1,3 @@
-import { BaseStyle } from '@markflowy/theme'
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles'
 import { ThemeProvider as MfThemeProvider, Notifications } from '@markflowy/components'
 import { Route, Routes } from 'react-router-dom'
@@ -13,19 +12,22 @@ import NiceModal from '@ebay/nice-modal-react'
 import { InjectFonts } from './injectFonts'
 import { Modal } from './components'
 import { MODAL_CONFIRM_ID } from './components/Modal'
-import { EditorProvider } from 'rme'
+import { ThemeProvider as EditorProvider } from 'rme'
 
 const AppThemeProvider: React.FC<BaseComponentProps> = function ({ children }) {
   const { muiTheme, curTheme } = useThemeStore()
 
-  const theme = curTheme?.styledContants || {}
+  const theme = curTheme?.styledConstants || {}
   return (
     <StyleSheetManager shouldForwardProp={isPropValid}>
       <MfThemeProvider theme={theme}>
         <ThemeProvider theme={theme}>
-          <EditorProvider theme={theme}>
+          <EditorProvider
+            theme={{
+              mode: curTheme.mode,
+            }}
+          >
             <InjectFonts />
-            <BaseStyle theme={curTheme?.styledContants} />
             <GlobalStyles />
             <NiceModal.Provider>
               <MuiThemeProvider theme={muiTheme}>{children}</MuiThemeProvider>

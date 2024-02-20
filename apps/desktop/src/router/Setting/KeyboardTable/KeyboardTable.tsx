@@ -29,7 +29,7 @@ export function KeyboardTable() {
       <Table size='small' aria-label='caption table'>
         <TableHead
           sx={{
-            backgroundColor: curTheme.styledContants.tipsBgColor,
+            backgroundColor: curTheme.styledConstants.tipsBgColor,
           }}
         >
           <TableRow>
