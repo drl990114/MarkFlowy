@@ -11,7 +11,6 @@ import useChangeCodeMirrorTheme from '@/components/EditorArea/editorHooks/useCha
 import { createWysiwygDelegate } from 'rme'
 import { createSourceCodeDelegate } from 'rme'
 import { useCommandEvent } from '@/components/EditorArea/editorHooks/CommandEvent'
-import { EditorCount } from '@/components/EditorArea/editorToolBar/EditorCount'
 import bus from '@/helper/eventBus'
 import { EVENT } from '@/constants'
 import classNames from 'classnames'
@@ -22,6 +21,8 @@ import { save } from '@tauri-apps/plugin-dialog'
 import { useTranslation } from 'react-i18next'
 import { debounce } from 'lodash'
 import { createWysiwygDelegateOptions } from './createWysiwygDelegateOptions'
+import { useMount, useUnmount } from 'react-use'
+import useEditorCounterStore from '@/stores/useEditorCounterStore'
 
 const appWindow = getCurrent()
 
@@ -63,6 +64,7 @@ function Editor(props: EditorProps) {
   const curFile = getFileObject(id)
   const [notExistFile, setNotExistFile] = useState(false)
   const { setEditorDelegate, setEditorCtx, insertNodeToFolderData } = useEditorStore()
+  const { addEditorCounter, deleteEditorCounter } = useEditorCounterStore()
   const { execute } = useCommandStore()
   const { t } = useTranslation()
   const { settingData } = useAppSettingStore()
@@ -70,6 +72,14 @@ function Editor(props: EditorProps) {
   const [delegate, setDelegate] = useState(
     createWysiwygDelegate(createWysiwygDelegateOptions(getFolderPathFromPath(curFile.path))),
   )
+
+  useMount(() => {
+    setEditorDelegate(id, delegate)
+  })
+
+  useUnmount(() => {
+    deleteEditorCounter({ id })
+  })
 
   useLayoutEffect(() => {
     const init = async () => {
@@ -239,17 +249,28 @@ function Editor(props: EditorProps) {
           useChangeCodeMirrorTheme()
         },
       ],
-      wysiwygToolBar: [<EditorCount key='editor-count' />],
-      markdownToolBar: [<EditorCount key='editor-count' />],
     }),
     [content, delegate, setEditorCtx, id, active],
   )
 
   const handleChange: EditorChangeHandler = useCallback(
     (params, editedContent) => {
+      const { tr, helpers } = params
+      const { getCharacterCount, getWordCount } = helpers
+
+      const characterCount = getCharacterCount()
+      const wordCount = getWordCount()
+
+      addEditorCounter({
+        id,
+        data: {
+          characterCount,
+          wordCount,
+        },
+      })
+
       if (!active) return
 
-      const { tr, helpers } = params
       if (tr?.docChanged && !tr.getMeta('APPLY_MARKS')) {
         contentRef.current = editedContent
         const state = {
@@ -261,13 +282,12 @@ function Editor(props: EditorProps) {
 
         setIdStateMap(id, state)
         debounceRefreshToc()
-
         if (settingData.autosave) {
           debounceSaveHandler()
         }
       }
     },
-    [id, debounceSaveHandler, active, debounceRefreshToc, settingData],
+    [id, debounceSaveHandler, active, debounceRefreshToc, settingData, addEditorCounter],
   )
 
   if (notExistFile) {

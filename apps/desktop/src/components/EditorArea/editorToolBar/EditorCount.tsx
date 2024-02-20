@@ -1,4 +1,5 @@
-import { useHelpers } from 'rme'
+import { useEditorStore } from '@/stores'
+import useEditorCounterStore from '@/stores/useEditorCounterStore'
 import styled from 'styled-components'
 
 const Container = styled.div`
@@ -15,10 +16,20 @@ const Container = styled.div`
 `
 
 export const EditorCount = () => {
-  const { getCharacterCount, getWordCount } = useHelpers(true)
+  const { editorCounterMap } = useEditorCounterStore()
+  const { activeId } = useEditorStore()
 
-  const characterCount = getCharacterCount()
-  const wordCount = getWordCount()
+  if (!activeId) {
+    return null
+  }
+
+  const counter = editorCounterMap[activeId]
+
+  if (!counter) {
+    return null
+  }
+
+  const { wordCount, characterCount } = counter
 
   return (
     <Container>
