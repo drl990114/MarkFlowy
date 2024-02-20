@@ -7,7 +7,6 @@ import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useStat
 import styled, { css } from 'styled-components'
 import { useCommandStore, useEditorStateStore, useEditorStore } from '@/stores'
 import { getFileObject, updateFileObject } from '@/helper/files'
-import useChangeCodeMirrorTheme from '@/components/EditorArea/editorHooks/useChangeCodeMirrorTheme'
 import { createWysiwygDelegate } from 'rme'
 import { createSourceCodeDelegate } from 'rme'
 import { useCommandEvent } from '@/components/EditorArea/editorHooks/CommandEvent'
@@ -246,7 +245,6 @@ function Editor(props: EditorProps) {
       hooks: [
         () => {
           useCommandEvent({ active })
-          useChangeCodeMirrorTheme()
         },
       ],
     }),
@@ -294,7 +292,7 @@ function Editor(props: EditorProps) {
     return <WarningHeader>File is not exist</WarningHeader>
   }
 
-  const cls = classNames('code-contents', 'markdown-body', {
+  const cls = classNames('code-contents', {
     'editor-active': active,
     'display-none': !active,
   })

@@ -111,7 +111,7 @@ const ChatList: React.FC<ChatListProps> = (props) => {
                         type='bubbles'
                         width={35}
                         height={35}
-                        color={curTheme.styledContants.accentColor}
+                        color={curTheme.styledConstants.accentColor}
                       />
                     ) : chat.status === 'error' ? (
                       <div>

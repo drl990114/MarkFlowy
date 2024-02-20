@@ -101,7 +101,7 @@ const EditorAreaTabs = memo(() => {
           return (
             <TabItem active={active} onClick={() => onSelectItem(file.id)} key={id}>
               <i className={'ri-file-3-line tab-items__icon'} />
-              <span style={{ color: active ? curTheme.styledContants.accentColor : '' }}>
+              <span style={{ color: active ? curTheme.styledConstants.accentColor : '' }}>
                 {file.name}
               </span>
 

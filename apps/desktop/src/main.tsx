@@ -22,7 +22,7 @@ const Main = () => {
     <Suspense
       fallback={
         <FallBackContainer>
-          <BarLoader color={lightTheme.styledContants.accentColor} width={200} />
+          <BarLoader color={lightTheme.styledConstants.accentColor} width={200} />
         </FallBackContainer>
       }
     >
