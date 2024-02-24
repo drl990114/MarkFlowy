@@ -59,7 +59,7 @@ export const common = {
   bigBorderRadius: '12px',
 
   black: '#74757D',
-  white: '#E0E0E0',
+  white: '#ffffff',
   gray: '#C0C0C0',
   blue: '#0359D0',
 
