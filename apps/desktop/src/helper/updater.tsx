@@ -1,6 +1,6 @@
 import { MODAL_CONFIRM_ID } from '@/components/Modal'
 import NiceModal from '@ebay/nice-modal-react'
-import { Button, toast } from '@markflowy/components'
+import { Button, toast } from 'zens'
 import { invoke } from '@tauri-apps/api/core'
 import type { Update } from '@tauri-apps/plugin-updater'
 import { check } from '@tauri-apps/plugin-updater'

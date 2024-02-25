@@ -1,5 +1,5 @@
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles'
-import { ThemeProvider as MfThemeProvider, Notifications } from '@markflowy/components'
+import { ThemeProvider as MfThemeProvider, Notifications } from 'zens'
 import { Route, Routes } from 'react-router-dom'
 import { ThemeProvider, StyleSheetManager } from 'styled-components'
 import { GlobalStyles } from './globalStyles'
@@ -20,7 +20,11 @@ const AppThemeProvider: React.FC<BaseComponentProps> = function ({ children }) {
   const theme = curTheme?.styledConstants || {}
   return (
     <StyleSheetManager shouldForwardProp={isPropValid}>
-      <MfThemeProvider theme={theme}>
+      <MfThemeProvider
+        theme={{
+          mode: curTheme.mode,
+        }}
+      >
         <ThemeProvider theme={theme}>
           <EditorProvider
             theme={{

@@ -1,5 +1,5 @@
 import NiceModal, { useModal } from '@ebay/nice-modal-react'
-import { Button, Dialog } from '@markflowy/components'
+import { Button, Dialog } from 'zens'
 import { useTranslation } from 'react-i18next'
 
 interface ConfirmModalProps {

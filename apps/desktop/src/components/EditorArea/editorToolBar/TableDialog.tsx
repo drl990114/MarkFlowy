@@ -1,4 +1,4 @@
-import { Dialog } from '@markflowy/components'
+import { Dialog } from 'zens'
 import bus from '@/helper/eventBus'
 import { Button, TextField, Grid } from '@mui/material'
 import { useCallback, useEffect, useState } from 'react'

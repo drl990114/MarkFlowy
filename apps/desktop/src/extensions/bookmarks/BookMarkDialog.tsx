@@ -1,4 +1,4 @@
-import { Input } from '@markflowy/components'
+import { Input } from 'zens'
 import { Label } from '@/components/UI/Label'
 import { useCommandStore } from '@/stores'
 import { Autocomplete, Button, TextField } from '@mui/material'
@@ -6,7 +6,7 @@ import type { SyntheticEvent } from 'react'
 import { useEffect, useMemo, useState } from 'react'
 import styled from 'styled-components'
 import useBookMarksStore from './useBookMarksStore'
-import { Dialog } from '@markflowy/components'
+import { Dialog } from 'zens'
 
 const ItemWrapper = styled.div`
   display: flex;

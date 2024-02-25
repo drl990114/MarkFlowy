@@ -1,5 +1,5 @@
-import type { TooltipProps } from '@markflowy/components'
-import { Tooltip } from '@markflowy/components'
+import type { TooltipProps } from 'zens'
+import { Tooltip } from 'zens'
 import classNames from 'classnames'
 
 interface MfIconButtonProps {

@@ -1,4 +1,4 @@
-import type { MenuItemData } from '@markflowy/components'
+import type { MenuItemData } from 'zens'
 import { create } from 'zustand'
 
 const useContextMenuStore = create<ContextMenuStore>((set) => {

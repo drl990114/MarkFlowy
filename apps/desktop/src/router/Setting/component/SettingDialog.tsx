@@ -1,4 +1,4 @@
-import { Dialog } from '@markflowy/components'
+import { Dialog } from 'zens'
 import { Setting } from '@/router'
 import { memo, useCallback, useEffect, useState } from 'react'
 import { useCommandStore } from '@/stores'

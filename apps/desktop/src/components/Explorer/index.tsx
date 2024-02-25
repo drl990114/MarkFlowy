@@ -10,7 +10,7 @@ import { useOpen } from '@/hooks'
 import { Empty, FileTree, List } from '@/components'
 import styled from 'styled-components'
 import useOpenedCacheStore from '@/stores/useOpenedCacheStore'
-import { Popover } from '@markflowy/components'
+import { Popover } from 'zens'
 import { MfIconButton } from '../UI/Button'
 
 const RecentListBottom = styled.div`
