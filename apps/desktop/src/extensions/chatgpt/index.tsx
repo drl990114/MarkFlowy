@@ -1,4 +1,4 @@
-import { Button, Input } from '@markflowy/components'
+import { Button, Input } from 'zens'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import ReactLoading from 'react-loading'
 import { parseChatList } from './parseChatList'

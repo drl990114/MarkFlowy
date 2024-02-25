@@ -1,4 +1,4 @@
-import { Dialog, Button, Space } from '@markflowy/components'
+import { Dialog, Button, Space } from 'zens'
 import { writeText } from '@tauri-apps/plugin-clipboard-manager'
 import { listen } from '@tauri-apps/api/event'
 import type { FC } from 'react'

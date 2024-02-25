@@ -1,6 +1,6 @@
 import type { IShowContextMenuParams } from '@/stores/useContextMenuStore'
 import useContextMenuStore from '@/stores/useContextMenuStore'
-import { Menu } from '@markflowy/components'
+import { Menu } from 'zens'
 import { useEffect } from 'react'
 
 const CONTEXT_MENU_ID = 'mf-context-menu'

@@ -11,7 +11,7 @@ import {
   useEffect,
   useMemo,
 } from 'react'
-import { Input } from '@markflowy/components'
+import { Input } from 'zens'
 import { Validity } from '../Validity'
 import { unVerifiedFileNameChars, verifyFileName } from './verify-file-name'
 import { EVENT } from '@/constants'

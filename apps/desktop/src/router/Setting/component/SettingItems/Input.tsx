@@ -1,4 +1,4 @@
-import { Input } from '@markflowy/components'
+import { Input } from 'zens'
 import { memo, useCallback } from 'react'
 import type { SettingItemProps } from '.'
 import { SettingLabel } from './Label'

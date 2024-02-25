@@ -3981,6 +3981,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@babel/runtime@npm:^7, @babel/runtime@npm:^7.23.8":
+  version: 7.23.9
+  resolution: "@babel/runtime@npm:7.23.9"
+  dependencies:
+    regenerator-runtime: "npm:^0.14.0"
+  checksum: 9a520fe1bf72249f7dd60ff726434251858de15cccfca7aa831bd19d0d3fb17702e116ead82724659b8da3844977e5e13de2bae01eb8a798f2823a669f122be6
+  languageName: node
+  linkType: hard
+
 "@babel/runtime@npm:^7.1.2, @babel/runtime@npm:^7.10.3, @babel/runtime@npm:^7.11.2, @babel/runtime@npm:^7.12.13":
   version: 7.23.1
   resolution: "@babel/runtime@npm:7.23.1"
@@ -4005,15 +4014,6 @@ __metadata:
   dependencies:
     regenerator-runtime: "npm:^0.13.11"
   checksum: 1d2f56797f548b009910bddf3dc04f980a9701193233145dc923f3ea87c8f88121a3c3ef1d449e9cb52a370d7d025a2243c748882d5546ff079ddf5ffe29f240
-  languageName: node
-  linkType: hard
-
-"@babel/runtime@npm:^7.23.8":
-  version: 7.23.9
-  resolution: "@babel/runtime@npm:7.23.9"
-  dependencies:
-    regenerator-runtime: "npm:^0.14.0"
-  checksum: 9a520fe1bf72249f7dd60ff726434251858de15cccfca7aa831bd19d0d3fb17702e116ead82724659b8da3844977e5e13de2bae01eb8a798f2823a669f122be6
   languageName: node
   linkType: hard
 
@@ -6454,29 +6454,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@markflowy/components@npm:0.0.10":
-  version: 0.0.10
-  resolution: "@markflowy/components@npm:0.0.10"
-  dependencies:
-    "@ariakit/react": "npm:^0.3.8"
-    "@floating-ui/dom": "npm:^1.0.0"
-    "@markflowy/theme": "npm:^0.0.8"
-    classnames: "npm:^2.3.0"
-    clsx: "npm:^2.0.0"
-    rc-image: "npm:^7.5.1"
-    react: "npm:^18.2.0"
-    react-dom: "npm:^18.2.0"
-    react-hot-toast: "npm:^2.4.1"
-    react-spinners: "npm:^0.13.8"
-    styled-components: "npm:^6.1.0"
-    stylis: "npm:^4.0.0"
-  peerDependencies:
-    react: ">=16.14.0"
-    react-dom: ">=16.14.0"
-  checksum: 9294c7b778b52b2d744251414d67c7f84e8370eb49a0f95f085594b3c225aa0833584a7fba441869d99aa09e5063b3fd2780fab7e8ee27d35d11a96dc3c3bade
-  languageName: node
-  linkType: hard
-
 "@markflowy/desktop@workspace:apps/desktop":
   version: 0.0.0-use.local
   resolution: "@markflowy/desktop@workspace:apps/desktop"
@@ -6488,7 +6465,6 @@ __metadata:
     "@emotion/react": "npm:^11.11.3"
     "@emotion/styled": "npm:^11.11.0"
     "@formkit/auto-animate": "npm:^0.7.0"
-    "@markflowy/components": "npm:0.0.10"
     "@markflowy/theme": "workspace:*"
     "@markflowy/types": "workspace:*"
     "@mui/material": "npm:^5.15.6"
@@ -6534,7 +6510,7 @@ __metadata:
     react-test-renderer: "npm:^18.2.0"
     react-use: "npm:^17.5.0"
     remixicon: "npm:^4.1.0"
-    rme: "npm:^0.0.28"
+    rme: "npm:^0.0.29"
     styled-components: "npm:^6.1.0"
     stylis: "npm:^4.0.0"
     tinykeys: "npm:^2.1.0"
@@ -6544,6 +6520,7 @@ __metadata:
     vite: "npm:^5.1.3"
     vite-plugin-svgr: "npm:^4.1.0"
     vitest: "npm:^1.2.2"
+    zens: "npm:^0.0.4"
     zustand: "npm:^4.4.6"
   languageName: unknown
   linkType: soft
@@ -6568,21 +6545,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@markflowy/theme@npm:^0.0.8":
-  version: 0.0.8
-  resolution: "@markflowy/theme@npm:0.0.8"
-  dependencies:
-    "@lezer/highlight": "npm:^1.1.6"
-    color: "npm:^4.2.3"
-    react: "npm:^18.2.0"
-    styled-components: "npm:^6.1.0"
-  peerDependencies:
-    eslint: ">=7.4.0"
-  checksum: f5ebed3c596c92871a9d594ee2cc3b48555b64e78a4bed2880c6a0d33736e3b1dd3c9efe9cbe29abb5e64a55d131a688b7ce70059233757994ae3553b9cbf6f6
-  languageName: node
-  linkType: hard
-
-"@markflowy/theme@workspace:*, @markflowy/theme@workspace:packages/theme":
+"@markflowy/theme@npm:^0.0.13, @markflowy/theme@workspace:*, @markflowy/theme@workspace:packages/theme":
   version: 0.0.0-use.local
   resolution: "@markflowy/theme@workspace:packages/theme"
   dependencies:
@@ -22661,9 +22624,9 @@ plugin-image-zoom@ataft/plugin-image-zoom:
   languageName: node
   linkType: hard
 
-"rme@npm:^0.0.28":
-  version: 0.0.28
-  resolution: "rme@npm:0.0.28"
+"rme@npm:^0.0.29":
+  version: 0.0.29
+  resolution: "rme@npm:0.0.29"
   dependencies:
     "@codemirror/autocomplete": "npm:^6.8.1"
     "@codemirror/commands": "npm:^6.2.4"
@@ -22680,7 +22643,6 @@ plugin-image-zoom@ataft/plugin-image-zoom:
     "@emotion/styled": "npm:^11.11.0"
     "@floating-ui/react": "npm:^0.25.1"
     "@lezer/highlight": "npm:^1.2.0"
-    "@markflowy/components": "npm:0.0.10"
     "@mui/material": "npm:5.15.6"
     "@remirror/core": "npm:^2.0.17"
     "@remirror/core-utils": "npm:^2.0.12"
@@ -22736,10 +22698,11 @@ plugin-image-zoom@ataft/plugin-image-zoom:
     tether-drop: "npm:^1.4.2"
     void-elements: "npm:^3.1.0"
     yjs: "npm:^13.6.6"
+    zens: "npm:0.0.4"
   peerDependencies:
     react: ">=16.14.0"
     react-dom: ">=16.14.0"
-  checksum: 0179fe81a5d014bb673ecc3dddcafa0fe104903d61d905453cb4047d1cfacfaba6c89e1bd49bac86361b7e61ee63881b2e9a9e1c8e985150dc7fcf8bcb337920
+  checksum: 3474c11abbbbf29c1951101616e56a57a4d51a6161020b44f311091c2cd83cec03277207e7c340cdf8db607cf79ab2fa233b88a7dc51b74f083672b53c9de4b0
   languageName: node
   linkType: hard
 
@@ -23553,6 +23516,16 @@ plugin-image-zoom@ataft/plugin-image-zoom:
     ip: "npm:^2.0.0"
     smart-buffer: "npm:^4.2.0"
   checksum: 5074f7d6a13b3155fa655191df1c7e7a48ce3234b8ccf99afa2ccb56591c195e75e8bb78486f8e9ea8168e95a29573cbaad55b2b5e195160ae4d2ea6811ba833
+  languageName: node
+  linkType: hard
+
+"sonner@npm:^1.4.0":
+  version: 1.4.0
+  resolution: "sonner@npm:1.4.0"
+  peerDependencies:
+    react: ^18.0.0
+    react-dom: ^18.0.0
+  checksum: 329be91a9b9c51fbdae548f394e936b20c80c37f1fdd226f58ad71a734c46e9aa96b44273b4b43018cb3c722804df53a23a5240de2d39f27fda516c1b9780ae7
   languageName: node
   linkType: hard
 
@@ -26342,6 +26315,28 @@ plugin-image-zoom@ataft/plugin-image-zoom:
   version: 1.0.0
   resolution: "yocto-queue@npm:1.0.0"
   checksum: 2cac84540f65c64ccc1683c267edce396b26b1e931aa429660aefac8fbe0188167b7aee815a3c22fa59a28a58d898d1a2b1825048f834d8d629f4c2a5d443801
+  languageName: node
+  linkType: hard
+
+"zens@npm:0.0.4, zens@npm:^0.0.4":
+  version: 0.0.4
+  resolution: "zens@npm:0.0.4"
+  dependencies:
+    "@ariakit/react": "npm:^0.3.8"
+    "@babel/runtime": "npm:^7"
+    "@floating-ui/dom": "npm:^1.0.0"
+    "@markflowy/theme": "npm:^0.0.13"
+    classnames: "npm:^2.3.0"
+    clsx: "npm:^2.0.0"
+    rc-image: "npm:^7.5.1"
+    react: "npm:^18.2.0"
+    react-dom: "npm:^18.2.0"
+    react-hot-toast: "npm:^2.4.1"
+    react-spinners: "npm:^0.13.8"
+    sonner: "npm:^1.4.0"
+    styled-components: "npm:^6.1.0"
+    stylis: "npm:^4.0.0"
+  checksum: e4fb459d2f602d011c081d065fab6c883e2f3aaaeaa3490af86184c73dac14ac33b6e754792558104861d15df598d1427b3969c6ad13233eb299b63980b6af44
   languageName: node
   linkType: hard
 
