@@ -13411,7 +13411,7 @@ __metadata:
     "@svgr/webpack": "npm:^8.1.0"
     "@types/react": "npm:^18.2.48"
     animate.css: "npm:^4.1.1"
-    clsx: "npm:^2.0.0"
+    clsx: "npm:^2.1.0"
     dotenv: "npm:^16.3.1"
     file-loader: "npm:^6.2.0"
     plugin-image-zoom: ataft/plugin-image-zoom
