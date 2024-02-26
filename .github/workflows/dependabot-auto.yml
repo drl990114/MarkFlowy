@@ -19,7 +19,7 @@ jobs:
       - uses: hmarr/auto-approve-action@v4
         with:
           review-message: "Auto approved automated PR"
-          github-token: ${{ secrets.ACCESS_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 #       - name: Enable auto-merge for Dependabot PRs
 #         run: gh pr merge --auto --merge "$PR_URL"
 #         env:
