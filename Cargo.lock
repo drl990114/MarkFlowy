@@ -1166,6 +1166,29 @@ dependencies = [
 ]
 
 [[package]]
+name = "dlopen2"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9e1297103d2bbaea85724fcee6294c2d50b1081f9ad47d0f6f6f61eda65315a6"
+dependencies = [
+ "dlopen2_derive",
+ "libc",
+ "once_cell",
+ "winapi 0.3.9",
+]
+
+[[package]]
+name = "dlopen2_derive"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f2b99bf03862d7f545ebc28ddd33a665b50865f4dfd84031a393823879bd4c54"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.48",
+]
+
+[[package]]
 name = "dlv-list"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2754,7 +2777,7 @@ dependencies = [
  "tracing",
  "tracing-subscriber",
  "window-shadows",
- "window-vibrancy 0.5.0",
+ "window-vibrancy 0.5.0 (git+https://github.com/tauri-apps/window-vibrancy)",
 ]
 
 [[package]]
@@ -4448,17 +4471,17 @@ dependencies = [
 
 [[package]]
 name = "tao"
-version = "0.25.0"
+version = "0.26.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9fa7ba6ee5b8908ba3a62e6a4f3683490ed732fca614cdd3f4c989bba548f9a9"
+checksum = "29d9325da2dd7ebd48a8a433c64240079b15dbe1249da04c72557611bcd08d1c"
 dependencies = [
  "bitflags 1.3.2",
- "cc",
  "cocoa",
  "core-foundation",
  "core-graphics 0.23.1",
  "crossbeam-channel",
  "dispatch",
+ "dlopen2",
  "gdkwayland-sys",
  "gdkx11-sys",
  "gtk",
@@ -4475,7 +4498,6 @@ dependencies = [
  "once_cell",
  "parking_lot",
  "png",
- "raw-window-handle 0.5.2",
  "raw-window-handle 0.6.0",
  "scopeguard",
  "tao-macros",
@@ -4485,7 +4507,6 @@ dependencies = [
  "windows-implement",
  "windows-version",
  "x11-dl",
- "zbus",
 ]
 
 [[package]]
@@ -4518,9 +4539,9 @@ checksum = "69758bda2e78f098e4ccb393021a0963bb3442eac05f135c30f61b7370bbafae"
 
 [[package]]
 name = "tauri"
-version = "2.0.0-beta.2"
+version = "2.0.0-beta.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a584d146c38bf174398dee0ec2cdd8f8fce142daee0306c370cf78f050304c60"
+checksum = "573d402763f2b5d1e9972200de27ef1f24ca5df51acf468eab20af8063b1a21d"
 dependencies = [
  "anyhow",
  "bytes",
@@ -4539,10 +4560,9 @@ dependencies = [
  "log",
  "mime",
  "muda",
- "nix",
  "objc",
  "percent-encoding",
- "raw-window-handle 0.5.2",
+ "raw-window-handle 0.6.0",
  "reqwest",
  "serde",
  "serde_json",
@@ -4562,15 +4582,15 @@ dependencies = [
  "url",
  "webkit2gtk",
  "webview2-com",
- "window-vibrancy 0.4.3",
+ "window-vibrancy 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "windows 0.52.0",
 ]
 
 [[package]]
 name = "tauri-build"
-version = "2.0.0-beta.1"
+version = "2.0.0-beta.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "314089a25d92a62f33f60d2a19c277f465e9088ee3ea251032ae914d6f2b1ce0"
+checksum = "d4e79432741cbce9f09c92c6d059cd6f2825d4d21d257f46459e71326d2bbe38"
 dependencies = [
  "anyhow",
  "cargo_toml",
@@ -4590,9 +4610,9 @@ dependencies = [
 
 [[package]]
 name = "tauri-codegen"
-version = "2.0.0-beta.1"
+version = "2.0.0-beta.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1e6ff13874390499976f01decf75103f28e7609abc5c155c6bfb56cf574a5628"
+checksum = "9737464c5f81041d79642f6a93acf9b91bd74f8d3d3b248000d6e14c3b781d73"
 dependencies = [
  "base64",
  "brotli",
@@ -4606,6 +4626,7 @@ dependencies = [
  "serde",
  "serde_json",
  "sha2",
+ "syn 2.0.48",
  "tauri-utils",
  "thiserror",
  "time",
@@ -4616,9 +4637,9 @@ dependencies = [
 
 [[package]]
 name = "tauri-macros"
-version = "2.0.0-beta.1"
+version = "2.0.0-beta.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "18707774f70a8ec20dbf653f07d12af1e0d7c1e3a625b7bd5a2cfe72c2b2549b"
+checksum = "27030c6775fd26ef8977bafb4063e4667580a0cb812427b62f622c91decdf2ef"
 dependencies = [
  "heck",
  "proc-macro2",
@@ -4630,9 +4651,9 @@ dependencies = [
 
 [[package]]
 name = "tauri-plugin"
-version = "2.0.0-beta.1"
+version = "2.0.0-beta.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dbb732726fec855b56e4a238464f1b0c10006f618180ef402ce5f394d840e61b"
+checksum = "03ac9259b84b72b048534240874f36bad92222c6c161490683baa5301d18ccdd"
 dependencies = [
  "anyhow",
  "glob",
@@ -4737,9 +4758,9 @@ dependencies = [
 
 [[package]]
 name = "tauri-plugin-shell"
-version = "2.0.0-beta.0"
+version = "2.0.0-beta.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dfaeb1d7afaff06304737abddd29cdada33419241d14eec85689d82675fc529e"
+checksum = "bb42a100bd4b6adad6f07455f54c5916d32be79d81e5914478ece45a04560cad"
 dependencies = [
  "encoding_rs",
  "log",
@@ -4799,14 +4820,14 @@ dependencies = [
 
 [[package]]
 name = "tauri-runtime"
-version = "2.0.0-beta.1"
+version = "2.0.0-beta.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1d72194de56e885dbd9fd8c493ccf95012e584c928900188da248f9ea4223b23"
+checksum = "098a2aa50708fb6082092d1cd0507ea0c72eac337c0684dd75f5c2b95ad5a516"
 dependencies = [
  "gtk",
  "http",
  "jni",
- "raw-window-handle 0.5.2",
+ "raw-window-handle 0.6.0",
  "serde",
  "serde_json",
  "tauri-utils",
@@ -4817,21 +4838,21 @@ dependencies = [
 
 [[package]]
 name = "tauri-runtime-wry"
-version = "2.0.0-beta.1"
+version = "2.0.0-beta.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "74a71bd248a7ce857835b1f65845a9de22171e30d8129e018b42961502565efb"
+checksum = "01d1bfefac44daa25f2bb5cde23302f86739adcd093a70dac8330f08f3397973"
 dependencies = [
  "cocoa",
  "gtk",
  "http",
  "jni",
- "nix",
  "percent-encoding",
- "raw-window-handle 0.5.2",
+ "raw-window-handle 0.6.0",
  "softbuffer",
  "tao",
  "tauri-runtime",
  "tauri-utils",
+ "url",
  "webkit2gtk",
  "webview2-com",
  "windows 0.52.0",
@@ -4840,9 +4861,9 @@ dependencies = [
 
 [[package]]
 name = "tauri-utils"
-version = "2.0.0-beta.1"
+version = "2.0.0-beta.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e7104f0639a1f3a7ebd7aac793be47d7924f569e7c10c6853083529bf9bb3fe6"
+checksum = "8b2bfb1f70dd152d3ce5c5d20d18b720f0f66943b2ba7e0f85910cb4472b9633"
 dependencies = [
  "brotli",
  "cargo_metadata",
@@ -5702,13 +5723,13 @@ dependencies = [
 
 [[package]]
 name = "window-vibrancy"
-version = "0.4.3"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "af6abc2b9c56bd95887825a1ce56cde49a2a97c07e28db465d541f5098a2656c"
+checksum = "33082acd404763b315866e14a0d5193f3422c81086657583937a750cdd3ec340"
 dependencies = [
  "cocoa",
  "objc",
- "raw-window-handle 0.5.2",
+ "raw-window-handle 0.6.0",
  "windows-sys 0.52.0",
  "windows-version",
 ]
@@ -6024,9 +6045,9 @@ dependencies = [
 
 [[package]]
 name = "wry"
-version = "0.35.2"
+version = "0.37.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d3016c47c9b6f7029a9da7cd48af8352327226bba0e955f3c92e2966651365a9"
+checksum = "8b717040ba9771fd88eb428c6ea6b555f8e734ff8534f02c13e8f10d97f5935e"
 dependencies = [
  "base64",
  "block",
@@ -6050,14 +6071,14 @@ dependencies = [
  "objc",
  "objc_id",
  "once_cell",
- "raw-window-handle 0.5.2",
+ "percent-encoding",
+ "raw-window-handle 0.6.0",
  "serde",
  "serde_json",
  "sha2",
  "soup3",
  "tao-macros",
  "thiserror",
- "url",
  "webkit2gtk",
  "webkit2gtk-sys",
  "webview2-com",
