@@ -3,15 +3,15 @@ import { create } from 'zustand'
 
 const useContextMenuStore = create<ContextMenuStore>((set) => {
   return {
-    x: -9999,
-    y: -9999,
+    x: 0,
+    y: 0,
     open: false,
     items: [],
     show: ({ x, y, items }) => {
       set({ x, y, items, open: true })
     },
     hide: () => {
-      set({ x: -9999, y: -9999, items: [], open: false })
+      set({ x: 0, y: 0, items: [], open: false })
     },
   }
 })

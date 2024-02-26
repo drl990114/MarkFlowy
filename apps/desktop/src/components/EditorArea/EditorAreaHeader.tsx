@@ -20,7 +20,7 @@ export const EditorAreaHeader = memo(() => {
     const editDelegate = getEditorDelegate(curFile?.id || '')
 
     showContextMenu({
-      x: rect.x,
+      x: rect.x + rect.width,
       y: rect.y + rect.height,
       items: [
         {

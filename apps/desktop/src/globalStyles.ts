@@ -26,6 +26,7 @@ export const GlobalStyles = createGlobalStyle`
     line-height: 32px;
     font-size: 1rem;
     cursor: pointer;
+    transition: all 0.3s ease;
 
     &:hover {
       color: ${(props) => props.theme.accentColor};

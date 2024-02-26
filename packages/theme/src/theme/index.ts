@@ -88,6 +88,7 @@ const styledLightTheme = {
   dialogBgColor: '#f6f7f9',
   dialogBackdropColor: 'rgba(220, 220, 220, 0.4)',
   contextMenuBgColor: '#f6f7f9',
+  contextMenuBgColorHover: '#1552B3',
 
   titleBarDefaultHoverColor: '#bdbdc2',
 
@@ -115,7 +116,8 @@ const styledDarkTheme = {
   tooltipBgColor: '#43414A',
   dialogBgColor: '#05010d',
   dialogBackdropColor: 'rgb(18, 18, 18, 0.7)',
-  contextMenuBgColor: '#43414A',
+  contextMenuBgColor: '#1E1F20',
+  contextMenuBgColorHover: '#1552B3',
 
   titleBarDefaultHoverColor: '#383838',
 

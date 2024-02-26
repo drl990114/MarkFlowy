@@ -49,11 +49,11 @@
     "react-router-dom": "^6.15.0",
     "react-use": "^17.5.0",
     "remixicon": "^4.1.0",
-    "rme": "^0.0.29",
+    "rme": "^0.0.33",
     "styled-components": "^6.1.0",
     "stylis": "^4.0.0",
     "tinykeys": "^2.1.0",
-    "zens": "^0.0.4",
+    "zens": "^0.0.7",
     "zustand": "^4.4.6"
   },
   "devDependencies": {
