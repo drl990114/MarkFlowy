@@ -1,9 +1,7 @@
 import type { IShowContextMenuParams } from '@/stores/useContextMenuStore'
 import useContextMenuStore from '@/stores/useContextMenuStore'
-import { Menu } from 'zens'
-import { useEffect } from 'react'
-
-const CONTEXT_MENU_ID = 'mf-context-menu'
+import { Menu, useMenuStore } from 'zens'
+import { memo, useEffect } from 'react'
 
 export const showContextMenu = (params: IShowContextMenuParams) => {
   const { show } = useContextMenuStore.getState()
@@ -14,55 +12,17 @@ export const hideContextMenu = () => {
   useContextMenuStore.getState().hide()
 }
 
-export const ContextMenu = () => {
+export const ContextMenu = memo(() => {
   const { x, y, items, show, open } = useContextMenuStore()
-  const handleClick = () => {
-    useContextMenuStore.getState().hide()
-  }
-
-  useEffect(() => {
-    window.addEventListener('contextmenu', handleClick, true)
-
-    return () => {
-      window.removeEventListener('contextmenu', handleClick)
-    }
-  }, [])
+  const menu = useMenuStore()
 
   useEffect(() => {
     if (open) {
-      let fixedX = x
-      let fixedY = y
-      const rect = document.getElementById(CONTEXT_MENU_ID)!.getBoundingClientRect()
-      const { width, height } = rect
-
-      if (y + height > window.innerHeight) {
-        fixedY = window.innerHeight - height - 10
-      }
-      if (x + width > window.innerWidth) {
-        fixedX = window.innerWidth - width - 10
-      }
-
-      show({
-        x: fixedX,
-        y: fixedY,
-        items,
-      })
+      menu.show()
     }
-  }, [x, y, items, open, show])
+  }, [x, y, items, open, menu, show])
 
-  return (
-    <Menu
-      open
-      id={CONTEXT_MENU_ID}
-      items={items}
-      style={{
-        position: 'fixed',
-        top: `${y}px`,
-        left: `${x}px`,
-        zIndex: 99,
-        minWidth: 140,
-      }}
-      onClose={hideContextMenu}
-    ></Menu>
-  )
-}
+  const anchorRect = { x, y }
+
+  return <Menu store={menu} items={items} getAnchorRect={() => anchorRect} onClose={hideContextMenu}></Menu>
+})

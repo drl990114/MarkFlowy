@@ -146,7 +146,7 @@ const ChatList: React.FC<ChatListProps> = (props) => {
           onKeyDown={handleKeydown}
           onChange={handleChange}
         />
-        <Button className='submit' type='primary' size='small' onClick={handleSubmit}>
+        <Button className='submit' btnType='primary' size='small' onClick={handleSubmit}>
           submit
         </Button>
       </BottomBar>

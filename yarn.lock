@@ -6510,7 +6510,7 @@ __metadata:
     react-test-renderer: "npm:^18.2.0"
     react-use: "npm:^17.5.0"
     remixicon: "npm:^4.1.0"
-    rme: "npm:^0.0.29"
+    rme: "npm:^0.0.33"
     styled-components: "npm:^6.1.0"
     stylis: "npm:^4.0.0"
     tinykeys: "npm:^2.1.0"
@@ -6520,7 +6520,7 @@ __metadata:
     vite: "npm:^5.1.3"
     vite-plugin-svgr: "npm:^4.1.0"
     vitest: "npm:^1.2.2"
-    zens: "npm:^0.0.4"
+    zens: "npm:^0.0.7"
     zustand: "npm:^4.4.6"
   languageName: unknown
   linkType: soft
@@ -6545,7 +6545,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@markflowy/theme@npm:^0.0.13, @markflowy/theme@workspace:*, @markflowy/theme@workspace:packages/theme":
+"@markflowy/theme@workspace:*, @markflowy/theme@workspace:packages/theme":
   version: 0.0.0-use.local
   resolution: "@markflowy/theme@workspace:packages/theme"
   dependencies:
@@ -22624,9 +22624,9 @@ plugin-image-zoom@ataft/plugin-image-zoom:
   languageName: node
   linkType: hard
 
-"rme@npm:^0.0.29":
-  version: 0.0.29
-  resolution: "rme@npm:0.0.29"
+"rme@npm:^0.0.33":
+  version: 0.0.33
+  resolution: "rme@npm:0.0.33"
   dependencies:
     "@codemirror/autocomplete": "npm:^6.8.1"
     "@codemirror/commands": "npm:^6.2.4"
@@ -22698,11 +22698,11 @@ plugin-image-zoom@ataft/plugin-image-zoom:
     tether-drop: "npm:^1.4.2"
     void-elements: "npm:^3.1.0"
     yjs: "npm:^13.6.6"
-    zens: "npm:0.0.4"
+    zens: "npm:^0.0.7"
   peerDependencies:
     react: ">=16.14.0"
     react-dom: ">=16.14.0"
-  checksum: 3474c11abbbbf29c1951101616e56a57a4d51a6161020b44f311091c2cd83cec03277207e7c340cdf8db607cf79ab2fa233b88a7dc51b74f083672b53c9de4b0
+  checksum: a30847a5bbf14d668a8323478a01b786b4c763bb963de143ca19499b407591b79eba0384ab10894c9410fed94d4a88fdc599a959155635d4b12ea07f2c5df0cb
   languageName: node
   linkType: hard
 
@@ -26318,16 +26318,16 @@ plugin-image-zoom@ataft/plugin-image-zoom:
   languageName: node
   linkType: hard
 
-"zens@npm:0.0.4, zens@npm:^0.0.4":
-  version: 0.0.4
-  resolution: "zens@npm:0.0.4"
+"zens@npm:^0.0.7":
+  version: 0.0.7
+  resolution: "zens@npm:0.0.7"
   dependencies:
     "@ariakit/react": "npm:^0.3.8"
     "@babel/runtime": "npm:^7"
     "@floating-ui/dom": "npm:^1.0.0"
-    "@markflowy/theme": "npm:^0.0.13"
     classnames: "npm:^2.3.0"
     clsx: "npm:^2.0.0"
+    color: "npm:^4.2.3"
     rc-image: "npm:^7.5.1"
     react: "npm:^18.2.0"
     react-dom: "npm:^18.2.0"
@@ -26336,7 +26336,7 @@ plugin-image-zoom@ataft/plugin-image-zoom:
     sonner: "npm:^1.4.0"
     styled-components: "npm:^6.1.0"
     stylis: "npm:^4.0.0"
-  checksum: e4fb459d2f602d011c081d065fab6c883e2f3aaaeaa3490af86184c73dac14ac33b6e754792558104861d15df598d1427b3969c6ad13233eb299b63980b6af44
+  checksum: 3ecef59b400072d6f87a8118202f5d5d171496cef795e4a78829827ec5543dead6294a0215f256643e3ab9e5a3d5a72990c592df175bc609f06f42a5ae6d23d3
   languageName: node
   linkType: hard
 

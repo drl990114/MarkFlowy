@@ -1,11 +1,10 @@
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles'
-import { ThemeProvider as MfThemeProvider, Notifications } from 'zens'
+import { ThemeProvider as ZensThemeProvider, Notifications } from 'zens'
 import { Route, Routes } from 'react-router-dom'
-import { ThemeProvider, StyleSheetManager } from 'styled-components'
+import { ThemeProvider } from 'styled-components'
 import { GlobalStyles } from './globalStyles'
 import { useAppSetup } from './hooks'
 import { Root } from '@/router'
-import isPropValid from '@emotion/is-prop-valid'
 import useThemeStore from './stores/useThemeStore'
 import { ContextMenu } from './components/UI/ContextMenu/ContextMenu'
 import NiceModal from '@ebay/nice-modal-react'
@@ -18,14 +17,14 @@ const AppThemeProvider: React.FC<BaseComponentProps> = function ({ children }) {
   const { muiTheme, curTheme } = useThemeStore()
 
   const theme = curTheme?.styledConstants || {}
+
   return (
-    <StyleSheetManager shouldForwardProp={isPropValid}>
-      <MfThemeProvider
-        theme={{
-          mode: curTheme.mode,
-        }}
-      >
-        <ThemeProvider theme={theme}>
+      <ThemeProvider theme={theme}>
+        <ZensThemeProvider
+          theme={{
+            mode: curTheme.mode,
+          }}
+        >
           <EditorProvider
             theme={{
               mode: curTheme.mode,
@@ -37,9 +36,8 @@ const AppThemeProvider: React.FC<BaseComponentProps> = function ({ children }) {
               <MuiThemeProvider theme={muiTheme}>{children}</MuiThemeProvider>
             </NiceModal.Provider>
           </EditorProvider>
-        </ThemeProvider>
-      </MfThemeProvider>
-    </StyleSheetManager>
+        </ZensThemeProvider>
+      </ThemeProvider>
   )
 }
 
