@@ -21,7 +21,7 @@
     "@mdx-js/react": "^3.0.0",
     "@svgr/webpack": "^8.1.0",
     "animate.css": "^4.1.1",
-    "clsx": "^2.0.0",
+    "clsx": "^2.1.0",
     "file-loader": "^6.2.0",
     "plugin-image-zoom": "ataft/plugin-image-zoom",
     "prism-react-renderer": "^2.1.0",
