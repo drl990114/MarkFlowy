@@ -69,7 +69,7 @@
     "@types/react-test-renderer": "^18.0.7",
     "@vitejs/plugin-react": "^4.2.1",
     "@vitest/ui": "^1.2.2",
-    "eslint": "8.56.0",
+    "eslint": "8.57.0",
     "happy-dom": "^10.10.0",
     "jest-remirror": "^2.1.5",
     "react-test-renderer": "^18.2.0",
