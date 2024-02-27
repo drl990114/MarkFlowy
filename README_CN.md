@@ -32,7 +32,12 @@
 
 支持平台 Linux, macOS 和 Windows.
 
-> 请注意：因为苹果安全策略对于没有开发者认证软件的限制，导致 **macOS aarch64** 版本无法直接安装。为了支持**自动更新**，目前 releases 中的 **macOS aarch64** 版本使用的是 **x86** 版本的软件，可能会有一定的兼容性影响（目前没有发现），不影响正常使用。
+> [!NOTE]
+> 因为苹果安全策略对于没有开发者认证软件的限制，导致 **macOS aarch64** 版本无法直接安装. 你可以通过一下步骤忽略该限制:
+> - 打开终端
+> - 进入到 `应用` 的目录下. 例如 `/Applications`.
+> - 执行 `xattr -cr MarkFlowy.app` 然后打开 app 即可
+> - 请确保下载来源: `github releases`.
 
 请看 [releases page](https://github.com/drl990114/MarkFlowy/releases)
 
