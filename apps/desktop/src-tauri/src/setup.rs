@@ -25,6 +25,11 @@ pub fn init(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
             .hidden_title(true);
     }
 
+    #[cfg(not(target_os = "macos"))]
+    {
+        main_win = main_win.decorations(false);
+    }
+
     let window = main_win.build().unwrap();
 
     #[cfg(not(target_os = "linux"))]
