@@ -4,7 +4,7 @@ import { useCommandStore, useEditorStore } from '@/stores'
 import { getFileObject } from '@/helper/files'
 import useBookMarksStore from '@/extensions/bookmarks/useBookMarksStore'
 import { showContextMenu } from '../UI/ContextMenu'
-import { emit } from '@tauri-apps/api/event'
+import bus from '@/helper/eventBus'
 
 export const EditorAreaHeader = memo(() => {
   const { activeId, getEditorDelegate } = useEditorStore()
@@ -43,13 +43,13 @@ export const EditorAreaHeader = memo(() => {
               label: 'Source Code',
               value: 'sourceCode',
               checked: editDelegate?.view === 'SourceCode',
-              handler: () => emit('editor_toggle_type', 'sourceCode'),
+              handler: () => bus.emit('editor_toggle_type', 'sourceCode'),
             },
             {
               label: 'Wysiwyg View',
               value: 'wysiwyg',
               checked: editDelegate?.view === 'Wysiwyg',
-              handler: () => emit('editor_toggle_type', 'wysiwyg'),
+              handler: () => bus.emit('editor_toggle_type', 'wysiwyg'),
             },
           ],
         },
