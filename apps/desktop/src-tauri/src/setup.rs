@@ -4,9 +4,6 @@ use tauri::{utils::config::WebviewUrl, App, Manager, WebviewWindowBuilder, Windo
 #[cfg(target_os = "macos")]
 use tauri::TitleBarStyle;
 
-#[cfg(not(target_os = "linux"))]
-use window_shadows::set_shadow;
-
 pub fn init(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
     let app = app.handle().clone();
 
@@ -28,18 +25,15 @@ pub fn init(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
             .hidden_title(true);
     }
 
-    #[cfg(not(target_os = "macos"))]
-    {
-        main_win = main_win.decorations(false);
-    }
-
     let window = main_win.build().unwrap();
+
+    #[cfg(not(target_os = "linux"))]
+    {
+        window.set_shadow(true);
+    }
 
     // #[cfg(target_os = "macos")]
     // window.set_transparent_titlebar(true, true);
-
-    #[cfg(not(target_os = "linux"))]
-    set_shadow(window.clone(), true).unwrap();
 
     Ok(())
 }
