@@ -18,7 +18,15 @@
     "resources:default",
     "menu:default",
     "tray:default",
-    "http:default",
+    {
+      "identifier": "http:default",
+      "allow": [
+        {
+          "name": "any",
+          "url": "**"
+        }
+      ]
+    },
     "dialog:allow-open",
     "dialog:allow-save",
     "clipboard-manager:allow-write",
