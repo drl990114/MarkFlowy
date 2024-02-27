@@ -1513,22 +1513,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "file_search"
-version = "0.0.1"
-dependencies = [
- "clipboard",
- "dirs 5.0.1",
- "grep",
- "ignore",
- "num_cpus",
- "regex",
- "serde",
- "toml 0.8.10",
- "uuid",
- "walkdir 2.4.0",
-]
-
-[[package]]
 name = "filetime"
 version = "0.2.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2792,10 +2776,10 @@ dependencies = [
  "cocoa",
  "dark-light",
  "download_npm",
- "file_search",
  "lazy_static",
  "log",
  "mf-utils",
+ "mf_file_search",
  "objc",
  "regex",
  "serde",
@@ -2812,8 +2796,7 @@ dependencies = [
  "tokio",
  "tracing",
  "tracing-subscriber",
- "window-shadows",
- "window-vibrancy 0.5.0 (git+https://github.com/tauri-apps/window-vibrancy)",
+ "window-vibrancy",
 ]
 
 [[package]]
@@ -2884,6 +2867,22 @@ version = "0.0.1"
 dependencies = [
  "fs_extra",
  "regex",
+]
+
+[[package]]
+name = "mf_file_search"
+version = "0.0.1"
+dependencies = [
+ "clipboard",
+ "dirs 5.0.1",
+ "grep",
+ "ignore",
+ "num_cpus",
+ "regex",
+ "serde",
+ "toml 0.8.10",
+ "uuid",
+ "walkdir 2.4.0",
 ]
 
 [[package]]
@@ -4636,7 +4635,7 @@ dependencies = [
  "url",
  "webkit2gtk",
  "webview2-com",
- "window-vibrancy 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "window-vibrancy",
  "windows 0.52.0",
 ]
 
@@ -5768,33 +5767,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f"
 
 [[package]]
-name = "window-shadows"
-version = "0.2.2"
-source = "git+https://github.com/tauri-apps/window-shadows#48fa81bbd9553b1b69e61590b4669bfad8b13ec8"
-dependencies = [
- "cocoa",
- "objc",
- "raw-window-handle 0.5.2",
- "windows-sys 0.52.0",
-]
-
-[[package]]
 name = "window-vibrancy"
 version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "33082acd404763b315866e14a0d5193f3422c81086657583937a750cdd3ec340"
-dependencies = [
- "cocoa",
- "objc",
- "raw-window-handle 0.6.0",
- "windows-sys 0.52.0",
- "windows-version",
-]
-
-[[package]]
-name = "window-vibrancy"
-version = "0.5.0"
-source = "git+https://github.com/tauri-apps/window-vibrancy#9b42c755e204a7dd157277caed1edd9d4e2a08d6"
 dependencies = [
  "cocoa",
  "objc",

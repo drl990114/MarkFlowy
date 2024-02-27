@@ -14,7 +14,7 @@ impl Default for SearchOptions {
 }
 
 pub mod cmd {
-    use file_search::{
+    use mf_file_search::{
         manager,
         options::{ContentOptions, Options},
         search::Search,

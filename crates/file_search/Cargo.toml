@@ -1,8 +1,9 @@
 [package]
-name = "file_search"
+name = "mf_file_search"
 version = "0.0.1"
 edition = "2021"
 description = "main rusl library"
+license = "MIT"
 
 [dependencies]
 regex = "1.10.3"

@@ -2,6 +2,8 @@
 name = "mf-utils"
 version = "0.0.1"
 edition = "2021"
+description = "markflow utils"
+license = "MIT"
 
 [dependencies]
 regex = "1.10.3"
