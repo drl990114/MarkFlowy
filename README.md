@@ -13,7 +13,7 @@
   <a href="https://github.com/drl990114/MarkFlowy/releases" target="__blank"><img alt="GitHub downloads" src="https://img.shields.io/github/downloads/drl990114/MarkFlowy/total?label=Downloads&color=%23fe7d37"></a>
   <a href="https://github.com/drl990114/MarkFlowy/releases" target="__blank"><img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/drl990114/MarkFlowy?label=Version"></a>
   <a href="https://github.com/drl990114/MarkFlowy" target="__blank"><img alt="GitHub" src="https://img.shields.io/github/commit-activity/w/drl990114/MarkFlowy?color=%2346bd1b"></a>
-  <a href="https://www.rust-lang.org/" target="__blank"><img alt="GitHub" src="https://img.shields.io/badge/Rust-1.72.0-dea584"></a>
+  <a href="https://www.rust-lang.org/" target="__blank"><img alt="GitHub" src="https://img.shields.io/badge/Rust-1.76.0-dea584"></a>
 </p>
 
 ## MarkFlowy is in Alpha
