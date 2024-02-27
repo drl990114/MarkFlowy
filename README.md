@@ -31,7 +31,12 @@ Currently, MarkFlowy is still in the alpha phase,This means there may be incompa
 
 Available for Linux, macOS and Windows.
 
-> Please note: Because of Apple’s security policy restrictions on software without developer certification, the **macOS aarch64** version cannot be installed directly. In order to support **automatic updates**, the current **macOS aarch64** version in releases uses the **x86** version of the software. There may be some compatibility impact(not found so far), but it does not affect normal use.
+> [!NOTE]
+> Because of Apple’s security policy restrictions on software without developer certification, the **macOS aarch64** version cannot be downloaded and used directly. You can ignore the limit by doing the following:
+> - Open your terminal
+> - Go to the `Applications` directory. .e.g `/Applications`.
+> - Run `xattr -cr MarkFlowy.app` and open the app again
+> - Please make sure you download from `github releases`.
 
 Please look [releases page](https://github.com/drl990114/MarkFlowy/releases)
 
