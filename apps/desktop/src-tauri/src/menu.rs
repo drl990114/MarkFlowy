@@ -64,16 +64,16 @@ pub fn generate_menu(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
                     .map_err(|err| println!("{:?}", err))
                     .ok();
             }
-            "SourceCodeView" => {
-                app.emit_to(focused_window, "editor_toggle_type", "sourceCode")
-                    .map_err(|err| println!("{:?}", err))
-                    .ok();
-            }
-            "WysiwygView" => {
-                app.emit_to(focused_window, "editor_toggle_type", "wysiwyg")
-                    .map_err(|err| println!("{:?}", err))
-                    .ok();
-            }
+            // "SourceCodeView" => {
+            //     app.emit_to(focused_window, "editor_toggle_type", "sourceCode")
+            //         .map_err(|err| println!("{:?}", err))
+            //         .ok();
+            // }
+            // "WysiwygView" => {
+            //     app.emit_to(focused_window, "editor_toggle_type", "wysiwyg")
+            //         .map_err(|err| println!("{:?}", err))
+            //         .ok();
+            // }
             _ => {}
         }
     };
@@ -119,19 +119,19 @@ pub fn generate_menu(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
                     .id("editor:dialog_create_table")
                     .build(app)?],
             )?,
-            &Submenu::with_items(
-                app,
-                "View",
-                true,
-                &[
-                    &MenuItemBuilder::new("SourceCode View")
-                        .id("SourceCodeView")
-                        .build(app)?,
-                    &MenuItemBuilder::new("Wysiwyg View")
-                        .id("WysiwygView")
-                        .build(app)?,
-                ],
-            )?,
+            // &Submenu::with_items(
+            //     app,
+            //     "View",
+            //     true,
+            //     &[
+            //         &MenuItemBuilder::new("SourceCode View")
+            //             .id("SourceCodeView")
+            //             .build(app)?,
+            //         &MenuItemBuilder::new("Wysiwyg View")
+            //             .id("WysiwygView")
+            //             .build(app)?,
+            //     ],
+            // )?,
         ],
     )?;
 

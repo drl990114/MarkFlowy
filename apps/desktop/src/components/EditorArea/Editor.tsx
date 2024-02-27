@@ -2,7 +2,6 @@
 import { Editor as MfEditor } from 'rme'
 import type { EditorChangeHandler, EditorContext, EditorRef, EditorViewType } from 'rme'
 import { invoke } from '@tauri-apps/api/core'
-import { getCurrent } from '@tauri-apps/api/window'
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import styled, { css } from 'styled-components'
 import { useCommandStore, useEditorStateStore, useEditorStore } from '@/stores'
@@ -22,8 +21,6 @@ import { debounce } from 'lodash'
 import { createWysiwygDelegateOptions } from './createWysiwygDelegateOptions'
 import { useMount, useUnmount } from 'react-use'
 import useEditorCounterStore from '@/stores/useEditorCounterStore'
-
-const appWindow = getCurrent()
 
 interface EditorWrapperProps {
   active: boolean
@@ -110,7 +107,7 @@ function Editor(props: EditorProps) {
   const contentRef = useRef<string>('')
 
   useEffect(() => {
-    const unListen = appWindow.listen<EditorViewType>('editor_toggle_type', async ({ payload }) => {
+    const cb = async (payload: EditorViewType) => {
       if (active) {
         if (editorRef.current?.getType() === payload) {
           return
@@ -133,10 +130,12 @@ function Editor(props: EditorProps) {
           },
         })
       }
-    })
+    }
+
+    bus.on('editor_toggle_type', cb)
 
     return () => {
-      unListen.then((fn) => fn())
+      bus.detach('editor_toggle_type', cb)
     }
   }, [active, curFile, execute, setEditorDelegate])
 
