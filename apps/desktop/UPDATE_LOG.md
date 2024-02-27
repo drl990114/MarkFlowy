@@ -1,6 +1,6 @@
 # UPDATE LOG
 
-## v0.7.5
+## v0.7.6
 
 Features:
 
@@ -27,6 +27,6 @@ Fixs:
 - Some ui bugs.
 
 
-## v0.7.4
+## v0.7.5
 
 updater test
