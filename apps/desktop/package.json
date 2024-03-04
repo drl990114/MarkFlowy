@@ -39,7 +39,7 @@
     "is-promise": "^4.0.0",
     "jsx-dom-cjs": "^8.0.7",
     "lodash": "^4.17.21",
-    "nanoid": "^5.0.4",
+    "nanoid": "^5.0.6",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-i18next": "^13.2.2",
