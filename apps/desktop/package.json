@@ -20,7 +20,7 @@
     "@formkit/auto-animate": "^0.7.0",
     "@markflowy/theme": "workspace:*",
     "@markflowy/types": "workspace:*",
-    "@mui/material": "^5.15.6",
+    "@mui/material": "^5.15.11",
     "@tanstack/react-query": "^5.24.7",
     "@tauri-apps/api": "^2.0.0-beta.3",
     "@tauri-apps/plugin-clipboard-manager": "^2.0.0-beta.1",
