@@ -2770,7 +2770,7 @@ dependencies = [
 
 [[package]]
 name = "markflowy"
-version = "0.7.5"
+version = "0.7.6"
 dependencies = [
  "anyhow",
  "cocoa",
@@ -4641,9 +4641,9 @@ dependencies = [
 
 [[package]]
 name = "tauri-build"
-version = "2.0.0-beta.5"
+version = "2.0.0-beta.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5fcbbc1a1b4d71d6f4084cb292f77e46b26b8bdb6a8fd7783d2059bf41dcc9e0"
+checksum = "3ca30dbed856449b41abed13a5a46655ea2196075e09e99e22fe8ed0958b6aee"
 dependencies = [
  "anyhow",
  "cargo_toml",
@@ -4914,9 +4914,9 @@ dependencies = [
 
 [[package]]
 name = "tauri-utils"
-version = "2.0.0-beta.5"
+version = "2.0.0-beta.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "66ed6c646be32b5e9df6f1380352f1ecdd720b149b35f53ba0bfc60b065b1e29"
+checksum = "92e35e2f9a5ee8539d00dde621f176647747736a388a07c3083a0cc1b96ba6d7"
 dependencies = [
  "brotli",
  "cargo_metadata",
