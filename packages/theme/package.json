@@ -44,7 +44,7 @@
     "@types/color": "^3.0.6",
     "@types/rollup-plugin-url": "^3",
     "eslint": "8.57.0",
-    "postcss": "^8.4.31",
+    "postcss": "^8.4.35",
     "postcss-import": "^15.1.0",
     "postcss-nested": "^6.0.1",
     "rimraf": "^5.0.5",
