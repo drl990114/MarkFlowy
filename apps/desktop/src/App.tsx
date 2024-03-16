@@ -12,32 +12,42 @@ import { InjectFonts } from './injectFonts'
 import { Modal } from './components'
 import { MODAL_CONFIRM_ID } from './components/Modal'
 import { ThemeProvider as EditorProvider } from 'rme'
+import useAppSettingStore from './stores/useAppSettingStore'
+import { editorResources } from './i18n'
+import { useMemo } from 'react'
 
 const AppThemeProvider: React.FC<BaseComponentProps> = function ({ children }) {
   const { muiTheme, curTheme } = useThemeStore()
-
+  const { settingData } = useAppSettingStore()
   const theme = curTheme?.styledConstants || {}
 
+  const themeProp = useMemo(
+    () => ({
+      mode: curTheme.mode,
+    }),
+    [curTheme.mode],
+  )
+
+  const i18nProp = useMemo(
+    () => ({
+      locales: editorResources,
+      language: settingData.language,
+    }),
+    [settingData.language],
+  )
+
   return (
-      <ThemeProvider theme={theme}>
-        <ZensThemeProvider
-          theme={{
-            mode: curTheme.mode,
-          }}
-        >
-          <EditorProvider
-            theme={{
-              mode: curTheme.mode,
-            }}
-          >
-            <InjectFonts />
-            <GlobalStyles />
-            <NiceModal.Provider>
-              <MuiThemeProvider theme={muiTheme}>{children}</MuiThemeProvider>
-            </NiceModal.Provider>
-          </EditorProvider>
-        </ZensThemeProvider>
-      </ThemeProvider>
+    <ThemeProvider theme={theme}>
+      <ZensThemeProvider theme={themeProp}>
+        <EditorProvider theme={themeProp} i18n={i18nProp}>
+          <InjectFonts />
+          <GlobalStyles />
+          <NiceModal.Provider>
+            <MuiThemeProvider theme={muiTheme}>{children}</MuiThemeProvider>
+          </NiceModal.Provider>
+        </EditorProvider>
+      </ZensThemeProvider>
+    </ThemeProvider>
   )
 }
 
