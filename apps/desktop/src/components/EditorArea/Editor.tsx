@@ -1,6 +1,12 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import { Editor as MfEditor } from 'rme'
-import type { EditorChangeHandler, EditorContext, EditorRef, EditorViewType } from 'rme'
+import type {
+  EditorChangeEventParams,
+  EditorChangeHandler,
+  EditorContext,
+  EditorRef,
+  EditorViewType,
+} from 'rme'
 import { invoke } from '@tauri-apps/api/core'
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import styled, { css } from 'styled-components'
@@ -68,6 +74,8 @@ function Editor(props: EditorProps) {
   const [delegate, setDelegate] = useState(
     createWysiwygDelegate(createWysiwygDelegateOptions(getFolderPathFromPath(curFile.path))),
   )
+  const editorRef = useRef<EditorRef>(null)
+  const editorContextRef = useRef<EditorChangeEventParams>()
 
   useMount(() => {
     setEditorDelegate(id, delegate)
@@ -88,23 +96,18 @@ function Editor(props: EditorProps) {
             filePath: file.path,
           })
           setContent(text)
-          contentRef.current = text
         } else {
           setNotExistFile(true)
           return ''
         }
       } else if (file.content !== undefined) {
         setContent(file.content)
-        contentRef.current = file.content
       }
 
       return ''
     }
     init()
   }, [delegate, curFile, setEditorDelegate])
-
-  const editorRef = useRef<EditorRef>(null)
-  const contentRef = useRef<string>('')
 
   useEffect(() => {
     const cb = async (payload: EditorViewType) => {
@@ -144,10 +147,25 @@ function Editor(props: EditorProps) {
       const { onSuccess } = params
       if (!active && !params.active) return
 
-      console.log('editorContent', contentRef.current)
-
       if (!curFile) return
-      const { setIdStateMap } = useEditorStateStore.getState()
+
+      const { idStateMap, setIdStateMap } = useEditorStateStore.getState()
+
+      const curEditorState = idStateMap.get(curFile.id)
+
+      if (!curEditorState?.hasUnsavedChanges) {
+        onSuccess?.()
+        return
+      }
+
+      if (!editorContextRef.current?.state.doc) {
+        // Unexpected
+        return
+      }
+
+      const fileContent = delegate.docToString(editorContextRef.current.state.doc)
+
+      console.log('editorContent', fileContent)
 
       try {
         if (!curFile.path) {
@@ -161,24 +179,22 @@ function Editor(props: EditorProps) {
             insertNodeToFolderData({
               ...curFile,
               name: filename,
-              content: contentRef.current,
+              content: fileContent,
               path,
             })
-            invoke('write_file', { filePath: path, content: contentRef.current }).then(() => {
+            invoke('write_file', { filePath: path, content: fileContent }).then(() => {
               onSuccess?.()
             })
             setIdStateMap(curFile.id, {
-              content: contentRef.current,
               hasUnsavedChanges: false,
             })
           })
         } else {
-          invoke('write_file', { filePath: curFile.path, content: contentRef.current }).then(() => {
+          invoke('write_file', { filePath: curFile.path, content: fileContent }).then(() => {
             onSuccess?.()
           })
 
           setIdStateMap(curFile.id, {
-            content: contentRef.current,
             hasUnsavedChanges: false,
           })
         }
@@ -186,7 +202,7 @@ function Editor(props: EditorProps) {
         console.error(error)
       }
     },
-    [active, curFile, t, insertNodeToFolderData],
+    [active, curFile, delegate, t, insertNodeToFolderData],
   )
 
   const debounceSave = useMemo(
@@ -251,7 +267,7 @@ function Editor(props: EditorProps) {
   )
 
   const handleChange: EditorChangeHandler = useCallback(
-    (params, editedContent) => {
+    (params) => {
       const { tr, helpers } = params
       const { getCharacterCount, getWordCount } = helpers
 
@@ -269,9 +285,8 @@ function Editor(props: EditorProps) {
       if (!active) return
 
       if (tr?.docChanged && !tr.getMeta('APPLY_MARKS')) {
-        contentRef.current = editedContent
+        editorContextRef.current = params
         const state = {
-          content: editedContent,
           hasUnsavedChanges: true,
           undoDepth: helpers.undoDepth(),
         }

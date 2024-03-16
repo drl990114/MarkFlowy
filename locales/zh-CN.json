@@ -28,5 +28,15 @@
     "text": "搜索",
     "caseSensitive": "大小写敏感",
     "toggleExpandAll": "切换展开全部"
+  },
+  "editor": {
+    "table": {
+      "insertColumnAfter": "向后插入列",
+      "insertColumnBefore": "向前插入列",
+      "insertRowAfter": "向后插入行",
+      "insertRowBefore": "向前插入行",
+      "deleteColumn": "删除列",
+      "deleteRow": "删除行"
+    }
   }
 }
