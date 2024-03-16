@@ -723,9 +723,9 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "4.5.1"
+version = "4.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c918d541ef2913577a0f9566e9ce27cb35b6df072075769e0b26cb5a554520da"
+checksum = "b230ab84b0ffdf890d5a10abdbc8b83ae1c4918275daea1ab8801f71536b2651"
 dependencies = [
  "clap_builder",
  "clap_derive",
@@ -733,9 +733,9 @@ dependencies = [
 
 [[package]]
 name = "clap_builder"
-version = "4.5.1"
+version = "4.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9f3e7391dad68afb0c2ede1bf619f579a3dc9c2ec67f089baa397123a2f3d1eb"
+checksum = "ae129e2e766ae0ec03484e609954119f123cc1fe650337e155d03b022f24f7b4"
 dependencies = [
  "anstream",
  "anstyle",
@@ -2407,7 +2407,7 @@ dependencies = [
  "memchr",
  "regex-automata 0.4.5",
  "same-file 1.0.6",
- "walkdir 2.4.0",
+ "walkdir 2.5.0",
  "winapi-util",
 ]
 
@@ -2557,7 +2557,7 @@ dependencies = [
  "jni-sys",
  "log",
  "thiserror",
- "walkdir 2.4.0",
+ "walkdir 2.5.0",
  "windows-sys 0.45.0",
 ]
 
@@ -2734,9 +2734,9 @@ dependencies = [
 
 [[package]]
 name = "log"
-version = "0.4.20"
+version = "0.4.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b5e6163cb8c49088c2c36f57875e58ccd8c87c7427f7fbd50ea6710b2f3f2e8f"
+checksum = "90ed8c1e510134f979dbc4f070f87d4313098b704861a105fe34231c70a3901c"
 
 [[package]]
 name = "loom"
@@ -2882,7 +2882,7 @@ dependencies = [
  "serde",
  "toml 0.8.10",
  "uuid",
- "walkdir 2.4.0",
+ "walkdir 2.5.0",
 ]
 
 [[package]]
@@ -2923,9 +2923,9 @@ dependencies = [
 
 [[package]]
 name = "mio"
-version = "0.8.10"
+version = "0.8.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8f3d0b296e374a4e6f3c7b0a1f5a51d748a0d34c85e7dc48fc3fa9a87657fe09"
+checksum = "a4a650543ca06a924e8b371db273b2756685faae30f8487da1b56505a8f78b0c"
 dependencies = [
  "libc",
  "wasi 0.11.0+wasi-snapshot-preview1",
@@ -4658,7 +4658,7 @@ dependencies = [
  "tauri-utils",
  "tauri-winres",
  "toml 0.8.10",
- "walkdir 2.4.0",
+ "walkdir 2.5.0",
 ]
 
 [[package]]
@@ -4685,7 +4685,7 @@ dependencies = [
  "time",
  "url",
  "uuid",
- "walkdir 2.4.0",
+ "walkdir 2.5.0",
 ]
 
 [[package]]
@@ -4942,7 +4942,7 @@ dependencies = [
  "thiserror",
  "toml 0.8.10",
  "url",
- "walkdir 2.4.0",
+ "walkdir 2.5.0",
 ]
 
 [[package]]
@@ -5470,9 +5470,9 @@ dependencies = [
 
 [[package]]
 name = "walkdir"
-version = "2.4.0"
+version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d71d857dc86794ca4c280d616f7da00d2dbfd8cd788846559a6813e6aa4b54ee"
+checksum = "29790946404f91d9c5d06f9874efddea1dc06c5efe94541a7d6863108e3a5e4b"
 dependencies = [
  "same-file 1.0.6",
  "winapi-util",
