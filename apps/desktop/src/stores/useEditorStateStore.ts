@@ -3,7 +3,6 @@ import { immer } from 'zustand/middleware/immer'
 
 type EditorState = {
   hasUnsavedChanges: boolean
-  content: string
   undoDepth?: number
 }
 
