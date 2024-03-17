@@ -10,7 +10,7 @@ const Container = styled.div`
 function Empty() {
   const { t } = useTranslation()
 
-  return <Container className='fjic h-full w-full'>{t('none')}</Container>
+  return <Container className='fjic h-full w-full'>{t('common.none')}</Container>
 }
 
 export default memo(Empty)

@@ -11,11 +11,13 @@ import { EVENT } from '@/constants'
 import { showContextMenu } from '../UI/ContextMenu'
 import NiceModal from '@ebay/nice-modal-react'
 import { MODAL_CONFIRM_ID } from '../Modal'
+import { useTranslation } from 'react-i18next'
 
 const FileNode: FC<FileNodeProps> = ({ item, level = 0, activeId, onSelect, open = false }) => {
   const [isOpen, setIsOpen] = useState(open)
   const newInputRef = useRef<NewInputRef>(null)
   const { deleteNode } = useEditorStore()
+  const { t } = useTranslation()
   const isActived = activeId === item.id
   const isFolder = item.kind === 'dir'
 
@@ -53,7 +55,7 @@ const FileNode: FC<FileNodeProps> = ({ item, level = 0, activeId, onSelect, open
       const contextMenuItems = [
         {
           value: 'add_file',
-          label: 'Add File',
+          label: t('contextmenu.explorer.add_file'),
           handler: () => {
             newFileHandler()
           },
@@ -63,10 +65,16 @@ const FileNode: FC<FileNodeProps> = ({ item, level = 0, activeId, onSelect, open
       if (level !== 0) {
         contextMenuItems.push({
           value: item.kind === 'dir' ? 'delete_folder' : 'delete_file',
-          label: item.kind === 'dir' ? 'Delete Folder' : 'Delete File',
+          label:
+            item.kind === 'dir'
+              ? t('contextmenu.explorer.delete_folder')
+              : t('contextmenu.explorer.delete_file'),
           handler: () => {
-            NiceModal.show(MODAL_CONFIRM_ID,{
-              title: `Are you sure you want to permanently delete ${item.name}`,
+            NiceModal.show(MODAL_CONFIRM_ID, {
+              title: t('confirm.delete.description', {
+                name: item.name,
+                something: item.kind === 'dir' ? t('common.folder') : t('common.file'),
+              }),
               onConfirm: delFileHandler,
             })
           },
@@ -79,7 +87,7 @@ const FileNode: FC<FileNodeProps> = ({ item, level = 0, activeId, onSelect, open
         items: contextMenuItems,
       })
     },
-    [deleteNode, item, level],
+    [deleteNode, item, t, level],
   )
 
   const nodeWrapperCls = classNames('file-node', {

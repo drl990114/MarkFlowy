@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { memo, useEffect, useState } from 'react'
 import SettingGroup from './component/SettingGroup'
 import { Container } from './styles'
+import type { SettingData } from '@/router/Setting/settingMap'
 import settingMap from '@/router/Setting/settingMap'
 import Logo from '@/assets/logo.svg?react'
 import { invoke } from '@tauri-apps/api/core'
@@ -27,16 +28,22 @@ function a11yProps(index: number) {
   }
 }
 
+function isSettingGroup(group: Setting.SettingGroup | Setting.SettingItem): group is Setting.SettingGroup {
+  return typeof group === 'object'
+}
+
 function Setting() {
   const [value, setValue] = useState(0)
   const [confPath, setConfPath] = useState('')
   const { appInfo } = useAppInfoStore()
   const { t } = useTranslation()
   const [update, setUpdate] = useState<Update | null>(null)
-  const settingDataGroups = Object.keys(settingMap)
-  const curGroupKey = settingDataGroups[value] as keyof typeof settingMap
-  const curGroup = settingMap[curGroupKey] as Setting.SettingData
-  const curGroupKeys = Object.keys(curGroup)
+  const settingDataGroupsKeys = Object.keys(settingMap).filter(
+    (key) => key !== 'i18nKey',
+  ) as (keyof typeof settingMap)[]
+  const curGroupKey = settingDataGroupsKeys[value] as Exclude<keyof SettingData, 'i18nKey'>
+  const curGroup = settingMap[curGroupKey] as Setting.SettingGroup
+  const curGroupKeys = Object.keys(curGroup).filter((key) => key !== 'i18nKey')as Exclude<keyof SettingData, 'i18nKey'>[]
 
   useEffect(() => {
     check().then((u) => {
@@ -53,9 +60,10 @@ function Setting() {
     }
 
     return curGroupKeys.map((key) => {
-      return (
-        <SettingGroup key={key} group={curGroup[key]} groupKey={key} categoryKey={curGroupKey} />
-      )
+      const group = curGroup[key]
+      if (isSettingGroup(group)) {
+        return <SettingGroup key={key} group={group} groupKey={key} categoryKey={curGroupKey} />
+      }
     })
   }
 
@@ -71,10 +79,11 @@ function Setting() {
         </div> */}
         <nav>
           <ul>
-            {settingDataGroups.map((group, index) => {
+            {settingDataGroupsKeys.map((groupKey, index) => {
+              const group = settingMap[groupKey] as Setting.SettingGroup
               return (
                 <li
-                  key={group}
+                  key={groupKey}
                   className={classNames({
                     active: index === value,
                   })}
@@ -83,14 +92,16 @@ function Setting() {
                     setValue(index)
                   }}
                 >
-                  {group}
+                  {t(group.i18nKey)}
                 </li>
               )
             })}
           </ul>
         </nav>
         <div className='sidebar-version__container'>
-          <span>{t('about.version')}: {appInfo.version}</span>
+          <span>
+            {t('about.version')}: {appInfo.version}
+          </span>
           {update ? (
             <Button
               size='small'
@@ -100,7 +111,7 @@ function Setting() {
                 setUpdate(null)
               }}
             >
-              {t('about.install')} 
+              {t('about.install')}
               {t('about.newVersion')}: {update.version}
             </Button>
           ) : null}

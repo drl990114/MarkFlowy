@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next"
 import styled from "styled-components"
 
 interface SettingLabelProps {
@@ -6,10 +7,11 @@ interface SettingLabelProps {
 
 export const SettingLabel = (props: SettingLabelProps) => {
   const { item } = props
+  const { t } = useTranslation()
 
   return <Container>
-    <label className="setting-item__title">{item.title}</label>
-    {item.desc ? <label className="setting-item__label">{item.desc}</label> : null}
+    <label className="setting-item__title">{t(item.title.i18nKey)}</label>
+    {item.desc ? <label className="setting-item__label">{t((item.desc.i18nKey))}</label> : null}
   </Container>
 }
 

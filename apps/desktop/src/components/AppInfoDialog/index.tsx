@@ -41,10 +41,10 @@ TauriVersion: ${appInfo.tauriVersion}
       onClose={handleClose}
       footer={[
         <Button key='ok' onClick={handleClose}>
-          {t('ok')}
+          {t('common.ok')}
         </Button>,
         <Button key='copy' btnType='primary' onClick={handleCopyAppInfo}>
-          {t('copy')}
+          {t('common.copy')}
         </Button>,
       ]}
     >

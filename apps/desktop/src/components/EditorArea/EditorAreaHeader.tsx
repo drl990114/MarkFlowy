@@ -5,10 +5,12 @@ import { getFileObject } from '@/helper/files'
 import useBookMarksStore from '@/extensions/bookmarks/useBookMarksStore'
 import { showContextMenu } from '../UI/ContextMenu'
 import bus from '@/helper/eventBus'
+import { useTranslation } from 'react-i18next'
 
 export const EditorAreaHeader = memo(() => {
   const { activeId, getEditorDelegate } = useEditorStore()
   const { execute } = useCommandStore()
+  const { t } = useTranslation()
   const ref = useRef<HTMLDivElement>()
   const curFile = activeId ? getFileObject(activeId) : undefined
 
@@ -24,7 +26,7 @@ export const EditorAreaHeader = memo(() => {
       y: rect.y + rect.height,
       items: [
         {
-          label: 'BookMark',
+          label: t('action.bookmark'),
           value: 'BookMark',
           checked: curBookMark !== undefined,
           handler: () => {
@@ -36,17 +38,17 @@ export const EditorAreaHeader = memo(() => {
           },
         },
         {
-          label: 'View',
+          label: t('view.label'),
           value: 'view',
           children: [
             {
-              label: 'Source Code',
+              label: t('view.source_code'),
               value: 'sourceCode',
               checked: editDelegate?.view === 'SourceCode',
               handler: () => bus.emit('editor_toggle_type', 'sourceCode'),
             },
             {
-              label: 'Wysiwyg View',
+              label: t('view.wysiwyg'),
               value: 'wysiwyg',
               checked: editDelegate?.view === 'Wysiwyg',
               handler: () => bus.emit('editor_toggle_type', 'wysiwyg'),
@@ -55,7 +57,7 @@ export const EditorAreaHeader = memo(() => {
         },
       ],
     })
-  }, [curFile, getEditorDelegate, execute])
+  }, [curFile, getEditorDelegate, t, execute])
 
   return (
     <div className='editor-area-header'>

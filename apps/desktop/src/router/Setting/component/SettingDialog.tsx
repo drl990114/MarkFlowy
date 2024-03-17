@@ -3,6 +3,7 @@ import { Setting } from '@/router'
 import { memo, useCallback, useEffect, useState } from 'react'
 import { useCommandStore } from '@/stores'
 import styled from 'styled-components'
+import { useTranslation } from 'react-i18next'
 
 const SettingDialogWrapper = styled(Dialog)`
   height: 80vh;
@@ -15,6 +16,7 @@ const SettingDialogWrapper = styled(Dialog)`
 
 export const SettingDialog = memo(() => {
   const [open, setOpen] = useState(false)
+  const { t } = useTranslation()
 
   useEffect(() => {
     useCommandStore.getState().addCommand({
@@ -28,7 +30,12 @@ export const SettingDialog = memo(() => {
   const handleClose = useCallback(() => setOpen(false), [])
 
   return (
-    <SettingDialogWrapper width="80vw" title='Setting' open={open} onClose={handleClose}>
+    <SettingDialogWrapper
+      width='80vw'
+      title={t('settings.label')}
+      open={open}
+      onClose={handleClose}
+    >
       <Setting />
     </SettingDialogWrapper>
   )

@@ -31,10 +31,10 @@ const Confirm = NiceModal.create(
         onClose={modal.hide}
         footer={[
           <Button key='cancel' onClick={modal.hide}>
-            {cancelText ?? t('cancel')}
+            {cancelText ?? t('common.cancel')}
           </Button>,
           <Button key='confirm' btnType='primary' onClick={handleConfirm}>
-            {confirmText ?? t('confirm')}
+            {confirmText ?? t('common.confirm')}
           </Button>,
         ]}
       >
