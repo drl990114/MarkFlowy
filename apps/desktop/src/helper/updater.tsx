@@ -7,8 +7,6 @@ import { check } from '@tauri-apps/plugin-updater'
 import { getI18n } from 'react-i18next'
 import styled from 'styled-components'
 import Markdown from 'react-markdown'
-import { cacheStore } from './cacheStore'
-import dayjs from 'dayjs'
 
 const Content = styled.div`
   margin-bottom: ${({ theme }) => theme?.spaceXs};
@@ -29,39 +27,11 @@ export const installUpdate = async (update: Update) => {
   })
 }
 
-export const cacheUpdaterNoticeTime = () => {
-  cacheStore.set('updaterNoticeTime', Date.now())
-}
-
-/**
- * check updater notice time, only notice once a day
- * @returns {boolean} true: need notice, false: not need notice
- */
-export const checkUpdaterNoticeFrequency = async () => {
-  const updaterNoticeTime = await cacheStore.get<Date>('updaterNoticeTime')
-
-  if (updaterNoticeTime) {
-    const now = Date.now()
-    const diffDay = dayjs(now).diff(updaterNoticeTime, 'day')
-
-    return diffDay > 1
-  }
-
-  return true
-}
-
 export const checkUpdate = async (opt: { install: boolean } = { install: false }) => {
   try {
-    const isNormalFrequency = await checkUpdaterNoticeFrequency()
-    if (!isNormalFrequency) {
-      return
-    }
-
     const i18n = getI18n()
 
     const update = await check()
-
-    cacheUpdaterNoticeTime()
 
     if (update !== null) {
       if (opt.install) {
