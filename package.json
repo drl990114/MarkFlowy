@@ -11,12 +11,15 @@
   ],
   "scripts": {
     "dev": "turbo dev",
-    "test": "turbo test",
-    "updater": "yarn workspace @markflowy/desktop updater",
+    "dev:desktop": "yarn workspace @markflowy/desktop tauri:dev",
     "build": "turbo build",
     "build:desktop": "yarn build && yarn workspace @markflowy/desktop tauri:build",
-    "dev:desktop": "yarn workspace @markflowy/desktop tauri:dev",
     "release": "node scripts/release.js",
+    "release:patch": "yarn release --patch",
+    "release:minor": "yarn release --minor",
+    "release:major": "yarn release --major",
+    "test": "turbo test",
+    "updater": "yarn workspace @markflowy/desktop updater",
     "lint": "eslint --fix --ext .tsx ./"
   },
   "devDependencies": {
