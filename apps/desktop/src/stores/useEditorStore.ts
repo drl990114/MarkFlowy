@@ -99,14 +99,15 @@ const useEditorStore = create<EditorStore>((set, get) => {
     insertNodeToFolderData: (fileNode) => {
       const { folderData } = get()
       if (fileNode) {
-        const parent = fileNode.kind === 'dir' ? fileNode : findParentNodeByPath(fileNode.path!, folderData![0])
+        const parent =
+          fileNode.kind === 'dir' ? fileNode : findParentNodeByPath(fileNode.path!, folderData![0])
 
         if (!parent) return false
         let sameFile = parent.children?.find((file) => isSameFile(file, fileNode))
         if (sameFile) {
           sameFile = {
             ...sameFile,
-            ...fileNode
+            ...fileNode,
           }
         } else {
           parent.children!.push(fileNode)
@@ -179,6 +180,26 @@ const useEditorStore = create<EditorStore>((set, get) => {
       })
     },
 
+    delOtherOpenedFile: (id: string) => {
+      set((state) => {
+        return {
+          ...state,
+          activeId: id,
+          opened: [id],
+        }
+      })
+    },
+
+    delAllOpenedFile: () => {
+      set((state) => {
+        return {
+          ...state,
+          activeId: undefined,
+          opened: [],
+        }
+      })
+    },
+
     getEditorContent: (id: string) => {
       const curDelegate = get().getEditorDelegate(id)
       if (!curDelegate) {
@@ -217,15 +238,14 @@ const useEditorStore = create<EditorStore>((set, get) => {
           ...state,
           editorCtxMap: new Map(state.editorCtxMap),
         }
-      }
-    ),
+      }),
 
     getEditorCtx: (id) => {
       const editorCtxMap = get().editorCtxMap
       const curCtx = editorCtxMap.get(id)
 
       return curCtx
-    }
+    },
   }
 })
 
@@ -244,6 +264,8 @@ type EditorStore = {
   deleteNode: (fileNode: IFile) => void
   addOpenedFile: (id: string) => void
   delOpenedFile: (id: string) => void
+  delOtherOpenedFile: (id: string) => void
+  delAllOpenedFile: () => void
   setFolderData: (folderData: IFile[]) => void
   setEditorDelegate: (id: string, delegate: EditorDelegate<any>) => void
   getEditorContent: (id: string) => string

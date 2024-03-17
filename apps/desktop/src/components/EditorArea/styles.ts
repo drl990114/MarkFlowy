@@ -32,12 +32,15 @@ export const TabItem = styled.div<TabItemProps>`
   justify-content: center;
   align-items: center;
   padding: 0 ${(props) => props.theme.spaceXs};
-  font-size: ${props => props.theme.fontXs};
+  font-size: ${(props) => props.theme.fontXs};
   height: calc(100% + 2px);
   box-sizing: border-box;
   white-space: nowrap;
   cursor: pointer;
   user-select: none;
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* Edge, IE */
 
   &:hover {
     background-color: ${(props) => props.theme.hoverColor};
@@ -70,7 +73,6 @@ export const Dot = styled.div<DotProps>`
 interface TabItemProps {
   active: boolean
 }
-
 
 export const WarningHeader = styled.h3`
   text-align: center;

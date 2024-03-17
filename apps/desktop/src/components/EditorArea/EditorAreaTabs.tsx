@@ -9,6 +9,8 @@ import useThemeStore from '@/stores/useThemeStore'
 import { setTitleBarText } from '../TitleBar'
 import { EditorAreaHeader } from './EditorAreaHeader'
 import { darken } from '@markflowy/theme'
+import { showContextMenu } from '../UI/ContextMenu'
+import { useTranslation } from 'react-i18next'
 
 type ContainerProps = {
   visible: boolean
@@ -53,11 +55,13 @@ const Container = styled.div<ContainerProps>`
   }
 `
 const EditorAreaTabs = memo(() => {
-  const { opened, activeId, setActiveId, delOpenedFile } = useEditorStore()
+  const { opened, activeId, setActiveId, delOpenedFile, delOtherOpenedFile, delAllOpenedFile } =
+    useEditorStore()
   const { idStateMap } = useEditorStateStore()
   const { curTheme } = useThemeStore()
   const [element] = useAutoAnimate<HTMLDivElement>()
   const htmlRef = useRef<HTMLDivElement>(null)
+  const { t } = useTranslation()
 
   useEffect(() => {
     if (!htmlRef.current) return
@@ -66,7 +70,7 @@ const EditorAreaTabs = memo(() => {
       ev.preventDefault()
       htmlRef.current!.scrollLeft += ev.deltaY
     }
-  }, [])
+  }, [element])
 
   const onSelectItem = (id: string) => {
     setActiveId(id)
@@ -98,10 +102,51 @@ const EditorAreaTabs = memo(() => {
           const active = activeId === id
           const editorState = idStateMap.get(id)
 
+          const handleContextMenu = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+            e.stopPropagation()
+            e.preventDefault()
+            showContextMenu({
+              x: e.clientX,
+              y: e.clientY,
+              items: [
+                {
+                  label: t('contextmenu.editor_tab.close'),
+                  value: 'close',
+                  handler: () => {
+                    close(e, id)
+                  },
+                },
+                {
+                  label: t('contextmenu.editor_tab.close_others'),
+                  value: 'close_others',
+                  handler: () => {
+                    delOtherOpenedFile(id)
+                  },
+                },
+                {
+                  label: t('contextmenu.editor_tab.close_all'),
+                  value: 'close_all',
+                  handler: () => {
+                    delAllOpenedFile()
+                  },
+                },
+              ],
+            })
+          }
+
           return (
-            <TabItem active={active} onClick={() => onSelectItem(file.id)} key={id}>
+            <TabItem
+              active={active}
+              onClick={() => onSelectItem(file.id)}
+              key={id}
+              onContextMenu={handleContextMenu}
+            >
               <i className={'ri-file-3-line tab-items__icon'} />
-              <span style={{ color: active ? curTheme.styledConstants.accentColor : '' }}>
+              <span
+                style={{
+                  color: active ? curTheme.styledConstants.accentColor : '',
+                }}
+              >
                 {file.name}
               </span>
 
