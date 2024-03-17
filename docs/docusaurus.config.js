@@ -7,7 +7,7 @@ module.exports = {
   tagline: 'An easy-to-use, customizable, modern file manager',
   url: 'https://markflowy.vercel.app',
   baseUrl: '/',
-  onBrokenLinks: 'throw',
+  onBrokenLinks: 'warn',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
   organizationName: 'drl990114',
