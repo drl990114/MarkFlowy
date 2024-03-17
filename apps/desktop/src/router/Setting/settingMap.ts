@@ -1,75 +1,9 @@
-const settingMap = {
-  general: {
-    "App": {
-      auto_update: {
-        key: 'auto_update',
-        title: 'Automatic updates',
-        desc: 'Automatically check for updates and install when the app starts.',
-        type: 'switch',
-      }
-    },
-    "Auto Save": {
-      autosave: {
-        key: 'autosave',
-        title: 'Switch auto save',
-        desc: 'Switch auto save, Active file will be automatically saved at set intervals.',
-        type: 'switch',
-      },
-      autosaveInterval: {
-        key: 'autosave_interval',
-        type: 'slider',
-        title: 'Auto save interval',
-        desc: 'Set the interval of auto save, in milliseconds.',
-        scope: [1000, 10000]
-      }
-    },
-    "Misc": {
-      language: {
-        key: 'language',
-        type: 'select',
-        title: 'Language',
-        desc: 'Set the language of the app.',
-        options: [
-          {
-            title: 'English',
-            value: 'en',
-          },
-          {
-            title: '简体中文',
-            value: 'cn',
-          },
-        ],
-      },
-    },
-  },
-  editor: {
-    Style: {
-      fullWidth: {
-        key: 'editor_full_width',
-        type: 'switch',
-        title: 'Full width',
-        desc: 'Set the editor to full width.',
-      }
-    }
-  },
-  extensions: {
-    ChatGPT: {
-      ApiKey: {
-        key: 'extensions_chatgpt_apikey',
-        type: 'input',
-        title: 'Api Key',
-        desc: 'Api Key for ChatGPT',
-      },
-    },
-  },
-  keyboard: {}
-}
-
+import SettingSchema from './settingSchema.json'
 export enum SettingKeys {
   language = 'language',
   chatgpt = 'extensions_chatgpt_apikey',
 }
 
-export default settingMap
+export default SettingSchema
 
-export type SettingData = typeof settingMap
+export type SettingData = typeof SettingSchema

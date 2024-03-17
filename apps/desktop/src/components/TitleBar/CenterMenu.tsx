@@ -7,11 +7,13 @@ import useThemeStore from '@/stores/useThemeStore'
 import { showContextMenu } from '../UI/ContextMenu/ContextMenu'
 import { useCommandStore } from '@/stores'
 import appSettingService from '@/services/app-setting'
+import { useTranslation } from 'react-i18next'
 
 export const CenterMenu = memo(() => {
   const ref = useRef<HTMLDivElement>(null)
   const { osType } = useGlobalOSInfo()
   const { themes, curTheme, setCurThemeByName } = useThemeStore()
+  const { t } = useTranslation()
 
   const getThemeMenu = useCallback(() => {
     return themes.map((theme) => {
@@ -38,19 +40,19 @@ export const CenterMenu = memo(() => {
     showContextMenu({
       items: [
         {
-          label: 'About MarkFlowy',
+          label: t('about.label'),
           value: 'about',
           handler: () => {
             emit(EVENT.dialog_setting_about)
           },
         },
         {
-          label: 'Theme',
+          label: t('view.theme.label'),
           value: 'theme',
           children: themeMenu,
         },
         {
-          label: 'Settings',
+          label: t('settings.label'),
           value: 'settings',
           handler: () => {
             useCommandStore.getState().execute('open_setting_dialog')

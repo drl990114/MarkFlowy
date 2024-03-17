@@ -1,12 +1,47 @@
 {
-  "none": "None",
-  "name": "name",
-  "ok": "ok",
-  "copy": "copy",
-  "confirm": "confirm",
-  "cancel": "cancel",
-  "menu": {
-    "setting": "setting"
+  "app_name": "MarkFlowy",
+  "common": {
+    "none": "None",
+    "name": "name",
+    "ok": "ok",
+    "confirm": "confirm",
+    "cancel": "cancel",
+    "close": "close",
+    "copy": "copy",
+    "error": "error",
+    "delete": "delete",
+    "file": "file",
+    "folder": "folder",
+    "fetching": "Loading..."
+  },
+  "view": {
+    "label": "View",
+    "theme": {
+      "label": "Theme"
+    },
+    "wysiwyg": "Wysiwyg",
+    "source_code": "Source Code"
+  },
+  "action": {
+    "bookmark": "bookmark",
+    "bookmarked": "bookmarked",
+    "done": "done",
+    "edit": "edit",
+    "more": "more",
+    "save": "save"
+  },
+  "confirm": {
+    "delete": {
+      "description": "Are you sure you want to delete the \"{{name}}\" {{something}}?"
+    }
+  },
+  "error": {
+    "unsupported_file_format": "Unsupported file format"
+  },
+  "sidebar": {
+    "explorer": "explorer",
+    "search": "search",
+    "table_of_contents": "Table of Contents"
   },
   "file": {
     "untitled": "untitled",
@@ -14,6 +49,7 @@
     "recentDir": "Recently opened folders"
   },
   "about": {
+    "label": "About",
     "version": "Version",
     "newVersion": "New version",
     "install": "Install",
@@ -22,21 +58,96 @@
     "website": "Website",
     "feedback": "feedback",
     "issues": "Issues",
-    "license": "License"
+    "license": "License",
+    "current": "current version"
   },
+  "contextmenu": {
+    "explorer": {
+      "add_file": "New file",
+      "add_folder": "New folder",
+      "delete_file": "Delete file",
+      "delete_folder": "Delete folder"
+    },
+    "editor_tab": {
+      "close": "Close",
+      "close_others": "Close others",
+      "close_right": "Close right",
+      "close_all": "Close all"
+    }
+  },
+  "notification": {},
   "search": {
-    "text": "search",
+    "search_empty": "Nothing found matching these search terms",
+    "text": "Search",
     "caseSensitive": "Case sensitive",
-    "toggleExpandAll": "Toggle Expand All"
+    "toggleExpandAll": "Toggle expand all"
+  },
+  "settings": {
+    "label": "Setting",
+    "general": {
+      "label": "general",
+      "app": {
+        "label": "application",
+        "automatic_updates": {
+          "label": "Automatic update",
+          "desc": "Automatically check for updates and install them when the application starts."
+        }
+      },
+      "autosave": {
+        "label": "Autosave",
+        "switch_auto_save": {
+          "label": "Autosave",
+          "desc": "Switch automatic saving. The current file will be automatically saved according to the set time interval."
+        },
+        "autosaveInterval": {
+          "label": "Auto save interval",
+          "desc": "Set the interval of auto save, in milliseconds."
+        }
+      },
+      "misc": {
+        "label": "Miscellaneous",
+        "language": {
+          "label": "Language",
+          "desc": "Set the language of the app."
+        }
+      }
+    },
+    "editor": {
+      "label": "Editor",
+      "style": {
+        "label": "Style",
+        "full_width": {
+          "label": "Full width",
+          "desc": "Set the editor to full width."
+        }
+      }
+    },
+    "keyboard": {
+      "label": "keyboard"
+    },
+    "extensions": {
+      "label": "Extensions",
+      "ChatGPT": {
+        "label": "ChatGPT",
+        "api_key": {
+          "label": "API Key",
+          "desc": "API key for ChatGPT."
+        }
+      }
+    }
+  },
+  "updater": {
+    "install": "install",
+    "download_and_install": "Download and install"
   },
   "editor": {
     "table": {
-      "insertColumnAfter": "insert column after",
-      "insertColumnBefore": "insert column before",
-      "insertRowAfter": "insert row after",
-      "insertRowBefore": "insert row before",
-      "deleteColumn": "delete column",
-      "deleteRow": "delete row"
+      "insertColumnAfter": "Insert column after",
+      "insertColumnBefore": "Insert column before",
+      "insertRowAfter": "Insert row after",
+      "insertRowBefore": "Insert row before",
+      "deleteColumn": "Delete column",
+      "deleteRow": "Delete row"
     }
   }
 }

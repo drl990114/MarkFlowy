@@ -1,0 +1,100 @@
+{
+  "general": {
+    "i18nKey": "settings.general.label",
+    "App": {
+      "i18nKey": "settings.general.app.label",
+      "auto_update": {
+        "key": "auto_update",
+        "title": {
+          "i18nKey": "settings.general.app.automatic_updates.label"
+        },
+        "desc": {
+          "i18nKey": "settings.general.app.automatic_updates.desc"
+        },
+        "type": "switch"
+      }
+    },
+    "Auto Save": {
+      "i18nKey": "settings.general.autosave.label",
+      "autosave": {
+        "key": "autosave",
+        "title": {
+          "i18nKey": "settings.general.autosave.switch_auto_save.label"
+        },
+        "desc": {
+          "i18nKey": "settings.general.autosave.switch_auto_save.desc"
+        },
+        "type": "switch"
+      },
+      "autosaveInterval": {
+        "key": "autosave_interval",
+        "type": "slider",
+        "title": {
+          "i18nKey": "settings.general.autosave.autosaveInterval.label"
+        },
+        "desc": {
+          "i18nKey": "settings.general.autosave.autosaveInterval.desc"
+        },
+        "scope": [1000, 10000]
+      }
+    },
+    "Misc": {
+      "i18nKey": "settings.general.misc.label",
+      "language": {
+        "key": "language",
+        "type": "select",
+        "title": {
+          "i18nKey": "settings.general.misc.language.label"
+        },
+        "desc": {
+          "i18nKey": "settings.general.misc.language.desc"
+        },
+        "options": [
+          {
+            "title": "English",
+            "value": "en"
+          },
+          {
+            "title": "简体中文",
+            "value": "cn"
+          }
+        ]
+      }
+    }
+  },
+  "editor": {
+    "i18nKey": "settings.editor.label",
+    "Style": {
+      "i18nKey": "settings.editor.style.label",
+      "fullWidth": {
+        "key": "editor_full_width",
+        "type": "switch",
+        "title": {
+          "i18nKey": "settings.editor.style.full_width.label"
+        },
+        "desc": {
+          "i18nKey": "settings.editor.style.full_width.desc"
+        }
+      }
+    }
+  },
+  "extensions": {
+    "i18nKey": "settings.extensions.label",
+    "ChatGPT": {
+      "i18nKey": "settings.extensions.ChatGPT.label",
+      "ApiKey": {
+        "key": "extensions_chatgpt_apikey",
+        "type": "input",
+        "title": {
+          "i18nKey": "settings.extensions.ChatGPT.api_key.label"
+        },
+        "desc": {
+          "i18nKey": "settings.extensions.ChatGPT.api_key.desc"
+        }
+      }
+    }
+  },
+  "keyboard": {
+    "i18nKey": "settings.keyboard.label"
+  }
+}
