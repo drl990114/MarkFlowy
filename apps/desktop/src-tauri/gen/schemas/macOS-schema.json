@@ -13,6 +13,13 @@
     },
     {
       "description": "A list of capabilities.",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Capability"
+      }
+    },
+    {
+      "description": "A list of capabilities.",
       "type": "object",
       "required": [
         "capabilities"
@@ -34,8 +41,7 @@
       "type": "object",
       "required": [
         "identifier",
-        "permissions",
-        "windows"
+        "permissions"
       ],
       "properties": {
         "identifier": {
@@ -85,15 +91,11 @@
           }
         },
         "platforms": {
-          "description": "Target platforms this capability applies. By default all platforms applies.",
-          "default": [
-            "linux",
-            "macOS",
-            "windows",
-            "android",
-            "iOS"
+          "description": "Target platforms this capability applies. By default all platforms are affected by this capability.",
+          "type": [
+            "array",
+            "null"
           ],
-          "type": "array",
           "items": {
             "$ref": "#/definitions/Target"
           }
@@ -108,7 +110,7 @@
       ],
       "properties": {
         "urls": {
-          "description": "Remote domains this capability refers to. Can use glob patterns.",
+          "description": "Remote domains this capability refers to using the [URLPattern standard](https://urlpattern.spec.whatwg.org/).\n\n# Examples\n\n- \"https://*.mydomain.dev\": allows subdomains of mydomain.dev - \"https://mydomain.dev/api/*\": allows any subpath of mydomain.dev/api",
           "type": "array",
           "items": {
             "type": "string"
@@ -208,32 +210,48 @@
                   "items": {
                     "title": "ScopeEntry",
                     "description": "HTTP scope entry object definition.",
-                    "type": "object",
-                    "required": [
-                      "url"
-                    ],
-                    "properties": {
-                      "url": {
-                        "description": "A URL that can be accessed by the webview when using the HTTP APIs. The scoped URL is matched against the request URL using a glob pattern.\n\nExamples:\n\n- \"https://*\" or \"https://**\" : allows all HTTPS urls\n\n- \"https://*.github.com/tauri-apps/tauri\": allows any subdomain of \"github.com\" with the \"tauri-apps/api\" path\n\n- \"https://myapi.service.com/users/*\": allows access to any URLs that begins with \"https://myapi.service.com/users/\"",
+                    "anyOf": [
+                      {
+                        "description": "A URL that can be accessed by the webview when using the HTTP APIs. Wildcards can be used following the URL pattern standard.\n\nSee [the URL Pattern spec](https://urlpattern.spec.whatwg.org/) for more information.\n\nExamples:\n\n- \"https://*\" : allows all HTTPS origin on port 443\n\n- \"https://*:*\" : allows all HTTPS origin on any port\n\n- \"https://*.github.com/tauri-apps/tauri\": allows any subdomain of \"github.com\" with the \"tauri-apps/api\" path\n\n- \"https://myapi.service.com/users/*\": allows access to any URLs that begins with \"https://myapi.service.com/users/\"",
                         "type": "string"
+                      },
+                      {
+                        "type": "object",
+                        "required": [
+                          "url"
+                        ],
+                        "properties": {
+                          "url": {
+                            "description": "A URL that can be accessed by the webview when using the HTTP APIs. Wildcards can be used following the URL pattern standard.\n\nSee [the URL Pattern spec](https://urlpattern.spec.whatwg.org/) for more information.\n\nExamples:\n\n- \"https://*\" : allows all HTTPS origin on port 443\n\n- \"https://*:*\" : allows all HTTPS origin on any port\n\n- \"https://*.github.com/tauri-apps/tauri\": allows any subdomain of \"github.com\" with the \"tauri-apps/api\" path\n\n- \"https://myapi.service.com/users/*\": allows access to any URLs that begins with \"https://myapi.service.com/users/\"",
+                            "type": "string"
+                          }
+                        }
                       }
-                    }
+                    ]
                   }
                 },
                 "deny": {
                   "items": {
                     "title": "ScopeEntry",
                     "description": "HTTP scope entry object definition.",
-                    "type": "object",
-                    "required": [
-                      "url"
-                    ],
-                    "properties": {
-                      "url": {
-                        "description": "A URL that can be accessed by the webview when using the HTTP APIs. The scoped URL is matched against the request URL using a glob pattern.\n\nExamples:\n\n- \"https://*\" or \"https://**\" : allows all HTTPS urls\n\n- \"https://*.github.com/tauri-apps/tauri\": allows any subdomain of \"github.com\" with the \"tauri-apps/api\" path\n\n- \"https://myapi.service.com/users/*\": allows access to any URLs that begins with \"https://myapi.service.com/users/\"",
+                    "anyOf": [
+                      {
+                        "description": "A URL that can be accessed by the webview when using the HTTP APIs. Wildcards can be used following the URL pattern standard.\n\nSee [the URL Pattern spec](https://urlpattern.spec.whatwg.org/) for more information.\n\nExamples:\n\n- \"https://*\" : allows all HTTPS origin on port 443\n\n- \"https://*:*\" : allows all HTTPS origin on any port\n\n- \"https://*.github.com/tauri-apps/tauri\": allows any subdomain of \"github.com\" with the \"tauri-apps/api\" path\n\n- \"https://myapi.service.com/users/*\": allows access to any URLs that begins with \"https://myapi.service.com/users/\"",
                         "type": "string"
+                      },
+                      {
+                        "type": "object",
+                        "required": [
+                          "url"
+                        ],
+                        "properties": {
+                          "url": {
+                            "description": "A URL that can be accessed by the webview when using the HTTP APIs. Wildcards can be used following the URL pattern standard.\n\nSee [the URL Pattern spec](https://urlpattern.spec.whatwg.org/) for more information.\n\nExamples:\n\n- \"https://*\" : allows all HTTPS origin on port 443\n\n- \"https://*:*\" : allows all HTTPS origin on any port\n\n- \"https://*.github.com/tauri-apps/tauri\": allows any subdomain of \"github.com\" with the \"tauri-apps/api\" path\n\n- \"https://myapi.service.com/users/*\": allows access to any URLs that begins with \"https://myapi.service.com/users/\"",
+                            "type": "string"
+                          }
+                        }
                       }
-                    }
+                    ]
                   }
                 }
               }
@@ -681,6 +699,97 @@
           "type": "string",
           "enum": [
             "http:deny-fetch-send"
+          ]
+        },
+        {
+          "description": "image:default -> Default permissions for the plugin.",
+          "type": "string",
+          "enum": [
+            "image:default"
+          ]
+        },
+        {
+          "description": "image:allow-from-bytes -> Enables the from_bytes command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "image:allow-from-bytes"
+          ]
+        },
+        {
+          "description": "image:allow-from-path -> Enables the from_path command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "image:allow-from-path"
+          ]
+        },
+        {
+          "description": "image:allow-height -> Enables the height command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "image:allow-height"
+          ]
+        },
+        {
+          "description": "image:allow-new -> Enables the new command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "image:allow-new"
+          ]
+        },
+        {
+          "description": "image:allow-rgba -> Enables the rgba command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "image:allow-rgba"
+          ]
+        },
+        {
+          "description": "image:allow-width -> Enables the width command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "image:allow-width"
+          ]
+        },
+        {
+          "description": "image:deny-from-bytes -> Denies the from_bytes command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "image:deny-from-bytes"
+          ]
+        },
+        {
+          "description": "image:deny-from-path -> Denies the from_path command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "image:deny-from-path"
+          ]
+        },
+        {
+          "description": "image:deny-height -> Denies the height command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "image:deny-height"
+          ]
+        },
+        {
+          "description": "image:deny-new -> Denies the new command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "image:deny-new"
+          ]
+        },
+        {
+          "description": "image:deny-rgba -> Denies the rgba command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "image:deny-rgba"
+          ]
+        },
+        {
+          "description": "image:deny-width -> Denies the width command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "image:deny-width"
           ]
         },
         {
