@@ -1,5 +1,14 @@
 # UPDATE LOG
 
+## v0.7.7
+
+Fixs: 
+
+- Editor performance optimization.
+  
+- Chinese translation supplement.
+
+
 ## v0.7.6
 
 Features:
