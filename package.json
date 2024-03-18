@@ -59,6 +59,6 @@
   },
   "packageManager": "yarn@4.0.2",
   "dependencies": {
-    "turbo": "^1.12.4"
+    "turbo": "^1.12.5"
   }
 }
