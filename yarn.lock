@@ -6259,7 +6259,7 @@ __metadata:
     create-context-state: "npm:^2.0.0"
     dayjs: "npm:^1.11.10"
     eslint: "npm:8.57.0"
-    happy-dom: "npm:^10.10.0"
+    happy-dom: "npm:^13.9.0"
     hox: "npm:^2.1.0"
     i18next: "npm:^23.8.2"
     immer: "npm:^10.0.3"
@@ -12907,13 +12907,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"css.escape@npm:^1.5.1":
-  version: 1.5.1
-  resolution: "css.escape@npm:1.5.1"
-  checksum: f6d38088d870a961794a2580b2b2af1027731bb43261cfdce14f19238a88664b351cc8978abc20f06cc6bbde725699dec8deb6fe9816b139fc3f2af28719e774
-  languageName: node
-  linkType: hard
-
 "cssesc@npm:^3.0.0":
   version: 3.0.0
   resolution: "cssesc@npm:3.0.0"
@@ -15568,17 +15561,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"happy-dom@npm:^10.10.0":
-  version: 10.10.0
-  resolution: "happy-dom@npm:10.10.0"
+"happy-dom@npm:^13.9.0":
+  version: 13.9.0
+  resolution: "happy-dom@npm:13.9.0"
   dependencies:
-    css.escape: "npm:^1.5.1"
     entities: "npm:^4.5.0"
-    iconv-lite: "npm:^0.6.3"
     webidl-conversions: "npm:^7.0.0"
-    whatwg-encoding: "npm:^2.0.0"
     whatwg-mimetype: "npm:^3.0.0"
-  checksum: 9e04125d9a4dd46e3764d75fbf878c3640edcddc1b57330f112cc6747b8bf3f86360248ef634f10428d3501e08046b4e1c233cf735012f4e0189dac87481aec4
+  checksum: 44f2c34610ed051eaf03e3a6478704e73a06f8c00625b03b70a79fb83cb922a76473b3d415705a1ffa51fb64e84b79eb4fec09ab7b934fb2a9d298f64d82062b
   languageName: node
   linkType: hard
 
@@ -16176,7 +16166,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"iconv-lite@npm:0.6.3, iconv-lite@npm:^0.6.2, iconv-lite@npm:^0.6.3":
+"iconv-lite@npm:^0.6.2":
   version: 0.6.3
   resolution: "iconv-lite@npm:0.6.3"
   dependencies:
@@ -25857,15 +25847,6 @@ plugin-image-zoom@ataft/plugin-image-zoom:
   version: 0.1.4
   resolution: "websocket-extensions@npm:0.1.4"
   checksum: b5399b487d277c78cdd2aef63764b67764aa9899431e3a2fa272c6ad7236a0fb4549b411d89afa76d5afd664c39d62fc19118582dc937e5bb17deb694f42a0d1
-  languageName: node
-  linkType: hard
-
-"whatwg-encoding@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "whatwg-encoding@npm:2.0.0"
-  dependencies:
-    iconv-lite: "npm:0.6.3"
-  checksum: 162d712d88fd134a4fe587e53302da812eb4215a1baa4c394dfd86eff31d0a079ff932c05233857997de07481093358d6e7587997358f49b8a580a777be22089
   languageName: node
   linkType: hard
 
