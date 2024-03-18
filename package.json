@@ -46,7 +46,7 @@
     "postcss-import": "^15.1.0",
     "postcss-nested": "^6.0.1",
     "prettier": "^3.2.5",
-    "rollup": "4.5.0",
+    "rollup": "4.13.0",
     "rollup-plugin-postcss": "^4.0.2",
     "rollup-plugin-url": "^3.0.1",
     "typescript": "^5.3.3"
