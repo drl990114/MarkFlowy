@@ -5,7 +5,7 @@ edition = "2021"
 author = "drl990114"
 
 [dependencies]
-anyhow = "1.0.80"
+anyhow = "1.0.81"
 env_logger = "0.11.2"
 log = "0.4.21"
 os_pipe = "1"
