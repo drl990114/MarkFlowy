@@ -647,7 +647,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8a969e13a7589e9e3e4207e153bae624ade2b5622fb4684a4923b23ec3d57719"
 dependencies = [
  "serde",
- "toml 0.8.10",
+ "toml 0.8.11",
 ]
 
 [[package]]
@@ -1324,7 +1324,7 @@ dependencies = [
  "cc",
  "memchr",
  "rustc_version",
- "toml 0.8.10",
+ "toml 0.8.11",
  "vswhom",
  "winreg 0.51.0",
 ]
@@ -2876,7 +2876,7 @@ dependencies = [
  "num_cpus",
  "regex",
  "serde",
- "toml 0.8.10",
+ "toml 0.8.11",
  "uuid",
  "walkdir",
 ]
@@ -2892,7 +2892,7 @@ dependencies = [
  "os_pipe",
  "serde",
  "serde_json",
- "toml 0.8.10",
+ "toml 0.8.11",
 ]
 
 [[package]]
@@ -4504,7 +4504,7 @@ dependencies = [
  "cfg-expr",
  "heck",
  "pkg-config",
- "toml 0.8.10",
+ "toml 0.8.11",
  "version-compare",
 ]
 
@@ -4643,7 +4643,7 @@ dependencies = [
  "serde_json",
  "tauri-utils",
  "tauri-winres",
- "toml 0.8.10",
+ "toml 0.8.11",
  "walkdir",
 ]
 
@@ -4701,7 +4701,7 @@ dependencies = [
  "serde",
  "serde_json",
  "tauri-utils",
- "toml 0.8.10",
+ "toml 0.8.11",
  "walkdir",
 ]
 
@@ -4929,7 +4929,7 @@ dependencies = [
  "serde_with",
  "swift-rs",
  "thiserror",
- "toml 0.8.10",
+ "toml 0.8.11",
  "url",
  "urlpattern",
  "walkdir",
@@ -5151,14 +5151,14 @@ dependencies = [
 
 [[package]]
 name = "toml"
-version = "0.8.10"
+version = "0.8.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9a9aad4a3066010876e8dcf5a8a06e70a558751117a145c6ce2b82c2e2054290"
+checksum = "af06656561d28735e9c1cd63dfd57132c8155426aa6af24f36a00a351f88c48e"
 dependencies = [
  "serde",
  "serde_spanned",
  "toml_datetime",
- "toml_edit 0.22.6",
+ "toml_edit 0.22.7",
 ]
 
 [[package]]
@@ -5207,9 +5207,9 @@ dependencies = [
 
 [[package]]
 name = "toml_edit"
-version = "0.22.6"
+version = "0.22.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2c1b5fd4128cc8d3e0cb74d4ed9a9cc7c7284becd4df68f5f940e1ad123606f6"
+checksum = "18769cd1cec395d70860ceb4d932812a0b4d06b1a4bb336745a4d21b9496e992"
 dependencies = [
  "indexmap 2.2.3",
  "serde",
