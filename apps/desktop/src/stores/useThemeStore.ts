@@ -1,4 +1,4 @@
-import { loadThemeCss } from '@/helper/extensions'
+import { loadThemeCss, removeInsertedTheme } from '@/helper/extensions'
 import { darkTheme, lightTheme, type MfTheme } from '@markflowy/theme'
 import { create } from 'zustand'
 import type { Theme } from '@mui/material'
@@ -42,6 +42,8 @@ const useThemeStore = create<ThemeStore>((set, get) => {
       if (targetTheme) {
         if (targetTheme.globalStyleText) {
           loadThemeCss(targetTheme.globalStyleText)
+        } else {
+          removeInsertedTheme()
         }
 
         set((prev) => ({

@@ -316,6 +316,7 @@ function Editor(props: EditorProps) {
       {typeof content === 'string' ? (
         <EditorWrapper
           id='editorarea-wrapper'
+          className='markdown-body'
           fullWidth={settingData.editor_full_width}
           active={active}
           onClick={handleWrapperClick}
