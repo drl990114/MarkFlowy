@@ -24,8 +24,9 @@ const AppThemeProvider: React.FC<BaseComponentProps> = function ({ children }) {
   const themeProp = useMemo(
     () => ({
       mode: curTheme.mode,
+      token: curTheme.styledConstants,
     }),
-    [curTheme.mode],
+    [curTheme.mode, curTheme.styledConstants],
   )
 
   const i18nProp = useMemo(

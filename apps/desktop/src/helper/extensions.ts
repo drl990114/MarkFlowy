@@ -9,3 +9,8 @@ export function loadThemeCss(url: string) {
   themeEl.innerHTML = url
   document.head.appendChild(themeEl)
 }
+
+
+export function removeInsertedTheme() {
+  if (themeEl) themeEl.remove()
+}
