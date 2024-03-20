@@ -57,6 +57,10 @@
           {
             "title": "简体中文",
             "value": "cn"
+          },
+          {
+            "title": "Français",
+            "value": "frFR"
           }
         ]
       }
