@@ -1,0 +1,153 @@
+{
+  "app_name": "MarkFlowy",
+  "common": {
+    "none": "aucun",
+    "name": "nom",
+    "ok": "ok",
+    "confirm": "confirmer",
+    "cancel": "annuler",
+    "close": "fermer",
+    "copy": "copier",
+    "error": "erreur",
+    "delete": "supprimer",
+    "file": "fichier",
+    "folder": "dossier",
+    "fetching": "chargement..."
+  },
+  "view": {
+    "label": "vue",
+    "theme": {
+      "label": "thême"
+    },
+    "wysiwyg": "éditeur",
+    "source_code": "code source"
+  },
+  "action": {
+    "bookmark": "favori",
+    "bookmarked": "ajouté aux favoris",
+    "done": "validé",
+    "edit": "editer",
+    "more": "plus",
+    "save": "enregistrer"
+  },
+  "confirm": {
+    "delete": {
+      "description": "Êtes-vous sûr de vouloir supprimer \"{{name}}\" {{something}}?"
+    }
+  },
+  "error": {
+    "unsupported_file_format": "format de fichier non reconnu"
+  },
+  "sidebar": {
+    "explorer": "explorer",
+    "search": "chercher",
+    "table_of_contents": "sommaire"
+  },
+  "file": {
+    "untitled": "sans titre",
+    "openDir": "ouvrir le dossier",
+    "recentDir": "Dossiers récemment ouverts"
+  },
+  "about": {
+    "label": "À propos",
+    "version": "Version",
+    "newVersion": "Nouvelle version",
+    "install": "Installer",
+    "author": "Auteur",
+    "release": "Sortie",
+    "website": "Site Web",
+    "feedback": "retour",
+    "issues": "question",
+    "license": "Licence",
+    "current": "version actuelle"
+  },
+  "contextmenu": {
+    "explorer": {
+      "add_file": "Nouveau fichier",
+      "add_folder": "Nouveau dossier",
+      "delete_file": "Supprimer le fichier",
+      "delete_folder": "Supprimer le dossier"
+    },
+    "editor_tab": {
+      "close": "Fermer",
+      "close_others": "Fermer les autres",
+      "close_right": "Fermer à droite",
+      "close_all": "Tout fermer"
+    }
+  },
+  "notification": {},
+  "search": {
+    "search_empty": "Pas de résultats avec ces termes",
+    "text": "Chercher",
+    "caseSensitive": "Sensible à la casse",
+    "toggleExpandAll": "Tout développer"
+  },
+  "settings": {
+    "label": "Configuration",
+    "general": {
+      "label": "général",
+      "app": {
+        "label": "application",
+        "automatic_updates": {
+          "label": "Mise à jour automatique",
+          "desc": "Vérifier automatiquement les mises à jour et les installer au lancement de l'application."
+        }
+      },
+      "autosave": {
+        "label": "Enregistrement automatique",
+        "switch_auto_save": {
+          "label": "Enregistrement automatique",
+          "desc": "Activer l'enregistrement automatique. Le fichier actuel sera automatique enregistré selon l'interval de temps."
+        },
+        "autosaveInterval": {
+          "label": "Interval d'enregistrement automatique",
+          "desc": "Régler l'interval d'enregistrement automatique en millisecondes."
+        }
+      },
+      "misc": {
+        "label": "Divers",
+        "language": {
+          "label": "Langue",
+          "desc": "Choisir la langue de l'application."
+        }
+      }
+    },
+    "editor": {
+      "label": "Editeur",
+      "style": {
+        "label": "Style",
+        "full_width": {
+          "label": "Pleine largeur",
+          "desc": "Mettre l'éditeur en plein largeur."
+        }
+      }
+    },
+    "keyboard": {
+      "label": "clavier"
+    },
+    "extensions": {
+      "label": "Extensions",
+      "ChatGPT": {
+        "label": "ChatGPT",
+        "api_key": {
+          "label": "clé API",
+          "desc": "clé API pour ChatGPT."
+        }
+      }
+    }
+  },
+  "updater": {
+    "install": "installer",
+    "download_and_install": "Télécharger et installer"
+  },
+  "editor": {
+    "table": {
+      "insertColumnAfter": "Insérer une colonne après",
+      "insertColumnBefore": "Insérer une colonne avant",
+      "insertRowAfter": "Insérer une ligne après",
+      "insertRowBefore": "Insérer une ligne avant",
+      "deleteColumn": "Supprimer la colonne",
+      "deleteRow": "Supprimer la ligne"
+    }
+  }
+}
