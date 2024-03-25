@@ -6262,7 +6262,7 @@ __metadata:
     happy-dom: "npm:^13.9.0"
     hox: "npm:^2.1.0"
     i18next: "npm:^23.8.2"
-    immer: "npm:^10.0.3"
+    immer: "npm:^10.0.4"
     is-promise: "npm:^4.0.0"
     jest-remirror: "npm:^2.1.5"
     jsx-dom-cjs: "npm:^8.0.7"
@@ -16232,10 +16232,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"immer@npm:^10.0.3":
-  version: 10.0.3
-  resolution: "immer@npm:10.0.3"
-  checksum: 0be07be2f278bd1988112613648e0cf9a64fc316d5b4817f273b519fbfed0f1714275b041911f0b8c560c199b2e3430824ce620c23262c96c9d4efc9909ff1cc
+"immer@npm:^10.0.4":
+  version: 10.0.4
+  resolution: "immer@npm:10.0.4"
+  checksum: c1196783cf18e836527f970e45dc88e5472756401831e94d494ca5fd00ab7b39de3156f50505908207e7efe59ac23244d2cde0bd0cff791de7e23709771757e6
   languageName: node
   linkType: hard
 
