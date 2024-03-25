@@ -6324,7 +6324,7 @@ __metadata:
     "@types/rollup-plugin-url": "npm:^3"
     color: "npm:^4.2.3"
     eslint: "npm:8.57.0"
-    postcss: "npm:^8.4.35"
+    postcss: "npm:^8.4.38"
     postcss-import: "npm:^15.1.0"
     postcss-nested: "npm:^6.0.1"
     react: "npm:^18.2.0"
@@ -17781,7 +17781,7 @@ __metadata:
     eslint: "npm:8.57.0"
     fast-glob: "npm:^3.3.0"
     husky: "npm:^8.0.3"
-    postcss: "npm:^8.4.35"
+    postcss: "npm:^8.4.38"
     postcss-import: "npm:^15.1.0"
     postcss-nested: "npm:^6.0.1"
     prettier: "npm:^3.2.5"
@@ -20861,6 +20861,17 @@ plugin-image-zoom@ataft/plugin-image-zoom:
   languageName: node
   linkType: hard
 
+"postcss@npm:^8.4.38":
+  version: 8.4.38
+  resolution: "postcss@npm:8.4.38"
+  dependencies:
+    nanoid: "npm:^3.3.7"
+    picocolors: "npm:^1.0.0"
+    source-map-js: "npm:^1.2.0"
+  checksum: 6e44a7ed835ffa9a2b096e8d3e5dfc6bcf331a25c48aeb862dd54e3aaecadf814fa22be224fd308f87d08adf2299164f88c5fd5ab1c4ef6cbd693ceb295377f4
+  languageName: node
+  linkType: hard
+
 "precision@npm:~1.0.0":
   version: 1.0.1
   resolution: "precision@npm:1.0.1"
@@ -23609,6 +23620,13 @@ plugin-image-zoom@ataft/plugin-image-zoom:
   version: 1.0.2
   resolution: "source-map-js@npm:1.0.2"
   checksum: 38e2d2dd18d2e331522001fc51b54127ef4a5d473f53b1349c5cca2123562400e0986648b52e9407e348eaaed53bce49248b6e2641e6d793ca57cb2c360d6d51
+  languageName: node
+  linkType: hard
+
+"source-map-js@npm:^1.2.0":
+  version: 1.2.0
+  resolution: "source-map-js@npm:1.2.0"
+  checksum: 74f331cfd2d121c50790c8dd6d3c9de6be21926de80583b23b37029b0f37aefc3e019fa91f9a10a5e120c08135297e1ecf312d561459c45908cb1e0e365f49e5
   languageName: node
   linkType: hard
 
