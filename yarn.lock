@@ -5729,10 +5729,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@formkit/auto-animate@npm:^0.7.0":
-  version: 0.7.0
-  resolution: "@formkit/auto-animate@npm:0.7.0"
-  checksum: d0e518acb28621dd647437744d6c0a7f1ab82e88b332e483ff9d6b6ef5e3ebd96c389a5c3ca94928b4994597bff792b2cc7a6655123379d818fbe25bc6287e88
+"@formkit/auto-animate@npm:^0.8.1":
+  version: 0.8.1
+  resolution: "@formkit/auto-animate@npm:0.8.1"
+  checksum: c35cbfddce7a84b9bda7f85eb2dd272b3d432d9914571876078e001bb2b8ddee0021f24cdabd5d5dd9ad13c090e90fd329ba6e007a08cef642fe4b4b6f446c54
   languageName: node
   linkType: hard
 
@@ -6232,7 +6232,7 @@ __metadata:
     "@emotion/css": "npm:^11.11.0"
     "@emotion/react": "npm:^11.11.3"
     "@emotion/styled": "npm:^11.11.0"
-    "@formkit/auto-animate": "npm:^0.7.0"
+    "@formkit/auto-animate": "npm:^0.8.1"
     "@markflowy/theme": "workspace:*"
     "@markflowy/types": "workspace:*"
     "@mui/material": "npm:^5.15.13"
