@@ -36,7 +36,7 @@
     "@lezer/highlight": "^1.2.0",
     "color": "^4.2.3",
     "react": "^18.2.0",
-    "styled-components": "^6.1.0"
+    "styled-components": "^6.1.8"
   },
   "devDependencies": {
     "@drl990114/codemirror-themes": "^0.0.1",
