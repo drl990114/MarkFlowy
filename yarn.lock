@@ -371,36 +371,36 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ariakit/core@npm:0.3.7":
-  version: 0.3.7
-  resolution: "@ariakit/core@npm:0.3.7"
-  checksum: e0f20bc75b6d91bbba72c3892691870ee6429be00742e24bf774e9699981b7877044b6d8658448b8110cd41ad59d742a5c099b13012ae98b39a4537f98242990
+"@ariakit/core@npm:0.4.4":
+  version: 0.4.4
+  resolution: "@ariakit/core@npm:0.4.4"
+  checksum: 06ddc9bced9167a06bd1b059f3fabce940277e95642195eb4592474c5f120422140982050b85a2488c08679e2004052ad0bff4d045e92356daad1974bf3c92c2
   languageName: node
   linkType: hard
 
-"@ariakit/react-core@npm:0.3.8":
-  version: 0.3.8
-  resolution: "@ariakit/react-core@npm:0.3.8"
+"@ariakit/react-core@npm:0.4.4":
+  version: 0.4.4
+  resolution: "@ariakit/react-core@npm:0.4.4"
   dependencies:
-    "@ariakit/core": "npm:0.3.7"
+    "@ariakit/core": "npm:0.4.4"
     "@floating-ui/dom": "npm:^1.0.0"
     use-sync-external-store: "npm:^1.2.0"
   peerDependencies:
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
-  checksum: f1091c6639194e1952fdef56a0daa8e4a2ae4f77371432fd3ef2e072de0f2d9da5dd553c7b0840bbdb8573b7b0fb41fde9f997749a21e750a3e8a7d74f7b46bd
+  checksum: 2ff0099daab8b6a7d1b06706d2bf5b34bfd0a68d1c547419c44d06b8b81a5ed21a6780ef08f1c4a07ccbb32abf15b2265e312e7514a6f1686856c926918a9680
   languageName: node
   linkType: hard
 
-"@ariakit/react@npm:^0.3.8":
-  version: 0.3.8
-  resolution: "@ariakit/react@npm:0.3.8"
+"@ariakit/react@npm:^0.4.3":
+  version: 0.4.4
+  resolution: "@ariakit/react@npm:0.4.4"
   dependencies:
-    "@ariakit/react-core": "npm:0.3.8"
+    "@ariakit/react-core": "npm:0.4.4"
   peerDependencies:
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
-  checksum: c1c2ab84df29ecc169a53c9857e07035ef2552b73bbda3e1e1f4f37fbb222ab1bdc2f152841c4d0986be97beb543cd60c3c0af8c802d3edda77301524cbf0652
+  checksum: e93702f574266a539accd376ea526c7f929f4ddafcbfa8832553a7722490a31974b58006e812f25fe09d1998dd328256c20923b3dce768fb963d989b48715774
   languageName: node
   linkType: hard
 
@@ -6285,8 +6285,8 @@ __metadata:
     react-test-renderer: "npm:^18.2.0"
     react-use: "npm:^17.5.0"
     remixicon: "npm:^4.1.0"
-    rme: "npm:^0.0.36"
-    styled-components: "npm:^6.1.8"
+    rme: "npm:^0.0.37"
+    styled-components: "npm:^6.1.0"
     stylis: "npm:^4.0.0"
     tinykeys: "npm:^2.1.0"
     ts-node: "npm:^10.9.2"
@@ -6295,7 +6295,7 @@ __metadata:
     vite: "npm:^5.1.3"
     vite-plugin-svgr: "npm:^4.1.0"
     vitest: "npm:^1.2.2"
-    zens: "npm:^0.0.7"
+    zens: "npm:^0.0.8"
     zustand: "npm:^4.4.6"
   languageName: unknown
   linkType: soft
@@ -7721,24 +7721,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@remirror/extension-markdown@npm:^2.0.13":
-  version: 2.0.13
-  resolution: "@remirror/extension-markdown@npm:2.0.13"
-  dependencies:
-    "@babel/runtime": "npm:^7.21.0"
-    "@remirror/core": "npm:^2.0.13"
-    "@remirror/messages": "npm:^2.0.3"
-    "@types/marked": "npm:^4.0.8"
-    "@types/turndown": "npm:^5.0.1"
-    marked: "npm:^4.3.0"
-    turndown: "npm:^7.1.2"
-    turndown-plugin-gfm: "npm:^1.0.2"
-  peerDependencies:
-    "@remirror/pm": ^2.0.5
-  checksum: c5933d56547a1df1d38051621430b2d3f54ff7991704c72ca7ad014a8ac8eba455b12843ea9353639ad9acc10e8e96f0610389a23393bf2283e7ffcb329fe39f
-  languageName: node
-  linkType: hard
-
 "@remirror/extension-markdown@npm:^2.0.14":
   version: 2.0.14
   resolution: "@remirror/extension-markdown@npm:2.0.14"
@@ -8398,13 +8380,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@remirror/react-editors@npm:^1.0.38":
-  version: 1.0.38
-  resolution: "@remirror/react-editors@npm:1.0.38"
+"@remirror/react-editors@npm:^1.0.41":
+  version: 1.0.41
+  resolution: "@remirror/react-editors@npm:1.0.41"
   dependencies:
     "@babel/runtime": "npm:^7.22.3"
     "@remirror/core-helpers": "npm:^3.0.0"
-    "@remirror/extension-react-tables": "npm:^2.2.18"
+    "@remirror/extension-react-tables": "npm:^2.2.19"
     "@remirror/pm": "npm:^2.0.8"
     "@remirror/react": "npm:^2.0.35"
     "@remirror/styles": "npm:^2.0.7"
@@ -8412,7 +8394,7 @@ __metadata:
     "@types/refractor": "npm:^3.0.2"
     create-context-state: "npm:^2.0.2"
     refractor: "npm:^3.6.0"
-    remirror: "npm:2.0.36"
+    remirror: "npm:2.0.39"
     svgmoji: "npm:^3.2.0"
   peerDependencies:
     "@types/react": ^16.14.0 || ^17 || ^18
@@ -8424,7 +8406,7 @@ __metadata:
       optional: true
     "@types/react-dom":
       optional: true
-  checksum: 1c9eb494d422c61c0211d9ab0236722ac2221c7166795819999d30a058b4794f901db3c695847a88254a4dd1314b8d6bedb51b526d9272eb1d63c64d41cc7f69
+  checksum: 699d2fb4628aa044e0285e7563e876caf035dbba34b62a41c00ef68543ac2ea0dcd172a27fde9160abbab807daf7f9c5981f03d503405fe1c75fef283e79a8c2
   languageName: node
   linkType: hard
 
@@ -9991,13 +9973,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/marked@npm:^4.0.8":
-  version: 4.3.1
-  resolution: "@types/marked@npm:4.3.1"
-  checksum: 5ea1cad105b8e1288d9c7b5777ab7d8481cf91bdac98616218dd450b2516ec0f096afe41f98d97f4ae384577f6b28f1ed50a8ebf86b7f851b2a0f13fff379398
-  languageName: node
-  linkType: hard
-
 "@types/marked@npm:^4.3.1":
   version: 4.3.2
   resolution: "@types/marked@npm:4.3.2"
@@ -10618,9 +10593,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@uiw/codemirror-themes@npm:^4.21.18":
-  version: 4.21.18
-  resolution: "@uiw/codemirror-themes@npm:4.21.18"
+"@uiw/codemirror-themes@npm:^4.21.24":
+  version: 4.21.24
+  resolution: "@uiw/codemirror-themes@npm:4.21.24"
   dependencies:
     "@codemirror/language": "npm:^6.0.0"
     "@codemirror/state": "npm:^6.0.0"
@@ -10629,7 +10604,7 @@ __metadata:
     "@codemirror/language": ">=6.0.0"
     "@codemirror/state": ">=6.0.0"
     "@codemirror/view": ">=6.0.0"
-  checksum: 04b8f8e14a7036f049a72fc14b43a472fd9f15dba54a02c4407b25976002710939fc44179fbf83d125145b5fe0ecb9df57641288b13426726a6e5dec5fe52893
+  checksum: f4e04c304f195f36b99a2f596dfa74cf04ada1038fe64629ac6655e97a670793a6c65af8e2c8ddd543faa87a042e3be70e22bacee778d776bb0300500860e281
   languageName: node
   linkType: hard
 
@@ -17447,6 +17422,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"lib0@npm:^0.2.86":
+  version: 0.2.93
+  resolution: "lib0@npm:0.2.93"
+  dependencies:
+    isomorphic.js: "npm:^0.2.4"
+  bin:
+    0ecdsa-generate-keypair: bin/0ecdsa-generate-keypair.js
+    0gentesthtml: bin/gentesthtml.js
+    0serve: bin/0serve.js
+  checksum: 398cb378c7819d5425e728ae594f274d4396c3ec25f49fd5213c41b07fdad2aa8fd0a8523568f0eb4653ce1b655677b668de872240f566213c35fc00f28e46e7
+  languageName: node
+  linkType: hard
+
 "lilconfig@npm:^2.0.3, lilconfig@npm:^2.0.5":
   version: 2.1.0
   resolution: "lilconfig@npm:2.1.0"
@@ -17467,6 +17455,15 @@ __metadata:
   dependencies:
     uc.micro: "npm:^1.0.1"
   checksum: d0a786d2e3f02f46b6f4a9b466af9eb936fb68e86b7cd305933d5457b12fdc53a4d0e0b697b02dc2e7d84a51d2425d719598bb7b47af7e01911e492e07a97957
+  languageName: node
+  linkType: hard
+
+"linkify-it@npm:^5.0.0":
+  version: 5.0.0
+  resolution: "linkify-it@npm:5.0.0"
+  dependencies:
+    uc.micro: "npm:^2.0.0"
+  checksum: ef3b7609dda6ec0c0be8a7b879cea195f0d36387b0011660cd6711bba0ad82137f59b458b7e703ec74f11d88e7c1328e2ad9b855a8500c0ded67461a8c4519e6
   languageName: node
   linkType: hard
 
@@ -22310,91 +22307,7 @@ plugin-image-zoom@ataft/plugin-image-zoom:
   languageName: node
   linkType: hard
 
-"remirror@npm:2.0.36":
-  version: 2.0.36
-  resolution: "remirror@npm:2.0.36"
-  dependencies:
-    "@babel/runtime": "npm:^7.22.3"
-    "@remirror/core": "npm:^2.0.19"
-    "@remirror/core-constants": "npm:^2.0.2"
-    "@remirror/core-helpers": "npm:^3.0.0"
-    "@remirror/core-types": "npm:^2.0.5"
-    "@remirror/core-utils": "npm:^2.0.13"
-    "@remirror/dom": "npm:^2.0.16"
-    "@remirror/extension-annotation": "npm:^2.0.16"
-    "@remirror/extension-bidi": "npm:^2.0.14"
-    "@remirror/extension-blockquote": "npm:^2.0.14"
-    "@remirror/extension-bold": "npm:^2.0.13"
-    "@remirror/extension-callout": "npm:^2.0.15"
-    "@remirror/extension-code": "npm:^2.0.13"
-    "@remirror/extension-code-block": "npm:^2.0.18"
-    "@remirror/extension-codemirror5": "npm:^2.0.13"
-    "@remirror/extension-collaboration": "npm:^2.0.13"
-    "@remirror/extension-columns": "npm:^2.0.14"
-    "@remirror/extension-diff": "npm:^2.0.13"
-    "@remirror/extension-doc": "npm:^2.1.5"
-    "@remirror/extension-drop-cursor": "npm:^2.0.13"
-    "@remirror/extension-embed": "npm:^2.0.14"
-    "@remirror/extension-emoji": "npm:^2.0.17"
-    "@remirror/extension-entity-reference": "npm:^2.2.6"
-    "@remirror/extension-epic-mode": "npm:^2.0.13"
-    "@remirror/extension-events": "npm:^2.1.16"
-    "@remirror/extension-font-family": "npm:^2.0.13"
-    "@remirror/extension-font-size": "npm:^2.0.13"
-    "@remirror/extension-gap-cursor": "npm:^2.0.13"
-    "@remirror/extension-hard-break": "npm:^2.0.13"
-    "@remirror/extension-heading": "npm:^2.0.14"
-    "@remirror/extension-history": "npm:^2.0.13"
-    "@remirror/extension-horizontal-rule": "npm:^2.0.13"
-    "@remirror/extension-image": "npm:^2.1.10"
-    "@remirror/extension-italic": "npm:^2.0.13"
-    "@remirror/extension-link": "npm:^2.0.17"
-    "@remirror/extension-list": "npm:^2.0.16"
-    "@remirror/extension-markdown": "npm:^2.0.13"
-    "@remirror/extension-mention": "npm:^2.0.15"
-    "@remirror/extension-mention-atom": "npm:^2.0.17"
-    "@remirror/extension-node-formatting": "npm:^2.0.13"
-    "@remirror/extension-paragraph": "npm:^2.0.13"
-    "@remirror/extension-placeholder": "npm:^2.0.14"
-    "@remirror/extension-positioner": "npm:^2.1.8"
-    "@remirror/extension-search": "npm:^2.0.14"
-    "@remirror/extension-shortcuts": "npm:^2.0.13"
-    "@remirror/extension-strike": "npm:^2.0.13"
-    "@remirror/extension-sub": "npm:^2.0.13"
-    "@remirror/extension-sup": "npm:^2.0.13"
-    "@remirror/extension-tables": "npm:^2.3.1"
-    "@remirror/extension-text": "npm:^2.0.13"
-    "@remirror/extension-text-case": "npm:^2.0.13"
-    "@remirror/extension-text-color": "npm:^2.0.15"
-    "@remirror/extension-text-highlight": "npm:^2.0.14"
-    "@remirror/extension-trailing-node": "npm:^2.0.13"
-    "@remirror/extension-underline": "npm:^2.0.13"
-    "@remirror/extension-whitespace": "npm:^2.0.13"
-    "@remirror/extension-yjs": "npm:^3.0.15"
-    "@remirror/icons": "npm:^2.0.3"
-    "@remirror/preset-core": "npm:^2.0.16"
-    "@remirror/preset-formatting": "npm:^2.0.14"
-    "@remirror/preset-wysiwyg": "npm:^2.0.19"
-    "@remirror/theme": "npm:^2.0.9"
-    "@types/codemirror": "npm:^5.60.7"
-    "@types/refractor": "npm:^3.0.2"
-    codemirror: "npm:^5.65.13"
-    refractor: "npm:^3.6.0"
-    yjs: "npm:^13.6.1"
-  peerDependencies:
-    "@remirror/pm": ^2.0.8
-    "@types/prettier": ^2.7.2
-    prettier: ^2.8.8
-  peerDependenciesMeta:
-    "@types/prettier":
-      optional: true
-    prettier:
-      optional: true
-  checksum: 3da8550cdf1665737320be24611382d2e5a0b2672f1cc835abaac1dbffca3223862e0103da852b724d129d4cb9634163750d54db5fcda8d790ec118773152eee
-  languageName: node
-  linkType: hard
-
-"remirror@npm:^2.0.39":
+"remirror@npm:2.0.39, remirror@npm:^2.0.39":
   version: 2.0.39
   resolution: "remirror@npm:2.0.39"
   dependencies:
@@ -22724,9 +22637,9 @@ plugin-image-zoom@ataft/plugin-image-zoom:
   languageName: node
   linkType: hard
 
-"rme@npm:^0.0.36":
-  version: 0.0.36
-  resolution: "rme@npm:0.0.36"
+"rme@npm:^0.0.37":
+  version: 0.0.37
+  resolution: "rme@npm:0.0.37"
   dependencies:
     "@codemirror/autocomplete": "npm:^6.8.1"
     "@codemirror/commands": "npm:^6.2.4"
@@ -22761,19 +22674,19 @@ plugin-image-zoom@ataft/plugin-image-zoom:
     "@remirror/react": "npm:^2.0.32"
     "@remirror/react-components": "npm:^2.1.13"
     "@remirror/react-core": "npm:^2.0.18"
-    "@remirror/react-editors": "npm:^1.0.38"
+    "@remirror/react-editors": "npm:^1.0.41"
     "@remirror/react-hooks": "npm:^2.0.25"
     "@remirror/styles": "npm:^2.0.5"
     "@remirror/theme": "npm:^2.0.8"
     "@remirror/types": "npm:^1.0.1"
-    "@uiw/codemirror-themes": "npm:^4.21.18"
+    "@uiw/codemirror-themes": "npm:^4.21.24"
     color: "npm:^4.2.3"
     create-context-state: "npm:^2.0.0"
     fuse.js: "npm:^6.6.2"
     html-parse-stringify: "npm:^3.0.1"
     i18next: "npm:^23.10.1"
     jsx-dom-cjs: "npm:^8.0.7"
-    linkify-it: "npm:^4.0.1"
+    linkify-it: "npm:^5.0.0"
     lodash: "npm:^4.17.21"
     markdown-it: "npm:^13.0.2"
     mdast: "npm:^3.0.0"
@@ -22799,12 +22712,12 @@ plugin-image-zoom@ataft/plugin-image-zoom:
     svgmoji: "npm:^3.2.0"
     tether-drop: "npm:^1.4.2"
     void-elements: "npm:^3.1.0"
-    yjs: "npm:^13.6.6"
-    zens: "npm:0.0.6"
+    yjs: "npm:^13.6.14"
+    zens: "npm:^0.0.8"
   peerDependencies:
     react: ">=16.14.0"
     react-dom: ">=16.14.0"
-  checksum: 7e39a3aa1ec53dd313b887450504f837659f410dbe8087868aadb97442262317e0f4a4cc2fe5f8ce95a04793cef26728ce010f2017d1b2d502fba44263574582
+  checksum: ec393faaaada8481cdbc91373534115753362bdf49d85a879b33918d955df73ce21945929d4df9eee6f76d35228f1d10e486e367634a27671e55f13c387476c5
   languageName: node
   linkType: hard
 
@@ -25010,6 +24923,13 @@ plugin-image-zoom@ataft/plugin-image-zoom:
   languageName: node
   linkType: hard
 
+"uc.micro@npm:^2.0.0":
+  version: 2.1.0
+  resolution: "uc.micro@npm:2.1.0"
+  checksum: 37197358242eb9afe367502d4638ac8c5838b78792ab218eafe48287b0ed28aaca268ec0392cc5729f6c90266744de32c06ae938549aee041fc93b0f9672d6b2
+  languageName: node
+  linkType: hard
+
 "ufo@npm:^1.1.2":
   version: 1.2.0
   resolution: "ufo@npm:1.2.0"
@@ -26433,12 +26353,21 @@ plugin-image-zoom@ataft/plugin-image-zoom:
   languageName: node
   linkType: hard
 
-"yjs@npm:^13.6.1, yjs@npm:^13.6.6":
+"yjs@npm:^13.6.1":
   version: 13.6.7
   resolution: "yjs@npm:13.6.7"
   dependencies:
     lib0: "npm:^0.2.74"
   checksum: 47d96fcebfed41b09ca762416ff4a51afd9e6343f116b98b1494ee73962a4abc6a9ec27bc5ff6fbef0f7c493d962764970be35f095b69d5b21c2f767e28b9d1a
+  languageName: node
+  linkType: hard
+
+"yjs@npm:^13.6.14":
+  version: 13.6.14
+  resolution: "yjs@npm:13.6.14"
+  dependencies:
+    lib0: "npm:^0.2.86"
+  checksum: aa277393aea2524bf80d014b570a2949a6fe930fb9809dbdb38c04fe6086385f3abba8daf4cce2ddfa421c2f8c450c7beede9972106dece405071e0dc5664a11
   languageName: node
   linkType: hard
 
@@ -26463,11 +26392,11 @@ plugin-image-zoom@ataft/plugin-image-zoom:
   languageName: node
   linkType: hard
 
-"zens@npm:0.0.6":
-  version: 0.0.6
-  resolution: "zens@npm:0.0.6"
+"zens@npm:^0.0.8":
+  version: 0.0.8
+  resolution: "zens@npm:0.0.8"
   dependencies:
-    "@ariakit/react": "npm:^0.3.8"
+    "@ariakit/react": "npm:^0.4.3"
     "@babel/runtime": "npm:^7"
     "@floating-ui/dom": "npm:^1.0.0"
     classnames: "npm:^2.3.0"
@@ -26481,29 +26410,7 @@ plugin-image-zoom@ataft/plugin-image-zoom:
     sonner: "npm:^1.4.0"
     styled-components: "npm:^6.1.0"
     stylis: "npm:^4.0.0"
-  checksum: cc8b372003cf78d6b02e69016bbd51eb84037e363375b993ca4d6680a48f4c4956291b3e387773be0676c3134e78b90b71081f2ebf727a81da3e873337d7cd75
-  languageName: node
-  linkType: hard
-
-"zens@npm:^0.0.7":
-  version: 0.0.7
-  resolution: "zens@npm:0.0.7"
-  dependencies:
-    "@ariakit/react": "npm:^0.3.8"
-    "@babel/runtime": "npm:^7"
-    "@floating-ui/dom": "npm:^1.0.0"
-    classnames: "npm:^2.3.0"
-    clsx: "npm:^2.0.0"
-    color: "npm:^4.2.3"
-    rc-image: "npm:^7.5.1"
-    react: "npm:^18.2.0"
-    react-dom: "npm:^18.2.0"
-    react-hot-toast: "npm:^2.4.1"
-    react-spinners: "npm:^0.13.8"
-    sonner: "npm:^1.4.0"
-    styled-components: "npm:^6.1.0"
-    stylis: "npm:^4.0.0"
-  checksum: 3ecef59b400072d6f87a8118202f5d5d171496cef795e4a78829827ec5543dead6294a0215f256643e3ab9e5a3d5a72990c592df175bc609f06f42a5ae6d23d3
+  checksum: d9e9fc92bd4dec71d83a6382552524415b348e181c8765f333c3536a1050cce0197feabf6c2cb3d95c566b1ac243ffc0036afcccae517ee07121ef4f1c274d5c
   languageName: node
   linkType: hard
 

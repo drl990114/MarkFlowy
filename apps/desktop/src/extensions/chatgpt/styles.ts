@@ -5,11 +5,11 @@ export const Container = styled.div`
   height: 100%;
   overflow: hidden;
   font-size: 0.8rem;
-  line-height: 1.25rem;
 
   .content {
     height: calc(100% - 60px - 2rem);
     overflow: auto;
+    line-height: 1.25rem;
 
     a {
       cursor: pointer;
