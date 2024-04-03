@@ -6294,7 +6294,7 @@ __metadata:
     eslint: "npm:8.57.0"
     happy-dom: "npm:^13.9.0"
     hox: "npm:^2.1.0"
-    i18next: "npm:^23.10.1"
+    i18next: "npm:23.8.2"
     immer: "npm:^10.0.4"
     is-promise: "npm:^4.0.0"
     jest-remirror: "npm:^2.1.5"
@@ -16197,6 +16197,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"i18next@npm:23.8.2":
+  version: 23.8.2
+  resolution: "i18next@npm:23.8.2"
+  dependencies:
+    "@babel/runtime": "npm:^7.23.2"
+  checksum: 594c4d5bafd9ac0073a5f2c0ccb40b157571857d43f7f22949a5ab6ea07e6e6f7e39058ddee6e7396369b54d5d741e76cba59c0d5c23ce0ab99e06b249c66f5e
+  languageName: node
+  linkType: hard
+
 "i18next@npm:^23.10.1":
   version: 23.10.1
   resolution: "i18next@npm:23.10.1"
@@ -21684,8 +21693,8 @@ plugin-image-zoom@ataft/plugin-image-zoom:
   linkType: hard
 
 "react-i18next@npm:^13.2.2":
-  version: 13.2.2
-  resolution: "react-i18next@npm:13.2.2"
+  version: 13.5.0
+  resolution: "react-i18next@npm:13.5.0"
   dependencies:
     "@babel/runtime": "npm:^7.22.5"
     html-parse-stringify: "npm:^3.0.1"
@@ -21697,7 +21706,7 @@ plugin-image-zoom@ataft/plugin-image-zoom:
       optional: true
     react-native:
       optional: true
-  checksum: e85fedfd21b0d4561dbda31ba4eb65161780b41ee4a1d376c77b12d0bd95baf0bf9c796fd3d59eb319ae4519158b3652336ef1244c1239ab3cbc537bd0420f00
+  checksum: 903b486d112cd0aa40bdc3afaefd0c32b91c0a1e3e3561367c8d91ddc0fbad9945f1d630c3ddcd4764795fc00e0887252e2d337256a825caf3a86de038f6b2db
   languageName: node
   linkType: hard
 
