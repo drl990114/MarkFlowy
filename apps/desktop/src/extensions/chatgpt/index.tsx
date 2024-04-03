@@ -1,22 +1,22 @@
-import { Button, Input } from 'zens'
+import { Button, Input, Menu, Space } from 'zens'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import ReactLoading from 'react-loading'
 import { parseChatList } from './parseChatList'
 import { BottomBar, Container, ListContainer } from './styles'
 import useChatGPTStore from './useChatGPTStore'
-import { useEditorStore } from '@/stores'
+import { useCommandStore, useEditorStore } from '@/stores'
 import { createFile } from '@/helper/filesys'
 import { SettingKeys } from '@/router/Setting/settingMap'
 import { RIGHTBARITEMKEYS } from '@/constants'
 import type { RightBarItem } from '@/components/SideBar'
-import { invoke } from '@tauri-apps/api/core'
 import type { RightNavItem } from '@/components/SideBar/SideBarHeader'
 import SideBarHeader from '@/components/SideBar/SideBarHeader'
 import useThemeStore from '@/stores/useThemeStore'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 
 const ChatList: React.FC<ChatListProps> = (props) => {
-  const { chatList, addChat, delChat } = useChatGPTStore()
+  const { chatList, curGptModelIndex, gptModels, setCurGptModelIndex, addChat, delChat } =
+    useChatGPTStore()
   const { settingData } = useAppSettingStore()
   const { curTheme } = useThemeStore()
   const apiKey = settingData[SettingKeys.chatgpt]
@@ -68,12 +68,32 @@ const ChatList: React.FC<ChatListProps> = (props) => {
     setAskInput(event.target.value)
   }, [])
 
-  const openSettingWindow = useCallback(() => invoke('open_conf_window'), [])
+  const openSettingWindow = useCallback(
+    () => useCommandStore.getState().execute('open_setting_dialog'),
+    [],
+  )
 
   return (
     <Container {...props}>
       <SideBarHeader
-        name='ChatGPT'
+        name={
+          <Space>
+            ChatGPT
+            <Menu
+              items={gptModels.map((model, index) => {
+                return {
+                  label: model,
+                  value: model,
+                  handler: () => {
+                    setCurGptModelIndex(index)
+                  },
+                }
+              })}
+            >
+              {gptModels[curGptModelIndex]} <i className='ri-arrow-drop-down-line'></i>
+            </Menu>
+          </Space>
+        }
         onRightNavItemClick={handleRightNavItemClick}
         rightNavItems={[
           {

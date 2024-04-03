@@ -56,7 +56,7 @@ export interface RightNavItem {
 }
 
 export interface SideBarHeaderProps {
-  name: string
+  name: React.ReactNode
   onRightNavItemClick?: (item: RightNavItem) => void
   rightNavItems?: RightNavItem[]
 }

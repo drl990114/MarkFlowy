@@ -3,11 +3,21 @@ import { create } from 'zustand'
 import { callChatGptApi } from '@/extensions/chatgpt/api'
 
 const useChatGPTStore = create<ChatGPTStore>((set, get) => ({
+  curGptModelIndex: 0,
+
+  gptModels: ['gpt-3.5-turbo', 'gpt-4-32k', 'gpt-4'],
+
   chatList: [],
+
+  setCurGptModelIndex: (index) => {
+    set((state) => {
+      return { ...state, curGptModelIndex: index }
+    })
+  },
 
   setChatStatus: (id, status) => {
     set((state) => {
-      const curChat = state.chatList.find(history => history.id === id)
+      const curChat = state.chatList.find((history) => history.id === id)
       if (curChat) {
         curChat.status = status
         return { ...state }
@@ -18,16 +28,14 @@ const useChatGPTStore = create<ChatGPTStore>((set, get) => ({
 
   addChat: (question: string, apiKey: string) => {
     const curStore = get()
+    const { gptModels, curGptModelIndex } = curStore
     const chat = curStore.addChatQuestion(question)
     callChatGptApi(
       question,
-      'gpt-3.5-turbo',
+      gptModels[curGptModelIndex],
       (res) => {
-        if (res.status === 'done')
-          curStore.addChatAnswer(chat.id, res.result)
-
-        else
-          curStore.setChatStatus(chat.id, res.status)
+        if (res.status === 'done') curStore.addChatAnswer(chat.id, res.result)
+        else curStore.setChatStatus(chat.id, res.status)
       },
       5,
       apiKey,
@@ -49,7 +57,7 @@ const useChatGPTStore = create<ChatGPTStore>((set, get) => ({
 
   addChatAnswer: (id: string, answer: string) => {
     set((state) => {
-      const curChat = state.chatList.find(history => history.id === id)
+      const curChat = state.chatList.find((history) => history.id === id)
       if (curChat) {
         curChat.answer = answer
         curChat.status = 'done'
@@ -63,10 +71,11 @@ const useChatGPTStore = create<ChatGPTStore>((set, get) => ({
     set((state) => {
       return {
         ...state,
-        chatList: state.chatList.filter(history => history.id !== id),
+        chatList: state.chatList.filter((history) => history.id !== id),
       }
     })
   },
+
 }))
 
 type ChatStatus = 'pending' | 'done' | 'error'
@@ -80,6 +89,9 @@ export interface ChatGPTHistory {
 
 interface ChatGPTStore {
   chatList: ChatGPTHistory[]
+  gptModels: string[]
+  curGptModelIndex: number
+  setCurGptModelIndex: (index: number) => void
   setChatStatus: (id: string, status: ChatStatus) => void
   addChat: (question: string, apiKey: string) => ChatGPTHistory
   addChatQuestion: (question: string) => ChatGPTHistory

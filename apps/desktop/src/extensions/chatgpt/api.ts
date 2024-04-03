@@ -4,16 +4,19 @@ export async function callChatGptApi(
   onStatus: (status: Status) => void,
   maxRetry = 5,
   apiKey: string,
+  params?: {
+    messages?: { role: string; content: string }[]
+  },
 ): Promise<Status> {
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`,
+      Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
       model,
-      messages: [
+      messages: params?.messages ?? [
         {
           role: 'system',
           content: 'Support search function, to answer my question.',
@@ -33,26 +36,16 @@ export async function callChatGptApi(
     }
     onStatus({ status: 'error', message: res.error.message })
     return { status: 'error', message: res.error.message }
-  }
-  else {
+  } else {
     const res = (await response.json()) as ApiStreamResponse
 
     let resText = ''
-    res.choices.forEach(choice => (resText += choice.message.content))
+    res.choices.forEach((choice) => (resText += choice.message.content))
 
     onStatus({ status: 'done', result: resText })
     return { status: 'done', result: resText }
   }
 }
-
-// const resolveModelShorthand = (model: string): string => {
-//   const shorthands: { [key: string]: string } = {
-//     '4': 'gpt-4',
-//     '4large': 'gpt-4-32k',
-//     '3': 'gpt-3.5-turbo',
-//   }
-//   return shorthands[model] ?? model
-// }
 
 interface ErrorResponse {
   error: {
