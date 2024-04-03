@@ -6425,6 +6425,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@mdx-js/react@npm:^3.0.1":
+  version: 3.0.1
+  resolution: "@mdx-js/react@npm:3.0.1"
+  dependencies:
+    "@types/mdx": "npm:^2.0.0"
+  peerDependencies:
+    "@types/react": ">=16"
+    react: ">=16"
+  checksum: d566407af11e76f498f8133fbfa8a9d8a2ad80dc7a66ca109d29fcb92e953a2d2d7aaedc0c28571d126f1967faeb126dd2e4ab4ea474c994bf5c76fa204c5997
+  languageName: node
+  linkType: hard
+
 "@messageformat/parser@npm:^5.0.0":
   version: 5.1.0
   resolution: "@messageformat/parser@npm:5.1.0"
@@ -13426,7 +13438,7 @@ __metadata:
     "@docusaurus/plugin-pwa": "npm:^3.1.1"
     "@docusaurus/preset-classic": "npm:^3.1.1"
     "@docusaurus/types": "npm:^3.1.1"
-    "@mdx-js/react": "npm:^3.0.0"
+    "@mdx-js/react": "npm:^3.0.1"
     "@svgr/webpack": "npm:^8.1.0"
     "@types/react": "npm:^18.2.48"
     animate.css: "npm:^4.1.1"
