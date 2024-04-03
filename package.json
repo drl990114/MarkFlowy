@@ -57,7 +57,7 @@
   "lint": {
     "*": "eslint --fix"
   },
-  "packageManager": "yarn@4.0.2",
+  "packageManager": "yarn@4.1.1",
   "dependencies": {
     "turbo": "^1.12.5"
   }
