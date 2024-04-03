@@ -34,7 +34,7 @@
     "create-context-state": "^2.0.0",
     "dayjs": "^1.11.10",
     "hox": "^2.1.0",
-    "i18next": "^23.10.1",
+    "i18next": "23.8.2",
     "immer": "^10.0.4",
     "is-promise": "^4.0.0",
     "jsx-dom-cjs": "^8.0.7",

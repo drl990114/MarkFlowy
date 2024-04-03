@@ -208,8 +208,8 @@
                 },
                 "allow": {
                   "items": {
-                    "title": "ScopeEntry",
-                    "description": "HTTP scope entry object definition.",
+                    "title": "HttpScopeEntry",
+                    "description": "HTTP scope entry.",
                     "anyOf": [
                       {
                         "description": "A URL that can be accessed by the webview when using the HTTP APIs. Wildcards can be used following the URL pattern standard.\n\nSee [the URL Pattern spec](https://urlpattern.spec.whatwg.org/) for more information.\n\nExamples:\n\n- \"https://*\" : allows all HTTPS origin on port 443\n\n- \"https://*:*\" : allows all HTTPS origin on any port\n\n- \"https://*.github.com/tauri-apps/tauri\": allows any subdomain of \"github.com\" with the \"tauri-apps/api\" path\n\n- \"https://myapi.service.com/users/*\": allows access to any URLs that begins with \"https://myapi.service.com/users/\"",
@@ -232,8 +232,8 @@
                 },
                 "deny": {
                   "items": {
-                    "title": "ScopeEntry",
-                    "description": "HTTP scope entry object definition.",
+                    "title": "HttpScopeEntry",
+                    "description": "HTTP scope entry.",
                     "anyOf": [
                       {
                         "description": "A URL that can be accessed by the webview when using the HTTP APIs. Wildcards can be used following the URL pattern standard.\n\nSee [the URL Pattern spec](https://urlpattern.spec.whatwg.org/) for more information.\n\nExamples:\n\n- \"https://*\" : allows all HTTPS origin on port 443\n\n- \"https://*:*\" : allows all HTTPS origin on any port\n\n- \"https://*.github.com/tauri-apps/tauri\": allows any subdomain of \"github.com\" with the \"tauri-apps/api\" path\n\n- \"https://myapi.service.com/users/*\": allows access to any URLs that begins with \"https://myapi.service.com/users/\"",
@@ -264,6 +264,12 @@
               "properties": {
                 "identifier": {
                   "oneOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "shell:default"
+                      ]
+                    },
                     {
                       "description": "shell:allow-execute -> Enables the execute command without any pre-configured scope.",
                       "type": "string",
@@ -329,7 +335,7 @@
                     "type": "object",
                     "required": [
                       "args",
-                      "command",
+                      "cmd",
                       "name",
                       "sidecar"
                     ],
@@ -342,7 +348,7 @@
                           }
                         ]
                       },
-                      "command": {
+                      "cmd": {
                         "description": "The command name. It can start with a variable that resolves to a system base directory. The variables are: `$AUDIO`, `$CACHE`, `$CONFIG`, `$DATA`, `$LOCALDATA`, `$DESKTOP`, `$DOCUMENT`, `$DOWNLOAD`, `$EXE`, `$FONT`, `$HOME`, `$PICTURE`, `$PUBLIC`, `$RUNTIME`, `$TEMPLATE`, `$VIDEO`, `$RESOURCE`, `$APP`, `$LOG`, `$TEMP`, `$APPCONFIG`, `$APPDATA`, `$APPLOCALDATA`, `$APPCACHE`, `$APPLOG`.",
                         "type": "string"
                       },
@@ -364,7 +370,7 @@
                     "type": "object",
                     "required": [
                       "args",
-                      "command",
+                      "cmd",
                       "name",
                       "sidecar"
                     ],
@@ -377,7 +383,7 @@
                           }
                         ]
                       },
-                      "command": {
+                      "cmd": {
                         "description": "The command name. It can start with a variable that resolves to a system base directory. The variables are: `$AUDIO`, `$CACHE`, `$CONFIG`, `$DATA`, `$LOCALDATA`, `$DESKTOP`, `$DOCUMENT`, `$DOWNLOAD`, `$EXE`, `$FONT`, `$HOME`, `$PICTURE`, `$PUBLIC`, `$RUNTIME`, `$TEMPLATE`, `$VIDEO`, `$RESOURCE`, `$APP`, `$LOG`, `$TEMP`, `$APPCONFIG`, `$APPDATA`, `$APPLOCALDATA`, `$APPCACHE`, `$APPLOG`.",
                         "type": "string"
                       },
@@ -478,6 +484,12 @@
           ]
         },
         {
+          "type": "string",
+          "enum": [
+            "clipboard-manager:default"
+          ]
+        },
+        {
           "description": "clipboard-manager:allow-read -> Enables the read command without any pre-configured scope.",
           "type": "string",
           "enum": [
@@ -503,6 +515,12 @@
           "type": "string",
           "enum": [
             "clipboard-manager:deny-write"
+          ]
+        },
+        {
+          "type": "string",
+          "enum": [
+            "dialog:default"
           ]
         },
         {
@@ -723,13 +741,6 @@
           ]
         },
         {
-          "description": "image:allow-height -> Enables the height command without any pre-configured scope.",
-          "type": "string",
-          "enum": [
-            "image:allow-height"
-          ]
-        },
-        {
           "description": "image:allow-new -> Enables the new command without any pre-configured scope.",
           "type": "string",
           "enum": [
@@ -744,10 +755,10 @@
           ]
         },
         {
-          "description": "image:allow-width -> Enables the width command without any pre-configured scope.",
+          "description": "image:allow-size -> Enables the size command without any pre-configured scope.",
           "type": "string",
           "enum": [
-            "image:allow-width"
+            "image:allow-size"
           ]
         },
         {
@@ -765,13 +776,6 @@
           ]
         },
         {
-          "description": "image:deny-height -> Denies the height command without any pre-configured scope.",
-          "type": "string",
-          "enum": [
-            "image:deny-height"
-          ]
-        },
-        {
           "description": "image:deny-new -> Denies the new command without any pre-configured scope.",
           "type": "string",
           "enum": [
@@ -786,10 +790,10 @@
           ]
         },
         {
-          "description": "image:deny-width -> Denies the width command without any pre-configured scope.",
+          "description": "image:deny-size -> Denies the size command without any pre-configured scope.",
           "type": "string",
           "enum": [
-            "image:deny-width"
+            "image:deny-size"
           ]
         },
         {
@@ -1108,6 +1112,12 @@
           ]
         },
         {
+          "type": "string",
+          "enum": [
+            "os:default"
+          ]
+        },
+        {
           "description": "os:allow-arch -> Enables the arch command without any pre-configured scope.",
           "type": "string",
           "enum": [
@@ -1360,6 +1370,12 @@
           ]
         },
         {
+          "type": "string",
+          "enum": [
+            "shell:default"
+          ]
+        },
+        {
           "description": "shell:allow-execute -> Enables the execute command without any pre-configured scope.",
           "type": "string",
           "enum": [
@@ -1413,6 +1429,12 @@
           "type": "string",
           "enum": [
             "shell:deny-stdin-write"
+          ]
+        },
+        {
+          "type": "string",
+          "enum": [
+            "store:default"
           ]
         },
         {
@@ -1591,10 +1613,24 @@
           ]
         },
         {
+          "description": "tray:allow-get-by-id -> Enables the get_by_id command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "tray:allow-get-by-id"
+          ]
+        },
+        {
           "description": "tray:allow-new -> Enables the new command without any pre-configured scope.",
           "type": "string",
           "enum": [
             "tray:allow-new"
+          ]
+        },
+        {
+          "description": "tray:allow-remove-by-id -> Enables the remove_by_id command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "tray:allow-remove-by-id"
           ]
         },
         {
@@ -1654,10 +1690,24 @@
           ]
         },
         {
+          "description": "tray:deny-get-by-id -> Denies the get_by_id command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "tray:deny-get-by-id"
+          ]
+        },
+        {
           "description": "tray:deny-new -> Denies the new command without any pre-configured scope.",
           "type": "string",
           "enum": [
             "tray:deny-new"
+          ]
+        },
+        {
+          "description": "tray:deny-remove-by-id -> Denies the remove_by_id command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "tray:deny-remove-by-id"
           ]
         },
         {
