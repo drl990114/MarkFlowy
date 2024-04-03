@@ -16,7 +16,7 @@
   "dependencies": {
     "@docusaurus/core": "^3.1.1",
     "@docusaurus/plugin-content-docs": "^3.1.1",
-    "@docusaurus/plugin-pwa": "^3.1.1",
+    "@docusaurus/plugin-pwa": "^3.2.0",
     "@docusaurus/preset-classic": "^3.1.1",
     "@mdx-js/react": "^3.0.1",
     "@svgr/webpack": "^8.1.0",
