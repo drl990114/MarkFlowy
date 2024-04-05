@@ -46,6 +46,12 @@ const useThemeStore = create<ThemeStore>((set, get) => {
           removeInsertedTheme()
         }
 
+        if (targetTheme.mode === 'dark') {
+          document.body.style.colorScheme = 'dark'
+        } else {
+          document.body.style.colorScheme = 'light'
+        }
+
         set((prev) => ({
           ...prev,
           curTheme: targetTheme,
