@@ -39,7 +39,7 @@
     "babel": "^6.23.0",
     "child_process": "^1.0.2",
     "eslint": "8.57.0",
-    "fast-glob": "^3.3.0",
+    "fast-glob": "^3.3.2",
     "husky": "^8.0.3",
     "postcss": "^8.4.38",
     "postcss-import": "^15.1.0",
