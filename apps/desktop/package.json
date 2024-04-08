@@ -58,7 +58,7 @@
   },
   "devDependencies": {
     "@babel/plugin-proposal-class-properties": "^7.18.6",
-    "@babel/plugin-proposal-decorators": "^7.23.9",
+    "@babel/plugin-proposal-decorators": "^7.24.1",
     "@tauri-apps/cli": "^2.0.0-beta.9",
     "@tauri-release/cli": "^0.2.5",
     "@types/color": "^3.0.6",
