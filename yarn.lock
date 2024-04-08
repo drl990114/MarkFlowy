@@ -18238,7 +18238,7 @@ __metadata:
     babel: "npm:^6.23.0"
     child_process: "npm:^1.0.2"
     eslint: "npm:8.57.0"
-    fast-glob: "npm:^3.3.0"
+    fast-glob: "npm:^3.3.2"
     husky: "npm:^8.0.3"
     postcss: "npm:^8.4.38"
     postcss-import: "npm:^15.1.0"
