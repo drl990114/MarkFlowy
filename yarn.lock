@@ -6508,7 +6508,7 @@ __metadata:
     create-context-state: "npm:^2.0.0"
     dayjs: "npm:^1.11.10"
     eslint: "npm:8.57.0"
-    happy-dom: "npm:^13.9.0"
+    happy-dom: "npm:^14.7.1"
     hox: "npm:^2.1.0"
     i18next: "npm:23.8.2"
     immer: "npm:^10.0.4"
@@ -16009,14 +16009,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"happy-dom@npm:^13.9.0":
-  version: 13.9.0
-  resolution: "happy-dom@npm:13.9.0"
+"happy-dom@npm:^14.7.1":
+  version: 14.7.1
+  resolution: "happy-dom@npm:14.7.1"
   dependencies:
     entities: "npm:^4.5.0"
     webidl-conversions: "npm:^7.0.0"
     whatwg-mimetype: "npm:^3.0.0"
-  checksum: 10/44f2c34610ed051eaf03e3a6478704e73a06f8c00625b03b70a79fb83cb922a76473b3d415705a1ffa51fb64e84b79eb4fec09ab7b934fb2a9d298f64d82062b
+  checksum: 10/8a8c8995abc92d5319750d71cac08a4aafd26e8a7203d2a970270c5c1ca68dad2b3af772de761e061107f3aaa51d6cb9430f07e05366047a126ef908377a4c08
   languageName: node
   linkType: hard
 
