@@ -13,13 +13,6 @@
     },
     {
       "description": "A list of capabilities.",
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/Capability"
-      }
-    },
-    {
-      "description": "A list of capabilities.",
       "type": "object",
       "required": [
         "capabilities"
@@ -41,7 +34,8 @@
       "type": "object",
       "required": [
         "identifier",
-        "permissions"
+        "permissions",
+        "windows"
       ],
       "properties": {
         "identifier": {
@@ -91,11 +85,15 @@
           }
         },
         "platforms": {
-          "description": "Target platforms this capability applies. By default all platforms are affected by this capability.",
-          "type": [
-            "array",
-            "null"
+          "description": "Target platforms this capability applies. By default all platforms applies.",
+          "default": [
+            "linux",
+            "macOS",
+            "windows",
+            "android",
+            "iOS"
           ],
+          "type": "array",
           "items": {
             "$ref": "#/definitions/Target"
           }
@@ -110,7 +108,7 @@
       ],
       "properties": {
         "urls": {
-          "description": "Remote domains this capability refers to using the [URLPattern standard](https://urlpattern.spec.whatwg.org/).\n\n# Examples\n\n- \"https://*.mydomain.dev\": allows subdomains of mydomain.dev - \"https://mydomain.dev/api/*\": allows any subpath of mydomain.dev/api",
+          "description": "Remote domains this capability refers to. Can use glob patterns.",
           "type": "array",
           "items": {
             "type": "string"
@@ -208,50 +206,34 @@
                 },
                 "allow": {
                   "items": {
-                    "title": "HttpScopeEntry",
-                    "description": "HTTP scope entry.",
-                    "anyOf": [
-                      {
-                        "description": "A URL that can be accessed by the webview when using the HTTP APIs. Wildcards can be used following the URL pattern standard.\n\nSee [the URL Pattern spec](https://urlpattern.spec.whatwg.org/) for more information.\n\nExamples:\n\n- \"https://*\" : allows all HTTPS origin on port 443\n\n- \"https://*:*\" : allows all HTTPS origin on any port\n\n- \"https://*.github.com/tauri-apps/tauri\": allows any subdomain of \"github.com\" with the \"tauri-apps/api\" path\n\n- \"https://myapi.service.com/users/*\": allows access to any URLs that begins with \"https://myapi.service.com/users/\"",
+                    "title": "ScopeEntry",
+                    "description": "HTTP scope entry object definition.",
+                    "type": "object",
+                    "required": [
+                      "url"
+                    ],
+                    "properties": {
+                      "url": {
+                        "description": "A URL that can be accessed by the webview when using the HTTP APIs. The scoped URL is matched against the request URL using a glob pattern.\n\nExamples:\n\n- \"https://*\" or \"https://**\" : allows all HTTPS urls\n\n- \"https://*.github.com/tauri-apps/tauri\": allows any subdomain of \"github.com\" with the \"tauri-apps/api\" path\n\n- \"https://myapi.service.com/users/*\": allows access to any URLs that begins with \"https://myapi.service.com/users/\"",
                         "type": "string"
-                      },
-                      {
-                        "type": "object",
-                        "required": [
-                          "url"
-                        ],
-                        "properties": {
-                          "url": {
-                            "description": "A URL that can be accessed by the webview when using the HTTP APIs. Wildcards can be used following the URL pattern standard.\n\nSee [the URL Pattern spec](https://urlpattern.spec.whatwg.org/) for more information.\n\nExamples:\n\n- \"https://*\" : allows all HTTPS origin on port 443\n\n- \"https://*:*\" : allows all HTTPS origin on any port\n\n- \"https://*.github.com/tauri-apps/tauri\": allows any subdomain of \"github.com\" with the \"tauri-apps/api\" path\n\n- \"https://myapi.service.com/users/*\": allows access to any URLs that begins with \"https://myapi.service.com/users/\"",
-                            "type": "string"
-                          }
-                        }
                       }
-                    ]
+                    }
                   }
                 },
                 "deny": {
                   "items": {
-                    "title": "HttpScopeEntry",
-                    "description": "HTTP scope entry.",
-                    "anyOf": [
-                      {
-                        "description": "A URL that can be accessed by the webview when using the HTTP APIs. Wildcards can be used following the URL pattern standard.\n\nSee [the URL Pattern spec](https://urlpattern.spec.whatwg.org/) for more information.\n\nExamples:\n\n- \"https://*\" : allows all HTTPS origin on port 443\n\n- \"https://*:*\" : allows all HTTPS origin on any port\n\n- \"https://*.github.com/tauri-apps/tauri\": allows any subdomain of \"github.com\" with the \"tauri-apps/api\" path\n\n- \"https://myapi.service.com/users/*\": allows access to any URLs that begins with \"https://myapi.service.com/users/\"",
+                    "title": "ScopeEntry",
+                    "description": "HTTP scope entry object definition.",
+                    "type": "object",
+                    "required": [
+                      "url"
+                    ],
+                    "properties": {
+                      "url": {
+                        "description": "A URL that can be accessed by the webview when using the HTTP APIs. The scoped URL is matched against the request URL using a glob pattern.\n\nExamples:\n\n- \"https://*\" or \"https://**\" : allows all HTTPS urls\n\n- \"https://*.github.com/tauri-apps/tauri\": allows any subdomain of \"github.com\" with the \"tauri-apps/api\" path\n\n- \"https://myapi.service.com/users/*\": allows access to any URLs that begins with \"https://myapi.service.com/users/\"",
                         "type": "string"
-                      },
-                      {
-                        "type": "object",
-                        "required": [
-                          "url"
-                        ],
-                        "properties": {
-                          "url": {
-                            "description": "A URL that can be accessed by the webview when using the HTTP APIs. Wildcards can be used following the URL pattern standard.\n\nSee [the URL Pattern spec](https://urlpattern.spec.whatwg.org/) for more information.\n\nExamples:\n\n- \"https://*\" : allows all HTTPS origin on port 443\n\n- \"https://*:*\" : allows all HTTPS origin on any port\n\n- \"https://*.github.com/tauri-apps/tauri\": allows any subdomain of \"github.com\" with the \"tauri-apps/api\" path\n\n- \"https://myapi.service.com/users/*\": allows access to any URLs that begins with \"https://myapi.service.com/users/\"",
-                            "type": "string"
-                          }
-                        }
                       }
-                    ]
+                    }
                   }
                 }
               }
@@ -264,12 +246,6 @@
               "properties": {
                 "identifier": {
                   "oneOf": [
-                    {
-                      "type": "string",
-                      "enum": [
-                        "shell:default"
-                      ]
-                    },
                     {
                       "description": "shell:allow-execute -> Enables the execute command without any pre-configured scope.",
                       "type": "string",
@@ -335,19 +311,11 @@
                     "type": "object",
                     "required": [
                       "args",
-                      "cmd",
+                      "command",
                       "name",
                       "sidecar"
                     ],
                     "properties": {
-                      "name": {
-                        "description": "The name for this allowed shell command configuration.\n\nThis name will be used inside of the webview API to call this command along with any specified arguments.",
-                        "type": "string"
-                      },
-                      "cmd": {
-                        "description": "The command name. It can start with a variable that resolves to a system base directory. The variables are: `$AUDIO`, `$CACHE`, `$CONFIG`, `$DATA`, `$LOCALDATA`, `$DESKTOP`, `$DOCUMENT`, `$DOWNLOAD`, `$EXE`, `$FONT`, `$HOME`, `$PICTURE`, `$PUBLIC`, `$RUNTIME`, `$TEMPLATE`, `$VIDEO`, `$RESOURCE`, `$APP`, `$LOG`, `$TEMP`, `$APPCONFIG`, `$APPDATA`, `$APPLOCALDATA`, `$APPCACHE`, `$APPLOG`.",
-                        "type": "string"
-                      },
                       "args": {
                         "description": "The allowed arguments for the command execution.",
                         "allOf": [
@@ -355,6 +323,14 @@
                             "$ref": "#/definitions/ShellAllowedArgs"
                           }
                         ]
+                      },
+                      "command": {
+                        "description": "The command name. It can start with a variable that resolves to a system base directory. The variables are: `$AUDIO`, `$CACHE`, `$CONFIG`, `$DATA`, `$LOCALDATA`, `$DESKTOP`, `$DOCUMENT`, `$DOWNLOAD`, `$EXE`, `$FONT`, `$HOME`, `$PICTURE`, `$PUBLIC`, `$RUNTIME`, `$TEMPLATE`, `$VIDEO`, `$RESOURCE`, `$APP`, `$LOG`, `$TEMP`, `$APPCONFIG`, `$APPDATA`, `$APPLOCALDATA`, `$APPCACHE`, `$APPLOG`.",
+                        "type": "string"
+                      },
+                      "name": {
+                        "description": "The name for this allowed shell command configuration.\n\nThis name will be used inside of the webview API to call this command along with any specified arguments.",
+                        "type": "string"
                       },
                       "sidecar": {
                         "description": "If this command is a sidecar command.",
@@ -370,19 +346,11 @@
                     "type": "object",
                     "required": [
                       "args",
-                      "cmd",
+                      "command",
                       "name",
                       "sidecar"
                     ],
                     "properties": {
-                      "name": {
-                        "description": "The name for this allowed shell command configuration.\n\nThis name will be used inside of the webview API to call this command along with any specified arguments.",
-                        "type": "string"
-                      },
-                      "cmd": {
-                        "description": "The command name. It can start with a variable that resolves to a system base directory. The variables are: `$AUDIO`, `$CACHE`, `$CONFIG`, `$DATA`, `$LOCALDATA`, `$DESKTOP`, `$DOCUMENT`, `$DOWNLOAD`, `$EXE`, `$FONT`, `$HOME`, `$PICTURE`, `$PUBLIC`, `$RUNTIME`, `$TEMPLATE`, `$VIDEO`, `$RESOURCE`, `$APP`, `$LOG`, `$TEMP`, `$APPCONFIG`, `$APPDATA`, `$APPLOCALDATA`, `$APPCACHE`, `$APPLOG`.",
-                        "type": "string"
-                      },
                       "args": {
                         "description": "The allowed arguments for the command execution.",
                         "allOf": [
@@ -390,6 +358,14 @@
                             "$ref": "#/definitions/ShellAllowedArgs"
                           }
                         ]
+                      },
+                      "command": {
+                        "description": "The command name. It can start with a variable that resolves to a system base directory. The variables are: `$AUDIO`, `$CACHE`, `$CONFIG`, `$DATA`, `$LOCALDATA`, `$DESKTOP`, `$DOCUMENT`, `$DOWNLOAD`, `$EXE`, `$FONT`, `$HOME`, `$PICTURE`, `$PUBLIC`, `$RUNTIME`, `$TEMPLATE`, `$VIDEO`, `$RESOURCE`, `$APP`, `$LOG`, `$TEMP`, `$APPCONFIG`, `$APPDATA`, `$APPLOCALDATA`, `$APPCACHE`, `$APPLOG`.",
+                        "type": "string"
+                      },
+                      "name": {
+                        "description": "The name for this allowed shell command configuration.\n\nThis name will be used inside of the webview API to call this command along with any specified arguments.",
+                        "type": "string"
                       },
                       "sidecar": {
                         "description": "If this command is a sidecar command.",
@@ -484,12 +460,6 @@
           ]
         },
         {
-          "type": "string",
-          "enum": [
-            "clipboard-manager:default"
-          ]
-        },
-        {
           "description": "clipboard-manager:allow-read -> Enables the read command without any pre-configured scope.",
           "type": "string",
           "enum": [
@@ -515,12 +485,6 @@
           "type": "string",
           "enum": [
             "clipboard-manager:deny-write"
-          ]
-        },
-        {
-          "type": "string",
-          "enum": [
-            "dialog:default"
           ]
         },
         {
@@ -717,83 +681,6 @@
           "type": "string",
           "enum": [
             "http:deny-fetch-send"
-          ]
-        },
-        {
-          "description": "image:default -> Default permissions for the plugin.",
-          "type": "string",
-          "enum": [
-            "image:default"
-          ]
-        },
-        {
-          "description": "image:allow-from-bytes -> Enables the from_bytes command without any pre-configured scope.",
-          "type": "string",
-          "enum": [
-            "image:allow-from-bytes"
-          ]
-        },
-        {
-          "description": "image:allow-from-path -> Enables the from_path command without any pre-configured scope.",
-          "type": "string",
-          "enum": [
-            "image:allow-from-path"
-          ]
-        },
-        {
-          "description": "image:allow-new -> Enables the new command without any pre-configured scope.",
-          "type": "string",
-          "enum": [
-            "image:allow-new"
-          ]
-        },
-        {
-          "description": "image:allow-rgba -> Enables the rgba command without any pre-configured scope.",
-          "type": "string",
-          "enum": [
-            "image:allow-rgba"
-          ]
-        },
-        {
-          "description": "image:allow-size -> Enables the size command without any pre-configured scope.",
-          "type": "string",
-          "enum": [
-            "image:allow-size"
-          ]
-        },
-        {
-          "description": "image:deny-from-bytes -> Denies the from_bytes command without any pre-configured scope.",
-          "type": "string",
-          "enum": [
-            "image:deny-from-bytes"
-          ]
-        },
-        {
-          "description": "image:deny-from-path -> Denies the from_path command without any pre-configured scope.",
-          "type": "string",
-          "enum": [
-            "image:deny-from-path"
-          ]
-        },
-        {
-          "description": "image:deny-new -> Denies the new command without any pre-configured scope.",
-          "type": "string",
-          "enum": [
-            "image:deny-new"
-          ]
-        },
-        {
-          "description": "image:deny-rgba -> Denies the rgba command without any pre-configured scope.",
-          "type": "string",
-          "enum": [
-            "image:deny-rgba"
-          ]
-        },
-        {
-          "description": "image:deny-size -> Denies the size command without any pre-configured scope.",
-          "type": "string",
-          "enum": [
-            "image:deny-size"
           ]
         },
         {
@@ -1112,12 +999,6 @@
           ]
         },
         {
-          "type": "string",
-          "enum": [
-            "os:default"
-          ]
-        },
-        {
           "description": "os:allow-arch -> Enables the arch command without any pre-configured scope.",
           "type": "string",
           "enum": [
@@ -1370,12 +1251,6 @@
           ]
         },
         {
-          "type": "string",
-          "enum": [
-            "shell:default"
-          ]
-        },
-        {
           "description": "shell:allow-execute -> Enables the execute command without any pre-configured scope.",
           "type": "string",
           "enum": [
@@ -1429,12 +1304,6 @@
           "type": "string",
           "enum": [
             "shell:deny-stdin-write"
-          ]
-        },
-        {
-          "type": "string",
-          "enum": [
-            "store:default"
           ]
         },
         {
@@ -1613,24 +1482,10 @@
           ]
         },
         {
-          "description": "tray:allow-get-by-id -> Enables the get_by_id command without any pre-configured scope.",
-          "type": "string",
-          "enum": [
-            "tray:allow-get-by-id"
-          ]
-        },
-        {
           "description": "tray:allow-new -> Enables the new command without any pre-configured scope.",
           "type": "string",
           "enum": [
             "tray:allow-new"
-          ]
-        },
-        {
-          "description": "tray:allow-remove-by-id -> Enables the remove_by_id command without any pre-configured scope.",
-          "type": "string",
-          "enum": [
-            "tray:allow-remove-by-id"
           ]
         },
         {
@@ -1690,24 +1545,10 @@
           ]
         },
         {
-          "description": "tray:deny-get-by-id -> Denies the get_by_id command without any pre-configured scope.",
-          "type": "string",
-          "enum": [
-            "tray:deny-get-by-id"
-          ]
-        },
-        {
           "description": "tray:deny-new -> Denies the new command without any pre-configured scope.",
           "type": "string",
           "enum": [
             "tray:deny-new"
-          ]
-        },
-        {
-          "description": "tray:deny-remove-by-id -> Denies the remove_by_id command without any pre-configured scope.",
-          "type": "string",
-          "enum": [
-            "tray:deny-remove-by-id"
           ]
         },
         {
@@ -2905,22 +2746,6 @@
         }
       ]
     },
-    "ShellAllowedArgs": {
-      "description": "A set of command arguments allowed to be executed by the webview API.\n\nA value of `true` will allow any arguments to be passed to the command. `false` will disable all arguments. A list of [`ShellAllowedArg`] will set those arguments as the only valid arguments to be passed to the attached command configuration.",
-      "anyOf": [
-        {
-          "description": "Use a simple boolean to allow all or disable all arguments to this command configuration.",
-          "type": "boolean"
-        },
-        {
-          "description": "A specific set of [`ShellAllowedArg`] that are valid to call for the command configuration.",
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/ShellAllowedArg"
-          }
-        }
-      ]
-    },
     "ShellAllowedArg": {
       "description": "A command argument allowed to be executed by the webview API.",
       "anyOf": [
@@ -2941,6 +2766,22 @@
             }
           },
           "additionalProperties": false
+        }
+      ]
+    },
+    "ShellAllowedArgs": {
+      "description": "A set of command arguments allowed to be executed by the webview API.\n\nA value of `true` will allow any arguments to be passed to the command. `false` will disable all arguments. A list of [`ShellAllowedArg`] will set those arguments as the only valid arguments to be passed to the attached command configuration.",
+      "anyOf": [
+        {
+          "description": "Use a simple boolean to allow all or disable all arguments to this command configuration.",
+          "type": "boolean"
+        },
+        {
+          "description": "A specific set of [`ShellAllowedArg`] that are valid to call for the command configuration.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ShellAllowedArg"
+          }
         }
       ]
     }
