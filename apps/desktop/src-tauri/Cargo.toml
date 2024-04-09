@@ -16,7 +16,7 @@ crate-type = [
 ]
 
 [build-dependencies.tauri-build]
-version = "2.0.0-beta.9"
+version = "2.0.0-beta.5"
 features = []
 
 [dependencies]
@@ -24,13 +24,13 @@ serde_json = "1.0"
 anyhow = "1.0.81"
 dark-light = "1.1.1"
 log = "0.4.21"
-tauri-plugin-updater = "2.0.0-beta.2"
-tauri-plugin-http = "2.0.0-beta.2"
-tauri-plugin-store = "2.0.0-beta.2"
-tauri-plugin-os = "2.0.0-beta.2"
-tauri-plugin-shell = "2.0.0-beta.2"
-tauri-plugin-dialog = "2.0.0-beta.2"
-tauri-plugin-clipboard-manager = "2.0.0-beta.2"
+tauri-plugin-updater = "2.0.0-beta.1"
+tauri-plugin-http = "2.0.0-beta.1"
+tauri-plugin-store = "2.0.0-beta.1"
+tauri-plugin-os = "2.0.0-beta.1"
+tauri-plugin-shell = "2.0.0-beta.1"
+tauri-plugin-dialog = "2.0.0-beta.1"
+tauri-plugin-clipboard-manager = "2.0.0-beta.1"
 regex = "1.10.4"
 lazy_static = "1.4.0"
 tracing = "0.1.40"
@@ -42,7 +42,7 @@ version = "1.0"
 features = ["derive"]
 
 [dependencies.tauri]
-version = "2.0.0-beta.11"
+version = "2.0.0-beta.6"
 features = [
     "protocol-asset",
     "devtools",
