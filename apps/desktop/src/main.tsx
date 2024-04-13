@@ -13,6 +13,7 @@ import {
 } from '@tanstack/react-query'
 import 'remixicon/fonts/remixicon.css'
 import './normalize.css'
+import './atom.css'
 
 enableMapSet()
 const queryClient = new QueryClient()
