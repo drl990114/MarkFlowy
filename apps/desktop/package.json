@@ -31,7 +31,6 @@
     "@tauri-apps/plugin-updater": "^2.0.0-beta.1",
     "classnames": "^2.5.1",
     "color": "^4.2.3",
-    "create-context-state": "^2.0.0",
     "dayjs": "^1.11.10",
     "hox": "^2.1.0",
     "i18next": "23.8.2",
@@ -49,11 +48,11 @@
     "react-router-dom": "^6.22.3",
     "react-use": "^17.5.0",
     "remixicon": "^4.1.0",
-    "rme": "^0.0.38",
+    "rme": "^0.0.40",
     "styled-components": "^6.1.8",
     "stylis": "^4.0.0",
     "tinykeys": "^2.1.0",
-    "zens": "^0.0.9",
+    "zens": "^0.0.11",
     "zustand": "^4.4.6"
   },
   "devDependencies": {

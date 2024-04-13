@@ -1,49 +1,10 @@
-import NiceModal, { useModal } from '@ebay/nice-modal-react'
-import { Button, Dialog } from 'zens'
-import { useTranslation } from 'react-i18next'
+import { Confirm } from './Confirm'
+import { InputConfirm } from './InputConfirm'
 
-interface ConfirmModalProps {
-  title?: string
-  content?: string
-  confirmText?: string
-  cancelText?: string
-  onConfirm?: () => void
-}
-
-export const MODAL_CONFIRM_ID = 'modal-confirm'
-
-const Confirm = NiceModal.create(
-  ({ title, content, confirmText, cancelText, onConfirm }: ConfirmModalProps) => {
-    const modal = useModal()
-    const { t } = useTranslation()
-
-    const handleConfirm = () => {
-      if (onConfirm) {
-        onConfirm()
-      }
-      modal.hide()
-    }
-
-    return (
-      <Dialog
-        title={title}
-        open={modal.visible}
-        onClose={modal.hide}
-        footer={[
-          <Button key='cancel' onClick={modal.hide}>
-            {cancelText ?? t('common.cancel')}
-          </Button>,
-          <Button key='confirm' btnType='primary' onClick={handleConfirm}>
-            {confirmText ?? t('common.confirm')}
-          </Button>,
-        ]}
-      >
-        {content}
-      </Dialog>
-    )
-  },
-)
+export * from './Confirm'
+export * from './InputConfirm'
 
 export default {
-  Confirm,
+  Confirm: Confirm,
+  InputConfirm: InputConfirm,
 }

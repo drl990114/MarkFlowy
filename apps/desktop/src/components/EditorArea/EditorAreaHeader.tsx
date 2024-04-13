@@ -6,13 +6,85 @@ import useBookMarksStore from '@/extensions/bookmarks/useBookMarksStore'
 import { showContextMenu } from '../UI/ContextMenu'
 import bus from '@/helper/eventBus'
 import { useTranslation } from 'react-i18next'
+import useChatGPTStore from '@/extensions/chatgpt/useChatGPTStore'
+import useAppSettingStore from '@/stores/useAppSettingStore'
+import { createFile } from '@/helper/filesys'
+import { toast } from 'zens'
+import useAppTasksStore from '@/stores/useTasksStore'
+import NiceModal from '@ebay/nice-modal-react'
+import type { InputConfirmModalProps } from '../Modal'
+import { MODAL_INPUT_ID } from '../Modal'
 
 export const EditorAreaHeader = memo(() => {
-  const { activeId, getEditorDelegate } = useEditorStore()
+  const { activeId, getEditorDelegate, getEditorContent, addOpenedFile, setActiveId } =
+    useEditorStore()
   const { execute } = useCommandStore()
+  const { getPostSummary, getPostTranslate } = useChatGPTStore()
+  const { settingData } = useAppSettingStore()
+  const { addAppTask } = useAppTasksStore()
   const { t } = useTranslation()
   const ref = useRef<HTMLDivElement>()
   const curFile = activeId ? getFileObject(activeId) : undefined
+
+  const fetchCurFileSummary = useCallback(async () => {
+    const content = getEditorContent(curFile?.id || '')
+    const res = await addAppTask({
+      title: 'ChatGPT: Retrieving article abstract',
+      promise: getPostSummary(content || '', settingData.extensions_chatgpt_apikey),
+    })
+    if (res.status === 'done') {
+      const summaryFile = createFile({
+        name: 'summary.md',
+        content: `
+# Summary
+
+${res.result}
+      `,
+      })
+      addOpenedFile(summaryFile.id)
+      setActiveId(summaryFile.id)
+    } else {
+      if (res.status === 'error') toast.error(res.message)
+    }
+  }, [
+    addAppTask,
+    addOpenedFile,
+    curFile?.id,
+    getEditorContent,
+    getPostSummary,
+    setActiveId,
+    settingData.extensions_chatgpt_apikey,
+  ])
+
+  const fetchCurFileTranslate = useCallback(
+    async (targetLang: string) => {
+      const content = getEditorContent(curFile?.id || '')
+      const res = await addAppTask({
+        title: 'ChatGPT: Translating article',
+        promise: getPostTranslate(content || '', settingData.extensions_chatgpt_apikey, targetLang),
+      })
+
+      if (res.status === 'done') {
+        const translateFile = createFile({
+          name: `translate-${targetLang}.md`,
+          content: `${res.result}`,
+        })
+        addOpenedFile(translateFile.id)
+        setActiveId(translateFile.id)
+      } else {
+        if (res.status === 'error') toast.error(res.message)
+      }
+    },
+    [
+      addAppTask,
+      addOpenedFile,
+      curFile?.id,
+      getEditorContent,
+      getPostTranslate,
+      setActiveId,
+      settingData.extensions_chatgpt_apikey,
+    ],
+  )
 
   const handleAddBookMark = useCallback(() => {
     const rect = ref.current?.getBoundingClientRect()
@@ -55,18 +127,43 @@ export const EditorAreaHeader = memo(() => {
             },
           ],
         },
+        {
+          label: t('settings.extensions.ChatGPT.label'),
+          value: 'chatgpt',
+          children: [
+            {
+              label: t('action.summary'),
+              value: 'summary',
+              handler: fetchCurFileSummary,
+            },
+            {
+              label: t('action.translate'),
+              value: 'translate',
+              handler: () => {
+                NiceModal.show<any, InputConfirmModalProps>(MODAL_INPUT_ID, {
+                  title: t('action.translate'),
+                  inputProps: {
+                    placeholder: t('placeholder.translate'),
+                  },
+                  onConfirm: (val) => {
+                    if (!val) {
+                      return
+                    }
+                    fetchCurFileTranslate(val)
+                  },
+                })
+              },
+            },
+          ],
+        },
       ],
     })
-  }, [curFile, getEditorDelegate, t, execute])
+  }, [curFile, getEditorDelegate, t, fetchCurFileSummary, execute, fetchCurFileTranslate])
 
   return (
     <div className='editor-area-header'>
       {curFile ? (
-        <MfIconButton
-          iconRef={ref}
-          icon={'ri-more-2-fill'}
-          onClick={handleAddBookMark}
-        />
+        <MfIconButton iconRef={ref} icon={'ri-more-2-fill'} onClick={handleAddBookMark} />
       ) : null}
     </div>
   )

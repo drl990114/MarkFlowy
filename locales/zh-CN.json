@@ -28,7 +28,12 @@
     "done": "完成",
     "edit": "编辑",
     "more": "更多",
-    "save": "保存"
+    "save": "保存",
+    "translate": "翻译",
+    "summary": "摘要"
+  },
+  "placeholder": {
+    "translate": "请输入目标语言"
   },
   "confirm": {
     "delete": {

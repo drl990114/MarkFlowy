@@ -15,6 +15,7 @@ import { ThemeProvider as EditorProvider } from 'rme'
 import useAppSettingStore from './stores/useAppSettingStore'
 import { editorResources } from './i18n'
 import { useMemo } from 'react'
+import { MODAL_INPUT_ID } from './components/Modal/InputConfirm'
 
 const AppThemeProvider: React.FC<BaseComponentProps> = function ({ children }) {
   const { muiTheme, curTheme } = useThemeStore()
@@ -63,6 +64,7 @@ function App() {
       <ContextMenu />
       <Notifications />
       <Modal.Confirm id={MODAL_CONFIRM_ID} />
+      <Modal.InputConfirm id={MODAL_INPUT_ID} />
     </AppThemeProvider>
   )
 }

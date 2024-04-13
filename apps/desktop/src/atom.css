@@ -12,6 +12,10 @@
   align-items: center;
 }
 
+.flex1 {
+  flex: 1;
+}
+
 .display-none {
   display: none;
 }
@@ -28,14 +32,19 @@
   overflow: auto;
 }
 
-.swirl {
-  animation: swirl 1s linear infinite;
-}
-
 @keyframes swirl {
   /*以百分比来规定改变发生的时间 也可以通过"from"和"to",等价于0% 和 100%*/
   0% {
       /*rotate(2D旋转) scale(放大或者缩小) translate(移动) skew(翻转)*/
+      transform: rotate(0deg);
+  }
+  100% {
+      transform: rotate(360deg);
+  }
+}
+
+@-webkit-keyframes swirl {
+  0% {
       transform: rotate(0deg);
   }
   100% {

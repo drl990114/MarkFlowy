@@ -28,7 +28,12 @@
     "done": "done",
     "edit": "edit",
     "more": "more",
-    "save": "save"
+    "save": "save",
+    "translate": "translate",
+    "summary": "summary"
+  },
+  "placeholder": {
+    "translate": "Please enter target language"
   },
   "confirm": {
     "delete": {
