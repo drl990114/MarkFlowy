@@ -1,11 +1,6 @@
 import { createGlobalStyle } from 'styled-components'
 
 export const GlobalStyles = createGlobalStyle`
-  .remirror-theme {
-    /* Provide sufficient space to see the popup */
-    --rmr-space-6: 400px;
-  }
-
   html {
     border-radius: 10px;
     overflow: hidden;
@@ -47,42 +42,6 @@ export const GlobalStyles = createGlobalStyle`
       color: ${(props) => props.theme.accentColor};
       background-color: ${(props) => props.theme.tipsBgColor};
     }
-  }
-
-  .w-full {
-    width: 100%;
-  }
-
-  .h-full {
-    height: 100%;
-  }
-
-  .split {
-    height: 1px;
-    width: 100%;
-    background-color: ${(props) => props.theme.borderColor};
-  }
-
-  .fjic {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-
-  .display-none {
-    display: none;
-  }
-
-  .cursor-pointer {
-    cursor: pointer;
-  }
-
-  .overflow-scroll {
-    overflow: scroll;
-  }
-
-  .overflow-auto {
-    overflow: auto;
   }
 
   /* Styles for scrollbar */
