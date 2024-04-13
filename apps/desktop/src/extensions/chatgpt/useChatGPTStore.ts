@@ -1,5 +1,6 @@
 import { nanoid } from 'nanoid'
 import { create } from 'zustand'
+import type { Status } from '@/extensions/chatgpt/api'
 import { callChatGptApi } from '@/extensions/chatgpt/api'
 
 const useChatGPTStore = create<ChatGPTStore>((set, get) => ({
@@ -41,6 +42,38 @@ const useChatGPTStore = create<ChatGPTStore>((set, get) => ({
       apiKey,
     )
     return chat
+  },
+
+  getPostSummary: async (text: string, apiKey: string) => {
+    const { gptModels, curGptModelIndex } = get()
+    const res = await callChatGptApi(text, gptModels[curGptModelIndex], () => {}, 5, apiKey, {
+      messages: [
+        {
+          role: 'system',
+          content:
+            'Please summarize the summary of this article and return it in markdown format. Only the answer can be returned.',
+        },
+        { role: 'user', content: text },
+      ],
+    })
+
+    return res
+  },
+
+  getPostTranslate: async (text: string, apiKey: string, targetLang: string) => {
+    const { gptModels, curGptModelIndex } = get()
+    const res = await callChatGptApi(text, gptModels[curGptModelIndex], () => {}, 5, apiKey, {
+      messages: [
+        {
+          role: 'system',
+          content:
+            `Please translate this document completely into ${targetLang} and return it in markdown format. Only the answer can be returned.`,
+        },
+        { role: 'user', content: text },
+      ],
+    })
+
+    return res
   },
 
   addChatQuestion: (question: string) => {
@@ -94,6 +127,8 @@ interface ChatGPTStore {
   setCurGptModelIndex: (index: number) => void
   setChatStatus: (id: string, status: ChatStatus) => void
   addChat: (question: string, apiKey: string) => ChatGPTHistory
+  getPostSummary: (text: string, apiKey: string) => Promise<Status>
+  getPostTranslate: (text: string, apiKey: string, targetLang: string) => Promise<Status>
   addChatQuestion: (question: string) => ChatGPTHistory
   addChatAnswer: (id: string, answer: string) => void
   delChat: (id: string) => void

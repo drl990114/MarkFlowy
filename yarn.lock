@@ -5926,6 +5926,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@floating-ui/react-dom@npm:^2.0.0, @floating-ui/react-dom@npm:^2.0.8":
+  version: 2.0.8
+  resolution: "@floating-ui/react-dom@npm:2.0.8"
+  dependencies:
+    "@floating-ui/dom": "npm:^1.6.1"
+  peerDependencies:
+    react: ">=16.8.0"
+    react-dom: ">=16.8.0"
+  checksum: 10/e57b2a498aecf8de0ec28adf434257fca7893bd9bd7e78b63ac98c63b29b9fc086fc175630154352f3610f5c4a0d329823837f4f6c235cc0459fde6417065590
+  languageName: node
+  linkType: hard
+
 "@floating-ui/react-dom@npm:^2.0.1":
   version: 2.0.1
   resolution: "@floating-ui/react-dom@npm:2.0.1"
@@ -5935,18 +5947,6 @@ __metadata:
     react: ">=16.8.0"
     react-dom: ">=16.8.0"
   checksum: 10/c453e252ef71e5386d1ed9fd3bca392d01547cb505daadf38b481544e1819ea00c5f6c4a637c86833d4f2d37377eebfa3c0bc36ffe0b74af2001664121c0d5d4
-  languageName: node
-  linkType: hard
-
-"@floating-ui/react-dom@npm:^2.0.8":
-  version: 2.0.8
-  resolution: "@floating-ui/react-dom@npm:2.0.8"
-  dependencies:
-    "@floating-ui/dom": "npm:^1.6.1"
-  peerDependencies:
-    react: ">=16.8.0"
-    react-dom: ">=16.8.0"
-  checksum: 10/e57b2a498aecf8de0ec28adf434257fca7893bd9bd7e78b63ac98c63b29b9fc086fc175630154352f3610f5c4a0d329823837f4f6c235cc0459fde6417065590
   languageName: node
   linkType: hard
 
@@ -5964,17 +5964,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@floating-ui/react@npm:^0.25.1":
-  version: 0.25.1
-  resolution: "@floating-ui/react@npm:0.25.1"
+"@floating-ui/react@npm:^0.26.11":
+  version: 0.26.12
+  resolution: "@floating-ui/react@npm:0.26.12"
   dependencies:
-    "@floating-ui/react-dom": "npm:^2.0.1"
-    "@floating-ui/utils": "npm:^0.1.1"
-    tabbable: "npm:^6.0.1"
+    "@floating-ui/react-dom": "npm:^2.0.0"
+    "@floating-ui/utils": "npm:^0.2.0"
+    tabbable: "npm:^6.0.0"
   peerDependencies:
     react: ">=16.8.0"
     react-dom: ">=16.8.0"
-  checksum: 10/ce262e47a2b5400fef0966c0b5f82ae33f6dbf13962bb82d5f93468bdad94f2787360a8b43efe7df63a289d0268c6b2af90f5de2766d32df26ed28468413222b
+  checksum: 10/da77f6b99ed0c8d5169f0ed287304615bef7c66b7a0011e4425e843016f6450a928bc27310a861fb14f8a1e58ef11fbdd92550583440f11af5d1a905968453a6
   languageName: node
   linkType: hard
 
@@ -5992,7 +5992,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@floating-ui/utils@npm:^0.2.1":
+"@floating-ui/utils@npm:^0.2.0, @floating-ui/utils@npm:^0.2.1":
   version: 0.2.1
   resolution: "@floating-ui/utils@npm:0.2.1"
   checksum: 10/33c9ab346e7b05c5a1e6a95bc902aafcfc2c9d513a147e2491468843bd5607531b06d0b9aa56aa491cbf22a6c2495c18ccfc4c0344baec54a689a7bb8e4898d6
@@ -6526,7 +6526,6 @@ __metadata:
     "@vitest/ui": "npm:^1.4.0"
     classnames: "npm:^2.5.1"
     color: "npm:^4.2.3"
-    create-context-state: "npm:^2.0.0"
     dayjs: "npm:^1.11.10"
     eslint: "npm:8.57.0"
     happy-dom: "npm:^14.7.1"
@@ -6548,7 +6547,7 @@ __metadata:
     react-test-renderer: "npm:^18.2.0"
     react-use: "npm:^17.5.0"
     remixicon: "npm:^4.1.0"
-    rme: "npm:^0.0.38"
+    rme: "npm:^0.0.40"
     styled-components: "npm:^6.1.8"
     stylis: "npm:^4.0.0"
     tinykeys: "npm:^2.1.0"
@@ -6558,7 +6557,7 @@ __metadata:
     vite: "npm:^5.1.7"
     vite-plugin-svgr: "npm:^4.1.0"
     vitest: "npm:^1.2.2"
-    zens: "npm:^0.0.9"
+    zens: "npm:^0.0.11"
     zustand: "npm:^4.4.6"
   languageName: unknown
   linkType: soft
@@ -23040,9 +23039,9 @@ plugin-image-zoom@ataft/plugin-image-zoom:
   languageName: node
   linkType: hard
 
-"rme@npm:^0.0.38":
-  version: 0.0.38
-  resolution: "rme@npm:0.0.38"
+"rme@npm:^0.0.40":
+  version: 0.0.40
+  resolution: "rme@npm:0.0.40"
   dependencies:
     "@codemirror/autocomplete": "npm:^6.8.1"
     "@codemirror/commands": "npm:^6.2.4"
@@ -23057,7 +23056,7 @@ plugin-image-zoom@ataft/plugin-image-zoom:
     "@emotion/css": "npm:^11.11.0"
     "@emotion/react": "npm:^11.11.4"
     "@emotion/styled": "npm:^11.11.0"
-    "@floating-ui/react": "npm:^0.25.1"
+    "@floating-ui/react": "npm:^0.26.11"
     "@lezer/highlight": "npm:^1.2.0"
     "@mui/material": "npm:5.15.14"
     "@remirror/core": "npm:^2.0.17"
@@ -23116,11 +23115,11 @@ plugin-image-zoom@ataft/plugin-image-zoom:
     tether-drop: "npm:^1.4.2"
     void-elements: "npm:^3.1.0"
     yjs: "npm:^13.6.14"
-    zens: "npm:^0.0.9"
+    zens: "npm:^0.0.11"
   peerDependencies:
     react: ">=16.14.0"
     react-dom: ">=16.14.0"
-  checksum: 10/4c26f79f2886d25cfc4f0ae68edba4225e9a93ae925ffbcc8d576d35ce11518162cd6e1ac6d4074d7445fe6e5035537158593381005bf2f7e8abaf3dfec935b8
+  checksum: 10/7a080c6638442c02641b31fea078c7e09d5ade80aa7acc4ca1beaf3246d50ddfdd32ef96f8a92a84a05ae12c4777a33caad91c8d6a9facffa02483f06bf6e94b
   languageName: node
   linkType: hard
 
@@ -24734,7 +24733,7 @@ plugin-image-zoom@ataft/plugin-image-zoom:
   languageName: node
   linkType: hard
 
-"tabbable@npm:^6.0.1":
+"tabbable@npm:^6.0.0, tabbable@npm:^6.0.1":
   version: 6.2.0
   resolution: "tabbable@npm:6.2.0"
   checksum: 10/980fa73476026e99dcacfc0d6e000d41d42c8e670faf4682496d30c625495e412c4369694f2a15cf1e5252d22de3c396f2b62edbe8d60b5dadc40d09e3f2dde3
@@ -26855,9 +26854,9 @@ plugin-image-zoom@ataft/plugin-image-zoom:
   languageName: node
   linkType: hard
 
-"zens@npm:^0.0.9":
-  version: 0.0.9
-  resolution: "zens@npm:0.0.9"
+"zens@npm:^0.0.11":
+  version: 0.0.11
+  resolution: "zens@npm:0.0.11"
   dependencies:
     "@ariakit/react": "npm:^0.4.3"
     "@babel/runtime": "npm:^7"
@@ -26873,7 +26872,7 @@ plugin-image-zoom@ataft/plugin-image-zoom:
     sonner: "npm:^1.4.0"
     styled-components: "npm:^6.1.0"
     stylis: "npm:^4.0.0"
-  checksum: 10/4d1fc3621829616a4b076370c5e1bc25112d87e00296cd53cd49aa730052e51abe2795eba600e69c6b4a3f2597f135e4306484b2a24eb5f862cf0dad30f42415
+  checksum: 10/4e19c27f6dd65a59cdf778aa43bd0a844b82a4c6a085f993d41167a086c2e4a6aed4af72457c33e606426af3925590f94907438b5bff947786dc9280505ccb59
   languageName: node
   linkType: hard
 

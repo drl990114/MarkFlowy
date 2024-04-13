@@ -4,6 +4,7 @@ import { Container } from './styled'
 import { Controls } from './Controls'
 import { CenterMenu } from './CenterMenu'
 import { useGlobalOSInfo } from '@/hooks'
+import { TaskList } from './TaskList'
 
 const appWindow = getCurrent()
 
@@ -33,6 +34,7 @@ export default function TitleBar() {
     <Container onDoubleClick={handleTitleBarDoubleClick}>
       <CenterMenu />
       <div id='titlebar' className='titlebar-text' data-tauri-drag-region />
+      <TaskList />
       {osType === 'macos' ? null : <Controls />}
     </Container>
   )
