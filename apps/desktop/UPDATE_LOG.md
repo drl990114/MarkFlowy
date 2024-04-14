@@ -10,6 +10,8 @@ Features:
 
 - Support ChatGPT translate post.
 
+- Multi-language support French.
+
 Fixs: 
 
 - Code block lang menu style error.
