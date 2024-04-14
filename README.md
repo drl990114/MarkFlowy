@@ -1,20 +1,23 @@
-<h4 align="right"><strong>English</strong> | <a href="./README_CN.md">简体中文</a></h4>
-
 <div align="center">
   <img align="center" src="./public/logo.png" width="120" height="120" />
 </div>
 
-<h1 align="center"/>MarkFlowy <sup><em>alpha</em></sup></h1>
+<h2 align="center"/>MarkFlowy <sup><em>alpha</em></sup></h2>
 
-<h4 align="center">Modern markdown editor.(WIP)</h3>
+<h4 align="center"><strong>English</strong> | <a href="./README_CN.md">简体中文</a></h4>
 
-<p align="center">
-  <a href="https://github.com/drl990114/MarkFlowy/actions/workflows/nodejs.yml"><img src="https://github.com/drl990114/MarkFlowy/actions/workflows/nodejs.yml/badge.svg?branch=main&color=%23fe7d27" alt="build status"></a>
-  <a href="https://github.com/drl990114/MarkFlowy/releases" target="__blank"><img alt="GitHub downloads" src="https://img.shields.io/github/downloads/drl990114/MarkFlowy/total?label=Downloads&color=%23fe7d37"></a>
-  <a href="https://github.com/drl990114/MarkFlowy/releases" target="__blank"><img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/drl990114/MarkFlowy?label=Version"></a>
-  <a href="https://github.com/drl990114/MarkFlowy" target="__blank"><img alt="GitHub" src="https://img.shields.io/github/commit-activity/w/drl990114/MarkFlowy?color=%2346bd1b"></a>
-  <a href="https://www.rust-lang.org/" target="__blank"><img alt="GitHub" src="https://img.shields.io/badge/Rust-1.76.0-dea584"></a>
-</p>
+
+[![Build Status][build-badge]][build]
+[![Downloads][downloads-badge]][release]
+[![MIT License][license-badge]][license]
+
+[![PRs Welcome][prs-welcome-badge]][prs-welcome]
+[![Code of Conduct][coc-badge]][coc]
+[![Commit Activity][commit-badge]][commit]
+[![TypeScript-version-icon]](https://www.typescriptlang.org/)
+[![Rust-version-icon]](https://www.rust-lang.org/)
+
+[![App Version][version-badge]][release]
 
 ## MarkFlowy is in Alpha
 
@@ -22,7 +25,7 @@ Currently, MarkFlowy is still in the alpha phase,This means there may be incompa
 
 ## Features
 
-- **Built-in ChatGpt**. Currently supports one-click export of conversations, making chatgpt your smart assistant.
+- **Built-in ChatGpt**. Currently supports one-click export of conversations、translate markdown articles and et article abstract, making chatgpt your smart assistant.
 - **Super lightweight**. The MarkFlowy is based on tauri and has a volume of less than 10MB and better performance.
 - **High availability**. MarkFlowy uses the remirror editor, which not only provides high scalability, but also has a great editing experience. And, MarkFlowy supports multiple editing modes, such as `source code`, `wysiwyg`.
 - **Custom Theme**. MarkFlowy supports custom themes, and you can also share your themes with others.
@@ -66,3 +69,19 @@ MarkFlowy is completely and permanently open source, if you want to support Mark
 
 And, thanks to all the open source projects that MarkFlowy depends on.
 
+<!-- badges -->
+[build-badge]: https://img.shields.io/github/actions/workflow/status/drl990114/MarkFlowy/nodejs.yml.svg?style=flat-square
+[build]: https://github.com/drl990114/MarkFlowy/actions/workflows/nodejs.yml
+[downloads-badge]:  https://img.shields.io/github/downloads/drl990114/MarkFlowy/total?label=downloads&style=flat-square
+[license-badge]: https://img.shields.io/badge/license-AGPL-purple.svg?style=flat-square
+[license]: https://opensource.org/licenses/AGPL-3.0
+[release]: https://github.com/drl990114/MarkFlowy/releases
+[prs-welcome-badge]: https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square
+[prs-welcome]: https://github.com/drl990114/MarkFlowy/blob/main/CONTRIBUTING.md
+[coc-badge]: https://img.shields.io/badge/code%20of-conduct-ff69b4.svg?style=flat-square
+[coc]: https://github.com/drl990114/MarkFlowy/blob/main/CODE_OF_CONDUCT.md
+[commit-badge]: https://img.shields.io/github/commit-activity/w/drl990114/MarkFlowy?color=%2346bd1b&style=flat-square
+[commit]: https://github.com/drl990114/MarkFlowy
+[version-badge]: https://img.shields.io/github/v/release/drl990114/MarkFlowy?label=version&style=flat-square
+[rust-version-icon]: https://img.shields.io/badge/Rust-1.77.0-dea584?style=flat-square
+[typescript-version-icon]: https://img.shields.io/github/package-json/dependency-version/drl990114/MarkFlowy/dev/typescript?label=TypeScript&style=flat-square
