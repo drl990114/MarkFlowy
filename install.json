@@ -1,6 +1,6 @@
 {
   "version": "v0.8.0",
-  "notes": "Features:\n\n- Support Table column and row selection.\n\n- Support ChatGPT get post summary.\n\n- Support ChatGPT translate post.\n\nFixs:\n\n- Code block lang menu style error.\n\n- Codemirror highlight error.\n\n- Some ui and ux optimize.",
+  "notes": "Features:\n\n- Support Table column and row selection.\n\n- Support ChatGPT get post summary.\n\n- Support ChatGPT translate post.\n\n- Multi-language support French.\n\nFixs:\n\n- Code block lang menu style error.\n\n- Codemirror highlight error.\n\n- Some ui and ux optimize.",
   "pub_date": "2024-04-14T14:59:05.153Z",
   "platforms": {
     "win64": {
