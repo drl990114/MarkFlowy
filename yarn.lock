@@ -3874,7 +3874,7 @@ __metadata:
     react-test-renderer: "npm:^18.2.0"
     react-use: "npm:^17.5.0"
     remixicon: "npm:^4.1.0"
-    rme: "npm:^0.0.41"
+    rme: "npm:^0.0.45"
     styled-components: "npm:^6.1.8"
     stylis: "npm:^4.0.0"
     tinykeys: "npm:^2.1.0"
@@ -5389,7 +5389,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@remirror/pm@npm:^2.0.4, @remirror/pm@npm:^2.0.8":
+"@remirror/pm@npm:^2.0.4":
   version: 2.0.8
   resolution: "@remirror/pm@npm:2.0.8"
   dependencies:
@@ -5613,36 +5613,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@remirror/react-editors@npm:^1.0.41":
-  version: 1.0.41
-  resolution: "@remirror/react-editors@npm:1.0.41"
-  dependencies:
-    "@babel/runtime": "npm:^7.22.3"
-    "@remirror/core-helpers": "npm:^3.0.0"
-    "@remirror/extension-react-tables": "npm:^2.2.19"
-    "@remirror/pm": "npm:^2.0.8"
-    "@remirror/react": "npm:^2.0.35"
-    "@remirror/styles": "npm:^2.0.7"
-    "@svgmoji/noto": "npm:^3.2.0"
-    "@types/refractor": "npm:^3.0.2"
-    create-context-state: "npm:^2.0.2"
-    refractor: "npm:^3.6.0"
-    remirror: "npm:2.0.39"
-    svgmoji: "npm:^3.2.0"
-  peerDependencies:
-    "@types/react": ^16.14.0 || ^17 || ^18
-    "@types/react-dom": ^16.9.0 || ^17 || ^18
-    react: ^16.14.0 || ^17 || ^18
-    react-dom: ^16.14.0 || ^17 || ^18
-  peerDependenciesMeta:
-    "@types/react":
-      optional: true
-    "@types/react-dom":
-      optional: true
-  checksum: 10/699d2fb4628aa044e0285e7563e876caf035dbba34b62a41c00ef68543ac2ea0dcd172a27fde9160abbab807daf7f9c5981f03d503405fe1c75fef283e79a8c2
-  languageName: node
-  linkType: hard
-
 "@remirror/react-hooks@npm:^2.0.25":
   version: 2.0.25
   resolution: "@remirror/react-hooks@npm:2.0.25"
@@ -5714,7 +5684,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@remirror/react@npm:^2.0.32, @remirror/react@npm:^2.0.35":
+"@remirror/react@npm:^2.0.32":
   version: 2.0.35
   resolution: "@remirror/react@npm:2.0.35"
   dependencies:
@@ -5740,37 +5710,6 @@ __metadata:
     "@types/react-dom":
       optional: true
   checksum: 10/b773be06a51d91d9a19f8c631c70ee052a637eb40965765b4e136a2f50dd5cfec882da3fcc0aaf674315716baf6ced4fe15c64b1f4392c02fa0d1ed307d77b54
-  languageName: node
-  linkType: hard
-
-"@remirror/styles@npm:^2.0.5, @remirror/styles@npm:^2.0.7":
-  version: 2.0.7
-  resolution: "@remirror/styles@npm:2.0.7"
-  dependencies:
-    "@babel/runtime": "npm:^7.22.3"
-    "@remirror/core-helpers": "npm:^3.0.0"
-  peerDependencies:
-    "@emotion/css": ^11.11.0
-    "@emotion/react": ^11.11.0
-    "@emotion/styled": ^11.11.0
-    "@types/react": ">= 16.14.40"
-    "@types/styled-components": ^5.1.26
-    react: ">= 16.14.0"
-    styled-components: ^5.3.10
-  peerDependenciesMeta:
-    "@emotion/css":
-      optional: true
-    "@emotion/react":
-      optional: true
-    "@emotion/styled":
-      optional: true
-    "@types/styled-components":
-      optional: true
-    react:
-      optional: true
-    styled-components:
-      optional: true
-  checksum: 10/1898c8969f9fcf25917c9e7d9f9a9e04f190fad24055927a65c194c72f27eee09c197e12eb794803dd009396635346d842c33663ef9211e0e5a55cf4c0ff6fdd
   languageName: node
   linkType: hard
 
@@ -18836,7 +18775,7 @@ plugin-image-zoom@ataft/plugin-image-zoom:
   languageName: node
   linkType: hard
 
-"remirror@npm:2.0.39, remirror@npm:^2.0.39":
+"remirror@npm:^2.0.39":
   version: 2.0.39
   resolution: "remirror@npm:2.0.39"
   dependencies:
@@ -19114,9 +19053,9 @@ plugin-image-zoom@ataft/plugin-image-zoom:
   languageName: node
   linkType: hard
 
-"rme@npm:^0.0.41":
-  version: 0.0.41
-  resolution: "rme@npm:0.0.41"
+"rme@npm:^0.0.45":
+  version: 0.0.45
+  resolution: "rme@npm:0.0.45"
   dependencies:
     "@codemirror/autocomplete": "npm:^6.8.1"
     "@codemirror/commands": "npm:^6.2.4"
@@ -19151,9 +19090,6 @@ plugin-image-zoom@ataft/plugin-image-zoom:
     "@remirror/react": "npm:^2.0.32"
     "@remirror/react-components": "npm:^2.1.13"
     "@remirror/react-core": "npm:^2.0.18"
-    "@remirror/react-editors": "npm:^1.0.41"
-    "@remirror/react-hooks": "npm:^2.0.25"
-    "@remirror/styles": "npm:^2.0.5"
     "@remirror/theme": "npm:^2.0.8"
     "@remirror/types": "npm:^1.0.1"
     color: "npm:^4.2.3"
@@ -19186,14 +19122,13 @@ plugin-image-zoom@ataft/plugin-image-zoom:
     styled-components: "npm:^6.1.0"
     stylis: "npm:^4.0.0"
     svgmoji: "npm:^3.2.0"
-    tether-drop: "npm:^1.4.2"
     void-elements: "npm:^3.1.0"
     yjs: "npm:^13.6.14"
     zens: "npm:^0.0.11"
   peerDependencies:
     react: ">=16.14.0"
     react-dom: ">=16.14.0"
-  checksum: 10/cf0b8086e8f1b27814d5e44b17a32097a9752c2ef41a4267362d051b0ad55c3e770254a18921b7220aac23098033e68884cfd403752d3aa6a3def8f1ea7ccbd4
+  checksum: 10/175455c47116e35174760a7834863387e405c6104719dee7ae63bc4371979ee3cb1101cc91fe9a004b6e99dad6b597171f1661cdc30a05b2f44ebb78c0068c52
   languageName: node
   linkType: hard
 
@@ -20727,22 +20662,6 @@ plugin-image-zoom@ataft/plugin-image-zoom:
   bin:
     terser: bin/terser
   checksum: 10/f4ee378065a327c85472f351ac232fa47ec84d4f15df7ec58c044b41e3c063cf11aaedd90dcfe9c7f2a6ef01d4aab23deb61622301170dc77d0a8b6a6a83cf5e
-  languageName: node
-  linkType: hard
-
-"tether-drop@npm:^1.4.2":
-  version: 1.4.2
-  resolution: "tether-drop@npm:1.4.2"
-  dependencies:
-    tether: "npm:^1.1.0"
-  checksum: 10/c40fe179883e7c8c8d2296f96928a150818f48ade2ff450abb41db4183d71348f278a127ca33f1d76036b33f579add3c2927ae22c44ed44727d17c3929bbcbab
-  languageName: node
-  linkType: hard
-
-"tether@npm:^1.1.0":
-  version: 1.4.7
-  resolution: "tether@npm:1.4.7"
-  checksum: 10/4185215f28392733f6248ea5d1734cd411d921ba3d5ae92df977bc1d11bd88dcf469ed6ceb9195accd8facc136ddd87d286f18cab2544300412e3f2d073d8e68
   languageName: node
   linkType: hard
 
