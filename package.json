@@ -40,7 +40,6 @@
     "child_process": "^1.0.2",
     "eslint": "8.57.0",
     "fast-glob": "^3.3.2",
-    "husky": "^8.0.3",
     "postcss": "^8.4.38",
     "postcss-import": "^15.1.0",
     "postcss-nested": "^6.0.1",
@@ -49,12 +48,6 @@
     "rollup-plugin-postcss": "^4.0.2",
     "rollup-plugin-url": "^3.0.1",
     "typescript": "^5.3.3"
-  },
-  "simple-git-hooks": {
-    "pre-commit": "yarn lint"
-  },
-  "lint": {
-    "*": "eslint --fix"
   },
   "packageManager": "yarn@4.1.1",
   "dependencies": {

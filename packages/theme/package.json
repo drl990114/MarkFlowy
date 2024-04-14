@@ -1,6 +1,6 @@
 {
   "name": "@markflowy/theme",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "type": "module",
   "license": "MIT",
   "homepage": "",
@@ -33,7 +33,7 @@
     "prepublish": "yarn build"
   },
   "dependencies": {
-    "@lezer/highlight": "^1.2.0",
+    "@lezer/highlight": "^1.0.0",
     "color": "^4.2.3",
     "react": "^18.2.0",
     "styled-components": "^6.1.8"
