@@ -4,8 +4,7 @@ import ReactLoading from 'react-loading'
 import { parseChatList } from './parseChatList'
 import { BottomBar, Container, ListContainer } from './styles'
 import useChatGPTStore from './useChatGPTStore'
-import { useCommandStore, useEditorStore } from '@/stores'
-import { createFile } from '@/helper/filesys'
+import { useCommandStore } from '@/stores'
 import { SettingKeys } from '@/router/Setting/settingMap'
 import { RIGHTBARITEMKEYS } from '@/constants'
 import type { RightBarItem } from '@/components/SideBar'
@@ -13,6 +12,7 @@ import type { RightNavItem } from '@/components/SideBar/SideBarHeader'
 import SideBarHeader from '@/components/SideBar/SideBarHeader'
 import useThemeStore from '@/stores/useThemeStore'
 import useAppSettingStore from '@/stores/useAppSettingStore'
+import { addNewMarkdownFileEdit } from '@/services/editor-file'
 
 const ChatList: React.FC<ChatListProps> = (props) => {
   const { chatList, curGptModelIndex, gptModels, setCurGptModelIndex, addChat, delChat } =
@@ -21,7 +21,6 @@ const ChatList: React.FC<ChatListProps> = (props) => {
   const { curTheme } = useThemeStore()
   const apiKey = settingData[SettingKeys.chatgpt]
   const [askInput, setAskInput] = useState('')
-  const { addOpenedFile, setActiveId } = useEditorStore()
   const listRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -50,10 +49,8 @@ const ChatList: React.FC<ChatListProps> = (props) => {
 
   const exportChats = useCallback(() => {
     const content = parseChatList(chatList)
-    const gptNotesFile = createFile({ name: 'notes.md', content })
-    addOpenedFile(gptNotesFile.id)
-    setActiveId(gptNotesFile.id)
-  }, [chatList, addOpenedFile, setActiveId])
+    addNewMarkdownFileEdit({ fileName: 'notes.md', content })
+  }, [chatList])
 
   const handleRightNavItemClick = useCallback(
     (item: RightNavItem) => {

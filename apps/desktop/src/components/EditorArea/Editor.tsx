@@ -27,6 +27,7 @@ import { debounce } from 'lodash'
 import { createWysiwygDelegateOptions } from './createWysiwygDelegateOptions'
 import { useMount, useUnmount } from 'react-use'
 import useEditorCounterStore from '@/stores/useEditorCounterStore'
+import { toast } from 'zens'
 
 interface EditorWrapperProps {
   active: boolean
@@ -158,12 +159,14 @@ function Editor(props: EditorProps) {
         return
       }
 
-      if (!editorContextRef.current?.state.doc) {
+      if (!editorContextRef.current?.state.doc && !curFile.content) {
         // Unexpected
         return
       }
 
-      const fileContent = delegate.docToString(editorContextRef.current.state.doc)
+      const fileContent = editorContextRef.current?.state.doc
+        ? delegate.docToString(editorContextRef.current.state.doc)
+        : curFile.content
 
       console.log('editorContent', fileContent)
 
@@ -188,6 +191,8 @@ function Editor(props: EditorProps) {
             setIdStateMap(curFile.id, {
               hasUnsavedChanges: false,
             })
+          }).catch(error => {
+            toast.error(String(error))
           })
         } else {
           invoke('write_file', { filePath: curFile.path, content: fileContent }).then(() => {
@@ -199,7 +204,7 @@ function Editor(props: EditorProps) {
           })
         }
       } catch (error) {
-        console.error(error)
+        toast.error(String(error))
       }
     },
     [active, curFile, delegate, t, insertNodeToFolderData],
