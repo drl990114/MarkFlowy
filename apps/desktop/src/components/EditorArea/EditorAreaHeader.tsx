@@ -8,16 +8,15 @@ import bus from '@/helper/eventBus'
 import { useTranslation } from 'react-i18next'
 import useChatGPTStore from '@/extensions/chatgpt/useChatGPTStore'
 import useAppSettingStore from '@/stores/useAppSettingStore'
-import { createFile } from '@/helper/filesys'
 import { toast } from 'zens'
 import useAppTasksStore from '@/stores/useTasksStore'
 import NiceModal from '@ebay/nice-modal-react'
 import type { InputConfirmModalProps } from '../Modal'
 import { MODAL_INPUT_ID } from '../Modal'
+import { addNewMarkdownFileEdit } from '@/services/editor-file'
 
 export const EditorAreaHeader = memo(() => {
-  const { activeId, getEditorDelegate, getEditorContent, addOpenedFile, setActiveId } =
-    useEditorStore()
+  const { activeId, getEditorDelegate, getEditorContent } = useEditorStore()
   const { execute } = useCommandStore()
   const { getPostSummary, getPostTranslate } = useChatGPTStore()
   const { settingData } = useAppSettingStore()
@@ -33,26 +32,22 @@ export const EditorAreaHeader = memo(() => {
       promise: getPostSummary(content || '', settingData.extensions_chatgpt_apikey),
     })
     if (res.status === 'done') {
-      const summaryFile = createFile({
-        name: 'summary.md',
+      addNewMarkdownFileEdit({
+        fileName: 'summary.md',
         content: `
 # Summary
 
 ${res.result}
       `,
       })
-      addOpenedFile(summaryFile.id)
-      setActiveId(summaryFile.id)
     } else {
       if (res.status === 'error') toast.error(res.message)
     }
   }, [
     addAppTask,
-    addOpenedFile,
     curFile?.id,
     getEditorContent,
     getPostSummary,
-    setActiveId,
     settingData.extensions_chatgpt_apikey,
   ])
 
@@ -65,23 +60,19 @@ ${res.result}
       })
 
       if (res.status === 'done') {
-        const translateFile = createFile({
-          name: `translate-${targetLang}.md`,
+        addNewMarkdownFileEdit({
+          fileName: `translate-${targetLang}.md`,
           content: `${res.result}`,
         })
-        addOpenedFile(translateFile.id)
-        setActiveId(translateFile.id)
       } else {
         if (res.status === 'error') toast.error(res.message)
       }
     },
     [
       addAppTask,
-      addOpenedFile,
       curFile?.id,
       getEditorContent,
       getPostTranslate,
-      setActiveId,
       settingData.extensions_chatgpt_apikey,
     ],
   )
