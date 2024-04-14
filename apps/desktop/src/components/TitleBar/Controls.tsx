@@ -50,9 +50,6 @@ export const Controls = memo(() => {
 })
 
 const Container = styled.div`
-  position: absolute;
-  right: 0;
-  top: 0;
   display: flex;
   flex-direction: row;
   justify-content: flex-end;
