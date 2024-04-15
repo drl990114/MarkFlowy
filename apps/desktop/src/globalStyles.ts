@@ -15,10 +15,11 @@ export const GlobalStyles = createGlobalStyle`
   }
 
   .icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     height: 32px;
     width: 32px;
-    text-align: center;
-    line-height: 32px;
     font-size: 1rem;
     cursor: pointer;
     transition: all 0.3s ease;

@@ -1,6 +1,6 @@
 import { RIGHTBARITEMKEYS } from '@/constants'
 import type { RightBarItem } from '@/components/SideBar'
-import { Input } from '@/components/UI/Input'
+import { Input } from 'zens'
 import { listen } from '@tauri-apps/api/event'
 import { memo, useCallback, useEffect, useState } from 'react'
 import { invoke } from '@tauri-apps/api/core'

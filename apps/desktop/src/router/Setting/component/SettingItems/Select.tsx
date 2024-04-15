@@ -2,7 +2,7 @@ import Autocomplete from '@mui/material/Autocomplete'
 import type { SettingItemProps } from '.'
 import { SettingItemContainer } from './Container'
 import { SettingLabel } from './Label'
-import { Input } from '@/components/UI/Input'
+import { Input } from 'zens'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import appSettingService from '@/services/app-setting'
 
@@ -31,11 +31,12 @@ const SelectSettingItem: React.FC<SettingItemProps<Setting.SelectSettingItem>> =
           if (!v) return
           appSettingService.writeSettingData(item, v.value)
         }}
-        renderInput={(params) => (
-          <div ref={params.InputProps.ref}>
-            <Input type='text' {...params.inputProps} />
-          </div>
-        )}
+        renderInput={({ inputProps }) => {
+          const { ref, ...rest } = inputProps
+          return <div>
+          <Input type='text' {...rest} inputRef={ref}/>
+        </div>
+        }}
       />
     </SettingItemContainer>
   )
