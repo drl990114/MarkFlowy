@@ -45,7 +45,7 @@
     "@types/rollup-plugin-url": "^3",
     "eslint": "8.57.0",
     "postcss": "^8.4.38",
-    "postcss-import": "^15.1.0",
+    "postcss-import": "^16.1.0",
     "postcss-nested": "^6.0.1",
     "rimraf": "^5.0.5",
     "rollup": "4.13.0",
