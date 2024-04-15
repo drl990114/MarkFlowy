@@ -3875,7 +3875,7 @@ __metadata:
     react-test-renderer: "npm:^18.2.0"
     react-use: "npm:^17.5.0"
     remixicon: "npm:^4.1.0"
-    rme: "npm:^0.0.45"
+    rme: "npm:^0.0.50"
     styled-components: "npm:^6.1.8"
     stylis: "npm:^4.0.0"
     tinykeys: "npm:^2.1.0"
@@ -3885,7 +3885,7 @@ __metadata:
     vite: "npm:^5.1.7"
     vite-plugin-svgr: "npm:^4.1.0"
     vitest: "npm:^1.2.2"
-    zens: "npm:^0.0.11"
+    zens: "npm:^0.0.14"
     zustand: "npm:^4.4.6"
   languageName: unknown
   linkType: soft
@@ -19077,9 +19077,9 @@ plugin-image-zoom@ataft/plugin-image-zoom:
   languageName: node
   linkType: hard
 
-"rme@npm:^0.0.45":
-  version: 0.0.45
-  resolution: "rme@npm:0.0.45"
+"rme@npm:^0.0.50":
+  version: 0.0.50
+  resolution: "rme@npm:0.0.50"
   dependencies:
     "@codemirror/autocomplete": "npm:^6.8.1"
     "@codemirror/commands": "npm:^6.2.4"
@@ -19148,11 +19148,11 @@ plugin-image-zoom@ataft/plugin-image-zoom:
     svgmoji: "npm:^3.2.0"
     void-elements: "npm:^3.1.0"
     yjs: "npm:^13.6.14"
-    zens: "npm:^0.0.11"
+    zens: "npm:^0.0.14"
   peerDependencies:
     react: ">=16.14.0"
     react-dom: ">=16.14.0"
-  checksum: 10/175455c47116e35174760a7834863387e405c6104719dee7ae63bc4371979ee3cb1101cc91fe9a004b6e99dad6b597171f1661cdc30a05b2f44ebb78c0068c52
+  checksum: 10/c45c68e5b395404f2d2cdf9eb0088998d23dcfaeb80412a8172e7260e8152c5cc59b9d22df808d5325c758e5362213d258977d0b8b7a80f0df19c4b26268b169
   languageName: node
   linkType: hard
 
@@ -22597,12 +22597,13 @@ plugin-image-zoom@ataft/plugin-image-zoom:
   languageName: node
   linkType: hard
 
-"zens@npm:^0.0.11":
-  version: 0.0.11
-  resolution: "zens@npm:0.0.11"
+"zens@npm:^0.0.14":
+  version: 0.0.14
+  resolution: "zens@npm:0.0.14"
   dependencies:
     "@ariakit/react": "npm:^0.4.3"
     "@babel/runtime": "npm:^7"
+    "@emotion/is-prop-valid": "npm:^1.2.2"
     "@floating-ui/dom": "npm:^1.0.0"
     classnames: "npm:^2.3.0"
     clsx: "npm:^2.0.0"
@@ -22615,7 +22616,7 @@ plugin-image-zoom@ataft/plugin-image-zoom:
     sonner: "npm:^1.4.0"
     styled-components: "npm:^6.1.0"
     stylis: "npm:^4.0.0"
-  checksum: 10/4e19c27f6dd65a59cdf778aa43bd0a844b82a4c6a085f993d41167a086c2e4a6aed4af72457c33e606426af3925590f94907438b5bff947786dc9280505ccb59
+  checksum: 10/52de2e2a47a6f66a6f9edfb14789a83990780e677fa2a73517eeedf53f9cdf0e79da3e12b4ce70e65da5dbfcbd740850525fe6f811766ffdd68c0573709af6b5
   languageName: node
   linkType: hard
 

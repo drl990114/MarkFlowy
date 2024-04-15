@@ -126,7 +126,7 @@ const listener = (event: MessageEvent) => {
 
 const appSetup = once(async function () {
   const settingData = await appSettingStoreSetup()
-  console.log('settingData', settingData)
+
   appWorkspaceSetup()
 
   window.removeEventListener('message', listener)
