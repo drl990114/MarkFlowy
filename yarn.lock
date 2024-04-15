@@ -3828,6 +3828,7 @@ __metadata:
     "@babel/plugin-proposal-decorators": "npm:^7.24.1"
     "@ebay/nice-modal-react": "npm:^1.2.13"
     "@emotion/css": "npm:^11.11.0"
+    "@emotion/is-prop-valid": "npm:^1.2.2"
     "@emotion/react": "npm:^11.11.3"
     "@emotion/styled": "npm:^11.11.0"
     "@formkit/auto-animate": "npm:^0.8.1"
