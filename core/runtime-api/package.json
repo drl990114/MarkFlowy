@@ -40,7 +40,7 @@
     "@rollup/plugin-typescript": "11.1.6",
     "eslint": "8.57.0",
     "rimraf": "^5.0.5",
-    "rollup": "4.13.0",
+    "rollup": "4.14.2",
     "rollup-plugin-postcss": "^4.0.2",
     "typescript": "^5.3.3",
     "url": "^0.11.3"
