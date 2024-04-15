@@ -3858,7 +3858,7 @@ __metadata:
     eslint: "npm:8.57.0"
     happy-dom: "npm:^14.7.1"
     hox: "npm:^2.1.0"
-    i18next: "npm:23.8.2"
+    i18next: "npm:23.11.2"
     immer: "npm:^10.0.4"
     is-promise: "npm:^4.0.0"
     jsx-dom-cjs: "npm:^8.0.7"
@@ -12847,12 +12847,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"i18next@npm:23.8.2":
-  version: 23.8.2
-  resolution: "i18next@npm:23.8.2"
+"i18next@npm:23.11.2":
+  version: 23.11.2
+  resolution: "i18next@npm:23.11.2"
   dependencies:
     "@babel/runtime": "npm:^7.23.2"
-  checksum: 10/594c4d5bafd9ac0073a5f2c0ccb40b157571857d43f7f22949a5ab6ea07e6e6f7e39058ddee6e7396369b54d5d741e76cba59c0d5c23ce0ab99e06b249c66f5e
+  checksum: 10/f2e01ae14f1304ff6d14d29331f5645c98ccadf3aeeb23a57816735e1a606509b95f40b2425ba707a362b03a703013ce56333173fe8c895ae8e56cfa21d5e50e
   languageName: node
   linkType: hard
 
