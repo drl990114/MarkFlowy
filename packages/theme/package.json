@@ -43,7 +43,7 @@
     "@types/codemirror": "^5.60.15",
     "@types/color": "^3.0.6",
     "@types/rollup-plugin-url": "^3",
-    "eslint": "8.57.0",
+    "eslint": "9.0.0",
     "postcss": "^8.4.38",
     "postcss-import": "^16.1.0",
     "postcss-nested": "^6.0.1",

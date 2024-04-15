@@ -38,7 +38,7 @@
     "@rollup/plugin-node-resolve": "15.2.3",
     "@rollup/plugin-terser": "0.4.4",
     "@rollup/plugin-typescript": "11.1.6",
-    "eslint": "8.57.0",
+    "eslint": "9.0.0",
     "rimraf": "^5.0.5",
     "rollup": "4.13.0",
     "rollup-plugin-postcss": "^4.0.2",
