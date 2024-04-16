@@ -1,30 +1,30 @@
 import { MODAL_CONFIRM_ID } from '@/components/Modal'
 import NiceModal from '@ebay/nice-modal-react'
-import { Button, toast } from 'zens'
+import { toast } from 'zens'
 import { invoke } from '@tauri-apps/api/core'
 import type { Update } from '@tauri-apps/plugin-updater'
 import { check } from '@tauri-apps/plugin-updater'
 import { getI18n } from 'react-i18next'
-import styled from 'styled-components'
 import Markdown from 'react-markdown'
 
-const Content = styled.div`
-  margin-bottom: ${({ theme }) => theme?.spaceXs};
-`
-
 export const installUpdate = async (update: Update) => {
-  toast.promise(update.downloadAndInstall(), {
-    loading: 'Downloading new version...',
-    success: (
-      <div>
-        <Content> Update new version success!</Content>
-        <Button size='small' onClick={() => invoke('app_restart')}>
-          Restart
-        </Button>
-      </div>
-    ),
-    error: 'Update new version error',
-  })
+  const id = toast.loading('Downloading new version...')
+
+  try {
+    await update.downloadAndInstall()
+    toast.dismiss(id)
+    toast.success('Update new version success!', {
+      action: {
+        label: 'Restart',
+        onClick: () => {
+          invoke('app_restart')
+        }
+      }
+    })
+  } catch (error) {
+    toast.dismiss(id)
+    toast.error(`Update new version error: ${error}`)
+  }
 }
 
 export const checkUpdate = async (opt: { install: boolean } = { install: false }) => {

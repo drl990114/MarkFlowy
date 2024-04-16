@@ -3875,7 +3875,7 @@ __metadata:
     react-test-renderer: "npm:^18.2.0"
     react-use: "npm:^17.5.0"
     remixicon: "npm:^4.1.0"
-    rme: "npm:^0.0.50"
+    rme: "npm:^0.0.51"
     styled-components: "npm:^6.1.8"
     stylis: "npm:^4.0.0"
     tinykeys: "npm:^2.1.0"
@@ -3885,7 +3885,7 @@ __metadata:
     vite: "npm:^5.1.7"
     vite-plugin-svgr: "npm:^4.1.0"
     vitest: "npm:^1.2.2"
-    zens: "npm:^0.0.14"
+    zens: "npm:0.0.16"
     zustand: "npm:^4.4.6"
   languageName: unknown
   linkType: soft
@@ -12233,15 +12233,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"goober@npm:^2.1.10":
-  version: 2.1.14
-  resolution: "goober@npm:2.1.14"
-  peerDependencies:
-    csstype: ^3.0.10
-  checksum: 10/372f18333ef64c403d29be7c1175cc9cd74cb947ec52cd42fbb1cf3f9870ac1dfec9c7671192cbf47ebc0ec17d8b05b6ef9a2b92952397d5b555a692381d5eaa
-  languageName: node
-  linkType: hard
-
 "gopd@npm:^1.0.1":
   version: 1.0.1
   resolution: "gopd@npm:1.0.1"
@@ -18131,18 +18122,6 @@ plugin-image-zoom@ataft/plugin-image-zoom:
   languageName: node
   linkType: hard
 
-"react-hot-toast@npm:^2.4.1":
-  version: 2.4.1
-  resolution: "react-hot-toast@npm:2.4.1"
-  dependencies:
-    goober: "npm:^2.1.10"
-  peerDependencies:
-    react: ">=16"
-    react-dom: ">=16"
-  checksum: 10/9af91efdb98837e39a126aff084b54db0336c5f88a7dad7c42daf7ee873d06a79d6e59f398412cc250a35ddf1a73c25700fe90b3c3a2a0c394fd17d99b2bcf8b
-  languageName: node
-  linkType: hard
-
 "react-i18next@npm:13.2.2":
   version: 13.2.2
   resolution: "react-i18next@npm:13.2.2"
@@ -19077,9 +19056,9 @@ plugin-image-zoom@ataft/plugin-image-zoom:
   languageName: node
   linkType: hard
 
-"rme@npm:^0.0.50":
-  version: 0.0.50
-  resolution: "rme@npm:0.0.50"
+"rme@npm:^0.0.51":
+  version: 0.0.51
+  resolution: "rme@npm:0.0.51"
   dependencies:
     "@codemirror/autocomplete": "npm:^6.8.1"
     "@codemirror/commands": "npm:^6.2.4"
@@ -19148,11 +19127,11 @@ plugin-image-zoom@ataft/plugin-image-zoom:
     svgmoji: "npm:^3.2.0"
     void-elements: "npm:^3.1.0"
     yjs: "npm:^13.6.14"
-    zens: "npm:^0.0.14"
+    zens: "npm:^0.0.16"
   peerDependencies:
     react: ">=16.14.0"
     react-dom: ">=16.14.0"
-  checksum: 10/c45c68e5b395404f2d2cdf9eb0088998d23dcfaeb80412a8172e7260e8152c5cc59b9d22df808d5325c758e5362213d258977d0b8b7a80f0df19c4b26268b169
+  checksum: 10/c0df151ae1c8353a1654e345d389e8d846968305faf7b7635d05ce30a06949769b145cf27d8dcf8314f3fe90e6bc788f201053563b7cf66a92f98f72785016e7
   languageName: node
   linkType: hard
 
@@ -22597,9 +22576,9 @@ plugin-image-zoom@ataft/plugin-image-zoom:
   languageName: node
   linkType: hard
 
-"zens@npm:^0.0.14":
-  version: 0.0.14
-  resolution: "zens@npm:0.0.14"
+"zens@npm:0.0.16, zens@npm:^0.0.16":
+  version: 0.0.16
+  resolution: "zens@npm:0.0.16"
   dependencies:
     "@ariakit/react": "npm:^0.4.3"
     "@babel/runtime": "npm:^7"
@@ -22611,12 +22590,11 @@ plugin-image-zoom@ataft/plugin-image-zoom:
     rc-image: "npm:^7.5.1"
     react: "npm:^18.2.0"
     react-dom: "npm:^18.2.0"
-    react-hot-toast: "npm:^2.4.1"
     react-spinners: "npm:^0.13.8"
     sonner: "npm:^1.4.0"
     styled-components: "npm:^6.1.0"
     stylis: "npm:^4.0.0"
-  checksum: 10/52de2e2a47a6f66a6f9edfb14789a83990780e677fa2a73517eeedf53f9cdf0e79da3e12b4ce70e65da5dbfcbd740850525fe6f811766ffdd68c0573709af6b5
+  checksum: 10/d24864ef13b1a3bc8b717f66d4c210b0411fdc38dccc2a00723e28e4c4a03f3aa4403f8a4cad67a00f133d9e7369ff8d3324a6afaa4e4b1056a7cbb2044590c7
   languageName: node
   linkType: hard
 
