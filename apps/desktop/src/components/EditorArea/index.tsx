@@ -5,9 +5,14 @@ import { memo } from 'react'
 import EditorAreaTabs from './EditorAreaTabs'
 import { FindReplace } from '@/components/EditorArea/editorToolBar/FindReplace'
 import { EditorCount } from './editorToolBar/EditorCount'
+import { EmptyState } from './EmptyState'
 
 function EditorArea() {
   const { opened, activeId } = useEditorStore()
+
+  if (opened.length === 0) {
+    return <EmptyState />
+  }
 
   return (
     <Container className='w-full h-full'>

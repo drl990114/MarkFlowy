@@ -45,7 +45,6 @@ export const Container = styled.div`
       }
 
       &__icon {
-        padding: 8px;
         margin-left: 8px;
         border-radius: ${(props) => props.theme.smallBorderRadius};
 

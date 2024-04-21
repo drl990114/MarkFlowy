@@ -46,11 +46,6 @@ async function appWorkspaceSetup() {
   const { setRecentWorkspaces } = useOpenedCacheStore.getState()
   const { setFolderData, addOpenedFile, setActiveId } = useEditorStore.getState()
 
-  function pushWelcomeFile() {
-    const welcomeFile = createWelcomeFile()
-    setActiveId(welcomeFile.id)
-    addOpenedFile(welcomeFile.id)
-  }
   try {
     const getOpenedCacheRes = await invoke<{ recent_workspaces: WorkspaceInfo[] }>(
       'get_opened_cache',
@@ -84,8 +79,6 @@ async function appWorkspaceSetup() {
               addOpenedFile(cur.id)
             }
           })
-        } else {
-          pushWelcomeFile()
         }
 
         useEditorStore.subscribe((state) => {
@@ -102,11 +95,8 @@ async function appWorkspaceSetup() {
           cacheStore.save()
         })
       })
-    } else {
-      pushWelcomeFile()
     }
   } catch (error) {
-    pushWelcomeFile()
   }
 }
 
