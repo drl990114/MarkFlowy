@@ -31,7 +31,8 @@
     "more": "更多",
     "save": "保存",
     "translate": "翻译",
-    "summary": "摘要"
+    "summary": "摘要",
+    "create_file": "新建文件"
   },
   "placeholder": {
     "translate": "请输入目标语言"
@@ -52,7 +53,8 @@
   "file": {
     "untitled": "未命名",
     "openDir": "打开文件夹",
-    "recentDir": "最近打开的文件"
+    "recentDir": "最近打开的文件",
+    "emptyOpened": "没有打开的文件"
   },
   "about": {
     "label": "关于",

@@ -31,7 +31,8 @@
     "more": "more",
     "save": "save",
     "translate": "translate",
-    "summary": "summary"
+    "summary": "summary",
+    "create_file": "Create a new file"
   },
   "placeholder": {
     "translate": "Please enter target language"
@@ -52,7 +53,8 @@
   "file": {
     "untitled": "untitled",
     "openDir": "Open Folder",
-    "recentDir": "Recently opened folders"
+    "recentDir": "Recently opened folders",
+    "emptyOpened": "No files opened"
   },
   "about": {
     "label": "About",
