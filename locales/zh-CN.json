@@ -20,7 +20,8 @@
       "label": "主题"
     },
     "wysiwyg": "所见即所得",
-    "source_code": "源代码"
+    "source_code": "源代码",
+    "preview": "预览"
   },
   "action": {
     "bookmark": "收藏",

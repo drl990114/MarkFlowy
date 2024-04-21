@@ -28,6 +28,7 @@ import { createWysiwygDelegateOptions } from './createWysiwygDelegateOptions'
 import { useMount, useUnmount } from 'react-use'
 import useEditorCounterStore from '@/stores/useEditorCounterStore'
 import { toast } from 'zens'
+import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 
 interface EditorWrapperProps {
   active: boolean
@@ -66,7 +67,8 @@ function Editor(props: EditorProps) {
   const { id, active } = props
   const curFile = getFileObject(id)
   const [notExistFile, setNotExistFile] = useState(false)
-  const { setEditorDelegate, setEditorCtx, insertNodeToFolderData } = useEditorStore()
+  const { setEditorDelegate, setEditorCtx, getEditorContent, insertNodeToFolderData } =
+    useEditorStore()
   const { addEditorCounter, deleteEditorCounter } = useEditorCounterStore()
   const { execute } = useCommandStore()
   const { t } = useTranslation()
@@ -80,6 +82,7 @@ function Editor(props: EditorProps) {
 
   useMount(() => {
     setEditorDelegate(id, delegate)
+    useEditorViewTypeStore.getState().setEditorViewType(curFile.id, 'wysiwyg')
   })
 
   useUnmount(() => {
@@ -123,6 +126,9 @@ function Editor(props: EditorProps) {
               const sourceCodeDelegate = createSourceCodeDelegate()
               setEditorDelegate(curFile.id, sourceCodeDelegate)
               setDelegate(sourceCodeDelegate)
+            } else if (payload === 'preview') {
+              const content = getEditorContent(curFile.id)
+              setContent(content)
             } else {
               const wysiwygDelegate = createWysiwygDelegate(
                 createWysiwygDelegateOptions(getFolderPathFromPath(curFile.path)),
@@ -130,6 +136,7 @@ function Editor(props: EditorProps) {
               setEditorDelegate(curFile.id, wysiwygDelegate)
               setDelegate(wysiwygDelegate)
             }
+            useEditorViewTypeStore.getState().setEditorViewType(curFile.id, payload)
             editorRef.current?.toggleType(payload)
           },
         })
@@ -141,7 +148,7 @@ function Editor(props: EditorProps) {
     return () => {
       bus.detach('editor_toggle_type', cb)
     }
-  }, [active, curFile, execute, setEditorDelegate])
+  }, [active, curFile, execute, setEditorDelegate, getEditorContent])
 
   const saveHandler = useCallback(
     async (params: SaveHandlerParams = {}) => {
@@ -175,27 +182,30 @@ function Editor(props: EditorProps) {
           save({
             title: 'Save File',
             defaultPath: curFile.name ?? `${t('file.untitled')}.md`,
-          }).then((path) => {
-            if (path === null) return
-            const filename = getFileNameFromPath(path)
-            updateFileObject(curFile.id, { ...curFile, path, name: filename })
-            insertNodeToFolderData({
-              ...curFile,
-              name: filename,
-              content: fileContent,
-              path,
-            })
-            invoke('write_file', { filePath: path, content: fileContent }).then(() => {
-              onSuccess?.()
-            })
-            setIdStateMap(curFile.id, {
-              hasUnsavedChanges: false,
-            })
-          }).catch(error => {
-            toast.error(String(error))
           })
+            .then((path) => {
+              if (path === null) return
+              const filename = getFileNameFromPath(path)
+              updateFileObject(curFile.id, { ...curFile, path, name: filename })
+              insertNodeToFolderData({
+                ...curFile,
+                name: filename,
+                content: fileContent,
+                path,
+              })
+              invoke('write_file', { filePath: path, content: fileContent }).then(() => {
+                onSuccess?.()
+              })
+              setIdStateMap(curFile.id, {
+                hasUnsavedChanges: false,
+              })
+            })
+            .catch((error) => {
+              toast.error(String(error))
+            })
         } else {
           invoke('write_file', { filePath: curFile.path, content: fileContent }).then(() => {
+            setContent(fileContent)
             onSuccess?.()
           })
 
@@ -288,9 +298,9 @@ function Editor(props: EditorProps) {
       })
 
       if (!active) return
+      editorContextRef.current = params
 
       if (tr?.docChanged && !tr.getMeta('APPLY_MARKS')) {
-        editorContextRef.current = params
         const state = {
           hasUnsavedChanges: true,
           undoDepth: helpers.undoDepth(),
