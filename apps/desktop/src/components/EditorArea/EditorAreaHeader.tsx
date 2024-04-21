@@ -14,9 +14,11 @@ import NiceModal from '@ebay/nice-modal-react'
 import type { InputConfirmModalProps } from '../Modal'
 import { MODAL_INPUT_ID } from '../Modal'
 import { addNewMarkdownFileEdit } from '@/services/editor-file'
+import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 
 export const EditorAreaHeader = memo(() => {
   const { activeId, getEditorDelegate, getEditorContent } = useEditorStore()
+  const { editorViewTypeMap } = useEditorViewTypeStore()
   const { execute } = useCommandStore()
   const { getPostSummary, getPostTranslate } = useChatGPTStore()
   const { settingData } = useAppSettingStore()
@@ -82,7 +84,6 @@ ${res.result}
     if (rect === undefined) return
     const { findMark } = useBookMarksStore.getState()
     const curBookMark = findMark(curFile?.path || '')
-    const editDelegate = getEditorDelegate(curFile?.id || '')
 
     showContextMenu({
       x: rect.x + rect.width,
@@ -99,24 +100,6 @@ ${res.result}
               execute('open_bookmark_dialog', curFile)
             }
           },
-        },
-        {
-          label: t('view.label'),
-          value: 'view',
-          children: [
-            {
-              label: t('view.source_code'),
-              value: 'sourceCode',
-              checked: editDelegate?.view === 'SourceCode',
-              handler: () => bus.emit('editor_toggle_type', 'sourceCode'),
-            },
-            {
-              label: t('view.wysiwyg'),
-              value: 'wysiwyg',
-              checked: editDelegate?.view === 'Wysiwyg',
-              handler: () => bus.emit('editor_toggle_type', 'wysiwyg'),
-            },
-          ],
         },
         {
           label: t('settings.extensions.ChatGPT.label'),
@@ -151,10 +134,52 @@ ${res.result}
     })
   }, [curFile, getEditorDelegate, t, fetchCurFileSummary, execute, fetchCurFileTranslate])
 
+  const handleViewClick = useCallback(() => {
+    const rect = ref.current?.getBoundingClientRect()
+    if (rect === undefined) return
+    const editorViewType = editorViewTypeMap.get(curFile?.id || '') || 'wysiwyg'
+
+    showContextMenu({
+      x: rect.x + rect.width,
+      y: rect.y + rect.height,
+      items: [
+        {
+          label: t('view.source_code'),
+          value: 'sourceCode',
+          checked: editorViewType === 'sourceCode',
+          handler: () => bus.emit('editor_toggle_type', 'sourceCode'),
+        },
+        {
+          label: t('view.wysiwyg'),
+          value: 'wysiwyg',
+          checked: editorViewType === 'wysiwyg',
+          handler: () => bus.emit('editor_toggle_type', 'wysiwyg'),
+        },
+        {
+          label: t('view.preview'),
+          value: 'preview',
+          checked: editorViewType === 'preview',
+          handler: () => bus.emit('editor_toggle_type', 'preview'),
+        },
+      ],
+    })
+  }, [curFile, editorViewTypeMap, t, fetchCurFileSummary, execute, fetchCurFileTranslate])
+
+  const editorViewType = editorViewTypeMap.get(curFile?.id || '') || 'wysiwyg'
+
+  const viewTypeIconMap = {
+    sourceCode: 'ri-code-s-slash-line',
+    wysiwyg: 'ri-edit-2-line',
+    preview: 'ri-eye-line',
+  }
+
   return (
     <div className='editor-area-header'>
       {curFile ? (
-        <MfIconButton iconRef={ref} icon={'ri-more-2-fill'} onClick={handleAddBookMark} />
+        <>
+          <MfIconButton iconRef={ref} icon={viewTypeIconMap[editorViewType]} onClick={handleViewClick} />
+          <MfIconButton iconRef={ref} icon={'ri-more-2-fill'} onClick={handleAddBookMark} />
+        </>
       ) : null}
     </div>
   )

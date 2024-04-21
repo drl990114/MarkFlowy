@@ -279,7 +279,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ariakit/react@npm:^0.4.3":
+"@ariakit/react@npm:^0.4.5":
   version: 0.4.5
   resolution: "@ariakit/react@npm:0.4.5"
   dependencies:
@@ -3875,7 +3875,7 @@ __metadata:
     react-test-renderer: "npm:^18.2.0"
     react-use: "npm:^17.5.0"
     remixicon: "npm:^4.1.0"
-    rme: "npm:^0.0.51"
+    rme: "npm:^0.0.55"
     styled-components: "npm:^6.1.8"
     stylis: "npm:^4.0.0"
     tinykeys: "npm:^2.1.0"
@@ -3885,7 +3885,7 @@ __metadata:
     vite: "npm:^5.1.7"
     vite-plugin-svgr: "npm:^4.1.0"
     vitest: "npm:^1.2.2"
-    zens: "npm:0.0.16"
+    zens: "npm:0.0.21"
     zustand: "npm:^4.4.6"
   languageName: unknown
   linkType: soft
@@ -16684,7 +16684,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"parse5@npm:^7.0.0":
+"parse5@npm:^7.0.0, parse5@npm:^7.1.2":
   version: 7.1.2
   resolution: "parse5@npm:7.1.2"
   dependencies:
@@ -19056,9 +19056,9 @@ plugin-image-zoom@ataft/plugin-image-zoom:
   languageName: node
   linkType: hard
 
-"rme@npm:^0.0.51":
-  version: 0.0.51
-  resolution: "rme@npm:0.0.51"
+"rme@npm:^0.0.55":
+  version: 0.0.55
+  resolution: "rme@npm:0.0.55"
   dependencies:
     "@codemirror/autocomplete": "npm:^6.8.1"
     "@codemirror/commands": "npm:^6.2.4"
@@ -19112,6 +19112,7 @@ plugin-image-zoom@ataft/plugin-image-zoom:
     micromark-extension-gfm-autolink-literal: "npm:^1.0.5"
     micromark-extension-gfm-strikethrough: "npm:^1.0.7"
     nanoid: "npm:^5.0.6"
+    parse5: "npm:^7.1.2"
     prosemirror-flat-list: "npm:^0.4.2"
     prosemirror-paste-rules: "npm:^2.0.7"
     punycode: "npm:^2.3.0"
@@ -19127,11 +19128,11 @@ plugin-image-zoom@ataft/plugin-image-zoom:
     svgmoji: "npm:^3.2.0"
     void-elements: "npm:^3.1.0"
     yjs: "npm:^13.6.14"
-    zens: "npm:^0.0.16"
+    zens: "npm:^0.0.21"
   peerDependencies:
     react: ">=16.14.0"
     react-dom: ">=16.14.0"
-  checksum: 10/c0df151ae1c8353a1654e345d389e8d846968305faf7b7635d05ce30a06949769b145cf27d8dcf8314f3fe90e6bc788f201053563b7cf66a92f98f72785016e7
+  checksum: 10/721db52e74475d9f08ab202d92bb130252695340eee45e732b07c4b48f3a98be3db57d80d50b27582ee99ec8479343358460ee3ad690d3b1157d02a688ab3d03
   languageName: node
   linkType: hard
 
@@ -22576,11 +22577,11 @@ plugin-image-zoom@ataft/plugin-image-zoom:
   languageName: node
   linkType: hard
 
-"zens@npm:0.0.16, zens@npm:^0.0.16":
-  version: 0.0.16
-  resolution: "zens@npm:0.0.16"
+"zens@npm:0.0.21, zens@npm:^0.0.21":
+  version: 0.0.21
+  resolution: "zens@npm:0.0.21"
   dependencies:
-    "@ariakit/react": "npm:^0.4.3"
+    "@ariakit/react": "npm:^0.4.5"
     "@babel/runtime": "npm:^7"
     "@emotion/is-prop-valid": "npm:^1.2.2"
     "@floating-ui/dom": "npm:^1.0.0"
@@ -22594,7 +22595,7 @@ plugin-image-zoom@ataft/plugin-image-zoom:
     sonner: "npm:^1.4.0"
     styled-components: "npm:^6.1.0"
     stylis: "npm:^4.0.0"
-  checksum: 10/d24864ef13b1a3bc8b717f66d4c210b0411fdc38dccc2a00723e28e4c4a03f3aa4403f8a4cad67a00f133d9e7369ff8d3324a6afaa4e4b1056a7cbb2044590c7
+  checksum: 10/a715919b2c629125a782201075069f72c5823f75a215378746630e96a9989e829be7f6b6d3673b6c8593ef4e6a1e517d9e42055a4650d70d234d42d42d2c5d1c
   languageName: node
   linkType: hard
 

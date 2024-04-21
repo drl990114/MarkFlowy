@@ -20,7 +20,8 @@
       "label": "Theme"
     },
     "wysiwyg": "Wysiwyg",
-    "source_code": "Source Code"
+    "source_code": "Source Code",
+    "preview": "Preview"
   },
   "action": {
     "bookmark": "bookmark",
