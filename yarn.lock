@@ -3848,7 +3848,7 @@ __metadata:
     "@types/color": "npm:^3.0.6"
     "@types/lodash": "npm:^4.14.202"
     "@types/node": "npm:^20.11.24"
-    "@types/react": "npm:^18.2.18"
+    "@types/react": "npm:^18.2.79"
     "@types/react-dom": "npm:^18.2.22"
     "@types/react-test-renderer": "npm:^18.0.7"
     "@vitejs/plugin-react": "npm:^4.2.1"
@@ -7406,13 +7406,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:*, @types/react@npm:^18.2.18, @types/react@npm:^18.2.48":
+"@types/react@npm:*":
   version: 18.2.78
   resolution: "@types/react@npm:18.2.78"
   dependencies:
     "@types/prop-types": "npm:*"
     csstype: "npm:^3.0.2"
   checksum: 10/a4bf8104c580fab40535cc6058425ac6a47c19b8dad45b566cdb38aaafa3ffa1f24e7b65ec95e391a6c18ccf4a33738a591c1f723c00300f13d61fc456a1eb8d
+  languageName: node
+  linkType: hard
+
+"@types/react@npm:^18.2.79":
+  version: 18.2.79
+  resolution: "@types/react@npm:18.2.79"
+  dependencies:
+    "@types/prop-types": "npm:*"
+    csstype: "npm:^3.0.2"
+  checksum: 10/2ef833e7d0a5c226beddbbe090811582371f6ae5e2f092a3d9f47cc6087c8bce0b96ee33e351de6d1d470f0a0ec5892d971933f841ef31538c1821681fc6569e
   languageName: node
   linkType: hard
 
@@ -10237,7 +10247,7 @@ __metadata:
     "@docusaurus/types": "npm:^3.1.1"
     "@mdx-js/react": "npm:^3.0.1"
     "@svgr/webpack": "npm:^8.1.0"
-    "@types/react": "npm:^18.2.48"
+    "@types/react": "npm:^18.2.79"
     animate.css: "npm:^4.1.1"
     clsx: "npm:^2.1.0"
     dotenv: "npm:^16.4.5"

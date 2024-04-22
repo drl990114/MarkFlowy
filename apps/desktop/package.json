@@ -64,7 +64,7 @@
     "@types/color": "^3.0.6",
     "@types/lodash": "^4.14.202",
     "@types/node": "^20.11.24",
-    "@types/react": "^18.2.18",
+    "@types/react": "^18.2.79",
     "@types/react-dom": "^18.2.22",
     "@types/react-test-renderer": "^18.0.7",
     "@vitejs/plugin-react": "^4.2.1",
