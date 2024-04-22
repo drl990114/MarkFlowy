@@ -23,7 +23,7 @@
     "@markflowy/types": "workspace:*",
     "@mui/material": "^5.15.14",
     "@tanstack/react-query": "^5.24.7",
-    "@tauri-apps/api": "^2.0.0-beta.3",
+    "@tauri-apps/api": "^2.0.0-beta.8",
     "@tauri-apps/plugin-clipboard-manager": "^2.0.0-beta.1",
     "@tauri-apps/plugin-dialog": "^2.0.0-beta.1",
     "@tauri-apps/plugin-http": "^2.0.0-beta.1",

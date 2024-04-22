@@ -3836,7 +3836,7 @@ __metadata:
     "@markflowy/types": "workspace:*"
     "@mui/material": "npm:^5.15.14"
     "@tanstack/react-query": "npm:^5.24.7"
-    "@tauri-apps/api": "npm:^2.0.0-beta.3"
+    "@tauri-apps/api": "npm:^2.0.0-beta.8"
     "@tauri-apps/cli": "npm:^2.0.0-beta.3"
     "@tauri-apps/plugin-clipboard-manager": "npm:^2.0.0-beta.1"
     "@tauri-apps/plugin-dialog": "npm:^2.0.0-beta.1"
@@ -6544,10 +6544,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tauri-apps/api@npm:^2.0.0-beta.3":
-  version: 2.0.0-beta.7
-  resolution: "@tauri-apps/api@npm:2.0.0-beta.7"
-  checksum: 10/f55331d9769de6d6045ffa3d91b86f0b136785079b646509e2c7febce40c01ef8250cb429a9909c59c6b4b10163a38eac01a8efda3e17595baee65ccacf9e6f4
+"@tauri-apps/api@npm:^2.0.0-beta.8":
+  version: 2.0.0-beta.8
+  resolution: "@tauri-apps/api@npm:2.0.0-beta.8"
+  checksum: 10/2b04172e5e015bce23f9cfc7c4c4ebe90cf158769d03864f6938ee90b487dfac81f7222051d93f0fffb058fef300358303fae6d1819fde1aad169601d42ba8f7
   languageName: node
   linkType: hard
 
