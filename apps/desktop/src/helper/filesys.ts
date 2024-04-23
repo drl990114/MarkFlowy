@@ -1,4 +1,3 @@
-import WELCOMECONTENT from '@/constants/welcomeContent'
 import { invoke } from '@tauri-apps/api/core'
 import { nanoid } from 'nanoid'
 import { setFileObject, setFileObjectByPath } from './files'
@@ -44,12 +43,6 @@ export const createFile = (opt?: Partial<IFile>): IFile => {
     setFileObjectByPath(file.path, file)
   }
   return file
-}
-export const createWelcomeFile = (): IFile => {
-  return createFile({
-    name: 'Welcome.md',
-    content: WELCOMECONTENT,
-  })
 }
 
 export const createUntitledFile = (): IFile => {
