@@ -45,7 +45,7 @@
   "devDependencies": {
     "@docusaurus/module-type-aliases": "^3.1.1",
     "@docusaurus/types": "^3.1.1",
-    "@types/react": "^18.2.48",
+    "@types/react": "^18.2.79",
     "dotenv": "^16.4.5"
   },
   "engines": {
