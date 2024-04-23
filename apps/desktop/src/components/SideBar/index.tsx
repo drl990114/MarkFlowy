@@ -8,6 +8,7 @@ import chatgpt from '@/extensions/chatgpt'
 import BookMarks from '@/extensions/bookmarks'
 import { TableOfContent } from '@/extensions/table-of-content'
 import { Search } from '@/extensions/search'
+import { Tooltip } from 'zens'
 
 function SideBar() {
   const [isResizing, setIsResizing] = useState(false)
@@ -107,9 +108,11 @@ function SideBar() {
             }
 
             return (
-              <div key={item.key} className={cls} onClick={handleRightBarItemClick}>
-                {item.icon}
-              </div>
+              <Tooltip title={item.title}>
+                <div key={item.key} className={cls} onClick={handleRightBarItemClick}>
+                  {item.icon}
+                </div>
+              </Tooltip>
             )
           })}
         </SideBarHeader>
