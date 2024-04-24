@@ -126,10 +126,8 @@ const SearchView = memo(() => {
   }, [caseSensitive, setSearchState])
 
   const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Enter') {
-        handleSearch()
-      }
+    () => {
+      handleSearch()
     },
     [handleSearch],
   )
@@ -174,7 +172,7 @@ const SearchView = memo(() => {
       <SearchInput>
         <Input
           className='search-input'
-          onKeyDown={handleKeyDown}
+          onPressEnter={handleKeyDown}
           value={searchKeyword}
           placeholder={t('search.text')}
           onChange={handleSearchTextChange}

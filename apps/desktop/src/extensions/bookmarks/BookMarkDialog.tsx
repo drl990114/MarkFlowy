@@ -105,28 +105,26 @@ export const BookMarkDialog: React.FC = () => {
       open={open}
       onClose={handleClose}
     >
-      <div>
-        <ItemWrapper>
-          <Label>path</Label>
-          <span>{path}</span>
-        </ItemWrapper>
-        <ItemWrapper>
-          <Label>name</Label>
-          <Input value={name} onChange={handleNameChange} />
-        </ItemWrapper>
-        <ItemWrapper>
-          <Label>tags</Label>
-          <Autocomplete
-            multiple
-            options={renderTagList}
-            value={tags}
-            onChange={handleTagChange}
-            renderInput={(params) => (
-              <TextField {...params} placeholder='Tag' onInput={handleNewTagInput} />
-            )}
-          />
-        </ItemWrapper>
-      </div>
+      <ItemWrapper>
+        <Label>path</Label>
+        <span>{path}</span>
+      </ItemWrapper>
+      <ItemWrapper>
+        <Label>name</Label>
+        <Input value={name} onChange={handleNameChange} />
+      </ItemWrapper>
+      <ItemWrapper>
+        <Label>tags</Label>
+        <Autocomplete
+          multiple
+          options={renderTagList}
+          value={tags}
+          onChange={handleTagChange}
+          renderInput={(params) => (
+            <TextField {...params} placeholder='Tag' onInput={handleNewTagInput} />
+          )}
+        />
+      </ItemWrapper>
     </Dialog>
   )
 }
