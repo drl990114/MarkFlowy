@@ -1,12 +1,12 @@
 import { Input } from 'zens'
 import { Label } from '@/components/UI/Label'
 import { useCommandStore } from '@/stores'
-import { Autocomplete, Button, TextField } from '@mui/material'
+import { Autocomplete, TextField } from '@mui/material'
 import type { SyntheticEvent } from 'react'
 import { useEffect, useMemo, useState } from 'react'
 import styled from 'styled-components'
 import useBookMarksStore from './useBookMarksStore'
-import { Dialog } from 'zens'
+import { Dialog, Button } from 'zens'
 
 const ItemWrapper = styled.div`
   display: flex;
@@ -59,7 +59,7 @@ export const BookMarkDialog: React.FC = () => {
         setName(bookmark.title)
         setTags(bookmark.tags)
         setOpen(true)
-      }
+      },
     })
   }, [addCommand])
 
@@ -98,33 +98,35 @@ export const BookMarkDialog: React.FC = () => {
         <Button key='ok' onClick={handleClose}>
           Cancel
         </Button>,
-        <Button key='copy' onClick={handleConfirm}>
+        <Button key='copy' btnType='primary' onClick={handleConfirm}>
           Confirm
         </Button>,
       ]}
       open={open}
       onClose={handleClose}
     >
-      <ItemWrapper>
-        <Label>path</Label>
-        <span>{path}</span>
-      </ItemWrapper>
-      <ItemWrapper>
-        <Label>name</Label>
-        <Input value={name} onChange={handleNameChange} />
-      </ItemWrapper>
-      <ItemWrapper>
-        <Label>tags</Label>
-        <Autocomplete
-          multiple
-          options={renderTagList}
-          value={tags}
-          onChange={handleTagChange}
-          renderInput={(params) => (
-            <TextField {...params} placeholder='Tag' onInput={handleNewTagInput} />
-          )}
-        />
-      </ItemWrapper>
+      <div>
+        <ItemWrapper>
+          <Label>path</Label>
+          <span>{path}</span>
+        </ItemWrapper>
+        <ItemWrapper>
+          <Label>name</Label>
+          <Input value={name} onChange={handleNameChange} />
+        </ItemWrapper>
+        <ItemWrapper>
+          <Label>tags</Label>
+          <Autocomplete
+            multiple
+            options={renderTagList}
+            value={tags}
+            onChange={handleTagChange}
+            renderInput={(params) => (
+              <TextField {...params} placeholder='Tag' onInput={handleNewTagInput} />
+            )}
+          />
+        </ItemWrapper>
+      </div>
     </Dialog>
   )
 }
