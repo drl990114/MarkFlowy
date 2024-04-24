@@ -161,6 +161,7 @@ const ChatList: React.FC<ChatListProps> = (props) => {
           value={askInput}
           placeholder='input question'
           onKeyDown={handleKeydown}
+          onPressEnter={handleSubmit}
           onChange={handleChange}
         />
         <Button className='submit' btnType='primary' size='small' onClick={handleSubmit}>
