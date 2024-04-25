@@ -108,8 +108,8 @@ function SideBar() {
             }
 
             return (
-              <Tooltip title={item.title}>
-                <div key={item.key} className={cls} onClick={handleRightBarItemClick}>
+              <Tooltip key={item.key} title={item.title}>
+                <div className={cls} onClick={handleRightBarItemClick}>
                   {item.icon}
                 </div>
               </Tooltip>
