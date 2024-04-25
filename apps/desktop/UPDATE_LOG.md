@@ -1,5 +1,24 @@
 # UPDATE LOG
 
+## v0.9.0
+
+Features:
+
+- Support preview mode
+
+- Better html inline node
+
+- Add tooltip to sidebar item.
+
+Fix:
+
+- Fixed the table of contents doesn't refresh while switching different md files.
+
+- Fixed reference text not show in editor.
+
+- Some ui and ux optimization.
+
+
 ## v0.8.0
 
 Features:
