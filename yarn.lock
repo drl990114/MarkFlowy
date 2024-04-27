@@ -3882,7 +3882,7 @@ __metadata:
     react-test-renderer: "npm:^18.2.0"
     react-use: "npm:^17.5.0"
     remixicon: "npm:^4.1.0"
-    rme: "npm:^0.0.57"
+    rme: "npm:^0.0.59"
     styled-components: "npm:^6.1.8"
     stylis: "npm:^4.0.0"
     tinykeys: "npm:^2.1.0"
@@ -19032,9 +19032,9 @@ plugin-image-zoom@ataft/plugin-image-zoom:
   languageName: node
   linkType: hard
 
-"rme@npm:^0.0.57":
-  version: 0.0.57
-  resolution: "rme@npm:0.0.57"
+"rme@npm:^0.0.59":
+  version: 0.0.59
+  resolution: "rme@npm:0.0.59"
   dependencies:
     "@codemirror/autocomplete": "npm:^6.8.1"
     "@codemirror/commands": "npm:^6.2.4"
@@ -19106,7 +19106,7 @@ plugin-image-zoom@ataft/plugin-image-zoom:
   peerDependencies:
     react: ">=16.14.0"
     react-dom: ">=16.14.0"
-  checksum: 10/88be3589da906b67dfb156a6da47f90ab9fbcf8a7724038bd95d6fd8bcb59e3b3026170cb4857a93e805523996870e44b62c960717124750c770ceac3c8919ff
+  checksum: 10/09e708e342c5bd3548b5e7921acf2fbc2c74ff15214a3c471bf1aa0a05f032d409ffba1abfc8ad253b64aa4330b7538e1a83bdef2dbf3a163b459efd65a34b93
   languageName: node
   linkType: hard
 
