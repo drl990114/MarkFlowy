@@ -1,5 +1,14 @@
 # UPDATE LOG
 
+## v0.9.1
+
+Fix:
+
+- Fixed cmd + A don't work in codemirror node.
+
+- Fixed codemirror history is not effective globally.
+
+
 ## v0.9.0
 
 Features:
