@@ -3863,7 +3863,7 @@ __metadata:
     classnames: "npm:^2.5.1"
     color: "npm:^4.2.3"
     dayjs: "npm:^1.11.11"
-    eslint: "npm:9.1.0"
+    eslint: "npm:9.1.1"
     happy-dom: "npm:^14.7.1"
     hox: "npm:^2.1.0"
     i18next: "npm:23.8.2"
@@ -3906,7 +3906,7 @@ __metadata:
     "@rollup/plugin-node-resolve": "npm:15.2.3"
     "@rollup/plugin-terser": "npm:0.4.4"
     "@rollup/plugin-typescript": "npm:11.1.6"
-    eslint: "npm:9.1.0"
+    eslint: "npm:9.1.1"
     rimraf: "npm:^5.0.5"
     rollup: "npm:4.14.3"
     rollup-plugin-postcss: "npm:^4.0.2"
@@ -3927,7 +3927,7 @@ __metadata:
     "@types/color": "npm:^3.0.6"
     "@types/rollup-plugin-url": "npm:^3"
     color: "npm:^4.2.3"
-    eslint: "npm:9.1.0"
+    eslint: "npm:9.1.1"
     postcss: "npm:^8.4.38"
     postcss-import: "npm:^16.1.0"
     postcss-nested: "npm:^6.0.1"
@@ -11179,9 +11179,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint@npm:9.1.0":
-  version: 9.1.0
-  resolution: "eslint@npm:9.1.0"
+"eslint@npm:9.1.1":
+  version: 9.1.1
+  resolution: "eslint@npm:9.1.1"
   dependencies:
     "@eslint-community/eslint-utils": "npm:^4.2.0"
     "@eslint-community/regexpp": "npm:^4.6.1"
@@ -11219,7 +11219,7 @@ __metadata:
     text-table: "npm:^0.2.0"
   bin:
     eslint: bin/eslint.js
-  checksum: 10/8a8902a9aed9113f13638b78794cbe2a711b44300cc0ec05b00e017d52d94b209cf1af81caaaad8cfb4087870f850d7da8e3a892d186c657fb5a21cb1b802379
+  checksum: 10/d0bf8c6335b26a489935df10b74505c0b43ba16a333d938c820ffd097faec05cc0aa27006f5e4091d2c3d10367da3aab01a37bace59d61932976bd7af6dcb99c
   languageName: node
   linkType: hard
 
@@ -14427,7 +14427,7 @@ __metadata:
     "@types/rollup-plugin-url": "npm:^3"
     babel: "npm:^6.23.0"
     child_process: "npm:^1.0.2"
-    eslint: "npm:9.1.0"
+    eslint: "npm:9.1.1"
     fast-glob: "npm:^3.3.2"
     postcss: "npm:^8.4.38"
     postcss-import: "npm:^16.1.0"
