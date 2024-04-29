@@ -68,7 +68,7 @@
     "@types/react-dom": "^18.2.22",
     "@types/react-test-renderer": "^18.0.7",
     "@vitejs/plugin-react": "^4.2.1",
-    "@vitest/ui": "^1.4.0",
+    "@vitest/ui": "^1.5.2",
     "eslint": "9.1.0",
     "happy-dom": "^14.7.1",
     "react-test-renderer": "^18.2.0",
