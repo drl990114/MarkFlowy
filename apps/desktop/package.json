@@ -32,7 +32,7 @@
     "@tauri-apps/plugin-updater": "^2.0.0-beta.1",
     "classnames": "^2.5.1",
     "color": "^4.2.3",
-    "dayjs": "^1.11.10",
+    "dayjs": "^1.11.11",
     "hox": "^2.1.0",
     "i18next": "23.8.2",
     "immer": "^10.0.4",
