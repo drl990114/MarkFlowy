@@ -230,12 +230,7 @@ html[data-theme='dark'] .docusaurus-highlight-code-line {
 	opacity: 0.6;
 	filter: blur(200px);
 }
-[data-theme='dark'] .powered-by-web::before {
-	background: conic-gradient(from 147.14deg at 50% 50%, #cf4e27 -55.68deg, #f24b5c 113.23deg, #7727cf 195deg, #cf4e27 304.32deg, #4f48d5 473.23deg);
-}
-[data-theme='light'] .powered-by-web::before {
-	background: conic-gradient(from 147.14deg at 50% 50%, #0f02fe -55.68deg, #ca0014 113.23deg, #6e1fd5 195deg, #0f02fe 304.32deg, #ca0014 473.23deg);
-}
+
 .powered-by-web h1 {
 	font-weight: 800 !important;
 	font-style: normal !important;
@@ -284,8 +279,9 @@ html[data-theme='dark'] .docusaurus-highlight-code-line {
 
 .slideshow-container {
 	position: relative;
-	padding-top: 53%;
+	padding-top: 63%;
 	overflow: hidden;
+	border-radius: 4px;
 }
 
 .slide {
@@ -311,6 +307,7 @@ html[data-theme='dark'] .docusaurus-highlight-code-line {
 
 .slide-caption {
 	color: #f2f2f2;
+	background-color: #00000057;
 	font-size: 15px;
 	padding: 8px 12px;
 	position: absolute;
@@ -367,6 +364,18 @@ html[data-theme='dark'] .docusaurus-highlight-code-line {
 .newsletter {
 	max-width: 800px;
 	margin: auto;
+}
+
+.copyright {
+	text-align: center;
+	padding: 20px;
+}
+
+.copyright-p-1 {
+}
+
+.copyright-p-2 {
+	margin-top: 0.5rem;
 }
 
 .newsletter-title {

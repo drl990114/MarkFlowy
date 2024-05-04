@@ -14,6 +14,7 @@
 [![PRs Welcome][prs-welcome-badge]][prs-welcome]
 [![Code of Conduct][coc-badge]][coc]
 [![Commit Activity][commit-badge]][commit]
+[![codefactor]](https://www.codefactor.io/repository/github/drl990114/markflowy)
 [![TypeScript-version-icon]](https://www.typescriptlang.org/)
 [![Rust-version-icon]](https://www.rust-lang.org/)
 
@@ -85,3 +86,4 @@ And, thanks to all the open source projects that MarkFlowy depends on.
 [version-badge]: https://img.shields.io/github/v/release/drl990114/MarkFlowy?label=version&style=flat-square
 [rust-version-icon]: https://img.shields.io/badge/Rust-1.77.0-dea584?style=flat-square
 [typescript-version-icon]: https://img.shields.io/github/package-json/dependency-version/drl990114/MarkFlowy/dev/typescript?label=TypeScript&style=flat-square
+[codefactor]: https://www.codefactor.io/repository/github/drl990114/markflowy/badge/main?style=flat-square
