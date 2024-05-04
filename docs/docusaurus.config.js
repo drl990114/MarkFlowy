@@ -1,4 +1,4 @@
-import { themes } from "prism-react-renderer"
+import { themes } from 'prism-react-renderer'
 require('dotenv').config({ path: '.env.local' })
 
 /** @type {import('@docusaurus/types').DocusaurusConfig} */
@@ -17,8 +17,8 @@ module.exports = {
   markdown: {
     format: 'md',
     mermaid: true,
-    preprocessor: ({filePath, fileContent}) => {
-      return fileContent.replaceAll('{{MY_VAR}}', 'MY_VALUE');
+    preprocessor: ({ filePath, fileContent }) => {
+      return fileContent.replaceAll('{{MY_VAR}}', 'MY_VALUE')
     },
     mdx1Compat: {
       comments: true,
@@ -56,7 +56,7 @@ module.exports = {
         {
           href: 'https://github.com/drl990114/MarkFlowy',
           position: 'right',
-          className: "header-github-link",
+          className: 'header-github-link',
           'aria-label': 'GitHub repository',
         },
       ],
@@ -78,11 +78,10 @@ module.exports = {
             {
               label: 'GitHub Discussions',
               href: 'https://github.com/drl990114/MarkFlowy/discussions',
-            }
+            },
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} Justin Maximillian drl990114 and <a href="https://github.com/drl990114/MarkFlowy/graphs/contributors" target="_blank">contributors</a>. Website Built with <a href="https://docusaurus.io" target="_blank">Docusaurus</a>.`,
     },
     prism: {
       theme: themes.vsLight,
@@ -109,7 +108,6 @@ module.exports = {
           },
           feedOptions: {
             type: 'all',
-            copyright: `Copyright © ${new Date().getFullYear()} drl990114 and <a href="https://github.com/drl990114/MarkFlowy/graphs/contributors" target="_blank">contributors</a>.`,
           },
         },
         theme: {

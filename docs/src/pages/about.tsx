@@ -8,9 +8,6 @@ const PoweredByTheWeb = () => {
     <div className='padding-top--xl powered-by-web padding-bottom--l'>
       <h1>
         <Translate id='about.title'>Cross-platform Markdown Editor.</Translate>
-        <em className=' margin-vert--md'>
-          <Translate id='about.poweredByTheWebTitle'>Powered by the web</Translate> <Check />
-        </em>
       </h1>
 
       <span className='powered-by-web--desc'>
@@ -53,7 +50,29 @@ const PoweredByTheWeb = () => {
               <Translate id='feature.filePreviewDescriptionPart1'>
                 Currently supports one-click export of conversations, making chatgpt your smart
                 assistant.
-              </Translate>{' '}
+              </Translate>
+            </p>
+          </div>
+          <div className='feature margin-bottom--md'>
+            <h2>
+              <Translate id='feature.filePreviewTitle2'>High availability</Translate>
+            </h2>
+            <p>
+              <Translate id='feature.filePreviewDescriptionPart2'>
+                MarkFlowy uses the remirror editor, which not only provides high scalability, but
+                also has a great editing experience. And, MarkFlowy supports multiple editing modes,
+                such as `source code`, `wysiwyg`.
+              </Translate>
+            </p>
+          </div>
+          <div className='feature margin-bottom--md'>
+            <h2>
+              <Translate id='feature.filePreviewTitle3'>Custom Theme</Translate>
+            </h2>
+            <p>
+              <Translate id='feature.filePreviewDescriptionPart3'>
+                MarkFlowy supports custom themes, and you can also share your themes with others.
+              </Translate>
             </p>
           </div>
         </div>

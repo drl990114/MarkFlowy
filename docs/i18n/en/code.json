@@ -29,14 +29,20 @@
   "feature.filePreview": {
     "message": "Built-in ChatGpt"
   },
+  "feature.filePreviewTitle2": {
+    "message": "High availability"
+  },
+  "feature.filePreviewTitle3": {
+    "message": "Custom Theme"
+  },
   "feature.filePreviewDescriptionPart1": {
-    "message": "Currently supports one-click export of conversations, making chatgpt your smart assistant."
+    "message": "Currently supports one-click export of conversations、translate markdown articles and et article abstract, making chatgpt your smart assistant."
   },
   "feature.filePreviewDescriptionPart2": {
-    "message": "built-in file previewer"
+    "message": "MarkFlowy uses the remirror editor, which not only provides high scalability, but also has a great editing experience. And, MarkFlowy supports multiple editing modes, such as 'source code', 'wysiwyg'."
   },
   "feature.filePreviewDescriptionPart3": {
-    "message": "to help you view files in a more intuitive way. It supports images, videos, PDFs to almost all programming language with Syntax Highlighting."
+    "message": "MarkFlowy supports custom themes, and you can also share your themes with others."
   },
   "feature.designTitle": {
     "message": "Designed out of the box"

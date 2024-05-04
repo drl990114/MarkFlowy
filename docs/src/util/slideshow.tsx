@@ -1,11 +1,6 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { memo, useCallback, useEffect, useState } from 'react'
 
 const slides = [
-  {
-    name: 'Default',
-    src: '/img/index.png',
-    alt: 'MarkFlowy',
-  },
   {
     name: 'Dark Mode',
     src: '/img/darkmode.png',
@@ -16,11 +11,26 @@ const slides = [
     src: '/img/chatgpt.png',
     alt: 'MarkFlowy Chatgpt Extension',
   },
+  {
+    name: 'Table',
+    src: '/img/table.png',
+    alt: 'MarkFlowy table',
+  },
+  {
+    name: 'Global Search',
+    src: '/img/globalsearch.png',
+    alt: 'MarkFlowy global search',
+  },
+  {
+    name: 'Source Code',
+    src: '/img/sourcecode.png',
+    alt: 'MarkFlowy source code mode',
+  },
 ]
 
 const SLIDE_INTERVAL = 2500
 
-export default function Slideshow() {
+export default memo(function Slideshow() {
   const [index, setIndex] = useState(0)
   const [handle, setHandle] = useState<NodeJS.Timeout | undefined>()
 
@@ -42,7 +52,7 @@ export default function Slideshow() {
   useEffect(() => {
     createIntervalTimer()
     return destroyIntervalTimer
-  }, [createIntervalTimer, destroyIntervalTimer])
+  }, [])
 
   return (
     <>
@@ -71,3 +81,4 @@ export default function Slideshow() {
     </>
   )
 }
+)
