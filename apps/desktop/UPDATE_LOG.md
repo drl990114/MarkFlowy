@@ -1,5 +1,11 @@
 # UPDATE LOG
 
+## v0.9.2
+
+Fix:
+
+- New files are not allowed temporarily. When the workspace is empty.
+
 ## v0.9.1
 
 Fix:
