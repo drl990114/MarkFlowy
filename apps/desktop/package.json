@@ -62,7 +62,7 @@
     "@tauri-apps/cli": "^2.0.0-beta.3",
     "@tauri-release/cli": "^0.2.5",
     "@types/color": "^3.0.6",
-    "@types/lodash": "^4.14.202",
+    "@types/lodash": "^4.17.1",
     "@types/node": "^20.11.24",
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.0",
