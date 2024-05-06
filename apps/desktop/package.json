@@ -26,7 +26,7 @@
     "@tauri-apps/api": "^2.0.0-beta.3",
     "@tauri-apps/plugin-clipboard-manager": "^2.0.0-beta.1",
     "@tauri-apps/plugin-dialog": "^2.0.0-beta.1",
-    "@tauri-apps/plugin-http": "^2.0.0-beta.1",
+    "@tauri-apps/plugin-http": "^2.0.0-beta.3",
     "@tauri-apps/plugin-os": "^2.0.0-beta.1",
     "@tauri-apps/plugin-store": "^2.0.0-beta.1",
     "@tauri-apps/plugin-updater": "^2.0.0-beta.1",
