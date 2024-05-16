@@ -11,7 +11,7 @@ updates:
     directory: "/"
     # Check the npm registry for updates every day (weekdays)
     schedule:
-      interval: weekly
+      interval: monthly
       time: "04:00"
     open-pull-requests-limit: 5
 
@@ -19,6 +19,6 @@ updates:
   - package-ecosystem: cargo
     directory: "/"
     schedule:
-      interval: weekly
+      interval: monthly
       time: "04:00"
     open-pull-requests-limit: 5
