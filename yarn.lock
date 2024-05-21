@@ -2074,6 +2074,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@babel/runtime@npm:^7.0.0, @babel/runtime@npm:^7.9.2":
+  version: 7.24.5
+  resolution: "@babel/runtime@npm:7.24.5"
+  dependencies:
+    regenerator-runtime: "npm:^0.14.0"
+  checksum: 10/e0f4f4d4503f7338749d1dd92361ad132d683bde64e6b61d6c855e100dcd01592295fcfdcc960c946b85ef7908dc2f501080da58447c05812cf3cd80c599bb62
+  languageName: node
+  linkType: hard
+
 "@babel/template@npm:^7.22.15, @babel/template@npm:^7.22.5, @babel/template@npm:^7.24.0":
   version: 7.24.0
   resolution: "@babel/template@npm:7.24.0"
@@ -3815,6 +3824,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@juggle/resize-observer@npm:^3.3.1":
+  version: 3.4.0
+  resolution: "@juggle/resize-observer@npm:3.4.0"
+  checksum: 10/73d1d00ee9132fb6f0aea0531940a6b93603e935590bd450fc6285a328d906102eeeb95dea77b2edac0e779031a9708aa8c82502bd298ee4dd26e7dff48f397a
+  languageName: node
+  linkType: hard
+
 "@leichtgewicht/ip-codec@npm:^2.0.1":
   version: 2.0.5
   resolution: "@leichtgewicht/ip-codec@npm:2.0.5"
@@ -4126,6 +4142,7 @@ __metadata:
     lodash: "npm:^4.17.21"
     nanoid: "npm:^5.0.6"
     react: "npm:^18.3.1"
+    react-arborist: "npm:^3.4.0"
     react-dom: "npm:^18.3.1"
     react-i18next: "npm:13.2.2"
     react-keywords: "npm:^1.0.0"
@@ -4135,17 +4152,18 @@ __metadata:
     react-test-renderer: "npm:^18.2.0"
     react-use: "npm:^17.5.0"
     remixicon: "npm:^4.1.0"
-    rme: "npm:^0.0.59"
+    rme: "npm:^0.0.60"
     styled-components: "npm:^6.1.8"
     stylis: "npm:^4.0.0"
     tinykeys: "npm:^2.1.0"
     ts-node: "npm:^10.9.2"
     typescript: "npm:^5.3.3"
     url: "npm:^0.11.3"
+    use-resize-observer: "npm:^9.1.0"
     vite: "npm:^5.2.10"
     vite-plugin-svgr: "npm:^4.1.0"
     vitest: "npm:^1.2.2"
-    zens: "npm:0.0.22"
+    zens: "npm:0.0.23"
     zustand: "npm:^4.4.6"
   languageName: unknown
   linkType: soft
@@ -4652,6 +4670,27 @@ __metadata:
     react: ">=16.9.0"
     react-dom: ">=16.9.0"
   checksum: 10/ae9d4cdf07647fc4da3944f74ab4d25c16cc7021c5760d4db37c0600461a84f480243e5186f3e5760903041d3a3e0927cb4226f44583fa668d3cacd29245fd69
+  languageName: node
+  linkType: hard
+
+"@react-dnd/asap@npm:^4.0.0":
+  version: 4.0.1
+  resolution: "@react-dnd/asap@npm:4.0.1"
+  checksum: 10/4fd8912de1c689f79be653b09ee561ebf1f67878cc69ea5ce54cd30e462853ca581121ef8e632864427cfe5ad206539bb5b59fce08fb471cec16be30886380dd
+  languageName: node
+  linkType: hard
+
+"@react-dnd/invariant@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "@react-dnd/invariant@npm:2.0.0"
+  checksum: 10/ef1e989920d70b15c80dccb01af9b598081d76993311aa22d2e9a3ec41d10a88540eeec4b4de7a8b2a2ea52dfc3495ab45e39192c2d27795a9258bd6b79d000e
+  languageName: node
+  linkType: hard
+
+"@react-dnd/shallowequal@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "@react-dnd/shallowequal@npm:2.0.0"
+  checksum: 10/b5bbdc795d65945bb7ba2322bed5cf8d4c6fe91dced98c3b10e3d16822c438f558751135ff296f8d1aa1eaa9d0037dacab2b522ca5eb812175123b9996966dcb
   languageName: node
   linkType: hard
 
@@ -10398,6 +10437,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"dnd-core@npm:14.0.1":
+  version: 14.0.1
+  resolution: "dnd-core@npm:14.0.1"
+  dependencies:
+    "@react-dnd/asap": "npm:^4.0.0"
+    "@react-dnd/invariant": "npm:^2.0.0"
+    redux: "npm:^4.1.1"
+  checksum: 10/6a65bb21efea2b6681ffdb4a143460788bb92879e76758025114a68646a275bd8425cd18bbe4a7688b9b3f85324ff0349170705f338d4ee7000ae416b519dca1
+  languageName: node
+  linkType: hard
+
 "dns-packet@npm:^5.2.2":
   version: 5.6.1
   resolution: "dns-packet@npm:5.6.1"
@@ -12738,7 +12788,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"hoist-non-react-statics@npm:^3.1.0, hoist-non-react-statics@npm:^3.3.1":
+"hoist-non-react-statics@npm:^3.1.0, hoist-non-react-statics@npm:^3.3.1, hoist-non-react-statics@npm:^3.3.2":
   version: 3.3.2
   resolution: "hoist-non-react-statics@npm:3.3.2"
   dependencies:
@@ -15068,6 +15118,13 @@ __metadata:
   dependencies:
     fs-monkey: "npm:^1.0.4"
   checksum: 10/7c9cdb453a6b06e87f11e2dbe6c518fd3c1c1581b370ffa24f42f3fd5b1db8c2203f596e43321a0032963f3e9b66400f2c3cf043904ac496d6ae33eafd0878fe
+  languageName: node
+  linkType: hard
+
+"memoize-one@npm:>=3.1.1 <6":
+  version: 5.2.1
+  resolution: "memoize-one@npm:5.2.1"
+  checksum: 10/b7141dc148b5c6fdd51e77ecf0421fd2581681eb8756e0b3dfbd4fe765b5e2b5a6bc90214bb6f19a96b6aed44de17eda3407142a7be9e24ccd0774bbd9874d1b
   languageName: node
   linkType: hard
 
@@ -18502,6 +18559,22 @@ plugin-image-zoom@ataft/plugin-image-zoom:
   languageName: node
   linkType: hard
 
+"react-arborist@npm:^3.4.0":
+  version: 3.4.0
+  resolution: "react-arborist@npm:3.4.0"
+  dependencies:
+    react-dnd: "npm:^14.0.3"
+    react-dnd-html5-backend: "npm:^14.0.3"
+    react-window: "npm:^1.8.10"
+    redux: "npm:^5.0.0"
+    use-sync-external-store: "npm:^1.2.0"
+  peerDependencies:
+    react: ">= 16.14"
+    react-dom: ">= 16.14"
+  checksum: 10/06bed41b8db33a23c604001d401a2f0c4572a1ef0ffe608568589178b1a148af3d0c72148a0d630bbd6f527a0520dd3e2cb78d4cc289f75088263152a2c152d5
+  languageName: node
+  linkType: hard
+
 "react-color@npm:^2.19.3":
   version: 2.19.3
   resolution: "react-color@npm:2.19.3"
@@ -18548,6 +18621,40 @@ plugin-image-zoom@ataft/plugin-image-zoom:
     strip-ansi: "npm:^6.0.1"
     text-table: "npm:^0.2.0"
   checksum: 10/4f6e04a3c4c6bc041bb85586646cff5e611049dd91f505e73cec47e284a854f28a25a4f50ff24b46e7df051b2a82c387870c8e08da232edbbbb36c01d4e94a2b
+  languageName: node
+  linkType: hard
+
+"react-dnd-html5-backend@npm:^14.0.3":
+  version: 14.1.0
+  resolution: "react-dnd-html5-backend@npm:14.1.0"
+  dependencies:
+    dnd-core: "npm:14.0.1"
+  checksum: 10/9249d538bdd6395d5148d4690568853754397786fb2356372d809f5e709b98ec0c1d40f71560511f562a47c5522aeb78d028f4c99b59f1d6ab3a01436ab70567
+  languageName: node
+  linkType: hard
+
+"react-dnd@npm:^14.0.3":
+  version: 14.0.5
+  resolution: "react-dnd@npm:14.0.5"
+  dependencies:
+    "@react-dnd/invariant": "npm:^2.0.0"
+    "@react-dnd/shallowequal": "npm:^2.0.0"
+    dnd-core: "npm:14.0.1"
+    fast-deep-equal: "npm:^3.1.3"
+    hoist-non-react-statics: "npm:^3.3.2"
+  peerDependencies:
+    "@types/hoist-non-react-statics": ">= 3.3.1"
+    "@types/node": ">= 12"
+    "@types/react": ">= 16"
+    react: ">= 16.14"
+  peerDependenciesMeta:
+    "@types/hoist-non-react-statics":
+      optional: true
+    "@types/node":
+      optional: true
+    "@types/react":
+      optional: true
+  checksum: 10/027d23c1e6c3e54fbb791c11cf8b42700d0eb3ff5eeaca64088e49c162e29fcd1f5ec07807c989e9c7253e3204c425f6510c0d92f0eb0325b3def400da0ac1a7
   languageName: node
   linkType: hard
 
@@ -18920,6 +19027,19 @@ plugin-image-zoom@ataft/plugin-image-zoom:
   languageName: node
   linkType: hard
 
+"react-window@npm:^1.8.10":
+  version: 1.8.10
+  resolution: "react-window@npm:1.8.10"
+  dependencies:
+    "@babel/runtime": "npm:^7.0.0"
+    memoize-one: "npm:>=3.1.1 <6"
+  peerDependencies:
+    react: ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
+    react-dom: ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
+  checksum: 10/6f4a713a2012d605370ef4c7026a45ddd6801e428faa4cad558b12b05ba54c00de72de9a360db109db9666f972a3d955b63af9e5a4cd5fbc52411a382273107b
+  languageName: node
+  linkType: hard
+
 "react@npm:^18.2.0":
   version: 18.2.0
   resolution: "react@npm:18.2.0"
@@ -19036,6 +19156,22 @@ plugin-image-zoom@ataft/plugin-image-zoom:
   dependencies:
     minimatch: "npm:^3.0.5"
   checksum: 10/19298852b0b87810aed5f2c81a73bfaaeb9ade7c9bf363f350fc1443f2cc3df66ecade5e102dfbb153fcd9df20342c301848e11e149e5f78759c1d55aa2c9c39
+  languageName: node
+  linkType: hard
+
+"redux@npm:^4.1.1":
+  version: 4.2.1
+  resolution: "redux@npm:4.2.1"
+  dependencies:
+    "@babel/runtime": "npm:^7.9.2"
+  checksum: 10/371e4833b671193303a7dea7803c8fdc8e0d566740c78f580e0a3b77b4161da25037626900a2205a5d616117fa6ad09a4232e5a110bd437186b5c6355a041750
+  languageName: node
+  linkType: hard
+
+"redux@npm:^5.0.0":
+  version: 5.0.1
+  resolution: "redux@npm:5.0.1"
+  checksum: 10/a373f9ed65693ead58bea5ef61c1d6bef39da9f2706db3be6f84815f3a1283230ecd1184efb1b3daa7f807d8211b0181564ca8f336fc6ee0b1e2fa0ba06737c2
   languageName: node
   linkType: hard
 
@@ -19573,9 +19709,9 @@ plugin-image-zoom@ataft/plugin-image-zoom:
   languageName: node
   linkType: hard
 
-"rme@npm:^0.0.59":
-  version: 0.0.59
-  resolution: "rme@npm:0.0.59"
+"rme@npm:^0.0.60":
+  version: 0.0.60
+  resolution: "rme@npm:0.0.60"
   dependencies:
     "@codemirror/autocomplete": "npm:^6.8.1"
     "@codemirror/commands": "npm:^6.2.4"
@@ -19643,11 +19779,11 @@ plugin-image-zoom@ataft/plugin-image-zoom:
     svgmoji: "npm:^3.2.0"
     void-elements: "npm:^3.1.0"
     yjs: "npm:^13.6.14"
-    zens: "npm:^0.0.22"
+    zens: "npm:^0.0.23"
   peerDependencies:
     react: ">=16.14.0"
     react-dom: ">=16.14.0"
-  checksum: 10/09e708e342c5bd3548b5e7921acf2fbc2c74ff15214a3c471bf1aa0a05f032d409ffba1abfc8ad253b64aa4330b7538e1a83bdef2dbf3a163b459efd65a34b93
+  checksum: 10/829d60d8ff7026b9f987df7ad4099fee5019fd3e48ec9108419dc092de5f6b91a081503e648ca77a4e128e49ff36aaba7b6ac96cd7216808b93b0b11fc9f79dd
   languageName: node
   linkType: hard
 
@@ -22059,6 +22195,18 @@ plugin-image-zoom@ataft/plugin-image-zoom:
   languageName: node
   linkType: hard
 
+"use-resize-observer@npm:^9.1.0":
+  version: 9.1.0
+  resolution: "use-resize-observer@npm:9.1.0"
+  dependencies:
+    "@juggle/resize-observer": "npm:^3.3.1"
+  peerDependencies:
+    react: 16.8.0 - 18
+    react-dom: 16.8.0 - 18
+  checksum: 10/821d3f783090e36c694ef0ae3e366b364a691a8254d04337700ea79757e01e2d79f307ee517487c9246db7e8bc9625b474dd6ac7dad18d777004dee817826080
+  languageName: node
+  linkType: hard
+
 "use-sync-external-store@npm:1.2.0, use-sync-external-store@npm:^1.2.0":
   version: 1.2.0
   resolution: "use-sync-external-store@npm:1.2.0"
@@ -23146,9 +23294,9 @@ plugin-image-zoom@ataft/plugin-image-zoom:
   languageName: node
   linkType: hard
 
-"zens@npm:0.0.22, zens@npm:^0.0.22":
-  version: 0.0.22
-  resolution: "zens@npm:0.0.22"
+"zens@npm:0.0.23, zens@npm:^0.0.23":
+  version: 0.0.23
+  resolution: "zens@npm:0.0.23"
   dependencies:
     "@ariakit/react": "npm:^0.4.5"
     "@babel/runtime": "npm:^7"
@@ -23164,7 +23312,7 @@ plugin-image-zoom@ataft/plugin-image-zoom:
     sonner: "npm:^1.4.0"
     styled-components: "npm:^6.1.0"
     stylis: "npm:^4.0.0"
-  checksum: 10/a3e7462d53ad913440d17ab5dbfe4cb67bdfd7b68d7468d4c37d246c25c42dc5a66be01fa7565665a805762947a69d9becf5e76d458473e575e9cf62e5132332
+  checksum: 10/2998ec14ffb57be1d2732de6ad2a0d42e847a5939c1b64f3b89c0273fef5b025eddbdd178d632f2ee408e3c97916f90e5471f5decb21f0e82e458679d37d8a32
   languageName: node
   linkType: hard
 

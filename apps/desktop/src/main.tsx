@@ -11,6 +11,7 @@ import {
   QueryClient,
   QueryClientProvider,
 } from '@tanstack/react-query'
+import 'react-complex-tree/lib/style-modern.css';
 import 'remixicon/fonts/remixicon.css'
 import './normalize.css'
 import './atom.css'

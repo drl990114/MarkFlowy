@@ -38,6 +38,9 @@
     "translate": "请输入目标语言"
   },
   "confirm": {
+    "move": {
+      "description": "你确定要移动 \"{{name}}\"吗?"
+    },
     "delete": {
       "description": "你确定要删除 \"{{name}}\" {{something}}吗?"
     }

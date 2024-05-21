@@ -47,6 +47,8 @@ pub fn run() {
             fc::cmd::delete_file,
             fc::cmd::delete_folder,
             fc::cmd::file_exists,
+            fc::cmd::move_files_to_target_folder,
+            fc::cmd::path_join,
             conf::cmd::get_app_conf_path,
             conf::cmd::get_app_conf,
             conf::cmd::reset_app_conf,

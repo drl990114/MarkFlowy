@@ -1,5 +1,5 @@
 import bus from '@/helper/eventBus'
-import type { IFile } from '@/helper/filesys'
+import { isMdFile, type IFile } from '@/helper/filesys'
 import { useEditorStore } from '@/stores'
 import {
   useCallback,
@@ -11,10 +11,10 @@ import {
   useEffect,
   useMemo,
 } from 'react'
-import { Input } from 'zens'
-import { Validity } from '../Validity'
+import { Input, Tooltip } from 'zens'
 import { unVerifiedFileNameChars, verifyFileName } from './verify-file-name'
 import { EVENT } from '@/constants'
+import { invoke } from '@tauri-apps/api/core'
 
 export type NewInputRef = {
   show: (args: { fileNode: IFile }) => void
@@ -23,112 +23,123 @@ export type NewInputRef = {
 const InvalidTextMap = {
   same: 'has same file',
   empty: 'file name can not be empty',
-  invalid: `invalid file name, file name can not include ${unVerifiedFileNameChars.join(' ')}`,
+  invalid: `file name can not include ${unVerifiedFileNameChars.join(' ')}`,
 }
 
-const NewFileInput = forwardRef<NewInputRef, HTMLAttributes<HTMLInputElement>>((props, ref) => {
-  const { className, style, ...otherProps } = props
-  const [visible, setVisible] = useState(false)
+const NewFileInput = forwardRef<
+  NewInputRef,
+  HTMLAttributes<HTMLInputElement> & {
+    fileNode: IFile
+    parentNode?: IFile
+    onCreate: (file: IFile) => void
+    onCancel: () => void
+  }
+>((props, ref) => {
+  const { className, fileNode, parentNode, onCreate, onCancel, ...otherProps } = props
   const [inputName, setInputName] = useState('')
-  const contextFileNode = useRef<IFile>()
   const [invalidState, setInvalidState] = useState(false)
   const [invalidText, setInvalidText] = useState(InvalidTextMap.same)
-  const { addFile } = useEditorStore()
-
-  const styleProps = useMemo(() => ({ className, style }), [className, style])
+  const verifing = useRef(false)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const hideInput = useCallback(() => {
-    setVisible(false)
     setInputName('')
+    onCancel?.()
+  }, [onCancel])
+
+  useEffect(() => {
+    setTimeout(() => {
+      inputRef.current?.focus()
+      inputRef.current?.addEventListener('blur', hideInput)
+      verify('')
+    })
+
+    return () => {
+      inputRef.current?.removeEventListener('blur', hideInput)
+    }
   }, [])
 
-  useEffect(() => {
-    if (visible) {
-      setTimeout(() => {
-        document.addEventListener('click', hideInput)
-      })
-    }
+  const getFileInfo = useCallback(
+    async (fileName: string): Promise<IFile> => {
+      let path1 = parentNode?.path
 
-    return () => {
-      document.removeEventListener('click', hideInput)
-    }
-  }, [visible, hideInput])
+      if (!isMdFile(fileName)) {
+        fileName = `${fileName}.md`
+      }
+      console.log('parentNode', parentNode, path1)
 
-  useEffect(() => {
-    bus.on(EVENT.sidebar_show_new_input, hideInput)
+      const targetPath = await invoke<string>('path_join', { path1, path2: fileName })
 
-    return () => {
-      bus.detach(EVENT.sidebar_show_new_input, hideInput)
-    }
-  }, [hideInput])
-
-  useImperativeHandle(ref, () => ({
-    show({ fileNode }) {
-      setVisible(true)
-      contextFileNode.current = fileNode
-    },
-  }))
-
-  const handleKeyup: React.KeyboardEventHandler<HTMLInputElement> = useCallback(
-    (event) => {
-      event.preventDefault()
-      if (!event.shiftKey && event.keyCode === 13) {
-        if (!contextFileNode.current) return
-        if (inputName === '') {
-          setInvalidText(InvalidTextMap.empty)
-          setInvalidState(true)
-          setTimeout(() => {
-            setInvalidState(false)
-          }, 2000)
-          return
-        } else if (verifyFileName(inputName) === false) {
-          setInvalidText(InvalidTextMap.invalid)
-          setInvalidState(true)
-          setTimeout(() => {
-            setInvalidState(false)
-          }, 2000)
-          return
-        }
-
-        const res = addFile(contextFileNode.current, { name: inputName, kind: 'file' })
-
-        if (res === false) {
-          setInvalidText(InvalidTextMap.same)
-          setInvalidState(true)
-          setTimeout(() => {
-            setInvalidState(false)
-          }, 2000)
-          return
-        }
-
-        hideInput()
-        return false
+      return {
+        id: fileNode.id,
+        kind: 'file',
+        path: targetPath,
+        name: fileName,
       }
     },
-    [addFile, inputName, hideInput],
+    [inputName, fileNode, parentNode],
   )
 
-  const handleChange: React.ChangeEventHandler<HTMLInputElement> = useCallback((e) => {
-    setInputName(e.target.value)
-  }, [])
+  const verify = useCallback(
+    async (name: string) => {
+      verifing.current = true
 
-  const stopPropagation: React.MouseEventHandler = useCallback((e) => {
-    e.stopPropagation()
-  }, [])
+      try {
+        const fileName = name
+        if (fileName === '') {
+          setInvalidText(InvalidTextMap.empty)
+          setInvalidState(true)
+        } else if (verifyFileName(fileName) === false) {
+          setInvalidText(InvalidTextMap.invalid)
+          setInvalidState(true)
+        } else {
+          const { path } = await getFileInfo(fileName)
 
-  if (!visible) return null
+          const fileExists = await invoke('file_exists', { filePath: path })
+
+          if (fileExists) {
+            setInvalidText(InvalidTextMap.same)
+            setInvalidState(true)
+          } else {
+            setInvalidState(false)
+          }
+        }
+      } catch (error) {}
+
+      verifing.current = false
+    },
+    [getFileInfo],
+  )
+
+  const handleChange: React.ChangeEventHandler<HTMLInputElement> = useCallback(
+    async (e) => {
+      e.stopPropagation()
+      let fileName = e.target.value
+      setInputName(fileName)
+
+      verify(fileName)
+    },
+    [verify],
+  )
 
   return (
-    <Validity invalidText={invalidText} invalidState={invalidState} {...styleProps}>
+    <Tooltip title={invalidText} open={invalidState}>
       <Input
+        inputRef={inputRef}
         value={inputName}
         onChange={handleChange}
-        onKeyUp={handleKeyup}
-        onClick={stopPropagation}
-        aria-invalid={true}
+        spellCheck={false}
+        onKeyDown={e => e.stopPropagation()}
+        onPressEnter={async () => {
+          if (invalidState === false && verifing.current === false) {
+            const fileInfo = await getFileInfo(inputName)
+
+            onCreate(fileInfo)
+          }
+        }}
         {...otherProps}
       ></Input>
-    </Validity>
+    </Tooltip>
   )
 })
 

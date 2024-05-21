@@ -2,8 +2,8 @@ import type { IFile } from './filesys'
 
 type IEntries = Record<string, IFile>;
 
-const entries: IEntries = {}
-const pathEntries: IEntries = {}
+export const entries: IEntries = {}
+export const pathEntries: IEntries = {}
 
 export function setFileObject(id: string, file: IFile): void {
   entries[id] = file

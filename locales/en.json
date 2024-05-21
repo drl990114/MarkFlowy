@@ -38,6 +38,9 @@
     "translate": "Please enter target language"
   },
   "confirm": {
+    "move": {
+      "description": "Are you sure you want to move the \"{{name}}\"?"
+    },
     "delete": {
       "description": "Are you sure you want to delete the \"{{name}}\" {{something}}?"
     }

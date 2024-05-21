@@ -63,7 +63,7 @@ const useEditorStore = create<EditorStore>((set, get) => {
     editorDelegateMap: new Map(),
     editorCtxMap: new Map(),
 
-    addFile: (fileNode, target) => {
+    addFile: async (fileNode, target) => {
       const { folderData, addOpenedFile } = get()
       if (fileNode && target) {
         const parent = fileNode.kind === 'dir' ? fileNode : findParentNode(fileNode, folderData![0])
@@ -72,27 +72,30 @@ const useEditorStore = create<EditorStore>((set, get) => {
           target.name = `${target.name}.md`
         }
 
-        if (!parent || hasSameFile(parent.children!, target)) return false
+        if (!parent || hasSameFile(parent.children!, target)) return
 
         const targetFile = createFile({
-          name: target.name,
           path: parent.path ? `${parent.path}/${target.name}` : target.name,
           content: '',
+          ...target,
         })
 
         parent.children!.push(targetFile)
         addOpenedFile(targetFile.id)
-        invoke('write_file', { filePath: targetFile.path, content: targetFile.content }).then(
-          () => {
-            set((state) => {
-              return {
-                ...state,
-                activeId: targetFile.id,
-                folderData: [...(state.folderData || [])],
-              }
-            })
-          },
-        )
+        await invoke('write_file', {
+          filePath: targetFile.path,
+          content: targetFile.content,
+        })
+
+        set((state) => {
+          return {
+            ...state,
+            activeId: targetFile.id,
+            // folderData: [...(state.folderData || [])],
+          }
+        })
+
+        return targetFile
       }
     },
 
@@ -123,7 +126,7 @@ const useEditorStore = create<EditorStore>((set, get) => {
       }
     },
 
-    deleteNode: (fileNode) => {
+    deleteNode: async (fileNode) => {
       const { folderData, activeId, delOpenedFile, opened } = get()
       const parent = findParentNode(fileNode, folderData![0])
       let targetFile: IFile | undefined
@@ -142,17 +145,17 @@ const useEditorStore = create<EditorStore>((set, get) => {
 
         parent.children = newChildren
 
-        invoke(targetFile.kind === 'dir' ? 'delete_folder' : 'delete_file', {
+        await invoke(targetFile.kind === 'dir' ? 'delete_folder' : 'delete_file', {
           filePath: targetFile.path,
-        }).then(() => {
-          delOpenedFile(targetFile!.id)
-          set((state) => {
-            return {
-              ...state,
-              activeId: activeId === targetFile!.id ? opened[opened.length - 1] : activeId,
-              folderData: [...(state.folderData || [])],
-            }
-          })
+        })
+
+        delOpenedFile(targetFile!.id)
+        set((state) => {
+          return {
+            ...state,
+            activeId: activeId === targetFile!.id ? opened[opened.length - 1] : activeId,
+            // folderData: [...(state.folderData || [])],
+          }
         })
       }
     },
@@ -259,9 +262,9 @@ type EditorStore = {
   editorCtxMap: Map<string, EditorContext>
   editorDelegateMap: Map<string, EditorDelegate<any>>
   setActiveId: (id: string) => void
-  addFile: (file: IFile, target: { name: string; kind: IFile['kind'] }) => boolean | void
+  addFile: (file: IFile, target: Partial<IFile>) => Promise<void | IFile>
   insertNodeToFolderData: (fileNode: IFile) => void
-  deleteNode: (fileNode: IFile) => void
+  deleteNode: (fileNode: IFile) => Promise<void>
   addOpenedFile: (id: string) => void
   delOpenedFile: (id: string) => void
   delOtherOpenedFile: (id: string) => void

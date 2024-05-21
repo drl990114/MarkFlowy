@@ -32,7 +32,7 @@ const Explorer: FC<ExplorerProps> = (props) => {
   const { openFolderDialog, openFolder } = useOpen()
 
   const handleSelect = (item: IFile) => {
-    if (item.kind === 'dir') return
+    if (item?.kind !== 'file') return
 
     addOpenedFile(item.id)
     setActiveId(item.id)
