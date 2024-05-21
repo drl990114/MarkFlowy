@@ -1,24 +1,8 @@
-import bus from '@/helper/eventBus'
 import { isMdFile, type IFile } from '@/helper/filesys'
-import { useEditorStore } from '@/stores'
-import {
-  useCallback,
-  type HTMLAttributes,
-  useState,
-  forwardRef,
-  useImperativeHandle,
-  useRef,
-  useEffect,
-  useMemo,
-} from 'react'
+import { useCallback, type HTMLAttributes, useState, useRef, useEffect } from 'react'
 import { Input, Tooltip } from 'zens'
 import { unVerifiedFileNameChars, verifyFileName } from './verify-file-name'
-import { EVENT } from '@/constants'
 import { invoke } from '@tauri-apps/api/core'
-
-export type NewInputRef = {
-  show: (args: { fileNode: IFile }) => void
-}
 
 const InvalidTextMap = {
   same: 'has same file',
@@ -26,15 +10,14 @@ const InvalidTextMap = {
   invalid: `file name can not include ${unVerifiedFileNameChars.join(' ')}`,
 }
 
-const NewFileInput = forwardRef<
-  NewInputRef,
-  HTMLAttributes<HTMLInputElement> & {
+const NewFileInput = (
+  props: HTMLAttributes<HTMLInputElement> & {
     fileNode: IFile
     parentNode?: IFile
     onCreate: (file: IFile) => void
     onCancel: () => void
-  }
->((props, ref) => {
+  },
+) => {
   const { className, fileNode, parentNode, onCreate, onCancel, ...otherProps } = props
   const [inputName, setInputName] = useState('')
   const [invalidState, setInvalidState] = useState(false)
@@ -129,7 +112,7 @@ const NewFileInput = forwardRef<
         value={inputName}
         onChange={handleChange}
         spellCheck={false}
-        onKeyDown={e => e.stopPropagation()}
+        onKeyDown={(e) => e.stopPropagation()}
         onPressEnter={async () => {
           if (invalidState === false && verifing.current === false) {
             const fileInfo = await getFileInfo(inputName)
@@ -141,6 +124,6 @@ const NewFileInput = forwardRef<
       ></Input>
     </Tooltip>
   )
-})
+}
 
 export default NewFileInput

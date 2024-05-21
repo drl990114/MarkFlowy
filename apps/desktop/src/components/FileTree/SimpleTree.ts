@@ -24,14 +24,14 @@ export class SimpleTree<T extends SimpleData> {
       parent = this.find(args.nodeId)
     }
     if (!parent) return null
-    parent.addChild(args.data, args.index)
+    parent.addChild(args.data)
   }
 
   move(args: { id: string; parentId: string | null; index: number }) {
     const src = this.find(args.id)
     const parent = args.parentId ? this.find(args.parentId) : this.root
     if (!src || !parent) return
-    parent.addChild(src.data, args.index)
+    parent.addChild(src.data)
     src.drop()
   }
 
@@ -105,8 +105,7 @@ class SimpleNode<T extends SimpleData> {
 
   update(changes: Partial<T>) {
     if (this.hasParent()) {
-      const i = this.childIndex
-      this.parent.addChild({ ...this.data, ...changes }, i)
+      this.parent.addChild({ ...this.data, ...changes })
       this.drop()
     }
   }

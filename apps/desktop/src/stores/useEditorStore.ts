@@ -141,7 +141,7 @@ const useEditorStore = create<EditorStore>((set, get) => {
             newChildren.push(child)
           }
         }
-        if (!targetFile) return false
+        if (!targetFile) return
 
         parent.children = newChildren
 
@@ -262,7 +262,7 @@ type EditorStore = {
   editorCtxMap: Map<string, EditorContext>
   editorDelegateMap: Map<string, EditorDelegate<any>>
   setActiveId: (id: string) => void
-  addFile: (file: IFile, target: Partial<IFile>) => Promise<void | IFile>
+  addFile: (file: IFile, target: BaseIFile) => Promise<void | IFile>
   insertNodeToFolderData: (fileNode: IFile) => void
   deleteNode: (fileNode: IFile) => Promise<void>
   addOpenedFile: (id: string) => void
