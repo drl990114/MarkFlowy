@@ -49,7 +49,6 @@ const NewFileInput = (
       if (!isMdFile(fileName)) {
         fileName = `${fileName}.md`
       }
-      console.log('parentNode', parentNode, path1)
 
       const targetPath = await invoke<string>('path_join', { path1, path2: fileName })
 

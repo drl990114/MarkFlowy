@@ -143,13 +143,15 @@ pub fn remove_folder(path: &str) -> AnyResult<()> {
 pub struct MoveFileInfo {
     old_path: String,
     new_path: String,
-    is_folder: bool,
     children: Option<Vec<FileInfo>>,
+    is_folder: bool,
+    is_replaced: Option<bool>,
 }
 
 pub fn move_files_to_target_folder(
     files: Vec<String>,
     target_folder: &str,
+    replace_exist: bool,
 ) -> AnyResult<Vec<MoveFileInfo>> {
     let mut path_map_old_to_new = vec![];
 
@@ -159,7 +161,23 @@ pub fn move_files_to_target_folder(
         let target_path = Path::new(target_folder).join(file_name);
 
         if target_path.exists() {
-            continue;
+            if replace_exist {
+                if target_path.is_dir() {
+                    fs::remove_dir_all(target_path.clone())?;
+                } else {
+                    fs::remove_file(target_path.clone())?;
+                }
+
+                path_map_old_to_new.push(MoveFileInfo {
+                    old_path: target_path.to_str().unwrap().to_string(),
+                    new_path: "".to_string(),
+                    is_folder: target_path.is_dir(),
+                    children: None,
+                    is_replaced: Some(true),
+                });
+            } else {
+                continue;
+            }
         }
 
         fs::rename(file_path, target_path.clone())?;
@@ -174,6 +192,7 @@ pub fn move_files_to_target_folder(
                 new_path: target_path.to_str().unwrap().to_string(),
                 is_folder: is_folder,
                 children: Some(files),
+                is_replaced: Some(false),
             });
         } else {
             path_map_old_to_new.push(MoveFileInfo {
@@ -181,9 +200,9 @@ pub fn move_files_to_target_folder(
                 new_path: target_path.to_str().unwrap().to_string(),
                 is_folder: is_folder,
                 children: None,
+                is_replaced: Some(false),
             });
         }
- 
     }
 
     Ok(path_map_old_to_new)
@@ -236,9 +255,10 @@ pub mod cmd {
     pub fn move_files_to_target_folder(
         files: Vec<String>,
         target_folder: &str,
+        replace_exist: bool,
     ) -> Option<Vec<MoveFileInfo>> {
-        let res = fc::move_files_to_target_folder(files, target_folder);
-        
+        let res = fc::move_files_to_target_folder(files, target_folder, replace_exist);
+
         match res {
             Ok(path_map_old_to_new) => Some(path_map_old_to_new),
             Err(_) => None,

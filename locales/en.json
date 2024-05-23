@@ -41,6 +41,9 @@
     "move": {
       "description": "Are you sure you want to move the \"{{name}}\"?"
     },
+    "replace": {
+      "description": "A file or folder with the name \"{{name}}\" already exists in the destination folder. Do you want to replace it?"
+    },
     "delete": {
       "description": "Are you sure you want to delete the \"{{name}}\" {{something}}?"
     }

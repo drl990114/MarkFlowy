@@ -41,6 +41,9 @@
     "move": {
       "description": "你确定要移动 \"{{name}}\"吗?"
     },
+    "replace": {
+      "description": "目标文件夹中已存在名为“{{name}}”的文件或文件夹。是否要替换它？"
+    },
     "delete": {
       "description": "你确定要删除 \"{{name}}\" {{something}}吗?"
     }

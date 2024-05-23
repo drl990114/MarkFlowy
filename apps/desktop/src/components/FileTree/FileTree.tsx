@@ -32,58 +32,81 @@ const FileTree: FC<FileTreeProps> = (props) => {
     }
   }
 
-  const onMove: TreeProps<IFile>['onMove'] = (args) => {
+  const onMove: TreeProps<IFile>['onMove'] = async (args) => {
     const _dragNodes = args.dragNodes.filter((node) => {
       return !args.dragIds.includes(node.parent?.id || '')
     })
+    // current only can move one file
+    const _dragNode = _dragNodes[0]
+    const parentNode = args.parentNode
 
-    NiceModal.show(MODAL_CONFIRM_ID, {
-      title: t('confirm.move.description', {
-        name: _dragNodes[0].data.name,
-      }),
-      onConfirm: () => {
-        const _dragIds = _dragNodes.map((node) => node.data.id)
+    if (!parentNode) {
+      return
+    }
+    const targetPath = await invoke<string>('path_join', { path1: parentNode?.data.path, path2: _dragNode.data.name })
+    const isExist = await invoke<boolean>('file_exists', { filePath: targetPath })
 
-        for (const id of _dragIds) {
-          tree.move({ id, parentId: args.parentId, index: args.index })
-        }
+    if (isExist) {
+      NiceModal.show(MODAL_CONFIRM_ID, {
+        title: t('confirm.replace.description', {
+          name: _dragNode.data.name,
+        }),
+        onConfirm: () => move(true),
+      })
+    } else {
+      NiceModal.show(MODAL_CONFIRM_ID, {
+        title: t('confirm.move.description', {
+          name: _dragNode.data.name,
+        }),
+        onConfirm: () => move(),
+      })
+    }
+    const move = (replace = false) => {
+      const _dragIds = _dragNodes.map((node) => node.data.id)
 
-        setFolderData(tree.data)
+      for (const id of _dragIds) {
+        tree.move({ id, parentId: args.parentId, index: args.index })
+      }
 
-        invoke('move_files_to_target_folder', {
-          files: _dragNodes.map((node) => node.data.path),
-          targetFolder: args.parentNode?.data.path,
-        }).then((res) => {
-          if (Array.isArray(res)) {
-            res.forEach((oldToNew) => {
-              const oldFile = getFileObjectByPath(oldToNew.old_path)
-              const oldFileNode = tree.find(oldFile.id)
+      setFolderData(tree.data)
 
-              if (oldToNew.is_folder) {
-                const dep = (fileNode: IFile, newPath: string, children: IFile[]) => {
-                  updateFileNodePath(fileNode.id, newPath)
+      invoke('move_files_to_target_folder', {
+        files: _dragNodes.map((node) => node.data.path),
+        targetFolder: args.parentNode?.data.path,
+        replaceExist: replace,
+      }).then((res) => {
+        if (Array.isArray(res)) {
+          res.forEach((oldToNew) => {
+            const oldFile = getFileObjectByPath(oldToNew.old_path)
+            const oldFileNode = tree.find(oldFile.id)
 
-                  fileNode.children?.forEach((child, index) => {
-                    if (child.kind === 'dir') {
-                      if (children[index]) {
-                        dep(child, children[index].path!, children[index].children!)
-                      }
-                    } else {
-                      updateFileNodePath(child.id, children[index].path!)
+            if (oldToNew.is_replaced) {
+              tree.drop({ id: oldFile.id })
+            } else if (oldToNew.is_folder) {
+              const dep = (fileNode: IFile, newPath: string, children: IFile[]) => {
+                updateFileNodePath(fileNode.id, newPath)
+
+                fileNode.children?.forEach((child, index) => {
+                  if (child.kind === 'dir') {
+                    if (children[index]) {
+                      dep(child, children[index].path!, children[index].children!)
                     }
-                  })
-                }
-
-                dep(oldFileNode!.data, oldToNew.new_path, oldToNew.children)
-              } else {
-                updateFileNodePath(oldFile.id, oldToNew.new_path)
+                  } else {
+                    updateFileNodePath(child.id, children[index].path!)
+                  }
+                })
               }
-            })
-          }
-          setFolderData(tree.data)
-        })
-      },
-    })
+
+              dep(oldFileNode!.data, oldToNew.new_path, oldToNew.children)
+            } else {
+              updateFileNodePath(oldFile.id, oldToNew.new_path)
+            }
+          })
+        }
+        setFolderData(tree.data)
+      })
+    }
+  
   }
 
   return (
