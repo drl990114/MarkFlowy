@@ -1,61 +1,34 @@
 import styled from 'styled-components'
 
-export const FileNodeStyled = styled.div`
-  .file-node {
-    display: flex;
-    align-items: center;
-    padding: 0 8px;
-    height: 32px;
-    box-sizing: border-box;
-    font-size: ${props => props.theme.fontSm};
-    cursor: pointer;
-    user-select: none;
-    -webkit-user-select: none; /* Safari */
+type NodeContainerProps = {
+  highlight: boolean
+  selected: boolean
+}
 
-    &__text {
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      overflow: hidden;
-      user-select: none;
-      -webkit-user-select: none; /* Safari */
-    }
+export const NodeContainer = styled.div<NodeContainerProps>`
+  font-size: ${(props) => props.theme.fontSm};
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  cursor: default;
+  height: 100%;
+  color: ${(props) =>
+    props.highlight || props.selected ? props.theme.accentColor : props.theme.primaryFontColor};
+  background-color: ${(props) => (props.highlight ? props.theme.borderColor : 'transparent')};
 
-    &:hover {
-      color: ${(props) => props.theme.accentColor};
-      background-color: ${(props) => props.theme.borderColor};
-    }
-
-    &--active {
-      color: ${(props) => props.theme.accentColor};
-    }
+  &:hover {
+    background-color: ${(props) => props.theme.borderColor};
   }
 
   .file-icon {
     flex-shrink: 0;
+    margin-right: 4px;
   }
 
-  .newfile-input {
-    margin: 0 8px;
-    border: 1px solid ${(props) => props.theme.accentColor};
-  }
-`
-
-export const RootFolderTab = styled.div`
-  padding: 4px 2px;
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  font-size: 1rem;
-  color: ${(props) => props.theme.tipsFontColor};
-
-  .arrow-icon {
-    display: inline-block;
-    font-size: 1.4rem;
-    color: ${(props) => props.theme.primaryFontColor};
-    transition: all 0.3s;
-
-    &__down {
-      transform: rotate(90deg);
-    }
-  }
+  ${(props) =>
+    props.highlight &&
+    `
+    border: 1px dash ${props.theme.accentColor};
+  `}
 `

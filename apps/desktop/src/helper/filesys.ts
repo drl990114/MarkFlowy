@@ -4,7 +4,7 @@ import { setFileObject, setFileObjectByPath } from './files'
 
 interface FileEntry {
   name: string
-  kind: 'file' | 'dir'
+  kind: 'file' | 'dir' | 'pending'
   path?: string
   children?: IFile[]
 }
@@ -94,7 +94,9 @@ export const readDirectory = (folderPath: string): Promise<IFile[]> => {
   })
 }
 
-export function isMdFile(fileName: string) {
+export function isMdFile(fileName?: string) {
+  if (!fileName) return false
+
   return fileName.endsWith('.md')
 }
 

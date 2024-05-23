@@ -4,7 +4,6 @@ export const Container = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 0 8px;
   user-select: none;
   overflow: auto;
   font-size: 0.8rem;

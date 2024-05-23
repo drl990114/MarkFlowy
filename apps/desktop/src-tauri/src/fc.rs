@@ -5,12 +5,12 @@ use std::fs;
 use std::path::Path;
 
 // #[warn(dead_code)]
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct FileInfo {
     name: String,
     kind: String,
     path: String,
-    children: Vec<FileInfo>,
+    children: Option<Vec<FileInfo>>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -36,7 +36,7 @@ pub fn read_directory(dir_path: &str) -> Vec<FileInfo> {
 
         let mut kind = String::from("file");
 
-        let mut children: Vec<FileInfo> = Vec::new();
+        let mut children: Option<Vec<FileInfo>> = None;
 
         let filename = match path_unwrap.file_name().into_string() {
             Ok(str) => str,
@@ -47,7 +47,7 @@ pub fn read_directory(dir_path: &str) -> Vec<FileInfo> {
 
         if meta_unwrap.is_dir() {
             kind = String::from("dir");
-            children = read_directory(file_path.to_str().unwrap());
+            children = Some(read_directory(file_path.to_str().unwrap()));
         }
 
         let new_file_info = FileInfo {
@@ -139,10 +139,81 @@ pub fn remove_folder(path: &str) -> AnyResult<()> {
     Ok(())
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct MoveFileInfo {
+    old_path: String,
+    new_path: String,
+    children: Option<Vec<FileInfo>>,
+    is_folder: bool,
+    is_replaced: Option<bool>,
+}
+
+pub fn move_files_to_target_folder(
+    files: Vec<String>,
+    target_folder: &str,
+    replace_exist: bool,
+) -> AnyResult<Vec<MoveFileInfo>> {
+    let mut path_map_old_to_new = vec![];
+
+    for file in files {
+        let file_path = Path::new(&file);
+        let file_name = file_path.file_name().unwrap();
+        let target_path = Path::new(target_folder).join(file_name);
+
+        if target_path.exists() {
+            if replace_exist {
+                if target_path.is_dir() {
+                    fs::remove_dir_all(target_path.clone())?;
+                } else {
+                    fs::remove_file(target_path.clone())?;
+                }
+
+                path_map_old_to_new.push(MoveFileInfo {
+                    old_path: target_path.to_str().unwrap().to_string(),
+                    new_path: "".to_string(),
+                    is_folder: target_path.is_dir(),
+                    children: None,
+                    is_replaced: Some(true),
+                });
+            } else {
+                continue;
+            }
+        }
+
+        fs::rename(file_path, target_path.clone())?;
+
+        let is_folder = target_path.clone().is_dir();
+
+        if is_folder {
+            let files = read_directory(target_path.to_str().unwrap());
+
+            path_map_old_to_new.push(MoveFileInfo {
+                old_path: file.to_string(),
+                new_path: target_path.to_str().unwrap().to_string(),
+                is_folder: is_folder,
+                children: Some(files),
+                is_replaced: Some(false),
+            });
+        } else {
+            path_map_old_to_new.push(MoveFileInfo {
+                old_path: file.to_string(),
+                new_path: target_path.to_str().unwrap().to_string(),
+                is_folder: is_folder,
+                children: None,
+                is_replaced: Some(false),
+            });
+        }
+    }
+
+    Ok(path_map_old_to_new)
+}
+
 pub mod cmd {
     use std::path::Path;
 
     use crate::fc;
+
+    use super::MoveFileInfo;
 
     // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
     #[tauri::command]
@@ -178,5 +249,25 @@ pub mod cmd {
     #[tauri::command]
     pub fn file_exists(file_path: &str) -> bool {
         fc::exists(Path::new(file_path))
+    }
+
+    #[tauri::command]
+    pub fn move_files_to_target_folder(
+        files: Vec<String>,
+        target_folder: &str,
+        replace_exist: bool,
+    ) -> Option<Vec<MoveFileInfo>> {
+        let res = fc::move_files_to_target_folder(files, target_folder, replace_exist);
+
+        match res {
+            Ok(path_map_old_to_new) => Some(path_map_old_to_new),
+            Err(_) => None,
+        }
+    }
+
+    #[tauri::command]
+    pub fn path_join(path1: &str, path2: &str) -> String {
+        let path = Path::new(path1).join(path2);
+        path.to_str().unwrap().to_string()
     }
 }
