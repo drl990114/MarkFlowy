@@ -4,21 +4,31 @@ import { Input, Tooltip } from 'zens'
 import { unVerifiedFileNameChars, verifyFileName } from './verify-file-name'
 import { invoke } from '@tauri-apps/api/core'
 
-const InvalidTextMap = {
-  same: 'has same file',
-  empty: 'file name can not be empty',
-  invalid: `file name can not include ${unVerifiedFileNameChars.join(' ')}`,
-}
-
 const NewFileInput = (
   props: HTMLAttributes<HTMLInputElement> & {
     fileNode: IFile
+    createType?: 'file' | 'dir'
     parentNode?: IFile
     onCreate: (file: IFile) => void
     onCancel: () => void
   },
 ) => {
-  const { className, fileNode, parentNode, onCreate, onCancel, ...otherProps } = props
+  const {
+    className,
+    fileNode,
+    parentNode,
+    createType = 'file',
+    onCreate,
+    onCancel,
+    ...otherProps
+  } = props
+
+  const InvalidTextMap = {
+    same: createType === 'file' ? 'has same file' : 'has same folder',
+    empty: 'file name can not be empty',
+    invalid: `file name can not include ${unVerifiedFileNameChars.join(' ')}`,
+  }
+
   const [inputName, setInputName] = useState('')
   const [invalidState, setInvalidState] = useState(false)
   const [invalidText, setInvalidText] = useState(InvalidTextMap.same)
@@ -46,7 +56,7 @@ const NewFileInput = (
     async (fileName: string): Promise<IFile> => {
       let path1 = parentNode?.path
 
-      if (!isMdFile(fileName)) {
+      if (createType === 'file' && !isMdFile(fileName)) {
         fileName = `${fileName}.md`
       }
 
@@ -54,12 +64,12 @@ const NewFileInput = (
 
       return {
         id: fileNode.id,
-        kind: 'file',
+        kind: createType,
         path: targetPath,
         name: fileName,
       }
     },
-    [inputName, fileNode, parentNode],
+    [inputName, fileNode, parentNode, createType],
   )
 
   const verify = useCallback(

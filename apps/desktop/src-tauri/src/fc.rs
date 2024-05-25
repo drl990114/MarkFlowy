@@ -121,11 +121,11 @@ pub fn create_file<P: AsRef<Path>>(filename: P) -> AnyResult<()> {
     Ok(())
 }
 
-// pub fn create_directory(path: &str) -> SerdeResult<()> {
-//     let dir_path = Path::new(path);
-//     fs::create_dir(dir_path);
-//     Ok(())
-// }
+pub fn create_folder(path: &str) -> AnyResult<()> {
+    let dir_path = Path::new(path);
+    let _ = fs::create_dir(dir_path);
+    Ok(())
+}
 
 pub fn remove_file(path: &str) -> AnyResult<()> {
     let file_path = Path::new(path);
@@ -237,6 +237,12 @@ pub mod cmd {
     #[tauri::command]
     pub fn delete_file(file_path: &str) -> String {
         fc::remove_file(file_path);
+        String::from("OK")
+    }
+
+    #[tauri::command]
+    pub fn create_folder(path: &str) -> String {
+        let _ = fc::create_folder(path);
         String::from("OK")
     }
 

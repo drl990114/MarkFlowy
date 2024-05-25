@@ -45,6 +45,7 @@ pub fn run() {
             fc::cmd::get_file_content,
             fc::cmd::write_file,
             fc::cmd::delete_file,
+            fc::cmd::create_folder,
             fc::cmd::delete_folder,
             fc::cmd::file_exists,
             fc::cmd::move_files_to_target_folder,

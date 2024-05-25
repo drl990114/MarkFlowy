@@ -4,7 +4,7 @@ import { setFileObject, setFileObjectByPath } from './files'
 
 interface FileEntry {
   name: string
-  kind: 'file' | 'dir' | 'pending'
+  kind: 'file' | 'dir' | 'pending_new_file' | 'pending_new_folder'
   path?: string
   children?: IFile[]
 }
