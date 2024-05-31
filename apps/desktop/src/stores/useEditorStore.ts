@@ -129,32 +129,17 @@ const useEditorStore = create<EditorStore>((set, get) => {
     deleteNode: async (fileNode) => {
       const { folderData, activeId, delOpenedFile, opened } = get()
       const parent = findParentNode(fileNode, folderData![0])
-      let targetFile: IFile | undefined
 
       if (parent?.children) {
-        const newChildren: IFile[] = []
-        for (let i = 0; i < parent.children.length; i++) {
-          const child = parent.children[i]
-          if (isSameFile(child, fileNode)) {
-            targetFile = child
-          } else {
-            newChildren.push(child)
-          }
-        }
-        if (!targetFile) return
-
-        parent.children = newChildren
-
-        await invoke(targetFile.kind === 'dir' ? 'delete_folder' : 'delete_file', {
-          filePath: targetFile.path,
+        await invoke(fileNode.kind === 'dir' ? 'delete_folder' : 'delete_file', {
+          filePath: fileNode.path,
         })
 
-        delOpenedFile(targetFile!.id)
+        delOpenedFile(fileNode!.id)
         set((state) => {
           return {
             ...state,
-            activeId: activeId === targetFile!.id ? opened[opened.length - 1] : activeId,
-            // folderData: [...(state.folderData || [])],
+            activeId: activeId === fileNode!.id ? opened[opened.length - 1] : activeId,
           }
         })
       }

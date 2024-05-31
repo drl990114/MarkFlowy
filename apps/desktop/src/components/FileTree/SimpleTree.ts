@@ -10,22 +10,12 @@ export class SimpleTree<T extends SimpleData> {
     return this.root.children?.map((node) => node.data) ?? []
   }
 
-  create(args: {
-    parentId: string | null
-    index: number
-    data: T
-    nodeId: string
-    nodeType: 'internal' | 'leaf'
-  }) {
-    console.log('createcreate', args)
-    let parent = args.parentId ? this.find(args.parentId) : this.root
-
-    if (args.nodeType === 'internal') {
-      parent = this.find(args.nodeId)
-    }
-    if (!parent) return null
-    parent.addChild(args.data)
+  create(args: { parentId: string | null; data: T }) {
+    const parent = args.parentId ? this.find(args.parentId) : this.root;
+    if (!parent) return null;
+    parent.addChild(args.data);
   }
+
 
   move(args: { id: string; parentId: string | null; index: number }) {
     const src = this.find(args.id)
@@ -92,7 +82,7 @@ class SimpleNode<T extends SimpleData> {
   addChild(data: T) {
     const node = createNode(data, this)
     this.children = this.children ?? []
-    const i = this.children.findIndex((child) => !Array.isArray(child.children))
+    const i = this.children.findIndex((child) => !Array.isArray(child.children)) || 0
     this.children.splice(i, 0, node)
     this.data.children = this.data.children ?? []
     this.data.children.splice(i, 0, data)

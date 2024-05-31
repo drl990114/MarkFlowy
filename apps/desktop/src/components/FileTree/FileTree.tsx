@@ -1,5 +1,5 @@
 import type { FC } from 'react'
-import { memo, useMemo, useState } from 'react'
+import { memo, useMemo } from 'react'
 import FileNode from './FileNode'
 import { type IFile } from '@/helper/filesys'
 import { Tree } from 'react-arborist'
@@ -15,8 +15,7 @@ import { useTranslation } from 'react-i18next'
 
 const FileTree: FC<FileTreeProps> = (props) => {
   const { data, onSelect } = props
-  const [active, setActive] = useState<any>(null)
-  const { setFolderData } = useEditorStore()
+  const { activeId, setFolderData } = useEditorStore()
   const { t } = useTranslation()
   const tree = useMemo(() => new SimpleTree<IFile>(data), [data])
 
@@ -27,6 +26,8 @@ const FileTree: FC<FileTreeProps> = (props) => {
 
     if (file && file.path !== newPath && file.path) {
       delete pathEntries[file.path]
+
+      tree.update({ id, changes: { ...file, path: newPath } })
       file.path = newPath
       pathEntries[newPath] = file
     }
@@ -43,7 +44,10 @@ const FileTree: FC<FileTreeProps> = (props) => {
     if (!parentNode) {
       return
     }
-    const targetPath = await invoke<string>('path_join', { path1: parentNode?.data.path, path2: _dragNode.data.name })
+    const targetPath = await invoke<string>('path_join', {
+      path1: parentNode.data.path,
+      path2: _dragNode.data.name,
+    })
     const isExist = await invoke<boolean>('file_exists', { filePath: targetPath })
 
     if (isExist) {
@@ -62,17 +66,9 @@ const FileTree: FC<FileTreeProps> = (props) => {
       })
     }
     const move = (replace = false) => {
-      const _dragIds = _dragNodes.map((node) => node.data.id)
-
-      for (const id of _dragIds) {
-        tree.move({ id, parentId: args.parentId, index: args.index })
-      }
-
-      setFolderData(tree.data)
-
       invoke('move_files_to_target_folder', {
         files: _dragNodes.map((node) => node.data.path),
-        targetFolder: args.parentNode?.data.path,
+        targetFolder: parentNode.data.path,
         replaceExist: replace,
       }).then((res) => {
         if (Array.isArray(res)) {
@@ -102,11 +98,15 @@ const FileTree: FC<FileTreeProps> = (props) => {
               updateFileNodePath(oldFile.id, oldToNew.new_path)
             }
           })
+
+          const _dragIds = _dragNodes.map((node) => node.data.id)
+          for (const id of _dragIds) {
+            tree.move({ id, parentId: args.parentId, index: args.index })
+          }
+          setFolderData(tree.data)
         }
-        setFolderData(tree.data)
       })
     }
-  
   }
 
   return (
@@ -119,12 +119,11 @@ const FileTree: FC<FileTreeProps> = (props) => {
           initialOpenState={{
             [data[0]?.id]: true,
           }}
-          selection={active?.id}
+          selection={activeId}
           indent={16}
           disableMultiSelection
           onSelect={(node) => onSelect(node[0]?.data)}
           onMove={onMove}
-          onActivate={(node) => setActive(node.data)}
         >
           {(props) => FileNode({ ...props, simpleTree: tree, setFolderData })}
         </Tree>

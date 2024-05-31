@@ -11,6 +11,7 @@ import { EditorAreaHeader } from './EditorAreaHeader'
 import { darken } from '@markflowy/theme'
 import { showContextMenu } from '../UI/ContextMenu'
 import { useTranslation } from 'react-i18next'
+import { Tooltip } from 'zens'
 
 type ContainerProps = {
   visible: boolean
@@ -135,32 +136,37 @@ const EditorAreaTabs = memo(() => {
           }
 
           return (
-            <TabItem
-              active={active}
-              onClick={() => onSelectItem(file.id)}
-              key={id}
-              onContextMenu={handleContextMenu}
-            >
-              <i className={'ri-file-3-line tab-items__icon'} />
-              <span
-                style={{
-                  color: active ? curTheme.styledConstants.accentColor : '',
-                }}
+            <Tooltip title={file.name} key={id}>
+              <TabItem
+                active={active}
+                onClick={() => onSelectItem(file.id)}
+                key={id}
+                onContextMenu={handleContextMenu}
               >
-                {file.name}
-              </span>
+                <i className={'ri-file-3-line tab-items__icon'} />
+                <span
+                  style={{
+                    color: active ? curTheme.styledConstants.accentColor : '',
+                    maxWidth: '160px',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                  }}
+                >
+                  {file.name}
+                </span>
 
-              <div className='tab-items__right'>
-                {editorState?.hasUnsavedChanges ? (
-                  <Dot />
-                ) : (
-                  <i
-                    className='ri-close-line tab-items__icon tab-items__close'
-                    onClick={(ev: React.MouseEvent<HTMLElement, MouseEvent>) => close(ev, id)}
-                  />
-                )}
-              </div>
-            </TabItem>
+                <div className='tab-items__right'>
+                  {editorState?.hasUnsavedChanges ? (
+                    <Dot />
+                  ) : (
+                    <i
+                      className='ri-close-line tab-items__icon tab-items__close'
+                      onClick={(ev: React.MouseEvent<HTMLElement, MouseEvent>) => close(ev, id)}
+                    />
+                  )}
+                </div>
+              </TabItem>
+            </Tooltip>
           )
         })}
       </div>

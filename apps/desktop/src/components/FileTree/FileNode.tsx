@@ -33,6 +33,9 @@ function FileNode({
     })
   }
 
+  const isPending = node.data.kind === 'pending_new_file' || node.data.kind === 'pending_new_folder'
+  const createType = node.data.kind === 'pending_new_folder' ? 'dir' : 'file'
+
   return (
     <NodeContainer
       style={style}
@@ -49,31 +52,57 @@ function FileNode({
         const items = []
 
         if (node.parent) {
-          items.push({
-            label: t('contextmenu.explorer.add_file'),
-            value: 'new_file',
-            handler: () => {
-              if (node.parent) {
-                const data = { id: nanoid(), name: '', kind: 'pending' } as any
-                if (node.isInternal) {
-                  node.open()
-                }
-                simpleTree.create({
-                  parentId: node.parent.id,
-                  data,
-                  index: 0,
-                  nodeId: node.id,
-                  nodeType: node.isLeaf ? 'leaf' : 'internal',
-                })
-                tree.create({
-                  parentId: node.parent?.id,
-                  index: 0,
-                })
+          items.push(
+            {
+              label: t('contextmenu.explorer.add_file'),
+              value: 'new_file',
+              handler: () => {
+                if (node.parent) {
+                  const data = { id: nanoid(), name: '', kind: 'pending_new_file' } as any
+                  if (node.isInternal) {
+                    node.open()
+                  }
+                  const parentId = node.isInternal ? node.id : node.parent.id
 
-                setFolderData(simpleTree.data)
-              }
+                  simpleTree.create({
+                    parentId,
+                    data
+                  })
+                  tree.create({
+                    parentId,
+                    index: 0,
+                  })
+
+                  setFolderData(simpleTree.data)
+                }
+              },
             },
-          })
+            {
+              label: t('contextmenu.explorer.add_folder'),
+              value: 'new_folder',
+              handler: () => {
+                if (node.parent) {
+                  const data = { id: nanoid(), name: '', kind: 'pending_new_folder', children: [] } as any
+                  if (node.isInternal) {
+                    node.open()
+                  }
+                  const parentId = node.isInternal ? node.id : node.parent.id
+
+                  simpleTree.create({
+                    parentId,
+                    data
+                  })
+                  tree.create({
+                    parentId,
+                    index: 0,
+                    type: 'internal',
+                  })
+
+                  setFolderData(simpleTree.data)
+                }
+              },
+            },
+          )
         }
         items.push({
           value: node.data.kind === 'dir' ? 'delete_folder' : 'delete_file',
@@ -113,23 +142,29 @@ function FileNode({
           })}
         </div>
 
-        {node.data.kind === 'pending' ? (
+        {isPending ? (
           <NewFileInput
             style={{ paddingTop: 0, paddingBottom: 0 }}
             fileNode={node.data}
+            createType={createType}
             parentNode={node.parent?.data}
             onCreate={async (file) => {
+              if (createType === 'dir') {
+                await invoke('create_folder', {
+                  path: file.path,
+                })
+              } else {
+                await invoke('write_file', {
+                  filePath: file.path,
+                  content: '',
+                })
+              }
               const targetFile = createFile({
                 path: file.path,
                 name: file.name,
                 content: '',
                 id: node.id,
-              })
-
-              console.log('onCreate', targetFile)
-              await invoke('write_file', {
-                filePath: targetFile.path,
-                content: targetFile.content,
+                kind: file.kind,
               })
 
               simpleTree.update({
