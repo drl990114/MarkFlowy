@@ -1,4 +1,4 @@
-import { createFile, type IFile } from '@/helper/filesys'
+import { createFile, updateFile, type IFile } from '@/helper/filesys'
 import { NodeRendererProps } from 'react-arborist'
 import { NodeContainer } from './styles'
 import { invoke } from '@tauri-apps/api/core'
@@ -24,7 +24,7 @@ function FileNode({
 }) {
   const indentSize = Number.parseFloat(`${style.paddingLeft || 0}`)
   const { t } = useTranslation()
-  const { deleteNode } = useEditorStore()
+  const { deleteNode, setFolderDataPure } = useEditorStore()
 
   const delFileHandler = () => {
     deleteNode(node.data).then(() => {
@@ -33,8 +33,65 @@ function FileNode({
     })
   }
 
-  const isPending = node.data.kind === 'pending_new_file' || node.data.kind === 'pending_new_folder'
-  const createType = node.data.kind === 'pending_new_folder' ? 'dir' : 'file'
+  const isPending =
+    node.data.kind === 'pending_new_file' ||
+    node.data.kind === 'pending_new_folder' ||
+    node.data.kind === 'pending_edit_folder' ||
+    node.data.kind === 'pending_edit_file'
+
+  const inputType =
+    node.data.kind === 'pending_new_folder' || node.data.kind === 'pending_edit_folder'
+      ? 'dir'
+      : 'file'
+  const isUpdate =
+    node.data.kind === 'pending_edit_folder' || node.data.kind === 'pending_edit_file'
+
+  const createFileHandler = async (file: IFile) => {
+    if (inputType === 'dir') {
+      await invoke('create_folder', {
+        path: file.path,
+      })
+    } else {
+      await invoke('write_file', {
+        filePath: file.path,
+        content: '',
+      })
+    }
+    const targetFile = createFile({
+      path: file.path,
+      name: file.name,
+      content: '',
+      id: node.id,
+      kind: file.kind,
+    })
+
+    simpleTree.update({
+      id: node.id,
+      changes: { ...node.data, ...targetFile },
+    })
+    setFolderData(simpleTree.data)
+  }
+
+  const renameFileHandler = async (file: IFile) => {
+    await invoke('rename_fs', {
+      oldPath: node.data.path,
+      newPath: file.path,
+    })
+
+    const targetFile = updateFile({
+      path: file.path,
+      name: file.name,
+      id: node.id,
+      kind: file.kind,
+    })
+
+    simpleTree.update({
+      id: node.id,
+      changes: { ...node.data, ...targetFile },
+    })
+
+    setFolderDataPure(simpleTree.data)
+  }
 
   return (
     <NodeContainer
@@ -66,7 +123,7 @@ function FileNode({
 
                   simpleTree.create({
                     parentId,
-                    data
+                    data,
                   })
                   tree.create({
                     parentId,
@@ -82,7 +139,12 @@ function FileNode({
               value: 'new_folder',
               handler: () => {
                 if (node.parent) {
-                  const data = { id: nanoid(), name: '', kind: 'pending_new_folder', children: [] } as any
+                  const data = {
+                    id: nanoid(),
+                    name: '',
+                    kind: 'pending_new_folder',
+                    children: [],
+                  } as any
                   if (node.isInternal) {
                     node.open()
                   }
@@ -90,7 +152,7 @@ function FileNode({
 
                   simpleTree.create({
                     parentId,
-                    data
+                    data,
                   })
                   tree.create({
                     parentId,
@@ -99,6 +161,21 @@ function FileNode({
                   })
 
                   setFolderData(simpleTree.data)
+                }
+              },
+            },
+            {
+              label: t('contextmenu.explorer.rename'),
+              value: 'rename',
+              handler: () => {
+                if (node.parent) {
+                  simpleTree.update({
+                    id: node.id,
+                    changes: {
+                      kind: node.data.kind === 'dir' ? 'pending_edit_folder' : 'pending_edit_file',
+                    },
+                  })
+                  setFolderDataPure(simpleTree.data)
                 }
               },
             },
@@ -146,35 +223,25 @@ function FileNode({
           <NewFileInput
             style={{ paddingTop: 0, paddingBottom: 0 }}
             fileNode={node.data}
-            createType={createType}
+            inputType={inputType}
             parentNode={node.parent?.data}
             onCreate={async (file) => {
-              if (createType === 'dir') {
-                await invoke('create_folder', {
-                  path: file.path,
-                })
+              if (isUpdate) {
+                await renameFileHandler(file)
               } else {
-                await invoke('write_file', {
-                  filePath: file.path,
-                  content: '',
-                })
+                await createFileHandler(file)
               }
-              const targetFile = createFile({
-                path: file.path,
-                name: file.name,
-                content: '',
-                id: node.id,
-                kind: file.kind,
-              })
-
-              simpleTree.update({
-                id: node.id,
-                changes: { ...node.data, ...targetFile },
-              })
-              setFolderData(simpleTree.data)
             }}
             onCancel={() => {
-              simpleTree.drop({ id: node.id })
+              if (isUpdate) {
+                simpleTree.update({
+                  id: node.id,
+                  changes: { kind: node.data.kind === 'pending_edit_folder' ? 'dir' : 'file' },
+                })
+              } else {
+                simpleTree.drop({ id: node.id })
+              }
+
               setFolderData(simpleTree.data)
             }}
           />

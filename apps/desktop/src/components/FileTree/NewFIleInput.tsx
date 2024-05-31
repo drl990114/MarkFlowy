@@ -7,7 +7,7 @@ import { invoke } from '@tauri-apps/api/core'
 const NewFileInput = (
   props: HTMLAttributes<HTMLInputElement> & {
     fileNode: IFile
-    createType?: 'file' | 'dir'
+    inputType?: 'file' | 'dir'
     parentNode?: IFile
     onCreate: (file: IFile) => void
     onCancel: () => void
@@ -17,7 +17,7 @@ const NewFileInput = (
     className,
     fileNode,
     parentNode,
-    createType = 'file',
+    inputType: createType = 'file',
     onCreate,
     onCancel,
     ...otherProps
@@ -29,7 +29,8 @@ const NewFileInput = (
     invalid: `file name can not include ${unVerifiedFileNameChars.join(' ')}`,
   }
 
-  const [inputName, setInputName] = useState('')
+  const initialName = fileNode.name || ''
+  const [inputName, setInputName] = useState(initialName)
   const [invalidState, setInvalidState] = useState(false)
   const [invalidText, setInvalidText] = useState(InvalidTextMap.same)
   const verifing = useRef(false)
@@ -44,13 +45,13 @@ const NewFileInput = (
     setTimeout(() => {
       inputRef.current?.focus()
       inputRef.current?.addEventListener('blur', hideInput)
-      verify('')
+      verify(initialName)
     })
 
     return () => {
       inputRef.current?.removeEventListener('blur', hideInput)
     }
-  }, [])
+  }, [initialName])
 
   const getFileInfo = useCallback(
     async (fileName: string): Promise<IFile> => {
