@@ -219,6 +219,12 @@ const useEditorStore = create<EditorStore>((set, get) => {
         activeId: undefined,
       })),
 
+    setFolderDataPure: (folderData) =>
+      set((state) => ({
+        ...state,
+        folderData,
+      })),
+
     setEditorCtx: (id, ctx) =>
       set((state) => {
         state.editorCtxMap.set(id, ctx)
@@ -255,6 +261,12 @@ type EditorStore = {
   delOtherOpenedFile: (id: string) => void
   delAllOpenedFile: () => void
   setFolderData: (folderData: IFile[]) => void
+  /**
+   * dont change opened and activeId
+   * @param folderData 
+   * @returns 
+   */
+  setFolderDataPure: (folderData: IFile[]) => void
   setEditorDelegate: (id: string, delegate: EditorDelegate<any>) => void
   getEditorContent: (id: string) => string
   getEditorDelegate: (id: string) => EditorDelegate<any> | undefined

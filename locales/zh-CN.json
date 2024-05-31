@@ -78,6 +78,7 @@
     "explorer": {
       "add_file": "新建文件",
       "add_folder": "新建文件夹",
+      "rename": "重命名",
       "delete_file": "删除文件",
       "delete_folder": "删除文件夹"
     },

@@ -4,7 +4,7 @@ import { setFileObject, setFileObjectByPath } from './files'
 
 interface FileEntry {
   name: string
-  kind: 'file' | 'dir' | 'pending_new_file' | 'pending_new_folder'
+  kind: 'file' | 'dir' | 'pending_new_file' | 'pending_new_folder' | 'pending_edit_folder' | 'pending_edit_file'
   path?: string
   children?: IFile[]
 }
@@ -42,6 +42,12 @@ export const createFile = (opt?: Partial<IFile>): IFile => {
   if (file.path) {
     setFileObjectByPath(file.path, file)
   }
+  return file
+}
+
+export const updateFile = (file: IFile): IFile => {
+  setFileObject(file.id, file)
+  setFileObjectByPath(file.path!, file)
   return file
 }
 

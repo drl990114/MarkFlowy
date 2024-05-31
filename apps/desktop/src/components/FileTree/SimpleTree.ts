@@ -10,18 +10,17 @@ export class SimpleTree<T extends SimpleData> {
     return this.root.children?.map((node) => node.data) ?? []
   }
 
-  create(args: { parentId: string | null; data: T }) {
-    const parent = args.parentId ? this.find(args.parentId) : this.root;
-    if (!parent) return null;
-    parent.addChild(args.data);
+  create(args: { parentId: string | null; index?: number; data: T }) {
+    const parent = args.parentId ? this.find(args.parentId) : this.root
+    if (!parent) return null
+    parent.addChild(args.data, args.index)
   }
-
 
   move(args: { id: string; parentId: string | null; index: number }) {
     const src = this.find(args.id)
     const parent = args.parentId ? this.find(args.parentId) : this.root
     if (!src || !parent) return
-    parent.addChild(src.data)
+    parent.addChild(src.data, args.index)
     src.drop()
   }
 
@@ -79,13 +78,15 @@ class SimpleNode<T extends SimpleData> {
     return this.hasParent() ? this.parent.children!.indexOf(this) : -1
   }
 
-  addChild(data: T) {
+  addChild(data: T, index?: number) {
     const node = createNode(data, this)
     this.children = this.children ?? []
-    const i = this.children.findIndex((child) => !Array.isArray(child.children)) || 0
-    this.children.splice(i, 0, node)
+    if (index === undefined) {
+      index = this.children.findIndex((child) => !Array.isArray(child.children)) || 0
+    }
+    this.children.splice(index, 0, node)
     this.data.children = this.data.children ?? []
-    this.data.children.splice(i, 0, data)
+    this.data.children.splice(index, 0, data)
   }
 
   removeChild(index: number) {
@@ -95,7 +96,8 @@ class SimpleNode<T extends SimpleData> {
 
   update(changes: Partial<T>) {
     if (this.hasParent()) {
-      this.parent.addChild({ ...this.data, ...changes })
+      const i = this.childIndex
+      this.parent.addChild({ ...this.data, ...changes }, i)
       this.drop()
     }
   }

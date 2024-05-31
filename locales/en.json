@@ -79,6 +79,7 @@
     "explorer": {
       "add_file": "New file",
       "add_folder": "New folder",
+      "rename": "Rename",
       "delete_file": "Delete file",
       "delete_folder": "Delete folder"
     },

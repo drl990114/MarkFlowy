@@ -210,6 +210,7 @@ pub fn move_files_to_target_folder(
 
 pub mod cmd {
     use std::path::Path;
+    use std::fs;
 
     use crate::fc;
 
@@ -275,5 +276,13 @@ pub mod cmd {
     pub fn path_join(path1: &str, path2: &str) -> String {
         let path = Path::new(path1).join(path2);
         path.to_str().unwrap().to_string()
+    }
+
+    #[tauri::command]
+    pub fn rename_fs (old_path: &str, new_path: &str) -> String {
+        let path = Path::new(old_path);
+        let new_path = Path::new(new_path);
+        fs::rename(path, new_path).unwrap();
+        String::from("OK")
     }
 }
