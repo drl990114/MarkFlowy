@@ -20,6 +20,7 @@ type ContainerProps = {
 const Container = styled.div<ContainerProps>`
   display: flex;
   justify-content: ${(props) => (props.visible ? 'space-between' : 'flex-end')};
+  background-color: ${(props) => props.theme.editorTabBgColor};
 
   .tab-items {
     display: flex;

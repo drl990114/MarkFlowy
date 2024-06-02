@@ -74,14 +74,21 @@ const styledLightTheme = {
   labelFontColor: '#9ca3af',
   accentColor: '#0369a1',
   borderColor: '#d7d7dc',
-  bgColor: '#fdfdfd',
+  bgColor: '#FAFAFA',
   hoverColor: '#d7d7dc',
   warnColor: '#e2b340',
   dangerColor: '#dc2626',
   tipsBgColor: '#f6f7f9',
   successColor: '#00c853',
   boxShadowColor: 'rgba(0, 0, 0, 0.08)',
-  
+
+  // app
+  titleBarBgColor: '#DCDCDD',
+  editorTabBgColor: '#EBEBEC',
+  editorTabActiveBgColor: '#FAFAFA',
+  sideBarHeaderBgColor: '#EBEBEC',
+  sideBarBgColor: '#EBEBEC',
+
   // components
   buttonBgColor: '#f6f7f9',
   tooltipBgColor: '#d7d7dc',
@@ -103,13 +110,20 @@ const styledDarkTheme = {
   labelFontColor: 'rgba(255, 255, 255, 0.5)',
   accentColor: '#1c78aa',
   borderColor: '#363b41',
-  bgColor: '#05010d',
+  bgColor: '#151515',
   hoverColor: '#1f2225',
   warnColor: '#e2b340',
   dangerColor: '#dc2626',
   tipsBgColor: '#0e1419',
   successColor: '#00c853',
   boxShadowColor: 'rgba(255, 255, 255, 0.04)',
+
+  // app
+  titleBarBgColor: '#212326',
+  editorTabBgColor: '#16191d',
+  editorTabActiveBgColor: '#151515',
+  sideBarHeaderBgColor: '#16191d',
+  sideBarBgColor: '#21262C',
 
   // components
   buttonBgColor: '#21262c',

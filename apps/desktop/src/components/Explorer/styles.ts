@@ -14,16 +14,6 @@ export const Container = styled.div`
     }
   }
 
-  .explorer-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    height: 2rem;
-    padding: 0 8px;
-    line-height: 2rem;
-    border-bottom: 1px solid ${(props) => props.theme.borderColor};
-  }
-
   .explorer-bottom {
     display: flex;
     justify-content: space-between;

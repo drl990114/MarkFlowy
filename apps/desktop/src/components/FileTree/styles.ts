@@ -15,7 +15,6 @@ export const NodeContainer = styled.div<NodeContainerProps>`
   height: 100%;
   color: ${(props) =>
     props.highlight || props.selected ? props.theme.accentColor : props.theme.primaryFontColor};
-  background-color: ${(props) => (props.highlight ? props.theme.borderColor : 'transparent')};
 
   &:hover {
     background-color: ${(props) => props.theme.borderColor};
