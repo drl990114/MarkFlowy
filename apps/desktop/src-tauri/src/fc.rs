@@ -148,6 +148,32 @@ pub struct MoveFileInfo {
     is_replaced: Option<bool>,
 }
 
+pub fn rename_fs (old_path: &Path, new_path: &Path) -> AnyResult<MoveFileInfo> {
+    fs::rename(old_path, new_path)?;
+
+    let is_folder = new_path.is_dir();
+
+    if is_folder {
+        let files = read_directory(new_path.to_str().unwrap());
+
+        Ok(MoveFileInfo {
+            old_path: old_path.to_str().unwrap().to_string(),
+            new_path: new_path.to_str().unwrap().to_string(),
+            is_folder: is_folder,
+            children: Some(files),
+            is_replaced: Some(false),
+        })
+    } else {
+        Ok(MoveFileInfo {
+            old_path: old_path.to_str().unwrap().to_string(),
+            new_path: new_path.to_str().unwrap().to_string(),
+            is_folder: is_folder,
+            children: None,
+            is_replaced: Some(false),
+        })
+    }
+}
+
 pub fn move_files_to_target_folder(
     files: Vec<String>,
     target_folder: &str,
@@ -180,29 +206,8 @@ pub fn move_files_to_target_folder(
             }
         }
 
-        fs::rename(file_path, target_path.clone())?;
-
-        let is_folder = target_path.clone().is_dir();
-
-        if is_folder {
-            let files = read_directory(target_path.to_str().unwrap());
-
-            path_map_old_to_new.push(MoveFileInfo {
-                old_path: file.to_string(),
-                new_path: target_path.to_str().unwrap().to_string(),
-                is_folder: is_folder,
-                children: Some(files),
-                is_replaced: Some(false),
-            });
-        } else {
-            path_map_old_to_new.push(MoveFileInfo {
-                old_path: file.to_string(),
-                new_path: target_path.to_str().unwrap().to_string(),
-                is_folder: is_folder,
-                children: None,
-                is_replaced: Some(false),
-            });
-        }
+        let move_file_info = rename_fs(file_path, Path::new(&target_path))?;
+        path_map_old_to_new.push(move_file_info);
     }
 
     Ok(path_map_old_to_new)
@@ -279,10 +284,10 @@ pub mod cmd {
     }
 
     #[tauri::command]
-    pub fn rename_fs (old_path: &str, new_path: &str) -> String {
+    pub fn rename_fs (old_path: &str, new_path: &str) -> MoveFileInfo {
         let path = Path::new(old_path);
         let new_path = Path::new(new_path);
-        fs::rename(path, new_path).unwrap();
-        String::from("OK")
+        let move_file_info = fc::rename_fs(path, new_path).unwrap();
+        move_file_info
     }
 }
