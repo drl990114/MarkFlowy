@@ -4152,7 +4152,7 @@ __metadata:
     react-test-renderer: "npm:^18.2.0"
     react-use: "npm:^17.5.0"
     remixicon: "npm:^4.1.0"
-    rme: "npm:^0.0.60"
+    rme: "npm:^0.0.61"
     styled-components: "npm:^6.1.11"
     stylis: "npm:^4.0.0"
     tinykeys: "npm:^2.1.0"
@@ -12231,10 +12231,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fuse.js@npm:^6.6.2":
-  version: 6.6.2
-  resolution: "fuse.js@npm:6.6.2"
-  checksum: 10/4768725963ee07dacfcb4abb001a12ea5e6e44c95d4e0918fcbfe0469107c5ad3ece2f1930396eb6c210383edf4c14ca083b91a2fc54950c5d021935a63d89de
+"fuse.js@npm:^7.0.0":
+  version: 7.0.0
+  resolution: "fuse.js@npm:7.0.0"
+  checksum: 10/d75d35f2d61afa85b8248f9cbfc7d4df29ae47ea574a15ad5c3c2a41930c5ed78668346295508b59ec4929fcb1a5cd6d9a8c649b5a3bc8b18e515f4e4cb9809d
   languageName: node
   linkType: hard
 
@@ -19716,9 +19716,9 @@ plugin-image-zoom@ataft/plugin-image-zoom:
   languageName: node
   linkType: hard
 
-"rme@npm:^0.0.60":
-  version: 0.0.60
-  resolution: "rme@npm:0.0.60"
+"rme@npm:^0.0.61":
+  version: 0.0.61
+  resolution: "rme@npm:0.0.61"
   dependencies:
     "@codemirror/autocomplete": "npm:^6.8.1"
     "@codemirror/commands": "npm:^6.2.4"
@@ -19757,7 +19757,7 @@ plugin-image-zoom@ataft/plugin-image-zoom:
     "@remirror/types": "npm:^1.0.1"
     color: "npm:^4.2.3"
     create-context-state: "npm:^2.0.0"
-    fuse.js: "npm:^6.6.2"
+    fuse.js: "npm:^7.0.0"
     html-parse-stringify: "npm:^3.0.1"
     i18next: "npm:^23.10.1"
     jsx-dom-cjs: "npm:^8.0.7"
@@ -19774,23 +19774,23 @@ plugin-image-zoom@ataft/plugin-image-zoom:
     parse5: "npm:^7.1.2"
     prosemirror-flat-list: "npm:^0.4.2"
     prosemirror-paste-rules: "npm:^2.0.7"
-    react: "npm:^18.2.0"
+    react: "npm:^18.3.1"
     react-dom: "npm:^18.2.0"
     react-i18next: "npm:^14.1.0"
     react-popper: "npm:^2.3.0"
     remirror: "npm:^2.0.39"
     remirror-extension-flat-list: "npm:^0.2.0"
     remixicon: "npm:^4.1.0"
-    styled-components: "npm:^6.1.0"
+    styled-components: "npm:^6.1.11"
     stylis: "npm:^4.0.0"
     svgmoji: "npm:^3.2.0"
     void-elements: "npm:^3.1.0"
     yjs: "npm:^13.6.14"
-    zens: "npm:^0.0.23"
+    zens: "npm:^0.0.24"
   peerDependencies:
     react: ">=16.14.0"
     react-dom: ">=16.14.0"
-  checksum: 10/829d60d8ff7026b9f987df7ad4099fee5019fd3e48ec9108419dc092de5f6b91a081503e648ca77a4e128e49ff36aaba7b6ac96cd7216808b93b0b11fc9f79dd
+  checksum: 10/ea4538a014551ccb174f38b0e0e1d3a3049c16c8f9b3a8d99d76a66a954880bdc2c94d71e01b05c1a2121f613113cb1f4c7901b2500e7d662ba1bb2b63784ecb
   languageName: node
   linkType: hard
 
@@ -23328,7 +23328,7 @@ plugin-image-zoom@ataft/plugin-image-zoom:
   languageName: node
   linkType: hard
 
-"zens@npm:0.0.23, zens@npm:^0.0.23":
+"zens@npm:0.0.23":
   version: 0.0.23
   resolution: "zens@npm:0.0.23"
   dependencies:
@@ -23347,6 +23347,28 @@ plugin-image-zoom@ataft/plugin-image-zoom:
     styled-components: "npm:^6.1.0"
     stylis: "npm:^4.0.0"
   checksum: 10/2998ec14ffb57be1d2732de6ad2a0d42e847a5939c1b64f3b89c0273fef5b025eddbdd178d632f2ee408e3c97916f90e5471f5decb21f0e82e458679d37d8a32
+  languageName: node
+  linkType: hard
+
+"zens@npm:^0.0.24":
+  version: 0.0.24
+  resolution: "zens@npm:0.0.24"
+  dependencies:
+    "@ariakit/react": "npm:^0.4.5"
+    "@babel/runtime": "npm:^7"
+    "@emotion/is-prop-valid": "npm:^1.2.2"
+    "@floating-ui/dom": "npm:^1.0.0"
+    classnames: "npm:^2.3.0"
+    clsx: "npm:^2.0.0"
+    color: "npm:^4.2.3"
+    rc-image: "npm:^7.5.1"
+    react: "npm:^18.2.0"
+    react-dom: "npm:^18.2.0"
+    react-spinners: "npm:^0.13.8"
+    sonner: "npm:^1.4.0"
+    styled-components: "npm:^6.1.11"
+    stylis: "npm:^4.0.0"
+  checksum: 10/591f576e4c39b298ade89ab7b3ad2008597faac48fd9a7a1239bf0959ef9b77f9103e091ab5ab0abe181d9d6c4f81dec2bfdecba23a9b6c871248fc35af2bcf0
   languageName: node
   linkType: hard
 

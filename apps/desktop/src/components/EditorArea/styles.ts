@@ -33,6 +33,7 @@ export const TabItem = styled.div<TabItemProps>`
   align-items: center;
   padding: 0 ${(props) => props.theme.spaceXs};
   font-size: ${(props) => props.theme.fontXs};
+  background-color: ${(props) => (props.active ? props.theme.editorTabActiveBgColor : props.theme.editorTabBgColor)};
   height: calc(100% + 2px);
   box-sizing: border-box;
   white-space: nowrap;

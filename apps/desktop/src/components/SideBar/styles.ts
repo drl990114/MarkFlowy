@@ -5,6 +5,7 @@ export const SideBarHeader = styled.div`
   justify-content: flex-start;
   align-items: center;
   flex-shrink: 0;
+  background-color: ${(props) => props.theme.sideBarHeaderBgColor};
 `
 
 export const Container = styled.div<ContainerProps>`
