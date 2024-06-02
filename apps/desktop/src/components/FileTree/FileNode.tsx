@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next'
 import NiceModal from '@ebay/nice-modal-react'
 import { MODAL_CONFIRM_ID } from '../Modal'
 import { useEditorStore } from '@/stores'
+import { MoveFileInfo, moveFileNode } from './file-operator'
 
 function FileNode({
   style,
@@ -73,23 +74,24 @@ function FileNode({
   }
 
   const renameFileHandler = async (file: IFile) => {
-    await invoke('rename_fs', {
+    const move_file_info = await invoke<MoveFileInfo>('rename_fs', {
       oldPath: node.data.path,
       newPath: file.path,
     })
 
-    const targetFile = updateFile({
+    moveFileNode(simpleTree, move_file_info)
+
+    updateFile({
       path: file.path,
       name: file.name,
       id: node.id,
       kind: file.kind,
     })
-
+    
     simpleTree.update({
       id: node.id,
-      changes: { ...node.data, ...targetFile },
+      changes: { kind: file.kind, name: file.name },
     })
-
     setFolderDataPure(simpleTree.data)
   }
 
@@ -226,6 +228,7 @@ function FileNode({
             inputType={inputType}
             parentNode={node.parent?.data}
             onCreate={async (file) => {
+              console.log('onCreate', file, isUpdate)
               if (isUpdate) {
                 await renameFileHandler(file)
               } else {
