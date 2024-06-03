@@ -9,7 +9,7 @@ anyhow = "1.0.82"
 env_logger = "0.11.3"
 log = "0.4.21"
 os_pipe = "1"
-toml = "0.8.11"
+toml = "0.8.13"
 
 [dependencies.clap]
 version = "4.5.3"
