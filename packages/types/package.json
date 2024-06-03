@@ -5,10 +5,12 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
+    "delete": "rimraf node_modules",
     "prepublish": "yarn build"
   },
   "devDependencies": {
     "@markflowy/theme": "workspace:*",
+    "rimraf": "^5.0.5",
     "typescript": "^5.3.3"
   }
 }
