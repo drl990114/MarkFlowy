@@ -10,7 +10,8 @@
     "tauri:build": "tauri build",
     "tauri:dev": "tauri dev",
     "test": "vitest run",
-    "test:dev": "vitest dev"
+    "test:dev": "vitest dev",
+    "delete": "rimraf node_modules"
   },
   "dependencies": {
     "@ebay/nice-modal-react": "^1.2.13",
@@ -55,7 +56,7 @@
     "stylis": "^4.0.0",
     "tinykeys": "^2.1.0",
     "use-resize-observer": "^9.1.0",
-    "zens": "0.0.23",
+    "zens": "0.0.24",
     "zustand": "^4.4.6"
   },
   "devDependencies": {
@@ -74,6 +75,7 @@
     "eslint": "9.1.1",
     "happy-dom": "^14.7.1",
     "react-test-renderer": "^18.2.0",
+    "rimraf": "^5.0.5",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3",
     "url": "^0.11.3",

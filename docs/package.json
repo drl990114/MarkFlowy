@@ -8,7 +8,8 @@
     "build": "docusaurus build",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",
-    "clear": "docusaurus clear",
+    "delete": "rimraf node_modules",
+    "clear": "docusaurus clear && rimraf build",
     "serve": "docusaurus serve",
     "write-translations": "docusaurus write-translations",
     "write-heading-ids": "docusaurus write-heading-ids"
@@ -46,7 +47,8 @@
     "@docusaurus/module-type-aliases": "^3.3.2",
     "@docusaurus/types": "^3.3.2",
     "@types/react": "^18.3.1",
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.4.5",
+    "rimraf": "^5.0.5"
   },
   "engines": {
     "node": ">=18.0"
