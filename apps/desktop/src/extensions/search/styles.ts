@@ -4,6 +4,7 @@ export const SearchContainer = styled.div`
   display: flex;
   flex-direction: column;
   flex: 1;
+  width: 100%;
   overflow-y: auto;
   overflow-x: hidden;
 `
@@ -22,6 +23,7 @@ export const SearchInput = styled.div`
 
   .search-input {
     flex: 1;
+    padding: 0.2rem;
     margin-right: 4px;
   }
 `

@@ -77,6 +77,7 @@ const ChatList: React.FC<ChatListProps> = (props) => {
           <Space>
             ChatGPT
             <Menu
+              menuButtonProps={{ size: 'small' }}
               items={gptModels.map((model, index) => {
                 return {
                   label: model,

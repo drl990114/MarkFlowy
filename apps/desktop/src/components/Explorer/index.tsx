@@ -11,7 +11,6 @@ import { Empty, FileTree, List } from '@/components'
 import styled from 'styled-components'
 import useOpenedCacheStore from '@/stores/useOpenedCacheStore'
 import { Popover } from 'zens'
-import { MfIconButton } from '../UI/Button'
 
 const RecentListBottom = styled.div`
   padding: 8px;
@@ -95,7 +94,7 @@ const Explorer: FC<ExplorerProps> = (props) => {
           }
         >
           {listData.length > 0 ? (
-            <MfIconButton icon='ri-more-2-fill explorer-bottom__action__icon' onClick={() => setPopperOpen(true)} />
+            <i className='ri-more-2-fill explorer-bottom__action__icon' onClick={() => setPopperOpen(true)} />
           ) : null}
         </Popover>
       </div>
