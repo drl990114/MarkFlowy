@@ -8,7 +8,7 @@ import { InjectFonts } from './injectFonts'
 import { GlobalStyles } from './globalStyles'
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles'
 import { ThemeProvider as ZensThemeProvider } from 'zens'
-import { StyleSheetManager, ThemeProvider } from 'styled-components'
+import { IStyleSheetContext, StyleSheetManager, ThemeProvider } from 'styled-components'
 import isPropValid from '@emotion/is-prop-valid'
 
 const AppThemeProvider: React.FC<BaseComponentProps> = function ({ children }) {
@@ -50,7 +50,7 @@ const AppThemeProvider: React.FC<BaseComponentProps> = function ({ children }) {
 }
 
 // This implements the default behavior from styled-components v5
-function shouldForwardProp(propName: string, target: any) {
+const shouldForwardProp: IStyleSheetContext['shouldForwardProp'] = function (propName, target) {
   if (typeof target === 'string') {
     // For HTML elements, forward the prop if it is a valid HTML attribute
     return isPropValid(propName)

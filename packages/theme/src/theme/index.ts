@@ -114,15 +114,15 @@ const styledDarkTheme = {
   hoverColor: '#1f2225',
   warnColor: '#e2b340',
   dangerColor: '#dc2626',
-  tipsBgColor: '#0e1419',
+  tipsBgColor: '#333333',
   successColor: '#00c853',
   boxShadowColor: 'rgba(255, 255, 255, 0.04)',
 
   // app
   titleBarBgColor: '#212326',
-  editorTabBgColor: '#16191d',
+  editorTabBgColor: '#1b1b1b',
   editorTabActiveBgColor: '#151515',
-  sideBarHeaderBgColor: '#16191d',
+  sideBarHeaderBgColor: '#1b1b1b',
   sideBarBgColor: '#21262C',
 
   // components

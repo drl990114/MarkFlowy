@@ -371,19 +371,8 @@ html[data-theme='dark'] .docusaurus-highlight-code-line {
 	padding: 20px;
 }
 
-.copyright-p-1 {
-}
-
 .copyright-p-2 {
 	margin-top: 0.5rem;
-}
-
-.newsletter-title {
-	-webkit-background-clip: text !important;
-	background-clip: text !important;
-	-webkit-text-fill-color: transparent;
-	background: linear-gradient(45deg, #ff4d4d, #ebb802);
-	font-size: 2.2rem;
 }
 
 .newsletter-description {
@@ -629,7 +618,6 @@ label[for='email-input-field'] {
 		text-align: center;
 		margin-top: 1.5rem;
 	}
-	.newsletter-title,
 	.newsletter-description {
 		text-align: center;
 	}

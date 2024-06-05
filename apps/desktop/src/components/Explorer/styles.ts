@@ -18,7 +18,7 @@ export const Container = styled.div`
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-bottom: 12px;
+    padding: 10px 6px;
     opacity: 0;
     transition: all 0.3s ease-in-out;
 
@@ -35,6 +35,7 @@ export const Container = styled.div`
 
       &__icon {
         margin-left: 8px;
+        padding: 6px;
         border-radius: ${(props) => props.theme.smallBorderRadius};
 
         &:hover {

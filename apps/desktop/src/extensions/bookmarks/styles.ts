@@ -9,7 +9,7 @@ export const Container = styled.div`
 
   .bookmark-list {
     height: calc(100% - 40px);
-    padding: 0.2rem 1rem;
+    padding: 0.2rem 0.4rem;
     overflow: auto;
     box-sizing: border-box;
 
@@ -22,7 +22,6 @@ export const Container = styled.div`
       transition: all 0.2s ease-in-out;
 
       &:hover {
-        color: ${(props) => props.theme.accentColor};
         background-color: ${(props) => props.theme.tipsBgColor};
       }
     }
