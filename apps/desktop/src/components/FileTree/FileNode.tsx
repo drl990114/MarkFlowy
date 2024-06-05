@@ -87,7 +87,7 @@ function FileNode({
       id: node.id,
       kind: file.kind,
     })
-    
+
     simpleTree.update({
       id: node.id,
       changes: { kind: file.kind, name: file.name },
@@ -255,7 +255,13 @@ function FileNode({
             ) : (
               <i className={`ri-markdown-fill file-icon`} />
             )}
-            {node.data.name}
+            <span
+              style={{
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {node.data.name}
+            </span>
           </>
         )}
       </div>

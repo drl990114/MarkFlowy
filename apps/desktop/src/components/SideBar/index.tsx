@@ -96,7 +96,7 @@ function SideBar() {
       noActiveItem={noActiveItem}
       style={{ width: visible ? Math.max(sidebarWidth, 100) : 0 }}
     >
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', width: '100%' }}>
         <SideBarHeader>
           {rightBarDataSource.map((item) => {
             const cls = classNames('icon', {
