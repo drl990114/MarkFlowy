@@ -40,6 +40,7 @@ pub fn run() {
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_clipboard_manager::init())
+        .plugin(tauri_plugin_notification::init())
         .invoke_handler(tauri::generate_handler![
             fc::cmd::open_folder,
             fc::cmd::get_file_content,
@@ -76,6 +77,7 @@ pub fn run() {
             APP_DIR.lock().unwrap().insert(0, home_dir_path);
             setup::init(app).expect("failed to setup app");
 
+            #[cfg(target_os = "macos")]
             menu::generate_menu(app).expect("failed to generate menu");
 
             Ok(())
