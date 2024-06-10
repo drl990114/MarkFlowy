@@ -87,6 +87,9 @@ const FileTree: FC<FileTreeProps> = (props) => {
           selection={activeId}
           indent={16}
           disableMultiSelection
+          // FIXME https://github.com/tauri-apps/tauri/issues/9966
+          disableDrag
+          disableDrop
           onSelect={(node) => onSelect(node[0]?.data)}
           onMove={onMove}
         >
