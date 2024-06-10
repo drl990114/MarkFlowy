@@ -128,14 +128,23 @@ impl AppConf {
     }
 
     pub fn theme_mode() -> Theme {
-        match Self::get_theme().as_str() {
-            "system" => match dark_light::detect() {
+        let cur_theme = Self::get_theme().to_string();
+
+        if cur_theme == "system" {
+            let mode = match dark_light::detect() {
                 dark_light::Mode::Dark => Theme::Dark,
                 dark_light::Mode::Light => Theme::Light,
                 dark_light::Mode::Default => Theme::Light,
-            },
-            "dark" => Theme::Dark,
-            _ => Theme::Light,
+            };
+
+            return mode;
+        }
+
+        let dark = cur_theme.to_lowercase().to_string().contains("dark");
+        if dark {
+            Theme::Dark
+        } else {
+            Theme::Light
         }
     }
 

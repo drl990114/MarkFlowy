@@ -37,6 +37,7 @@ export const common = {
 
   titleBarHeight: '30px',
   titleBarControlBtnWidth: '50px',
+  statusBarHeight: '32px',
 
   fontH1: '28px',
   fontH2: '26px',
@@ -84,10 +85,12 @@ const styledLightTheme = {
 
   // app
   titleBarBgColor: '#DCDCDD',
+  titleBarDefaultHoverColor: '#bdbdc2',
   editorTabBgColor: '#EBEBEC',
   editorTabActiveBgColor: '#FAFAFA',
   sideBarHeaderBgColor: '#EBEBEC',
   sideBarBgColor: '#EBEBEC',
+  statusBarBgColor: '#EBEBEC',
 
   // components
   buttonBgColor: '#f6f7f9',
@@ -96,8 +99,6 @@ const styledLightTheme = {
   dialogBackdropColor: 'rgba(220, 220, 220, 0.4)',
   contextMenuBgColor: '#f6f7f9',
   contextMenuBgColorHover: '#1552B3',
-
-  titleBarDefaultHoverColor: '#bdbdc2',
 
   scrollbarThumbColor: '#C4C4C4',
   scrollbarTrackColor: '#e4e4e7',
@@ -111,7 +112,7 @@ const styledDarkTheme = {
   accentColor: '#1c78aa',
   borderColor: '#363b41',
   bgColor: '#151515',
-  hoverColor: '#1f2225',
+  hoverColor: '#2b2f33',
   warnColor: '#e2b340',
   dangerColor: '#dc2626',
   tipsBgColor: '#333333',
@@ -120,10 +121,12 @@ const styledDarkTheme = {
 
   // app
   titleBarBgColor: '#212326',
+  titleBarDefaultHoverColor: '#383838',
   editorTabBgColor: '#1b1b1b',
   editorTabActiveBgColor: '#151515',
   sideBarHeaderBgColor: '#1b1b1b',
   sideBarBgColor: '#21262C',
+  statusBarBgColor: '#1b1b1b',
 
   // components
   buttonBgColor: '#21262c',
@@ -132,8 +135,6 @@ const styledDarkTheme = {
   dialogBackdropColor: 'rgb(18, 18, 18, 0.7)',
   contextMenuBgColor: '#1E1F20',
   contextMenuBgColorHover: '#1552B3',
-
-  titleBarDefaultHoverColor: '#383838',
 
   scrollbarThumbColor: '#2C3C52',
   scrollbarTrackColor: '#0e1419',
