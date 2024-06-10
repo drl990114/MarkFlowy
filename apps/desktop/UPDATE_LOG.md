@@ -1,10 +1,8 @@
 # UPDATE LOG
 
-## v0.10.0
+## v0.10.1
 
 Features:
-
-- Explorer support drag and drop to move files.
 
 - Explorer support create folder.
 
@@ -15,6 +13,8 @@ Fix:
 - Long file name display optimization.
 
 - problem with displaying line breaks in the table for `br`.
+
+- Titlebar window maximize button display error.
 
 - Some ui and ux optimization, Theme colors optimization.
 
