@@ -9,7 +9,7 @@ const NewFileInput = (
     fileNode: IFile
     inputType?: 'file' | 'dir'
     parentNode?: IFile
-    onCreate: (file: IFile) => void
+    onCreate: (file: IFile) => Promise<void>
     onCancel: () => void
   },
 ) => {
@@ -34,9 +34,13 @@ const NewFileInput = (
   const [invalidState, setInvalidState] = useState(false)
   const [invalidText, setInvalidText] = useState(InvalidTextMap.same)
   const verifing = useRef(false)
+  const creating = useRef(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
   const hideInput = useCallback(() => {
+    if (creating.current === true) {
+      return
+    }
     setInputName('')
     onCancel?.()
   }, [onCancel])
@@ -126,8 +130,10 @@ const NewFileInput = (
         onPressEnter={async () => {
           if (invalidState === false && verifing.current === false) {
             const fileInfo = await getFileInfo(inputName)
-
-            onCreate(fileInfo)
+            creating.current = true
+            onCreate(fileInfo).finally(() => {
+              creating.current = false
+            })
           }
         }}
         {...otherProps}
