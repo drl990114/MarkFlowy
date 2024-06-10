@@ -131,9 +131,9 @@ jobs:
           mv "artifacts/x86_64/macos/MarkFlowy.app.tar.gz" "artifacts/MarkFlowy_${{ env.version }}_macos_x86_64.app.tar.gz"
           mv "artifacts/x86_64/macos/MarkFlowy.app.tar.gz.sig" "artifacts/MarkFlowy_${{ env.version }}_macos_x86_64.app.tar.gz.sig"
 
-          mv "artifacts/x86_64/deb/mark-flowy_${{ env.version }}_amd64.deb" "artifacts/x86_64/deb/MarkFlowy_${{ env.version }}_linux_x86_64.deb"
-          mv "artifacts/x86_64/appimage/mark-flowy_${{ env.version }}_amd64.AppImage.tar.gz" "artifacts/MarkFlowy_${{ env.version }}_linux_x86_64.AppImage.tar.gz"
-          mv "artifacts/x86_64/appimage/mark-flowy_${{ env.version }}_amd64.AppImage.tar.gz.sig" "artifacts/MarkFlowy_${{ env.version }}_linux_x86_64.AppImage.tar.gz.sig"
+          mv "artifacts/x86_64/deb/MarkFlowy_${{ env.version }}_amd64.deb" "artifacts/x86_64/deb/MarkFlowy_${{ env.version }}_linux_x86_64.deb"
+          mv "artifacts/x86_64/appimage/MarkFlowy_${{ env.version }}_amd64.AppImage.tar.gz" "artifacts/MarkFlowy_${{ env.version }}_linux_x86_64.AppImage.tar.gz"
+          mv "artifacts/x86_64/appimage/MarkFlowy_${{ env.version }}_amd64.AppImage.tar.gz.sig" "artifacts/MarkFlowy_${{ env.version }}_linux_x86_64.AppImage.tar.gz.sig"
 
           mv "artifacts/x86_64/MarkFlowy_${{ env.version }}_x64_en-US.msi" "artifacts/MarkFlowy_${{ env.version }}_windows_x86_64.msi"
           mv "artifacts/x86_64/MarkFlowy_${{ env.version }}_x64_en-US.msi.zip" "artifacts/MarkFlowy_${{ env.version }}_windows_x86_64.msi.zip"
