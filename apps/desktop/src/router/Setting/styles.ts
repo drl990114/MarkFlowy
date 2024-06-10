@@ -11,7 +11,6 @@ export const Container = styled.div`
     width: 250px;
     height: 100%;
     overflow: auto;
-    background-color: ${(props) => props.theme.bgColor};
     border-right: 1px solid ${(props) => props.theme.borderColor};
 
     & .sidebar-version {

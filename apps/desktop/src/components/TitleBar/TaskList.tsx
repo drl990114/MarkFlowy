@@ -12,7 +12,7 @@ export const TaskList = memo(() => {
         <i className='ri-loader-4-line' />
       </RotateIcon>
     ),
-    [PromiseStatus.Resolved]: <TaskIcon><i className='ri-check-fill' />,</TaskIcon>,
+    [PromiseStatus.Resolved]: <TaskIcon><i className='ri-check-fill' /></TaskIcon>,
     [PromiseStatus.Rejected]: <TaskIcon><i className='ri-error-warning-line' /></TaskIcon>,
   }
 
