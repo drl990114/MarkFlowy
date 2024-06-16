@@ -1,0 +1,85 @@
+[package]
+name = "mf_server"
+version = "1.2.0"
+categories = ["web-programming"]
+edition = "2021"
+exclude = ["/README.md"]
+keywords = ["server"]
+license = "MIT"
+publish = false
+repository = "https://github.com/drl990114/MarkFlowy"
+rust-version = "1.77.1"
+
+[profile.release]
+strip = true
+opt-level = 'z' # Optimize for size.
+codegen-units = 1
+lto = true
+panic = 'abort'
+
+[dependencies]
+axum = "0.7.5"
+hyper = "1.2.0"
+tokio = { version = "1.37.0", features = ["macros", "rt-multi-thread"] }
+
+# GraphQL
+async-graphql = { version = "7.0.3", features = ["uuid", "chrono", "log"] }
+async-graphql-axum = "7.0.3"
+
+# Rest
+utoipa = { version = "4.2.0", features = ["axum_extras"] }
+utoipa-swagger-ui = { version = "6.0.0", features = ["axum"] }
+
+# Database
+sqlx = { version = "0.7.4", features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono", "migrate"] }
+
+# Logging
+tracing = "0.1.40"
+tracing-subscriber = { version = "0.3.18", features = ["env-filter", "chrono"] }
+
+# Configurations
+dotenv = "0.15.0"
+
+# Misc
+base64 = "0.22.0"
+chrono = { version = "0.4.37", features = ["serde"]}
+frunk = "0.4.2"
+frunk_core = { version = "0.4.2" }
+serde = { version = "1.0", features = ["derive"]}
+serde_json = "1.0"
+thiserror = "1.0.58"
+time = "0.3.34"
+ulid = { version = "1.1.2", features = ["uuid"] }
+url = "2.5.0"
+uuid = "1.8.0"
+axum-extra = { version = "0.9.3", features = ["cookie"] }
+jsonwebtoken = "9.3.0"
+validator = { version = "0.18.1", features = ["derive"] }
+anyhow = { version = "1.0.80" }
+argon2 = { version = "0.5.3" }
+rand = { version = "0.8.5" }
+tower-http = { version = "0.5.2", features = [
+  "add-extension",
+  "trace",
+  "cors",
+] }
+lazy_static = "1.4.0"
+
+[dev-dependencies]
+anyhow = "1.0.80"
+cynic = "3.5.0"
+http-body-util = "0.1.1"
+mime = "0.3.17"
+tower = { version = "0.4.13", features = ["util"] }
+
+[package.metadata.binstall]
+pkg-url = "{ repo }/releases/download/v{ version }/{ name }-{ version}-{ target }.tar.gz"
+bin-dir = "{ bin }{ binary-ext }"
+pkg-fmt = "tgz"
+
+[package.metadata.release]
+sign-commit = true
+sign-tag = true
+tag-message = "v{{version}}"
+pre-release-commit-message = "v{{version}}"
+pre-release-hook = ["just", "_release-prepare", "{{version}}"]

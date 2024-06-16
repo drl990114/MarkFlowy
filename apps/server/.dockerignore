@@ -1,0 +1,22 @@
+# The dockerignore is somewhat not important. Because we are using multi-stage builds.
+# The binary is the only file that is copied to the final image.
+# The dockerignore file is making sure we don't copy the uninteresting files at first build,
+# because it will slow down the build process. The copying phase will take considerable amount of time
+
+# Rust
+target
+.cargo
+
+# App
+tests
+docs
+scripts
+configs
+.cago-husky
+.env
+CHANGELOG.md
+README.md
+docker-compose.example.yml
+
+# Container Data
+cdata
