@@ -1,5 +1,5 @@
 {
-  "$schema": "./schemas/desktop-schema.json",
+  "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "main-capability",
   "description": "Capability for the main window",
   "windows": ["main"],
@@ -37,6 +37,7 @@
     "store:allow-get",
     "store:allow-set",
     "store:allow-save",
-    "updater:default"
+    "updater:default",
+    "notification:default"
   ]
 }
