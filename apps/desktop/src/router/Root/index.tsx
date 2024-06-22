@@ -10,11 +10,13 @@ import { PageLayout } from '@/components/Layout'
 import { SettingDialog } from '../Setting/component/SettingDialog'
 import { appInfoStoreSetup } from '@/services/app-info'
 import StatusBar from '@/components/StatusBar'
+import { useTitleBarEffect } from '@/hooks/useTitleBarEffect'
 
 function Root() {
   const { getBookMarkList } = useBookMarksStore()
 
   useCommandInit()
+  useTitleBarEffect()
 
   useEffect(() => {
     appInfoStoreSetup()
