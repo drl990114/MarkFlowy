@@ -11,6 +11,7 @@ use std::sync;
 use app::{bookmarks, conf, extensions, keybindings, opened_cache, process, themes};
 use lazy_static::lazy_static;
 use tauri::{Manager, Runtime};
+use tauri_plugin_window_state::{AppHandleExt, StateFlags};
 use tracing_subscriber;
 
 #[cfg(target_os = "macos")]
@@ -41,6 +42,7 @@ pub fn run() {
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_notification::init())
+        .plugin(tauri_plugin_window_state::Builder::default().build())
         .invoke_handler(tauri::generate_handler![
             fc::cmd::open_folder,
             fc::cmd::get_file_content,
@@ -81,6 +83,10 @@ pub fn run() {
             menu::generate_menu(app).expect("failed to generate menu");
 
             Ok(())
+        })
+        .on_window_event(|window, event| {
+            let app = window.app_handle();
+            app.save_window_state(StateFlags::all());
         })
         .run(context)
         .expect("error while running tauri application");
