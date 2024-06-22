@@ -20,6 +20,8 @@ pub_struct!(AppConf {
     language: Option<String>,
     auto_update: Option<bool>,
     editor_full_width: Option<bool>,
+    editor_root_font_size: Option<u32>,
+    editor_root_line_height: Option<String>,
     extensions_chatgpt_apikey: Option<String>,
     autosave: Option<bool>,
     autosave_interval: Option<u32>,
@@ -38,6 +40,8 @@ impl AppConf {
             language: Some("en".to_string()),
             auto_update: Some(false),
             editor_full_width: Some(false),
+            editor_root_font_size: Some(15),
+            editor_root_line_height: Some("1.6".to_string()),
             autosave: Some(false),
             autosave_interval: Some(2000),
             extensions_chatgpt_apikey: Some("".to_string()),
@@ -68,6 +72,12 @@ impl AppConf {
         }
         if oldconf.editor_full_width.is_some() {
             self.editor_full_width = oldconf.editor_full_width;
+        }
+        if oldconf.editor_root_font_size.is_some() {
+            self.editor_root_font_size = oldconf.editor_root_font_size;
+        }
+        if oldconf.editor_root_line_height.is_some() {
+            self.editor_root_line_height = oldconf.editor_root_line_height;
         }
         if oldconf.autosave_interval.is_some() {
             self.autosave_interval = oldconf.autosave_interval;

@@ -51,7 +51,7 @@
     "react-router-dom": "^6.22.3",
     "react-use": "^17.5.0",
     "remixicon": "^4.1.0",
-    "rme": "^0.0.63",
+    "rme": "^0.0.65",
     "styled-components": "^6.1.11",
     "stylis": "^4.0.0",
     "tinykeys": "^2.1.0",

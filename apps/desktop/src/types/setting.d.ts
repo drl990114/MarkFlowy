@@ -33,5 +33,10 @@ declare namespace Setting {
   type SliderSettingItem = {
     type: 'slider'
     scope: [number, number]
+    step?: number
+    /**
+     * Save the value to string
+     */
+    saveToString?: boolean
   } & BaseSettingItem
 }

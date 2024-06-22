@@ -79,6 +79,30 @@
         "desc": {
           "i18nKey": "settings.editor.style.full_width.desc"
         }
+      },
+      "fontSize": {
+        "key": "editor_root_font_size",
+        "type": "slider",
+        "title": {
+          "i18nKey": "settings.editor.style.font_size.label"
+        },
+        "desc": {
+          "i18nKey": "settings.editor.style.font_size.desc"
+        },
+        "scope": [12, 40]
+      },
+      "lineHeight": {
+        "key": "editor_root_line_height",
+        "type": "slider",
+        "title": {
+          "i18nKey": "settings.editor.style.line_height.label"
+        },
+        "desc": {
+          "i18nKey": "settings.editor.style.line_height.desc"
+        },
+        "step": 0.1,
+        "saveToString": true,
+        "scope": [1, 2]
       }
     }
   },

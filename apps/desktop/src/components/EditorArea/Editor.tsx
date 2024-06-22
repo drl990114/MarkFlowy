@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/rules-of-hooks */
-import { Editor as MfEditor } from 'rme'
+import { Editor as MfEditor, EditorProps as MfEditorProps } from 'rme'
 import type {
   EditorChangeEventParams,
   EditorChangeHandler,
@@ -264,11 +264,15 @@ function Editor(props: EditorProps) {
     [delegate.manager.view],
   )
 
-  const editorProps = useMemo(
+  const editorProps: MfEditorProps = useMemo(
     () => ({
       content: content!,
       delegate,
       offset: { top: 10, left: 16 },
+      styleToken: {
+        rootFontSize: `${settingData.editor_root_font_size}px`,
+        rootLineHeight: settingData.editor_root_line_height,
+      },
       onContextMounted: (context: EditorContext) => {
         setEditorCtx(id, context)
       },
@@ -278,7 +282,7 @@ function Editor(props: EditorProps) {
         },
       ],
     }),
-    [content, delegate, setEditorCtx, id, active],
+    [content, delegate, setEditorCtx, id, active, settingData],
   )
 
   const handleChange: EditorChangeHandler = useCallback(

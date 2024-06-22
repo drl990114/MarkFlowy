@@ -48,9 +48,11 @@ TauriVersion: ${appInfo.tauriVersion}
         </Button>,
       ]}
     >
-      <Space>{`${t('about.version')}: ${appInfo.version}`}</Space>
-      <br />
-      <Space>{`Tauri ${t('about.version')}: ${appInfo.tauriVersion}`}</Space>
+      <div style={{ lineHeight: '24px' }}>
+        <Space>{`${t('about.version')}: ${appInfo.version}`}</Space>
+        <br />
+        <Space>{`Tauri ${t('about.version')}: ${appInfo.tauriVersion}`}</Space>
+      </div>
     </Dialog>
   )
 }
