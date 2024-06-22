@@ -46,7 +46,7 @@ const SearchView = memo(() => {
   }, [activeId, editorCtxMap])
 
   useEffect(() => {
-    if (activeId && resultList.length > 0) {
+    if (activeId && resultList.length > 0 && searchKeyword) {
       const ctx = editorCtxMap.get(activeId)
       const searchParams = {
         query: searchKeyword,
@@ -125,12 +125,9 @@ const SearchView = memo(() => {
     setSearchState({ caseSensitive: !caseSensitive })
   }, [caseSensitive, setSearchState])
 
-  const handleKeyDown = useCallback(
-    () => {
-      handleSearch()
-    },
-    [handleSearch],
-  )
+  const handleKeyDown = useCallback(() => {
+    handleSearch()
+  }, [handleSearch])
 
   const handleFileInfoClick = useCallback(
     (p: string, index: number) => {
@@ -162,6 +159,9 @@ const SearchView = memo(() => {
 
   const handleSearchTextChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (!e.target.value) {
+        setSearchState({ resultList: [] })
+      }
       setSearchState({ searchKeyword: e.target.value })
     },
     [setSearchState],
