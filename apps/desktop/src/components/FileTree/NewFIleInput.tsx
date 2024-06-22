@@ -126,6 +126,7 @@ const NewFileInput = (
         value={inputName}
         onChange={handleChange}
         spellCheck={false}
+        onClick={(e) => e.stopPropagation()}
         onKeyDown={(e) => e.stopPropagation()}
         onPressEnter={async () => {
           if (invalidState === false && verifing.current === false) {

@@ -228,7 +228,6 @@ function FileNode({
             inputType={inputType}
             parentNode={node.parent?.data}
             onCreate={async (file) => {
-              console.log('onCreate', file, isUpdate)
               if (isUpdate) {
                 await renameFileHandler(file)
               } else {

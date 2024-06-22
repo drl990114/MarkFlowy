@@ -15,7 +15,7 @@ import { moveFileNode } from './file-operator'
 
 const FileTree: FC<FileTreeProps> = (props) => {
   const { data, onSelect } = props
-  const { activeId, setFolderData } = useEditorStore()
+  const { activeId, setFolderDataPure } = useEditorStore()
   const { t } = useTranslation()
   const tree = useMemo(() => new SimpleTree<IFile>(data), [data])
 
@@ -68,7 +68,7 @@ const FileTree: FC<FileTreeProps> = (props) => {
           for (const id of _dragIds) {
             tree.move({ id, parentId: args.parentId, index: args.index })
           }
-          setFolderData(tree.data)
+          setFolderDataPure(tree.data)
         }
       })
     }
@@ -93,7 +93,7 @@ const FileTree: FC<FileTreeProps> = (props) => {
           onSelect={(node) => onSelect(node[0]?.data)}
           onMove={onMove}
         >
-          {(props) => FileNode({ ...props, simpleTree: tree, setFolderData })}
+          {(props) => FileNode({ ...props, simpleTree: tree, setFolderData: setFolderDataPure })}
         </Tree>
       )}
     </FillFlexParent>
