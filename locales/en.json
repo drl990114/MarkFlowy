@@ -134,6 +134,14 @@
         "full_width": {
           "label": "Full width",
           "desc": "Set the editor to full width."
+        },
+        "font_size": {
+          "label": "Font size",
+          "desc": "Set the root font size of the editor."
+        },
+        "line_height": {
+          "label": "Line height",
+          "desc": "Set the root line height of the editor."
         }
       }
     },

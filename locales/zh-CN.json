@@ -133,6 +133,14 @@
         "full_width": {
           "label": "全宽度",
           "desc": "编辑器是否占满整个窗口。"
+        },
+        "font_size": {
+          "label": "字体大小",
+          "desc": "设置编辑器的根字体大小。"
+        },
+        "line_height": {
+          "label": "行高",
+          "desc": "设置编辑器的根行高。"
         }
       }
     },
