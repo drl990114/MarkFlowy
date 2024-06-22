@@ -51,12 +51,12 @@
     "react-router-dom": "^6.22.3",
     "react-use": "^17.5.0",
     "remixicon": "^4.1.0",
-    "rme": "^0.0.61",
+    "rme": "^0.0.63",
     "styled-components": "^6.1.11",
     "stylis": "^4.0.0",
     "tinykeys": "^2.1.0",
     "use-resize-observer": "^9.1.0",
-    "zens": "0.0.24",
+    "zens": "0.0.26",
     "zustand": "^4.4.6"
   },
   "devDependencies": {

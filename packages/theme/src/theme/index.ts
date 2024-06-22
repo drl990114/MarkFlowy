@@ -96,9 +96,9 @@ const styledLightTheme = {
   buttonBgColor: '#f6f7f9',
   tooltipBgColor: '#d7d7dc',
   dialogBgColor: '#f6f7f9',
-  dialogBackdropColor: 'rgba(220, 220, 220, 0.4)',
-  contextMenuBgColor: '#f6f7f9',
-  contextMenuBgColorHover: '#1552B3',
+  dialogBackdropColor: '#00000066',
+  contextMenuBgColor: '#FFFFFF',
+  contextMenuBgColorHover: '#E8E8EC',
 
   scrollbarThumbColor: '#C4C4C4',
   scrollbarTrackColor: '#e4e4e7',
@@ -131,10 +131,10 @@ const styledDarkTheme = {
   // components
   buttonBgColor: '#21262c',
   tooltipBgColor: '#43414A',
-  dialogBgColor: '#05010d',
-  dialogBackdropColor: 'rgb(18, 18, 18, 0.7)',
-  contextMenuBgColor: '#1E1F20',
-  contextMenuBgColorHover: '#1552B3',
+  dialogBgColor: '#151515',
+  dialogBackdropColor: '#00000099',
+  contextMenuBgColor: '#18191B',
+  contextMenuBgColorHover: '#2D3134',
 
   scrollbarThumbColor: '#2C3C52',
   scrollbarTrackColor: '#0e1419',
