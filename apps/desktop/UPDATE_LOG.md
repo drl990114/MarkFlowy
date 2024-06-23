@@ -1,5 +1,27 @@
 # UPDATE LOG
 
+## v0.11.0
+
+> In order to understand the current operation of the app, we have integrated the most basic user statistics.
+
+Features:
+
+- Support setting editor font size and line height.
+
+- When hovering over a heading node, the level prefix will be displayed.
+
+- Titlebar display active file name and edit state.
+
+- Support restore window state(e.g size, position).
+
+Fix: 
+
+- The copied image link should not be processed.
+
+- when users new a file or new a folder, all opened files should not be forced to close.
+
+- when click rename input , cursor should not blur.
+
 ## v0.10.2
 
 Features:
