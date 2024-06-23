@@ -27,3 +27,7 @@ html
 .rollup.cache
 
 .turbo
+
+.env
+.env.dev
+.env.prod
