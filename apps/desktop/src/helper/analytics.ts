@@ -2,7 +2,7 @@
 import { initializeApp } from 'firebase/app'
 import { getAnalytics } from 'firebase/analytics'
 
-const firebaseAnalyticsInit = () => {
+export const firebaseAnalyticsInit = () => {
   // Your web app's Firebase configuration
   // For Firebase JS SDK v7.20.0 and later, measurementId is optional
   const firebaseConfig = {
@@ -39,7 +39,6 @@ const umengAnalyticsInit = () => {
       arguments: ['appKey', '${import.meta.env.VITE_UMENG_APPKEY}']
     });
 
-    console.log('umeng', '${import.meta.env.VITE_UMENG_APPKEY}');
     //是否开启调试模式 
     // aplus_queue.push({
     //   action: 'aplus.setMetaInfo',
@@ -49,5 +48,5 @@ const umengAnalyticsInit = () => {
   document.head.appendChild(script)
 }
 
-firebaseAnalyticsInit()
+// firebaseAnalyticsInit()
 umengAnalyticsInit()

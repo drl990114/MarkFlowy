@@ -19,6 +19,7 @@ import { readDirectory } from '@/helper/filesys'
 import { getFileObject, getFileObjectByPath } from '@/helper/files'
 import { useGlobalKeyboard, useGlobalOSInfo } from '.'
 import { once } from 'lodash'
+import { firebaseAnalyticsInit } from '@/helper/analytics'
 
 async function appThemeExtensionsSetup(curTheme: string) {
   if (isBuiltInTheme(curTheme)) {
@@ -126,6 +127,9 @@ const appSetup = once(async function () {
   i18nInit({ lng: settingData.language })
   checkUpdate({ install: settingData.auto_update })
 
+  setTimeout(() => {
+    firebaseAnalyticsInit()
+  })
   return settingData
 })
 
