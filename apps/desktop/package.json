@@ -2,8 +2,8 @@
   "name": "@markflowy/desktop",
   "version": "0.7.0",
   "scripts": {
-    "dev": "vite --host",
-    "build": "tsc && vite build",
+    "dev": "vite --host --mode dev",
+    "build": "tsc && vite build --mode prod",
     "build:types": "tsc --tsconfig ./tsconfig.types.json",
     "updater": "tr updater",
     "preview": "vite preview",
@@ -34,6 +34,7 @@
     "classnames": "^2.5.1",
     "color": "^4.2.3",
     "dayjs": "^1.11.11",
+    "firebase": "^10.12.2",
     "hox": "^2.1.0",
     "i18next": "23.8.2",
     "immer": "^10.0.4",

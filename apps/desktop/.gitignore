@@ -7,3 +7,7 @@ node_modules
 coverage
 
 src-tauri/gen
+
+.env
+.env.dev
+.env.prod
