@@ -1,5 +1,11 @@
 # UPDATE LOG
 
+## v0.11.2
+
+Fix: 
+
+- Some image can't load.
+
 ## v0.11.1
 
 > In order to understand the current operation of the app, we have integrated the most basic user statistics.
