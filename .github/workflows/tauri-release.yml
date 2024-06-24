@@ -45,11 +45,12 @@ jobs:
 
       - name: Write env file
         run: |
-          echo VITE_FIREBASE_APIKEY=${{ secrets.VITE_FIREBASE_APIKEY }}  >> ./apps/desktop/.env.prod
-          echo VITE_FIREBASE_APPID=${{ secrets.VITE_FIREBASE_APPID }}  >> ./apps/desktop/.env.prod
-          echo VITE_FIREBASE_MESSAGINGSENDERID=${{ secrets.VITE_FIREBASE_MESSAGINGSENDERID }}  >> ./apps/desktop/.env.prod
-          echo VITE_FIREBASE_MEASUREMENTID=${{ secrets.VITE_FIREBASE_MEASUREMENTID }}  >> ./apps/desktop/.env.prod
-          echo VITE_UMENG_APPKEY=${{ secrets.VITE_UMENG_APPKEY }}  >> ./apps/desktop/.env.prod
+          echo VITE_FIREBASE_APIKEY=${{ secrets.VITE_FIREBASE_APIKEY }}  >> ./apps/desktop/.env
+          echo VITE_FIREBASE_APPID=${{ secrets.VITE_FIREBASE_APPID }}  >> ./apps/desktop/.env
+          echo VITE_FIREBASE_MESSAGINGSENDERID=${{ secrets.VITE_FIREBASE_MESSAGINGSENDERID }}  >> ./apps/desktop/.env
+          echo VITE_FIREBASE_MEASUREMENTID=${{ secrets.VITE_FIREBASE_MEASUREMENTID }}  >> ./apps/desktop/.env
+          echo VITE_UMENG_APPKEY=${{ secrets.VITE_UMENG_APPKEY }}  >> ./apps/desktop/.env
+          echo APTABASE_APPKEY=${{ secrets.APTABASE_APPKEY }}  >> ./apps/desktop/.env
 
       - name: Update CHANGELOG
         id: changelog

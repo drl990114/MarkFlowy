@@ -32,11 +32,13 @@ tauri-plugin-os = "2.0.0-beta.6"
 tauri-plugin-shell = "2.0.0-beta.7"
 tauri-plugin-dialog = "2.0.0-beta.9"
 tauri-plugin-clipboard-manager = "2.1.0-beta.4"
+tauri-plugin-aptabase = { git = "https://github.com/aptabase/tauri-plugin-aptabase", branch = "v2" }
 regex = "1.10.4"
 lazy_static = "1.4.0"
 tracing = "0.1.40"
 tracing-subscriber = "0.3.18"
 window-vibrancy = "0.5.0"
+dotenv = "0.15.0"
 
 [dependencies.tauri-plugin-notification]
 version = "2.0.0-beta.7"
