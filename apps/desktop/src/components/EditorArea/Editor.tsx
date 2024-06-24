@@ -276,6 +276,7 @@ function Editor(props: EditorProps) {
       onContextMounted: (context: EditorContext) => {
         setEditorCtx(id, context)
       },
+      delegateOptions: createWysiwygDelegateOptions(getFolderPathFromPath(curFile.path)),
       hooks: [
         () => {
           useCommandEvent({ active })
