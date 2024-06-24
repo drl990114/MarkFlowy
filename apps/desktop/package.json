@@ -2,8 +2,8 @@
   "name": "@markflowy/desktop",
   "version": "0.7.0",
   "scripts": {
-    "dev": "vite --host --mode dev",
-    "build": "tsc && vite build --mode prod",
+    "dev": "vite --host",
+    "build": "tsc && vite build",
     "build:types": "tsc --tsconfig ./tsconfig.types.json",
     "updater": "tr updater",
     "preview": "vite preview",
