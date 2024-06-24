@@ -9,8 +9,10 @@ use std::path::PathBuf;
 use std::sync;
 
 use app::{bookmarks, conf, extensions, keybindings, opened_cache, process, themes};
+use dotenv;
 use lazy_static::lazy_static;
 use tauri::{Manager, Runtime};
+use tauri_plugin_aptabase::EventTracker;
 use tauri_plugin_window_state::{AppHandleExt, StateFlags};
 use tracing_subscriber;
 
@@ -30,8 +32,11 @@ lazy_static! {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tracing_subscriber::fmt::init();
+    dotenv::dotenv().ok();
 
     let context = tauri::generate_context!();
+
+    let aptabase_appkey = std::env::var("APTABASE_APPKEY").unwrap_or_default();
 
     tauri::Builder::default()
         .plugin(tauri_plugin_http::init())
@@ -43,6 +48,7 @@ pub fn run() {
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_window_state::Builder::default().build())
+        .plugin(tauri_plugin_aptabase::Builder::new(&aptabase_appkey).build())
         .invoke_handler(tauri::generate_handler![
             fc::cmd::open_folder,
             fc::cmd::get_file_content,
@@ -75,6 +81,8 @@ pub fn run() {
             themes::cmd::load_themes
         ])
         .setup(|app| {
+            app.track_event("app_started", None);
+
             let home_dir_path = app.path().home_dir().expect("failed to get home dir");
             APP_DIR.lock().unwrap().insert(0, home_dir_path);
             setup::init(app).expect("failed to setup app");
