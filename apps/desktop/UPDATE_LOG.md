@@ -1,5 +1,13 @@
 # UPDATE LOG
 
+## v0.11.3
+
+Fix: 
+
+- Preview mode load some image error.
+
+- Updater does not work on WindowsOS.
+
 ## v0.11.2
 
 Fix: 
