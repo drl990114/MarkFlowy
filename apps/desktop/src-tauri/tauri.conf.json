@@ -1,6 +1,6 @@
 {
   "productName": "MarkFlowy",
-  "version": "0.11.2",
+  "version": "0.11.3",
   "identifier": "com.drl990114.markflowy",
   "build": {
     "beforeDevCommand": "yarn dev",
