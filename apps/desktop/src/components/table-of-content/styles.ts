@@ -1,22 +1,21 @@
 import styled from 'styled-components'
 
-export const SideBarHeader = styled.div`
+export const RightBarHeader = styled.div`
   display: flex;
   justify-content: flex-start;
   align-items: center;
   flex-shrink: 0;
-  background-color: ${(props) => props.theme.sideBarHeaderBgColor};
+  height: 32px;
+  background-color: ${(props) => props.theme.rightBarHeaderBgColor};
 `
 
-export const Container = styled.div<ContainerProps>`
+export const Container = styled.div`
   flex-grow: 0;
   flex-shrink: 0;
   height: 100%;
   width: 100%;
   position: relative;
-  display: flex;
-  flex-direction: row;
-  background: ${(props) => props.theme.sideBarBgColor};
+  background: ${(props) => props.theme.rightBarBgColor};
   color: ${(props) => props.theme.primaryFontColor};
   overflow: hidden;
 
@@ -52,7 +51,3 @@ export const Container = styled.div<ContainerProps>`
     }
   }
 `
-
-interface ContainerProps {
-  noActiveItem: boolean
-}

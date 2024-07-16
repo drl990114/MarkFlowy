@@ -29,6 +29,7 @@ import { useMount, useUnmount } from 'react-use'
 import useEditorCounterStore from '@/stores/useEditorCounterStore'
 import { toast } from 'zens'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
+import useSourceCodeEditorCodemirrorViewStore from '@/stores/useSourceCodeEditorCodemirrorViewStore'
 
 interface EditorWrapperProps {
   active: boolean
@@ -77,6 +78,7 @@ function Editor(props: EditorProps) {
   const [delegate, setDelegate] = useState(
     createWysiwygDelegate(createWysiwygDelegateOptions(getFolderPathFromPath(curFile.path))),
   )
+  const { setSourceCodeCodemirrorView} = useSourceCodeEditorCodemirrorViewStore()
   const editorRef = useRef<EditorRef>(null)
   const editorContextRef = useRef<EditorChangeEventParams>()
 
@@ -123,7 +125,11 @@ function Editor(props: EditorProps) {
         bus.emit(EVENT.editor_save, {
           onSuccess: () => {
             if (payload === 'sourceCode') {
-              const sourceCodeDelegate = createSourceCodeDelegate()
+              const sourceCodeDelegate = createSourceCodeDelegate({
+                onCodemirrorViewLoad: (cmView) => {
+                  setSourceCodeCodemirrorView(curFile.id, cmView)
+                }
+              })
               setEditorDelegate(curFile.id, sourceCodeDelegate)
               setDelegate(sourceCodeDelegate)
             } else if (payload === 'preview') {
@@ -233,8 +239,14 @@ function Editor(props: EditorProps) {
 
   useEffect(() => {
     if (active) {
+      debounceRefreshToc()
+    }
+  }, [active, debounceRefreshToc])
+
+  useEffect(() => {
+    if (active) {
       const { addCommand } = useCommandStore.getState()
-      addCommand({
+        addCommand({
         id: 'editor:save',
         handler: () => {
           saveHandler()
@@ -326,7 +338,7 @@ function Editor(props: EditorProps) {
     return <WarningHeader>File is not exist</WarningHeader>
   }
 
-  const cls = classNames('code-contents', {
+  const cls = classNames('code-contents scrollbar', {
     'editor-active': active,
     'display-none': !active,
   })

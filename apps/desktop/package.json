@@ -49,15 +49,16 @@
     "react-keywords": "^1.0.0",
     "react-loading": "^2.0.3",
     "react-markdown": "^9.0.1",
+    "react-resizable-panels": "^2.0.19",
     "react-router-dom": "^6.22.3",
     "react-use": "^17.5.0",
     "remixicon": "^4.1.0",
-    "rme": "^0.0.65",
+    "rme": "^0.0.70",
     "styled-components": "^6.1.11",
     "stylis": "^4.0.0",
     "tinykeys": "^2.1.0",
     "use-resize-observer": "^9.1.0",
-    "zens": "0.0.26",
+    "zens": "0.0.31",
     "zustand": "^4.4.6"
   },
   "devDependencies": {

@@ -10,9 +10,9 @@ import { EmptyState } from './EmptyState'
 function EditorArea() {
   const { opened, activeId } = useEditorStore()
 
-  useEffect(() => {
-    useCommandStore.getState().execute('app:toc_refresh')
-  }, [activeId])
+  // useEffect(() => {
+  //   useCommandStore.getState().execute('app:toc_refresh')
+  // }, [activeId])
 
   if (opened.length === 0) {
     return <EmptyState />
