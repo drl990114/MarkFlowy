@@ -5,25 +5,24 @@ import { Toc } from 'zens'
 import { useCommandStore, useEditorStore } from '@/stores'
 import { useEffect, useRef } from 'react'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
-import useSourceCodeEditorCodemirrorViewStore from '@/stores/useSourceCodeEditorCodemirrorViewStore'
 import { extractMatches } from 'rme'
 import { IHeadingData } from 'zens/lib/TableOfContent/HeadingTree'
 import { getHeadingValue } from '@/helper/string'
 import { Container, RightBarHeader } from './styles'
 import { useTranslation } from 'react-i18next'
+import { sourceCodeCodemirrorViewMap } from '../EditorArea/Editor'
 
 const TocView = () => {
-  const { addCommand } = useCommandStore()
   const tocRef = useRef<TocRef>(null)
-  const { editorViewTypeMap } = useEditorViewTypeStore()
-  const { sourceCodeCodemirrorViewMap } = useSourceCodeEditorCodemirrorViewStore()
   const { t } = useTranslation()
 
   useEffect(() => {
+    const addCommand = useCommandStore.getState().addCommand
     addCommand({
       id: 'app:toc_refresh',
       handler: () => {
         const activeId = useEditorStore.getState().activeId
+        const editorViewTypeMap = useEditorViewTypeStore.getState().editorViewTypeMap
 
         if (!activeId) return
 
@@ -50,7 +49,9 @@ const TocView = () => {
                     anchor: match.to,
                     head: match.to,
                   },
+                  scrollIntoView: true,
                 })
+                codemirrorView.cm.focus()
               },
             }
           })
@@ -63,7 +64,7 @@ const TocView = () => {
         })
       },
     })
-  }, [addCommand, sourceCodeCodemirrorViewMap])
+  }, [])
 
   const containerEl = document.querySelector('.editor-active') as HTMLElement
   const scrollEl = document.querySelector('.editor-active') as HTMLElement

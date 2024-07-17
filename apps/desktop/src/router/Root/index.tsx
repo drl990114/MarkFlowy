@@ -1,5 +1,4 @@
 import { useEffect, useRef } from 'react'
-import { Container } from './styles'
 import { AppInfoDialog, SideBar } from '@/components'
 import EditorArea from '@/components/EditorArea'
 import TableDialog from '@/components/EditorArea/editorToolBar/TableDialog'
@@ -26,7 +25,6 @@ function Root() {
   const toggleLeftPanelVisible = () => {
     const panel = leftPanelRef.current
     if (panel) {
-      console.log('panel.isExpanded()', panel.isExpanded())
       if (panel.isExpanded()) {
         panel.collapse()
         setLeftBarVisible(false)

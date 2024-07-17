@@ -6,6 +6,7 @@ import type {
   EditorContext,
   EditorRef,
   EditorViewType,
+  MfCodemirrorView,
 } from 'rme'
 import { invoke } from '@tauri-apps/api/core'
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
@@ -29,7 +30,6 @@ import { useMount, useUnmount } from 'react-use'
 import useEditorCounterStore from '@/stores/useEditorCounterStore'
 import { toast } from 'zens'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
-import useSourceCodeEditorCodemirrorViewStore from '@/stores/useSourceCodeEditorCodemirrorViewStore'
 
 interface EditorWrapperProps {
   active: boolean
@@ -64,6 +64,8 @@ const EditorWrapper = styled.div.attrs<EditorWrapperProps>((props) => props)`
         })}
 `
 
+export const sourceCodeCodemirrorViewMap: Map<string, MfCodemirrorView> = new Map()
+
 function Editor(props: EditorProps) {
   const { id, active } = props
   const curFile = getFileObject(id)
@@ -78,7 +80,6 @@ function Editor(props: EditorProps) {
   const [delegate, setDelegate] = useState(
     createWysiwygDelegate(createWysiwygDelegateOptions(getFolderPathFromPath(curFile.path))),
   )
-  const { setSourceCodeCodemirrorView} = useSourceCodeEditorCodemirrorViewStore()
   const editorRef = useRef<EditorRef>(null)
   const editorContextRef = useRef<EditorChangeEventParams>()
 
@@ -127,8 +128,11 @@ function Editor(props: EditorProps) {
             if (payload === 'sourceCode') {
               const sourceCodeDelegate = createSourceCodeDelegate({
                 onCodemirrorViewLoad: (cmView) => {
-                  setSourceCodeCodemirrorView(curFile.id, cmView)
-                }
+                  sourceCodeCodemirrorViewMap.set(curFile.id, cmView)
+                  setTimeout(() => {
+                    execute('app:toc_refresh')
+                  })
+                },
               })
               setEditorDelegate(curFile.id, sourceCodeDelegate)
               setDelegate(sourceCodeDelegate)
@@ -246,7 +250,7 @@ function Editor(props: EditorProps) {
   useEffect(() => {
     if (active) {
       const { addCommand } = useCommandStore.getState()
-        addCommand({
+      addCommand({
         id: 'editor:save',
         handler: () => {
           saveHandler()
