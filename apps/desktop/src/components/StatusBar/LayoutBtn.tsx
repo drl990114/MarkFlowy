@@ -1,13 +1,8 @@
 import styled, { css } from 'styled-components'
-import { memo, useCallback, useRef } from 'react'
-import { emit } from '@tauri-apps/api/event'
-import { EVENT } from '@/constants'
-import useThemeStore from '@/stores/useThemeStore'
-import { showContextMenu } from '../UI/ContextMenu/ContextMenu'
+import { memo, useRef } from 'react'
 import { useCommandStore } from '@/stores'
-import appSettingService from '@/services/app-setting'
-import { useTranslation } from 'react-i18next'
 import { Popover, Tooltip } from 'zens'
+import useLayoutStore from '@/stores/useLayoutStore'
 
 const LayoutPanelContainer = styled.div`
   display: grid;
@@ -34,7 +29,13 @@ const LayoutPanelItemContainer = styled.div<{ active: boolean }>`
     `}
 `
 
-const LayoutPanelItem = (props) => {
+interface LayoutPanelItemProps {
+  active: boolean
+  icon: string
+  onClick: () => void
+}
+
+const LayoutPanelItem = (props: LayoutPanelItemProps) => {
   return (
     <LayoutPanelItemContainer active={props.active} onClick={props.onClick}>
       <Tooltip title='Grid Layout'>
@@ -46,8 +47,7 @@ const LayoutPanelItem = (props) => {
 
 export const LayoutBtn = memo(() => {
   const ref = useRef<HTMLDivElement>(null)
-  const { themes, curTheme, setCurThemeByName } = useThemeStore()
-  const { t } = useTranslation()
+  const { leftBar, rightBar } = useLayoutStore()
 
   return (
     <Popover
@@ -57,12 +57,14 @@ export const LayoutBtn = memo(() => {
         <LayoutPanelContainer>
           <LayoutPanelItem
             icon='ri-layout-left-line'
+            active={leftBar.visible}
             onClick={() => {
               useCommandStore.getState().execute('app:toggle_leftsidebar_visible')
             }}
           />
           <LayoutPanelItem
             icon='ri-layout-right-line'
+            active={rightBar.visible}
             onClick={() => {
               useCommandStore.getState().execute('app:toggle_rightsidebar_visible')
             }}
