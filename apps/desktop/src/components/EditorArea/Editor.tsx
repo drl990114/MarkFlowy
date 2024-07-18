@@ -6,6 +6,7 @@ import type {
   EditorContext,
   EditorRef,
   EditorViewType,
+  MfCodemirrorView,
 } from 'rme'
 import { invoke } from '@tauri-apps/api/core'
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
@@ -63,6 +64,8 @@ const EditorWrapper = styled.div.attrs<EditorWrapperProps>((props) => props)`
         })}
 `
 
+export const sourceCodeCodemirrorViewMap: Map<string, MfCodemirrorView> = new Map()
+
 function Editor(props: EditorProps) {
   const { id, active } = props
   const curFile = getFileObject(id)
@@ -112,43 +115,6 @@ function Editor(props: EditorProps) {
     }
     init()
   }, [delegate, curFile, setEditorDelegate])
-
-  useEffect(() => {
-    const cb = async (payload: EditorViewType) => {
-      if (active) {
-        if (editorRef.current?.getType() === payload) {
-          return
-        }
-
-        bus.emit(EVENT.editor_save, {
-          onSuccess: () => {
-            if (payload === 'sourceCode') {
-              const sourceCodeDelegate = createSourceCodeDelegate()
-              setEditorDelegate(curFile.id, sourceCodeDelegate)
-              setDelegate(sourceCodeDelegate)
-            } else if (payload === 'preview') {
-              const content = getEditorContent(curFile.id)
-              setContent(content)
-            } else {
-              const wysiwygDelegate = createWysiwygDelegate(
-                createWysiwygDelegateOptions(getFolderPathFromPath(curFile.path)),
-              )
-              setEditorDelegate(curFile.id, wysiwygDelegate)
-              setDelegate(wysiwygDelegate)
-            }
-            useEditorViewTypeStore.getState().setEditorViewType(curFile.id, payload)
-            editorRef.current?.toggleType(payload)
-          },
-        })
-      }
-    }
-
-    bus.on('editor_toggle_type', cb)
-
-    return () => {
-      bus.detach('editor_toggle_type', cb)
-    }
-  }, [active, curFile, execute, setEditorDelegate, getEditorContent])
 
   const saveHandler = useCallback(
     async (params: SaveHandlerParams = {}) => {
@@ -230,6 +196,58 @@ function Editor(props: EditorProps) {
   )
 
   const debounceSaveHandler = useCallback(debounceSave, [settingData, debounceSave])
+
+  useEffect(() => {
+    const cb = async (payload: EditorViewType) => {
+      if (active) {
+        if (editorRef.current?.getType() === payload) {
+          return
+        }
+
+        bus.emit(EVENT.editor_save, {
+          onSuccess: () => {
+            if (payload === 'sourceCode') {
+              const sourceCodeDelegate = createSourceCodeDelegate({
+                onCodemirrorViewLoad: (cmView) => {
+                  sourceCodeCodemirrorViewMap.set(curFile.id, cmView)
+                  setTimeout(() => {
+                    execute('app:toc_refresh')
+                  })
+                },
+              })
+              setEditorDelegate(curFile.id, sourceCodeDelegate)
+              setDelegate(sourceCodeDelegate)
+            } else if (payload === 'preview') {
+              const content = getEditorContent(curFile.id)
+              setContent(content)
+              debounceRefreshToc()
+            } else {
+              const wysiwygDelegate = createWysiwygDelegate(
+                createWysiwygDelegateOptions(getFolderPathFromPath(curFile.path)),
+              )
+              setEditorDelegate(curFile.id, wysiwygDelegate)
+              setDelegate(wysiwygDelegate)
+              debounceRefreshToc()
+            }
+            useEditorViewTypeStore.getState().setEditorViewType(curFile.id, payload)
+            editorRef.current?.toggleType(payload)
+          },
+        })
+      }
+    }
+
+    bus.on('editor_toggle_type', cb)
+
+    return () => {
+      bus.detach('editor_toggle_type', cb)
+    }
+  }, [active, curFile, execute, setEditorDelegate, getEditorContent, debounceRefreshToc])
+
+  useEffect(() => {
+    if (active) {
+      debounceRefreshToc()
+    }
+  }, [active, debounceRefreshToc])
 
   useEffect(() => {
     if (active) {
@@ -326,7 +344,7 @@ function Editor(props: EditorProps) {
     return <WarningHeader>File is not exist</WarningHeader>
   }
 
-  const cls = classNames('code-contents', {
+  const cls = classNames('code-contents scrollbar', {
     'editor-active': active,
     'display-none': !active,
   })

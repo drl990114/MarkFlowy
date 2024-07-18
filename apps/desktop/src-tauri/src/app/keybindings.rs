@@ -37,11 +37,19 @@ impl Keybindings {
                 ),
             ),
             (
-                "app:toggle_sidebar".to_string(),
+                "app:toggle_leftsidebar_visible".to_string(),
                 KeybindingInfo::new(
-                    "app:toggle_sidebar".to_string(),
-                    "toggle sideBar visible".to_string(),
-                    vec!["CommandOrCtrl".to_string(), "`".to_string()],
+                    "app:toggle_leftsidebar_visible".to_string(),
+                    "toggle left sideBar visible".to_string(),
+                    vec!["CommandOrCtrl".to_string(), "l".to_string()],
+                ),
+            ),
+            (
+                "app:toggle_rightsidebar_visible".to_string(),
+                KeybindingInfo::new(
+                    "app:toggle_rightsidebar_visible".to_string(),
+                    "toggle right sideBar visible".to_string(),
+                    vec!["CommandOrCtrl".to_string(), "r".to_string()],
                 ),
             ),
             (

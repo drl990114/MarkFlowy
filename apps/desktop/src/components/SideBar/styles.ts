@@ -11,11 +11,12 @@ export const SideBarHeader = styled.div`
 export const Container = styled.div<ContainerProps>`
   flex-grow: 0;
   flex-shrink: 0;
-  max-width: 400px;
+  height: 100%;
+  width: 100%;
   position: relative;
   display: flex;
   flex-direction: row;
-  background: ${(props) => props.theme.bgColor};
+  background: ${(props) => props.theme.sideBarBgColor};
   color: ${(props) => props.theme.primaryFontColor};
   overflow: hidden;
 

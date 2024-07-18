@@ -89,8 +89,10 @@ const styledLightTheme = {
   editorTabBgColor: '#EBEBEC',
   editorTabActiveBgColor: '#FAFAFA',
   sideBarHeaderBgColor: '#EBEBEC',
-  sideBarBgColor: '#EBEBEC',
+  sideBarBgColor: '#F9F9F9',
   statusBarBgColor: '#EBEBEC',
+  rightBarBgColor: '#EBEBEC',
+  rightBarHeaderBgColor: '#F9F9F9',
 
   // components
   buttonBgColor: '#f6f7f9',
@@ -101,7 +103,7 @@ const styledLightTheme = {
   contextMenuBgColorHover: '#E8E8EC',
 
   scrollbarThumbColor: '#C4C4C4',
-  scrollbarTrackColor: '#e4e4e7',
+  scrollbarTrackColor: 'rgba(121, 121, 121, 0.4)',
 }
 
 const styledDarkTheme = {
@@ -125,8 +127,10 @@ const styledDarkTheme = {
   editorTabBgColor: '#1b1b1b',
   editorTabActiveBgColor: '#151515',
   sideBarHeaderBgColor: '#1b1b1b',
-  sideBarBgColor: '#21262C',
-  statusBarBgColor: '#1b1b1b',
+  sideBarBgColor: '#1E1D1E',
+  statusBarBgColor: '#262626',
+  rightBarBgColor: '#1E1D1E',
+  rightBarHeaderBgColor: '#1b1b1b',
 
   // components
   buttonBgColor: '#21262c',
