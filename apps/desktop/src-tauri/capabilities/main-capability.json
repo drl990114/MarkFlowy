@@ -42,6 +42,8 @@
     "store:allow-set",
     "store:allow-save",
     "updater:default",
-    "notification:default"
+    "notification:default",
+    "clipboard-manager:default",
+    "clipboard-manager:allow-write-text"
   ]
 }
