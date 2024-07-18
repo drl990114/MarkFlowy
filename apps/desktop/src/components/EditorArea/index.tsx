@@ -1,7 +1,7 @@
 import Editor from './Editor'
 import { Container } from './styles'
-import { useCommandStore, useEditorStore } from '@/stores'
-import { memo, useEffect } from 'react'
+import { useEditorStore } from '@/stores'
+import { memo } from 'react'
 import EditorAreaTabs from './EditorAreaTabs'
 import { FindReplace } from '@/components/EditorArea/editorToolBar/FindReplace'
 import { EditorCount } from './editorToolBar/EditorCount'
@@ -10,9 +10,9 @@ import { EmptyState } from './EmptyState'
 function EditorArea() {
   const { opened, activeId } = useEditorStore()
 
-  useEffect(() => {
-    useCommandStore.getState().execute('app:toc_refresh')
-  }, [activeId])
+  // useEffect(() => {
+  //   useCommandStore.getState().execute('app:toc_refresh')
+  // }, [activeId])
 
   if (opened.length === 0) {
     return <EmptyState />

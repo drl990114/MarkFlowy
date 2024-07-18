@@ -18,7 +18,6 @@ export const SearchInput = styled.div`
   justify-content: flex-start;
   align-items: center;
   font-size: ${({ theme }) => theme.fontBase};
-  background-color: ${({ theme }) => theme.bgColor};
   box-sizing: border-box;
 
   .search-input {
