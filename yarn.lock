@@ -4730,7 +4730,7 @@ __metadata:
     react-use: "npm:^17.5.0"
     remixicon: "npm:^4.1.0"
     rimraf: "npm:^5.0.5"
-    rme: "npm:^0.0.72"
+    rme: "npm:^0.0.73"
     styled-components: "npm:^6.1.11"
     stylis: "npm:^4.3.2"
     tinykeys: "npm:^2.1.0"
@@ -4741,7 +4741,7 @@ __metadata:
     vite: "npm:^5.2.10"
     vite-plugin-svgr: "npm:^4.1.0"
     vitest: "npm:^1.2.2"
-    zens: "npm:0.0.31"
+    zens: "npm:0.0.32"
     zustand: "npm:^4.4.6"
   languageName: unknown
   linkType: soft
@@ -20439,9 +20439,9 @@ plugin-image-zoom@ataft/plugin-image-zoom:
   languageName: node
   linkType: hard
 
-"rme@npm:^0.0.72":
-  version: 0.0.72
-  resolution: "rme@npm:0.0.72"
+"rme@npm:^0.0.73":
+  version: 0.0.73
+  resolution: "rme@npm:0.0.73"
   dependencies:
     "@codemirror/autocomplete": "npm:^6.8.1"
     "@codemirror/commands": "npm:^6.2.4"
@@ -20509,11 +20509,11 @@ plugin-image-zoom@ataft/plugin-image-zoom:
     svgmoji: "npm:^3.2.0"
     void-elements: "npm:^3.1.0"
     yjs: "npm:^13.6.14"
-    zens: "npm:^0.0.31"
+    zens: "npm:^0.0.32"
   peerDependencies:
     react: ">=16.14.0"
     react-dom: ">=16.14.0"
-  checksum: 10/3ed3d46cc2778724b6758514ffa94f48af45a35fba07ebaaa90a3cd266162874a8db2aeb87e42eaa9d7c7d6d4083d8e5aded361818a0d4c451f7be103dae2c10
+  checksum: 10/0d3ae7e042e8c7dc73c9dc3111533a62a3fab1c603ae6842866994e835a20ce90da3a9f80bb8f8f4738d27883caf9924da607b33215c7e838a978ce1f5a7f420
   languageName: node
   linkType: hard
 
@@ -24024,9 +24024,9 @@ plugin-image-zoom@ataft/plugin-image-zoom:
   languageName: node
   linkType: hard
 
-"zens@npm:0.0.31, zens@npm:^0.0.31":
-  version: 0.0.31
-  resolution: "zens@npm:0.0.31"
+"zens@npm:0.0.32, zens@npm:^0.0.32":
+  version: 0.0.32
+  resolution: "zens@npm:0.0.32"
   dependencies:
     "@ant-design/icons": "npm:^5.3.7"
     "@ariakit/react": "npm:^0.4.5"
@@ -24045,7 +24045,7 @@ plugin-image-zoom@ataft/plugin-image-zoom:
     sonner: "npm:^1.4.0"
     styled-components: "npm:^6.1.11"
     stylis: "npm:^4.0.0"
-  checksum: 10/d1e3029b694402b93225f68b125e77c6234d1c8bbcb00b7b99396d065bb8bef69cdf36f1e2d5c4e8808896377c1a2eb666b0f5bdca82aa69111666065bed4c34
+  checksum: 10/91581cd07c4e013ba71a95ae86bc423387ab47c71d9ee70616ee9023c464adece8fda7b5e689a3767129fcd244386d04e3c9ba32bdaa2f7e53d5f09fb46a868e
   languageName: node
   linkType: hard
 
