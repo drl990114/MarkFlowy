@@ -1,5 +1,18 @@
 # UPDATE LOG
 
+## v0.12.0
+
+Features:
+
+- Add right bar to show table of content.
+
+- Support show table of content in source code mode.
+
+Fix:
+
+- Search result display error when paragraph has inline node.
+
+
 ## v0.11.3
 
 Fix: 
