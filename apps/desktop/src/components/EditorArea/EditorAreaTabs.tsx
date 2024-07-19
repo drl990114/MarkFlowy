@@ -1,6 +1,5 @@
 import { getFileObject } from '@/helper/files'
 import type { IFile } from '@/helper/filesys'
-import { useAutoAnimate } from '@formkit/auto-animate/react'
 import { useEditorStore, useEditorStateStore } from '@/stores'
 import { memo, useEffect, useRef } from 'react'
 import { TabItem, Dot } from './styles'
@@ -61,18 +60,16 @@ const EditorAreaTabs = memo(() => {
     useEditorStore()
   const { idStateMap } = useEditorStateStore()
   const { curTheme } = useThemeStore()
-  const [element] = useAutoAnimate<HTMLDivElement>()
   const htmlRef = useRef<HTMLDivElement>(null)
   const { t } = useTranslation()
 
   useEffect(() => {
     if (!htmlRef.current) return
-    element(htmlRef.current)
     htmlRef.current.onwheel = (ev) => {
       ev.preventDefault()
       htmlRef.current!.scrollLeft += ev.deltaY
     }
-  }, [element])
+  }, [])
 
   const onSelectItem = (id: string) => {
     setActiveId(id)

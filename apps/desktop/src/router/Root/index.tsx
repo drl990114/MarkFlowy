@@ -63,6 +63,9 @@ function Root() {
       id: 'app:toggle_rightsidebar_visible',
       handler: toggleRightPanelVisible,
     })
+
+    leftPanelRef.current?.isExpanded() ? setLeftBarVisible(true) : setLeftBarVisible(false)
+    rightPanelRef.current?.isExpanded() ? setRightBarVisible(true) : setRightBarVisible(false)
   }, [])
 
   useEffect(() => {
@@ -74,7 +77,8 @@ function Root() {
       {/* <TitleBar /> */}
       <PanelGroup
         style={{
-          flex: 1,
+          width: '100%',
+          height: '100%',
           overflow: 'hidden',
         }}
         autoSaveId={RESIZE_PANEL_STORAGE_KEY}
