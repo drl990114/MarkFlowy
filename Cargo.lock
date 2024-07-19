@@ -3415,7 +3415,7 @@ dependencies = [
 
 [[package]]
 name = "markflowy"
-version = "0.11.3"
+version = "0.12.0"
 dependencies = [
  "anyhow",
  "cocoa",

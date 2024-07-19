@@ -19,7 +19,6 @@
     "@emotion/is-prop-valid": "^1.2.2",
     "@emotion/react": "^11.11.3",
     "@emotion/styled": "^11.11.0",
-    "@formkit/auto-animate": "^0.8.1",
     "@markflowy/theme": "workspace:*",
     "@markflowy/types": "workspace:*",
     "@mui/material": "^5.15.14",
