@@ -1,5 +1,11 @@
 # UPDATE LOG
 
+## v0.12.1
+
+Fix: 
+
+- Init layout visible status when open app.
+
 ## v0.12.0
 
 Features:
