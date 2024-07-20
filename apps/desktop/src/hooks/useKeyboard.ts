@@ -48,7 +48,8 @@ function useKeyboard() {
     keyboardInfos.forEach((keyboardInfo) => {
       if (keyboardInfo.key_map.length > 0) {
         const keybind = getTinyKeyBinding(keyboardInfo.key_map)
-        keybindingMap[keybind] = () => {
+        keybindingMap[keybind] = (event) => {
+          event.preventDefault()
           execute(keyboardInfo.id)
         }
       }
