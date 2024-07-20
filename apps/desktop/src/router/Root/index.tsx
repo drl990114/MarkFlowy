@@ -84,7 +84,13 @@ function Root() {
         autoSaveId={RESIZE_PANEL_STORAGE_KEY}
         direction='horizontal'
       >
-        <Panel collapsible={true} collapsedSize={0} defaultSize={20} ref={leftPanelRef}>
+        <Panel
+          collapsible={true}
+          collapsedSize={0}
+          defaultSize={20}
+          minSize={10}
+          ref={leftPanelRef}
+        >
           <SideBar />
         </Panel>
         <PanelResizeHandle />
@@ -92,7 +98,13 @@ function Root() {
           <EditorArea />
         </Panel>
         <PanelResizeHandle />
-        <Panel collapsible={true} collapsedSize={0} defaultSize={20} ref={rightPanelRef}>
+        <Panel
+          collapsible={true}
+          collapsedSize={0}
+          defaultSize={20}
+          minSize={10}
+          ref={rightPanelRef}
+        >
           {TableOfContent.components}
         </Panel>
       </PanelGroup>
