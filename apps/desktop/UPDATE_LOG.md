@@ -1,10 +1,14 @@
 # UPDATE LOG
 
-## v0.12.1
+## v0.12.2
 
 Fix: 
 
 - Init layout visible status when open app.
+
+- Prevent default behavior of shortcut keys.
+
+- Stuck when adjusting file tree size on WindowsOS.
 
 ## v0.12.0
 
