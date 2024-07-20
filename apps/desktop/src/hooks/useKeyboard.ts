@@ -49,7 +49,9 @@ function useKeyboard() {
       if (keyboardInfo.key_map.length > 0) {
         const keybind = getTinyKeyBinding(keyboardInfo.key_map)
         keybindingMap[keybind] = (event) => {
-          event.preventDefault()
+          if (!keyboardInfo.use_default_event) {
+            event.preventDefault()
+          }
           execute(keyboardInfo.id)
         }
       }
@@ -77,4 +79,5 @@ interface KeyboardInfo {
   id: string
   desc: string
   key_map: string[]
+  use_default_event: boolean
 }
