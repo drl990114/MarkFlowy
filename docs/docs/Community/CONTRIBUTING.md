@@ -59,7 +59,7 @@ yarn install
 and
 
 ```bash
-cargo install --path apps/desktop/src-tauri
+cargo install --locked --path apps/desktop/src-tauri
 ```
 
 #### Startup MarkFlowy
