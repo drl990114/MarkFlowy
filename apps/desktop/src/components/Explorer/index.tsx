@@ -66,7 +66,7 @@ const Explorer: FC<ExplorerProps> = (props) => {
 
   return (
     <Container className={containerCLs} onContextMenu={handleContextMenu}>
-      <div className='h-full w-full overflow-auto'>
+      <div className='h-full w-full overflow-hidden'>
         {folderData && folderData.length > 0 ? (
           <FileTree data={folderData} activeId={activeId} onSelect={handleSelect} />
         ) : (

@@ -32,6 +32,10 @@
   overflow: auto;
 }
 
+.overflow-hidden {
+  overflow: hidden;
+}
+
 @keyframes swirl {
   /*以百分比来规定改变发生的时间 也可以通过"from"和"to",等价于0% 和 100%*/
   0% {
