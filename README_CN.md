@@ -6,18 +6,23 @@
 
 <h4 align="center"><strong><a href="https://github.com/drl990114/MarkFlowy">English</a></strong> | 简体中文</h4>
 
-[![Build Status][build-badge]][build]
-[![Downloads][downloads-badge]][release]
-[![MIT License][license-badge]][license]
+<div align="center">
 
-[![PRs Welcome][prs-welcome-badge]][prs-welcome]
+[![Build Status][build-badge]][build]
+[![App Version][version-badge]][release]
+[![Downloads][downloads-badge]][release]
+<br/>
+[![MIT License][license-badge]][license]
 [![Code of Conduct][coc-badge]][coc]
 [![Commit Activity][commit-badge]][commit]
-[![codefactor]](https://www.codefactor.io/repository/github/drl990114/markflowy)
+<br/>
 [![TypeScript-version-icon]](https://www.typescriptlang.org/)
 [![Rust-version-icon]](https://www.rust-lang.org/)
-
-[![App Version][version-badge]][release]
+[![PRs Welcome][prs-welcome-badge]][prs-welcome]
+<br/>
+[![codefactor]](https://www.codefactor.io/repository/github/drl990114/markflowy)
+[![issues-closed]](https://github.com/drl990114/MarkFlowy/issues?q=sort%3Aupdated-desc+is%3Aissue+is%3Aclosed)
+</div>
 
 ## ⚠️ MarkFlowy 目前处于 Alpha 阶段
 
@@ -80,9 +85,10 @@ MarkFlowy 是完全永久开源的，如果你想支持 MarkFlowy，你可以`st
 [prs-welcome]: https://github.com/drl990114/MarkFlowy/blob/main/CONTRIBUTING.md
 [coc-badge]: https://img.shields.io/badge/code%20of-conduct-ff69b4.svg?style=flat-square
 [coc]: https://github.com/drl990114/MarkFlowy/blob/main/CODE_OF_CONDUCT.md
-[commit-badge]: https://img.shields.io/github/commit-activity/w/drl990114/MarkFlowy?color=%2346bd1b&style=flat-square
+[commit-badge]: https://img.shields.io/github/commit-activity/m/drl990114/MarkFlowy?color=%23ff9900&style=flat-square
 [commit]: https://github.com/drl990114/MarkFlowy
-[version-badge]: https://img.shields.io/github/v/release/drl990114/MarkFlowy?label=version&style=flat-square
+[version-badge]: https://img.shields.io/github/v/release/drl990114/MarkFlowy?color=%239accfe&label=version&style=flat-square
 [rust-version-icon]: https://img.shields.io/badge/Rust-1.77.0-dea584?style=flat-square
 [typescript-version-icon]: https://img.shields.io/github/package-json/dependency-version/drl990114/MarkFlowy/dev/typescript?label=TypeScript&style=flat-square
 [codefactor]: https://www.codefactor.io/repository/github/drl990114/markflowy/badge/main?style=flat-square
+[issues-closed]: https://img.shields.io/github/issues-closed/drl990114/MarkFlowy.svg?style=flat-square
