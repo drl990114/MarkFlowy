@@ -4738,9 +4738,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@markflowy/runtime-api@workspace:core/runtime-api":
+"@markflowy/runtime-api@workspace:packages/runtime-api":
   version: 0.0.0-use.local
-  resolution: "@markflowy/runtime-api@workspace:core/runtime-api"
+  resolution: "@markflowy/runtime-api@workspace:packages/runtime-api"
   dependencies:
     "@markflowy/theme": "workspace:*"
     "@markflowy/types": "workspace:*"
