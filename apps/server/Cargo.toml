@@ -50,7 +50,7 @@ serde_json = "1.0"
 thiserror = "1.0.58"
 time = "0.3.34"
 ulid = { version = "1.1.2", features = ["uuid"] }
-url = "2.5.0"
+url = "2.5.2"
 uuid = "1.8.0"
 axum-extra = { version = "0.9.3", features = ["cookie"] }
 jsonwebtoken = "9.3.0"
