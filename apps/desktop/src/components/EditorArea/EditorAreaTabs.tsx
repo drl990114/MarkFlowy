@@ -141,7 +141,6 @@ const EditorAreaTabs = memo(() => {
                 key={id}
                 onContextMenu={handleContextMenu}
               >
-                <i className={'ri-file-3-line tab-items__icon'} />
                 <span
                   style={{
                     color: active ? curTheme.styledConstants.accentColor : '',
@@ -150,6 +149,7 @@ const EditorAreaTabs = memo(() => {
                     textOverflow: 'ellipsis',
                   }}
                 >
+                  <i className={'ri-file-3-line tab-items__icon'} />
                   {file.name}
                 </span>
 
