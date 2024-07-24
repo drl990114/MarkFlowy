@@ -16,6 +16,10 @@ const style = {
 }
 
 const Container = styled.div`
+  ::-webkit-scrollbar {
+    display: none;
+  }
+
   .indentLines {
     --indent-size: 15px;
 

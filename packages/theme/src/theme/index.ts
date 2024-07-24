@@ -75,7 +75,7 @@ const styledLightTheme = {
   labelFontColor: '#9ca3af',
   accentColor: '#0369a1',
   borderColor: '#d7d7dc',
-  bgColor: '#FAFAFA',
+  bgColor: '#FFFFFF',
   hoverColor: '#d7d7dc',
   warnColor: '#e2b340',
   dangerColor: '#dc2626',
@@ -91,8 +91,8 @@ const styledLightTheme = {
   sideBarHeaderBgColor: '#EBEBEC',
   sideBarBgColor: '#F9F9F9',
   statusBarBgColor: '#EBEBEC',
-  rightBarBgColor: '#EBEBEC',
-  rightBarHeaderBgColor: '#F9F9F9',
+  rightBarBgColor: '#F9F9F9',
+  rightBarHeaderBgColor: '#EBEBEC',
 
   // components
   buttonBgColor: '#f6f7f9',
