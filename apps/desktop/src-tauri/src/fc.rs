@@ -148,7 +148,7 @@ pub struct MoveFileInfo {
     is_replaced: Option<bool>,
 }
 
-pub fn rename_fs (old_path: &Path, new_path: &Path) -> AnyResult<MoveFileInfo> {
+pub fn rename_fs(old_path: &Path, new_path: &Path) -> AnyResult<MoveFileInfo> {
     fs::rename(old_path, new_path)?;
 
     let is_folder = new_path.is_dir();
@@ -214,10 +214,10 @@ pub fn move_files_to_target_folder(
 }
 
 pub mod cmd {
-    use std::path::Path;
-    use std::fs;
-
     use crate::fc;
+    use std::fs;
+    use std::path::Path;
+    use trash;
 
     use super::MoveFileInfo;
 
@@ -284,10 +284,15 @@ pub mod cmd {
     }
 
     #[tauri::command]
-    pub fn rename_fs (old_path: &str, new_path: &str) -> MoveFileInfo {
+    pub fn rename_fs(old_path: &str, new_path: &str) -> MoveFileInfo {
         let path = Path::new(old_path);
         let new_path = Path::new(new_path);
         let move_file_info = fc::rename_fs(path, new_path).unwrap();
         move_file_info
+    }
+
+    #[tauri::command]
+    pub fn trash_delete(path: &str) -> bool {
+        trash::delete(path).is_ok()
     }
 }

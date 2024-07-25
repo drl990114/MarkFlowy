@@ -60,6 +60,7 @@ pub fn run() {
             fc::cmd::move_files_to_target_folder,
             fc::cmd::path_join,
             fc::cmd::rename_fs,
+            fc::cmd::trash_delete,
             conf::cmd::get_app_conf_path,
             conf::cmd::get_app_conf,
             conf::cmd::reset_app_conf,
