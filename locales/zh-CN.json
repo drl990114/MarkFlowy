@@ -46,6 +46,9 @@
     },
     "delete": {
       "description": "你确定要删除 \"{{name}}\" {{something}}吗?"
+    },
+    "trash": {
+      "description": "你确定要将 \"{{name}}\" 移动到回收站吗?"
     }
   },
   "error": {
@@ -80,7 +83,8 @@
       "add_folder": "新建文件夹",
       "rename": "重命名",
       "delete_file": "删除文件",
-      "delete_folder": "删除文件夹"
+      "delete_folder": "删除文件夹",
+      "moveto_trash": "移动到回收站"
     },
     "editor_tab": {
       "close": "关闭",
