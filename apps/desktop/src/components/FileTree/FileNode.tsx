@@ -25,7 +25,7 @@ function FileNode({
 }) {
   const indentSize = Number.parseFloat(`${style.paddingLeft || 0}`)
   const { t } = useTranslation()
-  const { deleteNode, setFolderDataPure } = useEditorStore()
+  const { deleteNode, setFolderDataPure, trashNode } = useEditorStore()
 
   const delFileHandler = () => {
     deleteNode(node.data).then(() => {
@@ -196,6 +196,25 @@ function FileNode({
                 something: node.data.kind === 'dir' ? t('common.folder') : t('common.file'),
               }),
               onConfirm: delFileHandler,
+            })
+          },
+        })
+
+        items.push({
+          value: 'trash',
+          label: t('contextmenu.explorer.moveto_trash'),
+          handler: () => {
+            NiceModal.show(MODAL_CONFIRM_ID, {
+              title: t('confirm.trash.description', {
+                name: node.data.name,
+                something: node.data.kind === 'dir' ? t('common.folder') : t('common.file'),
+              }),
+              onConfirm: () => {
+                trashNode(node.data).then(() => {
+                  simpleTree.drop({ id: node.id })
+                  setFolderData(simpleTree.data)
+                })
+              }
             })
           },
         })

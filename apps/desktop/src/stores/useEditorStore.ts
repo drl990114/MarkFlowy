@@ -145,6 +145,25 @@ const useEditorStore = create<EditorStore>((set, get) => {
       }
     },
 
+    trashNode: async (fileNode) => {
+      const { folderData, activeId, delOpenedFile, opened } = get()
+      const parent = findParentNode(fileNode, folderData![0])
+
+      if (parent?.children) {
+        await invoke('trash_delete', {
+          path: fileNode.path,
+        })
+
+        delOpenedFile(fileNode!.id)
+        set((state) => {
+          return {
+            ...state,
+            activeId: activeId === fileNode!.id ? opened[opened.length - 1] : activeId,
+          }
+        })
+      }
+    },
+
     setActiveId: (id: string) => {
       set((state) => ({
         ...state,
@@ -256,6 +275,7 @@ type EditorStore = {
   addFile: (file: IFile, target: BaseIFile) => Promise<void | IFile>
   insertNodeToFolderData: (fileNode: IFile) => void
   deleteNode: (fileNode: IFile) => Promise<void>
+  trashNode: (fileNode: IFile) => Promise<void>
   addOpenedFile: (id: string) => void
   delOpenedFile: (id: string) => void
   delOtherOpenedFile: (id: string) => void
@@ -263,8 +283,8 @@ type EditorStore = {
   setFolderData: (folderData: IFile[]) => void
   /**
    * dont change opened and activeId
-   * @param folderData 
-   * @returns 
+   * @param folderData
+   * @returns
    */
   setFolderDataPure: (folderData: IFile[]) => void
   setEditorDelegate: (id: string, delegate: EditorDelegate<any>) => void

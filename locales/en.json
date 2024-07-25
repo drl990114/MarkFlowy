@@ -46,6 +46,9 @@
     },
     "delete": {
       "description": "Are you sure you want to delete the \"{{name}}\" {{something}}?"
+    },
+    "trash": {
+      "description": "Are you sure you want to move the \"{{name}}\" to the trash?"
     }
   },
   "error": {
@@ -81,7 +84,8 @@
       "add_folder": "New folder",
       "rename": "Rename",
       "delete_file": "Delete file",
-      "delete_folder": "Delete folder"
+      "delete_folder": "Delete folder",
+      "moveto_trash": "Move to trash"
     },
     "editor_tab": {
       "close": "Close",

@@ -38,6 +38,7 @@ tracing = "0.1.40"
 tracing-subscriber = "0.3.18"
 window-vibrancy = "0.5.0"
 dotenv = "0.15.0"
+trash = "5.0.0"
 
 [dependencies.tauri-plugin-aptabase]
 git = "https://github.com/aptabase/tauri-plugin-aptabase"
