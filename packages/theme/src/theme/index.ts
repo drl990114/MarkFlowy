@@ -103,7 +103,7 @@ const styledLightTheme = {
   contextMenuBgColorHover: '#E8E8EC',
 
   scrollbarThumbColor: '#C4C4C4',
-  scrollbarTrackColor: 'rgba(121, 121, 121, 0.4)',
+  scrollbarTrackColor: '#e4e4e7',
 }
 
 const styledDarkTheme = {
