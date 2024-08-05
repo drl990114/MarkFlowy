@@ -1,5 +1,17 @@
 # UPDATE LOG
 
+## v0.13.0
+
+Features:
+
+- Support trash file and folder.
+
+- Improve html image node loading display.
+
+Fix:
+
+- revert html inline node parse method.
+
 ## v0.12.3
 
 Fix: 
