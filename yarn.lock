@@ -363,7 +363,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/eslint-parser@npm:^7.22.5, @babel/eslint-parser@npm:^7.24.1":
+"@babel/eslint-parser@npm:^7.22.5":
   version: 7.24.1
   resolution: "@babel/eslint-parser@npm:7.24.1"
   dependencies:
@@ -374,6 +374,20 @@ __metadata:
     "@babel/core": ^7.11.0
     eslint: ^7.5.0 || ^8.0.0
   checksum: 10/b65f93d880e4f3f62cb1d23a50139434b0e14b12acaeca40035d204a705f1ff0fbd191ed5101dd122473ba012dd3d08a3427960e4aab7fb384cfb3fc3f040a3e
+  languageName: node
+  linkType: hard
+
+"@babel/eslint-parser@npm:^7.25.1":
+  version: 7.25.1
+  resolution: "@babel/eslint-parser@npm:7.25.1"
+  dependencies:
+    "@nicolo-ribaudo/eslint-scope-5-internals": "npm:5.1.1-v1"
+    eslint-visitor-keys: "npm:^2.1.0"
+    semver: "npm:^6.3.1"
+  peerDependencies:
+    "@babel/core": ^7.11.0
+    eslint: ^7.5.0 || ^8.0.0 || ^9.0.0
+  checksum: 10/9a2ddab3accd391a1eb95cb1ea655daa8603515d0f17081c542db8621c6bbbc65aa3b9b96b779854eed80cc8664a8969d7ac54479e8738876c0be5d26fd66efa
   languageName: node
   linkType: hard
 
@@ -15380,7 +15394,7 @@ __metadata:
   resolution: "markflowy-monorepo@workspace:."
   dependencies:
     "@babel/core": "npm:^7.23.5"
-    "@babel/eslint-parser": "npm:^7.24.1"
+    "@babel/eslint-parser": "npm:^7.25.1"
     "@babel/eslint-plugin": "npm:^7.23.5"
     "@babel/plugin-proposal-class-properties": "npm:^7.18.6"
     "@babel/plugin-proposal-decorators": "npm:^7.24.1"
