@@ -76,7 +76,7 @@
     "eslint": "9.1.1",
     "happy-dom": "^14.7.1",
     "react-test-renderer": "^18.2.0",
-    "rimraf": "^5.0.5",
+    "rimraf": "^6.0.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3",
     "url": "^0.11.3",
