@@ -4881,7 +4881,6 @@ __metadata:
     enzyme-to-json: "npm:^3.6.2"
     framer-motion: "npm:^11.2.12"
     graphql: "npm:^16.9.0"
-    husky: "npm:^8.0.3"
     invariant: "npm:^2.2.4"
     isomorphic-fetch: "npm:^3.0.0"
     jest: "npm:^29.5.0"
@@ -13787,15 +13786,6 @@ __metadata:
   version: 5.0.0
   resolution: "human-signals@npm:5.0.0"
   checksum: 10/30f8870d831cdcd2d6ec0486a7d35d49384996742052cee792854273fa9dd9e7d5db06bb7985d4953e337e10714e994e0302e90dc6848069171b05ec836d65b0
-  languageName: node
-  linkType: hard
-
-"husky@npm:^8.0.3":
-  version: 8.0.3
-  resolution: "husky@npm:8.0.3"
-  bin:
-    husky: lib/bin.js
-  checksum: 10/b754cf70fdc97c3b60fec5b80056b9c11436464953b1691bf2b5dcf0081fb6685d2c5f47abb8b2b1c49f504aabea5321fdd6496f8b755d9f6e7525a493406abb
   languageName: node
   linkType: hard
 

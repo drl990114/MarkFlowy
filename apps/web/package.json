@@ -6,14 +6,12 @@
   "scripts": {
     "analyze": "ANALYZE=true yarn build",
     "dev": "next dev",
-    "prepare": "husky install",
     "prebuild": "rimraf .next",
     "precommit": "lint-staged",
     "build": "NODE_ENV=production next build",
     "start": "NODE_ENV=production next start",
     "test": "jest -c .jest.config.js",
-    "prettier": "prettier --write \"**/*.*\"",
-    "postinstall": "husky install"
+    "prettier": "prettier --write \"**/*.*\""
   },
   "dependencies": {
     "@apollo/client": "^3.11.3",
@@ -68,7 +66,6 @@
     "csstype": "^3.1.2",
     "enzyme": "^3.11.0",
     "enzyme-to-json": "^3.6.2",
-    "husky": "^8.0.3",
     "jest": "^29.5.0",
     "jest-environment-jsdom": "^29.5.0",
     "jest-styled-components": "^7.1.1",
