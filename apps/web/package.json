@@ -25,7 +25,7 @@
     "@styled-icons/fa-brands": "^10.47.0",
     "@styled-icons/material": "^10.47.0",
     "@zeit/next-source-maps": "^0.0.3",
-    "axios": "^1.7.2",
+    "axios": "^1.7.4",
     "contentlayer": "^0.3.4",
     "framer-motion": "^11.2.12",
     "graphql": "^16.9.0",

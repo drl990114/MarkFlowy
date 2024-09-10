@@ -4874,7 +4874,7 @@ __metadata:
     "@types/zeit__next-source-maps": "npm:^0.0.2"
     "@wojtekmaj/enzyme-adapter-react-17": "npm:^0.6.7"
     "@zeit/next-source-maps": "npm:^0.0.3"
-    axios: "npm:^1.7.2"
+    axios: "npm:^1.7.4"
     contentlayer: "npm:^0.3.4"
     csstype: "npm:^3.1.2"
     enzyme: "npm:^3.11.0"
@@ -9684,14 +9684,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:^1.7.2":
-  version: 1.7.3
-  resolution: "axios@npm:1.7.3"
+"axios@npm:^1.7.4":
+  version: 1.7.7
+  resolution: "axios@npm:1.7.7"
   dependencies:
     follow-redirects: "npm:^1.15.6"
     form-data: "npm:^4.0.0"
     proxy-from-env: "npm:^1.1.0"
-  checksum: 10/7f92af205705a8fb4a9d35666b663729507657f252a1d39d83582590119941872d49078017cf992e32f47aa3b7317f5439f77be772a173dac2ae0fedd38f43ae
+  checksum: 10/7f875ea13b9298cd7b40fd09985209f7a38d38321f1118c701520939de2f113c4ba137832fe8e3f811f99a38e12c8225481011023209a77b0c0641270e20cde1
   languageName: node
   linkType: hard
 
