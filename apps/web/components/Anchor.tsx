@@ -1,4 +1,4 @@
-import { Link as LinkIcon } from '@styled-icons/material'
+import { Link as LinkIcon } from '@styled-icons/material/Link/Link'
 import styled, { css } from 'styled-components'
 import { mobile } from '../utils/media'
 import rem from '../utils/rem'

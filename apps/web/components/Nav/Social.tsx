@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Github } from '@styled-icons/fa-brands';
+import { Github } from '@styled-icons/fa-brands/Github/Github';
 import rem from '../../utils/rem';
 import { navbarHeight } from '../../utils/sizes';
 import Link from '../Link';

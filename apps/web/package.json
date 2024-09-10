@@ -10,7 +10,6 @@
     "precommit": "lint-staged",
     "build": "NODE_ENV=production next build",
     "start": "NODE_ENV=production next start",
-    "test": "jest -c .jest.config.js",
     "prettier": "prettier --write \"**/*.*\""
   },
   "dependencies": {
@@ -20,7 +19,6 @@
     "@mdx-js/react": "^3.0.1",
     "@newhighsco/next-plugin-svgr": "^3.0.131",
     "@next/mdx": "^14.2.3",
-    "@styled-icons/boxicons-regular": "^10.47.0",
     "@styled-icons/fa-brands": "^10.47.0",
     "@styled-icons/material": "^10.47.0",
     "contentlayer": "^0.3.4",
@@ -43,7 +41,6 @@
   "devDependencies": {
     "@octokit/types": "^9.2.3",
     "@types/enzyme": "^3.10.13",
-    "@types/jest": "^29.5.1",
     "@types/mdx": "^2.0.5",
     "@types/node": "^18.16.14",
     "@types/react": "^18.3.0",
@@ -56,15 +53,11 @@
     "csstype": "^3.1.2",
     "enzyme": "^3.11.0",
     "enzyme-to-json": "^3.6.2",
-    "jest": "^29.5.0",
-    "jest-environment-jsdom": "^29.5.0",
-    "jest-styled-components": "^7.1.1",
     "lint-staged": "^13.2.2",
     "prettier": "^2.8.8",
     "react-test-renderer": "^18.3.1",
     "remark-gfm": "^4.0.0",
     "rimraf": "^3.0.2",
-    "ts-jest": "^29.1.0",
     "typescript": "^5.0.4",
     "webpack-bundle-analyzer": "^4.8.0"
   }

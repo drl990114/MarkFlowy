@@ -1,9 +1,8 @@
-import { KeyboardArrowDown } from '@styled-icons/material';
+import { KeyboardArrowDown } from '@styled-icons/material/KeyboardArrowDown/KeyboardArrowDown';
 import styled, { css } from 'styled-components';
 import { mobile } from '../../utils/media';
 import rem from '../../utils/rem';
 import { navbarHeight } from '../../utils/sizes';
-import Link from '../Link';
 import NavButton from './NavButton';
 import { CloseIcon, FoldIcon } from './NavIcons';
 import NavLinks from './NavLinks';

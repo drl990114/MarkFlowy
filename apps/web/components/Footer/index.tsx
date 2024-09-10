@@ -1,4 +1,4 @@
-import { Favorite } from '@styled-icons/material'
+import { Favorite } from '@styled-icons/material/Favorite/Favorite'
 import styled, { css } from 'styled-components'
 import { grey, paleGrey, red } from '../../utils/colors'
 import { mobile } from '../../utils/media'
