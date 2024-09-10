@@ -19,7 +19,7 @@ panic = 'abort'
 
 [dependencies]
 axum = "0.7.5"
-hyper = "1.3.1"
+hyper = "1.4.1"
 tokio = { version = "1.38.0", features = ["macros", "rt-multi-thread"] }
 
 # GraphQL
@@ -41,7 +41,7 @@ tracing-subscriber = { version = "0.3.18", features = ["env-filter", "chrono"] }
 dotenv = "0.15.0"
 
 # Misc
-base64 = "0.22.0"
+base64 = "0.22.1"
 chrono = { version = "0.4.37", features = ["serde"]}
 frunk = "0.4.2"
 frunk_core = { version = "0.4.2" }
