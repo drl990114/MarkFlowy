@@ -32,8 +32,6 @@ export type Feature = {
 }
 
 export default function Feature() {
-  let list = []
-
   const features = [
     {
       title: 'High availability',

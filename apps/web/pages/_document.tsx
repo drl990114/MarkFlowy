@@ -39,7 +39,7 @@ export default class MyDocument extends Document {
         </Head>
 
         <body>
-          <ThemeProvider theme={darkTheme}>
+          <ThemeProvider>
             <div className='root'>
               <Main />
             </div>

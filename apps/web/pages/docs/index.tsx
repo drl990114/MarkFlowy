@@ -24,7 +24,7 @@ export default function Documentation() {
                 <span>{key}</span>
               </Header>
 
-              {section.map(({ slug, title, _raw }) => {
+              {section.map(({ slug, title }) => {
                 return (
                   <SubHeader key={slug}>
                     <Link href={`/docs/${slug}`}>{title}</Link>

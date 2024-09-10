@@ -1,10 +1,12 @@
-import { ThemeProvider as RmeThemeProvider, WysiwygThemeWrapper } from 'rme'
-import { ThemeProvider as ZensThemeProvider } from 'zens'
 import { ThemeProvider as StyledThemeProvider } from 'styled-components'
 import { darkTheme } from 'theme'
-import dynamic from 'next/dynamic'
+import React from 'react'
 
-const ThemeProvider = ({ children, ...rest }: any) => (
+type ThemeProviderProps = {
+  children?: React.ReactNode
+}
+
+const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => (
   <StyledThemeProvider theme={darkTheme}>{children}</StyledThemeProvider>
 )
 

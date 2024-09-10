@@ -1,18 +1,18 @@
-import styled, { css } from 'styled-components';
-import { mobile } from '../../utils/media';
-import rem from '../../utils/rem';
-import { navbarHeight } from '../../utils/sizes';
-import Link from '../Link';
-import MobileNavbar from './MobileNavbar';
-import NavLinks from './NavLinks';
-import Social from './Social';
+import styled, { css } from 'styled-components'
+import { mobile } from '../../utils/media'
+import rem from '../../utils/rem'
+import { navbarHeight } from '../../utils/sizes'
+import Link from '../Link'
+import MobileNavbar from './MobileNavbar'
+import NavLinks from './NavLinks'
+import Social from './Social'
 
 export interface NavbarProps {
-  onSideToggle?: () => void;
-  onMobileNavToggle?: () => void;
-  isSideFolded?: boolean;
-  isMobileNavFolded?: boolean;
-  showSideNav?: boolean;
+  onSideToggle?: () => void
+  onMobileNavToggle?: () => void
+  isSideFolded?: boolean
+  isMobileNavFolded?: boolean
+  showSideNav?: boolean
 }
 
 export default function Navbar({
@@ -34,7 +34,7 @@ export default function Navbar({
 
       <NormalNavbar>
         <StartWrapper>
-          <LogoLink aria-label="MarkFlowy logo">
+          <LogoLink aria-label='MarkFlowy logo' href='.'>
             <strong>MarkFlowy</strong>
           </LogoLink>
 
@@ -43,6 +43,7 @@ export default function Navbar({
       </NormalNavbar>
 
       <EndWrapper
+        /** @ts-ignore */
         css={css`
           margin-left: auto;
           margin-right: 16px;
@@ -55,19 +56,19 @@ export default function Navbar({
         <StyledSocial style={{ marginLeft: 16 }} />
       </EndWrapper>
     </Wrapper>
-  );
+  )
 }
 
 const Wrapper = styled.nav<{ $transparent?: boolean }>`
   align-items: center;
-  background-color: ${props => props.theme.navBackground};
+  background-color: ${(props) => props.theme.navBackground};
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
   box-sizing: border-box;
   color: white;
   display: flex;
   flex-wrap: wrap;
-  font-family: ${props => props.theme.fontFamily};
+  font-family: ${(props) => props.theme.fontFamily};
   font-size: ${rem(15)};
   font-weight: 500;
   justify-content: center;
@@ -78,21 +79,21 @@ const Wrapper = styled.nav<{ $transparent?: boolean }>`
   transition: background 300ms ease-out;
   width: 100%;
   z-index: 3;
-`;
+`
 
 const StartWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: flex-start;
-`;
+`
 
 const EndWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: flex-end;
-`;
+`
 /* stylelint-disable */
-const StyledSocial = styled(Social)``;
+const StyledSocial = styled(Social)``
 /* stylelint-enable */
 
 const NormalNavbar = styled.div`
@@ -106,7 +107,7 @@ const NormalNavbar = styled.div`
       display: none;
     `)};
   }
-`;
+`
 
 const LogoLink = styled(Link).attrs((/* props */) => ({
   unstyled: true,
@@ -115,4 +116,4 @@ const LogoLink = styled(Link).attrs((/* props */) => ({
   display: inline-block;
   vertical-align: center;
   margin-right: ${rem(35)};
-`;
+`

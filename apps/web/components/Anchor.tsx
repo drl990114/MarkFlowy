@@ -1,27 +1,32 @@
-import { Link as LinkIcon } from '@styled-icons/material';
-import styled, { css } from 'styled-components';
-import { mobile } from '../utils/media';
-import rem from '../utils/rem';
-import { Header, SubHeader, TertiaryHeader } from './Layout';
+import { Link as LinkIcon } from '@styled-icons/material'
+import styled, { css } from 'styled-components'
+import { mobile } from '../utils/media'
+import rem from '../utils/rem'
+import { Header, SubHeader, TertiaryHeader } from './Layout'
 
 export interface AnchorProps {
-  id?: string;
-  level?: number;
+  id?: string
+  level?: number
 }
 
-export default function Anchor({ children, level, id, ...props }: React.PropsWithChildren<AnchorProps>) {
-  let override = undefined;
+export default function Anchor({
+  children,
+  level,
+  id,
+  ...props
+}: React.PropsWithChildren<AnchorProps>) {
+  let override = undefined
 
   switch (level) {
     case 3:
-      override = SubHeader;
-      break;
+      override = SubHeader
+      break
     case 4:
-      override = TertiaryHeader;
-      break;
+      override = TertiaryHeader
+      break
     default:
-      override = Header;
-      break;
+      override = Header
+      break
   }
 
   return (
@@ -34,7 +39,7 @@ export default function Anchor({ children, level, id, ...props }: React.PropsWit
         <AnchorIcon />
       </AnchorPrimitive>
     </AnchorHeader>
-  );
+  )
 }
 
 const InvisibleAnchor = styled.div.attrs((/* props */) => ({
@@ -50,18 +55,15 @@ const InvisibleAnchor = styled.div.attrs((/* props */) => ({
   ${mobile(css`
     top: ${rem(-90)};
   `)};
-`;
+`
 
 const AnchorPrimitive = styled.a`
   display: none;
   color: inherit;
   margin-left: ${rem(10)};
-`;
+`
 
-const AnchorIcon = styled(LinkIcon).attrs((/* props */) => ({
-  width: null,
-  height: null,
-}))`
+const AnchorIcon = styled(LinkIcon)`
   width: ${rem(20)};
   opacity: 0.7;
   margin-top: ${rem(-5)};
@@ -69,7 +71,7 @@ const AnchorIcon = styled(LinkIcon).attrs((/* props */) => ({
   &:hover {
     opacity: 0.9;
   }
-`;
+`
 
 const AnchorHeader = styled.div`
   position: relative;
@@ -84,4 +86,4 @@ const AnchorHeader = styled.div`
   &:hover ${AnchorPrimitive} {
     display: inline-block;
   }
-`;
+`

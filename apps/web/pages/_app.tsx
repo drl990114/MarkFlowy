@@ -31,7 +31,7 @@ export default class MyApp extends App {
           ></link>
         </Head>
 
-        <ThemeProvider theme={darkTheme}>
+        <ThemeProvider>
           <ResetStyles />
           <Component {...pageProps} />
         </ThemeProvider>

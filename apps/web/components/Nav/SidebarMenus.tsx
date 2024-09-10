@@ -20,7 +20,7 @@ export const SimpleSidebarMenu = () => {
               <span>{key}</span>
             </SectionTitle>
 
-            {section.map(({ slug, title, _raw }) => {
+            {section.map(({ slug, title }) => {
               return (
                 <SubSection key={title}>
                   <StyledLink href={`/docs/${slug}`}>{title}</StyledLink>
@@ -74,7 +74,7 @@ export const DocsSidebarMenu = () => {
               <span>{key}</span>
             </SectionTitle>
 
-            {section.map(({ slug, title, _raw }) => {
+            {section.map(({ slug, title }) => {
               return (
                 <SubSection key={title}>
                   <StyledLink href={`/docs/${slug}`}>{title}</StyledLink>
