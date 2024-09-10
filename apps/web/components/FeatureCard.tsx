@@ -25,7 +25,7 @@ const FeatureCard = (props: FeatureCardProps) => {
           alt='Markflowy'
           width={720}
           height={480}
-          style={{ width: '100%', height: 'auto' }}
+          style={{ width: '100%', height: 'auto', borderRadius: '8px' }}
         />
       </div>
     </Container>

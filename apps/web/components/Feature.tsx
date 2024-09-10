@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion'
 import FeatureCard from './FeatureCard'
 import styled, { css } from 'styled-components'
 import rem from 'utils/rem'
@@ -35,18 +34,35 @@ export type Feature = {
 export default function Feature() {
   let list = []
 
-  const feature = {
-    title: 'High availability',
-    descs: [
-      `MarkFlowy uses the remirror editor, which not only provides high scalability, but also has a great editing experience. And, MarkFlowy supports multiple editing modes, such as 'source code', 'wysiwyg'.`,
-    ],
-    img: '/screenshots/sourcecode.png',
-  }
+  const features = [
+    {
+      title: 'High availability',
+      descs: [
+        `MarkFlowy uses the remirror editor, which not only provides high scalability, but also has a great editing experience. And, MarkFlowy supports multiple editing modes, such as 'source code', 'wysiwyg'.`,
+      ],
+      img: '/screenshots/sourcecode.png',
+    },
+    {
+      title: 'Custom Theme',
+      descs: [
+        `MarkFlowy comes with a dark theme and supports custom themes. You can also share themes with others.`,
+      ],
+      img: '/screenshots/darkmode.png',
+    },
+    {
+      title: 'Built-in ChatGPT',
+      descs: [
+        `Currently supports one-click export of conversations、translate markdown articles and et article abstract, making chatgpt your smart assistant.`,
+      ],
+      img: '/screenshots/chatgpt.png',
+    },
+  ]
   return (
     <Container id='feature'>
       <div className='feature-cards'>
-        <FeatureCard feature={feature} />
-        <FeatureCard feature={feature} />
+        {features.map((feature) => {
+          return <FeatureCard feature={feature} />
+        })}
       </div>
     </Container>
   )
