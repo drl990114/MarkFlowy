@@ -16,7 +16,7 @@ const FeatureCard = (props: FeatureCardProps) => {
       <div className='feature-card__left'>
         <h3>{feature.title}</h3>
         {feature.descs.map((desc) => {
-          return <p>{desc}</p>
+          return <p key={desc}>{desc}</p>
         })}
       </div>
       <div className='feature-card__right'>

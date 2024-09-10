@@ -59,7 +59,7 @@ export default function Feature() {
     <Container id='feature'>
       <div className='feature-cards'>
         {features.map((feature) => {
-          return <FeatureCard feature={feature} />
+          return <FeatureCard key={feature.title} feature={feature} />
         })}
       </div>
     </Container>
