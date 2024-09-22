@@ -32,11 +32,11 @@
     "react-dom": "^18.3.1",
     "react-is": "^18.3.1",
     "rehype-slug": "^6.0.0",
-    "rme": "^0.0.74",
+    "rme": "0.1.0-beta.2",
     "styled-components": "^6.1.11",
     "stylis": "^4.2.0",
     "stylis-plugin-rtl": "^2.1.1",
-    "zens": "^0.0.35"
+    "zens": "^0.0.36"
   },
   "devDependencies": {
     "@octokit/types": "^9.2.3",
