@@ -1,35 +1,35 @@
 {
-  "version": "v0.13.1",
-  "notes": "Features:\n\n- Support trash file and folder.\n\n- Improve html image node loading display.\n\nFix:\n\n- revert html inline node parse method.",
-  "pub_date": "2024-08-05T15:19:07.988Z",
+  "version": "v0.14.0",
+  "notes": "Features:\n\n- Improve html inline editing experience.",
+  "pub_date": "2024-09-22T12:28:11.139Z",
   "platforms": {
     "win64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSU1d5YU04dG8vaDg5Wkt3VnB3VmhlQzZJenBzNkpDOTdSQXcxMXpTeFM3SHZrY2kwOCt3Q3dIM3EwZVNJZFdJVUNEVW9rSHdJZFlLcmlqSGFhU0pxekdzbDNLK2R5V3dvPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzIyODcwNjU3CWZpbGU6TWFya0Zsb3d5XzAuMTMuMV94NjRfZW4tVVMubXNpLnppcApHSXM5T243VE4wVXNxZVhQMmN1Q25xbXJkWFJUaUZkRU5nVllraGczL3ZIYmxicGRMaGE5Y0Jrd2RLbTIyYTNaUis3N2tJRndhNXhwWnpUdjZtbDJCUT09Cg==",
-      "url": "https://github.com/drl990114/MarkFlowy/releases/download/v0.13.1/MarkFlowy_0.13.1_windows_x86_64.msi.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSU1d5YU04dG8vaHpLelI5ekhqcHh3OEtlK2NTWkRGVSthemhobHBackNnZ0t1OFQvNDRLa0tYaS9rek0xQjUrcFlKTGZuTlJWejExcm90NndwdnVtRU42RlJJUGFDd2dNPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzI3MDA4MDAzCWZpbGU6TWFya0Zsb3d5XzAuMTQuMF94NjRfZW4tVVMubXNpLnppcApldDRzdndVbFJpSXd0aW9nT09QQTRNV1VLVVpzMXpZVnIyUVY5blhwZVRtbXlhbXdRVGYyL1c5ckkzUyt6N2ZITDd2b2RDQlBnQlZUUllHVmdxVHJDQT09Cg==",
+      "url": "https://github.com/drl990114/MarkFlowy/releases/download/v0.14.0/MarkFlowy_0.14.0_windows_x86_64.msi.zip"
     },
     "linux": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSU1d5YU04dG8vaC92NUNjb01BRFFWVDE3SStyWUw1T0Q1UzZQQTlPOEp3eE5WcHN1OGhueU1idHRUSnkrWSt5ZGIramRMaE1RQkpPenhWRlNHaVd2S2xuVnNteXZ0VXc4PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzIyODcwNDgyCWZpbGU6TWFya0Zsb3d5XzAuMTMuMV9hbWQ2NC5BcHBJbWFnZS50YXIuZ3oKL3pEanNidjZkdXBSWWs5VGE5azJkZVBERzRpUnoxWFZtSENNa1pzSDE2NFJoWFVnaERVQXNmWkJ3SXBqUTJXMmNYQXJBWUtFWWlWc2RudWNvMDc3Q3c9PQo=",
-      "url": "https://github.com/drl990114/MarkFlowy/releases/download/v0.13.1/MarkFlowy_0.13.1_linux_x86_64.AppImage.tar.gz"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSU1d5YU04dG8vaDFCK0huaWNONXgzbEl6Y0pIQW5HeGFkMEtLdkhQSE1uWjl0REhHTDlsaFJyU0tza0VYa1c5anNWQzJJR21KV295eVdSOFlIQnl2UjJsQnpSdDVaSndFPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzI3MDA3ODk4CWZpbGU6TWFya0Zsb3d5XzAuMTQuMF9hbWQ2NC5BcHBJbWFnZS50YXIuZ3oKNUhGZlZvT0NSVFNOYmJhVFZZSHd1SHp6cnFnMVZjak40U0JsUmNGU1JRVVQxc3duN2VVSDBuc2pIZkZLbUhaazVQb3F1Q3VRNHRoc01QYnBIMms0Q3c9PQo=",
+      "url": "https://github.com/drl990114/MarkFlowy/releases/download/v0.14.0/MarkFlowy_0.14.0_linux_x86_64.AppImage.tar.gz"
     },
     "darwin": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSU1d5YU04dG8vaC9HQVBZMGhQSFdZQWRXa3NQa1VIMWVYL3lwMzJneGJsRmxUWjYwOGYydDd1d2Z3YllwRGoyTEx6MlFBODU0bHd5bzlSUlBTZFVjMDVETDZ0NVJrUmc0PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzIyODcwMjIzCWZpbGU6TWFya0Zsb3d5LmFwcC50YXIuZ3oKMFBEYVFOYjYwQWpPbzN5aHN5WmpER3N4NGpQNmRFZHAzUjRtamswUFowQ2lXTlBlWEZCZ1MyaS83c1ZUWEZObG9YK0hRRFdzWmR5UHVOQ1ZLaFNTQXc9PQo=",
-      "url": "https://github.com/drl990114/MarkFlowy/releases/download/v0.13.1/MarkFlowy_0.13.1_macos_x86_64.app.tar.gz"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSU1d5YU04dG8vaDNRQ0lPT3c2NWt3ZW9mdFJXY1UxTzlwd1VmMGRqcWdDOG5XMWR5MWtEMTRtMFN5djN6NWZKVHVGZXRCR2JxNWprbThXUnh0UXZXTlFnK3NjYkNGN1EwPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzI3MDA3NjU3CWZpbGU6TWFya0Zsb3d5LmFwcC50YXIuZ3oKaEFiT0Z5UnhydU9VUlpXMFduQi8ySFQ4a1kza3FTalUvT0R2b3NsV00xclVaTGtNUk5kTHIwTVRHTm1xeU5IeHlYMzdEdE1pVkN3QmFSVmlhN0pYQkE9PQo=",
+      "url": "https://github.com/drl990114/MarkFlowy/releases/download/v0.14.0/MarkFlowy_0.14.0_macos_x86_64.app.tar.gz"
     },
     "darwin-aarch64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSU1d5YU04dG8vaHg1NVlCd29wTGJraFhEeDJFSlBKcnQvbFZaQ2JJUVVtUm5KMjVycDM1TDZTa0dla1VVVXNvRFFxdW0ySkZZZUFPSFlIVG1PTVliSUV2cTl5aGh0U1FzPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzIyODcwMjIzCWZpbGU6TWFya0Zsb3d5LmFwcC50YXIuZ3oKYTJRSE9taFdCekV4L3FRaTJuc2ZqS2d5VHJndW1YSFRLblFyMWFta1BoTURNR2U1eFFFUnRLelBVenFhWHMxbTB0Z3BYNFhxZFMveTFHbExNcWhVQkE9PQo=",
-      "url": "https://github.com/drl990114/MarkFlowy/releases/download/v0.13.1/MarkFlowy_0.13.1_macos_aarch64.app.tar.gz"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSU1d5YU04dG8vaHpvc2hZN1pyODRvNHQxcXdFTk5ldTY1Q0dIZWpYdXN6SjZueHViR1B3eUk0aG8zTUFtZFlyQ29oTzVRdmdSaWd1UnJ6V3IzeGRBWm1QcWZXL21Yamc4PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzI3MDA3NjY3CWZpbGU6TWFya0Zsb3d5LmFwcC50YXIuZ3oKWlFMaGllZ2YzRGRsYy9JS2h5LzkzL1RrRHZaVS94akJQOGc1eDAyUGsrd0N2Vk5LZmVMTWdzZXI1TUtMSGViMDdPeS9PSVNhbXN3ekp2akpUbUxsRFE9PQo=",
+      "url": "https://github.com/drl990114/MarkFlowy/releases/download/v0.14.0/MarkFlowy_0.14.0_macos_aarch64.app.tar.gz"
     },
     "darwin-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSU1d5YU04dG8vaC9HQVBZMGhQSFdZQWRXa3NQa1VIMWVYL3lwMzJneGJsRmxUWjYwOGYydDd1d2Z3YllwRGoyTEx6MlFBODU0bHd5bzlSUlBTZFVjMDVETDZ0NVJrUmc0PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzIyODcwMjIzCWZpbGU6TWFya0Zsb3d5LmFwcC50YXIuZ3oKMFBEYVFOYjYwQWpPbzN5aHN5WmpER3N4NGpQNmRFZHAzUjRtamswUFowQ2lXTlBlWEZCZ1MyaS83c1ZUWEZObG9YK0hRRFdzWmR5UHVOQ1ZLaFNTQXc9PQo=",
-      "url": "https://github.com/drl990114/MarkFlowy/releases/download/v0.13.1/MarkFlowy_0.13.1_macos_x86_64.app.tar.gz"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSU1d5YU04dG8vaDNRQ0lPT3c2NWt3ZW9mdFJXY1UxTzlwd1VmMGRqcWdDOG5XMWR5MWtEMTRtMFN5djN6NWZKVHVGZXRCR2JxNWprbThXUnh0UXZXTlFnK3NjYkNGN1EwPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzI3MDA3NjU3CWZpbGU6TWFya0Zsb3d5LmFwcC50YXIuZ3oKaEFiT0Z5UnhydU9VUlpXMFduQi8ySFQ4a1kza3FTalUvT0R2b3NsV00xclVaTGtNUk5kTHIwTVRHTm1xeU5IeHlYMzdEdE1pVkN3QmFSVmlhN0pYQkE9PQo=",
+      "url": "https://github.com/drl990114/MarkFlowy/releases/download/v0.14.0/MarkFlowy_0.14.0_macos_x86_64.app.tar.gz"
     },
     "linux-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSU1d5YU04dG8vaC92NUNjb01BRFFWVDE3SStyWUw1T0Q1UzZQQTlPOEp3eE5WcHN1OGhueU1idHRUSnkrWSt5ZGIramRMaE1RQkpPenhWRlNHaVd2S2xuVnNteXZ0VXc4PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzIyODcwNDgyCWZpbGU6TWFya0Zsb3d5XzAuMTMuMV9hbWQ2NC5BcHBJbWFnZS50YXIuZ3oKL3pEanNidjZkdXBSWWs5VGE5azJkZVBERzRpUnoxWFZtSENNa1pzSDE2NFJoWFVnaERVQXNmWkJ3SXBqUTJXMmNYQXJBWUtFWWlWc2RudWNvMDc3Q3c9PQo=",
-      "url": "https://github.com/drl990114/MarkFlowy/releases/download/v0.13.1/MarkFlowy_0.13.1_linux_x86_64.AppImage.tar.gz"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSU1d5YU04dG8vaDFCK0huaWNONXgzbEl6Y0pIQW5HeGFkMEtLdkhQSE1uWjl0REhHTDlsaFJyU0tza0VYa1c5anNWQzJJR21KV295eVdSOFlIQnl2UjJsQnpSdDVaSndFPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzI3MDA3ODk4CWZpbGU6TWFya0Zsb3d5XzAuMTQuMF9hbWQ2NC5BcHBJbWFnZS50YXIuZ3oKNUhGZlZvT0NSVFNOYmJhVFZZSHd1SHp6cnFnMVZjak40U0JsUmNGU1JRVVQxc3duN2VVSDBuc2pIZkZLbUhaazVQb3F1Q3VRNHRoc01QYnBIMms0Q3c9PQo=",
+      "url": "https://github.com/drl990114/MarkFlowy/releases/download/v0.14.0/MarkFlowy_0.14.0_linux_x86_64.AppImage.tar.gz"
     },
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSU1d5YU04dG8vaDg5Wkt3VnB3VmhlQzZJenBzNkpDOTdSQXcxMXpTeFM3SHZrY2kwOCt3Q3dIM3EwZVNJZFdJVUNEVW9rSHdJZFlLcmlqSGFhU0pxekdzbDNLK2R5V3dvPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzIyODcwNjU3CWZpbGU6TWFya0Zsb3d5XzAuMTMuMV94NjRfZW4tVVMubXNpLnppcApHSXM5T243VE4wVXNxZVhQMmN1Q25xbXJkWFJUaUZkRU5nVllraGczL3ZIYmxicGRMaGE5Y0Jrd2RLbTIyYTNaUis3N2tJRndhNXhwWnpUdjZtbDJCUT09Cg==",
-      "url": "https://github.com/drl990114/MarkFlowy/releases/download/v0.13.1/MarkFlowy_0.13.1_windows_x86_64.msi.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSU1d5YU04dG8vaHpLelI5ekhqcHh3OEtlK2NTWkRGVSthemhobHBackNnZ0t1OFQvNDRLa0tYaS9rek0xQjUrcFlKTGZuTlJWejExcm90NndwdnVtRU42RlJJUGFDd2dNPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzI3MDA4MDAzCWZpbGU6TWFya0Zsb3d5XzAuMTQuMF94NjRfZW4tVVMubXNpLnppcApldDRzdndVbFJpSXd0aW9nT09QQTRNV1VLVVpzMXpZVnIyUVY5blhwZVRtbXlhbXdRVGYyL1c5ckkzUyt6N2ZITDd2b2RDQlBnQlZUUllHVmdxVHJDQT09Cg==",
+      "url": "https://github.com/drl990114/MarkFlowy/releases/download/v0.14.0/MarkFlowy_0.14.0_windows_x86_64.msi.zip"
     }
   }
 }
