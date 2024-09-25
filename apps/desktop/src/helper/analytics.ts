@@ -48,5 +48,5 @@ const umengAnalyticsInit = () => {
   document.head.appendChild(script)
 }
 
-// firebaseAnalyticsInit()
+firebaseAnalyticsInit()
 umengAnalyticsInit()
