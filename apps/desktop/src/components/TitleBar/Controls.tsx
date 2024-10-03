@@ -1,10 +1,10 @@
 import styled from 'styled-components'
 import { memo, useEffect, useState } from 'react'
-import { getCurrent } from '@tauri-apps/api/window'
+import { getCurrentWindow } from '@tauri-apps/api/window'
 
 export const Controls = memo(() => {
   const [isScaleup, setScaleup] = useState(false)
-  const appWindow = getCurrent()
+  const appWindow = getCurrentWindow()
 
   useEffect(() => {
     const unlisten = appWindow.onResized(() => {

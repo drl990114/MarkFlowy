@@ -1,4 +1,4 @@
-import { getCurrent } from '@tauri-apps/api/window'
+import { getCurrentWindow } from '@tauri-apps/api/window'
 import { useState } from 'react'
 import { Container } from './styled'
 import { Controls } from './Controls'
@@ -6,7 +6,7 @@ import { CenterMenu } from './CenterMenu'
 import { useGlobalOSInfo } from '@/hooks'
 import { TaskList } from './TaskList'
 
-const appWindow = getCurrent()
+const appWindow = getCurrentWindow()
 
 export default function TitleBar() {
   const [isScaleup, setScaleup] = useState(false)
