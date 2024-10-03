@@ -20,7 +20,7 @@ pub mod cmd {
         search::Search,
     };
     use std::{sync::mpsc::channel, thread::spawn};
-    use tauri::{command, AppHandle, EventTarget, Manager};
+    use tauri::{command, AppHandle, Emitter, EventTarget, Manager};
 
     use super::SearchOptions;
 
