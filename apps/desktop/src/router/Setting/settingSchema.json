@@ -129,6 +129,16 @@
         "desc": {
           "i18nKey": "settings.extensions.ChatGPT.api_key.desc"
         }
+      },
+      "models":{
+        "key":"extensions_chatgpt_models",
+        "type":"input",
+        "title":{
+          "i18nKey":"settings.extensions.ChatGPT.models.label"
+          },
+          "desc":{
+            "i18nKey":"settings.extensions.ChatGPT.models.desc"
+            }
       }
     }
   },

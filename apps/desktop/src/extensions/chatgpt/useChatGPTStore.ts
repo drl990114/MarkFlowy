@@ -7,7 +7,7 @@ const useChatGPTStore = create<ChatGPTStore>((set, get) => ({
   curGptModelIndex: 0,
 
 
-  gptModels: ['gpt-3.5-turbo', 'gpt-4-32k', 'gpt-4', 'THUDM/glm-4-9b-chat', 'qwen2.5:7b-instruct-q4_K_M'],
+  gptModels: ['gpt-3.5-turbo', 'gpt-4-32k', 'gpt-4'],
   // gptModels: settingData.extensions_chatgpt_models,
 
   chatList: [],
@@ -112,6 +112,12 @@ const useChatGPTStore = create<ChatGPTStore>((set, get) => ({
     })
   },
 
+  setModels:(models: string[]) => {
+    set((state) => {
+      return { ...state, gptModels: models }
+    })
+  }
+
 }))
 
 type ChatStatus = 'pending' | 'done' | 'error'
@@ -135,6 +141,7 @@ interface ChatGPTStore {
   addChatQuestion: (question: string) => ChatGPTHistory
   addChatAnswer: (id: string, answer: string) => void
   delChat: (id: string) => void
+  setModels:(models: string[]) => void
 }
 
 export default useChatGPTStore

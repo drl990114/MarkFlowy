@@ -15,11 +15,11 @@ import useAppSettingStore from '@/stores/useAppSettingStore'
 import { addNewMarkdownFileEdit } from '@/services/editor-file'
 
 const ChatList: React.FC<ChatListProps> = (props) => {
-  const { chatList, curGptModelIndex, gptModels, setCurGptModelIndex, addChat, delChat } =
+  const { chatList, curGptModelIndex, gptModels, setCurGptModelIndex, addChat, delChat, setModels } =
     useChatGPTStore()
   const { settingData } = useAppSettingStore()
   const { curTheme } = useThemeStore()
-  const apiBase = settingData[SettingKeys.cahtgpt_url]
+  const apiBase = settingData[SettingKeys.chatgpt_url]
   const apiKey = settingData[SettingKeys.chatgpt]
   const [askInput, setAskInput] = useState('')
   const listRef = useRef<HTMLDivElement>(null)
@@ -28,6 +28,9 @@ const ChatList: React.FC<ChatListProps> = (props) => {
     if (listRef.current) {
       listRef.current.scrollTop = listRef.current.scrollHeight
     }
+
+    const newModels = settingData[SettingKeys.chatgpt_models].split(',').map((model: string) => model.trim())
+    setModels(newModels)
   }, [chatList.length])
 
   const handleSubmit = useCallback(() => {
