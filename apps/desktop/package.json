@@ -23,7 +23,7 @@
     "@markflowy/types": "workspace:*",
     "@mui/material": "^5.15.14",
     "@tanstack/react-query": "^5.24.7",
-    "@tauri-apps/api": "^2.0.0",
+    "@tauri-apps/api": "^2.0.1",
     "@tauri-apps/plugin-clipboard-manager": "^2.0.0",
     "@tauri-apps/plugin-dialog": "^2.0.0",
     "@tauri-apps/plugin-http": "^2.0.0",
@@ -63,7 +63,7 @@
   "devDependencies": {
     "@babel/plugin-proposal-class-properties": "^7.18.6",
     "@babel/plugin-proposal-decorators": "^7.24.1",
-    "@tauri-apps/cli": "^2.0.0",
+    "@tauri-apps/cli": "^2.0.1",
     "@tauri-release/cli": "^0.2.5",
     "@types/color": "^3.0.6",
     "@types/lodash": "^4.17.1",
