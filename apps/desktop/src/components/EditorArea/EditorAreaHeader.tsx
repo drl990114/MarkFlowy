@@ -31,7 +31,7 @@ export const EditorAreaHeader = memo(() => {
     const content = getEditorContent(curFile?.id || '')
     const res = await addAppTask({
       title: 'ChatGPT: Retrieving article abstract',
-      promise: getPostSummary(content || '', settingData.extensions_chatgpt_apikey),
+      promise: getPostSummary(content || '',settingData.extensions_chatgpt_apibase, settingData.extensions_chatgpt_apikey),
     })
     if (res.status === 'done') {
       addNewMarkdownFileEdit({
@@ -58,7 +58,7 @@ ${res.result}
       const content = getEditorContent(curFile?.id || '')
       const res = await addAppTask({
         title: 'ChatGPT: Translating article',
-        promise: getPostTranslate(content || '', settingData.extensions_chatgpt_apikey, targetLang),
+        promise: getPostTranslate(content || '',settingData.extensions_chatgpt_apibase,  settingData.extensions_chatgpt_apikey, targetLang),
       })
 
       if (res.status === 'done') {
