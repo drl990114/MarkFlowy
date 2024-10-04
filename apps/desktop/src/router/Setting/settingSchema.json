@@ -110,6 +110,16 @@
     "i18nKey": "settings.extensions.label",
     "ChatGPT": {
       "i18nKey": "settings.extensions.ChatGPT.label",
+      "ApiBase": {
+        "key": "extensions_chatgpt_apibase",
+        "type": "input",
+        "title": {
+          "i18nKey": "settings.extensions.ChatGPT.api_base.label"
+        },
+        "desc": {
+          "i18nKey": "settings.extensions.ChatGPT.api_base.desc"
+        }
+      },
       "ApiKey": {
         "key": "extensions_chatgpt_apikey",
         "type": "input",

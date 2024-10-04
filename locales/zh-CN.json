@@ -155,6 +155,10 @@
       "label": "扩展",
       "ChatGPT": {
         "label": "ChatGPT",
+        "api_base": {
+          "label": "API Base",
+          "desc": " ChatGPT 的 API 地址."
+        },
         "api_key": {
           "label": "API Key",
           "desc": "ChatGPT 的 API key。"

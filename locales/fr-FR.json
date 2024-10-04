@@ -129,6 +129,10 @@
       "label": "Extensions",
       "ChatGPT": {
         "label": "ChatGPT",
+        "api_base": {
+          "label": "API Base",
+          "desc": "API Base for ChatGPT."
+        },
         "api_key": {
           "label": "clé API",
           "desc": "clé API pour ChatGPT."

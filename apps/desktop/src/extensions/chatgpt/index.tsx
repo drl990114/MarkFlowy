@@ -19,6 +19,7 @@ const ChatList: React.FC<ChatListProps> = (props) => {
     useChatGPTStore()
   const { settingData } = useAppSettingStore()
   const { curTheme } = useThemeStore()
+  const apiBase = settingData[SettingKeys.cahtgpt_url]
   const apiKey = settingData[SettingKeys.chatgpt]
   const [askInput, setAskInput] = useState('')
   const listRef = useRef<HTMLDivElement>(null)
@@ -32,7 +33,7 @@ const ChatList: React.FC<ChatListProps> = (props) => {
   const handleSubmit = useCallback(() => {
     if (!apiKey) return
 
-    addChat(askInput, apiKey)
+    addChat(askInput, apiBase, apiKey)
     setAskInput('')
   }, [apiKey, addChat, askInput])
 
