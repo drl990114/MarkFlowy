@@ -2,9 +2,9 @@ import Autocomplete from '@mui/material/Autocomplete'
 import type { SettingItemProps } from '.'
 import { SettingItemContainer } from './Container'
 import { SettingLabel } from './Label'
-import { Input } from 'zens'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import appSettingService from '@/services/app-setting'
+import { TextField } from '@mui/material'
 
 const SelectSettingItem: React.FC<SettingItemProps<Setting.SelectSettingItem>> = (props) => {
   const { item } = props
@@ -31,12 +31,9 @@ const SelectSettingItem: React.FC<SettingItemProps<Setting.SelectSettingItem>> =
           if (!v) return
           appSettingService.writeSettingData(item, v.value)
         }}
-        renderInput={({ inputProps }) => {
-          const { ref, ...rest } = inputProps
-          return <div>
-          <Input type='text' {...rest} inputRef={ref}/>
-        </div>
-        }}
+        sx={{ width: '220px' }}
+        disableClearable
+        renderInput={(params) => <TextField {...params} size='small' />}
       />
     </SettingItemContainer>
   )
