@@ -1,5 +1,17 @@
 # UPDATE LOG
 
+## v0.15.0
+
+Features:
+
+- Add support for customize "chatgpt" api base url and model lists. (#731)
+
+- Update tauri to stable version 2.0.1.
+
+Fixs:
+
+- Fix language settings can not select.
+
 ## v0.14.0
 
 Features:
