@@ -4,7 +4,7 @@ use tauri::menu::{
     CheckMenuItem, CheckMenuItemBuilder, Menu, MenuEvent, MenuItem, MenuItemBuilder,
     PredefinedMenuItem, Submenu,
 };
-use tauri::{App, AppHandle, Manager};
+use tauri::{App, AppHandle, Emitter, Manager};
 
 pub fn generate_menu(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
     let app_conf = AppConf::read();

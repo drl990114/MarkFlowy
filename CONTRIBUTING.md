@@ -1,1 +1,1 @@
-Please look [CONTRIBUTING](./docs/docs/Community/CONTRIBUTING.md)
+Please look [CONTRIBUTING](./docs/Community/CONTRIBUTING.md)

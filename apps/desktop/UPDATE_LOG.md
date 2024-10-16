@@ -1,5 +1,23 @@
 # UPDATE LOG
 
+## v0.15.0
+
+Features:
+
+- Add support for customize "chatgpt" api base url and model lists. (#731)
+
+- Update tauri to stable version 2.0.1.
+
+Fixs:
+
+- Fix language settings can not select.
+
+## v0.14.0
+
+Features:
+
+- Improve html inline editing experience.
+
 ## v0.13.1
 
 Features:
@@ -8,13 +26,13 @@ Features:
 
 - Improve html image node loading display.
 
-Fix:
+Fixs:
 
 - revert html inline node parse method.
 
 ## v0.12.3
 
-Fix: 
+Fixs: 
 
 - Init layout visible status when open app.
 
@@ -30,14 +48,14 @@ Features:
 
 - Support show table of content in source code mode.
 
-Fix:
+Fixs:
 
 - Search result display error when paragraph has inline node.
 
 
 ## v0.11.3
 
-Fix: 
+Fixs: 
 
 - Preview mode load some image error.
 
@@ -45,7 +63,7 @@ Fix:
 
 ## v0.11.2
 
-Fix: 
+Fixs: 
 
 - Some image can't load.
 
@@ -63,7 +81,7 @@ Features:
 
 - Support restore window state(e.g size, position).
 
-Fix: 
+Fixs: 
 
 - The copied image link should not be processed.
 
@@ -79,7 +97,7 @@ Features:
 
 - Explorer support rename file or folder.
 
-Fix: 
+Fixs: 
 
 - Long file name display optimization.
 
@@ -91,13 +109,13 @@ Fix:
 
 ## v0.9.2
 
-Fix:
+Fixs:
 
 - New files are not allowed temporarily. When the workspace is empty.
 
 ## v0.9.1
 
-Fix:
+Fixs:
 
 - Fixed cmd + A don't work in codemirror node.
 
@@ -114,7 +132,7 @@ Features:
 
 - Add tooltip to sidebar item.
 
-Fix:
+Fixs:
 
 - Fixed the table of contents doesn't refresh while switching different md files.
 

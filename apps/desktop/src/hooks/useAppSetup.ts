@@ -14,12 +14,11 @@ import bus from '@/helper/eventBus'
 import type { WorkspaceInfo } from '@/stores/useOpenedCacheStore'
 import useOpenedCacheStore from '@/stores/useOpenedCacheStore'
 import { useEditorStore } from '@/stores'
-import { cacheStore } from '@/helper/cacheStore'
 import { readDirectory } from '@/helper/filesys'
 import { getFileObject, getFileObjectByPath } from '@/helper/files'
 import { useGlobalKeyboard, useGlobalOSInfo } from '.'
 import { once } from 'lodash'
-import { firebaseAnalyticsInit } from '@/helper/analytics'
+import { createStore } from '@tauri-apps/plugin-store'
 
 async function appThemeExtensionsSetup(curTheme: string) {
   if (isBuiltInTheme(curTheme)) {
@@ -48,6 +47,8 @@ async function appWorkspaceSetup() {
   const { setFolderData, addOpenedFile, setActiveId } = useEditorStore.getState()
 
   try {
+    const cacheStore = await createStore('.markflowy_cache.dat')
+
     const getOpenedCacheRes = await invoke<{ recent_workspaces: WorkspaceInfo[] }>(
       'get_opened_cache',
     )
@@ -98,6 +99,7 @@ async function appWorkspaceSetup() {
       })
     }
   } catch (error) {
+    console.error('Failed to load workspace', error)
   }
 }
 
@@ -127,9 +129,6 @@ const appSetup = once(async function () {
   i18nInit({ lng: settingData.language })
   checkUpdate({ install: settingData.auto_update })
 
-  setTimeout(() => {
-    firebaseAnalyticsInit()
-  })
   return settingData
 })
 

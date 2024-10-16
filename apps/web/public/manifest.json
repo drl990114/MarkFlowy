@@ -1,0 +1,8 @@
+{
+  "name": "MarkFlowy",
+  "short_name": "MarkFlowy",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#da936a",
+  "background_color": "#ffffff"
+}

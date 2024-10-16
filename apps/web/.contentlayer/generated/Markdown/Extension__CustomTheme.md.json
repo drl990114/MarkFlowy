@@ -1,0 +1,17 @@
+{
+  "body": {
+    "raw": "# Custom Theme\n\nMarkFlowy supports custom themes, and you can also share your themes with others.\n\n## Develop Environment\n\n- MarkFlowy > 0.7.0\n- nodejs >= 18.x\n- pnpm >= 7.x\n\n## How to make a theme\n\n### 1. Create theme files\n\nYou can fork [MarkFlowy-Theme-Template](https://github.com/MarkFlowy/custom-theme-template) to create your theme.\n\n```bash\npnpm install\n\npnpm run dev\n```\n\n### 2. Edit theme files\n\nOpen MarkFlowy, click `Settings`, you can see `path`, Open this path folder, create `themes` folder in `.markflowy` folder, and then create your theme folder in `themes` folder, e.g. `markflowy-theme-template`.\n\nYou can edit `rollup.config.js` to change the theme build files output.\n\n\n```js\noutput: {\n  // change this output file to development\n  // e.g. file: '/Users/xxx/.markflowy/themes/markflowy-theme-template/index.js',\n  file: pkg.browser,\n  format: 'es',\n  sourcemap: true,\n  entryFileNames: '[name].js',\n},\n```\n\nchange your theme, reload MarkFlowy to see the effect.\n\n\n\n\n",
+    "html": "<h1>Custom Theme</h1>\n<p>MarkFlowy supports custom themes, and you can also share your themes with others.</p>\n<h2>Develop Environment</h2>\n<ul>\n<li>MarkFlowy > 0.7.0</li>\n<li>nodejs >= 18.x</li>\n<li>pnpm >= 7.x</li>\n</ul>\n<h2>How to make a theme</h2>\n<h3>1. Create theme files</h3>\n<p>You can fork <a href=\"https://github.com/MarkFlowy/custom-theme-template\">MarkFlowy-Theme-Template</a> to create your theme.</p>\n<pre><code class=\"language-bash\">pnpm install\n\npnpm run dev\n</code></pre>\n<h3>2. Edit theme files</h3>\n<p>Open MarkFlowy, click <code>Settings</code>, you can see <code>path</code>, Open this path folder, create <code>themes</code> folder in <code>.markflowy</code> folder, and then create your theme folder in <code>themes</code> folder, e.g. <code>markflowy-theme-template</code>.</p>\n<p>You can edit <code>rollup.config.js</code> to change the theme build files output.</p>\n<pre><code class=\"language-js\">output: {\n  // change this output file to development\n  // e.g. file: '/Users/xxx/.markflowy/themes/markflowy-theme-template/index.js',\n  file: pkg.browser,\n  format: 'es',\n  sourcemap: true,\n  entryFileNames: '[name].js',\n},\n</code></pre>\n<p>change your theme, reload MarkFlowy to see the effect.</p>"
+  },
+  "_id": "Extension/CustomTheme.md",
+  "_raw": {
+    "sourceFilePath": "Extension/CustomTheme.md",
+    "sourceFileName": "CustomTheme.md",
+    "sourceFileDir": "Extension",
+    "contentType": "markdown",
+    "flattenedPath": "Extension/CustomTheme"
+  },
+  "type": "Markdown",
+  "slug": "Extension/CustomTheme",
+  "title": "CustomTheme"
+}
