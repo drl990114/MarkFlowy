@@ -61,6 +61,10 @@
           {
             "title": "Français",
             "value": "frFR"
+          },
+          {
+            "title": "Español",
+            "value": "es"
           }
         ]
       }
