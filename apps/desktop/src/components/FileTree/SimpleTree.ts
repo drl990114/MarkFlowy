@@ -1,3 +1,5 @@
+import { getFileObject, pathEntries } from '@/helper/files'
+
 type SimpleData = { id: string; name: string; children?: SimpleData[] }
 
 export class SimpleTree<T extends SimpleData> {
@@ -20,7 +22,7 @@ export class SimpleTree<T extends SimpleData> {
     const src = this.find(args.id)
     const parent = args.parentId ? this.find(args.parentId) : this.root
     if (!src || !parent) return
-    parent.addChild(src.data, args.index)
+        parent.addChild(src.data, args.index)
     src.drop()
   }
 
@@ -31,7 +33,9 @@ export class SimpleTree<T extends SimpleData> {
 
   drop(args: { id: string }) {
     const node = this.find(args.id)
+    const file = getFileObject(args.id)
     if (node) node.drop()
+    if (file?.path) delete pathEntries[file.path]
   }
 
   find(id: string, node: SimpleNode<T> = this.root): SimpleNode<T> | null {
@@ -92,6 +96,11 @@ class SimpleNode<T extends SimpleData> {
   removeChild(index: number) {
     this.children?.splice(index, 1)
     this.data.children?.splice(index, 1)
+  }
+
+  cleanChildren() {
+    this.children = []
+    this.data.children = []
   }
 
   update(changes: Partial<T>) {
