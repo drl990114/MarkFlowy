@@ -19,6 +19,7 @@ export const NodeContainer = styled.div<NodeContainerProps>`
   background-color: ${(props) =>
     props.highlight ? colorAdaptiveChange(props.theme.bgColor, 0.6, 0.2) : 'transparent'};
   border: 1px dashed transparent;
+  box-sizing: border-box;
 
   &:hover {
     /* background-color: ${(props) => props.theme.borderColor}; */
