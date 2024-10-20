@@ -24,7 +24,7 @@ tokio = { version = "1.38.0", features = ["macros", "rt-multi-thread"] }
 
 # GraphQL
 async-graphql = { version = "7.0.3", features = ["uuid", "chrono", "log"] }
-async-graphql-axum = "7.0.3"
+async-graphql-axum = "7.0.7"
 
 # Rest
 utoipa = { version = "4.2.0", features = ["axum_extras"] }
