@@ -1,5 +1,13 @@
 # UPDATE LOG
 
+## v0.16.0
+
+Features:
+
+- Support drag and drop file node to move.
+
+- Add Spanish translations.
+
 ## v0.15.0
 
 Features:
