@@ -7305,24 +7305,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tauri-apps/cli-darwin-arm64@npm:2.0.0-beta.9":
-  version: 2.0.0-beta.9
-  resolution: "@tauri-apps/cli-darwin-arm64@npm:2.0.0-beta.9"
-  conditions: os=darwin & cpu=arm64
-  languageName: node
-  linkType: hard
-
 "@tauri-apps/cli-darwin-arm64@npm:2.0.4":
   version: 2.0.4
   resolution: "@tauri-apps/cli-darwin-arm64@npm:2.0.4"
   conditions: os=darwin & cpu=arm64
-  languageName: node
-  linkType: hard
-
-"@tauri-apps/cli-darwin-x64@npm:2.0.0-beta.9":
-  version: 2.0.0-beta.9
-  resolution: "@tauri-apps/cli-darwin-x64@npm:2.0.0-beta.9"
-  conditions: os=darwin & cpu=x64
   languageName: node
   linkType: hard
 
@@ -7333,24 +7319,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tauri-apps/cli-linux-arm-gnueabihf@npm:2.0.0-beta.9":
-  version: 2.0.0-beta.9
-  resolution: "@tauri-apps/cli-linux-arm-gnueabihf@npm:2.0.0-beta.9"
-  conditions: os=linux & cpu=arm
-  languageName: node
-  linkType: hard
-
 "@tauri-apps/cli-linux-arm-gnueabihf@npm:2.0.4":
   version: 2.0.4
   resolution: "@tauri-apps/cli-linux-arm-gnueabihf@npm:2.0.4"
   conditions: os=linux & cpu=arm
-  languageName: node
-  linkType: hard
-
-"@tauri-apps/cli-linux-arm64-gnu@npm:2.0.0-beta.9":
-  version: 2.0.0-beta.9
-  resolution: "@tauri-apps/cli-linux-arm64-gnu@npm:2.0.0-beta.9"
-  conditions: os=linux & cpu=arm64 & libc=glibc
   languageName: node
   linkType: hard
 
@@ -7361,24 +7333,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tauri-apps/cli-linux-arm64-musl@npm:2.0.0-beta.9":
-  version: 2.0.0-beta.9
-  resolution: "@tauri-apps/cli-linux-arm64-musl@npm:2.0.0-beta.9"
-  conditions: os=linux & cpu=arm64 & libc=musl
-  languageName: node
-  linkType: hard
-
 "@tauri-apps/cli-linux-arm64-musl@npm:2.0.4":
   version: 2.0.4
   resolution: "@tauri-apps/cli-linux-arm64-musl@npm:2.0.4"
   conditions: os=linux & cpu=arm64 & libc=musl
-  languageName: node
-  linkType: hard
-
-"@tauri-apps/cli-linux-x64-gnu@npm:2.0.0-beta.9":
-  version: 2.0.0-beta.9
-  resolution: "@tauri-apps/cli-linux-x64-gnu@npm:2.0.0-beta.9"
-  conditions: os=linux & cpu=x64 & libc=glibc
   languageName: node
   linkType: hard
 
@@ -7389,24 +7347,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tauri-apps/cli-linux-x64-musl@npm:2.0.0-beta.9":
-  version: 2.0.0-beta.9
-  resolution: "@tauri-apps/cli-linux-x64-musl@npm:2.0.0-beta.9"
-  conditions: os=linux & cpu=x64 & libc=musl
-  languageName: node
-  linkType: hard
-
 "@tauri-apps/cli-linux-x64-musl@npm:2.0.4":
   version: 2.0.4
   resolution: "@tauri-apps/cli-linux-x64-musl@npm:2.0.4"
   conditions: os=linux & cpu=x64 & libc=musl
-  languageName: node
-  linkType: hard
-
-"@tauri-apps/cli-win32-arm64-msvc@npm:2.0.0-beta.9":
-  version: 2.0.0-beta.9
-  resolution: "@tauri-apps/cli-win32-arm64-msvc@npm:2.0.0-beta.9"
-  conditions: os=win32 & cpu=arm64
   languageName: node
   linkType: hard
 
@@ -7417,13 +7361,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tauri-apps/cli-win32-ia32-msvc@npm:2.0.0-beta.9":
-  version: 2.0.0-beta.9
-  resolution: "@tauri-apps/cli-win32-ia32-msvc@npm:2.0.0-beta.9"
-  conditions: os=win32 & cpu=ia32
-  languageName: node
-  linkType: hard
-
 "@tauri-apps/cli-win32-ia32-msvc@npm:2.0.4":
   version: 2.0.4
   resolution: "@tauri-apps/cli-win32-ia32-msvc@npm:2.0.4"
@@ -7431,58 +7368,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tauri-apps/cli-win32-x64-msvc@npm:2.0.0-beta.9":
-  version: 2.0.0-beta.9
-  resolution: "@tauri-apps/cli-win32-x64-msvc@npm:2.0.0-beta.9"
-  conditions: os=win32 & cpu=x64
-  languageName: node
-  linkType: hard
-
 "@tauri-apps/cli-win32-x64-msvc@npm:2.0.4":
   version: 2.0.4
   resolution: "@tauri-apps/cli-win32-x64-msvc@npm:2.0.4"
   conditions: os=win32 & cpu=x64
-  languageName: node
-  linkType: hard
-
-"@tauri-apps/cli@npm:2.0.0-beta.9":
-  version: 2.0.0-beta.9
-  resolution: "@tauri-apps/cli@npm:2.0.0-beta.9"
-  dependencies:
-    "@tauri-apps/cli-darwin-arm64": "npm:2.0.0-beta.9"
-    "@tauri-apps/cli-darwin-x64": "npm:2.0.0-beta.9"
-    "@tauri-apps/cli-linux-arm-gnueabihf": "npm:2.0.0-beta.9"
-    "@tauri-apps/cli-linux-arm64-gnu": "npm:2.0.0-beta.9"
-    "@tauri-apps/cli-linux-arm64-musl": "npm:2.0.0-beta.9"
-    "@tauri-apps/cli-linux-x64-gnu": "npm:2.0.0-beta.9"
-    "@tauri-apps/cli-linux-x64-musl": "npm:2.0.0-beta.9"
-    "@tauri-apps/cli-win32-arm64-msvc": "npm:2.0.0-beta.9"
-    "@tauri-apps/cli-win32-ia32-msvc": "npm:2.0.0-beta.9"
-    "@tauri-apps/cli-win32-x64-msvc": "npm:2.0.0-beta.9"
-  dependenciesMeta:
-    "@tauri-apps/cli-darwin-arm64":
-      optional: true
-    "@tauri-apps/cli-darwin-x64":
-      optional: true
-    "@tauri-apps/cli-linux-arm-gnueabihf":
-      optional: true
-    "@tauri-apps/cli-linux-arm64-gnu":
-      optional: true
-    "@tauri-apps/cli-linux-arm64-musl":
-      optional: true
-    "@tauri-apps/cli-linux-x64-gnu":
-      optional: true
-    "@tauri-apps/cli-linux-x64-musl":
-      optional: true
-    "@tauri-apps/cli-win32-arm64-msvc":
-      optional: true
-    "@tauri-apps/cli-win32-ia32-msvc":
-      optional: true
-    "@tauri-apps/cli-win32-x64-msvc":
-      optional: true
-  bin:
-    tauri: tauri.js
-  checksum: 10/897066778eaf616bf9ca3d12aa757891258a9a23e952d01522868af1c9b140dc259dc3e61141262b718b6a8e5277e3ca35b4fa087e082f6d037089cfd179044d
   languageName: node
   linkType: hard
 
@@ -14097,7 +13986,6 @@ __metadata:
     "@rollup/plugin-node-resolve": "npm:15.2.3"
     "@rollup/plugin-terser": "npm:0.4.4"
     "@rollup/plugin-typescript": "npm:11.1.6"
-    "@tauri-apps/cli": "npm:2.0.0-beta.9"
     "@types/rollup-plugin-url": "npm:^3"
     babel: "npm:^6.23.0"
     child_process: "npm:^1.0.2"
@@ -14111,7 +13999,7 @@ __metadata:
     rollup: "npm:4.24.0"
     rollup-plugin-postcss: "npm:^4.0.2"
     rollup-plugin-url: "npm:^3.0.1"
-    turbo: "npm:^1.13.2"
+    turbo: "npm:^2.2.3"
     typescript: "npm:^5.3.3"
   languageName: unknown
   linkType: soft
@@ -20146,58 +20034,58 @@ __metadata:
   languageName: node
   linkType: hard
 
-"turbo-darwin-64@npm:1.13.2":
-  version: 1.13.2
-  resolution: "turbo-darwin-64@npm:1.13.2"
+"turbo-darwin-64@npm:2.2.3":
+  version: 2.2.3
+  resolution: "turbo-darwin-64@npm:2.2.3"
   conditions: os=darwin & cpu=x64
   languageName: node
   linkType: hard
 
-"turbo-darwin-arm64@npm:1.13.2":
-  version: 1.13.2
-  resolution: "turbo-darwin-arm64@npm:1.13.2"
+"turbo-darwin-arm64@npm:2.2.3":
+  version: 2.2.3
+  resolution: "turbo-darwin-arm64@npm:2.2.3"
   conditions: os=darwin & cpu=arm64
   languageName: node
   linkType: hard
 
-"turbo-linux-64@npm:1.13.2":
-  version: 1.13.2
-  resolution: "turbo-linux-64@npm:1.13.2"
+"turbo-linux-64@npm:2.2.3":
+  version: 2.2.3
+  resolution: "turbo-linux-64@npm:2.2.3"
   conditions: os=linux & cpu=x64
   languageName: node
   linkType: hard
 
-"turbo-linux-arm64@npm:1.13.2":
-  version: 1.13.2
-  resolution: "turbo-linux-arm64@npm:1.13.2"
+"turbo-linux-arm64@npm:2.2.3":
+  version: 2.2.3
+  resolution: "turbo-linux-arm64@npm:2.2.3"
   conditions: os=linux & cpu=arm64
   languageName: node
   linkType: hard
 
-"turbo-windows-64@npm:1.13.2":
-  version: 1.13.2
-  resolution: "turbo-windows-64@npm:1.13.2"
+"turbo-windows-64@npm:2.2.3":
+  version: 2.2.3
+  resolution: "turbo-windows-64@npm:2.2.3"
   conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
 
-"turbo-windows-arm64@npm:1.13.2":
-  version: 1.13.2
-  resolution: "turbo-windows-arm64@npm:1.13.2"
+"turbo-windows-arm64@npm:2.2.3":
+  version: 2.2.3
+  resolution: "turbo-windows-arm64@npm:2.2.3"
   conditions: os=win32 & cpu=arm64
   languageName: node
   linkType: hard
 
-"turbo@npm:^1.13.2":
-  version: 1.13.2
-  resolution: "turbo@npm:1.13.2"
+"turbo@npm:^2.2.3":
+  version: 2.2.3
+  resolution: "turbo@npm:2.2.3"
   dependencies:
-    turbo-darwin-64: "npm:1.13.2"
-    turbo-darwin-arm64: "npm:1.13.2"
-    turbo-linux-64: "npm:1.13.2"
-    turbo-linux-arm64: "npm:1.13.2"
-    turbo-windows-64: "npm:1.13.2"
-    turbo-windows-arm64: "npm:1.13.2"
+    turbo-darwin-64: "npm:2.2.3"
+    turbo-darwin-arm64: "npm:2.2.3"
+    turbo-linux-64: "npm:2.2.3"
+    turbo-linux-arm64: "npm:2.2.3"
+    turbo-windows-64: "npm:2.2.3"
+    turbo-windows-arm64: "npm:2.2.3"
   dependenciesMeta:
     turbo-darwin-64:
       optional: true
@@ -20213,7 +20101,7 @@ __metadata:
       optional: true
   bin:
     turbo: bin/turbo
-  checksum: 10/945c78e7c6517898d3e773292bbb1dcf76587703f4cd75409f7b85777873648e0917b50261add6bd51d7e7552de4358f990a9ff693bc1bdefa1d7899c5521a7a
+  checksum: 10/ce7dc0b45d11ba9d2a435daad3357ad45e51a81583134912d1ff5b4569c6d233f56b5fc2459ad5c4a8d41ddec566574e34e5c8649ef64b7546348014bd371ea5
   languageName: node
   linkType: hard
 

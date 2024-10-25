@@ -34,7 +34,6 @@
     "@rollup/plugin-node-resolve": "15.2.3",
     "@rollup/plugin-terser": "0.4.4",
     "@rollup/plugin-typescript": "11.1.6",
-    "@tauri-apps/cli": "2.0.0-beta.9",
     "@types/rollup-plugin-url": "^3",
     "babel": "^6.23.0",
     "child_process": "^1.0.2",
@@ -52,6 +51,6 @@
   },
   "packageManager": "yarn@4.2.2",
   "dependencies": {
-    "turbo": "^1.13.2"
+    "turbo": "^2.2.3"
   }
 }
