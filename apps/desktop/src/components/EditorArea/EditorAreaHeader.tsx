@@ -25,6 +25,7 @@ export const EditorAreaHeader = memo(() => {
   const { addAppTask } = useAppTasksStore()
   const { t } = useTranslation()
   const ref = useRef<HTMLDivElement>()
+  const ref1 = useRef<HTMLDivElement>()
   const curFile = activeId ? getFileObject(activeId) : undefined
 
   const fetchCurFileSummary = useCallback(async () => {
@@ -80,7 +81,7 @@ ${res.result}
   )
 
   const handleAddBookMark = useCallback(() => {
-    const rect = ref.current?.getBoundingClientRect()
+    const rect = ref1.current?.getBoundingClientRect()
     if (rect === undefined) return
     const { findMark } = useBookMarksStore.getState()
     const curBookMark = findMark(curFile?.path || '')
@@ -178,7 +179,7 @@ ${res.result}
       {curFile ? (
         <>
           <MfIconButton iconRef={ref} icon={viewTypeIconMap[editorViewType]} onClick={handleViewClick} />
-          <MfIconButton iconRef={ref} icon={'ri-more-2-fill'} onClick={handleAddBookMark} />
+          <MfIconButton iconRef={ref1} icon={'ri-more-2-fill'} onClick={handleAddBookMark} />
         </>
       ) : null}
     </div>
