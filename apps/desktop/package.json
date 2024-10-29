@@ -59,7 +59,7 @@
     "tinykeys": "^2.1.0",
     "use-resize-observer": "^9.1.0",
     "zens": "0.0.36",
-    "zustand": "^4.4.6"
+    "zustand": "^5.0.0"
   },
   "devDependencies": {
     "@babel/plugin-proposal-class-properties": "^7.18.6",
