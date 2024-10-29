@@ -22,7 +22,9 @@ pub_struct!(AppConf {
     editor_full_width: Option<bool>,
     editor_root_font_size: Option<u32>,
     editor_root_line_height: Option<String>,
+    extensions_chatgpt_apibase: Option<String>,
     extensions_chatgpt_apikey: Option<String>,
+    extensions_chatgpt_models: Option<String>,
     autosave: Option<bool>,
     autosave_interval: Option<u32>,
 });
@@ -44,6 +46,8 @@ impl AppConf {
             editor_root_line_height: Some("1.6".to_string()),
             autosave: Some(false),
             autosave_interval: Some(2000),
+            extensions_chatgpt_apibase: Some("https://api.openai.com/v1/chat/completions".to_string()),
+            extensions_chatgpt_models: Some("gpt-3.5-turbo, gpt-4-32k, gpt-4".to_string()),
             extensions_chatgpt_apikey: Some("".to_string()),
         }
     }
@@ -82,8 +86,14 @@ impl AppConf {
         if oldconf.autosave_interval.is_some() {
             self.autosave_interval = oldconf.autosave_interval;
         }
+        if oldconf.extensions_chatgpt_apibase.is_some() {
+            self.extensions_chatgpt_apibase = oldconf.extensions_chatgpt_apibase;
+        }
         if oldconf.extensions_chatgpt_apikey.is_some() {
             self.extensions_chatgpt_apikey = oldconf.extensions_chatgpt_apikey;
+        }
+        if oldconf.extensions_chatgpt_models.is_some() {
+            self.extensions_chatgpt_models = oldconf.extensions_chatgpt_models;
         }
         self.write()
     }

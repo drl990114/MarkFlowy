@@ -1,0 +1,188 @@
+{
+  "app_name": "MarkFlowy",
+  "common": {
+    "none": "Nada",
+    "name": "nombre",
+    "ok": "aceptar",
+    "confirm": "confirmar",
+    "cancel": "cancelar",
+    "close": "cerrar",
+    "copy": "copiar",
+    "error": "error",
+    "delete": "eliminar",
+    "file": "archivo",
+    "folder": "carpeta",
+    "fetching": "Cargando..."
+  },
+  "view": {
+    "label": "Vista",
+    "theme": {
+      "label": "Tema"
+    },
+    "wysiwyg": "Wysiwyg",
+    "source_code": "Código Fuente",
+    "preview": "Vista Previa"
+  },
+  "action": {
+    "bookmark": "marcador",
+    "bookmarked": "se agregó a marcadores",
+    "done": "hecho",
+    "edit": "editar",
+    "more": "más",
+    "save": "guardar",
+    "translate": "traducir",
+    "summary": "resumen",
+    "create_file": "Crear un archivo nuevo"
+  },
+  "placeholder": {
+    "translate": "Idioma destino"
+  },
+  "confirm": {
+    "move": {
+      "description": "¿Está seguro que quiere mover \"{{name}}\"?"
+    },
+    "replace": {
+      "description": "Ya existe un archivo o carpeta con el nombre \"{{name}}\" en la carpeta de destino. ¿Quiere reemplazarlo?"
+    },
+    "delete": {
+      "description": "¿Está seguro que quiere eliminar \"{{name}}\"?"
+    },
+    "trash": {
+      "description": "¿Está seguro que quiere mover \"{{name}}\" a la papelera?"
+    }
+  },
+  "error": {
+    "unsupported_file_format": "Formato de archivo no admitido"
+  },
+  "sidebar": {
+    "explorer": "explorador",
+    "search": "buscar",
+    "table_of_contents": "Tabla de Contenidos"
+  },
+  "file": {
+    "untitled": "sin título",
+    "openDir": "Abrir Carpeta",
+    "recentDir": "Carpetas abiertas recientemente",
+    "emptyOpened": "No hay archivos abiertos"
+  },
+  "about": {
+    "label": "Acerca de",
+    "version": "Versión",
+    "newVersion": "Nueva versión",
+    "install": "Instalar",
+    "author": "Autor",
+    "release": "Versión",
+    "website": "Sitio web",
+    "feedback": "comentarios",
+    "issues": "Incidencias",
+    "license": "Licencia",
+    "current": "versión actual"
+  },
+  "contextmenu": {
+    "explorer": {
+      "add_file": "Nuevo archivo",
+      "add_folder": "Nueva carpeta",
+      "rename": "Renombrar",
+      "delete_file": "Eliminar archivo",
+      "delete_folder": "Eliminar archivo",
+      "moveto_trash": "Mover a la papelera"
+    },
+    "editor_tab": {
+      "close": "Cerrar",
+      "close_others": "Cerrar otros",
+      "close_right": "Cerrar a la derecha",
+      "close_all": "Cerrar todo"
+    }
+  },
+  "notification": {},
+  "search": {
+    "search_empty": "No se encontró ninguna coincidencia con los términos de búsqueda",
+    "text": "Buscar",
+    "caseSensitive": "Distinguir mayúsculas y minúsculas",
+    "toggleExpandAll": "Expandir / contraer todo"
+  },
+  "settings": {
+    "label": "Preferencias",
+    "general": {
+      "label": "general",
+      "app": {
+        "label": "Aplicación",
+        "automatic_updates": {
+          "label": "Actualización automática",
+          "desc": "Comprobar automáticamente si hay actualizaciones e instalarlas cuando inicia la aplicación."
+        }
+      },
+      "autosave": {
+        "label": "Autoguardado",
+        "switch_auto_save": {
+          "label": "Autoguardado",
+          "desc": "Activar el guardado automático. El archivo actual sera guardado automáticamente según el intervalo de tiempo establecido."
+        },
+        "autosaveInterval": {
+          "label": "Intervalo de autoguardado",
+          "desc": "Establecer el intervalo de autoguardado, en milisegundos."
+        }
+      },
+      "misc": {
+        "label": "Miscelánea",
+        "language": {
+          "label": "Idioma",
+          "desc": "Establecer el idioma de la aplicación."
+        }
+      }
+    },
+    "editor": {
+      "label": "Editor",
+      "style": {
+        "label": "Estilo",
+        "full_width": {
+          "label": "Anchura completa",
+          "desc": "Establecer el editor a anchura completa."
+        },
+        "font_size": {
+          "label": "Tamaño de letra",
+          "desc": "Establecer el tamaño de letra base del editor."
+        },
+        "line_height": {
+          "label": "Altura de línea",
+          "desc": "Establecer la altura de línea base del editor."
+        }
+      }
+    },
+    "keyboard": {
+      "label": "teclado"
+    },
+    "extensions": {
+      "label": "Extensiones",
+      "ChatGPT": {
+        "label": "ChatGPT",
+        "api_base": {
+          "label": "API Base",
+          "desc": "API Base de ChatGPT"
+        },
+        "api_key": {
+          "label": "API Key",
+          "desc": "API Key de ChatGPT"
+        },
+        "models":{
+          "label": "Modelo",
+          "desc":  "Una lista de modelos separados por coma, el valor predeterminado es \"gpt-3.5-turbo, gpt-4-32k, gpt-4\""
+        }
+      }
+    }
+  },
+  "updater": {
+    "install": "instalar",
+    "download_and_install": "Descargar e instalar"
+  },
+  "editor": {
+    "table": {
+      "insertColumnAfter": "Insertar columna después",
+      "insertColumnBefore": "Insertar columna antes",
+      "insertRowAfter": "Insertar fila debajo",
+      "insertRowBefore": "Insertar fila encima",
+      "deleteColumn": "Eliminar columna",
+      "deleteRow": "Eliminar fila"
+    }
+  }
+}

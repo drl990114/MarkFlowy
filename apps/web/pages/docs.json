@@ -1,0 +1,24 @@
+{
+  "pages": [
+    {
+      "title": "Basics",
+      "pathname": "basics",
+      "sections": [
+        {
+          "pathname": "motivation",
+          "title": "Motivation"
+        }
+      ]
+    },
+    {
+      "title": "API Reference",
+      "pathname": "api",
+      "sections": [
+        {
+          "pathname": "typescript",
+          "title": "typescript"
+        }
+      ]
+    }
+  ]
+}

@@ -6,7 +6,9 @@ import { callChatGptApi } from '@/extensions/chatgpt/api'
 const useChatGPTStore = create<ChatGPTStore>((set, get) => ({
   curGptModelIndex: 0,
 
+
   gptModels: ['gpt-3.5-turbo', 'gpt-4-32k', 'gpt-4'],
+  // gptModels: settingData.extensions_chatgpt_models,
 
   chatList: [],
 
@@ -27,11 +29,12 @@ const useChatGPTStore = create<ChatGPTStore>((set, get) => ({
     })
   },
 
-  addChat: (question: string, apiKey: string) => {
+  addChat: (question: string,url:string, apiKey: string) => {
     const curStore = get()
     const { gptModels, curGptModelIndex } = curStore
     const chat = curStore.addChatQuestion(question)
     callChatGptApi(
+      url,
       question,
       gptModels[curGptModelIndex],
       (res) => {
@@ -44,9 +47,9 @@ const useChatGPTStore = create<ChatGPTStore>((set, get) => ({
     return chat
   },
 
-  getPostSummary: async (text: string, apiKey: string) => {
+  getPostSummary: async (text: string,url:string, apiKey: string) => {
     const { gptModels, curGptModelIndex } = get()
-    const res = await callChatGptApi(text, gptModels[curGptModelIndex], () => {}, 5, apiKey, {
+    const res = await callChatGptApi(url, text, gptModels[curGptModelIndex], () => {}, 5, apiKey, {
       messages: [
         {
           role: 'system',
@@ -60,9 +63,9 @@ const useChatGPTStore = create<ChatGPTStore>((set, get) => ({
     return res
   },
 
-  getPostTranslate: async (text: string, apiKey: string, targetLang: string) => {
+  getPostTranslate: async (text: string,url:string, apiKey: string, targetLang: string) => {
     const { gptModels, curGptModelIndex } = get()
-    const res = await callChatGptApi(text, gptModels[curGptModelIndex], () => {}, 5, apiKey, {
+    const res = await callChatGptApi(url,text, gptModels[curGptModelIndex], () => {}, 5, apiKey, {
       messages: [
         {
           role: 'system',
@@ -109,6 +112,12 @@ const useChatGPTStore = create<ChatGPTStore>((set, get) => ({
     })
   },
 
+  setModels:(models: string[]) => {
+    set((state) => {
+      return { ...state, gptModels: models }
+    })
+  }
+
 }))
 
 type ChatStatus = 'pending' | 'done' | 'error'
@@ -126,12 +135,13 @@ interface ChatGPTStore {
   curGptModelIndex: number
   setCurGptModelIndex: (index: number) => void
   setChatStatus: (id: string, status: ChatStatus) => void
-  addChat: (question: string, apiKey: string) => ChatGPTHistory
-  getPostSummary: (text: string, apiKey: string) => Promise<Status>
-  getPostTranslate: (text: string, apiKey: string, targetLang: string) => Promise<Status>
+  addChat: (question: string,url:string, apiKey: string) => ChatGPTHistory
+  getPostSummary: (text: string,url:string, apiKey: string) => Promise<Status>
+  getPostTranslate: (text: string,url:string, apiKey: string, targetLang: string) => Promise<Status>
   addChatQuestion: (question: string) => ChatGPTHistory
   addChatAnswer: (id: string, answer: string) => void
   delChat: (id: string) => void
+  setModels:(models: string[]) => void
 }
 
 export default useChatGPTStore

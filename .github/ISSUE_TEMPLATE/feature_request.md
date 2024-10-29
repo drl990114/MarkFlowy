@@ -2,7 +2,7 @@
 name: Feature request
 about: Suggest an idea for this project
 title: "a feature"
-labels: feature
+labels: enhancement
 assignees: 'drl990114'
 
 ---
@@ -18,3 +18,7 @@ assignees: 'drl990114'
 
 **Additional context**
 <!-- Add any other context or screenshots about the feature request here. -->
+
+**Other**
+
+-   [ ] I want to try to complete the development of this feature.
