@@ -4,6 +4,7 @@ import { create } from 'zustand'
 import type { Theme } from '@mui/material'
 import { createTheme } from '@mui/material'
 import useAppSettingStore from './useAppSettingStore'
+import { getCurrentWindow } from '@tauri-apps/api/window'
 
 const muiDarkTheme = createTheme({
   palette: {
@@ -46,10 +47,14 @@ const useThemeStore = create<ThemeStore>((set, get) => {
           removeInsertedTheme()
         }
 
+        const appWindow = getCurrentWindow()
+
         if (targetTheme.mode === 'dark') {
           document.body.style.colorScheme = 'dark'
+          appWindow.setTheme('dark')
         } else {
           document.body.style.colorScheme = 'light'
+          appWindow.setTheme('light')
         }
 
         set((prev) => ({

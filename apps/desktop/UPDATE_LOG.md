@@ -1,5 +1,25 @@
 # UPDATE LOG
 
+## v0.16.0
+
+Features:
+
+- Support drag and drop file node to move.
+
+- Add Spanish translations.
+
+## v0.15.0
+
+Features:
+
+- Add support for customize "chatgpt" api base url and model lists. (#731)
+
+- Update tauri to stable version 2.0.1.
+
+Fixs:
+
+- Fix language settings can not select.
+
 ## v0.14.0
 
 Features:

@@ -1,6 +1,6 @@
 {
   "productName": "MarkFlowy",
-  "version": "0.14.0",
+  "version": "0.16.0",
   "identifier": "com.drl990114.markflowy",
   "build": {
     "beforeDevCommand": "yarn dev",
@@ -24,6 +24,7 @@
   },
   "bundle": {
     "active": true,
+    "createUpdaterArtifacts": "v1Compatible",
     "category": "DeveloperTool",
     "icon": [
       "icons/32x32.png",

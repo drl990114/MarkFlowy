@@ -156,9 +156,17 @@
       "label": "Extensions",
       "ChatGPT": {
         "label": "ChatGPT",
+        "api_base": {
+          "label": "API Base",
+          "desc": "API Base for ChatGPT."
+        },
         "api_key": {
           "label": "API Key",
           "desc": "API key for ChatGPT."
+        },
+        "models":{
+          "label": "Models",
+          "desc":  "A model list separated by commas, default is \"gpt-3.5-turbo, gpt-4-32k, gpt-4\""
         }
       }
     }

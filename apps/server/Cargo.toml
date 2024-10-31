@@ -23,7 +23,7 @@ hyper = "1.4.1"
 tokio = { version = "1.38.0", features = ["macros", "rt-multi-thread"] }
 
 # GraphQL
-async-graphql = { version = "7.0.3", features = ["uuid", "chrono", "log"] }
+async-graphql = { version = "7.0.7", features = ["uuid", "chrono", "log"] }
 async-graphql-axum = "7.0.7"
 
 # Rest
@@ -68,7 +68,7 @@ lazy_static = "1.4.0"
 [dev-dependencies]
 anyhow = "1.0.86"
 cynic = "3.5.0"
-http-body-util = "0.1.1"
+http-body-util = "0.1.2"
 mime = "0.3.17"
 tower = { version = "0.4.13", features = ["util"] }
 
