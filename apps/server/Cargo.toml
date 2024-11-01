@@ -63,7 +63,7 @@ tower-http = { version = "0.5.2", features = [
   "trace",
   "cors",
 ] }
-lazy_static = "1.4.0"
+lazy_static = "1.5.0"
 
 [dev-dependencies]
 anyhow = "1.0.86"
