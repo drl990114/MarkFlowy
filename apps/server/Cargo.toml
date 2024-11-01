@@ -19,7 +19,7 @@ panic = 'abort'
 
 [dependencies]
 axum = "0.7.5"
-hyper = "1.4.1"
+hyper = "1.5.0"
 tokio = { version = "1.38.0", features = ["macros", "rt-multi-thread"] }
 
 # GraphQL
