@@ -36,7 +36,7 @@
     "styled-components": "^6.1.11",
     "stylis": "^4.2.0",
     "stylis-plugin-rtl": "^2.1.1",
-    "zens": "^0.0.36"
+    "zens": "^0.0.37"
   },
   "devDependencies": {
     "@octokit/types": "^9.2.3",

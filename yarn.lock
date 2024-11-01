@@ -4367,7 +4367,7 @@ __metadata:
     vite: "npm:^5.2.14"
     vite-plugin-svgr: "npm:^4.1.0"
     vitest: "npm:^1.2.2"
-    zens: "npm:0.0.36"
+    zens: "npm:0.0.37"
     zustand: "npm:^5.0.0"
   languageName: unknown
   linkType: soft
@@ -4477,7 +4477,7 @@ __metadata:
     stylis-plugin-rtl: "npm:^2.1.1"
     typescript: "npm:^5.0.4"
     webpack-bundle-analyzer: "npm:^4.8.0"
-    zens: "npm:^0.0.36"
+    zens: "npm:^0.0.37"
   languageName: unknown
   linkType: soft
 
@@ -21381,7 +21381,32 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zens@npm:0.0.36, zens@npm:^0.0.36":
+"zens@npm:0.0.37, zens@npm:^0.0.37":
+  version: 0.0.37
+  resolution: "zens@npm:0.0.37"
+  dependencies:
+    "@ant-design/icons": "npm:^5.3.7"
+    "@ariakit/react": "npm:^0.4.11"
+    "@babel/runtime": "npm:^7"
+    "@emotion/is-prop-valid": "npm:^1.2.2"
+    "@floating-ui/dom": "npm:^1.0.0"
+    "@types/lodash": "npm:^4.17.6"
+    classnames: "npm:^2.3.0"
+    clsx: "npm:^2.0.0"
+    color: "npm:^4.2.3"
+    lodash: "npm:^4.17.21"
+    rc-image: "npm:^7.5.1"
+    react: "npm:^18.2.0"
+    react-dom: "npm:^18.2.0"
+    react-spinners: "npm:^0.13.8"
+    sonner: "npm:^1.4.0"
+    styled-components: "npm:^6.1.11"
+    stylis: "npm:^4.0.0"
+  checksum: 10/5f2b56b3ad61f8fe68c24d274177aad6aaf9db1cc32a1fde37661ee97eb5f510cdb7292cccada18c694707afe109000626c95907af4920ee3749b521941c5c78
+  languageName: node
+  linkType: hard
+
+"zens@npm:^0.0.36":
   version: 0.0.36
   resolution: "zens@npm:0.0.36"
   dependencies:

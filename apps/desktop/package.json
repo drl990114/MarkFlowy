@@ -58,7 +58,7 @@
     "stylis": "^4.3.2",
     "tinykeys": "^2.1.0",
     "use-resize-observer": "^9.1.0",
-    "zens": "0.0.36",
+    "zens": "0.0.37",
     "zustand": "^5.0.0"
   },
   "devDependencies": {
