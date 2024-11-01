@@ -23,7 +23,7 @@ hyper = "1.5.0"
 tokio = { version = "1.38.0", features = ["macros", "rt-multi-thread"] }
 
 # GraphQL
-async-graphql = { version = "7.0.7", features = ["uuid", "chrono", "log"] }
+async-graphql = { version = "7.0.11", features = ["uuid", "chrono", "log"] }
 async-graphql-axum = "7.0.7"
 
 # Rest
