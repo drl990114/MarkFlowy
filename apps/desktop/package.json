@@ -75,7 +75,7 @@
     "@vitejs/plugin-react": "^4.2.1",
     "@vitest/ui": "^1.6.0",
     "eslint": "9.1.1",
-    "happy-dom": "^14.7.1",
+    "happy-dom": "^15.7.4",
     "react-test-renderer": "^18.2.0",
     "rimraf": "^6.0.1",
     "ts-node": "^10.9.2",
