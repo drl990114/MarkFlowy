@@ -18,20 +18,20 @@ lto = true
 panic = 'abort'
 
 [dependencies]
-axum = "0.7.5"
+axum = "0.7.7"
 hyper = "1.5.0"
-tokio = { version = "1.38.0", features = ["macros", "rt-multi-thread"] }
+tokio = { version = "1.41.0", features = ["macros", "rt-multi-thread"] }
 
 # GraphQL
-async-graphql = { version = "7.0.7", features = ["uuid", "chrono", "log"] }
-async-graphql-axum = "7.0.7"
+async-graphql = { version = "7.0.11", features = ["uuid", "chrono", "log"] }
+async-graphql-axum = "7.0.11"
 
 # Rest
 utoipa = { version = "4.2.0", features = ["axum_extras"] }
 utoipa-swagger-ui = { version = "6.0.0", features = ["axum"] }
 
 # Database
-sqlx = { version = "0.7.4", features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono", "migrate"] }
+sqlx = { version = "0.8.2", features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono", "migrate"] }
 
 # Logging
 tracing = "0.1.40"
