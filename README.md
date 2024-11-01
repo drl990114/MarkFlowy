@@ -11,6 +11,7 @@
 [![Build Status][build-badge]][build]
 [![App Version][version-badge]][release]
 [![Downloads][downloads-badge]][release]
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fdrl990114%2FMarkFlowy.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fdrl990114%2FMarkFlowy?ref=badge_shield)
 <br/>
 [![MIT License][license-badge]][license]
 [![Code of Conduct][coc-badge]][coc]
@@ -92,3 +93,7 @@ And, thanks to all the open source projects that MarkFlowy depends on.
 [typescript-version-icon]: https://img.shields.io/github/package-json/dependency-version/drl990114/MarkFlowy/dev/typescript?label=TypeScript&style=flat-square
 [codefactor]: https://www.codefactor.io/repository/github/drl990114/markflowy/badge/main?style=flat-square
 [issues-closed]: https://img.shields.io/github/issues-closed/drl990114/MarkFlowy.svg?style=flat-square
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fdrl990114%2FMarkFlowy.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fdrl990114%2FMarkFlowy?ref=badge_large)
