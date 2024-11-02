@@ -35,14 +35,14 @@
   "devDependencies": {
     "@markflowy/theme": "workspace:*",
     "@markflowy/types": "workspace:*",
-    "@rollup/plugin-node-resolve": "15.2.3",
+    "@rollup/plugin-node-resolve": "15.3.0",
     "@rollup/plugin-terser": "0.4.4",
     "@rollup/plugin-typescript": "11.1.6",
-    "eslint": "9.1.1",
+    "eslint": "9.13.0",
     "rimraf": "^6.0.1",
-    "rollup": "4.24.0",
+    "rollup": "4.24.3",
     "rollup-plugin-postcss": "^4.0.2",
-    "typescript": "^5.3.3",
-    "url": "^0.11.3"
+    "typescript": "^5.6.3",
+    "url": "^0.11.4"
   }
 }
