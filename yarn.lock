@@ -5513,7 +5513,7 @@ __metadata:
     dayjs: "npm:^1.11.13"
     eslint: "npm:9.13.0"
     firebase: "npm:^11.0.1"
-    happy-dom: "npm:^15.7.4"
+    happy-dom: "npm:^15.8.3"
     hox: "npm:^2.1.1"
     i18next: "npm:23.16.4"
     immer: "npm:^10.1.1"
@@ -13586,14 +13586,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"happy-dom@npm:^15.7.4":
-  version: 15.7.4
-  resolution: "happy-dom@npm:15.7.4"
+"happy-dom@npm:^15.8.3":
+  version: 15.8.3
+  resolution: "happy-dom@npm:15.8.3"
   dependencies:
     entities: "npm:^4.5.0"
     webidl-conversions: "npm:^7.0.0"
     whatwg-mimetype: "npm:^3.0.0"
-  checksum: 10/fd5026e8a2d9437f161e4c6d9725ffe68f6d31cd09ac7d729b3cd5dd2207a3833272607171da1caf4b1247839ead8bd01a4381a0e31909589af29d27fa24a0f5
+  checksum: 10/cd8a031d233154b1d0502d1962676158a7d50bd77f9d09a9c9d0e9026f5cd36930c4946f4494d46ac9a0f273bfc99c8661b3f6f2f88f71f2e442d6791f6c07dd
   languageName: node
   linkType: hard
 
