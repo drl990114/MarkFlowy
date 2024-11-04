@@ -73,7 +73,7 @@ version = "1"
 features = ["full"]
 
 [target."cfg(any(target_os = \"macos\"))".dependencies]
-cocoa = "0.25"
+cocoa = "0.26"
 objc = "0.2.7"
 
 [features]
