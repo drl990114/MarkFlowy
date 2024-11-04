@@ -1,4 +1,4 @@
-const { withContentlayer } = require('next-contentlayer')
+const { withContentlayer } = require('next-contentlayer2')
 const { i18n } = require('./next-i18next.config.js')
 const withSvgr = require('@newhighsco/next-plugin-svgr')
 
