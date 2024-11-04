@@ -1,5 +1,5 @@
 // contentlayer.config.js
-import { defineDocumentType, makeSource } from "contentlayer/source-files";
+import { defineDocumentType, makeSource } from "contentlayer2/source-files";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 var Post = defineDocumentType(() => ({
@@ -87,4 +87,4 @@ export {
   Post,
   contentlayer_config_default as default
 };
-//# sourceMappingURL=compiled-contentlayer-config-TSEZ3UJW.mjs.map
+//# sourceMappingURL=compiled-contentlayer-config-PTYAUPAV.mjs.map
