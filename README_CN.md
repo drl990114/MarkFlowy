@@ -11,6 +11,7 @@
 [![Build Status][build-badge]][build]
 [![App Version][version-badge]][release]
 [![Downloads][downloads-badge]][release]
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fdrl990114%2FMarkFlowy.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fdrl990114%2FMarkFlowy?ref=badge_shield)
 <br/>
 [![MIT License][license-badge]][license]
 [![Code of Conduct][coc-badge]][coc]
@@ -70,7 +71,6 @@ MarkFlowy 是完全永久开源的，如果你想支持 MarkFlowy，你可以`st
 - <a href="https://github.com/remirror/remirror" target="_blank">Remirror</a> - React 的 ProseMirror 工具包，MarkFlowy 编辑器基于此开发。
 - <a href="https://github.com/ocavue/rino" target="_blank">Rino</a> - package/editor 有部分初始化代码来源于此。
 - <a href="https://github.com/vitejs/vite" target="_blank">Vite</a> - 前端构建工具
-- <a href="https://github.com/kimlimjustin/xplorer" target="_blank">Xplorer</a> - 主页主题来自 Xplorer.
 
 另外，感谢所有 MarkFlowy 依赖的开源项目。
 
@@ -92,3 +92,7 @@ MarkFlowy 是完全永久开源的，如果你想支持 MarkFlowy，你可以`st
 [typescript-version-icon]: https://img.shields.io/github/package-json/dependency-version/drl990114/MarkFlowy/dev/typescript?label=TypeScript&style=flat-square
 [codefactor]: https://www.codefactor.io/repository/github/drl990114/markflowy/badge/main?style=flat-square
 [issues-closed]: https://img.shields.io/github/issues-closed/drl990114/MarkFlowy.svg?style=flat-square
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fdrl990114%2FMarkFlowy.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fdrl990114%2FMarkFlowy?ref=badge_large)
