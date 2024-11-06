@@ -71,7 +71,6 @@ MarkFlowy is completely and permanently open source, if you want to support Mark
 - <a href="https://github.com/remirror/remirror" target="_blank">Remirror</a> - The ProseMirror toolkit for React, on which the MarkFlowy editor is based.
 - <a href="https://github.com/ocavue/rino" target="_blank">Rino</a> - Some initialization codes of package/editor come from here.
 - <a href="https://github.com/vitejs/vite" target="_blank">Vite</a> - front-end build tool.
-- <a href="https://github.com/kimlimjustin/xplorer" target="_blank">Xplorer</a> - Home page theme from xplorer.
 
 And, thanks to all the open source projects that MarkFlowy depends on.
 
