@@ -33,7 +33,7 @@
     "@halodong/eslint-config-react": "^0.38.24",
     "@rollup/plugin-node-resolve": "15.3.0",
     "@rollup/plugin-terser": "0.4.4",
-    "@rollup/plugin-typescript": "11.1.6",
+    "@rollup/plugin-typescript": "12.1.1",
     "@rollup/plugin-url": "^8.0.2",
     "babel": "^6.23.0",
     "child_process": "^1.0.2",

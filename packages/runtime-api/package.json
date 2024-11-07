@@ -37,7 +37,7 @@
     "@markflowy/types": "workspace:*",
     "@rollup/plugin-node-resolve": "15.3.0",
     "@rollup/plugin-terser": "0.4.4",
-    "@rollup/plugin-typescript": "11.1.6",
+    "@rollup/plugin-typescript": "12.1.1",
     "eslint": "9.13.0",
     "rimraf": "^6.0.1",
     "rollup": "4.24.3",

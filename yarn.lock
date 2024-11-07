@@ -5596,7 +5596,7 @@ __metadata:
     "@markflowy/types": "workspace:*"
     "@rollup/plugin-node-resolve": "npm:15.3.0"
     "@rollup/plugin-terser": "npm:0.4.4"
-    "@rollup/plugin-typescript": "npm:11.1.6"
+    "@rollup/plugin-typescript": "npm:12.1.1"
     eslint: "npm:9.13.0"
     rimraf: "npm:^6.0.1"
     rollup: "npm:4.24.3"
@@ -8154,9 +8154,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rollup/plugin-typescript@npm:11.1.6":
-  version: 11.1.6
-  resolution: "@rollup/plugin-typescript@npm:11.1.6"
+"@rollup/plugin-typescript@npm:12.1.1":
+  version: 12.1.1
+  resolution: "@rollup/plugin-typescript@npm:12.1.1"
   dependencies:
     "@rollup/pluginutils": "npm:^5.1.0"
     resolve: "npm:^1.22.1"
@@ -8169,7 +8169,7 @@ __metadata:
       optional: true
     tslib:
       optional: true
-  checksum: 10/4ae4d6cfc929393171288df2f18b5eb837fa53d8689118d9661b3064567341f6f6cf8389af55f1d5f015e3682abf30a64ab609fdf75ecb5a84224505e407eb69
+  checksum: 10/838d5e67d1b383154fab7ae1b0c58e91844c70380210b12c1d5f2ed5d2264d4fbd21ff991a13a4a72078dce897b5c482c70554a21671269219aa9d2525f14dcd
   languageName: node
   linkType: hard
 
@@ -15350,7 +15350,7 @@ __metadata:
     "@halodong/eslint-config-react": "npm:^0.38.24"
     "@rollup/plugin-node-resolve": "npm:15.3.0"
     "@rollup/plugin-terser": "npm:0.4.4"
-    "@rollup/plugin-typescript": "npm:11.1.6"
+    "@rollup/plugin-typescript": "npm:12.1.1"
     "@rollup/plugin-url": "npm:^8.0.2"
     babel: "npm:^6.23.0"
     child_process: "npm:^1.0.2"
