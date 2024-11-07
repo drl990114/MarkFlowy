@@ -4,7 +4,7 @@ import resolve from '@rollup/plugin-node-resolve'
 import postcss from 'rollup-plugin-postcss'
 import postcssImport from 'postcss-import'
 import postcssNested from 'postcss-nested'
-import url from 'rollup-plugin-url'
+import url from '@rollup/plugin-url'
 
 /**
  * Create a base rollup config

@@ -34,7 +34,7 @@
     "@rollup/plugin-node-resolve": "15.3.0",
     "@rollup/plugin-terser": "0.4.4",
     "@rollup/plugin-typescript": "11.1.6",
-    "@types/rollup-plugin-url": "^3",
+    "@rollup/plugin-url": "^8.0.2",
     "babel": "^6.23.0",
     "child_process": "^1.0.2",
     "eslint": "9.13.0",
@@ -46,7 +46,6 @@
     "rimraf": "^6.0.1",
     "rollup": "4.24.3",
     "rollup-plugin-postcss": "^4.0.2",
-    "rollup-plugin-url": "^3.0.1",
     "typescript": "^5.6.3"
   },
   "packageManager": "yarn@4.2.2",

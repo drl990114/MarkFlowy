@@ -40,9 +40,9 @@
   },
   "devDependencies": {
     "@drl990114/codemirror-themes": "^0.0.1",
+    "@rollup/plugin-url": "^8.0.2",
     "@types/codemirror": "^5.60.15",
     "@types/color": "^4.2.0",
-    "@types/rollup-plugin-url": "^3",
     "eslint": "9.13.0",
     "postcss": "^8.4.47",
     "postcss-import": "^16.1.0",
@@ -50,7 +50,6 @@
     "rimraf": "^6.0.1",
     "rollup": "4.24.3",
     "rollup-plugin-postcss": "^4.0.2",
-    "rollup-plugin-url": "^3.0.1",
     "typescript": "^5.6.3",
     "url": "^0.11.4"
   }
