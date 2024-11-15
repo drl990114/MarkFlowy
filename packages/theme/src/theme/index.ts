@@ -75,7 +75,7 @@ const styledLightTheme = {
   labelFontColor: '#9ca3af',
   accentColor: '#0369a1',
   borderColor: '#d7d7dc',
-  bgColor: '#FFFFFF',
+  bgColor: '#f7f7f7',
   hoverColor: '#d7d7dc',
   warnColor: '#e2b340',
   dangerColor: '#dc2626',
@@ -89,9 +89,9 @@ const styledLightTheme = {
   editorTabBgColor: '#EBEBEC',
   editorTabActiveBgColor: '#FAFAFA',
   sideBarHeaderBgColor: '#EBEBEC',
-  sideBarBgColor: '#F9F9F9',
+  sideBarBgColor: '#f2f2f2',
   statusBarBgColor: '#EBEBEC',
-  rightBarBgColor: '#F9F9F9',
+  rightBarBgColor: '#f2f2f2',
   rightBarHeaderBgColor: '#EBEBEC',
 
   // components
