@@ -90,7 +90,8 @@
       "close": "关闭",
       "close_others": "关闭其他",
       "close_right": "关闭右侧",
-      "close_all": "关闭全部"
+      "close_all": "关闭全部",
+      "export_html": "导出为 HTML"
     }
   },
   "notification": {},

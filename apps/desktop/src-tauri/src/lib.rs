@@ -15,7 +15,6 @@ use tauri::{Manager, Runtime};
 use tauri_plugin_aptabase::EventTracker;
 use tauri_plugin_window_state::{AppHandleExt, StateFlags};
 use tracing_subscriber;
-
 #[cfg(target_os = "macos")]
 #[macro_use]
 extern crate objc;
@@ -61,6 +60,7 @@ pub fn run() {
             fc::cmd::path_join,
             fc::cmd::rename_fs,
             fc::cmd::trash_delete,
+            fc::cmd::export_html_to_path,
             conf::cmd::get_app_conf_path,
             conf::cmd::get_app_conf,
             conf::cmd::reset_app_conf,
