@@ -11,7 +11,7 @@ In order to download necessary tools, clone the repository, and install dependen
 You'll need the following tools:
 
 - [Git](https://git-scm.com/)
-- [Node.JS](https://nodejs.org/en) >= 18.x
+- [Node.JS](https://nodejs.org/en) >= 20.x
 - [yarn](https://yarnpkg.com/) 4.0.0
 - [rust](https://www.rust-lang.org/) >= 1.79.0
 
