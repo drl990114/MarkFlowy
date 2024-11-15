@@ -91,7 +91,8 @@
       "close": "Close",
       "close_others": "Close others",
       "close_right": "Close right",
-      "close_all": "Close all"
+      "close_all": "Close all",
+      "export_html": "Export to HTML"
     }
   },
   "notification": {},

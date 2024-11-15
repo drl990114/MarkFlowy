@@ -32,7 +32,11 @@ export const EditorAreaHeader = memo(() => {
     const content = getEditorContent(curFile?.id || '')
     const res = await addAppTask({
       title: 'ChatGPT: Retrieving article abstract',
-      promise: getPostSummary(content || '',settingData.extensions_chatgpt_apibase, settingData.extensions_chatgpt_apikey),
+      promise: getPostSummary(
+        content || '',
+        settingData.extensions_chatgpt_apibase,
+        settingData.extensions_chatgpt_apikey,
+      ),
     })
     if (res.status === 'done') {
       addNewMarkdownFileEdit({
@@ -59,7 +63,12 @@ ${res.result}
       const content = getEditorContent(curFile?.id || '')
       const res = await addAppTask({
         title: 'ChatGPT: Translating article',
-        promise: getPostTranslate(content || '',settingData.extensions_chatgpt_apibase,  settingData.extensions_chatgpt_apikey, targetLang),
+        promise: getPostTranslate(
+          content || '',
+          settingData.extensions_chatgpt_apibase,
+          settingData.extensions_chatgpt_apikey,
+          targetLang,
+        ),
       })
 
       if (res.status === 'done') {
@@ -131,6 +140,16 @@ ${res.result}
             },
           ],
         },
+        {
+          type: 'divider' as const,
+        },
+        {
+          value: 'export_html',
+          label: t('contextmenu.editor_tab.export_html'),
+          handler: () => {
+            bus.emit('editor_export_html')
+          },
+        },
       ],
     })
   }, [curFile, getEditorDelegate, t, fetchCurFileSummary, execute, fetchCurFileTranslate])
@@ -178,7 +197,11 @@ ${res.result}
     <div className='editor-area-header'>
       {curFile ? (
         <>
-          <MfIconButton iconRef={ref} icon={viewTypeIconMap[editorViewType]} onClick={handleViewClick} />
+          <MfIconButton
+            iconRef={ref}
+            icon={viewTypeIconMap[editorViewType]}
+            onClick={handleViewClick}
+          />
           <MfIconButton iconRef={ref1} icon={'ri-more-2-fill'} onClick={handleAddBookMark} />
         </>
       ) : null}

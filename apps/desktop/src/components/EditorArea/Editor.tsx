@@ -244,6 +244,56 @@ function Editor(props: EditorProps) {
   }, [active, curFile, execute, setEditorDelegate, getEditorContent, debounceRefreshToc])
 
   useEffect(() => {
+    const exportHtmlHandler = async () => {
+      if (!active) {
+        return
+      }
+
+      save({
+        title: t('contextmenu.editor_tab.export_html'),
+        defaultPath: curFile.name.split('.')?.[0] + '.html',
+      }).then(async (path) => {
+        if (!path) return 
+
+        const n = toast.loading(t('contextmenu.editor_tab.export_html') + '...')
+        const res = await editorRef.current?.exportHtml()
+        const scStyled = document.head.querySelectorAll('style[data-styled]')
+
+        const html = `
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+  ${scStyled[0].innerHTML}
+  </style>
+  </head>
+  <body>
+  <div class="${document.getElementById(id)?.className}">
+  ${res}
+  </div>
+  </body>
+  </html>
+          `
+
+        invoke('export_html_to_path', { str: html, path }).then(() => {
+          toast.dismiss(n)
+          toast.success('Exported to ' + path)
+        })
+      })
+    }
+
+    bus.on('editor_export_html', exportHtmlHandler)
+
+    return () => {
+      bus.detach('editor_export_html', exportHtmlHandler)
+    }
+  }, [active])
+
+  useEffect(() => {
     if (active) {
       debounceRefreshToc()
     }
@@ -288,6 +338,7 @@ function Editor(props: EditorProps) {
       delegate,
       offset: { top: 10, left: 16 },
       styleToken: {
+        id,
         rootFontSize: `${settingData.editor_root_font_size}px`,
         rootLineHeight: settingData.editor_root_line_height,
       },

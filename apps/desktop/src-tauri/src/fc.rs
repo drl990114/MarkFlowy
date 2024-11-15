@@ -215,6 +215,7 @@ pub fn move_files_to_target_folder(
 
 pub mod cmd {
     use crate::fc;
+    use regex::Regex;
     use std::fs;
     use std::path::Path;
     use trash;
@@ -294,5 +295,18 @@ pub mod cmd {
     #[tauri::command]
     pub fn trash_delete(path: &str) -> bool {
         trash::delete(path).is_ok()
+    }
+
+    #[tauri::command]
+    pub fn export_html_to_path(str: &str, path: &str) -> String {
+        let re = Regex::new(r#"\\\""#).unwrap();
+
+        let result = re.replace_all(str, "\"");
+
+        let file_path = Path::new(path);
+
+        fs::write(file_path, result.to_string()).expect("ERROR");
+
+        String::from("OK")
     }
 }
