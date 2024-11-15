@@ -88,7 +88,7 @@ And, thanks to all the open source projects that MarkFlowy depends on.
 [commit-badge]: https://img.shields.io/github/commit-activity/m/drl990114/MarkFlowy?color=%23ff9900&style=flat-square
 [commit]: https://github.com/drl990114/MarkFlowy
 [version-badge]: https://img.shields.io/github/v/release/drl990114/MarkFlowy?color=%239accfe&label=version&style=flat-square
-[rust-version-icon]: https://img.shields.io/badge/Rust-1.75.0-dea584?style=flat-square
+[rust-version-icon]: https://img.shields.io/badge/Rust-1.79.0-dea584?style=flat-square
 [typescript-version-icon]: https://img.shields.io/github/package-json/dependency-version/drl990114/MarkFlowy/dev/typescript?label=TypeScript&style=flat-square
 [codefactor]: https://www.codefactor.io/repository/github/drl990114/markflowy/badge/main?style=flat-square
 [issues-closed]: https://img.shields.io/github/issues-closed/drl990114/MarkFlowy.svg?style=flat-square
