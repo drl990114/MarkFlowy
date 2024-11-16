@@ -31,6 +31,7 @@ const LayoutPanelItemContainer = styled.div<{ active: boolean }>`
 
 interface LayoutPanelItemProps {
   active: boolean
+  tooltipTitle: string
   icon: string
   onClick: () => void
 }
@@ -38,7 +39,7 @@ interface LayoutPanelItemProps {
 const LayoutPanelItem = (props: LayoutPanelItemProps) => {
   return (
     <LayoutPanelItemContainer active={props.active} onClick={props.onClick}>
-      <Tooltip title='Grid Layout'>
+      <Tooltip title={props.tooltipTitle}>
         <i className={props.icon}></i>
       </Tooltip>
     </LayoutPanelItemContainer>
@@ -53,10 +54,16 @@ export const LayoutBtn = memo(() => {
     <Popover
       placement='top-end'
       arrow
+      boxProps={{
+        style: {
+          height: '100%',
+        }
+      }}
       customContent={
         <LayoutPanelContainer>
           <LayoutPanelItem
             icon='ri-layout-left-line'
+            tooltipTitle='Toggle Left Sidebar'
             active={leftBar.visible}
             onClick={() => {
               useCommandStore.getState().execute('app:toggle_leftsidebar_visible')
@@ -64,6 +71,7 @@ export const LayoutBtn = memo(() => {
           />
           <LayoutPanelItem
             icon='ri-layout-right-line'
+            tooltipTitle='Toggle Right Sidebar'
             active={rightBar.visible}
             onClick={() => {
               useCommandStore.getState().execute('app:toggle_rightsidebar_visible')
