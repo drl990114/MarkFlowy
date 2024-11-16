@@ -150,6 +150,13 @@ ${res.result}
             bus.emit('editor_export_html')
           },
         },
+        {
+          value: 'export_image',
+          label: t('contextmenu.editor_tab.export_image'),
+          handler: () => {
+            bus.emit('editor_export_image')
+          },
+        },
       ],
     })
   }, [curFile, getEditorDelegate, t, fetchCurFileSummary, execute, fetchCurFileTranslate])

@@ -92,7 +92,8 @@
       "close_others": "Close others",
       "close_right": "Close right",
       "close_all": "Close all",
-      "export_html": "Export to HTML"
+      "export_html": "Export to HTML",
+      "export_image": "Export to Image"
     }
   },
   "notification": {},

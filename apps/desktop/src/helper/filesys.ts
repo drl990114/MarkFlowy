@@ -129,3 +129,20 @@ export function getFolderPathFromPath(filePath?: string) {
 
   return filePath
 }
+
+export function canvasDataToBinary(canvasData: string) {
+  // Remove the data URL prefix (e.g., 'data:image/png;base64,')
+  const data = canvasData.replace(/^data:image\/\w+;base64,/, '')
+
+  // Decode the base64 data into binary format
+  const binaryString = atob(data)
+
+  // Create a Uint8Array from the binary string
+  const length = binaryString.length
+  const binaryArray = new Uint8Array(length)
+  for (let i = 0; i < length; i++) {
+    binaryArray[i] = binaryString.charCodeAt(i)
+  }
+
+  return binaryArray
+}
