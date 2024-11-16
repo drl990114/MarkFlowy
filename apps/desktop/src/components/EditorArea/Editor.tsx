@@ -20,7 +20,7 @@ import bus from '@/helper/eventBus'
 import { EVENT } from '@/constants'
 import classNames from 'classnames'
 import { WarningHeader } from './styles'
-import { getFileNameFromPath, getFolderPathFromPath } from '@/helper/filesys'
+import { canvasDataToBinary, getFileNameFromPath, getFolderPathFromPath } from '@/helper/filesys'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import { save } from '@tauri-apps/plugin-dialog'
 import { useTranslation } from 'react-i18next'
@@ -30,6 +30,7 @@ import { useMount, useUnmount } from 'react-use'
 import useEditorCounterStore from '@/stores/useEditorCounterStore'
 import { toast } from 'zens'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
+import html2canvas from 'html2canvas'
 
 interface EditorWrapperProps {
   active: boolean
@@ -244,6 +245,38 @@ function Editor(props: EditorProps) {
   }, [active, curFile, execute, setEditorDelegate, getEditorContent, debounceRefreshToc])
 
   useEffect(() => {
+    const exportImageHandler = async () => {
+      if (!active) {
+        return
+      }
+
+      save({
+        title: t('contextmenu.editor_tab.export_image'),
+        defaultPath: curFile.name.split('.')?.[0] + '.jpg',
+      }).then(async (path) => {
+        if (!path) return
+
+        const n = toast.loading(t('contextmenu.editor_tab.export_image') + '...')
+
+        html2canvas(document.getElementById(id) as HTMLElement).then((canvas) => {
+          // to base 64
+          const image = canvas.toDataURL('image/jpg')
+
+          const data = canvasDataToBinary(image)
+
+          invoke('write_u8_array_to_file', { filePath: path, content: data })
+            .then(() => {
+              toast.dismiss(n)
+              toast.success('Exported to ' + path)
+            })
+            .catch((error) => {
+              toast.dismiss(n)
+              toast.error(String(error))
+            })
+        })
+      })
+    }
+
     const exportHtmlHandler = async () => {
       if (!active) {
         return
@@ -252,14 +285,15 @@ function Editor(props: EditorProps) {
       save({
         title: t('contextmenu.editor_tab.export_html'),
         defaultPath: curFile.name.split('.')?.[0] + '.html',
-      }).then(async (path) => {
-        if (!path) return 
+      })
+        .then(async (path) => {
+          if (!path) return
 
-        const n = toast.loading(t('contextmenu.editor_tab.export_html') + '...')
-        const res = await editorRef.current?.exportHtml()
-        const scStyled = document.head.querySelectorAll('style[data-styled]')
+          const n = toast.loading(t('contextmenu.editor_tab.export_html') + '...')
+          const res = await editorRef.current?.exportHtml()
+          const scStyled = document.head.querySelectorAll('style[data-styled]')
 
-        const html = `
+          const html = `
   <!DOCTYPE html>
   <html lang="en">
   <head>
@@ -279,17 +313,22 @@ function Editor(props: EditorProps) {
   </html>
           `
 
-        invoke('export_html_to_path', { str: html, path }).then(() => {
-          toast.dismiss(n)
-          toast.success('Exported to ' + path)
+          invoke('export_html_to_path', { str: html, path }).then(() => {
+            toast.dismiss(n)
+            toast.success('Exported to ' + path)
+          })
         })
-      })
+        .catch((error) => {
+          toast.error(String(error))
+        })
     }
 
     bus.on('editor_export_html', exportHtmlHandler)
+    bus.on('editor_export_image', exportImageHandler)
 
     return () => {
       bus.detach('editor_export_html', exportHtmlHandler)
+      bus.detach('editor_export_image', exportImageHandler)
     }
   }, [active])
 

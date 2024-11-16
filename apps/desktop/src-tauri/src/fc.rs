@@ -242,6 +242,13 @@ pub mod cmd {
     }
 
     #[tauri::command]
+    pub fn write_u8_array_to_file(file_path: &str, content: Vec<u8>) -> String {
+        let file_path = Path::new(file_path);
+        fs::write(file_path, content).expect("ERROR");
+        String::from("OK")
+    }
+
+    #[tauri::command]
     pub fn delete_file(file_path: &str) -> String {
         fc::remove_file(file_path);
         String::from("OK")

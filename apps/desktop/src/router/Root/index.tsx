@@ -108,11 +108,13 @@ function Root() {
           {TableOfContent.components}
         </Panel>
       </PanelGroup>
+      <StatusBar />
+
+      {/* global dialogs */}
       <AppInfoDialog />
       <TableDialog />
       <BookMarkDialog />
       <SettingDialog />
-      <StatusBar />
     </PageLayout>
   )
 }
