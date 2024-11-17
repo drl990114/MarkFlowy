@@ -85,7 +85,8 @@
       "rename": "Rename",
       "delete_file": "Delete file",
       "delete_folder": "Delete folder",
-      "moveto_trash": "Move to trash"
+      "moveto_trash": "Move to trash",
+      "copy": "Copy"
     },
     "editor_tab": {
       "close": "Close",

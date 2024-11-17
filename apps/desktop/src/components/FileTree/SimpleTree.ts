@@ -12,7 +12,7 @@ export class SimpleTree<T extends SimpleData> {
     return this.root.children?.map((node) => node.data) ?? []
   }
 
-  create(args: { parentId: string | null; index?: number; data: T }) {
+  create(args: { parentId: string | null; index?: number | null; data: T }) {
     const parent = args.parentId ? this.find(args.parentId) : this.root
     if (!parent) return null
     parent.addChild(args.data, args.index)
@@ -82,10 +82,10 @@ class SimpleNode<T extends SimpleData> {
     return this.hasParent() ? this.parent.children!.indexOf(this) : -1
   }
 
-  addChild(data: T, index?: number) {
+  addChild(data: T, index?: number | null) {
     const node = createNode(data, this)
     this.children = this.children ?? []
-    if (index === undefined) {
+    if (index === undefined || index === null) {
       index = this.children.findIndex((child) => !Array.isArray(child.children)) || 0
     }
     this.children.splice(index, 0, node)

@@ -84,7 +84,8 @@
       "rename": "重命名",
       "delete_file": "删除文件",
       "delete_folder": "删除文件夹",
-      "moveto_trash": "移动到回收站"
+      "moveto_trash": "移动到回收站",
+      "copy": "复制"
     },
     "editor_tab": {
       "close": "关闭",

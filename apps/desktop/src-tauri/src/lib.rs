@@ -54,6 +54,7 @@ pub fn run() {
             fc::cmd::write_file,
             fc::cmd::write_u8_array_to_file,
             fc::cmd::delete_file,
+            fc::cmd::copy_file_by_from,
             fc::cmd::create_folder,
             fc::cmd::delete_folder,
             fc::cmd::file_exists,

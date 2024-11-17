@@ -1,4 +1,4 @@
-import { createFile, updateFile, type IFile } from '@/helper/filesys'
+import { createFile, getFileNameFromPath, updateFile, type IFile } from '@/helper/filesys'
 import { NodeRendererProps } from 'react-arborist'
 import { NodeContainer } from './styles'
 import { invoke } from '@tauri-apps/api/core'
@@ -200,6 +200,38 @@ function FileNode({
           },
         })
 
+        if (node.data.kind === 'file') {
+          items.push({
+            value: 'copy',
+            label: t('contextmenu.explorer.copy'),
+            handler: () => {
+              invoke<string>('copy_file_by_from', {
+                from: node.data.path,
+              }).then((targetPath) => {
+                if (node.parent) {
+                  const file = createFile({
+                    name: getFileNameFromPath(targetPath),
+                    path: targetPath,
+                  })
+
+                  const parentId = node.parent.id
+
+                  simpleTree.create({
+                    parentId,
+                    data: file,
+                    index: node.rowIndex,
+                  })
+                  tree.create({
+                    parentId,
+                    index: node.rowIndex,
+                  })
+                  setFolderData(simpleTree.data)
+                }
+              })
+            },
+          })
+        }
+
         items.push({
           value: 'trash',
           label: t('contextmenu.explorer.moveto_trash'),
@@ -214,7 +246,7 @@ function FileNode({
                   simpleTree.drop({ id: node.id })
                   setFolderData(simpleTree.data)
                 })
-              }
+              },
             })
           },
         })
