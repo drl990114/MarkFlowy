@@ -300,6 +300,39 @@ pub mod cmd {
     }
 
     #[tauri::command]
+    pub fn copy_file_by_from(from: &str) -> String {
+        let from_path = Path::new(from);
+        let parent_path = from_path.parent().unwrap();
+        let mut to_path_name = from_path
+            .file_stem()
+            .unwrap()
+            .to_str()
+            .unwrap()
+            .to_string();
+
+        let file_ext = from_path.extension().unwrap();
+
+
+        while parent_path
+            .join(&format!(
+                "{}.{}",
+                to_path_name.clone(),
+                file_ext.to_str().unwrap()
+            ))
+            .exists()
+        {
+            to_path_name.push_str(" copy");
+        }
+
+        to_path_name.push_str(format!(".{}", file_ext.to_str().unwrap()).as_str());
+
+        let to_path = parent_path.join(&to_path_name);
+        fs::copy(from_path, to_path.clone()).unwrap();
+
+        to_path.to_str().unwrap().to_string()
+    }
+
+    #[tauri::command]
     pub fn trash_delete(path: &str) -> bool {
         trash::delete(path).is_ok()
     }
