@@ -1,5 +1,17 @@
 # UPDATE LOG
 
+## v0.17.0
+
+Features:
+
+- Support export markdown file to html.
+
+- Support export markdown file to image.
+
+- Support duplicate file.
+
+- Optimize the performance of the editor.
+
 ## v0.16.0
 
 Features:
