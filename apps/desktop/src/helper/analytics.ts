@@ -48,5 +48,9 @@ const umengAnalyticsInit = () => {
   document.head.appendChild(script)
 }
 
-firebaseAnalyticsInit()
-umengAnalyticsInit()
+try {
+  firebaseAnalyticsInit()
+  umengAnalyticsInit()
+} catch (error) {
+  console.error('Failed to initialize analytics:', error)
+}
