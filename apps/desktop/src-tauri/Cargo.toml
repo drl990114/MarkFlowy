@@ -1,6 +1,6 @@
 [package]
 name = "markflowy"
-version = "0.16.0"
+version = "0.17.0"
 description = "A Markdown Editor App"
 authors = ["drl990114"]
 license = " AGPL-3.0"
@@ -72,7 +72,7 @@ path = "../../../crates/download_npm"
 version = "1"
 features = ["full"]
 
-[target."cfg(any(target_os = \"macos\"))".dependencies]
+[target.'cfg(any(target_os = "macos"))'.dependencies]
 cocoa = "0.26"
 objc = "0.2.7"
 
