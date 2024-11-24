@@ -14,9 +14,7 @@ node_modules
 coverage
 html
 
-# Zero-installs
 .yarn/*
-!.yarn/cache
 !.yarn/patches
 !.yarn/plugins
 !.yarn/releases

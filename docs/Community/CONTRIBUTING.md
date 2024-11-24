@@ -53,12 +53,8 @@ Fork [MarkFlowy](https://github.com/drl990114/MarkFlowy) and `git clone`
 Execute the following command to install related dependencies.
 
 ```bash
-yarn install
-```
+yarn install --immutable
 
-and
-
-```bash
 cargo install --locked --path apps/desktop/src-tauri
 ```
 
