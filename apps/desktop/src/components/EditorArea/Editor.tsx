@@ -56,6 +56,7 @@ const EditorWrapper = styled.div.attrs<EditorWrapperProps>((props) => props)`
           maxWidth: props.fullWidth ? 'auto' : '800px',
           margin: '0 auto',
           padding: '0 20px',
+          paddingTop: '6px',
           paddingBottom: '8rem',
           marginInlineStart: 'auto',
           marginInlineEnd: 'auto',
