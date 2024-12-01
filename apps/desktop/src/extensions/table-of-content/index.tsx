@@ -1,5 +1,5 @@
 import { RIGHTBARITEMKEYS } from '@/constants'
-import type { RightBarItem } from '../SideBar'
+import type { RightBarItem } from '../../components/SideBar'
 import type { TocRef } from 'zens'
 import { Toc } from 'zens'
 import { useCommandStore, useEditorStore } from '@/stores'
@@ -10,7 +10,7 @@ import { IHeadingData } from 'zens/lib/TableOfContent/HeadingTree'
 import { getHeadingValue } from '@/helper/string'
 import { Container, RightBarHeader } from './styles'
 import { useTranslation } from 'react-i18next'
-import { sourceCodeCodemirrorViewMap } from '../EditorArea/Editor'
+import { sourceCodeCodemirrorViewMap } from '../../components/EditorArea/Editor'
 
 const TocView = () => {
   const tocRef = useRef<TocRef>(null)

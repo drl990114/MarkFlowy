@@ -11,7 +11,7 @@ import { appInfoStoreSetup } from '@/services/app-info'
 import StatusBar from '@/components/StatusBar'
 import { useTitleBarEffect } from '@/hooks/useTitleBarEffect'
 import { PanelGroup, Panel, PanelResizeHandle, ImperativePanelHandle } from 'react-resizable-panels'
-import { TableOfContent } from '@/components/table-of-content'
+import { TableOfContent } from '@/extensions/table-of-content'
 import { useCommandStore } from '@/stores'
 import useLayoutStore from '@/stores/useLayoutStore'
 
