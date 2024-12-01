@@ -143,7 +143,6 @@ const EditorAreaTabs = memo(() => {
               >
                 <span
                   style={{
-                    color: active ? curTheme.styledConstants.accentColor : '',
                     maxWidth: '160px',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
