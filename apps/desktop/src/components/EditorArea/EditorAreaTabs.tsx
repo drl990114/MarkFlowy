@@ -4,7 +4,6 @@ import { useEditorStore, useEditorStateStore } from '@/stores'
 import { memo, useEffect, useRef } from 'react'
 import { TabItem, Dot } from './styles'
 import styled, { css } from 'styled-components'
-import useThemeStore from '@/stores/useThemeStore'
 import { setTitleBarText } from '../TitleBar'
 import { EditorAreaHeader } from './EditorAreaHeader'
 import { darken } from '@markflowy/theme'
@@ -59,7 +58,6 @@ const EditorAreaTabs = memo(() => {
   const { opened, activeId, setActiveId, delOpenedFile, delOtherOpenedFile, delAllOpenedFile } =
     useEditorStore()
   const { idStateMap } = useEditorStateStore()
-  const { curTheme } = useThemeStore()
   const htmlRef = useRef<HTMLDivElement>(null)
   const { t } = useTranslation()
 
