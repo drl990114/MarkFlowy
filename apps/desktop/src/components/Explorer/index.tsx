@@ -78,10 +78,12 @@ const Explorer: FC<ExplorerProps> = (props) => {
           {t('file.openDir')}
         </span>
         <Popover
-          placement='top-end'
-          open={popperOpen}
           arrow
+          fixed
+          style={{ zIndex: 9999 }}
+          open={popperOpen}
           onClose={() => setPopperOpen(false)}
+          placement='top-end'
           customContent={
             <>
               <List

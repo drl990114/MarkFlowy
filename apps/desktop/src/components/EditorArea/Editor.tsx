@@ -24,7 +24,7 @@ import { canvasDataToBinary, getFileNameFromPath, getFolderPathFromPath } from '
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import { save } from '@tauri-apps/plugin-dialog'
 import { useTranslation } from 'react-i18next'
-import { debounce } from 'lodash'
+import { debounce, DebouncedFunc } from 'lodash'
 import { createWysiwygDelegateOptions } from './createWysiwygDelegateOptions'
 import { useMount, useUnmount } from 'react-use'
 import useEditorCounterStore from '@/stores/useEditorCounterStore'
@@ -82,6 +82,8 @@ function Editor(props: EditorProps) {
   const [delegate, setDelegate] = useState(
     createWysiwygDelegate(createWysiwygDelegateOptions(getFolderPathFromPath(curFile.path))),
   )
+  const debounceSaveHandlerCacheRef = useRef<DebouncedFunc<() => Promise<void>>>()
+  const noFileSaveingRef = useRef(false)
   const editorRef = useRef<EditorRef>(null)
   const editorContextRef = useRef<EditorChangeEventParams>()
 
@@ -147,11 +149,18 @@ function Editor(props: EditorProps) {
 
       try {
         if (!curFile.path) {
+          if (noFileSaveingRef.current === true)  {
+            return
+          }
+
+          noFileSaveingRef.current = true
           save({
             title: 'Save File',
             defaultPath: curFile.name ?? `${t('file.untitled')}.md`,
           })
             .then((path) => {
+              noFileSaveingRef.current = false
+
               if (path === null) return
               const filename = getFileNameFromPath(path)
               updateFileObject(curFile.id, { ...curFile, path, name: filename })
@@ -169,6 +178,7 @@ function Editor(props: EditorProps) {
               })
             })
             .catch((error) => {
+              noFileSaveingRef.current = false
               toast.error(String(error))
             })
         } else {
@@ -188,16 +198,23 @@ function Editor(props: EditorProps) {
     [active, curFile, delegate, t, insertNodeToFolderData],
   )
 
-  const debounceSave = useMemo(
-    () => debounce(() => saveHandler({ active: true }), settingData.autosave_interval),
-    [settingData.autosave_interval, saveHandler],
-  )
+  const debounceSave = useMemo(() => {
+    return debounce(() => saveHandler({ active: true }), settingData.autosave_interval)
+  }, [settingData.autosave_interval, saveHandler])
+
   const debounceRefreshToc = useMemo(
     () => debounce(() => execute('app:toc_refresh'), 1000),
     [execute],
   )
 
-  const debounceSaveHandler = useCallback(debounceSave, [settingData, debounceSave])
+  const debounceSaveHandler = useCallback(() => {
+    if (debounceSave) {
+      debounceSaveHandlerCacheRef.current?.cancel()
+
+      debounceSaveHandlerCacheRef.current = debounceSave
+      debounceSave()
+    }
+  }, [debounceSave])
 
   useEffect(() => {
     const cb = async (payload: EditorViewType) => {
