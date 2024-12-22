@@ -101,7 +101,7 @@ const useEditorStore = create<EditorStore>((set, get) => {
 
     insertNodeToFolderData: (fileNode) => {
       const { folderData } = get()
-      if (fileNode) {
+      if (fileNode && folderData) {
         const parent =
           fileNode.kind === 'dir' ? fileNode : findParentNodeByPath(fileNode.path!, folderData![0])
 
