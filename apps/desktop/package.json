@@ -73,7 +73,7 @@
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@types/react-test-renderer": "^18.3.0",
-    "@vitejs/plugin-react": "^4.3.3",
+    "@vitejs/plugin-react": "^4.3.4",
     "@vitest/ui": "^2.1.4",
     "eslint": "9.13.0",
     "happy-dom": "^15.11.0",
