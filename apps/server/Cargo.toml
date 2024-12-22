@@ -70,7 +70,7 @@ anyhow = "1.0.86"
 cynic = "3.5.0"
 http-body-util = "0.1.2"
 mime = "0.3.17"
-tower = { version = "0.4.13", features = ["util"] }
+tower = { version = "0.5.1", features = ["util"] }
 
 [package.metadata.binstall]
 pkg-url = "{ repo }/releases/download/v{ version }/{ name }-{ version}-{ target }.tar.gz"
