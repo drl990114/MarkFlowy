@@ -12,7 +12,8 @@
     "delete": "删除",
     "file": "文件",
     "folder": "文件夹",
-    "fetching": "加载中..."
+    "fetching": "加载中...",
+    "submit": "提交"
   },
   "view": {
     "label": "视图",

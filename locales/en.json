@@ -12,7 +12,8 @@
     "delete": "delete",
     "file": "file",
     "folder": "folder",
-    "fetching": "Loading..."
+    "fetching": "Loading...",
+    "submit": "submit"
   },
   "view": {
     "label": "View",

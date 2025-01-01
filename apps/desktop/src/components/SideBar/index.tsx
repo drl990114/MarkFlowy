@@ -3,7 +3,6 @@ import { memo, useMemo, useState } from 'react'
 import { Container as SideBarContainer, SideBarHeader } from './styles'
 import { Explorer } from '@/components'
 import { RIGHTBARITEMKEYS } from '@/constants'
-import chatgpt from '@/extensions/chatgpt'
 import BookMarks from '@/extensions/bookmarks'
 import { Search } from '@/extensions/search'
 import { Tooltip } from 'zens'
@@ -23,7 +22,6 @@ function SideBar() {
       },
       Search,
       BookMarks,
-      chatgpt,
     ]
   }, [])
 

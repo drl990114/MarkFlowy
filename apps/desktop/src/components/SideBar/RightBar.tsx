@@ -4,6 +4,7 @@ import { Container as SideBarContainer, SideBarHeader } from './styles'
 import { RIGHTBARITEMKEYS } from '@/constants'
 import { Tooltip } from 'zens'
 import { TableOfContent } from '@/extensions/table-of-content'
+import chatgpt from '@/extensions/chatgpt'
 
 function RightBar() {
   const [activeRightBarItemKey, setActiveRightBarItemKey] = useState<RIGHTBARITEMKEYS>(
@@ -13,6 +14,7 @@ function RightBar() {
   const rightBarDataSource: RightBarItem[] = useMemo(() => {
     return [
       TableOfContent,
+      chatgpt,
     ]
   }, [])
 
