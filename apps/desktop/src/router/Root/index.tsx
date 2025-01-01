@@ -11,9 +11,9 @@ import { appInfoStoreSetup } from '@/services/app-info'
 import StatusBar from '@/components/StatusBar'
 import { useTitleBarEffect } from '@/hooks/useTitleBarEffect'
 import { PanelGroup, Panel, PanelResizeHandle, ImperativePanelHandle } from 'react-resizable-panels'
-import { TableOfContent } from '@/extensions/table-of-content'
 import { useCommandStore } from '@/stores'
 import useLayoutStore from '@/stores/useLayoutStore'
+import RightBar from '@/components/SideBar/RightBar'
 
 export const RESIZE_PANEL_STORAGE_KEY = 'resize-panel'
 
@@ -105,7 +105,7 @@ function Root() {
           minSize={10}
           ref={rightPanelRef}
         >
-          {TableOfContent.components}
+          <RightBar />
         </Panel>
       </PanelGroup>
       <StatusBar />
