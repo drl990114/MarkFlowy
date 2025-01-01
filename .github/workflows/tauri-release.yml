@@ -149,7 +149,7 @@ jobs:
           mv "artifacts/x86_64/MarkFlowy_${{ env.version }}_x64_en-US.msi.zip.sig" "artifacts/MarkFlowy_${{ env.version }}_windows_x86_64.msi.zip.sig"
 
       - name: Create Release
-        uses: softprops/action-gh-release@master
+        uses: softprops/action-gh-release@v2.1.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
