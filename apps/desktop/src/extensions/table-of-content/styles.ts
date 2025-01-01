@@ -6,6 +6,7 @@ export const RightBarHeader = styled.div`
   align-items: center;
   flex-shrink: 0;
   height: 32px;
+  padding: 0 8px;
   background-color: ${(props) => props.theme.rightBarHeaderBgColor};
 `
 
