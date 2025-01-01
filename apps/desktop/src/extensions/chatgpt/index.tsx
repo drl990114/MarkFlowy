@@ -13,28 +13,42 @@ import SideBarHeader from '@/components/SideBar/SideBarHeader'
 import useThemeStore from '@/stores/useThemeStore'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import { addNewMarkdownFileEdit } from '@/services/editor-file'
+import { useTranslation } from 'react-i18next'
+import { toast } from 'zens'
 
 const ChatList: React.FC<ChatListProps> = (props) => {
-  const { chatList, curGptModelIndex, gptModels, setCurGptModelIndex, addChat, delChat, setModels } =
-    useChatGPTStore()
+  const {
+    chatList,
+    curGptModelIndex,
+    gptModels,
+    setCurGptModelIndex,
+    addChat,
+    delChat,
+    setModels,
+  } = useChatGPTStore()
   const { settingData } = useAppSettingStore()
   const { curTheme } = useThemeStore()
   const apiBase = settingData[SettingKeys.chatgpt_url]
   const apiKey = settingData[SettingKeys.chatgpt]
   const [askInput, setAskInput] = useState('')
   const listRef = useRef<HTMLDivElement>(null)
+  const { t } = useTranslation()
 
   useEffect(() => {
     if (listRef.current) {
       listRef.current.scrollTop = listRef.current.scrollHeight
     }
 
-    const newModels = settingData[SettingKeys.chatgpt_models].split(',').map((model: string) => model.trim())
+    const newModels = settingData[SettingKeys.chatgpt_models]
+      .split(',')
+      .map((model: string) => model.trim())
     setModels(newModels)
   }, [chatList.length])
 
   const handleSubmit = useCallback(() => {
-    if (!apiKey) return
+    if (!apiKey) {
+      return toast.error('Please set your ChatGPT API Key first')
+    }
 
     addChat(askInput, apiBase, apiKey)
     setAskInput('')
@@ -170,7 +184,7 @@ const ChatList: React.FC<ChatListProps> = (props) => {
           onChange={handleChange}
         />
         <Button className='submit' btnType='primary' size='small' onClick={handleSubmit}>
-          submit
+          {t('common.submit')}
         </Button>
       </BottomBar>
     </Container>
