@@ -1,5 +1,13 @@
 # UPDATE LOG
 
+## v0.18.1
+
+Features:
+
+- Support create file when workspace is empty.
+
+- Improve ui display and layout.
+
 ## v0.17.0
 
 Features:
