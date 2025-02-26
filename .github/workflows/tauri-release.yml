@@ -50,7 +50,7 @@ jobs:
           echo VITE_FIREBASE_MESSAGINGSENDERID=${{ secrets.VITE_FIREBASE_MESSAGINGSENDERID }}  >> ./apps/desktop/.env
           echo VITE_FIREBASE_MEASUREMENTID=${{ secrets.VITE_FIREBASE_MEASUREMENTID }}  >> ./apps/desktop/.env
           echo VITE_UMENG_APPKEY=${{ secrets.VITE_UMENG_APPKEY }}  >> ./apps/desktop/.env
-          echo APTABASE_APPKEY=${{ secrets.APTABASE_APPKEY }}  >> ./apps/desktop/.env
+          echo VITE_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}  >> ./apps/desktop/.env
 
       - name: Update CHANGELOG
         id: changelog

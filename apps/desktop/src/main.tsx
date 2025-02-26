@@ -10,8 +10,15 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import 'remixicon/fonts/remixicon.css'
 import './normalize.css'
 import './atom.css'
+import * as Sentry from "@sentry/react";
+
+Sentry.init({
+  dsn: import.meta.env.VITE_SENTRY_DSN,
+  integrations: [],
+});
 
 enableMapSet()
+
 const queryClient = new QueryClient()
 
 const Main = () => {
