@@ -5535,6 +5535,7 @@ __metadata:
     "@markflowy/theme": "workspace:*"
     "@markflowy/types": "workspace:*"
     "@mui/material": "npm:6.1.6"
+    "@sentry/react": "npm:^9.2.0"
     "@tanstack/react-query": "npm:^5.59.16"
     "@tauri-apps/api": "npm:^2.1.1"
     "@tauri-apps/cli": "npm:^2.1.0"
@@ -8448,6 +8449,77 @@ __metadata:
   version: 4.24.3
   resolution: "@rollup/rollup-win32-x64-msvc@npm:4.24.3"
   conditions: os=win32 & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@sentry-internal/browser-utils@npm:9.2.0":
+  version: 9.2.0
+  resolution: "@sentry-internal/browser-utils@npm:9.2.0"
+  dependencies:
+    "@sentry/core": "npm:9.2.0"
+  checksum: 10/e503c6a4ee71ec78d108ed7bae845ab436b646fefe56e696cf88a051bb4e183da768feea17d53942912582a056b4bda51c6c9de4042784ad72cb3196fa9ecaaa
+  languageName: node
+  linkType: hard
+
+"@sentry-internal/feedback@npm:9.2.0":
+  version: 9.2.0
+  resolution: "@sentry-internal/feedback@npm:9.2.0"
+  dependencies:
+    "@sentry/core": "npm:9.2.0"
+  checksum: 10/a323298fb1c5b1ff35dce0c4e41ee2651bded91123e9d90a1137c5abdf2dcfb80cb884a84bb86887d11e2627b19595172f804ece23721d5cf6d1a80de1693022
+  languageName: node
+  linkType: hard
+
+"@sentry-internal/replay-canvas@npm:9.2.0":
+  version: 9.2.0
+  resolution: "@sentry-internal/replay-canvas@npm:9.2.0"
+  dependencies:
+    "@sentry-internal/replay": "npm:9.2.0"
+    "@sentry/core": "npm:9.2.0"
+  checksum: 10/fe12d25bde4973ed8b10cd07ce512ff231d1f05026f55332aff9964b4cf43c19abbe368e9284861fd9f01393288afbff08f65da9bf652719877b742a66fa87f0
+  languageName: node
+  linkType: hard
+
+"@sentry-internal/replay@npm:9.2.0":
+  version: 9.2.0
+  resolution: "@sentry-internal/replay@npm:9.2.0"
+  dependencies:
+    "@sentry-internal/browser-utils": "npm:9.2.0"
+    "@sentry/core": "npm:9.2.0"
+  checksum: 10/436833ca5c862796b6771be3412f59b7b2b0dabe07a5153f8865268386991243094e6640689466c2cfca9c79eaae9d6215a84e94414f3e5911d02c355598728e
+  languageName: node
+  linkType: hard
+
+"@sentry/browser@npm:9.2.0":
+  version: 9.2.0
+  resolution: "@sentry/browser@npm:9.2.0"
+  dependencies:
+    "@sentry-internal/browser-utils": "npm:9.2.0"
+    "@sentry-internal/feedback": "npm:9.2.0"
+    "@sentry-internal/replay": "npm:9.2.0"
+    "@sentry-internal/replay-canvas": "npm:9.2.0"
+    "@sentry/core": "npm:9.2.0"
+  checksum: 10/179404771203a07b368d1372b74590e1f265336727424044b3f2057ae3ea6eae526271b70b0aabaf223c7328a2067ee528387fc44c81c4d10d6cb807e8b8a62a
+  languageName: node
+  linkType: hard
+
+"@sentry/core@npm:9.2.0":
+  version: 9.2.0
+  resolution: "@sentry/core@npm:9.2.0"
+  checksum: 10/cdefd492af154e48bfc91f63be8d56502543d161b7b12882cc0fa676445718b7ec636e48a4227c154abbbd6aa41fa47eb62a600340d3fc729cebeed8e12c4ae1
+  languageName: node
+  linkType: hard
+
+"@sentry/react@npm:^9.2.0":
+  version: 9.2.0
+  resolution: "@sentry/react@npm:9.2.0"
+  dependencies:
+    "@sentry/browser": "npm:9.2.0"
+    "@sentry/core": "npm:9.2.0"
+    hoist-non-react-statics: "npm:^3.3.2"
+  peerDependencies:
+    react: ^16.14.0 || 17.x || 18.x || 19.x
+  checksum: 10/27aca6a9792f84fdfcccb632789557dae93207d80ab0a67b733f263206f1e40a458fe88323275bab642439c488ff28e5df66f4107e55043fda6bbf844c415d98
   languageName: node
   linkType: hard
 
