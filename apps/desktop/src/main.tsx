@@ -7,10 +7,10 @@ import { enableMapSet } from 'immer'
 import { BarLoader } from 'zens'
 import { lightTheme } from '@markflowy/theme'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import * as Sentry from "@sentry/react";
 import 'remixicon/fonts/remixicon.css'
 import './normalize.css'
 import './atom.css'
-import * as Sentry from "@sentry/react";
 
 Sentry.init({
   dsn: import.meta.env.VITE_SENTRY_DSN,

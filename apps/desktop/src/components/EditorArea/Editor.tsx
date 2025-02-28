@@ -31,6 +31,7 @@ import useEditorCounterStore from '@/stores/useEditorCounterStore'
 import { toast } from 'zens'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import html2canvas from 'html2canvas'
+import * as Sentry from '@sentry/react'
 
 interface EditorWrapperProps {
   active: boolean
@@ -149,7 +150,7 @@ function Editor(props: EditorProps) {
 
       try {
         if (!curFile.path) {
-          if (noFileSaveingRef.current === true)  {
+          if (noFileSaveingRef.current === true) {
             return
           }
 
@@ -408,6 +409,11 @@ function Editor(props: EditorProps) {
           useCommandEvent({ active })
         },
       ],
+      errorHandler: {
+        onError({ error }) {
+          Sentry.captureException(error)
+        },
+      },
     }),
     [content, delegate, setEditorCtx, id, active, settingData],
   )
