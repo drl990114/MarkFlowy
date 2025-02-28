@@ -1,4 +1,5 @@
-/// <reference types="vitest" />
+/// <reference types="vitest/config" />
+
 import react from '@vitejs/plugin-react'
 import { fileURLToPath, URL } from 'url'
 import { defineConfig } from 'vite'
@@ -20,8 +21,8 @@ export default defineConfig({
     }),
     svgr({
       svgrOptions: {
-        exportType: 'default'
-      }
+        exportType: 'default',
+      },
     }),
   ],
   build: {
@@ -30,5 +31,9 @@ export default defineConfig({
   },
   resolve: {
     alias: [{ find: '@', replacement: fileURLToPath(new URL('./src', import.meta.url)) }],
-  }
+  },
+  test: {
+    environment: 'happy-dom',
+    reporters: ['json'],
+  },
 })
