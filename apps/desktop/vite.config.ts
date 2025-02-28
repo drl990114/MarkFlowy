@@ -34,6 +34,6 @@ export default defineConfig({
   },
   test: {
     environment: 'happy-dom',
-    reporters: ['json'],
+    reporters: ['verbose'],
   },
 })
