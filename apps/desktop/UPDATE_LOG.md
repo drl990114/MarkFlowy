@@ -1,5 +1,15 @@
 # UPDATE LOG
 
+## v0.19.0
+
+Features:
+
+- Supplement error capture and reporting
+
+Fixs:
+
+- Fixed the issue where inlining HTML tags in the **Heading** node would result in errors.
+
 ## v0.18.1
 
 Features:
