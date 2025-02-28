@@ -86,26 +86,34 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: matrix.os == 'ubuntu-latest'
         with:
-          name: artifacts-${{ matrix.arch }}
+          name: artifacts-${{ matrix.target }}
           path: |
             ./target/${{ matrix.target }}/release/bundle/appimage/**.AppImage.*
             ./target/${{ matrix.target }}/release/bundle/deb/**.deb
 
-      - uses: actions/upload-artifact@v3
-        if: matrix.os == 'macos-latest'
+      - uses: actions/upload-artifact@v4
+        if: matrix.os == 'macos-latest' && matrix.arch == 'aarch64'
         with:
-          name: artifacts-${{ matrix.arch }}
+          name: aarch64artifacts-${{ matrix.target }}
           path: |
             ./target/${{ matrix.target }}/release/bundle/dmg/**.dmg
             ./target/${{ matrix.target }}/release/bundle/macos/**.app.*
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
+        if: matrix.os == 'macos-latest' && matrix.arch == 'x86_64'
+        with:
+          name: artifacts-${{ matrix.target }}
+          path: |
+            ./target/${{ matrix.target }}/release/bundle/dmg/**.dmg
+            ./target/${{ matrix.target }}/release/bundle/macos/**.app.*
+
+      - uses: actions/upload-artifact@v4
         if: matrix.os == 'windows-latest'
         with:
-          name: artifacts-${{ matrix.arch }}
+          name: artifacts-${{ matrix.target }}
           path: |
             ./target/${{ matrix.target }}/release/bundle/msi/**
 
@@ -119,16 +127,18 @@ jobs:
         run: echo "version=${GITHUB_REF:11}" >> $GITHUB_ENV
 
       - name: Download x86_64 artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: artifacts-x86_64
+          pattern: artifacts-*
           path: artifacts/x86_64
+          merge-multiple: true
 
       - name: Download aarch64 artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: artifacts-aarch64
+          pattern: aarch64artifacts-*
           path: artifacts/aarch64
+          merge-multiple: true
 
       - name: Rename artifacts
         run: |
