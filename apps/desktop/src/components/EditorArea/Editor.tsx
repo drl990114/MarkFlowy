@@ -410,8 +410,10 @@ function Editor(props: EditorProps) {
         },
       ],
       errorHandler: {
-        onError({ error }) {
-          Sentry.captureException(error)
+        onError(params) {
+          if (params.error) {
+            Sentry.captureException(params.error)
+          }
         },
       },
     }),
