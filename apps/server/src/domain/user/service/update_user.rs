@@ -1,29 +1,38 @@
+use super::Service;
+use crate::{domain::user::{entities, model::{self, User}}, utils::crypto};
+
+use async_graphql::Context;
+use axum::Extension;
 use chrono::Utc;
-
-use super::{Service, UpdateUserInput};
-use crate::domain::user::{entities, Error};
-
 impl Service {
     pub async fn update_user(
         &self,
-        input: UpdateUserInput,
+        ctx: &Context<'_>,
+        input: model::input::UpdateUserInput,
     ) -> Result<entities::User, crate::Error> {
-        let username_exists = self.check_username_exists(&self.db, &input.name).await?;
-        if username_exists {
-            return Err(Error::UsernameAlreadyExists.into());
-        }
+        let user = ctx.data::<Extension<User>>().unwrap();
 
-        let user_input = entities::User {
-            id: input.id,
-            name: input.name,
-            email: input.email,
-            password: input.password,
+        let mut new_user = entities::User {
+            id: user.id,
+            name: input.name.unwrap_or(user.name.clone()),
+            email: input.email.unwrap_or(user.email.clone()),
+            password: user.password.clone(),
+            created_at: user.created_at,
             updated_at: Utc::now(),
-            // FIXME
-            created_at: Utc::now(),
         };
 
-        let user = self.repo.update_user(&self.db, &user_input).await?;
+        if let Some(password) = input.password {
+            let hash = crypto::hash(password).await;
+
+            if let Err(e) = hash {
+                return Err(crate::Error::Internal(e.to_string()));
+            }
+
+            let hash = hash.unwrap();
+            new_user.password = hash;
+        }
+
+        let user = self.repo.update_user(&self.db, &new_user).await?;
 
         Ok(user)
     }

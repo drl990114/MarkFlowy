@@ -93,7 +93,9 @@ impl Config {
         // app
         let env = std::env::var(ENV_APP_ENV)
             .map_err(|_| env_not_found(ENV_APP_ENV))?
-            .parse::<Env>()?;
+            .parse::<String>().unwrap();
+
+        let env_val = Env::from_str(&env).unwrap();
         let base_url =
             std::env::var(ENV_APP_BASE_URL).map_err(|_| env_not_found(ENV_APP_BASE_URL))?;
 
@@ -124,7 +126,7 @@ impl Config {
         };
 
         let mut config = Self {
-            env,
+            env: env_val,
             base_url,
             schema_location,
             http,

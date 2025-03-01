@@ -1,10 +1,8 @@
-mod create_user;
-mod delete_user;
-mod find_all_users;
-mod find_user_by_id;
-mod find_user_by_name;
-mod find_user_by_email;
-mod update_user;
+mod create_theme;
+mod delete_theme;
+mod find_all_themes;
+mod find_theme_by_id;
+mod update_theme;
 
 #[derive(Debug, Clone)]
 pub struct Repository {}

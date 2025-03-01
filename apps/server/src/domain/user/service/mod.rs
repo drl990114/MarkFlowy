@@ -1,13 +1,13 @@
-mod check_username_exists;
+mod check_useremail_exists;
 mod create_user;
 mod delete_user;
-mod find_user;
+mod find_user_by_id;
+mod find_user_by_email;
 mod find_users;
 mod notify_user;
 mod update_user;
 
 use frunk::LabelledGeneric;
-use uuid::Uuid;
 
 use super::repository::Repository;
 use crate::{db::DB, driver::Mailer};
@@ -34,8 +34,7 @@ pub struct CreateUserInput {
 }
 
 #[derive(Debug, LabelledGeneric)]
-pub struct UpdateUserInput {
-    pub id: Uuid,
+pub struct UpdateSelfInput {
     pub name: String,
     pub email: String,
     pub password: String,

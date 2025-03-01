@@ -10,8 +10,14 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use validator::Validate;
 
-use crate::{domain::user::entities::User, route::AppState, utils::{crypto, jwt}};
+use crate::{context::ServerContext, domain::user::entities::User, route::AppState, utils::{crypto, jwt}};
 
+
+#[derive(Validate, Clone)]
+pub struct AppContext {
+    pub state: Arc<AppState>,
+    pub service: Arc<ServerContext>
+}
 
 #[derive(Debug, Serialize, Deserialize, Validate)]
 pub struct CreateUserDto {
@@ -22,11 +28,21 @@ pub struct CreateUserDto {
 }
 
 pub async fn create_user(
-    State(state): State<Arc<AppState>>,
+    State(app_context): State<AppContext>,
     Json(body): Json<CreateUserDto>,
 ) -> impl IntoResponse {
     if let Err(e) = body.validate() {
         return Err((StatusCode::BAD_REQUEST, e.to_string()));
+    }
+
+    let state = app_context.state.clone();
+
+    let email_exist = app_context.service.user_service.check_useremail_exist(body.email.as_str()).await;
+
+    match email_exist {
+        Ok(true) => return Err((StatusCode::NOT_FOUND, "Email has been registered".to_string())),
+        Ok(false) => (),
+        Err(e) => return Err((StatusCode::INTERNAL_SERVER_ERROR, e.to_string())),
     }
 
     let password = body.password.to_string();
@@ -52,7 +68,7 @@ pub async fn create_user(
             StatusCode::CREATED,
             Json(json!({ "status": "success", "data": user })),
         )),
-        Err(_) => return Err((StatusCode::NOT_FOUND, "Failed to create user".to_string())),
+        Err(e) => return Err((StatusCode::NOT_FOUND, e.to_string())),
     }
 }
 
@@ -64,7 +80,7 @@ pub struct LoginDto {
 }
 
 pub async fn login(
-    State(state): State<Arc<AppState>>,
+    State(app_context): State<AppContext>,
     Json(body): Json<LoginDto>,
 ) -> impl IntoResponse {
     if let Err(e) = body.validate() {
@@ -73,9 +89,15 @@ pub async fn login(
 
     let email = body.email.to_string();
 
-    let res = sqlx::query_as!(User, "SELECT * FROM user_ WHERE email = $1", email)
-        .fetch_one(&state.db)
-        .await;
+    let email_exist = app_context.service.user_service.check_useremail_exist(email.as_str()).await;
+
+    match email_exist {
+        Ok(true) => (),
+        Ok(false) => return Err((StatusCode::NOT_FOUND, "User with email does not exist".to_string())),
+        Err(e) => return Err((StatusCode::INTERNAL_SERVER_ERROR, e.to_string())),
+    }
+
+    let res = app_context.service.user_service.find_user_by_email(email.as_str()).await;
 
     match res {
         Ok(user) => {
