@@ -28,7 +28,7 @@ async-graphql-axum = "7.0.11"
 
 # Rest
 utoipa = { version = "4.2.0", features = ["axum_extras"] }
-utoipa-swagger-ui = { version = "6.0.0", features = ["axum"] }
+utoipa-swagger-ui = { version = "8.1.0", features = ["axum"] }
 
 # Database
 sqlx = { version = "0.8.2", features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono", "migrate"] }
