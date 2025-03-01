@@ -15,14 +15,12 @@ pub struct CreateUserInput {
 
 #[derive(InputObject, LabelledGeneric)]
 pub struct UpdateUserInput {
-    /// The ID of the User to modify.
-    pub id: Id,
     /// The email for the User.
-    pub email: String,
+    pub email: Option<String>,
     /// The name for the User.
-    pub name: String,
+    pub name: Option<String>,
     /// The full name for the User.
-    pub password: String,
+    pub password: Option<String>,
 }
 
 #[derive(InputObject, LabelledGeneric)]

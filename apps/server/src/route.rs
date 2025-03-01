@@ -1,12 +1,11 @@
 use std::{fs,env, sync::Arc};
 
 use async_graphql::{
-    extensions, http::{playground_source, GraphQLPlaygroundConfig}, EmptyMutation, EmptySubscription, Schema
+    extensions, http::{playground_source, GraphQLPlaygroundConfig}, EmptySubscription, Schema
 };
 use async_graphql_axum::{GraphQLRequest, GraphQLResponse};
-use std::convert::Infallible;
 use axum::{
-    extract::State, http::header::HeaderMap, middleware, response::{self, IntoResponse}, routing::{get, post}, Extension, Router
+    extract::State, middleware, response::{self, IntoResponse}, routing::{get, post}, Extension, Router
 };
 use axum::http::{
     header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE},
@@ -18,7 +17,7 @@ use utoipa_swagger_ui::SwaggerUi;
 use tower_http::{cors::CorsLayer, trace::TraceLayer};
 
 use crate::{
-    config::{self, Config}, context::ServerContext, db, domain::{health, meta, user::{self, model::User}}, driver::mailer::Mailer, route, schema::{AppSchema, Mutation, Query}, utils::jwt::auth, Error
+    config::Config, context::ServerContext, db, domain::{health, meta, theme, user::{self, handler::AppContext, model::User}}, driver::mailer::Mailer, route, schema::{AppSchema, Mutation, Query}, utils::jwt::auth, Error
 };
 
 pub struct AppState {
@@ -30,7 +29,6 @@ pub async fn graphql_handler(
     State(schema): State<AppSchema>,
     req: GraphQLRequest,
 ) -> GraphQLResponse {
-    println!("useruser: {:?}", user.id);
     let mut req = req.into_inner();
     req = req.data(user);
 
@@ -47,15 +45,17 @@ pub async fn app() -> Result<Router, Error> {
     let db = db::connect(&config.database).await?;
     db::migrate(&db.clone()).await?;
 
+    let mailer_service = Mailer::new();
     let health_service = Arc::new(health::Service::new());
     let meta_service = Arc::new(meta::Service::new(Arc::clone(&config)));
-    let mailer_service = Mailer::new();
     let user_service = Arc::new(user::Service::new(db.clone(), mailer_service));
+    let theme_service = Arc::new(theme::Service::new(db.clone()));
 
     let server_context = Arc::new(ServerContext {
-        user_service,
         meta_service,
-        health_service
+        health_service,
+        user_service,
+        theme_service
     });
 
     let schema = Schema::build(Query::default(), Mutation::default(), EmptySubscription)
@@ -97,19 +97,24 @@ pub async fn app() -> Result<Router, Error> {
         db: db.clone(),
     });
 
+    let app_context = AppContext {
+        state: app_state.clone(),
+        service: server_context.clone()
+    };
+
     let mut app = Router::new()
         .route("/graphql", post(route::graphql_handler).route_layer(middleware::from_fn_with_state(app_state.clone(), auth)),)
         .route("/health", get(health::resolver::health))
-        .route("/api/create_user", post(user::handler::create_user).with_state(app_state.clone()))
-        .route("/api/login",post(user::handler::login).with_state(app_state.clone()))
+        .route("/api/create_user", post(user::handler::create_user).with_state(app_context.clone()))
+        .route("/api/login",post(user::handler::login).with_state(app_context.clone()))
         .layer(TraceLayer::new_for_http())
         .layer(cors);
 
-    if config.env != config::Env::Production {
-        app = app
-            .route("/playground", get(route::graphql_playground))
-            .merge(SwaggerUi::new("/swagger").url("/api-doc/openapi.json", ApiDoc::openapi()));
-    }
+    println!("config.env: {:?}", config.env);
+    app = app
+        .route("/playground", get(route::graphql_playground))
+        .merge(SwaggerUi::new("/swagger").url("/api-doc/openapi.json", ApiDoc::openapi()));
+
     let app = app.with_state(schema);
 
     Ok(app)

@@ -9,11 +9,6 @@ impl Service {
         &self,
         input: CreateUserInput,
     ) -> Result<entities::User, crate::Error> {
-        let username_exists = self.check_username_exists(&self.db, &input.name).await?;
-        if username_exists {
-            return Err(Error::UsernameAlreadyExists.into());
-        }
-
         let user_input = entities::User {
             id: Ulid::new().into(),
             name: input.name,

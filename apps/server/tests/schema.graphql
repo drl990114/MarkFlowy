@@ -44,6 +44,8 @@ type Mutation {
 	createUser(input: CreateUserInput!): User!
 	updateUser(input: UpdateUserInput!): User!
 	deleteUser(id: UUID!): User!
+
+	createTheme(input: CreateThemeInput!): Theme!
 }
 
 type PageInfo {
