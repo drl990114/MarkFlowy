@@ -183,6 +183,9 @@
       "insertRowBefore": "Insertar fila encima",
       "deleteColumn": "Eliminar columna",
       "deleteRow": "Eliminar fila"
+    },
+    "codemirror": {
+      "searchInputPlaceholder": "Idioma de entrada"
     }
   }
 }

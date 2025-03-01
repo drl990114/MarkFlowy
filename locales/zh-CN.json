@@ -186,6 +186,9 @@
       "insertRowBefore": "向前插入行",
       "deleteColumn": "删除列",
       "deleteRow": "删除行"
+    },
+    "codemirror": {
+      "searchInputPlaceholder": "请输入目标语言"
     }
   }
 }
