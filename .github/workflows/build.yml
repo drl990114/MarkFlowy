@@ -55,6 +55,9 @@ jobs:
 
       - name: Build workspaces
         run: yarn build
+      
+      - name: Cargo build
+        run: cargo build --release
 
       - name: Install rust target
         run: rustup target add ${{ matrix.target }}
