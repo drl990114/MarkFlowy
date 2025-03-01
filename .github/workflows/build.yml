@@ -38,7 +38,7 @@ jobs:
     
       - name: Write env file
         run: |
-          echo ${{ secrets.SERVER_ENV }}  >> ./apps/server/.env
+          echo "$SERVER_ENV" > ./apps/server/.env
 
       - name: Install dependencies (ubuntu only)
         if: matrix.os == 'ubuntu-latest'
