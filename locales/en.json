@@ -187,6 +187,9 @@
       "insertRowBefore": "Insert row before",
       "deleteColumn": "Delete column",
       "deleteRow": "Delete row"
+    },
+    "codemirror": {
+      "searchInputPlaceholder": "Input language"
     }
   }
 }

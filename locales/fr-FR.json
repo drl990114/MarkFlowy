@@ -156,6 +156,9 @@
       "insertRowBefore": "Insérer une ligne avant",
       "deleteColumn": "Supprimer la colonne",
       "deleteRow": "Supprimer la ligne"
+    },
+    "codemirror": {
+      "searchInputPlaceholder": "Langue d'entrée"
     }
   }
 }
