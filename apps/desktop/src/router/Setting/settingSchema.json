@@ -112,38 +112,76 @@
   },
   "extensions": {
     "i18nKey": "settings.extensions.label",
-    "ChatGPT": {
-      "i18nKey": "settings.extensions.ChatGPT.label",
-      "ApiBase": {
-        "key": "extensions_chatgpt_apibase",
-        "type": "input",
-        "title": {
-          "i18nKey": "settings.extensions.ChatGPT.api_base.label"
-        },
-        "desc": {
-          "i18nKey": "settings.extensions.ChatGPT.api_base.desc"
-        }
-      },
-      "ApiKey": {
-        "key": "extensions_chatgpt_apikey",
-        "type": "input",
-        "title": {
-          "i18nKey": "settings.extensions.ChatGPT.api_key.label"
-        },
-        "desc": {
-          "i18nKey": "settings.extensions.ChatGPT.api_key.desc"
-        }
-      },
-      "models":{
-        "key":"extensions_chatgpt_models",
-        "type":"input",
-        "title":{
-          "i18nKey":"settings.extensions.ChatGPT.models.label"
-          },
-          "desc":{
-            "i18nKey":"settings.extensions.ChatGPT.models.desc"
+    "AI": {
+      "i18nKey": "settings.extensions.AI.label",
+      "children": [
+        {
+          "i18nKey": "settings.extensions.ChatGPT.label",
+          "ApiBase": {
+            "key": "extensions_chatgpt_apibase",
+            "type": "input",
+            "title": {
+              "i18nKey": "settings.extensions.ChatGPT.api_base.label"
+            },
+            "desc": {
+              "i18nKey": "settings.extensions.ChatGPT.api_base.desc"
             }
-      }
+          },
+          "ApiKey": {
+            "key": "extensions_chatgpt_apikey",
+            "type": "input",
+            "title": {
+              "i18nKey": "settings.extensions.ChatGPT.api_key.label"
+            },
+            "desc": {
+              "i18nKey": "settings.extensions.ChatGPT.api_key.desc"
+            }
+          },
+          "models": {
+            "key": "extensions_chatgpt_models",
+            "type": "input",
+            "title": {
+              "i18nKey": "settings.extensions.ChatGPT.models.label"
+            },
+            "desc": {
+              "i18nKey": "settings.extensions.ChatGPT.models.desc"
+            }
+          }
+        },
+        {
+          "i18nKey": "settings.extensions.DeepSeek.label",
+          "ApiBase": {
+            "key": "extensions_deepseek_apibase",
+            "type": "input",
+            "title": {
+              "i18nKey": "settings.extensions.DeepSeek.api_base.label"
+            },
+            "desc": {
+              "i18nKey": "settings.extensions.DeepSeek.api_base.desc"
+            }
+          },
+          "ApiKey": {
+            "key": "extensions_deepseek_apikey",
+            "type": "input",
+            "title": {
+              "i18nKey": "settings.extensions.DeepSeek.api_key.label"
+            },
+            "desc": {
+              "i18nKey": "settings.extensions.DeepSeek.api_key.desc"
+            }
+          },
+          "models": {
+            "key": "extensions_deepseek_models",
+            "type": "input",
+            "title": {
+              "i18nKey": "settings.extensions.DeepSeek.models.label"
+            },
+            "desc": {
+              "i18nKey": "settings.extensions.DeepSeek.models.desc"
+            }
+          }
+        }
+      ]
     }
   },
   "keyboard": {

@@ -14,10 +14,13 @@ import { PanelGroup, Panel, PanelResizeHandle, ImperativePanelHandle } from 'rea
 import { useCommandStore } from '@/stores'
 import useLayoutStore from '@/stores/useLayoutStore'
 import RightBar from '@/components/SideBar/RightBar'
+import { useRefreshAIProvidersModels } from '@/extensions/ai/aiProvidersService'
 
 export const RESIZE_PANEL_STORAGE_KEY = 'resize-panel'
 
 function Root() {
+  useRefreshAIProvidersModels()
+
   const { setLeftBarVisible, setRightBarVisible } = useLayoutStore()
   const leftPanelRef = useRef<ImperativePanelHandle>(null)
   const rightPanelRef = useRef<ImperativePanelHandle>(null)

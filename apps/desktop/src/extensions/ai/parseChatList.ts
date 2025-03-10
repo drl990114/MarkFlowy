@@ -1,6 +1,6 @@
-import type { ChatGPTHistory } from '@/extensions/chatgpt/useChatGPTStore'
+import type { AIChatHistory } from '@/extensions/ai/useAiChatStore'
 
-export function parseChatList(chatList: ChatGPTHistory[]): string {
+export function parseChatList(chatList: AIChatHistory[]): string {
   let markdownContent = ''
 
   chatList.forEach((chat) => {

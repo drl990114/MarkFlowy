@@ -21,13 +21,13 @@ const useAppTasksStore = create(
             updateTask(newTask.id, { status: PromiseStatus.Resolved })
             delay(() => {
               deleteTask(newTask.id)
-            }, 2000)
+            }, 5000)
           })
           .catch(() => {
             updateTask(newTask.id, { status: PromiseStatus.Rejected })
             delay(() => {
               deleteTask(newTask.id)
-            }, 2000)
+            }, 5000)
           })
 
         set((state) => {
@@ -64,7 +64,7 @@ type Task = {
 
 interface TasksStore {
   taskList: Task[]
-  addAppTask: (task: Omit<Task, 'id' | 'status'>) => Promise<any>
+  addAppTask: <T extends any>(task: Omit<Task, 'id' | 'status'>) => Promise<T>
   updateAppTask: (taskId: string, props: Partial<Task>) => void
   deleteAppTask: (taskId: string) => void
 }
