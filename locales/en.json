@@ -158,6 +158,9 @@
     },
     "extensions": {
       "label": "Extensions",
+      "AI": {
+        "label": "AI"
+      },
       "ChatGPT": {
         "label": "ChatGPT",
         "api_base": {
@@ -171,6 +174,21 @@
         "models":{
           "label": "Models",
           "desc":  "A model list separated by commas, default is \"gpt-3.5-turbo, gpt-4-32k, gpt-4\""
+        }
+      },
+      "DeepSeek": {
+        "label": "DeepSeek",
+        "api_base": {
+          "label": "API Base",
+          "desc": "API Base for DeepSeek."
+        },
+        "api_key": {
+          "label": "API Key",
+          "desc": "API key for DeepSeek."
+        },
+        "models":{
+          "label": "Models",
+          "desc":  "A model list separated by commas, default is \"\""
         }
       }
     }

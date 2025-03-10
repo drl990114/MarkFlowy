@@ -15,6 +15,14 @@ macro_rules! pub_struct {
   }
 }
 
+macro_rules! merge_options {
+    ($self:ident, $old:ident, $($field:ident),+) => {
+        $(
+            $self.$field = $old.$field.or($self.$field);
+        )+
+    }
+}
+
 pub_struct!(AppConf {
     theme: Option<String>,
     language: Option<String>,
@@ -25,6 +33,9 @@ pub_struct!(AppConf {
     extensions_chatgpt_apibase: Option<String>,
     extensions_chatgpt_apikey: Option<String>,
     extensions_chatgpt_models: Option<String>,
+    extensions_deepseek_apibase: Option<String>,
+    extensions_deepseek_apikey: Option<String>,
+    extensions_deepseek_models: Option<String>,
     autosave: Option<bool>,
     autosave_interval: Option<u32>,
 });
@@ -46,9 +57,14 @@ impl AppConf {
             editor_root_line_height: Some("1.6".to_string()),
             autosave: Some(false),
             autosave_interval: Some(2000),
-            extensions_chatgpt_apibase: Some("https://api.openai.com/v1/chat/completions".to_string()),
-            extensions_chatgpt_models: Some("gpt-3.5-turbo, gpt-4-32k, gpt-4".to_string()),
+            extensions_chatgpt_apibase: Some(
+                "https://api.openai.com/v1/chat/completions".to_string(),
+            ),
+            extensions_chatgpt_models: Some("gpt-3.5-turbo,gpt-4-32k,gpt-4".to_string()),
             extensions_chatgpt_apikey: Some("".to_string()),
+            extensions_deepseek_models: Some("deepseek-chat,deepseek-reasoner".to_string()),
+            extensions_deepseek_apibase: Some("".to_string()),
+            extensions_deepseek_apikey: Some("".to_string()),
         }
     }
 
@@ -62,39 +78,25 @@ impl AppConf {
      * Generally used to be compatible with the original config when versions are different.
      */
     pub fn merge_conf(mut self, oldconf: AppConf) -> Self {
-        if oldconf.theme.is_some() {
-            self.theme = oldconf.theme;
-        }
-        if oldconf.language.is_some() {
-            self.language = oldconf.language;
-        }
-        if oldconf.autosave.is_some() {
-            self.autosave = oldconf.autosave;
-        }
-        if oldconf.auto_update.is_some() {
-            self.auto_update = oldconf.auto_update;
-        }
-        if oldconf.editor_full_width.is_some() {
-            self.editor_full_width = oldconf.editor_full_width;
-        }
-        if oldconf.editor_root_font_size.is_some() {
-            self.editor_root_font_size = oldconf.editor_root_font_size;
-        }
-        if oldconf.editor_root_line_height.is_some() {
-            self.editor_root_line_height = oldconf.editor_root_line_height;
-        }
-        if oldconf.autosave_interval.is_some() {
-            self.autosave_interval = oldconf.autosave_interval;
-        }
-        if oldconf.extensions_chatgpt_apibase.is_some() {
-            self.extensions_chatgpt_apibase = oldconf.extensions_chatgpt_apibase;
-        }
-        if oldconf.extensions_chatgpt_apikey.is_some() {
-            self.extensions_chatgpt_apikey = oldconf.extensions_chatgpt_apikey;
-        }
-        if oldconf.extensions_chatgpt_models.is_some() {
-            self.extensions_chatgpt_models = oldconf.extensions_chatgpt_models;
-        }
+        merge_options!(
+            self,
+            oldconf,
+            theme,
+            language,
+            autosave,
+            auto_update,
+            editor_full_width,
+            editor_root_font_size,
+            editor_root_line_height,
+            autosave_interval,
+            extensions_chatgpt_apibase,
+            extensions_chatgpt_apikey,
+            extensions_chatgpt_models,
+            extensions_deepseek_models,
+            extensions_deepseek_apibase,
+            extensions_deepseek_apikey
+        );
+
         self.write()
     }
 

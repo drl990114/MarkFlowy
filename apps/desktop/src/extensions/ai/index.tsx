@@ -3,33 +3,33 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import ReactLoading from 'react-loading'
 import { parseChatList } from './parseChatList'
 import { BottomBar, Container, ListContainer } from './styles'
-import useChatGPTStore from './useChatGPTStore'
+import useAiChatStore from './useAiChatStore'
 import { useCommandStore } from '@/stores'
-import { SettingKeys } from '@/router/Setting/settingMap'
 import { RIGHTBARITEMKEYS } from '@/constants'
 import type { RightBarItem } from '@/components/SideBar'
 import type { RightNavItem } from '@/components/SideBar/SideBarHeader'
 import SideBarHeader from '@/components/SideBar/SideBarHeader'
 import useThemeStore from '@/stores/useThemeStore'
-import useAppSettingStore from '@/stores/useAppSettingStore'
 import { addNewMarkdownFileEdit } from '@/services/editor-file'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'zens'
+import { aiProviders, getCurrentAISettingData } from './aiProvidersService'
 
 const ChatList: React.FC<ChatListProps> = (props) => {
   const {
+    aiProvider,
+    aiProviderCurModel,
+    aiProviderModels,
     chatList,
-    curGptModelIndex,
-    gptModels,
-    setCurGptModelIndex,
     addChat,
     delChat,
-    setModels,
-  } = useChatGPTStore()
-  const { settingData } = useAppSettingStore()
+    setAiProvider,
+    setAiProviderCurModel
+  } = useAiChatStore()
   const { curTheme } = useThemeStore()
-  const apiBase = settingData[SettingKeys.chatgpt_url]
-  const apiKey = settingData[SettingKeys.chatgpt]
+  const aiSettingData = getCurrentAISettingData()
+  const apiBase = aiSettingData.apiBase
+  const apiKey = aiSettingData.apiKey
   const [askInput, setAskInput] = useState('')
   const listRef = useRef<HTMLDivElement>(null)
   const { t } = useTranslation()
@@ -38,32 +38,16 @@ const ChatList: React.FC<ChatListProps> = (props) => {
     if (listRef.current) {
       listRef.current.scrollTop = listRef.current.scrollHeight
     }
-
-    const newModels = settingData[SettingKeys.chatgpt_models]
-      .split(',')
-      .map((model: string) => model.trim())
-    setModels(newModels)
   }, [chatList.length])
 
   const handleSubmit = useCallback(() => {
     if (!apiKey) {
-      return toast.error('Please set your ChatGPT API Key first')
+      return toast.error('Please set your API Key first')
     }
 
     addChat(askInput, apiBase, apiKey)
     setAskInput('')
   }, [apiKey, addChat, askInput])
-
-  const handleKeydown: React.KeyboardEventHandler<HTMLInputElement> = useCallback(
-    (event) => {
-      if (!event.shiftKey && event.keyCode === 13) {
-        handleSubmit()
-        event.preventDefault()
-        return false
-      }
-    },
-    [handleSubmit],
-  )
 
   const exportChats = useCallback(() => {
     const content = parseChatList(chatList)
@@ -93,20 +77,33 @@ const ChatList: React.FC<ChatListProps> = (props) => {
       <SideBarHeader
         name={
           <Space>
-            ChatGPT
             <Menu
               menuButtonProps={{ size: 'small' }}
-              items={gptModels.map((model, index) => {
+              items={aiProviders.map((provider) => {
                 return {
-                  label: model,
-                  value: model,
+                  label: provider,
+                  value: provider,
                   handler: () => {
-                    setCurGptModelIndex(index)
+                    setAiProvider(provider)
                   },
                 }
               })}
             >
-              {gptModels[curGptModelIndex]} <i className='ri-arrow-drop-down-line'></i>
+              {aiProvider} <i className='ri-arrow-drop-down-line'></i>
+            </Menu>
+            <Menu
+              menuButtonProps={{ size: 'small' }}
+              items={aiProviderModels.map((model) => {
+                return {
+                  label: model,
+                  value: model,
+                  handler: () => {
+                    setAiProviderCurModel(model)
+                  },
+                }
+              })}
+            >
+              {aiProviderCurModel[aiProvider]} <i className='ri-arrow-drop-down-line'></i>
             </Menu>
           </Space>
         }
@@ -139,8 +136,8 @@ const ChatList: React.FC<ChatListProps> = (props) => {
                   </div>
                   <div className='answer item'>
                     <div className='item-title'>
-                      <i className='ri-openai-fill item-icon' />
-                      <span>ChatGPT</span>
+                      <i className='ri-chat-smile-ai-line item-icon' />
+                      <span>AI</span>
                     </div>
                     {chat.status === 'pending' ? (
                       <ReactLoading
@@ -179,7 +176,6 @@ const ChatList: React.FC<ChatListProps> = (props) => {
           className='input'
           value={askInput}
           placeholder='input question'
-          onKeyDown={handleKeydown}
           onPressEnter={handleSubmit}
           onChange={handleChange}
         />
@@ -195,11 +191,11 @@ interface ChatListProps {
   className?: string
 }
 
-const ChatGPT = {
-  title: RIGHTBARITEMKEYS.ChatGPT,
-  key: RIGHTBARITEMKEYS.ChatGPT,
-  icon: <i className='ri-openai-fill' />,
+const AI = {
+  title: RIGHTBARITEMKEYS.AI,
+  key: RIGHTBARITEMKEYS.AI,
+  icon: <i className="ri-chat-smile-ai-line" />,
   components: <ChatList />,
 } as RightBarItem
 
-export default ChatGPT
+export default AI

@@ -31,7 +31,7 @@ Currently, MarkFlowy is still in the alpha phase,This means there may be incompa
 
 ## Features
 
-- **Built-in ChatGpt**. Currently supports one-click export of conversations、translate markdown articles and et article abstract, making chatgpt your smart assistant.
+- **Built-in AI**. Currently, it supports one click export of conversations, translation of articles to any language, and obtaining article abstracts. It also supports large models such as `DeepSeek` and `Chatgpt` to make them your intelligent assistants.
 - **Super lightweight**. The MarkFlowy is based on tauri and has a volume of less than 10MB and better performance.
 - **High availability**. MarkFlowy uses the remirror editor, which not only provides high scalability, but also has a great editing experience. And, MarkFlowy supports multiple editing modes, such as `source code`, `wysiwyg`.
 - **Custom Theme**. MarkFlowy supports custom themes, and you can also share your themes with others.

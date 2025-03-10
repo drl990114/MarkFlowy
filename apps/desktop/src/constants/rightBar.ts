@@ -1,6 +1,6 @@
 enum RIGHTBARITEMKEYS {
   Explorer = 'Explorer',
-  ChatGPT = 'ChatGPT',
+  AI = 'AI',
   BookMarks = 'Bookmarks',
   TableOfContent = 'Table Of Content',
   Search = 'Search'

@@ -6,21 +6,21 @@ import useBookMarksStore from '@/extensions/bookmarks/useBookMarksStore'
 import { showContextMenu } from '../UI/ContextMenu'
 import bus from '@/helper/eventBus'
 import { useTranslation } from 'react-i18next'
-import useChatGPTStore from '@/extensions/chatgpt/useChatGPTStore'
+import useAiChatStore from '@/extensions/ai/useAiChatStore'
 import useAppSettingStore from '@/stores/useAppSettingStore'
-import { toast } from 'zens'
 import useAppTasksStore from '@/stores/useTasksStore'
 import NiceModal from '@ebay/nice-modal-react'
 import type { InputConfirmModalProps } from '../Modal'
 import { MODAL_INPUT_ID } from '../Modal'
 import { addNewMarkdownFileEdit } from '@/services/editor-file'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
+import { getCurrentAISettingData } from '@/extensions/ai/aiProvidersService'
 
 export const EditorAreaHeader = memo(() => {
   const { activeId, getEditorDelegate, getEditorContent } = useEditorStore()
   const { editorViewTypeMap } = useEditorViewTypeStore()
   const { execute } = useCommandStore()
-  const { getPostSummary, getPostTranslate } = useChatGPTStore()
+  const { getPostSummary, getPostTranslate } = useAiChatStore()
   const { settingData } = useAppSettingStore()
   const { addAppTask } = useAppTasksStore()
   const { t } = useTranslation()
@@ -30,26 +30,19 @@ export const EditorAreaHeader = memo(() => {
 
   const fetchCurFileSummary = useCallback(async () => {
     const content = getEditorContent(curFile?.id || '')
-    const res = await addAppTask({
-      title: 'ChatGPT: Retrieving article abstract',
-      promise: getPostSummary(
-        content || '',
-        settingData.extensions_chatgpt_apibase,
-        settingData.extensions_chatgpt_apikey,
-      ),
+    const aiSettingData = getCurrentAISettingData()
+    const res = await addAppTask<ReturnType<typeof getPostSummary>>({
+      title: 'AI: Retrieving article abstract',
+      promise: getPostSummary(content || '', aiSettingData.apiBase, aiSettingData.apiKey),
     })
-    if (res.status === 'done') {
-      addNewMarkdownFileEdit({
-        fileName: 'summary.md',
-        content: `
+    addNewMarkdownFileEdit({
+      fileName: 'summary.md',
+      content: `
 # Summary
 
-${res.result}
-      `,
-      })
-    } else {
-      if (res.status === 'error') toast.error(res.message)
-    }
+${res}
+    `,
+    })
   }, [
     addAppTask,
     curFile?.id,
@@ -61,24 +54,22 @@ ${res.result}
   const fetchCurFileTranslate = useCallback(
     async (targetLang: string) => {
       const content = getEditorContent(curFile?.id || '')
+      const aiSettingData = getCurrentAISettingData()
+
       const res = await addAppTask({
-        title: 'ChatGPT: Translating article',
+        title: 'AI: Translating article',
         promise: getPostTranslate(
           content || '',
-          settingData.extensions_chatgpt_apibase,
-          settingData.extensions_chatgpt_apikey,
+          aiSettingData.apiBase,
+          aiSettingData.apiKey,
           targetLang,
         ),
       })
 
-      if (res.status === 'done') {
-        addNewMarkdownFileEdit({
-          fileName: `translate-${targetLang}.md`,
-          content: `${res.result}`,
-        })
-      } else {
-        if (res.status === 'error') toast.error(res.message)
-      }
+      addNewMarkdownFileEdit({
+        fileName: `translate-${targetLang}.md`,
+        content: `${res}`,
+      })
     },
     [
       addAppTask,
@@ -94,6 +85,8 @@ ${res.result}
     if (rect === undefined) return
     const { findMark } = useBookMarksStore.getState()
     const curBookMark = findMark(curFile?.path || '')
+
+    const { aiProvider } = useAiChatStore.getState()
 
     showContextMenu({
       x: rect.x + rect.width,
@@ -112,8 +105,8 @@ ${res.result}
           },
         },
         {
-          label: t('settings.extensions.ChatGPT.label'),
-          value: 'chatgpt',
+          label: `AI(${aiProvider})`,
+          value: 'AI',
           children: [
             {
               label: t('action.summary'),
