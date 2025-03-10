@@ -13,8 +13,6 @@ import { persist, createJSONStorage } from 'zustand/middleware'
 const useAiChatStore = create<AIStore>()(
   persist(
     (set, get) => ({
-      curGptModelIndex: 0,
-
       aiProvider: 'openai' as const,
       aiProviderModels: defaultAiProviderModelsMap['openai'],
       aiProviderCurModel: aiProviders.reduce(
@@ -27,8 +25,6 @@ const useAiChatStore = create<AIStore>()(
         {} as AIStore['aiProviderCurModel'],
       ),
       aiProviderModelsMap: cloneDeep(defaultAiProviderModelsMap),
-
-      gptModels: ['gpt-3.5-turbo', 'gpt-4-32k', 'gpt-4'],
 
       chatList: [],
 
@@ -213,8 +209,6 @@ interface AIStore {
   aiProviderModelsMap: Record<AIProviders, string[]>
   aiProviderCurModel: Record<AIProviders, string>
   chatList: AIChatHistory[]
-  gptModels: string[]
-  curGptModelIndex: number
   setChatStatus: (id: string, status: ChatStatus) => void
   addChat: (question: string, url: string, apiKey: string) => AIChatHistory
   getPostSummary: (text: string, url: string, apiKey: string) => Promise<string>
