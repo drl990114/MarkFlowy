@@ -64,6 +64,14 @@ You can read [CONTRIBUTING](./Community/CONTRIBUTING.md) to know how to start th
 
 MarkFlowy is completely and permanently open source, if you want to support MarkFlowy, you can `star` this project. This will give me great support and help, love you.
 
+In addition, you can sponsor me through WeChat or Alipay, which will greatly encourage me. And it will also be used for the subsequent development of the project, such as expenses for servers, domains, etc
+
+[Sponsor](https://drl990114.github.io/sponsor)
+
+| WeChat appreciates | Alipay appreciates |
+| :-: | :-: |
+| <img src="https://drl990114.github.io/images/wxpay.png" alt="WeChat QRcode" width=200> <br><small>Let's have a bottle of wine~</small> | <img src="https://drl990114.github.io/images/alipay.png" alt="Wechat QRcode" width=200> <br><small>Have a cup of coffee~</small> |
+
 ## Thanks
 
 - <a href="https://github.com/tauri-apps/tauri" target="_blank">Tauri</a> - A framework for building cross-platform applications that provides MarkFlowy with a solid foundation.
