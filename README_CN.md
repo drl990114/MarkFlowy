@@ -64,6 +64,14 @@
 
 MarkFlowy 是完全永久开源的，如果你想支持 MarkFlowy，你可以`star`这个项目。这会给我们很大的支持和帮助。
 
+另外你还可以通过微信或支付宝对我进行赞助，这会给我极大地鼓励。并且也会用于项目后续的发展，如服务器、域名等支出。
+
+[赞助列表](https://drl990114.github.io/sponsor)
+
+| 微信赞助 | 支付宝赞助 |
+| :-: | :-: |
+| <img src="https://drl990114.github.io/images/wxpay.png" alt="WeChat QRcode" width=200> <br><small>来瓶酒~</small> | <img src="https://drl990114.github.io/images/alipay.png" alt="Wechat QRcode" width=200> <br><small>来杯咖啡~</small> |
+
 ## 感谢
 
 - <a href="https://github.com/tauri-apps/tauri" target="_blank">Tauri</a> - 一个用于构建跨平台应用程序的框架，为 MarkFlowy 提供了可靠的基础。
