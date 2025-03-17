@@ -72,6 +72,13 @@ In addition, you can sponsor me through WeChat or Alipay, which will greatly enc
 | :-: | :-: |
 | <img src="https://drl990114.github.io/images/wxpay.png" alt="WeChat QRcode" width=200> <br><small>Let's have a bottle of wine~</small> | <img src="https://drl990114.github.io/images/alipay.png" alt="Wechat QRcode" width=200> <br><small>Have a cup of coffee~</small> |
 
+## Contributors
+
+The development of **MarkFlowy** cannot be separated from these contributors. They have contributed a lot of abilities to **MarkFlowy**. Meanwhile, welcome to follow them! ❤️
+
+<!-- readme: contributors -start -->
+<!-- readme: contributors -end -->
+
 ## Thanks
 
 - <a href="https://github.com/tauri-apps/tauri" target="_blank">Tauri</a> - A framework for building cross-platform applications that provides MarkFlowy with a solid foundation.
