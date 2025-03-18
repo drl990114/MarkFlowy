@@ -1,5 +1,29 @@
 # UPDATE LOG
 
+## v0.20.0
+
+Features:
+
+- Support DeepSeek and Ollama AI providers.
+
+- Support Mermaid diagram node.
+
+Fixs:
+
+- Fixed the issue where the content of the HTML Inline node may be incomplete during parsing.
+
+---
+
+特性：
+
+- 支持 DeepSeek 和 Ollama AI 服务商。
+
+- 支持 Mermaid 图表节点。
+
+修复：
+
+- 修复解析 HTML 内联节点时内容可能不完整的问题。
+
 ## v0.19.0
 
 Features:
