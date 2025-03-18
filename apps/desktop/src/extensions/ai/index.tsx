@@ -12,7 +12,6 @@ import SideBarHeader from '@/components/SideBar/SideBarHeader'
 import useThemeStore from '@/stores/useThemeStore'
 import { addNewMarkdownFileEdit } from '@/services/editor-file'
 import { useTranslation } from 'react-i18next'
-import { toast } from 'zens'
 import { aiProviders, getCurrentAISettingData } from './aiProvidersService'
 
 const ChatList: React.FC<ChatListProps> = (props) => {
@@ -41,9 +40,9 @@ const ChatList: React.FC<ChatListProps> = (props) => {
   }, [chatList.length])
 
   const handleSubmit = useCallback(() => {
-    if (!apiKey) {
-      return toast.error('Please set your API Key first')
-    }
+    // if (!apiKey) {
+    //   return toast.error('Please set your API Key first')
+    // }
 
     addChat(askInput, apiBase, apiKey)
     setAskInput('')

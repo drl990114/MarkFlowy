@@ -88,6 +88,32 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@ai-sdk/provider-utils@npm:^2.0.0":
+  version: 2.1.13
+  resolution: "@ai-sdk/provider-utils@npm:2.1.13"
+  dependencies:
+    "@ai-sdk/provider": "npm:1.0.11"
+    eventsource-parser: "npm:^3.0.0"
+    nanoid: "npm:^3.3.8"
+    secure-json-parse: "npm:^2.7.0"
+  peerDependencies:
+    zod: ^3.0.0
+  peerDependenciesMeta:
+    zod:
+      optional: true
+  checksum: 10/dd805ebb8e98563636406964d1b1a1f440e5a89ed22e2932b223186ccf2734b212ffa3d91cd2e38ef368ef08348c52817ebe39001bcdbe371da577a5af05de80
+  languageName: node
+  linkType: hard
+
+"@ai-sdk/provider@npm:1.0.11, @ai-sdk/provider@npm:^1.0.0":
+  version: 1.0.11
+  resolution: "@ai-sdk/provider@npm:1.0.11"
+  dependencies:
+    json-schema: "npm:^0.4.0"
+  checksum: 10/f502a01920a307a80f226d0b4e2fa04ad4d63273cbc4bb975822c3b0515bf8cab1f9aa097496f4983c72754aa2d6253125ff18bd0360a5804efdebe2f2ae79c7
+  languageName: node
+  linkType: hard
+
 "@ai-sdk/provider@npm:1.0.9":
   version: 1.0.9
   resolution: "@ai-sdk/provider@npm:1.0.9"
@@ -5569,6 +5595,7 @@ __metadata:
     jsx-dom-cjs: "npm:^8.1.5"
     lodash: "npm:^4.17.21"
     nanoid: "npm:^5.0.9"
+    ollama-ai-provider: "npm:^1.2.0"
     react: "npm:^18.3.1"
     react-arborist: "npm:^3.4.0"
     react-dom: "npm:^18.3.1"
@@ -18362,6 +18389,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"ollama-ai-provider@npm:^1.2.0":
+  version: 1.2.0
+  resolution: "ollama-ai-provider@npm:1.2.0"
+  dependencies:
+    "@ai-sdk/provider": "npm:^1.0.0"
+    "@ai-sdk/provider-utils": "npm:^2.0.0"
+    partial-json: "npm:0.1.7"
+  peerDependencies:
+    zod: ^3.0.0
+  peerDependenciesMeta:
+    zod:
+      optional: true
+  checksum: 10/bee535c484d74a884e786939eaf559471d6544f9a6a8078627ea479bea7fe4ba4af1b474dcaa2182661c1586019264cfd3b8069176bfe269787f879781bdd429
+  languageName: node
+  linkType: hard
+
 "once@npm:^1.4.0":
   version: 1.4.0
   resolution: "once@npm:1.4.0"
@@ -18631,6 +18674,13 @@ __metadata:
   dependencies:
     entities: "npm:^4.5.0"
   checksum: 10/fd1a8ad1540d871e1ad6ca9bf5b67e30280886f1ce4a28052c0cb885723aa984d8cb1ec3da998349a6146960c8a84aa87b1a42600eb3b94495c7303476f2f88e
+  languageName: node
+  linkType: hard
+
+"partial-json@npm:0.1.7":
+  version: 0.1.7
+  resolution: "partial-json@npm:0.1.7"
+  checksum: 10/6fb8d305638e4747fccfc0649b8a8de99314bfafcc4e3136a3a27c0632857c40b62e6e6bb5f17af00472387393f1d8a58a7865242ca20382af31b593a7bb1f89
   languageName: node
   linkType: hard
 

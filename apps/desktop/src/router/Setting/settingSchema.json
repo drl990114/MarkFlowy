@@ -180,6 +180,29 @@
               "i18nKey": "settings.extensions.DeepSeek.models.desc"
             }
           }
+        },
+        {
+          "i18nKey": "settings.extensions.Ollama.label",
+          "ApiBase": {
+            "key": "extensions_ollama_apibase",
+            "type": "input",
+            "title": {
+              "i18nKey": "settings.extensions.Ollama.api_base.label"
+            },
+            "desc": {
+              "i18nKey": "settings.extensions.Ollama.api_base.desc"
+            }
+          },
+          "models": {
+            "key": "extensions_ollama_models",
+            "type": "input",
+            "title": {
+              "i18nKey": "settings.extensions.Ollama.models.label"
+            },
+            "desc": {
+              "i18nKey": "settings.extensions.Ollama.models.desc"
+            }
+          }
         }
       ]
     }

@@ -1,6 +1,7 @@
 import { generateText } from 'ai'
 import { createOpenAI } from '@ai-sdk/openai'
 import { createDeepSeek } from '@ai-sdk/deepseek'
+import { createOllama } from 'ollama-ai-provider'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import useAiChatStore from './useAiChatStore'
 import { useEffect } from 'react'
@@ -19,7 +20,6 @@ export type AIProviders = AIGenerateTextParams['sdkProvider']
 export const generateTextHandlerMap = {
   deepseek: {
     generateText: async (params: AIGenerateTextParams) => {
-      console.log('params', params)
       const deepseek = createDeepSeek({
         baseURL: params.url || undefined,
         apiKey: params.apiKey,
@@ -35,7 +35,6 @@ export const generateTextHandlerMap = {
   },
   openai: {
     generateText: async (params: AIGenerateTextParams) => {
-      console.log('params', params)
       const openai = createOpenAI({
         baseURL: params.url || undefined,
         apiKey: params.apiKey,
@@ -43,6 +42,20 @@ export const generateTextHandlerMap = {
 
       const { text } = await generateText({
         model: openai(params.model),
+        prompt: params.text,
+      })
+
+      return text
+    },
+  },
+  ollama: {
+    generateText: async (params: AIGenerateTextParams) => {
+      const ollama = createOllama({
+        baseURL: params.url || undefined,
+      })
+
+      const { text } = await generateText({
+        model: ollama(params.model),
         prompt: params.text,
       })
 
@@ -58,9 +71,17 @@ export const aiProviders = Object.keys(
 export const defaultAiProviderModelsMap = {
   openai: ['gpt-3.5-turbo', 'gpt-4-32k', 'gpt-4'],
   deepseek: ['deepseek-chat'],
+  ollama: ['llama3.3'],
 }
 
-export const aiProviderSettingKeysMap = {
+export const aiProviderSettingKeysMap: Record<
+  AIProviders,
+  {
+    apibase: string
+    models: string
+    apikey?: string
+  }
+> = {
   openai: {
     apibase: 'extensions_chatgpt_apibase',
     models: 'extensions_chatgpt_models',
@@ -70,6 +91,10 @@ export const aiProviderSettingKeysMap = {
     apibase: 'extensions_deepseek_apibase',
     models: 'extensions_deepseek_models',
     apikey: 'extensions_deepseek_apikey',
+  },
+  ollama: {
+    apibase: 'extensions_ollama_apibase',
+    models: 'extensions_ollama_models',
   },
 }
 
@@ -81,7 +106,7 @@ export const getCurrentAISettingData = () => {
   return {
     apiBase: settingData[aiProviderSettings.apibase],
     models: settingData[aiProviderSettings.models],
-    apiKey: settingData[aiProviderSettings.apikey],
+    apiKey: aiProviderSettings.apikey ? settingData[aiProviderSettings.apikey] : '',
   }
 }
 
@@ -91,16 +116,14 @@ export const useRefreshAIProvidersModels = () => {
 
   useEffect(() => {
     const res = {} as Record<AIProviders, string[]>
-  
+
     aiProviders.forEach((provider) => {
       const models = settingData[aiProviderSettingKeysMap[provider].models]
         .split(',')
         .map((model: string) => model.trim())
       res[provider] = models
     })
-  
+
     setAiProviderModelsMap(res)
-
-
   }, [settingData])
 }
