@@ -36,6 +36,8 @@ pub_struct!(AppConf {
     extensions_deepseek_apibase: Option<String>,
     extensions_deepseek_apikey: Option<String>,
     extensions_deepseek_models: Option<String>,
+    extensions_ollama_apibase: Option<String>,
+    extensions_ollama_models: Option<String>,
     autosave: Option<bool>,
     autosave_interval: Option<u32>,
 });
@@ -65,6 +67,8 @@ impl AppConf {
             extensions_deepseek_models: Some("deepseek-chat,deepseek-reasoner".to_string()),
             extensions_deepseek_apibase: Some("".to_string()),
             extensions_deepseek_apikey: Some("".to_string()),
+            extensions_ollama_models: Some("llama3.3".to_string()),
+            extensions_ollama_apibase: Some("".to_string()),
         }
     }
 
@@ -94,7 +98,9 @@ impl AppConf {
             extensions_chatgpt_models,
             extensions_deepseek_models,
             extensions_deepseek_apibase,
-            extensions_deepseek_apikey
+            extensions_deepseek_apikey,
+            extensions_ollama_models,
+            extensions_ollama_apibase
         );
 
         self.write()

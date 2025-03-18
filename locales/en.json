@@ -190,6 +190,17 @@
           "label": "Models",
           "desc":  "A model list separated by commas, default is \"\""
         }
+      },
+      "Ollama": {
+        "label": "Ollama",
+        "api_base": {
+          "label": "API Base",
+          "desc": "API Base for Ollama."
+        },
+        "models":{
+          "label": "Models",
+          "desc":  "A model list separated by commas, default is \"\""
+        }
       }
     }
   },
