@@ -66,6 +66,7 @@ const Container = styled.div`
   .arrow-icon {
     display: inline-block;
     font-size: 1.4rem;
+    line-height: normal;
 
     &__down {
       transform: rotate(90deg);

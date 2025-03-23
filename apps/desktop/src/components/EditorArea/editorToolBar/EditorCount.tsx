@@ -8,8 +8,8 @@ const Container = styled.div`
   bottom: 0;
   padding: 8px 12px 8px 8px;
   z-index: 2;
-  opacity: 0.3;
-  font-size: 0.9rem;
+  opacity: 0.5;
+  font-size: 0.85rem;
   user-select: none;
   box-sizing: border-box;
   cursor: default;

@@ -2,18 +2,23 @@ import useAppTasksStore from '@/stores/useTasksStore'
 import { memo } from 'react'
 import styled from 'styled-components'
 import { PromiseStatus } from '@/types/global.d'
+import { Loading } from 'zens'
 
 export const TaskList = memo(() => {
   const { taskList } = useAppTasksStore()
 
   const iconMap = {
-    [PromiseStatus.Pending]: (
-      <RotateIcon>
-        <i className='ri-loader-4-line' />
-      </RotateIcon>
+    [PromiseStatus.Pending]: <Loading size={12} />,
+    [PromiseStatus.Resolved]: (
+      <TaskIcon>
+        <i className='ri-check-fill' />
+      </TaskIcon>
     ),
-    [PromiseStatus.Resolved]: <TaskIcon><i className='ri-check-fill' /></TaskIcon>,
-    [PromiseStatus.Rejected]: <TaskIcon><i className='ri-error-warning-line' /></TaskIcon>,
+    [PromiseStatus.Rejected]: (
+      <TaskIcon>
+        <i className='ri-error-warning-line' />
+      </TaskIcon>
+    ),
   }
 
   if (taskList.length === 0) {
@@ -24,7 +29,7 @@ export const TaskList = memo(() => {
 
   return (
     <Container>
-      {recentTask.title}
+      <Title>{recentTask.title}</Title>
       {iconMap[recentTask.status]}
     </Container>
   )
@@ -33,20 +38,14 @@ export const TaskList = memo(() => {
 const Container = styled.div`
   display: flex;
   align-items: center;
-  font-size: ${({ theme }) => theme.fontXs};
   color: ${({ theme }) => theme.labelFontColor};
-  padding: 0 ${({ theme }) => theme.spaceBase};
 `
 
 const TaskIcon = styled.span`
-  margin-left: ${({ theme }) => theme.spaceXs};
   padding: 0;
   font-size: ${({ theme }) => theme.fontH6};
 `
 
-const RotateIcon = styled.span`
-  margin-left: ${({ theme }) => theme.spaceXs};
-  padding: 0;
-  font-size: ${({ theme }) => theme.fontH6};
-  animation: swirl 1s infinite linear;
+const Title = styled.span`
+  margin-right: ${({ theme }) => theme.spaceXs};
 `
