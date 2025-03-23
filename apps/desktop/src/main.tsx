@@ -4,7 +4,7 @@ import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import App from './App'
 import { enableMapSet } from 'immer'
-import { BarLoader } from 'zens'
+import { Spinners } from 'zens'
 import { lightTheme } from '@markflowy/theme'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import * as Sentry from "@sentry/react";
@@ -34,7 +34,7 @@ const Main = () => {
             justifyContent: 'center',
           }}
         >
-          <BarLoader color={lightTheme.styledConstants.accentColor} width={200} />
+          <Spinners.BarLoader color={lightTheme.styledConstants.accentColor} width={200} />
         </div>
       }
     >
