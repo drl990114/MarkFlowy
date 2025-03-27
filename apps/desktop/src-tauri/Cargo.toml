@@ -16,7 +16,7 @@ crate-type = [
 ]
 
 [build-dependencies.tauri-build]
-version = "2.0.3"
+version = "2.1.0"
 features = []
 
 [dependencies]
@@ -24,14 +24,14 @@ serde_json = "1.0"
 anyhow = "1.0.86"
 dark-light = "1.1.1"
 log = "0.4.21"
-tauri-plugin-updater = "2.0.2"
-tauri-plugin-http = "2.0.3"
-tauri-plugin-window-state = "2.0.2"
-tauri-plugin-store = "2.1.0"
-tauri-plugin-os = "2.0.1"
-tauri-plugin-shell = "2.0.2"
-tauri-plugin-dialog = "2.0.3"
-tauri-plugin-clipboard-manager = "2.0.2"
+tauri-plugin-updater = "2.6.1"
+tauri-plugin-http = "2.4.2"
+tauri-plugin-window-state = "2.2.1"
+tauri-plugin-store = "2.2.0"
+tauri-plugin-os = "2.2.1"
+tauri-plugin-shell = "2.2.0"
+tauri-plugin-dialog = "2.2.0"
+tauri-plugin-clipboard-manager = "2.2.2"
 regex = "1.10.4"
 lazy_static = "1.5.0"
 tracing = "0.1.40"
@@ -41,7 +41,7 @@ dotenv = "0.15.0"
 trash = "5.2.2"
 
 [dependencies.tauri-plugin-notification]
-version = "2.0.1"
+version = "2.2.2"
 features = ["windows7-compat"]
 
 [dependencies.serde]
@@ -49,7 +49,7 @@ version = "1.0"
 features = ["derive"]
 
 [dependencies.tauri]
-version = "2.1.1"
+version = "2.4.0"
 features = [
     "protocol-asset",
     "devtools",
