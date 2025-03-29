@@ -8,7 +8,7 @@ export const Container = styled.div`
   #sidebar {
     display: flex;
     flex-direction: column;
-    width: 250px;
+    width: 220px;
     height: 100%;
     overflow: auto;
     border-right: 1px solid ${(props) => props.theme.borderColor};
@@ -32,10 +32,10 @@ export const Container = styled.div`
     background-color: transparent;
     overflow: hidden;
     border: none;
+    padding-right: 1rem;
   }
 
   #sidebar > * {
-    padding-left: 1rem;
     padding-right: 1rem;
   }
 

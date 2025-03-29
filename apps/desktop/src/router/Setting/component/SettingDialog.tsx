@@ -12,6 +12,22 @@ const SettingDialogWrapper = styled(Dialog)`
   max-height: 700px;
   overflow: hidden;
   background-color: ${(props) => props.theme.bgColor};
+  transition: all 0.3s ease-in-out;
+
+  .dialog-content {
+    height: calc(100% - 60px);
+    overflow-y: auto;
+    padding: 0 24px;
+    
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background-color: ${(props) => props.theme.borderColor};
+      border-radius: 3px;
+    }
+  }
 `
 
 export const SettingDialog = memo(() => {
@@ -31,7 +47,7 @@ export const SettingDialog = memo(() => {
 
   return (
     <SettingDialogWrapper
-      width='80vw'
+      width='70vw'
       title={t('settings.label')}
       open={open}
       onClose={handleClose}
