@@ -172,9 +172,9 @@
           "label": "API Key",
           "desc": "API key for ChatGPT."
         },
-        "models":{
+        "models": {
           "label": "Models",
-          "desc":  "A model list separated by commas, default is \"gpt-3.5-turbo, gpt-4-32k, gpt-4\""
+          "desc": "A model list separated by commas, default is \"gpt-3.5-turbo, gpt-4-32k, gpt-4\""
         }
       },
       "DeepSeek": {
@@ -187,9 +187,9 @@
           "label": "API Key",
           "desc": "API key for DeepSeek."
         },
-        "models":{
+        "models": {
           "label": "Models",
-          "desc":  "A model list separated by commas, default is \"\""
+          "desc": "A model list separated by commas, default is \"\""
         }
       },
       "Ollama": {
@@ -198,9 +198,9 @@
           "label": "API Base",
           "desc": "API Base for Ollama."
         },
-        "models":{
+        "models": {
           "label": "Models",
-          "desc":  "A model list separated by commas, default is \"\""
+          "desc": "A model list separated by commas, default is \"\""
         }
       }
     }

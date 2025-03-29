@@ -159,6 +159,274 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@alicloud/alimt20181012@npm:^1.3.0":
+  version: 1.3.0
+  resolution: "@alicloud/alimt20181012@npm:1.3.0"
+  dependencies:
+    "@alicloud/endpoint-util": "npm:^0.0.1"
+    "@alicloud/openapi-client": "npm:^0.4.9"
+    "@alicloud/openapi-util": "npm:^0.3.2"
+    "@alicloud/openplatform20191219": "npm:2.0.0"
+    "@alicloud/oss-client": "npm:^1.1.2"
+    "@alicloud/oss-util": "npm:0.0.1"
+    "@alicloud/tea-fileform": "npm:^1.0.0"
+    "@alicloud/tea-typescript": "npm:^1.7.1"
+    "@alicloud/tea-util": "npm:^1.4.8"
+  checksum: 10/6d7d2fa5585c1ce061f1d7e82a5a875a8c19c624165ee421a30c3f3d418fb02f328138ae6204b257038aa4ad75dbe9cb0e0fe5529e69066509b90f7e65122416
+  languageName: node
+  linkType: hard
+
+"@alicloud/credentials@npm:^1.0.0":
+  version: 1.1.0
+  resolution: "@alicloud/credentials@npm:1.1.0"
+  dependencies:
+    "@alicloud/sts-sdk": "npm:^1.0.0"
+    httpx: "npm:^2.2.0"
+    ini: "npm:^1.3.5"
+    json-bigint: "npm:^0.2.3"
+    kitx: "npm:^1.2.1"
+  checksum: 10/9ffe6cdde408269cb655368043337c7f84649b273fab08bde08d64f4fc80cc41ef944cb48a61453aa52bf3c5c239c903f8cc2cab9afc634bd235380d9cb7ff7c
+  languageName: node
+  linkType: hard
+
+"@alicloud/credentials@npm:^2, @alicloud/credentials@npm:^2.4.2":
+  version: 2.4.2
+  resolution: "@alicloud/credentials@npm:2.4.2"
+  dependencies:
+    "@alicloud/tea-typescript": "npm:^1.8.0"
+    httpx: "npm:^2.3.3"
+    ini: "npm:^1.3.5"
+    kitx: "npm:^2.0.0"
+  checksum: 10/acbc0da2d254c3812ddd860ae599511c2fe148f6620ea1f1950c544569c03791b2d6926721b87095f3d5e4896ae29463730b0f21fcfdc23e5052de319d1fd19c
+  languageName: node
+  linkType: hard
+
+"@alicloud/endpoint-util@npm:^0.0.1":
+  version: 0.0.1
+  resolution: "@alicloud/endpoint-util@npm:0.0.1"
+  dependencies:
+    "@alicloud/tea-typescript": "npm:^1.5.1"
+    kitx: "npm:^2.0.0"
+  checksum: 10/fe570e59813f0c5fec4eacd9a8d5c26f282f2af46b96b54d74c8320289d8168e84aba19b515bacec60217256e2d544a65006b6c6cb54b84cc9d316f6cdaeca53
+  languageName: node
+  linkType: hard
+
+"@alicloud/gateway-spi@npm:^0.0.8":
+  version: 0.0.8
+  resolution: "@alicloud/gateway-spi@npm:0.0.8"
+  dependencies:
+    "@alicloud/credentials": "npm:^2"
+    "@alicloud/tea-typescript": "npm:^1.7.1"
+  checksum: 10/120f57bc9f249cbcd1882df1cdaca20a9d9d97493203c95bb36474b8da5e38019a1657d11f3aa02cd7b353f5d13c9d2eb0a7ae3e3af6419f7e386c9ee57b42dc
+  languageName: node
+  linkType: hard
+
+"@alicloud/http-core-sdk@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "@alicloud/http-core-sdk@npm:1.0.0"
+  dependencies:
+    httpx: "npm:^2.1.3"
+  checksum: 10/ca8c943e5af8bd57cd2a60767673bf9adac2c2814539ec5d51f2a4fd32df753bf37c106242b9bde84f13a281701a2d007748793da0847bbc731c28d53823611c
+  languageName: node
+  linkType: hard
+
+"@alicloud/openapi-client@npm:^0.4.1, @alicloud/openapi-client@npm:^0.4.13, @alicloud/openapi-client@npm:^0.4.9":
+  version: 0.4.13
+  resolution: "@alicloud/openapi-client@npm:0.4.13"
+  dependencies:
+    "@alicloud/credentials": "npm:^2.4.2"
+    "@alicloud/gateway-spi": "npm:^0.0.8"
+    "@alicloud/openapi-util": "npm:^0.3.2"
+    "@alicloud/tea-typescript": "npm:^1.7.1"
+    "@alicloud/tea-util": "npm:1.4.9"
+    "@alicloud/tea-xml": "npm:0.0.3"
+  checksum: 10/59d733c96567179b2bbcdffadfe4d5419938e54bca8f61ad45b192217094a472ca69efd9c74d46f3ebe5be88ab833fb3deda05151585a0a05a731dd2ef659dd7
+  languageName: node
+  linkType: hard
+
+"@alicloud/openapi-util@npm:^0.2.9":
+  version: 0.2.9
+  resolution: "@alicloud/openapi-util@npm:0.2.9"
+  dependencies:
+    "@alicloud/tea-typescript": "npm:^1.7.1"
+    "@alicloud/tea-util": "npm:^1.3.0"
+    kitx: "npm:^2.1.0"
+    sm3: "npm:^1.0.3"
+  checksum: 10/f9f3804623490d6eadf6d747aa4cd5770d35b28197c8d02a23e2dd994d11c246704d2d1eb0e0aaa60dc90a09cde0899d06e64d4be1ad66f391391bb3424327f8
+  languageName: node
+  linkType: hard
+
+"@alicloud/openapi-util@npm:^0.3.2":
+  version: 0.3.2
+  resolution: "@alicloud/openapi-util@npm:0.3.2"
+  dependencies:
+    "@alicloud/tea-typescript": "npm:^1.7.1"
+    "@alicloud/tea-util": "npm:^1.3.0"
+    kitx: "npm:^2.1.0"
+    sm3: "npm:^1.0.3"
+  checksum: 10/27e4dcc21dc1adcb0b22ebcc8a93658f0c626c8cb3b6372bc137886e23957499156bb8b28409f8bbe7b414a710cf4a770a59ff5d065c13178eac60006ea11433
+  languageName: node
+  linkType: hard
+
+"@alicloud/openplatform20191219@npm:2.0.0":
+  version: 2.0.0
+  resolution: "@alicloud/openplatform20191219@npm:2.0.0"
+  dependencies:
+    "@alicloud/endpoint-util": "npm:^0.0.1"
+    "@alicloud/openapi-client": "npm:^0.4.1"
+    "@alicloud/openapi-util": "npm:^0.2.9"
+    "@alicloud/tea-typescript": "npm:^1.7.1"
+    "@alicloud/tea-util": "npm:^1.4.4"
+  checksum: 10/d6bcb7dd4bee57a3a5cacbce8ef5c3b16543feaad6b9281f4648f7bf203be26ec958d3f5dfe59ee35d4d944af8de19889b7b2fe2442b7d828818d5b859ded4dd
+  languageName: node
+  linkType: hard
+
+"@alicloud/oss-baseclient@npm:^1.2.0":
+  version: 1.2.0
+  resolution: "@alicloud/oss-baseclient@npm:1.2.0"
+  dependencies:
+    "@alicloud/credentials": "npm:^1.0.0"
+    "@alicloud/tea-typescript": "npm:^1.5.0"
+    "@types/mime": "npm:^2.0.1"
+    "@types/xml2js": "npm:^0.4.5"
+    int64-buffer: "npm:^0.99.1007"
+    kitx: "npm:^2.0.0"
+    mime: "npm:^2.4.4"
+    xml2js: "npm:^0.4.22"
+  checksum: 10/44c35357b3cee038067fd7648b5a7e024b383394fd3d6f800c14d053d2684bf7c63e2c13e911dc015200f26b02a1c76c883f1f1b6daab694b44997486798c4fe
+  languageName: node
+  linkType: hard
+
+"@alicloud/oss-client@npm:^1.1.2":
+  version: 1.1.3
+  resolution: "@alicloud/oss-client@npm:1.1.3"
+  dependencies:
+    "@alicloud/credentials": "npm:^2"
+    "@alicloud/oss-baseclient": "npm:^1.2.0"
+    "@alicloud/oss-util": "npm:^0.0.3"
+    "@alicloud/rpc-util": "npm:^0.0.1"
+    "@alicloud/tea-fileform": "npm:^1.0.0"
+    "@alicloud/tea-typescript": "npm:^1.2.0"
+    "@alicloud/tea-util": "npm:^1.2.6"
+    "@alicloud/tea-xml": "npm:^0.0.1"
+  checksum: 10/5f8daed9b2219df939cc3528b1a74861808890cbde2dee9b05d32773b3e1e86795d6066da6ff4e1c5cb006403fa5c7211f59b376db6e43c48b2261786033133f
+  languageName: node
+  linkType: hard
+
+"@alicloud/oss-util@npm:0.0.1":
+  version: 0.0.1
+  resolution: "@alicloud/oss-util@npm:0.0.1"
+  dependencies:
+    "@alicloud/tea-typescript": "npm:^1.5.0"
+    "@types/mime": "npm:^2.0.1"
+    "@types/xml2js": "npm:^0.4.5"
+    int64-buffer: "npm:^0.99.1007"
+    kitx: "npm:^2.0.0"
+    mime: "npm:^2.4.4"
+    xml2js: "npm:^0.4.22"
+  checksum: 10/dd034de8ee94a9c98acc42e8c45e60b55c3d01b960506e2bedeff85934ef8b4f06a3484b5523493fc49d051d522272973887b45cb89faf54251f71385b010a9f
+  languageName: node
+  linkType: hard
+
+"@alicloud/oss-util@npm:^0.0.3":
+  version: 0.0.3
+  resolution: "@alicloud/oss-util@npm:0.0.3"
+  dependencies:
+    "@alicloud/tea-typescript": "npm:^1.5.0"
+    "@types/mime": "npm:^2.0.1"
+    "@types/xml2js": "npm:^0.4.5"
+    int64-buffer: "npm:^0.99.1007"
+    kitx: "npm:^2.0.0"
+    mime: "npm:^2.4.4"
+    xml2js: "npm:^0.4.22"
+  checksum: 10/f791c903118ff1bcefcc206ea29d4616c963b22f5ae27deba36dd6db8f4c5d67cd7f24892a7d549f6b7b5e32cc87aab91941b2bf7689ed03e3fc24a60fb90798
+  languageName: node
+  linkType: hard
+
+"@alicloud/rpc-util@npm:^0.0.1":
+  version: 0.0.1
+  resolution: "@alicloud/rpc-util@npm:0.0.1"
+  dependencies:
+    "@alicloud/tea-typescript": "npm:^1"
+    "@types/xml2js": "npm:^0.4.5"
+    kitx: "npm:^2.0.0"
+    xml2js: "npm:^0.4.22"
+  checksum: 10/f366c98b992a24d2dc50e7cbd8fb2775fe18569f8cddbf1ae2d6cdd677dca999ea477271a083ae744f579a8a074e1c7a9073203274f875824d5f75025ecd745f
+  languageName: node
+  linkType: hard
+
+"@alicloud/sts-sdk@npm:^1.0.0":
+  version: 1.0.2
+  resolution: "@alicloud/sts-sdk@npm:1.0.2"
+  dependencies:
+    "@alicloud/http-core-sdk": "npm:^1.0.0"
+    uuid: "npm:^3.3.2"
+  checksum: 10/c4eca2420bc9df0fa45742aadbb5542b433205b09fe7e5312224a25f0097cf37adf8fb72f70101ec0cb921b1b732e6f45e38f05a357634fd9b172dfd5e80e713
+  languageName: node
+  linkType: hard
+
+"@alicloud/tea-fileform@npm:^1.0.0":
+  version: 1.2.0
+  resolution: "@alicloud/tea-fileform@npm:1.2.0"
+  dependencies:
+    "@alicloud/tea-typescript": "npm:^1"
+  checksum: 10/7ad66235d797e5b61a475ac8b8dec3cfb3f9990135035f864e7fe8e6f6e20c8e7c242ae329c20c2b5827c3d034bcebaddae071f4eaa6539e3bd3f116dc7514b3
+  languageName: node
+  linkType: hard
+
+"@alicloud/tea-typescript@npm:^1, @alicloud/tea-typescript@npm:^1.2.0, @alicloud/tea-typescript@npm:^1.5.0, @alicloud/tea-typescript@npm:^1.5.1, @alicloud/tea-typescript@npm:^1.7.1, @alicloud/tea-typescript@npm:^1.8.0":
+  version: 1.8.0
+  resolution: "@alicloud/tea-typescript@npm:1.8.0"
+  dependencies:
+    "@types/node": "npm:^12.0.2"
+    httpx: "npm:^2.2.6"
+  checksum: 10/366b7c5cf4f312d441d529040a0a2eb4cf13c2210fbb7a71032a7b0522863972c8af5e20f4a494ac118003da01590c5288bcbe7d03e3e03660aaf9056d50cc60
+  languageName: node
+  linkType: hard
+
+"@alicloud/tea-util@npm:1.4.9":
+  version: 1.4.9
+  resolution: "@alicloud/tea-util@npm:1.4.9"
+  dependencies:
+    "@alicloud/tea-typescript": "npm:^1.5.1"
+    kitx: "npm:^2.0.0"
+  checksum: 10/2d8c7c6ec706c6116d044afa738adaecde103c99b80e1d0e40b143bb12ece4a5cca39e4a1e866c9d4b3b7187b91e9cce2d6928f6299ff9458accdddc9ca6fb05
+  languageName: node
+  linkType: hard
+
+"@alicloud/tea-util@npm:^1.2.6, @alicloud/tea-util@npm:^1.3.0, @alicloud/tea-util@npm:^1.4.10, @alicloud/tea-util@npm:^1.4.4, @alicloud/tea-util@npm:^1.4.8":
+  version: 1.4.10
+  resolution: "@alicloud/tea-util@npm:1.4.10"
+  dependencies:
+    "@alicloud/tea-typescript": "npm:^1.5.1"
+    "@darabonba/typescript": "npm:^1.0.0"
+    kitx: "npm:^2.0.0"
+  checksum: 10/3d39d2b62ac5602961b7959719b188ebb21d7394d49e1a01a659d2587611cb4621e1a5f574a7b0be2a333388abb6b7fdef787bb75ba5635897a2ce41c28eda40
+  languageName: node
+  linkType: hard
+
+"@alicloud/tea-xml@npm:0.0.3":
+  version: 0.0.3
+  resolution: "@alicloud/tea-xml@npm:0.0.3"
+  dependencies:
+    "@alicloud/tea-typescript": "npm:^1"
+    "@types/xml2js": "npm:^0.4.5"
+    xml2js: "npm:^0.6.0"
+  checksum: 10/b1abe8952a9ae6ee657e8dd3d3c0f81ed34fb54d17b87f2d309351082fbe0224abf203d41d4fc6317feb76475322f841bcc14d2bec6a86d74f9239a857352dd2
+  languageName: node
+  linkType: hard
+
+"@alicloud/tea-xml@npm:^0.0.1":
+  version: 0.0.1
+  resolution: "@alicloud/tea-xml@npm:0.0.1"
+  dependencies:
+    "@alicloud/tea-typescript": "npm:^1"
+    "@types/xml2js": "npm:^0.4.5"
+    xml2js: "npm:^0.4.22"
+  checksum: 10/ea30533eb01ac1ba612040f1a83d841812a63a6bade5e534c2e5cb0fb8ad664a82b156a46844773fa5ff4695d270b6948387a3a1d4ca0a44bc83331f1de96ffe
+  languageName: node
+  linkType: hard
+
 "@ampproject/remapping@npm:^2.2.0":
   version: 2.3.0
   resolution: "@ampproject/remapping@npm:2.3.0"
@@ -3654,6 +3922,20 @@ __metadata:
   version: 3.6.1
   resolution: "@ctrl/tinycolor@npm:3.6.1"
   checksum: 10/f3c77b2d29076402d6b94632975cea1ce11942b05ca65d9108c951ff4d61965184dd7e480296e6625cb6df9e7de8b7938ce36a88cf1794c3b8ac83c908af468e
+  languageName: node
+  linkType: hard
+
+"@darabonba/typescript@npm:^1.0.0":
+  version: 1.0.3
+  resolution: "@darabonba/typescript@npm:1.0.3"
+  dependencies:
+    "@alicloud/tea-typescript": "npm:^1.5.1"
+    httpx: "npm:^2.3.2"
+    lodash: "npm:^4.17.21"
+    moment: "npm:^2.30.1"
+    moment-timezone: "npm:^0.5.45"
+    xml2js: "npm:^0.6.2"
+  checksum: 10/165743b35ba7ca29eb441f3741f3e1e87bc08d983d1809c34992cd4f7c68ea9d92a32067e812cf09a41e13de05a4c8effab3d657ce5c7ae6a96b3db5620848fe
   languageName: node
   linkType: hard
 
@@ -9635,6 +9917,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/mime@npm:^2.0.1":
+  version: 2.0.3
+  resolution: "@types/mime@npm:2.0.3"
+  checksum: 10/1f4f144423e149f300438f7cdca9b308d7a18a944e63f5ddf262558208a22a64c8e79b6973d602d86928e19052b3256b492429951b34d037242bb1bdfddae388
+  languageName: node
+  linkType: hard
+
 "@types/min-document@npm:^2.19.0":
   version: 2.19.2
   resolution: "@types/min-document@npm:2.19.2"
@@ -9664,6 +9953,31 @@ __metadata:
   dependencies:
     undici-types: "npm:~5.26.4"
   checksum: 10/73822f66f269ce865df7e2f586787ac7444bd1169fd265cbed1e851b72787f1170517c5b616e0308ec2fbc0934ec6403b0f28d4152acbb0486071aec41167d51
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:^12.0.2":
+  version: 12.20.55
+  resolution: "@types/node@npm:12.20.55"
+  checksum: 10/1f916a06fff02faadb09a16ed6e31820ce170798b202ef0b14fc244bfbd721938c54a3a99836e185e4414ca461fe96c5bb5c67c3d248f153555b7e6347f061dd
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:^20":
+  version: 20.17.28
+  resolution: "@types/node@npm:20.17.28"
+  dependencies:
+    undici-types: "npm:~6.19.2"
+  checksum: 10/eda2517544666c7b7f020f8fbea0fe32b66b1e70e0f63ee83bb2deb6615748491ebd8dab5cc98d86d436e604faf440de420f565d7a542287b3be47a254a76468
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:^22.5.4":
+  version: 22.13.14
+  resolution: "@types/node@npm:22.13.14"
+  dependencies:
+    undici-types: "npm:~6.20.0"
+  checksum: 10/5fafad441c7bb27f963aa8fdfa0787ffb1142b27f4dd2047a2cc27a39f981b432acc71a9b5a428a258f93daeb72f12b7468ab9163a41fe4f98584bc5d42ade6e
   languageName: node
   linkType: hard
 
@@ -9942,6 +10256,15 @@ __metadata:
     tapable: "npm:^2.2.0"
     webpack: "npm:^5"
   checksum: 10/2d9a2d4e26b1239623df97caceddd37a14c258623bccf27aca9da65b963cad33fdbfdc3a4770a58dbd2f9e6f591f62990616938aa52edf58aae3f6166c0045c1
+  languageName: node
+  linkType: hard
+
+"@types/xml2js@npm:^0.4.5":
+  version: 0.4.14
+  resolution: "@types/xml2js@npm:0.4.14"
+  dependencies:
+    "@types/node": "npm:*"
+  checksum: 10/d76338b8d6ce8540c7af6a32aacf96c38f6de48254568f58f6e5ac2af3f88e6bd1490e5346d3bb336990f91267d23c5cc09e8bf7e80840a63c7855dbf174ecbb
   languageName: node
   linkType: hard
 
@@ -10952,6 +11275,13 @@ __metadata:
   version: 5.2.2
   resolution: "big.js@npm:5.2.2"
   checksum: 10/c04416aeb084f4aa1c5857722439c327cc0ada9bd99ab80b650e3f30e2e4f1b92a04527ed1e7df8ffcd7c0ea311745a04af12d53e2f091bf09a06f1292003827
+  languageName: node
+  linkType: hard
+
+"bignumber.js@npm:^4.0.0":
+  version: 4.1.0
+  resolution: "bignumber.js@npm:4.1.0"
+  checksum: 10/b9a1761dd3c46ae2af44fb7c4c5587c57ba6815e6b4212c36f404984203866be01dd86a9882b2c65ebbed2625ed794c57a7955d78449ba1787843c3c8b556bc2
   languageName: node
   linkType: hard
 
@@ -14972,6 +15302,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"httpx@npm:^2.1.3, httpx@npm:^2.2.0, httpx@npm:^2.2.6, httpx@npm:^2.3.2, httpx@npm:^2.3.3":
+  version: 2.3.3
+  resolution: "httpx@npm:2.3.3"
+  dependencies:
+    "@types/node": "npm:^20"
+    debug: "npm:^4.1.1"
+  checksum: 10/e15eb0b4f100c06d75feeb5457a6aea319544995d8cff96ad22717f7744d9ad309557533171b11ea9ba47d057ee3bf164eb55c02480043b0691a326c293b6a12
+  languageName: node
+  linkType: hard
+
 "human-signals@npm:^5.0.0":
   version: 5.0.0
   resolution: "human-signals@npm:5.0.0"
@@ -15136,6 +15476,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"ini@npm:^1.3.5":
+  version: 1.3.8
+  resolution: "ini@npm:1.3.8"
+  checksum: 10/314ae176e8d4deb3def56106da8002b462221c174ddb7ce0c49ee72c8cd1f9044f7b10cc555a7d8850982c3b9ca96fc212122749f5234bc2b6fb05fb942ed566
+  languageName: node
+  linkType: hard
+
 "inline-style-parser@npm:0.1.1":
   version: 0.1.1
   resolution: "inline-style-parser@npm:0.1.1"
@@ -15156,6 +15503,13 @@ __metadata:
   dependencies:
     css-in-js-utils: "npm:^3.1.0"
   checksum: 10/a430c962693f32a36bcec0124c9798bcf3725bb90468d493108c0242446a9cc92ff1967bdf99b6ce5331e7a9b75e6836bc9ba1b3d4756876b8ef48036acb2509
+  languageName: node
+  linkType: hard
+
+"int64-buffer@npm:^0.99.1007":
+  version: 0.99.1007
+  resolution: "int64-buffer@npm:0.99.1007"
+  checksum: 10/d121162d2a38e0b1f90f9f993014ffd466ccf2a98154d420f6e9eb8aad846321cd5dbaca5a40d099b872a34243486732d8ed157a193bae0ca614108fab70324c
   languageName: node
   linkType: hard
 
@@ -15828,6 +16182,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"json-bigint@npm:^0.2.3":
+  version: 0.2.3
+  resolution: "json-bigint@npm:0.2.3"
+  dependencies:
+    bignumber.js: "npm:^4.0.0"
+  checksum: 10/d5d01401fba0b15345b3c3a931c709cbb6b1caecd0f13231caef3651bd01449ec19aca861c922e304a6560f4c0d35bf527ad7bda5b46382f9548a898b12f6cc4
+  languageName: node
+  linkType: hard
+
 "json-buffer@npm:3.0.1":
   version: 3.0.1
   resolution: "json-buffer@npm:3.0.1"
@@ -15960,6 +16323,22 @@ __metadata:
   version: 6.0.3
   resolution: "kind-of@npm:6.0.3"
   checksum: 10/5873d303fb36aad875b7538798867da2ae5c9e328d67194b0162a3659a627d22f742fc9c4ae95cd1704132a24b00cae5041fc00c0f6ef937dc17080dc4dbb962
+  languageName: node
+  linkType: hard
+
+"kitx@npm:^1.2.1":
+  version: 1.3.0
+  resolution: "kitx@npm:1.3.0"
+  checksum: 10/647de949e6e7ec150eb58d361d6c5301133e01e8ef67c4aed55ba1e1b1fd0897741f8d4b6b104ed60475efecbd23452204cd5331c2c293d32c6a7e33153f401d
+  languageName: node
+  linkType: hard
+
+"kitx@npm:^2.0.0, kitx@npm:^2.1.0":
+  version: 2.2.0
+  resolution: "kitx@npm:2.2.0"
+  dependencies:
+    "@types/node": "npm:^22.5.4"
+  checksum: 10/26df31a68903c132679af9497f2e8a9f78de63b950b9eff0ea891602c46c1942cd45df391995d86bed01f6c9a232b5e952458da8aa946707908a3183af489e00
   languageName: node
   linkType: hard
 
@@ -16433,6 +16812,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "markflowy-monorepo@workspace:."
   dependencies:
+    "@alicloud/alimt20181012": "npm:^1.3.0"
+    "@alicloud/openapi-client": "npm:^0.4.13"
+    "@alicloud/tea-util": "npm:^1.4.10"
     "@babel/core": "npm:^7.26.0"
     "@babel/eslint-parser": "npm:^7.25.9"
     "@babel/eslint-plugin": "npm:^7.25.9"
@@ -17697,6 +18079,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"mime@npm:^2.4.4":
+  version: 2.6.0
+  resolution: "mime@npm:2.6.0"
+  bin:
+    mime: cli.js
+  checksum: 10/7da117808b5cd0203bb1b5e33445c330fe213f4d8ee2402a84d62adbde9716ca4fb90dd6d9ab4e77a4128c6c5c24a9c4c9f6a4d720b095b1b342132d02dba58d
+  languageName: node
+  linkType: hard
+
 "mime@npm:^3.0.0":
   version: 3.0.0
   resolution: "mime@npm:3.0.0"
@@ -17879,6 +18270,22 @@ __metadata:
     pkg-types: "npm:^1.3.0"
     ufo: "npm:^1.5.4"
   checksum: 10/1b36163d38c2331f8ae480e6a11da3d15927a2148d729fcd9df6d0059ca74869aa693931bd1f762f82eb534b84c921bdfbc036eb0e4da4faeb55f1349d254f35
+  languageName: node
+  linkType: hard
+
+"moment-timezone@npm:^0.5.45":
+  version: 0.5.48
+  resolution: "moment-timezone@npm:0.5.48"
+  dependencies:
+    moment: "npm:^2.29.4"
+  checksum: 10/8e0b7a05577623552293b28eeee4e60634b8be87fdb74084fa6d5ccc516771eb42d88f29c5a5e50a94c494048d14cdef94f94526a9dfd5e1b0050ff29d0a6c0a
+  languageName: node
+  linkType: hard
+
+"moment@npm:^2.29.4, moment@npm:^2.30.1":
+  version: 2.30.1
+  resolution: "moment@npm:2.30.1"
+  checksum: 10/ae42d876d4ec831ef66110bdc302c0657c664991e45cf2afffc4b0f6cd6d251dde11375c982a5c0564ccc0fa593fc564576ddceb8c8845e87c15f58aa6baca69
   languageName: node
   linkType: hard
 
@@ -21423,6 +21830,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"sax@npm:>=0.6.0":
+  version: 1.4.1
+  resolution: "sax@npm:1.4.1"
+  checksum: 10/b1c784b545019187b53a0c28edb4f6314951c971e2963a69739c6ce222bfbc767e54d320e689352daba79b7d5e06d22b5d7113b99336219d6e93718e2f99d335
+  languageName: node
+  linkType: hard
+
 "scheduler@npm:^0.23.2":
   version: 0.23.2
   resolution: "scheduler@npm:0.23.2"
@@ -21651,6 +22065,13 @@ __metadata:
     ansi-styles: "npm:^6.2.1"
     is-fullwidth-code-point: "npm:^5.0.0"
   checksum: 10/10313dd3cf7a2e4b265f527b1684c7c568210b09743fd1bd74f2194715ed13ffba653dc93a5fa79e3b1711518b8990a732cb7143aa01ddafe626e99dfa6474b2
+  languageName: node
+  linkType: hard
+
+"sm3@npm:^1.0.3":
+  version: 1.0.3
+  resolution: "sm3@npm:1.0.3"
+  checksum: 10/d6a1ae21c15375b92874bec09b2a1b6f7fb0df63e6fa103ad7829253d394d91336521260d513a8a0a413f89bbeaa7022282f59847e57e1b7931a3aa19b929114
   languageName: node
   linkType: hard
 
@@ -22959,10 +23380,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici-types@npm:~6.19.8":
+"undici-types@npm:~6.19.2, undici-types@npm:~6.19.8":
   version: 6.19.8
   resolution: "undici-types@npm:6.19.8"
   checksum: 10/cf0b48ed4fc99baf56584afa91aaffa5010c268b8842f62e02f752df209e3dea138b372a60a963b3b2576ed932f32329ce7ddb9cb5f27a6c83040d8cd74b7a70
+  languageName: node
+  linkType: hard
+
+"undici-types@npm:~6.20.0":
+  version: 6.20.0
+  resolution: "undici-types@npm:6.20.0"
+  checksum: 10/583ac7bbf4ff69931d3985f4762cde2690bb607844c16a5e2fbb92ed312fe4fa1b365e953032d469fa28ba8b224e88a595f0b10a449332f83fa77c695e567dbe
   languageName: node
   linkType: hard
 
@@ -23329,6 +23757,15 @@ __metadata:
   bin:
     uuid: dist/esm/bin/uuid
   checksum: 10/d2da43b49b154d154574891ced66d0c83fc70caaad87e043400cf644423b067542d6f3eb641b7c819224a7cd3b4c2f21906acbedd6ec9c6a05887aa9115a9cf5
+  languageName: node
+  linkType: hard
+
+"uuid@npm:^3.3.2":
+  version: 3.4.0
+  resolution: "uuid@npm:3.4.0"
+  bin:
+    uuid: ./bin/uuid
+  checksum: 10/4f2b86432b04cc7c73a0dd1bcf11f1fc18349d65d2e4e32dd0fc658909329a1e0cc9244aa93f34c0cccfdd5ae1af60a149251a5f420ec3ac4223a3dab198fb2e
   languageName: node
   linkType: hard
 
@@ -23958,6 +24395,33 @@ __metadata:
     utf-8-validate:
       optional: true
   checksum: 10/9c796b84ba80ffc2c2adcdfc9c8e9a219ba99caa435c9a8d45f9ac593bba325563b3f83edc5eb067cc6d21b9a6bf2c930adf76dd40af5f58a5ca6859e81858f0
+  languageName: node
+  linkType: hard
+
+"xml2js@npm:^0.4.22":
+  version: 0.4.23
+  resolution: "xml2js@npm:0.4.23"
+  dependencies:
+    sax: "npm:>=0.6.0"
+    xmlbuilder: "npm:~11.0.0"
+  checksum: 10/52896ef39429f860f32471dd7bb2b89ef25b7e15528e3a4366de0bd5e55a251601565e7814763e70f9e75310c3afe649a42b8826442b74b41eff8a0ae333fccc
+  languageName: node
+  linkType: hard
+
+"xml2js@npm:^0.6.0, xml2js@npm:^0.6.2":
+  version: 0.6.2
+  resolution: "xml2js@npm:0.6.2"
+  dependencies:
+    sax: "npm:>=0.6.0"
+    xmlbuilder: "npm:~11.0.0"
+  checksum: 10/df29de8eeedb762c367d87945c39bcf54db19a2c522607491c266ed6184b5a749e37ff29cfaed0ac149da9ba332ac3dcf8e5ff2bd0a206be3343eca95faa941d
+  languageName: node
+  linkType: hard
+
+"xmlbuilder@npm:~11.0.0":
+  version: 11.0.1
+  resolution: "xmlbuilder@npm:11.0.1"
+  checksum: 10/c8c3d208783718db5b285101a736cd8e6b69a5c265199a0739abaa93d1a1b7de5489fd16df4e776e18b2c98cb91f421a7349e99fd8c1ebeb44ecfed72a25091a
   languageName: node
   linkType: hard
 

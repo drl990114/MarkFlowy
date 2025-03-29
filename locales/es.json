@@ -12,7 +12,8 @@
     "delete": "eliminar",
     "file": "archivo",
     "folder": "carpeta",
-    "fetching": "Cargando..."
+    "fetching": "Cargando...",
+    "submit": "Presentar"
   },
   "view": {
     "label": "Vista",
@@ -63,7 +64,8 @@
     "untitled": "sin título",
     "openDir": "Abrir Carpeta",
     "recentDir": "Carpetas abiertas recientemente",
-    "emptyOpened": "No hay archivos abiertos"
+    "emptyOpened": "No hay archivos abiertos",
+    "openFile": "Abrir archivo"
   },
   "about": {
     "label": "Acerca de",
@@ -85,13 +87,16 @@
       "rename": "Renombrar",
       "delete_file": "Eliminar archivo",
       "delete_folder": "Eliminar archivo",
-      "moveto_trash": "Mover a la papelera"
+      "moveto_trash": "Mover a la papelera",
+      "copy": "Copiar"
     },
     "editor_tab": {
       "close": "Cerrar",
       "close_others": "Cerrar otros",
       "close_right": "Cerrar a la derecha",
-      "close_all": "Cerrar todo"
+      "close_all": "Cerrar todo",
+      "export_html": "Exportar a HTML",
+      "export_image": "Exportar como imagen"
     }
   },
   "notification": {},
@@ -164,9 +169,38 @@
           "label": "API Key",
           "desc": "API Key de ChatGPT"
         },
-        "models":{
+        "models": {
           "label": "Modelo",
-          "desc":  "Una lista de modelos separados por coma, el valor predeterminado es \"gpt-3.5-turbo, gpt-4-32k, gpt-4\""
+          "desc": "Una lista de modelos separados por coma, el valor predeterminado es \"gpt-3.5-turbo, gpt-4-32k, gpt-4\""
+        }
+      },
+      "AI": {
+        "label": "AI"
+      },
+      "DeepSeek": {
+        "label": "DeepSeek",
+        "api_base": {
+          "label": "Base de API",
+          "desc": "Dirección API de DeepSeek."
+        },
+        "api_key": {
+          "label": "API Key",
+          "desc": "La clave API de DeepSeek."
+        },
+        "models": {
+          "label": "Lista de modelos",
+          "desc": "Lista de modelos, divida el nombre del modelo con comas, el valor predeterminado es \"\""
+        }
+      },
+      "Ollama": {
+        "label": "Ollama",
+        "api_base": {
+          "label": "Base de API",
+          "desc": "Dirección API de Ollama."
+        },
+        "models": {
+          "label": "Lista de modelos",
+          "desc": "Lista de modelos, divida el nombre del modelo con comas, el valor predeterminado es \"\""
         }
       }
     }
