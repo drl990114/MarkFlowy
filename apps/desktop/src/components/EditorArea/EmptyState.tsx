@@ -6,9 +6,17 @@ import styled from 'styled-components'
 
 export const EmptyState = memo(() => {
   const { t } = useTranslation()
-  const { openFolderDialog } = useOpen()
+  const { openFolderDialog, openFile } = useOpen()
 
   const startNavItems = [
+    {
+      name: t('file.openDir'),
+      action: openFolderDialog,
+    },
+    {
+      name: t('file.openFile'),
+      action: openFile,
+    },
     {
       name: t('action.create_file'),
       action: () =>
@@ -17,21 +25,16 @@ export const EmptyState = memo(() => {
           content: '',
         }),
     },
-    {
-      name:  t('file.openDir'),
-      action: openFolderDialog,
-    },
   ]
 
   return (
     <Container className='w-full h-full'>
       <div>
-        <p className='nav-title'>{t('file.emptyOpened')}</p>
         <div className='nav-list'>
           {startNavItems.map((item) => (
-            <div className='nav-list__item' key={item.name} onClick={item.action}>
+            <ActionButton key={item.name} onClick={item.action}>
               {item.name}
-            </div>
+            </ActionButton>
           ))}
         </div>
       </div>
@@ -57,12 +60,32 @@ const Container = styled.div`
     align-items: center;
     justify-content: center;
     gap: 8px;
-    min-width: 160px;
+    min-width: 180px;
 
     &__item {
       width: 100%;
       color: ${({ theme }) => theme.accentColor};
       cursor: pointer;
     }
+  }
+`
+
+const ActionButton = styled.button`
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background-color: ${(props) => props.theme.bgColorSecondary};
+  color: ${(props) => props.theme.primaryFontColor};
+
+  &:hover {
+    background-color: ${(props) => props.theme.hoverColor};
   }
 `
