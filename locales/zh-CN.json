@@ -63,6 +63,7 @@
   "file": {
     "untitled": "未命名",
     "openDir": "打开文件夹",
+    "openFile": "打开文件",
     "recentDir": "最近打开的文件夹",
     "emptyOpened": "没有打开的文件"
   },
@@ -76,7 +77,8 @@
     "website": "官网",
     "feedback": "反馈",
     "license": "许可证",
-    "current": "当前版本"
+    "current": "当前版本",
+    "issues": "问题"
   },
   "contextmenu": {
     "explorer": {

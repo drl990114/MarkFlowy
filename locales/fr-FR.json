@@ -12,7 +12,8 @@
     "delete": "supprimer",
     "file": "fichier",
     "folder": "dossier",
-    "fetching": "chargement..."
+    "fetching": "chargement...",
+    "submit": "Soumission"
   },
   "view": {
     "label": "vue",
@@ -20,7 +21,8 @@
       "label": "thême"
     },
     "wysiwyg": "éditeur",
-    "source_code": "code source"
+    "source_code": "code source",
+    "preview": "Aperçu"
   },
   "action": {
     "bookmark": "favori",
@@ -28,11 +30,23 @@
     "done": "validé",
     "edit": "editer",
     "more": "plus",
-    "save": "enregistrer"
+    "save": "enregistrer",
+    "translate": "Traduction",
+    "summary": "Résumé",
+    "create_file": "Nouveau fichier"
   },
   "confirm": {
     "delete": {
       "description": "Êtes-vous sûr de vouloir supprimer \"{{name}}\" {{something}}?"
+    },
+    "move": {
+      "description": "Êtes-vous sûr de vouloir déplacer \"{{name}}\"?"
+    },
+    "replace": {
+      "description": "Un fichier ou un dossier nommé \"{{name}}\" existe déjà dans le dossier de destination. Voulez-vous le remplacer?"
+    },
+    "trash": {
+      "description": "Êtes-vous sûr de vouloir déplacer \"{{name}}\" dans la corbeille?"
     }
   },
   "error": {
@@ -46,7 +60,9 @@
   "file": {
     "untitled": "sans titre",
     "openDir": "ouvrir le dossier",
-    "recentDir": "Dossiers récemment ouverts"
+    "recentDir": "Dossiers récemment ouverts",
+    "emptyOpened": "Aucun fichier ouvert",
+    "openFile": "Ouvrir un fichier"
   },
   "about": {
     "label": "À propos",
@@ -66,13 +82,18 @@
       "add_file": "Nouveau fichier",
       "add_folder": "Nouveau dossier",
       "delete_file": "Supprimer le fichier",
-      "delete_folder": "Supprimer le dossier"
+      "delete_folder": "Supprimer le dossier",
+      "rename": "Renommer",
+      "moveto_trash": "Déplacer vers la corbeille",
+      "copy": "Réplication"
     },
     "editor_tab": {
       "close": "Fermer",
       "close_others": "Fermer les autres",
       "close_right": "Fermer à droite",
-      "close_all": "Tout fermer"
+      "close_all": "Tout fermer",
+      "export_html": "Exporter au format HTML",
+      "export_image": "Exporter en tant qu'image"
     }
   },
   "notification": {},
@@ -119,6 +140,14 @@
         "full_width": {
           "label": "Pleine largeur",
           "desc": "Mettre l'éditeur en plein largeur."
+        },
+        "font_size": {
+          "label": "Taille de la police",
+          "desc": "Définit la taille de la police racine de l'éditeur."
+        },
+        "line_height": {
+          "label": "Ligne haute",
+          "desc": "Définit la hauteur de la ligne racine de l'éditeur."
         }
       }
     },
@@ -137,9 +166,38 @@
           "label": "clé API",
           "desc": "clé API pour ChatGPT."
         },
-        "models":{
+        "models": {
           "label": "Models",
-          "desc":  "A model list separated by commas, default is \"gpt-3.5-turbo, gpt-4-32k, gpt-4\""
+          "desc": "A model list separated by commas, default is \"gpt-3.5-turbo, gpt-4-32k, gpt-4\""
+        }
+      },
+      "AI": {
+        "label": "AI"
+      },
+      "DeepSeek": {
+        "label": "DeepSeek",
+        "api_base": {
+          "label": "Base API",
+          "desc": "Adresse API de DeepSeek."
+        },
+        "api_key": {
+          "label": "API Key",
+          "desc": "La clé API de DeepSeek."
+        },
+        "models": {
+          "label": "Liste des modèles",
+          "desc": "Liste de modèles, avec un nom de modèle divisé par une virgule, par défaut \"\""
+        }
+      },
+      "Ollama": {
+        "label": "Ollama",
+        "api_base": {
+          "label": "Base API",
+          "desc": "Adresse de l'API d'Ollama."
+        },
+        "models": {
+          "label": "Liste des modèles",
+          "desc": "Liste de modèles, avec un nom de modèle divisé par une virgule, par défaut \"\""
         }
       }
     }
@@ -160,5 +218,8 @@
     "codemirror": {
       "searchInputPlaceholder": "Langue d'entrée"
     }
+  },
+  "placeholder": {
+    "translate": "Veuillez saisir la langue cible"
   }
 }
