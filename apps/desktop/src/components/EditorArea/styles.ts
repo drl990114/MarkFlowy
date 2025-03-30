@@ -33,8 +33,9 @@ export const TabItem = styled.div<TabItemProps>`
   align-items: center;
   padding: 0 ${(props) => props.theme.spaceXs};
   font-size: ${(props) => props.theme.fontXs};
-  border-top: 2px solid ${props => props.active ? props.theme.accentColor : 'transparent'};
-  background-color: ${(props) => (props.active ? props.theme.editorTabActiveBgColor : props.theme.editorTabBgColor)};
+  border-top: 2px solid ${(props) => (props.active ? props.theme.accentColor : 'transparent')};
+  background-color: ${(props) =>
+    props.active ? props.theme.editorTabActiveBgColor : props.theme.editorTabBgColor};
   height: calc(100% + 2px);
   box-sizing: border-box;
   white-space: nowrap;
@@ -79,4 +80,15 @@ interface TabItemProps {
 export const WarningHeader = styled.h3`
   text-align: center;
   color: ${(props) => props.theme.dangerColor};
+`
+
+export const EditorPathContainer = styled.div`
+  font-size: 0.85em;
+  padding: 1em;
+  cursor: pointer;
+  transition: color 0.2s ease-in-out;
+
+  &:hover {
+    color: ${(props) => props.theme.accentColor};
+  }
 `
