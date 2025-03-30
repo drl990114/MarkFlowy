@@ -1,5 +1,37 @@
 # UPDATE LOG
 
+## v0.21.0
+
+Features:
+
+- Support opening individual files.
+
+- Support display editing file full path in the editor.
+
+Fix:
+
+- Fix the issue of AI translation and summary not taking effect.
+
+- Fix the issue of multiple editor instances causing paste failure.
+
+- Improve the performance and ui of the editor.
+
+---
+
+特性：
+
+- 支持打开单个文件。
+
+- 支持在编辑器中显示正在编辑的文件的完整路径。
+
+修复：
+
+- 修复 AI 翻译、摘要没生效的问题。
+
+- 修复多个实例导致粘贴失败的问题。
+
+- 优化编辑器性能和样式。
+
 ## v0.20.0
 
 Features:
