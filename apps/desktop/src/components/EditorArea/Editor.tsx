@@ -19,7 +19,7 @@ import { useCommandEvent } from '@/components/EditorArea/editorHooks/CommandEven
 import bus from '@/helper/eventBus'
 import { EVENT } from '@/constants'
 import classNames from 'classnames'
-import { WarningHeader } from './styles'
+import { EditorPathContainer, WarningHeader } from './styles'
 import { canvasDataToBinary, getFileNameFromPath, getFolderPathFromPath } from '@/helper/filesys'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import { save } from '@tauri-apps/plugin-dialog'
@@ -83,6 +83,7 @@ function Editor(props: EditorProps) {
   const [delegate, setDelegate] = useState(
     createWysiwygDelegate(createWysiwygDelegateOptions(getFolderPathFromPath(curFile.path))),
   )
+  const [showFullPath, setShowFullPath] = useState(false)
   const debounceSaveHandlerCacheRef = useRef<DebouncedFunc<() => Promise<void>>>()
   const noFileSaveingRef = useRef(false)
   const editorRef = useRef<EditorRef>(null)
@@ -460,25 +461,43 @@ function Editor(props: EditorProps) {
     return <WarningHeader>File is not exist</WarningHeader>
   }
 
+  const handlePathClick = () => {
+    setShowFullPath((prev) => !prev)
+  }
+
   const cls = classNames('code-contents scrollbar', {
     'editor-active': active,
     'display-none': !active,
   })
 
+  const pathCls = classNames({
+    'display-none': !active,
+  })
+
   return (
-    <div className={cls}>
-      {typeof content === 'string' ? (
-        <EditorWrapper
-          id='editorarea-wrapper'
-          className='markdown-body'
-          fullWidth={settingData.editor_full_width}
-          active={active}
-          onClick={handleWrapperClick}
+    <>
+      {curFile.path ? (
+        <EditorPathContainer
+          className={pathCls}
+          onClick={handlePathClick}
         >
-          <MfEditor ref={editorRef} onChange={handleChange} {...editorProps} />
-        </EditorWrapper>
+          {showFullPath ? curFile.path : `... / ${curFile.name}`}
+        </EditorPathContainer>
       ) : null}
-    </div>
+      <div className={cls}>
+        {typeof content === 'string' ? (
+          <EditorWrapper
+            id='editorarea-wrapper'
+            className='markdown-body'
+            fullWidth={settingData.editor_full_width}
+            active={active}
+            onClick={handleWrapperClick}
+          >
+            <MfEditor ref={editorRef} onChange={handleChange} {...editorProps} />
+          </EditorWrapper>
+        ) : null}
+      </div>
+    </>
   )
 }
 
