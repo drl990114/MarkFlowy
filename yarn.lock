@@ -5941,7 +5941,7 @@ __metadata:
     eslint: "npm:9.13.0"
     postcss: "npm:^8.4.47"
     postcss-import: "npm:^16.1.0"
-    postcss-nested: "npm:^7.0.1"
+    postcss-nested: "npm:^7.0.2"
     react: "npm:^18.3.1"
     rimraf: "npm:^6.0.1"
     rollup: "npm:4.24.3"
@@ -16834,7 +16834,7 @@ __metadata:
     fast-glob: "npm:^3.3.2"
     postcss: "npm:^8.4.47"
     postcss-import: "npm:^16.1.0"
-    postcss-nested: "npm:^7.0.1"
+    postcss-nested: "npm:^7.0.2"
     prettier: "npm:^3.3.3"
     rimraf: "npm:^6.0.1"
     rollup: "npm:4.24.3"
@@ -19566,14 +19566,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"postcss-nested@npm:^7.0.1":
-  version: 7.0.1
-  resolution: "postcss-nested@npm:7.0.1"
+"postcss-nested@npm:^7.0.2":
+  version: 7.0.2
+  resolution: "postcss-nested@npm:7.0.2"
   dependencies:
     postcss-selector-parser: "npm:^7.0.0"
   peerDependencies:
     postcss: ^8.2.14
-  checksum: 10/bfbcff5be0ec386d63f626f8f59868ba4a6ac6ef37d8a98145206ebda6e123bcbc22a54edf970b7eec8898d94c0d1f5a834df019b3166708096037d79a79dfb4
+  checksum: 10/adcb74bb94869f7313f2677bcdf5dd9e368602ca6d3e1c1e3da514ee00ccf5c2bdd414fdb9141de65b0b7aee83d8f2b149c0d3723bc4af5ee8b8062dc6e09c3d
   languageName: node
   linkType: hard
 
