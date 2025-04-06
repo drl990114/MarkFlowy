@@ -58,7 +58,7 @@ The current MarkFlowy is still in its infancy, and there may be some bad experie
 
 ### How to Contribute
 
-You can read [CONTRIBUTING](./Community/CONTRIBUTING.md) to know how to start the project and modify the code, Welcome to participate in code contribution.
+You can read [CONTRIBUTING](./docs/Community/CONTRIBUTING.md) to know how to start the project and modify the code, Welcome to participate in code contribution.
 
 ## Support
 
