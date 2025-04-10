@@ -94,6 +94,13 @@ The development of **MarkFlowy** cannot be separated from these contributors. Th
         </a>
     </td>
     <td align="center">
+        <a href="https://github.com/SamDc73">
+            <img src="https://avatars.githubusercontent.com/u/144215270?v=4" width="90;" alt="SamDc73"/>
+            <br />
+            <sub><b>Husam Alshehadat</b></sub>
+        </a>
+    </td>
+    <td align="center">
         <a href="https://github.com/marianoesteban">
             <img src="https://avatars.githubusercontent.com/u/3076449?v=4" width="90;" alt="marianoesteban"/>
             <br />
@@ -120,7 +127,8 @@ The development of **MarkFlowy** cannot be separated from these contributors. Th
             <br />
             <sub><b>Fossabot</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/punkyard">
             <img src="https://avatars.githubusercontent.com/u/59349105?v=4" width="90;" alt="punkyard"/>
