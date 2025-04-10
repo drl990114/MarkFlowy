@@ -5,6 +5,7 @@ use crate::{
 use serde_json::Value;
 use std::{collections::BTreeMap, path::PathBuf};
 use tauri::{Manager, Theme};
+use etcetera::{choose_app_strategy, AppStrategy, AppStrategyArgs};
 
 macro_rules! pub_struct {
   ($name:ident {$($field:ident: $t:ty,)*}) => {
@@ -45,7 +46,33 @@ pub_struct!(AppConf {
 pub const APP_CONF_PATH: &str = "markflowy.conf.json";
 
 pub fn app_root() -> PathBuf {
-    APP_DIR.lock().unwrap().get(&0).unwrap().join(".markflowy")
+    let app_dir = APP_DIR.lock().unwrap();
+    let home_dir = app_dir.get(&0).unwrap();
+    let legacy_path = home_dir.join(".markflowy");
+
+    // If legacy config exists, keep using it for backward compatibility
+    if exists(&legacy_path) {
+        return legacy_path;
+    }
+
+    // Use platform-specific paths via etcetera
+    #[cfg(target_os = "windows")]
+    {
+        // Keep Windows behavior exactly the same
+        legacy_path
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        // Use XDG paths on Linux/macOS with proper fallback
+        match choose_app_strategy(AppStrategyArgs {
+            top_level_domain: "com".to_string(),
+            author: "drl990114".to_string(),
+            app_name: "markflowy".to_string(),
+        }) {
+            Ok(strategy) => strategy.config_dir(),
+            Err(_) => legacy_path // Fallback to legacy path if something goes wrong
+        }
+    }
 }
 
 impl AppConf {
