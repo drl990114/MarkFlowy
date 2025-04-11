@@ -34,28 +34,28 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ai-sdk/deepseek@npm:^0.1.12":
-  version: 0.1.12
-  resolution: "@ai-sdk/deepseek@npm:0.1.12"
+"@ai-sdk/deepseek@npm:^0.2.9":
+  version: 0.2.9
+  resolution: "@ai-sdk/deepseek@npm:0.2.9"
   dependencies:
-    "@ai-sdk/openai-compatible": "npm:0.1.12"
-    "@ai-sdk/provider": "npm:1.0.9"
-    "@ai-sdk/provider-utils": "npm:2.1.10"
+    "@ai-sdk/openai-compatible": "npm:0.2.9"
+    "@ai-sdk/provider": "npm:1.1.2"
+    "@ai-sdk/provider-utils": "npm:2.2.6"
   peerDependencies:
     zod: ^3.0.0
-  checksum: 10/7f3385ac220e1c2b79b3cf3c5ea0351594f94a0751488c66fd6c68b184e5f89f7a0d38edc0187e5611cdc9d06d787260dfed71d48488b1f1c35996db2d7ee266
+  checksum: 10/e7d0b511d6fd7a047b147610f6f034e837f2442456b7e4140c1129c62605618d0868c8ceb202a7000e75460053b77e7bd25b33d45beb54a680c7844c8bb73d7c
   languageName: node
   linkType: hard
 
-"@ai-sdk/openai-compatible@npm:0.1.12":
-  version: 0.1.12
-  resolution: "@ai-sdk/openai-compatible@npm:0.1.12"
+"@ai-sdk/openai-compatible@npm:0.2.9":
+  version: 0.2.9
+  resolution: "@ai-sdk/openai-compatible@npm:0.2.9"
   dependencies:
-    "@ai-sdk/provider": "npm:1.0.9"
-    "@ai-sdk/provider-utils": "npm:2.1.10"
+    "@ai-sdk/provider": "npm:1.1.2"
+    "@ai-sdk/provider-utils": "npm:2.2.6"
   peerDependencies:
     zod: ^3.0.0
-  checksum: 10/f8ff39dfd01e0eb9fa1ed1df2fcab889e72b64181f158d30247897f14bccce59cc45e338a9db27e1b679dd84ff66f54a73ad9b8a63ce5ed350384548c7d28a81
+  checksum: 10/a12809f1f43d29d2b6c5fe78d05f96c2f6120ec66c09321930d46427655e8e86a74d664838349ce3ed940e5d973bd5d8cfb9200a7d751fda88d451f23f1757f9
   languageName: node
   linkType: hard
 
@@ -85,6 +85,19 @@ __metadata:
     zod:
       optional: true
   checksum: 10/600a732d5e0b02b873234921b8aa873a9c78b23a4d058a68e30e0783b1be0ba5067621cf119a3a676d082d1fbacad6951533ab7bb55bdb3a7d29b63a0bcd9b18
+  languageName: node
+  linkType: hard
+
+"@ai-sdk/provider-utils@npm:2.2.6":
+  version: 2.2.6
+  resolution: "@ai-sdk/provider-utils@npm:2.2.6"
+  dependencies:
+    "@ai-sdk/provider": "npm:1.1.2"
+    nanoid: "npm:^3.3.8"
+    secure-json-parse: "npm:^2.7.0"
+  peerDependencies:
+    zod: ^3.23.8
+  checksum: 10/2bf53d6c49e5e721a15ab36746edfb0839dba104d32efd5a8f336276097c2a56cbbefa1dc164f307f495a659fa33256bdd0465462b8d172510c80d1123552c47
   languageName: node
   linkType: hard
 
@@ -120,6 +133,15 @@ __metadata:
   dependencies:
     json-schema: "npm:^0.4.0"
   checksum: 10/5f399ded99da304821010ef189df3f7da72fc4c28c73d570bdc27dc8157dfa35cef8552099c450bef51b1c74c80a6029b36a515a035d4426fae8d5c5269fb82c
+  languageName: node
+  linkType: hard
+
+"@ai-sdk/provider@npm:1.1.2":
+  version: 1.1.2
+  resolution: "@ai-sdk/provider@npm:1.1.2"
+  dependencies:
+    json-schema: "npm:^0.4.0"
+  checksum: 10/1e5b6e695f834ab375c25b750292f60e378c17cf047a2cd62e8829c6e4bbe1582331afa8606333b5b6a5fe77ff434e5d9389a381ace4a58b12da0297a36bb626
   languageName: node
   linkType: hard
 
@@ -5831,7 +5853,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@markflowy/desktop@workspace:apps/desktop"
   dependencies:
-    "@ai-sdk/deepseek": "npm:^0.1.12"
+    "@ai-sdk/deepseek": "npm:^0.2.9"
     "@ai-sdk/openai": "npm:^1.1.15"
     "@babel/plugin-proposal-class-properties": "npm:^7.18.6"
     "@babel/plugin-proposal-decorators": "npm:^7.25.9"
