@@ -56,7 +56,7 @@
     "react-loading": "^2.0.3",
     "react-markdown": "^9.0.1",
     "react-resizable-panels": "^2.1.6",
-    "react-router-dom": "^6.27.0",
+    "react-router-dom": "^7.5.0",
     "react-use": "^17.5.1",
     "remixicon": "^4.5.0",
     "rme": "0.1.7",
