@@ -15,7 +15,7 @@
     "delete": "rimraf node_modules"
   },
   "dependencies": {
-    "@ai-sdk/deepseek": "^0.1.12",
+    "@ai-sdk/deepseek": "^0.2.11",
     "@ai-sdk/openai": "^1.1.15",
     "@ebay/nice-modal-react": "^1.2.13",
     "@emotion/css": "^11.13.4",
