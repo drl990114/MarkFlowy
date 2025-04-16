@@ -1,5 +1,21 @@
 # UPDATE LOG
 
+## v0.22.0
+
+Features:
+
+- Support opening images and JSON files.
+
+- Use xdg standards's config file path, in linux and macOS.
+
+---
+
+特性：
+
+- 支持打开图片和 JSON 文件。
+
+- 在 Linux 和 macOS 中使用 xdg 标准的配置文件路径。
+
 ## v0.21.0
 
 Features:
