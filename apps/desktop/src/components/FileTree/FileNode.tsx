@@ -303,7 +303,7 @@ function FileNode({
             {node.data?.kind === 'dir' ? (
               <i className={`${node.isOpen ? 'ri-folder-5-line' : 'ri-folder-3-line'} file-icon`} />
             ) : (
-              <i className={`ri-markdown-fill file-icon`} />
+              <i className={`${getFileIconClass(node.data)} file-icon`} />
             )}
             <span
               style={{
@@ -320,3 +320,17 @@ function FileNode({
 }
 
 export default FileNode
+
+const extFileIconClassMap: Record<string, string> = {
+  md: 'ri-markdown-fill',
+  markdown: 'ri-markdown-fill',
+}
+
+const getFileIconClass = (file: IFile) => {
+  const ext = file.ext
+  if (ext && extFileIconClassMap[ext]) {
+    return extFileIconClassMap[ext]
+  }
+
+  return 'ri-file-text-fill'
+}
