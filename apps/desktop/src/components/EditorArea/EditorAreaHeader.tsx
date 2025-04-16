@@ -15,6 +15,8 @@ import { MODAL_INPUT_ID } from '../Modal'
 import { addNewMarkdownFileEdit } from '@/services/editor-file'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import { getCurrentAISettingData } from '@/extensions/ai/aiProvidersService'
+import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
+import { EditorViewType } from 'rme'
 
 export const EditorAreaHeader = memo(() => {
   const { activeId, getEditorDelegate, getEditorContent } = useEditorStore()
@@ -158,6 +160,8 @@ ${res}
     const rect = ref.current?.getBoundingClientRect()
     if (rect === undefined) return
     const editorViewType = editorViewTypeMap.get(curFile?.id || '') || 'wysiwyg'
+    const { getFileTypeConfigById } = useFileTypeConfigStore.getState()
+    const curFileTypeConfig = getFileTypeConfigById(curFile?.id || '')
 
     showContextMenu({
       x: rect.x + rect.width,
@@ -165,23 +169,25 @@ ${res}
       items: [
         {
           label: t('view.source_code'),
-          value: 'sourceCode',
-          checked: editorViewType === 'sourceCode',
-          handler: () => bus.emit('editor_toggle_type', 'sourceCode'),
+          value: EditorViewType.SOURCECODE,
+          checked: editorViewType === EditorViewType.SOURCECODE,
+          handler: () => bus.emit('editor_toggle_type', EditorViewType.SOURCECODE),
         },
         {
           label: t('view.wysiwyg'),
-          value: 'wysiwyg',
-          checked: editorViewType === 'wysiwyg',
-          handler: () => bus.emit('editor_toggle_type', 'wysiwyg'),
+          value: EditorViewType.WYSIWYG,
+          checked: editorViewType === EditorViewType.WYSIWYG,
+          handler: () => bus.emit('editor_toggle_type', EditorViewType.WYSIWYG),
         },
         {
           label: t('view.preview'),
-          value: 'preview',
-          checked: editorViewType === 'preview',
-          handler: () => bus.emit('editor_toggle_type', 'preview'),
+          value: EditorViewType.PREVIEW,
+          checked: editorViewType === EditorViewType.PREVIEW,
+          handler: () => bus.emit('editor_toggle_type', EditorViewType.PREVIEW),
         },
-      ],
+      ].filter((item) => {
+        return curFileTypeConfig ? curFileTypeConfig?.supportedModes?.includes(item.value) : false
+      }),
     })
   }, [curFile, editorViewTypeMap, t, fetchCurFileSummary, execute, fetchCurFileTranslate])
 

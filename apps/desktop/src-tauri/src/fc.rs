@@ -1,5 +1,5 @@
 use anyhow::Result as AnyResult;
-use mf_utils::is_md_file_name;
+use mf_utils::is_supported_file_name;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::Path;
@@ -11,6 +11,7 @@ pub struct FileInfo {
     kind: String,
     path: String,
     children: Option<Vec<FileInfo>>,
+    ext: Option<String>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -44,6 +45,11 @@ pub fn read_directory(dir_path: &str) -> Vec<FileInfo> {
         };
 
         let file_path = new_path.join(filename.clone());
+        let ext = file_path.extension();
+        let file_ext = match ext {
+            Some(ext) => ext.to_str().unwrap().to_string(),
+            None => String::from(""),
+        };
 
         if meta_unwrap.is_dir() {
             kind = String::from("dir");
@@ -55,9 +61,10 @@ pub fn read_directory(dir_path: &str) -> Vec<FileInfo> {
             kind,
             path: file_path.to_str().unwrap().to_string(),
             children,
+            ext: file_ext.into(),
         };
 
-        if is_md_file_name(&new_file_info.name) || meta_unwrap.is_dir() {
+        if is_supported_file_name(&new_file_info.name) || meta_unwrap.is_dir(){
             files.push(new_file_info);
         }
     }

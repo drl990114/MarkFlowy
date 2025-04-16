@@ -1,12 +1,38 @@
-use regex::Regex;
 use fs_extra;
 use std::fs;
 use std::path::{Path, PathBuf};
 
-pub fn is_md_file_name(file_name: &str) -> bool {
-    let reg = Regex::new(r"\.md$").unwrap();
+use serde::{Deserialize, Serialize};
 
-    reg.is_match(file_name)
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+pub enum FileType {
+    Markdown,
+    Image,
+    Json,
+    Directory,
+    Unknown,
+}
+
+pub fn get_file_type(file_name: &str) -> FileType {
+    let lower_name = file_name.to_lowercase();
+    if lower_name.ends_with(".md") {
+        FileType::Markdown
+    } else if lower_name.ends_with(".jpg") || lower_name.ends_with(".png") {
+        FileType::Image
+    } else if lower_name.ends_with(".json") {
+        FileType::Json
+    } else {
+        FileType::Unknown
+    }
+}
+
+pub fn is_supported_file_name(file_name: &str) -> bool {
+    let file_type = get_file_type(file_name);
+    matches!(file_type, FileType::Markdown | FileType::Image | FileType::Json)
+}
+
+pub fn is_md_file_name(file_name: &str) -> bool {
+    matches!(get_file_type(file_name), FileType::Markdown)
 }
 
 pub fn move_files(source_paths: &Vec<PathBuf>, dest_path: &Path) {

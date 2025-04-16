@@ -7,6 +7,7 @@ interface FileEntry {
   kind: 'file' | 'dir' | 'pending_new_file' | 'pending_new_folder' | 'pending_edit_folder' | 'pending_edit_file'
   path?: string
   children?: IFile[]
+  ext?: string
 }
 
 export interface IFile extends FileEntry {
@@ -33,6 +34,7 @@ export const createFile = (opt?: Partial<IFile>): IFile => {
     name: 'Untitled.md',
     kind: 'file',
     path: undefined,
+    ext: 'md',
     content: '',
     ...opt,
   }

@@ -8,3 +8,4 @@ license = "MIT"
 [dependencies]
 regex = "1.10.4"
 fs_extra = "1.2.0"
+serde = { version = "1.0", features = ["derive"] }
