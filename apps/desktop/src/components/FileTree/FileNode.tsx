@@ -166,23 +166,27 @@ function FileNode({
                 }
               },
             },
-            {
-              label: t('contextmenu.explorer.rename'),
-              value: 'rename',
-              handler: () => {
-                if (node.parent) {
-                  simpleTree.update({
-                    id: node.id,
-                    changes: {
-                      kind: node.data.kind === 'dir' ? 'pending_edit_folder' : 'pending_edit_file',
-                    },
-                  })
-                  setFolderDataPure(simpleTree.data)
-                }
-              },
-            },
           )
         }
+
+        if (node.data.kind === 'dir' || node.data.ext === 'md') {
+          items.push({
+            label: t('contextmenu.explorer.rename'),
+            value: 'rename',
+            handler: () => {
+              if (node.parent) {
+                simpleTree.update({
+                  id: node.id,
+                  changes: {
+                    kind: node.data.kind === 'dir' ? 'pending_edit_folder' : 'pending_edit_file',
+                  },
+                })
+                setFolderDataPure(simpleTree.data)
+              }
+            },
+          })
+        }
+
         items.push({
           value: node.data.kind === 'dir' ? 'delete_folder' : 'delete_file',
           label:
