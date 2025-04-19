@@ -19,7 +19,13 @@ import bus from '@/helper/eventBus'
 import { EVENT } from '@/constants'
 import { FileTypeConfig } from '@/helper/fileTypeHandler'
 import { WarningHeader } from './styles'
-import { canvasDataToBinary, getFileNameFromPath, getFolderPathFromPath } from '@/helper/filesys'
+import {
+  canvasDataToBinary,
+  FileResultCode,
+  FileSysResult,
+  getFileNameFromPath,
+  getFolderPathFromPath,
+} from '@/helper/filesys'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import { save } from '@tauri-apps/plugin-dialog'
 import { useTranslation } from 'react-i18next'
@@ -55,20 +61,21 @@ function TextEditor(props: TextEditorProps) {
   const curFile = getFileObject(id)
   const createDelegate = useCallback(
     (editorViewType = EditorViewType.WYSIWYG, sourceCodeLanguage?: string) => {
+      const file = getFileObject(id)
       if (editorViewType === 'sourceCode') {
         return createSourceCodeDelegate({
           language: sourceCodeLanguage,
           onCodemirrorViewLoad: (cmView) => {
-            sourceCodeCodemirrorViewMap.set(curFile.id, cmView)
+            sourceCodeCodemirrorViewMap.set(file.id, cmView)
           },
         })
       } else {
         return createWysiwygDelegate(
-          createWysiwygDelegateOptions(getFolderPathFromPath(curFile.path)),
+          createWysiwygDelegateOptions(getFolderPathFromPath(file.path)),
         )
       }
     },
-    [curFile.path],
+    [id],
   )
   const [status, setStatus] = useState(TextEditorStatus.LOADING)
 
@@ -100,10 +107,14 @@ function TextEditor(props: TextEditorProps) {
       if (file.path) {
         const isExists = await invoke('file_exists', { filePath: file.path })
         if (isExists) {
-          const text = await invoke<string>('get_file_content', {
+          const res = await invoke<FileSysResult>('get_file_content', {
             filePath: file.path,
           })
-          setContent(text)
+          if (res.code !== FileResultCode.Success) {
+            toast.error(res.content)
+            return
+          }
+          setContent(res.content)
         } else {
           return setStatus(TextEditorStatus.NOTEXIST)
         }
@@ -166,9 +177,14 @@ function TextEditor(props: TextEditorProps) {
                 content: fileContent,
                 path,
               })
-              invoke('write_file', { filePath: path, content: fileContent }).then(() => {
-                onSuccess?.()
-              })
+              invoke<FileSysResult>('write_file', { filePath: path, content: fileContent }).then(
+                (res) => {
+                  if (res.code !== FileResultCode.Success) {
+                    return toast.error(res.content)
+                  }
+                  onSuccess?.()
+                },
+              )
               setIdStateMap(curFile.id, {
                 hasUnsavedChanges: false,
               })
@@ -178,7 +194,13 @@ function TextEditor(props: TextEditorProps) {
               toast.error(String(error))
             })
         } else {
-          invoke('write_file', { filePath: curFile.path, content: fileContent }).then(() => {
+          invoke<FileSysResult>('write_file', {
+            filePath: curFile.path,
+            content: fileContent,
+          }).then((res) => {
+            if (res.code !== FileResultCode.Success) {
+              return toast.error(res.content)
+            }
             setContent(fileContent)
             onSuccess?.()
           })
@@ -233,8 +255,6 @@ function TextEditor(props: TextEditorProps) {
               setEditorDelegate(curFile.id, sourceCodeDelegate)
               setDelegate(sourceCodeDelegate)
             } else if (payload === EditorViewType.PREVIEW) {
-              const content = getEditorContent(curFile.id)
-              setContent(content)
               debounceRefreshToc()
             } else {
               const wysiwygDelegate = createWysiwygDelegate(
@@ -463,7 +483,11 @@ function TextEditor(props: TextEditorProps) {
     return <WarningHeader>File is not exist</WarningHeader>
   }
 
-  return typeof content === 'string' ? (
+  if (typeof content !== 'string') {
+    return null
+  }
+
+  return (
     <EditorWrapper
       id='editorarea-wrapper'
       className='markdown-body'
@@ -473,7 +497,7 @@ function TextEditor(props: TextEditorProps) {
     >
       <MfEditor ref={editorRef} onChange={handleChange} {...editorProps} />
     </EditorWrapper>
-  ) : null
+  )
 }
 
 export interface TextEditorProps {

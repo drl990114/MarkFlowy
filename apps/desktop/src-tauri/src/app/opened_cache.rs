@@ -23,7 +23,7 @@ impl OpenedCache {
     pub fn new() -> Self {
         let path = &Self::get_path();
         if !exists(path) {
-            create_file(path).unwrap();
+            create_file(path);
         }
 
         Self {
