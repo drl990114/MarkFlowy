@@ -8,6 +8,12 @@ Features:
 
 - Use xdg standards's config file path, in linux and macOS.
 
+Fixs:
+
+- The issue of the preview mode not taking effect when switching to WYSIWYG mode.
+
+- Optimized error handling and crash issues.
+
 ---
 
 特性：
@@ -15,6 +21,12 @@ Features:
 - 支持打开图片和 JSON 文件。
 
 - 在 Linux 和 macOS 中使用 xdg 标准的配置文件路径。
+
+修复：
+
+- 预览模式在所见即所得模式切换不生效的问题。
+
+- 优化错误处理和崩溃问题。
 
 ## v0.21.0
 
