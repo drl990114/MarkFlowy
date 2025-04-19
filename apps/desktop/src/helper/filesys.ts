@@ -15,6 +15,19 @@ export interface IFile extends FileEntry {
   content?: string
 }
 
+export enum FileResultCode {
+  Success = "Success",
+  NotFound = "NotFound",
+  PermissionDenied = "PermissionDenied",
+  InvalidPath = "InvalidPath",
+  UnknownError = "UnknownError",
+}
+
+export interface FileSysResult {
+  code: FileResultCode
+  content: string
+}
+
 const wrapFiles = (entries: FileEntry[]) => {
   entries.forEach((entry) => {
     ;(entry as IFile).id = nanoid()
@@ -59,9 +72,12 @@ export const createUntitledFile = (): IFile => {
 
 export const readDirectory = (folderPath: string): Promise<IFile[]> => {
   return new Promise((resolve, reject) => {
-    invoke('open_folder', { folderPath })
-      .then((message: unknown) => {
-        const mess = message as string
+    invoke<FileSysResult>('open_folder', { folderPath })
+      .then((message) => {
+        if (message.code !== FileResultCode.Success) {
+          return
+        }
+        const mess = message.content
         const files = JSON.parse(mess)
         const entries: IFile[] = []
 

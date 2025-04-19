@@ -46,7 +46,7 @@ impl BookMarks {
     pub fn write(self) -> Self {
         let path = &Self::get_path();
         if !exists(path) {
-            create_file(path).unwrap();
+            create_file(path);
         }
         if let Ok(v) = serde_json::to_string_pretty(&self) {
             std::fs::write(path, v).unwrap_or_else(|_err| {

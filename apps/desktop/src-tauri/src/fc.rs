@@ -11,7 +11,7 @@ pub struct FileInfo {
     kind: String,
     path: String,
     children: Option<Vec<FileInfo>>,
-    ext: Option<String>,
+    ext: String,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -24,24 +24,53 @@ pub struct Post {
     author: String,
 }
 
-pub fn read_directory(dir_path: &str) -> Vec<FileInfo> {
+#[derive(Debug, Serialize, Deserialize)]
+pub enum FileResultCode {
+    Success = 0,
+    NotFound = -1,
+    PermissionDenied = -2,
+    InvalidPath = -3,
+    UnknownError = -99,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct FileResult {
+    pub code: FileResultCode,
+    pub content: String,
+}
+
+pub fn read_directory(dir_path: &str) -> Result<Vec<FileInfo>, FileResultCode> {
     let new_path = Path::new(dir_path);
-    let paths = fs::read_dir(new_path).unwrap();
+    let paths = match fs::read_dir(new_path) {
+        Ok(paths) => paths,
+        Err(e) => {
+            return match e.kind() {
+                std::io::ErrorKind::NotFound => Err(FileResultCode::NotFound),
+                std::io::ErrorKind::PermissionDenied => Err(FileResultCode::PermissionDenied),
+                _ => Err(FileResultCode::UnknownError),
+            };
+        }
+    };
 
     let mut files: Vec<FileInfo> = Vec::new();
 
     for path in paths {
-        let path_unwrap = path.unwrap();
-        let meta = path_unwrap.metadata();
-        let meta_unwrap = meta.unwrap();
+        let path_unwrap = match path {
+            Ok(p) => p,
+            Err(_) => continue,
+        };
+
+        let meta = match path_unwrap.metadata() {
+            Ok(m) => m,
+            Err(_) => continue,
+        };
 
         let mut kind = String::from("file");
-
         let mut children: Option<Vec<FileInfo>> = None;
 
         let filename = match path_unwrap.file_name().into_string() {
             Ok(str) => str,
-            Err(_error) => String::from("ERROR"),
+            Err(_) => continue,
         };
 
         let file_path = new_path.join(filename.clone());
@@ -51,9 +80,12 @@ pub fn read_directory(dir_path: &str) -> Vec<FileInfo> {
             None => String::from(""),
         };
 
-        if meta_unwrap.is_dir() {
+        if meta.is_dir() {
             kind = String::from("dir");
-            children = Some(read_directory(file_path.to_str().unwrap()));
+            children = match read_directory(file_path.to_str().unwrap()) {
+                Ok(children) => Some(children),
+                Err(_) => None,
+            };
         }
 
         let new_file_info = FileInfo {
@@ -62,16 +94,16 @@ pub fn read_directory(dir_path: &str) -> Vec<FileInfo> {
             path: file_path.to_str().unwrap().to_string(),
             children,
             ext: file_ext.into(),
+
         };
 
-        if is_supported_file_name(&new_file_info.name) || meta_unwrap.is_dir(){
+        if is_supported_file_name(&new_file_info.name) || meta.is_dir() {
             files.push(new_file_info);
         }
     }
 
     sort_files_by_kind_and_name(&mut files);
-
-    files
+    Ok(files)
 }
 
 pub fn sort_files_by_kind_and_name(files: &mut Vec<FileInfo>) {
@@ -88,62 +120,156 @@ pub fn sort_files_by_kind_and_name(files: &mut Vec<FileInfo>) {
     });
 }
 
-pub fn files_to_json(files: Vec<FileInfo>) -> String {
-    let files_str = match serde_json::to_string(&files) {
-        Ok(str) => str,
-        Err(error) => panic!("Problem opening the file: {:?}", error),
-    };
-
-    files_str
+pub fn files_to_json(files: Vec<FileInfo>) -> FileResult {
+    match serde_json::to_string(&files) {
+        Ok(content) => FileResult {
+            code: FileResultCode::Success,
+            content,
+        },
+        Err(e) => FileResult {
+            code: FileResultCode::UnknownError,
+            content: format!("Failed to serialize files: {}", e),
+        },
+    }
 }
 
-pub fn read_file(path: &str) -> String {
-    let contents = fs::read_to_string(path).expect("ERROR");
-    contents
+pub fn read_file(path: &str) -> FileResult {
+    match fs::read_to_string(path) {
+        Ok(content) => FileResult {
+            code: FileResultCode::Success,
+            content,
+        },
+        Err(e) => {
+            let code = match e.kind() {
+                std::io::ErrorKind::NotFound => FileResultCode::NotFound,
+                std::io::ErrorKind::PermissionDenied => FileResultCode::PermissionDenied,
+                _ => FileResultCode::UnknownError,
+            };
+            FileResult {
+                code,
+                content: format!("Failed to read file: {}", e),
+            }
+        }
+    }
 }
 
 // update file and create new file
-pub fn write_file(path: &str, content: &str) -> String {
+pub fn write_file(path: &str, content: &str) -> FileResult {
     let file_path = Path::new(path);
-    let result = match fs::write(file_path, content) {
-        Ok(()) => String::from("OK"),
-        Err(_err) => String::from("ERROR"),
-    };
-
-    result
+    match fs::write(file_path, content) {
+        Ok(()) => FileResult {
+            code: FileResultCode::Success,
+            content: String::from("File written successfully"),
+        },
+        Err(e) => {
+            let code = match e.kind() {
+                std::io::ErrorKind::NotFound => FileResultCode::NotFound,
+                std::io::ErrorKind::PermissionDenied => FileResultCode::PermissionDenied,
+                _ => FileResultCode::UnknownError,
+            };
+            FileResult {
+                code,
+                content: format!("Failed to write file: {}", e),
+            }
+        }
+    }
 }
 
 pub fn exists(path: &Path) -> bool {
     Path::new(path).exists()
 }
 
-pub fn create_file<P: AsRef<Path>>(filename: P) -> AnyResult<()> {
+pub fn create_file<P: AsRef<Path>>(filename: P) -> FileResult {
     let filename = filename.as_ref();
     if let Some(parent) = filename.parent() {
         if !parent.exists() {
-            fs::create_dir_all(parent)?;
+            if let Err(e) = fs::create_dir_all(parent) {
+                return FileResult {
+                    code: FileResultCode::UnknownError,
+                    content: format!("Failed to create parent directories: {}", e),
+                };
+            }
         }
     }
-    fs::File::create(filename)?;
-    Ok(())
+    match fs::File::create(filename) {
+        Ok(_) => FileResult {
+            code: FileResultCode::Success,
+            content: String::from("File created successfully"),
+        },
+        Err(e) => {
+            let code = match e.kind() {
+                std::io::ErrorKind::PermissionDenied => FileResultCode::PermissionDenied,
+                _ => FileResultCode::UnknownError,
+            };
+            FileResult {
+                code,
+                content: format!("Failed to create file: {}", e),
+            }
+        }
+    }
 }
 
-pub fn create_folder(path: &str) -> AnyResult<()> {
+pub fn create_folder(path: &str) -> FileResult {
     let dir_path = Path::new(path);
-    let _ = fs::create_dir(dir_path);
-    Ok(())
+    match fs::create_dir(dir_path) {
+        Ok(()) => FileResult {
+            code: FileResultCode::Success,
+            content: String::from(""),
+        },
+        Err(e) => {
+            let code = match e.kind() {
+                std::io::ErrorKind::AlreadyExists => FileResultCode::InvalidPath,
+                std::io::ErrorKind::PermissionDenied => FileResultCode::PermissionDenied,
+                _ => FileResultCode::UnknownError,
+            };
+            FileResult {
+                code,
+                content: format!("Failed to create folder: {}", e),
+            }
+        }
+    }
 }
 
-pub fn remove_file(path: &str) -> AnyResult<()> {
+pub fn remove_file(path: &str) -> FileResult {
     let file_path = Path::new(path);
-    fs::remove_file(file_path)?;
-    Ok(())
+    match fs::remove_file(file_path) {
+        Ok(()) => FileResult {
+            code: FileResultCode::Success,
+            content: String::from("File removed successfully"),
+        },
+        Err(e) => {
+            let code = match e.kind() {
+                std::io::ErrorKind::NotFound => FileResultCode::NotFound,
+                std::io::ErrorKind::PermissionDenied => FileResultCode::PermissionDenied,
+                _ => FileResultCode::UnknownError,
+            };
+            FileResult {
+                code,
+                content: format!("Failed to remove file: {}", e),
+            }
+        }
+    }
 }
 
-pub fn remove_folder(path: &str) -> AnyResult<()> {
+pub fn remove_folder(path: &str) -> FileResult {
     let folder_path = Path::new(path);
-    fs::remove_dir_all(folder_path)?;
-    Ok(())
+    match fs::remove_dir_all(folder_path) {
+        Ok(()) => FileResult {
+            code: FileResultCode::Success,
+            content: String::from("Folder removed successfully"),
+        },
+        Err(e) => {
+            let code = match e.kind() {
+                std::io::ErrorKind::NotFound => FileResultCode::NotFound,
+                std::io::ErrorKind::PermissionDenied => FileResultCode::PermissionDenied,
+                _ => FileResultCode::UnknownError,
+            };
+            FileResult {
+                code,
+                content: format!("Failed to remove folder: {}", e),
+            }
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -161,13 +287,21 @@ pub fn rename_fs(old_path: &Path, new_path: &Path) -> AnyResult<MoveFileInfo> {
     let is_folder = new_path.is_dir();
 
     if is_folder {
-        let files = read_directory(new_path.to_str().unwrap());
+        let res = read_directory(new_path.to_str().unwrap());
+
+        let files: Option<Vec<FileInfo>> = match res {
+            Ok(files) => Some(files),
+            Err(_) => None,
+        };
+        if files.is_none() {
+            return Err(anyhow::anyhow!("Failed to read directory"));
+        }
 
         Ok(MoveFileInfo {
             old_path: old_path.to_str().unwrap().to_string(),
             new_path: new_path.to_str().unwrap().to_string(),
             is_folder: is_folder,
-            children: Some(files),
+            children: files,
             is_replaced: Some(false),
         })
     } else {
@@ -227,25 +361,47 @@ pub mod cmd {
     use std::path::Path;
     use trash;
 
-    use super::MoveFileInfo;
+    use super::{FileResult, MoveFileInfo};
 
     // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
     #[tauri::command]
-    pub fn open_folder(folder_path: &str) -> String {
-        let files = fc::files_to_json(fc::read_directory(folder_path));
-        files
+    pub fn open_folder(folder_path: &str) -> FileResult {
+        let dir_data = fc::read_directory(folder_path);
+        match dir_data {
+            Ok(files) => {
+                let json_data = fc::files_to_json(files);
+                let content = match json_data.code {
+                    fc::FileResultCode::Success => json_data.content,
+                    _ => String::from(""),
+                };
+
+                if content == "" {
+                    return FileResult {
+                        code: fc::FileResultCode::NotFound,
+                        content: String::from("Folder not found"),
+                    };
+                }
+
+                FileResult {
+                    code: fc::FileResultCode::Success,
+                    content: content,
+                }
+            },
+            Err(_) => FileResult {
+                code: fc::FileResultCode::UnknownError,
+                content: String::from("Failed to read directory"),
+            },
+        }
     }
 
     #[tauri::command]
-    pub fn get_file_content(file_path: &str) -> String {
-        let content = fc::read_file(file_path);
-        content
+    pub fn get_file_content(file_path: &str) -> FileResult {
+        fc::read_file(file_path)
     }
 
     #[tauri::command]
-    pub fn write_file(file_path: &str, content: &str) -> String {
-        fc::write_file(file_path, content);
-        String::from("OK")
+    pub fn write_file(file_path: &str, content: &str) -> FileResult {
+        fc::write_file(file_path, content)
     }
 
     #[tauri::command]
@@ -262,15 +418,13 @@ pub mod cmd {
     }
 
     #[tauri::command]
-    pub fn create_folder(path: &str) -> String {
-        let _ = fc::create_folder(path);
-        String::from("OK")
+    pub fn create_folder(path: &str) -> FileResult {
+        fc::create_folder(path)
     }
 
     #[tauri::command]
-    pub fn delete_folder(file_path: &str) -> String {
-        let _ = fc::remove_folder(file_path);
-        String::from("OK")
+    pub fn delete_folder(file_path: &str) -> FileResult {
+        fc::remove_folder(file_path)
     }
 
     #[tauri::command]
@@ -310,15 +464,9 @@ pub mod cmd {
     pub fn copy_file_by_from(from: &str) -> String {
         let from_path = Path::new(from);
         let parent_path = from_path.parent().unwrap();
-        let mut to_path_name = from_path
-            .file_stem()
-            .unwrap()
-            .to_str()
-            .unwrap()
-            .to_string();
+        let mut to_path_name = from_path.file_stem().unwrap().to_str().unwrap().to_string();
 
         let file_ext = from_path.extension().unwrap();
-
 
         while parent_path
             .join(&format!(
