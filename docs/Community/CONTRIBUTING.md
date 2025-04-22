@@ -12,7 +12,7 @@ You'll need the following tools:
 
 - [Git](https://git-scm.com/)
 - [Node.JS](https://nodejs.org/en) >= 20.x
-- [yarn](https://yarnpkg.com/) 4.0.0
+- [yarn](https://yarnpkg.com/) = 4.8.0
 - [rust](https://www.rust-lang.org/) >= 1.79.0
 
 ### Table of Contents
