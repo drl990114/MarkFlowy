@@ -1,16 +1,14 @@
 import OpenSansLight from '@/assets/fonts/open-sans-v15-latin_latin-ext-300.woff'
 import OpenSansLightItalic from '@/assets/fonts/open-sans-v15-latin_latin-ext-300italic.woff'
-import OpenSansRegular from '@/assets/fonts/open-sans-v15-latin_latin-ext-regular.woff'
-import OpenSansItalic from '@/assets/fonts/open-sans-v15-latin_latin-ext-italic.woff'
 import OpenSansSemiBold from '@/assets/fonts/open-sans-v15-latin_latin-ext-600.woff'
 import OpenSansSemiBoldItalic from '@/assets/fonts/open-sans-v15-latin_latin-ext-600italic.woff'
 import OpenSansBold from '@/assets/fonts/open-sans-v15-latin_latin-ext-700.woff'
 import OpenSansBoldItalic from '@/assets/fonts/open-sans-v15-latin_latin-ext-700italic.woff'
+import OpenSansItalic from '@/assets/fonts/open-sans-v15-latin_latin-ext-italic.woff'
+import OpenSansRegular from '@/assets/fonts/open-sans-v15-latin_latin-ext-regular.woff'
 
-import DejaVuSansMono from '@/assets/fonts/DejaVuSansMono.ttf'
-import DejaVuSansMonoBold from '@/assets/fonts/DejaVuSansMono-Bold.ttf'
-import DejaVuSansMonoBoldOblique from '@/assets/fonts/DejaVuSansMono-BoldOblique.ttf'
-import DejaVuSansMonoOblique from '@/assets/fonts/DejaVuSansMono-Oblique.ttf'
+import FiraCodeBold from '@/assets/fonts/FiraCode-Bold.ttf'
+import FiraCode from '@/assets/fonts/FiraCode-Regular.ttf'
 
 import { createGlobalStyle } from 'styled-components'
 
@@ -93,38 +91,15 @@ export const InjectFonts = createGlobalStyle`
   }
 
   /*
- * DejaVu Sans Mono
+ * Fira Code
  */
   @font-face {
-    font-family: 'DejaVu Sans Mono';
-    src: local('DejaVu Sans Mono'), url(${DejaVuSansMono});
+    font-family: 'Fira Code';
+    src: local('Fira Code'), url(${FiraCode});
   }
   @font-face {
-    font-family: 'DejaVu Sans Mono';
+    font-family: 'Fira Code';
     font-weight: bold;
-    src: url(${DejaVuSansMonoBold});
+    src: url(${FiraCodeBold});
   }
-  @font-face {
-    font-family: 'DejaVu Sans Mono';
-    font-style: oblique;
-    font-weight: bold;
-    src: url(${DejaVuSansMonoBoldOblique});
-  }
-  @font-face {
-    font-family: 'DejaVu Sans Mono';
-    font-style: italic;
-    font-weight: bold;
-    src: url(${DejaVuSansMonoBoldOblique});
-  }
-  @font-face {
-    font-family: 'DejaVu Sans Mono';
-    font-style: italic;
-    src: url(${DejaVuSansMonoOblique});
-  }
-  @font-face {
-    font-family: 'DejaVu Sans Mono';
-    font-style: oblique;
-    src: url(${DejaVuSansMonoOblique});
-  }
-
 `
