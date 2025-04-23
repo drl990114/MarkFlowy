@@ -41,6 +41,8 @@ pub_struct!(AppConf {
     extensions_ollama_models: Option<String>,
     autosave: Option<bool>,
     autosave_interval: Option<u32>,
+    editor_root_font_family: Option<String>,
+    editor_code_font_family: Option<String>,
 });
 
 pub const APP_CONF_PATH: &str = "markflowy.conf.json";
@@ -86,6 +88,8 @@ impl AppConf {
             editor_root_line_height: Some("1.6".to_string()),
             autosave: Some(false),
             autosave_interval: Some(2000),
+            editor_root_font_family: Some("Open Sans".to_string()),
+            editor_code_font_family: Some("Fira Code".to_string()),
             extensions_chatgpt_apibase: Some(
                 "https://api.openai.com/v1/chat/completions".to_string(),
             ),
@@ -119,6 +123,8 @@ impl AppConf {
             editor_full_width,
             editor_root_font_size,
             editor_root_line_height,
+            editor_root_font_family,
+            editor_code_font_family,
             autosave_interval,
             extensions_chatgpt_apibase,
             extensions_chatgpt_apikey,

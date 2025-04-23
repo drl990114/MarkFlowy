@@ -151,6 +151,14 @@
         "line_height": {
           "label": "行高",
           "desc": "设置编辑器的根行高。"
+        },
+        "font_family": {
+          "label": "字体",
+          "desc": "设置编辑器的根字体。"
+        },
+        "code_font_family": {
+          "label": "代码字体",
+          "desc": "设置代码编辑器的字体。"
         }
       }
     },
@@ -172,9 +180,9 @@
           "label": "API Key",
           "desc": "ChatGPT 的 API key。"
         },
-        "models":{
+        "models": {
           "label": "模型列表",
-          "desc":  "模型列表, 用逗号分割模型名称, 默认为\"gpt-3.5-turbo, gpt-4-32k, gpt-4\""
+          "desc": "模型列表, 用逗号分割模型名称, 默认为\"gpt-3.5-turbo, gpt-4-32k, gpt-4\""
         }
       },
       "DeepSeek": {
@@ -187,9 +195,9 @@
           "label": "API Key",
           "desc": "DeepSeek 的 API key。"
         },
-        "models":{
+        "models": {
           "label": "模型列表",
-          "desc":  "模型列表, 用逗号分割模型名称, 默认为\"\""
+          "desc": "模型列表, 用逗号分割模型名称, 默认为\"\""
         }
       },
       "Ollama": {
@@ -198,9 +206,9 @@
           "label": "API Base",
           "desc": " Ollama 的 API 地址."
         },
-        "models":{
+        "models": {
           "label": "模型列表",
-          "desc":  "模型列表, 用逗号分割模型名称, 默认为\"\""
+          "desc": "模型列表, 用逗号分割模型名称, 默认为\"\""
         }
       }
     }

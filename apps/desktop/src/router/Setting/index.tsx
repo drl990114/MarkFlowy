@@ -1,20 +1,20 @@
+import Logo from '@/assets/logo.svg?react'
+import { CopyButton } from '@/components/UI/Button'
+import { installUpdate } from '@/helper/updater'
+import type { SettingData } from '@/router/Setting/settingMap'
+import settingMap from '@/router/Setting/settingMap'
+import useAppInfoStore from '@/stores/useAppInfoStore'
+import { invoke } from '@tauri-apps/api/core'
+import type { Update } from '@tauri-apps/plugin-updater'
+import { check } from '@tauri-apps/plugin-updater'
 import classNames from 'classnames'
 import type { ReactNode } from 'react'
 import { memo, useEffect, useState } from 'react'
-import SettingGroup from './component/SettingGroup'
-import { Container } from './styles'
-import type { SettingData } from '@/router/Setting/settingMap'
-import settingMap from '@/router/Setting/settingMap'
-import Logo from '@/assets/logo.svg?react'
-import { invoke } from '@tauri-apps/api/core'
-import { KeyboardTable } from './KeyboardTable'
-import { CopyButton } from '@/components/UI/Button'
-import { Button } from 'zens'
-import useAppInfoStore from '@/stores/useAppInfoStore'
-import type { Update } from '@tauri-apps/plugin-updater'
-import { check } from '@tauri-apps/plugin-updater'
-import { installUpdate } from '@/helper/updater'
 import { useTranslation } from 'react-i18next'
+import { Button } from 'zens'
+import SettingGroup from './component/SettingGroup'
+import { KeyboardTable } from './KeyboardTable'
+import { Container } from './styles'
 
 export interface DialogTitleProps {
   children?: ReactNode
@@ -28,7 +28,9 @@ function a11yProps(index: number) {
   }
 }
 
-function isSettingGroup(group: Setting.SettingGroup | Setting.SettingItem): group is Setting.SettingGroup {
+function isSettingGroup(
+  group: Setting.SettingGroup | Setting.SettingItem,
+): group is Setting.SettingGroup {
   return typeof group === 'object'
 }
 
@@ -43,7 +45,10 @@ function Setting() {
   ) as (keyof typeof settingMap)[]
   const curGroupKey = settingDataGroupsKeys[value] as Exclude<keyof SettingData, 'i18nKey'>
   const curGroup = settingMap[curGroupKey] as Setting.SettingGroup
-  const curGroupKeys = Object.keys(curGroup).filter((key) => key !== 'i18nKey')as Exclude<keyof SettingData, 'i18nKey'>[]
+  const curGroupKeys = Object.keys(curGroup).filter((key) => key !== 'i18nKey') as Exclude<
+    keyof SettingData,
+    'i18nKey'
+  >[]
 
   useEffect(() => {
     check().then((u) => {

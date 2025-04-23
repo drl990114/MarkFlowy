@@ -3,6 +3,7 @@ mod fc;
 mod menu;
 mod search;
 mod setup;
+mod font;
 
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -77,7 +78,8 @@ pub fn run() {
             extensions::cmd::extensions_init,
             process::app_exit,
             process::app_restart,
-            themes::cmd::load_themes
+            themes::cmd::load_themes,
+            font::cmd::font_list
         ])
         .setup(|app| {
             let home_dir_path = app.path().home_dir().expect("failed to get home dir");

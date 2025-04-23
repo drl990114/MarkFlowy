@@ -107,6 +107,26 @@
         "step": 0.1,
         "saveToString": true,
         "scope": [1, 2]
+      },
+      "normalFontFamily": {
+        "key": "editor_root_font_family",
+        "type": "fontListSelect",
+        "title": {
+          "i18nKey": "settings.editor.style.font_family.label"
+        },
+        "desc": {
+          "i18nKey": "settings.editor.style.font_family.desc"
+        }
+      },
+      "codeFontFamily": {
+        "key": "editor_code_font_family",
+        "type": "fontListSelect",
+        "title": {
+          "i18nKey": "settings.editor.style.code_font_family.label"
+        },
+        "desc": {
+          "i18nKey": "settings.editor.style.code_font_family.desc"
+        }
       }
     }
   },

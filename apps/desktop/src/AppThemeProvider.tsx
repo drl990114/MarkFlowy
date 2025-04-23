@@ -1,15 +1,15 @@
-import { ThemeProvider as EditorProvider } from 'rme'
-import useAppSettingStore from './stores/useAppSettingStore'
-import { editorResources } from './i18n'
-import { useMemo } from 'react'
-import useThemeStore from './stores/useThemeStore'
 import NiceModal from '@ebay/nice-modal-react'
-import { InjectFonts } from './injectFonts'
-import { GlobalStyles } from './globalStyles'
-import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles'
-import { ThemeProvider as ZensThemeProvider } from 'zens'
-import { IStyleSheetContext, StyleSheetManager, ThemeProvider } from 'styled-components'
 import isPropValid from '@emotion/is-prop-valid'
+import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles'
+import { useMemo } from 'react'
+import { ThemeProvider as EditorProvider } from 'rme'
+import { IStyleSheetContext, StyleSheetManager, ThemeProvider } from 'styled-components'
+import { ThemeProvider as ZensThemeProvider } from 'zens'
+import { GlobalStyles } from './globalStyles'
+import { editorResources } from './i18n'
+import { InjectFonts } from './injectFonts'
+import useAppSettingStore from './stores/useAppSettingStore'
+import useThemeStore from './stores/useThemeStore'
 
 const AppThemeProvider: React.FC<BaseComponentProps> = function ({ children }) {
   const { muiTheme, curTheme } = useThemeStore()
@@ -19,9 +19,18 @@ const AppThemeProvider: React.FC<BaseComponentProps> = function ({ children }) {
   const themeProp = useMemo(
     () => ({
       mode: curTheme.mode,
-      token: curTheme.styledConstants,
+      token: {
+        ...curTheme.styledConstants,
+        fontFamily: settingData.editor_root_font_family,
+        codemirrorFontFamily: settingData.editor_code_font_family,
+      },
     }),
-    [curTheme.mode, curTheme.styledConstants],
+    [
+      curTheme.mode,
+      curTheme.styledConstants,
+      settingData.editor_root_font_family,
+      settingData.editor_code_font_family,
+    ],
   )
 
   const i18nProp = useMemo(

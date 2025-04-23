@@ -148,6 +148,14 @@
         "line_height": {
           "label": "Ligne haute",
           "desc": "Définit la hauteur de la ligne racine de l'éditeur."
+        },
+        "font_family": {
+          "label": "Famille de polices",
+          "desc": "Définissez la famille de polices racine de l'éditeur."
+        },
+        "code_font_family": {
+          "label": "Famille de polices de code",
+          "desc": "Définissez la famille de polices de code de l'éditeur."
         }
       }
     },
