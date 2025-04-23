@@ -60,6 +60,8 @@ cargo install --locked --path apps/desktop/src-tauri
 
 #### Startup MarkFlowy
 
+Note: that before the first startup, it is necessary to execute `yarn build` to compile the packages for the workspace.
+
 Execute the following command, you will start MarkFlowy.
 
 ```bash
