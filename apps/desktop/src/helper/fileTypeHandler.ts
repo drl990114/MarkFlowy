@@ -1,5 +1,6 @@
 import { extname } from '@tauri-apps/api/path'
 import { EditorViewType } from 'rme'
+import { IFile } from './filesys'
 
 export type FileType = 'markdown' | 'image' | 'json' | 'text' | 'unknown'
 
@@ -53,8 +54,8 @@ export const isTextfileType = (fileTypeConfig: FileTypeConfig): boolean => {
   return ['markdown', 'json', 'text'].includes(fileTypeConfig.type)
 }
 
-export async function getFileTypeConfig(filePath: string): Promise<FileTypeConfig> {
-  const ext = await extname(filePath)
+export async function getFileTypeConfig(file: IFile): Promise<FileTypeConfig> {
+  const ext = await extname(file.path || file.name || '')
 
   return (
     fileTypeConfigs[ext.toLowerCase()] || {

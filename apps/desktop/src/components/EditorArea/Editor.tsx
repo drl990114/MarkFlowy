@@ -1,14 +1,14 @@
-import { MfCodemirrorView } from 'rme'
-import { memo, useEffect, useState } from 'react'
 import { getFileObject } from '@/helper/files'
-import classNames from 'classnames'
 import { getFileTypeConfig, isTextfileType } from '@/helper/fileTypeHandler'
+import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
+import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
+import classNames from 'classnames'
+import { memo, useState } from 'react'
+import { useMount } from 'react-use'
+import { MfCodemirrorView } from 'rme'
 import { PreviewContent } from './preview/PreviewContent'
 import { EditorPathContainer } from './styles'
-import { useMount } from 'react-use'
-import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import TextEditor from './TextEditor'
-import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
 
 export const sourceCodeCodemirrorViewMap: Map<string, MfCodemirrorView> = new Map()
 
@@ -21,9 +21,10 @@ function Editor(props: EditorProps) {
   const curFileTypeConfig = getFileTypeConfigById(id)
 
   useMount(async () => {
-    const fileTypeConfig = await getFileTypeConfig(curFile.path || '')
+    const fileTypeConfig = await getFileTypeConfig(curFile)
     if (fileTypeConfig) {
       useEditorViewTypeStore.getState().setEditorViewType(curFile.id, fileTypeConfig.defaultMode)
+      setFileTypeConfig(curFile.id, fileTypeConfig)
     }
   })
 
@@ -39,14 +40,6 @@ function Editor(props: EditorProps) {
   const pathCls = classNames({
     'display-none': !active,
   })
-
-  useEffect(() => {
-    const initFileType = async () => {
-      const config = await getFileTypeConfig(curFile.path || '')
-      setFileTypeConfig(curFile.id, config)
-    }
-    initFileType()
-  }, [curFile.path])
 
   if (!curFileTypeConfig) return null
 
