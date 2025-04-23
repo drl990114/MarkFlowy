@@ -393,13 +393,6 @@ function TextEditor(props: TextEditorProps) {
     }
   }, [saveHandler])
 
-  useEffect(() => {
-    if (!fileTypeConfig) {
-      return
-    }
-    setDelegate(createDelegate(fileTypeConfig.defaultMode, fileTypeConfig.type))
-  }, [fileTypeConfig, createDelegate])
-
   const handleWrapperClick: React.MouseEventHandler<HTMLDivElement> = useCallback(
     (e) => {
       if ((e.target as HTMLElement)?.id === 'editorarea-wrapper') {
@@ -483,6 +476,8 @@ function TextEditor(props: TextEditorProps) {
   if (typeof content !== 'string') {
     return null
   }
+
+  console.log('curFile', fileTypeConfig, curFile)
 
   return (
     <EditorWrapper
