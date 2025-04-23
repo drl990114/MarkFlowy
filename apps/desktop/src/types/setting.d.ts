@@ -5,7 +5,7 @@ declare namespace Setting {
     i18nKey: string
   } & Record<string, SettingItem>
 
-  type SettingItem = SelectSettingItem | InputSettingItem | SwitchSettingItem | SliderSettingItem
+  type SettingItem = SelectSettingItem | InputSettingItem | SwitchSettingItem | SliderSettingItem | FontListSelectSettingItem
 
   type BaseSettingItem = {
     key: string
@@ -20,6 +20,10 @@ declare namespace Setting {
   type SelectSettingItem = {
     type: 'select'
     options: readonly T[]
+  } & BaseSettingItem
+
+  type FontListSelectSettingItem = {
+    type: 'fontListSelect'
   } & BaseSettingItem
 
   type InputSettingItem = {

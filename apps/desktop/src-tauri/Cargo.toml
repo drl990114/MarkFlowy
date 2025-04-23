@@ -40,6 +40,7 @@ window-vibrancy = "0.5.0"
 dotenv = "0.15.0"
 trash = "5.2.2"
 etcetera = "0.10.0"
+font-kit = "0.14.2"
 
 [dependencies.tauri-plugin-notification]
 version = "2.2.2"

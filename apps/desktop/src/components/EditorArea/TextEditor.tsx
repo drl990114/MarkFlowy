@@ -1,24 +1,8 @@
 /* eslint-disable react-hooks/rules-of-hooks */
-import { Editor as MfEditor, EditorProps as MfEditorProps } from 'rme'
-import {
-  EditorChangeEventParams,
-  EditorChangeHandler,
-  EditorContext,
-  EditorRef,
-  EditorViewType,
-  MfCodemirrorView,
-} from 'rme'
-import { invoke } from '@tauri-apps/api/core'
-import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { useCommandStore, useEditorStateStore, useEditorStore } from '@/stores'
-import { getFileObject, updateFileObject } from '@/helper/files'
-import { createWysiwygDelegate } from 'rme'
-import { createSourceCodeDelegate } from 'rme'
 import { useCommandEvent } from '@/components/EditorArea/editorHooks/CommandEvent'
-import bus from '@/helper/eventBus'
 import { EVENT } from '@/constants'
-import { FileTypeConfig } from '@/helper/fileTypeHandler'
-import { WarningHeader } from './styles'
+import bus from '@/helper/eventBus'
+import { getFileObject, updateFileObject } from '@/helper/files'
 import {
   canvasDataToBinary,
   FileResultCode,
@@ -26,18 +10,31 @@ import {
   getFileNameFromPath,
   getFolderPathFromPath,
 } from '@/helper/filesys'
+import { FileTypeConfig } from '@/helper/fileTypeHandler'
+import { useCommandStore, useEditorStateStore, useEditorStore } from '@/stores'
 import useAppSettingStore from '@/stores/useAppSettingStore'
-import { save } from '@tauri-apps/plugin-dialog'
-import { useTranslation } from 'react-i18next'
-import { debounce, DebouncedFunc } from 'lodash'
-import { createWysiwygDelegateOptions } from './createWysiwygDelegateOptions'
-import { useMount, useUnmount } from 'react-use'
 import useEditorCounterStore from '@/stores/useEditorCounterStore'
-import { toast } from 'zens'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
-import html2canvas from 'html2canvas'
 import * as Sentry from '@sentry/react'
+import { invoke } from '@tauri-apps/api/core'
+import { save } from '@tauri-apps/plugin-dialog'
+import html2canvas from 'html2canvas'
+import { debounce, DebouncedFunc } from 'lodash'
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useMount, useUnmount } from 'react-use'
+import {
+  createSourceCodeDelegate, createWysiwygDelegate, EditorChangeEventParams,
+  EditorChangeHandler,
+  EditorContext,
+  EditorRef,
+  EditorViewType,
+  MfCodemirrorView, Editor as MfEditor, EditorProps as MfEditorProps
+} from 'rme'
+import { toast } from 'zens'
+import { createWysiwygDelegateOptions } from './createWysiwygDelegateOptions'
 import { EditorWrapper } from './EditorWrapper'
+import { WarningHeader } from './styles'
 
 type SaveHandlerParams = {
   /**

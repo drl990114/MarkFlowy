@@ -151,6 +151,14 @@
         "line_height": {
           "label": "Line height",
           "desc": "Set the root line height of the editor."
+        },
+        "font_family": {
+          "label": "Font family",
+          "desc": "Set the root font family of the editor."
+        },
+        "code_font_family": {
+          "label": "Code font family",
+          "desc": "Set the code font family of the editor."
         }
       }
     },

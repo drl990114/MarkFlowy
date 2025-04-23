@@ -151,6 +151,14 @@
         "line_height": {
           "label": "Altura de línea",
           "desc": "Establecer la altura de línea base del editor."
+        },
+        "font_family": {
+          "label": "Familia de fuentes",
+          "desc": "Defina la familia de fuentes raíz del editor."
+        },
+        "code_font_family": {
+          "label": "Code Familia tipográfico",
+          "desc": "Establezca la familia de fuentes de código del editor."
         }
       }
     },

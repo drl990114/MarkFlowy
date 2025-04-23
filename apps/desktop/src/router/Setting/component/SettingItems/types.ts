@@ -21,3 +21,9 @@ export function isSliderSettingItem(
 ): item is Setting.SliderSettingItem {
   return item.type === 'slider'
 }
+
+export function isFontListSelectSettingItem(
+  item: Setting.SettingItem,
+): item is Setting.FontListSelectSettingItem {
+  return item.type === 'fontListSelect'
+}
