@@ -5891,7 +5891,7 @@ __metadata:
     react-use: "npm:^17.5.1"
     remixicon: "npm:^4.5.0"
     rimraf: "npm:^6.0.1"
-    rme: "npm:0.1.9"
+    rme: "npm:0.1.11"
     styled-components: "npm:^6.1.13"
     stylis: "npm:^4.3.4"
     tinykeys: "npm:^3.0.0"
@@ -6007,7 +6007,7 @@ __metadata:
     rehype-slug: "npm:^6.0.0"
     remark-gfm: "npm:^4.0.0"
     rimraf: "npm:^6.0.1"
-    rme: "npm:0.1.9"
+    rme: "npm:0.1.11"
     styled-components: "npm:^6.1.13"
     styled-jsx: "npm:^5.1.6"
     stylis: "npm:^4.3.4"
@@ -16406,16 +16406,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lib0@npm:^0.2.98":
-  version: 0.2.98
-  resolution: "lib0@npm:0.2.98"
+"lib0@npm:^0.2.99":
+  version: 0.2.104
+  resolution: "lib0@npm:0.2.104"
   dependencies:
     isomorphic.js: "npm:^0.2.4"
   bin:
     0ecdsa-generate-keypair: bin/0ecdsa-generate-keypair.js
     0gentesthtml: bin/gentesthtml.js
     0serve: bin/0serve.js
-  checksum: 10/8ec7fb66e211b5041d988e93d768b47946f820dfbf65b9aeb5350041b09ec6fa86d528dc1605fc79eb4d66db6b5391a0e6bf73392c3d53f5a4601430664712c9
+  checksum: 10/f85e656ea7f0cd37b9f9a1e046152c0e871b50d526a22f57b01b2182177605ade3ede599e09eeb50dac623d2f173a7d8325827b455337740449a550332c5326e
   languageName: node
   linkType: hard
 
@@ -21419,9 +21419,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rme@npm:0.1.9":
-  version: 0.1.9
-  resolution: "rme@npm:0.1.9"
+"rme@npm:0.1.11":
+  version: 0.1.11
+  resolution: "rme@npm:0.1.11"
   dependencies:
     "@codemirror/autocomplete": "npm:^6.8.1"
     "@codemirror/commands": "npm:^6.2.4"
@@ -21491,12 +21491,12 @@ __metadata:
     stylis: "npm:^4.3.4"
     svgmoji: "npm:^3.2.0"
     void-elements: "npm:^3.1.0"
-    yjs: "npm:^13.6.20"
+    yjs: "npm:^13.6.24"
     zens: "npm:^0.0.44"
   peerDependencies:
     react: ">=16.14.0"
     react-dom: ">=16.14.0"
-  checksum: 10/c2ea28b98eb2abd0e56a6cb3782c4a57fc21c13137160d3b1aee821dc1383f6f9377d9453da04b95f1523c98789f73fafc3e21f38fe94d23edcd331c0997a4c6
+  checksum: 10/d9c035d554eef4e7ca53096bb4143988dd622d3ced016c77d104e89c88102bc6a77548ca0d6812456be2bd13ac702684e5eb4146c94a25df5313e7d09d0c2dbf
   languageName: node
   linkType: hard
 
@@ -24555,12 +24555,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yjs@npm:^13.6.20":
-  version: 13.6.20
-  resolution: "yjs@npm:13.6.20"
+"yjs@npm:^13.6.24":
+  version: 13.6.26
+  resolution: "yjs@npm:13.6.26"
   dependencies:
-    lib0: "npm:^0.2.98"
-  checksum: 10/7c64494f8bff24a95e237ed0e0c561efb9e8d451655620f04963dbbe5910b60e8ea978a0048fa377477493cbacbf002220f39445cf2ede298dc9a0f20ed5b942
+    lib0: "npm:^0.2.99"
+  checksum: 10/fa9c0d2fcd40da2019fc38ebe02e08c81c5e811423c87b35c5c6ebf193217a49fa0783a02031968b25579be359525e9bec64070669ac524d3cbcd23b00de3cc9
   languageName: node
   linkType: hard
 
