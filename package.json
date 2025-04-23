@@ -20,7 +20,7 @@
     "test": "turbo test",
     "updater": "yarn workspace @markflowy/desktop updater",
     "lint": "eslint --fix --ext .tsx ./",
-    "translate:locals": "node scripts/translate-locals.js",
+    "translate:locals": "node --env-file=.env scripts/translate-locals.js",
     "translate:check": "node scripts/translate-check.js"
   },
   "devDependencies": {
