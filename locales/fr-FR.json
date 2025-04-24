@@ -208,6 +208,11 @@
           "desc": "Liste de modèles, avec un nom de modèle divisé par une virgule, par défaut \"\""
         }
       }
+    },
+    "resetAppConf": {
+      "label": "Réinitialiser la configuration de l'application",
+      "desc": "Réinitialiser la configuration de l'application et restaurer les paramètres par défaut. Cette action réinitialise tous les paramètres, y compris le thème, la langue, l'enregistrement automatique, etc., et ne peut pas être restauré.",
+      "success": "La configuration de l'application a été réinitialisée à la valeur par défaut."
     }
   },
   "updater": {

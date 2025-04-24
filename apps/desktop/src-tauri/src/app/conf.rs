@@ -166,6 +166,22 @@ impl AppConf {
         self
     }
 
+    pub fn reset(self) -> Self {
+        let path = &Self::file_path();
+        if exists(path) {
+            std::fs::remove_file(path).unwrap_or_else(|_err| {
+                Self::default().write();
+            });
+        }
+        if let Ok(v) = serde_json::to_string_pretty(&self) {
+            std::fs::write(path, v).unwrap_or_else(|_err| {
+                Self::default().write();
+            });
+        } else {
+        }
+        self
+    }
+
     pub fn amend(self, json: Value) -> Self {
         let val = serde_json::to_value(&self).unwrap();
         let mut config: BTreeMap<String, Value> = serde_json::from_value(val).unwrap();
@@ -236,7 +252,7 @@ pub mod cmd {
 
     #[command]
     pub fn reset_app_conf() -> AppConf {
-        AppConf::default().write()
+        AppConf::default().reset()
     }
 
     #[command]

@@ -121,6 +121,8 @@ export const Container = styled.div`
     overflow: auto;
 
     & .conf-path {
+      display: flex;
+      align-items: center;
       margin-bottom: 0.5rem;
 
       a {
