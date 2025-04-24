@@ -1,9 +1,12 @@
 import Logo from '@/assets/logo.svg?react'
+import { MODAL_CONFIRM_ID } from '@/components/Modal'
 import { CopyButton } from '@/components/UI/Button'
 import { installUpdate } from '@/helper/updater'
 import type { SettingData } from '@/router/Setting/settingMap'
 import settingMap from '@/router/Setting/settingMap'
+import { appSettingStoreSetup } from '@/services/app-setting'
 import useAppInfoStore from '@/stores/useAppInfoStore'
+import NiceModal from '@ebay/nice-modal-react'
 import { invoke } from '@tauri-apps/api/core'
 import type { Update } from '@tauri-apps/plugin-updater'
 import { check } from '@tauri-apps/plugin-updater'
@@ -11,7 +14,7 @@ import classNames from 'classnames'
 import type { ReactNode } from 'react'
 import { memo, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button } from 'zens'
+import { Button, toast } from 'zens'
 import SettingGroup from './component/SettingGroup'
 import { KeyboardTable } from './KeyboardTable'
 import { Container } from './styles'
@@ -124,9 +127,27 @@ function Setting() {
       </div>
       <div id='detail'>
         <div className='conf-path'>
-          <small>
+          <span>
             Path: {confPath} <CopyButton text={confPath} />
-          </small>
+          </span>
+          <Button
+            size='small'
+            onClick={() => {
+              NiceModal.show(MODAL_CONFIRM_ID, {
+                title: t('settings.resetAppConf.desc'),
+                onConfirm: () => {
+                  invoke('reset_app_conf').then(async () => {
+                    await appSettingStoreSetup()
+                    toast.success(t('settings.resetAppConf.success'))
+                  }).catch((err) => {
+                    toast.error(String(err))
+                  })
+                },
+              })
+            }}
+          >
+            {t('settings.resetAppConf.label')}
+          </Button>
         </div>
         {renderCurrentSettingData()}
       </div>

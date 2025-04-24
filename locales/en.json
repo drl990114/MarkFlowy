@@ -211,6 +211,11 @@
           "desc": "A model list separated by commas, default is \"\""
         }
       }
+    },
+    "resetAppConf": {
+      "label": "Reset Application Configuration",
+      "desc": "Reset the application configuration to restore the default settings. This will reset all settings, including theme, language, autosave, etc., and cannot be restored.",
+      "success": "The app configuration has been reset to default values."
     }
   },
   "updater": {
