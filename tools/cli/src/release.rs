@@ -1,9 +1,11 @@
 use clap::Parser;
 use serde_json::{Map, Value};
-use std::process::Command;
+use std::{process::Command, thread::sleep, time::Duration};
 use toml;
 
 use crate::utils;
+use std::fs;
+use std::time::SystemTime;
 
 #[derive(Parser)]
 #[command(about = "bump the version of the project")]
@@ -59,10 +61,41 @@ fn write_new_version(new_version: String) {
 
     std::io::stdin().read_line(&mut input).unwrap();
 
+    fn wait_for_cargo_lock_update() {
+        let cargo_lock_path = "Cargo.lock";
+        let initial_modified = fs::metadata(cargo_lock_path)
+            .unwrap()
+            .modified()
+            .unwrap();
+        
+        let max_wait = Duration::from_secs(10);
+        let start = SystemTime::now();
+        
+        loop {
+            if let Ok(metadata) = fs::metadata(cargo_lock_path) {
+                if let Ok(current_modified) = metadata.modified() {
+                    if current_modified > initial_modified {
+                        break;
+                    }
+                }
+            }
+            
+            if SystemTime::now().duration_since(start).unwrap() > max_wait {
+                println!("Warning: Cargo.lock update timeout after 10 seconds");
+                break;
+            }
+            
+            sleep(Duration::from_millis(100));
+        }
+    }
+
     if input.trim() == "y" {
         println!("Releasing version: {new_version}");
         std::fs::write(PACKAGEFILE_URL, new_package_str).unwrap();
         std::fs::write(CRATESFILE_URL, new_crates_str).unwrap();
+        
+        wait_for_cargo_lock_update();
+        
         Command::new("git")
             .arg("add")
             .arg(".")
