@@ -1,5 +1,33 @@
 # UPDATE LOG
 
+## v0.23.1
+
+Features:
+
+- Support custom editor font family.
+
+- Support reset app settings.
+
+- Change default code font to Fira Code.
+
+Fixs:
+
+- Fix create new file display empty.
+
+---
+
+特性：
+
+- 支持自定义编辑器字体。
+
+- 支持重置应用设置。
+
+- 将默认代码字体更改为 Fira Code。
+
+修复：
+
+- 修复新建文件显示空白的问题。
+
 ## v0.22.1
 
 Features:
