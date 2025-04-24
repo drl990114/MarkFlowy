@@ -24,12 +24,16 @@ import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useStat
 import { useTranslation } from 'react-i18next'
 import { useMount, useUnmount } from 'react-use'
 import {
-  createSourceCodeDelegate, createWysiwygDelegate, EditorChangeEventParams,
+  createSourceCodeDelegate,
+  createWysiwygDelegate,
+  EditorChangeEventParams,
   EditorChangeHandler,
   EditorContext,
   EditorRef,
   EditorViewType,
-  MfCodemirrorView, Editor as MfEditor, EditorProps as MfEditorProps
+  MfCodemirrorView,
+  Editor as MfEditor,
+  EditorProps as MfEditorProps,
 } from 'rme'
 import { toast } from 'zens'
 import { createWysiwygDelegateOptions } from './createWysiwygDelegateOptions'
@@ -67,9 +71,7 @@ function TextEditor(props: TextEditorProps) {
           },
         })
       } else {
-        return createWysiwygDelegate(
-          createWysiwygDelegateOptions(getFolderPathFromPath(file.path)),
-        )
+        return createWysiwygDelegate(createWysiwygDelegateOptions(getFolderPathFromPath(file.path)))
       }
     },
     [id],
@@ -83,7 +85,9 @@ function TextEditor(props: TextEditorProps) {
   const { t } = useTranslation()
   const { settingData } = useAppSettingStore()
   const [content, setContent] = useState<string>()
-  const [delegate, setDelegate] = useState(createDelegate())
+  const [delegate, setDelegate] = useState(
+    createDelegate(fileTypeConfig.defaultMode, fileTypeConfig.type),
+  )
 
   const debounceSaveHandlerCacheRef = useRef<DebouncedFunc<() => Promise<void>>>()
   const noFileSaveingRef = useRef(false)
