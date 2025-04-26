@@ -1,24 +1,26 @@
+import bus from '@/helper/eventBus'
+import { getFileObject, getFileObjectByPath } from '@/helper/files'
+import { readDirectory } from '@/helper/filesys'
 import { checkUpdate } from '@/helper/updater'
 import { i18nInit } from '@/i18n'
 import { appSettingStoreSetup } from '@/services/app-setting'
+import { addExistingMarkdownFileEdit } from '@/services/editor-file'
+import { getFileContent } from '@/services/file-info'
+import { useEditorStore } from '@/stores'
+import type { WorkspaceInfo } from '@/stores/useOpenedCacheStore'
+import useOpenedCacheStore from '@/stores/useOpenedCacheStore'
+import { useSuspenseQuery } from '@tanstack/react-query'
 import { invoke } from '@tauri-apps/api/core'
+import { listen } from '@tauri-apps/api/event'
+import { LazyStore } from '@tauri-apps/plugin-store'
+import { once } from 'lodash'
+import { useCallback, useEffect } from 'react'
+import { toast } from 'zens'
+import { useGlobalKeyboard, useGlobalOSInfo } from '.'
+import __MF__ from '../context'
 import { isArray } from '../helper'
 import useExtensionsManagerStore from '../stores/useExtensionsManagerStore'
 import useThemeStore, { isBuiltInTheme } from '../stores/useThemeStore'
-import { toast } from 'zens'
-import { useCallback, useEffect } from 'react'
-import __MF__ from '../context'
-import { useSuspenseQuery } from '@tanstack/react-query'
-import { listen } from '@tauri-apps/api/event'
-import bus from '@/helper/eventBus'
-import type { WorkspaceInfo } from '@/stores/useOpenedCacheStore'
-import useOpenedCacheStore from '@/stores/useOpenedCacheStore'
-import { useEditorStore } from '@/stores'
-import { readDirectory } from '@/helper/filesys'
-import { getFileObject, getFileObjectByPath } from '@/helper/files'
-import { useGlobalKeyboard, useGlobalOSInfo } from '.'
-import { once } from 'lodash'
-import { LazyStore } from '@tauri-apps/plugin-store'
 
 async function appThemeExtensionsSetup(curTheme: string) {
   if (isBuiltInTheme(curTheme)) {
@@ -46,6 +48,34 @@ async function appWorkspaceSetup() {
   const { setRecentWorkspaces } = useOpenedCacheStore.getState()
   const { setFolderData, addOpenedFile, setActiveId } = useEditorStore.getState()
 
+  console.log('window.openedUrls', window.openedUrls)
+  
+  if (window.openedUrls) {
+    const openedPath = window.openedUrls.split('file://')[1]
+
+    const isFolder = (path: string) => {
+      const fileName = path.split('/').pop()
+      return fileName === undefined || fileName === '' || fileName.includes('.')
+    }
+
+    console.log('isFolder', isFolder(openedPath))
+    if (isFolder(openedPath)) {
+      readDirectory(openedPath).then((res) => {
+        setFolderData(res)
+      })
+    } else {
+      const fileContent = await getFileContent({ filePath: openedPath })
+      if (!fileContent) return
+      const fileName = openedPath.split('/').pop() || 'new-file.md'
+      await addExistingMarkdownFileEdit({
+        fileName,
+        content: fileContent,
+        path: openedPath,
+      })
+    }
+
+    return
+  }
   try {
     const cacheStore = await new LazyStore('.markflowy_cache.dat')
 

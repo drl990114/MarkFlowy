@@ -1,4 +1,5 @@
 {
+  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "MarkFlowy",
   "version": "0.23.1",
   "identifier": "com.drl990114.markflowy",
@@ -24,6 +25,19 @@
   },
   "bundle": {
     "active": true,
+    "fileAssociations": [
+      {
+        "ext": [
+          ".md",
+          ".markdown",
+          ".json"
+        ],
+        "name": "markflowy.file",
+        "description": "File",
+        "mimeType": "text/plain",
+        "role": "Editor"
+      }
+    ],
     "createUpdaterArtifacts": "v1Compatible",
     "category": "DeveloperTool",
     "icon": [

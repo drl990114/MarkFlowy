@@ -3,16 +3,15 @@ mod fc;
 mod menu;
 mod search;
 mod setup;
-mod font;
 
-use std::collections::HashMap;
 use std::path::PathBuf;
 use std::sync;
+use std::{collections::HashMap, sync::Mutex};
 
 use app::{bookmarks, conf, extensions, keybindings, opened_cache, process, themes};
 use dotenv;
 use lazy_static::lazy_static;
-use tauri::{Manager, Runtime};
+use tauri::{Manager, Runtime, State};
 use tauri_plugin_window_state::{AppHandleExt, StateFlags};
 use tracing_subscriber;
 #[cfg(target_os = "macos")]
@@ -28,6 +27,8 @@ lazy_static! {
     };
 }
 
+struct OpenedUrls(Mutex<Option<Vec<url::Url>>>);
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tracing_subscriber::fmt::init();
@@ -36,6 +37,7 @@ pub fn run() {
     let context = tauri::generate_context!();
 
     tauri::Builder::default()
+        .manage(OpenedUrls(Default::default()))
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_store::Builder::default().build())
@@ -78,13 +80,29 @@ pub fn run() {
             extensions::cmd::extensions_init,
             process::app_exit,
             process::app_restart,
-            themes::cmd::load_themes,
-            font::cmd::font_list
+            themes::cmd::load_themes
         ])
-        .setup(|app| {
+        .setup(|app: &mut tauri::App| {
             let home_dir_path = app.path().home_dir().expect("failed to get home dir");
             APP_DIR.lock().unwrap().insert(0, home_dir_path);
-            setup::init(app).expect("failed to setup app");
+
+            let opened_urls: State<OpenedUrls> = app.state();
+            let file_urls = opened_urls.inner().to_owned();
+
+            let opened_urls = if let Some(urls) = &*file_urls.0.lock().unwrap() {
+                urls.iter()
+                    .map(|u| {
+                        urlencoding::decode(u.as_str())
+                            .unwrap()
+                            .replace("\\", "\\\\")
+                    })
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            } else {
+                "".into()
+            };
+
+            setup::init(app, opened_urls).expect("failed to setup app");
 
             #[cfg(target_os = "macos")]
             menu::generate_menu(app).expect("failed to generate menu");
@@ -93,10 +111,22 @@ pub fn run() {
         })
         .on_window_event(|window, event| {
             let app = window.app_handle();
-            app.save_window_state(StateFlags::all());
+            let _ = app.save_window_state(StateFlags::all());
         })
-        .run(context)
-        .expect("error while running tauri application");
+        .build(context)
+        .unwrap()
+        .run(|app, event| {
+            #[cfg(target_os = "macos")]
+            match event {
+                tauri::RunEvent::Opened { urls, .. } => {
+                    let opened_urls = app.try_state::<OpenedUrls>();
+                    if let Some(u) = opened_urls {
+                        u.0.lock().unwrap().replace(urls);
+                    }
+                }
+                _ => (),
+            }
+        });
 }
 
 #[cfg(target_os = "macos")]
@@ -149,3 +179,4 @@ impl<R: Runtime> WindowExt for tauri::Window<R> {
         }
     }
 }
+

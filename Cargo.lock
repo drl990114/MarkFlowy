@@ -3565,6 +3565,8 @@ dependencies = [
  "tracing",
  "tracing-subscriber",
  "trash",
+ "url",
+ "urlencoding",
  "window-vibrancy 0.5.2",
 ]
 
