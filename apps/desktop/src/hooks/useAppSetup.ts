@@ -51,15 +51,13 @@ async function appWorkspaceSetup() {
   console.log('window.openedUrls', window.openedUrls)
   
   if (window.openedUrls) {
-    const openedPath = window.openedUrls.split('file://')[1]
+    
+    const openedPath = window.openedUrls
 
-    const isFolder = (path: string) => {
-      const fileName = path.split('/').pop()
-      return fileName === undefined || fileName === '' || fileName.includes('.')
-    }
+    const isDir = await invoke<boolean>('is_dir', { path: openedPath })
 
-    console.log('isFolder', isFolder(openedPath))
-    if (isFolder(openedPath)) {
+    console.log('isFolder', isDir)
+    if (isDir) {
       readDirectory(openedPath).then((res) => {
         setFolderData(res)
       })
