@@ -1,3 +1,8 @@
+#![cfg_attr(
+    all(not(debug_assertions), target_os = "windows"),
+    windows_subsystem = "windows"
+)]
+
 mod app;
 mod fc;
 mod menu;
@@ -7,6 +12,7 @@ mod setup;
 use std::path::PathBuf;
 use std::sync;
 use std::{collections::HashMap, sync::Mutex};
+use std::env;
 
 use app::{bookmarks, conf, extensions, keybindings, opened_cache, process, themes};
 use dotenv;
@@ -62,6 +68,8 @@ pub fn run() {
             fc::cmd::rename_fs,
             fc::cmd::trash_delete,
             fc::cmd::export_html_to_path,
+            fc::cmd::is_dir,
+            fc::cmd::get_path_name,
             conf::cmd::get_app_conf_path,
             conf::cmd::get_app_conf,
             conf::cmd::reset_app_conf,
@@ -88,6 +96,21 @@ pub fn run() {
 
             let opened_urls: State<OpenedUrls> = app.state();
             let file_urls = opened_urls.inner().to_owned();
+
+            #[cfg(any(windows, target_os = "linux"))]
+            {
+                // NOTICE: `args` may include URL protocol (`your-app-protocol://`) or arguments (`--`) if app supports them.
+                let mut urls = Vec::new();
+                for arg in env::args().skip(1) {
+                    if let Ok(url) = url::Url::parse(&arg) {
+                        urls.push(url);
+                    }
+                }
+
+                if !urls.is_empty() {
+                    file_urls.0.lock().unwrap().replace(urls);
+                }
+            }
 
             let opened_urls = if let Some(urls) = &*file_urls.0.lock().unwrap() {
                 urls.iter()
@@ -179,4 +202,3 @@ impl<R: Runtime> WindowExt for tauri::Window<R> {
         }
     }
 }
-
