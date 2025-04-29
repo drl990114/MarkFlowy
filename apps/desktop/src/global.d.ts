@@ -1,6 +1,6 @@
 declare global {
   interface Window {
-    openedUrls: string
+    openedUrls: string | null
   }
 }
 

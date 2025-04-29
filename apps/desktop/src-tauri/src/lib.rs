@@ -120,7 +120,7 @@ pub fn run() {
                             .replace("\\", "\\\\")
                     })
                     .collect::<Vec<_>>()
-                    .join(", ")
+                    .join(",")
             } else {
                 "".into()
             };

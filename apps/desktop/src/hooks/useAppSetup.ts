@@ -49,27 +49,71 @@ async function appWorkspaceSetup() {
   const { setFolderData, addOpenedFile, setActiveId } = useEditorStore.getState()
 
   console.log('window.openedUrls', window.openedUrls)
-  
+
   if (window.openedUrls) {
-    
-    const openedPath = window.openedUrls
+    const openedPaths = window.openedUrls?.split(',').map((p) => {
+      if (p.startsWith('file://')) {
+        p = p.slice(7)
+      }
 
-    const isDir = await invoke<boolean>('is_dir', { path: openedPath })
+      return p
+    })
 
-    console.log('isFolder', isDir)
-    if (isDir) {
-      readDirectory(openedPath).then((res) => {
-        setFolderData(res)
-      })
+    window.openedUrls = null
+
+    console.log('openedPaths', openedPaths)
+
+    if (openedPaths.length === 1) {
+      const openedPath = openedPaths[0]
+      const isDir = await invoke<boolean>('is_dir', { path: openedPath })
+
+      if (isDir) {
+        readDirectory(openedPath).then((res) => {
+          setFolderData(res)
+        })
+      } else {
+        const fileContent = await getFileContent({ filePath: openedPath })
+        if (fileContent === null) return
+        const fileName = openedPath.split('/').pop() || 'new-file.md'
+        await addExistingMarkdownFileEdit({
+          fileName,
+          content: fileContent,
+          path: openedPath,
+        })
+      }
     } else {
-      const fileContent = await getFileContent({ filePath: openedPath })
-      if (!fileContent) return
-      const fileName = openedPath.split('/').pop() || 'new-file.md'
-      await addExistingMarkdownFileEdit({
-        fileName,
-        content: fileContent,
-        path: openedPath,
-      })
+      let dirCount = 0
+      let dir: string | null = null
+
+      await Promise.all(
+        openedPaths.map(async (openedPath) => {
+          const isDir = await invoke<boolean>('is_dir', { path: openedPath })
+          if (isDir) {
+            dirCount++
+            dir = openedPath
+          }
+        }),
+      )
+
+      if (dirCount > 0 && dir) {
+        // TODO 这里只打开一个文件夹，后续可以通过多窗口实现
+        readDirectory(dir).then((res) => {
+          setFolderData(res)
+        })
+      } else {
+        await Promise.all(
+          openedPaths.map(async (openedPath) => {
+            const fileContent = await getFileContent({ filePath: openedPath })
+            if (fileContent === null) return
+            const fileName = openedPath.split('/').pop() || 'new-file.md'
+            await addExistingMarkdownFileEdit({
+              fileName,
+              content: fileContent,
+              path: openedPath,
+            })
+          }),
+        )
+      }
     }
 
     return
