@@ -65,7 +65,8 @@
     "openDir": "Abrir Carpeta",
     "recentDir": "Carpetas abiertas recientemente",
     "emptyOpened": "No hay archivos abiertos",
-    "openFile": "Abrir archivo"
+    "openFile": "Abrir archivo",
+    "unsupportedFileType": "Tipos de archivos no compatibles"
   },
   "about": {
     "label": "Acerca de",

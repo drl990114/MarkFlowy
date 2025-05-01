@@ -2,7 +2,7 @@ import { extname } from '@tauri-apps/api/path'
 import { EditorViewType } from 'rme'
 import { IFile } from './filesys'
 
-export type FileType = 'markdown' | 'image' | 'json' | 'text' | 'unknown'
+export type FileType = 'markdown' | 'image' | 'json' | 'text' | 'unsupported'
 
 export interface FileTypeConfig {
   type: FileType
@@ -59,7 +59,7 @@ export async function getFileTypeConfig(file: IFile): Promise<FileTypeConfig> {
 
   return (
     fileTypeConfigs[ext.toLowerCase()] || {
-      type: 'unknown',
+      type: 'unsupported',
       supportedModes: [EditorViewType.SOURCECODE],
       defaultMode: EditorViewType.SOURCECODE,
     }
