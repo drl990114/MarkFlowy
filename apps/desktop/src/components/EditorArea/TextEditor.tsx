@@ -481,8 +481,6 @@ function TextEditor(props: TextEditorProps) {
     return null
   }
 
-  console.log('curFile', fileTypeConfig, curFile)
-
   return (
     <EditorWrapper
       id='editorarea-wrapper'

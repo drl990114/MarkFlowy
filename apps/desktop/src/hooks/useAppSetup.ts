@@ -1,24 +1,26 @@
+import bus from '@/helper/eventBus'
+import { getFileObject, getFileObjectByPath } from '@/helper/files'
+import { readDirectory } from '@/helper/filesys'
 import { checkUpdate } from '@/helper/updater'
 import { i18nInit } from '@/i18n'
 import { appSettingStoreSetup } from '@/services/app-setting'
+import { addExistingMarkdownFileEdit } from '@/services/editor-file'
+import { getFileContent } from '@/services/file-info'
+import { useEditorStore } from '@/stores'
+import type { WorkspaceInfo } from '@/stores/useOpenedCacheStore'
+import useOpenedCacheStore from '@/stores/useOpenedCacheStore'
+import { useSuspenseQuery } from '@tanstack/react-query'
 import { invoke } from '@tauri-apps/api/core'
+import { listen } from '@tauri-apps/api/event'
+import { LazyStore } from '@tauri-apps/plugin-store'
+import { once } from 'lodash'
+import { useCallback, useEffect } from 'react'
+import { toast } from 'zens'
+import { useGlobalKeyboard, useGlobalOSInfo } from '.'
+import __MF__ from '../context'
 import { isArray } from '../helper'
 import useExtensionsManagerStore from '../stores/useExtensionsManagerStore'
 import useThemeStore, { isBuiltInTheme } from '../stores/useThemeStore'
-import { toast } from 'zens'
-import { useCallback, useEffect } from 'react'
-import __MF__ from '../context'
-import { useSuspenseQuery } from '@tanstack/react-query'
-import { listen } from '@tauri-apps/api/event'
-import bus from '@/helper/eventBus'
-import type { WorkspaceInfo } from '@/stores/useOpenedCacheStore'
-import useOpenedCacheStore from '@/stores/useOpenedCacheStore'
-import { useEditorStore } from '@/stores'
-import { readDirectory } from '@/helper/filesys'
-import { getFileObject, getFileObjectByPath } from '@/helper/files'
-import { useGlobalKeyboard, useGlobalOSInfo } from '.'
-import { once } from 'lodash'
-import { LazyStore } from '@tauri-apps/plugin-store'
 
 async function appThemeExtensionsSetup(curTheme: string) {
   if (isBuiltInTheme(curTheme)) {
@@ -46,6 +48,76 @@ async function appWorkspaceSetup() {
   const { setRecentWorkspaces } = useOpenedCacheStore.getState()
   const { setFolderData, addOpenedFile, setActiveId } = useEditorStore.getState()
 
+  console.log('window.openedUrls', window.openedUrls)
+
+  if (window.openedUrls) {
+    const openedPaths = window.openedUrls?.split(',').map((p) => {
+      if (p.startsWith('file://')) {
+        p = p.slice(7)
+      }
+
+      return p
+    })
+
+    window.openedUrls = null
+
+    console.log('openedPaths', openedPaths)
+
+    if (openedPaths.length === 1) {
+      const openedPath = openedPaths[0]
+      const isDir = await invoke<boolean>('is_dir', { path: openedPath })
+
+      if (isDir) {
+        readDirectory(openedPath).then((res) => {
+          setFolderData(res)
+        })
+      } else {
+        const fileContent = await getFileContent({ filePath: openedPath })
+        if (fileContent === null) return
+        const fileName = openedPath.split('/').pop() || 'new-file.md'
+        await addExistingMarkdownFileEdit({
+          fileName,
+          content: fileContent,
+          path: openedPath,
+        })
+      }
+    } else {
+      let dirCount = 0
+      let dir: string | null = null
+
+      await Promise.all(
+        openedPaths.map(async (openedPath) => {
+          const isDir = await invoke<boolean>('is_dir', { path: openedPath })
+          if (isDir) {
+            dirCount++
+            dir = openedPath
+          }
+        }),
+      )
+
+      if (dirCount > 0 && dir) {
+        // TODO 这里只打开一个文件夹，后续可以通过多窗口实现
+        readDirectory(dir).then((res) => {
+          setFolderData(res)
+        })
+      } else {
+        await Promise.all(
+          openedPaths.map(async (openedPath) => {
+            const fileContent = await getFileContent({ filePath: openedPath })
+            if (fileContent === null) return
+            const fileName = openedPath.split('/').pop() || 'new-file.md'
+            await addExistingMarkdownFileEdit({
+              fileName,
+              content: fileContent,
+              path: openedPath,
+            })
+          }),
+        )
+      }
+    }
+
+    return
+  }
   try {
     const cacheStore = await new LazyStore('.markflowy_cache.dat')
 

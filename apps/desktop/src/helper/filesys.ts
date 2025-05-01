@@ -73,7 +73,7 @@ export const createUntitledFile = (): IFile => {
 export const readDirectory = (folderPath: string): Promise<IFile[]> => {
   return new Promise((resolve, reject) => {
     invoke<FileSysResult>('open_folder', { folderPath })
-      .then((message) => {
+      .then(async (message) => {
         if (message.code !== FileResultCode.Success) {
           return
         }
@@ -82,6 +82,7 @@ export const readDirectory = (folderPath: string): Promise<IFile[]> => {
         const entries: IFile[] = []
 
         if (!files || !files.length) {
+          
           resolve([
             {
               id: nanoid(),
@@ -102,10 +103,13 @@ export const readDirectory = (folderPath: string): Promise<IFile[]> => {
 
         wrapFiles(entries)
 
+        const folderName = await invoke<string>('get_path_name', {
+          path: folderPath,
+        })
         resolve([
           {
             id: nanoid(),
-            name: getFileNameFromPath(folderPath),
+            name: folderName,
             path: folderPath,
             kind: 'dir',
             children: entries,
@@ -125,6 +129,10 @@ export function isMdFile(fileName?: string) {
 }
 
 export function getFileNameFromPath(filePath: string) {
+  if (filePath.endsWith('/')) {
+    filePath = filePath.slice(0, -1)
+  }
+
   const regex = /[\/\\]([^\/\\]+)$/
   const match = regex.exec(filePath)
 
