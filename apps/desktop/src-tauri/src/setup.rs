@@ -1,16 +1,18 @@
-use crate::{app::conf::AppConf, WindowExt};
-use tauri::{utils::config::WebviewUrl, App, Manager, Theme, WebviewWindowBuilder, Window};
+use crate::app::conf::AppConf;
+use tauri::{utils::config::WebviewUrl, App, WebviewWindowBuilder};
 
 #[cfg(target_os = "macos")]
 use tauri::TitleBarStyle;
 
-pub fn init(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
+pub fn init(app: &mut App, opened_urls: String) -> Result<(), Box<dyn std::error::Error>> {
     let app = app.handle().clone();
 
     let theme = AppConf::theme_mode();
 
     let mut main_win =
         WebviewWindowBuilder::new(&app, "main".to_string(), WebviewUrl::App("index.html".into()))
+            .initialization_script(&format!("window.openedUrls = `{opened_urls}`"))
+            .initialization_script(&format!("console.log(`window.openedUrl:{opened_urls}`)"))
             .title("MarkFlowy")
             .resizable(true)
             .fullscreen(false)

@@ -354,6 +354,19 @@ pub fn move_files_to_target_folder(
     Ok(path_map_old_to_new)
 }
 
+pub fn is_dir(path: &str) -> bool {
+    let file_path = Path::new(path);
+    file_path.is_dir()
+}
+
+pub fn get_path_name(path: &str) -> String {
+    let file_path = Path::new(path);
+    match file_path.file_name() {
+        Some(name) => name.to_str().unwrap().to_string(),
+        None => String::from(""),
+    }
+}
+
 pub mod cmd {
     use crate::fc;
     use regex::Regex;
@@ -503,5 +516,15 @@ pub mod cmd {
         fs::write(file_path, result.to_string()).expect("ERROR");
 
         String::from("OK")
+    }
+
+    #[tauri::command]
+    pub fn is_dir(path: &str) -> bool {
+        fc::is_dir(path)
+    }
+
+    #[tauri::command]
+    pub fn get_path_name(path: &str) -> String {
+        fc::get_path_name(path)
     }
 }
