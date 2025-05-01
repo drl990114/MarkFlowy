@@ -65,7 +65,8 @@
     "openDir": "打开文件夹",
     "openFile": "打开文件",
     "recentDir": "最近打开的文件夹",
-    "emptyOpened": "没有打开的文件"
+    "emptyOpened": "没有打开的文件",
+    "unsupportedFileType": "不支持的文件类型"
   },
   "about": {
     "label": "关于",

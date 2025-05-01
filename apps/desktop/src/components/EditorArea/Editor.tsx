@@ -9,6 +9,7 @@ import { MfCodemirrorView } from 'rme'
 import { PreviewContent } from './preview/PreviewContent'
 import { EditorPathContainer } from './styles'
 import TextEditor from './TextEditor'
+import { UnsupportedFileType } from './UnsupportedFileType'
 
 export const sourceCodeCodemirrorViewMap: Map<string, MfCodemirrorView> = new Map()
 
@@ -51,7 +52,9 @@ function Editor(props: EditorProps) {
         </EditorPathContainer>
       ) : null}
       <div className={cls}>
-        {isTextfileType(curFileTypeConfig) ? (
+        {curFileTypeConfig.type === 'unsupported' ? (
+          <UnsupportedFileType />
+        ) : isTextfileType(curFileTypeConfig) ? (
           <TextEditor fileTypeConfig={curFileTypeConfig} active={active} id={id} />
         ) : (
           <PreviewContent type={curFileTypeConfig.type} filePath={curFile.path} active={active} />

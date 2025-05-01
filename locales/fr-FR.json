@@ -62,7 +62,8 @@
     "openDir": "ouvrir le dossier",
     "recentDir": "Dossiers récemment ouverts",
     "emptyOpened": "Aucun fichier ouvert",
-    "openFile": "Ouvrir un fichier"
+    "openFile": "Ouvrir un fichier",
+    "unsupportedFileType": "Types de fichiers non pris en charge"
   },
   "about": {
     "label": "À propos",
