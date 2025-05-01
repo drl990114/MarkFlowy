@@ -8,7 +8,7 @@
     "dev": "next dev",
     "prebuild": "rimraf .next",
     "precommit": "lint-staged",
-    "build": "NODE_ENV=production next build",
+    "build:prod": "NODE_ENV=production next build",
     "start": "NODE_ENV=production next start",
     "prettier": "prettier --write \"**/*.*\""
   },
