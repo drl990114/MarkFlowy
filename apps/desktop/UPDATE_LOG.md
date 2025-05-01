@@ -1,5 +1,37 @@
 # UPDATE LOG
 
+## v0.24.0
+
+Happy International Labor Day, everyone！
+
+Features:
+
+- Support opening files through the `Open with` menu.
+
+- Support drag and drop folder in app icon to open.
+
+Fixs:
+
+- Fix input chinese cursor instability in chrome.
+
+- Fix json file edit highlight error.
+
+---
+
+祝大家国际劳动节快乐！
+
+特性：
+
+- 支持通过文件的 `打开方式` 菜单打开文件。
+
+- 支持将文件夹拖放到应用图标上打开。
+
+修复：
+
+- 修复在 Chrome 中输入中文时光标不稳定的问题。
+
+- 修复 JSON 文件编辑高亮错误的问题。
+
 ## v0.23.1
 
 Features:
