@@ -8,6 +8,7 @@ mod fc;
 mod menu;
 mod search;
 mod setup;
+mod font;
 
 use std::env;
 use std::path::PathBuf;
@@ -43,7 +44,6 @@ pub fn run() {
     let context = tauri::generate_context!();
 
     tauri::Builder::default()
-        .plugin(tauri_plugin_cli::init())
         .manage(OpenedUrls(Default::default()))
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
@@ -89,7 +89,8 @@ pub fn run() {
             extensions::cmd::extensions_init,
             process::app_exit,
             process::app_restart,
-            themes::cmd::load_themes
+            themes::cmd::load_themes,
+            font::cmd::font_list,
         ])
         .setup(|app: &mut tauri::App| {
             let home_dir_path = app.path().home_dir().expect("failed to get home dir");
