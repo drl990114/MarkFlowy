@@ -94,7 +94,6 @@ pub fn read_directory(dir_path: &str) -> Result<Vec<FileInfo>, FileResultCode> {
             path: file_path.to_str().unwrap().to_string(),
             children,
             ext: file_ext.into(),
-
         };
 
         if is_supported_file_name(&new_file_info.name) || meta.is_dir() {
@@ -399,7 +398,7 @@ pub mod cmd {
                     code: fc::FileResultCode::Success,
                     content: content,
                 }
-            },
+            }
             Err(_) => FileResult {
                 code: fc::FileResultCode::UnknownError,
                 content: String::from("Failed to read directory"),

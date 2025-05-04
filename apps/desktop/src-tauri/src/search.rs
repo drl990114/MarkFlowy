@@ -50,21 +50,13 @@ pub mod cmd {
             let mess = mess.unwrap();
             match mess {
                 manager::SearchResult::FinalResults(fi) => {
-                    let _ = _app.emit_to(
-                        EventTarget::any(),
-                        "search_channel_final",
-                        Some(fi),
-                    );
+                    let _ = _app.emit_to(EventTarget::any(), "search_channel_final", Some(fi));
                 }
                 manager::SearchResult::InterimResult(_fi) => {
                     // let _ = tauri::Manager::get_window(&_app, "main").unwrap().emit("search_channel_unit", Some(fi));
                 }
                 manager::SearchResult::SearchErrors(fi) => {
-                    let _ = _app.emit_to(
-                        EventTarget::any(),
-                        "search_channel_error",
-                        Some(fi),
-                    );
+                    let _ = _app.emit_to(EventTarget::any(), "search_channel_error", Some(fi));
                 }
             }
         });

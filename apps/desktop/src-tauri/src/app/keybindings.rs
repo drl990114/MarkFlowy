@@ -9,12 +9,17 @@ pub struct KeybindingInfo {
     desc: String,
     key_map: Vec<String>,
     // TODO need refactor
-    use_default_event: bool
+    use_default_event: bool,
 }
 
 impl KeybindingInfo {
     pub fn new(id: String, desc: String, key_map: Vec<String>, use_default_event: bool) -> Self {
-        Self { id, desc, key_map, use_default_event }
+        Self {
+            id,
+            desc,
+            key_map,
+            use_default_event,
+        }
     }
 }
 
@@ -36,7 +41,7 @@ impl Keybindings {
                         "Shift".to_string(),
                         "o".to_string(),
                     ],
-                    false
+                    false,
                 ),
             ),
             (
@@ -45,7 +50,7 @@ impl Keybindings {
                     "app:toggle_leftsidebar_visible".to_string(),
                     "toggle left sideBar visible".to_string(),
                     vec!["CommandOrCtrl".to_string(), "l".to_string()],
-                    false
+                    false,
                 ),
             ),
             (
@@ -54,7 +59,7 @@ impl Keybindings {
                     "app:toggle_rightsidebar_visible".to_string(),
                     "toggle right sideBar visible".to_string(),
                     vec!["CommandOrCtrl".to_string(), "r".to_string()],
-                    false
+                    false,
                 ),
             ),
             (
@@ -63,7 +68,7 @@ impl Keybindings {
                     "editor:save".to_string(),
                     "Save current active edit file".to_string(),
                     vec!["CommandOrCtrl".to_string(), "s".to_string()],
-                    false
+                    false,
                 ),
             ),
             (
@@ -72,7 +77,7 @@ impl Keybindings {
                     "editor:find_replace".to_string(),
                     "Find current active edit file".to_string(),
                     vec!["CommandOrCtrl".to_string(), "f".to_string()],
-                    false
+                    false,
                 ),
             ),
             (
@@ -81,7 +86,7 @@ impl Keybindings {
                     "editor:copy".to_string(),
                     "copy selected text".to_string(),
                     vec!["CommandOrCtrl".to_string(), "c".to_string()],
-                    true
+                    true,
                 ),
             ),
             (
@@ -90,7 +95,7 @@ impl Keybindings {
                     "editor:cut".to_string(),
                     "cut selected text".to_string(),
                     vec!["CommandOrCtrl".to_string(), "x".to_string()],
-                    true
+                    true,
                 ),
             ),
             (
@@ -103,7 +108,7 @@ impl Keybindings {
                         "Shift".to_string(),
                         "z".to_string(),
                     ],
-                    true
+                    true,
                 ),
             ),
             (
@@ -112,7 +117,7 @@ impl Keybindings {
                     "editor:undo".to_string(),
                     "undo".to_string(),
                     vec!["CommandOrCtrl".to_string(), "z".to_string()],
-                    true
+                    true,
                 ),
             ),
             (
@@ -121,7 +126,7 @@ impl Keybindings {
                     "editor:paste".to_string(),
                     "paste pasteboard content".to_string(),
                     vec!["CommandOrCtrl".to_string(), "v".to_string()],
-                    true
+                    true,
                 ),
             ),
             (
@@ -130,7 +135,7 @@ impl Keybindings {
                     "editor:toggle_bold".to_string(),
                     "toggle to bold mark".to_string(),
                     vec!["CommandOrCtrl".to_string(), "b".to_string()],
-                    false
+                    false,
                 ),
             ),
             (
@@ -139,7 +144,7 @@ impl Keybindings {
                     "editor:toggle_emphasis".to_string(),
                     "toggle to emphasis mark".to_string(),
                     vec!["CommandOrCtrl".to_string(), "i".to_string()],
-                    false
+                    false,
                 ),
             ),
             (
@@ -148,7 +153,7 @@ impl Keybindings {
                     "editor:toggle_codetext".to_string(),
                     "toggle to code text".to_string(),
                     vec!["CommandOrCtrl".to_string(), "e".to_string()],
-                    false
+                    false,
                 ),
             ),
             (
@@ -161,7 +166,7 @@ impl Keybindings {
                         "Shift".to_string(),
                         "s".to_string(),
                     ],
-                    false
+                    false,
                 ),
             ),
             (
@@ -170,7 +175,7 @@ impl Keybindings {
                     "editor:toggle_heading".to_string(),
                     "toggle to  h[1-6]".to_string(),
                     vec!["CommandOrCtrl".to_string(), "1-6".to_string()],
-                    false
+                    false,
                 ),
             ),
         ]
