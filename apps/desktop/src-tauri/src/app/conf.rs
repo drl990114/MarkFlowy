@@ -2,10 +2,10 @@ use crate::{
     fc::{create_file, exists},
     APP_DIR,
 };
+use etcetera::{choose_app_strategy, AppStrategy, AppStrategyArgs};
 use serde_json::Value;
 use std::{collections::BTreeMap, path::PathBuf};
 use tauri::{Manager, Theme};
-use etcetera::{choose_app_strategy, AppStrategy, AppStrategyArgs};
 
 macro_rules! pub_struct {
   ($name:ident {$($field:ident: $t:ty,)*}) => {
@@ -72,7 +72,7 @@ pub fn app_root() -> PathBuf {
             app_name: "markflowy".to_string(),
         }) {
             Ok(strategy) => strategy.config_dir(),
-            Err(_) => legacy_path // Fallback to legacy path if something goes wrong
+            Err(_) => legacy_path, // Fallback to legacy path if something goes wrong
         }
     }
 }

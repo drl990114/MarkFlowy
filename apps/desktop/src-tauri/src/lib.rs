@@ -9,10 +9,10 @@ mod menu;
 mod search;
 mod setup;
 
+use std::env;
 use std::path::PathBuf;
 use std::sync;
 use std::{collections::HashMap, sync::Mutex};
-use std::env;
 
 use app::{bookmarks, conf, extensions, keybindings, opened_cache, process, themes};
 use dotenv;
@@ -43,6 +43,7 @@ pub fn run() {
     let context = tauri::generate_context!();
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_cli::init())
         .manage(OpenedUrls(Default::default()))
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
