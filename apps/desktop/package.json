@@ -44,7 +44,7 @@
     "i18next": "23.16.0",
     "immer": "^10.1.1",
     "is-promise": "^4.0.0",
-    "jsx-dom-cjs": "^8.1.5",
+    "jsx-dom-cjs": "^8.1.6",
     "lodash": "^4.17.21",
     "nanoid": "^5.0.9",
     "ollama-ai-provider": "^1.2.0",
