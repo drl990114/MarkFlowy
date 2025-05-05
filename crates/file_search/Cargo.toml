@@ -12,7 +12,7 @@ grep = "0.3.1" #ripgrep
 ignore = "0.4.22" #parallel walker from ripgrep
 walkdir = "2.5.0" #walker from ripgrep
 clipboard = "0.5.0" #for clipboard
-dirs = "5.0.1" #for getting config file
+dirs = "6.0.0" #for getting config file
 serde = { version="1.0.206", features=["derive"]}  #save config
 toml = "0.8.11" #config format
 uuid = { version = "1.16.0", features = ["v4"] }

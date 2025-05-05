@@ -3653,7 +3653,7 @@ name = "mf_file_search"
 version = "0.0.1"
 dependencies = [
  "clipboard",
- "dirs 5.0.1",
+ "dirs 6.0.0",
  "grep",
  "ignore",
  "num_cpus",
