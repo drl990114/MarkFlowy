@@ -33,7 +33,7 @@
     "react-dom": "18.3.1",
     "react-is": "18.3.1",
     "rehype-slug": "^6.0.0",
-    "rme": "0.1.12",
+    "rme": "0.1.14",
     "styled-components": "^6.1.13",
     "styled-jsx": "^5.1.6",
     "stylis": "^4.3.4",

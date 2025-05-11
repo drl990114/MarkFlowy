@@ -234,6 +234,19 @@
     },
     "codemirror": {
       "searchInputPlaceholder": "Input language"
+    },
+    "common": {
+      "loading": "Loading",
+      "accept": "Accept"
+    },
+    "ai": {
+      "generate": "Generate",
+      "stop": "Stop",
+      "retry": "Retry",
+      "regenerate": "Regenerate",
+      "preview": "Preview",
+      "error": "Error",
+      "prompt": "Prompt"
     }
   }
 }

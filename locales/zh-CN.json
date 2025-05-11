@@ -224,6 +224,10 @@
     "download_and_install": "下载并安装"
   },
   "editor": {
+    "common": {
+      "loading": "加载中",
+      "accept": "接受"
+    },
     "table": {
       "insertColumnAfter": "向后插入列",
       "insertColumnBefore": "向前插入列",
@@ -234,6 +238,15 @@
     },
     "codemirror": {
       "searchInputPlaceholder": "请输入目标语言"
+    },
+    "ai": {
+      "generate": "生成",
+      "stop": "停止",
+      "retry": "重试",
+      "regenerate": "重新生成",
+      "preview": "预览",
+      "error": "错误",
+      "prompt": "提示"
     }
   }
 }
