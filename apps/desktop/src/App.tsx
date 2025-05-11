@@ -1,11 +1,11 @@
-import { Notifications } from 'zens'
-import { Route, Routes } from 'react-router-dom'
-import { useAppSetup } from './hooks'
 import { Root } from '@/router'
-import { ContextMenu } from './components/UI/ContextMenu/ContextMenu'
+import { Route, Routes } from 'react-router-dom'
+import { Notifications } from 'zens'
+import AppThemeProvider from './AppThemeProvider'
 import { Modal } from './components'
 import { MODAL_CONFIRM_ID, MODAL_INPUT_ID } from './components/Modal'
-import AppThemeProvider from './AppThemeProvider'
+import { ContextMenu } from './components/UI/ContextMenu/ContextMenu'
+import { useAppSetup } from './hooks'
 
 function App() {
   useAppSetup()

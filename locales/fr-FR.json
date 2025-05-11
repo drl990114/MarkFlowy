@@ -231,6 +231,19 @@
     },
     "codemirror": {
       "searchInputPlaceholder": "Langue d'entrée"
+    },
+    "common": {
+      "loading": "Chargement en",
+      "accept": "Accepter"
+    },
+    "ai": {
+      "generate": "Générer",
+      "stop": "Arrêter",
+      "retry": "Réessayer",
+      "regenerate": "Régénérer",
+      "preview": "Aperçu",
+      "error": "Erreur",
+      "prompt": "Astuces"
     }
   },
   "placeholder": {

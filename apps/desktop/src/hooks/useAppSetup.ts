@@ -1,3 +1,4 @@
+import useAiChatStore from '@/extensions/ai/useAiChatStore'
 import bus from '@/helper/eventBus'
 import { getFileObject, getFileObjectByPath } from '@/helper/files'
 import { readDirectory } from '@/helper/filesys'
@@ -7,6 +8,7 @@ import { appSettingStoreSetup } from '@/services/app-setting'
 import { addExistingMarkdownFileEdit } from '@/services/editor-file'
 import { getFileContent } from '@/services/file-info'
 import { useEditorStore } from '@/stores'
+import useAppSettingStore from '@/stores/useAppSettingStore'
 import type { WorkspaceInfo } from '@/stores/useOpenedCacheStore'
 import useOpenedCacheStore from '@/stores/useOpenedCacheStore'
 import { useSuspenseQuery } from '@tanstack/react-query'
@@ -189,7 +191,14 @@ const listener = (event: MessageEvent) => {
   }
 }
 
+const useMainStoreSetup = () => {
+  useAppSettingStore()
+  useAiChatStore()
+}
+
 const appSetup = once(async function () {
+  useMainStoreSetup()
+
   const settingData = await appSettingStoreSetup()
 
   appWorkspaceSetup()
