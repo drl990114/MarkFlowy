@@ -1,5 +1,25 @@
 # UPDATE LOG
 
+## v0.25.0
+
+Features:
+
+- Support AI generation within documents, create AI nodes through slash menu.
+
+Fixs:
+
+- Fix font list loading error.
+
+---
+
+特性：
+
+- 支持在文档内生成 AI 节点，通过斜杠菜单创建。
+
+修复：
+
+- 修复字体列表加载错误的问题。
+
 ## v0.24.0
 
 Happy International Labor Day, everyone！
