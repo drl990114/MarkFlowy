@@ -88,6 +88,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@ai-sdk/provider-utils@npm:2.2.8":
+  version: 2.2.8
+  resolution: "@ai-sdk/provider-utils@npm:2.2.8"
+  dependencies:
+    "@ai-sdk/provider": "npm:1.1.3"
+    nanoid: "npm:^3.3.8"
+    secure-json-parse: "npm:^2.7.0"
+  peerDependencies:
+    zod: ^3.23.8
+  checksum: 10/3aa8fce97c78d1c78e0c35e82425d4634957dfd16d5d8228994eef5ada71b9d5a1b0b9c2edb81db8cca106d90607c1798970e2e5ec74730cb8058bd7d900144a
+  languageName: node
+  linkType: hard
+
 "@ai-sdk/provider-utils@npm:^2.0.0":
   version: 2.1.13
   resolution: "@ai-sdk/provider-utils@npm:2.1.13"
@@ -123,39 +136,43 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ai-sdk/react@npm:1.1.19":
-  version: 1.1.19
-  resolution: "@ai-sdk/react@npm:1.1.19"
+"@ai-sdk/provider@npm:1.1.3":
+  version: 1.1.3
+  resolution: "@ai-sdk/provider@npm:1.1.3"
   dependencies:
-    "@ai-sdk/provider-utils": "npm:2.1.10"
-    "@ai-sdk/ui-utils": "npm:1.1.16"
+    json-schema: "npm:^0.4.0"
+  checksum: 10/b094ca2f08001d4d34a0dcdf9fbe1b6eeedeaf0cf1568ce148d67b04333fd959cca60f888a24522b6d74114eabbc469f762d290d08096adec992a3c6de23756a
+  languageName: node
+  linkType: hard
+
+"@ai-sdk/react@npm:1.2.12":
+  version: 1.2.12
+  resolution: "@ai-sdk/react@npm:1.2.12"
+  dependencies:
+    "@ai-sdk/provider-utils": "npm:2.2.8"
+    "@ai-sdk/ui-utils": "npm:1.2.11"
     swr: "npm:^2.2.5"
     throttleit: "npm:2.1.0"
   peerDependencies:
     react: ^18 || ^19 || ^19.0.0-rc
-    zod: ^3.0.0
+    zod: ^3.23.8
   peerDependenciesMeta:
-    react:
-      optional: true
     zod:
       optional: true
-  checksum: 10/4235de05ae45df5cf9a0332d45f54d1af2034f194e7648f4ff4a3969053c5e32a22f2d9e2292ec02d3a1aa43876bde1564c4d9fbd7b36d861e7a3f673aaa772c
+  checksum: 10/1809d785f8c9df65620576aa04d08d1ca1d1e3905518d833837d5cc5c2d489e31ffecb78c301ac209e354dc4f8b13d48ccea0966d3bbc5b654aab1633c19b6ca
   languageName: node
   linkType: hard
 
-"@ai-sdk/ui-utils@npm:1.1.16":
-  version: 1.1.16
-  resolution: "@ai-sdk/ui-utils@npm:1.1.16"
+"@ai-sdk/ui-utils@npm:1.2.11":
+  version: 1.2.11
+  resolution: "@ai-sdk/ui-utils@npm:1.2.11"
   dependencies:
-    "@ai-sdk/provider": "npm:1.0.9"
-    "@ai-sdk/provider-utils": "npm:2.1.10"
+    "@ai-sdk/provider": "npm:1.1.3"
+    "@ai-sdk/provider-utils": "npm:2.2.8"
     zod-to-json-schema: "npm:^3.24.1"
   peerDependencies:
-    zod: ^3.0.0
-  peerDependenciesMeta:
-    zod:
-      optional: true
-  checksum: 10/406c4e76d131df6ddd49d4dae2d10745fb41ac1881f71c15facb333550a5eb636e295f499ef3e972e5af3d5e87c7b2685fe8f4b41a424b419f90f82aa554fc93
+    zod: ^3.23.8
+  checksum: 10/2de445d6babd82a3588dbb396e88d85f4a1e2411fdade017a8f908cd21f99bb97e207a8c8f24ce4174c2cedb53a455b75814d1ee8e20a5074df783cfac57be6e
   languageName: node
   linkType: hard
 
@@ -5862,7 +5879,7 @@ __metadata:
     "@types/react-test-renderer": "npm:^18.3.0"
     "@vitejs/plugin-react": "npm:^4.3.4"
     "@vitest/ui": "npm:^3.0.7"
-    ai: "npm:^4.1.47"
+    ai: "npm:^4.3.15"
     classnames: "npm:^2.5.1"
     color: "npm:^4.2.3"
     dayjs: "npm:^1.11.13"
@@ -11005,25 +11022,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ai@npm:^4.1.47":
-  version: 4.1.47
-  resolution: "ai@npm:4.1.47"
+"ai@npm:^4.3.15":
+  version: 4.3.15
+  resolution: "ai@npm:4.3.15"
   dependencies:
-    "@ai-sdk/provider": "npm:1.0.9"
-    "@ai-sdk/provider-utils": "npm:2.1.10"
-    "@ai-sdk/react": "npm:1.1.19"
-    "@ai-sdk/ui-utils": "npm:1.1.16"
+    "@ai-sdk/provider": "npm:1.1.3"
+    "@ai-sdk/provider-utils": "npm:2.2.8"
+    "@ai-sdk/react": "npm:1.2.12"
+    "@ai-sdk/ui-utils": "npm:1.2.11"
     "@opentelemetry/api": "npm:1.9.0"
     jsondiffpatch: "npm:0.6.0"
   peerDependencies:
     react: ^18 || ^19 || ^19.0.0-rc
-    zod: ^3.0.0
+    zod: ^3.23.8
   peerDependenciesMeta:
     react:
       optional: true
-    zod:
-      optional: true
-  checksum: 10/bbde75f1b534a0a4d1740dc5ff1cdc897f2fd2397ee949708bbd0238ec5d8ce52ff5930b1f96ee60e0bc576f81757095b283672cf3938c5eb68bad35295314c5
+  checksum: 10/0749fdfeac306e5ff3bea1a209c7462ebd880a44239a1e80044ffa9b228443d1c2dad21cbe1a531f9f48a912237ec49aa97b9d0e3b8c30fe90032927bde9e292
   languageName: node
   linkType: hard
 
