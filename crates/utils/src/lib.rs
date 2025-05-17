@@ -9,6 +9,7 @@ pub enum FileType {
     Markdown,
     Image,
     Json,
+    Txt,
     Directory,
     Unknown,
 }
@@ -21,6 +22,8 @@ pub fn get_file_type(file_name: &str) -> FileType {
         FileType::Image
     } else if lower_name.ends_with(".json") {
         FileType::Json
+    } else if lower_name.ends_with(".txt") {
+        FileType::Txt
     } else {
         FileType::Unknown
     }
@@ -28,7 +31,7 @@ pub fn get_file_type(file_name: &str) -> FileType {
 
 pub fn is_supported_file_name(file_name: &str) -> bool {
     let file_type = get_file_type(file_name);
-    matches!(file_type, FileType::Markdown | FileType::Image | FileType::Json)
+    file_type != FileType::Unknown
 }
 
 pub fn is_md_file_name(file_name: &str) -> bool {
