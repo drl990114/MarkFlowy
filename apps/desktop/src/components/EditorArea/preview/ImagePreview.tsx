@@ -1,5 +1,6 @@
 import { convertFileSrc } from '@tauri-apps/api/core'
 import { FC, useEffect, useState } from 'react'
+import styled from 'styled-components'
 import { Image } from 'zens'
 
 interface ImagePreviewProps {
@@ -18,5 +19,11 @@ export const ImagePreview: FC<ImagePreviewProps> = (props) => {
 
   if (!src) return null
 
-  return <Image src={src} />
+  return <StyledImagePreview src={src} />
 }
+
+const StyledImagePreview = styled(Image)`
+  max-width: calc(100% - 20px);
+  max-height: calc(100% - 20px);
+  object-fit: contain;
+`
