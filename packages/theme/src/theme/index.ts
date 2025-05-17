@@ -112,7 +112,7 @@ const styledDarkTheme = {
 
   primaryFontColor: '#c8d1d9',
   labelFontColor: 'rgba(255, 255, 255, 0.5)',
-  accentColor: '#1c78aa',
+  accentColor: '#2593d0',
   borderColor: '#363b41',
   bgColor: '#151515',
   bgColorSecondary: "#252525",
