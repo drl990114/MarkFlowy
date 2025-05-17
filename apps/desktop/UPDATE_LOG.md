@@ -1,5 +1,33 @@
 # UPDATE LOG
 
+## v0.26.0
+
+Features:
+
+- Support open and edit .txt files.
+
+Fixs:
+
+- Fallback Tauri version to fix image loading failure issue.
+
+- The accent color changes brighter in dark mode.
+
+- Improve image file preview style.
+
+---
+
+特性：
+
+- 支持打开和编辑 .txt 文件。
+
+修复：
+
+- 回退 Tauri 版本以修复图片加载失败的问题。
+
+- 深色模式下强调色变亮的问题。
+
+- 优化图片文件预览样式。
+
 ## v0.25.0
 
 Features:
