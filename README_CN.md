@@ -4,26 +4,33 @@
 
 <h1 align="center"/>MarkFlowy <sup><em>alpha</em></sup></h1>
 
-<h4 align="center"><strong><a href="https://github.com/drl990114/MarkFlowy">English</a></strong> | 简体中文</h4>
+<div align='center'>
+<br>
+<em>现代化与智能化的 Markdown 编辑器。</em>
+<br>
+<br>
+</div>
 
 <div align="center">
 
 [![Build Status][build-badge]][build]
 [![App Version][version-badge]][release]
 [![Downloads][downloads-badge]][release]
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fdrl990114%2FMarkFlowy.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fdrl990114%2FMarkFlowy?ref=badge_shield)
 <br/>
+[![PRs Welcome][prs-welcome-badge]][prs-welcome]
 [![MIT License][license-badge]][license]
 [![Code of Conduct][coc-badge]][coc]
-[![Commit Activity][commit-badge]][commit]
+[![codefactor]](https://www.codefactor.io/repository/github/drl990114/markflowy)
 <br/>
 [![TypeScript-version-icon]](https://www.typescriptlang.org/)
 [![Rust-version-icon]](https://www.rust-lang.org/)
-[![PRs Welcome][prs-welcome-badge]][prs-welcome]
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fdrl990114%2FMarkFlowy.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fdrl990114%2FMarkFlowy?ref=badge_shield)
 <br/>
-[![codefactor]](https://www.codefactor.io/repository/github/drl990114/markflowy)
+[![Commit Activity][commit-badge]][commit]
 [![issues-closed]](https://github.com/drl990114/MarkFlowy/issues?q=sort%3Aupdated-desc+is%3Aissue+is%3Aclosed)
 </div>
+
+<h4 align="center"><strong><a href="https://github.com/drl990114/MarkFlowy">English</a></strong> | 简体中文</h4>
 
 ## ⚠️ MarkFlowy 目前处于 Alpha 阶段
 
