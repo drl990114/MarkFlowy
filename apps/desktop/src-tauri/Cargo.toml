@@ -22,7 +22,7 @@ features = []
 [dependencies]
 serde_json = "1.0"
 anyhow = "1.0.86"
-dark-light = "1.1.1"
+dark-light = "2.0.0"
 log = "0.4.21"
 tauri-plugin-updater = "2.6.1"
 tauri-plugin-http = "2.4.2"
