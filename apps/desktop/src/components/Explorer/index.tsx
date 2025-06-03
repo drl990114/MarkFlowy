@@ -1,16 +1,16 @@
+import { Empty, FileTree, List } from '@/components'
+import type { IFile } from '@/helper/filesys'
+import { useOpen } from '@/hooks'
+import { useEditorStore } from '@/stores'
+import useOpenedCacheStore from '@/stores/useOpenedCacheStore'
 import classNames from 'classnames'
 import type { FC, MouseEventHandler } from 'react'
 import { memo, useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import styled from 'styled-components'
+import { Popover } from 'zens'
 import type { ListDataItem } from '../UI/List'
 import { Container } from './styles'
-import { useEditorStore } from '@/stores'
-import type { IFile } from '@/helper/filesys'
-import { useOpen } from '@/hooks'
-import { Empty, FileTree, List } from '@/components'
-import styled from 'styled-components'
-import useOpenedCacheStore from '@/stores/useOpenedCacheStore'
-import { Popover } from 'zens'
 
 const RecentListBottom = styled.div`
   padding: 8px;

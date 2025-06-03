@@ -1,5 +1,5 @@
 import { Root } from '@/router'
-import { Route, Routes } from 'react-router-dom'
+import { Route, Routes } from 'react-router'
 import { Notifications } from 'zens'
 import AppThemeProvider from './AppThemeProvider'
 import { Modal } from './components'

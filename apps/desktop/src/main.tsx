@@ -1,16 +1,16 @@
+import { lightTheme } from '@markflowy/theme'
+import * as Sentry from "@sentry/react"
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { HoxRoot } from 'hox'
+import { enableMapSet } from 'immer'
 import { StrictMode, Suspense } from 'react'
 import ReactDOM from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
-import App from './App'
-import { enableMapSet } from 'immer'
-import { Spinners } from 'zens'
-import { lightTheme } from '@markflowy/theme'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import * as Sentry from "@sentry/react";
+import { BrowserRouter } from 'react-router'
 import 'remixicon/fonts/remixicon.css'
-import './normalize.css'
+import { Spinners } from 'zens'
+import App from './App'
 import './atom.css'
+import './normalize.css'
 
 Sentry.init({
   dsn: import.meta.env.VITE_SENTRY_DSN,
