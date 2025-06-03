@@ -5914,7 +5914,7 @@ __metadata:
     "@mui/material": "npm:6.1.6"
     "@sentry/react": "npm:^9.2.0"
     "@tanstack/react-query": "npm:^5.59.16"
-    "@tauri-apps/api": "npm:2.4.0"
+    "@tauri-apps/api": "npm:2.5.0"
     "@tauri-apps/cli": "npm:2.4.0"
     "@tauri-apps/plugin-clipboard-manager": "npm:^2.2.2"
     "@tauri-apps/plugin-dialog": "npm:2.2.0"
@@ -9365,10 +9365,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tauri-apps/api@npm:2.4.0":
-  version: 2.4.0
-  resolution: "@tauri-apps/api@npm:2.4.0"
-  checksum: 10/97772d37f9793f9d1bf2d7c100083e58dd0c89193b8942287e12adee68290e2ef4be2c3d53a25bb8e3c7e6715e2f3fd00bf857caaddc2547ebbd5ab203e95d86
+"@tauri-apps/api@npm:2.5.0":
+  version: 2.5.0
+  resolution: "@tauri-apps/api@npm:2.5.0"
+  checksum: 10/011dbd960d432e871ef7f1d9de75732cff51ad30cb9fc022a3eda1f6179898a76662a328c82c7f15e1b3702664aa323eb585d6cacbee51f699bf1eb6ad27ca2f
   languageName: node
   linkType: hard
 
