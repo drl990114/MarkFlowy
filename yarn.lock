@@ -5948,7 +5948,7 @@ __metadata:
     nanoid: "npm:^5.0.9"
     ollama-ai-provider: "npm:^1.2.0"
     react: "npm:^18.3.1"
-    react-arborist: "npm:^3.4.0"
+    react-arborist: "npm:^3.4.3"
     react-dom: "npm:^18.3.1"
     react-i18next: "npm:15.0.0"
     react-keywords: "npm:^1.0.0"
@@ -20542,19 +20542,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-arborist@npm:^3.4.0":
-  version: 3.4.0
-  resolution: "react-arborist@npm:3.4.0"
+"react-arborist@npm:^3.4.3":
+  version: 3.4.3
+  resolution: "react-arborist@npm:3.4.3"
   dependencies:
     react-dnd: "npm:^14.0.3"
     react-dnd-html5-backend: "npm:^14.0.3"
-    react-window: "npm:^1.8.10"
+    react-window: "npm:^1.8.11"
     redux: "npm:^5.0.0"
     use-sync-external-store: "npm:^1.2.0"
   peerDependencies:
     react: ">= 16.14"
     react-dom: ">= 16.14"
-  checksum: 10/06bed41b8db33a23c604001d401a2f0c4572a1ef0ffe608568589178b1a148af3d0c72148a0d630bbd6f527a0520dd3e2cb78d4cc289f75088263152a2c152d5
+  checksum: 10/5e9a505c47f72421d41d01fab4e39ec2d64af2519d5701c289c4b4dfe89e750f5f25fd0fbd3f48a3f8ec46eb9b72b9e7c471301c07ce81c5b84033a1b38bc8bc
   languageName: node
   linkType: hard
 
@@ -20858,16 +20858,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-window@npm:^1.8.10":
-  version: 1.8.10
-  resolution: "react-window@npm:1.8.10"
+"react-window@npm:^1.8.11":
+  version: 1.8.11
+  resolution: "react-window@npm:1.8.11"
   dependencies:
     "@babel/runtime": "npm:^7.0.0"
     memoize-one: "npm:>=3.1.1 <6"
   peerDependencies:
-    react: ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
-    react-dom: ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
-  checksum: 10/6f4a713a2012d605370ef4c7026a45ddd6801e428faa4cad558b12b05ba54c00de72de9a360db109db9666f972a3d955b63af9e5a4cd5fbc52411a382273107b
+    react: ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+    react-dom: ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+  checksum: 10/bdbac2b664c5a799443b97a32b2f60a00cc13cc14ca8a8b1e81e2dc7dd00d8d54f05743113972fe1a641b57ada5d874b59c3cbe7e8a07a88c6713a0fb65d60f6
   languageName: node
   linkType: hard
 
