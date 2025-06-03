@@ -26,7 +26,7 @@
     "@markflowy/types": "workspace:*",
     "@mui/material": "6.1.6",
     "@sentry/react": "^9.2.0",
-    "@tanstack/react-query": "^5.59.16",
+    "@tanstack/react-query": "^5.79.2",
     "@tauri-apps/api": "2.4.0",
     "@tauri-apps/plugin-clipboard-manager": "^2.2.2",
     "@tauri-apps/plugin-dialog": "2.2.0",
