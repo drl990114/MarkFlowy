@@ -1,5 +1,5 @@
 import { lightTheme } from '@markflowy/theme'
-import * as Sentry from "@sentry/react"
+import * as Sentry from '@sentry/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { HoxRoot } from 'hox'
 import { enableMapSet } from 'immer'
@@ -15,7 +15,7 @@ import './normalize.css'
 Sentry.init({
   dsn: import.meta.env.VITE_SENTRY_DSN,
   integrations: [],
-});
+})
 
 enableMapSet()
 

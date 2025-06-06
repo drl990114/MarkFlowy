@@ -2,7 +2,10 @@ use anyhow::Result as AnyResult;
 use mf_utils::is_supported_file_name;
 use serde::{Deserialize, Serialize};
 use std::fs;
+use std::future::Future;
 use std::path::Path;
+
+use crate::task_system::error::SystemError;
 
 // #[warn(dead_code)]
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -40,6 +43,7 @@ pub struct FileResult {
 }
 
 pub fn read_directory(dir_path: &str) -> Result<Vec<FileInfo>, FileResultCode> {
+    // 同步版本保留，作为兼容性接口
     let new_path = Path::new(dir_path);
     let paths = match fs::read_dir(new_path) {
         Ok(paths) => paths,
@@ -103,6 +107,103 @@ pub fn read_directory(dir_path: &str) -> Result<Vec<FileInfo>, FileResultCode> {
 
     sort_files_by_kind_and_name(&mut files);
     Ok(files)
+}
+
+// 新增异步版本，使用task_system
+pub fn read_directory_async(
+    dir_path: String,
+) -> impl Future<Output = Result<Vec<FileInfo>, SystemError>> {
+    use crate::task_system::{
+        error::SystemError,
+        system::System,
+        task::{ExecStatus, Interrupter, Task, TaskId, TaskOutput},
+    };
+    use async_trait::async_trait;
+    use thiserror::Error;
+
+    #[derive(Debug, Error)]
+    enum ReadDirError {
+        #[error("File error: {0:?}")]
+        FileError(FileResultCode),
+        #[error("System error: {0}")]
+        SystemError(#[from] SystemError),
+    }
+
+    #[derive(Debug)]
+    struct ReadDirectoryTask {
+        id: TaskId,
+        dir_path: String,
+    }
+
+    impl ReadDirectoryTask {
+        fn new(dir_path: String) -> Self {
+            Self {
+                id: TaskId::new_v4(),
+                dir_path,
+            }
+        }
+    }
+
+    #[async_trait]
+    impl Task<ReadDirError> for ReadDirectoryTask {
+        fn id(&self) -> TaskId {
+            self.id
+        }
+
+        fn with_priority(&self) -> bool {
+            // 文件读取任务通常需要优先处理
+            true
+        }
+
+        async fn run(&mut self, _interrupter: &Interrupter) -> Result<ExecStatus, ReadDirError> {
+            // 执行实际的目录读取操作
+            match read_directory(&self.dir_path) {
+                Ok(files) => Ok(ExecStatus::Done(TaskOutput::Out(Box::new(files)))),
+                Err(e) => Err(ReadDirError::FileError(e)),
+            }
+        }
+    }
+
+    async move {
+        // 创建任务系统实例
+        let system = System::<ReadDirError>::new();
+
+        // 创建目录读取任务并分发
+        let task = ReadDirectoryTask::new(dir_path);
+        let handle = system
+            .dispatch(task)
+            .await
+            .map_err(|_| SystemError::TaskAborted(TaskId::nil()))?;
+
+        // 等待任务完成并处理结果
+        match handle.await {
+            Ok(crate::task_system::task::TaskStatus::Done((_, TaskOutput::Out(out)))) => {
+                // 将AnyTaskOutput转换回Vec<FileInfo>
+                let files = out
+                    .downcast::<Vec<FileInfo>>()
+                    .map_err(|_| SystemError::TaskAborted(TaskId::nil()))?;
+                Ok(*files)
+            }
+            Ok(crate::task_system::task::TaskStatus::Done((_, TaskOutput::Empty))) => {
+                Ok(Vec::new())
+            }
+            Ok(crate::task_system::task::TaskStatus::Error(ReadDirError::FileError(fc))) => {
+                // 使用TaskJoin替代不存在的TaskFailed
+                Err(SystemError::TaskJoin(TaskId::nil()))
+            }
+            Ok(crate::task_system::task::TaskStatus::Error(ReadDirError::SystemError(e))) => Err(e),
+            Ok(crate::task_system::task::TaskStatus::Canceled) => {
+                Err(SystemError::TaskAborted(TaskId::nil()))
+            }
+            Ok(crate::task_system::task::TaskStatus::ForcedAbortion) => {
+                Err(SystemError::TaskAborted(TaskId::nil()))
+            }
+            Ok(crate::task_system::task::TaskStatus::Shutdown(_)) => {
+                Err(SystemError::TaskAborted(TaskId::nil()))
+            }
+            Err(e) => Err(e),
+        }
+    }
 }
 
 pub fn sort_files_by_kind_and_name(files: &mut Vec<FileInfo>) {
@@ -380,6 +481,35 @@ pub mod cmd {
     pub fn open_folder(folder_path: &str) -> FileResult {
         let dir_data = fc::read_directory(folder_path);
         match dir_data {
+            Ok(files) => {
+                let json_data = fc::files_to_json(files);
+                let content = match json_data.code {
+                    fc::FileResultCode::Success => json_data.content,
+                    _ => String::from(""),
+                };
+
+                if content == "" {
+                    return FileResult {
+                        code: fc::FileResultCode::NotFound,
+                        content: String::from("Folder not found"),
+                    };
+                }
+
+                FileResult {
+                    code: fc::FileResultCode::Success,
+                    content: content,
+                }
+            }
+            Err(_) => FileResult {
+                code: fc::FileResultCode::UnknownError,
+                content: String::from("Failed to read directory"),
+            },
+        }
+    }
+
+    #[tauri::command]
+    pub async fn open_folder_async(folder_path: String) -> FileResult {
+        match fc::read_directory_async(folder_path).await {
             Ok(files) => {
                 let json_data = fc::files_to_json(files);
                 let content = match json_data.code {
