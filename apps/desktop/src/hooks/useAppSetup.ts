@@ -70,7 +70,7 @@ async function appWorkspaceSetup() {
       const isDir = await invoke<boolean>('is_dir', { path: openedPath })
 
       if (isDir) {
-        readDirectory(openedPath).then((res) => {
+        await readDirectory(openedPath).then((res) => {
           setFolderData(res)
         })
       } else {
@@ -99,7 +99,7 @@ async function appWorkspaceSetup() {
 
       if (dirCount > 0 && dir) {
         // TODO 这里只打开一个文件夹，后续可以通过多窗口实现
-        readDirectory(dir).then((res) => {
+        await readDirectory(dir).then((res) => {
           setFolderData(res)
         })
       } else {
@@ -135,7 +135,7 @@ async function appWorkspaceSetup() {
         cacheStore.get<string>('activeFilePath'),
       ])
       const cacheStoreInitPromisesRes = await cacheStoreInitPromises
-      readDirectory(recentWorkspaces[0].path).then((res) => {
+      await readDirectory(recentWorkspaces[0].path).then((res) => {
         setFolderData(res)
         const openedFilePaths: string[] = cacheStoreInitPromisesRes[0] || []
         const activeFilePath = cacheStoreInitPromisesRes[1]
@@ -201,14 +201,14 @@ const appSetup = once(async function () {
 
   const settingData = await appSettingStoreSetup()
 
-  appWorkspaceSetup()
-
   window.removeEventListener('message', listener)
   window.addEventListener('message', listener)
 
   appThemeExtensionsSetup(settingData.theme)
   i18nInit({ lng: settingData.language })
   checkUpdate({ install: settingData.auto_update })
+
+  await appWorkspaceSetup()
 
   return settingData
 })

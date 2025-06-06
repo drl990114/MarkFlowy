@@ -9,6 +9,7 @@ mod menu;
 mod search;
 mod setup;
 mod font;
+mod task_system;
 
 use std::env;
 use std::path::PathBuf;
@@ -56,6 +57,7 @@ pub fn run() {
         .plugin(tauri_plugin_window_state::Builder::default().build())
         .invoke_handler(tauri::generate_handler![
             fc::cmd::open_folder,
+            fc::cmd::open_folder_async,
             fc::cmd::get_file_content,
             fc::cmd::write_file,
             fc::cmd::write_u8_array_to_file,
