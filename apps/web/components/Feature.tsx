@@ -9,6 +9,7 @@ const Container = styled.section`
   align-items: center;
   margin: 20px 0;
   width: 100%;
+  max-width: 1380px;
 
   .feature-cards {
     display: flex;
