@@ -74,7 +74,7 @@ export const readDirectory = (folderPath: string): Promise<IFile[]> => {
   return new Promise((resolve, reject) => {
     invoke<FileSysResult>('open_folder_async', { folderPath })
       .then(async (message) => {
-        console.log('readDirectory', message)
+
         if (message.code !== FileResultCode.Success) {
           return
         }

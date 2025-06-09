@@ -1,5 +1,6 @@
 use anyhow::Result as AnyResult;
 use mf_utils::is_supported_file_name;
+use natural_sort_rs::Natural;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::future::Future;
@@ -207,15 +208,24 @@ pub fn read_directory_async(
 }
 
 pub fn sort_files_by_kind_and_name(files: &mut Vec<FileInfo>) {
+    use std::cmp::Ordering;
+
     files.sort_by(|a, b| {
-        if a.kind == b.kind {
-            a.name.cmp(&b.name)
-        } else {
-            if a.kind == "dir" {
-                std::cmp::Ordering::Less
+        // 1. 首先按类型排序（文件夹优先）
+        if a.kind != b.kind {
+            return if a.kind == "dir" {
+                Ordering::Less
             } else {
-                std::cmp::Ordering::Greater
-            }
+                Ordering::Greater
+            };
+        }
+
+        if Natural::str(a.name.clone()) < Natural::str(b.name.clone()) {
+            Ordering::Less
+        } else if Natural::str(a.name.clone()) > Natural::str(b.name.clone()) {
+            Ordering::Greater
+        } else {
+            Ordering::Equal
         }
     });
 }

@@ -52,6 +52,7 @@ thiserror           = { version = "2.0.8" }
 tokio               = { version = "1.41.0", features = ["full", "parking_lot", "rt-multi-thread", "sync", "time"] }
 tokio-stream        = { version = "0.1.17" }
 uuid                = { version = "1.16.0", features = ["v4"] }
+natural-sort-rs = { version = "0.2.1", features = ["alloc"] }
 downcast-rs = "1.2"
 
 [dependencies.tauri-plugin-notification]

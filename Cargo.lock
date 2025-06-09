@@ -3655,6 +3655,7 @@ dependencies = [
  "log",
  "mf-utils",
  "mf_file_search",
+ "natural-sort-rs",
  "objc",
  "pin-project-lite",
  "rand 0.9.1",
@@ -3939,6 +3940,12 @@ dependencies = [
  "security-framework-sys",
  "tempfile",
 ]
+
+[[package]]
+name = "natural-sort-rs"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7955b5597d93c0f70b18e141ba4fd07982f02774391e718728064cc9c40b0aa4"
 
 [[package]]
 name = "ndk"
