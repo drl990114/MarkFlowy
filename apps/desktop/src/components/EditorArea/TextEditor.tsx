@@ -340,7 +340,7 @@ function TextEditor(props: TextEditorProps) {
   ${scStyled[0].innerHTML}
   </style>
   </head>
-  <body>
+  <body style="height: 100vh; overflow: auto;">
   <div class="${document.getElementById(id)?.className}">
   ${res}
   </div>
