@@ -1,5 +1,21 @@
 # UPDATE LOG
 
+## v0.27.0
+
+Features:
+
+- Enhance WYSIWYG editor toolbar.
+
+- Optimize the problem of long stuck opening of large folders.
+
+--- 
+
+特性：
+
+- 增强所见即所得编辑器工具栏。
+
+- 优化大文件夹打开时长卡顿的问题。
+
 ## v0.26.0
 
 Features:
