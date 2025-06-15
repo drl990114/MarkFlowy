@@ -244,6 +244,20 @@
       "preview": "Aperçu",
       "error": "Erreur",
       "prompt": "Astuces"
+    },
+    "toolbar": {
+      "undo": "Annuler",
+      "redo": "Refaire",
+      "separator": "Insérez le séparateur",
+      "blockquote": "Blockquote",
+      "bold": "Audacieux",
+      "italic": "Italique",
+      "codeText": "Texte du code",
+      "codeBlock": "Bloc de code",
+      "heading": "Rubrique",
+      "bulletList": "Liste des balles",
+      "orderedList": "Liste ordonné",
+      "taskList": "Liste des tâches"
     }
   },
   "placeholder": {

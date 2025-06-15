@@ -247,6 +247,20 @@
       "preview": "预览",
       "error": "错误",
       "prompt": "提示"
+    },
+    "toolbar": {
+      "undo": "撤消",
+      "redo": "重做",
+      "separator": "插入分隔符",
+      "blockquote": "引用",
+      "bold": "粗体",
+      "italic": "斜体",
+      "codeText": "代码文本",
+      "codeBlock": "代码块",
+      "heading": "标题",
+      "bulletList": "符号列表",
+      "orderedList": "有序列表",
+      "taskList": "任务列表"
     }
   }
 }

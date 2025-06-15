@@ -33,7 +33,7 @@ function Editor(props: EditorProps) {
     setShowFullPath((prev) => !prev)
   }
 
-  const cls = classNames('code-contents scrollbar', {
+  const cls = classNames('code-contents', {
     'editor-active': active,
     'display-none': !active,
   })

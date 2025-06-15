@@ -247,6 +247,20 @@
       "preview": "Vista previa",
       "error": "Error",
       "prompt": "Consejos"
+    },
+    "toolbar": {
+      "undo": "Deshacer",
+      "redo": "Rehacer",
+      "separator": "Insertar separador",
+      "blockquote": "Blockquote",
+      "bold": "Negrita",
+      "italic": "Cursiva",
+      "codeText": "Texto de código",
+      "codeBlock": "Bloque de código",
+      "heading": "Rúbrica",
+      "bulletList": "Lista de viñetas",
+      "orderedList": "Lista ordenada",
+      "taskList": "Lista de tareas"
     }
   }
 }

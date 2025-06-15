@@ -411,6 +411,9 @@ function TextEditor(props: TextEditorProps) {
       initialType: fileTypeConfig?.defaultMode,
       content: content!,
       delegate,
+      style: {
+        height: '100%',
+      },
       offset: { top: 10, left: 16 },
       styleToken: {
         id,
@@ -426,6 +429,16 @@ function TextEditor(props: TextEditorProps) {
           useCommandEvent({ active })
         },
       ],
+      wysiwygToolBarOptions: {
+        enable: true,
+        compProps: {
+          style: {
+            position: 'sticky',
+            top: '0',
+            zIndex: 10,
+          },
+        },
+      },
       errorHandler: {
         onError(params) {
           if (params.error) {

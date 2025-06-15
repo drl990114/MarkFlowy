@@ -6,8 +6,10 @@ interface EditorWrapperProps {
 }
 
 export const EditorWrapper = styled.div.attrs<EditorWrapperProps>((props) => props)`
-  min-height: 100%;
-  overflow: hidden;
+  flex: 1;
+  height: 100%;
+  overflow: auto;
+  box-sizing: border-box;
 
   ${(props) =>
     props.active
@@ -15,8 +17,7 @@ export const EditorWrapper = styled.div.attrs<EditorWrapperProps>((props) => pro
           maxWidth: props.fullWidth ? 'auto' : '800px',
           margin: '0 auto',
           padding: '0 20px',
-          paddingTop: '6px',
-          paddingBottom: '8rem',
+          paddingBottom: '3rem',
           marginInlineStart: 'auto',
           marginInlineEnd: 'auto',
         })
