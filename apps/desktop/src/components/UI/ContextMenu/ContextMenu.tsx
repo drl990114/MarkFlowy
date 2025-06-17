@@ -1,7 +1,7 @@
 import type { IShowContextMenuParams } from '@/stores/useContextMenuStore'
 import useContextMenuStore from '@/stores/useContextMenuStore'
-import { Menu, useMenuStore } from 'zens'
 import { memo, useEffect } from 'react'
+import { Menu, useMenuStore } from 'zens'
 
 export const showContextMenu = (params: IShowContextMenuParams) => {
   const { show } = useContextMenuStore.getState()
@@ -24,5 +24,5 @@ export const ContextMenu = memo(() => {
 
   const anchorRect = { x, y }
 
-  return <Menu store={menu} items={items} getAnchorRect={() => anchorRect} onClose={hideContextMenu}></Menu>
+  return <Menu style={{ zIndex: 11 }} store={menu} items={items} getAnchorRect={() => anchorRect} onClose={hideContextMenu}></Menu>
 })
