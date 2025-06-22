@@ -5,13 +5,10 @@ import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
 import classNames from 'classnames'
 import { memo, useState } from 'react'
 import { useMount } from 'react-use'
-import { MfCodemirrorView } from 'rme'
 import { PreviewContent } from './preview/PreviewContent'
 import { EditorPathContainer } from './styles'
 import TextEditor from './TextEditor'
 import { UnsupportedFileType } from './UnsupportedFileType'
-
-export const sourceCodeCodemirrorViewMap: Map<string, MfCodemirrorView> = new Map()
 
 function Editor(props: EditorProps) {
   const { id, active } = props
@@ -34,7 +31,6 @@ function Editor(props: EditorProps) {
   }
 
   const cls = classNames('code-contents', {
-    'editor-active': active,
     'display-none': !active,
   })
 

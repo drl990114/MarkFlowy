@@ -1,16 +1,16 @@
 import { RIGHTBARITEMKEYS } from '@/constants'
-import type { RightBarItem } from '../../components/SideBar'
+import { getHeadingValue } from '@/helper/string'
+import { useCommandStore, useEditorStore } from '@/stores'
+import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
+import { useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
+import { EditorViewType, extractMatches } from 'rme'
 import type { TocRef } from 'zens'
 import { Toc } from 'zens'
-import { useCommandStore, useEditorStore } from '@/stores'
-import { useEffect, useRef } from 'react'
-import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
-import { extractMatches } from 'rme'
 import { IHeadingData } from 'zens/lib/TableOfContent/HeadingTree'
-import { getHeadingValue } from '@/helper/string'
+import { sourceCodeCodemirrorViewMap } from '../../components/EditorArea/TextEditor'
+import type { RightBarItem } from '../../components/SideBar'
 import { Container, RightBarHeader } from './styles'
-import { useTranslation } from 'react-i18next'
-import { sourceCodeCodemirrorViewMap } from '../../components/EditorArea/Editor'
 
 const TocView = () => {
   const tocRef = useRef<TocRef>(null)
@@ -26,7 +26,7 @@ const TocView = () => {
 
         if (!activeId) return
 
-        if (editorViewTypeMap.get(activeId) === 'sourceCode') {
+        if (editorViewTypeMap.get(activeId) === EditorViewType.SOURCECODE) {
           const codemirrorView = sourceCodeCodemirrorViewMap.get(activeId)
           if (!codemirrorView) {
             return

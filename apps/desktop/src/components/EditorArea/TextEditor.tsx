@@ -18,6 +18,7 @@ import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import * as Sentry from '@sentry/react'
 import { invoke } from '@tauri-apps/api/core'
 import { save } from '@tauri-apps/plugin-dialog'
+import classNames from 'classnames'
 import html2canvas from 'html2canvas'
 import { debounce, DebouncedFunc } from 'lodash'
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
@@ -494,10 +495,14 @@ function TextEditor(props: TextEditorProps) {
     return null
   }
 
+  const cls = classNames('markdown-body', {
+    'editor-active': active,
+  })
+
   return (
     <EditorWrapper
       id='editorarea-wrapper'
-      className='markdown-body'
+      className={cls}
       fullWidth={settingData.editor_full_width}
       active={active}
       onClick={handleWrapperClick}
