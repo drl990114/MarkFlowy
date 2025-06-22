@@ -1,5 +1,17 @@
 # UPDATE LOG
 
+## v0.27.1
+
+Fixes:
+
+- fix the table of contents link not working when clicking on the heading node.
+
+---
+
+修复：
+
+- 修复点击标题节点时链接跳转不生效的问题。
+
 ## v0.27.0
 
 Features:
@@ -22,7 +34,7 @@ Features:
 
 - Support open and edit .txt files.
 
-Fixs:
+Fixes:
 
 - Fallback Tauri version to fix image loading failure issue.
 
@@ -50,7 +62,7 @@ Features:
 
 - Support AI generation within documents, create AI nodes through slash menu.
 
-Fixs:
+Fixes:
 
 - Fix font list loading error.
 
@@ -74,7 +86,7 @@ Features:
 
 - Support drag and drop folder in app icon to open.
 
-Fixs:
+Fixes:
 
 - Fix input chinese cursor instability in chrome.
 
@@ -106,7 +118,7 @@ Features:
 
 - Change default code font to Fira Code.
 
-Fixs:
+Fixes:
 
 - Fix create new file display empty.
 
@@ -132,7 +144,7 @@ Features:
 
 - Use xdg standards's config file path, in linux and macOS.
 
-Fixs:
+Fixes:
 
 - The issue of the preview mode not taking effect when switching to WYSIWYG mode.
 
@@ -192,7 +204,7 @@ Features:
 
 - Support Mermaid diagram node.
 
-Fixs:
+Fixes:
 
 - Fixed the issue where the content of the HTML Inline node may be incomplete during parsing.
 
@@ -214,7 +226,7 @@ Features:
 
 - Supplement error capture and reporting
 
-Fixs:
+Fixes:
 
 - Fixed the issue where inlining HTML tags in the **Heading** node would result in errors.
 
@@ -254,7 +266,7 @@ Features:
 
 - Update tauri to stable version 2.0.1.
 
-Fixs:
+Fixes:
 
 - Fix language settings can not select.
 
@@ -272,13 +284,13 @@ Features:
 
 - Improve html image node loading display.
 
-Fixs:
+Fixes:
 
 - revert html inline node parse method.
 
 ## v0.12.3
 
-Fixs: 
+Fixes: 
 
 - Init layout visible status when open app.
 
@@ -294,14 +306,14 @@ Features:
 
 - Support show table of content in source code mode.
 
-Fixs:
+Fixes:
 
 - Search result display error when paragraph has inline node.
 
 
 ## v0.11.3
 
-Fixs: 
+Fixes: 
 
 - Preview mode load some image error.
 
@@ -309,7 +321,7 @@ Fixs:
 
 ## v0.11.2
 
-Fixs: 
+Fixes: 
 
 - Some image can't load.
 
@@ -327,7 +339,7 @@ Features:
 
 - Support restore window state(e.g size, position).
 
-Fixs: 
+Fixes: 
 
 - The copied image link should not be processed.
 
@@ -343,7 +355,7 @@ Features:
 
 - Explorer support rename file or folder.
 
-Fixs: 
+Fixes: 
 
 - Long file name display optimization.
 
@@ -355,13 +367,13 @@ Fixs:
 
 ## v0.9.2
 
-Fixs:
+Fixes:
 
 - New files are not allowed temporarily. When the workspace is empty.
 
 ## v0.9.1
 
-Fixs:
+Fixes:
 
 - Fixed cmd + A don't work in codemirror node.
 
@@ -378,7 +390,7 @@ Features:
 
 - Add tooltip to sidebar item.
 
-Fixs:
+Fixes:
 
 - Fixed the table of contents doesn't refresh while switching different md files.
 
@@ -399,7 +411,7 @@ Features:
 
 - Multi-language support French.
 
-Fixs: 
+Fixes: 
 
 - Code block lang menu style error.
 
@@ -410,7 +422,7 @@ Fixs:
 
 ## v0.7.7
 
-Fixs: 
+Fixes: 
 
 - Editor performance optimization.
   
@@ -433,7 +445,7 @@ Features:
 
 - Support slash menu for commands.
 
-Fixs:
+Fixes:
 
 - Some image load error.
 
