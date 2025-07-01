@@ -24,7 +24,7 @@
     "@emotion/styled": "^11.13.0",
     "@markflowy/theme": "workspace:*",
     "@markflowy/types": "workspace:*",
-    "@mui/material": "6.1.6",
+    "@mui/material": "7.2.0",
     "@sentry/react": "^9.2.0",
     "@tanstack/react-query": "^5.79.2",
     "@tauri-apps/api": "2.4.0",
