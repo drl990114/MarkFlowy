@@ -5954,7 +5954,7 @@ __metadata:
     react-keywords: "npm:^1.0.0"
     react-loading: "npm:^2.0.3"
     react-markdown: "npm:^9.0.1"
-    react-resizable-panels: "npm:^3.0.1"
+    react-resizable-panels: "npm:^3.0.3"
     react-router: "npm:^7.6.1"
     react-test-renderer: "npm:^18.3.1"
     react-use: "npm:^17.5.1"
@@ -20747,13 +20747,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-resizable-panels@npm:^3.0.1":
-  version: 3.0.2
-  resolution: "react-resizable-panels@npm:3.0.2"
+"react-resizable-panels@npm:^3.0.3":
+  version: 3.0.3
+  resolution: "react-resizable-panels@npm:3.0.3"
   peerDependencies:
     react: ^16.14.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     react-dom: ^16.14.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
-  checksum: 10/de86c997c10a0d5bcfb713505705db25daf335258dfeaf55a82d1c6eb7c9564f32e5eeac0dbe8f09441579344c0f917ca2c8bf14fd587a1f668ef96524a36a6c
+  checksum: 10/1797f7f1aa3db3fc3d2882486a05d61d036570784ff43c3d65f2cc7d4eddf28c76d8babea82d49c97f82ce7d2f2f8f7e6ff04208025640c77d230c04d7796aae
   languageName: node
   linkType: hard
 
