@@ -93,6 +93,13 @@ The development of **MarkFlowy** cannot be separated from these contributors. Th
         </a>
     </td>
     <td align="center">
+        <a href="https://github.com/mona1874">
+            <img src="https://avatars.githubusercontent.com/u/106304755?v=4" width="90;" alt="mona1874"/>
+            <br />
+            <sub><b>Null</b></sub>
+        </a>
+    </td>
+    <td align="center">
         <a href="https://github.com/AdySnowflake">
             <img src="https://avatars.githubusercontent.com/u/163967164?v=4" width="90;" alt="AdySnowflake"/>
             <br />
@@ -126,20 +133,13 @@ The development of **MarkFlowy** cannot be separated from these contributors. Th
             <br />
             <sub><b>Chiefass</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/fossabot">
             <img src="https://avatars.githubusercontent.com/u/29791463?v=4" width="90;" alt="fossabot"/>
             <br />
             <sub><b>Fossabot</b></sub>
-        </a>
-    </td></tr>
-<tr>
-    <td align="center">
-        <a href="https://github.com/mona1874">
-            <img src="https://avatars.githubusercontent.com/u/106304755?v=4" width="90;" alt="mona1874"/>
-            <br />
-            <sub><b>Null</b></sub>
         </a>
     </td>
     <td align="center">
