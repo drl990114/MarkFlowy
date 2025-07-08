@@ -6063,7 +6063,7 @@ __metadata:
     enzyme-to-json: "npm:^3.6.2"
     isomorphic-fetch: "npm:^3.0.0"
     lint-staged: "npm:^16.0.0"
-    markdown-to-jsx: "npm:^7.7.4"
+    markdown-to-jsx: "npm:^7.7.10"
     next: "npm:^14.2.30"
     next-contentlayer2: "npm:0.5.2"
     next-i18next: "npm:^15.3.0"
@@ -16959,12 +16959,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"markdown-to-jsx@npm:^7.7.4":
-  version: 7.7.4
-  resolution: "markdown-to-jsx@npm:7.7.4"
+"markdown-to-jsx@npm:^7.7.10":
+  version: 7.7.10
+  resolution: "markdown-to-jsx@npm:7.7.10"
   peerDependencies:
     react: ">= 0.14.0"
-  checksum: 10/35c0c492f8ab4a30c8fb5e983dce6921995c16b759d8e9bc4d9e9c9404dd5a86de5076b070e226cff9bffed31b529c2e91d0a188604c9ed5ca6b0d766bb16c94
+  checksum: 10/f0c55a235e91adf28bf1cc654bd33e44a97c2601f6154800206172be621dd4236520c9934860f905ba478e195e408f224863187b09f22497d932093974fab040
   languageName: node
   linkType: hard
 
