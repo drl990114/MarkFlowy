@@ -45,7 +45,7 @@
     "@types/color": "^4.2.0",
     "eslint": "9.13.0",
     "postcss": "^8.4.47",
-    "postcss-import": "^16.1.0",
+    "postcss-import": "^16.1.1",
     "postcss-nested": "^7.0.2",
     "rimraf": "^6.0.1",
     "rollup": "4.24.3",
