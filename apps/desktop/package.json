@@ -41,7 +41,7 @@
     "firebase": "^11.0.1",
     "hox": "^2.1.1",
     "html2canvas": "^1.4.1",
-    "i18next": "23.16.0",
+    "i18next": "25.3.1",
     "immer": "^10.1.1",
     "is-promise": "^4.0.0",
     "jsx-dom-cjs": "^8.1.6",
