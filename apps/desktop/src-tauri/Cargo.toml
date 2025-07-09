@@ -49,7 +49,7 @@ downcast-rs = "1.2"
 version = "2.3"
 
 [dependencies.async-trait]
-version = "0.1.83"
+version = "0.1.88"
 
 [dependencies.futures]
 version = "0.3.31"
