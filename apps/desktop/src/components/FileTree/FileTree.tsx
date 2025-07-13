@@ -1,17 +1,17 @@
+import { type IFile } from '@/helper/filesys'
+import { useEditorStore } from '@/stores'
+import NiceModal from '@ebay/nice-modal-react'
+import { invoke } from '@tauri-apps/api/core'
 import type { FC } from 'react'
 import { memo, useMemo } from 'react'
-import FileNode from './FileNode'
-import { type IFile } from '@/helper/filesys'
 import { Tree } from 'react-arborist'
 import { TreeProps } from 'react-arborist/dist/module/types/tree-props'
-import { useEditorStore } from '@/stores'
-import { invoke } from '@tauri-apps/api/core'
-import { FillFlexParent } from '../fill-flex-parent'
-import { SimpleTree } from './SimpleTree'
-import NiceModal from '@ebay/nice-modal-react'
-import { MODAL_CONFIRM_ID } from '../Modal'
 import { useTranslation } from 'react-i18next'
+import { FillFlexParent } from '../fill-flex-parent'
+import { MODAL_CONFIRM_ID } from '../Modal'
 import { moveFileNode } from './file-operator'
+import FileNode from './FileNode'
+import { SimpleTree } from './SimpleTree'
 
 const FileTree: FC<FileTreeProps> = (props) => {
   const { data, onSelect } = props
@@ -91,7 +91,14 @@ const FileTree: FC<FileTreeProps> = (props) => {
           onMove={onMove}
           renderCursor={() => null}
         >
-          {(props) => FileNode({ ...props, simpleTree: tree, setFolderData: setFolderDataPure })}
+          {(props) =>
+            FileNode({
+              ...props,
+              simpleTree: tree,
+              setFolderData: setFolderDataPure,
+              isRoot: data[0]?.id === props.node.id,
+            })
+          }
         </Tree>
       )}
     </FillFlexParent>

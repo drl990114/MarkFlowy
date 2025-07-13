@@ -262,5 +262,9 @@
       "orderedList": "Lista ordenada",
       "taskList": "Lista de tareas"
     }
+  },
+  "explorer": {
+    "reset_folder_view": "Restablecer vista de carpeta",
+    "collapse_folders": "Contraer carpetas"
   }
 }
