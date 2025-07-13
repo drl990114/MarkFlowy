@@ -3,16 +3,17 @@ import useEditorCounterStore from '@/stores/useEditorCounterStore'
 import styled from 'styled-components'
 
 const Container = styled.div`
-  position: fixed;
+  position: absolute;
   right: 0;
   bottom: 0;
   padding: 8px 12px 8px 8px;
   z-index: 2;
-  opacity: 0.5;
+  opacity: 0.8;
   font-size: 0.85rem;
   user-select: none;
   box-sizing: border-box;
   cursor: default;
+  background-color: ${(props) => props.theme.statusBarBgColor};
 `
 
 export const EditorCount = () => {
@@ -33,7 +34,7 @@ export const EditorCount = () => {
 
   return (
     <Container>
-      {wordCount} words {characterCount} chars
+      <span style={{ opacity: 0.8 }}>{wordCount} words {characterCount} chars</span>
     </Container>
   )
 }
