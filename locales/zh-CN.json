@@ -262,5 +262,9 @@
       "orderedList": "有序列表",
       "taskList": "任务列表"
     }
+  },
+  "explorer": {
+    "reset_folder_view": "重置文件夹视图",
+    "collapse_folders": "折叠文件夹"
   }
 }

@@ -262,5 +262,9 @@
   },
   "placeholder": {
     "translate": "Veuillez saisir la langue cible"
+  },
+  "explorer": {
+    "reset_folder_view": "Réinitialiser la vue dossier",
+    "collapse_folders": "Dossiers d'effondrement"
   }
 }

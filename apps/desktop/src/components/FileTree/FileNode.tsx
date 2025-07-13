@@ -1,16 +1,18 @@
 import { createFile, getFileNameFromPath, updateFile, type IFile } from '@/helper/filesys'
-import { NodeRendererProps } from 'react-arborist'
-import { NodeContainer } from './styles'
-import { invoke } from '@tauri-apps/api/core'
-import { showContextMenu } from '../UI/ContextMenu'
-import { nanoid } from 'nanoid'
-import { SimpleTree } from './SimpleTree'
-import NewFileInput from './NewFIleInput'
-import { useTranslation } from 'react-i18next'
-import NiceModal from '@ebay/nice-modal-react'
-import { MODAL_CONFIRM_ID } from '../Modal'
 import { useEditorStore } from '@/stores'
+import NiceModal from '@ebay/nice-modal-react'
+import { invoke } from '@tauri-apps/api/core'
+import { nanoid } from 'nanoid'
+import { NodeRendererProps } from 'react-arborist'
+import { useTranslation } from 'react-i18next'
+import { Space } from 'zens'
+import { MODAL_CONFIRM_ID } from '../Modal'
+import { MfIconButton } from '../UI/Button'
+import { showContextMenu } from '../UI/ContextMenu'
 import { MoveFileInfo, moveFileNode } from './file-operator'
+import NewFileInput from './NewFIleInput'
+import { SimpleTree } from './SimpleTree'
+import { NodeContainer } from './styles'
 
 function FileNode({
   style,
@@ -19,9 +21,11 @@ function FileNode({
   tree,
   simpleTree,
   setFolderData,
+  isRoot = false,
 }: NodeRendererProps<IFile> & {
   simpleTree: SimpleTree<IFile>
   setFolderData: any
+  isRoot?: boolean
 }) {
   const indentSize = Number.parseFloat(`${style.paddingLeft || 0}`)
   const { t } = useTranslation()
@@ -104,7 +108,7 @@ function FileNode({
           tree.dragDestinationParent?.id !== tree.dragNode?.parent?.id
         )
       }
-      selected={tree.selectedNodes.includes(node)}
+      selected={useEditorStore.getState().activeId === node.id}
       onContextMenu={(e) => {
         e.stopPropagation()
         e.preventDefault()
@@ -269,7 +273,7 @@ function FileNode({
       }}
       ref={dragHandle}
     >
-      <div style={{ display: 'flex', paddingLeft: '6px' }}>
+      <div style={{ display: 'flex', padding: '0 6px', width: '100%', boxSizing: 'border-box' }}>
         <div className='indentLines'>
           {new Array(indentSize / 16).fill(0).map((_, index) => {
             return <div key={index}></div>
@@ -303,20 +307,64 @@ function FileNode({
             }}
           />
         ) : (
-          <>
-            {node.data?.kind === 'dir' ? (
-              <i className={`${node.isOpen ? 'ri-folder-5-line' : 'ri-folder-3-line'} file-icon`} />
-            ) : (
-              <i className={`${getFileIconClass(node.data)} file-icon`} />
-            )}
-            <span
-              style={{
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {node.data.name}
-            </span>
-          </>
+          <div
+            style={{
+              display: 'flex',
+              width: '100%',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
+            <div style={{ flex: 1 }}>
+              {node.data?.kind === 'dir' ? (
+                <i
+                  className={`${node.isOpen ? 'ri-folder-5-line' : 'ri-folder-3-line'} file-icon`}
+                />
+              ) : (
+                <i className={`${getFileIconClass(node.data)} file-icon`} />
+              )}
+              <span
+                style={{
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {node.data.name}
+              </span>
+            </div>
+
+            {isRoot ? (
+              <Space size={2}>
+                <MfIconButton
+                  size='small'
+                  rounded='smooth'
+                  icon={'ri-reset-right-line'}
+                  onClick={(e) => {
+                    e?.stopPropagation()
+                    e?.preventDefault()
+
+                    const activeId = useEditorStore.getState().activeId
+                    if (activeId) {
+                      tree.scrollTo(activeId)
+                    }
+                  }}
+                  tooltipProps={{ title: t('explorer.reset_folder_view') }}
+                />
+                <MfIconButton
+                  size='small'
+                  rounded='smooth'
+                  icon={'ri-collapse-vertical-fill'}
+                  onClick={(e) => {
+                    e?.stopPropagation()
+                    e?.preventDefault()
+
+                    tree.closeAll()
+                    node.open()
+                  }}
+                  tooltipProps={{ title: t('explorer.collapse_folders') }}
+                />
+              </Space>
+            ) : null}
+          </div>
         )}
       </div>
     </NodeContainer>

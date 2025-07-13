@@ -35,6 +35,35 @@ export const GlobalStyles = createGlobalStyle`
     }
   }
 
+  .icon-small {
+    height: 22px;
+    width: 22px;
+    font-size: 0.8rem;
+  }
+
+  .icon-medium {
+    height: 32px;
+    width: 32px;
+    font-size: 1rem;
+  }
+
+  .icon-large {
+    height: 40px;
+    width: 40px;
+    font-size: 1.2rem;
+  }
+
+  .icon-rounded {
+    border-radius: 50%;
+  }
+
+  .icon-smooth {
+    border-radius: 6px;
+  }
+  .icon-square {
+    border-radius: 0;
+  }
+
   .label-default {
     color: ${(props) => props.theme.primaryFontColor};
     background-color: ${(props) => props.theme.bgColor};
