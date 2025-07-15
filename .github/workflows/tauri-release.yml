@@ -213,17 +213,11 @@ jobs:
       - name: Query version number
         run: echo "version=${{ env.version }}" >> $GITHUB_ENV
 
-  upgradeLink-upload:
-      needs: release
-      permissions:
-        contents: write
-      runs-on: ubuntu-latest
-      steps:
-        - name: Send a request to UpgradeLink
-          uses: toolsetlink/upgradelink-action@v5
-          with:
-            source-url: 'https://github.com/drl990114/MarkFlowy/releases/download/v${{ needs.publish-tauri.outputs.appVersion }}/install.json'
-            access-key: ${{ secrets.UPGRADE_LINK_ACCESS_KEY }}
-            tauri-key: ${{ secrets.UPGRADE_LINK_TAURI_KEY }}
-            github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Send a request to UpgradeLink
+        uses: toolsetlink/upgradelink-action@v5
+        with:
+          source-url: 'https://github.com/drl990114/MarkFlowy/releases/download/v${{ env.version }}/install.json'
+          access-key: ${{ secrets.UPGRADE_LINK_ACCESS_KEY }}
+          tauri-key: ${{ secrets.UPGRADE_LINK_TAURI_KEY }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
