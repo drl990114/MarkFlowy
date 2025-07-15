@@ -42,7 +42,7 @@ dotenv = "0.15.0"
 
 # Misc
 base64 = "0.22.1"
-chrono = { version = "0.4.37", features = ["serde"]}
+chrono = { version = "0.4.41", features = ["serde"]}
 frunk = "0.4.2"
 frunk_core = { version = "0.4.2" }
 serde = { version = "1.0", features = ["derive"]}
