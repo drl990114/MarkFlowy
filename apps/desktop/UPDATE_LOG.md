@@ -1,5 +1,21 @@
 # UPDATE LOG
 
+## v0.28.0
+
+Features:
+
+- Support folding file trees and quick positioning of file tree focus.
+
+- Adjust EditorCount positioning and opacity
+
+---
+
+特性：
+
+- 支持折叠文件树和快速定位文件树焦点。
+
+- 调整文件字数统计的位置和透明度。
+
 ## v0.27.1
 
 Fixes:
