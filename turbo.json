@@ -1,6 +1,11 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "tasks": {
+    "postinstall": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["^postinstall"]
+    },
     "build": {
       "dependsOn": ["^build"]
     },

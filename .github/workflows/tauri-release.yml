@@ -52,14 +52,6 @@ jobs:
           echo VITE_UMENG_APPKEY=${{ secrets.VITE_UMENG_APPKEY }}  >> ./apps/desktop/.env
           echo VITE_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}  >> ./apps/desktop/.env
 
-      - name: Update CHANGELOG
-        id: changelog
-        uses: requarks/changelog-action@v1
-        with:
-          token: ${{ github.token }}
-          tag: ${{ github.ref_name }}
-          excludeTypes: 'chore,docs,style,refactor,test,ci,build'
-
       - name: Rust setup
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -69,7 +61,7 @@ jobs:
           key: ${{ matrix.target }}
 
       - name: Install dependencies
-        run: yarn install --immutable
+        run: yarn setup
 
       - name: Build workspaces
         run: yarn build
@@ -92,7 +84,9 @@ jobs:
           name: artifacts-${{ matrix.target }}
           path: |
             ./target/${{ matrix.target }}/release/bundle/appimage/**.AppImage.*
+            ./target/${{ matrix.target }}/release/bundle/appimage/**.AppImage
             ./target/${{ matrix.target }}/release/bundle/deb/**.deb
+            ./target/${{ matrix.target }}/release/bundle/rpm/**.rpm
 
       - uses: actions/upload-artifact@v4
         if: matrix.os == 'macos-latest' && matrix.arch == 'aarch64'
@@ -116,22 +110,7 @@ jobs:
           name: artifacts-${{ matrix.target }}
           path: |
             ./target/${{ matrix.target }}/release/bundle/msi/**
-
-      - name: Generate release tag
-        id: save_tag
-        if: matrix.platform == 'ubuntu-24.04'
-        run: |
-          # 调试输出
-          echo ${{ steps.tauri-action.outputs.appVersion }}
-          # 输出到步骤级
-          echo "appVersion=${{ steps.tauri-action.outputs.appVersion }}" >> $GITHUB_OUTPUT
-
-      - name: Set job output
-        id: set_output
-        if: matrix.platform == 'ubuntu-24.04'
-        run: |
-          # 注意：这里引用的是 save_tag 步骤的 tag_name 输出
-          echo "appVersion=${{ steps.save_tag.outputs.appVersion }}" >> $GITHUB_OUTPUT
+            ./target/${{ matrix.target }}/release/bundle/nsis/**
 
   release:
     permissions:
@@ -158,21 +137,24 @@ jobs:
 
       - name: Rename artifacts
         run: |
-          mv "artifacts/aarch64/dmg/MarkFlowy_${{ env.version }}_aarch64.dmg" "artifacts/MarkFlowy_${{ env.version }}_macos_aarch64.dmg"
-          mv "artifacts/aarch64/macos/MarkFlowy.app.tar.gz" "artifacts/MarkFlowy_${{ env.version }}_macos_aarch64.app.tar.gz"
-          mv "artifacts/aarch64/macos/MarkFlowy.app.tar.gz.sig" "artifacts/MarkFlowy_${{ env.version }}_macos_aarch64.app.tar.gz.sig"
+          mv "artifacts/aarch64/dmg/MarkFlowy_${{ env.version }}_aarch64.dmg" "artifacts/MarkFlowy_v${{ env.version }}_aarch64.dmg"
+          mv "artifacts/aarch64/macos/MarkFlowy.app.tar.gz" "artifacts/MarkFlowy_aarch64.app.tar.gz"
+          mv "artifacts/aarch64/macos/MarkFlowy.app.tar.gz.sig" "artifacts/MarkFlowy_aarch64.app.tar.gz.sig"
 
-          mv "artifacts/x86_64/dmg/MarkFlowy_${{ env.version }}_x64.dmg" "artifacts/MarkFlowy_${{ env.version }}_macos_x86_64.dmg"
-          mv "artifacts/x86_64/macos/MarkFlowy.app.tar.gz" "artifacts/MarkFlowy_${{ env.version }}_macos_x86_64.app.tar.gz"
-          mv "artifacts/x86_64/macos/MarkFlowy.app.tar.gz.sig" "artifacts/MarkFlowy_${{ env.version }}_macos_x86_64.app.tar.gz.sig"
+          mv "artifacts/x86_64/dmg/MarkFlowy_${{ env.version }}_x64.dmg" "artifacts/MarkFlowy_v${{ env.version }}_x64.dmg"
+          mv "artifacts/x86_64/macos/MarkFlowy.app.tar.gz" "artifacts/MarkFlowy_x64.app.tar.gz"
+          mv "artifacts/x86_64/macos/MarkFlowy.app.tar.gz.sig" "artifacts/MarkFlowy_x64.app.tar.gz.sig"
 
-          mv "artifacts/x86_64/deb/MarkFlowy_${{ env.version }}_amd64.deb" "artifacts/x86_64/deb/MarkFlowy_${{ env.version }}_linux_x86_64.deb"
-          mv "artifacts/x86_64/appimage/MarkFlowy_${{ env.version }}_amd64.AppImage.tar.gz" "artifacts/MarkFlowy_${{ env.version }}_linux_x86_64.AppImage.tar.gz"
-          mv "artifacts/x86_64/appimage/MarkFlowy_${{ env.version }}_amd64.AppImage.tar.gz.sig" "artifacts/MarkFlowy_${{ env.version }}_linux_x86_64.AppImage.tar.gz.sig"
+          mv "artifacts/x86_64/deb/MarkFlowy_${{ env.version }}_amd64.deb" "artifacts/MarkFlowy_v${{ env.version }}_amd64.deb"
+          mv "artifacts/x86_64/appimage/MarkFlowy_${{ env.version }}_amd64.AppImage" "artifacts/MarkFlowy_v${{ env.version }}_amd64.AppImage"
+          mv "artifacts/x86_64/appimage/MarkFlowy_${{ env.version }}_amd64.AppImage.sig" "artifacts/MarkFlowy_v${{ env.version }}_amd64.AppImage.sig"
+          mv artifacts/x86_64/rpm/* artifacts/
 
-          mv "artifacts/x86_64/MarkFlowy_${{ env.version }}_x64_en-US.msi" "artifacts/MarkFlowy_${{ env.version }}_windows_x86_64.msi"
-          mv "artifacts/x86_64/MarkFlowy_${{ env.version }}_x64_en-US.msi.zip" "artifacts/MarkFlowy_${{ env.version }}_windows_x86_64.msi.zip"
-          mv "artifacts/x86_64/MarkFlowy_${{ env.version }}_x64_en-US.msi.zip.sig" "artifacts/MarkFlowy_${{ env.version }}_windows_x86_64.msi.zip.sig"
+          mv "artifacts/x86_64/msi/MarkFlowy_${{ env.version }}_x64_en-US.msi" "artifacts/MarkFlowy_v${{ env.version }}_x64.msi"
+          mv "artifacts/x86_64/msi/MarkFlowy_${{ env.version }}_x64_en-US.msi.sig" "artifacts/MarkFlowy_v${{ env.version }}_x64.msi.sig"
+
+          mv "artifacts/x86_64/nsis/MarkFlowy_${{ env.version }}_x64-setup.exe" "artifacts/MarkFlowy_v${{ env.version }}_x64-setup.exe"
+          mv "artifacts/x86_64/nsis/MarkFlowy_${{ env.version }}_x64-setup.exe.sig" "artifacts/MarkFlowy_v${{ env.version }}_x64-setup.exe.sig"
 
       - name: Create Release
         uses: softprops/action-gh-release@v2.1.0
@@ -189,7 +171,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Install dependencies
-        run: yarn install --immutable
+        run: yarn setup
 
       - name: Updater JSON
         run: yarn updater --token=${{ secrets.GITHUB_TOKEN }}
@@ -209,15 +191,27 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./apps/desktop/updater
           # force_orphan: true
-
+ 
+  upgradeLink-upload:
+    needs: release
+    permissions:
+      contents: write
+    runs-on: ubuntu-24.04
+    steps:
       - name: Query version number
-        run: echo "version=${{ env.version }}" >> $GITHUB_ENV
+        run: echo "version=${GITHUB_REF:11}" >> $GITHUB_ENV
+
+      - name: Generate release tag
+        id: save_tag
+        run: |
+          # 调试输出
+          echo ${{ env.version }}
 
       - name: Send a request to UpgradeLink
         uses: toolsetlink/upgradelink-action@v5
         with:
           source-url: 'https://github.com/drl990114/MarkFlowy/releases/download/v${{ env.version }}/install.json'
-          access-key: ${{ secrets.UPGRADE_LINK_ACCESS_KEY }}
-          tauri-key: ${{ secrets.UPGRADE_LINK_TAURI_KEY }}
+          access-key: ${{ secrets.UPGRADE_LINK_ACCESS_KEY }}  # ACCESS_KEY  密钥key
+          tauri-key: ${{ secrets.UPGRADE_LINK_TAURI_KEY }}    # TAURI_KEY tauri 应用唯一标识
           github-token: ${{ secrets.GITHUB_TOKEN }}
 

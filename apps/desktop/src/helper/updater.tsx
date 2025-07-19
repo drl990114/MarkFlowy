@@ -1,11 +1,11 @@
 import { MODAL_CONFIRM_ID } from '@/components/Modal'
 import NiceModal from '@ebay/nice-modal-react'
-import { toast } from 'zens'
 import { invoke } from '@tauri-apps/api/core'
 import type { Update } from '@tauri-apps/plugin-updater'
 import { check } from '@tauri-apps/plugin-updater'
 import { getI18n } from 'react-i18next'
 import Markdown from 'react-markdown'
+import { toast } from 'zens'
 
 export const installUpdate = async (update: Update) => {
   const id = toast.loading('Downloading new version...')
@@ -18,8 +18,8 @@ export const installUpdate = async (update: Update) => {
         label: 'Restart',
         onClick: () => {
           invoke('app_restart')
-        }
-      }
+        },
+      },
     })
   } catch (error) {
     toast.dismiss(id)
@@ -31,7 +31,25 @@ export const checkUpdate = async (opt: { install: boolean } = { install: false }
   try {
     const i18n = getI18n()
 
-    const update = await check()
+    let update = null
+
+    try {
+      update = await check({
+        headers: {
+          'X-AccessKey': 'Z_a1MB4UFk1vRd-v7D11Zw',
+        },
+      })
+    } catch (error) {
+      console.error('Check update error1:', error)
+
+      try {
+        update = await check()
+      } catch (e) {
+        toast.error(`Check update error: ${e}`)
+        console.error('Check update error2:', e)
+      }
+      return
+    }
 
     if (update !== null) {
       if (opt.install) {
