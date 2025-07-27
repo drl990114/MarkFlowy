@@ -1,5 +1,21 @@
 # UPDATE LOG
 
+## v0.28.2
+
+Fixes:
+
+- Fix the issue of losing format when pasting Excel data.
+
+- Optimize the display of the bottom status bar and adjust it to display on the right side.
+
+---
+
+修复：
+
+- 修复粘贴 excel 时格式丢失的问题。
+
+- 优化底部状态栏显示和调整到右侧显示。
+
 ## v0.28.1
 
 Features:
