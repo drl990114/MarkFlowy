@@ -1,93 +1,43 @@
-import styled, { css } from 'styled-components'
-import { memo, useRef } from 'react'
 import { useCommandStore } from '@/stores'
-import { Popover, Tooltip } from 'zens'
 import useLayoutStore from '@/stores/useLayoutStore'
+import { memo, useRef } from 'react'
+import styled from 'styled-components'
 
-const LayoutPanelContainer = styled.div`
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  grid-row-gap: ${(props) => props.theme.spaceSm};
-  grid-column-gap: ${(props) => props.theme.spaceSm};
-`
-
-const LayoutPanelItemContainer = styled.div<{ active: boolean }>`
-  display: flex;
-  padding: ${(props) => props.theme.spaceSm};
-  border-radius: ${(props) => props.theme.smallBorderRadius};
-  background-color: ${(props) => props.theme.borderColor};
-  font-size: ${(props) => props.theme.fontH6};
-
-  &:hover {
-    background-color: ${(props) => props.theme.accentColor};
-  }
-
-  ${(props) =>
-    props.active &&
-    css`
-      background-color: ${(props) => props.theme.accentColor};
-    `}
-`
-
-interface LayoutPanelItemProps {
-  active: boolean
-  tooltipTitle: string
-  icon: string
-  onClick: () => void
-}
-
-const LayoutPanelItem = (props: LayoutPanelItemProps) => {
-  return (
-    <LayoutPanelItemContainer active={props.active} onClick={props.onClick}>
-      <Tooltip title={props.tooltipTitle}>
-        <i className={props.icon}></i>
-      </Tooltip>
-    </LayoutPanelItemContainer>
-  )
-}
-
-export const LayoutBtn = memo(() => {
+export const LayoutLeftBtn = memo(() => {
   const ref = useRef<HTMLDivElement>(null)
-  const { leftBar, rightBar } = useLayoutStore()
+  const { leftBar } = useLayoutStore()
 
   return (
-    <Popover
-      placement='top-end'
-      arrow
-      boxProps={{
-        style: {
-          height: '100%',
-        }
+    <Container
+      ref={ref}
+      active={leftBar.visible}
+      onClick={() => {
+        useCommandStore.getState().execute('app:toggle_leftsidebar_visible')
       }}
-      customContent={
-        <LayoutPanelContainer>
-          <LayoutPanelItem
-            icon='ri-layout-left-line'
-            tooltipTitle='Toggle Left Sidebar'
-            active={leftBar.visible}
-            onClick={() => {
-              useCommandStore.getState().execute('app:toggle_leftsidebar_visible')
-            }}
-          />
-          <LayoutPanelItem
-            icon='ri-layout-right-line'
-            tooltipTitle='Toggle Right Sidebar'
-            active={rightBar.visible}
-            onClick={() => {
-              useCommandStore.getState().execute('app:toggle_rightsidebar_visible')
-            }}
-          />
-        </LayoutPanelContainer>
-      }
     >
-      <Container ref={ref}>
-        <i className='ri-layout-masonry-line'></i>
-      </Container>
-    </Popover>
+      <i className='ri-layout-left-line'></i>
+    </Container>
   )
 })
 
-const Container = styled.div`
+export const LayoutRightBtn = () => {
+  const ref = useRef<HTMLDivElement>(null)
+  const { rightBar } = useLayoutStore()
+
+  return (
+    <Container
+      ref={ref}
+      active={rightBar.visible}
+      onClick={() => {
+        useCommandStore.getState().execute('app:toggle_rightsidebar_visible')
+      }}
+    >
+      <i className='ri-layout-right-line'></i>
+    </Container>
+  )
+}
+
+const Container = styled.div<{ active: boolean }>`
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -97,6 +47,7 @@ const Container = styled.div`
   font-size: 16px;
   cursor: pointer;
   transition: background-color 0.3s ease-in-out;
+  color: ${(props) => props.active ? props.theme.accentColor : 'inherit'};
 
   &:hover {
     background-color: ${(props) => props.theme.hoverColor};

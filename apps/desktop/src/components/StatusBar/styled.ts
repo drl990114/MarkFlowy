@@ -6,7 +6,7 @@ export const Container = styled.div`
   left: 0;
   right: 0;
   display: flex;
-  justify-content: flex-start;
+  justify-content: flex-end;
   align-items: center;
   height: ${(props) => props.theme.statusBarHeight};
   background: ${(props) => props.theme.statusBarBgColor};
