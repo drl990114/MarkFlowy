@@ -1,12 +1,12 @@
-import styled from 'styled-components'
-import { memo, useCallback, useRef } from 'react'
-import { emit } from '@tauri-apps/api/event'
 import { EVENT } from '@/constants'
-import useThemeStore from '@/stores/useThemeStore'
-import { showContextMenu } from '../UI/ContextMenu/ContextMenu'
-import { useCommandStore } from '@/stores'
 import appSettingService from '@/services/app-setting'
+import { useCommandStore } from '@/stores'
+import useThemeStore from '@/stores/useThemeStore'
+import { emit } from '@tauri-apps/api/event'
+import { memo, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
+import styled from 'styled-components'
+import { showContextMenu } from '../UI/ContextMenu/ContextMenu'
 
 export const CenterMenu = memo(() => {
   const ref = useRef<HTMLDivElement>(null)
@@ -59,7 +59,7 @@ export const CenterMenu = memo(() => {
           },
         },
       ],
-      x: rect[0]?.left || 12,
+      x: rect[0]?.right || 12,
       y: rect[0]?.top - 4 || 0,
     })
   }
