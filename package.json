@@ -8,7 +8,7 @@
     "docs"
   ],
   "scripts": {
-    "setup": "yarn install && turbo postinstall",
+    "setup": "turbo postinstall",
     "dev": "turbo dev",
     "dev:desktop": "yarn workspace @markflowy/desktop tauri:dev",
     "build": "turbo build",
