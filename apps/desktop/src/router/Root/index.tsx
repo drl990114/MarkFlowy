@@ -1,20 +1,19 @@
-import { useEffect, useRef } from 'react'
 import { AppInfoDialog, SideBar } from '@/components'
 import EditorArea from '@/components/EditorArea'
 import TableDialog from '@/components/EditorArea/editorToolBar/TableDialog'
-import { useCommandInit } from '@/hooks/useCommandInit'
+import { PageLayout } from '@/components/Layout'
+import RightBar from '@/components/SideBar/RightBar'
+import StatusBar from '@/components/StatusBar'
+import { useRefreshAIProvidersModels } from '@/extensions/ai/aiProvidersService'
 import { BookMarkDialog } from '@/extensions/bookmarks/BookMarkDialog'
 import useBookMarksStore from '@/extensions/bookmarks/useBookMarksStore'
-import { PageLayout } from '@/components/Layout'
-import { SettingDialog } from '../Setting/component/SettingDialog'
+import { useCommandInit } from '@/hooks/useCommandInit'
 import { appInfoStoreSetup } from '@/services/app-info'
-import StatusBar from '@/components/StatusBar'
-import { useTitleBarEffect } from '@/hooks/useTitleBarEffect'
-import { PanelGroup, Panel, PanelResizeHandle, ImperativePanelHandle } from 'react-resizable-panels'
 import { useCommandStore } from '@/stores'
 import useLayoutStore from '@/stores/useLayoutStore'
-import RightBar from '@/components/SideBar/RightBar'
-import { useRefreshAIProvidersModels } from '@/extensions/ai/aiProvidersService'
+import { memo, useEffect, useRef } from 'react'
+import { ImperativePanelHandle, Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels'
+import { SettingDialog } from '../Setting/component/SettingDialog'
 
 export const RESIZE_PANEL_STORAGE_KEY = 'resize-panel'
 
@@ -54,7 +53,6 @@ function Root() {
   const { getBookMarkList } = useBookMarksStore()
 
   useCommandInit()
-  useTitleBarEffect()
 
   useEffect(() => {
     appInfoStoreSetup()
@@ -73,7 +71,7 @@ function Root() {
 
   useEffect(() => {
     getBookMarkList()
-  }, [getBookMarkList])
+  }, [])
 
   return (
     <PageLayout>
@@ -122,4 +120,4 @@ function Root() {
   )
 }
 
-export default Root
+export default memo(Root)

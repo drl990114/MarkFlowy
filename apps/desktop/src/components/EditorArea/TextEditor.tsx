@@ -81,7 +81,6 @@ function TextEditor(props: TextEditorProps) {
 
   const { setEditorDelegate, setEditorCtx, getEditorContent, insertNodeToFolderData } =
     useEditorStore()
-  const { addEditorCounter, deleteEditorCounter } = useEditorCounterStore()
   const { execute } = useCommandStore()
   const { t } = useTranslation()
   const { settingData } = useAppSettingStore()
@@ -100,7 +99,7 @@ function TextEditor(props: TextEditorProps) {
   })
 
   useUnmount(() => {
-    deleteEditorCounter({ id })
+    useEditorCounterStore.getState().deleteEditorCounter({ id })
   })
 
   useLayoutEffect(() => {
@@ -459,7 +458,7 @@ function TextEditor(props: TextEditorProps) {
       const characterCount = getCharacterCount()
       const wordCount = getWordCount()
 
-      addEditorCounter({
+      useEditorCounterStore.getState().addEditorCounter({
         id,
         data: {
           characterCount,
@@ -484,7 +483,7 @@ function TextEditor(props: TextEditorProps) {
         }
       }
     },
-    [id, debounceSaveHandler, active, debounceRefreshToc, settingData, addEditorCounter],
+    [id, debounceSaveHandler, active, debounceRefreshToc, settingData],
   )
 
   if (status === TextEditorStatus.NOTEXIST) {

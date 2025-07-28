@@ -214,10 +214,6 @@ const appSetup = once(async function () {
 })
 
 const useAppSetup = () => {
-  useGlobalOSInfo()
-  useGlobalKeyboard()
-
-  // setup event listener
   const eventInit = useCallback(() => {
     const unListenMenu = listen<string>('native:menu', ({ payload }) => {
       bus.emit(payload)
@@ -241,6 +237,9 @@ const useAppSetup = () => {
     queryKey: [],
     queryFn: appSetup,
   })
+
+  useGlobalOSInfo()
+  useGlobalKeyboard()
 }
 
 export default useAppSetup

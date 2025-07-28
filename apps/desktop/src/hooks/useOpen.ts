@@ -1,13 +1,12 @@
-import { useCallback } from 'react'
-import { open } from '@tauri-apps/plugin-dialog'
 import { readDirectory } from '@/helper/filesys'
-import { useEditorStore } from '@/stores'
-import useOpenedCacheStore from '@/stores/useOpenedCacheStore'
 import { addExistingMarkdownFileEdit } from '@/services/editor-file'
 import { getFileContent } from '@/services/file-info'
+import { useEditorStore } from '@/stores'
+import useOpenedCacheStore from '@/stores/useOpenedCacheStore'
+import { open } from '@tauri-apps/plugin-dialog'
+import { useCallback } from 'react'
 
 const useOpen = () => {
-  const { setFolderData } = useEditorStore()
   const { addRecentWorkspaces } = useOpenedCacheStore()
 
   const openFolder = useCallback(
@@ -15,12 +14,12 @@ const useOpen = () => {
       try {
         const res = await readDirectory(dir)
         addRecentWorkspaces({ path: dir })
-        setFolderData(res)
+        useEditorStore.getState().setFolderData(res)
       } catch (error) {
         console.error('error', error)
       }
     },
-    [addRecentWorkspaces, setFolderData],
+    [addRecentWorkspaces],
   )
 
   const openFolderDialog = useCallback(async () => {
@@ -42,7 +41,7 @@ const useOpen = () => {
       path: file,
     })
   }
-  , [addRecentWorkspaces, setFolderData])
+  , [addRecentWorkspaces])
 
   return {
     openFolderDialog,
