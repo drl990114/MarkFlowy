@@ -1,15 +1,14 @@
 import { getFileObject } from '@/helper/files'
 import type { IFile } from '@/helper/filesys'
-import { useEditorStore, useEditorStateStore } from '@/stores'
-import { memo, useEffect, useRef } from 'react'
-import { TabItem, Dot } from './styles'
-import styled, { css } from 'styled-components'
-import { setTitleBarText } from '../TitleBar'
-import { EditorAreaHeader } from './EditorAreaHeader'
+import { useEditorStateStore, useEditorStore } from '@/stores'
 import { darken } from '@markflowy/theme'
-import { showContextMenu } from '../UI/ContextMenu'
+import { memo, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
+import styled, { css } from 'styled-components'
 import { Tooltip } from 'zens'
+import { showContextMenu } from '../UI/ContextMenu'
+import { EditorAreaHeader } from './EditorAreaHeader'
+import { Dot, TabItem } from './styles'
 
 type ContainerProps = {
   visible: boolean
@@ -80,10 +79,6 @@ const EditorAreaTabs = memo(() => {
 
     if (activeId === id) {
       if (opened.length > 0) {
-        if (opened.length === 1) {
-          setTitleBarText('')
-        }
-
         setActiveId(curIndex === 0 ? opened[curIndex + 1] : opened[curIndex - 1])
       }
     }

@@ -1,9 +1,9 @@
+import { useCommandStore } from '@/stores'
 import { invoke } from '@tauri-apps/api/core'
 import { createGlobalStore } from 'hox'
 import { useEffect, useState } from 'react'
 // @ts-ignore
 import { createKeybindingsHandler } from 'tinykeys'
-import { useCommandStore } from '@/stores'
 
 /**
  * A map of keybinding strings to event handlers.
@@ -28,7 +28,6 @@ const getTinyKeyBinding = (keyMap: string[]) => {
 
 function useKeyboard() {
   const [keyboardInfos, setKeyboardInfos] = useState<KeyboardInfo[]>([])
-  const { execute } = useCommandStore()
 
   useEffect(() => {
     invoke<{ cmds: Record<string, KeyboardInfo> }>('get_keyboard_infos').then((res) => {
@@ -52,7 +51,7 @@ function useKeyboard() {
           if (!keyboardInfo.use_default_event) {
             event.preventDefault()
           }
-          execute(keyboardInfo.id)
+          useCommandStore.getState().execute(keyboardInfo.id)
         }
       }
     })
@@ -64,7 +63,7 @@ function useKeyboard() {
     return () => {
       window.removeEventListener('keydown', handler)
     }
-  }, [execute, keyboardInfos])
+  }, [keyboardInfos])
 
   return {
     keyboardInfos,

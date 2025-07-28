@@ -3,7 +3,7 @@ import { useEditorStore } from '@/stores'
 import NiceModal from '@ebay/nice-modal-react'
 import { invoke } from '@tauri-apps/api/core'
 import type { FC } from 'react'
-import { memo, useMemo } from 'react'
+import { memo, useDeferredValue, useMemo } from 'react'
 import { Tree } from 'react-arborist'
 import { TreeProps } from 'react-arborist/dist/module/types/tree-props'
 import { useTranslation } from 'react-i18next'
@@ -16,6 +16,7 @@ import { SimpleTree } from './SimpleTree'
 const FileTree: FC<FileTreeProps> = (props) => {
   const { data, onSelect } = props
   const { activeId, setFolderDataPure } = useEditorStore()
+  const deferredActiveId = useDeferredValue(activeId)
   const { t } = useTranslation()
   const tree = useMemo(() => new SimpleTree<IFile>(data), [data])
 
@@ -84,12 +85,11 @@ const FileTree: FC<FileTreeProps> = (props) => {
           initialOpenState={{
             [data[0]?.id]: true,
           }}
-          selection={activeId}
+          selection={deferredActiveId}
           indent={16}
           disableMultiSelection
           onSelect={(node) => onSelect(node[0]?.data)}
           onMove={onMove}
-          renderCursor={() => null}
         >
           {(props) =>
             FileNode({
