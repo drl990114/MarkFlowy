@@ -1,7 +1,7 @@
 import styled from 'styled-components'
+import { getSections } from 'utils/sections'
 import rem from '../../utils/rem'
 import { StyledLink } from '../Link'
-import { getSections } from 'utils/sections'
 
 export interface SimpleSidebarMenuProps {
   pages?: { title: string; pathname: string; sections: { title: string }[]; href: string }[]
@@ -15,7 +15,7 @@ export const SimpleSidebarMenu = () => {
       {keys.map((key) => {
         const section = sections[key]
         return (
-          <Section>
+          <Section key={key}>
             <SectionTitle>
               <span>{key}</span>
             </SectionTitle>
