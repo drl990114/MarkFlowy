@@ -51,9 +51,9 @@ Available for Linux, macOS and Windows.
 > - Open your terminal
 > - Go to the `Applications` directory. .e.g `/Applications`.
 > - Run `xattr -cr MarkFlowy.app` and open the app again
-> - Please make sure you download from `github releases`.
+> - Please make sure you download from `github releases` or [UpgradeLink](https://download.upgrade.toolsetlink.com/download?appKey=xpn68m4j5qU0Y1rfDYFHaA).
 
-Please look [releases page](https://github.com/drl990114/MarkFlowy/releases)
+You can download it from the [UpgradeLink download page](https://download.upgrade.toolsetlink.com/download?appKey=xpn68m4j5qU0Y1rfDYFHaA) or [GitHub Release](https://github.com/drl990114/MarkFlowy/releases)
 
 ## Why
 At present, I have used many Markdown applications, but I have not encountered one that is very suitable for me. I have always hoped to have a Markdown editor that is efficient, beautiful, lightweight, data-safe, and can be easily combined with various workflows. This It is also the original intention of doing MarkFlowy.
@@ -68,7 +68,7 @@ You can read [CONTRIBUTING](./docs/Community/CONTRIBUTING.md) to know how to sta
 
 ## Support
 
-MarkFlowy is completely and permanently open source, if you want to support MarkFlowy, you can `star` this project. This will give me great support and help, love you.
+MarkFlowy is completely and permanently open source, if you want to support MarkFlowy, you can `star` this project. For special support, please contact me via [email](mailto:drl990114@gmail.com).
 
 In addition, you can sponsor me through WeChat or Alipay, which will greatly encourage me. And it will also be used for the subsequent development of the project, such as expenses for servers, domains, etc
 
@@ -77,6 +77,18 @@ In addition, you can sponsor me through WeChat or Alipay, which will greatly enc
 | WeChat appreciates | Alipay appreciates |
 | :-: | :-: |
 | <img src="https://drl990114.github.io/images/wxpay.png" alt="WeChat QRcode" width=200> <br><small>Let's have a bottle of wine~</small> | <img src="https://drl990114.github.io/images/alipay.png" alt="Wechat QRcode" width=200> <br><small>Have a cup of coffee~</small> |
+
+## Sponsors
+
+<table>
+<tr>
+    <td align="center">
+        <a href="https://www.toolsetlink.com/">
+            <img src="./public/sponsors/UpgradeLink.png" width="90;" alt="UpgradeLink"/>
+        </a>
+    </td>
+</tr>
+</table>
 
 ## Contributors
 
@@ -151,16 +163,6 @@ The development of **MarkFlowy** cannot be separated from these contributors. Th
     </td></tr>
 </table>
 <!-- readme: contributors -end -->
-
-## Thanks
-
-- <a href="https://github.com/tauri-apps/tauri" target="_blank">Tauri</a> - A framework for building cross-platform applications that provides MarkFlowy with a solid foundation.
-- <a href="https://github.com/facebook/react" target="_blank">React</a> - Web user interface framework.
-- <a href="https://github.com/remirror/remirror" target="_blank">Remirror</a> - The ProseMirror toolkit for React, on which the MarkFlowy editor is based.
-- <a href="https://github.com/ocavue/rino" target="_blank">Rino</a> - Some initialization codes of package/editor come from here.
-- <a href="https://github.com/vitejs/vite" target="_blank">Vite</a> - front-end build tool.
-
-And, thanks to all the open source projects that MarkFlowy depends on.
 
 <!-- badges -->
 [build-badge]: https://img.shields.io/github/actions/workflow/status/drl990114/MarkFlowy/nodejs.yml.svg?style=flat-square

@@ -52,9 +52,9 @@
 > - 打开终端
 > - 进入到 `应用` 的目录下. 例如 `/Applications`.
 > - 执行 `xattr -cr MarkFlowy.app` 然后打开 app 即可
-> - 请确保下载来源: `github releases`.
+> - 请确保下载来源: `github releases` 或 [UpgradeLink](https://download.upgrade.toolsetlink.com/download?appKey=xpn68m4j5qU0Y1rfDYFHaA).
 
-请看 [releases page](https://github.com/drl990114/MarkFlowy/releases)
+你可以通过 [UpgradeLink 下载页面](https://download.upgrade.toolsetlink.com/download?appKey=xpn68m4j5qU0Y1rfDYFHaA) 或 [GitHub Release](https://github.com/drl990114/MarkFlowy/releases) 下载.
 
 ## 为什么
 在目前，我使用过很多Markdown应用，但没有遇到非常适合我的，我一直希望可以有一款高效、美观、轻量、数据安全并且可以方便的与各种工作流结合的Markdown编辑器，这也是做 MarkFlowy 的初衷。
@@ -69,7 +69,7 @@
 
 ## 支持
 
-MarkFlowy 是完全永久开源的，如果你想支持 MarkFlowy，你可以`star`这个项目。这会给我们很大的支持和帮助。
+MarkFlowy 是完全永久开源的，如果你想支持 MarkFlowy，你可以`star`这个项目。特殊赞助可以通过 [邮箱](mailto:drl990114@gmail.com) 联系我。
 
 另外你还可以通过微信或支付宝对我进行赞助，这会给我极大地鼓励。并且也会用于项目后续的发展，如服务器、域名等支出。
 
@@ -79,15 +79,17 @@ MarkFlowy 是完全永久开源的，如果你想支持 MarkFlowy，你可以`st
 | :-: | :-: |
 | <img src="https://drl990114.github.io/images/wxpay.png" alt="WeChat QRcode" width=200> <br><small>来瓶酒~</small> | <img src="https://drl990114.github.io/images/alipay.png" alt="Wechat QRcode" width=200> <br><small>来杯咖啡~</small> |
 
-## 感谢
+## 赞助商
 
-- <a href="https://github.com/tauri-apps/tauri" target="_blank">Tauri</a> - 一个用于构建跨平台应用程序的框架，为 MarkFlowy 提供了可靠的基础。
-- <a href="https://github.com/facebook/react" target="_blank">React</a> - Web 用户界面框架。
-- <a href="https://github.com/remirror/remirror" target="_blank">Remirror</a> - React 的 ProseMirror 工具包，MarkFlowy 编辑器基于此开发。
-- <a href="https://github.com/ocavue/rino" target="_blank">Rino</a> - package/editor 有部分初始化代码来源于此。
-- <a href="https://github.com/vitejs/vite" target="_blank">Vite</a> - 前端构建工具
-
-另外，感谢所有 MarkFlowy 依赖的开源项目。
+<table>
+<tr>
+    <td align="center">
+        <a href="https://www.toolsetlink.com/">
+            <img src="./public/sponsors/UpgradeLink.png" width="100;" alt="UpgradeLink"/>
+        </a>
+    </td>
+</tr>
+</table>
 
 <!-- badges -->
 [build-badge]: https://img.shields.io/github/actions/workflow/status/drl990114/MarkFlowy/nodejs.yml.svg?style=flat-square
