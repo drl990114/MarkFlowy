@@ -80,15 +80,9 @@ In addition, you can sponsor me through WeChat or Alipay, which will greatly enc
 
 ## Sponsors
 
-<table>
-<tr>
-    <td align="center">
-        <a href="https://www.toolsetlink.com/">
-            <img src="./public/sponsors/UpgradeLink.png" width="90;" alt="UpgradeLink"/>
-        </a>
-    </td>
-</tr>
-</table>
+<a href="https://www.toolsetlink.com">
+  <img height="54" alt="UpgradeLink" src="./public/sponsors/UpgradeLink_1.png" />
+</a>
 
 ## Contributors
 
