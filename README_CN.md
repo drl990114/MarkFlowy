@@ -81,15 +81,9 @@ MarkFlowy 是完全永久开源的，如果你想支持 MarkFlowy，你可以`st
 
 ## 赞助商
 
-<table>
-<tr>
-    <td align="center">
-        <a href="https://www.toolsetlink.com/">
-            <img src="./public/sponsors/UpgradeLink.png" width="100;" alt="UpgradeLink"/>
-        </a>
-    </td>
-</tr>
-</table>
+<a href="https://www.toolsetlink.com">
+  <img height="54" alt="UpgradeLink" src="./public/sponsors/UpgradeLink_1.png" />
+</a>
 
 <!-- badges -->
 [build-badge]: https://img.shields.io/github/actions/workflow/status/drl990114/MarkFlowy/nodejs.yml.svg?style=flat-square
