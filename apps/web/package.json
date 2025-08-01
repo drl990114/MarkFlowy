@@ -21,7 +21,7 @@
     "@next/mdx": "^14.2.3",
     "@styled-icons/fa-brands": "^10.47.0",
     "@styled-icons/material": "^10.47.0",
-    "@swc/helpers": "^0.5.15",
+    "@swc/helpers": "^0.5.17",
     "contentlayer2": "0.5.2",
     "isomorphic-fetch": "^3.0.0",
     "markdown-to-jsx": "^7.7.10",
