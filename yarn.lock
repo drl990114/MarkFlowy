@@ -34,28 +34,28 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ai-sdk/deepseek@npm:^0.1.12":
-  version: 0.1.12
-  resolution: "@ai-sdk/deepseek@npm:0.1.12"
+"@ai-sdk/deepseek@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "@ai-sdk/deepseek@npm:1.0.0"
   dependencies:
-    "@ai-sdk/openai-compatible": "npm:0.1.12"
-    "@ai-sdk/provider": "npm:1.0.9"
-    "@ai-sdk/provider-utils": "npm:2.1.10"
+    "@ai-sdk/openai-compatible": "npm:1.0.0"
+    "@ai-sdk/provider": "npm:2.0.0"
+    "@ai-sdk/provider-utils": "npm:3.0.0"
   peerDependencies:
-    zod: ^3.0.0
-  checksum: 10/7f3385ac220e1c2b79b3cf3c5ea0351594f94a0751488c66fd6c68b184e5f89f7a0d38edc0187e5611cdc9d06d787260dfed71d48488b1f1c35996db2d7ee266
+    zod: ^3.25.76 || ^4
+  checksum: 10/047b3e62f185257fe190e9362d3fd7a82b43f8bedb558f316c05dc1442129a56709555f19ce43cac7475bdc99d6a04e633641f052e04746172773c13ad2931f9
   languageName: node
   linkType: hard
 
-"@ai-sdk/openai-compatible@npm:0.1.12":
-  version: 0.1.12
-  resolution: "@ai-sdk/openai-compatible@npm:0.1.12"
+"@ai-sdk/openai-compatible@npm:1.0.0":
+  version: 1.0.0
+  resolution: "@ai-sdk/openai-compatible@npm:1.0.0"
   dependencies:
-    "@ai-sdk/provider": "npm:1.0.9"
-    "@ai-sdk/provider-utils": "npm:2.1.10"
+    "@ai-sdk/provider": "npm:2.0.0"
+    "@ai-sdk/provider-utils": "npm:3.0.0"
   peerDependencies:
-    zod: ^3.0.0
-  checksum: 10/f8ff39dfd01e0eb9fa1ed1df2fcab889e72b64181f158d30247897f14bccce59cc45e338a9db27e1b679dd84ff66f54a73ad9b8a63ce5ed350384548c7d28a81
+    zod: ^3.25.76 || ^4
+  checksum: 10/29545ad9410f112e246ef3c2214a53a1a8b22edf741ffdb51e858941e409c2ccb65f7108e7c0180a9aad430f9e3da4b00c318deaa07d2d9cbddd6f6a93f0b53e
   languageName: node
   linkType: hard
 
@@ -101,6 +101,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@ai-sdk/provider-utils@npm:3.0.0":
+  version: 3.0.0
+  resolution: "@ai-sdk/provider-utils@npm:3.0.0"
+  dependencies:
+    "@ai-sdk/provider": "npm:2.0.0"
+    "@standard-schema/spec": "npm:^1.0.0"
+    eventsource-parser: "npm:^3.0.3"
+    zod-to-json-schema: "npm:^3.24.1"
+  peerDependencies:
+    zod: ^3.25.76 || ^4
+  checksum: 10/0ce4eac4e3851b16c78b5b84e5df71c51981735dff37d926212f091e6662de345b8d07b4042316e28eca79a92a23b1c85983c3d37cfd3b7cd1fa239588e71a86
+  languageName: node
+  linkType: hard
+
 "@ai-sdk/provider-utils@npm:^2.0.0":
   version: 2.1.13
   resolution: "@ai-sdk/provider-utils@npm:2.1.13"
@@ -142,6 +156,15 @@ __metadata:
   dependencies:
     json-schema: "npm:^0.4.0"
   checksum: 10/b094ca2f08001d4d34a0dcdf9fbe1b6eeedeaf0cf1568ce148d67b04333fd959cca60f888a24522b6d74114eabbc469f762d290d08096adec992a3c6de23756a
+  languageName: node
+  linkType: hard
+
+"@ai-sdk/provider@npm:2.0.0":
+  version: 2.0.0
+  resolution: "@ai-sdk/provider@npm:2.0.0"
+  dependencies:
+    json-schema: "npm:^0.4.0"
+  checksum: 10/e6d5460f0c52e64033ccc5d20787ab9ff5251646e6263daa76a006367fda8ad527dadc959110113c42796d293d4e669c3ae911062086574cd46f0707357dedb5
   languageName: node
   linkType: hard
 
@@ -5900,7 +5923,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@markflowy/desktop@workspace:apps/desktop"
   dependencies:
-    "@ai-sdk/deepseek": "npm:^0.1.12"
+    "@ai-sdk/deepseek": "npm:^1.0.0"
     "@ai-sdk/openai": "npm:^1.1.15"
     "@babel/plugin-proposal-class-properties": "npm:^7.18.6"
     "@babel/plugin-proposal-decorators": "npm:^7.25.9"
@@ -9071,6 +9094,13 @@ __metadata:
   version: 1.0.6
   resolution: "@seznam/compose-react-refs@npm:1.0.6"
   checksum: 10/f9b1840385a6866a564897d8a2aad3a3dcdde1ccb5bef8476616ef447b689c75cdc5f47bf40e0d2e2d3b37c8e934ec13eeb9d09388fb98bb280a897788d1f478
+  languageName: node
+  linkType: hard
+
+"@standard-schema/spec@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "@standard-schema/spec@npm:1.0.0"
+  checksum: 10/aee780cc1431888ca4b9aba9b24ffc8f3073fc083acc105e3951481478a2f4dc957796931b2da9e2d8329584cf211e4542275f188296c1cdff3ed44fd93a8bc8
   languageName: node
   linkType: hard
 
@@ -14589,6 +14619,13 @@ __metadata:
   version: 3.0.0
   resolution: "eventsource-parser@npm:3.0.0"
   checksum: 10/8215adf5d8404105ecd0658030b0407e06987ceb9aadcea28a38d69bacf02e5d0fc8bba5fa7c3954552c89509c8ef5e1fa3895e000c061411c055b4bbc26f4b0
+  languageName: node
+  linkType: hard
+
+"eventsource-parser@npm:^3.0.3":
+  version: 3.0.3
+  resolution: "eventsource-parser@npm:3.0.3"
+  checksum: 10/b8f8e79333441ad0eb9299e3fa693ab506892ffc53f0cc1d23134090351cf2d71c8e405a2e879f6acfbd2e17f41d5a00dafba05ff25c82141fc07078ad992187
   languageName: node
   linkType: hard
 
