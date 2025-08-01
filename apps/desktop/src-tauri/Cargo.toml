@@ -85,7 +85,7 @@ version = "0.2.1"
 features = ["alloc"]
 
 [dependencies.tauri-plugin-notification]
-version = "2.2.2"
+version = "2.3.0"
 features = ["windows7-compat"]
 
 [dependencies.serde]
