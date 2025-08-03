@@ -1,12 +1,13 @@
 import NiceModal, { useModal } from '@ebay/nice-modal-react'
-import { Button, Dialog } from 'zens'
 import { useTranslation } from 'react-i18next'
+import { Button, Dialog } from 'zens'
 
 export interface ConfirmModalProps {
   title?: string
   content?: React.ReactNode
   confirmText?: string
   cancelText?: string
+  actionsGenerater?: (hideModal: () => void) => React.ReactNode[]
   onConfirm?: () => void
   onClose?: () => void
 }
@@ -19,7 +20,8 @@ export const ConfirmModal = ({
   confirmText,
   cancelText,
   onConfirm,
-  onClose
+  onClose,
+  actionsGenerater,
 }: ConfirmModalProps) => {
   const modal = useModal()
   const { t } = useTranslation()
@@ -41,14 +43,18 @@ export const ConfirmModal = ({
       title={title}
       open={modal.visible}
       onClose={handleClose}
-      footer={[
-        <Button key='cancel' onClick={handleClose}>
-          {cancelText ?? t('common.cancel')}
-        </Button>,
-        <Button key='confirm' btnType='primary' onClick={handleConfirm}>
-          {confirmText ?? t('common.confirm')}
-        </Button>,
-      ]}
+      footer={
+        actionsGenerater
+          ? actionsGenerater(modal.hide)
+          : [
+              <Button key='cancel' onClick={handleClose}>
+                {cancelText ?? t('common.cancel')}
+              </Button>,
+              <Button key='confirm' btnType='primary' onClick={handleConfirm}>
+                {confirmText ?? t('common.confirm')}
+              </Button>,
+            ]
+      }
     >
       {content}
     </Dialog>

@@ -2,7 +2,12 @@
 import { useCommandEvent } from '@/components/EditorArea/editorHooks/CommandEvent'
 import { EVENT } from '@/constants'
 import bus from '@/helper/eventBus'
-import { getFileObject, updateFileObject } from '@/helper/files'
+import {
+  delSaveOpenedEditorEntries,
+  getFileObject,
+  setSaveOpenedEditorEntries,
+  updateFileObject,
+} from '@/helper/files'
 import {
   canvasDataToBinary,
   FileResultCode,
@@ -100,6 +105,9 @@ function TextEditor(props: TextEditorProps) {
 
   useUnmount(() => {
     useEditorCounterStore.getState().deleteEditorCounter({ id })
+    const { delIdStateMap } = useEditorStateStore.getState()
+
+    delIdStateMap(id)
   })
 
   useLayoutEffect(() => {
@@ -232,6 +240,14 @@ function TextEditor(props: TextEditorProps) {
 
       debounceSaveHandlerCacheRef.current = debounceSave
       debounceSave()
+    }
+  }, [debounceSave])
+
+  useLayoutEffect(() => {
+    setSaveOpenedEditorEntries(id, () => saveHandler({ active: true }))
+
+    return () => {
+      delSaveOpenedEditorEntries(id)
     }
   }, [debounceSave])
 

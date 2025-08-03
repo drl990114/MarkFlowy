@@ -31,6 +31,8 @@
     "edit": "编辑",
     "more": "更多",
     "save": "保存",
+    "save_and_close": "保存并关闭",
+    "unsave_and_close": "直接关闭",
     "translate": "翻译",
     "summary": "摘要",
     "create_file": "新建文件",
@@ -54,6 +56,10 @@
     },
     "edit_filename_cancel": {
       "description": "是否要保存重命名内容？"
+    },
+    "close": {
+      "title": "是否要保存更改？",
+      "description": "你有未保存的文件，确定要退出吗？"
     }
   },
   "error": {

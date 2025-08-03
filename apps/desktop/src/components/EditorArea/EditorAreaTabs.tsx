@@ -1,5 +1,6 @@
-import { getFileObject } from '@/helper/files'
+import { getFileObject, getSaveOpenedEditorEntries } from '@/helper/files'
 import type { IFile } from '@/helper/filesys'
+import { checkUnsavedFiles } from '@/services/checkUnsavedFiles'
 import { useEditorStateStore, useEditorStore } from '@/stores'
 import { darken } from '@markflowy/theme'
 import { memo, useEffect, useRef } from 'react'
@@ -105,6 +106,21 @@ const EditorAreaTabs = memo(() => {
                   label: t('contextmenu.editor_tab.close'),
                   value: 'close',
                   handler: () => {
+                    if (
+                      checkUnsavedFiles({
+                        fileIds: [id],
+                        onSaveAndClose: async () => {
+                          const saveHandler = getSaveOpenedEditorEntries(id)
+                          await saveHandler?.()
+                          close(e, id)
+                        },
+                        onUnsavedAndClose: () => {
+                          close(e, id)
+                        },
+                      }) > 0
+                    ) {
+                      return
+                    }
                     close(e, id)
                   },
                 },
@@ -112,6 +128,22 @@ const EditorAreaTabs = memo(() => {
                   label: t('contextmenu.editor_tab.close_others'),
                   value: 'close_others',
                   handler: () => {
+                    const otherIds = opened.filter((openedId) => openedId !== id)
+                    if (
+                      checkUnsavedFiles({
+                        fileIds: otherIds,
+                        onSaveAndClose: async (hasUnsavedFileIds) => {
+                          const saves = hasUnsavedFileIds.map((otherId) => getSaveOpenedEditorEntries(otherId))
+                          await Promise.all(saves.map((saveHandler) => saveHandler?.()))
+                          delOtherOpenedFile(id)
+                        },
+                        onUnsavedAndClose: () => {
+                          delOtherOpenedFile(id)
+                        },
+                      }) > 0
+                    ) {
+                      return
+                    }
                     delOtherOpenedFile(id)
                   },
                 },
@@ -119,6 +151,21 @@ const EditorAreaTabs = memo(() => {
                   label: t('contextmenu.editor_tab.close_all'),
                   value: 'close_all',
                   handler: () => {
+                    if (
+                      checkUnsavedFiles({
+                        fileIds: opened,
+                        onSaveAndClose: async (hasUnsavedFileIds) => {
+                          const saves = hasUnsavedFileIds.map((otherId) => getSaveOpenedEditorEntries(otherId))
+                          await Promise.all(saves.map((saveHandler) => saveHandler?.()))
+                          delAllOpenedFile()
+                        },
+                        onUnsavedAndClose: () => {
+                          delAllOpenedFile()
+                        },
+                      }) > 0
+                    ) {
+                      return
+                    }
                     delAllOpenedFile()
                   },
                 },

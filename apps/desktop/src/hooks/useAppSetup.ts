@@ -1,10 +1,11 @@
 import useAiChatStore from '@/extensions/ai/useAiChatStore'
 import bus from '@/helper/eventBus'
-import { getFileObject, getFileObjectByPath } from '@/helper/files'
+import { getFileObject, getFileObjectByPath, getSaveOpenedEditorEntries } from '@/helper/files'
 import { readDirectory } from '@/helper/filesys'
 import { checkUpdate } from '@/helper/updater'
 import { i18nInit } from '@/i18n'
 import { appSettingStoreSetup } from '@/services/app-setting'
+import { checkUnsavedFiles } from '@/services/checkUnsavedFiles'
 import { addExistingMarkdownFileEdit } from '@/services/editor-file'
 import { getFileContent } from '@/services/file-info'
 import { useEditorStore } from '@/stores'
@@ -14,6 +15,7 @@ import useOpenedCacheStore from '@/stores/useOpenedCacheStore'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { invoke } from '@tauri-apps/api/core'
 import { listen } from '@tauri-apps/api/event'
+import { getCurrentWindow } from '@tauri-apps/api/window'
 import { LazyStore } from '@tauri-apps/plugin-store'
 import { once } from 'lodash'
 import { useCallback, useEffect } from 'react'
@@ -215,12 +217,43 @@ const appSetup = once(async function () {
 
 const useAppSetup = () => {
   const eventInit = useCallback(() => {
+    const currentWindow = getCurrentWindow()
+
+    const closeRequest = currentWindow.listen('tauri://close-requested', async () => {
+      const handleCloseWindow = async () => {
+        closeRequest.then((fn) => fn())
+        currentWindow.destroy()
+      }
+
+      const openedIds = useEditorStore.getState().opened
+      if (
+        checkUnsavedFiles({
+          fileIds: openedIds,
+          onSaveAndClose: async (hasUnsavedFileIds) => {
+            const saves = hasUnsavedFileIds.map((otherId) => getSaveOpenedEditorEntries(otherId))
+            await Promise.all(saves.map((saveHandler) => saveHandler?.()))
+            handleCloseWindow()
+          },
+          onUnsavedAndClose: () => {
+            handleCloseWindow()
+          },
+        }) > 0
+      ) {
+        console.log('有未保存的文件，阻止关闭')
+        return false
+      } else {
+        handleCloseWindow()
+
+        return true
+      }
+    })
     const unListenMenu = listen<string>('native:menu', ({ payload }) => {
       bus.emit(payload)
     })
 
     return () => {
       unListenMenu.then((fn) => fn())
+      closeRequest.then((fn) => fn())
     }
   }, [])
 

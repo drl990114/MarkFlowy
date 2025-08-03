@@ -1,9 +1,23 @@
-import type { IFile } from './filesys'
+import type { IFile } from './filesys';
 
 type IEntries = Record<string, IFile>;
 
 export const entries: IEntries = {}
 export const pathEntries: IEntries = {}
+
+export const saveOpenedEditorEntries: Record<string, () => Promise<void>> = {}
+
+export function setSaveOpenedEditorEntries(id: string, saveHandler: () => Promise<void>): void {
+  saveOpenedEditorEntries[id] = saveHandler
+}
+
+export function getSaveOpenedEditorEntries(id: string): (() => void) | undefined {
+  return saveOpenedEditorEntries[id]
+}
+
+export function delSaveOpenedEditorEntries(id: string): void {
+  delete saveOpenedEditorEntries[id]
+}
 
 export function setFileObject(id: string, file: IFile): void {
   entries[id] = file

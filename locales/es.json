@@ -34,7 +34,9 @@
     "translate": "traducir",
     "summary": "resumen",
     "create_file": "Crear un archivo nuevo",
-    "unsave": "Unguardar"
+    "unsave": "Unguardar",
+    "save_and_close": "Guardar y cerrar",
+    "unsave_and_close": "Cierre directo"
   },
   "placeholder": {
     "translate": "Idioma destino"
@@ -54,6 +56,10 @@
     },
     "edit_filename_cancel": {
       "description": "¿Desea guardar el nombre del contenido?"
+    },
+    "close": {
+      "title": "¿Desea guardar los cambios?",
+      "description": "¿Tiene archivos no guardados, está seguro de que desea salir?"
     }
   },
   "error": {
