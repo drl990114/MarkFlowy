@@ -34,7 +34,9 @@
     "unsave": "unsave",
     "translate": "translate",
     "summary": "summary",
-    "create_file": "Create a new file"
+    "create_file": "Create a new file",
+    "save_and_close": "Save and close",
+    "unsave_and_close": "Direct Close"
   },
   "placeholder": {
     "translate": "Please enter target language"
@@ -54,6 +56,10 @@
     },
     "edit_filename_cancel": {
       "description": "Do you want to save the rename content?"
+    },
+    "close": {
+      "title": "Do you want to save the changes?",
+      "description": "You have unsaved files, are you sure you want to exit?"
     }
   },
   "error": {

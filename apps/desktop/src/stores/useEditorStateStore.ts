@@ -12,6 +12,7 @@ type EditorStateStoreState = {
 
 type EditorStateStoreAction = {
   setIdStateMap: (id: string, editorState: EditorState) => void
+  delIdStateMap: (id: string) => void
 }
 
 const useEditorStateStore = create(
@@ -23,6 +24,13 @@ const useEditorStateStore = create(
         state.idStateMap?.set(id, editorState)
       })
     },
+
+    delIdStateMap: (id) =>
+      set((state) => {
+        if (state.idStateMap.has(id)) {
+          state.idStateMap.delete(id)
+        }
+      }),
   })),
 )
 

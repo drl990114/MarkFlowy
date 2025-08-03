@@ -34,7 +34,9 @@
     "translate": "Traduction",
     "summary": "Résumé",
     "create_file": "Nouveau fichier",
-    "unsave": "Unsave"
+    "unsave": "Unsave",
+    "save_and_close": "Enregistrer et fermer",
+    "unsave_and_close": "Fermeture directe"
   },
   "confirm": {
     "delete": {
@@ -51,6 +53,10 @@
     },
     "edit_filename_cancel": {
       "description": "Voulez-vous enregistrer le contenu renommer?"
+    },
+    "close": {
+      "title": "Voulez-vous enregistrer les modifications?",
+      "description": "Avez-vous des fichiers non sauvegardés, êtes-vous sûr de vouloir quitter?"
     }
   },
   "error": {
