@@ -33,7 +33,8 @@
     "save": "保存",
     "translate": "翻译",
     "summary": "摘要",
-    "create_file": "新建文件"
+    "create_file": "新建文件",
+    "unsave": "取消保存"
   },
   "placeholder": {
     "translate": "请输入目标语言"
@@ -50,6 +51,9 @@
     },
     "trash": {
       "description": "你确定要将 \"{{name}}\" 移动到回收站吗?"
+    },
+    "edit_filename_cancel": {
+      "description": "是否要保存重命名内容？"
     }
   },
   "error": {

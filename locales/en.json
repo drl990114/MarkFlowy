@@ -31,6 +31,7 @@
     "edit": "edit",
     "more": "more",
     "save": "save",
+    "unsave": "unsave",
     "translate": "translate",
     "summary": "summary",
     "create_file": "Create a new file"
@@ -50,6 +51,9 @@
     },
     "trash": {
       "description": "Are you sure you want to move the \"{{name}}\" to the trash?"
+    },
+    "edit_filename_cancel": {
+      "description": "Do you want to save the rename content?"
     }
   },
   "error": {
