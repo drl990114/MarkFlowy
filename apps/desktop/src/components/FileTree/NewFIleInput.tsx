@@ -1,8 +1,8 @@
 import { isMdFile, type IFile } from '@/helper/filesys'
-import { useCallback, type HTMLAttributes, useState, useRef, useEffect } from 'react'
+import { invoke } from '@tauri-apps/api/core'
+import { useCallback, useEffect, useRef, useState, type HTMLAttributes } from 'react'
 import { Input, Tooltip } from 'zens'
 import { unVerifiedFileNameChars, verifyFileName } from './verify-file-name'
-import { invoke } from '@tauri-apps/api/core'
 
 const NewFileInput = (
   props: HTMLAttributes<HTMLInputElement> & {
@@ -10,7 +10,11 @@ const NewFileInput = (
     inputType?: 'file' | 'dir'
     parentNode?: IFile
     onCreate: (file: IFile) => Promise<void>
-    onCancel: () => void
+    /**
+     * @param file 如果创建的文件名无效，则为 undefined
+     * @returns
+     */
+    onCancel: (file?: IFile) => void
   },
 ) => {
   const {
@@ -37,23 +41,32 @@ const NewFileInput = (
   const creating = useRef(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const hideInput = useCallback(() => {
+  const handleBlur = useCallback(() => {
     if (creating.current === true) {
       return
     }
-    setInputName('')
-    onCancel?.()
+    if (invalidState === false && verifing.current === false) {
+      getFileInfo(inputRef.current?.value || initialName)
+        .then((fileInfo) => {
+          onCancel?.(fileInfo)
+        })
+        .catch(() => {
+          onCancel?.()
+        })
+    } else {
+      onCancel?.()
+    }
   }, [onCancel])
 
   useEffect(() => {
     setTimeout(() => {
       inputRef.current?.focus()
-      inputRef.current?.addEventListener('blur', hideInput)
+      inputRef.current?.addEventListener('blur', handleBlur)
       verify(initialName)
     })
 
     return () => {
-      inputRef.current?.removeEventListener('blur', hideInput)
+      inputRef.current?.removeEventListener('blur', handleBlur)
     }
   }, [initialName])
 
@@ -74,7 +87,7 @@ const NewFileInput = (
         name: fileName,
       }
     },
-    [inputName, fileNode, parentNode, createType],
+    [fileNode, parentNode, createType],
   )
 
   const verify = useCallback(

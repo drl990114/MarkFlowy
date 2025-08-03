@@ -33,7 +33,8 @@
     "save": "enregistrer",
     "translate": "Traduction",
     "summary": "Résumé",
-    "create_file": "Nouveau fichier"
+    "create_file": "Nouveau fichier",
+    "unsave": "Unsave"
   },
   "confirm": {
     "delete": {
@@ -47,6 +48,9 @@
     },
     "trash": {
       "description": "Êtes-vous sûr de vouloir déplacer \"{{name}}\" dans la corbeille?"
+    },
+    "edit_filename_cancel": {
+      "description": "Voulez-vous enregistrer le contenu renommer?"
     }
   },
   "error": {

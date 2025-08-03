@@ -293,17 +293,40 @@ function FileNode({
                 await createFileHandler(file)
               }
             }}
-            onCancel={() => {
-              if (isUpdate) {
-                simpleTree.update({
-                  id: node.id,
-                  changes: { kind: node.data.kind === 'pending_edit_folder' ? 'dir' : 'file' },
-                })
-              } else {
-                simpleTree.drop({ id: node.id })
+            onCancel={(fileInfo) => {
+              const cancelInput = () => {
+                if (isUpdate) {
+                  simpleTree.update({
+                    id: node.id,
+                    changes: { kind: node.data.kind === 'pending_edit_folder' ? 'dir' : 'file' },
+                  })
+                } else {
+                  simpleTree.drop({ id: node.id })
+                }
+
+                setFolderData(simpleTree.data)
               }
 
-              setFolderData(simpleTree.data)
+              if (!fileInfo) {
+                cancelInput()
+                return
+              }
+
+              NiceModal.show(MODAL_CONFIRM_ID, {
+                title: t('confirm.edit_filename_cancel.description'),
+                confirmText: t('action.save'),
+                cancelText: t('action.unsave'),
+                onConfirm: async () => {
+                  if (isUpdate) {
+                    await renameFileHandler(fileInfo)
+                  } else {
+                    await createFileHandler(fileInfo)
+                  }
+                },
+                onClose: () => {
+                  cancelInput()
+                },
+              })
             }}
           />
         ) : (
