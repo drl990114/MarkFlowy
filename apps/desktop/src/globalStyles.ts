@@ -11,6 +11,7 @@ export const GlobalStyles = createGlobalStyle`
     background-color: ${(props) => props.theme.bgColor};
     color: ${(props) => props.theme.primaryFontColor};
     overflow: hidden;
+    line-height: normal;
     font-family: "Open Sans", "Clear Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
   }
 
@@ -38,7 +39,7 @@ export const GlobalStyles = createGlobalStyle`
   .icon-small {
     height: 22px;
     width: 22px;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
   }
 
   .icon-medium {
