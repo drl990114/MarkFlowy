@@ -61,7 +61,7 @@ version = "7.6.2"
 version = "0.2.15"
 
 [dependencies.thiserror]
-version = "2.0.8"
+version = "2.0.12"
 
 [dependencies.tokio]
 version = "1.41.0"
@@ -132,7 +132,7 @@ features = ["derive"]
 version = "3.3.0"
 
 [dev-dependencies.thiserror]
-version = "2.0.8"
+version = "2.0.12"
 
 [dev-dependencies.tokio]
 version = "1.41.0"
