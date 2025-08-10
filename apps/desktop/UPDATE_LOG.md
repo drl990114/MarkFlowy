@@ -1,5 +1,41 @@
 # UPDATE LOG
 
+## v0.29.0
+
+Features:
+
+- Support quick management of Git repositories, such as staging, committing, and pushing (beta version, welcome to discuss features or report issues on GitHub).
+
+- When exiting the application, check for unsaved files and prompt the user to save or discard changes.
+
+- Confirm whether to cancel or save when renaming a file loses focus through a popup.
+
+- Layout adjustments and style optimizations.
+
+- Update the update check to support UpgradeLink nodes, improving update speed for users in China.
+
+Fixes:
+
+- Fix the positioning issue of the table's menu button.
+
+---
+
+特性：
+
+- 支持 Git 仓库的快捷管理，如暂存、提交、推送（beta版，欢迎在 Github issue 中讨论特性或反馈问题）
+
+- 退出应用时，检查未保存的文件，提示用户保存或放弃更改。
+
+- 重命名文件失去焦点时，通过弹窗确认是取消还是保存。
+
+- 布局调整和样式优化。
+
+- 检查更新支持 UpgradeLink 节点，提升中国用户的更新速度。
+
+修复：
+
+- 修复表格的菜单按钮定位问题。
+
 ## v0.28.3
 
 Fixes:
