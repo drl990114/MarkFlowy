@@ -1,3 +1,4 @@
+import { useEditorStore } from '@/stores'
 import { invoke } from '@tauri-apps/api/core'
 import { nanoid } from 'nanoid'
 import { setFileObject, setFileObjectByPath } from './files'
@@ -173,3 +174,18 @@ export function canvasDataToBinary(canvasData: string) {
 
   return binaryArray
 }
+
+export function getRelativePathWithCurWorkspace (filePath: string) {
+  const rootPath = useEditorStore.getState().getRootPath()
+
+  if (!rootPath || !filePath.startsWith(rootPath)) {
+    return filePath
+  }
+
+  let relativePath = filePath.slice(rootPath.length)
+  if (relativePath.startsWith('/') || relativePath.startsWith('\\')) {
+    relativePath = relativePath.slice(1)
+  }
+  return relativePath
+}
+

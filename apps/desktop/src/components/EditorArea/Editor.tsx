@@ -3,10 +3,9 @@ import { getFileTypeConfig, isTextfileType } from '@/helper/fileTypeHandler'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
 import classNames from 'classnames'
-import { memo, useState } from 'react'
+import { memo } from 'react'
 import { useMount } from 'react-use'
 import { PreviewContent } from './preview/PreviewContent'
-import { EditorPathContainer } from './styles'
 import TextEditor from './TextEditor'
 import { UnsupportedFileType } from './UnsupportedFileType'
 
@@ -14,7 +13,6 @@ function Editor(props: EditorProps) {
   const { id, active } = props
   const curFile = getFileObject(id)
 
-  const [showFullPath, setShowFullPath] = useState(false)
   const { getFileTypeConfigById, setFileTypeConfig } = useFileTypeConfigStore()
   const curFileTypeConfig = getFileTypeConfigById(id)
 
@@ -26,37 +24,22 @@ function Editor(props: EditorProps) {
     }
   })
 
-  const handlePathClick = () => {
-    setShowFullPath((prev) => !prev)
-  }
-
   const cls = classNames('code-contents', {
-    'display-none': !active,
-  })
-
-  const pathCls = classNames({
     'display-none': !active,
   })
 
   if (!curFileTypeConfig) return null
 
   return (
-    <>
-      {curFile.path ? (
-        <EditorPathContainer className={pathCls} onClick={handlePathClick}>
-          {showFullPath ? curFile.path : `... / ${curFile.name}`}
-        </EditorPathContainer>
-      ) : null}
-      <div className={cls}>
-        {curFileTypeConfig.type === 'unsupported' ? (
-          <UnsupportedFileType />
-        ) : isTextfileType(curFileTypeConfig) ? (
-          <TextEditor fileTypeConfig={curFileTypeConfig} active={active} id={id} />
-        ) : (
-          <PreviewContent type={curFileTypeConfig.type} filePath={curFile.path} active={active} />
-        )}
-      </div>
-    </>
+    <div className={cls}>
+      {curFileTypeConfig.type === 'unsupported' ? (
+        <UnsupportedFileType />
+      ) : isTextfileType(curFileTypeConfig) ? (
+        <TextEditor fileTypeConfig={curFileTypeConfig} active={active} id={id} />
+      ) : (
+        <PreviewContent type={curFileTypeConfig.type} filePath={curFile.path} active={active} />
+      )}
+    </div>
   )
 }
 

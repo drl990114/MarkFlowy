@@ -49,6 +49,36 @@
     "updater:default",
     "notification:default",
     "clipboard-manager:default",
-    "clipboard-manager:allow-write-text"
+    "clipboard-manager:allow-write-text",
+    {
+      "identifier": "shell:allow-execute",
+      "allow": [
+        {
+          "name": "run-git-add",
+          "cmd": "git",
+          "args": ["add", { "validator": "\\S+" }]
+        },
+        {
+          "name": "run-git-commit",
+          "cmd": "git",
+          "args": ["commit", "-m", { "validator": "\\S+" }]
+        },
+        {
+          "name": "run-git-revlist",
+          "cmd": "git",
+          "args": ["rev-list", "--count", "--left-right", { "validator": "\\S+" }]
+        },
+        {
+          "name": "run-git-push",
+          "cmd": "git",
+          "args": ["push"]
+        },
+        {
+          "name": "run-git-diff",
+          "cmd": "git",
+          "args": ["diff", "--name-only", { "validator": "\\S+" }]
+        }
+      ]
+    }
   ]
 }

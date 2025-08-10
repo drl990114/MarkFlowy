@@ -4,6 +4,7 @@ import TableDialog from '@/components/EditorArea/editorToolBar/TableDialog'
 import { PageLayout } from '@/components/Layout'
 import RightBar from '@/components/SideBar/RightBar'
 import StatusBar from '@/components/StatusBar'
+import { WorkspaceDialog } from '@/components/WorkspaceDialog'
 import { useRefreshAIProvidersModels } from '@/extensions/ai/aiProvidersService'
 import { BookMarkDialog } from '@/extensions/bookmarks/BookMarkDialog'
 import useBookMarksStore from '@/extensions/bookmarks/useBookMarksStore'
@@ -116,6 +117,7 @@ function Root() {
       <TableDialog />
       <BookMarkDialog />
       <SettingDialog />
+      <WorkspaceDialog />
     </PageLayout>
   )
 }

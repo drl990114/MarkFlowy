@@ -33,6 +33,7 @@
     "@tauri-apps/plugin-dialog": "2.2.0",
     "@tauri-apps/plugin-http": "2.4.2",
     "@tauri-apps/plugin-os": "2.2.1",
+    "@tauri-apps/plugin-shell": "2.2.2",
     "@tauri-apps/plugin-store": "2.2.0",
     "@tauri-apps/plugin-updater": "2.6.1",
     "ai": "^4.3.15",
@@ -65,7 +66,7 @@
     "stylis": "^4.3.4",
     "tinykeys": "^3.0.0",
     "use-resize-observer": "^9.1.0",
-    "zens": "0.1.0",
+    "zens": "0.1.1",
     "zod": "^3.24.2",
     "zustand": "^5.0.6"
   },

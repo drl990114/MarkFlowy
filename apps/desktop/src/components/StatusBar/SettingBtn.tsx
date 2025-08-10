@@ -59,7 +59,7 @@ export const CenterMenu = memo(() => {
           },
         },
       ],
-      x: rect[0]?.right || 12,
+      x: rect[0]?.left || 12,
       y: rect[0]?.top - 4 || 0,
     })
   }

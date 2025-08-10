@@ -276,5 +276,19 @@
   "explorer": {
     "reset_folder_view": "Réinitialiser la vue dossier",
     "collapse_folders": "Dossiers d'effondrement"
+  },
+  "workspace": {
+    "info": "Informations sur la zone de travail",
+    "none": "Espace de travail non ouvert",
+    "sync_mode": {
+      "git_local": {
+        "name": "Git local",
+        "description": "Synchronisation avec un entrepôt Git local"
+      },
+      "pure_local": {
+        "name": "Pure locale",
+        "description": "Espace de travail local uniquement"
+      }
+    }
   }
 }

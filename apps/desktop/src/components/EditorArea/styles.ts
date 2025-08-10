@@ -9,7 +9,6 @@ export const Container = styled.div`
   flex-direction: column;
 
   .editor-area-header {
-    padding: 0 0.5rem;
     display: flex;
     flex: initial;
     align-items: center;
@@ -82,8 +81,6 @@ export const WarningHeader = styled.h3`
 `
 
 export const EditorPathContainer = styled.div`
-  font-size: 0.85em;
-  padding: 1em;
   cursor: pointer;
   transition: color 0.2s ease-in-out;
 
