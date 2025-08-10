@@ -111,6 +111,20 @@
     }
   },
   "notification": {},
+  "workspace": {
+    "info": "工作区信息",
+    "none": "未打开工作区",
+    "sync_mode": {
+      "git_local": {
+        "name": "Git 本地",
+        "description": "与本地 Git 仓库同步"
+      },
+      "pure_local": {
+        "name": "纯本地",
+        "description": "仅本地工作区"
+      }
+    }
+  },
   "search": {
     "search_empty": "无法找到符合这些搜索词的任何内容",
     "text": "搜索",

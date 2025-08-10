@@ -25,6 +25,7 @@ import __MF__ from '../context'
 import { isArray } from '../helper'
 import useExtensionsManagerStore from '../stores/useExtensionsManagerStore'
 import useThemeStore, { isBuiltInTheme } from '../stores/useThemeStore'
+import { useWorkspaceWatcherSetup } from './useWorkspaceWatcherSetup'
 
 async function appThemeExtensionsSetup(curTheme: string) {
   if (isBuiltInTheme(curTheme)) {
@@ -273,6 +274,7 @@ const useAppSetup = () => {
 
   useGlobalOSInfo()
   useGlobalKeyboard()
+  useWorkspaceWatcherSetup()
 }
 
 export default useAppSetup

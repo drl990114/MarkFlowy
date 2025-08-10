@@ -16,7 +16,7 @@ use std::path::PathBuf;
 use std::sync;
 use std::{collections::HashMap, sync::Mutex};
 
-use app::{bookmarks, conf, extensions, keybindings, opened_cache, process, themes};
+use app::{bookmarks, conf, extensions, keybindings, opened_cache, process, themes, workspace, file_watcher};
 use dotenv;
 use lazy_static::lazy_static;
 use tauri::{Manager, Runtime, State};
@@ -100,6 +100,10 @@ pub fn run() {
             process::app_restart,
             themes::cmd::load_themes,
             font::cmd::font_list,
+            workspace::cmd::is_git_repository,
+            file_watcher::cmd::watch_file,
+            file_watcher::cmd::stop_file_watcher,
+            file_watcher::cmd::stop_all_file_watchers,
         ])
         .setup(|app: &mut tauri::App| {
             let home_dir_path = app.path().home_dir().expect("failed to get home dir");

@@ -1,7 +1,7 @@
-import { create } from 'zustand'
-import { createFile, isMdFile, type IFile, getFolderPathFromPath } from '@/helper/filesys'
-import type { EditorContext, EditorDelegate } from 'rme'
+import { createFile, getFolderPathFromPath, isMdFile, type IFile } from '@/helper/filesys'
 import { invoke } from '@tauri-apps/api/core'
+import type { EditorContext, EditorDelegate } from 'rme'
+import { create } from 'zustand'
 
 const findParentNode = (fileNode: IFile, rootFile: IFile) => {
   const dfs = (file: IFile): undefined | IFile => {
@@ -62,6 +62,8 @@ const useEditorStore = create<EditorStore>((set, get) => {
     folderData: null,
     editorDelegateMap: new Map(),
     editorCtxMap: new Map(),
+
+    getRootPath: () => get().folderData?.[0].path,
 
     addFile: async (fileNode, target) => {
       const { folderData, addOpenedFile } = get()
@@ -271,6 +273,7 @@ type EditorStore = {
   folderData: null | IFile[]
   editorCtxMap: Map<string, EditorContext>
   editorDelegateMap: Map<string, EditorDelegate<any>>
+  getRootPath: () => string | undefined
   setActiveId: (id: string) => void
   addFile: (file: IFile, target: BaseIFile) => Promise<void | IFile>
   insertNodeToFolderData: (fileNode: IFile) => void

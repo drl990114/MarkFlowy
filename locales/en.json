@@ -276,5 +276,19 @@
       "orderedList": "Ordered List",
       "taskList": "Task List"
     }
+  },
+  "workspace": {
+    "info": "Workspace Information",
+    "none": "Workspace is not open",
+    "sync_mode": {
+      "git_local": {
+        "name": "Git Local",
+        "description": "Synchronize with local Git repository"
+      },
+      "pure_local": {
+        "name": "Pure Local",
+        "description": "Local Workspace Only"
+      }
+    }
   }
 }

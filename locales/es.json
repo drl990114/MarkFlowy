@@ -276,5 +276,19 @@
   "explorer": {
     "reset_folder_view": "Restablecer vista de carpeta",
     "collapse_folders": "Contraer carpetas"
+  },
+  "workspace": {
+    "info": "Información del área de trabajo",
+    "none": "El área de trabajo no está abierta",
+    "sync_mode": {
+      "git_local": {
+        "name": "Local de Git",
+        "description": "Sincronización con repositorios locales de Git"
+      },
+      "pure_local": {
+        "name": "Local puro",
+        "description": "Espacio de trabajo local solamente"
+      }
+    }
   }
 }
