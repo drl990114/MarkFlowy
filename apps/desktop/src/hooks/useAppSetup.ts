@@ -216,6 +216,18 @@ const appSetup = once(async function () {
   return settingData
 })
 
+const useFontfamilySetup = () => {
+  const { osType } = useGlobalOSInfo()
+
+  if (osType === 'macos') {
+    document.body.style.fontFamily = 'SF Pro,-apple-system,BlinkMacSystemFont,sans-serif'
+  } else if (osType === 'windows') {
+    document.body.style.fontFamily = 'Segoe UI, Roboto, Helvetica, Arial, sans-serif'
+  } else if (osType === 'linux') {
+    document.body.style.fontFamily = 'Ubuntu, Roboto, Helvetica, Arial, sans-serif'
+  }
+}
+
 const useAppSetup = () => {
   const eventInit = useCallback(() => {
     const currentWindow = getCurrentWindow()
@@ -275,6 +287,7 @@ const useAppSetup = () => {
   useGlobalOSInfo()
   useGlobalKeyboard()
   useWorkspaceWatcherSetup()
+  useFontfamilySetup()
 }
 
 export default useAppSetup
