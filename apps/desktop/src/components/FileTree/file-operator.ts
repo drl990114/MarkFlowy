@@ -1,6 +1,7 @@
-import { IFile } from '@/helper/filesys'
-import { SimpleTree } from './SimpleTree'
 import { getFileObject, getFileObjectByPath, pathEntries } from '@/helper/files'
+import { IFile } from '@/helper/filesys'
+import { toast } from 'zens'
+import { SimpleTree } from './SimpleTree'
 
 export const updateFileNodePath = (tree: SimpleTree<IFile>, params: Partial<IFile>) => {
   const { id, ...rest } = params
@@ -31,6 +32,12 @@ export type MoveFileInfo = {
 
 export const moveFileNode = async (tree: SimpleTree<IFile>, moveFileInfo: MoveFileInfo) => {
   const oldFile = getFileObjectByPath(moveFileInfo.old_path)
+
+  if (!oldFile) {
+    toast.error(`File not found for path: ${moveFileInfo.old_path}`)
+    return
+  }
+
   const oldFileNode = tree.find(oldFile.id)
 
   if (moveFileInfo.is_replaced) {

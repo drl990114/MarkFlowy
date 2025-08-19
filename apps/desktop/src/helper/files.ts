@@ -35,6 +35,9 @@ export function setFileObjectByPath(path: string, file: IFile): void {
   pathEntries[path] = file
 }
 
-export function getFileObjectByPath(path: string): IFile {
+export function getFileObjectByPath(path?: string): undefined | IFile {
+  if (!path) {
+    return undefined
+  }
   return pathEntries[path]
 }

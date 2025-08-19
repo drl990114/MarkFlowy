@@ -69,6 +69,16 @@
           "args": ["rev-list", "--count", "--left-right", { "validator": "\\S+" }]
         },
         {
+          "name": "run-git-fetch",
+          "cmd": "git",
+          "args": ["fetch", "--prune"]
+        },
+        {
+          "name": "run-git-pull",
+          "cmd": "git",
+          "args": ["pull", "--ff-only"]
+        },
+        {
           "name": "run-git-push",
           "cmd": "git",
           "args": ["push"]
