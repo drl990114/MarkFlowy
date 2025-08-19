@@ -112,6 +112,7 @@
   },
   "notification": {},
   "workspace": {
+    "label": "书",
     "info": "工作区信息",
     "none": "未打开工作区",
     "sync_mode": {

@@ -1,11 +1,17 @@
 import { useEditorStore } from '@/stores'
 import { invoke } from '@tauri-apps/api/core'
 import { nanoid } from 'nanoid'
-import { setFileObject, setFileObjectByPath } from './files'
+import { getFileObjectByPath, setFileObject, setFileObjectByPath } from './files'
 
 interface FileEntry {
   name: string
-  kind: 'file' | 'dir' | 'pending_new_file' | 'pending_new_folder' | 'pending_edit_folder' | 'pending_edit_file'
+  kind:
+    | 'file'
+    | 'dir'
+    | 'pending_new_file'
+    | 'pending_new_folder'
+    | 'pending_edit_folder'
+    | 'pending_edit_file'
   path?: string
   children?: IFile[]
   ext?: string
@@ -17,11 +23,11 @@ export interface IFile extends FileEntry {
 }
 
 export enum FileResultCode {
-  Success = "Success",
-  NotFound = "NotFound",
-  PermissionDenied = "PermissionDenied",
-  InvalidPath = "InvalidPath",
-  UnknownError = "UnknownError",
+  Success = 'Success',
+  NotFound = 'NotFound',
+  PermissionDenied = 'PermissionDenied',
+  InvalidPath = 'InvalidPath',
+  UnknownError = 'UnknownError',
 }
 
 export interface FileSysResult {
@@ -31,7 +37,7 @@ export interface FileSysResult {
 
 const wrapFiles = (entries: FileEntry[]) => {
   entries.forEach((entry) => {
-    ;(entry as IFile).id = nanoid()
+    ;(entry as IFile).id = getFileObjectByPath(entry.path)?.id || nanoid()
 
     setFileObject((entry as IFile).id, entry as IFile)
     setFileObjectByPath(entry.path!, entry as IFile)
@@ -75,7 +81,6 @@ export const readDirectory = (folderPath: string): Promise<IFile[]> => {
   return new Promise((resolve, reject) => {
     invoke<FileSysResult>('open_folder_async', { folderPath })
       .then(async (message) => {
-
         if (message.code !== FileResultCode.Success) {
           return
         }
@@ -84,7 +89,6 @@ export const readDirectory = (folderPath: string): Promise<IFile[]> => {
         const entries: IFile[] = []
 
         if (!files || !files.length) {
-          
           resolve([
             {
               id: nanoid(),
@@ -108,15 +112,19 @@ export const readDirectory = (folderPath: string): Promise<IFile[]> => {
         const folderName = await invoke<string>('get_path_name', {
           path: folderPath,
         })
-        resolve([
-          {
-            id: nanoid(),
-            name: folderName,
-            path: folderPath,
-            kind: 'dir',
-            children: entries,
-          },
-        ])
+
+        const root: IFile = {
+          id: getFileObjectByPath(folderPath)?.id || nanoid(),
+          name: folderName,
+          path: folderPath,
+          kind: 'dir',
+          children: entries,
+        }
+
+        setFileObjectByPath(folderPath, root)
+        setFileObject(root.id, root)
+
+        resolve([root])
       })
       .catch((err) => {
         reject(err)
@@ -175,7 +183,7 @@ export function canvasDataToBinary(canvasData: string) {
   return binaryArray
 }
 
-export function getRelativePathWithCurWorkspace (filePath: string) {
+export function getRelativePathWithCurWorkspace(filePath: string) {
   const rootPath = useEditorStore.getState().getRootPath()
 
   if (!rootPath || !filePath.startsWith(rootPath)) {
@@ -188,4 +196,3 @@ export function getRelativePathWithCurWorkspace (filePath: string) {
   }
   return relativePath
 }
-
