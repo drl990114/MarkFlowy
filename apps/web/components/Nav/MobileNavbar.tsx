@@ -51,7 +51,6 @@ const Wrapper = styled.div`
   ${mobile(css`
     align-items: center;
     display: flex;
-    flex-grow: 1;
     height: ${rem(navbarHeight)};
     justify-content: space-between;
     margin-left: 16px;

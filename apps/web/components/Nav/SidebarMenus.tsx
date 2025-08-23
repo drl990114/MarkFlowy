@@ -1,14 +1,19 @@
+import { useTranslation } from 'next-i18next'
+import { useRouter } from 'next/router'
 import styled from 'styled-components'
 import { getSections } from 'utils/sections'
 import rem from '../../utils/rem'
-import { StyledLink } from '../Link'
+import Link from '../Link'
 
 export interface SimpleSidebarMenuProps {
   pages?: { title: string; pathname: string; sections: { title: string }[]; href: string }[]
 }
 
 export const SimpleSidebarMenu = () => {
-  const sections = getSections()
+  const router = useRouter()
+  const currentLocale = router.locale || 'en'
+  const sections = getSections(currentLocale)
+  const { t } = useTranslation()
   const keys = Object.keys(sections)
   return (
     <MenuInner>
@@ -23,7 +28,7 @@ export const SimpleSidebarMenu = () => {
             {section.map(({ slug, title }) => {
               return (
                 <SubSection key={title}>
-                  <StyledLink href={`/docs/${slug}`}>{title}</StyledLink>
+                  <Link href={`/docs${slug}`}>{t(`fileTitle.${title}`)}</Link>
                 </SubSection>
               )
             })}
@@ -60,8 +65,11 @@ const SubSection = styled.h5`
 export interface DocsSidebarMenuProps {}
 
 export const DocsSidebarMenu = () => {
-  const sections = getSections()
+  const router = useRouter()
+  const currentLocale = router.locale || 'en'
+  const sections = getSections(currentLocale)
   const keys = Object.keys(sections)
+  const { t } = useTranslation()
 
   return (
     <MenuInner>
@@ -71,13 +79,13 @@ export const DocsSidebarMenu = () => {
         return (
           <Section key={key}>
             <SectionTitle>
-              <span>{key}</span>
+              <span>{t(`fileTitle.${key}`)}</span>
             </SectionTitle>
 
             {section.map(({ slug, title }) => {
               return (
                 <SubSection key={title}>
-                  <StyledLink href={`/docs/${slug}`}>{title}</StyledLink>
+                  <Link href={`/docs${slug}`}>{t(`fileTitle.${title}`)}</Link>
                 </SubSection>
               )
             })}

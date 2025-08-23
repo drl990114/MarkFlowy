@@ -1,6 +1,6 @@
 import { defineDocumentType, makeSource } from 'contentlayer2/source-files'
-import remarkGfm from 'remark-gfm'
 import rehypeSlug from 'rehype-slug'
+import remarkGfm from 'remark-gfm'
 
 export const Post = defineDocumentType(() => ({
   name: 'Post',
@@ -47,13 +47,22 @@ export const Markdown = defineDocumentType(() => ({
     slug: {
       type: 'string',
       resolve: (doc) => {
-        return doc._raw.flattenedPath
+        // 去掉 第一个/ 前缀
+        // 例如 en/getting-started.md -> /getting-started.md
+        return doc._raw.flattenedPath.replace(/^[^/]+/, '')
       },
     },
     title: {
       type: 'string',
       resolve: (doc) => {
         return doc._raw.sourceFileName.split('.md')?.[0]
+      },
+    },
+    locale: {
+      type: 'string',
+      resolve: (doc) => {
+        const pathParts = doc._raw.flattenedPath.split('/')
+        return pathParts[0] || 'en'
       },
     }
     // excerpt: {

@@ -1,8 +1,9 @@
+import { useRouter } from 'next/router';
 import React from 'react';
+import Footer from './Footer';
 import { Container, Content, Title } from './Layout';
 import Nav, { NavProps } from './Nav';
 import Head from './SeoHead';
-import { useRouter } from 'next/router';
 
 export interface DocsLayoutProps {
   description?: string;
@@ -57,6 +58,8 @@ export default function DocsLayout({
 
         {children}
       </Content>
+
+      <Footer />
     </Container>
   );
 }

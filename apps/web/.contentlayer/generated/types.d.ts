@@ -17,6 +17,7 @@ export type Markdown = {
   body: Markdown
   slug: string
   title: string
+  locale: string
 }
 
 export type Post = {

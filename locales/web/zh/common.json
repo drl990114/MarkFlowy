@@ -1,0 +1,50 @@
+{
+  "common": {
+    "docs": "文档"
+  },
+  "docs": {
+    "sidebar": {
+      "gettingStarted": "快速开始"
+    }
+  },
+  "home": {
+    "hero": {
+      "title": "MarkFlowy",
+      "subtitle": "高效舒适的编辑体验",
+      "description": "",
+      "download": "立即下载"
+    },
+    "features": {
+      "feature1": {
+        "title": "多模式编辑",
+        "description": "支持源代码、所见即所得编辑模式，满足不同场景需求，并且支持编辑 Markdown 以外的文件，如 json、txt 等"
+      },
+      "feature2": {
+        "title": "内置 AI 助手",
+        "description": "集成强大的 AI 助手，支持文本生成、对话、翻译等功能，提升编辑效率"
+      },
+      "feature3": {
+        "title": "自定义主题",
+        "description": "提供明暗两种内置主题，并支持自定义主题，满足个性化需求"
+      }
+    }
+  },
+  "navigation": {
+    "home": "首页",
+    "docs": "文档",
+    "download": "下载",
+    "github": "GitHub",
+    "theme": "主题",
+    "language": "语言",
+    "releases": "发布记录"
+  },
+  "fileTitle": {
+    "intro": "介绍",
+    "CustomTheme": "自定义主题",
+    "CODE_OF_CONDUCT": "行为准则",
+    "CONTRIBUTING": "贡献指南",
+    "Community": "社区准则",
+    "Extension": "扩展指南",
+    "License": "许可证"
+  }
+}

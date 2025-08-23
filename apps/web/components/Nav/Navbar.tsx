@@ -1,8 +1,10 @@
+import { i18n } from 'next-i18next'
 import styled, { css } from 'styled-components'
 import { mobile } from '../../utils/media'
 import rem from '../../utils/rem'
 import { navbarHeight } from '../../utils/sizes'
 import Link from '../Link'
+import LanguageSwitcher from './LanguageSwitcher'
 import MobileNavbar from './MobileNavbar'
 import NavLinks from './NavLinks'
 import Social from './Social'
@@ -34,7 +36,7 @@ export default function Navbar({
 
       <NormalNavbar>
         <StartWrapper>
-          <LogoLink aria-label='MarkFlowy logo' href='.'>
+          <LogoLink aria-label='MarkFlowy logo' href={`./${i18n?.language || 'en'}`}>
             <strong>MarkFlowy</strong>
           </LogoLink>
 
@@ -53,7 +55,8 @@ export default function Navbar({
           `)}
         `}
       >
-        <StyledSocial style={{ marginLeft: 16 }} />
+        <LanguageSwitcher style={{ marginRight: 8 }} />
+        <StyledSocial style={{ marginLeft: 8 }} />
       </EndWrapper>
     </Wrapper>
   )

@@ -1,0 +1,50 @@
+{
+  "common": {
+    "docs": "Documentation"
+  },
+  "docs": {
+    "sidebar": {
+      "gettingStarted": "Getting Started"
+    }
+  },
+  "home": {
+    "hero": {
+      "title": "MarkFlowy",
+      "subtitle": "Efficient and comfortable editing",
+      "description": "",
+      "download": "Download Now"
+    },
+    "features": {
+      "feature1": {
+        "title": "Multiple Editing Modes",
+        "description": "Supports source code and WYSIWYG editing modes to meet different scenario needs, and supports editing files other than Markdown, such as json, txt, etc."
+      },
+      "feature2": {
+        "title": "Built-in AI Assistant",
+        "description": "Integrates a powerful AI assistant that supports text generation, conversation, translation, and other functions to improve editing efficiency."
+      },
+      "feature3": {
+        "title": "Custom Themes",
+        "description": "Provides built-in light and dark themes, and supports custom themes to meet personalized needs."
+      }
+    }
+  },
+  "navigation": {
+    "home": "Home",
+    "docs": "Documentation",
+    "download": "Download",
+    "github": "GitHub",
+    "theme": "Theme",
+    "language": "Language",
+    "releases": "Releases"
+  },
+  "fileTitle": {
+    "intro": "Introduction",
+    "CustomTheme": "Custom Theme",
+    "CODE_OF_CONDUCT": "CODE_OF_CONDUCT",
+    "CONTRIBUTING": "CONTRIBUTING",
+    "Community": "Community Guidelines",
+    "Extension": "Extensions Guide",
+    "License": "License"
+  }
+}

@@ -1,7 +1,7 @@
 import UnstyledLink, { LinkProps as UnstyledLinkProps } from 'next/link';
 import React from 'react';
 import styled from 'styled-components';
-import { blmGrey, lightGrey, red } from '../utils/colors';
+import { lightGrey, red } from '../utils/colors';
 import rem from '../utils/rem';
 
 type AnchorProps = JSX.IntrinsicElements['a'];
@@ -67,7 +67,6 @@ export const InlineLink = styled.a.attrs((/* props */) => ({
   target: '_blank',
   rel: 'noopener',
 }))`
-  color: ${blmGrey};
   cursor: pointer;
   text-decoration: underline;
 

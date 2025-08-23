@@ -1,7 +1,7 @@
 // contentlayer.config.js
 import { defineDocumentType, makeSource } from "contentlayer2/source-files";
-import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
+import remarkGfm from "remark-gfm";
 var Post = defineDocumentType(() => ({
   name: "Post",
   contentType: "mdx",
@@ -46,13 +46,20 @@ var Markdown = defineDocumentType(() => ({
     slug: {
       type: "string",
       resolve: (doc) => {
-        return doc._raw.flattenedPath;
+        return doc._raw.flattenedPath.replace(/^[^/]+/, "");
       }
     },
     title: {
       type: "string",
       resolve: (doc) => {
         return doc._raw.sourceFileName.split(".md")?.[0];
+      }
+    },
+    locale: {
+      type: "string",
+      resolve: (doc) => {
+        const pathParts = doc._raw.flattenedPath.split("/");
+        return pathParts[0] || "en";
       }
     }
     // excerpt: {
@@ -87,4 +94,4 @@ export {
   Post,
   contentlayer_config_default as default
 };
-//# sourceMappingURL=compiled-contentlayer-config-PTYAUPAV.mjs.map
+//# sourceMappingURL=compiled-contentlayer-config-IHS33S7D.mjs.map
