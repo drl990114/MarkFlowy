@@ -1,0 +1,18 @@
+{
+  "body": {
+    "raw": "# 自定义主题\n\nMarkFlowy 支持自定义主题，你还可以与他人分享你的主题。\n\n## 开发环境\n\n- MarkFlowy > 0.7.0\n- nodejs >= 18.x\n- pnpm >= 7.x\n\n## 如何制作主题\n\n### 1. 创建主题文件\n\n你可以 fork [MarkFlowy-Theme-Template](https://github.com/MarkFlowy/custom-theme-template) 来创建你的主题。\n\n```bash\npnpm install\n\npnpm run dev\n```\n\n### 2. 编辑主题文件\n\n打开 MarkFlowy，点击 `设置`，你可以看到 `路径`，打开这个路径文件夹，在 `.markflowy` 文件夹中创建 `themes` 文件夹，然后在 `themes` 文件夹中创建你的主题文件夹，例如 `markflowy-theme-template`。\n\n你可以编辑 `rollup.config.js` 来更改主题构建文件的输出。\n\n```js\noutput: {\n  // 将此输出文件更改为开发环境\n  // 例如 file: '/Users/xxx/.markflowy/themes/markflowy-theme-template/index.js',\n  file: pkg.browser,\n  format: 'es',\n  sourcemap: true,\n  entryFileNames: '[name].js',\n},\n```\n\n更改你的主题后，重新加载 MarkFlowy 即可看到效果。\n",
+    "html": "<h1>自定义主题</h1>\n<p>MarkFlowy 支持自定义主题，你还可以与他人分享你的主题。</p>\n<h2>开发环境</h2>\n<ul>\n<li>MarkFlowy > 0.7.0</li>\n<li>nodejs >= 18.x</li>\n<li>pnpm >= 7.x</li>\n</ul>\n<h2>如何制作主题</h2>\n<h3>1. 创建主题文件</h3>\n<p>你可以 fork <a href=\"https://github.com/MarkFlowy/custom-theme-template\">MarkFlowy-Theme-Template</a> 来创建你的主题。</p>\n<pre><code class=\"language-bash\">pnpm install\n\npnpm run dev\n</code></pre>\n<h3>2. 编辑主题文件</h3>\n<p>打开 MarkFlowy，点击 <code>设置</code>，你可以看到 <code>路径</code>，打开这个路径文件夹，在 <code>.markflowy</code> 文件夹中创建 <code>themes</code> 文件夹，然后在 <code>themes</code> 文件夹中创建你的主题文件夹，例如 <code>markflowy-theme-template</code>。</p>\n<p>你可以编辑 <code>rollup.config.js</code> 来更改主题构建文件的输出。</p>\n<pre><code class=\"language-js\">output: {\n  // 将此输出文件更改为开发环境\n  // 例如 file: '/Users/xxx/.markflowy/themes/markflowy-theme-template/index.js',\n  file: pkg.browser,\n  format: 'es',\n  sourcemap: true,\n  entryFileNames: '[name].js',\n},\n</code></pre>\n<p>更改你的主题后，重新加载 MarkFlowy 即可看到效果。</p>"
+  },
+  "_id": "zh/Extension/CustomTheme.md",
+  "_raw": {
+    "sourceFilePath": "zh/Extension/CustomTheme.md",
+    "sourceFileName": "CustomTheme.md",
+    "sourceFileDir": "zh/Extension",
+    "contentType": "markdown",
+    "flattenedPath": "zh/Extension/CustomTheme"
+  },
+  "type": "Markdown",
+  "slug": "/Extension/CustomTheme",
+  "title": "CustomTheme",
+  "locale": "zh"
+}

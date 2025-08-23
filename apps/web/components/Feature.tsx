@@ -1,7 +1,8 @@
-import FeatureCard from './FeatureCard'
+import { useTranslation } from 'next-i18next'
 import styled, { css } from 'styled-components'
-import rem from 'utils/rem'
 import { mobile } from 'utils/media'
+import rem from 'utils/rem'
+import FeatureCard from './FeatureCard'
 
 const Container = styled.section`
   display: flex;
@@ -33,27 +34,23 @@ export type Feature = {
 }
 
 export default function Feature() {
+  const { t } = useTranslation()
+
   const features = [
     {
-      title: 'High availability',
-      descs: [
-        `MarkFlowy uses the remirror editor, which not only provides high scalability, but also has a great editing experience. And, MarkFlowy supports multiple editing modes, such as 'source code', 'wysiwyg'.`,
-      ],
+      title: t('home.features.feature1.title'),
+      descs: [t('home.features.feature1.description')],
       img: '/screenshots/sourcecode.png',
     },
     {
-      title: 'Custom Theme',
-      descs: [
-        `MarkFlowy comes with a dark theme and supports custom themes. You can also share themes with others.`,
-      ],
-      img: '/screenshots/darkmode.png',
+      title: t('home.features.feature2.title'),
+      descs: [t('home.features.feature2.description')],
+      img: '/screenshots/ai.png',
     },
     {
-      title: 'Built-in ChatGPT',
-      descs: [
-        `Currently supports one-click export of conversations、translate markdown articles and et article abstract, making chatgpt your smart assistant.`,
-      ],
-      img: '/screenshots/chatgpt.png',
+      title: t('home.features.feature3.title'),
+      descs: [t('home.features.feature3.description')],
+      img: '/screenshots/darkmode.png',
     },
   ]
   return (

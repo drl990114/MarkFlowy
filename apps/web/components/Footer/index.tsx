@@ -1,6 +1,7 @@
 import { Favorite } from '@styled-icons/material/Favorite/Favorite'
 import styled, { css } from 'styled-components'
-import { grey, paleGrey, red } from '../../utils/colors'
+import { footerHeight } from 'utils/sizes'
+import { red } from '../../utils/colors'
 import { mobile } from '../../utils/media'
 import rem from '../../utils/rem'
 import { Content } from '../Layout'
@@ -9,7 +10,7 @@ import Link from '../Link'
 export default function Footer() {
   return (
     <Wrapper>
-      <FooterContent $hero>
+      <FooterContent $hero $footer>
         {'Hosted on '}
         <FooterLink inline href='https://vercel.com'>
           ▲ Vercel
@@ -40,6 +41,7 @@ const Wrapper = styled.footer`
   color: ${(props) => props.theme.primaryFontColor};
   background: ${(props) => props.theme.footerBgColor};
   font-size: 16px;
+  height: ${rem(footerHeight)};
   box-sizing: border-box;
 `
 
@@ -55,7 +57,6 @@ const FooterLink = styled(Link)`
 `
 
 const FooterContent = styled(Content)`
-  padding: ${rem(30)} ${rem(40)} ${rem(30)} ${rem(40)};
 
   ${mobile(css`
     padding: ${rem(30)} ${rem(20)} ${rem(30)} ${rem(20)};

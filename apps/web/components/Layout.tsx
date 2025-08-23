@@ -1,7 +1,7 @@
 import styled, { css } from 'styled-components'
 import { mobile } from '../utils/media'
 import rem from '../utils/rem'
-import { sidebarWidth } from '../utils/sizes'
+import { footerHeight, sidebarWidth } from '../utils/sizes'
 
 export const Container = styled.div`
   padding-left: ${rem(sidebarWidth)};
@@ -11,13 +11,16 @@ export const Container = styled.div`
   `)};
 `
 
-export const Content = styled.div<{ $hero?: boolean; $moveRight?: boolean }>`
+export const Content = styled.div<{ $hero?: boolean; $moveRight?: boolean; $footer?: boolean }>`
   box-sizing: border-box;
   font-family: ${(props) => props.theme.fontFamily};
   margin: 0 auto;
+  min-height: ${(props) =>
+    props.$footer ? '0' : `calc(100vh - ${rem(footerHeight)})`};
   max-width: ${(props) => (props.$hero ? '100ch' : '120ch')};
-  padding: ${rem(90)} ${rem(60)} 0 ${rem(60)};
+  padding: ${(props) => (props.$footer ? '0' : `${rem(90)} ${rem(60)} 0 ${rem(60)}`)};
   transition: transform 150ms ease-out;
+  background-color: #181a1c;
 
   @layer base {
     p,
@@ -34,6 +37,7 @@ export const Content = styled.div<{ $hero?: boolean; $moveRight?: boolean }>`
 
   ${(p) =>
     p.$hero &&
+    !p.$footer &&
     css`
       padding: ${rem(170)} ${rem(60)} 0 ${rem(60)};
     `};
@@ -42,7 +46,7 @@ export const Content = styled.div<{ $hero?: boolean; $moveRight?: boolean }>`
 export const Title = styled.h1`
   text-align: left;
   width: 100%;
-  color: ${props => props.theme.primaryFontColor};
+  color: ${(props) => props.theme.primaryFontColor};
   font-size: ${rem(42)};
   font-weight: bold;
   font-family: ${(props) => props.theme.fontFamily};

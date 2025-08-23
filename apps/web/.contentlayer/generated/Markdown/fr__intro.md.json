@@ -1,0 +1,18 @@
+{
+  "body": {
+    "raw": "# Introduction à MarkFlowy\n\nMarkFlowy est un puissant éditeur Markdown conçu pour les flux de travail modernes.\n\n## Fonctionnalités Principales\n\n### Éditeur WYSIWYG\n- Interface d'édition visuelle intuitive\n- Fonction de prévisualisation en temps réel\n- Prise en charge de toute la syntaxe Markdown standard\n\n### Édition de Code Source\n- Coloration syntaxique\n- Autocomplétion\n- Prise en charge du pliage de code\n\n### Système de Thèmes\n- Plusieurs thèmes intégrés\n- Prise en charge des thèmes personnalisés\n- Basculement entre mode sombre et clair\n\n### Fonctionnalités d'Extension\n- Système de plugins\n- Extensions personnalisées\n- Prise en charge de l'API\n\n## Démarrage Rapide\n\n1. Téléchargez et installez MarkFlowy\n2. Ouvrez l'application\n3. Commencez à créer votre premier document Markdown\n\n## Plateformes Prises en Charge\n\n- Windows\n- macOS\n- Linux\n\n## Projet Open Source\n\nMarkFlowy est un projet open source, les contributions de la communauté sont les bienvenues.\n",
+    "html": "<h1>Introduction à MarkFlowy</h1>\n<p>MarkFlowy est un puissant éditeur Markdown conçu pour les flux de travail modernes.</p>\n<h2>Fonctionnalités Principales</h2>\n<h3>Éditeur WYSIWYG</h3>\n<ul>\n<li>Interface d'édition visuelle intuitive</li>\n<li>Fonction de prévisualisation en temps réel</li>\n<li>Prise en charge de toute la syntaxe Markdown standard</li>\n</ul>\n<h3>Édition de Code Source</h3>\n<ul>\n<li>Coloration syntaxique</li>\n<li>Autocomplétion</li>\n<li>Prise en charge du pliage de code</li>\n</ul>\n<h3>Système de Thèmes</h3>\n<ul>\n<li>Plusieurs thèmes intégrés</li>\n<li>Prise en charge des thèmes personnalisés</li>\n<li>Basculement entre mode sombre et clair</li>\n</ul>\n<h3>Fonctionnalités d'Extension</h3>\n<ul>\n<li>Système de plugins</li>\n<li>Extensions personnalisées</li>\n<li>Prise en charge de l'API</li>\n</ul>\n<h2>Démarrage Rapide</h2>\n<ol>\n<li>Téléchargez et installez MarkFlowy</li>\n<li>Ouvrez l'application</li>\n<li>Commencez à créer votre premier document Markdown</li>\n</ol>\n<h2>Plateformes Prises en Charge</h2>\n<ul>\n<li>Windows</li>\n<li>macOS</li>\n<li>Linux</li>\n</ul>\n<h2>Projet Open Source</h2>\n<p>MarkFlowy est un projet open source, les contributions de la communauté sont les bienvenues.</p>"
+  },
+  "_id": "fr/intro.md",
+  "_raw": {
+    "sourceFilePath": "fr/intro.md",
+    "sourceFileName": "intro.md",
+    "sourceFileDir": "fr",
+    "contentType": "markdown",
+    "flattenedPath": "fr/intro"
+  },
+  "type": "Markdown",
+  "slug": "/intro",
+  "title": "intro",
+  "locale": "fr"
+}

@@ -1,14 +1,34 @@
-import React, { useEffect, useState } from 'react'
+import Feature from 'components/Feature'
+import { GetStaticProps } from 'next'
+import { i18n, useTranslation } from 'next-i18next'
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
+import React from 'react'
 import styled, { css } from 'styled-components'
 import Footer from '../components/Footer'
 import { Content } from '../components/Layout'
 import Nav from '../components/Nav'
 import SeoHead from '../components/SeoHead'
 import rem from '../utils/rem'
-import Feature from 'components/Feature'
 
 export default function Index() {
+  const { t } = useTranslation()
   const [isMobileNavFolded, setIsMobileNavFolded] = React.useState(true)
+  const localesDescMap = {
+    en: (
+      <SupportingTagline>
+        MarkFlowy is an <HighlightLink>open-source</HighlightLink> markdown editor application that
+        supports Windows, Linux, and macOS, designed to make editing more{' '}
+        <HighlightLink>efficient</HighlightLink> and <HighlightLink>comfortable</HighlightLink>.
+      </SupportingTagline>
+    ),
+    zh: (
+      <SupportingTagline>
+        MarkFlowy 是一款 <HighlightLink>开源</HighlightLink> 的 Markdown 编辑器应用，支持
+        Windows、Linux 和 macOS，旨在提供 <HighlightLink>更高效</HighlightLink> 、
+        <HighlightLink>舒适</HighlightLink> 的编辑体验
+      </SupportingTagline>
+    ),
+  }
   return (
     <>
       <SeoHead title='MarkFlowy'>
@@ -22,12 +42,10 @@ export default function Index() {
       />
 
       <Wrapper>
-        <Content $hero>
+        <Content $hero style={{ backgroundColor: 'transparent', minHeight: '0' }}>
           <Title>
-            <Tagline>Efficient and comfortable editing</Tagline>
-            <SupportingTagline>
-              MarkFlowy is an  <HighlightLink>open-source</HighlightLink> markdown editor application that supports Windows, Linux, and macOS, designed to make editing more efficient and comfortable
-            </SupportingTagline>
+            <Tagline>{t('home.hero.subtitle')}</Tagline>
+            {localesDescMap[(i18n?.language as keyof typeof localesDescMap) || 'en']}
           </Title>
 
           <Links>
@@ -37,10 +55,12 @@ export default function Index() {
               target='_blank'
               rel='noopener'
             >
-              Download for free
+              {t('home.hero.download')}
             </Button>
 
-            <Button href='/docs'>Documentation</Button>
+            <Button href={`${i18n?.language ? `/${i18n.language}` : ''}/docs`}>
+              {t('common.docs')}
+            </Button>
           </Links>
         </Content>
         <Feature />
@@ -62,7 +82,7 @@ const Tagline = styled.h1`
 `
 
 const SupportingTagline = styled.p`
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   margin: 0;
   font-weight: 400;
 
@@ -154,3 +174,11 @@ const Wrapper = styled.div.attrs((props) => ({
 const Links = styled.div`
   margin: ${rem(36)} 0;
 `
+
+export const getStaticProps: GetStaticProps = async ({ locale }) => {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale || 'en', ['common'])),
+    },
+  }
+}

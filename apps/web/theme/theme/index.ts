@@ -73,7 +73,7 @@ const styledDarkTheme = {
   navBackground: '#1d1f21',
   bgColor: '#1d1f21',
   footerBgColor: '#181a1c',
-  sidebarBackground: '#181a1c',
+  sidebarBackground: '#1b1d1f',
 }
 
 export const lightTheme = styledLightTheme

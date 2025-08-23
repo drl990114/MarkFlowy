@@ -12,7 +12,7 @@ module.exports = withSvgr(
       styledComponents: true,
       styledJsx: true
     },
-    i18n,
+    i18n: { ...i18n, },
     experimental: {
       output: 'standalone',
     },
