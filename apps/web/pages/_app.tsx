@@ -1,10 +1,10 @@
+import { Analytics } from '@vercel/analytics/react'
+import ThemeProvider from 'components/ThemeProvider'
+import { appWithTranslation } from 'next-i18next'
 import App from 'next/app'
 import Head from 'next/head'
 import { createGlobalStyle } from 'styled-components'
-import { darkTheme, lightTheme } from 'theme'
 import './normalize.css'
-import ThemeProvider from 'components/ThemeProvider'
-import { appWithTranslation } from 'next-i18next'
 
 
 class MyApp extends App {
@@ -35,6 +35,7 @@ class MyApp extends App {
         <ThemeProvider>
           <ResetStyles />
           <Component {...pageProps} />
+          <Analytics />
         </ThemeProvider>
       </>
     )
