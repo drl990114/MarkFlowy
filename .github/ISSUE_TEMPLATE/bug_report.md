@@ -6,6 +6,9 @@ labels: "status: needs triage"
 assignees: 'drl990114'
 
 ---
+<!-- Language suggestions / 语言建议 -->
+<!--  You can use english to describe. -->
+<!-- 你可以使用中文来描述 -->
 
 **Describe the bug**
 <!-- A clear and concise description of what the bug is. -->
