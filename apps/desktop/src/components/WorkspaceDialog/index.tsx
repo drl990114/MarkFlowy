@@ -1,5 +1,5 @@
 import { gitCommitWithCurrentWorkspace, gitPushWithCurrentWorkspace } from '@/services/git'
-import { getWorkspace, WorkSpace } from '@/services/workspace'
+import { getWorkspace, WorkSpace, WorkspaceSyncMode } from '@/services/workspace'
 import { useCommandStore } from '@/stores'
 import { t } from 'i18next'
 import { memo, useCallback, useEffect, useState } from 'react'
@@ -28,6 +28,13 @@ const WorkspaceDialogWrapper = styled(Dialog)`
       border-radius: 3px;
     }
   }
+`
+
+const WorkspaceMainContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 6px 0;
 `
 
 export const WorkspaceDialog = memo(() => {
@@ -69,20 +76,24 @@ export const WorkspaceDialog = memo(() => {
       title={t('workspace.info')}
       open={open}
       onClose={handleClose}
-      footer={[
-        <Input
-          key='commitMessageInput'
-          value={commitMessage}
-          onChange={(e) => setCommitMessage(e.target.value)}
-        />,
-        <Button key='gitCommit' btnType='primary' onClick={handleSync} disabled={loading}>
-          {'git commit & git push'}
-        </Button>,
-      ]}
+      footer={
+        workspace?.syncMode === WorkspaceSyncMode.GIT_LOCAL
+          ? [
+              <Input
+                key='commitMessageInput'
+                value={commitMessage}
+                onChange={(e) => setCommitMessage(e.target.value)}
+              />,
+              <Button key='gitCommit' btnType='primary' onClick={handleSync} disabled={loading}>
+                {'git commit & git push'}
+              </Button>,
+            ]
+          : null
+      }
     >
       {workspace ? (
-        <>
-          <div style={{ whiteSpace: 'nowrap' }}>
+        <WorkspaceMainContainer>
+          <div>
             <i className='ri-folder-5-line'></i>:{' '}
             <span style={{ fontSize: '0.9em' }}>{workspace.rootPath}</span>
           </div>
@@ -92,7 +103,7 @@ export const WorkspaceDialog = memo(() => {
               {workspace.syncModeName}（{workspace.syncModeDescription}）
             </span>
           </div>
-        </>
+        </WorkspaceMainContainer>
       ) : (
         <div>{t('workspace.none')}</div>
       )}
