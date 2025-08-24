@@ -1,4 +1,5 @@
 import Feature from 'components/Feature'
+import HighlightLink from 'components/HighLightLink'
 import { GetStaticProps } from 'next'
 import { i18n, useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
@@ -51,15 +52,15 @@ export default function Index() {
           <Links>
             <Button
               $primary
-              href='https://github.com/drl990114/MarkFlowy/releases'
+              href='https://download.upgrade.toolsetlink.com/download?appKey=xpn68m4j5qU0Y1rfDYFHaA'
               target='_blank'
               rel='noopener'
             >
               {t('home.hero.download')}
             </Button>
 
-            <Button href={`${i18n?.language ? `/${i18n.language}` : ''}/docs`}>
-              {t('common.docs')}
+            <Button href={`${i18n?.language ? `/${i18n.language}` : ''}/playground`}>
+              {t('playground.title')}
             </Button>
           </Links>
         </Content>
@@ -88,32 +89,6 @@ const SupportingTagline = styled.p`
 
   @media screen and (max-width: 800px) {
     font-size: 1rem;
-  }
-`
-
-const HighlightLink = styled.a`
-  display: inline-block;
-  position: relative;
-  text-decoration: none;
-  transition: color 0.2s ease;
-
-  &:hover {
-    &::before {
-      height: 0.25em;
-      border-radius: 2px;
-    }
-  }
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    height: 0.125em;
-    border-radius: 6px;
-    box-sizing: border-box;
-    background-image: linear-gradient(to right, #47b6ff, #ec4899);
   }
 `
 

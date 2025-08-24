@@ -6,8 +6,12 @@ type ThemeProviderProps = {
   children?: React.ReactNode
 }
 
-const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => (
-  <StyledThemeProvider theme={darkTheme}>{children}</StyledThemeProvider>
-)
+const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
+  return (
+    <StyledThemeProvider theme={darkTheme}>
+      {children}
+    </StyledThemeProvider>
+  )
+}
 
 export default ThemeProvider

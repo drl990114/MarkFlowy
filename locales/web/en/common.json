@@ -2,6 +2,9 @@
   "common": {
     "docs": "Documentation"
   },
+  "playground": {
+    "title": "Try Playground"
+  },
   "docs": {
     "sidebar": {
       "gettingStarted": "Getting Started"
