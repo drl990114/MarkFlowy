@@ -2,7 +2,7 @@
   <img align="center" src="./public/logo.png" width="120" height="120" />
 </div>
 
-<h1 align="center"/>MarkFlowy <sup><em>alpha</em></sup></h1>
+<h1 align="center"/>MarkFlowy <sup><em>beta</em></sup></h1>
 
 <div align='center'>
 <br>
@@ -32,9 +32,11 @@
 
 <h4 align="center"><strong><a href="https://github.com/drl990114/MarkFlowy">English</a></strong> | 简体中文</h4>
 
-## ⚠️ MarkFlowy 目前处于 Alpha 阶段
+<img src="./public/home-zh1.png" alt="screenshot" />
 
-目前 MarkFlowy还处于alpha阶段，建议在有数据备份的情况下使用。
+## MarkFlowy 目前处于 Beta 阶段 ⚠️
+
+目前 MarkFlowy 处于 beta 阶段，建议在有数据备份的情况下使用。
 
 ## Features
 

@@ -2,7 +2,7 @@
   <img align="center" src="./public/logo.png" width="120" height="120" />
 </div>
 
-<h2 align="center"/>MarkFlowy <sup><em>alpha</em></sup></h2>
+<h2 align="center"/>MarkFlowy <sup><em>beta</em></sup></h2>
 <div align='center'>
 <br>
 <em>Modern and intelligent Markdown editor.</em>
@@ -31,9 +31,11 @@
 
 <h4 align="center"><strong>English</strong> | <a href="./README_CN.md">简体中文</a></h4>
 
-## MarkFlowy is in Alpha
+<img src="./public/home-en1.png" alt="screenshot" />
 
-Currently, MarkFlowy is still in the alpha phase,This means there may be incompatible version updates, and it is recommended to use it when there is data backup available. 
+## MarkFlowy is in Beta Stage ⚠️
+
+Currently, MarkFlowy is in the beta stage, and it is recommended to use it with data backups.
 
 ## Features
 
