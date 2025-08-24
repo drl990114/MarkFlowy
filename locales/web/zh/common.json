@@ -7,6 +7,9 @@
       "gettingStarted": "快速开始"
     }
   },
+  "playground": {
+    "title": "体验 Playground"
+  },
   "home": {
     "hero": {
       "title": "MarkFlowy",

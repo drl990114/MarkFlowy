@@ -7,8 +7,9 @@ import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
 import 'prosemirror-flat-list/dist/style.css'
 import DocsLayout from '../../components/DocsLayout'
+import RmeProvider from '../../components/RmeProvider'
 
-const DynamicThemeProvider = dynamic(() => import('../../components/MdHtmlWrapper'), {
+const DynamicMdHtmlWrapper = dynamic(() => import('../../components/MdHtmlWrapper'), {
   ssr: false,
   loading: () => <Loading />,
 })
@@ -30,9 +31,11 @@ const PostLayout = () => {
   if (markdown) {
     return (
       <DocsLayout>
-        <DynamicThemeProvider
-          dangerouslySetInnerHTML={{ __html: markdown.body.html }}
-        ></DynamicThemeProvider>
+        <RmeProvider>
+          <DynamicMdHtmlWrapper
+            dangerouslySetInnerHTML={{ __html: markdown.body.html }}
+          ></DynamicMdHtmlWrapper>
+        </RmeProvider>
       </DocsLayout>
     )
   } else {

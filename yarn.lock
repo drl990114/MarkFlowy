@@ -5962,7 +5962,7 @@ __metadata:
     react-use: "npm:^17.5.1"
     remixicon: "npm:^4.5.0"
     rimraf: "npm:^6.0.1"
-    rme: "npm:0.1.24"
+    rme: "npm:0.1.25"
     styled-components: "npm:^6.1.13"
     stylis: "npm:^4.3.4"
     tinykeys: "npm:^3.0.0"
@@ -6050,6 +6050,7 @@ __metadata:
     "@styled-icons/material": "npm:^10.47.0"
     "@swc/helpers": "npm:^0.5.17"
     "@types/enzyme": "npm:^3.10.18"
+    "@types/lodash": "npm:^4.17.20"
     "@types/mdx": "npm:^2.0.13"
     "@types/node": "npm:^22.8.6"
     "@types/react": "npm:18.3.12"
@@ -6065,6 +6066,7 @@ __metadata:
     enzyme-to-json: "npm:^3.6.2"
     isomorphic-fetch: "npm:^3.0.0"
     lint-staged: "npm:^16.0.0"
+    lodash: "npm:^4.17.21"
     markdown-to-jsx: "npm:^7.7.10"
     next: "npm:^14.2.30"
     next-contentlayer2: "npm:0.5.2"
@@ -6078,7 +6080,7 @@ __metadata:
     rehype-slug: "npm:^6.0.0"
     remark-gfm: "npm:^4.0.0"
     rimraf: "npm:^6.0.1"
-    rme: "npm:0.1.24"
+    rme: "npm:0.1.25"
     styled-components: "npm:^6.1.13"
     styled-jsx: "npm:^5.1.6"
     stylis: "npm:^4.3.4"
@@ -10102,6 +10104,13 @@ __metadata:
   version: 4.17.13
   resolution: "@types/lodash@npm:4.17.13"
   checksum: 10/ddb34e20810c71be2d9445bcc4b64ec25b83976738454de709854b79c7f655b03704b76235445699956d65012987720e0e429a35489de65495cdb5420202d905
+  languageName: node
+  linkType: hard
+
+"@types/lodash@npm:^4.17.20":
+  version: 4.17.20
+  resolution: "@types/lodash@npm:4.17.20"
+  checksum: 10/8cd8ad3bd78d2e06a93ae8d6c9907981d5673655fec7cb274a4d9a59549aab5bb5b3017361280773b8990ddfccf363e14d1b37c97af8a9fe363de677f9a61524
   languageName: node
   linkType: hard
 
@@ -21913,9 +21922,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rme@npm:0.1.24":
-  version: 0.1.24
-  resolution: "rme@npm:0.1.24"
+"rme@npm:0.1.25":
+  version: 0.1.25
+  resolution: "rme@npm:0.1.25"
   dependencies:
     "@codemirror/autocomplete": "npm:^6.8.1"
     "@codemirror/commands": "npm:^6.2.4"
@@ -21991,7 +22000,7 @@ __metadata:
   peerDependencies:
     react: ">=16.14.0"
     react-dom: ">=16.14.0"
-  checksum: 10/bbcf97e6255d9d0ba3b4acca97334d539072556e0ed9ab8902bf5309bfd7ef3846549406e64b134620cd0e77a95523a3ff01fa0fdeb49dd476e277ec40fd584d
+  checksum: 10/de39e7c0c8e63d74ae5479e31b62d21a8877a89473d14121726ea59a5c956bf1a5900f2e8aad7b35676a9eb15cf49f94bacd6d356dc58fa093113e4e7f944de8
   languageName: node
   linkType: hard
 
