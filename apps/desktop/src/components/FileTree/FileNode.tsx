@@ -1,15 +1,22 @@
-import { createFile, getFileNameFromPath, updateFile, type IFile } from '@/helper/filesys'
+import {
+  createFile,
+  getFileNameFromPath,
+  readDirectory,
+  updateFile,
+  type IFile,
+} from '@/helper/filesys'
 import { useEditorStore } from '@/stores'
 import NiceModal from '@ebay/nice-modal-react'
 import { invoke } from '@tauri-apps/api/core'
 import { nanoid } from 'nanoid'
 import { NodeRendererProps } from 'react-arborist'
 import { useTranslation } from 'react-i18next'
-import { Space } from 'zens'
+import { Space, toast } from 'zens'
 import { MODAL_CONFIRM_ID } from '../Modal'
 import { MfIconButton } from '../UI/Button'
 import { showContextMenu } from '../UI/ContextMenu'
 import { MoveFileInfo, moveFileNode } from './file-operator'
+import { fileTreeHandler } from './FileTree'
 import NewFileInput from './NewFIleInput'
 import { SimpleTree } from './SimpleTree'
 import { NodeContainer } from './styles'
@@ -360,7 +367,27 @@ function FileNode({
                 <MfIconButton
                   size='small'
                   rounded='smooth'
-                  icon={'ri-reset-right-line'}
+                  icon={'ri-refresh-line'}
+                  onClick={async (e) => {
+                    e?.stopPropagation()
+                    e?.preventDefault()
+                    const rootPath = useEditorStore.getState().getRootPath()
+                    if (!rootPath) {
+                      toast.error('No workspace found')
+                      return
+                    }
+                    await readDirectory(rootPath).then((res) => {
+                      fileTreeHandler.updateTreeView?.({
+                        data: res,
+                      })
+                    })
+                  }}
+                  tooltipProps={{ title: t('explorer.refresh_folder_data') }}
+                />
+                <MfIconButton
+                  size='small'
+                  rounded='smooth'
+                  icon={'ri-focus-3-line'}
                   onClick={(e) => {
                     e?.stopPropagation()
                     e?.preventDefault()
@@ -370,7 +397,7 @@ function FileNode({
                       tree.scrollTo(activeId)
                     }
                   }}
-                  tooltipProps={{ title: t('explorer.reset_folder_view') }}
+                  tooltipProps={{ title: t('explorer.focus_active_file') }}
                 />
                 <MfIconButton
                   size='small'

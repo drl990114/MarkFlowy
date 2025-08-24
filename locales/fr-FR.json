@@ -274,8 +274,9 @@
     "translate": "Veuillez saisir la langue cible"
   },
   "explorer": {
-    "reset_folder_view": "Réinitialiser la vue dossier",
-    "collapse_folders": "Dossiers d'effondrement"
+    "collapse_folders": "Dossiers d'effondrement",
+    "refresh_folder_data": "Actualiser les données du dossier",
+    "focus_active_file": "Focus sur le fichier actuel"
   },
   "workspace": {
     "info": "Informations sur la zone de travail",
