@@ -3,9 +3,9 @@ sidebar_position: 1
 ---
 # MarkFlowy
 
-## MarkFlowy is in Alpha
+## MarkFlowy is in Beta Stage ⚠️
 
-Currently, MarkFlowy is still in the alpha phase,This means there may be incompatible version updates, and it is recommended to use it when there is data backup available. 
+Currently, MarkFlowy is in the beta stage, and it is recommended to use it with data backups.
 
 ## Feature
 

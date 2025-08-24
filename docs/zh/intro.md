@@ -3,9 +3,9 @@ sidebar_position: 1
 ---
 # MarkFlowy
 
-## MarkFlowy 处于 Alpha 阶段
+## MarkFlowy 目前处于 Beta 阶段 ⚠️
 
-目前，MarkFlowy 仍处于 alpha 阶段，这意味着可能会有不兼容的版本更新，建议在有数据备份的情况下使用。
+目前 MarkFlowy 处于 beta 阶段，建议在有数据备份的情况下使用。
 
 ## 功能特性
 
