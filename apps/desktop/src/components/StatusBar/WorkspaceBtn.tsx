@@ -93,7 +93,6 @@ const GitStatusBtn = () => {
         fileTreeHandler.updateTreeView?.({
           data: res,
         })
-        useEditorStore.getState().setFolderDataPure(res)
       })
 
       // 3. 执行 push 推送本地更改到远程

@@ -71,8 +71,9 @@
     "table_of_contents": "Table of Contents"
   },
   "explorer": {
-    "reset_folder_view": "Reset folder view",
-    "collapse_folders": "Collapse folders"
+    "collapse_folders": "Collapse folders",
+    "refresh_folder_data": "Refresh Folder Data",
+    "focus_active_file": "Focus on the current file"
   },
   "file": {
     "untitled": "untitled",

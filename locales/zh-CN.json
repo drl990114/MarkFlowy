@@ -289,7 +289,8 @@
     }
   },
   "explorer": {
-    "reset_folder_view": "重置文件夹视图",
+    "refresh_folder_data": "刷新文件夹数据",
+    "focus_active_file": "聚焦当前文件",
     "collapse_folders": "折叠文件夹"
   }
 }

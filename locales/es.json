@@ -274,8 +274,9 @@
     }
   },
   "explorer": {
-    "reset_folder_view": "Restablecer vista de carpeta",
-    "collapse_folders": "Contraer carpetas"
+    "collapse_folders": "Contraer carpetas",
+    "refresh_folder_data": "Actualizar los datos de la carpeta",
+    "focus_active_file": "Centrarse en el archivo actual"
   },
   "workspace": {
     "info": "Información del área de trabajo",
