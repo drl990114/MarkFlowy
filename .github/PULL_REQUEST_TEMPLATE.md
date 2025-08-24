@@ -3,6 +3,10 @@ Thanks for submitting a pull request!
 We appreciate you spending the time to work on these changes.
 -->
 
+<!-- Language suggestions / 语言建议 -->
+<!--  You can use english to describe. -->
+<!-- 你可以使用中文来描述 -->
+
 -   [ ] I read the contributing guide
 -   [ ] I agree to follow the code of conduct
 
