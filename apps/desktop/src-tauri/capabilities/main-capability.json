@@ -56,17 +56,22 @@
         {
           "name": "run-git-add",
           "cmd": "git",
-          "args": ["add", { "validator": "\\S+" }]
+          "args": ["add", { "validator": "*" }]
         },
         {
           "name": "run-git-commit",
           "cmd": "git",
-          "args": ["commit", "-m", { "validator": "\\S+" }]
+          "args": ["commit", "-m", { "validator": "*" }]
         },
         {
           "name": "run-git-revlist",
           "cmd": "git",
-          "args": ["rev-list", "--count", "--left-right", { "validator": "\\S+" }]
+          "args": ["rev-list", "--count", "--left-right", { "validator": "*" }]
+        },
+        {
+          "name": "run-git-remote",
+          "cmd": "git",
+          "args": ["remote", "-v"]
         },
         {
           "name": "run-git-fetch",
@@ -86,7 +91,7 @@
         {
           "name": "run-git-diff",
           "cmd": "git",
-          "args": ["diff", "--name-only", { "validator": "\\S+" }]
+          "args": ["diff", "--name-only", { "validator": "*" }]
         }
       ]
     }
