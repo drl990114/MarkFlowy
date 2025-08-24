@@ -5,6 +5,7 @@ import { footerHeight, sidebarWidth } from '../utils/sizes'
 
 export const Container = styled.div`
   padding-left: ${rem(sidebarWidth)};
+  background-color: #181a1c;
 
   ${mobile(css`
     padding-left: 0;
