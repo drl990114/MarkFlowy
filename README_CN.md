@@ -65,7 +65,7 @@
 
 ### 如何贡献
 
-您可以阅读 [CONTRIBUTING](./docs/Community/CONTRIBUTING.md) 来了解如何启动项目和修改代码，欢迎参与代码贡献。
+您可以阅读 [CONTRIBUTING](./docs/en/Community/CONTRIBUTING.md) 来了解如何启动项目和修改代码，欢迎参与代码贡献。
 
 ## 支持
 
