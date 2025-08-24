@@ -1,5 +1,37 @@
 # UPDATE LOG
 
+## v0.30.0
+
+Features:
+
+- Support refresh folder data.
+
+- Support pull changes from remote Git repository.
+
+- In Table, arrow up/down keys move rows, left/right keys move columns.
+
+Fixes:
+
+- Fix the issue of inserting a table when editing `-` + `space` in Table
+
+- Some style and performance optimizations.
+
+---
+
+特性：
+
+- 支持刷新文件夹数据。
+
+- 支持同步远程 Git 仓库的更改。
+
+- Table 内方向键改为上下键移动行，左右键移动列。
+
+修复：
+
+- 修复 Table 中编辑 `-` + `空格` 时会插入表格的问题。
+
+- 一些样式与性能优化。
+
 ## v0.29.0
 
 Features:
