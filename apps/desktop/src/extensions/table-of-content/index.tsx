@@ -1,3 +1,4 @@
+import { Empty } from '@/components'
 import { RIGHTBARITEMKEYS } from '@/constants'
 import { getHeadingValue } from '@/helper/string'
 import { useCommandStore, useEditorStore } from '@/stores'
@@ -74,7 +75,7 @@ const TocView = () => {
       <RightBarHeader>
         <small className='sidebar-header__name'>{t('sidebar.table_of_contents')}</small>
       </RightBarHeader>
-      <Toc ref={tocRef} containerEl={containerEl} scrollEl={scrollEl} />
+      <Toc ref={tocRef} containerEl={containerEl} scrollEl={scrollEl} Empty={<Empty />} />
     </Container>
   )
 }
