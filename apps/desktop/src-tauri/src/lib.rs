@@ -95,6 +95,7 @@ pub fn run() {
             bookmarks::cmd::edit_bookmark,
             bookmarks::cmd::remove_bookmark,
             search::cmd::search_files,
+            search::cmd::search_files_async,
             extensions::cmd::extensions_init,
             process::app_exit,
             process::app_restart,
