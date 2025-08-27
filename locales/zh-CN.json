@@ -120,6 +120,10 @@
         "name": "Git 本地",
         "description": "与本地 Git 仓库同步"
       },
+      "git_remote": {
+        "name": "Git 远程",
+        "description": "与远程 Git 仓库同步"
+      },
       "pure_local": {
         "name": "纯本地",
         "description": "仅本地工作区"

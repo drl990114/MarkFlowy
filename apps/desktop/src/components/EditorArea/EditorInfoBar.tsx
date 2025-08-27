@@ -6,7 +6,7 @@ import { getFileObject } from '@/helper/files'
 import { getRelativePathWithCurWorkspace } from '@/helper/filesys'
 import { addNewMarkdownFileEdit } from '@/services/editor-file'
 import { gitAddFileWithCurrentWorkspace } from '@/services/git'
-import { getWorkspace, WorkSpace, WorkspaceSyncMode } from '@/services/workspace'
+import { checkIsGitRepoBySyncMode, getWorkspace, WorkSpace } from '@/services/workspace'
 import { useCommandStore, useEditorStore } from '@/stores'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
@@ -84,7 +84,7 @@ export const EditorInfoBar = () => {
       if (!curFile?.path) {
         return
       }
-      if (workspace?.syncMode === WorkspaceSyncMode.GIT_LOCAL) {
+      if (checkIsGitRepoBySyncMode(workspace?.syncMode)) {
         checkCurFileGitStatus()
       }
     })
@@ -278,7 +278,7 @@ ${res}
       ) : null}
 
       <Space>
-        {workspace?.syncMode === WorkspaceSyncMode.GIT_LOCAL && hasGitStatus ? (
+        {checkIsGitRepoBySyncMode(workspace?.syncMode) && hasGitStatus ? (
           <MfIconButton
             size='small'
             rounded='smooth'

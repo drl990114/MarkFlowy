@@ -42,7 +42,6 @@ export const gitCommitWithCurrentWorkspace = async (message: string) => {
     console.error('No root path available')
     return
   }
-
   return await wrapGitCommand(
     Command.create('run-git-commit', ['commit', '-m', message], {
       cwd: rootPath,
@@ -58,7 +57,7 @@ export const gitPushWithCurrentWorkspace = async () => {
     return
   }
 
-  await wrapGitCommand(
+  return await wrapGitCommand(
     Command.create('run-git-push', ['push'], {
       cwd: rootPath,
     }).execute(),
