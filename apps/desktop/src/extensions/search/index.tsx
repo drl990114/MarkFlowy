@@ -1,19 +1,18 @@
-import { RIGHTBARITEMKEYS } from '@/constants'
 import type { RightBarItem } from '@/components/SideBar'
-import { Input } from 'zens'
-import { listen } from '@tauri-apps/api/event'
-import { memo, useCallback, useEffect, useState } from 'react'
+import { MfIconButton } from '@/components/UI/Button'
+import { RIGHTBARITEMKEYS } from '@/constants'
+import { getFileObjectByPath } from '@/helper/files'
+import { useEditorStore } from '@/stores'
 import { invoke } from '@tauri-apps/api/core'
+import classNames from 'classnames'
+import { nanoid } from 'nanoid'
+import { memo, useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import Keywords from 'react-keywords'
+import { Input } from 'zens'
+import { SearchContainer, SearchInfoBox, SearchInput } from './styles'
 import type { SearchInfo } from './useSearchStore'
 import useSearchStore from './useSearchStore'
-import { SearchContainer, SearchInfoBox, SearchInput } from './styles'
-import { MfIconButton } from '@/components/UI/Button'
-import { useEditorStore } from '@/stores'
-import { getFileObjectByPath } from '@/helper/files'
-import { nanoid } from 'nanoid'
-import Keywords from 'react-keywords'
-import classNames from 'classnames'
-import { useTranslation } from 'react-i18next'
 
 const SearchView = memo(() => {
   const { resultList, addSearchResult, searchKeyword, caseSensitive, activeIndex, setSearchState } =
@@ -60,24 +59,6 @@ const SearchView = memo(() => {
     }
   }, [activeIndex, caseSensitive, activeId, searchKeyword, editorCtxMap, resultList])
 
-  useEffect(() => {
-    const unlisten = listen<{ data: SearchInfo[] }>('search_channel_final', ({ payload }) => {
-      addSearchResult(payload.data)
-
-      const newExpandIdMap: Record<string, boolean> = {}
-
-      payload.data.forEach((searchInfo) => {
-        newExpandIdMap[searchInfo.id] = true
-      })
-
-      setExpandIdMap(newExpandIdMap)
-    })
-
-    return () => {
-      unlisten.then((fn) => fn())
-    }
-  }, [addSearchResult])
-
   const highlightKeyWord = (text: string, keyword: string) => {
     const prev = indexRef
 
@@ -102,14 +83,14 @@ const SearchView = memo(() => {
 
   const highlight = (txt: string) => <mark>{txt}</mark>
 
-  const handleSearch = useCallback(() => {
+  const handleSearch = useCallback(async () => {
     if (!folderData?.[0]) return
     if (!searchKeyword) {
       setSearchState({ resultList: [] })
       return
     }
 
-    invoke('search_files', {
+    const res = await invoke<{ data: SearchInfo[] }>('search_files_async', {
       query: {
         dir: folderData[0].path,
         name_text: '.md',
@@ -119,7 +100,17 @@ const SearchView = memo(() => {
         content_case_sensitive: caseSensitive,
       },
     })
-  }, [folderData, searchKeyword, caseSensitive, setSearchState])
+
+    addSearchResult(res.data)
+
+    const newExpandIdMap: Record<string, boolean> = {}
+
+    res.data.forEach((searchInfo) => {
+      newExpandIdMap[searchInfo.id] = true
+    })
+
+    setExpandIdMap(newExpandIdMap)
+  }, [folderData, searchKeyword, caseSensitive, setSearchState, addSearchResult])
 
   const toggleCaseSensitive = useCallback(() => {
     setSearchState({ caseSensitive: !caseSensitive })
