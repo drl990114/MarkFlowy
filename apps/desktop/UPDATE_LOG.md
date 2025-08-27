@@ -1,5 +1,25 @@
 # UPDATE LOG
 
+## v0.30.1
+
+Features:
+
+- Support distinguishing between git remote and git local.
+
+Fixes:
+
+-  Some style optimizations.
+
+---
+
+特性：
+
+- 同步方式区分 git 远程和 git 本地。
+
+修复：
+
+- 一些样式优化。
+
 ## v0.30.0
 
 Features:
