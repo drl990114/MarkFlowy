@@ -59,16 +59,50 @@ export const WorkspaceDialog = memo(() => {
 
   const handleSync = async () => {
     setLoading(true)
-    const id = toast.loading('Git commit & push...')
+
+    const needPush = workspace?.syncMode === WorkspaceSyncMode.GIT_REMOTE
+
+    const id = toast.loading(needPush ? 'Git commit & push...' : 'Git commit...')
     try {
-      await gitCommitWithCurrentWorkspace(commitMessage)
-      await gitPushWithCurrentWorkspace()
-    } catch (error) {
-      toast.error('Failed to sync workspace:' + error)
+      const res = await gitCommitWithCurrentWorkspace(commitMessage)
+      console.log('git commit result:', res)
+      if (needPush) {
+        await gitPushWithCurrentWorkspace()
+      }
+
+      toast.success(needPush ? 'Git commit & push success' : 'Git commit success')
+    } catch (error: unknown) {
+      toast.error(error as string)
     } finally {
       setLoading(false)
       toast.dismiss(id)
     }
+  }
+
+  // TODO 检查暂存区内容，显示个清单
+  const syncmodeFooterMap: Record<WorkspaceSyncMode, JSX.Element[] | null> = {
+    [WorkspaceSyncMode.None]: null,
+    [WorkspaceSyncMode.PURE_LOCAL]: null,
+    [WorkspaceSyncMode.GIT_LOCAL]: [
+      <Input
+        key='commitMessageInput'
+        value={commitMessage}
+        onChange={(e) => setCommitMessage(e.target.value)}
+      />,
+      <Button key='gitCommit' btnType='primary' onClick={handleSync} disabled={loading}>
+        {'git commit'}
+      </Button>,
+    ],
+    [WorkspaceSyncMode.GIT_REMOTE]: [
+      <Input
+        key='commitMessageInput'
+        value={commitMessage}
+        onChange={(e) => setCommitMessage(e.target.value)}
+      />,
+      <Button key='gitCommit' btnType='primary' onClick={handleSync} disabled={loading}>
+        {'git commit & git push'}
+      </Button>,
+    ],
   }
 
   return (
@@ -76,20 +110,7 @@ export const WorkspaceDialog = memo(() => {
       title={t('workspace.info')}
       open={open}
       onClose={handleClose}
-      footer={
-        workspace?.syncMode === WorkspaceSyncMode.GIT_LOCAL
-          ? [
-              <Input
-                key='commitMessageInput'
-                value={commitMessage}
-                onChange={(e) => setCommitMessage(e.target.value)}
-              />,
-              <Button key='gitCommit' btnType='primary' onClick={handleSync} disabled={loading}>
-                {'git commit & git push'}
-              </Button>,
-            ]
-          : null
-      }
+      footer={syncmodeFooterMap[workspace?.syncMode || WorkspaceSyncMode.PURE_LOCAL] || null}
     >
       {workspace ? (
         <WorkspaceMainContainer>

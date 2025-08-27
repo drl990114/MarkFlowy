@@ -286,6 +286,10 @@
         "name": "Git Local",
         "description": "Synchronize with local Git repository"
       },
+      "git_remote": {
+        "name": "Git Remote",
+        "description": "Synchronize with remote Git repository"
+      },
       "pure_local": {
         "name": "Pure Local",
         "description": "Local Workspace Only"

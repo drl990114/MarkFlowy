@@ -1,5 +1,5 @@
 import { getFileNameFromPath, readDirectory } from '@/helper/filesys'
-import { getWorkspace, WorkSpace, WorkspaceSyncMode } from '@/services/workspace'
+import { checkIsGitRepoBySyncMode, getWorkspace, WorkSpace } from '@/services/workspace'
 import { useCommandStore, useEditorStore } from '@/stores'
 import { listen } from '@tauri-apps/api/event'
 import { Command } from '@tauri-apps/plugin-shell'
@@ -29,7 +29,10 @@ const Container = styled.div`
 const GitStatusBtn = () => {
   const [status, setStatus] = useState<string | null>(null)
   const [syncing, setSyncing] = useState(false)
+  const { folderData } = useEditorStore()
 
+  const rootPath = folderData?.[0]?.path
+  
   const debounceCheckGitStatus = useMemo(
     () =>
       debounce(async () => {
@@ -38,9 +41,11 @@ const GitStatusBtn = () => {
         })
           .execute()
           .then((output) => {
-            console.log('Git status output:', output)
+            if (output.stderr) {
+              return setStatus(null)
+            }
             const [ahead, behind] = output.stdout.trim().split('\t')
-            const noChange = ahead === '0' && behind === '0'
+            const noChange = (ahead === '0' && behind === '0') || !ahead || !behind
             if (noChange) {
               return setStatus('No changes')
             }
@@ -60,7 +65,7 @@ const GitStatusBtn = () => {
     return () => {
       unsubscribe.then((f) => f())
     }
-  }, [])
+  }, [rootPath])
 
   const handleGitSync = async () => {
     const rootPath = useEditorStore.getState().getRootPath()
@@ -102,20 +107,7 @@ const GitStatusBtn = () => {
       console.log('Git push output:', pushOutput)
 
       // 4. 更新状态显示
-      Command.create('run-git-revlist', ['rev-list', '--count', '--left-right', '@{u}...HEAD'], {
-        cwd: useEditorStore.getState().getRootPath(),
-      })
-        .execute()
-        .then((output) => {
-          console.log('Git status output:', output)
-          const [ahead, behind] = output.stdout.trim().split('\t')
-          const noChange = ahead === '0' && behind === '0' || !ahead || !behind
-          if (noChange) {
-            return setStatus('No changes')
-          }
-          setStatus(`${ahead}↓ ${behind}↑`)
-        })
-
+      debounceCheckGitStatus()
       toast.success('Git sync completed')
     } catch (error) {
       toast.error(`Git sync failed: ${error}`)
@@ -158,7 +150,7 @@ export const WorkspaceBtn = () => {
       >
         {t('workspace.label')}: {getFileNameFromPath(workspace.rootPath || '')}
       </Container>
-      {workspace?.syncMode === WorkspaceSyncMode.GIT_LOCAL ? <GitStatusBtn /> : null}
+      {checkIsGitRepoBySyncMode(workspace?.syncMode) ? <GitStatusBtn /> : null}
     </>
   ) : null
 }

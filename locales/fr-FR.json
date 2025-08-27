@@ -286,6 +286,10 @@
         "name": "Git local",
         "description": "Synchronisation avec un entrepôt Git local"
       },
+      "git_remote": {
+        "name": "Git distant",
+        "description": "Synchronisation avec un dépôt Git distant"
+      },
       "pure_local": {
         "name": "Pure locale",
         "description": "Espace de travail local uniquement"
