@@ -29,50 +29,50 @@
 [![issues-closed]](https://github.com/drl990114/MarkFlowy/issues?q=sort%3Aupdated-desc+is%3Aissue+is%3Aclosed)
 </div>
 
-<h4 align="center"><strong>English</strong> | <a href="./README_CN.md">简体中文</a> | <a href="./README_CN.md">简体中文</a></h4>
+<h4 align="center"><strong>English</strong> | <a href="./README_CN.md">简体中文</a> | <a href="./README_JA.md">日本語</a></h4>
 
 <img src="./public/home-en1.png" alt="screenshot" />
 
-## MarkFlowy is in Beta Stage ⚠️
+## MarkFlowy はベータ版です ⚠️
 
-Currently, MarkFlowy is in the beta stage, and it is recommended to use it with data backups.
+現在、MarkFlowy はベータ版であり、データのバックアップを取ることをお勧めします。
 
-## Features
+## 機能
 
-- **Built-in AI**. Currently, it supports one click export of conversations, translation of articles to any language, and obtaining article abstracts. It also supports large models such as `DeepSeek` and `Chatgpt` to make them your intelligent assistants.
-- **Super lightweight**. The MarkFlowy is based on tauri and has a volume of less than 10MB and better performance.
-- **High availability**. MarkFlowy uses the remirror editor, which not only provides high scalability, but also has a great editing experience. And, MarkFlowy supports multiple editing modes, such as `source code`, `wysiwyg`.
-- **Custom Theme**. MarkFlowy supports custom themes, and you can also share your themes with others.
+- **組み込みAI**. 現在、会話のワンクリックエクスポート、記事の任意の言語への翻訳、記事の要約の取得をサポートしています。また、`DeepSeek`や`Chatgpt`などの大規模モデルをサポートし、インテリジェントアシスタントとして利用できます。
+- **超軽量**. MarkFlowyはtauriに基づいており、容量は10MB未満で、パフォーマンスも向上しています。
+- **高可用性**. MarkFlowyはremirrorエディタを使用しており、高いスケーラビリティを提供するだけでなく、優れた編集体験も提供します。また、MarkFlowyは`ソースコード`、`WYSIWYG`などの複数の編集モードをサポートしています。
+- **カスタムテーマ**. MarkFlowyはカスタムテーマをサポートしており、他のユーザーとテーマを共有することもできます。
 
-## Download
+## ダウンロード
 
-Available for Linux, macOS and Windows.
+Linux、macOS、Windows向けに利用可能です。
 
 > [!NOTE]
-> Because of Apple’s security policy restrictions on software without developer certification, the **macOS aarch64** version cannot be downloaded and used directly. You can ignore the limit by doing the following:
-> - Open your terminal
-> - Go to the `Applications` directory. .e.g `/Applications`.
-> - Run `xattr -cr MarkFlowy.app` and open the app again
-> - Please make sure you download from `github releases` or [UpgradeLink](https://download.upgrade.toolsetlink.com/download?appKey=xpn68m4j5qU0Y1rfDYFHaA).
+> Appleのセキュリティポリシーにより、開発者認証のないソフトウェアは**macOS aarch64**版を直接ダウンロードして使用できません。以下の手順で制限を回避できます。
+> - terminal を開く
+> - `Applications` ディレクトリに移動します。例: `/Applications`。
+> - `xattr -cr MarkFlowy.app` を実行し、再度アプリを開きます。
+> - `github releases` または [UpgradeLink](https://download.upgrade.toolsetlink.com/download?appKey=xpn68m4j5qU0Y1rfDYFHaA) からダウンロードしてください。
 
-You can download it from the [UpgradeLink download page](https://download.upgrade.toolsetlink.com/download?appKey=xpn68m4j5qU0Y1rfDYFHaA) or [GitHub Release](https://github.com/drl990114/MarkFlowy/releases)
+[UpgradeLink ダウンロードページ](https://download.upgrade.toolsetlink.com/download?appKey=xpn68m4j5qU0Y1rfDYFHaA) または [GitHub Release](https://github.com/drl990114/MarkFlowy/releases) からダウンロードできます。
 
-## Why
-At present, I have used many Markdown applications, but I have not encountered one that is very suitable for me. I have always hoped to have a Markdown editor that is efficient, beautiful, lightweight, data-safe, and can be easily combined with various workflows. This It is also the original intention of doing MarkFlowy.
+## 動機
+現在、私は多くのMarkdownアプリケーションを使用していますが、自分に非常に適したものには出会っていません。効率的で美しく、軽量でデータ安全であり、さまざまなワークフローと簡単に統合できるMarkdownエディタを常に求めてきました。これがMarkFlowyを作る原点でもあります。
 
 ## Contribute
 
-The current MarkFlowy is still in its infancy, and there may be some bad experiences or bugs, for which I am sorry. All partners who are interested or encounter usage problems are welcome to submit [issues](https://github.com/drl990114/MarkFlowy/issues/new) or [PR](https://github.com/drl990114/MarkFlowy/compare) to participate in this project.
+現在のMarkFlowyはまだ発展途上であり、悪い体験やバグがあるかもしれません。その点についてはお詫び申し上げます。興味のあるパートナーや使用上の問題に直面している方は、[issues](https://github.com/drl990114/MarkFlowy/issues/new)や[PR](https://github.com/drl990114/MarkFlowy/compare)を提出して、このプロジェクトに参加してください。
 
 ### How to Contribute
 
-You can read [CONTRIBUTING](./docs/en/Community/CONTRIBUTING.md) to know how to start the project and modify the code, Welcome to participate in code contribution.
+プロジェクトの開始方法やコードの修正方法については [CONTRIBUTING](./docs/en/Community/CONTRIBUTING.md) をご覧ください。コードへの貢献を歓迎します。
 
-## Support
+## サポート
 
-MarkFlowy is completely and permanently open source, if you want to support MarkFlowy, you can `star` this project. For special support, please contact me via [email](mailto:drl990114@gmail.com).
+MarkFlowyは完全にオープンソースであり、MarkFlowyをサポートしたい場合は、このプロジェクトに`star`を付けることができます。特別なサポートが必要な場合は、[email](mailto:drl990114@gmail.com)で私に連絡してください。
 
-In addition, you can sponsor me through WeChat or Alipay, which will greatly encourage me. And it will also be used for the subsequent development of the project, such as expenses for servers, domains, etc
+また、WeChatやAlipayを通じて私を支援することもでき、これは私にとって大きな励みになります。そして、それはサーバー、ドメインなどのプロジェクトの今後の開発に使用されます。
 
 [Sponsor](https://drl990114.github.io/sponsor)
 
@@ -88,7 +88,7 @@ In addition, you can sponsor me through WeChat or Alipay, which will greatly enc
 
 ## Contributors
 
-The development of **MarkFlowy** cannot be separated from these contributors. They have contributed a lot of abilities to **MarkFlowy**. Meanwhile, welcome to follow them! ❤️
+**MarkFlowy** の開発は、これらの貢献者なしには成し得ませんでした。彼らは **MarkFlowy** に多くの能力を提供してくれました。ぜひ彼らをフォローしてください！ ❤️
 
 <!-- readme: contributors -start -->
 <table>

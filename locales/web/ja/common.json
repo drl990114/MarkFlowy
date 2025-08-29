@@ -1,0 +1,53 @@
+{
+  "common": {
+    "docs": "ドキュメント"
+  },
+  "playground": {
+    "title": "プレイグラウンドを試す"
+  },
+  "docs": {
+    "sidebar": {
+      "gettingStarted": "はじめに"
+    }
+  },
+  "home": {
+    "hero": {
+      "title": "MarkFlowy",
+      "subtitle": "効率的で快適な編集",
+      "description": "",
+      "download": "今すぐダウンロード"
+    },
+    "features": {
+      "feature1": {
+        "title": "複数の編集モード",
+        "description": "ソースコードとWYSIWYG編集モードをサポートし、異なるシナリオのニーズに対応します。また、Markdown以外のファイル（json、txtなど）の編集もサポートします。"
+      },
+      "feature2": {
+        "title": "組み込みAIアシスタント",
+        "description": "強力なAIアシスタントを統合し、テキスト生成、会話、翻訳などの機能をサポートして編集効率を向上させます。"
+      },
+      "feature3": {
+        "title": "カスタムテーマ",
+        "description": "ライトテーマとダークテーマを組み込みで提供し、カスタムテーマもサポートしてパーソナライズされたニーズに対応します。"
+      }
+    }
+  },
+  "navigation": {
+    "home": "ホーム",
+    "docs": "ドキュメント",
+    "download": "ダウンロード",
+    "github": "GitHub",
+    "theme": "テーマ",
+    "language": "言語",
+    "releases": "リリース"
+  },
+  "fileTitle": {
+    "intro": "紹介",
+    "CustomTheme": "カスタムテーマ",
+    "CODE_OF_CONDUCT": "行動規範",
+    "CONTRIBUTING": "貢献ガイド",
+    "Community": "コミュニティガイドライン",
+    "Extension": "拡張ガイド",
+    "License": "ライセンス"
+  }
+}
