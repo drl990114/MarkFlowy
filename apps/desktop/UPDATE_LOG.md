@@ -1,5 +1,17 @@
 # UPDATE LOG
 
+## v0.30.2
+
+Fixes:
+
+- Fix the issue of Chinese input not taking effect in specific situations on macOS.
+
+---
+
+修复：
+
+- 修复 macOS 特定情况下中文输入无效的问题。
+
 ## v0.30.1
 
 Features:
