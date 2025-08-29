@@ -35,7 +35,7 @@ tauri-plugin-clipboard-manager = "2.2.2"
 regex = "1.10.4"
 lazy_static = "1.5.0"
 tracing = "0.1.40"
-tracing-subscriber = "0.3.18"
+tracing-subscriber = "0.3.20"
 window-vibrancy = "0.5.0"
 dotenv = "0.15.0"
 trash = "5.2.2"
@@ -148,7 +148,7 @@ features = [
 ]
 
 [dev-dependencies.tracing-subscriber]
-version = "0.3.19"
+version = "0.3.20"
 features = ["env-filter"]
 
 [dev-dependencies.tracing-test]
