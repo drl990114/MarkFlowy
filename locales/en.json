@@ -81,7 +81,10 @@
     "openFile": "Open a File",
     "recentDir": "Recently opened folders",
     "emptyOpened": "No files opened",
-    "unsupportedFileType": "Unsupported file type"
+    "unsupportedFileType": "Unsupported file type",
+    "lastModified": "Last Updated",
+    "size": "File Size",
+    "info": "File Information"
   },
   "about": {
     "label": "About",
