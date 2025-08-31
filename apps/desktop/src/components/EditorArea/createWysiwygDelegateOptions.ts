@@ -43,6 +43,10 @@ export const createWysiwygDelegateOptions = (filePath?: string): CreateWysiwygDe
         }
       }
 
+      if (url.startsWith('data:')) {
+        return url
+      }
+
       const dirPath = filePath || useEditorStore.getState().folderData?.[0]?.path
       if (dirPath) {
         const newUrl = await join(dirPath, url)
