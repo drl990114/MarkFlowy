@@ -290,6 +290,12 @@
       "bulletList": "符号列表",
       "orderedList": "有序列表",
       "taskList": "任务列表"
+    },
+    "slashMenu": {
+      "searchPlaceholder": "搜索菜单项...",
+      "noResults": "无结果",
+      "toNavigate": "用于导航",
+      "toSelect": "用于选择"
     }
   },
   "explorer": {

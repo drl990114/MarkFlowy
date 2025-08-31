@@ -268,6 +268,12 @@
       "bulletList": "Liste des balles",
       "orderedList": "Liste ordonné",
       "taskList": "Liste des tâches"
+    },
+    "slashMenu": {
+      "searchPlaceholder": "Rechercher un élément de menu...",
+      "noResults": "Aucun résultat",
+      "toNavigate": "Pour la navigation",
+      "toSelect": "Pour la sélection"
     }
   },
   "placeholder": {

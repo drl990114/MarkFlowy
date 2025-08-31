@@ -276,6 +276,12 @@
       "bulletList": "Bullet List",
       "orderedList": "Ordered List",
       "taskList": "Task List"
+    },
+    "slashMenu": {
+      "searchPlaceholder": "Search menu items...",
+      "noResults": "No results",
+      "toNavigate": "to navigate",
+      "toSelect": "to select"
     }
   },
   "workspace": {
