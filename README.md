@@ -31,7 +31,7 @@
 
 <h4 align="center"><strong>English</strong> | <a href="./README_CN.md">简体中文</a></h4>
 
-<img src="./public/home-en1.png" alt="screenshot" />
+<img src="./public/show-en.png" alt="screenshot" />
 
 ## MarkFlowy is in Beta Stage ⚠️
 

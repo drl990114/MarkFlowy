@@ -32,7 +32,7 @@
 
 <h4 align="center"><strong><a href="https://github.com/drl990114/MarkFlowy">English</a></strong> | 简体中文</h4>
 
-<img src="./public/home-zh1.png" alt="screenshot" />
+<img src="./public/show-zh.png" alt="screenshot" />
 
 ## MarkFlowy 目前处于 Beta 阶段 ⚠️
 
