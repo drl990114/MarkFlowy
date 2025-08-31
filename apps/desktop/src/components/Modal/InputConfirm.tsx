@@ -1,7 +1,7 @@
-import { memo, useState } from 'react'
-import { ConfirmModal } from './Confirm'
-import { Input } from 'zens'
 import NiceModal from '@ebay/nice-modal-react'
+import { memo, useState } from 'react'
+import { Input, InputProps } from 'zens'
+import { ConfirmModal } from './Confirm'
 
 export const MODAL_INPUT_ID = 'modal-input'
 
@@ -9,7 +9,7 @@ export interface InputConfirmModalProps {
   title?: string
   confirmText?: string
   cancelText?: string
-  inputProps?: React.InputHTMLAttributes<HTMLInputElement>
+  inputProps?: InputProps
   onConfirm?: (val: string) => void
 }
 
