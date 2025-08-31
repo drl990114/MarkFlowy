@@ -80,6 +80,7 @@ pub fn run() {
             fc::cmd::export_html_to_path,
             fc::cmd::is_dir,
             fc::cmd::get_path_name,
+            fc::cmd::get_file_normal_info,
             conf::cmd::get_app_conf_path,
             conf::cmd::get_app_conf,
             conf::cmd::reset_app_conf,

@@ -79,12 +79,3 @@ export const WarningHeader = styled.h3`
   text-align: center;
   color: ${(props) => props.theme.dangerColor};
 `
-
-export const EditorPathContainer = styled.div`
-  cursor: pointer;
-  transition: color 0.2s ease-in-out;
-
-  &:hover {
-    color: ${(props) => props.theme.accentColor};
-  }
-`

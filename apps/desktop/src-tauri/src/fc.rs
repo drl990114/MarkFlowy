@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 use std::fs;
 use std::future::Future;
 use std::path::Path;
+use chrono::{DateTime, Local};
 
 use crate::task_system::error::SystemError;
 
@@ -477,8 +478,84 @@ pub fn get_path_name(path: &str) -> String {
     }
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct FileNormalInfo {
+    pub size: String,
+    pub last_modified: String,
+    pub error_msg: String
+}
+
+impl Default for FileNormalInfo {
+    fn default() -> Self {
+        FileNormalInfo {
+            size: "".into(),
+            last_modified: "".into(),
+            error_msg: "".into()
+        }
+    }
+}
+
+fn format_file_size(size: u64) -> String {
+    const KB: u64 = 1024;
+    const MB: u64 = KB * 1024;
+    const GB: u64 = MB * 1024;
+
+    if size >= GB {
+        format!("{:.2} GB", size as f64 / GB as f64)
+    } else if size >= MB {
+        format!("{:.2} MB", size as f64 / MB as f64)
+    } else if size >= KB {
+        format!("{:.2} KB", size as f64 / KB as f64)
+    } else {
+        format!("{} bytes", size)
+    }
+}
+
+pub fn get_file_normal_info(path_str: &str) -> FileNormalInfo {
+    let path = Path::new(path_str);
+    
+    // 尝试获取元数据
+    let metadata_result = fs::metadata(path);
+    
+    match metadata_result {
+        Ok(metadata) => {
+            // 获取并格式化文件大小
+            let size = metadata.len();
+            let formatted_size = format_file_size(size);
+            
+            // 获取并格式化修改时间
+            let modified_time = match metadata.modified() {
+                Ok(time) => {
+                    let datetime: DateTime<Local> = DateTime::from(time);
+                    format!("{}", datetime.format("%Y-%m-%d %H:%M:%S"))
+                },
+                Err(e) => {
+                    return FileNormalInfo {
+                        size: "".to_string(),
+                        last_modified: "".to_string(),
+                        error_msg: format!("无法获取修改时间: {}", e),
+                    };
+                }
+            };
+            
+            FileNormalInfo {
+                size: formatted_size,
+                last_modified: modified_time,
+                error_msg: "".to_string(),
+            }
+        },
+        Err(e) => {
+            FileNormalInfo {
+                size: "".to_string(),
+                last_modified: "".to_string(),
+                error_msg: format!("无法获取文件元数据: {}", e),
+            }
+        }
+    }
+}
+
 pub mod cmd {
-    use crate::fc;
+    use crate::fc::{self, FileNormalInfo};
     use regex::Regex;
     use std::fs;
     use std::path::Path;
@@ -665,5 +742,10 @@ pub mod cmd {
     #[tauri::command]
     pub fn get_path_name(path: &str) -> String {
         fc::get_path_name(path)
+    }
+
+    #[tauri::command]
+    pub fn get_file_normal_info(path: &str) -> FileNormalInfo {
+        fc::get_file_normal_info(path)
     }
 }

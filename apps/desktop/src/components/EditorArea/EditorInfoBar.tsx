@@ -13,22 +13,25 @@ import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
 import useAppTasksStore from '@/stores/useTasksStore'
 import NiceModal from '@ebay/nice-modal-react'
+import { invoke } from '@tauri-apps/api/core'
 import { listen } from '@tauri-apps/api/event'
 import { Command } from '@tauri-apps/plugin-shell'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { EditorViewType } from 'rme'
 import styled from 'styled-components'
-import { Space } from 'zens'
-import { InputConfirmModalProps, MODAL_INPUT_ID } from '../Modal'
+import { Space, toast } from 'zens'
+import { InputConfirmModalProps, MODAL_INFO_ID, MODAL_INPUT_ID } from '../Modal'
 import { MfIconButton } from '../UI/Button'
 import { showContextMenu } from '../UI/ContextMenu'
-import { EditorPathContainer } from './styles'
 
-export const EditorInfoBar = () => {
+type FileNormalInfo = {
+  size: string
+  last_modified: string
+}
+export const EditorInfoBar = memo(() => {
   const { activeId, folderData, getEditorDelegate, getEditorContent, getRootPath } =
     useEditorStore()
-  const [showFullPath, setShowFullPath] = useState(false)
   const [workspace, setWorkspace] = useState<WorkSpace | null>(null)
 
   const { editorViewTypeMap } = useEditorViewTypeStore()
@@ -42,6 +45,10 @@ export const EditorInfoBar = () => {
   const ref2 = useRef<HTMLDivElement>()
   const curFile = activeId ? getFileObject(activeId) : undefined
   const [hasGitStatus, setHasGitStatus] = useState(false)
+  const [fileNormalInfo, setFileNormalInfo] = useState<FileNormalInfo>({
+    size: '',
+    last_modified: '',
+  })
   const rootPath = getRootPath()
 
   useEffect(() => {
@@ -49,6 +56,26 @@ export const EditorInfoBar = () => {
       setWorkspace(workspace)
     })
   }, [folderData])
+
+  const getFileNormalInfo = useCallback(async () => {
+    if (!curFile?.path) {
+      return
+    }
+
+    try {
+      const res = await invoke<FileNormalInfo>('get_file_normal_info', {
+        path: curFile?.path,
+      })
+
+      setFileNormalInfo(res)
+    } catch (error: unknown) {
+      toast.error((error as Error).message)
+    }
+  }, [curFile])
+
+  useEffect(() => {
+    getFileNormalInfo()
+  }, [getFileNormalInfo])
 
   const checkCurFileGitStatus = useCallback(async () => {
     if (!curFile?.path || !rootPath) {
@@ -80,10 +107,16 @@ export const EditorInfoBar = () => {
   useEffect(() => {
     checkCurFileGitStatus()
 
-    const unsubscribe = listen('file_watcher_event', async () => {
+    const unsubscribe = listen<{
+      paths: string[]
+    }>('file_watcher_event', async (res) => {
       if (!curFile?.path) {
         return
       }
+      if (Array.isArray(res.payload?.paths) && res.payload.paths.includes(curFile.path)) {
+        getFileNormalInfo()
+      }
+
       if (checkIsGitRepoBySyncMode(workspace?.syncMode)) {
         checkCurFileGitStatus()
       }
@@ -92,7 +125,7 @@ export const EditorInfoBar = () => {
     return () => {
       unsubscribe.then((f) => f())
     }
-  }, [workspace?.syncMode, checkCurFileGitStatus])
+  }, [workspace?.syncMode, checkCurFileGitStatus, getFileNormalInfo])
 
   const fetchCurFileSummary = useCallback(async () => {
     const content = getEditorContent(curFile?.id || '')
@@ -263,19 +296,39 @@ ${res}
     preview: 'ri-eye-line',
   }
 
-  const handlePathClick = () => {
-    setShowFullPath((prev) => !prev)
-  }
-
   if (!activeId || !curFile) return null
 
   return (
     <Container>
-      {curFile.path ? (
-        <EditorPathContainer onClick={handlePathClick}>
-          {showFullPath ? curFile.path : `... ${getRelativePathWithCurWorkspace(curFile.path)}`}
-        </EditorPathContainer>
-      ) : null}
+      {fileNormalInfo.last_modified ? (
+        <Space>
+          <span>
+            {t('file.lastModified')}: {fileNormalInfo.last_modified}
+          </span>
+          <MfIconButton
+            size='small'
+            rounded='smooth'
+            icon='ri-file-info-line'
+            onClick={() => {
+              NiceModal.show(MODAL_INFO_ID, {
+                title: t('file.info'),
+                content: (
+                  <Space direction='vertical'>
+                    <span>
+                      {t('file.lastModified')}: {fileNormalInfo.last_modified}
+                    </span>
+                    <span>
+                      {t('file.size')}: {fileNormalInfo.size}
+                    </span>
+                  </Space>
+                ),
+              })
+            }}
+          />
+        </Space>
+      ) : (
+        <div />
+      )}
 
       <Space>
         {checkIsGitRepoBySyncMode(workspace?.syncMode) && hasGitStatus ? (
@@ -321,7 +374,7 @@ ${res}
       </Space>
     </Container>
   )
-}
+})
 
 const Container = styled.div`
   display: flex;

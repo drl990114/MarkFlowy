@@ -3,7 +3,7 @@ import { Route, Routes } from 'react-router'
 import { Notifications } from 'zens'
 import AppThemeProvider from './AppThemeProvider'
 import { Modal } from './components'
-import { MODAL_CONFIRM_ID, MODAL_INPUT_ID } from './components/Modal'
+import { MODAL_CONFIRM_ID, MODAL_INFO_ID, MODAL_INPUT_ID } from './components/Modal'
 import { ContextMenu } from './components/UI/ContextMenu/ContextMenu'
 import { useAppSetup } from './hooks'
 
@@ -19,6 +19,7 @@ function App() {
       <Notifications />
       <Modal.Confirm id={MODAL_CONFIRM_ID} />
       <Modal.InputConfirm id={MODAL_INPUT_ID} />
+      <Modal.Info id={MODAL_INFO_ID} />
     </AppThemeProvider>
   )
 }

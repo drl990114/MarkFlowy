@@ -76,7 +76,10 @@
     "recentDir": "Carpetas abiertas recientemente",
     "emptyOpened": "No hay archivos abiertos",
     "openFile": "Abrir archivo",
-    "unsupportedFileType": "Tipos de archivos no compatibles"
+    "unsupportedFileType": "Tipos de archivos no compatibles",
+    "lastModified": "Última actualización",
+    "size": "Tamaño de archivo",
+    "info": "Información del archivo"
   },
   "about": {
     "label": "Acerca de",

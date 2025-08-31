@@ -73,7 +73,10 @@
     "recentDir": "Dossiers récemment ouverts",
     "emptyOpened": "Aucun fichier ouvert",
     "openFile": "Ouvrir un fichier",
-    "unsupportedFileType": "Types de fichiers non pris en charge"
+    "unsupportedFileType": "Types de fichiers non pris en charge",
+    "lastModified": "Dernière mise à jour",
+    "size": "Taille du fichier",
+    "info": "Informations sur le fichier"
   },
   "about": {
     "label": "À propos",
