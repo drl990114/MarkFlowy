@@ -38,14 +38,14 @@ export default function Feature() {
 
   const features = [
     {
-      title: t('home.features.feature1.title'),
-      descs: [t('home.features.feature1.description')],
-      img: '/screenshots/sourcecode.png',
-    },
-    {
       title: t('home.features.feature2.title'),
       descs: [t('home.features.feature2.description')],
       img: '/screenshots/ai.png',
+    },
+        {
+      title: t('home.features.feature1.title'),
+      descs: [t('home.features.feature1.description')],
+      img: '/screenshots/sourcecode.png',
     },
     {
       title: t('home.features.feature3.title'),
