@@ -271,6 +271,12 @@
       "bulletList": "Lista de viñetas",
       "orderedList": "Lista ordenada",
       "taskList": "Lista de tareas"
+    },
+    "slashMenu": {
+      "searchPlaceholder": "Buscar elementos del menú...",
+      "noResults": "Sin resultados",
+      "toNavigate": "Para la navegación",
+      "toSelect": "Para la selección"
     }
   },
   "explorer": {
