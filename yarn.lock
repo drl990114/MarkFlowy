@@ -5962,7 +5962,7 @@ __metadata:
     react-use: "npm:^17.5.1"
     remixicon: "npm:^4.5.0"
     rimraf: "npm:^6.0.1"
-    rme: "npm:0.1.29"
+    rme: "npm:0.2.0"
     styled-components: "npm:^6.1.13"
     stylis: "npm:^4.3.4"
     tinykeys: "npm:^3.0.0"
@@ -5973,7 +5973,7 @@ __metadata:
     vite: "npm:^6.2.7"
     vite-plugin-svgr: "npm:^4.2.0"
     vitest: "npm:^3.0.7"
-    zens: "npm:0.1.4"
+    zens: "npm:0.1.5"
     zod: "npm:^3.24.2"
     zustand: "npm:^5.0.6"
   languageName: unknown
@@ -6081,14 +6081,14 @@ __metadata:
     rehype-slug: "npm:^6.0.0"
     remark-gfm: "npm:^4.0.0"
     rimraf: "npm:^6.0.1"
-    rme: "npm:0.1.29"
+    rme: "npm:0.2.0"
     styled-components: "npm:^6.1.13"
     styled-jsx: "npm:^5.1.6"
     stylis: "npm:^4.3.4"
     stylis-plugin-rtl: "npm:^2.1.1"
     typescript: "npm:^5.7.3"
     webpack-bundle-analyzer: "npm:^4.10.2"
-    zens: "npm:0.1.4"
+    zens: "npm:0.1.5"
   languageName: unknown
   linkType: soft
 
@@ -21887,9 +21887,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rme@npm:0.1.29":
-  version: 0.1.29
-  resolution: "rme@npm:0.1.29"
+"rme@npm:0.2.0":
+  version: 0.2.0
+  resolution: "rme@npm:0.2.0"
   dependencies:
     "@codemirror/autocomplete": "npm:^6.8.1"
     "@codemirror/commands": "npm:^6.2.4"
@@ -21961,11 +21961,11 @@ __metadata:
     svgmoji: "npm:^3.2.0"
     void-elements: "npm:^3.1.0"
     yjs: "npm:^13.6.24"
-    zens: "npm:^0.1.4"
+    zens: "npm:^0.1.5"
   peerDependencies:
     react: ">=16.14.0"
     react-dom: ">=16.14.0"
-  checksum: 10/d97c84753e63a78418575ad95d7ca974fea3fbc986b1c97d34308ebb5222b92e5dfe4eef1ffc1f695faa24006d91705587a1e681b01c1afd51c6ee5dcdab0f3c
+  checksum: 10/ab5832371b218d4d2ea0867c269bb8687eb31368c069c2cc707b18eab46addebf6347ab3786dc96769eff47d5b576a3446657edd1674643d221f0df426a2747a
   languageName: node
   linkType: hard
 
@@ -25183,9 +25183,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zens@npm:0.1.4, zens@npm:^0.1.4":
-  version: 0.1.4
-  resolution: "zens@npm:0.1.4"
+"zens@npm:0.1.5, zens@npm:^0.1.5":
+  version: 0.1.5
+  resolution: "zens@npm:0.1.5"
   dependencies:
     "@ant-design/icons": "npm:^5.5.1"
     "@ariakit/react": "npm:^0.4.18"
@@ -25204,7 +25204,7 @@ __metadata:
     sonner: "npm:^1.7.0"
     styled-components: "npm:^6.1.13"
     stylis: "npm:^4.3.4"
-  checksum: 10/1f8f61ce1b5c2176b301d54364e0e7e8905b9f64e669ee9b96a49c863280ecc0dd477791c55fb5961c6bebabff86b70430fc60251a850ec42bbd3443f4c349bc
+  checksum: 10/652b51b0e2d52388fa20d8a6f7f8fdeef0337e36aedd3bb5205358e17d6fdd4542cd12c73c3762a249623828b13b613988f4975ba22891bab0ff80fdee2f6c2d
   languageName: node
   linkType: hard
 
