@@ -1,5 +1,34 @@
 # UPDATE LOG
 
+## v0.31.0
+
+Features:
+
+- The slash menu supports search and enhanced directional movement.
+
+- The original file path is changed to display the last update time, and supports clicking to view file size and other information.
+
+Fixes:
+
+- Fix the issue that image elements cannot be loaded in base64 format.
+
+- Fix the issue that the slash menu cannot be invoked with the Chinese input method.
+
+---
+
+特性：
+
+- Slash 菜单支持搜索，并且加强了方向移动。
+
+- 原有的文件路径改为显示上次更新时间，支持点击查看文件大小等信息。
+
+修复：
+
+- 修复图片元素无法加载 base64 格式的问题。
+
+- 修复中文输入法无法唤起 slash 菜单的问题。
+
+
 ## v0.30.2
 
 Fixes:
