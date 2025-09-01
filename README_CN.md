@@ -30,7 +30,7 @@
 [![issues-closed]](https://github.com/drl990114/MarkFlowy/issues?q=sort%3Aupdated-desc+is%3Aissue+is%3Aclosed)
 </div>
 
-<h4 align="center"><strong><a href="https://github.com/drl990114/MarkFlowy">English</a></strong> | 简体中文</h4>
+<h4 align="center"> <a href="https://github.com/drl990114/MarkFlowy">English</a> | <strong>简体中文</strong> | <a href="./README_JA.md">日本語</a></h4>
 
 <img src="./public/show-zh.png" alt="screenshot" />
 
