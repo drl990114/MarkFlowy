@@ -1,188 +1,188 @@
 {
   "app_name": "MarkFlowy",
   "common": {
-    "none": "なし",
-    "name": "名前",
+    "none": "None",
+    "name": "name",
     "ok": "ok",
-    "confirm": "確認",
-    "cancel": "キャンセル",
-    "close": "閉じる",
-    "copy": "コピー",
-    "error": "エラー",
-    "delete": "削除",
-    "file": "ファイル",
-    "folder": "フォルダー",
-    "fetching": "読み込み中...",
-    "submit": "送信"
+    "confirm": "confirm",
+    "cancel": "cancel",
+    "close": "close",
+    "copy": "copy",
+    "error": "error",
+    "delete": "delete",
+    "file": "file",
+    "folder": "folder",
+    "fetching": "Loading...",
+    "submit": "submit"
   },
   "view": {
-    "label": "表示",
+    "label": "View",
     "theme": {
-      "label": "テーマ"
+      "label": "Theme"
     },
     "wysiwyg": "Wysiwyg",
-    "source_code": "ソースコード",
-    "preview": "プレビュー"
+    "source_code": "Source Code",
+    "preview": "Preview"
   },
   "action": {
-    "bookmark": "ブックマーク",
-    "bookmarked": "ブックマーク済み",
-    "done": "完了",
-    "edit": "編集",
-    "more": "もっと",
-    "save": "保存",
-    "unsave": "未保存",
-    "translate": "翻訳",
-    "summary": "要約",
-    "create_file": "新しいファイルを作成",
-    "save_and_close": "保存して閉じる",
-    "unsave_and_close": "直接閉じる"
+    "bookmark": "bookmark",
+    "bookmarked": "bookmarked",
+    "done": "done",
+    "edit": "edit",
+    "more": "more",
+    "save": "save",
+    "unsave": "unsave",
+    "translate": "translate",
+    "summary": "summary",
+    "create_file": "Create a new file",
+    "save_and_close": "Save and close",
+    "unsave_and_close": "Direct Close"
   },
   "placeholder": {
-    "translate": "ターゲット言語を入力してください"
+    "translate": "Please enter target language"
   },
   "confirm": {
     "move": {
-      "description": "「{{name}}」を移動してもよろしいですか？"
+      "description": "Are you sure you want to move the \"{{name}}\"?"
     },
     "replace": {
-      "description": "「{{name}}」という名前のファイルまたはフォルダーは、すでに宛先フォルダーに存在します。置き換えますか？"
+      "description": "A file or folder with the name \"{{name}}\" already exists in the destination folder. Do you want to replace it?"
     },
     "delete": {
-      "description": "「{{name}}」を削除してもよろしいですか？"
+      "description": "Are you sure you want to delete the \"{{name}}\" {{something}}?"
     },
     "trash": {
-      "description": "「{{name}}」をゴミ箱に移動してもよろしいですか？"
+      "description": "Are you sure you want to move the \"{{name}}\" to the trash?"
     },
     "edit_filename_cancel": {
-      "description": "名前の変更内容を保存しますか？"
+      "description": "Do you want to save the rename content?"
     },
     "close": {
-      "title": "変更を保存しますか？",
-      "description": "未保存のファイルがあります。終了してもよろしいですか？"
+      "title": "Do you want to save the changes?",
+      "description": "You have unsaved files, are you sure you want to exit?"
     }
   },
   "error": {
-    "unsupported_file_format": "サポート外のファイル形式です"
+    "unsupported_file_format": "Unsupported file format"
   },
   "sidebar": {
-    "explorer": "エクスプローラー",
-    "search": "検索",
-    "table_of_contents": "目次"
+    "explorer": "explorer",
+    "search": "search",
+    "table_of_contents": "Table of Contents"
   },
   "explorer": {
-    "collapse_folders": "フォルダーを折りたたむ",
-    "refresh_folder_data": "フォルダーのデータを更新",
-    "focus_active_file": "現在のファイルにフォーカス"
+    "collapse_folders": "Collapse folders",
+    "refresh_folder_data": "Refresh Folder Data",
+    "focus_active_file": "Focus on the current file"
   },
   "file": {
-    "untitled": "無題",
-    "openDir": "フォルダーを開く",
-    "openFile": "ファイルを開く",
-    "recentDir": "最近開いたフォルダー",
-    "emptyOpened": "開いているファイルはありません",
-    "unsupportedFileType": "サポート外のファイル形式です"
+    "untitled": "untitled",
+    "openDir": "Open Folder",
+    "openFile": "Open a File",
+    "recentDir": "Recently opened folders",
+    "emptyOpened": "No files opened",
+    "unsupportedFileType": "Unsupported file type"
   },
   "about": {
     "label": "About",
-    "version": "バージョン",
-    "newVersion": "新しいバージョン",
-    "install": "インストール",
-    "author": "著者",
-    "release": "リリース",
-    "website": "ウェブサイト",
-    "feedback": "フィードバック",
-    "issues": "問題",
-    "license": "ライセンス",
-    "current": "現在のバージョン"
+    "version": "Version",
+    "newVersion": "New version",
+    "install": "Install",
+    "author": "Author",
+    "release": "Release",
+    "website": "Website",
+    "feedback": "feedback",
+    "issues": "Issues",
+    "license": "License",
+    "current": "current version"
   },
   "contextmenu": {
     "explorer": {
-      "add_file": "新しいファイル",
-      "add_folder": "新しいフォルダー",
-      "rename": "名前の変更",
-      "delete_file": "ファイルの削除",
-      "delete_folder": "フォルダーの削除",
-      "moveto_trash": "ゴミ箱に移動",
-      "copy": "コピー"
+      "add_file": "New file",
+      "add_folder": "New folder",
+      "rename": "Rename",
+      "delete_file": "Delete file",
+      "delete_folder": "Delete folder",
+      "moveto_trash": "Move to trash",
+      "copy": "Copy"
     },
     "editor_tab": {
-      "close": "閉じる",
-      "close_others": "他を閉じる",
-      "close_right": "右を閉じる",
-      "close_all": "すべて閉じる",
-      "export_html": "HTMLにエクスポート",
-      "export_image": "画像にエクスポート"
+      "close": "Close",
+      "close_others": "Close others",
+      "close_right": "Close right",
+      "close_all": "Close all",
+      "export_html": "Export to HTML",
+      "export_image": "Export to Image"
     }
   },
   "notification": {},
   "search": {
-    "search_empty": "一致する検索結果が見つかりませんでした",
-    "text": "検索",
-    "caseSensitive": "大文字と小文字を区別",
-    "toggleExpandAll": "すべて展開/折りたたむ"
+    "search_empty": "Nothing found matching these search terms",
+    "text": "Search",
+    "caseSensitive": "Case sensitive",
+    "toggleExpandAll": "Toggle expand all"
   },
   "settings": {
-    "label": "設定",
+    "label": "Setting",
     "general": {
-      "label": "一般",
+      "label": "general",
       "app": {
-        "label": "アプリケーション",
+        "label": "application",
         "automatic_updates": {
-          "label": "自動更新",
-          "desc": "アプリケーション起動時に自動的に更新を確認し、インストールします。"
+          "label": "Automatic update",
+          "desc": "Automatically check for updates and install them when the application starts."
         }
       },
       "autosave": {
-        "label": "自動保存",
+        "label": "Autosave",
         "switch_auto_save": {
-          "label": "自動保存",
-          "desc": "自動保存を切り替えます。現在のファイルは、設定された時間間隔に従って自動的に保存されます。"
+          "label": "Autosave",
+          "desc": "Switch automatic saving. The current file will be automatically saved according to the set time interval."
         },
         "autosaveInterval": {
-          "label": "自動保存間隔",
-          "desc": "自動保存の間隔をミリ秒単位で設定します。"
+          "label": "Auto save interval",
+          "desc": "Set the interval of auto save, in milliseconds."
         }
       },
       "misc": {
-        "label": "その他",
+        "label": "Miscellaneous",
         "language": {
-          "label": "言語",
-          "desc": "アプリの言語を設定します。"
+          "label": "Language",
+          "desc": "Set the language of the app."
         }
       }
     },
     "editor": {
-      "label": "エディター",
+      "label": "Editor",
       "style": {
-        "label": "スタイル",
+        "label": "Style",
         "full_width": {
-          "label": "フルサイズ",
-          "desc": "エディターをフルサイズに設定します。"
+          "label": "Full width",
+          "desc": "Set the editor to full width."
         },
         "font_size": {
-          "label": "フォントサイズ",
-          "desc": "エディターのルートフォントサイズを設定します。"
+          "label": "Font size",
+          "desc": "Set the root font size of the editor."
         },
         "line_height": {
-          "label": "行の高さ",
-          "desc": "エディターのルート行の高さを設定します。"
+          "label": "Line height",
+          "desc": "Set the root line height of the editor."
         },
         "font_family": {
-          "label": "フォントファミリー",
-          "desc": "エディターのルートフォントファミリーを設定します。"
+          "label": "Font family",
+          "desc": "Set the root font family of the editor."
         },
         "code_font_family": {
-          "label": "コードフォントファミリー",
-          "desc": "エディターのコードフォントファミリーを設定します。"
+          "label": "Code font family",
+          "desc": "Set the code font family of the editor."
         }
       }
     },
     "keyboard": {
-      "label": "キーボード"
+      "label": "keyboard"
     },
     "extensions": {
-      "label": "拡張機能",
+      "label": "Extensions",
       "AI": {
         "label": "AI"
       },
@@ -198,7 +198,7 @@
         },
         "models": {
           "label": "Models",
-          "desc": "モデルのリストをカンマで区切って指定します。デフォルトは \"gpt-3.5-turbo, gpt-4-32k, gpt-4\""
+          "desc": "A model list separated by commas, default is \"gpt-3.5-turbo, gpt-4-32k, gpt-4\""
         }
       },
       "DeepSeek": {
@@ -213,7 +213,7 @@
         },
         "models": {
           "label": "Models",
-          "desc": "モデルのリストをカンマで区切って指定します。デフォルトは \"\""
+          "desc": "A model list separated by commas, default is \"\""
         }
       },
       "Ollama": {
@@ -224,77 +224,77 @@
         },
         "models": {
           "label": "Models",
-          "desc": "モデルのリストをカンマで区切って指定します。デフォルトは \"\""
+          "desc": "A model list separated by commas, default is \"\""
         }
       }
     },
     "resetAppConf": {
-      "label": "アプリケーション設定のリセット",
-      "desc": "アプリケーション設定をリセットして、デフォルト設定に戻します。テーマ、言語、自動保存など全ての設定がリセットされ、元に戻すことはできません。",
-      "success": "アプリケーション設定がデフォルト値にリセットされました。"
+      "label": "Reset Application Configuration",
+      "desc": "Reset the application configuration to restore the default settings. This will reset all settings, including theme, language, autosave, etc., and cannot be restored.",
+      "success": "The app configuration has been reset to default values."
     }
   },
   "updater": {
-    "install": "インストール",
-    "download_and_install": "ダウンロードしてインストール"
+    "install": "install",
+    "download_and_install": "Download and install"
   },
   "editor": {
     "table": {
-      "insertColumnAfter": "列を挿入",
-      "insertColumnBefore": "列を挿入",
-      "insertRowAfter": "行を挿入",
-      "insertRowBefore": "行を挿入",
-      "deleteColumn": "列を削除",
-      "deleteRow": "行を削除"
+      "insertColumnAfter": "Insert column after",
+      "insertColumnBefore": "Insert column before",
+      "insertRowAfter": "Insert row after",
+      "insertRowBefore": "Insert row before",
+      "deleteColumn": "Delete column",
+      "deleteRow": "Delete row"
     },
     "codemirror": {
-      "searchInputPlaceholder": "言語を入力"
+      "searchInputPlaceholder": "Input language"
     },
     "common": {
-      "loading": "読み込み中",
-      "accept": "承認"
+      "loading": "Loading",
+      "accept": "Accept"
     },
     "ai": {
-      "generate": "生成",
-      "stop": "停止",
-      "retry": "再試行",
-      "regenerate": "再生成",
-      "preview": "プレビュー",
-      "error": "エラー",
-      "prompt": "プロンプト"
+      "generate": "Generate",
+      "stop": "Stop",
+      "retry": "Retry",
+      "regenerate": "Regenerate",
+      "preview": "Preview",
+      "error": "Error",
+      "prompt": "Prompt"
     },
     "toolbar": {
-      "undo": "元に戻す",
-      "redo": "やり直す",
-      "separator": "区切りを挿入",
-      "blockquote": "引用",
-      "bold": "太字",
-      "italic": "斜体",
-      "codeText": "コードテキスト",
-      "codeBlock": "コードブロック",
-      "heading": "見出し",
-      "bulletList": "箇条書き",
-      "orderedList": "番号付きリスト",
-      "taskList": "タスクリスト"
+      "undo": "Undo",
+      "redo": "Redo",
+      "separator": "Insert Separator",
+      "blockquote": "Blockquote",
+      "bold": "Bold",
+      "italic": "Italic",
+      "codeText": "Code Text",
+      "codeBlock": "Code Block",
+      "heading": "Heading",
+      "bulletList": "Bullet List",
+      "orderedList": "Ordered List",
+      "taskList": "Task List"
     }
   },
   "workspace": {
-    "info": "ワークスペース情報",
-    "none": "ワークスペースは開いていません",
+    "info": "Workspace Information",
+    "none": "Workspace is not open",
     "sync_mode": {
       "git_local": {
         "name": "Git Local",
-        "description": "ローカルGitリポジトリと同期"
+        "description": "Synchronize with local Git repository"
       },
       "git_remote": {
         "name": "Git Remote",
-        "description": "リモートGitリポジトリと同期"
+        "description": "Synchronize with remote Git repository"
       },
       "pure_local": {
         "name": "Pure Local",
-        "description": "ローカルワークスペースのみ"
+        "description": "Local Workspace Only"
       }
     },
-    "label": "ブック"
+    "label": "Book"
   }
 }
