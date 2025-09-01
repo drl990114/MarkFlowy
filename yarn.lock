@@ -5938,7 +5938,7 @@ __metadata:
     dayjs: "npm:^1.11.13"
     eslint: "npm:9.13.0"
     firebase: "npm:^11.0.1"
-    happy-dom: "npm:^17.1.8"
+    happy-dom: "npm:^18.0.1"
     hox: "npm:^2.1.1"
     html2canvas: "npm:^1.4.1"
     i18next: "npm:23.16.0"
@@ -10202,6 +10202,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/node@npm:^20.0.0":
+  version: 20.19.11
+  resolution: "@types/node@npm:20.19.11"
+  dependencies:
+    undici-types: "npm:~6.21.0"
+  checksum: 10/7179ed464a781cad20117362df58c12839b40922b53356e1a74f86c99d9d1ef9a27edce360901608f896c247c9c4131ba9c7222331e92cde17b723c75d5c8f2e
+  languageName: node
+  linkType: hard
+
 "@types/node@npm:^22.5.4":
   version: 22.13.14
   resolution: "@types/node@npm:22.13.14"
@@ -10486,6 +10495,13 @@ __metadata:
     tapable: "npm:^2.2.0"
     webpack: "npm:^5"
   checksum: 10/2d9a2d4e26b1239623df97caceddd37a14c258623bccf27aca9da65b963cad33fdbfdc3a4770a58dbd2f9e6f591f62990616938aa52edf58aae3f6166c0045c1
+  languageName: node
+  linkType: hard
+
+"@types/whatwg-mimetype@npm:^3.0.2":
+  version: 3.0.2
+  resolution: "@types/whatwg-mimetype@npm:3.0.2"
+  checksum: 10/609607beeaa8b50b9e00541d8f571880d651b26b6b006103370099aba00784037de54433627c9fe775a5558e3d1fc09c2a48f54c8af91988e9bebeaf6a698eeb
   languageName: node
   linkType: hard
 
@@ -15345,13 +15361,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"happy-dom@npm:^17.1.8":
-  version: 17.1.8
-  resolution: "happy-dom@npm:17.1.8"
+"happy-dom@npm:^18.0.1":
+  version: 18.0.1
+  resolution: "happy-dom@npm:18.0.1"
   dependencies:
-    webidl-conversions: "npm:^7.0.0"
+    "@types/node": "npm:^20.0.0"
+    "@types/whatwg-mimetype": "npm:^3.0.2"
     whatwg-mimetype: "npm:^3.0.0"
-  checksum: 10/1e24fda9743999edd465f28daf1de86ec1c0832fc91245dbc424b6d497e3906a63935c673771c3188e58aa7cd0ddc945c27777ed0d597a23fe7f6fef11787338
+  checksum: 10/27f6638d7b8bc67f97ddde7f004e47785ae1487e14065d7c6119adbb9ba7d8a53935d5714d37d9f60efef7f9b180a41c2b7fbbdffcea57b6d04060360a1a1d03
   languageName: node
   linkType: hard
 
@@ -23973,6 +23990,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"undici-types@npm:~6.21.0":
+  version: 6.21.0
+  resolution: "undici-types@npm:6.21.0"
+  checksum: 10/ec8f41aa4359d50f9b59fa61fe3efce3477cc681908c8f84354d8567bb3701fafdddf36ef6bff307024d3feb42c837cf6f670314ba37fc8145e219560e473d14
+  languageName: node
+  linkType: hard
+
 "undici@npm:^5.25.4":
   version: 5.28.4
   resolution: "undici@npm:5.28.4"
@@ -24707,13 +24731,6 @@ __metadata:
   version: 3.0.1
   resolution: "webidl-conversions@npm:3.0.1"
   checksum: 10/b65b9f8d6854572a84a5c69615152b63371395f0c5dcd6729c45789052296df54314db2bc3e977df41705eacb8bc79c247cee139a63fa695192f95816ed528ad
-  languageName: node
-  linkType: hard
-
-"webidl-conversions@npm:^7.0.0":
-  version: 7.0.0
-  resolution: "webidl-conversions@npm:7.0.0"
-  checksum: 10/4c4f65472c010eddbe648c11b977d048dd96956a625f7f8b9d64e1b30c3c1f23ea1acfd654648426ce5c743c2108a5a757c0592f02902cf7367adb7d14e67721
   languageName: node
   linkType: hard
 
