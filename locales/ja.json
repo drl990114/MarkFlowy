@@ -1,0 +1,300 @@
+{
+  "app_name": "MarkFlowy",
+  "common": {
+    "none": "なし",
+    "name": "名前",
+    "ok": "ok",
+    "confirm": "確認",
+    "cancel": "キャンセル",
+    "close": "閉じる",
+    "copy": "コピー",
+    "error": "エラー",
+    "delete": "削除",
+    "file": "ファイル",
+    "folder": "フォルダー",
+    "fetching": "読み込み中...",
+    "submit": "送信"
+  },
+  "view": {
+    "label": "表示",
+    "theme": {
+      "label": "テーマ"
+    },
+    "wysiwyg": "Wysiwyg",
+    "source_code": "ソースコード",
+    "preview": "プレビュー"
+  },
+  "action": {
+    "bookmark": "ブックマーク",
+    "bookmarked": "ブックマーク済み",
+    "done": "完了",
+    "edit": "編集",
+    "more": "もっと",
+    "save": "保存",
+    "unsave": "未保存",
+    "translate": "翻訳",
+    "summary": "要約",
+    "create_file": "新しいファイルを作成",
+    "save_and_close": "保存して閉じる",
+    "unsave_and_close": "直接閉じる"
+  },
+  "placeholder": {
+    "translate": "ターゲット言語を入力してください"
+  },
+  "confirm": {
+    "move": {
+      "description": "「{{name}}」を移動してもよろしいですか？"
+    },
+    "replace": {
+      "description": "「{{name}}」という名前のファイルまたはフォルダーは、すでに宛先フォルダーに存在します。置き換えますか？"
+    },
+    "delete": {
+      "description": "「{{name}}」を削除してもよろしいですか？"
+    },
+    "trash": {
+      "description": "「{{name}}」をゴミ箱に移動してもよろしいですか？"
+    },
+    "edit_filename_cancel": {
+      "description": "名前の変更内容を保存しますか？"
+    },
+    "close": {
+      "title": "変更を保存しますか？",
+      "description": "未保存のファイルがあります。終了してもよろしいですか？"
+    }
+  },
+  "error": {
+    "unsupported_file_format": "サポート外のファイル形式です"
+  },
+  "sidebar": {
+    "explorer": "エクスプローラー",
+    "search": "検索",
+    "table_of_contents": "目次"
+  },
+  "explorer": {
+    "collapse_folders": "フォルダーを折りたたむ",
+    "refresh_folder_data": "フォルダーのデータを更新",
+    "focus_active_file": "現在のファイルにフォーカス"
+  },
+  "file": {
+    "untitled": "無題",
+    "openDir": "フォルダーを開く",
+    "openFile": "ファイルを開く",
+    "recentDir": "最近開いたフォルダー",
+    "emptyOpened": "開いているファイルはありません",
+    "unsupportedFileType": "サポート外のファイル形式です"
+  },
+  "about": {
+    "label": "About",
+    "version": "バージョン",
+    "newVersion": "新しいバージョン",
+    "install": "インストール",
+    "author": "著者",
+    "release": "リリース",
+    "website": "ウェブサイト",
+    "feedback": "フィードバック",
+    "issues": "問題",
+    "license": "ライセンス",
+    "current": "現在のバージョン"
+  },
+  "contextmenu": {
+    "explorer": {
+      "add_file": "新しいファイル",
+      "add_folder": "新しいフォルダー",
+      "rename": "名前の変更",
+      "delete_file": "ファイルの削除",
+      "delete_folder": "フォルダーの削除",
+      "moveto_trash": "ゴミ箱に移動",
+      "copy": "コピー"
+    },
+    "editor_tab": {
+      "close": "閉じる",
+      "close_others": "他を閉じる",
+      "close_right": "右を閉じる",
+      "close_all": "すべて閉じる",
+      "export_html": "HTMLにエクスポート",
+      "export_image": "画像にエクスポート"
+    }
+  },
+  "notification": {},
+  "search": {
+    "search_empty": "一致する検索結果が見つかりませんでした",
+    "text": "検索",
+    "caseSensitive": "大文字と小文字を区別",
+    "toggleExpandAll": "すべて展開/折りたたむ"
+  },
+  "settings": {
+    "label": "設定",
+    "general": {
+      "label": "一般",
+      "app": {
+        "label": "アプリケーション",
+        "automatic_updates": {
+          "label": "自動更新",
+          "desc": "アプリケーション起動時に自動的に更新を確認し、インストールします。"
+        }
+      },
+      "autosave": {
+        "label": "自動保存",
+        "switch_auto_save": {
+          "label": "自動保存",
+          "desc": "自動保存を切り替えます。現在のファイルは、設定された時間間隔に従って自動的に保存されます。"
+        },
+        "autosaveInterval": {
+          "label": "自動保存間隔",
+          "desc": "自動保存の間隔をミリ秒単位で設定します。"
+        }
+      },
+      "misc": {
+        "label": "その他",
+        "language": {
+          "label": "言語",
+          "desc": "アプリの言語を設定します。"
+        }
+      }
+    },
+    "editor": {
+      "label": "エディター",
+      "style": {
+        "label": "スタイル",
+        "full_width": {
+          "label": "フルサイズ",
+          "desc": "エディターをフルサイズに設定します。"
+        },
+        "font_size": {
+          "label": "フォントサイズ",
+          "desc": "エディターのルートフォントサイズを設定します。"
+        },
+        "line_height": {
+          "label": "行の高さ",
+          "desc": "エディターのルート行の高さを設定します。"
+        },
+        "font_family": {
+          "label": "フォントファミリー",
+          "desc": "エディターのルートフォントファミリーを設定します。"
+        },
+        "code_font_family": {
+          "label": "コードフォントファミリー",
+          "desc": "エディターのコードフォントファミリーを設定します。"
+        }
+      }
+    },
+    "keyboard": {
+      "label": "キーボード"
+    },
+    "extensions": {
+      "label": "拡張機能",
+      "AI": {
+        "label": "AI"
+      },
+      "ChatGPT": {
+        "label": "ChatGPT",
+        "api_base": {
+          "label": "API Base",
+          "desc": "API Base for ChatGPT."
+        },
+        "api_key": {
+          "label": "API Key",
+          "desc": "API key for ChatGPT."
+        },
+        "models": {
+          "label": "Models",
+          "desc": "モデルのリストをカンマで区切って指定します。デフォルトは \"gpt-3.5-turbo, gpt-4-32k, gpt-4\""
+        }
+      },
+      "DeepSeek": {
+        "label": "DeepSeek",
+        "api_base": {
+          "label": "API Base",
+          "desc": "API Base for DeepSeek."
+        },
+        "api_key": {
+          "label": "API Key",
+          "desc": "API key for DeepSeek."
+        },
+        "models": {
+          "label": "Models",
+          "desc": "モデルのリストをカンマで区切って指定します。デフォルトは \"\""
+        }
+      },
+      "Ollama": {
+        "label": "Ollama",
+        "api_base": {
+          "label": "API Base",
+          "desc": "API Base for Ollama."
+        },
+        "models": {
+          "label": "Models",
+          "desc": "モデルのリストをカンマで区切って指定します。デフォルトは \"\""
+        }
+      }
+    },
+    "resetAppConf": {
+      "label": "アプリケーション設定のリセット",
+      "desc": "アプリケーション設定をリセットして、デフォルト設定に戻します。テーマ、言語、自動保存など全ての設定がリセットされ、元に戻すことはできません。",
+      "success": "アプリケーション設定がデフォルト値にリセットされました。"
+    }
+  },
+  "updater": {
+    "install": "インストール",
+    "download_and_install": "ダウンロードしてインストール"
+  },
+  "editor": {
+    "table": {
+      "insertColumnAfter": "列を挿入",
+      "insertColumnBefore": "列を挿入",
+      "insertRowAfter": "行を挿入",
+      "insertRowBefore": "行を挿入",
+      "deleteColumn": "列を削除",
+      "deleteRow": "行を削除"
+    },
+    "codemirror": {
+      "searchInputPlaceholder": "言語を入力"
+    },
+    "common": {
+      "loading": "読み込み中",
+      "accept": "承認"
+    },
+    "ai": {
+      "generate": "生成",
+      "stop": "停止",
+      "retry": "再試行",
+      "regenerate": "再生成",
+      "preview": "プレビュー",
+      "error": "エラー",
+      "prompt": "プロンプト"
+    },
+    "toolbar": {
+      "undo": "元に戻す",
+      "redo": "やり直す",
+      "separator": "区切りを挿入",
+      "blockquote": "引用",
+      "bold": "太字",
+      "italic": "斜体",
+      "codeText": "コードテキスト",
+      "codeBlock": "コードブロック",
+      "heading": "見出し",
+      "bulletList": "箇条書き",
+      "orderedList": "番号付きリスト",
+      "taskList": "タスクリスト"
+    }
+  },
+  "workspace": {
+    "info": "ワークスペース情報",
+    "none": "ワークスペースは開いていません",
+    "sync_mode": {
+      "git_local": {
+        "name": "Git Local",
+        "description": "ローカルGitリポジトリと同期"
+      },
+      "git_remote": {
+        "name": "Git Remote",
+        "description": "リモートGitリポジトリと同期"
+      },
+      "pure_local": {
+        "name": "Pure Local",
+        "description": "ローカルワークスペースのみ"
+      }
+    },
+    "label": "ブック"
+  }
+}
