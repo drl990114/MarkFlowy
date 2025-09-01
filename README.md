@@ -136,13 +136,20 @@ The development of **MarkFlowy** cannot be separated from these contributors. Th
         </a>
     </td>
     <td align="center">
+        <a href="https://github.com/dai">
+            <img src="https://avatars.githubusercontent.com/u/12391?v=4" width="90;" alt="dai"/>
+            <br />
+            <sub><b>Dai</b></sub>
+        </a>
+    </td></tr>
+<tr>
+    <td align="center">
         <a href="https://github.com/fossabot">
             <img src="https://avatars.githubusercontent.com/u/29791463?v=4" width="90;" alt="fossabot"/>
             <br />
             <sub><b>Fossabot</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/punkyard">
             <img src="https://avatars.githubusercontent.com/u/59349105?v=4" width="90;" alt="punkyard"/>
