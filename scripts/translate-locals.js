@@ -11,6 +11,7 @@ const aliLangTypeMap = {
   en: 'en',
   es: 'es',
   'fr-FR': 'fr',
+  ja: 'ja',
 }
 
 const baseLangName = 'zh-CN'
@@ -62,7 +63,7 @@ async function translateValue(value, targetLang) {
   let translateGeneralRequest = new $alimt20181012.TranslateGeneralRequest({
     formatType: 'text',
     sourceText: value,
-    sourceLanguage: aliLangTypeMap[baseLangName],
+    sourceLanguage: aliLangTypeMap[baseLangName] || baseLangName,
     targetLanguage: aliLangTypeMap[targetLang],
   })
   let runtime = new $Util.RuntimeOptions({})
