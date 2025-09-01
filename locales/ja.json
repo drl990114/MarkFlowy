@@ -81,7 +81,10 @@
     "openFile": "ファイルを開く",
     "recentDir": "最近開いたフォルダー",
     "emptyOpened": "開いているファイルはありません",
-    "unsupportedFileType": "サポート外のファイル形式です"
+    "unsupportedFileType": "サポート外のファイル形式です",
+    "info": "ファイル情報",
+    "lastModified": "前回の更新",
+    "size": "ファイルサイズ"
   },
   "about": {
     "label": "About",
@@ -276,6 +279,12 @@
       "bulletList": "箇条書き",
       "orderedList": "番号付きリスト",
       "taskList": "タスクリスト"
+    },
+    "slashMenu": {
+      "searchPlaceholder": "メニュー項目を検索します...",
+      "noResults": "結果がありません",
+      "toNavigate": "ナビゲーション用",
+      "toSelect": "選択用"
     }
   },
   "workspace": {
