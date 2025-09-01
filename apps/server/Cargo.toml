@@ -54,7 +54,7 @@ url = "2.5.2"
 uuid = "1.16.0"
 axum-extra = { version = "0.9.3", features = ["cookie"] }
 jsonwebtoken = "9.3.1"
-validator = { version = "0.18.1", features = ["derive"] }
+validator = { version = "0.20.0", features = ["derive"] }
 anyhow = { version = "1.0.86" }
 argon2 = { version = "0.5.3" }
 rand = { version = "0.8.5" }
