@@ -40,7 +40,13 @@ Fork [MarkFlowy](https://github.com/drl990114/MarkFlowy) and `git clone`
 
 #### Translation file
 
+##### Add a new language
+
 In order to facilitate everyone's participation, the translation file path is placed in locales in the project root directory. If you want to add a new language, you can directly refer to the en.json file for translation.
+
+##### Modify an existing language
+
+Modifying the existing language may not be particularly easy to find the corresponding key. If you do not find it in the locales file, you can mention the issue, and I will help you find the corresponding place to modify.
 
 ### Development work steps
 
