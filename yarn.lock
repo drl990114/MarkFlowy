@@ -5921,7 +5921,7 @@ __metadata:
     "@tauri-apps/plugin-http": "npm:2.4.2"
     "@tauri-apps/plugin-os": "npm:2.2.1"
     "@tauri-apps/plugin-shell": "npm:2.2.2"
-    "@tauri-apps/plugin-store": "npm:2.2.0"
+    "@tauri-apps/plugin-store": "npm:2.4.0"
     "@tauri-apps/plugin-updater": "npm:2.6.1"
     "@tauri-release/cli": "npm:^0.2.5"
     "@types/color": "npm:^4.2.0"
@@ -9384,6 +9384,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tauri-apps/api@npm:^2.8.0":
+  version: 2.8.0
+  resolution: "@tauri-apps/api@npm:2.8.0"
+  checksum: 10/091f027cef0ffb2d289c774d3b49f514321d585c50a58a5a12d61d25686722abe5295a2dcae80658799a890cbe017bd456a236f98fbf0624dd88811affab067e
+  languageName: node
+  linkType: hard
+
 "@tauri-apps/cli-darwin-arm64@npm:2.4.0":
   version: 2.4.0
   resolution: "@tauri-apps/cli-darwin-arm64@npm:2.4.0"
@@ -9550,12 +9557,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tauri-apps/plugin-store@npm:2.2.0":
-  version: 2.2.0
-  resolution: "@tauri-apps/plugin-store@npm:2.2.0"
+"@tauri-apps/plugin-store@npm:2.4.0":
+  version: 2.4.0
+  resolution: "@tauri-apps/plugin-store@npm:2.4.0"
   dependencies:
-    "@tauri-apps/api": "npm:^2.0.0"
-  checksum: 10/94f32d8294c8e62018611e6a315eda0c2c70a09fe40a7e7ae09ce54faedc89a6fb5dffdd65bb936c587b27173257557b1bf980cc40d6359ca7b0da78e1fcb80d
+    "@tauri-apps/api": "npm:^2.8.0"
+  checksum: 10/99c56c6bd5a812fc65cea22d20e42b76e6c424654008d5c198d4596e96053d11716e38fd3143baec3d0c1067169d0a073fea04175f2db82db1280a0dc4e353ec
   languageName: node
   linkType: hard
 
