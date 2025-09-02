@@ -6044,7 +6044,7 @@ __metadata:
     "@mdx-js/mdx": "npm:^3.1.0"
     "@mdx-js/react": "npm:^3.1.0"
     "@newhighsco/next-plugin-svgr": "npm:^3.0.144"
-    "@next/mdx": "npm:^14.2.3"
+    "@next/mdx": "npm:^15.5.2"
     "@octokit/types": "npm:^13.6.1"
     "@styled-icons/fa-brands": "npm:^10.47.0"
     "@styled-icons/material": "npm:^10.47.0"
@@ -6536,9 +6536,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@next/mdx@npm:^14.2.3":
-  version: 14.2.5
-  resolution: "@next/mdx@npm:14.2.5"
+"@next/mdx@npm:^15.5.2":
+  version: 15.5.2
+  resolution: "@next/mdx@npm:15.5.2"
   dependencies:
     source-map: "npm:^0.7.0"
   peerDependencies:
@@ -6549,7 +6549,7 @@ __metadata:
       optional: true
     "@mdx-js/react":
       optional: true
-  checksum: 10/f9c3a44fda3a50726c2706c210b65eccc4011afffcc7b846092ddd7131778348643979a6478559c54a79c3f16e8eda763f2176ae28729a889097ab16a70cb2d9
+  checksum: 10/fb7ec21460edb82a2c626e6c08f16d71414bedb7c007523d9eb2cb9324dcc8cef53c210da9542404f7639709d2901c20d2499943e11367498407b3d1f49dd749
   languageName: node
   linkType: hard
 
