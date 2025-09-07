@@ -3,7 +3,7 @@ import { aiGenerateTextRequest } from '@/extensions/ai/api'
 import useAiChatStore from '@/extensions/ai/useAiChatStore'
 import { sleep } from '@/helper'
 import { useEditorStore } from '@/stores'
-import { convertFileSrc } from '@tauri-apps/api/core'
+import { convertFileSrc, invoke } from '@tauri-apps/api/core'
 import { join } from '@tauri-apps/api/path'
 import { writeText } from '@tauri-apps/plugin-clipboard-manager'
 import { fetch } from '@tauri-apps/plugin-http'
@@ -49,12 +49,26 @@ export const createWysiwygDelegateOptions = (filePath?: string): CreateWysiwygDe
       }
 
       const dirPath = filePath || useEditorStore.getState().folderData?.[0]?.path
+
       if (dirPath) {
-        const newUrl = await join(dirPath, url)
-        return convertFileSrc(newUrl)
+        try {
+          const relativeUrl = await join(dirPath, url)
+          const isExists = await invoke('file_exists', { filePath: relativeUrl })
+          if (isExists) {
+            return convertFileSrc(relativeUrl)
+          } else {
+            return convertFileSrc(url)
+          }
+        } catch (error) {
+          return url
+        }
       }
 
-      return convertFileSrc(url)
+      try {
+        return convertFileSrc(url)
+      } catch (error) {
+        return url
+      }
     },
     ai: {
       defaultSelectProvider: aiStoreState.aiProvider,
