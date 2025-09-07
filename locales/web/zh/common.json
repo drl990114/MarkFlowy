@@ -30,6 +30,10 @@
         "title": "自定义主题",
         "description": "提供明暗两种内置主题，并支持自定义主题，满足个性化需求"
       }
+    },
+    "contributors": {
+      "title": "由众多贡献者共同打造",
+      "description": "感谢所有为 MarkFlowy 做出贡献的开发者"
     }
   },
   "navigation": {

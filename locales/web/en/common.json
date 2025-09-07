@@ -30,6 +30,10 @@
         "title": "Custom Themes",
         "description": "Provides built-in light and dark themes, and supports custom themes to meet personalized needs."
       }
+    },
+    "contributors": {
+      "title": "Built by Many Contributors",
+      "description": "Thanks to all the developers who have contributed to MarkFlowy"
     }
   },
   "navigation": {
