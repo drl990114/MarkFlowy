@@ -5,6 +5,7 @@ import { sleep } from '@/helper'
 import { useEditorStore } from '@/stores'
 import { convertFileSrc } from '@tauri-apps/api/core'
 import { join } from '@tauri-apps/api/path'
+import { writeText } from '@tauri-apps/plugin-clipboard-manager'
 import { fetch } from '@tauri-apps/plugin-http'
 import type { CreateWysiwygDelegateOptions } from 'rme'
 
@@ -72,6 +73,14 @@ export const createWysiwygDelegateOptions = (filePath?: string): CreateWysiwygDe
 
         return text
       },
+    },
+    customCopyFunction: async (text) => {
+      try {
+        await writeText(text)
+        return true
+      } catch (error) {
+        return false
+      }
     },
   }
 }
