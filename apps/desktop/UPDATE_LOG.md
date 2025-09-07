@@ -1,5 +1,37 @@
 # UPDATE LOG
 
+## v0.32.0
+
+Features:
+
+- Support Math node for mathematical formulas.
+
+- Support softbreak (single line break), which can be inserted with `Shift + Enter` or `mod + Enter`. Pressing `Enter` directly will insert a new paragraph (double line break).
+
+- Support copying code block content.
+
+- Image loading supports absolute paths, prioritizing relative paths first.
+
+Fixes:
+
+- Optimize the trigger conditions of the `Slash menu` to be compatible with more language keyboards.
+
+---
+
+特性：
+
+- 支持 Math 数学公式节点。
+
+- 支持 softbreak（单换行符），可以通过 `Shift + Enter` 或 `mod + Enter` 插入，直接 `Enter` 则插入新的段落（双换行符）。
+
+- 支持复制代码块内容。
+
+- 图片加载支持绝对路径，优先尝试相对路径。
+
+修复：
+
+- 对 Slash 菜单的触发条件做了优化，兼容更多语言键盘。
+
 ## v0.31.0
 
 Features:
