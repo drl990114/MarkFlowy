@@ -5962,7 +5962,7 @@ __metadata:
     react-use: "npm:^17.5.1"
     remixicon: "npm:^4.5.0"
     rimraf: "npm:^6.0.1"
-    rme: "npm:0.2.1"
+    rme: "npm:0.2.2"
     styled-components: "npm:^6.1.13"
     stylis: "npm:^4.3.4"
     tinykeys: "npm:^3.0.0"
@@ -6081,7 +6081,7 @@ __metadata:
     rehype-slug: "npm:^6.0.0"
     remark-gfm: "npm:^4.0.0"
     rimraf: "npm:^6.0.1"
-    rme: "npm:0.2.1"
+    rme: "npm:0.2.2"
     styled-components: "npm:^6.1.13"
     styled-jsx: "npm:^5.1.6"
     stylis: "npm:^4.3.4"
@@ -16750,6 +16750,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"katex@npm:^0.16.22":
+  version: 0.16.22
+  resolution: "katex@npm:0.16.22"
+  dependencies:
+    commander: "npm:^8.3.0"
+  bin:
+    katex: cli.js
+  checksum: 10/fdb8667d9aa971154502b120ba340766754d202e3d3e322aca0a96de27032ad2dbb8a7295d798d310cd7ce4ddd21ed1f3318895541b61c9b4fdf611166589e02
+  languageName: node
+  linkType: hard
+
 "katex@npm:^0.16.9":
   version: 0.16.21
   resolution: "katex@npm:0.16.21"
@@ -21887,9 +21898,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rme@npm:0.2.1":
-  version: 0.2.1
-  resolution: "rme@npm:0.2.1"
+"rme@npm:0.2.2":
+  version: 0.2.2
+  resolution: "rme@npm:0.2.2"
   dependencies:
     "@codemirror/autocomplete": "npm:^6.8.1"
     "@codemirror/commands": "npm:^6.2.4"
@@ -21934,6 +21945,7 @@ __metadata:
     i18next: "npm:^23.10.1"
     js-event-bus: "npm:^1.1.1"
     jsx-dom-cjs: "npm:^8.1.5"
+    katex: "npm:^0.16.22"
     linkify-it: "npm:^5.0.0"
     lodash: "npm:^4.17.21"
     markdown-it: "npm:^14.1.0"
@@ -21965,7 +21977,7 @@ __metadata:
   peerDependencies:
     react: ">=16.14.0"
     react-dom: ">=16.14.0"
-  checksum: 10/03d1e10421f685faf53d8024389da27ad151cb7d7c5db3bf9b7dfbdce2846fa59a1deb5fffea2f98ab9440645449172799b1c155348ae7e1c471c0e27b65155c
+  checksum: 10/f5aa09902f23146b49bb67f7c1d1f341bd70323d7c47cc1a13e6a5b45570a62cd0ba80fad10ce752df34e744f5884eb0761a5ae216d98e936449b59cb2048f81
   languageName: node
   linkType: hard
 
