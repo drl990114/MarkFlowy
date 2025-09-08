@@ -12,6 +12,7 @@ interface FileEntry {
     | 'pending_new_folder'
     | 'pending_edit_folder'
     | 'pending_edit_file'
+    | 'new_tab'
   path?: string
   children?: IFile[]
   ext?: string

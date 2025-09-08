@@ -76,7 +76,8 @@
     "unsupportedFileType": "Types de fichiers non pris en charge",
     "lastModified": "Dernière mise à jour",
     "size": "Taille du fichier",
-    "info": "Informations sur le fichier"
+    "info": "Informations sur le fichier",
+    "newTab": "Nouvelle onglet"
   },
   "about": {
     "label": "À propos",

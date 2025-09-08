@@ -1,28 +1,26 @@
 import { getFileObject, getSaveOpenedEditorEntries } from '@/helper/files'
 import type { IFile } from '@/helper/filesys'
 import { checkUnsavedFiles } from '@/services/checkUnsavedFiles'
+import { addEmptyEditorTab } from '@/services/editor-file'
 import { useEditorStateStore, useEditorStore } from '@/stores'
 import { darken } from '@markflowy/theme'
 import { memo, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import styled, { css } from 'styled-components'
+import styled from 'styled-components'
 import { Tooltip } from 'zens'
+import { MfIconButton } from '../UI/Button'
 import { showContextMenu } from '../UI/ContextMenu'
 import { EditorAreaHeader } from './EditorAreaHeader'
 import { Dot, TabItem } from './styles'
 
-type ContainerProps = {
-  visible: boolean
-}
-
-const Container = styled.div<ContainerProps>`
+const Container = styled.div`
   display: flex;
-  justify-content: ${(props) => (props.visible ? 'space-between' : 'flex-end')};
+  flex: 0 0 auto;
   background-color: ${(props) => props.theme.editorTabBgColor};
 
   .tab-items {
     display: flex;
-    width: 100%;
+    flex: 0 1 auto;
     overflow-x: auto;
     overflow-y: hidden;
 
@@ -46,12 +44,6 @@ const Container = styled.div<ContainerProps>`
         background-color: ${(props) => darken(props.theme.hoverColor, 0.2)};
       }
     }
-
-    ${(props) =>
-      !props.visible &&
-      css({
-        display: 'none',
-      })}
   }
 `
 const EditorAreaTabs = memo(() => {
@@ -88,7 +80,7 @@ const EditorAreaTabs = memo(() => {
   }
 
   return (
-    <Container visible>
+    <Container>
       <div className='tab-items' ref={htmlRef}>
         {opened.map((id) => {
           const file = getFileObject(id) as IFile
@@ -133,7 +125,9 @@ const EditorAreaTabs = memo(() => {
                       checkUnsavedFiles({
                         fileIds: otherIds,
                         onSaveAndClose: async (hasUnsavedFileIds) => {
-                          const saves = hasUnsavedFileIds.map((otherId) => getSaveOpenedEditorEntries(otherId))
+                          const saves = hasUnsavedFileIds.map((otherId) =>
+                            getSaveOpenedEditorEntries(otherId),
+                          )
                           await Promise.all(saves.map((saveHandler) => saveHandler?.()))
                           delOtherOpenedFile(id)
                         },
@@ -155,7 +149,9 @@ const EditorAreaTabs = memo(() => {
                       checkUnsavedFiles({
                         fileIds: opened,
                         onSaveAndClose: async (hasUnsavedFileIds) => {
-                          const saves = hasUnsavedFileIds.map((otherId) => getSaveOpenedEditorEntries(otherId))
+                          const saves = hasUnsavedFileIds.map((otherId) =>
+                            getSaveOpenedEditorEntries(otherId),
+                          )
                           await Promise.all(saves.map((saveHandler) => saveHandler?.()))
                           delAllOpenedFile()
                         },
@@ -207,6 +203,8 @@ const EditorAreaTabs = memo(() => {
           )
         })}
       </div>
+      <MfIconButton icon={'ri-add-line'} onClick={addEmptyEditorTab} />
+      <div style={{ flex: '1 1 auto' }} />
       <EditorAreaHeader />
     </Container>
   )

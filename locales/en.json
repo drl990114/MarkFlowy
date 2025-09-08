@@ -84,7 +84,8 @@
     "unsupportedFileType": "Unsupported file type",
     "lastModified": "Last Updated",
     "size": "File Size",
-    "info": "File Information"
+    "info": "File Information",
+    "newTab": "New Tab"
   },
   "about": {
     "label": "About",

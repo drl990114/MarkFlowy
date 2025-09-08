@@ -79,7 +79,8 @@
     "unsupportedFileType": "Tipos de archivos no compatibles",
     "lastModified": "Última actualización",
     "size": "Tamaño de archivo",
-    "info": "Información del archivo"
+    "info": "Información del archivo",
+    "newTab": "Nuevas pestañas"
   },
   "about": {
     "label": "Acerca de",

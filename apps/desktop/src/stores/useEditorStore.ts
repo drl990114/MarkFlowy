@@ -1,4 +1,5 @@
 import { createFile, getFolderPathFromPath, isMdFile, type IFile } from '@/helper/filesys'
+import { isEmptyEditor } from '@/services/editor-file'
 import { invoke } from '@tauri-apps/api/core'
 import type { EditorContext, EditorDelegate } from 'rme'
 import { create } from 'zustand'
@@ -174,6 +175,29 @@ const useEditorStore = create<EditorStore>((set, get) => {
     },
 
     addOpenedFile: (id: string) => {
+      const oldState = get()
+      if (
+        oldState.activeId &&
+        isEmptyEditor(oldState.activeId) &&
+        !isEmptyEditor(id) &&
+        !oldState.opened.includes(id)
+      ) {
+        const activeEmptyFileIndex = oldState.opened.findIndex(
+          (openedId) => openedId === oldState.activeId,
+        )
+        if (activeEmptyFileIndex > -1) {
+          oldState.opened.splice(activeEmptyFileIndex, 1, id)
+        }
+
+        set((state) => ({
+          ...state,
+          opened: [...oldState.opened],
+          activeId: id,
+        }))
+
+        return
+      }
+
       set((state) => {
         if (state.opened.includes(id)) return state
         else return { ...state, opened: [...state.opened, id] }
