@@ -79,7 +79,8 @@
     "unsupportedFileType": "不支持的文件类型",
     "info": "文件信息",
     "lastModified": "上次更新",
-    "size": "文件大小"
+    "size": "文件大小",
+    "newTab": "新标签"
   },
   "about": {
     "label": "关于",

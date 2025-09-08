@@ -84,7 +84,8 @@
     "unsupportedFileType": "サポート外のファイル形式です",
     "info": "ファイル情報",
     "lastModified": "前回の更新",
-    "size": "ファイルサイズ"
+    "size": "ファイルサイズ",
+    "newTab": "新しいタブ"
   },
   "about": {
     "label": "About",

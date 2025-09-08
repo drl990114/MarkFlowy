@@ -4,7 +4,7 @@ import useBookMarksStore from '@/extensions/bookmarks/useBookMarksStore'
 import bus from '@/helper/eventBus'
 import { getFileObject } from '@/helper/files'
 import { getRelativePathWithCurWorkspace } from '@/helper/filesys'
-import { addNewMarkdownFileEdit } from '@/services/editor-file'
+import { addNewMarkdownFileEdit, isEmptyEditor } from '@/services/editor-file'
 import { gitAddFileWithCurrentWorkspace } from '@/services/git'
 import { checkIsGitRepoBySyncMode, getWorkspace, WorkSpace } from '@/services/workspace'
 import { useCommandStore, useEditorStore } from '@/stores'
@@ -59,6 +59,11 @@ export const EditorInfoBar = memo(() => {
 
   const getFileNormalInfo = useCallback(async () => {
     if (!curFile?.path) {
+      setFileNormalInfo({
+        size: '',
+        last_modified: '',
+      })
+
       return
     }
 
@@ -296,7 +301,7 @@ ${res}
     preview: 'ri-eye-line',
   }
 
-  if (!activeId || !curFile) return null
+  if (!activeId || !curFile || isEmptyEditor(curFile.id)) return null
 
   return (
     <Container>

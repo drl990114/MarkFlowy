@@ -16,6 +16,7 @@ export const GlobalStyles = createGlobalStyle`
   }
 
   .icon {
+    flex: 0 0 auto;
     display: flex;
     justify-content: center;
     align-items: center;
