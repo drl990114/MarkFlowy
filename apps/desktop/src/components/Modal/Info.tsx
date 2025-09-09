@@ -5,15 +5,13 @@ export interface InfoModalProps {
   title?: string
   content?: React.ReactNode
   onClose?: () => void
+  width?: string
 }
 
 export const MODAL_INFO_ID = 'modal-info'
 
-export const InfoModal = ({
-  title,
-  content,
-  onClose,
-}: InfoModalProps) => {
+export const InfoModal = (props: InfoModalProps) => {
+  const { title, content, onClose } = props
   const modal = useModal()
 
   const handleClose = () => {
@@ -27,6 +25,7 @@ export const InfoModal = ({
       open={modal.visible}
       onClose={handleClose}
       footer={null}
+      width={props.width}
     >
       {content}
     </Dialog>

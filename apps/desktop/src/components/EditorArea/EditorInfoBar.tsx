@@ -7,7 +7,7 @@ import { getRelativePathWithCurWorkspace } from '@/helper/filesys'
 import { addNewMarkdownFileEdit, isEmptyEditor } from '@/services/editor-file'
 import { gitAddFileWithCurrentWorkspace } from '@/services/git'
 import { checkIsGitRepoBySyncMode, getWorkspace, WorkSpace } from '@/services/workspace'
-import { useCommandStore, useEditorStore } from '@/stores'
+import { useCommandStore, useEditorStateStore, useEditorStore } from '@/stores'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
@@ -16,6 +16,7 @@ import NiceModal from '@ebay/nice-modal-react'
 import { invoke } from '@tauri-apps/api/core'
 import { listen } from '@tauri-apps/api/event'
 import { Command } from '@tauri-apps/plugin-shell'
+import { debounce } from 'lodash'
 import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { EditorViewType } from 'rme'
@@ -29,6 +30,11 @@ type FileNormalInfo = {
   size: string
   last_modified: string
 }
+const EMPTY_FILE_NORMAL_INFO: FileNormalInfo = {
+  size: '',
+  last_modified: '',
+}
+
 export const EditorInfoBar = memo(() => {
   const { activeId, folderData, getEditorDelegate, getEditorContent, getRootPath } =
     useEditorStore()
@@ -45,10 +51,9 @@ export const EditorInfoBar = memo(() => {
   const ref2 = useRef<HTMLDivElement>()
   const curFile = activeId ? getFileObject(activeId) : undefined
   const [hasGitStatus, setHasGitStatus] = useState(false)
-  const [fileNormalInfo, setFileNormalInfo] = useState<FileNormalInfo>({
-    size: '',
-    last_modified: '',
-  })
+  const [fileNormalInfo, setFileNormalInfo] = useState<FileNormalInfo>(EMPTY_FILE_NORMAL_INFO)
+  const { idStateMap } = useEditorStateStore()
+  const editorState = activeId ? idStateMap.get(activeId) : undefined
   const rootPath = getRootPath()
 
   useEffect(() => {
@@ -57,30 +62,29 @@ export const EditorInfoBar = memo(() => {
     })
   }, [folderData])
 
-  const getFileNormalInfo = useCallback(async () => {
-    if (!curFile?.path) {
-      setFileNormalInfo({
-        size: '',
-        last_modified: '',
-      })
+  const getFileNormalInfo = useCallback(
+    debounce(async () => {
+      if (!curFile?.path) {
+        setFileNormalInfo(EMPTY_FILE_NORMAL_INFO)
+        return
+      }
 
-      return
-    }
+      try {
+        const res = await invoke<FileNormalInfo>('get_file_normal_info', {
+          path: curFile.path,
+        })
 
-    try {
-      const res = await invoke<FileNormalInfo>('get_file_normal_info', {
-        path: curFile?.path,
-      })
-
-      setFileNormalInfo(res)
-    } catch (error: unknown) {
-      toast.error((error as Error).message)
-    }
-  }, [curFile])
+        setFileNormalInfo(res)
+      } catch (error: unknown) {
+        toast.error((error as Error).message)
+      }
+    }, 500),
+    [curFile],
+  )
 
   useEffect(() => {
     getFileNormalInfo()
-  }, [getFileNormalInfo])
+  }, [editorState?.hasUnsavedChanges, getFileNormalInfo])
 
   const checkCurFileGitStatus = useCallback(async () => {
     if (!curFile?.path || !rootPath) {
@@ -317,6 +321,7 @@ ${res}
             onClick={() => {
               NiceModal.show(MODAL_INFO_ID, {
                 title: t('file.info'),
+                width: '600px',
                 content: (
                   <Space direction='vertical'>
                     <span>
@@ -324,6 +329,9 @@ ${res}
                     </span>
                     <span>
                       {t('file.size')}: {fileNormalInfo.size}
+                    </span>
+                    <span>
+                      {t('file.path')}: {curFile.path}
                     </span>
                   </Space>
                 ),

@@ -85,7 +85,8 @@
     "lastModified": "Last Updated",
     "size": "File Size",
     "info": "File Information",
-    "newTab": "New Tab"
+    "newTab": "New Tab",
+    "path": "File Path"
   },
   "about": {
     "label": "About",

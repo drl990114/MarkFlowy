@@ -85,7 +85,8 @@
     "info": "ファイル情報",
     "lastModified": "前回の更新",
     "size": "ファイルサイズ",
-    "newTab": "新しいタブ"
+    "newTab": "新しいタブ",
+    "path": "ファイルパス"
   },
   "about": {
     "label": "About",

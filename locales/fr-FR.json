@@ -77,7 +77,8 @@
     "lastModified": "Dernière mise à jour",
     "size": "Taille du fichier",
     "info": "Informations sur le fichier",
-    "newTab": "Nouvelle onglet"
+    "newTab": "Nouvelle onglet",
+    "path": "Chemin d'accès au fichier"
   },
   "about": {
     "label": "À propos",
