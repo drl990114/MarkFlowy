@@ -80,7 +80,8 @@
     "lastModified": "Última actualización",
     "size": "Tamaño de archivo",
     "info": "Información del archivo",
-    "newTab": "Nuevas pestañas"
+    "newTab": "Nuevas pestañas",
+    "path": "Ruta de archivo"
   },
   "about": {
     "label": "Acerca de",
