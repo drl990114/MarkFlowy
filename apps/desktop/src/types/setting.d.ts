@@ -3,6 +3,7 @@ declare namespace Setting {
 
   type SettingGroup = {
     i18nKey: string
+    iconName: string
   } & Record<string, SettingItem>
 
   type SettingItem = SelectSettingItem | InputSettingItem | SwitchSettingItem | SliderSettingItem | FontListSelectSettingItem

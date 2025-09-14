@@ -1,6 +1,6 @@
-import { AIGenerateTextParams, getCurrentAISettingData } from '@/extensions/ai/aiProvidersService'
+import { AIGenerateTextParams } from '@/extensions/ai/aiProvidersService'
 import { aiGenerateTextRequest } from '@/extensions/ai/api'
-import useAiChatStore from '@/extensions/ai/useAiChatStore'
+import useAiChatStore, { getCurrentAISettingData } from '@/extensions/ai/useAiChatStore'
 import { sleep } from '@/helper'
 import { useEditorStore } from '@/stores'
 import { convertFileSrc, invoke } from '@tauri-apps/api/core'

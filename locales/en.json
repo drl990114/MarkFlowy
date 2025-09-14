@@ -186,10 +186,10 @@
     "keyboard": {
       "label": "keyboard"
     },
-    "extensions": {
-      "label": "Extensions",
-      "AI": {
-        "label": "AI"
+    "ai": {
+      "label": "AI",
+      "model": {
+        "label": "AI Model"
       },
       "ChatGPT": {
         "label": "ChatGPT",

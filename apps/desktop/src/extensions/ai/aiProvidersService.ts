@@ -1,10 +1,7 @@
-import { generateText, LanguageModel } from 'ai'
-import { createOpenAI } from '@ai-sdk/openai'
 import { createDeepSeek } from '@ai-sdk/deepseek'
+import { createOpenAI } from '@ai-sdk/openai'
+import { generateText, LanguageModel } from 'ai'
 import { createOllama } from 'ollama-ai-provider'
-import useAppSettingStore from '@/stores/useAppSettingStore'
-import useAiChatStore from './useAiChatStore'
-import { useEffect } from 'react'
 
 export type AIGenerateTextParams = {
   sdkProvider: keyof typeof generateTextHandlerMap
@@ -92,12 +89,6 @@ export const aiProviders = Object.keys(
   generateTextHandlerMap,
 ) as (keyof typeof generateTextHandlerMap)[]
 
-export const defaultAiProviderModelsMap = {
-  openai: ['gpt-3.5-turbo', 'gpt-4-32k', 'gpt-4'],
-  deepseek: ['deepseek-chat'],
-  ollama: ['llama3.3'],
-}
-
 export const aiProviderSettingKeysMap: Record<
   AIProviders,
   {
@@ -120,34 +111,4 @@ export const aiProviderSettingKeysMap: Record<
     apibase: 'extensions_ollama_apibase',
     models: 'extensions_ollama_models',
   },
-}
-
-export const getCurrentAISettingData = () => {
-  const settingData = useAppSettingStore.getState().settingData
-  const aiProvider = useAiChatStore.getState().aiProvider
-  const aiProviderSettings = aiProviderSettingKeysMap[aiProvider]
-
-  return {
-    apiBase: settingData[aiProviderSettings.apibase],
-    models: settingData[aiProviderSettings.models],
-    apiKey: aiProviderSettings.apikey ? settingData[aiProviderSettings.apikey] : '',
-  }
-}
-
-export const useRefreshAIProvidersModels = () => {
-  const { settingData } = useAppSettingStore()
-  const { setAiProviderModelsMap } = useAiChatStore()
-
-  useEffect(() => {
-    const res = {} as Record<AIProviders, string[]>
-
-    aiProviders.forEach((provider) => {
-      const models = settingData[aiProviderSettingKeysMap[provider].models]
-        .split(',')
-        .map((model: string) => model.trim())
-      res[provider] = models
-    })
-
-    setAiProviderModelsMap(res)
-  }, [settingData])
 }

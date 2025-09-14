@@ -1,6 +1,7 @@
 {
   "general": {
     "i18nKey": "settings.general.label",
+    "iconName": "ri-equalizer-line",
     "App": {
       "i18nKey": "settings.general.app.label",
       "auto_update": {
@@ -72,6 +73,7 @@
   },
   "editor": {
     "i18nKey": "settings.editor.label",
+    "iconName": "ri-edit-box-line",
     "Style": {
       "i18nKey": "settings.editor.style.label",
       "fullWidth": {
@@ -130,97 +132,98 @@
       }
     }
   },
-  "extensions": {
-    "i18nKey": "settings.extensions.label",
-    "AI": {
-      "i18nKey": "settings.extensions.AI.label",
+  "ai": {
+    "i18nKey": "settings.ai.label",
+    "iconName": "ri-sparkling-line",
+    "model": {
+      "i18nKey": "settings.ai.model.label",
       "children": [
         {
-          "i18nKey": "settings.extensions.ChatGPT.label",
+          "i18nKey": "settings.ai.ChatGPT.label",
           "ApiBase": {
             "key": "extensions_chatgpt_apibase",
             "type": "input",
             "title": {
-              "i18nKey": "settings.extensions.ChatGPT.api_base.label"
+              "i18nKey": "settings.ai.ChatGPT.api_base.label"
             },
             "desc": {
-              "i18nKey": "settings.extensions.ChatGPT.api_base.desc"
+              "i18nKey": "settings.ai.ChatGPT.api_base.desc"
             }
           },
           "ApiKey": {
             "key": "extensions_chatgpt_apikey",
             "type": "input",
             "title": {
-              "i18nKey": "settings.extensions.ChatGPT.api_key.label"
+              "i18nKey": "settings.ai.ChatGPT.api_key.label"
             },
             "desc": {
-              "i18nKey": "settings.extensions.ChatGPT.api_key.desc"
+              "i18nKey": "settings.ai.ChatGPT.api_key.desc"
             }
           },
           "models": {
             "key": "extensions_chatgpt_models",
             "type": "input",
             "title": {
-              "i18nKey": "settings.extensions.ChatGPT.models.label"
+              "i18nKey": "settings.ai.ChatGPT.models.label"
             },
             "desc": {
-              "i18nKey": "settings.extensions.ChatGPT.models.desc"
+              "i18nKey": "settings.ai.ChatGPT.models.desc"
             }
           }
         },
         {
-          "i18nKey": "settings.extensions.DeepSeek.label",
+          "i18nKey": "settings.ai.DeepSeek.label",
           "ApiBase": {
             "key": "extensions_deepseek_apibase",
             "type": "input",
             "title": {
-              "i18nKey": "settings.extensions.DeepSeek.api_base.label"
+              "i18nKey": "settings.ai.DeepSeek.api_base.label"
             },
             "desc": {
-              "i18nKey": "settings.extensions.DeepSeek.api_base.desc"
+              "i18nKey": "settings.ai.DeepSeek.api_base.desc"
             }
           },
           "ApiKey": {
             "key": "extensions_deepseek_apikey",
             "type": "input",
             "title": {
-              "i18nKey": "settings.extensions.DeepSeek.api_key.label"
+              "i18nKey": "settings.ai.DeepSeek.api_key.label"
             },
             "desc": {
-              "i18nKey": "settings.extensions.DeepSeek.api_key.desc"
+              "i18nKey": "settings.ai.DeepSeek.api_key.desc"
             }
           },
           "models": {
             "key": "extensions_deepseek_models",
             "type": "input",
             "title": {
-              "i18nKey": "settings.extensions.DeepSeek.models.label"
+              "i18nKey": "settings.ai.DeepSeek.models.label"
             },
             "desc": {
-              "i18nKey": "settings.extensions.DeepSeek.models.desc"
+              "i18nKey": "settings.ai.DeepSeek.models.desc"
             }
           }
         },
         {
-          "i18nKey": "settings.extensions.Ollama.label",
+          "i18nKey": "settings.ai.Ollama.label",
           "ApiBase": {
             "key": "extensions_ollama_apibase",
             "type": "input",
             "title": {
-              "i18nKey": "settings.extensions.Ollama.api_base.label"
+              "i18nKey": "settings.ai.Ollama.api_base.label"
             },
             "desc": {
-              "i18nKey": "settings.extensions.Ollama.api_base.desc"
+              "i18nKey": "settings.ai.Ollama.api_base.desc"
             }
           },
           "models": {
             "key": "extensions_ollama_models",
             "type": "input",
             "title": {
-              "i18nKey": "settings.extensions.Ollama.models.label"
+              "i18nKey": "settings.ai.Ollama.models.label"
             },
             "desc": {
-              "i18nKey": "settings.extensions.Ollama.models.desc"
+              "i18nKey": "settings.ai.Ollama.models.desc"
             }
           }
         }
@@ -228,6 +231,7 @@
     }
   },
   "keyboard": {
-    "i18nKey": "settings.keyboard.label"
+    "i18nKey": "settings.keyboard.label",
+    "iconName": "ri-keyboard-fill"
   }
 }
