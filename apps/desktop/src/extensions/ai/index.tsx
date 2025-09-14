@@ -1,18 +1,18 @@
-import { Button, Input, Menu, Space } from 'zens'
-import { useCallback, useEffect, useRef, useState } from 'react'
-import ReactLoading from 'react-loading'
-import { parseChatList } from './parseChatList'
-import { BottomBar, Container, ListContainer } from './styles'
-import useAiChatStore from './useAiChatStore'
-import { useCommandStore } from '@/stores'
-import { RIGHTBARITEMKEYS } from '@/constants'
 import type { RightBarItem } from '@/components/SideBar'
 import type { RightNavItem } from '@/components/SideBar/SideBarHeader'
 import SideBarHeader from '@/components/SideBar/SideBarHeader'
-import useThemeStore from '@/stores/useThemeStore'
+import { RIGHTBARITEMKEYS } from '@/constants'
 import { addNewMarkdownFileEdit } from '@/services/editor-file'
+import { useCommandStore } from '@/stores'
+import useThemeStore from '@/stores/useThemeStore'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { aiProviders, getCurrentAISettingData } from './aiProvidersService'
+import ReactLoading from 'react-loading'
+import { Button, Input, Menu, Space } from 'zens'
+import { aiProviders } from './aiProvidersService'
+import { parseChatList } from './parseChatList'
+import { BottomBar, Container, ListContainer } from './styles'
+import useAiChatStore, { getCurrentAISettingData } from './useAiChatStore'
 
 const ChatList: React.FC<ChatListProps> = (props) => {
   const {
@@ -23,7 +23,7 @@ const ChatList: React.FC<ChatListProps> = (props) => {
     addChat,
     delChat,
     setAiProvider,
-    setAiProviderCurModel
+    setAiProviderCurModel,
   } = useAiChatStore()
   const { curTheme } = useThemeStore()
   const aiSettingData = getCurrentAISettingData()
@@ -193,7 +193,7 @@ interface ChatListProps {
 const AI = {
   title: RIGHTBARITEMKEYS.AI,
   key: RIGHTBARITEMKEYS.AI,
-  icon: <i className="ri-chat-smile-ai-line" />,
+  icon: <i className='ri-chat-smile-ai-line' />,
   components: <ChatList />,
 } as RightBarItem
 

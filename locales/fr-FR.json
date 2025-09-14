@@ -178,8 +178,11 @@
     "keyboard": {
       "label": "clavier"
     },
-    "extensions": {
-      "label": "Extensions",
+    "ai": {
+      "label": "AI",
+      "model": {
+        "label": "AI modèle"
+      },
       "ChatGPT": {
         "label": "ChatGPT",
         "api_base": {
@@ -194,9 +197,6 @@
           "label": "Models",
           "desc": "A model list separated by commas, default is \"gpt-3.5-turbo, gpt-4-32k, gpt-4\""
         }
-      },
-      "AI": {
-        "label": "AI"
       },
       "DeepSeek": {
         "label": "DeepSeek",

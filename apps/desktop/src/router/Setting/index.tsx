@@ -46,12 +46,14 @@ function Setting() {
   const settingDataGroupsKeys = Object.keys(settingMap).filter(
     (key) => key !== 'i18nKey',
   ) as (keyof typeof settingMap)[]
-  const curGroupKey = settingDataGroupsKeys[value] as Exclude<keyof SettingData, 'i18nKey'>
-  const curGroup = settingMap[curGroupKey] as Setting.SettingGroup
-  const curGroupKeys = Object.keys(curGroup).filter((key) => key !== 'i18nKey') as Exclude<
+  const curGroupKey = settingDataGroupsKeys[value] as Exclude<
     keyof SettingData,
-    'i18nKey'
-  >[]
+    'i18nKey' | 'iconName'
+  >
+  const curGroup = settingMap[curGroupKey] as Setting.SettingGroup
+  const curGroupKeys = Object.keys(curGroup).filter(
+    (key) => key !== 'i18nKey' && key !== 'iconName',
+  ) as Exclude<keyof SettingData, 'i18nKey' | 'iconName'>[]
 
   useEffect(() => {
     check().then((u) => {
@@ -100,7 +102,9 @@ function Setting() {
                     setValue(index)
                   }}
                 >
-                  {t(group.i18nKey)}
+                  <div>
+                    <i className={group.iconName} /> {t(group.i18nKey)}
+                  </div>
                 </li>
               )
             })}
@@ -136,12 +140,14 @@ function Setting() {
               NiceModal.show(MODAL_CONFIRM_ID, {
                 title: t('settings.resetAppConf.desc'),
                 onConfirm: () => {
-                  invoke('reset_app_conf').then(async () => {
-                    await appSettingStoreSetup()
-                    toast.success(t('settings.resetAppConf.success'))
-                  }).catch((err) => {
-                    toast.error(String(err))
-                  })
+                  invoke('reset_app_conf')
+                    .then(async () => {
+                      await appSettingStoreSetup()
+                      toast.success(t('settings.resetAppConf.success'))
+                    })
+                    .catch((err) => {
+                      toast.error(String(err))
+                    })
                 },
               })
             }}

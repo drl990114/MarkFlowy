@@ -1,5 +1,5 @@
-import { getCurrentAISettingData } from '@/extensions/ai/aiProvidersService'
-import useAiChatStore from '@/extensions/ai/useAiChatStore'
+
+import useAiChatStore, { getCurrentAISettingData } from '@/extensions/ai/useAiChatStore'
 import useBookMarksStore from '@/extensions/bookmarks/useBookMarksStore'
 import bus from '@/helper/eventBus'
 import { getFileObject } from '@/helper/files'

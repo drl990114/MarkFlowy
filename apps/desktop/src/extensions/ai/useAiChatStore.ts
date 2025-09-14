@@ -1,14 +1,52 @@
-import { nanoid } from 'nanoid'
-import { create } from 'zustand'
 import { aiGenerateTextRequest } from '@/extensions/ai/api'
+import useAppSettingStore from '@/stores/useAppSettingStore'
+import { cloneDeep } from 'lodash'
+import { nanoid } from 'nanoid'
+import { useEffect } from 'react'
+import { create } from 'zustand'
+import { createJSONStorage, persist } from 'zustand/middleware'
 import {
   AIGenerateTextParams,
-  defaultAiProviderModelsMap,
   AIProviders,
   aiProviders,
+  aiProviderSettingKeysMap,
 } from './aiProvidersService'
-import { cloneDeep } from 'lodash'
-import { persist, createJSONStorage } from 'zustand/middleware'
+
+export const defaultAiProviderModelsMap = {
+  openai: ['gpt-3.5-turbo', 'gpt-4-32k', 'gpt-4'],
+  deepseek: ['deepseek-chat'],
+  ollama: ['llama3.3'],
+}
+
+export const getCurrentAISettingData = () => {
+  const settingData = useAppSettingStore.getState().settingData
+  const aiProvider = useAiChatStore.getState().aiProvider
+  const aiProviderSettings = aiProviderSettingKeysMap[aiProvider]
+
+  return {
+    apiBase: settingData[aiProviderSettings.apibase],
+    models: settingData[aiProviderSettings.models],
+    apiKey: aiProviderSettings.apikey ? settingData[aiProviderSettings.apikey] : '',
+  }
+}
+
+export const useRefreshAIProvidersModels = () => {
+  const { settingData } = useAppSettingStore()
+  const { setAiProviderModelsMap } = useAiChatStore()
+
+  useEffect(() => {
+    const res = {} as Record<AIProviders, string[]>
+
+    aiProviders.forEach((provider) => {
+      const models = settingData[aiProviderSettingKeysMap[provider].models]
+        .split(',')
+        .map((model: string) => model.trim())
+      res[provider] = models
+    })
+
+    setAiProviderModelsMap(res)
+  }, [settingData])
+}
 
 const useAiChatStore = create<AIStore>()(
   persist(

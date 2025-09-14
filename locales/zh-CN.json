@@ -205,10 +205,10 @@
     "keyboard": {
       "label": "键盘"
     },
-    "extensions": {
-      "label": "扩展",
-      "AI": {
-        "label": "AI"
+    "ai": {
+      "label": "AI",
+      "model": {
+        "label": "AI 模型"
       },
       "ChatGPT": {
         "label": "ChatGPT",
