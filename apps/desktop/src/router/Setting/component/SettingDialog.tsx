@@ -1,15 +1,15 @@
-import { Dialog } from 'zens'
 import { Setting } from '@/router'
-import { memo, useCallback, useEffect, useState } from 'react'
 import { useCommandStore } from '@/stores'
-import styled from 'styled-components'
+import { memo, useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import styled from 'styled-components'
+import { Dialog } from 'zens'
 
 const SettingDialogWrapper = styled(Dialog)`
-  height: 80vh;
-  max-width: 1000px;
+  width: 86vw;
+  max-width: 1280px;
   min-width: 700px;
-  max-height: 700px;
+  height: 90vh;
   overflow: hidden;
   background-color: ${(props) => props.theme.bgColor};
   transition: all 0.3s ease-in-out;
