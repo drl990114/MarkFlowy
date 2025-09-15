@@ -188,9 +188,6 @@
     },
     "ai": {
       "label": "AI",
-      "AI": {
-        "label": "AI プロバイダー"
-      },
       "ChatGPT": {
         "label": "ChatGPT",
         "api_base": {
