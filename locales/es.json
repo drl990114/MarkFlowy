@@ -281,7 +281,8 @@
       "searchPlaceholder": "Buscar elementos del menú...",
       "noResults": "Sin resultados",
       "toNavigate": "Para la navegación",
-      "toSelect": "Para la selección"
+      "toSelect": "Para la selección",
+      "toCancel": "Para cancelar"
     }
   },
   "explorer": {

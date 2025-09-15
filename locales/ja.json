@@ -186,10 +186,10 @@
     "keyboard": {
       "label": "キーボード"
     },
-    "extensions": {
-      "label": "拡張機能",
+    "ai": {
+      "label": "AI",
       "AI": {
-        "label": "AI"
+        "label": "AI プロバイダー"
       },
       "ChatGPT": {
         "label": "ChatGPT",
@@ -231,6 +231,9 @@
           "label": "Models",
           "desc": "モデルのリストをカンマで区切って指定します。デフォルトは \"\""
         }
+      },
+      "model": {
+        "label": "AIモデル"
       }
     },
     "resetAppConf": {
@@ -286,7 +289,8 @@
       "searchPlaceholder": "メニュー項目を検索します...",
       "noResults": "結果がありません",
       "toNavigate": "ナビゲーション用",
-      "toSelect": "選択用"
+      "toSelect": "選択用",
+      "toCancel": "キャンセル用"
     }
   },
   "workspace": {
