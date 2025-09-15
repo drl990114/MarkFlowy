@@ -278,7 +278,8 @@
       "searchPlaceholder": "Rechercher un élément de menu...",
       "noResults": "Aucun résultat",
       "toNavigate": "Pour la navigation",
-      "toSelect": "Pour la sélection"
+      "toSelect": "Pour la sélection",
+      "toCancel": "Utilisé pour annuler"
     }
   },
   "placeholder": {

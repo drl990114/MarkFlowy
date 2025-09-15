@@ -300,7 +300,8 @@
       "searchPlaceholder": "搜索菜单项...",
       "noResults": "无结果",
       "toNavigate": "用于导航",
-      "toSelect": "用于选择"
+      "toSelect": "用于选择",
+      "toCancel": "用于取消"
     }
   },
   "explorer": {

@@ -66,6 +66,10 @@
           {
             "title": "Español",
             "value": "es"
+          },
+          {
+            "title": "日本語",
+            "value": "ja"
           }
         ]
       }
