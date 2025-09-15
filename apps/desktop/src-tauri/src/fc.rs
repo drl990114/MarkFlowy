@@ -555,7 +555,7 @@ pub fn get_file_normal_info(path_str: &str) -> FileNormalInfo {
 }
 
 pub mod cmd {
-    use crate::fc::{self, FileNormalInfo};
+    use crate::fc::{self, FileNormalInfo, FileResultCode};
     use regex::Regex;
     use std::fs;
     use std::path::Path;
@@ -634,10 +634,43 @@ pub mod cmd {
     }
 
     #[tauri::command]
-    pub fn write_u8_array_to_file(file_path: &str, content: Vec<u8>) -> String {
+    pub fn write_u8_array_to_file(file_path: &str, content: Vec<u8>) -> FileResult {
         let file_path = Path::new(file_path);
-        fs::write(file_path, content).expect("ERROR");
-        String::from("OK")
+        
+        // Create parent directories if they don't exist
+        if let Some(parent) = file_path.parent() {
+            if !parent.exists() {
+                if let Err(e) = fs::create_dir_all(parent) {
+                    let code = match e.kind() {
+                        std::io::ErrorKind::PermissionDenied => FileResultCode::PermissionDenied,
+                        _ => FileResultCode::UnknownError,
+                    };
+                    return FileResult {
+                        code,
+                        content: format!("Failed to create parent directories: {}", e),
+                    };
+                }
+            }
+        }
+        
+        // Write the file content
+        match fs::write(file_path, content) {
+            Ok(()) => FileResult {
+                code: FileResultCode::Success,
+                content: String::from("File written successfully"),
+            },
+            Err(e) => {
+                let code = match e.kind() {
+                    std::io::ErrorKind::NotFound => FileResultCode::NotFound,
+                    std::io::ErrorKind::PermissionDenied => FileResultCode::PermissionDenied,
+                    _ => FileResultCode::UnknownError,
+                };
+                FileResult {
+                    code,
+                    content: format!("Failed to write file: {}", e),
+                }
+            }
+        }
     }
 
     #[tauri::command]
