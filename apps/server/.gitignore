@@ -1,6 +1,0 @@
-/target
-cdata
-
-.env
-.env.dev
-.env.prod
