@@ -1,2 +1,2 @@
 [workspace]
-members = ["apps/desktop/src-tauri", "apps/server", "crates/*", "tools/*"]
+members = ["apps/desktop/src-tauri", "crates/*", "tools/*"]
