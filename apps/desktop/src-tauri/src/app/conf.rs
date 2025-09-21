@@ -43,6 +43,9 @@ pub_struct!(AppConf {
     autosave_interval: Option<u32>,
     editor_root_font_family: Option<String>,
     editor_code_font_family: Option<String>,
+    when_paste_image: Option<String>,
+    paste_image_save_absolute_path: Option<String>,
+    paste_image_save_relative_path: Option<String>,
 });
 
 pub const APP_CONF_PATH: &str = "markflowy.conf.json";
@@ -100,6 +103,9 @@ impl AppConf {
             extensions_deepseek_apikey: Some("".to_string()),
             extensions_ollama_models: Some("llama3.3".to_string()),
             extensions_ollama_apibase: Some("".to_string()),
+            when_paste_image: Some("do_nothing".to_string()),
+            paste_image_save_absolute_path: None,
+            paste_image_save_relative_path: Some("assets/images".to_string()),
         }
     }
 
@@ -133,7 +139,10 @@ impl AppConf {
             extensions_deepseek_apibase,
             extensions_deepseek_apikey,
             extensions_ollama_models,
-            extensions_ollama_apibase
+            extensions_ollama_apibase,
+            when_paste_image,
+            paste_image_save_absolute_path,
+            paste_image_save_relative_path
         );
 
         self.write()

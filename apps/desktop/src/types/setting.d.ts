@@ -6,7 +6,12 @@ declare namespace Setting {
     iconName: string
   } & Record<string, SettingItem>
 
-  type SettingItem = SelectSettingItem | InputSettingItem | SwitchSettingItem | SliderSettingItem | FontListSelectSettingItem
+  type SettingItem =
+    | SelectSettingItem
+    | InputSettingItem
+    | SwitchSettingItem
+    | SliderSettingItem
+    | FontListSelectSettingItem
 
   type BaseSettingItem = {
     key: string
@@ -43,5 +48,9 @@ declare namespace Setting {
      * Save the value to string
      */
     saveToString?: boolean
+  } & BaseSettingItem
+
+  type PathSelectSettingItem = {
+    type: 'path_select'
   } & BaseSettingItem
 }

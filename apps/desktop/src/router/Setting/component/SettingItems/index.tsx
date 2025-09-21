@@ -28,9 +28,6 @@ const SettingItem: React.FC<SettingItemProps> = (props) => {
 
 export interface SettingItemProps<T = Setting.SettingItem> {
   item: T
-  itemKey: string
-  itemParentKey: string
-  categoryKey: string
 }
 
 export default SettingItem

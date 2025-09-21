@@ -119,6 +119,10 @@ const SettingSchema = {
       },
     },
   },
+  image: {
+    i18nKey: 'settings.image.label',
+    iconName: 'ri-image-2-line',
+  },
   ai: {
     i18nKey: 'settings.ai.label',
     iconName: 'ri-sparkling-line',
