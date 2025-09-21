@@ -207,7 +207,7 @@ const ContribGrid = styled.div`
 
 const ContribItem = styled.a`
   margin: 0.5rem;
-  padding: 0.5rem;
+  padding: 0.5rem 0.75rem;
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -258,8 +258,8 @@ const ContribItem = styled.a`
 
 const Avatar = styled.img`
   display: inline-flex;
-  width: 75px;
-  height: 75px;
+  width: 54px;
+  height: 54px;
   border-radius: 50%;
 `
 
@@ -274,7 +274,7 @@ const ContribInfo = styled.div`
 `
 
 const Name = styled.span`
-  font-size: 1.2rem;
+  font-size: 1rem;
   font-weight: bold;
   word-break: break-word;
 `
