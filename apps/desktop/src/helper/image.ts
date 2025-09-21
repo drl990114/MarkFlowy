@@ -2,6 +2,7 @@ import { useEditorStore } from '@/stores'
 import { convertFileSrc, invoke } from '@tauri-apps/api/core'
 import { join } from '@tauri-apps/api/path'
 import { fetch } from '@tauri-apps/plugin-http'
+import { FileResultCode, FileSysResult } from './filesys'
 
 const convertHttpToBase64 = async (url: string): Promise<string> => {
   try {
@@ -112,7 +113,7 @@ export const moveImageToFolder = async (
 
     // Generate a unique filename
     const fileName = `image_${Date.now()}.png`
-    const filePath = `${targetFolderPath}/${fileName}`
+    const filePath = await join(targetFolderPath, fileName)
     console.log('Saving base64 image to:', filePath)
     await invoke('write_u8_array_to_file', { filePath, content: buffer })
     return filePath
@@ -154,10 +155,13 @@ export const moveImageToFolder = async (
     console.log('targetPath', targetPath)
 
     try {
-      const res = await invoke('copy_file', { from: localPath, to: targetPath })
-      if (res) {
+      const res = await invoke<FileSysResult>('copy_file', { from: localPath, to: targetPath })
+      if (res.code === FileResultCode.Success) {
         console.log('Image copied to:', targetPath)
         return targetPath
+      } else {
+        console.error('Failed to copy image file:', res.content)
+        throw new Error(res.content)
       }
     } catch (error) {
       console.error('Failed to copy image file:', error)
