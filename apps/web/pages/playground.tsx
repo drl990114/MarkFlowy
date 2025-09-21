@@ -5,7 +5,6 @@ import dynamic from 'next/dynamic'
 import Head from 'next/head'
 import { useState } from 'react'
 import styled from 'styled-components'
-import RmeProvider from '../components/RmeProvider'
 
 // 动态导入RME编辑器，禁用SSR
 const PlaygroundContent = dynamic(() => import('../components/PlaygroundCSRContent'), {
@@ -37,9 +36,7 @@ const Playground = () => {
         onMobileNavToggle={() => setIsMobileNavFolded((x) => !x)}
       />
 
-      <RmeProvider>
-        <PlaygroundContent />
-      </RmeProvider>
+      <PlaygroundContent />
     </>
   )
 }

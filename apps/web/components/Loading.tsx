@@ -1,25 +1,17 @@
-import styled, { keyframes } from 'styled-components'
+import styled from 'styled-components'
 
-const rotate360 = keyframes`
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(360deg);
-  }
-`
-
-const StyledLoading = styled.div`
-  display: inline-block;
-  animation: ${rotate360} 2s linear infinite;
-  padding: 2rem 1rem;
-  font-size: 1.2rem;
+const LoadingContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 16px;
+  color: ${(props) => props.theme.labelFontColor};
 `
 
 const Loading = () => (
   <div style={{ position: 'absolute', left: '50%', transform: 'translate(50%,0)' }}>
-    <StyledLoading>&lt; 💅🏾 &gt;</StyledLoading>
+    <LoadingContainer>Loading ...</LoadingContainer>
   </div>
 )
 
