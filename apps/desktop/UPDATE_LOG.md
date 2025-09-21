@@ -1,5 +1,37 @@
 # UPDATE LOG
 
+## v0.33.0
+
+Features:
+
+- Support processing images when copying in the editor (e.g., copy as base64, save to local folder, save to workspace relative path).
+
+- Support editing multiple files when the workspace is empty.
+
+- Change the image in Markdown syntax to a node implementation, supporting drag to resize.
+
+- Support Japanese language.
+
+Fixes:
+
+- Optimize the trigger conditions of the `Slash menu`.
+
+---
+
+特性：
+
+- 支持在编辑器复制图片时，对其做处理（如复制为base64、保存到本地文件夹、保存到工作区相对路径）
+
+- 支持在空工作区的时候，编辑多个文件
+
+- Markdown 语法的图片改为 node 实现方式，支持拖拽调整大小
+
+- 支持日语
+
+修复：
+
+- 对 Slash 菜单的触发条件做了优化。
+
 ## v0.32.0
 
 Features:
