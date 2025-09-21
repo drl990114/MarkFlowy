@@ -1,23 +1,31 @@
-import dynamic from 'next/dynamic'
 import { darkTheme } from 'theme'
 import Loading from './Loading'
-
-// 动态导入RME的WysiwygThemeWrapper，禁用SSR
-const RmeWysiwygThemeWrapper = dynamic(() => import('rme').then(mod => ({ default: mod.WysiwygThemeWrapper })), {
-  ssr: false,
-  loading: () => <Loading />,
-})
+import { useRmeWrapper } from '../hooks/useRme'
 
 const MdHtmlWrapper = ({ children, ...rest }: any) => {
+  const { WysiwygThemeWrapper, loading, error } = useRmeWrapper()
+
+  if (loading) {
+    return <Loading />
+  }
+
+  if (error) {
+    return <div>Error loading wrapper: {error.message}</div>
+  }
+
+  if (!WysiwygThemeWrapper) {
+    return <Loading />
+  }
+
   return (
-    <RmeWysiwygThemeWrapper
+    <WysiwygThemeWrapper
       style={{
         whiteSpace: 'wrap',
       }}
       {...rest}
     >
       {children}
-    </RmeWysiwygThemeWrapper>
+    </WysiwygThemeWrapper>
   )
 }
 

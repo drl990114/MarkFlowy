@@ -1,18 +1,19 @@
 import { useEffect, useRef, useState } from 'react'
-import { Editor } from 'rme'
 import styled from 'styled-components'
 import { navbarHeight } from 'utils/sizes'
+import { useRmeEditor } from '../hooks/useRme'
+import RmeProvider from './RmeProvider'
 
 const PlaygroundContainer = styled.div`
   margin-top: ${navbarHeight}px;
-  background-color: ${props => props.theme.bgColor};
-  color: ${props => props.theme.primaryFontColor};
-  font-family: ${props => props.theme.fontFamily};
+  background-color: #181a1c;
+  color: ${(props) => props.theme.primaryFontColor};
+  font-family: ${(props) => props.theme.fontFamily};
 `
 
 const Header = styled.header`
-  border-bottom: 1px solid ${props => props.theme.borderColor};
-  background-color: ${props => props.theme.navBackground};
+  border-bottom: 1px solid ${(props) => props.theme.borderColor};
+  background-color: ${(props) => props.theme.navBackground};
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -20,8 +21,8 @@ const Header = styled.header`
 
 const Title = styled.h1`
   margin: 0;
-  font-size: ${props => props.theme.fontH2};
-  color: ${props => props.theme.primaryFontColor};
+  font-size: ${(props) => props.theme.fontH2};
+  color: ${(props) => props.theme.primaryFontColor};
 `
 
 const EditorContainer = styled.div`
@@ -36,25 +37,27 @@ const LoadingContainer = styled.div`
   justify-content: center;
   height: 100%;
   font-size: 16px;
-  color: ${props => props.theme.labelFontColor};
+  color: ${(props) => props.theme.labelFontColor};
 `
 
 const PlaygroundContent = () => {
-  const [rmeHooks, setRmeHooks] = useState<any>(null)
   const [viewType, setViewType] = useState<string>('wysiwyg')
   const editorRef = useRef<any>(null)
+  const { 
+    Editor, 
+    EditorViewType, 
+    createWysiwygDelegate, 
+    createSourceCodeDelegate, 
+    loading, 
+    error 
+  } = useRmeEditor()
 
+  // 初始化视图类型
   useEffect(() => {
-    // 动态加载RME hooks
-    import('rme').then((mod) => {
-      setRmeHooks({
-        EditorViewType: mod.EditorViewType,
-        createWysiwygDelegate: mod.createWysiwygDelegate,
-        createSourceCodeDelegate: mod.createSourceCodeDelegate,
-      })
-      setViewType(mod.EditorViewType.WYSIWYG)
-    })
-  }, [])
+    if (EditorViewType && viewType === 'wysiwyg') {
+      setViewType(EditorViewType.WYSIWYG)
+    }
+  }, [EditorViewType, viewType])
 
   const initialContent = `# Welcome to Markflowy Playground
 
@@ -99,17 +102,38 @@ This playground demonstrates the full RME editor functionality with:
 
 Enjoy experimenting with the editor!
 `
-
-  const handleViewTypeChange = (newViewType: string) => {
-    setViewType(newViewType)
-  }
-
   const handleEditorChange = (params: any) => {
     // Content changes are handled by the editor internally
     console.log('Editor content changed')
   }
 
-  if (!rmeHooks) {
+  if (loading) {
+    return (
+      <PlaygroundContainer>
+        <Header>
+          <Title>Markflowy Playground</Title>
+        </Header>
+        <EditorContainer>
+          <LoadingContainer>Loading Editor...</LoadingContainer>
+        </EditorContainer>
+      </PlaygroundContainer>
+    )
+  }
+
+  if (error) {
+    return (
+      <PlaygroundContainer>
+        <Header>
+          <Title>Markflowy Playground</Title>
+        </Header>
+        <EditorContainer>
+          <LoadingContainer>Error loading editor: {error.message}</LoadingContainer>
+        </EditorContainer>
+      </PlaygroundContainer>
+    )
+  }
+
+  if (!Editor || !EditorViewType || !createWysiwygDelegate || !createSourceCodeDelegate) {
     return (
       <PlaygroundContainer>
         <Header>
@@ -124,26 +148,25 @@ Enjoy experimenting with the editor!
 
   return (
     <PlaygroundContainer>
-      <Header>
-      
-      </Header>
-      
-      <EditorContainer>
-        <Editor
-          ref={editorRef}
-          content={initialContent}
-          initialType={viewType as any}
-          onChange={handleEditorChange}
-          delegate={
-            viewType === rmeHooks.EditorViewType.WYSIWYG
-              ? rmeHooks.createWysiwygDelegate()
-              : rmeHooks.createSourceCodeDelegate()
-          }
-        />
-      </EditorContainer>
+      <Header></Header>
+
+      <RmeProvider>
+        <EditorContainer>
+          <Editor
+            ref={editorRef}
+            content={initialContent}
+            initialType={viewType as any}
+            onChange={handleEditorChange}
+            delegate={
+              viewType === EditorViewType.WYSIWYG
+                ? createWysiwygDelegate()
+                : createSourceCodeDelegate()
+            }
+          />
+        </EditorContainer>
+      </RmeProvider>
     </PlaygroundContainer>
   )
 }
-
 
 export default PlaygroundContent
