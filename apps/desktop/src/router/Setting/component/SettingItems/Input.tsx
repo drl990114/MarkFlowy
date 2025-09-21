@@ -1,11 +1,11 @@
-import { Input } from 'zens'
-import { memo, useCallback, useEffect, useState } from 'react'
-import type { SettingItemProps } from '.'
-import { SettingLabel } from './Label'
-import { SettingItemContainer } from './Container'
-import useAppSettingStore from '@/stores/useAppSettingStore'
 import appSettingService from '@/services/app-setting'
+import useAppSettingStore from '@/stores/useAppSettingStore'
 import { debounce } from 'lodash'
+import { memo, useCallback, useEffect, useState } from 'react'
+import { Input } from 'zens'
+import type { SettingItemProps } from '.'
+import { SettingItemContainer } from './Container'
+import { SettingLabel } from './Label'
 
 const InputSettingItem: React.FC<SettingItemProps<Setting.InputSettingItem>> = memo((
   props,
@@ -37,6 +37,7 @@ const InputSettingItem: React.FC<SettingItemProps<Setting.InputSettingItem>> = m
     <SettingItemContainer>
       <SettingLabel item={item} />
       <Input
+        style={{ maxWidth: '300px' }}
         value={inputValue}
         onChange={handleChange}
       />

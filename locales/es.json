@@ -232,6 +232,30 @@
       "label": "Restablecer la configuración de la aplicación",
       "desc": "Restablecer la configuración de la aplicación y restaurar la configuración predeterminada. Esta acción restablece todos los ajustes, incluidos el tema, el idioma, el guardado automático, etc., y no se puede recuperar.",
       "success": "La configuración de la aplicación se ha restablecido a los valores predeterminados."
+    },
+    "image": {
+      "label": "Imágenes",
+      "event": {
+        "label": "Editor de eventos de imagen",
+        "when_paste_image": {
+          "label": "Al pegar una imagen",
+          "desc": "Seleccione el comportamiento predeterminado al pegar una imagen en el editor.",
+          "options": {
+            "do_nothing": "Sin operación",
+            "save_to_local_relative": "Ruta relativa guardada en el área de trabajo",
+            "save_to_local_absolute": "Guardar en la ruta absoluta global",
+            "paste_as_base64": "Pegar como código Base64"
+          }
+        },
+        "paste_image_save_absolute_path": {
+          "label": "Ruta absoluta global",
+          "desc": "Cuando \"Al pegar una imagen\" selecciona \"Guardar en la ruta absoluta global\", la imagen se guarda en esta ruta."
+        },
+        "paste_image_save_relative_path": {
+          "label": "Ruta relativa del área de trabajo",
+          "desc": "Cuando \"Al pegar una imagen\" selecciona \"Guardar en la ruta relativa del área de trabajo\", la imagen se guarda en esta ruta."
+        }
+      }
     }
   },
   "updater": {

@@ -229,6 +229,30 @@
       "label": "Réinitialiser la configuration de l'application",
       "desc": "Réinitialiser la configuration de l'application et restaurer les paramètres par défaut. Cette action réinitialise tous les paramètres, y compris le thème, la langue, l'enregistrement automatique, etc., et ne peut pas être restauré.",
       "success": "La configuration de l'application a été réinitialisée à la valeur par défaut."
+    },
+    "image": {
+      "label": "Image",
+      "event": {
+        "label": "Événements d'image de l'éditeur",
+        "when_paste_image": {
+          "label": "Lors du collage de l'image",
+          "desc": "Sélectionnez le comportement par défaut lorsque vous collez une image dans l'éditeur.",
+          "options": {
+            "do_nothing": "Aucune opération",
+            "save_to_local_relative": "Enregistrer le chemin relatif de la zone de travail",
+            "save_to_local_absolute": "Enregistrer le chemin absolu global",
+            "paste_as_base64": "Collez pour l'encodage Base64"
+          }
+        },
+        "paste_image_save_absolute_path": {
+          "label": "Chemin absolu global",
+          "desc": "Lorsque \"Coller une image\" sélectionne \"Enregistrer dans le chemin absolu global\", l'image est enregistrée dans ce chemin."
+        },
+        "paste_image_save_relative_path": {
+          "label": "Chemin relatif de la zone de travail",
+          "desc": "Lorsque \"Coller une image\" sélectionne \"Enregistrer dans le chemin relatif de la zone de travail\", l'image est enregistrée dans ce chemin."
+        }
+      }
     }
   },
   "updater": {

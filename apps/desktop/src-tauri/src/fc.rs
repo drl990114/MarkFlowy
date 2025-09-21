@@ -781,4 +781,14 @@ pub mod cmd {
     pub fn get_file_normal_info(path: &str) -> FileNormalInfo {
         fc::get_file_normal_info(path)
     }
+
+    #[tauri::command]
+    pub fn copy_file(from: &str, to: &str) -> bool {
+        let old_path = Path::new(from);
+        let new_path = Path::new(to);
+        match fs::copy(old_path, new_path) {
+            Ok(_) => true,
+            Err(_) => false,
+        }
+    }
 }

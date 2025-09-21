@@ -26,6 +26,7 @@ const Container = styled.div`
   }
 
   .setting-item__label {
+    white-space: pre-wrap;
     font-size: 13px;
     color: ${({ theme }) => theme.labelFontColor};
   }
