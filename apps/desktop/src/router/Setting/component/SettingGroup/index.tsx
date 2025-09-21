@@ -1,11 +1,11 @@
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import styled from 'styled-components'
 import SettingItem from '../SettingItems'
 import { SettingGroupContainer } from './styles'
-import { useState } from 'react'
-import styled from 'styled-components'
 
 const SettingGroup: React.FC<SettingGroupProps> = (props) => {
-  const { group, groupKey, categoryKey } = props
+  const { group } = props
   const { t } = useTranslation()
   const [tabIndex, setTabIndex] = useState(0)
 
@@ -21,9 +21,6 @@ const SettingGroup: React.FC<SettingGroupProps> = (props) => {
           <SettingItem
             key={key}
             item={groupItem[key]}
-            itemKey={key}
-            itemParentKey={groupKey}
-            categoryKey={categoryKey}
           />
         ))}
       </>

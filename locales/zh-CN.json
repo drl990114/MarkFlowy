@@ -202,6 +202,30 @@
         }
       }
     },
+    "image": {
+      "label": "图片",
+      "event": {
+        "label": "编辑器图片事件",
+        "when_paste_image": {
+          "label": "粘贴图片时",
+          "desc": "选择在编辑器中粘贴图片时的默认行为。",
+          "options": {
+            "do_nothing": "无操作",
+            "save_to_local_relative": "保存到工作区相对路径",
+            "save_to_local_absolute": "保存到全局绝对路径",
+            "paste_as_base64": "粘贴为 Base64 编码"
+          }
+        },
+        "paste_image_save_absolute_path": {
+          "label": "全局绝对路径",
+          "desc": "当“粘贴图片时”选择“保存到全局绝对路径”时，图片将保存到此路径。"
+        },
+        "paste_image_save_relative_path": {
+          "label": "工作区相对路径",
+          "desc": "当“粘贴图片时”选择“保存到工作区相对路径”时，图片将保存到此路径。"
+        }
+      }
+    },
     "keyboard": {
       "label": "键盘"
     },

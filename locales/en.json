@@ -237,6 +237,30 @@
       "label": "Reset Application Configuration",
       "desc": "Reset the application configuration to restore the default settings. This will reset all settings, including theme, language, autosave, etc., and cannot be restored.",
       "success": "The app configuration has been reset to default values."
+    },
+    "image": {
+      "label": "Picture",
+      "event": {
+        "label": "Editor Picture Events",
+        "when_paste_image": {
+          "label": "When pasting a picture",
+          "desc": "Select the default behavior when pasting pictures in the editor.",
+          "options": {
+            "do_nothing": "No Operation",
+            "save_to_local_relative": "Save to workspace relative path",
+            "save_to_local_absolute": "Save to Global Absolute Path",
+            "paste_as_base64": "Paste as Base64 encoding"
+          }
+        },
+        "paste_image_save_absolute_path": {
+          "label": "Global Absolute Path",
+          "desc": "When you select Save to Global Absolute Path when Paste Picture, the picture is saved to this path."
+        },
+        "paste_image_save_relative_path": {
+          "label": "Workspace relative path",
+          "desc": "When you select Save to workspace relative path when Paste Picture, the picture is saved to this path."
+        }
+      }
     }
   },
   "updater": {

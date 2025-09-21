@@ -781,4 +781,62 @@ pub mod cmd {
     pub fn get_file_normal_info(path: &str) -> FileNormalInfo {
         fc::get_file_normal_info(path)
     }
+
+    #[tauri::command]
+    pub fn copy_file(from: &str, to: &str) -> FileResult {
+        let old_path = Path::new(from);
+        let new_path = Path::new(to);
+        
+        // Validate input paths
+        if from.is_empty() || to.is_empty() {
+            return FileResult {
+                code: FileResultCode::InvalidPath,
+                content: String::from("Source or destination path cannot be empty"),
+            };
+        }
+        
+        // Check if source file exists
+        if !old_path.exists() {
+            return FileResult {
+                code: FileResultCode::NotFound,
+                content: format!("Source file not found: {}", from),
+            };
+        }
+        
+        // Create parent directories for destination if they don't exist
+        if let Some(parent) = new_path.parent() {
+            if !parent.exists() {
+                if let Err(e) = fs::create_dir_all(parent) {
+                    let code = match e.kind() {
+                        std::io::ErrorKind::PermissionDenied => FileResultCode::PermissionDenied,
+                        _ => FileResultCode::UnknownError,
+                    };
+                    return FileResult {
+                        code,
+                        content: format!("Failed to create parent directories for destination: {}", e),
+                    };
+                }
+            }
+        }
+        
+        // Perform the copy operation
+        match fs::copy(old_path, new_path) {
+            Ok(bytes_copied) => FileResult {
+                code: FileResultCode::Success,
+                content: format!("File copied successfully ({} bytes)", bytes_copied),
+            },
+            Err(e) => {
+                let code = match e.kind() {
+                    std::io::ErrorKind::NotFound => FileResultCode::NotFound,
+                    std::io::ErrorKind::PermissionDenied => FileResultCode::PermissionDenied,
+                    std::io::ErrorKind::AlreadyExists => FileResultCode::InvalidPath,
+                    _ => FileResultCode::UnknownError,
+                };
+                FileResult {
+                    code,
+                    content: format!("Failed to copy file from '{}' to '{}': {}", from, to, e),
+                }
+            }
+        }
+    }
 }

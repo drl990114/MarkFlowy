@@ -16,6 +16,7 @@ import { memo, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button, toast } from 'zens'
 import SettingGroup from './component/SettingGroup'
+import { ImageSetting } from './ImageSetting'
 import { KeyboardTable } from './KeyboardTable'
 import { Container } from './styles'
 
@@ -67,6 +68,10 @@ function Setting() {
   const renderCurrentSettingData = () => {
     if (curGroupKey === 'keyboard') {
       return <KeyboardTable />
+    }
+
+    if (curGroupKey === 'image') {
+      return <ImageSetting />
     }
 
     return curGroupKeys.map((key) => {
