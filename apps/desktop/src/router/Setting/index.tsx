@@ -3,7 +3,7 @@ import { MODAL_CONFIRM_ID } from '@/components/Modal'
 import { CopyButton } from '@/components/UI/Button'
 import { installUpdate } from '@/helper/updater'
 import type { SettingData } from '@/router/Setting/settingMap'
-import settingMap from '@/router/Setting/settingMap'
+import { getSettingMap } from '@/router/Setting/settingMap'
 import { appSettingStoreSetup } from '@/services/app-setting'
 import useAppInfoStore from '@/stores/useAppInfoStore'
 import NiceModal from '@ebay/nice-modal-react'
@@ -44,6 +44,8 @@ function Setting() {
   const { appInfo } = useAppInfoStore()
   const { t } = useTranslation()
   const [update, setUpdate] = useState<Update | null>(null)
+  const settingMap = getSettingMap()
+
   const settingDataGroupsKeys = Object.keys(settingMap).filter(
     (key) => key !== 'i18nKey',
   ) as (keyof typeof settingMap)[]

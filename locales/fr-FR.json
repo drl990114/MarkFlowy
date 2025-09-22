@@ -173,6 +173,13 @@
           "label": "Famille de polices de code",
           "desc": "Définissez la famille de polices de code de l'éditeur."
         }
+      },
+      "behavior": {
+        "label": "Comportement",
+        "md_default_mode": {
+          "label": "Mode par défaut de Markdown",
+          "desc": "Définit le mode d'édition par défaut lorsque vous créez un nouveau fichier Markdown."
+        }
       }
     },
     "keyboard": {
