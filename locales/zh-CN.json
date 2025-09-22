@@ -200,6 +200,13 @@
           "label": "代码字体",
           "desc": "设置代码编辑器的字体。"
         }
+      },
+      "behavior": {
+        "label": "行为",
+        "md_default_mode": {
+          "label": "Markdown 默认模式",
+          "desc": "设置新建 Markdown 文件时的默认编辑模式。"
+        }
       }
     },
     "image": {

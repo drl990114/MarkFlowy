@@ -31,6 +31,7 @@ const SelectSettingItem: React.FC<SettingItemProps<Setting.SelectSettingItem>> =
           if (!v) return
           appSettingService.writeSettingData(item, v.value)
         }}
+        getOptionKey={(option) => option.value}
         sx={{ width: '220px' }}
         disableClearable
         renderInput={(params) => <TextField {...params} size='small' />}

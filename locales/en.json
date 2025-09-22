@@ -181,6 +181,13 @@
           "label": "Code font family",
           "desc": "Set the code font family of the editor."
         }
+      },
+      "behavior": {
+        "label": "Behavior",
+        "md_default_mode": {
+          "label": "Markdown Default Mode",
+          "desc": "Sets the default editing mode when creating a new Markdown file."
+        }
       }
     },
     "keyboard": {

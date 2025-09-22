@@ -176,6 +176,13 @@
           "label": "Code Familia tipográfico",
           "desc": "Establezca la familia de fuentes de código del editor."
         }
+      },
+      "behavior": {
+        "label": "Comportamiento",
+        "md_default_mode": {
+          "label": "Modo predeterminado de Markdown",
+          "desc": "Establece el modo de edición predeterminado al crear un nuevo archivo de Markdown."
+        }
       }
     },
     "keyboard": {

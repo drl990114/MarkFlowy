@@ -181,6 +181,13 @@
           "label": "コードフォントファミリー",
           "desc": "エディターのコードフォントファミリーを設定します。"
         }
+      },
+      "behavior": {
+        "label": "行為",
+        "md_default_mode": {
+          "label": "Markdownデフォルトモード",
+          "desc": "Markdownファイルを新規作成するときのデフォルト編集モードを設定します。"
+        }
       }
     },
     "keyboard": {
