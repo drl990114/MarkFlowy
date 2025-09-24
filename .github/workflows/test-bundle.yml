@@ -115,14 +115,14 @@ jobs:
             ./target/${{ matrix.target }}/release/bundle/msi/**
             ./target/${{ matrix.target }}/release/bundle/nsis/**
 
-  build-fix-webview2:
+  build-offline-installer:
     permissions:
       contents: write
     strategy:
       fail-fast: false
       matrix:
         include:
-          - build: windows-fix-webview2
+          - build: windows-offline-installer
             os: windows-latest
             arch: x86_64
             target: x86_64-pc-windows-msvc
@@ -157,9 +157,9 @@ jobs:
       - name: Setup
         run: yarn setup
 
-      - name: Webview2 fix_webview_bundle
-        if: matrix.build == 'windows-fix-webview2'
-        run: yarn desktop:fix_webview2
+      - name: Use offline bundle
+        if: matrix.os == 'windows-latest'
+        run: yarn use-offline-bundle
 
       - name: Build workspaces
         run: yarn build
@@ -179,7 +179,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: matrix.os == 'windows-latest'
         with:
-          name: artifacts-${{ matrix.target }}-fix-webview2
+          name: offline-installer-artifacts-${{ matrix.target }}
           path: |
             ./target/${{ matrix.target }}/release/bundle/msi/**
             ./target/${{ matrix.target }}/release/bundle/nsis/**
