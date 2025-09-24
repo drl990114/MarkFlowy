@@ -115,6 +115,75 @@ jobs:
             ./target/${{ matrix.target }}/release/bundle/msi/**
             ./target/${{ matrix.target }}/release/bundle/nsis/**
 
+  build-offline-installer:
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - build: windows-offline-installer
+            os: windows-latest
+            arch: x86_64
+            target: x86_64-pc-windows-msvc
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3
+        with:
+          token: ${{ secrets.ACCESS_TOKEN }}
+
+      - name: Write env file
+        run: |
+          echo VITE_FIREBASE_APIKEY=${{ secrets.VITE_FIREBASE_APIKEY }}  >> ./apps/desktop/.env
+          echo VITE_FIREBASE_APPID=${{ secrets.VITE_FIREBASE_APPID }}  >> ./apps/desktop/.env
+          echo VITE_FIREBASE_MESSAGINGSENDERID=${{ secrets.VITE_FIREBASE_MESSAGINGSENDERID }}  >> ./apps/desktop/.env
+          echo VITE_FIREBASE_MEASUREMENTID=${{ secrets.VITE_FIREBASE_MEASUREMENTID }}  >> ./apps/desktop/.env
+          echo VITE_UMENG_APPKEY=${{ secrets.VITE_UMENG_APPKEY }}  >> ./apps/desktop/.env
+          echo VITE_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}  >> ./apps/desktop/.env
+
+      - name: Rust setup
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - uses: Swatinem/rust-cache@2656b87321093db1cb55fbd73183d195214fdfd1 # v2
+        with:
+          key: ${{ matrix.target }}
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Setup
+        run: yarn setup
+
+      - name: Use offline bundle
+        if: matrix.os == 'windows-latest'
+        run: yarn use-offline-bundle
+
+      - name: Build workspaces
+        run: yarn build
+
+      - name: Install rust target
+        run: rustup target add ${{ matrix.target }}
+
+      - name: Build the app
+        run: yarn build:desktop --target ${{ matrix.target }}
+        env:
+          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+
+      - uses: actions/upload-artifact@v4
+        if: matrix.os == 'windows-latest'
+        with:
+          name: offline-installer-artifacts-${{ matrix.target }}
+          path: |
+            ./target/${{ matrix.target }}/release/bundle/msi/**
+            ./target/${{ matrix.target }}/release/bundle/nsis/**
+
   release:
     permissions:
       contents: write
@@ -138,6 +207,13 @@ jobs:
           path: artifacts/aarch64
           merge-multiple: true
 
+      - name: Download offline installer artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: offline-installer-artifacts-*
+          path: artifacts/offline-installer
+          merge-multiple: true
+
       - name: Rename artifacts
         run: |
           mv "artifacts/aarch64/dmg/MarkFlowy_${{ env.version }}_aarch64.dmg" "artifacts/MarkFlowy_v${{ env.version }}_aarch64.dmg"
@@ -158,6 +234,12 @@ jobs:
 
           mv "artifacts/x86_64/nsis/MarkFlowy_${{ env.version }}_x64-setup.exe" "artifacts/MarkFlowy_v${{ env.version }}_x64-setup.exe"
           mv "artifacts/x86_64/nsis/MarkFlowy_${{ env.version }}_x64-setup.exe.sig" "artifacts/MarkFlowy_v${{ env.version }}_x64-setup.exe.sig"
+
+          mv "artifacts/offline-installer/msi/MarkFlowy_${{ env.version }}_x64_en-US.msi" "artifacts/MarkFlowy_v${{ env.version }}_offline_installer_x64.msi"
+          mv "artifacts/offline-installer/msi/MarkFlowy_${{ env.version }}_x64_en-US.msi.sig" "artifacts/MarkFlowy_v${{ env.version }}_offline_installer_x64.msi.sig"
+
+          mv "artifacts/offline-installer/nsis/MarkFlowy_${{ env.version }}_x64-setup.exe" "artifacts/MarkFlowy_v${{ env.version }}_offline_installer_x64-setup.exe"
+          mv "artifacts/offline-installer/nsis/MarkFlowy_${{ env.version }}_x64-setup.exe.sig" "artifacts/MarkFlowy_v${{ env.version }}_offline_installer_x64-setup.exe.sig"
 
       - name: Create Release
         uses: softprops/action-gh-release@v2.1.0
