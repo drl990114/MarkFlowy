@@ -40,7 +40,6 @@
     "classnames": "^2.5.1",
     "color": "^4.2.3",
     "dayjs": "^1.11.13",
-    "firebase": "^11.0.1",
     "hox": "^2.1.1",
     "html2canvas": "^1.4.1",
     "i18next": "23.16.0",
