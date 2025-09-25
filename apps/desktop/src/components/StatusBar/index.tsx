@@ -1,4 +1,4 @@
-import { TaskList } from '../TitleBar/TaskList'
+import { TaskList } from '../TaskList/TaskList'
 import { LayoutLeftBtn, LayoutRightBtn } from './LayoutBtn'
 import { CenterMenu } from './SettingBtn'
 import { Container, LeftContainer, RightContainer } from './styled'
