@@ -45,11 +45,6 @@ jobs:
 
       - name: Write env file
         run: |
-          echo VITE_FIREBASE_APIKEY=${{ secrets.VITE_FIREBASE_APIKEY }}  >> ./apps/desktop/.env
-          echo VITE_FIREBASE_APPID=${{ secrets.VITE_FIREBASE_APPID }}  >> ./apps/desktop/.env
-          echo VITE_FIREBASE_MESSAGINGSENDERID=${{ secrets.VITE_FIREBASE_MESSAGINGSENDERID }}  >> ./apps/desktop/.env
-          echo VITE_FIREBASE_MEASUREMENTID=${{ secrets.VITE_FIREBASE_MEASUREMENTID }}  >> ./apps/desktop/.env
-          echo VITE_UMENG_APPKEY=${{ secrets.VITE_UMENG_APPKEY }}  >> ./apps/desktop/.env
           echo VITE_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}  >> ./apps/desktop/.env
 
       - name: Rust setup
@@ -136,11 +131,6 @@ jobs:
 
       - name: Write env file
         run: |
-          echo VITE_FIREBASE_APIKEY=${{ secrets.VITE_FIREBASE_APIKEY }}  >> ./apps/desktop/.env
-          echo VITE_FIREBASE_APPID=${{ secrets.VITE_FIREBASE_APPID }}  >> ./apps/desktop/.env
-          echo VITE_FIREBASE_MESSAGINGSENDERID=${{ secrets.VITE_FIREBASE_MESSAGINGSENDERID }}  >> ./apps/desktop/.env
-          echo VITE_FIREBASE_MEASUREMENTID=${{ secrets.VITE_FIREBASE_MEASUREMENTID }}  >> ./apps/desktop/.env
-          echo VITE_UMENG_APPKEY=${{ secrets.VITE_UMENG_APPKEY }}  >> ./apps/desktop/.env
           echo VITE_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}  >> ./apps/desktop/.env
 
       - name: Rust setup
