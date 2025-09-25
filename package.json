@@ -13,6 +13,7 @@
     "dev:desktop": "yarn workspace @markflowy/desktop tauri:dev",
     "build": "turbo build",
     "build:desktop": "yarn build && yarn workspace @markflowy/desktop tauri:build",
+    "use-offline-bundle": "node scripts/use-offline-bundle.js",
     "delete": "turbo delete",
     "release": "node scripts/release.js",
     "release:patch": "yarn release --patch",

@@ -1,0 +1,185 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - ci/fix_webview_bundle
+
+jobs:
+  build:
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - build: linux
+            os: ubuntu-24.04
+            arch: x86_64
+            target: x86_64-unknown-linux-gnu
+          - build: macos
+            os: macos-latest
+            arch: x86_64
+            target: x86_64-apple-darwin
+          - build: macos
+            os: macos-latest
+            arch: aarch64
+            target: aarch64-apple-darwin
+          - build: windows
+            os: windows-latest
+            arch: x86_64
+            target: x86_64-pc-windows-msvc
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3
+        with:
+          token: ${{ secrets.ACCESS_TOKEN }}
+
+      - name: Install dependencies (ubuntu only)
+        if: matrix.os == 'ubuntu-24.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev patchelf libgtk-3-dev librsvg2-dev libxcb-shape0-dev libxcb-xfixes0-dev libsoup-3.0 javascriptcoregtk-4.1 webkit2gtk-4.1 pkg-config libfreetype6-dev libfontconfig1-dev
+
+      - name: Write env file
+        run: |
+          echo VITE_FIREBASE_APIKEY=${{ secrets.VITE_FIREBASE_APIKEY }}  >> ./apps/desktop/.env
+          echo VITE_FIREBASE_APPID=${{ secrets.VITE_FIREBASE_APPID }}  >> ./apps/desktop/.env
+          echo VITE_FIREBASE_MESSAGINGSENDERID=${{ secrets.VITE_FIREBASE_MESSAGINGSENDERID }}  >> ./apps/desktop/.env
+          echo VITE_FIREBASE_MEASUREMENTID=${{ secrets.VITE_FIREBASE_MEASUREMENTID }}  >> ./apps/desktop/.env
+          echo VITE_UMENG_APPKEY=${{ secrets.VITE_UMENG_APPKEY }}  >> ./apps/desktop/.env
+          echo VITE_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}  >> ./apps/desktop/.env
+
+      - name: Rust setup
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - uses: Swatinem/rust-cache@2656b87321093db1cb55fbd73183d195214fdfd1 # v2
+        with:
+          key: ${{ matrix.target }}
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Setup
+        run: yarn setup
+
+      - name: Build workspaces
+        run: yarn build
+
+      - name: Install rust target
+        run: rustup target add ${{ matrix.target }}
+
+      - name: Build the app
+        run: yarn build:desktop --target ${{ matrix.target }}
+        env:
+          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+
+      - uses: actions/upload-artifact@v4
+        if: matrix.os == 'ubuntu-24.04'
+        with:
+          name: artifacts-${{ matrix.target }}
+          path: |
+            ./target/${{ matrix.target }}/release/bundle/appimage/**.AppImage.*
+            ./target/${{ matrix.target }}/release/bundle/appimage/**.AppImage
+            ./target/${{ matrix.target }}/release/bundle/deb/**.deb
+            ./target/${{ matrix.target }}/release/bundle/rpm/**.rpm
+
+      - uses: actions/upload-artifact@v4
+        if: matrix.os == 'macos-latest' && matrix.arch == 'aarch64'
+        with:
+          name: aarch64artifacts-${{ matrix.target }}
+          path: |
+            ./target/${{ matrix.target }}/release/bundle/dmg/**.dmg
+            ./target/${{ matrix.target }}/release/bundle/macos/**.app.*
+
+      - uses: actions/upload-artifact@v4
+        if: matrix.os == 'macos-latest' && matrix.arch == 'x86_64'
+        with:
+          name: artifacts-${{ matrix.target }}
+          path: |
+            ./target/${{ matrix.target }}/release/bundle/dmg/**.dmg
+            ./target/${{ matrix.target }}/release/bundle/macos/**.app.*
+
+      - uses: actions/upload-artifact@v4
+        if: matrix.os == 'windows-latest'
+        with:
+          name: artifacts-${{ matrix.target }}
+          path: |
+            ./target/${{ matrix.target }}/release/bundle/msi/**
+            ./target/${{ matrix.target }}/release/bundle/nsis/**
+
+  build-offline-installer:
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - build: windows-offline-installer
+            os: windows-latest
+            arch: x86_64
+            target: x86_64-pc-windows-msvc
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3
+        with:
+          token: ${{ secrets.ACCESS_TOKEN }}
+
+      - name: Write env file
+        run: |
+          echo VITE_FIREBASE_APIKEY=${{ secrets.VITE_FIREBASE_APIKEY }}  >> ./apps/desktop/.env
+          echo VITE_FIREBASE_APPID=${{ secrets.VITE_FIREBASE_APPID }}  >> ./apps/desktop/.env
+          echo VITE_FIREBASE_MESSAGINGSENDERID=${{ secrets.VITE_FIREBASE_MESSAGINGSENDERID }}  >> ./apps/desktop/.env
+          echo VITE_FIREBASE_MEASUREMENTID=${{ secrets.VITE_FIREBASE_MEASUREMENTID }}  >> ./apps/desktop/.env
+          echo VITE_UMENG_APPKEY=${{ secrets.VITE_UMENG_APPKEY }}  >> ./apps/desktop/.env
+          echo VITE_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}  >> ./apps/desktop/.env
+
+      - name: Rust setup
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - uses: Swatinem/rust-cache@2656b87321093db1cb55fbd73183d195214fdfd1 # v2
+        with:
+          key: ${{ matrix.target }}
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Setup
+        run: yarn setup
+
+      - name: Use offline bundle
+        if: matrix.os == 'windows-latest'
+        run: yarn use-offline-bundle
+
+      - name: Build workspaces
+        run: yarn build
+
+      - name: Install rust target
+        run: rustup target add ${{ matrix.target }}
+
+      - name: Build the app
+        run: yarn build:desktop --target ${{ matrix.target }}
+        env:
+          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+
+      - uses: actions/upload-artifact@v4
+        if: matrix.os == 'windows-latest'
+        with:
+          name: offline-installer-artifacts-${{ matrix.target }}
+          path: |
+            ./target/${{ matrix.target }}/release/bundle/msi/**
+            ./target/${{ matrix.target }}/release/bundle/nsis/**
