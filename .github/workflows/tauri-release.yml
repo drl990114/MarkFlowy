@@ -241,6 +241,38 @@ jobs:
           mv "artifacts/offline-installer/nsis/MarkFlowy_${{ env.version }}_x64-setup.exe" "artifacts/MarkFlowy_v${{ env.version }}_offline_installer_x64-setup.exe"
           mv "artifacts/offline-installer/nsis/MarkFlowy_${{ env.version }}_x64-setup.exe.sig" "artifacts/MarkFlowy_v${{ env.version }}_offline_installer_x64-setup.exe.sig"
 
+      - run: |
+          cat > release.txt << EOF
+          ## v${{ env.version }}
+
+          <details>
+
+          <summary> FAQ | 常见问题 </summary>
+
+          ## FAQ:
+
+          ### Windows users
+          - We provide an Offline Installer with built-in ​​WebView2 Runtime​​ for devices that cannot automatically install WebView2 online or are in a no-network environment. Please note that this installer is relatively large in size and is recommended to be used only when necessary.
+
+          ### macOS users
+          - ​​macOS x86_64 version​​: When you launch the app for the first time, you may see a prompt saying "Cannot open the application" because the app is from an unidentified developer. Please go to "System Preferences" > "Security & Privacy", and click "Open Anyway" in the "General" tab.
+          - ​​macOS aarch64 (Apple Silicon) users​​: If you see a prompt saying "The application is damaged" when you launch it for the first time, it is usually due to system security restrictions. Please open the terminal and run the following command to fix the permission issue, and then you can open the app normally:
+            xattr -cr /Applications/MarkFlowy.app
+
+          ## 常见问题：
+
+          ### Windows 用户
+          - 我们提供了内置 ​​WebView2 运行时​​的离线安装包（Offline Installer），适用于无法自动在线安装 WebView2 或处于无网络环境的设备。请注意，此安装包体积较大，建议仅在必要时使用.
+
+          ### macOS 用户
+          - ​​macOS x86_64 版本​​：首次启动应用时，系统可能会提示“无法打开应用程序”，这是因为应用来自未识别的开发者。请前往“系统偏好设置” > “安全性与隐私”，在“通用”标签页中点击“仍要打开”即可.
+          - ​​macOS aarch64 (Apple Silicon) 用户​​：首次启动若提示“应用程序已损坏”，通常是由于系统的安全限制。请打开终端，执行以下命令来修复权限问题，之后即可正常打开应用
+            xattr -cr /Applications/MarkFlowy.app
+
+          </details>
+
+          EOF
+
       - name: Create Release
         uses: softprops/action-gh-release@v2.1.0
         env:
@@ -248,7 +280,7 @@ jobs:
         with:
           tagName: v${{ env.version }}
           releaseName: v${{ env.version }}
-          releaseBody: v${{ env.version }}
+          body_path: release.txt
           releaseDraft: false
           prerelease: true
           files: ./artifacts/**/*
