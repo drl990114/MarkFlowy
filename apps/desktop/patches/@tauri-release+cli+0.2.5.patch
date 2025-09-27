@@ -1,12 +1,17 @@
 diff --git a/node_modules/@tauri-release/cli/dist/updater.cjs b/node_modules/@tauri-release/cli/dist/updater.cjs
-index 8bc9ce9..e2488d0 100644
+index 8bc9ce9..51fd654 100644
 --- a/node_modules/@tauri-release/cli/dist/updater.cjs
 +++ b/node_modules/@tauri-release/cli/dist/updater.cjs
-@@ -91,13 +91,13 @@ async function updater() {
+@@ -90,14 +90,17 @@ async function updater() {
+       }
      });
    };
-   const promises = latestRelease.assets.map(async (asset) => {
+-  const promises = latestRelease.assets.map(async (asset) => {
 -    await setAsset(asset, /.msi.zip/, ["win64", "windows-x86_64"]);
++
++  const assets = latestRelease.assets.filter(a => !a.name.includes('offline_installer'));
++
++  const promises = assets.map(async (asset) => {
 +    await setAsset(asset, /.msi/, ["win64", "windows-x86_64"]);
      await setAsset(asset, /.app.tar.gz/, [
        "darwin",
@@ -19,7 +24,7 @@ index 8bc9ce9..e2488d0 100644
    await Promise.allSettled(promises);
    fs.writeFileSync(filename, JSON.stringify(updateData, null, 2));
 diff --git a/node_modules/@tauri-release/cli/dist/updater.mjs b/node_modules/@tauri-release/cli/dist/updater.mjs
-index 883f7fa..b3b9785 100644
+index 883f7fa..d5d3db1 100644
 --- a/node_modules/@tauri-release/cli/dist/updater.mjs
 +++ b/node_modules/@tauri-release/cli/dist/updater.mjs
 @@ -1,10 +1,10 @@
@@ -37,11 +42,16 @@ index 883f7fa..b3b9785 100644
  
  async function updater() {
    const argv = $argv();
-@@ -89,13 +89,13 @@ async function updater() {
+@@ -88,14 +88,17 @@ async function updater() {
+       }
      });
    };
-   const promises = latestRelease.assets.map(async (asset) => {
+-  const promises = latestRelease.assets.map(async (asset) => {
 -    await setAsset(asset, /.msi.zip/, ["win64", "windows-x86_64"]);
++
++  const assets = latestRelease.assets.filter(a => !a.name.includes('offline_installer'));
++
++  const promises = assets.map(async (asset) => {
 +    await setAsset(asset, /.msi/, ["win64", "windows-x86_64"]);
      await setAsset(asset, /.app.tar.gz/, [
        "darwin",
