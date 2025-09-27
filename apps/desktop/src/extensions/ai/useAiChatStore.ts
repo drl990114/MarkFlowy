@@ -66,11 +66,14 @@ const useAiChatStore = create<AIStore>()(
 
       chatList: [],
 
-      setChatStatus: (id, status) => {
+      setChatStatus: (id, status, errorMessage) => {
         set((state) => {
           const curChat = state.chatList.find((history) => history.id === id)
           if (curChat) {
             curChat.status = status
+            if (errorMessage) {
+              curChat.errorMessage = errorMessage
+            }
             return { ...state }
           }
           return state
@@ -92,9 +95,9 @@ const useAiChatStore = create<AIStore>()(
           .then((text) => {
             curStore.addChatAnswer(chat.id, text)
           })
-          .catch(() => {
-            // TODO show error message in interface
-            curStore.setChatStatus(chat.id, 'error')
+          .catch((error) => {
+            const errorMessage = error?.message || error?.toString() || 'Unknown error occurred'
+            curStore.setChatStatus(chat.id, 'error', errorMessage)
           })
 
         return chat
@@ -239,6 +242,7 @@ export interface AIChatHistory {
   question: string
   answer?: string
   status: ChatStatus
+  errorMessage?: string
 }
 
 interface AIStore {
@@ -247,7 +251,7 @@ interface AIStore {
   aiProviderModelsMap: Record<AIProviders, string[]>
   aiProviderCurModel: Record<AIProviders, string>
   chatList: AIChatHistory[]
-  setChatStatus: (id: string, status: ChatStatus) => void
+  setChatStatus: (id: string, status: ChatStatus, errorMessage?: string) => void
   addChat: (question: string, url: string, apiKey: string) => AIChatHistory
   getPostSummary: (text: string, url: string, apiKey: string) => Promise<string>
   getPostTranslate: (

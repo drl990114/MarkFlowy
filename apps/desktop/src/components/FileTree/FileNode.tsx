@@ -286,7 +286,6 @@ function FileNode({
             return <div key={index}></div>
           })}
         </div>
-
         {isPending ? (
           <NewFileInput
             style={{ paddingTop: 0, paddingBottom: 0 }}
