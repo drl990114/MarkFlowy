@@ -45,8 +45,9 @@ const NewFileInput = (
     if (creating.current === true) {
       return
     }
-    if (invalidState === false && verifing.current === false) {
-      getFileInfo(inputRef.current?.value || initialName)
+    const fileName = inputRef.current?.value || initialName
+    if (invalidState === false && verifing.current === false && fileName) {
+      getFileInfo(fileName)
         .then((fileInfo) => {
           onCancel?.(fileInfo)
         })
@@ -135,6 +136,7 @@ const NewFileInput = (
   return (
     <Tooltip title={invalidText} open={invalidState}>
       <Input
+        size='small'
         inputRef={inputRef}
         value={inputName}
         onChange={handleChange}

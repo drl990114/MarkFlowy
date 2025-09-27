@@ -2,6 +2,7 @@ import { type IFile } from '@/helper/filesys'
 import { useEditorStore } from '@/stores'
 import NiceModal from '@ebay/nice-modal-react'
 import { invoke } from '@tauri-apps/api/core'
+import { nanoid } from 'nanoid'
 import type { FC } from 'react'
 import { memo, useDeferredValue, useMemo } from 'react'
 import { Tree, TreeApi } from 'react-arborist'
@@ -9,6 +10,7 @@ import { TreeProps } from 'react-arborist/dist/module/types/tree-props'
 import { useTranslation } from 'react-i18next'
 import { FillFlexParent } from '../fill-flex-parent'
 import { MODAL_CONFIRM_ID } from '../Modal'
+import { showContextMenu } from '../UI/ContextMenu'
 import { moveFileNode } from './file-operator'
 import FileNode from './FileNode'
 import { SimpleTree } from './SimpleTree'
@@ -23,7 +25,7 @@ export const fileTreeHandler: {
 
 const FileTree: FC<FileTreeProps> = (props) => {
   const { data, onSelect } = props
-  const { activeId, setFolderDataPure } = useEditorStore()
+  const { activeId, setFolderDataPure, setFolderData } = useEditorStore()
   const deferredActiveId = useDeferredValue(activeId)
   const { t } = useTranslation()
   const tree = useMemo(() => new SimpleTree<IFile>(data), [data])
@@ -98,6 +100,64 @@ const FileTree: FC<FileTreeProps> = (props) => {
           disableMultiSelection
           onSelect={(node) => onSelect(node[0]?.data)}
           onMove={onMove}
+          onContextMenu={(e) => {
+            const items = []
+            const workspaceRoot = data[0]
+            if (workspaceRoot) {
+              items.push(
+                {
+                  label: t('contextmenu.explorer.add_file'),
+                  value: 'new_file',
+                  handler: () => {
+                    const data = { id: nanoid(), name: '', kind: 'pending_new_file' } as any
+                    fileTreeHandler.rootTree?.open(workspaceRoot.id)
+                    tree.create({
+                      parentId: workspaceRoot.id,
+                      data,
+                    })
+                    fileTreeHandler.rootTree?.create({
+                      parentId: workspaceRoot.id,
+                      index: 0,
+                    })
+
+                    setFolderData(tree.data)
+                  },
+                },
+                {
+                  label: t('contextmenu.explorer.add_folder'),
+                  value: 'new_folder',
+                  handler: () => {
+                    const data = {
+                      id: nanoid(),
+                      name: '',
+                      kind: 'pending_new_folder',
+                      children: [],
+                    } as any
+                    fileTreeHandler.rootTree?.open(workspaceRoot.id)
+
+                    tree.create({
+                      parentId: workspaceRoot.id,
+                      data,
+                    })
+                    fileTreeHandler.rootTree?.create({
+                      parentId: workspaceRoot.id,
+                      index: 0,
+                      type: 'internal',
+                    })
+
+                    setFolderData(tree.data)
+                  },
+                },
+              )
+            }
+
+            if (items.length === 0) return
+            showContextMenu({
+              x: e.clientX,
+              y: e.clientY,
+              items,
+            })
+          }}
         >
           {(props) => {
             const isRoot = props.node.id === data[0]?.id
