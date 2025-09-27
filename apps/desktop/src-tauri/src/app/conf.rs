@@ -95,9 +95,7 @@ impl AppConf {
             autosave_interval: Some(2000),
             editor_root_font_family: Some("Open Sans".to_string()),
             editor_code_font_family: Some("Fira Code".to_string()),
-            extensions_chatgpt_apibase: Some(
-                "https://api.openai.com/v1/chat/completions".to_string(),
-            ),
+            extensions_chatgpt_apibase: Some("".to_string()),
             extensions_chatgpt_models: Some("gpt-3.5-turbo,gpt-4-32k,gpt-4".to_string()),
             extensions_chatgpt_apikey: Some("".to_string()),
             extensions_deepseek_models: Some("deepseek-chat,deepseek-reasoner".to_string()),

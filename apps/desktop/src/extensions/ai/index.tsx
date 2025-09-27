@@ -147,8 +147,13 @@ const ChatList: React.FC<ChatListProps> = (props) => {
                       />
                     ) : chat.status === 'error' ? (
                       <div>
-                        request error, please check your ApiKey is it right or not{' '}
-                        <a onClick={openSettingWindow}>setting</a>
+                        <div style={{ color: 'red', margin: '6px 0' }}>
+                          Error: {chat.errorMessage || 'Request failed'}
+                        </div>
+                        <div>
+                          Please check your ApiKey and settings{' '}
+                          <a onClick={openSettingWindow}>setting</a>
+                        </div>
                       </div>
                     ) : (
                       <p>{chat.answer}</p>
