@@ -1,5 +1,41 @@
 # UPDATE LOG
 
+## v0.34.0
+
+Features:
+
+- Support setting the default editing mode when opening Markdown files in the editor.
+
+- Support offline installation bundle for Windows.
+
+- Support right-clicking on the blank area of the file tree to create new files and new folders.
+
+Fixes:
+
+- Enhance error handling during AI conversations to display error messages.
+
+- Remove the default setting of baseUrl for OpenAI. If older versions encounter OpenAI request failures, try deleting the baseUrl setting first.
+
+- Some style and performance optimizations.
+
+---
+
+特性：
+
+- 支持设置编辑器打开 Markdown 文件时的默认编辑模式。
+
+- 支持 Windows 的 offline 安装包。
+
+- 支持右键文件书的空白地方创建新文件和新文件夹。
+
+修复：
+
+- 增强 AI 对话时的错误处理，显示错误信息。
+
+- 取消 OpenAI 的 baseUrl 默认设置，老版本如果遇到 OpenAI 请求失败问题，可以先尝试删除 baseUrl 设置。
+
+- 一些样式和性能优化。
+
 ## v0.33.0
 
 Features:
