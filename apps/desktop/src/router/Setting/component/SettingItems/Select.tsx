@@ -5,6 +5,7 @@ import Autocomplete from '@mui/material/Autocomplete'
 import type { SettingItemProps } from '.'
 import { SettingItemContainer } from './Container'
 import { SettingLabel } from './Label'
+import { changeLng } from '@/i18n'
 
 const SelectSettingItem: React.FC<SettingItemProps<Setting.SelectSettingItem>> = (props) => {
   const { item } = props
@@ -30,6 +31,9 @@ const SelectSettingItem: React.FC<SettingItemProps<Setting.SelectSettingItem>> =
           e.stopPropagation()
           if (!v) return
           appSettingService.writeSettingData(item, v.value)
+          if (item.key === 'language') {
+            changeLng(v.value)
+          }
         }}
         getOptionKey={(option) => option.value}
         sx={{ width: '220px' }}
