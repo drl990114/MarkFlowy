@@ -41,8 +41,5 @@ pub fn init(app: &mut App, opened_urls: String) -> Result<(), Box<dyn std::error
     //     window.set_shadow(true);
     // }
 
-    // #[cfg(target_os = "macos")]
-    // window.set_transparent_titlebar(true, true);
-
     Ok(())
 }

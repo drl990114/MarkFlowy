@@ -113,9 +113,6 @@ path = "../../../crates/file_search"
 [dependencies.download_npm]
 path = "../../../crates/download_npm"
 
-[target.'cfg(any(target_os = "macos"))'.dependencies]
-cocoa = "0.26"
-objc = "0.2.7"
 
 [features]
 custom-protocol = ["tauri/custom-protocol"]
