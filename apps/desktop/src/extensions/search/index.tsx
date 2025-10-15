@@ -152,6 +152,9 @@ const SearchView = memo(() => {
     (e: React.ChangeEvent<HTMLInputElement>) => {
       if (!e.target.value) {
         setSearchState({ resultList: [] })
+        if (activeId) {
+          editorCtxMap.get(activeId)?.commands?.stopFind?.()
+        }
       }
       setSearchState({ searchKeyword: e.target.value })
     },
