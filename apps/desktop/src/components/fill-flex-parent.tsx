@@ -37,6 +37,7 @@ const Container = styled.div`
     padding-left: 10px;
     border-right: 1px solid ${props => props.theme.fileTreeIndentLineColor};
     margin-right: calc(var(--indent-size) - 10px - 1px);
+    z-index: 1;
   }
 `
 export const FillFlexParent = React.forwardRef(function FillFlexParent(props: Props, forwardRef) {

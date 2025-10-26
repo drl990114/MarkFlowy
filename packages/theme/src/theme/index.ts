@@ -71,12 +71,18 @@ export const common = {
 const styledLightTheme = {
   ...common,
 
+  // font
   primaryFontColor: '#000000',
+  disabledFontColor: '#9ca3af',
+  unselectedFontColor: '#505050',
   labelFontColor: '#9ca3af',
+
   accentColor: '#0369a1',
-  borderColor: '#d7d7dc',
-  bgColor: '#f7f7f7',
-  bgColorSecondary: "#e7e7e7",
+  accentColorFocused: '#eef4fa',
+  borderColor: '#D2D2D2',
+  borderColorFocused: '#C7DEFF',
+  bgColor: '#ffffff',
+  bgColorSecondary: '#e7e7e7',
   hoverColor: '#d7d7dc',
   warnColor: '#e2b340',
   dangerColor: '#dc2626',
@@ -87,15 +93,16 @@ const styledLightTheme = {
   // app
   titleBarBgColor: '#DCDCDD',
   titleBarDefaultHoverColor: '#bdbdc2',
-  editorTabBgColor: '#EBEBEC',
+  editorTabBgColor: '#E9E9E9',
   editorTabActiveBgColor: '#FAFAFA',
   editorToolbarBgColor: '#EBEBEC',
   fileTreeIndentLineColor: '#E0E0E0',
-  sideBarHeaderBgColor: '#EBEBEC',
-  sideBarBgColor: '#f2f2f2',
-  statusBarBgColor: '#EBEBEC',
-  rightBarBgColor: '#f2f2f2',
-  rightBarHeaderBgColor: '#EBEBEC',
+  fileTreeSelectedBgColor: '#E4E0E0',
+  sideBarHeaderBgColor: '#F9F9F9',
+  sideBarBgColor: '#F9F9F9',
+  statusBarBgColor: '#E9E9E9',
+  rightBarBgColor: '#F9F9F9',
+  rightBarHeaderBgColor: '#F9F9F9',
 
   // components
   buttonBgColor: '#f6f7f9',
@@ -112,12 +119,19 @@ const styledLightTheme = {
 const styledDarkTheme = {
   ...common,
 
-  primaryFontColor: '#c8d1d9',
-  labelFontColor: 'rgba(255, 255, 255, 0.5)',
+  // font
+  primaryFontColor: '#CACCCA',
+  disabledFontColor: '#ffffff80',
+  unselectedFontColor: '#ffffff80',
+  labelFontColor: '#ffffff80',
+
+  // color
   accentColor: '#2593d0',
-  borderColor: '#363b41',
-  bgColor: '#151515',
-  bgColorSecondary: "#252525",
+  accentColorFocused: '#1c2433',
+  borderColor: '#404040',
+  borderColorFocused: '#2970BD',
+  bgColor: '#131313',
+  bgColorSecondary: '#252525',
   hoverColor: '#2b2f33',
   warnColor: '#e2b340',
   dangerColor: '#dc2626',
@@ -128,15 +142,16 @@ const styledDarkTheme = {
   // app
   titleBarBgColor: '#212326',
   titleBarDefaultHoverColor: '#383838',
-  editorTabBgColor: '#1b1b1b',
+  editorTabBgColor: '#232323',
   editorTabActiveBgColor: '#151515',
   editorToolbarBgColor: '#1b1b1b',
   fileTreeIndentLineColor: '#2C2C2C',
-  sideBarHeaderBgColor: '#1b1b1b',
+  fileTreeSelectedBgColor: '#474646',
+  sideBarHeaderBgColor: '#1E1D1E',
   sideBarBgColor: '#1E1D1E',
   statusBarBgColor: '#262626',
   rightBarBgColor: '#1E1D1E',
-  rightBarHeaderBgColor: '#1b1b1b',
+  rightBarHeaderBgColor: '#1E1D1E',
 
   // components
   buttonBgColor: '#21262c',

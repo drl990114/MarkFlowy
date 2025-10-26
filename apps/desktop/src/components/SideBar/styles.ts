@@ -4,8 +4,12 @@ export const SideBarHeader = styled.div`
   display: flex;
   justify-content: flex-start;
   align-items: center;
+  padding: 4px;
+  gap: 4px;
   flex-shrink: 0;
+  height: 24px;
   background-color: ${(props) => props.theme.sideBarHeaderBgColor};
+  border-bottom: 1px solid ${(props) => props.theme.borderColor};
 `
 
 export const Container = styled.div<ContainerProps>`

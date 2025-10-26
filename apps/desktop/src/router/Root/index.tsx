@@ -15,6 +15,7 @@ import useLayoutStore from '@/stores/useLayoutStore'
 import { memo, useEffect, useRef } from 'react'
 import { ImperativePanelHandle, Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels'
 import { SettingDialog } from '../Setting/component/SettingDialog'
+import { LeftPanel, RightPanel } from './styles'
 
 export const RESIZE_PANEL_STORAGE_KEY = 'resize-panel'
 
@@ -86,7 +87,7 @@ function Root() {
         autoSaveId={RESIZE_PANEL_STORAGE_KEY}
         direction='horizontal'
       >
-        <Panel
+        <LeftPanel
           collapsible={true}
           collapsedSize={0}
           defaultSize={20}
@@ -94,13 +95,13 @@ function Root() {
           ref={leftPanelRef}
         >
           <SideBar />
-        </Panel>
+        </LeftPanel>
         <PanelResizeHandle />
         <Panel defaultSize={60} minSize={40}>
           <EditorArea />
         </Panel>
         <PanelResizeHandle />
-        <Panel
+        <RightPanel
           collapsible={true}
           collapsedSize={0}
           defaultSize={20}
@@ -108,7 +109,7 @@ function Root() {
           ref={rightPanelRef}
         >
           <RightBar />
-        </Panel>
+        </RightPanel>
       </PanelGroup>
       <StatusBar />
 

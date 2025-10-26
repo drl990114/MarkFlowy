@@ -24,7 +24,7 @@ export const fileTreeHandler: {
 }
 
 const FileTree: FC<FileTreeProps> = (props) => {
-  const { data, onSelect } = props
+  const { data, onSelect, dndRootElement } = props
   const { activeId, setFolderDataPure, setFolderData } = useEditorStore()
   const deferredActiveId = useDeferredValue(activeId)
   const { t } = useTranslation()
@@ -85,12 +85,17 @@ const FileTree: FC<FileTreeProps> = (props) => {
     }
   }
 
+  if (!dndRootElement) {
+    return null
+  }
+
   return (
     <FillFlexParent>
       {(dimens) => (
         <Tree
           {...dimens}
           data={data}
+          dndRootElement={dndRootElement}
           openByDefault={false}
           initialOpenState={{
             [data[0]?.id]: true,
@@ -187,6 +192,7 @@ interface FileTreeProps extends BaseComponentProps {
   data: IFile[]
   activeId?: string
   onSelect: (file: IFile) => void
+  dndRootElement: Node
 }
 
 export default memo(FileTree)

@@ -15,6 +15,8 @@ export const Container = styled.div`
     justify-content: flex-end;
     box-sizing: border-box;
     z-index: 10;
+    border-bottom: 1px solid ${(props) => props.theme.borderColor};
+    border-left: 1px solid ${(props) => props.theme.borderColor};
   }
 
   .code-contents {
@@ -29,12 +31,16 @@ export const TabItem = styled.div<TabItemProps>`
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 0 ${(props) => props.theme.spaceXs};
+  position: relative;
+  top: 1px;
+  padding-left: ${(props) => props.theme.spaceXl};
+  padding-right: ${(props) => props.theme.spaceXs};
   font-size: ${(props) => props.theme.fontXs};
-  border-top: 2px solid ${(props) => (props.active ? props.theme.accentColor : 'transparent')};
+  border-left: 1px solid ${(props) => props.theme.borderColor};
   background-color: ${(props) =>
     props.active ? props.theme.editorTabActiveBgColor : props.theme.editorTabBgColor};
-  height: calc(100% + 2px);
+  border-bottom: 2px solid
+    ${(props) => (props.active ? props.theme.editorTabActiveBgColor : props.theme.borderColor)};
   box-sizing: border-box;
   white-space: nowrap;
   cursor: pointer;
@@ -43,8 +49,8 @@ export const TabItem = styled.div<TabItemProps>`
   -moz-user-select: none; /* Firefox */
   -ms-user-select: none; /* Edge, IE */
 
-  &:hover {
-    background-color: ${(props) => props.theme.hoverColor};
+  &:first-child {
+    border-left: none;
   }
 
   .close {

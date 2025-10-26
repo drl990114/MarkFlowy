@@ -6,4 +6,5 @@ export const PageLayout = styled.div`
   height: 100vh;
   width: 100vw;
   overflow: hidden;
+  border-top: 1px solid ${props => props.theme.borderColor};
 `

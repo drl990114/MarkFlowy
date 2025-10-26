@@ -72,7 +72,7 @@ export const InjectFonts = createGlobalStyle`
       url(${OpenSansSemiBoldItalic}) format('woff');
   }
   @font-face {
-    font-family: 'Open Sans';
+    font-family: 'Open Sans Bold';
     font-style: normal;
     font-weight: 700;
     src:
@@ -81,7 +81,7 @@ export const InjectFonts = createGlobalStyle`
       url(${OpenSansBold}) format('woff');
   }
   @font-face {
-    font-family: 'Open Sans';
+    font-family: 'Open Sans Bold Italic';
     font-style: italic;
     font-weight: 700;
     src:

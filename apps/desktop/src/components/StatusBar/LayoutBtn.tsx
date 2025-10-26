@@ -10,6 +10,7 @@ export const LayoutLeftBtn = memo(() => {
   return (
     <Container
       ref={ref}
+      className='icon-small icon-smooth'
       active={leftBar.visible}
       onClick={() => {
         useCommandStore.getState().execute('app:toggle_leftsidebar_visible')
@@ -27,6 +28,7 @@ export const LayoutRightBtn = () => {
   return (
     <Container
       ref={ref}
+      className='icon-small icon-smooth'
       active={rightBar.visible}
       onClick={() => {
         useCommandStore.getState().execute('app:toggle_rightsidebar_visible')
@@ -42,9 +44,6 @@ const Container = styled.div<{ active: boolean }>`
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  width: 32px;
-  height: 100%;
-  font-size: 16px;
   cursor: pointer;
   transition: background-color 0.3s ease-in-out;
   color: ${(props) => props.active ? props.theme.accentColor : 'inherit'};

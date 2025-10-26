@@ -1,18 +1,18 @@
-import classNames from 'classnames'
-import { memo, useMemo, useState } from 'react'
-import { Container as SideBarContainer, SideBarHeader } from './styles'
 import { Explorer } from '@/components'
 import { RIGHTBARITEMKEYS } from '@/constants'
 import BookMarks from '@/extensions/bookmarks'
 import { Search } from '@/extensions/search'
+import classNames from 'classnames'
+import { memo, useMemo, useState } from 'react'
 import { Tooltip } from 'zens'
+import { Container as SideBarContainer, SideBarHeader } from './styles'
 
 function SideBar() {
   const [activeRightBarItemKey, setActiveRightBarItemKey] = useState<RIGHTBARITEMKEYS>(
     RIGHTBARITEMKEYS.Explorer,
   )
 
-  const rightBarDataSource: RightBarItem[] = useMemo(() => {
+  const leftBarDataSource: RightBarItem[] = useMemo(() => {
     return [
       {
         title: RIGHTBARITEMKEYS.Explorer,
@@ -26,9 +26,9 @@ function SideBar() {
   }, [])
 
   const activeRightBarItem = useMemo(() => {
-    const activeItem = rightBarDataSource.find((item) => item.key === activeRightBarItemKey)
+    const activeItem = leftBarDataSource.find((item) => item.key === activeRightBarItemKey)
     return activeItem
-  }, [activeRightBarItemKey, rightBarDataSource])
+  }, [activeRightBarItemKey, leftBarDataSource])
 
   const noActiveItem = !activeRightBarItemKey
 
@@ -36,9 +36,10 @@ function SideBar() {
     <SideBarContainer noActiveItem={noActiveItem}>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', width: '100%' }}>
         <SideBarHeader>
-          {rightBarDataSource.map((item) => {
-            const cls = classNames('icon', {
+          {leftBarDataSource.map((item) => {
+            const cls = classNames('icon', 'icon-small', 'icon-smooth', {
               'app-sidebar-active': activeRightBarItemKey === item.key,
+              'icon-unselected': activeRightBarItemKey !== item.key
             })
 
             const handleRightBarItemClick = () => {

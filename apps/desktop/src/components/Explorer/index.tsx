@@ -5,7 +5,7 @@ import { useEditorStore } from '@/stores'
 import useOpenedCacheStore from '@/stores/useOpenedCacheStore'
 import classNames from 'classnames'
 import type { FC, MouseEventHandler } from 'react'
-import { memo, useCallback, useMemo, useState } from 'react'
+import { memo, useCallback, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 import { Popover } from 'zens'
@@ -29,6 +29,7 @@ const Explorer: FC<ExplorerProps> = (props) => {
   const [popperOpen, setPopperOpen] = useState(false)
   const { recentWorkspaces, clearRecentWorkspaces } = useOpenedCacheStore()
   const { openFolderDialog, openFolder } = useOpen()
+  const dndRootElementRef = useRef(null)
 
   const handleSelect = (item: IFile) => {
     if (item?.kind !== 'file') return
@@ -66,9 +67,14 @@ const Explorer: FC<ExplorerProps> = (props) => {
 
   return (
     <Container className={containerCLs} onContextMenu={handleContextMenu}>
-      <div className='h-full w-full overflow-hidden'>
+      <div className='h-full w-full overflow-hidden' ref={dndRootElementRef}>
         {folderData && folderData.length > 0 ? (
-          <FileTree data={folderData} activeId={activeId} onSelect={handleSelect} />
+          <FileTree
+            data={folderData}
+            activeId={activeId}
+            onSelect={handleSelect}
+            dndRootElement={dndRootElementRef.current as unknown as Node}
+          />
         ) : (
           <Empty />
         )}
@@ -96,7 +102,10 @@ const Explorer: FC<ExplorerProps> = (props) => {
           }
         >
           {listData.length > 0 ? (
-            <i className='ri-more-2-fill explorer-bottom__action__icon' onClick={() => setPopperOpen(true)} />
+            <i
+              className='ri-more-2-fill explorer-bottom__action__icon'
+              onClick={() => setPopperOpen(true)}
+            />
           ) : null}
         </Popover>
       </div>

@@ -1,9 +1,7 @@
 import { getFileObject, getSaveOpenedEditorEntries } from '@/helper/files'
 import type { IFile } from '@/helper/filesys'
 import { checkUnsavedFiles } from '@/services/checkUnsavedFiles'
-import { addEmptyEditorTab } from '@/services/editor-file'
 import { useEditorStateStore, useEditorStore } from '@/stores'
-import { darken } from '@markflowy/theme'
 import { memo, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
@@ -36,14 +34,20 @@ const Container = styled.div`
     &__right {
       margin-left: ${(props) => props.theme.spaceXs};
     }
+  }
 
-    &__close {
-      border-radius: ${(props) => props.theme.smallBorderRadius};
+  .tab-control {
+    display: flex;
+    align-items: center;
+    padding: 0 ${(props) => props.theme.spaceXs};
+    border-bottom: 1px solid ${(props) => props.theme.borderColor};
+    border-right: 1px solid ${(props) => props.theme.borderColor};
+  }
 
-      &:hover {
-        background-color: ${(props) => darken(props.theme.hoverColor, 0.2)};
-      }
-    }
+  .tab-filling {
+    flex: 1 1 auto;
+    border-bottom: 1px solid ${(props) => props.theme.borderColor};
+    border-left: 1px solid ${(props) => props.theme.borderColor};
   }
 `
 const EditorAreaTabs = memo(() => {
@@ -65,8 +69,8 @@ const EditorAreaTabs = memo(() => {
     setActiveId(id)
   }
 
-  const close = (ev: React.MouseEvent<HTMLElement, MouseEvent>, id: string) => {
-    ev.stopPropagation()
+  const close = (ev: React.MouseEvent<HTMLElement, MouseEvent> | undefined, id: string) => {
+    ev?.stopPropagation()
     const curIndex = opened.findIndex((openedId) => openedId === id)
     if (curIndex < 0) return
 
@@ -81,6 +85,10 @@ const EditorAreaTabs = memo(() => {
 
   return (
     <Container>
+      {/* <div className='tab-control'>
+        <MfIconButton icon='ri-arrow-left-line' size='small' rounded='smooth' />
+        <MfIconButton icon='ri-arrow-right-line' size='small' rounded='smooth' />
+      </div> */}
       <div className='tab-items' ref={htmlRef}>
         {opened.map((id) => {
           const file = getFileObject(id) as IFile
@@ -184,7 +192,6 @@ const EditorAreaTabs = memo(() => {
                     textOverflow: 'ellipsis',
                   }}
                 >
-                  <i className={'ri-file-3-line tab-items__icon'} />
                   {file.name}
                 </span>
 
@@ -192,9 +199,14 @@ const EditorAreaTabs = memo(() => {
                   {editorState?.hasUnsavedChanges ? (
                     <Dot />
                   ) : (
-                    <i
-                      className='ri-close-line tab-items__icon tab-items__close'
-                      onClick={(ev: React.MouseEvent<HTMLElement, MouseEvent>) => close(ev, id)}
+                    <MfIconButton
+                      icon='ri-close-line'
+                      size='small'
+                      rounded='rounded'
+                      className='close'
+                      onClick={(ev: React.MouseEvent<HTMLElement, MouseEvent> | undefined) =>
+                        close(ev, id)
+                      }
                     />
                   )}
                 </div>
@@ -203,8 +215,7 @@ const EditorAreaTabs = memo(() => {
           )
         })}
       </div>
-      <MfIconButton icon={'ri-add-line'} onClick={addEmptyEditorTab} />
-      <div style={{ flex: '1 1 auto' }} />
+      <div className='tab-filling' />
       <EditorAreaHeader />
     </Container>
   )

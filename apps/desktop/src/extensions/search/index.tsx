@@ -175,11 +175,15 @@ const SearchView = memo(() => {
           onClick={toggleCaseSensitive}
           active={caseSensitive}
           icon='ri-font-size'
+          size='small'
+          rounded='smooth'
           tooltipProps={{
             title: t('search.caseSensitive'),
           }}
         />
         <MfIconButton
+          size='small'
+          rounded='smooth'
           onClick={toggleAllExpand}
           icon={isAllExpand ? 'ri-contract-up-down-line' : 'ri-expand-up-down-line'}
           tooltipProps={{

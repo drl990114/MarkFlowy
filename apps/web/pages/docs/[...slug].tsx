@@ -5,7 +5,6 @@ import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
-import 'prosemirror-flat-list/dist/style.css'
 import DocsLayout from '../../components/DocsLayout'
 import RmeProvider from '../../components/RmeProvider'
 

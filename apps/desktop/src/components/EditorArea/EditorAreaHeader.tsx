@@ -1,5 +1,6 @@
 import { getFileObject, getSaveOpenedEditorEntries } from '@/helper/files'
 import { checkUnsavedFiles } from '@/services/checkUnsavedFiles'
+import { addEmptyEditorTab } from '@/services/editor-file'
 import { useCommandStore, useEditorStore } from '@/stores'
 import { memo, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -51,6 +52,7 @@ export const EditorAreaHeader = memo(() => {
 
   return (
     <div className='editor-area-header'>
+      <MfIconButton icon={'ri-add-line'} onClick={addEmptyEditorTab} />
       {curFile ? (
         <>
           <MfIconButton iconRef={ref} icon={'ri-more-2-fill'} onClick={handleClick} />
