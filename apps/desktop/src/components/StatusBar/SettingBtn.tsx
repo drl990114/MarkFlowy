@@ -65,7 +65,7 @@ export const CenterMenu = memo(() => {
   }
 
   return (
-    <Container ref={ref} onClick={handleClick}>
+    <Container className='icon-small icon-smooth' ref={ref} onClick={handleClick}>
       <i className="ri-settings-3-line"></i>
     </Container>
   )
@@ -76,9 +76,6 @@ const Container = styled.div`
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  width: 32px;
-  height: 100%;
-  font-size: 16px;
   cursor: pointer;
   transition: background-color 0.3s ease-in-out;
 

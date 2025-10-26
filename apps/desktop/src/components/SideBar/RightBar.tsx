@@ -1,10 +1,10 @@
+import { RIGHTBARITEMKEYS } from '@/constants'
+import aiExtension from '@/extensions/ai'
+import { TableOfContent } from '@/extensions/table-of-content'
 import classNames from 'classnames'
 import { memo, useMemo, useState } from 'react'
-import { Container as SideBarContainer, SideBarHeader } from './styles'
-import { RIGHTBARITEMKEYS } from '@/constants'
 import { Tooltip } from 'zens'
-import { TableOfContent } from '@/extensions/table-of-content'
-import aiExtension from '@/extensions/ai'
+import { Container as SideBarContainer, SideBarHeader } from './styles'
 
 function RightBar() {
   const [activeRightBarItemKey, setActiveRightBarItemKey] = useState<RIGHTBARITEMKEYS>(
@@ -30,8 +30,9 @@ function RightBar() {
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', width: '100%' }}>
         <SideBarHeader>
           {rightBarDataSource.map((item) => {
-            const cls = classNames('icon', {
+            const cls = classNames('icon', 'icon-small', 'icon-smooth', {
               'app-sidebar-active': activeRightBarItemKey === item.key,
+              'icon-unselected': activeRightBarItemKey !== item.key
             })
 
             const handleRightBarItemClick = () => {

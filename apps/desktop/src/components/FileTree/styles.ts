@@ -1,4 +1,3 @@
-import { colorAdaptiveChange } from '@/helper/theme'
 import styled from 'styled-components'
 
 type NodeContainerProps = {
@@ -15,15 +14,21 @@ export const NodeContainer = styled.div<NodeContainerProps>`
   cursor: default;
   height: 100%;
   color: ${(props) =>
-    props.highlight || props.selected ? props.theme.accentColor : props.theme.primaryFontColor};
+    props.highlight || props.selected
+      ? props.theme.primaryFontColor
+      : props.theme.primaryFontColor};
   background-color: ${(props) =>
-    props.highlight ? colorAdaptiveChange(props.theme.bgColor, 0.6, 0.2) : 'transparent'};
-  border: 1px dashed transparent;
+    props.highlight
+      ? props.theme.accentColorFocused
+      : props.selected
+        ? props.theme.fileTreeSelectedBgColor
+        : 'transparent'};
+  border: 1px solid
+    ${(props) => (props.selected ? props.theme.borderColorFocused : 'transparent')};
   box-sizing: border-box;
 
   &:hover {
-    /* background-color: ${(props) => props.theme.borderColor}; */
-    border: 1px dashed ${(props) => props.theme.accentColor};
+    background-color: ${(props) => props.theme.fileTreeSelectedBgColor};
   }
 
   .file-icon {

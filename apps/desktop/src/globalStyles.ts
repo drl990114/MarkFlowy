@@ -15,6 +15,10 @@ export const GlobalStyles = createGlobalStyle`
     font-family: "Open Sans", "Clear Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
   }
 
+  * {
+    border-color: ${(props) => props.theme.borderColor};
+  }
+
   .icon {
     flex: 0 0 auto;
     display: flex;
@@ -34,6 +38,15 @@ export const GlobalStyles = createGlobalStyle`
     &--active {
       color: ${(props) => props.theme.accentColor};
       font-weight: 1000;
+    }
+
+    &-unselected {
+      color: ${(props) => props.theme.unselectedFontColor};
+    }
+
+    &-disabled {
+      color: ${(props) => props.theme.disabledFontColor};
+      cursor: not-allowed;
     }
   }
 

@@ -31,12 +31,12 @@ const SideBarHeader: FC<SideBarHeaderProps> = (props) => {
         {props.rightNavItems?.map((item) => {
           return item.tooltip ? (
             <Tooltip {...item.tooltip} key={item.key}>
-              <i className={`icon ${item.iconCls}`} onClick={() => handleRightNavItemClick(item)} />
+              <i className={`icon icon-small icon-smooth ${item.iconCls}`} onClick={() => handleRightNavItemClick(item)} />
             </Tooltip>
           ) : (
             <i
               key={item.key}
-              className={`icon ${item.iconCls}`}
+              className={`icon icon-small icon-smooth ${item.iconCls}`}
               onClick={() => handleRightNavItemClick(item)}
             />
           )
