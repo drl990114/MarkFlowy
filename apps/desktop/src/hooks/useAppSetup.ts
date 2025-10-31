@@ -252,7 +252,6 @@ const useAppSetup = () => {
           },
         }) > 0
       ) {
-        console.log('有未保存的文件，阻止关闭')
         return false
       } else {
         handleCloseWindow()

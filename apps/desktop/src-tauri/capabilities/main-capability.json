@@ -18,6 +18,7 @@
     "core:window:allow-destroy",
     "core:app:default",
     "core:app:allow-set-app-theme",
+    "core:app:allow-app-hide",
     "core:resources:default",
     "core:menu:default",
     "core:tray:default",
