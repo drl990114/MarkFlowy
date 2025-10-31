@@ -186,7 +186,8 @@
       }
     },
     "keyboard": {
-      "label": "teclado"
+      "label": "teclado",
+      "shortcut_conflict": "La tecla de acceso directo está ocupada"
     },
     "ai": {
       "label": "AI",
@@ -339,5 +340,31 @@
       }
     },
     "label": "Libro"
+  },
+  "command": {
+    "id_descriptions": {
+      "app_openFolder": "Abrir una carpeta",
+      "app_toggleLeftsidebarVisible": "Alternar barra lateral izquierda visible",
+      "app_toggleRightsidebarVisible": "Alternar barra lateral derecha visible",
+      "app_save": "Guardar archivo de edición activo actual",
+      "app_findReplaceEditor": "Buscar y reemplazar en el editor",
+      "app_closeCurrentEditorTab": "Cerrar la pestaña actual del editor",
+      "app_hide": "Ocultar la aplicación",
+      "editor_copy": "Copiar texto seleccionado en el editor",
+      "editor_cut": "Cortar texto seleccionado en el editor",
+      "editor_redo": "Rehacer",
+      "editor_undo": "Deshacer",
+      "editor_paste": "Pegar texto seleccionado en el editor",
+      "editor_toggleStrong": "Alternar a marca en negrita",
+      "editor_toggleEmphasis": "Alternar a la marca cursiva",
+      "editor_toggleCodeText": "Alternar a la marca de código",
+      "editor_toggleDelete": "Alternar para eliminar marca",
+      "editor_toggleH1": "Alternar a H1",
+      "editor_toggleH2": "Alternar a H2",
+      "editor_toggleH3": "Alternar a H3",
+      "editor_toggleH4": "Alternar a H4",
+      "editor_toggleH5": "Alternar a H5",
+      "editor_toggleH6": "Alternar a H6"
+    }
   }
 }

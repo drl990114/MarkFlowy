@@ -85,7 +85,7 @@ pub fn run() {
             conf::cmd::save_app_conf,
             conf::cmd::open_conf_window,
             keybindings::cmd::get_keyboard_infos,
-            keybindings::cmd::amend_cmd,
+            keybindings::cmd::update_keybinding,
             opened_cache::cmd::get_opened_cache,
             opened_cache::cmd::add_recent_workspace,
             opened_cache::cmd::clear_recent_workspaces,

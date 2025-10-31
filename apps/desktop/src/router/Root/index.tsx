@@ -59,11 +59,11 @@ function Root() {
   useEffect(() => {
     appInfoStoreSetup()
     useCommandStore.getState().addCommand({
-      id: 'app:toggle_leftsidebar_visible',
+      id: 'app_toggleLeftsidebarVisible',
       handler: toggleLeftPanelVisible,
     })
     useCommandStore.getState().addCommand({
-      id: 'app:toggle_rightsidebar_visible',
+      id: 'app_toggleRightsidebarVisible',
       handler: toggleRightPanelVisible,
     })
 

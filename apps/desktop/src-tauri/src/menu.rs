@@ -60,7 +60,7 @@ pub fn generate_menu(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
             //         .ok();
             // }
             "About" => {
-                app.emit_to(focused_window, "dialog_setting_about", {})
+                app.emit_to(focused_window, "app_about", {})
                     .map_err(|err| println!("{:?}", err))
                     .ok();
             }
@@ -96,7 +96,7 @@ pub fn generate_menu(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
                 app,
                 "File",
                 true,
-                &[&MenuItemBuilder::new("Save").id("editor:save").build(app)?],
+                &[&MenuItemBuilder::new("Save").id("app_save").build(app)?],
             )?,
             &Submenu::with_items(
                 app,

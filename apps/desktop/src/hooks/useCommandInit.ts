@@ -6,6 +6,6 @@ export const useCommandInit = () => {
   const { openFolderDialog } = useOpen()
 
   useEffect(() => {
-    useCommandStore.getState().addCommand({ id: 'app:open_folder', handler: openFolderDialog })
+    useCommandStore.getState().addCommand({ id: 'app_openFolder', handler: openFolderDialog })
   }, [openFolderDialog])
 }

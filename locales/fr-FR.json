@@ -183,7 +183,8 @@
       }
     },
     "keyboard": {
-      "label": "clavier"
+      "label": "clavier",
+      "shortcut_conflict": "Le raccourci a été occupé"
     },
     "ai": {
       "label": "AI",
@@ -339,5 +340,31 @@
       }
     },
     "label": "Livre"
+  },
+  "command": {
+    "id_descriptions": {
+      "app_openFolder": "Ouvrir un dossier",
+      "app_toggleLeftsidebarVisible": "Basculer la barre latérale gauche visible",
+      "app_toggleRightsidebarVisible": "Basculer la barre latérale droite visible",
+      "app_save": "Enregistrer le fichier de modification actif actuel",
+      "app_findReplaceEditor": "Rechercher et remplacer dans l'éditeur",
+      "app_closeCurrentEditorTab": "Fermer l'onglet de l'éditeur actuel",
+      "app_hide": "Cacher l'application",
+      "editor_copy": "Copier le texte sélectionné dans l'éditeur",
+      "editor_cut": "Couper le texte sélectionné dans l'éditeur",
+      "editor_redo": "Refaire",
+      "editor_undo": "Annuler",
+      "editor_paste": "Coller le texte sélectionné dans l'éditeur",
+      "editor_toggleStrong": "Basculer vers la marque audacieuse",
+      "editor_toggleEmphasis": "Basculer vers la marque italique",
+      "editor_toggleCodeText": "Basculer vers la marque de code",
+      "editor_toggleDelete": "Bascule pour supprimer la marque",
+      "editor_toggleH1": "Basculer sur H1",
+      "editor_toggleH2": "Bascule à H2",
+      "editor_toggleH3": "Basculer sur H3",
+      "editor_toggleH4": "Basculer sur H4",
+      "editor_toggleH5": "Bascule à H5",
+      "editor_toggleH6": "Basculer sur H6"
+    }
   }
 }

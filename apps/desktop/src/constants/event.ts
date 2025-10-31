@@ -1,13 +1,9 @@
 enum EVENT {
-  // app
-  dialog_setting_about = 'dialog_setting_about',
-  sidebar_show_new_input = 'SIDEBAR:show-new-input',
-  sidebar_hide_new_input = 'SIDEBAR:hide-new-input',
-  sidebar_delete_file = 'SIDEBAR:delete-file',
-  
-
-  // editor
-  editor_save = 'editor:save',
+  app_about = 'app_about',
+  app_save = 'app_save',
+  app_openSetting = 'app_openSetting',
+  app_hide = 'app_hide',
+  app_closeCurrentEditorTab = 'app_closeCurrentEditorTab'
 }
 
 export default EVENT

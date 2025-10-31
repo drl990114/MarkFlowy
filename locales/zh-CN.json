@@ -234,7 +234,8 @@
       }
     },
     "keyboard": {
-      "label": "键盘"
+      "label": "键盘",
+      "shortcut_conflict": "该快捷键已被占用"
     },
     "ai": {
       "label": "AI",
@@ -339,5 +340,31 @@
     "refresh_folder_data": "刷新文件夹数据",
     "focus_active_file": "聚焦当前文件",
     "collapse_folders": "折叠文件夹"
+  },
+  "command": {
+    "id_descriptions": {
+      "app_openFolder": "打开文件夹",
+      "app_toggleLeftsidebarVisible": "切换左侧边栏可见",
+      "app_toggleRightsidebarVisible": "切换右侧边栏可见",
+      "app_save": "保存当前活动的编辑文件",
+      "app_findReplaceEditor": "在编辑器中查找和替换",
+      "app_closeCurrentEditorTab": "关闭当前编辑器选项卡",
+      "app_hide": "隐藏应用程序",
+      "editor_copy": "在编辑器中复制选定的文本",
+      "editor_cut": "在编辑器中剪切所选文本",
+      "editor_redo": "重做",
+      "editor_undo": "撤消",
+      "editor_paste": "在编辑器中粘贴所选文本",
+      "editor_toggleStrong": "切换到粗体标记",
+      "editor_toggleEmphasis": "切换到斜体标记",
+      "editor_toggleCodeText": "切换到代码标记",
+      "editor_toggleDelete": "切换至删除标记",
+      "editor_toggleH1": "切换到H1",
+      "editor_toggleH2": "切换到H2",
+      "editor_toggleH3": "切换到H3",
+      "editor_toggleH4": "切换到H4",
+      "editor_toggleH5": "切换到H5",
+      "editor_toggleH6": "切换到H6"
+    }
   }
 }
