@@ -1,3 +1,4 @@
+import { EVENT } from '@/constants'
 import { Setting } from '@/router'
 import { useCommandStore } from '@/stores'
 import { memo, useCallback, useEffect, useState } from 'react'
@@ -36,7 +37,7 @@ export const SettingDialog = memo(() => {
 
   useEffect(() => {
     useCommandStore.getState().addCommand({
-      id: 'open_setting_dialog',
+      id: EVENT.app_openSetting,
       handler: () => {
         setOpen(true)
       },

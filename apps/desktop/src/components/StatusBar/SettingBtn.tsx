@@ -53,7 +53,7 @@ export const CenterMenu = memo(() => {
           label: t('settings.label'),
           value: 'settings',
           handler: () => {
-            useCommandStore.getState().execute('open_setting_dialog')
+            useCommandStore.getState().execute(EVENT.app_openSetting)
             // FIXME tauri 2.0 bug in windows https://github.com/tauri-apps/plugins-workspace/issues/656
             // invoke('open_conf_window')
           },
