@@ -1,10 +1,9 @@
+import { createKeybindingsHandler } from '@/helper/bindkeys'
 import { useCommandStore } from '@/stores'
 import { invoke } from '@tauri-apps/api/core'
 import { createGlobalStore } from 'hox'
 import { t } from 'i18next'
 import { useEffect, useState } from 'react'
-// @ts-ignore
-import { createKeybindingsHandler } from 'tinykeys'
 import { toast } from 'zens'
 import { create } from 'zustand'
 
@@ -30,23 +29,7 @@ export const useEditorKeybindingStore = create<EditorKeybindingStore>((set) => {
   }
 })
 
-const getTinyKeyBinding = (keyMap: string[]) => {
-  let keyBinding = ''
-  keyMap.forEach((key, index) => {
-    if (key === 'CommandOrCtrl') {
-      keyBinding += '$mod'
-    } else {
-      keyBinding += key
-    }
-
-    if (index < keyMap.length - 1) {
-      keyBinding += '+'
-    }
-  })
-  return keyBinding
-}
-
-const getRmeKeyBinding = (keyMap: string[]) => {
+const getKeyBinding = (keyMap: string[]) => {
   let keyBinding = ''
   keyMap.forEach((key, index) => {
     if (key === 'CommandOrCtrl') {
@@ -82,12 +65,12 @@ function useKeyboard() {
     keyboardInfos.forEach((keyboardInfo) => {
       if (keyboardInfo.key_map.length > 0) {
         if (keyboardInfo.id.startsWith('editor_')) {
-          const keybind = getRmeKeyBinding(keyboardInfo.key_map)
+          const keybind = getKeyBinding(keyboardInfo.key_map)
           const key = keyboardInfo.id.replace('editor_', '')
 
           editorKeybingMap[key] = keybind
         } else {
-          const keybind = getTinyKeyBinding(keyboardInfo.key_map)
+          const keybind = getKeyBinding(keyboardInfo.key_map)
           keybindingMap[keybind] = () => {
             useCommandStore.getState().execute(keyboardInfo.id)
           }
@@ -112,13 +95,13 @@ function useKeyboard() {
       return false
     }
     return keyboardInfos.filter(info => info.when === curCommand.when).some((cmd) => {
-      if (cmd.key_map.length > 0) {
-        const existingKeybinding = getTinyKeyBinding(cmd.key_map)
-        const newKeybinding = getTinyKeyBinding(newKeyMap)
-        return existingKeybinding === newKeybinding
-      }
-      return false
-    })
+        if (cmd.key_map.length > 0) {
+          const existingKeybinding = getKeyBinding(cmd.key_map)
+          const newKeybinding = getKeyBinding(newKeyMap)
+          return existingKeybinding === newKeybinding
+        }
+        return false
+      })
   }
 
   const updateKeyBinding = async (commandId: string, newKeyMap: string[]) => {

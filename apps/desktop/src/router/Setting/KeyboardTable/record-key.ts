@@ -43,8 +43,6 @@ export function recordKey(e: KeyboardEvent) {
       val = val.slice(3)
     } else if (val.startsWith('Digit')) {
       val = val.slice(5)
-    } else if (val.startsWith('Arrow')) {
-      val = val.slice(5)
     } else if (val.startsWith('Numpad')) {
       val = e.code
     } else if (val === 'Equal') {
@@ -53,7 +51,7 @@ export function recordKey(e: KeyboardEvent) {
       val = e.key
     }
 
-    keys.push(val.toLocaleLowerCase())
+    keys.push(val)
   }
 
   if (e.key === 'Enter' && keys.length <= 1) {
