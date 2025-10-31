@@ -5313,7 +5313,6 @@ __metadata:
     rme: "npm:0.2.6"
     styled-components: "npm:^6.1.13"
     stylis: "npm:^4.3.4"
-    tinykeys: "npm:^3.0.0"
     ts-node: "npm:^10.9.2"
     typescript: "npm:^5.7.3"
     url: "npm:^0.11.4"
@@ -22059,13 +22058,6 @@ __metadata:
     fdir: "npm:^6.4.4"
     picomatch: "npm:^4.0.2"
   checksum: 10/b04557ee58ad2be5f2d2cbb4b441476436c92bb45ba2e1fc464d686b793392b305ed0bcb8b877429e9b5036bdd46770c161a08384c0720b6682b7cd6ac80e403
-  languageName: node
-  linkType: hard
-
-"tinykeys@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "tinykeys@npm:3.0.0"
-  checksum: 10/9ad9bfe3a45366ca77567a23018c8b24dbde4a66050c439f5aa439c66ca578102af0762ee5f7256ee4739b8c1ce64f076fcb8001f867fe842b4271d2bbe9de76
   languageName: node
   linkType: hard
 
