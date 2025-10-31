@@ -127,6 +127,32 @@
     "caseSensitive": "Case sensitive",
     "toggleExpandAll": "Toggle expand all"
   },
+  "command": {
+    "id_descriptions": {
+      "app_openFolder": "Open a folder",
+      "app_toggleLeftsidebarVisible": "Toggle left sideBar visible",
+      "app_toggleRightsidebarVisible": "Toggle right sideBar visible",
+      "app_save": "Save current active edit file",
+      "app_findReplaceEditor": "Find and replace in editor",
+      "app_closeCurrentEditorTab": "Close current editor tab",
+      "app_hide": "Hide the application",
+      "editor_copy": "Copy selected text in editor",
+      "editor_cut": "Cut selected text in editor",
+      "editor_redo": "Redo",
+      "editor_undo": "Undo",
+      "editor_paste": "Paste selected text in editor",
+      "editor_toggleStrong": "toggle to bold mark",
+      "editor_toggleEmphasis": "toggle to italic mark",
+      "editor_toggleCodeText": "toggle to code mark",
+      "editor_toggleDelete": "toggle to delete mark",
+      "editor_toggleH1": "toggle to H1",
+      "editor_toggleH2": "toggle to H2",
+      "editor_toggleH3": "toggle to H3",
+      "editor_toggleH4": "toggle to H4",
+      "editor_toggleH5": "toggle to H5",
+      "editor_toggleH6": "toggle to H6"
+    }
+  },
   "settings": {
     "label": "Setting",
     "general": {
@@ -191,7 +217,8 @@
       }
     },
     "keyboard": {
-      "label": "keyboard"
+      "label": "keyboard",
+      "shortcut_conflict": "This shortcut is already occupied"
     },
     "ai": {
       "label": "AI",

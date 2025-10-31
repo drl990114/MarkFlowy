@@ -258,7 +258,7 @@ function TextEditor(props: TextEditorProps) {
           return
         }
 
-        bus.emit(EVENT.editor_save, {
+        bus.emit(EVENT.app_save, {
           onSuccess: () => {
             if (payload === EditorViewType.SOURCECODE) {
               const sourceCodeDelegate = createSourceCodeDelegate({
@@ -393,7 +393,7 @@ function TextEditor(props: TextEditorProps) {
     if (active) {
       const { addCommand } = useCommandStore.getState()
       addCommand({
-        id: 'editor:save',
+        id: 'app_save',
         handler: () => {
           saveHandler()
         },
@@ -406,10 +406,10 @@ function TextEditor(props: TextEditorProps) {
       saveHandler({ onSuccess: hooks?.onSuccess })
     }
 
-    bus.on(EVENT.editor_save, callback)
+    bus.on(EVENT.app_save, callback)
 
     return () => {
-      bus.detach(EVENT.editor_save, callback)
+      bus.detach(EVENT.app_save, callback)
     }
   }, [saveHandler])
 

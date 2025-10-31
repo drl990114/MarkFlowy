@@ -14,7 +14,7 @@ const aliLangTypeMap = {
   ja: 'ja',
 }
 
-const baseLangName = 'zh-CN'
+const baseLangName = 'en'
 const baseLangFile = path.join(__dirname, `../locales/${baseLangName}.json`)
 const langDir = path.join(__dirname, '../locales')
 

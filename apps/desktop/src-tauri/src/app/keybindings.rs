@@ -1,203 +1,201 @@
 use super::conf;
 use crate::fc::{create_file, exists};
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, path::PathBuf};
+use std::{path::PathBuf};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct KeybindingInfo {
     id: String,
-    desc: String,
     key_map: Vec<String>,
-    // TODO need refactor
-    use_default_event: bool,
+    when: String
 }
 
 impl KeybindingInfo {
-    pub fn new(id: String, desc: String, key_map: Vec<String>, use_default_event: bool) -> Self {
+    pub fn new(id: String, key_map: Vec<String>, when: String) -> Self {
         Self {
             id,
-            desc,
             key_map,
-            use_default_event,
+            when
         }
     }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Keybindings {
-    cmds: HashMap<String, KeybindingInfo>,
+    cmds: Vec<KeybindingInfo>,
 }
 
 impl Keybindings {
     pub fn new() -> Self {
-        let map: HashMap<String, KeybindingInfo> = vec![
-            (
-                "app:open_folder".to_string(),
-                KeybindingInfo::new(
-                    "app:open_folder".to_string(),
-                    "open folder".to_string(),
-                    vec![
-                        "CommandOrCtrl".to_string(),
-                        "Shift".to_string(),
-                        "o".to_string(),
-                    ],
-                    false,
-                ),
+        let cmds = vec![
+            KeybindingInfo::new(
+                "app_openFolder".to_string(),
+                vec![
+                    "CommandOrCtrl".to_string(),
+                    "Shift".to_string(),
+                    "o".to_string(),
+                ],
+                "always".to_string(),
             ),
-            (
-                "app:toggle_leftsidebar_visible".to_string(),
-                KeybindingInfo::new(
-                    "app:toggle_leftsidebar_visible".to_string(),
-                    "toggle left sideBar visible".to_string(),
-                    vec!["CommandOrCtrl".to_string(), "l".to_string()],
-                    false,
-                ),
+            KeybindingInfo::new(
+                "app_toggleLeftsidebarVisible".to_string(),
+                vec!["CommandOrCtrl".to_string(), "l".to_string()],
+                "always".to_string(),
             ),
-            (
-                "app:toggle_rightsidebar_visible".to_string(),
-                KeybindingInfo::new(
-                    "app:toggle_rightsidebar_visible".to_string(),
-                    "toggle right sideBar visible".to_string(),
-                    vec!["CommandOrCtrl".to_string(), "r".to_string()],
-                    false,
-                ),
+            KeybindingInfo::new(
+                "app_toggleRightsidebarVisible".to_string(),
+                vec!["CommandOrCtrl".to_string(), "r".to_string()],
+                "always".to_string(),
             ),
-            (
-                "editor:save".to_string(),
-                KeybindingInfo::new(
-                    "editor:save".to_string(),
-                    "Save current active edit file".to_string(),
-                    vec!["CommandOrCtrl".to_string(), "s".to_string()],
-                    false,
-                ),
+            KeybindingInfo::new(
+                "app_save".to_string(),
+                vec!["CommandOrCtrl".to_string(), "s".to_string()],
+                "always".to_string(),
             ),
-            (
-                "editor:find_replace".to_string(),
-                KeybindingInfo::new(
-                    "editor:find_replace".to_string(),
-                    "Find current active edit file".to_string(),
-                    vec!["CommandOrCtrl".to_string(), "f".to_string()],
-                    false,
-                ),
+            KeybindingInfo::new(
+                "app_findReplaceEditor".to_string(),
+                vec!["CommandOrCtrl".to_string(), "f".to_string()],
+                "editor_focus".to_string(),
             ),
-            (
-                "editor:copy".to_string(),
-                KeybindingInfo::new(
-                    "editor:copy".to_string(),
-                    "copy selected text".to_string(),
-                    vec!["CommandOrCtrl".to_string(), "c".to_string()],
-                    true,
-                ),
+            KeybindingInfo::new(
+                "app_closeCurrentEditorTab".to_string(),
+                vec!["CommandOrCtrl".to_string(), "w".to_string()],
+                "always".to_string(),
             ),
-            (
-                "editor:cut".to_string(),
-                KeybindingInfo::new(
-                    "editor:cut".to_string(),
-                    "cut selected text".to_string(),
-                    vec!["CommandOrCtrl".to_string(), "x".to_string()],
-                    true,
-                ),
+            KeybindingInfo::new(
+                "app_hide".to_string(),
+                vec!["CommandOrCtrl".to_string(), "h".to_string()],
+                "always".to_string(),
             ),
-            (
-                "editor:redo".to_string(),
-                KeybindingInfo::new(
-                    "editor:redo".to_string(),
-                    "redo".to_string(),
-                    vec![
-                        "CommandOrCtrl".to_string(),
-                        "Shift".to_string(),
-                        "z".to_string(),
-                    ],
-                    true,
-                ),
+            KeybindingInfo::new(
+                "app_openSetting".to_string(),
+                vec!["CommandOrCtrl".to_string(), ",".to_string()],
+                "always".to_string(),
             ),
-            (
-                "editor:undo".to_string(),
-                KeybindingInfo::new(
-                    "editor:undo".to_string(),
-                    "undo".to_string(),
-                    vec!["CommandOrCtrl".to_string(), "z".to_string()],
-                    true,
-                ),
+            KeybindingInfo::new(
+                "editor_copy".to_string(),
+                vec!["CommandOrCtrl".to_string(), "c".to_string()],
+                "editor_focus".to_string(),
             ),
-            (
-                "editor:paste".to_string(),
-                KeybindingInfo::new(
-                    "editor:paste".to_string(),
-                    "paste pasteboard content".to_string(),
-                    vec!["CommandOrCtrl".to_string(), "v".to_string()],
-                    true,
-                ),
+            KeybindingInfo::new(
+                "editor_cut".to_string(),
+                vec!["CommandOrCtrl".to_string(), "x".to_string()],
+                "editor_focus".to_string(),
             ),
-            (
-                "editor:toggle_bold".to_string(),
-                KeybindingInfo::new(
-                    "editor:toggle_bold".to_string(),
-                    "toggle to bold mark".to_string(),
-                    vec!["CommandOrCtrl".to_string(), "b".to_string()],
-                    false,
-                ),
+            KeybindingInfo::new(
+                "editor_redo".to_string(),
+                vec![
+                    "CommandOrCtrl".to_string(),
+                    "Shift".to_string(),
+                    "z".to_string(),
+                ],
+                "editor_focus".to_string(),
             ),
-            (
-                "editor:toggle_emphasis".to_string(),
-                KeybindingInfo::new(
-                    "editor:toggle_emphasis".to_string(),
-                    "toggle to emphasis mark".to_string(),
-                    vec!["CommandOrCtrl".to_string(), "i".to_string()],
-                    false,
-                ),
+            KeybindingInfo::new(
+                "editor_undo".to_string(),
+                vec!["CommandOrCtrl".to_string(), "z".to_string()],
+                "editor_focus".to_string(),
             ),
-            (
-                "editor:toggle_codetext".to_string(),
-                KeybindingInfo::new(
-                    "editor:toggle_codetext".to_string(),
-                    "toggle to code text".to_string(),
-                    vec!["CommandOrCtrl".to_string(), "e".to_string()],
-                    false,
-                ),
+            KeybindingInfo::new(
+                "editor_paste".to_string(),
+                vec!["CommandOrCtrl".to_string(), "v".to_string()],
+                "editor_focus".to_string(),
             ),
-            (
-                "editor:toggle_delete_inline".to_string(),
-                KeybindingInfo::new(
-                    "editor:toggle_delete_inline".to_string(),
-                    "toggle to delete mark".to_string(),
-                    vec![
-                        "CommandOrCtrl".to_string(),
-                        "Shift".to_string(),
-                        "s".to_string(),
-                    ],
-                    false,
-                ),
+            KeybindingInfo::new(
+                "editor_toggleStrong".to_string(),
+                vec!["CommandOrCtrl".to_string(), "b".to_string()],
+                "editor_focus".to_string(),
             ),
-            (
-                "editor:toggle_heading".to_string(),
-                KeybindingInfo::new(
-                    "editor:toggle_heading".to_string(),
-                    "toggle to  h[1-6]".to_string(),
-                    vec!["CommandOrCtrl".to_string(), "1-6".to_string()],
-                    false,
-                ),
+            KeybindingInfo::new(
+                "editor_toggleEmphasis".to_string(),
+                vec!["CommandOrCtrl".to_string(), "i".to_string()],
+                "editor_focus".to_string(),
             ),
-        ]
-        .into_iter()
-        .collect();
+            KeybindingInfo::new(
+                "editor_toggleCodeText".to_string(),
+                vec!["CommandOrCtrl".to_string(), "e".to_string()],
+                "editor_focus".to_string(),
+            ),
+            KeybindingInfo::new(
+                "editor_toggleDelete".to_string(),
+                vec![
+                    "CommandOrCtrl".to_string(),
+                    "Shift".to_string(),
+                    "s".to_string(),
+                ],
+                "editor_focus".to_string(),
+            ),
+            KeybindingInfo::new(
+                "editor_toggleH1".to_string(),
+                vec!["CommandOrCtrl".to_string(), "1".to_string()],
+                "editor_focus".to_string(),
+            ),
+            KeybindingInfo::new(
+                "editor_toggleH2".to_string(),
+                vec!["CommandOrCtrl".to_string(), "2".to_string()],
+                "editor_focus".to_string(),
+            ),
+            KeybindingInfo::new(
+                "editor_toggleH3".to_string(),
+                vec!["CommandOrCtrl".to_string(), "3".to_string()],
+                "editor_focus".to_string(),
+            ),
+            KeybindingInfo::new(
+                "editor_toggleH4".to_string(),
+                vec!["CommandOrCtrl".to_string(), "4".to_string()],
+                "editor_focus".to_string(),
+            ),
+            KeybindingInfo::new(
+                "editor_toggleH5".to_string(),
+                vec!["CommandOrCtrl".to_string(), "5".to_string()],
+                "editor_focus".to_string(),
+            ),
+            KeybindingInfo::new(
+                "editor_toggleH6".to_string(),
+                vec!["CommandOrCtrl".to_string(), "6".to_string()],
+                "editor_focus".to_string(),
+            ),
+        ];
 
-        Self { cmds: map }
+        Self { cmds }
     }
 
-    pub fn amend_cmds(mut self, id: String, new_cmd: KeybindingInfo) -> Self {
-        self.cmds.insert(id, new_cmd);
-        self.write()
+    pub fn update_keybinding(mut self, id: String, new_key_map: Vec<String>) -> bool {
+        if let Some(cmd) = self.cmds.iter_mut().find(|cmd| cmd.id == id) {
+            cmd.key_map = new_key_map;
+            self.write();
+            return true;
+        }
+        return false;
     }
 
     pub fn get_path() -> PathBuf {
-        conf::app_root().join("keybord_map.json")
+        conf::app_root().join("keybord_map_v1.json")
     }
 
     pub fn read() -> Self {
+        println!("reeeeeeeeee2");
+
+        if !Self::get_path().exists() {
+            return Self::default().write();
+        }
         match std::fs::read_to_string(Self::get_path()) {
             Ok(v) => {
-                if let Ok(v2) = serde_json::from_str::<Keybindings>(&v) {
+                println!("reeeeeeeeee3 {:?}", v);
+                if let Ok(mut v2) = serde_json::from_str::<Keybindings>(&v) {
+                    let default_key_bindings = Self::default();
+                    let mut is_diff = false;
+
+                    for default_cmd in default_key_bindings.cmds {
+                        if !v2.cmds.iter().any(|cmd| cmd.id == default_cmd.id) {
+                            v2.cmds.push(default_cmd);
+                            is_diff = true;
+                        }
+                    }
+
+                    if is_diff {
+                        v2 = v2.clone().write();
+                    }
                     v2
                 } else {
                     Self::default()
@@ -212,34 +210,30 @@ impl Keybindings {
         if !exists(path) {
             create_file(path);
         }
-        if let Ok(v) = serde_json::to_string_pretty(&self) {
-            std::fs::write(path, v).unwrap_or_else(|_err| {
-                Self::default().write();
-            });
-        } else {
-        }
-        self
-    }
-
-    pub fn get_accelerator(self, id: String) -> Option<String> {
-        if let Some(v) = self.cmds.get(&id) {
-            let v2 = v.key_map.join(" + ");
-            if v2.len() > 0 {
-                return Some(v2);
+        
+        let mut sorted_cmds = self.cmds.clone();
+        sorted_cmds.sort_by(|a, b| {
+            let a_is_app = a.id.starts_with("app:");
+            let b_is_app = b.id.starts_with("app:");
+            
+            if a_is_app && !b_is_app {
+                return std::cmp::Ordering::Less;
+            } else if !a_is_app && b_is_app {
+                return std::cmp::Ordering::Greater;
             }
-        }
-        None
-    }
-
-    pub fn reset_keybinding(self) -> Self {
-        let keyboard_infos = Self::new();
-        let path = &Self::get_path();
-        if let Ok(v) = serde_json::to_string_pretty(&keyboard_infos) {
+            
+            a.id.cmp(&b.id)
+        });
+        
+        let ordered_keybindings = Keybindings { cmds: sorted_cmds };
+        
+        if let Ok(v) = serde_json::to_string_pretty(&ordered_keybindings) {
             std::fs::write(path, v).unwrap_or_else(|_err| {
                 Self::default().write();
             });
         } else {
         }
+        
         self
     }
 }
@@ -251,16 +245,16 @@ impl Default for Keybindings {
 }
 
 pub mod cmd {
-    use super::{KeybindingInfo, Keybindings};
+    use super::{Keybindings};
     use tauri::command;
 
     #[command]
     pub fn get_keyboard_infos() -> Keybindings {
-        Keybindings::read().reset_keybinding()
+        Keybindings::read()
     }
 
     #[command]
-    pub fn amend_cmd(id: String, new_cmd: KeybindingInfo) -> Keybindings {
-        Keybindings::read().amend_cmds(id, new_cmd)
+    pub fn update_keybinding(id: String, new_key_map: Vec<String>) -> bool {
+        Keybindings::read().update_keybinding(id, new_key_map)
     }
 }

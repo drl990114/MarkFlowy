@@ -13,7 +13,7 @@ export const LayoutLeftBtn = memo(() => {
       className='icon-small icon-smooth'
       active={leftBar.visible}
       onClick={() => {
-        useCommandStore.getState().execute('app:toggle_leftsidebar_visible')
+        useCommandStore.getState().execute('app_toggleLeftsidebarVisible')
       }}
     >
       <i className='ri-layout-left-line'></i>
@@ -31,7 +31,7 @@ export const LayoutRightBtn = () => {
       className='icon-small icon-smooth'
       active={rightBar.visible}
       onClick={() => {
-        useCommandStore.getState().execute('app:toggle_rightsidebar_visible')
+        useCommandStore.getState().execute('app_toggleRightsidebarVisible')
       }}
     >
       <i className='ri-layout-right-line'></i>

@@ -41,7 +41,7 @@ export const CenterMenu = memo(() => {
           label: t('about.label'),
           value: 'about',
           handler: () => {
-            emit(EVENT.dialog_setting_about)
+            emit(EVENT.app_about)
           },
         },
         {

@@ -3,6 +3,7 @@ import { aiGenerateTextRequest } from '@/extensions/ai/api'
 import useAiChatStore, { getCurrentAISettingData } from '@/extensions/ai/useAiChatStore'
 import { sleep } from '@/helper'
 import { convertImageToBase64, getImageUrlInTauri, moveImageToFolder } from '@/helper/image'
+import { useEditorKeybindingStore } from '@/hooks/useKeyboard'
 import { useEditorStore } from '@/stores'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import { join } from '@tauri-apps/api/path'
@@ -23,6 +24,8 @@ export const createWysiwygDelegateOptions = (filePath?: string): CreateWysiwygDe
   })
 
   return {
+    disableAllBuildInShortcuts: true,
+    overrideShortcutMap: useEditorKeybindingStore.getState().editorKeybingMap,
     imageCopyHandler: async (src) => {
       await sleep(1)
 

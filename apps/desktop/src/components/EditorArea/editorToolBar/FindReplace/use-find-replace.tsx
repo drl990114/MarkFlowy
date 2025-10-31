@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 import { useCommandStore } from '@/stores'
-import type { EditorContext } from 'rme'
 import { useCallback, useEffect, useState } from 'react'
+import type { EditorContext } from 'rme'
 
 interface FindReplaceState {
   query: string
@@ -95,7 +95,7 @@ export function useFindReplace(ctx: EditorContext): UseFindReplaceReturn {
 
   useEffect(() => {
     addCommand({
-      id: 'editor:stop_find',
+      id: 'app_stopFindEditor',
       handler: () => {
         stopFind()
       }

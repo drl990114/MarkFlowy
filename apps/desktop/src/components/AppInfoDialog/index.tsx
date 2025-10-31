@@ -1,11 +1,11 @@
-import { Dialog, Button, Space } from 'zens'
-import { writeText } from '@tauri-apps/plugin-clipboard-manager'
+import { EVENT } from '@/constants'
+import useAppInfoStore from '@/stores/useAppInfoStore'
 import { listen } from '@tauri-apps/api/event'
+import { writeText } from '@tauri-apps/plugin-clipboard-manager'
 import type { FC } from 'react'
 import { memo, useCallback, useEffect, useState } from 'react'
-import { EVENT } from '@/constants'
 import { useTranslation } from 'react-i18next'
-import useAppInfoStore from '@/stores/useAppInfoStore'
+import { Button, Dialog, Space } from 'zens'
 
 const AboutDialog: FC = () => {
   const [open, setOpen] = useState(false)
@@ -13,7 +13,7 @@ const AboutDialog: FC = () => {
   const { appInfo } = useAppInfoStore()
 
   useEffect(() => {
-    const unlisten = listen(EVENT.dialog_setting_about, () => setOpen(true))
+    const unlisten = listen(EVENT.app_about, () => setOpen(true))
     return () => {
       unlisten.then((fn) => fn())
     }

@@ -1,8 +1,8 @@
+import { useCommandStore, useEditorStore } from '@/stores'
 import type { FC } from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { FindReplaceComponent } from './find-replace-component'
 import styled from 'styled-components'
-import { useCommandStore, useEditorStore } from '@/stores'
+import { FindReplaceComponent } from './find-replace-component'
 
 function useFindReplaceOpen() {
   const [open, setOpen] = useState(false)
@@ -11,11 +11,11 @@ function useFindReplaceOpen() {
   
   useEffect(() => {
     addCommand({
-      id: 'editor:find_replace',
+      id: 'app_findReplaceEditor',
       handler: () => {
         setOpen((prev) => {
           if (!prev) {
-            execute('editor:stop_find')
+            execute('app_stopFindEditor')
           }
           return !prev
         })

@@ -1,54 +1,89 @@
-import Table from '@mui/material/Table'
-import TableBody from '@mui/material/TableBody'
-import TableCell from '@mui/material/TableCell'
-import TableContainer from '@mui/material/TableContainer'
-import TableHead from '@mui/material/TableHead'
-import TableRow from '@mui/material/TableRow'
-import Paper from '@mui/material/Paper'
 import { useGlobalKeyboard } from '@/hooks'
-import useGlobalOSInfo from '@/hooks/useOSInfo'
-import type { OsType } from '@tauri-apps/plugin-os'
-import useThemeStore from '@/stores/useThemeStore'
+import { KeyboardInfo } from '@/hooks/useKeyboard'
+import { useRef } from 'react'
+import { useTranslation } from 'react-i18next'
+import styled from 'styled-components'
+import { Button } from 'zens'
+import { RecordKeysModal, RecordKeysModalRef } from './RecordKeysModal'
+import { transferKey } from './record-key'
 
-function transferKey(key: string, osType?: OsType) {
-  if (osType === 'macos') {
-    return key.replace('CommandOrCtrl', '⌘')
-  } else {
-    return key.replace('CommandOrCtrl', 'Ctrl')
+// Styled components
+const TableContainer = styled.div`
+  border: 1px solid ${(props) => props.theme.borderColor};
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: ${(props) => props.theme.bgColor};
+  margin-bottom: 16px;
+`
+
+const Table = styled.table`
+  width: 100%;
+  border-collapse: collapse;
+  font-size: ${(props) => props.theme.fontSm};
+`
+
+const TableHead = styled.thead`
+  background-color: ${(props) => props.theme.tipsBgColor};
+`
+
+const TableRow = styled.tr`
+  border-bottom: 1px solid ${(props) => props.theme.borderColor};
+
+  &:hover {
+    background-color: ${(props) => props.theme.tipsBgColor};
   }
-  return key
-}
+`
+
+const TableCell = styled.th`
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+`
+
+const TableDataCell = styled.td`
+  padding: 12px 16px;
+  text-align: left;
+`
 
 export function KeyboardTable() {
-  const { curTheme } = useThemeStore()
   const { keyboardInfos } = useGlobalKeyboard()
-  const { osType } = useGlobalOSInfo()
+  const recordKeysModalRef = useRef<RecordKeysModalRef>(null)
+  const { t } = useTranslation()
+
+  const handleOpen = (command: KeyboardInfo) => {
+    recordKeysModalRef.current?.open(command)
+  }
 
   return (
-    <TableContainer component={Paper}>
-      <Table size='small' aria-label='caption table'>
-        <TableHead
-          sx={{
-            backgroundColor: curTheme.styledConstants.tipsBgColor,
-          }}
-        >
-          <TableRow>
-            <TableCell>Command</TableCell>
-            <TableCell>Descibe</TableCell>
-            <TableCell>Keybinding</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {keyboardInfos.map((row) => (
-            <TableRow key={row.id}>
-              <TableCell>{row.id}</TableCell>
-              <TableCell>{row.desc}</TableCell>
-              <TableCell>{row.key_map.map((v) => transferKey(v, osType)).join(' + ')}</TableCell>
+    <>
+      <TableContainer>
+        <Table aria-label='keyboard shortcuts table'>
+          <TableHead>
+            <TableRow>
+              <TableCell>Command</TableCell>
+              <TableCell>Description</TableCell>
+              <TableCell>Keybinding</TableCell>
+              <TableCell>Action</TableCell>
             </TableRow>
-          ))}
-        </TableBody>
-        <caption>Customized shortcut keys will soon be supported.</caption>
-      </Table>
-    </TableContainer>
+          </TableHead>
+          <tbody>
+            {keyboardInfos.map((row) => (
+              <TableRow key={row.id}>
+                <TableDataCell>{row.id}</TableDataCell>
+                <TableDataCell>{t(`command.id_descriptions.${row.id}`)}</TableDataCell>
+                <TableDataCell>{row.key_map.map((v) => transferKey(v)).join(' + ')}</TableDataCell>
+                <TableDataCell>
+                  <Button size='small' onClick={() => handleOpen(row)}>
+                    Edit
+                  </Button>
+                </TableDataCell>
+              </TableRow>
+            ))}
+          </tbody>
+        </Table>
+      </TableContainer>
+
+      <RecordKeysModal ref={recordKeysModalRef} />
+    </>
   )
 }
