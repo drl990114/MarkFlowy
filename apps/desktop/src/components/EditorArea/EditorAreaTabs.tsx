@@ -1,7 +1,8 @@
+import { EVENT } from '@/constants'
 import { getFileObject, getSaveOpenedEditorEntries } from '@/helper/files'
 import type { IFile } from '@/helper/filesys'
 import { checkUnsavedFiles } from '@/services/checkUnsavedFiles'
-import { useEditorStateStore, useEditorStore } from '@/stores'
+import { useCommandStore, useEditorStateStore, useEditorStore } from '@/stores'
 import { memo, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
@@ -82,6 +83,18 @@ const EditorAreaTabs = memo(() => {
 
     delOpenedFile(id)
   }
+
+  useEffect(() => {
+    useCommandStore.getState().addCommand({
+      id: EVENT.app_closeCurrentEditorTab,
+      handler: () => {
+        const activeId = useEditorStore.getState().activeId
+        if (activeId) {
+          close(undefined, activeId)
+        }
+      },
+    })
+  }, [])
 
   return (
     <Container>

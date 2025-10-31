@@ -1,6 +1,7 @@
 import { useGlobalKeyboard } from '@/hooks'
 import { KeyboardInfo } from '@/hooks/useKeyboard'
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 import { Button, Dialog, Input } from 'zens'
 import { recordKey, transferKey } from './record-key'
@@ -36,6 +37,7 @@ export const RecordKeysModal = forwardRef<RecordKeysModalRef, RecordKeysModalPro
   const [open, setOpen] = useState(false)
   const [newKeyBinding, setNewKeyBinding] = useState<string[]>([])
   const [selectedCommand, setSelectedCommand] = useState<KeyboardInfo | null>(null)
+  const { t } = useTranslation()
   const modalRef = useRef<HTMLInputElement>(null)
 
   useImperativeHandle(ref, () => {
@@ -70,7 +72,7 @@ export const RecordKeysModal = forwardRef<RecordKeysModalRef, RecordKeysModalPro
   const handleKeyDown = (event: KeyboardEvent) => {
     if (!selectedCommand) return
 
-    const { keys, isEnter, isExit} = recordKey(event)
+    const { keys, isExit} = recordKey(event)
 
     if (keys === null || isExit) {
       setNewKeyBinding([])
@@ -99,7 +101,7 @@ export const RecordKeysModal = forwardRef<RecordKeysModalRef, RecordKeysModalPro
             <FormValue>{selectedCommand.id}</FormValue>
 
             <FormLabel>Description:</FormLabel>
-            <FormValue>{selectedCommand.desc}</FormValue>
+            <FormValue>{t(selectedCommand.id)}</FormValue>
 
             <FormLabel>Shortcut:</FormLabel>
             <Input inputRef={modalRef} placeholder='请按下快捷键' value={newKeyBinding.length ? transferKey(newKeyBinding.join('+')) : ''} readOnly />
