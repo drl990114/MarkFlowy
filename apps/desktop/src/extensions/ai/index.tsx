@@ -1,7 +1,7 @@
 import type { RightBarItem } from '@/components/SideBar'
 import type { RightNavItem } from '@/components/SideBar/SideBarHeader'
 import SideBarHeader from '@/components/SideBar/SideBarHeader'
-import { RIGHTBARITEMKEYS } from '@/constants'
+import { EVENT, RIGHTBARITEMKEYS } from '@/constants'
 import { addNewMarkdownFileEdit } from '@/services/editor-file'
 import { useCommandStore } from '@/stores'
 import useThemeStore from '@/stores/useThemeStore'
@@ -67,7 +67,7 @@ const ChatList: React.FC<ChatListProps> = (props) => {
   }, [])
 
   const openSettingWindow = useCallback(
-    () => useCommandStore.getState().execute('open_setting_dialog'),
+    () => useCommandStore.getState().execute(EVENT.app_openSetting),
     [],
   )
 
