@@ -1,7 +1,15 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { darkTheme } from 'theme'
+import { preloadRme, useRme, useRmeThemeProvider } from '../hooks/useRme'
 import Loading from './Loading'
-import { useRmeThemeProvider } from '../hooks/useRme'
+
+// 在组件定义前尝试提前触发预加载
+if (typeof window !== 'undefined') {
+  // 使用新的预加载函数
+  preloadRme().catch(err => {
+    console.warn('RME preload attempt failed, will try again:', err)
+  })
+}
 
 type RmeProviderProps = {
   children?: React.ReactNode
@@ -18,17 +26,51 @@ const THEME_CONFIG = {
   },
 } as const
 
+export const RmePreload = () => {
+  useRme()
+  return null
+}
+
 const RmeProvider: React.FC<RmeProviderProps> = ({ children }) => {
-  const { ThemeProvider, loading, error } = useRmeThemeProvider()
+  const { ThemeProvider, loading, error, reload } = useRmeThemeProvider()
+
+  useEffect(() => {
+    if (loading && !ThemeProvider && reload) {
+      reload().catch(console.warn)
+    }
+  }, [loading, ThemeProvider, reload])
 
   // 加载中显示Loading组件
   if (loading) {
     return <Loading />
   }
 
-  // 加载错误显示错误信息
+  // 加载错误显示错误信息并提供重试选项
   if (error) {
-    return <div>Error loading RME: {error.message}</div>
+    return (
+      <div style={{ 
+        padding: '2rem', 
+        textAlign: 'center', 
+        color: 'white', 
+        backgroundColor: '#181a1c'
+      }}>
+        <p>Error loading RME: {error.message}</p>
+        <button 
+          onClick={() => reload && reload()}
+          style={{
+            marginTop: '1rem',
+            padding: '0.5rem 1rem',
+            backgroundColor: '#0070f3',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer'
+          }}
+        >
+          Retry
+        </button>
+      </div>
+    )
   }
 
   // 模块未加载完成
