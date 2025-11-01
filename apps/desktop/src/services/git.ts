@@ -27,7 +27,6 @@ const commonPrevCheck = async () => {
     workspace?.syncMode === WorkspaceSyncMode.GIT_LOCAL ||
     workspace?.syncMode === WorkspaceSyncMode.GIT_REMOTE
   ) {
-    console.error('Not a git repository')
     return rootPath
   }
 

@@ -64,15 +64,16 @@ export const WorkspaceDialog = memo(() => {
 
     const id = toast.loading(needPush ? 'Git commit & push...' : 'Git commit...')
     try {
-      const res = await gitCommitWithCurrentWorkspace(commitMessage)
-      console.log('git commit result:', res)
+      await gitCommitWithCurrentWorkspace(commitMessage)
       if (needPush) {
         await gitPushWithCurrentWorkspace()
       }
 
+      toast.dismiss(id)
       toast.success(needPush ? 'Git commit & push success' : 'Git commit success')
     } catch (error: unknown) {
-      toast.error(error as string)
+      toast.dismiss(id)
+      toast.error(String(error))
     } finally {
       setLoading(false)
       toast.dismiss(id)
