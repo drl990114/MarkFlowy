@@ -1,5 +1,54 @@
 # UPDATE LOG
 
+## v0.40.0
+
+Long time no see! A huge upgrade has brought many features that everyone has been looking forward to.
+
+Features:
+
+- Completely upgraded interface, inspired by Apple’s design palette and made more compact.
+
+- Editor now supports drag-and-drop to move elements.
+
+- Custom keyboard shortcuts are now supported.
+
+- Added shortcuts for quickly opening settings, quickly closing the current editing page, and hiding the app.
+
+- The language switch will take effect immediately.
+
+Fixes:
+
+- Git-related commands are now invoked only when the workspace type requires it.
+
+- Fixed auto-update failures on macOS AArch64.
+
+- Improved input experience for math nodes.
+
+---
+
+好久不见，一次巨大的升级，带来了很多大家期待的功能。
+
+特性：
+
+- 界面全新升级，参考 Apple 设计色彩，并且更加紧凑。
+
+- 编辑器支持拖拽移动元素。
+
+- 支持自定义快捷键。
+
+- 添加了快速打开设置、快速关闭当前编辑页、隐藏app等快捷键。
+
+- 切换语言后，立即生效。
+
+修复：
+
+- 根据工作区的类型判断是否调用 git 相关命令。
+
+- 修复 mac aarch64 的自动更新失败问题。
+
+- math 节点的输入方式优化。
+
+
 ## v0.34.1
 
 Features:
