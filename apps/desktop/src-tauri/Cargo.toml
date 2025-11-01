@@ -1,6 +1,6 @@
 [package]
 name = "markflowy"
-version = "0.34.1"
+version = "0.40.0"
 description = "A Markdown Editor App"
 authors = ["drl990114"]
 license = " AGPL-3.0"
@@ -112,7 +112,6 @@ path = "../../../crates/file_search"
 
 [dependencies.download_npm]
 path = "../../../crates/download_npm"
-
 
 [features]
 custom-protocol = ["tauri/custom-protocol"]
