@@ -22,12 +22,12 @@ const NavLink = styled(Link).attrs((/* props */) => ({
     opacity 0.2s,
     transform 0.2s;
   cursor: pointer;
-
   letter-spacing: ${rem(0.4)};
-  color: currentColor;
+  color: ${props => props.theme.unselectedFontColor};
 
   &:hover,
   &:focus {
+  color: currentColor;
     opacity: 0.8;
   }
 

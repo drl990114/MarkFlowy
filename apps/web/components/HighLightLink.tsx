@@ -3,6 +3,7 @@ import { styled } from "styled-components"
 const HighlightLink = styled.a`
   display: inline-block;
   position: relative;
+  margin: 0 4px;
   text-decoration: none;
   transition: color 0.2s ease;
 

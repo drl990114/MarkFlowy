@@ -44,6 +44,7 @@ const MenuInner = styled.div`
   box-sizing: border-box;
   height: 100%;
   padding-top: ${rem(60)};
+  border-right: 1px solid ${(props) => props.theme.borderColor};
 `
 
 const Section = styled.div`

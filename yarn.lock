@@ -5427,6 +5427,7 @@ __metadata:
     react-test-renderer: "npm:^18.3.1"
     rehype-slug: "npm:^6.0.0"
     remark-gfm: "npm:^4.0.0"
+    remixicon: "npm:^4.7.0"
     rimraf: "npm:^6.0.1"
     rme: "npm:0.2.6"
     styled-components: "npm:^6.1.13"
@@ -20300,10 +20301,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"remixicon@npm:^4.5.0":
-  version: 4.5.0
-  resolution: "remixicon@npm:4.5.0"
-  checksum: 10/d014999bf4b5606bd39bd0e26997163b0c1c0ed31c4ae32e2bf2fbe8318793a8a03303d0e5ceb4c16663b0da60c3f7005e49bdbdc522443e976f162ef4098a60
+"remixicon@npm:^4.5.0, remixicon@npm:^4.7.0":
+  version: 4.7.0
+  resolution: "remixicon@npm:4.7.0"
+  checksum: 10/bc0c9f30cb75d4b968bb03c29151cb317ab8c2e7ef3d5abbb4af3c55066df1b05bd8809e2f10c21867b2abeab76d91e897eb6a1e7d8fd694fe145569404585b7
   languageName: node
   linkType: hard
 

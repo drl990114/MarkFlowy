@@ -3,6 +3,32 @@ import { useEffect, useMemo, useState } from 'react'
 // 全局缓存RME模块，避免重复加载
 let rmeModuleCache: any = null
 let rmeModulePromise: Promise<any> | null = null
+let isPreloading = false
+let preloadError: Error | null = null
+
+export const preloadRme = (): Promise<void | RmeModule> => {
+  // 如果已经加载完成，立即返回
+  if (rmeModuleCache) {
+    return Promise.resolve()
+  }
+  
+  // 如果正在预加载，返回现有Promise
+  if (rmeModulePromise) {
+    return rmeModulePromise.then(() => {})
+  }
+  
+  // 开始新的预加载
+  isPreloading = true
+  
+  return Promise.resolve().then(() => {
+    return loadRmeModule().catch(err => {
+      preloadError = err
+      console.warn('RME preloading failed, will try again when needed:', err)
+    }).finally(() => {
+      isPreloading = false
+    })
+  })
+}
 
 // RME模块接口定义
 export interface RmeModule {
@@ -18,7 +44,7 @@ export interface RmeModule {
 }
 
 // 统一的RME模块加载器
-const loadRmeModule = async (): Promise<RmeModule> => {
+export const loadRmeModule = async (): Promise<RmeModule> => {
   // 如果已经缓存，直接返回
   if (rmeModuleCache) {
     return rmeModuleCache
@@ -40,9 +66,17 @@ const loadRmeModule = async (): Promise<RmeModule> => {
 
 // 预加载RME模块（在浏览器环境）
 if (typeof window !== 'undefined') {
-  loadRmeModule().catch(() => {
-    // 忽略预加载错误
-  })
+  // 使用requestIdleCallback或setTimeout实现低优先级预加载
+  if ('requestIdleCallback' in window) {
+    window.requestIdleCallback(() => {
+      preloadRme()
+    }, { timeout: 2000 })
+  } else {
+    // 降级方案
+    setTimeout(() => {
+      preloadRme()
+    }, 0)
+  }
 }
 
 // Hook: 获取RME模块
@@ -52,18 +86,30 @@ export const useRme = () => {
   const [error, setError] = useState<Error | null>(null)
 
   useEffect(() => {
+    // 已缓存，直接使用
     if (rmeModuleCache) {
       setRmeModule(rmeModuleCache)
       setLoading(false)
+      setError(null)
       return
     }
 
+    // 已有预加载错误，优先尝试再次加载
+    if (preloadError) {
+      setError(null)
+      setLoading(true)
+      preloadError = null
+    }
+
+    // 重新加载模块
     loadRmeModule()
       .then((mod) => {
         setRmeModule(mod)
         setLoading(false)
+        setError(null)
       })
       .catch((err) => {
+        console.error('Failed to load RME module:', err)
         setError(err)
         setLoading(false)
       })
@@ -79,6 +125,7 @@ export const useRmeThemeProvider = () => {
     ThemeProvider: rmeModule?.ThemeProvider,
     loading,
     error,
+    reload: () => loadRmeModule()
   }), [rmeModule?.ThemeProvider, loading, error])
 }
 

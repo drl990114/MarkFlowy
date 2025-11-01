@@ -21,7 +21,7 @@ export default function Releases({ releases, sidebarPages }: ReleasesProps) {
     en: (
       <p>
         Here are the latest releases of Markflowy. Click on each version to see the detailed changes
-        and updates. You can download it from the{' '}
+        and updates. You can download it from the {' '}
         <HighlightLink
           href='https://download.upgrade.toolsetlink.com/download?appKey=xpn68m4j5qU0Y1rfDYFHaA'
           target='_blank'

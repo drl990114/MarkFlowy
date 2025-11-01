@@ -5,6 +5,7 @@ import rem from '../../utils/rem'
 import { navbarHeight } from '../../utils/sizes'
 import Link from '../Link'
 import LanguageSwitcher from './LanguageSwitcher'
+import { Logo } from './Logo'
 import MobileNavbar from './MobileNavbar'
 import NavLinks from './NavLinks'
 import Social from './Social'
@@ -37,6 +38,8 @@ export default function Navbar({
       <NormalNavbar>
         <StartWrapper>
           <LogoLink aria-label='MarkFlowy logo' href={`./${i18n?.language || 'en'}`}>
+            <Logo />
+            <Brand> / </Brand>
             <strong>MarkFlowy</strong>
           </LogoLink>
 
@@ -62,10 +65,18 @@ export default function Navbar({
   )
 }
 
+export const Brand = styled.span`
+  font-size: ${rem(20)};
+  font-weight: bold;
+  margin: 0 12px;
+  color: ${(props) => props.theme.unselectedFontColor};
+`
+
 const Wrapper = styled.nav<{ $transparent?: boolean }>`
   align-items: center;
   background-color: ${(props) => props.theme.navBackground};
   backdrop-filter: blur(5px);
+  border-bottom: 1px solid ${(props) => props.theme.borderColor};
   -webkit-backdrop-filter: blur(5px);
   box-sizing: border-box;
   color: white;
@@ -116,7 +127,8 @@ const LogoLink = styled(Link).attrs((/* props */) => ({
   unstyled: true,
   href: '/',
 }))`
-  display: inline-block;
+  display: flex;
+  align-items: center;
   vertical-align: center;
   margin-right: ${rem(35)};
 `

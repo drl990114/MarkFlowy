@@ -1,8 +1,10 @@
 import { Analytics } from '@vercel/analytics/react'
+import { RmePreload } from 'components/RmeProvider'
 import ThemeProvider from 'components/ThemeProvider'
 import { appWithTranslation } from 'next-i18next'
 import App from 'next/app'
 import Head from 'next/head'
+import 'remixicon/fonts/remixicon.css'
 import { createGlobalStyle } from 'styled-components'
 import './normalize.css'
 
@@ -32,10 +34,11 @@ class MyApp extends App {
           ></link>
         </Head>
 
-        <ThemeProvider>
+        <ThemeProvider data-theme='dark'>
           <ResetStyles />
           <Component {...pageProps} />
           <Analytics />
+          <RmePreload />
         </ThemeProvider>
       </>
     )

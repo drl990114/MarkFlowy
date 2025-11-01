@@ -1,9 +1,8 @@
 'use client'
-import styled, { css } from 'styled-components'
 import Image from 'next/image'
+import styled from 'styled-components'
 import { Feature } from './Feature'
-import { mobile } from 'utils/media'
-import rem from 'utils/rem'
+import { ImageWrapper } from './ImageWrapper'
 
 type FeatureCardProps = {
   feature: Feature
@@ -20,13 +19,15 @@ const FeatureCard = (props: FeatureCardProps) => {
         })}
       </div>
       <div className='feature-card__right'>
-        <Image
-          src={feature.img}
-          alt='Markflowy'
-          width={720}
-          height={480}
-          style={{ width: '100%', height: 'auto', borderRadius: '8px' }}
-        />
+        <ImageWrapper>
+          <Image
+            src={feature.img}
+            alt='Markflowy'
+            width={720}
+            height={480}
+            style={{ width: '100%', height: 'auto', borderRadius: '6px' }}
+          />
+        </ImageWrapper>
       </div>
     </Container>
   )

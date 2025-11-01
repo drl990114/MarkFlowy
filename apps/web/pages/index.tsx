@@ -1,5 +1,6 @@
 import Feature from 'components/Feature'
 import HighlightLink from 'components/HighLightLink'
+import { SupportPlatforms } from 'components/SupportPlatforms'
 import { GetStaticProps } from 'next'
 import { i18n, useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
@@ -28,16 +29,14 @@ export default function Index({
   const localesDescMap = {
     en: (
       <SupportingTagline>
-        MarkFlowy is an <HighlightLink>open-source</HighlightLink> markdown editor application that
-        supports Windows, Linux, and macOS, designed to make editing more{' '}
-        <HighlightLink>efficient</HighlightLink> and <HighlightLink>comfortable</HighlightLink>.
+        MarkFlowy is an <HighlightLink>open-source</HighlightLink> markdown editor application,
+        dedicated to providing a <HighlightLink>lighter, smarter, and more focused</HighlightLink> editing experience
       </SupportingTagline>
     ),
     zh: (
       <SupportingTagline>
-        MarkFlowy 是一款 <HighlightLink>开源</HighlightLink> 的 Markdown 编辑器应用，支持
-        Windows、Linux 和 macOS，旨在提供 <HighlightLink>更高效</HighlightLink> 、
-        <HighlightLink>舒适</HighlightLink> 的编辑体验
+        MarkFlowy 是一款 <HighlightLink>开源</HighlightLink> 的 Markdown 编辑器应用,
+        致力于提供<HighlightLink>更轻巧、更智能、更专注</HighlightLink> 的编辑体验
       </SupportingTagline>
     ),
   }
@@ -54,7 +53,7 @@ export default function Index({
       />
 
       <Wrapper>
-        <Content $hero style={{ backgroundColor: 'transparent', minHeight: '0' }}>
+        <Content $hero style={{ minHeight: '0' }}>
           <Title>
             <Tagline>{t('home.hero.subtitle')}</Tagline>
             {localesDescMap[(i18n?.language as keyof typeof localesDescMap) || 'en']}
@@ -74,15 +73,15 @@ export default function Index({
               {t('playground.title')}
             </Button>
           </Links>
+
+          <SupportPlatforms />
         </Content>
+        <Hr />
         <Feature />
+        <Hr />
         <ContributorsSection>
-          <ContributorsTitle>
-            {t('home.contributors.title')}
-          </ContributorsTitle>
-          <ContributorsDescription>
-            {t('home.contributors.description')}
-          </ContributorsDescription>
+          <ContributorsTitle>{t('home.contributors.title')}</ContributorsTitle>
+          <ContributorsDescription>{t('home.contributors.description')}</ContributorsDescription>
           <ContribGrid>
             {contributors.map((c) => (
               <ContribItem key={c.id} href={c.html_url} target='_blank' rel='noopener noreferrer'>
@@ -101,8 +100,7 @@ export default function Index({
 }
 
 const Tagline = styled.h1`
-  font-weight: 700;
-  font-size: 3.75rem;
+  font-size: 3rem;
   line-height: 1.1;
   margin: 0 0 0.5em;
 
@@ -112,13 +110,21 @@ const Tagline = styled.h1`
 `
 
 const SupportingTagline = styled.p`
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   margin: 0;
   font-weight: 400;
 
   @media screen and (max-width: 800px) {
     font-size: 1rem;
   }
+`
+
+const Hr = styled.hr`
+  width: 100%;
+  height: 1px;
+  border: 0;
+  background-color: ${(props) => props.theme.borderColor};
+  margin: 2rem 0;
 `
 
 const Button = styled.a<{ $primary?: boolean }>`
@@ -132,7 +138,7 @@ const Button = styled.a<{ $primary?: boolean }>`
   margin: 0.5rem 1rem;
   padding: 0.5rem 0;
   transition: all 200ms ease-in-out;
-  width: 11rem;
+  width: 10rem;
 
   &:hover {
     filter: brightness(0.85);
@@ -154,7 +160,7 @@ const Title = styled.div`
   align-items: center;
   display: flex;
   flex-direction: column;
-  margin: 3rem 0;
+  margin: 3rem 0 1.6rem 0;
 
   > * {
     flex-shrink: 0;
@@ -207,59 +213,26 @@ const ContribGrid = styled.div`
 
 const ContribItem = styled.a`
   margin: 0.5rem;
-  padding: 0.5rem 0.75rem;
+  padding: 0.75rem;
   display: flex;
   flex-direction: row;
   align-items: center;
   position: relative;
-  box-shadow: 0 0 0 1px rgb(255 255 255 / 10%), 0 3px 2px rgb(0 0 0 / 4%), 0 7px 5px rgb(0 0 0 / 2%),
-    0 13px 10px rgb(0 0 0 / 2%), 0 22px 17px rgb(0 0 0 / 2%) !important;
   border-radius: 10px;
   color: ${(props) => props.theme.primaryFontColor};
   text-decoration: none !important;
+  border: 1px solid ${(props) => props.theme.borderColor};
   transition: 0.5s;
 
-  &::before {
-    content: '';
-    position: absolute;
-    top: 5px;
-    bottom: 0;
-    left: 5px;
-    right: 5px;
-    z-index: -1;
-    opacity: 0.6;
-    filter: blur(50px);
-    border-radius: 6px;
-  }
-
-  /* light theme */
-  [data-theme='light'] & {
-    background: ${(props) => props.theme.tipsBgColor};
-    box-shadow: 0 0 0 1px ${(props) => props.theme.boxShadowColor}, 0 6px 16px ${(props) => props.theme.boxShadowColor} !important;
-  }
-  [data-theme='light'] &:hover {
-    background: ${(props) => props.theme.hoverColor};
-  }
-
-  /* dark theme */
-  [data-theme='dark'] & {
-    background: ${(props) => props.theme.tipsBgColor};
-    box-shadow: 0 0 0 1px ${(props) => props.theme.boxShadowColor}, 0 6px 16px ${(props) => props.theme.boxShadowColor} !important;
-  }
-  [data-theme='dark'] &:hover {
-    background: ${(props) => props.theme.hoverColor};
-  }
-
-  /* gradient glow (use accentColor mixed for subtle brand feel) */
-  [data-theme='light'] &::before {
-    background: radial-gradient(60% 60% at 50% 50%, ${(props) => props.theme.accentColor}33 0%, transparent 100%);
+  &:hover {
+    border: 1px solid ${(props) => props.theme.borderColorFocused};
   }
 `
 
 const Avatar = styled.img`
   display: inline-flex;
-  width: 54px;
-  height: 54px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
 `
 
