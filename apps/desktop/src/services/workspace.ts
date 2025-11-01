@@ -20,20 +20,24 @@ export const getWorkspace = async () => {
     return new WorkSpace({ syncMode: WorkspaceSyncMode.None })
 
   const rootPath = workspace[0].path
-  const isGitRepo = await invoke<string>('is_git_repository', { path: rootPath })
+  try {
+    const isGitRepo = await invoke<string>('is_git_repository', { path: rootPath })
 
-  if (isGitRepo) {
-    const res = await Command.create('run-git-remote', ['remote', '-v'], {
-      cwd: rootPath,
-    }).execute()
+    if (isGitRepo) {
+      const res = await Command.create('run-git-remote', ['remote', '-v'], {
+        cwd: rootPath,
+      }).execute()
 
-    const isRemote = !res.stderr && res.stdout.trim().length > 0
+      const isRemote = !res.stderr && res.stdout.trim().length > 0
 
-    return new WorkSpace({
-      syncMode: isRemote ? WorkspaceSyncMode.GIT_REMOTE : WorkspaceSyncMode.GIT_LOCAL,
-      rootPath: rootPath,
-    })
-  } else {
+      return new WorkSpace({
+        syncMode: isRemote ? WorkspaceSyncMode.GIT_REMOTE : WorkspaceSyncMode.GIT_LOCAL,
+        rootPath: rootPath,
+      })
+    } else {
+      return new WorkSpace({ syncMode: WorkspaceSyncMode.PURE_LOCAL, rootPath: rootPath })
+    }
+  } catch (error) {
     return new WorkSpace({ syncMode: WorkspaceSyncMode.PURE_LOCAL, rootPath: rootPath })
   }
 }

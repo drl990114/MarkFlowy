@@ -57,6 +57,6 @@ const useWorkspaceWatcher = () => {
     }
   }, [rootPath])
 }
-const [useGlobalKeyboard] = createGlobalStore(useWorkspaceWatcher)
+const [useGlobalWorkspaceWatcher] = createGlobalStore(useWorkspaceWatcher)
 
-export default useGlobalKeyboard
+export default useGlobalWorkspaceWatcher
