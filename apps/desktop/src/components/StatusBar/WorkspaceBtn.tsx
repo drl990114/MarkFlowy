@@ -1,4 +1,5 @@
 import { getFileNameFromPath, readDirectory } from '@/helper/filesys'
+import { gitRevlistWithCurrentWorkspace } from '@/services/git'
 import { checkIsGitRepoBySyncMode, getWorkspace, WorkSpace } from '@/services/workspace'
 import { useCommandStore, useEditorStore } from '@/stores'
 import { listen } from '@tauri-apps/api/event'
@@ -32,25 +33,24 @@ const GitStatusBtn = () => {
   const { folderData } = useEditorStore()
 
   const rootPath = folderData?.[0]?.path
-  
+
   const debounceCheckGitStatus = useMemo(
     () =>
       debounce(async () => {
-        Command.create('run-git-revlist', ['rev-list', '--count', '--left-right', '@{u}...HEAD'], {
-          cwd: useEditorStore.getState().getRootPath(),
-        })
-          .execute()
-          .then((output) => {
-            if (output.stderr) {
-              return setStatus(null)
-            }
-            const [ahead, behind] = output.stdout.trim().split('\t')
-            const noChange = (ahead === '0' && behind === '0') || !ahead || !behind
-            if (noChange) {
-              return setStatus('No changes')
-            }
-            setStatus(`${ahead}↓ ${behind}↑`)
-          })
+        try {
+          const res = await gitRevlistWithCurrentWorkspace()
+          if (!res) {
+            return setStatus(null)
+          }
+          const [ahead, behind] = res.stdout.trim().split('\t')
+          const noChange = (ahead === '0' && behind === '0') || !ahead || !behind
+          if (noChange) {
+            return setStatus('No changes')
+          }
+          setStatus(`${ahead}↓ ${behind}↑`)
+        } catch (error) {
+          setStatus(null)
+        }
       }, 1000),
     [],
   )

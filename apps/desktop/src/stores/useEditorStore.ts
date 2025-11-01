@@ -1,8 +1,8 @@
-import { createFile, getFolderPathFromPath, isMdFile, type IFile } from '@/helper/filesys'
-import { isEmptyEditor } from '@/services/editor-file'
-import { invoke } from '@tauri-apps/api/core'
-import type { EditorContext, EditorDelegate } from 'rme'
-import { create } from 'zustand'
+import { createFile, getFolderPathFromPath, isMdFile, type IFile } from '@/helper/filesys';
+import { isEmptyEditor } from '@/services/editor-file';
+import { invoke } from '@tauri-apps/api/core';
+import type { EditorContext, EditorDelegate } from 'rme';
+import { create } from 'zustand';
 
 const findParentNode = (fileNode: IFile, rootFile: IFile) => {
   const dfs = (file: IFile): undefined | IFile => {
