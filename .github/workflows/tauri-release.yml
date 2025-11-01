@@ -177,7 +177,7 @@ jobs:
   release:
     permissions:
       contents: write
-    needs: build
+    needs: [build, build-offline-installer]
     runs-on: ubuntu-24.04
     steps:
       - name: Query version number
