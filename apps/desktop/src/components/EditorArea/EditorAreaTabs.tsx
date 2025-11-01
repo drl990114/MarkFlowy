@@ -3,7 +3,7 @@ import { getFileObject, getSaveOpenedEditorEntries } from '@/helper/files'
 import type { IFile } from '@/helper/filesys'
 import { checkUnsavedFiles } from '@/services/checkUnsavedFiles'
 import { useCommandStore, useEditorStateStore, useEditorStore } from '@/stores'
-import { memo, useEffect, useRef } from 'react'
+import { memo, useCallback, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 import { Tooltip } from 'zens'
@@ -52,7 +52,7 @@ const Container = styled.div`
   }
 `
 const EditorAreaTabs = memo(() => {
-  const { opened, activeId, setActiveId, delOpenedFile, delOtherOpenedFile, delAllOpenedFile } =
+  const { opened, activeId, setActiveId, delOtherOpenedFile, delAllOpenedFile } =
     useEditorStore()
   const { idStateMap } = useEditorStateStore()
   const htmlRef = useRef<HTMLDivElement>(null)
@@ -70,19 +70,24 @@ const EditorAreaTabs = memo(() => {
     setActiveId(id)
   }
 
-  const close = (ev: React.MouseEvent<HTMLElement, MouseEvent> | undefined, id: string) => {
-    ev?.stopPropagation()
-    const curIndex = opened.findIndex((openedId) => openedId === id)
-    if (curIndex < 0) return
+  const close = useCallback(
+    (ev: React.MouseEvent<HTMLElement, MouseEvent> | undefined, id: string) => {
+      ev?.stopPropagation()
+      const { opened, activeId, delOpenedFile, setActiveId } = useEditorStore.getState()
+      const curIndex = opened.findIndex((openedId) => openedId === id)
 
-    if (activeId === id) {
-      if (opened.length > 0) {
-        setActiveId(curIndex === 0 ? opened[curIndex + 1] : opened[curIndex - 1])
+      if (curIndex < 0) return
+
+      if (activeId === id) {
+        if (opened.length > 0) {
+          setActiveId(curIndex === 0 ? opened[curIndex + 1] : opened[curIndex - 1])
+        }
       }
-    }
 
-    delOpenedFile(id)
-  }
+      delOpenedFile(id)
+    },
+    [],
+  )
 
   useEffect(() => {
     useCommandStore.getState().addCommand({
