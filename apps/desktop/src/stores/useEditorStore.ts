@@ -208,6 +208,7 @@ const useEditorStore = create<EditorStore>((set, get) => {
       set((state) => {
         return {
           ...state,
+          activeId: state.activeId === id ? undefined : state.activeId,
           opened: state.opened.filter((opened) => opened !== id),
         }
       })

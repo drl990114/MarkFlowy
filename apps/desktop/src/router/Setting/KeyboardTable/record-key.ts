@@ -30,7 +30,6 @@ export function recordKey(e: KeyboardEvent) {
 
   const modifiers: Record<string, boolean> = {
     [CtrlOrCmd]: (isMacOS && e.metaKey) || (!isMacOS && e.ctrlKey),
-    [Ctrl]: e.ctrlKey && !isMacOS, // 仅在非macOS上保留Ctrl键
     [Alt]: e.altKey,
     [Shift]: e.shiftKey,
   }
