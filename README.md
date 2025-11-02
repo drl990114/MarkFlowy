@@ -39,10 +39,25 @@ Currently, MarkFlowy is in the beta stage, and it is recommended to use it with 
 
 ## Features
 
-- **Built-in AI**. Currently, it supports one click export of conversations, translation of articles to any language, and obtaining article abstracts. It also supports large models such as `DeepSeek` and `Chatgpt` to make them your intelligent assistants.
-- **Super lightweight**. The MarkFlowy is based on tauri and has a volume of less than 10MB and better performance.
-- **High availability**. MarkFlowy uses the remirror editor, which not only provides high scalability, but also has a great editing experience. And, MarkFlowy supports multiple editing modes, such as `source code`, `wysiwyg`.
-- **Custom Theme**. MarkFlowy supports custom themes, and you can also share your themes with others.
+- **Built-in AI:** Currently supports one-click export of dialogues, translation of articles to any language, and article summaries. It supports large models like `DeepSeek` and `Chatgpt`, making them your intelligent assistant.
+
+- **lightweight:** MarkFlowy is based on Tauri, boasting a size of less than 20MB and improved performance.
+
+- **Multiple Editing Modes:** MarkFlowy uses Prosemirror as its core editor, offering high extensibility and a superior editing experience. It supports multiple editing modes, such as source code and wysiwyg.
+
+- **Editing Multiple File Types:** In addition to Markdown, it supports editing `JSON`, `TXT`, and other file types.
+
+- **Custom Themes:** Supports custom themes, and you can share your themes with others.
+
+- **Custom Keyboard Shortcuts:** Supports custom keyboard shortcuts to meet individual needs.
+
+- **Image Processing:** When pasting images into MarkFlowy, you can choose to paste them to a specified path or convert them to `base64`.
+
+- **File Management**: A powerful file tree that supports drag-and-drop movement, global search, and other common functions.
+
+- **Git Management**: Provides a quick and easy way to manage Git repositories, facilitating the use of Git as a repository synchronization solution.
+
+- **Multi-language support:** Supports multiple languages ​​including Chinese, English, Spanish, Japanese, and French.
 
 ## Download
 
@@ -58,7 +73,12 @@ Available for Linux, macOS and Windows.
 You can download it from the [UpgradeLink download page](https://download.upgrade.toolsetlink.com/download?appKey=xpn68m4j5qU0Y1rfDYFHaA) or [GitHub Release](https://github.com/drl990114/MarkFlowy/releases)
 
 ## Why
-At present, I have used many Markdown applications, but I have not encountered one that is very suitable for me. I have always hoped to have a Markdown editor that is efficient, beautiful, lightweight, data-safe, and can be easily combined with various workflows. This It is also the original intention of doing MarkFlowy.
+
+**Actually, the initial inspiration for MarkFlowy stemmed from a casual conversation with a friend a few years ago**. As developers, we shared many expectations for an ideal Markdown editor. After trying many existing applications, I felt they couldn't fully meet our comprehensive needs in terms of efficiency, aesthetics, lightweight design, and workflow integration. We envisioned our ideal editor together. Although we later went our separate ways and lost touch, that seed of desire to create something beautiful has always remained in my heart.
+
+It was this initial aspiration that propelled me step by step to transform MarkFlowy from a concept into reality. I hope to create a lightweight, intelligent editor that not only handles content securely and reliably but also improves editing efficiency through AI.
+
+MarkFlowy is a product, and also a testament to a life journey. Through continuous learning and development, it has grown into my response to the concepts of **efficiency, intelligence, and lightweight**. I hope MarkFlowy will become a tool that everyone finds convenient and enjoyable, and I welcome everyone to experience it and provide valuable feedback.
 
 ## Contribute
 

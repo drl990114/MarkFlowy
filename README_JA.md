@@ -39,10 +39,25 @@
 
 ## 機能
 
-- **組み込みAI**. 現在、会話のワンクリックエクスポート、記事の任意の言語への翻訳、記事の要約の取得をサポートしています。また、`DeepSeek`や`Chatgpt`などの大規模モデルをサポートし、インテリジェントアシスタントとして利用できます。
-- **超軽量**. MarkFlowyはtauriに基づいており、容量は10MB未満で、パフォーマンスも向上しています。
-- **高可用性**. MarkFlowyはremirrorエディタを使用しており、高いスケーラビリティを提供するだけでなく、優れた編集体験も提供します。また、MarkFlowyは`ソースコード`、`WYSIWYG`などの複数の編集モードをサポートしています。
-- **カスタムテーマ**. MarkFlowyはカスタムテーマをサポートしており、他のユーザーとテーマを共有することもできます。
+- **AI搭載:** ダイアログのワンクリックエクスポート、記事のあらゆる言語への翻訳、記事の要約作成に対応しています。`DeepSeek`や`Chatgpt`といった大規模なモデルにも対応しており、インテリジェントなアシスタントとして活躍します。
+
+- **軽量:** MarkFlowyはTauriをベースにしており、20MB未満のサイズと優れたパフォーマンスを誇ります。
+
+- **複数の編集モード:** MarkFlowyはProsemirrorをコアエディターとして採用し、高い拡張性と優れた編集エクスペリエンスを提供します。ソースコードやWYSIWYGなど、複数の編集モードをサポートしています。
+
+- **複数ファイル形式の編集:** Markdownに加えて、`JSON`、`TXT`などのファイル形式の編集もサポートしています。
+
+- **カスタムテーマ:** カスタムテーマをサポートし、作成したテーマを他のユーザーと共有できます。
+
+- **カスタムキーボードショートカット:** 個々のニーズに合わせてカスタムキーボードショートカットを設定できます。
+
+- **画像処理:** MarkFlowyに画像を貼り付ける際、指定したパスに貼り付けるか、`base64`に変換するかを選択できます。
+
+- **ファイル管理**: ドラッグアンドドロップによる移動、グローバル検索、その他の一般的な機能をサポートする強力なファイルツリー。
+
+- **Git管理**: Gitリポジトリを迅速かつ簡単に管理する方法を提供し、Gitをリポジトリ同期ソリューションとして活用しやすくします。
+
+- **多言語サポート：** 中国語、英語、スペイン語、日本語、フランス語を含む複数の言語をサポートします。
 
 ## ダウンロード
 
@@ -58,7 +73,12 @@ Linux、macOS、Windows向けに利用可能です。
 [UpgradeLink ダウンロードページ](https://download.upgrade.toolsetlink.com/download?appKey=xpn68m4j5qU0Y1rfDYFHaA) または [GitHub Release](https://github.com/drl990114/MarkFlowy/releases) からダウンロードできます。
 
 ## 動機
-現在、私は多くのMarkdownアプリケーションを使用していますが、自分に非常に適したものには出会っていません。効率的で美しく、軽量でデータ安全であり、さまざまなワークフローと簡単に統合できるMarkdownエディタを常に求めてきました。これがMarkFlowyを作る原点でもあります。
+
+**実は、MarkFlowyの最初のインスピレーションは、数年前の友人との何気ない会話から生まれました**。開発者として、私たちは理想的なMarkdownエディタに多くの期待を抱いていました。既存のアプリケーションを数多く試した結果、効率性、美しさ、軽量設計、ワークフロー統合といった点で、私たちの包括的なニーズを完全に満たすことができないと感じました。そこで、私たちは一緒に理想のエディタを思い描きました。その後、別々の道を歩み、連絡も途絶えてしまいましたが、美しいものを作りたいという思いは、常に私の心の中にありました。
+
+この最初の思いが、MarkFlowyを構想から現実へと一歩一歩変えていく原動力となりました。コンテンツを安全かつ確実に処理するだけでなく、AIによって編集効率も向上させる、軽量でインテリジェントなエディタを作りたいと思っています。
+
+MarkFlowyは製品であると同時に、私の人生の証でもあります。継続的な学習と開発を通して、**効率性、インテリジェンス、軽量性**というコンセプトに対する私の答えへと成長しました。 MarkFlowy が皆様にとって便利で楽しいツールになることを願っています。皆様に MarkFlowy を体験していただき、貴重なフィードバックを提供していただければ幸いです。
 
 ## Contribute
 
@@ -89,69 +109,6 @@ MarkFlowyは完全にオープンソースであり、MarkFlowyをサポート�
 ## Contributors
 
 **MarkFlowy** の開発は、これらの貢献者なしには成し得ませんでした。彼らは **MarkFlowy** に多くの能力を提供してくれました。ぜひ彼らをフォローしてください！ ❤️
-
-<!-- readme: contributors -start -->
-<table>
-<tr>
-    <td align="center">
-        <a href="https://github.com/drl990114">
-            <img src="https://avatars.githubusercontent.com/u/48054715?v=4" width="90;" alt="drl990114"/>
-            <br />
-            <sub><b>Drl990114</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/AdySnowflake">
-            <img src="https://avatars.githubusercontent.com/u/163967164?v=4" width="90;" alt="AdySnowflake"/>
-            <br />
-            <sub><b>Null</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/SamDc73">
-            <img src="https://avatars.githubusercontent.com/u/144215270?v=4" width="90;" alt="SamDc73"/>
-            <br />
-            <sub><b>Husam Alshehadat</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/marianoesteban">
-            <img src="https://avatars.githubusercontent.com/u/3076449?v=4" width="90;" alt="marianoesteban"/>
-            <br />
-            <sub><b>Mariano Esteban</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/Raven-1027">
-            <img src="https://avatars.githubusercontent.com/u/83693755?v=4" width="90;" alt="Raven-1027"/>
-            <br />
-            <sub><b>Null</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/chiefass">
-            <img src="https://avatars.githubusercontent.com/u/106591791?v=4" width="90;" alt="chiefass"/>
-            <br />
-            <sub><b>Chiefass</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/fossabot">
-            <img src="https://avatars.githubusercontent.com/u/29791463?v=4" width="90;" alt="fossabot"/>
-            <br />
-            <sub><b>Fossabot</b></sub>
-        </a>
-    </td></tr>
-<tr>
-    <td align="center">
-        <a href="https://github.com/punkyard">
-            <img src="https://avatars.githubusercontent.com/u/59349105?v=4" width="90;" alt="punkyard"/>
-            <br />
-            <sub><b>Pun Kyard</b></sub>
-        </a>
-    </td></tr>
-</table>
-<!-- readme: contributors -end -->
 
 <!-- badges -->
 [build-badge]: https://img.shields.io/github/actions/workflow/status/drl990114/MarkFlowy/nodejs.yml.svg?style=flat-square
