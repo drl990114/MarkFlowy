@@ -2,13 +2,13 @@
 
 import en__introMd from './en__intro.md.json' with { type: 'json' }
 import zh__introMd from './zh__intro.md.json' with { type: 'json' }
+import en__extension__customThemeMd from './en__Extension__CustomTheme.md.json' with { type: 'json' }
 import en__community__code_of_conductMd from './en__Community__CODE_OF_CONDUCT.md.json' with { type: 'json' }
 import en__community__contributingMd from './en__Community__CONTRIBUTING.md.json' with { type: 'json' }
 import en__community__licenseMd from './en__Community__License.md.json' with { type: 'json' }
-import en__extension__customThemeMd from './en__Extension__CustomTheme.md.json' with { type: 'json' }
 import zh__community__code_of_conductMd from './zh__Community__CODE_OF_CONDUCT.md.json' with { type: 'json' }
 import zh__community__contributingMd from './zh__Community__CONTRIBUTING.md.json' with { type: 'json' }
 import zh__community__licenseMd from './zh__Community__License.md.json' with { type: 'json' }
 import zh__extension__customThemeMd from './zh__Extension__CustomTheme.md.json' with { type: 'json' }
 
-export const allMarkdowns = [en__introMd, zh__introMd, en__community__code_of_conductMd, en__community__contributingMd, en__community__licenseMd, en__extension__customThemeMd, zh__community__code_of_conductMd, zh__community__contributingMd, zh__community__licenseMd, zh__extension__customThemeMd]
+export const allMarkdowns = [en__introMd, zh__introMd, en__extension__customThemeMd, en__community__code_of_conductMd, en__community__contributingMd, en__community__licenseMd, zh__community__code_of_conductMd, zh__community__contributingMd, zh__community__licenseMd, zh__extension__customThemeMd]
