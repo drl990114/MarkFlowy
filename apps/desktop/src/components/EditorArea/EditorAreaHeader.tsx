@@ -11,7 +11,7 @@ export const EditorAreaHeader = memo(() => {
   const { opened, activeId, getEditorDelegate, delAllOpenedFile } = useEditorStore()
   const { execute } = useCommandStore()
   const { t } = useTranslation()
-  const ref = useRef<HTMLDivElement>()
+  const ref = useRef<HTMLDivElement>(null)
   const curFile = activeId ? getFileObject(activeId) : undefined
 
   const handleClick = useCallback(() => {

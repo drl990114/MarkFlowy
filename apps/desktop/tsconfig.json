@@ -7,7 +7,7 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src", "src/**/*.json"],
+  "include": ["src", "src/**/*.json", "src/types/*.d.ts"],
   "exclude": [
     "node_modules",
     "dist",

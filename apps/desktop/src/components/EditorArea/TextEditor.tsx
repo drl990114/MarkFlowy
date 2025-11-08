@@ -94,10 +94,10 @@ function TextEditor(props: TextEditorProps) {
     createDelegate(fileTypeConfig.defaultMode, fileTypeConfig.type),
   )
 
-  const debounceSaveHandlerCacheRef = useRef<DebouncedFunc<() => Promise<void>>>()
+  const debounceSaveHandlerCacheRef = useRef<DebouncedFunc<() => Promise<void>>>(null)
   const noFileSaveingRef = useRef(false)
   const editorRef = useRef<EditorRef>(null)
-  const editorContextRef = useRef<EditorChangeEventParams>()
+  const editorContextRef = useRef<EditorChangeEventParams>(null)
 
   useMount(async () => {
     setEditorDelegate(id, delegate)
