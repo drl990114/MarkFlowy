@@ -4,6 +4,7 @@ import ThemeProvider from 'components/ThemeProvider'
 import { appWithTranslation } from 'next-i18next'
 import App from 'next/app'
 import Head from 'next/head'
+import React from 'react'
 import 'remixicon/fonts/remixicon.css'
 import { createGlobalStyle } from 'styled-components'
 import './normalize.css'
@@ -12,6 +13,8 @@ import './normalize.css'
 class MyApp extends App {
   render() {
     const { Component, pageProps } = this.props
+
+    console.log('React version:', React.version)
 
     return (
       <>

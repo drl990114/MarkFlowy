@@ -29,7 +29,8 @@
     "**/*.js",
     "**/*.jsx",
     "**/*.cjs",
-    "**/*.mjs"
+    "**/*.mjs",
+    "./theme/types/*.d.ts"
   ],
   "exclude": ["**/node_modules", "**/.*/"]
 }

@@ -174,14 +174,12 @@ impl Keybindings {
     }
 
     pub fn read() -> Self {
-        println!("reeeeeeeeee2");
 
         if !Self::get_path().exists() {
             return Self::default().write();
         }
         match std::fs::read_to_string(Self::get_path()) {
             Ok(v) => {
-                println!("reeeeeeeeee3 {:?}", v);
                 if let Ok(mut v2) = serde_json::from_str::<Keybindings>(&v) {
                     let default_key_bindings = Self::default();
                     let mut is_diff = false;
