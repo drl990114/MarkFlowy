@@ -46,9 +46,9 @@ export const EditorInfoBar = memo(() => {
   const { settingData } = useAppSettingStore()
   const { addAppTask } = useAppTasksStore()
   const { t } = useTranslation()
-  const ref = useRef<HTMLDivElement>()
-  const ref1 = useRef<HTMLDivElement>()
-  const ref2 = useRef<HTMLDivElement>()
+  const ref = useRef<HTMLDivElement>(null)
+  const ref1 = useRef<HTMLDivElement>(null)
+  const ref2 = useRef<HTMLDivElement>(null)
   const curFile = activeId ? getFileObject(activeId) : undefined
   const [hasGitStatus, setHasGitStatus] = useState(false)
   const [fileNormalInfo, setFileNormalInfo] = useState<FileNormalInfo>(EMPTY_FILE_NORMAL_INFO)
