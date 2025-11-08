@@ -7,3 +7,4 @@ pub mod opened_cache;
 pub mod process;
 pub mod themes;
 pub mod workspace;
+pub mod clipboard;

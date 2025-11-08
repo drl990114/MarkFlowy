@@ -6,6 +6,7 @@ import { convertImageToBase64, getImageUrlInTauri, moveImageToFolder } from '@/h
 import { useEditorKeybindingStore } from '@/hooks/useKeyboard'
 import { useEditorStore } from '@/stores'
 import useAppSettingStore from '@/stores/useAppSettingStore'
+import { invoke } from '@tauri-apps/api/core'
 import { join } from '@tauri-apps/api/path'
 import { writeText } from '@tauri-apps/plugin-clipboard-manager'
 import type { CreateWysiwygDelegateOptions } from 'rme'
@@ -26,6 +27,26 @@ export const createWysiwygDelegateOptions = (filePath?: string): CreateWysiwygDe
   return {
     disableAllBuildInShortcuts: true,
     overrideShortcutMap: useEditorKeybindingStore.getState().editorKeybingMap,
+    clipboardReadFunction: async () => {
+      let html = '',
+        text = ''
+
+      try {
+        html = await invoke<string>('get_clipboard_html')
+      } catch (error) {
+        console.error('get_clipboard_html error: ', error)
+      }
+      try {
+        text = await invoke<string>('get_clipboard_text')
+      } catch (error) {
+        console.error('get_clipboard_text error: ', error)
+      }
+
+      return {
+        html,
+        text,
+      }
+    },
     imageCopyHandler: async (src) => {
       await sleep(1)
 

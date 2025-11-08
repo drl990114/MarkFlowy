@@ -104,6 +104,8 @@ pub fn run() {
             file_watcher::cmd::watch_file,
             file_watcher::cmd::stop_file_watcher,
             file_watcher::cmd::stop_all_file_watchers,
+            app::clipboard::get_clipboard_html,
+            app::clipboard::get_clipboard_text,
         ])
         .setup(|app: &mut tauri::App| {
             let home_dir_path = app.path().home_dir().expect("failed to get home dir");
