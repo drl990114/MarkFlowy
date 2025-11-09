@@ -22,16 +22,21 @@
     "core:resources:default",
     "core:menu:default",
     "core:tray:default",
+    "http:default",
     {
-      "identifier": "http:default",
+      "identifier": "http:allow-fetch",
       "allow": [
         {
-          "name": "https",
-          "url": "https://*"
+          "url": "http://**"
         },
         {
-          "name": "http",
-          "url": "http://*"
+          "url": "https://**"
+        },
+        {
+          "url": "http://*:*"
+        },
+        {
+          "url": "https://*:*"
         }
       ]
     },

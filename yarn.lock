@@ -3798,7 +3798,7 @@ __metadata:
     react-use: "npm:^17.6.0"
     remixicon: "npm:^4.5.0"
     rimraf: "npm:^6.0.1"
-    rme: "npm:0.3.0-beta.5"
+    rme: "npm:0.3.0-beta.10"
     styled-components: "npm:^6.1.13"
     stylis: "npm:^4.3.4"
     ts-node: "npm:^10.9.2"
@@ -3914,7 +3914,7 @@ __metadata:
     remark-gfm: "npm:^4.0.0"
     remixicon: "npm:^4.7.0"
     rimraf: "npm:^6.0.1"
-    rme: "npm:0.3.0-beta.5"
+    rme: "npm:0.3.0-beta.10"
     styled-components: "npm:^6.1.13"
     stylis: "npm:^4.3.4"
     typescript: "npm:^5.7.3"
@@ -17884,9 +17884,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rme@npm:0.3.0-beta.5":
-  version: 0.3.0-beta.5
-  resolution: "rme@npm:0.3.0-beta.5"
+"rme@npm:0.3.0-beta.10":
+  version: 0.3.0-beta.10
+  resolution: "rme@npm:0.3.0-beta.10"
   dependencies:
     "@codemirror/autocomplete": "npm:^6.19.1"
     "@codemirror/commands": "npm:^6.10.0"
@@ -17965,7 +17965,7 @@ __metadata:
     void-elements: "npm:^3.1.0"
     yjs: "npm:^13.6.27"
     zens: "npm:^0.1.10"
-  checksum: 10/0cf3ce4ba00aeb9d512c6de6b0529cd98c60fa1f5b72a2d6ef5720ac01ecbbf1b6bdc90ddedf8afd92a89f3306b5234abeaebee937da4f7b7928f203958ca72f
+  checksum: 10/785fdaee4c37225a21758c1975b345cb088cacba6bcd9b245163e0e0e44c5b66b1f518bbc33431c0da8fd1e80119b8ab1831865f2db2599caf8c303cb26d173b
   languageName: node
   linkType: hard
 
