@@ -188,6 +188,13 @@
           "label": "Markdownデフォルトモード",
           "desc": "Markdownファイルを新規作成するときのデフォルト編集モードを設定します。"
         }
+      },
+      "wysiwyg": {
+        "label": "所見即所得",
+        "codemirror_linewrap": {
+          "label": "コードブロック改行",
+          "desc": "コードブロック中の行の文字数が時を超えて改行しますか?"
+        }
       }
     },
     "keyboard": {

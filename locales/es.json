@@ -183,6 +183,13 @@
           "label": "Modo predeterminado de Markdown",
           "desc": "Establece el modo de edición predeterminado al crear un nuevo archivo de Markdown."
         }
+      },
+      "wysiwyg": {
+        "label": "Wysiwyg",
+        "codemirror_linewrap": {
+          "label": "Salto de línea de bloque de código",
+          "desc": "Si el número de líneas en el bloque de código excede la línea."
+        }
       }
     },
     "keyboard": {

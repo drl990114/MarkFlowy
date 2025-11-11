@@ -139,6 +139,19 @@ export const getSettingMap = () => {
           ],
         },
       },
+      Wysiwyg: {
+        i18nKey: 'settings.editor.wysiwyg.label',
+        mdDefaultMode: {
+          key: 'wysiwyg_editor_codemirror_line_wrap',
+          type: 'switch',
+          title: {
+            i18nKey: 'settings.editor.wysiwyg.codemirror_linewrap.label',
+          },
+          desc: {
+            i18nKey: 'settings.editor.wysiwyg.codemirror_linewrap.desc',
+          },
+        },
+      }
     },
     image: {
       i18nKey: 'settings.image.label',

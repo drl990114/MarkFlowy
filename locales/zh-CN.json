@@ -207,6 +207,13 @@
           "label": "Markdown 默认模式",
           "desc": "设置新建 Markdown 文件时的默认编辑模式。"
         }
+      },
+      "wysiwyg": {
+        "label": "所见即所得",
+        "codemirror_linewrap": {
+          "label": "代码块换行",
+          "desc": "代码块中的行字数超出时是否换行。"
+        }
       }
     },
     "image": {

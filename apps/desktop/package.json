@@ -60,11 +60,11 @@
     "react-router": "^7.9.5",
     "react-use": "^17.6.0",
     "remixicon": "^4.5.0",
-    "rme": "0.3.0-beta.10",
+    "rme": "0.3.0-beta.11",
     "styled-components": "^6.1.13",
     "stylis": "^4.3.4",
     "use-resize-observer": "^9.1.0",
-    "zens": "0.1.10",
+    "zens": "0.1.11",
     "zod": "^3.24.2",
     "zustand": "^5.0.6"
   },
