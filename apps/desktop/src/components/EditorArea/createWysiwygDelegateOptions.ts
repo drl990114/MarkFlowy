@@ -23,10 +23,14 @@ export const createWysiwygDelegateOptions = (filePath?: string): CreateWysiwygDe
       models: models,
     }
   })
+  const settingData = useAppSettingStore.getState().settingData
 
   return {
     disableAllBuildInShortcuts: true,
     overrideShortcutMap: useEditorKeybindingStore.getState().editorKeybingMap,
+    codemirrorOptions: {
+      lineWrapping: settingData.wysiwyg_editor_codemirror_line_wrap,
+    },
     clipboardReadFunction: async () => {
       let html = '',
         text = ''

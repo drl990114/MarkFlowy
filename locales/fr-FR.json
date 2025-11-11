@@ -180,6 +180,13 @@
           "label": "Mode par défaut de Markdown",
           "desc": "Définit le mode d'édition par défaut lorsque vous créez un nouveau fichier Markdown."
         }
+      },
+      "wysiwyg": {
+        "label": "Wysiwyg",
+        "codemirror_linewrap": {
+          "label": "Jets de ligne de bloc de code",
+          "desc": "Si vous changez de ligne lorsque le nombre de mots dans le bloc de code dépasse."
+        }
       }
     },
     "keyboard": {

@@ -214,6 +214,13 @@
           "label": "Markdown Default Mode",
           "desc": "Sets the default editing mode when creating a new Markdown file."
         }
+      },
+      "wysiwyg": {
+        "label": "Wysiwyg",
+        "codemirror_linewrap": {
+          "label": "Code block wrap",
+          "desc": "Whether the line breaks when the number of line words in the code block exceeds."
+        }
       }
     },
     "keyboard": {
