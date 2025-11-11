@@ -139,7 +139,7 @@ function Setting() {
       <div id='detail'>
         <div className='conf-path'>
           <span>
-            Path: {confPath} <CopyButton text={confPath} />
+            <i className='ri-folder-5-line' />: {confPath} <CopyButton text={confPath} />
           </span>
           <Button
             size='small'

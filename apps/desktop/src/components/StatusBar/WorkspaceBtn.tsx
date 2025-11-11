@@ -4,7 +4,6 @@ import { checkIsGitRepoBySyncMode, getWorkspace, WorkSpace } from '@/services/wo
 import { useCommandStore, useEditorStore } from '@/stores'
 import { listen } from '@tauri-apps/api/event'
 import { Command } from '@tauri-apps/plugin-shell'
-import { t } from 'i18next'
 import { debounce } from 'lodash'
 import { useEffect, useMemo, useState } from 'react'
 import styled from 'styled-components'
@@ -148,7 +147,7 @@ export const WorkspaceBtn = () => {
           useCommandStore.getState().execute('open_workspace_dialog')
         }}
       >
-        {t('workspace.label')}: {getFileNameFromPath(workspace.rootPath || '')}
+        {getFileNameFromPath(workspace.rootPath || '')}
       </Container>
       {checkIsGitRepoBySyncMode(workspace?.syncMode) ? <GitStatusBtn /> : null}
     </>

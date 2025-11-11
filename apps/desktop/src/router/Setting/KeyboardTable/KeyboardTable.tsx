@@ -11,9 +11,27 @@ import { transferKey } from './record-key'
 const TableContainer = styled.div`
   border: 1px solid ${(props) => props.theme.borderColor};
   border-radius: 8px;
-  overflow: hidden;
+  overflow: auto;
   background-color: ${(props) => props.theme.bgColor};
   margin-bottom: 16px;
+  
+  &::-webkit-scrollbar {
+    height: 8px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: ${(props) => props.theme.tipsBgColor};
+    border-radius: 4px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: ${(props) => props.theme.borderColor};
+    border-radius: 4px;
+    
+    &:hover {
+      background: ${(props) => props.theme.textColor};
+    }
+  }
 `
 
 const Table = styled.table`
