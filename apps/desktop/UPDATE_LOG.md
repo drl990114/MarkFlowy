@@ -1,5 +1,37 @@
 # UPDATE LOG
 
+## v0.41.0
+
+Features:
+
+- Supports line breaks in code blocks configured with `Wysiwyg` mode.
+
+- React framework upgrade and performance optimization.
+
+Fixes:
+
+- Fixed an issue where an extra confirmation pop-up would appear when pasting.
+
+- Optimized image node display.
+
+- Optimized the scrolling display of the shortcut table in the small window.
+
+---
+
+特性:
+
+- 支持配置 `Wysiwyg` 模式的代码块换行。
+
+- react 框架升级，性能优化。
+
+修复: 
+
+- 修复粘贴时会有额外的弹窗确认问题。
+
+- 优化图片节点的显示。
+
+- 优化快捷键表格在小窗口的滚动显示。
+
 ## v0.40.0
 
 Long time no see! A huge upgrade has brought many features that everyone has been looking forward to.
