@@ -197,3 +197,20 @@ export function getRelativePathWithCurWorkspace(filePath: string) {
   }
   return relativePath
 }
+
+export async function getMdRelativePath(filePath: string, relativeTo: string) {
+  if (!filePath || !relativeTo) {
+    return filePath
+  }
+
+  let res = await invoke<{ code: FileResultCode; content: string }>('get_md_relative_path', {
+    filePath,
+    relativeTo,
+  })
+
+  if (res.code !== FileResultCode.Success) {
+    return filePath
+  }
+
+  return res.content
+}
