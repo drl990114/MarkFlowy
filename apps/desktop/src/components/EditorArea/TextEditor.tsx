@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import { useCommandEvent } from '@/components/EditorArea/editorHooks/CommandEvent'
 import { EVENT } from '@/constants'
+import { clipboardRead } from '@/helper/clipboard'
 import bus from '@/helper/eventBus'
 import {
   delSaveOpenedEditorEntries,
@@ -15,6 +16,7 @@ import {
   getFileNameFromPath,
 } from '@/helper/filesys'
 import { FileTypeConfig } from '@/helper/fileTypeHandler'
+import { useEditorKeybindingStore } from '@/hooks/useKeyboard'
 import { useCommandStore, useEditorStateStore, useEditorStore } from '@/stores'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import useEditorCounterStore from '@/stores/useEditorCounterStore'
@@ -70,6 +72,9 @@ function TextEditor(props: TextEditorProps) {
       if (editorViewType === 'sourceCode') {
         return createSourceCodeDelegate({
           language: sourceCodeLanguage,
+          disableAllBuildInShortcuts: true,
+          overrideShortcutMap: useEditorKeybindingStore.getState().editorKeybingMap,
+          clipboardReadFunction: clipboardRead,
           onCodemirrorViewLoad: (cmView) => {
             sourceCodeCodemirrorViewMap.set(id, cmView)
           },
@@ -260,6 +265,9 @@ function TextEditor(props: TextEditorProps) {
           onSuccess: () => {
             if (payload === EditorViewType.SOURCECODE) {
               const sourceCodeDelegate = createSourceCodeDelegate({
+                disableAllBuildInShortcuts: true,
+                overrideShortcutMap: useEditorKeybindingStore.getState().editorKeybingMap,
+                clipboardReadFunction: clipboardRead,
                 onCodemirrorViewLoad: (cmView) => {
                   sourceCodeCodemirrorViewMap.set(curFile.id, cmView)
                   setTimeout(() => {
