@@ -1,11 +1,11 @@
 use anyhow::Result as AnyResult;
+use chrono::{DateTime, Local};
 use mf_utils::is_supported_file_name;
 use natural_sort_rs::Natural;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::future::Future;
 use std::path::Path;
-use chrono::{DateTime, Local};
 
 use crate::task_system::error::SystemError;
 
@@ -482,7 +482,7 @@ pub fn get_path_name(path: &str) -> String {
 pub struct FileNormalInfo {
     pub size: String,
     pub last_modified: String,
-    pub error_msg: String
+    pub error_msg: String,
 }
 
 impl Default for FileNormalInfo {
@@ -490,7 +490,7 @@ impl Default for FileNormalInfo {
         FileNormalInfo {
             size: "".into(),
             last_modified: "".into(),
-            error_msg: "".into()
+            error_msg: "".into(),
         }
     }
 }
@@ -513,22 +513,22 @@ fn format_file_size(size: u64) -> String {
 
 pub fn get_file_normal_info(path_str: &str) -> FileNormalInfo {
     let path = Path::new(path_str);
-    
+
     // 尝试获取元数据
     let metadata_result = fs::metadata(path);
-    
+
     match metadata_result {
         Ok(metadata) => {
             // 获取并格式化文件大小
             let size = metadata.len();
             let formatted_size = format_file_size(size);
-            
+
             // 获取并格式化修改时间
             let modified_time = match metadata.modified() {
                 Ok(time) => {
                     let datetime: DateTime<Local> = DateTime::from(time);
                     format!("{}", datetime.format("%Y-%m-%d %H:%M:%S"))
-                },
+                }
                 Err(e) => {
                     return FileNormalInfo {
                         size: "".to_string(),
@@ -537,20 +537,18 @@ pub fn get_file_normal_info(path_str: &str) -> FileNormalInfo {
                     };
                 }
             };
-            
+
             FileNormalInfo {
                 size: formatted_size,
                 last_modified: modified_time,
                 error_msg: "".to_string(),
             }
-        },
-        Err(e) => {
-            FileNormalInfo {
-                size: "".to_string(),
-                last_modified: "".to_string(),
-                error_msg: format!("无法获取文件元数据: {}", e),
-            }
         }
+        Err(e) => FileNormalInfo {
+            size: "".to_string(),
+            last_modified: "".to_string(),
+            error_msg: format!("无法获取文件元数据: {}", e),
+        },
     }
 }
 
@@ -636,7 +634,7 @@ pub mod cmd {
     #[tauri::command]
     pub fn write_u8_array_to_file(file_path: &str, content: Vec<u8>) -> FileResult {
         let file_path = Path::new(file_path);
-        
+
         // Create parent directories if they don't exist
         if let Some(parent) = file_path.parent() {
             if !parent.exists() {
@@ -652,7 +650,7 @@ pub mod cmd {
                 }
             }
         }
-        
+
         // Write the file content
         match fs::write(file_path, content) {
             Ok(()) => FileResult {
@@ -723,6 +721,96 @@ pub mod cmd {
     }
 
     #[tauri::command]
+    pub fn get_md_relative_path(file_path: &str, relative_to: &str) -> FileResult {
+        use std::path::Component;
+        
+        let cur_path = Path::new(file_path);
+        let relative_to_path = Path::new(relative_to);
+        
+        if !cur_path.is_absolute() {
+            return FileResult {
+                code: FileResultCode::InvalidPath,
+                content: "File path must be absolute".to_string(),
+            };
+        }
+        
+        if !relative_to_path.is_absolute() {
+            return FileResult {
+                code: FileResultCode::InvalidPath,
+                content: "Relative path must be absolute".to_string(),
+            };
+        }
+        
+        let cur_components: Vec<Component> = cur_path.components().collect();
+        let relative_to_components: Vec<Component> = relative_to_path.components().collect();
+        
+        let common_prefix_len = cur_components
+            .iter()
+            .zip(relative_to_components.iter())
+            .take_while(|(a, b)| a == b)
+            .count();
+        
+        let mut components = vec![];
+        for _ in common_prefix_len..relative_to_components.len() {
+            components.push("..");
+        }
+        
+        for component in &cur_components[common_prefix_len..] {
+            if let Component::Normal(name) = component {
+                if let Some(name_str) = name.to_str() {
+                    components.push(name_str);
+                } else {
+                    return FileResult {
+                        code: FileResultCode::InvalidPath,
+                        content: "Failed to convert path to string (invalid UTF-8)".to_string(),
+                    };
+                }
+            } else if let Component::CurDir | Component::ParentDir = component {
+                match component {
+                    Component::Normal(name) => {
+                        if let Some(name_str) = name.to_str() {
+                            components.push(name_str);
+                        } else {
+                            return FileResult {
+                                code: FileResultCode::InvalidPath,
+                                content: "Failed to convert path to string (invalid UTF-8)".to_string(),
+                            };
+                        }
+                    },
+                    Component::CurDir => {
+                        components.push(".");
+                    },
+                    Component::ParentDir => {
+                        components.push("..");
+                    },
+                    Component::Prefix(_) => {
+                        // Windows驱动器前缀，忽略
+                        continue;
+                    },
+                    Component::RootDir => {
+                        // Unix根目录，忽略
+                        continue;
+                    },
+                }
+            }
+        }
+        
+        let relative_path = if components.is_empty() {
+            ".".to_string()
+        } else {
+            components.join("/")
+        };
+        
+        // 确保返回的是Markdown语法的路径（使用正斜杠）
+        let md_relative_path = relative_path.replace("\\", "/");
+        
+        FileResult {
+            code: FileResultCode::Success,
+            content: md_relative_path,
+        }
+    }
+
+    #[tauri::command]
     pub fn copy_file_by_from(from: &str) -> String {
         let from_path = Path::new(from);
         let parent_path = from_path.parent().unwrap();
@@ -786,7 +874,7 @@ pub mod cmd {
     pub fn copy_file(from: &str, to: &str) -> FileResult {
         let old_path = Path::new(from);
         let new_path = Path::new(to);
-        
+
         // Validate input paths
         if from.is_empty() || to.is_empty() {
             return FileResult {
@@ -794,7 +882,7 @@ pub mod cmd {
                 content: String::from("Source or destination path cannot be empty"),
             };
         }
-        
+
         // Check if source file exists
         if !old_path.exists() {
             return FileResult {
@@ -802,7 +890,7 @@ pub mod cmd {
                 content: format!("Source file not found: {}", from),
             };
         }
-        
+
         // Create parent directories for destination if they don't exist
         if let Some(parent) = new_path.parent() {
             if !parent.exists() {
@@ -813,12 +901,15 @@ pub mod cmd {
                     };
                     return FileResult {
                         code,
-                        content: format!("Failed to create parent directories for destination: {}", e),
+                        content: format!(
+                            "Failed to create parent directories for destination: {}",
+                            e
+                        ),
                     };
                 }
             }
         }
-        
+
         // Perform the copy operation
         match fs::copy(old_path, new_path) {
             Ok(bytes_copied) => FileResult {

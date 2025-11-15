@@ -72,6 +72,7 @@ pub fn run() {
             fc::cmd::file_exists,
             fc::cmd::move_files_to_target_folder,
             fc::cmd::path_join,
+            fc::cmd::get_md_relative_path,
             fc::cmd::rename_fs,
             fc::cmd::trash_delete,
             fc::cmd::export_html_to_path,

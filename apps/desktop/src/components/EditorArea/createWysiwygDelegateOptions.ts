@@ -2,6 +2,7 @@ import { AIGenerateTextParams } from '@/extensions/ai/aiProvidersService'
 import { aiGenerateTextRequest } from '@/extensions/ai/api'
 import useAiChatStore, { getCurrentAISettingData } from '@/extensions/ai/useAiChatStore'
 import { sleep } from '@/helper'
+import { getMdRelativePath } from '@/helper/filesys'
 import { convertImageToBase64, getImageUrlInTauri, moveImageToFolder } from '@/helper/image'
 import { useEditorKeybindingStore } from '@/hooks/useKeyboard'
 import { useEditorStore } from '@/stores'
@@ -13,7 +14,9 @@ import type { CreateWysiwygDelegateOptions } from 'rme'
 
 type AIOptions = NonNullable<CreateWysiwygDelegateOptions['ai']>
 
-export const createWysiwygDelegateOptions = (filePath?: string): CreateWysiwygDelegateOptions => {
+export const createWysiwygDelegateOptions = (
+  fileFolderPath?: string,
+): CreateWysiwygDelegateOptions => {
   const aiStoreState = useAiChatStore.getState()
   const aiProviderModelsMap = aiStoreState.aiProviderModelsMap
   let supportProviderInfosMap: AIOptions['supportProviderInfosMap'] = {}
@@ -73,7 +76,8 @@ export const createWysiwygDelegateOptions = (filePath?: string): CreateWysiwygDe
             settingData.paste_image_save_relative_path,
           )
           if (workspaceRoot) {
-            return await moveImageToFolder(src, targetPath)
+            const fullPath = await moveImageToFolder(src, targetPath)
+            return await getMdRelativePath(fullPath, fileFolderPath || workspaceRoot)
           }
         }
 
@@ -82,7 +86,8 @@ export const createWysiwygDelegateOptions = (filePath?: string): CreateWysiwygDe
           settingData.paste_image_save_absolute_path
         ) {
           const targetPath = settingData.paste_image_save_absolute_path
-          return await moveImageToFolder(src, targetPath)
+          const fullPath = await moveImageToFolder(src, targetPath)
+          return await getMdRelativePath(fullPath, targetPath)
         }
       } catch (error) {
         console.error('Image conversion failed:', error)
@@ -95,7 +100,7 @@ export const createWysiwygDelegateOptions = (filePath?: string): CreateWysiwygDe
       await sleep(1)
 
       try {
-        const src = await getImageUrlInTauri(url, filePath)
+        const src = await getImageUrlInTauri(url, fileFolderPath)
         return src
       } catch (error) {
         console.error('Failed to get image URL:', error)

@@ -101,7 +101,6 @@ export const moveImageToFolder = async (
   imageSrc: string,
   targetFolderPath: string,
 ): Promise<string> => {
-  console.log('moveImageToFolder', imageSrc, targetFolderPath)
   if (!targetFolderPath) {
     return imageSrc
   }
@@ -128,7 +127,7 @@ export const moveImageToFolder = async (
       const buffer = new Uint8Array(arrayBuffer)
       const fileName = `image_${Date.now()}.png`
       const filePath = await join(targetFolderPath, fileName)
-      console.log('Downloading image to:', buffer)
+      console.log('Downloading image to:', filePath)
       await invoke('write_u8_array_to_file', { filePath, content: buffer })
       return filePath
     } catch (error) {
@@ -136,7 +135,6 @@ export const moveImageToFolder = async (
       throw error
     }
   } else {
-    // 先判断是不是在目标文件夹中的文件
     const rootPath = useEditorStore.getState().folderData?.[0]?.path || ''
     const { src: localPath } = await getImageInfo(imageSrc, rootPath)
     console.log('Local image path:', localPath)
@@ -229,7 +227,7 @@ export const getImageInfo = async (src: string, baseUrl: string) => {
   }
 }
 
-export const getImageUrlInTauri = async (url: string, filePath?: string) => {
+export const getImageUrlInTauri = async (url: string, fileFolderPath?: string) => {
   if (!url) return url
 
   if ((url.startsWith('http') || url.startsWith('https')) && !url.includes(location.origin)) {
@@ -251,7 +249,7 @@ export const getImageUrlInTauri = async (url: string, filePath?: string) => {
     return url
   }
 
-  const dirPath = filePath || useEditorStore.getState().folderData?.[0]?.path
+  const dirPath = fileFolderPath || useEditorStore.getState().folderData?.[0]?.path
 
   if (dirPath) {
     try {
