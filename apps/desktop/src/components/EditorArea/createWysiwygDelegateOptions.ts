@@ -51,7 +51,7 @@ export const createWysiwygDelegateOptions = (filePath?: string): CreateWysiwygDe
         text,
       }
     },
-    imageCopyHandler: async (src) => {
+    imagePasteHandler: async (src) => {
       await sleep(1)
 
       try {
