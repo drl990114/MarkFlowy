@@ -13,7 +13,6 @@ import {
   FileResultCode,
   FileSysResult,
   getFileNameFromPath,
-  getFolderPathFromPath,
 } from '@/helper/filesys'
 import { FileTypeConfig } from '@/helper/fileTypeHandler'
 import { useCommandStore, useEditorStateStore, useEditorStore } from '@/stores'
@@ -68,16 +67,15 @@ function TextEditor(props: TextEditorProps) {
   const curFile = getFileObject(id)
   const createDelegate = useCallback(
     (editorViewType = EditorViewType.WYSIWYG, sourceCodeLanguage?: string) => {
-      const file = getFileObject(id)
       if (editorViewType === 'sourceCode') {
         return createSourceCodeDelegate({
           language: sourceCodeLanguage,
           onCodemirrorViewLoad: (cmView) => {
-            sourceCodeCodemirrorViewMap.set(file.id, cmView)
+            sourceCodeCodemirrorViewMap.set(id, cmView)
           },
         })
       } else {
-        return createWysiwygDelegate(createWysiwygDelegateOptions(getFolderPathFromPath(file.path)))
+        return createWysiwygDelegate(createWysiwygDelegateOptions(id))
       }
     },
     [id],
@@ -275,7 +273,7 @@ function TextEditor(props: TextEditorProps) {
               debounceRefreshToc()
             } else {
               const wysiwygDelegate = createWysiwygDelegate(
-                createWysiwygDelegateOptions(getFolderPathFromPath(curFile.path)),
+                createWysiwygDelegateOptions(curFile.id),
               )
               setEditorDelegate(curFile.id, wysiwygDelegate)
               setDelegate(wysiwygDelegate)
@@ -439,7 +437,7 @@ function TextEditor(props: TextEditorProps) {
       onContextMounted: (context: EditorContext) => {
         setEditorCtx(id, context)
       },
-      delegateOptions: createWysiwygDelegateOptions(getFolderPathFromPath(curFile.path)),
+      delegateOptions: createWysiwygDelegateOptions(curFile.id),
       hooks: [
         () => {
           useCommandEvent({ active })

@@ -2,21 +2,20 @@ import { AIGenerateTextParams } from '@/extensions/ai/aiProvidersService'
 import { aiGenerateTextRequest } from '@/extensions/ai/api'
 import useAiChatStore, { getCurrentAISettingData } from '@/extensions/ai/useAiChatStore'
 import { sleep } from '@/helper'
-import { getMdRelativePath } from '@/helper/filesys'
+import { clipboardRead } from '@/helper/clipboard'
+import { getFileObject } from '@/helper/files'
+import { getFolderPathFromPath, getMdRelativePath } from '@/helper/filesys'
 import { convertImageToBase64, getImageUrlInTauri, moveImageToFolder } from '@/helper/image'
 import { useEditorKeybindingStore } from '@/hooks/useKeyboard'
 import { useEditorStore } from '@/stores'
 import useAppSettingStore from '@/stores/useAppSettingStore'
-import { invoke } from '@tauri-apps/api/core'
 import { join } from '@tauri-apps/api/path'
 import { writeText } from '@tauri-apps/plugin-clipboard-manager'
 import type { CreateWysiwygDelegateOptions } from 'rme'
 
 type AIOptions = NonNullable<CreateWysiwygDelegateOptions['ai']>
 
-export const createWysiwygDelegateOptions = (
-  fileFolderPath?: string,
-): CreateWysiwygDelegateOptions => {
+export const createWysiwygDelegateOptions = (fileId?: string): CreateWysiwygDelegateOptions => {
   const aiStoreState = useAiChatStore.getState()
   const aiProviderModelsMap = aiStoreState.aiProviderModelsMap
   let supportProviderInfosMap: AIOptions['supportProviderInfosMap'] = {}
@@ -34,30 +33,14 @@ export const createWysiwygDelegateOptions = (
     codemirrorOptions: {
       lineWrapping: settingData.wysiwyg_editor_codemirror_line_wrap,
     },
-    clipboardReadFunction: async () => {
-      let html = '',
-        text = ''
-
-      try {
-        html = await invoke<string>('get_clipboard_html')
-      } catch (error) {
-        console.error('get_clipboard_html error: ', error)
-      }
-      try {
-        text = await invoke<string>('get_clipboard_text')
-      } catch (error) {
-        console.error('get_clipboard_text error: ', error)
-      }
-
-      return {
-        html,
-        text,
-      }
-    },
+    clipboardReadFunction: clipboardRead,
     imagePasteHandler: async (src) => {
       await sleep(1)
 
       try {
+        const file = fileId ? getFileObject(fileId) : null
+        const fileFolderPath = getFolderPathFromPath(file?.path)
+
         const workspaceRoot = useEditorStore.getState().folderData?.[0]?.path
         const settingData = useAppSettingStore.getState().settingData
 
@@ -100,6 +83,9 @@ export const createWysiwygDelegateOptions = (
       await sleep(1)
 
       try {
+        const file = fileId ? getFileObject(fileId) : null
+        const fileFolderPath = getFolderPathFromPath(file?.path)
+
         const src = await getImageUrlInTauri(url, fileFolderPath)
         return src
       } catch (error) {
