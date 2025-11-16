@@ -1,5 +1,45 @@
 # UPDATE LOG
 
+## v0.42.0
+
+Features:
+
+- Support saving images to relative paths when pasting.
+
+- Source code mode shortcuts remain consistent with WYSIWYG mode.
+
+- Support `Google AI model` configuration.
+
+- When pasting images, if pasting as `relative workspace` or `relative file` path and a workspace is open, the image path will be converted to relative path instead of the original absolute path.
+
+- Support editing `textbundle (markdown)` format folders. When pasting images into Markdown within textbundle , images will be automatically copied to `textbundle/assets` .
+
+Fixes:
+
+- Fixed white screen issue during AI chat submission.
+
+- Fixed the issue where old paths were used when pasting images after dragging and dropping files.
+
+---
+
+特性:
+
+- 支持粘贴时，保存图片到相对当前文件路径。
+
+- 源代码模式的快捷键保持与所见即所得模式下一致。
+
+- 支持 Google AI 模型配置。
+
+- 粘贴图片时，在粘贴为相对工作区或相对文件时，如果有打开的工作区，图片路径会变为相对路径返回，而不是原来的绝对路径。
+
+- 支持 `textbundle (markdown)` 格式的文件夹编辑，当粘贴图片到 `textbundle` 中的 `Markdown` 时，图片会固定复制到 `textbundle/assets`。
+
+修复:
+
+- 修复 AI chat 提交时白屏问题。
+
+- 修复拖拽文件后，粘贴图片时用的是旧路径。
+
 ## v0.41.0
 
 Features:
