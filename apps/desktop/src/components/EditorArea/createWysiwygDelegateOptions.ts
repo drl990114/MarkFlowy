@@ -72,6 +72,21 @@ export const createWysiwygDelegateOptions = (fileId?: string): CreateWysiwygDele
           const fullPath = await moveImageToFolder(src, targetPath)
           return await getMdRelativePath(fullPath, targetPath)
         }
+
+        if (
+          settingData.when_paste_image === 'save_to_file_relative' &&
+          settingData.paste_image_save_relative_path_rule
+        ) {
+          const targetPath = settingData.paste_image_save_relative_path_rule.replace(
+            '${documentPath}',
+            fileFolderPath || workspaceRoot || '',
+          )
+
+          if (workspaceRoot) {
+            const fullPath = await moveImageToFolder(src, targetPath)
+            return await getMdRelativePath(fullPath, fileFolderPath || workspaceRoot)
+          }
+        }
       } catch (error) {
         console.error('Image conversion failed:', error)
       }

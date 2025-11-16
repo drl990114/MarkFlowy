@@ -259,16 +259,21 @@
             "do_nothing": "Sin operación",
             "save_to_local_relative": "Ruta relativa guardada en el área de trabajo",
             "save_to_local_absolute": "Guardar en la ruta absoluta global",
-            "paste_as_base64": "Pegar como código Base64"
+            "paste_as_base64": "Pegar como código Base64",
+            "save_to_file_relative": "Ruta guardada en el archivo actual relativo"
           }
         },
         "paste_image_save_absolute_path": {
           "label": "Ruta absoluta global",
-          "desc": "Cuando \"Al pegar una imagen\" selecciona \"Guardar en la ruta absoluta global\", la imagen se guarda en esta ruta."
+          "desc": "Al \"pegar una imagen\", la imagen se guarda en esta ruta."
         },
         "paste_image_save_relative_path": {
           "label": "Ruta relativa del área de trabajo",
-          "desc": "Cuando \"Al pegar una imagen\" selecciona \"Guardar en la ruta relativa del área de trabajo\", la imagen se guarda en esta ruta."
+          "desc": "Al \"pegar una imagen\", la imagen calculará la ruta relativa al área de trabajo actual de acuerdo con su regla, guarde en esta ruta"
+        },
+        "paste_image_save_relative_path_rule": {
+          "label": "Reglas de ruta",
+          "desc": "$ {DocumentPath} se refiere a la ruta de la carpeta superior del archivo que está editando actualmente. Al \"pegar una imagen, la imagen se guardará en la ruta relativa al archivo actual."
         }
       }
     }
