@@ -273,6 +273,21 @@
           "label": "Models",
           "desc": "A model list separated by commas, default is \"\""
         }
+      },
+      "Google": {
+        "label": "Google",
+        "api_base": {
+          "label": "API Base",
+          "desc": "The API address AI by Google."
+        },
+        "api_key": {
+          "label": "API Key",
+          "desc": "Google's AI API key."
+        },
+        "models": {
+          "label": "Model List",
+          "desc": "Model list, separated by commas. The default value is \"\""
+        }
       }
     },
     "resetAppConf": {

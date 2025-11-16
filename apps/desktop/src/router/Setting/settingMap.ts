@@ -252,6 +252,39 @@ export const getSettingMap = () => {
               },
             },
           },
+           {
+            i18nKey: 'settings.ai.Google.label',
+            ApiBase: {
+              key: 'extensions_google_apibase',
+              type: 'input',
+              title: {
+                i18nKey: 'settings.ai.Google.api_base.label',
+              },
+              desc: {
+                i18nKey: 'settings.ai.Google.api_base.desc',
+              },
+            },
+            ApiKey: {
+              key: 'extensions_google_apikey',
+              type: 'input',
+              title: {
+                i18nKey: 'settings.ai.Google.api_key.label',
+              },
+              desc: {
+                i18nKey: 'settings.ai.Google.api_key.desc',
+              },
+            },
+            models: {
+              key: 'extensions_google_models',
+              type: 'input',
+              title: {
+                i18nKey: 'settings.ai.Google.models.label',
+              },
+              desc: {
+                i18nKey: 'settings.ai.Google.models.desc',
+              },
+            },
+          },
         ],
       },
     },

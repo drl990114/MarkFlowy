@@ -1,15 +1,15 @@
 import { createDeepSeek } from '@ai-sdk/deepseek'
+import { createGoogleGenerativeAI } from '@ai-sdk/google'
 import { createOpenAI } from '@ai-sdk/openai'
-import { generateText, LanguageModel } from 'ai'
-import { createOllama } from 'ollama-ai-provider'
+import { generateText, LanguageModel, ModelMessage } from 'ai'
+import { createOllama } from 'ollama-ai-provider-v2'
 
 export type AIGenerateTextParams = {
   sdkProvider: keyof typeof generateTextHandlerMap
   url: string
   apiKey: string
   model: string
-  text: string
-  config?: Pick<Parameters<typeof generateText>[0], 'messages'>
+  messages: Array<ModelMessage>
 }
 
 export type AIProviders = AIGenerateTextParams['sdkProvider']
@@ -21,12 +21,7 @@ type WrapCommonParamsFuncParams = Partial<AIGenerateTextParams> & {
 const wrapCommonParams = (params: WrapCommonParamsFuncParams) => {
   const res: Parameters<typeof generateText>[0] = {
     model: params.aiModel,
-  }
-
-  if (params.config?.messages) {
-    res.messages = params.config.messages
-  } else if (params.text) {
-    res.prompt = params.text
+    messages: params.messages!,
   }
 
   return res
@@ -83,6 +78,23 @@ export const generateTextHandlerMap = {
       return text
     },
   },
+  google: {
+    generateText: async (params: AIGenerateTextParams) => {
+      const google = createGoogleGenerativeAI({
+        baseURL: params.url || undefined,
+        apiKey: params.apiKey,
+      })
+
+      const { text } = await generateText(
+        wrapCommonParams({
+          aiModel: google(params.model),
+          ...params,
+        }),
+      )
+
+      return text
+    },
+  },
 }
 
 export const aiProviders = Object.keys(
@@ -110,5 +122,10 @@ export const aiProviderSettingKeysMap: Record<
   ollama: {
     apibase: 'extensions_ollama_apibase',
     models: 'extensions_ollama_models',
+  },
+  google: {
+    apibase: 'extensions_google_apibase',
+    models: 'extensions_google_models',
+    apikey: 'extensions_google_apikey',
   },
 }

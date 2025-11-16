@@ -246,6 +246,21 @@
       },
       "model": {
         "label": "AIモデル"
+      },
+      "Google": {
+        "label": "Google",
+        "api_base": {
+          "label": "API Base",
+          "desc": "Google AIのAPIアドレス."
+        },
+        "api_key": {
+          "label": "APIキー",
+          "desc": "Google AIのAPIキー。"
+        },
+        "models": {
+          "label": "モデルリスト",
+          "desc": "モデルリスト。モデル名をコンマで分割し、デフォルトは「」です"
+        }
       }
     },
     "resetAppConf": {

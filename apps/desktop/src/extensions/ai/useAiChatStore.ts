@@ -16,6 +16,7 @@ export const defaultAiProviderModelsMap = {
   openai: ['gpt-3.5-turbo', 'gpt-4-32k', 'gpt-4'],
   deepseek: ['deepseek-chat'],
   ollama: ['llama3.3'],
+  google: ['gemini-2.5-flash']
 }
 
 export const getCurrentAISettingData = () => {
@@ -90,7 +91,9 @@ const useAiChatStore = create<AIStore>()(
           url,
           apiKey,
           model: aiProviderCurModel[aiProvider],
-          text: question,
+          messages: [
+            { role: 'user', content: question },
+          ],
         })
           .then((text) => {
             curStore.addChatAnswer(chat.id, text)
@@ -110,17 +113,14 @@ const useAiChatStore = create<AIStore>()(
           url,
           apiKey,
           model: aiProviderCurModel[aiProvider],
-          text,
-          config: {
-            messages: [
-              {
-                role: 'system',
-                content:
-                  'Please summarize the summary of this article and return it in markdown format. Only the answer can be returned.',
-              },
-              { role: 'user', content: text },
-            ],
-          },
+          messages: [
+            {
+              role: 'system',
+              content:
+                'Please summarize the summary of this article and return it in markdown format. Only the answer can be returned.',
+            },
+            { role: 'user', content: text },
+          ],
         })
 
         return res
@@ -133,16 +133,13 @@ const useAiChatStore = create<AIStore>()(
           url,
           apiKey,
           model: aiProviderCurModel[aiProvider],
-          text: text,
-          config: {
-            messages: [
-              {
-                role: 'system',
-                content: `Please translate this document completely into ${targetLang} and return it in markdown format. Only the answer can be returned.`,
-              },
-              { role: 'user', content: text },
-            ],
-          },
+          messages: [
+            {
+              role: 'system',
+              content: `Please translate this document completely into ${targetLang} and return it in markdown format. Only the answer can be returned.`,
+            },
+            { role: 'user', content: text },
+          ],
         })
 
         return res

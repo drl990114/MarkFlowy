@@ -294,6 +294,21 @@
           "label": "模型列表",
           "desc": "模型列表, 用逗号分割模型名称, 默认为\"\""
         }
+      },
+      "Google": {
+        "label": "Google",
+        "api_base": {
+          "label": "API Base",
+          "desc": " Google AI 的 API 地址."
+        },
+        "api_key": {
+          "label": "API Key",
+          "desc": "Google AI 的 API key。"
+        },
+        "models": {
+          "label": "模型列表",
+          "desc": "模型列表, 用逗号分割模型名称, 默认为\"\""
+        }
       }
     }
   },
