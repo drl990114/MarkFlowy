@@ -288,7 +288,7 @@
         },
         "paste_image_save_relative_path_rule": {
           "label": "Reglas de ruta",
-          "desc": "$ {DocumentPath} se refiere a la ruta de la carpeta superior del archivo que está editando actualmente. Al \"pegar una imagen, la imagen se guardará en la ruta relativa al archivo actual."
+          "desc": "${documentPath} se refiere a la ruta de la carpeta superior del archivo que está editando actualmente. Al \"pegar una imagen, la imagen se guardará en la ruta relativa al archivo actual."
         }
       }
     }

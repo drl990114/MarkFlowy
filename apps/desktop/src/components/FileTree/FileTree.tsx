@@ -25,7 +25,7 @@ export const fileTreeHandler: {
 
 const FileTree: FC<FileTreeProps> = (props) => {
   const { data, onSelect, dndRootElement } = props
-  const { activeId, setFolderDataPure, setFolderData } = useEditorStore()
+  const { activeId, setFolderDataPure } = useEditorStore()
   const deferredActiveId = useDeferredValue(activeId)
   const { t } = useTranslation()
   const tree = useMemo(() => new SimpleTree<IFile>(data), [data])
@@ -125,7 +125,7 @@ const FileTree: FC<FileTreeProps> = (props) => {
                       index: 0,
                     })
 
-                    setFolderData(tree.data)
+                    setFolderDataPure(tree.data)
                   },
                 },
                 {
@@ -150,7 +150,7 @@ const FileTree: FC<FileTreeProps> = (props) => {
                       type: 'internal',
                     })
 
-                    setFolderData(tree.data)
+                    setFolderDataPure(tree.data)
                   },
                 },
               )

@@ -115,7 +115,7 @@ impl AppConf {
             when_paste_image: Some("do_nothing".to_string()),
             paste_image_save_absolute_path: None,
             paste_image_save_relative_path: Some("assets/images".to_string()),
-            paste_image_save_relative_path_rule: Some("${document}/assets".to_string()),
+            paste_image_save_relative_path_rule: Some("${documentPath}/assets".to_string()),
         }
     }
 

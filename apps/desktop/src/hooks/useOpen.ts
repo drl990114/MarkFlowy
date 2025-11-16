@@ -31,10 +31,15 @@ const useOpen = () => {
 
   const openFile = useCallback(async () => {
     const file = await open({ multiple: false, filters: [{ name: 'Markdown', extensions: ['md'] }] })
+  
     if (typeof file !== 'string') return
+
     const fileContent = await getFileContent({ filePath: file })
-    if (!fileContent) return
+
+    if (fileContent === null) return
+
     const fileName = file.split('/').pop() || 'new-file.md'
+
     await addExistingMarkdownFileEdit({
       fileName,
       content: fileContent,
