@@ -5,7 +5,7 @@ import { sleep } from '@/helper'
 import { clipboardRead } from '@/helper/clipboard'
 import { getFileObject } from '@/helper/files'
 import { getFolderPathFromPath, getMdRelativePath } from '@/helper/filesys'
-import { convertImageToBase64, getImageUrlInTauri, moveImageToFolder } from '@/helper/image'
+import { convertImageToBase64, getImageUrlInTauri, moveImageToLocalFolder } from '@/helper/image'
 import { useEditorKeybindingStore } from '@/hooks/useKeyboard'
 import { useEditorStore } from '@/stores'
 import useAppSettingStore from '@/stores/useAppSettingStore'
@@ -44,6 +44,17 @@ export const createWysiwygDelegateOptions = (fileId?: string): CreateWysiwygDele
         const workspaceRoot = useEditorStore.getState().folderData?.[0]?.path
         const settingData = useAppSettingStore.getState().settingData
 
+        const isTextbundle = fileFolderPath?.endsWith('.textbundle')
+
+        if (isTextbundle) {
+          const targetPath = `${fileFolderPath || workspaceRoot || ''}/assets`
+
+          if (workspaceRoot) {
+            const fullPath = await moveImageToLocalFolder(src, targetPath)
+            return await getMdRelativePath(fullPath, fileFolderPath || workspaceRoot)
+          }
+        }
+
         if (settingData.when_paste_image === 'do_nothing') {
           return src
         }
@@ -59,7 +70,7 @@ export const createWysiwygDelegateOptions = (fileId?: string): CreateWysiwygDele
             settingData.paste_image_save_relative_path,
           )
           if (workspaceRoot) {
-            const fullPath = await moveImageToFolder(src, targetPath)
+            const fullPath = await moveImageToLocalFolder(src, targetPath)
             return await getMdRelativePath(fullPath, fileFolderPath || workspaceRoot)
           }
         }
@@ -69,7 +80,7 @@ export const createWysiwygDelegateOptions = (fileId?: string): CreateWysiwygDele
           settingData.paste_image_save_absolute_path
         ) {
           const targetPath = settingData.paste_image_save_absolute_path
-          const fullPath = await moveImageToFolder(src, targetPath)
+          const fullPath = await moveImageToLocalFolder(src, targetPath)
           return await getMdRelativePath(fullPath, targetPath)
         }
 
@@ -83,7 +94,7 @@ export const createWysiwygDelegateOptions = (fileId?: string): CreateWysiwygDele
           )
 
           if (workspaceRoot) {
-            const fullPath = await moveImageToFolder(src, targetPath)
+            const fullPath = await moveImageToLocalFolder(src, targetPath)
             return await getMdRelativePath(fullPath, fileFolderPath || workspaceRoot)
           }
         }

@@ -6,17 +6,17 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub enum FileType {
+    Unknown,
     Markdown,
     Image,
     Json,
     Txt,
-    Directory,
-    Unknown,
+    Directory
 }
 
 pub fn get_file_type(file_name: &str) -> FileType {
     let lower_name = file_name.to_lowercase();
-    if lower_name.ends_with(".md") {
+    if lower_name.ends_with(".md") || lower_name.ends_with(".markdown") {
         FileType::Markdown
     } else if lower_name.ends_with(".jpg") || lower_name.ends_with(".png") {
         FileType::Image

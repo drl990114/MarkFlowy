@@ -97,7 +97,7 @@ export const convertImageToBase64 = async (src: string): Promise<string> => {
   return src
 }
 
-export const moveImageToFolder = async (
+export const moveImageToLocalFolder = async (
   imageSrc: string,
   targetFolderPath: string,
 ): Promise<string> => {
