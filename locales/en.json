@@ -290,16 +290,21 @@
             "do_nothing": "No Operation",
             "save_to_local_relative": "Save to workspace relative path",
             "save_to_local_absolute": "Save to Global Absolute Path",
-            "paste_as_base64": "Paste as Base64 encoding"
+            "paste_as_base64": "Paste as Base64 encoding",
+            "save_to_file_relative": "Save to a path relative to the current file"
           }
         },
         "paste_image_save_absolute_path": {
           "label": "Global Absolute Path",
-          "desc": "When you select Save to Global Absolute Path when Paste Picture, the picture is saved to this path."
+          "desc": "When you paste a picture, the picture is saved to this path."
         },
         "paste_image_save_relative_path": {
           "label": "Workspace relative path",
-          "desc": "When you select Save to workspace relative path when Paste Picture, the picture is saved to this path."
+          "desc": "When \"Paste Picture\", the picture will be calculated relative to the current workspace path according to your rules and saved to this path"
+        },
+        "paste_image_save_relative_path_rule": {
+          "label": "Path Rules",
+          "desc": "${documentPath} refers to the parent folder path of the file you are currently editing. When you paste the picture, the picture will be saved to the path relative to the current file."
         }
       }
     }

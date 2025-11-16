@@ -33,6 +33,10 @@ export const ImageSetting = () => {
               value: 'paste_as_base64',
               title: t('settings.image.event.when_paste_image.options.paste_as_base64'),
             },
+            {
+              value: 'save_to_file_relative',
+              title: t('settings.image.event.when_paste_image.options.save_to_file_relative')
+            }
           ] as const,
         }}
       />
@@ -43,6 +47,17 @@ export const ImageSetting = () => {
             type: 'input',
             title: { i18nKey: 'settings.image.event.paste_image_save_relative_path.label' },
             desc: { i18nKey: 'settings.image.event.paste_image_save_relative_path.desc' },
+          }}
+        />
+      ) : null}
+
+      {settingData.when_paste_image === 'save_to_file_relative' ? (
+        <InputSettingItem
+          item={{
+            key: 'paste_image_save_relative_path_rule',
+            type: 'input',
+            title: { i18nKey: 'settings.image.event.paste_image_save_relative_path_rule.label' },
+            desc: { i18nKey: 'settings.image.event.paste_image_save_relative_path_rule.desc' },
           }}
         />
       ) : null}

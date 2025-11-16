@@ -256,16 +256,21 @@
             "do_nothing": "Aucune opération",
             "save_to_local_relative": "Enregistrer le chemin relatif de la zone de travail",
             "save_to_local_absolute": "Enregistrer le chemin absolu global",
-            "paste_as_base64": "Collez pour l'encodage Base64"
+            "paste_as_base64": "Collez pour l'encodage Base64",
+            "save_to_file_relative": "Enregistrer le chemin d'accès au fichier actuel relatif"
           }
         },
         "paste_image_save_absolute_path": {
           "label": "Chemin absolu global",
-          "desc": "Lorsque \"Coller une image\" sélectionne \"Enregistrer dans le chemin absolu global\", l'image est enregistrée dans ce chemin."
+          "desc": "Lorsque \"Coller une image\", l'image sera enregistrée dans ce chemin."
         },
         "paste_image_save_relative_path": {
           "label": "Chemin relatif de la zone de travail",
-          "desc": "Lorsque \"Coller une image\" sélectionne \"Enregistrer dans le chemin relatif de la zone de travail\", l'image est enregistrée dans ce chemin."
+          "desc": "Lorsque \"Coller une image\", l'image sera calculée en fonction de vos règles par rapport au chemin de travail actuel, enregistré dans ce chemin"
+        },
+        "paste_image_save_relative_path_rule": {
+          "label": "Règles de chemin",
+          "desc": "$ {DocumentPath} fait référence au chemin du dossier supérieur du fichier que vous éditez actuellement. Lorsque vous \"collez l'image, l'image sera enregistrée au chemin par rapport au fichier actuel."
         }
       }
     }
