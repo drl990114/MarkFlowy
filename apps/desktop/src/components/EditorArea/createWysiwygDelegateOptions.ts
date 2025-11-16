@@ -69,9 +69,11 @@ export const createWysiwygDelegateOptions = (fileId?: string): CreateWysiwygDele
             workspaceRoot || '',
             settingData.paste_image_save_relative_path,
           )
+          const fullPath = await moveImageToLocalFolder(src, targetPath)
           if (workspaceRoot) {
-            const fullPath = await moveImageToLocalFolder(src, targetPath)
             return await getMdRelativePath(fullPath, fileFolderPath || workspaceRoot)
+          } else {
+            return fullPath
           }
         }
 
@@ -81,7 +83,7 @@ export const createWysiwygDelegateOptions = (fileId?: string): CreateWysiwygDele
         ) {
           const targetPath = settingData.paste_image_save_absolute_path
           const fullPath = await moveImageToLocalFolder(src, targetPath)
-          return await getMdRelativePath(fullPath, targetPath)
+          return fullPath
         }
 
         if (
@@ -90,12 +92,14 @@ export const createWysiwygDelegateOptions = (fileId?: string): CreateWysiwygDele
         ) {
           const targetPath = settingData.paste_image_save_relative_path_rule.replace(
             '${documentPath}',
-            fileFolderPath || workspaceRoot || '',
+            fileFolderPath || '',
           )
+          const fullPath = await moveImageToLocalFolder(src, targetPath)
 
           if (workspaceRoot) {
-            const fullPath = await moveImageToLocalFolder(src, targetPath)
-            return await getMdRelativePath(fullPath, fileFolderPath || workspaceRoot)
+            return await getMdRelativePath(fullPath, fileFolderPath || workspaceRoot || '')
+          } else {
+            return fullPath
           }
         }
       } catch (error) {
@@ -134,13 +138,14 @@ export const createWysiwygDelegateOptions = (fileId?: string): CreateWysiwygDele
           messages: [
             {
               role: 'system',
-              content: 'You are a helpful Markdown editor assistant, Please refer to the user information to generate the Markdown content.',
+              content:
+                'You are a helpful Markdown editor assistant, Please refer to the user information to generate the Markdown content.',
             },
             {
               role: 'user',
               content: params.prompt,
             },
-          ]
+          ],
         })
 
         return text

@@ -285,7 +285,7 @@
         },
         "paste_image_save_relative_path_rule": {
           "label": "Règles de chemin",
-          "desc": "$ {DocumentPath} fait référence au chemin du dossier supérieur du fichier que vous éditez actuellement. Lorsque vous \"collez l'image, l'image sera enregistrée au chemin par rapport au fichier actuel."
+          "desc": "${documentPath} fait référence au chemin du dossier supérieur du fichier que vous éditez actuellement. Lorsque vous \"collez l'image, l'image sera enregistrée au chemin par rapport au fichier actuel."
         }
       }
     }
