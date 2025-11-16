@@ -20,13 +20,16 @@ export async function getFileTypeConfig(file: IFile): Promise<FileTypeConfig> {
   const ext = await extname(file.path || file.name || '')
   const { settingData } = useAppSettingStore.getState()
 
+  const markdownFileType: FileTypeConfig = {
+    type: 'markdown',
+    supportedModes: [EditorViewType.PREVIEW, EditorViewType.WYSIWYG, EditorViewType.SOURCECODE],
+    defaultMode: settingData.md_editor_default_mode || EditorViewType.WYSIWYG,
+    exporters: ['Html', 'Image'],
+  }
+
   const fileTypeConfigs: Record<string, FileTypeConfig> = {
-    md: {
-      type: 'markdown',
-      supportedModes: [EditorViewType.PREVIEW, EditorViewType.WYSIWYG, EditorViewType.SOURCECODE],
-      defaultMode: settingData.md_editor_default_mode || EditorViewType.WYSIWYG,
-      exporters: ['Html', 'Image'],
-    },
+    md: markdownFileType,
+    markdown: markdownFileType,
     json: {
       type: 'json',
       supportedModes: [EditorViewType.SOURCECODE],
