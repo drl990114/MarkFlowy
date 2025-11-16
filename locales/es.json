@@ -241,6 +241,21 @@
           "label": "Lista de modelos",
           "desc": "Lista de modelos, divida el nombre del modelo con comas, el valor predeterminado es \"\""
         }
+      },
+      "Google": {
+        "label": "Google",
+        "api_base": {
+          "label": "Base de API",
+          "desc": "Dirección API de Google AI."
+        },
+        "api_key": {
+          "label": "API Key",
+          "desc": "La clave API de Google AI."
+        },
+        "models": {
+          "label": "Lista de modelos",
+          "desc": "Lista de modelos, divida el nombre del modelo con comas, el valor predeterminado es \"\""
+        }
       }
     },
     "resetAppConf": {

@@ -238,6 +238,21 @@
           "label": "Liste des modèles",
           "desc": "Liste de modèles, avec un nom de modèle divisé par une virgule, par défaut \"\""
         }
+      },
+      "Google": {
+        "label": "Google",
+        "api_base": {
+          "label": "Base API",
+          "desc": "Adresse API de Google AI."
+        },
+        "api_key": {
+          "label": "API Key",
+          "desc": "La clé API de Google AI."
+        },
+        "models": {
+          "label": "Liste des modèles",
+          "desc": "Liste de modèles, avec un nom de modèle divisé par une virgule, par défaut \"\""
+        }
       }
     },
     "resetAppConf": {

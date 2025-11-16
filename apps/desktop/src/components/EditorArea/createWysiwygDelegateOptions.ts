@@ -131,7 +131,16 @@ export const createWysiwygDelegateOptions = (fileId?: string): CreateWysiwygDele
           url: apiBase,
           apiKey,
           model: params.model,
-          text: params.prompt,
+          messages: [
+            {
+              role: 'system',
+              content: 'You are a helpful Markdown editor assistant, Please refer to the user information to generate the Markdown content.',
+            },
+            {
+              role: 'user',
+              content: params.prompt,
+            },
+          ]
         })
 
         return text

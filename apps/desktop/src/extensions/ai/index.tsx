@@ -7,8 +7,7 @@ import { useCommandStore } from '@/stores'
 import useThemeStore from '@/stores/useThemeStore'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import ReactLoading from 'react-loading'
-import { Button, Input, Menu, Space } from 'zens'
+import { Button, Input, Loading, Menu, Space } from 'zens'
 import { aiProviders } from './aiProvidersService'
 import { parseChatList } from './parseChatList'
 import { BottomBar, Container, ListContainer } from './styles'
@@ -139,12 +138,9 @@ const ChatList: React.FC<ChatListProps> = (props) => {
                       <span>AI</span>
                     </div>
                     {chat.status === 'pending' ? (
-                      <ReactLoading
-                        type='bubbles'
-                        width={35}
-                        height={35}
-                        color={curTheme.styledConstants.accentColor}
-                      />
+                      <div style={{ padding: '6px 0' }}>
+                        <Loading size={16} color={curTheme.styledConstants.accentColor} />
+                      </div>
                     ) : chat.status === 'error' ? (
                       <div>
                         <div style={{ color: 'red', margin: '6px 0' }}>
@@ -156,7 +152,7 @@ const ChatList: React.FC<ChatListProps> = (props) => {
                         </div>
                       </div>
                     ) : (
-                      <p>{chat.answer}</p>
+                      <p style={{ whiteSpace: 'pre-wrap' }}>{chat.answer}</p>
                     )}
                   </div>
                 </div>
