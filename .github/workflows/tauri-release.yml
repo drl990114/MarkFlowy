@@ -233,7 +233,8 @@ jobs:
 
       - run: |
           cat > release.txt << EOF
-          ## v${{ env.version }}
+
+          ---
 
           <details>
 
