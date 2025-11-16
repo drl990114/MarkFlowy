@@ -130,6 +130,7 @@
   "command": {
     "id_descriptions": {
       "app_openFolder": "Open a folder",
+      "app_openSetting": "Open the Settings window",
       "app_toggleLeftsidebarVisible": "Toggle left sideBar visible",
       "app_toggleRightsidebarVisible": "Toggle right sideBar visible",
       "app_save": "Save current active edit file",

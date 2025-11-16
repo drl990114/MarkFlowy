@@ -356,6 +356,7 @@
   "command": {
     "id_descriptions": {
       "app_openFolder": "フォルダを開く",
+      "app_openSetting": "設定ウィンドウを開く",
       "app_toggleLeftsidebarVisible": "左サイドバーを切り替えて表示",
       "app_toggleRightsidebarVisible": "表示される右サイドバーの切り替え",
       "app_save": "現在のアクティブな編集ファイルを保存する",
