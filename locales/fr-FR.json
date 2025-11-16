@@ -356,6 +356,7 @@
   "command": {
     "id_descriptions": {
       "app_openFolder": "Ouvrir un dossier",
+      "app_openSetting": "Ouvrir la fenêtre des paramètres",
       "app_toggleLeftsidebarVisible": "Basculer la barre latérale gauche visible",
       "app_toggleRightsidebarVisible": "Basculer la barre latérale droite visible",
       "app_save": "Enregistrer le fichier de modification actif actuel",

@@ -356,6 +356,7 @@
   "command": {
     "id_descriptions": {
       "app_openFolder": "打开文件夹",
+      "app_openSetting": "打开设置窗口",
       "app_toggleLeftsidebarVisible": "切换左侧边栏可见",
       "app_toggleRightsidebarVisible": "切换右侧边栏可见",
       "app_save": "保存当前活动的编辑文件",

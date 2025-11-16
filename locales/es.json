@@ -356,6 +356,7 @@
   "command": {
     "id_descriptions": {
       "app_openFolder": "Abrir una carpeta",
+      "app_openSetting": "Abrir la ventana de configuración",
       "app_toggleLeftsidebarVisible": "Alternar barra lateral izquierda visible",
       "app_toggleRightsidebarVisible": "Alternar barra lateral derecha visible",
       "app_save": "Guardar archivo de edición activo actual",
