@@ -1,15 +1,17 @@
+import { CSSProperties } from "react"
 import { useTranslation } from "react-i18next"
 import styled from "styled-components"
 
 interface SettingLabelProps {
   item: Setting.BaseSettingItem
+  style?: CSSProperties
 }
 
 export const SettingLabel = (props: SettingLabelProps) => {
-  const { item } = props
+  const { item, style } = props
   const { t } = useTranslation()
 
-  return <Container>
+  return <Container style={style}>
     <label className="setting-item__title">{t(item.title.i18nKey)}</label>
     {item.desc ? <label className="setting-item__label">{t((item.desc.i18nKey))}</label> : null}
   </Container>

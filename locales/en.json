@@ -13,7 +13,10 @@
     "file": "file",
     "folder": "folder",
     "fetching": "Loading...",
-    "submit": "submit"
+    "submit": "submit",
+    "addHeader": "Add Header",
+    "key": "Key",
+    "value": "Value"
   },
   "view": {
     "label": "View",
@@ -394,5 +397,11 @@
       }
     },
     "label": "Book"
+  },
+  "request": {
+    "headers_config": {
+      "label": "Configure Request Header",
+      "desc": "Add custom HTTP request headers to support multiple key-value pairs."
+    }
   }
 }

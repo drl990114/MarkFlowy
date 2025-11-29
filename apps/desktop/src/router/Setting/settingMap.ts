@@ -195,6 +195,19 @@ export const getSettingMap = () => {
                 i18nKey: 'settings.ai.ChatGPT.models.desc',
               },
             },
+            requestHeaders: {
+              key: 'extensions_chatgpt_request_headers',
+              type: 'stringMapJson',
+              title: {
+                i18nKey: 'request.headers_config.label',
+              },
+              desc: {
+                i18nKey: 'request.headers_config.desc',
+              },
+              i18nProps: {
+                add: 'common.addHeader'
+              }
+            },
           },
           {
             i18nKey: 'settings.ai.DeepSeek.label',
@@ -228,6 +241,19 @@ export const getSettingMap = () => {
                 i18nKey: 'settings.ai.DeepSeek.models.desc',
               },
             },
+            requestHeaders: {
+              key: 'extensions_deepseek_request_headers',
+              type: 'stringMapJson',
+              title: {
+                i18nKey: 'request.headers_config.label',
+              },
+              desc: {
+                i18nKey: 'request.headers_config.desc',
+              },
+              i18nProps: {
+                add: 'common.addHeader'
+              }
+            },
           },
           {
             i18nKey: 'settings.ai.Ollama.label',
@@ -250,6 +276,19 @@ export const getSettingMap = () => {
               desc: {
                 i18nKey: 'settings.ai.Ollama.models.desc',
               },
+            },
+            requestHeaders: {
+              key: 'extensions_ollama_request_headers',
+              type: 'stringMapJson',
+              title: {
+                i18nKey: 'request.headers_config.label',
+              },
+              desc: {
+                i18nKey: 'request.headers_config.desc',
+              },
+              i18nProps: {
+                add: 'common.addHeader'
+              }
             },
           },
            {
@@ -283,6 +322,19 @@ export const getSettingMap = () => {
               desc: {
                 i18nKey: 'settings.ai.Google.models.desc',
               },
+            },
+            requestHeaders: {
+              key: 'extensions_google_request_headers',
+              type: 'stringMapJson',
+              title: {
+                i18nKey: 'request.headers_config.label',
+              },
+              desc: {
+                i18nKey: 'request.headers_config.desc',
+              },
+              i18nProps: {
+                add: 'common.addHeader'
+              }
             },
           },
         ],

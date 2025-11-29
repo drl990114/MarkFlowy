@@ -13,7 +13,10 @@
     "file": "archivo",
     "folder": "carpeta",
     "fetching": "Cargando...",
-    "submit": "Presentar"
+    "submit": "Presentar",
+    "addHeader": "Añadir Header",
+    "key": "Claves",
+    "value": "Valor"
   },
   "view": {
     "label": "Vista",
@@ -393,6 +396,12 @@
       "editor_toggleH4": "Alternar a H4",
       "editor_toggleH5": "Alternar a H5",
       "editor_toggleH6": "Alternar a H6"
+    }
+  },
+  "request": {
+    "headers_config": {
+      "label": "Configurar el encabezado de la solicitud",
+      "desc": "Agrega un encabezado de solicitud HTTP personalizado que admite varias configuraciones de pares clave-valor."
     }
   }
 }

@@ -141,7 +141,7 @@ export const EditorInfoBar = memo(() => {
     const aiSettingData = getCurrentAISettingData()
     const res = await addAppTask<ReturnType<typeof getPostSummary>>({
       title: 'AI: Retrieving article abstract',
-      promise: getPostSummary(content || '', aiSettingData.apiBase, aiSettingData.apiKey),
+      promise: getPostSummary(content || '', aiSettingData),
     })
     addNewMarkdownFileEdit({
       fileName: 'summary.md',
@@ -168,8 +168,7 @@ ${res}
         title: 'AI: Translating article',
         promise: getPostTranslate(
           content || '',
-          aiSettingData.apiBase,
-          aiSettingData.apiKey,
+          aiSettingData,
           targetLang,
         ),
       })

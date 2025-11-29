@@ -130,6 +130,7 @@ export const createWysiwygDelegateOptions = (fileId?: string): CreateWysiwygDele
         const aiSettingData = getCurrentAISettingData()
         const apiBase = aiSettingData.apiBase
         const apiKey = aiSettingData.apiKey
+        const headers = aiSettingData.headers
         const text = await aiGenerateTextRequest({
           sdkProvider: params.provider as AIGenerateTextParams['sdkProvider'],
           url: apiBase,
@@ -146,6 +147,7 @@ export const createWysiwygDelegateOptions = (fileId?: string): CreateWysiwygDele
               content: params.prompt,
             },
           ],
+          headers,
         })
 
         return text

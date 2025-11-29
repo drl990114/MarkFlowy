@@ -5,7 +5,7 @@ import { EVENT, RIGHTBARITEMKEYS } from '@/constants'
 import { addNewMarkdownFileEdit } from '@/services/editor-file'
 import { useCommandStore } from '@/stores'
 import useThemeStore from '@/stores/useThemeStore'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button, Input, Loading, Menu, Space } from 'zens'
 import { aiProviders } from './aiProvidersService'
@@ -25,9 +25,7 @@ const ChatList: React.FC<ChatListProps> = (props) => {
     setAiProviderCurModel,
   } = useAiChatStore()
   const { curTheme } = useThemeStore()
-  const aiSettingData = getCurrentAISettingData()
-  const apiBase = aiSettingData.apiBase
-  const apiKey = aiSettingData.apiKey
+  const aiSettingData = useMemo(() => getCurrentAISettingData(), [])
   const [askInput, setAskInput] = useState('')
   const listRef = useRef<HTMLDivElement>(null)
   const { t } = useTranslation()
@@ -43,9 +41,9 @@ const ChatList: React.FC<ChatListProps> = (props) => {
     //   return toast.error('Please set your API Key first')
     // }
 
-    addChat(askInput, apiBase, apiKey)
+    addChat(askInput, aiSettingData)
     setAskInput('')
-  }, [apiKey, addChat, askInput])
+  }, [aiSettingData, addChat, askInput])
 
   const exportChats = useCallback(() => {
     const content = parseChatList(chatList)

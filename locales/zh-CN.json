@@ -13,7 +13,10 @@
     "file": "文件",
     "folder": "文件夹",
     "fetching": "加载中...",
-    "submit": "提交"
+    "submit": "提交",
+    "addHeader": "添加 Header",
+    "key": "键",
+    "value": "值"
   },
   "view": {
     "label": "视图",
@@ -37,6 +40,12 @@
     "summary": "摘要",
     "create_file": "新建文件",
     "unsave": "取消保存"
+  },
+  "request": {
+    "headers_config": {
+      "label": "配置请求头",
+      "desc": "添加自定义 HTTP 请求头，支持多个键值对配置。"
+    }
   },
   "placeholder": {
     "translate": "请输入目标语言"
