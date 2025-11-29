@@ -13,7 +13,10 @@
     "file": "ファイル",
     "folder": "フォルダー",
     "fetching": "読み込み中...",
-    "submit": "送信"
+    "submit": "送信",
+    "addHeader": "Headerを追加",
+    "key": "キー",
+    "value": "値"
   },
   "view": {
     "label": "表示",
@@ -393,6 +396,12 @@
       "editor_toggleH4": "H4へのトグル",
       "editor_toggleH5": "H5へのトグル",
       "editor_toggleH6": "H6へのトグル"
+    }
+  },
+  "request": {
+    "headers_config": {
+      "label": "リクエストヘッダの設定",
+      "desc": "カスタムHTTPリクエストヘッダーを追加し、複数のキー値ペア構成をサポートします。"
     }
   }
 }

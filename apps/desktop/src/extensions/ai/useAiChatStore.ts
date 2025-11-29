@@ -16,10 +16,17 @@ export const defaultAiProviderModelsMap = {
   openai: ['gpt-3.5-turbo', 'gpt-4-32k', 'gpt-4'],
   deepseek: ['deepseek-chat'],
   ollama: ['llama3.3'],
-  google: ['gemini-2.5-flash']
+  google: ['gemini-2.5-flash'],
 }
 
-export const getCurrentAISettingData = () => {
+export type AISettingData = {
+  apiBase: string
+  models: string
+  apiKey: string
+  headers?: Record<string, string>
+}
+
+export const getCurrentAISettingData = (): AISettingData => {
   const settingData = useAppSettingStore.getState().settingData
   const aiProvider = useAiChatStore.getState().aiProvider
   const aiProviderSettings = aiProviderSettingKeysMap[aiProvider]
@@ -28,6 +35,9 @@ export const getCurrentAISettingData = () => {
     apiBase: settingData[aiProviderSettings.apibase],
     models: settingData[aiProviderSettings.models],
     apiKey: aiProviderSettings.apikey ? settingData[aiProviderSettings.apikey] : '',
+    headers: aiProviderSettings.requestHeaders
+      ? settingData[aiProviderSettings.requestHeaders]
+      : undefined,
   }
 }
 
@@ -81,19 +91,19 @@ const useAiChatStore = create<AIStore>()(
         })
       },
 
-      addChat: (question: string, url: string, apiKey: string) => {
+      addChat: (question: string, aiSettingData) => {
         const curStore = get()
         const { aiProviderCurModel, aiProvider } = curStore
         const chat = curStore.addChatQuestion(question)
+        const { apiKey, apiBase, headers } = aiSettingData
 
         aiGenerateTextRequest({
           sdkProvider: aiProvider,
-          url,
+          url: apiBase,
           apiKey,
+          headers,
           model: aiProviderCurModel[aiProvider],
-          messages: [
-            { role: 'user', content: question },
-          ],
+          messages: [{ role: 'user', content: question }],
         })
           .then((text) => {
             curStore.addChatAnswer(chat.id, text)
@@ -106,12 +116,15 @@ const useAiChatStore = create<AIStore>()(
         return chat
       },
 
-      getPostSummary: async (text: string, url: string, apiKey: string) => {
+      getPostSummary: async (text: string, aiSettingData) => {
         const { aiProvider, aiProviderCurModel } = get()
+        const { apiKey, apiBase, headers } = aiSettingData
+
         const res = await aiGenerateTextRequest({
           sdkProvider: aiProvider,
-          url,
+          url: apiBase,
           apiKey,
+          headers,
           model: aiProviderCurModel[aiProvider],
           messages: [
             {
@@ -126,12 +139,15 @@ const useAiChatStore = create<AIStore>()(
         return res
       },
 
-      getPostTranslate: async (text: string, url: string, apiKey: string, targetLang: string) => {
+      getPostTranslate: async (text: string, aiSettingData, targetLang: string) => {
         const { aiProvider, aiProviderCurModel } = get()
+        const { apiKey, apiBase, headers } = aiSettingData
+        
         const res = await aiGenerateTextRequest({
           sdkProvider: aiProvider,
-          url,
+          url: apiBase,
           apiKey,
+          headers,
           model: aiProviderCurModel[aiProvider],
           messages: [
             {
@@ -249,12 +265,11 @@ interface AIStore {
   aiProviderCurModel: Record<AIProviders, string>
   chatList: AIChatHistory[]
   setChatStatus: (id: string, status: ChatStatus, errorMessage?: string) => void
-  addChat: (question: string, url: string, apiKey: string) => AIChatHistory
-  getPostSummary: (text: string, url: string, apiKey: string) => Promise<string>
+  addChat: (question: string, aiSettingData: AISettingData) => AIChatHistory
+  getPostSummary: (text: string, aiSettingData: AISettingData) => Promise<string>
   getPostTranslate: (
     text: string,
-    url: string,
-    apiKey: string,
+    aiSettingData: AISettingData,
     targetLang: string,
   ) => Promise<string>
   addChatQuestion: (question: string) => AIChatHistory

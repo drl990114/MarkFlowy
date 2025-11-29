@@ -4,8 +4,8 @@ use crate::{
 };
 use etcetera::{choose_app_strategy, AppStrategy, AppStrategyArgs};
 use serde_json::Value;
-use std::{collections::BTreeMap, path::PathBuf};
-use tauri::{Manager, Theme};
+use std::{collections::{BTreeMap, HashMap}, path::PathBuf};
+use tauri::Theme;
 
 macro_rules! pub_struct {
   ($name:ident {$($field:ident: $t:ty,)*}) => {
@@ -34,14 +34,18 @@ pub_struct!(AppConf {
     extensions_chatgpt_apibase: Option<String>,
     extensions_chatgpt_apikey: Option<String>,
     extensions_chatgpt_models: Option<String>,
+    extensions_chatgpt_request_headers: Option<HashMap<String, String>>,
     extensions_deepseek_apibase: Option<String>,
     extensions_deepseek_apikey: Option<String>,
     extensions_deepseek_models: Option<String>,
+    extensions_deepseek_request_headers: Option<HashMap<String, String>>,
     extensions_ollama_apibase: Option<String>,
     extensions_ollama_models: Option<String>,
+    extensions_ollama_request_headers: Option<HashMap<String, String>>,
     extensions_google_apibase: Option<String>,
     extensions_google_models: Option<String>,
     extensions_google_apikey: Option<String>,
+    extensions_google_request_headers: Option<HashMap<String, String>>,
     autosave: Option<bool>,
     autosave_interval: Option<u32>,
     editor_root_font_family: Option<String>,
@@ -104,14 +108,18 @@ impl AppConf {
             extensions_chatgpt_apibase: Some("".to_string()),
             extensions_chatgpt_models: Some("gpt-3.5-turbo,gpt-4-32k,gpt-4".to_string()),
             extensions_chatgpt_apikey: Some("".to_string()),
+            extensions_chatgpt_request_headers: Some(HashMap::new()),
             extensions_deepseek_models: Some("deepseek-chat,deepseek-reasoner".to_string()),
             extensions_deepseek_apibase: Some("".to_string()),
             extensions_deepseek_apikey: Some("".to_string()),
+            extensions_deepseek_request_headers: Some(HashMap::new()),
             extensions_ollama_models: Some("llama3.3".to_string()),
             extensions_ollama_apibase: Some("".to_string()),
+            extensions_ollama_request_headers: Some(HashMap::new()),
             extensions_google_models: Some("gemini-2.5-flash".to_string()),
             extensions_google_apibase: Some("".to_string()),
             extensions_google_apikey: Some("".to_string()),
+            extensions_google_request_headers: Some(HashMap::new()),
             when_paste_image: Some("do_nothing".to_string()),
             paste_image_save_absolute_path: None,
             paste_image_save_relative_path: Some("assets/images".to_string()),
@@ -147,14 +155,18 @@ impl AppConf {
             extensions_chatgpt_apibase,
             extensions_chatgpt_apikey,
             extensions_chatgpt_models,
+            extensions_chatgpt_request_headers,
             extensions_deepseek_models,
             extensions_deepseek_apibase,
             extensions_deepseek_apikey,
+            extensions_deepseek_request_headers,
             extensions_ollama_models,
             extensions_ollama_apibase,
+            extensions_ollama_request_headers,
             extensions_google_models,
             extensions_google_apibase,
             extensions_google_apikey,
+            extensions_google_request_headers,
             when_paste_image,
             paste_image_save_absolute_path,
             paste_image_save_relative_path,

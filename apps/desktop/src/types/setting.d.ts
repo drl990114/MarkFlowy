@@ -12,6 +12,7 @@ declare namespace Setting {
     | SwitchSettingItem
     | SliderSettingItem
     | FontListSelectSettingItem
+    | StringMapJsonSettingItem
 
   type BaseSettingItem = {
     key: string
@@ -30,6 +31,13 @@ declare namespace Setting {
 
   type FontListSelectSettingItem = {
     type: 'fontListSelect'
+  } & BaseSettingItem
+
+  type StringMapJsonSettingItem = {
+    type: 'stringMapJson'
+    i18nProps: {
+      add: string
+    }
   } & BaseSettingItem
 
   type InputSettingItem = {

@@ -13,7 +13,10 @@
     "file": "fichier",
     "folder": "dossier",
     "fetching": "chargement...",
-    "submit": "Soumission"
+    "submit": "Soumission",
+    "addHeader": "Ajouter Header",
+    "key": "Touches",
+    "value": "Valeur"
   },
   "view": {
     "label": "vue",
@@ -393,6 +396,12 @@
       "editor_toggleH4": "Basculer sur H4",
       "editor_toggleH5": "Bascule à H5",
       "editor_toggleH6": "Basculer sur H6"
+    }
+  },
+  "request": {
+    "headers_config": {
+      "label": "Configuration de l'en-tête de demande",
+      "desc": "Ajoutez des en-têtes de requête HTTP personnalisés qui prennent en charge plusieurs configurations de paires clé-valeur."
     }
   }
 }
