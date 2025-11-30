@@ -1,5 +1,25 @@
 # UPDATE LOG
 
+## v0.43.0
+
+Features:
+
+- support config ai request headers.
+
+Fixed:
+
+- Fix the mark matching condition.
+
+---
+
+特性:
+
+- 支持配置 AI 请求头。
+
+修复:
+
+- 修复mark匹配条件。
+
 ## v0.42.0
 
 Features:
