@@ -81,7 +81,8 @@
     "size": "Taille du fichier",
     "info": "Informations sur le fichier",
     "newTab": "Nouvelle onglet",
-    "path": "Chemin d'accès au fichier"
+    "path": "Chemin d'accès au fichier",
+    "clearRecent": "Effacer les enregistrements"
   },
   "about": {
     "label": "À propos",

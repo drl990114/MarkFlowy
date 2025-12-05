@@ -89,7 +89,8 @@
     "size": "File Size",
     "info": "File Information",
     "newTab": "New Tab",
-    "path": "File Path"
+    "path": "File Path",
+    "clearRecent": "Clear Recent"
   },
   "about": {
     "label": "About",

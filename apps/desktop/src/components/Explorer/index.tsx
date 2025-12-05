@@ -3,9 +3,10 @@ import type { IFile } from '@/helper/filesys'
 import { useOpen } from '@/hooks'
 import { useEditorStore } from '@/stores'
 import useOpenedCacheStore from '@/stores/useOpenedCacheStore'
+import { homeDir } from '@tauri-apps/api/path'
 import classNames from 'classnames'
 import type { FC, MouseEventHandler } from 'react'
-import { memo, useCallback, useMemo, useState } from 'react'
+import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 import { Popover } from 'zens'
@@ -17,11 +18,32 @@ const RecentListBottom = styled.div`
   font-size: 0.7rem;
   cursor: pointer;
   text-align: center;
+  color: ${(props) => props.theme.labelFontColor};
 
   &:hover {
     background-color: ${(props) => props.theme.tipsBgColor};
   }
 `
+
+const shortenPath = (path: string, homePath: string) => {
+  if (!homePath) return path
+  if (path === homePath) return '~'
+  if (path.startsWith(homePath)) {
+    const nextChar = path[homePath.length]
+    if (nextChar === '/' || nextChar === '\\') {
+      return `~${path.slice(homePath.length)}`
+    }
+  }
+  return path
+}
+
+const getFolderName = (path: string) => {
+  if (!path) return ''
+  // Remove trailing separator if exists
+  const normalized = path.replace(/[/\\]$/, '')
+  const match = normalized.match(/[^/\\]+$/)
+  return match ? match[0] : normalized
+}
 
 const Explorer: FC<ExplorerProps> = (props) => {
   const { t } = useTranslation()
@@ -30,6 +52,11 @@ const Explorer: FC<ExplorerProps> = (props) => {
   const { recentWorkspaces, clearRecentWorkspaces } = useOpenedCacheStore()
   const { openFolderDialog, openFolder } = useOpen()
   const [dndRootElement, setDndRootElement] = useState<HTMLDivElement | null>(null)
+  const [homePath, setHomePath] = useState<string>('')
+
+  useEffect(() => {
+    homeDir().then(setHomePath)
+  }, [])
 
   const handleSelect = (item: IFile) => {
     if (item?.kind !== 'file') return
@@ -45,7 +72,7 @@ const Explorer: FC<ExplorerProps> = (props) => {
 
   const handleOpenHistoryListItemClick = useCallback(
     (item: ListDataItem) => {
-      openFolder(item.title)
+      openFolder(item.key as string)
       setPopperOpen(false)
     },
     [openFolder],
@@ -57,10 +84,11 @@ const Explorer: FC<ExplorerProps> = (props) => {
     () =>
       recentWorkspaces.map((history: { path: string }) => ({
         key: history.path,
-        title: history.path,
+        title: getFolderName(history.path),
+        tooltip: shortenPath(history.path, homePath),
         iconCls: 'ri-folder-5-line',
       })),
-    [recentWorkspaces],
+    [recentWorkspaces, homePath],
   )
 
   const containerCLs = classNames(props.className)
@@ -97,7 +125,7 @@ const Explorer: FC<ExplorerProps> = (props) => {
                 data={listData}
                 onItemClick={handleOpenHistoryListItemClick}
               />
-              <RecentListBottom onClick={handleClearRecent}>Clear Recent</RecentListBottom>
+              <RecentListBottom onClick={handleClearRecent}>{t('file.clearRecent')}</RecentListBottom>
             </>
           }
         >
