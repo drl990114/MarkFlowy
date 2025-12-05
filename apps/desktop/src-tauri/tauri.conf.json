@@ -34,7 +34,7 @@
           ".markdown",
           ".json"
         ],
-        "name": "markflowy.file",
+        "name": "Editor",
         "description": "File",
         "mimeType": "text/plain",
         "role": "Editor"
@@ -78,7 +78,13 @@
           "**"
         ]
       },
-      "csp": null
+      "csp": {
+        "img-src": "'self' data: blob: https: http:",
+        "style-src": "'self' 'unsafe-inline'",
+        "font-src": "'self' data: https: http:",
+        "frame-src": "'self' https: http:"
+      },
+      "dangerousDisableAssetCspModification": true
     }
   }
 }
