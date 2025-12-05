@@ -89,7 +89,8 @@
     "lastModified": "前回の更新",
     "size": "ファイルサイズ",
     "newTab": "新しいタブ",
-    "path": "ファイルパス"
+    "path": "ファイルパス",
+    "clearRecent": "記録をクリア"
   },
   "about": {
     "label": "About",

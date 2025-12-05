@@ -41,7 +41,7 @@ const List: FC<ListProps> = (props) => {
                   primary={item.title}
                 />
               ) : (
-                <Tooltip title={item.title} placement='right' {...tip}>
+                <Tooltip title={item.tooltip || item.title} placement='right' {...tip}>
                   <ListItemText
                     className='list-item__text'
                     primaryTypographyProps={{
@@ -67,6 +67,7 @@ const List: FC<ListProps> = (props) => {
 export interface ListDataItem {
   key: React.Key
   title: string
+  tooltip?: string
   iconCls?: string
 }
 

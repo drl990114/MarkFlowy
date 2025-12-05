@@ -90,7 +90,8 @@
     "lastModified": "上次更新",
     "size": "文件大小",
     "newTab": "新标签",
-    "path": "文件路径"
+    "path": "文件路径",
+    "clearRecent": "清除记录"
   },
   "about": {
     "label": "关于",

@@ -84,7 +84,8 @@
     "size": "Tamaño de archivo",
     "info": "Información del archivo",
     "newTab": "Nuevas pestañas",
-    "path": "Ruta de archivo"
+    "path": "Ruta de archivo",
+    "clearRecent": "Borrar registros"
   },
   "about": {
     "label": "Acerca de",
