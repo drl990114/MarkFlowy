@@ -101,12 +101,29 @@ const EditorAreaTabs = memo(() => {
     })
   }, [])
 
+  const moveActiveTab = (dir: 'left' | 'right') => {
+    const { opened, activeId, setActiveId } = useEditorStore.getState()
+    const curIndex = opened.findIndex((openedId) => openedId === activeId)
+
+    if (curIndex < 0) return
+
+    if (dir === 'left') {
+      if (opened.length > 0) {
+        setActiveId(curIndex === 0 ? opened[opened.length - 1] : opened[curIndex - 1])
+      }
+    } else {
+      if (opened.length > 0) {
+        setActiveId(curIndex === opened.length - 1 ? opened[0] : opened[curIndex + 1])
+      }
+    }
+  }
+
   return (
     <Container>
-      {/* <div className='tab-control'>
-        <MfIconButton icon='ri-arrow-left-line' size='small' rounded='smooth' />
-        <MfIconButton icon='ri-arrow-right-line' size='small' rounded='smooth' />
-      </div> */}
+      <div className='tab-control'>
+        <MfIconButton icon='ri-arrow-left-line' size='small' rounded='smooth' onClick={() => moveActiveTab('left')}/>
+        <MfIconButton icon='ri-arrow-right-line' size='small' rounded='smooth' onClick={() => moveActiveTab('right')}/>
+      </div>
       <div className='tab-items' ref={htmlRef}>
         {opened.map((id) => {
           const file = getFileObject(id) as IFile
