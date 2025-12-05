@@ -234,6 +234,7 @@ export const getImageUrlInTauri = async (url: string, fileFolderPath?: string) =
     try {
       const response = await fetch(url, {
         method: 'GET',
+        mode: 'cors'
       })
 
       const blob = await response.blob()
