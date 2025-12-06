@@ -24,7 +24,7 @@
     "isomorphic-fetch": "^3.0.0",
     "lodash": "^4.17.21",
     "markdown-to-jsx": "^7.7.10",
-    "next": "^15.4.6",
+    "next": "^15.5.7",
     "next-contentlayer2": "0.5.8",
     "next-i18next": "^15.3.0",
     "polished": "^4.3.1",
