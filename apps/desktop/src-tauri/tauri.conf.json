@@ -27,13 +27,10 @@
   },
   "bundle": {
     "active": true,
+    "copyright": "Copyright (c) 2023-present drl990114",
     "fileAssociations": [
       {
-        "ext": [
-          ".md",
-          ".markdown",
-          ".json"
-        ],
+        "ext": [".md", ".markdown", ".json"],
         "name": "Editor",
         "description": "File",
         "mimeType": "text/plain",
@@ -56,9 +53,7 @@
         "type": "embedBootstrapper"
       },
       "wix": {
-        "language": [
-          "en-US"
-        ]
+        "language": ["en-US"]
       }
     },
     "macOS": {
@@ -74,9 +69,7 @@
     "security": {
       "assetProtocol": {
         "enable": true,
-        "scope": [
-          "**"
-        ]
+        "scope": ["**"]
       },
       "csp": {
         "img-src": "'self' data: blob: https: http:",
