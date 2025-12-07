@@ -16,19 +16,19 @@ export const NodeContainer = styled.div<NodeContainerProps>`
   color: ${(props) =>
     props.highlight || props.selected
       ? props.theme.primaryFontColor
-      : props.theme.primaryFontColor};
+      : props.theme.unselectedFontColor};
   background-color: ${(props) =>
     props.highlight
       ? props.theme.accentColorFocused
       : props.selected
         ? props.theme.fileTreeSelectedBgColor
         : 'transparent'};
-  border: 1px solid
-    ${(props) => (props.selected ? props.theme.borderColorFocused : 'transparent')};
+  border: 1px solid ${(props) => (props.selected ? props.theme.borderColorFocused : 'transparent')};
   box-sizing: border-box;
 
   &:hover {
     background-color: ${(props) => props.theme.fileTreeSelectedBgColor};
+    color: ${(props) => props.theme.primaryFontColor};
   }
 
   .file-icon {
