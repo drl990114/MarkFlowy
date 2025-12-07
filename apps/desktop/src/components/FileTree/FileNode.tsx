@@ -347,7 +347,7 @@ function FileNode({
             <div style={{ flex: 1 }}>
               {node.data?.kind === 'dir' ? (
                 <i
-                  className={`${node.isOpen ? 'ri-folder-5-line' : 'ri-folder-3-line'} file-icon`}
+                  className={`${node.isOpen ? 'ri-folder-5-fill' : 'ri-folder-3-fill'} file-icon`}
                 />
               ) : (
                 <i className={`${getFileIconClass(node.data)} file-icon`} />
@@ -423,8 +423,9 @@ function FileNode({
 export default FileNode
 
 const extFileIconClassMap: Record<string, string> = {
-  md: 'ri-markdown-fill',
-  markdown: 'ri-markdown-fill',
+  md: 'ri-markdown-line',
+  markdown: 'ri-markdown-line',
+  json: 'ri-file-code-line',
 }
 
 const getFileIconClass = (file: IFile) => {
@@ -433,5 +434,5 @@ const getFileIconClass = (file: IFile) => {
     return extFileIconClassMap[ext]
   }
 
-  return 'ri-file-text-fill'
+  return 'ri-file-line'
 }
