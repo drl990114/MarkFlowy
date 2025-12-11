@@ -49,10 +49,80 @@ async function appThemeExtensionsSetup(curTheme: string) {
   })
 }
 
+async function handleOpenedPaths(openedPaths: string[]) {
+  const { setFolderData, addOpenedFile, setActiveId } = useEditorStore.getState()
+
+  console.log('handleOpenedPaths', openedPaths)
+
+  if (openedPaths.length === 1) {
+    const openedPath = openedPaths[0]
+    const isDir = await invoke<boolean>('is_dir', { path: openedPath })
+
+    if (isDir) {
+      await readDirectory(openedPath).then((res) => {
+        setFolderData(res)
+      })
+    } else {
+      const existingFile = getFileObjectByPath(openedPath)
+      if (existingFile) {
+        setActiveId(existingFile.id)
+        addOpenedFile(existingFile.id)
+      } else {
+        const fileContent = await getFileContent({ filePath: openedPath })
+        if (fileContent === null) return
+        const fileName = openedPath.split('/').pop() || 'new-file.md'
+        await addExistingMarkdownFileEdit({
+          fileName,
+          content: fileContent,
+          path: openedPath,
+        })
+      }
+    }
+  } else {
+    let dirCount = 0
+    let dir: string | null = null
+
+    await Promise.all(
+      openedPaths.map(async (openedPath) => {
+        const isDir = await invoke<boolean>('is_dir', { path: openedPath })
+        if (isDir) {
+          dirCount++
+          dir = openedPath
+        }
+      }),
+    )
+
+    if (dirCount > 0 && dir) {
+      // TODO 这里只打开一个文件夹，后续可以通过多窗口实现
+      await readDirectory(dir).then((res) => {
+        setFolderData(res)
+      })
+    } else {
+      await Promise.all(
+        openedPaths.map(async (openedPath) => {
+          const existingFile = getFileObjectByPath(openedPath)
+          if (existingFile) {
+            setActiveId(existingFile.id)
+            addOpenedFile(existingFile.id)
+          } else {
+            const fileContent = await getFileContent({ filePath: openedPath })
+            if (fileContent === null) return
+            const fileName = openedPath.split('/').pop() || 'new-file.md'
+            await addExistingMarkdownFileEdit({
+              fileName,
+              content: fileContent,
+              path: openedPath,
+            })
+          }
+        }),
+      )
+    }
+  }
+}
+
 async function appWorkspaceSetup() {
   const { setRecentWorkspaces } = useOpenedCacheStore.getState()
   const { setFolderData, addOpenedFile, setActiveId } = useEditorStore.getState()
-
   console.log('window.openedUrls', window.openedUrls)
 
   if (window.openedUrls) {
@@ -66,61 +136,7 @@ async function appWorkspaceSetup() {
 
     window.openedUrls = null
 
-    console.log('openedPaths', openedPaths)
-
-    if (openedPaths.length === 1) {
-      const openedPath = openedPaths[0]
-      const isDir = await invoke<boolean>('is_dir', { path: openedPath })
-
-      if (isDir) {
-        await readDirectory(openedPath).then((res) => {
-          setFolderData(res)
-        })
-      } else {
-        const fileContent = await getFileContent({ filePath: openedPath })
-        if (fileContent === null) return
-        const fileName = openedPath.split('/').pop() || 'new-file.md'
-        await addExistingMarkdownFileEdit({
-          fileName,
-          content: fileContent,
-          path: openedPath,
-        })
-      }
-    } else {
-      let dirCount = 0
-      let dir: string | null = null
-
-      await Promise.all(
-        openedPaths.map(async (openedPath) => {
-          const isDir = await invoke<boolean>('is_dir', { path: openedPath })
-          if (isDir) {
-            dirCount++
-            dir = openedPath
-          }
-        }),
-      )
-
-      if (dirCount > 0 && dir) {
-        // TODO 这里只打开一个文件夹，后续可以通过多窗口实现
-        await readDirectory(dir).then((res) => {
-          setFolderData(res)
-        })
-      } else {
-        await Promise.all(
-          openedPaths.map(async (openedPath) => {
-            const fileContent = await getFileContent({ filePath: openedPath })
-            if (fileContent === null) return
-            const fileName = openedPath.split('/').pop() || 'new-file.md'
-            await addExistingMarkdownFileEdit({
-              fileName,
-              content: fileContent,
-              path: openedPath,
-            })
-          }),
-        )
-      }
-    }
-
+    await handleOpenedPaths(openedPaths)
     return
   }
   try {
@@ -263,9 +279,23 @@ const useAppSetup = () => {
       bus.emit(payload)
     })
 
+    const unListenOpenedUrls = listen<string>('opened-urls', async ({ payload }) => {
+      console.log('Received opened-urls event:', payload)
+      if (payload) {
+        const openedPaths = payload.split(',').map((p) => {
+          if (p.startsWith('file://')) {
+            return p.slice(7)
+          }
+          return p
+        })
+        await handleOpenedPaths(openedPaths)
+      }
+    })
+
     return () => {
       unListenMenu.then((fn) => fn())
       closeRequest.then((fn) => fn())
+      unListenOpenedUrls.then((fn) => fn())
     }
   }, [])
 

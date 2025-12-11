@@ -157,12 +157,21 @@ pub fn run() {
         .build(context)
         .unwrap()
         .run(|app, event| {
-            #[cfg(target_os = "macos")]
             match event {
                 tauri::RunEvent::Opened { urls, .. } => {
-                    let opened_urls = app.try_state::<OpenedUrls>();
-                    if let Some(u) = opened_urls {
-                        u.0.lock().unwrap().replace(urls);
+                    let urls_str = urls
+                        .iter()
+                        .map(|u| {
+                            urlencoding::decode(u.as_str())
+                                .unwrap()
+                                .replace("\\", "\\\\")
+                        })
+                        .collect::<Vec<_>>()
+                        .join(",");
+                    
+                    if let Some(window) = app.get_webview_window("main") {
+                        use tauri::Emitter;
+                        let _ = window.emit("opened-urls", urls_str);
                     }
                 }
                 _ => (),
