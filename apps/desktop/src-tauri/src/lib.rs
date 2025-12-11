@@ -157,6 +157,7 @@ pub fn run() {
         .build(context)
         .unwrap()
         .run(|app, event| {
+            #[cfg(target_os = "macos")]
             match event {
                 tauri::RunEvent::Opened { urls, .. } => {
                     let urls_str = urls
