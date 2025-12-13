@@ -8,3 +8,4 @@ pub mod process;
 pub mod themes;
 pub mod workspace;
 pub mod clipboard;
+pub mod window_manager;

@@ -1,3 +1,4 @@
+import { currentWindow } from '@/services/windows'
 import { getWorkspace, WorkSpace } from '@/services/workspace'
 import { useEditorStore } from '@/stores'
 import { invoke } from '@tauri-apps/api/core'
@@ -32,6 +33,12 @@ const useWorkspaceWatcher = () => {
   useEffect(() => {
     getWorkspace().then((ws) => setWorkspace(ws))
 
+    try {
+      invoke('update_window_path', {
+        windowLabel: currentWindow.label,
+        newPath: rootPath,
+      })
+    } catch (error) {}
     const setupWatcher = async () => {
       try {
         await invoke('stop_file_watcher', {
@@ -44,6 +51,7 @@ const useWorkspaceWatcher = () => {
         invoke('watch_file', {
           key: 'workspace',
           path: rootPath,
+          windowLabel: currentWindow.label,
         })
       }
     }

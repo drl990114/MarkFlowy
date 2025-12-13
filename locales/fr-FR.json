@@ -82,7 +82,12 @@
     "info": "Informations sur le fichier",
     "newTab": "Nouvelle onglet",
     "path": "Chemin d'accès au fichier",
-    "clearRecent": "Effacer les enregistrements"
+    "clearRecent": "Effacer les enregistrements",
+    "openFolderModal": {
+      "title": "Comment ouvrir un dossier?",
+      "currentWindow": "Fenêtre actuelle",
+      "newWindow": "Nouvelle fenêtre"
+    }
   },
   "about": {
     "label": "À propos",

@@ -79,7 +79,8 @@ export const createUntitledFile = (): IFile => {
 }
 
 export const readDirectory = (folderPath: string): Promise<IFile[]> => {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
+    
     invoke<FileSysResult>('open_folder_async', { folderPath })
       .then(async (message) => {
         if (message.code !== FileResultCode.Success) {

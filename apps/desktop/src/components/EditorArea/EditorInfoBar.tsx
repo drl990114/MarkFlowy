@@ -6,6 +6,7 @@ import { getFileObject } from '@/helper/files'
 import { getRelativePathWithCurWorkspace } from '@/helper/filesys'
 import { addNewMarkdownFileEdit, isEmptyEditor } from '@/services/editor-file'
 import { gitAddFileWithCurrentWorkspace } from '@/services/git'
+import { currentWindow } from '@/services/windows'
 import { checkIsGitRepoBySyncMode, getWorkspace, WorkSpace } from '@/services/workspace'
 import { useCommandStore, useEditorStateStore, useEditorStore } from '@/stores'
 import useAppSettingStore from '@/stores/useAppSettingStore'
@@ -14,7 +15,6 @@ import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
 import useAppTasksStore from '@/stores/useTasksStore'
 import NiceModal from '@ebay/nice-modal-react'
 import { invoke } from '@tauri-apps/api/core'
-import { listen } from '@tauri-apps/api/event'
 import { Command } from '@tauri-apps/plugin-shell'
 import { debounce } from 'lodash'
 import { memo, useCallback, useEffect, useRef, useState } from 'react'
@@ -116,7 +116,7 @@ export const EditorInfoBar = memo(() => {
   useEffect(() => {
     checkCurFileGitStatus()
 
-    const unsubscribe = listen<{
+    const unsubscribe = currentWindow.listen<{
       paths: string[]
     }>('file_watcher_event', async (res) => {
       if (!curFile?.path) {

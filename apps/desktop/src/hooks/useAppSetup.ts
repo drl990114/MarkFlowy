@@ -8,14 +8,13 @@ import { appSettingStoreSetup } from '@/services/app-setting'
 import { checkUnsavedFiles } from '@/services/checkUnsavedFiles'
 import { addExistingMarkdownFileEdit } from '@/services/editor-file'
 import { getFileContent } from '@/services/file-info'
+import { createNewWindow, currentWindow } from '@/services/windows'
 import { useEditorStore } from '@/stores'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import type { WorkspaceInfo } from '@/stores/useOpenedCacheStore'
 import useOpenedCacheStore from '@/stores/useOpenedCacheStore'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { invoke } from '@tauri-apps/api/core'
-import { listen } from '@tauri-apps/api/event'
-import { getCurrentWindow } from '@tauri-apps/api/window'
 import { LazyStore } from '@tauri-apps/plugin-store'
 import { once } from 'lodash'
 import { useCallback, useEffect } from 'react'
@@ -54,14 +53,21 @@ async function handleOpenedPaths(openedPaths: string[]) {
 
   console.log('handleOpenedPaths', openedPaths)
 
-  if (openedPaths.length === 1) {
-    const openedPath = openedPaths[0]
+  const handleOpenedPath = async (openedPath: string) => {
     const isDir = await invoke<boolean>('is_dir', { path: openedPath })
 
     if (isDir) {
-      await readDirectory(openedPath).then((res) => {
-        setFolderData(res)
-      })
+      const rootPath = useEditorStore.getState().getRootPath()
+      if (openedPath === rootPath) {
+        return
+      }
+      if (rootPath || openedPaths.length > 1) {
+        await createNewWindow({ path: openedPath })
+      } else {
+        await readDirectory(openedPath).then((res) => {
+          setFolderData(res)
+        })
+      }
     } else {
       const existingFile = getFileObjectByPath(openedPath)
       if (existingFile) {
@@ -78,67 +84,22 @@ async function handleOpenedPaths(openedPaths: string[]) {
         })
       }
     }
+  }
+
+  if (openedPaths.length === 1) {
+    await handleOpenedPath(openedPaths[0])
   } else {
-    let dirCount = 0
-    let dir: string | null = null
-
-    await Promise.all(
-      openedPaths.map(async (openedPath) => {
-        const isDir = await invoke<boolean>('is_dir', { path: openedPath })
-        if (isDir) {
-          dirCount++
-          dir = openedPath
-        }
-      }),
-    )
-
-    if (dirCount > 0 && dir) {
-      // TODO 这里只打开一个文件夹，后续可以通过多窗口实现
-      await readDirectory(dir).then((res) => {
-        setFolderData(res)
-      })
-    } else {
-      await Promise.all(
-        openedPaths.map(async (openedPath) => {
-          const existingFile = getFileObjectByPath(openedPath)
-          if (existingFile) {
-            setActiveId(existingFile.id)
-            addOpenedFile(existingFile.id)
-          } else {
-            const fileContent = await getFileContent({ filePath: openedPath })
-            if (fileContent === null) return
-            const fileName = openedPath.split('/').pop() || 'new-file.md'
-            await addExistingMarkdownFileEdit({
-              fileName,
-              content: fileContent,
-              path: openedPath,
-            })
-          }
-        }),
-      )
-    }
+    await Promise.all(openedPaths.map(handleOpenedPath))
   }
 }
 
 async function appWorkspaceSetup() {
   const { setRecentWorkspaces } = useOpenedCacheStore.getState()
   const { setFolderData, addOpenedFile, setActiveId } = useEditorStore.getState()
+  console.log('=== appWorkspaceSetup: Checking window.openedUrls ===')
   console.log('window.openedUrls', window.openedUrls)
+  console.log('window.openedUrls type:', typeof window.openedUrls)
 
-  if (window.openedUrls) {
-    const openedPaths = window.openedUrls?.split(',').map((p) => {
-      if (p.startsWith('file://')) {
-        p = p.slice(7)
-      }
-
-      return p
-    })
-
-    window.openedUrls = null
-
-    await handleOpenedPaths(openedPaths)
-    return
-  }
   try {
     const cacheStore = await new LazyStore('.markflowy_cache.dat')
 
@@ -147,6 +108,25 @@ async function appWorkspaceSetup() {
     )
     const recentWorkspaces = getOpenedCacheRes.recent_workspaces
     setRecentWorkspaces(recentWorkspaces)
+
+    if (window.openedUrls) {
+      console.log('Processing window.openedUrls:', window.openedUrls)
+      const openedPaths = window.openedUrls?.split(',').map((p) => {
+        console.log('Processing path from openedUrls:', p)
+        if (p.startsWith('file://')) {
+          p = p.slice(7)
+          console.log('Removed file:// prefix:', p)
+        }
+
+        return p
+      })
+
+      console.log('Final openedPaths:', openedPaths)
+      window.openedUrls = null
+
+      await handleOpenedPaths(openedPaths)
+      return
+    }
 
     if (recentWorkspaces.length > 0) {
       const cacheStoreInitPromises = Promise.all([
@@ -246,8 +226,6 @@ const useFontfamilySetup = () => {
 
 const useAppSetup = () => {
   const eventInit = useCallback(() => {
-    const currentWindow = getCurrentWindow()
-
     const closeRequest = currentWindow.listen('tauri://close-requested', async () => {
       const handleCloseWindow = async () => {
         closeRequest.then((fn) => fn())
@@ -275,11 +253,11 @@ const useAppSetup = () => {
         return true
       }
     })
-    const unListenMenu = listen<string>('native:menu', ({ payload }) => {
+    const unListenMenu = currentWindow.listen<string>('native:menu', ({ payload }) => {
       bus.emit(payload)
     })
 
-    const unListenOpenedUrls = listen<string>('opened-urls', async ({ payload }) => {
+    const unListenOpenedUrls = currentWindow.listen<string>('opened-urls', async ({ payload }) => {
       console.log('Received opened-urls event:', payload)
       if (payload) {
         const openedPaths = payload.split(',').map((p) => {
@@ -289,6 +267,7 @@ const useAppSetup = () => {
           return p
         })
         await handleOpenedPaths(openedPaths)
+        currentWindow.setFocus()
       }
     })
 

@@ -90,7 +90,12 @@
     "size": "ファイルサイズ",
     "newTab": "新しいタブ",
     "path": "ファイルパス",
-    "clearRecent": "記録をクリア"
+    "clearRecent": "記録をクリア",
+    "openFolderModal": {
+      "title": "フォルダを開くにはどうすればいいですか?",
+      "currentWindow": "現在のウィンドウ",
+      "newWindow": "新しいウィンドウ"
+    }
   },
   "about": {
     "label": "About",
