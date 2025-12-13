@@ -94,13 +94,13 @@ pub mod cmd {
                     match r.recv() {
                         Ok(manager::SearchResult::FinalResults(fi)) => {
                             return Ok(ExecStatus::Done(TaskOutput::Out(Box::new(fi))))
-                        },
+                        }
                         Ok(manager::SearchResult::InterimResult(_)) => {
                             // ignore interim results in async direct-return API
-                        },
+                        }
                         Ok(manager::SearchResult::SearchErrors(errs)) => {
                             errors.extend(errs);
-                        },
+                        }
                         Err(_) => break,
                     }
                 }
@@ -127,25 +127,25 @@ pub mod cmd {
                     .downcast::<manager::FinalResults>()
                     .map_err(|_| vec!["search task result conversion error".to_string()])?;
                 Ok(*results)
-            },
+            }
             Ok(crate::task_system::task::TaskStatus::Done((_, TaskOutput::Empty))) => {
                 Err(vec!["search task returned empty result".to_string()])
-            },
+            }
             Ok(crate::task_system::task::TaskStatus::Error(SearchError::SearchError(errs))) => {
                 Err(errs)
-            },
+            }
             Ok(crate::task_system::task::TaskStatus::Error(SearchError::SystemError(_))) => {
                 Err(vec!["search task system error".to_string()])
-            },
+            }
             Ok(crate::task_system::task::TaskStatus::Canceled) => {
                 Err(vec!["search task was canceled".to_string()])
-            },
+            }
             Ok(crate::task_system::task::TaskStatus::ForcedAbortion) => {
                 Err(vec!["search task was forcibly aborted".to_string()])
-            },
+            }
             Ok(crate::task_system::task::TaskStatus::Shutdown(_)) => {
                 Err(vec!["search task was shutdown".to_string()])
-            },
+            }
             Err(_) => Err(vec!["search task join error".to_string()]),
         }
     }

@@ -1,6 +1,6 @@
 use crate::app::conf::AppConf;
 use crate::app::keybindings::Keybindings;
-use crate::app::window_manager::{get_focused_window};
+use crate::app::window_manager::get_focused_window;
 use tauri::menu::{
     CheckMenuItem, CheckMenuItemBuilder, Menu, MenuEvent, MenuItem, MenuItemBuilder,
     PredefinedMenuItem, Submenu,
@@ -31,12 +31,12 @@ pub fn generate_menu(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
 
     let menu_handler = move |app: &AppHandle, event: MenuEvent| {
         let menu_id = event.id().as_ref();
-        
+
         // 获取当前焦点窗口
         if let Some(window) = get_focused_window(app) {
             let focused_window_label = window.label();
             println!("focused_window: {}", focused_window_label);
-            
+
             // 发送菜单事件到焦点窗口
             app.emit_to(&focused_window_label, "native:menu", menu_id)
                 .expect("failed to emit");

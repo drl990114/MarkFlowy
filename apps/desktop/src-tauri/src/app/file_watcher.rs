@@ -225,7 +225,12 @@ pub mod cmd {
     }
 
     #[command]
-    pub fn watch_file(_app: AppHandle, key: &str, path: &str, window_label: &str) -> Result<(), String> {
+    pub fn watch_file(
+        _app: AppHandle,
+        key: &str,
+        path: &str,
+        window_label: &str,
+    ) -> Result<(), String> {
         let app_clone = _app.clone();
         let key_clone = key.to_string();
         let window_label_clone = window_label.to_string();

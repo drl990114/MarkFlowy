@@ -723,38 +723,38 @@ pub mod cmd {
     #[tauri::command]
     pub fn get_md_relative_path(file_path: &str, relative_to: &str) -> FileResult {
         use std::path::Component;
-        
+
         let cur_path = Path::new(file_path);
         let relative_to_path = Path::new(relative_to);
-        
+
         if !cur_path.is_absolute() {
             return FileResult {
                 code: FileResultCode::InvalidPath,
                 content: "File path must be absolute".to_string(),
             };
         }
-        
+
         if !relative_to_path.is_absolute() {
             return FileResult {
                 code: FileResultCode::InvalidPath,
                 content: "Relative path must be absolute".to_string(),
             };
         }
-        
+
         let cur_components: Vec<Component> = cur_path.components().collect();
         let relative_to_components: Vec<Component> = relative_to_path.components().collect();
-        
+
         let common_prefix_len = cur_components
             .iter()
             .zip(relative_to_components.iter())
             .take_while(|(a, b)| a == b)
             .count();
-        
+
         let mut components = vec![];
         for _ in common_prefix_len..relative_to_components.len() {
             components.push("..");
         }
-        
+
         for component in &cur_components[common_prefix_len..] {
             if let Component::Normal(name) = component {
                 if let Some(name_str) = name.to_str() {
@@ -773,37 +773,38 @@ pub mod cmd {
                         } else {
                             return FileResult {
                                 code: FileResultCode::InvalidPath,
-                                content: "Failed to convert path to string (invalid UTF-8)".to_string(),
+                                content: "Failed to convert path to string (invalid UTF-8)"
+                                    .to_string(),
                             };
                         }
-                    },
+                    }
                     Component::CurDir => {
                         components.push(".");
-                    },
+                    }
                     Component::ParentDir => {
                         components.push("..");
-                    },
+                    }
                     Component::Prefix(_) => {
                         // Windows驱动器前缀，忽略
                         continue;
-                    },
+                    }
                     Component::RootDir => {
                         // Unix根目录，忽略
                         continue;
-                    },
+                    }
                 }
             }
         }
-        
+
         let relative_path = if components.is_empty() {
             ".".to_string()
         } else {
             components.join("/")
         };
-        
+
         // 确保返回的是Markdown语法的路径（使用正斜杠）
         let md_relative_path = relative_path.replace("\\", "/");
-        
+
         FileResult {
             code: FileResultCode::Success,
             content: md_relative_path,

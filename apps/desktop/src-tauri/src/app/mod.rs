@@ -1,4 +1,5 @@
 pub mod bookmarks;
+pub mod clipboard;
 pub mod conf;
 pub mod extensions;
 pub mod file_watcher;
@@ -6,6 +7,5 @@ pub mod keybindings;
 pub mod opened_cache;
 pub mod process;
 pub mod themes;
-pub mod workspace;
-pub mod clipboard;
 pub mod window_manager;
+pub mod workspace;

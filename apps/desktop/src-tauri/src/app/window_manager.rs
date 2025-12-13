@@ -1,4 +1,5 @@
 use crate::WINDOW_INSTANCES;
+use serde_json;
 use std::path::PathBuf;
 use tauri::{command, AppHandle, Manager, WebviewUrl, WebviewWindowBuilder};
 use uuid;
@@ -26,23 +27,20 @@ pub fn get_window_instances() -> Result<std::collections::HashMap<String, String
 
 /// 创建新窗口
 #[command]
-pub fn create_new_window(
-    _app: AppHandle,
-    path: Option<String>,
-) -> Result<String, String> {
+pub fn create_new_window(_app: AppHandle, path: Option<String>) -> Result<String, String> {
     let theme = AppConf::theme_mode();
-    let workspace_path = path.map(PathBuf::from);
+    let workspace_path = path.clone().map(PathBuf::from);
 
     // 检查是否已存在打开相同路径的窗口
     if let Some(ref target_path) = workspace_path {
         let instances = WINDOW_INSTANCES
             .lock()
             .map_err(|_| "Failed to lock window instances")?;
-        
+
         // 查找是否有相同路径的窗口
         let mut stale_labels: Vec<String> = Vec::new();
         let mut existing_window_label: Option<String> = None;
-        
+
         for (existing_label, existing_path) in instances.iter() {
             if existing_path == target_path {
                 if _app.get_webview_window(existing_label).is_some() {
@@ -54,21 +52,21 @@ pub fn create_new_window(
                 }
             }
         }
-        
+
         // 释放读锁，准备可能的写操作
         drop(instances);
-        
+
         // 删除过期条目
         if !stale_labels.is_empty() {
             let mut instances = WINDOW_INSTANCES
                 .lock()
                 .map_err(|_| "Failed to lock window instances")?;
-            
+
             for stale_label in stale_labels {
                 instances.remove(&stale_label);
             }
         }
-        
+
         // 如果找到存在的窗口，聚焦并返回
         if let Some(label) = existing_window_label {
             if let Some(existing_window) = _app.get_webview_window(&label) {
@@ -95,22 +93,24 @@ pub fn create_new_window(
         .map(|p| p.to_str().unwrap_or("").to_string())
         .unwrap_or("".into());
 
+    // 使用JSON序列化确保路径中的特殊字符被正确转义
+    let escaped_urls = serde_json::to_string(&opened_urls).unwrap_or_else(|_| opened_urls.clone());
+
     println!("opened_urls:{}", opened_urls);
+    println!("escaped_urls:{}", escaped_urls);
+    println!("path:{}", path.as_ref().unwrap());
     tauri::async_runtime::spawn(async move {
-        let mut new_win = WebviewWindowBuilder::new(
-            &_app,
-            window_label,
-            WebviewUrl::App("index.html".into()),
-        )
-        .initialization_script(&format!("window.openedUrls = `{opened_urls}`"))
-        .initialization_script(&format!("console.log(`window.openedUrl:{opened_urls}`)"))
-        .title("MarkFlowy")
-        .resizable(true)
-        .fullscreen(false)
-        .theme(Some(theme))
-        .disable_drag_drop_handler()
-        .inner_size(1200.0, 800.0)
-        .min_inner_size(400.0, 400.0);
+        let mut new_win =
+            WebviewWindowBuilder::new(&_app, window_label, WebviewUrl::App("index.html".into()))
+                .initialization_script(&format!("window.openedUrls = {escaped_urls}"))
+                .initialization_script(&format!("console.log('window.openedUrl:{}')", escaped_urls))
+                .title("MarkFlowy")
+                .resizable(true)
+                .fullscreen(false)
+                .theme(Some(theme))
+                .disable_drag_drop_handler()
+                .inner_size(1200.0, 800.0)
+                .min_inner_size(400.0, 400.0);
 
         #[cfg(target_os = "macos")]
         {
@@ -138,29 +138,26 @@ pub fn update_window_path(
     let mut instances = WINDOW_INSTANCES
         .lock()
         .map_err(|_| "Failed to lock window instances")?;
-    
+
     // 检查窗口是否存在
     if _app.get_webview_window(window_label).is_none() {
         return Err("Window not found".to_string());
     }
-    
+
     // 更新路径
     instances.insert(window_label.to_string(), PathBuf::from(new_path));
-    
+
     Ok(true)
 }
 
 /// 根据路径检查是否有活跃的窗口，有则返回窗口标签
 #[command]
-pub fn check_window_by_path(
-    _app: AppHandle,
-    path: String,
-) -> Result<Option<String>, String> {
+pub fn check_window_by_path(_app: AppHandle, path: String) -> Result<Option<String>, String> {
     let target_path = PathBuf::from(path);
     let instances = WINDOW_INSTANCES
         .lock()
         .map_err(|_| "Failed to lock window instances")?;
-    
+
     // 查找是否有相同路径的活跃窗口
     for (existing_label, existing_path) in instances.iter() {
         if existing_path == &target_path {
@@ -170,7 +167,7 @@ pub fn check_window_by_path(
             }
         }
     }
-    
+
     Ok(None)
 }
 
@@ -209,10 +206,7 @@ pub fn get_focused_window(app: &AppHandle) -> Option<tauri::WebviewWindow> {
 
 /// 聚焦指定标签的窗口
 #[command]
-pub fn focus_window_by_label(
-    _app: AppHandle,
-    window_label: String,
-) -> Result<bool, String> {
+pub fn focus_window_by_label(_app: AppHandle, window_label: String) -> Result<bool, String> {
     if let Some(window) = _app.get_webview_window(&window_label) {
         window.set_focus().map_err(|e| e.to_string())?;
         Ok(true)

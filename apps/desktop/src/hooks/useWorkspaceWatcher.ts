@@ -38,13 +38,13 @@ const useWorkspaceWatcher = () => {
         windowLabel: currentWindow.label,
         newPath: rootPath,
       })
-    } catch (error) {}
+    } catch (error) { }
     const setupWatcher = async () => {
       try {
         await invoke('stop_file_watcher', {
           key: 'workspace',
         })
-      } catch (error) {}
+      } catch (error) { }
 
       console.log('rootPath', rootPath)
       if (rootPath) {

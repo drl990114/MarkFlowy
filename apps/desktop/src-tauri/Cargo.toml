@@ -155,3 +155,6 @@ features = ["no-env-filter"]
 [dev-dependencies.uuid]
 version = "1.16.0"
 features = ["serde"]
+
+[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+tauri-plugin-single-instance = "2"

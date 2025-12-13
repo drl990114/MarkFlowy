@@ -1,22 +1,18 @@
 use super::conf;
 use crate::fc::{create_file, exists};
 use serde::{Deserialize, Serialize};
-use std::{path::PathBuf};
+use std::path::PathBuf;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct KeybindingInfo {
     id: String,
     key_map: Vec<String>,
-    when: String
+    when: String,
 }
 
 impl KeybindingInfo {
     pub fn new(id: String, key_map: Vec<String>, when: String) -> Self {
-        Self {
-            id,
-            key_map,
-            when
-        }
+        Self { id, key_map, when }
     }
 }
 
@@ -174,7 +170,6 @@ impl Keybindings {
     }
 
     pub fn read() -> Self {
-
         if !Self::get_path().exists() {
             return Self::default().write();
         }
@@ -208,30 +203,30 @@ impl Keybindings {
         if !exists(path) {
             create_file(path);
         }
-        
+
         let mut sorted_cmds = self.cmds.clone();
         sorted_cmds.sort_by(|a, b| {
             let a_is_app = a.id.starts_with("app:");
             let b_is_app = b.id.starts_with("app:");
-            
+
             if a_is_app && !b_is_app {
                 return std::cmp::Ordering::Less;
             } else if !a_is_app && b_is_app {
                 return std::cmp::Ordering::Greater;
             }
-            
+
             a.id.cmp(&b.id)
         });
-        
+
         let ordered_keybindings = Keybindings { cmds: sorted_cmds };
-        
+
         if let Ok(v) = serde_json::to_string_pretty(&ordered_keybindings) {
             std::fs::write(path, v).unwrap_or_else(|_err| {
                 Self::default().write();
             });
         } else {
         }
-        
+
         self
     }
 }
@@ -243,7 +238,7 @@ impl Default for Keybindings {
 }
 
 pub mod cmd {
-    use super::{Keybindings};
+    use super::Keybindings;
     use tauri::command;
 
     #[command]

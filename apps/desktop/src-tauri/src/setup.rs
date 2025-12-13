@@ -1,11 +1,10 @@
 use crate::app::{conf::AppConf, window_manager};
-use tauri::{App, Emitter, WebviewWindowBuilder, utils::config::WebviewUrl};
+use tauri::{utils::config::WebviewUrl, App, AppHandle, Emitter, WebviewWindowBuilder};
 
 #[cfg(target_os = "macos")]
 use tauri::TitleBarStyle;
 
-pub fn init(app: &mut App, opened_urls: String) -> Result<(), Box<dyn std::error::Error>> {
-    let app_handle = app.handle().clone();
+pub fn init(app_handle: AppHandle, opened_urls: String) -> Result<(), Box<dyn std::error::Error>> {
 
     // 首先检查是否已经存在窗口
     if let Some(existing_window) = window_manager::get_last_opened_window(&app_handle) {
@@ -43,6 +42,23 @@ pub fn init(app: &mut App, opened_urls: String) -> Result<(), Box<dyn std::error
     }
 
     let window = main_win.build().unwrap();
+    
+    // 将初始窗口添加到全局窗口实例缓存中
+    let window_label = window.label().to_string();
+    let workspace_path = if !opened_urls.is_empty() {
+        opened_urls.split(',').next().unwrap_or("").to_string()
+    } else {
+        "".to_string()
+    };
+    
+    // 存储窗口实例信息到全局缓存
+    if !workspace_path.is_empty() {
+        use std::path::PathBuf;
+        use crate::WINDOW_INSTANCES;
+        
+        let mut instances = WINDOW_INSTANCES.lock().unwrap();
+        instances.insert(window_label, PathBuf::from(workspace_path));
+    }
 
     Ok(())
 }
