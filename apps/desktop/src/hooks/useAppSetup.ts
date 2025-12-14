@@ -1,7 +1,7 @@
 import useAiChatStore from '@/extensions/ai/useAiChatStore'
 import bus from '@/helper/eventBus'
 import { getFileObject, getFileObjectByPath, getSaveOpenedEditorEntries } from '@/helper/files'
-import { readDirectory } from '@/helper/filesys'
+import { getFileNameFromPath, readDirectory } from '@/helper/filesys'
 import { checkUpdate } from '@/helper/updater'
 import { i18nInit } from '@/i18n'
 import { appSettingStoreSetup } from '@/services/app-setting'
@@ -76,7 +76,7 @@ async function handleOpenedPaths(openedPaths: string[]) {
       } else {
         const fileContent = await getFileContent({ filePath: openedPath })
         if (fileContent === null) return
-        const fileName = openedPath.split('/').pop() || 'new-file.md'
+        const fileName = getFileNameFromPath(openedPath) || 'new-file.md'
         await addExistingMarkdownFileEdit({
           fileName,
           content: fileContent,
