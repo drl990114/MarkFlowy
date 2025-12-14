@@ -85,7 +85,12 @@
     "info": "Información del archivo",
     "newTab": "Nuevas pestañas",
     "path": "Ruta de archivo",
-    "clearRecent": "Borrar registros"
+    "clearRecent": "Borrar registros",
+    "openFolderModal": {
+      "title": "¿Cómo abrir una carpeta?",
+      "currentWindow": "Ventana actual",
+      "newWindow": "Nueva ventana"
+    }
   },
   "about": {
     "label": "Acerca de",

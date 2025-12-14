@@ -4,7 +4,10 @@ use crate::{
 };
 use etcetera::{choose_app_strategy, AppStrategy, AppStrategyArgs};
 use serde_json::Value;
-use std::{collections::{BTreeMap, HashMap}, path::PathBuf};
+use std::{
+    collections::{BTreeMap, HashMap},
+    path::PathBuf,
+};
 use tauri::Theme;
 
 macro_rules! pub_struct {
@@ -275,6 +278,7 @@ impl Default for AppConf {
 
 pub mod cmd {
     use super::AppConf;
+    use std::{collections::HashMap, path::PathBuf};
     use tauri::{command, AppHandle, WebviewUrl, WebviewWindowBuilder};
 
     #[command]

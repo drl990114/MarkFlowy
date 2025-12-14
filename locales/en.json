@@ -90,7 +90,12 @@
     "info": "File Information",
     "newTab": "New Tab",
     "path": "File Path",
-    "clearRecent": "Clear Recent"
+    "clearRecent": "Clear Recent",
+    "openFolderModal": {
+      "title": "How do I open a folder?",
+      "currentWindow": "Current Window",
+      "newWindow": "New Window"
+    }
   },
   "about": {
     "label": "About",

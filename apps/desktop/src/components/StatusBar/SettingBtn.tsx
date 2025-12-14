@@ -1,8 +1,10 @@
+
 import { EVENT } from '@/constants'
 import appSettingService from '@/services/app-setting'
+import { currentWindow } from '@/services/windows'
 import { useCommandStore } from '@/stores'
 import useThemeStore from '@/stores/useThemeStore'
-import { emit } from '@tauri-apps/api/event'
+import { emitTo } from '@tauri-apps/api/event'
 import { memo, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
@@ -41,7 +43,7 @@ export const CenterMenu = memo(() => {
           label: t('about.label'),
           value: 'about',
           handler: () => {
-            emit(EVENT.app_about)
+            emitTo(currentWindow.label, EVENT.app_about)
           },
         },
         {
@@ -66,7 +68,7 @@ export const CenterMenu = memo(() => {
 
   return (
     <Container className='icon-small icon-smooth' ref={ref} onClick={handleClick}>
-      <i className="ri-settings-3-line"></i>
+      <i className='ri-settings-3-line'></i>
     </Container>
   )
 })

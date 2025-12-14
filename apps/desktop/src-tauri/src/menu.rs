@@ -1,5 +1,6 @@
 use crate::app::conf::AppConf;
 use crate::app::keybindings::Keybindings;
+use crate::app::window_manager::get_focused_window;
 use tauri::menu::{
     CheckMenuItem, CheckMenuItemBuilder, Menu, MenuEvent, MenuItem, MenuItemBuilder,
     PredefinedMenuItem, Submenu,
@@ -30,51 +31,27 @@ pub fn generate_menu(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
 
     let menu_handler = move |app: &AppHandle, event: MenuEvent| {
         let menu_id = event.id().as_ref();
-        let binding = app.get_webview_window("main").unwrap();
-        let focused_window: &str = binding.label();
-        println!("focused_window: {}", focused_window);
 
-        app.emit_to(focused_window, "native:menu", menu_id)
-            .expect("failed to emit");
+        // 获取当前焦点窗口
+        if let Some(window) = get_focused_window(app) {
+            let focused_window_label = window.label();
+            println!("focused_window: {}", focused_window_label);
 
-        match menu_id {
-            // "theme_light" | "theme_dark" => {
-            //     let theme = match menu_id {
-            //         "theme_dark" => "dark",
-            //         _ => "light",
-            //     };
-            //     AppConf::read()
-            //         .amend(serde_json::json!({ "theme": theme }))
-            //         .write();
+            // 发送菜单事件到焦点窗口
+            app.emit_to(&focused_window_label, "native:menu", menu_id)
+                .expect("failed to emit");
 
-            //     if theme == "light" {
-            //         let _ = theme_menu_light_item.set_checked(true);
-            //         let _ = theme_menu_dark_item.set_checked(false);
-            //     } else {
-            //         let _ = theme_menu_light_item.set_checked(false);
-            //         let _ = theme_menu_dark_item.set_checked(true);
-            //     }
-
-            //     app.emit_all("change_theme", theme)
-            //         .map_err(|err| println!("{:?}", err))
-            //         .ok();
-            // }
-            "About" => {
-                app.emit_to(focused_window, "app_about", {})
-                    .map_err(|err| println!("{:?}", err))
-                    .ok();
+            // 处理特定的菜单事件
+            match menu_id {
+                "About" => {
+                    app.emit_to(&focused_window_label, "app_about", {})
+                        .map_err(|err| println!("{:?}", err))
+                        .ok();
+                }
+                _ => {}
             }
-            // "SourceCodeView" => {
-            //     app.emit_to(focused_window, "editor_toggle_type", "sourceCode")
-            //         .map_err(|err| println!("{:?}", err))
-            //         .ok();
-            // }
-            // "WysiwygView" => {
-            //     app.emit_to(focused_window, "editor_toggle_type", "wysiwyg")
-            //         .map_err(|err| println!("{:?}", err))
-            //         .ok();
-            // }
-            _ => {}
+        } else {
+            println!("No focused window found for menu event");
         }
     };
 
