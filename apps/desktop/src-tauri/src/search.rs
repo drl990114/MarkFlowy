@@ -72,40 +72,51 @@ pub mod cmd {
             }
 
             async fn run(&mut self, _interrupter: &Interrupter) -> Result<ExecStatus, SearchError> {
-                // 执行实际的搜索操作
-                let (s, r) = channel();
-                let default_options = Options::default();
-                let opts = Options {
-                    name: default_options.name,
-                    content: ContentOptions {
-                        case_sensitive: self.options.content_case_sensitive,
-                    },
-                    sort: default_options.sort,
-                    last_dir: default_options.last_dir,
-                    name_history: default_options.name_history,
-                    content_history: default_options.content_history,
-                };
+                let query = self.query.clone();
+                let options = self.options.clone();
 
-                let mut man = manager::Manager::new(s, opts);
-                man.search(self.query.clone());
+                let search_result = tokio::task::spawn_blocking(move || {
+                    let (s, r) = channel();
+                    let default_options = Options::default();
+                    let opts = Options {
+                        name: default_options.name,
+                        content: ContentOptions {
+                            case_sensitive: options.content_case_sensitive,
+                        },
+                        sort: default_options.sort,
+                        last_dir: default_options.last_dir,
+                        name_history: default_options.name_history,
+                        content_history: default_options.content_history,
+                    };
 
-                let mut errors: Vec<String> = Vec::new();
-                loop {
-                    match r.recv() {
-                        Ok(manager::SearchResult::FinalResults(fi)) => {
-                            return Ok(ExecStatus::Done(TaskOutput::Out(Box::new(fi))))
+                    let mut man = manager::Manager::new(s, opts);
+                    man.search(query);
+
+                    let mut errors: Vec<String> = Vec::new();
+                    loop {
+                        match r.recv() {
+                            Ok(manager::SearchResult::FinalResults(fi)) => return Ok(fi),
+                            Ok(manager::SearchResult::InterimResult(_)) => {
+                                // ignore interim results in async direct-return API
+                            }
+                            Ok(manager::SearchResult::SearchErrors(errs)) => {
+                                errors.extend(errs);
+                            }
+                            Err(_) => break,
                         }
-                        Ok(manager::SearchResult::InterimResult(_)) => {
-                            // ignore interim results in async direct-return API
-                        }
-                        Ok(manager::SearchResult::SearchErrors(errs)) => {
-                            errors.extend(errs);
-                        }
-                        Err(_) => break,
                     }
-                }
 
-                Err(SearchError::SearchError(errors))
+                    Err(SearchError::SearchError(errors))
+                })
+                .await
+                .map_err(|_| {
+                    SearchError::SearchError(vec!["search task spawn error".to_string()])
+                })?;
+
+                match search_result {
+                    Ok(fi) => Ok(ExecStatus::Done(TaskOutput::Out(Box::new(fi)))),
+                    Err(e) => Err(e),
+                }
             }
         }
 
