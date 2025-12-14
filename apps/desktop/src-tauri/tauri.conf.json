@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "MarkFlowy",
-  "version": "0.43.0",
+  "version": "0.42.0",
   "identifier": "com.drl990114.markflowy",
   "build": {
     "beforeDevCommand": "yarn dev",
@@ -31,8 +31,8 @@
     "fileAssociations": [
       {
         "ext": [".md", ".markdown", ".json"],
-        "name": "Editor",
-        "description": "File",
+        "name": "Text Document",
+        "description": "Text Document",
         "mimeType": "text/plain",
         "role": "Editor"
       }

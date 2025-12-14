@@ -91,7 +91,12 @@
     "size": "文件大小",
     "newTab": "新标签",
     "path": "文件路径",
-    "clearRecent": "清除记录"
+    "clearRecent": "清除记录",
+    "openFolderModal": {
+      "title": "如何打开文件夹？",
+      "currentWindow": "当前窗口",
+      "newWindow": "新窗口"
+    }
   },
   "about": {
     "label": "关于",

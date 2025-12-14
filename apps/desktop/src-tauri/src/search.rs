@@ -20,47 +20,9 @@ pub mod cmd {
         search::Search,
     };
     use std::{sync::mpsc::channel, thread::spawn};
-    use tauri::{command, AppHandle, Emitter, EventTarget, Manager};
+    use tauri::{command, AppHandle, Emitter, EventTarget};
 
     use super::SearchOptions;
-
-    #[command]
-    pub fn search_files(_app: AppHandle, query: Search, options: SearchOptions) {
-        let (s, r) = channel();
-        let default_options = Options::default();
-        let opts = Options {
-            name: default_options.name,
-            content: ContentOptions {
-                case_sensitive: options.content_case_sensitive,
-            },
-            sort: default_options.sort,
-            last_dir: default_options.last_dir,
-            name_history: default_options.name_history,
-            content_history: default_options.content_history,
-        };
-
-        let mut man = manager::Manager::new(s, opts);
-        man.search(query);
-
-        spawn(move || loop {
-            let mess = r.recv();
-            if mess.is_err() {
-                break;
-            }
-            let mess = mess.unwrap();
-            match mess {
-                manager::SearchResult::FinalResults(fi) => {
-                    let _ = _app.emit_to(EventTarget::any(), "search_channel_final", Some(fi));
-                }
-                manager::SearchResult::InterimResult(_fi) => {
-                    // let _ = tauri::Manager::get_window(&_app, "main").unwrap().emit("search_channel_unit", Some(fi));
-                }
-                manager::SearchResult::SearchErrors(fi) => {
-                    let _ = _app.emit_to(EventTarget::any(), "search_channel_error", Some(fi));
-                }
-            }
-        });
-    }
 
     #[command]
     pub async fn search_files_async(
@@ -132,13 +94,13 @@ pub mod cmd {
                     match r.recv() {
                         Ok(manager::SearchResult::FinalResults(fi)) => {
                             return Ok(ExecStatus::Done(TaskOutput::Out(Box::new(fi))))
-                        },
+                        }
                         Ok(manager::SearchResult::InterimResult(_)) => {
                             // ignore interim results in async direct-return API
-                        },
+                        }
                         Ok(manager::SearchResult::SearchErrors(errs)) => {
                             errors.extend(errs);
-                        },
+                        }
                         Err(_) => break,
                     }
                 }
@@ -165,25 +127,25 @@ pub mod cmd {
                     .downcast::<manager::FinalResults>()
                     .map_err(|_| vec!["search task result conversion error".to_string()])?;
                 Ok(*results)
-            },
+            }
             Ok(crate::task_system::task::TaskStatus::Done((_, TaskOutput::Empty))) => {
                 Err(vec!["search task returned empty result".to_string()])
-            },
+            }
             Ok(crate::task_system::task::TaskStatus::Error(SearchError::SearchError(errs))) => {
                 Err(errs)
-            },
+            }
             Ok(crate::task_system::task::TaskStatus::Error(SearchError::SystemError(_))) => {
                 Err(vec!["search task system error".to_string()])
-            },
+            }
             Ok(crate::task_system::task::TaskStatus::Canceled) => {
                 Err(vec!["search task was canceled".to_string()])
-            },
+            }
             Ok(crate::task_system::task::TaskStatus::ForcedAbortion) => {
                 Err(vec!["search task was forcibly aborted".to_string()])
-            },
+            }
             Ok(crate::task_system::task::TaskStatus::Shutdown(_)) => {
                 Err(vec!["search task was shutdown".to_string()])
-            },
+            }
             Err(_) => Err(vec!["search task join error".to_string()]),
         }
     }

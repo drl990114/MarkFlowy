@@ -1,6 +1,7 @@
 import { Empty, FileTree, List } from '@/components'
 import type { IFile } from '@/helper/filesys'
 import { useOpen } from '@/hooks'
+import { createNewWindow } from '@/services/windows'
 import { useEditorStore } from '@/stores'
 import useOpenedCacheStore from '@/stores/useOpenedCacheStore'
 import { homeDir } from '@tauri-apps/api/path'
@@ -72,7 +73,8 @@ const Explorer: FC<ExplorerProps> = (props) => {
 
   const handleOpenHistoryListItemClick = useCallback(
     (item: ListDataItem) => {
-      openFolder(item.key as string)
+      createNewWindow({ path: item.key as string })
+      // openFolder(item.key as string)
       setPopperOpen(false)
     },
     [openFolder],

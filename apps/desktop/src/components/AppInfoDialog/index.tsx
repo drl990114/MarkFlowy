@@ -1,6 +1,6 @@
 import { EVENT } from '@/constants'
+import { currentWindow } from '@/services/windows'
 import useAppInfoStore from '@/stores/useAppInfoStore'
-import { listen } from '@tauri-apps/api/event'
 import { writeText } from '@tauri-apps/plugin-clipboard-manager'
 import type { FC } from 'react'
 import { memo, useCallback, useEffect, useState } from 'react'
@@ -13,7 +13,7 @@ const AboutDialog: FC = () => {
   const { appInfo } = useAppInfoStore()
 
   useEffect(() => {
-    const unlisten = listen(EVENT.app_about, () => setOpen(true))
+    const unlisten = currentWindow.listen(EVENT.app_about, () => setOpen(true))
     return () => {
       unlisten.then((fn) => fn())
     }
