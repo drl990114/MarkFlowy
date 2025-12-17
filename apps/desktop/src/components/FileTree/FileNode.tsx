@@ -273,12 +273,21 @@ function FileNode({
         })
       }}
       onClick={(e) => {
+        if (isPending) {
+          e.stopPropagation()
+          return
+        }
         if (e.shiftKey) {
           return
         }
         node.isInternal && node.toggle()
       }}
-      ref={dragHandle}
+      onMouseUp={(e) => {
+        if (isPending) {
+          e.stopPropagation()
+        }
+      }}
+      ref={isPending ? null : dragHandle}
     >
       <div style={{ display: 'flex', padding: '0 6px', width: '100%', boxSizing: 'border-box' }}>
         <div className='indentLines'>
