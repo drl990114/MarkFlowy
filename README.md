@@ -135,13 +135,6 @@ The development of **MarkFlowy** cannot be separated from these contributors. Th
         </a>
     </td>
     <td align="center">
-        <a href="https://github.com/KiraKiraAyu">
-            <img src="https://avatars.githubusercontent.com/u/99468824?v=4" width="90;" alt="KiraKiraAyu"/>
-            <br />
-            <sub><b>Lysastriel</b></sub>
-        </a>
-    </td>
-    <td align="center">
         <a href="https://github.com/marianoesteban">
             <img src="https://avatars.githubusercontent.com/u/3076449?v=4" width="90;" alt="marianoesteban"/>
             <br />
@@ -161,15 +154,15 @@ The development of **MarkFlowy** cannot be separated from these contributors. Th
             <br />
             <sub><b>Chiefass</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/dai">
             <img src="https://avatars.githubusercontent.com/u/12391?v=4" width="90;" alt="dai"/>
             <br />
             <sub><b>Dai</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/fossabot">
             <img src="https://avatars.githubusercontent.com/u/29791463?v=4" width="90;" alt="fossabot"/>
