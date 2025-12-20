@@ -22,6 +22,7 @@ declare namespace Setting {
     desc?: {
       i18nKey: string
     }
+    afterWrite?: (val: any) => void
   }
 
   type SelectSettingItem = {

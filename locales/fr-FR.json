@@ -322,6 +322,16 @@
           "desc": "$ {DocumentPath} fait référence au chemin du dossier supérieur dans lequel vous éditez actuellement le fichier. Lorsque \"Téléchargez une image, l'image sera enregistrée dans le chemin par rapport au fichier actuel."
         }
       }
+    },
+    "display": {
+      "label": "Apparence",
+      "size": {
+        "label": "Taille",
+        "zoom": {
+          "label": "Échelle de mise à l'échelle",
+          "desc": "Zoom ou agrandissement de l'échelle d'affichage de la page entière"
+        }
+      }
     }
   },
   "updater": {

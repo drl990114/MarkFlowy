@@ -357,6 +357,16 @@
           "desc": "${documentPath} refers to the parent folder path of the file you are currently editing. When uploading an image, the image will be saved to the path relative to the current file."
         }
       }
+    },
+    "display": {
+      "label": "Appearance",
+      "size": {
+        "label": "Dimensions",
+        "zoom": {
+          "label": "Scaling",
+          "desc": "Scales or enlarges the display scale of the entire page"
+        }
+      }
     }
   },
   "updater": {

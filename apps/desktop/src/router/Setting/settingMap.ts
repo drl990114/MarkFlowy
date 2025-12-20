@@ -1,4 +1,5 @@
-import { locales } from '@/i18n'
+import { changeLng, Langs, locales } from '@/i18n'
+import { currentWebview } from '@/services/windows'
 import i18n from 'i18next'
 import { EditorViewType } from 'rme'
 
@@ -59,6 +60,32 @@ export const getSettingMap = () => {
             value: key,
             title: locales[key as keyof typeof locales],
           })),
+          afterWrite: (val: Langs) => {
+            changeLng(val)
+          },
+        },
+      },
+    },
+    display: {
+      i18nKey: 'settings.display.label',
+      iconName: 'ri-window-line',
+      size: {
+        i18nKey: 'settings.display.size.label',
+        zoom: {
+          key: 'webview_zoom',
+          type: 'slider',
+          title: {
+            i18nKey: 'settings.display.size.zoom.label',
+          },
+          desc: {
+            i18nKey: 'settings.display.size.zoom.desc',
+          },
+          step: 0.1,
+          saveToString: true,
+          scope: [0.5, 2],
+          afterWrite: (val: string) => {
+            currentWebview.setZoom(Number(val))
+          },
         },
       },
     },
@@ -151,7 +178,7 @@ export const getSettingMap = () => {
             i18nKey: 'settings.editor.wysiwyg.codemirror_linewrap.desc',
           },
         },
-      }
+      },
     },
     image: {
       i18nKey: 'settings.image.label',
@@ -205,8 +232,8 @@ export const getSettingMap = () => {
                 i18nKey: 'request.headers_config.desc',
               },
               i18nProps: {
-                add: 'common.addHeader'
-              }
+                add: 'common.addHeader',
+              },
             },
           },
           {
@@ -251,8 +278,8 @@ export const getSettingMap = () => {
                 i18nKey: 'request.headers_config.desc',
               },
               i18nProps: {
-                add: 'common.addHeader'
-              }
+                add: 'common.addHeader',
+              },
             },
           },
           {
@@ -287,11 +314,11 @@ export const getSettingMap = () => {
                 i18nKey: 'request.headers_config.desc',
               },
               i18nProps: {
-                add: 'common.addHeader'
-              }
+                add: 'common.addHeader',
+              },
             },
           },
-           {
+          {
             i18nKey: 'settings.ai.Google.label',
             ApiBase: {
               key: 'extensions_google_apibase',
@@ -333,8 +360,8 @@ export const getSettingMap = () => {
                 i18nKey: 'request.headers_config.desc',
               },
               i18nProps: {
-                add: 'common.addHeader'
-              }
+                add: 'common.addHeader',
+              },
             },
           },
         ],

@@ -191,6 +191,16 @@
         }
       }
     },
+    "display": {
+      "label": "外观",
+      "size": {
+        "label": "尺寸",
+        "zoom": {
+          "label": "缩放比例",
+          "desc": "对整个页面的显示比例进行缩放或放大"
+        }
+      }
+    },
     "editor": {
       "label": "编辑器",
       "style": {

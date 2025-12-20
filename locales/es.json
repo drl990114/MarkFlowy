@@ -325,6 +325,16 @@
           "desc": "$ {DocumentPath} se refiere a la ruta de la carpeta superior del archivo que está editando actualmente. Al \"cargar una imagen, la imagen se guardará en la ruta relativa al archivo actual."
         }
       }
+    },
+    "display": {
+      "label": "Apariencia",
+      "size": {
+        "label": "Tamaño",
+        "zoom": {
+          "label": "Escala",
+          "desc": "Ampliar o ampliar la escala de visualización de toda la página"
+        }
+      }
     }
   },
   "updater": {

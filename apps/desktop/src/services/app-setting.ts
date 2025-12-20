@@ -12,7 +12,7 @@ export const appSettingStoreSetup = async () => {
   return settingData
 }
 
-export const writeSettingData = async (item: Pick<Setting.SettingItem, 'key'>, value: any) => {
+export const writeSettingData = async (item: Pick<Setting.SettingItem, 'key' | 'afterWrite'>, value: any) => {
   const { settingData } = useAppSettingStore.getState()
 
   const newSettingData = {
@@ -23,6 +23,10 @@ export const writeSettingData = async (item: Pick<Setting.SettingItem, 'key'>, v
   await invoke('save_app_conf', { data: newSettingData, label: 'markflowy' })
 
   emit('app_conf_change')
+
+  if (item.afterWrite) {
+    item.afterWrite(value)
+  }
 }
 
 const appSettingService = {

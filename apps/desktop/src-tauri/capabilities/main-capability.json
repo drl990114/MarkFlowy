@@ -16,6 +16,7 @@
     "core:window:allow-minimize",
     "core:window:allow-close",
     "core:window:allow-destroy",
+    "core:webview:allow-set-webview-zoom",
     "core:app:default",
     "core:app:allow-set-app-theme",
     "core:app:allow-app-hide",
