@@ -274,10 +274,10 @@
     },
     "image": {
       "label": "Imágenes",
-      "event": {
-        "label": "Editor de eventos de imagen",
+      "paste_event": {
+        "label": "Evento de pegado del editor",
         "when_paste_image": {
-          "label": "Al pegar una imagen",
+          "label": "Cuando el texto pegado contiene una imagen",
           "desc": "Seleccione el comportamiento predeterminado al pegar una imagen en el editor.",
           "options": {
             "do_nothing": "Sin operación",
@@ -297,7 +297,32 @@
         },
         "paste_image_save_relative_path_rule": {
           "label": "Reglas de ruta",
-          "desc": "${documentPath} se refiere a la ruta de la carpeta superior del archivo que está editando actualmente. Al \"pegar una imagen, la imagen se guardará en la ruta relativa al archivo actual."
+          "desc": "$ {DocumentPath} se refiere a la ruta de la carpeta superior del archivo que está editando actualmente. Al \"pegar una imagen, la imagen se guardará en la ruta relativa al archivo actual."
+        }
+      },
+      "upload_img": {
+        "label": "Subir archivo de imagen",
+        "when_upload_image": {
+          "label": "Subir el comportamiento de la imagen",
+          "desc": "Seleccione el comportamiento al cargar archivos de imagen en el editor (el comportamiento de carga incluye: arrastrar y soltar archivos de imagen y pegar con software de captura de pantalla)",
+          "options": {
+            "save_to_local_absolute": "Guardar en la ruta absoluta global",
+            "save_to_local_relative": "Ruta relativa guardada en el área de trabajo",
+            "paste_as_base64": "Pegar como código Base64",
+            "save_to_file_relative": "Ruta guardada en el archivo actual relativo"
+          }
+        },
+        "upload_image_save_absolute_path": {
+          "label": "Ruta absoluta global",
+          "desc": "Al \"cargar una imagen\", la imagen se guarda en esta ruta."
+        },
+        "upload_image_save_relative_path": {
+          "label": "Ruta relativa del área de trabajo",
+          "desc": "Al \"cargar una imagen\", la imagen calculará la ruta relativa al área de trabajo actual de acuerdo con sus reglas y guardará esta ruta"
+        },
+        "upload_image_save_relative_path_rule": {
+          "label": "Reglas de ruta",
+          "desc": "$ {DocumentPath} se refiere a la ruta de la carpeta superior del archivo que está editando actualmente. Al \"cargar una imagen, la imagen se guardará en la ruta relativa al archivo actual."
         }
       }
     }

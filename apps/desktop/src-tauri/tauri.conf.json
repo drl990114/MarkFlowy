@@ -69,15 +69,18 @@
     "security": {
       "assetProtocol": {
         "enable": true,
-        "scope": ["**"]
+        "scope": {
+          "requireLiteralLeadingDot": false,
+          "allow": ["**/*"]
+        }
       },
       "csp": {
-        "img-src": "'self' data: blob: https: http:",
+        "default-src": "'self' customprotocol: asset:",
+        "img-src": "'self' data: blob: https: http: http://asset.localhost asset:",
         "style-src": "'self' 'unsafe-inline'",
         "font-src": "'self' data: https: http:",
         "frame-src": "'self' https: http:"
-      },
-      "dangerousDisableAssetCspModification": true
+      }
     }
   }
 }

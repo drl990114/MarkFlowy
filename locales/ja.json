@@ -279,10 +279,10 @@
     },
     "image": {
       "label": "画像",
-      "event": {
-        "label": "エディタ画像イベント",
+      "paste_event": {
+        "label": "エディタ貼り付けイベント",
         "when_paste_image": {
-          "label": "画像を貼り付ける時",
+          "label": "貼り付けたテキストに画像が含まれている場合",
           "desc": "エディタで画像を貼り付けるときのデフォルトの動作を選択します。",
           "options": {
             "do_nothing": "操作なし",
@@ -302,7 +302,32 @@
         },
         "paste_image_save_relative_path_rule": {
           "label": "パスルール",
-          "desc": "${documentPath} は、あなたが現在編集しているファイルの上位フォルダパスで、「画像を貼り付けると、画像は現在のファイルを基準にしたパスに保存されます。"
+          "desc": "$ {DocumentPath} は、あなたが現在編集しているファイルの上位フォルダパスで、「画像を貼り付けると、画像は現在のファイルを基準にしたパスに保存されます。"
+        }
+      },
+      "upload_img": {
+        "label": "画像ファイルをアップロードする",
+        "when_upload_image": {
+          "label": "画像をアップロードする行為",
+          "desc": "エディターで画像ファイルをアップロードする時の動作を処理することを選択します。",
+          "options": {
+            "save_to_local_absolute": "グローバル絶対パスに保存",
+            "save_to_local_relative": "作業エリアへの相対パスを保存します",
+            "paste_as_base64": "Base64エンコードに貼り付けます",
+            "save_to_file_relative": "相対的な現在のファイルへのパスを保存します"
+          }
+        },
+        "upload_image_save_absolute_path": {
+          "label": "グローバル絶対パス",
+          "desc": "「画像をアップロードするとき」に、このパスに画像が保存されます。"
+        },
+        "upload_image_save_relative_path": {
+          "label": "作業エリア相対パス",
+          "desc": "「画像をアップロードする」の場合、画像はルールに基づいて現在のワークスペースに対するパスを計算し、このパスに保存します"
+        },
+        "upload_image_save_relative_path_rule": {
+          "label": "パスルール",
+          "desc": "$ {DocumentPath} は、あなたが現在編集しているファイルの上位フォルダパスで、「画像をアップロードすると、画像は現在のファイルを基準にしたパスに保存されます。"
         }
       }
     }

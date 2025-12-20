@@ -306,10 +306,10 @@
     },
     "image": {
       "label": "Picture",
-      "event": {
-        "label": "Editor Picture Events",
+      "paste_event": {
+        "label": "Editor Paste Event",
         "when_paste_image": {
-          "label": "When pasting a picture",
+          "label": "When pasted text contains a picture",
           "desc": "Select the default behavior when pasting pictures in the editor.",
           "options": {
             "do_nothing": "No Operation",
@@ -330,6 +330,31 @@
         "paste_image_save_relative_path_rule": {
           "label": "Path Rules",
           "desc": "${documentPath} refers to the parent folder path of the file you are currently editing. When you paste the picture, the picture will be saved to the path relative to the current file."
+        }
+      },
+      "upload_img": {
+        "label": "Upload image file",
+        "when_upload_image": {
+          "label": "Upload Image Behavior",
+          "desc": "Select the behavior when uploading image files in the editor (upload behavior includes: drag and drop image files, but also screenshot software paste)",
+          "options": {
+            "save_to_local_absolute": "Save to Global Absolute Path",
+            "save_to_local_relative": "Save to workspace relative path",
+            "paste_as_base64": "Paste as Base64 encoding",
+            "save_to_file_relative": "Save to a path relative to the current file"
+          }
+        },
+        "upload_image_save_absolute_path": {
+          "label": "Global Absolute Path",
+          "desc": "When you upload an image, the image is saved to this path."
+        },
+        "upload_image_save_relative_path": {
+          "label": "Workspace relative path",
+          "desc": "When \"uploading an image\", the image will be calculated relative to the current workspace path according to your rules and saved to this path"
+        },
+        "upload_image_save_relative_path_rule": {
+          "label": "Path Rules",
+          "desc": "${documentPath} refers to the parent folder path of the file you are currently editing. When uploading an image, the image will be saved to the path relative to the current file."
         }
       }
     }

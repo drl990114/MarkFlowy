@@ -59,6 +59,10 @@ pub_struct!(AppConf {
     paste_image_save_absolute_path: Option<String>,
     paste_image_save_relative_path: Option<String>,
     paste_image_save_relative_path_rule: Option<String>,
+    when_upload_image: Option<String>,
+    upload_image_save_absolute_path: Option<String>,
+    upload_image_save_relative_path: Option<String>,
+    upload_image_save_relative_path_rule: Option<String>,
 });
 
 pub const APP_CONF_PATH: &str = "markflowy.conf.json";
@@ -127,6 +131,16 @@ impl AppConf {
             paste_image_save_absolute_path: None,
             paste_image_save_relative_path: Some("assets/images".to_string()),
             paste_image_save_relative_path_rule: Some("${documentPath}/assets".to_string()),
+            when_upload_image: Some("save_to_local_absolute".to_string()),
+            upload_image_save_absolute_path: Some(
+                app_root()
+                    .join("assets/images")
+                    .to_str()
+                    .unwrap()
+                    .to_string(),
+            ),
+            upload_image_save_relative_path: Some("assets/images".to_string()),
+            upload_image_save_relative_path_rule: Some("${documentPath}/assets".to_string()),
         }
     }
 
@@ -173,7 +187,11 @@ impl AppConf {
             when_paste_image,
             paste_image_save_absolute_path,
             paste_image_save_relative_path,
-            paste_image_save_relative_path_rule
+            paste_image_save_relative_path_rule,
+            when_upload_image,
+            upload_image_save_absolute_path,
+            upload_image_save_relative_path,
+            upload_image_save_relative_path_rule
         );
 
         self.write()

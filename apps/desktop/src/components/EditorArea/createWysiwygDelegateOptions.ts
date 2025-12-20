@@ -5,7 +5,12 @@ import { sleep } from '@/helper'
 import { clipboardRead } from '@/helper/clipboard'
 import { getFileObject } from '@/helper/files'
 import { getFolderPathFromPath, getMdRelativePath } from '@/helper/filesys'
-import { convertImageToBase64, getImageUrlInTauri, moveImageToLocalFolder } from '@/helper/image'
+import {
+  convertImageToBase64,
+  getImageUrlInTauri,
+  moveImageToLocalFolder,
+  readFileAsBase64,
+} from '@/helper/image'
 import { useEditorKeybindingStore } from '@/hooks/useKeyboard'
 import { useEditorStore } from '@/stores'
 import useAppSettingStore from '@/stores/useAppSettingStore'
@@ -34,6 +39,144 @@ export const createWysiwygDelegateOptions = (fileId?: string): CreateWysiwygDele
       lineWrapping: settingData.wysiwyg_editor_codemirror_line_wrap,
     },
     clipboardReadFunction: clipboardRead,
+    uploadImageHandler: (files) => {
+      let completed = 0
+      const promises: any[] = []
+
+      for (const { file, progress } of files) {
+        promises.push(async () => {
+          try {
+            const fileObject = fileId ? getFileObject(fileId) : null
+            const fileFolderPath = getFolderPathFromPath(fileObject?.path)
+            const workspaceRoot = useEditorStore.getState().folderData?.[0]?.path
+            const settingData = useAppSettingStore.getState().settingData
+
+            const isTextbundle = fileFolderPath?.endsWith('.textbundle')
+
+            if (isTextbundle) {
+              const targetPath = `${fileFolderPath || workspaceRoot || ''}/assets`
+              if (workspaceRoot) {
+                const base64 = await readFileAsBase64(file)
+                const fullPath = await moveImageToLocalFolder(base64, targetPath)
+                completed += 1
+                progress(completed / files.length)
+                return {
+                  src: await getMdRelativePath(fullPath, fileFolderPath || workspaceRoot),
+                  'data-file-name': file.name,
+                }
+              }
+            }
+
+            if (settingData.when_upload_image === 'paste_as_base64') {
+              const src = await readFileAsBase64(file)
+              completed += 1
+              progress(completed / files.length)
+              return {
+                src,
+                'data-file-name': file.name,
+              }
+            }
+
+            if (
+              settingData.when_upload_image === 'save_to_local_relative' &&
+              settingData.upload_image_save_relative_path
+            ) {
+              const targetPath = await join(
+                workspaceRoot || '',
+                settingData.upload_image_save_relative_path,
+              )
+              const base64 = await readFileAsBase64(file)
+              const fullPath = await moveImageToLocalFolder(base64, targetPath)
+              completed += 1
+              progress(completed / files.length)
+              if (workspaceRoot) {
+                return {
+                  src: await getMdRelativePath(fullPath, fileFolderPath || workspaceRoot),
+                  'data-file-name': file.name,
+                }
+              } else {
+                return {
+                  src: fullPath,
+                  'data-file-name': file.name,
+                }
+              }
+            }
+
+            if (
+              settingData.when_upload_image === 'save_to_local_absolute' &&
+              settingData.upload_image_save_absolute_path
+            ) {
+              const targetPath = settingData.upload_image_save_absolute_path
+              const base64 = await readFileAsBase64(file)
+
+              const fullPath = await moveImageToLocalFolder(base64, targetPath)
+              completed += 1
+              progress(completed / files.length)
+              return {
+                src: fullPath,
+                'data-file-name': file.name,
+              }
+            }
+
+            if (
+              settingData.when_upload_image === 'save_to_file_relative' &&
+              settingData.upload_image_save_relative_path_rule
+            ) {
+              const targetPath = settingData.upload_image_save_relative_path_rule.replace(
+                '${documentPath}',
+                fileFolderPath || '',
+              )
+              const base64 = await readFileAsBase64(file)
+              const fullPath = await moveImageToLocalFolder(base64, targetPath)
+              completed += 1
+              progress(completed / files.length)
+              if (workspaceRoot) {
+                return {
+                  src: await getMdRelativePath(fullPath, fileFolderPath || workspaceRoot || ''),
+                  'data-file-name': file.name,
+                }
+              } else {
+                return {
+                  src: fullPath,
+                  'data-file-name': file.name,
+                }
+              }
+            }
+
+            if (settingData.when_upload_image === 'upload_as_base64') {
+              const src = await readFileAsBase64(file)
+              completed += 1
+              progress(completed / files.length)
+              return {
+                src,
+                'data-file-name': file.name,
+              }
+            }
+          } catch (error) {
+            console.error('Image upload failed:', error)
+            // Fallback to base64 if anything goes wrong
+            const reader = new FileReader()
+            return new Promise<any>((resolve) => {
+              reader.addEventListener(
+                'load',
+                (readerEvent) => {
+                  completed += 1
+                  progress(completed / files.length)
+                  resolve({
+                    src: readerEvent.target?.result as string,
+                    'data-file-name': file.name,
+                  })
+                },
+                { once: true },
+              )
+              reader.readAsDataURL(file)
+            })
+          }
+        })
+      }
+
+      return promises
+    },
     imagePasteHandler: async (src) => {
       await sleep(1)
 

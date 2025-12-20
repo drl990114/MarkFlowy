@@ -43,7 +43,17 @@ const Main = () => {
   )
 }
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+const rootElement = document.getElementById('root')!
+rootElement.addEventListener('dragover', (e) => {
+  e.preventDefault()
+})
+rootElement.addEventListener('drop', (event) => {
+  event.preventDefault()
+  const files = event.dataTransfer?.files
+  console.log('Dropped files:', files)
+})
+
+ReactDOM.createRoot(rootElement).render(
   <StrictMode>
     <HoxRoot>
       <QueryClientProvider client={queryClient}>

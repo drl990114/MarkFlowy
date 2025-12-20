@@ -271,10 +271,10 @@
     },
     "image": {
       "label": "Image",
-      "event": {
-        "label": "Événements d'image de l'éditeur",
+      "paste_event": {
+        "label": "Événements de collage de l'éditeur",
         "when_paste_image": {
-          "label": "Lors du collage de l'image",
+          "label": "Lorsque le texte collé contient des images",
           "desc": "Sélectionnez le comportement par défaut lorsque vous collez une image dans l'éditeur.",
           "options": {
             "do_nothing": "Aucune opération",
@@ -294,7 +294,32 @@
         },
         "paste_image_save_relative_path_rule": {
           "label": "Règles de chemin",
-          "desc": "${documentPath} fait référence au chemin du dossier supérieur du fichier que vous éditez actuellement. Lorsque vous \"collez l'image, l'image sera enregistrée au chemin par rapport au fichier actuel."
+          "desc": "$ {DocumentPath} fait référence au chemin du dossier supérieur du fichier que vous éditez actuellement. Lorsque vous \"collez l'image, l'image sera enregistrée au chemin par rapport au fichier actuel."
+        }
+      },
+      "upload_img": {
+        "label": "Télécharger un fichier image",
+        "when_upload_image": {
+          "label": "Télécharger le comportement de l'image",
+          "desc": "Sélectionnez le comportement lors du téléchargement du fichier image dans l'éditeur (le comportement de téléchargement comprend: glisser-déposer le fichier image, y compris le collage du logiciel de capture d'écran)",
+          "options": {
+            "save_to_local_absolute": "Enregistrer le chemin absolu global",
+            "save_to_local_relative": "Enregistrer le chemin relatif de la zone de travail",
+            "paste_as_base64": "Collez pour l'encodage Base64",
+            "save_to_file_relative": "Enregistrer le chemin d'accès au fichier actuel relatif"
+          }
+        },
+        "upload_image_save_absolute_path": {
+          "label": "Chemin absolu global",
+          "desc": "Lorsque \"Télécharger une image\", l'image sera enregistrée sur ce chemin."
+        },
+        "upload_image_save_relative_path": {
+          "label": "Chemin relatif de la zone de travail",
+          "desc": "Lorsque \"lors du téléchargement d'une image\", l'image sera calculée en fonction de vos règles par rapport au chemin de travail actuel et enregistrée dans ce chemin"
+        },
+        "upload_image_save_relative_path_rule": {
+          "label": "Règles de chemin",
+          "desc": "$ {DocumentPath} fait référence au chemin du dossier supérieur dans lequel vous éditez actuellement le fichier. Lorsque \"Téléchargez une image, l'image sera enregistrée dans le chemin par rapport au fichier actuel."
         }
       }
     }

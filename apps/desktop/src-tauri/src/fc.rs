@@ -554,6 +554,8 @@ pub fn get_file_normal_info(path_str: &str) -> FileNormalInfo {
 
 pub mod cmd {
     use crate::fc::{self, FileNormalInfo, FileResultCode};
+    use base64::engine::Engine;
+    use base64::prelude::BASE64_STANDARD;
     use regex::Regex;
     use std::fs;
     use std::path::Path;
@@ -629,6 +631,27 @@ pub mod cmd {
     #[tauri::command]
     pub fn write_file(file_path: &str, content: &str) -> FileResult {
         fc::write_file(file_path, content)
+    }
+
+    #[tauri::command]
+    pub fn read_u8_array_from_file(file_path: &str) -> FileResult {
+        match fs::read(file_path) {
+            Ok(content) => FileResult {
+                code: FileResultCode::Success,
+                content: BASE64_STANDARD.encode(content),
+            },
+            Err(e) => {
+                let code = match e.kind() {
+                    std::io::ErrorKind::NotFound => FileResultCode::NotFound,
+                    std::io::ErrorKind::PermissionDenied => FileResultCode::PermissionDenied,
+                    _ => FileResultCode::UnknownError,
+                };
+                FileResult {
+                    code,
+                    content: format!("Failed to read file: {}", e),
+                }
+            }
+        }
     }
 
     #[tauri::command]

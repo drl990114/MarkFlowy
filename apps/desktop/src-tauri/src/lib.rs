@@ -88,6 +88,7 @@ pub fn run() {
             fc::cmd::get_file_content,
             fc::cmd::write_file,
             fc::cmd::write_u8_array_to_file,
+            fc::cmd::read_u8_array_from_file,
             fc::cmd::delete_file,
             fc::cmd::copy_file_by_from,
             fc::cmd::create_folder,

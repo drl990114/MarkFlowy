@@ -97,6 +97,30 @@ export const convertImageToBase64 = async (src: string): Promise<string> => {
   return src
 }
 
+export const readFileAsBase64 = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+
+    reader.addEventListener(
+      'load',
+      (readerEvent) => {
+        resolve(readerEvent.target?.result as string)
+      },
+      { once: true },
+    )
+
+    reader.addEventListener(
+      'error',
+      () => {
+        reject(new Error('Failed to read file as base64'))
+      },
+      { once: true },
+    )
+
+    reader.readAsDataURL(file)
+  })
+}
+
 export const moveImageToLocalFolder = async (
   imageSrc: string,
   targetFolderPath: string,
@@ -225,6 +249,55 @@ export const getImageInfo = async (src: string, baseUrl: string) => {
     isUnknownType: false,
     src: '',
   }
+}
+
+export const getImageObjectUrl = async (filePath: string): Promise<string> => {
+  if (!filePath) {
+    return filePath
+  }
+  try {
+    const result = await invoke<FileSysResult>('read_u8_array_from_file', { filePath })
+    if (result.code === FileResultCode.Success) {
+      const base64Content = result.content
+      const mimeType = getMimeTypeFromPath(filePath)
+      const blob = base64ToBlob(base64Content, mimeType)
+
+      const objectURL = URL.createObjectURL(blob)
+      return objectURL
+    } else {
+      console.error('Failed to read file:', result.content)
+      return filePath
+    }
+  } catch (error) {
+    console.error('Error getting object URL:', error)
+    return filePath
+  }
+}
+
+// 辅助函数：从文件路径获取 MIME 类型
+const getMimeTypeFromPath = (filePath: string): string => {
+  const extension = filePath.split('.').pop()?.toLowerCase()
+  const mimeTypes: Record<string, string> = {
+    jpg: 'image/jpeg',
+    jpeg: 'image/jpeg',
+    png: 'image/png',
+    gif: 'image/gif',
+    svg: 'image/svg+xml',
+    webp: 'image/webp',
+    bmp: 'image/bmp',
+    tiff: 'image/tiff',
+  }
+  return mimeTypes[extension || ''] || 'image/jpeg'
+}
+
+const base64ToBlob = (base64: string, mimeType: string): Blob => {
+  const byteCharacters = atob(base64)
+  const byteNumbers = new Array(byteCharacters.length)
+  for (let i = 0; i < byteCharacters.length; i++) {
+    byteNumbers[i] = byteCharacters.charCodeAt(i)
+  }
+  const byteArray = new Uint8Array(byteNumbers)
+  return new Blob([byteArray], { type: mimeType })
 }
 
 export const getImageUrlInTauri = async (url: string, fileFolderPath?: string) => {

@@ -233,10 +233,10 @@
     },
     "image": {
       "label": "图片",
-      "event": {
-        "label": "编辑器图片事件",
+      "paste_event": {
+        "label": "编辑器粘贴事件",
         "when_paste_image": {
-          "label": "粘贴图片时",
+          "label": "粘贴的文本包含图片时",
           "desc": "选择在编辑器中粘贴图片时的默认行为。",
           "options": {
             "do_nothing": "无操作",
@@ -257,6 +257,31 @@
         "paste_image_save_relative_path_rule": {
           "label": "路径规则",
           "desc": "${documentPath} 是指你当前编辑文件的上级文件夹路径，当“粘贴图片时，图片将保存到相对于当前文件的路径。"
+        }
+      },
+      "upload_img": {
+        "label": "上传图片文件",
+        "when_upload_image": {
+          "label": "上传图片行为",
+          "desc": "选择在编辑器中处理上传图片文件时的行为(上传行为包括：拖放图片文件、也包括截图软件粘贴)",
+          "options": {
+            "save_to_local_absolute": "保存到全局绝对路径",
+            "save_to_local_relative": "保存到工作区相对路径",
+            "paste_as_base64": "粘贴为 Base64 编码",
+            "save_to_file_relative": "保存到相对当前文件的路径"
+          }
+        },
+        "upload_image_save_absolute_path": {
+          "label": "全局绝对路径",
+          "desc": "当“上传图片时”，图片将保存到此路径。"
+        },
+        "upload_image_save_relative_path": {
+          "label": "工作区相对路径",
+          "desc": "当“上传图片时”，图片将根据你的规则计算出相对于当前工作区路径，保存到此路径"
+        },
+        "upload_image_save_relative_path_rule": {
+          "label": "路径规则",
+          "desc": "${documentPath} 是指你当前编辑文件的上级文件夹路径，当“上传图片时，图片将保存到相对于当前文件的路径。"
         }
       }
     },

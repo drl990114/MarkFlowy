@@ -2971,6 +2971,7 @@ dependencies = [
  "arboard",
  "async-channel",
  "async-trait",
+ "base64 0.21.7",
  "chrono",
  "dark-light",
  "dotenv",
