@@ -1,6 +1,6 @@
 import useAppSettingStore from '@/stores/useAppSettingStore'
-import { emit } from '@tauri-apps/api/event'
 import { invoke } from '@tauri-apps/api/core'
+import { emit } from '@tauri-apps/api/event'
 
 export const appSettingStoreSetup = async () => {
   const { setSettingData } = useAppSettingStore.getState()
@@ -13,14 +13,12 @@ export const appSettingStoreSetup = async () => {
 }
 
 export const writeSettingData = async (item: Pick<Setting.SettingItem, 'key'>, value: any) => {
-  const { setSettingData, settingData } = useAppSettingStore.getState()
+  const { settingData } = useAppSettingStore.getState()
 
   const newSettingData = {
     ...settingData,
     [item.key]: value,
   }
-
-  setSettingData(newSettingData)
 
   await invoke('save_app_conf', { data: newSettingData, label: 'markflowy' })
 

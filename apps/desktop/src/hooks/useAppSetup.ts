@@ -253,6 +253,11 @@ const useAppSetup = () => {
         return true
       }
     })
+
+    const settingDataUpdate = currentWindow.listen('app_conf_change', async () => {
+      appSettingStoreSetup()
+    })
+
     const unListenMenu = currentWindow.listen<string>('native:menu', ({ payload }) => {
       bus.emit(payload)
     })
@@ -275,6 +280,7 @@ const useAppSetup = () => {
       unListenMenu.then((fn) => fn())
       closeRequest.then((fn) => fn())
       unListenOpenedUrls.then((fn) => fn())
+      settingDataUpdate.then((fn) => fn())
     }
   }, [])
 
