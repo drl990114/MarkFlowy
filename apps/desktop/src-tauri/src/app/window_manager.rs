@@ -133,7 +133,7 @@ pub fn create_new_window(_app: AppHandle, path: Option<String>) -> Result<String
 pub fn update_window_path(
     _app: AppHandle,
     window_label: &str,
-    new_path: String,
+    new_path: Option<String>,
 ) -> Result<bool, String> {
     let mut instances = WINDOW_INSTANCES
         .lock()
@@ -145,7 +145,11 @@ pub fn update_window_path(
     }
 
     // 更新路径
-    instances.insert(window_label.to_string(), PathBuf::from(new_path));
+    if let Some(path) = new_path {
+        instances.insert(window_label.to_string(), PathBuf::from(path));
+    } else {
+        instances.remove(window_label);
+    }
 
     Ok(true)
 }
