@@ -29,6 +29,11 @@ export const GlobalStyles = createGlobalStyle`
     font-size: 1rem;
     cursor: pointer;
     transition: all 0.3s ease;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: "liga" 1, "calt" 1;
+    font-display: swap;
 
     &:hover {
       color: ${(props) => props.theme.accentColor};
