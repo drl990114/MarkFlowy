@@ -16,3 +16,7 @@ export function isArray(tar: any): tar is any[] {
 export function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
+
+export function filterObjectEmptyValues(obj: Record<string, any>) {
+  return Object.fromEntries(Object.entries(obj).filter(([_, v]) => v !== undefined))
+}

@@ -1,13 +1,23 @@
-import type { AIChatHistory } from '@/extensions/ai/useAiChatStore'
+interface AIChatHistory {
+  id: string
+  question?: string
+  answer?: string
+  status: 'pending' | 'streaming' | 'done' | 'error'
+}
 
 export function parseChatList(chatList: AIChatHistory[]): string {
   let markdownContent = ''
 
   chatList.forEach((chat) => {
     if (chat.status === 'done') {
-      const questionText = questionToMarkdownText(chat.question)
-      const answerText = answerToMarkdownText(chat.answer!)
-      markdownContent += questionText + answerText
+      if (chat.question) {
+        const questionText = questionToMarkdownText(chat.question!)
+        markdownContent += questionText
+      }
+      if (chat.answer) {
+        const answerText = answerToMarkdownText(chat.answer!)
+        markdownContent += answerText
+      }
     }
   })
 

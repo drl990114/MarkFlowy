@@ -16,7 +16,8 @@
     "submit": "submit",
     "addHeader": "Add Header",
     "key": "Key",
-    "value": "Value"
+    "value": "Value",
+    "success": "Success"
   },
   "view": {
     "label": "View",
@@ -444,5 +445,9 @@
       "label": "Configure Request Header",
       "desc": "Add custom HTTP request headers to support multiple key-value pairs."
     }
+  },
+  "ai": {
+    "capabilities": "Function",
+    "export_conversation": "one-click export dialog content to md file"
   }
 }

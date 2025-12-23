@@ -16,7 +16,8 @@
     "submit": "送信",
     "addHeader": "Headerを追加",
     "key": "キー",
-    "value": "値"
+    "value": "値",
+    "success": "成功"
   },
   "view": {
     "label": "表示",
@@ -444,5 +445,9 @@
       "label": "リクエストヘッダの設定",
       "desc": "カスタムHTTPリクエストヘッダーを追加し、複数のキー値ペア構成をサポートします。"
     }
+  },
+  "ai": {
+    "capabilities": "機能",
+    "export_conversation": "ワンクリックで会話内容をmdファイルにエクスポート"
   }
 }

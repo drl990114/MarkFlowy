@@ -16,7 +16,8 @@
     "submit": "Presentar",
     "addHeader": "Añadir Header",
     "key": "Claves",
-    "value": "Valor"
+    "value": "Valor",
+    "success": "Éxito"
   },
   "view": {
     "label": "Vista",
@@ -444,5 +445,9 @@
       "label": "Configurar el encabezado de la solicitud",
       "desc": "Agrega un encabezado de solicitud HTTP personalizado que admite varias configuraciones de pares clave-valor."
     }
+  },
+  "ai": {
+    "capabilities": "Función",
+    "export_conversation": "Exportar contenido de conversación como archivo md con un clic"
   }
 }

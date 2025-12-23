@@ -1,4 +1,4 @@
-import { aiGenerateTextRequest } from '@/extensions/ai/api'
+import { aiGenerateTextRequest, aiStreamTextRequest } from '@/extensions/ai/api'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import { cloneDeep } from 'lodash'
 import { nanoid } from 'nanoid'
@@ -28,7 +28,7 @@ export type AISettingData = {
 
 export const getCurrentAISettingData = (): AISettingData => {
   const settingData = useAppSettingStore.getState().settingData
-  const aiProvider = useAiChatStore.getState().aiProvider
+  const aiProvider = useAiChatStoreV2.getState().aiProvider
   const aiProviderSettings = aiProviderSettingKeysMap[aiProvider]
 
   return {
@@ -43,7 +43,7 @@ export const getCurrentAISettingData = (): AISettingData => {
 
 export const useRefreshAIProvidersModels = () => {
   const { settingData } = useAppSettingStore()
-  const { setAiProviderModelsMap } = useAiChatStore()
+  const { setAiProviderModelsMap } = useAiChatStoreV2()
 
   useEffect(() => {
     const res = {} as Record<AIProviders, string[]>
@@ -59,7 +59,17 @@ export const useRefreshAIProvidersModels = () => {
   }, [settingData])
 }
 
-const useAiChatStore = create<AIStore>()(
+export interface AIChatMessage {
+  key: string
+  role: 'user' | 'ai'
+  content: string
+  status: 'pending' | 'streaming' | 'done' | 'error'
+  errorMessage?: string
+  timestamp: number
+  abortController?: AbortController
+}
+
+const useAiChatStoreV2 = create<AIStore>()(
   persist(
     (set, get) => ({
       aiProvider: 'openai' as const,
@@ -77,15 +87,15 @@ const useAiChatStore = create<AIStore>()(
 
       chatList: [],
 
-      setChatStatus: (id, status, errorMessage) => {
+      setChatStatus: (key, status, errorMessage) => {
         set((state) => {
-          const curChat = state.chatList.find((history) => history.id === id)
+          const curChat = state.chatList.find((message) => message.key === key)
           if (curChat) {
             curChat.status = status
             if (errorMessage) {
               curChat.errorMessage = errorMessage
             }
-            return { ...state }
+            return { ...state, chatList: [...state.chatList] }
           }
           return state
         })
@@ -94,26 +104,107 @@ const useAiChatStore = create<AIStore>()(
       addChat: (question: string, aiSettingData) => {
         const curStore = get()
         const { aiProviderCurModel, aiProvider } = curStore
-        const chat = curStore.addChatQuestion(question)
         const { apiKey, apiBase, headers } = aiSettingData
 
-        aiGenerateTextRequest({
+        const userMessage: AIChatMessage = {
+          key: `user-${nanoid()}`,
+          role: 'user',
+          content: question,
+          status: 'done',
+          timestamp: Date.now(),
+        }
+
+        set((state) => ({
+          ...state,
+          chatList: [...state.chatList, userMessage],
+        }))
+
+        const abortController = new AbortController()
+
+        const aiMessageKey = `ai-${nanoid()}`
+        const aiMessage: AIChatMessage = {
+          key: aiMessageKey,
+          role: 'ai',
+          content: '',
+          status: 'pending',
+          timestamp: Date.now(),
+          abortController,
+        }
+
+        set((state) => ({
+          ...state,
+          chatList: [...state.chatList, aiMessage],
+        }))
+
+        aiStreamTextRequest({
           sdkProvider: aiProvider,
           url: apiBase,
           apiKey,
           headers,
           model: aiProviderCurModel[aiProvider],
           messages: [{ role: 'user', content: question }],
+          abortSignal: abortController.signal,
+          onError: ({ error }: any) => {
+            const errorMessage = error?.message || String(error) || 'Unknown error occurred'
+            const state = get()
+            state.setChatStatus(aiMessageKey, 'error', errorMessage)
+          },
         })
-          .then((text) => {
-            curStore.addChatAnswer(chat.id, text)
+          .then(async (result) => {
+            const state = get()
+            const curChat = state.chatList.find((message) => message.key === aiMessageKey)
+
+            if (!curChat || curChat.status !== 'pending') {
+              return
+            }
+
+            let fullText = ''
+            try {
+              // 逐个获取流式响应的文本块
+              for await (const chunk of result.textStream) {
+                // 再次检查状态，确保在流处理过程中没有被取消或出错
+                const currentState = get()
+                const currentChat = currentState.chatList.find(
+                  (message) => message.key === aiMessageKey,
+                )
+                if (currentChat?.status === 'pending') {
+                  state.setChatStatus(aiMessageKey, 'streaming')
+                } else if (!currentChat || currentChat.status !== 'streaming') {
+                  return
+                }
+
+                fullText += chunk
+                // 实时更新AI消息内容
+                set((state) => ({
+                  ...state,
+                  chatList: state.chatList.map((message) => {
+                    if (message.key === aiMessageKey) {
+                      return {
+                        ...message,
+                        content: fullText,
+                      }
+                    }
+                    return message
+                  }),
+                }))
+              }
+
+              const finalState = get()
+              const finalChat = finalState.chatList.find((message) => message.key === aiMessageKey)
+              if (finalChat && finalChat.status === 'streaming') {
+                state.setChatStatus(aiMessageKey, 'done')
+              }
+            } catch (error: any) {
+              const errorMessage = error?.message || String(error) || 'Unknown error occurred'
+              state.setChatStatus(aiMessageKey, 'error', errorMessage)
+            }
           })
           .catch((error) => {
-            const errorMessage = error?.message || error?.toString() || 'Unknown error occurred'
-            curStore.setChatStatus(chat.id, 'error', errorMessage)
+            const errorMessage = error?.message || String(error) || 'Unknown error occurred'
+            curStore.setChatStatus(aiMessageKey, 'error', errorMessage)
           })
 
-        return chat
+        return aiMessage
       },
 
       getPostSummary: async (text: string, aiSettingData) => {
@@ -142,7 +233,7 @@ const useAiChatStore = create<AIStore>()(
       getPostTranslate: async (text: string, aiSettingData, targetLang: string) => {
         const { aiProvider, aiProviderCurModel } = get()
         const { apiKey, apiBase, headers } = aiSettingData
-        
+
         const res = await aiGenerateTextRequest({
           sdkProvider: aiProvider,
           url: apiBase,
@@ -162,34 +253,36 @@ const useAiChatStore = create<AIStore>()(
       },
 
       addChatQuestion: (question: string) => {
-        const chat = {
-          id: nanoid(),
-          question,
-          status: 'pending' as const,
+        const message: AIChatMessage = {
+          key: `user-${nanoid()}`,
+          role: 'user',
+          content: question,
+          status: 'done',
+          timestamp: Date.now(),
         }
+
         set((state) => {
-          return { ...state, chatList: [...state.chatList, chat] }
+          return { ...state, chatList: [...state.chatList, message] }
         })
-        return chat
+        return message
       },
 
-      addChatAnswer: (id: string, answer: string) => {
+      addChatAnswer: (key: string, answer: string) => {
         set((state) => {
-          const curChat = state.chatList.find((history) => history.id === id)
-          if (curChat) {
-            curChat.answer = answer
-            curChat.status = 'done'
+          const curMessage = state.chatList.find((message) => message.key === key)
+          if (curMessage) {
+            curMessage.content = answer
             return { ...state }
           }
           return state
         })
       },
 
-      delChat: (id: string) => {
+      delChat: (key: string) => {
         set((state) => {
           return {
             ...state,
-            chatList: state.chatList.filter((history) => history.id !== id),
+            chatList: state.chatList.filter((message) => message.key !== key),
           }
         })
       },
@@ -224,6 +317,18 @@ const useAiChatStore = create<AIStore>()(
         })
       },
 
+      cancelChatStream: (key) => {
+        set((state) => {
+          const curMessage = state.chatList.find((message) => message.key === key)
+          if (curMessage && curMessage.abortController) {
+            curMessage.abortController.abort()
+            curMessage.status = 'done'
+            return { ...state }
+          }
+          return state
+        })
+      },
+
       setAiProviderModelsMap: (data) => {
         set((prev) => {
           const aiProviderCurModel = { ...prev.aiProviderCurModel }
@@ -242,42 +347,33 @@ const useAiChatStore = create<AIStore>()(
       },
     }),
     {
-      name: 'ai-storage',
-      storage: createJSONStorage(() => localStorage), // (optional) by default, 'localStorage' is used
+      name: 'ai-storage-v2',
+      storage: createJSONStorage(() => localStorage),
     },
   ),
 )
-
-type ChatStatus = 'pending' | 'done' | 'error'
-
-export interface AIChatHistory {
-  id: string
-  question: string
-  answer?: string
-  status: ChatStatus
-  errorMessage?: string
-}
 
 interface AIStore {
   aiProvider: AIProviders
   aiProviderModels: string[]
   aiProviderModelsMap: Record<AIProviders, string[]>
   aiProviderCurModel: Record<AIProviders, string>
-  chatList: AIChatHistory[]
-  setChatStatus: (id: string, status: ChatStatus, errorMessage?: string) => void
-  addChat: (question: string, aiSettingData: AISettingData) => AIChatHistory
+  chatList: AIChatMessage[]
+  setChatStatus: (key: string, status: AIChatMessage['status'], errorMessage?: string) => void
+  addChat: (question: string, aiSettingData: AISettingData) => AIChatMessage
   getPostSummary: (text: string, aiSettingData: AISettingData) => Promise<string>
   getPostTranslate: (
     text: string,
     aiSettingData: AISettingData,
     targetLang: string,
   ) => Promise<string>
-  addChatQuestion: (question: string) => AIChatHistory
-  addChatAnswer: (id: string, answer: string) => void
-  delChat: (id: string) => void
+  addChatQuestion: (question: string) => AIChatMessage
+  addChatAnswer: (key: string, answer: string) => void
+  delChat: (key: string) => void
+  cancelChatStream: (key: string) => void
   setAiProvider: (provider: AIGenerateTextParams['sdkProvider']) => void
   setAiProviderCurModel: (model: string) => void
   setAiProviderModelsMap: (aiProviderModelsMap: AIStore['aiProviderModelsMap']) => void
 }
 
-export default useAiChatStore
+export default useAiChatStoreV2

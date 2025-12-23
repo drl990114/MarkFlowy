@@ -5,15 +5,20 @@ export const Container = styled.div`
   height: 100%;
   overflow: hidden;
   font-size: 0.8rem;
+  display: flex;
+  flex-direction: column;
 
   .content {
-    height: calc(100% - 60px - 2rem);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid ${(props) => props.theme.borderColor};
     overflow: auto;
     line-height: 1.25rem;
 
     a {
       cursor: pointer;
-      color: ${props => props.theme.accentColor};
+      color: ${(props) => props.theme.accentColor};
     }
 
     .introduction {
@@ -31,7 +36,7 @@ export const Container = styled.div`
       &-item {
         margin: 0.875rem 0.875rem 0;
         padding: 0.875rem;
-        background-color: ${props => props.theme.tipsBgColor};
+        background-color: ${(props) => props.theme.tipsBgColor};
       }
     }
   }
@@ -61,13 +66,13 @@ export const ListContainer = styled.div`
   .question {
     height: 100%;
     width: 100%;
-    background: ${props => props.theme.bgColor};
+    background: ${(props) => props.theme.bgColor};
   }
 
   .answer {
     height: 100%;
     width: 100%;
-    background: ${props => props.theme.tipsBgColor};
+    background: ${(props) => props.theme.tipsBgColor};
   }
 `
 
@@ -78,16 +83,5 @@ export const BottomBar = styled.div`
   box-sizing: border-box;
   position: sticky;
   bottom: 0;
-  background-color: ${props => props.theme.bgColor};
-
-  .input {
-    margin: 0 8px;
-    flex: 1 1 70px;
-    border: 1px solid ${props => props.theme.borderColor};
-    min-width: 50px;
-  }
-
-  .submit {
-    font-size: 0.7rem;
-  }
+  background-color: ${(props) => props.theme.bgColor};
 `

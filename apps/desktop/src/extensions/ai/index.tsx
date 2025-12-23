@@ -5,13 +5,19 @@ import { EVENT, RIGHTBARITEMKEYS } from '@/constants'
 import { addNewMarkdownFileEdit } from '@/services/editor-file'
 import { useCommandStore } from '@/stores'
 import useThemeStore from '@/stores/useThemeStore'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import type { BubbleItemType } from '@ant-design/x'
+import { Actions, Bubble, Sender } from '@ant-design/x'
+import XMarkdown from '@ant-design/x-markdown'
+import { RoleType } from '@ant-design/x/es/bubble/interface'
+import { Spin, Typography } from 'antd'
+import { useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button, Input, Loading, Menu, Space } from 'zens'
+import { Icon, Menu, Space, toast } from 'zens'
 import { aiProviders } from './aiProvidersService'
 import { parseChatList } from './parseChatList'
-import { BottomBar, Container, ListContainer } from './styles'
-import useAiChatStore, { getCurrentAISettingData } from './useAiChatStore'
+import { BottomBar, Container } from './styles'
+import useAiChatStore, { AIChatMessage, getCurrentAISettingData } from './useAiChatStore'
+const { Text } = Typography
 
 const ChatList: React.FC<ChatListProps> = (props) => {
   const {
@@ -21,32 +27,166 @@ const ChatList: React.FC<ChatListProps> = (props) => {
     chatList,
     addChat,
     delChat,
+    cancelChatStream,
     setAiProvider,
     setAiProviderCurModel,
   } = useAiChatStore()
   const { curTheme } = useThemeStore()
-  const aiSettingData = useMemo(() => getCurrentAISettingData(), [])
+  const aiSettingData = getCurrentAISettingData()
   const [askInput, setAskInput] = useState('')
-  const listRef = useRef<HTMLDivElement>(null)
   const { t } = useTranslation()
 
-  useEffect(() => {
-    if (listRef.current) {
-      listRef.current.scrollTop = listRef.current.scrollHeight
-    }
-  }, [chatList.length])
+  const bubbleItems: BubbleItemType[] = useMemo(() => {
+    return chatList.map((message) => {
+      if (message.role === 'user') {
+        return {
+          key: message.key,
+          role: 'user',
+          content: {
+            ...message,
+          },
+          typing: false,
+        }
+      }
+
+      return {
+        key: message.key,
+        role: 'ai',
+        content: {
+          ...message,
+        },
+        typing: message.status === 'streaming',
+        loading: message.status === 'pending',
+      }
+    })
+  }, [chatList])
+
+  const actionItems = [
+    {
+      key: 'copy',
+      icon: <Icon.CopyOutlined />,
+      label: t('common.copy'),
+    },
+    {
+      key: 'del',
+      icon: <Icon.DeleteOutlined />,
+      label: t('common.delete'),
+    },
+  ]
+
+  const roleConfig: RoleType = useMemo(
+    () => ({
+      ai: {
+        header: 'AI Assistant',
+        styles: {
+          content: {
+            padding: '6px 12px',
+            fontSize: '1em',
+            minHeight: 'auto',
+          },
+        },
+        loadingRender: () => <Spin indicator={<Icon.LoadingOutlined spin />} />,
+        contentRender(content) {
+          return <XMarkdown>{content.content}</XMarkdown>
+        },
+        footer: (item: AIChatMessage) => {
+          return (
+            <div>
+              {item.status === 'error' ? (
+                <Space direction='horizontal'>
+                  <Text type='danger' style={{ fontSize: '12px' }}>
+                    Error: {item.errorMessage || 'Request failed'}{' '}
+                    <a onClick={openSettingWindow}>setting</a>
+                  </Text>
+                </Space>
+              ) : null}
+              <Actions
+                items={actionItems}
+                onClick={(actionItem) => {
+                  const chatList = useAiChatStore.getState().chatList
+                  const message = chatList.find((msg) => msg.key === item.key)
+                  if (!message) return
+
+                  if (actionItem.key === 'copy') {
+                    navigator.clipboard.writeText(message.content)
+                    toast.success(t('common.success'))
+                  } else if (actionItem.key === 'del') {
+                    delChat(message.key)
+
+                    if (message.role === 'ai') {
+                      const currentIndex = chatList.findIndex((msg) => msg.key === message.key)
+                      if (currentIndex > 0) {
+                        for (let i = currentIndex - 1; i >= 0; i--) {
+                          if (chatList[i].role === 'user') {
+                            delChat(chatList[i].key)
+                            break
+                          }
+                        }
+                      }
+                    } else if (message.role === 'user') {
+                      const currentIndex = chatList.findIndex((msg) => msg.key === message.key)
+                      if (currentIndex < chatList.length - 1) {
+                        for (let i = currentIndex + 1; i < chatList.length; i++) {
+                          if (chatList[i].role === 'ai') {
+                            delChat(chatList[i].key)
+                            break
+                          }
+                        }
+                      }
+                    }
+                  }
+                }}
+              ></Actions>
+            </div>
+          )
+        },
+      },
+      user: {
+        placement: 'end' as const,
+        header: 'You',
+        styles: {
+          content: {
+            padding: '6px 12px',
+            fontSize: '1em',
+            minHeight: 'auto',
+          },
+        },
+        contentRender(content) {
+          return <Text>{content.content}</Text>
+        },
+      },
+    }),
+    [curTheme.styledConstants.accentColor],
+  )
 
   const handleSubmit = useCallback(() => {
-    // if (!apiKey) {
-    //   return toast.error('Please set your API Key first')
-    // }
-
-    addChat(askInput, aiSettingData)
-    setAskInput('')
+    if (askInput.trim()) {
+      addChat(askInput, aiSettingData)
+      setAskInput('')
+    }
   }, [aiSettingData, addChat, askInput])
 
   const exportChats = useCallback(() => {
-    const content = parseChatList(chatList)
+    const oldFormatChats = chatList
+      .map((message) => {
+        if (message.role === 'user') {
+          return {
+            id: message.key,
+            question: message.content,
+            status: 'done' as const,
+          }
+        } else if (message.role === 'ai') {
+          return {
+            id: message.key,
+            answer: message.content,
+            status: message.status === 'done' ? 'done' : 'pending',
+          }
+        }
+        return null
+      })
+      .filter(Boolean) as any[]
+
+    const content = parseChatList(oldFormatChats)
     addNewMarkdownFileEdit({ fileName: 'notes.md', content })
   }, [chatList])
 
@@ -59,8 +199,8 @@ const ChatList: React.FC<ChatListProps> = (props) => {
     [exportChats],
   )
 
-  const handleChange: React.ChangeEventHandler<HTMLInputElement> = useCallback((event) => {
-    setAskInput(event.target.value)
+  const handleChange = useCallback((value: string) => {
+    setAskInput(value)
   }, [])
 
   const openSettingWindow = useCallback(
@@ -74,6 +214,7 @@ const ChatList: React.FC<ChatListProps> = (props) => {
         name={
           <Space>
             <Menu
+              style={{ zIndex: 1000 }}
               menuButtonProps={{ size: 'small' }}
               items={aiProviders.map((provider) => {
                 return {
@@ -88,6 +229,7 @@ const ChatList: React.FC<ChatListProps> = (props) => {
               {aiProvider} <i className='ri-arrow-drop-down-line'></i>
             </Menu>
             <Menu
+              style={{ zIndex: 1000 }}
               menuButtonProps={{ size: 'small' }}
               items={aiProviderModels.map((model) => {
                 return {
@@ -112,74 +254,35 @@ const ChatList: React.FC<ChatListProps> = (props) => {
           },
         ]}
       />
-      <div className='content' ref={listRef}>
+      <div className='content'>
         {chatList.length > 0 ? (
-          <ListContainer>
-            {chatList.map((chat) => {
-              return (
-                <div key={chat.id}>
-                  <div className='question item'>
-                    <div className='item-header'>
-                      <div className='item-title'>
-                        <i className='ri-user-4-line item-icon' />
-                        <span>You</span>
-                      </div>
-                      <div>
-                        <i className='icon ri-delete-bin-line' onClick={() => delChat(chat.id)} />
-                      </div>
-                    </div>
-                    <p>{chat.question}</p>
-                  </div>
-                  <div className='answer item'>
-                    <div className='item-title'>
-                      <i className='ri-chat-smile-ai-line item-icon' />
-                      <span>AI</span>
-                    </div>
-                    {chat.status === 'pending' ? (
-                      <div style={{ padding: '6px 0' }}>
-                        <Loading size={16} color={curTheme.styledConstants.accentColor} />
-                      </div>
-                    ) : chat.status === 'error' ? (
-                      <div>
-                        <div style={{ color: 'red', margin: '6px 0' }}>
-                          Error: {chat.errorMessage || 'Request failed'}
-                        </div>
-                        <div>
-                          Please check your ApiKey and settings{' '}
-                          <a onClick={openSettingWindow}>setting</a>
-                        </div>
-                      </div>
-                    ) : (
-                      <p style={{ whiteSpace: 'pre-wrap' }}>{chat.answer}</p>
-                    )}
-                  </div>
-                </div>
-              )
-            })}
-          </ListContainer>
+          <Bubble.List role={roleConfig} items={bubbleItems} style={{ flex: 1 }} />
         ) : (
           <div className='introduction'>
             <div className='introduction-title'>
               <i className='ri-flashlight-line' />
-              Capabilities
+              {t('ai.capabilities')}
             </div>
-            <div className='introduction-item'>
-              One-click export of conversation content as md file
-            </div>
+            <div className='introduction-item'>{t('ai.export_conversation')}</div>
           </div>
         )}
       </div>
       <BottomBar>
-        <Input
-          className='input'
+        <Sender
           value={askInput}
-          placeholder='input question'
-          onPressEnter={handleSubmit}
+          submitType='shiftEnter'
+          placeholder='shift + enter ->'
           onChange={handleChange}
+          onSubmit={handleSubmit}
+          onCancel={() => {
+            const streamingMessage = chatList.find((msg) => msg.status === 'streaming')
+            if (streamingMessage) {
+              cancelChatStream(streamingMessage.key)
+            }
+          }}
+          autoSize={{ minRows: 2, maxRows: 6 }}
+          loading={chatList.some((msg) => msg.status === 'pending' || msg.status === 'streaming')}
         />
-        <Button className='submit' btnType='primary' size='small' onClick={handleSubmit}>
-          {t('common.submit')}
-        </Button>
       </BottomBar>
     </Container>
   )

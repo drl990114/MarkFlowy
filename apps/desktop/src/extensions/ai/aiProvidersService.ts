@@ -1,7 +1,7 @@
 import { createDeepSeek } from '@ai-sdk/deepseek'
 import { createGoogleGenerativeAI } from '@ai-sdk/google'
 import { createOpenAI } from '@ai-sdk/openai'
-import { generateText, LanguageModel, ModelMessage } from 'ai'
+import { generateText, ModelMessage, streamText } from 'ai'
 import { createOllama } from 'ollama-ai-provider-v2'
 
 export type AIGenerateTextParams = {
@@ -11,22 +11,20 @@ export type AIGenerateTextParams = {
   model: string
   messages: Array<ModelMessage>
   headers?: Record<string, string>
+  abortSignal?: AbortSignal
+}
+
+export type AIStreamTextParams = Parameters<typeof streamText>[0] & {
+  sdkProvider: keyof typeof generateTextHandlerMap
+  url: string
+  apiKey: string
+  model: string
+  messages: Array<ModelMessage>
+  headers?: Record<string, string>
+  abortSignal?: AbortSignal
 }
 
 export type AIProviders = AIGenerateTextParams['sdkProvider']
-
-type WrapCommonParamsFuncParams = Partial<AIGenerateTextParams> & {
-  aiModel: LanguageModel
-}
-
-const wrapCommonParams = (params: WrapCommonParamsFuncParams) => {
-  const res: Parameters<typeof generateText>[0] = {
-    model: params.aiModel,
-    messages: params.messages!,
-  }
-
-  return res
-}
 
 export const generateTextHandlerMap = {
   deepseek: {
@@ -37,14 +35,26 @@ export const generateTextHandlerMap = {
         headers: params.headers,
       })
 
-      const { text } = await generateText(
-        wrapCommonParams({
-          aiModel: deepseek(params.model),
-          ...params,
-        }),
-      )
+      const { text } = await generateText({
+        ...params,
+        model: deepseek(params.model),
+      })
 
       return text
+    },
+    streamText: async (params: AIGenerateTextParams) => {
+      const deepseek = createDeepSeek({
+        baseURL: params.url || undefined,
+        apiKey: params.apiKey,
+        headers: params.headers,
+      })
+
+      const result = await streamText({
+        ...params,
+        model: deepseek(params.model),
+      })
+
+      return result
     },
   },
   openai: {
@@ -55,14 +65,26 @@ export const generateTextHandlerMap = {
         headers: params.headers,
       })
 
-      const { text } = await generateText(
-        wrapCommonParams({
-          aiModel: openai(params.model),
-          ...params,
-        }),
-      )
+      const { text } = await generateText({
+        ...params,
+        model: openai(params.model),
+      })
 
       return text
+    },
+    streamText: async (params: AIGenerateTextParams) => {
+      const openai = createOpenAI({
+        baseURL: params.url || undefined,
+        apiKey: params.apiKey,
+        headers: params.headers,
+      })
+
+      const result = await streamText({
+        ...params,
+        model: openai(params.model),
+      })
+
+      return result
     },
   },
   ollama: {
@@ -72,14 +94,25 @@ export const generateTextHandlerMap = {
         headers: params.headers,
       })
 
-      const { text } = await generateText(
-        wrapCommonParams({
-          aiModel: ollama(params.model),
-          ...params,
-        }),
-      )
+      const { text } = await generateText({
+        ...params,
+        model: ollama(params.model),
+      })
 
       return text
+    },
+    streamText: async (params: AIGenerateTextParams) => {
+      const ollama = createOllama({
+        baseURL: params.url || undefined,
+        headers: params.headers,
+      })
+
+      const result = await streamText({
+        ...params,
+        model: ollama(params.model),
+      })
+
+      return result
     },
   },
   google: {
@@ -90,14 +123,26 @@ export const generateTextHandlerMap = {
         headers: params.headers,
       })
 
-      const { text } = await generateText(
-        wrapCommonParams({
-          aiModel: google(params.model),
-          ...params,
-        }),
-      )
+      const { text } = await generateText({
+        ...params,
+        model: google(params.model),
+      })
 
       return text
+    },
+    streamText: async (params: AIGenerateTextParams) => {
+      const google = createGoogleGenerativeAI({
+        baseURL: params.url || undefined,
+        apiKey: params.apiKey,
+        headers: params.headers,
+      })
+
+      const result = await streamText({
+        ...params,
+        model: google(params.model),
+      })
+
+      return result
     },
   },
 }

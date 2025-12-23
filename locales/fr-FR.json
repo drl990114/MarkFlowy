@@ -16,7 +16,8 @@
     "submit": "Soumission",
     "addHeader": "Ajouter Header",
     "key": "Touches",
-    "value": "Valeur"
+    "value": "Valeur",
+    "success": "Succès"
   },
   "view": {
     "label": "vue",
@@ -444,5 +445,9 @@
       "label": "Configuration de l'en-tête de demande",
       "desc": "Ajoutez des en-têtes de requête HTTP personnalisés qui prennent en charge plusieurs configurations de paires clé-valeur."
     }
+  },
+  "ai": {
+    "capabilities": "Fonctions",
+    "export_conversation": "Exporter le contenu de la conversation en un seul clic en tant que fichier md"
   }
 }

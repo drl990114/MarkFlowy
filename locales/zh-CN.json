@@ -16,7 +16,8 @@
     "submit": "提交",
     "addHeader": "添加 Header",
     "key": "键",
-    "value": "值"
+    "value": "值",
+    "success": "成功"
   },
   "view": {
     "label": "视图",
@@ -444,5 +445,9 @@
       "editor_toggleH5": "切换到H5",
       "editor_toggleH6": "切换到H6"
     }
+  },
+  "ai": {
+    "capabilities": "功能",
+    "export_conversation": "一键导出对话内容为 md 文件"
   }
 }
