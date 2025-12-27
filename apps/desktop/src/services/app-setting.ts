@@ -7,6 +7,8 @@ export const appSettingStoreSetup = async () => {
 
   const settingData = await invoke<Record<string, any>>('get_app_conf')
 
+  console.log('Loaded app setting data:', settingData)
+
   setSettingData(settingData)
 
   return settingData

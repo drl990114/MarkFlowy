@@ -17,7 +17,7 @@ pub fn init(app_handle: AppHandle, opened_urls: String) -> Result<(), Box<dyn st
         return Ok(());
     }
 
-    let theme = AppConf::theme_mode();
+    let theme = AppConf::theme_mode(&app_handle.clone());
 
     let mut main_win = WebviewWindowBuilder::new(
         &app_handle,

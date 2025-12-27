@@ -1,5 +1,5 @@
 use crate::{
-    fc::{create_file, exists},
+    fc::exists,
     APP_DIR,
 };
 use etcetera::{choose_app_strategy, AppStrategy, AppStrategyArgs};
@@ -8,7 +8,8 @@ use std::{
     collections::{BTreeMap, HashMap},
     path::PathBuf,
 };
-use tauri::Theme;
+use tauri::{AppHandle, Manager, Theme};
+use tauri_plugin_store::{Store, StoreBuilder};
 
 macro_rules! pub_struct {
   ($name:ident {$($field:ident: $t:ty,)*}) => {
@@ -67,6 +68,15 @@ pub_struct!(AppConf {
 });
 
 pub const APP_CONF_PATH: &str = "markflowy.conf.json";
+pub const STORE_KEY: &str = "app_config_v3";
+
+fn create_store(app: &AppHandle) -> Result<std::sync::Arc<Store<tauri::Wry>>, String> {
+    let store_path = "markflowy_store.bin";
+
+    StoreBuilder::new(app.app_handle(), store_path)
+        .build()
+        .map_err(|e| format!("Failed to build store: {:?}", e))
+}
 
 pub fn app_root() -> PathBuf {
     let app_dir = APP_DIR.lock().unwrap();
@@ -96,6 +106,21 @@ pub fn app_root() -> PathBuf {
             Err(_) => legacy_path, // Fallback to legacy path if something goes wrong
         }
     }
+}
+
+fn migrate_from_file(_app: &AppHandle) -> Option<AppConf> {
+    let legacy_path = app_root().join(APP_CONF_PATH);
+    if exists(&legacy_path) {
+        match std::fs::read_to_string(&legacy_path) {
+            Ok(content) => {
+                if let Ok(conf) = serde_json::from_str::<AppConf>(&content) {
+                    return Some(conf);
+                }
+            }
+            Err(_) => {}
+        }
+    }
+    None
 }
 
 impl AppConf {
@@ -150,12 +175,60 @@ impl AppConf {
         app_root().join(APP_CONF_PATH)
     }
 
+    pub fn read_from_store(app: &AppHandle) -> Result<Self, String> {
+        let store = create_store(app)?;
+
+        if let Some(value) = store.get(STORE_KEY) {
+            match serde_json::from_value::<AppConf>(value.clone()) {
+                Ok(conf) => Ok(conf),
+                Err(e) => Err(format!("Failed to deserialize config: {}", e)),
+            }
+        } else {
+            // Store 中没有配置，尝试从旧文件迁移
+            if let Some(migrated_conf) = migrate_from_file(app) {
+                // 将迁移的配置写入 Store
+                let _ = store.set(
+                    STORE_KEY.to_string(),
+                    serde_json::to_value(&migrated_conf).unwrap(),
+                );
+                let _ = store.save();
+                let legacy_path = app_root().join(APP_CONF_PATH);
+                if exists(&legacy_path) {
+                    let _ = std::fs::remove_file(&legacy_path);
+                }
+                Ok(migrated_conf)
+            } else {
+                // 使用默认配置
+                let default_conf = Self::new();
+                let _ = store.set(
+                    STORE_KEY.to_string(),
+                    serde_json::to_value(&default_conf).unwrap(),
+                );
+                let _ = store.save();
+                Ok(default_conf)
+            }
+        }
+    }
+
+    pub fn write_to_store(self, app: &AppHandle) -> Result<Self, String> {
+        let store = create_store(app)?;
+
+        let value = serde_json::to_value(&self)
+            .map_err(|e| format!("Failed to serialize config: {}", e))?;
+
+        store.set(STORE_KEY.to_string(), value);
+        store
+            .save()
+            .map_err(|e| format!("Failed to save store: {:?}", e))?;
+        Ok(self)
+    }
+
     /**
      * merge old config
      *
      * Generally used to be compatible with the original config when versions are different.
      */
-    pub fn merge_conf(mut self, oldconf: AppConf) -> Self {
+    pub fn merge_conf(mut self, oldconf: AppConf, app: &AppHandle) -> Self {
         merge_options!(
             self,
             oldconf,
@@ -197,50 +270,48 @@ impl AppConf {
             upload_image_save_relative_path_rule
         );
 
-        self.write()
+        self.write_with_app(app)
     }
 
-    pub fn read() -> Self {
-        match std::fs::read_to_string(Self::file_path()) {
-            Ok(v) => match serde_json::from_str::<AppConf>(&v) {
-                Ok(v) => return Self::new().merge_conf(v),
-                Err(_err) => Self::default().write(),
-            },
+    pub fn read_with_app(app: &AppHandle) -> Self {
+        match Self::read_from_store(app) {
+            Ok(conf) => Self::new().merge_conf(conf, app),
             Err(err) => {
-                print!("read err,{}", err);
+                eprintln!("Failed to read from store: {}, falling back to file", err);
                 Self::default()
             }
         }
     }
 
-    pub fn write(self) -> Self {
-        let path = &Self::file_path();
-        if !exists(path) {
-            create_file(path);
+    pub fn write_with_app(self, app: &AppHandle) -> Self {
+        match self.clone().write_to_store(app) {
+            Ok(conf) => conf,
+            Err(err) => {
+                eprintln!("Failed to write to store: {}, falling back to file", err);
+                Self::default()
+            }
         }
-        if let Ok(v) = serde_json::to_string_pretty(&self) {
-            std::fs::write(path, v).unwrap_or_else(|_err| {
-                Self::default().write();
-            });
-        } else {
-        }
-        self
     }
 
-    pub fn reset(self) -> Self {
-        let path = &Self::file_path();
-        if exists(path) {
-            std::fs::remove_file(path).unwrap_or_else(|_err| {
-                Self::default().write();
-            });
+    pub fn reset_with_app(self, app: &AppHandle) -> Self {
+        let store = match create_store(app) {
+            Ok(store) => store,
+            Err(_) => return Self::default(),
+        };
+
+        store.delete(STORE_KEY);
+        if store.save().is_ok() {
+            let legacy_path = Self::file_path();
+            if exists(&legacy_path) {
+                let _ = std::fs::remove_file(&legacy_path);
+            }
+            return self
+                .clone()
+                .write_to_store(app)
+                .unwrap_or_else(|_| Self::default());
         }
-        if let Ok(v) = serde_json::to_string_pretty(&self) {
-            std::fs::write(path, v).unwrap_or_else(|_err| {
-                Self::default().write();
-            });
-        } else {
-        }
-        self
+
+        Self::default()
     }
 
     pub fn amend(self, json: Value) -> Self {
@@ -253,7 +324,11 @@ impl AppConf {
         }
 
         match serde_json::to_string_pretty(&config) {
-            Ok(v) => match serde_json::from_str::<AppConf>(&v) {
+            Ok(_v) => match serde_json::from_value::<AppConf>(serde_json::Value::Object(
+                config
+                    .into_iter()
+                    .collect::<serde_json::Map<String, Value>>(),
+            )) {
                 Ok(v) => v,
                 Err(_err) => self,
             },
@@ -261,12 +336,12 @@ impl AppConf {
         }
     }
 
-    pub fn get_theme() -> String {
-        Self::read().theme.unwrap().to_lowercase()
+    pub fn get_theme_with_app(app: &AppHandle) -> String {
+        Self::read_with_app(app).theme.unwrap().to_lowercase()
     }
 
-    pub fn theme_mode() -> Theme {
-        let cur_theme = Self::get_theme().to_string();
+    pub fn theme_mode(app: &AppHandle) -> Theme {
+        let cur_theme = Self::get_theme_with_app(app).to_string();
 
         if cur_theme == "system" {
             let mode = match dark_light::detect() {
@@ -286,8 +361,25 @@ impl AppConf {
         }
     }
 
-    pub fn theme_check(self, mode: &str) -> bool {
-        self.theme.unwrap().to_lowercase() == mode
+    pub fn theme_mode_with_app(app: &AppHandle) -> Theme {
+        let cur_theme = Self::get_theme_with_app(app).to_string();
+
+        if cur_theme == "system" {
+            let mode = match dark_light::detect() {
+                dark_light::Mode::Dark => Theme::Dark,
+                dark_light::Mode::Light => Theme::Light,
+                dark_light::Mode::Default => Theme::Light,
+            };
+
+            return mode;
+        }
+
+        let dark = cur_theme.to_lowercase().to_string().contains("dark");
+        if dark {
+            Theme::Dark
+        } else {
+            Theme::Light
+        }
     }
 }
 
@@ -299,36 +391,32 @@ impl Default for AppConf {
 
 pub mod cmd {
     use super::AppConf;
-    use std::{collections::HashMap, path::PathBuf};
     use tauri::{command, AppHandle, WebviewUrl, WebviewWindowBuilder};
 
     #[command]
-    pub fn get_app_conf_path() -> String {
-        AppConf::file_path().to_str().unwrap().to_string()
+    pub fn get_app_conf(app: AppHandle) -> AppConf {
+        AppConf::read_with_app(&app)
     }
 
     #[command]
-    pub fn get_app_conf() -> AppConf {
-        AppConf::read()
+    pub fn reset_app_conf(app: AppHandle) -> AppConf {
+        AppConf::default().reset_with_app(&app)
     }
 
     #[command]
-    pub fn reset_app_conf() -> AppConf {
-        AppConf::default().reset()
+    pub fn save_app_conf(app: AppHandle, data: serde_json::Value) {
+        AppConf::read_with_app(&app)
+            .amend(serde_json::json!(data))
+            .write_with_app(&app);
     }
 
     #[command]
-    pub fn save_app_conf(_app: AppHandle, data: serde_json::Value) {
-        AppConf::read().amend(serde_json::json!(data)).write();
-    }
-
-    #[command]
-    pub fn open_conf_window(_app: AppHandle) {
-        let theme = AppConf::theme_mode();
+    pub fn open_conf_window(app: AppHandle) {
+        let theme = AppConf::theme_mode_with_app(&app);
 
         tauri::async_runtime::spawn(async move {
             let conf_win =
-                WebviewWindowBuilder::new(&_app, "conf", WebviewUrl::App("./setting".into()))
+                WebviewWindowBuilder::new(&app, "conf", WebviewUrl::App("./setting".into()))
                     .title("markflowy setting")
                     .resizable(true)
                     .fullscreen(false)

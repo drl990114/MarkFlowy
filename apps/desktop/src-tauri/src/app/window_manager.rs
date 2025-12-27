@@ -28,7 +28,7 @@ pub fn get_window_instances() -> Result<std::collections::HashMap<String, String
 /// 创建新窗口
 #[command]
 pub fn create_new_window(_app: AppHandle, path: Option<String>) -> Result<String, String> {
-    let theme = AppConf::theme_mode();
+    let theme = AppConf::theme_mode(&_app.clone());
     let workspace_path = path.clone().map(PathBuf::from);
 
     // 检查是否已存在打开相同路径的窗口

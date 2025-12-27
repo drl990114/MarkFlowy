@@ -1,6 +1,5 @@
 import Logo from '@/assets/logo.svg?react'
 import { MODAL_CONFIRM_ID } from '@/components/Modal'
-import { CopyButton } from '@/components/UI/Button'
 import { installUpdate } from '@/helper/updater'
 import type { SettingData } from '@/router/Setting/settingMap'
 import { getSettingMap } from '@/router/Setting/settingMap'
@@ -40,7 +39,6 @@ function isSettingGroup(
 
 function Setting() {
   const [value, setValue] = useState(0)
-  const [confPath, setConfPath] = useState('')
   const { appInfo } = useAppInfoStore()
   const { t } = useTranslation()
   const [update, setUpdate] = useState<Update | null>(null)
@@ -61,9 +59,6 @@ function Setting() {
   useEffect(() => {
     check().then((u) => {
       setUpdate(u)
-    })
-    invoke('get_app_conf_path').then((res: unknown) => {
-      setConfPath(res as string)
     })
   }, [])
 
@@ -138,9 +133,6 @@ function Setting() {
       </div>
       <div id='detail'>
         <div className='conf-path'>
-          <span>
-            <i className='ri-folder-5-line' />: {confPath} <CopyButton text={confPath} />
-          </span>
           <Button
             size='small'
             onClick={() => {

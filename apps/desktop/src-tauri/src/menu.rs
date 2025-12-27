@@ -8,7 +8,7 @@ use tauri::menu::{
 use tauri::{App, AppHandle, Emitter, Manager};
 
 pub fn generate_menu(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
-    let app_conf = AppConf::read();
+    let app_conf = AppConf::read_with_app(&app.handle());
     let _keyboard_infos = Keybindings::read();
 
     // let is_dark = app_conf.clone().theme_check("dark");
