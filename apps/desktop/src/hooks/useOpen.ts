@@ -46,6 +46,8 @@ const useOpen = () => {
                 await invoke('focus_window_by_label', {
                   windowLabel: existingWindowLabel,
                 })
+                addRecentWorkspaces({ path: dir })
+
                 console.log('Focused existing window for path:', existingWindowLabel)
                 return
               }

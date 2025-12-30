@@ -101,7 +101,7 @@ async function appWorkspaceSetup() {
   console.log('window.openedUrls type:', typeof window.openedUrls)
 
   try {
-    const cacheStore = await new LazyStore('.markflowy_cache.dat')
+    const cacheStore = await new LazyStore('.markflowy_workspaces.dat')
 
     const getOpenedCacheRes = await invoke<{ recent_workspaces: WorkspaceInfo[] }>(
       'get_opened_cache',
@@ -129,15 +129,17 @@ async function appWorkspaceSetup() {
     }
 
     if (recentWorkspaces.length > 0) {
+      const targetWorkspacePath = recentWorkspaces[0].path
       const cacheStoreInitPromises = Promise.all([
-        cacheStore.get<string[]>('openedFilePaths'),
-        cacheStore.get<string>('activeFilePath'),
+        cacheStore.get<{
+          openedFilePaths: string[]
+          activeFilePath: string
+        }>(targetWorkspacePath),
       ])
       const cacheStoreInitPromisesRes = await cacheStoreInitPromises
-      await readDirectory(recentWorkspaces[0].path).then((res) => {
+      await readDirectory(targetWorkspacePath).then((res) => {
         setFolderData(res)
-        const openedFilePaths: string[] = cacheStoreInitPromisesRes[0] || []
-        const activeFilePath = cacheStoreInitPromisesRes[1]
+        const { openedFilePaths, activeFilePath } = cacheStoreInitPromisesRes[0] || {}
 
         if (activeFilePath) {
           const activeFile = getFileObjectByPath(activeFilePath)
@@ -157,17 +159,19 @@ async function appWorkspaceSetup() {
         }
 
         useEditorStore.subscribe((state) => {
-          const openedFiles = state.opened.map((fileId) => {
-            const file = getFileObject(fileId)
-            return file.path
-          })
-          cacheStore.set('openedFilePaths', openedFiles)
-          cacheStore.set(
-            'activeFilePath',
-            state.activeId ? getFileObject(state.activeId)?.path : '',
-          )
+          const rootPath = state.getRootPath()
+          if (rootPath) {
+            const openedFiles = state.opened.map((fileId) => {
+              const file = getFileObject(fileId)
+              return file.path
+            })
 
-          cacheStore.save()
+            cacheStore.set(rootPath, {
+              openedFilePaths: openedFiles,
+              activeFilePath: state.activeId ? getFileObject(state.activeId)?.path : '',
+            })
+            cacheStore.save()
+          }
         })
       })
     }
