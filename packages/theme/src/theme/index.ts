@@ -18,7 +18,7 @@ export type MfTheme = {
   /**
    * Replace styled constants
    */
-  styledConstants: Record<string, string>
+  styledConstants: typeof styledLightTheme
   /**
    * Codemirror theme.
    */
