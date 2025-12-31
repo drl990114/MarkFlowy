@@ -1,4 +1,4 @@
-import { Tag } from 'antd'
+import { Flex, Tag } from 'antd'
 import type { BookMarkItem } from './useBookMarksStore'
 
 interface BookMarkViewItemProps {
@@ -21,11 +21,11 @@ export const BookMarkViewItem = (props: BookMarkViewItemProps) => {
     >
       {bookmark.title}
       {showTags && bookmark.tags.length > 0 ? (
-        <div data-id={bookmark.id}>
+        <Flex data-id={bookmark.id} gap={4}>
           {bookmark.tags.map((tag) => (
             <Tag key={tag} color='#0369a1' variant='solid'>{tag}</Tag>
           ))}
-        </div>
+        </Flex>
       ) : null}
     </div>
   )

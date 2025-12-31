@@ -1,16 +1,18 @@
-import { Button, ButtonGroup } from '@mui/material'
+import { Radio } from 'antd'
 import type { FC } from 'react'
 
 export const ReplaceController: FC<{
-  replace: () => void;
-  replaceAll: () => void;
-}> = ({ replace, replaceAll }) => (
-  <ButtonGroup variant='outlined' size='small'>
-    <Button aria-label='Relace' sx={{ textTransform: 'none' }} onClick={replace}>
-      Replace
-    </Button>
-    <Button aria-label='Relace all' sx={{ textTransform: 'none' }} onClick={replaceAll}>
-      All
-    </Button>
-  </ButtonGroup>
-)
+  replace: () => void
+  replaceAll: () => void
+}> = ({ replace, replaceAll }) => {
+  return (
+    <Radio.Group size='small' style={{ display: 'flex' }}>
+      <Radio.Button checked value='replace' onClick={replace}>
+        Replace
+      </Radio.Button>
+      <Radio.Button checked value='replaceAll' onClick={replaceAll}>
+        All
+      </Radio.Button>
+    </Radio.Group>
+  )
+}

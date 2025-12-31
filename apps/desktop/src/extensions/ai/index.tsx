@@ -250,7 +250,7 @@ const ChatList: React.FC<ChatListProps> = (props) => {
           {
             iconCls: 'ri-file-download-line',
             key: 'exportChats',
-            tooltip: { title: 'Export Chats', arrow: true },
+            tooltip: { title: 'Export Chats' },
           },
         ]}
       />

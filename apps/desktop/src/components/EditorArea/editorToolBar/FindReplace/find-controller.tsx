@@ -1,48 +1,42 @@
-import { IconButton } from '@mui/material'
+import { Button, Flex } from 'antd'
 import type { FC } from 'react'
 
 export const FindController: FC<{
-  findPrev: () => void;
-  findNext: () => void;
-  stopFind: () => void;
-  caseSensitive: boolean;
-  toggleCaseSensitive: () => void;
-  onDismiss?: () => void;
+  findPrev: () => void
+  findNext: () => void
+  stopFind: () => void
+  caseSensitive: boolean
+  toggleCaseSensitive: () => void
+  onDismiss?: () => void
 }> = ({ findPrev, findNext, stopFind, caseSensitive, toggleCaseSensitive, onDismiss }) => (
-  <>
-    <IconButton
+  <Flex gap={8}>
+    <Button
+      shape='circle'
+      size='small'
+      icon={<i className='ri-arrow-left-s-fill' />}
       onClick={findPrev}
+    />
+    <Button
+      shape='circle'
       size='small'
-      title='Next Match (Enter)'
-      aria-label='Next Match (Enter)'
-    >
-      <i className='ri-arrow-left-s-fill' />
-    </IconButton>
-    <IconButton
+      icon={<i className='ri-arrow-right-s-fill' />}
       onClick={findNext}
+    />
+    <Button
+      type={caseSensitive ? 'primary' : 'default'}
+      shape='circle'
       size='small'
-      title='Previous Match (Shift+Enter)'
-      aria-label='Previous Match (Shift+Enter)'
-    >
-      <i className='ri-arrow-right-s-fill' />
-    </IconButton>
-    <IconButton
+      icon={<i className='ri-font-size' />}
       onClick={toggleCaseSensitive}
-      size='small'
-      color={caseSensitive ? 'primary' : 'default'}
-      title='Match Case'
-      aria-label='Match Case'
-    >
-      <i className='ri-font-size' />
-    </IconButton>
-    <IconButton
+    />
+    <Button
       onClick={() => {
         stopFind()
         onDismiss?.()
       }}
+      shape='circle'
       size='small'
-    >
-      <i className="ri-close-line" />
-    </IconButton>
-  </>
+      icon={<i className='ri-close-line' />}
+    />
+  </Flex>
 )

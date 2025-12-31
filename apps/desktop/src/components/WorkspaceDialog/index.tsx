@@ -2,7 +2,7 @@ import { gitCommitWithCurrentWorkspace, gitPushWithCurrentWorkspace } from '@/se
 import { getWorkspace, WorkSpace, WorkspaceSyncMode } from '@/services/workspace'
 import { useCommandStore } from '@/stores'
 import { t } from 'i18next'
-import { memo, useCallback, useEffect, useState } from 'react'
+import { JSX, memo, useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { Button, Dialog, Input, toast } from 'zens'
 

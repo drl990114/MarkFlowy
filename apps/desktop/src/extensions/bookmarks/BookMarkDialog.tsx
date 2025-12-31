@@ -1,7 +1,7 @@
 import { useCommandStore } from '@/stores'
-import { Autocomplete, TextField } from '@mui/material'
-import type { SyntheticEvent } from 'react'
+import { Select } from 'antd'
 import { useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 import { Button, Dialog, Input } from 'zens'
 import useBookMarksStore from './useBookMarksStore'
@@ -18,17 +18,18 @@ const ItemWrapper = styled.div`
     min-width: 40px;
   }
 
-  .MuiTextField-root,
-  .MuiAutocomplete-root,
+  .ant-select,
   input {
     flex: 1;
   }
 
-  .MuiInputBase-input {
-    padding: 7.5px 4px 7.5px 5px;
+  .ant-select-selector {
+    padding: 4px 8px !important;
+    min-height: 32px !important;
   }
-  .MuiInputBase-root.MuiOutlinedInput-root {
-    padding: 0 0.5rem;
+
+  .ant-select-selection-placeholder {
+    line-height: 32px !important;
   }
 `
 
@@ -40,6 +41,7 @@ export const BookMarkDialog: React.FC = () => {
   const [newTag, setNewTag] = useState<string>('')
   const { tagList, addBookMark } = useBookMarksStore()
   const { addCommand } = useCommandStore()
+  const { t } = useTranslation()
 
   useEffect(() => {
     addCommand({
@@ -66,8 +68,8 @@ export const BookMarkDialog: React.FC = () => {
     setName(e.target.value)
   }
 
-  const handleNewTagInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setNewTag(e.target.value)
+  const handleNewTagInput = (value: string) => {
+    setNewTag(value)
   }
   const handleConfirm = () => {
     addBookMark({
@@ -82,8 +84,8 @@ export const BookMarkDialog: React.FC = () => {
     setOpen(false)
   }
 
-  const handleTagChange = (_event: SyntheticEvent<Element, Event>, newValue: string[]) => {
-    setTags(newValue as string[])
+  const handleTagChange = (newValue: string[]) => {
+    setTags(newValue)
   }
 
   const renderTagList = useMemo(() => {
@@ -95,10 +97,10 @@ export const BookMarkDialog: React.FC = () => {
       title='bookmark'
       footer={[
         <Button key='ok' onClick={handleClose}>
-          Cancel
+          {t('common.cancel')}
         </Button>,
         <Button key='copy' btnType='primary' onClick={handleConfirm}>
-          Confirm
+          {t('common.confirm')}
         </Button>,
       ]}
       open={open}
@@ -114,14 +116,14 @@ export const BookMarkDialog: React.FC = () => {
       </ItemWrapper>
       <ItemWrapper>
         <span>tags</span>
-        <Autocomplete
-          multiple
-          options={renderTagList}
+        <Select
+          mode="tags"
+          style={{ width: '100%' }}
+          placeholder="Tag"
           value={tags}
           onChange={handleTagChange}
-          renderInput={(params) => (
-            <TextField {...params} placeholder='Tag' onInput={handleNewTagInput} />
-          )}
+          options={renderTagList.map(tag => ({ value: tag, label: tag }))}
+          onSearch={handleNewTagInput}
         />
       </ItemWrapper>
     </Dialog>

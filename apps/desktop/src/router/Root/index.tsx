@@ -1,6 +1,5 @@
 import { AppInfoDialog, SideBar } from '@/components'
 import EditorArea from '@/components/EditorArea'
-import TableDialog from '@/components/EditorArea/editorToolBar/TableDialog'
 import { PageLayout } from '@/components/Layout'
 import RightBar from '@/components/SideBar/RightBar'
 import StatusBar from '@/components/StatusBar'
@@ -115,7 +114,6 @@ function Root() {
 
       {/* global dialogs */}
       <AppInfoDialog />
-      <TableDialog />
       <BookMarkDialog />
       <SettingDialog />
       <WorkspaceDialog />

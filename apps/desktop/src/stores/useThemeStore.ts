@@ -1,28 +1,8 @@
 import { loadThemeCss, removeInsertedTheme } from '@/helper/extensions'
 import { darkTheme, lightTheme, type MfTheme } from '@markflowy/theme'
-import { create } from 'zustand'
-import type { Theme } from '@mui/material'
-import { createTheme } from '@mui/material'
-import useAppSettingStore from './useAppSettingStore'
 import { getCurrentWindow } from '@tauri-apps/api/window'
-
-const muiDarkTheme = createTheme({
-  palette: {
-    mode: 'dark',
-  },
-  typography: {
-    htmlFontSize: 18,
-  },
-})
-
-const muiLightTheme = createTheme({
-  palette: {
-    mode: 'light',
-  },
-  typography: {
-    htmlFontSize: 18,
-  },
-})
+import { create } from 'zustand'
+import useAppSettingStore from './useAppSettingStore'
 
 export const isBuiltInTheme = (themeName: string) => {
   return themeName === lightTheme.name || themeName === darkTheme.name
@@ -33,8 +13,6 @@ const useThemeStore = create<ThemeStore>((set, get) => {
     curTheme: lightTheme,
 
     themes: [lightTheme, darkTheme],
-
-    muiTheme: muiLightTheme,
 
     setCurThemeByName: (themeName) => {
       const { themes } = get()
@@ -60,7 +38,6 @@ const useThemeStore = create<ThemeStore>((set, get) => {
         set((prev) => ({
           ...prev,
           curTheme: targetTheme,
-          muiTheme: targetTheme.mode === 'light' ? muiLightTheme : muiDarkTheme,
         }))
       }
     },
@@ -96,7 +73,6 @@ const useThemeStore = create<ThemeStore>((set, get) => {
 
 type ThemeStore = {
   curTheme: MfTheme
-  muiTheme: Theme
   themes: MfTheme[]
   setCurThemeByName: (themeName: string) => void
   getCurTheme: () => MfTheme | undefined

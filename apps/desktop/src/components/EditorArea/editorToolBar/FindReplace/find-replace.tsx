@@ -46,7 +46,6 @@ function useFindReplaceOpen() {
 }
 
 const FindReplaceWrapper = styled.div`
-  height: 70px;
   position: sticky;
   left: 0;
   right: 0;

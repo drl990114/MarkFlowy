@@ -108,7 +108,7 @@ const BookMarksList: React.FC<ChatListProps> = (props) => {
           {
             iconCls: viewMode === 'list' ? 'ri-price-tag-3-line' : 'ri-list-unordered',
             key: 'toggleViewMode',
-            tooltip: { title: 'toogle view mode', arrow: true },
+            tooltip: { title: 'toogle view mode' },
           },
         ]}
       />

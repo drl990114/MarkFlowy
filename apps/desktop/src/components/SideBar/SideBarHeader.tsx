@@ -1,7 +1,6 @@
-import type { TooltipProps } from '@mui/material'
-import { Tooltip } from '@mui/material'
 import type { FC } from 'react'
 import styled from 'styled-components'
+import { Tooltip, TooltipProps } from 'zens'
 
 const Container = styled.div`
   display: flex;
@@ -31,7 +30,10 @@ const SideBarHeader: FC<SideBarHeaderProps> = (props) => {
         {props.rightNavItems?.map((item) => {
           return item.tooltip ? (
             <Tooltip {...item.tooltip} key={item.key}>
-              <i className={`icon icon-small icon-smooth ${item.iconCls}`} onClick={() => handleRightNavItemClick(item)} />
+              <i
+                className={`icon icon-small icon-smooth ${item.iconCls}`}
+                onClick={() => handleRightNavItemClick(item)}
+              />
             </Tooltip>
           ) : (
             <i

@@ -1,6 +1,5 @@
 import NiceModal from '@ebay/nice-modal-react'
 import isPropValid from '@emotion/is-prop-valid'
-import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles'
 import { useMemo } from 'react'
 import { ThemeProvider as EditorProvider } from 'rme'
 import { IStyleSheetContext, StyleSheetManager, ThemeProvider } from 'styled-components'
@@ -12,7 +11,7 @@ import useAppSettingStore from './stores/useAppSettingStore'
 import useThemeStore from './stores/useThemeStore'
 
 const AppThemeProvider: React.FC<BaseComponentProps> = function ({ children }) {
-  const { muiTheme, curTheme } = useThemeStore()
+  const { curTheme } = useThemeStore()
   const { settingData } = useAppSettingStore()
   const theme = curTheme?.styledConstants || {}
 
@@ -48,9 +47,7 @@ const AppThemeProvider: React.FC<BaseComponentProps> = function ({ children }) {
           <EditorProvider theme={themeProp} i18n={i18nProp}>
             <InjectFonts />
             <GlobalStyles />
-            <NiceModal.Provider>
-              <MuiThemeProvider theme={muiTheme}>{children}</MuiThemeProvider>
-            </NiceModal.Provider>
+            <NiceModal.Provider>{children}</NiceModal.Provider>
           </EditorProvider>
         </ZensThemeProvider>
       </ThemeProvider>

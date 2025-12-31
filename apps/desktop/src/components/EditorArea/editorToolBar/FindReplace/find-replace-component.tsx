@@ -1,15 +1,15 @@
-import { Box } from '@mui/material'
+import { Flex } from 'antd'
 import { type FC } from 'react'
+import type { EditorContext } from 'rme'
 import { FindController } from './find-controller'
 import { FindInput } from './find-input'
 import { ReplaceController } from './replace-controller'
 import { ReplaceInput } from './replace-input'
 import { useFindReplace } from './use-find-replace'
-import type { EditorContext } from 'rme'
 
 export interface FindReplaceComponentProps {
-  onDismiss?: () => void;
-  editorCtx: EditorContext;
+  onDismiss?: () => void
+  editorCtx: EditorContext
 }
 
 export const FindReplaceComponent: FC<FindReplaceComponentProps> = ({ onDismiss, editorCtx }) => {
@@ -30,20 +30,9 @@ export const FindReplaceComponent: FC<FindReplaceComponentProps> = ({ onDismiss,
   } = useFindReplace(editorCtx)
 
   return (
-    <Box
-      sx={{
-        display: 'grid',
-        gridTemplateColumns: '1fr max-content',
-        gridTemplateRows: '1fr 1fr',
-        rowGap: 1,
-        columnGap: 1,
-        alignItems: 'center',
-      }}
-    >
-      <Box>
+    <Flex gap={8} vertical wrap={false}>
+      <Flex gap={4} wrap={false}>
         <FindInput query={query} setQuery={setQuery} total={total} activeIndex={activeIndex} />
-      </Box>
-      <Box sx={{ justifySelf: 'end' }}>
         <FindController
           findPrev={findPrev}
           findNext={findNext}
@@ -52,13 +41,11 @@ export const FindReplaceComponent: FC<FindReplaceComponentProps> = ({ onDismiss,
           stopFind={stopFind}
           onDismiss={onDismiss}
         />
-      </Box>
-      <Box>
+      </Flex>
+      <Flex gap={4} wrap={false}>
         <ReplaceInput replacement={replacement} setReplacement={setReplacement} />
-      </Box>
-      <Box sx={{ justifySelf: 'end' }}>
         <ReplaceController replace={replace} replaceAll={replaceAll} />
-      </Box>
-    </Box>
+      </Flex>
+    </Flex>
   )
 }

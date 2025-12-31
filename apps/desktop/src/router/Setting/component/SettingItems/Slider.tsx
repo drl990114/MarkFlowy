@@ -1,16 +1,18 @@
+import appSettingService from '@/services/app-setting'
+import useAppSettingStore from '@/stores/useAppSettingStore'
+import { Slider } from 'antd'
+import { debounce } from 'lodash'
 import { useCallback, useEffect, useState } from 'react'
 import type { SettingItemProps } from '.'
-import { Slider } from '@mui/material'
-import { SettingLabel } from './Label'
 import { SettingItemContainer } from './Container'
-import useAppSettingStore from '@/stores/useAppSettingStore'
-import appSettingService from '@/services/app-setting'
-import { debounce } from 'lodash'
+import { SettingLabel } from './Label'
 
 const SliderSettingItem: React.FC<SettingItemProps<Setting.SliderSettingItem>> = (props) => {
   const { item } = props
   const { settingData } = useAppSettingStore()
-  const curValue = settingData[item.key] as unknown as number
+  const rawValue = settingData[item.key]
+  const isArrayType = Array.isArray(rawValue)
+  const curValue = isArrayType ? (rawValue as number[]) : (rawValue as number)
   const [value, setValue] = useState<number | number[]>(curValue)
 
   useEffect(() => {
@@ -28,7 +30,7 @@ const SliderSettingItem: React.FC<SettingItemProps<Setting.SliderSettingItem>> =
   )
 
   const handleChange = useCallback(
-    (_e: Event, v: number | number[]) => {
+    (v: number | number[]) => {
       setValue(v)
       writeSettingData(v)
     },
@@ -38,15 +40,26 @@ const SliderSettingItem: React.FC<SettingItemProps<Setting.SliderSettingItem>> =
   return (
     <SettingItemContainer>
       <SettingLabel item={item}/>
-      <Slider
-        className='setting-item__slider'
-        value={value}
-        onChange={handleChange}
-        valueLabelDisplay='auto'
-        step={item.step || 1}
-        min={item.scope[0]}
-        max={item.scope[1]}
-      />
+      {isArrayType ? (
+        <Slider
+          className='setting-item__slider'
+          value={value as number[]}
+          range
+          onChange={handleChange}
+          step={item.step || 1}
+          min={item.scope[0]}
+          max={item.scope[1]}
+        />
+      ) : (
+        <Slider
+          className='setting-item__slider'
+          value={value as number}
+          onChange={handleChange}
+          step={item.step || 1}
+          min={item.scope[0]}
+          max={item.scope[1]}
+        />
+      )}
     </SettingItemContainer>
   )
 }

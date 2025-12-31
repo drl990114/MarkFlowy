@@ -88,14 +88,6 @@ pub fn generate_menu(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
                     &PredefinedMenuItem::select_all(app, None)?,
                 ],
             )?,
-            &Submenu::with_items(
-                app,
-                "Paragraph",
-                true,
-                &[&MenuItemBuilder::new("Table")
-                    .id("editor:dialog_create_table")
-                    .build(app)?],
-            )?,
             // &Submenu::with_items(
             //     app,
             //     "View",
