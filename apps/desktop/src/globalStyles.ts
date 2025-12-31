@@ -84,14 +84,8 @@ export const GlobalStyles = createGlobalStyle`
     border-radius: 0;
   }
 
-  .label-default {
-    color: ${(props) => props.theme.primaryFontColor};
-    background-color: ${(props) => props.theme.bgColor};
-
-    &:hover {
-      color: ${(props) => props.theme.accentColor};
-      background-color: ${(props) => props.theme.tipsBgColor};
-    }
+  .popover {
+    border: 1px solid ${(props) => props.theme.borderColor};
   }
 
   /* Styles for scrollbar */

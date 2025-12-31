@@ -8,7 +8,7 @@ import { emitTo } from '@tauri-apps/api/event'
 import { memo, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
-import { showContextMenu } from '../UI/ContextMenu/ContextMenu'
+import { showContextMenu } from '../ui-v2/ContextMenu/ContextMenu'
 
 export const CenterMenu = memo(() => {
   const ref = useRef<HTMLDivElement>(null)

@@ -12,27 +12,33 @@ export const ListContainer = styled.div`
 
     &-title {
       padding: 0 6px;
-      margin: 0;
+      margin: 0 0 6px 0;
     }
 
     &-item {
       margin: 4px 0;
-      padding: 0 6px;
+      padding: 4px 6px;
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
       width: 100%;
       cursor: pointer;
       box-sizing: border-box;
 
+      &:hover {
+        background-color: ${(props) => props.theme.tipsBgColor};
+      }
       &__text {
         margin: 4;
         padding: 0;
-        fontsize: 12px;
+        font-size: 12px;
       }
 
       &__avatar {
         width: 20px;
         height: 20px;
+        line-height: 20px;
         min-width: 20px;
-        margin-right: 6px;
       }
     }
   }

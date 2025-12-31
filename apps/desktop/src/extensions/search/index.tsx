@@ -1,5 +1,5 @@
 import type { RightBarItem } from '@/components/SideBar'
-import { MfIconButton } from '@/components/UI/Button'
+import { MfIconButton } from '@/components/ui-v2/Button'
 import { RIGHTBARITEMKEYS } from '@/constants'
 import { getFileObjectByPath } from '@/helper/files'
 import { useEditorStore } from '@/stores'

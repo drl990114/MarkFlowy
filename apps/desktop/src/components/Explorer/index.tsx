@@ -5,17 +5,17 @@ import { createNewWindow } from '@/services/windows'
 import { useEditorStore } from '@/stores'
 import useOpenedCacheStore from '@/stores/useOpenedCacheStore'
 import { homeDir } from '@tauri-apps/api/path'
+import { Popover } from 'antd'
 import classNames from 'classnames'
 import type { FC, MouseEventHandler } from 'react'
 import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
-import { Popover } from 'zens'
-import type { ListDataItem } from '../UI/List'
+import type { ListDataItem } from '../ui-v2/List'
 import { Container } from './styles'
 
 const RecentListBottom = styled.div`
-  padding: 8px;
+  padding: 4px 8px;
   font-size: 0.7rem;
   cursor: pointer;
   text-align: center;
@@ -49,7 +49,6 @@ const getFolderName = (path: string) => {
 const Explorer: FC<ExplorerProps> = (props) => {
   const { t } = useTranslation()
   const { folderData, activeId, addOpenedFile, setActiveId } = useEditorStore()
-  const [popperOpen, setPopperOpen] = useState(false)
   const { recentWorkspaces, clearRecentWorkspaces } = useOpenedCacheStore()
   const { openFolderDialog, openFolder } = useOpen()
   const [dndRootElement, setDndRootElement] = useState<HTMLDivElement | null>(null)
@@ -68,14 +67,12 @@ const Explorer: FC<ExplorerProps> = (props) => {
 
   const handleClearRecent = () => {
     clearRecentWorkspaces()
-    setPopperOpen(false)
   }
 
   const handleOpenHistoryListItemClick = useCallback(
     (item: ListDataItem) => {
       createNewWindow({ path: item.key as string })
       // openFolder(item.key as string)
-      setPopperOpen(false)
     },
     [openFolder],
   )
@@ -97,7 +94,7 @@ const Explorer: FC<ExplorerProps> = (props) => {
 
   return (
     <Container className={containerCLs} onContextMenu={handleContextMenu}>
-      <div className='h-full w-full overflow-hidden' ref={ref => setDndRootElement(ref)}>
+      <div className='h-full w-full overflow-hidden' ref={(ref) => setDndRootElement(ref)}>
         {folderData && folderData.length > 0 ? (
           <FileTree
             data={folderData}
@@ -114,28 +111,25 @@ const Explorer: FC<ExplorerProps> = (props) => {
           {t('file.openDir')}
         </span>
         <Popover
-          arrow
-          fixed
-          style={{ zIndex: 9999 }}
-          open={popperOpen}
-          onClose={() => setPopperOpen(false)}
-          placement='top-end'
-          customContent={
+          classNames={{
+            container: 'popover',
+          }}
+          placement='bottomRight'
+          content={
             <>
               <List
                 title={t('file.recentDir')}
                 data={listData}
                 onItemClick={handleOpenHistoryListItemClick}
               />
-              <RecentListBottom onClick={handleClearRecent}>{t('file.clearRecent')}</RecentListBottom>
+              <RecentListBottom onClick={handleClearRecent}>
+                {t('file.clearRecent')}
+              </RecentListBottom>
             </>
           }
         >
           {listData.length > 0 ? (
-            <i
-              className='ri-more-2-fill explorer-bottom__action__icon'
-              onClick={() => setPopperOpen(true)}
-            />
+            <i className='ri-more-2-fill explorer-bottom__action__icon' />
           ) : null}
         </Popover>
       </div>

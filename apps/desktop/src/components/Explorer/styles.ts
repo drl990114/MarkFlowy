@@ -10,16 +10,15 @@ export const Container = styled.div`
 
   &:hover {
     .explorer-bottom {
-      opacity: 1;
+      display: flex;
     }
   }
 
   .explorer-bottom {
-    display: flex;
+    display: none;
     justify-content: space-between;
     align-items: center;
     padding: 10px 6px;
-    opacity: 0;
     transition: all 0.3s ease-in-out;
 
     &__action {

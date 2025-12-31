@@ -5,7 +5,7 @@ import { Notifications } from 'zens'
 import AppThemeProvider from './AppThemeProvider'
 import { Modal } from './components'
 import { MODAL_CONFIRM_ID, MODAL_INFO_ID, MODAL_INPUT_ID } from './components/Modal'
-import { ContextMenu } from './components/UI/ContextMenu/ContextMenu'
+import { ContextMenu } from './components/ui-v2/ContextMenu/ContextMenu'
 import { useAppSetup } from './hooks'
 
 console.log('React Version:', React.version)

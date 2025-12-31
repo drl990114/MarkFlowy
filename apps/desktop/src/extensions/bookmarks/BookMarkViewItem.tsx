@@ -1,4 +1,4 @@
-import { Tag } from '@/components/UI/Tag'
+import { Tag } from 'antd'
 import type { BookMarkItem } from './useBookMarksStore'
 
 interface BookMarkViewItemProps {
@@ -23,9 +23,7 @@ export const BookMarkViewItem = (props: BookMarkViewItemProps) => {
       {showTags && bookmark.tags.length > 0 ? (
         <div data-id={bookmark.id}>
           {bookmark.tags.map((tag) => (
-            <Tag className='bookmark-list__tag' key={tag}>
-              {tag}
-            </Tag>
+            <Tag key={tag} color='#0369a1' variant='solid'>{tag}</Tag>
           ))}
         </div>
       ) : null}

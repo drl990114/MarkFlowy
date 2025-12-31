@@ -1,16 +1,15 @@
-import { Input } from 'zens'
-import { Label } from '@/components/UI/Label'
 import { useCommandStore } from '@/stores'
 import { Autocomplete, TextField } from '@mui/material'
 import type { SyntheticEvent } from 'react'
 import { useEffect, useMemo, useState } from 'react'
 import styled from 'styled-components'
+import { Button, Dialog, Input } from 'zens'
 import useBookMarksStore from './useBookMarksStore'
-import { Dialog, Button } from 'zens'
 
 const ItemWrapper = styled.div`
   display: flex;
   align-items: center;
+  gap: 10px;
   margin-bottom: 10px;
   font-size: 0.9rem;
 
@@ -106,15 +105,15 @@ export const BookMarkDialog: React.FC = () => {
       onClose={handleClose}
     >
       <ItemWrapper>
-        <Label>path</Label>
+        <span>path</span>
         <span>{path}</span>
       </ItemWrapper>
       <ItemWrapper>
-        <Label>name</Label>
+        <span>name</span>
         <Input value={name} onChange={handleNameChange} />
       </ItemWrapper>
       <ItemWrapper>
-        <Label>tags</Label>
+        <span>tags</span>
         <Autocomplete
           multiple
           options={renderTagList}

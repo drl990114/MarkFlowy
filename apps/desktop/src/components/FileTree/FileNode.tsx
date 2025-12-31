@@ -1,9 +1,9 @@
 import {
-  createFile,
-  getFileNameFromPath,
-  readDirectory,
-  updateFile,
-  type IFile,
+    createFile,
+    getFileNameFromPath,
+    readDirectory,
+    updateFile,
+    type IFile,
 } from '@/helper/filesys'
 import { useEditorStore } from '@/stores'
 import NiceModal from '@ebay/nice-modal-react'
@@ -13,8 +13,8 @@ import { NodeRendererProps } from 'react-arborist'
 import { useTranslation } from 'react-i18next'
 import { Space, toast } from 'zens'
 import { MODAL_CONFIRM_ID } from '../Modal'
-import { MfIconButton } from '../UI/Button'
-import { showContextMenu } from '../UI/ContextMenu'
+import { MfIconButton } from '../ui-v2/Button'
+import { showContextMenu } from '../ui-v2/ContextMenu'
 import { MoveFileInfo, moveFileNode } from './file-operator'
 import { fileTreeHandler } from './FileTree'
 import NewFileInput from './NewFIleInput'

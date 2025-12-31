@@ -23,8 +23,8 @@ import { EditorViewType } from 'rme'
 import styled from 'styled-components'
 import { Space, toast } from 'zens'
 import { InputConfirmModalProps, MODAL_INFO_ID, MODAL_INPUT_ID } from '../Modal'
-import { MfIconButton } from '../UI/Button'
-import { showContextMenu } from '../UI/ContextMenu'
+import { MfIconButton } from '../ui-v2/Button'
+import { showContextMenu } from '../ui-v2/ContextMenu'
 
 type FileNormalInfo = {
   size: string
