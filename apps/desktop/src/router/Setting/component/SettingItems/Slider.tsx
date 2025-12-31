@@ -25,7 +25,7 @@ const SliderSettingItem: React.FC<SettingItemProps<Setting.SliderSettingItem>> =
         value = String(value)
       }
       appSettingService.writeSettingData(item, value)
-    }, 200),
+    }, 1000),
     [item],
   )
 
