@@ -27,10 +27,6 @@ const TableContainer = styled.div`
   &::-webkit-scrollbar-thumb {
     background: ${(props) => props.theme.borderColor};
     border-radius: 4px;
-    
-    &:hover {
-      background: ${(props) => props.theme.textColor};
-    }
   }
 `
 

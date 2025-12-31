@@ -62,8 +62,8 @@ const Container = styled.div`
     max-width: 350px;
     padding: 20px;
     border-radius: 8px;
-    background-color: ${({ theme }) => theme.cardBgColor || theme.bgColor};
-    box-shadow: ${({ theme }) => theme.shadow || '0 1px 3px rgba(0, 0, 0, 0.05)'};
+    background-color: ${({ theme }) => theme.bgColor};
+    box-shadow: '0 1px 3px rgba(0, 0, 0, 0.05)';
   }
 
   .app-title {
