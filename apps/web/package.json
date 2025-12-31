@@ -16,6 +16,7 @@
     "@mdx-js/react": "^3.1.0",
     "@newhighsco/next-plugin-svgr": "^3.0.144",
     "@next/mdx": "^15.5.5",
+    "@popperjs/core": "^2.11.8",
     "@styled-icons/fa-brands": "^10.47.0",
     "@styled-icons/material": "^10.47.0",
     "@swc/helpers": "^0.5.17",

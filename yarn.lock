@@ -3950,6 +3950,7 @@ __metadata:
     "@newhighsco/next-plugin-svgr": "npm:^3.0.144"
     "@next/mdx": "npm:^15.5.5"
     "@octokit/types": "npm:^13.6.1"
+    "@popperjs/core": "npm:^2.11.8"
     "@styled-icons/fa-brands": "npm:^10.47.0"
     "@styled-icons/material": "npm:^10.47.0"
     "@swc/helpers": "npm:^0.5.17"
