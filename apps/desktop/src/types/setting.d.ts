@@ -43,6 +43,9 @@ declare namespace Setting {
 
   type InputSettingItem = {
     type: 'input'
+    prefix?: string
+    suffix?: string
+    valuePreHandle?: (val: string) => string
   } & BaseSettingItem
 
   type SwitchSettingItem = {

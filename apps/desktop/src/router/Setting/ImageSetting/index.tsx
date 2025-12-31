@@ -63,6 +63,13 @@ export const ImageSetting = () => {
             item={{
               key: 'paste_image_save_relative_path_rule',
               type: 'input',
+              prefix: '${documentPath}/',
+              valuePreHandle: (value: string) => {
+                if (value.includes('${documentPath}/')) {
+                  return value.replace('${documentPath}/', '')
+                }
+                return value
+              }, 
               title: {
                 i18nKey: 'settings.image.paste_event.paste_image_save_relative_path_rule.label',
               },
@@ -135,6 +142,13 @@ export const ImageSetting = () => {
             item={{
               key: 'upload_image_save_relative_path_rule',
               type: 'input',
+              prefix: '${documentPath}/',
+              valuePreHandle: (value: string) => {
+                if (value.includes('${documentPath}/')) {
+                  return value.replace('${documentPath}/', '')
+                }
+                return value
+              },
               title: {
                 i18nKey: 'settings.image.upload_img.upload_image_save_relative_path_rule.label',
               },

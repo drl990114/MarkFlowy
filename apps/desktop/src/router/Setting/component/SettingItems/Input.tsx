@@ -12,7 +12,7 @@ const InputSettingItem: React.FC<SettingItemProps<Setting.InputSettingItem>> = m
 ) => {
   const { item } = props
   const { settingData } = useAppSettingStore()
-  const curValue = settingData[item.key] as unknown as string
+  const curValue = item.valuePreHandle ? item.valuePreHandle(settingData[item.key] as unknown as string) : settingData[item.key] as unknown as string
 
   const [inputValue, setInputValue] = useState<string>(curValue)
 
@@ -40,6 +40,8 @@ const InputSettingItem: React.FC<SettingItemProps<Setting.InputSettingItem>> = m
         style={{ maxWidth: '300px' }}
         value={inputValue}
         onChange={handleChange}
+        prefix={item.prefix}
+        suffix={item.suffix}
       />
     </SettingItemContainer>
   )
