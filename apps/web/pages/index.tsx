@@ -1,6 +1,7 @@
 import Feature from 'components/Feature'
 import HighlightLink from 'components/HighLightLink'
 import { SupportPlatforms } from 'components/SupportPlatforms'
+import { motion } from 'motion/react'
 import { GetStaticProps } from 'next'
 import { i18n, useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
@@ -26,6 +27,16 @@ export default function Index({
 }) {
   const { t } = useTranslation()
   const [isMobileNavFolded, setIsMobileNavFolded] = React.useState(true)
+  const [mousePosition, setMousePosition] = React.useState({ x: 0, y: 0 })
+
+  React.useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePosition({ x: e.clientX, y: e.clientY });
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
   const localesDescMap = {
     en: (
       <SupportingTagline>
@@ -53,6 +64,18 @@ export default function Index({
       />
 
       <Wrapper>
+        <motion.div 
+          style={{
+            position: 'fixed',
+            pointerEvents: 'none',
+            inset: 0,
+            zIndex: 1000,
+          }}
+          animate={{ 
+            background: `radial-gradient(400px circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(255,255,255,0.1), transparent 40%)` 
+          }} 
+          transition={{ type: "spring", damping: 30, stiffness: 200 }} 
+        />
         <Content $hero style={{ minHeight: '0' }}>
           <Title>
             <Tagline>{t('home.hero.subtitle')}</Tagline>
