@@ -3869,7 +3869,7 @@ __metadata:
     react-use: "npm:^17.6.0"
     remixicon: "npm:^4.5.0"
     rimraf: "npm:^6.0.1"
-    rme: "npm:0.3.0-beta.33"
+    rme: "npm:0.3.0-beta.34"
     styled-components: "npm:^6.1.13"
     stylis: "npm:^4.3.4"
     ts-node: "npm:^10.9.2"
@@ -3987,7 +3987,7 @@ __metadata:
     remark-gfm: "npm:^4.0.0"
     remixicon: "npm:^4.7.0"
     rimraf: "npm:^6.0.1"
-    rme: "npm:0.3.0-beta.33"
+    rme: "npm:0.3.0-beta.34"
     styled-components: "npm:^6.1.13"
     stylis: "npm:^4.3.4"
     typescript: "npm:^5.7.3"
@@ -18649,9 +18649,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rme@npm:0.3.0-beta.33":
-  version: 0.3.0-beta.33
-  resolution: "rme@npm:0.3.0-beta.33"
+"rme@npm:0.3.0-beta.34":
+  version: 0.3.0-beta.34
+  resolution: "rme@npm:0.3.0-beta.34"
   dependencies:
     "@codemirror/autocomplete": "npm:^6.19.1"
     "@codemirror/commands": "npm:^6.10.0"
@@ -18723,6 +18723,7 @@ __metadata:
     react-i18next: "npm:^15.7.4"
     react-popper: "npm:^2.3.0"
     remixicon: "npm:^4.7.0"
+    roman-numerals: "npm:^0.3.2"
     string.prototype.matchall: "npm:^4.0.12"
     styled-components: "npm:^6.1.19"
     stylis: "npm:^4.3.6"
@@ -18730,7 +18731,7 @@ __metadata:
     void-elements: "npm:^3.1.0"
     yjs: "npm:^13.6.27"
     zens: "npm:^0.1.16"
-  checksum: 10/0519d234aa3d83a297a729613408e45646bbf9ffd6ddbeb49d98ee98ded040006ea6e6707878c6fbb8547b77dc87fc7cc7094aed4948068e22bd770977d7ed58
+  checksum: 10/b2d21db498de80813738561e8024b55349868f8491f58717acae7fc4ec94714f7105d80c6f903dcc466206c5db8f74ce3ab585cd4a6ddc157c4b13c66cd2e65d
   languageName: node
   linkType: hard
 
@@ -18914,6 +18915,13 @@ __metadata:
   bin:
     rollup: dist/bin/rollup
   checksum: 10/35d5e83a69000ddd6c087015eb5f862943c53b6e20702575ef50aeb99ce99b864fa74cca630815eb97cdfe1f278f5602f782e55f227b32ac2301f2a5f1fc5373
+  languageName: node
+  linkType: hard
+
+"roman-numerals@npm:^0.3.2":
+  version: 0.3.2
+  resolution: "roman-numerals@npm:0.3.2"
+  checksum: 10/89a43972c4e9986cf068dbf42816c658a54b2e48687c6fd3a8e7913964a614b643a32c683aea055ceca2c4b4b8b4191a825063144950ac89c3754c0a4a7b8c77
   languageName: node
   linkType: hard
 
