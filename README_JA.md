@@ -92,13 +92,13 @@ MarkFlowyは製品であると同時に、私の人生の証でもあります�
 
 MarkFlowyは完全にオープンソースであり、MarkFlowyをサポートしたい場合は、このプロジェクトに`star`を付けることができます。特別なサポートが必要な場合は、[email](mailto:drl990114@gmail.com)で私に連絡してください。
 
-また、WeChatやAlipayを通じて私を支援することもでき、これは私にとって大きな励みになります。そして、それはサーバー、ドメインなどのプロジェクトの今後の開発に使用されます。
+<!-- また、WeChatやAlipayを通じて私を支援することもでき、これは私にとって大きな励みになります。そして、それはサーバー、ドメインなどのプロジェクトの今後の開発に使用されます。
 
 [Sponsor](https://drl990114.github.io/sponsor)
 
 | WeChat appreciates | Alipay appreciates |
 | :-: | :-: |
-| <img src="https://drl990114.github.io/images/wxpay.png" alt="WeChat QRcode" width=200> <br><small>Let's have a bottle of wine~</small> | <img src="https://drl990114.github.io/images/alipay.png" alt="Wechat QRcode" width=200> <br><small>Have a cup of coffee~</small> |
+| <img src="https://drl990114.github.io/images/wxpay.png" alt="WeChat QRcode" width=200> <br><small>Let's have a bottle of wine~</small> | <img src="https://drl990114.github.io/images/alipay.png" alt="Wechat QRcode" width=200> <br><small>Have a cup of coffee~</small> | -->
 
 ## Sponsors
 
