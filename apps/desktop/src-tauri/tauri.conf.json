@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "MarkFlowy",
-  "version": "0.50.0",
+  "version": "0.50.1",
   "identifier": "com.drl990114.markflowy",
   "build": {
     "beforeDevCommand": "yarn dev",
@@ -30,7 +30,12 @@
     "copyright": "Copyright (c) 2023-present drl990114",
     "fileAssociations": [
       {
-        "ext": [".md", ".markdown", ".json", ".txt"],
+        "ext": [
+          ".md",
+          ".markdown",
+          ".json",
+          ".txt"
+        ],
         "name": "Text Document",
         "description": "Text Document",
         "mimeType": "text/plain",
@@ -53,7 +58,9 @@
         "type": "embedBootstrapper"
       },
       "wix": {
-        "language": ["en-US"]
+        "language": [
+          "en-US"
+        ]
       }
     },
     "macOS": {
@@ -71,7 +78,9 @@
         "enable": true,
         "scope": {
           "requireLiteralLeadingDot": false,
-          "allow": ["**/*"]
+          "allow": [
+            "**/*"
+          ]
         }
       },
       "csp": null
