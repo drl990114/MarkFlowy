@@ -30,11 +30,7 @@
     "copyright": "Copyright (c) 2023-present drl990114",
     "fileAssociations": [
       {
-        "ext": [
-          ".md",
-          ".markdown",
-          ".json"
-        ],
+        "ext": [".md", ".markdown", ".json", ".txt"],
         "name": "Text Document",
         "description": "Text Document",
         "mimeType": "text/plain",
@@ -57,9 +53,7 @@
         "type": "embedBootstrapper"
       },
       "wix": {
-        "language": [
-          "en-US"
-        ]
+        "language": ["en-US"]
       }
     },
     "macOS": {
@@ -77,18 +71,10 @@
         "enable": true,
         "scope": {
           "requireLiteralLeadingDot": false,
-          "allow": [
-            "**/*"
-          ]
+          "allow": ["**/*"]
         }
       },
-      "csp": {
-        "default-src": "'self' customprotocol: asset:",
-        "img-src": "'self' data: blob: https: http: http://asset.localhost asset:",
-        "style-src": "'self' 'unsafe-inline'",
-        "font-src": "'self' data: https: http:",
-        "frame-src": "'self' https: http:"
-      }
+      "csp": null
     }
   }
 }
