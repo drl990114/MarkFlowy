@@ -1,5 +1,81 @@
 # UPDATE LOG
 
+## v0.50.0
+
+Happy New Year 2026! Thank you for your support in the past year♥️. In 2026, I will focus on refining existing features and addressing issues. I also hope for your continued support and valuable feedback.
+
+This update brings many new features and bug fixes：
+
+### Features: 
+
+#### Application:
+
+- Support for opening `multiple windows`.
+
+- AI conversation refactored to `stream` output with a more user-friendly interface and interaction.
+
+- Support for multiple system right-clicks to quickly open files with `MarkFlowy`.
+
+- Application configuration files no longer use explicit JSON file storage; instead, they use the application's data storage for improved security.
+
+- Support for interface scaling, configurable in `Settings - Display - Zoom Ratio` .
+
+- Quick left/right movement of the currently open file editing page in the file tab bar.
+
+#### Editor:
+
+- `WYSIWYG` mode now supports parsing of Markdown reference syntax.
+
+- `WYSIWYG` mode supports drag-and-drop image upload, defaulting to storage in the application's `.markflowy/assets/images` directory.
+
+- `Source code` mode supports `tab` key indentation.
+
+### Fixes:
+
+- Fixed drag event conflicts when renaming files.
+
+- Fixed `link` paste and copy format loss issues.
+
+- Fixed `ordered list` numbering not recalculating across different paragraphs.
+
+---
+
+2026 新年快乐！感谢过去一年大家的支持♥️。在 2026，我会将主要精力放在现有功能的完善优化和 issues 处理上，同时也希望大家可以多多支持，提出宝贵的建议和反馈。
+
+这次更新了诸多功能和修复了一些问题:
+
+### 特性：
+
+#### 应用:
+
+- 支持打开多个窗口。
+
+- AI 对话重构，改为流式输出，界面与交互更友好。
+
+- 支持多次系统右键,使用 MarkFlowy 快速打开文件。
+
+- 应用的配置文件不再使用显式的 json 文件储存，使用应用的数据存储，提高安全性。
+
+- 支持设置界面的缩放，在 `设置 - 显示 - 缩放比例` 中设置。
+
+- 文件标签栏左侧，支持快速左右移动当前打开的文件编辑页。
+
+#### 编辑器:
+
+- 所见即所得模式支持 Markdown 引用语法的解析。
+
+- 所见即所得模式支持图片的拖拽上传，默认将存放在应用的 `.conf/assets/images` 目录。
+
+- 源代码模式支持 `tab` 键缩进。
+
+### 修复:
+
+- 修复重命名文件时，拖拽事件冲突问题。
+
+- 修复 link 粘贴和复制格式丢失问题。
+
+- 修复 ordered list 的排序在不同段落中没有重新计算问题。
+
 ## v0.43.0
 
 Features:
@@ -84,7 +160,7 @@ Fixes:
 
 - react 框架升级，性能优化。
 
-修复: 
+修复:
 
 - 修复粘贴时会有额外的弹窗确认问题。
 
@@ -139,7 +215,6 @@ Fixes:
 - 修复 mac aarch64 的自动更新失败问题。
 
 - math 节点的输入方式优化。
-
 
 ## v0.34.1
 
@@ -269,7 +344,6 @@ Fixes:
 
 - 修复中文输入法无法唤起 slash 菜单的问题。
 
-
 ## v0.30.2
 
 Fixes:
@@ -290,7 +364,7 @@ Features:
 
 Fixes:
 
--  Some style optimizations.
+- Some style optimizations.
 
 ---
 
@@ -422,7 +496,7 @@ Features:
 
 - Optimize the problem of long stuck opening of large folders.
 
---- 
+---
 
 特性：
 
@@ -692,7 +766,7 @@ Fixes:
 
 ## v0.12.3
 
-Fixes: 
+Fixes:
 
 - Init layout visible status when open app.
 
@@ -712,10 +786,9 @@ Fixes:
 
 - Search result display error when paragraph has inline node.
 
-
 ## v0.11.3
 
-Fixes: 
+Fixes:
 
 - Preview mode load some image error.
 
@@ -723,7 +796,7 @@ Fixes:
 
 ## v0.11.2
 
-Fixes: 
+Fixes:
 
 - Some image can't load.
 
@@ -741,7 +814,7 @@ Features:
 
 - Support restore window state(e.g size, position).
 
-Fixes: 
+Fixes:
 
 - The copied image link should not be processed.
 
@@ -757,7 +830,7 @@ Features:
 
 - Explorer support rename file or folder.
 
-Fixes: 
+Fixes:
 
 - Long file name display optimization.
 
@@ -781,7 +854,6 @@ Fixes:
 
 - Fixed codemirror history is not effective globally.
 
-
 ## v0.9.0
 
 Features:
@@ -800,7 +872,6 @@ Fixes:
 
 - Some ui and ux optimization.
 
-
 ## v0.8.0
 
 Features:
@@ -813,7 +884,7 @@ Features:
 
 - Multi-language support French.
 
-Fixes: 
+Fixes:
 
 - Code block lang menu style error.
 
@@ -821,15 +892,12 @@ Fixes:
 
 - Some ui and ux optimize.
 
-
 ## v0.7.7
 
-Fixes: 
+Fixes:
 
 - Editor performance optimization.
-  
 - Chinese translation supplement.
-
 
 ## v0.7.6
 
@@ -856,7 +924,6 @@ Fixes:
 - Clipboard paste error.
 
 - Some ui bugs.
-
 
 ## v0.7.5
 
