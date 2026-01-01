@@ -1,6 +1,6 @@
 # UPDATE LOG
 
-## v0.50.0
+## v0.50.1
 
 Happy New Year 2026! Thank you for your support in the past year♥️. In 2026, I will focus on refining existing features and addressing issues. I also hope for your continued support and valuable feedback.
 
@@ -26,7 +26,7 @@ This update brings many new features and bug fixes：
 
 - `WYSIWYG` mode now supports parsing of Markdown reference syntax.
 
-- `WYSIWYG` mode supports drag-and-drop image upload, defaulting to storage in the application's `.markflowy/assets/images` directory.
+- `WYSIWYG` mode supports drag-and-drop image upload, defaulting to storage in the application's `${markflowyConfigPath}/assets/images` directory. The completed path can be viewed and modified in `Settings - Pictures`.
 
 - `Source code` mode supports `tab` key indentation.
 
@@ -64,7 +64,7 @@ This update brings many new features and bug fixes：
 
 - 所见即所得模式支持 Markdown 引用语法的解析。
 
-- 所见即所得模式支持图片的拖拽上传，默认将存放在应用的 `.conf/assets/images` 目录。
+- 所见即所得模式支持图片的拖拽上传，默认将存放在应用的 `${markflowyConfigPath}/assets/images` 目录。完成路径可以在 `设置 - 图片`中查看和修改。
 
 - 源代码模式支持 `tab` 键缩进。
 
