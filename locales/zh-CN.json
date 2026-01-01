@@ -166,6 +166,7 @@
     },
     "general": {
       "label": "通用",
+      "desc": "应用程序的通用设置。",
       "app": {
         "label": "应用",
         "automatic_updates": {
@@ -194,6 +195,7 @@
     },
     "display": {
       "label": "外观",
+      "desc": "应用程序的外观和显示设置，包括界面缩放、主题等视觉相关配置。",
       "size": {
         "label": "尺寸",
         "zoom": {
@@ -204,6 +206,7 @@
     },
     "editor": {
       "label": "编辑器",
+      "desc": "Markdown编辑器的配置选项，包括样式、行为和所见即所得模式的相关设置。",
       "style": {
         "label": "样式",
         "full_width": {
@@ -244,6 +247,7 @@
     },
     "image": {
       "label": "图片",
+      "desc": "图片处理和上传的配置，包括粘贴图片、上传图片文件的保存路径和行为设置。",
       "paste_event": {
         "label": "编辑器粘贴事件",
         "when_paste_image": {
@@ -298,10 +302,12 @@
     },
     "keyboard": {
       "label": "键盘",
+      "desc": "键盘快捷键和按键行为的配置，包括快捷键冲突检测等相关设置。",
       "shortcut_conflict": "该快捷键已被占用"
     },
     "ai": {
       "label": "AI",
+      "desc": "AI模型配置，baseUrl 空时默认会请求官方地址，请求头可以用来配置密钥等信息，具体请根据服务提供方的文档。",
       "model": {
         "label": "AI 模型"
       },

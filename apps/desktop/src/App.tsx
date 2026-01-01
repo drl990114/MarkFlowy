@@ -15,14 +15,14 @@ function App() {
 
   return (
     <AppThemeProvider>
+      <ContextMenu />
+      <Notifications />
+      <Modal.InputConfirm id={MODAL_INPUT_ID} />
+      <Modal.Info id={MODAL_INFO_ID} />
+      <Modal.Confirm id={MODAL_CONFIRM_ID} />
       <Routes>
         <Route index path='/' element={<Root />} />
       </Routes>
-      <ContextMenu />
-      <Notifications />
-      <Modal.Confirm id={MODAL_CONFIRM_ID} />
-      <Modal.InputConfirm id={MODAL_INPUT_ID} />
-      <Modal.Info id={MODAL_INFO_ID} />
     </AppThemeProvider>
   )
 }

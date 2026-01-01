@@ -8,6 +8,9 @@ export const getSettingMap = () => {
     general: {
       i18nKey: 'settings.general.label',
       iconName: 'ri-equalizer-line',
+      desc: {
+        i18nKey: 'settings.general.desc',
+      },
       App: {
         i18nKey: 'settings.general.app.label',
         auto_update: {
@@ -69,6 +72,9 @@ export const getSettingMap = () => {
     display: {
       i18nKey: 'settings.display.label',
       iconName: 'ri-window-line',
+      desc: {
+        i18nKey: 'settings.display.desc',
+      },
       size: {
         i18nKey: 'settings.display.size.label',
         zoom: {
@@ -92,6 +98,9 @@ export const getSettingMap = () => {
     editor: {
       i18nKey: 'settings.editor.label',
       iconName: 'ri-edit-box-line',
+      desc: {
+        i18nKey: 'settings.editor.desc',
+      },
       Style: {
         i18nKey: 'settings.editor.style.label',
         fullWidth: {
@@ -183,10 +192,16 @@ export const getSettingMap = () => {
     image: {
       i18nKey: 'settings.image.label',
       iconName: 'ri-image-2-line',
+      desc: {
+        i18nKey: 'settings.image.desc',
+      },
     },
     ai: {
       i18nKey: 'settings.ai.label',
       iconName: 'ri-sparkling-line',
+      desc: {
+        i18nKey: 'settings.ai.desc',
+      },
       model: {
         i18nKey: 'settings.ai.model.label',
         children: [
@@ -370,6 +385,9 @@ export const getSettingMap = () => {
     keyboard: {
       i18nKey: 'settings.keyboard.label',
       iconName: 'ri-keyboard-fill',
+      desc: {
+        i18nKey: 'settings.keyboard.desc',
+      },
     },
   }
 }

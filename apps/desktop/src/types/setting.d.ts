@@ -4,6 +4,9 @@ declare namespace Setting {
   type SettingGroup = {
     i18nKey: string
     iconName: string
+    desc: {
+      i18nKey: string
+    }
   } & Record<string, SettingItem>
 
   type SettingItem =

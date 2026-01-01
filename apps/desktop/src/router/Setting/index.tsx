@@ -44,17 +44,33 @@ function Setting() {
   const [update, setUpdate] = useState<Update | null>(null)
   const settingMap = getSettingMap()
 
+  const handleResetConfiguration = () => {
+    NiceModal.show(MODAL_CONFIRM_ID, {
+      title: t('settings.resetAppConf.desc'),
+      onConfirm: () => {
+        invoke('reset_app_conf')
+          .then(async () => {
+            await appSettingStoreSetup()
+            toast.success(t('settings.resetAppConf.success'))
+          })
+          .catch((err: any) => {
+            toast.error(String(err))
+          })
+      },
+    })
+  }
+
   const settingDataGroupsKeys = Object.keys(settingMap).filter(
     (key) => key !== 'i18nKey',
   ) as (keyof typeof settingMap)[]
   const curGroupKey = settingDataGroupsKeys[value] as Exclude<
     keyof SettingData,
-    'i18nKey' | 'iconName'
+    'i18nKey' | 'iconName' | 'desc'
   >
   const curGroup = settingMap[curGroupKey] as Setting.SettingGroup
   const curGroupKeys = Object.keys(curGroup).filter(
-    (key) => key !== 'i18nKey' && key !== 'iconName',
-  ) as Exclude<keyof SettingData, 'i18nKey' | 'iconName'>[]
+    (key) => key !== 'i18nKey' && key !== 'iconName' && key !== 'desc',
+  ) as Exclude<keyof SettingData, 'i18nKey' | 'iconName' | 'desc'>[]
 
   useEffect(() => {
     check().then((u) => {
@@ -132,27 +148,20 @@ function Setting() {
         </div>
       </div>
       <div id='detail'>
-        <div className='conf-path'>
-          <Button
-            size='small'
-            onClick={() => {
-              NiceModal.show(MODAL_CONFIRM_ID, {
-                title: t('settings.resetAppConf.desc'),
-                onConfirm: () => {
-                  invoke('reset_app_conf')
-                    .then(async () => {
-                      await appSettingStoreSetup()
-                      toast.success(t('settings.resetAppConf.success'))
-                    })
-                    .catch((err) => {
-                      toast.error(String(err))
-                    })
-                },
-              })
-            }}
-          >
-            {t('settings.resetAppConf.label')}
-          </Button>
+        <div className='setting-header'>
+          <div className='setting-desc'>
+            <h2 className='setting-title'>{t(curGroup.i18nKey)}</h2>
+            <p className='setting-subtitle'>{t(curGroup.desc?.i18nKey)}</p>
+          </div>
+          <div className='setting-actions'>
+            <Button
+              size='small'
+              btnType='primary'
+              onClick={handleResetConfiguration}
+            >
+              {t('settings.resetAppConf.label')}
+            </Button>
+          </div>
         </div>
         {renderCurrentSettingData()}
       </div>

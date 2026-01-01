@@ -160,7 +160,8 @@
           "label": "Idioma",
           "desc": "Establecer el idioma de la aplicación."
         }
-      }
+      },
+      "desc": "Configuración universal de la aplicación."
     },
     "editor": {
       "label": "Editor",
@@ -200,11 +201,13 @@
           "label": "Salto de línea de bloque de código",
           "desc": "Si el número de líneas en el bloque de código excede la línea."
         }
-      }
+      },
+      "desc": "Las opciones de configuración del editor de Markdown incluyen estilos, comportamientos y ajustes relacionados con el modo WYSIWYG."
     },
     "keyboard": {
       "label": "teclado",
-      "shortcut_conflict": "La tecla de acceso directo está ocupada"
+      "shortcut_conflict": "La tecla de acceso directo está ocupada",
+      "desc": "Configuración de los atajos de teclado y el comportamiento de las teclas, incluidas las configuraciones relacionadas, como la detección de conflictos de atajos."
     },
     "ai": {
       "label": "AI",
@@ -266,7 +269,8 @@
           "label": "Lista de modelos",
           "desc": "Lista de modelos, divida el nombre del modelo con comas, el valor predeterminado es \"\""
         }
-      }
+      },
+      "desc": "Para la configuración del modelo AI, el baseUrl solicitará la dirección oficial de forma predeterminada cuando esté vacío. El encabezado de solicitud se puede utilizar para configurar la clave y otra información. Para obtener más información, consulte la documentación del proveedor de servicios."
     },
     "resetAppConf": {
       "label": "Restablecer la configuración de la aplicación",
@@ -325,7 +329,8 @@
           "label": "Reglas de ruta",
           "desc": "$ {DocumentPath} se refiere a la ruta de la carpeta superior del archivo que está editando actualmente. Al \"cargar una imagen, la imagen se guardará en la ruta relativa al archivo actual."
         }
-      }
+      },
+      "desc": "Configuración de procesamiento y carga de imágenes, incluida la ruta de guardado y la configuración de comportamiento para pegar imágenes, cargar archivos de imágenes."
     },
     "display": {
       "label": "Apariencia",
@@ -335,7 +340,8 @@
           "label": "Escala",
           "desc": "Ampliar o ampliar la escala de visualización de toda la página"
         }
-      }
+      },
+      "desc": "Configuración de apariencia y visualización de la aplicación, incluida la configuración relacionada con la visión, como el zoom de la interfaz y el tema."
     }
   },
   "updater": {

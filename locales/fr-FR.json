@@ -157,7 +157,8 @@
           "label": "Langue",
           "desc": "Choisir la langue de l'application."
         }
-      }
+      },
+      "desc": "Paramètres universels de l'application."
     },
     "editor": {
       "label": "Editeur",
@@ -197,11 +198,13 @@
           "label": "Jets de ligne de bloc de code",
           "desc": "Si vous changez de ligne lorsque le nombre de mots dans le bloc de code dépasse."
         }
-      }
+      },
+      "desc": "Options de configuration pour l'éditeur Markdown, y compris les paramètres relatifs au style, au comportement et au mode WYSIWYG."
     },
     "keyboard": {
       "label": "clavier",
-      "shortcut_conflict": "Le raccourci a été occupé"
+      "shortcut_conflict": "Le raccourci a été occupé",
+      "desc": "Configuration des raccourcis clavier et du comportement des touches, y compris les paramètres associés tels que la détection des conflits de raccourcis."
     },
     "ai": {
       "label": "AI",
@@ -263,7 +266,8 @@
           "label": "Liste des modèles",
           "desc": "Liste de modèles, avec un nom de modèle divisé par une virgule, par défaut \"\""
         }
-      }
+      },
+      "desc": "Configuration du modèle AI, lorsque le baseUrl est vide, l'adresse officielle sera demandée par défaut. L'en-tête de demande peut être utilisé pour configurer des informations telles que des clés. Pour plus de détails, veuillez vous baser sur la documentation du fournisseur de service."
     },
     "resetAppConf": {
       "label": "Réinitialiser la configuration de l'application",
@@ -322,7 +326,8 @@
           "label": "Règles de chemin",
           "desc": "$ {DocumentPath} fait référence au chemin du dossier supérieur dans lequel vous éditez actuellement le fichier. Lorsque \"Téléchargez une image, l'image sera enregistrée dans le chemin par rapport au fichier actuel."
         }
-      }
+      },
+      "desc": "Configuration du traitement d'image et du téléchargement, y compris les paramètres de chemin d'enregistrement et de comportement pour coller des images, télécharger des fichiers d'image."
     },
     "display": {
       "label": "Apparence",
@@ -332,7 +337,8 @@
           "label": "Échelle de mise à l'échelle",
           "desc": "Zoom ou agrandissement de l'échelle d'affichage de la page entière"
         }
-      }
+      },
+      "desc": "Les paramètres d'apparence et d'affichage de l'application, y compris le zoom de l'interface, les thèmes et autres configurations visuelles."
     }
   },
   "updater": {

@@ -192,7 +192,8 @@
           "label": "Language",
           "desc": "Set the language of the app."
         }
-      }
+      },
+      "desc": "Common settings for the application."
     },
     "editor": {
       "label": "Editor",
@@ -232,11 +233,13 @@
           "label": "Code block wrap",
           "desc": "Whether the line breaks when the number of line words in the code block exceeds."
         }
-      }
+      },
+      "desc": "Markdown configuration options for the editor, including settings for style, behavior, and WYSIWYG mode."
     },
     "keyboard": {
       "label": "keyboard",
-      "shortcut_conflict": "This shortcut is already occupied"
+      "shortcut_conflict": "This shortcut is already occupied",
+      "desc": "Configuration of keyboard shortcuts and key behavior, including settings related to shortcut conflict detection."
     },
     "ai": {
       "label": "AI",
@@ -298,7 +301,8 @@
           "label": "Model List",
           "desc": "Model list, separated by commas. The default value is \"\""
         }
-      }
+      },
+      "desc": "AI the model configuration, when the baseUrl is empty, the official address will be requested by default, and the request header can be used to configure information such as keys, please refer to the documentation of the service provider."
     },
     "resetAppConf": {
       "label": "Reset Application Configuration",
@@ -357,7 +361,8 @@
           "label": "Path Rules",
           "desc": "${documentPath} refers to the parent folder path of the file you are currently editing. When uploading an image, the image will be saved to the path relative to the current file."
         }
-      }
+      },
+      "desc": "Configuring image processing and upload, including pasting images, saving paths and behavior settings for uploading image files."
     },
     "display": {
       "label": "Appearance",
@@ -367,7 +372,8 @@
           "label": "Scaling",
           "desc": "Scales or enlarges the display scale of the entire page"
         }
-      }
+      },
+      "desc": "Appearance and display settings for the application, including visually relevant configurations such as interface scaling and themes."
     }
   },
   "updater": {

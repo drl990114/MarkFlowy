@@ -7,7 +7,7 @@ const Container = styled.div`
   justify-content: space-between;
   align-items: center;
   height: 40px;
-  padding: 0 1rem;
+  padding: 0 8px;
   font-size: 0.8rem;
 
   .sidebar-header {

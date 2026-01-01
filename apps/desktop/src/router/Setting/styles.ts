@@ -120,6 +120,59 @@ export const Container = styled.div`
     width: 100%;
     overflow: auto;
 
+    & .setting-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid ${(props) => props.theme.borderColor};
+      
+      @media (max-width: 768px) {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+      }
+    }
+
+    & .setting-desc {
+      flex: 1;
+      margin-right: 1rem;
+      
+      @media (max-width: 768px) {
+        margin-right: 0;
+        margin-bottom: 0.5rem;
+      }
+    }
+
+    & .setting-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin: 0 0 0.5rem 0;
+      text-transform: capitalize;
+    }
+
+    & .setting-subtitle {
+      font-size: 0.875rem;
+      color: ${(props) => props.theme.labelFontColor};
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    & .setting-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      
+      @media (max-width: 768px) {
+        width: 100%;
+        
+        button {
+          width: 100%;
+        }
+      }
+    }
+
     & .conf-path {
       display: flex;
       align-items: center;
