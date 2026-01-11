@@ -95,7 +95,7 @@ impl Keybindings {
             KeybindingInfo::new(
                 "editor_paste".to_string(),
                 vec!["CommandOrCtrl".to_string(), "v".to_string()],
-                "editor_focus".to_string(),
+                "disabled".to_string(),
             ),
             KeybindingInfo::new(
                 "editor_toggleStrong".to_string(),
@@ -170,31 +170,32 @@ impl Keybindings {
     }
 
     pub fn read() -> Self {
+        let default_key_bindings = Self::default();
+        
         if !Self::get_path().exists() {
-            return Self::default().write();
+            return default_key_bindings.write();
         }
+        
         match std::fs::read_to_string(Self::get_path()) {
             Ok(v) => {
-                if let Ok(mut v2) = serde_json::from_str::<Keybindings>(&v) {
-                    let default_key_bindings = Self::default();
-                    let mut is_diff = false;
-
-                    for default_cmd in default_key_bindings.cmds {
-                        if !v2.cmds.iter().any(|cmd| cmd.id == default_cmd.id) {
-                            v2.cmds.push(default_cmd);
-                            is_diff = true;
+                if let Ok(user_keybindings) = serde_json::from_str::<Keybindings>(&v) {
+                    // 创建一个新的keybindings，基于默认配置
+                    let mut merged_keybindings = default_key_bindings.clone();
+                    
+                    // 只合并用户自定义的快捷键配置
+                    for user_cmd in user_keybindings.cmds {
+                        if let Some(default_cmd) = merged_keybindings.cmds.iter_mut().find(|cmd| cmd.id == user_cmd.id) {
+                            // 只更新key_map，保持其他字段（如when）使用默认值
+                            default_cmd.key_map = user_cmd.key_map;
                         }
                     }
-
-                    if is_diff {
-                        v2 = v2.clone().write();
-                    }
-                    v2
+                    
+                    merged_keybindings
                 } else {
-                    Self::default()
+                    default_key_bindings
                 }
             }
-            Err(_err) => Self::default(),
+            Err(_err) => default_key_bindings,
         }
     }
 
@@ -204,27 +205,37 @@ impl Keybindings {
             create_file(path);
         }
 
-        let mut sorted_cmds = self.cmds.clone();
-        sorted_cmds.sort_by(|a, b| {
-            let a_is_app = a.id.starts_with("app:");
-            let b_is_app = b.id.starts_with("app:");
+        // 获取默认配置，用于过滤
+        let default_keybindings = Self::default();
+        
+        // 只保存与默认配置不同的快捷键
+        let user_defined_cmds: Vec<KeybindingInfo> = self.cmds
+            .iter()
+            .filter_map(|cmd| {
+                if let Some(default_cmd) = default_keybindings.cmds.iter().find(|d| d.id == cmd.id) {
+                    // 只保存key_map不同的配置
+                    if cmd.key_map != default_cmd.key_map {
+                        Some(KeybindingInfo {
+                            id: cmd.id.clone(),
+                            key_map: cmd.key_map.clone(),
+                            when: cmd.when.clone(), // 保持当前配置，虽然理论上应该与默认相同
+                        })
+                    } else {
+                        None // 与默认配置相同，不保存
+                    }
+                } else {
+                    // 如果找不到对应的默认配置，也保存（安全起见）
+                    Some(cmd.clone())
+                }
+            })
+            .collect();
 
-            if a_is_app && !b_is_app {
-                return std::cmp::Ordering::Less;
-            } else if !a_is_app && b_is_app {
-                return std::cmp::Ordering::Greater;
-            }
+        let user_keybindings = Keybindings { cmds: user_defined_cmds };
 
-            a.id.cmp(&b.id)
-        });
-
-        let ordered_keybindings = Keybindings { cmds: sorted_cmds };
-
-        if let Ok(v) = serde_json::to_string_pretty(&ordered_keybindings) {
+        if let Ok(v) = serde_json::to_string_pretty(&user_keybindings) {
             std::fs::write(path, v).unwrap_or_else(|_err| {
                 Self::default().write();
             });
-        } else {
         }
 
         self

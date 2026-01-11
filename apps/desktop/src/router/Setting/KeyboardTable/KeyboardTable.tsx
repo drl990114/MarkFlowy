@@ -3,7 +3,7 @@ import { KeyboardInfo } from '@/hooks/useKeyboard'
 import { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
-import { Button } from 'zens'
+import { Button, Tooltip } from 'zens'
 import { RecordKeysModal, RecordKeysModalRef } from './RecordKeysModal'
 import { transferKey } from './record-key'
 
@@ -14,16 +14,16 @@ const TableContainer = styled.div`
   overflow: auto;
   background-color: ${(props) => props.theme.bgColor};
   margin-bottom: 16px;
-  
+
   &::-webkit-scrollbar {
     height: 8px;
   }
-  
+
   &::-webkit-scrollbar-track {
     background: ${(props) => props.theme.tipsBgColor};
     border-radius: 4px;
   }
-  
+
   &::-webkit-scrollbar-thumb {
     background: ${(props) => props.theme.borderColor};
     border-radius: 4px;
@@ -87,9 +87,17 @@ export function KeyboardTable() {
                 <TableDataCell>{t(`command.id_descriptions.${row.id}`)}</TableDataCell>
                 <TableDataCell>{row.key_map.map((v) => transferKey(v)).join(' + ')}</TableDataCell>
                 <TableDataCell>
-                  <Button size='small' onClick={() => handleOpen(row)}>
-                    Edit
-                  </Button>
+                  {row.when === 'disabled' ? (
+                    <Tooltip title='This shortcut is disabled and cannot be edited'>
+                      <Button size='small' disabled>
+                        Edit
+                      </Button>
+                    </Tooltip>
+                  ) : (
+                    <Button size='small' onClick={() => handleOpen(row)}>
+                      Edit
+                    </Button>
+                  )}
                 </TableDataCell>
               </TableRow>
             ))}
