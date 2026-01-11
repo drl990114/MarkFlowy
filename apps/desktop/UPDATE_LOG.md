@@ -1,5 +1,21 @@
 # UPDATE LOG
 
+## v0.50.2
+
+Fixes:
+
+- Paste events temporarily do not support customization due to browser security policy restrictions, affecting user experience. Continuous optimization will be carried out in the future.
+
+- Support for parsing `front-matter` syntax.
+
+---
+
+修复：
+
+- 粘贴事件暂时不支持自定义，因为浏览器安全策略限制，影响用户体验，后续会持续优化。
+
+- 支持 `front-matter` 语法的解析。
+
 ## v0.50.1
 
 Happy New Year 2026! Thank you for your support in the past year♥️. In 2026, I will focus on refining existing features and addressing issues. I also hope for your continued support and valuable feedback.
