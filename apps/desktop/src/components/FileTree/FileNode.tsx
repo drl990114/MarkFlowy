@@ -1,9 +1,9 @@
 import {
-    createFile,
-    getFileNameFromPath,
-    readDirectory,
-    updateFile,
-    type IFile,
+  createFile,
+  getFileNameFromPath,
+  readDirectory,
+  updateFile,
+  type IFile,
 } from '@/helper/filesys'
 import { useEditorStore } from '@/stores'
 import NiceModal from '@ebay/nice-modal-react'
@@ -353,7 +353,7 @@ function FileNode({
               alignItems: 'center',
             }}
           >
-            <div style={{ flex: 1 }}>
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', overflow: 'hidden', minWidth: 0 }}>
               {node.data?.kind === 'dir' ? (
                 <i
                   className={`${node.isOpen ? 'ri-folder-5-fill' : 'ri-folder-3-fill'} file-icon`}
@@ -364,6 +364,8 @@ function FileNode({
               <span
                 style={{
                   whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
                 }}
               >
                 {node.data.name}
