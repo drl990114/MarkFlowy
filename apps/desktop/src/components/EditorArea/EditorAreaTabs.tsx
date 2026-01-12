@@ -121,8 +121,8 @@ const EditorAreaTabs = memo(() => {
   return (
     <Container>
       <div className='tab-control'>
-        <MfIconButton icon='ri-arrow-left-line' size='small' rounded='smooth' onClick={() => moveActiveTab('left')}/>
-        <MfIconButton icon='ri-arrow-right-line' size='small' rounded='smooth' onClick={() => moveActiveTab('right')}/>
+        <MfIconButton icon='ri-arrow-left-line' size='small' rounded='smooth' onClick={() => moveActiveTab('left')} />
+        <MfIconButton icon='ri-arrow-right-line' size='small' rounded='smooth' onClick={() => moveActiveTab('right')} />
       </div>
       <div className='tab-items' ref={htmlRef}>
         {opened.map((id) => {
