@@ -121,14 +121,37 @@ const EditorAreaTabs = memo(() => {
   return (
     <Container>
       <div className='tab-control'>
-        <MfIconButton icon='ri-arrow-left-line' size='small' rounded='smooth' onClick={() => moveActiveTab('left')}/>
-        <MfIconButton icon='ri-arrow-right-line' size='small' rounded='smooth' onClick={() => moveActiveTab('right')}/>
+        <MfIconButton icon='ri-arrow-left-line' size='small' rounded='smooth' onClick={() => moveActiveTab('left')} />
+        <MfIconButton icon='ri-arrow-right-line' size='small' rounded='smooth' onClick={() => moveActiveTab('right')} />
       </div>
       <div className='tab-items' ref={htmlRef}>
         {opened.map((id) => {
           const file = getFileObject(id) as IFile
           const active = activeId === id
           const editorState = idStateMap.get(id)
+
+          const handleMiddleClick = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+            // 鼠标中键点击关闭标签页
+            if (e.button !== 1) return
+            e.stopPropagation()
+            e.preventDefault()
+            if (
+              checkUnsavedFiles({
+                fileIds: [id],
+                onSaveAndClose: async () => {
+                  const saveHandler = getSaveOpenedEditorEntries(id)
+                  await saveHandler?.()
+                  close(e, id)
+                },
+                onUnsavedAndClose: () => {
+                  close(e, id)
+                },
+              }) > 0
+            ) {
+              return
+            }
+            close(e, id)
+          }
 
           const handleContextMenu = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
             e.stopPropagation()
@@ -219,6 +242,7 @@ const EditorAreaTabs = memo(() => {
                 onClick={() => onSelectItem(file.id)}
                 key={id}
                 onContextMenu={handleContextMenu}
+                onMouseDown={handleMiddleClick}
               >
                 <span
                   style={{
