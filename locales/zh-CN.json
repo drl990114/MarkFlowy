@@ -271,7 +271,7 @@
         },
         "paste_image_save_relative_path_rule": {
           "label": "路径规则",
-          "desc": "${documentPath} 是指你当前编辑文件的上级文件夹路径，当“粘贴图片时，图片将保存到相对于当前文件的路径。"
+          "desc": "支持变量：${documentPath}（当前文件所在文件夹路径）、${fileName}（当前文件名，不含扩展名）。例如：${documentPath}/photo/${fileName}"
         }
       },
       "upload_img": {
@@ -296,7 +296,7 @@
         },
         "upload_image_save_relative_path_rule": {
           "label": "路径规则",
-          "desc": "${documentPath} 是指你当前编辑文件的上级文件夹路径，当“上传图片时，图片将保存到相对于当前文件的路径。"
+          "desc": "支持变量：${documentPath}（当前文件所在文件夹路径）、${fileName}（当前文件名，不含扩展名）。例如：${documentPath}/photo/${fileName}"
         }
       }
     },
