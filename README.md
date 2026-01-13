@@ -128,6 +128,13 @@ The development of **MarkFlowy** cannot be separated from these contributors. Th
         </a>
     </td>
     <td align="center">
+        <a href="https://github.com/codeErrorSleep">
+            <img src="https://avatars.githubusercontent.com/u/20470033?v=4" width="90;" alt="codeErrorSleep"/>
+            <br />
+            <sub><b>Qiu Shao</b></sub>
+        </a>
+    </td>
+    <td align="center">
         <a href="https://github.com/SamDc73">
             <img src="https://avatars.githubusercontent.com/u/144215270?v=4" width="90;" alt="SamDc73"/>
             <br />
@@ -154,15 +161,15 @@ The development of **MarkFlowy** cannot be separated from these contributors. Th
             <br />
             <sub><b>Null</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/chiefass">
             <img src="https://avatars.githubusercontent.com/u/106591791?v=4" width="90;" alt="chiefass"/>
             <br />
             <sub><b>Chiefass</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/dai">
             <img src="https://avatars.githubusercontent.com/u/12391?v=4" width="90;" alt="dai"/>
