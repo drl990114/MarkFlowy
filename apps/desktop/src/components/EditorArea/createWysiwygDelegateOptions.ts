@@ -20,6 +20,41 @@ import type { CreateWysiwygDelegateOptions } from 'rme'
 
 type AIOptions = NonNullable<CreateWysiwygDelegateOptions['ai']>
 
+/**
+ * Get the file name without extension
+ */
+const getFileNameWithoutExt = (fileName?: string): string => {
+  if (!fileName) return ''
+  const lastDotIndex = fileName.lastIndexOf('.')
+  if (lastDotIndex === -1) return fileName
+  return fileName.substring(0, lastDotIndex)
+}
+
+/**
+ * Replace variables in path rule
+ * Supported variables:
+ * - ${documentPath}: Parent folder path of the current document
+ * - ${fileName}: Current document file name (without extension)
+ */
+const replacePathVariables = (
+  pathRule: string,
+  documentPath: string,
+  fileName: string,
+): string => {
+  // Clean up pathRule: remove leading dot if present (e.g., ".${documentPath}" -> "${documentPath}")
+  let normalizedPath = pathRule.startsWith('.') ? pathRule.substring(1) : pathRule
+
+  // If pathRule doesn't start with ${documentPath} or absolute path, prepend documentPath
+  // This handles the case where UI strips the prefix for display
+  if (!normalizedPath.startsWith('${documentPath}') && !normalizedPath.startsWith('/')) {
+    normalizedPath = `${documentPath}/${normalizedPath}`
+  }
+
+  return normalizedPath
+    .replace(/\$\{documentPath\}/g, documentPath)
+    .replace(/\$\{fileName\}/g, fileName)
+}
+
 export const createWysiwygDelegateOptions = (fileId?: string): CreateWysiwygDelegateOptions => {
   const aiStoreState = useAiChatStore.getState()
   const aiProviderModelsMap = aiStoreState.aiProviderModelsMap
@@ -122,9 +157,15 @@ export const createWysiwygDelegateOptions = (fileId?: string): CreateWysiwygDele
               settingData.when_upload_image === 'save_to_file_relative' &&
               settingData.upload_image_save_relative_path_rule
             ) {
-              const targetPath = settingData.upload_image_save_relative_path_rule.replace(
-                '${documentPath}',
-                fileFolderPath || '',
+              // Use fileFolderPath, fallback to workspaceRoot if empty
+              const basePath = fileFolderPath || workspaceRoot || ''
+              if (!basePath) {
+                throw new Error('No document path or workspace root available')
+              }
+              const targetPath = replacePathVariables(
+                settingData.upload_image_save_relative_path_rule,
+                basePath,
+                getFileNameWithoutExt(fileObject?.name),
               )
               const base64 = await readFileAsBase64(file)
               const fullPath = await moveImageToLocalFolder(base64, targetPath)
@@ -233,9 +274,15 @@ export const createWysiwygDelegateOptions = (fileId?: string): CreateWysiwygDele
           settingData.when_paste_image === 'save_to_file_relative' &&
           settingData.paste_image_save_relative_path_rule
         ) {
-          const targetPath = settingData.paste_image_save_relative_path_rule.replace(
-            '${documentPath}',
-            fileFolderPath || '',
+          // Use fileFolderPath, fallback to workspaceRoot if empty
+          const basePath = fileFolderPath || workspaceRoot || ''
+          if (!basePath) {
+            return src
+          }
+          const targetPath = replacePathVariables(
+            settingData.paste_image_save_relative_path_rule,
+            basePath,
+            getFileNameWithoutExt(file?.name),
           )
           const fullPath = await moveImageToLocalFolder(src, targetPath)
 
@@ -249,7 +296,6 @@ export const createWysiwygDelegateOptions = (fileId?: string): CreateWysiwygDele
         console.error('Image conversion failed:', error)
       }
 
-      console.log('All conversion methods failed, returning original src')
       return src
     },
     handleViewImgSrcUrl: async (url) => {

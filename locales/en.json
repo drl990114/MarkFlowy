@@ -334,7 +334,7 @@
         },
         "paste_image_save_relative_path_rule": {
           "label": "Path Rules",
-          "desc": "${documentPath} refers to the parent folder path of the file you are currently editing. When you paste the picture, the picture will be saved to the path relative to the current file."
+          "desc": "Supported variables: ${documentPath} (parent folder path of current file), ${fileName} (current file name without extension). Example: ${documentPath}/photo/${fileName}"
         }
       },
       "upload_img": {
@@ -359,7 +359,7 @@
         },
         "upload_image_save_relative_path_rule": {
           "label": "Path Rules",
-          "desc": "${documentPath} refers to the parent folder path of the file you are currently editing. When uploading an image, the image will be saved to the path relative to the current file."
+          "desc": "Supported variables: ${documentPath} (parent folder path of current file), ${fileName} (current file name without extension). Example: ${documentPath}/photo/${fileName}"
         }
       },
       "desc": "Configuring image processing and upload, including pasting images, saving paths and behavior settings for uploading image files."

@@ -299,7 +299,7 @@
         },
         "paste_image_save_relative_path_rule": {
           "label": "Règles de chemin",
-          "desc": "$ {DocumentPath} fait référence au chemin du dossier supérieur du fichier que vous éditez actuellement. Lorsque vous \"collez l'image, l'image sera enregistrée au chemin par rapport au fichier actuel."
+          "desc": "Variables supportées: ${documentPath} (chemin du dossier parent du fichier actuel), ${fileName} (nom du fichier actuel sans extension). Exemple: ${documentPath}/photo/${fileName}"
         }
       },
       "upload_img": {
@@ -324,7 +324,7 @@
         },
         "upload_image_save_relative_path_rule": {
           "label": "Règles de chemin",
-          "desc": "$ {DocumentPath} fait référence au chemin du dossier supérieur dans lequel vous éditez actuellement le fichier. Lorsque \"Téléchargez une image, l'image sera enregistrée dans le chemin par rapport au fichier actuel."
+          "desc": "Variables supportées: ${documentPath} (chemin du dossier parent du fichier actuel), ${fileName} (nom du fichier actuel sans extension). Exemple: ${documentPath}/photo/${fileName}"
         }
       },
       "desc": "Configuration du traitement d'image et du téléchargement, y compris les paramètres de chemin d'enregistrement et de comportement pour coller des images, télécharger des fichiers d'image."

@@ -302,7 +302,7 @@
         },
         "paste_image_save_relative_path_rule": {
           "label": "Reglas de ruta",
-          "desc": "$ {DocumentPath} se refiere a la ruta de la carpeta superior del archivo que está editando actualmente. Al \"pegar una imagen, la imagen se guardará en la ruta relativa al archivo actual."
+          "desc": "Variables soportadas: ${documentPath} (ruta de la carpeta padre del archivo actual), ${fileName} (nombre del archivo actual sin extensión). Ejemplo: ${documentPath}/photo/${fileName}"
         }
       },
       "upload_img": {
@@ -327,7 +327,7 @@
         },
         "upload_image_save_relative_path_rule": {
           "label": "Reglas de ruta",
-          "desc": "$ {DocumentPath} se refiere a la ruta de la carpeta superior del archivo que está editando actualmente. Al \"cargar una imagen, la imagen se guardará en la ruta relativa al archivo actual."
+          "desc": "Variables soportadas: ${documentPath} (ruta de la carpeta padre del archivo actual), ${fileName} (nombre del archivo actual sin extensión). Ejemplo: ${documentPath}/photo/${fileName}"
         }
       },
       "desc": "Configuración de procesamiento y carga de imágenes, incluida la ruta de guardado y la configuración de comportamiento para pegar imágenes, cargar archivos de imágenes."

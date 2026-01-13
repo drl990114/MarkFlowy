@@ -307,7 +307,7 @@
         },
         "paste_image_save_relative_path_rule": {
           "label": "パスルール",
-          "desc": "$ {DocumentPath} は、あなたが現在編集しているファイルの上位フォルダパスで、「画像を貼り付けると、画像は現在のファイルを基準にしたパスに保存されます。"
+          "desc": "サポートされる変数：${documentPath}（現在のファイルの親フォルダパス）、${fileName}（拡張子なしの現在のファイル名）。例：${documentPath}/photo/${fileName}"
         }
       },
       "upload_img": {
@@ -332,7 +332,7 @@
         },
         "upload_image_save_relative_path_rule": {
           "label": "パスルール",
-          "desc": "$ {DocumentPath} は、あなたが現在編集しているファイルの上位フォルダパスで、「画像をアップロードすると、画像は現在のファイルを基準にしたパスに保存されます。"
+          "desc": "サポートされる変数：${documentPath}（現在のファイルの親フォルダパス）、${fileName}（拡張子なしの現在のファイル名）。例：${documentPath}/photo/${fileName}"
         }
       },
       "desc": "画像処理とアップロードの設定には、画像の貼り付け、画像ファイルの保存パスと動作設定が含まれます。"
