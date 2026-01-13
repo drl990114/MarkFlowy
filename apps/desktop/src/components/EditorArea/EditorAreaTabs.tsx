@@ -130,6 +130,29 @@ const EditorAreaTabs = memo(() => {
           const active = activeId === id
           const editorState = idStateMap.get(id)
 
+          const handleMiddleClick = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+            // 鼠标中键点击关闭标签页
+            if (e.button !== 1) return
+            e.stopPropagation()
+            e.preventDefault()
+            if (
+              checkUnsavedFiles({
+                fileIds: [id],
+                onSaveAndClose: async () => {
+                  const saveHandler = getSaveOpenedEditorEntries(id)
+                  await saveHandler?.()
+                  close(e, id)
+                },
+                onUnsavedAndClose: () => {
+                  close(e, id)
+                },
+              }) > 0
+            ) {
+              return
+            }
+            close(e, id)
+          }
+
           const handleContextMenu = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
             e.stopPropagation()
             e.preventDefault()
@@ -219,6 +242,7 @@ const EditorAreaTabs = memo(() => {
                 onClick={() => onSelectItem(file.id)}
                 key={id}
                 onContextMenu={handleContextMenu}
+                onMouseDown={handleMiddleClick}
               >
                 <span
                   style={{
