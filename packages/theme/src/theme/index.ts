@@ -165,6 +165,251 @@ const styledDarkTheme = {
   scrollbarTrackColor: '#0e1419',
 }
 
+// GitHub Light Theme
+const styledGitHubLightTheme = {
+  ...common,
+
+  // font
+  primaryFontColor: '#24292f',
+  disabledFontColor: '#8c959f',
+  unselectedFontColor: '#57606a',
+  labelFontColor: '#57606a',
+
+  accentColor: '#0969da',
+  accentColorFocused: '#ddf4ff',
+  borderColor: '#d0d7de',
+  borderColorFocused: '#0969da',
+  bgColor: '#ffffff',
+  bgColorSecondary: '#f6f8fa',
+  hoverColor: '#f3f4f6',
+  warnColor: '#9a6700',
+  dangerColor: '#cf222e',
+  tipsBgColor: '#f6f8fa',
+  successColor: '#1a7f37',
+  boxShadowColor: 'rgba(31, 35, 40, 0.04)',
+
+  // app
+  titleBarBgColor: '#f6f8fa',
+  titleBarDefaultHoverColor: '#eaeef2',
+  editorTabBgColor: '#f6f8fa',
+  editorTabActiveBgColor: '#ffffff',
+  editorToolbarBgColor: '#f6f8fa',
+  fileTreeIndentLineColor: '#d8dee4',
+  fileTreeSelectedBgColor: '#ddf4ff',
+  sideBarHeaderBgColor: '#f6f8fa',
+  sideBarBgColor: '#f6f8fa',
+  statusBarBgColor: '#f6f8fa',
+  rightBarBgColor: '#f6f8fa',
+  rightBarHeaderBgColor: '#f6f8fa',
+
+  // components
+  buttonBgColor: '#f6f8fa',
+  tooltipBgColor: '#eaeef2',
+  dialogBgColor: '#ffffff',
+  dialogBackdropColor: '#00000066',
+  contextMenuBgColor: '#ffffff',
+  contextMenuBgColorHover: '#f3f4f6',
+
+  scrollbarThumbColor: '#8c959f',
+  scrollbarTrackColor: '#f6f8fa',
+}
+
+// GitHub Dark Theme
+const styledGitHubDarkTheme = {
+  ...common,
+
+  // font
+  primaryFontColor: '#c9d1d9',
+  disabledFontColor: '#484f58',
+  unselectedFontColor: '#8b949e',
+  labelFontColor: '#8b949e',
+
+  accentColor: '#58a6ff',
+  accentColorFocused: '#388bfd26',
+  borderColor: '#30363d',
+  borderColorFocused: '#58a6ff',
+  bgColor: '#0d1117',
+  bgColorSecondary: '#161b22',
+  hoverColor: '#21262d',
+  warnColor: '#d29922',
+  dangerColor: '#f85149',
+  tipsBgColor: '#161b22',
+  successColor: '#3fb950',
+  boxShadowColor: 'rgba(0, 0, 0, 0.3)',
+
+  // app
+  titleBarBgColor: '#161b22',
+  titleBarDefaultHoverColor: '#21262d',
+  editorTabBgColor: '#161b22',
+  editorTabActiveBgColor: '#0d1117',
+  editorToolbarBgColor: '#161b22',
+  fileTreeIndentLineColor: '#21262d',
+  fileTreeSelectedBgColor: '#388bfd26',
+  sideBarHeaderBgColor: '#161b22',
+  sideBarBgColor: '#161b22',
+  statusBarBgColor: '#161b22',
+  rightBarBgColor: '#161b22',
+  rightBarHeaderBgColor: '#161b22',
+
+  // components
+  buttonBgColor: '#21262d',
+  tooltipBgColor: '#30363d',
+  dialogBgColor: '#0d1117',
+  dialogBackdropColor: '#00000099',
+  contextMenuBgColor: '#161b22',
+  contextMenuBgColorHover: '#21262d',
+
+  scrollbarThumbColor: '#484f58',
+  scrollbarTrackColor: '#0d1117',
+}
+
+// GitBook Theme (Light)
+const styledGitBookTheme = {
+  ...common,
+
+  // font
+  primaryFontColor: '#1f2328',
+  disabledFontColor: '#9ca3af',
+  unselectedFontColor: '#6b7280',
+  labelFontColor: '#6b7280',
+
+  accentColor: '#346ddb',
+  accentColorFocused: '#e8f0fe',
+  borderColor: '#e5e7eb',
+  borderColorFocused: '#346ddb',
+  bgColor: '#ffffff',
+  bgColorSecondary: '#f9fafb',
+  hoverColor: '#f3f4f6',
+  warnColor: '#ca8a04',
+  dangerColor: '#dc2626',
+  tipsBgColor: '#f0f9ff',
+  successColor: '#16a34a',
+  boxShadowColor: 'rgba(0, 0, 0, 0.05)',
+
+  // app
+  titleBarBgColor: '#f9fafb',
+  titleBarDefaultHoverColor: '#e5e7eb',
+  editorTabBgColor: '#f3f4f6',
+  editorTabActiveBgColor: '#ffffff',
+  editorToolbarBgColor: '#f9fafb',
+  fileTreeIndentLineColor: '#e5e7eb',
+  fileTreeSelectedBgColor: '#e8f0fe',
+  sideBarHeaderBgColor: '#f9fafb',
+  sideBarBgColor: '#f9fafb',
+  statusBarBgColor: '#f9fafb',
+  rightBarBgColor: '#f9fafb',
+  rightBarHeaderBgColor: '#f9fafb',
+
+  // components
+  buttonBgColor: '#f3f4f6',
+  tooltipBgColor: '#e5e7eb',
+  dialogBgColor: '#ffffff',
+  dialogBackdropColor: '#00000066',
+  contextMenuBgColor: '#ffffff',
+  contextMenuBgColorHover: '#f3f4f6',
+
+  scrollbarThumbColor: '#d1d5db',
+  scrollbarTrackColor: '#f9fafb',
+}
+
+// Sepia Theme (类似 GitBook 的护眼暖色主题)
+const styledSepiaTheme = {
+  ...common,
+
+  // font
+  primaryFontColor: '#5c4b37',
+  disabledFontColor: '#a89984',
+  unselectedFontColor: '#7c6f64',
+  labelFontColor: '#7c6f64',
+
+  accentColor: '#b57614',
+  accentColorFocused: '#f5e6d3',
+  borderColor: '#d5c4a1',
+  borderColorFocused: '#b57614',
+  bgColor: '#fbf1c7',
+  bgColorSecondary: '#f2e5bc',
+  hoverColor: '#ebdbb2',
+  warnColor: '#d79921',
+  dangerColor: '#cc241d',
+  tipsBgColor: '#f5e6d3',
+  successColor: '#79740e',
+  boxShadowColor: 'rgba(60, 56, 54, 0.08)',
+
+  // app
+  titleBarBgColor: '#f2e5bc',
+  titleBarDefaultHoverColor: '#ebdbb2',
+  editorTabBgColor: '#f2e5bc',
+  editorTabActiveBgColor: '#fbf1c7',
+  editorToolbarBgColor: '#f2e5bc',
+  fileTreeIndentLineColor: '#d5c4a1',
+  fileTreeSelectedBgColor: '#ebdbb2',
+  sideBarHeaderBgColor: '#f2e5bc',
+  sideBarBgColor: '#f2e5bc',
+  statusBarBgColor: '#f2e5bc',
+  rightBarBgColor: '#f2e5bc',
+  rightBarHeaderBgColor: '#f2e5bc',
+
+  // components
+  buttonBgColor: '#f2e5bc',
+  tooltipBgColor: '#ebdbb2',
+  dialogBgColor: '#fbf1c7',
+  dialogBackdropColor: '#00000066',
+  contextMenuBgColor: '#fbf1c7',
+  contextMenuBgColorHover: '#f2e5bc',
+
+  scrollbarThumbColor: '#bdae93',
+  scrollbarTrackColor: '#f2e5bc',
+}
+
+// Nord Theme (流行的冷色深色主题)
+const styledNordTheme = {
+  ...common,
+
+  // font
+  primaryFontColor: '#eceff4',
+  disabledFontColor: '#4c566a',
+  unselectedFontColor: '#d8dee9',
+  labelFontColor: '#d8dee9',
+
+  accentColor: '#88c0d0',
+  accentColorFocused: '#3b4252',
+  borderColor: '#3b4252',
+  borderColorFocused: '#88c0d0',
+  bgColor: '#2e3440',
+  bgColorSecondary: '#3b4252',
+  hoverColor: '#434c5e',
+  warnColor: '#ebcb8b',
+  dangerColor: '#bf616a',
+  tipsBgColor: '#3b4252',
+  successColor: '#a3be8c',
+  boxShadowColor: 'rgba(0, 0, 0, 0.2)',
+
+  // app
+  titleBarBgColor: '#3b4252',
+  titleBarDefaultHoverColor: '#434c5e',
+  editorTabBgColor: '#3b4252',
+  editorTabActiveBgColor: '#2e3440',
+  editorToolbarBgColor: '#3b4252',
+  fileTreeIndentLineColor: '#434c5e',
+  fileTreeSelectedBgColor: '#434c5e',
+  sideBarHeaderBgColor: '#3b4252',
+  sideBarBgColor: '#3b4252',
+  statusBarBgColor: '#3b4252',
+  rightBarBgColor: '#3b4252',
+  rightBarHeaderBgColor: '#3b4252',
+
+  // components
+  buttonBgColor: '#3b4252',
+  tooltipBgColor: '#434c5e',
+  dialogBgColor: '#2e3440',
+  dialogBackdropColor: '#00000099',
+  contextMenuBgColor: '#3b4252',
+  contextMenuBgColorHover: '#434c5e',
+
+  scrollbarThumbColor: '#4c566a',
+  scrollbarTrackColor: '#2e3440',
+}
+
 export const lightTheme: MfTheme = {
   name: 'MarkFlowy Light',
   mode: 'light',
@@ -176,3 +421,44 @@ export const darkTheme: MfTheme = {
   mode: 'dark',
   styledConstants: styledDarkTheme,
 }
+
+export const githubLightTheme: MfTheme = {
+  name: 'GitHub Light',
+  mode: 'light',
+  styledConstants: styledGitHubLightTheme,
+}
+
+export const githubDarkTheme: MfTheme = {
+  name: 'GitHub Dark',
+  mode: 'dark',
+  styledConstants: styledGitHubDarkTheme,
+}
+
+export const gitbookTheme: MfTheme = {
+  name: 'GitBook',
+  mode: 'light',
+  styledConstants: styledGitBookTheme,
+}
+
+export const sepiaTheme: MfTheme = {
+  name: 'Sepia',
+  mode: 'light',
+  styledConstants: styledSepiaTheme,
+}
+
+export const nordTheme: MfTheme = {
+  name: 'Nord',
+  mode: 'dark',
+  styledConstants: styledNordTheme,
+}
+
+// 所有内置主题列表
+export const builtInThemes: MfTheme[] = [
+  lightTheme,
+  darkTheme,
+  githubLightTheme,
+  githubDarkTheme,
+  gitbookTheme,
+  sepiaTheme,
+  nordTheme,
+]
