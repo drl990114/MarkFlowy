@@ -121,17 +121,17 @@ The development of **MarkFlowy** cannot be separated from these contributors. Th
         </a>
     </td>
     <td align="center">
-        <a href="https://github.com/AdySnowflake">
-            <img src="https://avatars.githubusercontent.com/u/163967164?v=4" width="90;" alt="AdySnowflake"/>
-            <br />
-            <sub><b>Null</b></sub>
-        </a>
-    </td>
-    <td align="center">
         <a href="https://github.com/codeErrorSleep">
             <img src="https://avatars.githubusercontent.com/u/20470033?v=4" width="90;" alt="codeErrorSleep"/>
             <br />
             <sub><b>Qiu Shao</b></sub>
+        </a>
+    </td>
+    <td align="center">
+        <a href="https://github.com/AdySnowflake">
+            <img src="https://avatars.githubusercontent.com/u/163967164?v=4" width="90;" alt="AdySnowflake"/>
+            <br />
+            <sub><b>Null</b></sub>
         </a>
     </td>
     <td align="center">
