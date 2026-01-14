@@ -3863,7 +3863,7 @@ __metadata:
     react-i18next: "npm:^16.2.4"
     react-keywords: "npm:^1.0.0"
     react-markdown: "npm:^10.1.0"
-    react-resizable-panels: "npm:^3.0.6"
+    react-resizable-panels: "npm:^4.4.1"
     react-router: "npm:^7.12.0"
     react-test-renderer: "npm:^19.2.0"
     react-use: "npm:^17.6.0"
@@ -17989,13 +17989,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-resizable-panels@npm:^3.0.6":
-  version: 3.0.6
-  resolution: "react-resizable-panels@npm:3.0.6"
+"react-resizable-panels@npm:^4.4.1":
+  version: 4.4.1
+  resolution: "react-resizable-panels@npm:4.4.1"
   peerDependencies:
-    react: ^16.14.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
-    react-dom: ^16.14.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
-  checksum: 10/cacd2a0a63e4ecca193ceb2c8369d760946987c6386e38be39c7f98f909db923f161dbfd5187c289f5093c035c4a7757c4bd30b0d792bd8b45f2bc64183fe47f
+    react: ^18.0.0 || ^19.0.0
+    react-dom: ^18.0.0 || ^19.0.0
+  checksum: 10/228d3c333694631f8c6626831dabbe0bc13990eb5cebc2f8dd840cfeda50013706197f25bfeabb7f6a2f628abce905d491cb081cbbc38c5259b6da87f3af44aa
   languageName: node
   linkType: hard
 

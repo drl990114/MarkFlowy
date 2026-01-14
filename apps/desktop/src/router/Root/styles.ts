@@ -1,16 +1,22 @@
-import { Panel } from 'react-resizable-panels'
+import { Separator } from 'react-resizable-panels'
 import styled from 'styled-components'
 
-export const Container = styled.div`
-  display: flex;
-  flex: 1;
-  overflow: hidden;
-`
+export const StyleSeparator = styled(Separator)`
+  background-color: ${(props) => props.theme.borderColor};
+  cursor: col-resize !important;
+  width: 1px;
+  transition: all 0.2s ease;
+  position: relative;
 
-export const LeftPanel = styled(Panel)`
-  border-right: 1px solid ${(props) => props.theme.borderColor};
-`
+  &:focus {
+    outline: 1px solid ${(props) => props.theme.accentColor};
+  }
 
-export const RightPanel = styled(Panel)`
-  border-left: 1px solid ${(props) => props.theme.borderColor};
+  &[data-separator='hover'] {
+    background-color: ${(props) => props.theme.accentColor};
+  }
+
+  &[data-separator='active'] {
+    background-color: ${(props) => props.theme.accentColor};
+  }
 `

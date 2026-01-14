@@ -12,28 +12,33 @@ import { appInfoStoreSetup } from '@/services/app-info'
 import { useCommandStore } from '@/stores'
 import useLayoutStore from '@/stores/useLayoutStore'
 import { memo, useEffect, useRef } from 'react'
-import { ImperativePanelHandle, Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels'
+import { Group, Panel, PanelImperativeHandle, useDefaultLayout } from 'react-resizable-panels'
 import { SettingDialog } from '../Setting/component/SettingDialog'
-import { LeftPanel, RightPanel } from './styles'
+import { StyleSeparator } from './styles'
 
-export const RESIZE_PANEL_STORAGE_KEY = 'resize-panel'
+export const RESIZE_PANEL_STORAGE_KEY = 'root-resize-panel'
 
 function Root() {
   useRefreshAIProvidersModels()
 
+  const { defaultLayout, onLayoutChanged } = useDefaultLayout({
+    id: RESIZE_PANEL_STORAGE_KEY,
+    storage: localStorage,
+  })
+
   const { setLeftBarVisible, setRightBarVisible } = useLayoutStore()
-  const leftPanelRef = useRef<ImperativePanelHandle>(null)
-  const rightPanelRef = useRef<ImperativePanelHandle>(null)
+  const leftPanelRef = useRef<PanelImperativeHandle>(null)
+  const rightPanelRef = useRef<PanelImperativeHandle>(null)
 
   const toggleLeftPanelVisible = () => {
     const panel = leftPanelRef.current
     if (panel) {
-      if (panel.isExpanded()) {
-        panel.collapse()
-        setLeftBarVisible(false)
-      } else {
+      if (panel.isCollapsed()) {
         panel.expand()
         setLeftBarVisible(true)
+      } else {
+        panel.collapse()
+        setLeftBarVisible(false)
       }
     }
   }
@@ -41,12 +46,12 @@ function Root() {
   const toggleRightPanelVisible = () => {
     const panel = rightPanelRef.current
     if (panel) {
-      if (panel.isExpanded()) {
-        panel.collapse()
-        setRightBarVisible(false)
-      } else {
+      if (panel.isCollapsed()) {
         panel.expand()
         setRightBarVisible(true)
+      } else {
+        panel.collapse()
+        setRightBarVisible(false)
       }
     }
   }
@@ -66,8 +71,8 @@ function Root() {
       handler: toggleRightPanelVisible,
     })
 
-    leftPanelRef.current?.isExpanded() ? setLeftBarVisible(true) : setLeftBarVisible(false)
-    rightPanelRef.current?.isExpanded() ? setRightBarVisible(true) : setRightBarVisible(false)
+    leftPanelRef.current?.isCollapsed() ? setLeftBarVisible(false) : setLeftBarVisible(true)
+    rightPanelRef.current?.isCollapsed() ? setRightBarVisible(false) : setRightBarVisible(true)
   }, [])
 
   useEffect(() => {
@@ -77,39 +82,33 @@ function Root() {
   return (
     <PageLayout>
       {/* <TitleBar /> */}
-      <PanelGroup
-        style={{
-          width: '100%',
-          height: '100%',
-          overflow: 'hidden',
-        }}
-        autoSaveId={RESIZE_PANEL_STORAGE_KEY}
-        direction='horizontal'
-      >
-        <LeftPanel
-          collapsible={true}
+      <Group defaultLayout={defaultLayout} onLayoutChange={onLayoutChanged}>
+        <Panel
+          id='root-left'
+          collapsible
           collapsedSize={0}
           defaultSize={20}
           minSize={10}
-          ref={leftPanelRef}
+          panelRef={leftPanelRef}
         >
           <SideBar />
-        </LeftPanel>
-        <PanelResizeHandle />
-        <Panel defaultSize={60} minSize={40}>
+        </Panel>
+        <StyleSeparator />
+        <Panel id='root-center' defaultSize={60} minSize={40}>
           <EditorArea />
         </Panel>
-        <PanelResizeHandle />
-        <RightPanel
-          collapsible={true}
+        <StyleSeparator />
+        <Panel
+          id='root-right'
+          collapsible
           collapsedSize={0}
           defaultSize={20}
           minSize={10}
-          ref={rightPanelRef}
+          panelRef={rightPanelRef}
         >
           <RightBar />
-        </RightPanel>
-      </PanelGroup>
+        </Panel>
+      </Group>
       <StatusBar />
 
       {/* global dialogs */}
