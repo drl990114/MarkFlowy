@@ -119,7 +119,8 @@
       "delete_file": "ファイルの削除",
       "delete_folder": "フォルダーの削除",
       "moveto_trash": "ゴミ箱に移動",
-      "copy": "コピー"
+      "copy": "コピー",
+      "show_in_folder": "Finderで表示"
     },
     "editor_tab": {
       "close": "閉じる",

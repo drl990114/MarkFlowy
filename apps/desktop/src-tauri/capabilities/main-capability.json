@@ -2,7 +2,9 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "main-capability",
   "description": "Capability for the main window",
-  "windows": ["**"],
+  "windows": [
+    "**"
+  ],
   "permissions": [
     "core:path:default",
     "core:event:default",
@@ -63,42 +65,77 @@
         {
           "name": "run-git-add",
           "cmd": "git",
-          "args": ["add", { "validator": "*" }]
+          "args": [
+            "add",
+            {
+              "validator": "*"
+            }
+          ]
         },
         {
           "name": "run-git-commit",
           "cmd": "git",
-          "args": ["commit", "-m", { "validator": "*" }]
+          "args": [
+            "commit",
+            "-m",
+            {
+              "validator": "*"
+            }
+          ]
         },
         {
           "name": "run-git-revlist",
           "cmd": "git",
-          "args": ["rev-list", "--count", "--left-right", { "validator": "*" }]
+          "args": [
+            "rev-list",
+            "--count",
+            "--left-right",
+            {
+              "validator": "*"
+            }
+          ]
         },
         {
           "name": "run-git-remote",
           "cmd": "git",
-          "args": ["remote", "-v"]
+          "args": [
+            "remote",
+            "-v"
+          ]
         },
         {
           "name": "run-git-fetch",
           "cmd": "git",
-          "args": ["fetch", "--prune"]
+          "args": [
+            "fetch",
+            "--prune"
+          ]
         },
         {
           "name": "run-git-pull",
           "cmd": "git",
-          "args": ["pull", "--ff-only"]
+          "args": [
+            "pull",
+            "--ff-only"
+          ]
         },
         {
           "name": "run-git-push",
           "cmd": "git",
-          "args": ["push"]
+          "args": [
+            "push"
+          ]
         },
         {
           "name": "run-git-diff",
           "cmd": "git",
-          "args": ["diff", "--name-only", { "validator": "*" }]
+          "args": [
+            "diff",
+            "--name-only",
+            {
+              "validator": "*"
+            }
+          ]
         }
       ]
     }

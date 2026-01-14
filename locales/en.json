@@ -119,7 +119,8 @@
       "delete_file": "Delete file",
       "delete_folder": "Delete folder",
       "moveto_trash": "Move to trash",
-      "copy": "Copy"
+      "copy": "Copy",
+      "show_in_folder": "Show in Folder"
     },
     "editor_tab": {
       "close": "Close",

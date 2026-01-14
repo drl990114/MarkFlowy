@@ -111,7 +111,8 @@
       "delete_folder": "Supprimer le dossier",
       "rename": "Renommer",
       "moveto_trash": "Déplacer vers la corbeille",
-      "copy": "Réplication"
+      "copy": "Réplication",
+      "show_in_folder": "Afficher dans le dossier"
     },
     "editor_tab": {
       "close": "Fermer",
