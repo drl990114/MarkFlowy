@@ -19,7 +19,7 @@ import { LazyStore } from '@tauri-apps/plugin-store'
 import { once } from 'lodash'
 import { useCallback, useEffect } from 'react'
 import { toast } from 'zens'
-import { useGlobalKeyboard, useGlobalOSInfo } from '.'
+import { useGlobalKeyboard, useGlobalOSInfo, useFileDrop } from '.'
 import __MF__ from '../context'
 import { isArray } from '../helper'
 import useExtensionsManagerStore from '../stores/useExtensionsManagerStore'
@@ -306,6 +306,7 @@ const useAppSetup = () => {
   useGlobalKeyboard()
   useWorkspaceWatcher()
   useFontfamilySetup()
+  useFileDrop()
 }
 
 export default useAppSetup
