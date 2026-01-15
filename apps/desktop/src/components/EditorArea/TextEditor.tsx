@@ -1,5 +1,3 @@
-/* eslint-disable react-hooks/rules-of-hooks */
-import { useCommandEvent } from '@/components/EditorArea/editorHooks/CommandEvent'
 import { EVENT } from '@/constants'
 import { clipboardRead } from '@/helper/clipboard'
 import bus from '@/helper/eventBus'
@@ -446,11 +444,6 @@ function TextEditor(props: TextEditorProps) {
         setEditorCtx(id, context)
       },
       delegateOptions: createWysiwygDelegateOptions(curFile.id),
-      hooks: [
-        () => {
-          useCommandEvent({ active })
-        },
-      ],
       wysiwygToolBarOptions: {
         enable: true,
         compProps: {

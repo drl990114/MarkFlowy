@@ -1,4 +1,3 @@
-
 import useAiChatStore, { getCurrentAISettingData } from '@/extensions/ai/useAiChatStore'
 import useBookMarksStore from '@/extensions/bookmarks/useBookMarksStore'
 import bus from '@/helper/eventBus'
@@ -166,11 +165,7 @@ ${res}
 
       const res = await addAppTask({
         title: 'AI: Translating article',
-        promise: getPostTranslate(
-          content || '',
-          aiSettingData,
-          targetLang,
-        ),
+        promise: getPostTranslate(content || '', aiSettingData, targetLang),
       })
 
       addNewMarkdownFileEdit({
@@ -394,4 +389,5 @@ const Container = styled.div`
   justify-content: space-between;
   padding: 4px 8px;
   font-size: ${(props) => props.theme.fontXs};
+  background-color: ${(props) => props.theme.bgColor};
 `
