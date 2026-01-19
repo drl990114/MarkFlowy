@@ -81,6 +81,7 @@
   },
   "file": {
     "untitled": "無題",
+    "not_found": "ファイルが見つかりません",
     "openDir": "フォルダーを開く",
     "openFile": "ファイルを開く",
     "recentDir": "最近開いたフォルダー",

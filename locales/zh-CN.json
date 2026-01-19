@@ -82,6 +82,7 @@
   },
   "file": {
     "untitled": "未命名",
+    "not_found": "文件不存在",
     "openDir": "打开文件夹",
     "openFile": "打开文件",
     "recentDir": "最近打开的文件夹",

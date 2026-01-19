@@ -76,6 +76,7 @@
   },
   "file": {
     "untitled": "sin título",
+    "not_found": "Archivo no encontrado",
     "openDir": "Abrir Carpeta",
     "recentDir": "Carpetas abiertas recientemente",
     "emptyOpened": "No hay archivos abiertos",

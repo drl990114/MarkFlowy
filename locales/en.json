@@ -81,6 +81,7 @@
   },
   "file": {
     "untitled": "untitled",
+    "not_found": "File not found",
     "openDir": "Open Folder",
     "openFile": "Open a File",
     "recentDir": "Recently opened folders",

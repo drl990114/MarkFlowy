@@ -271,6 +271,11 @@ function FileNode({
           label: t('contextmenu.explorer.show_in_folder'),
           handler: async () => {
             try {
+              const exists = await invoke<boolean>('file_exists', { filePath: node.data.path })
+              if (!exists) {
+                toast.error(t('file.not_found'))
+                return
+              }
               await invoke('show_in_folder', { path: node.data.path })
             } catch (error) {
               console.error('Failed to show in folder:', error)
