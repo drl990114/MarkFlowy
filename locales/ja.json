@@ -81,6 +81,7 @@
   },
   "file": {
     "untitled": "無題",
+    "not_found": "ファイルが見つかりません",
     "openDir": "フォルダーを開く",
     "openFile": "ファイルを開く",
     "recentDir": "最近開いたフォルダー",
@@ -119,7 +120,8 @@
       "delete_file": "ファイルの削除",
       "delete_folder": "フォルダーの削除",
       "moveto_trash": "ゴミ箱に移動",
-      "copy": "コピー"
+      "copy": "コピー",
+      "show_in_folder": "Finderで表示"
     },
     "editor_tab": {
       "close": "閉じる",

@@ -82,6 +82,7 @@
   },
   "file": {
     "untitled": "未命名",
+    "not_found": "文件不存在",
     "openDir": "打开文件夹",
     "openFile": "打开文件",
     "recentDir": "最近打开的文件夹",
@@ -120,7 +121,8 @@
       "delete_file": "删除文件",
       "delete_folder": "删除文件夹",
       "moveto_trash": "移动到回收站",
-      "copy": "复制"
+      "copy": "复制",
+      "show_in_folder": "打开文件所在位置"
     },
     "editor_tab": {
       "close": "关闭",

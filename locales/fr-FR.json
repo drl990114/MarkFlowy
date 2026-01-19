@@ -73,6 +73,7 @@
   },
   "file": {
     "untitled": "sans titre",
+    "not_found": "Fichier introuvable",
     "openDir": "ouvrir le dossier",
     "recentDir": "Dossiers récemment ouverts",
     "emptyOpened": "Aucun fichier ouvert",
@@ -111,7 +112,8 @@
       "delete_folder": "Supprimer le dossier",
       "rename": "Renommer",
       "moveto_trash": "Déplacer vers la corbeille",
-      "copy": "Réplication"
+      "copy": "Réplication",
+      "show_in_folder": "Afficher dans le dossier"
     },
     "editor_tab": {
       "close": "Fermer",
