@@ -1,23 +1,33 @@
-![MarkFlowy](https://socialify.git.ci/drl990114/MarkFlowy/image?font=Raleway&forks=1&issues=1&logo=https%3A%2F%2Fwww.markflowy.cc%2Flogo.svg&name=1&pulls=1&stargazers=1&theme=Light)
+<div align="center">
+  <img align="center" src="./public/logo.png" width="120" height="120" />
+</div>
 
-<h4 align="center"><strong>English</strong> | <a href="./README_CN.md">简体中文</a> | <a href="./README_JA.md">日本語</a></h4>
+<h2 align="center"/>MarkFlowy <sup><em>beta</em></sup></h2>
+<div align='center'>
+<br>
+<em>Modern and intelligent Markdown editor.</em>
+<br>
+<br>
+</div>
 
 <div align="center">
 
 [![App Version][version-badge]][release]
 [![Downloads][downloads-badge]][release]
-<br/>
 [![PRs Welcome][prs-welcome-badge]][prs-welcome]
-[![MIT License][license-badge]][license]
-[![Commit Activity][commit-badge]][commit]
+<br/>
+[![Build Status][build-badge]][build]
 [![Code of Conduct][coc-badge]][coc]
+[![Commit Activity][commit-badge]][commit]
+[![issues-closed]](https://github.com/drl990114/MarkFlowy/issues?q=sort%3Aupdated-desc+is%3Aissue+is%3Aclosed)
 <br/>
 [![TypeScript-version-icon]](https://www.typescriptlang.org/)
 [![Rust-version-icon]](https://www.rust-lang.org/)
-[![Build Status][build-badge]][build]
+[![License][license-badge]][license]
 <br/>
 </div>
 
+<h4 align="center"><strong>English</strong> | <a href="./README_CN.md">简体中文</a> | <a href="./README_JA.md">日本語</a></h4>
 
 <img src="./public/show-en.png" alt="screenshot" />
 
@@ -196,7 +206,7 @@ The development of **MarkFlowy** cannot be separated from these contributors. Th
 [license-badge]: https://img.shields.io/badge/license-AGPL-purple.svg?style=flat-square&labelColor=black
 [license]: https://opensource.org/licenses/AGPL-3.0?labelColor=black
 [release]: https://github.com/drl990114/MarkFlowy/releases?labelColor=black
-[prs-welcome-badge]: https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square&labelColor=black
+[prs-welcome-badge]: https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square&labelColor=black&color=%23dd5c13
 [prs-welcome]: https://github.com/drl990114/MarkFlowy/blob/main/CONTRIBUTING.md?labelColor=black
 [coc-badge]: https://img.shields.io/badge/code%20of-conduct-ff69b4.svg?style=flat-square&labelColor=black
 [coc]: https://github.com/drl990114/MarkFlowy/blob/main/CODE_OF_CONDUCT.md?labelColor=black
@@ -206,7 +216,7 @@ The development of **MarkFlowy** cannot be separated from these contributors. Th
 [rust-version-icon]: https://img.shields.io/badge/Rust-1.85.0-dea584?style=flat-square&labelColor=black
 [typescript-version-icon]: https://img.shields.io/github/package-json/dependency-version/drl990114/MarkFlowy/dev/typescript?label=TypeScript&style=flat-square&labelColor=black
 [issues-closed]: https://img.shields.io/github/issues-closed/drl990114/MarkFlowy.svg?style=flat-square&labelColor=black
-
+[codefactor]: https://www.codefactor.io/repository/github/drl990114/markflowy/badge/main?style=flat-square&labelColor=black
 
 ## License
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fdrl990114%2FMarkFlowy.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fdrl990114%2FMarkFlowy?ref=badge_large)
