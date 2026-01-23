@@ -97,16 +97,16 @@ const ImageBackground = styled.div`
   background-size: 20px 20px;
 `
 
-const Title = styled.h2`
-  font-size: ${rem(40)};
-  font-weight: 700;
+const Title = styled.h3`
+  font-size: ${rem(30)};
+  font-weight: 600;
   line-height: 1.1;
   letter-spacing: -0.02em;
   color: #ffffff;
   margin-bottom: ${rem(20)};
 
   @media (max-width: ${rem(980)}) {
-    font-size: ${rem(28)};
+    font-size: ${rem(24)};
   }
 `
 

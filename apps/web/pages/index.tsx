@@ -10,6 +10,7 @@ import Nav from '../components/HomeNav'
 import { HoverBorderGradient } from '../components/HoverBorderGradient'
 import SeoHead from '../components/SeoHead'
 import { useMockFiles } from '../hooks/useMockFiles'
+import { useSystemType } from '../hooks/useSystemType'
 import { mobile } from '../utils/media'
 import rem from '../utils/rem'
 
@@ -34,6 +35,20 @@ export default function Index({
   const [isMobileNavFolded, setIsMobileNavFolded] = React.useState(true)
   const [activeTab, setActiveTab] = React.useState<'markdown' | 'json'>('markdown')
   const { markdownContent, jsonContent } = useMockFiles()
+  const systemType = useSystemType()
+
+  const renderSystemIcon = () => {
+    switch (systemType) {
+      case 'windows':
+        return <i className='ri-windows-fill' style={{ marginRight: '8px' }}></i>
+      case 'macos':
+        return <i className='ri-apple-fill' style={{ marginRight: '8px' }}></i>
+      case 'linux':
+        return <i className='ri-ubuntu-fill' style={{ marginRight: '8px' }}></i>
+      default:
+        return <DownloadIcon style={{ marginRight: '8px' }} />
+    }
+  }
 
   return (
     <>
@@ -66,8 +81,10 @@ export default function Index({
                     )
                   }}
                 >
-                  <DownloadIcon />
-                  <span>{t('home.hero.download')}</span>
+                  <span style={{ display: 'flex', alignItems: 'center' }}>
+                    {renderSystemIcon()}
+                    {t('home.hero.download')}
+                  </span>
                 </HoverBorderGradient>
               </HeroActions>
             </HeroContent>
@@ -172,27 +189,6 @@ export default function Index({
         </Footer>
       </MarketingLayout>
     </>
-  )
-}
-
-const DownloadIcon = () => {
-  return (
-    <svg
-      width='66'
-      height='65'
-      viewBox='0 0 66 65'
-      fill='none'
-      xmlns='http://www.w3.org/2000/svg'
-      style={{ width: rem(12), height: rem(12) }}
-    >
-      <path
-        d='M8 8.05571C8 8.05571 54.9009 18.1782 57.8687 30.062C60.8365 41.9458 9.05432 57.4696 9.05432 57.4696'
-        stroke='currentColor'
-        strokeWidth='15'
-        strokeMiterlimit='3.86874'
-        strokeLinecap='round'
-      />
-    </svg>
   )
 }
 
@@ -367,6 +363,24 @@ const EditorLoading = styled.div`
   }
 `
 
+const DownloadIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    viewBox='0 0 24 24'
+    width='1.2em'
+    height='1.2em'
+    fill='none'
+    stroke='currentColor'
+    strokeWidth='2'
+    strokeLinecap='round'
+    strokeLinejoin='round'
+    {...props}
+  >
+    <path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4' />
+    <polyline points='7 10 12 15 17 10' />
+    <line x1='12' y1='15' x2='12' y2='3' />
+  </svg>
+)
+
 // Hero Section
 const HeroSection = styled.section`
   position: relative;
@@ -393,8 +407,8 @@ const HeroContent = styled.div`
 const HeroTitle = styled.h1`
   font-size: ${rem(26)};
   font-weight: 400;
-  line-height: 1.25;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.04em;
+  line-height: 1.5;
   margin: 0;
   text-align: left;
 
@@ -483,7 +497,7 @@ const ContributorsSection = styled.section`
 
 const ContributorsTitle = styled.h2`
   font-size: ${rem(40)};
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1.2;
   color: #ffffff;
   margin-bottom: ${rem(16)};
@@ -558,7 +572,7 @@ const ContribInfo = styled.div`
 
 const Name = styled.span`
   font-size: ${rem(14)};
-  font-weight: 500;
+  font-weight: 400;
   color: rgba(255, 255, 255, 0.9);
   transition: color 0.3s ease;
 

@@ -38,7 +38,7 @@ export const common = {
   secondaryBg: '#ffffff',
   secondaryText: '#08060d',
 
-  fontFamily: `'Inter', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'`,
+  fontFamily: `'Inter', -apple-system, BlinkMacSystemFont, 'PingFang SC Light', 'PingFang SC', 'Microsoft YaHei Light', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'`,
   codemirrorFontFamily: `'JetBrains Mono', 'Fira Code', 'Menlo', 'Monaco', 'Consolas', monospace`,
 }
 

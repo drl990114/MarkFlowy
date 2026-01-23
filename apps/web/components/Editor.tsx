@@ -9,6 +9,7 @@ const EditorContainer = styled.div`
   width: 100%;
   height: 100%;
   overflow: auto;
+  font-weight: 400;
 `
 
 const LoadingContainer = styled.div`
@@ -26,15 +27,7 @@ const Editor = (props: { viewType?: string; initialContent?: string }) => {
 
   const initialContent =
     props.initialContent ||
-    `
-##### Welcome to MarkFlowy!
-
-- [x] Support WYSIWYG and Source Code views
-- [x] Agent integration for AI-assisted writing
-- [x] Customizable theme tokens
-
-Enjoy experimenting with the editor!
-`
+    `##### Welcome to MarkFlowy!`
 
   if (loading) {
     return <LoadingContainer>Loading Editor...</LoadingContainer>
