@@ -48,7 +48,7 @@
     "immer": "^10.1.1",
     "is-promise": "^4.0.0",
     "jsx-dom-cjs": "^8.1.6",
-    "lodash": "^4.17.21",
+    "lodash": "^4.17.23",
     "nanoid": "^5.1.5",
     "ollama-ai-provider-v2": "^1.5.4",
     "react": "^19.2.0",
