@@ -1,6 +1,6 @@
 import FeatureList from 'components/FeatureList'
 import { GetStaticProps } from 'next'
-import { useTranslation } from 'next-i18next'
+import { i18n, useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
@@ -92,10 +92,10 @@ export default function Index({
                 </EditorTab>
               </EditorTabs>
               <EditorWrapper $visible={activeTab === 'markdown'}>
-                <Editor key='wysiwyg' viewType='wysiwyg' initialContent={markdownContent} />
+                <Editor key={`${i18n?.language}_wysiwyg`} viewType='wysiwyg' initialContent={markdownContent} />
               </EditorWrapper>
               <EditorWrapper $visible={activeTab === 'json'}>
-                <Editor key='source_code' viewType='source_code' initialContent={jsonContent} />
+                <Editor key={`${i18n?.language}_source_code`} viewType='source_code' initialContent={jsonContent} />
               </EditorWrapper>
             </MacContainer>
           </ProductSection>
