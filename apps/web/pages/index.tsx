@@ -59,7 +59,13 @@ export default function Index({
               </HeroTitle>
 
               <HeroActions>
-                <HoverBorderGradient>
+                <HoverBorderGradient
+                  onClick={() => {
+                    window.open(
+                      'https://download.upgrade.toolsetlink.com/download?appKey=xpn68m4j5qU0Y1rfDYFHaA',
+                    )
+                  }}
+                >
                   <DownloadIcon />
                   <span>{t('home.hero.download')}</span>
                 </HoverBorderGradient>
@@ -92,10 +98,18 @@ export default function Index({
                 </EditorTab>
               </EditorTabs>
               <EditorWrapper $visible={activeTab === 'markdown'}>
-                <Editor key={`${i18n?.language}_wysiwyg`} viewType='wysiwyg' initialContent={markdownContent} />
+                <Editor
+                  key={`${i18n?.language}_wysiwyg`}
+                  viewType='wysiwyg'
+                  initialContent={markdownContent}
+                />
               </EditorWrapper>
               <EditorWrapper $visible={activeTab === 'json'}>
-                <Editor key={`${i18n?.language}_source_code`} viewType='source_code' initialContent={jsonContent} />
+                <Editor
+                  key={`${i18n?.language}_source_code`}
+                  viewType='source_code'
+                  initialContent={jsonContent}
+                />
               </EditorWrapper>
             </MacContainer>
           </ProductSection>
