@@ -82,6 +82,7 @@
     "@types/react-test-renderer": "^19.1.0",
     "@vitejs/plugin-react": "^4.3.4",
     "@vitest/ui": "^3.0.7",
+    "babel-plugin-react-compiler": "^1.0.0",
     "eslint": "9.13.0",
     "happy-dom": "^17.1.8",
     "patch-package": "^8.0.0",
