@@ -27,20 +27,26 @@ export const common = {
   midBorderRadius: '8px',
   bigBorderRadius: '12px',
 
+  homeMaxWidth: '1300px',
+
   black: '#74757D',
   white: '#ffffff',
   gray: '#C0C0C0',
   blue: '#0359D0',
+  primaryBg: '#08060d',
+  primaryText: '#ffffff',
+  secondaryBg: '#ffffff',
+  secondaryText: '#08060d',
 
-  fontFamily: `NotionInter,Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,"Apple Color Emoji",Arial,sans-serif,"Segoe UI Emoji","Segoe UI Symbol"`,
-  codemirrorFontFamily: `'Fira Code', 'Source Code Pro', 'Droid Sans Mono', Consolas, monospace`,
+  fontFamily: `'Inter', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'`,
+  codemirrorFontFamily: `'JetBrains Mono', 'Fira Code', 'Menlo', 'Monaco', 'Consolas', monospace`,
 }
 
 const styledDarkTheme = {
   ...common,
 
   // font
-  primaryFontColor: '#CACCCA',
+  primaryFontColor: '#edecec',
   disabledFontColor: '#ffffff80',
   unselectedFontColor: '#ffffff80',
   labelFontColor: '#ffffff80',
@@ -50,8 +56,8 @@ const styledDarkTheme = {
   accentColorFocused: '#1c2433',
   borderColor: '#303030',
   borderColorFocused: '#505050',
-  bgColor: '#131313',
-  bgColorSecondary: '#252525',
+  bgColor: '#14120b',
+  bgColorSecondary: '#1b1913',
   hoverColor: '#2b2f33',
   warnColor: '#e2b340',
   dangerColor: '#dc2626',
@@ -60,9 +66,9 @@ const styledDarkTheme = {
   boxShadowColor: 'rgba(255, 255, 255, 0.04)',
 
   // components
-  navBackground: '#1d1f21',
-  footerBgColor: '#181a1c',
-  sidebarBackground: '#1b1d1f',
+  navBackground: '#14120b',
+  footerBgColor: '#1b1913',
+  sidebarBackground: '#1b1913',
   buttonBgColor: '#21262c',
   tooltipBgColor: '#43414A',
   dialogBgColor: '#151515',

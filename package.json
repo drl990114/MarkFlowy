@@ -9,6 +9,7 @@
   ],
   "scripts": {
     "setup": "turbo postinstall",
+    "yarn:id": "yarn install && yarn dedupe",
     "dev": "turbo dev",
     "dev:desktop": "yarn workspace @markflowy/desktop tauri:dev",
     "build": "turbo build",

@@ -10,10 +10,39 @@
       "gettingStarted": "Getting Started"
     }
   },
+  "mock": {
+    "intro": {
+      "title": "Welcome to MarkFlowy!",
+      "ai_label": "AI-Powered:",
+      "ai_desc": "Built-in translation, summary, and DeepSeek/ChatGPT and other mainstream models support.",
+      "lightweight_label": "Lightweight:",
+      "lightweight_desc": "Tauri-based architecture, under 20MB.",
+      "modes_label": "Editing Modes:",
+      "modes_desc": "Switch between WYSIWYG and Source Code.",
+      "files_label": "File Support:",
+      "files_desc": "Handles Markdown, JSON, TXT, and more.",
+      "themes_label": "Custom Themes:",
+      "themes_desc": "Design and share your own editor styles.",
+      "hotkeys_label": "Hotkeys:",
+      "hotkeys_desc": "Fully customizable keyboard shortcuts.",
+      "images_label": "Smart Images:",
+      "images_desc": "Easy path management or Base64 conversion.",
+      "manager_label": "File Manager:",
+      "manager_desc": "Powerful tree view with global search.",
+      "git_label": "Git Ready:",
+      "git_desc": "Integrated repository and sync management.",
+      "multilingual_label": "Multilingual:",
+      "multilingual_desc": "Native support for 5+ major languages.",
+      "footer": "Enjoy experimenting with the editor!"
+    },
+    "config": {
+      "description": "Next-generation professional text editor designed for AI."
+    }
+  },
   "home": {
     "hero": {
       "title": "MarkFlowy",
-      "subtitle": "Efficient and comfortable editing",
+      "subtitle": "MarkFlowy is committed to efficient and comfortable Markdown creation,\nThe next generation professional editor driven by AI.",
       "description": "",
       "download": "Download Now"
     },

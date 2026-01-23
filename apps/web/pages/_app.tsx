@@ -76,7 +76,6 @@ const ResetStyles = createGlobalStyle`
 
   .root {
     position: relative;
-    overflow: auto;
   }
 
   .small {

@@ -1,4 +1,5 @@
 import styled from 'styled-components'
+import rem from 'utils/rem'
 
 const Container = styled.div`
   position: relative;
@@ -8,7 +9,7 @@ const Container = styled.div`
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 1.5rem;
+  gap: ${rem(20)};
 `
 
 const PlatformLink = styled.a`
@@ -16,11 +17,22 @@ const PlatformLink = styled.a`
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.2s ease;
-  font-size: 20px;
+  width: ${rem(48)};
+  height: ${rem(48)};
+  border-radius: ${rem(12)};
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: ${rem(24)};
+  color: rgba(255, 255, 255, 0.8);
 
   &:hover {
-    transform: translateY(-2px);
+    transform: translateY(-4px);
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    color: #ffffff;
   }
 `
 

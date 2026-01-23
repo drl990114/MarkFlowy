@@ -1,63 +1,23 @@
-import { useEffect, useRef, useState } from 'react'
+import dynamic from 'next/dynamic'
+import { useState } from 'react'
 import styled from 'styled-components'
+import rem from 'utils/rem'
 import { navbarHeight } from 'utils/sizes'
-import { useRmeEditor } from '../hooks/useRme'
-import RmeProvider from './RmeProvider'
+
+const Editor = dynamic(() => import('./Editor'), {
+  ssr: false,
+  loading: () => <span>Loading Editor...</span>,
+})
 
 const PlaygroundContainer = styled.div`
-  margin-top: ${navbarHeight}px;
-  background-color: #181a1c;
+  margin-top: ${rem(navbarHeight)};
+  background-color: ${(props) => props.theme.bgColor};
   color: ${(props) => props.theme.primaryFontColor};
   font-family: ${(props) => props.theme.fontFamily};
 `
 
-const Header = styled.header`
-  border-bottom: 1px solid ${(props) => props.theme.borderColor};
-  background-color: ${(props) => props.theme.navBackground};
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-`
-
-const Title = styled.h1`
-  margin: 0;
-  font-size: ${(props) => props.theme.fontH2};
-  color: ${(props) => props.theme.primaryFontColor};
-`
-
-const EditorContainer = styled.div`
-  height: ${`calc(100vh - ${navbarHeight}px)`};
-  padding: 1rem;
-  overflow: auto;
-`
-
-const LoadingContainer = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  font-size: 16px;
-  color: ${(props) => props.theme.labelFontColor};
-`
-
 const PlaygroundContent = () => {
   const [viewType, setViewType] = useState<string>('wysiwyg')
-  const editorRef = useRef<any>(null)
-  const { 
-    Editor, 
-    EditorViewType, 
-    createWysiwygDelegate, 
-    createSourceCodeDelegate, 
-    loading, 
-    error 
-  } = useRmeEditor()
-
-  // 初始化视图类型
-  useEffect(() => {
-    if (EditorViewType && viewType === 'wysiwyg') {
-      setViewType(EditorViewType.WYSIWYG)
-    }
-  }, [EditorViewType, viewType])
 
   const initialContent = `# Welcome to Markflowy Playground
 
@@ -102,69 +62,9 @@ This playground demonstrates the full RME editor functionality with:
 
 Enjoy experimenting with the editor!
 `
-  const handleEditorChange = (params: any) => {
-    // Content changes are handled by the editor internally
-    console.log('Editor content changed')
-  }
-
-  if (loading) {
-    return (
-      <PlaygroundContainer>
-        <Header>
-          <Title>Markflowy Playground</Title>
-        </Header>
-        <EditorContainer>
-          <LoadingContainer>Loading Editor...</LoadingContainer>
-        </EditorContainer>
-      </PlaygroundContainer>
-    )
-  }
-
-  if (error) {
-    return (
-      <PlaygroundContainer>
-        <Header>
-          <Title>Markflowy Playground</Title>
-        </Header>
-        <EditorContainer>
-          <LoadingContainer>Error loading editor: {error.message}</LoadingContainer>
-        </EditorContainer>
-      </PlaygroundContainer>
-    )
-  }
-
-  if (!Editor || !EditorViewType || !createWysiwygDelegate || !createSourceCodeDelegate) {
-    return (
-      <PlaygroundContainer>
-        <Header>
-          <Title>Markflowy Playground</Title>
-        </Header>
-        <EditorContainer>
-          <LoadingContainer>Loading Editor...</LoadingContainer>
-        </EditorContainer>
-      </PlaygroundContainer>
-    )
-  }
-
   return (
     <PlaygroundContainer>
-      <Header></Header>
-
-      <RmeProvider>
-        <EditorContainer>
-          <Editor
-            ref={editorRef}
-            content={initialContent}
-            initialType={viewType as any}
-            onChange={handleEditorChange}
-            delegate={
-              viewType === EditorViewType.WYSIWYG
-                ? createWysiwygDelegate()
-                : createSourceCodeDelegate()
-            }
-          />
-        </EditorContainer>
-      </RmeProvider>
+      <Editor initialContent={initialContent} viewType={viewType} />
     </PlaygroundContainer>
   )
 }
