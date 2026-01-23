@@ -1,8 +1,5 @@
-import { Favorite } from '@styled-icons/material/Favorite/Favorite'
 import { Logo } from 'components/Nav/Logo'
 import styled, { css } from 'styled-components'
-import { footerHeight } from 'utils/sizes'
-import { red } from '../../utils/colors'
 import { mobile } from '../../utils/media'
 import rem from '../../utils/rem'
 import Link from '../Link'
@@ -11,33 +8,27 @@ export default function Footer() {
   return (
     <Wrapper>
       <LeftSection>
-        <LogoLink href='/'>
-          <LogoContainer>
-            <Logo size={40} />
-          </LogoContainer>
+        <Brand href='/'>
+          <Logo size={24} />
           <AppName>MarkFlowy</AppName>
-        </LogoLink>
-        <CopyrightText>Copyright © 2023-present drl990114</CopyrightText>
+        </Brand>
+        <CopyrightText>
+          ©2023 - present . All rights reserved.
+        </CopyrightText>
       </LeftSection>
+
       <RightSection>
-        <div>
-          {'Hosted on '}
-          <FooterLink inline href='https://vercel.com'>
-            ▲ Vercel
+        <Nav>
+          <FooterLink href='https://github.com/drl990114/MarkFlowy' target='_blank'>
+            GitHub
           </FooterLink>
-          <br />
-          {'Made with '}
-          <Heart />
-          {' by '}
-          <FooterLink inline href='https://github.com/drl990114'>
-            @drl990114
+          <FooterLink href='https://github.com/drl990114/MarkFlowy/graphs/contributors' target='_blank'>
+            Contributors
           </FooterLink>
-          {' and '}
-          <FooterLink inline href='https://github.com/drl990114/MarkFlowy/graphs/contributors'>
-            contributors
+          <FooterLink href='https://vercel.com' target='_blank'>
+            Vercel
           </FooterLink>
-          {'.'}
-        </div>
+        </Nav>
       </RightSection>
     </Wrapper>
   )
@@ -49,71 +40,80 @@ const Wrapper = styled.footer`
   align-items: center;
   color: ${(props) => props.theme.primaryFontColor};
   background: ${(props) => props.theme.footerBgColor};
-  padding: 0 ${rem(20)};
-  font-size: 16px;
-  height: ${rem(footerHeight)};
+  padding: 0 ${rem(40)};
+  height: ${rem(80)};
   border-top: 1px solid ${(props) => props.theme.borderColor};
   box-sizing: border-box;
 
   ${mobile(css`
-    padding: ${rem(30)} ${rem(20)} ${rem(30)} ${rem(20)};
+    height: auto;
+    padding: ${rem(40)} ${rem(20)};
     flex-direction: column;
+    gap: ${rem(24)};
     text-align: center;
-    gap: ${rem(20)};
   `)};
-`
-
-const Heart = styled(Favorite)`
-  display: inline-block;
-  width: ${rem(17)};
-  color: ${red};
-  transform: translateY(-10%);
-`
-
-const FooterLink = styled(Link)`
-  color: ${(props) => props.theme.primaryFontColor};
-`
-
-const CopyrightText = styled.span`
-  font-size: ${rem(14)};
-  color: ${props => props.theme.unselectedFontColor}
 `
 
 const LeftSection = styled.div`
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
+  gap: ${rem(24)};
 
+  ${mobile(css`
+    flex-direction: column;
+    gap: ${rem(12)};
+  `)};
 `
 
-const LogoLink = styled.a`
+const Brand = styled.a`
   display: flex;
   align-items: center;
-  margin-bottom: ${rem(16)};
+  gap: ${rem(10)};
   text-decoration: none;
   color: ${(props) => props.theme.primaryFontColor};
-  gap: ${rem(16)};
-`
+  transition: opacity 0.2s;
 
-const LogoContainer = styled.div`
-  width: ${rem(32)};
-  height: ${rem(32)};
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  &:hover {
+    opacity: 0.8;
+  }
 `
 
 const AppName = styled.span`
-  font-size: ${rem(20)};
+  font-size: ${rem(18)};
   font-weight: 600;
-  color: ${(props) => props.theme.primaryFontColor};
+  letter-spacing: -0.01em;
+`
+
+const CopyrightText = styled.span`
+  font-size: ${rem(13)};
+  color: ${(props) => props.theme.unselectedFontColor};
+
+  ${mobile(css`
+    font-size: ${rem(12)};
+  `)};
 `
 
 const RightSection = styled.div`
-  text-align: right;
-  font-size: ${rem(16)};
+  display: flex;
+  align-items: center;
+`
+
+const Nav = styled.nav`
+  display: flex;
+  gap: ${rem(24)};
 
   ${mobile(css`
-    text-align: center;
+    gap: ${rem(16)};
   `)};
+`
+
+const FooterLink = styled(Link)`
+  font-size: ${rem(14)};
+  color: ${(props) => props.theme.unselectedFontColor};
+  transition: color 0.2s;
+  text-decoration: none;
+
+  &:hover {
+    color: ${(props) => props.theme.primaryFontColor};
+  }
 `

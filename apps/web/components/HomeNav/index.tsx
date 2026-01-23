@@ -1,6 +1,6 @@
+import Sidebar from '../Nav/Sidebar'
+import { DocsSidebarMenu, SimpleSidebarMenu, SimpleSidebarMenuProps } from '../Nav/SidebarMenus'
 import Navbar from './Navbar'
-import Sidebar from './Sidebar'
-import { DocsSidebarMenu, SimpleSidebarMenu, SimpleSidebarMenuProps } from './SidebarMenus'
 
 export interface NavProps {
   isSideFolded?: boolean
@@ -20,6 +20,7 @@ const Nav = (props: NavProps) => {
     onMobileNavToggle,
     showSideNav,
     useDocsSidebarMenu,
+    pages,
   } = props
 
   return (

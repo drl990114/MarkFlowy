@@ -6,12 +6,13 @@ import Loading from './Loading'
 // 在组件定义前尝试提前触发预加载
 if (typeof window !== 'undefined') {
   // 使用新的预加载函数
-  preloadRme().catch(err => {
+  preloadRme().catch((err) => {
     console.warn('RME preload attempt failed, will try again:', err)
   })
 }
 
 type RmeProviderProps = {
+  themeTokens?: Record<string, string>
   children?: React.ReactNode
 }
 
@@ -31,7 +32,7 @@ export const RmePreload = () => {
   return null
 }
 
-const RmeProvider: React.FC<RmeProviderProps> = ({ children }) => {
+const RmeProvider: React.FC<RmeProviderProps> = ({ themeTokens, children }) => {
   const { ThemeProvider, loading, error, reload } = useRmeThemeProvider()
 
   useEffect(() => {
@@ -40,7 +41,6 @@ const RmeProvider: React.FC<RmeProviderProps> = ({ children }) => {
     }
   }, [loading, ThemeProvider, reload])
 
-  // 加载中显示Loading组件
   if (loading) {
     return <Loading />
   }
@@ -48,14 +48,16 @@ const RmeProvider: React.FC<RmeProviderProps> = ({ children }) => {
   // 加载错误显示错误信息并提供重试选项
   if (error) {
     return (
-      <div style={{ 
-        padding: '2rem', 
-        textAlign: 'center', 
-        color: 'white', 
-        backgroundColor: '#181a1c'
-      }}>
+      <div
+        style={{
+          padding: '2rem',
+          textAlign: 'center',
+          color: 'white',
+          backgroundColor: '#181a1c',
+        }}
+      >
         <p>Error loading RME: {error.message}</p>
-        <button 
+        <button
           onClick={() => reload && reload()}
           style={{
             marginTop: '1rem',
@@ -64,7 +66,7 @@ const RmeProvider: React.FC<RmeProviderProps> = ({ children }) => {
             color: 'white',
             border: 'none',
             borderRadius: '4px',
-            cursor: 'pointer'
+            cursor: 'pointer',
           }}
         >
           Retry
@@ -78,12 +80,12 @@ const RmeProvider: React.FC<RmeProviderProps> = ({ children }) => {
     return <Loading />
   }
 
-  // 渲染ThemeProvider
-  return (
-    <ThemeProvider theme={THEME_CONFIG}>
-      {children}
-    </ThemeProvider>
-  )
+  let theme = { ...THEME_CONFIG }
+  if (themeTokens) {
+    Object.assign(theme.token, themeTokens)
+  }
+
+  return <ThemeProvider theme={theme}>{children}</ThemeProvider>
 }
 
 export default RmeProvider

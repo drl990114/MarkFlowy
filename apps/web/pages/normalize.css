@@ -9,6 +9,7 @@
  */
 
  html {
+  letter-spacing: 0.02em;
   line-height: 1.15; /* 1 */
   -webkit-text-size-adjust: 100%; /* 2 */
 }

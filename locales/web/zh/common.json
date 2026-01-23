@@ -10,10 +10,39 @@
   "playground": {
     "title": "体验 Playground"
   },
+  "mock": {
+    "intro": {
+      "title": "欢迎使用 MarkFlowy！",
+      "ai_label": "AI 驱动：",
+      "ai_desc": "内置翻译、摘要功能，并支持 DeepSeek/ChatGPT 等多种主流模型。",
+      "lightweight_label": "轻量化：",
+      "lightweight_desc": "基于 Tauri 架构，体积小于 20MB。",
+      "modes_label": "编辑模式：",
+      "modes_desc": "支持所见即所得 (WYSIWYG) 与源码模式切换。",
+      "files_label": "文件支持：",
+      "files_desc": "支持 Markdown、JSON、TXT 等多种格式。",
+      "themes_label": "自定义主题：",
+      "themes_desc": "设计并分享你自己的编辑器风格。",
+      "hotkeys_label": "快捷键：",
+      "hotkeys_desc": "全面支持自定义键盘快捷键。",
+      "images_label": "智能图片：",
+      "images_desc": "便捷的路径管理或 Base64 自动转换。",
+      "manager_label": "文件管理：",
+      "manager_desc": "强大的树状视图，支持全局搜索。",
+      "git_label": "Git 集成：",
+      "git_desc": "内置仓库管理与同步解决方案。",
+      "multilingual_label": "多语言：",
+      "multilingual_desc": "原生支持 5 种以上主流语言。",
+      "footer": "尽情体验编辑的乐趣吧！"
+    }
+  },
+  "config": {
+    "description": "由 AI 驱动的下一代专业文本编辑器。"
+  },
   "home": {
     "hero": {
       "title": "MarkFlowy",
-      "subtitle": "高效舒适的编辑体验",
+      "subtitle": "MarkFlowy 致力于高效舒适的 Markdown 创作，\nAI 驱动的下一代专业编辑器。",
       "description": "",
       "download": "立即下载"
     },

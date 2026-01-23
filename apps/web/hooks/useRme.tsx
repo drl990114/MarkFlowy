@@ -39,8 +39,8 @@ export interface RmeModule {
     WYSIWYG: string
     SOURCE_CODE: string
   }
-  createWysiwygDelegate: () => any
-  createSourceCodeDelegate: () => any
+  createWysiwygDelegate: typeof import('rme').createWysiwygDelegate
+  createSourceCodeDelegate: typeof import('rme').createSourceCodeDelegate
 }
 
 // 统一的RME模块加载器

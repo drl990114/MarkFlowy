@@ -16,8 +16,6 @@ export default function SeoHead({
   title = 'MarkFlowy',
   url = '',
 }: React.PropsWithChildren<SeoHeadProps>) {
-  const properCanonical = canonical || url;
-
   return (
     <NextHead>
       <title>{title}</title>

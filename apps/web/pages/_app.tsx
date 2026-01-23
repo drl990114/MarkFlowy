@@ -60,6 +60,7 @@ const ResetStyles = createGlobalStyle`
   html, body {
     font-size: 16px;
     line-height: 1.6;
+    font-weight: 400;
     font-family: ${(props) => props.theme.fontFamily};
     font-variant-ligatures: common-ligatures;
     font-style: normal;
@@ -67,7 +68,8 @@ const ResetStyles = createGlobalStyle`
     margin: 0;
     color: ${(props) => props.theme.primaryFontColor};
     background-color: ${(props) => props.theme.bgColor};
-    -webkit-font-smoothing: subpixel-antialiased;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   body.sticky {
@@ -76,7 +78,6 @@ const ResetStyles = createGlobalStyle`
 
   .root {
     position: relative;
-    overflow: auto;
   }
 
   .small {

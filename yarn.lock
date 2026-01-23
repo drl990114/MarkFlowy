@@ -3869,7 +3869,7 @@ __metadata:
     react-use: "npm:^17.6.0"
     remixicon: "npm:^4.5.0"
     rimraf: "npm:^6.0.1"
-    rme: "npm:0.3.0-beta.39"
+    rme: "npm:0.3.0-beta.44"
     styled-components: "npm:^6.1.13"
     stylis: "npm:^4.3.4"
     ts-node: "npm:^10.9.2"
@@ -3973,7 +3973,7 @@ __metadata:
     isomorphic-fetch: "npm:^3.0.0"
     lodash: "npm:^4.17.21"
     markdown-to-jsx: "npm:^7.7.10"
-    motion: "npm:^12.23.26"
+    motion: "npm:^12.28.2"
     next: "npm:^15.5.7"
     next-contentlayer2: "npm:0.5.8"
     next-i18next: "npm:^15.3.0"
@@ -3987,7 +3987,7 @@ __metadata:
     remark-gfm: "npm:^4.0.0"
     remixicon: "npm:^4.7.0"
     rimraf: "npm:^6.0.1"
-    rme: "npm:0.3.0-beta.39"
+    rme: "npm:0.3.0-beta.44"
     styled-components: "npm:^6.1.13"
     stylis: "npm:^4.3.4"
     typescript: "npm:^5.7.3"
@@ -12184,12 +12184,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"framer-motion@npm:^12.23.26":
-  version: 12.23.26
-  resolution: "framer-motion@npm:12.23.26"
+"framer-motion@npm:^12.28.2":
+  version: 12.28.2
+  resolution: "framer-motion@npm:12.28.2"
   dependencies:
-    motion-dom: "npm:^12.23.23"
-    motion-utils: "npm:^12.23.6"
+    motion-dom: "npm:^12.28.2"
+    motion-utils: "npm:^12.27.2"
     tslib: "npm:^2.4.0"
   peerDependencies:
     "@emotion/is-prop-valid": "*"
@@ -12202,7 +12202,7 @@ __metadata:
       optional: true
     react-dom:
       optional: true
-  checksum: 10/29d51ac57ce8c2599664bf706d7a83c2aba4fe1dee1c0c7d75d5c45c120b1c2ca5d257c3ff608992b26bf8e9cf258cacf231b0873d7b16f01c5eeb42b9831f78
+  checksum: 10/7e673e24ba68b42ed3b34a309b9863e1b837a8af354e576685398ae8bf9530d95a2768a04050c2784d9b38f2fcee592c9a45a51776229f88c7c034dd98f974c2
   languageName: node
   linkType: hard
 
@@ -15891,27 +15891,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"motion-dom@npm:^12.23.23":
-  version: 12.23.23
-  resolution: "motion-dom@npm:12.23.23"
+"motion-dom@npm:^12.28.2":
+  version: 12.28.2
+  resolution: "motion-dom@npm:12.28.2"
   dependencies:
-    motion-utils: "npm:^12.23.6"
-  checksum: 10/6bec34c28b478622bd23ce919c0d64e7f372cbc3f88e665f1e34fbf590e9bb53eebea086fb28f4e0c31941bd5274e086dc9b5360b68c4976891b94c4e92ca01a
+    motion-utils: "npm:^12.27.2"
+  checksum: 10/78152ff953fd1614e130a9ca3ebdca9fb79d4b8a50322e01bca01a6464a018a2ed209461c64900af05b680d21eb744368dc53c16e85900b3ced103ccc84c53a1
   languageName: node
   linkType: hard
 
-"motion-utils@npm:^12.23.6":
-  version: 12.23.6
-  resolution: "motion-utils@npm:12.23.6"
-  checksum: 10/fae741319e72389eca8f3e73e644ffe6501409d00c7febb2f9b836629ae86ef735e73d670d0591706ca5e93ce10228ddbcff0ecdeb09b4cd8df14df7007aedd9
+"motion-utils@npm:^12.27.2":
+  version: 12.27.2
+  resolution: "motion-utils@npm:12.27.2"
+  checksum: 10/e4c4724b1bf11d5c6dca17e8c2fd42dc7270f03ca1fd1669908e3b8bb2cd528669c7aab8df134fedbc94806edb2f9e0e9f84c66cbe77d0cb923733417b5f9f79
   languageName: node
   linkType: hard
 
-"motion@npm:^12.23.26":
-  version: 12.23.26
-  resolution: "motion@npm:12.23.26"
+"motion@npm:^12.28.2":
+  version: 12.28.2
+  resolution: "motion@npm:12.28.2"
   dependencies:
-    framer-motion: "npm:^12.23.26"
+    framer-motion: "npm:^12.28.2"
     tslib: "npm:^2.4.0"
   peerDependencies:
     "@emotion/is-prop-valid": "*"
@@ -15924,7 +15924,7 @@ __metadata:
       optional: true
     react-dom:
       optional: true
-  checksum: 10/c5e683d2c67e55816587cbbd451c5600dc0602aa04108ab0bf8d4472befd490e90b3177362dbc8b9f96316ec16383924cc574eb7c9e031540f1e88e64a2704ae
+  checksum: 10/5bf42b045d2ad133ca75d2d44d17c32c2ba3a0dcbb7d5ced971f6b4ac0dc5f11f437cb2d67d34e5d2fad0f247104bb11bf3cba46825e85eb5a8eaf7c58213791
   languageName: node
   linkType: hard
 
@@ -17563,6 +17563,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"prosemirror-search@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "prosemirror-search@npm:1.1.0"
+  dependencies:
+    prosemirror-model: "npm:^1.21.0"
+    prosemirror-state: "npm:^1.4.3"
+    prosemirror-view: "npm:^1.33.6"
+  checksum: 10/2988194d37a7966176d29618f2c57d91e01d2f7bb4e7d3d71f73d23799606fea4edc1bab7e058fc0c34174e91b4786b440ed695d36a9d6a3b5edfb4ae35b77e9
+  languageName: node
+  linkType: hard
+
 "prosemirror-state@npm:^1.0.0, prosemirror-state@npm:^1.2.2, prosemirror-state@npm:^1.4.3":
   version: 1.4.3
   resolution: "prosemirror-state@npm:1.4.3"
@@ -17610,14 +17621,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prosemirror-view@npm:^1.0.0, prosemirror-view@npm:^1.1.0, prosemirror-view@npm:^1.27.0, prosemirror-view@npm:^1.31.0, prosemirror-view@npm:^1.33.8, prosemirror-view@npm:^1.39.1, prosemirror-view@npm:^1.39.2":
-  version: 1.41.3
-  resolution: "prosemirror-view@npm:1.41.3"
+"prosemirror-view@npm:^1.0.0, prosemirror-view@npm:^1.1.0, prosemirror-view@npm:^1.27.0, prosemirror-view@npm:^1.31.0, prosemirror-view@npm:^1.33.6, prosemirror-view@npm:^1.33.8, prosemirror-view@npm:^1.39.1, prosemirror-view@npm:^1.39.2":
+  version: 1.41.5
+  resolution: "prosemirror-view@npm:1.41.5"
   dependencies:
     prosemirror-model: "npm:^1.20.0"
     prosemirror-state: "npm:^1.0.0"
     prosemirror-transform: "npm:^1.1.0"
-  checksum: 10/2cd8c29c28f6061f31cac371667baa47a7f20705897f31b8ba4fb6d2dc226f9ce38a91068e3faf8b40c7f76727c3953df293223dc6aee0079b5dc3a44ccb7dca
+  checksum: 10/13000903bf2119c1b8707ea84a4c6c6b9945aa085c3f0d0dc7fab247906c83670fb781d07c36a2e6a57c4d4c9581d8d6a3624a719e716bcc164de3e10ca67fd9
   languageName: node
   linkType: hard
 
@@ -18649,9 +18660,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rme@npm:0.3.0-beta.39":
-  version: 0.3.0-beta.39
-  resolution: "rme@npm:0.3.0-beta.39"
+"rme@npm:0.3.0-beta.44":
+  version: 0.3.0-beta.44
+  resolution: "rme@npm:0.3.0-beta.44"
   dependencies:
     "@codemirror/autocomplete": "npm:^6.19.1"
     "@codemirror/commands": "npm:^6.10.0"
@@ -18717,6 +18728,7 @@ __metadata:
     prosemirror-commands: "npm:^1.7.1"
     prosemirror-inputrules: "npm:^1.5.1"
     prosemirror-paste-rules: "npm:^3.0.0"
+    prosemirror-search: "npm:^1.1.0"
     prosemirror-transform: "npm:^1.10.4"
     react: "npm:^19.2.0"
     react-dom: "npm:^19.2.0"
@@ -18730,7 +18742,7 @@ __metadata:
     void-elements: "npm:^3.1.0"
     yjs: "npm:^13.6.27"
     zens: "npm:^0.1.16"
-  checksum: 10/fda1001a06ab19486d84e548b053934b0e9ed44b6d41ca61685c3df4908b868a2cfd9df4fa3d3f957e5a3363e66bf2eaa114b6f8c2b3e0c8caa97dbb23b86197
+  checksum: 10/c92894ecaf1a9e0d8975a502cfd55b19575a4df37fb06e2399555142ddbde54d6595ec44e02d5a2526bd0b0b83a189df0791e238ec7d6c7d12499cd60abe2785
   languageName: node
   linkType: hard
 

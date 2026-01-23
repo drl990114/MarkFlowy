@@ -12,21 +12,19 @@
 
 <div align="center">
 
-[![Build Status][build-badge]][build]
 [![App Version][version-badge]][release]
 [![Downloads][downloads-badge]][release]
-<br/>
 [![PRs Welcome][prs-welcome-badge]][prs-welcome]
-[![MIT License][license-badge]][license]
+<br/>
+[![Build Status][build-badge]][build]
 [![Code of Conduct][coc-badge]][coc]
-[![codefactor]](https://www.codefactor.io/repository/github/drl990114/markflowy)
+[![Commit Activity][commit-badge]][commit]
+[![issues-closed]](https://github.com/drl990114/MarkFlowy/issues?q=sort%3Aupdated-desc+is%3Aissue+is%3Aclosed)
 <br/>
 [![TypeScript-version-icon]](https://www.typescriptlang.org/)
 [![Rust-version-icon]](https://www.rust-lang.org/)
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fdrl990114%2FMarkFlowy.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fdrl990114%2FMarkFlowy?ref=badge_shield)
+[![License][license-badge]][license]
 <br/>
-[![Commit Activity][commit-badge]][commit]
-[![issues-closed]](https://github.com/drl990114/MarkFlowy/issues?q=sort%3Aupdated-desc+is%3Aissue+is%3Aclosed)
 </div>
 
 <h4 align="center"><strong>English</strong> | <a href="./README_CN.md">简体中文</a> | <a href="./README_JA.md">日本語</a></h4>
@@ -202,24 +200,23 @@ The development of **MarkFlowy** cannot be separated from these contributors. Th
 <!-- readme: contributors -end -->
 
 <!-- badges -->
-[build-badge]: https://img.shields.io/github/actions/workflow/status/drl990114/MarkFlowy/nodejs.yml.svg?style=flat-square
-[build]: https://github.com/drl990114/MarkFlowy/actions/workflows/nodejs.yml
-[downloads-badge]:  https://img.shields.io/github/downloads/drl990114/MarkFlowy/total?label=downloads&style=flat-square
-[license-badge]: https://img.shields.io/badge/license-AGPL-purple.svg?style=flat-square
-[license]: https://opensource.org/licenses/AGPL-3.0
-[release]: https://github.com/drl990114/MarkFlowy/releases
-[prs-welcome-badge]: https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square
-[prs-welcome]: https://github.com/drl990114/MarkFlowy/blob/main/CONTRIBUTING.md
-[coc-badge]: https://img.shields.io/badge/code%20of-conduct-ff69b4.svg?style=flat-square
-[coc]: https://github.com/drl990114/MarkFlowy/blob/main/CODE_OF_CONDUCT.md
-[commit-badge]: https://img.shields.io/github/commit-activity/m/drl990114/MarkFlowy?color=%23ff9900&style=flat-square
-[commit]: https://github.com/drl990114/MarkFlowy
-[version-badge]: https://img.shields.io/github/v/release/drl990114/MarkFlowy?color=%239accfe&label=version&style=flat-square
-[rust-version-icon]: https://img.shields.io/badge/Rust-1.85.0-dea584?style=flat-square
-[typescript-version-icon]: https://img.shields.io/github/package-json/dependency-version/drl990114/MarkFlowy/dev/typescript?label=TypeScript&style=flat-square
-[codefactor]: https://www.codefactor.io/repository/github/drl990114/markflowy/badge/main?style=flat-square
-[issues-closed]: https://img.shields.io/github/issues-closed/drl990114/MarkFlowy.svg?style=flat-square
-
+[build-badge]: https://img.shields.io/github/actions/workflow/status/drl990114/MarkFlowy/nodejs.yml.svg?style=flat-square&labelColor=black
+[build]: https://github.com/drl990114/MarkFlowy/actions/workflows/nodejs.yml?labelColor=black
+[downloads-badge]:  https://img.shields.io/github/downloads/drl990114/MarkFlowy/total?label=downloads&style=flat-square&labelColor=black
+[license-badge]: https://img.shields.io/badge/license-AGPL-purple.svg?style=flat-square&labelColor=black
+[license]: https://opensource.org/licenses/AGPL-3.0?labelColor=black
+[release]: https://github.com/drl990114/MarkFlowy/releases?labelColor=black
+[prs-welcome-badge]: https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square&labelColor=black&color=%23dd5c13
+[prs-welcome]: https://github.com/drl990114/MarkFlowy/blob/main/CONTRIBUTING.md?labelColor=black
+[coc-badge]: https://img.shields.io/badge/code%20of-conduct-ff69b4.svg?style=flat-square&labelColor=black
+[coc]: https://github.com/drl990114/MarkFlowy/blob/main/CODE_OF_CONDUCT.md?labelColor=black
+[commit-badge]: https://img.shields.io/github/commit-activity/m/drl990114/MarkFlowy?color=%23ff9900&style=flat-square&labelColor=black
+[commit]: https://github.com/drl990114/MarkFlowy?labelColor=black
+[version-badge]: https://img.shields.io/github/v/release/drl990114/MarkFlowy?color=%239accfe&label=version&style=flat-square&labelColor=black
+[rust-version-icon]: https://img.shields.io/badge/Rust-1.85.0-dea584?style=flat-square&labelColor=black
+[typescript-version-icon]: https://img.shields.io/github/package-json/dependency-version/drl990114/MarkFlowy/dev/typescript?label=TypeScript&style=flat-square&labelColor=black
+[issues-closed]: https://img.shields.io/github/issues-closed/drl990114/MarkFlowy.svg?style=flat-square&labelColor=black
+[codefactor]: https://www.codefactor.io/repository/github/drl990114/markflowy/badge/main?style=flat-square&labelColor=black
 
 ## License
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fdrl990114%2FMarkFlowy.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fdrl990114%2FMarkFlowy?ref=badge_large)
