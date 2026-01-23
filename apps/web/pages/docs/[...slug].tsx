@@ -30,7 +30,11 @@ const PostLayout = () => {
   if (markdown) {
     return (
       <DocsLayout>
-        <RmeProvider>
+        <RmeProvider
+          themeTokens={{
+            bgColor: '#14120B',
+          }}
+        >
           <DynamicMdHtmlWrapper
             dangerouslySetInnerHTML={{ __html: markdown.body.html }}
           ></DynamicMdHtmlWrapper>
@@ -51,7 +55,7 @@ export const getStaticPaths: GetStaticPaths = async ({ locales = [] }) => {
     const pathParts = markdown._raw.flattenedPath.split('/')
     const docLocale = pathParts[0]
     const docSlug = pathParts.slice(1)
-    
+
     if (locales.includes(docLocale) && docSlug.length > 0) {
       paths.push({
         params: { slug: docSlug },

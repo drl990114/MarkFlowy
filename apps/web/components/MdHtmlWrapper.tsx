@@ -1,6 +1,5 @@
-import { darkTheme } from 'theme'
-import Loading from './Loading'
 import { useRmeWrapper } from '../hooks/useRme'
+import Loading from './Loading'
 
 const MdHtmlWrapper = ({ children, ...rest }: any) => {
   const { WysiwygThemeWrapper, loading, error } = useRmeWrapper()
