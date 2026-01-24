@@ -187,6 +187,29 @@ export const getSettingMap = () => {
             i18nKey: 'settings.editor.wysiwyg.codemirror_linewrap.desc',
           },
         },
+        spellcheck: {
+          key: 'wysiwyg_editor_spellcheck',
+          type: 'switch',
+          title: {
+            i18nKey: 'settings.editor.wysiwyg.spellcheck.label',
+          },
+          desc: {
+            i18nKey: 'settings.editor.wysiwyg.spellcheck.desc',
+          },
+        },
+      },
+      SourceCode: {
+        i18nKey: 'settings.editor.sourcecode.label',
+        spellcheck: {
+          key: 'source_code_editor_spellcheck',
+          type: 'switch',
+          title: {
+            i18nKey: 'settings.editor.sourcecode.spellcheck.label',
+          },
+          desc: {
+            i18nKey: 'settings.editor.sourcecode.spellcheck.desc',
+          },
+        },
       },
     },
     image: {

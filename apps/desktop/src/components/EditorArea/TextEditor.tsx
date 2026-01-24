@@ -434,6 +434,12 @@ function TextEditor(props: TextEditorProps) {
       style: {
         height: '100%',
       },
+      wysiwygTextContainerProps: {
+        spellCheck: settingData.wysiwyg_editor_spellcheck,
+      },
+      sourceCodeTextContainerProps: {
+        spellCheck: settingData.source_code_editor_spellcheck,
+      },
       offset: { top: 10, left: 16 },
       styleToken: {
         id,

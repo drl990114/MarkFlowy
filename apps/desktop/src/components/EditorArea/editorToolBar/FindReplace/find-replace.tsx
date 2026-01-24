@@ -50,7 +50,6 @@ const FindReplaceWrapper = styled.div`
   left: 0;
   right: 0;
   top: 200;
-  z-index: 1000000;
   background-color: ${({ theme }) => theme.bgColor};
   backdrop-filter: blur(8px);
   width: '100%';

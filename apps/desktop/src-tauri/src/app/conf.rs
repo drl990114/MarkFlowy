@@ -1,7 +1,4 @@
-use crate::{
-    fc::exists,
-    APP_DIR,
-};
+use crate::{fc::exists, APP_DIR};
 use etcetera::{choose_app_strategy, AppStrategy, AppStrategyArgs};
 use serde_json::Value;
 use std::{
@@ -56,6 +53,8 @@ pub_struct!(AppConf {
     editor_root_font_family: Option<String>,
     editor_code_font_family: Option<String>,
     wysiwyg_editor_codemirror_line_wrap: Option<bool>,
+    wysiwyg_editor_spellcheck: Option<bool>,
+    source_code_editor_spellcheck: Option<bool>,
     md_editor_default_mode: Option<String>,
     when_paste_image: Option<String>,
     paste_image_save_absolute_path: Option<String>,
@@ -138,6 +137,8 @@ impl AppConf {
             autosave_interval: Some(2000),
             editor_root_font_family: Some("Open Sans".to_string()),
             editor_code_font_family: Some("Fira Code".to_string()),
+            wysiwyg_editor_spellcheck: Some(false),
+            source_code_editor_spellcheck: Some(false),
             wysiwyg_editor_codemirror_line_wrap: Some(true),
             extensions_chatgpt_apibase: Some("".to_string()),
             extensions_chatgpt_models: Some("gpt-3.5-turbo,gpt-4-32k,gpt-4".to_string()),
@@ -244,6 +245,8 @@ impl AppConf {
             editor_root_font_family,
             editor_code_font_family,
             wysiwyg_editor_codemirror_line_wrap,
+            wysiwyg_editor_spellcheck,
+            source_code_editor_spellcheck,
             autosave_interval,
             extensions_chatgpt_apibase,
             extensions_chatgpt_apikey,

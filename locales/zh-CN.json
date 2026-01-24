@@ -244,6 +244,17 @@
         "codemirror_linewrap": {
           "label": "代码块换行",
           "desc": "代码块中的行字数超出时是否换行。"
+        },
+        "spellcheck": {
+          "label": "拼写检查",
+          "desc": "是否在Wysiwyg模式下启用拼写检查。"
+        }
+      },
+      "sourcecode": {
+        "label": "源代码",
+        "spellcheck": {
+          "label": "拼写检查",
+          "desc": "是否在源代码模式下启用拼写检查。"
         }
       }
     },

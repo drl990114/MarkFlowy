@@ -93,14 +93,14 @@ const styledLightTheme = {
   // app
   titleBarBgColor: '#DCDCDD',
   titleBarDefaultHoverColor: '#bdbdc2',
-  editorTabBgColor: '#E9E9E9',
+  editorTabBgColor: '#f6f8fa',
   editorTabActiveBgColor: '#FAFAFA',
   editorToolbarBgColor: '#EBEBEC',
   fileTreeIndentLineColor: '#E0E0E0',
   fileTreeSelectedBgColor: '#E4E0E0',
   sideBarHeaderBgColor: '#F9F9F9',
   sideBarBgColor: '#F9F9F9',
-  statusBarBgColor: '#E9E9E9',
+  statusBarBgColor: '#f6f8fa',
   rightBarBgColor: '#F9F9F9',
   rightBarHeaderBgColor: '#F9F9F9',
 

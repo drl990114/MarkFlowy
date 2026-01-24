@@ -202,9 +202,20 @@
         "codemirror_linewrap": {
           "label": "Salto de línea de bloque de código",
           "desc": "Si el número de líneas en el bloque de código excede la línea."
+        },
+        "spellcheck": {
+          "label": "Comprobación ortografía",
+          "desc": "Si desea activar la revisión ortografía en el modo Wysiwyg."
         }
       },
-      "desc": "Las opciones de configuración del editor de Markdown incluyen estilos, comportamientos y ajustes relacionados con el modo WYSIWYG."
+      "desc": "Las opciones de configuración del editor de Markdown incluyen estilos, comportamientos y ajustes relacionados con el modo WYSIWYG.",
+      "sourcecode": {
+        "label": "Código fuente",
+        "spellcheck": {
+          "label": "Comprobación ortografía",
+          "desc": "Si se habilita la revisión ortografía en el modo Código fuente."
+        }
+      }
     },
     "keyboard": {
       "label": "teclado",

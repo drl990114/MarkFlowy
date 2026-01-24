@@ -199,9 +199,20 @@
         "codemirror_linewrap": {
           "label": "Jets de ligne de bloc de code",
           "desc": "Si vous changez de ligne lorsque le nombre de mots dans le bloc de code dépasse."
+        },
+        "spellcheck": {
+          "label": "Spellcheck",
+          "desc": "Indique si l'orthographe doit être activé en mode Wysiwyg."
         }
       },
-      "desc": "Options de configuration pour l'éditeur Markdown, y compris les paramètres relatifs au style, au comportement et au mode WYSIWYG."
+      "desc": "Options de configuration pour l'éditeur Markdown, y compris les paramètres relatifs au style, au comportement et au mode WYSIWYG.",
+      "sourcecode": {
+        "label": "Code source",
+        "spellcheck": {
+          "label": "Spellcheck",
+          "desc": "Indique si l'orthographe doit être activé en mode Code source."
+        }
+      }
     },
     "keyboard": {
       "label": "clavier",

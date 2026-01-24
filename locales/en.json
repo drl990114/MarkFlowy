@@ -234,6 +234,17 @@
         "codemirror_linewrap": {
           "label": "Code block wrap",
           "desc": "Whether the line breaks when the number of line words in the code block exceeds."
+        },
+        "spellcheck": {
+          "label": "Spellcheck",
+          "desc": "Whether to enable spellcheck in Wysiwyg mode."
+        }
+      },
+      "sourcecode": {
+        "label": "Source Code",
+        "spellcheck": {
+          "label": "Spellcheck",
+          "desc": "Whether to enable spellcheck in Source Code mode."
         }
       },
       "desc": "Markdown configuration options for the editor, including settings for style, behavior, and WYSIWYG mode."
