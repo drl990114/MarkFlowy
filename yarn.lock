@@ -3823,6 +3823,7 @@ __metadata:
     "@popperjs/core": "npm:^2.11.8"
     "@sentry/react": "npm:^9.2.0"
     "@tanstack/react-query": "npm:^5.79.2"
+    "@tanstack/react-virtual": "npm:^3.13.18"
     "@tauri-apps/api": "npm:2.9.1"
     "@tauri-apps/cli": "npm:2.9.5"
     "@tauri-apps/plugin-clipboard-manager": "npm:^2.3.2"
@@ -3862,7 +3863,6 @@ __metadata:
     react-arborist: "npm:^3.4.3"
     react-dom: "npm:^19.2.0"
     react-i18next: "npm:^16.2.4"
-    react-keywords: "npm:^1.0.0"
     react-markdown: "npm:^10.1.0"
     react-resizable-panels: "npm:^4.4.1"
     react-router: "npm:^7.12.0"
@@ -7038,6 +7038,25 @@ __metadata:
   peerDependencies:
     react: ^18 || ^19
   checksum: 10/fff04926d6443b01746207d2734bcf246e7adf2a711c75834cc64abdb4e75220ad508ef90571f230ae3d64300a56daa36b4f9ba8b62f89b293f2049f9f505de4
+  languageName: node
+  linkType: hard
+
+"@tanstack/react-virtual@npm:^3.13.18":
+  version: 3.13.18
+  resolution: "@tanstack/react-virtual@npm:3.13.18"
+  dependencies:
+    "@tanstack/virtual-core": "npm:3.13.18"
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+    react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+  checksum: 10/73dcfd5681db1c07834c9d286a7d2194ebded84f09466b37072c630bad1ec9d546c0b58981e8a4cf855b0bd6a5c53c64834c6428022fe12096ff3a905da2a4a4
+  languageName: node
+  linkType: hard
+
+"@tanstack/virtual-core@npm:3.13.18":
+  version: 3.13.18
+  resolution: "@tanstack/virtual-core@npm:3.13.18"
+  checksum: 10/b891eac7bfa1bc20a353f65e12d6863c1ff8f91ad763f5ebbd624887c286f4b3ec5664b0c1426270463765802e514792d6864b95076e4087735b28d7db0461f0
   languageName: node
   linkType: hard
 
@@ -17954,16 +17973,6 @@ __metadata:
   version: 19.2.0
   resolution: "react-is@npm:19.2.0"
   checksum: 10/5cf0230571da0b446c64c0ff7b0e6992b7a8b12b39542db4003de1611e3f108e26f30b93a85ded5cd89c5bcce97f57639524ae40e57bb2f4f1ebd0935b624abf
-  languageName: node
-  linkType: hard
-
-"react-keywords@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "react-keywords@npm:1.0.0"
-  peerDependencies:
-    react: ">=16.8.0"
-    react-dom: ">=16.8.0"
-  checksum: 10/0518a021c111674c6f33143651e91fa0ac5dfb83be636b38aced71bd7c49b46082673f8e22322c00ed38f1cd37e11e49c9ae5316a607de3a2a4b9325b1a2c989
   languageName: node
   linkType: hard
 

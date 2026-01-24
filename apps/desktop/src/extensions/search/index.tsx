@@ -3,16 +3,83 @@ import { MfIconButton } from '@/components/ui-v2/Button'
 import { RIGHTBARITEMKEYS } from '@/constants'
 import { getFileObjectByPath } from '@/helper/files'
 import { useEditorStore } from '@/stores'
+import { useVirtualizer } from '@tanstack/react-virtual'
 import { invoke } from '@tauri-apps/api/core'
 import classNames from 'classnames'
-import { nanoid } from 'nanoid'
-import { memo, useCallback, useEffect, useState } from 'react'
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import Keywords from 'react-keywords'
 import { Input } from 'zens'
-import { SearchContainer, SearchInfoBox, SearchInput } from './styles'
+import { SearchContainer, SearchInfoBox, SearchInput, SearchList } from './styles'
 import type { SearchInfo } from './useSearchStore'
 import useSearchStore from './useSearchStore'
+
+const escapeRegExp = (string: string) => {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+interface SearchMatchSnippetProps {
+  content: string
+  keyword: string
+  matchIndexInLine: number
+  caseSensitive: boolean
+}
+
+const SearchMatchSnippet = memo(
+  ({ content, keyword, matchIndexInLine, caseSensitive }: SearchMatchSnippetProps) => {
+    const prefixWindow = 10 // 前置字符减少，确保在窄屏下 active 项靠左显示
+    const suffixWindow = 50 // 后置字符可以多一些
+
+    const getMatchPositions = (text: string, query: string) => {
+      if (!query) return []
+      const regex = new RegExp(escapeRegExp(query), caseSensitive ? 'g' : 'gi')
+      const positions: { start: number; end: number }[] = []
+      let match
+      while ((match = regex.exec(text)) !== null) {
+        positions.push({ start: match.index, end: regex.lastIndex })
+      }
+      return positions
+    }
+
+    const positions = getMatchPositions(content, keyword)
+    const currentMatch = positions[matchIndexInLine]
+
+    if (!currentMatch) return <span className="snippet-text">{content}</span>
+
+    const start = Math.max(0, currentMatch.start - prefixWindow)
+    const end = Math.min(content.length, currentMatch.end + suffixWindow)
+
+    const snippet = content.slice(start, end)
+
+    const renderSnippet = () => {
+      const regex = new RegExp(escapeRegExp(keyword), caseSensitive ? 'g' : 'gi')
+      const result = []
+      let lastIndex = 0
+      let match
+
+      while ((match = regex.exec(snippet)) !== null) {
+        result.push(snippet.slice(lastIndex, match.index))
+
+        const isCurrentMatch = match.index + start === currentMatch.start
+        result.push(
+          <mark key={match.index} className={isCurrentMatch ? 'active' : ''}>
+            {match[0]}
+          </mark>,
+        )
+        lastIndex = regex.lastIndex
+      }
+      result.push(snippet.slice(lastIndex))
+      return result
+    }
+
+    return (
+      <span className="snippet-text">
+        {start > 0 && '...'}
+        {renderSnippet()}
+        {end < content.length && '...'}
+      </span>
+    )
+  },
+)
 
 const SearchView = memo(() => {
   const { resultList, addSearchResult, searchKeyword, caseSensitive, activeIndex, setSearchState } =
@@ -20,21 +87,85 @@ const SearchView = memo(() => {
   const { addOpenedFile, setActiveId, folderData, editorCtxMap, activeId } = useEditorStore()
   const [expandIdMap, setExpandIdMap] = useState<Record<string, boolean>>({})
   const { t } = useTranslation()
-  let indexRef = 0
+  const parentRef = useRef<HTMLDivElement>(null)
 
-  const isAllExpand = Object.values(expandIdMap).every((v) => v)
+  const getMatchCount = useCallback(
+    (text: string, keyword: string) => {
+      if (!keyword) return 0
+      const regex = new RegExp(escapeRegExp(keyword), caseSensitive ? 'g' : 'gi')
+      const matches = text.match(regex)
+      return matches ? matches.length : 0
+    },
+    [caseSensitive],
+  )
+
+  const flattenedData = useMemo(() => {
+    const data: Array<
+      | { type: 'header'; searchInfo: SearchInfo; id: string }
+      | {
+          type: 'match'
+          searchInfo: SearchInfo
+          match: any
+          matchIndexInLine: number
+          globalIndex: number
+          isActive: boolean
+          id: string
+        }
+    > = []
+
+    resultList.forEach((searchInfo) => {
+      data.push({
+        type: 'header',
+        searchInfo,
+        id: `header-${searchInfo.id}`,
+      })
+
+      if (expandIdMap[searchInfo.id]) {
+        const isCurrentFileActive = getFileObjectByPath(searchInfo.path)?.id === activeId
+        let fileIndexRef = 0
+        searchInfo.matches.forEach((match) => {
+          const count = getMatchCount(match.content, searchKeyword)
+          for (let i = 0; i < count; i++) {
+            const currentIndex = fileIndexRef + i
+            data.push({
+              type: 'match',
+              searchInfo,
+              match,
+              matchIndexInLine: i,
+              globalIndex: currentIndex,
+              isActive: isCurrentFileActive && currentIndex === activeIndex,
+              id: `match-${match.id}-${i}`,
+            })
+          }
+          fileIndexRef += count
+        })
+      }
+    })
+
+    return data
+  }, [resultList, expandIdMap, activeId, activeIndex, searchKeyword, getMatchCount])
+
+  const rowVirtualizer = useVirtualizer({
+    count: flattenedData.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: (index: number) => (flattenedData[index].type === 'header' ? 32 : 44),
+    overscan: 10,
+  })
+
+  const isAllExpand = resultList.length > 0 && resultList.every((item) => expandIdMap[item.id])
 
   const toggleAllExpand = useCallback(() => {
-    setExpandIdMap((prev) => {
-      return Object.keys(prev).reduce(
+    const nextValue = !isAllExpand
+    setExpandIdMap(
+      resultList.reduce(
         (acc, cur) => {
-          acc[cur] = !isAllExpand
+          acc[cur.id] = nextValue
           return acc
         },
         {} as Record<string, boolean>,
-      )
-    })
-  }, [isAllExpand])
+      ),
+    )
+  }, [isAllExpand, resultList])
 
   useEffect(() => {
     return () => {
@@ -59,30 +190,6 @@ const SearchView = memo(() => {
     }
   }, [activeIndex, caseSensitive, activeId, searchKeyword, editorCtxMap, resultList])
 
-  const highlightKeyWord = (text: string, keyword: string) => {
-    const prev = indexRef
-
-    const regex = new RegExp(keyword, caseSensitive ? 'g' : 'gi')
-
-    const component = text
-      .split(regex)
-      .flatMap((str) => {
-        const key = nanoid()
-        indexRef++
-        return [<mark key={key}>{keyword}</mark>, str]
-      })
-      .slice(1)
-
-    indexRef--
-
-    return {
-      indexScope: [prev, indexRef],
-      component,
-    }
-  }
-
-  const highlight = (txt: string) => <mark>{txt}</mark>
-
   const handleSearch = useCallback(async () => {
     if (!folderData?.[0]) return
     if (!searchKeyword) {
@@ -101,6 +208,7 @@ const SearchView = memo(() => {
       },
     })
 
+    console.log('res', res)
     addSearchResult(res.data)
 
     const newExpandIdMap: Record<string, boolean> = {}
@@ -165,6 +273,7 @@ const SearchView = memo(() => {
     <SearchContainer>
       <SearchInput>
         <Input
+          size='small'
           className='search-input'
           onPressEnter={handleKeyDown}
           value={searchKeyword}
@@ -191,51 +300,80 @@ const SearchView = memo(() => {
           }}
         />
       </SearchInput>
-      {resultList.map((searchInfo) => {
-        indexRef = 0
+      <SearchList ref={parentRef}>
+        <div
+          style={{
+            height: `${rowVirtualizer.getTotalSize()}px`,
+            width: '100%',
+            position: 'relative',
+          }}
+        >
+          {rowVirtualizer.getVirtualItems().map((virtualItem) => {
+            const item = flattenedData[virtualItem.index]
 
-        const isExpand = expandIdMap[searchInfo.id]
+            if (item.type === 'header') {
+              const isExpand = expandIdMap[item.searchInfo.id]
+              const iconCls = classNames('search-info__icon', {
+                'ri-arrow-down-s-line': isExpand,
+                'ri-arrow-right-s-line': !isExpand,
+              })
 
-        const iconCls = classNames('search-info__icon', {
-          'ri-arrow-drop-down-line': isExpand,
-          'ri-arrow-drop-right-line': !isExpand,
-        })
+              return (
+                <SearchInfoBox
+                  key={virtualItem.key}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: `${virtualItem.size}px`,
+                    transform: `translateY(${virtualItem.start}px)`,
+                  }}
+                >
+                  <div
+                    className='search-info__path'
+                    onClick={() => toggleSearchInfoExpand(item.searchInfo.id)}
+                    title={item.searchInfo.path}
+                  >
+                    <i className={iconCls} />
+                    <i className='ri-file-list-2-line' style={{ marginRight: 4, opacity: 0.7 }} />
+                    {item.searchInfo.relative_path}
+                  </div>
+                </SearchInfoBox>
+              )
+            }
 
-        return (
-          <SearchInfoBox key={searchInfo.id}>
-            <div
-              className='search-info__path'
-              onClick={() => toggleSearchInfoExpand(searchInfo.id)}
-            >
-              <i className={iconCls} />
-              {searchInfo.relative_path}
-            </div>
-            {isExpand
-              ? searchInfo.matches.map((match) => {
-                  const { indexScope } = highlightKeyWord(match.content, searchKeyword)
-                  return (
-                    <div
-                      className='search-info'
-                      key={match.id}
-                      onClick={() => handleFileInfoClick(searchInfo.path, indexScope[0])}
-                    >
-                      <div className='search-info__linenumber'>{match.line}:</div>
-                      <div className='search-info__content'>
-                        <Keywords
-                          value={searchKeyword}
-                          caseIgnored={!caseSensitive}
-                          render={highlight}
-                        >
-                          {match.content}
-                        </Keywords>
-                      </div>
-                    </div>
-                  )
-                })
-              : null}
-          </SearchInfoBox>
-        )
-      })}
+            return (
+              <SearchInfoBox
+                key={virtualItem.key}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: `${virtualItem.size}px`,
+                  transform: `translateY(${virtualItem.start}px)`,
+                }}
+              >
+                <div
+                  className={classNames('search-info', { active: item.isActive })}
+                  onClick={() => handleFileInfoClick(item.searchInfo.path, item.globalIndex)}
+                >
+                  <div className='search-info__linenumber'>line {item.match.line}:</div>
+                  <div className='search-info__content'>
+                    <SearchMatchSnippet
+                      content={item.match.content}
+                      keyword={searchKeyword}
+                      matchIndexInLine={item.matchIndexInLine}
+                      caseSensitive={caseSensitive}
+                    />
+                  </div>
+                </div>
+              </SearchInfoBox>
+            )
+          })}
+        </div>
+      </SearchList>
     </SearchContainer>
   )
 })
