@@ -895,51 +895,6 @@ pub mod cmd {
     }
 
     #[tauri::command]
-    pub fn show_in_folder(path: &str) -> bool {
-        #[cfg(target_os = "macos")]
-        {
-            // macOS: Use open -R to reveal and select the file in Finder
-            std::process::Command::new("open")
-                .args(["-R", path])
-                .spawn()
-                .is_ok()
-        }
-
-        #[cfg(target_os = "windows")]
-        {
-            // Windows: Use explorer /select to reveal and select the file in Explorer
-            std::process::Command::new("explorer")
-                .args(["/select,", path])
-                .spawn()
-                .is_ok()
-        }
-
-        #[cfg(target_os = "linux")]
-        {
-            let file_path = Path::new(path);
-            // Get parent directory
-            let folder_path = if file_path.is_dir() {
-                file_path.to_path_buf()
-            } else {
-                match file_path.parent() {
-                    Some(parent) => parent.to_path_buf(),
-                    None => return false,
-                }
-            };
-            // Linux: Use xdg-open to open the parent directory
-            std::process::Command::new("xdg-open")
-                .arg(folder_path.to_str().unwrap_or(""))
-                .spawn()
-                .is_ok()
-        }
-
-        #[cfg(not(any(target_os = "macos", target_os = "windows", target_os = "linux")))]
-        {
-            false
-        }
-    }
-
-    #[tauri::command]
     pub fn copy_file(from: &str, to: &str) -> FileResult {
         let old_path = Path::new(from);
         let new_path = Path::new(to);

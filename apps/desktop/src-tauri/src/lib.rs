@@ -105,7 +105,6 @@ pub fn run() {
             fc::cmd::get_path_name,
             fc::cmd::get_file_normal_info,
             fc::cmd::copy_file,
-            fc::cmd::show_in_folder,
             conf::cmd::get_app_conf,
             conf::cmd::reset_app_conf,
             conf::cmd::save_app_conf,

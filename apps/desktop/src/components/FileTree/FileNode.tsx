@@ -8,6 +8,7 @@ import {
 import { useEditorStore } from '@/stores'
 import NiceModal from '@ebay/nice-modal-react'
 import { invoke } from '@tauri-apps/api/core'
+import { revealItemInDir } from '@tauri-apps/plugin-opener'
 import { nanoid } from 'nanoid'
 import { NodeRendererProps } from 'react-arborist'
 import { useTranslation } from 'react-i18next'
@@ -272,11 +273,11 @@ function FileNode({
           handler: async () => {
             try {
               const exists = await invoke<boolean>('file_exists', { filePath: node.data.path })
-              if (!exists) {
+              if (!exists || !node.data.path) {
                 toast.error(t('file.not_found'))
                 return
               }
-              await invoke('show_in_folder', { path: node.data.path })
+              await revealItemInDir(node.data.path)
             } catch (error) {
               console.error('Failed to show in folder:', error)
             }
