@@ -412,6 +412,13 @@ export const getSettingMap = () => {
         i18nKey: 'settings.keyboard.desc',
       },
     },
+    support: {
+      i18nKey: 'settings.support.label',
+      iconName: 'ri-heart-fill',
+      desc: {
+        i18nKey: 'settings.support.desc',
+      },
+    },
   }
 }
 

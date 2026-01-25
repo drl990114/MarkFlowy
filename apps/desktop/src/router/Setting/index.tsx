@@ -18,6 +18,7 @@ import SettingGroup from './component/SettingGroup'
 import { ImageSetting } from './ImageSetting'
 import { KeyboardTable } from './KeyboardTable'
 import { Container } from './styles'
+import { Support } from './Support'
 
 export interface DialogTitleProps {
   children?: ReactNode
@@ -87,6 +88,10 @@ function Setting() {
       return <ImageSetting />
     }
 
+    if (curGroupKey === 'support') {
+      return <Support />
+    }
+
     return curGroupKeys.map((key) => {
       const group = curGroup[key]
       if (isSettingGroup(group)) {
@@ -121,7 +126,11 @@ function Setting() {
                   }}
                 >
                   <div>
-                    <i className={group.iconName} /> {t(group.i18nKey)}
+                    <i
+                      className={group.iconName}
+                      style={{ color: groupKey === 'support' ? '#FF4D4F' : '' }}
+                    />{' '}
+                    {t(group.i18nKey)}
                   </div>
                 </li>
               )
@@ -154,11 +163,7 @@ function Setting() {
             <p className='setting-subtitle'>{t(curGroup.desc?.i18nKey)}</p>
           </div>
           <div className='setting-actions'>
-            <Button
-              size='small'
-              btnType='primary'
-              onClick={handleResetConfiguration}
-            >
+            <Button size='small' btnType='primary' onClick={handleResetConfiguration}>
               {t('settings.resetAppConf.label')}
             </Button>
           </div>

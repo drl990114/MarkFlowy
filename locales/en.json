@@ -387,6 +387,14 @@
         }
       },
       "desc": "Appearance and display settings for the application, including visually relevant configurations such as interface scaling and themes."
+    },
+    "support": {
+      "label": "Support",
+      "desc": "Your every support is important to us! To make this open source project better, you can participate in the following ways",
+      "github_star": "Light up Star on GitHub",
+      "github_star_desc": "If you like this project, please give us a Star on GitHub, this is our greatest encouragement!",
+      "github_issue": "Submit Issue or Proposal",
+      "github_issue_desc": "If you encounter problems or have any suggestions, please submit your Issue on GitHub."
     }
   },
   "updater": {

@@ -59,6 +59,7 @@
     "notification:default",
     "clipboard-manager:default",
     "clipboard-manager:allow-write-text",
+    "opener:default",
     {
       "identifier": "shell:allow-execute",
       "allow": [

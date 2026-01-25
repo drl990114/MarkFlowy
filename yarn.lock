@@ -3829,6 +3829,7 @@ __metadata:
     "@tauri-apps/plugin-clipboard-manager": "npm:^2.3.2"
     "@tauri-apps/plugin-dialog": "npm:2.4.2"
     "@tauri-apps/plugin-http": "npm:2.5.4"
+    "@tauri-apps/plugin-opener": "npm:^2.5.3"
     "@tauri-apps/plugin-os": "npm:2.3.2"
     "@tauri-apps/plugin-shell": "npm:2.3.3"
     "@tauri-apps/plugin-store": "npm:2.4.1"
@@ -3870,7 +3871,7 @@ __metadata:
     react-use: "npm:^17.6.0"
     remixicon: "npm:^4.5.0"
     rimraf: "npm:^6.0.1"
-    rme: "npm:0.3.0-beta.45"
+    rme: "npm:0.3.0-beta.50"
     styled-components: "npm:^6.1.13"
     stylis: "npm:^4.3.4"
     ts-node: "npm:^10.9.2"
@@ -3988,7 +3989,7 @@ __metadata:
     remark-gfm: "npm:^4.0.0"
     remixicon: "npm:^4.7.0"
     rimraf: "npm:^6.0.1"
-    rme: "npm:0.3.0-beta.45"
+    rme: "npm:0.3.0-beta.50"
     styled-components: "npm:^6.1.13"
     stylis: "npm:^4.3.4"
     typescript: "npm:^5.7.3"
@@ -7212,6 +7213,15 @@ __metadata:
   dependencies:
     "@tauri-apps/api": "npm:^2.8.0"
   checksum: 10/d0ffe1beb7c9ffcac1f2b0b648ee3b3f3273402564ed6f298dac21bb6712b97007c801cc78010e3e0ca6bbff14a97a9cce5423aaa0e11dce9ad1e3351b872d8c
+  languageName: node
+  linkType: hard
+
+"@tauri-apps/plugin-opener@npm:^2.5.3":
+  version: 2.5.3
+  resolution: "@tauri-apps/plugin-opener@npm:2.5.3"
+  dependencies:
+    "@tauri-apps/api": "npm:^2.8.0"
+  checksum: 10/60f4270931862f2d48a6292de9b57f5d480d9344f563e0e22984cb0ea4e113b4dd88d44727b93194d9f0424deb21a229ea8145a05645711ae0f55130a79cfd31
   languageName: node
   linkType: hard
 
@@ -18686,9 +18696,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rme@npm:0.3.0-beta.45":
-  version: 0.3.0-beta.45
-  resolution: "rme@npm:0.3.0-beta.45"
+"rme@npm:0.3.0-beta.50":
+  version: 0.3.0-beta.50
+  resolution: "rme@npm:0.3.0-beta.50"
   dependencies:
     "@codemirror/autocomplete": "npm:^6.19.1"
     "@codemirror/commands": "npm:^6.10.0"
@@ -18768,7 +18778,7 @@ __metadata:
     void-elements: "npm:^3.1.0"
     yjs: "npm:^13.6.27"
     zens: "npm:^0.1.16"
-  checksum: 10/8324948ba1ede5cdc52212f2f233263d6870f17658375d463aba8353c9e88f4f0a5fb9d95e78ff8958dc2e6f50564a506d064588fec8cd04a4d051454ee6f579
+  checksum: 10/51ec456528ca3961aafbcbce6901688927f8c5e9f8cbb091a3506e685eb5d7bb80a053b23b490212ff0c2087d026b71f06c1411c8ade62b9b0495c549246ef3b
   languageName: node
   linkType: hard
 

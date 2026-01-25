@@ -355,6 +355,14 @@
         }
       },
       "desc": "Configuración de apariencia y visualización de la aplicación, incluida la configuración relacionada con la visión, como el zoom de la interfaz y el tema."
+    },
+    "support": {
+      "label": "Apoyo",
+      "desc": "¡Cada uno de sus apoyos es importante para nosotros! Para mejorar este proyecto de código abierto, puede participar en",
+      "github_star": "Ilumina la estrella en GitHub",
+      "github_star_desc": "Si te gusta este proyecto, por favor, darnos una estrella en GitHub, ¡es nuestro mayor estímulo!",
+      "github_issue": "Presentar un Issue o una propuesta",
+      "github_issue_desc": "Si tiene problemas o tiene alguna sugerencia, bienvenido a enviar Issue en GitHub."
     }
   },
   "updater": {

@@ -314,9 +314,17 @@
       }
     },
     "keyboard": {
-      "label": "键盘",
-      "desc": "键盘快捷键和按键行为的配置，包括快捷键冲突检测等相关设置。",
-      "shortcut_conflict": "该快捷键已被占用"
+        "label": "键盘",
+        "desc": "键盘快捷键和按键行为的配置，包括快捷键冲突检测等相关设置。",
+        "shortcut_conflict": "该快捷键已被占用"
+      },
+    "support": {
+      "label": "支持",
+      "desc": "您的每一份支持对我们都很重要！让这个开源项目变得更好，您可以通过以下方式来参与",
+      "github_star": "在 GitHub 上点亮 Star",
+      "github_star_desc": "如果你喜欢这个项目，请在 GitHub 上给我们一个 Star，这是对我们最大的鼓励！",
+      "github_issue": "提交 Issue 或建议",
+      "github_issue_desc": "如果你遇到问题或有任何建议，欢迎在 GitHub 上提交 Issue。"
     },
     "ai": {
       "label": "AI",

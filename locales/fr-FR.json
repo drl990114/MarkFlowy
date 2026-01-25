@@ -352,6 +352,14 @@
         }
       },
       "desc": "Les paramètres d'apparence et d'affichage de l'application, y compris le zoom de l'interface, les thèmes et autres configurations visuelles."
+    },
+    "support": {
+      "label": "Soutien",
+      "desc": "Chacun de vos soutiens est important pour nous! Pour améliorer ce projet open source, voici comment vous pouvez vous engager",
+      "github_star": "Illuminez Star sur GitHub",
+      "github_star_desc": "Si vous avez aimé ce projet, donnez-nous un Star sur GitHub, c'est le plus grand encouragement pour nous!",
+      "github_issue": "Soumettre un numéro ou une proposition",
+      "github_issue_desc": "Si vous rencontrez des problèmes ou avez des suggestions, n'hésitez pas à soumettre Issue sur GitHub."
     }
   },
   "updater": {
