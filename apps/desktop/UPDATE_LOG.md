@@ -1,5 +1,65 @@
 # UPDATE LOG
 
+## v0.51.0
+
+Features:
+
+- Support for opening file location via right-click, using the system's default file explorer.
+
+- Optimized global search display: each matching line is shown separately, with improved performance.
+
+- Added more block types to the '/' slash menu.
+
+- Added `fileName` variable when saving images to paths relative to the document; see settings for details.
+
+- Added multiple built-in themes.
+
+- Added support for spell check settings (disabled by default).
+
+- Support for quickly inserting `front-matter` nodes by typing `---` at the beginning of a document.
+
+- Support for closing Editor tabs using the middle mouse button.
+
+- Add setting native menu for MacOS.
+
+Fixes:
+
+- Rewrote the search plugin with support for syntax highlighting in code blocks.
+
+- Improved code block language editing: using up/down arrow keys to move the cursor will now focus the language selection box first.
+
+- Optimized overall performance and styles.
+
+---
+
+特性：
+
+- 支持右键打开文件所在位置，使用系统默认的文件浏览器打开。
+
+- 全局搜索显示优化，每行匹配字符单独显示，并优化性能。
+
+- '/' 快捷菜单补充更多块类型。
+
+- 保存图片到文件相对路径时，新增 `fileName` 变量，具体可见设置中的描述。
+
+- 新增多个内置主题。
+
+- 支持设置拼写检查，默认关闭。
+
+- 编辑器支持通过在文档开头输入 `---` 快速插入 `front-matter` 节点。
+
+- 支持通过鼠标中键关闭 Editor 标签页。
+
+- 为 MacOS 添加`设置`原生菜单。
+
+修复：
+
+- 搜索插件重写，支持代码块的高亮。
+
+- 代码块的语言编辑体验支持，支持上下方向键移动光标会先聚焦到语言选择框。
+
+- 优化性能与样式。
+
 ## v0.50.2
 
 Fixes:
