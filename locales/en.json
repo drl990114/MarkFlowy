@@ -411,7 +411,8 @@
       "deleteRow": "Delete row"
     },
     "codemirror": {
-      "searchInputPlaceholder": "Input language"
+      "searchInputPlaceholder": "Input language",
+      "frontMatterPlaceholder": "Enter yaml front matter"
     },
     "common": {
       "loading": "Loading",

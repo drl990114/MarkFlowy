@@ -376,7 +376,8 @@
       "deleteRow": "Supprimer la ligne"
     },
     "codemirror": {
-      "searchInputPlaceholder": "Langue d'entrée"
+      "searchInputPlaceholder": "Langue d'entrée",
+      "frontMatterPlaceholder": "Entrez yaml front matter"
     },
     "common": {
       "loading": "Chargement en",

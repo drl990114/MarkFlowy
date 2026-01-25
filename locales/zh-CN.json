@@ -408,7 +408,8 @@
       "deleteRow": "删除行"
     },
     "codemirror": {
-      "searchInputPlaceholder": "请输入目标语言"
+      "searchInputPlaceholder": "请输入目标语言",
+      "frontMatterPlaceholder": "输入 yaml front matter"
     },
     "ai": {
       "generate": "生成",

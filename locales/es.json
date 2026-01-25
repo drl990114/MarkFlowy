@@ -379,7 +379,8 @@
       "deleteRow": "Eliminar fila"
     },
     "codemirror": {
-      "searchInputPlaceholder": "Idioma de entrada"
+      "searchInputPlaceholder": "Idioma de entrada",
+      "frontMatterPlaceholder": "Entrada yaml front matter"
     },
     "common": {
       "loading": "Cargando",

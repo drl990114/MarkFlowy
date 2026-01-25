@@ -384,7 +384,8 @@
       "deleteRow": "行を削除"
     },
     "codemirror": {
-      "searchInputPlaceholder": "言語を入力"
+      "searchInputPlaceholder": "言語を入力",
+      "frontMatterPlaceholder": "Yaml frontmatterと入力します"
     },
     "common": {
       "loading": "読み込み中",
