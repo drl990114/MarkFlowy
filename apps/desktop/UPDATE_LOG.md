@@ -1,6 +1,6 @@
 # UPDATE LOG
 
-## v0.51.0
+## v0.51.1
 
 Features:
 
