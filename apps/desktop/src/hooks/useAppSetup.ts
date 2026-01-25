@@ -9,7 +9,7 @@ import { checkUnsavedFiles } from '@/services/checkUnsavedFiles'
 import { addExistingMarkdownFileEdit } from '@/services/editor-file'
 import { getFileContent } from '@/services/file-info'
 import { createNewWindow, currentWindow } from '@/services/windows'
-import { useEditorStore } from '@/stores'
+import { useCommandStore, useEditorStore } from '@/stores'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import type { WorkspaceInfo } from '@/stores/useOpenedCacheStore'
 import useOpenedCacheStore from '@/stores/useOpenedCacheStore'
@@ -264,6 +264,7 @@ const useAppSetup = () => {
 
     const unListenMenu = currentWindow.listen<string>('native:menu', ({ payload }) => {
       bus.emit(payload)
+      useCommandStore.getState().execute(payload)
     })
 
     const unListenOpenedUrls = currentWindow.listen<string>('opened-urls', async ({ payload }) => {
