@@ -26,7 +26,7 @@
     "lodash": "^4.17.23",
     "markdown-to-jsx": "^7.7.10",
     "motion": "^12.28.2",
-    "next": "^15.5.7",
+    "next": "^16.1.5",
     "next-contentlayer2": "0.5.8",
     "next-i18next": "^15.3.0",
     "polished": "^4.3.1",
