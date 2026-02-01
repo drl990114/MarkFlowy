@@ -363,6 +363,22 @@
       "github_star_desc": "Si te gusta este proyecto, por favor, darnos una estrella en GitHub, ¡es nuestro mayor estímulo!",
       "github_issue": "Presentar un Issue o una propuesta",
       "github_issue_desc": "Si tiene problemas o tiene alguna sugerencia, bienvenido a enviar Issue en GitHub."
+    },
+    "copilot": {
+      "label": "Copilot",
+      "desc": "Configuración de escritura asistida por IA, seleccione el proveedor y el modelo de IA que ha configurado, y se recomienda seleccionar un modelo pequeño con una cantidad de parámetros de aproximadamente 2b o menos para mejorar la velocidad de respuesta.",
+      "enable": {
+        "label": "Habilitar Copilot",
+        "desc": "Habilitar la escritura asistida por IA"
+      },
+      "provider": {
+        "label": "Proveedor",
+        "desc": "Elegir un proveedor de servicios de IA"
+      },
+      "model": {
+        "label": "Modelo",
+        "desc": "Elegir el modelo de IA que se utilizará"
+      }
     }
   },
   "updater": {

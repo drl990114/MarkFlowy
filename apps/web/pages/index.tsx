@@ -450,7 +450,7 @@ const BgImageContainer = styled.div`
 const BgImage = styled.div`
   max-width: ${(props) => props.theme.homeMaxWidth};
   height: 100%;
-  background-image: url('./bg.png');
+  background-image: url('/bg.png');
   background-repeat: no-repeat;
   background-position: center center;
   background-size: cover;

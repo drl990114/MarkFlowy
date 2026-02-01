@@ -219,6 +219,49 @@ export const getSettingMap = () => {
         i18nKey: 'settings.image.desc',
       },
     },
+    copilot: {
+      i18nKey: 'settings.copilot.label',
+      iconName: 'ri-magic-line',
+      desc: {
+        i18nKey: 'settings.copilot.desc',
+      },
+      enable: {
+        key: 'copilot_enabled',
+        type: 'switch',
+        title: {
+          i18nKey: 'settings.copilot.enable.label',
+        },
+        desc: {
+          i18nKey: 'settings.copilot.enable.desc',
+        },
+      },
+      provider: {
+        key: 'copilot_provider',
+        type: 'select',
+        title: {
+          i18nKey: 'settings.copilot.provider.label',
+        },
+        desc: {
+          i18nKey: 'settings.copilot.provider.desc',
+        },
+        options: [
+          { value: 'ChatGPT', title: 'ChatGPT' },
+          { value: 'DeepSeek', title: 'DeepSeek' },
+          { value: 'Ollama', title: 'Ollama' },
+          { value: 'Google', title: 'Google' },
+        ],
+      },
+      model: {
+        key: 'copilot_model',
+        type: 'select',
+        title: {
+          i18nKey: 'settings.copilot.model.label',
+        },
+        desc: {
+          i18nKey: 'settings.copilot.model.desc',
+        },
+      },
+    },
     ai: {
       i18nKey: 'settings.ai.label',
       iconName: 'ri-sparkling-line',
@@ -405,6 +448,7 @@ export const getSettingMap = () => {
         ],
       },
     },
+
     keyboard: {
       i18nKey: 'settings.keyboard.label',
       iconName: 'ri-keyboard-fill',

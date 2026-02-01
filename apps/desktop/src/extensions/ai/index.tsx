@@ -4,11 +4,11 @@ import SideBarHeader from '@/components/SideBar/SideBarHeader'
 import { EVENT, RIGHTBARITEMKEYS } from '@/constants'
 import { addNewMarkdownFileEdit } from '@/services/editor-file'
 import { useCommandStore } from '@/stores'
-import useThemeStore from '@/stores/useThemeStore'
 import type { BubbleItemType } from '@ant-design/x'
 import { Actions, Bubble, Sender } from '@ant-design/x'
 import XMarkdown from '@ant-design/x-markdown'
 import { RoleType } from '@ant-design/x/es/bubble/interface'
+import { ErrorBoundary } from '@sentry/react'
 import { Spin, Typography } from 'antd'
 import { useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -31,7 +31,6 @@ const ChatList: React.FC<ChatListProps> = (props) => {
     setAiProvider,
     setAiProviderCurModel,
   } = useAiChatStore()
-  const { curTheme } = useThemeStore()
   const aiSettingData = getCurrentAISettingData()
   const [askInput, setAskInput] = useState('')
   const { t } = useTranslation()
@@ -87,7 +86,12 @@ const ChatList: React.FC<ChatListProps> = (props) => {
         },
         loadingRender: () => <Spin indicator={<Icon.LoadingOutlined spin />} />,
         contentRender(content) {
-          return <XMarkdown>{content.content}</XMarkdown>
+          console.log('content', content)
+          return (
+            <ErrorBoundary>
+              <XMarkdown>{content.content}</XMarkdown>
+            </ErrorBoundary>
+          )
         },
         footer: (item: AIChatMessage) => {
           return (
@@ -156,7 +160,7 @@ const ChatList: React.FC<ChatListProps> = (props) => {
         },
       },
     }),
-    [curTheme.styledConstants.accentColor],
+    [],
   )
 
   const handleSubmit = useCallback(() => {

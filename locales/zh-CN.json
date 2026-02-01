@@ -326,6 +326,22 @@
       "github_issue": "提交 Issue 或建议",
       "github_issue_desc": "如果你遇到问题或有任何建议，欢迎在 GitHub 上提交 Issue。"
     },
+    "copilot": {
+      "label": "Copilot",
+      "desc": "AI 辅助写作配置，选择你配置好的 AI 供应商和模型，建议选择参数量 2b 左右或以下的小模型，以提高响应速度。",
+      "enable": {
+        "label": "启用 Copilot",
+        "desc": "启用 AI 辅助写作功能"
+      },
+      "provider": {
+        "label": "供应商",
+        "desc": "选择 AI 服务提供商"
+      },
+      "model": {
+        "label": "模型",
+        "desc": "选择使用的 AI 模型"
+      }
+    },
     "ai": {
       "label": "AI",
       "desc": "AI模型配置，baseUrl 空时默认会请求官方地址，请求头可以用来配置密钥等信息，具体请根据服务提供方的文档。",

@@ -12,6 +12,7 @@ import {
   readFileAsBase64,
 } from '@/helper/image'
 import { useEditorKeybindingStore } from '@/hooks/useKeyboard'
+import { locales } from '@/i18n'
 import { useEditorStore } from '@/stores'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import { join } from '@tauri-apps/api/path'
@@ -36,11 +37,7 @@ const getFileNameWithoutExt = (fileName?: string): string => {
  * - ${documentPath}: Parent folder path of the current document
  * - ${fileName}: Current document file name (without extension)
  */
-const replacePathVariables = (
-  pathRule: string,
-  documentPath: string,
-  fileName: string,
-): string => {
+const replacePathVariables = (pathRule: string, documentPath: string, fileName: string): string => {
   // Clean up pathRule: remove leading dot if present (e.g., ".${documentPath}" -> "${documentPath}")
   let normalizedPath = pathRule.startsWith('.') ? pathRule.substring(1) : pathRule
 
@@ -315,6 +312,78 @@ export const createWysiwygDelegateOptions = (fileId?: string): CreateWysiwygDele
     ai: {
       defaultSelectProvider: aiStoreState.aiProvider,
       supportProviderInfosMap,
+      copilot: settingData.copilot_enabled
+        ? {
+            generateText: async ({
+              context,
+            }: {
+              context: {
+                prevParagraph: string | null
+                nextParagraph: string | null
+                textBefore: string
+                textAfter: string
+                nodeType: string
+              }
+            }) => {
+              const aiSettingData = getCurrentAISettingData()
+              const apiBase = aiSettingData.apiBase
+              const apiKey = aiSettingData.apiKey
+              const headers = aiSettingData.headers
+
+              const contextPrompt = [
+                context.prevParagraph ? `Previous paragraph: ${context.prevParagraph}` : '',
+                `Current paragraph context:`,
+                `Text before cursor: ${context.textBefore}`,
+                `Text after cursor: ${context.textAfter}`,
+                context.nextParagraph ? `Next paragraph: ${context.nextParagraph}` : '',
+              ]
+                .filter(Boolean)
+                .join('\n')
+
+              console.log('copilot', contextPrompt)
+              const text = await aiGenerateTextRequest({
+                sdkProvider: settingData.copilot_provider as AIGenerateTextParams['sdkProvider'],
+                url: apiBase,
+                apiKey,
+                model: settingData.copilot_model,
+                messages: [
+                  {
+                    role: 'system',
+                    content:
+                      '## Task: Content Completion, Fill Text at the `{CURSOR}` Position.\n' +
+                      '\n' +
+                      '### Instructions:\n' +
+                      '- You are a world class writing assistant.\n' +
+                      '- Given the current text, context, and the `{CURSOR}` position, provide a suggestion for text completion.\n' +
+                      '- The suggestion must be based on the current text, as well as the text before the cursor.\n' +
+                      '- Output ONLY the missing continuation immediately after the cursor, not a full rewrite.\n' +
+                      '- Never repeat or paraphrase any part of the existing text before or after the cursor.\n' +
+                      '- Write in the same language as the user input (auto-detect from the context). If unclear, default to ' +
+                      `${locales[settingData.language as keyof typeof locales]}.\n` +
+                      '- Continue the writing style and tone of the existing text.\n' +
+                      '- Use Markdown only if already present in the paragraph; do not introduce new headings or lists.\n' +
+                      '- Complete ONLY the current paragraph. Do not start a new paragraph or add unrelated content.\n' +
+                      '- Keep the completion short: at most 2 sentences.\n' +
+                      '- THIS IS NOT A CONVERSATION, SO PLEASE DO NOT ASK QUESTIONS OR PROMPT FOR ADDITIONAL INFORMATION.\n' +
+                      '\n' +
+                      '### Notes:\n' +
+                      '- Never include any annotations such as "Suggestion:" or "Suggestions:".\n' +
+                      '- Never suggest a newline after a space or newline.\n' +
+                      '- If you do not have a suggestion, return an empty string.\n' +
+                      '- If text after the cursor is non-empty, return an empty string.\n' +
+                      '- DO NOT RETURN ANY TEXT THAT IS ALREADY PRESENT IN THE CURRENT TEXT.\n',
+                  },
+                  {
+                    role: 'system',
+                    content: 'Context:\n' + '---\n' + contextPrompt + '\n' + '---\n',
+                  },
+                ],
+                headers,
+              })
+              return text
+            },
+          }
+        : undefined,
       generateText: async (params) => {
         const aiSettingData = getCurrentAISettingData()
         const apiBase = aiSettingData.apiBase

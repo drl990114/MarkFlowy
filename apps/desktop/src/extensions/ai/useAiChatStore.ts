@@ -159,6 +159,11 @@ const useAiChatStoreV2 = create<AIStore>()(
             }
 
             let fullText = ''
+            let buffer = ''
+            let lastFlush = 0
+            const FLUSH_INTERVAL_MS = 80
+            const MAX_BUFFER_LEN = 256
+
             try {
               // 逐个获取流式响应的文本块
               for await (const chunk of result.textStream) {
@@ -173,8 +178,33 @@ const useAiChatStoreV2 = create<AIStore>()(
                   return
                 }
 
-                fullText += chunk
-                // 实时更新AI消息内容
+                buffer += chunk
+                const now = Date.now()
+                const shouldFlush =
+                  buffer.length >= MAX_BUFFER_LEN || now - lastFlush >= FLUSH_INTERVAL_MS
+
+                if (shouldFlush) {
+                  fullText += buffer
+                  buffer = ''
+                  lastFlush = now
+                  set((state) => ({
+                    ...state,
+                    chatList: state.chatList.map((message) => {
+                      if (message.key === aiMessageKey) {
+                        return {
+                          ...message,
+                          content: fullText,
+                        }
+                      }
+                      return message
+                    }),
+                  }))
+                }
+              }
+
+              if (buffer.length > 0) {
+                fullText += buffer
+                buffer = ''
                 set((state) => ({
                   ...state,
                   chatList: state.chatList.map((message) => {
