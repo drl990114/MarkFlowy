@@ -48,6 +48,7 @@ downcast-rs = "1.2"
 notify = "6.1"
 arboard = "3.6.1"
 base64 = "^0.21.7"
+zhconv = "^0.4.0"
 
 [dependencies.chrono]
 version = "0.4"

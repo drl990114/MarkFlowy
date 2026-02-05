@@ -2,7 +2,7 @@ import useAiChatStore, { getCurrentAISettingData } from '@/extensions/ai/useAiCh
 import useBookMarksStore from '@/extensions/bookmarks/useBookMarksStore'
 import bus from '@/helper/eventBus'
 import { getFileObject } from '@/helper/files'
-import { getRelativePathWithCurWorkspace } from '@/helper/filesys'
+import { FileResultCode, getRelativePathWithCurWorkspace } from '@/helper/filesys'
 import { addNewMarkdownFileEdit, isEmptyEditor } from '@/services/editor-file'
 import { gitAddFileWithCurrentWorkspace } from '@/services/git'
 import { currentWindow } from '@/services/windows'
@@ -182,6 +182,26 @@ ${res}
     ],
   )
 
+  const convertText = useCallback(
+    async (variant: string) => {
+      const content = getEditorContent(curFile?.id || '')
+      try {
+        const res = await invoke<{ code: FileResultCode; content: string }>('convert_text', {
+          text: content || '',
+          variant,
+        })
+        if (res.code === FileResultCode.Success) {
+          bus.emit('editor_set_content', res.content)
+        } else {
+          toast.error(res.content)
+        }
+      } catch (error) {
+        toast.error(String(error))
+      }
+    },
+    [curFile?.id, getEditorContent],
+  )
+
   const handleMoreAction = useCallback(() => {
     const rect = ref1.current?.getBoundingClientRect()
     if (rect === undefined) return
@@ -252,9 +272,41 @@ ${res}
             bus.emit('editor_export_image')
           },
         },
+        {
+          type: 'divider' as const,
+        },
+        {
+          label: '简繁转换',
+          value: 'convert_text',
+          children: [
+            {
+              label: '简 -> 繁 (台湾)',
+              value: 'zh-TW',
+              handler: () => convertText('zh-TW'),
+            },
+            {
+              label: '简 -> 繁 (香港)',
+              value: 'zh-HK',
+              handler: () => convertText('zh-HK'),
+            },
+            {
+              label: '繁 -> 简',
+              value: 'zh-Hans',
+              handler: () => convertText('zh-Hans'),
+            },
+          ],
+        },
       ],
     })
-  }, [curFile, getEditorDelegate, t, fetchCurFileSummary, execute, fetchCurFileTranslate])
+  }, [
+    curFile,
+    getEditorDelegate,
+    t,
+    fetchCurFileSummary,
+    execute,
+    fetchCurFileTranslate,
+    convertText,
+  ])
 
   const handleViewClick = useCallback(() => {
     const rect = ref.current?.getBoundingClientRect()

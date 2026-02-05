@@ -252,6 +252,15 @@ function TextEditor(props: TextEditorProps) {
     }
   }, [debounceSave])
 
+  const setContentHandler = useCallback(
+    (newContent: string) => {
+      if (!active) return
+      editorRef.current?.setContent(newContent)
+      setContent(newContent)
+    },
+    [active],
+  )
+
   useEffect(() => {
     const cb = async (payload: EditorViewType) => {
       if (active) {
@@ -380,12 +389,14 @@ function TextEditor(props: TextEditorProps) {
 
     bus.on('editor_export_html', exportHtmlHandler)
     bus.on('editor_export_image', exportImageHandler)
+    bus.on('editor_set_content', setContentHandler)
 
     return () => {
       bus.detach('editor_export_html', exportHtmlHandler)
       bus.detach('editor_export_image', exportImageHandler)
+      bus.detach('editor_set_content', setContentHandler)
     }
-  }, [active])
+  }, [active, setContentHandler])
 
   useEffect(() => {
     if (active) {

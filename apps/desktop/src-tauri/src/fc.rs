@@ -552,6 +552,86 @@ pub fn get_file_normal_info(path_str: &str) -> FileNormalInfo {
     }
 }
 
+pub fn convert_text_async(
+    text: String,
+    variant: String,
+) -> impl Future<Output = Result<String, SystemError>> {
+    use crate::task_system::{
+        error::SystemError,
+        system::System,
+        task::{ExecStatus, Interrupter, Task, TaskId, TaskOutput},
+    };
+    use async_trait::async_trait;
+    use thiserror::Error;
+    use zhconv::{zhconv, Variant};
+
+    #[derive(Debug, Error)]
+    enum ConvertError {
+        #[error("System error: {0}")]
+        SystemError(#[from] SystemError),
+    }
+
+    #[derive(Debug)]
+    struct ConvertTextTask {
+        id: TaskId,
+        text: String,
+        variant: String,
+    }
+
+    impl ConvertTextTask {
+        fn new(text: String, variant: String) -> Self {
+            Self {
+                id: TaskId::new_v4(),
+                text,
+                variant,
+            }
+        }
+    }
+
+    #[async_trait]
+    impl Task<ConvertError> for ConvertTextTask {
+        fn id(&self) -> TaskId {
+            self.id
+        }
+
+        fn with_priority(&self) -> bool {
+            true
+        }
+
+        async fn run(&mut self, _interrupter: &Interrupter) -> Result<ExecStatus, ConvertError> {
+            let variant_enum = match self.variant.as_str() {
+                "zh-TW" => Variant::ZhTW,
+                "zh-HK" => Variant::ZhHK,
+                "zh-CN" => Variant::ZhCN,
+                "zh-Hans" => Variant::ZhHans,
+                _ => Variant::ZhTW,
+            };
+            let result = zhconv(&self.text, variant_enum);
+            Ok(ExecStatus::Done(TaskOutput::Out(Box::new(result))))
+        }
+    }
+
+    async move {
+        let system = System::<ConvertError>::new();
+        let task = ConvertTextTask::new(text, variant);
+        let handle = system
+            .dispatch(task)
+            .await
+            .map_err(|_| SystemError::TaskAborted(TaskId::nil()))?;
+
+        match handle.await {
+            Ok(crate::task_system::task::TaskStatus::Done((_, TaskOutput::Out(out)))) => {
+                let text = out
+                    .downcast::<String>()
+                    .map_err(|_| SystemError::TaskAborted(TaskId::nil()))?;
+                Ok(*text)
+            }
+            Ok(crate::task_system::task::TaskStatus::Error(ConvertError::SystemError(e))) => Err(e),
+            _ => Err(SystemError::TaskAborted(TaskId::nil())),
+        }
+    }
+}
+
 pub mod cmd {
     use crate::fc::{self, FileNormalInfo, FileResultCode};
     use base64::engine::Engine;
@@ -952,6 +1032,20 @@ pub mod cmd {
                     content: format!("Failed to copy file from '{}' to '{}': {}", from, to, e),
                 }
             }
+        }
+    }
+
+    #[tauri::command]
+    pub async fn convert_text(text: String, variant: String) -> FileResult {
+        match fc::convert_text_async(text, variant).await {
+            Ok(content) => FileResult {
+                code: FileResultCode::Success,
+                content,
+            },
+            Err(e) => FileResult {
+                code: FileResultCode::UnknownError,
+                content: e.to_string(),
+            },
         }
     }
 }
