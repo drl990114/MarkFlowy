@@ -384,6 +384,24 @@
         "label": "モデル",
         "desc": "使用するAIモデルを選択します"
       }
+    },
+    "themeStore": {
+      "label": "テーマショップ",
+      "desc": "コミュニティが作成したテーマを閲覧してダウンロードし、エディタの外観を豊かにします。",
+      "submit_theme": "トピックの送信",
+      "name": "名称",
+      "mode": "モード",
+      "version": "バージョン",
+      "author": "著者",
+      "description": "説明",
+      "tags": "ラベル",
+      "action": "操作",
+      "official": "公式",
+      "builtin": "内蔵",
+      "installed": "インストール済み",
+      "download": "ダウンロード",
+      "uninstall": "アンインストール",
+      "only_installed": "インストール済みのみを見る"
     }
   },
   "updater": {

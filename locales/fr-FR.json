@@ -376,6 +376,24 @@
         "label": "Modèle",
         "desc": "Choisir le modèle d'IA à utiliser"
       }
+    },
+    "themeStore": {
+      "label": "Magasin à thème",
+      "desc": "Parcourir et télécharger des thèmes créés par la communauté pour enrichir votre apparence d'éditeur.",
+      "submit_theme": "Soumettre un sujet",
+      "name": "Nom",
+      "mode": "Mode",
+      "version": "Version",
+      "author": "Auteur",
+      "description": "Description",
+      "tags": "Étiquettes",
+      "action": "Opération",
+      "official": "Officiel",
+      "builtin": "Intégré",
+      "installed": "Installé",
+      "download": "Télécharger",
+      "uninstall": "Désinstaller",
+      "only_installed": "Il suffit de regarder installé"
     }
   },
   "updater": {

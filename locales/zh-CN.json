@@ -314,10 +314,10 @@
       }
     },
     "keyboard": {
-        "label": "键盘",
-        "desc": "键盘快捷键和按键行为的配置，包括快捷键冲突检测等相关设置。",
-        "shortcut_conflict": "该快捷键已被占用"
-      },
+      "label": "键盘",
+      "desc": "键盘快捷键和按键行为的配置，包括快捷键冲突检测等相关设置。",
+      "shortcut_conflict": "该快捷键已被占用"
+    },
     "support": {
       "label": "支持",
       "desc": "您的每一份支持对我们都很重要！让这个开源项目变得更好，您可以通过以下方式来参与",
@@ -341,6 +341,24 @@
         "label": "模型",
         "desc": "选择使用的 AI 模型"
       }
+    },
+    "themeStore": {
+      "label": "主题商店",
+      "desc": "浏览和下载社区创建的主题，丰富你的编辑器外观。",
+      "submit_theme": "提交主题",
+      "name": "名称",
+      "mode": "模式",
+      "version": "版本",
+      "author": "作者",
+      "description": "描述",
+      "tags": "标签",
+      "action": "操作",
+      "official": "官方",
+      "builtin": "内置",
+      "installed": "已安装",
+      "download": "下载",
+      "uninstall": "卸载",
+      "only_installed": "仅看已安装"
     },
     "ai": {
       "label": "AI",

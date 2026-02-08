@@ -43,6 +43,9 @@ export const ConfirmModal = ({
       title={title}
       open={modal.visible}
       onClose={handleClose}
+      style={{
+        zIndex: 99
+      }}
       footer={
         actionsGenerater
           ? actionsGenerater(modal.hide)

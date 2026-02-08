@@ -411,6 +411,24 @@
         "label": "Model",
         "desc": "Select the AI model to use"
       }
+    },
+    "themeStore": {
+      "label": "Theme Store",
+      "desc": "Browse and download themes created by the community to enrich the look of your editor.",
+      "submit_theme": "Submission Topic",
+      "name": "Name",
+      "mode": "Mode",
+      "version": "Version",
+      "author": "Author",
+      "description": "Description",
+      "tags": "Label",
+      "action": "Operation",
+      "official": "Official",
+      "builtin": "Built-in",
+      "installed": "Installed",
+      "download": "Download",
+      "uninstall": "Unload",
+      "only_installed": "Only see installed"
     }
   },
   "updater": {

@@ -129,6 +129,8 @@ pub fn run() {
             process::app_exit,
             process::app_restart,
             themes::cmd::load_themes,
+            themes::cmd::download_theme,
+            themes::cmd::remove_theme,
             font::cmd::font_list,
             workspace::cmd::is_git_repository,
             file_watcher::cmd::watch_file,

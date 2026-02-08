@@ -379,6 +379,24 @@
         "label": "Modelo",
         "desc": "Elegir el modelo de IA que se utilizará"
       }
+    },
+    "themeStore": {
+      "label": "Tienda de temas",
+      "desc": "Explorar y descargar los temas creados por la comunidad para enriquecer la apariencia de su editor.",
+      "submit_theme": "Enviar un tema",
+      "name": "Nombre",
+      "mode": "Modo",
+      "version": "Versión",
+      "author": "Autor",
+      "description": "Descripción",
+      "tags": "Etiqueta",
+      "action": "Operación",
+      "official": "Oficial",
+      "builtin": "Construido",
+      "installed": "Instalado",
+      "download": "Descargar",
+      "uninstall": "Desinstalar",
+      "only_installed": "Solo mira la instalación"
     }
   },
   "updater": {

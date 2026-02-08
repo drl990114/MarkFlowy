@@ -7,6 +7,7 @@ import { appSettingStoreSetup } from '@/services/app-setting'
 import useAppInfoStore from '@/stores/useAppInfoStore'
 import NiceModal from '@ebay/nice-modal-react'
 import { invoke } from '@tauri-apps/api/core'
+import { openUrl } from '@tauri-apps/plugin-opener'
 import type { Update } from '@tauri-apps/plugin-updater'
 import { check } from '@tauri-apps/plugin-updater'
 import classNames from 'classnames'
@@ -20,6 +21,8 @@ import { ImageSetting } from './ImageSetting'
 import { KeyboardTable } from './KeyboardTable'
 import { Container } from './styles'
 import { Support } from './Support'
+import { ThemeStore } from './ThemeStore'
+
 export interface DialogTitleProps {
   children?: ReactNode
   onClose: () => void
@@ -84,6 +87,10 @@ function Setting() {
       return <KeyboardTable />
     }
 
+    if (curGroupKey === 'themeStore') {
+      return <ThemeStore />
+    }
+
     if (curGroupKey === 'image') {
       return <ImageSetting />
     }
@@ -102,6 +109,30 @@ function Setting() {
         return <SettingGroup key={key} group={group} groupKey={key} categoryKey={curGroupKey} />
       }
     })
+  }
+
+  const handleOpenThemeStoreFile = () => {
+    openUrl('https://github.com/drl990114/MarkFlowy')
+  }
+
+  const renderAction = () => {
+    if (curGroupKey === 'themeStore') {
+      return (
+        <Button size='small' btnType='primary' onClick={handleOpenThemeStoreFile}>
+          <i className='ri-github-fill' style={{ marginRight: '8px' }} />
+          {t('settings.themeStore.submit_theme')}
+        </Button>
+      )
+    }
+
+    if (curGroupKey === 'general') {
+      return (
+        <Button size='small' btnType='primary' onClick={handleResetConfiguration}>
+          <i className='ri-restart-line' style={{ marginRight: '8px' }} />
+          {t('settings.resetAppConf.label')}
+        </Button>
+      )
+    }
   }
 
   return (
@@ -166,11 +197,7 @@ function Setting() {
             <h2 className='setting-title'>{t(curGroup.i18nKey)}</h2>
             <p className='setting-subtitle'>{t(curGroup.desc?.i18nKey)}</p>
           </div>
-          <div className='setting-actions'>
-            <Button size='small' btnType='primary' onClick={handleResetConfiguration}>
-              {t('settings.resetAppConf.label')}
-            </Button>
-          </div>
+          <div className='setting-actions'>{renderAction()}</div>
         </div>
         {renderCurrentSettingData()}
       </div>

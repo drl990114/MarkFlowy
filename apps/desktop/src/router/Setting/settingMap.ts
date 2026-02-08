@@ -95,6 +95,13 @@ export const getSettingMap = () => {
         },
       },
     },
+    themeStore: {
+      i18nKey: 'settings.themeStore.label',
+      iconName: 'ri-palette-line',
+      desc: {
+        i18nKey: 'settings.themeStore.desc',
+      },
+    },
     editor: {
       i18nKey: 'settings.editor.label',
       iconName: 'ri-edit-box-line',

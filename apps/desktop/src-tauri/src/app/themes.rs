@@ -93,9 +93,56 @@ impl Default for AppThemes {
 pub mod cmd {
     use super::{AppThemes, Theme};
     use tauri::command;
+    use download_npm;
 
     #[command]
     pub async fn load_themes() -> Vec<Theme> {
         AppThemes::default().init().await.themes
+    }
+
+    #[command]
+    pub async fn download_theme(name: String) -> Result<(), String> {
+        let dir_path = AppThemes::dir_path();
+        // Handle invalid path encoding to prevent runtime panics and provide debug context
+        let dest_path = dir_path.to_str().ok_or_else(|| {
+            let err_msg = format!("Invalid theme directory path: {:?}", dir_path);
+            tracing::error!("{}", err_msg);
+            err_msg
+        })?.to_string();
+
+        download_npm::download(
+            &name,
+            download_npm::DownloadOptions {
+                untar: true,
+                dest_path,
+            },
+        )
+        .await
+        .map_err(|e| {
+            // Log the detailed error for debugging purposes while returning a user-friendly message
+            let err_msg = format!("Failed to download theme '{}': {}", name, e);
+            tracing::error!("{}", err_msg);
+            err_msg
+        })?;
+
+        Ok(())
+    }
+
+    #[command]
+    pub async fn remove_theme(name: String) -> Result<(), String> {
+        let dir_path = AppThemes::dir_path();
+        let theme_path = dir_path.join(&name);
+
+        if !theme_path.exists() {
+            return Err(format!("Theme '{}' not found", name));
+        }
+
+        std::fs::remove_dir_all(&theme_path).map_err(|e| {
+            let err_msg = format!("Failed to remove theme '{}': {}", name, e);
+            tracing::error!("{}", err_msg);
+            err_msg
+        })?;
+
+        Ok(())
     }
 }
