@@ -1,0 +1,50 @@
+{
+  "editor": {
+    "table": {
+      "insertColumnAfter": "Insérer une colonne après",
+      "insertColumnBefore": "Insérer une colonne avant",
+      "insertRowAfter": "Insérer une ligne après",
+      "insertRowBefore": "Insérer une ligne avant",
+      "deleteColumn": "Supprimer la colonne",
+      "deleteRow": "Supprimer la ligne"
+    },
+    "codemirror": {
+      "searchInputPlaceholder": "Langue d'entrée",
+      "frontMatterPlaceholder": "Entrez yaml front matter"
+    },
+    "common": {
+      "loading": "Chargement en",
+      "accept": "Accepter"
+    },
+    "ai": {
+      "generate": "Générer",
+      "stop": "Arrêter",
+      "retry": "Réessayer",
+      "regenerate": "Régénérer",
+      "preview": "Aperçu",
+      "error": "Erreur",
+      "prompt": "Astuces"
+    },
+    "toolbar": {
+      "undo": "Annuler",
+      "redo": "Refaire",
+      "separator": "Insérez le séparateur",
+      "blockquote": "Blockquote",
+      "bold": "Audacieux",
+      "italic": "Italique",
+      "codeText": "Texte du code",
+      "codeBlock": "Bloc de code",
+      "heading": "Rubrique",
+      "bulletList": "Liste des balles",
+      "orderedList": "Liste ordonné",
+      "taskList": "Liste des tâches"
+    },
+    "slashMenu": {
+      "searchPlaceholder": "Rechercher un élément de menu...",
+      "noResults": "Aucun résultat",
+      "toNavigate": "Pour la navigation",
+      "toSelect": "Pour la sélection",
+      "toCancel": "Utilisé pour annuler"
+    }
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "editor": {
+    "table": {
+      "insertColumnAfter": "Insertar columna después",
+      "insertColumnBefore": "Insertar columna antes",
+      "insertRowAfter": "Insertar fila debajo",
+      "insertRowBefore": "Insertar fila encima",
+      "deleteColumn": "Eliminar columna",
+      "deleteRow": "Eliminar fila"
+    },
+    "codemirror": {
+      "searchInputPlaceholder": "Idioma de entrada",
+      "frontMatterPlaceholder": "Entrada yaml front matter"
+    },
+    "common": {
+      "loading": "Cargando",
+      "accept": "Aceptar"
+    },
+    "ai": {
+      "generate": "Generar",
+      "stop": "Paren",
+      "retry": "Inténtalo de nuevo",
+      "regenerate": "Regeneración",
+      "preview": "Vista previa",
+      "error": "Error",
+      "prompt": "Consejos"
+    },
+    "toolbar": {
+      "undo": "Deshacer",
+      "redo": "Rehacer",
+      "separator": "Insertar separador",
+      "blockquote": "Blockquote",
+      "bold": "Negrita",
+      "italic": "Cursiva",
+      "codeText": "Texto de código",
+      "codeBlock": "Bloque de código",
+      "heading": "Rúbrica",
+      "bulletList": "Lista de viñetas",
+      "orderedList": "Lista ordenada",
+      "taskList": "Lista de tareas"
+    },
+    "slashMenu": {
+      "searchPlaceholder": "Buscar elementos del menú...",
+      "noResults": "Sin resultados",
+      "toNavigate": "Para la navegación",
+      "toSelect": "Para la selección",
+      "toCancel": "Para cancelar"
+    }
+  }
+}

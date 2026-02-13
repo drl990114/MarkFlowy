@@ -1,0 +1,50 @@
+{
+  "editor": {
+    "common": {
+      "loading": "加载中",
+      "accept": "接受"
+    },
+    "table": {
+      "insertColumnAfter": "向后插入列",
+      "insertColumnBefore": "向前插入列",
+      "insertRowAfter": "向后插入行",
+      "insertRowBefore": "向前插入行",
+      "deleteColumn": "删除列",
+      "deleteRow": "删除行"
+    },
+    "codemirror": {
+      "searchInputPlaceholder": "请输入目标语言",
+      "frontMatterPlaceholder": "输入 yaml front matter"
+    },
+    "ai": {
+      "generate": "生成",
+      "stop": "停止",
+      "retry": "重试",
+      "regenerate": "重新生成",
+      "preview": "预览",
+      "error": "错误",
+      "prompt": "提示"
+    },
+    "toolbar": {
+      "undo": "撤消",
+      "redo": "重做",
+      "separator": "插入分隔符",
+      "blockquote": "引用",
+      "bold": "粗体",
+      "italic": "斜体",
+      "codeText": "代码文本",
+      "codeBlock": "代码块",
+      "heading": "标题",
+      "bulletList": "符号列表",
+      "orderedList": "有序列表",
+      "taskList": "任务列表"
+    },
+    "slashMenu": {
+      "searchPlaceholder": "搜索菜单项...",
+      "noResults": "无结果",
+      "toNavigate": "用于导航",
+      "toSelect": "用于选择",
+      "toCancel": "用于取消"
+    }
+  }
+}

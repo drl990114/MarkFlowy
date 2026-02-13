@@ -1,7 +1,13 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useMemo } from 'react'
+import { useTranslation } from 'next-i18next'
 import { darkTheme } from 'theme'
 import { preloadRme, useRme, useRmeThemeProvider } from '../hooks/useRme'
 import Loading from './Loading'
+import EN_EDITOR from '../../../locales/editor/en.json'
+import CN_EDITOR from '../../../locales/editor/cn.json'
+import FRFR_EDITOR from '../../../locales/editor/frFR.json'
+import JA_EDITOR from '../../../locales/editor/ja.json'
+import ES_EDITOR from '../../../locales/editor/es.json'
 
 // 在组件定义前尝试提前触发预加载
 if (typeof window !== 'undefined') {
@@ -27,6 +33,23 @@ const THEME_CONFIG = {
   },
 } as const
 
+const EDITOR_I18N_RESOURCES = {
+  en: { translation: { ...EN_EDITOR.editor } },
+  cn: { translation: { ...CN_EDITOR.editor } },
+  frFR: { translation: { ...FRFR_EDITOR.editor } },
+  es: { translation: { ...ES_EDITOR.editor } },
+  ja: { translation: { ...JA_EDITOR.editor } },
+} as const
+
+function normalizeEditorLang(lng?: string) {
+  const lower = (lng || 'en').toLowerCase()
+  if (lower.startsWith('zh')) return 'cn'
+  if (lower.startsWith('ja')) return 'ja'
+  if (lower.startsWith('fr')) return 'frFR'
+  if (lower.startsWith('es')) return 'es'
+  return 'en'
+}
+
 export const RmePreload = () => {
   useRme()
   return null
@@ -34,6 +57,15 @@ export const RmePreload = () => {
 
 const RmeProvider: React.FC<RmeProviderProps> = ({ themeTokens, children }) => {
   const { ThemeProvider, loading, error, reload } = useRmeThemeProvider()
+  const { i18n } = useTranslation()
+
+  const editorI18n = useMemo(
+    () => ({
+      locales: EDITOR_I18N_RESOURCES,
+      language: normalizeEditorLang(i18n?.language),
+    }),
+    [i18n?.language],
+  )
 
   useEffect(() => {
     if (loading && !ThemeProvider && reload) {
@@ -85,7 +117,11 @@ const RmeProvider: React.FC<RmeProviderProps> = ({ themeTokens, children }) => {
     Object.assign(theme.token, themeTokens)
   }
 
-  return <ThemeProvider theme={theme}>{children}</ThemeProvider>
+  return (
+    <ThemeProvider theme={theme} i18n={editorI18n}>
+      {children}
+    </ThemeProvider>
+  )
 }
 
 export default RmeProvider

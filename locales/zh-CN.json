@@ -28,6 +28,23 @@
     "source_code": "源代码",
     "preview": "预览"
   },
+  "toolbar": {
+    "undo": "撤消",
+    "redo": "重做",
+    "h1": "标题 1",
+    "h2": "标题 2",
+    "h3": "标题 3",
+    "bold": "粗体",
+    "italic": "斜体",
+    "code": "行内代码",
+    "strike": "删除线",
+    "link": "链接",
+    "image": "图片",
+    "quote": "引用",
+    "bulletList": "符号列表",
+    "orderedList": "有序列表",
+    "taskList": "任务列表"
+  },
   "action": {
     "bookmark": "收藏",
     "bookmarked": "已收藏",
@@ -427,54 +444,6 @@
   "updater": {
     "install": "安装",
     "download_and_install": "下载并安装"
-  },
-  "editor": {
-    "common": {
-      "loading": "加载中",
-      "accept": "接受"
-    },
-    "table": {
-      "insertColumnAfter": "向后插入列",
-      "insertColumnBefore": "向前插入列",
-      "insertRowAfter": "向后插入行",
-      "insertRowBefore": "向前插入行",
-      "deleteColumn": "删除列",
-      "deleteRow": "删除行"
-    },
-    "codemirror": {
-      "searchInputPlaceholder": "请输入目标语言",
-      "frontMatterPlaceholder": "输入 yaml front matter"
-    },
-    "ai": {
-      "generate": "生成",
-      "stop": "停止",
-      "retry": "重试",
-      "regenerate": "重新生成",
-      "preview": "预览",
-      "error": "错误",
-      "prompt": "提示"
-    },
-    "toolbar": {
-      "undo": "撤消",
-      "redo": "重做",
-      "separator": "插入分隔符",
-      "blockquote": "引用",
-      "bold": "粗体",
-      "italic": "斜体",
-      "codeText": "代码文本",
-      "codeBlock": "代码块",
-      "heading": "标题",
-      "bulletList": "符号列表",
-      "orderedList": "有序列表",
-      "taskList": "任务列表"
-    },
-    "slashMenu": {
-      "searchPlaceholder": "搜索菜单项...",
-      "noResults": "无结果",
-      "toNavigate": "用于导航",
-      "toSelect": "用于选择",
-      "toCancel": "用于取消"
-    }
   },
   "explorer": {
     "refresh_folder_data": "刷新文件夹数据",

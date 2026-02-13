@@ -28,6 +28,23 @@
     "source_code": "Source Code",
     "preview": "Preview"
   },
+  "toolbar": {
+    "undo": "Undo",
+    "redo": "Redo",
+    "h1": "Heading 1",
+    "h2": "Heading 2",
+    "h3": "Heading 3",
+    "bold": "Bold",
+    "italic": "Italic",
+    "code": "Inline Code",
+    "strike": "Strikethrough",
+    "link": "Link",
+    "image": "Image",
+    "quote": "Blockquote",
+    "bulletList": "Bullet List",
+    "orderedList": "Ordered List",
+    "taskList": "Task List"
+  },
   "action": {
     "bookmark": "bookmark",
     "bookmarked": "bookmarked",
@@ -434,54 +451,6 @@
   "updater": {
     "install": "install",
     "download_and_install": "Download and install"
-  },
-  "editor": {
-    "table": {
-      "insertColumnAfter": "Insert column after",
-      "insertColumnBefore": "Insert column before",
-      "insertRowAfter": "Insert row after",
-      "insertRowBefore": "Insert row before",
-      "deleteColumn": "Delete column",
-      "deleteRow": "Delete row"
-    },
-    "codemirror": {
-      "searchInputPlaceholder": "Input language",
-      "frontMatterPlaceholder": "Enter yaml front matter"
-    },
-    "common": {
-      "loading": "Loading",
-      "accept": "Accept"
-    },
-    "ai": {
-      "generate": "Generate",
-      "stop": "Stop",
-      "retry": "Retry",
-      "regenerate": "Regenerate",
-      "preview": "Preview",
-      "error": "Error",
-      "prompt": "Prompt"
-    },
-    "toolbar": {
-      "undo": "Undo",
-      "redo": "Redo",
-      "separator": "Insert Separator",
-      "blockquote": "Blockquote",
-      "bold": "Bold",
-      "italic": "Italic",
-      "codeText": "Code Text",
-      "codeBlock": "Code Block",
-      "heading": "Heading",
-      "bulletList": "Bullet List",
-      "orderedList": "Ordered List",
-      "taskList": "Task List"
-    },
-    "slashMenu": {
-      "searchPlaceholder": "Search menu items...",
-      "noResults": "No results",
-      "toNavigate": "to navigate",
-      "toSelect": "to select",
-      "toCancel": "for cancellation"
-    }
   },
   "workspace": {
     "info": "Workspace Information",

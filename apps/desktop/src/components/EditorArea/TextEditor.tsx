@@ -462,14 +462,7 @@ function TextEditor(props: TextEditorProps) {
       },
       delegateOptions: createWysiwygDelegateOptions(curFile.id),
       wysiwygToolBarOptions: {
-        enable: true,
-        compProps: {
-          style: {
-            position: 'sticky',
-            top: '0',
-            zIndex: 10,
-          },
-        },
+        enable: false,
       },
       errorHandler: {
         onError(params) {

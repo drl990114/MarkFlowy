@@ -28,6 +28,23 @@
     "source_code": "ソースコード",
     "preview": "プレビュー"
   },
+  "toolbar": {
+    "undo": "元に戻す",
+    "redo": "やり直す",
+    "h1": "見出し 1",
+    "h2": "見出し 2",
+    "h3": "見出し 3",
+    "bold": "太字",
+    "italic": "斜体",
+    "code": "インラインコード",
+    "strike": "取り消し線",
+    "link": "リンク",
+    "image": "画像",
+    "quote": "引用",
+    "bulletList": "箇条書き",
+    "orderedList": "番号付きリスト",
+    "taskList": "タスクリスト"
+  },
   "action": {
     "bookmark": "ブックマーク",
     "bookmarked": "ブックマーク済み",
@@ -407,54 +424,6 @@
   "updater": {
     "install": "インストール",
     "download_and_install": "ダウンロードしてインストール"
-  },
-  "editor": {
-    "table": {
-      "insertColumnAfter": "列を挿入",
-      "insertColumnBefore": "列を挿入",
-      "insertRowAfter": "行を挿入",
-      "insertRowBefore": "行を挿入",
-      "deleteColumn": "列を削除",
-      "deleteRow": "行を削除"
-    },
-    "codemirror": {
-      "searchInputPlaceholder": "言語を入力",
-      "frontMatterPlaceholder": "Yaml frontmatterと入力します"
-    },
-    "common": {
-      "loading": "読み込み中",
-      "accept": "承認"
-    },
-    "ai": {
-      "generate": "生成",
-      "stop": "停止",
-      "retry": "再試行",
-      "regenerate": "再生成",
-      "preview": "プレビュー",
-      "error": "エラー",
-      "prompt": "プロンプト"
-    },
-    "toolbar": {
-      "undo": "元に戻す",
-      "redo": "やり直す",
-      "separator": "区切りを挿入",
-      "blockquote": "引用",
-      "bold": "太字",
-      "italic": "斜体",
-      "codeText": "コードテキスト",
-      "codeBlock": "コードブロック",
-      "heading": "見出し",
-      "bulletList": "箇条書き",
-      "orderedList": "番号付きリスト",
-      "taskList": "タスクリスト"
-    },
-    "slashMenu": {
-      "searchPlaceholder": "メニュー項目を検索します...",
-      "noResults": "結果がありません",
-      "toNavigate": "ナビゲーション用",
-      "toSelect": "選択用",
-      "toCancel": "キャンセル用"
-    }
   },
   "workspace": {
     "info": "ワークスペース情報",

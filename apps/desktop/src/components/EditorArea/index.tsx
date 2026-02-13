@@ -1,9 +1,10 @@
 import { FindReplace } from '@/components/EditorArea/editorToolBar/FindReplace'
+import { SourceCodeToolbar } from '@/components/EditorArea/editorToolBar/SourceCodeToolbar/SourceCodeToolbar'
+import { WysiwygToolbar } from '@/components/EditorArea/editorToolBar/WysiwygToolbar'
 import { useEditorStore } from '@/stores'
 import { memo } from 'react'
 import Editor from './Editor'
 import EditorAreaTabs from './EditorAreaTabs'
-import { EditorInfoBar } from './EditorInfoBar'
 import { EditorCount } from './editorToolBar/EditorCount'
 import { EmptyState } from './EmptyState'
 import { Container } from './styles'
@@ -18,7 +19,8 @@ function EditorArea() {
   return (
     <Container className='w-full h-full'>
       <EditorAreaTabs />
-      <EditorInfoBar />
+      <WysiwygToolbar />
+      <SourceCodeToolbar />
       <FindReplace />
       {opened.map((id) => {
         return <Editor key={id} id={id} active={id === activeId} />
