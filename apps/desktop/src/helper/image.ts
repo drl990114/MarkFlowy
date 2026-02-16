@@ -3,6 +3,7 @@ import { convertFileSrc, invoke } from '@tauri-apps/api/core'
 import { join } from '@tauri-apps/api/path'
 import { fetch } from '@tauri-apps/plugin-http'
 import { FileResultCode, FileSysResult } from './filesys'
+import { logger } from './logger'
 
 const convertHttpToBase64 = async (url: string): Promise<string> => {
   try {
@@ -27,11 +28,11 @@ const convertHttpToBase64 = async (url: string): Promise<string> => {
         reader.readAsDataURL(blob)
       })
 
-      console.log('Converted to base64 via fetch')
+      logger.info('Converted to base64 via fetch')
       return base64
     }
   } catch (fetchError) {
-    console.log('Direct fetch failed, trying canvas method:', fetchError)
+    logger.info('Direct fetch failed, trying canvas method:', fetchError)
   }
 
   return url
@@ -87,13 +88,13 @@ export const convertImageToBase64 = async (src: string): Promise<string> => {
       img.src = fileSrc
     })
 
-    console.log('Converted to base64 via canvas')
+    logger.info('Converted to base64 via canvas')
     return base64
   } catch (canvasError) {
-    console.error('Canvas method failed:', canvasError)
+    logger.error('Canvas method failed:', canvasError)
   }
 
-  console.log('All conversion methods failed, returning original src')
+  logger.info('All conversion methods failed, returning original src')
   return src
 }
 
@@ -137,7 +138,7 @@ export const moveImageToLocalFolder = async (
     // Generate a unique filename
     const fileName = `image_${Date.now()}.png`
     const filePath = await join(targetFolderPath, fileName)
-    console.log('Saving base64 image to:', filePath)
+    logger.info('Saving base64 image to:', filePath)
     await invoke('write_u8_array_to_file', { filePath, content: buffer })
     return filePath
   } else if (imageSrc.startsWith('http') || imageSrc.startsWith('https')) {
@@ -151,21 +152,21 @@ export const moveImageToLocalFolder = async (
       const buffer = new Uint8Array(arrayBuffer)
       const fileName = `image_${Date.now()}.png`
       const filePath = await join(targetFolderPath, fileName)
-      console.log('Downloading image to:', filePath)
+      logger.info('Downloading image to:', filePath)
       await invoke('write_u8_array_to_file', { filePath, content: buffer })
       return filePath
     } catch (error) {
-      console.error('Failed to download image:', error)
+      logger.error('Failed to download image:', error)
       throw error
     }
   } else {
     const rootPath = useEditorStore.getState().folderData?.[0]?.path || ''
     const { src: localPath } = await getImageInfo(imageSrc, rootPath)
-    console.log('Local image path:', localPath)
+    logger.info('Local image path:', localPath)
 
     // 判断这个localPath是不是在targetFolderPath里面
     if (localPath.startsWith(targetFolderPath)) {
-      console.log('Image is already in the target folder:', localPath)
+      logger.info('Image is already in the target folder:', localPath)
       return localPath
     }
 
@@ -174,19 +175,19 @@ export const moveImageToLocalFolder = async (
       `image_${Date.now()}.${localPath.split('.').pop()}`,
     )
 
-    console.log('targetPath', targetPath)
+    logger.info('targetPath', targetPath)
 
     try {
       const res = await invoke<FileSysResult>('copy_file', { from: localPath, to: targetPath })
       if (res.code === FileResultCode.Success) {
-        console.log('Image copied to:', targetPath)
+        logger.info('Image copied to:', targetPath)
         return targetPath
       } else {
-        console.error('Failed to copy image file:', res.content)
+        logger.error('Failed to copy image file:', res.content)
         throw new Error(res.content)
       }
     } catch (error) {
-      console.error('Failed to copy image file:', error)
+      logger.error('Failed to copy image file:', error)
     }
     return targetPath
   }
@@ -214,7 +215,7 @@ export const getImageInfo = async (src: string, baseUrl: string) => {
     const isAbsoluteLocal = /^(?:\/|\\\\|[a-zA-Z]:\\).+/.test(src)
     if (isUrl || (!isAbsoluteLocal && !baseUrl)) {
       if (!isUrl && !baseUrl) {
-        console.warn('"baseUrl" is not defined!')
+        logger.warn('"baseUrl" is not defined!')
       }
 
       return {
@@ -265,11 +266,11 @@ export const getImageObjectUrl = async (filePath: string): Promise<string> => {
       const objectURL = URL.createObjectURL(blob)
       return objectURL
     } else {
-      console.error('Failed to read file:', result.content)
+      logger.error('Failed to read file:', result.content)
       return filePath
     }
   } catch (error) {
-    console.error('Error getting object URL:', error)
+    logger.error('Error getting object URL:', error)
     return filePath
   }
 }

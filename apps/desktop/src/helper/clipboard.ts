@@ -1,4 +1,5 @@
 import { invoke } from "@tauri-apps/api/core"
+import { logger } from "./logger"
 
 export const clipboardRead = async () => {
   let html = '',
@@ -7,12 +8,12 @@ export const clipboardRead = async () => {
   try {
     html = await invoke<string>('get_clipboard_html')
   } catch (error) {
-    console.error('get_clipboard_html error: ', error)
+    logger.error('get_clipboard_html error: ', error)
   }
   try {
     text = await invoke<string>('get_clipboard_text')
   } catch (error) {
-    console.error('get_clipboard_text error: ', error)
+    logger.error('get_clipboard_text error: ', error)
   }
 
   return {

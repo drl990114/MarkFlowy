@@ -2,6 +2,7 @@ import type { RightBarItem } from '@/components/SideBar'
 import { MfIconButton } from '@/components/ui-v2/Button'
 import { RIGHTBARITEMKEYS } from '@/constants'
 import { getFileObjectByPath } from '@/helper/files'
+import { logger } from '@/helper/logger'
 import { useEditorStore } from '@/stores'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { invoke } from '@tauri-apps/api/core'
@@ -208,7 +209,7 @@ const SearchView = memo(() => {
       },
     })
 
-    console.log('res', res)
+    logger.info('res', res)
     addSearchResult(res.data)
 
     const newExpandIdMap: Record<string, boolean> = {}

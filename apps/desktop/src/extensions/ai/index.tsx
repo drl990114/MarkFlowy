@@ -2,6 +2,7 @@ import type { RightBarItem } from '@/components/SideBar'
 import type { RightNavItem } from '@/components/SideBar/SideBarHeader'
 import SideBarHeader from '@/components/SideBar/SideBarHeader'
 import { EVENT, RIGHTBARITEMKEYS } from '@/constants'
+import { logger } from '@/helper/logger'
 import { addNewMarkdownFileEdit } from '@/services/editor-file'
 import { useCommandStore } from '@/stores'
 import type { BubbleItemType } from '@ant-design/x'
@@ -86,7 +87,7 @@ const ChatList: React.FC<ChatListProps> = (props) => {
         },
         loadingRender: () => <Spin indicator={<Icon.LoadingOutlined spin />} />,
         contentRender(content) {
-          console.log('content', content)
+          logger.info('content', content)
           return (
             <ErrorBoundary>
               <XMarkdown>{content.content}</XMarkdown>

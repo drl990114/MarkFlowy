@@ -1,4 +1,5 @@
 import { getFileNameFromPath, readDirectory } from '@/helper/filesys'
+import { logger } from '@/helper/logger'
 import { gitRevlistWithCurrentWorkspace } from '@/services/git'
 import { checkIsGitRepoBySyncMode, getWorkspace, WorkSpace } from '@/services/workspace'
 import { useCommandStore, useEditorStore } from '@/stores'
@@ -79,13 +80,13 @@ const GitStatusBtn = () => {
       const fetchOutput = await Command.create('run-git-fetch', ['fetch', '--prune'], {
         cwd: useEditorStore.getState().getRootPath(),
       }).execute()
-      console.log('Git fetch output:', fetchOutput)
+      logger.info('Git fetch output:', fetchOutput)
 
       // 2. 执行 pull 合并远程更改到本地
       const pullOutput = await Command.create('run-git-pull', ['pull', '--ff-only'], {
         cwd: useEditorStore.getState().getRootPath(),
       }).execute()
-      console.log('Git pull output:', pullOutput)
+      logger.info('Git pull output:', pullOutput)
 
       // 检查是否有冲突
       if (pullOutput.stderr) {
@@ -103,14 +104,14 @@ const GitStatusBtn = () => {
       const pushOutput = await Command.create('run-git-push', ['push'], {
         cwd: useEditorStore.getState().getRootPath(),
       }).execute()
-      console.log('Git push output:', pushOutput)
+      logger.info('Git push output:', pushOutput)
 
       // 4. 更新状态显示
       debounceCheckGitStatus()
       toast.success('Git sync completed')
     } catch (error) {
       toast.error(`Git sync failed: ${error}`)
-      console.error('Git sync error:', error)
+      logger.info('Git sync error:', error)
     } finally {
       setSyncing(false)
     }

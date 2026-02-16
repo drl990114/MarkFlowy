@@ -1,4 +1,5 @@
 import { MODAL_CONFIRM_ID } from '@/components/Modal'
+import { logger } from '@/helper/logger'
 import useExtensionsManagerStore from '@/stores/useExtensionsManagerStore'
 import useThemeStore from '@/stores/useThemeStore'
 import NiceModal from '@ebay/nice-modal-react'
@@ -112,7 +113,7 @@ export function ThemeStore() {
             })
           }
         } catch (error) {
-          console.error('Failed to install theme:', error)
+          logger.error('Failed to install theme:', error)
         }
       },
     })
@@ -142,7 +143,7 @@ export function ThemeStore() {
           }
           
         } catch (error) {
-          console.error('Failed to uninstall theme:', error)
+          logger.error('Failed to uninstall theme:', error)
         }
       },
     })

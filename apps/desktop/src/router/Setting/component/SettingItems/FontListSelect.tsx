@@ -1,3 +1,4 @@
+import { logger } from '@/helper/logger'
 import appSettingService from '@/services/app-setting'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import { invoke } from '@tauri-apps/api/core'
@@ -27,7 +28,7 @@ const FontListSelectSettingItem: React.FC<SettingItemProps<Setting.FontListSelec
   }
 
   const handleSearch = (value: string) => {
-    console.log('search:', value)
+    logger.info('search:', value)
   }
 
   const options = fontList.map(font => ({

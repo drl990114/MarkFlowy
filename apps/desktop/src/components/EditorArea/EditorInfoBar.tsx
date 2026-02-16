@@ -3,6 +3,7 @@ import useBookMarksStore from '@/extensions/bookmarks/useBookMarksStore'
 import bus from '@/helper/eventBus'
 import { getFileObject } from '@/helper/files'
 import { FileResultCode, getRelativePathWithCurWorkspace } from '@/helper/filesys'
+import { logger } from '@/helper/logger'
 import { addNewMarkdownFileEdit, isEmptyEditor } from '@/services/editor-file'
 import { gitAddFileWithCurrentWorkspace } from '@/services/git'
 import { currentWindow } from '@/services/windows'
@@ -107,7 +108,7 @@ export const EditorInfoBar = memo(() => {
         setHasGitStatus(false)
       }
     } catch (error) {
-      console.error('Failed to check git status:', error)
+      logger.error('Failed to check git status:', error)
       setHasGitStatus(false)
     }
   }, [curFile?.path, rootPath])

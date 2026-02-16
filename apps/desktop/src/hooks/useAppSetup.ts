@@ -2,6 +2,7 @@ import useAiChatStore from '@/extensions/ai/useAiChatStore'
 import bus from '@/helper/eventBus'
 import { getFileObject, getFileObjectByPath, getSaveOpenedEditorEntries } from '@/helper/files'
 import { getFileNameFromPath, readDirectory } from '@/helper/filesys'
+import { logger } from '@/helper/logger'
 import { checkUpdate } from '@/helper/updater'
 import { i18nInit } from '@/i18n'
 import { appSettingStoreSetup } from '@/services/app-setting'
@@ -51,7 +52,7 @@ async function appThemeExtensionsSetup(curTheme: string) {
 async function handleOpenedPaths(openedPaths: string[]) {
   const { setFolderData, addOpenedFile, setActiveId } = useEditorStore.getState()
 
-  console.log('handleOpenedPaths', openedPaths)
+  logger.debug('handleOpenedPaths', openedPaths)
 
   const handleOpenedPath = async (openedPath: string) => {
     const isDir = await invoke<boolean>('is_dir', { path: openedPath })
@@ -96,9 +97,8 @@ async function handleOpenedPaths(openedPaths: string[]) {
 async function appWorkspaceSetup() {
   const { setRecentWorkspaces } = useOpenedCacheStore.getState()
   const { setFolderData, addOpenedFile, setActiveId } = useEditorStore.getState()
-  console.log('=== appWorkspaceSetup: Checking window.openedUrls ===')
-  console.log('window.openedUrls', window.openedUrls)
-  console.log('window.openedUrls type:', typeof window.openedUrls)
+  logger.debug('=== appWorkspaceSetup: Checking window.openedUrls ===')
+  logger.debug('window.openedUrls', window.openedUrls)
 
   try {
     const cacheStore = await new LazyStore('.markflowy_workspaces.dat')
@@ -110,18 +110,14 @@ async function appWorkspaceSetup() {
     setRecentWorkspaces(recentWorkspaces)
 
     if (window.openedUrls) {
-      console.log('Processing window.openedUrls:', window.openedUrls)
       const openedPaths = window.openedUrls?.split(',').map((p) => {
-        console.log('Processing path from openedUrls:', p)
         if (p.startsWith('file://')) {
           p = p.slice(7)
-          console.log('Removed file:// prefix:', p)
         }
 
         return p
       })
 
-      console.log('Final openedPaths:', openedPaths)
       window.openedUrls = null
 
       await handleOpenedPaths(openedPaths)
@@ -176,7 +172,7 @@ async function appWorkspaceSetup() {
       })
     }
   } catch (error) {
-    console.error('Failed to load workspace', error)
+    logger.error('Failed to load workspace', error)
   }
 }
 
@@ -268,7 +264,7 @@ const useAppSetup = () => {
     })
 
     const unListenOpenedUrls = currentWindow.listen<string>('opened-urls', async ({ payload }) => {
-      console.log('Received opened-urls event:', payload)
+      logger.debug('Received opened-urls event:', payload)
       if (payload) {
         const openedPaths = payload.split(',').map((p) => {
           if (p.startsWith('file://')) {
@@ -299,7 +295,7 @@ const useAppSetup = () => {
   }, [eventInit])
 
   useSuspenseQuery({
-    queryKey: [],
+    queryKey: ['appSetup'],
     queryFn: appSetup,
   })
 

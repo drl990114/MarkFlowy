@@ -1,5 +1,6 @@
 import { getFileObject } from '@/helper/files'
 import { getRelativePathWithCurWorkspace } from '@/helper/filesys'
+import { logger } from '@/helper/logger'
 import { gitAddFileWithCurrentWorkspace } from '@/services/git'
 import { currentWindow } from '@/services/windows'
 import { checkIsGitRepoBySyncMode, getWorkspace } from '@/services/workspace'
@@ -44,7 +45,7 @@ export const GitStatus = memo(() => {
         setHasGitStatus(false)
       }
     } catch (error) {
-      console.error('Failed to check git status:', error)
+      logger.error('Failed to check git status:', error)
       setHasGitStatus(false)
     }
   }, [curFile?.path, rootPath])

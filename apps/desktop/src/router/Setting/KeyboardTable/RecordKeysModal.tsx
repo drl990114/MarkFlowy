@@ -1,3 +1,4 @@
+import { logger } from '@/helper/logger'
 import { useGlobalKeyboard } from '@/hooks'
 import { KeyboardInfo } from '@/hooks/useKeyboard'
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
@@ -88,7 +89,7 @@ export const RecordKeysModal = forwardRef<RecordKeysModalRef, RecordKeysModalPro
       await updateKeyBinding(selectedCommand.id, newKeyBinding)
       handleClose()
     } catch (error) {
-      console.error('保存快捷键失败:', error)
+      logger.error('保存快捷键失败:', error)
     }
   }
 

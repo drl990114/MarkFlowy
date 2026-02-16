@@ -6,6 +6,7 @@ import { check } from '@tauri-apps/plugin-updater'
 import { getI18n } from 'react-i18next'
 import Markdown from 'react-markdown'
 import { toast } from 'zens'
+import { logger } from './logger'
 
 export const installUpdate = async (update: Update) => {
   const id = toast.loading('Downloading new version...')
@@ -40,13 +41,13 @@ export const checkUpdate = async (opt: { install: boolean } = { install: false }
         },
       })
     } catch (error) {
-      console.error('Check update error1:', error)
+      logger.error('Check update error1:', error)
 
       try {
         update = await check()
       } catch (e) {
         toast.error(`Check update error: ${e}`)
-        console.error('Check update error2:', e)
+        logger.error('Check update error2:', e)
       }
       return
     }

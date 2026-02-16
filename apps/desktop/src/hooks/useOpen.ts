@@ -1,5 +1,6 @@
 import { MODAL_CONFIRM_ID } from '@/components/Modal'
 import { readDirectory } from '@/helper/filesys'
+import { logger } from '@/helper/logger'
 import { addExistingMarkdownFileEdit } from '@/services/editor-file'
 import { getFileContent } from '@/services/file-info'
 import { currentWindow } from '@/services/windows'
@@ -29,7 +30,7 @@ const useOpen = () => {
               })
               addRecentWorkspaces({ path: dir })
             } catch (error) {
-              console.error('Error creating new window:', error)
+              logger.error('Error creating new window:', error)
             }
           },
           onClose: async () => {
@@ -48,7 +49,7 @@ const useOpen = () => {
                 })
                 addRecentWorkspaces({ path: dir })
 
-                console.log('Focused existing window for path:', existingWindowLabel)
+                logger.info('Focused existing window for path:', existingWindowLabel)
                 return
               }
 
@@ -56,14 +57,14 @@ const useOpen = () => {
               addRecentWorkspaces({ path: dir })
               useEditorStore.getState().setFolderData(res)
 
-              console.log('Opening folder in current window:', dir)
+              logger.info('Opening folder in current window:', dir)
             } catch (error) {
-              console.error('Error opening folder in current window:', error)
+              logger.error('Error opening folder in current window:', error)
             }
           },
         })
       } catch (error) {
-        console.error('Error showing folder open modal:', error)
+        logger.error('Error showing folder open modal:', error)
       }
     },
     [addRecentWorkspaces, t],

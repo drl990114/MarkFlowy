@@ -1,4 +1,5 @@
 import { getRelativePathWithCurWorkspace, IFile } from '@/helper/filesys'
+import { logger } from '@/helper/logger'
 import { useWorkspaceStore } from '@/hooks/useWorkspaceWatcher'
 import { useEditorStore } from '@/stores'
 import { ChildProcess, Command } from '@tauri-apps/plugin-shell'
@@ -19,7 +20,7 @@ const wrapGitCommand = async (commandPromise: Promise<ChildProcess<any>>, errorM
 const commonPrevCheck = async () => {
   const rootPath = useEditorStore.getState().getRootPath()
   if (!rootPath) {
-    console.error('No root path available')
+    logger.error('No root path available')
     return
   }
   const { workspace } = useWorkspaceStore.getState()
@@ -38,7 +39,7 @@ export const gitAddFileWithCurrentWorkspace = async (file: IFile) => {
     return
   }
   if (file.path === undefined) {
-    console.error('File path is undefined')
+    logger.error('File path is undefined')
     return
   }
 

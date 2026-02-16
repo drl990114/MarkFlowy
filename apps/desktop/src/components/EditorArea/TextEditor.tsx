@@ -14,6 +14,7 @@ import {
   getFileNameFromPath,
 } from '@/helper/filesys'
 import { FileTypeConfig } from '@/helper/fileTypeHandler'
+import { logger } from '@/helper/logger'
 import { useEditorKeybindingStore } from '@/hooks/useKeyboard'
 import { useCommandStore, useEditorStateStore, useEditorStore } from '@/stores'
 import useAppSettingStore from '@/stores/useAppSettingStore'
@@ -162,7 +163,7 @@ function TextEditor(props: TextEditorProps) {
         ? delegate.docToString(editorContextRef.current.state.doc)
         : curFile.content
 
-      console.log('editorContent', fileContent)
+      logger.info('editorContent', fileContent)
 
       try {
         if (!curFile.path) {

@@ -1,4 +1,5 @@
 import { createKeybindingsHandler } from '@/helper/bindkeys'
+import { logger } from '@/helper/logger'
 import { useCommandStore } from '@/stores'
 import { invoke } from '@tauri-apps/api/core'
 import { createGlobalStore } from 'hox'
@@ -51,7 +52,7 @@ function useKeyboard() {
 
   useEffect(() => {
     invoke<{ cmds: KeyboardInfo[] }>('get_keyboard_infos').then((res) => {
-      console.log('KeyboardInfo', res)
+      logger.debug('KeyboardInfo', res)
       const cmds: KeyboardInfo[] = res.cmds || []
 
       setKeyboardInfos(cmds)

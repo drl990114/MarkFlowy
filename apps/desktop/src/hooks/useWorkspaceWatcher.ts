@@ -1,3 +1,4 @@
+import { logger } from '@/helper/logger'
 import { currentWindow } from '@/services/windows'
 import { getWorkspace, WorkSpace } from '@/services/workspace'
 import { useEditorStore } from '@/stores'
@@ -46,7 +47,7 @@ const useWorkspaceWatcher = () => {
         })
       } catch (error) { }
 
-      console.log('rootPath', rootPath)
+      logger.info('rootPath', rootPath)
       if (rootPath) {
         invoke('watch_file', {
           key: 'workspace',

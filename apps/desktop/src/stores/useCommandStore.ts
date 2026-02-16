@@ -1,3 +1,4 @@
+import { logger } from '@/helper/logger'
 import { create } from 'zustand'
 
 const useCommandStore = create<CommandStore>((set, get) => {
@@ -24,7 +25,7 @@ const useCommandStore = create<CommandStore>((set, get) => {
       if (command) {
         command.exec(...args)
       } else {
-        console.warn(`command ${id} not found`)
+        logger.warn(`command ${id} not found`)
       }
     },
   }

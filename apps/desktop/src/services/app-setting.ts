@@ -1,3 +1,4 @@
+import { logger } from '@/helper/logger'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import { invoke } from '@tauri-apps/api/core'
 import { emit } from '@tauri-apps/api/event'
@@ -7,7 +8,7 @@ export const appSettingStoreSetup = async () => {
 
   const settingData = await invoke<Record<string, any>>('get_app_conf')
 
-  console.log('Loaded app setting data:', settingData)
+  logger.info('Loaded app setting data:', settingData)
 
   setSettingData(settingData)
 

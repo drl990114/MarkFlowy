@@ -11,6 +11,7 @@ import {
   moveImageToLocalFolder,
   readFileAsBase64,
 } from '@/helper/image'
+import { logger } from '@/helper/logger'
 import { useEditorKeybindingStore } from '@/hooks/useKeyboard'
 import { locales } from '@/i18n'
 import { useEditorStore } from '@/stores'
@@ -191,7 +192,7 @@ export const createWysiwygDelegateOptions = (fileId?: string): CreateWysiwygDele
               }
             }
           } catch (error) {
-            console.error('Image upload failed:', error)
+            logger.error('Image upload failed:', error)
             // Fallback to base64 if anything goes wrong
             const reader = new FileReader()
             return new Promise<any>((resolve) => {
@@ -290,7 +291,7 @@ export const createWysiwygDelegateOptions = (fileId?: string): CreateWysiwygDele
           }
         }
       } catch (error) {
-        console.error('Image conversion failed:', error)
+        logger.error('Image conversion failed:', error)
       }
 
       return src
@@ -305,7 +306,7 @@ export const createWysiwygDelegateOptions = (fileId?: string): CreateWysiwygDele
         const src = await getImageUrlInTauri(url, fileFolderPath)
         return src
       } catch (error) {
-        console.error('Failed to get image URL:', error)
+        logger.error('Failed to get image URL:', error)
       }
       return url
     },
@@ -340,7 +341,7 @@ export const createWysiwygDelegateOptions = (fileId?: string): CreateWysiwygDele
                 .filter(Boolean)
                 .join('\n')
 
-              console.log('copilot', contextPrompt)
+              logger.info('copilot', contextPrompt)
               const text = await aiGenerateTextRequest({
                 sdkProvider: settingData.copilot_provider as AIGenerateTextParams['sdkProvider'],
                 url: apiBase,

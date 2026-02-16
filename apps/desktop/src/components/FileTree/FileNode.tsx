@@ -5,6 +5,7 @@ import {
   updateFile,
   type IFile,
 } from '@/helper/filesys'
+import { logger } from '@/helper/logger'
 import { useEditorStore } from '@/stores'
 import NiceModal from '@ebay/nice-modal-react'
 import { invoke } from '@tauri-apps/api/core'
@@ -279,7 +280,7 @@ function FileNode({
               }
               await revealItemInDir(node.data.path)
             } catch (error) {
-              console.error('Failed to show in folder:', error)
+              logger.error('Failed to show in folder:', error)
             }
           },
         })

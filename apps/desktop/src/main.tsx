@@ -50,8 +50,6 @@ rootElement.addEventListener('dragover', (e) => {
 })
 rootElement.addEventListener('drop', (event) => {
   event.preventDefault()
-  const files = event.dataTransfer?.files
-  console.log('Dropped files:', files)
 })
 
 ReactDOM.createRoot(rootElement).render(
