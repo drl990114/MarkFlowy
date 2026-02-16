@@ -1,13 +1,16 @@
-import React, { useEffect, useMemo } from 'react'
+import i18next from 'i18next'
 import { useTranslation } from 'next-i18next'
+import { useRouter } from 'next/router'
+import React, { useEffect, useMemo } from 'react'
+import { I18nextProvider, initReactI18next } from 'react-i18next'
 import { darkTheme } from 'theme'
-import { preloadRme, useRme, useRmeThemeProvider } from '../hooks/useRme'
-import Loading from './Loading'
-import EN_EDITOR from '../../../locales/editor/en.json'
 import CN_EDITOR from '../../../locales/editor/cn.json'
+import EN_EDITOR from '../../../locales/editor/en.json'
+import ES_EDITOR from '../../../locales/editor/es.json'
 import FRFR_EDITOR from '../../../locales/editor/frFR.json'
 import JA_EDITOR from '../../../locales/editor/ja.json'
-import ES_EDITOR from '../../../locales/editor/es.json'
+import { preloadRme, useRme, useRmeThemeProvider } from '../hooks/useRme'
+import Loading from './Loading'
 
 // 在组件定义前尝试提前触发预加载
 if (typeof window !== 'undefined') {
@@ -33,7 +36,7 @@ const THEME_CONFIG = {
   },
 } as const
 
-const EDITOR_I18N_RESOURCES = {
+export const editorResources = {
   en: { translation: { ...EN_EDITOR.editor } },
   cn: { translation: { ...CN_EDITOR.editor } },
   frFR: { translation: { ...FRFR_EDITOR.editor } },
@@ -58,14 +61,33 @@ export const RmePreload = () => {
 const RmeProvider: React.FC<RmeProviderProps> = ({ themeTokens, children }) => {
   const { ThemeProvider, loading, error, reload } = useRmeThemeProvider()
   const { i18n } = useTranslation()
+  const router = useRouter()
 
-  const editorI18n = useMemo(
+  const editorI18nInstance = useMemo(() => i18next.createInstance(), [])
+
+  const i18nProp = useMemo(
     () => ({
-      locales: EDITOR_I18N_RESOURCES,
-      language: normalizeEditorLang(i18n?.language),
+      locales: editorResources,
+      language: normalizeEditorLang(router.locale || i18n?.language),
     }),
-    [i18n?.language],
+    [router.locale, i18n?.language],
   )
+
+  useEffect(() => {
+    const run = async () => {
+      if (!editorI18nInstance.isInitialized) {
+        await editorI18nInstance.use(initReactI18next).init({
+          resources: editorResources,
+          interpolation: { escapeValue: false },
+          fallbackLng: 'en',
+          lng: i18nProp.language,
+        })
+        return
+      }
+      await editorI18nInstance.changeLanguage(i18nProp.language)
+    }
+    run()
+  }, [editorI18nInstance, i18nProp.language])
 
   useEffect(() => {
     if (loading && !ThemeProvider && reload) {
@@ -118,9 +140,11 @@ const RmeProvider: React.FC<RmeProviderProps> = ({ themeTokens, children }) => {
   }
 
   return (
-    <ThemeProvider theme={theme} i18n={editorI18n}>
-      {children}
-    </ThemeProvider>
+    <I18nextProvider i18n={editorI18nInstance}>
+      <ThemeProvider key={i18nProp.language} theme={theme} i18n={i18nProp}>
+        {children}
+      </ThemeProvider>
+    </I18nextProvider>
   )
 }
 

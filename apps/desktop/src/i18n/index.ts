@@ -1,16 +1,16 @@
 import type { InitOptions } from 'i18next'
 import i18next from 'i18next'
 import { initReactI18next } from 'react-i18next'
-import EN from '../../../../locales/en.json'
-import zhCN from '../../../../locales/zh-CN.json'
-import frFR from '../../../../locales/fr-FR.json'
-import es from '../../../../locales/es.json'
-import ja from '../../../../locales/ja.json'
-import EN_EDITOR from '../../../../locales/editor/en.json'
 import cn_EDITOR from '../../../../locales/editor/cn.json'
-import frFR_EDITOR from '../../../../locales/editor/frFR.json'
+import EN_EDITOR from '../../../../locales/editor/en.json'
 import es_EDITOR from '../../../../locales/editor/es.json'
+import frFR_EDITOR from '../../../../locales/editor/frFR.json'
 import ja_EDITOR from '../../../../locales/editor/ja.json'
+import EN from '../../../../locales/en.json'
+import es from '../../../../locales/es.json'
+import frFR from '../../../../locales/fr-FR.json'
+import ja from '../../../../locales/ja.json'
+import zhCN from '../../../../locales/zh-CN.json'
 
 export const locales = {
   en: 'English',
