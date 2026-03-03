@@ -23,6 +23,7 @@ const ToolbarWrapper = styled.div`
   z-index: 10;
   flex-wrap: nowrap;
   overflow: hidden;
+  box-sizing: border-box;
 `
 
 const Divider = styled.div`

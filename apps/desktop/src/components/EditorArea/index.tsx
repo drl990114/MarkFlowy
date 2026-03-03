@@ -3,11 +3,13 @@ import { SourceCodeToolbar } from '@/components/EditorArea/editorToolBar/SourceC
 import { WysiwygToolbar } from '@/components/EditorArea/editorToolBar/WysiwygToolbar'
 import { useEditorStore } from '@/stores'
 import { memo } from 'react'
+import { TocView } from '../TableOfContent'
 import Editor from './Editor'
 import EditorAreaTabs from './EditorAreaTabs'
 import { EditorCount } from './editorToolBar/EditorCount'
+import { EditorToc } from './EditorWrapper'
 import { EmptyState } from './EmptyState'
-import { Container } from './styles'
+import { Container, EditorPanel } from './styles'
 
 function EditorArea() {
   const { opened, activeId } = useEditorStore()
@@ -22,9 +24,15 @@ function EditorArea() {
       <WysiwygToolbar />
       <SourceCodeToolbar />
       <FindReplace />
-      {opened.map((id) => {
-        return <Editor key={id} id={id} active={id === activeId} />
-      })}
+      <EditorPanel id="editor-panel">
+        {opened.map((id) => {
+          return <Editor key={id} id={id} active={id === activeId} />
+        })}
+
+        <EditorToc >
+          <TocView variant='editor' />
+        </EditorToc>
+      </EditorPanel>
       <EditorCount />
     </Container>
   )

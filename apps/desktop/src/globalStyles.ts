@@ -87,6 +87,9 @@ export const GlobalStyles = createGlobalStyle`
   .popover {
     border: 1px solid ${(props) => props.theme.borderColor};
   }
+  .display-none {
+    display: none;
+  }
 
   /* Styles for scrollbar */
 

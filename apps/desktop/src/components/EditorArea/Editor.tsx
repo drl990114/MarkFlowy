@@ -3,7 +3,6 @@ import { getFileTypeConfig, isTextfileType } from '@/helper/fileTypeHandler'
 import { isEmptyEditor } from '@/services/editor-file'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
-import classNames from 'classnames'
 import { memo } from 'react'
 import { useMount } from 'react-use'
 import { EmptyState } from './EmptyState'
@@ -26,10 +25,6 @@ function Editor(props: EditorProps) {
     }
   })
 
-  const cls = classNames('code-contents', {
-    'display-none': !active,
-  })
-
   if (isEmptyEditor(curFile.id)) {
     if (active) {
       return <EmptyState />
@@ -41,7 +36,7 @@ function Editor(props: EditorProps) {
   if (!curFileTypeConfig) return null
 
   return (
-    <div className={cls}>
+    <div className={'code-contents'} style={active ? undefined : { display: 'none' }}>
       {curFileTypeConfig.type === 'unsupported' ? (
         <UnsupportedFileType />
       ) : isTextfileType(curFileTypeConfig) ? (

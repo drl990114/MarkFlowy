@@ -1,6 +1,5 @@
 import { RIGHTBARITEMKEYS } from '@/constants'
 import aiExtension from '@/extensions/ai'
-import { TableOfContent } from '@/extensions/table-of-content'
 import classNames from 'classnames'
 import { memo, useMemo, useState } from 'react'
 import { Tooltip } from 'zens'
@@ -8,12 +7,11 @@ import { Container as SideBarContainer, SideBarHeader } from './styles'
 
 function RightBar() {
   const [activeRightBarItemKey, setActiveRightBarItemKey] = useState<RIGHTBARITEMKEYS>(
-    RIGHTBARITEMKEYS.TableOfContent,
+    RIGHTBARITEMKEYS.AI,
   )
 
   const rightBarDataSource: RightBarItem[] = useMemo(() => {
     return [
-      TableOfContent,
       aiExtension,
     ]
   }, [])

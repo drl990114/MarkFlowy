@@ -104,6 +104,9 @@ const styledLightTheme = {
   rightBarBgColor: '#F9F9F9',
   rightBarHeaderBgColor: '#F9F9F9',
 
+  tocbarProgressBgColor: '#f6f8fa',
+  tocbarProgressActiveBgColor: '#00c853',
+
   // components
   buttonBgColor: '#f6f7f9',
   tooltipBgColor: '#d7d7dc',
@@ -152,6 +155,9 @@ const styledDarkTheme = {
   statusBarBgColor: '#262626',
   rightBarBgColor: '#1E1D1E',
   rightBarHeaderBgColor: '#1E1D1E',
+
+  tocbarProgressBgColor: '#212326',
+  tocbarProgressActiveBgColor: '#ffffff',
 
   // components
   buttonBgColor: '#21262c',
@@ -202,6 +208,9 @@ const styledGitHubLightTheme = {
   rightBarBgColor: '#f6f8fa',
   rightBarHeaderBgColor: '#f6f8fa',
 
+  tocbarProgressBgColor: '#f6f8fa',
+  tocbarProgressActiveBgColor: '#1a7f37',
+
   // components
   buttonBgColor: '#f6f8fa',
   tooltipBgColor: '#eaeef2',
@@ -250,6 +259,9 @@ const styledGitHubDarkTheme = {
   statusBarBgColor: '#161b22',
   rightBarBgColor: '#161b22',
   rightBarHeaderBgColor: '#161b22',
+
+  tocbarProgressBgColor: '#161b22',
+  tocbarProgressActiveBgColor: '#3fb950',
 
   // components
   buttonBgColor: '#21262d',
@@ -300,6 +312,9 @@ const styledGitBookTheme = {
   rightBarBgColor: '#f9fafb',
   rightBarHeaderBgColor: '#f9fafb',
 
+  tocbarProgressBgColor: '#f9fafb',
+  tocbarProgressActiveBgColor: '#16a34a',
+
   // components
   buttonBgColor: '#f3f4f6',
   tooltipBgColor: '#e5e7eb',
@@ -349,6 +364,9 @@ const styledSepiaTheme = {
   rightBarBgColor: '#f2e5bc',
   rightBarHeaderBgColor: '#f2e5bc',
 
+  tocbarProgressBgColor: '#f2e5bc',
+  tocbarProgressActiveBgColor: '#79740e',
+
   // components
   buttonBgColor: '#f2e5bc',
   tooltipBgColor: '#ebdbb2',
@@ -397,6 +415,9 @@ const styledNordTheme = {
   statusBarBgColor: '#3b4252',
   rightBarBgColor: '#3b4252',
   rightBarHeaderBgColor: '#3b4252',
+
+  tocbarProgressBgColor: '#3b4252',
+  tocbarProgressActiveBgColor: '#a3be8c',
 
   // components
   buttonBgColor: '#3b4252',

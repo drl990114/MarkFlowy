@@ -21,9 +21,7 @@ export const Container = styled.div`
 
   .code-contents {
     flex: 1;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
+    display: flex;
   }
 `
 
@@ -84,4 +82,12 @@ interface TabItemProps {
 export const WarningHeader = styled.h3`
   text-align: center;
   color: ${(props) => props.theme.dangerColor};
+`
+
+export const EditorPanel = styled.div`
+  flex: 1;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
 `
