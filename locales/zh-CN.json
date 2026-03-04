@@ -97,6 +97,11 @@
     "search": "搜索",
     "table_of_contents": "目录"
   },
+  "statusBar": {
+    "words": "词",
+    "chars": "字符",
+    "displaySettings": "显示设置"
+  },
   "file": {
     "untitled": "未命名",
     "not_found": "文件不存在",

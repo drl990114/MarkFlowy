@@ -480,5 +480,10 @@
   "ai": {
     "capabilities": "Función",
     "export_conversation": "Exportar contenido de conversación como archivo md con un clic"
+  },
+  "statusBar": {
+    "words": "Palabras",
+    "chars": "Caracteres",
+    "displaySettings": "Configuración de pantalla"
   }
 }

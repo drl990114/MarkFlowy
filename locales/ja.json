@@ -480,5 +480,10 @@
   "ai": {
     "capabilities": "機能",
     "export_conversation": "ワンクリックで会話内容をmdファイルにエクスポート"
+  },
+  "statusBar": {
+    "words": "ワード",
+    "chars": "文字",
+    "displaySettings": "表示設定"
   }
 }

@@ -1,4 +1,5 @@
 import { TaskList } from '../TaskList/TaskList'
+import { EditorCount } from './EditorCount'
 import { LayoutLeftBtn, LayoutRightBtn } from './LayoutBtn'
 import { CenterMenu } from './SettingBtn'
 import { Container, LeftContainer, RightContainer } from './styled'
@@ -13,6 +14,7 @@ export default function StatusBar() {
       </LeftContainer>
       <RightContainer>
         <TaskList />
+        <EditorCount />
         <LayoutLeftBtn />
         <LayoutRightBtn />
       </RightContainer>

@@ -6,7 +6,6 @@ import { memo } from 'react'
 import { TocView } from '../TableOfContent'
 import Editor from './Editor'
 import EditorAreaTabs from './EditorAreaTabs'
-import { EditorCount } from './editorToolBar/EditorCount'
 import { EditorToc } from './EditorWrapper'
 import { EmptyState } from './EmptyState'
 import { Container, EditorPanel } from './styles'
@@ -33,7 +32,6 @@ function EditorArea() {
           <TocView variant='editor' />
         </EditorToc>
       </EditorPanel>
-      <EditorCount />
     </Container>
   )
 }

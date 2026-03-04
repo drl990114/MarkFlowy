@@ -91,6 +91,11 @@
     "search": "search",
     "table_of_contents": "Table of Contents"
   },
+  "statusBar": {
+    "words": "words",
+    "chars": "chars",
+    "displaySettings": "Display Settings"
+  },
   "explorer": {
     "collapse_folders": "Collapse folders",
     "refresh_folder_data": "Refresh Folder Data",
