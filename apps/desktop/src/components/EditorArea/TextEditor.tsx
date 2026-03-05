@@ -142,7 +142,7 @@ function TextEditor(props: TextEditorProps) {
     async (params: SaveHandlerParams = {}) => {
       const { onSuccess } = params
       if (!active && !params.active) return
-
+      const curFile = getFileObject(id)
       if (!curFile) return
 
       const { idStateMap, setIdStateMap } = useEditorStateStore.getState()
@@ -224,7 +224,7 @@ function TextEditor(props: TextEditorProps) {
         toast.error(String(error))
       }
     },
-    [active, curFile, delegate, t, insertNodeToFolderData],
+    [active, id, delegate, t, insertNodeToFolderData],
   )
 
   const debounceSave = useMemo(() => {
@@ -431,7 +431,10 @@ function TextEditor(props: TextEditorProps) {
 
   const handleWrapperClick: React.MouseEventHandler<HTMLDivElement> = useCallback(
     (e) => {
-      if ((e.target as HTMLElement)?.id === 'editorarea-wrapper') {
+      if (
+        (e.target as HTMLElement)?.id === 'editorarea-wrapper' ||
+        (e.target as HTMLElement).parentElement?.id === 'editorarea-wrapper'
+      ) {
         delegate.manager.view.focus()
       }
     },
@@ -504,7 +507,8 @@ function TextEditor(props: TextEditorProps) {
 
         setIdStateMap(id, state)
         debounceRefreshToc()
-        if (settingData.autosave) {
+        const curFile = getFileObject(id)
+        if (settingData.autosave && curFile?.path) {
           debounceSaveHandler()
         }
       }
