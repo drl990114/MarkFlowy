@@ -300,10 +300,11 @@ export const createWysiwygDelegateOptions = (fileId?: string): CreateWysiwygDele
       await sleep(1)
 
       try {
+        const decodedUrl = decodeURIComponent(url)
         const file = fileId ? getFileObject(fileId) : null
         const fileFolderPath = getFolderPathFromPath(file?.path)
 
-        const src = await getImageUrlInTauri(url, fileFolderPath)
+        const src = await getImageUrlInTauri(decodedUrl, fileFolderPath)
         return src
       } catch (error) {
         logger.error('Failed to get image URL:', error)
