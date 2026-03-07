@@ -74,6 +74,10 @@ Execute the following command, you will start MarkFlowy.
 yarn dev:desktop
 ```
 
+## How to Submit Themes to the Theme Store
+
+MarkFlowy has a built-in theme store feature where users can browse, download, and install community-created themes. If you want to submit your own theme to the theme store for other users, please refer to the "Sharing Your Theme" section in the [Custom Theme Documentation](./Extension/CustomTheme.md), which details the complete process for theme creation and submission to the theme store.
+
 # Thank You!
 
 Your contributions to open source, large or small, make the project better. Thank you for taking the time to contribute.

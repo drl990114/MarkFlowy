@@ -74,6 +74,10 @@ cargo install --locked --path apps/desktop/src-tauri
 yarn dev:desktop
 ```
 
+## 如何提交主题到主题商店
+
+MarkFlowy 内置了主题商店功能，用户可以浏览、下载和安装社区创建的主题。如果你想将自己的主题提交到主题商店供其他用户使用，请参考 [自定义主题文档](./Extension/CustomTheme.md) 中的"分享你的主题"部分，该文档详细介绍了主题创建的完整流程和提交到主题商店的具体步骤。
+
 # 致谢
 
 无论大小，你对开源项目的贡献都会让它变得更好。感谢你抽出时间为 MarkFlowy 做出贡献！

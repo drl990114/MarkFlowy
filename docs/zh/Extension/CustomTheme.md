@@ -38,3 +38,33 @@ output: {
 ```
 
 更改你的主题后，重新加载 MarkFlowy 即可看到效果。
+
+## 分享你的主题
+
+完成主题开发后，你可以将主题分享给社区的其他用户：
+
+### 提交到主题商店
+
+如果你想让更多用户使用你的主题，可以将主题提交到 MarkFlowy 的官方主题商店：
+
+1. **准备你的主题**
+   - 确保主题功能完整且测试通过
+   - 为主题仓库编写清晰的 README 文档
+   - 发布到 npm 包管理器 [npm 包发布流程](https://docs.npmjs.com/creating-and-publishing-scoped-public-packages/)
+
+2. **提交到社区主题列表**
+   编辑项目根目录的 `community-themes.json` 文件，添加你的主题信息：
+
+```json
+{
+  "name": "你的主题名称",
+  "mode": ["dark", "light"],
+  "description": "主题的简短描述",
+  "packageName": "npm包名或GitHub仓库名",
+  "author": "你的名字",
+  "repository": "https://github.com/你的用户名/你的主题仓库"
+}
+```
+
+3. **创建 Pull Request**
+   将修改提交到主仓库，维护者审核通过后，你的主题就会出现在主题商店中。
