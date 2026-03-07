@@ -17,7 +17,8 @@
     "addHeader": "Headerを追加",
     "key": "キー",
     "value": "値",
-    "success": "成功"
+    "success": "成功",
+    "import": "インポート"
   },
   "view": {
     "label": "表示",
@@ -418,7 +419,11 @@
       "installed": "インストール済み",
       "download": "ダウンロード",
       "uninstall": "アンインストール",
-      "only_installed": "インストール済みのみを見る"
+      "only_installed": "インストール済みのみを見る",
+      "no_local_themes": "ローカルテーマなし",
+      "remove_local_theme": "ローカルトピック \"{{name}}\" を削除しますか?これにより、フォルダの下のファイルが削除されます。",
+      "online_themes": "オンラインテーマ",
+      "local_css_files": "ローカルCSSファイル"
     }
   },
   "updater": {

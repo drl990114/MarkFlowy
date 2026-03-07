@@ -17,7 +17,8 @@
     "addHeader": "Add Header",
     "key": "Key",
     "value": "Value",
-    "success": "Success"
+    "success": "Success",
+    "import": "Import"
   },
   "view": {
     "label": "View",
@@ -450,7 +451,11 @@
       "installed": "Installed",
       "download": "Download",
       "uninstall": "Unload",
-      "only_installed": "Only see installed"
+      "only_installed": "Only see installed",
+      "no_local_themes": "No local theme",
+      "remove_local_theme": "Are you sure you want to remove the local theme \"{{name}}\"? This will delete the files under the folder.",
+      "online_themes": "Online Themes",
+      "local_css_files": "Local CSS file"
     }
   },
   "updater": {

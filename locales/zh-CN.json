@@ -17,7 +17,8 @@
     "addHeader": "添加 Header",
     "key": "键",
     "value": "值",
-    "success": "成功"
+    "success": "成功",
+    "import": "导入"
   },
   "view": {
     "label": "视图",
@@ -380,7 +381,11 @@
       "installed": "已安装",
       "download": "下载",
       "uninstall": "卸载",
-      "only_installed": "仅看已安装"
+      "only_installed": "仅看已安装",
+      "no_local_themes": "无本地主题",
+      "remove_local_theme": "确认移除本地主题\"{{name}}\" 吗？这会删除文件夹下的文件。",
+      "online_themes": "在线主题",
+      "local_css_files": "本地 CSS 文件"
     },
     "ai": {
       "label": "AI",

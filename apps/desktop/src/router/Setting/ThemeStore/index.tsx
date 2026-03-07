@@ -1,14 +1,64 @@
 import { MODAL_CONFIRM_ID } from '@/components/Modal'
+import { loadLocalThemeCss } from '@/helper/extensions'
 import { logger } from '@/helper/logger'
 import useExtensionsManagerStore from '@/stores/useExtensionsManagerStore'
 import useThemeStore from '@/stores/useThemeStore'
 import NiceModal from '@ebay/nice-modal-react'
 import { invoke } from '@tauri-apps/api/core'
+import { open } from '@tauri-apps/plugin-dialog'
 import { Button, Checkbox } from 'antd'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 import themeData from '../../../../../../community-themes.json'
+
+const SectionTitle = styled.h3`
+  font-size: 14px;
+  font-weight: 600;
+  margin: 16px 0 12px;
+  color: ${(props) => props.theme.labelFontColor};
+`
+
+const LocalThemeContainer = styled.div`
+  border: 1px solid ${(props) => props.theme.borderColor};
+  border-radius: 8px;
+  overflow: auto;
+  background-color: ${(props) => props.theme.bgColor};
+  margin-bottom: 16px;
+`
+
+const LocalThemeRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid ${(props) => props.theme.borderColor};
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background-color: ${(props) => props.theme.tipsBgColor};
+  }
+`
+
+const LocalThemeInfo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+`
+
+const LocalThemeName = styled.span`
+  font-size: 13px;
+  font-weight: 500;
+  color: ${(props) => props.theme.labelFontColor};
+`
+
+const LocalThemeActions = styled.div`
+  display: flex;
+  gap: 8px;
+`
 
 const TableContainer = styled.div`
   border: 1px solid ${(props) => props.theme.borderColor};
@@ -83,11 +133,73 @@ export interface ThemeItem {
   repository: string
 }
 
+export interface LocalTheme {
+  id: string
+  name: string
+  path: string
+  css_content: string
+}
+
 export function ThemeStore() {
   const storeThemes = (themeData || []) as unknown as ThemeItem[]
   const { themes: installedThemes, deleteTheme } = useThemeStore()
   const [onlyInstalled, setOnlyInstalled] = useState(false)
+  const [localThemes, setLocalThemes] = useState<LocalTheme[]>([])
   const { t } = useTranslation()
+
+  useEffect(() => {
+    loadLocalThemes()
+  }, [])
+
+  const loadLocalThemes = async () => {
+    try {
+      const themes = await invoke<LocalTheme[]>('load_local_themes')
+      setLocalThemes(themes)
+    } catch (error) {
+      logger.error('Failed to load local themes:', error)
+    }
+  }
+
+  const handleImportLocalTheme = async () => {
+    try {
+      const selected = await open({
+        filters: [
+          {
+            name: 'CSS',
+            extensions: ['css'],
+          },
+        ],
+      })
+
+      if (selected) {
+        const newTheme = await invoke<LocalTheme>('import_local_theme', {
+          filePath: selected,
+        })
+        const updatedThemes = [...localThemes, newTheme]
+        setLocalThemes(updatedThemes)
+        loadLocalThemeCss(updatedThemes.map((t) => t.css_content))
+      }
+    } catch (error) {
+      logger.error('Failed to import local theme:', error)
+    }
+  }
+
+  const handleRemoveLocalTheme = async (localTheme: LocalTheme) => {
+    NiceModal.show(MODAL_CONFIRM_ID, {
+      title: t('common.delete'),
+      content: t('settings.themeStore.remove_local_theme', { name: localTheme.name }),
+      onConfirm: async () => {
+        try {
+          await invoke('remove_local_theme', { id: localTheme.id })
+          const updatedThemes = localThemes.filter((t) => t.id !== localTheme.id)
+          setLocalThemes(updatedThemes)
+          loadLocalThemeCss(updatedThemes.map((t) => t.css_content))
+        } catch (error) {
+          logger.error('Failed to remove local theme:', error)
+        }
+      },
+    })
+  }
 
   const isInstalled = (packageName: string) => {
     // Check if theme exists in installed themes by checking if any installed theme matches the name
@@ -157,12 +269,45 @@ export function ThemeStore() {
   })
 
   return (
-    <TableContainer>
-      <Toolbar>
-        <Checkbox checked={onlyInstalled} onChange={(e) => setOnlyInstalled(e.target.checked)}>
-          {t('settings.themeStore.only_installed')}
-        </Checkbox>
-      </Toolbar>
+    <div>
+      <SectionTitle>{t('settings.themeStore.local_css_files')}</SectionTitle>
+      <LocalThemeContainer>
+        <Toolbar>
+          <Button size='small' onClick={handleImportLocalTheme}>
+            {t('common.import')} CSS
+          </Button>
+        </Toolbar>
+        {localThemes.length === 0 ? (
+          <div style={{ padding: '16px', textAlign: 'center', color: '#888' }}>
+            {t('settings.themeStore.no_local_themes')}.
+          </div>
+        ) : (
+          localThemes.map((localTheme) => (
+            <LocalThemeRow key={localTheme.id}>
+              <LocalThemeInfo>
+                <LocalThemeName>{localTheme.name}</LocalThemeName>
+              </LocalThemeInfo>
+              <LocalThemeActions>
+                <Button
+                  size='small'
+                  danger
+                  onClick={() => handleRemoveLocalTheme(localTheme)}
+                >
+                  {t('common.delete')}
+                </Button>
+              </LocalThemeActions>
+            </LocalThemeRow>
+          ))
+        )}
+      </LocalThemeContainer>
+
+      <SectionTitle>{t('settings.themeStore.online_themes')}</SectionTitle>
+      <TableContainer>
+        <Toolbar>
+          <Checkbox checked={onlyInstalled} onChange={(e) => setOnlyInstalled(e.target.checked)}>
+            {t('settings.themeStore.only_installed')}
+          </Checkbox>
+        </Toolbar>
       <Table>
         <TableHead>
           <TableRow>
@@ -199,5 +344,6 @@ export function ThemeStore() {
         </tbody>
       </Table>
     </TableContainer>
+    </div>
   )
 }

@@ -2,6 +2,7 @@ import useAiChatStore from '@/extensions/ai/useAiChatStore'
 import bus from '@/helper/eventBus'
 import { getFileObject, getFileObjectByPath, getSaveOpenedEditorEntries } from '@/helper/files'
 import { getFileNameFromPath, readDirectory } from '@/helper/filesys'
+import { loadLocalThemeCss } from '@/helper/extensions'
 import { logger } from '@/helper/logger'
 import { checkUpdate } from '@/helper/updater'
 import { i18nInit } from '@/i18n'
@@ -27,9 +28,22 @@ import useExtensionsManagerStore from '../stores/useExtensionsManagerStore'
 import useThemeStore, { isBuiltInTheme } from '../stores/useThemeStore'
 import useWorkspaceWatcher from './useWorkspaceWatcher'
 
+interface LocalTheme {
+  id: string
+  name: string
+  path: string
+  css_content: string
+}
+
 async function appThemeExtensionsSetup(curTheme: string) {
   if (isBuiltInTheme(curTheme)) {
     useThemeStore.getState().setCurThemeByName(curTheme)
+  }
+
+  const localThemes = await invoke<LocalTheme[]>('load_local_themes')
+  if (localThemes.length > 0) {
+    const cssContents = localThemes.map((t) => t.css_content)
+    loadLocalThemeCss(cssContents)
   }
 
   invoke<Record<string, any>>('load_themes').then((res) => {

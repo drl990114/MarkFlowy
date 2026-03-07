@@ -17,7 +17,8 @@
     "addHeader": "Ajouter Header",
     "key": "Touches",
     "value": "Valeur",
-    "success": "Succès"
+    "success": "Succès",
+    "import": "Importer"
   },
   "view": {
     "label": "vue",
@@ -410,7 +411,11 @@
       "installed": "Installé",
       "download": "Télécharger",
       "uninstall": "Désinstaller",
-      "only_installed": "Il suffit de regarder installé"
+      "only_installed": "Il suffit de regarder installé",
+      "no_local_themes": "Aucun thème local",
+      "remove_local_theme": "Confirmez la suppression du thème local \"{{name}}\"? Cela supprime les fichiers sous le dossier.",
+      "online_themes": "Thèmes en ligne",
+      "local_css_files": "Fichiers CSS locaux"
     }
   },
   "updater": {
