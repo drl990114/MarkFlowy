@@ -6,6 +6,7 @@ const scrollbarHidden = css`
   &::-webkit-scrollbar {
     width: 0;
     height: 0;
+    display: none;
   }
 
   &::-webkit-scrollbar-track {
@@ -16,17 +17,27 @@ const scrollbarHidden = css`
     border-radius: 6px;
     background: transparent;
   }
+
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  overflow: -moz-scrollbars-none;
+  overflow: hidden;
 `
 
 const scrollbarVisible = (props: ScThemeProps) => css`
   &::-webkit-scrollbar {
     width: 6px;
     height: 6px;
+    display: block;
   }
 
   &::-webkit-scrollbar-thumb {
     background: ${(props.theme as any).scrollbarThumbColor};
   }
+
+  scrollbar-width: thin;
+  -ms-overflow-style: auto;
+  overflow: auto;
 `
 
 const tocListExpandedAlign = css`
@@ -154,6 +165,12 @@ export const TocDiv = styled.div<TocDivProps>`
     text-overflow: ellipsis;
     white-space: normal;
     ${scrollbarHidden};
+
+    &:hover,
+    &.show-scrollbar,
+    .toc-list--expanded & {
+      ${scrollbarVisible};
+    }
   }
 
   ul {
@@ -170,6 +187,7 @@ export const TocDiv = styled.div<TocDivProps>`
     width: 100%;
     display: flex;
     justify-content: center;
+    box-sizing: border-box;
   }
 
   ${(props) =>
@@ -194,13 +212,6 @@ export const TocDiv = styled.div<TocDivProps>`
       a {
         gap: 6px;
         min-height: 12px;
-      }
-
-      &:hover {
-        .toc-link__chapter,
-        .toc-link__title {
-          max-width: 160px;
-        }
       }
     `}
 
@@ -232,6 +243,10 @@ export const TocDiv = styled.div<TocDivProps>`
 
       nav {
         ${scrollbarVisible(props)};
+
+        &:hover {
+          ${scrollbarVisible(props)};
+        }
       }
 
       ${tocListExpandedAlign};
@@ -245,7 +260,8 @@ export const TocDiv = styled.div<TocDivProps>`
   ${(props) =>
     props.compact !== false &&
     css`
-      &:hover {
+      &:hover,
+      .toc-list--expanded {
         .toc-list {
           overflow: auto;
         }
@@ -260,10 +276,7 @@ export const TocDiv = styled.div<TocDivProps>`
         .toc-link__title {
           opacity: 1;
           transform: translateX(0);
-          max-width: 220px;
-          pointer-events: auto;
-          white-space: nowrap;
-          word-break: nowrap;
+          max-width: 160px;
         }
 
         .toc-link__title {
@@ -331,6 +344,10 @@ export const TocLink = styled.a<ITocListProps & ScThemeProps>`
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    max-width: 160px;
+    pointer-events: auto;
+    white-space: nowrap;
+    word-break: nowrap;
     transition:
       opacity 0.2s ease,
       transform 0.2s ease,
@@ -347,9 +364,7 @@ export const TocLink = styled.a<ITocListProps & ScThemeProps>`
         : css`
             opacity: 1;
             transform: translateX(0);
-            max-width: 220px;
             pointer-events: auto;
-            white-space: nowrap;
           `}
   }
 `

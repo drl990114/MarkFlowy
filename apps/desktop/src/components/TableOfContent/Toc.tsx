@@ -3,9 +3,12 @@ import React, {
   useCallback,
   useEffect,
   useImperativeHandle,
+  useMemo,
+  useRef,
   useState,
 } from 'react';
 
+import { useVirtualizer } from '@tanstack/react-virtual';
 
 import type { IHeadingData } from './HeadingTree';
 import { HeadingTree, TraverseResult } from './HeadingTree';
@@ -39,6 +42,11 @@ export interface TocProps {
    */
   compact?: boolean;
   /**
+   * Whether the TOC is pinned (always show scrollbar)
+   * @default false
+   */
+  pinned?: boolean;
+  /**
    * Optional toolbar content shown on hover
    */
   toolbar?: React.ReactNode;
@@ -61,6 +69,7 @@ export const Toc = forwardRef<TocRef, TocProps>((props, ref) => {
       autoExpand = false,
       variant = 'sidebar',
       compact = true,
+      pinned = false,
       toolbar,
       toolbarFixed = false,
       activeId,
@@ -71,6 +80,26 @@ export const Toc = forwardRef<TocRef, TocProps>((props, ref) => {
     const [activeParentsState, setActiveParentsState] = useState<any>();
     const [container, setContainer] = useState<HTMLElement>();
     const [scroll, setScroll] = useState<HTMLElement | undefined>(scrollEl);
+    const navRef = useRef<HTMLElement>(null);
+
+    const flattenedHeadings = useMemo(() => {
+      if (!headingTree) return [];
+      const items: HeadingNode[] = [];
+      headingTree.traverseInPreorder((h) => {
+        items.push(h);
+        return !autoExpand || activeParentsState?.[h.key] || h.parent?.key === -1
+          ? TraverseResult.Continue
+          : TraverseResult.NoChildren;
+      });
+      return items;
+    }, [headingTree, autoExpand, activeParentsState]);
+
+    const rowVirtualizer = useVirtualizer({
+      count: flattenedHeadings.length,
+      getScrollElement: () => navRef.current,
+      estimateSize: () => (variant === 'editor' ? 18 : 28),
+      overscan: 10,
+    });
 
     const refreshContainerHeadings = useCallback((targetContainer: HTMLElement) => {
       if (!targetContainer) return;
@@ -244,11 +273,11 @@ export const Toc = forwardRef<TocRef, TocProps>((props, ref) => {
     }));
 
     const renderHeadings = () => {
-      if (!headingTree) {
-        return;
+      if (flattenedHeadings.length === 0) {
+        return null;
       }
-      const items: React.ReactNode[] = [];
-      headingTree.traverseInPreorder((h) => {
+
+      const renderItem = (h: HeadingNode) => {
         const isActive = activeId
           ? h.id === activeId
           : !scroll
@@ -260,7 +289,8 @@ export const Toc = forwardRef<TocRef, TocProps>((props, ref) => {
         const levelIndex = Math.min(6, Math.max(1, headingLevel || 1)) - 1;
         const barWidthByLevel = Math.max(4, 24 - levelIndex * 4);
         const barWidth = variant === 'editor' ? barWidthByLevel : baseBarWidth;
-        items.push(
+
+        return (
           <TocListItem depth={h.depth} active={isActive} key={h.key}>
             <TocLink
               href={`#${h.id}`}
@@ -280,27 +310,65 @@ export const Toc = forwardRef<TocRef, TocProps>((props, ref) => {
               <span className="toc-link__chapter">{h.chapter}</span>
               <span className="toc-link__title">{h.title}</span>
             </TocLink>
-          </TocListItem>,
+          </TocListItem>
         );
+      };
 
-        return !autoExpand || activeParentsState?.[h.key] || h.parent?.key === -1
-          ? TraverseResult.Continue
-          : TraverseResult.NoChildren;
-      });
+      if (flattenedHeadings.length > 50) {
+        const handleScrollWheel = (e: React.WheelEvent) => {
+          e.stopPropagation();
+        };
 
-      return items;
+        const navStyle: React.CSSProperties = {
+          height: `${rowVirtualizer.getTotalSize()}px`,
+          width: '100%',
+          position: 'relative',
+        };
+
+        return (
+          <nav
+            ref={navRef}
+            onWheel={handleScrollWheel}
+            className={!compact || pinned ? 'show-scrollbar' : ''}
+            style={navStyle}
+          >
+            {rowVirtualizer.getVirtualItems().map((virtualItem) => {
+              const h = flattenedHeadings[virtualItem.index];
+              return (
+                <div
+                  key={virtualItem.key}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: `${virtualItem.size}px`,
+                    transform: `translateY(${virtualItem.start}px)`,
+                  }}
+                >
+                  {renderItem(h)}
+                </div>
+              );
+            })}
+          </nav>
+        );
+      }
+
+      return (
+        <nav className={!compact || pinned ? 'show-scrollbar' : ''}>
+          <ul>{flattenedHeadings.map(renderItem)}</ul>
+        </nav>
+      );
     };
 
     return (
       <TocDiv variant={variant} compact={compact} toolbarFixed={toolbarFixed} hasToolbar={!!toolbar}>
-        <div className="toc-list">
+        <div className={`toc-list ${!compact || pinned ? 'toc-list--expanded' : ''}`}>
           {toolbar}
           {headingTree?.getRoot()?.children?.length === 0 ? (
             null
           ) : (
-            <nav>
-              <ul>{renderHeadings()}</ul>
-            </nav>
+            <>{renderHeadings()}</>
           )}
         </div>
       </TocDiv>

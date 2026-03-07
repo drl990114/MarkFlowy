@@ -201,43 +201,45 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
             return
           }
 
-          const matches = extractMatches(codemirrorView.cm)
-          const sourceHeadings: SourceHeadingInfo[] = matches.map((match) => {
-            const depth = Number(match.type.split('ATXHeading')?.[1]) || 1
-            const value = getHeadingValue(match.value)
-            const pos = match.to
+          setTimeout(() => {
+            const matches = extractMatches(codemirrorView.cm)
+            const sourceHeadings: SourceHeadingInfo[] = matches.map((match) => {
+              const depth = Number(match.type.split('ATXHeading')?.[1]) || 1
+              const value = getHeadingValue(match.value)
+              const pos = match.to
 
-            return {
-              depth,
-              value,
-              pos,
-              id: `heading-${pos}`,
-            }
-          })
+              return {
+                depth,
+                value,
+                pos,
+                id: `heading-${pos}`,
+              }
+            })
 
-          sourceHeadingsRef.current = sourceHeadings
-          setSourceScrollEl(codemirrorView.cm.scrollDOM)
+            sourceHeadingsRef.current = sourceHeadings
+            setSourceScrollEl(codemirrorView.cm.scrollDOM)
 
-          const headings: IHeadingData[] = sourceHeadings.map((heading) => {
-            return {
-              depth: heading.depth,
-              value: heading.value,
-              id: heading.id,
-              htmlNode: null,
-              onClick: () => {
-                codemirrorView.cm.dispatch({
-                  selection: {
-                    anchor: heading.pos,
-                    head: heading.pos,
-                  },
-                  scrollIntoView: true,
-                })
-                codemirrorView.cm.focus()
-              },
-            }
-          })
-          tocRef.current?.refreshByHeadings({ newHeadings: headings })
-          scheduleActiveHeadingUpdateRef.current()
+            const headings: IHeadingData[] = sourceHeadings.map((heading) => {
+              return {
+                depth: heading.depth,
+                value: heading.value,
+                id: heading.id,
+                htmlNode: null,
+                onClick: () => {
+                  codemirrorView.cm.dispatch({
+                    selection: {
+                      anchor: heading.pos,
+                      head: heading.pos,
+                    },
+                    scrollIntoView: true,
+                  })
+                  codemirrorView.cm.focus()
+                },
+              }
+            })
+            tocRef.current?.refreshByHeadings({ newHeadings: headings })
+            scheduleActiveHeadingUpdateRef.current()
+          }, 0)
           return
         }
 
@@ -248,28 +250,32 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
             return
           }
 
-          const headingInfos = getAllHeadings(editorView.state.doc)
-          wysiwygHeadingsRef.current = headingInfos
+          setTimeout(() => {
+            const headingInfos = getAllHeadings(editorView.state.doc)
+            wysiwygHeadingsRef.current = headingInfos
 
-          const headings = headingInfos.map((heading) => {
-            return {
-              depth: heading.level,
-              value: heading.text,
-              id: heading.id,
-              htmlNode: null,
-              onClick: () => jumpToHeading(editorView, heading.pos, wysiwygScrollElRef.current),
-            } as IHeadingData
-          })
+            const headings = headingInfos.map((heading) => {
+              return {
+                depth: heading.level,
+                value: heading.text,
+                id: heading.id,
+                htmlNode: null,
+                onClick: () => jumpToHeading(editorView, heading.pos, wysiwygScrollElRef.current),
+              } as IHeadingData
+            })
 
-          tocRef.current?.refreshByHeadings({ newHeadings: headings })
-          scheduleActiveHeadingUpdateRef.current()
+            tocRef.current?.refreshByHeadings({ newHeadings: headings })
+            scheduleActiveHeadingUpdateRef.current()
+          }, 0)
           return
         }
 
-        tocRef.current?.refresh({
-          newContainer: document.querySelector('#editor-panel') as HTMLElement,
-          newScroll: document.querySelector('#editor-panel') as HTMLElement,
-        })
+        setTimeout(() => {
+          tocRef.current?.refresh({
+            newContainer: document.querySelector('#editor-panel') as HTMLElement,
+            newScroll: document.querySelector('#editor-panel') as HTMLElement,
+          })
+        }, 0)
       },
     })
   }, [])
@@ -320,6 +326,7 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
         scrollEl={scrollEl}
         variant={variant}
         compact={!pinned}
+        pinned={pinned}
         activeId={activeHeadingId ?? undefined}
         toolbar={
           <div className={'toc-toolbar'}>
