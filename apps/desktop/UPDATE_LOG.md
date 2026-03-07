@@ -1,5 +1,57 @@
 # UPDATE LOG
 
+## v0.55.0
+
+Features:
+
+- 【Beta】 Added Copilot plugin in WYSIWYG mode, supporting document auto-completion. It is disabled by default due to instability and needs to be enabled in settings.
+
+- Adjusted interface layout for simplified display and optimized interaction experience.
+
+- Added Traditional/Simplified Chinese toggle, accessible via “More” in the Editor toolbar.
+
+- New Theme Store allows submitting themes via PR. See [Custom Theme Documentation](https://github.com/drl990114/MarkFlowy/blob/main/docs/en/Extension/CustomTheme.md) for details.
+
+- Support importing local CSS files, which are loaded on application startup.
+
+- Optimized image loading in HTML blocks, now supporting relative paths.
+
+Fixes:
+
+- Fixed the issue on macOS where pasting in code blocks required secondary confirmation.
+
+- Fixed rendering issues on Windows caused by incorrect Mark matching.
+
+- Optimized image loading to support encoded paths.
+
+- Numerous performance improvements.
+
+---
+
+特性：
+
+- 【Beta】所见即所得模式下新增 Copilot 插件，支持文档自动补全，因还不稳定，默认关闭，需在设置中开启。
+
+- 界面布局调整，简化显示，优化交互体验。
+
+- 支持繁简切换，在 Editor 工具栏的 “更多” 中使用。
+
+- 新增主题商店，可以通过 PR 来提交主题，详细操作请看：[Custom Theme Documentation](https://github.com/drl990114/MarkFlowy/blob/main/docs/zh/Extension/CustomTheme.md),
+
+- 支持导入本地 CSS 文件，应用启动时会加载该文件。
+
+- html 块中的图片加载优化，支持相对路径。
+
+修复：
+
+- 修复 MacOS 中代码块粘贴需要二次确认的问题。
+
+- 修复 Windows 下 Mark 匹配错误导致的渲染问题。
+
+- 优化图片加载，支持 encode 后的路径。
+
+- 很多的性能优化。
+
 ## v0.51.1
 
 Features:
