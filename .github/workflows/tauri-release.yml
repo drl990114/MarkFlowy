@@ -321,10 +321,16 @@ jobs:
           echo ${{ env.version }}
 
       - name: Send a request to UpgradeLink
-        uses: toolsetlink/upgradelink-action@v5
+        uses: toolsetlink/upgradelink-action@3.0.2
         with:
-          source-url: 'https://github.com/drl990114/MarkFlowy/releases/download/v${{ env.version }}/install.json'
-          access-key: ${{ secrets.UPGRADE_LINK_ACCESS_KEY }}  # ACCESS_KEY  密钥key
-          tauri-key: ${{ secrets.UPGRADE_LINK_TAURI_KEY }}    # TAURI_KEY tauri 应用唯一标识
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          access_key: ${{ secrets.UPGRADE_LINK_ACCESS_KEY }}  # ACCESS_KEY  密钥key
+          access_secret: ${{ secrets.UPGRADE_LINK_ACCESS_SECRET }}
+          config: |
+            {
+              "app_type": "tauri",
+              "request": {
+                "app_key": "${{ secrets.UPGRADE_LINK_TAURI_KEY }}",
+                "latest_json_url": "https://github.com/drl990114/MarkFlowy/releases/download/v${{ env.version }}/install.json"
+              }
+            }
 
