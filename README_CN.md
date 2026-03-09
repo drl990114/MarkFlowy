@@ -14,6 +14,8 @@
 
 <div align="center">
 
+[![GitHub Repo stars](https://img.shields.io/github/stars/drl990114/MarkFlowy)](https://github.com/drl990114/MarkFlowy)
+[![G-Star](https://atomgit.com/drl990114/MarkFlowy/star/badge.svg)](https://atomgit.com/drl990114/MarkFlowy)
 [![App Version][version-badge]][release]
 [![Downloads][downloads-badge]][release]
 [![PRs Welcome][prs-welcome-badge]][prs-welcome]
@@ -26,6 +28,7 @@
 [![TypeScript-version-icon]](https://www.typescriptlang.org/)
 [![Rust-version-icon]](https://www.rust-lang.org/)
 [![License][license-badge]][license]
+[![codefactor]](https://www.codefactor.io/repository/github/drl990114/markflowy)
 <br/>
 </div>
 
@@ -39,7 +42,7 @@
 
 ## 功能特性
 
-- **内置 AI**：当前支持一键导出对话、翻译文章到任何语言以及获取文章摘要，支持`DeepSeek`、`Chatgpt`等大模型让他们成为你的智能助手。
+- **内置 AI**：当前支持Copilot、一键导出对话、翻译文章到任何语言以及获取文章摘要，支持`DeepSeek`、`Chatgpt`等大模型让他们成为你的智能助手。
 - **超轻量**：MarkFlowy 基于 tauri, 拥有小于 20MB 的体积和更好的性能。
 - **多编辑模式**：MarkFlowy 使用 prosemirror 作为编辑器核心, 不仅扩展性高，编辑体验也很好。并支持多种编辑模式，如`source code`, `wysiwyg`。
 - **编辑多种文件**：除了 Markdown，还支持编辑 `json`、`txt` 等文件类型。

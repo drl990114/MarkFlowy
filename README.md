@@ -12,6 +12,8 @@
 
 <div align="center">
 
+[![GitHub Repo stars](https://img.shields.io/github/stars/drl990114/MarkFlowy)](https://github.com/drl990114/MarkFlowy)
+[![G-Star](https://atomgit.com/drl990114/MarkFlowy/star/badge.svg)](https://atomgit.com/drl990114/MarkFlowy)
 [![App Version][version-badge]][release]
 [![Downloads][downloads-badge]][release]
 [![PRs Welcome][prs-welcome-badge]][prs-welcome]
@@ -24,6 +26,8 @@
 [![TypeScript-version-icon]](https://www.typescriptlang.org/)
 [![Rust-version-icon]](https://www.rust-lang.org/)
 [![License][license-badge]][license]
+[![codefactor]](https://www.codefactor.io/repository/github/drl990114/markflowy)
+
 <br/>
 </div>
 
@@ -37,7 +41,7 @@ Currently, MarkFlowy is in the beta stage, and it is recommended to use it with 
 
 ## Features
 
-- **Built-in AI:** Currently supports one-click export of dialogues, translation of articles to any language, and article summaries. It supports large models like `DeepSeek` and `Chatgpt`, making them your intelligent assistant.
+- **Built-in AI:** Currently supports Copilot, one-click export of dialogues, translation of articles to any language, and article summaries. It supports large models like `DeepSeek` and `Chatgpt`, making them your intelligent assistant.
 
 - **lightweight:** MarkFlowy is based on Tauri, boasting a size of less than 20MB and improved performance.
 

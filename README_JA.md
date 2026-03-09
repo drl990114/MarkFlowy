@@ -13,6 +13,8 @@
 
 <div align="center">
 
+[![GitHub Repo stars](https://img.shields.io/github/stars/drl990114/MarkFlowy)](https://github.com/drl990114/MarkFlowy)
+[![G-Star](https://atomgit.com/drl990114/MarkFlowy/star/badge.svg)](https://atomgit.com/drl990114/MarkFlowy)
 [![App Version][version-badge]][release]
 [![Downloads][downloads-badge]][release]
 [![PRs Welcome][prs-welcome-badge]][prs-welcome]
@@ -25,6 +27,7 @@
 [![TypeScript-version-icon]](https://www.typescriptlang.org/)
 [![Rust-version-icon]](https://www.rust-lang.org/)
 [![License][license-badge]][license]
+[![codefactor]](https://www.codefactor.io/repository/github/drl990114/markflowy)
 <br/>
 </div>
 
@@ -38,7 +41,7 @@
 
 ## 機能
 
-- **AI搭載:** ダイアログのワンクリックエクスポート、記事のあらゆる言語への翻訳、記事の要約作成に対応しています。`DeepSeek`や`Chatgpt`といった大規模なモデルにも対応しており、インテリジェントなアシスタントとして活躍します。
+- **AI搭載:** 現在はCopilot、ワンタッチで会話をエクスポートし、文章を任意の言語に翻訳し、記事の要約を取得することをサポートしており、「DeepSeek `」、「Chatgpt」などの大きなモデルをサポートして、彼らをスマートアシスタントにしています。
 
 - **軽量:** MarkFlowyはTauriをベースにしており、20MB未満のサイズと優れたパフォーマンスを誇ります。
 
