@@ -2,12 +2,10 @@ import useAiChatStore, { getCurrentAISettingData } from '@/extensions/ai/useAiCh
 import useBookMarksStore from '@/extensions/bookmarks/useBookMarksStore'
 import bus from '@/helper/eventBus'
 import { getFileObject } from '@/helper/files'
-import { FileResultCode, getRelativePathWithCurWorkspace } from '@/helper/filesys'
-import { logger } from '@/helper/logger'
+import { FileResultCode } from '@/helper/filesys'
 import { addNewMarkdownFileEdit, isEmptyEditor } from '@/services/editor-file'
-import { gitAddFileWithCurrentWorkspace } from '@/services/git'
 import { currentWindow } from '@/services/windows'
-import { checkIsGitRepoBySyncMode, getWorkspace, WorkSpace } from '@/services/workspace'
+import { getWorkspace, WorkSpace } from '@/services/workspace'
 import { useCommandStore, useEditorStateStore, useEditorStore } from '@/stores'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
@@ -15,7 +13,6 @@ import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
 import useAppTasksStore from '@/stores/useTasksStore'
 import NiceModal from '@ebay/nice-modal-react'
 import { invoke } from '@tauri-apps/api/core'
-import { Command } from '@tauri-apps/plugin-shell'
 import { debounce } from 'lodash'
 import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -36,8 +33,7 @@ const EMPTY_FILE_NORMAL_INFO: FileNormalInfo = {
 }
 
 export const EditorInfoBar = memo(() => {
-  const { activeId, folderData, getEditorDelegate, getEditorContent, getRootPath } =
-    useEditorStore()
+  const { activeId, folderData, getEditorDelegate, getEditorContent } = useEditorStore()
   const [workspace, setWorkspace] = useState<WorkSpace | null>(null)
 
   const { editorViewTypeMap } = useEditorViewTypeStore()
@@ -48,13 +44,10 @@ export const EditorInfoBar = memo(() => {
   const { t } = useTranslation()
   const ref = useRef<HTMLDivElement>(null)
   const ref1 = useRef<HTMLDivElement>(null)
-  const ref2 = useRef<HTMLDivElement>(null)
   const curFile = activeId ? getFileObject(activeId) : undefined
-  const [hasGitStatus, setHasGitStatus] = useState(false)
   const [fileNormalInfo, setFileNormalInfo] = useState<FileNormalInfo>(EMPTY_FILE_NORMAL_INFO)
   const { idStateMap } = useEditorStateStore()
   const editorState = activeId ? idStateMap.get(activeId) : undefined
-  const rootPath = getRootPath()
 
   useEffect(() => {
     getWorkspace().then((workspace) => {
@@ -86,36 +79,7 @@ export const EditorInfoBar = memo(() => {
     getFileNormalInfo()
   }, [editorState?.hasUnsavedChanges, getFileNormalInfo])
 
-  const checkCurFileGitStatus = useCallback(async () => {
-    if (!curFile?.path || !rootPath) {
-      setHasGitStatus(false)
-      return
-    }
-
-    // check current file status
-    try {
-      const res = await Command.create(
-        'run-git-diff',
-        ['diff', '--name-only', getRelativePathWithCurWorkspace(curFile?.path)],
-        {
-          cwd: rootPath,
-        },
-      ).execute()
-
-      if (res.stdout.trim()) {
-        setHasGitStatus(true)
-      } else {
-        setHasGitStatus(false)
-      }
-    } catch (error) {
-      logger.error('Failed to check git status:', error)
-      setHasGitStatus(false)
-    }
-  }, [curFile?.path, rootPath])
-
   useEffect(() => {
-    checkCurFileGitStatus()
-
     const unsubscribe = currentWindow.listen<{
       paths: string[]
     }>('file_watcher_event', async (res) => {
@@ -125,16 +89,12 @@ export const EditorInfoBar = memo(() => {
       if (Array.isArray(res.payload?.paths) && res.payload.paths.includes(curFile.path)) {
         getFileNormalInfo()
       }
-
-      if (checkIsGitRepoBySyncMode(workspace?.syncMode)) {
-        checkCurFileGitStatus()
-      }
     })
 
     return () => {
       unsubscribe.then((f) => f())
     }
-  }, [workspace?.syncMode, checkCurFileGitStatus, getFileNormalInfo])
+  }, [workspace?.syncMode, getFileNormalInfo])
 
   const fetchCurFileSummary = useCallback(async () => {
     const content = getEditorContent(curFile?.id || '')
@@ -391,32 +351,6 @@ ${res}
       )}
 
       <Space>
-        {checkIsGitRepoBySyncMode(workspace?.syncMode) && hasGitStatus ? (
-          <MfIconButton
-            size='small'
-            rounded='smooth'
-            iconRef={ref2}
-            icon='ri-git-repository-commits-line'
-            onClick={() => {
-              if (!curFile.path) return
-
-              const rect = ref2.current?.getBoundingClientRect()
-              if (rect === undefined) return
-
-              showContextMenu({
-                x: rect.x,
-                y: rect.y + rect.height,
-                items: [
-                  {
-                    label: 'git add',
-                    value: 'git_add',
-                    handler: () => gitAddFileWithCurrentWorkspace(curFile),
-                  },
-                ],
-              })
-            }}
-          />
-        ) : null}
         <MfIconButton
           size='small'
           rounded='smooth'

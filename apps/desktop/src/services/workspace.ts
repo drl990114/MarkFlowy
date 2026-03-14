@@ -1,6 +1,5 @@
 import { useEditorStore } from '@/stores'
 import { invoke } from '@tauri-apps/api/core'
-import { Command } from '@tauri-apps/plugin-shell'
 import { t } from 'i18next'
 
 export enum WorkspaceSyncMode {
@@ -24,14 +23,8 @@ export const getWorkspace = async () => {
     const isGitRepo = await invoke<string>('is_git_repository', { path: rootPath })
 
     if (isGitRepo) {
-      const res = await Command.create('run-git-remote', ['remote', '-v'], {
-        cwd: rootPath,
-      }).execute()
-
-      const isRemote = !res.stderr && res.stdout.trim().length > 0
-
       return new WorkSpace({
-        syncMode: isRemote ? WorkspaceSyncMode.GIT_REMOTE : WorkspaceSyncMode.GIT_LOCAL,
+        syncMode: WorkspaceSyncMode.GIT_LOCAL,
         rootPath: rootPath,
       })
     } else {
@@ -49,7 +42,6 @@ interface WorkSpaceOptions {
 
 export class WorkSpace {
   syncMode = WorkspaceSyncMode.None
-  syncModeDescription = ''
   syncModeName = ''
   rootPath: string | null = null
 
@@ -58,13 +50,10 @@ export class WorkSpace {
     this.rootPath = options.rootPath ?? null
 
     if (this.syncMode === WorkspaceSyncMode.GIT_LOCAL) {
-      this.syncModeDescription = t('workspace.sync_mode.git_local.description')
       this.syncModeName = t('workspace.sync_mode.git_local.name')
     } else if (this.syncMode === WorkspaceSyncMode.GIT_REMOTE) {
-      this.syncModeDescription = t('workspace.sync_mode.git_remote.description')
       this.syncModeName = t('workspace.sync_mode.git_remote.name')
     } else if (this.syncMode === WorkspaceSyncMode.PURE_LOCAL) {
-      this.syncModeDescription = t('workspace.sync_mode.pure_local.description')
       this.syncModeName = t('workspace.sync_mode.pure_local.name')
     }
   }

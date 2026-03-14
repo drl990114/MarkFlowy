@@ -7,7 +7,6 @@ import styled from 'styled-components'
 import { ToolbarSection, usePriorityHidden } from '../responsive'
 import { AIButton } from '../WysiwygToolbar/components/AIButton'
 import { FileInfo } from '../WysiwygToolbar/components/FileInfo'
-import { GitStatus } from '../WysiwygToolbar/components/GitStatus'
 import { MoreActions } from '../WysiwygToolbar/components/MoreActions'
 import { ViewSwitcher } from '../WysiwygToolbar/components/ViewSwitcher'
 import { CodeCommandButton } from './CodeCommandButton'
@@ -62,7 +61,6 @@ export const SourceCodeToolbar: FC = () => {
         <AIButton />
         <ViewSwitcher />
         <FileInfo />
-        <GitStatus />
         <MoreActions />
       </ToolbarSection>
 

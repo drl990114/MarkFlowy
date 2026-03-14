@@ -16,13 +16,13 @@
 [![G-Star](https://atomgit.com/drl990114/MarkFlowy/star/badge.svg)](https://atomgit.com/drl990114/MarkFlowy)
 [![App Version][version-badge]][release]
 [![Downloads][downloads-badge]][release]
-[![PRs Welcome][prs-welcome-badge]][prs-welcome]
 <br/>
 [![Build Status][build-badge]][build]
 [![Code of Conduct][coc-badge]][coc]
 [![Commit Activity][commit-badge]][commit]
 [![issues-closed]](https://github.com/drl990114/MarkFlowy/issues?q=sort%3Aupdated-desc+is%3Aissue+is%3Aclosed)
 <br/>
+[![PRs Welcome][prs-welcome-badge]][prs-welcome]
 [![TypeScript-version-icon]](https://www.typescriptlang.org/)
 [![Rust-version-icon]](https://www.rust-lang.org/)
 [![License][license-badge]][license]
@@ -56,8 +56,6 @@ Currently, MarkFlowy is in the beta stage, and it is recommended to use it with 
 - **Image Processing:** When pasting images into MarkFlowy, you can choose to paste them to a specified path or convert them to `base64`.
 
 - **File Management**: A powerful file tree that supports drag-and-drop movement, global search, and other common functions.
-
-- **Git Management**: Provides a quick and easy way to manage Git repositories, facilitating the use of Git as a repository synchronization solution.
 
 - **Multi-language support:** Supports multiple languages ​​including Chinese, English, Spanish, Japanese, and French.
 

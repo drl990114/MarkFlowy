@@ -8,7 +8,6 @@ import { ToolbarSection, usePriorityHidden } from '../responsive'
 import { CommandButton } from './CommandButton'
 import { AIButton } from './components/AIButton'
 import { FileInfo } from './components/FileInfo'
-import { GitStatus } from './components/GitStatus'
 import { MoreActions } from './components/MoreActions'
 import { ViewSwitcher } from './components/ViewSwitcher'
 
@@ -71,7 +70,6 @@ export const WysiwygToolbar: FC = () => {
       >
         <AIButton />
         <ViewSwitcher />
-        <GitStatus />
         <FileInfo />
         <MoreActions />
       </ToolbarSection>

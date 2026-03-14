@@ -17,13 +17,13 @@
 [![G-Star](https://atomgit.com/drl990114/MarkFlowy/star/badge.svg)](https://atomgit.com/drl990114/MarkFlowy)
 [![App Version][version-badge]][release]
 [![Downloads][downloads-badge]][release]
-[![PRs Welcome][prs-welcome-badge]][prs-welcome]
 <br/>
 [![Build Status][build-badge]][build]
 [![Code of Conduct][coc-badge]][coc]
 [![Commit Activity][commit-badge]][commit]
 [![issues-closed]](https://github.com/drl990114/MarkFlowy/issues?q=sort%3Aupdated-desc+is%3Aissue+is%3Aclosed)
 <br/>
+[![PRs Welcome][prs-welcome-badge]][prs-welcome]
 [![TypeScript-version-icon]](https://www.typescriptlang.org/)
 [![Rust-version-icon]](https://www.rust-lang.org/)
 [![License][license-badge]][license]
@@ -56,8 +56,6 @@
 - **画像処理:** MarkFlowyに画像を貼り付ける際、指定したパスに貼り付けるか、`base64`に変換するかを選択できます。
 
 - **ファイル管理**: ドラッグアンドドロップによる移動、グローバル検索、その他の一般的な機能をサポートする強力なファイルツリー。
-
-- **Git管理**: Gitリポジトリを迅速かつ簡単に管理する方法を提供し、Gitをリポジトリ同期ソリューションとして活用しやすくします。
 
 - **多言語サポート：** 中国語、英語、スペイン語、日本語、フランス語を含む複数の言語をサポートします。
 

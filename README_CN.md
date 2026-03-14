@@ -18,13 +18,13 @@
 [![G-Star](https://atomgit.com/drl990114/MarkFlowy/star/badge.svg)](https://atomgit.com/drl990114/MarkFlowy)
 [![App Version][version-badge]][release]
 [![Downloads][downloads-badge]][release]
-[![PRs Welcome][prs-welcome-badge]][prs-welcome]
 <br/>
 [![Build Status][build-badge]][build]
 [![Code of Conduct][coc-badge]][coc]
 [![Commit Activity][commit-badge]][commit]
 [![issues-closed]](https://github.com/drl990114/MarkFlowy/issues?q=sort%3Aupdated-desc+is%3Aissue+is%3Aclosed)
 <br/>
+[![PRs Welcome][prs-welcome-badge]][prs-welcome]
 [![TypeScript-version-icon]](https://www.typescriptlang.org/)
 [![Rust-version-icon]](https://www.rust-lang.org/)
 [![License][license-badge]][license]
@@ -50,7 +50,6 @@
 - **自定义快捷键**：支持自定义快捷键，满足个性化需求。
 - **图片处理**：当你粘贴图片到 MarkFlowy，可以选择粘贴到指定的路径，或者转为 `base64`。
 - **文件管理**：功能强大的文件树，支持拖拽移动、全局搜索等常用功能。
-- **Git管理**：提供了快捷的 git 仓库管理方式，方便的使用 git 作为仓库的同步方案。
 - **多语言支持**：支持中文、英文、西班牙语、日语、法语等多种语言。
 
 ## 下载

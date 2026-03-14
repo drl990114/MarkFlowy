@@ -1,10 +1,9 @@
-import { gitCommitWithCurrentWorkspace, gitPushWithCurrentWorkspace } from '@/services/git'
-import { getWorkspace, WorkSpace, WorkspaceSyncMode } from '@/services/workspace'
+import { getWorkspace, WorkSpace } from '@/services/workspace'
 import { useCommandStore } from '@/stores'
 import { t } from 'i18next'
-import { JSX, memo, useCallback, useEffect, useState } from 'react'
+import { memo, useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { Button, Dialog, Input, toast } from 'zens'
+import { Dialog } from 'zens'
 
 const WorkspaceDialogWrapper = styled(Dialog)`
   max-width: 800px;
@@ -40,8 +39,6 @@ const WorkspaceMainContainer = styled.div`
 export const WorkspaceDialog = memo(() => {
   const [open, setOpen] = useState(false)
   const [workspace, setWorkspace] = useState<WorkSpace | null>(null)
-  const [commitMessage, setCommitMessage] = useState('Daily commit')
-  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     useCommandStore.getState().addCommand({
@@ -57,73 +54,13 @@ export const WorkspaceDialog = memo(() => {
 
   const handleClose = useCallback(() => setOpen(false), [])
 
-  const handleSync = async () => {
-    setLoading(true)
-
-    const needPush = workspace?.syncMode === WorkspaceSyncMode.GIT_REMOTE
-
-    const id = toast.loading(needPush ? 'Git commit & push...' : 'Git commit...')
-    try {
-      await gitCommitWithCurrentWorkspace(commitMessage)
-      if (needPush) {
-        await gitPushWithCurrentWorkspace()
-      }
-
-      toast.dismiss(id)
-      toast.success(needPush ? 'Git commit & push success' : 'Git commit success')
-    } catch (error: unknown) {
-      toast.dismiss(id)
-      toast.error(String(error))
-    } finally {
-      setLoading(false)
-      toast.dismiss(id)
-    }
-  }
-
-  // TODO 检查暂存区内容，显示个清单
-  const syncmodeFooterMap: Record<WorkspaceSyncMode, JSX.Element[] | null> = {
-    [WorkspaceSyncMode.None]: null,
-    [WorkspaceSyncMode.PURE_LOCAL]: null,
-    [WorkspaceSyncMode.GIT_LOCAL]: [
-      <Input
-        key='commitMessageInput'
-        value={commitMessage}
-        onChange={(e) => setCommitMessage(e.target.value)}
-      />,
-      <Button key='gitCommit' btnType='primary' onClick={handleSync} disabled={loading}>
-        {'git commit'}
-      </Button>,
-    ],
-    [WorkspaceSyncMode.GIT_REMOTE]: [
-      <Input
-        key='commitMessageInput'
-        value={commitMessage}
-        onChange={(e) => setCommitMessage(e.target.value)}
-      />,
-      <Button key='gitCommit' btnType='primary' onClick={handleSync} disabled={loading}>
-        {'git commit & git push'}
-      </Button>,
-    ],
-  }
-
   return (
-    <WorkspaceDialogWrapper
-      title={t('workspace.info')}
-      open={open}
-      onClose={handleClose}
-      footer={syncmodeFooterMap[workspace?.syncMode || WorkspaceSyncMode.PURE_LOCAL] || null}
-    >
+    <WorkspaceDialogWrapper title={t('workspace.info')} open={open} onClose={handleClose}>
       {workspace ? (
         <WorkspaceMainContainer>
           <div>
             <i className='ri-folder-5-line'></i>:{' '}
             <span style={{ fontSize: '0.9em' }}>{workspace.rootPath}</span>
-          </div>
-          <div>
-            <i className='ri-folder-upload-line'></i>:{' '}
-            <span style={{ fontSize: '0.9em' }}>
-              {workspace.syncModeName}（{workspace.syncModeDescription}）
-            </span>
           </div>
         </WorkspaceMainContainer>
       ) : (
