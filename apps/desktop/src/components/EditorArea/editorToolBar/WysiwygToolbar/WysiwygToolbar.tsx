@@ -7,9 +7,7 @@ import styled from 'styled-components'
 import { ToolbarSection, usePriorityHidden } from '../responsive'
 import { CommandButton } from './CommandButton'
 import { AIButton } from './components/AIButton'
-import { FileInfo } from './components/FileInfo'
-import { MoreActions } from './components/MoreActions'
-import { ViewSwitcher } from './components/ViewSwitcher'
+import { MenuButton } from './components/MenuButton'
 
 const ToolbarWrapper = styled.div`
   background-color: ${({ theme }) => theme.bgColor};
@@ -68,10 +66,8 @@ export const WysiwygToolbar: FC = () => {
         registerWidth={registerItemWidth}
         hidden={hiddenIds.has('common')}
       >
+        <MenuButton />
         <AIButton />
-        <ViewSwitcher />
-        <FileInfo />
-        <MoreActions />
       </ToolbarSection>
 
       <ToolbarSection

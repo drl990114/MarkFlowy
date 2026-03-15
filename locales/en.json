@@ -18,7 +18,8 @@
     "key": "Key",
     "value": "Value",
     "success": "Success",
-    "import": "Import"
+    "import": "Import",
+    "menu": "Menu"
   },
   "view": {
     "label": "View",
@@ -58,7 +59,8 @@
     "summary": "summary",
     "create_file": "Create a new file",
     "save_and_close": "Save and close",
-    "unsave_and_close": "Direct Close"
+    "unsave_and_close": "Direct Close",
+    "convert_text": "Simplified transformation"
   },
   "placeholder": {
     "translate": "Please enter target language"

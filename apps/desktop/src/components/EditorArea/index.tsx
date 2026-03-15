@@ -1,4 +1,5 @@
 import { FindReplace } from '@/components/EditorArea/editorToolBar/FindReplace'
+import { PreviewToolbar } from '@/components/EditorArea/editorToolBar/PreviewToolbar/PreviewToolbar'
 import { SourceCodeToolbar } from '@/components/EditorArea/editorToolBar/SourceCodeToolbar/SourceCodeToolbar'
 import { WysiwygToolbar } from '@/components/EditorArea/editorToolBar/WysiwygToolbar'
 import { useEditorStore } from '@/stores'
@@ -22,6 +23,7 @@ function EditorArea() {
       <EditorAreaTabs />
       <WysiwygToolbar />
       <SourceCodeToolbar />
+      <PreviewToolbar />
       <FindReplace />
       <EditorPanel id="editor-panel">
         {opened.map((id) => {

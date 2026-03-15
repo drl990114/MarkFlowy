@@ -1,3 +1,4 @@
+import { MfIconLabelButton } from '@/components/ui-v2/Button/icon-label-button'
 import useAiChatStore, { getCurrentAISettingData } from '@/extensions/ai/useAiChatStore'
 import { getFileObject } from '@/helper/files'
 import { addNewMarkdownFileEdit } from '@/services/editor-file'
@@ -7,7 +8,6 @@ import NiceModal from '@ebay/nice-modal-react'
 import { useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { InputConfirmModalProps, MODAL_INPUT_ID } from '../../../../Modal'
-import { MfIconButton } from '../../../../ui-v2/Button'
 import { showContextMenu } from '../../../../ui-v2/ContextMenu'
 
 export const AIButton = () => {
@@ -102,13 +102,14 @@ ${res}
   if (!curFile) return null
 
   return (
-    <MfIconButton
+    <MfIconLabelButton
       size='small'
       rounded='smooth'
       iconRef={ref}
       icon={'ri-quill-pen-ai-line'}
       onClick={handleAIClick}
       tooltipProps={{ title: `AI (${aiProvider})` }}
+      label={`AI`}
     />
   )
 }

@@ -6,10 +6,8 @@ import { EditorViewType } from 'rme'
 import styled from 'styled-components'
 import { ToolbarSection, usePriorityHidden } from '../responsive'
 import { AIButton } from '../WysiwygToolbar/components/AIButton'
-import { FileInfo } from '../WysiwygToolbar/components/FileInfo'
-import { MoreActions } from '../WysiwygToolbar/components/MoreActions'
-import { ViewSwitcher } from '../WysiwygToolbar/components/ViewSwitcher'
 import { CodeCommandButton } from './CodeCommandButton'
+import { SourceCodeMenuButton } from './SourceCodeMenuButton'
 
 const ToolbarWrapper = styled.div`
   background-color: ${({ theme }) => theme.bgColor};
@@ -58,10 +56,8 @@ export const SourceCodeToolbar: FC = () => {
   return (
     <ToolbarWrapper ref={containerRef}>
       <ToolbarSection id="common" registerWidth={registerItemWidth} hidden={hiddenIds.has('common')}>
+        <SourceCodeMenuButton />
         <AIButton />
-        <ViewSwitcher />
-        <FileInfo />
-        <MoreActions />
       </ToolbarSection>
 
       <ToolbarSection id="history" registerWidth={registerItemWidth} hidden={hiddenIds.has('history')}>

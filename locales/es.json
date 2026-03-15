@@ -18,7 +18,8 @@
     "key": "Claves",
     "value": "Valor",
     "success": "Éxito",
-    "import": "Importar"
+    "import": "Importar",
+    "menu": "Menú"
   },
   "view": {
     "label": "Vista",
@@ -58,7 +59,8 @@
     "create_file": "Crear un archivo nuevo",
     "unsave": "Unguardar",
     "save_and_close": "Guardar y cerrar",
-    "unsave_and_close": "Cierre directo"
+    "unsave_and_close": "Cierre directo",
+    "convert_text": "Conversión simplificada y tradicional"
   },
   "placeholder": {
     "translate": "Idioma destino"

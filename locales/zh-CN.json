@@ -18,7 +18,8 @@
     "key": "键",
     "value": "值",
     "success": "成功",
-    "import": "导入"
+    "import": "导入",
+    "menu": "菜单"
   },
   "view": {
     "label": "视图",
@@ -58,7 +59,8 @@
     "translate": "翻译",
     "summary": "摘要",
     "create_file": "新建文件",
-    "unsave": "取消保存"
+    "unsave": "取消保存",
+    "convert_text": "简繁转换"
   },
   "request": {
     "headers_config": {
