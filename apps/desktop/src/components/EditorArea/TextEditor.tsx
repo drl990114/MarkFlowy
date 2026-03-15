@@ -258,8 +258,14 @@ function TextEditor(props: TextEditorProps) {
       if (!active) return
       editorRef.current?.setContent(newContent)
       setContent(newContent)
+      
+      // Set save state to unsaved after content change
+      const { setIdStateMap } = useEditorStateStore.getState()
+      setIdStateMap(id, {
+        hasUnsavedChanges: true,
+      })
     },
-    [active],
+    [active, id],
   )
 
   useEffect(() => {
