@@ -1,8 +1,8 @@
 import useAiChatStore from '@/extensions/ai/useAiChatStore'
 import bus from '@/helper/eventBus'
+import { loadLocalThemeCss } from '@/helper/extensions'
 import { getFileObject, getFileObjectByPath, getSaveOpenedEditorEntries } from '@/helper/files'
 import { getFileNameFromPath, readDirectory } from '@/helper/filesys'
-import { loadLocalThemeCss } from '@/helper/extensions'
 import { logger } from '@/helper/logger'
 import { checkUpdate } from '@/helper/updater'
 import { i18nInit } from '@/i18n'
@@ -17,6 +17,7 @@ import type { WorkspaceInfo } from '@/stores/useOpenedCacheStore'
 import useOpenedCacheStore from '@/stores/useOpenedCacheStore'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { invoke } from '@tauri-apps/api/core'
+import { getCurrentWebview } from '@tauri-apps/api/webview'
 import { LazyStore } from '@tauri-apps/plugin-store'
 import { once } from 'lodash'
 import { useCallback, useEffect } from 'react'
@@ -220,6 +221,12 @@ const appSetup = once(async function () {
   appThemeExtensionsSetup(settingData.theme)
   i18nInit({ lng: settingData.language })
   checkUpdate({ install: settingData.auto_update })
+
+  // Initialize zoom level based on webview_zoom setting
+  if (settingData.webview_zoom) {
+    const webview = getCurrentWebview()
+    webview.setZoom(Number(settingData.webview_zoom))
+  }
 
   await appWorkspaceSetup()
 
