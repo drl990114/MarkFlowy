@@ -163,19 +163,22 @@ export const WysiwygToolbar: FC = () => {
         />
         <CommandButton
           editorCtx={editorCtx}
-          commandName='toggleBulletList'
+          commandName='toggleList'
+          attrs={{ kind: 'bullet' }}
           icon='ri-list-unordered'
           label={t('toolbar.bulletList') || 'Bullet List'}
         />
         <CommandButton
           editorCtx={editorCtx}
-          commandName='toggleOrderedList'
+          commandName='toggleList'
+          attrs={{ kind: 'ordered' }}
           icon='ri-list-ordered'
           label={t('toolbar.orderedList') || 'Ordered List'}
         />
         <CommandButton
           editorCtx={editorCtx}
-          commandName='toggleTaskList'
+          commandName='toggleList'
+          attrs={{ kind: 'task' }}
           icon='ri-checkbox-line'
           label={t('toolbar.taskList') || 'Task List'}
         />
