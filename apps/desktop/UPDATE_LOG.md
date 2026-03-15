@@ -1,5 +1,29 @@
 # UPDATE LOG
 
+## v0.55.3
+
+Fixes:
+
+- Feature convergence: removed Git management functionality.
+
+- After switching between Traditional and Simplified Chinese, the save status is updated to “Unsaved” and supports undo.
+
+- Fixed the issue where the zoom ratio was not initialized.
+
+- Fixed the issue where some toolbar buttons were unresponsive.
+
+---
+
+修复：
+
+- 功能收敛，删除 git 管理功能
+
+- 繁简切换后，保存状态更新为“未保存”，支持撤销
+
+- 缩放比例没有初始化的问题修复
+
+- 工具栏部分按钮点击没反应的问题修复
+
 ## v0.55.2
 
 Features:
