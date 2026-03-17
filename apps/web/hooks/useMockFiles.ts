@@ -14,7 +14,6 @@ export const useMockFiles = () => {
 - [x] ⌨️ **${t('mock.intro.hotkeys_label', 'Hotkeys:')}** ${t('mock.intro.hotkeys_desc', 'Fully customizable keyboard shortcuts.')}
 - [x] 🖼️ **${t('mock.intro.images_label', 'Smart Images:')}** ${t('mock.intro.images_desc', 'Easy path management or Base64 conversion.')}
 - [x] 🔍 **${t('mock.intro.manager_label', 'File Manager:')}** ${t('mock.intro.manager_desc', 'Powerful tree view with global search.')}
-- [x] 🌿 **${t('mock.intro.git_label', 'Git Ready:')}** ${t('mock.intro.git_desc', 'Integrated repository and sync management.')}
 - [x] 🌐 **${t('mock.intro.multilingual_label', 'Multilingual:')}** ${t('mock.intro.multilingual_desc', 'Native support for 5+ major languages.')}
 
 ${t('mock.intro.footer', 'Enjoy experimenting with the editor!')}

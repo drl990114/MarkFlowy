@@ -14,7 +14,7 @@
     "intro": {
       "title": "欢迎使用 MarkFlowy！",
       "ai_label": "AI 驱动：",
-      "ai_desc": "内置翻译、摘要功能，并支持 DeepSeek/ChatGPT 等多种主流模型。",
+      "ai_desc": "内置 Copilot、翻译、摘要功能，并支持 DeepSeek/ChatGPT 等多种主流模型。",
       "lightweight_label": "轻量化：",
       "lightweight_desc": "基于 Tauri 架构，体积小于 20MB。",
       "modes_label": "编辑模式：",
@@ -29,8 +29,6 @@
       "images_desc": "便捷的路径管理或 Base64 自动转换。",
       "manager_label": "文件管理：",
       "manager_desc": "强大的树状视图，支持全局搜索。",
-      "git_label": "Git 集成：",
-      "git_desc": "内置仓库管理与同步解决方案。",
       "multilingual_label": "多语言：",
       "multilingual_desc": "原生支持 5 种以上主流语言。",
       "footer": "尽情体验编辑的乐趣吧！"
