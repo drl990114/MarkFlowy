@@ -4,10 +4,8 @@ import { SourceCodeToolbar } from '@/components/EditorArea/editorToolBar/SourceC
 import { WysiwygToolbar } from '@/components/EditorArea/editorToolBar/WysiwygToolbar'
 import { useEditorStore } from '@/stores'
 import { memo } from 'react'
-import { TocView } from '../TableOfContent'
 import Editor from './Editor'
 import EditorAreaTabs from './EditorAreaTabs'
-import { EditorToc } from './EditorWrapper'
 import { EmptyState } from './EmptyState'
 import { Container, EditorPanel } from './styles'
 
@@ -29,10 +27,6 @@ function EditorArea() {
         {opened.map((id) => {
           return <Editor key={id} id={id} active={id === activeId} />
         })}
-
-        <EditorToc >
-          <TocView variant='editor' />
-        </EditorToc>
       </EditorPanel>
     </Container>
   )

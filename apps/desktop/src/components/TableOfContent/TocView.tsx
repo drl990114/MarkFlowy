@@ -6,7 +6,6 @@ import type { Node as ProseMirrorNode } from 'prosemirror-model'
 import { TextSelection } from 'prosemirror-state'
 import type { EditorView } from 'prosemirror-view'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import { EditorViewType, extractMatches } from 'rme'
 import type { TocRef } from 'zens'
 import { IHeadingData } from 'zens/lib/TableOfContent/HeadingTree'
@@ -123,8 +122,6 @@ type TocViewProps = {
 
 export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
   const tocRef = useRef<TocRef>(null)
-  const { t } = useTranslation()
-  const [pinned, setPinned] = useState(false)
   const [activeHeadingId, setActiveHeadingId] = useState<string | null>(null)
   const wysiwygHeadingsRef = useRef<HeadingInfo[]>([])
   const sourceHeadingsRef = useRef<SourceHeadingInfo[]>([])
@@ -325,22 +322,9 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
         containerEl={containerEl}
         scrollEl={scrollEl}
         variant={variant}
-        compact={!pinned}
-        pinned={pinned}
+        compact={false}
+        pinned
         activeId={activeHeadingId ?? undefined}
-        toolbar={
-          <div className={'toc-toolbar'}>
-            <span className="toc-toolbar__title">{t('sidebar.table_of_contents')}</span>
-            <button
-              type="button"
-              className={`toc-toolbar__pin ${pinned ? 'is-active' : ''}`}
-              aria-pressed={pinned}
-              onClick={() => setPinned((prev) => !prev)}
-            >
-              <i className="ri-pushpin-2-line" />
-            </button>
-          </div>
-        }
         toolbarFixed
       />
     </TocViewContainer>

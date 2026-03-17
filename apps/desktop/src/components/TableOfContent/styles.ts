@@ -276,7 +276,6 @@ export const TocDiv = styled.div<TocDivProps>`
         .toc-link__title {
           opacity: 1;
           transform: translateX(0);
-          max-width: 160px;
         }
 
         .toc-link__title {
@@ -344,7 +343,6 @@ export const TocLink = styled.a<ITocListProps & ScThemeProps>`
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    max-width: 160px;
     pointer-events: auto;
     white-space: nowrap;
     word-break: nowrap;
@@ -387,7 +385,7 @@ export const TocViewContainer = styled.div<ContainerProps>`
     props.variant === 'editor' &&
     css`
       background: transparent;
-      width: 280px;
+      width: 100%;
       height: 100%;
       overflow: visible;
 
