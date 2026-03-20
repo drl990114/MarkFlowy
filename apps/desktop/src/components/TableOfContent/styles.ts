@@ -372,11 +372,12 @@ type ContainerProps = {
 }
 
 export const TocViewContainer = styled.div<ContainerProps>`
-  flex-grow: 0;
-  flex-shrink: 0;
   height: 100%;
   width: 100%;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
   background: ${(props) => props.theme.rightBarBgColor};
   color: ${(props) => props.theme.primaryFontColor};
   overflow: hidden;
@@ -387,7 +388,6 @@ export const TocViewContainer = styled.div<ContainerProps>`
       background: transparent;
       width: 100%;
       height: 100%;
-      overflow: visible;
 
       &:hover {
         height: 100%;

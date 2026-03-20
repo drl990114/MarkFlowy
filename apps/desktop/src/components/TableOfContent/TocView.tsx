@@ -2,6 +2,7 @@ import { Toc } from '@/components/TableOfContent'
 import { getHeadingValue } from '@/helper/string'
 import { useCommandStore, useEditorStore } from '@/stores'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
+import { t } from 'i18next'
 import type { Node as ProseMirrorNode } from 'prosemirror-model'
 import { TextSelection } from 'prosemirror-state'
 import type { EditorView } from 'prosemirror-view'
@@ -10,6 +11,7 @@ import { EditorViewType, extractMatches } from 'rme'
 import type { TocRef } from 'zens'
 import { IHeadingData } from 'zens/lib/TableOfContent/HeadingTree'
 import { sourceCodeCodemirrorViewMap } from '../EditorArea/TextEditor'
+import SideBarHeader from '../SideBar/SideBarHeader'
 import { TocViewContainer } from './styles'
 
 type HeadingInfo = {
@@ -317,16 +319,19 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
 
   return (
     <TocViewContainer variant={variant}>
-      <Toc
-        ref={tocRef}
-        containerEl={containerEl}
-        scrollEl={scrollEl}
-        variant={variant}
-        compact={false}
-        pinned
-        activeId={activeHeadingId ?? undefined}
-        toolbarFixed
-      />
+      <SideBarHeader name={t('sidebar.table_of_contents')} />
+      <div style={{ height: 'calc(100% - 40px)', boxSizing: 'border-box' }}>
+        <Toc
+          ref={tocRef}
+          containerEl={containerEl}
+          scrollEl={scrollEl}
+          variant={variant}
+          compact={false}
+          pinned
+          activeId={activeHeadingId ?? undefined}
+          toolbarFixed
+        />
+      </div>
     </TocViewContainer>
   )
 }

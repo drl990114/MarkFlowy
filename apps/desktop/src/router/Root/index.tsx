@@ -88,7 +88,7 @@ function Root() {
           collapsible
           collapsedSize={0}
           defaultSize={20}
-          minSize={10}
+          minSize={160}
           panelRef={leftPanelRef}
         >
           <SideBar />
@@ -103,7 +103,7 @@ function Root() {
           collapsible
           collapsedSize={0}
           defaultSize={20}
-          minSize={10}
+          minSize={160}
           panelRef={rightPanelRef}
         >
           <RightBar />
