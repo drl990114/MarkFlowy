@@ -32,7 +32,6 @@ const ChatList: React.FC<ChatListProps> = (props) => {
     setAiProvider,
     setAiProviderCurModel,
   } = useAiChatStore()
-  const aiSettingData = getCurrentAISettingData()
   const [askInput, setAskInput] = useState('')
   const { t } = useTranslation()
 
@@ -166,10 +165,11 @@ const ChatList: React.FC<ChatListProps> = (props) => {
 
   const handleSubmit = useCallback(() => {
     if (askInput.trim()) {
-      addChat(askInput, aiSettingData)
+      const setting = getCurrentAISettingData()
+      addChat(askInput, setting)
       setAskInput('')
     }
-  }, [aiSettingData, addChat, askInput])
+  }, [addChat, askInput])
 
   const exportChats = useCallback(() => {
     const oldFormatChats = chatList
