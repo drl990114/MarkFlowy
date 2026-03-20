@@ -79,6 +79,7 @@
     "CONTRIBUTING": "CONTRIBUTING",
     "Community": "Community Guidelines",
     "Extension": "Extensions Guide",
-    "License": "License"
+    "License": "License",
+    "UseCopilotWithOllama": "Using Copilot with Ollama"
   }
 }

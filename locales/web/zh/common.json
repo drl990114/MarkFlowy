@@ -79,6 +79,7 @@
     "CONTRIBUTING": "贡献指南",
     "Community": "社区准则",
     "Extension": "扩展指南",
-    "License": "许可证"
+    "License": "许可证",
+    "UseCopilotWithOllama": "Copilot 与 Ollama 组合实践"
   }
 }
