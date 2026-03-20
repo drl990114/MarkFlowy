@@ -1,5 +1,25 @@
 # UPDATE LOG
 
+## v0.55.4
+
+I wrote an article on how to use Copilot and Ollama in MarkFlowy. If you encounter some problems, you may find solutions here, [Use Copilot with Ollama](https://www.markflowy.cc/en/docs/Extension/UseCopilotWithOllama)。
+
+Fixes:
+
+- The style is adjusted, and the TOC location is back
+
+- Fix Copilot configuration errors
+
+---
+
+我写了一篇如何在 MarkFlowy 中使用 Copilot 和 Ollama，如果你遇到了一些问题，也许可以在这里找到解决方案, [如何Copilot 与 Ollama 配合使用](https://www.markflowy.cc/zh/docs/Extension/UseCopilotWithOllama)。
+
+修复：
+
+- 样式调整，目录位置回退回去了
+
+- 修复 Copilot 配置错误的问题
+
 ## v0.55.3
 
 Fixes:
