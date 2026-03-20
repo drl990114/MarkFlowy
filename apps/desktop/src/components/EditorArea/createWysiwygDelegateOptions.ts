@@ -344,7 +344,7 @@ export const createWysiwygDelegateOptions = (fileId?: string): CreateWysiwygDele
 
               logger.info('copilot', contextPrompt)
               const text = await aiGenerateTextRequest({
-                sdkProvider: settingData.copilot_provider as AIGenerateTextParams['sdkProvider'],
+                sdkProvider: (settingData.copilot_provider as string)?.toLowerCase() as AIGenerateTextParams['sdkProvider'],
                 url: apiBase,
                 apiKey,
                 model: settingData.copilot_model,

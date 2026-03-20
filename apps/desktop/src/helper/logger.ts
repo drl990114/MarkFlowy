@@ -1,7 +1,7 @@
 type LogArgs = unknown[]
 
 function isDev() {
-  return import.meta.env.DEV
+  return true
 }
 
 export const logger = {
