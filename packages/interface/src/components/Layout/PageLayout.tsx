@@ -1,4 +1,4 @@
-import styled from "styled-components"
+import styled from 'styled-components'
 
 export const PageLayout = styled.div`
   display: flex;
@@ -6,5 +6,5 @@ export const PageLayout = styled.div`
   height: 100vh;
   width: 100vw;
   overflow: hidden;
-  border-top: 1px solid ${props => props.theme.borderColor};
+  border-top: 1px solid ${(props) => props.theme.borderColor};
 `

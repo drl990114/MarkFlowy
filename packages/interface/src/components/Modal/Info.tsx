@@ -1,3 +1,4 @@
+import React from 'react'
 import NiceModal, { useModal } from '@ebay/nice-modal-react'
 import { Dialog } from 'zens'
 

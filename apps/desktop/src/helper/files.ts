@@ -41,3 +41,7 @@ export function getFileObjectByPath(path?: string): undefined | IFile {
   }
   return pathEntries[path]
 }
+
+export function deletePathEntry(path: string): void {
+  delete pathEntries[path]
+}

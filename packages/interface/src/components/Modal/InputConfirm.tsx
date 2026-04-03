@@ -1,6 +1,7 @@
 import NiceModal from '@ebay/nice-modal-react'
-import { memo, useState } from 'react'
-import { Input, InputProps } from 'zens'
+import React, { memo, useState } from 'react'
+import type { InputProps } from 'zens'
+import { Input } from 'zens'
 import { ConfirmModal } from './Confirm'
 
 export const MODAL_INPUT_ID = 'modal-input'
@@ -32,7 +33,6 @@ export const InputConfirmModal = memo((props: InputConfirmModalProps) => {
       content={
         <Input
           {...inputProps}
-
           className='flex1'
           value={inputVal}
           onChange={(e) => setInputVal(e.target.value)}

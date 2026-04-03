@@ -1,0 +1,9 @@
+{
+  "extends": "../../tsconfig.rollup.json",
+  "compilerOptions": {
+    "jsx": "react",
+    "skipLibCheck": true
+  },
+  "include": ["./src"],
+  "exclude": ["./src/**/*.spec.ts", "./src/**/*.test.ts", "node_modules", "./src/**/*.js"]
+}
