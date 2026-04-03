@@ -1,0 +1,63 @@
+{
+  "name": "@markflowy/interface",
+  "version": "0.0.1",
+  "license": "MIT",
+  "homepage": "",
+  "main": "./dist/index.mjs",
+  "keywords": [
+    "markdown",
+    "ui",
+    "interface"
+  ],
+  "type": "module",
+  "browser": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    "import": "./dist/index.mjs",
+    "types": "./dist/index.d.ts",
+    "browser": "./dist/index.min.js"
+  },
+  "files": [
+    "dist",
+    "!dist/**/*.map",
+    "README.md"
+  ],
+  "peerDependencies": {
+    "eslint": ">=7.4.0"
+  },
+  "dependencies": {
+    "@ebay/nice-modal-react": "^1.2.13",
+    "classnames": "^2.5.1",
+    "i18next": "^25.6.0",
+    "postcss": "^8.4.47",
+    "react": "^19.2.0",
+    "react-arborist": "^3.4.3",
+    "react-dom": "^19.2.0",
+    "react-i18next": "^16.2.4",
+    "styled-components": "^6.3.12",
+    "zens": "0.1.17"
+  },
+  "devDependencies": {
+    "@markflowy/theme": "workspace:*",
+    "@markflowy/types": "workspace:*",
+    "@rollup/plugin-node-resolve": "15.3.0",
+    "@rollup/plugin-terser": "0.4.4",
+    "@rollup/plugin-typescript": "11.1.6",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
+    "eslint": "9.13.0",
+    "rimraf": "^6.0.1",
+    "rollup": "4.24.3",
+    "rollup-plugin-postcss": "^4.0.2",
+    "typescript": "^5.7.3",
+    "url": "^0.11.4"
+  },
+  "scripts": {
+    "build": "yarn clear && rollup -c",
+    "dev": "rollup -cw",
+    "delete": "rimraf node_modules",
+    "clear": "rimraf dist && rimraf tsconfig.tsbuildinfo",
+    "prepublish": "yarn build"
+  }
+}

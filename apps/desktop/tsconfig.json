@@ -3,6 +3,12 @@
   "compilerOptions": {
     "baseUrl": ".",
     "outDir": "./dist-types/",
+    "preserveSymlinks": true,
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "emitDeclarationOnly": false,
+    "noEmit": true,
     "paths": {
       "@/*": ["./src/*"]
     }

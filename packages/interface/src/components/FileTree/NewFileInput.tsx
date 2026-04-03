@@ -1,8 +1,8 @@
-import { isMdFile, type IFile } from '@/helper/filesys'
-import { invoke } from '@tauri-apps/api/core'
-import { useCallback, useEffect, useRef, useState, type HTMLAttributes } from 'react'
+import React, { useCallback, useEffect, useRef, useState, type HTMLAttributes } from 'react'
 import { Input, Tooltip } from 'zens'
-import { unVerifiedFileNameChars, verifyFileName } from './verify-file-name'
+import type { IFile } from '../../types/file'
+import { useFileSystem } from '../../contexts/FileSystemContext'
+import { isMdFile, unVerifiedFileNameChars, verifyFileName } from './verify-file-name'
 
 const NewFileInput = (
   props: HTMLAttributes<HTMLInputElement> & {
@@ -18,7 +18,6 @@ const NewFileInput = (
   },
 ) => {
   const {
-    className,
     fileNode,
     parentNode,
     inputType: createType = 'file',
@@ -26,6 +25,8 @@ const NewFileInput = (
     onCancel,
     ...otherProps
   } = props
+
+  const { pathJoin, fileExists } = useFileSystem()
 
   const InvalidTextMap = {
     same: createType === 'file' ? 'has same file' : 'has same folder',
@@ -57,7 +58,7 @@ const NewFileInput = (
     } else {
       onCancel?.()
     }
-  }, [onCancel])
+  }, [onCancel, initialName, invalidState])
 
   useEffect(() => {
     setTimeout(() => {
@@ -79,7 +80,7 @@ const NewFileInput = (
         fileName = `${fileName}.md`
       }
 
-      const targetPath = await invoke<string>('path_join', { path1, path2: fileName })
+      const targetPath = await pathJoin(path1 || '', fileName)
 
       return {
         id: fileNode.id,
@@ -88,7 +89,7 @@ const NewFileInput = (
         name: fileName,
       }
     },
-    [fileNode, parentNode, createType],
+    [fileNode, parentNode, createType, pathJoin],
   )
 
   const verify = useCallback(
@@ -104,22 +105,24 @@ const NewFileInput = (
           setInvalidText(InvalidTextMap.invalid)
           setInvalidState(true)
         } else {
-          const { path } = await getFileInfo(fileName)
+          const fileInfo = await getFileInfo(fileName)
 
-          const fileExists = await invoke('file_exists', { filePath: path })
+          if (fileInfo.path) {
+            const exists = await fileExists(fileInfo.path)
 
-          if (fileExists) {
-            setInvalidText(InvalidTextMap.same)
-            setInvalidState(true)
-          } else {
-            setInvalidState(false)
+            if (exists) {
+              setInvalidText(InvalidTextMap.same)
+              setInvalidState(true)
+            } else {
+              setInvalidState(false)
+            }
           }
         }
       } catch (error) {}
 
       verifing.current = false
     },
-    [getFileInfo],
+    [getFileInfo, fileExists],
   )
 
   const handleChange: React.ChangeEventHandler<HTMLInputElement> = useCallback(

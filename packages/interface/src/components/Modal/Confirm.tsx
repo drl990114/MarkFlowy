@@ -1,3 +1,4 @@
+import React from 'react'
 import NiceModal, { useModal } from '@ebay/nice-modal-react'
 import { useTranslation } from 'react-i18next'
 import { Button, Dialog } from 'zens'
@@ -44,7 +45,7 @@ export const ConfirmModal = ({
       open={modal.visible}
       onClose={handleClose}
       style={{
-        zIndex: 99
+        zIndex: 99,
       }}
       footer={
         actionsGenerater

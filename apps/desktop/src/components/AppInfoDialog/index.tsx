@@ -4,12 +4,10 @@ import useAppInfoStore from '@/stores/useAppInfoStore'
 import { writeText } from '@tauri-apps/plugin-clipboard-manager'
 import type { FC } from 'react'
 import { memo, useCallback, useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import { Button, Dialog, Space } from 'zens'
+import { AppInfoDialog as AppInfoDialogUI } from '@markflowy/interface'
 
 const AboutDialog: FC = () => {
   const [open, setOpen] = useState(false)
-  const { t } = useTranslation()
   const { appInfo } = useAppInfoStore()
 
   useEffect(() => {
@@ -35,25 +33,16 @@ TauriVersion: ${appInfo.tauriVersion}
   const handleClose = useCallback(() => setOpen(false), [])
 
   return (
-    <Dialog
+    <AppInfoDialogUI
       open={open}
-      title={appInfo.name}
+      appInfo={{
+        name: appInfo.name,
+        version: appInfo.version,
+        extraInfo: `Tauri Version: ${appInfo.tauriVersion}`,
+      }}
       onClose={handleClose}
-      footer={[
-        <Button key='ok' onClick={handleClose}>
-          {t('common.ok')}
-        </Button>,
-        <Button key='copy' btnType='primary' onClick={handleCopyAppInfo}>
-          {t('common.copy')}
-        </Button>,
-      ]}
-    >
-      <div style={{ lineHeight: '24px' }}>
-        <Space>{`${t('about.version')}: ${appInfo.version}`}</Space>
-        <br />
-        <Space>{`Tauri ${t('about.version')}: ${appInfo.tauriVersion}`}</Space>
-      </div>
-    </Dialog>
+      onCopy={handleCopyAppInfo}
+    />
   )
 }
 

@@ -1,4 +1,4 @@
-import { Empty, FileTree, List } from '@/components'
+import { Empty, List, FileTree, ContextMenuItem } from '@markflowy/interface'
 import type { IFile } from '@/helper/filesys'
 import { useOpen } from '@/hooks'
 import { createNewWindow } from '@/services/windows'
@@ -10,9 +10,16 @@ import classNames from 'classnames'
 import type { FC, MouseEventHandler } from 'react'
 import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import NiceModal from '@ebay/nice-modal-react'
 import styled from 'styled-components'
 import type { ListDataItem } from '../ui-v2/List'
 import { Container } from './styles'
+import { FillFlexParent } from '../fill-flex-parent'
+import { MODAL_CONFIRM_ID, MODAL_INPUT_ID } from '../Modal'
+import { showContextMenu } from '../ui-v2/ContextMenu'
+import { MfIconButton } from '../ui-v2/Button'
+import { getFileObject, getFileObjectByPath, setFileObject, setFileObjectByPath, deletePathEntry } from '@/helper/files'
+import { createFile, updateFile } from '@/helper/filesys'
 
 const RecentListBottom = styled.div`
   padding: 4px 8px;
@@ -48,7 +55,7 @@ const getFolderName = (path: string) => {
 
 const Explorer: FC<ExplorerProps> = (props) => {
   const { t } = useTranslation()
-  const { folderData, activeId, addOpenedFile, setActiveId } = useEditorStore()
+  const { folderData, addOpenedFile, setActiveId } = useEditorStore()
   const { recentWorkspaces, clearRecentWorkspaces } = useOpenedCacheStore()
   const { openFolderDialog, openFolder } = useOpen()
   const [dndRootElement, setDndRootElement] = useState<HTMLDivElement | null>(null)
@@ -79,6 +86,47 @@ const Explorer: FC<ExplorerProps> = (props) => {
 
   const handleContextMenu: MouseEventHandler = useCallback((e) => e.preventDefault(), [])
 
+  const handleShowConfirm = useCallback(({ title, onConfirm }: { title: string; onConfirm: () => void }) => {
+    NiceModal.show(MODAL_CONFIRM_ID, {
+      title,
+      onConfirm,
+    })
+  }, [])
+
+  const handleShowInputConfirm = useCallback(({
+    title,
+    confirmText,
+    cancelText,
+    onConfirm,
+    onClose,
+  }: {
+    title: string
+    confirmText?: string
+    cancelText?: string
+    onConfirm: () => void
+    onClose: () => void
+  }) => {
+    NiceModal.show(MODAL_INPUT_ID, {
+      title,
+      confirmText,
+      cancelText,
+      onConfirm,
+      onClose,
+    })
+  }, [])
+
+  const handleShowContextMenu = useCallback(({ x, y, items }: { x: number; y: number; items: ContextMenuItem[] }) => {
+    showContextMenu({
+      x,
+      y,
+      items: items.map(item => ({
+        label: item.label,
+        value: item.value,
+        handler: item.handler,
+      })),
+    })
+  }, [])
+
   const listData = useMemo(
     () =>
       recentWorkspaces.map((history: { path: string }) => ({
@@ -98,9 +146,20 @@ const Explorer: FC<ExplorerProps> = (props) => {
         {folderData && folderData.length > 0 ? (
           <FileTree
             data={folderData}
-            activeId={activeId}
             onSelect={handleSelect}
             dndRootElement={dndRootElement as unknown as Node}
+            fillFlexParentComponent={FillFlexParent as FC<{ children: (dimens: { width: number; height: number }) => React.ReactNode }>}
+            onShowConfirm={handleShowConfirm}
+            onShowInputConfirm={handleShowInputConfirm}
+            onShowContextMenu={handleShowContextMenu}
+            getFileObject={getFileObject}
+            getFileObjectByPath={getFileObjectByPath}
+            setFileObject={setFileObject}
+            setFileObjectByPath={setFileObjectByPath}
+            deletePathEntry={deletePathEntry}
+            createFile={createFile}
+            updateFile={updateFile}
+            iconButtonComponent={MfIconButton}
           />
         ) : (
           <Empty />

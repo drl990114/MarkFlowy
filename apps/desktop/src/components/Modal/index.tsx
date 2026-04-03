@@ -1,13 +1,2 @@
-import { Confirm } from './Confirm'
-import { Info } from './Info'
-import { InputConfirm } from './InputConfirm'
-
-export * from './Confirm'
-export * from './Info'
-export * from './InputConfirm'
-
-export default {
-  Confirm: Confirm,
-  InputConfirm: InputConfirm,
-  Info: Info
-}
+export { Modal as default, Confirm, Info, InputConfirm, MODAL_CONFIRM_ID, MODAL_INFO_ID, MODAL_INPUT_ID } from '@markflowy/interface'
+export type { ConfirmModalProps, InfoModalProps, InputConfirmModalProps } from '@markflowy/interface'
