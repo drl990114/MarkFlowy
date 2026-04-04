@@ -32,6 +32,7 @@ export default defineConfig({
   },
   resolve: {
     alias: [{ find: '@', replacement: fileURLToPath(new URL('./src', import.meta.url)) }],
+    dedupe: ['react', 'react-dom'],
   },
   test: {
     environment: 'happy-dom',
