@@ -215,6 +215,10 @@
         "md_default_mode": {
           "label": "Modo predeterminado de Markdown",
           "desc": "Establece el modo de edición predeterminado al crear un nuevo archivo de Markdown."
+        },
+        "typewriter_scroll": {
+          "label": "Desplazamiento de la máquina de escribir",
+          "desc": "Una vez habilitado, el cursor se mostrará en la ventana de visualización en el momento de la edición."
         }
       },
       "wysiwyg": {

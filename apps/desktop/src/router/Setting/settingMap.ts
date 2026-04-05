@@ -181,6 +181,16 @@ export const getSettingMap = () => {
             { value: EditorViewType.SOURCECODE, title: i18n.t('view.source_code') },
           ],
         },
+        typewriterScroll: {
+          key: 'editor_typewriter_scroll',
+          type: 'switch',
+          title: {
+            i18nKey: 'settings.editor.behavior.typewriter_scroll.label',
+          },
+          desc: {
+            i18nKey: 'settings.editor.behavior.typewriter_scroll.desc',
+          },
+        },
       },
       Wysiwyg: {
         i18nKey: 'settings.editor.wysiwyg.label',

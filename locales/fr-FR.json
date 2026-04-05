@@ -212,6 +212,10 @@
         "md_default_mode": {
           "label": "Mode par défaut de Markdown",
           "desc": "Définit le mode d'édition par défaut lorsque vous créez un nouveau fichier Markdown."
+        },
+        "typewriter_scroll": {
+          "label": "Défilement de la machine à écrire",
+          "desc": "Une fois activé, le curseur s'affiche au center de la vue lors de l'édition."
         }
       },
       "wysiwyg": {

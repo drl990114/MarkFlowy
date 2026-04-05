@@ -253,6 +253,10 @@
         "md_default_mode": {
           "label": "Markdown Default Mode",
           "desc": "Sets the default editing mode when creating a new Markdown file."
+        },
+        "typewriter_scroll": {
+          "label": "Typewriter Scroll",
+          "desc": "When enabled, the caret will be centered in the viewport during editing."
         }
       },
       "wysiwyg": {
