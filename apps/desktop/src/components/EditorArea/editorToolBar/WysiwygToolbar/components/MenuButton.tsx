@@ -3,8 +3,10 @@ import useBookMarksStore from '@/extensions/bookmarks/useBookMarksStore'
 import bus from '@/helper/eventBus'
 import { getFileObject } from '@/helper/files'
 import { FileResultCode } from '@/helper/filesys'
+import { writeSettingData } from '@/services/app-setting'
 import { currentWindow } from '@/services/windows'
 import { useCommandStore, useEditorStateStore, useEditorStore } from '@/stores'
+import useAppSettingStore from '@/stores/useAppSettingStore'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
 import NiceModal from '@ebay/nice-modal-react'
@@ -31,6 +33,7 @@ export const MenuButton = memo(() => {
   const { activeId, getEditorContent } = useEditorStore()
   const { execute } = useCommandStore()
   const { editorViewTypeMap } = useEditorViewTypeStore()
+  const { settingData } = useAppSettingStore()
   const { t } = useTranslation()
   const ref = useRef<any>(null)
 
@@ -146,6 +149,20 @@ export const MenuButton = memo(() => {
           type: 'divider' as const,
         },
         {
+          label: t('settings.editor.behavior.typewriter_scroll.label'),
+          value: 'typewriter_scroll',
+          checked: settingData.editor_typewriter_scroll,
+          handler: () => {
+            writeSettingData(
+              { key: 'editor_typewriter_scroll' },
+              !settingData.editor_typewriter_scroll,
+            )
+          },
+        },
+        {
+          type: 'divider' as const,
+        },
+        {
           label: t('file.info'),
           value: 'file_info',
           handler: () => {
@@ -226,7 +243,7 @@ export const MenuButton = memo(() => {
         },
       ],
     })
-  }, [curFile, editorViewType, t, execute, convertText, fileNormalInfo])
+  }, [curFile, editorViewType, t, execute, convertText, fileNormalInfo, settingData])
 
   if (!curFile) return null
 

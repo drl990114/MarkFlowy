@@ -71,6 +71,9 @@ export const createWysiwygDelegateOptions = (fileId?: string): CreateWysiwygDele
     codemirrorOptions: {
       lineWrapping: settingData.wysiwyg_editor_codemirror_line_wrap,
     },
+    typewriterScroll: {
+      enabled: settingData.editor_typewriter_scroll,
+    },
     clipboardReadFunction: clipboardRead,
     uploadImageHandler: (files) => {
       let completed = 0

@@ -220,6 +220,10 @@
         "md_default_mode": {
           "label": "Markdownデフォルトモード",
           "desc": "Markdownファイルを新規作成するときのデフォルト編集モードを設定します。"
+        },
+        "typewriter_scroll": {
+          "label": "タイプライターのスクロール",
+          "desc": "オンにすると、カーソルは編集時にビューポートに中央表示されます。"
         }
       },
       "wysiwyg": {

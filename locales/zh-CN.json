@@ -262,6 +262,10 @@
         "md_default_mode": {
           "label": "Markdown 默认模式",
           "desc": "设置新建 Markdown 文件时的默认编辑模式。"
+        },
+        "typewriter_scroll": {
+          "label": "打字机滚动",
+          "desc": "启用后，光标将在编辑时居中显示在视口中。"
         }
       },
       "wysiwyg": {
