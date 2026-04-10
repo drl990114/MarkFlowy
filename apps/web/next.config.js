@@ -14,5 +14,8 @@ module.exports = withSvgr(
     },
     i18n: { ...i18n, },
     output: 'standalone',
+    env: {
+      NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3200',
+    },
   }),
 )

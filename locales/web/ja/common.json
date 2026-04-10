@@ -49,5 +49,23 @@
     "Community": "コミュニティガイドライン",
     "Extension": "拡張ガイド",
     "License": "ライセンス"
+  },
+  "auth": {
+    "login": "ログイン",
+    "register": "新規登録",
+    "email": "メールアドレス",
+    "emailPlaceholder": "メールアドレスを入力",
+    "displayName": "表示名",
+    "displayNamePlaceholder": "表示名を入力",
+    "verificationCode": "認証コード",
+    "codePlaceholder": "8桁のコードを入力",
+    "sendCode": "コードを送信",
+    "resend": "再送信",
+    "resendCode": "{{seconds}}秒後に再送信",
+    "signIn": "ログイン",
+    "createAccount": "アカウント作成",
+    "changeEmail": "変更",
+    "autoRegisterHint": "未登録のメールアドレスは自動的に登録されます",
+    "backToHome": "ホームに戻る"
   }
 }

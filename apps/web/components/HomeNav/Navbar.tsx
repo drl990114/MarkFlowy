@@ -1,4 +1,5 @@
-import { i18n } from 'next-i18next'
+import { i18n, useTranslation } from 'next-i18next'
+import { useRouter } from 'next/router'
 import styled, { css } from 'styled-components'
 import { mobile } from '../../utils/media'
 import rem from '../../utils/rem'
@@ -16,6 +17,23 @@ export interface NavbarProps {
   isSideFolded?: boolean
   isMobileNavFolded?: boolean
   showSideNav?: boolean
+}
+
+function AuthButtons() {
+  const router = useRouter()
+  const { t } = useTranslation()
+
+  const handleLogin = () => {
+    router.push('/auth')
+  }
+
+  return (
+    <AuthButtonsWrapper>
+      <LoginButton onClick={handleLogin}>
+        {t('auth.login')}
+      </LoginButton>
+    </AuthButtonsWrapper>
+  )
 }
 
 export default function Navbar({
@@ -61,6 +79,7 @@ export default function Navbar({
         >
           <LanguageSwitcher style={{ marginRight: 8 }} />
           <StyledSocial style={{ marginLeft: 8 }} />
+          <AuthButtons />
         </EndWrapper>
       </Wrapper>
       <div style={{ height: `${navbarHeight}px` }} />
@@ -137,4 +156,32 @@ const LogoLink = styled(Link).attrs((/* props */) => ({
   align-items: center;
   vertical-align: center;
   margin-right: ${rem(35)};
+`
+
+const AuthButtonsWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${rem(12)};
+  margin-left: ${rem(16)};
+
+  ${mobile(css`
+    display: none;
+  `)}
+`
+
+const LoginButton = styled.button`
+  padding: ${rem(8)} ${rem(16)};
+  background: transparent;
+  border: 1px solid ${(props) => props.theme.borderColor};
+  border-radius: ${rem(6)};
+  font-size: ${rem(14)};
+  font-weight: 500;
+  color: ${(props) => props.theme.unselectedFontColor};
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: #da936a;
+    color: #da936a;
+  }
 `

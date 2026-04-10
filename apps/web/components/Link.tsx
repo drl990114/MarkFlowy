@@ -41,7 +41,7 @@ export default function Link({
   return (
     <UnstyledLink passHref legacyBehavior {...rest}>
       <Child aria-label={ariaLabel} className={className} title={title} {...dataAttrs} target={target}>
-        {children}
+        {children as React.ReactNode}
       </Child>
     </UnstyledLink>
   );
