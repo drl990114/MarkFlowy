@@ -81,5 +81,23 @@
     "Extension": "扩展指南",
     "License": "许可证",
     "UseCopilotWithOllama": "Copilot 与 Ollama 组合实践"
+  },
+  "auth": {
+    "login": "登录",
+    "register": "注册",
+    "email": "邮箱",
+    "emailPlaceholder": "请输入邮箱",
+    "displayName": "显示名称",
+    "displayNamePlaceholder": "请输入显示名称",
+    "verificationCode": "验证码",
+    "codePlaceholder": "请输入8位验证码",
+    "sendCode": "发送验证码",
+    "resend": "重新发送",
+    "resendCode": "{{seconds}}秒后重发",
+    "signIn": "登录",
+    "createAccount": "创建账号",
+    "changeEmail": "修改",
+    "autoRegisterHint": "未注册邮箱将自动注册",
+    "backToHome": "返回首页"
   }
 }

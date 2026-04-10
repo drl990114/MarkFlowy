@@ -81,5 +81,23 @@
     "Extension": "Extensions Guide",
     "License": "License",
     "UseCopilotWithOllama": "Using Copilot with Ollama"
+  },
+  "auth": {
+    "login": "Sign In",
+    "register": "Sign Up",
+    "email": "Email",
+    "emailPlaceholder": "Enter your email",
+    "displayName": "Display Name",
+    "displayNamePlaceholder": "Enter your display name",
+    "verificationCode": "Verification Code",
+    "codePlaceholder": "Enter 8-digit code",
+    "sendCode": "Send Code",
+    "resend": "Resend Code",
+    "resendCode": "Resend in {{seconds}}s",
+    "signIn": "Sign In",
+    "createAccount": "Create Account",
+    "changeEmail": "Change",
+    "autoRegisterHint": "Unregistered emails will be signed up automatically",
+    "backToHome": "Back to Home"
   }
 }
