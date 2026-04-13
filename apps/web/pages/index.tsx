@@ -11,6 +11,7 @@ import { HoverBorderGradient } from '../components/HoverBorderGradient'
 import SeoHead from '../components/SeoHead'
 import { useMockFiles } from '../hooks/useMockFiles'
 import { useSystemType } from '../hooks/useSystemType'
+import { useRedirectIfAuthenticated } from '../hooks/useAuth'
 import { mobile } from '../utils/media'
 import rem from '../utils/rem'
 
@@ -31,11 +32,20 @@ export default function Index({
 }: {
   contributors?: Contributor[]
 }) {
+  const checkingAuth = useRedirectIfAuthenticated()
   const { t } = useTranslation()
   const [isMobileNavFolded, setIsMobileNavFolded] = React.useState(true)
   const [activeTab, setActiveTab] = React.useState<'markdown' | 'json'>('markdown')
   const { markdownContent, jsonContent } = useMockFiles()
   const systemType = useSystemType()
+
+  if (checkingAuth) {
+    return (
+      <LoadingContainer>
+        <LoadingSpinner />
+      </LoadingContainer>
+    )
+  }
 
   const renderSystemIcon = () => {
     switch (systemType) {
@@ -646,6 +656,29 @@ const FooterCopyright = styled.p`
   font-size: ${rem(13)};
   color: rgba(255, 255, 255, 0.3);
   margin: 0;
+`
+
+const LoadingContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: ${(props) => props.theme.bgColor};
+`
+
+const LoadingSpinner = styled.div`
+  width: ${rem(40)};
+  height: ${rem(40)};
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top-color: #da936a;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
 `
 
 const BOTS_ID = [49699333, 29139614, 41898282, 29791463]
