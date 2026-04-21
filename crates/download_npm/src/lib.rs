@@ -2,6 +2,7 @@ use reqwest;
 use std::fs;
 use std::io::{copy, Read, Write};
 use std::path::Path;
+use std::time::Duration;
 use flate2::read::GzDecoder;
 use tar;
 use tar::Archive;
@@ -26,35 +27,45 @@ pub async fn download(
     package_name: &str,
     opt: DownloadOptions,
 ) -> Result<(), Box<dyn std::error::Error>> {
+    let client = reqwest::Client::builder()
+        .timeout(Duration::from_secs(30))
+        .build()?;
+
     let registry_url = generate_registry_url(package_name);
-    let response = reqwest::get(&registry_url)
+    let response = client
+        .get(&registry_url)
+        .send()
         .await?
         .json::<serde_json::Value>()
         .await?;
-    let latest_version = response["dist-tags"]["latest"].as_str().unwrap();
-    let download_url = response["versions"][&latest_version]["dist"]["tarball"]
+
+    let latest_version = response["dist-tags"]["latest"]
         .as_str()
-        .unwrap();
+        .ok_or("Missing 'latest' version in npm registry response")?;
+
+    let download_url = response["versions"][latest_version]["dist"]["tarball"]
+        .as_str()
+        .ok_or("Missing tarball URL in npm registry response")?;
 
     println!("{}", download_url);
-    let download_response = reqwest::get(download_url).await?;
+    let download_response = client.get(download_url).send().await?;
     let dest_path = Path::new(&opt.dest_path);
 
     if !dest_path.exists() {
-        fs::create_dir(dest_path).expect("Cannot create destination directory");
+        fs::create_dir_all(dest_path)?;
     }
 
     if opt.untar {
         let target_dest_path = dest_path.join(format!("{}.tgz", package_name));
         let mut dest = fs::File::create(target_dest_path.clone())?;
-    
+
         copy(&mut download_response.bytes().await?.as_ref(), &mut dest)?;
-    
+
         let file = fs::File::open(target_dest_path.clone())?;
         let decoder = GzDecoder::new(file);
-    
+
         let mut archive = Archive::new(decoder);
-    
+
         for entry_result in archive.entries()? {
             let mut entry = entry_result?;
             let path = entry.path()?;
@@ -62,14 +73,12 @@ pub async fn download(
 
             // only copy main files
             if path.clone().ends_with("package.json") || path.ends_with("index.js") || path.ends_with("style.css") {
-    
+
                 let target_dir_path = target_dest_path.parent().unwrap().join(package_name);
 
                 let file_name = path.file_name().unwrap().to_str().clone().unwrap();
                 let target_file_path = target_dir_path.join(Path::new(file_name));
 
-                // let target_file_path = target_dir_path.join(path.strip_prefix("package/").unwrap().to_path_buf().clone());
-    
                 if !target_dir_path.clone().join(path.clone()).exists() {
                     fs::create_dir_all(target_dir_path)?;
                     let mut target_file = fs::File::create(target_file_path)?;
@@ -85,7 +94,7 @@ pub async fn download(
     } else {
         let target_dest_path = dest_path.join(format!("{}.tgz", package_name));
         let mut dest = fs::File::create(target_dest_path.clone())?;
-    
+
         copy(&mut download_response.bytes().await?.as_ref(), &mut dest)?;
     }
 
