@@ -19,6 +19,7 @@ export const appSettingStoreSetup = async () => {
       theme: 'light',
       language: 'en',
       webview_zoom: '1.0',
+      auto_update: false,
     }
     setSettingData(defaultSetting)
     return defaultSetting

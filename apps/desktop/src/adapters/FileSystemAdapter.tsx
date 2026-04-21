@@ -24,6 +24,15 @@ export const TauriFileSystemProvider: FC<FileSystemAdapterProps> = ({ children }
       return files
     },
 
+    readSubdirectory: async (folderPath: string): Promise<IFile[]> => {
+      const result = await invoke<FileSysResult>('open_folder_async', { folderPath })
+      if (result.code !== FileResultCode.Success) {
+        return []
+      }
+      const files = JSON.parse(result.content)
+      return files
+    },
+
     writeFile: async (filePath: string, content: string): Promise<void> => {
       await invoke('write_file', { filePath, content })
     },
