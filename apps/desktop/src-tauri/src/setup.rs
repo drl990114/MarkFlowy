@@ -41,8 +41,8 @@ pub fn init(app_handle: AppHandle, opened_urls: String) -> Result<(), Box<dyn st
         main_win = main_win.title_bar_style(TitleBarStyle::Transparent);
     }
 
-    let window = main_win.build().unwrap();
-    
+    let window = main_win.build()?;
+
     // 将初始窗口添加到全局窗口实例缓存中
     let window_label = window.label().to_string();
     let workspace_path = if !opened_urls.is_empty() {
@@ -50,13 +50,14 @@ pub fn init(app_handle: AppHandle, opened_urls: String) -> Result<(), Box<dyn st
     } else {
         "".to_string()
     };
-    
+
     // 存储窗口实例信息到全局缓存
     if !workspace_path.is_empty() {
         use std::path::PathBuf;
         use crate::WINDOW_INSTANCES;
-        
-        let mut instances = WINDOW_INSTANCES.lock().unwrap();
+
+        let mut instances = WINDOW_INSTANCES.lock()
+            .map_err(|e| format!("Failed to lock window instances: {}", e))?;
         instances.insert(window_label, PathBuf::from(workspace_path));
     }
 
