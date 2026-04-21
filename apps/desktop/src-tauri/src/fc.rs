@@ -82,13 +82,13 @@ pub fn read_directory(dir_path: &str) -> Result<Vec<FileInfo>, FileResultCode> {
         let file_path = new_path.join(filename.clone());
         let ext = file_path.extension();
         let file_ext = match ext {
-            Some(ext) => ext.to_str().unwrap().to_string(),
+            Some(ext) => ext.to_str().unwrap_or("").to_string(),
             None => String::from(""),
         };
 
         if meta.is_dir() {
             kind = String::from("dir");
-            children = match read_directory(file_path.to_str().unwrap()) {
+            children = match read_directory(file_path.to_str().unwrap_or("")) {
                 Ok(children) => Some(children),
                 Err(_) => None,
             };
@@ -97,7 +97,7 @@ pub fn read_directory(dir_path: &str) -> Result<Vec<FileInfo>, FileResultCode> {
         let new_file_info = FileInfo {
             name: filename,
             kind,
-            path: file_path.to_str().unwrap().to_string(),
+            path: file_path.to_str().unwrap_or("").to_string(),
             children,
             ext: file_ext.into(),
         };
@@ -398,7 +398,7 @@ pub fn rename_fs(old_path: &Path, new_path: &Path) -> AnyResult<MoveFileInfo> {
     let is_folder = new_path.is_dir();
 
     if is_folder {
-        let res = read_directory(new_path.to_str().unwrap());
+        let res = read_directory(new_path.to_str().unwrap_or(""));
 
         let files: Option<Vec<FileInfo>> = match res {
             Ok(files) => Some(files),
@@ -409,16 +409,16 @@ pub fn rename_fs(old_path: &Path, new_path: &Path) -> AnyResult<MoveFileInfo> {
         }
 
         Ok(MoveFileInfo {
-            old_path: old_path.to_str().unwrap().to_string(),
-            new_path: new_path.to_str().unwrap().to_string(),
+            old_path: old_path.to_str().unwrap_or("").to_string(),
+            new_path: new_path.to_str().unwrap_or("").to_string(),
             is_folder: is_folder,
             children: files,
             is_replaced: Some(false),
         })
     } else {
         Ok(MoveFileInfo {
-            old_path: old_path.to_str().unwrap().to_string(),
-            new_path: new_path.to_str().unwrap().to_string(),
+            old_path: old_path.to_str().unwrap_or("").to_string(),
+            new_path: new_path.to_str().unwrap_or("").to_string(),
             is_folder: is_folder,
             children: None,
             is_replaced: Some(false),
@@ -435,7 +435,10 @@ pub fn move_files_to_target_folder(
 
     for file in files {
         let file_path = Path::new(&file);
-        let file_name = file_path.file_name().unwrap();
+        let file_name = match file_path.file_name() {
+            Some(name) => name,
+            None => continue,
+        };
         let target_path = Path::new(target_folder).join(file_name);
 
         if target_path.exists() {
@@ -447,7 +450,7 @@ pub fn move_files_to_target_folder(
                 }
 
                 path_map_old_to_new.push(MoveFileInfo {
-                    old_path: target_path.to_str().unwrap().to_string(),
+                    old_path: target_path.to_str().unwrap_or("").to_string(),
                     new_path: "".to_string(),
                     is_folder: target_path.is_dir(),
                     children: None,
@@ -473,7 +476,7 @@ pub fn is_dir(path: &str) -> bool {
 pub fn get_path_name(path: &str) -> String {
     let file_path = Path::new(path);
     match file_path.file_name() {
-        Some(name) => name.to_str().unwrap().to_string(),
+        Some(name) => name.to_str().unwrap_or("").to_string(),
         None => String::from(""),
     }
 }
@@ -812,15 +815,14 @@ pub mod cmd {
     #[tauri::command]
     pub fn path_join(path1: &str, path2: &str) -> String {
         let path = Path::new(path1).join(path2);
-        path.to_str().unwrap().to_string()
+        path.to_str().unwrap_or("").to_string()
     }
 
     #[tauri::command]
-    pub fn rename_fs(old_path: &str, new_path: &str) -> MoveFileInfo {
+    pub fn rename_fs(old_path: &str, new_path: &str) -> Option<MoveFileInfo> {
         let path = Path::new(old_path);
         let new_path = Path::new(new_path);
-        let move_file_info = fc::rename_fs(path, new_path).unwrap();
-        move_file_info
+        fc::rename_fs(path, new_path).ok()
     }
 
     #[tauri::command]
@@ -915,30 +917,30 @@ pub mod cmd {
     }
 
     #[tauri::command]
-    pub fn copy_file_by_from(from: &str) -> String {
+    pub fn copy_file_by_from(from: &str) -> Option<String> {
         let from_path = Path::new(from);
-        let parent_path = from_path.parent().unwrap();
-        let mut to_path_name = from_path.file_stem().unwrap().to_str().unwrap().to_string();
+        let parent_path = from_path.parent()?;
+        let mut to_path_name = from_path.file_stem()?.to_str()?.to_string();
 
-        let file_ext = from_path.extension().unwrap();
+        let file_ext = from_path.extension()?;
 
         while parent_path
             .join(&format!(
                 "{}.{}",
                 to_path_name.clone(),
-                file_ext.to_str().unwrap()
+                file_ext.to_str().unwrap_or("")
             ))
             .exists()
         {
             to_path_name.push_str(" copy");
         }
 
-        to_path_name.push_str(format!(".{}", file_ext.to_str().unwrap()).as_str());
+        to_path_name.push_str(format!(".{}", file_ext.to_str().unwrap_or("")).as_str());
 
         let to_path = parent_path.join(&to_path_name);
-        fs::copy(from_path, to_path.clone()).unwrap();
+        fs::copy(from_path, to_path.clone()).ok()?;
 
-        to_path.to_str().unwrap().to_string()
+        Some(to_path.to_str()?.to_string())
     }
 
     #[tauri::command]
@@ -954,9 +956,10 @@ pub mod cmd {
 
         let file_path = Path::new(path);
 
-        fs::write(file_path, result.to_string()).expect("ERROR");
-
-        String::from("OK")
+        match fs::write(file_path, result.to_string()) {
+            Ok(_) => String::from("OK"),
+            Err(e) => format!("ERROR: {}", e),
+        }
     }
 
     #[tauri::command]
