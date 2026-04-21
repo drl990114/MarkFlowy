@@ -12,6 +12,8 @@ export interface MoveFileInfo {
 export interface FileSystemContextValue {
   /** Read a directory and return file tree */
   readDirectory: (folderPath: string) => Promise<IFile[]>
+  /** Read a subdirectory and return file tree (for lazy loading) */
+  readSubdirectory: (folderPath: string) => Promise<IFile[]>
   /** Write file content */
   writeFile: (filePath: string, content: string) => Promise<void>
   /** Delete a file */

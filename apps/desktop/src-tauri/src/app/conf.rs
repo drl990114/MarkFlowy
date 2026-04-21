@@ -83,30 +83,35 @@ fn create_store(app: &AppHandle) -> Result<std::sync::Arc<Store<tauri::Wry>>, St
 
 pub fn app_root() -> PathBuf {
     let app_dir = APP_DIR.lock().unwrap();
-    let home_dir = app_dir.get(&0).unwrap();
-    let legacy_path = home_dir.join(".markflowy");
+    let base_dir = app_dir.get(&0).unwrap().clone();
 
-    // If legacy config exists, keep using it for backward compatibility
-    if exists(&legacy_path) {
-        return legacy_path;
+    #[cfg(target_os = "macos")]
+    {
+        return base_dir;
     }
 
-    // Use platform-specific paths via etcetera
-    #[cfg(target_os = "windows")]
+    #[cfg(not(target_os = "macos"))]
     {
-        // Keep Windows behavior exactly the same
-        legacy_path
-    }
-    #[cfg(not(target_os = "windows"))]
-    {
-        // Use XDG paths on Linux/macOS with proper fallback
-        match choose_app_strategy(AppStrategyArgs {
-            top_level_domain: "com".to_string(),
-            author: "drl990114".to_string(),
-            app_name: "markflowy".to_string(),
-        }) {
-            Ok(strategy) => strategy.config_dir(),
-            Err(_) => legacy_path, // Fallback to legacy path if something goes wrong
+        let legacy_path = base_dir.join(".markflowy");
+
+        if exists(&legacy_path) {
+            return legacy_path;
+        }
+
+        #[cfg(target_os = "windows")]
+        {
+            legacy_path
+        }
+        #[cfg(not(target_os = "windows"))]
+        {
+            match choose_app_strategy(AppStrategyArgs {
+                top_level_domain: "com".to_string(),
+                author: "drl990114".to_string(),
+                app_name: "markflowy".to_string(),
+            }) {
+                Ok(strategy) => strategy.config_dir(),
+                Err(_) => legacy_path,
+            }
         }
     }
 }

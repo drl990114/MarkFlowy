@@ -8,6 +8,210 @@ use std::future::Future;
 use std::path::Path;
 
 use crate::task_system::error::SystemError;
+use crate::task_system::task::TaskId;
+
+#[cfg(target_os = "macos")]
+use core_foundation::url::CFURL;
+#[cfg(target_os = "macos")]
+use core_foundation::base::TCFType;
+#[cfg(target_os = "macos")]
+use core_foundation_sys::url::{CFURLStartAccessingSecurityScopedResource, CFURLStopAccessingSecurityScopedResource};
+
+#[cfg(target_os = "macos")]
+fn start_accessing_security_scoped_resource(path: &Path) -> bool {
+    let path_str = match path.to_str() {
+        Some(s) => s,
+        None => return false,
+    };
+    
+    let cf_url = CFURL::from_path(path_str, true);
+    match cf_url {
+        Some(url) => {
+            unsafe {
+                CFURLStartAccessingSecurityScopedResource(url.as_concrete_TypeRef()) != 0
+            }
+        }
+        None => false,
+    }
+}
+
+#[cfg(target_os = "macos")]
+fn stop_accessing_security_scoped_resource(path: &Path) {
+    let path_str = match path.to_str() {
+        Some(s) => s,
+        None => return,
+    };
+    
+    let cf_url = CFURL::from_path(path_str, true);
+    if let Some(url) = cf_url {
+        unsafe {
+            CFURLStopAccessingSecurityScopedResource(url.as_concrete_TypeRef());
+        }
+    }
+}
+
+#[cfg(not(target_os = "macos"))]
+fn start_accessing_security_scoped_resource(_path: &Path) -> bool {
+    true
+}
+
+#[cfg(not(target_os = "macos"))]
+fn stop_accessing_security_scoped_resource(_path: &Path) {}
+
+#[cfg(target_os = "macos")]
+mod security_bookmark {
+    use core_foundation::base::TCFType;
+    use core_foundation::data::CFData;
+    use core_foundation::url::CFURL;
+    use core_foundation_sys::base::kCFAllocatorDefault;
+    use core_foundation_sys::url::{
+        CFURLCreateByResolvingBookmarkData, CFURLCreateBookmarkData,
+        CFURLStartAccessingSecurityScopedResource,
+        kCFURLBookmarkResolutionWithSecurityScope, kCFURLBookmarkCreationWithSecurityScope,
+    };
+    use std::fs;
+    use std::io::{Read, Write};
+    use std::path::PathBuf;
+
+    pub fn create_security_scoped_bookmark(path: &std::path::Path) -> Option<Vec<u8>> {
+        let path_str = path.to_str()?;
+        let cf_url = CFURL::from_path(path_str, true)?;
+        
+        unsafe {
+            let mut error: core_foundation_sys::error::CFErrorRef = std::ptr::null_mut();
+            let bookmark_data = CFURLCreateBookmarkData(
+                kCFAllocatorDefault,
+                cf_url.as_concrete_TypeRef(),
+                kCFURLBookmarkCreationWithSecurityScope,
+                std::ptr::null(),
+                std::ptr::null(),
+                &mut error,
+            );
+            
+            if bookmark_data.is_null() {
+                return None;
+            }
+            
+            let cf_data = CFData::wrap_under_create_rule(bookmark_data);
+            let data = cf_data.to_vec();
+            Some(data)
+        }
+    }
+
+    pub fn resolve_security_scoped_bookmark(bookmark_data: &[u8]) -> Option<std::path::PathBuf> {
+        unsafe {
+            let cf_data = CFData::from_buffer(bookmark_data);
+            let mut error: core_foundation_sys::error::CFErrorRef = std::ptr::null_mut();
+            let mut is_stale: core_foundation_sys::base::Boolean = 0;
+            
+            let cf_url = CFURLCreateByResolvingBookmarkData(
+                kCFAllocatorDefault,
+                cf_data.as_concrete_TypeRef(),
+                kCFURLBookmarkResolutionWithSecurityScope,
+                std::ptr::null(),
+                std::ptr::null(),
+                &mut is_stale,
+                &mut error,
+            );
+            
+            if cf_url.is_null() {
+                return None;
+            }
+            
+            let url = CFURL::wrap_under_create_rule(cf_url);
+            
+            CFURLStartAccessingSecurityScopedResource(url.as_concrete_TypeRef());
+            
+            let path_str = url.get_string().to_string();
+            let path_str = urlencoding::decode(&path_str).ok()?;
+            let path_str = path_str.strip_prefix("file://").unwrap_or(&path_str);
+            
+            Some(std::path::PathBuf::from(path_str))
+        }
+    }
+
+    pub fn get_bookmark_storage_path() -> Option<PathBuf> {
+        use etcetera::app_strategy::{AppStrategyArgs, AppStrategy};
+        
+        let args = AppStrategyArgs {
+            top_level_domain: "com".to_string(),
+            author: "toolsetlink".to_string(),
+            app_name: "MarkFlowy".to_string(),
+        };
+        
+        let app_support = match etcetera::app_strategy::choose_native_strategy(args) {
+            Ok(strategy) => strategy.data_dir(),
+            Err(_) => return None,
+        };
+        
+        if !app_support.exists() {
+            fs::create_dir_all(&app_support).ok()?;
+        }
+        
+        Some(app_support.join("bookmarks.bin"))
+    }
+
+    pub fn save_bookmark(path: &std::path::Path) -> bool {
+        let bookmark_data = match create_security_scoped_bookmark(path) {
+            Some(data) => data,
+            None => return false,
+        };
+        
+        let storage_path = match get_bookmark_storage_path() {
+            Some(p) => p,
+            None => return false,
+        };
+        
+        let mut bookmarks = load_all_bookmarks();
+        let path_str = path.to_string_lossy().to_string();
+        bookmarks.insert(path_str, bookmark_data);
+        
+        let mut file = match fs::File::create(&storage_path) {
+            Ok(f) => f,
+            Err(_) => return false,
+        };
+        
+        let serialized = match bincode::serialize(&bookmarks) {
+            Ok(data) => data,
+            Err(_) => return false,
+        };
+        file.write_all(&serialized).is_ok()
+    }
+
+    pub fn load_all_bookmarks() -> std::collections::HashMap<String, Vec<u8>> {
+        let storage_path = match get_bookmark_storage_path() {
+            Some(p) => p,
+            None => return std::collections::HashMap::new(),
+        };
+        
+        if !storage_path.exists() {
+            return std::collections::HashMap::new();
+        }
+        
+        let mut file = match fs::File::open(&storage_path) {
+            Ok(f) => f,
+            Err(_) => return std::collections::HashMap::new(),
+        };
+        
+        let mut data = Vec::new();
+        if file.read_to_end(&mut data).is_err() {
+            return std::collections::HashMap::new();
+        }
+        
+        bincode::deserialize(&data).unwrap_or_default()
+    }
+
+    pub fn restore_access_for_path(path: &std::path::Path) -> bool {
+        let path_str = path.to_string_lossy().to_string();
+        let bookmarks = load_all_bookmarks();
+        
+        if let Some(bookmark_data) = bookmarks.get(&path_str) {
+            resolve_security_scoped_bookmark(bookmark_data).is_some()
+        } else {
+            false
+        }
+    }
+}
 
 // #[warn(dead_code)]
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -45,11 +249,20 @@ pub struct FileResult {
 }
 
 pub fn read_directory(dir_path: &str) -> Result<Vec<FileInfo>, FileResultCode> {
-    // 同步版本保留，作为兼容性接口
+    read_directory_single_level(dir_path)
+}
+
+pub fn read_directory_single_level(dir_path: &str) -> Result<Vec<FileInfo>, FileResultCode> {
     let new_path = Path::new(dir_path);
+    
+    let has_access = start_accessing_security_scoped_resource(new_path);
+    
     let paths = match fs::read_dir(new_path) {
         Ok(paths) => paths,
         Err(e) => {
+            if has_access {
+                stop_accessing_security_scoped_resource(new_path);
+            }
             return match e.kind() {
                 std::io::ErrorKind::NotFound => Err(FileResultCode::NotFound),
                 std::io::ErrorKind::PermissionDenied => Err(FileResultCode::PermissionDenied),
@@ -88,10 +301,7 @@ pub fn read_directory(dir_path: &str) -> Result<Vec<FileInfo>, FileResultCode> {
 
         if meta.is_dir() {
             kind = String::from("dir");
-            children = match read_directory(file_path.to_str().unwrap_or("")) {
-                Ok(children) => Some(children),
-                Err(_) => None,
-            };
+            children = Some(Vec::new());
         }
 
         let new_file_info = FileInfo {
@@ -107,105 +317,12 @@ pub fn read_directory(dir_path: &str) -> Result<Vec<FileInfo>, FileResultCode> {
         }
     }
 
+    if has_access {
+        stop_accessing_security_scoped_resource(new_path);
+    }
+    
     sort_files_by_kind_and_name(&mut files);
     Ok(files)
-}
-
-// 新增异步版本，使用task_system
-pub fn read_directory_async(
-    dir_path: String,
-) -> impl Future<Output = Result<Vec<FileInfo>, SystemError>> {
-    use crate::task_system::{
-        error::SystemError,
-        system::System,
-        task::{ExecStatus, Interrupter, Task, TaskId, TaskOutput},
-    };
-    use async_trait::async_trait;
-    use thiserror::Error;
-
-    #[derive(Debug, Error)]
-    enum ReadDirError {
-        #[error("File error: {0:?}")]
-        FileError(FileResultCode),
-        #[error("System error: {0}")]
-        SystemError(#[from] SystemError),
-    }
-
-    #[derive(Debug)]
-    struct ReadDirectoryTask {
-        id: TaskId,
-        dir_path: String,
-    }
-
-    impl ReadDirectoryTask {
-        fn new(dir_path: String) -> Self {
-            Self {
-                id: TaskId::new_v4(),
-                dir_path,
-            }
-        }
-    }
-
-    #[async_trait]
-    impl Task<ReadDirError> for ReadDirectoryTask {
-        fn id(&self) -> TaskId {
-            self.id
-        }
-
-        fn with_priority(&self) -> bool {
-            // 文件读取任务通常需要优先处理
-            true
-        }
-
-        async fn run(&mut self, _interrupter: &Interrupter) -> Result<ExecStatus, ReadDirError> {
-            // 执行实际的目录读取操作
-            match read_directory(&self.dir_path) {
-                Ok(files) => Ok(ExecStatus::Done(TaskOutput::Out(Box::new(files)))),
-                Err(e) => Err(ReadDirError::FileError(e)),
-            }
-        }
-    }
-
-    async move {
-        // 创建任务系统实例
-        let system = System::<ReadDirError>::new();
-
-        // 创建目录读取任务并分发
-        let task = ReadDirectoryTask::new(dir_path);
-        let handle = system
-            .dispatch(task)
-            .await
-            .map_err(|_| SystemError::TaskAborted(TaskId::nil()))?;
-
-        // 等待任务完成并处理结果
-        match handle.await {
-            Ok(crate::task_system::task::TaskStatus::Done((_, TaskOutput::Out(out)))) => {
-                // 将AnyTaskOutput转换回Vec<FileInfo>
-                let files = out
-                    .downcast::<Vec<FileInfo>>()
-                    .map_err(|_| SystemError::TaskAborted(TaskId::nil()))?;
-                Ok(*files)
-            }
-            Ok(crate::task_system::task::TaskStatus::Done((_, TaskOutput::Empty))) => {
-                Ok(Vec::new())
-            }
-            Ok(crate::task_system::task::TaskStatus::Error(ReadDirError::FileError(fc))) => {
-                // 使用TaskJoin替代不存在的TaskFailed
-                Err(SystemError::TaskJoin(TaskId::nil()))
-            }
-            Ok(crate::task_system::task::TaskStatus::Error(ReadDirError::SystemError(e))) => Err(e),
-            Ok(crate::task_system::task::TaskStatus::Canceled) => {
-                Err(SystemError::TaskAborted(TaskId::nil()))
-            }
-            Ok(crate::task_system::task::TaskStatus::ForcedAbortion) => {
-                Err(SystemError::TaskAborted(TaskId::nil()))
-            }
-            Ok(crate::task_system::task::TaskStatus::Shutdown(_)) => {
-                Err(SystemError::TaskAborted(TaskId::nil()))
-            }
-            Err(e) => Err(e),
-        }
-    }
 }
 
 pub fn sort_files_by_kind_and_name(files: &mut Vec<FileInfo>) {
@@ -646,66 +763,6 @@ pub mod cmd {
 
     use super::{FileResult, MoveFileInfo};
 
-    // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-    #[tauri::command]
-    pub fn open_folder(folder_path: &str) -> FileResult {
-        let dir_data = fc::read_directory(folder_path);
-        match dir_data {
-            Ok(files) => {
-                let json_data = fc::files_to_json(files);
-                let content = match json_data.code {
-                    fc::FileResultCode::Success => json_data.content,
-                    _ => String::from(""),
-                };
-
-                if content == "" {
-                    return FileResult {
-                        code: fc::FileResultCode::NotFound,
-                        content: String::from("Folder not found"),
-                    };
-                }
-
-                FileResult {
-                    code: fc::FileResultCode::Success,
-                    content: content,
-                }
-            }
-            Err(_) => FileResult {
-                code: fc::FileResultCode::UnknownError,
-                content: String::from("Failed to read directory"),
-            },
-        }
-    }
-
-    #[tauri::command]
-    pub async fn open_folder_async(folder_path: String) -> FileResult {
-        match fc::read_directory_async(folder_path).await {
-            Ok(files) => {
-                let json_data = fc::files_to_json(files);
-                let content = match json_data.code {
-                    fc::FileResultCode::Success => json_data.content,
-                    _ => String::from(""),
-                };
-
-                if content == "" {
-                    return FileResult {
-                        code: fc::FileResultCode::NotFound,
-                        content: String::from("Folder not found"),
-                    };
-                }
-
-                FileResult {
-                    code: fc::FileResultCode::Success,
-                    content: content,
-                }
-            }
-            Err(_) => FileResult {
-                code: fc::FileResultCode::UnknownError,
-                content: String::from("Failed to read directory"),
-            },
-        }
-    }
-
     #[tauri::command]
     pub fn get_file_content(file_path: &str) -> FileResult {
         fc::read_file(file_path)
@@ -1049,6 +1106,30 @@ pub mod cmd {
                 code: FileResultCode::UnknownError,
                 content: e.to_string(),
             },
+        }
+    }
+
+    #[tauri::command]
+    pub fn save_security_bookmark(path: &str) -> bool {
+        #[cfg(target_os = "macos")]
+        {
+            super::security_bookmark::save_bookmark(Path::new(path))
+        }
+        #[cfg(not(target_os = "macos"))]
+        {
+            true
+        }
+    }
+
+    #[tauri::command]
+    pub fn restore_security_bookmark(path: &str) -> bool {
+        #[cfg(target_os = "macos")]
+        {
+            super::security_bookmark::restore_access_for_path(Path::new(path))
+        }
+        #[cfg(not(target_os = "macos"))]
+        {
+            true
         }
     }
 }

@@ -37,9 +37,11 @@ export interface FileTreeProps {
 export const fileTreeHandler: {
   rootTree: undefined | TreeApi<IFile>
   updateTreeView: undefined | ((params: { data: IFile[] }) => void)
+  clearLoadedDirsCache: undefined | (() => void)
 } = {
   rootTree: undefined,
   updateTreeView: undefined,
+  clearLoadedDirsCache: undefined,
 }
 
 const FileTree: FC<FileTreeProps> = (props) => {
@@ -62,12 +64,36 @@ const FileTree: FC<FileTreeProps> = (props) => {
   } = props
 
   const { activeId, setFolderDataPure } = useFileTree()
-  const { pathJoin, fileExists, moveFilesToTargetFolder } = useFileSystem()
+  const { pathJoin, fileExists, moveFilesToTargetFolder, readSubdirectory } = useFileSystem()
   const deferredActiveId = useDeferredValue(activeId)
   const tree = useMemo(() => new SimpleTree<IFile>(data), [data])
   const treeRef = useRef<TreeApi<IFile> | null>(null)
+  const loadedDirsRef = useRef<Set<string>>(new Set())
 
   if (data === null) return null
+
+  const onToggle: TreeProps<IFile>['onToggle'] = async (id: string) => {
+    const node = tree.find(id)
+    if (!node) return
+
+    const nodeData = node.data as IFile
+    if (nodeData.kind !== 'dir' || !nodeData.path) return
+
+    if (loadedDirsRef.current.has(nodeData.path)) return
+
+    if (!nodeData.children || nodeData.children.length === 0) {
+      try {
+        const children = await readSubdirectory(nodeData.path)
+        if (children.length > 0) {
+          nodeData.children = children
+          loadedDirsRef.current.add(nodeData.path)
+          setFolderDataPure([...tree.data])
+        }
+      } catch (error) {
+        console.error('Failed to load subdirectory:', error)
+      }
+    }
+  }
 
   const onMove: TreeProps<IFile>['onMove'] = async (args) => {
     const _dragNodes = args.dragNodes.filter((node) => {
@@ -144,6 +170,7 @@ const FileTree: FC<FileTreeProps> = (props) => {
           disableMultiSelection
           onSelect={(node) => onSelect(node[0]?.data)}
           onMove={onMove}
+          onToggle={onToggle}
           onContextMenu={(e) => {
             const items: ContextMenuItem[] = []
             const workspaceRoot = data[0]
@@ -213,6 +240,9 @@ const FileTree: FC<FileTreeProps> = (props) => {
                   data: params.data,
                 })
                 setFolderDataPure(params.data)
+              }
+              fileTreeHandler.clearLoadedDirsCache = () => {
+                loadedDirsRef.current.clear()
               }
             }
             return (

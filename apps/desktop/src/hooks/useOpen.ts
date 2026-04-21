@@ -71,9 +71,16 @@ const useOpen = () => {
   )
 
   const openFolderDialog = useCallback(async () => {
-    const dir = await open({ directory: true, recursive: true })
+    const dir = await open({ 
+      directory: true, 
+      recursive: true,
+      fileAccessMode: 'scoped'
+    })
 
     if (typeof dir !== 'string') return
+    
+    await invoke<boolean>('save_security_bookmark', { path: dir })
+    
     openFolder(dir)
   }, [openFolder])
 

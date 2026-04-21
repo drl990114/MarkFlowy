@@ -37,31 +37,46 @@ interface LocalTheme {
 }
 
 async function appThemeExtensionsSetup(curTheme: string) {
-  if (isBuiltInTheme(curTheme)) {
-    useThemeStore.getState().setCurThemeByName(curTheme)
-  }
-
-  const localThemes = await invoke<LocalTheme[]>('load_local_themes')
-  if (localThemes.length > 0) {
-    const cssContents = localThemes.map((t) => t.css_content)
-    loadLocalThemeCss(cssContents)
-  }
-
-  invoke<Record<string, any>>('load_themes').then((res) => {
-    if (isArray(res)) {
-      try {
-        res.map((extension) => {
-          useExtensionsManagerStore.getState().loadExtension(extension)
-        })
-      } catch (error) {
-        toast.error(`Failed to load extensions: ${error}`)
-      } finally {
-        useThemeStore.getState().setCurThemeByName(curTheme)
-      }
-    } else {
+  try {
+    if (isBuiltInTheme(curTheme)) {
       useThemeStore.getState().setCurThemeByName(curTheme)
     }
-  })
+
+    logger.debug('Loading local themes...')
+    const localThemes = await invoke<LocalTheme[]>('load_local_themes')
+    logger.debug('Local themes loaded:', localThemes.length)
+    
+    if (localThemes.length > 0) {
+      const cssContents = localThemes.map((t) => t.css_content)
+      loadLocalThemeCss(cssContents)
+    }
+
+    logger.debug('Loading themes...')
+    invoke<Record<string, any>>('load_themes').then((res) => {
+      logger.debug('Themes loaded:', res)
+      if (isArray(res)) {
+        try {
+          res.map((extension) => {
+            useExtensionsManagerStore.getState().loadExtension(extension)
+          })
+        } catch (error) {
+          logger.error('Failed to load extensions:', error)
+          toast.error(`Failed to load extensions: ${error}`)
+        } finally {
+          useThemeStore.getState().setCurThemeByName(curTheme)
+        }
+      } else {
+        useThemeStore.getState().setCurThemeByName(curTheme)
+      }
+    }).catch((error) => {
+      logger.error('Failed to invoke load_themes:', error)
+      useThemeStore.getState().setCurThemeByName(curTheme)
+    })
+  } catch (error) {
+    logger.error('Failed to setup theme extensions:', error)
+    logger.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace')
+    useThemeStore.getState().setCurThemeByName(curTheme)
+  }
 }
 
 async function handleOpenedPaths(openedPaths: string[]) {
@@ -110,21 +125,27 @@ async function handleOpenedPaths(openedPaths: string[]) {
 }
 
 async function appWorkspaceSetup() {
-  const { setRecentWorkspaces } = useOpenedCacheStore.getState()
+  const { setRecentWorkspaces, clearRecentWorkspaces } = useOpenedCacheStore.getState()
   const { setFolderData, addOpenedFile, setActiveId } = useEditorStore.getState()
   logger.debug('=== appWorkspaceSetup: Checking window.openedUrls ===')
   logger.debug('window.openedUrls', window.openedUrls)
 
   try {
+    logger.debug('Creating LazyStore for workspace cache...')
     const cacheStore = await new LazyStore('.markflowy_workspaces.dat')
+    logger.debug('LazyStore created successfully')
 
+    logger.debug('Invoking get_opened_cache...')
     const getOpenedCacheRes = await invoke<{ recent_workspaces: WorkspaceInfo[] }>(
       'get_opened_cache',
     )
+    logger.debug('get_opened_cache result:', getOpenedCacheRes)
+    
     const recentWorkspaces = getOpenedCacheRes.recent_workspaces
     setRecentWorkspaces(recentWorkspaces)
 
     if (window.openedUrls) {
+      logger.debug('Processing window.openedUrls:', window.openedUrls)
       const openedPaths = window.openedUrls?.split(',').map((p) => {
         if (p.startsWith('file://')) {
           p = p.slice(7)
@@ -140,7 +161,10 @@ async function appWorkspaceSetup() {
     }
 
     if (recentWorkspaces.length > 0) {
+      logger.debug('Found recent workspaces:', recentWorkspaces)
       const targetWorkspacePath = recentWorkspaces[0].path
+      logger.debug('Target workspace path:', targetWorkspacePath)
+      
       const cacheStoreInitPromises = Promise.all([
         cacheStore.get<{
           openedFilePaths: string[]
@@ -148,7 +172,12 @@ async function appWorkspaceSetup() {
         }>(targetWorkspacePath),
       ])
       const cacheStoreInitPromisesRes = await cacheStoreInitPromises
-      await readDirectory(targetWorkspacePath).then((res) => {
+      logger.debug('Cache store init result:', cacheStoreInitPromisesRes)
+      
+      logger.debug('Reading directory:', targetWorkspacePath)
+      try {
+        const res = await readDirectory(targetWorkspacePath)
+        logger.debug('Directory read successfully, file count:', res.length)
         setFolderData(res)
         const { openedFilePaths, activeFilePath } = cacheStoreInitPromisesRes[0] || {}
 
@@ -184,10 +213,21 @@ async function appWorkspaceSetup() {
             cacheStore.save()
           }
         })
-      })
+      } catch (error) {
+        logger.error('Failed to read directory:', targetWorkspacePath, error)
+        logger.error('This might be due to sandbox restrictions or the directory no longer exists')
+        logger.error('Clearing recent workspaces cache...')
+        
+        await clearRecentWorkspaces()
+        
+        toast.error('无法访问上次的工作区，请重新选择文件夹。这可能是由于沙盒权限限制导致的。')
+      }
+    } else {
+      logger.debug('No recent workspaces found')
     }
   } catch (error) {
     logger.error('Failed to load workspace', error)
+    logger.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace')
   }
 }
 

@@ -28,6 +28,8 @@
   "bundle": {
     "active": true,
     "copyright": "Copyright (c) 2023-present drl990114",
+    "shortDescription": "AI-Powered Markdown Editor",
+    "longDescription": "MarkFlowy is a modern, lightweight Markdown editor with built-in AI capabilities. Features include AI-powered translation, summarization, multiple editing modes (WYSIWYG and source code), custom themes, keyboard shortcuts, and support for multiple file formats. Built with Tauri for optimal performance.",
     "fileAssociations": [
       {
         "ext": [
@@ -64,7 +66,7 @@
       }
     },
     "macOS": {
-      "entitlements": null,
+      "entitlements": "./entitlements.plist",
       "exceptionDomain": "",
       "frameworks": [],
       "providerShortName": null,

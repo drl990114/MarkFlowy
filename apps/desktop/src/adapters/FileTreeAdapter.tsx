@@ -1,5 +1,5 @@
 import type { FC, ReactNode } from 'react'
-import { FileTreeContext, FileTreeContextValue } from '@markflowy/interface'
+import { FileTreeContext, FileTreeContextValue, fileTreeHandler } from '@markflowy/interface'
 import { useEditorStore } from '@/stores'
 import { readDirectory } from '@/helper/filesys'
 
@@ -23,6 +23,7 @@ export const FileTreeProvider: FC<FileTreeAdapterProps> = ({ children }) => {
       if (!rootPath) {
         throw new Error('No workspace found')
       }
+      fileTreeHandler.clearLoadedDirsCache?.()
       const res = await readDirectory(rootPath)
       editorStore.setFolderDataPure(res)
     },
