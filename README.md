@@ -135,6 +135,13 @@ The development of **MarkFlowy** cannot be separated from these contributors. Th
         </a>
     </td>
     <td align="center">
+        <a href="https://github.com/hobostay">
+            <img src="https://avatars.githubusercontent.com/u/110803307?v=4" width="90;" alt="hobostay"/>
+            <br />
+            <sub><b>Qiaochu Hu</b></sub>
+        </a>
+    </td>
+    <td align="center">
         <a href="https://github.com/SamDc73">
             <img src="https://avatars.githubusercontent.com/u/144215270?v=4" width="90;" alt="SamDc73"/>
             <br />
@@ -154,15 +161,15 @@ The development of **MarkFlowy** cannot be separated from these contributors. Th
             <br />
             <sub><b>Mariano Esteban</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/Raven-1027">
             <img src="https://avatars.githubusercontent.com/u/83693755?v=4" width="90;" alt="Raven-1027"/>
             <br />
             <sub><b>Null</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/chiefass">
             <img src="https://avatars.githubusercontent.com/u/106591791?v=4" width="90;" alt="chiefass"/>
