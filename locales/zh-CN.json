@@ -31,7 +31,7 @@
     "preview": "预览"
   },
   "toolbar": {
-    "undo": "撤消",
+    "undo": "撤销",
     "redo": "重做",
     "h1": "标题 1",
     "h2": "标题 2",
@@ -475,7 +475,7 @@
       "editor_copy": "在编辑器中复制选定的文本",
       "editor_cut": "在编辑器中剪切所选文本",
       "editor_redo": "重做",
-      "editor_undo": "撤消",
+      "editor_undo": "撤销",
       "editor_paste": "在编辑器中粘贴所选文本",
       "editor_toggleStrong": "切换到粗体标记",
       "editor_toggleEmphasis": "切换到斜体标记",
