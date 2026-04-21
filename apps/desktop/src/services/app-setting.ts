@@ -6,13 +6,23 @@ import { emit } from '@tauri-apps/api/event'
 export const appSettingStoreSetup = async () => {
   const { setSettingData } = useAppSettingStore.getState()
 
-  const settingData = await invoke<Record<string, any>>('get_app_conf')
-
-  logger.info('Loaded app setting data:', settingData)
-
-  setSettingData(settingData)
-
-  return settingData
+  try {
+    logger.debug('Invoking get_app_conf...')
+    const settingData = await invoke<Record<string, any>>('get_app_conf')
+    logger.info('Loaded app setting data:', settingData)
+    setSettingData(settingData)
+    return settingData
+  } catch (error) {
+    logger.error('Failed to load app setting:', error)
+    logger.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace')
+    const defaultSetting = {
+      theme: 'light',
+      language: 'en',
+      webview_zoom: '1.0',
+    }
+    setSettingData(defaultSetting)
+    return defaultSetting
+  }
 }
 
 export const writeSettingData = async (item: Pick<Setting.SettingItem, 'key' | 'afterWrite'>, value: any) => {

@@ -1,5 +1,6 @@
 import { useEditorStore } from '@/stores'
 import { invoke } from '@tauri-apps/api/core'
+import { readDir } from '@tauri-apps/plugin-fs'
 import { nanoid } from 'nanoid'
 import { getFileObjectByPath, setFileObject, setFileObjectByPath } from './files'
 
@@ -78,60 +79,109 @@ export const createUntitledFile = (): IFile => {
   return createFile()
 }
 
-export const readDirectory = (folderPath: string): Promise<IFile[]> => {
-  return new Promise(async (resolve, reject) => {
+export const readDirectory = async (folderPath: string): Promise<IFile[]> => {
+  const entries: IFile[] = []
+  
+  try {
+    await invoke<boolean>('restore_security_bookmark', { path: folderPath })
     
-    invoke<FileSysResult>('open_folder_async', { folderPath })
-      .then(async (message) => {
-        if (message.code !== FileResultCode.Success) {
-          return
-        }
-        const mess = message.content
-        const files = JSON.parse(mess)
-        const entries: IFile[] = []
+    const dirEntries = await readDir(folderPath)
+    
+    for (const entry of dirEntries) {
+      const fileName = entry.name
+      const filePath = `${folderPath}/${fileName}`
+      const ext = fileName.includes('.') ? fileName.split('.').pop() || '' : ''
+      
+      const isDir = entry.isDirectory
+      
+      const fileEntry: IFile = {
+        id: nanoid(),
+        name: fileName,
+        kind: isDir ? 'dir' : 'file',
+        path: filePath,
+        children: isDir ? [] : undefined,
+        ext: isDir ? '' : ext,
+      }
+      
+      if (isSupportedFile(fileName) || isDir) {
+        entries.push(fileEntry)
+      }
+    }
+    
+    sortFilesByKindAndName(entries)
+    wrapFiles(entries)
+    
+    const folderName = await invoke<string>('get_path_name', {
+      path: folderPath,
+    })
+    
+    const root: IFile = {
+      id: getFileObjectByPath(folderPath)?.id || nanoid(),
+      name: folderName,
+      path: folderPath,
+      kind: 'dir',
+      children: entries,
+    }
+    
+    setFileObjectByPath(folderPath, root)
+    setFileObject(root.id, root)
+    
+    return [root]
+  } catch (err) {
+    throw new Error(`Failed to read directory: ${err}`)
+  }
+}
 
-        if (!files || !files.length) {
-          resolve([
-            {
-              id: nanoid(),
-              name: getFileNameFromPath(folderPath),
-              path: folderPath,
-              kind: 'dir',
-              children: entries,
-            },
-          ])
-          return
-        }
+const isSupportedFile = (fileName: string): boolean => {
+  const supportedExtensions = ['md', 'markdown', 'txt']
+  const ext = fileName.includes('.') ? fileName.split('.').pop()?.toLowerCase() || '' : ''
+  return supportedExtensions.includes(ext)
+}
 
-        for (let i = 0; i < files.length; i++) {
-          const file = files[i]
-
-          entries.push(file)
-        }
-
-        wrapFiles(entries)
-
-        const folderName = await invoke<string>('get_path_name', {
-          path: folderPath,
-        })
-
-        const root: IFile = {
-          id: getFileObjectByPath(folderPath)?.id || nanoid(),
-          name: folderName,
-          path: folderPath,
-          kind: 'dir',
-          children: entries,
-        }
-
-        setFileObjectByPath(folderPath, root)
-        setFileObject(root.id, root)
-
-        resolve([root])
-      })
-      .catch((err) => {
-        reject(err)
-      })
+const sortFilesByKindAndName = (files: IFile[]) => {
+  files.sort((a, b) => {
+    if (a.kind === 'dir' && b.kind !== 'dir') return -1
+    if (a.kind !== 'dir' && b.kind === 'dir') return 1
+    return a.name.localeCompare(b.name, undefined, { numeric: true })
   })
+}
+
+export const readSubdirectory = async (folderPath: string): Promise<IFile[]> => {
+  const entries: IFile[] = []
+  
+  try {
+    await invoke<boolean>('restore_security_bookmark', { path: folderPath })
+    
+    const dirEntries = await readDir(folderPath)
+    
+    for (const entry of dirEntries) {
+      const fileName = entry.name
+      const filePath = `${folderPath}/${fileName}`
+      const ext = fileName.includes('.') ? fileName.split('.').pop() || '' : ''
+      
+      const isDir = entry.isDirectory
+      
+      const fileEntry: IFile = {
+        id: nanoid(),
+        name: fileName,
+        kind: isDir ? 'dir' : 'file',
+        path: filePath,
+        children: isDir ? [] : undefined,
+        ext: isDir ? '' : ext,
+      }
+      
+      if (isSupportedFile(fileName) || isDir) {
+        entries.push(fileEntry)
+      }
+    }
+    
+    sortFilesByKindAndName(entries)
+    wrapFiles(entries)
+    
+    return entries
+  } catch (err) {
+    return []
+  }
 }
 
 export function isMdFile(fileName?: string) {

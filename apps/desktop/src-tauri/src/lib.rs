@@ -69,6 +69,8 @@ pub fn run() {
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_window_state::Builder::default().build())
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_fs::init())
+        .plugin(tauri_plugin_persisted_scope::init())
         .plugin(tauri_plugin_single_instance::init(|app_handle: &tauri::AppHandle, args: Vec<String>, cwd: String| {
             // 提取文件路径参数（args[0]是程序本身，args[1..]是传递的参数）
             let opened_urls = if args.len() > 1 {
@@ -84,8 +86,6 @@ pub fn run() {
             }
         }))
         .invoke_handler(tauri::generate_handler![
-            fc::cmd::open_folder,
-            fc::cmd::open_folder_async,
             fc::cmd::get_file_content,
             fc::cmd::write_file,
             fc::cmd::write_u8_array_to_file,
@@ -124,6 +124,7 @@ pub fn run() {
             bookmarks::cmd::add_bookmark,
             bookmarks::cmd::edit_bookmark,
             bookmarks::cmd::remove_bookmark,
+            bookmarks::cmd::rename_bookmark_item,
             search::cmd::search_files_async,
             extensions::cmd::extensions_init,
             process::app_exit,
@@ -141,10 +142,21 @@ pub fn run() {
             file_watcher::cmd::stop_all_file_watchers,
             app::clipboard::get_clipboard_html,
             app::clipboard::get_clipboard_text,
+            fc::cmd::save_security_bookmark,
+            fc::cmd::restore_security_bookmark,
         ])
         .setup(|app: &mut tauri::App| {
-            let home_dir_path = app.path().home_dir().expect("failed to get home dir");
-            APP_DIR.lock().unwrap().insert(0, home_dir_path);
+            #[cfg(target_os = "macos")]
+            {
+                let app_data_dir = app.path().app_data_dir().expect("failed to get app data dir");
+                APP_DIR.lock().unwrap().insert(0, app_data_dir);
+            }
+            
+            #[cfg(not(target_os = "macos"))]
+            {
+                let home_dir_path = app.path().home_dir().expect("failed to get home dir");
+                APP_DIR.lock().unwrap().insert(0, home_dir_path);
+            }
 
             let opened_urls: State<OpenedUrls> = app.state();
             let file_urls = opened_urls.inner().to_owned();

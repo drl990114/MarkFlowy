@@ -169,6 +169,7 @@ export function ThemeStore() {
             extensions: ['css'],
           },
         ],
+        fileAccessMode: 'scoped'
       })
 
       if (selected) {

@@ -16,7 +16,7 @@ crate-type = [
 ]
 
 [build-dependencies.tauri-build]
-version = "2.5.3"
+version = "2.5.6"
 features = []
 
 [dependencies]
@@ -25,14 +25,16 @@ anyhow = "1.0.86"
 dark-light = "1.1.1"
 log = "0.4.21"
 tauri-plugin-updater = "2.9.0"
-tauri-plugin-http = "2.5.4"
+tauri-plugin-http = "2.5.8"
 tauri-plugin-window-state = "2.4.1"
-tauri-plugin-store = "2.4.1"
+tauri-plugin-store = "2.4.2"
 tauri-plugin-os = "2.3.2"
-tauri-plugin-shell = "2.3.3"
-tauri-plugin-dialog = "2.4.2"
+tauri-plugin-shell = "2.3.5"
+tauri-plugin-dialog = "2.7.0"
 tauri-plugin-clipboard-manager = "2.3.2"
 tauri-plugin-opener = "2.5.3"
+tauri-plugin-fs = "2.5.0"
+tauri-plugin-persisted-scope = "2.3.6"
 regex = "1.10.4"
 lazy_static = "1.5.0"
 tracing = "0.1.40"
@@ -49,6 +51,11 @@ notify = "6.1"
 arboard = "3.6.1"
 base64 = "^0.21.7"
 zhconv = "^0.4.0"
+bincode = "1.3"
+
+[target.'cfg(target_os = "macos")'.dependencies]
+core-foundation = "0.10"
+core-foundation-sys = "0.8"
 
 [dependencies.chrono]
 version = "0.4"
@@ -102,7 +109,7 @@ version = "1.0"
 features = ["derive"]
 
 [dependencies.tauri]
-version = "2.9.4"
+version = "2.10.3"
 features = [
     "protocol-asset",
     "devtools",

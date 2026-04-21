@@ -25,7 +25,11 @@ const PathSelectSettingItem: React.FC<SettingItemProps<Setting.PathSelectSetting
       >
         <Button
           onClick={async () => {
-            const dir = await open({ directory: true, recursive: true })
+            const dir = await open({ 
+              directory: true, 
+              recursive: true,
+              fileAccessMode: 'scoped'
+            })
             if (typeof dir !== 'string') return
             appSettingService.writeSettingData(item, dir)
           }}
