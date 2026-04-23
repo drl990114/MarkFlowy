@@ -69,6 +69,15 @@ impl Keybindings {
                 "always".to_string(),
             ),
             KeybindingInfo::new(
+                "app_toggleEditorType".to_string(),
+                vec![
+                    "CommandOrCtrl".to_string(),
+                    "Shift".to_string(),
+                    "m".to_string(),
+                ],
+                "editor_focus".to_string(),
+            ),
+            KeybindingInfo::new(
                 "editor_copy".to_string(),
                 vec!["CommandOrCtrl".to_string(), "c".to_string()],
                 "editor_focus".to_string(),

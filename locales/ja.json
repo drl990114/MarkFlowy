@@ -461,6 +461,7 @@
       "app_findReplaceEditor": "エディタで見つけて置き換える",
       "app_closeCurrentEditorTab": "現在のエディタタブを閉じる",
       "app_hide": "アプリケーションを隠す",
+      "app_toggleEditorType": "ソースコード/WYSIWYGモードを切り替える",
       "editor_copy": "選択したテキストをエディタでコピーする",
       "editor_cut": "エディタで選択したテキストをカット",
       "editor_redo": "再実行",

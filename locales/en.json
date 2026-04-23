@@ -174,6 +174,7 @@
       "app_findReplaceEditor": "Find and replace in editor",
       "app_closeCurrentEditorTab": "Close current editor tab",
       "app_hide": "Hide the application",
+      "app_toggleEditorType": "Toggle source code / WYSIWYG mode",
       "editor_copy": "Copy selected text in editor",
       "editor_cut": "Cut selected text in editor",
       "editor_redo": "Redo",

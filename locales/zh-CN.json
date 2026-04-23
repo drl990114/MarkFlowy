@@ -472,6 +472,7 @@
       "app_findReplaceEditor": "在编辑器中查找和替换",
       "app_closeCurrentEditorTab": "关闭当前编辑器选项卡",
       "app_hide": "隐藏应用程序",
+      "app_toggleEditorType": "切换源代码/所见即所得模式",
       "editor_copy": "在编辑器中复制选定的文本",
       "editor_cut": "在编辑器中剪切所选文本",
       "editor_redo": "重做",

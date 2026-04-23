@@ -461,6 +461,7 @@
       "app_findReplaceEditor": "Rechercher et remplacer dans l'éditeur",
       "app_closeCurrentEditorTab": "Fermer l'onglet de l'éditeur actuel",
       "app_hide": "Cacher l'application",
+      "app_toggleEditorType": "Basculer entre les modes code source et WYSIWYG",
       "editor_copy": "Copier le texte sélectionné dans l'éditeur",
       "editor_cut": "Couper le texte sélectionné dans l'éditeur",
       "editor_redo": "Refaire",
