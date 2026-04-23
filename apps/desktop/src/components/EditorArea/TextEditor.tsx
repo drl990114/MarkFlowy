@@ -25,7 +25,7 @@ import { invoke } from '@tauri-apps/api/core'
 import { save } from '@tauri-apps/plugin-dialog'
 import classNames from 'classnames'
 import html2canvas from 'html2canvas'
-import { debounce, DebouncedFunc } from 'lodash'
+import { debounce, DebouncedFunc, throttle } from 'lodash'
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useMount, useUnmount } from 'react-use'
@@ -53,6 +53,7 @@ type SaveHandlerParams = {
    */
   active?: boolean
   onSuccess?: () => void
+  onFinally?: () => void
 }
 
 enum TextEditorStatus {
@@ -140,22 +141,40 @@ function TextEditor(props: TextEditorProps) {
 
   const saveHandler = useCallback(
     async (params: SaveHandlerParams = {}) => {
-      const { onSuccess } = params
-      if (!active && !params.active) return
+      const { onSuccess, onFinally } = params
+      const runFinally = () => {
+        onFinally?.()
+      }
+      const runSuccess = () => {
+        try {
+          onSuccess?.()
+        } finally {
+          runFinally()
+        }
+      }
+
+      if (!active && !params.active) {
+        runFinally()
+        return
+      }
       const curFile = getFileObject(id)
-      if (!curFile) return
+      if (!curFile) {
+        runFinally()
+        return
+      }
 
       const { idStateMap, setIdStateMap } = useEditorStateStore.getState()
 
       const curEditorState = idStateMap.get(curFile.id)
 
       if (!curEditorState?.hasUnsavedChanges) {
-        onSuccess?.()
+        runSuccess()
         return
       }
 
       if (!editorContextRef.current?.state.doc && !curFile.content) {
         // Unexpected
+        runFinally()
         return
       }
 
@@ -168,6 +187,7 @@ function TextEditor(props: TextEditorProps) {
       try {
         if (!curFile.path) {
           if (noFileSaveingRef.current === true) {
+            runFinally()
             return
           }
 
@@ -179,7 +199,10 @@ function TextEditor(props: TextEditorProps) {
             .then((path) => {
               noFileSaveingRef.current = false
 
-              if (path === null) return
+              if (path === null) {
+                runFinally()
+                return
+              }
               const filename = getFileNameFromPath(path)
               updateFileObject(curFile.id, { ...curFile, path, name: filename })
               insertNodeToFolderData({
@@ -191,11 +214,15 @@ function TextEditor(props: TextEditorProps) {
               invoke<FileSysResult>('write_file', { filePath: path, content: fileContent }).then(
                 (res) => {
                   if (res.code !== FileResultCode.Success) {
+                    runFinally()
                     return toast.error(res.content)
                   }
-                  onSuccess?.()
+                  runSuccess()
                 },
-              )
+              ).catch((error) => {
+                toast.error(String(error))
+                runFinally()
+              })
               setIdStateMap(curFile.id, {
                 hasUnsavedChanges: false,
               })
@@ -203,6 +230,7 @@ function TextEditor(props: TextEditorProps) {
             .catch((error) => {
               noFileSaveingRef.current = false
               toast.error(String(error))
+              runFinally()
             })
         } else {
           invoke<FileSysResult>('write_file', {
@@ -210,10 +238,14 @@ function TextEditor(props: TextEditorProps) {
             content: fileContent,
           }).then((res) => {
             if (res.code !== FileResultCode.Success) {
+              runFinally()
               return toast.error(res.content)
             }
             setContent(fileContent)
-            onSuccess?.()
+            runSuccess()
+          }).catch((error) => {
+            toast.error(String(error))
+            runFinally()
           })
 
           setIdStateMap(curFile.id, {
@@ -222,6 +254,7 @@ function TextEditor(props: TextEditorProps) {
         }
       } catch (error) {
         toast.error(String(error))
+        runFinally()
       }
     },
     [active, id, delegate, t, insertNodeToFolderData],
@@ -268,13 +301,20 @@ function TextEditor(props: TextEditorProps) {
     [active, id],
   )
 
+  const editorTypeSwitchingRef = useRef(false)
+
   useEffect(() => {
-    const cb = async (payload: EditorViewType) => {
+    const cb = throttle((payload: EditorViewType) => {
       if (active) {
+        if (editorTypeSwitchingRef.current) {
+          return
+        }
+
         if (editorRef.current?.getType() === payload) {
           return
         }
 
+        editorTypeSwitchingRef.current = true
         bus.emit(EVENT.app_save, {
           onSuccess: () => {
             if (payload === EditorViewType.SOURCECODE) {
@@ -304,13 +344,17 @@ function TextEditor(props: TextEditorProps) {
             useEditorViewTypeStore.getState().setEditorViewType(curFile.id, payload)
             editorRef.current?.toggleType(payload)
           },
+          onFinally: () => {
+            editorTypeSwitchingRef.current = false
+          },
         })
       }
-    }
+    }, 300, { leading: true, trailing: false })
 
     bus.on('editor_toggle_type', cb)
 
     return () => {
+      cb.cancel()
       bus.detach('editor_toggle_type', cb)
     }
   }, [active, curFile, execute, setEditorDelegate, getEditorContent, debounceRefreshToc])
@@ -425,7 +469,10 @@ function TextEditor(props: TextEditorProps) {
 
   useEffect(() => {
     const callback = (hooks: SaveHandlerParams) => {
-      saveHandler({ onSuccess: hooks?.onSuccess })
+      if (!active) {
+        return
+      }
+      saveHandler({ onSuccess: hooks?.onSuccess, onFinally: hooks?.onFinally })
     }
 
     bus.on(EVENT.app_save, callback)
@@ -433,7 +480,7 @@ function TextEditor(props: TextEditorProps) {
     return () => {
       bus.detach(EVENT.app_save, callback)
     }
-  }, [saveHandler])
+  }, [active, saveHandler])
 
   const handleWrapperClick: React.MouseEventHandler<HTMLDivElement> = useCallback(
     (e) => {

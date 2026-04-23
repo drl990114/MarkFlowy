@@ -128,13 +128,6 @@ The development of **MarkFlowy** cannot be separated from these contributors. Th
         </a>
     </td>
     <td align="center">
-        <a href="https://github.com/AdySnowflake">
-            <img src="https://avatars.githubusercontent.com/u/163967164?v=4" width="90;" alt="AdySnowflake"/>
-            <br />
-            <sub><b>Null</b></sub>
-        </a>
-    </td>
-    <td align="center">
         <a href="https://github.com/hobostay">
             <img src="https://avatars.githubusercontent.com/u/110803307?v=4" width="90;" alt="hobostay"/>
             <br />
@@ -142,10 +135,10 @@ The development of **MarkFlowy** cannot be separated from these contributors. Th
         </a>
     </td>
     <td align="center">
-        <a href="https://github.com/SamDc73">
-            <img src="https://avatars.githubusercontent.com/u/144215270?v=4" width="90;" alt="SamDc73"/>
+        <a href="https://github.com/AdySnowflake">
+            <img src="https://avatars.githubusercontent.com/u/163967164?v=4" width="90;" alt="AdySnowflake"/>
             <br />
-            <sub><b>Husam Alshehadat</b></sub>
+            <sub><b>Null</b></sub>
         </a>
     </td>
     <td align="center">
@@ -153,6 +146,13 @@ The development of **MarkFlowy** cannot be separated from these contributors. Th
             <img src="https://avatars.githubusercontent.com/u/99468824?v=4" width="90;" alt="KiraKiraAyu"/>
             <br />
             <sub><b>Lysastriel</b></sub>
+        </a>
+    </td>
+    <td align="center">
+        <a href="https://github.com/SamDc73">
+            <img src="https://avatars.githubusercontent.com/u/144215270?v=4" width="90;" alt="SamDc73"/>
+            <br />
+            <sub><b>Husam Alshehadat</b></sub>
         </a>
     </td>
     <td align="center">
