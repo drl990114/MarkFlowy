@@ -3918,7 +3918,7 @@ __metadata:
     "@types/color": "npm:^4.2.0"
     color: "npm:^4.2.3"
     eslint: "npm:9.13.0"
-    postcss: "npm:^8.4.47"
+    postcss: "npm:^8.5.10"
     postcss-import: "npm:^16.1.1"
     postcss-nested: "npm:^7.0.2"
     react: "npm:^18.3.1"
@@ -14594,7 +14594,7 @@ __metadata:
     child_process: "npm:^1.0.2"
     eslint: "npm:9.13.0"
     fast-glob: "npm:^3.3.2"
-    postcss: "npm:^8.4.47"
+    postcss: "npm:^8.5.10"
     postcss-import: "npm:^16.1.1"
     postcss-nested: "npm:^7.0.2"
     prettier: "npm:^3.3.3"
@@ -16118,6 +16118,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"nanoid@npm:^3.3.11":
+  version: 3.3.11
+  resolution: "nanoid@npm:3.3.11"
+  bin:
+    nanoid: bin/nanoid.cjs
+  checksum: 10/73b5afe5975a307aaa3c95dfe3334c52cdf9ae71518176895229b8d65ab0d1c0417dd081426134eb7571c055720428ea5d57c645138161e7d10df80815527c48
+  languageName: node
+  linkType: hard
+
 "nanoid@npm:^3.3.6, nanoid@npm:^3.3.7, nanoid@npm:^3.3.8":
   version: 3.3.8
   resolution: "nanoid@npm:3.3.8"
@@ -17459,7 +17468,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"postcss@npm:^8.4.47, postcss@npm:^8.5.3":
+"postcss@npm:^8.5.10":
+  version: 8.5.10
+  resolution: "postcss@npm:8.5.10"
+  dependencies:
+    nanoid: "npm:^3.3.11"
+    picocolors: "npm:^1.1.1"
+    source-map-js: "npm:^1.2.1"
+  checksum: 10/7eac6169e535b63c8412e94d4f6047fc23efa3e9dde804b541940043c831b25f1cd867d83cd2c4371ad2450c8abcb42c208aa25668c1f0f3650d7f72faf711a8
+  languageName: node
+  linkType: hard
+
+"postcss@npm:^8.5.3":
   version: 8.5.3
   resolution: "postcss@npm:8.5.3"
   dependencies:

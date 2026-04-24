@@ -47,7 +47,7 @@
     "child_process": "^1.0.2",
     "eslint": "9.13.0",
     "fast-glob": "^3.3.2",
-    "postcss": "^8.4.47",
+    "postcss": "^8.5.10",
     "postcss-import": "^16.1.1",
     "postcss-nested": "^7.0.2",
     "prettier": "^3.3.3",
