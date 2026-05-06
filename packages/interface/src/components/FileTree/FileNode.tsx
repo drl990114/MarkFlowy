@@ -1,9 +1,9 @@
 import React, { type FC } from 'react'
 import type { NodeRendererProps } from 'react-arborist'
 import { toast } from 'zens'
-import type { IFile } from '../../types/file'
 import { useFileSystem } from '../../contexts/FileSystemContext'
 import { useFileTree } from '../../contexts/FileTreeContext'
+import type { IFile } from '../../types/file'
 import { moveFileNode } from './file-operator'
 import NewFileInput from './NewFileInput'
 import { NodeContainer } from './styles'
@@ -334,6 +334,9 @@ function FileNode({
         }
         if (e.shiftKey) {
           return
+        }
+        if (node.data.kind === 'dir') {
+          node.toggle()
         }
       }}
       onMouseUp={(e) => {
