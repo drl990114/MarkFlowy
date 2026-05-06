@@ -764,6 +764,17 @@ pub mod cmd {
     use super::{FileResult, MoveFileInfo};
 
     #[tauri::command]
+    pub fn open_folder_async(folder_path: &str) -> FileResult {
+        match fc::read_directory(folder_path) {
+            Ok(files) => fc::files_to_json(files),
+            Err(code) => FileResult {
+                code,
+                content: String::from("Failed to read directory"),
+            },
+        }
+    }
+
+    #[tauri::command]
     pub fn get_file_content(file_path: &str) -> FileResult {
         fc::read_file(file_path)
     }

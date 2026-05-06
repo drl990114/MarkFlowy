@@ -86,6 +86,7 @@ pub fn run() {
             }
         }))
         .invoke_handler(tauri::generate_handler![
+            fc::cmd::open_folder_async,
             fc::cmd::get_file_content,
             fc::cmd::write_file,
             fc::cmd::write_u8_array_to_file,

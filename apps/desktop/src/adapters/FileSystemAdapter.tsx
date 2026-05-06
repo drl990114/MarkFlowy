@@ -1,5 +1,6 @@
 import { invoke } from '@tauri-apps/api/core'
 import { revealItemInDir } from '@tauri-apps/plugin-opener'
+import { nanoid } from 'nanoid'
 import type { FC, ReactNode } from 'react'
 import {
   FileSystemContext,
@@ -7,6 +8,7 @@ import {
   MoveFileInfo,
 } from '@markflowy/interface'
 import { FileResultCode, FileSysResult, IFile } from '@/helper/filesys'
+import { getFileObjectByPath, setFileObject, setFileObjectByPath } from '@/helper/files'
 
 interface FileSystemAdapterProps {
   children: ReactNode
@@ -29,7 +31,20 @@ export const TauriFileSystemProvider: FC<FileSystemAdapterProps> = ({ children }
       if (result.code !== FileResultCode.Success) {
         return []
       }
-      const files = JSON.parse(result.content)
+      const files = JSON.parse(result.content) as IFile[]
+
+      const wrapFiles = (entries: IFile[]) => {
+        entries.forEach((entry) => {
+          entry.id = getFileObjectByPath(entry.path)?.id || nanoid()
+          setFileObject(entry.id, entry)
+          setFileObjectByPath(entry.path!, entry)
+          if (entry.children) {
+            wrapFiles(entry.children)
+          }
+        })
+      }
+      wrapFiles(files)
+
       return files
     },
 
