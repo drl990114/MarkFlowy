@@ -2,7 +2,8 @@
   "extends": "../../tsconfig.rollup.json",
   "compilerOptions": {
     "jsx": "react",
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "types": ["react", "react-dom"]
   },
   "include": ["./src"],
   "exclude": ["./src/**/*.spec.ts", "./src/**/*.test.ts", "node_modules", "./src/**/*.js"]

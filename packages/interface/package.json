@@ -24,10 +24,16 @@
     "README.md"
   ],
   "peerDependencies": {
-    "eslint": ">=7.4.0"
+    "@codemirror/commands": ">=6.0.0",
+    "@codemirror/state": ">=6.0.0",
+    "@codemirror/view": ">=6.0.0",
+    "eslint": ">=7.4.0",
+    "rme": ">=0.3.0"
   },
   "dependencies": {
     "@ebay/nice-modal-react": "^1.2.13",
+    "@popperjs/core": "^2.11.8",
+    "@tanstack/react-virtual": "^3.13.18",
     "classnames": "^2.5.1",
     "i18next": "^25.6.0",
     "postcss": "^8.4.47",
@@ -36,9 +42,13 @@
     "react-dom": "^19.2.4",
     "react-i18next": "^16.2.4",
     "styled-components": "^6.3.12",
-    "zens": "0.1.17"
+    "zens": "0.1.17",
+    "zustand": "^4.5.0"
   },
   "devDependencies": {
+    "@codemirror/commands": "^6.3.0",
+    "@codemirror/state": "^6.3.0",
+    "@codemirror/view": "^6.22.0",
     "@markflowy/theme": "workspace:*",
     "@markflowy/types": "workspace:*",
     "@rollup/plugin-node-resolve": "15.3.0",
@@ -48,6 +58,7 @@
     "@types/react-dom": "^19.2.2",
     "eslint": "9.13.0",
     "rimraf": "^6.0.1",
+    "rme": "0.3.7",
     "rollup": "4.24.3",
     "rollup-plugin-postcss": "^4.0.2",
     "typescript": "^5.7.3",

@@ -1,40 +1,56 @@
-import { clipboardRead } from '@/helper/clipboard'
-import { logger } from '@/helper/logger'
-import { type ChangeSpec, EditorSelection } from '@codemirror/state'
-import { type EditorView } from '@codemirror/view'
+import type { ChangeSpec } from '@codemirror/state'
+import { EditorSelection } from '@codemirror/state'
+import type { EditorView } from '@codemirror/view'
 
-const urlRE =
-  /^\[([^\]]+)\]\((.+?)\)|(((?:(?:aaas?|about|acap|adiumxtra|af[ps]|aim|apt|attachment|aw|beshare|bitcoin|bolo|callto|cap|chrome(?:-extension)?|cid|coap|com-eventbrite-attendee|content|crid|cvs|data|dav|dict|dlna-(?:playcontainer|playsingle)|dns|doi|dtn|dvb|ed2k|facetime|feed|file|finger|fish|ftp|geo|gg|git|gizmoproject|go|gopher|gtalk|h323|hcp|https?|iax|icap|icon|im|imap|info|ipn|ipp|irc[6s]?|iris(?:\.beep|\.lwz|\.xpc|\.xpcs)?|itms|jar|javascript|jms|keyparc|lastfm|ldaps?|magnet|mailto|maps|market|message|mid|mms|ms-help|msnim|msrps?|mtqp|mumble|mupdate|mvn|news|nfs|nih?|nntp|notes|oid|opaquelocktoken|palm|paparazzi|platform|pop|pres|proxy|psyc|query|res(?:ource)?|rmi|rsync|rtmp|rtsp|secondlife|service|session|sftp|sgn|shttp|sieve|sips?|skype|sm[bs]|snmp|soap\.beeps?|soldat|spotify|ssh|steam|svn|tag|teamspeak|tel(?:net)?|tftp|things|thismessage|tip|tn3270|tv|udp|unreal|urn|ut2004|vemmi|ventrilo|view-source|webcal|wss?|wtai|wyciwyg|xcon(?:-userid)?|xfire|xmlrpc\.beeps?|xmpp|xri|ymsgr|z39\.50[rs]?):(?:\/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.-]+[.][a-z]{2,4}\/)(?:[^\s()<>]|\([^\s()<>]*\))+(?:\([^\s()<>]*\)|[^\s`*!()[\]{};:'".,<>?«»“”‘’])))|([a-z0-9.\-_+]+?@[a-z0-9.\-_+]+\.[a-z]{2,7})$/i
+// URL regex for validating URLs in links/images - simplified version
+// Matches common URL patterns and email addresses
+const urlRE = /^(https?:\/\/|ftp:\/\/|mailto:|www\.)[^\s]+$/i
 
-function insertLinkOrImage(target: EditorView, type: 'link' | 'image') {
+export interface ClipboardReadResult {
+  text: string
+}
+
+export type ClipboardReadFunction = () => Promise<ClipboardReadResult>
+
+function insertLinkOrImage(
+  target: EditorView,
+  type: 'link' | 'image',
+  clipboardRead?: ClipboardReadFunction
+) {
   const pre = type === 'image' ? '!' : ''
 
-  clipboardRead()
-    .then(({ text }) => {
-      const url = urlRE.test(text || '') ? text : ''
+  const insertWithText = (text: string) => {
+    const url = urlRE.test(text || '') ? text : ''
 
-      const transaction = target.state.changeByRange(({ from, to }) => {
-        const title = target.state.sliceDoc(from, to)
-        let offset = 1
-        if (title.length > 0 && url && url.length > 0) {
-          offset = 4 + title.length + url.length
-        } else if (title.length > 0 && (!url || url.length === 0)) {
-          offset = 3 + title.length
-        }
+    const transaction = target.state.changeByRange(({ from, to }) => {
+      const title = target.state.sliceDoc(from, to)
+      let offset = 1
+      if (title.length > 0 && url && url.length > 0) {
+        offset = 4 + title.length + url.length
+      } else if (title.length > 0 && (!url || url.length === 0)) {
+        offset = 3 + title.length
+      }
 
-        if (type === 'image') {
-          offset++
-        }
+      if (type === 'image') {
+        offset++
+      }
 
-        return {
-          changes: { from, to, insert: `${pre}[${title}](${url})` },
-          range: EditorSelection.cursor(from + offset),
-        }
-      })
-
-      target.dispatch(transaction)
+      return {
+        changes: { from, to, insert: `${pre}[${title}](${url})` },
+        range: EditorSelection.cursor(from + offset),
+      }
     })
-    .catch((err) => logger.error(err))
+
+    target.dispatch(transaction)
+  }
+
+  if (clipboardRead) {
+    clipboardRead()
+      .then(({ text }) => insertWithText(text))
+      .catch(() => insertWithText(''))
+  } else {
+    insertWithText('')
+  }
 
   return true
 }
@@ -102,7 +118,7 @@ function applyInlineMarkup(target: EditorView, start: string, end: string): void
       return { range: EditorSelection.cursor(range.to + end.length) }
     } else {
       return {
-        changes: { from: range.from, to: range.to, insert: start + contents + end },
+        changes: { from: range.to, insert: start + contents + end },
         range: EditorSelection.range(
           range.from + start.length,
           range.from + start.length + contents.length,
@@ -155,10 +171,12 @@ export function applyH1(target: EditorView): boolean {
   applyBlockMarkup(target, '#')
   return true
 }
+
 export function applyH2(target: EditorView): boolean {
   applyBlockMarkup(target, '##')
   return true
 }
+
 export function applyH3(target: EditorView): boolean {
   applyBlockMarkup(target, '###')
   return true
@@ -189,10 +207,10 @@ export function applyTaskList(target: EditorView): boolean {
   return true
 }
 
-export function insertLink(target: EditorView): boolean {
-  return insertLinkOrImage(target, 'link')
+export function insertLink(target: EditorView, clipboardRead?: ClipboardReadFunction): boolean {
+  return insertLinkOrImage(target, 'link', clipboardRead)
 }
 
-export function insertImage(target: EditorView): boolean {
-  return insertLinkOrImage(target, 'image')
+export function insertImage(target: EditorView, clipboardRead?: ClipboardReadFunction): boolean {
+  return insertLinkOrImage(target, 'image', clipboardRead)
 }

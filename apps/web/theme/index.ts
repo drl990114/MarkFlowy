@@ -47,6 +47,7 @@ const styledDarkTheme = {
 
   // font
   primaryFontColor: '#edecec',
+  secondaryFontColor: '#a0a0a0',
   disabledFontColor: '#ffffff80',
   unselectedFontColor: '#ffffff80',
   labelFontColor: '#ffffff80',
@@ -75,6 +76,7 @@ const styledDarkTheme = {
   dialogBackdropColor: '#00000099',
   contextMenuBgColor: '#18191B',
   contextMenuBgColorHover: '#2D3134',
+  contextMenuSeparatorColor: '#303030',
 
   scrollbarThumbColor: '#2C3C52',
   scrollbarTrackColor: '#0e1419',

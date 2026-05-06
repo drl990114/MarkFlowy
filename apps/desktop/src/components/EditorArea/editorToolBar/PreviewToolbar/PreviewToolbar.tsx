@@ -2,23 +2,13 @@ import { useEditorStore } from '@/stores'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import { FC, useMemo } from 'react'
 import { EditorViewType } from 'rme'
-import styled from 'styled-components'
-import { ToolbarSection, usePriorityHidden } from '../responsive'
+import {
+  ToolbarSection,
+  usePriorityHidden,
+  ToolbarWrapper,
+} from '@markflowy/interface'
+import { MenuList } from '../components/MenuList'
 import { ViewSwitcher } from '../WysiwygToolbar/components/ViewSwitcher'
-
-const ToolbarWrapper = styled.div`
-  background-color: ${({ theme }) => theme.bgColor};
-  width: 100%;
-  padding: 4px 8px;
-  border-bottom: 1px solid ${({ theme }) => theme.borderColor};
-  display: flex;
-  align-items: center;
-  gap: 0;
-  z-index: 10;
-  flex-wrap: nowrap;
-  overflow: hidden;
-  box-sizing: border-box;
-`
 
 export const PreviewToolbar: FC = () => {
   const { activeId } = useEditorStore()
@@ -39,6 +29,7 @@ export const PreviewToolbar: FC = () => {
   return (
     <ToolbarWrapper ref={containerRef}>
       <ToolbarSection id="common" registerWidth={registerItemWidth} hidden={hiddenIds.has('common')}>
+        <MenuList />
         <ViewSwitcher />
       </ToolbarSection>
     </ToolbarWrapper>

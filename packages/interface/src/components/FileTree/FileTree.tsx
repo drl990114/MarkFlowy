@@ -1,19 +1,19 @@
-import React, { type FC } from 'react'
-import { memo, useDeferredValue, useMemo, useRef } from 'react'
+import React, { memo, useMemo, useRef, type FC } from 'react'
 import { Tree, TreeApi } from 'react-arborist'
 import type { TreeProps } from 'react-arborist/dist/module/types/tree-props'
-import type { IFile } from '../../types/file'
+import type { MoveFileInfo } from '../../contexts/FileSystemContext'
 import { useFileSystem } from '../../contexts/FileSystemContext'
 import { useFileTree } from '../../contexts/FileTreeContext'
+import type { IFile } from '../../types/file'
 import FileNode, { ContextMenuItem } from './FileNode'
 import { moveFileNode } from './file-operator'
 import { SimpleTree } from './types'
-import type { MoveFileInfo } from '../../contexts/FileSystemContext'
 
 export interface FileTreeProps {
   data: IFile[]
   onSelect: (file: IFile) => void
-  dndRootElement: Node
+  dndRootElement?: Node | null
+  disableDrag?: boolean
   fillFlexParentComponent: FC<{ children: (dimens: { width: number; height: number }) => React.ReactNode }>
   onShowConfirm: (params: { title: string; onConfirm: () => void }) => void
   onShowInputConfirm?: (params: {
@@ -49,6 +49,7 @@ const FileTree: FC<FileTreeProps> = (props) => {
     data,
     onSelect,
     dndRootElement,
+    disableDrag = false,
     fillFlexParentComponent: FillFlexParent,
     onShowConfirm,
     onShowInputConfirm,
@@ -65,12 +66,11 @@ const FileTree: FC<FileTreeProps> = (props) => {
 
   const { activeId, setFolderDataPure } = useFileTree()
   const { pathJoin, fileExists, moveFilesToTargetFolder, readSubdirectory } = useFileSystem()
-  const deferredActiveId = useDeferredValue(activeId)
   const tree = useMemo(() => new SimpleTree<IFile>(data), [data])
   const treeRef = useRef<TreeApi<IFile> | null>(null)
   const loadedDirsRef = useRef<Set<string>>(new Set())
 
-  if (data === null) return null
+  if (data === null || data.length === 0) return null
 
   const onToggle: TreeProps<IFile>['onToggle'] = async (id: string) => {
     const node = tree.find(id)
@@ -99,7 +99,6 @@ const FileTree: FC<FileTreeProps> = (props) => {
     const _dragNodes = args.dragNodes.filter((node) => {
       return !args.dragIds.includes(node.parent?.id || '')
     })
-    // current only can move one file
     const _dragNode = _dragNodes[0]
     const parentNode = args.parentNode
 
@@ -150,8 +149,10 @@ const FileTree: FC<FileTreeProps> = (props) => {
     }
   }
 
-  if (!dndRootElement) {
-    return null
+  const handleSelect = (nodes: { data: IFile }[] | null | undefined) => {
+    if (nodes && nodes.length > 0 && nodes[0]?.data) {
+      onSelect(nodes[0].data)
+    }
   }
 
   return (
@@ -161,14 +162,15 @@ const FileTree: FC<FileTreeProps> = (props) => {
           {...dimens}
           data={data}
           dndRootElement={dndRootElement}
+          disableDrag={disableDrag}
           openByDefault={false}
           initialOpenState={{
             [data[0]?.id]: true,
           }}
-          selection={deferredActiveId}
+          selection={activeId}
           indent={16}
           disableMultiSelection
-          onSelect={(node) => onSelect(node[0]?.data)}
+          onSelect={handleSelect}
           onMove={onMove}
           onToggle={onToggle}
           onContextMenu={(e) => {
@@ -180,11 +182,11 @@ const FileTree: FC<FileTreeProps> = (props) => {
                   label: 'New File',
                   value: 'new_file',
                   handler: () => {
-                    const data = { id: `pending-${Date.now()}`, name: '', kind: 'pending_new_file' } as IFile
+                    const newData = { id: `pending-${Date.now()}`, name: '', kind: 'pending_new_file' } as IFile
                     treeRef.current?.open(workspaceRoot.id)
                     tree.create({
                       parentId: workspaceRoot.id,
-                      data,
+                      data: newData,
                     })
                     treeRef.current?.create({
                       parentId: workspaceRoot.id,
@@ -198,7 +200,7 @@ const FileTree: FC<FileTreeProps> = (props) => {
                   label: 'New Folder',
                   value: 'new_folder',
                   handler: () => {
-                    const data = {
+                    const newData = {
                       id: `pending-${Date.now()}`,
                       name: '',
                       kind: 'pending_new_folder',
@@ -208,7 +210,7 @@ const FileTree: FC<FileTreeProps> = (props) => {
 
                     tree.create({
                       parentId: workspaceRoot.id,
-                      data,
+                      data: newData,
                     })
                     treeRef.current?.create({
                       parentId: workspaceRoot.id,

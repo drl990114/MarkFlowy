@@ -7,8 +7,15 @@ interface RequestConfig extends RequestInit {
   skipAuth?: boolean
 }
 
+interface RefreshTokenResponse {
+  accessToken: string
+  refreshToken: string
+}
+
 class ApiClient {
   private baseUrl: string
+  private isRefreshing = false
+  private refreshPromise: Promise<RefreshTokenResponse | null> | null = null
 
   constructor() {
     this.baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3200'
@@ -19,7 +26,54 @@ class ApiClient {
     return localStorage.getItem('accessToken')
   }
 
-  private async handleResponse<T>(response: Response): Promise<T> {
+  private getRefreshToken(): string | null {
+    if (typeof window === 'undefined') return null
+    return localStorage.getItem('refreshToken')
+  }
+
+  private setTokens(accessToken: string, refreshToken: string) {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('accessToken', accessToken)
+      localStorage.setItem('refreshToken', refreshToken)
+    }
+  }
+
+  private clearAuth() {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('accessToken')
+      localStorage.removeItem('refreshToken')
+      localStorage.removeItem('user')
+      window.location.href = '/auth'
+    }
+  }
+
+  private async refreshAccessToken(): Promise<RefreshTokenResponse | null> {
+    const refreshToken = this.getRefreshToken()
+    if (!refreshToken) {
+      return null
+    }
+
+    try {
+      const response = await fetch(`${this.baseUrl}/auth/refresh`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken }),
+        credentials: 'include',
+      })
+
+      if (!response.ok) {
+        return null
+      }
+
+      const data = await response.json()
+      this.setTokens(data.accessToken, data.refreshToken)
+      return data
+    } catch {
+      return null
+    }
+  }
+
+  private async handleResponse<T>(response: Response, retryRequest?: () => Promise<T>): Promise<T> {
     if (!response.ok) {
       let errorMessage = 'Request failed'
       
@@ -30,12 +84,30 @@ class ApiClient {
         errorMessage = response.statusText || errorMessage
       }
 
-      if (response.status === 401) {
-        if (typeof window !== 'undefined') {
-          localStorage.removeItem('accessToken')
-          localStorage.removeItem('refreshToken')
-          localStorage.removeItem('user')
-          window.location.href = '/auth'
+      if (response.status === 401 && retryRequest) {
+        if (this.isRefreshing) {
+          if (this.refreshPromise) {
+            const result = await this.refreshPromise
+            if (result) {
+              return retryRequest()
+            } else {
+              this.clearAuth()
+              throw new Error('Session expired')
+            }
+          }
+        } else {
+          this.isRefreshing = true
+          this.refreshPromise = this.refreshAccessToken()
+          const result = await this.refreshPromise
+          this.isRefreshing = false
+          this.refreshPromise = null
+
+          if (result) {
+            return retryRequest()
+          } else {
+            this.clearAuth()
+            throw new Error('Session expired')
+          }
         }
       }
 
@@ -65,13 +137,23 @@ class ApiClient {
       }
     }
 
-    const response = await fetch(`${this.baseUrl}${endpoint}`, {
-      ...fetchConfig,
-      headers,
-      credentials: 'include',
-    })
+    const makeRequest = async (): Promise<Response> => {
+      if (!skipAuth) {
+        const token = this.getAuthToken()
+        if (token) {
+          ;(headers as Record<string, string>)['Authorization'] = `Bearer ${token}`
+        }
+      }
 
-    return this.handleResponse<T>(response)
+      return fetch(`${this.baseUrl}${endpoint}`, {
+        ...fetchConfig,
+        headers,
+        credentials: 'include',
+      })
+    }
+
+    const response = await makeRequest()
+    return this.handleResponse<T>(response, () => makeRequest().then(r => this.handleResponse<T>(r)))
   }
 
   async get<T = any>(endpoint: string, options?: ApiClientOptions): Promise<T> {
