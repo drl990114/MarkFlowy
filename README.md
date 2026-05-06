@@ -176,6 +176,13 @@ The development of **MarkFlowy** cannot be separated from these contributors. Th
         </a>
     </td>
     <td align="center">
+        <a href="https://github.com/andriishin">
+            <img src="https://avatars.githubusercontent.com/u/3613462?v=4" width="90;" alt="andriishin"/>
+            <br />
+            <sub><b>Alexander</b></sub>
+        </a>
+    </td>
+    <td align="center">
         <a href="https://github.com/chiefass">
             <img src="https://avatars.githubusercontent.com/u/106591791?v=4" width="90;" alt="chiefass"/>
             <br />
