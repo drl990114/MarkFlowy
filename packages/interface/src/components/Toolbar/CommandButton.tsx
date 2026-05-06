@@ -1,5 +1,5 @@
-import { MfIconButton } from '@/components/ui-v2/Button'
-import { FC, useCallback } from 'react'
+import React, { FC, useCallback } from 'react'
+import { MfIconButton } from '../Button/icon-button'
 import type { EditorContext } from 'rme'
 
 export interface CommandButtonProps {

@@ -335,7 +335,6 @@ function FileNode({
         if (e.shiftKey) {
           return
         }
-        node.isInternal && node.toggle()
       }}
       onMouseUp={(e) => {
         if (isPending) {

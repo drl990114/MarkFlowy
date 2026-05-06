@@ -3,33 +3,15 @@ import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import { FC, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { EditorViewType } from 'rme'
-import styled from 'styled-components'
-import { ToolbarSection, usePriorityHidden } from '../responsive'
-import { CommandButton } from './CommandButton'
+import {
+  ToolbarSection,
+  usePriorityHidden,
+  ToolbarWrapper,
+  ToolbarDivider,
+  CommandButton,
+} from '@markflowy/interface'
+import { MenuList } from '../components/MenuList'
 import { AIButton } from './components/AIButton'
-import { MenuButton } from './components/MenuButton'
-
-const ToolbarWrapper = styled.div`
-  background-color: ${({ theme }) => theme.bgColor};
-  width: 100%;
-  padding: 4px 8px;
-  border-bottom: 1px solid ${({ theme }) => theme.borderColor};
-  display: flex;
-  align-items: center;
-  gap: 0;
-  z-index: 10;
-  flex-wrap: nowrap;
-  overflow: hidden;
-  box-sizing: border-box;
-`
-
-const Divider = styled.div`
-  width: 1px;
-  height: 20px;
-  background-color: ${({ theme }) => theme.borderColor};
-  margin: 0 4px;
-  flex-shrink: 0;
-`
 
 export const WysiwygToolbar: FC = () => {
   const { editorCtxMap, activeId } = useEditorStore()
@@ -66,7 +48,7 @@ export const WysiwygToolbar: FC = () => {
         registerWidth={registerItemWidth}
         hidden={hiddenIds.has('common')}
       >
-        <MenuButton />
+        <MenuList showTypewriterScroll />
         <AIButton />
       </ToolbarSection>
 
@@ -75,7 +57,7 @@ export const WysiwygToolbar: FC = () => {
         registerWidth={registerItemWidth}
         hidden={hiddenIds.has('history')}
       >
-        <Divider />
+        <ToolbarDivider />
         <CommandButton
           editorCtx={editorCtx}
           commandName='undo'
@@ -95,7 +77,7 @@ export const WysiwygToolbar: FC = () => {
         registerWidth={registerItemWidth}
         hidden={hiddenIds.has('headings')}
       >
-        <Divider />
+        <ToolbarDivider />
         <CommandButton
           editorCtx={editorCtx}
           commandName='toggleHeading'
@@ -124,7 +106,7 @@ export const WysiwygToolbar: FC = () => {
         registerWidth={registerItemWidth}
         hidden={hiddenIds.has('formatting')}
       >
-        <Divider />
+        <ToolbarDivider />
         <CommandButton
           editorCtx={editorCtx}
           commandName='toggleStrong'
@@ -150,7 +132,7 @@ export const WysiwygToolbar: FC = () => {
         registerWidth={registerItemWidth}
         hidden={hiddenIds.has('blocks')}
       >
-        <Divider />
+        <ToolbarDivider />
         <CommandButton
           editorCtx={editorCtx}
           commandName='toggleBlockquote'

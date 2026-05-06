@@ -1,146 +1,225 @@
-import type { FileTreeItemData, IHeadingData, IFile, ContextMenuItem } from '@markflowy/interface'
-import { ContextMenu, FileTree, MfIconButton, MfIconLabelButton, showContextMenu, SideBarHeader, TableOfContents, ToolbarDivider, ToolbarWrapper } from '@markflowy/interface'
-import { WebFileSystemProvider, FileTreeProvider } from 'adapters'
+import type { ContextMenuItem, IFile, IHeadingData } from '@markflowy/interface'
+import { ContextMenu, FileTree, MfIconButton, MfIconLabelButton, SideBarHeader, TableOfContents, ToolbarDivider, ToolbarWrapper, showContextMenu } from '@markflowy/interface'
+import { FileTreeProvider, WebFileSystemProvider } from 'adapters'
 import { FillFlexParent } from 'components/FillFlexParent'
-import {
-    SaveableEditor,
-    type SaveableEditorRef,
-} from 'features/githubWorkspace/components/SaveableEditor'
-import {
-    githubService,
-    type GitHubContent,
-} from 'features/githubWorkspace/services/githubService'
-import { base64ToUtf8, utf8ToBase64 } from 'features/githubWorkspace/utils/base64'
-import { useAuth } from 'hooks/useAuth'
+import dynamic from 'next/dynamic'
 import Link from 'next/link'
-import { useRouter } from 'next/router'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import styled from 'styled-components'
 import rem from 'utils/rem'
 import type { MenuItemData } from 'zens'
 
+// Dynamically import Editor to avoid SSR issues with rme
+const Editor = dynamic(() => import('components/Editor'), {
+  ssr: false,
+  loading: () => (
+    <LoadingContainer>
+      <LoadingSpinner />
+    </LoadingContainer>
+  ),
+})
 
+const STORAGE_KEY_PREFIX = 'markflowy-temp-content'
+
+const getStorageKey = (fileId: string) => `${STORAGE_KEY_PREFIX}-${fileId}`
+
+const defaultContents: Record<string, string> = {
+  'temp-file': `# Quick Edit
+
+This is a **temporary workspace** - your content is automatically saved to your browser's local storage.
+
+## Features
+
+- ✅ No login required
+- ✅ Auto-save to local storage
+- ✅ Full markdown support
+- ✅ WYSIWYG editing
+
+## Try it out!
+
+Start typing here... Your changes will be preserved even if you refresh the page.
+
+### Subsection 1
+
+You can add subsections like this.
+
+### Subsection 2
+
+More content here...
+
+---
+
+*Happy writing! ✍️*
+`,
+  'temp-notes': `# Notes
+
+Welcome to your notes file!
+
+## Getting Started
+
+Use this space to jot down your ideas, meeting notes, or anything you need to remember.
+
+## Tips
+
+- Use **bold** for emphasis
+- Use *italic* for style
+- Create lists for organization
+
+---
+
+Start writing your notes here...
+`,
+}
+
+const getDefaultContent = (fileId: string): string => {
+  return defaultContents[fileId] || '# New File\n\nStart writing here...'
+}
+
+// Mock file data with folder structure
+const mockFolderData: IFile[] = [
+  {
+    id: 'temp-root',
+    name: 'Quick Edit',
+    kind: 'dir',
+    path: '/temp',
+    children: [
+      {
+        id: 'temp-file',
+        name: 'Quick Edit.md',
+        kind: 'file',
+        path: '/temp/Quick Edit.md',
+        ext: 'md',
+      },
+      {
+        id: 'temp-notes',
+        name: 'Notes.md',
+        kind: 'file',
+        path: '/temp/Notes.md',
+        ext: 'md',
+      },
+    ],
+  },
+]
 
 type ViewType = 'wysiwyg' | 'source' | 'preview'
 
-export default function GitHubEditPage() {
-  const { loading: authLoading, isAuthenticated } = useAuth(true)
-  const router = useRouter()
-  const { owner, repo } = router.query as { owner: string; repo: string }
-  const path = typeof router.query.path === 'string' ? router.query.path : ''
-  const branch = typeof router.query.branch === 'string' ? router.query.branch : ''
+// Get all file IDs from folder data
+const getAllFileIds = (files: IFile[]): string[] => {
+  const ids: string[] = []
+  const traverse = (items: IFile[]) => {
+    items.forEach(item => {
+      if (item.kind === 'file') {
+        ids.push(item.id)
+      }
+      if (item.children) {
+        traverse(item.children)
+      }
+    })
+  }
+  traverse(files)
+  return ids
+}
 
-  const [content, setContent] = useState<string | null>(null)
-  const [sha, setSha] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState('')
-  const [commitMessage, setCommitMessage] = useState('Update via MarkFlowy')
+// Extract headings from content for specific file
+const extractHeadingsForFile = (content: string, fileId: string): IHeadingData[] => {
+  const headingRegex = /^(#{1,6})\s+(.+)$/gm
+  const headings: IHeadingData[] = []
+  let match
+
+  while ((match = headingRegex.exec(content)) !== null) {
+    const depth = match[1].length
+    const value = match[2].trim()
+    const id = `heading-${fileId}-${headings.length}-${value.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
+
+    headings.push({
+      depth,
+      value,
+      id,
+      htmlNode: null,
+      onClick: (headingItem) => {
+        const element = document.getElementById(headingItem.id)
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }
+      },
+    })
+  }
+
+  return headings
+}
+
+export default function TempWorkspacePage() {
   const [viewType, setViewType] = useState<ViewType>('wysiwyg')
-  const [headingsData, setHeadingsData] = useState<IHeadingData[]>([])
-  const [folderData, setFolderData] = useState<IFile[]>([])
-  const [activeId, setActiveId] = useState<string>('github-file')
-  const editorRef = useRef<SaveableEditorRef>(null)
+  const [headingsDataMap, setHeadingsDataMap] = useState<Record<string, IHeadingData[]>>({})
+  const [folderData, setFolderData] = useState<IFile[]>(mockFolderData)
+  const [activeId, setActiveId] = useState<string>('temp-file')
+  const [opened, setOpened] = useState<string[]>(['temp-file'])
+  const [contentMap, setContentMap] = useState<Record<string, string>>({})
+  const tocRef = useRef<HTMLDivElement>(null)
   const fileTreeRef = useRef<HTMLDivElement>(null)
 
-  // Extract headings from content
-  useEffect(() => {
-    if (content) {
-      const extractedHeadings = extractHeadings(content)
-      setHeadingsData(extractedHeadings)
-    }
-  }, [content])
+  // Get all available file IDs
+  const allFileIds = useMemo(() => getAllFileIds(folderData), [folderData])
 
+  // Load initial content for all files
   useEffect(() => {
-    if (!owner || !repo || !path || !isAuthenticated || authLoading) return
+    const initialContentMap: Record<string, string> = {}
+    const initialHeadingsMap: Record<string, IHeadingData[]> = {}
+    allFileIds.forEach(fileId => {
+      const storageKey = getStorageKey(fileId)
+      const savedContent = localStorage.getItem(storageKey)
+      const content = savedContent || getDefaultContent(fileId)
+      initialContentMap[fileId] = content
+      initialHeadingsMap[fileId] = extractHeadingsForFile(content, fileId)
+    })
+    setContentMap(initialContentMap)
+    setHeadingsDataMap(initialHeadingsMap)
+  }, [allFileIds])
 
-    githubService
-      .getContents(owner, repo, path, branch)
-      .then((data) => {
-        const file = data as GitHubContent
-        if (file.type !== 'file' || !file.content) {
-          setError('Not a file or content is empty')
-          setLoading(false)
-          return
+  // Handle file selection from file tree
+  const handleSelect = useCallback((file: IFile | undefined) => {
+    if (file && file.kind === 'file') {
+      const fileId = file.id
+      setActiveId(fileId)
+      setOpened(prev => {
+        if (!prev.includes(fileId)) {
+          return [...prev, fileId]
         }
-        setSha(file.sha)
-        setContent(base64ToUtf8(file.content.replace(/\s/g, '')))
-        setLoading(false)
+        return prev
       })
-      .catch((err: any) => {
-        setError(err?.message || 'Failed to load file')
-        setLoading(false)
-      })
-  }, [owner, repo, path, branch, isAuthenticated, authLoading])
-
-  // Update folder data when path changes
-  useEffect(() => {
-    if (!path) return
-    
-    const fileName = path.split('/').pop() || 'file.md'
-    const fileExt = fileName.split('.').pop() || ''
-    const fileData: IFile = {
-      id: 'github-file',
-      name: fileName,
-      kind: 'file',
-      path: path,
-      ext: fileExt,
     }
-    setFolderData([fileData])
-    setActiveId('github-file')
-  }, [path])
+  }, [setActiveId, setOpened])
 
-  if (authLoading) {
-    return (
-      <LoadingContainer>
-        <LoadingSpinner />
-      </LoadingContainer>
-    )
-  }
+  // Handle content change for specific file
+  const handleChange = useCallback((fileId: string, newContent: string) => {
+    setContentMap(prev => ({
+      ...prev,
+      [fileId]: newContent,
+    }))
+    // Auto-save to localStorage with file-specific key
+    const storageKey = getStorageKey(fileId)
+    localStorage.setItem(storageKey, newContent)
+    // Update headings for TOC
+    const headings = extractHeadingsForFile(newContent, fileId)
+    setHeadingsDataMap(prev => ({
+      ...prev,
+      [fileId]: headings,
+    }))
+  }, [])
 
-  if (!isAuthenticated) {
-    return null
-  }
-
-  const handleSave = async () => {
-    if (!editorRef.current || !sha || !path || !branch) return
-    const newContent = editorRef.current.getContent()
-    if (newContent === undefined) {
-      setError('Unable to read editor content')
-      return
+  // Handle clear current file
+  const handleClear = useCallback(() => {
+    if (confirm('Are you sure you want to clear all content? This cannot be undone.')) {
+      const storageKey = getStorageKey(activeId)
+      localStorage.removeItem(storageKey)
+      // Reset to default content for current file
+      const defaultContent = getDefaultContent(activeId)
+      setContentMap(prev => ({
+        ...prev,
+        [activeId]: defaultContent,
+      }))
     }
-
-    setSaving(true)
-    setError('')
-
-    try {
-      await githubService.createOrUpdateFile(owner, repo, path, {
-        message: commitMessage || 'Update via MarkFlowy',
-        content: utf8ToBase64(newContent),
-        sha,
-        branch,
-      })
-      // refresh sha
-      const updated = await githubService.getContents(owner, repo, path, branch)
-      setSha((updated as GitHubContent).sha)
-      alert('Saved successfully')
-    } catch (err: any) {
-      setError(err?.message || 'Failed to save file')
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  const handleHeadingClick = (id: string) => {
-    const element = document.getElementById(id)
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }
-  }
-
-  const handleSelect = (file: IFile) => {
-    setActiveId(file.id)
-  }
+  }, [activeId])
 
   const handleShowConfirm = ({ title, onConfirm }: { title: string; onConfirm: () => void }) => {
     if (confirm(title)) {
@@ -149,7 +228,6 @@ export default function GitHubEditPage() {
   }
 
   const handleShowContextMenu = ({ x, y, items }: { x: number; y: number; items: ContextMenuItem[] }) => {
-    // Convert ContextMenuItem to MenuItemData
     const menuItems: MenuItemData[] = items.map(item => ({
       label: item.label,
       value: item.value,
@@ -160,12 +238,37 @@ export default function GitHubEditPage() {
 
   // Mock file object getters
   const getFileObject = (id: string): IFile | undefined => {
-    return folderData.find(f => f.id === id)
+    const findInFolder = (items: IFile[]): IFile | undefined => {
+      for (const item of items) {
+        if (item.id === id) return item
+        if (item.children) {
+          const found = findInFolder(item.children)
+          if (found) return found
+        }
+      }
+      return undefined
+    }
+    return findInFolder(folderData)
   }
 
   const getFileObjectByPath = (path: string): IFile | undefined => {
-    return folderData.find(f => f.path === path)
+    const findInFolder = (items: IFile[]): IFile | undefined => {
+      for (const item of items) {
+        if (item.path === path) return item
+        if (item.children) {
+          const found = findInFolder(item.children)
+          if (found) return found
+        }
+      }
+      return undefined
+    }
+    return findInFolder(folderData)
   }
+
+  // Get current headings for active file
+  const currentHeadings = useMemo(() => {
+    return headingsDataMap[activeId] || []
+  }, [headingsDataMap, activeId])
 
   return (
     <WebFileSystemProvider>
@@ -179,26 +282,23 @@ export default function GitHubEditPage() {
           {/* Top Toolbar */}
           <TopToolbar>
             <ToolbarLeft>
-              <BackLink href={`/workspace/github/${owner}/${repo}`}>← {owner}/{repo}</BackLink>
+              <BackLink href='/workspace'>← Workspaces</BackLink>
             </ToolbarLeft>
             <ToolbarCenter>
-              <FilePath>{path}</FilePath>
+              <WorkspaceInfo>
+                <WorkspaceIcon>
+                  <EditIcon />
+                </WorkspaceIcon>
+                <WorkspaceTitle>Quick Edit</WorkspaceTitle>
+              </WorkspaceInfo>
             </ToolbarCenter>
             <ToolbarRight>
               <Actions>
-                <CommitInput
-                  value={commitMessage}
-                  onChange={(e) => setCommitMessage(e.target.value)}
-                  placeholder='Commit message'
-                />
-                <SaveButton onClick={handleSave} disabled={saving || loading}>
-                  {saving ? 'Saving...' : 'Save'}
-                </SaveButton>
+                <ClearButton onClick={handleClear}>Clear</ClearButton>
+                <SaveStatus>Saved to local</SaveStatus>
               </Actions>
             </ToolbarRight>
           </TopToolbar>
-
-          {error && <ErrorBanner>{error}</ErrorBanner>}
 
           {/* Main Content Area */}
           <MainContent>
@@ -349,11 +449,18 @@ export default function GitHubEditPage() {
                   <MenuList viewType={viewType} onViewTypeChange={setViewType} />
                 </ToolbarSection>
               </ToolbarWrapper>
-              <EditorContent>
-                {loading && <Message>Loading file...</Message>}
-                {!loading && content !== null && (
-                  <SaveableEditor ref={editorRef} initialContent={content} viewType={viewType} />
-                )}
+              <EditorContent ref={tocRef}>
+                {opened.map(fileId => (
+                  <EditorWrapper key={fileId} active={activeId === fileId}>
+                    <Editor
+                      fileId={fileId}
+                      initialContent={contentMap[fileId] || getDefaultContent(fileId)}
+                      onChange={(content) => handleChange(fileId, content)}
+                      viewType={viewType}
+                      active={activeId === fileId}
+                    />
+                  </EditorWrapper>
+                ))}
               </EditorContent>
             </CenterArea>
 
@@ -361,14 +468,12 @@ export default function GitHubEditPage() {
             <RightSidebar>
               <SideBarHeader name='Outline' />
               <TocContainer>
-                {content && (
-                  <TableOfContents
-                    headingsData={headingsData}
-                    variant='sidebar'
-                    compact={false}
-                    pinned
-                  />
-                )}
+                <TableOfContents
+                  headingsData={currentHeadings}
+                  variant='sidebar'
+                  compact={false}
+                  pinned
+                />
               </TocContainer>
             </RightSidebar>
           </MainContent>
@@ -430,10 +535,33 @@ const BackLink = styled(Link)`
   }
 `
 
-const FilePath = styled.div`
-  font-size: ${rem(14)};
-  font-weight: 500;
-  color: ${(props) => props.theme.primaryFontColor};
+const WorkspaceInfo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${rem(10)};
+`
+
+const WorkspaceIcon = styled.div`
+  width: ${rem(28)};
+  height: ${rem(28)};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #da936a 0%, #c47a4f 100%);
+  border-radius: ${rem(6)};
+  color: #ffffff;
+`
+
+const EditIcon = () => (
+  <svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'>
+    <path d='M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7'></path>
+    <path d='M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z'></path>
+  </svg>
+)
+
+const WorkspaceTitle = styled.div`
+  font-size: ${rem(15)};
+  font-weight: 600;
 `
 
 const Actions = styled.div`
@@ -442,49 +570,28 @@ const Actions = styled.div`
   gap: ${rem(10)};
 `
 
-const CommitInput = styled.input`
-  width: ${rem(220)};
-  padding: ${rem(5)} ${rem(10)};
-  background: ${(props) => props.theme.bgColor};
+const ClearButton = styled.button`
+  padding: ${rem(5)} ${rem(12)};
+  background: transparent;
   border: 1px solid ${(props) => props.theme.borderColor};
   border-radius: ${rem(4)};
-  color: ${(props) => props.theme.primaryFontColor};
   font-size: ${rem(13)};
-
-  &:focus {
-    outline: none;
-    border-color: #da936a;
-  }
-`
-
-const SaveButton = styled.button`
-  padding: ${rem(5)} ${rem(14)};
-  background: #da936a;
-  border: none;
-  border-radius: ${rem(4)};
-  font-size: ${rem(13)};
-  font-weight: 500;
-  color: #ffffff;
+  color: ${(props) => props.theme.disabledFontColor};
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: all 0.2s ease;
 
-  &:hover:not(:disabled) {
-    background: #c9845b;
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+  &:hover {
+    border-color: #ef4444;
+    color: #ef4444;
   }
 `
 
-const ErrorBanner = styled.div`
-  padding: ${rem(10)} ${rem(20)};
-  background: rgba(220, 38, 38, 0.08);
-  border-bottom: 1px solid rgba(220, 38, 38, 0.2);
-  font-size: ${rem(13)};
-  color: #dc2626;
-  flex-shrink: 0;
+const SaveStatus = styled.div`
+  font-size: ${rem(12)};
+  color: ${(props) => props.theme.disabledFontColor};
+  padding: ${rem(4)} ${rem(10)};
+  background: ${(props) => props.theme.bgColor};
+  border-radius: ${rem(4)};
 `
 
 // Main Content Area Styles
@@ -511,22 +618,38 @@ const FileTreeWrapper = styled.div`
   display: flex;
   flex-direction: column;
   overflow: hidden;
-`
+  padding: ${rem(8)} 0;
 
-const SidebarHeader = styled.div`
-  padding: ${rem(12)} ${rem(16)};
-  border-bottom: 1px solid ${(props) => props.theme.borderColor};
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-`
+  /* Custom scrollbar */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
 
-const SidebarTitle = styled.div`
-  font-size: ${rem(12)};
-  font-weight: 600;
-  color: ${(props) => props.theme.disabledFontColor};
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: ${(props) => props.theme.borderColor};
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: ${(props) => props.theme.borderColorFocused};
+  }
+
+  /* File tree item styles */
+  .file-icon {
+    margin-right: ${rem(6)};
+    font-size: ${rem(14)};
+    color: ${(props) => props.theme.accentColor};
+  }
+
+  /* Selected file highlight */
+  [role="treeitem"] {
+    border-radius: ${rem(4)};
+    margin: 0 ${rem(8)};
+  }
 `
 
 // Center Area Styles
@@ -547,7 +670,17 @@ const ToolbarSection = styled.div`
 const EditorContent = styled.div`
   flex: 1;
   overflow: hidden;
-  padding: ${rem(20)};
+  position: relative;
+`
+
+// Editor wrapper - controls visibility like desktop
+const EditorWrapper = styled.div<{ active: boolean }>`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: ${props => props.active ? 'block' : 'none'};
 `
 
 // Right Sidebar Styles
@@ -562,10 +695,9 @@ const RightSidebar = styled.div`
   flex-shrink: 0;
 `
 
-const Message = styled.div`
-  padding: ${rem(24)};
-  font-size: ${rem(14)};
-  color: ${(props) => props.theme.disabledFontColor};
+const TocContainer = styled.div`
+  flex: 1;
+  overflow: hidden;
 `
 
 const LoadingContainer = styled.div`
@@ -644,36 +776,3 @@ const MenuList = ({ viewType, onViewTypeChange }: MenuListProps) => {
     />
   )
 }
-
-// Extract headings from markdown content
-function extractHeadings(content: string): IHeadingData[] {
-  const headingRegex = /^(#{1,6})\s+(.+)$/gm
-  const headings: IHeadingData[] = []
-  let match
-
-  while ((match = headingRegex.exec(content)) !== null) {
-    const depth = match[1].length
-    const value = match[2].trim()
-    const id = `heading-${headings.length}-${value.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
-
-    headings.push({
-      depth,
-      value,
-      id,
-      htmlNode: null,
-      onClick: (headingItem) => {
-        const element = document.getElementById(headingItem.id)
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth', block: 'start' })
-        }
-      },
-    })
-  }
-
-  return headings
-}
-
-const TocContainer = styled.div`
-  flex: 1;
-  overflow: hidden;
-`

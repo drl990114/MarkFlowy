@@ -27,9 +27,8 @@ export function useAuth(requireAuth = false) {
     const checkAuth = async () => {
       try {
         const token = localStorage.getItem('accessToken')
-        const userStr = localStorage.getItem('user')
 
-        if (!token || !userStr) {
+        if (!token) {
           setAuthState({
             user: null,
             loading: false,
@@ -42,13 +41,38 @@ export function useAuth(requireAuth = false) {
           return
         }
 
-        const user = JSON.parse(userStr) as User
-
-        setAuthState({
-          user,
-          loading: false,
-          isAuthenticated: true,
-        })
+        try {
+          const user = await apiClient.get<User>('/me')
+          localStorage.setItem('user', JSON.stringify(user))
+          
+          setAuthState({
+            user,
+            loading: false,
+            isAuthenticated: true,
+          })
+        } catch (error) {
+          console.error('Failed to fetch user:', error)
+          
+          const userStr = localStorage.getItem('user')
+          if (userStr) {
+            const user = JSON.parse(userStr) as User
+            setAuthState({
+              user,
+              loading: false,
+              isAuthenticated: true,
+            })
+          } else {
+            setAuthState({
+              user: null,
+              loading: false,
+              isAuthenticated: false,
+            })
+            
+            if (requireAuth) {
+              router.push('/auth')
+            }
+          }
+        }
       } catch (error) {
         console.error('Auth check failed:', error)
         
@@ -71,7 +95,17 @@ export function useAuth(requireAuth = false) {
     checkAuth()
   }, [requireAuth, router])
 
-  const logout = () => {
+  const logout = async () => {
+    const refreshToken = localStorage.getItem('refreshToken')
+    
+    if (refreshToken) {
+      try {
+        await apiClient.post('/auth/logout', { refreshToken })
+      } catch (error) {
+        console.error('Logout request failed:', error)
+      }
+    }
+    
     localStorage.removeItem('accessToken')
     localStorage.removeItem('refreshToken')
     localStorage.removeItem('user')

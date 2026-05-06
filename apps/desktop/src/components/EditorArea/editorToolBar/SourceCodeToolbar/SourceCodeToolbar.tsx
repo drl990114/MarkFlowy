@@ -3,33 +3,18 @@ import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import { FC, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { EditorViewType } from 'rme'
-import styled from 'styled-components'
-import { ToolbarSection, usePriorityHidden } from '../responsive'
+import {
+  ToolbarSection,
+  usePriorityHidden,
+  ToolbarWrapper,
+  ToolbarDivider,
+  CodeCommandButton,
+  ClipboardReadFunction,
+} from '@markflowy/interface'
+import { MenuList } from '../components/MenuList'
 import { AIButton } from '../WysiwygToolbar/components/AIButton'
-import { CodeCommandButton } from './CodeCommandButton'
-import { SourceCodeMenuButton } from './SourceCodeMenuButton'
-
-const ToolbarWrapper = styled.div`
-  background-color: ${({ theme }) => theme.bgColor};
-  width: 100%;
-  padding: 4px 8px;
-  border-bottom: 1px solid ${({ theme }) => theme.borderColor};
-  display: flex;
-  align-items: center;
-  gap: 0;
-  z-index: 10;
-  flex-wrap: nowrap;
-  overflow: hidden;
-  box-sizing: border-box;
-`
-
-const Divider = styled.div`
-  width: 1px;
-  height: 20px;
-  background-color: ${({ theme }) => theme.borderColor};
-  margin: 0 4px;
-  flex-shrink: 0;
-`
+import { sourceCodeCodemirrorViewMap } from '../../TextEditor'
+import { clipboardRead } from '@/helper/clipboard'
 
 export const SourceCodeToolbar: FC = () => {
   const { activeId } = useEditorStore()
@@ -49,6 +34,15 @@ export const SourceCodeToolbar: FC = () => {
 
   const { containerRef, hiddenIds, registerItemWidth } = usePriorityHidden({ items: sections, gap: 0 })
 
+  const getEditorView = () => {
+    if (!activeId) return undefined
+    return sourceCodeCodemirrorViewMap.get(activeId)?.cm
+  }
+
+  const clipboardReadFn: ClipboardReadFunction = async () => {
+    return clipboardRead()
+  }
+
   if (viewType !== EditorViewType.SOURCECODE) {
     return null
   }
@@ -56,105 +50,122 @@ export const SourceCodeToolbar: FC = () => {
   return (
     <ToolbarWrapper ref={containerRef}>
       <ToolbarSection id="common" registerWidth={registerItemWidth} hidden={hiddenIds.has('common')}>
-        <SourceCodeMenuButton />
+        <MenuList size='small' />
         <AIButton />
       </ToolbarSection>
 
       <ToolbarSection id="history" registerWidth={registerItemWidth} hidden={hiddenIds.has('history')}>
-        <Divider />
+        <ToolbarDivider />
         <CodeCommandButton
           commandName='undo'
           icon='ri-arrow-go-back-line'
           label={t('toolbar.undo') || 'Undo'}
+          getEditorView={getEditorView}
         />
         <CodeCommandButton
           commandName='redo'
           icon='ri-arrow-go-forward-line'
           label={t('toolbar.redo') || 'Redo'}
+          getEditorView={getEditorView}
         />
       </ToolbarSection>
 
       <ToolbarSection id="headings" registerWidth={registerItemWidth} hidden={hiddenIds.has('headings')}>
-        <Divider />
+        <ToolbarDivider />
         <CodeCommandButton
           commandName='toggleHeading'
           attrs={{ level: 1 }}
           icon='ri-h-1'
           label={t('toolbar.h1') || 'Heading 1'}
+          getEditorView={getEditorView}
         />
         <CodeCommandButton
           commandName='toggleHeading'
           attrs={{ level: 2 }}
           icon='ri-h-2'
           label={t('toolbar.h2') || 'Heading 2'}
+          getEditorView={getEditorView}
         />
         <CodeCommandButton
           commandName='toggleHeading'
           attrs={{ level: 3 }}
           icon='ri-h-3'
           label={t('toolbar.h3') || 'Heading 3'}
+          getEditorView={getEditorView}
         />
       </ToolbarSection>
 
       <ToolbarSection id="formatting" registerWidth={registerItemWidth} hidden={hiddenIds.has('formatting')}>
-        <Divider />
+        <ToolbarDivider />
         <CodeCommandButton
           commandName='toggleStrong'
           icon='ri-bold'
           label={t('toolbar.bold') || 'Bold'}
+          getEditorView={getEditorView}
         />
         <CodeCommandButton
           commandName='toggleEmphasis'
           icon='ri-italic'
           label={t('toolbar.italic') || 'Italic'}
+          getEditorView={getEditorView}
         />
         <CodeCommandButton
           commandName='toggleCodeText'
           icon='ri-code-line'
           label={t('toolbar.code') || 'Inline Code'}
+          getEditorView={getEditorView}
         />
         <CodeCommandButton
           commandName='toggleDelete'
           icon='ri-strikethrough'
           label={t('toolbar.strike') || 'Strikethrough'}
+          getEditorView={getEditorView}
         />
       </ToolbarSection>
-      
+
       <ToolbarSection id="insert" registerWidth={registerItemWidth} hidden={hiddenIds.has('insert')}>
-        <Divider />
+        <ToolbarDivider />
         <CodeCommandButton
           commandName='insertLink'
           icon='ri-link'
           label={t('toolbar.link') || 'Link'}
+          getEditorView={getEditorView}
+          clipboardRead={clipboardReadFn}
         />
         <CodeCommandButton
           commandName='insertImage'
           icon='ri-image-line'
           label={t('toolbar.image') || 'Image'}
+          getEditorView={getEditorView}
+          clipboardRead={clipboardReadFn}
         />
       </ToolbarSection>
 
       <ToolbarSection id="blocks" registerWidth={registerItemWidth} hidden={hiddenIds.has('blocks')}>
-        <Divider />
+        <ToolbarDivider />
         <CodeCommandButton
           commandName='toggleBlockquote'
           icon='ri-double-quotes-l'
           label={t('toolbar.quote') || 'Blockquote'}
+          getEditorView={getEditorView}
         />
         <CodeCommandButton
           commandName='toggleBulletList'
           icon='ri-list-unordered'
           label={t('toolbar.bulletList') || 'Bullet List'}
+          getEditorView={getEditorView}
         />
         <CodeCommandButton
           commandName='toggleOrderedList'
           icon='ri-list-ordered'
           label={t('toolbar.orderedList') || 'Ordered List'}
+          getEditorView={getEditorView}
         />
         <CodeCommandButton
           commandName='toggleTaskList'
           icon='ri-checkbox-line'
           label={t('toolbar.taskList') || 'Task List'}
+          getEditorView={getEditorView}
         />
       </ToolbarSection>
     </ToolbarWrapper>

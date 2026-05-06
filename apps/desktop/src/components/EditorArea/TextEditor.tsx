@@ -324,9 +324,7 @@ function TextEditor(props: TextEditorProps) {
                 clipboardReadFunction: clipboardRead,
                 onCodemirrorViewLoad: (cmView) => {
                   sourceCodeCodemirrorViewMap.set(curFile.id, cmView)
-                  setTimeout(() => {
-                    execute('app:toc_refresh')
-                  })
+                  debounceRefreshToc()
                 },
               })
               setEditorDelegate(curFile.id, sourceCodeDelegate)
@@ -454,6 +452,12 @@ function TextEditor(props: TextEditorProps) {
       debounceRefreshToc()
     }
   }, [active, debounceRefreshToc])
+
+  useEffect(() => {
+    if (active) {
+      debounceRefreshToc()
+    }
+  }, [active, delegate, debounceRefreshToc])
 
   useEffect(() => {
     if (active) {

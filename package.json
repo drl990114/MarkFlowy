@@ -38,6 +38,7 @@
     "@babel/preset-env": "^7.26.0",
     "@babel/preset-react": "^7.25.9",
     "@babel/preset-typescript": "^7.26.0",
+    "@codemirror/legacy-modes": "^6.5.2",
     "@halodong/eslint-config-react": "^0.38.24",
     "@rollup/plugin-node-resolve": "15.3.0",
     "@rollup/plugin-terser": "0.4.4",

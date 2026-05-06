@@ -98,14 +98,22 @@ export class HeadingTree {
     };
 
     const visit = (h: HeadingNode): TraverseResult => {
-      h.lazyLoad(this.offsetCacheVersion);
-      const res = f(h);
-      if (res !== TraverseResult.Continue) {
-        return res;
+      const result = f(h);
+      if (result === TraverseResult.Stop) {
+        return TraverseResult.Stop;
+      }
+      if (result === TraverseResult.NoChildren) {
+        return TraverseResult.Continue;
       }
       return visitChildren(h);
     };
 
-    visitChildren(this.root!);
+    if (this.root) {
+      for (const child of this.root.children) {
+        if (visit(child) === TraverseResult.Stop) {
+          break;
+        }
+      }
+    }
   }
 }

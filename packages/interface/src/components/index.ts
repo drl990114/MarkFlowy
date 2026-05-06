@@ -19,3 +19,9 @@ export * from './Button'
 export * from './TaskList'
 
 export * from './FileTree'
+
+export * from './Toolbar'
+
+export * from './ContextMenu'
+
+export * from './TableOfContents'

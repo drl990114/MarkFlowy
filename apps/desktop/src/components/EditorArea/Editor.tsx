@@ -1,6 +1,7 @@
 import { getFileObject } from '@/helper/files'
 import { getFileTypeConfig, isTextfileType } from '@/helper/fileTypeHandler'
 import { isEmptyEditor } from '@/services/editor-file'
+import { useCommandStore } from '@/stores'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
 import { memo } from 'react'
@@ -16,12 +17,16 @@ function Editor(props: EditorProps) {
 
   const { getFileTypeConfigById, setFileTypeConfig } = useFileTypeConfigStore()
   const curFileTypeConfig = getFileTypeConfigById(id)
+  const { execute } = useCommandStore()
 
   useMount(async () => {
     const fileTypeConfig = await getFileTypeConfig(curFile)
     if (fileTypeConfig) {
       useEditorViewTypeStore.getState().setEditorViewType(curFile.id, fileTypeConfig.defaultMode)
       setFileTypeConfig(curFile.id, fileTypeConfig)
+      setTimeout(() => {
+        execute('app:toc_refresh')
+      }, 100)
     }
   })
 

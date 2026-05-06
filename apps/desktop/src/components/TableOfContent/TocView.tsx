@@ -1,15 +1,13 @@
-import { Toc } from '@/components/TableOfContent'
 import { getHeadingValue } from '@/helper/string'
 import { useCommandStore, useEditorStore } from '@/stores'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
+import { TableOfContents, TableOfContentsRef, IHeadingData } from '@markflowy/interface'
 import { t } from 'i18next'
 import type { Node as ProseMirrorNode } from 'prosemirror-model'
 import { TextSelection } from 'prosemirror-state'
 import type { EditorView } from 'prosemirror-view'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { EditorViewType, extractMatches } from 'rme'
-import type { TocRef } from 'zens'
-import { IHeadingData } from 'zens/lib/TableOfContent/HeadingTree'
 import { sourceCodeCodemirrorViewMap } from '../EditorArea/TextEditor'
 import SideBarHeader from '../SideBar/SideBarHeader'
 import { TocViewContainer } from './styles'
@@ -123,7 +121,7 @@ type TocViewProps = {
 }
 
 export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
-  const tocRef = useRef<TocRef>(null)
+  const tocRef = useRef<TableOfContentsRef>(null)
   const [activeHeadingId, setActiveHeadingId] = useState<string | null>(null)
   const wysiwygHeadingsRef = useRef<HeadingInfo[]>([])
   const sourceHeadingsRef = useRef<SourceHeadingInfo[]>([])
@@ -131,6 +129,7 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
   const [sourceScrollEl, setSourceScrollEl] = useState<HTMLElement | null>(null)
   const rafRef = useRef<number | null>(null)
   const scheduleActiveHeadingUpdateRef = useRef<() => void>(() => {})
+  const activeId = useEditorStore((state) => state.activeId)
 
   const calculateActiveHeadingId = useCallback(() => {
     const activeId = useEditorStore.getState().activeId
@@ -192,11 +191,20 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
         const activeId = useEditorStore.getState().activeId
         const editorViewTypeMap = useEditorViewTypeStore.getState().editorViewTypeMap
 
-        if (!activeId) return
+        if (!activeId) {
+          tocRef.current?.refreshByHeadings({ newHeadings: [] })
+          setActiveHeadingId(null)
+          return
+        }
 
-        if (editorViewTypeMap.get(activeId) === EditorViewType.SOURCECODE) {
+        const viewType = editorViewTypeMap.get(activeId)
+
+        if (viewType === EditorViewType.SOURCECODE) {
           const codemirrorView = sourceCodeCodemirrorViewMap.get(activeId)
           if (!codemirrorView) {
+            setTimeout(() => {
+              useCommandStore.getState().execute('app:toc_refresh')
+            }, 500)
             return
           }
 
@@ -242,10 +250,13 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
           return
         }
 
-        if (editorViewTypeMap.get(activeId) === EditorViewType.WYSIWYG) {
+        if (viewType === EditorViewType.WYSIWYG) {
           const editorDelegate = useEditorStore.getState().getEditorDelegate(activeId)
           const editorView = editorDelegate?.manager?.view
           if (!editorView) {
+            setTimeout(() => {
+              useCommandStore.getState().execute('app:toc_refresh')
+            }, 500)
             return
           }
 
@@ -269,12 +280,8 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
           return
         }
 
-        setTimeout(() => {
-          tocRef.current?.refresh({
-            newContainer: document.querySelector('#editor-panel') as HTMLElement,
-            newScroll: document.querySelector('#editor-panel') as HTMLElement,
-          })
-        }, 0)
+        tocRef.current?.refreshByHeadings({ newHeadings: [] })
+        setActiveHeadingId(null)
       },
     })
   }, [])
@@ -314,6 +321,19 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
     }
   }, [])
 
+  useEffect(() => {
+    const execute = useCommandStore.getState().execute
+    if (!activeId) {
+      tocRef.current?.refreshByHeadings({ newHeadings: [] })
+      setActiveHeadingId(null)
+      return
+    }
+    const timer = setTimeout(() => {
+      execute('app:toc_refresh')
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [activeId])
+
   const containerEl = document.querySelector('#editor-panel') as HTMLElement
   const scrollEl = document.querySelector('#editor-panel') as HTMLElement
 
@@ -321,7 +341,7 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
     <TocViewContainer variant={variant}>
       <SideBarHeader name={t('sidebar.table_of_contents')} />
       <div style={{ height: 'calc(100% - 40px)', boxSizing: 'border-box' }}>
-        <Toc
+        <TableOfContents
           ref={tocRef}
           containerEl={containerEl}
           scrollEl={scrollEl}
