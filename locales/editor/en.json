@@ -45,6 +45,22 @@
       "toNavigate": "to navigate",
       "toSelect": "to select",
       "toCancel": "to cancel"
+    },
+    "blockType": {
+      "delete": "Delete",
+      "paragraph": "Paragraph",
+      "heading": "Heading {{level}}",
+      "codeBlock": "Code Block",
+      "blockquote": "Quote",
+      "bulletList": "Bullet List",
+      "orderedList": "Ordered List",
+      "taskList": "Task List",
+      "transformTo": "Transform to"
+    },
+    "blockTypeGroup": {
+      "text": "Text",
+      "list": "List",
+      "other": "Other"
     }
   }
 }

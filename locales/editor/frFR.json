@@ -45,6 +45,22 @@
       "toNavigate": "Pour la navigation",
       "toSelect": "Pour la sélection",
       "toCancel": "Utilisé pour annuler"
+    },
+    "blockType": {
+      "delete": "Supprimer",
+      "paragraph": "Paragraphe",
+      "heading": "Titre {{level}}",
+      "codeBlock": "Bloc de code",
+      "blockquote": "Citation",
+      "bulletList": "Liste à puces",
+      "orderedList": "Liste ordonnée",
+      "taskList": "Liste de tâches",
+      "transformTo": "Transformer en"
+    },
+    "blockTypeGroup": {
+      "text": "Texte",
+      "list": "Liste",
+      "other": "Autre"
     }
   }
 }

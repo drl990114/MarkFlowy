@@ -45,6 +45,22 @@
       "toNavigate": "用于导航",
       "toSelect": "用于选择",
       "toCancel": "用于取消"
+    },
+    "blockType": {
+      "delete": "删除",
+      "paragraph": "段落",
+      "heading": "标题 {{level}}",
+      "codeBlock": "代码块",
+      "blockquote": "引用",
+      "bulletList": "无序列表",
+      "orderedList": "有序列表",
+      "taskList": "任务列表",
+      "transformTo": "转换为"
+    },
+    "blockTypeGroup": {
+      "text": "文本",
+      "list": "列表",
+      "other": "其他"
     }
   }
 }

@@ -45,6 +45,22 @@
       "toNavigate": "ナビゲーション用",
       "toSelect": "選択用",
       "toCancel": "キャンセル用"
+    },
+    "blockType": {
+      "delete": "削除",
+      "paragraph": "段落",
+      "heading": "見出し {{level}}",
+      "codeBlock": "コードブロック",
+      "blockquote": "引用",
+      "bulletList": "箇条書き",
+      "orderedList": "番号付きリスト",
+      "taskList": "タスクリスト",
+      "transformTo": "変換"
+    },
+    "blockTypeGroup": {
+      "text": "テキスト",
+      "list": "リスト",
+      "other": "その他"
     }
   }
 }
