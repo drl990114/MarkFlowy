@@ -14,7 +14,7 @@ export default function AuthCallbackPage() {
     if (typeof access_token === 'string' && typeof refresh_token === 'string') {
       localStorage.setItem('accessToken', access_token)
       localStorage.setItem('refreshToken', refresh_token)
-      router.replace('/workspace/github')
+      router.replace('/workspace')
     } else {
       setError('Authentication failed. Missing tokens.')
     }

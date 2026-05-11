@@ -126,6 +126,7 @@ export default function Index({
               </EditorTabs>
               <EditorWrapper $visible={activeTab === 'markdown'}>
                 <Editor
+                  fileId='home-markdown'
                   key={`${i18n?.language}_wysiwyg`}
                   viewType='wysiwyg'
                   initialContent={markdownContent}
@@ -133,6 +134,7 @@ export default function Index({
               </EditorWrapper>
               <EditorWrapper $visible={activeTab === 'json'}>
                 <Editor
+                  fileId='home-json'
                   key={`${i18n?.language}_source_code`}
                   viewType='source_code'
                   initialContent={jsonContent}

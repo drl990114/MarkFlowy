@@ -64,7 +64,7 @@ Enjoy experimenting with the editor!
 `
   return (
     <PlaygroundContainer>
-      <Editor initialContent={initialContent} viewType={viewType} />
+      <Editor fileId='playground' initialContent={initialContent} viewType={viewType} />
     </PlaygroundContainer>
   )
 }

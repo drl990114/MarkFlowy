@@ -8,20 +8,23 @@ import type { IFile } from '@markflowy/interface'
 
 interface FileSystemAdapterProps {
   children: ReactNode
+  readSubdirectory?: (folderPath: string) => Promise<IFile[]>
 }
 
 /**
- * Web FileSystem Provider - Mock implementation for web environment
+ * WebFileSystem Provider - Mock implementation for web environment
  * Since web version doesn't have real file system access, most operations are no-ops
  */
-export const WebFileSystemProvider: FC<FileSystemAdapterProps> = ({ children }) => {
+export const WebFileSystemProvider: FC<FileSystemAdapterProps> = ({ children, readSubdirectory }) => {
   const value: FileSystemContextValue = {
     readDirectory: async (): Promise<IFile[]> => {
-      // Web version doesn't support reading local directories
       return []
     },
 
-    readSubdirectory: async (): Promise<IFile[]> => {
+    readSubdirectory: async (folderPath: string): Promise<IFile[]> => {
+      if (readSubdirectory) {
+        return readSubdirectory(folderPath)
+      }
       return []
     },
 
