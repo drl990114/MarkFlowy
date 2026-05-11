@@ -79,7 +79,6 @@ export default function Navbar({
         >
           <LanguageSwitcher style={{ marginRight: 8 }} />
           <StyledSocial style={{ marginLeft: 8 }} />
-          <AuthButtons />
         </EndWrapper>
       </Wrapper>
       <div style={{ height: `${navbarHeight}px` }} />
