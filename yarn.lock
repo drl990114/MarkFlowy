@@ -3993,6 +3993,7 @@ __metadata:
     react: "npm:^19.2.4"
     react-dom: "npm:^19.2.4"
     react-is: "npm:^19.2.4"
+    react-resizable-panels: "npm:^4.11.0"
     react-test-renderer: "npm:^19.2.0"
     rehype-slug: "npm:^6.0.0"
     remark-gfm: "npm:^4.0.0"
@@ -18221,6 +18222,16 @@ __metadata:
   version: 2.0.2
   resolution: "react-property@npm:2.0.2"
   checksum: 10/3a4bc1951b2b7992cb8a2d3f12016dd0920d1c06eb58b456204a6ae1210401d62baece098d3200ed8a0513dde247a5d96ffdb24f354e32ce5a9b26fbd8552668
+  languageName: node
+  linkType: hard
+
+"react-resizable-panels@npm:^4.11.0":
+  version: 4.11.0
+  resolution: "react-resizable-panels@npm:4.11.0"
+  peerDependencies:
+    react: ^18.0.0 || ^19.0.0
+    react-dom: ^18.0.0 || ^19.0.0
+  checksum: 10/54b4c026d0bdb52b05f275747ebda6f400338ba81344a9dade27b2ec98e7b36cf1eed1575ae31fe5f06e7f2227c6a9a2d1c816121407310449388e5bab793846
   languageName: node
   linkType: hard
 

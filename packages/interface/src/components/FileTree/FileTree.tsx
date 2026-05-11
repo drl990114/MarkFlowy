@@ -164,9 +164,6 @@ const FileTree: FC<FileTreeProps> = (props) => {
           dndRootElement={dndRootElement}
           disableDrag={disableDrag}
           openByDefault={false}
-          initialOpenState={{
-            [data[0]?.id]: true,
-          }}
           selection={activeId}
           indent={16}
           disableMultiSelection
