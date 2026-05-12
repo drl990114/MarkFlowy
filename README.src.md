@@ -190,6 +190,10 @@ In addition, you can sponsor me through WeChat or Alipay, which will greatly enc
   <img height="54" alt="UpgradeLink" src="./public/sponsors/UpgradeLink_1.png" />
 </a>
 
+${en:'Thanks to [UpgradeLink](https://www.toolsetlink.com) for providing reliable installation and upgrade services, ensuring seamless software updates for MarkFlowy users.', zh:'感谢 [UpgradeLink](https://www.toolsetlink.com) 提供可靠的安装与升级服务，确保 MarkFlowy 用户获得无缝的软件更新体验。', ja:'[UpgradeLink](https://www.toolsetlink.com) が信頼性の高いインストールおよびアップグレードサービスを提供し、MarkFlowy ユーザーにシームレスなソフトウェアアップデートを保証してくれたことに感謝します。'}<!--en-->
+感谢 [UpgradeLink](https://www.toolsetlink.com) 提供可靠的安装与升级服务，确保 MarkFlowy 用户获得无缝的软件更新体验。<!--zh-->
+[UpgradeLink](https://www.toolsetlink.com) が信頼性の高いインストールおよびアップグレードサービスを提供し、MarkFlowy ユーザーにシームレスなソフトウェアアップデートを保証してくれたことに感謝します。<!--ja-->
+
 ## ${en:'Special Thanks', zh:'特别感谢', ja:'特別な感謝'}
 
 - [rino](https://github.com/ocavue/rino) by [ocavue](https://github.com/ocavue) - ${en:'The initial version of the editor in this project was developed based on rino.', zh:'感谢 ocavue 开发的 rino，当前项目 editor 的初版基于此构建。', ja:'ocavue 氏の rino プロジェクトに感謝します。このプロジェクトのエディターの初期バージョンは rino に基づいて開発されました。'}<!--en-->
