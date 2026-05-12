@@ -110,6 +110,13 @@ In addition, you can sponsor me through WeChat or Alipay, which will greatly enc
   <img height="54" alt="UpgradeLink" src="./public/sponsors/UpgradeLink_1.png" />
 </a>
 
+## Special Thanks
+
+- [rino](https://github.com/ocavue/rino) by [ocavue](https://github.com/ocavue) - The initial version of the editor in this project was developed based on rino.
+- [remirror](https://remirror.io/) - A powerful ProseMirror-based rich text editor framework.
+- [tauri](https://tauri.app/) - Build smaller, faster, and more secure desktop apps with a web frontend.
+- And thanks to all the open source libraries and projects that MarkFlowy depends on.
+
 ## Contributors
 
 The development of **MarkFlowy** cannot be separated from these contributors. They have contributed a lot of abilities to **MarkFlowy**. Meanwhile, welcome to follow them! ❤️
