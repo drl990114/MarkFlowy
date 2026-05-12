@@ -110,6 +110,8 @@ In addition, you can sponsor me through WeChat or Alipay, which will greatly enc
   <img height="54" alt="UpgradeLink" src="./public/sponsors/UpgradeLink_1.png" />
 </a>
 
+Thanks to [UpgradeLink](https://www.toolsetlink.com) for providing reliable installation and upgrade services, ensuring seamless software updates for MarkFlowy users.
+
 ## Special Thanks
 
 - [rino](https://github.com/ocavue/rino) by [ocavue](https://github.com/ocavue) - The initial version of the editor in this project was developed based on rino.

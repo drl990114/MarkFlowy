@@ -103,6 +103,8 @@ MarkFlowy 是完全永久开源的，如果你想支持 MarkFlowy，你可以`st
   <img height="54" alt="UpgradeLink" src="./public/sponsors/UpgradeLink_1.png" />
 </a>
 
+感谢 [UpgradeLink](https://www.toolsetlink.com) 提供可靠的安装与升级服务，确保 MarkFlowy 用户获得无缝的软件更新体验。
+
 ## 特别感谢
 
 - [rino](https://github.com/ocavue/rino) by [ocavue](https://github.com/ocavue) - 感谢 ocavue 开发的 rino，当前项目 editor 的初版基于此构建。
