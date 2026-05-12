@@ -103,6 +103,13 @@ MarkFlowy 是完全永久开源的，如果你想支持 MarkFlowy，你可以`st
   <img height="54" alt="UpgradeLink" src="./public/sponsors/UpgradeLink_1.png" />
 </a>
 
+## 特别感谢
+
+- [rino](https://github.com/ocavue/rino) by [ocavue](https://github.com/ocavue) - 感谢 ocavue 开发的 rino，当前项目 editor 的初版基于此构建。
+- [remirror](https://remirror.io/) - 一个强大的基于 ProseMirror 的富文本编辑器框架。
+- [tauri](https://tauri.app/) - 使用 Web 前端构建更小、更快、更安全的桌面应用。
+- 感谢所有 MarkFlowy 依赖的库和开源项目。
+
 <!-- badges -->
 [build-badge]: https://img.shields.io/github/actions/workflow/status/drl990114/MarkFlowy/nodejs.yml.svg?style=flat-square&labelColor=black
 [build]: https://github.com/drl990114/MarkFlowy/actions/workflows/nodejs.yml?labelColor=black

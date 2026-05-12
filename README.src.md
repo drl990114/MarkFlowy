@@ -190,6 +190,25 @@ In addition, you can sponsor me through WeChat or Alipay, which will greatly enc
   <img height="54" alt="UpgradeLink" src="./public/sponsors/UpgradeLink_1.png" />
 </a>
 
+${en:'Thanks to [UpgradeLink](https://www.toolsetlink.com) for providing reliable installation and upgrade services, ensuring seamless software updates for MarkFlowy users.', zh:'感谢 [UpgradeLink](https://www.toolsetlink.com) 提供可靠的安装与升级服务，确保 MarkFlowy 用户获得无缝的软件更新体验。', ja:'[UpgradeLink](https://www.toolsetlink.com) が信頼性の高いインストールおよびアップグレードサービスを提供し、MarkFlowy ユーザーにシームレスなソフトウェアアップデートを保証してくれたことに感謝します。'}<!--en-->
+感谢 [UpgradeLink](https://www.toolsetlink.com) 提供可靠的安装与升级服务，确保 MarkFlowy 用户获得无缝的软件更新体验。<!--zh-->
+[UpgradeLink](https://www.toolsetlink.com) が信頼性の高いインストールおよびアップグレードサービスを提供し、MarkFlowy ユーザーにシームレスなソフトウェアアップデートを保証してくれたことに感謝します。<!--ja-->
+
+## ${en:'Special Thanks', zh:'特别感谢', ja:'特別な感謝'}
+
+- [rino](https://github.com/ocavue/rino) by [ocavue](https://github.com/ocavue) - ${en:'The initial version of the editor in this project was developed based on rino.', zh:'感谢 ocavue 开发的 rino，当前项目 editor 的初版基于此构建。', ja:'ocavue 氏の rino プロジェクトに感謝します。このプロジェクトのエディターの初期バージョンは rino に基づいて開発されました。'}<!--en-->
+- [rino](https://github.com/ocavue/rino) by [ocavue](https://github.com/ocavue) - 感谢 ocavue 开发的 rino，当前项目 editor 的初版基于此构建。<!--zh-->
+- [rino](https://github.com/ocavue/rino) by [ocavue](https://github.com/ocavue) - ocavue 氏の rino プロジェクトに感謝します。このプロジェクトのエディターの初期バージョンは rino に基づいて開発されました。<!--ja-->
+- [remirror](https://remirror.io/) - ${en:'A powerful ProseMirror-based rich text editor framework.', zh:'一个强大的基于 ProseMirror 的富文本编辑器框架。', ja:'ProseMirrorベースの強力なリッチテキストエディターフレームワーク。'}<!--en-->
+- [remirror](https://remirror.io/) - 一个强大的基于 ProseMirror 的富文本编辑器框架。<!--zh-->
+- [remirror](https://remirror.io/) - ProseMirrorベースの強力なリッチテキストエディターフレームワーク。<!--ja-->
+- [tauri](https://tauri.app/) - ${en:'Build smaller, faster, and more secure desktop apps with a web frontend.', zh:'使用 Web 前端构建更小、更快、更安全的桌面应用。', ja:'Webフロントエンドでより小さく、より速く、より安全なデスクトップアプリを構築。'}<!--en-->
+- [tauri](https://tauri.app/) - 使用 Web 前端构建更小、更快、更安全的桌面应用。<!--zh-->
+- [tauri](https://tauri.app/) - Webフロントエンドでより小さく、より速く、より安全なデスクトップアプリを構築。<!--ja-->
+- ${en:'And thanks to all the open source libraries and projects that MarkFlowy depends on.', zh:'感谢所有 MarkFlowy 依赖的库和开源项目。', ja:'そして、MarkFlowy が依存しているすべてのオープンソースライブラリとプロジェクトに感謝します。'}<!--en-->
+- 感谢所有 MarkFlowy 依赖的库和开源项目。<!--zh-->
+- そして、MarkFlowy が依存しているすべてのオープンソースライブラリとプロジェクトに感謝します。<!--ja-->
+
 ## Contributors<!--en--><!--ja-->
 <!--en--><!--ja-->
 The development of **MarkFlowy** cannot be separated from these contributors. They have contributed a lot of abilities to **MarkFlowy**. Meanwhile, welcome to follow them! ❤️<!--en-->
