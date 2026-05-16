@@ -1,0 +1,161 @@
+[
+  {
+    "attrs": {
+      "depth": 1,
+      "first": true,
+      "last": true,
+    },
+    "end": 10,
+    "marks": [
+      "mdText",
+    ],
+    "start": 0,
+  },
+  {
+    "attrs": {
+      "depth": 1,
+      "first": true,
+    },
+    "end": 12,
+    "marks": [
+      "mdMark",
+    ],
+    "start": 10,
+  },
+  {
+    "attrs": {
+      "depth": 2,
+      "first": true,
+      "last": true,
+    },
+    "end": 16,
+    "marks": [
+      "mdStrong",
+    ],
+    "start": 12,
+  },
+  {
+    "attrs": {
+      "depth": 1,
+      "last": true,
+    },
+    "end": 18,
+    "marks": [
+      "mdMark",
+    ],
+    "start": 16,
+  },
+  {
+    "attrs": {
+      "depth": 1,
+      "first": true,
+      "last": true,
+    },
+    "end": 31,
+    "marks": [
+      "mdText",
+    ],
+    "start": 18,
+  },
+  {
+    "attrs": {
+      "depth": 1,
+      "first": true,
+    },
+    "end": 32,
+    "marks": [
+      "mdMark",
+    ],
+    "start": 31,
+  },
+  {
+    "attrs": {
+      "depth": 2,
+      "first": true,
+      "href": "https://google.com",
+      "last": true,
+    },
+    "end": 36,
+    "marks": [
+      "mdLinkText",
+    ],
+    "start": 32,
+  },
+  {
+    "attrs": {
+      "depth": 1,
+    },
+    "end": 38,
+    "marks": [
+      "mdMark",
+    ],
+    "start": 36,
+  },
+  {
+    "attrs": {
+      "depth": 1,
+    },
+    "end": 56,
+    "marks": [
+      "mdLinkUri",
+    ],
+    "start": 38,
+  },
+  {
+    "attrs": {
+      "depth": 1,
+      "last": true,
+    },
+    "end": 57,
+    "marks": [
+      "mdMark",
+    ],
+    "start": 56,
+  },
+  {
+    "attrs": {
+      "depth": 1,
+      "first": true,
+      "last": true,
+    },
+    "end": 62,
+    "marks": [
+      "mdText",
+    ],
+    "start": 57,
+  },
+  {
+    "attrs": {
+      "depth": 1,
+      "first": true,
+    },
+    "end": 63,
+    "marks": [
+      "mdMark",
+    ],
+    "start": 62,
+  },
+  {
+    "attrs": {
+      "depth": 2,
+      "first": true,
+      "last": true,
+    },
+    "end": 71,
+    "marks": [
+      "mdEm",
+    ],
+    "start": 63,
+  },
+  {
+    "attrs": {
+      "depth": 1,
+      "last": true,
+    },
+    "end": 72,
+    "marks": [
+      "mdMark",
+    ],
+    "start": 71,
+  },
+]
