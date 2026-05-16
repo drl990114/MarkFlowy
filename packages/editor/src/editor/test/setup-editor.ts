@@ -2,9 +2,6 @@ import '@rme-sdk/pm'
 import '@rme-sdk/preset-core'
 import 'jest-prosemirror'
 
-import { BlockquoteExtension } from '@rme-sdk/extension-blockquote'
-import { HeadingExtension } from '@rme-sdk/extension-heading'
-import { HorizontalRuleExtension } from '@rme-sdk/extension-horizontal-rule'
 import { renderEditor, type TaggedProsemirrorNode } from 'jest-remirror'
 import type { Command } from 'prosemirror-state'
 import { expect } from 'vitest'
@@ -17,15 +14,12 @@ import { markdownToTaggedDoc } from './markdown'
 export function setupTestingEditor() {
   const extensions = [
     new ListExtension(),
-    new BlockquoteExtension(),
-    new HorizontalRuleExtension({}),
-    new HeadingExtension({}),
   ]
   const editor = renderEditor(extensions, {})
   const {
     view,
     add,
-    nodes: { doc, p, blockquote, horizontalRule },
+    nodes: { doc, p },
     attributeNodes: { list: untypedList },
     manager,
     schema,
@@ -81,8 +75,6 @@ export function setupTestingEditor() {
 
     doc,
     p,
-    blockquote,
-    horizontalRule,
 
     bulletList,
     orderedList,
