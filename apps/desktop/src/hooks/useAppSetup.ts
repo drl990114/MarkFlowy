@@ -259,7 +259,7 @@ const appSetup = once(async function () {
   window.addEventListener('message', listener)
 
   appThemeExtensionsSetup(settingData.theme)
-  i18nInit({ lng: settingData.language })
+  await i18nInit({ lng: settingData.language })
   checkUpdate({ install: settingData.auto_update })
 
   // Initialize zoom level based on webview_zoom setting

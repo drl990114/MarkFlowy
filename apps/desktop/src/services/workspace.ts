@@ -1,6 +1,6 @@
 import { useEditorStore } from '@/stores'
 import { invoke } from '@tauri-apps/api/core'
-import { t } from 'i18next'
+import { t } from '@/i18n'
 
 export enum WorkspaceSyncMode {
   None = 'none',

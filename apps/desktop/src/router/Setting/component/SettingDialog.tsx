@@ -2,7 +2,7 @@ import { EVENT } from '@/constants'
 import { Setting } from '@/router'
 import { useCommandStore } from '@/stores'
 import { memo, useCallback, useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '@/i18n'
 import styled from 'styled-components'
 import { Dialog } from 'zens'
 

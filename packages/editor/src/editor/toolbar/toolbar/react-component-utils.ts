@@ -8,7 +8,7 @@ import {
   isString,
   ProsemirrorAttributes,
 } from '@rme-sdk/core'
-import { t } from 'i18next'
+import { t } from '@markflowy/i18n'
 
 export interface RmeCommandDecoratorMessageProps extends CommandDecoratorMessageProps {
   t: typeof t

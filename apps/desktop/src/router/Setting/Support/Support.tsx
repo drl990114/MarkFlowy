@@ -1,5 +1,5 @@
 import { openUrl } from '@tauri-apps/plugin-opener'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '@/i18n'
 import styled from 'styled-components'
 import { Button } from 'zens'
 

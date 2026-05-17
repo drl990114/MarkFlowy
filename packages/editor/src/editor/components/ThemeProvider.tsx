@@ -1,9 +1,10 @@
+import type { Langs } from '@markflowy/i18n'
+import { changeLng, i18nInit, isInitialized, locales } from '@markflowy/i18n'
+import mermaid from 'mermaid'
+import { memo, useEffect, useRef } from 'react'
 import { ThemeProvider as ScThemeProvider } from 'styled-components'
 import { CreateThemeOptions, changeTheme } from '../codemirror'
-import { memo, useEffect } from 'react'
 import { darkTheme, lightTheme } from '../theme'
-import { changeLng, i18nInit } from '../i18n'
-import mermaid from 'mermaid'
 import { eventBus } from '../utils/eventbus'
 
 export * from './Editor'
@@ -11,20 +12,12 @@ export * from './Editor'
 type Props = {
   theme?: {
     mode: 'light' | 'dark'
-    /**
-     * Some theme variables can be modified through the token attribute in theme.
-     */
     token?: Record<string, any>
-    /**
-     * The sourcode editor theme.
-     */
     codemirrorTheme?: CreateThemeOptions
   }
   i18n?: {
-    locales?: Record<string, Record<'translation', Record<string, any>>>
     language?: string
   }
-  locales?: Record<string, any>
   children?: React.ReactNode
 }
 
@@ -35,15 +28,19 @@ export const ThemeProvider: React.FC<Props> = memo(({ theme, i18n, children }: P
 
   const themeToken = theme?.token ? { ...defaultThemeToken, ...theme.token } : defaultThemeToken
 
+  const prevLanguageRef = useRef<string | undefined>(undefined)
+
   useEffect(() => {
-    if (i18n?.locales) {
-      i18nInit(i18n.locales).then(() => {
-        if (i18n?.language) {
-          changeLng(i18n?.language)
-        }
-      })
+    const initI18n = async () => {
+      if (!isInitialized()) {
+        await i18nInit({ lng: i18n?.language })
+      } else if (i18n?.language && prevLanguageRef.current !== i18n.language && i18n.language in locales) {
+        await changeLng(i18n.language as Langs)
+      }
+      prevLanguageRef.current = i18n?.language
     }
-  }, [i18n])
+    initI18n()
+  }, [i18n?.language])
 
   useEffect(() => {
     const codemirrorTheme =

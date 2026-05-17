@@ -3,7 +3,7 @@ import { computePosition } from '@floating-ui/dom'
 import type { EditorView, FindProsemirrorNodeResult } from '@rme-sdk/core'
 import { Selection } from '@rme-sdk/pm/state'
 import Fuse from 'fuse.js'
-import { t } from 'i18next'
+import { t } from '@markflowy/i18n'
 import { isBrowser } from '../../utils/common'
 import { fakeIndentedLanguage } from './codemirror-extension'
 

@@ -1,6 +1,6 @@
 import React from 'react'
 import NiceModal, { useModal } from '@ebay/nice-modal-react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '@markflowy/i18n'
 import { Button, Dialog } from 'zens'
 
 export interface ConfirmModalProps {

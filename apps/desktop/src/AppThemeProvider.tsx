@@ -5,7 +5,6 @@ import { ThemeProvider as EditorProvider } from 'rme'
 import { IStyleSheetContext, StyleSheetManager, ThemeProvider } from 'styled-components'
 import { ThemeProvider as ZensThemeProvider } from 'zens'
 import { GlobalStyles } from './globalStyles'
-import { editorResources } from './i18n'
 import { InjectFonts } from './injectFonts'
 import useAppSettingStore from './stores/useAppSettingStore'
 import useThemeStore from './stores/useThemeStore'
@@ -34,7 +33,6 @@ const AppThemeProvider: React.FC<BaseComponentProps> = function ({ children }) {
 
   const i18nProp = useMemo(
     () => ({
-      locales: editorResources,
       language: settingData.language,
     }),
     [settingData.language],
@@ -55,13 +53,10 @@ const AppThemeProvider: React.FC<BaseComponentProps> = function ({ children }) {
   )
 }
 
-// This implements the default behavior from styled-components v5
 const shouldForwardProp: IStyleSheetContext['shouldForwardProp'] = function (propName, target) {
   if (typeof target === 'string') {
-    // For HTML elements, forward the prop if it is a valid HTML attribute
     return isPropValid(propName)
   }
-  // For other elements, forward all props
   return true
 }
 

@@ -1,7 +1,7 @@
 import { isHTMLElement } from '@ocavue/utils'
 import { NodeSelection } from '@rme-sdk/pm/state'
 import { useCommands, useExtension, useRemirrorContext } from '@rme-sdk/react-core'
-import { t } from 'i18next'
+import { t } from '@markflowy/i18n'
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import styled from 'styled-components'
 import { Dropdown, type DropdownMenuItem, type MenuItemType } from 'zens'

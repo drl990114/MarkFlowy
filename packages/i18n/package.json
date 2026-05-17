@@ -1,0 +1,36 @@
+{
+  "name": "@markflowy/i18n",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist/*"
+  ],
+  "scripts": {
+    "build": "rimraf dist && node esbuild.config.mjs && tsc --emitDeclarationOnly && node scripts/flatten-dts.mjs",
+    "dev": "tsc --watch",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "i18next": "23.16.8",
+    "react-i18next": "15.7.4"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.0",
+    "esbuild": "^0.24.2",
+    "react": "^19.2.0",
+    "rimraf": "^6.1.0",
+    "typescript": "~5.0.4"
+  }
+}

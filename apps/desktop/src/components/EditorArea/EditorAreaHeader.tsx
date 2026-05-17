@@ -3,7 +3,7 @@ import { checkUnsavedFiles } from '@/services/checkUnsavedFiles'
 import { addEmptyEditorTab } from '@/services/editor-file'
 import { useCommandStore, useEditorStore } from '@/stores'
 import { memo, useCallback, useRef } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '@/i18n'
 import { MfIconButton } from '../ui-v2/Button'
 import { showContextMenu } from '../ui-v2/ContextMenu'
 

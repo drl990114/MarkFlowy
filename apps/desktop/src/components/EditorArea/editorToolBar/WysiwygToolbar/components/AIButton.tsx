@@ -6,7 +6,7 @@ import { useEditorStore } from '@/stores'
 import useAppTasksStore from '@/stores/useTasksStore'
 import NiceModal from '@ebay/nice-modal-react'
 import { useCallback, useRef } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '@/i18n'
 import { InputConfirmModalProps, MODAL_INPUT_ID } from '../../../../Modal'
 import { showContextMenu } from '../../../../ui-v2/ContextMenu'
 

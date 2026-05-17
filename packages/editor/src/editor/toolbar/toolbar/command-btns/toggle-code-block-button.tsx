@@ -1,7 +1,7 @@
 import { useActive, useCommands } from '@rme-sdk/react-core'
 import { FC, useCallback } from 'react'
 
-import { t } from 'i18next'
+import { t } from '@markflowy/i18n'
 import { LineCodeMirrorExtension } from '../../../extensions/CodeMirror'
 import { CodeMirrorExtensionAttributes } from '../../../extensions/CodeMirror/codemirror-types'
 import { CommandButton, CommandButtonProps } from './command-button'

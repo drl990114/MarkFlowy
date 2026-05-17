@@ -27,7 +27,7 @@ import classNames from 'classnames'
 import html2canvas from 'html2canvas'
 import { debounce, DebouncedFunc, throttle } from 'lodash'
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '@/i18n'
 import { useMount, useUnmount } from 'react-use'
 import {
   createSourceCodeDelegate,

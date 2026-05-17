@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '@/i18n'
 import styled from 'styled-components'
 import SettingItem from '../SettingItems'
 import { SettingGroupContainer } from './styles'

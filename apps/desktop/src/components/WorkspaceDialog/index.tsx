@@ -1,6 +1,6 @@
 import { getWorkspace, WorkSpace } from '@/services/workspace'
 import { useCommandStore } from '@/stores'
-import { t } from 'i18next'
+import { t } from '@/i18n'
 import { memo, useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { Dialog } from 'zens'
