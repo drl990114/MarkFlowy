@@ -9,6 +9,30 @@
     "frontendDist": "../dist"
   },
   "plugins": {
+    "cli": {
+      "description": "MarkFlowy - AI-Native Markdown Editor",
+      "longDescription": "A modern, lightweight Markdown editor with built-in AI capabilities.\n\nUsage: markflowy [COMMAND] [OPTIONS]\n       mf [COMMAND] [OPTIONS]\n\nYou can create a symlink or alias 'mf' to 'markflowy' for shorter invocation.",
+      "subcommands": {
+        "open": {
+          "description": "Open a file or folder in MarkFlowy",
+          "args": [
+            {
+              "name": "path",
+              "description": "Path to the file or folder to open",
+              "index": 1,
+              "takesValue": true,
+              "required": true
+            }
+          ]
+        },
+        "help": {
+          "description": "Print this help message"
+        },
+        "version": {
+          "description": "Print version information"
+        }
+      }
+    },
     "shell": {
       "open": true
     },

@@ -23,6 +23,7 @@ use app::{
 use dotenv;
 use lazy_static::lazy_static;
 use tauri::{Manager, Runtime, State};
+use tauri_plugin_cli::CliExt;
 use tauri_plugin_window_state::{AppHandleExt, StateFlags};
 use tracing_subscriber;
 
@@ -42,6 +43,49 @@ lazy_static! {
 }
 
 struct OpenedUrls(Mutex<Option<Vec<url::Url>>>);
+
+fn print_cli_help() {
+    println!(
+        r#"MarkFlowy - AI-Powered Markdown Editor
+
+Usage: markflowy [COMMAND] [OPTIONS]
+       mf [COMMAND] [OPTIONS]
+
+Commands:
+  open <path>    Open a file or folder in MarkFlowy
+  help           Print this help message
+  version        Print version information
+
+Options:
+  -h, --help     Print help
+  -V, --version  Print version
+
+Examples:
+  markflowy open /path/to/file.md
+  markflowy open /path/to/folder
+  markflowy help
+  markflowy version
+
+Note: Create a symlink or alias 'mf' -> 'markflowy' for shorter invocation."#
+    );
+}
+
+fn is_terminal_launch() -> bool {
+    std::env::var("TERM").is_ok()
+}
+
+fn path_to_file_url(path: &str) -> String {
+    url::Url::from_file_path(std::path::Path::new(path))
+        .map(|u| u.to_string())
+        .unwrap_or_else(|_| path.to_string())
+}
+
+macro_rules! cli_debug {
+    ($($arg:tt)*) => {
+        #[cfg(debug_assertions)]
+        eprintln!("[markflowy-cli] {}", format!($($arg)*));
+    };
+}
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -71,18 +115,41 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_persisted_scope::init())
-        .plugin(tauri_plugin_single_instance::init(|app_handle: &tauri::AppHandle, args: Vec<String>, cwd: String| {
-            // 提取文件路径参数（args[0]是程序本身，args[1..]是传递的参数）
-            let opened_urls = if args.len() > 1 {
-                // 跳过程序本身，将其余参数用逗号连接
-                args[1..].join(",")
-            } else {
-                "".to_string()
-            };
-            
-            // 调用setup函数处理参数和窗口复用逻辑
-            if let Err(e) = crate::setup::init(app_handle.clone(), opened_urls) {
-                println!("单例参数处理失败: {:?}", e);
+        .plugin(tauri_plugin_cli::init())
+        .plugin(tauri_plugin_single_instance::init(|app_handle: &tauri::AppHandle, args: Vec<String>, _cwd: String| {
+            if args.len() > 1 {
+                match args[1].as_str() {
+                    "help" => {
+                        print_cli_help();
+                        std::process::exit(0);
+                    }
+                    "version" => {
+                        println!("MarkFlowy v{}", app_handle.package_info().version);
+                        std::process::exit(0);
+                    }
+                    "open" => {
+                        let opened_urls = args.iter()
+                            .skip(2)
+                            .map(|p| path_to_file_url(p))
+                            .collect::<Vec<_>>()
+                            .join(",");
+                        if let Err(e) = crate::setup::init(app_handle.clone(), opened_urls) {
+                            println!("CLI open failed: {:?}", e);
+                        }
+                    }
+                    _ => {
+                        let opened_urls = args.iter()
+                            .skip(1)
+                            .map(|p| path_to_file_url(p))
+                            .collect::<Vec<_>>()
+                            .join(",");
+                        if !opened_urls.is_empty() {
+                            if let Err(e) = crate::setup::init(app_handle.clone(), opened_urls) {
+                                println!("File open failed: {:?}", e);
+                            }
+                        }
+                    }
+                }
             }
         }))
         .invoke_handler(tauri::generate_handler![
@@ -147,6 +214,53 @@ pub fn run() {
             fc::cmd::restore_security_bookmark,
         ])
         .setup(|app: &mut tauri::App| {
+            cli_debug!("========================================");
+            cli_debug!("cfg!(debug_assertions)={}, tauri::is_dev()={}", cfg!(debug_assertions), tauri::is_dev());
+            cli_debug!("custom-protocol: {}", if cfg!(feature = "custom-protocol") { "ENABLED" } else { "DISABLED" });
+            cli_debug!("binary: {:?}", std::env::current_exe().unwrap_or_default());
+
+            match app.cli().matches() {
+                Ok(matches) => {
+                    if let Some(subcommand) = matches.subcommand {
+                        match subcommand.name.as_str() {
+                            "help" => {
+                                print_cli_help();
+                                std::process::exit(0);
+                            }
+                            "version" => {
+                                println!("MarkFlowy v{}", app.package_info().version);
+                                std::process::exit(0);
+                            }
+                            "open" => {
+                                if let Some(arg_data) = subcommand.matches.args.get("path") {
+                                    if let Some(raw_path) = arg_data.value.as_str() {
+                                        let url = path_to_file_url(raw_path);
+                                        cli_debug!("open: {} -> {}", raw_path, url);
+
+                                        let mut file_urls = app.state::<OpenedUrls>().inner().0.lock().unwrap();
+                                        if let Ok(parsed) = url::Url::parse(&url) {
+                                            *file_urls = Some(vec![parsed]);
+                                        } else {
+                                            cli_debug!("failed to parse URL: {}", url);
+                                        }
+                                    }
+                                }
+                            }
+                            _ => {}
+                        }
+                    } else if is_terminal_launch() {
+                        cli_debug!("terminal launch, no subcommand -> showing help");
+                        print_cli_help();
+                        std::process::exit(0);
+                    } else {
+                        cli_debug!("GUI launch -> normal startup");
+                    }
+                }
+                Err(e) => {
+                    cli_debug!("cli matches error: {:?}", e);
+                }
+            }
+
             #[cfg(target_os = "macos")]
             {
                 let app_data_dir = app.path().app_data_dir().expect("failed to get app data dir");
