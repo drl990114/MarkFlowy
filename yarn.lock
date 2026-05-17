@@ -4360,6 +4360,7 @@ __metadata:
     "@tanstack/react-virtual": "npm:^3.13.18"
     "@tauri-apps/api": "npm:2.10.1"
     "@tauri-apps/cli": "npm:2.10.1"
+    "@tauri-apps/plugin-cli": "npm:^2.4.0"
     "@tauri-apps/plugin-clipboard-manager": "npm:^2.3.2"
     "@tauri-apps/plugin-dialog": "npm:2.7.0"
     "@tauri-apps/plugin-fs": "npm:2.5.0"
@@ -8339,6 +8340,15 @@ __metadata:
   bin:
     tauri: tauri.js
   checksum: 10/9533de72531bb63ce0da3ca19b03df853fff50d4cb167239342b8f825341d5bb8ef7be3d7e53b0ee2e137dd2b1216deef5c5cb19daf0f91ac4e0b439e91744db
+  languageName: node
+  linkType: hard
+
+"@tauri-apps/plugin-cli@npm:^2.4.0":
+  version: 2.4.1
+  resolution: "@tauri-apps/plugin-cli@npm:2.4.1"
+  dependencies:
+    "@tauri-apps/api": "npm:^2.8.0"
+  checksum: 10/f3403fd75c302e191c2bfec4551e443030b034dbb1b31bca43a01c2a4745eb88b9842e3c4f03b16661f436e0b3001622b739af3e07c9cd8a9ddc7710458d6c08
   languageName: node
   linkType: hard
 
