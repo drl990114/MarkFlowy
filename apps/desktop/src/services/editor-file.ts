@@ -1,7 +1,7 @@
 import { getFileObject } from '@/helper/files'
 import { createFile } from '@/helper/filesys'
 import { useEditorStateStore, useEditorStore } from '@/stores'
-import i18n from 'i18next'
+import { i18n } from '@/i18n'
 
 interface AddNewMarkdownFileEditParams {
   fileName: string

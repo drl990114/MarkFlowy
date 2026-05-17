@@ -1,6 +1,6 @@
 import type { AnyExtension, CommandsFromExtensions } from '@rme-sdk/main'
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '@markflowy/i18n'
 import styled, { css } from 'styled-components'
 import { Input, Space } from 'zens'
 import { nodeTypeIconMap } from '../../const'

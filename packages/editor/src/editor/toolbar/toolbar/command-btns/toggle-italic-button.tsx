@@ -2,7 +2,7 @@ import { ItalicExtension } from '@rme-sdk/extension-italic'
 import { useActive, useCommands } from '@rme-sdk/react-core'
 import { FC, useCallback } from 'react'
 
-import { t } from 'i18next'
+import { t } from '@markflowy/i18n'
 import { CommandButton, CommandButtonProps } from './command-button'
 
 export interface ToggleItalicButtonProps

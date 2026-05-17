@@ -1,7 +1,7 @@
 import { useOpen } from '@/hooks'
 import { addNewMarkdownFileEdit } from '@/services/editor-file'
 import { memo } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '@/i18n'
 import styled from 'styled-components'
 
 export const EmptyState = memo(() => {

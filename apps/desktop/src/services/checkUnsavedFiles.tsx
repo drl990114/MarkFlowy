@@ -2,7 +2,7 @@ import { MODAL_CONFIRM_ID } from '@/components/Modal'
 import { getFileObject } from '@/helper/files'
 import { useEditorStateStore } from '@/stores'
 import NiceModal from '@ebay/nice-modal-react'
-import { t } from 'i18next'
+import { t } from '@/i18n'
 import { Button } from 'zens'
 
 interface CheckUnsavedFilesParams {

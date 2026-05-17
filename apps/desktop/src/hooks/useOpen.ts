@@ -10,7 +10,7 @@ import NiceModal from '@ebay/nice-modal-react'
 import { invoke } from '@tauri-apps/api/core'
 import { open } from '@tauri-apps/plugin-dialog'
 import { useCallback } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '@/i18n'
 
 const useOpen = () => {
   const { addRecentWorkspaces } = useOpenedCacheStore()

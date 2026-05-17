@@ -1,14 +1,8 @@
-import i18next from 'i18next'
+import { createInstance, I18nextProvider, initReactI18next, editorResources } from '@markflowy/i18n'
 import { useTranslation } from 'next-i18next'
 import { useRouter } from 'next/router'
 import React, { useEffect, useMemo } from 'react'
-import { I18nextProvider, initReactI18next } from 'react-i18next'
 import { darkTheme } from 'theme'
-import CN_EDITOR from '../../../locales/editor/cn.json'
-import EN_EDITOR from '../../../locales/editor/en.json'
-import ES_EDITOR from '../../../locales/editor/es.json'
-import FRFR_EDITOR from '../../../locales/editor/frFR.json'
-import JA_EDITOR from '../../../locales/editor/ja.json'
 import { preloadRme, useRme, useRmeThemeProvider } from '../hooks/useRme'
 import Loading from './Loading'
 
@@ -36,14 +30,6 @@ const THEME_CONFIG = {
   },
 } as const
 
-export const editorResources = {
-  en: { translation: { ...EN_EDITOR.editor } },
-  cn: { translation: { ...CN_EDITOR.editor } },
-  frFR: { translation: { ...FRFR_EDITOR.editor } },
-  es: { translation: { ...ES_EDITOR.editor } },
-  ja: { translation: { ...JA_EDITOR.editor } },
-} as const
-
 function normalizeEditorLang(lng?: string) {
   const lower = (lng || 'en').toLowerCase()
   if (lower.startsWith('zh')) return 'cn'
@@ -63,7 +49,7 @@ const RmeProvider: React.FC<RmeProviderProps> = ({ themeTokens, children }) => {
   const { i18n } = useTranslation()
   const router = useRouter()
 
-  const editorI18nInstance = useMemo(() => i18next.createInstance(), [])
+  const editorI18nInstance = useMemo(() => createInstance(), [])
 
   const i18nProp = useMemo(
     () => ({

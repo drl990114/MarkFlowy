@@ -27,7 +27,7 @@ import {
 import type { EditorState } from '@rme-sdk/main'
 import { TextSelection } from '@rme-sdk/pm/state'
 import { Decoration, DecorationSet } from '@rme-sdk/pm/view'
-import { t } from 'i18next'
+import { t } from '@markflowy/i18n'
 import type { NodeSerializerOptions } from '../../transform'
 import { ParserRuleType } from '../../transform'
 import createCodeMirrorMenuDecorations from './codemirror-lang-menu'

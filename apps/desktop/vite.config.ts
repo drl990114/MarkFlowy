@@ -31,7 +31,10 @@ export default defineConfig({
     rollupOptions: {},
   },
   resolve: {
-    alias: [{ find: '@', replacement: fileURLToPath(new URL('./src', import.meta.url)) }],
+    alias: [
+      { find: '@', replacement: fileURLToPath(new URL('./src', import.meta.url)) },
+      { find: '@markflowy/i18n', replacement: fileURLToPath(new URL('../../packages/i18n/dist/index.js', import.meta.url)) },
+    ],
     dedupe: ['react', 'react-dom'],
   },
   test: {

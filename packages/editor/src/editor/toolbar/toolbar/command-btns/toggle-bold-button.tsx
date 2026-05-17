@@ -2,7 +2,7 @@ import { BoldExtension } from '@rme-sdk/extension-bold';
 import { useActive, useCommands } from '@rme-sdk/react-core';
 import { FC, useCallback } from 'react';
 
-import { t } from 'i18next';
+import { t } from '@markflowy/i18n';
 import { CommandButton, CommandButtonProps } from './command-button';
 
 export interface ToggleBoldButtonProps

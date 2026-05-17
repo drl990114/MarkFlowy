@@ -8,7 +8,7 @@ import { invoke } from '@tauri-apps/api/core'
 import { open } from '@tauri-apps/plugin-dialog'
 import { Button, Checkbox } from 'antd'
 import { useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '@/i18n'
 import styled from 'styled-components'
 import themeData from '../../../../../../community-themes.json'
 

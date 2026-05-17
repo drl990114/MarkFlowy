@@ -15,7 +15,7 @@ import NiceModal from '@ebay/nice-modal-react'
 import { invoke } from '@tauri-apps/api/core'
 import { debounce } from 'lodash'
 import { memo, useCallback, useEffect, useRef, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '@/i18n'
 import { EditorViewType } from 'rme'
 import { isDivider, Space, toast, type MenuItemData } from 'zens'
 

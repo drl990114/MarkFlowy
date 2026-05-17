@@ -1,6 +1,5 @@
-import { changeLng, Langs, locales } from '@/i18n'
+import { changeLng, i18n, Langs, locales } from '@/i18n'
 import { currentWebview } from '@/services/windows'
-import i18n from 'i18next'
 import { EditorViewType } from 'rme'
 
 export const getSettingMap = () => {

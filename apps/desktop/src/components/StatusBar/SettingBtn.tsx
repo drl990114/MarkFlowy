@@ -6,7 +6,7 @@ import { useCommandStore } from '@/stores'
 import useThemeStore from '@/stores/useThemeStore'
 import { emitTo } from '@tauri-apps/api/event'
 import { memo, useCallback, useRef } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '@/i18n'
 import styled from 'styled-components'
 import { showContextMenu } from '../ui-v2/ContextMenu/ContextMenu'
 

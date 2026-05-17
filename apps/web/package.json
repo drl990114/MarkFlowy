@@ -12,6 +12,7 @@
     "prettier": "prettier --write \"**/*.*\""
   },
   "dependencies": {
+    "@markflowy/i18n": "workspace:*",
     "@markflowy/interface": "workspace:*",
     "@mdx-js/mdx": "^3.1.0",
     "@mdx-js/react": "^3.1.0",
@@ -37,7 +38,7 @@
     "react-resizable-panels": "^4.11.0",
     "rehype-slug": "^6.0.0",
     "remixicon": "^4.9.1",
-    "rme": "0.3.7",
+    "rme": "workspace:*",
     "styled-components": "^6.1.13",
     "stylis": "^4.3.4",
     "zens": "0.2.1"

@@ -1,5 +1,5 @@
 import useAppSettingStore from '@/stores/useAppSettingStore'
-import { t } from 'i18next'
+import { t } from '@/i18n'
 import { SettingGroupContainer } from '../component/SettingGroup/styles'
 import InputSettingItem from '../component/SettingItems/Input'
 import PathSelectSettingItem from '../component/SettingItems/PathSelect'

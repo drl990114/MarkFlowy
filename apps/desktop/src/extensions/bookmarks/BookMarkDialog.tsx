@@ -1,7 +1,7 @@
 import { useCommandStore } from '@/stores'
 import { Select } from 'antd'
 import { useEffect, useMemo, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '@/i18n'
 import styled from 'styled-components'
 import { Button, Dialog, Input } from 'zens'
 import useBookMarksStore from './useBookMarksStore'

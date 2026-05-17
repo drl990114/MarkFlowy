@@ -1,5 +1,5 @@
 import type { NodeViewComponentProps } from '@rme-sdk/react'
-import { t } from 'i18next'
+import { t } from '@markflowy/i18n'
 import { useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 import { Button, Menu } from 'zens'

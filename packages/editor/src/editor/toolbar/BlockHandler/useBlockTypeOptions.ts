@@ -2,7 +2,7 @@ import type { ProsemirrorNode } from '@rme-sdk/core'
 import { TextSelection } from '@rme-sdk/pm/state'
 import { useCommands } from '@rme-sdk/react-core'
 import { useMemo } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '@markflowy/i18n'
 import { nodeTypeIconMap } from '../../const'
 import type { BlockTypeGroup, BlockTypeOption, NodeTransformContext } from './types'
 

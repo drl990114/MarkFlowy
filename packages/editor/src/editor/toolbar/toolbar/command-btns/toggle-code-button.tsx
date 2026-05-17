@@ -2,7 +2,7 @@ import { CodeExtension } from '@rme-sdk/extension-code'
 import { useActive, useCommands } from '@rme-sdk/react-core'
 import { FC, useCallback } from 'react'
 
-import { t } from 'i18next'
+import { t } from '@markflowy/i18n'
 import { CommandButton, CommandButtonProps } from './command-button'
 
 export interface ToggleCodeButtonProps

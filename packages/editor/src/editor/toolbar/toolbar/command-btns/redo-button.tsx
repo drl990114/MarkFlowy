@@ -1,6 +1,6 @@
 import { HistoryExtension } from '@rme-sdk/extension-history'
 import { useCommands, useHelpers } from '@rme-sdk/react-core'
-import { t } from 'i18next'
+import { t } from '@markflowy/i18n'
 import { FC, useCallback } from 'react'
 import { CommandButton, CommandButtonProps } from './command-button'
 
