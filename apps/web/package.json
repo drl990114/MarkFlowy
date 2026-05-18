@@ -7,7 +7,9 @@
     "analyze": "ANALYZE=true yarn build",
     "dev": "next dev --turbopack -p 3100",
     "prebuild": "rimraf .next",
-    "build:prod": "NODE_ENV=production next build --turbopack",
+    "build": "yarn workspace @markflowy/i18n build && yarn workspace @markflowy/interface build && next build --turbopack",
+    "build:prod": "NODE_ENV=production yarn build",
+    "build:vercel": "yarn workspace @markflowy/types build && yarn workspace @markflowy/theme build && yarn workspace @markflowy/i18n build && yarn workspace @markflowy/interface build && NODE_ENV=production next build --turbopack",
     "start": "NODE_ENV=production next start",
     "prettier": "prettier --write \"**/*.*\""
   },
