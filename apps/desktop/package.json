@@ -13,7 +13,7 @@
     "test": "vitest run",
     "test:dev": "vitest --ui",
     "delete": "rimraf node_modules",
-    "postinstall": "patch-package"
+    "postinstall": "node scripts/postinstall.js"
   },
   "dependencies": {
     "@ai-sdk/deepseek": "^1.0.28",
