@@ -7,7 +7,8 @@
       "dependsOn": ["^postinstall"]
     },
     "build": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", "build/**", ".next/**", "!.next/cache/**"]
     },
     "deploy": {
       "dependsOn": ["build", "test", "lint"]
