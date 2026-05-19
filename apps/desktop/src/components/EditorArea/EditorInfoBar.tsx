@@ -205,7 +205,7 @@ ${res}
                   inputProps: {
                     placeholder: t('placeholder.translate'),
                   },
-                  onConfirm: (val) => {
+                  onConfirm: (val: string) => {
                     if (!val) {
                       return
                     }
