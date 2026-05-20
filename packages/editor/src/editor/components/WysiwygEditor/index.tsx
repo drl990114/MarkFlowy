@@ -5,6 +5,7 @@ import { memo, useCallback, useEffect, useMemo, type FC } from 'react'
 import { TransformerExtension } from '../../extensions/Transformer/transformer-extension'
 import { WysiwygThemeWrapper } from '../../theme'
 import { BlockHandler } from '../../toolbar/BlockHandler'
+import { LinkHoverIcon } from '../../toolbar/LinkHoverIcon'
 import { SlashMenu } from '../../toolbar/SlashMenu'
 import TableToolbar from '../../toolbar/TableToolbar'
 import { WysiwygToolbar } from '../../toolbar/toolbar'
@@ -78,6 +79,7 @@ const WysiwygEditor: FC<EditorProps> = (props) => {
           <TableToolbar />
           <BlockHandler />
           <SlashMenu />
+          <LinkHoverIcon handleLinkClick={props.delegateOptions?.handleLinkClick} />
           {wysiwygToolBar || null}
           {isTesting ? <ProsemirrorDevTools /> : null}
         </Remirror>

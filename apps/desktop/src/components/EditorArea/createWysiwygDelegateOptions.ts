@@ -18,6 +18,7 @@ import { useEditorStore } from '@/stores'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import { join } from '@tauri-apps/api/path'
 import { writeText } from '@tauri-apps/plugin-clipboard-manager'
+import { openUrl } from '@tauri-apps/plugin-opener'
 import type { CreateWysiwygDelegateOptions } from 'rme'
 
 type AIOptions = NonNullable<CreateWysiwygDelegateOptions['ai']>
@@ -423,6 +424,10 @@ export const createWysiwygDelegateOptions = (fileId?: string): CreateWysiwygDele
       } catch (error) {
         return false
       }
+    },
+    handleLinkClick: (href) => {
+      openUrl(href)
+      return true
     },
   }
 }
