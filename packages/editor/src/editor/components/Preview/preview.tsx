@@ -1,6 +1,7 @@
 import { type Node } from '@rme-sdk/pm/model'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Icon } from 'zens'
+import type { LinkClickHandler } from '../../extensions/LinkClick'
 import { WysiwygThemeWrapper } from '../../theme'
 import { rmeProsemirrorNodeToHtml } from '../../utils/prosemirrorNodeToHtml'
 import { EditorProps } from '../Editor'
@@ -10,6 +11,7 @@ interface PreviewProps {
   doc: Node | string
   delegateOptions?: EditorProps['delegateOptions']
   onError?: (e: Error) => void
+  handleLinkClick?: LinkClickHandler
 }
 
 export type HTMLAstNode = {
@@ -20,9 +22,15 @@ export type HTMLAstNode = {
   content?: string
 }
 
+const defaultLinkClickHandler: LinkClickHandler = (href: string, event: MouseEvent) => {
+  window.open(href, '_blank', 'noopener,noreferrer')
+  return true
+}
+
 export const Preview: React.FC<PreviewProps> = (props) => {
-  const { doc, delegateOptions } = props
+  const { doc, delegateOptions, handleLinkClick } = props
   const [processedHtml, setProcessedHtml] = useState('')
+  const containerRef = useRef<HTMLDivElement>(null)
   let targetDoc: PreviewProps['doc'] = doc
 
   if (typeof targetDoc === 'string') {
@@ -40,6 +48,29 @@ export const Preview: React.FC<PreviewProps> = (props) => {
       })
   }, [props.onError])
 
+  const handleClick = useCallback(
+    (event: React.MouseEvent) => {
+      const target = event.target as HTMLElement
+      const linkElement = target.closest('a')
+
+      if (!linkElement) {
+        return
+      }
+
+      const href = linkElement.getAttribute('href')
+      if (!href) {
+        return
+      }
+
+      event.preventDefault()
+      event.stopPropagation()
+
+      const handler = handleLinkClick || defaultLinkClickHandler
+      handler(href, event.nativeEvent)
+    },
+    [handleLinkClick],
+  )
+
   if (!processedHtml) {
     return (
       <div
@@ -56,5 +87,9 @@ export const Preview: React.FC<PreviewProps> = (props) => {
     )
   }
 
-  return <WysiwygThemeWrapper dangerouslySetInnerHTML={{ __html: processedHtml }} />
+  return (
+    <div ref={containerRef} onClick={handleClick}>
+      <WysiwygThemeWrapper dangerouslySetInnerHTML={{ __html: processedHtml }} />
+    </div>
+  )
 }

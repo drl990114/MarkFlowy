@@ -140,7 +140,13 @@ export const Editor = memo(
     }, [handleContextMounted, hooks])
 
     if (type === 'preview') {
-      return <Preview doc={otherProps.content} delegateOptions={otherProps.delegateOptions} />
+      return (
+        <Preview
+          doc={otherProps.content}
+          delegateOptions={otherProps.delegateOptions}
+          handleLinkClick={otherProps.delegateOptions?.handleLinkClick}
+        />
+      )
     }
 
     return type === 'sourceCode' ? (

@@ -49,6 +49,7 @@ import { LineTableExtension, LineTableRowExtension } from './Table'
 import { LineTextExtension } from './Text'
 import { TransformerExtension } from './Transformer/transformer-extension'
 import { TypewriterScrollExtension, TypewriterScrollOptions } from './TypewriterScroll'
+import { LinkClickExtension, LinkClickHandler } from './LinkClick'
 
 export * from './Image'
 export * from './List'
@@ -75,6 +76,8 @@ export type ExtensionsOptions = {
   uploadImageHandler?: (files: FileWithProgress[]) => DelayedImage[]
 
   typewriterScroll?: TypewriterScrollOptions
+
+  handleLinkClick?: LinkClickHandler
 }
 
 function extensions(options: ExtensionsOptions): any[] {
@@ -116,6 +119,9 @@ function extensions(options: ExtensionsOptions): any[] {
       handleViewImgSrcUrl,
     }),
     new CommonKeymapExtension(),
+    new LinkClickExtension({
+      handleLinkClick: options.handleLinkClick,
+    }),
     new CountExtension({}),
     new HtmlImageExtension({
       handleViewImgSrcUrl,
