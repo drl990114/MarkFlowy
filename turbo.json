@@ -7,6 +7,7 @@
       "dependsOn": ["^postinstall"]
     },
     "build": {
+      "cache": false,
       "dependsOn": ["^build"],
       "outputs": ["dist/**", "build/**", ".next/**", "!.next/cache/**"]
     },
@@ -17,7 +18,7 @@
     "delete": {},
     "lint": {},
     "dev": {
-      "cache": true,
+      "cache": false,
       "persistent": true
     }
   }

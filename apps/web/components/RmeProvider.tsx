@@ -24,7 +24,6 @@ const THEME_CONFIG = {
   mode: 'dark' as const,
   token: {
     ...darkTheme,
-    bgColor: '#181a1c',
     fontFamily: darkTheme.fontFamily,
     codemirrorFontFamily: darkTheme.codemirrorFontFamily,
   },

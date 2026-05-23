@@ -234,7 +234,7 @@ const MainContent = styled.div`
 const MacContainer = styled.div`
   width: min(80%, 1000px);
   height: 600px;
-  background: #14120b;
+  background: ${(props) => props.theme.bgColor};
   border-radius: 12px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
   overflow: hidden;
@@ -314,7 +314,7 @@ const EditorTab = styled.div<{ $active: boolean }>`
   color: ${(props) => (props.$active ? '#ffffff' : '#969696')};
   cursor: pointer;
   padding: 0 20px;
-  background: ${(props) => (props.$active ? '#14120b' : 'transparent')};
+  background: ${(props) => (props.$active ? props.theme.bgColor : 'transparent')};
   border-right: 1px solid #2a2822;
   display: flex;
   align-items: center;
@@ -332,7 +332,7 @@ const EditorTab = styled.div<{ $active: boolean }>`
         left: 0;
         right: 0;
         height: 1px;
-        background: #14120b;
+        background: ${(props) => props.theme.bgColor};
       }
     `}
 
@@ -354,7 +354,7 @@ const EditorLoading = styled.div`
   justify-content: center;
   height: 100%;
   width: 100%;
-  background: #14120b;
+  background: ${(props) => props.theme.bgColor};
   color: #abaaa8;
   font-size: 13px;
   gap: 12px;

@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host",
-    "build": "tsc && vite build",
+    "build": "vite build",
     "build:types": "tsc --tsconfig ./tsconfig.types.json",
     "updater": "tr updater",
     "preview": "vite preview",

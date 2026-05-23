@@ -206,11 +206,7 @@ const Editor = (props: EditorProps) => {
   // Preview mode - render markdown as HTML
   if (currentViewType === 'preview') {
     return (
-      <RmeProvider
-        themeTokens={{
-          bgColor: '#14120B',
-        }}
-      >
+      <RmeProvider>
         <PreviewContainer>
           <Markdown>{content || defaultContent}</Markdown>
         </PreviewContainer>
@@ -223,11 +219,7 @@ const Editor = (props: EditorProps) => {
   }
 
   return (
-    <RmeProvider
-      themeTokens={{
-        bgColor: '#14120B',
-      }}
-    >
+    <RmeProvider>
       <EditorContainer>
         <RmeEditor
           key={editorKey}
