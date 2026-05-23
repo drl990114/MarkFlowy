@@ -1,6 +1,6 @@
 import React, { FC, useCallback } from 'react'
-import { MfIconButton } from '../Button/icon-button'
 import type { EditorContext } from 'rme'
+import { MfIconButton } from '../Button/icon-button'
 
 export interface CommandButtonProps {
   editorCtx: EditorContext
@@ -23,6 +23,7 @@ export const CommandButton: FC<CommandButtonProps> = ({
     const commands = editorCtx.commands as any
     if (commands[commandName]) {
       commands[commandName](attrs)
+      editorCtx.view.focus()
     }
   }, [editorCtx, commandName, attrs])
 
