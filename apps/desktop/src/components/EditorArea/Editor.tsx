@@ -10,6 +10,7 @@ import { EmptyState } from './EmptyState'
 import { PreviewContent } from './preview/PreviewContent'
 import TextEditor from './TextEditor'
 import { UnsupportedFileType } from './UnsupportedFileType'
+import { EditorScrollContainer } from './styles'
 
 function Editor(props: EditorProps) {
   const { id, active } = props
@@ -41,15 +42,17 @@ function Editor(props: EditorProps) {
   if (!curFileTypeConfig) return null
 
   return (
-    <div className={'code-contents'} style={active ? undefined : { display: 'none' }}>
-      {curFileTypeConfig.type === 'unsupported' ? (
-        <UnsupportedFileType />
-      ) : isTextfileType(curFileTypeConfig) ? (
-        <TextEditor fileTypeConfig={curFileTypeConfig} active={active} id={id} />
-      ) : (
-        <PreviewContent type={curFileTypeConfig.type} filePath={curFile.path} active={active} />
-      )}
-    </div>
+    <EditorScrollContainer style={active ? undefined : { display: 'none' }}>
+      <div className={'code-contents'}>
+        {curFileTypeConfig.type === 'unsupported' ? (
+          <UnsupportedFileType />
+        ) : isTextfileType(curFileTypeConfig) ? (
+          <TextEditor fileTypeConfig={curFileTypeConfig} active={active} id={id} />
+        ) : (
+          <PreviewContent type={curFileTypeConfig.type} filePath={curFile.path} active={active} />
+        )}
+      </div>
+    </EditorScrollContainer>
   )
 }
 

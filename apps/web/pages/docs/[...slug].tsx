@@ -30,11 +30,7 @@ const PostLayout = () => {
   if (markdown) {
     return (
       <DocsLayout>
-        <RmeProvider
-          themeTokens={{
-            bgColor: '#14120B',
-          }}
-        >
+        <RmeProvider>
           <DynamicMdHtmlWrapper
             dangerouslySetInnerHTML={{ __html: markdown.body.html }}
           ></DynamicMdHtmlWrapper>

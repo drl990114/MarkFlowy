@@ -221,11 +221,7 @@ export const SaveableEditor = forwardRef<SaveableEditorRef, SaveableEditorProps>
     // Preview mode - render markdown as HTML
     if (currentViewType === 'preview') {
       return (
-        <RmeProvider
-          themeTokens={{
-            bgColor: '#14120B',
-          }}
-        >
+        <RmeProvider>
           <PreviewContainer>
             <Markdown>{content || initialContent}</Markdown>
           </PreviewContainer>
@@ -238,11 +234,7 @@ export const SaveableEditor = forwardRef<SaveableEditorRef, SaveableEditorProps>
     }
 
     return (
-      <RmeProvider
-        themeTokens={{
-          bgColor: '#14120B',
-        }}
-      >
+      <RmeProvider>
         <EditorContainer>
           <Editor
             key={editorKey}

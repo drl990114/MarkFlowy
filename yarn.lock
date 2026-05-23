@@ -4542,6 +4542,7 @@ __metadata:
   dependencies:
     "@markflowy/i18n": "workspace:*"
     "@markflowy/interface": "workspace:*"
+    "@markflowy/theme": "workspace:*"
     "@mdx-js/mdx": "npm:^3.1.0"
     "@mdx-js/react": "npm:^3.1.0"
     "@newhighsco/next-plugin-svgr": "npm:^3.0.144"
@@ -22804,6 +22805,7 @@ __metadata:
     "@lezer/highlight": "npm:^1.2.3"
     "@lezer/javascript": "npm:^1.5.4"
     "@markflowy/i18n": "workspace:*"
+    "@markflowy/theme": "workspace:*"
     "@ocavue/utils": "npm:^0.7.1"
     "@rme-sdk/core": "npm:^1.5.0"
     "@rme-sdk/core-types": "npm:^1.5.0"

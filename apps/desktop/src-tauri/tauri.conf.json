@@ -24,12 +24,6 @@
               "required": true
             }
           ]
-        },
-        "help": {
-          "description": "Print this help message"
-        },
-        "version": {
-          "description": "Print version information"
         }
       }
     },

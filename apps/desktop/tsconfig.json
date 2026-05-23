@@ -11,7 +11,8 @@
     "noEmit": true,
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "skipLibCheck": true
   },
   "include": ["src", "src/**/*.json", "src/types/*.d.ts"],
   "exclude": [

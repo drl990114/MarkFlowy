@@ -131,6 +131,7 @@
     "@lezer/highlight": "^1.2.3",
     "@lezer/javascript": "^1.5.4",
     "@markflowy/i18n": "workspace:*",
+    "@markflowy/theme": "workspace:*",
     "@ocavue/utils": "^0.7.1",
     "@rme-sdk/core": "^1.5.0",
     "@rme-sdk/core-utils": "^1.5.0",

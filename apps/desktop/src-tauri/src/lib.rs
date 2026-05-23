@@ -119,14 +119,6 @@ pub fn run() {
         .plugin(tauri_plugin_single_instance::init(|app_handle: &tauri::AppHandle, args: Vec<String>, _cwd: String| {
             if args.len() > 1 {
                 match args[1].as_str() {
-                    "help" => {
-                        print_cli_help();
-                        std::process::exit(0);
-                    }
-                    "version" => {
-                        println!("MarkFlowy v{}", app_handle.package_info().version);
-                        std::process::exit(0);
-                    }
                     "open" => {
                         let opened_urls = args.iter()
                             .skip(2)
@@ -223,14 +215,6 @@ pub fn run() {
                 Ok(matches) => {
                     if let Some(subcommand) = matches.subcommand {
                         match subcommand.name.as_str() {
-                            "help" => {
-                                print_cli_help();
-                                std::process::exit(0);
-                            }
-                            "version" => {
-                                println!("MarkFlowy v{}", app.package_info().version);
-                                std::process::exit(0);
-                            }
                             "open" => {
                                 if let Some(arg_data) = subcommand.matches.args.get("path") {
                                     if let Some(raw_path) = arg_data.value.as_str() {
@@ -248,7 +232,7 @@ pub fn run() {
                             }
                             _ => {}
                         }
-                    } else if is_terminal_launch() {
+                    } else if is_terminal_launch() && !cfg!(debug_assertions) {
                         cli_debug!("terminal launch, no subcommand -> showing help");
                         print_cli_help();
                         std::process::exit(0);

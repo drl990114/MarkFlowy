@@ -8,7 +8,6 @@ use std::future::Future;
 use std::path::Path;
 
 use crate::task_system::error::SystemError;
-use crate::task_system::task::TaskId;
 
 #[cfg(target_os = "macos")]
 use core_foundation::url::CFURL;
