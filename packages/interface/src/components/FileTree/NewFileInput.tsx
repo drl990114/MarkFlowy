@@ -41,9 +41,13 @@ const NewFileInput = (
   const verifing = useRef(false)
   const creating = useRef(false)
   const inputRef = useRef<HTMLInputElement>(null)
+  const isComposing = useRef(false)
 
   const handleBlur = useCallback(() => {
     if (creating.current === true) {
+      return
+    }
+    if (isComposing.current) {
       return
     }
     const fileName = inputRef.current?.value || initialName
@@ -63,13 +67,8 @@ const NewFileInput = (
   useEffect(() => {
     setTimeout(() => {
       inputRef.current?.focus()
-      inputRef.current?.addEventListener('blur', handleBlur)
       verify(initialName)
     })
-
-    return () => {
-      inputRef.current?.removeEventListener('blur', handleBlur)
-    }
   }, [initialName])
 
   const getFileInfo = useCallback(
@@ -131,6 +130,22 @@ const NewFileInput = (
       let fileName = e.target.value
       setInputName(fileName)
 
+      if (!isComposing.current) {
+        verify(fileName)
+      }
+    },
+    [verify],
+  )
+
+  const handleCompositionStart = useCallback(() => {
+    isComposing.current = true
+  }, [])
+
+  const handleCompositionEnd: React.CompositionEventHandler<HTMLInputElement> = useCallback(
+    (e) => {
+      isComposing.current = false
+      const fileName = (e.target as HTMLInputElement).value
+      setInputName(fileName)
       verify(fileName)
     },
     [verify],
@@ -143,10 +158,13 @@ const NewFileInput = (
         inputRef={inputRef}
         value={inputName}
         onChange={handleChange}
+        onCompositionStart={handleCompositionStart}
+        onCompositionEnd={handleCompositionEnd}
         spellCheck={false}
         onClick={(e) => e.stopPropagation()}
         onKeyDown={(e) => e.stopPropagation()}
-        onPressEnter={async () => {
+        onPressEnter={async (e) => {
+          if (e.isComposing) return
           if (invalidState === false && verifing.current === false) {
             const fileInfo = await getFileInfo(inputName)
             creating.current = true
@@ -155,6 +173,7 @@ const NewFileInput = (
             })
           }
         }}
+        onBlur={handleBlur}
         {...otherProps}
       ></Input>
     </Tooltip>
