@@ -2,23 +2,23 @@
   "common": {
     "docs": "文档"
   },
+  "playground": {
+    "title": "试试 Playground"
+  },
   "docs": {
     "sidebar": {
       "gettingStarted": "快速开始"
     }
   },
-  "playground": {
-    "title": "体验 Playground"
-  },
   "mock": {
     "intro": {
       "title": "欢迎使用 MarkFlowy！",
       "ai_label": "AI 驱动：",
-      "ai_desc": "内置 Copilot、翻译、摘要功能，并支持 DeepSeek/ChatGPT 等多种主流模型。",
+      "ai_desc": "内置 Copilot、翻译、摘要功能，支持 DeepSeek/ChatGPT 等主流模型。",
       "lightweight_label": "轻量化：",
       "lightweight_desc": "基于 Tauri 架构，体积小于 20MB。",
       "modes_label": "编辑模式：",
-      "modes_desc": "支持所见即所得 (WYSIWYG) 与源码模式切换。",
+      "modes_desc": "支持所见即所得与源码模式切换。",
       "files_label": "文件支持：",
       "files_desc": "支持 Markdown、JSON、TXT 等多种格式。",
       "themes_label": "自定义主题：",
@@ -31,35 +31,56 @@
       "manager_desc": "强大的树状视图，支持全局搜索。",
       "multilingual_label": "多语言：",
       "multilingual_desc": "原生支持 5 种以上主流语言。",
-      "footer": "尽情体验编辑的乐趣吧！"
+      "footer": "尽情体验编辑器吧！"
+    },
+    "config": {
+      "description": "下一代 AI 驱动的专业文本编辑器。"
     }
-  },
-  "config": {
-    "description": "由 AI 驱动的下一代专业文本编辑器。"
   },
   "home": {
     "hero": {
       "title": "MarkFlowy",
-      "subtitle": "MarkFlowy 致力于高效舒适的 Markdown 创作，\nAI 驱动的下一代专业编辑器。",
+      "subtitle": "MarkFlowy 致力于高效舒适的 Markdown 创作，\n由 AI 驱动的新一代专业编辑器。",
       "description": "",
       "download": "立即下载"
     },
     "features": {
+      "lead": "极简而强大的编辑器，将 AI 智能与精炼的写作体验结合——为专注与匠心而生。",
       "feature1": {
         "title": "多模式编辑",
-        "description": "支持源代码、所见即所得编辑模式，满足不同场景需求，并且支持编辑 Markdown 以外的文件，如 json、txt 等"
+        "description": "支持源代码和所见即所得编辑模式，满足不同场景需求，并支持编辑 Markdown 以外的文件，如 JSON、TXT 等。"
       },
       "feature2": {
         "title": "内置 AI 助手",
-        "description": "集成强大的 AI 助手，支持文本生成、对话、翻译等功能，提升编辑效率"
+        "description": "集成强大的 AI 助手，支持文本生成、对话、翻译等功能，提升编辑效率。"
       },
       "feature3": {
         "title": "自定义主题",
-        "description": "提供明暗两种内置主题，并支持自定义主题，满足个性化需求"
+        "description": "提供内置明暗主题，并支持自定义主题，满足个性化需求。"
+      },
+      "capability1": {
+        "tag": "编辑",
+        "title": "所见即所得 & 源码模式",
+        "body": "在所见即所得与源码模式间无缝切换，支持编辑 Markdown、JSON、TXT 等多种格式。"
+      },
+      "capability2": {
+        "tag": "AI",
+        "title": "Copilot 智能助手",
+        "body": "内置 AI 助手，支持 ChatGPT、DeepSeek、Ollama 等模型。生成文本、翻译、摘要、对话——一切尽在编辑器中。"
+      },
+      "capability3": {
+        "tag": "性能",
+        "title": "轻量 & 跨平台",
+        "body": "基于 Tauri 构建，体积不足 20MB，在 macOS、Windows 和 Linux 上提供原生性能。"
+      },
+      "capability4": {
+        "tag": "定制",
+        "title": "主题 & 快捷键",
+        "body": "设计你自己的编辑器主题并分享，全面自定义键盘快捷键以匹配你的工作流。"
       }
     },
     "contributors": {
-      "title": "由众多贡献者共同打造",
+      "title": "由众多贡献者共同构建",
       "description": "感谢所有为 MarkFlowy 做出贡献的开发者"
     }
   },
@@ -70,17 +91,17 @@
     "github": "GitHub",
     "theme": "主题",
     "language": "语言",
-    "releases": "发布记录"
+    "releases": "版本发布"
   },
   "fileTitle": {
-    "intro": "介绍",
+    "intro": "简介",
     "CustomTheme": "自定义主题",
     "CODE_OF_CONDUCT": "行为准则",
     "CONTRIBUTING": "贡献指南",
     "Community": "社区准则",
     "Extension": "扩展指南",
     "License": "许可证",
-    "UseCopilotWithOllama": "Copilot 与 Ollama 组合实践"
+    "UseCopilotWithOllama": "使用 Ollama 的 Copilot"
   },
   "auth": {
     "login": "登录",
@@ -96,8 +117,8 @@
     "resendCode": "{{seconds}}秒后重发",
     "signIn": "登录",
     "createAccount": "创建账号",
-    "changeEmail": "修改",
-    "autoRegisterHint": "未注册邮箱将自动注册",
+    "changeEmail": "更换",
+    "autoRegisterHint": "未注册的邮箱将自动注册",
     "backToHome": "返回首页"
   }
 }

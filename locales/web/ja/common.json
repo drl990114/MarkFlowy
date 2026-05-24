@@ -3,33 +3,85 @@
     "docs": "ドキュメント"
   },
   "playground": {
-    "title": "プレイグラウンドを試す"
+    "title": "Playground を試す"
   },
   "docs": {
     "sidebar": {
       "gettingStarted": "はじめに"
     }
   },
+  "mock": {
+    "intro": {
+      "title": "MarkFlowy へようこそ！",
+      "ai_label": "AI 搭載：",
+      "ai_desc": "内蔵 Copilot、翻訳、要約機能。DeepSeek/ChatGPT などの主要モデルに対応。",
+      "lightweight_label": "軽量：",
+      "lightweight_desc": "Tauri ベースのアーキテクチャ、20MB 以下。",
+      "modes_label": "編集モード：",
+      "modes_desc": "WYSIWYG とソースコードモードの切り替えに対応。",
+      "files_label": "ファイルサポート：",
+      "files_desc": "Markdown、JSON、TXT など複数の形式に対応。",
+      "themes_label": "カスタムテーマ：",
+      "themes_desc": "独自のエディタスタイルをデザインして共有。",
+      "hotkeys_label": "ショートカット：",
+      "hotkeys_desc": "キーボードショートカットの完全カスタマイズに対応。",
+      "images_label": "スマート画像：",
+      "images_desc": "パス管理または Base64 自動変換。",
+      "manager_label": "ファイル管理：",
+      "manager_desc": "強力なツリービューとグローバル検索。",
+      "multilingual_label": "多言語：",
+      "multilingual_desc": "5つ以上の主要言語をネイティブサポート。",
+      "footer": "エディタをお楽しみください！"
+    },
+    "config": {
+      "description": "AI 駆動の次世代プロフェッショナルテキストエディタ。"
+    }
+  },
   "home": {
     "hero": {
       "title": "MarkFlowy",
-      "subtitle": "効率的で快適な編集",
+      "subtitle": "MarkFlowy は効率的で快適な Markdown 創作に取り組んでいます。\nAI 駆動の次世代プロフェッショナルエディタ。",
       "description": "",
       "download": "今すぐダウンロード"
     },
     "features": {
+      "lead": "ミニマルで強力なエディタ。AI の知性と洗練された執筆体験を融合——集中と匠の技のために。",
       "feature1": {
         "title": "複数の編集モード",
-        "description": "ソースコードとWYSIWYG編集モードをサポートし、異なるシナリオのニーズに対応します。また、Markdown以外のファイル（json、txtなど）の編集もサポートします。"
+        "description": "ソースコードと WYSIWYG 編集モードをサポートし、異なるシーンのニーズに対応。Markdown 以外のファイル（JSON、TXT など）の編集もサポート。"
       },
       "feature2": {
         "title": "組み込みAIアシスタント",
-        "description": "強力なAIアシスタントを統合し、テキスト生成、会話、翻訳などの機能をサポートして編集効率を向上させます。"
+        "description": "強力な AI アシスタントを統合し、テキスト生成、対話、翻訳などの機能をサポートして編集効率を向上。"
       },
       "feature3": {
         "title": "カスタムテーマ",
-        "description": "ライトテーマとダークテーマを組み込みで提供し、カスタムテーマもサポートしてパーソナライズされたニーズに対応します。"
+        "description": "内蔵のライト/ダークテーマを提供し、カスタムテーマもサポートして個別のニーズに対応。"
+      },
+      "capability1": {
+        "tag": "編集",
+        "title": "WYSIWYG & ソースコード",
+        "body": "WYSIWYG とソースコードモードをシームレスに切り替え。Markdown、JSON、TXT など多様な形式を柔軟に編集。"
+      },
+      "capability2": {
+        "tag": "AI",
+        "title": "Copilot & スマートアシスト",
+        "body": "ChatGPT、DeepSeek、Ollama を搭載した AI アシスタント。テキスト生成、翻訳、要約、対話——すべてエディタ内で。"
+      },
+      "capability3": {
+        "tag": "パフォーマンス",
+        "title": "軽量 & クロスプラットフォーム",
+        "body": "Tauri ベースで 20MB 以下。macOS、Windows、Linux でネイティブパフォーマンスを提供。"
+      },
+      "capability4": {
+        "tag": "カスタマイズ",
+        "title": "テーマ & ショートカット",
+        "body": "独自のエディタテーマをデザインして共有。キーボードショートカットを完全カスタマイズしてワークフローに適合。"
       }
+    },
+    "contributors": {
+      "title": "多くの貢献者によって構築",
+      "description": "MarkFlowy に貢献してくださったすべての開発者に感謝します"
     }
   },
   "navigation": {
@@ -48,7 +100,8 @@
     "CONTRIBUTING": "貢献ガイド",
     "Community": "コミュニティガイドライン",
     "Extension": "拡張ガイド",
-    "License": "ライセンス"
+    "License": "ライセンス",
+    "UseCopilotWithOllama": "Ollama で Copilot を使用"
   },
   "auth": {
     "login": "ログイン",

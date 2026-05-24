@@ -393,7 +393,7 @@ const Tab = styled.button<{ $active: boolean }>`
         left: 0;
         right: 0;
         height: 1.5px;
-        background: #da936a;
+        background: #d4564a;
       }
     `}
 
@@ -430,7 +430,7 @@ const Input = styled.input`
 
   &:focus {
     outline: none;
-    border-color: #da936a;
+    border-color: #d4564a;
   }
 
   &::placeholder {
@@ -460,7 +460,7 @@ const ChangeEmail = styled.button`
   background: transparent;
   border: none;
   font-size: ${rem(12)};
-  color: #da936a;
+  color: #d4564a;
   cursor: pointer;
   padding: 0;
   margin-left: ${rem(8)};
@@ -488,7 +488,7 @@ const ErrorMessage = styled.div`
 const SubmitButton = styled.button`
   width: 100%;
   padding: ${rem(10)} ${rem(16)};
-  background: #da936a;
+  background: #d4564a;
   border: none;
   border-radius: ${rem(6)};
   font-size: ${rem(14)};
@@ -541,7 +541,7 @@ const ResendButton = styled.button`
   background: transparent;
   border: none;
   font-size: ${rem(13)};
-  color: #da936a;
+  color: #d4564a;
   cursor: pointer;
   padding: 0;
 

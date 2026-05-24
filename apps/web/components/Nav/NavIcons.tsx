@@ -13,7 +13,7 @@ export const Svg = styled.svg`
 export const CloseIcon = () => (
   <Svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" xmlnsXlink="http://www.w3.org/1999/xlink">
     <title>close</title>
-    <use fill="#FFF" xlinkHref="#close" transform="translate(1 1)" />
+    <use fill="currentColor" xlinkHref="#close" transform="translate(1 1)" />
     <defs>
       <path id="close" d="M-.7.7l13 13 1.4-1.4-13-13L-.7.7zm13-1.4l-13 13 1.4 1.4 13-13-1.4-1.4z" />
     </defs>
@@ -23,7 +23,7 @@ export const CloseIcon = () => (
 export const FoldIcon = () => (
   <Svg xmlns="http://www.w3.org/2000/svg" width="17" height="14" xmlnsXlink="http://www.w3.org/1999/xlink">
     <title>fold</title>
-    <use fill="#FFF" xlinkHref="#fold" transform="translate(0 1)" />
+    <use fill="currentColor" xlinkHref="#fold" transform="translate(0 1)" />
     <defs>
       <path id="fold" d="M0 1h17v-2H0v2zm17 4H0v2h17V5zM0 13h17v-2H0v2z" />
     </defs>
@@ -33,7 +33,7 @@ export const FoldIcon = () => (
 export const ArrowIcon = () => (
   <Svg xmlns="http://www.w3.org/2000/svg" width="12" height="8" xmlnsXlink="http://www.w3.org/1999/xlink">
     <title>arrow down</title>
-    <use fill="#FFF" xlinkHref="#menuArrow" transform="translate(1 1)" />
+    <use fill="currentColor" xlinkHref="#menuArrow" transform="translate(1 1)" />
     <defs>
       <path
         id="menuArrow"
@@ -45,7 +45,7 @@ export const ArrowIcon = () => (
 export const SearchIcon = () => (
   <Svg xmlns="http://www.w3.org/2000/svg" width="12" height="8" xmlnsXlink="http://www.w3.org/1999/xlink">
     <title>arrow down</title>
-    <use fill="#FFF" xlinkHref="#menuSearch" transform="translate(1 1)" />
+    <use fill="currentColor" xlinkHref="#menuSearch" transform="translate(1 1)" />
     <defs>
       <path
         id="menuSearch"

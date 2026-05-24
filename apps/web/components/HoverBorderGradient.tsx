@@ -16,13 +16,12 @@ type HoverBorderGradientProps = {
 
 const Container = styled.div`
   position: relative;
-  display: flex;
+  display: inline-flex;
   border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  background-color: rgba(0, 0, 0, 0.4);
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  background-color: var(--ink);
+  transition: transform 0.4s cubic-bezier(0.22, 0.61, 0.36, 1),
+              box-shadow 0.4s cubic-bezier(0.22, 0.61, 0.36, 1);
   align-items: center;
-  flex-direction: column;
   justify-content: center;
   overflow: visible;
   padding: 1.5px;
@@ -30,49 +29,54 @@ const Container = styled.div`
   cursor: pointer;
 
   &:hover {
-    transform: scale(1.06);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(212, 86, 74, 0.15);
+  }
+
+  &:active {
+    transform: translateY(-1px);
   }
 `
 
 const Content = styled.div`
   width: auto;
-  color: #000000;
+  color: var(--paper);
   z-index: 2;
-  background-color: #ffffff;
-  padding: ${rem(8)} ${rem(28)};
+  background-color: var(--ink);
+  padding: ${rem(11)} ${rem(28)};
   border-radius: inherit;
+  font-family: var(--sans);
   font-weight: 600;
-  font-size: ${rem(16)};
+  font-size: ${rem(14)};
   display: flex;
   align-items: center;
-  gap: ${rem(10)};
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  gap: ${rem(8)};
+  letter-spacing: 0.01em;
 `
 
 const MotionBackground = styled(motion.div)`
-  flex: none;
+  position: absolute;
   inset: -1px;
   overflow: hidden;
-  position: absolute;
   z-index: 0;
   border-radius: inherit;
-  filter: blur(4px);
+  filter: blur(0px);
   width: calc(100% + 2px);
   height: calc(100% + 2px);
 `
 
 const InnerBackground = styled.div`
-  background-color: #ffffff;
+  background-color: var(--ink);
   position: absolute;
   z-index: 1;
-  inset: 2px;
+  inset: 1.5px;
   border-radius: 9999px;
 `
 
 export function HoverBorderGradient({
   children,
   as: Tag = 'button',
-  duration = 1.2,
+  duration = 1.5,
   clockwise = true,
   onClick,
   ...props
@@ -90,13 +94,13 @@ export function HoverBorderGradient({
   }
 
   const movingMap: Record<Direction, string> = {
-    TOP: 'radial-gradient(30% 60% at 50% 0%, #ff8c00 0%, #ff8c00 40%, rgba(255, 140, 0, 0) 100%)',
-    LEFT: 'radial-gradient(25% 55% at 0% 50%, #ff8c00 0%, #ff8c00 40%, rgba(255, 140, 0, 0) 100%)',
-    BOTTOM: 'radial-gradient(30% 60% at 50% 100%, #ff8c00 0%, #ff8c00 40%, rgba(255, 140, 0, 0) 100%)',
-    RIGHT: 'radial-gradient(25% 55% at 100% 50%, #ff8c00 0%, #ff8c00 40%, rgba(255, 140, 0, 0) 100%)',
+    TOP: 'radial-gradient(30% 60% at 50% 0%, #d4564a 0%, #d4564a 35%, rgba(212, 86, 74, 0) 100%)',
+    LEFT: 'radial-gradient(25% 55% at 0% 50%, #d4564a 0%, #d4564a 35%, rgba(212, 86, 74, 0) 100%)',
+    BOTTOM: 'radial-gradient(30% 60% at 50% 100%, #d4564a 0%, #d4564a 35%, rgba(212, 86, 74, 0) 100%)',
+    RIGHT: 'radial-gradient(25% 55% at 100% 50%, #d4564a 0%, #d4564a 35%, rgba(212, 86, 74, 0) 100%)',
   }
 
-  const highlight = 'radial-gradient(80% 180% at 50% 50%, #ff8c00 0%, #ff8c00 30%, rgba(255, 255, 255, 0) 100%)'
+  const highlight = 'radial-gradient(80% 180% at 50% 50%, #e06b5f 0%, #d4564a 30%, rgba(212, 86, 74, 0) 100%)'
 
   useEffect(() => {
     if (!hovered) {

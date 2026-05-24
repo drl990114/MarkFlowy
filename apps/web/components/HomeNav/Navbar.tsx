@@ -1,9 +1,8 @@
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { i18n, useTranslation } from 'next-i18next'
-import { useRouter } from 'next/router'
 import styled, { css } from 'styled-components'
 import { mobile } from '../../utils/media'
 import rem from '../../utils/rem'
-import { navbarHeight } from '../../utils/sizes'
 import Link from '../Link'
 import LanguageSwitcher from '../Nav/LanguageSwitcher'
 import { Logo } from '../Nav/Logo'
@@ -19,168 +18,182 @@ export interface NavbarProps {
   showSideNav?: boolean
 }
 
-function AuthButtons() {
-  const router = useRouter()
-  const { t } = useTranslation()
-
-  const handleLogin = () => {
-    router.push('/auth')
-  }
-
-  return (
-    <AuthButtonsWrapper>
-      <LoginButton onClick={handleLogin}>
-        {t('auth.login')}
-      </LoginButton>
-    </AuthButtonsWrapper>
-  )
-}
-
 export default function Navbar({
-  onSideToggle,
   onMobileNavToggle,
-  isSideFolded,
   isMobileNavFolded,
-  showSideNav,
 }: NavbarProps) {
+  const { t } = useTranslation()
+  const [navState, setNavState] = useState<'visible' | 'hidden' | 'scrolled'>('visible')
+  const lastScrollY = useRef(0)
+  const ticking = useRef(false)
+
+  const updateNavState = useCallback(() => {
+    const scrollY = window.scrollY
+
+    if (scrollY < 10) {
+      setNavState('visible')
+    } else if (scrollY > lastScrollY.current + 5 && scrollY > 80) {
+      setNavState('hidden')
+    } else if (scrollY < lastScrollY.current - 5) {
+      setNavState('scrolled')
+    } else if (scrollY > 10) {
+      setNavState('scrolled')
+    }
+
+    lastScrollY.current = scrollY
+    ticking.current = false
+  }, [])
+
+  useEffect(() => {
+    const onScroll = () => {
+      if (!ticking.current) {
+        ticking.current = true
+        requestAnimationFrame(updateNavState)
+      }
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [updateNavState])
+
   return (
-    <>
-      <Wrapper>
-        <MobileNavbar
-          isSideFolded={isSideFolded}
-          isMobileNavFolded={isMobileNavFolded}
-          onSideToggle={onSideToggle}
-          onMobileNavToggle={onMobileNavToggle}
-          showSideNav={showSideNav}
-        />
+    <Wrapper $state={navState}>
+      <MainBarRow>
+        <NavInner>
+          <MobileNavbar
+            isMobileNavFolded={isMobileNavFolded}
+            onMobileNavToggle={onMobileNavToggle}
+          />
 
-        <NormalNavbar>
-          <StartWrapper>
-            <LogoLink aria-label='MarkFlowy logo' href={`./${i18n?.language || 'en'}`}>
+          <DesktopStart>
+            <LogoLink aria-label='MarkFlowy logo' href={`/${i18n?.language || 'en'}`}>
               <Logo />
-              <Brand> / </Brand>
-              <strong>MarkFlowy</strong>
+              <BrandName>MarkFlowy</BrandName>
             </LogoLink>
+            <StyledNavLinks />
+          </DesktopStart>
 
-            <NavLinks />
-          </StartWrapper>
-        </NormalNavbar>
-
-        <EndWrapper
-          /** @ts-ignore */
-          css={css`
-            margin-left: auto;
-            margin-right: 16px;
-
-            ${mobile(css`
-              margin-right: 48px;
-            `)}
-          `}
-        >
-          <LanguageSwitcher style={{ marginRight: 8 }} />
-          <StyledSocial style={{ marginLeft: 8 }} />
-        </EndWrapper>
-      </Wrapper>
-      <div style={{ height: `${navbarHeight}px` }} />
-    </>
+          <DesktopEnd>
+            <LanguageSwitcher />
+            <StyledSocial />
+          </DesktopEnd>
+        </NavInner>
+      </MainBarRow>
+    </Wrapper>
   )
 }
 
 export const Brand = styled.span`
-  font-size: ${rem(20)};
-  font-weight: bold;
-  margin: 0 12px;
-  color: ${(props) => props.theme.unselectedFontColor};
+  font-family: var(--sans);
+  font-size: ${rem(18)};
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 ${rem(6)};
 `
 
-const Wrapper = styled.nav<{ $transparent?: boolean; $scrolled?: boolean }>`
+const Wrapper = styled.nav<{ $state: 'visible' | 'hidden' | 'scrolled' }>`
   position: fixed;
   top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  margin: 0 auto;
-  width: min(${(props) => props.theme.homeMaxWidth}, 100%);
-  display: flex;
-  align-items: center;
-  background-color: ${(props) => props.theme.navBackground};
-  box-sizing: border-box;
-  color: white;
-  flex-wrap: wrap;
-  font-family: ${(props) => props.theme.fontFamily};
-  font-size: ${rem(15)};
-  font-weight: 500;
-  justify-content: center;
-  height: ${rem(navbarHeight)};
-  transition: background 300ms ease-out;
-  z-index: 3;
-  padding: 0 ${rem(30)};
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: color-mix(in srgb, var(--paper) 92%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transform: translateY(0);
+  transition: transform 400ms cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 200ms ease,
+              border-color 200ms ease;
 
-  ${mobile(css`
-    padding: 0 ${rem(20)};
-  `)}
+  ${(p) =>
+    p.$state === 'hidden' &&
+    css`
+      transform: translateY(-100%);
+    `}
+
+  ${(p) =>
+    p.$state === 'scrolled' &&
+    css`
+      box-shadow: 0 1px 0 var(--line-soft);
+    `}
 `
 
-const StartWrapper = styled.div`
+const MainBarRow = styled.div`
+  height: ${rem(52)};
+`
+
+const NavInner = styled.div`
+  max-width: ${rem(1200)};
+  margin: 0 auto;
+  padding: 0 ${rem(24)};
+  height: 100%;
+  display: flex;
+  align-items: center;
+`
+
+const DesktopStart = styled.div`
   display: flex;
   align-items: center;
   justify-content: flex-start;
-`
-
-const EndWrapper = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-`
-/* stylelint-disable */
-const StyledSocial = styled(Social)``
-/* stylelint-enable */
-
-const NormalNavbar = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  ${StartWrapper}, ${EndWrapper} ${StyledSocial} {
-    ${mobile(css`
-      display: none;
-    `)};
-  }
-`
-
-const LogoLink = styled(Link).attrs((/* props */) => ({
-  unstyled: true,
-  href: '/',
-}))`
-  display: flex;
-  align-items: center;
-  vertical-align: center;
-  margin-right: ${rem(35)};
-`
-
-const AuthButtonsWrapper = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${rem(12)};
-  margin-left: ${rem(16)};
 
   ${mobile(css`
     display: none;
   `)}
 `
 
-const LoginButton = styled.button`
-  padding: ${rem(8)} ${rem(16)};
-  background: transparent;
-  border: 1px solid ${(props) => props.theme.borderColor};
-  border-radius: ${rem(6)};
-  font-size: ${rem(14)};
-  font-weight: 500;
-  color: ${(props) => props.theme.unselectedFontColor};
-  cursor: pointer;
-  transition: all 0.2s ease;
+const DesktopEnd = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: ${rem(12)};
+  margin-left: auto;
 
-  &:hover {
-    border-color: #da936a;
-    color: #da936a;
+  ${mobile(css`
+    display: none;
+  `)}
+`
+
+const LogoLink = styled(Link).attrs(() => ({
+  unstyled: true,
+  href: '/',
+}))`
+  display: flex;
+  align-items: center;
+  gap: ${rem(8)};
+  margin-right: ${rem(32)};
+  color: var(--ink);
+  text-decoration: none;
+`
+
+const BrandName = styled.strong`
+  font-family: var(--sans);
+  font-size: ${rem(16)};
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+`
+
+const StyledNavLinks = styled(NavLinks)`
+  a {
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink-soft);
+    transition: color 150ms ease;
+
+    &:hover {
+      color: var(--seal);
+    }
+  }
+`
+
+const StyledSocial = styled(Social)`
+  a, svg {
+    color: var(--ink-soft);
+    transition: color 150ms ease;
+
+    &:hover {
+      color: var(--seal);
+    }
   }
 `

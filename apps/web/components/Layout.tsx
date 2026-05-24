@@ -5,7 +5,7 @@ import { footerHeight, sidebarWidth } from '../utils/sizes'
 
 export const Container = styled.div`
   padding-left: ${rem(sidebarWidth)};
-  background-color: ${(props) => props.theme.bgColor};
+  background-color: var(--paper);
 
   ${mobile(css`
     padding-left: 0;
@@ -14,7 +14,7 @@ export const Container = styled.div`
 
 export const Content = styled.div<{ $hero?: boolean; $moveRight?: boolean; $footer?: boolean }>`
   box-sizing: border-box;
-  font-family: ${(props) => props.theme.fontFamily};
+  font-family: var(--body);
   margin: 0 auto;
   min-height: ${(props) =>
     props.$footer ? '0' : `calc(100vh - ${rem(footerHeight)})`};
@@ -46,10 +46,10 @@ export const Content = styled.div<{ $hero?: boolean; $moveRight?: boolean; $foot
 export const Title = styled.h1`
   text-align: left;
   width: 100%;
-  color: ${(props) => props.theme.primaryFontColor};
+  color: var(--ink);
   font-size: ${rem(42)};
   font-weight: bold;
-  font-family: ${(props) => props.theme.fontFamily};
+  font-family: var(--sans);
 
   + h2 {
     margin-top: -0.5em;
@@ -59,7 +59,8 @@ export const Title = styled.h1`
 export const Header = styled.h2`
   font-size: ${rem(32)};
   font-weight: 600;
-  font-family: ${(props) => props.theme.fontFamily};
+  font-family: var(--sans);
+  color: var(--ink);
   margin: 2em 0 1em;
 
   + h3 {
@@ -71,7 +72,8 @@ export const SubHeader = styled.h3`
   margin: 2em 0 1em;
   font-size: ${rem(24)};
   font-weight: 600;
-  font-family: ${(props) => props.theme.fontFamily};
+  font-family: var(--sans);
+  color: var(--ink);
 
   + h4 {
     margin-top: -0.5em;
@@ -82,5 +84,6 @@ export const TertiaryHeader = styled.h4`
   margin: 2em 0 1em;
   font-size: ${rem(18)};
   font-weight: 600;
-  font-family: ${(props) => props.theme.fontFamily};
+  font-family: var(--sans);
+  color: var(--ink);
 `

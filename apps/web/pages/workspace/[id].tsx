@@ -704,7 +704,7 @@ const WorkspaceIcon = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #da936a 0%, #c47a4f 100%);
+  background: linear-gradient(135deg, #d4564a 0%, #b8453c 100%);
   border-radius: ${rem(6)};
   color: #ffffff;
 `
@@ -741,7 +741,7 @@ const BranchSelect = styled.select`
 
   &:focus {
     outline: none;
-    border-color: #da936a;
+    border-color: #d4564a;
   }
 `
 
@@ -770,7 +770,7 @@ const CommitInput = styled.input`
 
   &:focus {
     outline: none;
-    border-color: #da936a;
+    border-color: #d4564a;
   }
 `
 
@@ -778,7 +778,7 @@ const SaveButton = styled.button`
   padding: ${rem(4)} ${rem(12)};
   font-size: ${rem(13)};
   font-weight: 500;
-  background: #da936a;
+  background: #d4564a;
   color: white;
   border: none;
   border-radius: ${rem(4)};
@@ -921,7 +921,7 @@ const LoadingSpinner = styled.div`
   width: ${rem(40)};
   height: ${rem(40)};
   border: 3px solid rgba(255, 255, 255, 0.1);
-  border-top-color: #da936a;
+  border-top-color: #d4564a;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 

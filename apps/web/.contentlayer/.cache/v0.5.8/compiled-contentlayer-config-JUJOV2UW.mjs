@@ -37,7 +37,7 @@ var Markdown = defineDocumentType(() => ({
   name: "Markdown",
   contentType: "markdown",
   // Location of Post source files (relative to `contentDirPath`)
-  filePathPattern: "./**/*.md",
+  filePathPattern: "./*/**/*.md",
   // At the time of writing, we also have to define the `fields`
   // option to prevent an error on generation. We'll discuss
   // this option later. For now, we'll add an empty object.
@@ -94,4 +94,4 @@ export {
   Post,
   contentlayer_config_default as default
 };
-//# sourceMappingURL=compiled-contentlayer-config-IHS33S7D.mjs.map
+//# sourceMappingURL=compiled-contentlayer-config-JUJOV2UW.mjs.map

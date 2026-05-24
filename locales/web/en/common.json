@@ -45,9 +45,10 @@
       "download": "Download Now"
     },
     "features": {
+      "lead": "A minimalist yet powerful editor that combines AI intelligence with refined writing experience — built for those who value focus and craft.",
       "feature1": {
         "title": "Multiple Editing Modes",
-        "description": "Supports source code and WYSIWYG editing modes to meet different scenario needs, and supports editing files other than Markdown, such as json, txt, etc."
+        "description": "Supports source code and WYSIWYG editing modes to meet different scenario needs, and supports editing files other than Markdown, such as JSON, TXT, etc."
       },
       "feature2": {
         "title": "Built-in AI Assistant",
@@ -56,6 +57,26 @@
       "feature3": {
         "title": "Custom Themes",
         "description": "Provides built-in light and dark themes, and supports custom themes to meet personalized needs."
+      },
+      "capability1": {
+        "tag": "Editing",
+        "title": "WYSIWYG & Source Code",
+        "body": "Seamlessly switch between What You See Is What You Get and source code modes. Edit Markdown, JSON, TXT and more with full flexibility."
+      },
+      "capability2": {
+        "tag": "AI",
+        "title": "Copilot & Smart Assist",
+        "body": "Built-in AI assistant powered by ChatGPT, DeepSeek, and Ollama. Generate text, translate, summarize, and chat — all within the editor."
+      },
+      "capability3": {
+        "tag": "Performance",
+        "title": "Lightweight & Cross-Platform",
+        "body": "Built on Tauri for minimal footprint — under 20MB. Native performance on macOS, Windows, and Linux."
+      },
+      "capability4": {
+        "tag": "Customization",
+        "title": "Themes & Hotkeys",
+        "body": "Design your own editor themes and share them. Fully customizable keyboard shortcuts to match your workflow."
       }
     },
     "contributors": {

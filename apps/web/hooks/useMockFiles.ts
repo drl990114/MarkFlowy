@@ -21,14 +21,35 @@ ${t('mock.intro.footer', 'Enjoy experimenting with the editor!')}
 
   const jsonContent = `{
   "name": "MarkFlowy",
-  "version": "beta",
+  "version": "1.0.0-beta.2",
+  "description": "${t('mock.config.description', 'Next-generation professional text editor designed for AI.')}",
+  "homepage": "https://markflowy.dev",
+  "author": {
+    "name": "drl990114",
+    "email": "drl990114@gmail.com",
+    "url": "https://github.com/drl990114"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/drl990114/MarkFlowy"
+  },
+  "license": "AGPL-3.0",
   "features": [
-    "WYSIWYG",
-    "Source Code",
-    "AI Assistant",
-    "Custom Themes"
+    "WYSIWYG Editing",
+    "Source Code View",
+    "AI Copilot",
+    "Custom Themes",
+    "Multi-language Support"
   ],
-  "description": "${t('mock.config.description', 'Next-generation professional text editor designed for AI.')}"
+  "editor": {
+    "mode": "wysiwyg",
+    "fontFamily": "Inter",
+    "fontSize": 14,
+    "lineHeight": 1.6,
+    "tabSize": 2,
+    "wordWrap": true,
+    "lineNumbers": true
+  }
 }`
 
   return {

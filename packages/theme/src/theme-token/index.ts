@@ -5,6 +5,7 @@ export * from './markflowy'
 export * from './markflowy/desktop'
 export * from './markflowy/editor'
 export * from './markflowy/web'
+export * from './markflowy/web-atelier'
 export * from './nord'
 export * from './sepia'
 
