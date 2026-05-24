@@ -14,16 +14,17 @@ const Sidebar = styled.nav<SidebarProps>`
   transform: translateZ(0);
   display: block;
   z-index: 1;
-  font-family: ${props => props.theme.fontFamily};
+  font-family: var(--body);
 
   left: 0;
   top: ${rem(navbarHeight)};
   bottom: 0;
   right: auto;
   width: ${rem(sidebarWidth)};
-  background: ${props => props.theme.sidebarBackground};
+  background: var(--paper-warm);
+  border-right: 1px solid var(--line-soft);
   box-sizing: border-box;
-  color: inherit;
+  color: var(--ink);
   overflow-y: auto;
   transition: transform 150ms ease-out;
 

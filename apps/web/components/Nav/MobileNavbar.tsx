@@ -31,14 +31,13 @@ export default function MobileNavbar({
         <NavButton onClick={onSideToggle}>{isSideFolded ? <FoldIcon /> : <CloseIcon />}</NavButton>
       )}
       <Logo />
-      <Brand> / </Brand>
-      MarkFlowy
+      <Brand>MarkFlowy</Brand>
       {children}
-      <NavButton onClick={onMobileNavToggle} style={{ position: 'absolute', right: 0 }}>
+      <MenuToggle onClick={onMobileNavToggle}>
         <ArrowWrapper $shouldRotate={!isMobileNavFolded}>
           <StyledIcon as={KeyboardArrowDown} $size={36} />
         </ArrowWrapper>
-      </NavButton>
+      </MenuToggle>
       <SecondaryMenu $isOpen={!isMobileNavFolded}>
         <NavLinks />
       </SecondaryMenu>
@@ -54,10 +53,22 @@ const Wrapper = styled.div`
     display: flex;
     height: ${rem(navbarHeight)};
     justify-content: space-between;
+    position: relative;
     margin-left: 16px;
+    color: var(--ink);
 
     > ${NavButton} {
       margin-left: -8px;
+      color: var(--ink);
+      flex-shrink: 0;
+
+      svg {
+        fill: var(--ink);
+      }
+
+      svg use {
+        fill: var(--ink);
+      }
     }
   `)};
 `
@@ -78,9 +89,9 @@ const SecondaryMenu = styled.div<{ $isOpen?: boolean }>`
         `};
   -webkit-overflow-scrolling: touch;
   align-items: center;
-  background: rgba(33, 33, 33, 0.9);
-  backdrop-filter: blur(5px);
-  color: #fff;
+  background: rgba(239, 231, 210, 0.95);
+  backdrop-filter: blur(8px);
+  color: var(--ink);
   display: flex;
   flex-wrap: nowrap;
   justify-content: center;
@@ -106,5 +117,33 @@ const StyledIcon = styled.div<{ $size?: number }>`
   && {
     width: ${(p) => rem(p.$size || 20)};
     height: ${(p) => rem(p.$size || 20)};
+    color: var(--ink);
+  }
+`
+
+const MenuToggle = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: ${rem(navbarHeight)};
+  width: ${rem(44)};
+  padding: 0;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  flex-shrink: 0;
+  transition: filter 200ms ease;
+
+  &:hover {
+    filter: brightness(0.85);
+  }
+
+  &:active {
+    filter: brightness(0.7);
+  }
+
+  svg {
+    color: var(--ink);
   }
 `

@@ -471,7 +471,7 @@ const TokenInput = styled.input`
   transition: border-color 0.2s ease;
 
   &:focus {
-    border-color: #da936a;
+    border-color: #d4564a;
   }
 
   &:disabled {
@@ -494,7 +494,7 @@ const TokenHint = styled.p`
 `
 
 const TokenHintLink = styled.a`
-  color: #da936a;
+  color: #d4564a;
   text-decoration: none;
 
   &:hover {
@@ -509,7 +509,7 @@ const Actions = styled.div`
 
 const SaveButton = styled.button`
   padding: ${rem(10)} ${rem(20)};
-  background: linear-gradient(135deg, #da936a 0%, #c47a4f 100%);
+  background: linear-gradient(135deg, #d4564a 0%, #b8453c 100%);
   color: #ffffff;
   border: none;
   border-radius: ${rem(8)};
@@ -676,7 +676,7 @@ const HelpNumber = styled.span`
   justify-content: center;
   width: ${rem(24)};
   height: ${rem(24)};
-  background: linear-gradient(135deg, #da936a 0%, #c47a4f 100%);
+  background: linear-gradient(135deg, #d4564a 0%, #b8453c 100%);
   color: #ffffff;
   font-size: ${rem(12)};
   font-weight: 600;
@@ -691,7 +691,7 @@ const HelpText = styled.span`
 `
 
 const HelpLink = styled.a`
-  color: #da936a;
+  color: #d4564a;
   text-decoration: none;
 
   &:hover {
@@ -711,7 +711,7 @@ const LoadingSpinner = styled.div`
   width: ${rem(40)};
   height: ${rem(40)};
   border: 3px solid rgba(255, 255, 255, 0.1);
-  border-top-color: #da936a;
+  border-top-color: #d4564a;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 

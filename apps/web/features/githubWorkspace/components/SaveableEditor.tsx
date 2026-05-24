@@ -55,7 +55,7 @@ const PreviewContainer = styled.div`
   }
 
   blockquote {
-    border-left: 4px solid #da936a;
+    border-left: 4px solid #d4564a;
     padding-left: 1em;
     margin-left: 0;
     color: ${(props) => props.theme.disabledFontColor};

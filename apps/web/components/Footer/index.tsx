@@ -38,11 +38,11 @@ const Wrapper = styled.footer`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  color: ${(props) => props.theme.primaryFontColor};
-  background: ${(props) => props.theme.footerBgColor};
+  color: var(--ink-mute);
+  background: var(--paper-warm);
   padding: 0 ${rem(40)};
   height: ${rem(80)};
-  border-top: 1px solid ${(props) => props.theme.borderColor};
+  border-top: 1px solid var(--line);
   box-sizing: border-box;
 
   ${mobile(css`
@@ -70,15 +70,16 @@ const Brand = styled.a`
   align-items: center;
   gap: ${rem(10)};
   text-decoration: none;
-  color: ${(props) => props.theme.primaryFontColor};
-  transition: opacity 0.2s;
+  color: var(--ink);
+  transition: color 0.2s;
 
   &:hover {
-    opacity: 0.8;
+    color: var(--seal);
   }
 `
 
 const AppName = styled.span`
+  font-family: var(--sans);
   font-size: ${rem(18)};
   font-weight: 600;
   letter-spacing: -0.01em;
@@ -86,7 +87,7 @@ const AppName = styled.span`
 
 const CopyrightText = styled.span`
   font-size: ${rem(13)};
-  color: ${(props) => props.theme.unselectedFontColor};
+  color: var(--ink-mute);
 
   ${mobile(css`
     font-size: ${rem(12)};
@@ -109,11 +110,11 @@ const Nav = styled.nav`
 
 const FooterLink = styled(Link)`
   font-size: ${rem(14)};
-  color: ${(props) => props.theme.unselectedFontColor};
+  color: var(--ink-mute);
   transition: color 0.2s;
   text-decoration: none;
 
   &:hover {
-    color: ${(props) => props.theme.primaryFontColor};
+    color: var(--seal);
   }
 `

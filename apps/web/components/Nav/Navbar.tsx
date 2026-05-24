@@ -39,8 +39,7 @@ export default function Navbar({
         <StartWrapper>
           <LogoLink aria-label='MarkFlowy logo' href={`./${i18n?.language || 'en'}`}>
             <Logo />
-            <Brand> / </Brand>
-            <strong>MarkFlowy</strong>
+            <Brand>MarkFlowy</Brand>
           </LogoLink>
 
           <NavLinks />
@@ -66,23 +65,24 @@ export default function Navbar({
 }
 
 export const Brand = styled.span`
-  font-size: ${rem(20)};
-  font-weight: bold;
-  margin: 0 12px;
-  color: ${(props) => props.theme.unselectedFontColor};
+  font-family: var(--sans);
+  font-size: ${rem(18)};
+  font-weight: 700;
+  margin: 0 ${rem(10)};
+  color: var(--ink);
 `
 
 const Wrapper = styled.nav<{ $transparent?: boolean }>`
   align-items: center;
-  background-color: ${(props) => props.theme.navBackground};
-  backdrop-filter: blur(5px);
-  border-bottom: 1px solid ${(props) => props.theme.borderColor};
-  -webkit-backdrop-filter: blur(5px);
+  background-color: color-mix(in srgb, var(--paper) 92%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line-soft);
   box-sizing: border-box;
-  color: white;
+  color: var(--ink);
   display: flex;
   flex-wrap: wrap;
-  font-family: ${(props) => props.theme.fontFamily};
+  font-family: var(--sans);
   font-size: ${rem(15)};
   font-weight: 500;
   justify-content: center;
@@ -105,6 +105,7 @@ const EndWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: flex-end;
+  color: var(--ink-mute);
 `
 /* stylelint-disable */
 const StyledSocial = styled(Social)``
@@ -131,4 +132,6 @@ const LogoLink = styled(Link).attrs((/* props */) => ({
   align-items: center;
   vertical-align: center;
   margin-right: ${rem(35)};
+  color: var(--ink);
+  text-decoration: none;
 `

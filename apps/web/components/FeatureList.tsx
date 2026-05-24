@@ -2,8 +2,9 @@ import { motion } from 'motion/react'
 import { useTranslation } from 'next-i18next'
 import Image from 'next/image'
 import Link from 'next/link'
-import styled from 'styled-components'
-import rem from 'utils/rem'
+import styled, { css } from 'styled-components'
+import { mobile } from '../utils/media'
+import rem from '../utils/rem'
 
 export type FeatureItemProps = {
   title: string
@@ -21,118 +22,179 @@ const Section = styled.section`
   padding: ${rem(80)} 0;
   display: flex;
   flex-direction: column;
-  gap: ${rem(120)};
+  gap: ${rem(80)};
 
-  @media (max-width: ${rem(980)}) {
+  ${mobile(css`
     padding: ${rem(40)} 0;
-    gap: ${rem(60)};
-  }
+    gap: ${rem(48)};
+  `)}
 `
 
-const Row = styled.div<{ $imagePosition: 'left' | 'right' }>`
-  display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
-  gap: ${rem(60)};
-  width: 100%;
-  margin: 0 auto;
+const SectionRule = styled.div`
+  display: flex;
   align-items: center;
-  border-radius: 6px;
-  padding: ${rem(60)} ${rem(48)};
-  background-color: ${(props) => props.theme.bgColorSecondary};
+  justify-content: space-between;
+  border-top: 1px solid var(--line-soft);
+  padding-top: ${rem(16)};
 
-  @media (max-width: ${rem(980)}) {
-    grid-template-columns: 1fr;
-    gap: ${rem(32)};
-    padding: ${rem(32)} ${rem(24)};
-  }
+  ${mobile(css`
+    padding-top: ${rem(12)};
+  `)}
 `
 
-const TextColumn = styled(motion.div)<{ $imagePosition: 'left' | 'right' }>`
-  grid-column: ${(props) => (props.$imagePosition === 'right' ? '1 / span 4' : '9 / span 4')};
+const RomanNumeral = styled.span`
+  font-family: var(--serif);
+  font-style: italic;
+  color: var(--seal);
+  font-size: ${rem(18)};
+  letter-spacing: 0.02em;
+
+  ${mobile(css`
+    font-size: ${rem(15)};
+  `)}
+`
+
+const RuleMeta = styled.span`
+  font-family: var(--sans);
+  font-size: ${rem(11)};
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+
+  ${mobile(css`
+    font-size: ${rem(10)};
+  `)}
+`
+
+const SectionHeader = styled.div`
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  gap: ${rem(20)};
+  max-width: ${rem(800)};
 
-  & > *:first-child {
-    margin-top: 0;
-  }
-  & > *:last-child {
-    margin-bottom: 0;
-  }
-
-  @media (max-width: ${rem(980)}) {
-    grid-column: 1 / -1;
-    order: 2;
-    text-align: center;
-    align-items: center;
-  }
+  ${mobile(css`
+    gap: ${rem(14)};
+  `)}
 `
 
-const ImageColumn = styled(motion.div)<{ $imagePosition: 'left' | 'right' }>`
-  grid-column: ${(props) => (props.$imagePosition === 'right' ? '5 / span 8' : '1 / span 8')};
-  position: relative;
+const SectionLabel = styled.span`
   display: flex;
-  justify-content: center;
   align-items: center;
-
-  @media (max-width: ${rem(980)}) {
-    grid-column: 1 / -1;
-    order: 1;
-  }
-`
-
-const ImageBackground = styled.div`
-  position: relative;
-  width: 100%;
-  aspect-ratio: 16 / 10;
-  background: rgba(255, 255, 255, 0.02);
-  border-radius: 10px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  overflow: hidden;
-
-  background-color: #1a1a1a;
-  background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
-  background-size: 20px 20px;
-`
-
-const Title = styled.h3`
-  font-size: ${rem(30)};
+  gap: ${rem(10)};
+  font-family: var(--sans);
+  font-size: ${rem(12)};
   font-weight: 600;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-  color: #ffffff;
-  margin-bottom: ${rem(20)};
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
 
-  @media (max-width: ${rem(980)}) {
-    font-size: ${rem(24)};
+  &::before {
+    content: '';
+    display: inline-block;
+    width: ${rem(24)};
+    height: 2px;
+    background: var(--seal);
   }
 `
 
-const Description = styled.p`
-  font-size: ${rem(18)};
-  line-height: 1.6;
-  color: rgba(255, 255, 255, 0.6);
-  margin-bottom: ${rem(24)};
+const DisplayTitle = styled.h2`
+  font-family: var(--sans);
+  font-size: clamp(${rem(40)}, 4.6vw, ${rem(66)});
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  margin: 0;
 
-  @media (max-width: ${rem(980)}) {
-    font-size: ${rem(16)};
-  }
+  ${mobile(css`
+    font-size: clamp(${rem(28)}, 8vw, ${rem(40)});
+  `)}
+`
+
+const ItalicEmphasis = styled.span`
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+`
+
+const SealDot = styled.span`
+  color: var(--seal);
+`
+
+const LeadParagraph = styled.p`
+  font-family: var(--body);
+  font-size: ${rem(18)};
+  line-height: 1.65;
+  color: var(--ink-soft);
+  margin: 0;
+  max-width: ${rem(580)};
+
+  ${mobile(css`
+    font-size: ${rem(15)};
+  `)}
+`
+
+const FeatureRowWrapper = styled(motion.div)`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: ${rem(60)};
+  align-items: center;
+  padding: ${rem(48)} 0;
+
+  ${mobile(css`
+    grid-template-columns: 1fr;
+    gap: ${rem(28)};
+    padding: ${rem(28)} 0;
+  `)}
+`
+
+const TextColumn = styled(motion.div)`
+  display: flex;
+  flex-direction: column;
+  gap: ${rem(16)};
+`
+
+const FeatureTitle = styled.h3`
+  font-family: var(--sans);
+  font-size: ${rem(24)};
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin: 0;
+
+  ${mobile(css`
+    font-size: ${rem(20)};
+  `)}
+`
+
+const FeatureDesc = styled.p`
+  font-family: var(--body);
+  font-size: ${rem(16)};
+  line-height: 1.65;
+  color: var(--ink-soft);
+  margin: 0;
+
+  ${mobile(css`
+    font-size: ${rem(14)};
+  `)}
 `
 
 const LearnMoreLink = styled(Link)`
-  font-size: ${rem(16)};
-  color: #ff8c00; /* Adjust to match the brand color if needed */
+  font-family: var(--sans);
+  font-size: ${rem(14)};
+  font-weight: 500;
+  color: var(--seal);
   text-decoration: none;
   display: inline-flex;
   align-items: center;
-  gap: ${rem(8)};
-  font-weight: 500;
-  transition: opacity 0.2s ease;
+  gap: ${rem(6)};
+  transition: opacity 0.2s ease, transform 0.2s ease;
 
   &:hover {
-    opacity: 0.8;
+    opacity: 0.85;
+    transform: translateX(4px);
   }
 
   &::after {
@@ -140,29 +202,128 @@ const LearnMoreLink = styled(Link)`
   }
 `
 
+const ImageColumn = styled(motion.div)`
+  position: relative;
+`
+
+const ImageFrame = styled.div`
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  background: var(--paper-warm);
+  border-radius: ${rem(10)};
+  overflow: hidden;
+  box-shadow: var(--shadow);
+
+  ${mobile(css`
+    border-radius: ${rem(8)};
+  `)}
+`
+
+const CapabilityGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: ${rem(20)};
+
+  ${mobile(css`
+    grid-template-columns: 1fr;
+    gap: ${rem(14)};
+  `)}
+`
+
+const CapabilityCard = styled(motion.div)`
+  border: 1px solid var(--line-soft);
+  border-radius: ${rem(8)};
+  padding: ${rem(28)};
+  display: flex;
+  flex-direction: column;
+  gap: ${rem(12)};
+  transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+  cursor: default;
+
+  &:hover {
+    border-color: var(--seal);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  }
+
+  ${mobile(css`
+    padding: ${rem(20)};
+    gap: ${rem(8)};
+  `)}
+`
+
+const CapabilityNumber = styled.span`
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: ${rem(20)};
+  color: var(--seal);
+  line-height: 1;
+
+  ${mobile(css`
+    font-size: ${rem(17)};
+  `)}
+`
+
+const CapabilityTag = styled.span`
+  font-family: var(--sans);
+  font-size: ${rem(10)};
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+`
+
+const CapabilityTitle = styled.h4`
+  font-family: var(--sans);
+  font-size: ${rem(18)};
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  margin: 0;
+
+  ${mobile(css`
+    font-size: ${rem(16)};
+  `)}
+`
+
+const CapabilityBody = styled.p`
+  font-family: var(--body);
+  font-size: ${rem(14)};
+  line-height: 1.6;
+  color: var(--ink-soft);
+  margin: 0;
+
+  ${mobile(css`
+    font-size: ${rem(13)};
+  `)}
+`
+
 const FeatureRow = ({ title, descs, img, imagePosition = 'right', link }: FeatureItemProps) => {
-  const childrens = [
+  const textElement = (
     <TextColumn
-      $imagePosition={imagePosition}
-      initial={{ opacity: 0, x: imagePosition === 'right' ? -20 : 20 }}
+      initial={{ opacity: 0, x: imagePosition === 'right' ? -30 : 30 }}
       whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.6 }}
     >
-      <Title>{title}</Title>
+      <FeatureTitle>{title}</FeatureTitle>
       {descs.map((desc, index) => (
-        <Description key={index}>{desc}</Description>
+        <FeatureDesc key={index}>{desc}</FeatureDesc>
       ))}
       {link && <LearnMoreLink href={link.href}>{link.text}</LearnMoreLink>}
-    </TextColumn>,
+    </TextColumn>
+  )
+
+  const imageElement = (
     <ImageColumn
-      $imagePosition={imagePosition}
-      initial={{ opacity: 0, scale: 0.95 }}
-      whileInView={{ opacity: 1, scale: 1 }}
+      initial={{ opacity: 0, x: imagePosition === 'right' ? 30 : -30 }}
+      whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true }}
-      transition={{ duration: 0.6, delay: 0.2 }}
+      transition={{ duration: 0.6, delay: 0.15 }}
     >
-      <ImageBackground>
+      <ImageFrame>
         <Image
           src={img}
           alt={title}
@@ -170,14 +331,25 @@ const FeatureRow = ({ title, descs, img, imagePosition = 'right', link }: Featur
           height={500}
           style={{ width: '100%', height: 'auto', display: 'block' }}
         />
-      </ImageBackground>
-    </ImageColumn>,
-  ]
-  if (imagePosition === 'left') {
-    // childrens 换个顺序
-    childrens.reverse()
-  }
-  return <Row $imagePosition={imagePosition}>{childrens}</Row>
+      </ImageFrame>
+    </ImageColumn>
+  )
+
+  return (
+    <FeatureRowWrapper>
+      {imagePosition === 'right' ? (
+        <>
+          {textElement}
+          {imageElement}
+        </>
+      ) : (
+        <>
+          {imageElement}
+          {textElement}
+        </>
+      )}
+    </FeatureRowWrapper>
+  )
 }
 
 export default function FeatureList() {
@@ -204,11 +376,74 @@ export default function FeatureList() {
     },
   ]
 
+  const capabilities = [
+    {
+      number: '01',
+      tag: t('home.features.capability1.tag'),
+      title: t('home.features.capability1.title'),
+      body: t('home.features.capability1.body'),
+    },
+    {
+      number: '02',
+      tag: t('home.features.capability2.tag'),
+      title: t('home.features.capability2.title'),
+      body: t('home.features.capability2.body'),
+    },
+    {
+      number: '03',
+      tag: t('home.features.capability3.tag'),
+      title: t('home.features.capability3.title'),
+      body: t('home.features.capability3.body'),
+    },
+    {
+      number: '04',
+      tag: t('home.features.capability4.tag'),
+      title: t('home.features.capability4.title'),
+      body: t('home.features.capability4.body'),
+    },
+  ]
+
   return (
     <Section id='features-list'>
+      <SectionRule>
+        <RomanNumeral>II</RomanNumeral>
+        <RuleMeta>Features · 03</RuleMeta>
+      </SectionRule>
+
+      <SectionHeader>
+        <SectionLabel>Features</SectionLabel>
+        <DisplayTitle>
+          Built for <ItalicEmphasis>writers</ItalicEmphasis>,<br />
+          designed for <ItalicEmphasis>flow</ItalicEmphasis><SealDot>.</SealDot>
+        </DisplayTitle>
+        <LeadParagraph>{t('home.features.lead')}</LeadParagraph>
+      </SectionHeader>
+
       {features.map((feature, index) => (
         <FeatureRow key={index} {...feature} />
       ))}
+
+      <SectionRule>
+        <RomanNumeral>III</RomanNumeral>
+        <RuleMeta>Capabilities · 04</RuleMeta>
+      </SectionRule>
+
+      <CapabilityGrid>
+        {capabilities.map((cap, index) => (
+          <CapabilityCard
+            key={index}
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.45, delay: index * 0.08 }}
+          >
+            <CapabilityNumber>{cap.number}</CapabilityNumber>
+            <CapabilityTag>{cap.tag}</CapabilityTag>
+            <CapabilityTitle>{cap.title}</CapabilityTitle>
+            <CapabilityBody>{cap.body}</CapabilityBody>
+          </CapabilityCard>
+        ))}
+      </CapabilityGrid>
     </Section>
   )
 }

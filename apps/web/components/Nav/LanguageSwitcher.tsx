@@ -29,7 +29,6 @@ const languages = [
 
 export default function LanguageSwitcher({ className, style }: LanguageSwitcherProps) {
   const router = useRouter()
-  const { t } = useTranslation()
   const currentLocale = router.locale || 'en'
 
   const handleLanguageChange = (locale: string) => {
@@ -95,19 +94,17 @@ const TriggerButton = styled.div`
   align-items: center;
   justify-content: center;
   background: transparent;
-  color: white;
+  color: var(--ink-soft);
   font-size: ${rem(14)};
   padding: ${rem(6)} ${rem(8)};
   cursor: pointer;
   outline: none;
-  transition: all 0.2s ease;
+  border-radius: ${rem(6)};
+  transition: color 0.15s ease, background 0.15s ease;
 
   &:hover {
-    border-color: rgba(255, 255, 255, 0.4);
-  }
-
-  &:focus {
-    border-color: rgba(255, 255, 255, 0.6);
+    color: var(--ink);
+    background: rgba(232, 230, 227, 0.06);
   }
 `
 
@@ -116,14 +113,14 @@ const Menu = styled.ul`
   top: calc(100% + ${rem(6)});
   right: 0;
   min-width: ${rem(160)};
-  background: ${(props) => props.theme.bgColor};
-  color: ${(props) => props.theme.primaryFontColor};
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: var(--paper-warm);
+  color: var(--ink);
+  border: 1px solid var(--line);
   border-radius: ${rem(8)};
   padding: ${rem(6)} 0;
   margin: 0;
   list-style: none;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
   z-index: 1000;
 `
 
@@ -133,8 +130,9 @@ const MenuItem = styled.li`
   padding: ${rem(8)} ${rem(12)};
   cursor: pointer;
   user-select: none;
+  transition: background 0.15s ease;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(232, 230, 227, 0.06);
   }
 `

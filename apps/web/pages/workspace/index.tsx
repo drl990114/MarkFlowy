@@ -395,7 +395,7 @@ const ImportButton = styled.button`
   align-items: center;
   gap: ${rem(8)};
   padding: ${rem(8)} ${rem(16)};
-  background: #da936a;
+  background: #d4564a;
   border: none;
   border-radius: ${rem(8)};
   font-size: ${rem(14)};
@@ -405,7 +405,7 @@ const ImportButton = styled.button`
   transition: all 0.2s ease;
 
   &:hover {
-    background: #c47a4f;
+    background: #b8453c;
   }
 `
 
@@ -433,7 +433,7 @@ const LoadingSpinner = styled.div`
   width: ${rem(40)};
   height: ${rem(40)};
   border: 3px solid rgba(255, 255, 255, 0.1);
-  border-top-color: #da936a;
+  border-top-color: #d4564a;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 
@@ -476,7 +476,7 @@ const TempWorkspaceCard = styled(Link)`
   transition: all 0.2s ease;
 
   &:hover {
-    border-color: #da936a;
+    border-color: #d4564a;
     box-shadow: 0 4px 12px rgba(218, 147, 106, 0.15);
     transform: translateY(-2px);
   }
@@ -494,7 +494,7 @@ const WorkspaceCard = styled(Link)`
   transition: all 0.2s ease;
 
   &:hover {
-    border-color: #da936a;
+    border-color: #d4564a;
     box-shadow: 0 4px 12px rgba(218, 147, 106, 0.15);
     transform: translateY(-2px);
   }
@@ -531,7 +531,7 @@ const TempWorkspaceIcon = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #da936a 0%, #c47a4f 100%);
+  background: linear-gradient(135deg, #d4564a 0%, #b8453c 100%);
   border-radius: ${rem(12)};
   color: #ffffff;
 `
@@ -554,7 +554,7 @@ const GitHubIcon = () => (
 
 const TempWorkspaceBadge = styled.span`
   padding: ${rem(4)} ${rem(10)};
-  background: linear-gradient(135deg, #da936a 0%, #c47a4f 100%);
+  background: linear-gradient(135deg, #d4564a 0%, #b8453c 100%);
   color: #ffffff;
   font-size: ${rem(11)};
   font-weight: 600;
@@ -737,7 +737,7 @@ const RepoActions = styled.div`
 
 const ImportRepoButton = styled.button`
   padding: ${rem(6)} ${rem(14)};
-  background: #da936a;
+  background: #d4564a;
   border: none;
   border-radius: ${rem(6)};
   font-size: ${rem(13)};
@@ -747,7 +747,7 @@ const ImportRepoButton = styled.button`
   transition: all 0.2s ease;
 
   &:hover:not(:disabled) {
-    background: #c47a4f;
+    background: #b8453c;
   }
 
   &:disabled {

@@ -6,11 +6,16 @@ import { useRmeEditor } from '../hooks/useRme'
 import RmeProvider from './RmeProvider'
 
 const EditorContainer = styled.div`
-  padding: 1rem;
+  padding: 0;
   width: 100%;
+  min-width: 0;
   height: 100%;
   overflow: auto;
   font-weight: 400;
+
+  .rme-editor-root {
+    padding: 16px 24px;
+  }
 `
 
 const PreviewContainer = styled.div`
@@ -24,6 +29,7 @@ const PreviewContainer = styled.div`
   h1, h2, h3, h4, h5, h6 {
     margin-top: 1.5em;
     margin-bottom: 0.5em;
+    font-family: var(--sans);
   }
 
   p {
@@ -36,14 +42,15 @@ const PreviewContainer = styled.div`
   }
 
   code {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--paper-warm);
     padding: 0.2em 0.4em;
     border-radius: 3px;
-    font-family: monospace;
+    font-family: var(--mono);
+    font-size: 0.9em;
   }
 
   pre {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--paper-warm);
     padding: 1em;
     border-radius: 6px;
     overflow-x: auto;
@@ -55,10 +62,10 @@ const PreviewContainer = styled.div`
   }
 
   blockquote {
-    border-left: 4px solid #da936a;
+    border-left: 3px solid var(--seal);
     padding-left: 1em;
     margin-left: 0;
-    color: ${(props) => props.theme.disabledFontColor};
+    color: var(--ink-mute);
   }
 
   img {
@@ -71,12 +78,12 @@ const PreviewContainer = styled.div`
     margin-bottom: 1em;
 
     th, td {
-      border: 1px solid ${(props) => props.theme.borderColor};
+      border: 1px solid var(--line);
       padding: 0.5em;
     }
 
     th {
-      background: ${(props) => props.theme.bgColorSecondary};
+      background: var(--paper-warm);
     }
   }
 `
@@ -87,7 +94,8 @@ const LoadingContainer = styled.div`
   justify-content: center;
   height: 100%;
   font-size: 16px;
-  color: ${(props) => props.theme.labelFontColor};
+  color: var(--ink-faint);
+  font-family: var(--body);
 `
 
 interface EditorProps {
@@ -103,17 +111,13 @@ const Editor = (props: EditorProps) => {
   const { Editor, EditorViewType, createWysiwygDelegate, createSourceCodeDelegate, loading, error } = useRmeEditor()
   const [content, setContent] = useState(initialContent || '')
   const editorRef = useRef<EditorRef>(null)
-  
-  // Track current view type
+
   const [currentViewType, setCurrentViewType] = useState(viewType || 'wysiwyg')
-  
-  // Key to force re-mount when view type changes
+
   const [editorKey, setEditorKey] = useState(0)
-  
-  // Track if editor is ready (for CSR)
+
   const [isReady, setIsReady] = useState(false)
-  
-  // Create delegate function - same pattern as desktop
+
   const createDelegate = useCallback((viewType: string) => {
     if (!createWysiwygDelegate || !createSourceCodeDelegate) {
       return null
@@ -125,38 +129,30 @@ const Editor = (props: EditorProps) => {
           onCodemirrorViewLoad: () => {},
         })
   }, [createWysiwygDelegate, createSourceCodeDelegate])
-  
-  // Initialize delegate with current view type - same as desktop pattern
+
   const [delegate, setDelegate] = useState(() => createDelegate(viewType || 'wysiwyg'))
 
   const defaultContent = initialContent || `##### Welcome to MarkFlowy!`
 
-  // CSR: ensure component is mounted on client
   useEffect(() => {
     setIsReady(true)
   }, [])
 
-  // Handle initialContent changes (file switching)
   useEffect(() => {
     if (initialContent !== undefined && initialContent !== content) {
       setContent(initialContent)
-      // Force re-mount editor with new content
       setEditorKey(prev => prev + 1)
     }
   }, [initialContent])
 
-  // Handle view type changes - following desktop pattern
   useEffect(() => {
     if (viewType && viewType !== currentViewType) {
-      // Update current view type first
       setCurrentViewType(viewType)
-      
-      // For wysiwyg and source, create new delegate and force re-mount
+
       if (viewType === 'wysiwyg' || viewType === 'source') {
         const newDelegate = createDelegate(viewType)
         if (newDelegate) {
           setDelegate(newDelegate)
-          // Force re-mount editor with new key when view type changes
           setEditorKey(prev => prev + 1)
         }
       }
@@ -168,8 +164,7 @@ const Editor = (props: EditorProps) => {
       if (!params || !params.state) {
         return
       }
-      
-      // Convert doc to string and update content
+
       if (delegate && typeof delegate.docToString === 'function') {
         try {
           const newContent = delegate.docToString(params.state.doc)
@@ -185,14 +180,10 @@ const Editor = (props: EditorProps) => {
     [delegate, onChange],
   )
 
-  // Memoize editor props like desktop does
   const editorProps = useMemo(() => ({
     initialType: (currentViewType === 'wysiwyg' && EditorViewType ? EditorViewType.WYSIWYG : (EditorViewType?.SOURCE_CODE || 'sourceCode')) as any,
     content: content || defaultContent,
     delegate,
-    styleToken: {
-      rootFontSize: `14px`,
-    },
   }), [currentViewType, EditorViewType, content, defaultContent, delegate])
 
   if (!isReady || loading) {
@@ -203,7 +194,6 @@ const Editor = (props: EditorProps) => {
     return <LoadingContainer>Error loading editor: {error.message}</LoadingContainer>
   }
 
-  // Preview mode - render markdown as HTML
   if (currentViewType === 'preview') {
     return (
       <RmeProvider>

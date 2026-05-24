@@ -19,21 +19,19 @@ const NavLink = styled(Link).attrs((/* props */) => ({
   display: inline-block;
   line-height: ${rem(navbarHeight)};
   transition:
-    opacity 0.2s,
+    color 0.2s,
     transform 0.2s;
   cursor: pointer;
   letter-spacing: ${rem(0.4)};
-  color: ${props => props.theme.unselectedFontColor};
+  color: var(--ink-mute);
 
   &:hover,
   &:focus {
-  color: currentColor;
-    opacity: 0.8;
+    color: var(--seal);
   }
 
   &:active {
     transform: scale(0.95);
-    opacity: 0.6;
   }
 `
 
