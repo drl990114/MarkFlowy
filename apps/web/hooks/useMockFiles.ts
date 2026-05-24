@@ -21,9 +21,8 @@ ${t('mock.intro.footer', 'Enjoy experimenting with the editor!')}
 
   const jsonContent = `{
   "name": "MarkFlowy",
-  "version": "1.0.0-beta.2",
   "description": "${t('mock.config.description', 'Next-generation professional text editor designed for AI.')}",
-  "homepage": "https://markflowy.dev",
+  "homepage": "https://markflowy.cc",
   "author": {
     "name": "drl990114",
     "email": "drl990114@gmail.com",
@@ -40,20 +39,11 @@ ${t('mock.intro.footer', 'Enjoy experimenting with the editor!')}
     "AI Copilot",
     "Custom Themes",
     "Multi-language Support"
-  ],
-  "editor": {
-    "mode": "wysiwyg",
-    "fontFamily": "Inter",
-    "fontSize": 14,
-    "lineHeight": 1.6,
-    "tabSize": 2,
-    "wordWrap": true,
-    "lineNumbers": true
-  }
+  ]
 }`
 
   return {
     markdownContent,
-    jsonContent
+    jsonContent,
   }
 }
