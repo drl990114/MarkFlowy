@@ -102,7 +102,7 @@ export default function Index({
               <motion.div whileInView={{ opacity: 1, y: 0 }} initial={{ opacity: 0, y: 16 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.05, ease: [0.22, 0.61, 0.36, 1] }}>
                 <HeroTitle>
                   <TitleMain>Mark</TitleMain>
-                  <TitleItalic>Flowy</TitleItalic>
+                  <FlowyText />
                   <TitleDot />
                 </HeroTitle>
               </motion.div>
@@ -423,13 +423,13 @@ const LabelLine = styled.span`
 const HeroTitle = styled.h1`
   font-family: var(--sans);
   font-size: clamp(${rem(42)}, 5.5vw, ${rem(72)});
-  font-weight: 800;
+  font-weight: 700;
   line-height: 1.05;
   letter-spacing: -0.03em;
   color: var(--ink);
   margin: 0;
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: ${rem(4)};
 `
 
@@ -1214,6 +1214,123 @@ const LoadingContainer = styled.div`
   min-height: 100vh;
   background: var(--paper);
 `
+
+const FlowyText = () => {
+  const charDelay = 0.18
+  const charDuration = 0.5
+  return (
+    <TitleItalic as="span" style={{ display: 'inline-flex', alignItems: 'baseline' }}>
+      <motion.svg
+        viewBox="0 0 130 60"
+        style={{
+          display: 'inline-block',
+          width: 'auto',
+          height: '1em',
+          verticalAlign: 'baseline',
+          overflow: 'visible',
+        }}
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.3, delay: 0.2 }}
+      >
+        <defs>
+          <filter id="flowy-glow">
+            <feGaussianBlur stdDeviation="1.2" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+
+        <g
+          fill="none"
+          stroke="var(--ink)"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          {/* F */}
+          <motion.path
+            d="M10 53 L12 17 L34 17 M12 35 L30 35"
+            initial={{ pathLength: 0, opacity: 0 }}
+            whileInView={{ pathLength: 1, opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: charDuration, delay: 0.2, ease: [0.33, 1, 0.68, 1] }}
+          />
+
+          {/* l */}
+          <motion.path
+            d="M46 15 Q47 15 48 20 L50 53"
+            initial={{ pathLength: 0, opacity: 0 }}
+            whileInView={{ pathLength: 1, opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: charDuration * 0.7, delay: 0.2 + charDelay, ease: [0.33, 1, 0.68, 1] }}
+          />
+
+          {/* o */}
+          <motion.path
+            d="M58 37 Q58 25 68 23 Q78 21 80 33 Q82 45 72 47 Q62 49 60 38"
+            initial={{ pathLength: 0, opacity: 0 }}
+            whileInView={{ pathLength: 1, opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: charDuration * 0.85, delay: 0.2 + charDelay * 2, ease: [0.33, 1, 0.68, 1] }}
+          />
+
+          {/* w */}
+          <motion.path
+            d="M86 17 L92 47 L98 33 L104 47 L110 17"
+            initial={{ pathLength: 0, opacity: 0 }}
+            whileInView={{ pathLength: 1, opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: charDuration * 0.95, delay: 0.2 + charDelay * 3, ease: [0.33, 1, 0.68, 1] }}
+          />
+
+          {/* y — upper V */}
+          <motion.path
+            d="M115 17 L120 40 L126 17"
+            initial={{ pathLength: 0, opacity: 0 }}
+            whileInView={{ pathLength: 1, opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: charDuration * 0.7, delay: 0.2 + charDelay * 4, ease: [0.33, 1, 0.68, 1] }}
+          />
+
+          {/* y — descending */}
+          <motion.path
+            d="M120 40 Q118 50 117 57"
+            initial={{ pathLength: 0, opacity: 0 }}
+            whileInView={{ pathLength: 1, opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: charDuration * 0.6, delay: 0.2 + charDelay * 4.3, ease: [0.33, 1, 0.68, 1] }}
+          />
+        </g>
+
+        {/* Brand reveal glow overlay */}
+        <motion.g
+          filter="url(#flowy-glow)"
+          opacity="0"
+          fill="none"
+          stroke="var(--seal)"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          initial={false}
+          whileInView={{ opacity: [0, 0.45, 0] }}
+          viewport={{ once: true }}
+          transition={{ duration: 1.4, delay: 0.15, ease: 'easeOut' }}
+        >
+          <path d="M10 53 L12 17 L34 17 M12 35 L30 35" />
+          <path d="M46 15 Q47 15 48 20 L50 53" />
+          <path d="M58 37 Q58 25 68 23 Q78 21 80 33 Q82 45 72 47 Q62 49 60 38" />
+          <path d="M86 17 L92 47 L98 33 L104 47 L110 17" />
+          <path d="M115 17 L120 40 L126 17" />
+          <path d="M120 40 Q118 50 117 57" />
+        </motion.g>
+      </motion.svg>
+    </TitleItalic>
+  )
+}
 
 const LoadingSpinner = styled.div`
   width: ${rem(40)};
