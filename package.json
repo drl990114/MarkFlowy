@@ -8,6 +8,7 @@
     "docs"
   ],
   "scripts": {
+    "postinstall": "patch-package",
     "setup": "turbo postinstall",
     "yarn:id": "yarn install && yarn dedupe",
     "dev": "turbo dev",
@@ -49,6 +50,7 @@
     "child_process": "^1.0.2",
     "eslint": "9.13.0",
     "fast-glob": "^3.3.2",
+    "patch-package": "^8.0.0",
     "postcss": "^8.4.47",
     "postcss-import": "^16.1.1",
     "postcss-nested": "^7.0.2",

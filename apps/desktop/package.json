@@ -12,8 +12,7 @@
     "tauri:dev": "tauri dev",
     "test": "vitest run",
     "test:dev": "vitest --ui",
-    "delete": "rimraf node_modules",
-    "postinstall": "patch-package"
+    "delete": "rimraf node_modules"
   },
   "dependencies": {
     "@ai-sdk/deepseek": "^1.0.28",
@@ -89,7 +88,6 @@
     "esbuild": "^0.27.0",
     "eslint": "9.13.0",
     "happy-dom": "^17.1.8",
-    "patch-package": "^8.0.0",
     "react-test-renderer": "^19.2.0",
     "rimraf": "^6.0.1",
     "ts-node": "^10.9.2",
