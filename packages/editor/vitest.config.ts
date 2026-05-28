@@ -11,6 +11,9 @@ export default defineConfig(() => ({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./src/editor/test/setup-vitest.ts'],
+    alias: [
+      { find: 'zens', replacement: fileURLToPath(new URL('./src/editor/test/__mocks__/zens.ts', import.meta.url)) },
+    ],
   },
   coverage: {
     reporter: ['text', 'json', 'html']

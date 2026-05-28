@@ -257,7 +257,7 @@ export class LineCodeMirrorExtension extends NodeExtension<CodeMirrorExtensionOp
           const language = tok.info
           return {
             language,
-            'front-matter': tok.attrGet('front-matter'),
+            'front-matter': tok.attrGet('front-matter') ?? false,
           }
         },
       },
