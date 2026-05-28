@@ -380,6 +380,28 @@ pub fn read_file(path: &str) -> FileResult {
     }
 }
 
+pub fn is_text_file(path: &str) -> bool {
+    use std::io::Read;
+    let file = match std::fs::File::open(path) {
+        Ok(f) => f,
+        Err(_) => return false,
+    };
+    let mut reader = std::io::BufReader::new(file);
+    let mut buf = [0u8; 8192];
+    let n = match reader.read(&mut buf) {
+        Ok(n) => n,
+        Err(_) => return false,
+    };
+    if n == 0 {
+        return true;
+    }
+    let chunk = &buf[..n];
+    if chunk.contains(&0) {
+        return false;
+    }
+    std::str::from_utf8(chunk).is_ok()
+}
+
 // update file and create new file
 pub fn write_file(path: &str, content: &str) -> FileResult {
     let file_path = Path::new(path);
@@ -863,6 +885,11 @@ pub mod cmd {
     #[tauri::command]
     pub fn file_exists(file_path: &str) -> bool {
         fc::exists(Path::new(file_path))
+    }
+
+    #[tauri::command]
+    pub fn is_text_file(file_path: &str) -> bool {
+        fc::is_text_file(file_path)
     }
 
     #[tauri::command]

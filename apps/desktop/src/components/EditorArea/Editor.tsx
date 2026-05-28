@@ -1,11 +1,13 @@
 import { getFileObject } from '@/helper/files'
 import { getFileTypeConfig, isTextfileType } from '@/helper/fileTypeHandler'
+import { logger } from '@/helper/logger'
 import { isEmptyEditor } from '@/services/editor-file'
 import { useCommandStore } from '@/stores'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
 import { memo } from 'react'
 import { useMount } from 'react-use'
+import { EditorViewType } from 'rme'
 import { EmptyState } from './EmptyState'
 import { PreviewContent } from './preview/PreviewContent'
 import TextEditor from './TextEditor'
@@ -21,10 +23,19 @@ function Editor(props: EditorProps) {
   const { execute } = useCommandStore()
 
   useMount(async () => {
-    const fileTypeConfig = await getFileTypeConfig(curFile)
-    if (fileTypeConfig) {
-      useEditorViewTypeStore.getState().setEditorViewType(curFile.id, fileTypeConfig.defaultMode)
-      setFileTypeConfig(curFile.id, fileTypeConfig)
+    logger.info('[Editor] useMount start', { id, fileName: curFile.name, path: curFile.path })
+    let fileTypeConfig = await getFileTypeConfig(curFile).catch((err) => {
+      logger.error('[Editor] getFileTypeConfig rejected', { id, fileName: curFile.name, error: String(err) })
+      return null
+    })
+    if (!fileTypeConfig) {
+      logger.warn('[Editor] getFileTypeConfig returned null, using unsupported fallback', { id, fileName: curFile.name })
+      fileTypeConfig = { type: 'unsupported' as const, supportedModes: [], defaultMode: EditorViewType.PREVIEW }
+    }
+    logger.info('[Editor] fileTypeConfig resolved', { id, fileName: curFile.name, type: fileTypeConfig.type, defaultMode: fileTypeConfig.defaultMode })
+    useEditorViewTypeStore.getState().setEditorViewType(curFile.id, fileTypeConfig.defaultMode)
+    setFileTypeConfig(curFile.id, fileTypeConfig)
+    if (fileTypeConfig.type === 'markdown') {
       setTimeout(() => {
         execute('app:toc_refresh')
       }, 100)
@@ -45,7 +56,7 @@ function Editor(props: EditorProps) {
     <EditorScrollContainer style={active ? undefined : { display: 'none' }}>
       <div className={'code-contents'}>
         {curFileTypeConfig.type === 'unsupported' ? (
-          <UnsupportedFileType />
+          <UnsupportedFileType fileName={curFile.name} />
         ) : isTextfileType(curFileTypeConfig) ? (
           <TextEditor fileTypeConfig={curFileTypeConfig} active={active} id={id} />
         ) : (

@@ -107,6 +107,8 @@
     "recentDir": "最近開いたフォルダー",
     "emptyOpened": "開いているファイルはありません",
     "unsupportedFileType": "サポート外のファイル形式です",
+    "unsupportedFileTypeDesc": "このファイル形式の表示または編集は現在サポートされていません。",
+    "unsupportedFileTypeLink": "GitHubでサポートをリクエスト",
     "info": "ファイル情報",
     "lastModified": "前回の更新",
     "size": "ファイルサイズ",

@@ -112,6 +112,8 @@
     "recentDir": "Recently opened folders",
     "emptyOpened": "No files opened",
     "unsupportedFileType": "Unsupported file type",
+    "unsupportedFileTypeDesc": "This file format is not currently supported for viewing or editing.",
+    "unsupportedFileTypeLink": "Request support on GitHub",
     "lastModified": "Last Updated",
     "size": "File Size",
     "info": "File Information",

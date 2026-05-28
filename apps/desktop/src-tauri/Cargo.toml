@@ -114,7 +114,6 @@ version = "2.10.3"
 features = [
     "protocol-asset",
     "devtools",
-    "custom-protocol",
 ]
 
 [dependencies.mf-utils]

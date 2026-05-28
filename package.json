@@ -11,7 +11,7 @@
     "setup": "turbo postinstall",
     "yarn:id": "yarn install && yarn dedupe",
     "dev": "turbo dev",
-    "dev:desktop": "turbo run dev --filter=!@markflowy/desktop --filter=!@markflowy/web & yarn workspace @markflowy/desktop tauri:dev",
+    "dev:desktop": "lsof -ti :3000 | xargs kill -9 2>/dev/null; lsof -ti :3030 | xargs kill -9 2>/dev/null; turbo run dev --filter=!@markflowy/desktop --filter=!@markflowy/web & yarn workspace @markflowy/desktop tauri:dev",
     "build": "turbo build",
     "build:web": "yarn turbo build --filter=!@markflowy/desktop",
     "build:desktop": "yarn build && yarn workspace @markflowy/desktop tauri:build",

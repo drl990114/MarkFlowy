@@ -2,6 +2,7 @@ import { useEditorStore } from '@/stores'
 import { invoke } from '@tauri-apps/api/core'
 import { readDir } from '@tauri-apps/plugin-fs'
 import { nanoid } from 'nanoid'
+import { logger } from '@/helper/logger'
 import { getFileObjectByPath, setFileObject, setFileObjectByPath } from './files'
 
 interface FileEntry {
@@ -40,6 +41,8 @@ export interface FileSysResult {
 const wrapFiles = (entries: FileEntry[]) => {
   entries.forEach((entry) => {
     ;(entry as IFile).id = getFileObjectByPath(entry.path)?.id || nanoid()
+
+    logger.info('[filesys] wrapFiles entry', { name: entry.name, ext: entry.ext, kind: entry.kind })
 
     setFileObject((entry as IFile).id, entry as IFile)
     setFileObjectByPath(entry.path!, entry as IFile)
@@ -102,10 +105,10 @@ export const readDirectory = async (folderPath: string): Promise<IFile[]> => {
         children: isDir ? [] : undefined,
         ext: isDir ? '' : ext,
       }
+
+      logger.info('[filesys] readDirectory entry', { fileName, ext, isDir })
       
-      if (isSupportedFile(fileName) || isDir) {
-        entries.push(fileEntry)
-      }
+      entries.push(fileEntry)
     }
     
     sortFilesByKindAndName(entries)
@@ -130,12 +133,6 @@ export const readDirectory = async (folderPath: string): Promise<IFile[]> => {
   } catch (err) {
     throw new Error(`Failed to read directory: ${err}`)
   }
-}
-
-const isSupportedFile = (fileName: string): boolean => {
-  const supportedExtensions = ['md', 'markdown', 'txt']
-  const ext = fileName.includes('.') ? fileName.split('.').pop()?.toLowerCase() || '' : ''
-  return supportedExtensions.includes(ext)
 }
 
 const sortFilesByKindAndName = (files: IFile[]) => {
@@ -170,9 +167,7 @@ export const readSubdirectory = async (folderPath: string): Promise<IFile[]> => 
         ext: isDir ? '' : ext,
       }
       
-      if (isSupportedFile(fileName) || isDir) {
-        entries.push(fileEntry)
-      }
+      entries.push(fileEntry)
     }
     
     sortFilesByKindAndName(entries)

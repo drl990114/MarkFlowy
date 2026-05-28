@@ -16,6 +16,7 @@ import {
 import { FileTypeConfig } from '@/helper/fileTypeHandler'
 import { logger } from '@/helper/logger'
 import { useEditorKeybindingStore } from '@/hooks/useKeyboard'
+import { useTranslation } from '@/i18n'
 import { useCommandStore, useEditorStateStore, useEditorStore } from '@/stores'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import useEditorCounterStore from '@/stores/useEditorCounterStore'
@@ -27,8 +28,8 @@ import classNames from 'classnames'
 import html2canvas from 'html2canvas'
 import { debounce, DebouncedFunc, throttle } from 'lodash'
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { useTranslation } from '@/i18n'
-import { useMount, useUnmount } from 'react-use'
+import { useUnmount } from 'react-use'
+import type { CreateWysiwygDelegateOptions } from 'rme'
 import {
   createSourceCodeDelegate,
   createWysiwygDelegate,
@@ -46,6 +47,18 @@ import { createWysiwygDelegateOptions } from './createWysiwygDelegateOptions'
 import { EditorWrapper } from './EditorWrapper'
 import { WarningHeader } from './styles'
 
+const delegateOptionsCache = new Map<string, CreateWysiwygDelegateOptions>()
+
+function getOrCreateDelegateOptions(fileId?: string): CreateWysiwygDelegateOptions {
+  const key = fileId || '__no_id__'
+  let cached = delegateOptionsCache.get(key)
+  if (!cached) {
+    cached = createWysiwygDelegateOptions(fileId)
+    delegateOptionsCache.set(key, cached)
+  }
+  return cached
+}
+
 type SaveHandlerParams = {
   /**
    * when active is true, saveHandler will save the file content to disk.
@@ -60,6 +73,7 @@ enum TextEditorStatus {
   LOADING,
   SUCCESS,
   NOTEXIST,
+  READERROR,
 }
 
 export const sourceCodeCodemirrorViewMap: Map<string, MfCodemirrorView> = new Map()
@@ -80,7 +94,7 @@ function TextEditor(props: TextEditorProps) {
           },
         })
       } else {
-        return createWysiwygDelegate(createWysiwygDelegateOptions(id))
+        return createWysiwygDelegate(getOrCreateDelegateOptions(id))
       }
     },
     [id],
@@ -92,19 +106,13 @@ function TextEditor(props: TextEditorProps) {
   const { execute } = useCommandStore()
   const { t } = useTranslation()
   const { settingData } = useAppSettingStore()
-  const [content, setContent] = useState<string>()
-  const [delegate, setDelegate] = useState(
-    createDelegate(fileTypeConfig.defaultMode, fileTypeConfig.type),
-  )
+  const [content, setContent] = useState<string | undefined>()
+  const [delegate, setDelegate] = useState<ReturnType<typeof createDelegate> | null>(null)
 
   const debounceSaveHandlerCacheRef = useRef<DebouncedFunc<() => Promise<void>>>(null)
   const noFileSaveingRef = useRef(false)
   const editorRef = useRef<EditorRef>(null)
   const editorContextRef = useRef<EditorChangeEventParams>(null)
-
-  useMount(async () => {
-    setEditorDelegate(id, delegate)
-  })
 
   useUnmount(() => {
     useEditorCounterStore.getState().deleteEditorCounter({ id })
@@ -117,19 +125,17 @@ function TextEditor(props: TextEditorProps) {
     const init = async () => {
       const file = curFile
       if (file.path) {
-        const isExists = await invoke('file_exists', { filePath: file.path })
-        if (isExists) {
-          const res = await invoke<FileSysResult>('get_file_content', {
-            filePath: file.path,
-          })
-          if (res.code !== FileResultCode.Success) {
-            toast.error(res.content)
-            return
-          }
-          setContent(res.content)
-        } else {
+        const res = await invoke<FileSysResult>('get_file_content', {
+          filePath: file.path,
+        })
+        if (res.code === FileResultCode.NotFound) {
           return setStatus(TextEditorStatus.NOTEXIST)
         }
+        if (res.code !== FileResultCode.Success) {
+          toast.error(res.content)
+          return setStatus(TextEditorStatus.READERROR)
+        }
+        setContent(res.content)
       } else if (file.content !== undefined) {
         setContent(file.content)
       }
@@ -137,7 +143,14 @@ function TextEditor(props: TextEditorProps) {
       return setStatus(TextEditorStatus.SUCCESS)
     }
     init()
-  }, [delegate, curFile, setEditorDelegate])
+  }, [curFile])
+
+  useLayoutEffect(() => {
+    if (status !== TextEditorStatus.SUCCESS || delegate) return
+    const newDelegate = createDelegate(fileTypeConfig.defaultMode, fileTypeConfig.type)
+    setDelegate(newDelegate)
+    setEditorDelegate(id, newDelegate)
+  }, [status, delegate, id, fileTypeConfig, createDelegate, setEditorDelegate])
 
   const saveHandler = useCallback(
     async (params: SaveHandlerParams = {}) => {
@@ -178,7 +191,7 @@ function TextEditor(props: TextEditorProps) {
         return
       }
 
-      const fileContent = editorContextRef.current?.state.doc
+      const fileContent = editorContextRef.current?.state.doc && delegate
         ? delegate.docToString(editorContextRef.current.state.doc)
         : curFile.content
 
@@ -265,8 +278,13 @@ function TextEditor(props: TextEditorProps) {
   }, [settingData.autosave_interval, saveHandler])
 
   const debounceRefreshToc = useMemo(
-    () => debounce(() => execute('app:toc_refresh'), 1000),
-    [execute],
+    () =>
+      debounce(() => {
+        if (fileTypeConfig.type === 'markdown') {
+          execute('app:toc_refresh')
+        }
+      }, 1000),
+    [execute, fileTypeConfig.type],
   )
 
   const debounceSaveHandler = useCallback(() => {
@@ -333,7 +351,7 @@ function TextEditor(props: TextEditorProps) {
               debounceRefreshToc()
             } else {
               const wysiwygDelegate = createWysiwygDelegate(
-                createWysiwygDelegateOptions(curFile.id),
+                getOrCreateDelegateOptions(curFile.id),
               )
               setEditorDelegate(curFile.id, wysiwygDelegate)
               setDelegate(wysiwygDelegate)
@@ -488,6 +506,7 @@ function TextEditor(props: TextEditorProps) {
 
   const handleWrapperClick: React.MouseEventHandler<HTMLDivElement> = useCallback(
     (e) => {
+      if (!delegate) return
       if (
         (e.target as HTMLElement)?.id === 'editorarea-wrapper' ||
         (e.target as HTMLElement).parentElement?.id === 'editorarea-wrapper'
@@ -495,14 +514,14 @@ function TextEditor(props: TextEditorProps) {
         delegate.manager.view.focus()
       }
     },
-    [delegate.manager.view],
+    [delegate],
   )
 
   const editorProps: MfEditorProps = useMemo(
     () => ({
       initialType: fileTypeConfig?.defaultMode,
       content: content!,
-      delegate,
+      delegate: delegate!,
       style: {
         height: '100%',
       },
@@ -521,7 +540,7 @@ function TextEditor(props: TextEditorProps) {
       onContextMounted: (context: EditorContext) => {
         setEditorCtx(id, context)
       },
-      delegateOptions: createWysiwygDelegateOptions(curFile.id),
+      delegateOptions: getOrCreateDelegateOptions(curFile.id),
       wysiwygToolBarOptions: {
         enable: false,
       },
@@ -577,7 +596,11 @@ function TextEditor(props: TextEditorProps) {
     return <WarningHeader>File is not exist</WarningHeader>
   }
 
-  if (typeof content !== 'string') {
+  if (status === TextEditorStatus.READERROR) {
+    return <WarningHeader>Failed to read file content</WarningHeader>
+  }
+
+  if (typeof content !== 'string' || !delegate) {
     return null
   }
 

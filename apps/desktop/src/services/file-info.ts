@@ -6,16 +6,11 @@ export const getFileContent = async (params: { filePath?: string }) => {
   if (!filePath) {
     return null
   }
-  const isExists = await invoke('file_exists', { filePath })
-  if (isExists) {
-    const res = await invoke<FileSysResult>('get_file_content', {
-      filePath,
-    })
-    if (res.code !== FileResultCode.Success) {
-      return null
-    }
-    return res.content
-  } else {
+  const res = await invoke<FileSysResult>('get_file_content', {
+    filePath,
+  })
+  if (res.code !== FileResultCode.Success) {
     return null
   }
+  return res.content
 }
