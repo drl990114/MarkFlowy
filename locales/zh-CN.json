@@ -113,6 +113,8 @@
     "recentDir": "最近打开的文件夹",
     "emptyOpened": "没有打开的文件",
     "unsupportedFileType": "不支持的文件类型",
+    "unsupportedFileTypeDesc": "暂不支持该文件格式的查看或编辑。",
+    "unsupportedFileTypeLink": "在 GitHub 提交需求",
     "info": "文件信息",
     "lastModified": "上次更新",
     "size": "文件大小",

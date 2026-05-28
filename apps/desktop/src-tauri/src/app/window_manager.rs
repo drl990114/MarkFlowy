@@ -9,6 +9,14 @@ use super::conf::AppConf;
 #[cfg(target_os = "macos")]
 use tauri::TitleBarStyle;
 
+fn get_webview_url(path: &str) -> WebviewUrl {
+    if tauri::is_dev() {
+        WebviewUrl::External(format!("http://localhost:3000/{}", path).parse().unwrap())
+    } else {
+        WebviewUrl::App(path.into())
+    }
+}
+
 /// 获取所有窗口实例信息
 #[command]
 pub fn get_window_instances() -> Result<std::collections::HashMap<String, String>, String> {
@@ -101,7 +109,7 @@ pub fn create_new_window(_app: AppHandle, path: Option<String>) -> Result<String
     println!("path:{}", path.as_ref().unwrap());
     tauri::async_runtime::spawn(async move {
         let mut new_win =
-            WebviewWindowBuilder::new(&_app, window_label, WebviewUrl::App("index.html".into()))
+            WebviewWindowBuilder::new(&_app, window_label, get_webview_url("index.html"))
                 .initialization_script(&format!("window.openedUrls = {escaped_urls}"))
                 .initialization_script(&format!("console.log('window.openedUrl:{}')", escaped_urls))
                 .title("MarkFlowy")

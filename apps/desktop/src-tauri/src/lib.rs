@@ -155,6 +155,7 @@ pub fn run() {
             fc::cmd::create_folder,
             fc::cmd::delete_folder,
             fc::cmd::file_exists,
+            fc::cmd::is_text_file,
             fc::cmd::move_files_to_target_folder,
             fc::cmd::path_join,
             fc::cmd::get_md_relative_path,

@@ -127,7 +127,7 @@ async function handleOpenedPaths(openedPaths: string[]) {
 async function appWorkspaceSetup() {
   const { setRecentWorkspaces, clearRecentWorkspaces } = useOpenedCacheStore.getState()
   const { setFolderData, addOpenedFile, setActiveId } = useEditorStore.getState()
-  logger.debug('=== appWorkspaceSetup: Checking window.openedUrls ===')
+  logger.debug('==== appWorkspaceSetup: Checking window.openedUrls ===')
   logger.debug('window.openedUrls', window.openedUrls)
 
   try {

@@ -1,9 +1,49 @@
-import type { IFile } from './filesys';
+import { create } from 'zustand'
+import type { IFile } from '@/helper/filesys'
+import { logger } from '@/helper/logger'
 
-type IEntries = Record<string, IFile>;
+interface FileCacheState {
+  entries: Record<string, IFile>
+  pathEntries: Record<string, IFile>
+}
 
-export const entries: IEntries = {}
-export const pathEntries: IEntries = {}
+const useFileCacheStore = create<FileCacheState>(() => ({
+  entries: {},
+  pathEntries: {},
+}))
+
+export function setFileObject(id: string, file: IFile): void {
+  useFileCacheStore.setState((state) => ({
+    entries: { ...state.entries, [id]: file },
+  }))
+}
+
+export function getFileObject(id: string): IFile {
+  return useFileCacheStore.getState().entries[id]
+}
+
+export function updateFileObject(id: string, file: IFile): void {
+  setFileObject(id, file)
+}
+
+export function setFileObjectByPath(path: string, file: IFile): void {
+  logger.info('[files] setFileObjectByPath', { path, name: file.name, ext: file.ext })
+  useFileCacheStore.setState((state) => ({
+    pathEntries: { ...state.pathEntries, [path]: file },
+  }))
+}
+
+export function getFileObjectByPath(path?: string): undefined | IFile {
+  if (!path) return undefined
+  return useFileCacheStore.getState().pathEntries[path]
+}
+
+export function deletePathEntry(path: string): void {
+  useFileCacheStore.setState((state) => {
+    const { [path]: _, ...rest } = state.pathEntries
+    return { pathEntries: rest }
+  })
+}
 
 export const saveOpenedEditorEntries: Record<string, () => Promise<void>> = {}
 
@@ -19,29 +59,4 @@ export function delSaveOpenedEditorEntries(id: string): void {
   delete saveOpenedEditorEntries[id]
 }
 
-export function setFileObject(id: string, file: IFile): void {
-  entries[id] = file
-}
-
-export function getFileObject(id: string): IFile {
-  return entries[id]
-}
-
-export function updateFileObject(id: string, file: IFile): void {
-  entries[id] = file
-}
-
-export function setFileObjectByPath(path: string, file: IFile): void {
-  pathEntries[path] = file
-}
-
-export function getFileObjectByPath(path?: string): undefined | IFile {
-  if (!path) {
-    return undefined
-  }
-  return pathEntries[path]
-}
-
-export function deletePathEntry(path: string): void {
-  delete pathEntries[path]
-}
+export default useFileCacheStore

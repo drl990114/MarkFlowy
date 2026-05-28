@@ -102,6 +102,8 @@
     "emptyOpened": "No hay archivos abiertos",
     "openFile": "Abrir archivo",
     "unsupportedFileType": "Tipos de archivos no compatibles",
+    "unsupportedFileTypeDesc": "Este formato de archivo no es compatible actualmente para su visualización o edición.",
+    "unsupportedFileTypeLink": "Solicitar soporte en GitHub",
     "lastModified": "Última actualización",
     "size": "Tamaño de archivo",
     "info": "Información del archivo",

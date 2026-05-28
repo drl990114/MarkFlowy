@@ -1,10 +1,15 @@
+// @ts-check
+
+import { commonjs } from "@hyrious/esbuild-plugin-commonjs"
 import * as esbuild from 'esbuild'
+import { nodeExternalsPlugin } from 'esbuild-node-externals'
 import alias from 'esbuild-plugin-alias'
+import { esbuildDecorators } from 'esbuild-plugin-ts-decorators'
 import pkg from 'esbuild-plugin-markdown'
 import fs from 'fs'
 const { markdownPlugin } = pkg
 
-const ctx = await esbuild.context({
+const devCtx = await esbuild.context({
   entryPoints: ['./src/index-dev.tsx'],
   bundle: true,
   outdir: 'build',
@@ -27,14 +32,41 @@ const ctx = await esbuild.context({
   ],
 })
 
+const distCtx = await esbuild.context({
+  plugins: [
+    commonjs(),
+    alias({
+      '@': './src',
+    }),
+    esbuildDecorators({
+      tsconfig: './tsconfig.json',
+      cwd: process.cwd(),
+    }),
+    nodeExternalsPlugin(),
+  ],
+  minify: false,
+  splitting: true,
+  entryPoints: { index: './src/index.ts' },
+  outExtension: { '.js': '.mjs' },
+  outdir: './dist/',
+  bundle: true,
+  format: 'esm',
+  sourcemap: true,
+  treeShaking: true,
+  logLevel: 'info',
+})
+
 fs.existsSync('./build') || fs.mkdirSync('./build')
+fs.existsSync('./dist') || fs.mkdirSync('./dist')
 
 fs.copyFile('./public/index.html', './build/index.html', (err) => {
   if (err) throw err
 })
 
-await ctx.watch()
-await ctx.serve({
+await devCtx.watch()
+await distCtx.watch()
+
+await devCtx.serve({
   servedir: 'build',
   port: 3030,
   host: 'localhost',

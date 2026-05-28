@@ -1,12 +1,12 @@
 import { Root } from '@/router'
 import { Route, Routes } from 'react-router'
 import { Notifications } from 'zens'
+import { FileTreeProvider, TauriFileSystemProvider } from './adapters'
 import AppThemeProvider from './AppThemeProvider'
 import { Modal } from './components'
 import { MODAL_CONFIRM_ID, MODAL_INFO_ID, MODAL_INPUT_ID } from './components/Modal'
 import { ContextMenu } from './components/ui-v2/ContextMenu/ContextMenu'
 import { useAppSetup } from './hooks'
-import { TauriFileSystemProvider, FileTreeProvider } from './adapters'
 
 function App() {
   useAppSetup()

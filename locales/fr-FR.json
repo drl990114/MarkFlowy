@@ -99,6 +99,8 @@
     "emptyOpened": "Aucun fichier ouvert",
     "openFile": "Ouvrir un fichier",
     "unsupportedFileType": "Types de fichiers non pris en charge",
+    "unsupportedFileTypeDesc": "Ce format de fichier n'est actuellement pas pris en charge pour l'affichage ou l'édition.",
+    "unsupportedFileTypeLink": "Demander la prise en charge sur GitHub",
     "lastModified": "Dernière mise à jour",
     "size": "Taille du fichier",
     "info": "Informations sur le fichier",

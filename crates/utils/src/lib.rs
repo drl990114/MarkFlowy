@@ -29,9 +29,8 @@ pub fn get_file_type(file_name: &str) -> FileType {
     }
 }
 
-pub fn is_supported_file_name(file_name: &str) -> bool {
-    let file_type = get_file_type(file_name);
-    file_type != FileType::Unknown
+pub fn is_supported_file_name(_file_name: &str) -> bool {
+    true
 }
 
 pub fn is_md_file_name(file_name: &str) -> bool {
