@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./",
+    "target": "es2018",
+    "module": "esnext",
+    "jsx": "react-jsx",
+    "declaration": true,
+    "declarationDir": "lib",
+    "strict": true,
+    "allowJs": true,
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "paths": {
+      "zens": ["src/index.ts"],
+      "@@/*": [".dumi/tmp/*"],
+      "@/*": ["src/*"]
+    }
+  },
+  "include": [
+    "src",
+    "typings.d.ts"
+  ],
+
+  "exclude": ["node_modules", "lib", "esm", "dist", "typings", "**/__test__", "test", "tests"]
+}

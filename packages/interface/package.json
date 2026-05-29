@@ -41,7 +41,7 @@
     "react-arborist": "^3.4.3",
     "react-dom": "^19.2.4",
     "styled-components": "^6.3.12",
-    "zens": "0.1.17",
+    "zens": "workspace:*",
     "zustand": "^4.5.0"
   },
   "devDependencies": {

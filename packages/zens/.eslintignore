@@ -1,0 +1,7 @@
+.dumi/
+esm/
+lib/
+scripts/
+template/
+**/__tests__/
+*.js
