@@ -46,7 +46,7 @@
     "rme": "workspace:*",
     "styled-components": "^6.1.13",
     "stylis": "^4.3.4",
-    "zens": "0.2.1"
+    "zens": "workspace:*"
   },
   "devDependencies": {
     "@octokit/types": "^13.6.1",
