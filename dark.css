@@ -177,7 +177,7 @@ table {
 
 li > ol,
 li > ul {
-  margin: 0 0;
+  margin: 0;
 }
 
 hr {
@@ -302,7 +302,7 @@ tt {
   border: 1px solid var(--dark-trait);
   background-color: var(--bg-color-dark);
   border-radius: var(--border-radius);
-  padding: 2px 4px 0px 4px;
+  padding: 2px 4px 0px;
   font-size: 0.9em;
   font-family: var(--monospace);
 }
@@ -351,7 +351,7 @@ tt {
 }
 
 code {
-  padding: 0 2px 0 2px;
+  padding: 0 2px;
 }
 
 .CodeMirror-lines {

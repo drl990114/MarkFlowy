@@ -285,6 +285,43 @@ export const SlashMenuRoot: React.FC<SlashMenuRootProps> = memo(
       setSearchText(e.target.value)
     }, [])
 
+    const handleEnterKey = useCallback(() => {
+      if (activeItemId) {
+        const item = currentMenuItem?.children?.find((child) => child.id === activeItemId)
+        if (item?.handler) {
+          item.handler()
+        }
+      }
+      if (currentMenuItem?.handler) {
+        currentMenuItem.handler()
+      }
+      closeMenu()
+    }, [activeItemId, closeMenu, currentMenuItem])
+
+    const handleNavigationKey = useCallback((event: KeyboardEvent) => {
+      const keyHandlers: Record<string, () => void> = {
+        ArrowDown: handleDown,
+        ArrowUp: handleUp,
+        ArrowRight: handleRight,
+        ArrowLeft: handleLeft,
+      }
+
+      const handler = keyHandlers[event.key]
+      if (handler) {
+        handler()
+        return true
+      }
+
+      if (event.key === 'Enter') {
+        event.preventDefault()
+        event.stopPropagation()
+        handleEnterKey()
+        return true
+      }
+
+      return false
+    }, [handleDown, handleUp, handleRight, handleLeft, handleEnterKey])
+
     useEffect(() => {
       const keydownHandler = (event: KeyboardEvent) => {
         if (event.key === 'Escape') {
@@ -302,7 +339,6 @@ export const SlashMenuRoot: React.FC<SlashMenuRootProps> = memo(
           event.key === 'ArrowLeft' ||
           event.key === 'Enter'
 
-        // 如果正在输入搜索文本，需要 mod 键（导航键除外）
         if (searchText && event[getModEventKey()] === false && !isNavigationKey) {
           return
         }
@@ -320,30 +356,7 @@ export const SlashMenuRoot: React.FC<SlashMenuRootProps> = memo(
           }
         }
 
-        if (event.key === 'ArrowDown') {
-          handleDown()
-        } else if (event.key === 'ArrowUp') {
-          handleUp()
-        } else if (event.key === 'ArrowRight') {
-          handleRight()
-        } else if (event.key === 'ArrowLeft') {
-          handleLeft()
-        } else if (event.key === 'Enter') {
-          // Prevent paragraph insertion
-          event.preventDefault()
-          event.stopPropagation()
-
-          if (activeItemId) {
-            const item = currentMenuItem?.children?.find((child) => child.id === activeItemId)
-            if (item?.handler) {
-              item.handler()
-            }
-          }
-          if (currentMenuItem?.handler) {
-            currentMenuItem.handler()
-          }
-          closeMenu()
-        }
+        handleNavigationKey(event)
       }
 
       if (isBrowser()) {
@@ -357,14 +370,11 @@ export const SlashMenuRoot: React.FC<SlashMenuRootProps> = memo(
       }
     }, [
       activeItemId,
-      handleDown,
-      handleLeft,
-      handleRight,
-      handleUp,
       closeMenu,
       filteredMenuItems,
       currentMenuItem,
       searchText,
+      handleNavigationKey,
     ])
 
     return (

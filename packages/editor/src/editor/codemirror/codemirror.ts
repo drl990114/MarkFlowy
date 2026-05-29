@@ -319,7 +319,7 @@ export class MfCodemirrorView {
     this.cm = new CodeMirrorEditorView({
       state: startState,
       dispatch: this.valueChanged.bind(this),
-      ...(this.options.codemirrorEditorViewConfig || {}),
+      ...this.options.codemirrorEditorViewConfig,
     })
 
     cmInstanceMap.set(this.id, this)
@@ -713,14 +713,12 @@ export class MfCodemirrorView {
 
     // Default copy behavior
     if (isBrowser() && navigator.clipboard && window.isSecureContext) {
-      // Use modern clipboard API
       try {
         await navigator.clipboard.writeText(code)
         this.showCopySuccess()
       } catch (error) {
         console.error('Clipboard API failed:', error)
       }
-    } else {
     }
   }
 
