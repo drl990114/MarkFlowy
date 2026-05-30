@@ -7,6 +7,7 @@ import { MathInlineView } from './math-inline-nodeview'
 
 export interface MathInlineAttributes {
   tex: string
+  display: boolean
 }
 
 export type MathInlineNodeAttrs = ProsemirrorAttributes<MathInlineAttributes>
@@ -29,27 +30,27 @@ export class MathInlineExtension extends NodeExtension {
       inline: true,
       atom: true,
       selectable: true,
-      // disallow marks on the inline atom similar to html-inline-node
       marks: '',
       ...override,
       attrs: {
         ...extra.defaults(),
         tex: { default: '' },
         fromInput: { default: false },
+        display: { default: false },
       },
       parseDOM: [
         {
           tag: 'span[data-type="math-inline"]',
           getAttrs: (dom) => {
             const el = dom as HTMLElement
-            return { ...extra.parse(dom), tex: el.getAttribute('data-tex') ?? '' }
+            return { ...extra.parse(dom), tex: el.getAttribute('data-tex') ?? '', display: el.getAttribute('data-display') === 'true' }
           },
         },
         ...(override.parseDOM ?? []),
       ],
       toDOM: (node) => {
         const attrs = omitExtraAttributes(node.attrs, extra)
-        return ['span', { ...extra.dom(node), 'data-type': 'math-inline', 'data-tex': attrs.tex }]
+        return ['span', { ...extra.dom(node), 'data-type': 'math-inline', 'data-tex': attrs.tex, 'data-display': attrs.display ? 'true' : 'false' }]
       },
     }
   }
@@ -65,7 +66,7 @@ export class MathInlineExtension extends NodeExtension {
         token: 'math_inline',
         node: this.name,
         getAttrs: (tok: any) => {
-          return { tex: tok.attrs?.tex || '' }
+          return { tex: tok.attrs?.tex || '', display: tok.attrs?.display || false }
         },
       },
     ] as const
@@ -73,12 +74,15 @@ export class MathInlineExtension extends NodeExtension {
 
   public toMarkdown({ state, node }: NodeSerializerOptions) {
     const tex = (node.attrs as any).tex as string
-    state.text(`$${tex}$`, false)
+    const display = (node.attrs as any).display as boolean
+    if (display) {
+      state.text(`$$${tex}$$`, false)
+    } else {
+      state.text(`$${tex}$`, false)
+    }
   }
 
   createNodeViews(): NodeViewMethod | Record<string, NodeViewMethod> {
     return (node, view, getPos) => new MathInlineView(node, view, getPos)
   }
 }
-
-

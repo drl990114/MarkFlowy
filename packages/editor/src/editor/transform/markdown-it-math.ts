@@ -24,14 +24,14 @@ const rule = (state: any) => {
 
     let newTokens: Token[] = []
     if (curToken.type === 'inline' && curToken.children && curToken.children.some(t => t.type === 'math_inline')) {
-      // If the inline token contains math_inline children, we need to process them
       const inlineTokens = curToken.children
       inlineTokens.forEach(t => {
         if (t.type === 'math_inline') {
           const tex = (t.attrs as any)?.tex || ''
+          const display = (t.attrs as any)?.display || false
           const originalContent = t.content || ''
           const mathToken = new Token('math_inline', '', 0)
-          ;(mathToken as any).attrs = { tex }
+          ;(mathToken as any).attrs = { tex, display }
           mathToken.content = originalContent
           newTokens.push(mathToken)
           edited = true
@@ -40,7 +40,6 @@ const rule = (state: any) => {
         }
       })
 
-      // Replace the current inline token with the new tokens
       tokens.splice(i, 1, ...newTokens)
       tokensLength += newTokens.length - 1
       continue
@@ -51,59 +50,76 @@ const rule = (state: any) => {
   return edited
 }
 
-// Minimal $...$ and $$...$$ tokenizer producing tokens: math_inline and math_block
+function findClosingDelimiter(src: string, start: number, delimiter: string): number {
+  let end = start
+  while ((end = src.indexOf(delimiter, end)) !== -1) {
+    let backslashes = 0
+    let i = end - 1
+    while (i >= 0 && src[i] === '\\') {
+      backslashes++
+      i--
+    }
+    if (backslashes % 2 === 0) break
+    end++
+  }
+  return end
+}
+
 export default function MarkdownItMath(md: MarkdownIt) {
-  // Inline math: $...$
   md.inline.ruler.after('escape', 'math_inline', (state, silent) => {
     const pos = state.pos
     const ch = state.src.charCodeAt(pos)
     if (ch !== 0x24 /* $ */) return false
-    // avoid $$ here, handled by block rule
-    if (state.src.charCodeAt(pos + 1) === 0x24) return false
 
-    let start = pos + 1
-    let end = start
-    while ((end = state.src.indexOf('$', end)) !== -1) {
-      // ensure not escaped
-      let backslashes = 0
-      let i = end - 1
-      while (i >= 0 && state.src[i] === '\\') {
-        backslashes++
-        i--
-      }
-      if (backslashes % 2 === 0) break
-      end++
-    }
+    const isDoubleDollar = state.src.charCodeAt(pos + 1) === 0x24
+    if (isDoubleDollar && state.src.charCodeAt(pos + 2) === 0x24) return false
+
+    const delimiter = isDoubleDollar ? '$$' : '$'
+    const start = pos + delimiter.length
+    const end = findClosingDelimiter(state.src, start, delimiter)
+
     if (end === -1) return false
     if (!silent) {
       const token = state.push('math_inline', '', 0)
       const tex = state.src.slice(start, end)
-      const originalContent = state.src.slice(pos, end + 1) // 包含$标签的原始内容
-      token.attrs = { tex } as any
-      // token.content = tex
+      token.attrs = { tex, display: isDoubleDollar } as any
     }
-    state.pos = end + 1
+    state.pos = end + delimiter.length
     return true
   })
 
-  // Block math: $$...$$
   md.block.ruler.after('fence', 'math_block', (state, startLine, endLine, silent) => {
     let pos = state.bMarks[startLine] + state.tShift[startLine]
     const max = state.eMarks[startLine]
     if (pos + 2 > max) return false
     if (state.src.charCodeAt(pos) !== 0x24 || state.src.charCodeAt(pos + 1) !== 0x24) return false
+
+    const lineContent = state.src.slice(pos + 2, max)
+    const closingIdx = lineContent.indexOf('$$')
+    if (closingIdx !== -1) {
+      const afterClosing = lineContent.slice(closingIdx + 2).trim()
+      if (!afterClosing) {
+        if (silent) return true
+        const content = lineContent.slice(0, closingIdx).trim()
+        const token = state.push('math_block', 'div', 0)
+        token.block = true
+        token.content = content
+        token.attrs = [['tex', content]]
+        token.map = [startLine, startLine + 1]
+        state.line = startLine + 1
+        return true
+      }
+    }
+
     pos += 2
     if (silent) return true
 
-    // search for closing $$
     let nextLine = startLine
     let found = false
-    let content = ''
     for (;;) {
       nextLine++
       if (nextLine >= endLine) break
       let lineStart = state.bMarks[nextLine] + state.tShift[nextLine]
-      const lineEnd = state.eMarks[nextLine]
       if (
         state.src.charCodeAt(lineStart) === 0x24 &&
         state.src.charCodeAt(lineStart + 1) === 0x24
@@ -115,11 +131,7 @@ export default function MarkdownItMath(md: MarkdownIt) {
     }
     if (!found) return false
 
-    // Aggregate content between lines
-    content = state.getLines(startLine + 1, nextLine, state.tShift[startLine + 1], true)
-
-    // 构建包含$$标签的原始内容
-    const originalContent = state.getLines(startLine, nextLine + 1, state.tShift[startLine], true)
+    const content = state.getLines(startLine + 1, nextLine, state.tShift[startLine + 1], true)
 
     const token = state.push('math_block', 'div', 0)
     token.block = true
@@ -130,8 +142,5 @@ export default function MarkdownItMath(md: MarkdownIt) {
     return true
   }, { alt: ['paragraph', 'reference', 'blockquote', 'list'] })
 
-  // Add core rule to process math tokens
   md.core.ruler.push('markdown-it-math', rule)
 }
-
-

@@ -3,7 +3,7 @@ import { keymap } from '@rme-sdk/pm/keymap'
 import { Node as ProseNode } from '@rme-sdk/pm/model'
 import { Command, EditorState, Plugin, TextSelection, Transaction } from '@rme-sdk/pm/state'
 import { Decoration, EditorView, NodeView } from '@rme-sdk/pm/view'
-import { tex2svgInline } from './mathjax'
+import { tex2svg, tex2svgInline, tex2svgDisplay } from './mathjax'
 
 function collapseCmd(
   outerView: EditorView,
@@ -125,6 +125,7 @@ export class MathInlineView implements NodeView {
     if (!this._renderElt) return
     const raw = this._innerView?.state.doc.textContent ?? (this._node.attrs as any).tex ?? ''
     const tex: string = raw.replace(/\u200b/g, '').trim()
+    const display: boolean = (this._node.attrs as any).display ?? false
 
     try {
       while (this._renderElt.firstChild) {
@@ -133,7 +134,7 @@ export class MathInlineView implements NodeView {
 
       const container = document.createElement('span')
       container.setAttribute('data-type', 'math-inline')
-      container.innerHTML = tex2svgInline(tex)
+      container.innerHTML = display ? tex2svgDisplay(tex) : tex2svgInline(tex)
 
       let newRenderEl: HTMLElement = container
       if (container.childElementCount === 1 && container.firstElementChild) {

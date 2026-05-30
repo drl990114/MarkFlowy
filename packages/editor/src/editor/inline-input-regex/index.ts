@@ -23,11 +23,12 @@ export const getHtmlImageInputRule = <T extends NodeType | string>(nodeType: T) 
 ]
 
 export const getInlineMathInputRule = <T extends NodeType | string>(nodeType: T) => [
-  // Typed inline math trigger: $$ -> insert empty inline math and focus inside
   {
-    regexp: /\$\$(?!\$)/,
+    regexp: /\$\$([^$\n]+?)\$\$(?!\$)/,
     type: nodeType,
-    getAttributes: () => ({ tex: '', fromInput: true }),
+    getAttributes: (match: string[]) => {
+      return { tex: match[1] ?? '', fromInput: true, display: true }
+    },
   },
   {
     regexp: /<span[^>]*data-type=["']math-inline["'][^>]*><\/span>/,
@@ -38,7 +39,7 @@ export const getInlineMathInputRule = <T extends NodeType | string>(nodeType: T)
     regexp: /\$([^$\n]+?)\$/,
     type: nodeType,
     getAttributes: (match: string[]) => {
-      return { tex: match[1] ?? '', fromInput: true }
+      return { tex: match[1] ?? '', fromInput: true, display: false }
     },
   },
 ]
