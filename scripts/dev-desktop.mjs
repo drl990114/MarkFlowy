@@ -1,6 +1,5 @@
-import { execSync, spawn } from 'child_process'
+import { exec, execSync, spawn } from 'child_process'
 import { promisify } from 'util'
-import { exec } from 'child_process'
 
 const execAsync = promisify(exec)
 
@@ -32,17 +31,38 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 const cleanup = () => {
   procs.forEach((p) => {
     try {
-      p.kill('SIGTERM')
+      process.kill(-p.pid, 'SIGTERM')
     } catch {}
   })
-  process.exit(0)
+
+  setTimeout(() => {
+    procs.forEach((p) => {
+      try {
+        process.kill(-p.pid, 'SIGKILL')
+      } catch {}
+    })
+    killPort(3000)
+    killPort(3030)
+    killPort(1420)
+    killPort(8000)
+    process.exit(0)
+  }, 2000)
 }
 
-process.on('SIGINT', cleanup)
-process.on('SIGTERM', cleanup)
+let cleanedUp = false
+const safeCleanup = () => {
+  if (cleanedUp) return
+  cleanedUp = true
+  cleanup()
+}
+
+process.on('SIGINT', safeCleanup)
+process.on('SIGTERM', safeCleanup)
 
 await killPort(3000)
 await killPort(3030)
+await killPort(1420)
+await killPort(8000)
 await sleep(500)
 
 const turboProc = spawn(
@@ -60,5 +80,5 @@ const tauriProc = spawn('yarn', ['workspace', '@markflowy/desktop', 'tauri:dev']
 })
 procs.push(tauriProc)
 
-tauriProc.on('exit', cleanup)
+tauriProc.on('exit', safeCleanup)
 turboProc.on('exit', () => {})

@@ -145,6 +145,7 @@ const useAiChatStoreV2 = create<AIStore>()(
           messages: [{ role: 'user', content: question }],
           abortSignal: abortController.signal,
           onError: ({ error }: any) => {
+            if (abortController.signal.aborted) return
             const errorMessage = error?.message || String(error) || 'Unknown error occurred'
             const state = get()
             state.setChatStatus(aiMessageKey, 'error', errorMessage)
@@ -225,11 +226,13 @@ const useAiChatStoreV2 = create<AIStore>()(
                 state.setChatStatus(aiMessageKey, 'done')
               }
             } catch (error: any) {
+              if (abortController.signal.aborted) return
               const errorMessage = error?.message || String(error) || 'Unknown error occurred'
               state.setChatStatus(aiMessageKey, 'error', errorMessage)
             }
           })
           .catch((error) => {
+            if (abortController.signal.aborted) return
             const errorMessage = error?.message || String(error) || 'Unknown error occurred'
             curStore.setChatStatus(aiMessageKey, 'error', errorMessage)
           })
@@ -352,8 +355,12 @@ const useAiChatStoreV2 = create<AIStore>()(
           const curMessage = state.chatList.find((message) => message.key === key)
           if (curMessage && curMessage.abortController) {
             curMessage.abortController.abort()
-            curMessage.status = 'done'
-            return { ...state }
+            return {
+              ...state,
+              chatList: state.chatList.map((message) =>
+                message.key === key ? { ...message, status: 'done' as const } : message,
+              ),
+            }
           }
           return state
         })

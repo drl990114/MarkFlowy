@@ -280,9 +280,11 @@ const ChatList: React.FC<ChatListProps> = (props) => {
           onChange={handleChange}
           onSubmit={handleSubmit}
           onCancel={() => {
-            const streamingMessage = chatList.find((msg) => msg.status === 'streaming')
-            if (streamingMessage) {
-              cancelChatStream(streamingMessage.key)
+            const activeMessage = chatList.find(
+              (msg) => msg.status === 'streaming' || msg.status === 'pending',
+            )
+            if (activeMessage) {
+              cancelChatStream(activeMessage.key)
             }
           }}
           autoSize={{ minRows: 2, maxRows: 6 }}
