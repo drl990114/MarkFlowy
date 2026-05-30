@@ -16,7 +16,7 @@
   ],
   "scripts": {
     "build": "rimraf dist && node esbuild.config.mjs && tsc --emitDeclarationOnly && node scripts/flatten-dts.mjs",
-    "dev": "tsc --watch",
+    "dev": "node esbuild.config.mjs --watch",
     "clean": "rimraf dist"
   },
   "dependencies": {
@@ -31,6 +31,6 @@
     "esbuild": "^0.24.2",
     "react": "^19.2.0",
     "rimraf": "^6.1.0",
-    "typescript": "~5.0.4"
+    "typescript": "^5.7.3"
   }
 }

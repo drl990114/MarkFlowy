@@ -1,4 +1,7 @@
 import { apiClient } from './api-client'
+import type { AuthTokens, User } from '@markflowy/types'
+
+export type { AuthTokens, User } from '@markflowy/types'
 
 export interface SendEmailCodeParams {
   email: string
@@ -9,20 +12,6 @@ export interface VerifyEmailCodeParams {
   email: string
   code: string
   purpose: string
-}
-
-export interface AuthTokens {
-  accessToken: string
-  refreshToken: string
-}
-
-export interface User {
-  id: string
-  email: string
-  displayName: string | null
-  avatarUrl: string | null
-  createdAt: string
-  updatedAt: string
 }
 
 export const authApi = {

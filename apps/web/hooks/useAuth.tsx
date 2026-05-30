@@ -1,13 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { apiClient } from '../utils/apiClient'
-
-export interface User {
-  id: string
-  email: string
-  displayName?: string
-  avatarUrl?: string
-}
+import type { User } from '@markflowy/types'
 
 interface AuthState {
   user: User | null

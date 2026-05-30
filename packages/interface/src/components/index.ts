@@ -25,3 +25,5 @@ export * from './Toolbar'
 export * from './ContextMenu'
 
 export * from './TableOfContents'
+
+export * from './FillFlexParent'

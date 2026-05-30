@@ -6,17 +6,16 @@ const buildOptions = {
   entryPoints: ['src/index.ts'],
   bundle: true,
   format: 'esm',
-  outfile: 'dist/index.js',
-  external: ['i18next', 'react-i18next'],
+  outfile: 'dist/index.mjs',
   platform: 'neutral',
-  target: 'es2020',
+  target: 'es2022',
   sourcemap: true,
 }
 
 if (isWatch) {
   const ctx = await esbuild.context(buildOptions)
   await ctx.watch()
-  console.log('[i18n] watching for changes...')
+  console.log('[@markflowy/api-client] watching for changes...')
 } else {
   await esbuild.build(buildOptions)
 }

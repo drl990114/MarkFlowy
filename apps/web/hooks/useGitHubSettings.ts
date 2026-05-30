@@ -1,12 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { apiClient } from 'utils/apiClient'
-
-export interface GitHubConfig {
-  hasToken: boolean
-  username?: string
-  createdAt?: string
-}
+import type { GitHubConfig } from '@markflowy/types'
 
 export interface GitHubRepo {
   id: number

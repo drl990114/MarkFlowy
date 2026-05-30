@@ -1,13 +1,12 @@
 export { apiClient } from './api-client'
-export type { ApiResponse, RequestConfig } from './api-client'
+export type { ApiResponse, RequestConfig } from '@markflowy/api-client'
 
 export { authApi } from './auth-api'
 export type {
   SendEmailCodeParams,
   VerifyEmailCodeParams,
-  AuthTokens,
-  User,
 } from './auth-api'
+export type { AuthTokens, User } from '@markflowy/types'
 
 export { workspacesApi, WorkspaceType, WorkspaceRole } from './workspaces-api'
 export type {
@@ -18,8 +17,6 @@ export type {
   UpdateWorkspaceParams,
   UpsertWorkspaceMemberParams,
   GetContentsParams,
-  CreateOrUpdateFileParams,
-  DeleteFileParams,
   GitHubTreeItem,
   GitHubFileContent,
   GitHubBranch,
@@ -37,3 +34,4 @@ export type {
   CreatePullRequestParams,
   GitHubPullRequest,
 } from './github-api'
+export type { CreateOrUpdateFileParams, DeleteFileParams } from '@markflowy/github-api'

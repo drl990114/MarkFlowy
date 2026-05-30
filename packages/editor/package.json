@@ -91,7 +91,7 @@
     "rollup-plugin-postcss": "^4.0.2",
     "style-loader": "^4.0.0",
     "ts-node": "^10.9.2",
-    "typescript": "~5.0.4",
+    "typescript": "^5.7.3",
     "unified": "^11.0.5",
     "url": "^0.11.4",
     "vite": "^5.4.21",
