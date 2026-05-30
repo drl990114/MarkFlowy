@@ -37,9 +37,7 @@ export function createSourceCodeManager(
 ): RemirrorManager<any> {
   const typewriterScrollOptions = options?.typewriterScroll ?? {}
   const typewriterScrollExtension = new TypewriterScrollExtension(typewriterScrollOptions)
-  const typewriterCmExtension = typewriterScrollOptions.enabled === true
-    ? [typewriterScrollExtension.createCodeMirrorExtension()]
-    : []
+  const typewriterCmExtension = [typewriterScrollExtension.createCodeMirrorExtension()]
 
   return createReactManager(() => [
     new CountExtension({}),

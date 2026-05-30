@@ -98,9 +98,7 @@ function extensions(options: ExtensionsOptions): any[] {
   } = options
 
   const typewriterScrollExtension = new TypewriterScrollExtension(typewriterScrollOptions)
-  const typewriterCmExtension = typewriterScrollOptions.enabled === true
-    ? [typewriterScrollExtension.createCodeMirrorExtension()]
-    : []
+  const typewriterCmExtension = [typewriterScrollExtension.createCodeMirrorExtension()]
 
   const codemirrorNodeCommonOptions = {
     customCopyFunction,

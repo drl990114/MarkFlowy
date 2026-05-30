@@ -84,6 +84,7 @@ function TextEditor(props: TextEditorProps) {
   const curFile = getFileObject(id)
   const createDelegate = useCallback(
     (editorViewType = EditorViewType.WYSIWYG, sourceCodeLanguage?: string) => {
+      const currentSettingData = useAppSettingStore.getState().settingData
       if (editorViewType === 'sourceCode') {
         return createSourceCodeDelegate({
           language: sourceCodeLanguage,
@@ -92,6 +93,9 @@ function TextEditor(props: TextEditorProps) {
           clipboardReadFunction: clipboardRead,
           onCodemirrorViewLoad: (cmView) => {
             sourceCodeCodemirrorViewMap.set(id, cmView)
+          },
+          typewriterScroll: {
+            enabled: currentSettingData.editor_typewriter_scroll,
           },
         })
       } else {
@@ -323,6 +327,18 @@ function TextEditor(props: TextEditorProps) {
   const editorTypeSwitchingRef = useRef(false)
 
   useEffect(() => {
+    if (!active) return
+    const ctx = useEditorStore.getState().getEditorCtx(id)
+    if (ctx?.commands?.toggleTypewriterScroll) {
+      ctx.commands.toggleTypewriterScroll(settingData.editor_typewriter_scroll)
+    }
+  }, [settingData.editor_typewriter_scroll, delegate, id, active])
+
+  useEffect(() => {
+    delegateOptionsCache.clear()
+  }, [settingData.editor_typewriter_scroll])
+
+  useEffect(() => {
     const cb = throttle((payload: EditorViewType) => {
       if (active) {
         if (editorTypeSwitchingRef.current) {
@@ -337,6 +353,7 @@ function TextEditor(props: TextEditorProps) {
         bus.emit(EVENT.app_save, undefined, {
           onSuccess: () => {
             if (payload === EditorViewType.SOURCECODE) {
+              const currentSettingData = useAppSettingStore.getState().settingData
               const sourceCodeDelegate = createSourceCodeDelegate({
                 disableAllBuildInShortcuts: true,
                 overrideShortcutMap: useEditorKeybindingStore.getState().editorKeybingMap,
@@ -344,6 +361,9 @@ function TextEditor(props: TextEditorProps) {
                 onCodemirrorViewLoad: (cmView) => {
                   sourceCodeCodemirrorViewMap.set(curFile.id, cmView)
                   debounceRefreshToc()
+                },
+                typewriterScroll: {
+                  enabled: currentSettingData.editor_typewriter_scroll,
                 },
               })
               setEditorDelegate(curFile.id, sourceCodeDelegate)
