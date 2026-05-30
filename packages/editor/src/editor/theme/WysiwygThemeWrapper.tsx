@@ -758,6 +758,11 @@ export const WysiwygThemeWrapper = styled.div.attrs<WrapperProps>((p) => ({
 
   .inline-input-render {
     line-height: normal;
+
+    svg {
+      vertical-align: middle;
+      max-width: 100%;
+    }
   }
 
   .reference-def {
@@ -833,6 +838,10 @@ export const WysiwygThemeWrapper = styled.div.attrs<WrapperProps>((p) => ({
 
     &:hover {
       border-color: ${(props) => props.theme.borderColor};
+    }
+
+    svg {
+      max-width: 100%;
     }
   }
 

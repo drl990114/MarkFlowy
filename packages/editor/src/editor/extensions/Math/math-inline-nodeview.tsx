@@ -1,14 +1,10 @@
-// prosemirror imports
 import { history, redo, undo } from '@rme-sdk/pm/history'
 import { keymap } from '@rme-sdk/pm/keymap'
 import { Node as ProseNode } from '@rme-sdk/pm/model'
 import { Command, EditorState, Plugin, TextSelection, Transaction } from '@rme-sdk/pm/state'
 import { Decoration, EditorView, NodeView } from '@rme-sdk/pm/view'
-import katex from 'katex'
+import { tex2svgInline } from './mathjax'
 
-/**
- * Create a ProseMirror command to collapse the inner editor selection back to the outer view.
- */
 function collapseCmd(
   outerView: EditorView,
   dir: 1 | -1,
@@ -137,12 +133,7 @@ export class MathInlineView implements NodeView {
 
       const container = document.createElement('span')
       container.setAttribute('data-type', 'math-inline')
-
-      katex.render(tex || '', container, {
-        throwOnError: false,
-        displayMode: false,
-        output: 'mathml',
-      })
+      container.innerHTML = tex2svgInline(tex)
 
       let newRenderEl: HTMLElement = container
       if (container.childElementCount === 1 && container.firstElementChild) {
@@ -199,7 +190,6 @@ export class MathInlineView implements NodeView {
             Backspace: (state) => {
               const { from, to } = state.selection
               if (from === 0 && to === state.doc.content.size) {
-                // If the inner editor is empty, delete the whole math block node
                 const pos = this._getPos()
                 if (pos !== undefined) {
                   const tr = this._outerView.state.tr.delete(pos, pos + this._node.nodeSize)

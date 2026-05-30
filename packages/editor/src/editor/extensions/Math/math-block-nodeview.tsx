@@ -4,9 +4,9 @@ import type { EditorView as CodeMirrorEditorView } from '@codemirror/view'
 import { Node as ProseNode } from '@rme-sdk/pm/model'
 import { Decoration, EditorView, NodeView } from '@rme-sdk/pm/view'
 import { latex } from 'codemirror-lang-latex'
-import katex from 'katex'
 import { addLabelToDom } from '../../utils/dom'
 import { MathBlockExtensionOptions } from './math-block-extension'
+import { tex2svgDisplay } from './mathjax'
 
 export class MathBlockView implements NodeView {
   private _node: ProseNode
@@ -56,9 +56,7 @@ export class MathBlockView implements NodeView {
   }
 
   destroy() {
-    // close the inner editor without rendering
     this.closeEditor(false)
-    // clean up dom elements
     if (this._renderElt) {
       this._renderElt.remove()
       delete this._renderElt
@@ -116,12 +114,7 @@ export class MathBlockView implements NodeView {
 
       const container = document.createElement('div')
       container.setAttribute('data-type', 'math-block')
-
-      katex.render(tex || '', container, {
-        throwOnError: false,
-        displayMode: false,
-        output: 'mathml',
-      })
+      container.innerHTML = tex2svgDisplay(tex)
 
       let newRenderEl: HTMLElement = container
       if (container.childElementCount === 1 && container.firstElementChild) {
@@ -177,7 +170,6 @@ export class MathBlockView implements NodeView {
     this._innerView = this.mfCodemirrorView.cm
     this._renderElt?.classList.add('node-hide')
 
-    console.log('currentTex', currentTex, this._node.textContent)
     const prevCursorPos: number = this._node.textContent.length || 0
 
     this.setSelection(prevCursorPos, prevCursorPos)
