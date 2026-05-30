@@ -1,3 +1,4 @@
+import { commandRegistry } from '@/commands'
 import useAiChatStore, { getCurrentAISettingData } from '@/extensions/ai/useAiChatStore'
 import useBookMarksStore from '@/extensions/bookmarks/useBookMarksStore'
 import bus from '@/helper/eventBus'
@@ -6,7 +7,7 @@ import { FileResultCode } from '@/helper/filesys'
 import { addNewMarkdownFileEdit, isEmptyEditor } from '@/services/editor-file'
 import { currentWindow } from '@/services/windows'
 import { getWorkspace, WorkSpace } from '@/services/workspace'
-import { useCommandStore, useEditorStateStore, useEditorStore } from '@/stores'
+import { useEditorStateStore, useEditorStore } from '@/stores'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
@@ -37,7 +38,6 @@ export const EditorInfoBar = memo(() => {
   const [workspace, setWorkspace] = useState<WorkSpace | null>(null)
 
   const { editorViewTypeMap } = useEditorViewTypeStore()
-  const { execute } = useCommandStore()
   const { getPostSummary, getPostTranslate } = useAiChatStore()
   const { settingData } = useAppSettingStore()
   const { addAppTask } = useAppTasksStore()
@@ -181,9 +181,9 @@ ${res}
           checked: curBookMark !== undefined,
           handler: () => {
             if (curBookMark) {
-              execute('edit_bookmark_dialog', curBookMark)
+              commandRegistry.execute('edit_bookmark_dialog', curBookMark)
             } else {
-              execute('open_bookmark_dialog', curFile)
+              commandRegistry.execute('open_bookmark_dialog', curFile)
             }
           },
         },
@@ -264,7 +264,6 @@ ${res}
     getEditorDelegate,
     t,
     fetchCurFileSummary,
-    execute,
     fetchCurFileTranslate,
     convertText,
   ])
@@ -284,12 +283,14 @@ ${res}
           label: t('view.source_code'),
           value: EditorViewType.SOURCECODE,
           checked: editorViewType === EditorViewType.SOURCECODE,
+          commandId: 'app_toggleEditorType',
           handler: () => bus.emit('editor_toggle_type', EditorViewType.SOURCECODE),
         },
         {
           label: t('view.wysiwyg'),
           value: EditorViewType.WYSIWYG,
           checked: editorViewType === EditorViewType.WYSIWYG,
+          commandId: 'app_toggleEditorType',
           handler: () => bus.emit('editor_toggle_type', EditorViewType.WYSIWYG),
         },
         {
@@ -302,7 +303,7 @@ ${res}
         return curFileTypeConfig ? curFileTypeConfig?.supportedModes?.includes(item.value) : false
       }),
     })
-  }, [curFile, editorViewTypeMap, t, fetchCurFileSummary, execute, fetchCurFileTranslate])
+  }, [curFile, editorViewTypeMap, t, fetchCurFileSummary, fetchCurFileTranslate])
 
   const editorViewType = editorViewTypeMap.get(curFile?.id || '') || 'wysiwyg'
 

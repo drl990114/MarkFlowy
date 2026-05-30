@@ -1,8 +1,9 @@
+import { commandRegistry } from '@/commands'
 import useBookMarksStore from '@/extensions/bookmarks/useBookMarksStore'
 import bus from '@/helper/eventBus'
 import { getFileObject } from '@/helper/files'
 import { FileResultCode } from '@/helper/filesys'
-import { useCommandStore, useEditorStore } from '@/stores'
+import { useEditorStore } from '@/stores'
 import { invoke } from '@tauri-apps/api/core'
 import { useCallback, useRef } from 'react'
 import { useTranslation } from '@/i18n'
@@ -12,7 +13,6 @@ import { showContextMenu } from '../../../../ui-v2/ContextMenu'
 
 export const MoreActions = () => {
   const { activeId, getEditorContent } = useEditorStore()
-  const { execute } = useCommandStore()
   const { t } = useTranslation()
   const ref = useRef<any>(null)
   
@@ -54,9 +54,9 @@ export const MoreActions = () => {
           checked: curBookMark !== undefined,
           handler: () => {
             if (curBookMark) {
-              execute('edit_bookmark_dialog', curBookMark)
+              commandRegistry.execute('edit_bookmark_dialog', curBookMark)
             } else {
-              execute('open_bookmark_dialog', curFile)
+              commandRegistry.execute('open_bookmark_dialog', curFile)
             }
           },
         },
@@ -103,7 +103,7 @@ export const MoreActions = () => {
         },
       ],
     })
-  }, [curFile, execute, t, convertText])
+  }, [curFile, t, convertText])
 
   if (!curFile) return null
 

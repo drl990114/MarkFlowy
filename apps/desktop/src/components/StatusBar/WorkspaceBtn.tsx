@@ -1,6 +1,7 @@
+import { commandRegistry } from '@/commands'
 import { getFileNameFromPath } from '@/helper/filesys'
 import { getWorkspace, WorkSpace } from '@/services/workspace'
-import { useCommandStore, useEditorStore } from '@/stores'
+import { useEditorStore } from '@/stores'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 
@@ -34,7 +35,7 @@ export const WorkspaceBtn = () => {
     <>
       <Container
         onClick={() => {
-          useCommandStore.getState().execute('open_workspace_dialog')
+          commandRegistry.execute('open_workspace_dialog')
         }}
       >
         {getFileNameFromPath(workspace.rootPath || '')}

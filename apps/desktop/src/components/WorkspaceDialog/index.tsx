@@ -1,5 +1,5 @@
+import { commandRegistry } from '@/commands'
 import { getWorkspace, WorkSpace } from '@/services/workspace'
-import { useCommandStore } from '@/stores'
 import { t } from '@/i18n'
 import { memo, useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components'
@@ -41,7 +41,7 @@ export const WorkspaceDialog = memo(() => {
   const [workspace, setWorkspace] = useState<WorkSpace | null>(null)
 
   useEffect(() => {
-    useCommandStore.getState().addCommand({
+    const disposable = commandRegistry.registerCommand({
       id: 'open_workspace_dialog',
       handler: () => {
         setOpen(true)
@@ -50,6 +50,8 @@ export const WorkspaceDialog = memo(() => {
         })
       },
     })
+
+    return () => disposable.dispose()
   }, [])
 
   const handleClose = useCallback(() => setOpen(false), [])

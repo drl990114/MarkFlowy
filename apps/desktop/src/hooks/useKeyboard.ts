@@ -1,6 +1,6 @@
+import { commandRegistry, keybindingRegistry } from '@/commands'
 import { createKeybindingsHandler } from '@/helper/bindkeys'
 import { logger } from '@/helper/logger'
-import { useCommandStore } from '@/stores'
 import { invoke } from '@tauri-apps/api/core'
 import { createGlobalStore } from 'hox'
 import { t } from '@/i18n'
@@ -8,9 +8,6 @@ import { useEffect, useState } from 'react'
 import { toast } from 'zens'
 import { create } from 'zustand'
 
-/**
- * A map of keybinding strings to event handlers.
- */
 export type KeyBindingMap = Record<string, (event: KeyboardEvent) => void>
 
 interface EditorKeybindingStore {
@@ -30,22 +27,6 @@ export const useEditorKeybindingStore = create<EditorKeybindingStore>((set) => {
   }
 })
 
-const getKeyBinding = (keyMap: string[]) => {
-  let keyBinding = ''
-  keyMap.forEach((key, index) => {
-    if (key === 'CommandOrCtrl') {
-      keyBinding += 'mod'
-    } else {
-      keyBinding += key
-    }
-
-    if (index < keyMap.length - 1) {
-      keyBinding += '-'
-    }
-  })
-  return keyBinding
-}
-
 function useKeyboard() {
   const [keyboardInfos, setKeyboardInfos] = useState<KeyboardInfo[]>([])
   const { setEditorKeybingMap } = useEditorKeybindingStore()
@@ -56,6 +37,14 @@ function useKeyboard() {
       const cmds: KeyboardInfo[] = res.cmds || []
 
       setKeyboardInfos(cmds)
+
+      keybindingRegistry.setKeybindings(
+        cmds.map((cmd) => ({
+          id: cmd.id,
+          keyMap: cmd.key_map,
+          when: cmd.when,
+        })),
+      )
     })
   }, [])
 
@@ -66,14 +55,14 @@ function useKeyboard() {
     keyboardInfos.forEach((keyboardInfo) => {
       if (keyboardInfo.key_map.length > 0) {
         if (keyboardInfo.id.startsWith('editor_')) {
-          const keybind = getKeyBinding(keyboardInfo.key_map)
+          const keybind = keybindingRegistry.getKeyBindingString(keyboardInfo.key_map)
           const key = keyboardInfo.id.replace('editor_', '')
 
           editorKeybingMap[key] = keybind
         } else {
-          const keybind = getKeyBinding(keyboardInfo.key_map)
+          const keybind = keybindingRegistry.getKeyBindingString(keyboardInfo.key_map)
           keybindingMap[keybind] = () => {
-            useCommandStore.getState().execute(keyboardInfo.id)
+            commandRegistry.execute(keyboardInfo.id)
           }
         }
       }
@@ -97,8 +86,8 @@ function useKeyboard() {
     }
     return keyboardInfos.filter(info => info.when === curCommand.when).some((cmd) => {
         if (cmd.key_map.length > 0) {
-          const existingKeybinding = getKeyBinding(cmd.key_map)
-          const newKeybinding = getKeyBinding(newKeyMap)
+          const existingKeybinding = keybindingRegistry.getKeyBindingString(cmd.key_map)
+          const newKeybinding = keybindingRegistry.getKeyBindingString(newKeyMap)
           return existingKeybinding === newKeybinding
         }
         return false
@@ -120,6 +109,8 @@ function useKeyboard() {
       setKeyboardInfos((prev) =>
         prev.map((cmd) => (cmd.id === commandId ? { ...cmd, key_map: [...newKeyMap] } : cmd)),
       )
+
+      keybindingRegistry.updateKeybinding(commandId, newKeyMap)
     }
   }
 

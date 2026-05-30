@@ -1,6 +1,6 @@
+import { commandRegistry } from '@/commands'
 import { EVENT } from '@/constants'
 import { Setting } from '@/router'
-import { useCommandStore } from '@/stores'
 import { memo, useCallback, useEffect, useState } from 'react'
 import { useTranslation } from '@/i18n'
 import styled from 'styled-components'
@@ -36,12 +36,14 @@ export const SettingDialog = memo(() => {
   const { t } = useTranslation()
 
   useEffect(() => {
-    useCommandStore.getState().addCommand({
+    const disposable = commandRegistry.registerCommand({
       id: EVENT.app_openSetting,
       handler: () => {
         setOpen(true)
       },
     })
+
+    return () => disposable.dispose()
   }, [])
 
   const handleClose = useCallback(() => setOpen(false), [])

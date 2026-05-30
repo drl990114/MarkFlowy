@@ -1,8 +1,8 @@
+import { commandRegistry } from '@/commands'
 import { getFileObject } from '@/helper/files'
 import { getFileTypeConfig, isTextfileType } from '@/helper/fileTypeHandler'
 import { logger } from '@/helper/logger'
 import { isEmptyEditor } from '@/services/editor-file'
-import { useCommandStore } from '@/stores'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
 import { memo } from 'react'
@@ -20,7 +20,6 @@ function Editor(props: EditorProps) {
 
   const { getFileTypeConfigById, setFileTypeConfig } = useFileTypeConfigStore()
   const curFileTypeConfig = getFileTypeConfigById(id)
-  const { execute } = useCommandStore()
 
   useMount(async () => {
     logger.info('[Editor] useMount start', { id, fileName: curFile.name, path: curFile.path })
@@ -37,7 +36,7 @@ function Editor(props: EditorProps) {
     setFileTypeConfig(curFile.id, fileTypeConfig)
     if (fileTypeConfig.type === 'markdown') {
       setTimeout(() => {
-        execute('app:toc_refresh')
+        commandRegistry.execute('app:toc_refresh')
       }, 100)
     }
   })

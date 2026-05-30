@@ -1,9 +1,9 @@
+import { commandRegistry } from '@/commands'
 import type { RightBarItem } from '@/components/SideBar'
 import type { RightNavItem } from '@/components/SideBar/SideBarHeader'
 import SideBarHeader from '@/components/SideBar/SideBarHeader'
 import { showContextMenu } from '@/components/ui-v2/ContextMenu/ContextMenu'
 import { RIGHTBARITEMKEYS } from '@/constants'
-import { useCommandStore } from '@/stores'
 import { useCallback, useEffect, useState } from 'react'
 import { BookMarkViewItem } from './BookMarkViewItem'
 import { Container } from './styles'
@@ -63,7 +63,7 @@ const BookMarksList: React.FC<ChatListProps> = (props) => {
                 value: 'edit',
                 label: 'Edit',
                 handler: () => {
-                  useCommandStore.getState().execute('edit_bookmark_dialog', bookmark)
+                  commandRegistry.execute('edit_bookmark_dialog', bookmark)
                 }
               },
               {

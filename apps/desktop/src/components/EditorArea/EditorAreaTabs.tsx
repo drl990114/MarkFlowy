@@ -1,8 +1,9 @@
+import { commandRegistry } from '@/commands'
 import { EVENT } from '@/constants'
 import { getFileObject, getSaveOpenedEditorEntries } from '@/helper/files'
 import type { IFile } from '@/helper/filesys'
 import { checkUnsavedFiles } from '@/services/checkUnsavedFiles'
-import { useCommandStore, useEditorStateStore, useEditorStore } from '@/stores'
+import { useEditorStateStore, useEditorStore } from '@/stores'
 import { memo, useCallback, useEffect, useRef } from 'react'
 import { useTranslation } from '@/i18n'
 import styled from 'styled-components'
@@ -90,7 +91,7 @@ const EditorAreaTabs = memo(() => {
   )
 
   useEffect(() => {
-    useCommandStore.getState().addCommand({
+    const disposable = commandRegistry.registerCommand({
       id: EVENT.app_closeCurrentEditorTab,
       handler: () => {
         const activeId = useEditorStore.getState().activeId
@@ -99,6 +100,8 @@ const EditorAreaTabs = memo(() => {
         }
       },
     })
+
+    return () => disposable.dispose()
   }, [])
 
   const moveActiveTab = (dir: 'left' | 'right') => {
@@ -163,6 +166,7 @@ const EditorAreaTabs = memo(() => {
                 {
                   label: t('contextmenu.editor_tab.close'),
                   value: 'close',
+                  commandId: EVENT.app_closeCurrentEditorTab,
                   handler: () => {
                     if (
                       checkUnsavedFiles({

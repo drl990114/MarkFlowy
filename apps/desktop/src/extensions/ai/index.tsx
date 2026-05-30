@@ -1,10 +1,10 @@
+import { commandRegistry } from '@/commands'
 import type { RightBarItem } from '@/components/SideBar'
 import type { RightNavItem } from '@/components/SideBar/SideBarHeader'
 import SideBarHeader from '@/components/SideBar/SideBarHeader'
 import { EVENT, RIGHTBARITEMKEYS } from '@/constants'
 import { logger } from '@/helper/logger'
 import { addNewMarkdownFileEdit } from '@/services/editor-file'
-import { useCommandStore } from '@/stores'
 import type { BubbleItemType } from '@ant-design/x'
 import { Actions, Bubble, Sender } from '@ant-design/x'
 import XMarkdown from '@ant-design/x-markdown'
@@ -209,7 +209,7 @@ const ChatList: React.FC<ChatListProps> = (props) => {
   }, [])
 
   const openSettingWindow = useCallback(
-    () => useCommandStore.getState().execute(EVENT.app_openSetting),
+    () => commandRegistry.execute(EVENT.app_openSetting),
     [],
   )
 

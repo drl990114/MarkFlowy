@@ -1,10 +1,11 @@
+import { commandRegistry } from '@/commands'
 import { EVENT } from '@/constants'
 import { FindReplace } from '@/components/EditorArea/editorToolBar/FindReplace'
 import { PreviewToolbar } from '@/components/EditorArea/editorToolBar/PreviewToolbar/PreviewToolbar'
 import { SourceCodeToolbar } from '@/components/EditorArea/editorToolBar/SourceCodeToolbar/SourceCodeToolbar'
 import { WysiwygToolbar } from '@/components/EditorArea/editorToolBar/WysiwygToolbar'
 import bus from '@/helper/eventBus'
-import { useCommandStore, useEditorStore } from '@/stores'
+import { useEditorStore } from '@/stores'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
 import { memo, useEffect } from 'react'
@@ -16,10 +17,9 @@ import { Container, EditorPanel } from './styles'
 
 function EditorArea() {
   const { opened, activeId } = useEditorStore()
-  const { addCommand } = useCommandStore()
 
   useEffect(() => {
-    addCommand({
+    const disposable = commandRegistry.registerCommand({
       id: EVENT.app_toggleEditorType,
       handler: () => {
         const { activeId } = useEditorStore.getState()
@@ -43,7 +43,9 @@ function EditorArea() {
         bus.emit('editor_toggle_type', targetViewType)
       },
     })
-  }, [addCommand])
+
+    return () => disposable.dispose()
+  }, [])
 
   if (opened.length === 0) {
     return <EmptyState />

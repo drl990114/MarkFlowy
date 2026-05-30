@@ -1,4 +1,5 @@
-import { useCommandStore, useEditorStore } from '@/stores'
+import { commandRegistry } from '@/commands'
+import { useEditorStore } from '@/stores'
 import type { FC } from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
@@ -7,21 +8,22 @@ import { FindReplaceComponent } from './find-replace-component'
 function useFindReplaceOpen() {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
-  const { addCommand, execute } = useCommandStore()
-  
+
   useEffect(() => {
-    addCommand({
+    const disposable = commandRegistry.registerCommand({
       id: 'app_findReplaceEditor',
       handler: () => {
         setOpen((prev) => {
           if (!prev) {
-            execute('app_stopFindEditor')
+            commandRegistry.execute('app_stopFindEditor')
           }
           return !prev
         })
       }
     })
-  }, [addCommand, execute])
+
+    return () => disposable.dispose()
+  }, [])
 
   const focus = useCallback(() => {
     const input = ref.current?.querySelector('input')

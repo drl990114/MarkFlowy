@@ -1,3 +1,4 @@
+import { commandRegistry } from '@/commands'
 import { AppInfoDialog, SideBar } from '@/components'
 import EditorArea from '@/components/EditorArea'
 import { PageLayout } from '@/components/Layout'
@@ -9,7 +10,6 @@ import { BookMarkDialog } from '@/extensions/bookmarks/BookMarkDialog'
 import useBookMarksStore from '@/extensions/bookmarks/useBookMarksStore'
 import { useCommandInit } from '@/hooks/useCommandInit'
 import { appInfoStoreSetup } from '@/services/app-info'
-import { useCommandStore } from '@/stores'
 import useLayoutStore from '@/stores/useLayoutStore'
 import { memo, useEffect, useRef } from 'react'
 import { Group, Panel, PanelImperativeHandle, useDefaultLayout } from 'react-resizable-panels'
@@ -62,17 +62,22 @@ function Root() {
 
   useEffect(() => {
     appInfoStoreSetup()
-    useCommandStore.getState().addCommand({
+    const d1 = commandRegistry.registerCommand({
       id: 'app_toggleLeftsidebarVisible',
       handler: toggleLeftPanelVisible,
     })
-    useCommandStore.getState().addCommand({
+    const d2 = commandRegistry.registerCommand({
       id: 'app_toggleRightsidebarVisible',
       handler: toggleRightPanelVisible,
     })
 
     leftPanelRef.current?.isCollapsed() ? setLeftBarVisible(false) : setLeftBarVisible(true)
     rightPanelRef.current?.isCollapsed() ? setRightBarVisible(false) : setRightBarVisible(true)
+
+    return () => {
+      d1.dispose()
+      d2.dispose()
+    }
   }, [])
 
   useEffect(() => {

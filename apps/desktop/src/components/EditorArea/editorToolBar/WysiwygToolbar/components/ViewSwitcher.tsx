@@ -39,12 +39,14 @@ export const ViewSwitcher = () => {
           label: t('view.source_code'),
           value: EditorViewType.SOURCECODE,
           checked: editorViewType === EditorViewType.SOURCECODE,
+          commandId: 'app_toggleEditorType',
           handler: () => bus.emit('editor_toggle_type', EditorViewType.SOURCECODE),
         },
         {
           label: t('view.wysiwyg'),
           value: EditorViewType.WYSIWYG,
           checked: editorViewType === EditorViewType.WYSIWYG,
+          commandId: 'app_toggleEditorType',
           handler: () => bus.emit('editor_toggle_type', EditorViewType.WYSIWYG),
         },
         {

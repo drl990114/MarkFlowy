@@ -1,5 +1,6 @@
+import { commandRegistry } from '@/commands'
 import { getHeadingValue } from '@/helper/string'
-import { useCommandStore, useEditorStore } from '@/stores'
+import { useEditorStore } from '@/stores'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import { TableOfContents, TableOfContentsRef, IHeadingData } from '@markflowy/interface'
 import { t } from '@/i18n'
@@ -184,8 +185,7 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
   }, [scheduleActiveHeadingUpdate])
 
   useEffect(() => {
-    const addCommand = useCommandStore.getState().addCommand
-    addCommand({
+    const disposable = commandRegistry.registerCommand({
       id: 'app:toc_refresh',
       handler: () => {
         const activeId = useEditorStore.getState().activeId
@@ -203,7 +203,7 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
           const codemirrorView = sourceCodeCodemirrorViewMap.get(activeId)
           if (!codemirrorView) {
             setTimeout(() => {
-              useCommandStore.getState().execute('app:toc_refresh')
+              commandRegistry.execute('app:toc_refresh')
             }, 500)
             return
           }
@@ -255,7 +255,7 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
           const editorView = editorDelegate?.manager?.view
           if (!editorView) {
             setTimeout(() => {
-              useCommandStore.getState().execute('app:toc_refresh')
+              commandRegistry.execute('app:toc_refresh')
             }, 500)
             return
           }
@@ -284,6 +284,8 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
         setActiveHeadingId(null)
       },
     })
+
+    return () => disposable.dispose()
   }, [])
 
   useEffect(() => {
@@ -322,14 +324,13 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
   }, [])
 
   useEffect(() => {
-    const execute = useCommandStore.getState().execute
     if (!activeId) {
       tocRef.current?.refreshByHeadings({ newHeadings: [] })
       setActiveHeadingId(null)
       return
     }
     const timer = setTimeout(() => {
-      execute('app:toc_refresh')
+      commandRegistry.execute('app:toc_refresh')
     }, 300)
     return () => clearTimeout(timer)
   }, [activeId])

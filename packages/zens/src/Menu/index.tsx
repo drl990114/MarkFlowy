@@ -16,6 +16,7 @@ export type MenuItemData = MenuGroupType | MenuDividerType;
 export type MenuGroupType = {
   label: string;
   shortcut?: string;
+  commandId?: string;
   value: string;
   checked?: boolean;
   handler?: () => void;

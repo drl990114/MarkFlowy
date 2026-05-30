@@ -1,3 +1,4 @@
+import { commandRegistry } from '@/commands'
 import { MODAL_INFO_ID } from '@/components/Modal'
 import { MfIconLabelButton } from '@/components/ui-v2/Button/icon-label-button'
 import { showContextMenu } from '@/components/ui-v2/ContextMenu'
@@ -7,7 +8,7 @@ import { getFileObject } from '@/helper/files'
 import { FileResultCode } from '@/helper/filesys'
 import { writeSettingData } from '@/services/app-setting'
 import { currentWindow } from '@/services/windows'
-import { useCommandStore, useEditorStateStore, useEditorStore } from '@/stores'
+import { useEditorStateStore, useEditorStore } from '@/stores'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
@@ -70,7 +71,6 @@ export const MenuList = memo((props: MenuListProps) => {
   } = props
 
   const { activeId, getEditorContent } = useEditorStore()
-  const { execute } = useCommandStore()
   const { editorViewTypeMap } = useEditorViewTypeStore()
   const { settingData } = useAppSettingStore()
   const { t } = useTranslation()
@@ -169,12 +169,14 @@ export const MenuList = memo((props: MenuListProps) => {
             label: t('view.source_code'),
             value: EditorViewType.SOURCECODE,
             checked: editorViewType === EditorViewType.SOURCECODE,
+            commandId: 'app_toggleEditorType',
             handler: () => bus.emit('editor_toggle_type', EditorViewType.SOURCECODE),
           },
           {
             label: t('view.wysiwyg'),
             value: EditorViewType.WYSIWYG,
             checked: editorViewType === EditorViewType.WYSIWYG,
+            commandId: 'app_toggleEditorType',
             handler: () => bus.emit('editor_toggle_type', EditorViewType.WYSIWYG),
           },
           {
@@ -242,9 +244,9 @@ export const MenuList = memo((props: MenuListProps) => {
         checked: curBookMark !== undefined,
         handler: () => {
           if (curBookMark) {
-            execute('edit_bookmark_dialog', curBookMark)
+            commandRegistry.execute('edit_bookmark_dialog', curBookMark)
           } else {
-            execute('open_bookmark_dialog', curFile)
+            commandRegistry.execute('open_bookmark_dialog', curFile)
           }
         },
       })
@@ -315,7 +317,6 @@ export const MenuList = memo((props: MenuListProps) => {
     fileNormalInfo,
     settingData.editor_typewriter_scroll,
     t,
-    execute,
     convertText,
     showViewSwitcher,
     showTypewriterScroll,

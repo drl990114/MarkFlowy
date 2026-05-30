@@ -1,4 +1,4 @@
-import { useCommandStore } from '@/stores'
+import { commandRegistry } from '@/commands'
 import { Select } from 'antd'
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from '@/i18n'
@@ -40,11 +40,10 @@ export const BookMarkDialog: React.FC = () => {
   const [tags, setTags] = useState<string[]>([])
   const [newTag, setNewTag] = useState<string>('')
   const { tagList, addBookMark } = useBookMarksStore()
-  const { addCommand } = useCommandStore()
   const { t } = useTranslation()
 
   useEffect(() => {
-    addCommand({
+    const d1 = commandRegistry.registerCommand({
       id: 'open_bookmark_dialog',
       handler: (file) => {
         setPath(file.path)
@@ -53,7 +52,7 @@ export const BookMarkDialog: React.FC = () => {
       },
     })
 
-    addCommand({
+    const d2 = commandRegistry.registerCommand({
       id: 'edit_bookmark_dialog',
       handler: (bookmark) => {
         setPath(bookmark.path)
@@ -62,7 +61,12 @@ export const BookMarkDialog: React.FC = () => {
         setOpen(true)
       },
     })
-  }, [addCommand])
+
+    return () => {
+      d1.dispose()
+      d2.dispose()
+    }
+  }, [])
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value)

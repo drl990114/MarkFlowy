@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-shadow */
-import { useCommandStore } from '@/stores'
+import { commandRegistry } from '@/commands'
 import { useCallback, useEffect, useState } from 'react'
 import type { EditorContext } from 'rme'
 
@@ -35,7 +35,6 @@ type UseFindReplaceReturn = FindReplaceState & {
 export function useFindReplace(ctx: EditorContext): UseFindReplaceReturn {
   const helpers = ctx.helpers
   const commands = ctx.commands
-  const { addCommand } = useCommandStore()
   const [state, setState] = useState<FindReplaceState>(initialState)
 
   const find = useCallback(
@@ -94,13 +93,15 @@ export function useFindReplace(ctx: EditorContext): UseFindReplaceReturn {
 
 
   useEffect(() => {
-    addCommand({
+    const disposable = commandRegistry.registerCommand({
       id: 'app_stopFindEditor',
       handler: () => {
         stopFind()
       }
     })
-  }, [addCommand, stopFind])
+
+    return () => disposable.dispose()
+  }, [stopFind])
 
   useEffect(() => {
     find()

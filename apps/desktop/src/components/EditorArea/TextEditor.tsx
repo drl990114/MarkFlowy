@@ -1,3 +1,4 @@
+import { commandRegistry } from '@/commands'
 import { EVENT } from '@/constants'
 import { clipboardRead } from '@/helper/clipboard'
 import bus from '@/helper/eventBus'
@@ -17,7 +18,7 @@ import { FileTypeConfig } from '@/helper/fileTypeHandler'
 import { logger } from '@/helper/logger'
 import { useEditorKeybindingStore } from '@/hooks/useKeyboard'
 import { useTranslation } from '@/i18n'
-import { useCommandStore, useEditorStateStore, useEditorStore } from '@/stores'
+import { useEditorStateStore, useEditorStore } from '@/stores'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import useEditorCounterStore from '@/stores/useEditorCounterStore'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
@@ -103,7 +104,6 @@ function TextEditor(props: TextEditorProps) {
 
   const { setEditorDelegate, setEditorCtx, getEditorContent, insertNodeToFolderData } =
     useEditorStore()
-  const { execute } = useCommandStore()
   const { t } = useTranslation()
   const { settingData } = useAppSettingStore()
   const [content, setContent] = useState<string | undefined>()
@@ -281,10 +281,10 @@ function TextEditor(props: TextEditorProps) {
     () =>
       debounce(() => {
         if (fileTypeConfig.type === 'markdown') {
-          execute('app:toc_refresh')
+          commandRegistry.execute('app:toc_refresh')
         }
       }, 1000),
-    [execute, fileTypeConfig.type],
+    [fileTypeConfig.type],
   )
 
   const debounceSaveHandler = useCallback(() => {
@@ -373,7 +373,7 @@ function TextEditor(props: TextEditorProps) {
       cb.cancel()
       bus.detach('editor_toggle_type', cb)
     }
-  }, [active, curFile, execute, setEditorDelegate, getEditorContent, debounceRefreshToc])
+  }, [active, curFile, setEditorDelegate, getEditorContent, debounceRefreshToc])
 
   useEffect(() => {
     const exportImageHandler = async () => {
@@ -479,13 +479,14 @@ function TextEditor(props: TextEditorProps) {
 
   useEffect(() => {
     if (active) {
-      const { addCommand } = useCommandStore.getState()
-      addCommand({
+      const disposable = commandRegistry.registerCommand({
         id: 'app_save',
         handler: () => {
           saveHandler()
         },
       })
+
+      return () => disposable.dispose()
     }
   }, [active, saveHandler])
 

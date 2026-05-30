@@ -2,7 +2,6 @@
 import { EVENT } from '@/constants'
 import appSettingService from '@/services/app-setting'
 import { currentWindow } from '@/services/windows'
-import { useCommandStore } from '@/stores'
 import useThemeStore from '@/stores/useThemeStore'
 import { emitTo } from '@tauri-apps/api/event'
 import { memo, useCallback, useRef } from 'react'
@@ -54,11 +53,7 @@ export const CenterMenu = memo(() => {
         {
           label: t('settings.label'),
           value: 'settings',
-          handler: () => {
-            useCommandStore.getState().execute(EVENT.app_openSetting)
-            // FIXME tauri 2.0 bug in windows https://github.com/tauri-apps/plugins-workspace/issues/656
-            // invoke('open_conf_window')
-          },
+          commandId: EVENT.app_openSetting,
         },
       ],
       x: rect[0]?.left || 12,
