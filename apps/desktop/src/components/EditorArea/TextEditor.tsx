@@ -106,6 +106,7 @@ function TextEditor(props: TextEditorProps) {
     useEditorStore()
   const { t } = useTranslation()
   const { settingData } = useAppSettingStore()
+  const [currentViewType, setCurrentViewType] = useState<EditorViewType>(fileTypeConfig.defaultMode)
   const [content, setContent] = useState<string | undefined>()
   const [delegate, setDelegate] = useState<ReturnType<typeof createDelegate> | null>(null)
 
@@ -333,7 +334,7 @@ function TextEditor(props: TextEditorProps) {
         }
 
         editorTypeSwitchingRef.current = true
-        bus.emit(EVENT.app_save, {
+        bus.emit(EVENT.app_save, undefined, {
           onSuccess: () => {
             if (payload === EditorViewType.SOURCECODE) {
               const sourceCodeDelegate = createSourceCodeDelegate({
@@ -358,6 +359,7 @@ function TextEditor(props: TextEditorProps) {
               debounceRefreshToc()
             }
             useEditorViewTypeStore.getState().setEditorViewType(curFile.id, payload)
+            setCurrentViewType(payload)
             editorRef.current?.toggleType(payload)
           },
           onFinally: () => {
@@ -616,6 +618,8 @@ function TextEditor(props: TextEditorProps) {
       fullWidth={settingData.editor_full_width}
       active={active}
       onClick={handleWrapperClick}
+      editorViewType={currentViewType}
+      fileType={fileTypeConfig.type}
     >
       <MfEditor ref={editorRef} onChange={handleChange} {...editorProps} />
     </EditorWrapper>

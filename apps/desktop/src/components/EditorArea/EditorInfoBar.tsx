@@ -152,7 +152,7 @@ ${res}
           variant,
         })
         if (res.code === FileResultCode.Success) {
-          bus.emit('editor_set_content', res.content)
+          bus.emit('editor_set_content', undefined, res.content)
         } else {
           toast.error(res.content)
         }
@@ -284,20 +284,20 @@ ${res}
           value: EditorViewType.SOURCECODE,
           checked: editorViewType === EditorViewType.SOURCECODE,
           commandId: 'app_toggleEditorType',
-          handler: () => bus.emit('editor_toggle_type', EditorViewType.SOURCECODE),
+          handler: () => bus.emit('editor_toggle_type', undefined, EditorViewType.SOURCECODE),
         },
         {
           label: t('view.wysiwyg'),
           value: EditorViewType.WYSIWYG,
           checked: editorViewType === EditorViewType.WYSIWYG,
           commandId: 'app_toggleEditorType',
-          handler: () => bus.emit('editor_toggle_type', EditorViewType.WYSIWYG),
+          handler: () => bus.emit('editor_toggle_type', undefined, EditorViewType.WYSIWYG),
         },
         {
           label: t('view.preview'),
           value: EditorViewType.PREVIEW,
           checked: editorViewType === EditorViewType.PREVIEW,
-          handler: () => bus.emit('editor_toggle_type', EditorViewType.PREVIEW),
+          handler: () => bus.emit('editor_toggle_type', undefined, EditorViewType.PREVIEW),
         },
       ].filter((item) => {
         return curFileTypeConfig ? curFileTypeConfig?.supportedModes?.includes(item.value) : false

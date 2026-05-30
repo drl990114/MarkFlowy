@@ -27,7 +27,7 @@ export const MoreActions = () => {
           variant,
         })
         if (res.code === FileResultCode.Success) {
-          bus.emit('editor_set_content', res.content)
+          bus.emit('editor_set_content', undefined, res.content)
         } else {
           toast.error(res.content)
         }

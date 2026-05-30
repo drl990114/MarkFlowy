@@ -1,9 +1,9 @@
 import { commandRegistry } from '@/commands'
-import { EVENT } from '@/constants'
 import { FindReplace } from '@/components/EditorArea/editorToolBar/FindReplace'
 import { PreviewToolbar } from '@/components/EditorArea/editorToolBar/PreviewToolbar/PreviewToolbar'
 import { SourceCodeToolbar } from '@/components/EditorArea/editorToolBar/SourceCodeToolbar/SourceCodeToolbar'
 import { WysiwygToolbar } from '@/components/EditorArea/editorToolBar/WysiwygToolbar'
+import { EVENT } from '@/constants'
 import bus from '@/helper/eventBus'
 import { useEditorStore } from '@/stores'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
@@ -22,6 +22,7 @@ function EditorArea() {
     const disposable = commandRegistry.registerCommand({
       id: EVENT.app_toggleEditorType,
       handler: () => {
+        console.log('qweqw')
         const { activeId } = useEditorStore.getState()
         if (!activeId) return
 
@@ -40,7 +41,7 @@ function EditorArea() {
             ? EditorViewType.WYSIWYG
             : EditorViewType.SOURCECODE
 
-        bus.emit('editor_toggle_type', targetViewType)
+        bus.emit('editor_toggle_type', undefined, targetViewType)
       },
     })
 

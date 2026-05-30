@@ -1,8 +1,12 @@
 import styled, { css } from 'styled-components'
+import { EditorViewType } from 'rme'
+import { FileType } from '@/helper/fileTypeHandler'
 
 interface EditorWrapperProps {
   active: boolean
   fullWidth: boolean
+  editorViewType?: EditorViewType
+  fileType?: FileType
 }
 
 export const EditorWrapper = styled.div.attrs<EditorWrapperProps>((props) => props)`
@@ -18,10 +22,15 @@ export const EditorWrapper = styled.div.attrs<EditorWrapperProps>((props) => pro
     grid-row: 1;
   }
 
-  ${(props) =>
-    props.active
+  ${(props) => {
+    const shouldFullWidth =
+      props.fullWidth ||
+      props.editorViewType === EditorViewType.SOURCECODE ||
+      (props.fileType != null && props.fileType !== 'markdown')
+
+    return props.active
       ? css({
-          maxWidth: props.fullWidth ? 'auto' : '800px',
+          maxWidth: shouldFullWidth ? 'auto' : '800px',
           margin: '0 auto',
           paddingBottom: '3rem',
           marginInlineStart: 'auto',
@@ -29,7 +38,8 @@ export const EditorWrapper = styled.div.attrs<EditorWrapperProps>((props) => pro
         })
       : css({
           display: 'none',
-        })}
+        })
+  }}
 `
 
 export const EditorToc = styled.div`

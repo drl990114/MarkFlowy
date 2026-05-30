@@ -4,7 +4,7 @@ import { Icon } from 'zens'
 import type { LinkClickHandler } from '../../extensions/LinkClick'
 import { WysiwygThemeWrapper } from '../../theme'
 import { rmeProsemirrorNodeToHtml } from '../../utils/prosemirrorNodeToHtml'
-import { EditorProps } from '../Editor'
+import { defaultStyleToken, EditorProps } from '../Editor'
 import { createWysiwygDelegate } from '../WysiwygEditor'
 
 interface PreviewProps {
@@ -12,6 +12,7 @@ interface PreviewProps {
   delegateOptions?: EditorProps['delegateOptions']
   onError?: (e: Error) => void
   handleLinkClick?: LinkClickHandler
+  styleToken?: EditorProps['styleToken']
 }
 
 export type HTMLAstNode = {
@@ -28,7 +29,7 @@ const defaultLinkClickHandler: LinkClickHandler = (href: string, event: MouseEve
 }
 
 export const Preview: React.FC<PreviewProps> = (props) => {
-  const { doc, delegateOptions, handleLinkClick } = props
+  const { doc, delegateOptions, handleLinkClick, styleToken = defaultStyleToken } = props
   const [processedHtml, setProcessedHtml] = useState('')
   const containerRef = useRef<HTMLDivElement>(null)
   let targetDoc: PreviewProps['doc'] = doc
@@ -88,8 +89,13 @@ export const Preview: React.FC<PreviewProps> = (props) => {
   }
 
   return (
-    <div ref={containerRef} onClick={handleClick}>
-      <WysiwygThemeWrapper dangerouslySetInnerHTML={{ __html: processedHtml }} />
-    </div>
+    <WysiwygThemeWrapper {...styleToken}>
+      <div
+        ref={containerRef}
+        onClick={handleClick}
+        style={{ padding: '0 40px' }}
+        dangerouslySetInnerHTML={{ __html: processedHtml }}
+      />
+    </WysiwygThemeWrapper>
   )
 }

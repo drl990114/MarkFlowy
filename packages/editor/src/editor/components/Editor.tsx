@@ -145,6 +145,7 @@ export const Editor = memo(
           doc={otherProps.content}
           delegateOptions={otherProps.delegateOptions}
           handleLinkClick={otherProps.delegateOptions?.handleLinkClick}
+          styleToken={otherProps.styleToken}
         />
       )
     }

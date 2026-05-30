@@ -1,6 +1,5 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "concurrency": "3",
   "tasks": {
     "postinstall": {
       "cache": false,
