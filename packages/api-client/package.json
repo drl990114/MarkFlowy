@@ -1,0 +1,27 @@
+{
+  "name": "@markflowy/api-client",
+  "version": "0.0.1",
+  "type": "module",
+  "main": "./dist/index.mjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs"
+    }
+  },
+  "files": [
+    "dist/*"
+  ],
+  "scripts": {
+    "build": "rimraf dist && node esbuild.config.mjs && tsc --emitDeclarationOnly",
+    "dev": "node esbuild.config.mjs --watch",
+    "clean": "rimraf dist"
+  },
+  "devDependencies": {
+    "esbuild": "^0.24.2",
+    "rimraf": "^6.1.0",
+    "typescript": "^5.7.3"
+  }
+}

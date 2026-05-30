@@ -1,11 +1,15 @@
 import { apiClient } from './api-client'
-import type { GitHubTreeItem, GitHubFileContent, GitHubBranch } from './workspaces-api'
+import type {
+  GitHubTreeItem,
+  GitHubFileContent,
+  GitHubBranch,
+  GitHubRepository,
+  GitHubPullRequest,
+} from '@markflowy/github-api'
+import type { GitHubConfig } from '@markflowy/types'
 
-export interface GitHubConfig {
-  hasToken: boolean
-  username?: string
-  createdAt?: string
-}
+export type { GitHubConfig } from '@markflowy/types'
+export type { GitHubRepository, GitHubPullRequest } from '@markflowy/github-api'
 
 export interface SaveGithubConfigParams {
   token: string
@@ -18,63 +22,11 @@ export interface ListReposParams {
   direction?: string
 }
 
-export interface GitHubRepository {
-  id: number
-  name: string
-  full_name: string
-  private: boolean
-  owner: {
-    login: string
-    id: number
-    avatar_url: string
-  }
-  description: string | null
-  html_url: string
-  clone_url: string
-  ssh_url: string
-  default_branch: string
-  created_at: string
-  updated_at: string
-  pushed_at: string
-}
-
-export interface CreateOrUpdateFileParams {
-  message: string
-  content: string
-  sha?: string
-  branch?: string
-}
-
-export interface DeleteFileParams {
-  message: string
-  sha: string
-  branch?: string
-}
-
 export interface CreatePullRequestParams {
   title: string
   head: string
   base: string
   body: string
-}
-
-export interface GitHubPullRequest {
-  id: number
-  number: number
-  html_url: string
-  title: string
-  body: string
-  state: string
-  created_at: string
-  updated_at: string
-  head: {
-    ref: string
-    sha: string
-  }
-  base: {
-    ref: string
-    sha: string
-  }
 }
 
 export const githubApi = {
@@ -120,7 +72,7 @@ export const githubApi = {
     owner: string,
     repo: string,
     path: string,
-    params: CreateOrUpdateFileParams,
+    params: import('@markflowy/github-api').CreateOrUpdateFileParams,
   ) => {
     return apiClient.put<{ content: GitHubFileContent; commit: any }>(
       `/github/repos/${owner}/${repo}/contents/${path}`,
@@ -128,7 +80,7 @@ export const githubApi = {
     )
   },
 
-  deleteFile: async (owner: string, repo: string, path: string, params: DeleteFileParams) => {
+  deleteFile: async (owner: string, repo: string, path: string, params: import('@markflowy/github-api').DeleteFileParams) => {
     const queryParams: Record<string, string> = {
       sha: params.sha,
       message: params.message,

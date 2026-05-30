@@ -34,7 +34,7 @@
     "preview": "cross-env PREVIEW=1 npm run build:site && cross-env PREVIEW=1 dumi preview",
     "release": "np --no-cleanup --no-tests --any-branch",
     "start": "dumi dev",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "test:coverage": "jest --coverage",
     "test:update": "jest --updateSnapshot",
     "test:watch": "jest --watch"
@@ -148,7 +148,7 @@
     "through2": "^4.0.2",
     "ts-jest": "29.3.2",
     "ts-node": "^10.9.2",
-    "typescript": "^5.6.3"
+    "typescript": "^5.7.3"
   },
   "publishConfig": {
     "access": "public",

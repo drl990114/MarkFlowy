@@ -1,114 +1,34 @@
 import { fetch } from '@tauri-apps/plugin-http'
+import { ApiClient, createMemoryTokenStorage, type FetchAdapter } from '@markflowy/api-client'
 import { logger } from '@/helper/logger'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3200'
 
-export interface ApiResponse<T = any> {
-  data?: T
-  error?: {
-    message: string
-    statusCode: number
-  }
+const tauriFetchAdapter: FetchAdapter = {
+  fetch: (url, init) => fetch(url, init as any),
 }
 
-export interface RequestConfig {
-  headers?: Record<string, string>
-  params?: Record<string, any>
-}
+const tokenStorage = createMemoryTokenStorage()
 
-class ApiClient {
-  private baseUrl: string
-  private token: string | null = null
-
-  constructor(baseUrl: string) {
-    this.baseUrl = baseUrl
+class DesktopApiClient extends ApiClient {
+  constructor() {
+    super({ baseUrl: API_BASE_URL, fetchAdapter: tauriFetchAdapter, tokenStorage })
   }
 
-  setToken(token: string | null) {
-    this.token = token
-  }
-
-  getToken() {
-    return this.token
-  }
-
-  private buildUrl(path: string, params?: Record<string, any>): string {
-    const url = new URL(`${this.baseUrl}${path}`)
-    if (params) {
-      Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          url.searchParams.append(key, String(value))
-        }
-      })
-    }
-    return url.toString()
-  }
-
-  private async request<T>(
+  protected async request<T>(
     method: string,
     path: string,
     data?: any,
-    config?: RequestConfig,
-  ): Promise<ApiResponse<T>> {
-    try {
-      const url = this.buildUrl(path, config?.params)
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-        ...config?.headers,
-      }
-
-      if (this.token) {
-        headers['Authorization'] = `Bearer ${this.token}`
-      }
-
-      const response = await fetch(url, {
-        method,
-        headers,
-        body: data ? JSON.stringify(data) : undefined,
-      })
-
-      const responseData = await response.json()
-
-      if (!response.ok) {
-        return {
-          error: {
-            message: responseData.message || 'Request failed',
-            statusCode: response.status,
-          },
-        }
-      }
-
-      return { data: responseData }
-    } catch (error) {
-      logger.error('API request error:', error)
-      return {
-        error: {
-          message: error instanceof Error ? error.message : 'Network error',
-          statusCode: 0,
-        },
-      }
+    config?: any,
+  ): Promise<any> {
+    const result = await super.request<T>(method, path, data, config)
+    if (result.error) {
+      logger.error('API request error:', result.error)
     }
-  }
-
-  async get<T>(path: string, config?: RequestConfig): Promise<ApiResponse<T>> {
-    return this.request<T>('GET', path, undefined, config)
-  }
-
-  async post<T>(path: string, data?: any, config?: RequestConfig): Promise<ApiResponse<T>> {
-    return this.request<T>('POST', path, data, config)
-  }
-
-  async put<T>(path: string, data?: any, config?: RequestConfig): Promise<ApiResponse<T>> {
-    return this.request<T>('PUT', path, data, config)
-  }
-
-  async patch<T>(path: string, data?: any, config?: RequestConfig): Promise<ApiResponse<T>> {
-    return this.request<T>('PATCH', path, data, config)
-  }
-
-  async delete<T>(path: string, config?: RequestConfig): Promise<ApiResponse<T>> {
-    return this.request<T>('DELETE', path, undefined, config)
+    return result
   }
 }
 
-export const apiClient = new ApiClient(API_BASE_URL)
+export const apiClient = new DesktopApiClient()
+
+export type { ApiResponse, RequestConfig } from '@markflowy/api-client'

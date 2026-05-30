@@ -5,11 +5,12 @@ import { fileURLToPath, URL } from 'url'
 import { defineConfig } from 'vite'
 import svgr from 'vite-plugin-svgr'
 
-// https://vitejs.dev/config/
 export default defineConfig({
   server: {
     port: 3000,
+    strictPort: true,
   },
+  clearScreen: false,
   plugins: [
     react({
       babel: {
@@ -28,6 +29,7 @@ export default defineConfig({
   ],
   build: {
     minify: 'esbuild',
+    sourcemap: true,
     rollupOptions: {},
   },
   resolve: {

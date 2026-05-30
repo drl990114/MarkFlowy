@@ -8,14 +8,21 @@
       "dependsOn": ["^postinstall"]
     },
     "build": {
-      "cache": false,
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", "build/**", ".next/**", "!.next/cache/**"]
+      "outputs": ["dist/**", "build/**", ".next/**", "!.next/cache/**"],
+      "inputs": ["src/**", "package.json", "tsconfig.json", "tsconfig.*.json", "rollup.config.*", "esbuild.config.*"]
     },
     "deploy": {
       "dependsOn": ["build", "test", "lint"]
     },
-    "test": {},
+    "test": {
+      "dependsOn": ["^build"],
+      "inputs": ["src/**", "test/**", "tests/**", "vitest.config.*", "jest.config.*"]
+    },
+    "typecheck": {
+      "dependsOn": ["^build"],
+      "inputs": ["src/**", "tsconfig.json", "tsconfig.*.json", "package.json"]
+    },
     "delete": {},
     "lint": {},
     "dev": {

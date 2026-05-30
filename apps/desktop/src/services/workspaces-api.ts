@@ -1,4 +1,13 @@
 import { apiClient } from './api-client'
+import type {
+  GitHubTreeItem,
+  GitHubFileContent,
+  GitHubBranch,
+  CreateOrUpdateFileParams,
+  DeleteFileParams,
+} from '@markflowy/github-api'
+
+export type { GitHubTreeItem, GitHubFileContent, GitHubBranch, CreateOrUpdateFileParams, DeleteFileParams } from '@markflowy/github-api'
 
 export enum WorkspaceType {
   LOCAL = 'LOCAL',
@@ -69,51 +78,6 @@ export interface UpsertWorkspaceMemberParams {
 
 export interface GetContentsParams {
   ref?: string
-}
-
-export interface CreateOrUpdateFileParams {
-  message: string
-  content: string
-  sha?: string
-  branch?: string
-}
-
-export interface DeleteFileParams {
-  message: string
-  sha: string
-  branch?: string
-}
-
-export interface GitHubTreeItem {
-  path: string
-  mode: string
-  type: 'blob' | 'tree' | 'commit'
-  sha: string
-  size?: number
-  url: string
-}
-
-export interface GitHubFileContent {
-  name: string
-  path: string
-  sha: string
-  size: number
-  url: string
-  html_url: string
-  git_url: string
-  download_url: string
-  type: 'file' | 'dir' | 'symlink' | 'submodule'
-  content?: string
-  encoding?: string
-}
-
-export interface GitHubBranch {
-  name: string
-  commit: {
-    sha: string
-    url: string
-  }
-  protected: boolean
 }
 
 export const workspacesApi = {

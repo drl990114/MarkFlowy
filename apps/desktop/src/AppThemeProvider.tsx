@@ -4,7 +4,7 @@ import { useMemo } from 'react'
 import { ThemeProvider as EditorProvider } from 'rme'
 import { IStyleSheetContext, StyleSheetManager, ThemeProvider } from 'styled-components'
 import { ThemeProvider as ZensThemeProvider } from 'zens'
-import { GlobalStyles } from './globalStyles'
+import { GlobalStyles, DesktopSpecificStyles } from './globalStyles'
 import { InjectFonts } from './injectFonts'
 import useAppSettingStore from './stores/useAppSettingStore'
 import useThemeStore from './stores/useThemeStore'
@@ -45,6 +45,7 @@ const AppThemeProvider: React.FC<BaseComponentProps> = function ({ children }) {
           <EditorProvider theme={themeProp} i18n={i18nProp}>
             <InjectFonts />
             <GlobalStyles />
+            <DesktopSpecificStyles />
             <NiceModal.Provider>{children}</NiceModal.Provider>
           </EditorProvider>
         </ZensThemeProvider>

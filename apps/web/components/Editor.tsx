@@ -1,9 +1,9 @@
+import RmeProvider from 'components/RmeProvider'
+import { useRmeEditor } from 'hooks/useRme'
 import Markdown from 'markdown-to-jsx'
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Editor as RmeEditor, type EditorChangeEventParams, type EditorRef } from 'rme'
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
+import type { EditorChangeEventParams, EditorRef } from 'rme'
 import styled from 'styled-components'
-import { useRmeEditor } from '../hooks/useRme'
-import RmeProvider from './RmeProvider'
 
 const EditorContainer = styled.div`
   padding: 0;
@@ -98,129 +98,158 @@ const LoadingContainer = styled.div`
   font-family: var(--body);
 `
 
-interface EditorProps {
-  fileId: string
+export interface WebEditorRef {
+  getContent: () => string | undefined
+}
+
+interface WebEditorProps {
+  fileId?: string
   viewType?: string
   initialContent?: string
   onChange?: (content: string) => void
   active?: boolean
 }
 
-const Editor = (props: EditorProps) => {
-  const { fileId, viewType, initialContent, onChange, active = true } = props
-  const { Editor, EditorViewType, createWysiwygDelegate, createSourceCodeDelegate, loading, error } = useRmeEditor()
-  const [content, setContent] = useState(initialContent || '')
-  const editorRef = useRef<EditorRef>(null)
+export const WebEditor = forwardRef<WebEditorRef, WebEditorProps>(
+  function WebEditor(props, ref) {
+    const { fileId, viewType, initialContent, onChange, active = true } = props
+    const { Editor, EditorViewType, createWysiwygDelegate, createSourceCodeDelegate, loading, error } = useRmeEditor()
+    const [content, setContent] = useState(initialContent || '')
+    const editorRef = useRef<EditorRef>(null)
 
-  const [currentViewType, setCurrentViewType] = useState(viewType || 'wysiwyg')
+    const [currentViewType, setCurrentViewType] = useState(viewType || 'wysiwyg')
 
-  const [editorKey, setEditorKey] = useState(0)
+    const [editorKey, setEditorKey] = useState(0)
 
-  const [isReady, setIsReady] = useState(false)
+    const [isReady, setIsReady] = useState(false)
 
-  const createDelegate = useCallback((viewType: string) => {
-    if (!createWysiwygDelegate || !createSourceCodeDelegate) {
-      return null
-    }
-    return viewType === 'wysiwyg'
-      ? createWysiwygDelegate()
-      : createSourceCodeDelegate({
-          language: 'markdown',
-          onCodemirrorViewLoad: () => {},
-        })
-  }, [createWysiwygDelegate, createSourceCodeDelegate])
-
-  const [delegate, setDelegate] = useState(() => createDelegate(viewType || 'wysiwyg'))
-
-  const defaultContent = initialContent || `##### Welcome to MarkFlowy!`
-
-  useEffect(() => {
-    setIsReady(true)
-  }, [])
-
-  useEffect(() => {
-    if (initialContent !== undefined && initialContent !== content) {
-      setContent(initialContent)
-      setEditorKey(prev => prev + 1)
-    }
-  }, [initialContent])
-
-  useEffect(() => {
-    if (viewType && viewType !== currentViewType) {
-      setCurrentViewType(viewType)
-
-      if (viewType === 'wysiwyg' || viewType === 'source') {
-        const newDelegate = createDelegate(viewType)
-        if (newDelegate) {
-          setDelegate(newDelegate)
-          setEditorKey(prev => prev + 1)
-        }
+    const createDelegate = useCallback((viewType: string) => {
+      if (!createWysiwygDelegate || !createSourceCodeDelegate) {
+        return null
       }
-    }
-  }, [viewType, currentViewType, createDelegate])
+      return viewType === 'wysiwyg'
+        ? createWysiwygDelegate()
+        : createSourceCodeDelegate({
+            language: 'markdown',
+            onCodemirrorViewLoad: () => {},
+          })
+    }, [createWysiwygDelegate, createSourceCodeDelegate])
 
-  const handleChange = useCallback(
-    (params: EditorChangeEventParams) => {
-      if (!params || !params.state) {
-        return
+    const [delegate, setDelegate] = useState(() => createDelegate(viewType || 'wysiwyg'))
+
+    const defaultContent = initialContent || `##### Welcome to MarkFlowy!`
+
+    useEffect(() => {
+      setIsReady(true)
+    }, [])
+
+    useEffect(() => {
+      if (initialContent !== undefined && initialContent !== content) {
+        setContent(initialContent)
+        setEditorKey(prev => prev + 1)
       }
+    }, [initialContent])
 
-      if (delegate && typeof delegate.docToString === 'function') {
-        try {
-          const newContent = delegate.docToString(params.state.doc)
-          if (newContent !== undefined) {
-            setContent(newContent)
-            onChange?.(newContent)
+    useEffect(() => {
+      if (viewType && viewType !== currentViewType) {
+        setCurrentViewType(viewType)
+
+        if (viewType === 'wysiwyg' || viewType === 'source') {
+          const newDelegate = createDelegate(viewType)
+          if (newDelegate) {
+            setDelegate(newDelegate)
+            setEditorKey(prev => prev + 1)
           }
-        } catch {
-          // Ignore conversion errors
         }
       }
-    },
-    [delegate, onChange],
-  )
+    }, [viewType, currentViewType, createDelegate])
 
-  const editorProps = useMemo(() => ({
-    initialType: (currentViewType === 'wysiwyg' && EditorViewType ? EditorViewType.WYSIWYG : (EditorViewType?.SOURCE_CODE || 'sourceCode')) as any,
-    content: content || defaultContent,
-    delegate,
-  }), [currentViewType, EditorViewType, content, defaultContent, delegate])
+    const handleChange = useCallback(
+      (params: EditorChangeEventParams) => {
+        if (!params || !params.state) {
+          return
+        }
 
-  if (!isReady || loading) {
-    return <LoadingContainer>Loading Editor...</LoadingContainer>
-  }
+        if (delegate && typeof delegate.docToString === 'function') {
+          try {
+            const newContent = delegate.docToString(params.state.doc)
+            if (newContent !== undefined) {
+              setContent(newContent)
+              onChange?.(newContent)
+            }
+          } catch {
+          }
+        }
+      },
+      [delegate, onChange],
+    )
 
-  if (error) {
-    return <LoadingContainer>Error loading editor: {error.message}</LoadingContainer>
-  }
+    useImperativeHandle(
+      ref,
+      () => ({
+        getContent: () => {
+          if (!delegate || !editorRef.current) {
+            return undefined
+          }
+          try {
+            const editor = editorRef.current as any
+            if (editor.state?.doc && typeof delegate.docToString === 'function') {
+              return delegate.docToString(editor.state.doc)
+            }
+            return undefined
+          } catch {
+            return undefined
+          }
+        },
+      }),
+      [delegate],
+    )
 
-  if (currentViewType === 'preview') {
+    const editorProps = useMemo(() => ({
+      initialType: (currentViewType === 'wysiwyg' && EditorViewType ? EditorViewType.WYSIWYG : (EditorViewType?.SOURCE_CODE || 'sourceCode')) as any,
+      content: content || defaultContent,
+      delegate,
+    }), [currentViewType, EditorViewType, content, defaultContent, delegate])
+
+    if (!isReady || loading) {
+      return <LoadingContainer>Loading Editor...</LoadingContainer>
+    }
+
+    if (error) {
+      return <LoadingContainer>Error loading editor: {error.message}</LoadingContainer>
+    }
+
+    if (currentViewType === 'preview') {
+      return (
+        <RmeProvider>
+          <PreviewContainer>
+            <Markdown>{content || defaultContent}</Markdown>
+          </PreviewContainer>
+        </RmeProvider>
+      )
+    }
+
+    if (!Editor || !EditorViewType || !delegate) {
+      return <LoadingContainer>Loading Editor...</LoadingContainer>
+    }
+
     return (
       <RmeProvider>
-        <PreviewContainer>
-          <Markdown>{content || defaultContent}</Markdown>
-        </PreviewContainer>
+        <EditorContainer>
+          <Editor
+            key={editorKey}
+            ref={editorRef}
+            {...editorProps}
+            delegate={delegate!}
+            onChange={handleChange}
+          />
+        </EditorContainer>
       </RmeProvider>
     )
-  }
+  },
+)
 
-  if (!Editor || !EditorViewType || !delegate) {
-    return <LoadingContainer>Loading Editor...</LoadingContainer>
-  }
+export default WebEditor
 
-  return (
-    <RmeProvider>
-      <EditorContainer>
-        <RmeEditor
-          key={editorKey}
-          ref={editorRef}
-          {...editorProps}
-          delegate={delegate!}
-          onChange={handleChange}
-        />
-      </EditorContainer>
-    </RmeProvider>
-  )
-}
-
-export default memo(Editor)
+export type { SaveableEditorRef } from '../features/githubWorkspace/components/SaveableEditor'
+export { SaveableEditor } from '../features/githubWorkspace/components/SaveableEditor'
