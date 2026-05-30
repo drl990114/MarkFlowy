@@ -44,6 +44,11 @@
       "description": "",
       "download": "今すぐダウンロード"
     },
+    "statRings": {
+      "users": "ユーザー",
+      "years": "年開発",
+      "githubStars": "GitHub Stars"
+    },
     "features": {
       "lead": "ミニマルで強力なエディタ。AI の知性と洗練された執筆体験を融合——集中と匠の技のために。",
       "feature1": {

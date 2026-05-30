@@ -137,6 +137,15 @@ export const WebEditor = forwardRef<WebEditorRef, WebEditorProps>(
 
     const [delegate, setDelegate] = useState(() => createDelegate(viewType || 'wysiwyg'))
 
+    useEffect(() => {
+      if (!delegate && createWysiwygDelegate && createSourceCodeDelegate) {
+        const newDelegate = createDelegate(currentViewType)
+        if (newDelegate) {
+          setDelegate(newDelegate)
+        }
+      }
+    }, [delegate, createWysiwygDelegate, createSourceCodeDelegate, currentViewType, createDelegate])
+
     const defaultContent = initialContent || `##### Welcome to MarkFlowy!`
 
     useEffect(() => {

@@ -59,6 +59,9 @@ export const loadRmeModule = async (): Promise<RmeModule> => {
   rmeModulePromise = import('rme').then((mod) => {
     rmeModuleCache = mod
     return mod
+  }).catch((err) => {
+    rmeModulePromise = null
+    throw err
   })
 
   return rmeModulePromise

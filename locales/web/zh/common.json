@@ -44,6 +44,11 @@
       "description": "",
       "download": "立即下载"
     },
+    "statRings": {
+      "users": "用户",
+      "years": "年迭代",
+      "githubStars": "GitHub Stars"
+    },
     "features": {
       "lead": "极简而强大的编辑器，将 AI 智能与精炼的写作体验结合——为专注与匠心而生。",
       "feature1": {

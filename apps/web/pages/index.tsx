@@ -134,20 +134,20 @@ export default function Index({
                   <StatRing $percent={85}>
                     <RingBg />
                     <RingFill $percent={85} />
-                    <RingNumber>5+</RingNumber>
-                    <RingLabel>{t('home.features.feature3.title').split(' ')[0]}</RingLabel>
+                    <RingNumber>10K+</RingNumber>
+                    <RingLabel>{t('home.statRings.users')}</RingLabel>
                   </StatRing>
                   <StatRing $percent={72}>
                     <RingBg />
                     <RingFill $percent={72} />
-                    <RingNumber>20M</RingNumber>
-                    <RingLabel>Size</RingLabel>
+                    <RingNumber>3</RingNumber>
+                    <RingLabel>{t('home.statRings.years')}</RingLabel>
                   </StatRing>
                   <StatRing $percent={60}>
                     <RingBg />
                     <RingFill $percent={60} />
-                    <RingNumber>2</RingNumber>
-                    <RingLabel>{t('home.features.feature1.title').split(' ')[0]}</RingLabel>
+                    <RingNumber>2K+</RingNumber>
+                    <RingLabel>{t('home.statRings.githubStars')}</RingLabel>
                   </StatRing>
                 </StatRings>
               </motion.div>
@@ -580,7 +580,7 @@ const HeroRight = styled(motion.div)`
 
 const MacWindow = styled.div`
   width: 100%;
-  min-width: 0;
+  min-width: 592px;
   height: ${rem(540)};
   background: var(--paper-warm);
   border-radius: ${rem(12)};
@@ -703,7 +703,7 @@ const SourceEditorWrapper = styled.div<{ $visible: boolean }>`
   min-width: 0;
   position: relative;
   overflow: hidden;
-  background: var(--paper);
+  background: var(--paper-warm);
   font-family: var(--mono);
 
   &::after {
@@ -714,7 +714,7 @@ const SourceEditorWrapper = styled.div<{ $visible: boolean }>`
     right: 0;
     height: ${rem(48)};
     pointer-events: none;
-    background: linear-gradient(to bottom, transparent, var(--paper));
+    background: linear-gradient(to bottom, transparent, var(--paper-warm));
     z-index: 3;
   }
 `

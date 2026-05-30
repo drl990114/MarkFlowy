@@ -43,6 +43,7 @@ export const SourceCodeThemeWrapper = styled.div.attrs<WarpperProps>((p) => ({
     line-height: ${(props) => props.rootLineHeight};
     font-size: ${(props) => props.rootFontSize};
     font-family: ${(props) => props.theme.codemirrorFontFamily} !important;
+    background-color: ${(props) => props.theme.bgColor};
 
     &.cm-focused {
       outline: none;
