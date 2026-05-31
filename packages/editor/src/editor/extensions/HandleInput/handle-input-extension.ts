@@ -177,12 +177,28 @@ export class HandleInputExtension extends PlainExtension {
 
         // 如果有替换，按位置倒序排列并执行
         if (replacements.length > 0) {
+          // 过滤掉被更长匹配覆盖的短匹配
+          replacements.sort((a, b) => a.from - b.from || b.to - a.to)
+          const filtered: typeof replacements = []
+          for (const r of replacements) {
+            let covered = false
+            for (const f of filtered) {
+              if (f.from <= r.from && f.to >= r.to) {
+                covered = true
+                break
+              }
+            }
+            if (!covered) {
+              filtered.push(r)
+            }
+          }
+
           // 按位置倒序排列，从后往前替换，避免位置偏移问题
-          replacements.sort((a, b) => b.from - a.from)
+          filtered.sort((a, b) => b.from - a.from)
 
           tr = newState.tr
 
-          for (const replacement of replacements) {
+          for (const replacement of filtered) {
             // 验证位置仍然有效
             if (replacement.from >= 0 && replacement.to <= tr.doc.content.size) {
               tr = tr.replaceWith(replacement.from, replacement.to, replacement.node)
