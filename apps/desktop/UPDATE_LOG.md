@@ -1,5 +1,69 @@
 # UPDATE LOG
 
+## v0.80.1
+
+Features:
+
+- Support CLI open command, quickly open files or folders via command line.
+
+- Support typewriter mode for focused writing experience.
+
+- Support shortcut to toggle between source code and WYSIWYG modes.
+
+- Support link open in editor.
+
+- Replaced KaTeX with MathJax for math rendering, with display mode support for inline math.
+
+- Lazy load file tree for better performance.
+
+- Optimized multiple code logic and page presentation.
+
+Fixes:
+
+- Fixed file tree toggle error.
+
+- Fixed NewFileInput issue under Chinese input method.
+
+- Fixed i18n not working in some cases.
+
+- Fixed build errors and improved stability.
+
+- Replaced unwrap() with proper error handling for better safety.
+
+- Fixed aborted streams handling and improved cleanup.
+
+---
+
+特性：
+
+- 支持 CLI open 命令，可通过命令行快速打开文件或文件夹。
+
+- 支持打字机模式，提供更专注的写作体验。
+
+- 支持快捷键在源代码模式和所见即所得模式之间切换。
+
+- 支持编辑器内链接打开。
+
+- 数学公式渲染由 KaTeX 替换为 MathJax，行内数学公式支持显示模式。
+
+- 文件树懒加载，提升性能。
+
+- 优化多处代码逻辑和页面展示。
+
+修复：
+
+- 修复文件树切换错误。
+
+- 修复中文输入法下创建文件的异常问题。
+
+- 修复部分场景下 i18n 不生效的问题。
+
+- 修复构建错误，提升稳定性。
+
+- 使用安全的错误处理替代 unwrap()，提升安全性。
+
+- 修复中断流的处理并优化清理逻辑。
+
 ## v0.55.4
 
 I wrote an article on how to use Copilot and Ollama in MarkFlowy. If you encounter some problems, you may find solutions here, [Use Copilot with Ollama](https://www.markflowy.cc/en/docs/Extension/UseCopilotWithOllama)。
