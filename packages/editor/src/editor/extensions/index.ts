@@ -37,7 +37,7 @@ import { MathBlockExtension, MathInlineExtension } from './Math'
 import { MermaidBlockExtension } from './Mermaid'
 import { NodeIndicatorExtension } from './NodeIndicator'
 import { LineParagraphExtension } from './Paragraph'
-import { PlaceholderExtension } from './Placeholder'
+import { PlaceholderExtension, PlaceholderOptions } from './Placeholder'
 import {
   ReferenceDefinitionExtension,
   ReferenceHrefExtension,
@@ -77,6 +77,8 @@ export type ExtensionsOptions = {
 
   typewriterScroll?: TypewriterScrollOptions
 
+  placeholder?: PlaceholderOptions
+
   handleLinkClick?: LinkClickHandler
 }
 
@@ -95,6 +97,7 @@ function extensions(options: ExtensionsOptions): any[] {
     clipboardReadFunction = clipboardRead,
     codemirrorOptions = {},
     typewriterScroll: typewriterScrollOptions = {},
+    placeholder: placeholderOptions = {},
   } = options
 
   const typewriterScrollExtension = new TypewriterScrollExtension(typewriterScrollOptions)
@@ -141,7 +144,7 @@ function extensions(options: ExtensionsOptions): any[] {
     //   handleViewImgSrcUrl,
     // }),
 
-    new PlaceholderExtension({ placeholder: "Type '/' for commands" }),
+    new PlaceholderExtension({ placeholder: "Type '/' for commands", ...placeholderOptions }),
     new LineParagraphExtension(),
     new LineTextExtension(),
     new LineHardBreakExtension(),

@@ -208,6 +208,20 @@ export const MenuList = memo((props: MenuListProps) => {
       items.push({ type: 'divider' })
     }
 
+    // 占位符提示
+    items.push({
+      label: t('settings.editor.behavior.placeholder.label'),
+      value: 'placeholder',
+      checked: settingData.editor_placeholder,
+      handler: () => {
+        writeSettingData(
+          { key: 'editor_placeholder' },
+          !settingData.editor_placeholder,
+        )
+      },
+    })
+    items.push({ type: 'divider' })
+
     // 文件信息
     if (showFileInfo) {
       items.push({

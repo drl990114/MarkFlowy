@@ -218,6 +218,10 @@
         "typewriter_scroll": {
           "label": "Défilement de la machine à écrire",
           "desc": "Une fois activé, le curseur s'affiche au center de la vue lors de l'édition."
+        },
+        "placeholder": {
+          "label": "Espace réservé",
+          "desc": "Une fois activé, le texte de l'espace réservé s'affiche dans les paragraphes vides."
         }
       },
       "wysiwyg": {

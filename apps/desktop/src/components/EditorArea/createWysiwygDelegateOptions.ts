@@ -38,6 +38,9 @@ export const createWysiwygDelegateOptions = (fileId?: string): CreateWysiwygDele
     typewriterScroll: {
       enabled: settingData.editor_typewriter_scroll,
     },
+    placeholder: {
+      enabled: settingData.editor_placeholder,
+    },
     clipboardReadFunction: clipboardRead,
     uploadImageHandler: (files) => handleUploadImage(files, fileId),
     imagePasteHandler: (src) => handleImagePaste(src, fileId),

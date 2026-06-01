@@ -259,6 +259,10 @@
         "typewriter_scroll": {
           "label": "Typewriter Scroll",
           "desc": "When enabled, the caret will be centered in the viewport during editing."
+        },
+        "placeholder": {
+          "label": "Placeholder",
+          "desc": "When enabled, placeholder text will be displayed in empty paragraphs."
         }
       },
       "wysiwyg": {

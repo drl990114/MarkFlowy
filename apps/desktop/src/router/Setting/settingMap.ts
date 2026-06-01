@@ -190,6 +190,16 @@ export const getSettingMap = () => {
             i18nKey: 'settings.editor.behavior.typewriter_scroll.desc',
           },
         },
+        placeholder: {
+          key: 'editor_placeholder',
+          type: 'switch',
+          title: {
+            i18nKey: 'settings.editor.behavior.placeholder.label',
+          },
+          desc: {
+            i18nKey: 'settings.editor.behavior.placeholder.desc',
+          },
+        },
       },
       Wysiwyg: {
         i18nKey: 'settings.editor.wysiwyg.label',

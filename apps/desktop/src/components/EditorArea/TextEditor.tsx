@@ -335,8 +335,16 @@ function TextEditor(props: TextEditorProps) {
   }, [settingData.editor_typewriter_scroll, delegate, id, active])
 
   useEffect(() => {
+    if (!active) return
+    const ctx = useEditorStore.getState().getEditorCtx(id)
+    if (ctx?.commands?.togglePlaceholder) {
+      ctx.commands.togglePlaceholder(settingData.editor_placeholder)
+    }
+  }, [settingData.editor_placeholder, delegate, id, active])
+
+  useEffect(() => {
     delegateOptionsCache.clear()
-  }, [settingData.editor_typewriter_scroll])
+  }, [settingData.editor_typewriter_scroll, settingData.editor_placeholder])
 
   useEffect(() => {
     const cb = throttle((payload: EditorViewType) => {
