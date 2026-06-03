@@ -13,7 +13,7 @@
     "yarn:id": "yarn install && yarn dedupe",
     "dev": "turbo dev",
     "dev:desktop": "node scripts/dev-desktop.mjs",
-    "build": "turbo build --concurrency=3",
+    "build": "turbo build --concurrency=2",
     "build:web": "yarn turbo build --filter=!@markflowy/desktop",
     "build:desktop": "yarn build && yarn workspace @markflowy/desktop tauri:build",
     "use-offline-bundle": "node scripts/use-offline-bundle.js",

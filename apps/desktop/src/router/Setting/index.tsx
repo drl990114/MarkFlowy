@@ -21,6 +21,7 @@ import { ImageSetting } from './ImageSetting'
 import { KeyboardTable } from './KeyboardTable'
 import { Container } from './styles'
 import { Support } from './Support'
+import { ThemeSetting } from './ThemeSetting'
 import { ThemeStore } from './ThemeStore'
 
 export interface DialogTitleProps {
@@ -105,6 +106,9 @@ function Setting() {
 
     return curGroupKeys.map((key) => {
       const group = curGroup[key]
+      if (key === 'Theme' && curGroupKey === 'display') {
+        return <ThemeSetting key={key} />
+      }
       if (isSettingGroup(group)) {
         return <SettingGroup key={key} group={group} groupKey={key} categoryKey={curGroupKey} />
       }

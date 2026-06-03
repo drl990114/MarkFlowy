@@ -415,6 +415,24 @@
     },
     "display": {
       "label": "Appearance",
+      "theme": {
+        "label": "Theme",
+        "mode": {
+          "label": "Theme Mode",
+          "desc": "Choose how the app switches between light and dark themes",
+          "system": "Follow System",
+          "light": "Light",
+          "dark": "Dark"
+        },
+        "light_theme": {
+          "label": "Light Theme",
+          "desc": "Select the theme used in light mode"
+        },
+        "dark_theme": {
+          "label": "Dark Theme",
+          "desc": "Select the theme used in dark mode"
+        }
+      },
       "size": {
         "label": "Dimensions",
         "zoom": {

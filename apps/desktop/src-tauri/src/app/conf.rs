@@ -27,6 +27,9 @@ macro_rules! merge_options {
 
 pub_struct!(AppConf {
     theme: Option<String>,
+    theme_mode: Option<String>,
+    light_theme: Option<String>,
+    dark_theme: Option<String>,
     language: Option<String>,
     auto_update: Option<bool>,
     webview_zoom: Option<String>,
@@ -136,6 +139,9 @@ impl AppConf {
     pub fn new() -> Self {
         Self {
             theme: Some("light".to_string()),
+            theme_mode: Some("system".to_string()),
+            light_theme: Some("MarkFlowy Light".to_string()),
+            dark_theme: Some("MarkFlowy Dark".to_string()),
             language: Some("en".to_string()),
             auto_update: Some(false),
             webview_zoom: Some("1.0".to_string()),
@@ -249,6 +255,9 @@ impl AppConf {
             self,
             oldconf,
             theme,
+            theme_mode,
+            light_theme,
+            dark_theme,
             language,
             autosave,
             auto_update,
@@ -364,45 +373,35 @@ impl AppConf {
     }
 
     pub fn theme_mode(app: &AppHandle) -> Theme {
-        let cur_theme = Self::get_theme_with_app(app).to_string();
+        let conf = Self::read_with_app(app);
+        let mode = conf.theme_mode.unwrap_or_else(|| "system".to_string());
 
-        if cur_theme == "system" {
-            let mode = match dark_light::detect() {
+        match mode.as_str() {
+            "system" => match dark_light::detect() {
                 dark_light::Mode::Dark => Theme::Dark,
                 dark_light::Mode::Light => Theme::Light,
                 dark_light::Mode::Default => Theme::Light,
-            };
-
-            return mode;
+            },
+            "dark" => Theme::Dark,
+            _ => Theme::Light,
         }
+    }
 
-        let dark = cur_theme.to_lowercase().to_string().contains("dark");
-        if dark {
-            Theme::Dark
-        } else {
-            Theme::Light
+    /// Returns None when theme_mode is "system", so the window follows the OS preference.
+    /// Otherwise returns Some(Theme) for explicit light/dark mode.
+    pub fn theme_mode_for_window(app: &AppHandle) -> Option<Theme> {
+        let conf = Self::read_with_app(app);
+        let mode = conf.theme_mode.unwrap_or_else(|| "system".to_string());
+
+        match mode.as_str() {
+            "system" => None,
+            "dark" => Some(Theme::Dark),
+            _ => Some(Theme::Light),
         }
     }
 
     pub fn theme_mode_with_app(app: &AppHandle) -> Theme {
-        let cur_theme = Self::get_theme_with_app(app).to_string();
-
-        if cur_theme == "system" {
-            let mode = match dark_light::detect() {
-                dark_light::Mode::Dark => Theme::Dark,
-                dark_light::Mode::Light => Theme::Light,
-                dark_light::Mode::Default => Theme::Light,
-            };
-
-            return mode;
-        }
-
-        let dark = cur_theme.to_lowercase().to_string().contains("dark");
-        if dark {
-            Theme::Dark
-        } else {
-            Theme::Light
-        }
+        Self::theme_mode(app)
     }
 }
 
@@ -435,7 +434,7 @@ pub mod cmd {
 
     #[command]
     pub fn open_conf_window(app: AppHandle) {
-        let theme = AppConf::theme_mode_with_app(&app);
+        let theme = AppConf::theme_mode_for_window(&app);
 
         tauri::async_runtime::spawn(async move {
             let conf_win =
@@ -443,7 +442,7 @@ pub mod cmd {
                     .title("markflowy setting")
                     .resizable(true)
                     .fullscreen(false)
-                    .theme(Some(theme))
+                    .theme(theme)
                     .inner_size(1000.0, 600.0)
                     .min_inner_size(500.0, 500.0);
 

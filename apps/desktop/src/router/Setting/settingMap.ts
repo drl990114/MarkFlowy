@@ -74,6 +74,9 @@ export const getSettingMap = () => {
       desc: {
         i18nKey: 'settings.display.desc',
       },
+      Theme: {
+        i18nKey: 'settings.display.theme.label',
+      },
       size: {
         i18nKey: 'settings.display.size.label',
         zoom: {

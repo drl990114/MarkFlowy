@@ -1,40 +1,50 @@
 
 import { EVENT } from '@/constants'
-import appSettingService from '@/services/app-setting'
 import { currentWindow } from '@/services/windows'
 import useThemeStore from '@/stores/useThemeStore'
 import { emitTo } from '@tauri-apps/api/event'
-import { memo, useCallback, useRef } from 'react'
+import { memo, useMemo, useRef } from 'react'
 import { useTranslation } from '@/i18n'
 import styled from 'styled-components'
 import { showContextMenu } from '../ui-v2/ContextMenu/ContextMenu'
 
 export const CenterMenu = memo(() => {
   const ref = useRef<HTMLDivElement>(null)
-  const { themes, curTheme, setCurThemeByName } = useThemeStore()
+  const { themeMode, setThemeMode } = useThemeStore()
   const { t } = useTranslation()
 
-  const getThemeMenu = useCallback(() => {
-    return themes.map((theme) => {
-      return {
-        label: theme.name,
-        value: theme.name,
-        checked: curTheme.name === theme.name,
-        handler: () => {
-          appSettingService.writeSettingData({ key: 'theme' }, theme.name)
-          setCurThemeByName(theme.name)
-        },
-      }
-    })
-  }, [themes, curTheme, setCurThemeByName])
+  const themeMenu = useMemo(() => [
+    {
+      label: t('settings.display.theme.mode.system'),
+      value: 'system',
+      checked: themeMode === 'system',
+      handler: () => {
+        setThemeMode('system')
+      },
+    },
+    {
+      label: t('settings.display.theme.mode.light'),
+      value: 'light',
+      checked: themeMode === 'light',
+      handler: () => {
+        setThemeMode('light')
+      },
+    },
+    {
+      label: t('settings.display.theme.mode.dark'),
+      value: 'dark',
+      checked: themeMode === 'dark',
+      handler: () => {
+        setThemeMode('dark')
+      },
+    },
+  ], [themeMode, setThemeMode, t])
 
   const handleClick = () => {
     if (!ref.current) {
       return
     }
     const rect = ref.current.getClientRects()
-
-    const themeMenu = getThemeMenu()
 
     showContextMenu({
       items: [

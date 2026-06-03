@@ -36,7 +36,7 @@ pub fn get_window_instances() -> Result<std::collections::HashMap<String, String
 /// 创建新窗口
 #[command]
 pub fn create_new_window(_app: AppHandle, path: Option<String>) -> Result<String, String> {
-    let theme = AppConf::theme_mode(&_app.clone());
+    let theme = AppConf::theme_mode_for_window(&_app.clone());
     let workspace_path = path.clone().map(PathBuf::from);
 
     // 检查是否已存在打开相同路径的窗口
@@ -115,7 +115,7 @@ pub fn create_new_window(_app: AppHandle, path: Option<String>) -> Result<String
                 .title("MarkFlowy")
                 .resizable(true)
                 .fullscreen(false)
-                .theme(Some(theme))
+                .theme(theme)
                 .disable_drag_drop_handler()
                 .inner_size(1200.0, 800.0)
                 .min_inner_size(400.0, 400.0);

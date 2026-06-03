@@ -377,6 +377,24 @@
     },
     "display": {
       "label": "Apariencia",
+      "theme": {
+        "label": "Tema",
+        "mode": {
+          "label": "Modo de tema",
+          "desc": "Elija cómo la aplicación cambia entre los temas claro y oscuro",
+          "system": "Seguir el sistema",
+          "light": "Claro",
+          "dark": "Oscuro"
+        },
+        "light_theme": {
+          "label": "Tema claro",
+          "desc": "Seleccione el tema utilizado en modo claro"
+        },
+        "dark_theme": {
+          "label": "Tema oscuro",
+          "desc": "Seleccione el tema utilizado en modo oscuro"
+        }
+      },
       "size": {
         "label": "Tamaño",
         "zoom": {

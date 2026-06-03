@@ -27,7 +27,7 @@ import { useGlobalKeyboard, useGlobalOSInfo } from '.'
 import __MF__ from '../context'
 import { isArray } from '../helper'
 import useExtensionsManagerStore from '../stores/useExtensionsManagerStore'
-import useThemeStore, { isBuiltInTheme } from '../stores/useThemeStore'
+import useThemeStore from '../stores/useThemeStore'
 import useWorkspaceWatcher from './useWorkspaceWatcher'
 
 interface LocalTheme {
@@ -37,11 +37,32 @@ interface LocalTheme {
   css_content: string
 }
 
-async function appThemeExtensionsSetup(curTheme: string) {
+async function appThemeExtensionsSetup() {
   try {
-    if (isBuiltInTheme(curTheme)) {
-      useThemeStore.getState().setCurThemeByName(curTheme)
+    const { initFromSettings } = useThemeStore.getState()
+    const { settingData } = useAppSettingStore.getState()
+
+    // 迁移旧配置：如果没有 theme_mode，从旧 theme 字段推断
+    if (!settingData.theme_mode) {
+      const oldTheme = settingData.theme || 'light'
+      if (oldTheme === 'system') {
+        settingData.theme_mode = 'system'
+      } else if (oldTheme === 'light') {
+        // 旧默认值 "light" 迁移为 "system"，让新用户默认跟随系统
+        settingData.theme_mode = 'system'
+      } else {
+        const isDark = oldTheme.toLowerCase().includes('dark')
+        settingData.theme_mode = isDark ? 'dark' : 'light'
+      }
+      if (!settingData.light_theme) {
+        settingData.light_theme = 'MarkFlowy Light'
+      }
+      if (!settingData.dark_theme) {
+        settingData.dark_theme = 'MarkFlowy Dark'
+      }
     }
+
+    initFromSettings(settingData)
 
     logger.debug('Loading local themes...')
     const localThemes = await invoke<LocalTheme[]>('load_local_themes')
@@ -64,19 +85,19 @@ async function appThemeExtensionsSetup(curTheme: string) {
           logger.error('Failed to load extensions:', error)
           toast.error(`Failed to load extensions: ${error}`)
         } finally {
-          useThemeStore.getState().setCurThemeByName(curTheme)
+          useThemeStore.getState().applyTheme()
         }
       } else {
-        useThemeStore.getState().setCurThemeByName(curTheme)
+        useThemeStore.getState().applyTheme()
       }
     }).catch((error) => {
       logger.error('Failed to invoke load_themes:', error)
-      useThemeStore.getState().setCurThemeByName(curTheme)
+      useThemeStore.getState().applyTheme()
     })
   } catch (error) {
     logger.error('Failed to setup theme extensions:', error)
     logger.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace')
-    useThemeStore.getState().setCurThemeByName(curTheme)
+    useThemeStore.getState().applyTheme()
   }
 }
 
@@ -259,7 +280,7 @@ const appSetup = once(async function () {
   window.removeEventListener('message', listener)
   window.addEventListener('message', listener)
 
-  appThemeExtensionsSetup(settingData.theme)
+  appThemeExtensionsSetup()
   await i18nInit({ lng: settingData.language })
   checkUpdate({ install: settingData.auto_update })
 
