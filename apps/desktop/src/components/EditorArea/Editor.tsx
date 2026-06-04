@@ -8,11 +8,27 @@ import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
 import { memo } from 'react'
 import { useMount } from 'react-use'
 import { EditorViewType } from 'rme'
+import { OverlayScrollbarsComponent } from 'overlayscrollbars-react'
 import { EmptyState } from './EmptyState'
 import { PreviewContent } from './preview/PreviewContent'
 import TextEditor from './TextEditor'
 import { UnsupportedFileType } from './UnsupportedFileType'
 import { EditorScrollContainer } from './styles'
+import 'overlayscrollbars/overlayscrollbars.css'
+
+const overlayScrollbarsOptions = {
+  scrollbars: {
+    theme: 'os-theme-markflowy',
+    autoHide: 'leave',
+    autoHideDelay: 300,
+    dragScroll: true,
+    clickScroll: true,
+  },
+  overflow: {
+    x: 'scroll',
+    y: 'scroll',
+  },
+} as const
 
 function Editor(props: EditorProps) {
   const { id, active } = props
@@ -53,15 +69,20 @@ function Editor(props: EditorProps) {
 
   return (
     <EditorScrollContainer style={active ? undefined : { display: 'none' }}>
-      <div className={'code-contents'}>
-        {curFileTypeConfig.type === 'unsupported' ? (
-          <UnsupportedFileType fileName={curFile.name} />
-        ) : isTextfileType(curFileTypeConfig) ? (
-          <TextEditor fileTypeConfig={curFileTypeConfig} active={active} id={id} />
-        ) : (
-          <PreviewContent type={curFileTypeConfig.type} filePath={curFile.path} active={active} />
-        )}
-      </div>
+      <OverlayScrollbarsComponent
+        options={overlayScrollbarsOptions}
+        style={{ height: '100%' }}
+      >
+        <div className={'code-contents'}>
+          {curFileTypeConfig.type === 'unsupported' ? (
+            <UnsupportedFileType fileName={curFile.name} />
+          ) : isTextfileType(curFileTypeConfig) ? (
+            <TextEditor fileTypeConfig={curFileTypeConfig} active={active} id={id} />
+          ) : (
+            <PreviewContent type={curFileTypeConfig.type} filePath={curFile.path} active={active} />
+          )}
+        </div>
+      </OverlayScrollbarsComponent>
     </EditorScrollContainer>
   )
 }

@@ -6583,6 +6583,8 @@ __metadata:
     lodash: "npm:^4.17.23"
     nanoid: "npm:^5.1.5"
     ollama-ai-provider-v2: "npm:^1.5.4"
+    overlayscrollbars: "npm:^2.16.0"
+    overlayscrollbars-react: "npm:^0.5.6"
     react: "npm:^19.2.0"
     react-arborist: "npm:^3.4.3"
     react-dom: "npm:^19.2.0"
@@ -32243,6 +32245,23 @@ __metadata:
   version: 1.0.2
   resolution: "os-tmpdir@npm:1.0.2"
   checksum: 10/5666560f7b9f10182548bf7013883265be33620b1c1b4a4d405c25be2636f970c5488ff3e6c48de75b55d02bde037249fe5dbfbb4c0fb7714953d56aed062e6d
+  languageName: node
+  linkType: hard
+
+"overlayscrollbars-react@npm:^0.5.6":
+  version: 0.5.6
+  resolution: "overlayscrollbars-react@npm:0.5.6"
+  peerDependencies:
+    overlayscrollbars: ^2.0.0
+    react: ">=16.8.0"
+  checksum: 10/473f5af860feab4b5418f9adc8e356fb201e9de61286443ff64002b9c997bc19bf17cf60e314c502c14ca41fa213c12f18111e6fe913be86ad68a15c32e66789
+  languageName: node
+  linkType: hard
+
+"overlayscrollbars@npm:^2.16.0":
+  version: 2.16.0
+  resolution: "overlayscrollbars@npm:2.16.0"
+  checksum: 10/7a78c9ecd2f3c3366a57ba8b6c670872d277a6b151cd548d7a4303ff10b1c5b353bf56a34a9a1aa7e8e9c834a1a5bac50d353280d2b075a8dea90830076f06c6
   languageName: node
   linkType: hard
 

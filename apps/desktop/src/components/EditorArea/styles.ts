@@ -1,4 +1,23 @@
-import styled from 'styled-components'
+import styled, { createGlobalStyle } from 'styled-components'
+
+export const OverlayScrollbarStyles = createGlobalStyle`
+  .os-theme-markflowy {
+    box-sizing: border-box;
+    --os-size: 8px;
+    --os-padding-perpendicular: 2px;
+    --os-padding-axis: 2px;
+    --os-track-border-radius: 4px;
+    --os-handle-border-radius: 4px;
+    --os-handle-interactive-area-offset: 4px;
+
+    --os-handle-bg: ${(props) => props.theme.scrollbarThumbColor};
+    --os-handle-bg-hover: ${(props) => props.theme.scrollbarThumbColor};
+    --os-handle-bg-active: ${(props) => props.theme.scrollbarThumbColor};
+    --os-handle-perpendicular-size: 60%;
+    --os-handle-perpendicular-size-hover: 80%;
+    --os-handle-perpendicular-size-active: 80%;
+  }
+`
 
 export const Container = styled.div`
   position: relative;

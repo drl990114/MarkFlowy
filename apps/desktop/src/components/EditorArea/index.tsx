@@ -13,7 +13,7 @@ import { EditorViewType } from 'rme'
 import Editor from './Editor'
 import EditorAreaTabs from './EditorAreaTabs'
 import { EmptyState } from './EmptyState'
-import { Container, EditorPanel } from './styles'
+import { Container, EditorPanel, OverlayScrollbarStyles } from './styles'
 
 function EditorArea() {
   const { opened, activeId } = useEditorStore()
@@ -54,6 +54,7 @@ function EditorArea() {
 
   return (
     <Container className='w-full h-full'>
+      <OverlayScrollbarStyles />
       <EditorAreaTabs />
       <WysiwygToolbar />
       <SourceCodeToolbar />
