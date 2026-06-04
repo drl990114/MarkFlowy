@@ -9,26 +9,39 @@ import { InjectFonts } from './injectFonts'
 import useAppSettingStore from './stores/useAppSettingStore'
 import useThemeStore from './stores/useThemeStore'
 
+const LEGACY_DEFAULT_ROOT_FONT_FAMILY = 'Open Sans'
+const LEGACY_DEFAULT_CODE_FONT_FAMILY = 'Fira Code'
+const SYSTEM_DEFAULT_FONT_FAMILY = 'System Default'
+const DEFAULT_MONOSPACE_FONT_FAMILY = 'Default Monospace'
+
 const AppThemeProvider: React.FC<BaseComponentProps> = function ({ children }) {
   const { curTheme } = useThemeStore()
   const { settingData } = useAppSettingStore()
   const theme = curTheme?.styledConstants || {}
+
+  const rootFontFamily =
+    !settingData.editor_root_font_family ||
+    settingData.editor_root_font_family === LEGACY_DEFAULT_ROOT_FONT_FAMILY ||
+    settingData.editor_root_font_family === SYSTEM_DEFAULT_FONT_FAMILY
+      ? curTheme.styledConstants.fontFamily
+      : settingData.editor_root_font_family
+  const codeFontFamily =
+    !settingData.editor_code_font_family ||
+    settingData.editor_code_font_family === LEGACY_DEFAULT_CODE_FONT_FAMILY ||
+    settingData.editor_code_font_family === DEFAULT_MONOSPACE_FONT_FAMILY
+      ? curTheme.styledConstants.codemirrorFontFamily
+      : settingData.editor_code_font_family
 
   const themeProp = useMemo(
     () => ({
       mode: curTheme.mode,
       token: {
         ...curTheme.styledConstants,
-        fontFamily: settingData.editor_root_font_family,
-        codemirrorFontFamily: settingData.editor_code_font_family,
+        fontFamily: rootFontFamily,
+        codemirrorFontFamily: codeFontFamily,
       },
     }),
-    [
-      curTheme.mode,
-      curTheme.styledConstants,
-      settingData.editor_root_font_family,
-      settingData.editor_code_font_family,
-    ],
+    [curTheme.mode, curTheme.styledConstants, rootFontFamily, codeFontFamily],
   )
 
   const i18nProp = useMemo(

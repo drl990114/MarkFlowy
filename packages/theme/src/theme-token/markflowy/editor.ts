@@ -2,6 +2,7 @@ import { markflowyDarkTheme, markflowyLightTheme } from './index'
 
 export const editorSpecificTokens = {
   nodeSelectedColor: '#3988ff33',
+  strongFontColor: '#24292f',
   markBgColor: '#fff8c5',
   markFontColor: '#24292f',
   imgBgColor: '#ffffff',
@@ -42,6 +43,7 @@ export const editorDarkTheme = {
   ...editorSpecificTokens,
 
   nodeSelectedColor: 'rgba(55, 148, 255, 0.18)',
+  strongFontColor: '#e6e6e6',
   markBgColor: 'rgba(55, 148, 255, 0.28)',
   markFontColor: '#fff',
   imgBgColor: '#1e1e1e',

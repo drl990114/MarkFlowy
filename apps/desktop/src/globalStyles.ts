@@ -12,7 +12,9 @@ export const DesktopSpecificStyles = createGlobalStyle`
     color: ${(props) => props.theme.primaryFontColor};
     overflow: hidden;
     line-height: normal;
-    font-family: "Open Sans", "Clear Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-family: ${(props) => props.theme.fontFamily};
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
 
   * {

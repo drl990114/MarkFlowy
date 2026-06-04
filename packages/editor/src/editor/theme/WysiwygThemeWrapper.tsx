@@ -48,7 +48,8 @@ export const WysiwygThemeWrapper = styled.div.attrs<WrapperProps>((p) => ({
 
   & b,
   & strong {
-    font-weight: 600;
+    color: ${(props) => props.theme.strongFontColor};
+    font-weight: 700;
   }
 
   & dfn {

@@ -5,14 +5,14 @@ export const common = {
   titleBarControlBtnWidth: '50px',
   statusBarHeight: '32px',
 
-  fontH1: '28px',
+  fontH1: '30px',
   fontH2: '26px',
-  fontH3: '24px',
-  fontH4: '22px',
-  fontH5: '20px',
-  fontH6: '18px',
-  fontBase: '15px',
-  fontSm: '14px',
+  fontH3: '22px',
+  fontH4: '20px',
+  fontH5: '18px',
+  fontH6: '16px',
+  fontBase: '14px',
+  fontSm: '13px',
   fontXs: '12px',
 
   spaceXs: '4px',
@@ -30,6 +30,6 @@ export const common = {
   gray: '#C0C0C0',
   blue: '#0359D0',
 
-  fontFamily: `'Open Sans', 'Clear Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif`,
-  codemirrorFontFamily: `'Fira Code', 'Source Code Pro', 'Droid Sans Mono', Consolas, monospace`,
+  fontFamily: `-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', 'Noto Sans CJK SC', 'Microsoft YaHei UI', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif`,
+  codemirrorFontFamily: `'Fira Code', 'SF Mono', Menlo, Monaco, Consolas, 'Liberation Mono', monospace`,
 }

@@ -548,6 +548,15 @@ function TextEditor(props: TextEditorProps) {
     [delegate],
   )
 
+  const rootFontSize =
+    !settingData.editor_root_font_size || settingData.editor_root_font_size === 15
+      ? 16
+      : settingData.editor_root_font_size
+  const rootLineHeight =
+    !settingData.editor_root_line_height || settingData.editor_root_line_height === '1.6'
+      ? '1.65'
+      : settingData.editor_root_line_height
+
   const editorProps: MfEditorProps = useMemo(
     () => ({
       initialType: fileTypeConfig?.defaultMode,
@@ -565,8 +574,8 @@ function TextEditor(props: TextEditorProps) {
       offset: { top: 10, left: 16 },
       styleToken: {
         id,
-        rootFontSize: `${settingData.editor_root_font_size}px`,
-        rootLineHeight: settingData.editor_root_line_height,
+        rootFontSize: `${rootFontSize}px`,
+        rootLineHeight,
       },
       onContextMounted: (context: EditorContext) => {
         setEditorCtx(id, context)
@@ -583,7 +592,17 @@ function TextEditor(props: TextEditorProps) {
         },
       },
     }),
-    [content, delegate, setEditorCtx, id, active, settingData, fileTypeConfig],
+    [
+      content,
+      delegate,
+      setEditorCtx,
+      id,
+      active,
+      settingData,
+      fileTypeConfig,
+      rootFontSize,
+      rootLineHeight,
+    ],
   )
 
   const handleChange: EditorChangeHandler = useCallback(

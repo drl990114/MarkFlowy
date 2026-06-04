@@ -12,6 +12,7 @@ export const styledDarkTheme = {
   boxShadowColor: 'rgba(255, 255, 255, 0.04)',
 
   nodeSelectedColor: 'rgba(55, 148, 255, 0.18)',
+  strongFontColor: '#e6e6e6',
   markBgColor: '#fff8c5',
   markFontColor: '#000',
   imgBgColor: '#1e1e1e',

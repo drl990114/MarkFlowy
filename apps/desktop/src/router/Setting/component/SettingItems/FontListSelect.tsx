@@ -8,6 +8,9 @@ import type { SettingItemProps } from '.'
 import { SettingItemContainer } from './Container'
 import { SettingLabel } from './Label'
 
+const SYSTEM_DEFAULT_FONT_FAMILY = 'System Default'
+const DEFAULT_MONOSPACE_FONT_FAMILY = 'Default Monospace'
+
 const FontListSelectSettingItem: React.FC<SettingItemProps<Setting.FontListSelectSettingItem>> = (
   props,
 ) => {
@@ -31,10 +34,20 @@ const FontListSelectSettingItem: React.FC<SettingItemProps<Setting.FontListSelec
     logger.info('search:', value)
   }
 
-  const options = fontList.map(font => ({
-    value: font,
-    label: font
-  }))
+  const defaultOptions =
+    item.key === 'editor_root_font_family'
+      ? [{ value: SYSTEM_DEFAULT_FONT_FAMILY, label: SYSTEM_DEFAULT_FONT_FAMILY }]
+      : item.key === 'editor_code_font_family'
+        ? [{ value: DEFAULT_MONOSPACE_FONT_FAMILY, label: DEFAULT_MONOSPACE_FONT_FAMILY }]
+        : []
+
+  const options = [
+    ...defaultOptions,
+    ...fontList.map((font) => ({
+      value: font,
+      label: font,
+    })),
+  ]
 
   return (
     <SettingItemContainer>
@@ -45,7 +58,7 @@ const FontListSelectSettingItem: React.FC<SettingItemProps<Setting.FontListSelec
         options={options}
         showSearch={{ optionFilterProp: 'label', onSearch: handleSearch }}
         style={{ width: '220px' }}
-        placeholder="Select a font"
+        placeholder='Select a font'
       />
     </SettingItemContainer>
   )
