@@ -4,12 +4,12 @@ import type { CreateThemeOptions} from '@drl990114/codemirror-themes'
 export const codemirrorDark: CreateThemeOptions = {
   theme: 'dark',
   settings: {
-    background: '#11191f',
-    foreground: '#c9d1d9',
-    caret: '#c9d1d9',
-    selection: '#1c78aa',
-    selectionMatch: '#1c78aa',
-    lineHighlight: '#36334280',
+    background: '#111111',
+    foreground: '#cccccc',
+    caret: '#cccccc',
+    selection: 'rgba(55, 148, 255, 0.35)',
+    selectionMatch: 'rgba(55, 148, 255, 0.28)',
+    lineHighlight: '#2a2a2a',
   },
   styles: [
     { tag: [t.standard(t.tagName), t.tagName], color: '#7ee787' },
