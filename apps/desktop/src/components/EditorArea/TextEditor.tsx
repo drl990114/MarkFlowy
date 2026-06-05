@@ -28,7 +28,7 @@ import { save } from '@tauri-apps/plugin-dialog'
 import classNames from 'classnames'
 import html2canvas from 'html2canvas'
 import { debounce, DebouncedFunc, throttle } from 'lodash'
-import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useUnmount } from 'react-use'
 import type { CreateWysiwygDelegateOptions } from 'rme'
 import {
@@ -49,6 +49,22 @@ import { EditorWrapper } from './EditorWrapper'
 import { WarningHeader } from './styles'
 
 const delegateOptionsCache = new Map<string, CreateWysiwygDelegateOptions>()
+const LARGE_MARKDOWN_SOURCE_MODE_THRESHOLD = 200_000
+
+const requestIdle = (callback: () => void) => {
+  if ('requestIdleCallback' in window) {
+    return window.requestIdleCallback(callback, { timeout: 1000 })
+  }
+  return window.setTimeout(callback, 0)
+}
+
+const cancelIdle = (handle: number) => {
+  if ('cancelIdleCallback' in window) {
+    window.cancelIdleCallback(handle)
+    return
+  }
+  window.clearTimeout(handle)
+}
 
 function getOrCreateDelegateOptions(fileId?: string): CreateWysiwygDelegateOptions {
   const key = fileId || '__no_id__'
@@ -113,26 +129,46 @@ function TextEditor(props: TextEditorProps) {
   const [currentViewType, setCurrentViewType] = useState<EditorViewType>(fileTypeConfig.defaultMode)
   const [content, setContent] = useState<string | undefined>()
   const [delegate, setDelegate] = useState<ReturnType<typeof createDelegate> | null>(null)
+  const effectiveDefaultViewType = useMemo(() => {
+    if (
+      fileTypeConfig.type === 'markdown' &&
+      typeof content === 'string' &&
+      content.length > LARGE_MARKDOWN_SOURCE_MODE_THRESHOLD &&
+      fileTypeConfig.supportedModes.includes(EditorViewType.SOURCECODE)
+    ) {
+      return EditorViewType.SOURCECODE
+    }
+
+    return fileTypeConfig.defaultMode
+  }, [content, fileTypeConfig])
 
   const debounceSaveHandlerCacheRef = useRef<DebouncedFunc<() => Promise<void>>>(null)
   const noFileSaveingRef = useRef(false)
   const editorRef = useRef<EditorRef>(null)
   const editorContextRef = useRef<EditorChangeEventParams>(null)
+  const counterIdleHandleRef = useRef<number | null>(null)
 
   useUnmount(() => {
     useEditorCounterStore.getState().deleteEditorCounter({ id })
+    if (counterIdleHandleRef.current !== null) {
+      cancelIdle(counterIdleHandleRef.current)
+      counterIdleHandleRef.current = null
+    }
     const { delIdStateMap } = useEditorStateStore.getState()
 
     delIdStateMap(id)
   })
 
-  useLayoutEffect(() => {
+  useEffect(() => {
+    let canceled = false
+
     const init = async () => {
       const file = curFile
       if (file.path) {
         const res = await invoke<FileSysResult>('get_file_content', {
           filePath: file.path,
         })
+        if (canceled) return
         if (res.code === FileResultCode.NotFound) {
           return setStatus(TextEditorStatus.NOTEXIST)
         }
@@ -142,20 +178,35 @@ function TextEditor(props: TextEditorProps) {
         }
         setContent(res.content)
       } else if (file.content !== undefined) {
+        if (canceled) return
         setContent(file.content)
       }
 
       return setStatus(TextEditorStatus.SUCCESS)
     }
     init()
+
+    return () => {
+      canceled = true
+    }
   }, [curFile])
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (status !== TextEditorStatus.SUCCESS || delegate) return
-    const newDelegate = createDelegate(fileTypeConfig.defaultMode, fileTypeConfig.type)
+    const newDelegate = createDelegate(effectiveDefaultViewType, fileTypeConfig.type)
     setDelegate(newDelegate)
     setEditorDelegate(id, newDelegate)
-  }, [status, delegate, id, fileTypeConfig, createDelegate, setEditorDelegate])
+    setCurrentViewType(effectiveDefaultViewType)
+    useEditorViewTypeStore.getState().setEditorViewType(id, effectiveDefaultViewType)
+  }, [
+    status,
+    delegate,
+    id,
+    fileTypeConfig,
+    effectiveDefaultViewType,
+    createDelegate,
+    setEditorDelegate,
+  ])
 
   const saveHandler = useCallback(
     async (params: SaveHandlerParams = {}) => {
@@ -301,13 +352,13 @@ function TextEditor(props: TextEditorProps) {
     }
   }, [debounceSave])
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     setSaveOpenedEditorEntries(id, () => saveHandler({ active: true }))
 
     return () => {
       delSaveOpenedEditorEntries(id)
     }
-  }, [debounceSave])
+  }, [id, saveHandler])
 
   const setContentHandler = useCallback(
     (newContent: string) => {
@@ -559,7 +610,7 @@ function TextEditor(props: TextEditorProps) {
 
   const editorProps: MfEditorProps = useMemo(
     () => ({
-      initialType: fileTypeConfig?.defaultMode,
+      initialType: effectiveDefaultViewType,
       content: content!,
       delegate: delegate!,
       style: {
@@ -600,6 +651,7 @@ function TextEditor(props: TextEditorProps) {
       active,
       settingData,
       fileTypeConfig,
+      effectiveDefaultViewType,
       rootFontSize,
       rootLineHeight,
     ],
@@ -607,22 +659,24 @@ function TextEditor(props: TextEditorProps) {
 
   const handleChange: EditorChangeHandler = useCallback(
     (params) => {
-      const { tr, helpers } = params
-      const { getCharacterCount, getWordCount } = helpers
-
-      const characterCount = getCharacterCount()
-      const wordCount = getWordCount()
-
-      useEditorCounterStore.getState().addEditorCounter({
-        id,
-        data: {
-          characterCount,
-          wordCount,
-        },
-      })
-
       if (!active) return
+
+      const { tr, helpers } = params
       editorContextRef.current = params
+
+      if (counterIdleHandleRef.current !== null) {
+        cancelIdle(counterIdleHandleRef.current)
+      }
+      counterIdleHandleRef.current = requestIdle(() => {
+        counterIdleHandleRef.current = null
+        useEditorCounterStore.getState().addEditorCounter({
+          id,
+          data: {
+            characterCount: helpers.getCharacterCount(),
+            wordCount: helpers.getWordCount(),
+          },
+        })
+      })
 
       if (tr?.docChanged && !tr.getMeta('APPLY_MARKS')) {
         const state = {

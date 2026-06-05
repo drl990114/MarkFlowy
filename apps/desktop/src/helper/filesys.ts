@@ -2,8 +2,13 @@ import { useEditorStore } from '@/stores'
 import { invoke } from '@tauri-apps/api/core'
 import { readDir } from '@tauri-apps/plugin-fs'
 import { nanoid } from 'nanoid'
-import { logger } from '@/helper/logger'
-import { getFileObjectByPath, setFileObject, setFileObjectByPath } from './files'
+import {
+  getFileObjectByPath,
+  setFileObject,
+  setFileObjectByPath,
+  setFileObjects,
+  setFileObjectsByPath,
+} from './files'
 
 export { FileResultCode } from '@markflowy/interface'
 export type { IFile, FileEntry, FileSysResult } from '@markflowy/interface'
@@ -11,18 +16,28 @@ import type { IFile, FileEntry } from '@markflowy/interface'
 import { FileResultCode } from '@markflowy/interface'
 
 const wrapFiles = (entries: FileEntry[]) => {
-  entries.forEach((entry) => {
-    ;(entry as IFile).id = getFileObjectByPath(entry.path)?.id || nanoid()
+  const idEntries: Array<{ id: string; file: IFile }> = []
+  const pathEntries: Array<{ path: string; file: IFile }> = []
 
-    logger.info('[filesys] wrapFiles entry', { name: entry.name, ext: entry.ext, kind: entry.kind })
+  const visit = (items: FileEntry[]) => {
+    items.forEach((entry) => {
+      const file = entry as IFile
+      file.id = getFileObjectByPath(entry.path)?.id || nanoid()
 
-    setFileObject((entry as IFile).id, entry as IFile)
-    setFileObjectByPath(entry.path!, entry as IFile)
+      idEntries.push({ id: file.id, file })
+      if (entry.path) {
+        pathEntries.push({ path: entry.path, file })
+      }
 
-    if (entry.children) {
-      wrapFiles(entry.children)
-    }
-  })
+      if (entry.children) {
+        visit(entry.children)
+      }
+    })
+  }
+
+  visit(entries)
+  setFileObjects(idEntries)
+  setFileObjectsByPath(pathEntries)
 }
 
 export const createFile = (opt?: Partial<IFile>): IFile => {
@@ -78,8 +93,6 @@ export const readDirectory = async (folderPath: string): Promise<IFile[]> => {
         ext: isDir ? '' : ext,
       }
 
-      logger.info('[filesys] readDirectory entry', { fileName, ext, isDir })
-      
       entries.push(fileEntry)
     }
     

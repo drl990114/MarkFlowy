@@ -8,7 +8,11 @@ import {
   MoveFileInfo,
 } from '@markflowy/interface'
 import { FileResultCode, FileSysResult, IFile } from '@/helper/filesys'
-import { getFileObjectByPath, setFileObject, setFileObjectByPath } from '@/helper/files'
+import {
+  getFileObjectByPath,
+  setFileObjects,
+  setFileObjectsByPath,
+} from '@/helper/files'
 
 interface FileSystemAdapterProps {
   children: ReactNode
@@ -34,14 +38,25 @@ export const TauriFileSystemProvider: FC<FileSystemAdapterProps> = ({ children }
       const files = JSON.parse(result.content) as IFile[]
 
       const wrapFiles = (entries: IFile[]) => {
-        entries.forEach((entry) => {
-          entry.id = getFileObjectByPath(entry.path)?.id || nanoid()
-          setFileObject(entry.id, entry)
-          setFileObjectByPath(entry.path!, entry)
-          if (entry.children) {
-            wrapFiles(entry.children)
-          }
-        })
+        const idEntries: Array<{ id: string; file: IFile }> = []
+        const pathEntries: Array<{ path: string; file: IFile }> = []
+
+        const visit = (items: IFile[]) => {
+          items.forEach((entry) => {
+            entry.id = getFileObjectByPath(entry.path)?.id || nanoid()
+            idEntries.push({ id: entry.id, file: entry })
+            if (entry.path) {
+              pathEntries.push({ path: entry.path, file: entry })
+            }
+            if (entry.children) {
+              visit(entry.children)
+            }
+          })
+        }
+
+        visit(entries)
+        setFileObjects(idEntries)
+        setFileObjectsByPath(pathEntries)
       }
       wrapFiles(files)
 

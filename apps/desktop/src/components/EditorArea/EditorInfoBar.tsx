@@ -76,6 +76,10 @@ export const EditorInfoBar = memo(() => {
 
   useEffect(() => {
     getFileNormalInfo()
+
+    return () => {
+      getFileNormalInfo.cancel()
+    }
   }, [editorState?.hasUnsavedChanges, getFileNormalInfo])
 
   useEffect(() => {
@@ -91,6 +95,7 @@ export const EditorInfoBar = memo(() => {
     })
 
     return () => {
+      getFileNormalInfo.cancel()
       unsubscribe.then((f) => f())
     }
   }, [workspace?.syncMode, getFileNormalInfo])

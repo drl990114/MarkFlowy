@@ -32,22 +32,43 @@ export const Preview: React.FC<PreviewProps> = (props) => {
   const { doc, delegateOptions, handleLinkClick, styleToken = defaultStyleToken } = props
   const [processedHtml, setProcessedHtml] = useState('')
   const containerRef = useRef<HTMLDivElement>(null)
-  let targetDoc: PreviewProps['doc'] = doc
-
-  if (typeof targetDoc === 'string') {
-    targetDoc = createWysiwygDelegate(delegateOptions).stringToDoc(targetDoc)
-  }
 
   useEffect(() => {
-    rmeProsemirrorNodeToHtml(targetDoc, delegateOptions)
-      .then((html) => {
-        setProcessedHtml(html)
-      })
-      .catch((e) => {
-        props.onError?.(e)
-        console.error(e)
-      })
-  }, [props.onError])
+    let canceled = false
+    setProcessedHtml('')
+
+    const handle = window.setTimeout(() => {
+      try {
+        const targetDoc =
+          typeof doc === 'string'
+            ? createWysiwygDelegate(delegateOptions).stringToDoc(doc)
+            : doc
+
+        rmeProsemirrorNodeToHtml(targetDoc, delegateOptions)
+          .then((html) => {
+            if (!canceled) {
+              setProcessedHtml(html)
+            }
+          })
+          .catch((e) => {
+            if (!canceled) {
+              props.onError?.(e)
+              console.error(e)
+            }
+          })
+      } catch (e) {
+        if (!canceled) {
+          props.onError?.(e as Error)
+          console.error(e)
+        }
+      }
+    }, 0)
+
+    return () => {
+      canceled = true
+      window.clearTimeout(handle)
+    }
+  }, [delegateOptions, doc, props.onError])
 
   const handleClick = useCallback(
     (event: React.MouseEvent) => {

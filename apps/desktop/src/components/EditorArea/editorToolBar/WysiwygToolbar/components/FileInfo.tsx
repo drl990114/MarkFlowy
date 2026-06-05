@@ -1,6 +1,5 @@
 import { getFileObject } from '@/helper/files'
 import { dialog } from '@/services/dialog'
-import { currentWindow } from '@/services/windows'
 import { useEditorStateStore, useEditorStore } from '@/stores'
 import { invoke } from '@tauri-apps/api/core'
 import { debounce } from 'lodash'
@@ -49,24 +48,11 @@ export const FileInfo = memo(() => {
 
   useEffect(() => {
     getFileNormalInfo()
-  }, [editorState?.hasUnsavedChanges, getFileNormalInfo])
-
-  useEffect(() => {
-    const unsubscribe = currentWindow.listen<{
-      paths: string[]
-    }>('file_watcher_event', async (res) => {
-      if (!curFile?.path) {
-        return
-      }
-      if (Array.isArray(res.payload?.paths) && res.payload.paths.includes(curFile.path)) {
-        getFileNormalInfo()
-      }
-    })
 
     return () => {
-      unsubscribe.then((f) => f())
+      getFileNormalInfo.cancel()
     }
-  }, [curFile, getFileNormalInfo])
+  }, [editorState?.hasUnsavedChanges, getFileNormalInfo])
 
   return (
     <Space>

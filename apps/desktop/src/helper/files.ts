@@ -1,6 +1,5 @@
 import { create } from 'zustand'
 import type { IFile } from '@/helper/filesys'
-import { logger } from '@/helper/logger'
 
 interface FileCacheState {
   entries: Record<string, IFile>
@@ -18,6 +17,17 @@ export function setFileObject(id: string, file: IFile): void {
   }))
 }
 
+export function setFileObjects(files: Array<{ id: string; file: IFile }>): void {
+  if (files.length === 0) return
+  useFileCacheStore.setState((state) => {
+    const entries = { ...state.entries }
+    for (const { id, file } of files) {
+      entries[id] = file
+    }
+    return { entries }
+  })
+}
+
 export function getFileObject(id: string): IFile {
   return useFileCacheStore.getState().entries[id]
 }
@@ -27,10 +37,20 @@ export function updateFileObject(id: string, file: IFile): void {
 }
 
 export function setFileObjectByPath(path: string, file: IFile): void {
-  logger.info('[files] setFileObjectByPath', { path, name: file.name, ext: file.ext })
   useFileCacheStore.setState((state) => ({
     pathEntries: { ...state.pathEntries, [path]: file },
   }))
+}
+
+export function setFileObjectsByPath(files: Array<{ path: string; file: IFile }>): void {
+  if (files.length === 0) return
+  useFileCacheStore.setState((state) => {
+    const pathEntries = { ...state.pathEntries }
+    for (const { path, file } of files) {
+      pathEntries[path] = file
+    }
+    return { pathEntries }
+  })
 }
 
 export function getFileObjectByPath(path?: string): undefined | IFile {
