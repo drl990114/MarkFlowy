@@ -94,7 +94,7 @@
     "unified": "^11.0.5",
     "url": "^0.11.4",
     "vite": "^5.4.21",
-    "vitest": "^3.2.4",
+    "vitest": "^4.1.0",
     "webdriverio": "^9.20.0"
   },
   "browserslist": {
