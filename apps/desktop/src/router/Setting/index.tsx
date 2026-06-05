@@ -1,11 +1,10 @@
 import Logo from '@/assets/logo.svg?react'
-import { MODAL_CONFIRM_ID } from '@/components/Modal'
 import { installUpdate } from '@/helper/updater'
 import type { SettingData } from '@/router/Setting/settingMap'
 import { getSettingMap } from '@/router/Setting/settingMap'
 import { appSettingStoreSetup } from '@/services/app-setting'
+import { dialog } from '@/services/dialog'
 import useAppInfoStore from '@/stores/useAppInfoStore'
-import NiceModal from '@ebay/nice-modal-react'
 import { invoke } from '@tauri-apps/api/core'
 import { openUrl } from '@tauri-apps/plugin-opener'
 import type { Update } from '@tauri-apps/plugin-updater'
@@ -49,20 +48,25 @@ function Setting() {
   const [update, setUpdate] = useState<Update | null>(null)
   const settingMap = getSettingMap()
 
-  const handleResetConfiguration = () => {
-    NiceModal.show(MODAL_CONFIRM_ID, {
+  const handleResetConfiguration = async () => {
+    const action = await dialog.confirm({
       title: t('settings.resetAppConf.desc'),
-      onConfirm: () => {
-        invoke('reset_app_conf')
-          .then(async () => {
-            await appSettingStoreSetup()
-            toast.success(t('settings.resetAppConf.success'))
-          })
-          .catch((err: any) => {
-            toast.error(String(err))
-          })
-      },
+      actions: [
+        { id: 'cancel', label: t('common.cancel') },
+        { id: 'confirm', label: t('common.confirm'), primary: true, danger: true },
+      ],
     })
+
+    if (action !== 'confirm') return
+
+    invoke('reset_app_conf')
+      .then(async () => {
+        await appSettingStoreSetup()
+        toast.success(t('settings.resetAppConf.success'))
+      })
+      .catch((err: any) => {
+        toast.error(String(err))
+      })
   }
 
   const settingDataGroupsKeys = Object.keys(settingMap).filter(

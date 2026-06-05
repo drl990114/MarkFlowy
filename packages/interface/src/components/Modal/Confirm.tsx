@@ -1,16 +1,30 @@
-import React from 'react'
+import React, { useMemo, useState } from 'react'
 import NiceModal, { useModal } from '@ebay/nice-modal-react'
 import { useTranslation } from '@markflowy/i18n'
 import { Button, Dialog } from 'zens'
 
+export interface DialogAction {
+  id: string
+  label: React.ReactNode
+  primary?: boolean
+  danger?: boolean
+  disabled?: boolean
+  autoFocus?: boolean
+}
+
+export interface DialogRememberOptions {
+  key: string
+  label?: React.ReactNode
+  enabled?: boolean
+}
+
 export interface ConfirmModalProps {
   title?: string
   content?: React.ReactNode
-  confirmText?: string
-  cancelText?: string
-  actionsGenerater?: (hideModal: () => void) => React.ReactNode[]
-  onConfirm?: () => void
-  onClose?: () => void
+  actions?: DialogAction[]
+  remember?: DialogRememberOptions
+  onResolve?: (actionId: string | null) => void
+  onRemember?: (actionId: string) => void | Promise<void>
 }
 
 export const MODAL_CONFIRM_ID = 'modal-confirm'
@@ -18,24 +32,38 @@ export const MODAL_CONFIRM_ID = 'modal-confirm'
 export const ConfirmModal = ({
   title,
   content,
-  confirmText,
-  cancelText,
-  onConfirm,
-  onClose,
-  actionsGenerater,
+  actions,
+  remember,
+  onResolve,
+  onRemember,
 }: ConfirmModalProps) => {
   const modal = useModal()
   const { t } = useTranslation()
+  const [rememberChecked, setRememberChecked] = useState(false)
 
-  const handleConfirm = () => {
-    if (onConfirm) {
-      onConfirm()
+  const normalizedActions = useMemo<DialogAction[]>(
+    () =>
+      actions?.length
+        ? actions
+        : [
+            { id: 'cancel', label: t('common.cancel') },
+            { id: 'confirm', label: t('common.confirm'), primary: true },
+          ],
+    [actions, t],
+  )
+
+  const handleAction = async (action: DialogAction) => {
+    if (remember?.enabled !== false && rememberChecked) {
+      await onRemember?.(action.id)
     }
+    onResolve?.(action.id)
+    setRememberChecked(false)
     modal.hide()
   }
 
   const handleClose = () => {
-    onClose?.()
+    onResolve?.(null)
+    setRememberChecked(false)
     modal.hide()
   }
 
@@ -48,19 +76,37 @@ export const ConfirmModal = ({
         zIndex: 99,
       }}
       footer={
-        actionsGenerater
-          ? actionsGenerater(modal.hide)
-          : [
-              <Button key='cancel' onClick={handleClose}>
-                {cancelText ?? t('common.cancel')}
-              </Button>,
-              <Button key='confirm' btnType='primary' onClick={handleConfirm}>
-                {confirmText ?? t('common.confirm')}
-              </Button>,
-            ]
+        <div className='mf-confirm__footer'>
+          {remember?.enabled === false ? null : remember ? (
+            <label className='mf-confirm__remember'>
+              <input
+                type='checkbox'
+                checked={rememberChecked}
+                onChange={(event) => setRememberChecked(event.target.checked)}
+              />
+              <span>{remember.label ?? 'Remember this choice'}</span>
+            </label>
+          ) : (
+            <span />
+          )}
+          <div className='mf-confirm__actions'>
+            {normalizedActions.map((action) => (
+              <Button
+                key={action.id}
+                btnType={action.primary ? 'primary' : 'default'}
+                danger={action.danger}
+                disabled={action.disabled}
+                autoFocus={action.autoFocus}
+                onClick={() => handleAction(action)}
+              >
+                {action.label}
+              </Button>
+            ))}
+          </div>
+        </div>
       }
     >
-      {content}
+      {content ? <div className='mf-confirm__content'>{content}</div> : null}
     </Dialog>
   )
 }

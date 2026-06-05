@@ -1,6 +1,7 @@
 import { Empty, List, FileTree, ContextMenuItem } from '@markflowy/interface'
 import type { IFile } from '@/helper/filesys'
 import { useOpen } from '@/hooks'
+import { dialog } from '@/services/dialog'
 import { createNewWindow } from '@/services/windows'
 import { useEditorStore } from '@/stores'
 import useOpenedCacheStore from '@/stores/useOpenedCacheStore'
@@ -10,12 +11,10 @@ import classNames from 'classnames'
 import type { FC, MouseEventHandler } from 'react'
 import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from '@/i18n'
-import NiceModal from '@ebay/nice-modal-react'
 import styled from 'styled-components'
 import type { ListDataItem } from '../ui-v2/List'
 import { Container } from './styles'
 import { FillFlexParent } from '../fill-flex-parent'
-import { MODAL_CONFIRM_ID, MODAL_INPUT_ID } from '../Modal'
 import { showContextMenu } from '../ui-v2/ContextMenu'
 import { MfIconButton } from '../ui-v2/Button'
 import { getFileObject, getFileObjectByPath, setFileObject, setFileObjectByPath, deletePathEntry } from '@/helper/files'
@@ -86,12 +85,19 @@ const Explorer: FC<ExplorerProps> = (props) => {
 
   const handleContextMenu: MouseEventHandler = useCallback((e) => e.preventDefault(), [])
 
-  const handleShowConfirm = useCallback(({ title, onConfirm }: { title: string; onConfirm: () => void }) => {
-    NiceModal.show(MODAL_CONFIRM_ID, {
+  const handleShowConfirm = useCallback(async ({ title, onConfirm }: { title: string; onConfirm: () => void }) => {
+    const action = await dialog.confirm({
       title,
-      onConfirm,
+      actions: [
+        { id: 'cancel', label: t('common.cancel') },
+        { id: 'confirm', label: t('common.confirm'), primary: true },
+      ],
     })
-  }, [])
+
+    if (action === 'confirm') {
+      onConfirm()
+    }
+  }, [t])
 
   const handleShowInputConfirm = useCallback(({
     title,
@@ -106,14 +112,20 @@ const Explorer: FC<ExplorerProps> = (props) => {
     onConfirm: () => void
     onClose: () => void
   }) => {
-    NiceModal.show(MODAL_INPUT_ID, {
+    dialog.confirm({
       title,
-      confirmText,
-      cancelText,
-      onConfirm,
-      onClose,
+      actions: [
+        { id: 'cancel', label: cancelText ?? t('common.cancel') },
+        { id: 'confirm', label: confirmText ?? t('common.confirm'), primary: true },
+      ],
+    }).then((action) => {
+      if (action === 'confirm') {
+        onConfirm()
+        return
+      }
+      onClose()
     })
-  }, [])
+  }, [t])
 
   const handleShowContextMenu = useCallback(({ x, y, items }: { x: number; y: number; items: ContextMenuItem[] }) => {
     showContextMenu({

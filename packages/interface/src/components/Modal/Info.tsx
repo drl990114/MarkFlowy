@@ -5,18 +5,18 @@ import { Dialog } from 'zens'
 export interface InfoModalProps {
   title?: string
   content?: React.ReactNode
-  onClose?: () => void
+  onResolve?: () => void
   width?: string
 }
 
 export const MODAL_INFO_ID = 'modal-info'
 
 export const InfoModal = (props: InfoModalProps) => {
-  const { title, content, onClose } = props
+  const { title, content, onResolve } = props
   const modal = useModal()
 
   const handleClose = () => {
-    onClose?.()
+    onResolve?.()
     modal.hide()
   }
 

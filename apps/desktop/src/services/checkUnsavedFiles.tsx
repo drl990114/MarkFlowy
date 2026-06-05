@@ -1,9 +1,7 @@
-import { MODAL_CONFIRM_ID } from '@/components/Modal'
 import { getFileObject } from '@/helper/files'
+import { dialog } from '@/services/dialog'
 import { useEditorStateStore } from '@/stores'
-import NiceModal from '@ebay/nice-modal-react'
 import { t } from '@/i18n'
-import { Button } from 'zens'
 
 interface CheckUnsavedFilesParams {
   fileIds: string[]
@@ -15,7 +13,7 @@ export const checkUnsavedFiles = (params: CheckUnsavedFilesParams) => {
 
   const hasUnsavedFiles = params.fileIds.filter((id) => idStateMap.get(id)?.hasUnsavedChanges)
   if (hasUnsavedFiles.length > 0) {
-    NiceModal.show(MODAL_CONFIRM_ID, {
+    dialog.confirm({
       title: t('confirm.close.title'),
       content: (
         <div>
@@ -35,30 +33,18 @@ export const checkUnsavedFiles = (params: CheckUnsavedFilesParams) => {
           </div>
         </div>
       ),
-      actionsGenerater: (hideModal: () => void) => [
-        <Button
-          key='confirm'
-          btnType='primary'
-          onClick={() => {
-            params.onSaveAndClose?.(hasUnsavedFiles)
-            hideModal()
-          }}
-        >
-          {t('action.save_and_close')}
-        </Button>,
-        <Button
-          key='unsaved'
-          onClick={() => {
-            params.onUnsavedAndClose?.()
-            hideModal()
-          }}
-        >
-          {t('action.unsave_and_close')}
-        </Button>,
-        <Button key='cancel' onClick={hideModal}>
-          {t('common.cancel')}
-        </Button>,
+      actions: [
+        { id: 'save', label: t('action.save_and_close'), primary: true },
+        { id: 'unsaved', label: t('action.unsave_and_close'), danger: true },
+        { id: 'cancel', label: t('common.cancel') },
       ],
+    }).then((action) => {
+      if (action === 'save') {
+        params.onSaveAndClose?.(hasUnsavedFiles)
+      }
+      if (action === 'unsaved') {
+        params.onUnsavedAndClose?.()
+      }
     })
   }
 

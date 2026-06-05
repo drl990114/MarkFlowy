@@ -21,6 +21,9 @@
     "import": "导入",
     "menu": "菜单"
   },
+  "dialog": {
+    "remember_choice": "记住此选择"
+  },
   "view": {
     "label": "视图",
     "theme": {

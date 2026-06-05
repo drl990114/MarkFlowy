@@ -1,9 +1,8 @@
-import { MODAL_CONFIRM_ID } from '@/components/Modal'
 import { loadLocalThemeCss } from '@/helper/extensions'
 import { logger } from '@/helper/logger'
+import { dialog } from '@/services/dialog'
 import useExtensionsManagerStore from '@/stores/useExtensionsManagerStore'
 import useThemeStore from '@/stores/useThemeStore'
-import NiceModal from '@ebay/nice-modal-react'
 import { invoke } from '@tauri-apps/api/core'
 import { open } from '@tauri-apps/plugin-dialog'
 import { Button, Checkbox } from 'antd'
@@ -186,20 +185,25 @@ export function ThemeStore() {
   }
 
   const handleRemoveLocalTheme = async (localTheme: LocalTheme) => {
-    NiceModal.show(MODAL_CONFIRM_ID, {
+    const action = await dialog.confirm({
       title: t('common.delete'),
       content: t('settings.themeStore.remove_local_theme', { name: localTheme.name }),
-      onConfirm: async () => {
-        try {
-          await invoke('remove_local_theme', { id: localTheme.id })
-          const updatedThemes = localThemes.filter((t) => t.id !== localTheme.id)
-          setLocalThemes(updatedThemes)
-          loadLocalThemeCss(updatedThemes.map((t) => t.css_content))
-        } catch (error) {
-          logger.error('Failed to remove local theme:', error)
-        }
-      },
+      actions: [
+        { id: 'cancel', label: t('common.cancel') },
+        { id: 'confirm', label: t('common.delete'), primary: true, danger: true },
+      ],
     })
+
+    if (action !== 'confirm') return
+
+    try {
+      await invoke('remove_local_theme', { id: localTheme.id })
+      const updatedThemes = localThemes.filter((t) => t.id !== localTheme.id)
+      setLocalThemes(updatedThemes)
+      loadLocalThemeCss(updatedThemes.map((t) => t.css_content))
+    } catch (error) {
+      logger.error('Failed to remove local theme:', error)
+    }
   }
 
   const isInstalled = (packageName: string) => {
@@ -213,53 +217,60 @@ export function ThemeStore() {
   }
 
   const handleInstall = async (theme: ThemeItem) => {
-    NiceModal.show(MODAL_CONFIRM_ID, {
+    const action = await dialog.confirm({
       title: 'Install Theme',
       content: `Are you sure you want to install ${theme.name}?`,
-      onConfirm: async () => {
-        try {
-          await invoke('download_theme', { name: theme.packageName })
-          const res = await invoke<any[]>('load_themes')
-          if (Array.isArray(res)) {
-            res.forEach((extension) => {
-              useExtensionsManagerStore.getState().loadExtension(extension)
-            })
-          }
-        } catch (error) {
-          logger.error('Failed to install theme:', error)
-        }
-      },
+      actions: [
+        { id: 'cancel', label: t('common.cancel') },
+        { id: 'confirm', label: t('common.confirm'), primary: true },
+      ],
     })
+
+    if (action !== 'confirm') return
+
+    try {
+      await invoke('download_theme', { name: theme.packageName })
+      const res = await invoke<any[]>('load_themes')
+      if (Array.isArray(res)) {
+        res.forEach((extension) => {
+          useExtensionsManagerStore.getState().loadExtension(extension)
+        })
+      }
+    } catch (error) {
+      logger.error('Failed to install theme:', error)
+    }
   }
 
   const handleUninstall = async (theme: ThemeItem) => {
-    NiceModal.show(MODAL_CONFIRM_ID, {
+    const action = await dialog.confirm({
       title: 'Uninstall Theme',
       content: `Are you sure you want to uninstall ${theme.name}?`,
-      onConfirm: async () => {
-        try {
-          await invoke('remove_theme', { name: theme.packageName })
-          
-          // Find the theme name in installedThemes to delete it from store
-          const installedTheme = installedThemes.find(
-            (t: any) =>
-              t.name === theme.packageName ||
-              t.name === theme.name
-          )
-          
-          if (installedTheme) {
-            deleteTheme(installedTheme.name)
-          } else {
-             // Fallback: try to delete by name and packageName just in case
-             deleteTheme(theme.name)
-             deleteTheme(theme.packageName)
-          }
-          
-        } catch (error) {
-          logger.error('Failed to uninstall theme:', error)
-        }
-      },
+      actions: [
+        { id: 'cancel', label: t('common.cancel') },
+        { id: 'confirm', label: t('common.confirm'), primary: true, danger: true },
+      ],
     })
+
+    if (action !== 'confirm') return
+
+    try {
+      await invoke('remove_theme', { name: theme.packageName })
+
+      const installedTheme = installedThemes.find(
+        (t: any) =>
+          t.name === theme.packageName ||
+          t.name === theme.name
+      )
+
+      if (installedTheme) {
+        deleteTheme(installedTheme.name)
+      } else {
+        deleteTheme(theme.name)
+        deleteTheme(theme.packageName)
+      }
+    } catch (error) {
+      logger.error('Failed to uninstall theme:', error)
+    }
   }
 
   const filteredThemes = storeThemes.filter((theme) => {

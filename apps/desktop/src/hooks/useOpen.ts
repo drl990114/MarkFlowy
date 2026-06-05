@@ -1,12 +1,11 @@
-import { MODAL_CONFIRM_ID } from '@/components/Modal'
 import { readDirectory } from '@/helper/filesys'
 import { logger } from '@/helper/logger'
+import { dialog } from '@/services/dialog'
 import { addExistingMarkdownFileEdit } from '@/services/editor-file'
 import { getFileContent } from '@/services/file-info'
 import { currentWindow } from '@/services/windows'
 import { useEditorStore } from '@/stores'
 import useOpenedCacheStore from '@/stores/useOpenedCacheStore'
-import NiceModal from '@ebay/nice-modal-react'
 import { invoke } from '@tauri-apps/api/core'
 import { open } from '@tauri-apps/plugin-dialog'
 import { useCallback } from 'react'
@@ -19,50 +18,59 @@ const useOpen = () => {
   const openFolder = useCallback(
     async (dir: string) => {
       try {
-        NiceModal.show(MODAL_CONFIRM_ID, {
+        const action = await dialog.confirm({
           title: t('file.openFolderModal.title'),
-          confirmText: t('file.openFolderModal.newWindow'),
-          cancelText: t('file.openFolderModal.currentWindow'),
-          onConfirm: async () => {
-            try {
-              await invoke('create_new_window', {
-                path: dir,
-              })
-              addRecentWorkspaces({ path: dir })
-            } catch (error) {
-              logger.error('Error creating new window:', error)
-            }
+          actions: [
+            { id: 'currentWindow', label: t('file.openFolderModal.currentWindow') },
+            { id: 'newWindow', label: t('file.openFolderModal.newWindow'), primary: true },
+          ],
+          remember: {
+            key: 'open_folder_target_window',
+            label: t('dialog.remember_choice'),
           },
-          onClose: async () => {
-            try {
-              const existingWindowLabel = (await invoke('check_window_by_path', {
-                path: dir,
-              })) as string | null
+        })
 
-              if (existingWindowLabel) {
-                if (currentWindow.label === existingWindowLabel) {
-                  return
-                }
+        if (action === 'newWindow') {
+          try {
+            await invoke('create_new_window', {
+              path: dir,
+            })
+            addRecentWorkspaces({ path: dir })
+          } catch (error) {
+            logger.error('Error creating new window:', error)
+          }
+          return
+        }
 
-                await invoke('focus_window_by_label', {
-                  windowLabel: existingWindowLabel,
-                })
-                addRecentWorkspaces({ path: dir })
+        if (action === 'currentWindow') {
+          try {
+            const existingWindowLabel = (await invoke('check_window_by_path', {
+              path: dir,
+            })) as string | null
 
-                logger.info('Focused existing window for path:', existingWindowLabel)
+            if (existingWindowLabel) {
+              if (currentWindow.label === existingWindowLabel) {
                 return
               }
 
-              const res = await readDirectory(dir)
+              await invoke('focus_window_by_label', {
+                windowLabel: existingWindowLabel,
+              })
               addRecentWorkspaces({ path: dir })
-              useEditorStore.getState().setFolderData(res)
 
-              logger.info('Opening folder in current window:', dir)
-            } catch (error) {
-              logger.error('Error opening folder in current window:', error)
+              logger.info('Focused existing window for path:', existingWindowLabel)
+              return
             }
-          },
-        })
+
+            const res = await readDirectory(dir)
+            addRecentWorkspaces({ path: dir })
+            useEditorStore.getState().setFolderData(res)
+
+            logger.info('Opening folder in current window:', dir)
+          } catch (error) {
+            logger.error('Error opening folder in current window:', error)
+          }
+        }
       } catch (error) {
         logger.error('Error showing folder open modal:', error)
       }

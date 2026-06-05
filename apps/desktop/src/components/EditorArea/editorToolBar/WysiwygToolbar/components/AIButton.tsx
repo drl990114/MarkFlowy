@@ -1,13 +1,12 @@
 import { MfIconLabelButton } from '@/components/ui-v2/Button/icon-label-button'
 import useAiChatStore, { getCurrentAISettingData } from '@/extensions/ai/useAiChatStore'
 import { getFileObject } from '@/helper/files'
+import { dialog } from '@/services/dialog'
 import { addNewMarkdownFileEdit } from '@/services/editor-file'
 import { useEditorStore } from '@/stores'
 import useAppTasksStore from '@/stores/useTasksStore'
-import NiceModal from '@ebay/nice-modal-react'
 import { useCallback, useRef } from 'react'
 import { useTranslation } from '@/i18n'
-import { InputConfirmModalProps, MODAL_INPUT_ID } from '../../../../Modal'
 import { showContextMenu } from '../../../../ui-v2/ContextMenu'
 
 export const AIButton = () => {
@@ -80,19 +79,17 @@ ${res}
         {
           label: t('action.translate'),
           value: 'translate',
-          handler: () => {
-            NiceModal.show<any, InputConfirmModalProps>(MODAL_INPUT_ID, {
+          handler: async () => {
+            const val = await dialog.inputConfirm({
               title: t('action.translate'),
               inputProps: {
                 placeholder: t('placeholder.translate'),
               },
-              onConfirm: (val: string) => {
-                if (!val) {
-                  return
-                }
-                fetchCurFileTranslate(val)
-              },
             })
+
+            if (val) {
+              fetchCurFileTranslate(val)
+            }
           },
         },
       ],

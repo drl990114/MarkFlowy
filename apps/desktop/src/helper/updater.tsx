@@ -1,5 +1,4 @@
-import { MODAL_CONFIRM_ID } from '@/components/Modal'
-import NiceModal from '@ebay/nice-modal-react'
+import { dialog } from '@/services/dialog'
 import { invoke } from '@tauri-apps/api/core'
 import type { Update } from '@tauri-apps/plugin-updater'
 import { check } from '@tauri-apps/plugin-updater'
@@ -58,7 +57,7 @@ export const checkUpdate = async (opt: { install: boolean } = { install: false }
       } else {
         const dateString = (update?.date || '').split('.')[0]
 
-        NiceModal.show(MODAL_CONFIRM_ID, {
+        const action = await dialog.confirm({
           title: `New version ${update.version}`,
           content: (
             <div>
@@ -68,9 +67,15 @@ export const checkUpdate = async (opt: { install: boolean } = { install: false }
               </p>
             </div>
           ),
-          confirmText: i18n.t('about.install'),
-          onConfirm: () => installUpdate(update),
+          actions: [
+            { id: 'cancel', label: i18n.t('common.cancel') },
+            { id: 'install', label: i18n.t('about.install'), primary: true },
+          ],
         })
+
+        if (action === 'install') {
+          installUpdate(update)
+        }
       }
     }
   } catch (error) {

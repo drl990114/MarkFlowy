@@ -1,5 +1,4 @@
 import { commandRegistry } from '@/commands'
-import { MODAL_INFO_ID } from '@/components/Modal'
 import { MfIconLabelButton } from '@/components/ui-v2/Button/icon-label-button'
 import { showContextMenu } from '@/components/ui-v2/ContextMenu'
 import useBookMarksStore from '@/extensions/bookmarks/useBookMarksStore'
@@ -7,12 +6,12 @@ import bus from '@/helper/eventBus'
 import { getFileObject } from '@/helper/files'
 import { FileResultCode } from '@/helper/filesys'
 import { writeSettingData } from '@/services/app-setting'
+import { dialog } from '@/services/dialog'
 import { currentWindow } from '@/services/windows'
 import { useEditorStateStore, useEditorStore } from '@/stores'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
-import NiceModal from '@ebay/nice-modal-react'
 import { invoke } from '@tauri-apps/api/core'
 import { debounce } from 'lodash'
 import { memo, useCallback, useEffect, useRef, useState } from 'react'
@@ -228,7 +227,7 @@ export const MenuList = memo((props: MenuListProps) => {
         label: t('file.info'),
         value: 'file_info',
         handler: () => {
-          NiceModal.show(MODAL_INFO_ID, {
+          dialog.info({
             title: t('file.info'),
             width: '600px',
             content: (

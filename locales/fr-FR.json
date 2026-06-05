@@ -21,6 +21,9 @@
     "import": "Importer",
     "menu": "Menu"
   },
+  "dialog": {
+    "remember_choice": "Se souvenir de ce choix"
+  },
   "view": {
     "label": "vue",
     "theme": {

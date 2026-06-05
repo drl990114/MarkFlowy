@@ -1,13 +1,12 @@
 import { getFileObject } from '@/helper/files'
+import { dialog } from '@/services/dialog'
 import { currentWindow } from '@/services/windows'
 import { useEditorStateStore, useEditorStore } from '@/stores'
-import NiceModal from '@ebay/nice-modal-react'
 import { invoke } from '@tauri-apps/api/core'
 import { debounce } from 'lodash'
 import { memo, useCallback, useEffect, useState } from 'react'
 import { useTranslation } from '@/i18n'
 import { Space, toast } from 'zens'
-import { MODAL_INFO_ID } from '../../../../Modal'
 import { MfIconButton } from '../../../../ui-v2/Button'
 
 type FileNormalInfo = {
@@ -76,7 +75,7 @@ export const FileInfo = memo(() => {
         rounded='smooth'
         icon='ri-file-info-line'
         onClick={() => {
-          NiceModal.show(MODAL_INFO_ID, {
+          dialog.info({
             title: t('file.info'),
             width: '600px',
             content: (

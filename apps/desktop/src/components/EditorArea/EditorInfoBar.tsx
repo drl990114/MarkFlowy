@@ -4,6 +4,7 @@ import useBookMarksStore from '@/extensions/bookmarks/useBookMarksStore'
 import bus from '@/helper/eventBus'
 import { getFileObject } from '@/helper/files'
 import { FileResultCode } from '@/helper/filesys'
+import { dialog } from '@/services/dialog'
 import { addNewMarkdownFileEdit, isEmptyEditor } from '@/services/editor-file'
 import { currentWindow } from '@/services/windows'
 import { getWorkspace, WorkSpace } from '@/services/workspace'
@@ -12,7 +13,6 @@ import useAppSettingStore from '@/stores/useAppSettingStore'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
 import useAppTasksStore from '@/stores/useTasksStore'
-import NiceModal from '@ebay/nice-modal-react'
 import { invoke } from '@tauri-apps/api/core'
 import { debounce } from 'lodash'
 import { memo, useCallback, useEffect, useRef, useState } from 'react'
@@ -20,7 +20,6 @@ import { useTranslation } from '@/i18n'
 import { EditorViewType } from 'rme'
 import styled from 'styled-components'
 import { Space, toast } from 'zens'
-import { InputConfirmModalProps, MODAL_INFO_ID, MODAL_INPUT_ID } from '../Modal'
 import { MfIconButton } from '../ui-v2/Button'
 import { showContextMenu } from '../ui-v2/ContextMenu'
 
@@ -199,19 +198,17 @@ ${res}
             {
               label: t('action.translate'),
               value: 'translate',
-              handler: () => {
-                NiceModal.show<any, InputConfirmModalProps>(MODAL_INPUT_ID, {
+              handler: async () => {
+                const val = await dialog.inputConfirm({
                   title: t('action.translate'),
                   inputProps: {
                     placeholder: t('placeholder.translate'),
                   },
-                  onConfirm: (val: string) => {
-                    if (!val) {
-                      return
-                    }
-                    fetchCurFileTranslate(val)
-                  },
                 })
+
+                if (val) {
+                  fetchCurFileTranslate(val)
+                }
               },
             },
           ],
@@ -323,29 +320,29 @@ ${res}
             {t('file.lastModified')}: {fileNormalInfo.last_modified}
           </span>
           <MfIconButton
-            size='small'
-            rounded='smooth'
-            icon='ri-file-info-line'
-            onClick={() => {
-              NiceModal.show(MODAL_INFO_ID, {
-                title: t('file.info'),
-                width: '600px',
-                content: (
-                  <Space direction='vertical'>
-                    <span>
-                      {t('file.lastModified')}: {fileNormalInfo.last_modified}
-                    </span>
-                    <span>
-                      {t('file.size')}: {fileNormalInfo.size}
-                    </span>
-                    <span>
-                      {t('file.path')}: {curFile.path}
-                    </span>
-                  </Space>
-                ),
-              })
-            }}
-          />
+          size='small'
+          rounded='smooth'
+          icon='ri-file-info-line'
+          onClick={() => {
+            dialog.info({
+              title: t('file.info'),
+              width: '600px',
+              content: (
+                <Space direction='vertical'>
+                  <span>
+                    {t('file.lastModified')}: {fileNormalInfo.last_modified}
+                  </span>
+                  <span>
+                    {t('file.size')}: {fileNormalInfo.size}
+                  </span>
+                  <span>
+                    {t('file.path')}: {curFile.path}
+                  </span>
+                </Space>
+              ),
+            })
+          }}
+        />
         </Space>
       ) : (
         <div />
