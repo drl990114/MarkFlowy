@@ -28,6 +28,11 @@ type SourceHeadingInfo = {
   id: string
 }
 
+type HeadingViewportCoords = {
+  top: number
+  bottom?: number
+}
+
 const getAllHeadings = (doc: ProseMirrorNode): HeadingInfo[] => {
   const headings: HeadingInfo[] = []
 
@@ -82,20 +87,42 @@ const jumpToHeading = (
   })
 }
 
+const getActiveEditorScrollEl = (activeId: string): HTMLElement | null => {
+  const activeEditor = Array.from(
+    document.querySelectorAll<HTMLElement>('[data-editor-active="true"][data-editor-id]'),
+  ).find((element) => element.dataset.editorId === activeId)
+
+  return (
+    (activeEditor?.querySelector('[data-overlayscrollbars-viewport]') as HTMLElement | null) ||
+    (activeEditor?.querySelector('.os-viewport') as HTMLElement | null) ||
+    activeEditor
+  )
+}
+
+const resolveSourceScrollEl = (activeId: string, codemirrorScrollEl: HTMLElement) => {
+  if (codemirrorScrollEl.scrollHeight > codemirrorScrollEl.clientHeight + 1) {
+    return codemirrorScrollEl
+  }
+
+  return getActiveEditorScrollEl(activeId) ?? codemirrorScrollEl
+}
+
 const resolveActiveHeadingId = (params: {
   headings: Array<{ pos: number; id: string }>
   scrollEl: HTMLElement | null
-  getCoords: (pos: number) => { top: number } | null
+  getCoords: (pos: number) => HeadingViewportCoords | null
   offset?: number
 }): string | null => {
-  const { headings, scrollEl, getCoords, offset = 120 } = params
+  const { headings, scrollEl, getCoords, offset = 16 } = params
   if (!scrollEl || headings.length === 0) {
     return null
   }
 
-  const containerTop = scrollEl.getBoundingClientRect().top
-  const activeLine = containerTop + offset
+  const containerRect = scrollEl.getBoundingClientRect()
+  const viewportTop = containerRect.top + offset
+  const viewportBottom = containerRect.bottom
   let currentId: string | null = headings[0]?.id ?? null
+  let firstVisibleId: string | null = null
 
   for (const heading of headings) {
     try {
@@ -104,7 +131,16 @@ const resolveActiveHeadingId = (params: {
         continue
       }
 
-      if (coords.top <= activeLine) {
+      const headingTop = coords.top
+      const headingBottom = coords.bottom ?? coords.top
+      const isVisible = headingBottom >= viewportTop && headingTop <= viewportBottom
+
+      if (isVisible) {
+        firstVisibleId = heading.id
+        break
+      }
+
+      if (headingTop < viewportTop) {
         currentId = heading.id
       } else {
         break
@@ -114,7 +150,7 @@ const resolveActiveHeadingId = (params: {
     }
   }
 
-  return currentId
+  return firstVisibleId ?? currentId
 }
 
 type TocViewProps = {
@@ -124,9 +160,12 @@ type TocViewProps = {
 export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
   const tocRef = useRef<TableOfContentsRef>(null)
   const [activeHeadingId, setActiveHeadingId] = useState<string | null>(null)
+  const [editorPanelEl, setEditorPanelEl] = useState<HTMLElement | null>(null)
   const wysiwygHeadingsRef = useRef<HeadingInfo[]>([])
   const sourceHeadingsRef = useRef<SourceHeadingInfo[]>([])
   const wysiwygScrollElRef = useRef<HTMLElement | null>(null)
+  const [wysiwygScrollEl, setWysiwygScrollEl] = useState<HTMLElement | null>(null)
+  const sourceScrollElRef = useRef<HTMLElement | null>(null)
   const [sourceScrollEl, setSourceScrollEl] = useState<HTMLElement | null>(null)
   const rafRef = useRef<number | null>(null)
   const scheduleActiveHeadingUpdateRef = useRef<() => void>(() => {})
@@ -149,7 +188,10 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
       return resolveActiveHeadingId({
         headings: wysiwygHeadingsRef.current,
         scrollEl: wysiwygScrollElRef.current,
-        getCoords: (pos) => editorView.coordsAtPos(pos),
+        getCoords: (pos) => {
+          const coords = editorView.coordsAtPos(pos)
+          return { top: coords.top, bottom: coords.bottom }
+        },
       })
     }
 
@@ -161,13 +203,38 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
 
       return resolveActiveHeadingId({
         headings: sourceHeadingsRef.current,
-        scrollEl: sourceScrollEl,
-        getCoords: (pos) => codemirrorView.cm.coordsAtPos(pos),
+        scrollEl: sourceScrollElRef.current,
+        getCoords: (pos) => {
+          const cmEditorEl = codemirrorView.cm.dom
+          if (!cmEditorEl) {
+            return null
+          }
+
+          const lineBlock = codemirrorView.cm.lineBlockAt(pos)
+          const viewportEl = sourceScrollElRef.current
+          const baseRect =
+            viewportEl === codemirrorView.cm.scrollDOM
+              ? codemirrorView.cm.scrollDOM.getBoundingClientRect()
+              : cmEditorEl.getBoundingClientRect()
+          const cmScrollTop = codemirrorView.cm.scrollDOM.scrollTop
+
+          return {
+            top: baseRect.top + lineBlock.top - cmScrollTop,
+            bottom: baseRect.top + lineBlock.bottom - cmScrollTop,
+          }
+        },
       })
     }
 
     return null
-  }, [sourceScrollEl])
+  }, [])
+
+  const updateActiveHeadingId = useCallback(() => {
+    const nextActiveId = calculateActiveHeadingId()
+    setActiveHeadingId((currentActiveId) =>
+      currentActiveId === nextActiveId ? currentActiveId : nextActiveId,
+    )
+  }, [calculateActiveHeadingId])
 
   const scheduleActiveHeadingUpdate = useCallback(() => {
     if (rafRef.current) {
@@ -175,10 +242,10 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
     }
 
     rafRef.current = requestAnimationFrame(() => {
-      const nextActiveId = calculateActiveHeadingId()
-      setActiveHeadingId(nextActiveId)
+      rafRef.current = null
+      updateActiveHeadingId()
     })
-  }, [calculateActiveHeadingId])
+  }, [updateActiveHeadingId])
 
   useEffect(() => {
     scheduleActiveHeadingUpdateRef.current = scheduleActiveHeadingUpdate
@@ -213,7 +280,7 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
             const sourceHeadings: SourceHeadingInfo[] = matches.map((match) => {
               const depth = Number(match.type.split('ATXHeading')?.[1]) || 1
               const value = getHeadingValue(match.value)
-              const pos = match.to
+              const pos = match.from
 
               return {
                 depth,
@@ -224,7 +291,12 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
             })
 
             sourceHeadingsRef.current = sourceHeadings
-            setSourceScrollEl(codemirrorView.cm.scrollDOM)
+            const nextScrollEl = resolveSourceScrollEl(activeId, codemirrorView.cm.scrollDOM)
+            sourceScrollElRef.current = nextScrollEl
+            setSourceScrollEl(nextScrollEl)
+            wysiwygHeadingsRef.current = []
+            wysiwygScrollElRef.current = null
+            setWysiwygScrollEl(null)
 
             const headings: IHeadingData[] = sourceHeadings.map((heading) => {
               return {
@@ -241,6 +313,7 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
                     scrollIntoView: true,
                   })
                   codemirrorView.cm.focus()
+                  scheduleActiveHeadingUpdateRef.current()
                 },
               }
             })
@@ -261,8 +334,17 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
           }
 
           setTimeout(() => {
+            const editorPanelEl = document.querySelector('#editor-panel') as HTMLElement | null
+            const nextScrollEl = getActiveEditorScrollEl(activeId) ?? editorPanelEl
+            wysiwygScrollElRef.current = nextScrollEl
+            setWysiwygScrollEl(nextScrollEl)
+            setEditorPanelEl(editorPanelEl)
+
             const headingInfos = getAllHeadings(editorView.state.doc)
             wysiwygHeadingsRef.current = headingInfos
+            sourceHeadingsRef.current = []
+            sourceScrollElRef.current = null
+            setSourceScrollEl(null)
 
             const headings = headingInfos.map((heading) => {
               return {
@@ -270,7 +352,10 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
                 value: heading.text,
                 id: heading.id,
                 htmlNode: null,
-                onClick: () => jumpToHeading(editorView, heading.pos, wysiwygScrollElRef.current),
+                onClick: () => {
+                  jumpToHeading(editorView, heading.pos, wysiwygScrollElRef.current)
+                  scheduleActiveHeadingUpdateRef.current()
+                },
               } as IHeadingData
             })
 
@@ -282,6 +367,12 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
 
         tocRef.current?.refreshByHeadings({ newHeadings: [] })
         setActiveHeadingId(null)
+        wysiwygHeadingsRef.current = []
+        wysiwygScrollElRef.current = null
+        setWysiwygScrollEl(null)
+        sourceHeadingsRef.current = []
+        sourceScrollElRef.current = null
+        setSourceScrollEl(null)
       },
     })
 
@@ -289,29 +380,49 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
   }, [])
 
   useEffect(() => {
-    const scrollEl = document.querySelector('#editor-panel') as HTMLElement | null
-    if (!scrollEl) return
+    const editorPanelEl = document.querySelector('#editor-panel') as HTMLElement | null
+    const scrollEl = activeId ? getActiveEditorScrollEl(activeId) : null
+    setEditorPanelEl(editorPanelEl)
+    if (!scrollEl) {
+      wysiwygScrollElRef.current = null
+      setWysiwygScrollEl(null)
+      return
+    }
 
     wysiwygScrollElRef.current = scrollEl
+    setWysiwygScrollEl(scrollEl)
+  }, [activeId])
 
+  useEffect(() => {
+    if (!wysiwygScrollEl) return
     const handleScroll = () => scheduleActiveHeadingUpdate()
-    scrollEl.addEventListener('scroll', handleScroll, { passive: true })
+    wysiwygScrollEl.addEventListener('scroll', handleScroll, { passive: true })
     handleScroll()
 
     return () => {
-      scrollEl.removeEventListener('scroll', handleScroll)
+      wysiwygScrollEl.removeEventListener('scroll', handleScroll)
     }
-  }, [scheduleActiveHeadingUpdate])
+  }, [wysiwygScrollEl, scheduleActiveHeadingUpdate])
 
   useEffect(() => {
     if (!sourceScrollEl) return
 
     const handleScroll = () => scheduleActiveHeadingUpdate()
-    sourceScrollEl.addEventListener('scroll', handleScroll, { passive: true })
+    const activeId = useEditorStore.getState().activeId
+    const codemirrorView = activeId ? sourceCodeCodemirrorViewMap.get(activeId) : null
+    const scrollTargets = Array.from(
+      new Set([sourceScrollEl, codemirrorView?.cm.scrollDOM].filter(Boolean)),
+    ) as HTMLElement[]
+
+    scrollTargets.forEach((scrollTarget) => {
+      scrollTarget.addEventListener('scroll', handleScroll, { passive: true })
+    })
     handleScroll()
 
     return () => {
-      sourceScrollEl.removeEventListener('scroll', handleScroll)
+      scrollTargets.forEach((scrollTarget) => {
+        scrollTarget.removeEventListener('scroll', handleScroll)
+      })
     }
   }, [sourceScrollEl, scheduleActiveHeadingUpdate])
 
@@ -327,6 +438,12 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
     if (!activeId) {
       tocRef.current?.refreshByHeadings({ newHeadings: [] })
       setActiveHeadingId(null)
+      wysiwygHeadingsRef.current = []
+      wysiwygScrollElRef.current = null
+      setWysiwygScrollEl(null)
+      sourceHeadingsRef.current = []
+      sourceScrollElRef.current = null
+      setSourceScrollEl(null)
       return
     }
     const timer = setTimeout(() => {
@@ -335,17 +452,14 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
     return () => clearTimeout(timer)
   }, [activeId])
 
-  const containerEl = document.querySelector('#editor-panel') as HTMLElement
-  const scrollEl = document.querySelector('#editor-panel') as HTMLElement
-
   return (
     <TocViewContainer variant={variant}>
       <SideBarHeader name={t('sidebar.table_of_contents')} />
       <div style={{ height: 'calc(100% - 40px)', boxSizing: 'border-box' }}>
         <TableOfContents
           ref={tocRef}
-          containerEl={containerEl}
-          scrollEl={scrollEl}
+          containerEl={editorPanelEl ?? undefined}
+          scrollEl={editorPanelEl ?? undefined}
           variant={variant}
           compact={false}
           pinned

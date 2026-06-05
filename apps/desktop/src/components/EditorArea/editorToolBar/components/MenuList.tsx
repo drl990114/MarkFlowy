@@ -212,17 +212,30 @@ export const MenuList = memo((props: MenuListProps) => {
       items.push({
         label: t('file.info'),
         value: 'file_info',
-        handler: () => {
+        handler: async () => {
+          let latestFileNormalInfo = fileNormalInfo
+
+          if (curFile?.path) {
+            try {
+              latestFileNormalInfo = await invoke<FileNormalInfo>('get_file_normal_info', {
+                path: curFile.path,
+              })
+              setFileNormalInfo(latestFileNormalInfo)
+            } catch (error: unknown) {
+              toast.error((error as Error).message)
+            }
+          }
+
           dialog.info({
             title: t('file.info'),
             width: '600px',
             content: (
               <Space direction='vertical'>
                 <span>
-                  {t('file.lastModified')}: {fileNormalInfo.last_modified}
+                  {t('file.lastModified')}: {latestFileNormalInfo.last_modified}
                 </span>
                 <span>
-                  {t('file.size')}: {fileNormalInfo.size}
+                  {t('file.size')}: {latestFileNormalInfo.size}
                 </span>
                 <span>
                   {t('file.path')}: {curFile?.path}

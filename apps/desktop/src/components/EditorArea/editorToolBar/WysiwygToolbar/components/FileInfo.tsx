@@ -54,31 +54,46 @@ export const FileInfo = memo(() => {
     }
   }, [editorState?.hasUnsavedChanges, getFileNormalInfo])
 
+  const showFileInfo = async () => {
+    let latestFileNormalInfo = fileNormalInfo
+
+    if (curFile?.path) {
+      try {
+        latestFileNormalInfo = await invoke<FileNormalInfo>('get_file_normal_info', {
+          path: curFile.path,
+        })
+        setFileNormalInfo(latestFileNormalInfo)
+      } catch (error: unknown) {
+        toast.error((error as Error).message)
+      }
+    }
+
+    dialog.info({
+      title: t('file.info'),
+      width: '600px',
+      content: (
+        <Space direction='vertical'>
+          <span>
+            {t('file.lastModified')}: {latestFileNormalInfo.last_modified}
+          </span>
+          <span>
+            {t('file.size')}: {latestFileNormalInfo.size}
+          </span>
+          <span>
+            {t('file.path')}: {curFile?.path}
+          </span>
+        </Space>
+      ),
+    })
+  }
+
   return (
     <Space>
       <MfIconButton
         size='small'
         rounded='smooth'
         icon='ri-file-info-line'
-        onClick={() => {
-          dialog.info({
-            title: t('file.info'),
-            width: '600px',
-            content: (
-              <Space direction='vertical'>
-                <span>
-                  {t('file.lastModified')}: {fileNormalInfo.last_modified}
-                </span>
-                <span>
-                  {t('file.size')}: {fileNormalInfo.size}
-                </span>
-                <span>
-                  {t('file.path')}: {curFile?.path}
-                </span>
-              </Space>
-            ),
-          })
-        }}
+        onClick={showFileInfo}
       />
     </Space>
   )

@@ -68,7 +68,11 @@ function Editor(props: EditorProps) {
   if (!curFileTypeConfig) return null
 
   return (
-    <EditorScrollContainer style={active ? undefined : { display: 'none' }}>
+    <EditorScrollContainer
+      data-editor-id={id}
+      data-editor-active={active ? 'true' : 'false'}
+      style={active ? undefined : { display: 'none' }}
+    >
       <OverlayScrollbarsComponent
         options={overlayScrollbarsOptions}
         style={{ height: '100%' }}

@@ -32,6 +32,9 @@ export const Preview: React.FC<PreviewProps> = (props) => {
   const { doc, delegateOptions, handleLinkClick, styleToken = defaultStyleToken } = props
   const [processedHtml, setProcessedHtml] = useState('')
   const containerRef = useRef<HTMLDivElement>(null)
+  const onErrorRef = useRef(props.onError)
+
+  onErrorRef.current = props.onError
 
   useEffect(() => {
     let canceled = false
@@ -52,13 +55,13 @@ export const Preview: React.FC<PreviewProps> = (props) => {
           })
           .catch((e) => {
             if (!canceled) {
-              props.onError?.(e)
+              onErrorRef.current?.(e)
               console.error(e)
             }
           })
       } catch (e) {
         if (!canceled) {
-          props.onError?.(e as Error)
+          onErrorRef.current?.(e as Error)
           console.error(e)
         }
       }
@@ -68,7 +71,7 @@ export const Preview: React.FC<PreviewProps> = (props) => {
       canceled = true
       window.clearTimeout(handle)
     }
-  }, [delegateOptions, doc, props.onError])
+  }, [delegateOptions, doc])
 
   const handleClick = useCallback(
     (event: React.MouseEvent) => {

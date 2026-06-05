@@ -63,16 +63,16 @@ export const TocDiv = styled.div<TocDivProps>`
   position: relative;
   height: 100%;
   width: 100%;
-  line-height: 1.6em;
+  line-height: 1.45;
   padding-bottom: 0.25rem;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   box-sizing: border-box;
 
   .toc-list {
     height: 100%;
-    padding: 0.4rem 1rem;
+    padding: 0.5rem 0.65rem 0.75rem 0.55rem;
     overflow: hidden;
     box-sizing: border-box;
     transition:
@@ -80,7 +80,7 @@ export const TocDiv = styled.div<TocDivProps>`
       transform 0.2s ease;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 2px;
     ${scrollbarHidden};
 
     &:hover::-webkit-scrollbar-thumb {
@@ -177,7 +177,7 @@ export const TocDiv = styled.div<TocDivProps>`
     list-style: none;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 1px;
     align-items: center;
   }
 
@@ -301,18 +301,35 @@ export interface TocListProps {
 
 export const TocLink = styled.a<TocListProps & { theme?: any }>`
   color: ${(props) => (props.active ? props.theme.primaryFontColor : props.theme.labelFontColor)};
-  font-weight: ${(props) => (props.active ? `600` : '400')};
+  font-weight: ${(props) => (props.active ? `500` : '400')};
   display: inline-flex;
-  align-items: flex-start;
-  justify-content: center;
-  gap: 8px;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 7px;
   box-shadow: none;
   text-decoration: none;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  min-height: 14px;
+  min-height: ${(props) => (props.compact ? '14px' : '24px')};
   width: 100%;
+  max-width: 100%;
+  padding: ${(props) =>
+    props.compact ? '0' : `0 7px 0 calc(7px + ${props.depth * 1}em)`};
+  border-radius: ${(props) => (props.compact ? '0' : '4px')};
+  background: transparent;
+  box-sizing: border-box;
+  transition:
+    color 0.18s ease,
+    background 0.18s ease;
+
+  &:hover {
+    color: ${(props) => props.theme.primaryFontColor};
+    background: ${(props) =>
+      props.compact
+        ? 'transparent'
+        : props.theme.hoverColor};
+  }
 
   ${(props) =>
     props.compact &&
@@ -337,11 +354,21 @@ export const TocLink = styled.a<TocListProps & { theme?: any }>`
     `}
 
   & .toc-link__chapter {
-    margin-right: ${(props) => props.theme.spaceXs};
-    text-align: right;
-    color: ${(props) => props.theme.accentColor};
-    font-weight: bold;
-    opacity: ${(props) => (props.active ? 1 : 0.6)};
+    flex: 0 0 auto;
+    min-width: 0;
+    margin-right: 0;
+    text-align: left;
+    color: ${(props) => (props.active ? props.theme.accentColor : props.theme.labelFontColor)};
+    font-size: 0.68rem;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    opacity: ${(props) => (props.active ? 0.9 : 0.42)};
+  }
+
+  & .toc-link__title {
+    flex: 0 1 auto;
+    min-width: 0;
+    opacity: ${(props) => (props.active ? 1 : 0.78)};
   }
 
   & .toc-link__chapter,
@@ -379,5 +406,5 @@ export const TocListItem = styled.li<TocListProps & { theme?: any }>`
   position: relative;
   display: flex;
   align-items: center;
-  padding-left: ${(props) => `${props.depth * 1}em`};
+  padding-left: 0;
 `
