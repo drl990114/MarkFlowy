@@ -44,7 +44,13 @@ export function createConfig({ input = 'index.ts', pkg, external = [] }) {
           sourceMap: false,
           minimize: true,
         }),
-        typescript({ sourceMap: true }),
+        typescript({
+          sourceMap: true,
+          noEmit: false,
+          declaration: false,
+          declarationMap: false,
+          emitDeclarationOnly: false,
+        }),
       ],
     },
     {
@@ -79,7 +85,13 @@ export function createConfig({ input = 'index.ts', pkg, external = [] }) {
           sourceMap: false,
           minimize: true,
         }),
-        typescript({ sourceMap: true }),
+        typescript({
+          sourceMap: true,
+          noEmit: false,
+          declaration: false,
+          declarationMap: false,
+          emitDeclarationOnly: false,
+        }),
       ],
     },
   ]

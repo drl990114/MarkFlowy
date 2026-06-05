@@ -13,8 +13,6 @@
     "sourceMap": true,
     "strict": true,
     "target": "ES2022",
-    "declaration": true,
-    "declarationDir": ".",
     "outDir": "./dist",
     "skipLibCheck": true,
     "paths": {

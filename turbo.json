@@ -8,7 +8,7 @@
     },
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", "build/**", ".next/**", "!.next/cache/**"],
+      "outputs": ["dist/**", "dist-types/**", "lib/**", "esm/**", "build/**", ".next/**", "!.next/cache/**"],
       "inputs": ["src/**", "package.json", "tsconfig.json", "tsconfig.*.json", "rollup.config.*", "esbuild.config.*"]
     },
     "deploy": {
