@@ -11,10 +11,10 @@ mod search;
 mod setup;
 mod task_system;
 
-use std::env;
 use std::path::PathBuf;
 use std::sync;
 use std::{collections::HashMap, sync::Mutex};
+use std::{env, fs};
 
 use app::{
     bookmarks, conf, extensions, file_watcher, keybindings, opened_cache, process, themes,
@@ -119,10 +119,217 @@ fn is_terminal_launch() -> bool {
     std::env::var("TERM").is_ok()
 }
 
-fn path_to_file_url(path: &str) -> String {
-    url::Url::from_file_path(std::path::Path::new(path))
+fn path_to_file_url(path: &str, cwd: Option<&str>) -> String {
+    if url::Url::parse(path).is_ok() {
+        return path.to_string();
+    }
+
+    let path = PathBuf::from(path);
+    let path = if path.is_absolute() {
+        path
+    } else {
+        cwd.filter(|cwd| !cwd.is_empty())
+            .map(PathBuf::from)
+            .or_else(|| env::current_dir().ok())
+            .unwrap_or_else(|| PathBuf::from("."))
+            .join(path)
+    };
+
+    url::Url::from_file_path(&path)
         .map(|u| u.to_string())
-        .unwrap_or_else(|_| path.to_string())
+        .unwrap_or_else(|_| path.to_string_lossy().to_string())
+}
+
+fn cli_binary_name() -> &'static str {
+    #[cfg(windows)]
+    {
+        "markflowy.exe"
+    }
+
+    #[cfg(not(windows))]
+    {
+        "markflowy"
+    }
+}
+
+fn path_entries() -> Vec<PathBuf> {
+    env::var_os("PATH")
+        .map(|paths| env::split_paths(&paths).collect())
+        .unwrap_or_default()
+}
+
+#[cfg(windows)]
+fn same_path(left: &std::path::Path, right: &std::path::Path) -> bool {
+    left.to_string_lossy()
+        .eq_ignore_ascii_case(&right.to_string_lossy())
+}
+
+#[cfg(not(windows))]
+fn same_path(left: &std::path::Path, right: &std::path::Path) -> bool {
+    left == right
+}
+
+fn push_unique_path(paths: &mut Vec<PathBuf>, path: PathBuf) {
+    if !paths
+        .iter()
+        .any(|existing_path| same_path(existing_path, &path))
+    {
+        paths.push(path);
+    }
+}
+
+fn path_contains_dir(dir: &std::path::Path) -> bool {
+    path_entries()
+        .iter()
+        .any(|path_entry| same_path(path_entry, dir))
+}
+
+fn existing_cli_paths() -> Vec<PathBuf> {
+    let cli_binary_name = cli_binary_name();
+
+    path_entries()
+        .into_iter()
+        .map(|dir| dir.join(cli_binary_name))
+        .filter(|path| path.exists())
+        .collect()
+}
+
+#[cfg(unix)]
+fn existing_cli_candidate_dirs(home_dir: &std::path::Path) -> Vec<PathBuf> {
+    vec![
+        home_dir.join(".local").join("bin"),
+        home_dir.join("bin"),
+        env::var_os("CARGO_HOME")
+            .map(PathBuf::from)
+            .unwrap_or_else(|| home_dir.join(".cargo"))
+            .join("bin"),
+        PathBuf::from("/usr/local/bin"),
+        PathBuf::from("/opt/homebrew/bin"),
+    ]
+}
+
+#[cfg(windows)]
+fn existing_cli_candidate_dirs(_home_dir: &std::path::Path) -> Vec<PathBuf> {
+    Vec::new()
+}
+
+#[cfg(unix)]
+fn new_cli_candidate_dirs(home_dir: &std::path::Path) -> Vec<PathBuf> {
+    vec![
+        home_dir.join(".local").join("bin"),
+        home_dir.join("bin"),
+        env::var_os("CARGO_HOME")
+            .map(PathBuf::from)
+            .unwrap_or_else(|| home_dir.join(".cargo"))
+            .join("bin"),
+    ]
+}
+
+#[cfg(windows)]
+fn new_cli_candidate_dirs(_home_dir: &std::path::Path) -> Vec<PathBuf> {
+    // On Windows, prefer updating an existing PATH entry only. Adding a new user
+    // bin directory requires changing PATH, which should be an explicit install step.
+    Vec::new()
+}
+
+fn cli_install_paths(app: &tauri::App) -> Vec<PathBuf> {
+    let mut paths = existing_cli_paths();
+    let Some(home_dir) = app.path().home_dir().ok() else {
+        return paths;
+    };
+
+    for dir in existing_cli_candidate_dirs(&home_dir) {
+        let path = dir.join(cli_binary_name());
+        if path.exists() {
+            push_unique_path(&mut paths, path);
+        }
+    }
+
+    for dir in new_cli_candidate_dirs(&home_dir) {
+        if path_contains_dir(&dir) {
+            let path = dir.join(cli_binary_name());
+            push_unique_path(&mut paths, path);
+        }
+    }
+
+    paths
+}
+
+#[cfg(unix)]
+fn install_cli_link(
+    target_path: &std::path::Path,
+    current_exe: &std::path::Path,
+) -> std::io::Result<()> {
+    use std::os::unix::fs::symlink;
+
+    if target_path == current_exe {
+        return Ok(());
+    }
+
+    if fs::read_link(target_path)
+        .map(|linked_path| linked_path == current_exe)
+        .unwrap_or(false)
+    {
+        return Ok(());
+    }
+
+    let _ = fs::remove_file(target_path);
+    symlink(current_exe, target_path)
+}
+
+#[cfg(windows)]
+fn install_cli_link(
+    target_path: &std::path::Path,
+    current_exe: &std::path::Path,
+) -> std::io::Result<()> {
+    if target_path == current_exe {
+        return Ok(());
+    }
+
+    let _ = fs::remove_file(target_path);
+    fs::copy(current_exe, target_path).map(|_| ())
+}
+
+fn install_cli(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>> {
+    if cfg!(debug_assertions) || tauri::is_dev() {
+        return Ok(());
+    }
+
+    let current_exe = env::current_exe()?;
+    let target_paths = cli_install_paths(app);
+    let mut last_error = None;
+    let mut installed_count = 0;
+
+    for target_path in target_paths {
+        if let Some(parent) = target_path.parent() {
+            if let Err(error) = fs::create_dir_all(parent) {
+                last_error = Some(error);
+                continue;
+            }
+        }
+
+        match install_cli_link(&target_path, &current_exe) {
+            Ok(_) => {
+                installed_count += 1;
+                #[cfg(debug_assertions)]
+                eprintln!(
+                    "[markflowy-cli] installed CLI: {:?} -> {:?}",
+                    target_path, current_exe
+                );
+            }
+            Err(error) => {
+                last_error = Some(error);
+            }
+        }
+    }
+
+    if installed_count == 0 {
+        if let Some(error) = last_error {
+            return Err(Box::new(error));
+        }
+    }
+
+    Ok(())
 }
 
 macro_rules! cli_debug {
@@ -161,34 +368,39 @@ pub fn run() {
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_persisted_scope::init())
         .plugin(tauri_plugin_cli::init())
-        .plugin(tauri_plugin_single_instance::init(|app_handle: &tauri::AppHandle, args: Vec<String>, _cwd: String| {
-            if args.len() > 1 {
-                match args[1].as_str() {
-                    "open" => {
-                        let opened_urls = args.iter()
-                            .skip(2)
-                            .map(|p| path_to_file_url(p))
-                            .collect::<Vec<_>>()
-                            .join(",");
-                        if let Err(e) = crate::setup::init(app_handle.clone(), opened_urls) {
-                            println!("CLI open failed: {:?}", e);
-                        }
-                    }
-                    _ => {
-                        let opened_urls = args.iter()
-                            .skip(1)
-                            .map(|p| path_to_file_url(p))
-                            .collect::<Vec<_>>()
-                            .join(",");
-                        if !opened_urls.is_empty() {
+        .plugin(tauri_plugin_single_instance::init(
+            |app_handle: &tauri::AppHandle, args: Vec<String>, cwd: String| {
+                if args.len() > 1 {
+                    match args[1].as_str() {
+                        "open" => {
+                            let opened_urls = args
+                                .iter()
+                                .skip(2)
+                                .map(|p| path_to_file_url(p, Some(&cwd)))
+                                .collect::<Vec<_>>()
+                                .join(",");
                             if let Err(e) = crate::setup::init(app_handle.clone(), opened_urls) {
-                                println!("File open failed: {:?}", e);
+                                println!("CLI open failed: {:?}", e);
+                            }
+                        }
+                        _ => {
+                            let opened_urls = args
+                                .iter()
+                                .skip(1)
+                                .map(|p| path_to_file_url(p, Some(&cwd)))
+                                .collect::<Vec<_>>()
+                                .join(",");
+                            if !opened_urls.is_empty() {
+                                if let Err(e) = crate::setup::init(app_handle.clone(), opened_urls)
+                                {
+                                    println!("File open failed: {:?}", e);
+                                }
                             }
                         }
                     }
                 }
-            }
-        }))
+            },
+        ))
         .invoke_handler(tauri::generate_handler![
             fc::cmd::open_folder_async,
             fc::cmd::get_file_content,
@@ -253,9 +465,24 @@ pub fn run() {
         ])
         .setup(|app: &mut tauri::App| {
             cli_debug!("========================================");
-            cli_debug!("cfg!(debug_assertions)={}, tauri::is_dev()={}", cfg!(debug_assertions), tauri::is_dev());
-            cli_debug!("custom-protocol: {}", if cfg!(feature = "custom-protocol") { "ENABLED" } else { "DISABLED" });
+            cli_debug!(
+                "cfg!(debug_assertions)={}, tauri::is_dev()={}",
+                cfg!(debug_assertions),
+                tauri::is_dev()
+            );
+            cli_debug!(
+                "custom-protocol: {}",
+                if cfg!(feature = "custom-protocol") {
+                    "ENABLED"
+                } else {
+                    "DISABLED"
+                }
+            );
             cli_debug!("binary: {:?}", std::env::current_exe().unwrap_or_default());
+
+            if let Err(e) = install_cli(app) {
+                cli_debug!("failed to install CLI: {:?}", e);
+            }
 
             match app.cli().matches() {
                 Ok(matches) => {
@@ -264,10 +491,11 @@ pub fn run() {
                             "open" => {
                                 if let Some(arg_data) = subcommand.matches.args.get("path") {
                                     if let Some(raw_path) = arg_data.value.as_str() {
-                                        let url = path_to_file_url(raw_path);
+                                        let url = path_to_file_url(raw_path, None);
                                         cli_debug!("open: {} -> {}", raw_path, url);
 
-                                        let mut file_urls = app.state::<OpenedUrls>().inner().0.lock().unwrap();
+                                        let mut file_urls =
+                                            app.state::<OpenedUrls>().inner().0.lock().unwrap();
                                         if let Ok(parsed) = url::Url::parse(&url) {
                                             *file_urls = Some(vec![parsed]);
                                         } else {
@@ -293,10 +521,13 @@ pub fn run() {
 
             #[cfg(target_os = "macos")]
             {
-                let app_data_dir = app.path().app_data_dir().expect("failed to get app data dir");
+                let app_data_dir = app
+                    .path()
+                    .app_data_dir()
+                    .expect("failed to get app data dir");
                 APP_DIR.lock().unwrap().insert(0, app_data_dir);
             }
-            
+
             #[cfg(not(target_os = "macos"))]
             {
                 let home_dir_path = app.path().home_dir().expect("failed to get home dir");
