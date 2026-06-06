@@ -3056,7 +3056,7 @@ dependencies = [
 
 [[package]]
 name = "markflowy"
-version = "0.80.1"
+version = "0.81.0"
 dependencies = [
  "anyhow",
  "arboard",
