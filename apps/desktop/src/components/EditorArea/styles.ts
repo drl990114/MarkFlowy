@@ -17,6 +17,34 @@ export const OverlayScrollbarStyles = createGlobalStyle`
     --os-handle-perpendicular-size-hover: 80%;
     --os-handle-perpendicular-size-active: 80%;
   }
+
+  /* When a live-preview block (mermaid/math/etc.) enters fullscreen mode,
+     lower sidebars and status bar so the fixed-position fullscreen overlay
+     is not obscured by them.
+     The class 'mf-livepreview-fullscreen-active' is toggled on document.body
+     via the mf:livepreview-fullscreen custom event dispatched by LivePreviewNodeView.
+
+     react-resizable-panels Panel renders: <div data-panel id="panel-id"> */
+  body.mf-livepreview-fullscreen-active {
+    /* Hide sidebars and status bar via data attribute set by JS */
+    [data-mf-hidden] {
+      display: none !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+    }
+
+    /* Break OverlayScrollbars stacking context so position: fixed
+       can escape and cover the full viewport.
+       .os-size-observer-host uses contain:strict which creates both
+       a stacking context AND a containing block for fixed-position descendants */
+    .os-size-observer-host,
+    .os-viewport {
+      contain: unset !important;
+      transform: none !important;
+      filter: none !important;
+      backdrop-filter: none !important;
+    }
+  }
 `
 
 export const Container = styled.div`
@@ -33,7 +61,6 @@ export const Container = styled.div`
     align-items: center;
     justify-content: flex-end;
     box-sizing: border-box;
-    z-index: 10;
     border-bottom: 1px solid ${(props) => props.theme.borderColor};
     border-left: 1px solid ${(props) => props.theme.borderColor};
   }
@@ -41,6 +68,7 @@ export const Container = styled.div`
   .code-contents {
     flex: 1;
     display: flex;
+    padding-top: ${(props) => props.theme.spaceSm};
   }
 `
 

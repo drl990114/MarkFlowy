@@ -209,12 +209,13 @@ export const livePreviewBlockStyles = css`
 
   .mf-live-preview-fullscreen {
     position: fixed;
-    inset: 24px;
+    inset: 0;
     z-index: ${editorZIndex.fullscreen};
     min-height: 0;
     margin: 0;
-    border-color: ${(props) => props.theme.accentColor};
-    box-shadow: 0 20px 60px rgb(0 0 0 / 24%);
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
 
     .mf-live-preview-body,
     .mf-live-preview-editor,

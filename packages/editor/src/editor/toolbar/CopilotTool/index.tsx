@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import { usePopper } from 'react-popper'
 import styled from 'styled-components'
 import { CopilotExtension, type CopilotState } from '../../extensions/Copilot/copilot-extension'
+import { editorZIndex } from '../../theme/z-index'
 
 export const CopilotTool = () => {
   const { view: editorView, getState } = useRemirrorContext({ autoUpdate: true })
@@ -105,7 +106,7 @@ const Container = styled.div`
     0 1px 4px -2px ${(props) => props.theme.boxShadowColor},
     0 2px 8px 0 ${(props) => props.theme.boxShadowColor},
     0 8px 16px 4px ${(props) => props.theme.boxShadowColor};
-  z-index: 1000;
+  z-index: ${editorZIndex.floatingMenu};
   pointer-events: none;
   white-space: pre-wrap;
 `

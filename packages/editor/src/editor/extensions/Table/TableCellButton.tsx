@@ -2,6 +2,7 @@ import { autoUpdate, useFloating, VirtualElement } from '@floating-ui/react'
 import { useCommands } from '@rme-sdk/react'
 import React, { useCallback, useEffect } from 'react'
 
+import { editorZIndex } from '../../theme/z-index'
 import type { LineTableCellExtension } from './table-extension'
 import { useHoveringCellDom } from './use-hovering-cell-dom'
 
@@ -70,7 +71,7 @@ const TableCellButtonComponent: React.FC<TableCellButtonComponentProps> = ({
         position: strategy,
         top: y ?? '',
         left: x ?? '',
-        zIndex: 10,
+        zIndex: editorZIndex.blockHandler,
         width: '20px',
         height: '20px',
         padding: '8px 0px',

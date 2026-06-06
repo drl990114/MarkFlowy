@@ -987,7 +987,7 @@ export const WysiwygThemeWrapper = styled.div.attrs<WrapperProps>((p) => ({
     -ms-user-select: none;
     user-select: none;
     cursor: none;
-    z-index: -1;
+    z-index: ${editorZIndex.hidden};
   }
 
   .remirror-positioner-widget {

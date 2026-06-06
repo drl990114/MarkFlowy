@@ -266,6 +266,11 @@ export class LivePreviewNodeView implements NodeView, LivePreviewNodeViewApi {
     const method = this.fullscreen ? 'addEventListener' : 'removeEventListener'
     document[method]('keydown', this.handleDocumentKeydown as EventListener, true)
 
+    // Dispatch custom event so the host app can adjust UI (e.g., lower sidebar/statusbar z-index)
+    document.dispatchEvent(
+      new CustomEvent('mf:livepreview-fullscreen', { detail: { fullscreen: this.fullscreen } }),
+    )
+
     if (this.fullscreen && this.mode !== 'preview') {
       this.focusCodeMirrorAtStoredPosition()
     }

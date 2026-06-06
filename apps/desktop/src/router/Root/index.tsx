@@ -84,6 +84,34 @@ function Root() {
     getBookMarkList()
   }, [])
 
+  // Listen for live-preview fullscreen events from editor package
+  // to adjust sidebar/statusbar z-index so fullscreen content is not obscured
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<{ fullscreen: boolean }>).detail
+      const active = detail.fullscreen
+
+      document.body.classList.toggle('mf-livepreview-fullscreen-active', active)
+
+      // Directly hide/show sidebars and status bar via DOM manipulation
+      // (more reliable than CSS-only approach)
+      const leftPanel = document.getElementById('root-left')
+      const rightPanel = document.getElementById('root-right')
+      const statusBar = document.querySelector('.app-status-bar')
+
+      ;[leftPanel, rightPanel, statusBar].forEach((el) => {
+        if (!el) return
+        if (active) {
+          el.setAttribute('data-mf-hidden', '')
+        } else {
+          el.removeAttribute('data-mf-hidden')
+        }
+      })
+    }
+    document.addEventListener('mf:livepreview-fullscreen', handler)
+    return () => document.removeEventListener('mf:livepreview-fullscreen', handler)
+  }, [])
+
   return (
     <PageLayout>
       {/* <TitleBar /> */}
@@ -114,7 +142,9 @@ function Root() {
           <RightBar />
         </Panel>
       </Group>
-      <StatusBar />
+      <div className='app-status-bar'>
+        <StatusBar />
+      </div>
 
       {/* global dialogs */}
       <AppInfoDialog />

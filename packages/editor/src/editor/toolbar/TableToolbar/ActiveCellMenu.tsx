@@ -2,6 +2,7 @@ import { useCommands, type UseMultiPositionerReturn } from '@rme-sdk/react'
 import { useRef, useState } from 'react'
 import { useTranslation } from '@markflowy/i18n'
 import { Dropdown, DropdownMenuItem } from 'zens'
+import { editorZIndex } from '../../theme/z-index'
 
 const ActiveCellMenu = (props: ActiveCellMenuProps) => {
   const { positioner } = props
@@ -77,7 +78,7 @@ const ActiveCellMenu = (props: ActiveCellMenuProps) => {
         top: y,
         width: 20,
         height: 20,
-        zIndex: 1,
+        zIndex: editorZIndex.inlineWidget,
       }}
     >
       <Dropdown

@@ -6,6 +6,7 @@ import type { PopoverStore } from 'zens'
 import { Popover, Image as ZensImage } from 'zens'
 import type { ExtensionsOptions } from '..'
 import { Resizable } from '../../components/Resizable'
+import { editorZIndex } from '../../theme/z-index'
 import { isBrowser } from '../../utils/common'
 import { ImageToolTips } from './image-tool-tips'
 
@@ -188,7 +189,7 @@ export function ImageNodeView(props: ImageNodeViewProps) {
   return (
     <div
       ref={popoverRef}
-      style={{ position: 'relative', zIndex: selected ? 10 : 'auto', lineHeight: 0 }}
+      style={{ position: 'relative', zIndex: selected ? editorZIndex.imageSelected : 'auto', lineHeight: 0 }}
     >
       <Popover
         customContent={
@@ -211,7 +212,7 @@ export function ImageNodeView(props: ImageNodeViewProps) {
         placement="top-start"
         onStoreChange={handleStoreChange}
         toggleOnClick
-        style={{ zIndex: 11 }}
+        style={{ zIndex: editorZIndex.imageToolbar }}
       >
         {Main}
       </Popover>

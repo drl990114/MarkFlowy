@@ -4,6 +4,7 @@ import { useState, type FC } from 'react'
 import styled from 'styled-components'
 import { Button, Input } from 'zens'
 import { Shortcut } from '../../toolbar/SlashMenu/SlashMenuRoot'
+import { editorZIndex } from '../../theme/z-index'
 import { ImageNodeViewProps } from './image-nodeview'
 
 interface ImageToolTipsProps {
@@ -28,7 +29,7 @@ const Container = styled.div`
   box-shadow: 0 4px 12px ${(props) => props.theme.boxShadowColor};
   font-size: ${(props) => props.theme.fontBase};
   line-height: normal;
-  z-index: 100;
+  z-index: ${editorZIndex.imageToolTips};
 `
 
 const InputGroup = styled.div`

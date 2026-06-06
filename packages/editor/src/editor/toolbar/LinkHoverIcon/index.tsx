@@ -2,6 +2,7 @@ import { useRemirrorContext } from '@rme-sdk/react-core'
 import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 import type { LinkClickHandler } from '../../extensions/LinkClick'
+import { editorZIndex } from '../../theme/z-index'
 import { isBrowser } from '../../utils/common'
 
 interface LinkHoverIconProps {
@@ -155,7 +156,7 @@ const Container = styled.div`
   background-color: ${(props) => props.theme.bgColor};
   border: 1px solid ${(props) => props.theme.borderColor};
   cursor: pointer;
-  z-index: 100;
+  z-index: ${editorZIndex.dropdown};
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 
   &:hover {

@@ -8,7 +8,6 @@ export const ToolbarWrapper = styled.div`
   display: flex;
   align-items: center;
   gap: 0;
-  z-index: 10;
   flex-wrap: nowrap;
   overflow: hidden;
   box-sizing: border-box;

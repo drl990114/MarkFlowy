@@ -1,6 +1,7 @@
 import { autoUpdate, flip, hide, offset, shift, useFloating, VirtualElement } from "@floating-ui/react"
 import React, { useCallback, useEffect, useState } from "react"
 
+import { editorZIndex } from "../../theme/z-index"
 import { useCellSelectionDom } from "./use-cell-selection-dom"
 
 function calcCellSelectionBoundingClientRect(
@@ -42,7 +43,7 @@ const TableMenuButton: React.FC<TableMenuButtonProps> = ({ handleClick, anchorCe
                 left: x ?? "",
                 opacity: referenceHidden ? 0 : 1,
 
-                zIndex: 11,
+                zIndex: editorZIndex.tableTooltip,
                 width: "24px",
                 height: "24px",
                 cursor: "pointer",

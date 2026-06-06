@@ -7,6 +7,7 @@ import styled from 'styled-components'
 import { Dropdown, type DropdownMenuItem, type MenuItemType } from 'zens'
 import { nodeTypeIconMap } from '../../const'
 import { createDraggingPreview, setViewDragging } from '../../extensions/NodeIndicator/drag-preview'
+import { editorZIndex } from '../../theme/z-index'
 import {
   NodeIndicatorExtension,
   NodeIndicatorState,
@@ -286,7 +287,7 @@ const Container = styled.div`
   border: 1px solid ${(props) => props.theme.borderColor};
   border-radius: ${(props) => props.theme.smallBorderRadius};
   font-size: ${(props) => props.theme.fontXs};
-  z-index: 10;
+  z-index: ${editorZIndex.blockHandler};
   background-color: ${(props) => props.theme.bgColor};
   cursor: pointer;
 

@@ -6,6 +6,7 @@ import { SlashMenuExtension } from '../../extensions/SlashMenu'
 import type { SlashMenuState } from '../../extensions/SlashMenu/type'
 import { SlashMetaTypes } from '../../extensions/SlashMenu/type'
 import { dispatchWithMeta } from '../../extensions/SlashMenu/utils'
+import { editorZIndex } from '../../theme/z-index'
 import { isBrowser } from '../../utils/common'
 import { SlashMenuRoot } from './SlashMenuRoot'
 
@@ -166,5 +167,5 @@ export const SlashMenu = () => {
 const Container = styled.div`
   border-radius: 4px;
   border: 1px solid ${(props) => props.theme.slashMenuBorderColor};
-  z-index: 1000;
+  z-index: ${editorZIndex.floatingMenu};
 `

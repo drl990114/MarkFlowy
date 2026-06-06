@@ -1,5 +1,6 @@
 import { type FC } from 'react'
 import styled, { css } from 'styled-components'
+import { editorZIndex } from '../../theme/z-index'
 
 export enum ResizableHandleType {
   Right,
@@ -27,7 +28,7 @@ const ResizableHandleContainer = styled.span<ResizableHandleProps>`
   border: 1px solid rgba(255, 255, 255, 0.5);
   border-radius: 6px;
   transition: opacity ${props => props.selected ? '100ms' : '300ms'} ease-in 0s;
-  z-index: 99;
+  z-index: ${editorZIndex.resizableHandle};
 
   ${(props) => {
     if (props.visible) {
