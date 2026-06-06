@@ -1,5 +1,7 @@
 import styled, { css } from 'styled-components'
 import { FlatListStyles } from './FlatListStyles'
+import { livePreviewBlockStyles } from './LivePreviewBlockStyles'
+import { editorZIndex } from './z-index'
 
 interface WrapperProps {
   codeEditor?: boolean
@@ -113,11 +115,6 @@ export const WysiwygThemeWrapper = styled.div.attrs<WrapperProps>((p) => ({
     background-color: ${(props) => props.theme.kbdBgColor};
     border: solid 1px ${(props) => props.theme.kbdBorderColor};
     border-radius: 6px;
-  }
-
-  & blockquote {
-    color: ${(props) => props.theme.blockquoteFontColor};
-    border-left: 0.25em solid ${(props) => props.theme.blockquoteBorderColor};
   }
 
   & table th,
@@ -243,9 +240,7 @@ export const WysiwygThemeWrapper = styled.div.attrs<WrapperProps>((p) => ({
   }
 
   & input[type='checkbox']:disabled {
-    --form-control-color: #eee;
-
-    color: #eee;
+    color: ${(props) => props.theme.labelFontColor};
     cursor: not-allowed;
   }
 
@@ -269,7 +264,7 @@ export const WysiwygThemeWrapper = styled.div.attrs<WrapperProps>((p) => ({
   & [role='button']:focus-visible,
   & input[type='radio']:focus-visible,
   & input[type='checkbox']:focus-visible {
-    outline: 2px solid #58a6ff;
+    outline: 2px solid ${(props) => props.theme.accentColor};
     outline-offset: -2px;
     box-shadow: none;
   }
@@ -338,8 +333,8 @@ export const WysiwygThemeWrapper = styled.div.attrs<WrapperProps>((p) => ({
   & blockquote {
     margin: 0;
     padding: 0 1em;
-    color: #8b949e;
-    border-left: 0.25em solid #30363d;
+    color: ${(props) => props.theme.blockquoteFontColor};
+    border-left: 0.25em solid ${(props) => props.theme.blockquoteBorderColor};
   }
 
   & ul,
@@ -635,8 +630,8 @@ export const WysiwygThemeWrapper = styled.div.attrs<WrapperProps>((p) => ({
   & .code-block__menu {
     position: relative;
     height: 26px;
-    margin-bottom: -26px;
-    z-index: 1;
+    margin-bottom: -1px;
+    z-index: ${editorZIndex.inlineWidget};
   }
   & .code-block__reference {
     position: absolute;
@@ -666,7 +661,7 @@ export const WysiwygThemeWrapper = styled.div.attrs<WrapperProps>((p) => ({
     border: 1px solid ${(props) => props.theme.borderColor};
     overflow: auto;
     box-sizing: border-box;
-    z-index: 100;
+    z-index: ${editorZIndex.dropdown};
     border-radius: 8px;
     box-shadow:
       0 1px 4px -2px ${(props) => props.theme.boxShadowColor},
@@ -698,7 +693,8 @@ export const WysiwygThemeWrapper = styled.div.attrs<WrapperProps>((p) => ({
   }
 
   & .code-block__menu + .cm-editor {
-    padding-top: 32px;
+    padding-top: 8px;
+    border-top-left-radius: 0;
   }
 
   & .code-block__language {
@@ -773,7 +769,7 @@ export const WysiwygThemeWrapper = styled.div.attrs<WrapperProps>((p) => ({
     border-radius: 0.2em;
     background-color: ${(props) => props.theme.bgColor};
     line-height: normal;
-    z-index: 1;
+    z-index: ${editorZIndex.inlineWidget};
   }
 
   .inline-input-render {
@@ -841,246 +837,7 @@ export const WysiwygThemeWrapper = styled.div.attrs<WrapperProps>((p) => ({
     }
   }
 
-  .mf-live-preview-block {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    min-height: 200px;
-    margin: 0.5em 0 0.75em;
-    overflow: hidden;
-    border: 1px solid ${(props) => props.theme.borderColor};
-    border-radius: 6px;
-    background: ${(props) => props.theme.bgColor};
-    box-shadow: 0 1px 2px rgb(0 0 0 / 4%);
-  }
-
-  .mf-live-preview-selected {
-    border-color: ${(props) => props.theme.accentColor};
-    box-shadow: 0 0 0 1px ${(props) => props.theme.accentColor};
-  }
-
-  .mf-live-preview-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    min-height: 30px;
-    padding: 0 6px 0 10px;
-    border-bottom: 1px solid ${(props) => props.theme.borderColor};
-    background: ${(props) => props.theme.preBgColor};
-  }
-
-  .mf-live-preview-language {
-    display: inline-flex;
-    align-items: center;
-    min-width: 0;
-    height: 100%;
-    color: ${(props) => props.theme.labelFontColor};
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 0;
-    text-transform: uppercase;
-  }
-
-  .mf-live-preview-toolbar {
-    display: inline-flex;
-    align-items: center;
-    gap: 1px;
-  }
-
-  .mf-live-preview-tool {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    padding: 0;
-    border: 1px solid transparent;
-    border-radius: ${(props) => props.theme.smallBorderRadius};
-    color: ${(props) => props.theme.labelFontColor};
-    background: transparent;
-    cursor: pointer;
-    line-height: 1;
-
-    i {
-      font-size: 15px;
-    }
-
-    &:hover {
-      color: ${(props) => props.theme.primaryFontColor};
-      border-color: ${(props) => props.theme.borderColor};
-      background: ${(props) => props.theme.hoverColor};
-    }
-  }
-
-  .mf-live-preview-body {
-    position: relative;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 1px minmax(0, 1fr);
-    flex: 1;
-    min-height: 168px;
-  }
-
-  .mf-live-preview-editor {
-    min-width: 0;
-    min-height: 168px;
-    overflow: hidden;
-    background: ${(props) => props.theme.preBgColor};
-
-    .cm-editor {
-      height: 100%;
-      min-height: 168px;
-      margin: 0;
-      padding: 6px 0;
-      border-radius: 0;
-      background: ${(props) => props.theme.preBgColor};
-    }
-
-    .cm-scroller {
-      overflow: auto;
-    }
-  }
-
-  .mf-live-preview-divider {
-    position: relative;
-    z-index: 1;
-    width: 1px;
-    height: 100%;
-    padding: 0;
-    border: 0;
-    border-left: 1px solid ${(props) => props.theme.borderColor};
-    background: ${(props) => props.theme.borderColor};
-    color: ${(props) => props.theme.labelFontColor};
-    cursor: pointer;
-
-    i {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 16px;
-      height: 34px;
-      transform: translate(-50%, -50%);
-      border: 1px solid ${(props) => props.theme.borderColor};
-      border-radius: 6px;
-      background: ${(props) => props.theme.bgColor};
-      font-size: 13px;
-    }
-
-    &:hover i {
-      color: ${(props) => props.theme.primaryFontColor};
-      background: ${(props) => props.theme.hoverColor};
-    }
-  }
-
-  .mf-live-preview-render {
-    box-sizing: border-box;
-    min-width: 0;
-    min-height: 168px;
-    padding: 14px 16px;
-    overflow: auto;
-    background: ${(props) => props.theme.bgColor};
-    cursor: zoom-in;
-  }
-
-  .mf-live-preview-render > * {
-    max-width: 100%;
-  }
-
-  .mf-live-preview-render svg {
-    max-width: 100%;
-  }
-
-  .mf-live-preview-math .mf-live-preview-render {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .mf-live-preview-mermaid .mf-live-preview-render {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .mf-live-preview-error {
-    margin: 0;
-    white-space: pre-wrap;
-    color: #c2410c;
-    font-family: ${(props) => props.theme.codemirrorFontFamily};
-    font-size: 12px;
-    line-height: 1.5;
-  }
-
-  .mf-live-preview-render-error {
-    background: color-mix(in srgb, ${(props) => props.theme.bgColor} 92%, #c2410c);
-  }
-
-  .mf-live-preview-block[data-mode='preview'] {
-    .mf-live-preview-body {
-      display: block;
-      min-height: 168px;
-    }
-
-    .mf-live-preview-editor {
-      display: none;
-    }
-
-    .mf-live-preview-divider {
-      position: absolute;
-      top: 50%;
-      left: 0;
-      width: 0;
-      height: 0;
-      border: 0;
-      background: transparent;
-      transform: translateY(-50%);
-    }
-
-    .mf-live-preview-divider i {
-      left: 0;
-      transform: translate(-50%, -50%) rotate(180deg);
-      background: ${(props) => props.theme.preBgColor};
-    }
-
-    .mf-live-preview-render {
-      width: 100%;
-      min-height: 168px;
-      padding: 14px 16px;
-    }
-  }
-
-  .mf-live-preview-fullscreen {
-    position: fixed;
-    inset: 24px;
-    z-index: 999;
-    min-height: 0;
-    margin: 0;
-    border-color: ${(props) => props.theme.accentColor};
-    box-shadow: 0 20px 60px rgb(0 0 0 / 24%);
-
-    .mf-live-preview-body,
-    .mf-live-preview-editor,
-    .mf-live-preview-render,
-    .mf-live-preview-editor .cm-editor {
-      min-height: 0;
-    }
-
-    .mf-live-preview-render {
-      cursor: default;
-    }
-  }
-
-  .mf-live-preview-fullscreen[data-mode='preview'] {
-    .mf-live-preview-body {
-      height: 100%;
-    }
-
-    .mf-live-preview-render {
-      height: 100%;
-    }
-  }
+  ${livePreviewBlockStyles}
 
   & .ProseMirror-focused {
     outline: none;
@@ -1142,7 +899,7 @@ export const WysiwygThemeWrapper = styled.div.attrs<WrapperProps>((p) => ({
     font-size: small;
     border-radius: ${(props) => props.theme.smallBorderRadius};
     cursor: pointer;
-    z-index: 10;
+    z-index: ${editorZIndex.copyButton};
     color: ${(props) => props.theme.labelFontColor};
     background: ${(props) => props.theme.hoverColor};
   }
@@ -1201,7 +958,7 @@ export const WysiwygThemeWrapper = styled.div.attrs<WrapperProps>((p) => ({
     &::before {
       position: absolute;
       pointer-events: none;
-      color: #aaa;
+      color: ${(props) => props.theme.placeholderFontColor};
       height: 0;
       font-style: italic;
       content: attr(data-placeholder);
@@ -1211,10 +968,6 @@ export const WysiwygThemeWrapper = styled.div.attrs<WrapperProps>((p) => ({
   .remirror-editor {
     /* height: 100%; */
     outline: none;
-  }
-
-  .cm-editor {
-    height: 100%;
   }
 
   .remirror-floating-popover {
@@ -1252,15 +1005,15 @@ export const WysiwygThemeWrapper = styled.div.attrs<WrapperProps>((p) => ({
   .rme-find-decoration,
   .ProseMirror-search-match,
   .cm-search-match {
-    background-color: yellow;
-    color: #222;
+    background-color: ${(props) => props.theme.selectionMatchBgColor};
+    color: ${(props) => props.theme.primaryFontColor};
   }
 
   .rme-find-active-decoration,
   .ProseMirror-active-search-match,
   .cm-search-active {
-    background-color: orange;
-    color: #222;
+    background-color: ${(props) => props.theme.accentColor};
+    color: ${(props) => props.theme.bgColor};
   }
 
   & .html-image-node-view-wrapper,
@@ -1268,7 +1021,7 @@ export const WysiwygThemeWrapper = styled.div.attrs<WrapperProps>((p) => ({
     display: inline-flex;
     padding: 0 2px;
     vertical-align: bottom;
-    z-index: 1;
+    z-index: ${editorZIndex.inlineWidget};
   }
 
   & .ai-block-node-view-wrapper {
