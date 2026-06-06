@@ -28,7 +28,9 @@ export const editorSpecificTokens = {
   tableSelectorCellBorderColor: '#1c7ed6',
   codeBgColor: '#afb8c133',
   preBgColor: '#e7e7e7',
+  contextMenuBgColor: '#ffffff',
   contextMenuBgColorActive: '#F2F2F2',
+  contextMenuBgColorHover: '#E8E8EC',
   slashMenuBorderColor: 'rgb(229 229 229 / 1)',
   selectionMatchBgColor: '#fff8c5',
 }
@@ -71,6 +73,7 @@ export const editorDarkTheme = {
   preBgColor: '#1e1e1e',
   contextMenuBgColor: '#252526',
   contextMenuBgColorActive: '#37373d',
+  contextMenuBgColorHover: '#2a2d2e',
   slashMenuBorderColor: '#303030',
   selectionMatchBgColor: 'rgba(55, 148, 255, 0.28)',
 }

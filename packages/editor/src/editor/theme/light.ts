@@ -12,6 +12,8 @@ export const styledLightTheme = {
   tipsBgColor: '#f6f7f9',
   successColor: '#00c853',
   boxShadowColor: 'rgba(0, 0, 0, 0.08)',
+  contextMenuBgColor: '#ffffff',
+  contextMenuBgColorHover: '#E8E8EC',
 
   ...editorSpecificTokens,
 }

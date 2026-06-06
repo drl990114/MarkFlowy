@@ -1,6 +1,6 @@
+import { useTranslation } from '@markflowy/i18n'
 import type { AnyExtension, CommandsFromExtensions } from '@rme-sdk/main'
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useTranslation } from '@markflowy/i18n'
 import styled, { css } from 'styled-components'
 import { Input, Space } from 'zens'
 import { nodeTypeIconMap } from '../../const'
@@ -10,7 +10,7 @@ import { getModEventKey, getModKeyIconName } from '../../utils/getOS'
 import TablePanel from './TablePanel'
 
 type SlashMenuRootProps = {
-  rootRef: React.RefObject<HTMLDivElement>
+  rootRef: React.RefObject<HTMLDivElement | null>
   commands: CommandsFromExtensions<AnyExtension>
   closeMenu: (config?: { insertSlash?: boolean }) => void
 }
@@ -24,8 +24,21 @@ export enum ChildrenHandlerNext {
 export const SlashMenuRoot: React.FC<SlashMenuRootProps> = memo(
   ({ rootRef, commands, closeMenu }) => {
     const componentRefMap = useRef<Record<string, any>>({})
+    const searchInputRef = useRef<HTMLInputElement>(null)
     const [searchText, setSearchText] = useState('')
     const { t } = useTranslation()
+
+    useEffect(() => {
+      if (!isBrowser()) return
+
+      const frame = requestAnimationFrame(() => {
+        searchInputRef.current?.focus({ preventScroll: true })
+      })
+
+      return () => {
+        cancelAnimationFrame(frame)
+      }
+    }, [])
 
     const menuItems = useMemo(() => {
       const headingItems = Array.from({ length: 6 }).map((_, i) => {
@@ -381,6 +394,7 @@ export const SlashMenuRoot: React.FC<SlashMenuRootProps> = memo(
       <div ref={rootRef} style={{ display: 'flex', flexDirection: 'column' }}>
         <SearchContainer>
           <Input
+            inputRef={searchInputRef}
             type="text"
             size="small"
             style={{
@@ -389,7 +403,6 @@ export const SlashMenuRoot: React.FC<SlashMenuRootProps> = memo(
             placeholder={t('slashMenu.searchPlaceholder')}
             value={searchText}
             onChange={handleSearchChange}
-            autoFocus
             onKeyDown={(e) => {
               if (e.code === 'Backspace') {
                 if (searchText === '') {

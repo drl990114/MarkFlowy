@@ -70,40 +70,50 @@ export const SlashMenu = () => {
   const [popperElement, setPopperElement] = useState(null)
 
   const virtualReference = useMemo(() => {
-    const domNode = editorView.domAtPos(editorState.selection.to)?.node
-    const cursorPosition = editorView.state.selection.to
-    const cursorLeft = editorView.coordsAtPos(cursorPosition).left
+    const cursorPosition = editorState.selection.to
+    const createVirtualRect = (rect: Pick<DOMRect, 'top' | 'right' | 'bottom' | 'left'>) => {
+      const width = Math.max(rect.right - rect.left, 0)
+      const height = Math.max(rect.bottom - rect.top, 0)
 
-    if (!(domNode instanceof HTMLElement)) return
-
-    const { top, height } = domNode.getBoundingClientRect()
+      return {
+        top: rect.top,
+        right: rect.right,
+        bottom: rect.bottom,
+        left: rect.left,
+        width,
+        height,
+        x: rect.left,
+        y: rect.top,
+        toJSON: () =>
+          JSON.stringify({
+            top: rect.top,
+            right: rect.right,
+            bottom: rect.bottom,
+            left: rect.left,
+            width,
+            height,
+            x: rect.left,
+            y: rect.top,
+          }),
+      }
+    }
 
     return {
       getBoundingClientRect() {
-        return {
-          top: top,
-          right: cursorLeft,
-          bottom: top,
-          left: cursorLeft,
-          width: 0,
-          height: height,
-          x: cursorLeft,
-          y: top,
-          toJSON: () =>
-            JSON.stringify({
-              top: top,
-              right: cursorLeft,
-              bottom: top,
-              left: cursorLeft,
-              width: 0,
-              height: height,
-              x: cursorLeft,
-              y: top,
-            }),
+        try {
+          return createVirtualRect(editorView.coordsAtPos(cursorPosition))
+        } catch {
+          const editorRect = editorView.dom.getBoundingClientRect()
+          return createVirtualRect({
+            top: editorRect.top,
+            right: editorRect.left,
+            bottom: editorRect.top,
+            left: editorRect.left,
+          })
         }
       },
     }
-  }, [editorView, editorState])
+  }, [editorView, editorState.selection.to])
 
   const { styles, attributes } = usePopper(virtualReference, popperElement, {
     placement: Placement.bottomStart,
@@ -115,7 +125,7 @@ export const SlashMenu = () => {
     ],
   })
 
-  const closeMenu = useCallback((config: {
+  const closeMenu = useCallback((config?: {
     insertSlash?: boolean
   }) => {
     if (menuState.open) {
