@@ -634,12 +634,15 @@ export const WysiwygThemeWrapper = styled.div.attrs<WrapperProps>((p) => ({
 
   & .code-block__menu {
     position: relative;
+    height: 26px;
+    margin-bottom: -26px;
     z-index: 1;
   }
   & .code-block__reference {
     position: absolute;
-    top: 100%;
-    width: 100%;
+    top: 0;
+    left: 0;
+    width: auto;
     font-size: 0.8em;
     background-color: transparent;
     box-sizing: border-box;
@@ -671,15 +674,31 @@ export const WysiwygThemeWrapper = styled.div.attrs<WrapperProps>((p) => ({
       0 8px 16px 4px ${(props) => props.theme.boxShadowColor};
 
     &__input {
-      height: 100%;
-      width: 200px;
-      padding: 0 10px;
+      height: 26px;
+      min-width: 72px;
+      max-width: 200px;
+      padding: 0 8px;
       outline: none;
       font-weight: 600;
+      color: ${(props) => props.theme.primaryFontColor};
       box-sizing: border-box;
-      background-color: ${(props) => props.theme.bgColor};
+      background-color: ${(props) => props.theme.preBgColor};
       border: 1px solid ${(props) => props.theme.borderColor};
+      border-radius: 4px 4px 0 0;
+      font-family: ${(props) => props.theme.codemirrorFontFamily};
+
+      &::placeholder {
+        color: ${(props) => props.theme.labelFontColor};
+      }
+
+      &:focus {
+        border-color: ${(props) => props.theme.accentColor};
+      }
     }
+  }
+
+  & .code-block__menu + .cm-editor {
+    padding-top: 32px;
   }
 
   & .code-block__language {
@@ -822,84 +841,244 @@ export const WysiwygThemeWrapper = styled.div.attrs<WrapperProps>((p) => ({
     }
   }
 
-  .math-block-nodeview {
+  .mf-live-preview-block {
     position: relative;
-    margin: 0;
-    min-height: 40px;
-    transition: all 0.3s;
-  }
-
-  .math-block-render {
     display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 1em 0;
-    border-radius: 0.2em;
-    border: 1px solid transparent;
-
-    &:hover {
-      border-color: ${(props) => props.theme.borderColor};
-    }
-
-    svg {
-      max-width: 100%;
-    }
-  }
-
-  .math-block-preview {
-    position: absolute;
-    top: calc(100% + 0.5em);
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 1em 0;
-    width: 100%;
+    flex-direction: column;
+    min-height: 200px;
+    margin: 0.5em 0 0.75em;
+    overflow: hidden;
     border: 1px solid ${(props) => props.theme.borderColor};
-    border-radius: 0.2em;
-    background-color: ${(props) => props.theme.bgColor};
+    border-radius: 6px;
+    background: ${(props) => props.theme.bgColor};
+    box-shadow: 0 1px 2px rgb(0 0 0 / 4%);
+  }
+
+  .mf-live-preview-selected {
+    border-color: ${(props) => props.theme.accentColor};
+    box-shadow: 0 0 0 1px ${(props) => props.theme.accentColor};
+  }
+
+  .mf-live-preview-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 30px;
+    padding: 0 6px 0 10px;
+    border-bottom: 1px solid ${(props) => props.theme.borderColor};
+    background: ${(props) => props.theme.preBgColor};
+  }
+
+  .mf-live-preview-language {
+    display: inline-flex;
+    align-items: center;
+    min-width: 0;
+    height: 100%;
+    color: ${(props) => props.theme.labelFontColor};
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: uppercase;
+  }
+
+  .mf-live-preview-toolbar {
+    display: inline-flex;
+    align-items: center;
+    gap: 1px;
+  }
+
+  .mf-live-preview-tool {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: ${(props) => props.theme.smallBorderRadius};
+    color: ${(props) => props.theme.labelFontColor};
+    background: transparent;
+    cursor: pointer;
+    line-height: 1;
+
+    i {
+      font-size: 15px;
+    }
+
+    &:hover {
+      color: ${(props) => props.theme.primaryFontColor};
+      border-color: ${(props) => props.theme.borderColor};
+      background: ${(props) => props.theme.hoverColor};
+    }
+  }
+
+  .mf-live-preview-body {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 1px minmax(0, 1fr);
+    flex: 1;
+    min-height: 168px;
+  }
+
+  .mf-live-preview-editor {
+    min-width: 0;
+    min-height: 168px;
+    overflow: hidden;
+    background: ${(props) => props.theme.preBgColor};
+
+    .cm-editor {
+      height: 100%;
+      min-height: 168px;
+      margin: 0;
+      padding: 6px 0;
+      border-radius: 0;
+      background: ${(props) => props.theme.preBgColor};
+    }
+
+    .cm-scroller {
+      overflow: auto;
+    }
+  }
+
+  .mf-live-preview-divider {
+    position: relative;
     z-index: 1;
-  }
-
-  .html-node {
-    position: relative;
-    min-height: 40px;
+    width: 1px;
+    height: 100%;
     padding: 0;
+    border: 0;
+    border-left: 1px solid ${(props) => props.theme.borderColor};
+    background: ${(props) => props.theme.borderColor};
+    color: ${(props) => props.theme.labelFontColor};
+    cursor: pointer;
+
+    i {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 34px;
+      transform: translate(-50%, -50%);
+      border: 1px solid ${(props) => props.theme.borderColor};
+      border-radius: 6px;
+      background: ${(props) => props.theme.bgColor};
+      font-size: 13px;
+    }
+
+    &:hover i {
+      color: ${(props) => props.theme.primaryFontColor};
+      background: ${(props) => props.theme.hoverColor};
+    }
+  }
+
+  .mf-live-preview-render {
+    box-sizing: border-box;
+    min-width: 0;
+    min-height: 168px;
+    padding: 14px 16px;
+    overflow: auto;
+    background: ${(props) => props.theme.bgColor};
+    cursor: zoom-in;
+  }
+
+  .mf-live-preview-render > * {
+    max-width: 100%;
+  }
+
+  .mf-live-preview-render svg {
+    max-width: 100%;
+  }
+
+  .mf-live-preview-math .mf-live-preview-render {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mf-live-preview-mermaid .mf-live-preview-render {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mf-live-preview-error {
     margin: 0;
-    border: 1px solid transparent;
+    white-space: pre-wrap;
+    color: #c2410c;
+    font-family: ${(props) => props.theme.codemirrorFontFamily};
+    font-size: 12px;
+    line-height: 1.5;
+  }
 
-    &:hover {
-      border-color: ${(props) => props.theme.borderColor};
+  .mf-live-preview-render-error {
+    background: color-mix(in srgb, ${(props) => props.theme.bgColor} 92%, #c2410c);
+  }
+
+  .mf-live-preview-block[data-mode='preview'] {
+    .mf-live-preview-body {
+      display: block;
+      min-height: 168px;
+    }
+
+    .mf-live-preview-editor {
+      display: none;
+    }
+
+    .mf-live-preview-divider {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: 0;
+      height: 0;
+      border: 0;
+      background: transparent;
+      transform: translateY(-50%);
+    }
+
+    .mf-live-preview-divider i {
+      left: 0;
+      transform: translate(-50%, -50%) rotate(180deg);
+      background: ${(props) => props.theme.preBgColor};
+    }
+
+    .mf-live-preview-render {
+      width: 100%;
+      min-height: 168px;
+      padding: 14px 16px;
     }
   }
 
-  .html-src {
-    outline: none;
-
-    .cm-editor {
-      margin: 0;
-    }
-  }
-
-  .mermaid-node {
-    position: relative;
-    padding: 0;
+  .mf-live-preview-fullscreen {
+    position: fixed;
+    inset: 24px;
+    z-index: 999;
+    min-height: 0;
     margin: 0;
-    min-height: 40px;
-    transition: all 0.3s;
-    border: 1px solid transparent;
+    border-color: ${(props) => props.theme.accentColor};
+    box-shadow: 0 20px 60px rgb(0 0 0 / 24%);
 
-    &:hover {
-      border-color: ${(props) => props.theme.borderColor};
+    .mf-live-preview-body,
+    .mf-live-preview-editor,
+    .mf-live-preview-render,
+    .mf-live-preview-editor .cm-editor {
+      min-height: 0;
+    }
+
+    .mf-live-preview-render {
+      cursor: default;
     }
   }
 
-  .mermaid-src {
-    outline: none;
+  .mf-live-preview-fullscreen[data-mode='preview'] {
+    .mf-live-preview-body {
+      height: 100%;
+    }
 
-    .cm-editor {
-      margin: 0;
+    .mf-live-preview-render {
+      height: 100%;
     }
   }
 

@@ -12,7 +12,7 @@ import { setBlockType } from '@rme-sdk/pm/commands'
 import type { NodeSerializerOptions } from '../../transform'
 import { ParserRuleType } from '../../transform'
 import { CustomCopyFunction } from '../CodeMirror/codemirror-types'
-import { MathBlockView } from './math-block-nodeview'
+import { createMathRenderer, LivePreviewNodeView } from '../LivePreviewBlock'
 
 export interface MathBlockExtensionOptions {
   customCopyFunction?: CustomCopyFunction
@@ -56,7 +56,17 @@ export class MathBlockExtension extends NodeExtension<MathBlockExtensionOptions>
   }
 
   createNodeViews(): NodeViewMethod | Record<string, NodeViewMethod> {
-    return (node, view, getPos) => new MathBlockView(node, view, getPos as () => number, this.options)
+    return (node, view, getPos) =>
+      new LivePreviewNodeView({
+        node,
+        view,
+        getPos: getPos as () => number,
+        renderer: createMathRenderer({
+          codemirrorExtensions: this.options.codemirrorExtensions,
+        }),
+        customCopyFunction: this.options.customCopyFunction,
+        openOnMount: Boolean((node.attrs as any).fromInput),
+      })
   }
 
   createMathBlock =

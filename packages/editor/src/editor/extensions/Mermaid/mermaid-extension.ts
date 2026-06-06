@@ -14,7 +14,7 @@ import { TextSelection } from '@rme-sdk/pm/state'
 import type { NodeSerializerOptions } from '../../transform'
 import { ParserRuleType } from '../../transform'
 import { CustomCopyFunction } from '../CodeMirror/codemirror-types'
-import { MermaidNodeView } from './mermaid-view'
+import { createMermaidRenderer, LivePreviewNodeView } from '../LivePreviewBlock'
 
 export interface MermaidExtensionOptions {
   customCopyFunction?: CustomCopyFunction
@@ -60,7 +60,15 @@ export class MermaidBlockExtension extends NodeExtension<MermaidExtensionOptions
 
   createNodeViews(): NodeViewMethod {
     return (node: ProsemirrorNode, view, getPos) => {
-      return new MermaidNodeView(node, view, getPos as () => number, this.options)
+      return new LivePreviewNodeView({
+        node,
+        view,
+        getPos: getPos as () => number,
+        renderer: createMermaidRenderer({
+          codemirrorExtensions: this.options.codemirrorExtensions,
+        }),
+        customCopyFunction: this.options.customCopyFunction,
+      })
     }
   }
 

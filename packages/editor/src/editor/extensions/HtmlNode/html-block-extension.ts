@@ -15,7 +15,7 @@ import { ParserRuleType } from '../../transform'
 import { needSplitInlineHtmlTokenTags } from '../../transform/markdown-it-html-inline'
 import { arrayExclude } from '../../utils/common'
 import type { LineHtmlBlockExtensionOptions } from './html-block-types'
-import { HtmlNodeView } from './html-block-view'
+import { createHtmlRenderer, LivePreviewNodeView } from '../LivePreviewBlock'
 
 @extension<LineHtmlBlockExtensionOptions>({
   defaultOptions: {},
@@ -56,7 +56,16 @@ export class LineHtmlBlockExtension extends NodeExtension<LineHtmlBlockExtension
 
   createNodeViews(): NodeViewMethod {
     return (node, view, getPos) => {
-      return new HtmlNodeView(node, view, getPos as () => number, this.options)
+      return new LivePreviewNodeView({
+        node,
+        view,
+        getPos: getPos as () => number,
+        renderer: createHtmlRenderer({
+          codemirrorExtensions: this.options.codemirrorExtensions,
+          handleViewImgSrcUrl: this.options.handleViewImgSrcUrl,
+        }),
+        customCopyFunction: this.options.customCopyFunction,
+      })
     }
   }
 
