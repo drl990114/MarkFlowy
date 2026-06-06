@@ -238,6 +238,7 @@ pub enum FileResultCode {
     NotFound = -1,
     PermissionDenied = -2,
     InvalidPath = -3,
+    Binary = -4,
     UnknownError = -99,
 }
 
@@ -360,11 +361,110 @@ pub fn files_to_json(files: Vec<FileInfo>) -> FileResult {
     }
 }
 
+fn decode_utf16_bytes(bytes: &[u8], little_endian: bool) -> Result<String, String> {
+    if bytes.len() % 2 != 0 {
+        return Err(String::from("UTF-16 content has an odd byte length"));
+    }
+
+    let code_units = bytes.chunks_exact(2).map(|chunk| {
+        if little_endian {
+            u16::from_le_bytes([chunk[0], chunk[1]])
+        } else {
+            u16::from_be_bytes([chunk[0], chunk[1]])
+        }
+    });
+
+    std::char::decode_utf16(code_units)
+        .map(|result| result.map_err(|e| format!("Invalid UTF-16 content: {}", e)))
+        .collect()
+}
+
+fn decode_text_bytes(bytes: Vec<u8>) -> Result<String, FileResult> {
+    if bytes.is_empty() {
+        return Ok(String::new());
+    }
+
+    if bytes.starts_with(&[0xEF, 0xBB, 0xBF]) {
+        return String::from_utf8(bytes[3..].to_vec()).map_err(|e| FileResult {
+            code: FileResultCode::UnknownError,
+            content: format!("Unsupported UTF-8 content: {}", e),
+        });
+    }
+
+    if bytes.starts_with(&[0xFF, 0xFE]) {
+        return decode_utf16_bytes(&bytes[2..], true).map_err(|e| FileResult {
+            code: FileResultCode::UnknownError,
+            content: e,
+        });
+    }
+
+    if bytes.starts_with(&[0xFE, 0xFF]) {
+        return decode_utf16_bytes(&bytes[2..], false).map_err(|e| FileResult {
+            code: FileResultCode::UnknownError,
+            content: e,
+        });
+    }
+
+    let mut could_be_utf16_le = true;
+    let mut could_be_utf16_be = true;
+    let mut contains_zero_byte = false;
+
+    for (i, byte) in bytes.iter().take(512).enumerate() {
+        let is_endian = i % 2 == 1;
+        let is_zero_byte = *byte == 0;
+
+        if is_zero_byte {
+            contains_zero_byte = true;
+        }
+
+        if could_be_utf16_le && ((is_endian && !is_zero_byte) || (!is_endian && is_zero_byte)) {
+            could_be_utf16_le = false;
+        }
+
+        if could_be_utf16_be && ((is_endian && is_zero_byte) || (!is_endian && !is_zero_byte)) {
+            could_be_utf16_be = false;
+        }
+
+        if is_zero_byte && !could_be_utf16_le && !could_be_utf16_be {
+            break;
+        }
+    }
+
+    if contains_zero_byte {
+        if could_be_utf16_le {
+            return decode_utf16_bytes(&bytes, true).map_err(|e| FileResult {
+                code: FileResultCode::UnknownError,
+                content: e,
+            });
+        }
+
+        if could_be_utf16_be {
+            return decode_utf16_bytes(&bytes, false).map_err(|e| FileResult {
+                code: FileResultCode::UnknownError,
+                content: e,
+            });
+        }
+
+        return Err(FileResult {
+            code: FileResultCode::Binary,
+            content: String::from("File seems to be binary and cannot be opened as text"),
+        });
+    }
+
+    String::from_utf8(bytes).map_err(|e| FileResult {
+        code: FileResultCode::UnknownError,
+        content: format!("Unsupported text encoding: {}", e),
+    })
+}
+
 pub fn read_file(path: &str) -> FileResult {
-    match fs::read_to_string(path) {
-        Ok(content) => FileResult {
-            code: FileResultCode::Success,
-            content,
+    match fs::read(path) {
+        Ok(bytes) => match decode_text_bytes(bytes) {
+            Ok(content) => FileResult {
+                code: FileResultCode::Success,
+                content,
+            },
+            Err(result) => result,
         },
         Err(e) => {
             let code = match e.kind() {

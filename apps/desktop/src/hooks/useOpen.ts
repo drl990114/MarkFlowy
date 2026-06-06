@@ -1,8 +1,7 @@
-import { readDirectory } from '@/helper/filesys'
+import { getFileNameFromPath, readDirectory } from '@/helper/filesys'
 import { logger } from '@/helper/logger'
 import { dialog } from '@/services/dialog'
 import { addExistingMarkdownFileEdit } from '@/services/editor-file'
-import { getFileContent } from '@/services/file-info'
 import { currentWindow } from '@/services/windows'
 import { useEditorStore } from '@/stores'
 import useOpenedCacheStore from '@/stores/useOpenedCacheStore'
@@ -10,6 +9,12 @@ import { invoke } from '@tauri-apps/api/core'
 import { open } from '@tauri-apps/plugin-dialog'
 import { useCallback } from 'react'
 import { useTranslation } from '@/i18n'
+
+const getExtFromPath = (path: string) => {
+  const fileName = getFileNameFromPath(path) || ''
+  const dotIndex = fileName.lastIndexOf('.')
+  return dotIndex > -1 ? fileName.slice(dotIndex + 1) : ''
+}
 
 const useOpen = () => {
   const { addRecentWorkspaces } = useOpenedCacheStore()
@@ -100,15 +105,11 @@ const useOpen = () => {
 
     if (typeof file !== 'string') return
 
-    const fileContent = await getFileContent({ filePath: file })
-
-    if (fileContent === null) return
-
-    const fileName = file.split('/').pop() || 'new-file.md'
+    const fileName = getFileNameFromPath(file) || 'new-file.md'
 
     await addExistingMarkdownFileEdit({
       fileName,
-      content: fileContent,
+      ext: getExtFromPath(file),
       path: file,
     })
   }, [addRecentWorkspaces])

@@ -10,7 +10,6 @@ import { i18nInit } from '@/i18n'
 import { appSettingStoreSetup } from '@/services/app-setting'
 import { checkUnsavedFiles } from '@/services/checkUnsavedFiles'
 import { addExistingMarkdownFileEdit } from '@/services/editor-file'
-import { getFileContent } from '@/services/file-info'
 import { createNewWindow, currentWindow } from '@/services/windows'
 import { useEditorStore } from '@/stores'
 import useAppSettingStore from '@/stores/useAppSettingStore'
@@ -35,6 +34,12 @@ interface LocalTheme {
   name: string
   path: string
   css_content: string
+}
+
+const getExtFromPath = (path: string) => {
+  const fileName = getFileNameFromPath(path) || ''
+  const dotIndex = fileName.lastIndexOf('.')
+  return dotIndex > -1 ? fileName.slice(dotIndex + 1) : ''
 }
 
 async function appThemeExtensionsSetup() {
@@ -127,12 +132,10 @@ async function handleOpenedPaths(openedPaths: string[]) {
         setActiveId(existingFile.id)
         addOpenedFile(existingFile.id)
       } else {
-        const fileContent = await getFileContent({ filePath: openedPath })
-        if (fileContent === null) return
         const fileName = getFileNameFromPath(openedPath) || 'new-file.md'
         await addExistingMarkdownFileEdit({
           fileName,
-          content: fileContent,
+          ext: getExtFromPath(openedPath),
           path: openedPath,
         })
       }

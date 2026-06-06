@@ -5,16 +5,16 @@ import { logger } from '@/helper/logger'
 import { isEmptyEditor } from '@/services/editor-file'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
+import { OverlayScrollbarsComponent } from 'overlayscrollbars-react'
+import 'overlayscrollbars/overlayscrollbars.css'
 import { memo } from 'react'
 import { useMount } from 'react-use'
 import { EditorViewType } from 'rme'
-import { OverlayScrollbarsComponent } from 'overlayscrollbars-react'
 import { EmptyState } from './EmptyState'
 import { PreviewContent } from './preview/PreviewContent'
+import { EditorScrollContainer } from './styles'
 import TextEditor from './TextEditor'
 import { UnsupportedFileType } from './UnsupportedFileType'
-import { EditorScrollContainer } from './styles'
-import 'overlayscrollbars/overlayscrollbars.css'
 
 const overlayScrollbarsOptions = {
   scrollbars: {
@@ -38,7 +38,8 @@ function Editor(props: EditorProps) {
   const curFileTypeConfig = getFileTypeConfigById(id)
 
   useMount(async () => {
-    logger.info('[Editor] useMount start', { id, fileName: curFile.name, path: curFile.path })
+    const mountStart = Date.now()
+    logger.info('[Editor] useMount start', { id, fileName: curFile.name, path: curFile.path, mountStart })
     let fileTypeConfig = await getFileTypeConfig(curFile).catch((err) => {
       logger.error('[Editor] getFileTypeConfig rejected', { id, fileName: curFile.name, error: String(err) })
       return null
@@ -47,7 +48,7 @@ function Editor(props: EditorProps) {
       logger.warn('[Editor] getFileTypeConfig returned null, using unsupported fallback', { id, fileName: curFile.name })
       fileTypeConfig = { type: 'unsupported' as const, supportedModes: [], defaultMode: EditorViewType.PREVIEW }
     }
-    logger.info('[Editor] fileTypeConfig resolved', { id, fileName: curFile.name, type: fileTypeConfig.type, defaultMode: fileTypeConfig.defaultMode })
+    logger.info(`[Editor] fileTypeConfig resolved at ${Date.now()}, elapsed=${Date.now() - mountStart}ms`, { id, fileName: curFile.name, type: fileTypeConfig.type, defaultMode: fileTypeConfig.defaultMode })
     useEditorViewTypeStore.getState().setEditorViewType(curFile.id, fileTypeConfig.defaultMode)
     setFileTypeConfig(curFile.id, fileTypeConfig)
     if (fileTypeConfig.type === 'markdown') {

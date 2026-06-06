@@ -1,5 +1,4 @@
 import useAppSettingStore from '@/stores/useAppSettingStore'
-import { invoke } from '@tauri-apps/api/core'
 import { EditorViewType } from 'rme'
 import { IFile } from './filesys'
 
@@ -41,7 +40,6 @@ const TEXT_EXTENSIONS = new Set([
   'ex', 'exs',
   'erl',
   'sol',
-  'wasm',
   'asm', 's',
   'v', 'sv', 'svh',
   'vhd', 'vhdl',
@@ -68,7 +66,7 @@ const BINARY_EXTENSIONS = new Set([
   'ttf', 'otf', 'woff', 'woff2',
   'sqlite', 'db',
   'pyc', 'class', 'o', 'obj',
-  'bin', 'dat',
+  'bin', 'dat', 'wasm',
 ])
 
 const FILES_WITHOUT_EXT = new Set([
@@ -100,14 +98,6 @@ function isKnownNoExtFileName(fileName: string): boolean {
     if (lower.startsWith(name + '.')) return true
   }
   return false
-}
-
-async function isTextFile(filePath: string): Promise<boolean> {
-  try {
-    return await invoke<boolean>('is_text_file', { filePath })
-  } catch {
-    return false
-  }
 }
 
 const TEXT_FILE_TYPE_CONFIG: FileTypeConfig = {
@@ -163,14 +153,7 @@ export async function getFileTypeConfig(file: IFile): Promise<FileTypeConfig> {
     return TEXT_FILE_TYPE_CONFIG
   }
 
-  if (file.path) {
-    const textFile = await isTextFile(file.path)
-    if (textFile) {
-      return TEXT_FILE_TYPE_CONFIG
-    }
-  }
-
-  return UNSUPPORTED_FILE_TYPE_CONFIG
+  return TEXT_FILE_TYPE_CONFIG
 }
 
 export function isSupportedMode(config: FileTypeConfig, mode: string): boolean {

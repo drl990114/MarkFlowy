@@ -23,6 +23,7 @@ export enum FileResultCode {
   NotFound = 'NotFound',
   PermissionDenied = 'PermissionDenied',
   InvalidPath = 'InvalidPath',
+  Binary = 'Binary',
   UnknownError = 'UnknownError',
 }
 

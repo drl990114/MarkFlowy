@@ -91,6 +91,7 @@ enum TextEditorStatus {
   SUCCESS,
   NOTEXIST,
   READERROR,
+  BINARY,
 }
 
 export const sourceCodeCodemirrorViewMap: Map<string, MfCodemirrorView> = new Map()
@@ -171,6 +172,9 @@ function TextEditor(props: TextEditorProps) {
         if (canceled) return
         if (res.code === FileResultCode.NotFound) {
           return setStatus(TextEditorStatus.NOTEXIST)
+        }
+        if (String(res.code) === 'Binary') {
+          return setStatus(TextEditorStatus.BINARY)
         }
         if (res.code !== FileResultCode.Success) {
           toast.error(res.content)
@@ -702,6 +706,10 @@ function TextEditor(props: TextEditorProps) {
 
   if (status === TextEditorStatus.READERROR) {
     return <WarningHeader>Failed to read file content</WarningHeader>
+  }
+
+  if (status === TextEditorStatus.BINARY) {
+    return <WarningHeader>Binary file cannot be opened as text</WarningHeader>
   }
 
   if (typeof content !== 'string' || !delegate) {

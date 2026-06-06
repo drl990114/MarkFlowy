@@ -14,18 +14,20 @@ export const addNewMarkdownFileEdit = async (params: AddNewMarkdownFileEditParam
 
 interface AddExistingMarkdownFileEditParams {
   fileName: string
-  content: string
+  content?: string
   path: string
+  ext?: string
 }
 
 export const addExistingMarkdownFileEdit = async (params: AddExistingMarkdownFileEditParams) => {
-  await addNewMarkdownFileEdit(params)
+  await addMarkdownFileEdit(params)
 }
 
 interface AddMarkdownFileEditParams {
   fileName: string
-  content: string
+  content?: string
   path?: string
+  ext?: string
 }
 
 export const addMarkdownFileEdit = async (params: AddMarkdownFileEditParams) => {
