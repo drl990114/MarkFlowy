@@ -24,6 +24,9 @@
               "required": true
             }
           ]
+        },
+        "version": {
+          "description": "Print version information"
         }
       }
     },

@@ -89,6 +89,13 @@ fn update_window_opened_urls(window: &tauri::WebviewWindow, opened_urls: &str) {
     }
 }
 
+fn print_version() {
+    println!(
+        "markflowy {}",
+        env!("CARGO_PKG_VERSION")
+    );
+}
+
 fn print_cli_help() {
     println!(
         r#"MarkFlowy - AI-Powered Markdown Editor
@@ -484,6 +491,14 @@ pub fn run() {
                 cli_debug!("failed to install CLI: {:?}", e);
             }
 
+            // Handle -V / --version before tauri CLI parsing,
+            // since tauri_plugin_cli doesn't natively support these flags.
+            let args: Vec<String> = env::args().collect();
+            if args.iter().any(|a| a == "-V" || a == "--version") {
+                print_version();
+                std::process::exit(0);
+            }
+
             match app.cli().matches() {
                 Ok(matches) => {
                     if let Some(subcommand) = matches.subcommand {
@@ -503,6 +518,10 @@ pub fn run() {
                                         }
                                     }
                                 }
+                            }
+                            "version" => {
+                                print_version();
+                                std::process::exit(0);
                             }
                             _ => {}
                         }
