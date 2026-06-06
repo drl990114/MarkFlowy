@@ -1,5 +1,33 @@
 # UPDATE LOG
 
+## v0.81.0
+
+Features:
+
+- Add theme support for system theme.  (#1113)
+
+- Enhance CLI path handling and support relative paths. (#1112)
+
+- Add empty paragraph placeholder toggle setting.
+
+- Update font settings and improve theme consistency across the application.
+
+- Enhance search functionality with improved state management and UI updates.
+
+---
+
+特性：
+
+- 明亮主题支持跟随系统(#1113)
+
+- 增强 CLI 路径处理，支持相对路径。(#1112)
+
+- 新增 placeholder 显示/隐藏设置。
+
+- 更新字体设置，改善应用内主题一致性。
+
+- 改进搜索功能的状态管理和 UI 更新。
+
 ## v0.80.1
 
 Features:
