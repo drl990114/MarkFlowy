@@ -27,6 +27,13 @@ use tauri_plugin_cli::CliExt;
 use tauri_plugin_window_state::{AppHandleExt, StateFlags};
 use tracing_subscriber;
 
+#[cfg(windows)]
+use windows_sys::Win32::System::Console::{AttachConsole, GetConsoleWindow, ATTACH_PARENT_PROCESS};
+#[cfg(windows)]
+use windows_sys::Win32::UI::WindowsAndMessaging::{
+    SendMessageTimeoutW, HWND_BROADCAST, SMTO_ABORTIFHUNG, WM_SETTINGCHANGE,
+};
+
 lazy_static! {
     /// FIXME Haven't found a better way to get the home dir yet, and we will optimize it later.
     /// 0 -> home_dr
@@ -90,10 +97,7 @@ fn update_window_opened_urls(window: &tauri::WebviewWindow, opened_urls: &str) {
 }
 
 fn print_version() {
-    println!(
-        "markflowy {}",
-        env!("CARGO_PKG_VERSION")
-    );
+    println!("markflowy {}", env!("CARGO_PKG_VERSION"));
 }
 
 fn print_cli_help() {
@@ -123,8 +127,24 @@ Note: Create a symlink or alias 'mf' -> 'markflowy' for shorter invocation."#
 }
 
 fn is_terminal_launch() -> bool {
+    #[cfg(windows)]
+    {
+        return unsafe { GetConsoleWindow() != 0 };
+    }
+
+    #[cfg(not(windows))]
     std::env::var("TERM").is_ok()
 }
+
+#[cfg(windows)]
+fn attach_parent_console() {
+    unsafe {
+        AttachConsole(ATTACH_PARENT_PROCESS);
+    }
+}
+
+#[cfg(not(windows))]
+fn attach_parent_console() {}
 
 fn path_to_file_url(path: &str, cwd: Option<&str>) -> String {
     if url::Url::parse(path).is_ok() {
@@ -145,6 +165,19 @@ fn path_to_file_url(path: &str, cwd: Option<&str>) -> String {
     url::Url::from_file_path(&path)
         .map(|u| u.to_string())
         .unwrap_or_else(|_| path.to_string_lossy().to_string())
+}
+
+/// CLI wrapper 的文件名
+fn cli_wrapper_name() -> &'static str {
+    #[cfg(windows)]
+    {
+        "markflowy.cmd"
+    }
+
+    #[cfg(not(windows))]
+    {
+        "markflowy"
+    }
 }
 
 fn cli_binary_name() -> &'static str {
@@ -176,167 +209,90 @@ fn same_path(left: &std::path::Path, right: &std::path::Path) -> bool {
     left == right
 }
 
-fn push_unique_path(paths: &mut Vec<PathBuf>, path: PathBuf) {
-    if !paths
-        .iter()
-        .any(|existing_path| same_path(existing_path, &path))
-    {
-        paths.push(path);
-    }
-}
-
 fn path_contains_dir(dir: &std::path::Path) -> bool {
     path_entries()
         .iter()
         .any(|path_entry| same_path(path_entry, dir))
 }
 
-fn existing_cli_paths() -> Vec<PathBuf> {
-    let cli_binary_name = cli_binary_name();
-
-    path_entries()
-        .into_iter()
-        .map(|dir| dir.join(cli_binary_name))
-        .filter(|path| path.exists())
-        .collect()
-}
-
+/// CLI wrapper 安装的目标目录（仅一个，不再猜测多个）
 #[cfg(unix)]
-fn existing_cli_candidate_dirs(home_dir: &std::path::Path) -> Vec<PathBuf> {
-    vec![
-        home_dir.join(".local").join("bin"),
-        home_dir.join("bin"),
-        env::var_os("CARGO_HOME")
-            .map(PathBuf::from)
-            .unwrap_or_else(|| home_dir.join(".cargo"))
-            .join("bin"),
-        PathBuf::from("/usr/local/bin"),
-        PathBuf::from("/opt/homebrew/bin"),
-    ]
+fn cli_install_dir(home_dir: &std::path::Path) -> PathBuf {
+    home_dir.join(".local").join("bin")
 }
 
 #[cfg(windows)]
-fn existing_cli_candidate_dirs(_home_dir: &std::path::Path) -> Vec<PathBuf> {
-    Vec::new()
+fn cli_install_dir(home_dir: &std::path::Path) -> PathBuf {
+    env::var_os("LOCALAPPDATA")
+        .map(PathBuf::from)
+        .unwrap_or_else(|| home_dir.join("AppData").join("Local"))
+        .join("MarkFlowy")
+        .join("bin")
 }
 
+/// 版本标记文件路径，与 wrapper 同目录
+fn cli_version_file(dir: &std::path::Path) -> PathBuf {
+    dir.join(".markflowy-cli-version")
+}
+
+/// 读取已安装 CLI 的版本标记
+fn read_installed_cli_version(dir: &std::path::Path) -> Option<String> {
+    let version_path = cli_version_file(dir);
+    fs::read_to_string(&version_path).ok().map(|v| v.trim().to_string())
+}
+
+/// 写入版本标记
+fn write_installed_cli_version(dir: &std::path::Path, version: &str) -> std::io::Result<()> {
+    fs::write(cli_version_file(dir), version)
+}
+
+/// 生成 Unix wrapper script 内容
 #[cfg(unix)]
-fn new_cli_candidate_dirs(home_dir: &std::path::Path) -> Vec<PathBuf> {
-    vec![
-        home_dir.join(".local").join("bin"),
-        home_dir.join("bin"),
-        env::var_os("CARGO_HOME")
-            .map(PathBuf::from)
-            .unwrap_or_else(|| home_dir.join(".cargo"))
-            .join("bin"),
-    ]
+fn generate_wrapper_script(exe_path: &std::path::Path) -> String {
+    let exe_str = exe_path.to_string_lossy();
+    format!(
+        "#!/usr/bin/env sh\n# MarkFlowy CLI wrapper - auto-generated, do not edit\nexec \"{exe_str}\" \"$@\"\n"
+    )
 }
 
+/// 生成 Windows wrapper .cmd 文件内容
 #[cfg(windows)]
-fn new_cli_candidate_dirs(_home_dir: &std::path::Path) -> Vec<PathBuf> {
-    // On Windows, prefer updating an existing PATH entry only. Adding a new user
-    // bin directory requires changing PATH, which should be an explicit install step.
-    Vec::new()
+fn generate_wrapper_script(exe_path: &std::path::Path) -> String {
+    let exe_str = exe_path.to_string_loss();
+    format!(
+        "@echo off\r\nrem MarkFlowy CLI wrapper - auto-generated, do not edit\r\n\"{exe_str}\" %*\r\n"
+    )
 }
 
-fn cli_install_paths(app: &tauri::App) -> Vec<PathBuf> {
-    let mut paths = existing_cli_paths();
-    let Some(home_dir) = app.path().home_dir().ok() else {
-        return paths;
-    };
-
-    for dir in existing_cli_candidate_dirs(&home_dir) {
-        let path = dir.join(cli_binary_name());
-        if path.exists() {
-            push_unique_path(&mut paths, path);
-        }
-    }
-
-    for dir in new_cli_candidate_dirs(&home_dir) {
-        if path_contains_dir(&dir) {
-            let path = dir.join(cli_binary_name());
-            push_unique_path(&mut paths, path);
-        }
-    }
-
-    paths
-}
-
-#[cfg(unix)]
-fn install_cli_link(
+/// 安装 CLI wrapper（替代原来的 symlink/copy）
+fn install_cli_wrapper(
     target_path: &std::path::Path,
     current_exe: &std::path::Path,
 ) -> std::io::Result<()> {
-    use std::os::unix::fs::symlink;
-
     if target_path == current_exe {
         return Ok(());
     }
 
-    if fs::read_link(target_path)
-        .map(|linked_path| linked_path == current_exe)
-        .unwrap_or(false)
+    // 先删除旧文件（可能是 symlink 或旧 wrapper）
+    // 必须先删除，否则 fs::write 会跟随 symlink 写入到目标文件
+    let _ = fs::remove_file(target_path);
+
+    let script = generate_wrapper_script(current_exe);
+    fs::write(target_path, &script)?;
+
+    #[cfg(unix)]
     {
-        return Ok(());
-    }
-
-    let _ = fs::remove_file(target_path);
-    symlink(current_exe, target_path)
-}
-
-#[cfg(windows)]
-fn install_cli_link(
-    target_path: &std::path::Path,
-    current_exe: &std::path::Path,
-) -> std::io::Result<()> {
-    if target_path == current_exe {
-        return Ok(());
-    }
-
-    let _ = fs::remove_file(target_path);
-    fs::copy(current_exe, target_path).map(|_| ())
-}
-
-fn install_cli(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>> {
-    if cfg!(debug_assertions) || tauri::is_dev() {
-        return Ok(());
-    }
-
-    let current_exe = env::current_exe()?;
-    let target_paths = cli_install_paths(app);
-    let mut last_error = None;
-    let mut installed_count = 0;
-
-    for target_path in target_paths {
-        if let Some(parent) = target_path.parent() {
-            if let Err(error) = fs::create_dir_all(parent) {
-                last_error = Some(error);
-                continue;
-            }
-        }
-
-        match install_cli_link(&target_path, &current_exe) {
-            Ok(_) => {
-                installed_count += 1;
-                #[cfg(debug_assertions)]
-                eprintln!(
-                    "[markflowy-cli] installed CLI: {:?} -> {:?}",
-                    target_path, current_exe
-                );
-            }
-            Err(error) => {
-                last_error = Some(error);
-            }
-        }
-    }
-
-    if installed_count == 0 {
-        if let Some(error) = last_error {
-            return Err(Box::new(error));
-        }
+        use std::os::unix::fs::PermissionsExt;
+        fs::set_permissions(target_path, fs::Permissions::from_mode(0o755))?;
     }
 
     Ok(())
+}
+
+/// 检查已安装的 wrapper 是否是最新版本
+fn is_cli_up_to_date(target_dir: &std::path::Path, _current_exe: &std::path::Path) -> bool {
+    let app_version = env!("CARGO_PKG_VERSION");
+    read_installed_cli_version(target_dir).as_deref() == Some(app_version)
 }
 
 macro_rules! cli_debug {
@@ -344,6 +300,179 @@ macro_rules! cli_debug {
         #[cfg(debug_assertions)]
         eprintln!("[markflowy-cli] {}", format!($($arg)*));
     };
+}
+
+/// 清理旧版本安装的 symlink/copy（旧代码会在多个目录创建）
+#[cfg(unix)]
+fn cleanup_old_cli_symlinks(home_dir: &std::path::Path, current_exe: &std::path::Path) {
+    let old_dirs: Vec<PathBuf> = vec![
+        home_dir.join(".local").join("bin"),
+        home_dir.join("bin"),
+        env::var_os("CARGO_HOME")
+            .map(PathBuf::from)
+            .unwrap_or_else(|| home_dir.join(".cargo"))
+            .join("bin"),
+    ];
+
+    let binary_name = cli_binary_name();
+    for dir in old_dirs {
+        let path = dir.join(binary_name);
+        // 只删除指向当前应用二进制的 symlink，不删除用户自己创建的
+        if path.is_symlink() {
+            if let Ok(target) = fs::read_link(&path) {
+                if target == current_exe || target.is_absolute() && target.exists() && same_path(&target, current_exe) {
+                    let _ = fs::remove_file(&path);
+                    cli_debug!("cleaned up old symlink: {:?}", path);
+                }
+            }
+        }
+    }
+}
+
+/// Windows 上清理旧版本 copy 的二进制文件
+#[cfg(windows)]
+fn cleanup_old_cli_symlinks(home_dir: &std::path::Path, _current_exe: &std::path::Path) {
+    let old_dir = cli_install_dir(home_dir);
+    // 旧代码 copy 了 markflowy.exe 到安装目录，新代码用 markflowy.cmd wrapper
+    // 删除旧的 markflowy.exe（如果存在且不是当前 exe）
+    let old_exe = old_dir.join(cli_binary_name());
+    if old_exe.exists() && !old_exe.is_symlink() {
+        // 检查是否是旧版本 copy 的（大小可能与应用二进制不同则保留）
+        let _ = fs::remove_file(&old_exe);
+        cli_debug!("cleaned up old CLI copy: {:?}", old_exe);
+    }
+}
+
+#[cfg(windows)]
+fn normalize_path_for_env(path: &std::path::Path) -> String {
+    path.to_string_lossy().trim_end_matches('\\').to_string()
+}
+
+#[cfg(windows)]
+fn user_path_contains_dir(user_path: &str, dir: &std::path::Path) -> bool {
+    let dir = normalize_path_for_env(dir);
+
+    env::split_paths(user_path)
+        .any(|entry| normalize_path_for_env(&entry).eq_ignore_ascii_case(&dir))
+}
+
+#[cfg(windows)]
+fn broadcast_environment_change() {
+    let environment: Vec<u16> = "Environment\0".encode_utf16().collect();
+
+    unsafe {
+        SendMessageTimeoutW(
+            HWND_BROADCAST,
+            WM_SETTINGCHANGE,
+            0,
+            environment.as_ptr() as isize,
+            SMTO_ABORTIFHUNG,
+            5000,
+            std::ptr::null_mut(),
+        );
+    }
+}
+
+#[cfg(windows)]
+fn ensure_user_path_contains_dir(dir: &std::path::Path) -> Result<(), Box<dyn std::error::Error>> {
+    use winreg::enums::{HKEY_CURRENT_USER, KEY_READ, KEY_WRITE};
+    use winreg::RegKey;
+
+    let hkcu = RegKey::predef(HKEY_CURRENT_USER);
+    let environment = hkcu.open_subkey_with_flags("Environment", KEY_READ | KEY_WRITE)?;
+    let current_path = environment
+        .get_value::<String, _>("Path")
+        .unwrap_or_default();
+
+    if user_path_contains_dir(&current_path, dir) {
+        return Ok(());
+    }
+
+    let dir = normalize_path_for_env(dir);
+    let new_path = if current_path.trim().is_empty() {
+        dir
+    } else {
+        format!("{};{}", current_path.trim_end_matches(';'), dir)
+    };
+
+    environment.set_value("Path", &new_path)?;
+    broadcast_environment_change();
+
+    Ok(())
+}
+
+#[cfg(not(windows))]
+fn ensure_user_path_contains_dir(_dir: &std::path::Path) -> Result<(), Box<dyn std::error::Error>> {
+    Ok(())
+}
+
+fn install_cli_in_background(app: &tauri::App) {
+    if cfg!(debug_assertions) || tauri::is_dev() {
+        return;
+    }
+
+    let Some(home_dir) = app.path().home_dir().ok() else {
+        return;
+    };
+
+    let install_dir = cli_install_dir(&home_dir);
+
+    // Unix 上目标目录需要在 PATH 中才安装
+    #[cfg(unix)]
+    if !path_contains_dir(&install_dir) {
+        cli_debug!("install dir {:?} not in PATH, skipping", install_dir);
+        return;
+    }
+
+    let current_exe = match env::current_exe() {
+        Ok(path) => path,
+        Err(error) => {
+            cli_debug!("failed to get current exe for CLI install: {:?}", error);
+            return;
+        }
+    };
+
+    // 版本和路径都匹配，无需更新
+    if is_cli_up_to_date(&install_dir, &current_exe) {
+        cli_debug!("CLI wrapper is up to date, skipping install");
+        return;
+    }
+
+    let app_version = env!("CARGO_PKG_VERSION").to_string();
+
+    tauri::async_runtime::spawn_blocking(move || {
+        // 先清理旧版本安装的 symlink
+        cleanup_old_cli_symlinks(&home_dir, &current_exe);
+
+        if let Err(error) = fs::create_dir_all(&install_dir) {
+            cli_debug!("failed to create install dir: {:?}", error);
+            return;
+        }
+
+        let target_path = install_dir.join(cli_wrapper_name());
+
+        match install_cli_wrapper(&target_path, &current_exe) {
+            Ok(_) => {
+                // 写入版本标记
+                if let Err(error) = write_installed_cli_version(&install_dir, &app_version) {
+                    cli_debug!("failed to write CLI version file: {:?}", error);
+                }
+
+                if let Err(error) = ensure_user_path_contains_dir(&install_dir) {
+                    cli_debug!("failed to add CLI dir to PATH: {:?}", error);
+                }
+
+                cli_debug!(
+                    "installed CLI wrapper: {:?} -> {:?}",
+                    target_path,
+                    current_exe
+                );
+            }
+            Err(error) => {
+                cli_debug!("failed to install CLI wrapper: {:?}", error);
+            }
+        }
+    });
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -357,6 +486,7 @@ pub fn run() {
 
     tracing_subscriber::fmt::init();
     dotenv::dotenv().ok();
+    attach_parent_console();
 
     let context = tauri::generate_context!();
 
@@ -487,9 +617,7 @@ pub fn run() {
             );
             cli_debug!("binary: {:?}", std::env::current_exe().unwrap_or_default());
 
-            if let Err(e) = install_cli(app) {
-                cli_debug!("failed to install CLI: {:?}", e);
-            }
+            install_cli_in_background(app);
 
             // Handle -V / --version before tauri CLI parsing,
             // since tauri_plugin_cli doesn't natively support these flags.
