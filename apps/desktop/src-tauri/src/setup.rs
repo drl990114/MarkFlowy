@@ -1,16 +1,17 @@
 use crate::app::{conf::AppConf, window_manager};
-use tauri::{utils::config::WebviewUrl, App, AppHandle, Emitter, WebviewWindowBuilder};
+use tauri::{utils::config::WebviewUrl, AppHandle, Emitter, WebviewWindowBuilder};
 
 #[cfg(target_os = "macos")]
 use tauri::TitleBarStyle;
 
 pub fn init(app_handle: AppHandle, opened_urls: String) -> Result<(), Box<dyn std::error::Error>> {
+    let escaped_urls = serde_json::to_string(&opened_urls)?;
 
     // 首先检查是否已经存在窗口
     if let Some(existing_window) = window_manager::get_last_opened_window(&app_handle) {
-        let script = format!("window.openedUrls = `{opened_urls}`; console.log(`[setup.rs] Updated openedUrls to: {opened_urls}`);");
+        let script = format!("window.openedUrls = {escaped_urls}; console.log('[setup.rs] Updated openedUrls:', window.openedUrls);");
         let _ = existing_window.eval(&script);
-        existing_window.emit("opened-urls", opened_urls.clone());
+        let _ = existing_window.emit("opened-urls", opened_urls.clone());
 
         // 确保窗口被聚焦
         let _ = existing_window.set_focus();
@@ -24,10 +25,8 @@ pub fn init(app_handle: AppHandle, opened_urls: String) -> Result<(), Box<dyn st
         "main".to_string(),
         WebviewUrl::App("index.html".into()),
     )
-    .initialization_script(&format!("window.openedUrls = `{opened_urls}`"))
-    .initialization_script(&format!(
-        "console.log(`[setup.rs] window.openedUrls set to: {opened_urls}`)"
-    ))
+    .initialization_script(&format!("window.openedUrls = {escaped_urls}"))
+    .initialization_script("console.log('[setup.rs] window.openedUrls set to:', window.openedUrls)")
     .title("MarkFlowy")
     .resizable(true)
     .fullscreen(false)

@@ -22,7 +22,7 @@ use app::{
 };
 use dotenv;
 use lazy_static::lazy_static;
-use tauri::{Manager, Runtime, State};
+use tauri::{Manager, State};
 use tauri_plugin_cli::CliExt;
 use tauri_plugin_window_state::{AppHandleExt, StateFlags};
 use tracing_subscriber;
@@ -43,6 +43,51 @@ lazy_static! {
 }
 
 struct OpenedUrls(Mutex<Option<Vec<url::Url>>>);
+
+fn opened_urls_to_string(urls: &[url::Url]) -> String {
+    urls.iter()
+        .map(|u| {
+            urlencoding::decode(u.as_str())
+                .unwrap()
+                .replace("\\", "\\\\")
+        })
+        .collect::<Vec<_>>()
+        .join(",")
+}
+
+fn append_opened_urls(opened_urls: &OpenedUrls, urls: &[url::Url]) -> Vec<url::Url> {
+    let mut stored_urls = opened_urls.0.lock().unwrap();
+    let stored_urls = stored_urls.get_or_insert_with(Vec::new);
+
+    for url in urls {
+        if !stored_urls.iter().any(|stored_url| stored_url == url) {
+            stored_urls.push(url.clone());
+        }
+    }
+
+    stored_urls.clone()
+}
+
+fn clear_opened_urls(opened_urls: &OpenedUrls) {
+    opened_urls.0.lock().unwrap().take();
+}
+
+fn update_window_opened_urls(window: &tauri::WebviewWindow, opened_urls: &str) {
+    if let Ok(script_opened_urls) = serde_json::to_string(opened_urls) {
+        let _ = window.eval(&format!(
+            r#"
+            (() => {{
+                const incoming = {script_opened_urls};
+                const current = typeof window.openedUrls === 'string' && window.openedUrls
+                    ? window.openedUrls.split(',')
+                    : [];
+                const merged = [...current, ...incoming.split(',')].filter(Boolean);
+                window.openedUrls = [...new Set(merged)].join(',');
+            }})();
+            "#
+        ));
+    }
+}
 
 fn print_cli_help() {
     println!(
@@ -277,14 +322,7 @@ pub fn run() {
             }
 
             let opened_urls = if let Some(urls) = &*file_urls.0.lock().unwrap() {
-                urls.iter()
-                    .map(|u| {
-                        urlencoding::decode(u.as_str())
-                            .unwrap()
-                            .replace("\\", "\\\\")
-                    })
-                    .collect::<Vec<_>>()
-                    .join(",")
+                opened_urls_to_string(urls)
             } else {
                 "".into()
             };
@@ -318,32 +356,33 @@ pub fn run() {
             match event {
                 tauri::RunEvent::Opened { urls, .. } => {
                     let opened_urls = app.try_state::<OpenedUrls>();
-                    if let Some(u) = opened_urls {
-                        u.0.lock().unwrap().replace(urls.clone());
-                    }
-
-                    let urls_str = urls
-                        .iter()
-                        .map(|u| {
-                            urlencoding::decode(u.as_str())
-                                .unwrap()
-                                .replace("\\", "\\\\")
-                        })
-                        .collect::<Vec<_>>()
-                        .join(",");
+                    let urls = if let Some(opened_urls) = &opened_urls {
+                        append_opened_urls(opened_urls.inner(), &urls)
+                    } else {
+                        urls.clone()
+                    };
+                    let urls_str = opened_urls_to_string(&urls);
 
                     println!("Processed URLs string: {}", urls_str);
 
                     if let Some(window) = window_manager::get_focused_window(app) {
                         use tauri::Emitter;
                         println!("Emitting to focused window: {}", window.label());
+                        update_window_opened_urls(&window, &urls_str);
                         let result = window.emit("opened-urls", urls_str.clone());
+                        if let Some(opened_urls) = &opened_urls {
+                            clear_opened_urls(opened_urls.inner());
+                        }
                         println!("Emit result: {:?}", result);
                     } else {
                         if let Some(window) = window_manager::get_last_opened_window(app) {
                             use tauri::Emitter;
                             println!("Emitting to last opened window: {}", window.label());
+                            update_window_opened_urls(&window, &urls_str);
                             let result = window.emit("opened-urls", urls_str.clone());
+                            if let Some(opened_urls) = &opened_urls {
+                                clear_opened_urls(opened_urls.inner());
+                            }
                             println!("Emit result: {:?}", result);
                         } else {
                             println!("No window found to emit event");
