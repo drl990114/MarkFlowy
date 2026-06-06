@@ -129,7 +129,7 @@ Note: Create a symlink or alias 'mf' -> 'markflowy' for shorter invocation."#
 fn is_terminal_launch() -> bool {
     #[cfg(windows)]
     {
-        return unsafe { GetConsoleWindow() != 0 };
+        return unsafe { !GetConsoleWindow().is_null() };
     }
 
     #[cfg(not(windows))]
@@ -258,7 +258,7 @@ fn generate_wrapper_script(exe_path: &std::path::Path) -> String {
 /// 生成 Windows wrapper .cmd 文件内容
 #[cfg(windows)]
 fn generate_wrapper_script(exe_path: &std::path::Path) -> String {
-    let exe_str = exe_path.to_string_loss();
+    let exe_str = exe_path.to_string_lossy();
     format!(
         "@echo off\r\nrem MarkFlowy CLI wrapper - auto-generated, do not edit\r\n\"{exe_str}\" %*\r\n"
     )
