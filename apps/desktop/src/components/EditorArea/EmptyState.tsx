@@ -11,14 +11,17 @@ export const EmptyState = memo(() => {
   const startNavItems = [
     {
       name: t('file.openDir'),
+      icon: 'ri-folder-open-line',
       action: openFolderDialog,
     },
     {
       name: t('file.openFile'),
+      icon: 'ri-file-text-line',
       action: openFile,
     },
     {
       name: t('action.create_file'),
+      icon: 'ri-file-add-line',
       action: () =>
         addNewMarkdownFileEdit({
           fileName: 'new-file.md',
@@ -30,15 +33,14 @@ export const EmptyState = memo(() => {
   return (
     <Container className='w-full h-full'>
       <div className='empty-state-content'>
-        <div className='app-title'>
-          <p>MarkFlowy</p>
-        </div>
-
         <div className='nav-section'>
           <div className='nav-btn-list'>
             {startNavItems.map((item) => (
               <ActionButton key={item.name} onClick={item.action}>
-                {item.name}
+                <span className='action-label'>
+                  <i className={item.icon} aria-hidden='true' />
+                  <span>{item.name}</span>
+                </span>
               </ActionButton>
             ))}
           </div>
@@ -52,30 +54,18 @@ const Container = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 30px 40px;
+  padding: 32px 40px;
   box-sizing: border-box;
   background-color: ${({ theme }) => theme.bgColor};
   color: ${({ theme }) => theme.primaryFontColor};
 
   .empty-state-content {
     width: 100%;
-    max-width: 350px;
-    padding: 20px;
-    border-radius: 8px;
-    background-color: ${({ theme }) => theme.bgColor};
-    box-shadow: '0 1px 3px rgba(0, 0, 0, 0.05)';
-  }
-
-  .app-title {
-    margin-bottom: 16px;
-    font-size: 1.5rem;
-    font-weight: 700;
-    letter-spacing: -0.5px;
-    color: ${({ theme }) => theme.primaryFontColor};
+    max-width: 280px;
   }
 
   .nav-section {
-    margin-bottom: 24px;
+    margin-bottom: 0;
 
     &:last-child {
       margin-bottom: 0;
@@ -85,7 +75,7 @@ const Container = styled.div`
   .nav-btn-list {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 2px;
     width: 100%;
     flex-wrap: wrap;
   }
@@ -95,18 +85,80 @@ const ActionButton = styled.button`
   width: 100%;
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 8px 16px;
-  border: none;
-  border-radius: 4px;
+  justify-content: space-between;
+  min-height: 36px;
+  padding: 7px 9px;
+  border: 1px solid transparent;
+  border-radius: 6px;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 450;
   cursor: pointer;
-  transition: all 0.3s ease;
-  background-color: ${(props) => props.theme.bgColorSecondary};
-  color: ${(props) => props.theme.primaryFontColor};
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    color 0.2s ease,
+    padding 0.2s ease;
+  background-color: transparent;
+  color: ${(props) => props.theme.labelFontColor};
+
+  .action-label {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    i {
+      flex: 0 0 auto;
+      width: 16px;
+      color: ${(props) => props.theme.disabledFontColor};
+      font-size: 16px;
+      line-height: 1;
+      transition: color 0.2s ease;
+    }
+
+    span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  &::after {
+    content: '>';
+    color: ${(props) => props.theme.disabledFontColor};
+    font-size: 14px;
+    line-height: 1;
+    opacity: 0;
+    transform: translateX(-4px);
+    transition:
+      color 0.2s ease,
+      opacity 0.2s ease,
+      transform 0.2s ease;
+  }
 
   &:hover {
     background-color: ${(props) => props.theme.hoverColor};
+    border-color: ${(props) => props.theme.borderColor};
+    color: ${(props) => props.theme.primaryFontColor};
+    padding-right: 8px;
+
+    .action-label i {
+      color: ${(props) => props.theme.accentColor};
+    }
+
+    &::after {
+      color: ${(props) => props.theme.primaryFontColor};
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${(props) => props.theme.accentColor};
+    outline-offset: 2px;
+  }
+
+  &:active {
+    background-color: ${(props) => props.theme.bgColorSecondary};
   }
 `

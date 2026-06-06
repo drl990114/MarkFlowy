@@ -1,6 +1,7 @@
 import NiceModal from '@ebay/nice-modal-react'
 import isPropValid from '@emotion/is-prop-valid'
 import { useMemo } from 'react'
+import { ConfigProvider, theme as antdTheme, type ThemeConfig } from 'antd'
 import { ThemeProvider as EditorProvider } from 'rme'
 import { IStyleSheetContext, StyleSheetManager, ThemeProvider } from 'styled-components'
 import { ThemeProvider as ZensThemeProvider } from 'zens'
@@ -44,6 +45,48 @@ const AppThemeProvider: React.FC<BaseComponentProps> = function ({ children }) {
     [curTheme.mode, curTheme.styledConstants, rootFontFamily, codeFontFamily],
   )
 
+  const antdThemeProp = useMemo<ThemeConfig>(
+    () => ({
+      algorithm: curTheme.mode === 'dark' ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
+      token: {
+        colorPrimary: curTheme.styledConstants.accentColor,
+        colorInfo: curTheme.styledConstants.accentColor,
+        colorSuccess: curTheme.styledConstants.successColor,
+        colorError: curTheme.styledConstants.dangerColor,
+        colorWarning: curTheme.styledConstants.warnColor,
+        colorText: curTheme.styledConstants.primaryFontColor,
+        colorTextSecondary: curTheme.styledConstants.labelFontColor,
+        colorTextTertiary: curTheme.styledConstants.disabledFontColor,
+        colorBgBase: curTheme.styledConstants.bgColor,
+        colorBgContainer: curTheme.styledConstants.bgColor,
+        colorBgElevated: curTheme.styledConstants.contextMenuBgColor,
+        colorBgLayout: curTheme.styledConstants.bgColor,
+        colorBorder: curTheme.styledConstants.borderColor,
+        colorBorderSecondary: curTheme.styledConstants.borderColor,
+        colorFillSecondary: curTheme.styledConstants.hoverColor,
+        colorFillTertiary: curTheme.styledConstants.contextMenuBgColorHover,
+        borderRadius: 6,
+        borderRadiusLG: 8,
+        fontFamily: rootFontFamily,
+        fontSize: 12,
+        controlHeight: 28,
+        controlHeightSM: 24,
+        controlHeightLG: 32,
+        boxShadowSecondary: `0 10px 24px ${curTheme.styledConstants.boxShadowColor}`,
+      },
+      components: {
+        Popover: {
+          colorBgElevated: curTheme.styledConstants.contextMenuBgColor,
+        },
+        Tooltip: {
+          colorBgSpotlight: curTheme.styledConstants.tooltipBgColor,
+          colorTextLightSolid: curTheme.styledConstants.primaryFontColor,
+        },
+      },
+    }),
+    [curTheme.mode, curTheme.styledConstants, rootFontFamily],
+  )
+
   const i18nProp = useMemo(
     () => ({
       language: settingData.language,
@@ -54,14 +97,16 @@ const AppThemeProvider: React.FC<BaseComponentProps> = function ({ children }) {
   return (
     <StyleSheetManager shouldForwardProp={shouldForwardProp}>
       <ThemeProvider theme={theme}>
-        <ZensThemeProvider theme={themeProp}>
-          <EditorProvider theme={themeProp} i18n={i18nProp}>
-            <InjectFonts />
-            <GlobalStyles />
-            <DesktopSpecificStyles />
-            <NiceModal.Provider>{children}</NiceModal.Provider>
-          </EditorProvider>
-        </ZensThemeProvider>
+        <ConfigProvider theme={antdThemeProp}>
+          <ZensThemeProvider theme={themeProp}>
+            <EditorProvider theme={themeProp} i18n={i18nProp}>
+              <InjectFonts />
+              <GlobalStyles />
+              <DesktopSpecificStyles />
+              <NiceModal.Provider>{children}</NiceModal.Provider>
+            </EditorProvider>
+          </ZensThemeProvider>
+        </ConfigProvider>
       </ThemeProvider>
     </StyleSheetManager>
   )
