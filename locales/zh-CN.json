@@ -187,7 +187,15 @@
     "search_empty": "无法找到符合这些搜索词的任何内容",
     "text": "搜索",
     "caseSensitive": "大小写敏感",
-    "toggleExpandAll": "切换展开全部"
+    "toggleExpandAll": "切换展开全部",
+    "ready": "准备搜索",
+    "readyDesc": "输入关键词后按 Enter 或点击搜索按钮",
+    "searching": "正在搜索",
+    "searchingDesc": "正在扫描当前工作区的 Markdown 文件",
+    "searchingWithKeyword": "正在搜索“{{keyword}}”...",
+    "resultSummary": "{{files}} 个文件，{{matches}} 处匹配：{{keyword}}",
+    "emptyDesc": "换个关键词或关闭大小写敏感后再试试",
+    "search_failed": "搜索失败"
   },
   "settings": {
     "label": "设置",

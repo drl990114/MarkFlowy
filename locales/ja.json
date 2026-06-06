@@ -162,7 +162,15 @@
     "search_empty": "一致する検索結果が見つかりませんでした",
     "text": "検索",
     "caseSensitive": "大文字と小文字を区別",
-    "toggleExpandAll": "すべて展開/折りたたむ"
+    "toggleExpandAll": "すべて展開/折りたたむ",
+    "ready": "検索できます",
+    "readyDesc": "キーワードを入力して Enter または検索を押してください",
+    "searching": "検索中",
+    "searchingDesc": "現在のワークスペースの Markdown ファイルを検索しています",
+    "searchingWithKeyword": "「{{keyword}}」を検索中...",
+    "resultSummary": "{{files}} ファイル、{{matches}} 件一致: {{keyword}}",
+    "emptyDesc": "別のキーワードを試すか、大文字小文字の区別をオフにしてください",
+    "search_failed": "検索に失敗しました"
   },
   "settings": {
     "label": "設定",

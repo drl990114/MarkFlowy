@@ -167,7 +167,15 @@
     "search_empty": "Nothing found matching these search terms",
     "text": "Search",
     "caseSensitive": "Case sensitive",
-    "toggleExpandAll": "Toggle expand all"
+    "toggleExpandAll": "Toggle expand all",
+    "ready": "Ready to search",
+    "readyDesc": "Enter a keyword, then press Enter or click search",
+    "searching": "Searching",
+    "searchingDesc": "Scanning Markdown files in the current workspace",
+    "searchingWithKeyword": "Searching \"{{keyword}}\"...",
+    "resultSummary": "{{files}} files, {{matches}} matches: {{keyword}}",
+    "emptyDesc": "Try another keyword or turn off case sensitivity",
+    "search_failed": "Search failed"
   },
   "command": {
     "id_descriptions": {

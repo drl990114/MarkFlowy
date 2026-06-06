@@ -10,7 +10,14 @@ import classNames from 'classnames'
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from '@/i18n'
 import { Input } from 'zens'
-import { SearchContainer, SearchInfoBox, SearchInput, SearchList } from './styles'
+import {
+  SearchContainer,
+  SearchInfoBox,
+  SearchInput,
+  SearchList,
+  SearchMeta,
+  SearchStateBox,
+} from './styles'
 import type { SearchInfo } from './useSearchStore'
 import useSearchStore from './useSearchStore'
 
@@ -87,8 +94,12 @@ const SearchView = memo(() => {
     useSearchStore()
   const { addOpenedFile, setActiveId, folderData, editorCtxMap, activeId } = useEditorStore()
   const [expandIdMap, setExpandIdMap] = useState<Record<string, boolean>>({})
+  const [isSearching, setIsSearching] = useState(false)
+  const [hasSearched, setHasSearched] = useState(false)
+  const [searchError, setSearchError] = useState('')
   const { t } = useTranslation()
   const parentRef = useRef<HTMLDivElement>(null)
+  const searchRequestIdRef = useRef(0)
 
   const getMatchCount = useCallback(
     (text: string, keyword: string) => {
@@ -149,11 +160,26 @@ const SearchView = memo(() => {
   const rowVirtualizer = useVirtualizer({
     count: flattenedData.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: (index: number) => (flattenedData[index].type === 'header' ? 32 : 44),
+    estimateSize: (index: number) => (flattenedData[index].type === 'header' ? 34 : 44),
     overscan: 10,
   })
 
   const isAllExpand = resultList.length > 0 && resultList.every((item) => expandIdMap[item.id])
+  const trimmedKeyword = searchKeyword.trim()
+  const resultFileCount = resultList.length
+  const resultMatchCount = useMemo(
+    () =>
+      resultList.reduce(
+        (total, searchInfo) =>
+          total +
+          searchInfo.matches.reduce(
+            (matchTotal, match) => matchTotal + getMatchCount(match.content, searchKeyword),
+            0,
+          ),
+        0,
+      ),
+    [getMatchCount, resultList, searchKeyword],
+  )
 
   const toggleAllExpand = useCallback(() => {
     const nextValue = !isAllExpand
@@ -193,37 +219,72 @@ const SearchView = memo(() => {
 
   const handleSearch = useCallback(async () => {
     if (!folderData?.[0]) return
-    if (!searchKeyword) {
+    const queryText = searchKeyword.trim()
+
+    if (!queryText) {
+      searchRequestIdRef.current += 1
+      setHasSearched(false)
+      setIsSearching(false)
+      setSearchError('')
       setSearchState({ resultList: [] })
       return
     }
 
-    const res = await invoke<{ data: SearchInfo[] }>('search_files_async', {
-      query: {
-        dir: folderData[0].path,
-        name_text: '.md',
-        contents_text: searchKeyword,
-      },
-      options: {
-        content_case_sensitive: caseSensitive,
-      },
-    })
+    const requestId = searchRequestIdRef.current + 1
+    searchRequestIdRef.current = requestId
+    setHasSearched(true)
+    setIsSearching(true)
+    setSearchError('')
 
-    logger.info('res', res)
-    addSearchResult(res.data)
+    try {
+      const res = await invoke<{ data: SearchInfo[] }>('search_files_async', {
+        query: {
+          dir: folderData[0].path,
+          name_text: '.md',
+          contents_text: queryText,
+        },
+        options: {
+          content_case_sensitive: caseSensitive,
+        },
+      })
 
-    const newExpandIdMap: Record<string, boolean> = {}
+      if (searchRequestIdRef.current !== requestId) return
 
-    res.data.forEach((searchInfo) => {
-      newExpandIdMap[searchInfo.id] = true
-    })
+      logger.info('res', res)
+      addSearchResult(res.data)
 
-    setExpandIdMap(newExpandIdMap)
+      const newExpandIdMap: Record<string, boolean> = {}
+
+      res.data.forEach((searchInfo) => {
+        newExpandIdMap[searchInfo.id] = true
+      })
+
+      setExpandIdMap(newExpandIdMap)
+    } catch (error) {
+      if (searchRequestIdRef.current !== requestId) return
+      logger.error('search failed', error)
+      setSearchError(error instanceof Error ? error.message : String(error))
+      addSearchResult([])
+      setExpandIdMap({})
+    } finally {
+      if (searchRequestIdRef.current === requestId) {
+        setIsSearching(false)
+      }
+    }
   }, [folderData, searchKeyword, caseSensitive, setSearchState, addSearchResult])
 
   const toggleCaseSensitive = useCallback(() => {
-    setSearchState({ caseSensitive: !caseSensitive })
-  }, [caseSensitive, setSearchState])
+    searchRequestIdRef.current += 1
+    setHasSearched(false)
+    setIsSearching(false)
+    setSearchError('')
+    setExpandIdMap({})
+    setSearchState({ caseSensitive: !caseSensitive, resultList: [], activeIndex: 0 })
+
+    if (activeId) {
+      editorCtxMap.get(activeId)?.commands?.stopFind?.()
+    }
+  }, [activeId, caseSensitive, editorCtxMap, setSearchState])
 
   const handleKeyDown = useCallback(() => {
     handleSearch()
@@ -259,15 +320,87 @@ const SearchView = memo(() => {
 
   const handleSearchTextChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (!e.target.value) {
-        setSearchState({ resultList: [] })
-        if (activeId) {
-          editorCtxMap.get(activeId)?.commands?.stopFind?.()
-        }
+      const nextKeyword = e.target.value
+
+      searchRequestIdRef.current += 1
+      setHasSearched(false)
+      setIsSearching(false)
+      setSearchError('')
+      setExpandIdMap({})
+      setSearchState({ searchKeyword: nextKeyword, resultList: [], activeIndex: 0 })
+
+      if (activeId) {
+        editorCtxMap.get(activeId)?.commands?.stopFind?.()
       }
-      setSearchState({ searchKeyword: e.target.value })
     },
-    [setSearchState],
+    [activeId, editorCtxMap, setSearchState],
+  )
+
+  const handleClearSearch = useCallback(() => {
+    searchRequestIdRef.current += 1
+    setHasSearched(false)
+    setIsSearching(false)
+    setSearchError('')
+    setExpandIdMap({})
+    setSearchState({ searchKeyword: '', resultList: [], activeIndex: 0 })
+    if (activeId) {
+      editorCtxMap.get(activeId)?.commands?.stopFind?.()
+    }
+  }, [activeId, editorCtxMap, setSearchState])
+
+  const renderSearchState = useCallback(
+    () => {
+      if (isSearching && resultList.length === 0) {
+        return (
+          <SearchStateBox>
+            <div className='search-state__icon'>
+              <i className='ri-loader-4-line' />
+            </div>
+            <div className='search-state__title'>{t('search.searching')}</div>
+            <div className='search-state__desc'>{t('search.searchingDesc')}</div>
+          </SearchStateBox>
+        )
+      }
+
+      if (searchError) {
+        return (
+          <SearchStateBox>
+            <div className='search-state__icon'>
+              <i className='ri-error-warning-line' />
+            </div>
+            <div className='search-state__title'>{t('search.search_failed')}</div>
+            <div className='search-state__desc'>{searchError}</div>
+          </SearchStateBox>
+        )
+      }
+
+      if (!trimmedKeyword) {
+        return (
+          <SearchStateBox>
+            <div className='search-state__icon'>
+              <i className='ri-search-2-line' />
+            </div>
+            <div className='search-state__title'>{t('search.ready')}</div>
+            <div className='search-state__desc'>{t('search.readyDesc')}</div>
+          </SearchStateBox>
+        )
+      }
+
+      if (hasSearched && resultList.length === 0) {
+        return (
+          <SearchStateBox>
+            <div className='search-state__icon'>
+              <i className='ri-file-search-line' />
+            </div>
+            <div className='search-state__title'>{t('search.search_empty')}</div>
+            <div className='search-state__desc'>{t('search.emptyDesc')}</div>
+          </SearchStateBox>
+        )
+      }
+
+      return null
+    },
+    [hasSearched, isSearching, resultList.length, searchError, t, trimmedKeyword],
   )
 
   return (
@@ -281,7 +414,20 @@ const SearchView = memo(() => {
           placeholder={t('search.text')}
           onChange={handleSearchTextChange}
         />
+        {searchKeyword ? (
+          <MfIconButton
+            className='search-input__action'
+            size='small'
+            rounded='smooth'
+            onClick={handleClearSearch}
+            icon='ri-close-line'
+            tooltipProps={{
+              title: t('common.close'),
+            }}
+          />
+        ) : null}
         <MfIconButton
+          className='search-input__action'
           onClick={toggleCaseSensitive}
           active={caseSensitive}
           icon='ri-font-size'
@@ -292,6 +438,7 @@ const SearchView = memo(() => {
           }}
         />
         <MfIconButton
+          className='search-input__action'
           size='small'
           rounded='smooth'
           onClick={toggleAllExpand}
@@ -300,8 +447,34 @@ const SearchView = memo(() => {
             title: t('search.toggleExpandAll'),
           }}
         />
+        <MfIconButton
+          className='search-input__action'
+          size='small'
+          rounded='smooth'
+          onClick={handleSearch}
+          icon={isSearching ? 'ri-loader-4-line' : 'ri-search-line'}
+          active={isSearching}
+          tooltipProps={{
+            title: t('search.text'),
+          }}
+        />
+        {isSearching ? <div className='search-input__progress' /> : null}
       </SearchInput>
+      {hasSearched && !searchError ? (
+        <SearchMeta>
+          <div className='search-meta__content'>
+            {isSearching
+              ? t('search.searchingWithKeyword', { keyword: trimmedKeyword })
+              : t('search.resultSummary', {
+                files: resultFileCount,
+                matches: resultMatchCount,
+                keyword: trimmedKeyword,
+              })}
+          </div>
+        </SearchMeta>
+      ) : null}
       <SearchList ref={parentRef}>
+        {renderSearchState() ?? (
         <div
           style={{
             height: `${rowVirtualizer.getTotalSize()}px`,
@@ -337,8 +510,9 @@ const SearchView = memo(() => {
                     title={item.searchInfo.path}
                   >
                     <i className={iconCls} />
-                    <i className='ri-file-list-2-line' style={{ marginRight: 4, opacity: 0.7 }} />
-                    {item.searchInfo.relative_path}
+                    <i className='ri-file-list-2-line search-info__file-icon' />
+                    <span className='search-info__path-text'>{item.searchInfo.relative_path}</span>
+                    <span className='search-info__badge'>{item.searchInfo.matches.length}</span>
                   </div>
                 </SearchInfoBox>
               )
@@ -374,6 +548,7 @@ const SearchView = memo(() => {
             )
           })}
         </div>
+        )}
       </SearchList>
     </SearchContainer>
   )

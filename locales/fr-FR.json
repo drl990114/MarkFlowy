@@ -154,7 +154,15 @@
     "search_empty": "Pas de résultats avec ces termes",
     "text": "Chercher",
     "caseSensitive": "Sensible à la casse",
-    "toggleExpandAll": "Tout développer"
+    "toggleExpandAll": "Tout développer",
+    "ready": "Prêt à rechercher",
+    "readyDesc": "Saisissez un mot-clé, puis appuyez sur Entrée ou Rechercher",
+    "searching": "Recherche en cours",
+    "searchingDesc": "Analyse des fichiers Markdown de l'espace de travail actuel",
+    "searchingWithKeyword": "Recherche de \"{{keyword}}\"...",
+    "resultSummary": "{{files}} fichiers, {{matches}} occurrences : {{keyword}}",
+    "emptyDesc": "Essayez un autre mot-clé ou désactivez la casse",
+    "search_failed": "La recherche a échoué"
   },
   "settings": {
     "label": "Configuration",

@@ -157,7 +157,15 @@
     "search_empty": "No se encontró ninguna coincidencia con los términos de búsqueda",
     "text": "Buscar",
     "caseSensitive": "Distinguir mayúsculas y minúsculas",
-    "toggleExpandAll": "Expandir / contraer todo"
+    "toggleExpandAll": "Expandir / contraer todo",
+    "ready": "Listo para buscar",
+    "readyDesc": "Introduce una palabra clave y pulsa Enter o Buscar",
+    "searching": "Buscando",
+    "searchingDesc": "Analizando archivos Markdown del espacio de trabajo actual",
+    "searchingWithKeyword": "Buscando \"{{keyword}}\"...",
+    "resultSummary": "{{files}} archivos, {{matches}} coincidencias: {{keyword}}",
+    "emptyDesc": "Prueba otra palabra clave o desactiva mayúsculas/minúsculas",
+    "search_failed": "La búsqueda falló"
   },
   "settings": {
     "label": "Preferencias",
