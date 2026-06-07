@@ -1,6 +1,6 @@
 [package]
 name = "markflowy"
-version = "0.81.0"
+version = "0.81.5"
 description = "A Markdown Editor App"
 authors = ["drl990114"]
 license = " AGPL-3.0"
@@ -125,13 +125,16 @@ path = "../../../crates/download_npm"
 core-foundation = "0.10"
 core-foundation-sys = "0.8"
 
-[target.'cfg(windows)'.dependencies]
+[target."cfg(windows)".dependencies]
 winreg = "0.52"
-windows-sys = { version = "0.59", features = [
+
+[target."cfg(windows)".dependencies.windows-sys]
+version = "0.59"
+features = [
     "Win32_Foundation",
     "Win32_System_Console",
     "Win32_UI_WindowsAndMessaging",
-] }
+]
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-single-instance = "2"
