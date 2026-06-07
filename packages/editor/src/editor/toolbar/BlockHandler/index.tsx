@@ -185,6 +185,29 @@ export const BlockHandler = memo(({ getMenuBoundary }: BlockHandlerProps) => {
     }
   }, [dropdownOpen, editorView, getMenuBoundary])
 
+  useEffect(() => {
+    if (!dropdownOpen) return
+
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target
+      if (!(target instanceof Node)) return
+
+      const clickedTrigger = !!triggerRef.current?.contains(target)
+      const clickedMenu = target instanceof Element && !!target.closest('.rme-block-handler-menu')
+      if (clickedTrigger || clickedMenu) {
+        return
+      }
+
+      setDropdownOpen(false)
+    }
+
+    document.addEventListener('pointerdown', handlePointerDown, true)
+
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown, true)
+    }
+  }, [dropdownOpen])
+
   const displayState = dropdownOpen ? displayStateRef.current : state
 
   const transformOptions = useMemo(() => {

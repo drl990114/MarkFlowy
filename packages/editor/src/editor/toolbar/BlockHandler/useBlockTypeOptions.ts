@@ -44,8 +44,16 @@ const selectInsideNode = ({ view, pos }: NodeTransformContext) => {
   const docSize = view.state.doc.content.size
   const textPos = Math.max(0, Math.min(pos + 1, docSize))
   const selection = TextSelection.near(view.state.doc.resolve(textPos), 1)
-  view.dispatch(view.state.tr.setSelection(selection))
+  view.dispatch(view.state.tr.setSelection(selection).setMeta('addToHistory', false))
   view.focus()
+}
+
+const setSelectionInsideTransformedNode = (
+  tr: NodeTransformContext['tr'],
+  pos: number,
+) => {
+  const textPos = Math.max(0, Math.min(pos + 1, tr.doc.content.size))
+  tr.setSelection(TextSelection.near(tr.doc.resolve(textPos), 1))
 }
 
 const deleteNode = (context: NodeTransformContext) => {
@@ -68,7 +76,9 @@ const transformToHeading = (level: number) => (context: NodeTransformContext) =>
   if (!headingType) return false
 
   tr.setBlockType(pos, pos + context.node.nodeSize, headingType, { level })
+  setSelectionInsideTransformedNode(tr, pos)
   view.dispatch(tr)
+  view.focus()
   return true
 }
 
@@ -78,7 +88,9 @@ const transformToParagraph = (context: NodeTransformContext) => {
   if (!paragraphType) return false
 
   tr.setBlockType(pos, pos + context.node.nodeSize, paragraphType)
+  setSelectionInsideTransformedNode(tr, pos)
   view.dispatch(tr)
+  view.focus()
   return true
 }
 
@@ -87,16 +99,11 @@ const transformToCodeBlock = (context: NodeTransformContext) => {
   const codeMirrorType = view.state.schema.nodes.codeMirror
   if (!codeMirrorType) return false
 
-  const textContent = extractTextContent(node)
-
-  tr.delete(pos, pos + node.nodeSize)
-  const newNode = codeMirrorType.create({ language: '' }, view.state.schema.text(textContent))
-  tr.insert(pos, newNode)
-
-  const newPos = pos + 1
-  tr.setSelection(TextSelection.create(tr.doc, newPos))
+  tr.setBlockType(pos, pos + node.nodeSize, codeMirrorType, { language: '' })
+  setSelectionInsideTransformedNode(tr, pos)
 
   view.dispatch(tr)
+  view.focus()
   return true
 }
 
@@ -113,21 +120,11 @@ const transformToBlockquote = (context: NodeTransformContext) => {
   tr.delete(pos, pos + node.nodeSize)
   tr.insert(pos, blockquote)
 
-  const newPos = pos + 1
-  tr.setSelection(TextSelection.create(tr.doc, newPos))
+  setSelectionInsideTransformedNode(tr, pos)
 
   view.dispatch(tr)
+  view.focus()
   return true
-}
-
-const extractTextContent = (node: ProsemirrorNode): string => {
-  let text = ''
-  node.descendants((child) => {
-    if (child.isText) {
-      text += child.text
-    }
-  })
-  return text
 }
 
 export const useBlockTypeOptions = (
@@ -140,6 +137,7 @@ export const useBlockTypeOptions = (
 
       selectInsideNode(context)
       commands.toggleList(attrs)
+      context.view.focus()
       return true
     }
 
