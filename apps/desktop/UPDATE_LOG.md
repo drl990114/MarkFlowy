@@ -1,5 +1,39 @@
 # UPDATE LOG
 
+## v0.81.5
+
+Features:
+
+- Improved live preview blocks for HTML, Mermaid, and math with a unified editing experience, preview toggle, copy source, and fullscreen preview support.
+
+- Improved block transform and slash menu interactions, including better menu scrolling, outside-click closing, and more reliable selection behavior.
+
+- Improved desktop startup and editor loading with lazy-loaded editor panels and a loading skeleton while file content is being prepared.
+
+
+- Improved Windows CLI installation with a more reliable command wrapper.
+
+Fixes:
+
+- Fixed focus and visual issues around slash menu and context menu interactions.
+
+---
+
+特性：
+
+- 改进 HTML、Mermaid 和数学公式的实时预览块，统一编辑体验，并支持预览切换、复制源码和全屏预览。
+
+- 改进块转换菜单和斜杠菜单交互，包括菜单滚动、点击外部关闭以及选区保持。
+
+- 优化桌面端启动和编辑器加载，编辑区域按需加载，并在文件内容准备期间显示加载占位。
+
+- 改进 WindowsOS CLI 安装逻辑，命令包装器更加可靠。
+
+修复：
+
+- 修复斜杠菜单和上下文菜单交互中的焦点与视觉问题。
+
+
 ## v0.81.0
 
 Features:
