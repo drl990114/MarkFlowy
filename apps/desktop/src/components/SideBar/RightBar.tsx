@@ -1,10 +1,18 @@
 import { RIGHTBARITEMKEYS } from '@/constants'
-import aiExtension from '@/extensions/ai'
-import TABLEOFCONTENT from '@/extensions/table-of-content'
 import classNames from 'classnames'
-import { memo, useMemo, useState } from 'react'
+import { lazy, memo, Suspense, useMemo, useState } from 'react'
 import { Tooltip } from 'zens'
 import { Container as SideBarContainer, SideBarHeader } from './styles'
+
+const TableOfContentExtension = lazy(async () => {
+  const { default: TABLEOFCONTENT } = await import('@/extensions/table-of-content')
+  return { default: () => <>{TABLEOFCONTENT.components}</> }
+})
+
+const AIExtension = lazy(async () => {
+  const { default: aiExtension } = await import('@/extensions/ai')
+  return { default: () => <>{aiExtension.components}</> }
+})
 
 function RightBar() {
   const [activeRightBarItemKey, setActiveRightBarItemKey] = useState<RIGHTBARITEMKEYS>(
@@ -13,8 +21,26 @@ function RightBar() {
 
   const rightBarDataSource: RightBarItem[] = useMemo(() => {
     return [
-      TABLEOFCONTENT,
-      aiExtension,
+      {
+        title: RIGHTBARITEMKEYS.TableOfContent,
+        key: RIGHTBARITEMKEYS.TableOfContent,
+        icon: <i className='ri-list-unordered' />,
+        components: (
+          <Suspense fallback={null}>
+            <TableOfContentExtension />
+          </Suspense>
+        ),
+      },
+      {
+        title: RIGHTBARITEMKEYS.AI,
+        key: RIGHTBARITEMKEYS.AI,
+        icon: <i className='ri-chat-smile-ai-line' />,
+        components: (
+          <Suspense fallback={null}>
+            <AIExtension />
+          </Suspense>
+        ),
+      },
     ]
   }, [])
 

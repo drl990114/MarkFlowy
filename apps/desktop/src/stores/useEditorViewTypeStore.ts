@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { EditorViewType } from 'rme'
+import { EditorViewType } from '@/constants/editorViewType'
 import { immer } from 'zustand/middleware/immer'
 
 const useEditorViewTypeStore = create(

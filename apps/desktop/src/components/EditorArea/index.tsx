@@ -1,22 +1,17 @@
 import { commandRegistry } from '@/commands'
-import { FindReplace } from '@/components/EditorArea/editorToolBar/FindReplace'
-import { PreviewToolbar } from '@/components/EditorArea/editorToolBar/PreviewToolbar/PreviewToolbar'
-import { SourceCodeToolbar } from '@/components/EditorArea/editorToolBar/SourceCodeToolbar/SourceCodeToolbar'
-import { WysiwygToolbar } from '@/components/EditorArea/editorToolBar/WysiwygToolbar'
+import { EditorViewType } from '@/constants/editorViewType'
 import { EVENT } from '@/constants'
 import bus from '@/helper/eventBus'
 import { useEditorStore } from '@/stores'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
-import { memo, useEffect } from 'react'
-import { EditorViewType } from 'rme'
-import Editor from './Editor'
-import EditorAreaTabs from './EditorAreaTabs'
+import { lazy, memo, Suspense, useEffect } from 'react'
 import { EmptyState } from './EmptyState'
-import { Container, EditorPanel, OverlayScrollbarStyles } from './styles'
+
+const EditorAreaContent = lazy(() => import('./EditorAreaContent'))
 
 function EditorArea() {
-  const { opened, activeId } = useEditorStore()
+  const { opened } = useEditorStore()
 
   useEffect(() => {
     const disposable = commandRegistry.registerCommand({
@@ -53,19 +48,9 @@ function EditorArea() {
   }
 
   return (
-    <Container className='w-full h-full'>
-      <OverlayScrollbarStyles />
-      <EditorAreaTabs />
-      <WysiwygToolbar />
-      <SourceCodeToolbar />
-      <PreviewToolbar />
-      <FindReplace />
-      <EditorPanel id="editor-panel">
-        {opened.map((id) => {
-          return <Editor key={id} id={id} active={id === activeId} />
-        })}
-      </EditorPanel>
-    </Container>
+    <Suspense fallback={null}>
+      <EditorAreaContent />
+    </Suspense>
   )
 }
 

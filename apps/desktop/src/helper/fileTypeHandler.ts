@@ -1,5 +1,5 @@
 import useAppSettingStore from '@/stores/useAppSettingStore'
-import { EditorViewType } from 'rme'
+import { EditorViewType } from '@/constants/editorViewType'
 import { IFile } from './filesys'
 
 export type FileType = 'markdown' | 'image' | 'json' | 'text' | 'unsupported'

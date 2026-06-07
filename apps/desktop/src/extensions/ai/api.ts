@@ -1,7 +1,13 @@
 import { filterObjectEmptyValues } from '@/helper'
-import { AIGenerateTextParams, AIStreamTextParams, generateTextHandlerMap } from './aiProvidersService'
+import type { AIGenerateTextParams, AIStreamTextParams } from './aiProvidersService'
+
+async function getGenerateTextHandlerMap() {
+  const { generateTextHandlerMap } = await import('./aiProvidersRuntime')
+  return generateTextHandlerMap
+}
 
 export async function aiGenerateTextRequest(params: AIGenerateTextParams) {
+  const generateTextHandlerMap = await getGenerateTextHandlerMap()
   const handler = generateTextHandlerMap[params.sdkProvider]?.generateText
   return handler(params)
 }
@@ -24,6 +30,7 @@ export async function aiStreamTextRequest(params: AIStreamTextParams) {
   const mergedHeaders = mergeHeaders(DEFAULT_REQUEST_HEADERS, params.headers)
   const paramsWithHeaders = { ...noEmptyParams, headers: mergedHeaders }
 
+  const generateTextHandlerMap = await getGenerateTextHandlerMap()
   const handler = generateTextHandlerMap[params.sdkProvider]?.streamText
   return handler(paramsWithHeaders)
 }

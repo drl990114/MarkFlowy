@@ -79,7 +79,8 @@ async function appThemeExtensionsSetup() {
     }
 
     logger.debug('Loading themes...')
-    invoke<Record<string, any>>('load_themes').then((res) => {
+    try {
+      const res = await invoke<Record<string, any>>('load_themes')
       logger.debug('Themes loaded:', res)
       if (isArray(res)) {
         try {
@@ -95,10 +96,10 @@ async function appThemeExtensionsSetup() {
       } else {
         useThemeStore.getState().applyTheme()
       }
-    }).catch((error) => {
+    } catch (error) {
       logger.error('Failed to invoke load_themes:', error)
       useThemeStore.getState().applyTheme()
-    })
+    }
   } catch (error) {
     logger.error('Failed to setup theme extensions:', error)
     logger.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace')
@@ -157,13 +158,12 @@ async function appWorkspaceSetup() {
 
   try {
     logger.debug('Creating LazyStore for workspace cache...')
-    const cacheStore = await new LazyStore('.markflowy_workspaces.dat')
-    logger.debug('LazyStore created successfully')
-
     logger.debug('Invoking get_opened_cache...')
-    const getOpenedCacheRes = await invoke<{ recent_workspaces: WorkspaceInfo[] }>(
-      'get_opened_cache',
-    )
+    const [cacheStore, getOpenedCacheRes] = await Promise.all([
+      new LazyStore('.markflowy_workspaces.dat'),
+      invoke<{ recent_workspaces: WorkspaceInfo[] }>('get_opened_cache'),
+    ])
+    logger.debug('LazyStore created successfully')
     logger.debug('get_opened_cache result:', getOpenedCacheRes)
     
     const recentWorkspaces = getOpenedCacheRes.recent_workspaces
@@ -190,21 +190,20 @@ async function appWorkspaceSetup() {
       const targetWorkspacePath = recentWorkspaces[0].path
       logger.debug('Target workspace path:', targetWorkspacePath)
       
-      const cacheStoreInitPromises = Promise.all([
-        cacheStore.get<{
-          openedFilePaths: string[]
-          activeFilePath: string
-        }>(targetWorkspacePath),
-      ])
-      const cacheStoreInitPromisesRes = await cacheStoreInitPromises
-      logger.debug('Cache store init result:', cacheStoreInitPromisesRes)
-      
       logger.debug('Reading directory:', targetWorkspacePath)
       try {
-        const res = await readDirectory(targetWorkspacePath)
+        const [workspaceCache, res] = await Promise.all([
+          cacheStore.get<{
+          openedFilePaths: string[]
+          activeFilePath: string
+          }>(targetWorkspacePath),
+          readDirectory(targetWorkspacePath),
+        ])
+        logger.debug('Cache store init result:', workspaceCache)
+      
         logger.debug('Directory read successfully, file count:', res.length)
         setFolderData(res)
-        const { openedFilePaths, activeFilePath } = cacheStoreInitPromisesRes[0] || {}
+        const { openedFilePaths, activeFilePath } = workspaceCache || {}
 
         if (activeFilePath) {
           const activeFile = getFileObjectByPath(activeFilePath)
@@ -283,17 +282,19 @@ const appSetup = once(async function () {
   window.removeEventListener('message', listener)
   window.addEventListener('message', listener)
 
-  appThemeExtensionsSetup()
-  await i18nInit({ lng: settingData.language })
-  checkUpdate({ install: settingData.auto_update })
-
   // Initialize zoom level based on webview_zoom setting
   if (settingData.webview_zoom) {
     const webview = getCurrentWebview()
     webview.setZoom(Number(settingData.webview_zoom))
   }
 
-  await appWorkspaceSetup()
+  await Promise.all([
+    appThemeExtensionsSetup(),
+    i18nInit({ lng: settingData.language }),
+    appWorkspaceSetup(),
+  ])
+
+  checkUpdate({ install: settingData.auto_update })
 
   return settingData
 })
