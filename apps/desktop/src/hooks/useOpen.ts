@@ -93,7 +93,7 @@ const useOpen = () => {
     if (typeof dir !== 'string') return
 
     await invoke<boolean>('save_security_bookmark', { path: dir })
-    await invoke<boolean>('activate_workspace_root', { path: dir })
+    await invoke<boolean>('activate_workspace_root', { rootPath: dir })
 
     openFolder(dir)
   }, [openFolder])

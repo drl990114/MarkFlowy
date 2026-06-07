@@ -14,7 +14,7 @@ const List: FC<ListProps> = (props) => {
       {title ? <h5 className='list-title'>{title}</h5> : null}
       {data.map((item) => {
         return (
-          <Tooltip title={item.tooltip || item.title} skipTimeout={0} placement='right' {...tip} key={item.key}>
+          <Tooltip title={item.tooltip || item.title} placement='right' {...tip} key={item.key}>
             <div
               key={item.key}
               className='list-item'

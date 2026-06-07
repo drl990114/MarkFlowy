@@ -298,7 +298,7 @@ const Explorer: FC<ExplorerProps> = (props) => {
               <h5 className='recent-workspaces__title'>{t('file.recentDir')}</h5>
               <div className='recent-workspaces__list'>
                 {recentWorkspaceItems.map((item) => (
-                  <Tooltip key={item.key} title={item.tooltip} skipTimeout={0} placement='right'>
+                  <Tooltip key={item.key} title={item.tooltip} placement='right'>
                     <button
                       type='button'
                       className='recent-workspaces__item'
