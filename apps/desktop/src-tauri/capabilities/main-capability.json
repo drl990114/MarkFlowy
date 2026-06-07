@@ -67,6 +67,8 @@
     "fs:allow-mkdir",
     "fs:allow-remove",
     "fs:allow-stat",
+    "fs:allow-start-accessing-security-scoped-resource",
+    "fs:allow-stop-accessing-security-scoped-resource",
     {
       "identifier": "fs:scope",
       "allow": [

@@ -1,4 +1,6 @@
 import { useEditorStore } from '@/stores'
+import type { FileEntry, IFile } from '@markflowy/interface'
+import { FileResultCode } from '@markflowy/interface'
 import { invoke } from '@tauri-apps/api/core'
 import { readDir } from '@tauri-apps/plugin-fs'
 import { nanoid } from 'nanoid'
@@ -11,9 +13,13 @@ import {
 } from './files'
 
 export { FileResultCode } from '@markflowy/interface'
-export type { IFile, FileEntry, FileSysResult } from '@markflowy/interface'
-import type { IFile, FileEntry } from '@markflowy/interface'
-import { FileResultCode } from '@markflowy/interface'
+export type { FileEntry, FileSysResult, IFile } from '@markflowy/interface'
+
+// 安全范围管理已移至 Rust 后端（fc.rs），macOS 上 plugin-fs 的 start/stopAccessingSecurityScopedResource 为 no-op
+export async function releaseSecurityScope(path?: string) {
+  if (!path) return
+  await invoke('release_security_scopes', { path })
+}
 
 const wrapFiles = (entries: FileEntry[]) => {
   const idEntries: Array<{ id: string; file: IFile }> = []
@@ -73,8 +79,6 @@ export const readDirectory = async (folderPath: string): Promise<IFile[]> => {
   const entries: IFile[] = []
   
   try {
-    await invoke<boolean>('restore_security_bookmark', { path: folderPath })
-    
     const dirEntries = await readDir(folderPath)
     
     for (const entry of dirEntries) {
@@ -132,8 +136,6 @@ export const readSubdirectory = async (folderPath: string): Promise<IFile[]> => 
   const entries: IFile[] = []
   
   try {
-    await invoke<boolean>('restore_security_bookmark', { path: folderPath })
-    
     const dirEntries = await readDir(folderPath)
     
     for (const entry of dirEntries) {

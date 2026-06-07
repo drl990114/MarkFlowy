@@ -91,9 +91,10 @@ const useOpen = () => {
     })
 
     if (typeof dir !== 'string') return
-    
+
     await invoke<boolean>('save_security_bookmark', { path: dir })
-    
+    await invoke<boolean>('activate_workspace_root', { path: dir })
+
     openFolder(dir)
   }, [openFolder])
 
@@ -101,9 +102,12 @@ const useOpen = () => {
     const file = await open({
       multiple: false,
       filters: [{ name: 'Markdown', extensions: ['md'] }],
+      fileAccessMode: 'scoped',
     })
 
     if (typeof file !== 'string') return
+
+    await invoke<boolean>('save_security_bookmark', { path: file })
 
     const fileName = getFileNameFromPath(file) || 'new-file.md'
 

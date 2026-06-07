@@ -12,7 +12,7 @@ function EditorAreaContent() {
   const { opened, activeId } = useEditorStore()
 
   return (
-    <Container className='w-full h-full'>
+    <Container className='w-full h-full editor-area-container'>
       <OverlayScrollbarStyles />
       <EditorAreaTabs />
       <WysiwygToolbar />

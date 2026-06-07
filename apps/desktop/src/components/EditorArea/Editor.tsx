@@ -7,7 +7,7 @@ import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-react'
 import 'overlayscrollbars/overlayscrollbars.css'
-import { memo } from 'react'
+import { memo, useEffect, useState } from 'react'
 import { useMount } from 'react-use'
 import { EditorViewType } from 'rme'
 import { EmptyState } from './EmptyState'
@@ -32,6 +32,7 @@ const overlayScrollbarsOptions = {
 
 function Editor(props: EditorProps) {
   const { id, active } = props
+  const [shouldMountContent, setShouldMountContent] = useState(active)
   const curFile = getFileObject(id)
 
   const { getFileTypeConfigById, setFileTypeConfig } = useFileTypeConfigStore()
@@ -58,6 +59,12 @@ function Editor(props: EditorProps) {
     }
   })
 
+  useEffect(() => {
+    if (active) {
+      setShouldMountContent(true)
+    }
+  }, [active])
+
   if (isEmptyEditor(curFile.id)) {
     if (active) {
       return <EmptyState />
@@ -79,7 +86,7 @@ function Editor(props: EditorProps) {
         style={{ height: '100%' }}
       >
         <div className={'code-contents'}>
-          {curFileTypeConfig.type === 'unsupported' ? (
+          {!shouldMountContent ? null : curFileTypeConfig.type === 'unsupported' ? (
             <UnsupportedFileType fileName={curFile.name} />
           ) : isTextfileType(curFileTypeConfig) ? (
             <TextEditor fileTypeConfig={curFileTypeConfig} active={active} id={id} />

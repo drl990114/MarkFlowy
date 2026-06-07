@@ -33,6 +33,12 @@ export const OverlayScrollbarStyles = createGlobalStyle`
       pointer-events: none !important;
     }
 
+    /* Hide editor area tabs & toolbars so they don't obscure the fullscreen overlay.
+       These are siblings of #editor-panel inside the editor area container */
+    .editor-area-container > :not(#editor-panel) {
+      display: none !important;
+    }
+
     /* Break OverlayScrollbars stacking context so position: fixed
        can escape and cover the full viewport.
        .os-size-observer-host uses contain:strict which creates both
@@ -141,9 +147,33 @@ export const EditorPanel = styled.div`
 
 export const EditorScrollContainer = styled.div`
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  top: 0; left: 0; right: 0; bottom: 0;
   overflow: auto;
+`
+
+export const EditorSkeleton = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 32px;
+  gap: 12px;
+
+  .skeleton-line {
+    height: 16px;
+    border-radius: 4px;
+    background-color: ${(props) => props.theme.borderColor};
+    animation: skeleton-pulse 1.6s ease-in-out infinite;
+
+    &:nth-child(odd) {
+      width: 100%;
+    }
+    &:nth-child(even) {
+      width: 85%;
+    }
+
+    @keyframes skeleton-pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+  }
 `

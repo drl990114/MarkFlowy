@@ -3,7 +3,7 @@ import useAiChatStore from '@/extensions/ai/useAiChatStore'
 import bus from '@/helper/eventBus'
 import { loadLocalThemeCss } from '@/helper/extensions'
 import { getFileObject, getFileObjectByPath, getSaveOpenedEditorEntries } from '@/helper/files'
-import { getFileNameFromPath, readDirectory } from '@/helper/filesys'
+import { createFile, getFileNameFromPath, readDirectory, releaseSecurityScope } from '@/helper/filesys'
 import { logger } from '@/helper/logger'
 import { checkUpdate } from '@/helper/updater'
 import { i18nInit } from '@/i18n'
@@ -40,6 +40,19 @@ const getExtFromPath = (path: string) => {
   const fileName = getFileNameFromPath(path) || ''
   const dotIndex = fileName.lastIndexOf('.')
   return dotIndex > -1 ? fileName.slice(dotIndex + 1) : ''
+}
+
+const ensureCachedFileByPath = (path: string) => {
+  const existingFile = getFileObjectByPath(path)
+  if (existingFile) {
+    return existingFile
+  }
+
+  return createFile({
+    name: getFileNameFromPath(path) || 'new-file.md',
+    ext: getExtFromPath(path),
+    path,
+  })
 }
 
 async function appThemeExtensionsSetup() {
@@ -205,21 +218,17 @@ async function appWorkspaceSetup() {
         setFolderData(res)
         const { openedFilePaths, activeFilePath } = workspaceCache || {}
 
-        if (activeFilePath) {
-          const activeFile = getFileObjectByPath(activeFilePath)
-          if (activeFile) {
-            setActiveId(activeFile.id)
-            addOpenedFile(activeFile.id)
-          }
-        }
-
         if (openedFilePaths) {
           openedFilePaths.forEach((path) => {
-            const cur = getFileObjectByPath(path)
-            if (cur) {
-              addOpenedFile(cur.id)
-            }
+            const cur = ensureCachedFileByPath(path)
+            addOpenedFile(cur.id)
           })
+        }
+
+        if (activeFilePath) {
+          const activeFile = ensureCachedFileByPath(activeFilePath)
+          addOpenedFile(activeFile.id)
+          setActiveId(activeFile.id)
         }
 
         useEditorStore.subscribe((state) => {
@@ -315,6 +324,8 @@ const useAppSetup = () => {
   const eventInit = useCallback(() => {
     const closeRequest = currentWindow.listen('tauri://close-requested', async () => {
       const handleCloseWindow = async () => {
+        const rootPath = useEditorStore.getState().getRootPath()
+        await releaseSecurityScope(rootPath)
         closeRequest.then((fn) => fn())
         currentWindow.destroy()
       }

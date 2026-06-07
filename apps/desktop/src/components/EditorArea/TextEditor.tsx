@@ -46,16 +46,16 @@ import {
 import { toast } from 'zens'
 import { createWysiwygDelegateOptions } from './createWysiwygDelegateOptions'
 import { EditorWrapper } from './EditorWrapper'
-import { WarningHeader } from './styles'
+import { EditorSkeleton, WarningHeader } from './styles'
 
 const delegateOptionsCache = new Map<string, CreateWysiwygDelegateOptions>()
 const LARGE_MARKDOWN_SOURCE_MODE_THRESHOLD = 200_000
 
-const requestIdle = (callback: () => void) => {
+const requestIdle = (callback: () => void): number => {
   if ('requestIdleCallback' in window) {
-    return window.requestIdleCallback(callback, { timeout: 1000 })
+    return window.requestIdleCallback(callback, { timeout: 1000 }) as unknown as number
   }
-  return window.setTimeout(callback, 0)
+  return setTimeout(callback, 0) as unknown as number
 }
 
 const cancelIdle = (handle: number) => {
@@ -63,7 +63,7 @@ const cancelIdle = (handle: number) => {
     window.cancelIdleCallback(handle)
     return
   }
-  window.clearTimeout(handle)
+  clearTimeout(handle)
 }
 
 function getOrCreateDelegateOptions(fileId?: string): CreateWysiwygDelegateOptions {
@@ -95,6 +95,19 @@ enum TextEditorStatus {
 }
 
 export const sourceCodeCodemirrorViewMap: Map<string, MfCodemirrorView> = new Map()
+
+async function readFileContent(filePath: string): Promise<FileSysResult> {
+  const invokeStartTime = performance.now()
+  const res = await invoke<FileSysResult>('get_file_content', {
+    filePath,
+  })
+  console.log(
+    'Finished loading file content via get_file_content, time taken:',
+    performance.now() - invokeStartTime,
+    'ms',
+  )
+  return res
+}
 
 function TextEditor(props: TextEditorProps) {
   const { id, active, fileTypeConfig } = props
@@ -166,9 +179,10 @@ function TextEditor(props: TextEditorProps) {
     const init = async () => {
       const file = curFile
       if (file.path) {
-        const res = await invoke<FileSysResult>('get_file_content', {
-          filePath: file.path,
-        })
+        console.log('Loading file content from path:', file.path)
+        const startTime = performance.now()
+        const res = await readFileContent(file.path)
+        console.log('Finished loading file content total, time taken:', performance.now() - startTime, 'ms')
         if (canceled) return
         if (res.code === FileResultCode.NotFound) {
           return setStatus(TextEditorStatus.NOTEXIST)
@@ -713,7 +727,13 @@ function TextEditor(props: TextEditorProps) {
   }
 
   if (typeof content !== 'string' || !delegate) {
-    return null
+    return (
+      <EditorSkeleton>
+        {Array.from({ length: 12 }).map((_, i) => (
+          <div key={i} className='skeleton-line' />
+        ))}
+      </EditorSkeleton>
+    )
   }
 
   const cls = classNames('markdown-body', {

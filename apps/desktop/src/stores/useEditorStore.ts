@@ -1,4 +1,4 @@
-import { createFile, getFolderPathFromPath, isMdFile, type IFile } from '@/helper/filesys';
+import { createFile, getFolderPathFromPath, isMdFile, releaseSecurityScope, type IFile } from '@/helper/filesys';
 import { isEmptyEditor } from '@/services/editor-file';
 import { invoke } from '@tauri-apps/api/core';
 import type { EditorContext, EditorDelegate } from 'rme';
@@ -257,13 +257,21 @@ const useEditorStore = create<EditorStore>((set, get) => {
         return state
       }),
 
-    setFolderData: (folderData) =>
+    setFolderData: (folderData) => {
+      const prevRootPath = get().getRootPath()
+      const nextRootPath = folderData?.[0]?.path
+
+      if (prevRootPath && prevRootPath !== nextRootPath) {
+        releaseSecurityScope(prevRootPath).catch(() => {})
+      }
+
       set((state) => ({
         ...state,
         folderData,
         opened: [],
         activeId: undefined,
-      })),
+      }))
+    },
 
     setFolderDataPure: (folderData) =>
       set((state) => ({

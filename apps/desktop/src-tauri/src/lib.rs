@@ -603,6 +603,8 @@ pub fn run() {
             app::clipboard::get_clipboard_text,
             fc::cmd::save_security_bookmark,
             fc::cmd::restore_security_bookmark,
+            fc::cmd::release_security_scopes,
+            fc::cmd::activate_workspace_root,
         ])
         .setup(|app: &mut tauri::App| {
             cli_debug!("========================================");
