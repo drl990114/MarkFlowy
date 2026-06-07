@@ -15,6 +15,7 @@ import {
 import SourceEditor, { createSourceCodeDelegate } from './SourceEditor'
 import { useContextMounted } from './useContextMounted'
 import WysiwygEditor, { createWysiwygDelegate } from './WysiwygEditor'
+import type { BlockHandlerProps } from '../toolbar/BlockHandler'
 // @ts-ignore
 import HTML from 'html-parse-stringify'
 import { nanoid } from 'nanoid'
@@ -200,6 +201,7 @@ export interface EditorProps {
     enable?: boolean
     compProps?: WysiwygToolbarProps
   }
+  blockHandlerOptions?: BlockHandlerProps
   onContextMounted?: (context: EditorContext) => void
   errorHandler?: Pick<ErrorBoundaryProps, 'onError' | 'fallback'>
 }

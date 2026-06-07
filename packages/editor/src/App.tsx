@@ -374,6 +374,10 @@ function App() {
         wysiwygToolBarOptions={{
           enable: true,
         }}
+        blockHandlerOptions={{
+          getMenuBoundary: (editorView) =>
+            editorView.dom.closest<HTMLElement>('.playground-self-scroll'),
+        }}
       />
     </div>
   )

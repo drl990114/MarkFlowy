@@ -1,26 +1,67 @@
+import { t } from '@markflowy/i18n'
 import { isHTMLElement } from '@ocavue/utils'
+import type { EditorView } from '@rme-sdk/core'
 import { NodeSelection } from '@rme-sdk/pm/state'
 import { useCommands, useExtension, useRemirrorContext } from '@rme-sdk/react-core'
-import { t } from '@markflowy/i18n'
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import styled from 'styled-components'
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import styled, { createGlobalStyle } from 'styled-components'
 import { Dropdown, type DropdownMenuItem, type MenuItemType } from 'zens'
 import { nodeTypeIconMap } from '../../const'
+import { LineListExtension } from '../../extensions'
 import { createDraggingPreview, setViewDragging } from '../../extensions/NodeIndicator/drag-preview'
-import { editorZIndex } from '../../theme/z-index'
 import {
   NodeIndicatorExtension,
   NodeIndicatorState,
 } from '../../extensions/NodeIndicator/node-indicator-extension'
+import { editorZIndex } from '../../theme/z-index'
 import { useBlockTypeOptions } from './useBlockTypeOptions'
 
-export const BlockHandler = memo(() => {
+const MENU_VIEWPORT_PADDING = 8
+const MENU_MIN_HEIGHT = 96
+
+type MenuBoundary = HTMLElement | DOMRect
+
+export interface BlockHandlerProps {
+  getMenuBoundary?: (editorView: EditorView) => MenuBoundary | null | undefined
+}
+
+const getBoundaryRect = (boundary: MenuBoundary): DOMRect => {
+  return boundary instanceof HTMLElement ? boundary.getBoundingClientRect() : (boundary as unknown as DOMRect)
+}
+
+const updateBlockHandlerMenuHeight = (boundary: MenuBoundary) => {
+  const boundaryRect = getBoundaryRect(boundary)
+  const menus = Array.from(
+    document.querySelectorAll<HTMLElement>('.rme-block-handler-menu'),
+  )
+
+  menus.forEach((menu) => {
+    const rect = menu.getBoundingClientRect()
+    const spaceBelow = boundaryRect.bottom - rect.top - MENU_VIEWPORT_PADDING
+    const spaceAbove = rect.bottom - boundaryRect.top - MENU_VIEWPORT_PADDING
+    const availableHeight = Math.max(
+      MENU_MIN_HEIGHT,
+      rect.bottom > boundaryRect.bottom
+        ? spaceBelow
+        : rect.top < boundaryRect.top
+          ? spaceAbove
+          : Math.max(spaceBelow, spaceAbove),
+    )
+    const scrollArea = menu.querySelector<HTMLElement>(':scope > .dropdown-menu-scroll-area')
+    if (!scrollArea) return
+
+    scrollArea.style.maxHeight = `${availableHeight}px`
+    scrollArea.style.overflowY = scrollArea.scrollHeight > availableHeight ? 'auto' : ''
+  })
+}
+
+export const BlockHandler = memo(({ getMenuBoundary }: BlockHandlerProps) => {
   const { view: editorView } = useRemirrorContext({ autoUpdate: true })
   const nodeIndicatorExtension = useExtension(NodeIndicatorExtension)
   const state = nodeIndicatorExtension?.getPluginState() as NodeIndicatorState | undefined
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [fixedPosition, setFixedPosition] = useState<{ left: number; top: number } | null>(null)
-  const commands = useCommands()
+  const commands = useCommands<LineListExtension>()
   const blockTypeOptions = useBlockTypeOptions(t, commands)
   const triggerRef = useRef<HTMLDivElement>(null)
   const displayStateRef = useRef<NodeIndicatorState | undefined>(state)
@@ -111,6 +152,39 @@ export const BlockHandler = memo(() => {
     }
   }, [dropdownOpen])
 
+  useLayoutEffect(() => {
+    if (!dropdownOpen || !editorView) return
+
+    let frameId = 0
+    const scheduleUpdate = () => {
+      cancelAnimationFrame(frameId)
+      frameId = requestAnimationFrame(() => {
+        updateBlockHandlerMenuHeight(getMenuBoundary?.(editorView) ?? editorView.dom)
+      })
+    }
+
+    scheduleUpdate()
+
+    const mutationObserver = new MutationObserver(scheduleUpdate)
+    mutationObserver.observe(document.body, {
+      attributes: true,
+      childList: true,
+      subtree: true,
+    })
+
+    document.addEventListener('pointermove', scheduleUpdate, true)
+    window.addEventListener('resize', scheduleUpdate)
+    window.addEventListener('scroll', scheduleUpdate, true)
+
+    return () => {
+      cancelAnimationFrame(frameId)
+      mutationObserver.disconnect()
+      document.removeEventListener('pointermove', scheduleUpdate, true)
+      window.removeEventListener('resize', scheduleUpdate)
+      window.removeEventListener('scroll', scheduleUpdate, true)
+    }
+  }, [dropdownOpen, editorView, getMenuBoundary])
+
   const displayState = dropdownOpen ? displayStateRef.current : state
 
   const transformOptions = useMemo(() => {
@@ -119,7 +193,9 @@ export const BlockHandler = memo(() => {
 
     return blockTypeOptions.filter(
       (option) =>
-        option.group === 'transform' && (!option.isAvailable || option.isAvailable(currentNode)),
+        option.group === 'transform' &&
+        (!option.isActive || !option.isActive(currentNode)) &&
+        (!option.isAvailable || option.isAvailable(currentNode)),
     )
   }, [blockTypeOptions, displayState?.node])
 
@@ -152,11 +228,14 @@ export const BlockHandler = memo(() => {
     )
   }, [transformOptions])
 
-  const groupLabels: Record<string, string> = {
-    text: t('blockTypeGroup.text') || 'Text',
-    list: t('blockTypeGroup.list') || 'List',
-    other: t('blockTypeGroup.other') || 'Other',
-  }
+  const groupLabels = useMemo<Record<string, string>>(
+    () => ({
+      text: t('blockTypeGroup.text') || 'Text',
+      list: t('blockTypeGroup.list') || 'List',
+      other: t('blockTypeGroup.other') || 'Other',
+    }),
+    [t],
+  )
 
   const menuItems: DropdownMenuItem[] = useMemo(() => {
     if (!displayState?.node) return []
@@ -172,7 +251,7 @@ export const BlockHandler = memo(() => {
 
       transformSubMenuItems.push({
         key: `group-${groupKey}`,
-        label: groupLabels[groupKey],
+        label: <span className="rme-block-handler-menu-group-label">{groupLabels[groupKey]}</span>,
         disabled: true,
       })
 
@@ -247,6 +326,8 @@ export const BlockHandler = memo(() => {
         items: menuItems,
         onClick: handleMenuClick,
       }}
+      overlayClassName="rme-block-handler-menu"
+      overlayStyle={{ zIndex: editorZIndex.blockHandler + 1 }}
       trigger={['click']}
       placement="bottomLeft"
       getPopupContainer={() => document.body}
@@ -255,6 +336,7 @@ export const BlockHandler = memo(() => {
       onOpenChange={setDropdownOpen}
       triggerRef={triggerRef}
     >
+      <BlockHandlerMenuStyle />
       <Container
         ref={triggerRef}
         key="rme-block-handler"
@@ -314,4 +396,75 @@ const IconButton = styled.div`
   width: 18px;
   border-radius: ${(props) => props.theme.smallBorderRadius};
   cursor: pointer;
+`
+
+const BlockHandlerMenuStyle = createGlobalStyle`
+  .rme-block-handler-menu {
+    min-width: 154px;
+    max-width: 220px;
+    padding: 4px;
+    border-radius: 6px;
+    box-shadow: 0 10px 28px ${(props) => props.theme.boxShadowColor};
+  }
+
+  .rme-block-handler-menu {
+    overflow: visible;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+
+  .rme-block-handler-menu > .dropdown-menu-scroll-area {
+    min-height: 0;
+    overflow-x: hidden;
+  }
+
+  .rme-block-handler-menu [role='separator'] {
+    margin: 4px 0;
+    border-color: ${(props) => props.theme.borderColor};
+  }
+
+  .rme-block-handler-menu [role='menuitem'] {
+    min-height: 24px;
+    padding: 3px 7px;
+    gap: 6px;
+    border-radius: 5px;
+    line-height: 18px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .rme-block-handler-menu [role='menuitem'][data-active-item] {
+    background-color: ${(props) => props.theme.contextMenuBgColorHover};
+  }
+
+  .rme-block-handler-menu [role='menuitem']:has(.rme-block-handler-menu-group-label) {
+    min-height: 18px;
+    padding: 5px 7px 2px;
+    background-color: transparent;
+    color: ${(props) => props.theme.labelFontColor};
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0;
+    opacity: 1;
+    pointer-events: none;
+  }
+
+  .rme-block-handler-menu .dropdown-menu-item-icon {
+    width: 14px;
+    height: 14px;
+    font-size: 13px;
+    color: ${(props) => props.theme.labelFontColor};
+  }
+
+  .rme-block-handler-menu .dropdown-menu-item-label {
+    margin-left: 2px;
+  }
+
+  .rme-block-handler-menu [aria-disabled='true'] {
+    opacity: 1;
+  }
+
+  .rme-block-handler-menu [data-danger='true'] {
+    color: ${(props) => props.theme.dangerColor};
+  }
 `

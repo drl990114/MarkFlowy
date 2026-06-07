@@ -8,6 +8,7 @@ import { MenuItem, MenuSeparator, MenuWrapper } from '../Menu/styles';
 import {
   DropdownArrow,
   DropdownButtonWrapper,
+  DropdownMenuScrollArea,
   DropdownToolbar,
   DropdownToolbarDivider,
   DropdownToolbarItem,
@@ -407,8 +408,10 @@ const Dropdown: React.FC<DropdownProps> = (props) => {
               <span className="dropdown-menu-item-label">{label}</span>
               <MenuButtonArrow />
             </MenuItem>
-            <MenuWrapper>
-              {renderMenuItems(children)}
+            <MenuWrapper className={overlayClassName}>
+              <DropdownMenuScrollArea className="dropdown-menu-scroll-area">
+                {renderMenuItems(children)}
+              </DropdownMenuScrollArea>
             </MenuWrapper>
           </MenuProvider>
         );
@@ -500,7 +503,9 @@ const Dropdown: React.FC<DropdownProps> = (props) => {
       {...rest}
     >
       {renderToolbar()}
-      {renderMenuItems(menu.items)}
+      <DropdownMenuScrollArea className="dropdown-menu-scroll-area">
+        {renderMenuItems(menu.items)}
+      </DropdownMenuScrollArea>
     </MenuWrapper>
   ) : null;
 

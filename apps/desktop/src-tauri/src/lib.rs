@@ -238,7 +238,9 @@ fn cli_version_file(dir: &std::path::Path) -> PathBuf {
 /// 读取已安装 CLI 的版本标记
 fn read_installed_cli_version(dir: &std::path::Path) -> Option<String> {
     let version_path = cli_version_file(dir);
-    fs::read_to_string(&version_path).ok().map(|v| v.trim().to_string())
+    fs::read_to_string(&version_path)
+        .ok()
+        .map(|v| v.trim().to_string())
 }
 
 /// 写入版本标记
@@ -320,7 +322,9 @@ fn cleanup_old_cli_symlinks(home_dir: &std::path::Path, current_exe: &std::path:
         // 只删除指向当前应用二进制的 symlink，不删除用户自己创建的
         if path.is_symlink() {
             if let Ok(target) = fs::read_link(&path) {
-                if target == current_exe || target.is_absolute() && target.exists() && same_path(&target, current_exe) {
+                if target == current_exe
+                    || target.is_absolute() && target.exists() && same_path(&target, current_exe)
+                {
                     let _ = fs::remove_file(&path);
                     cli_debug!("cleaned up old symlink: {:?}", path);
                 }
@@ -415,32 +419,32 @@ fn install_cli_in_background(app: &tauri::App) {
         return;
     };
 
-    let install_dir = cli_install_dir(&home_dir);
+    tauri::async_runtime::spawn_blocking(move || {
+        let install_dir = cli_install_dir(&home_dir);
 
-    // Unix 上目标目录需要在 PATH 中才安装
-    #[cfg(unix)]
-    if !path_contains_dir(&install_dir) {
-        cli_debug!("install dir {:?} not in PATH, skipping", install_dir);
-        return;
-    }
-
-    let current_exe = match env::current_exe() {
-        Ok(path) => path,
-        Err(error) => {
-            cli_debug!("failed to get current exe for CLI install: {:?}", error);
+        // Unix 上目标目录需要在 PATH 中才安装。PATH 扫描放在后台，避免拖慢首屏窗口创建。
+        #[cfg(unix)]
+        if !path_contains_dir(&install_dir) {
+            cli_debug!("install dir {:?} not in PATH, skipping", install_dir);
             return;
         }
-    };
 
-    // 版本和路径都匹配，无需更新
-    if is_cli_up_to_date(&install_dir, &current_exe) {
-        cli_debug!("CLI wrapper is up to date, skipping install");
-        return;
-    }
+        let current_exe = match env::current_exe() {
+            Ok(path) => path,
+            Err(error) => {
+                cli_debug!("failed to get current exe for CLI install: {:?}", error);
+                return;
+            }
+        };
 
-    let app_version = env!("CARGO_PKG_VERSION").to_string();
+        // 版本和路径都匹配，无需更新。版本标记读取也在后台执行。
+        if is_cli_up_to_date(&install_dir, &current_exe) {
+            cli_debug!("CLI wrapper is up to date, skipping install");
+            return;
+        }
 
-    tauri::async_runtime::spawn_blocking(move || {
+        let app_version = env!("CARGO_PKG_VERSION").to_string();
+
         // 先清理旧版本安装的 symlink
         cleanup_old_cli_symlinks(&home_dir, &current_exe);
 

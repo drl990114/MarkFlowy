@@ -3,6 +3,8 @@ import { TextSelection } from '@rme-sdk/pm/state'
 import { useCommands } from '@rme-sdk/react-core'
 import { useMemo } from 'react'
 import { useTranslation } from '@markflowy/i18n'
+import { LineListExtension } from '../../extensions'
+import type { ListAttributes } from '../../extensions/List/input-rule/types'
 import { nodeTypeIconMap } from '../../const'
 import type { BlockTypeGroup, BlockTypeOption, NodeTransformContext } from './types'
 
@@ -18,21 +20,32 @@ const isBlockquote = (node: ProsemirrorNode) => node.type.name === 'blockquote'
 const isList = (kind: string) => (node: ProsemirrorNode) =>
   node.type.name === 'list' && node.attrs.kind === kind
 
+const canSetTextBlockType = (node: ProsemirrorNode) => {
+  return ['paragraph', 'heading', 'codeMirror'].includes(node.type.name)
+}
+
 const canTransformToTextBlock = (node: ProsemirrorNode) => {
-  const textBlockTypes = ['paragraph', 'heading', 'codeMirror', 'blockquote', 'list']
-  return textBlockTypes.includes(node.type.name)
+  return canSetTextBlockType(node)
 }
 
 const canTransformToList = (node: ProsemirrorNode) => {
-  return ['paragraph', 'heading', 'codeMirror', 'blockquote', 'list'].includes(node.type.name)
+  return ['paragraph', 'heading', 'list'].includes(node.type.name)
 }
 
 const canTransformToCodeBlock = (node: ProsemirrorNode) => {
-  return ['paragraph', 'heading', 'blockquote', 'list'].includes(node.type.name)
+  return ['paragraph', 'heading'].includes(node.type.name)
 }
 
 const canTransformToBlockquote = (node: ProsemirrorNode) => {
-  return ['paragraph', 'heading', 'codeMirror', 'list'].includes(node.type.name)
+  return ['paragraph', 'heading'].includes(node.type.name)
+}
+
+const selectInsideNode = ({ view, pos }: NodeTransformContext) => {
+  const docSize = view.state.doc.content.size
+  const textPos = Math.max(0, Math.min(pos + 1, docSize))
+  const selection = TextSelection.near(view.state.doc.resolve(textPos), 1)
+  view.dispatch(view.state.tr.setSelection(selection))
+  view.focus()
 }
 
 const deleteNode = (context: NodeTransformContext) => {
@@ -119,9 +132,17 @@ const extractTextContent = (node: ProsemirrorNode): string => {
 
 export const useBlockTypeOptions = (
   t: (key: string, options?: any) => string,
-  commands: ReturnType<typeof useCommands>,
+  commands: ReturnType<typeof useCommands<LineListExtension>>,
 ): BlockTypeOption[] => {
   const options = useMemo<BlockTypeOption[]>(() => {
+    const transformToList = (attrs: ListAttributes) => (context: NodeTransformContext) => {
+      if (!commands.toggleList) return false
+
+      selectInsideNode(context)
+      commands.toggleList(attrs)
+      return true
+    }
+
     const headingOptions: BlockTypeOption[] = Array.from({ length: 6 }, (_, i) => {
       const level = i + 1
       return {
@@ -171,13 +192,7 @@ export const useBlockTypeOptions = (
         group: 'transform' as const,
         isActive: isList('bullet'),
         isAvailable: canTransformToList,
-        transform: (context) => {
-          if (commands.toggleBulletList?.enabled?.()) {
-            commands.toggleBulletList()
-            return true
-          }
-          return false
-        },
+        transform: transformToList({}),
       },
       {
         key: 'ordered-list',
@@ -186,13 +201,7 @@ export const useBlockTypeOptions = (
         group: 'transform' as const,
         isActive: isList('ordered'),
         isAvailable: canTransformToList,
-        transform: (context) => {
-          if (commands.toggleOrderedList?.enabled?.()) {
-            commands.toggleOrderedList()
-            return true
-          }
-          return false
-        },
+        transform: transformToList({ kind: 'ordered' }),
       },
       {
         key: 'task-list',
@@ -201,13 +210,7 @@ export const useBlockTypeOptions = (
         group: 'transform' as const,
         isActive: isList('task'),
         isAvailable: canTransformToList,
-        transform: (context) => {
-          if (commands.toggleTaskList?.enabled?.()) {
-            commands.toggleTaskList()
-            return true
-          }
-          return false
-        },
+        transform: transformToList({ kind: 'task' }),
       },
     ]
 
@@ -265,4 +268,3 @@ export const useBlockTypeGroups = (): BlockTypeGroup[] => {
     ]
   }, [options, t])
 }
-

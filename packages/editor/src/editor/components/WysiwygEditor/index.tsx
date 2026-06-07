@@ -23,6 +23,7 @@ const WysiwygEditor: FC<EditorProps> = (props) => {
     isTesting,
     editable = true,
     wysiwygToolBarOptions,
+    blockHandlerOptions,
     styleToken = defaultStyleToken,
     wysiwygTextContainerProps = {},
   } = props
@@ -77,7 +78,7 @@ const WysiwygEditor: FC<EditorProps> = (props) => {
           ) : null}
           <Text {...wysiwygTextContainerProps} />
           <TableToolbar />
-          <BlockHandler />
+          <BlockHandler {...blockHandlerOptions} />
           <SlashMenu />
           <LinkHoverIcon handleLinkClick={props.delegateOptions?.handleLinkClick} />
           {wysiwygToolBar || null}

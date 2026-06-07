@@ -97,3 +97,8 @@ export const DropdownToolbarDivider = styled.div`
   background-color: ${(props) => props.theme.borderColor};
   margin: 0 4px;
 `;
+
+export const DropdownMenuScrollArea = styled.div`
+  min-height: 0;
+  overflow: visible;
+`;
