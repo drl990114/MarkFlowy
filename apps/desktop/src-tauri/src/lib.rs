@@ -28,7 +28,7 @@ use tauri_plugin_window_state::{AppHandleExt, StateFlags};
 use tracing_subscriber;
 
 #[cfg(windows)]
-use windows_sys::Win32::System::Console::{AttachConsole, GetConsoleWindow, ATTACH_PARENT_PROCESS};
+use windows_sys::Win32::System::Console::{AttachConsole, ATTACH_PARENT_PROCESS};
 #[cfg(windows)]
 use windows_sys::Win32::UI::WindowsAndMessaging::{
     SendMessageTimeoutW, HWND_BROADCAST, SMTO_ABORTIFHUNG, WM_SETTINGCHANGE,
@@ -124,16 +124,6 @@ Examples:
 
 Note: Create a symlink or alias 'mf' -> 'markflowy' for shorter invocation."#
     );
-}
-
-fn is_terminal_launch() -> bool {
-    #[cfg(windows)]
-    {
-        return unsafe { !GetConsoleWindow().is_null() };
-    }
-
-    #[cfg(not(windows))]
-    std::env::var("TERM").is_ok()
 }
 
 #[cfg(windows)]
@@ -494,7 +484,7 @@ pub fn run() {
 
     let context = tauri::generate_context!();
 
-    tauri::Builder::default()
+    let app = tauri::Builder::default()
         .manage(OpenedUrls(Default::default()))
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
@@ -632,6 +622,10 @@ pub fn run() {
                 print_version();
                 std::process::exit(0);
             }
+            if args.iter().any(|a| a == "-h" || a == "--help" || a == "help") {
+                print_cli_help();
+                std::process::exit(0);
+            }
 
             match app.cli().matches() {
                 Ok(matches) => {
@@ -659,10 +653,6 @@ pub fn run() {
                             }
                             _ => {}
                         }
-                    } else if is_terminal_launch() && !cfg!(debug_assertions) {
-                        cli_debug!("terminal launch, no subcommand -> showing help");
-                        print_cli_help();
-                        std::process::exit(0);
                     } else {
                         cli_debug!("GUI launch -> normal startup");
                     }
@@ -711,7 +701,13 @@ pub fn run() {
                 "".into()
             };
 
-            setup::init(app.handle().clone(), opened_urls).expect("failed to setup app");
+            setup::init(app.handle().clone(), opened_urls).map_err(|error| {
+                eprintln!("Failed to create MarkFlowy window: {error}");
+                eprintln!(
+                    "If this happens on Linux, check WebKitGTK/GTK runtime dependencies and try launching with GDK_BACKEND=x11 markflowy."
+                );
+                error
+            })?;
 
             #[cfg(target_os = "macos")]
             menu::generate_menu(app).expect("failed to generate menu");
@@ -733,25 +729,47 @@ pub fn run() {
                 }
             }
         })
-        .build(context)
-        .unwrap()
-        .run(|app, event| {
-            #[cfg(target_os = "macos")]
-            match event {
-                tauri::RunEvent::Opened { urls, .. } => {
-                    let opened_urls = app.try_state::<OpenedUrls>();
-                    let urls = if let Some(opened_urls) = &opened_urls {
-                        append_opened_urls(opened_urls.inner(), &urls)
-                    } else {
-                        urls.clone()
-                    };
-                    let urls_str = opened_urls_to_string(&urls);
+        .build(context);
 
-                    println!("Processed URLs string: {}", urls_str);
+    let app = match app {
+        Ok(app) => app,
+        Err(error) => {
+            eprintln!("Failed to initialize MarkFlowy: {error}");
+            #[cfg(target_os = "linux")]
+            eprintln!(
+                "Linux hint: verify WebKitGTK/GTK runtime dependencies and try GDK_BACKEND=x11 markflowy if you are on Wayland."
+            );
+            std::process::exit(1);
+        }
+    };
 
-                    if let Some(window) = window_manager::get_focused_window(app) {
+    app.run(|app, event| {
+        #[cfg(target_os = "macos")]
+        match event {
+            tauri::RunEvent::Opened { urls, .. } => {
+                let opened_urls = app.try_state::<OpenedUrls>();
+                let urls = if let Some(opened_urls) = &opened_urls {
+                    append_opened_urls(opened_urls.inner(), &urls)
+                } else {
+                    urls.clone()
+                };
+                let urls_str = opened_urls_to_string(&urls);
+
+                println!("Processed URLs string: {}", urls_str);
+
+                if let Some(window) = window_manager::get_focused_window(app) {
+                    use tauri::Emitter;
+                    println!("Emitting to focused window: {}", window.label());
+                    update_window_opened_urls(&window, &urls_str);
+                    let result = window.emit("opened-urls", urls_str.clone());
+                    if let Some(opened_urls) = &opened_urls {
+                        clear_opened_urls(opened_urls.inner());
+                    }
+                    println!("Emit result: {:?}", result);
+                } else {
+                    if let Some(window) = window_manager::get_last_opened_window(app) {
                         use tauri::Emitter;
-                        println!("Emitting to focused window: {}", window.label());
+                        println!("Emitting to last opened window: {}", window.label());
                         update_window_opened_urls(&window, &urls_str);
                         let result = window.emit("opened-urls", urls_str.clone());
                         if let Some(opened_urls) = &opened_urls {
@@ -759,21 +777,11 @@ pub fn run() {
                         }
                         println!("Emit result: {:?}", result);
                     } else {
-                        if let Some(window) = window_manager::get_last_opened_window(app) {
-                            use tauri::Emitter;
-                            println!("Emitting to last opened window: {}", window.label());
-                            update_window_opened_urls(&window, &urls_str);
-                            let result = window.emit("opened-urls", urls_str.clone());
-                            if let Some(opened_urls) = &opened_urls {
-                                clear_opened_urls(opened_urls.inner());
-                            }
-                            println!("Emit result: {:?}", result);
-                        } else {
-                            println!("No window found to emit event");
-                        }
+                        println!("No window found to emit event");
                     }
                 }
-                _ => {}
             }
-        });
+            _ => {}
+        }
+    });
 }
