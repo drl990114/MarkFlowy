@@ -22,7 +22,8 @@ use app::{
 };
 use dotenv;
 use lazy_static::lazy_static;
-use tauri::{Manager, State};
+use serde::{Deserialize, Serialize};
+use tauri::{Emitter, Manager, State};
 use tauri_plugin_cli::CliExt;
 use tauri_plugin_window_state::{AppHandleExt, StateFlags};
 use tracing_subscriber;
@@ -50,6 +51,45 @@ lazy_static! {
 }
 
 struct OpenedUrls(Mutex<Option<Vec<url::Url>>>);
+
+const CLI_GUI_CHILD_ENV: &str = "MARKFLOWY_CLI_GUI_CHILD";
+
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct CliWindowState {
+    pub id: String,
+    pub workspace_path: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct CliCommandState {
+    pub id: String,
+    pub label: Option<String>,
+    pub category: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct CliRuntimeState {
+    pub version: String,
+    pub pid: Option<u32>,
+    pub windows: Vec<CliWindowState>,
+    pub commands: Vec<CliCommandState>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct CliOpenPayload {
+    path: String,
+    kind: String,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct CliCommandPayload {
+    id: String,
+}
 
 fn opened_urls_to_string(urls: &[url::Url]) -> String {
     urls.iter()
@@ -108,17 +148,28 @@ Usage: markflowy [COMMAND] [OPTIONS]
        mf [COMMAND] [OPTIONS]
 
 Commands:
-  open <path>    Open a file or folder in MarkFlowy
-  help           Print this help message
-  version        Print version information
+  open <path> [--window-id <id>]       Open a file or folder
+  file open <path> [--window-id <id>]  Open a file
+  window list                          Print windows with workspace paths
+  window focus <id>                    Focus a window
+  command list                         Print registered GUI commands
+  command execute <id> [--window-id <id>]
+                                      Execute a GUI command
+  status                               Print CLI runtime status
+  help                                 Print this help message
+  version                              Print version information
 
 Options:
-  -h, --help     Print help
-  -V, --version  Print version
+  -h, --help                          Print help
+  -V, --version                       Print version
+  --window-id, --window <id>           Target window id
 
 Examples:
   markflowy open /path/to/file.md
-  markflowy open /path/to/folder
+  markflowy open /path/to/folder --window-id main
+  markflowy file open /path/to/file.md --window-id main
+  markflowy window list
+  markflowy command execute app_save --window-id main
   markflowy help
   markflowy version
 
@@ -155,6 +206,368 @@ fn path_to_file_url(path: &str, cwd: Option<&str>) -> String {
     url::Url::from_file_path(&path)
         .map(|u| u.to_string())
         .unwrap_or_else(|_| path.to_string_lossy().to_string())
+}
+
+fn absolute_path_string(path: &str, cwd: Option<&str>) -> String {
+    let path = PathBuf::from(path);
+    let path = if path.is_absolute() {
+        path
+    } else {
+        cwd.filter(|cwd| !cwd.is_empty())
+            .map(PathBuf::from)
+            .or_else(|| env::current_dir().ok())
+            .unwrap_or_else(|| PathBuf::from("."))
+            .join(path)
+    };
+
+    path.to_string_lossy().to_string()
+}
+
+fn runtime_dir() -> Option<PathBuf> {
+    #[cfg(windows)]
+    {
+        env::var_os("LOCALAPPDATA")
+            .map(PathBuf::from)
+            .or_else(|| {
+                env::var_os("USERPROFILE")
+                    .map(|home| PathBuf::from(home).join("AppData").join("Local"))
+            })
+            .map(|dir| dir.join("MarkFlowy"))
+    }
+
+    #[cfg(not(windows))]
+    {
+        env::var_os("HOME")
+            .map(PathBuf::from)
+            .map(|home| home.join(".markflowy"))
+    }
+}
+
+fn runtime_state_path() -> Option<PathBuf> {
+    runtime_dir().map(|dir| dir.join("runtime.json"))
+}
+
+#[cfg(unix)]
+fn is_process_alive(pid: u32) -> bool {
+    extern "C" {
+        fn kill(pid: i32, sig: i32) -> i32;
+    }
+
+    if pid == 0 || pid == std::process::id() {
+        return false;
+    }
+
+    unsafe { kill(pid as i32, 0) == 0 }
+}
+
+#[cfg(windows)]
+fn is_process_alive(pid: u32) -> bool {
+    if pid == 0 || pid == std::process::id() {
+        return false;
+    }
+
+    std::process::Command::new("tasklist")
+        .args(["/FI", &format!("PID eq {pid}"), "/NH"])
+        .output()
+        .map(|output| String::from_utf8_lossy(&output.stdout).contains(&pid.to_string()))
+        .unwrap_or(false)
+}
+
+fn empty_cli_runtime_state() -> CliRuntimeState {
+    CliRuntimeState {
+        version: env!("CARGO_PKG_VERSION").to_string(),
+        ..Default::default()
+    }
+}
+
+fn read_cli_runtime_state() -> CliRuntimeState {
+    let state = runtime_state_path()
+        .and_then(|path| fs::read_to_string(path).ok())
+        .and_then(|content| serde_json::from_str::<CliRuntimeState>(&content).ok())
+        .unwrap_or_else(empty_cli_runtime_state);
+
+    match state.pid {
+        Some(pid) if is_process_alive(pid) => state,
+        _ => empty_cli_runtime_state(),
+    }
+}
+
+fn write_cli_runtime_state(state: &CliRuntimeState) -> Result<(), String> {
+    let path = runtime_state_path().ok_or_else(|| "Failed to resolve runtime path".to_string())?;
+    if let Some(parent) = path.parent() {
+        fs::create_dir_all(parent).map_err(|e| e.to_string())?;
+    }
+
+    let content = serde_json::to_string_pretty(state).map_err(|e| e.to_string())?;
+    fs::write(path, content).map_err(|e| e.to_string())
+}
+
+fn sync_cli_runtime_windows(app: &tauri::AppHandle) {
+    let mut state = read_cli_runtime_state();
+    state.version = env!("CARGO_PKG_VERSION").to_string();
+    state.pid = Some(std::process::id());
+
+    let mut windows = Vec::new();
+    if let Ok(instances) = WINDOW_INSTANCES.lock() {
+        for (label, path) in instances.iter() {
+            if app.get_webview_window(label).is_some() {
+                windows.push(CliWindowState {
+                    id: label.clone(),
+                    workspace_path: path.to_string_lossy().to_string(),
+                });
+            }
+        }
+    }
+
+    if app.get_webview_window("main").is_some() && !windows.iter().any(|window| window.id == "main")
+    {
+        windows.push(CliWindowState {
+            id: "main".to_string(),
+            workspace_path: "".to_string(),
+        });
+    }
+
+    windows.sort_by(|a, b| a.id.cmp(&b.id));
+    state.windows = windows;
+    let _ = write_cli_runtime_state(&state);
+}
+
+fn print_json<T: Serialize>(value: &T) {
+    match serde_json::to_string_pretty(value) {
+        Ok(content) => println!("{content}"),
+        Err(error) => {
+            eprintln!("Failed to serialize JSON: {error}");
+            std::process::exit(1);
+        }
+    }
+}
+
+fn get_arg_value(args: &[String], names: &[&str]) -> Option<String> {
+    args.iter().enumerate().find_map(|(index, arg)| {
+        if names.iter().any(|name| arg == name) {
+            args.get(index + 1).cloned()
+        } else {
+            names.iter().find_map(|name| {
+                arg.strip_prefix(&format!("{name}="))
+                    .map(|value| value.to_string())
+            })
+        }
+    })
+}
+
+fn strip_cli_options(args: &[String]) -> Vec<String> {
+    let mut result = Vec::new();
+    let mut index = 0;
+
+    while index < args.len() {
+        let arg = &args[index];
+        if arg == "--window-id" || arg == "--window" {
+            index += 2;
+            continue;
+        }
+        if arg.starts_with("--window-id=") || arg.starts_with("--window=") {
+            index += 1;
+            continue;
+        }
+
+        result.push(arg.clone());
+        index += 1;
+    }
+
+    result
+}
+
+fn target_window<'a>(
+    app: &'a tauri::AppHandle,
+    window_id: Option<&str>,
+) -> Option<tauri::WebviewWindow> {
+    window_id
+        .and_then(|id| app.get_webview_window(id))
+        .or_else(|| window_manager::get_focused_window(app))
+}
+
+fn emit_open_to_window(
+    app: &tauri::AppHandle,
+    window_id: Option<&str>,
+    path: String,
+    kind: &str,
+) -> Result<(), String> {
+    let window = target_window(app, window_id).ok_or_else(|| "Window not found".to_string())?;
+    window.set_focus().map_err(|e| e.to_string())?;
+    window
+        .emit(
+            "cli:open",
+            CliOpenPayload {
+                path,
+                kind: kind.to_string(),
+            },
+        )
+        .map_err(|e| e.to_string())
+}
+
+fn handle_running_cli_command(app: &tauri::AppHandle, args: &[String], cwd: Option<&str>) {
+    let positional = strip_cli_options(args);
+    if positional.len() <= 1 {
+        return;
+    }
+
+    let window_id = get_arg_value(args, &["--window-id", "--window"]);
+
+    match positional[1].as_str() {
+        "open" => {
+            if let Some(path) = positional.get(2) {
+                let path = absolute_path_string(path, cwd);
+                if let Err(error) = emit_open_to_window(app, window_id.as_deref(), path, "auto") {
+                    println!("CLI open failed: {error}");
+                }
+            }
+        }
+        "file" if positional.get(2).map(String::as_str) == Some("open") => {
+            if let Some(path) = positional.get(3) {
+                let path = absolute_path_string(path, cwd);
+                if let Err(error) = emit_open_to_window(app, window_id.as_deref(), path, "file") {
+                    println!("CLI file open failed: {error}");
+                }
+            }
+        }
+        "window" if positional.get(2).map(String::as_str) == Some("focus") => {
+            if let Some(target) = positional.get(3) {
+                if let Some(window) = app.get_webview_window(target) {
+                    let _ = window.set_focus();
+                } else {
+                    println!("Window not found: {target}");
+                }
+            }
+        }
+        "command" if positional.get(2).map(String::as_str) == Some("execute") => {
+            if let Some(command_id) = positional.get(3) {
+                if let Some(window) = target_window(app, window_id.as_deref()) {
+                    let _ = window.set_focus();
+                    if let Err(error) = window.emit(
+                        "cli:command",
+                        CliCommandPayload {
+                            id: command_id.clone(),
+                        },
+                    ) {
+                        println!("CLI command execute failed: {error}");
+                    }
+                } else {
+                    println!("Window not found");
+                }
+            }
+        }
+        _ => {}
+    }
+}
+
+fn is_cli_control_command(positional: &[String]) -> bool {
+    matches!(
+        positional.get(1).map(String::as_str),
+        Some("open") | Some("file") | Some("window") | Some("command")
+    )
+}
+
+fn spawn_cli_gui_child_and_exit(args: &[String]) {
+    if env::var_os(CLI_GUI_CHILD_ENV).is_some() || !is_cli_control_command(&strip_cli_options(args))
+    {
+        return;
+    }
+
+    let exe = match env::current_exe() {
+        Ok(exe) => exe,
+        Err(error) => {
+            eprintln!("Failed to resolve MarkFlowy executable: {error}");
+            std::process::exit(1);
+        }
+    };
+
+    let mut command = std::process::Command::new(exe);
+    command
+        .args(env::args_os().skip(1))
+        .env(CLI_GUI_CHILD_ENV, "1")
+        .stdin(std::process::Stdio::null())
+        .stdout(std::process::Stdio::null())
+        .stderr(std::process::Stdio::null());
+
+    if let Err(error) = command.spawn() {
+        eprintln!("Failed to start MarkFlowy GUI process: {error}");
+        std::process::exit(1);
+    }
+
+    std::process::exit(0);
+}
+
+fn handle_read_only_cli_command() {
+    let args: Vec<String> = env::args().collect();
+    let positional = strip_cli_options(&args);
+
+    if args.iter().any(|a| a == "-V" || a == "--version") {
+        print_version();
+        std::process::exit(0);
+    }
+    if args
+        .iter()
+        .any(|a| a == "-h" || a == "--help" || a == "help")
+    {
+        print_cli_help();
+        std::process::exit(0);
+    }
+
+    match positional.get(1).map(String::as_str) {
+        Some("status") => {
+            let state = read_cli_runtime_state();
+            print_json(&state);
+            std::process::exit(0);
+        }
+        Some("window") if positional.get(2).map(String::as_str) == Some("list") => {
+            let state = read_cli_runtime_state();
+            print_json(&state.windows);
+            std::process::exit(0);
+        }
+        Some("command") if positional.get(2).map(String::as_str) == Some("list") => {
+            let state = read_cli_runtime_state();
+            print_json(&state.commands);
+            std::process::exit(0);
+        }
+        _ => {}
+    }
+
+    spawn_cli_gui_child_and_exit(&args);
+}
+
+#[tauri::command]
+fn update_cli_window_state(
+    app: tauri::AppHandle,
+    window_id: String,
+    workspace_path: Option<String>,
+) -> Result<(), String> {
+    {
+        let mut instances = WINDOW_INSTANCES
+            .lock()
+            .map_err(|_| "Failed to lock window instances".to_string())?;
+
+        if let Some(path) = workspace_path {
+            if path.is_empty() {
+                instances.remove(&window_id);
+            } else {
+                instances.insert(window_id, PathBuf::from(path));
+            }
+        } else {
+            instances.remove(&window_id);
+        }
+    }
+
+    sync_cli_runtime_windows(&app);
+    Ok(())
+}
+
+#[tauri::command]
+fn update_cli_command_state(commands: Vec<CliCommandState>) -> Result<(), String> {
+    let mut state = read_cli_runtime_state();
+    state.version = env!("CARGO_PKG_VERSION").to_string();
+    state.commands = commands;
+    state.commands.sort_by(|a, b| a.id.cmp(&b.id));
+    write_cli_runtime_state(&state)
 }
 
 /// CLI wrapper 的文件名
@@ -481,6 +894,7 @@ pub fn run() {
     tracing_subscriber::fmt::init();
     dotenv::dotenv().ok();
     attach_parent_console();
+    handle_read_only_cli_command();
 
     let context = tauri::generate_context!();
 
@@ -501,12 +915,24 @@ pub fn run() {
         .plugin(tauri_plugin_cli::init())
         .plugin(tauri_plugin_single_instance::init(
             |app_handle: &tauri::AppHandle, args: Vec<String>, cwd: String| {
+                handle_running_cli_command(app_handle, &args, Some(&cwd));
+                let positional = strip_cli_options(&args);
+                if matches!(
+                    positional.get(1).map(String::as_str),
+                    Some("open") | Some("file") | Some("window") | Some("command")
+                ) {
+                    return;
+                }
                 if args.len() > 1 {
                     match args[1].as_str() {
                         "open" => {
+                            if get_arg_value(&args, &["--window-id", "--window"]).is_some() {
+                                return;
+                            }
                             let opened_urls = args
                                 .iter()
                                 .skip(2)
+                                .filter(|arg| !arg.starts_with("--window"))
                                 .map(|p| path_to_file_url(p, Some(&cwd)))
                                 .collect::<Vec<_>>()
                                 .join(",");
@@ -595,6 +1021,8 @@ pub fn run() {
             fc::cmd::restore_security_bookmark,
             fc::cmd::release_security_scopes,
             fc::cmd::activate_workspace_root,
+            update_cli_window_state,
+            update_cli_command_state,
         ])
         .setup(|app: &mut tauri::App| {
             cli_debug!("========================================");
@@ -636,6 +1064,24 @@ pub fn run() {
                                     if let Some(raw_path) = arg_data.value.as_str() {
                                         let url = path_to_file_url(raw_path, None);
                                         cli_debug!("open: {} -> {}", raw_path, url);
+
+                                        let mut file_urls =
+                                            app.state::<OpenedUrls>().inner().0.lock().unwrap();
+                                        if let Ok(parsed) = url::Url::parse(&url) {
+                                            *file_urls = Some(vec![parsed]);
+                                        } else {
+                                            cli_debug!("failed to parse URL: {}", url);
+                                        }
+                                    }
+                                }
+                            }
+                            "file" => {
+                                let args: Vec<String> = env::args().collect();
+                                let positional = strip_cli_options(&args);
+                                if positional.get(2).map(String::as_str) == Some("open") {
+                                    if let Some(raw_path) = positional.get(3) {
+                                        let url = path_to_file_url(raw_path, None);
+                                        cli_debug!("file open: {} -> {}", raw_path, url);
 
                                         let mut file_urls =
                                             app.state::<OpenedUrls>().inner().0.lock().unwrap();
@@ -708,6 +1154,7 @@ pub fn run() {
                 );
                 error
             })?;
+            sync_cli_runtime_windows(app.handle());
 
             #[cfg(target_os = "macos")]
             menu::generate_menu(app).expect("failed to generate menu");
@@ -727,6 +1174,7 @@ pub fn run() {
                         window_label
                     );
                 }
+                sync_cli_runtime_windows(app);
             }
         })
         .build(context);
