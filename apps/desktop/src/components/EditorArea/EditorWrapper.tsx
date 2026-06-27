@@ -16,6 +16,7 @@ export const EditorWrapper = styled.div.attrs<EditorWrapperProps>((props) => pro
   position: relative;
   display: grid;
   grid-template-columns: 1fr;
+  --rme-editor-inline-padding: clamp(16px, 5vw, 40px);
 
   > * {
     grid-column: 1;
@@ -30,7 +31,7 @@ export const EditorWrapper = styled.div.attrs<EditorWrapperProps>((props) => pro
 
     return props.active
       ? css({
-          maxWidth: shouldFullWidth ? 'auto' : '800px',
+          maxWidth: shouldFullWidth ? 'none' : '800px',
           margin: '0 auto',
           paddingBottom: '3rem',
           marginInlineStart: 'auto',

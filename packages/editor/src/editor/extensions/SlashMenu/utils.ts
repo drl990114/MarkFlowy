@@ -13,6 +13,22 @@ export const isSlashKey = <T extends HTMLElement>(event: ReactKeyboardEvent<T> |
   return event.key === "/"
 }
 
+export const getSlashFilterBeforeCursor = (view: EditorView): string | null => {
+  const { selection } = view.state
+  if (selection.from !== selection.to) return null
+  const $from = selection.$from
+  const textBeforeCursor = $from.parent.textBetween(0, $from.parentOffset, undefined, '\ufffc')
+  return getSlashFilterFromTextBeforeCursor(textBeforeCursor)
+}
+
+export const getSlashFilterFromTextBeforeCursor = (textBeforeCursor: string): string | null => {
+  const slashIndex = textBeforeCursor.lastIndexOf('/')
+  if (slashIndex < 0) return null
+  const filter = textBeforeCursor.slice(slashIndex + 1)
+  if (/\s/.test(filter)) return null
+  return filter
+}
+
 export const defaultIgnoredKeys = [
   "Unidentified",
   "Alt",
