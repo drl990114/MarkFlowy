@@ -149,13 +149,6 @@ The development of **MarkFlowy** cannot be separated from these contributors. Th
         </a>
     </td>
     <td align="center">
-        <a href="https://github.com/AdySnowflake">
-            <img src="https://avatars.githubusercontent.com/u/163967164?v=4" width="90;" alt="AdySnowflake"/>
-            <br />
-            <sub><b>Null</b></sub>
-        </a>
-    </td>
-    <td align="center">
         <a href="https://github.com/KiraKiraAyu">
             <img src="https://avatars.githubusercontent.com/u/99468824?v=4" width="90;" alt="KiraKiraAyu"/>
             <br />
@@ -163,39 +156,32 @@ The development of **MarkFlowy** cannot be separated from these contributors. Th
         </a>
     </td>
     <td align="center">
-        <a href="https://github.com/SamDc73">
-            <img src="https://avatars.githubusercontent.com/u/144215270?v=4" width="90;" alt="SamDc73"/>
-            <br />
-            <sub><b>Husam Alshehadat</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/marianoesteban">
-            <img src="https://avatars.githubusercontent.com/u/3076449?v=4" width="90;" alt="marianoesteban"/>
-            <br />
-            <sub><b>Mariano Esteban</b></sub>
-        </a>
-    </td></tr>
-<tr>
-    <td align="center">
-        <a href="https://github.com/Raven-1027">
-            <img src="https://avatars.githubusercontent.com/u/83693755?v=4" width="90;" alt="Raven-1027"/>
+        <a href="https://github.com/AdySnowflake">
+            <img src="https://avatars.githubusercontent.com/u/163967164?v=4" width="90;" alt="AdySnowflake"/>
             <br />
             <sub><b>Null</b></sub>
         </a>
     </td>
     <td align="center">
-        <a href="https://github.com/andriishin">
-            <img src="https://avatars.githubusercontent.com/u/3613462?v=4" width="90;" alt="andriishin"/>
+        <a href="https://github.com/punkyard">
+            <img src="https://avatars.githubusercontent.com/u/59349105?v=4" width="90;" alt="punkyard"/>
             <br />
-            <sub><b>Alexander</b></sub>
+            <sub><b>Pun Kyard</b></sub>
         </a>
     </td>
     <td align="center">
-        <a href="https://github.com/chiefass">
-            <img src="https://avatars.githubusercontent.com/u/106591791?v=4" width="90;" alt="chiefass"/>
+        <a href="https://github.com/hope-zjl">
+            <img src="https://avatars.githubusercontent.com/u/54581644?v=4" width="90;" alt="hope-zjl"/>
             <br />
-            <sub><b>Chiefass</b></sub>
+            <sub><b>Null</b></sub>
+        </a>
+    </td></tr>
+<tr>
+    <td align="center">
+        <a href="https://github.com/fossabot">
+            <img src="https://avatars.githubusercontent.com/u/29791463?v=4" width="90;" alt="fossabot"/>
+            <br />
+            <sub><b>Fossabot</b></sub>
         </a>
     </td>
     <td align="center">
@@ -206,24 +192,38 @@ The development of **MarkFlowy** cannot be separated from these contributors. Th
         </a>
     </td>
     <td align="center">
-        <a href="https://github.com/fossabot">
-            <img src="https://avatars.githubusercontent.com/u/29791463?v=4" width="90;" alt="fossabot"/>
+        <a href="https://github.com/chiefass">
+            <img src="https://avatars.githubusercontent.com/u/106591791?v=4" width="90;" alt="chiefass"/>
             <br />
-            <sub><b>Fossabot</b></sub>
+            <sub><b>Chiefass</b></sub>
         </a>
     </td>
     <td align="center">
-        <a href="https://github.com/hope-zjl">
-            <img src="https://avatars.githubusercontent.com/u/54581644?v=4" width="90;" alt="hope-zjl"/>
+        <a href="https://github.com/andriishin">
+            <img src="https://avatars.githubusercontent.com/u/3613462?v=4" width="90;" alt="andriishin"/>
+            <br />
+            <sub><b>Alexander</b></sub>
+        </a>
+    </td>
+    <td align="center">
+        <a href="https://github.com/Raven-1027">
+            <img src="https://avatars.githubusercontent.com/u/83693755?v=4" width="90;" alt="Raven-1027"/>
             <br />
             <sub><b>Null</b></sub>
         </a>
     </td>
     <td align="center">
-        <a href="https://github.com/punkyard">
-            <img src="https://avatars.githubusercontent.com/u/59349105?v=4" width="90;" alt="punkyard"/>
+        <a href="https://github.com/marianoesteban">
+            <img src="https://avatars.githubusercontent.com/u/3076449?v=4" width="90;" alt="marianoesteban"/>
             <br />
-            <sub><b>Pun Kyard</b></sub>
+            <sub><b>Mariano Esteban</b></sub>
+        </a>
+    </td>
+    <td align="center">
+        <a href="https://github.com/SamDc73">
+            <img src="https://avatars.githubusercontent.com/u/144215270?v=4" width="90;" alt="SamDc73"/>
+            <br />
+            <sub><b>Husam Alshehadat</b></sub>
         </a>
     </td></tr>
 </table>
