@@ -13,6 +13,7 @@ type SlashMenuRootProps = {
   rootRef: React.RefObject<HTMLDivElement | null>
   commands: CommandsFromExtensions<AnyExtension>
   closeMenu: (config?: { insertSlash?: boolean }) => void
+  filter: string
 }
 
 export enum ChildrenHandlerNext {
@@ -22,10 +23,10 @@ export enum ChildrenHandlerNext {
 }
 
 export const SlashMenuRoot: React.FC<SlashMenuRootProps> = memo(
-  ({ rootRef, commands, closeMenu }) => {
+  ({ rootRef, commands, closeMenu, filter }) => {
     const componentRefMap = useRef<Record<string, any>>({})
     const searchInputRef = useRef<HTMLInputElement>(null)
-    const [searchText, setSearchText] = useState('')
+    const [searchText, setSearchText] = useState(filter)
     const { t } = useTranslation()
 
     useEffect(() => {
@@ -39,6 +40,10 @@ export const SlashMenuRoot: React.FC<SlashMenuRootProps> = memo(
         cancelAnimationFrame(frame)
       }
     }, [])
+
+    useEffect(() => {
+      setSearchText(filter)
+    }, [filter])
 
     const menuItems = useMemo(() => {
       const headingItems = Array.from({ length: 6 }).map((_, i) => {

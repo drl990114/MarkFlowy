@@ -15,13 +15,23 @@ import {
 } from '@rme-sdk/extension-tables'
 import { TextSelection } from '@rme-sdk/pm/state'
 
-import { TableMap } from '@rme-sdk/pm/tables'
+import {
+  addRow,
+  deleteCellSelection,
+  deleteColumn,
+  deleteRow,
+  deleteTable,
+  goToNextCell,
+  isCellSelection,
+  selectedRect,
+  TableMap,
+} from '@rme-sdk/pm/tables'
 import type { NodeSerializerOptions } from '../../transform'
 import { ParserRuleType } from '../../transform'
 import { buildBlockEnterKeymap } from '../../utils/build-block-enter-keymap'
 import { selectCell } from './table-helpers'
 import { TableSelectorExtension } from './table-selector-extension'
-import { findTable } from './table-utils'
+import { findTable, getCellSelectionType } from './table-utils'
 
 enum TABLE_ALIGEN {
   DEFAULT = 1,
@@ -182,6 +192,19 @@ export class LineTableExtension extends TableExtension {
         const tr = state.tr.setSelection(TextSelection.near(state.doc.resolve(targetPos + 1)))
         if (dispatch) dispatch(tr)
         return true
+      },
+      Tab: ({ state, dispatch }) => {
+        return handleTableTab(state, dispatch)
+      },
+      'Shift-Tab': ({ state, dispatch }) => {
+        if (!findTable(state.selection)) return false
+        return goToNextCell(-1)(state, dispatch)
+      },
+      Backspace: ({ state, dispatch }) => {
+        return handleDeleteCellSelection(state, dispatch)
+      },
+      Delete: ({ state, dispatch }) => {
+        return handleDeleteCellSelection(state, dispatch)
       },
     }
   }
@@ -408,4 +431,48 @@ export function getNodePositionByCellContent(cellContent: Fragment) {
   }
 
   return nodePositions
+}
+
+function handleDeleteCellSelection(
+  state: Parameters<ReturnType<typeof goToNextCell>>[0],
+  dispatch?: Parameters<ReturnType<typeof goToNextCell>>[1],
+): boolean {
+  const { selection } = state
+  if (!isCellSelection(selection)) return false
+
+  const selectionType = getCellSelectionType(selection)
+  if (selectionType === 'table') {
+    return deleteTable(state, dispatch)
+  }
+  if (selectionType === 'row') {
+    return deleteRow(state, dispatch)
+  }
+  if (selectionType === 'column') {
+    return deleteColumn(state, dispatch)
+  }
+  return deleteCellSelection(state, dispatch)
+}
+
+function handleTableTab(
+  state: Parameters<ReturnType<typeof goToNextCell>>[0],
+  dispatch?: Parameters<ReturnType<typeof goToNextCell>>[1],
+): boolean {
+  if (!findTable(state.selection)) return false
+  if (goToNextCell(1)(state, dispatch)) {
+    return true
+  }
+  if (!dispatch) {
+    return true
+  }
+
+  const rect = selectedRect(state)
+  const tr = addRow(state.tr, rect, rect.bottom)
+  const table = tr.doc.nodeAt(rect.tableStart - 1)
+  if (!table) return false
+
+  const map = TableMap.get(table)
+  const targetCellPos = rect.tableStart + map.positionAt(rect.bottom, 0, table)
+  tr.setSelection(TextSelection.near(tr.doc.resolve(targetCellPos + 1))).scrollIntoView()
+  dispatch(tr)
+  return true
 }

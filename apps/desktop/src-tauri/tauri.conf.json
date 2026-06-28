@@ -22,8 +22,104 @@
               "index": 1,
               "takesValue": true,
               "required": true
+            },
+            {
+              "name": "window-id",
+              "description": "Target window id",
+              "takesValue": true,
+              "required": false
+            },
+            {
+              "name": "window",
+              "description": "Target window id",
+              "takesValue": true,
+              "required": false
             }
           ]
+        },
+        "file": {
+          "description": "File commands",
+          "subcommands": {
+            "open": {
+              "description": "Open a file in MarkFlowy",
+              "args": [
+                {
+                  "name": "path",
+                  "description": "Path to the file to open",
+                  "index": 1,
+                  "takesValue": true,
+                  "required": true
+                },
+                {
+                  "name": "window-id",
+                  "description": "Target window id",
+                  "takesValue": true,
+                  "required": false
+                },
+                {
+                  "name": "window",
+                  "description": "Target window id",
+                  "takesValue": true,
+                  "required": false
+                }
+              ]
+            }
+          }
+        },
+        "window": {
+          "description": "Window commands",
+          "subcommands": {
+            "list": {
+              "description": "Print windows with workspace paths"
+            },
+            "focus": {
+              "description": "Focus a window",
+              "args": [
+                {
+                  "name": "id",
+                  "description": "Window id",
+                  "index": 1,
+                  "takesValue": true,
+                  "required": true
+                }
+              ]
+            }
+          }
+        },
+        "command": {
+          "description": "GUI command commands",
+          "subcommands": {
+            "list": {
+              "description": "Print registered GUI commands"
+            },
+            "execute": {
+              "description": "Execute a registered GUI command",
+              "args": [
+                {
+                  "name": "id",
+                  "description": "Command id",
+                  "index": 1,
+                  "takesValue": true,
+                  "required": true
+                },
+                {
+                  "name": "window-id",
+                  "description": "Target window id",
+                  "takesValue": true,
+                  "required": false
+                },
+                {
+                  "name": "window",
+                  "description": "Target window id",
+                  "takesValue": true,
+                  "required": false
+                }
+              ]
+            }
+          }
+        },
+        "status": {
+          "description": "Print CLI runtime status"
         },
         "version": {
           "description": "Print version information"

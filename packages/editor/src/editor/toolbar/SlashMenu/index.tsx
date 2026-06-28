@@ -157,7 +157,12 @@ export const SlashMenu = () => {
           }}
           {...attributes.popper}
         >
-          <SlashMenuRoot rootRef={rootRef} commands={commands} closeMenu={closeMenu} />
+          <SlashMenuRoot
+            rootRef={rootRef}
+            commands={commands}
+            closeMenu={closeMenu}
+            filter={menuState.filter}
+          />
         </Container>
       ) : null}
     </>

@@ -15,6 +15,7 @@ export class SlashMenuExtension extends PlainExtension {
   }
 
   createPlugin(): CreateExtensionPlugin<SlashMenuState> {
+    let isComposing = false
     const initialState: SlashMenuState = {
       open: false,
       filter: '',
@@ -30,6 +31,15 @@ export class SlashMenuExtension extends PlainExtension {
 
           const state = this.getState(editorState)
           if (!state) return false
+          if (event.key === 'Escape' && state.open) {
+            dispatchWithMeta(view, this.spec.key!, { type: SlashMetaTypes.close })
+            return true
+          }
+
+          if (event.isComposing || isComposing || event.key === 'Process') {
+            return false
+          }
+
           const slashCase = getCase(state, event, view, initialState.ignoredKeys)
 
           switch (slashCase) {
@@ -59,11 +69,7 @@ export class SlashMenuExtension extends PlainExtension {
               dispatchWithMeta(view, this.spec.key!, { type: SlashMetaTypes.open })
               return true
             case SlashCases.CloseMenu: {
-              if (event.isComposing) {
-                dispatchWithMeta(view, this.spec.key!, {
-                  type: SlashMetaTypes.close,
-                })
-              } else if (isSlashKey(event)) {
+              if (isSlashKey(event)) {
                 view.dispatch(
                   editorState.tr.insertText('/').setMeta(this.spec.key!, {
                     type: SlashMetaTypes.close,
@@ -80,15 +86,51 @@ export class SlashMenuExtension extends PlainExtension {
             case SlashCases.Execute:
             case SlashCases.NextItem:
             case SlashCases.PrevItem:
-            case SlashCases.addChar:
-            case SlashCases.removeChar:
             case SlashCases.Catch: {
+              return true
+            }
+
+            case SlashCases.removeChar: {
+              dispatchWithMeta(view, this.spec.key!, {
+                type: SlashMetaTypes.inputChange,
+                filter: state.filter.slice(0, -1),
+              })
+              return true
+            }
+
+            case SlashCases.addChar: {
+              if (event.key.length === 1) {
+                dispatchWithMeta(view, this.spec.key!, {
+                  type: SlashMetaTypes.inputChange,
+                  filter: `${state.filter}${event.key}`,
+                })
+              }
               return true
             }
 
             default:
               return false
           }
+        },
+        handleTextInput(view, _from, _to, text) {
+          const state = this.getState(view.state)
+          if (!state?.open || !text) return false
+
+          dispatchWithMeta(view, this.spec.key!, {
+            type: SlashMetaTypes.inputChange,
+            filter: `${state.filter}${text}`,
+          })
+          return true
+        },
+        handleDOMEvents: {
+          compositionstart: () => {
+            isComposing = true
+            return false
+          },
+          compositionend: () => {
+            isComposing = false
+            return false
+          },
         },
       },
 
@@ -108,6 +150,11 @@ export class SlashMenuExtension extends PlainExtension {
               return {
                 ...initialState,
                 open: true,
+              }
+            case SlashMetaTypes.inputChange:
+              return {
+                ...state,
+                filter: meta.filter ?? '',
               }
             default:
               return state

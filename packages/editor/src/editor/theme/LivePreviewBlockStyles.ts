@@ -141,6 +141,10 @@ export const livePreviewBlockStyles = css`
     min-height: 168px;
     padding: 14px 16px;
     overflow: auto;
+    color: inherit;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
     background: ${(props) => props.theme.bgColor};
     cursor: zoom-in;
   }
@@ -151,6 +155,14 @@ export const livePreviewBlockStyles = css`
 
   .mf-live-preview-render svg {
     max-width: 100%;
+  }
+
+  .mf-live-preview-html .mf-live-preview-render li > p {
+    margin: 0;
+  }
+
+  .mf-live-preview-html .mf-live-preview-render li > p + p {
+    margin-top: 0.5em;
   }
 
   .mf-live-preview-math .mf-live-preview-render,

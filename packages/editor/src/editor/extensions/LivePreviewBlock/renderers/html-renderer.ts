@@ -1,11 +1,40 @@
 import { html } from '@codemirror/lang-html'
 import type { Extension as CodeMirrorExtension } from '@codemirror/state'
+import MarkdownIt from 'markdown-it'
 import type { ExtensionsOptions } from '../../index'
 import { isImageElement } from '../../../utils/html'
 import type { LivePreviewRenderer } from '../live-preview-types'
 
-export function removeNewlines(str: string) {
-  return str.replace(/\n+|\t/g, '')
+const markdownHtmlRenderer = MarkdownIt('commonmark', { html: true })
+const whitespacePreservingTags = new Set(['PRE', 'CODE', 'TEXTAREA', 'SCRIPT', 'STYLE'])
+
+function hasWhitespacePreservingParent(node: Node) {
+  let parent = node.parentElement
+
+  while (parent) {
+    if (whitespacePreservingTags.has(parent.tagName)) {
+      return true
+    }
+    parent = parent.parentElement
+  }
+
+  return false
+}
+
+function removeFormattingWhitespace(root: HTMLElement) {
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT)
+  const textNodesToRemove: Text[] = []
+  let node = walker.nextNode()
+
+  while (node) {
+    const text = node.textContent || ''
+    if (/^[\s]+$/.test(text) && /[\n\r\t]/.test(text) && !hasWhitespacePreservingParent(node)) {
+      textNodesToRemove.push(node as Text)
+    }
+    node = walker.nextNode()
+  }
+
+  textNodesToRemove.forEach((textNode) => textNode.remove())
 }
 
 export function createHtmlRenderer(options: {
@@ -18,15 +47,17 @@ export function createHtmlRenderer(options: {
     className: 'mf-live-preview-html',
     getCodeMirrorExtensions: () => [html(), ...(options.codemirrorExtensions ?? [])],
     render: (content, container) => {
-      const source = removeNewlines(content).trim()
+      const source = content.trim()
       container.replaceChildren()
 
       if (!source) {
         return
       }
 
+      const htmlContent = markdownHtmlRenderer.render(source)
       const domParser = new DOMParser()
-      const doc = domParser.parseFromString(source, 'text/html')
+      const doc = domParser.parseFromString(htmlContent, 'text/html')
+      removeFormattingWhitespace(doc.body)
 
       if (options.handleViewImgSrcUrl) {
         const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_ELEMENT)

@@ -13,6 +13,8 @@ export const needSplitInlineHtmlTokenTags = ['img', 'iframe', 'br']
 
 export const excludeHtmlInlineNodes = ['html_inline_node', 'html_image', 'iframe_inline', 'html_br', 'math_inline', 'md_image']
 
+const mergeableHtmlBlockContainerTags = ['details']
+
 const typeMap: Record<string, string> = {
   img: 'html_image',
   iframe: 'iframe_inline',
@@ -150,6 +152,97 @@ function isHtmlInlineToken(t: Token) {
 function isHtmlBlockToken(t: Token) {
   return t.type === 'html_block'
 }
+
+function countOpeningTags(content: string, tag: string) {
+  const regex = new RegExp(`<${tag}\\b(?![^>]*\\/>)`, 'gi')
+  return content.match(regex)?.length || 0
+}
+
+function countClosingTags(content: string, tag: string) {
+  const regex = new RegExp(`</${tag}\\s*>`, 'gi')
+  return content.match(regex)?.length || 0
+}
+
+function getMergeableHtmlBlockContainerTag(token: Token) {
+  if (!isHtmlBlockToken(token)) return ''
+
+  const tag = getTagName(token.content)
+  if (!mergeableHtmlBlockContainerTags.includes(tag)) return ''
+
+  return countOpeningTags(token.content, tag) > countClosingTags(token.content, tag) ? tag : ''
+}
+
+function getLineStartOffset(src: string, targetLine: number) {
+  let offset = 0
+
+  for (let line = 0; line < targetLine; line++) {
+    const nextLineOffset = src.indexOf('\n', offset)
+    if (nextLineOffset === -1) return src.length
+
+    offset = nextLineOffset + 1
+  }
+
+  return offset
+}
+
+function getSourceByLineRange(src: string, startLine: number, endLine: number) {
+  const startOffset = getLineStartOffset(src, startLine)
+  const endOffset = getLineStartOffset(src, endLine)
+
+  return src.slice(startOffset, endOffset)
+}
+
+function createMergedHtmlBlockToken(
+  tokens: Token[],
+  startIndex: number,
+  endIndex: number,
+  src: string,
+) {
+  const startToken = tokens[startIndex]
+  const endToken = tokens[endIndex]
+  const merged = new Token('html_block', '', 0)
+
+  if (startToken.map && endToken.map && src) {
+    merged.content = getSourceByLineRange(src, startToken.map[0], endToken.map[1])
+    merged.map = [startToken.map[0], endToken.map[1]]
+  } else {
+    merged.content = tokens
+      .slice(startIndex, endIndex + 1)
+      .map((token) => token.content)
+      .join('')
+  }
+
+  merged.block = true
+
+  return merged
+}
+
+function mergeHtmlBlockContainers(tokens: Token[], src: string) {
+  let edited = false
+
+  for (let i = 0; i < tokens.length; i++) {
+    const tag = getMergeableHtmlBlockContainerTag(tokens[i])
+    if (!tag) continue
+
+    let depth = countOpeningTags(tokens[i].content, tag) - countClosingTags(tokens[i].content, tag)
+
+    for (let j = i + 1; j < tokens.length; j++) {
+      if (isHtmlBlockToken(tokens[j])) {
+        depth += countOpeningTags(tokens[j].content, tag)
+        depth -= countClosingTags(tokens[j].content, tag)
+      }
+
+      if (depth <= 0) {
+        const merged = createMergedHtmlBlockToken(tokens, i, j, src)
+        tokens.splice(i, j - i + 1, merged)
+        edited = true
+        break
+      }
+    }
+  }
+
+  return edited
+}
 // function hasSplitInlineHtmlToken(t: Token) {
 //   let res = false
 
@@ -167,7 +260,7 @@ function isHtmlBlockToken(t: Token) {
 // }
 
 const rule = (state: any) => {
-  const edited = false
+  let edited = mergeHtmlBlockContainers(state.tokens, state.src)
   const tokens = state.tokens
   let tokensLength = tokens.length
 
@@ -215,6 +308,7 @@ const rule = (state: any) => {
         tokens.splice(i, 1, ...newTokens)
 
         tokensLength += newTokens.length - 1
+        edited = true
       }
     } else if (isHtmlBlockToken(curToken)) {
       const tag = getTagName(curToken.content)
@@ -228,6 +322,7 @@ const rule = (state: any) => {
           1,
           ...[new Token('paragraph_open', '', 0), newToken, new Token('paragraph_close', '', 0)],
         )
+        edited = true
       }
     }
   }

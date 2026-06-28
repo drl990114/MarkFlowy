@@ -38,6 +38,15 @@ interface LocalTheme {
   css_content: string
 }
 
+interface CliOpenPayload {
+  path: string
+  kind: 'auto' | 'file' | 'workspace'
+}
+
+interface CliCommandPayload {
+  id: string
+}
+
 const getExtFromPath = (path: string) => {
   const fileName = getFileNameFromPath(path) || ''
   const dotIndex = fileName.lastIndexOf('.')
@@ -163,6 +172,42 @@ async function handleOpenedPaths(openedPaths: string[]) {
   } else {
     await Promise.all(openedPaths.map(handleOpenedPath))
   }
+}
+
+async function openWorkspaceInCurrentWindow(path: string) {
+  const { setFolderData } = useEditorStore.getState()
+  await invoke<boolean>('save_security_bookmark', { path })
+  await invoke<boolean>('activate_workspace_root', { rootPath: path })
+  const res = await readDirectory(path)
+  setFolderData(res)
+  await useOpenedCacheStore.getState().addRecentWorkspaces({ path })
+  await invoke('update_window_path', {
+    windowLabel: currentWindow.label,
+    newPath: path,
+  })
+}
+
+async function openFileInCurrentWindow(path: string) {
+  await invoke<boolean>('save_security_bookmark', { path })
+  const fileName = getFileNameFromPath(path) || 'new-file.md'
+  await addExistingMarkdownFileEdit({
+    fileName,
+    ext: getExtFromPath(path),
+    path,
+  })
+}
+
+async function handleCliOpen(payload: CliOpenPayload) {
+  const isWorkspace = payload.kind === 'workspace'
+    || (payload.kind === 'auto' && await invoke<boolean>('is_dir', { path: payload.path }))
+
+  if (isWorkspace) {
+    await openWorkspaceInCurrentWindow(payload.path)
+  } else {
+    await openFileInCurrentWindow(payload.path)
+  }
+
+  currentWindow.setFocus()
 }
 
 async function appWorkspaceSetup() {
@@ -399,10 +444,30 @@ const useAppSetup = () => {
       }
     })
 
+    const unListenCliOpen = currentWindow.listen<CliOpenPayload>('cli:open', async ({ payload }) => {
+      try {
+        await handleCliOpen(payload)
+      } catch (error) {
+        logger.error('Failed to handle CLI open:', error)
+        toast.error(`Failed to handle CLI open: ${error}`)
+      }
+    })
+
+    const unListenCliCommand = currentWindow.listen<CliCommandPayload>('cli:command', async ({ payload }) => {
+      try {
+        await commandRegistry.execute(payload.id)
+      } catch (error) {
+        logger.error('Failed to execute CLI command:', error)
+        toast.error(`Failed to execute CLI command: ${error}`)
+      }
+    })
+
     return () => {
       unListenMenu.then((fn) => fn())
       closeRequest.then((fn) => fn())
       unListenOpenedUrls.then((fn) => fn())
+      unListenCliOpen.then((fn) => fn())
+      unListenCliCommand.then((fn) => fn())
       settingDataUpdate.then((fn) => fn())
     }
   }, [])
@@ -420,6 +485,44 @@ const useAppSetup = () => {
     queryKey: ['appSetup'],
     queryFn: appSetup,
   })
+
+  useEffect(() => {
+    const updateWindowState = (workspacePath?: string) => {
+      invoke('update_cli_window_state', {
+        windowId: currentWindow.label,
+        workspacePath: workspacePath || '',
+      }).catch((error) => {
+        logger.error('Failed to update CLI window state:', error)
+      })
+    }
+
+    updateWindowState(useEditorStore.getState().getRootPath())
+    const unsubscribe = useEditorStore.subscribe((state) => {
+      updateWindowState(state.getRootPath())
+    })
+
+    return () => {
+      unsubscribe()
+    }
+  }, [])
+
+  useEffect(() => {
+    const disposable = commandRegistry.onDidChangeCommands((commands) => {
+      invoke('update_cli_command_state', {
+        commands: commands.map((command) => ({
+          id: command.id,
+          label: command.label,
+          category: command.category,
+        })),
+      }).catch((error) => {
+        logger.error('Failed to update CLI command state:', error)
+      })
+    })
+
+    return () => {
+      disposable.dispose()
+    }
+  }, [])
 
   useGlobalOSInfo()
   useGlobalKeyboard()
