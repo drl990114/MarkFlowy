@@ -6,6 +6,10 @@ export function isInputSettingItem(item: Setting.SettingItem): item is Setting.I
   return item.type === 'input'
 }
 
+export function isFileExcludePatternsSettingItem(item: Setting.SettingItem): item is Setting.FileExcludePatternsSettingItem {
+  return item?.type === 'listInput' || item?.type === 'list-input' || item?.type === 'file-exclude-patterns'
+}
+
 export function isSwitchSettingItem(item: Setting.SettingItem): item is Setting.SwitchSettingItem {
   return item.type === 'switch'
 }

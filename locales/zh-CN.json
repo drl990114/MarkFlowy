@@ -15,6 +15,7 @@
     "fetching": "加载中...",
     "submit": "提交",
     "addHeader": "添加 Header",
+    "addPattern": "添加规则",
     "key": "键",
     "value": "值",
     "success": "成功",
@@ -230,6 +231,10 @@
         "language": {
           "label": "语言",
           "desc": "设置应用的语言。"
+        },
+        "file_exclude_patterns": {
+          "label": "文件排除列表",
+          "desc": "从侧边栏和搜索中排除匹配的文件或目录。每行一个类似 .gitignore 的规则。"
         }
       }
     },

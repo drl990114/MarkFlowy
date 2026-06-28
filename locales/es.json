@@ -15,6 +15,7 @@
     "fetching": "Cargando...",
     "submit": "Presentar",
     "addHeader": "Añadir Header",
+    "addPattern": "Añadir patrón",
     "key": "Claves",
     "value": "Valor",
     "success": "Éxito",
@@ -194,6 +195,10 @@
         "language": {
           "label": "Idioma",
           "desc": "Establecer el idioma de la aplicación."
+        },
+        "file_exclude_patterns": {
+          "label": "Lista de exclusión de archivos",
+          "desc": "Excluir archivos y carpetas coincidentes del explorador y la búsqueda. Un patrón tipo gitignore por línea."
         }
       },
       "desc": "Configuración universal de la aplicación."

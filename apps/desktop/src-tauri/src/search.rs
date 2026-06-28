@@ -2,13 +2,17 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct SearchOptions {
+    #[serde(default)]
     content_case_sensitive: bool,
+    #[serde(default)]
+    file_exclude_patterns: Option<String>,
 }
 
 impl Default for SearchOptions {
     fn default() -> Self {
         Self {
             content_case_sensitive: false,
+            file_exclude_patterns: None,
         }
     }
 }
@@ -78,11 +82,20 @@ pub mod cmd {
                 let search_result = tokio::task::spawn_blocking(move || {
                     let (s, r) = channel();
                     let default_options = Options::default();
+                    let mut name_options = default_options.name;
+                    let mut content_options = ContentOptions {
+                        case_sensitive: options.content_case_sensitive,
+                        ..Default::default()
+                    };
+
+                    if let Some(exclude_patterns) = options.file_exclude_patterns {
+                        name_options.exclude_patterns = exclude_patterns.clone();
+                        content_options.exclude_patterns = exclude_patterns;
+                    }
+
                     let opts = Options {
-                        name: default_options.name,
-                        content: ContentOptions {
-                            case_sensitive: options.content_case_sensitive,
-                        },
+                        name: name_options,
+                        content: content_options,
                         sort: default_options.sort,
                         last_dir: default_options.last_dir,
                         name_history: default_options.name_history,

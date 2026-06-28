@@ -15,6 +15,7 @@
     "fetching": "読み込み中...",
     "submit": "送信",
     "addHeader": "Headerを追加",
+    "addPattern": "パターンを追加",
     "key": "キー",
     "value": "値",
     "success": "成功",
@@ -199,6 +200,10 @@
         "language": {
           "label": "言語",
           "desc": "アプリの言語を設定します。"
+        },
+        "file_exclude_patterns": {
+          "label": "ファイル除外リスト",
+          "desc": "エクスプローラーと検索から一致するファイルやフォルダーを除外します。1 行に 1 つの gitignore 形式のパターンを入力します。"
         }
       },
       "desc": "アプリケーションの共通設定。"

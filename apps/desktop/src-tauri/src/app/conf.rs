@@ -64,6 +64,7 @@ pub_struct!(AppConf {
     wysiwyg_editor_spellcheck: Option<bool>,
     source_code_editor_spellcheck: Option<bool>,
     md_editor_default_mode: Option<String>,
+    file_exclude_patterns: Option<String>,
     when_paste_image: Option<String>,
     paste_image_save_absolute_path: Option<String>,
     paste_image_save_relative_path: Option<String>,
@@ -76,6 +77,8 @@ pub_struct!(AppConf {
 });
 
 pub const APP_CONF_PATH: &str = "markflowy.conf.json";
+pub const APP_FILE_EXCLUDE_PATTERNS_PATH: &str = "markflowy-ignore";
+pub const DEFAULT_EXCLUDE_PATTERNS: &str = ".DS_Store\n.git\nThumbs.db\n.svn\n.hg\n";
 pub const STORE_KEY: &str = "app_config_v3";
 
 fn create_store(app: &AppHandle) -> Result<std::sync::Arc<Store<tauri::Wry>>, String> {
@@ -121,6 +124,44 @@ pub fn app_root() -> PathBuf {
     }
 }
 
+pub fn file_exclude_patterns_path() -> PathBuf {
+    app_root().join(APP_FILE_EXCLUDE_PATTERNS_PATH)
+}
+
+fn read_or_create_file_exclude_patterns(fallback: Option<&str>) -> String {
+    let fallback = fallback.unwrap_or(DEFAULT_EXCLUDE_PATTERNS).to_string();
+    let path = file_exclude_patterns_path();
+
+    if let Ok(content) = std::fs::read_to_string(&path) {
+        return content;
+    }
+
+    if let Some(parent) = path.parent() {
+        if let Err(err) = std::fs::create_dir_all(parent) {
+            eprintln!("Failed to create directory {:?}: {}", parent, err);
+        }
+    }
+
+    if let Err(err) = std::fs::write(&path, &fallback) {
+        eprintln!("Failed to write file exclude patterns to {:?}: {}", path, err);
+    }
+    fallback
+}
+
+fn write_file_exclude_patterns(patterns: &str) {
+    let path = file_exclude_patterns_path();
+
+    if let Some(parent) = path.parent() {
+        if let Err(err) = std::fs::create_dir_all(parent) {
+            eprintln!("Failed to create directory {:?}: {}", parent, err);
+        }
+    }
+
+    if let Err(err) = std::fs::write(&path, patterns) {
+        eprintln!("Failed to write file exclude patterns to {:?}: {}", path, err);
+    }
+}
+
 fn migrate_from_file(_app: &AppHandle) -> Option<AppConf> {
     let legacy_path = app_root().join(APP_CONF_PATH);
     if exists(&legacy_path) {
@@ -162,6 +203,7 @@ impl AppConf {
             wysiwyg_editor_spellcheck: Some(false),
             source_code_editor_spellcheck: Some(false),
             wysiwyg_editor_codemirror_line_wrap: Some(true),
+            file_exclude_patterns: Some(DEFAULT_EXCLUDE_PATTERNS.to_string()),
             extensions_chatgpt_apibase: Some("".to_string()),
             extensions_chatgpt_models: Some("gpt-3.5-turbo,gpt-4-32k,gpt-4".to_string()),
             extensions_chatgpt_apikey: Some("".to_string()),
@@ -197,6 +239,19 @@ impl AppConf {
 
     pub fn file_path() -> PathBuf {
         app_root().join(APP_CONF_PATH)
+    }
+
+    pub fn with_file_exclude_patterns_from_file(mut self) -> Self {
+        self.file_exclude_patterns = Some(read_or_create_file_exclude_patterns(
+            self.file_exclude_patterns.as_deref(),
+        ));
+        self
+    }
+
+    pub fn write_file_exclude_patterns(&self) {
+        if let Some(patterns) = self.file_exclude_patterns.as_deref() {
+            write_file_exclude_patterns(patterns);
+        }
     }
 
     pub fn read_from_store(app: &AppHandle) -> Result<Self, String> {
@@ -278,6 +333,7 @@ impl AppConf {
             wysiwyg_editor_codemirror_line_wrap,
             wysiwyg_editor_spellcheck,
             source_code_editor_spellcheck,
+            file_exclude_patterns,
             autosave_interval,
             extensions_chatgpt_apibase,
             extensions_chatgpt_apikey,
@@ -309,16 +365,18 @@ impl AppConf {
     }
 
     pub fn read_with_app(app: &AppHandle) -> Self {
-        match Self::read_from_store(app) {
-            Ok(conf) => Self::new().merge_conf(conf, app),
+        let conf = match Self::read_from_store(app) {
+            Ok(conf) => conf.with_file_exclude_patterns_from_file(),
             Err(err) => {
                 eprintln!("Failed to read from store: {}, falling back to file", err);
-                Self::default()
+                Self::default().with_file_exclude_patterns_from_file()
             }
-        }
+        };
+        Self::new().merge_conf(conf, app)
     }
 
     pub fn write_with_app(self, app: &AppHandle) -> Self {
+        self.write_file_exclude_patterns();
         match self.clone().write_to_store(app) {
             Ok(conf) => conf,
             Err(err) => {
@@ -340,10 +398,7 @@ impl AppConf {
             if exists(&legacy_path) {
                 let _ = std::fs::remove_file(&legacy_path);
             }
-            return self
-                .clone()
-                .write_to_store(app)
-                .unwrap_or_else(|_| Self::default());
+            return self.write_with_app(app);
         }
 
         Self::default()

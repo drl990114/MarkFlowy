@@ -1,3 +1,4 @@
+pub mod exclude;
 pub mod fileinfo;
 pub mod manager;
 pub mod options;
