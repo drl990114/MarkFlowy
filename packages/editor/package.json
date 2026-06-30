@@ -159,7 +159,7 @@
     "html-parse-stringify": "^3.0.1",
     "js-event-bus": "^1.1.1",
     "jsx-dom-cjs": "^8.1.6",
-    "linkify-it": "^5.0.0",
+    "linkify-it": "^5.0.1",
     "lodash": "^4.17.21",
     "markdown-it": "^14.1.0",
     "mathjax-full": "^3.2.2",
