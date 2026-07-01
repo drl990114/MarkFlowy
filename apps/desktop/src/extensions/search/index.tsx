@@ -1,9 +1,11 @@
 import type { RightBarItem } from '@/components/SideBar'
 import { MfIconButton } from '@/components/ui-v2/Button'
 import { RIGHTBARITEMKEYS } from '@/constants'
+import { resolveFileExcludePatterns } from '@/helper/file-exclude'
 import { getFileObjectByPath } from '@/helper/files'
 import { logger } from '@/helper/logger'
 import { useEditorStore } from '@/stores'
+import useAppSettingStore from '@/stores/useAppSettingStore'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { invoke } from '@tauri-apps/api/core'
 import classNames from 'classnames'
@@ -93,6 +95,7 @@ const SearchView = memo(() => {
   const { resultList, addSearchResult, searchKeyword, caseSensitive, activeIndex, setSearchState } =
     useSearchStore()
   const { addOpenedFile, setActiveId, folderData, editorCtxMap, activeId } = useEditorStore()
+  const settingData = useAppSettingStore((state) => state.settingData)
   const [expandIdMap, setExpandIdMap] = useState<Record<string, boolean>>({})
   const [isSearching, setIsSearching] = useState(false)
   const [hasSearched, setHasSearched] = useState(false)
@@ -166,6 +169,10 @@ const SearchView = memo(() => {
 
   const isAllExpand = resultList.length > 0 && resultList.every((item) => expandIdMap[item.id])
   const trimmedKeyword = searchKeyword.trim()
+  const fileExcludePatterns = useMemo(
+    () => resolveFileExcludePatterns(settingData),
+    [settingData],
+  )
   const resultFileCount = resultList.length
   const resultMatchCount = useMemo(
     () =>
@@ -245,6 +252,7 @@ const SearchView = memo(() => {
         },
         options: {
           content_case_sensitive: caseSensitive,
+          file_exclude_patterns: fileExcludePatterns,
         },
       })
 
@@ -271,7 +279,7 @@ const SearchView = memo(() => {
         setIsSearching(false)
       }
     }
-  }, [folderData, searchKeyword, caseSensitive, setSearchState, addSearchResult])
+  }, [folderData, searchKeyword, caseSensitive, fileExcludePatterns, setSearchState, addSearchResult])
 
   const toggleCaseSensitive = useCallback(() => {
     searchRequestIdRef.current += 1

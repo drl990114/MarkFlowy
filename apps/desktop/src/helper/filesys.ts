@@ -1,9 +1,10 @@
 import { useEditorStore } from '@/stores'
-import type { FileEntry, IFile } from '@markflowy/interface'
+import useAppSettingStore from '@/stores/useAppSettingStore'
+import type { FileEntry, FileSysResult, IFile } from '@markflowy/interface'
 import { FileResultCode } from '@markflowy/interface'
 import { invoke } from '@tauri-apps/api/core'
-import { readDir } from '@tauri-apps/plugin-fs'
 import { nanoid } from 'nanoid'
+import { resolveFileExcludePatterns } from './file-exclude'
 import {
   getFileObjectByPath,
   setFileObject,
@@ -75,32 +76,26 @@ export const createUntitledFile = (): IFile => {
   return createFile()
 }
 
-export const readDirectory = async (folderPath: string): Promise<IFile[]> => {
-  const entries: IFile[] = []
-  
-  try {
-    const dirEntries = await readDir(folderPath)
-    
-    for (const entry of dirEntries) {
-      const fileName = entry.name
-      const filePath = `${folderPath}/${fileName}`
-      const ext = fileName.includes('.') ? fileName.split('.').pop() || '' : ''
-      
-      const isDir = entry.isDirectory
-      
-      const fileEntry: IFile = {
-        id: nanoid(),
-        name: fileName,
-        kind: isDir ? 'dir' : 'file',
-        path: filePath,
-        children: isDir ? [] : undefined,
-        ext: isDir ? '' : ext,
-      }
+const readDirectoryEntries = async (
+  folderPath: string,
+  rootPath = folderPath,
+): Promise<IFile[]> => {
+  const result = await invoke<FileSysResult>('open_folder_async', {
+    folderPath,
+    rootPath,
+    fileExcludePatterns: getCurrentFileExcludePatterns(),
+  })
 
-      entries.push(fileEntry)
-    }
-    
-    sortFilesByKindAndName(entries)
+  if (result.code !== FileResultCode.Success) {
+    throw new Error(`Failed to read directory: ${result.code}`)
+  }
+
+  return JSON.parse(result.content) as IFile[]
+}
+
+export const readDirectory = async (folderPath: string): Promise<IFile[]> => {
+  try {
+    const entries = await readDirectoryEntries(folderPath)
     wrapFiles(entries)
     
     const folderName = await invoke<string>('get_path_name', {
@@ -124,46 +119,23 @@ export const readDirectory = async (folderPath: string): Promise<IFile[]> => {
   }
 }
 
-const sortFilesByKindAndName = (files: IFile[]) => {
-  files.sort((a, b) => {
-    if (a.kind === 'dir' && b.kind !== 'dir') return -1
-    if (a.kind !== 'dir' && b.kind === 'dir') return 1
-    return a.name.localeCompare(b.name, undefined, { numeric: true })
-  })
-}
-
 export const readSubdirectory = async (folderPath: string): Promise<IFile[]> => {
-  const entries: IFile[] = []
-  
   try {
-    const dirEntries = await readDir(folderPath)
-    
-    for (const entry of dirEntries) {
-      const fileName = entry.name
-      const filePath = `${folderPath}/${fileName}`
-      const ext = fileName.includes('.') ? fileName.split('.').pop() || '' : ''
-      
-      const isDir = entry.isDirectory
-      
-      const fileEntry: IFile = {
-        id: nanoid(),
-        name: fileName,
-        kind: isDir ? 'dir' : 'file',
-        path: filePath,
-        children: isDir ? [] : undefined,
-        ext: isDir ? '' : ext,
-      }
-      
-      entries.push(fileEntry)
-    }
-    
-    sortFilesByKindAndName(entries)
+    const entries = await readDirectoryEntries(folderPath, getFileExcludeRootPath(folderPath))
     wrapFiles(entries)
     
     return entries
   } catch (err) {
     return []
   }
+}
+
+const getCurrentFileExcludePatterns = () => {
+  return resolveFileExcludePatterns(useAppSettingStore.getState().settingData)
+}
+
+const getFileExcludeRootPath = (folderPath: string) => {
+  return useEditorStore.getState().getRootPath() || folderPath
 }
 
 export function isMdFile(fileName?: string) {

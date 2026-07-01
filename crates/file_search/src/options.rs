@@ -44,6 +44,8 @@ pub struct NameOptions {
     pub ignore_dot: bool,
     #[serde(default = "bool_true")]
     pub use_gitignore: bool,
+    #[serde(default)]
+    pub exclude_patterns: String,
 }
 
 fn bool_true() -> bool {
@@ -59,13 +61,26 @@ impl Default for NameOptions {
             follow_links: false,
             ignore_dot: true,
             use_gitignore: true,
+            exclude_patterns: String::new(),
         }
     }
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug, Default)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct ContentOptions {
+    #[serde(default)]
     pub case_sensitive: bool,
+    #[serde(default)]
+    pub exclude_patterns: String,
+}
+
+impl Default for ContentOptions {
+    fn default() -> Self {
+        Self {
+            case_sensitive: false,
+            exclude_patterns: String::new(),
+        }
+    }
 }
 
 #[derive(Clone, Copy, Serialize, Deserialize, Debug, Default)]

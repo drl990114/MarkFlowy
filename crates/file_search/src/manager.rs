@@ -12,6 +12,7 @@ use serde::{Deserialize, Serialize};
 use clipboard::{ClipboardContext, ClipboardProvider};
 use ignore::WalkBuilder;
 
+use crate::exclude::{build_exclude_matcher, is_excluded_path};
 use crate::fileinfo::{FileInfo, Match};
 use crate::options::{FTypes, Options, Sort};
 use crate::rgtools::{self, SEPARATOR};
@@ -160,13 +161,23 @@ impl Manager {
         let re = re.unwrap();
         let re = Arc::new(re);
 
-        let walker = WalkBuilder::new(dir)
+        let exclude_matcher = build_exclude_matcher(dir, &options.name.exclude_patterns);
+        let mut walker_builder = WalkBuilder::new(dir);
+        walker_builder
             .follow_links(options.name.follow_links)
             .same_file_system(options.name.same_filesystem)
             .threads(num_cpus::get())
             .hidden(options.name.ignore_dot)
-            .git_ignore(options.name.use_gitignore)
-            .build_parallel();
+            .git_ignore(options.name.use_gitignore);
+
+        if !exclude_matcher.is_empty() {
+            walker_builder.filter_entry(move |entry| {
+                let is_dir = entry.file_type().map(|file_type| file_type.is_dir()).unwrap_or(false);
+                !is_excluded_path(&exclude_matcher, entry.path(), is_dir)
+            });
+        }
+
+        let walker = walker_builder.build_parallel();
 
         //walk dir
         walker.run(|| {
@@ -442,5 +453,55 @@ mod tests {
                 SearchResult::SearchErrors(_) => panic!(),
             }
         }
+    }
+
+    #[test]
+    fn find_names_respects_exclude_patterns() {
+        let mut dir = std::env::temp_dir();
+        dir.push("markflowy_exclude_patterns_test");
+        if dir.exists() {
+            let _ = std::fs::remove_dir_all(&dir);
+        }
+        std::fs::create_dir_all(dir.join("ignored")).unwrap();
+        std::fs::write(dir.join("visible.md"), "visible").unwrap();
+        std::fs::write(dir.join("Thumbs.db"), "thumb").unwrap();
+        std::fs::write(dir.join("draft.tmp"), "draft").unwrap();
+        std::fs::write(dir.join("keep.tmp"), "keep").unwrap();
+        std::fs::write(dir.join("ignored").join("nested.md"), "nested").unwrap();
+
+        let (s, r) = channel();
+        let mut options = Options::default();
+        options.name.ignore_dot = false;
+        options.name.use_gitignore = false;
+        options.name.exclude_patterns = "Thumbs.db\n*.tmp\n!keep.tmp\nignored/".to_string();
+
+        Manager::find_names(
+            &Search {
+                dir: dir.to_string_lossy().to_string(),
+                name_text: ".*".to_string(),
+                contents_text: "".to_string(),
+            },
+            options,
+            1,
+            s,
+            Arc::new(AtomicBool::new(false)),
+        );
+
+        let names: Vec<String> = r
+            .try_iter()
+            .filter_map(|message| match message {
+                Message::File(file, _) => Some(file.name),
+                _ => None,
+            })
+            .collect();
+
+        assert!(names.contains(&"visible.md".to_string()));
+        assert!(names.contains(&"keep.tmp".to_string()));
+        assert!(!names.contains(&"Thumbs.db".to_string()));
+        assert!(!names.contains(&"draft.tmp".to_string()));
+        assert!(!names.contains(&"ignored".to_string()));
+        assert!(!names.contains(&"nested.md".to_string()));
+
+        let _ = std::fs::remove_dir_all(&dir);
     }
 }

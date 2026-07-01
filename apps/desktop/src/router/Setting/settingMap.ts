@@ -66,6 +66,20 @@ export const getSettingMap = () => {
             changeLng(val)
           },
         },
+        fileExcludePatterns: {
+          key: 'file_exclude_patterns',
+          type: 'listInput',
+          placeholder: 'e.g. **/node_modules/*',
+          title: {
+            i18nKey: 'settings.general.misc.file_exclude_patterns.label',
+          },
+          desc: {
+            i18nKey: 'settings.general.misc.file_exclude_patterns.desc',
+          },
+          i18nProps: {
+            add: 'common.addPattern',
+          },
+        },
       },
     },
     display: {

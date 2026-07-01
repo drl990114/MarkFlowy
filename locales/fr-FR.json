@@ -15,6 +15,7 @@
     "fetching": "chargement...",
     "submit": "Soumission",
     "addHeader": "Ajouter Header",
+    "addPattern": "Ajouter un motif",
     "key": "Touches",
     "value": "Valeur",
     "success": "Succès",
@@ -191,6 +192,10 @@
         "language": {
           "label": "Langue",
           "desc": "Choisir la langue de l'application."
+        },
+        "file_exclude_patterns": {
+          "label": "Liste d'exclusion de fichiers",
+          "desc": "Exclure les fichiers et dossiers correspondants de l'explorateur et de la recherche. Un motif de type gitignore par ligne."
         }
       },
       "desc": "Paramètres universels de l'application."

@@ -15,6 +15,7 @@
     "fetching": "Loading...",
     "submit": "submit",
     "addHeader": "Add Header",
+    "addPattern": "Add Pattern",
     "key": "Key",
     "value": "Value",
     "success": "Success",
@@ -232,6 +233,10 @@
         "language": {
           "label": "Language",
           "desc": "Set the language of the app."
+        },
+        "file_exclude_patterns": {
+          "label": "File exclusion list",
+          "desc": "Exclude matching files and folders from the explorer and search. One gitignore-style pattern per line."
         }
       },
       "desc": "Common settings for the application."

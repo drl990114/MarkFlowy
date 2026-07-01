@@ -15,6 +15,7 @@ use std::{
 };
 use walkdir::WalkDir;
 
+use crate::exclude::{build_exclude_matcher, is_excluded_path};
 use crate::options::ContentOptions;
 
 struct MyWrite {
@@ -54,7 +55,19 @@ pub fn search_contents(
         .build_no_color(my_write);
 
     if let Some(allowed_files) = allowed_files {
+        let exclude_matchers = paths
+            .iter()
+            .map(|path| build_exclude_matcher(path, &ops.exclude_patterns))
+            .collect::<Vec<_>>();
+
         for path in allowed_files {
+            if exclude_matchers
+                .iter()
+                .any(|matcher| is_excluded_path(matcher, &path, false))
+            {
+                continue;
+            }
+
             let file = File::open(&path);
             if file.is_err() {
                 continue;
@@ -67,7 +80,11 @@ pub fn search_contents(
         }
     } else {
         for path in paths {
-            for result in WalkDir::new(path) {
+            let exclude_matcher = build_exclude_matcher(path, &ops.exclude_patterns);
+
+            for result in WalkDir::new(path).into_iter().filter_entry(|entry| {
+                !is_excluded_path(&exclude_matcher, entry.path(), entry.file_type().is_dir())
+            }) {
                 if must_stop.load(Ordering::Relaxed) {
                     return ContentResults::default();
                 }

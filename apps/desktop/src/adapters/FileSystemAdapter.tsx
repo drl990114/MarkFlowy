@@ -7,32 +7,49 @@ import {
   FileSystemContextValue,
   MoveFileInfo,
 } from '@markflowy/interface'
+import { logger } from '@/helper/logger'
+import { resolveFileExcludePatterns } from '@/helper/file-exclude'
 import { FileResultCode, FileSysResult, IFile } from '@/helper/filesys'
 import {
   getFileObjectByPath,
   setFileObjects,
   setFileObjectsByPath,
 } from '@/helper/files'
+import { useEditorStore } from '@/stores'
+import useAppSettingStore from '@/stores/useAppSettingStore'
 
 interface FileSystemAdapterProps {
   children: ReactNode
 }
 
 export const TauriFileSystemProvider: FC<FileSystemAdapterProps> = ({ children }) => {
+  const settingData = useAppSettingStore((state) => state.settingData)
+  const fileExcludePatterns = resolveFileExcludePatterns(settingData)
+
   const value: FileSystemContextValue = {
     readDirectory: async (folderPath: string): Promise<IFile[]> => {
-      const result = await invoke<FileSysResult>('open_folder_async', { folderPath })
+      const result = await invoke<FileSysResult>('open_folder_async', {
+        folderPath,
+        rootPath: folderPath,
+        fileExcludePatterns,
+      })
       if (result.code !== FileResultCode.Success) {
         throw new Error(`Failed to read directory: ${result.code}`)
       }
-      const files = JSON.parse(result.content)
+      const files = JSON.parse(result.content) as IFile[]
       // Note: wrapFiles logic should be handled by the caller
       return files
     },
 
     readSubdirectory: async (folderPath: string): Promise<IFile[]> => {
-      const result = await invoke<FileSysResult>('open_folder_async', { folderPath })
+      const rootPath = useEditorStore.getState().getRootPath() || folderPath
+      const result = await invoke<FileSysResult>('open_folder_async', {
+        folderPath,
+        rootPath,
+        fileExcludePatterns,
+      })
       if (result.code !== FileResultCode.Success) {
+        logger.error(`Failed to read subdirectory at ${folderPath}: ${result.code}`)
         return []
       }
       const files = JSON.parse(result.content) as IFile[]

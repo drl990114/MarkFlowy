@@ -12,6 +12,7 @@ declare namespace Setting {
   type SettingItem =
     | SelectSettingItem
     | InputSettingItem
+    | FileExcludePatternsSettingItem
     | SwitchSettingItem
     | SliderSettingItem
     | FontListSelectSettingItem
@@ -49,6 +50,14 @@ declare namespace Setting {
     prefix?: string
     suffix?: string
     valuePreHandle?: (val: string) => string
+  } & BaseSettingItem
+
+  type FileExcludePatternsSettingItem = {
+    type: 'listInput' | 'list-input' | 'file-exclude-patterns'
+    placeholder?: string
+    i18nProps?: {
+      add?: string
+    }
   } & BaseSettingItem
 
   type SwitchSettingItem = {

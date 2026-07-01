@@ -2,6 +2,7 @@ import { commandRegistry } from '@/commands'
 import useAiChatStore from '@/extensions/ai/useAiChatStore'
 import bus from '@/helper/eventBus'
 import { loadLocalThemeCss } from '@/helper/extensions'
+import { hasFileExcludePatternsChanged } from '@/helper/file-exclude'
 import { getFileObject, getFileObjectByPath, getSaveOpenedEditorEntries } from '@/helper/files'
 import { createFile, getFileNameFromPath, readDirectory, releaseSecurityScope } from '@/helper/filesys'
 import { logger } from '@/helper/logger'
@@ -28,6 +29,7 @@ import { isArray } from '../helper'
 import useExtensionsManagerStore from '../stores/useExtensionsManagerStore'
 import useThemeStore from '../stores/useThemeStore'
 import useWorkspaceWatcher from './useWorkspaceWatcher'
+import { fileTreeHandler } from '@markflowy/interface'
 
 interface LocalTheme {
   id: string
@@ -309,6 +311,23 @@ async function appWorkspaceSetup() {
   }
 }
 
+async function refreshWorkspaceFileTree() {
+  const { getRootPath, setFolderDataPure } = useEditorStore.getState()
+  const rootPath = getRootPath()
+
+  if (!rootPath) {
+    return
+  }
+
+  try {
+    fileTreeHandler.clearLoadedDirsCache?.()
+    const folderData = await readDirectory(rootPath)
+    setFolderDataPure(folderData)
+  } catch (error) {
+    logger.error('Failed to refresh workspace after file exclude setting change', error)
+  }
+}
+
 const listener = (event: MessageEvent) => {
   if (event.origin !== window.location.origin) {
     return
@@ -398,7 +417,12 @@ const useAppSetup = () => {
     })
 
     const settingDataUpdate = currentWindow.listen('app_conf_change', async () => {
-      appSettingStoreSetup()
+      const prevSettingData = useAppSettingStore.getState().settingData
+      const nextSettingData = await appSettingStoreSetup()
+
+      if (hasFileExcludePatternsChanged(prevSettingData, nextSettingData)) {
+        await refreshWorkspaceFileTree()
+      }
     })
 
     const unListenMenu = currentWindow.listen<string>('native:menu', ({ payload }) => {

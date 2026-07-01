@@ -494,6 +494,40 @@ pub fn files_to_json(files: Vec<FileInfo>) -> FileResult {
     }
 }
 
+pub fn filter_files_by_exclude_patterns(
+    files: Vec<FileInfo>,
+    root_path: &str,
+    patterns: &str,
+) -> Vec<FileInfo> {
+    if patterns.trim().is_empty() {
+        return files;
+    }
+
+    let matcher = mf_file_search::exclude::build_exclude_matcher(root_path, patterns);
+    filter_files_with_exclude_matcher(files, &matcher)
+}
+
+fn filter_files_with_exclude_matcher(
+    files: Vec<FileInfo>,
+    matcher: &mf_file_search::exclude::ExcludeMatcher,
+) -> Vec<FileInfo> {
+    files
+        .into_iter()
+        .filter_map(|mut file| {
+            let is_dir = file.kind == "dir";
+            if mf_file_search::exclude::is_excluded_path(matcher, &file.path, is_dir) {
+                return None;
+            }
+
+            if let Some(children) = file.children.take() {
+                file.children = Some(filter_files_with_exclude_matcher(children, matcher));
+            }
+
+            Some(file)
+        })
+        .collect()
+}
+
 fn decode_utf16_bytes(bytes: &[u8], little_endian: bool) -> Result<String, String> {
     if bytes.len() % 2 != 0 {
         return Err(String::from("UTF-16 content has an odd byte length"));
@@ -1062,9 +1096,27 @@ pub mod cmd {
     use super::{FileResult, MoveFileInfo};
 
     #[tauri::command]
-    pub fn open_folder_async(folder_path: &str) -> FileResult {
+    pub fn open_folder_async(
+        folder_path: &str,
+        root_path: Option<String>,
+        file_exclude_patterns: Option<String>,
+    ) -> FileResult {
         match fc::read_directory(folder_path) {
-            Ok(files) => fc::files_to_json(files),
+            Ok(files) => {
+                let mut files = files;
+                if let Some(patterns) = file_exclude_patterns
+                    .as_deref()
+                    .filter(|patterns| !patterns.trim().is_empty())
+                {
+                    files = fc::filter_files_by_exclude_patterns(
+                        files,
+                        root_path.as_deref().unwrap_or(folder_path),
+                        patterns,
+                    );
+                }
+
+                fc::files_to_json(files)
+            }
             Err(code) => FileResult {
                 code,
                 content: String::from("Failed to read directory"),
@@ -1467,6 +1519,51 @@ pub mod cmd {
             }
         }
         #[cfg(not(target_os = "macos"))]
-        { true }
+        {
+            true
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn test_file(name: &str, kind: &str, path: &str) -> FileInfo {
+        FileInfo {
+            name: name.to_string(),
+            kind: kind.to_string(),
+            path: path.to_string(),
+            children: if kind == "dir" {
+                Some(Vec::new())
+            } else {
+                None
+            },
+            ext: Path::new(path)
+                .extension()
+                .and_then(|ext| ext.to_str())
+                .unwrap_or("")
+                .to_string(),
+        }
+    }
+
+    #[test]
+    fn filters_directory_entries_with_rust_ignore_matcher() {
+        let files = vec![
+            test_file("build", "dir", "/workspace/build"),
+            test_file("src", "dir", "/workspace/src"),
+            test_file("keep.tmp", "file", "/workspace/keep.tmp"),
+            test_file("drop.tmp", "file", "/workspace/drop.tmp"),
+        ];
+
+        let filtered =
+            filter_files_by_exclude_patterns(files, "/workspace", "/build/\n*.tmp\n!keep.tmp\n");
+
+        let names = filtered
+            .iter()
+            .map(|file| file.name.as_str())
+            .collect::<Vec<_>>();
+
+        assert_eq!(names, vec!["src", "keep.tmp"]);
     }
 }
