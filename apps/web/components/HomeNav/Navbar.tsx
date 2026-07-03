@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
 import { i18n, useTranslation } from 'next-i18next'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import styled, { css } from 'styled-components'
 import { mobile } from '../../utils/media'
 import rem from '../../utils/rem'
@@ -18,10 +18,7 @@ export interface NavbarProps {
   showSideNav?: boolean
 }
 
-export default function Navbar({
-  onMobileNavToggle,
-  isMobileNavFolded,
-}: NavbarProps) {
+export default function Navbar({ onMobileNavToggle, isMobileNavFolded }: NavbarProps) {
   const { t } = useTranslation()
   const [navState, setNavState] = useState<'visible' | 'hidden' | 'scrolled'>('visible')
   const lastScrollY = useRef(0)
@@ -74,6 +71,7 @@ export default function Navbar({
           </DesktopStart>
 
           <DesktopEnd>
+            {/* <LoginLink href='/auth'>{t('auth.login')}</LoginLink> */}
             <LanguageSwitcher />
             <StyledSocial />
           </DesktopEnd>
@@ -101,9 +99,10 @@ const Wrapper = styled.nav<{ $state: 'visible' | 'hidden' | 'scrolled' }>`
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   transform: translateY(0);
-  transition: transform 400ms cubic-bezier(0.16, 1, 0.3, 1),
-              box-shadow 200ms ease,
-              border-color 200ms ease;
+  transition:
+    transform 400ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 200ms ease,
+    border-color 200ms ease;
 
   ${(p) =>
     p.$state === 'hidden' &&
@@ -153,6 +152,35 @@ const DesktopEnd = styled.div`
   `)}
 `
 
+const LoginLink = styled(Link).attrs(() => ({
+  unstyled: true,
+}))`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: ${rem(34)};
+  padding: 0 ${rem(14)};
+  border: 1px solid var(--line);
+  border-radius: ${rem(6)};
+  background: color-mix(in srgb, var(--paper-warm) 70%, transparent);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: ${rem(14)};
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    background 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease;
+
+  &:hover,
+  &:focus-visible {
+    border-color: color-mix(in srgb, var(--seal) 50%, var(--line));
+    background: color-mix(in srgb, var(--seal) 10%, transparent);
+    color: var(--seal);
+  }
+`
+
 const LogoLink = styled(Link).attrs(() => ({
   unstyled: true,
   href: '/',
@@ -188,7 +216,8 @@ const StyledNavLinks = styled(NavLinks)`
 `
 
 const StyledSocial = styled(Social)`
-  a, svg {
+  a,
+  svg {
     color: var(--ink-soft);
     transition: color 150ms ease;
 

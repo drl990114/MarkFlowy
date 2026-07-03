@@ -3,7 +3,13 @@ import type { ViewType } from 'hooks/useWorkspaceState'
 import rem from 'utils/rem'
 import styled from 'styled-components'
 
-function MenuList({ viewType, onViewTypeChange }: { viewType: ViewType; onViewTypeChange: (type: ViewType) => void }) {
+function MenuList({
+  viewType,
+  onViewTypeChange,
+}: {
+  viewType: ViewType
+  onViewTypeChange: (type: ViewType) => void
+}) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: rem(4) }}>
       <MfIconButton
@@ -12,7 +18,7 @@ function MenuList({ viewType, onViewTypeChange }: { viewType: ViewType; onViewTy
         tooltipProps={{ title: 'WYSIWYG' }}
         size='small'
         rounded='smooth'
-        className={viewType === 'wysiwyg' ? 'active' : ''}
+        active={viewType === 'wysiwyg'}
       />
       <MfIconButton
         icon='ri-code-line'
@@ -20,7 +26,7 @@ function MenuList({ viewType, onViewTypeChange }: { viewType: ViewType; onViewTy
         tooltipProps={{ title: 'Source' }}
         size='small'
         rounded='smooth'
-        className={viewType === 'source' ? 'active' : ''}
+        active={viewType === 'source'}
       />
       <MfIconButton
         icon='ri-file-list-line'
@@ -28,13 +34,19 @@ function MenuList({ viewType, onViewTypeChange }: { viewType: ViewType; onViewTy
         tooltipProps={{ title: 'Preview' }}
         size='small'
         rounded='smooth'
-        className={viewType === 'preview' ? 'active' : ''}
+        active={viewType === 'preview'}
       />
     </div>
   )
 }
 
-export function EditorToolbar({ viewType, onViewTypeChange }: { viewType: ViewType; onViewTypeChange: (type: ViewType) => void }) {
+export function EditorToolbar({
+  viewType,
+  onViewTypeChange,
+}: {
+  viewType: ViewType
+  onViewTypeChange: (type: ViewType) => void
+}) {
   return (
     <ToolbarWrapper>
       <ToolbarSection>

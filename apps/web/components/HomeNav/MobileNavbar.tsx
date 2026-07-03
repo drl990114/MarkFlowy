@@ -3,10 +3,9 @@ import styled, { css } from 'styled-components'
 import { mobile } from '../../utils/media'
 import rem from '../../utils/rem'
 import { navbarHeight } from '../../utils/sizes'
+import Link from '../Link'
 import { Logo } from '../Nav/Logo'
 import NavLinks from '../Nav/NavLinks'
-import { Brand } from './Navbar'
-import Link from '../Link'
 
 export interface MobileNavbarProps {
   isMobileNavFolded?: boolean
@@ -37,6 +36,10 @@ export default function MobileNavbar({
 
       <DropdownMenu $isOpen={!isMobileNavFolded}>
         <DropdownLinks />
+        {/* <LoginLink href='/auth'>
+          <i className='ri-login-circle-line' />
+          {t('auth.login')}
+        </LoginLink> */}
       </DropdownMenu>
     </Wrapper>
   )
@@ -98,8 +101,9 @@ const Bar = styled.span<{ $isOpen?: boolean }>`
   height: 2px;
   background: var(--ink);
   border-radius: 1px;
-  transition: transform 0.25s cubic-bezier(0.22, 0.61, 0.36, 1),
-              opacity 0.2s ease;
+  transition:
+    transform 0.25s cubic-bezier(0.22, 0.61, 0.36, 1),
+    opacity 0.2s ease;
 
   ${(p) =>
     p.$isOpen &&
@@ -128,14 +132,15 @@ const DropdownMenu = styled.div<{ $isOpen?: boolean }>`
   overflow: hidden;
   max-height: 0;
   opacity: 0;
-  transition: max-height 0.35s cubic-bezier(0.22, 0.61, 0.36, 1),
-              opacity 0.25s ease;
+  transition:
+    max-height 0.35s cubic-bezier(0.22, 0.61, 0.36, 1),
+    opacity 0.25s ease;
   z-index: 100;
 
   ${(p) =>
     p.$isOpen &&
     css`
-      max-height: ${rem(300)};
+      max-height: ${rem(360)};
       opacity: 1;
     `}
 
@@ -148,7 +153,9 @@ const DropdownMenu = styled.div<{ $isOpen?: boolean }>`
     display: flex;
     align-items: center;
     padding: ${rem(14)} ${rem(24)};
-    transition: color 0.15s ease, background 0.15s ease;
+    transition:
+      color 0.15s ease,
+      background 0.15s ease;
 
     &:hover,
     &:focus {
@@ -179,3 +186,28 @@ const DropdownLinks = styled(NavLinks)`
   }
 `
 
+const LoginLink = styled(Link).attrs(() => ({
+  unstyled: true,
+}))`
+  justify-content: center;
+  gap: ${rem(8)};
+  min-height: ${rem(40)};
+  margin: ${rem(8)} ${rem(24)} ${rem(16)};
+  padding: 0 ${rem(14)} !important;
+  border: 1px solid var(--line);
+  border-radius: ${rem(6)};
+  background: color-mix(in srgb, var(--paper-warm) 72%, transparent);
+  color: var(--ink) !important;
+  font-weight: 600 !important;
+
+  i {
+    font-size: ${rem(17)};
+  }
+
+  &:hover,
+  &:focus-visible {
+    border-color: color-mix(in srgb, var(--seal) 50%, var(--line));
+    background: color-mix(in srgb, var(--seal) 10%, transparent) !important;
+    color: var(--seal) !important;
+  }
+`
