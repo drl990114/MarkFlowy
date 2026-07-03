@@ -13,10 +13,11 @@ interface PreviewContentProps {
   type: FileType
   filePath?: string
   active: boolean
+  visible?: boolean
 }
 
-export function PreviewContent({ type, filePath, active }: PreviewContentProps) {
-  if (!active) return null
+export function PreviewContent({ type, filePath, active, visible = active }: PreviewContentProps) {
+  if (!visible) return null
 
   const renderContent = () => {
     switch (type) {

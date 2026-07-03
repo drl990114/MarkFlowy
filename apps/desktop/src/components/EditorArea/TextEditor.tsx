@@ -50,6 +50,43 @@ import { EditorSkeleton, WarningHeader } from './styles'
 
 const delegateOptionsCache = new Map<string, CreateWysiwygDelegateOptions>()
 const LARGE_MARKDOWN_SOURCE_MODE_THRESHOLD = 200_000
+const TEXT_EDITOR_CONTENT_SYNC_EVENT = 'editor_content_sync'
+const mountedTextEditorCounts = new Map<string, number>()
+const textEditorSaveHandlers = new Map<string, Map<string, () => Promise<void>>>()
+let textEditorInstanceSeq = 0
+
+interface TextEditorContentSyncPayload {
+  fileId: string
+  sourceInstanceId: string
+  content: string
+}
+
+function setTextEditorSaveHandler(
+  fileId: string,
+  instanceId: string,
+  saveHandler: () => Promise<void>,
+) {
+  const handlers = textEditorSaveHandlers.get(fileId) ?? new Map<string, () => Promise<void>>()
+  handlers.set(instanceId, saveHandler)
+  textEditorSaveHandlers.set(fileId, handlers)
+  setSaveOpenedEditorEntries(fileId, saveHandler)
+}
+
+function deleteTextEditorSaveHandler(fileId: string, instanceId: string) {
+  const handlers = textEditorSaveHandlers.get(fileId)
+  if (!handlers) return
+
+  handlers.delete(instanceId)
+
+  const nextHandler = Array.from(handlers.values()).at(-1)
+  if (nextHandler) {
+    setSaveOpenedEditorEntries(fileId, nextHandler)
+    return
+  }
+
+  textEditorSaveHandlers.delete(fileId)
+  delSaveOpenedEditorEntries(fileId)
+}
 
 const requestIdle = (callback: () => void): number => {
   if ('requestIdleCallback' in window) {
@@ -110,8 +147,13 @@ async function readFileContent(filePath: string): Promise<FileSysResult> {
 }
 
 function TextEditor(props: TextEditorProps) {
-  const { id, active, fileTypeConfig } = props
+  const { id, active, visible = active, fileTypeConfig } = props
   const curFile = getFileObject(id)
+  const instanceIdRef = useRef<string | undefined>(undefined)
+  if (!instanceIdRef.current) {
+    textEditorInstanceSeq += 1
+    instanceIdRef.current = `text-editor-${textEditorInstanceSeq}`
+  }
   const createDelegate = useCallback(
     (editorViewType = EditorViewType.WYSIWYG, sourceCodeLanguage?: string) => {
       const currentSettingData = useAppSettingStore.getState().settingData
@@ -161,23 +203,112 @@ function TextEditor(props: TextEditorProps) {
   const editorRef = useRef<EditorRef>(null)
   const editorContextRef = useRef<EditorChangeEventParams>(null)
   const counterIdleHandleRef = useRef<number | null>(null)
+  const isApplyingRemoteContentRef = useRef(false)
+  const latestContentRef = useRef<string | undefined>(undefined)
+  const remoteContentResetHandleRef = useRef<number | null>(null)
 
   useUnmount(() => {
-    useEditorCounterStore.getState().deleteEditorCounter({ id })
     if (counterIdleHandleRef.current !== null) {
       cancelIdle(counterIdleHandleRef.current)
       counterIdleHandleRef.current = null
     }
-    const { delIdStateMap } = useEditorStateStore.getState()
-
-    delIdStateMap(id)
+    if (remoteContentResetHandleRef.current !== null) {
+      window.clearTimeout(remoteContentResetHandleRef.current)
+      remoteContentResetHandleRef.current = null
+    }
   })
+
+  useEffect(() => {
+    mountedTextEditorCounts.set(id, (mountedTextEditorCounts.get(id) ?? 0) + 1)
+
+    return () => {
+      const nextCount = (mountedTextEditorCounts.get(id) ?? 1) - 1
+
+      if (nextCount > 0) {
+        mountedTextEditorCounts.set(id, nextCount)
+        return
+      }
+
+      mountedTextEditorCounts.delete(id)
+      useEditorCounterStore.getState().deleteEditorCounter({ id })
+      useEditorStateStore.getState().delIdStateMap(id)
+    }
+  }, [id])
+
+  const updateCachedFileContent = useCallback((nextContent: string) => {
+    const file = getFileObject(id)
+    if (!file) return
+
+    updateFileObject(id, {
+      ...file,
+      content: nextContent,
+    })
+  }, [id])
+
+  const emitContentSync = useCallback(
+    (nextContent: string) => {
+      bus.emit(TEXT_EDITOR_CONTENT_SYNC_EVENT, undefined, {
+        fileId: id,
+        sourceInstanceId: instanceIdRef.current!,
+        content: nextContent,
+      } satisfies TextEditorContentSyncPayload)
+    },
+    [id],
+  )
+
+  const applySyncedContent = useCallback(
+    (nextContent: string) => {
+      if (latestContentRef.current === nextContent) return
+
+      if (remoteContentResetHandleRef.current !== null) {
+        window.clearTimeout(remoteContentResetHandleRef.current)
+      }
+
+      isApplyingRemoteContentRef.current = true
+      latestContentRef.current = nextContent
+      editorRef.current?.setContent(nextContent)
+      setContent(nextContent)
+      updateCachedFileContent(nextContent)
+
+      remoteContentResetHandleRef.current = window.setTimeout(() => {
+        isApplyingRemoteContentRef.current = false
+        remoteContentResetHandleRef.current = null
+      }, 0)
+    },
+    [updateCachedFileContent],
+  )
+
+  useEffect(() => {
+    latestContentRef.current = content
+  }, [content])
+
+  useEffect(() => {
+    const handleContentSync = (payload: TextEditorContentSyncPayload) => {
+      if (payload.fileId !== id) return
+      if (payload.sourceInstanceId === instanceIdRef.current) return
+
+      applySyncedContent(payload.content)
+    }
+
+    bus.on(TEXT_EDITOR_CONTENT_SYNC_EVENT, handleContentSync)
+
+    return () => {
+      bus.detach(TEXT_EDITOR_CONTENT_SYNC_EVENT, handleContentSync)
+    }
+  }, [applySyncedContent, id])
 
   useEffect(() => {
     let canceled = false
 
     const init = async () => {
       const file = curFile
+      const editorState = useEditorStateStore.getState().idStateMap.get(file.id)
+
+      if (editorState?.hasUnsavedChanges && typeof file.content === 'string') {
+        setContent(file.content)
+        return setStatus(TextEditorStatus.SUCCESS)
+      }
+
       if (file.path) {
         console.log('Loading file content from path:', file.path)
         const startTime = performance.now()
@@ -195,6 +326,7 @@ function TextEditor(props: TextEditorProps) {
           return setStatus(TextEditorStatus.READERROR)
         }
         setContent(res.content)
+        updateCachedFileContent(res.content)
       } else if (file.content !== undefined) {
         if (canceled) return
         setContent(file.content)
@@ -207,7 +339,7 @@ function TextEditor(props: TextEditorProps) {
     return () => {
       canceled = true
     }
-  }, [curFile])
+  }, [curFile, updateCachedFileContent])
 
   useEffect(() => {
     if (status !== TextEditorStatus.SUCCESS || delegate) return
@@ -291,11 +423,17 @@ function TextEditor(props: TextEditorProps) {
                 return
               }
               const filename = getFileNameFromPath(path)
-              updateFileObject(curFile.id, { ...curFile, path, name: filename })
+              const savedFileContent = typeof fileContent === 'string' ? fileContent : curFile.content
+              updateFileObject(curFile.id, {
+                ...curFile,
+                path,
+                name: filename,
+                content: savedFileContent,
+              })
               insertNodeToFolderData({
                 ...curFile,
                 name: filename,
-                content: fileContent,
+                content: savedFileContent,
                 path,
               })
               invoke<FileSysResult>('write_file', { filePath: path, content: fileContent }).then(
@@ -328,7 +466,10 @@ function TextEditor(props: TextEditorProps) {
               runFinally()
               return toast.error(res.content)
             }
-            setContent(fileContent)
+            if (typeof fileContent === 'string') {
+              setContent(fileContent)
+              updateCachedFileContent(fileContent)
+            }
             runSuccess()
           }).catch((error) => {
             toast.error(String(error))
@@ -344,7 +485,7 @@ function TextEditor(props: TextEditorProps) {
         runFinally()
       }
     },
-    [active, id, delegate, t, insertNodeToFolderData],
+    [active, id, delegate, t, insertNodeToFolderData, updateCachedFileContent],
   )
 
   const debounceSave = useMemo(() => {
@@ -371,10 +512,11 @@ function TextEditor(props: TextEditorProps) {
   }, [debounceSave])
 
   useEffect(() => {
-    setSaveOpenedEditorEntries(id, () => saveHandler({ active: true }))
+    const instanceId = instanceIdRef.current!
+    setTextEditorSaveHandler(id, instanceId, () => saveHandler({ active: true }))
 
     return () => {
-      delSaveOpenedEditorEntries(id)
+      deleteTextEditorSaveHandler(id, instanceId)
     }
   }, [id, saveHandler])
 
@@ -383,14 +525,17 @@ function TextEditor(props: TextEditorProps) {
       if (!active) return
       editorRef.current?.setContent(newContent)
       setContent(newContent)
+      latestContentRef.current = newContent
+      updateCachedFileContent(newContent)
       
       // Set save state to unsaved after content change
       const { setIdStateMap } = useEditorStateStore.getState()
       setIdStateMap(id, {
         hasUnsavedChanges: true,
       })
+      emitContentSync(newContent)
     },
-    [active, id],
+    [active, emitContentSync, id, updateCachedFileContent],
   )
 
   const editorTypeSwitchingRef = useRef(false)
@@ -677,41 +822,65 @@ function TextEditor(props: TextEditorProps) {
 
   const handleChange: EditorChangeHandler = useCallback(
     (params) => {
-      if (!active) return
-
       const { tr, helpers } = params
       editorContextRef.current = params
 
-      if (counterIdleHandleRef.current !== null) {
+      if (active && counterIdleHandleRef.current !== null) {
         cancelIdle(counterIdleHandleRef.current)
       }
-      counterIdleHandleRef.current = requestIdle(() => {
-        counterIdleHandleRef.current = null
-        useEditorCounterStore.getState().addEditorCounter({
-          id,
-          data: {
-            characterCount: helpers.getCharacterCount(),
-            wordCount: helpers.getWordCount(),
-          },
+
+      if (active) {
+        counterIdleHandleRef.current = requestIdle(() => {
+          counterIdleHandleRef.current = null
+          useEditorCounterStore.getState().addEditorCounter({
+            id,
+            data: {
+              characterCount: helpers.getCharacterCount(),
+              wordCount: helpers.getWordCount(),
+            },
+          })
         })
-      })
+      }
 
       if (tr?.docChanged && !tr.getMeta('APPLY_MARKS')) {
-        const state = {
-          hasUnsavedChanges: true,
-          undoDepth: helpers.undoDepth(),
-        }
-        const { setIdStateMap } = useEditorStateStore.getState()
+        const nextContent = delegate?.docToString(params.state.doc)
+        if (typeof nextContent !== 'string') return
 
-        setIdStateMap(id, state)
-        debounceRefreshToc()
-        const curFile = getFileObject(id)
-        if (settingData.autosave && curFile?.path) {
-          debounceSaveHandler()
+        latestContentRef.current = nextContent
+        setContent(nextContent)
+        updateCachedFileContent(nextContent)
+
+        if (!isApplyingRemoteContentRef.current) {
+          const state = {
+            hasUnsavedChanges: true,
+            undoDepth: helpers.undoDepth(),
+          }
+          const { setIdStateMap } = useEditorStateStore.getState()
+
+          setIdStateMap(id, state)
+          emitContentSync(nextContent)
+
+          if (active) {
+            debounceRefreshToc()
+          }
+
+          const curFile = getFileObject(id)
+          if (settingData.autosave && curFile?.path) {
+            debounceSaveHandler()
+          }
         }
       }
     },
-    [id, debounceSaveHandler, active, debounceRefreshToc, settingData],
+    [
+      id,
+      delegate,
+      debounceSaveHandler,
+      active,
+      debounceRefreshToc,
+      emitContentSync,
+      settingData,
+      updateCachedFileContent,
+    ],
   )
 
   if (status === TextEditorStatus.NOTEXIST) {
@@ -746,6 +915,7 @@ function TextEditor(props: TextEditorProps) {
       className={cls}
       fullWidth={settingData.editor_full_width}
       active={active}
+      $visible={visible}
       onClick={handleWrapperClick}
       editorViewType={currentViewType}
       fileType={fileTypeConfig.type}
@@ -758,6 +928,7 @@ function TextEditor(props: TextEditorProps) {
 export interface TextEditorProps {
   id: string
   active: boolean
+  visible?: boolean
   fileTypeConfig: FileTypeConfig
   onSave?: () => void
 }

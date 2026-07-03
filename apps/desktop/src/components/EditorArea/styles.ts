@@ -33,9 +33,13 @@ export const OverlayScrollbarStyles = createGlobalStyle`
       pointer-events: none !important;
     }
 
-    /* Hide editor area tabs & toolbars so they don't obscure the fullscreen overlay.
-       These are siblings of #editor-panel inside the editor area container */
+    /* Hide editor area tabs & toolbars so they don't obscure the fullscreen overlay. */
     .editor-area-container > :not(#editor-panel) {
+      display: none !important;
+    }
+
+    .editor-group-toolbar,
+    .editor-area-tabs {
       display: none !important;
     }
 
@@ -66,6 +70,10 @@ export const Container = styled.div`
     flex: initial;
     align-items: center;
     justify-content: flex-end;
+    gap: 4px;
+    height: 32px;
+    min-height: 32px;
+    padding: 0 6px;
     box-sizing: border-box;
     border-bottom: 1px solid ${(props) => props.theme.borderColor};
     border-left: 1px solid ${(props) => props.theme.borderColor};
@@ -80,10 +88,12 @@ export const Container = styled.div`
 
 export const TabItem = styled.div<TabItemProps>`
   display: flex;
+  flex: 0 0 auto;
   justify-content: center;
   align-items: center;
   position: relative;
   top: 1px;
+  height: 100%;
   padding-left: ${(props) => props.theme.spaceXl};
   padding-right: ${(props) => props.theme.spaceXs};
   font-size: ${(props) => props.theme.fontXs};

@@ -71,7 +71,7 @@ export function setSaveOpenedEditorEntries(id: string, saveHandler: () => Promis
   saveOpenedEditorEntries[id] = saveHandler
 }
 
-export function getSaveOpenedEditorEntries(id: string): (() => void) | undefined {
+export function getSaveOpenedEditorEntries(id: string): (() => Promise<void>) | undefined {
   return saveOpenedEditorEntries[id]
 }
 

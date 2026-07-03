@@ -16,12 +16,18 @@ import { AIButton } from '../WysiwygToolbar/components/AIButton'
 import { sourceCodeCodemirrorViewMap } from '../../TextEditor'
 import { clipboardRead } from '@/helper/clipboard'
 
-export const SourceCodeToolbar: FC = () => {
+interface SourceCodeToolbarProps {
+  editorId?: string
+}
+
+export const SourceCodeToolbar: FC<SourceCodeToolbarProps> = (props) => {
+  const { editorId } = props
   const { activeId } = useEditorStore()
   const { getEditorViewType } = useEditorViewTypeStore()
   const { t } = useTranslation()
+  const targetEditorId = editorId ?? activeId
 
-  const viewType = activeId ? getEditorViewType(activeId) : EditorViewType.WYSIWYG
+  const viewType = targetEditorId ? getEditorViewType(targetEditorId) : EditorViewType.WYSIWYG
 
   const sections = useMemo(() => [
     { id: 'common', priority: 100 },
@@ -35,8 +41,8 @@ export const SourceCodeToolbar: FC = () => {
   const { containerRef, hiddenIds, registerItemWidth } = usePriorityHidden({ items: sections, gap: 0 })
 
   const getEditorView = () => {
-    if (!activeId) return undefined
-    return sourceCodeCodemirrorViewMap.get(activeId)?.cm
+    if (!targetEditorId) return undefined
+    return sourceCodeCodemirrorViewMap.get(targetEditorId)?.cm
   }
 
   const clipboardReadFn: ClipboardReadFunction = async () => {
@@ -50,8 +56,8 @@ export const SourceCodeToolbar: FC = () => {
   return (
     <ToolbarWrapper ref={containerRef}>
       <ToolbarSection id="common" registerWidth={registerItemWidth} hidden={hiddenIds.has('common')}>
-        <MenuList size='small' />
-        <AIButton />
+        <MenuList editorId={targetEditorId} size='small' />
+        <AIButton editorId={targetEditorId} />
       </ToolbarSection>
 
       <ToolbarSection id="history" registerWidth={registerItemWidth} hidden={hiddenIds.has('history')}>

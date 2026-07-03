@@ -9,13 +9,19 @@ import { EditorViewType } from 'rme'
 import { MfIconButton } from '../../../../ui-v2/Button'
 import { showContextMenu } from '../../../../ui-v2/ContextMenu'
 
-export const ViewSwitcher = () => {
+interface ViewSwitcherProps {
+  editorId?: string
+}
+
+export const ViewSwitcher = (props: ViewSwitcherProps) => {
+  const { editorId } = props
   const { activeId } = useEditorStore()
+  const targetEditorId = editorId ?? activeId
   const { editorViewTypeMap } = useEditorViewTypeStore()
   const { t } = useTranslation()
   const ref = useRef<any>(null)
   
-  const curFile = activeId ? getFileObject(activeId) : undefined
+  const curFile = targetEditorId ? getFileObject(targetEditorId) : undefined
   const editorViewType = editorViewTypeMap.get(curFile?.id || '') || 'wysiwyg'
 
   const viewTypeIconMap: Record<string, string> = {

@@ -10,11 +10,17 @@ import {
 import { MenuList } from '../components/MenuList'
 import { ViewSwitcher } from '../WysiwygToolbar/components/ViewSwitcher'
 
-export const PreviewToolbar: FC = () => {
+interface PreviewToolbarProps {
+  editorId?: string
+}
+
+export const PreviewToolbar: FC<PreviewToolbarProps> = (props) => {
+  const { editorId } = props
   const { activeId } = useEditorStore()
   const { getEditorViewType } = useEditorViewTypeStore()
+  const targetEditorId = editorId ?? activeId
 
-  const viewType = activeId ? getEditorViewType(activeId) : EditorViewType.WYSIWYG
+  const viewType = targetEditorId ? getEditorViewType(targetEditorId) : EditorViewType.WYSIWYG
 
   const sections = useMemo(() => [
     { id: 'common', priority: 100 },
@@ -29,8 +35,8 @@ export const PreviewToolbar: FC = () => {
   return (
     <ToolbarWrapper ref={containerRef}>
       <ToolbarSection id="common" registerWidth={registerItemWidth} hidden={hiddenIds.has('common')}>
-        <MenuList />
-        <ViewSwitcher />
+        <MenuList editorId={targetEditorId} />
+        <ViewSwitcher editorId={targetEditorId} />
       </ToolbarSection>
     </ToolbarWrapper>
   )

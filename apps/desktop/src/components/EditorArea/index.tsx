@@ -2,6 +2,8 @@ import { commandRegistry } from '@/commands'
 import { EditorViewType } from '@/constants/editorViewType'
 import { EVENT } from '@/constants'
 import bus from '@/helper/eventBus'
+import { t } from '@/i18n'
+import { guardUnsavedFiles } from '@/services/checkUnsavedFiles'
 import { useEditorStore } from '@/stores'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
@@ -14,10 +16,9 @@ function EditorArea() {
   const { opened } = useEditorStore()
 
   useEffect(() => {
-    const disposable = commandRegistry.registerCommand({
+    const toggleEditorTypeDisposable = commandRegistry.registerCommand({
       id: EVENT.app_toggleEditorType,
       handler: () => {
-        console.log('qweqw')
         const { activeId } = useEditorStore.getState()
         if (!activeId) return
 
@@ -39,8 +40,63 @@ function EditorArea() {
         bus.emit('editor_toggle_type', undefined, targetViewType)
       },
     })
+    const closeCurrentEditorTabDisposable = commandRegistry.registerCommand({
+      id: EVENT.app_closeCurrentEditorTab,
+      handler: () => {
+        const { activeGroupId, activeId } = useEditorStore.getState()
+        if (activeGroupId && activeId) {
+          guardUnsavedFiles({
+            fileIds: [activeId],
+            onContinue: () => {
+              useEditorStore.getState().closeFileInGroup(activeGroupId, activeId)
+            },
+          })
+        }
+      },
+    })
+    const splitEditorRightDisposable = commandRegistry.registerCommand({
+      id: EVENT.app_splitEditorRight,
+      handler: () => {
+        const { activeGroupId, activeId } = useEditorStore.getState()
+        if (activeGroupId) {
+          guardUnsavedFiles({
+            fileIds: activeId ? [activeId] : [],
+            labels: {
+              save: t('action.save_and_continue'),
+              unsaved: t('action.continue_without_save'),
+            },
+            onContinue: () => {
+              useEditorStore.getState().splitGroup(activeGroupId, 'horizontal', 'after')
+            },
+          })
+        }
+      },
+    })
+    const splitEditorDownDisposable = commandRegistry.registerCommand({
+      id: EVENT.app_splitEditorDown,
+      handler: () => {
+        const { activeGroupId, activeId } = useEditorStore.getState()
+        if (activeGroupId) {
+          guardUnsavedFiles({
+            fileIds: activeId ? [activeId] : [],
+            labels: {
+              save: t('action.save_and_continue'),
+              unsaved: t('action.continue_without_save'),
+            },
+            onContinue: () => {
+              useEditorStore.getState().splitGroup(activeGroupId, 'vertical', 'after')
+            },
+          })
+        }
+      },
+    })
 
-    return () => disposable.dispose()
+    return () => {
+      toggleEditorTypeDisposable.dispose()
+      closeCurrentEditorTabDisposable.dispose()
+      splitEditorRightDisposable.dispose()
+      splitEditorDownDisposable.dispose()
+    }
   }, [])
 
   if (opened.length === 0) {

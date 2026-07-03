@@ -1,6 +1,7 @@
 import { createFile, getFolderPathFromPath, isMdFile, releaseSecurityScope, type IFile } from '@/helper/filesys';
 import { isEmptyEditor } from '@/services/editor-file';
 import { invoke } from '@tauri-apps/api/core';
+import { nanoid } from 'nanoid';
 import type { EditorContext, EditorDelegate } from 'rme';
 import { create } from 'zustand';
 
@@ -56,10 +57,326 @@ const hasSameFile = (fileNodeList: IFile[], target: BaseIFile) => {
   return !!fileNodeList.find((file) => isSameFile(file, target))
 }
 
+export type EditorSplitDirection = 'horizontal' | 'vertical'
+export type EditorSplitPlacement = 'before' | 'after'
+export type EditorLayoutNode = EditorLayoutBranch | EditorLayoutLeaf
+
+export interface EditorLayoutBranch {
+  type: 'branch'
+  id: string
+  direction: EditorSplitDirection
+  sizes: number[]
+  children: EditorLayoutNode[]
+}
+
+export interface EditorLayoutLeaf {
+  type: 'leaf'
+  id: string
+  opened: string[]
+  activeId?: string
+}
+
+const createEditorLeaf = (opened: string[] = [], activeId?: string): EditorLayoutLeaf => ({
+  type: 'leaf',
+  id: nanoid(),
+  opened,
+  activeId,
+})
+
+const createDefaultEditorLayout = () => createEditorLeaf()
+
+const isEditorLeaf = (node: EditorLayoutNode): node is EditorLayoutLeaf => node.type === 'leaf'
+
+const unique = (ids: string[]) => Array.from(new Set(ids.filter(Boolean)))
+
+const normalizeSizes = (length: number) => {
+  if (length <= 0) return []
+  return Array.from({ length }, () => 100 / length)
+}
+
+const getAllGroups = (node: EditorLayoutNode): EditorLayoutLeaf[] => {
+  if (isEditorLeaf(node)) return [node]
+  return node.children.flatMap(getAllGroups)
+}
+
+const getAllOpenedIds = (node: EditorLayoutNode) => {
+  return unique(getAllGroups(node).flatMap((group) => group.opened))
+}
+
+const getFirstGroup = (node: EditorLayoutNode) => getAllGroups(node)[0]
+
+const findGroup = (node: EditorLayoutNode, groupId?: string): EditorLayoutLeaf | undefined => {
+  if (!groupId) return undefined
+  if (isEditorLeaf(node)) return node.id === groupId ? node : undefined
+
+  for (const child of node.children) {
+    const group = findGroup(child, groupId)
+    if (group) return group
+  }
+}
+
+const findGroupContainingFile = (
+  node: EditorLayoutNode,
+  fileId: string,
+): EditorLayoutLeaf | undefined => {
+  return getAllGroups(node).find((group) => group.opened.includes(fileId))
+}
+
+const syncEditorLayoutState = (layout: EditorLayoutNode, preferredGroupId?: string) => {
+  const groups = getAllGroups(layout)
+  const activeGroup = groups.find((group) => group.id === preferredGroupId) || groups[0]
+  let activeId = activeGroup?.activeId
+
+  if (activeGroup && activeId && !activeGroup.opened.includes(activeId)) {
+    activeId = activeGroup.opened[0]
+    activeGroup.activeId = activeId
+  }
+
+  return {
+    opened: getAllOpenedIds(layout),
+    activeId,
+    activeGroupId: activeGroup?.id,
+  }
+}
+
+const addFileToGroup = (group: EditorLayoutLeaf, id: string) => {
+  if (
+    group.activeId &&
+    isEmptyEditor(group.activeId) &&
+    !isEmptyEditor(id) &&
+    !group.opened.includes(id)
+  ) {
+    const activeEmptyFileIndex = group.opened.findIndex((openedId) => openedId === group.activeId)
+    if (activeEmptyFileIndex > -1) {
+      group.opened.splice(activeEmptyFileIndex, 1, id)
+      group.activeId = id
+      return true
+    }
+  }
+
+  if (!group.opened.includes(id)) {
+    group.opened.push(id)
+  }
+
+  return false
+}
+
+const insertFileToGroup = (group: EditorLayoutLeaf, id: string, index?: number) => {
+  if (group.opened.includes(id)) return
+
+  if (typeof index === 'number') {
+    const insertIndex = Math.max(0, Math.min(index, group.opened.length))
+    group.opened.splice(insertIndex, 0, id)
+    return
+  }
+
+  group.opened.push(id)
+}
+
+const closeFileInGroup = (group: EditorLayoutLeaf, id: string) => {
+  const curIndex = group.opened.findIndex((openedId) => openedId === id)
+  if (curIndex < 0) return
+
+  group.opened.splice(curIndex, 1)
+
+  if (group.activeId === id) {
+    group.activeId = group.opened[curIndex] || group.opened[curIndex - 1]
+  }
+}
+
+const removeFileFromAllGroups = (node: EditorLayoutNode, id: string) => {
+  getAllGroups(node).forEach((group) => closeFileInGroup(group, id))
+}
+
+const splitGroupInLayout = (
+  node: EditorLayoutNode,
+  groupId: string,
+  direction: EditorSplitDirection,
+  insertion: EditorSplitPlacement,
+): { node: EditorLayoutNode; newGroup?: EditorLayoutLeaf } => {
+  if (isEditorLeaf(node)) {
+    if (node.id !== groupId) return { node }
+
+    const copiedActiveId = node.activeId || node.opened[0]
+    const newGroup = createEditorLeaf(copiedActiveId ? [copiedActiveId] : [], copiedActiveId)
+    const children = insertion === 'before' ? [newGroup, node] : [node, newGroup]
+
+    return {
+      node: {
+        type: 'branch',
+        id: nanoid(),
+        direction,
+        sizes: normalizeSizes(children.length),
+        children,
+      },
+      newGroup,
+    }
+  }
+
+  const nextChildren: EditorLayoutNode[] = []
+  let newGroup: EditorLayoutLeaf | undefined
+
+  for (const child of node.children) {
+    if (isEditorLeaf(child) && child.id === groupId) {
+      const copiedActiveId = child.activeId || child.opened[0]
+      newGroup = createEditorLeaf(copiedActiveId ? [copiedActiveId] : [], copiedActiveId)
+
+      if (node.direction === direction) {
+        if (insertion === 'before') {
+          nextChildren.push(newGroup, child)
+        } else {
+          nextChildren.push(child, newGroup)
+        }
+      } else {
+        const branchChildren = insertion === 'before' ? [newGroup, child] : [child, newGroup]
+        nextChildren.push({
+          type: 'branch',
+          id: nanoid(),
+          direction,
+          sizes: normalizeSizes(branchChildren.length),
+          children: branchChildren,
+        })
+      }
+      continue
+    }
+
+    const result = splitGroupInLayout(child, groupId, direction, insertion)
+    nextChildren.push(result.node)
+    if (result.newGroup) {
+      newGroup = result.newGroup
+    }
+  }
+
+  return {
+    node: {
+      ...node,
+      children: nextChildren,
+      sizes: newGroup ? normalizeSizes(nextChildren.length) : node.sizes,
+    },
+    newGroup,
+  }
+}
+
+const removeGroupFromLayout = (
+  node: EditorLayoutNode,
+  groupId: string,
+): { node: EditorLayoutNode; removed: boolean } => {
+  if (isEditorLeaf(node)) {
+    if (node.id === groupId) {
+      return { node: createDefaultEditorLayout(), removed: true }
+    }
+
+    return { node, removed: false }
+  }
+
+  const children: EditorLayoutNode[] = []
+  let removed = false
+
+  for (const child of node.children) {
+    if (isEditorLeaf(child) && child.id === groupId) {
+      removed = true
+      continue
+    }
+
+    const result = removeGroupFromLayout(child, groupId)
+    children.push(result.node)
+    removed = removed || result.removed
+  }
+
+  if (!removed) return { node, removed: false }
+
+  if (children.length === 0) {
+    return { node: createDefaultEditorLayout(), removed: true }
+  }
+
+  if (children.length === 1) {
+    return { node: children[0], removed: true }
+  }
+
+  return {
+    node: {
+      ...node,
+      children,
+      sizes: normalizeSizes(children.length),
+    },
+    removed: true,
+  }
+}
+
+const pruneEmptyEditorGroups = (node: EditorLayoutNode): EditorLayoutNode => {
+  const groups = getAllGroups(node)
+
+  if (groups.length <= 1) return node
+  if (groups.every((group) => group.opened.length === 0)) return createDefaultEditorLayout()
+
+  if (isEditorLeaf(node)) return node
+
+  const children = node.children
+    .map(pruneEmptyEditorGroups)
+    .filter((child) => !isEditorLeaf(child) || child.opened.length > 0)
+
+  if (children.length === 0) return createDefaultEditorLayout()
+  if (children.length === 1) return children[0]
+
+  return {
+    ...node,
+    children,
+    sizes: normalizeSizes(children.length),
+  }
+}
+
+const updateBranchSizes = (
+  node: EditorLayoutNode,
+  branchId: string,
+  sizes: number[],
+): EditorLayoutNode => {
+  if (isEditorLeaf(node)) return node
+
+  if (node.id === branchId && sizes.length === node.children.length) {
+    const total = sizes.reduce((sum, size) => sum + size, 0)
+    return {
+      ...node,
+      sizes: total > 0 ? sizes.map((size) => (size / total) * 100) : normalizeSizes(sizes.length),
+    }
+  }
+
+  return {
+    ...node,
+    children: node.children.map((child) => updateBranchSizes(child, branchId, sizes)),
+  }
+}
+
+const cloneEditorLayout = (node: EditorLayoutNode): EditorLayoutNode => {
+  if (isEditorLeaf(node)) {
+    return {
+      ...node,
+      opened: [...node.opened],
+    }
+  }
+
+  return {
+    ...node,
+    sizes: [...node.sizes],
+    children: node.children.map(cloneEditorLayout),
+  }
+}
+
+const commitEditorLayoutState = (layout: EditorLayoutNode, activeGroupId?: string) => {
+  const editorLayout = cloneEditorLayout(pruneEmptyEditorGroups(layout))
+  return {
+    editorLayout,
+    ...syncEditorLayoutState(editorLayout, activeGroupId),
+  }
+}
+
 const useEditorStore = create<EditorStore>((set, get) => {
+  const initialEditorLayout = createDefaultEditorLayout()
+
   return {
     opened: [],
     activeId: undefined,
+    activeGroupId: initialEditorLayout.id,
+    editorLayout: initialEditorLayout,
     folderData: null,
     editorDelegateMap: new Map(),
     editorCtxMap: new Map(),
@@ -168,70 +485,252 @@ const useEditorStore = create<EditorStore>((set, get) => {
     },
 
     setActiveId: (id: string) => {
-      set((state) => ({
-        ...state,
-        activeId: id,
-      }))
+      set((state) => {
+        const targetGroup =
+          findGroup(state.editorLayout, state.activeGroupId) ||
+          findGroupContainingFile(state.editorLayout, id) ||
+          getFirstGroup(state.editorLayout)
+
+        if (targetGroup) {
+          addFileToGroup(targetGroup, id)
+          targetGroup.activeId = id
+        }
+
+        const synced = commitEditorLayoutState(state.editorLayout, targetGroup?.id)
+
+        return {
+          ...state,
+          ...synced,
+        }
+      })
     },
 
     addOpenedFile: (id: string) => {
-      const oldState = get()
-      if (
-        oldState.activeId &&
-        isEmptyEditor(oldState.activeId) &&
-        !isEmptyEditor(id) &&
-        !oldState.opened.includes(id)
-      ) {
-        const activeEmptyFileIndex = oldState.opened.findIndex(
-          (openedId) => openedId === oldState.activeId,
-        )
-        if (activeEmptyFileIndex > -1) {
-          oldState.opened.splice(activeEmptyFileIndex, 1, id)
-        }
-
-        set((state) => ({
-          ...state,
-          opened: [...oldState.opened],
-          activeId: id,
-        }))
-
-        return
-      }
-
       set((state) => {
-        if (state.opened.includes(id)) return state
-        else return { ...state, opened: [...state.opened, id] }
+        const activeGroup =
+          findGroup(state.editorLayout, state.activeGroupId) || getFirstGroup(state.editorLayout)
+        const replacedEmptyTab = activeGroup ? addFileToGroup(activeGroup, id) : false
+        const synced = commitEditorLayoutState(state.editorLayout, state.activeGroupId)
+
+        return {
+          ...state,
+          ...synced,
+          activeId: replacedEmptyTab ? id : state.activeId,
+        }
       })
     },
 
     delOpenedFile: (id: string) => {
       set((state) => {
+        removeFileFromAllGroups(state.editorLayout, id)
+        const synced = commitEditorLayoutState(state.editorLayout, state.activeGroupId)
+
         return {
           ...state,
-          activeId: state.activeId === id ? undefined : state.activeId,
-          opened: state.opened.filter((opened) => opened !== id),
+          ...synced,
         }
       })
     },
 
     delOtherOpenedFile: (id: string) => {
       set((state) => {
+        const activeGroup =
+          findGroup(state.editorLayout, state.activeGroupId) ||
+          findGroupContainingFile(state.editorLayout, id)
+
+        if (activeGroup) {
+          activeGroup.opened = activeGroup.opened.includes(id) ? [id] : []
+          activeGroup.activeId = activeGroup.opened[0]
+        }
+
+        const synced = commitEditorLayoutState(state.editorLayout, activeGroup?.id)
+
         return {
           ...state,
-          activeId: id,
-          opened: [id],
+          ...synced,
         }
       })
     },
 
     delAllOpenedFile: () => {
       set((state) => {
+        const editorLayout = createDefaultEditorLayout()
+
         return {
           ...state,
+          editorLayout,
+          activeGroupId: editorLayout.id,
           activeId: undefined,
           opened: [],
         }
       })
+    },
+
+    setActiveGroupId: (groupId) => {
+      set((state) => {
+        const synced = commitEditorLayoutState(state.editorLayout, groupId)
+
+        return {
+          ...state,
+          ...synced,
+        }
+      })
+    },
+
+    getActiveGroup: () => {
+      const state = get()
+      return findGroup(state.editorLayout, state.activeGroupId) || getFirstGroup(state.editorLayout)
+    },
+
+    getGroup: (groupId) => {
+      return findGroup(get().editorLayout, groupId)
+    },
+
+    openFileInGroup: (groupId, id, options = {}) => {
+      set((state) => {
+        const group = findGroup(state.editorLayout, groupId) || getFirstGroup(state.editorLayout)
+        if (!group) return state
+
+        addFileToGroup(group, id)
+        if (options.activate !== false) {
+          group.activeId = id
+        }
+
+        const synced = commitEditorLayoutState(
+          state.editorLayout,
+          options.activate === false ? state.activeGroupId : group.id,
+        )
+
+        return {
+          ...state,
+          ...synced,
+        }
+      })
+    },
+
+    closeFileInGroup: (groupId, id) => {
+      set((state) => {
+        const group = findGroup(state.editorLayout, groupId)
+        if (!group) return state
+
+        closeFileInGroup(group, id)
+        const synced = commitEditorLayoutState(state.editorLayout, group.id)
+
+        return {
+          ...state,
+          ...synced,
+        }
+      })
+    },
+
+    closeOtherFilesInGroup: (groupId, id) => {
+      set((state) => {
+        const group = findGroup(state.editorLayout, groupId)
+        if (!group) return state
+
+        group.opened = group.opened.includes(id) ? [id] : []
+        group.activeId = group.opened[0]
+        const synced = commitEditorLayoutState(state.editorLayout, group.id)
+
+        return {
+          ...state,
+          ...synced,
+        }
+      })
+    },
+
+    closeAllFilesInGroup: (groupId) => {
+      set((state) => {
+        const group = findGroup(state.editorLayout, groupId)
+        if (!group) return state
+
+        group.opened = []
+        group.activeId = undefined
+        const synced = commitEditorLayoutState(state.editorLayout, group.id)
+
+        return {
+          ...state,
+          ...synced,
+        }
+      })
+    },
+
+    moveFileToGroup: (sourceGroupId, targetGroupId, id, targetIndex) => {
+      set((state) => {
+        const sourceGroup = findGroup(state.editorLayout, sourceGroupId)
+        const targetGroup = findGroup(state.editorLayout, targetGroupId)
+
+        if (!sourceGroup || !targetGroup || !sourceGroup.opened.includes(id)) return state
+
+        if (sourceGroup.id === targetGroup.id) {
+          targetGroup.activeId = id
+        } else {
+          closeFileInGroup(sourceGroup, id)
+          insertFileToGroup(targetGroup, id, targetIndex)
+          targetGroup.activeId = id
+        }
+
+        const synced = commitEditorLayoutState(state.editorLayout, targetGroup.id)
+
+        return {
+          ...state,
+          ...synced,
+        }
+      })
+    },
+
+    splitGroup: (groupId, direction, insertion = 'after') => {
+      let createdGroupId: string | undefined
+
+      set((state) => {
+        const result = splitGroupInLayout(state.editorLayout, groupId, direction, insertion)
+        if (!result.newGroup) return state
+
+        createdGroupId = result.newGroup.id
+        const synced = commitEditorLayoutState(result.node, result.newGroup.id)
+
+        return {
+          ...state,
+          ...synced,
+        }
+      })
+
+      return createdGroupId
+    },
+
+    closeGroup: (groupId) => {
+      set((state) => {
+        const result = removeGroupFromLayout(state.editorLayout, groupId)
+        if (!result.removed) return state
+
+        const synced = commitEditorLayoutState(result.node, state.activeGroupId)
+
+        return {
+          ...state,
+          ...synced,
+        }
+      })
+    },
+
+    setBranchSizes: (branchId, sizes) => {
+      set((state) => {
+        const editorLayout = updateBranchSizes(state.editorLayout, branchId, sizes)
+        const synced = commitEditorLayoutState(editorLayout, state.activeGroupId)
+
+        return {
+          ...state,
+          ...synced,
+        }
+      })
+    },
+
+    setEditorLayout: (editorLayout, activeGroupId) => {
+      const synced = commitEditorLayoutState(editorLayout, activeGroupId)
+
+      set((state) => ({
+        ...state,
+        ...synced,
+      }))
     },
 
     getEditorContent: (id: string) => {
@@ -260,6 +759,7 @@ const useEditorStore = create<EditorStore>((set, get) => {
     setFolderData: (folderData) => {
       const prevRootPath = get().getRootPath()
       const nextRootPath = folderData?.[0]?.path
+      const editorLayout = createDefaultEditorLayout()
 
       if (prevRootPath && prevRootPath !== nextRootPath) {
         releaseSecurityScope(prevRootPath).catch(() => {})
@@ -268,6 +768,8 @@ const useEditorStore = create<EditorStore>((set, get) => {
       set((state) => ({
         ...state,
         folderData,
+        editorLayout,
+        activeGroupId: editorLayout.id,
         opened: [],
         activeId: undefined,
       }))
@@ -300,6 +802,8 @@ const useEditorStore = create<EditorStore>((set, get) => {
 type EditorStore = {
   opened: string[]
   activeId?: string
+  activeGroupId?: string
+  editorLayout: EditorLayoutNode
   /**
    * folderData only has root file.
    */
@@ -316,6 +820,27 @@ type EditorStore = {
   delOpenedFile: (id: string) => void
   delOtherOpenedFile: (id: string) => void
   delAllOpenedFile: () => void
+  setActiveGroupId: (groupId: string) => void
+  getActiveGroup: () => EditorLayoutLeaf | undefined
+  getGroup: (groupId: string) => EditorLayoutLeaf | undefined
+  openFileInGroup: (groupId: string, id: string, options?: { activate?: boolean }) => void
+  closeFileInGroup: (groupId: string, id: string) => void
+  closeOtherFilesInGroup: (groupId: string, id: string) => void
+  closeAllFilesInGroup: (groupId: string) => void
+  moveFileToGroup: (
+    sourceGroupId: string,
+    targetGroupId: string,
+    id: string,
+    targetIndex?: number,
+  ) => void
+  splitGroup: (
+    groupId: string,
+    direction: EditorSplitDirection,
+    insertion?: EditorSplitPlacement,
+  ) => string | undefined
+  closeGroup: (groupId: string) => void
+  setBranchSizes: (branchId: string, sizes: number[]) => void
+  setEditorLayout: (editorLayout: EditorLayoutNode, activeGroupId?: string) => void
   setFolderData: (folderData: IFile[]) => void
   /**
    * dont change opened and activeId

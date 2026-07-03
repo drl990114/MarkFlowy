@@ -31,8 +31,8 @@ const overlayScrollbarsOptions = {
 } as const
 
 function Editor(props: EditorProps) {
-  const { id, active } = props
-  const [shouldMountContent, setShouldMountContent] = useState(active)
+  const { id, active, visible = active } = props
+  const [shouldMountContent, setShouldMountContent] = useState(visible)
   const curFile = getFileObject(id)
 
   const { getFileTypeConfigById, setFileTypeConfig } = useFileTypeConfigStore()
@@ -60,13 +60,13 @@ function Editor(props: EditorProps) {
   })
 
   useEffect(() => {
-    if (active) {
+    if (visible) {
       setShouldMountContent(true)
     }
-  }, [active])
+  }, [visible])
 
   if (isEmptyEditor(curFile.id)) {
-    if (active) {
+    if (visible) {
       return <EmptyState />
     } else {
       return null
@@ -79,7 +79,7 @@ function Editor(props: EditorProps) {
     <EditorScrollContainer
       data-editor-id={id}
       data-editor-active={active ? 'true' : 'false'}
-      style={active ? undefined : { display: 'none' }}
+      style={visible ? undefined : { display: 'none' }}
     >
       <OverlayScrollbarsComponent
         options={overlayScrollbarsOptions}
@@ -89,9 +89,19 @@ function Editor(props: EditorProps) {
           {!shouldMountContent ? null : curFileTypeConfig.type === 'unsupported' ? (
             <UnsupportedFileType fileName={curFile.name} />
           ) : isTextfileType(curFileTypeConfig) ? (
-            <TextEditor fileTypeConfig={curFileTypeConfig} active={active} id={id} />
+            <TextEditor
+              fileTypeConfig={curFileTypeConfig}
+              active={active}
+              id={id}
+              visible={visible}
+            />
           ) : (
-            <PreviewContent type={curFileTypeConfig.type} filePath={curFile.path} active={active} />
+            <PreviewContent
+              type={curFileTypeConfig.type}
+              filePath={curFile.path}
+              active={active}
+              visible={visible}
+            />
           )}
         </div>
       </OverlayScrollbarsComponent>
@@ -102,6 +112,7 @@ function Editor(props: EditorProps) {
 export interface EditorProps {
   id: string
   active: boolean
+  visible?: boolean
   onSave?: () => void
 }
 

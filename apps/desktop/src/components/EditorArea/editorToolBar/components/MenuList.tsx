@@ -29,6 +29,8 @@ const EMPTY_FILE_NORMAL_INFO: FileNormalInfo = {
 }
 
 export interface MenuListProps {
+  /** 目标 editor，默认使用当前全局 active editor */
+  editorId?: string
   /** 是否显示视图切换选项 */
   showViewSwitcher?: boolean
   /** 是否显示打字机滚动选项 */
@@ -55,6 +57,7 @@ export interface MenuListProps {
 
 export const MenuList = memo((props: MenuListProps) => {
   const {
+    editorId,
     showViewSwitcher = true,
     showTypewriterScroll = false,
     showFileInfo = true,
@@ -69,6 +72,7 @@ export const MenuList = memo((props: MenuListProps) => {
   } = props
 
   const { activeId, getEditorContent } = useEditorStore()
+  const targetEditorId = editorId ?? activeId
   const { editorViewTypeMap } = useEditorViewTypeStore()
   const { settingData } = useAppSettingStore()
   const { t } = useTranslation()
@@ -76,11 +80,11 @@ export const MenuList = memo((props: MenuListProps) => {
 
   const [fileNormalInfo, setFileNormalInfo] = useState<FileNormalInfo>(EMPTY_FILE_NORMAL_INFO)
 
-  const curFile = activeId ? getFileObject(activeId) : undefined
+  const curFile = targetEditorId ? getFileObject(targetEditorId) : undefined
   const editorViewType = editorViewTypeMap.get(curFile?.id || '') || 'wysiwyg'
 
   const { idStateMap } = useEditorStateStore()
-  const editorState = activeId ? idStateMap.get(activeId) : undefined
+  const editorState = targetEditorId ? idStateMap.get(targetEditorId) : undefined
 
   const getFileNormalInfo = useCallback(
     debounce(async () => {

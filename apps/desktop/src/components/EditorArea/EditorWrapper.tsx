@@ -4,6 +4,7 @@ import { FileType } from '@/helper/fileTypeHandler'
 
 interface EditorWrapperProps {
   active: boolean
+  $visible: boolean
   fullWidth: boolean
   editorViewType?: EditorViewType
   fileType?: FileType
@@ -29,7 +30,7 @@ export const EditorWrapper = styled.div.attrs<EditorWrapperProps>((props) => pro
       props.editorViewType === EditorViewType.SOURCECODE ||
       (props.fileType != null && props.fileType !== 'markdown')
 
-    return props.active
+    return props.$visible
       ? css({
           maxWidth: shouldFullWidth ? 'none' : '800px',
           margin: '0 auto',

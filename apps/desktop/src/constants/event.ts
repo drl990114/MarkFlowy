@@ -6,6 +6,8 @@ enum EVENT {
   app_hide = 'app_hide',
   app_closeCurrentEditorTab = 'app_closeCurrentEditorTab',
   app_toggleEditorType = 'app_toggleEditorType',
+  app_splitEditorRight = 'app_splitEditorRight',
+  app_splitEditorDown = 'app_splitEditorDown',
 }
 
 export default EVENT

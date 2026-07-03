@@ -63,7 +63,9 @@
     "create_file": "Crear un archivo nuevo",
     "unsave": "Unguardar",
     "save_and_close": "Guardar y cerrar",
+    "save_and_continue": "Guardar y continuar",
     "unsave_and_close": "Cierre directo",
+    "continue_without_save": "Continuar sin guardar",
     "convert_text": "Conversión simplificada y tradicional"
   },
   "placeholder": {
@@ -506,6 +508,8 @@
       "app_closeCurrentEditorTab": "Cerrar la pestaña actual del editor",
       "app_hide": "Ocultar la aplicación",
       "app_toggleEditorType": "Alternar entre modo código fuente y WYSIWYG",
+      "app_splitEditorRight": "Dividir editor a la derecha",
+      "app_splitEditorDown": "Dividir editor hacia abajo",
       "editor_copy": "Copiar texto seleccionado en el editor",
       "editor_cut": "Cortar texto seleccionado en el editor",
       "editor_redo": "Rehacer",

@@ -63,7 +63,9 @@
     "create_file": "Nouveau fichier",
     "unsave": "Unsave",
     "save_and_close": "Enregistrer et fermer",
+    "save_and_continue": "Enregistrer et continuer",
     "unsave_and_close": "Fermeture directe",
+    "continue_without_save": "Continuer sans enregistrer",
     "convert_text": "Conversion simple et complexe"
   },
   "confirm": {
@@ -506,6 +508,8 @@
       "app_closeCurrentEditorTab": "Fermer l'onglet de l'éditeur actuel",
       "app_hide": "Cacher l'application",
       "app_toggleEditorType": "Basculer entre les modes code source et WYSIWYG",
+      "app_splitEditorRight": "Scinder l'éditeur vers la droite",
+      "app_splitEditorDown": "Scinder l'éditeur vers le bas",
       "editor_copy": "Copier le texte sélectionné dans l'éditeur",
       "editor_cut": "Couper le texte sélectionné dans l'éditeur",
       "editor_redo": "Refaire",

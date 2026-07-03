@@ -13,13 +13,19 @@ import {
 import { MenuList } from '../components/MenuList'
 import { AIButton } from './components/AIButton'
 
-export const WysiwygToolbar: FC = () => {
+interface WysiwygToolbarProps {
+  editorId?: string
+}
+
+export const WysiwygToolbar: FC<WysiwygToolbarProps> = (props) => {
+  const { editorId } = props
   const { editorCtxMap, activeId } = useEditorStore()
   const { getEditorViewType } = useEditorViewTypeStore()
   const { t } = useTranslation()
+  const targetEditorId = editorId ?? activeId
 
-  const editorCtx = editorCtxMap.get(activeId ?? '')
-  const viewType = activeId ? getEditorViewType(activeId) : EditorViewType.WYSIWYG
+  const editorCtx = editorCtxMap.get(targetEditorId ?? '')
+  const viewType = targetEditorId ? getEditorViewType(targetEditorId) : EditorViewType.WYSIWYG
 
   const sections = useMemo(
     () => [
@@ -48,8 +54,8 @@ export const WysiwygToolbar: FC = () => {
         registerWidth={registerItemWidth}
         hidden={hiddenIds.has('common')}
       >
-        <MenuList showTypewriterScroll />
-        <AIButton />
+        <MenuList editorId={targetEditorId} showTypewriterScroll />
+        <AIButton editorId={targetEditorId} />
       </ToolbarSection>
 
       <ToolbarSection

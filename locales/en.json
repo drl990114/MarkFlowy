@@ -63,7 +63,9 @@
     "summary": "summary",
     "create_file": "Create a new file",
     "save_and_close": "Save and close",
+    "save_and_continue": "Save and continue",
     "unsave_and_close": "Direct Close",
+    "continue_without_save": "Continue without saving",
     "convert_text": "Simplified transformation"
   },
   "placeholder": {
@@ -189,6 +191,8 @@
       "app_closeCurrentEditorTab": "Close current editor tab",
       "app_hide": "Hide the application",
       "app_toggleEditorType": "Toggle source code / WYSIWYG mode",
+      "app_splitEditorRight": "Split editor right",
+      "app_splitEditorDown": "Split editor down",
       "editor_copy": "Copy selected text in editor",
       "editor_cut": "Cut selected text in editor",
       "editor_redo": "Redo",

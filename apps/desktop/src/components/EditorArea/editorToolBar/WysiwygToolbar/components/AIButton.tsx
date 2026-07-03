@@ -9,14 +9,20 @@ import { useCallback, useRef } from 'react'
 import { useTranslation } from '@/i18n'
 import { showContextMenu } from '../../../../ui-v2/ContextMenu'
 
-export const AIButton = () => {
+interface AIButtonProps {
+  editorId?: string
+}
+
+export const AIButton = (props: AIButtonProps) => {
+  const { editorId } = props
   const { activeId, getEditorContent } = useEditorStore()
+  const targetEditorId = editorId ?? activeId
   const { getPostSummary, getPostTranslate, aiProvider } = useAiChatStore()
   const { addAppTask } = useAppTasksStore()
   const { t } = useTranslation()
   const ref = useRef<any>(null)
   
-  const curFile = activeId ? getFileObject(activeId) : undefined
+  const curFile = targetEditorId ? getFileObject(targetEditorId) : undefined
 
   const fetchCurFileSummary = useCallback(async () => {
     const content = getEditorContent(curFile?.id || '')

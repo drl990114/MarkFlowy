@@ -63,7 +63,9 @@
     "summary": "要約",
     "create_file": "新しいファイルを作成",
     "save_and_close": "保存して閉じる",
+    "save_and_continue": "保存して続行",
     "unsave_and_close": "直接閉じる",
+    "continue_without_save": "保存せずに続行",
     "convert_text": "簡単に変換する"
   },
   "placeholder": {
@@ -506,6 +508,8 @@
       "app_closeCurrentEditorTab": "現在のエディタタブを閉じる",
       "app_hide": "アプリケーションを隠す",
       "app_toggleEditorType": "ソースコード/WYSIWYGモードを切り替える",
+      "app_splitEditorRight": "エディタを右に分割",
+      "app_splitEditorDown": "エディタを下に分割",
       "editor_copy": "選択したテキストをエディタでコピーする",
       "editor_cut": "エディタで選択したテキストをカット",
       "editor_redo": "再実行",

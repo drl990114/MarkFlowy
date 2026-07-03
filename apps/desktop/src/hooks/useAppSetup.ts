@@ -14,6 +14,7 @@ import { addExistingMarkdownFileEdit } from '@/services/editor-file'
 import { createNewWindow, currentWindow } from '@/services/windows'
 import { useEditorStore } from '@/stores'
 import useAppSettingStore from '@/stores/useAppSettingStore'
+import type { EditorLayoutNode } from '@/stores/useEditorStore'
 import type { WorkspaceInfo } from '@/stores/useOpenedCacheStore'
 import useOpenedCacheStore from '@/stores/useOpenedCacheStore'
 import { useSuspenseQuery } from '@tanstack/react-query'
@@ -21,6 +22,7 @@ import { invoke } from '@tauri-apps/api/core'
 import { getCurrentWebview } from '@tauri-apps/api/webview'
 import { LazyStore } from '@tauri-apps/plugin-store'
 import { once } from 'lodash'
+import { nanoid } from 'nanoid'
 import { useCallback, useEffect } from 'react'
 import { toast } from 'zens'
 import { useGlobalKeyboard, useGlobalOSInfo } from '.'
@@ -47,6 +49,29 @@ interface CliCommandPayload {
   id: string
 }
 
+type PersistedEditorLayoutNode =
+  | {
+      type: 'branch'
+      id?: string
+      direction: 'horizontal' | 'vertical'
+      sizes?: number[]
+      children: PersistedEditorLayoutNode[]
+    }
+  | {
+      type: 'leaf'
+      id?: string
+      openedFilePaths?: string[]
+      activeFilePath?: string
+    }
+
+interface WorkspaceCache {
+  version?: number
+  openedFilePaths?: string[]
+  activeFilePath?: string
+  editorLayout?: PersistedEditorLayoutNode
+  activeGroupId?: string
+}
+
 const getExtFromPath = (path: string) => {
   const fileName = getFileNameFromPath(path) || ''
   const dotIndex = fileName.lastIndexOf('.')
@@ -64,6 +89,55 @@ const ensureCachedFileByPath = (path: string) => {
     ext: getExtFromPath(path),
     path,
   })
+}
+
+const serializeEditorLayout = (node: EditorLayoutNode): PersistedEditorLayoutNode => {
+  if (node.type === 'leaf') {
+    return {
+      type: 'leaf',
+      id: node.id,
+      openedFilePaths: node.opened
+        .map((fileId) => getFileObject(fileId)?.path)
+        .filter((path): path is string => Boolean(path)),
+      activeFilePath: node.activeId ? getFileObject(node.activeId)?.path : undefined,
+    }
+  }
+
+  return {
+    type: 'branch',
+    id: node.id,
+    direction: node.direction,
+    sizes: node.sizes,
+    children: node.children.map(serializeEditorLayout),
+  }
+}
+
+const hydrateEditorLayout = (node: PersistedEditorLayoutNode): EditorLayoutNode => {
+  if (node.type === 'leaf') {
+    const opened = (node.openedFilePaths || []).map((path) => ensureCachedFileByPath(path).id)
+    const activeId = node.activeFilePath ? ensureCachedFileByPath(node.activeFilePath).id : opened[0]
+
+    return {
+      type: 'leaf',
+      id: node.id || nanoid(),
+      opened,
+      activeId,
+    }
+  }
+
+  const children = node.children.map(hydrateEditorLayout)
+  const sizes =
+    node.sizes?.length === children.length
+      ? node.sizes
+      : children.map(() => 100 / Math.max(children.length, 1))
+
+  return {
+    type: 'branch',
+    id: node.id || nanoid(),
+    direction: node.direction,
+    sizes,
+    children,
+  }
 }
 
 async function appThemeExtensionsSetup() {
@@ -212,7 +286,7 @@ async function handleCliOpen(payload: CliOpenPayload) {
 
 async function appWorkspaceSetup() {
   const { setRecentWorkspaces, clearRecentWorkspaces } = useOpenedCacheStore.getState()
-  const { setFolderData, addOpenedFile, setActiveId } = useEditorStore.getState()
+  const { setFolderData, addOpenedFile, setActiveId, setEditorLayout } = useEditorStore.getState()
   logger.debug('==== appWorkspaceSetup: Checking window.openedUrls ===')
   logger.debug('window.openedUrls', window.openedUrls)
 
@@ -253,29 +327,28 @@ async function appWorkspaceSetup() {
       logger.debug('Reading directory:', targetWorkspacePath)
       try {
         const [workspaceCache, res] = await Promise.all([
-          cacheStore.get<{
-          openedFilePaths: string[]
-          activeFilePath: string
-          }>(targetWorkspacePath),
+          cacheStore.get<WorkspaceCache>(targetWorkspacePath),
           readDirectory(targetWorkspacePath),
         ])
         logger.debug('Cache store init result:', workspaceCache)
       
         logger.debug('Directory read successfully, file count:', res.length)
         setFolderData(res)
-        const { openedFilePaths, activeFilePath } = workspaceCache || {}
+        const { openedFilePaths, activeFilePath, editorLayout, activeGroupId } = workspaceCache || {}
 
-        if (openedFilePaths) {
+        if (editorLayout) {
+          setEditorLayout(hydrateEditorLayout(editorLayout), activeGroupId)
+        } else if (openedFilePaths) {
           openedFilePaths.forEach((path) => {
             const cur = ensureCachedFileByPath(path)
             addOpenedFile(cur.id)
           })
-        }
 
-        if (activeFilePath) {
-          const activeFile = ensureCachedFileByPath(activeFilePath)
-          addOpenedFile(activeFile.id)
-          setActiveId(activeFile.id)
+          if (activeFilePath) {
+            const activeFile = ensureCachedFileByPath(activeFilePath)
+            addOpenedFile(activeFile.id)
+            setActiveId(activeFile.id)
+          }
         }
 
         useEditorStore.subscribe((state) => {
@@ -287,8 +360,11 @@ async function appWorkspaceSetup() {
             })
 
             cacheStore.set(rootPath, {
+              version: 2,
               openedFilePaths: openedFiles,
               activeFilePath: state.activeId ? getFileObject(state.activeId)?.path : '',
+              editorLayout: serializeEditorLayout(state.editorLayout),
+              activeGroupId: state.activeGroupId,
             })
             cacheStore.save()
           }
