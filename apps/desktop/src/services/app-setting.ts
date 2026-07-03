@@ -17,6 +17,7 @@ export const appSettingStoreSetup = async () => {
     logger.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace')
     const defaultSetting = {
       theme: 'light',
+      theme_accent_color: 'system',
       language: 'en',
       webview_zoom: '1.0',
       auto_update: false,
@@ -27,19 +28,27 @@ export const appSettingStoreSetup = async () => {
 }
 
 export const writeSettingData = async (item: Pick<Setting.SettingItem, 'key' | 'afterWrite'>, value: any) => {
-  const { settingData } = useAppSettingStore.getState()
+  const { settingData, setSettingData } = useAppSettingStore.getState()
 
   const newSettingData = {
     ...settingData,
     [item.key]: value,
   }
 
-  await invoke('save_app_conf', { data: newSettingData, label: 'markflowy' })
+  setSettingData(newSettingData)
 
-  emit('app_conf_change')
+  try {
+    await invoke('save_app_conf', { data: newSettingData, label: 'markflowy' })
 
-  if (item.afterWrite) {
-    item.afterWrite(value)
+    emit('app_conf_change')
+
+    if (item.afterWrite) {
+      item.afterWrite(value)
+    }
+  } catch (error) {
+    logger.error('Failed to write app setting:', error)
+    setSettingData(settingData)
+    throw error
   }
 }
 

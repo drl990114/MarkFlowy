@@ -1,21 +1,76 @@
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import useThemeStore, { type ThemeMode } from '@/stores/useThemeStore'
-import { Select } from 'antd'
-import { memo, useMemo } from 'react'
+import appSettingService from '@/services/app-setting'
+import {
+  FOLLOW_THEME_ACCENT_COLOR,
+  isThemeAccentColorOverride,
+  normalizeThemeAccentColor,
+  resolveThemeAccentColor,
+  THEME_ACCENT_COLOR_SETTING_KEY,
+} from '@/helper/theme'
+import { ColorPicker, Select, Space } from 'antd'
+import { debounce } from 'lodash'
+import { memo, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from '@/i18n'
 import { SettingGroupContainer } from '../component/SettingGroup/styles'
 import { SettingItemContainer } from '../component/SettingItems/Container'
 import { SettingLabel } from '../component/SettingItems/Label'
 
+type AccentColorMode = 'system' | 'custom'
+
 export const ThemeSetting = memo(() => {
   const { settingData } = useAppSettingStore()
-  const { themes, themeMode, lightThemeName, darkThemeName, setThemeMode, setLightTheme, setDarkTheme } = useThemeStore()
+  const {
+    themes,
+    themeMode,
+    lightThemeName,
+    darkThemeName,
+    curTheme,
+    setThemeMode,
+    setLightTheme,
+    setDarkTheme,
+  } = useThemeStore()
   const { t } = useTranslation()
 
   const lightThemes = useMemo(() => themes.filter((t) => t.mode === 'light'), [themes])
   const darkThemes = useMemo(() => themes.filter((t) => t.mode === 'dark'), [themes])
 
   const currentThemeMode = (settingData.theme_mode as ThemeMode) || themeMode
+  const accentColorSetting = settingData[THEME_ACCENT_COLOR_SETTING_KEY]
+  const isCustomAccentColor = isThemeAccentColorOverride(accentColorSetting)
+  const accentColorMode: AccentColorMode = isCustomAccentColor ? 'custom' : 'system'
+  const accentColor = resolveThemeAccentColor(curTheme.styledConstants.accentColor, accentColorSetting)
+  const [draftAccentColor, setDraftAccentColor] = useState(accentColor)
+
+  const writeAccentColor = useMemo(
+    () =>
+      debounce((value: string) => {
+        appSettingService.writeSettingData({ key: THEME_ACCENT_COLOR_SETTING_KEY }, value)
+      }, 220),
+    [],
+  )
+
+  useEffect(() => {
+    setDraftAccentColor(accentColor)
+  }, [accentColor])
+
+  useEffect(() => {
+    return () => {
+      writeAccentColor.flush()
+    }
+  }, [writeAccentColor])
+
+  const handleAccentColorModeChange = (mode: AccentColorMode) => {
+    writeAccentColor.cancel()
+    const value = mode === 'custom' ? draftAccentColor : FOLLOW_THEME_ACCENT_COLOR
+    appSettingService.writeSettingData({ key: THEME_ACCENT_COLOR_SETTING_KEY }, value)
+  }
+
+  const handleAccentColorChange = (color: { toHexString: () => string }) => {
+    const nextColor = normalizeThemeAccentColor(color.toHexString())
+    setDraftAccentColor(nextColor)
+    writeAccentColor(nextColor)
+  }
 
   return (
     <SettingGroupContainer>
@@ -25,7 +80,6 @@ export const ThemeSetting = memo(() => {
         <SettingLabel
           item={{
             key: 'theme_mode',
-            type: 'select',
             title: { i18nKey: 'settings.display.theme.mode.label' },
             desc: { i18nKey: 'settings.display.theme.mode.desc' },
           }}
@@ -49,7 +103,6 @@ export const ThemeSetting = memo(() => {
           <SettingLabel
             item={{
               key: 'light_theme',
-              type: 'select',
               title: { i18nKey: 'settings.display.theme.light_theme.label' },
               desc: { i18nKey: 'settings.display.theme.light_theme.desc' },
             }}
@@ -70,7 +123,6 @@ export const ThemeSetting = memo(() => {
           <SettingLabel
             item={{
               key: 'dark_theme',
-              type: 'select',
               title: { i18nKey: 'settings.display.theme.dark_theme.label' },
               desc: { i18nKey: 'settings.display.theme.dark_theme.desc' },
             }}
@@ -85,6 +137,39 @@ export const ThemeSetting = memo(() => {
           />
         </SettingItemContainer>
       )}
+
+      <SettingItemContainer>
+        <SettingLabel
+          item={{
+            key: THEME_ACCENT_COLOR_SETTING_KEY,
+            title: { i18nKey: 'settings.display.theme.accent_color.label' },
+            desc: { i18nKey: 'settings.display.theme.accent_color.desc' },
+          }}
+        />
+        <Space.Compact>
+          <Select
+            value={accentColorMode}
+            options={[
+              { value: 'system', label: t('settings.display.theme.accent_color.follow_theme') },
+              { value: 'custom', label: t('settings.display.theme.accent_color.custom') },
+            ]}
+            onChange={handleAccentColorModeChange}
+            style={{ width: 140 }}
+          />
+          <ColorPicker
+            value={draftAccentColor}
+            format='hex'
+            disabled={!isCustomAccentColor}
+            disabledAlpha
+            onChange={handleAccentColorChange}
+            onOpenChange={(open) => {
+              if (!open) {
+                writeAccentColor.flush()
+              }
+            }}
+          />
+        </Space.Compact>
+      </SettingItemContainer>
     </SettingGroupContainer>
   )
 })

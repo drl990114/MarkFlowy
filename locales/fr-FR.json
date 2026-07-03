@@ -408,6 +408,12 @@
         "dark_theme": {
           "label": "Thème sombre",
           "desc": "Sélectionnez le thème utilisé en mode sombre"
+        },
+        "accent_color": {
+          "label": "Couleur du thème",
+          "desc": "Remplacer la couleur d'accent du thème sélectionné",
+          "follow_theme": "Suivre le thème",
+          "custom": "Personnalisée"
         }
       },
       "size": {

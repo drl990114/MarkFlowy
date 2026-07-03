@@ -28,6 +28,7 @@ macro_rules! merge_options {
 pub_struct!(AppConf {
     theme: Option<String>,
     theme_mode: Option<String>,
+    theme_accent_color: Option<String>,
     light_theme: Option<String>,
     dark_theme: Option<String>,
     language: Option<String>,
@@ -182,6 +183,7 @@ impl AppConf {
         Self {
             theme: Some("light".to_string()),
             theme_mode: Some("system".to_string()),
+            theme_accent_color: Some("system".to_string()),
             light_theme: Some("MarkFlowy Light".to_string()),
             dark_theme: Some("MarkFlowy Dark".to_string()),
             language: Some("en".to_string()),
@@ -313,6 +315,7 @@ impl AppConf {
             oldconf,
             theme,
             theme_mode,
+            theme_accent_color,
             light_theme,
             dark_theme,
             language,

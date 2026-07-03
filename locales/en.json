@@ -451,6 +451,12 @@
         "dark_theme": {
           "label": "Dark Theme",
           "desc": "Select the theme used in dark mode"
+        },
+        "accent_color": {
+          "label": "Theme Color",
+          "desc": "Override the selected theme's accent color",
+          "follow_theme": "Follow Theme",
+          "custom": "Custom"
         }
       },
       "size": {

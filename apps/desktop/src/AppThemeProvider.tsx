@@ -6,6 +6,11 @@ import { ThemeProvider as EditorProvider } from 'rme'
 import { IStyleSheetContext, StyleSheetManager, ThemeProvider } from 'styled-components'
 import { ThemeProvider as ZensThemeProvider } from 'zens'
 import { GlobalStyles, DesktopSpecificStyles } from './globalStyles'
+import {
+  isThemeAccentColorOverride,
+  resolveThemeAccentColor,
+  THEME_ACCENT_COLOR_SETTING_KEY,
+} from './helper/theme'
 import { InjectFonts } from './injectFonts'
 import useAppSettingStore from './stores/useAppSettingStore'
 import useThemeStore from './stores/useThemeStore'
@@ -18,7 +23,6 @@ const DEFAULT_MONOSPACE_FONT_FAMILY = 'Default Monospace'
 const AppThemeProvider: React.FC<BaseComponentProps> = function ({ children }) {
   const { curTheme } = useThemeStore()
   const { settingData } = useAppSettingStore()
-  const theme = curTheme?.styledConstants || {}
 
   const rootFontFamily =
     !settingData.editor_root_font_family ||
@@ -33,38 +37,50 @@ const AppThemeProvider: React.FC<BaseComponentProps> = function ({ children }) {
       ? curTheme.styledConstants.codemirrorFontFamily
       : settingData.editor_code_font_family
 
+  const accentColorSetting = settingData[THEME_ACCENT_COLOR_SETTING_KEY]
+  const hasAccentColorOverride = isThemeAccentColorOverride(accentColorSetting)
+  const accentColor = resolveThemeAccentColor(curTheme.styledConstants.accentColor, accentColorSetting)
+  const theme = useMemo(
+    () => ({
+      ...curTheme.styledConstants,
+      accentColor,
+      accentColorFocused: hasAccentColorOverride
+        ? `${accentColor}18`
+        : curTheme.styledConstants.accentColorFocused,
+      fontFamily: rootFontFamily,
+      codemirrorFontFamily: codeFontFamily,
+    }),
+    [curTheme.styledConstants, accentColor, hasAccentColorOverride, rootFontFamily, codeFontFamily],
+  )
+
   const themeProp = useMemo(
     () => ({
       mode: curTheme.mode,
-      token: {
-        ...curTheme.styledConstants,
-        fontFamily: rootFontFamily,
-        codemirrorFontFamily: codeFontFamily,
-      },
+      token: theme,
     }),
-    [curTheme.mode, curTheme.styledConstants, rootFontFamily, codeFontFamily],
+    [curTheme.mode, theme],
   )
 
   const antdThemeProp = useMemo<ThemeConfig>(
     () => ({
       algorithm: curTheme.mode === 'dark' ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
       token: {
-        colorPrimary: curTheme.styledConstants.accentColor,
-        colorInfo: curTheme.styledConstants.accentColor,
-        colorSuccess: curTheme.styledConstants.successColor,
-        colorError: curTheme.styledConstants.dangerColor,
-        colorWarning: curTheme.styledConstants.warnColor,
-        colorText: curTheme.styledConstants.primaryFontColor,
-        colorTextSecondary: curTheme.styledConstants.labelFontColor,
-        colorTextTertiary: curTheme.styledConstants.disabledFontColor,
-        colorBgBase: curTheme.styledConstants.bgColor,
-        colorBgContainer: curTheme.styledConstants.bgColor,
-        colorBgElevated: curTheme.styledConstants.contextMenuBgColor,
-        colorBgLayout: curTheme.styledConstants.bgColor,
-        colorBorder: curTheme.styledConstants.borderColor,
-        colorBorderSecondary: curTheme.styledConstants.borderColor,
-        colorFillSecondary: curTheme.styledConstants.hoverColor,
-        colorFillTertiary: curTheme.styledConstants.contextMenuBgColorHover,
+        colorPrimary: theme.accentColor,
+        colorInfo: theme.accentColor,
+        colorSuccess: theme.successColor,
+        colorError: theme.dangerColor,
+        colorWarning: theme.warnColor,
+        colorText: theme.primaryFontColor,
+        colorTextSecondary: theme.labelFontColor,
+        colorTextTertiary: theme.disabledFontColor,
+        colorBgBase: theme.bgColor,
+        colorBgContainer: theme.bgColor,
+        colorBgElevated: theme.contextMenuBgColor,
+        colorBgLayout: theme.bgColor,
+        colorBorder: theme.borderColor,
+        colorBorderSecondary: theme.borderColor,
+        colorFillSecondary: theme.hoverColor,
+        colorFillTertiary: theme.contextMenuBgColorHover,
         borderRadius: 6,
         borderRadiusLG: 8,
         fontFamily: rootFontFamily,
@@ -72,19 +88,19 @@ const AppThemeProvider: React.FC<BaseComponentProps> = function ({ children }) {
         controlHeight: 28,
         controlHeightSM: 24,
         controlHeightLG: 32,
-        boxShadowSecondary: `0 10px 24px ${curTheme.styledConstants.boxShadowColor}`,
+        boxShadowSecondary: `0 10px 24px ${theme.boxShadowColor}`,
       },
       components: {
         Popover: {
-          colorBgElevated: curTheme.styledConstants.contextMenuBgColor,
+          colorBgElevated: theme.contextMenuBgColor,
         },
         Tooltip: {
-          colorBgSpotlight: curTheme.styledConstants.tooltipBgColor,
-          colorTextLightSolid: curTheme.styledConstants.primaryFontColor,
+          colorBgSpotlight: theme.tooltipBgColor,
+          colorTextLightSolid: theme.primaryFontColor,
         },
       },
     }),
-    [curTheme.mode, curTheme.styledConstants, rootFontFamily],
+    [curTheme.mode, theme, rootFontFamily],
   )
 
   const i18nProp = useMemo(
