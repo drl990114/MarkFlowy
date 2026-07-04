@@ -2,9 +2,9 @@
 set -eu
 
 APP_NAME="MarkFlowy"
-DEFAULT_MANIFEST_URL="https://drl990114.github.io/MarkFlowy/install.json"
+DEFAULT_MANIFEST_URL="https://github.com/drl990114/MarkFlowy/releases/latest/download/install.json"
+FALLBACK_MANIFEST_URL="https://drl990114.github.io/MarkFlowy/install.json"
 
-MANIFEST_URL="${MARKFLOWY_MANIFEST_URL:-$DEFAULT_MANIFEST_URL}"
 INSTALL_DIR="${MARKFLOWY_INSTALL_DIR:-${HOME:-}/.local/share/markflowy}"
 BIN_DIR="${MARKFLOWY_BIN_DIR:-${HOME:-}/.local/bin}"
 APPIMAGE_PATH="$INSTALL_DIR/MarkFlowy.AppImage"
@@ -50,6 +50,30 @@ download() {
   else
     die "curl or wget is required"
   fi
+}
+
+download_manifest() {
+  output=$1
+
+  if [ -n "${MARKFLOWY_MANIFEST_URL:-}" ]; then
+    say "Fetching release manifest from $MARKFLOWY_MANIFEST_URL..."
+    download "$MARKFLOWY_MANIFEST_URL" "$output"
+    manifest_url=$MARKFLOWY_MANIFEST_URL
+    return
+  fi
+
+  for url in "$DEFAULT_MANIFEST_URL" "$FALLBACK_MANIFEST_URL"; do
+    say "Fetching release manifest from $url..."
+
+    if download "$url" "$output"; then
+      manifest_url=$url
+      return
+    fi
+
+    err "failed to fetch release manifest from $url"
+  done
+
+  die "failed to fetch release manifest"
 }
 
 shell_quote() {
@@ -176,20 +200,20 @@ trap 'rm -rf "$tmp_dir"' EXIT HUP INT TERM
 
 platform=$(detect_platform)
 version=""
+manifest_url=""
 
 if [ -n "${MARKFLOWY_DOWNLOAD_URL:-}" ]; then
   download_url=$MARKFLOWY_DOWNLOAD_URL
 else
   manifest_path="$tmp_dir/install.json"
 
-  say "Fetching release manifest..."
-  download "$MANIFEST_URL" "$manifest_path"
+  download_manifest "$manifest_path"
 
   version=$(extract_version "$manifest_path")
   download_url=$(extract_platform_url "$manifest_path" "$platform")
 
   if [ -z "$download_url" ]; then
-    die "no AppImage URL found for platform '$platform' in $MANIFEST_URL"
+    die "no AppImage URL found for platform '$platform' in $manifest_url"
   fi
 fi
 
