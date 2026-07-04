@@ -13,8 +13,10 @@ import {
   FileResultCode,
   FileSysResult,
   getFileNameFromPath,
+  getFolderPathFromPath,
 } from '@/helper/filesys'
 import { FileTypeConfig } from '@/helper/fileTypeHandler'
+import { getExportableImageSrc } from '@/helper/image'
 import { logger } from '@/helper/logger'
 import { useEditorKeybindingStore } from '@/hooks/useKeyboard'
 import { useTranslation } from '@/i18n'
@@ -147,6 +149,402 @@ async function readFileContent(filePath: string): Promise<FileSysResult> {
     'ms',
   )
   return res
+}
+
+async function waitForImageLoad(img: HTMLImageElement, src: string) {
+  await new Promise<void>((resolve) => {
+    let settled = false
+    const finish = () => {
+      if (settled) return
+      settled = true
+      window.clearTimeout(timer)
+      img.removeEventListener('load', finish)
+      img.removeEventListener('error', finish)
+      resolve()
+    }
+    const timer = window.setTimeout(finish, 5000)
+
+    img.addEventListener('load', finish, { once: true })
+    img.addEventListener('error', finish, { once: true })
+    img.src = src
+
+    if (img.decode) {
+      img.decode().then(finish).catch(() => {
+        if (img.complete) {
+          finish()
+        }
+      })
+    } else if (img.complete) {
+      finish()
+    }
+  })
+}
+
+const CSS_IMAGE_URL_REG = /url\(\s*(['"]?)(.*?)\1\s*\)/g
+const XLINK_NS = 'http://www.w3.org/1999/xlink'
+const RISKY_EXPORT_TAG_NAMES = new Set([
+  'canvas',
+  'embed',
+  'iframe',
+  'img',
+  'object',
+  'picture',
+  'source',
+  'svg',
+  'video',
+])
+
+const getTransparentImageSrc = (element?: Element): string => {
+  const rect = element?.getBoundingClientRect()
+  const width = Math.max(1, Math.round(rect?.width || 1))
+  const height = Math.max(1, Math.round(rect?.height || 1))
+  const canvas = document.createElement('canvas')
+  canvas.width = width
+  canvas.height = height
+  return canvas.toDataURL('image/png')
+}
+
+const isCanvasSafeImageSrc = (src: string) => /^data:image\/(?:png|jpe?g|gif|webp|bmp);/i.test(src)
+
+async function getCanvasSafeImageSrc(
+  src: string,
+  fileFolderPath?: string,
+  renderedSrc?: string,
+  fallbackElement?: Element,
+) {
+  const exportSrc = await getExportableImageSrc(src, fileFolderPath, renderedSrc)
+  return isCanvasSafeImageSrc(exportSrc) ? exportSrc : getTransparentImageSrc(fallbackElement)
+}
+
+async function replaceCssImageUrls(
+  value: string,
+  fileFolderPath?: string,
+  fallbackElement?: Element,
+) {
+  const matches = Array.from(value.matchAll(CSS_IMAGE_URL_REG))
+  if (!matches.length) {
+    return value
+  }
+
+  let nextValue = ''
+  let lastIndex = 0
+
+  for (const match of matches) {
+    const matchIndex = match.index ?? 0
+    const matchedText = match[0]
+    const rawUrl = match[2]
+    const exportSrc = await getCanvasSafeImageSrc(rawUrl, fileFolderPath, undefined, fallbackElement)
+
+    nextValue += value.slice(lastIndex, matchIndex)
+    nextValue += `url("${exportSrc.replace(/"/g, '\\"')}")`
+    lastIndex = matchIndex + matchedText.length
+  }
+
+  nextValue += value.slice(lastIndex)
+  return nextValue
+}
+
+async function prepareImagesForExport(root: HTMLElement, fileFolderPath?: string) {
+  const restoreFns: Array<() => void> = []
+  const images = Array.from(root.querySelectorAll('img'))
+
+  await Promise.all(
+    images.map(async (img) => {
+      const originalSrc =
+        img.getAttribute('data-rme-original-src') ||
+        img.getAttribute('src') ||
+        img.currentSrc ||
+        ''
+      const renderedSrc = img.currentSrc || img.src
+      const exportSrc = await getCanvasSafeImageSrc(originalSrc, fileFolderPath, renderedSrc, img)
+
+      if (exportSrc === renderedSrc) {
+        return
+      }
+
+      const previousSrc = img.getAttribute('src')
+      const previousSrcset = img.getAttribute('srcset')
+
+      restoreFns.push(() => {
+        if (previousSrc === null) {
+          img.removeAttribute('src')
+        } else {
+          img.setAttribute('src', previousSrc)
+        }
+
+        if (previousSrcset === null) {
+          img.removeAttribute('srcset')
+        } else {
+          img.setAttribute('srcset', previousSrcset)
+        }
+      })
+
+      img.removeAttribute('srcset')
+      await waitForImageLoad(img, exportSrc)
+    }),
+  )
+
+  return () => {
+    restoreFns.reverse().forEach((restore) => restore())
+  }
+}
+
+async function prepareCssImagesForExport(root: HTMLElement, fileFolderPath?: string) {
+  const restoreFns: Array<() => void> = []
+  const cssImageProperties = [
+    'background-image',
+    'border-image-source',
+    'list-style-image',
+    'mask-image',
+    '-webkit-mask-image',
+  ]
+  const elements = [root, ...Array.from(root.querySelectorAll('*'))]
+
+  for (const element of elements) {
+    if (!('style' in element)) {
+      continue
+    }
+
+    const style = (element as HTMLElement | SVGElement).style
+    const computedStyle = window.getComputedStyle(element)
+
+    for (const property of cssImageProperties) {
+      const value = computedStyle.getPropertyValue(property)
+      if (!value || value === 'none' || !value.includes('url(')) {
+        continue
+      }
+
+      const nextValue = await replaceCssImageUrls(value, fileFolderPath, element)
+      if (nextValue === value) {
+        continue
+      }
+
+      const previousValue = style.getPropertyValue(property)
+      const previousPriority = style.getPropertyPriority(property)
+      restoreFns.push(() => {
+        if (previousValue) {
+          style.setProperty(property, previousValue, previousPriority)
+        } else {
+          style.removeProperty(property)
+        }
+      })
+      style.setProperty(property, nextValue)
+    }
+  }
+
+  return () => {
+    restoreFns.reverse().forEach((restore) => restore())
+  }
+}
+
+async function prepareSvgImagesForExport(root: HTMLElement, fileFolderPath?: string) {
+  const restoreFns: Array<() => void> = []
+  const svgImages = Array.from(root.querySelectorAll('svg image'))
+
+  await Promise.all(
+    svgImages.map(async (image) => {
+      const previousHref = image.getAttribute('href')
+      const previousXlinkHref = image.getAttributeNS(XLINK_NS, 'href')
+      const href = previousHref || previousXlinkHref || ''
+      if (!href) {
+        return
+      }
+
+      const exportSrc = await getCanvasSafeImageSrc(href, fileFolderPath, undefined, image)
+
+      restoreFns.push(() => {
+        if (previousHref === null) {
+          image.removeAttribute('href')
+        } else {
+          image.setAttribute('href', previousHref)
+        }
+
+        if (previousXlinkHref === null) {
+          image.removeAttributeNS(XLINK_NS, 'href')
+        } else {
+          image.setAttributeNS(XLINK_NS, 'href', previousXlinkHref)
+        }
+      })
+
+      image.setAttribute('href', exportSrc)
+      image.setAttributeNS(XLINK_NS, 'href', exportSrc)
+    }),
+  )
+
+  return () => {
+    restoreFns.reverse().forEach((restore) => restore())
+  }
+}
+
+function prepareEmbeddedMediaForExport(root: HTMLElement) {
+  const restoreFns: Array<() => void> = []
+  const canvases = Array.from(root.querySelectorAll('canvas')) as HTMLCanvasElement[]
+  const embeddedFrames = Array.from(root.querySelectorAll('iframe, video'))
+
+  const hideElement = (element: HTMLElement) => {
+    const previousVisibility = element.style.visibility
+    restoreFns.push(() => {
+      element.style.visibility = previousVisibility
+    })
+    element.style.visibility = 'hidden'
+  }
+
+  canvases.forEach((canvas) => {
+    try {
+      canvas.toDataURL('image/png')
+    } catch (error) {
+      hideElement(canvas)
+    }
+  })
+
+  embeddedFrames.forEach((element) => {
+    hideElement(element as HTMLElement)
+  })
+
+  return () => {
+    restoreFns.reverse().forEach((restore) => restore())
+  }
+}
+
+async function prepareResourcesForExport(root: HTMLElement, fileFolderPath?: string) {
+  const restoreFns = [
+    prepareEmbeddedMediaForExport(root),
+    await prepareImagesForExport(root, fileFolderPath),
+    await prepareSvgImagesForExport(root, fileFolderPath),
+    await prepareCssImagesForExport(root, fileFolderPath),
+  ]
+
+  return () => {
+    restoreFns.reverse().forEach((restore) => restore())
+  }
+}
+
+function isSecurityError(error: unknown) {
+  const errorText = String(error)
+  return errorText.includes('SecurityError') || errorText.includes('operation is insecure')
+}
+
+function ignoreRiskyExportElement(element: Element) {
+  return RISKY_EXPORT_TAG_NAMES.has(element.tagName.toLowerCase())
+}
+
+function sanitizeClonedExportDocument(clonedDocument: Document) {
+  const style = clonedDocument.createElement('style')
+  style.textContent = `
+    *, *::before, *::after {
+      background-image: none !important;
+      border-image-source: none !important;
+      list-style-image: none !important;
+      mask-image: none !important;
+      -webkit-mask-image: none !important;
+    }
+
+    canvas, embed, iframe, img, object, picture, source, svg, video {
+      visibility: hidden !important;
+    }
+  `
+  clonedDocument.head.appendChild(style)
+
+  clonedDocument
+    .querySelectorAll('canvas, embed, iframe, img, object, picture, source, svg, video')
+    .forEach((element) => {
+      element.setAttribute('data-html2canvas-ignore', 'true')
+    })
+
+  clonedDocument.querySelectorAll<HTMLElement>('*').forEach((element) => {
+    element.style.backgroundImage = 'none'
+    element.style.borderImageSource = 'none'
+    element.style.listStyleImage = 'none'
+    element.style.maskImage = 'none'
+    element.style.setProperty('-webkit-mask-image', 'none')
+  })
+}
+
+function canvasToExportDataUrl(canvas: HTMLCanvasElement) {
+  return canvas.toDataURL('image/jpeg', 0.95)
+}
+
+function renderTextFallbackImageDataUrl(element: HTMLElement) {
+  const rect = element.getBoundingClientRect()
+  const width = Math.max(320, Math.min(4096, Math.ceil(rect.width || element.scrollWidth || 800)))
+  const height = Math.max(240, Math.min(12000, Math.ceil(element.scrollHeight || rect.height || 600)))
+  const canvas = document.createElement('canvas')
+  canvas.width = width
+  canvas.height = height
+
+  const ctx = canvas.getContext('2d')
+  if (!ctx) {
+    throw new Error('Failed to get canvas context')
+  }
+
+  const backgroundColor = window.getComputedStyle(element).backgroundColor || '#ffffff'
+  ctx.fillStyle = backgroundColor === 'rgba(0, 0, 0, 0)' ? '#ffffff' : backgroundColor
+  ctx.fillRect(0, 0, width, height)
+  ctx.fillStyle = window.getComputedStyle(element).color || '#111111'
+  ctx.font = '14px sans-serif'
+  ctx.textBaseline = 'top'
+
+  const maxLineWidth = width - 48
+  const words = (element.innerText || element.textContent || '').replace(/\s+/g, ' ').trim().split(' ')
+  let line = ''
+  let y = 24
+
+  for (const word of words) {
+    const nextLine = line ? `${line} ${word}` : word
+    if (ctx.measureText(nextLine).width > maxLineWidth && line) {
+      ctx.fillText(line, 24, y)
+      y += 22
+      line = word
+      if (y > height - 24) break
+    } else {
+      line = nextLine
+    }
+  }
+
+  if (line && y <= height - 24) {
+    ctx.fillText(line, 24, y)
+  }
+
+  return canvasToExportDataUrl(canvas)
+}
+
+async function renderElementToImageDataUrl(element: HTMLElement) {
+  const html2canvasOptions: Parameters<typeof html2canvas>[1] = {
+    allowTaint: false,
+    foreignObjectRendering: false,
+    imageTimeout: 15000,
+    logging: false,
+    useCORS: true,
+    ignoreElements: (element: Element) => element.tagName.toLowerCase() === 'iframe',
+  }
+
+  try {
+    const canvas = await html2canvas(element, html2canvasOptions)
+    return canvasToExportDataUrl(canvas)
+  } catch (error) {
+    if (!isSecurityError(error)) {
+      throw error
+    }
+  }
+
+  logger.warn('Canvas was tainted during image export, retrying without media resources.')
+
+  try {
+    const fallbackCanvas = await html2canvas(element, {
+      ...html2canvasOptions,
+      ignoreElements: ignoreRiskyExportElement,
+      onclone: sanitizeClonedExportDocument,
+    })
+
+    return canvasToExportDataUrl(fallbackCanvas)
+  } catch (error) {
+    if (!isSecurityError(error)) {
+      throw error
+    }
+  }
+
+  logger.warn('Canvas stayed tainted after media-free retry, falling back to text-only export.')
+  return renderTextFallbackImageDataUrl(element)
 }
 
 function TextEditor(props: TextEditorProps) {
@@ -630,31 +1028,48 @@ function TextEditor(props: TextEditorProps) {
         return
       }
 
-      save({
-        title: t('contextmenu.editor_tab.export_image'),
-        defaultPath: curFile.name.split('.')?.[0] + '.jpg',
-      }).then(async (path) => {
+      try {
+        const path = await save({
+          title: t('contextmenu.editor_tab.export_image'),
+          defaultPath: curFile.name.split('.')?.[0] + '.jpg',
+        })
         if (!path) return
 
         const n = toast.loading(t('contextmenu.editor_tab.export_image') + '...')
+        let restoreExportResources: (() => void) | undefined
 
-        html2canvas(document.getElementById(id) as HTMLElement).then((canvas) => {
-          // to base 64
-          const image = canvas.toDataURL('image/jpg')
+        try {
+          const exportElement = document.getElementById(id)
+          if (!exportElement) {
+            throw new Error('Editor element not found')
+          }
 
+          restoreExportResources = await prepareResourcesForExport(
+            exportElement,
+            getFolderPathFromPath(curFile.path),
+          )
+          const image = await renderElementToImageDataUrl(exportElement)
           const data = canvasDataToBinary(image)
+          const res = await invoke<FileSysResult>('write_u8_array_to_file', {
+            filePath: path,
+            content: data,
+          })
 
-          invoke('write_u8_array_to_file', { filePath: path, content: data })
-            .then(() => {
-              toast.dismiss(n)
-              toast.success('Exported to ' + path)
-            })
-            .catch((error) => {
-              toast.dismiss(n)
-              toast.error(String(error))
-            })
-        })
-      })
+          if (res.code !== FileResultCode.Success) {
+            throw new Error(res.content)
+          }
+
+          toast.success('Exported to ' + path)
+        } catch (error) {
+          logger.error('Failed to export image:', error)
+          toast.error(String(error))
+        } finally {
+          restoreExportResources?.()
+          toast.dismiss(n)
+        }
+      } catch (error) {
+        toast.error(String(error))
+      }
     }
 
     const exportHtmlHandler = async () => {
@@ -712,7 +1127,7 @@ function TextEditor(props: TextEditorProps) {
       bus.detach('editor_export_image', exportImageHandler)
       bus.detach('editor_set_content', setContentHandler)
     }
-  }, [active, setContentHandler])
+  }, [active, curFile.name, curFile.path, id, setContentHandler, t])
 
   useEffect(() => {
     if (active) {

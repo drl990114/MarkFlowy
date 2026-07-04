@@ -137,7 +137,11 @@ export function ImageNodeView(props: ImageNodeViewProps) {
     return Loading
   }
 
-  const otherAttrs = omit(node.attrs, 'data-refer-label')
+  const originSrc = curRefer?.href || node.attrs.src || ''
+  const otherAttrs = {
+    ...omit(node.attrs, 'data-refer-label'),
+    'data-rme-original-src': originSrc,
+  }
   const Main = (
     <Resizable
       key={`${node.attrs.src}`}
@@ -148,12 +152,11 @@ export function ImageNodeView(props: ImageNodeViewProps) {
       <ZensImage
         {...otherAttrs}
         onLoad={() => initRef.current?.()}
-        src={curRefer?.href || node.attrs.src}
+        src={originSrc}
         loader={Loading}
         imgPromise={() => {
           return new Promise(async (resolve, reject) => {
-            let targetSrc = curRefer?.href || node.attrs.src || ''
-            const originSrc = curRefer?.href || node.attrs.src || ''
+            let targetSrc = originSrc
             if (handleViewImgSrcUrl) {
               try {
                 targetSrc = await handleViewImgSrcUrl(targetSrc)

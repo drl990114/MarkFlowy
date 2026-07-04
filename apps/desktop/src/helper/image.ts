@@ -38,6 +38,140 @@ const convertHttpToBase64 = async (url: string): Promise<string> => {
   return url
 }
 
+const isHttpUrl = (src: string) => /^https?:\/\//i.test(src)
+
+const isAbsoluteLocalPath = (src: string) => /^(?:\/|\\\\|[a-zA-Z]:[\\/]).+/.test(src)
+
+const safeDecodeURIComponent = (src: string): string => {
+  try {
+    return decodeURIComponent(src)
+  } catch (error) {
+    return src
+  }
+}
+
+const getLocalPathFromTauriAssetUrl = (src: string): string | null => {
+  try {
+    const url = new URL(src)
+    const isAssetProtocol = url.protocol === 'asset:'
+    const isAssetHttpHost = /^https?:$/i.test(url.protocol) && url.hostname === 'asset.localhost'
+
+    if (!isAssetProtocol && !isAssetHttpHost) {
+      return null
+    }
+
+    const encodedPath = url.pathname.startsWith('/') ? url.pathname.slice(1) : url.pathname
+    const path = safeDecodeURIComponent(encodedPath)
+    return path || null
+  } catch (error) {
+    return null
+  }
+}
+
+const getLocalPathFromFileUrl = (src: string): string | null => {
+  try {
+    const url = new URL(src)
+    if (url.protocol !== 'file:') {
+      return null
+    }
+
+    const path = safeDecodeURIComponent(url.pathname)
+    return path.replace(/^\/([a-zA-Z]:[\\/])/, '$1') || null
+  } catch (error) {
+    return null
+  }
+}
+
+const resolveLocalImagePath = async (
+  src: string,
+  fileFolderPath?: string,
+): Promise<string | null> => {
+  const assetPath = getLocalPathFromTauriAssetUrl(src)
+  if (assetPath) {
+    return assetPath
+  }
+
+  const fileUrlPath = getLocalPathFromFileUrl(src)
+  if (fileUrlPath) {
+    return fileUrlPath
+  }
+
+  if (isAbsoluteLocalPath(src)) {
+    return src
+  }
+
+  if (!fileFolderPath || isHttpUrl(src) || src.startsWith('data:') || src.startsWith('blob:')) {
+    return null
+  }
+
+  try {
+    const localPath = await join(fileFolderPath, src)
+    const isExists = await invoke('file_exists', { filePath: localPath })
+    return isExists ? localPath : null
+  } catch (error) {
+    return null
+  }
+}
+
+export const readImageFileAsDataUrl = async (filePath: string): Promise<string | null> => {
+  try {
+    const result = await invoke<FileSysResult>('read_u8_array_from_file', { filePath })
+    if (result.code !== FileResultCode.Success) {
+      logger.warn('Failed to read image file:', result.content)
+      return null
+    }
+
+    return `data:${getMimeTypeFromPath(filePath)};base64,${result.content}`
+  } catch (error) {
+    logger.error('Error reading image file:', error)
+    return null
+  }
+}
+
+const normalizeExportImageSource = (src: string): string => {
+  const trimmedSrc = (src || '').trim()
+
+  if (
+    isHttpUrl(trimmedSrc) ||
+    trimmedSrc.startsWith('data:') ||
+    trimmedSrc.startsWith('blob:')
+  ) {
+    return trimmedSrc
+  }
+
+  return safeDecodeURIComponent(trimmedSrc)
+}
+
+export const getExportableImageSrc = async (
+  src: string,
+  fileFolderPath?: string,
+  renderedSrc?: string,
+): Promise<string> => {
+  const normalizedSrc = normalizeExportImageSource(src)
+  const normalizedRenderedSrc = normalizeExportImageSource(renderedSrc || '')
+  const source = normalizedSrc || normalizedRenderedSrc
+
+  if (!source || source.startsWith('data:') || source.startsWith('blob:')) {
+    return source
+  }
+
+  if (isHttpUrl(source)) {
+    return await convertHttpToBase64(source)
+  }
+
+  const localPath =
+    (await resolveLocalImagePath(source, fileFolderPath)) ||
+    (normalizedRenderedSrc
+      ? await resolveLocalImagePath(normalizedRenderedSrc, fileFolderPath)
+      : null)
+
+  if (!localPath) {
+    return source
+  }
+
+  return (await readImageFileAsDataUrl(localPath)) || source
+}
+
 export const convertImageToBase64 = async (src: string): Promise<string> => {
   // If already base64, return as is
   if (src.startsWith('data:')) {
@@ -45,7 +179,7 @@ export const convertImageToBase64 = async (src: string): Promise<string> => {
   }
 
   try {
-    if (src.startsWith('http') || src.startsWith('https')) {
+    if (isHttpUrl(src)) {
       const base64 = await convertHttpToBase64(src)
       return base64
     }
@@ -141,7 +275,7 @@ export const moveImageToLocalFolder = async (
     logger.info('Saving base64 image to:', filePath)
     await invoke('write_u8_array_to_file', { filePath, content: buffer })
     return filePath
-  } else if (imageSrc.startsWith('http') || imageSrc.startsWith('https')) {
+  } else if (isHttpUrl(imageSrc)) {
     // It's a URL, download and save it to the target folder
     try {
       const response = await fetch(imageSrc, { method: 'GET', mode: 'cors' })
@@ -276,7 +410,7 @@ export const getImageObjectUrl = async (filePath: string): Promise<string> => {
 }
 
 // 辅助函数：从文件路径获取 MIME 类型
-const getMimeTypeFromPath = (filePath: string): string => {
+export const getMimeTypeFromPath = (filePath: string): string => {
   const extension = filePath.split('.').pop()?.toLowerCase()
   const mimeTypes: Record<string, string> = {
     jpg: 'image/jpeg',
@@ -304,7 +438,7 @@ const base64ToBlob = (base64: string, mimeType: string): Blob => {
 export const getImageUrlInTauri = async (url: string, fileFolderPath?: string) => {
   if (!url) return url
 
-  if ((url.startsWith('http') || url.startsWith('https')) && !url.includes(location.origin)) {
+  if (isHttpUrl(url) && !url.includes(location.origin)) {
     try {
       const response = await fetch(url, {
         method: 'GET',
