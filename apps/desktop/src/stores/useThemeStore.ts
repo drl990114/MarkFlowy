@@ -10,6 +10,11 @@ export const FALLBACK_DARK_THEME = 'MarkFlowy Dark'
 
 export type ThemeMode = 'light' | 'dark' | 'system'
 type SystemTheme = Exclude<ThemeMode, 'system'>
+type ThemeSyncWindow = Window & {
+  __markflowyThemeSyncSetup?: boolean
+}
+
+const SYSTEM_THEME_SYNC_INTERVAL_MS = 1000
 
 export const isBuiltInTheme = (themeName: string) => {
   return builtInThemes.some((theme) => theme.name === themeName)
@@ -28,6 +33,14 @@ const getBrowserSystemTheme = (): SystemTheme => {
   }
 
   return 'light'
+}
+
+const getWindowSystemTheme = async (): Promise<SystemTheme | undefined> => {
+  try {
+    return normalizeSystemTheme(await getCurrentWindow().theme())
+  } catch {
+    return undefined
+  }
 }
 
 const getNativeSystemTheme = async (): Promise<SystemTheme | undefined> => {
@@ -49,20 +62,24 @@ const applyThemeToDOM = (targetTheme: MfTheme, themeMode: ThemeMode) => {
     removeInsertedTheme()
   }
 
-  const appWindow = getCurrentWindow()
-
   if (targetTheme.mode === 'dark') {
     document.body.style.colorScheme = 'dark'
   } else {
     document.body.style.colorScheme = 'light'
   }
 
-  // Keep the native window on the OS preference while the app UI uses
-  // the resolved systemTheme tracked in this store.
-  if (themeMode === 'system') {
-    appWindow.setTheme(null)
-  } else {
-    appWindow.setTheme(targetTheme.mode)
+  try {
+    const appWindow = getCurrentWindow()
+
+    // Keep the native window on the OS preference while the app UI uses
+    // the resolved systemTheme tracked in this store.
+    if (themeMode === 'system') {
+      void appWindow.setTheme(null)
+    } else {
+      void appWindow.setTheme(targetTheme.mode)
+    }
+  } catch {
+    // The desktop build always has Tauri internals; this keeps browser previews from crashing.
   }
 }
 
@@ -209,6 +226,11 @@ const useThemeStore = create<ThemeStore>((set, get) => {
     },
 
     setSystemTheme: (theme) => {
+      const { curTheme, systemTheme, themeMode } = get()
+      if (systemTheme === theme && (themeMode !== 'system' || curTheme.mode === theme)) {
+        return
+      }
+
       set((prev) => ({ ...prev, systemTheme: theme }))
       if (get().themeMode === 'system') {
         get().applyTheme()
@@ -216,7 +238,8 @@ const useThemeStore = create<ThemeStore>((set, get) => {
     },
 
     syncSystemTheme: async () => {
-      const nativeTheme = await getNativeSystemTheme()
+      const windowTheme = get().themeMode === 'system' ? await getWindowSystemTheme() : undefined
+      const nativeTheme = windowTheme || await getNativeSystemTheme()
       const nextTheme = nativeTheme || getBrowserSystemTheme()
 
       get().setSystemTheme(nextTheme)
@@ -245,15 +268,64 @@ const useThemeStore = create<ThemeStore>((set, get) => {
   }
 })
 
-// 监听系统主题变化
-if (typeof window !== 'undefined' && window.matchMedia) {
+const syncSystemThemeIfNeeded = () => {
+  if (useThemeStore.getState().themeMode === 'system') {
+    void useThemeStore.getState().syncSystemTheme()
+  }
+}
+
+const updateSystemTheme = (theme: unknown) => {
+  const nextTheme = normalizeSystemTheme(theme)
+  if (!nextTheme) {
+    return
+  }
+
+  useThemeStore.getState().setSystemTheme(nextTheme)
+}
+
+const setupSystemThemeSync = () => {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  const themeWindow = window as ThemeSyncWindow
+  if (themeWindow.__markflowyThemeSyncSetup) {
+    return
+  }
+  themeWindow.__markflowyThemeSyncSetup = true
+
+  syncSystemThemeIfNeeded()
+
   const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
   mediaQuery.addEventListener('change', (event) => {
-    const themeStore = useThemeStore.getState()
-
-    themeStore.setSystemTheme(event.matches ? 'dark' : 'light')
-    void themeStore.syncSystemTheme()
+    updateSystemTheme(event.matches ? 'dark' : 'light')
+    void useThemeStore.getState().syncSystemTheme()
   })
+
+  try {
+    void getCurrentWindow()
+      .onThemeChanged(({ payload }) => {
+        updateSystemTheme(payload)
+        void useThemeStore.getState().syncSystemTheme()
+      })
+      .catch(() => undefined)
+  } catch {
+    // Browser preview: there is no Tauri window to subscribe to.
+  }
+
+  window.addEventListener('focus', syncSystemThemeIfNeeded)
+
+  if (typeof document !== 'undefined') {
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        syncSystemThemeIfNeeded()
+      }
+    })
+  }
+
+  window.setInterval(syncSystemThemeIfNeeded, SYSTEM_THEME_SYNC_INTERVAL_MS)
 }
+
+setupSystemThemeSync()
 
 export default useThemeStore
