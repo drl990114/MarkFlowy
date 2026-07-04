@@ -179,6 +179,21 @@ fn migrate_from_file(_app: &AppHandle) -> Option<AppConf> {
 }
 
 impl AppConf {
+    pub fn system_theme() -> Theme {
+        match dark_light::detect() {
+            dark_light::Mode::Dark => Theme::Dark,
+            dark_light::Mode::Light | dark_light::Mode::Default => Theme::Light,
+        }
+    }
+
+    pub fn system_theme_name() -> &'static str {
+        match Self::system_theme() {
+            Theme::Dark => "dark",
+            Theme::Light => "light",
+            _ => "light",
+        }
+    }
+
     pub fn new() -> Self {
         Self {
             theme: Some("light".to_string()),
@@ -438,11 +453,7 @@ impl AppConf {
         let mode = conf.theme_mode.unwrap_or_else(|| "system".to_string());
 
         match mode.as_str() {
-            "system" => match dark_light::detect() {
-                dark_light::Mode::Dark => Theme::Dark,
-                dark_light::Mode::Light => Theme::Light,
-                dark_light::Mode::Default => Theme::Light,
-            },
+            "system" => Self::system_theme(),
             "dark" => Theme::Dark,
             _ => Theme::Light,
         }
@@ -491,6 +502,11 @@ pub mod cmd {
         AppConf::read_with_app(&app)
             .amend(serde_json::json!(data))
             .write_with_app(&app);
+    }
+
+    #[command]
+    pub fn get_system_theme() -> String {
+        AppConf::system_theme_name().to_string()
     }
 
     #[command]

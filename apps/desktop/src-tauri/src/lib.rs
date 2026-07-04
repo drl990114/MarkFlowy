@@ -984,6 +984,7 @@ pub fn run() {
             conf::cmd::get_app_conf,
             conf::cmd::reset_app_conf,
             conf::cmd::save_app_conf,
+            conf::cmd::get_system_theme,
             conf::cmd::open_conf_window,
             app::window_manager::create_new_window,
             app::window_manager::get_window_instances,

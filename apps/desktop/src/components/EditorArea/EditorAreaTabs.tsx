@@ -20,7 +20,7 @@ import { Dot, TabItem } from './styles'
 const Container = styled.div<{ $compact: boolean }>`
   display: flex;
   flex: 0 0 auto;
-  height: 32px;
+  height: 33px;
   min-width: 0;
   background-color: ${(props) => props.theme.editorTabBgColor};
 
@@ -50,6 +50,7 @@ const Container = styled.div<{ $compact: boolean }>`
     align-items: center;
     height: 100%;
     padding: 0 ${(props) => props.theme.spaceXs};
+    box-sizing: border-box;
     border-bottom: 1px solid ${(props) => props.theme.borderColor};
     border-right: 1px solid ${(props) => props.theme.borderColor};
   }
@@ -58,6 +59,7 @@ const Container = styled.div<{ $compact: boolean }>`
     flex: 1 1 auto;
     height: 100%;
     min-width: ${(props) => (props.$compact ? '0' : '24px')};
+    box-sizing: border-box;
     border-bottom: 1px solid ${(props) => props.theme.borderColor};
     border-left: 1px solid ${(props) => props.theme.borderColor};
   }

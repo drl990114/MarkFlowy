@@ -1,5 +1,6 @@
 import { loadThemeCss, removeInsertedTheme } from '@/helper/extensions'
 import { builtInThemes, darkTheme, lightTheme, type MfTheme } from '@markflowy/theme'
+import { invoke } from '@tauri-apps/api/core'
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import { create } from 'zustand'
 import appSettingService from '@/services/app-setting'
@@ -8,9 +9,33 @@ export const FALLBACK_LIGHT_THEME = 'MarkFlowy Light'
 export const FALLBACK_DARK_THEME = 'MarkFlowy Dark'
 
 export type ThemeMode = 'light' | 'dark' | 'system'
+type SystemTheme = Exclude<ThemeMode, 'system'>
 
 export const isBuiltInTheme = (themeName: string) => {
   return builtInThemes.some((theme) => theme.name === themeName)
+}
+
+const normalizeSystemTheme = (theme: unknown): SystemTheme | undefined => {
+  return theme === 'dark' || theme === 'light' ? theme : undefined
+}
+
+const getBrowserSystemTheme = (): SystemTheme => {
+  if (
+    typeof window !== 'undefined' &&
+    window.matchMedia?.('(prefers-color-scheme: dark)').matches
+  ) {
+    return 'dark'
+  }
+
+  return 'light'
+}
+
+const getNativeSystemTheme = async (): Promise<SystemTheme | undefined> => {
+  try {
+    return normalizeSystemTheme(await invoke<SystemTheme>('get_system_theme'))
+  } catch {
+    return undefined
+  }
 }
 
 const resolveTheme = (themes: MfTheme[], themeName: string, fallbackName: string): MfTheme | undefined => {
@@ -32,8 +57,8 @@ const applyThemeToDOM = (targetTheme: MfTheme, themeMode: ThemeMode) => {
     document.body.style.colorScheme = 'light'
   }
 
-  // When themeMode is 'system', don't set a fixed window theme
-  // so the webview can follow the OS preference via matchMedia
+  // Keep the native window on the OS preference while the app UI uses
+  // the resolved systemTheme tracked in this store.
   if (themeMode === 'system') {
     appWindow.setTheme(null)
   } else {
@@ -45,6 +70,7 @@ type ThemeStore = {
   curTheme: MfTheme
   themes: MfTheme[]
   themeMode: ThemeMode
+  systemTheme: SystemTheme
   lightThemeName: string
   darkThemeName: string
   setCurThemeByName: (themeName: string) => void
@@ -54,8 +80,10 @@ type ThemeStore = {
   setThemeMode: (mode: ThemeMode) => void
   setLightTheme: (themeName: string) => void
   setDarkTheme: (themeName: string) => void
+  setSystemTheme: (theme: SystemTheme) => void
+  syncSystemTheme: () => Promise<SystemTheme>
   applyTheme: () => void
-  initFromSettings: (settingData: Record<string, any>) => void
+  initFromSettings: (settingData: Record<string, any>) => Promise<void>
 }
 
 const useThemeStore = create<ThemeStore>((set, get) => {
@@ -63,14 +91,14 @@ const useThemeStore = create<ThemeStore>((set, get) => {
     curTheme: lightTheme,
     themes: [...builtInThemes],
     themeMode: 'system',
+    systemTheme: getBrowserSystemTheme(),
     lightThemeName: FALLBACK_LIGHT_THEME,
     darkThemeName: FALLBACK_DARK_THEME,
 
     applyTheme: () => {
-      const { themeMode, lightThemeName, darkThemeName, themes } = get()
+      const { themeMode, systemTheme, lightThemeName, darkThemeName, themes } = get()
 
-      const isSystemDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-      const isDark = themeMode === 'dark' || (themeMode === 'system' && isSystemDark)
+      const isDark = themeMode === 'dark' || (themeMode === 'system' && systemTheme === 'dark')
 
       const targetName = isDark ? darkThemeName : lightThemeName
       const fallbackName = isDark ? FALLBACK_DARK_THEME : FALLBACK_LIGHT_THEME
@@ -162,6 +190,9 @@ const useThemeStore = create<ThemeStore>((set, get) => {
     setThemeMode: (mode) => {
       appSettingService.writeSettingData({ key: 'theme_mode' }, mode)
       set((prev) => ({ ...prev, themeMode: mode }))
+      if (mode === 'system') {
+        void get().syncSystemTheme()
+      }
       get().applyTheme()
     },
 
@@ -177,9 +208,23 @@ const useThemeStore = create<ThemeStore>((set, get) => {
       get().applyTheme()
     },
 
-    initFromSettings: (settingData) => {
-      const state = get()
+    setSystemTheme: (theme) => {
+      set((prev) => ({ ...prev, systemTheme: theme }))
+      if (get().themeMode === 'system') {
+        get().applyTheme()
+      }
+    },
 
+    syncSystemTheme: async () => {
+      const nativeTheme = await getNativeSystemTheme()
+      const nextTheme = nativeTheme || getBrowserSystemTheme()
+
+      get().setSystemTheme(nextTheme)
+
+      return nextTheme
+    },
+
+    initFromSettings: async (settingData) => {
       const themeMode = (settingData.theme_mode as ThemeMode) || 'system'
       const lightThemeName = (settingData.light_theme as string) || FALLBACK_LIGHT_THEME
       const darkThemeName = (settingData.dark_theme as string) || FALLBACK_DARK_THEME
@@ -191,8 +236,11 @@ const useThemeStore = create<ThemeStore>((set, get) => {
         darkThemeName,
       }))
 
-      // 应用主题
-      get().applyTheme()
+      if (themeMode === 'system') {
+        await get().syncSystemTheme()
+      } else {
+        get().applyTheme()
+      }
     },
   }
 })
@@ -200,10 +248,11 @@ const useThemeStore = create<ThemeStore>((set, get) => {
 // 监听系统主题变化
 if (typeof window !== 'undefined' && window.matchMedia) {
   const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-  mediaQuery.addEventListener('change', () => {
-    if (useThemeStore.getState().themeMode === 'system') {
-      useThemeStore.getState().applyTheme()
-    }
+  mediaQuery.addEventListener('change', (event) => {
+    const themeStore = useThemeStore.getState()
+
+    themeStore.setSystemTheme(event.matches ? 'dark' : 'light')
+    void themeStore.syncSystemTheme()
   })
 }
 
