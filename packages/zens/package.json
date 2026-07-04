@@ -112,7 +112,7 @@
     "cz-conventional-changelog": "^3.3.0",
     "doctoc": "^2.2.1",
     "dumi": "^2.4.21",
-    "esbuild": "0.24.0",
+    "esbuild": "0.28.1",
     "esbuild-css-modules-plugin": "^3.1.2",
     "eslint": "9.14.0",
     "eslint-config-airbnb": "19.0.4",
