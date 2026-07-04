@@ -618,6 +618,20 @@ fn path_contains_dir(dir: &std::path::Path) -> bool {
         .any(|path_entry| same_path(path_entry, dir))
 }
 
+fn current_exe_for_cli_wrapper() -> std::io::Result<PathBuf> {
+    #[cfg(target_os = "linux")]
+    {
+        if let Some(appimage) = env::var_os("APPIMAGE") {
+            let appimage_path = PathBuf::from(appimage);
+            if appimage_path.is_absolute() && appimage_path.exists() {
+                return Ok(appimage_path);
+            }
+        }
+    }
+
+    env::current_exe()
+}
+
 /// CLI wrapper 安装的目标目录（仅一个，不再猜测多个）
 #[cfg(unix)]
 fn cli_install_dir(home_dir: &std::path::Path) -> PathBuf {
@@ -832,7 +846,7 @@ fn install_cli_in_background(app: &tauri::App) {
             return;
         }
 
-        let current_exe = match env::current_exe() {
+        let current_exe = match current_exe_for_cli_wrapper() {
             Ok(path) => path,
             Err(error) => {
                 cli_debug!("failed to get current exe for CLI install: {:?}", error);
