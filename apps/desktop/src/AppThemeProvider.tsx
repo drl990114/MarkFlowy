@@ -20,6 +20,21 @@ const LEGACY_DEFAULT_CODE_FONT_FAMILY = 'Fira Code'
 const SYSTEM_DEFAULT_FONT_FAMILY = 'System Default'
 const DEFAULT_MONOSPACE_FONT_FAMILY = 'Default Monospace'
 
+function normalizeFontFamily(fontFamily: string): string {
+  const trimmed = fontFamily.trim()
+  if (!trimmed || /^['"].*['"]$/.test(trimmed)) return trimmed
+
+  // CSS font-family names that are not valid identifiers (e.g. contain spaces)
+  // must be quoted, otherwise the declaration is invalid and the font won't apply.
+  const isValidCssIdentifier =
+    /^[a-zA-Z0-9\-_\u0080-\uFFFF]+$/.test(trimmed) &&
+    !/^\d/.test(trimmed) &&
+    !/^-\d/.test(trimmed)
+  if (isValidCssIdentifier) return trimmed
+
+  return `"${trimmed.replace(/"/g, '\\"')}"`
+}
+
 const AppThemeProvider: React.FC<BaseComponentProps> = function ({ children }) {
   const { curTheme } = useThemeStore()
   const { settingData } = useAppSettingStore()
@@ -29,13 +44,13 @@ const AppThemeProvider: React.FC<BaseComponentProps> = function ({ children }) {
     settingData.editor_root_font_family === LEGACY_DEFAULT_ROOT_FONT_FAMILY ||
     settingData.editor_root_font_family === SYSTEM_DEFAULT_FONT_FAMILY
       ? curTheme.styledConstants.fontFamily
-      : settingData.editor_root_font_family
+      : normalizeFontFamily(settingData.editor_root_font_family)
   const codeFontFamily =
     !settingData.editor_code_font_family ||
     settingData.editor_code_font_family === LEGACY_DEFAULT_CODE_FONT_FAMILY ||
     settingData.editor_code_font_family === DEFAULT_MONOSPACE_FONT_FAMILY
       ? curTheme.styledConstants.codemirrorFontFamily
-      : settingData.editor_code_font_family
+      : normalizeFontFamily(settingData.editor_code_font_family)
 
   const accentColorSetting = settingData[THEME_ACCENT_COLOR_SETTING_KEY]
   const hasAccentColorOverride = isThemeAccentColorOverride(accentColorSetting)
