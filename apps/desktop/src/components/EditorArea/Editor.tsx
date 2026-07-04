@@ -25,7 +25,7 @@ const overlayScrollbarsOptions = {
     clickScroll: true,
   },
   overflow: {
-    x: 'scroll',
+    x: 'hidden',
     y: 'scroll',
   },
 } as const
@@ -83,7 +83,7 @@ function Editor(props: EditorProps) {
     >
       <OverlayScrollbarsComponent
         options={overlayScrollbarsOptions}
-        style={{ height: '100%' }}
+        style={{ height: '100%', minWidth: 0 }}
       >
         <div className={'code-contents'}>
           {!shouldMountContent ? null : curFileTypeConfig.type === 'unsupported' ? (

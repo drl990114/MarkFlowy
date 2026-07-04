@@ -184,9 +184,10 @@ export const WysiwygThemeWrapper = styled.div.attrs<WrapperProps>((p) => ({
     border-spacing: 0;
     border-collapse: collapse;
     display: block;
-    width: max-content;
+    width: 100%;
     max-width: 100%;
-    overflow: auto;
+    overflow-x: auto;
+    overflow-y: hidden;
     margin: 2em 0;
   }
 
@@ -363,9 +364,12 @@ export const WysiwygThemeWrapper = styled.div.attrs<WrapperProps>((p) => ({
   & pre {
     margin-top: 0;
     margin-bottom: 0;
+    width: 100%;
+    max-width: 100%;
     font-family: ${(props) => props.theme.codemirrorFontFamily};
     font-size: 0.8em;
     word-wrap: normal;
+    box-sizing: border-box;
   }
 
   .markdown-body::before {
@@ -906,6 +910,9 @@ export const WysiwygThemeWrapper = styled.div.attrs<WrapperProps>((p) => ({
 
   .cm-editor {
     height: auto;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
     padding: 12px 0;
     margin-bottom: 1em;
     line-height: ${(props) => props.rootLineHeight};
@@ -914,6 +921,7 @@ export const WysiwygThemeWrapper = styled.div.attrs<WrapperProps>((p) => ({
     border-radius: ${(props) => props.theme.smallBorderRadius};
     background-color: ${(props) => props.theme.preBgColor};
     overflow: auto;
+    box-sizing: border-box;
 
     &[data-front-matter='true'] {
       .cm-lineNumbers {
@@ -932,6 +940,11 @@ export const WysiwygThemeWrapper = styled.div.attrs<WrapperProps>((p) => ({
 
     .cm-content {
       background-color: ${(props) => props.theme.preBgColor};
+    }
+    .cm-scroller {
+      width: 100%;
+      max-width: 100%;
+      overflow-x: auto;
     }
     .cm-scroller .cm-gutters {
       font-family: inherit;
@@ -1053,10 +1066,20 @@ export const WysiwygThemeWrapper = styled.div.attrs<WrapperProps>((p) => ({
   }
 
   & .ProseMirror .tableWrapper {
-    overflow: visible;
+    width: calc(100% + 22px);
+    max-width: calc(100% + 22px);
+    margin-left: -22px;
+    padding-left: 22px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    box-sizing: border-box;
   }
 
   & .ProseMirror table {
+    display: table;
+    width: max-content;
+    min-width: 100%;
+    max-width: none;
     overflow: visible;
 
     .rme-table-selector {

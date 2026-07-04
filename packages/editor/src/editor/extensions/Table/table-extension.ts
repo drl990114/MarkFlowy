@@ -25,7 +25,9 @@ import {
   isCellSelection,
   selectedRect,
   TableMap,
+  TableView,
 } from '@rme-sdk/pm/tables'
+import type { Node as ProsemirrorNode } from '@rme-sdk/pm/model'
 import type { NodeSerializerOptions } from '../../transform'
 import { ParserRuleType } from '../../transform'
 import { buildBlockEnterKeymap } from '../../utils/build-block-enter-keymap'
@@ -40,9 +42,15 @@ enum TABLE_ALIGEN {
   LEFT = 4,
 }
 
+const DEFAULT_TABLE_CELL_MIN_WIDTH = 100
+
 export class LineTableExtension extends TableExtension {
   get name() {
     return 'table' as const
+  }
+
+  createNodeViews() {
+    return (node: ProsemirrorNode) => new TableView(node, DEFAULT_TABLE_CELL_MIN_WIDTH)
   }
 
   createKeymap = (): KeyBindings => {

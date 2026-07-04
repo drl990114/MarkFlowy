@@ -60,7 +60,8 @@ export const OverlayScrollbarStyles = createGlobalStyle`
 export const Container = styled.div`
   position: relative;
   flex: 1;
-  overflow-x: auto;
+  min-width: 0;
+  overflow-x: hidden;
   overflow-y: hidden;
   display: flex;
   flex-direction: column;
@@ -82,6 +83,8 @@ export const Container = styled.div`
   .code-contents {
     flex: 1;
     display: flex;
+    min-width: 0;
+    width: 100%;
     padding-top: ${(props) => props.theme.spaceSm};
   }
 `
@@ -151,13 +154,16 @@ export const EditorPanel = styled.div`
   display: flex;
   width: 100%;
   height: 100%;
+  min-width: 0;
+  min-height: 0;
   position: relative;
 `
 
 export const EditorScrollContainer = styled.div`
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
 `
 
 export const EditorSkeleton = styled.div`

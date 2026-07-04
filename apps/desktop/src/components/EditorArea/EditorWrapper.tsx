@@ -12,6 +12,8 @@ interface EditorWrapperProps {
 
 export const EditorWrapper = styled.div.attrs<EditorWrapperProps>((props) => props)`
   flex: 1;
+  width: 100%;
+  min-width: 0;
   height: 100%;
   box-sizing: border-box;
   position: relative;
@@ -22,6 +24,7 @@ export const EditorWrapper = styled.div.attrs<EditorWrapperProps>((props) => pro
   > * {
     grid-column: 1;
     grid-row: 1;
+    min-width: 0;
   }
 
   ${(props) => {
