@@ -1,5 +1,45 @@
 # UPDATE LOG
 
+## v0.82.0
+
+Features:
+
+- Added file exclusion patterns setting, integrated with the file explorer and search.
+
+- Enhanced CLI window management and command execution for more reliable command-line workflows.
+
+- Added split editor layout support.
+
+- Added accent color customization in appearance settings.
+
+- Improved HTML live preview rendering with details support and additional tests.
+
+Fixes:
+
+- Normalized font family values for valid CSS and more reliable theme rendering.
+
+- Improved Windows system theme detection and synchronization for better consistency when following the system theme.
+
+---
+
+特性：
+
+- 新增文件排除规则设置，集成到文件树和搜索。
+
+- 增强 CLI 的窗口管理与命令执行能力，提升命令行工作流可靠性。
+
+- 支持分屏 editor 布局。
+
+- 外观设置新增强调色自定义。
+
+- 改进 HTML 实时预览渲染，支持 details 内容并补充相关测试。
+
+修复：
+
+- 规范字体族配置为合法 CSS 值，提升主题渲染稳定性。
+
+- 优化 Windows 系统主题检测与同步，提升跟随系统主题时的一致性。
+
 ## v0.81.5
 
 Features:
