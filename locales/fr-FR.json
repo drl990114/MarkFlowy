@@ -240,6 +240,11 @@
         "placeholder": {
           "label": "Espace réservé",
           "desc": "Une fois activé, le texte de l'espace réservé s'affiche dans les paragraphes vides."
+        },
+        "insert_date_format": {
+          "label": "Format de date insérée",
+          "desc": "Format utilisé par la commande Insérer la date actuelle. Utilise les jetons de format Day.js, comme YYYY-MM-DD ou YYYY-MM-DD HH:mm.",
+          "preview": "Aperçu :"
         }
       },
       "wysiwyg": {
@@ -525,6 +530,7 @@
       "editor_toggleEmphasis": "Basculer vers la marque italique",
       "editor_toggleCodeText": "Basculer vers la marque de code",
       "editor_toggleDelete": "Bascule pour supprimer la marque",
+      "editor_insertCurrentDate": "Insérer la date actuelle",
       "editor_toggleH1": "Basculer sur H1",
       "editor_toggleH2": "Bascule à H2",
       "editor_toggleH3": "Basculer sur H3",

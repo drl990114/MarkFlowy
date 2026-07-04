@@ -1,5 +1,6 @@
 import FontListSelectSettingItem from './FontListSelect'
 import InputSettingItem from './Input'
+import DateFormatSettingItem from './DateFormat'
 import SelectSettingItem from './Select'
 import SliderSettingItem from './Slider'
 import StringMapJsonSettingItem from './StringMapJson'
@@ -13,6 +14,7 @@ import {
   isStringMapJsonSettingItem,
   isSwitchSettingItem,
   isFileExcludePatternsSettingItem,
+  isDateFormatSettingItem,
 } from './types'
 
 const SettingItem: React.FC<SettingItemProps> = (props) => {
@@ -25,6 +27,9 @@ const SettingItem: React.FC<SettingItemProps> = (props) => {
 
   if (isFileExcludePatternsSettingItem(item))
     return <FileExcludePatternsSettingItem key={item.key} item={item} {...otherProps} />
+
+  if (isDateFormatSettingItem(item))
+    return <DateFormatSettingItem key={item.key} item={item} {...otherProps} />
 
   if (isSwitchSettingItem(item))
     return <SwitchSettingItem key={item.key} item={item} {...otherProps} />

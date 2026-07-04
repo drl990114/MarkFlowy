@@ -248,6 +248,11 @@
         "placeholder": {
           "label": "プレースホルダー",
           "desc": "オンにすると、空の段落にプレースホルダーテキストが表示されます。"
+        },
+        "insert_date_format": {
+          "label": "挿入する日付形式",
+          "desc": "現在の日付を挿入コマンドで使う日付形式です。YYYY-MM-DD や YYYY-MM-DD HH:mm などの Day.js 形式トークンを使えます。",
+          "preview": "プレビュー:"
         }
       },
       "wysiwyg": {
@@ -525,6 +530,7 @@
       "editor_toggleEmphasis": "イタリックマークへのトグル",
       "editor_toggleCodeText": "コードマークへの切り替え",
       "editor_toggleDelete": "マークを削除するトグル",
+      "editor_insertCurrentDate": "現在の日付を挿入",
       "editor_toggleH1": "H1へのトグル",
       "editor_toggleH2": "H2へのトグル",
       "editor_toggleH3": "H3へのトグル",

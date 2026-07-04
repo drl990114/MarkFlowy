@@ -1,6 +1,6 @@
 import { changeLng, i18n, Langs, locales } from '@/i18n'
 import { currentWebview } from '@/services/windows'
-import { EditorViewType } from 'rme'
+import { DEFAULT_CURRENT_DATE_FORMAT, EditorViewType } from 'rme'
 
 export const getSettingMap = () => {
   return {
@@ -215,6 +215,17 @@ export const getSettingMap = () => {
           },
           desc: {
             i18nKey: 'settings.editor.behavior.placeholder.desc',
+          },
+        },
+        insertDateFormat: {
+          key: 'editor_insert_date_format',
+          type: 'dateFormat',
+          placeholder: DEFAULT_CURRENT_DATE_FORMAT,
+          title: {
+            i18nKey: 'settings.editor.behavior.insert_date_format.label',
+          },
+          desc: {
+            i18nKey: 'settings.editor.behavior.insert_date_format.desc',
           },
         },
       },

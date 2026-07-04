@@ -63,6 +63,7 @@ export const createWysiwygDelegate = (
     toggleEmphasis: 'mod-i',
     toggleCodeText: 'mod-e',
     toggleDelete: 'mod-shift-s',
+    insertCurrentDate: 'mod-;',
   }
 
   const overrideShortcutMap = {

@@ -3,6 +3,7 @@ import { KeyBinding } from '@codemirror/view'
 import { clipboardRead } from '../../utils/clipboard-read'
 import { isBrowser } from '../../utils/common'
 import { ClipboardReadFunction } from './../../utils/clipboard-read'
+import { CurrentDateFormatOption } from '../../utils/date'
 import {
   applyBold,
   applyCode,
@@ -15,6 +16,7 @@ import {
   applyItalic,
   applyStrikethrough,
   getInsertLinkOrImageCommand,
+  insertCurrentDate,
 } from './commands/markdown'
 
 export interface CommandKeymapOptions {
@@ -32,6 +34,8 @@ export interface CommandKeymapOptions {
   disableAllBuildInShortcuts?: boolean
 
   clipboardReadFunction?: ClipboardReadFunction
+
+  currentDateFormat?: CurrentDateFormatOption
 }
 
 export type CommandName = keyof typeof defaultCommandShortcutMap
@@ -54,6 +58,7 @@ const defaultCommandShortcutMap = {
   toggleDelete: 'mod-shift-s',
   insertLink: 'mod-k',
   insertImage: 'mod-alt-i',
+  insertCurrentDate: 'mod-;',
 } as const
 
 /**
@@ -108,6 +113,12 @@ export function createCommandKeymap(options: CommandKeymapOptions = {}): KeyBind
     keymap.push({
       key: shortcutMap.insertImage,
       run: getInsertLinkOrImageCommand({ type: 'image', options }),
+    })
+  }
+  if (shortcutMap.insertCurrentDate) {
+    keymap.push({
+      key: shortcutMap.insertCurrentDate,
+      run: (view) => insertCurrentDate(view, options.currentDateFormat),
     })
   }
 

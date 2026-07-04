@@ -10,7 +10,8 @@ export const rmeDefaultKeymap: KeymapConfig = {
   'mod-b': 'toggleStrong',
   'mod-i': 'toggleEmphasis',
   'mod-e': 'toggleCodeText',
-  'mod-shift-s': 'toggleDelete'
+  'mod-shift-s': 'toggleDelete',
+  'mod-;': 'insertCurrentDate',
 }
 
 export const getKeybindByCommandName = (commandName: string) => {

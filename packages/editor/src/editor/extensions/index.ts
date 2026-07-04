@@ -11,6 +11,7 @@ import { corePreset } from '@rme-sdk/preset-core'
 import { ReactComponentExtension } from '@rme-sdk/react'
 import { ClipboardReadFunction, clipboardRead } from '../utils/clipboard-read'
 import { isBrowser } from '../utils/common'
+import { CurrentDateFormatOption } from '../utils/date'
 import { AIExtension } from './Ai'
 import { AIOptions } from './Ai/ai-types'
 import { LineBlockquoteExtension } from './BlockQuote'
@@ -20,6 +21,7 @@ import { CustomCopyFunction } from './CodeMirror/codemirror-types'
 import { CodemirrorOptions, getSetupByCodemirrorOptions } from './CodeMirror/setup'
 import { CommonKeymapExtension } from './CommonKeymap'
 import { CopilotExtension } from './Copilot/copilot-extension'
+import { DateExtension } from './Date'
 import { FindExtension } from './Find/find-extension'
 import { HandleInputExtension } from './HandleInput/handle-input-extension'
 import { LineHardBreakExtension } from './HardBreak'
@@ -80,6 +82,8 @@ export type ExtensionsOptions = {
   placeholder?: PlaceholderOptions
 
   handleLinkClick?: LinkClickHandler
+
+  currentDateFormat?: CurrentDateFormatOption
 }
 
 function extensions(options: ExtensionsOptions): any[] {
@@ -120,6 +124,9 @@ function extensions(options: ExtensionsOptions): any[] {
       handleViewImgSrcUrl,
     }),
     new CommonKeymapExtension(),
+    new DateExtension({
+      currentDateFormat: options.currentDateFormat,
+    }),
     new LinkClickExtension({
       handleLinkClick: options.handleLinkClick,
     }),

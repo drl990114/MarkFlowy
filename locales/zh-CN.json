@@ -314,6 +314,11 @@
         "placeholder": {
           "label": "占位符提示",
           "desc": "启用后，在空段落中显示占位符提示文本。"
+        },
+        "insert_date_format": {
+          "label": "插入日期格式",
+          "desc": "插入当前日期命令使用的日期格式。支持 Day.js 格式 token，例如 YYYY-MM-DD 或 YYYY-MM-DD HH:mm。",
+          "preview": "预览："
         }
       },
       "wysiwyg": {
@@ -536,6 +541,7 @@
       "editor_toggleEmphasis": "切换到斜体标记",
       "editor_toggleCodeText": "切换到代码标记",
       "editor_toggleDelete": "切换至删除标记",
+      "editor_insertCurrentDate": "插入当前日期",
       "editor_toggleH1": "切换到H1",
       "editor_toggleH2": "切换到H2",
       "editor_toggleH3": "切换到H3",

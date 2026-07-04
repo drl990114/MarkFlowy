@@ -243,6 +243,11 @@
         "placeholder": {
           "label": "Marcador de posición",
           "desc": "Una vez habilitado, se mostrará texto de marcador de posición en los párrafos vacíos."
+        },
+        "insert_date_format": {
+          "label": "Formato de fecha insertada",
+          "desc": "Formato usado por el comando Insertar fecha actual. Usa tokens de formato de Day.js, como YYYY-MM-DD o YYYY-MM-DD HH:mm.",
+          "preview": "Vista previa:"
         }
       },
       "wysiwyg": {
@@ -525,6 +530,7 @@
       "editor_toggleEmphasis": "Alternar a la marca cursiva",
       "editor_toggleCodeText": "Alternar a la marca de código",
       "editor_toggleDelete": "Alternar para eliminar marca",
+      "editor_insertCurrentDate": "Insertar fecha actual",
       "editor_toggleH1": "Alternar a H1",
       "editor_toggleH2": "Alternar a H2",
       "editor_toggleH3": "Alternar a H3",

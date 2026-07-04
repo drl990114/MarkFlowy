@@ -44,7 +44,10 @@ import {
   EditorProps as MfEditorProps,
 } from 'rme'
 import { toast } from 'zens'
-import { createWysiwygDelegateOptions } from './createWysiwygDelegateOptions'
+import {
+  createWysiwygDelegateOptions,
+  getCurrentEditorInsertDateFormat,
+} from './createWysiwygDelegateOptions'
 import { EditorWrapper } from './EditorWrapper'
 import { EditorSkeleton, WarningHeader } from './styles'
 
@@ -163,6 +166,7 @@ function TextEditor(props: TextEditorProps) {
           disableAllBuildInShortcuts: true,
           overrideShortcutMap: useEditorKeybindingStore.getState().editorKeybingMap,
           clipboardReadFunction: clipboardRead,
+          currentDateFormat: getCurrentEditorInsertDateFormat,
           onCodemirrorViewLoad: (cmView) => {
             sourceCodeCodemirrorViewMap.set(id, cmView)
           },
@@ -580,6 +584,7 @@ function TextEditor(props: TextEditorProps) {
                 disableAllBuildInShortcuts: true,
                 overrideShortcutMap: useEditorKeybindingStore.getState().editorKeybingMap,
                 clipboardReadFunction: clipboardRead,
+                currentDateFormat: getCurrentEditorInsertDateFormat,
                 onCodemirrorViewLoad: (cmView) => {
                   sourceCodeCodemirrorViewMap.set(curFile.id, cmView)
                   debounceRefreshToc()

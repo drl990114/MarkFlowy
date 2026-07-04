@@ -17,6 +17,10 @@ import { handleUploadImage, handleImagePaste } from './imageHandlers'
 
 type AIOptions = NonNullable<CreateWysiwygDelegateOptions['ai']>
 
+export const getCurrentEditorInsertDateFormat = () => {
+  return useAppSettingStore.getState().settingData.editor_insert_date_format as string | undefined
+}
+
 export const createWysiwygDelegateOptions = (fileId?: string): CreateWysiwygDelegateOptions => {
   const aiStoreState = useAiChatStore.getState()
   const aiProviderModelsMap = aiStoreState.aiProviderModelsMap
@@ -38,6 +42,7 @@ export const createWysiwygDelegateOptions = (fileId?: string): CreateWysiwygDele
     typewriterScroll: {
       enabled: settingData.editor_typewriter_scroll,
     },
+    currentDateFormat: getCurrentEditorInsertDateFormat,
     placeholder: {
       enabled: settingData.editor_placeholder,
     },

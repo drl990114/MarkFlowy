@@ -10,6 +10,7 @@ import { basicSetup } from '../../extensions/CodeMirror/setup'
 import { TypewriterScrollExtension, TypewriterScrollOptions } from '../../extensions/TypewriterScroll'
 import type { DocToString, EditorDelegate, StringToDoc } from '../../types'
 import { ClipboardReadFunction } from '../../utils/clipboard-read'
+import { CurrentDateFormatOption } from '../../utils/date'
 import { FindExtension } from '@/editor/extensions/Find/find-extension'
 
 type CreateSourceCodeManagerOptions = {
@@ -31,6 +32,8 @@ type CreateSourceCodeManagerOptions = {
   clipboardReadFunction?: ClipboardReadFunction
 
   typewriterScroll?: TypewriterScrollOptions
+
+  currentDateFormat?: CurrentDateFormatOption
 }
 export function createSourceCodeManager(
   options?: CreateSourceCodeManagerOptions,
@@ -52,6 +55,7 @@ export function createSourceCodeManager(
         overrideShortcutMap: options?.overrideShortcutMap,
         disableAllBuildInShortcuts: options?.disableAllBuildInShortcuts,
         clipboardReadFunction: options?.clipboardReadFunction,
+        currentDateFormat: options?.currentDateFormat,
       }
     }),
     typewriterScrollExtension,

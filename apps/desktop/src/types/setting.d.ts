@@ -17,6 +17,7 @@ declare namespace Setting {
     | SliderSettingItem
     | FontListSelectSettingItem
     | StringMapJsonSettingItem
+    | DateFormatSettingItem
 
   type BaseSettingItem = {
     key: string
@@ -50,6 +51,11 @@ declare namespace Setting {
     prefix?: string
     suffix?: string
     valuePreHandle?: (val: string) => string
+  } & BaseSettingItem
+
+  type DateFormatSettingItem = {
+    type: 'dateFormat'
+    placeholder?: string
   } & BaseSettingItem
 
   type FileExcludePatternsSettingItem = {

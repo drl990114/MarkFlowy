@@ -37070,6 +37070,7 @@ __metadata:
     codemirror-lang-latex: "npm:^0.2.0"
     color: "npm:^4.2.3"
     css-loader: "npm:7.1.2"
+    dayjs: "npm:^1.11.13"
     dedent: "npm:^1.7.0"
     esbuild: "npm:^0.24.2"
     esbuild-css-modules-plugin: "npm:^3.1.5"

@@ -8,7 +8,7 @@ export { default as EditorExtensions } from './extensions'
 export * from './hooks'
 export * from './theme'
 export * from './types'
+export * from './utils/date'
 
 export * from './extensions'
 export * from './toolbar/toolbar'
-

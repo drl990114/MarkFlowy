@@ -202,6 +202,7 @@
       "editor_toggleEmphasis": "toggle to italic mark",
       "editor_toggleCodeText": "toggle to code mark",
       "editor_toggleDelete": "toggle to delete mark",
+      "editor_insertCurrentDate": "Insert current date",
       "editor_toggleH1": "toggle to H1",
       "editor_toggleH2": "toggle to H2",
       "editor_toggleH3": "toggle to H3",
@@ -283,6 +284,11 @@
         "placeholder": {
           "label": "Placeholder",
           "desc": "When enabled, placeholder text will be displayed in empty paragraphs."
+        },
+        "insert_date_format": {
+          "label": "Insert date format",
+          "desc": "Date format used by the Insert current date command. Uses Day.js format tokens, such as YYYY-MM-DD or YYYY-MM-DD HH:mm.",
+          "preview": "Preview:"
         }
       },
       "wysiwyg": {

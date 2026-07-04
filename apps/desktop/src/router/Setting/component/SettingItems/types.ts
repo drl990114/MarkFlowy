@@ -6,6 +6,12 @@ export function isInputSettingItem(item: Setting.SettingItem): item is Setting.I
   return item.type === 'input'
 }
 
+export function isDateFormatSettingItem(
+  item: Setting.SettingItem,
+): item is Setting.DateFormatSettingItem {
+  return item.type === 'dateFormat'
+}
+
 export function isFileExcludePatternsSettingItem(item: Setting.SettingItem): item is Setting.FileExcludePatternsSettingItem {
   return item?.type === 'listInput' || item?.type === 'list-input' || item?.type === 'file-exclude-patterns'
 }

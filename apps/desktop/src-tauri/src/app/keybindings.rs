@@ -131,6 +131,11 @@ impl Keybindings {
                 "editor_focus".to_string(),
             ),
             KeybindingInfo::new(
+                "editor_insertCurrentDate".to_string(),
+                vec!["CommandOrCtrl".to_string(), ";".to_string()],
+                "editor_focus".to_string(),
+            ),
+            KeybindingInfo::new(
                 "editor_toggleH1".to_string(),
                 vec!["CommandOrCtrl".to_string(), "1".to_string()],
                 "editor_focus".to_string(),

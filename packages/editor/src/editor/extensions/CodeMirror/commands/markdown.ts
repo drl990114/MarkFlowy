@@ -1,5 +1,6 @@
 import { type ChangeSpec, EditorSelection } from '@codemirror/state'
 import { type EditorView } from '@codemirror/view'
+import { CurrentDateFormatOption, formatCurrentDate } from '../../../utils/date'
 import { CommandKeymapOptions } from '../keymap'
 
 const urlRE =
@@ -189,6 +190,20 @@ export function applyRule(target: EditorView): boolean {
   target.dispatch({
     changes: { from: target.state.selection.main.from, insert: '\n***\n' },
   })
+  return true
+}
+
+export function insertCurrentDate(
+  target: EditorView,
+  format?: CurrentDateFormatOption,
+): boolean {
+  const currentDate = formatCurrentDate(format)
+  const transaction = target.state.changeByRange(({ from, to }) => ({
+    changes: { from, to, insert: currentDate },
+    range: EditorSelection.cursor(from + currentDate.length),
+  }))
+
+  target.dispatch(transaction)
   return true
 }
 
