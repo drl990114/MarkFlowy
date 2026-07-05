@@ -67,6 +67,28 @@
 
 Linux、macOS、Windows向けに利用可能です。
 
+### Linux インストールスクリプト
+
+Linux では、`scripts/install-linux.sh` を直接ダウンロードして実行できます。
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/drl990114/MarkFlowy/main/scripts/install-linux.sh -o install-linux.sh
+sh install-linux.sh
+```
+
+`curl` が利用できない場合は、代わりに `wget` を使用します。
+
+```sh
+wget -O install-linux.sh https://raw.githubusercontent.com/drl990114/MarkFlowy/main/scripts/install-linux.sh
+sh install-linux.sh
+```
+
+このスクリプトは現在のアーキテクチャに対応する AppImage をダウンロードし、`~/.local/share/markflowy` にインストールして、`~/.local/bin/markflowy` コマンドを作成します。アンインストールするには:
+
+```sh
+sh install-linux.sh --uninstall
+```
+
 > [!NOTE]
 > Appleのセキュリティポリシーにより、開発者認証のないソフトウェアは**macOS aarch64**版を直接ダウンロードして使用できません。以下の手順で制限を回避できます。
 > - terminal を開く

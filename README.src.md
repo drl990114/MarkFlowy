@@ -106,6 +106,28 @@ Available for Linux, macOS and Windows.<!--en-->
 支持平台 Linux, macOS 和 Windows.<!--zh-->
 Linux、macOS、Windows向けに利用可能です。<!--ja-->
 
+### ${en:'Linux installer', zh:'Linux 安装脚本', ja:'Linux インストールスクリプト'}
+
+${en:'On Linux, you can download and run `scripts/install-linux.sh` directly:', zh:'在 Linux 上，你可以直接下载并运行 `scripts/install-linux.sh`：', ja:'Linux では、`scripts/install-linux.sh` を直接ダウンロードして実行できます。'}
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/drl990114/MarkFlowy/main/scripts/install-linux.sh -o install-linux.sh
+sh install-linux.sh
+```
+
+${en:'If `curl` is unavailable, use `wget` instead:', zh:'如果没有 `curl`，可以改用 `wget`：', ja:'`curl` が利用できない場合は、代わりに `wget` を使用します。'}
+
+```sh
+wget -O install-linux.sh https://raw.githubusercontent.com/drl990114/MarkFlowy/main/scripts/install-linux.sh
+sh install-linux.sh
+```
+
+${en:'The script downloads the AppImage for your architecture, installs it to `~/.local/share/markflowy`, and creates the `~/.local/bin/markflowy` command. To uninstall:', zh:'脚本会下载适配当前架构的 AppImage，安装到 `~/.local/share/markflowy`，并创建 `~/.local/bin/markflowy` 命令。卸载可执行：', ja:'このスクリプトは現在のアーキテクチャに対応する AppImage をダウンロードし、`~/.local/share/markflowy` にインストールして、`~/.local/bin/markflowy` コマンドを作成します。アンインストールするには:'}
+
+```sh
+sh install-linux.sh --uninstall
+```
+
 > [!NOTE]
 > Because of Apple’s security policy restrictions on software without developer certification, the **macOS aarch64** version cannot be downloaded and used directly. You can ignore the limit by doing the following:<!--en-->
 > - Open your terminal<!--en-->

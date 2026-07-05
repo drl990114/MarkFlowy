@@ -18,6 +18,28 @@ sidebar_position: 1
 
 支持 Linux、macOS 和 Windows。
 
+### Linux 安装脚本
+
+在 Linux 上，你可以直接下载并运行 `scripts/install-linux.sh`：
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/drl990114/MarkFlowy/main/scripts/install-linux.sh -o install-linux.sh
+sh install-linux.sh
+```
+
+如果没有 `curl`，可以改用 `wget`：
+
+```sh
+wget -O install-linux.sh https://raw.githubusercontent.com/drl990114/MarkFlowy/main/scripts/install-linux.sh
+sh install-linux.sh
+```
+
+脚本会下载适配当前架构的 AppImage，安装到 `~/.local/share/markflowy`，并创建 `~/.local/bin/markflowy` 命令。卸载可执行：
+
+```sh
+sh install-linux.sh --uninstall
+```
+
 > [!NOTE]
 > 由于苹果对未获得开发者认证软件的安全策略限制，**macOS aarch64** 版本无法直接下载使用。你可以通过以下方式忽略限制：
 > - 打开终端

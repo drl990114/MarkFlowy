@@ -18,6 +18,28 @@ Currently, MarkFlowy is in the beta stage, and it is recommended to use it with 
 
 Available for Linux, macOS and Windows.
 
+### Linux installer
+
+On Linux, you can download and run `scripts/install-linux.sh` directly:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/drl990114/MarkFlowy/main/scripts/install-linux.sh -o install-linux.sh
+sh install-linux.sh
+```
+
+If `curl` is unavailable, use `wget` instead:
+
+```sh
+wget -O install-linux.sh https://raw.githubusercontent.com/drl990114/MarkFlowy/main/scripts/install-linux.sh
+sh install-linux.sh
+```
+
+The script downloads the AppImage for your architecture, installs it to `~/.local/share/markflowy`, and creates the `~/.local/bin/markflowy` command. To uninstall:
+
+```sh
+sh install-linux.sh --uninstall
+```
+
 > [!NOTE]
 > Because of Apple’s security policy restrictions on software without developer certification, the **macOS aarch64** version cannot be downloaded and used directly. You can ignore the limit by doing the following:
 > - Open your terminal
