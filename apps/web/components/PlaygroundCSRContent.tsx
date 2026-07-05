@@ -4,7 +4,7 @@ import styled from 'styled-components'
 import rem from 'utils/rem'
 import { navbarHeight } from 'utils/sizes'
 
-const Editor = dynamic(() => import('./Editor'), {
+const Editor = dynamic(() => import('./Editor').then((mod) => mod.default), {
   ssr: false,
   loading: () => <span>Loading Editor...</span>,
 })

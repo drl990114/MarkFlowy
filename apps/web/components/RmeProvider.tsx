@@ -1,5 +1,4 @@
 import { createInstance, editorResources, I18nextProvider, initReactI18next } from '@markflowy/i18n'
-import { useTranslation } from 'next-i18next'
 import { useRouter } from 'next/router'
 import React, { useEffect, useMemo } from 'react'
 import { darkTheme } from 'theme'
@@ -120,7 +119,6 @@ export const RmePreload = () => {
 
 const RmeProvider: React.FC<RmeProviderProps> = ({ themeTokens, children }) => {
   const { ThemeProvider, loading, error, reload } = useRmeThemeProvider()
-  const { i18n } = useTranslation()
   const router = useRouter()
 
   const editorI18nInstance = useMemo(() => createInstance(), [])
@@ -128,9 +126,9 @@ const RmeProvider: React.FC<RmeProviderProps> = ({ themeTokens, children }) => {
   const i18nProp = useMemo(
     () => ({
       locales: editorResources,
-      language: normalizeEditorLang(router.locale || i18n?.language),
+      language: normalizeEditorLang(router.locale),
     }),
-    [router.locale, i18n?.language],
+    [router.locale],
   )
 
   useEffect(() => {
@@ -192,9 +190,12 @@ const RmeProvider: React.FC<RmeProviderProps> = ({ themeTokens, children }) => {
     return <Loading />
   }
 
-  let theme = { ...THEME_CONFIG }
-  if (themeTokens) {
-    Object.assign(theme.token, themeTokens)
+  const theme = {
+    ...THEME_CONFIG,
+    token: {
+      ...THEME_CONFIG.token,
+      ...(themeTokens || {}),
+    },
   }
 
   return (

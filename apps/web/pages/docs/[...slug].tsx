@@ -6,9 +6,8 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
 import DocsLayout from '../../components/DocsLayout'
-import RmeProvider from '../../components/RmeProvider'
 
-const DynamicMdHtmlWrapper = dynamic(() => import('../../components/MdHtmlWrapper'), {
+const DynamicDocsRmeContent = dynamic(() => import('../../components/DocsRmeContent'), {
   ssr: false,
   loading: () => <Loading />,
 })
@@ -30,11 +29,7 @@ const PostLayout = () => {
   if (markdown) {
     return (
       <DocsLayout>
-        <RmeProvider>
-          <DynamicMdHtmlWrapper
-            dangerouslySetInnerHTML={{ __html: markdown.body.html }}
-          ></DynamicMdHtmlWrapper>
-        </RmeProvider>
+        <DynamicDocsRmeContent html={markdown.body.html} />
       </DocsLayout>
     )
   } else {

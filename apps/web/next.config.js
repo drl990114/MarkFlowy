@@ -10,9 +10,6 @@ module.exports = withSvgr(
     },
     i18n: { ...i18n, },
     output: 'standalone',
-    env: {
-      NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3200',
-    },
     transpilePackages: ['@markflowy/interface', 'zens', 'antd', '@ant-design/x'],
     turbopack: {},
   }),

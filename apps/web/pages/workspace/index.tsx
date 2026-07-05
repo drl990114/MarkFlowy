@@ -1,5 +1,6 @@
 import { githubService } from 'features/githubWorkspace/services/githubService'
 import { useAuth } from 'hooks/useAuth'
+import type { GitHubConfig } from '@markflowy/types'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
@@ -45,14 +46,29 @@ interface Workspace {
   settings?: WorkspaceSettings
 }
 
+const formatWorkspaceDate = (value?: string) => {
+  if (!value) return 'Not available'
+
+  return new Date(value).toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  })
+}
+
 export default function WorkspaceListPage() {
-  const { loading: authLoading, isAuthenticated } = useAuth(true)
+  const { loading: authLoading, isAuthenticated } = useAuth(false)
 
   const [workspaces, setWorkspaces] = useState<Workspace[]>([])
   const [loadingWorkspaces, setLoadingWorkspaces] = useState(false)
 
   const [repos, setRepos] = useState<GitHubRepo[]>([])
+  const [githubConfig, setGithubConfig] = useState<GitHubConfig | null>(null)
+  const [loadingGitHubConfig, setLoadingGitHubConfig] = useState(false)
+  const [githubConfigError, setGitHubConfigError] = useState('')
   const [loadingRepos, setLoadingRepos] = useState(false)
+  const [repoError, setRepoError] = useState('')
+  const [selectedRepoFullName, setSelectedRepoFullName] = useState('')
 
   const [showImportModal, setShowImportModal] = useState(false)
   const [importingRepo, setImportingRepo] = useState<string | null>(null)
@@ -60,7 +76,6 @@ export default function WorkspaceListPage() {
   useEffect(() => {
     if (!isAuthenticated || authLoading) return
     loadWorkspaces()
-    loadRepos()
   }, [isAuthenticated, authLoading])
 
   const loadWorkspaces = async () => {
@@ -77,13 +92,43 @@ export default function WorkspaceListPage() {
 
   const loadRepos = async () => {
     setLoadingRepos(true)
+    setRepoError('')
     try {
       const data = await githubService.listRepos(1, 100)
       setRepos(data)
-    } catch {
-      // ignore
+    } catch (err: any) {
+      setRepoError(err?.message || 'Failed to load GitHub repositories')
     } finally {
       setLoadingRepos(false)
+    }
+  }
+
+  const loadGitHubConfig = async () => {
+    setLoadingGitHubConfig(true)
+    setGitHubConfigError('')
+    try {
+      const data = await apiClient.get<GitHubConfig>('/github/config')
+      setGithubConfig(data)
+      return data
+    } catch (err: any) {
+      setGithubConfig(null)
+      setGitHubConfigError(err?.message || 'Failed to load GitHub configuration')
+      return null
+    } finally {
+      setLoadingGitHubConfig(false)
+    }
+  }
+
+  const handleOpenImportModal = async () => {
+    setShowImportModal(true)
+    setSelectedRepoFullName('')
+    setRepoError('')
+
+    const data = await loadGitHubConfig()
+    if (data?.hasToken) {
+      await loadRepos()
+    } else {
+      setRepos([])
     }
   }
 
@@ -133,6 +178,19 @@ export default function WorkspaceListPage() {
     }
   }
 
+  const getRepoSourceUrl = (repo: GitHubRepo) => {
+    return `https://github.com/${repo.owner.login}/${repo.name}`
+  }
+
+  const getImportedWorkspace = (repo: GitHubRepo) => {
+    return workspaces.find(
+      (workspace) =>
+        workspace.type === 'GITHUB' &&
+        (workspace.sourceUrl === getRepoSourceUrl(repo) ||
+          Boolean(workspace.sourceUrl?.includes(repo.full_name))),
+    )
+  }
+
   if (authLoading) {
     return (
       <LoadingContainer>
@@ -143,201 +201,276 @@ export default function WorkspaceListPage() {
 
   const myWorkspaces = workspaces.filter((w) => w.type !== 'GITHUB')
   const githubWorkspaces = workspaces.filter((w) => w.type === 'GITHUB')
+  const selectedRepo = repos.find((repo) => repo.full_name === selectedRepoFullName)
+  const selectedImportedWorkspace = selectedRepo ? getImportedWorkspace(selectedRepo) : undefined
 
   return (
     <Container>
       <Header>
-        <HeaderLeft>
-          <ProductMark>
-            <i className='ri-folder-3-line' />
-          </ProductMark>
-          <HeaderCopy>
-            <Title>Workspaces</Title>
-            <Subtitle>
-              {workspaces.length} synced workspace{workspaces.length === 1 ? '' : 's'}
-            </Subtitle>
-          </HeaderCopy>
-        </HeaderLeft>
-        <HeaderRight>
-          {isAuthenticated && (
-            <>
-              <SettingsLink href='/workspace/settings/github'>
-                <i className='ri-github-fill' />
-                GitHub
-              </SettingsLink>
-              <ImportButton onClick={() => setShowImportModal(true)}>
-                <i className='ri-add-line' />
-                Import Repo
-              </ImportButton>
-            </>
-          )}
-        </HeaderRight>
+        <HeaderInner>
+          <HeaderLeft>
+            <ProductMark>
+              <i className='ri-folder-3-line' />
+            </ProductMark>
+            <HeaderCopy>
+              <Title>Workspaces</Title>
+              <Subtitle>
+                {workspaces.length} synced workspace{workspaces.length === 1 ? '' : 's'}
+              </Subtitle>
+            </HeaderCopy>
+          </HeaderLeft>
+          <HeaderRight>
+            {isAuthenticated && (
+              <>
+                <SettingsLink href='/settings'>
+                  <i className='ri-user-settings-line' />
+                  Settings
+                </SettingsLink>
+                <ImportButton onClick={handleOpenImportModal}>
+                  <i className='ri-add-line' />
+                  Import Workspace
+                </ImportButton>
+              </>
+            )}
+          </HeaderRight>
+        </HeaderInner>
       </Header>
 
       <Content>
-        <Section>
-          <SectionHeader>
-            <SectionTitle>Recent</SectionTitle>
-            <SectionMeta>Pinned preview</SectionMeta>
-          </SectionHeader>
-          <WorkspaceList>
-            <WorkspaceRow href='/workspace/demo-workspace'>
-              <WorkspaceIcon $variant='demo'>
-                <i className='ri-folder-3-line' />
-              </WorkspaceIcon>
-              <WorkspaceMain>
-                <WorkspaceName>Demo Workspace</WorkspaceName>
-                <WorkspacePath>/workspace/demo-workspace</WorkspacePath>
-              </WorkspaceMain>
-              <WorkspaceTags>
-                <WorkspaceTag>Demo</WorkspaceTag>
-                <WorkspaceTag>Local</WorkspaceTag>
-              </WorkspaceTags>
-              <OpenIndicator className='ri-arrow-right-s-line' />
-            </WorkspaceRow>
-          </WorkspaceList>
-        </Section>
-
-        {isAuthenticated && myWorkspaces.length > 0 && (
-          <Section>
-            <SectionHeader>
-              <SectionTitle>Local & Shared</SectionTitle>
-              <SectionMeta>
-                {myWorkspaces.length} workspace{myWorkspaces.length === 1 ? '' : 's'}
-              </SectionMeta>
-            </SectionHeader>
-            <WorkspaceList>
-              {myWorkspaces.map((workspace) => (
-                <WorkspaceRow key={workspace.id} href={getWorkspaceHref(workspace)}>
-                  <WorkspaceIcon $variant='local'>
+        <WorkspaceShell>
+          <SectionStack>
+            <Section>
+              <SectionHeader>
+                <SectionTitle>Recent</SectionTitle>
+                <SectionMeta>Pinned preview</SectionMeta>
+              </SectionHeader>
+              <WorkspaceList>
+                <WorkspaceRow href='/workspace/demo-workspace'>
+                  <WorkspaceIcon $variant='demo'>
                     <i className='ri-folder-3-line' />
                   </WorkspaceIcon>
                   <WorkspaceMain>
-                    <WorkspaceName>{workspace.name}</WorkspaceName>
-                    <WorkspacePath>{workspace.sourceUrl || workspace.slug}</WorkspacePath>
+                    <WorkspaceName>Demo Workspace</WorkspaceName>
+                    <WorkspacePath>/workspace/demo-workspace</WorkspacePath>
                   </WorkspaceMain>
                   <WorkspaceTags>
-                    <WorkspaceTag>{getWorkspaceTypeLabel(workspace.type)}</WorkspaceTag>
-                    <WorkspaceTag>
-                      {new Date(workspace.updatedAt).toLocaleDateString()}
-                    </WorkspaceTag>
+                    <WorkspaceTag>Demo</WorkspaceTag>
+                    <WorkspaceTag>Local</WorkspaceTag>
                   </WorkspaceTags>
-                  <DeleteButton
-                    onClick={(e) => {
-                      e.preventDefault()
-                      e.stopPropagation()
-                      handleDeleteWorkspace(workspace.id)
-                    }}
-                    aria-label={`Delete ${workspace.name}`}
-                  >
-                    <i className='ri-delete-bin-line' />
-                  </DeleteButton>
+                  <OpenIndicator className='ri-arrow-right-s-line' />
                 </WorkspaceRow>
-              ))}
-            </WorkspaceList>
-          </Section>
-        )}
+              </WorkspaceList>
+            </Section>
 
-        {isAuthenticated && githubWorkspaces.length > 0 && (
-          <Section>
-            <SectionHeader>
-              <SectionTitle>GitHub</SectionTitle>
-              <SectionMeta>
-                {githubWorkspaces.length} repository workspace
-                {githubWorkspaces.length === 1 ? '' : 's'}
-              </SectionMeta>
-            </SectionHeader>
-            <WorkspaceList>
-              {githubWorkspaces.map((workspace) => (
-                <WorkspaceRow key={workspace.id} href={getWorkspaceHref(workspace)}>
-                  <WorkspaceIcon $variant='github'>
-                    <i className='ri-github-fill' />
-                  </WorkspaceIcon>
-                  <WorkspaceMain>
-                    <WorkspaceName>{workspace.name}</WorkspaceName>
-                    <WorkspacePath>{workspace.sourceUrl || workspace.slug}</WorkspacePath>
-                  </WorkspaceMain>
-                  <WorkspaceTags>
-                    <WorkspaceTag>GitHub</WorkspaceTag>
-                    <WorkspaceTag>
-                      {new Date(workspace.updatedAt).toLocaleDateString()}
-                    </WorkspaceTag>
-                  </WorkspaceTags>
-                  <DeleteButton
-                    onClick={(e) => {
-                      e.preventDefault()
-                      e.stopPropagation()
-                      handleDeleteWorkspace(workspace.id)
-                    }}
-                    aria-label={`Delete ${workspace.name}`}
-                  >
-                    <i className='ri-delete-bin-line' />
-                  </DeleteButton>
-                </WorkspaceRow>
-              ))}
-            </WorkspaceList>
-          </Section>
-        )}
+            {isAuthenticated && myWorkspaces.length > 0 && (
+              <Section>
+                <SectionHeader>
+                  <SectionTitle>Local & Shared</SectionTitle>
+                  <SectionMeta>
+                    {myWorkspaces.length} workspace{myWorkspaces.length === 1 ? '' : 's'}
+                  </SectionMeta>
+                </SectionHeader>
+                <WorkspaceList>
+                  {myWorkspaces.map((workspace) => (
+                    <WorkspaceRow key={workspace.id} href={getWorkspaceHref(workspace)}>
+                      <WorkspaceIcon $variant='local'>
+                        <i className='ri-folder-3-line' />
+                      </WorkspaceIcon>
+                      <WorkspaceMain>
+                        <WorkspaceName>{workspace.name}</WorkspaceName>
+                        <WorkspacePath>{workspace.sourceUrl || workspace.slug}</WorkspacePath>
+                      </WorkspaceMain>
+                      <WorkspaceTags>
+                        <WorkspaceTag>{getWorkspaceTypeLabel(workspace.type)}</WorkspaceTag>
+                        <WorkspaceTag>{formatWorkspaceDate(workspace.updatedAt)}</WorkspaceTag>
+                      </WorkspaceTags>
+                      <DeleteButton
+                        onClick={(e) => {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          handleDeleteWorkspace(workspace.id)
+                        }}
+                        aria-label={`Delete ${workspace.name}`}
+                        title={`Delete ${workspace.name}`}
+                      >
+                        <i className='ri-delete-bin-line' />
+                      </DeleteButton>
+                    </WorkspaceRow>
+                  ))}
+                </WorkspaceList>
+              </Section>
+            )}
 
-        {loadingWorkspaces && <LoadingText>Loading workspaces...</LoadingText>}
+            {isAuthenticated && githubWorkspaces.length > 0 && (
+              <Section>
+                <SectionHeader>
+                  <SectionTitle>GitHub</SectionTitle>
+                  <SectionMeta>
+                    {githubWorkspaces.length} repository workspace
+                    {githubWorkspaces.length === 1 ? '' : 's'}
+                  </SectionMeta>
+                </SectionHeader>
+                <WorkspaceList>
+                  {githubWorkspaces.map((workspace) => (
+                    <WorkspaceRow key={workspace.id} href={getWorkspaceHref(workspace)}>
+                      <WorkspaceIcon $variant='github'>
+                        <i className='ri-github-fill' />
+                      </WorkspaceIcon>
+                      <WorkspaceMain>
+                        <WorkspaceName>{workspace.name}</WorkspaceName>
+                        <WorkspacePath>{workspace.sourceUrl || workspace.slug}</WorkspacePath>
+                      </WorkspaceMain>
+                      <WorkspaceTags>
+                        <WorkspaceTag>GitHub</WorkspaceTag>
+                        <WorkspaceTag>{formatWorkspaceDate(workspace.updatedAt)}</WorkspaceTag>
+                      </WorkspaceTags>
+                      <DeleteButton
+                        onClick={(e) => {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          handleDeleteWorkspace(workspace.id)
+                        }}
+                        aria-label={`Delete ${workspace.name}`}
+                        title={`Delete ${workspace.name}`}
+                      >
+                        <i className='ri-delete-bin-line' />
+                      </DeleteButton>
+                    </WorkspaceRow>
+                  ))}
+                </WorkspaceList>
+              </Section>
+            )}
 
-        {isAuthenticated && !loadingWorkspaces && workspaces.length === 0 && (
-          <EmptyPanel>
-            <i className='ri-inbox-2-line' />
-            <span>No synced workspaces yet.</span>
-          </EmptyPanel>
-        )}
+            {loadingWorkspaces && <LoadingText>Loading workspaces...</LoadingText>}
+
+            {isAuthenticated && !loadingWorkspaces && workspaces.length === 0 && (
+              <EmptyPanel>
+                <i className='ri-inbox-2-line' />
+                <EmptyCopy>
+                  <EmptyTitle>No synced workspaces yet.</EmptyTitle>
+                  <EmptyTextLine>Import a GitHub repository when you are ready.</EmptyTextLine>
+                </EmptyCopy>
+              </EmptyPanel>
+            )}
+          </SectionStack>
+        </WorkspaceShell>
       </Content>
 
       {showImportModal && (
         <ModalOverlay onClick={() => setShowImportModal(false)}>
           <ModalContent onClick={(e) => e.stopPropagation()}>
             <ModalHeader>
-              <ModalTitle>Import GitHub Repository</ModalTitle>
-              <ModalClose onClick={() => setShowImportModal(false)} aria-label='Close'>
+              <ModalTitle>Import Workspace</ModalTitle>
+              <ModalClose
+                onClick={() => setShowImportModal(false)}
+                aria-label='Close'
+                title='Close'
+              >
                 <i className='ri-close-line' />
               </ModalClose>
             </ModalHeader>
             <ModalBody>
-              {loadingRepos && <LoadingText>Loading repositories...</LoadingText>}
-              {!loadingRepos && repos.length === 0 && (
-                <EmptyText>
-                  No GitHub repositories found.{' '}
-                  <Link href='/workspace/settings/github'>Configure GitHub token</Link>
-                </EmptyText>
+              {loadingGitHubConfig && <LoadingText>Checking GitHub configuration...</LoadingText>}
+
+              {!loadingGitHubConfig && githubConfigError && (
+                <ErrorPanel>
+                  <i className='ri-error-warning-line' />
+                  <span>{githubConfigError}</span>
+                </ErrorPanel>
               )}
-              <RepoList>
-                {repos.map((repo) => {
-                  const alreadyImported = workspaces.some(
-                    (w) => w.type === 'GITHUB' && w.sourceUrl?.includes(repo.full_name),
-                  )
-                  return (
-                    <RepoItem key={repo.id}>
+
+              {!loadingGitHubConfig && !githubConfigError && !githubConfig?.hasToken && (
+                <SetupPanel>
+                  <SetupIcon>
+                    <i className='ri-github-fill' />
+                  </SetupIcon>
+                  <SetupCopy>
+                    <SetupTitle>Connect GitHub first</SetupTitle>
+                    <SetupText>
+                      Add a GitHub Personal Access Token in personal settings before importing a
+                      repository workspace.
+                    </SetupText>
+                  </SetupCopy>
+                  <SetupLink href='/settings#github'>
+                    Configure Token
+                    <i className='ri-arrow-right-line' />
+                  </SetupLink>
+                </SetupPanel>
+              )}
+
+              {!loadingGitHubConfig && githubConfig?.hasToken && (
+                <ImportForm>
+                  <ImportField>
+                    <FieldLabel htmlFor='github-repo-select'>GitHub repository</FieldLabel>
+                    <RepoSelect
+                      id='github-repo-select'
+                      value={selectedRepoFullName}
+                      onChange={(e) => setSelectedRepoFullName(e.target.value)}
+                      disabled={loadingRepos || !!importingRepo}
+                    >
+                      <option value=''>
+                        {loadingRepos ? 'Loading repositories...' : 'Select a repository'}
+                      </option>
+                      {repos.map((repo) => (
+                        <option key={repo.id} value={repo.full_name}>
+                          {repo.full_name}
+                        </option>
+                      ))}
+                    </RepoSelect>
+                  </ImportField>
+
+                  {repoError && (
+                    <ErrorPanel>
+                      <i className='ri-error-warning-line' />
+                      <span>{repoError}</span>
+                    </ErrorPanel>
+                  )}
+
+                  {!loadingRepos && repos.length === 0 && !repoError && (
+                    <EmptyText>No GitHub repositories found.</EmptyText>
+                  )}
+
+                  {selectedRepo && (
+                    <SelectedRepoPanel>
                       <RepoInfo>
-                        <RepoName>{repo.full_name}</RepoName>
-                        {repo.description && <RepoDesc>{repo.description}</RepoDesc>}
+                        <RepoName>{selectedRepo.full_name}</RepoName>
+                        {selectedRepo.description && (
+                          <RepoDesc>{selectedRepo.description}</RepoDesc>
+                        )}
                         <RepoMeta>
-                          <RepoTag $private={repo.private}>
-                            {repo.private ? 'Private' : 'Public'}
+                          <RepoTag $private={selectedRepo.private}>
+                            {selectedRepo.private ? 'Private' : 'Public'}
                           </RepoTag>
+                          <RepoUpdated>
+                            Updated {new Date(selectedRepo.updated_at).toLocaleDateString()}
+                          </RepoUpdated>
                         </RepoMeta>
                       </RepoInfo>
-                      <RepoActions>
-                        {alreadyImported ? (
-                          <ImportedBadge>Imported</ImportedBadge>
-                        ) : (
-                          <ImportRepoButton
-                            onClick={() => handleImportRepo(repo)}
-                            disabled={!!importingRepo}
-                          >
-                            {importingRepo === repo.full_name ? 'Importing...' : 'Import'}
-                          </ImportRepoButton>
-                        )}
-                      </RepoActions>
-                    </RepoItem>
-                  )
-                })}
-              </RepoList>
+                    </SelectedRepoPanel>
+                  )}
+
+                  {selectedImportedWorkspace && (
+                    <NoticePanel>
+                      <i className='ri-checkbox-circle-line' />
+                      <span>This repository is already imported.</span>
+                      <ExistingWorkspaceLink href={getWorkspaceHref(selectedImportedWorkspace)}>
+                        Open
+                      </ExistingWorkspaceLink>
+                    </NoticePanel>
+                  )}
+
+                  <ModalActions>
+                    <ImportRepoButton
+                      onClick={() => selectedRepo && handleImportRepo(selectedRepo)}
+                      disabled={!selectedRepo || !!selectedImportedWorkspace || !!importingRepo}
+                    >
+                      {importingRepo === selectedRepo?.full_name
+                        ? 'Importing...'
+                        : 'Import Repository'}
+                    </ImportRepoButton>
+                  </ModalActions>
+                </ImportForm>
+              )}
             </ModalBody>
           </ModalContent>
         </ModalOverlay>
@@ -346,32 +479,63 @@ export default function WorkspaceListPage() {
   )
 }
 
+const workspacePalette = {
+  page: '#101012',
+  header: 'rgba(16, 16, 18, 0.96)',
+  surface: '#151518',
+  surfaceRaised: '#1a1b1f',
+  surfaceMuted: '#121214',
+  line: 'rgba(232, 230, 227, 0.10)',
+  lineStrong: 'rgba(232, 230, 227, 0.16)',
+  text: '#ececea',
+  textMuted: '#a0a09c',
+  textFaint: '#777873',
+  accent: '#d4564a',
+  accentHover: '#e06357',
+  accentSoft: 'rgba(212, 86, 74, 0.14)',
+  danger: '#ff6b64',
+  success: '#73c991',
+}
+
 const Container = styled.div`
-  display: flex;
-  flex-direction: column;
   min-height: 100vh;
-  background: ${(props) => props.theme.bgColor};
-  color: ${(props) => props.theme.primaryFontColor};
+  background: ${workspacePalette.page};
+  color: ${workspacePalette.text};
   font-family: ${(props) => props.theme.fontFamily};
 `
 
-const Header = styled.div`
+const Header = styled.header`
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  border-bottom: 1px solid ${workspacePalette.line};
+  background: ${workspacePalette.header};
+  backdrop-filter: blur(${rem(18)});
+`
+
+const HeaderInner = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: ${rem(52)};
-  padding: 0 ${rem(16)};
-  border-bottom: 1px solid ${(props) => props.theme.borderColor};
-  border-top: 1px solid ${(props) => props.theme.borderColor};
-  background: ${(props) => props.theme.titleBarBgColor};
-  flex-shrink: 0;
-  gap: ${rem(16)};
+  width: 100%;
+  max-width: ${rem(1180)};
+  min-height: ${rem(78)};
+  margin: 0 auto;
+  padding: 0 ${rem(28)};
+  gap: ${rem(18)};
+
+  @media (max-width: 720px) {
+    align-items: stretch;
+    flex-direction: column;
+    min-height: auto;
+    padding: ${rem(16)} ${rem(14)};
+  }
 `
 
 const HeaderLeft = styled.div`
   display: flex;
   align-items: center;
-  gap: ${rem(10)};
+  gap: ${rem(12)};
   min-width: 0;
 `
 
@@ -379,13 +543,14 @@ const ProductMark = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  width: ${rem(28)};
-  height: ${rem(28)};
-  color: ${(props) => props.theme.accentColor};
-  background: ${(props) => props.theme.buttonBgColor};
-  border: 1px solid ${(props) => props.theme.borderColor};
-  border-radius: ${(props) => props.theme.smallBorderRadius};
+  width: ${rem(36)};
+  height: ${rem(36)};
+  color: ${workspacePalette.accent};
+  background: ${workspacePalette.surfaceRaised};
+  border: 1px solid ${workspacePalette.lineStrong};
+  border-radius: ${rem(8)};
   flex: 0 0 auto;
+  font-size: ${rem(19)};
 `
 
 const HeaderCopy = styled.div`
@@ -393,16 +558,17 @@ const HeaderCopy = styled.div`
 `
 
 const Title = styled.h1`
-  font-size: ${(props) => props.theme.fontBase};
-  font-weight: 600;
-  line-height: 1.35;
+  font-size: ${rem(24)};
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0;
   margin: 0;
 `
 
 const Subtitle = styled.p`
-  font-size: ${(props) => props.theme.fontXs};
-  color: ${(props) => props.theme.disabledFontColor};
-  margin: 0;
+  font-size: ${rem(13)};
+  color: ${workspacePalette.textMuted};
+  margin: ${rem(3)} 0 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -411,23 +577,28 @@ const Subtitle = styled.p`
 const HeaderRight = styled.div`
   display: flex;
   align-items: center;
-  gap: ${rem(8)};
+  gap: ${rem(10)};
   flex-shrink: 0;
+
+  @media (max-width: 720px) {
+    width: 100%;
+  }
 `
 
 const SettingsLink = styled(Link)`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: ${rem(6)};
-  height: ${rem(28)};
-  padding: 0 ${rem(10)};
-  background: ${(props) => props.theme.buttonBgColor};
-  border: 1px solid ${(props) => props.theme.borderColor};
-  border-radius: ${(props) => props.theme.smallBorderRadius};
-  font-size: ${(props) => props.theme.fontSm};
-  font-weight: 500;
-  color: ${(props) => props.theme.primaryFontColor};
+  gap: ${rem(7)};
+  min-width: ${rem(110)};
+  height: ${rem(36)};
+  padding: 0 ${rem(13)};
+  background: ${workspacePalette.surfaceRaised};
+  border: 1px solid ${workspacePalette.lineStrong};
+  border-radius: ${rem(7)};
+  font-size: ${rem(14)};
+  font-weight: 600;
+  color: ${workspacePalette.text};
   text-decoration: none;
   transition:
     background-color 0.16s ease,
@@ -436,9 +607,18 @@ const SettingsLink = styled(Link)`
   white-space: nowrap;
 
   &:hover {
-    color: ${(props) => props.theme.accentColor};
-    background: ${(props) => props.theme.hoverColor};
-    border-color: ${(props) => props.theme.borderColorFocused};
+    background: #202127;
+    border-color: rgba(232, 230, 227, 0.22);
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${workspacePalette.accent};
+    outline-offset: 2px;
+  }
+
+  @media (max-width: 720px) {
+    flex: 1;
+    min-width: 0;
   }
 `
 
@@ -446,35 +626,57 @@ const ImportButton = styled.button`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: ${rem(6)};
-  height: ${rem(28)};
-  padding: 0 ${rem(10)};
-  background: ${(props) => props.theme.accentColor};
-  border: 1px solid ${(props) => props.theme.accentColor};
-  border-radius: ${(props) => props.theme.smallBorderRadius};
-  font-size: ${(props) => props.theme.fontSm};
-  font-weight: 500;
+  gap: ${rem(7)};
+  min-width: ${rem(164)};
+  height: ${rem(36)};
+  padding: 0 ${rem(15)};
+  background: ${workspacePalette.accent};
+  border: 1px solid ${workspacePalette.accent};
+  border-radius: ${rem(7)};
+  font-size: ${rem(14)};
+  font-weight: 700;
   color: #ffffff;
   cursor: pointer;
   transition:
-    opacity 0.16s ease,
-    transform 0.16s ease;
+    background-color 0.16s ease,
+    border-color 0.16s ease;
   white-space: nowrap;
 
   &:hover {
-    opacity: 0.9;
+    background: ${workspacePalette.accentHover};
+    border-color: ${workspacePalette.accentHover};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${workspacePalette.accent};
+    outline-offset: 2px;
+  }
+
+  @media (max-width: 720px) {
+    flex: 1.2;
+    min-width: 0;
   }
 `
 
-const Content = styled.div`
+const Content = styled.main`
   width: 100%;
-  max-width: ${rem(1080)};
-  padding: ${rem(20)} ${rem(24)} ${rem(28)};
-  overflow: auto;
+  max-width: ${rem(1180)};
+  margin: 0 auto;
+  padding: ${rem(28)} ${rem(28)} ${rem(44)};
 
   @media (max-width: 720px) {
-    padding: ${rem(16)} ${rem(12)} ${rem(24)};
+    padding: ${rem(18)} ${rem(14)} ${rem(28)};
   }
+`
+
+const WorkspaceShell = styled.div`
+  min-width: 0;
+`
+
+const SectionStack = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${rem(14)};
 `
 
 const LoadingContainer = styled.div`
@@ -482,14 +684,14 @@ const LoadingContainer = styled.div`
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: ${(props) => props.theme.bgColor};
+  background: ${workspacePalette.page};
 `
 
 const LoadingSpinner = styled.div`
   width: ${rem(40)};
   height: ${rem(40)};
   border: 3px solid rgba(255, 255, 255, 0.1);
-  border-top-color: #d4564a;
+  border-top-color: ${workspacePalette.accent};
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 
@@ -501,34 +703,34 @@ const LoadingSpinner = styled.div`
 `
 
 const Section = styled.section`
-  border: 1px solid ${(props) => props.theme.borderColor};
-  background: ${(props) => props.theme.bgColorSecondary};
-  border-radius: ${(props) => props.theme.midBorderRadius};
+  border: 1px solid ${workspacePalette.line};
+  background: ${workspacePalette.surface};
+  border-radius: ${rem(8)};
   overflow: hidden;
-  margin-bottom: ${rem(16)};
 `
 
 const SectionHeader = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: ${rem(36)};
-  padding: 0 ${rem(12)};
-  border-bottom: 1px solid ${(props) => props.theme.borderColor};
-  background: ${(props) => props.theme.sideBarHeaderBgColor};
+  min-height: ${rem(46)};
+  padding: 0 ${rem(16)};
+  border-bottom: 1px solid ${workspacePalette.line};
+  background: ${workspacePalette.surfaceMuted};
   gap: ${rem(10)};
 `
 
 const SectionTitle = styled.h2`
-  font-size: ${(props) => props.theme.fontSm};
-  font-weight: 600;
+  font-size: ${rem(14)};
+  font-weight: 700;
+  line-height: 1.35;
   margin: 0;
-  color: ${(props) => props.theme.primaryFontColor};
+  color: ${workspacePalette.text};
 `
 
 const SectionMeta = styled.span`
-  font-size: ${(props) => props.theme.fontXs};
-  color: ${(props) => props.theme.disabledFontColor};
+  font-size: ${rem(12)};
+  color: ${workspacePalette.textFaint};
   white-space: nowrap;
 `
 
@@ -539,44 +741,51 @@ const WorkspaceList = styled.div`
 
 const WorkspaceRow = styled(Link)`
   display: grid;
-  grid-template-columns: ${rem(32)} minmax(0, 1fr) auto ${rem(24)};
+  grid-template-columns: ${rem(38)} minmax(0, 1fr) auto ${rem(32)};
   align-items: center;
-  gap: ${rem(10)};
-  min-height: ${rem(56)};
-  padding: ${rem(8)} ${rem(10)};
+  gap: ${rem(12)};
+  min-height: ${rem(66)};
+  padding: ${rem(12)} ${rem(14)};
   color: inherit;
   text-decoration: none;
-  border-bottom: 1px solid ${(props) => props.theme.borderColor};
+  border-bottom: 1px solid ${workspacePalette.line};
   transition:
     background-color 0.16s ease,
-    color 0.16s ease;
+    border-color 0.16s ease;
 
   &:last-child {
     border-bottom: 0;
   }
 
   &:hover {
-    background: ${(props) => props.theme.hoverColor};
+    background: ${workspacePalette.surfaceRaised};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${workspacePalette.accent};
+    outline-offset: -2px;
   }
 
   @media (max-width: 720px) {
-    grid-template-columns: ${rem(32)} minmax(0, 1fr) ${rem(24)};
+    grid-template-columns: ${rem(38)} minmax(0, 1fr) ${rem(32)};
+    gap: ${rem(10)};
   }
 `
 
 const WorkspaceIcon = styled.div<{ $variant: 'demo' | 'local' | 'github' }>`
-  width: ${rem(32)};
-  height: ${rem(32)};
+  width: ${rem(38)};
+  height: ${rem(38)};
   display: flex;
   align-items: center;
   justify-content: center;
-  background: ${(props) =>
-    props.$variant === 'github' ? props.theme.buttonBgColor : props.theme.accentColorFocused};
-  border: 1px solid ${(props) => props.theme.borderColor};
-  border-radius: ${(props) => props.theme.smallBorderRadius};
+  background: ${(props) => (props.$variant === 'github' ? '#0f1012' : workspacePalette.accentSoft)};
+  border: 1px solid
+    ${(props) =>
+      props.$variant === 'github' ? 'rgba(232, 230, 227, 0.14)' : 'rgba(212, 86, 74, 0.28)'};
+  border-radius: ${rem(8)};
   color: ${(props) =>
-    props.$variant === 'github' ? props.theme.primaryFontColor : props.theme.accentColor};
-  font-size: ${rem(16)};
+    props.$variant === 'github' ? workspacePalette.text : workspacePalette.accent};
+  font-size: ${rem(18)};
   flex-shrink: 0;
 `
 
@@ -585,8 +794,8 @@ const WorkspaceMain = styled.div`
 `
 
 const WorkspaceName = styled.div`
-  font-size: ${(props) => props.theme.fontSm};
-  font-weight: 600;
+  font-size: ${rem(14)};
+  font-weight: 700;
   line-height: 1.35;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -594,8 +803,9 @@ const WorkspaceName = styled.div`
 `
 
 const WorkspacePath = styled.div`
-  color: ${(props) => props.theme.disabledFontColor};
-  font-size: ${(props) => props.theme.fontXs};
+  margin-top: ${rem(2)};
+  color: ${workspacePalette.textMuted};
+  font-size: ${rem(13)};
   line-height: 1.35;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -617,42 +827,70 @@ const WorkspaceTags = styled.div`
 const WorkspaceTag = styled.span`
   display: inline-flex;
   align-items: center;
-  min-height: ${rem(22)};
+  min-height: ${rem(24)};
   padding: 0 ${rem(8)};
-  background: ${(props) => props.theme.bgColor};
-  border: 1px solid ${(props) => props.theme.borderColor};
-  color: ${(props) => props.theme.disabledFontColor};
-  font-size: ${(props) => props.theme.fontXs};
-  border-radius: ${(props) => props.theme.smallBorderRadius};
+  background: #101012;
+  border: 1px solid ${workspacePalette.line};
+  color: ${workspacePalette.textMuted};
+  font-size: ${rem(12)};
+  font-weight: 600;
+  border-radius: ${rem(6)};
   white-space: nowrap;
 `
 
 const EmptyText = styled.div`
   font-size: ${rem(14)};
-  color: ${(props) => props.theme.disabledFontColor};
+  color: ${workspacePalette.textMuted};
   text-align: center;
-  padding: ${rem(20)} 0;
+  padding: ${rem(22)} 0;
 `
 
 const EmptyPanel = styled.div`
   display: flex;
   align-items: center;
-  gap: ${rem(8)};
-  min-height: ${rem(44)};
-  padding: 0 ${rem(12)};
-  border: 1px dashed ${(props) => props.theme.borderColor};
-  border-radius: ${(props) => props.theme.midBorderRadius};
-  color: ${(props) => props.theme.disabledFontColor};
-  font-size: ${(props) => props.theme.fontSm};
+  gap: ${rem(12)};
+  min-height: ${rem(72)};
+  padding: ${rem(16)};
+  border: 1px dashed ${workspacePalette.lineStrong};
+  border-radius: ${rem(8)};
+  background: ${workspacePalette.surfaceMuted};
+  color: ${workspacePalette.textMuted};
 
   i {
-    font-size: ${rem(16)};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: ${rem(36)};
+    height: ${rem(36)};
+    border: 1px solid ${workspacePalette.line};
+    border-radius: ${rem(8)};
+    color: ${workspacePalette.textFaint};
+    font-size: ${rem(18)};
+    flex: 0 0 auto;
   }
 `
 
+const EmptyCopy = styled.div`
+  min-width: 0;
+`
+
+const EmptyTitle = styled.div`
+  color: ${workspacePalette.text};
+  font-size: ${rem(14)};
+  font-weight: 700;
+  line-height: 1.35;
+`
+
+const EmptyTextLine = styled.div`
+  margin-top: ${rem(2)};
+  color: ${workspacePalette.textMuted};
+  font-size: ${rem(13)};
+  line-height: 1.45;
+`
+
 const OpenIndicator = styled.i`
-  color: ${(props) => props.theme.disabledFontColor};
-  font-size: ${rem(18)};
+  color: ${workspacePalette.textFaint};
+  font-size: ${rem(20)};
   justify-self: center;
 `
 
@@ -660,12 +898,12 @@ const DeleteButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  width: ${rem(24)};
-  height: ${rem(24)};
+  width: ${rem(30)};
+  height: ${rem(30)};
   background: transparent;
-  border: 1px solid ${(props) => props.theme.borderColor};
-  border-radius: ${(props) => props.theme.smallBorderRadius};
-  color: ${(props) => props.theme.disabledFontColor};
+  border: 1px solid transparent;
+  border-radius: ${rem(7)};
+  color: ${workspacePalette.textFaint};
   cursor: pointer;
   transition:
     background-color 0.16s ease,
@@ -674,90 +912,145 @@ const DeleteButton = styled.button`
   justify-self: center;
 
   &:hover {
-    background: rgba(255, 77, 79, 0.1);
-    border-color: rgba(255, 77, 79, 0.3);
-    color: #ff4d4f;
+    background: rgba(255, 107, 100, 0.1);
+    border-color: rgba(255, 107, 100, 0.28);
+    color: ${workspacePalette.danger};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${workspacePalette.danger};
+    outline-offset: 2px;
   }
 `
 
 const ModalOverlay = styled.div`
   position: fixed;
   inset: 0;
-  background: ${(props) => props.theme.dialogBackdropColor};
+  background: rgba(0, 0, 0, 0.68);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  padding: ${rem(16)};
+  padding: ${rem(18)};
+  backdrop-filter: blur(${rem(10)});
 `
 
 const ModalContent = styled.div`
-  background: ${(props) => props.theme.dialogBgColor};
-  border: 1px solid ${(props) => props.theme.borderColor};
-  border-radius: ${(props) => props.theme.midBorderRadius};
+  background: ${workspacePalette.surface};
+  border: 1px solid ${workspacePalette.lineStrong};
+  border-radius: ${rem(8)};
   width: 100%;
-  max-width: ${rem(680)};
-  max-height: 80vh;
+  max-width: ${rem(700)};
+  max-height: 84vh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  box-shadow: 0 ${rem(24)} ${rem(70)} rgba(0, 0, 0, 0.42);
 `
 
 const ModalHeader = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: ${rem(40)};
-  padding: 0 ${rem(12)};
-  border-bottom: 1px solid ${(props) => props.theme.borderColor};
-  background: ${(props) => props.theme.sideBarHeaderBgColor};
+  min-height: ${rem(54)};
+  padding: 0 ${rem(18)};
+  border-bottom: 1px solid ${workspacePalette.line};
+  background: ${workspacePalette.surfaceMuted};
 `
 
 const ModalTitle = styled.h3`
-  font-size: ${(props) => props.theme.fontSm};
-  font-weight: 600;
+  font-size: ${rem(16)};
+  font-weight: 700;
   margin: 0;
 `
 
 const ModalClose = styled.button`
-  background: none;
-  border: none;
-  width: ${rem(24)};
-  height: ${rem(24)};
+  background: transparent;
+  border: 1px solid transparent;
+  width: ${rem(30)};
+  height: ${rem(30)};
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: ${(props) => props.theme.smallBorderRadius};
-  font-size: ${rem(16)};
-  color: ${(props) => props.theme.disabledFontColor};
+  border-radius: ${rem(7)};
+  font-size: ${rem(18)};
+  color: ${workspacePalette.textMuted};
   cursor: pointer;
   line-height: 1;
+  transition:
+    background-color 0.16s ease,
+    border-color 0.16s ease,
+    color 0.16s ease;
 
   &:hover {
-    color: ${(props) => props.theme.primaryFontColor};
+    background: ${workspacePalette.surfaceRaised};
+    border-color: ${workspacePalette.line};
+    color: ${workspacePalette.text};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${workspacePalette.accent};
+    outline-offset: 2px;
   }
 `
 
 const ModalBody = styled.div`
-  padding: ${rem(12)};
+  padding: ${rem(18)};
   overflow-y: auto;
   flex: 1;
 `
 
-const RepoList = styled.div`
+const ImportForm = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${rem(8)};
+  gap: ${rem(14)};
 `
 
-const RepoItem = styled.div`
+const ImportField = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${rem(7)};
+`
+
+const FieldLabel = styled.label`
+  font-size: ${rem(12)};
+  font-weight: 700;
+  color: ${workspacePalette.textMuted};
+`
+
+const RepoSelect = styled.select`
+  width: 100%;
+  min-height: ${rem(38)};
+  padding: 0 ${rem(12)};
+  background: ${workspacePalette.surfaceMuted};
+  border: 1px solid ${workspacePalette.lineStrong};
+  border-radius: ${rem(7)};
+  color: ${workspacePalette.text};
+  font-size: ${rem(14)};
+  outline: none;
+  cursor: pointer;
+  transition:
+    border-color 0.16s ease,
+    background-color 0.16s ease;
+
+  &:focus {
+    border-color: ${workspacePalette.accent};
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+`
+
+const SelectedRepoPanel = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: ${rem(10)} ${rem(12)};
-  background: ${(props) => props.theme.bgColor};
-  border: 1px solid ${(props) => props.theme.borderColor};
-  border-radius: ${(props) => props.theme.smallBorderRadius};
+  padding: ${rem(12)} ${rem(14)};
+  background: ${workspacePalette.surfaceMuted};
+  border: 1px solid ${workspacePalette.line};
+  border-radius: ${rem(8)};
   gap: ${rem(12)};
 `
 
@@ -767,15 +1060,18 @@ const RepoInfo = styled.div`
 `
 
 const RepoName = styled.div`
-  font-size: ${(props) => props.theme.fontSm};
-  font-weight: 600;
+  font-size: ${rem(14)};
+  font-weight: 700;
   margin-bottom: ${rem(4)};
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `
 
 const RepoDesc = styled.div`
-  font-size: ${(props) => props.theme.fontXs};
-  color: ${(props) => props.theme.disabledFontColor};
-  margin-bottom: ${rem(4)};
+  font-size: ${rem(13)};
+  color: ${workspacePalette.textMuted};
+  margin-bottom: ${rem(6)};
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -783,64 +1079,186 @@ const RepoDesc = styled.div`
 
 const RepoMeta = styled.div`
   display: flex;
+  align-items: center;
   gap: ${rem(8)};
+  min-width: 0;
 `
 
 const RepoTag = styled.span<{ $private: boolean }>`
   display: inline-flex;
   align-items: center;
-  padding: ${rem(2)} ${rem(8)};
-  background: ${(props) => (props.$private ? 'rgba(255, 77, 79, 0.1)' : 'rgba(82, 196, 26, 0.1)')};
+  min-height: ${rem(22)};
+  padding: 0 ${rem(8)};
+  background: ${(props) =>
+    props.$private ? 'rgba(255, 107, 100, 0.11)' : 'rgba(115, 201, 145, 0.11)'};
   border: 1px solid
-    ${(props) => (props.$private ? 'rgba(255, 77, 79, 0.2)' : 'rgba(82, 196, 26, 0.2)')};
-  color: ${(props) => (props.$private ? '#ff4d4f' : '#52c41a')};
-  font-size: ${(props) => props.theme.fontXs};
-  border-radius: ${(props) => props.theme.smallBorderRadius};
+    ${(props) => (props.$private ? 'rgba(255, 107, 100, 0.24)' : 'rgba(115, 201, 145, 0.24)')};
+  color: ${(props) => (props.$private ? workspacePalette.danger : workspacePalette.success)};
+  font-size: ${rem(12)};
+  font-weight: 700;
+  border-radius: ${rem(6)};
 `
 
-const RepoActions = styled.div`
+const RepoUpdated = styled.span`
+  font-size: ${rem(12)};
+  color: ${workspacePalette.textFaint};
+  white-space: nowrap;
+`
+
+const ModalActions = styled.div`
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: ${rem(8)};
 `
 
 const ImportRepoButton = styled.button`
-  min-height: ${rem(26)};
-  padding: 0 ${rem(12)};
-  background: ${(props) => props.theme.accentColor};
-  border: 1px solid ${(props) => props.theme.accentColor};
-  border-radius: ${(props) => props.theme.smallBorderRadius};
-  font-size: ${(props) => props.theme.fontSm};
-  font-weight: 500;
+  min-height: ${rem(36)};
+  padding: 0 ${rem(15)};
+  background: ${workspacePalette.accent};
+  border: 1px solid ${workspacePalette.accent};
+  border-radius: ${rem(7)};
+  font-size: ${rem(14)};
+  font-weight: 700;
   color: #ffffff;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition:
+    background-color 0.16s ease,
+    border-color 0.16s ease,
+    opacity 0.16s ease;
 
   &:hover:not(:disabled) {
-    background: #b8453c;
+    background: ${workspacePalette.accentHover};
+    border-color: ${workspacePalette.accentHover};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${workspacePalette.accent};
+    outline-offset: 2px;
   }
 
   &:disabled {
-    opacity: 0.6;
+    opacity: 0.58;
     cursor: not-allowed;
   }
 `
 
-const ImportedBadge = styled.span`
+const SetupPanel = styled.div`
+  display: grid;
+  grid-template-columns: ${rem(38)} minmax(0, 1fr) auto;
+  align-items: center;
+  gap: ${rem(13)};
+  padding: ${rem(14)};
+  background: ${workspacePalette.surfaceMuted};
+  border: 1px solid ${workspacePalette.line};
+  border-radius: ${rem(8)};
+
+  @media (max-width: 640px) {
+    grid-template-columns: ${rem(38)} minmax(0, 1fr);
+  }
+`
+
+const SetupIcon = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: ${rem(38)};
+  height: ${rem(38)};
+  background: #0f1012;
+  border: 1px solid ${workspacePalette.lineStrong};
+  border-radius: ${rem(8)};
+  color: ${workspacePalette.text};
+  font-size: ${rem(19)};
+`
+
+const SetupCopy = styled.div`
+  min-width: 0;
+`
+
+const SetupTitle = styled.div`
+  font-size: ${rem(14)};
+  font-weight: 700;
+  line-height: 1.35;
+`
+
+const SetupText = styled.div`
+  margin-top: ${rem(3)};
+  font-size: ${rem(13)};
+  color: ${workspacePalette.textMuted};
+  line-height: 1.5;
+`
+
+const SetupLink = styled(Link)`
   display: inline-flex;
   align-items: center;
-  min-height: ${rem(26)};
-  padding: 0 ${rem(12)};
-  background: ${(props) => props.theme.bgColor};
-  border: 1px solid ${(props) => props.theme.borderColor};
-  border-radius: ${(props) => props.theme.smallBorderRadius};
-  font-size: ${(props) => props.theme.fontSm};
-  color: ${(props) => props.theme.disabledFontColor};
+  justify-content: center;
+  gap: ${rem(6)};
+  min-height: ${rem(34)};
+  padding: 0 ${rem(13)};
+  background: ${workspacePalette.accent};
+  border: 1px solid ${workspacePalette.accent};
+  border-radius: ${rem(7)};
+  color: #ffffff;
+  font-size: ${rem(14)};
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+
+  &:hover {
+    background: ${workspacePalette.accentHover};
+    border-color: ${workspacePalette.accentHover};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${workspacePalette.accent};
+    outline-offset: 2px;
+  }
+
+  @media (max-width: 640px) {
+    grid-column: 1 / -1;
+  }
+`
+
+const ErrorPanel = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${rem(8)};
+  min-height: ${rem(38)};
+  padding: ${rem(9)} ${rem(11)};
+  background: rgba(255, 107, 100, 0.1);
+  border: 1px solid rgba(255, 107, 100, 0.24);
+  border-radius: ${rem(8)};
+  color: ${workspacePalette.danger};
+  font-size: ${rem(14)};
+`
+
+const NoticePanel = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${rem(8)};
+  min-height: ${rem(38)};
+  padding: ${rem(9)} ${rem(11)};
+  background: rgba(115, 201, 145, 0.1);
+  border: 1px solid rgba(115, 201, 145, 0.24);
+  border-radius: ${rem(8)};
+  color: ${workspacePalette.success};
+  font-size: ${rem(14)};
+`
+
+const ExistingWorkspaceLink = styled(Link)`
+  margin-left: auto;
+  color: inherit;
+  font-weight: 700;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
 `
 
 const LoadingText = styled.div`
-  font-size: ${(props) => props.theme.fontSm};
-  color: ${(props) => props.theme.disabledFontColor};
+  font-size: ${rem(14)};
+  color: ${workspacePalette.textMuted};
   text-align: center;
-  padding: ${rem(16)} 0;
+  padding: ${rem(18)} 0;
 `

@@ -2,7 +2,7 @@ import { ContextMenu, FileTree, SideBarHeader, TableOfContents } from '@markflow
 import { FileTreeProvider, WebFileSystemProvider } from 'adapters'
 import { EditorToolbar } from 'components/workspace/EditorToolbar'
 import { FillFlexParent } from 'components/FillFlexParent'
-import { useWorkspaceState } from 'hooks/useWorkspaceState'
+import { normalizeWorkspaceIdParam, useWorkspaceState } from 'hooks/useWorkspaceState'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -11,7 +11,7 @@ import { Group, Panel, Separator } from 'react-resizable-panels'
 import styled from 'styled-components'
 import rem from 'utils/rem'
 
-const Editor = dynamic(() => import('components/Editor'), {
+const Editor = dynamic(() => import('components/Editor').then((mod) => mod.default), {
   ssr: false,
   loading: () => (
     <LoadingContainer>
@@ -20,9 +20,24 @@ const Editor = dynamic(() => import('components/Editor'), {
   ),
 })
 
+const WorkspaceDetailCSRPage = dynamic(() => Promise.resolve(WorkspaceDetailPageContent), {
+  ssr: false,
+  loading: () => (
+    <Container>
+      <LoadingContainer>
+        <LoadingSpinner />
+      </LoadingContainer>
+    </Container>
+  ),
+})
+
 export default function WorkspaceDetailPage() {
+  return <WorkspaceDetailCSRPage />
+}
+
+function WorkspaceDetailPageContent() {
   const router = useRouter()
-  const { id } = router.query as { id: string }
+  const id = normalizeWorkspaceIdParam(router.query.id)
 
   const {
     authLoading,

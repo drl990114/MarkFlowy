@@ -23,9 +23,18 @@ type Contributor = {
   html_url: string
 }
 
-const Editor = dynamic(() => import('../components/Editor'), {
+const Editor = dynamic(() => import('../components/Editor').then((mod) => mod.default), {
   ssr: false,
   loading: () => <EditorLoading />,
+})
+
+const HomeEditorPreview = dynamic(() => Promise.resolve(HomeEditorPreviewContent), {
+  ssr: false,
+  loading: () => (
+    <MacWindow>
+      <EditorLoading />
+    </MacWindow>
+  ),
 })
 
 const WIRE_ITEMS_ROW_A = [
@@ -48,8 +57,6 @@ export default function Index({
   const checkingAuth = useRedirectIfAuthenticated()
   const { t } = useTranslation()
   const [isMobileNavFolded, setIsMobileNavFolded] = React.useState(true)
-  const [activeTab, setActiveTab] = React.useState<'wysiwyg' | 'source'>('wysiwyg')
-  const { markdownContent, jsonContent } = useMockFiles()
   const systemType = useSystemType()
 
   if (checkingAuth) {
@@ -158,46 +165,7 @@ export default function Index({
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ duration: 0.8, delay: 0.15, ease: [0.22, 0.61, 0.36, 1] }}
             >
-              <MacWindow>
-                <MacTitleBar>
-                  <MacButtons>
-                    <MacButton $red />
-                    <MacButton $yellow />
-                    <MacButton $green />
-                  </MacButtons>
-                  <MacTitle>MarkFlowy</MacTitle>
-                </MacTitleBar>
-                <EditorTabs>
-                  <EditorTab
-                    $active={activeTab === 'wysiwyg'}
-                    onClick={() => setActiveTab('wysiwyg')}
-                  >
-                    README.md
-                  </EditorTab>
-                  <EditorTab
-                    $active={activeTab === 'source'}
-                    onClick={() => setActiveTab('source')}
-                  >
-                    config.json
-                  </EditorTab>
-                </EditorTabs>
-                <EditorWrapper $visible={activeTab === 'wysiwyg'}>
-                  <Editor
-                    fileId='home-markdown'
-                    key={`${i18n?.language}_wysiwyg`}
-                    viewType='wysiwyg'
-                    initialContent={markdownContent}
-                  />
-                </EditorWrapper>
-                <SourceEditorWrapper $visible={activeTab === 'source'}>
-                  <Editor
-                    fileId='home-json'
-                    key={`${i18n?.language}_source_code`}
-                    viewType='source_code'
-                    initialContent={jsonContent}
-                  />
-                </SourceEditorWrapper>
-              </MacWindow>
+              <HomeEditorPreview />
             </HeroRight>
           </HeroGrid>
         </HeroSection>
@@ -339,6 +307,54 @@ export default function Index({
         </Footer>
       </PageLayout>
     </>
+  )
+}
+
+function HomeEditorPreviewContent() {
+  const [activeTab, setActiveTab] = React.useState<'wysiwyg' | 'source'>('wysiwyg')
+  const { markdownContent, jsonContent } = useMockFiles()
+
+  return (
+    <MacWindow>
+      <MacTitleBar>
+        <MacButtons>
+          <MacButton $red />
+          <MacButton $yellow />
+          <MacButton $green />
+        </MacButtons>
+        <MacTitle>MarkFlowy</MacTitle>
+      </MacTitleBar>
+      <EditorTabs>
+        <EditorTab
+          $active={activeTab === 'wysiwyg'}
+          onClick={() => setActiveTab('wysiwyg')}
+        >
+          README.md
+        </EditorTab>
+        <EditorTab
+          $active={activeTab === 'source'}
+          onClick={() => setActiveTab('source')}
+        >
+          config.json
+        </EditorTab>
+      </EditorTabs>
+      <EditorWrapper $visible={activeTab === 'wysiwyg'}>
+        <Editor
+          fileId='home-markdown'
+          key={`${i18n?.language}_wysiwyg`}
+          viewType='wysiwyg'
+          initialContent={markdownContent}
+        />
+      </EditorWrapper>
+      <SourceEditorWrapper $visible={activeTab === 'source'}>
+        <Editor
+          fileId='home-json'
+          key={`${i18n?.language}_source_code`}
+          viewType='source_code'
+          initialContent={jsonContent}
+        />
+      </SourceEditorWrapper>
+    </MacWindow>
   )
 }
 

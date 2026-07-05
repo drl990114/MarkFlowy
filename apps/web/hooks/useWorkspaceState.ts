@@ -13,6 +13,13 @@ export interface FileState {
   isDirty: boolean
 }
 
+export function normalizeWorkspaceIdParam(id?: string | string[]) {
+  if (Array.isArray(id)) {
+    return id.filter(Boolean).join('/')
+  }
+  return id || ''
+}
+
 const extractHeadingsForFile = (content: string, fileId: string): IHeadingData[] => {
   const headingRegex = /^(#{1,6})\s+(.+)$/gm
   const headings: IHeadingData[] = []
@@ -41,7 +48,7 @@ const extractHeadingsForFile = (content: string, fileId: string): IHeadingData[]
 }
 
 export function useWorkspaceState(id: string) {
-  const { loading: authLoading, isAuthenticated } = useAuth(true)
+  const { loading: authLoading, isAuthenticated } = useAuth(false)
 
   const [adapter, setAdapter] = useState<WorkspaceAdapter | null>(null)
   const [viewType, setViewType] = useState<ViewType>('wysiwyg')
@@ -102,8 +109,17 @@ export function useWorkspaceState(id: string) {
 
   useEffect(() => {
     if (!adapter) return
+    if (adapter.requiresAuth && authLoading) return
+
+    if (adapter.requiresAuth && !isAuthenticated) {
+      setError('Sign in to open this workspace.')
+      setLoadingTree(false)
+      setLoadingFile(false)
+      return
+    }
 
     if (adapter.type === 'local') {
+      setError('')
       adapter.loadTree().then((files) => {
         setFolderData(files)
         const firstFile = findFirstFile(files)
@@ -118,8 +134,6 @@ export function useWorkspaceState(id: string) {
       })
       return
     }
-
-    if (adapter.type === 'github' && !isAuthenticated) return
 
     const load = async () => {
       setLoadingTree(true)
@@ -143,7 +157,7 @@ export function useWorkspaceState(id: string) {
     }
 
     load()
-  }, [adapter, isAuthenticated, findFirstFile, currentBranch])
+  }, [adapter, authLoading, isAuthenticated, findFirstFile, currentBranch])
 
   const getFileObject = useCallback((id: string): IFile | undefined => {
     const findInFolder = (items: IFile[]): IFile | undefined => {

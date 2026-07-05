@@ -5,6 +5,7 @@ import { apiClient } from '../utils/apiClient'
 export interface WorkspaceAdapter {
   type: string
   title: string
+  requiresAuth?: boolean
   loadTree(): Promise<IFile[]>
   loadFileContent(file: IFile): Promise<{ content: string; sha?: string }>
   saveFileContent?(file: IFile, content: string, options?: Record<string, any>): Promise<any>
@@ -138,6 +139,7 @@ export function createLocalAdapter(): WorkspaceAdapter {
   return {
     type: 'local',
     title: 'Demo Workspace',
+    requiresAuth: false,
     async loadTree() {
       return mockFolderData
     },
@@ -153,6 +155,7 @@ export function createGitHubAdapter(owner: string, repo: string, branch: string 
   return {
     type: 'github',
     title: `${owner} / ${repo}`,
+    requiresAuth: true,
     async loadTree() {
       return githubService.loadRepoTree(owner, repo, currentBranch, false)
     },
