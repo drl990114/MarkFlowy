@@ -1,5 +1,38 @@
 # UPDATE LOG
 
+## v0.82.1
+
+Features:
+
+- Support quick date insertion in the editor via mod + ;
+
+- Added install-linux.sh script for easier downloading.
+
+Fixes:
+
+- Optimized table overflow styles.
+
+- Fixed theme changes following the system settings.
+
+- Fixed image export issues.
+
+---
+
+特性：
+
+- editor 支持快速插入日期，通过 mod + ;
+
+- 新增 install-linux.sh 脚本，更方便下载。
+
+修复：
+
+- 优化表格溢出的样式
+
+- 修复跟随系统的主题变化
+
+- 修复图片导出问题
+
+
 ## v0.82.0
 
 Features:
