@@ -8,7 +8,8 @@ export const Container = styled.div`
   overflow: auto;
   font-size: 0.8rem;
 
-  &:hover {
+  &:hover,
+  &:focus-within {
     .explorer-bottom {
       display: flex;
     }
