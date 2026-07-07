@@ -5,19 +5,27 @@ import { fileURLToPath, URL } from 'url'
 import { defineConfig } from 'vite'
 import svgr from 'vite-plugin-svgr'
 
+const workspaceRoot = fileURLToPath(new URL('../..', import.meta.url))
+
 export default defineConfig({
   server: {
     port: 3000,
     strictPort: true,
+    fs: {
+      allow: [workspaceRoot],
+    },
   },
   clearScreen: false,
+  optimizeDeps: {
+    exclude: ['rme'],
+  },
   plugins: [
     react({
       babel: {
         plugins: [
           ['@babel/plugin-proposal-decorators', { legacy: true }],
           ['@babel/plugin-proposal-class-properties', { loose: true }],
-          'babel-plugin-react-compiler'
+          'babel-plugin-react-compiler',
         ],
       },
     }),
@@ -37,7 +45,9 @@ export default defineConfig({
             return
           }
 
-          if (/[\\/]node_modules[\\/](react|react-dom|react-router|hox|zustand|immer)[\\/]/.test(id)) {
+          if (
+            /[\\/]node_modules[\\/](react|react-dom|react-router|hox|zustand|immer)[\\/]/.test(id)
+          ) {
             return 'vendor-react'
           }
 
@@ -69,7 +79,10 @@ export default defineConfig({
   resolve: {
     alias: [
       { find: '@', replacement: fileURLToPath(new URL('./src', import.meta.url)) },
-      { find: '@markflowy/i18n', replacement: fileURLToPath(new URL('../../packages/i18n/dist/index.js', import.meta.url)) },
+      {
+        find: '@markflowy/i18n',
+        replacement: fileURLToPath(new URL('../../packages/i18n/dist/index.js', import.meta.url)),
+      },
     ],
     dedupe: ['react', 'react-dom'],
   },
