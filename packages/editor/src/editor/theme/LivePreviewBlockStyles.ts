@@ -215,7 +215,7 @@ export const livePreviewBlockStyles = css`
   .mf-live-preview-mermaid[data-mode='split'] {
     .mf-live-preview-body {
       grid-template-columns: minmax(0, 1fr);
-      grid-template-rows: minmax(120px, auto) auto minmax(168px, 1fr);
+      grid-template-rows: minmax(120px, auto) auto auto;
     }
 
     /* 中间分隔线由竖变横 */
@@ -230,6 +230,13 @@ export const livePreviewBlockStyles = css`
         height: 16px;
         transform: translate(-50%, -50%) rotate(90deg);
       }
+    }
+
+    /* 渲染区紧贴图内容,去掉垂直居中造成的上下大片留白 */
+    .mf-live-preview-render {
+      align-items: flex-start;
+      min-height: 0;
+      padding: 8px 10px;
     }
   }
 
