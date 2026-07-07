@@ -232,9 +232,10 @@ export const livePreviewBlockStyles = css`
       }
     }
 
-    /* 渲染区紧贴图内容,去掉垂直居中造成的上下大片留白 */
+    /* 渲染区紧贴图内容,去掉居中造成的四周大片留白 */
     .mf-live-preview-render {
       align-items: flex-start;
+      justify-content: flex-start;
       min-height: 0;
       padding: 8px 10px;
     }
