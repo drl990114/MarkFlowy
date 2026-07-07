@@ -14,11 +14,20 @@ import { TextSelection } from '@rme-sdk/pm/state'
 import type { NodeSerializerOptions } from '../../transform'
 import { ParserRuleType } from '../../transform'
 import { CustomCopyFunction } from '../CodeMirror/codemirror-types'
-import { createMermaidRenderer, LivePreviewNodeView } from '../LivePreviewBlock'
+import {
+  createMermaidRenderer,
+  LivePreviewNodeView,
+  type LivePreviewMode,
+} from '../LivePreviewBlock'
 
 export interface MermaidExtensionOptions {
   customCopyFunction?: CustomCopyFunction
   codemirrorExtensions?: Extension[]
+  /**
+   * 初始展示模式。默认 'split'(mermaid 的 split 由样式改为上下分栏:
+   * 源码在上、渲染图在下)。设为 'preview' 可只显示渲染图。
+   */
+  defaultMode?: LivePreviewMode
 }
 @extension<MermaidExtensionOptions>({
   defaultOptions: {
@@ -68,6 +77,7 @@ export class MermaidBlockExtension extends NodeExtension<MermaidExtensionOptions
           codemirrorExtensions: this.options.codemirrorExtensions,
         }),
         customCopyFunction: this.options.customCopyFunction,
+        defaultMode: this.options.defaultMode,
       })
     }
   }
