@@ -28,7 +28,6 @@ import * as Sentry from '@sentry/react'
 import { invoke } from '@tauri-apps/api/core'
 import { save } from '@tauri-apps/plugin-dialog'
 import classNames from 'classnames'
-import html2canvas from 'html2canvas'
 import { debounce, DebouncedFunc, throttle } from 'lodash'
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useUnmount } from 'react-use'
@@ -59,6 +58,8 @@ const TEXT_EDITOR_CONTENT_SYNC_EVENT = 'editor_content_sync'
 const mountedTextEditorCounts = new Map<string, number>()
 const textEditorSaveHandlers = new Map<string, Map<string, () => Promise<void>>>()
 let textEditorInstanceSeq = 0
+type Html2Canvas = typeof import('html2canvas')['default']
+let html2canvasPromise: Promise<Html2Canvas> | undefined
 
 interface TextEditorContentSyncPayload {
   fileId: string
@@ -464,6 +465,17 @@ function canvasToExportDataUrl(canvas: HTMLCanvasElement) {
   return canvas.toDataURL('image/jpeg', 0.95)
 }
 
+async function loadHtml2Canvas() {
+  html2canvasPromise ??= import('html2canvas')
+    .then((module) => module.default)
+    .catch((error) => {
+      html2canvasPromise = undefined
+      throw error
+    })
+
+  return html2canvasPromise
+}
+
 function renderTextFallbackImageDataUrl(element: HTMLElement) {
   const rect = element.getBoundingClientRect()
   const width = Math.max(320, Math.min(4096, Math.ceil(rect.width || element.scrollWidth || 800)))
@@ -509,7 +521,8 @@ function renderTextFallbackImageDataUrl(element: HTMLElement) {
 }
 
 async function renderElementToImageDataUrl(element: HTMLElement) {
-  const html2canvasOptions: Parameters<typeof html2canvas>[1] = {
+  const html2canvas = await loadHtml2Canvas()
+  const html2canvasOptions: Parameters<Html2Canvas>[1] = {
     allowTaint: false,
     foreignObjectRendering: false,
     imageTimeout: 15000,
@@ -580,10 +593,29 @@ function TextEditor(props: TextEditorProps) {
   )
   const [status, setStatus] = useState(TextEditorStatus.LOADING)
 
-  const { setEditorDelegate, setEditorCtx, getEditorContent, insertNodeToFolderData } =
-    useEditorStore()
+  const setEditorDelegate = useEditorStore((state) => state.setEditorDelegate)
+  const setEditorCtx = useEditorStore((state) => state.setEditorCtx)
+  const insertNodeToFolderData = useEditorStore((state) => state.insertNodeToFolderData)
   const { t } = useTranslation()
-  const { settingData } = useAppSettingStore()
+  const autosave = useAppSettingStore((state) => state.settingData.autosave)
+  const autosaveInterval = useAppSettingStore((state) => state.settingData.autosave_interval)
+  const editorFullWidth = useAppSettingStore((state) => state.settingData.editor_full_width)
+  const editorPlaceholder = useAppSettingStore((state) => state.settingData.editor_placeholder)
+  const editorRootFontSize = useAppSettingStore(
+    (state) => state.settingData.editor_root_font_size,
+  )
+  const editorRootLineHeight = useAppSettingStore(
+    (state) => state.settingData.editor_root_line_height,
+  )
+  const editorTypewriterScroll = useAppSettingStore(
+    (state) => state.settingData.editor_typewriter_scroll,
+  )
+  const sourceCodeEditorSpellcheck = useAppSettingStore(
+    (state) => state.settingData.source_code_editor_spellcheck,
+  )
+  const wysiwygEditorSpellcheck = useAppSettingStore(
+    (state) => state.settingData.wysiwyg_editor_spellcheck,
+  )
   const [currentViewType, setCurrentViewType] = useState<EditorViewType>(fileTypeConfig.defaultMode)
   const [content, setContent] = useState<string | undefined>()
   const [delegate, setDelegate] = useState<ReturnType<typeof createDelegate> | null>(null)
@@ -891,8 +923,8 @@ function TextEditor(props: TextEditorProps) {
   )
 
   const debounceSave = useMemo(() => {
-    return debounce(() => saveHandler({ active: true }), settingData.autosave_interval)
-  }, [settingData.autosave_interval, saveHandler])
+    return debounce(() => saveHandler({ active: true }), autosaveInterval)
+  }, [autosaveInterval, saveHandler])
 
   const debounceRefreshToc = useMemo(
     () =>
@@ -946,21 +978,21 @@ function TextEditor(props: TextEditorProps) {
     if (!active) return
     const ctx = useEditorStore.getState().getEditorCtx(id)
     if (ctx?.commands?.toggleTypewriterScroll) {
-      ctx.commands.toggleTypewriterScroll(settingData.editor_typewriter_scroll)
+      ctx.commands.toggleTypewriterScroll(editorTypewriterScroll)
     }
-  }, [settingData.editor_typewriter_scroll, delegate, id, active])
+  }, [editorTypewriterScroll, delegate, id, active])
 
   useEffect(() => {
     if (!active) return
     const ctx = useEditorStore.getState().getEditorCtx(id)
     if (ctx?.commands?.togglePlaceholder) {
-      ctx.commands.togglePlaceholder(settingData.editor_placeholder)
+      ctx.commands.togglePlaceholder(editorPlaceholder)
     }
-  }, [settingData.editor_placeholder, delegate, id, active])
+  }, [editorPlaceholder, delegate, id, active])
 
   useEffect(() => {
     delegateOptionsCache.clear()
-  }, [settingData.editor_typewriter_scroll, settingData.editor_placeholder])
+  }, [editorTypewriterScroll, editorPlaceholder])
 
   useEffect(() => {
     const cb = throttle((payload: EditorViewType) => {
@@ -1020,7 +1052,7 @@ function TextEditor(props: TextEditorProps) {
       cb.cancel()
       bus.detach('editor_toggle_type', cb)
     }
-  }, [active, curFile, setEditorDelegate, getEditorContent, debounceRefreshToc])
+  }, [active, curFile, setEditorDelegate, debounceRefreshToc])
 
   useEffect(() => {
     const exportImageHandler = async () => {
@@ -1183,13 +1215,13 @@ function TextEditor(props: TextEditorProps) {
   )
 
   const rootFontSize =
-    !settingData.editor_root_font_size || settingData.editor_root_font_size === 15
+    !editorRootFontSize || editorRootFontSize === 15
       ? 16
-      : settingData.editor_root_font_size
+      : editorRootFontSize
   const rootLineHeight =
-    !settingData.editor_root_line_height || settingData.editor_root_line_height === '1.6'
+    !editorRootLineHeight || editorRootLineHeight === '1.6'
       ? '1.65'
-      : settingData.editor_root_line_height
+      : editorRootLineHeight
 
   const editorProps: MfEditorProps = useMemo(
     () => ({
@@ -1200,10 +1232,10 @@ function TextEditor(props: TextEditorProps) {
         height: '100%',
       },
       wysiwygTextContainerProps: {
-        spellCheck: settingData.wysiwyg_editor_spellcheck,
+        spellCheck: wysiwygEditorSpellcheck,
       },
       sourceCodeTextContainerProps: {
-        spellCheck: settingData.source_code_editor_spellcheck,
+        spellCheck: sourceCodeEditorSpellcheck,
       },
       offset: { top: 10, left: 16 },
       styleToken: {
@@ -1232,7 +1264,8 @@ function TextEditor(props: TextEditorProps) {
       setEditorCtx,
       id,
       active,
-      settingData,
+      sourceCodeEditorSpellcheck,
+      wysiwygEditorSpellcheck,
       fileTypeConfig,
       effectiveDefaultViewType,
       rootFontSize,
@@ -1285,7 +1318,7 @@ function TextEditor(props: TextEditorProps) {
           }
 
           const curFile = getFileObject(id)
-          if (settingData.autosave && curFile?.path) {
+          if (autosave && curFile?.path) {
             debounceSaveHandler()
           }
         }
@@ -1298,7 +1331,7 @@ function TextEditor(props: TextEditorProps) {
       active,
       debounceRefreshToc,
       emitContentSync,
-      settingData,
+      autosave,
       updateCachedFileContent,
     ],
   )
@@ -1333,7 +1366,7 @@ function TextEditor(props: TextEditorProps) {
     <EditorWrapper
       id='editorarea-wrapper'
       className={cls}
-      fullWidth={settingData.editor_full_width}
+      fullWidth={editorFullWidth}
       active={active}
       $visible={visible}
       onClick={handleWrapperClick}

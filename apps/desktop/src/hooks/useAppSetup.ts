@@ -72,6 +72,18 @@ interface WorkspaceCache {
   activeGroupId?: string
 }
 
+type EditorStoreSnapshot = ReturnType<typeof useEditorStore.getState>
+
+type WorkspaceCacheDraft = {
+  activeGroupId?: string
+  activeId?: string
+  editorLayout: EditorLayoutNode
+  opened: string[]
+  rootPath?: string
+}
+
+const WORKSPACE_CACHE_SAVE_DEBOUNCE_MS = 800
+
 const getExtFromPath = (path: string) => {
   const fileName = getFileNameFromPath(path) || ''
   const dotIndex = fileName.lastIndexOf('.')
@@ -110,6 +122,54 @@ const serializeEditorLayout = (node: EditorLayoutNode): PersistedEditorLayoutNod
     sizes: node.sizes,
     children: node.children.map(serializeEditorLayout),
   }
+}
+
+const selectWorkspaceCacheDraft = (state: EditorStoreSnapshot): WorkspaceCacheDraft => ({
+  activeGroupId: state.activeGroupId,
+  activeId: state.activeId,
+  editorLayout: state.editorLayout,
+  opened: state.opened,
+  rootPath: state.getRootPath(),
+})
+
+const isSameOpenedFiles = (prev: string[], next: string[]) => {
+  if (prev === next) return true
+  if (prev.length !== next.length) return false
+
+  return prev.every((id, index) => id === next[index])
+}
+
+const isSameWorkspaceCacheDraft = (
+  prev: WorkspaceCacheDraft,
+  next: WorkspaceCacheDraft,
+) => {
+  return (
+    prev.activeGroupId === next.activeGroupId &&
+    prev.activeId === next.activeId &&
+    prev.editorLayout === next.editorLayout &&
+    prev.rootPath === next.rootPath &&
+    isSameOpenedFiles(prev.opened, next.opened)
+  )
+}
+
+const persistWorkspaceCache = (
+  cacheStore: LazyStore,
+  { activeGroupId, activeId, editorLayout, opened, rootPath }: WorkspaceCacheDraft,
+) => {
+  if (!rootPath) return
+
+  const openedFilePaths = opened
+    .map((fileId) => getFileObject(fileId)?.path)
+    .filter((path): path is string => Boolean(path))
+
+  cacheStore.set(rootPath, {
+    version: 2,
+    openedFilePaths,
+    activeFilePath: activeId ? getFileObject(activeId)?.path : '',
+    editorLayout: serializeEditorLayout(editorLayout),
+    activeGroupId,
+  })
+  cacheStore.save()
 }
 
 const hydrateEditorLayout = (node: PersistedEditorLayoutNode): EditorLayoutNode => {
@@ -351,24 +411,23 @@ async function appWorkspaceSetup() {
           }
         }
 
-        useEditorStore.subscribe((state) => {
-          const rootPath = state.getRootPath()
-          if (rootPath) {
-            const openedFiles = state.opened.map((fileId) => {
-              const file = getFileObject(fileId)
-              return file.path
-            })
+        let cacheSaveTimer: ReturnType<typeof window.setTimeout> | undefined
+        useEditorStore.subscribe(
+          selectWorkspaceCacheDraft,
+          (cacheDraft) => {
+            if (cacheSaveTimer !== undefined) {
+              window.clearTimeout(cacheSaveTimer)
+            }
 
-            cacheStore.set(rootPath, {
-              version: 2,
-              openedFilePaths: openedFiles,
-              activeFilePath: state.activeId ? getFileObject(state.activeId)?.path : '',
-              editorLayout: serializeEditorLayout(state.editorLayout),
-              activeGroupId: state.activeGroupId,
-            })
-            cacheStore.save()
-          }
-        })
+            cacheSaveTimer = window.setTimeout(() => {
+              persistWorkspaceCache(cacheStore, cacheDraft)
+              cacheSaveTimer = undefined
+            }, WORKSPACE_CACHE_SAVE_DEBOUNCE_MS)
+          },
+          {
+            equalityFn: isSameWorkspaceCacheDraft,
+          },
+        )
       } catch (error) {
         logger.error('Failed to read directory:', targetWorkspacePath, error)
         logger.error('This might be due to sandbox restrictions or the directory no longer exists')
@@ -580,9 +639,12 @@ const useAppSetup = () => {
     }
 
     updateWindowState(useEditorStore.getState().getRootPath())
-    const unsubscribe = useEditorStore.subscribe((state) => {
-      updateWindowState(state.getRootPath())
-    })
+    const unsubscribe = useEditorStore.subscribe(
+      (state) => state.getRootPath(),
+      (rootPath) => {
+        updateWindowState(rootPath)
+      },
+    )
 
     return () => {
       unsubscribe()

@@ -63,6 +63,10 @@ export default defineConfig({
             return 'vendor-antd'
           }
 
+          if (/[\\/]node_modules[\\/](html2canvas)[\\/]/.test(id)) {
+            return 'vendor-export-image'
+          }
+
           if (/[\\/]node_modules[\\/](prosemirror-|@codemirror|codemirror|rme)[\\/]/.test(id)) {
             return 'vendor-editor'
           }

@@ -60,9 +60,8 @@ const FindReplaceWrapper = styled.div`
 
 export const FindReplace: FC = () => {
   const { open, ref, close } = useFindReplaceOpen()
-  const { editorCtxMap, activeId } = useEditorStore()
-
-  const editorCtx = editorCtxMap.get(activeId ?? '')
+  const activeId = useEditorStore((state) => state.activeId)
+  const editorCtx = useEditorStore((state) => state.editorCtxMap.get(activeId ?? ''))
 
   if (!open || !editorCtx || !editorCtx.helpers.findRanges) return null
 

@@ -4,6 +4,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { nanoid } from 'nanoid';
 import type { EditorContext, EditorDelegate } from 'rme';
 import { create } from 'zustand';
+import { subscribeWithSelector } from 'zustand/middleware';
 
 const findParentNode = (fileNode: IFile, rootFile: IFile) => {
   const dfs = (file: IFile): undefined | IFile => {
@@ -369,7 +370,7 @@ const commitEditorLayoutState = (layout: EditorLayoutNode, activeGroupId?: strin
   }
 }
 
-const useEditorStore = create<EditorStore>((set, get) => {
+const useEditorStore = create<EditorStore>()(subscribeWithSelector((set, get) => {
   const initialEditorLayout = createDefaultEditorLayout()
 
   return {
@@ -797,7 +798,7 @@ const useEditorStore = create<EditorStore>((set, get) => {
       return curCtx
     },
   }
-})
+}))
 
 type EditorStore = {
   opened: string[]

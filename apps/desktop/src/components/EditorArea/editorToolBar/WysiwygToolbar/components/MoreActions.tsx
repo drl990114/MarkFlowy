@@ -12,7 +12,8 @@ import { MfIconButton } from '../../../../ui-v2/Button'
 import { showContextMenu } from '../../../../ui-v2/ContextMenu'
 
 export const MoreActions = () => {
-  const { activeId, getEditorContent } = useEditorStore()
+  const activeId = useEditorStore((state) => state.activeId)
+  const getEditorContent = useEditorStore((state) => state.getEditorContent)
   const { t } = useTranslation()
   const ref = useRef<any>(null)
   

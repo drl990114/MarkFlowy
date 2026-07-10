@@ -3,11 +3,11 @@ import { type Node } from '@rme-sdk/pm/model'
 // @ts-ignore
 import HTML from 'html-parse-stringify'
 import { normalizeReference } from 'markdown-it/lib/common/utils.mjs'
-import mermaid from 'mermaid'
 import { nanoid } from 'nanoid'
 import { EditorProps } from '../components'
 import { HTMLAstNode } from '../components/Preview'
 import { isBrowser } from './common'
+import { loadMermaid } from './mermaid'
 
 export const handlerByAdditions: Record<
   string,
@@ -61,6 +61,7 @@ export const handlerByAdditions: Record<
           textContent = dom.textContent || ''
         }
 
+        const mermaid = await loadMermaid()
         const res = await mermaid.render(
           `mermaid_${previewMermaidRenderCount.count++}`,
           textContent,

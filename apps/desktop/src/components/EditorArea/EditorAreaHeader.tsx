@@ -14,7 +14,9 @@ interface EditorAreaHeaderProps {
 export const EditorAreaHeader = memo((props: EditorAreaHeaderProps) => {
   const { groupId } = props
   const group = useEditorStore((state) => state.getGroup(groupId))
-  const { setActiveGroupId, closeAllFilesInGroup, splitGroup } = useEditorStore()
+  const setActiveGroupId = useEditorStore((state) => state.setActiveGroupId)
+  const closeAllFilesInGroup = useEditorStore((state) => state.closeAllFilesInGroup)
+  const splitGroup = useEditorStore((state) => state.splitGroup)
   const { t } = useTranslation()
   const ref = useRef<HTMLDivElement>(null)
   const opened = group?.opened ?? []

@@ -1,7 +1,7 @@
 import { invoke } from '@tauri-apps/api/core'
 import { revealItemInDir } from '@tauri-apps/plugin-opener'
 import { nanoid } from 'nanoid'
-import type { FC, ReactNode } from 'react'
+import { useMemo, type FC, type ReactNode } from 'react'
 import {
   FileSystemContext,
   FileSystemContextValue,
@@ -23,10 +23,11 @@ interface FileSystemAdapterProps {
 }
 
 export const TauriFileSystemProvider: FC<FileSystemAdapterProps> = ({ children }) => {
-  const settingData = useAppSettingStore((state) => state.settingData)
-  const fileExcludePatterns = resolveFileExcludePatterns(settingData)
+  const fileExcludePatterns = useAppSettingStore((state) =>
+    resolveFileExcludePatterns(state.settingData),
+  )
 
-  const value: FileSystemContextValue = {
+  const value: FileSystemContextValue = useMemo(() => ({
     readDirectory: async (folderPath: string): Promise<IFile[]> => {
       const result = await invoke<FileSysResult>('open_folder_async', {
         folderPath,
@@ -159,7 +160,7 @@ export const TauriFileSystemProvider: FC<FileSystemAdapterProps> = ({ children }
     revealInFolder: async (path: string): Promise<void> => {
       await revealItemInDir(path)
     },
-  }
+  }), [fileExcludePatterns])
 
   return <FileSystemContext.Provider value={value}>{children}</FileSystemContext.Provider>
 }

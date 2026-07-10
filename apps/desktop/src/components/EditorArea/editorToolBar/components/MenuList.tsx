@@ -71,7 +71,8 @@ export const MenuList = memo((props: MenuListProps) => {
     rounded,
   } = props
 
-  const { activeId, getEditorContent } = useEditorStore()
+  const activeId = useEditorStore((state) => state.activeId)
+  const getEditorContent = useEditorStore((state) => state.getEditorContent)
   const targetEditorId = editorId ?? activeId
   const { editorViewTypeMap } = useEditorViewTypeStore()
   const { settingData } = useAppSettingStore()
@@ -83,8 +84,9 @@ export const MenuList = memo((props: MenuListProps) => {
   const curFile = targetEditorId ? getFileObject(targetEditorId) : undefined
   const editorViewType = editorViewTypeMap.get(curFile?.id || '') || 'wysiwyg'
 
-  const { idStateMap } = useEditorStateStore()
-  const editorState = targetEditorId ? idStateMap.get(targetEditorId) : undefined
+  const hasUnsavedChanges = useEditorStateStore((state) =>
+    targetEditorId ? state.idStateMap.get(targetEditorId)?.hasUnsavedChanges : undefined,
+  )
 
   const getFileNormalInfo = useCallback(
     debounce(async () => {
@@ -112,7 +114,7 @@ export const MenuList = memo((props: MenuListProps) => {
     return () => {
       getFileNormalInfo.cancel()
     }
-  }, [editorState?.hasUnsavedChanges, getFileNormalInfo])
+  }, [hasUnsavedChanges, getFileNormalInfo])
 
   const convertText = useCallback(
     async (variant: string) => {

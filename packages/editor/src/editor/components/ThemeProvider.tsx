@@ -1,11 +1,11 @@
 import type { Langs } from '@markflowy/i18n'
 import { changeLng, i18nInit, isInitialized, locales } from '@markflowy/i18n'
-import mermaid from 'mermaid'
 import { memo, useEffect, useRef } from 'react'
 import { ThemeProvider as ScThemeProvider } from 'styled-components'
 import { CreateThemeOptions, changeTheme } from '../codemirror'
 import { darkTheme, lightTheme } from '../theme'
 import { eventBus } from '../utils/eventbus'
+import { setMermaidTheme } from '../utils/mermaid'
 
 export * from './Editor'
 
@@ -49,10 +49,7 @@ export const ThemeProvider: React.FC<Props> = memo(({ theme, i18n, children }: P
         : lightTheme.codemirrorTheme
     changeTheme(codemirrorTheme)
 
-    mermaid.initialize({
-      theme: mode === 'dark' ? 'dark' : 'default',
-    })
-
+    setMermaidTheme(mode === 'dark' ? 'dark' : 'default')
     eventBus.emit('change-theme')
   }, [mode, theme?.codemirrorTheme, changeTheme])
 

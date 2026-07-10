@@ -16,7 +16,7 @@ interface PreviewToolbarProps {
 
 export const PreviewToolbar: FC<PreviewToolbarProps> = (props) => {
   const { editorId } = props
-  const { activeId } = useEditorStore()
+  const activeId = useEditorStore((state) => state.activeId)
   const { getEditorViewType } = useEditorViewTypeStore()
   const targetEditorId = editorId ?? activeId
 

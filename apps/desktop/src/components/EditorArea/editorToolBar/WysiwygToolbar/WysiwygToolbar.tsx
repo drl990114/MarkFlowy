@@ -19,12 +19,12 @@ interface WysiwygToolbarProps {
 
 export const WysiwygToolbar: FC<WysiwygToolbarProps> = (props) => {
   const { editorId } = props
-  const { editorCtxMap, activeId } = useEditorStore()
+  const activeId = useEditorStore((state) => state.activeId)
   const { getEditorViewType } = useEditorViewTypeStore()
   const { t } = useTranslation()
   const targetEditorId = editorId ?? activeId
 
-  const editorCtx = editorCtxMap.get(targetEditorId ?? '')
+  const editorCtx = useEditorStore((state) => state.editorCtxMap.get(targetEditorId ?? ''))
   const viewType = targetEditorId ? getEditorViewType(targetEditorId) : EditorViewType.WYSIWYG
 
   const sections = useMemo(
