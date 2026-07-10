@@ -164,17 +164,17 @@ The development of **MarkFlowy** cannot be separated from these contributors. Th
         </a>
     </td>
     <td align="center">
-        <a href="https://github.com/hobostay">
-            <img src="https://avatars.githubusercontent.com/u/110803307?v=4" width="90;" alt="hobostay"/>
-            <br />
-            <sub><b>Qiaochu Hu</b></sub>
-        </a>
-    </td>
-    <td align="center">
         <a href="https://github.com/KiraKiraAyu">
             <img src="https://avatars.githubusercontent.com/u/99468824?v=4" width="90;" alt="KiraKiraAyu"/>
             <br />
             <sub><b>Lysastriel</b></sub>
+        </a>
+    </td>
+    <td align="center">
+        <a href="https://github.com/hobostay">
+            <img src="https://avatars.githubusercontent.com/u/110803307?v=4" width="90;" alt="hobostay"/>
+            <br />
+            <sub><b>Qiaochu Hu</b></sub>
         </a>
     </td>
     <td align="center">
