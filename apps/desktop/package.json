@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "vite --host --force",
     "build": "vite build",
-    "build:types": "tsc --tsconfig ./tsconfig.types.json",
+    "build:analyze": "vite build --mode analyze",
+    "build:types": "tsc -p ./tsconfig.json --noEmit",
     "updater": "tr updater",
     "preview": "vite preview",
     "tauri:build": "tauri build --features custom-protocol",
@@ -95,6 +96,7 @@
     "happy-dom": "^17.1.8",
     "react-test-renderer": "^19.2.0",
     "rimraf": "^6.0.1",
+    "rollup-plugin-visualizer": "^7.0.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.3",
     "url": "^0.11.4",

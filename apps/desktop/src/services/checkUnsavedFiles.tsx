@@ -9,10 +9,10 @@ interface CheckUnsavedFilesParams {
   onUnsavedAndClose?: (hasUnsavedFileIds: string[]) => void | Promise<void>
 }
 
-interface GuardUnsavedFilesParams {
+export interface GuardUnsavedFilesParams {
   fileIds: string[]
   onContinue: () => void | Promise<void>
-  onSaveAndContinue?: (hasUnsavedFileIds: string[]) => void | Promise<void>
+  onSaveAndContinue?: (hasUnsavedFileIds: string[]) => boolean | void | Promise<boolean | void>
   onUnsavedAndContinue?: (hasUnsavedFileIds: string[]) => void | Promise<void>
   labels?: UnsavedConfirmLabels
 }
@@ -32,7 +32,10 @@ export const getUnsavedFileIds = (fileIds: string[]) => {
 
 export const saveUnsavedFiles = async (fileIds: string[]) => {
   const saves = unique(fileIds).map((id) => getSaveOpenedEditorEntries(id))
-  await Promise.all(saves.map((saveHandler) => saveHandler?.()))
+  if (saves.some((saveHandler) => !saveHandler)) return false
+
+  const results = await Promise.all(saves.map((saveHandler) => saveHandler!()))
+  return results.every(Boolean)
 }
 
 const confirmUnsavedFiles = async (fileIds: string[], labels?: UnsavedConfirmLabels) => {
@@ -64,32 +67,46 @@ const confirmUnsavedFiles = async (fileIds: string[], labels?: UnsavedConfirmLab
   })
 }
 
+const guardUnsavedFileIds = async (params: GuardUnsavedFilesParams, hasUnsavedFiles: string[]) => {
+  if (hasUnsavedFiles.length === 0) {
+    await params.onContinue()
+    return true
+  }
+
+  const action = await confirmUnsavedFiles(hasUnsavedFiles, params.labels)
+
+  if (action === 'save') {
+    if (params.onSaveAndContinue) {
+      const saved = await params.onSaveAndContinue(hasUnsavedFiles)
+      return saved !== false
+    } else {
+      const saved = await saveUnsavedFiles(hasUnsavedFiles)
+      if (!saved) return false
+      await params.onContinue()
+    }
+    return true
+  }
+
+  if (action === 'unsaved') {
+    if (params.onUnsavedAndContinue) {
+      await params.onUnsavedAndContinue(hasUnsavedFiles)
+    } else {
+      await params.onContinue()
+    }
+    return true
+  }
+
+  return false
+}
+
+export const guardUnsavedFilesAsync = async (params: GuardUnsavedFilesParams) => {
+  return guardUnsavedFileIds(params, getUnsavedFileIds(params.fileIds))
+}
+
 export const guardUnsavedFiles = (params: GuardUnsavedFilesParams) => {
   const hasUnsavedFiles = getUnsavedFileIds(params.fileIds)
 
-  if (hasUnsavedFiles.length === 0) {
-    void params.onContinue()
-    return 0
-  }
-
-  void confirmUnsavedFiles(hasUnsavedFiles, params.labels).then(async (action) => {
-    if (action === 'save') {
-      if (params.onSaveAndContinue) {
-        await params.onSaveAndContinue(hasUnsavedFiles)
-      } else {
-        await saveUnsavedFiles(hasUnsavedFiles)
-        await params.onContinue()
-      }
-    }
-
-    if (action === 'unsaved') {
-      if (params.onUnsavedAndContinue) {
-        await params.onUnsavedAndContinue(hasUnsavedFiles)
-      } else {
-        await params.onContinue()
-      }
-    }
-  })
+  void guardUnsavedFileIds(params, hasUnsavedFiles)
 
   return hasUnsavedFiles.length
 }

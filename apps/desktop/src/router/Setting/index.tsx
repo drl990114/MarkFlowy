@@ -79,7 +79,7 @@ function Setting() {
   const curGroup = settingMap[curGroupKey] as Setting.SettingGroup
   const curGroupKeys = Object.keys(curGroup).filter(
     (key) => key !== 'i18nKey' && key !== 'iconName' && key !== 'desc',
-  ) as Exclude<keyof SettingData, 'i18nKey' | 'iconName' | 'desc'>[]
+  )
 
   useEffect(() => {
     check().then((u) => {

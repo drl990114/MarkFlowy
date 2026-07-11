@@ -19,12 +19,22 @@ vi.mock('@markflowy/interface', () => ({
 }))
 
 vi.mock('../files', () => ({
+  deletePathEntry: vi.fn(),
+  getFileObject: vi.fn(),
   getFileObjectByPath: vi.fn(),
   setFileObject: vi.fn(),
   setFileObjectByPath: vi.fn(),
+  setFileObjects: vi.fn(),
+  setFileObjectsByPath: vi.fn(),
 }))
 
-import { getFileNameFromPath, getFolderPathFromPath, isMdFile } from '../filesys'
+import {
+  deletePathEntry,
+  getFileObject,
+  setFileObject,
+  setFileObjectByPath,
+} from '../files'
+import { getFileNameFromPath, getFolderPathFromPath, isMdFile, updateFile } from '../filesys'
 
 describe('test helper/filesys ', () => {
   it('getFileNameFromPath', () => {
@@ -51,5 +61,35 @@ describe('test helper/filesys ', () => {
 
     expect(getFolderPathFromPath(macPath)).toBe('/path/to')
     expect(getFolderPathFromPath(winPath)).toBe('C:\\path\\to')
+  })
+
+  it('merges rename metadata without dropping cached file content', () => {
+    vi.mocked(getFileObject).mockReturnValue({
+      id: 'file-1',
+      name: 'before.md',
+      kind: 'file',
+      path: '/workspace/before.md',
+      ext: 'md',
+      content: 'cached content',
+    })
+
+    const renamedFile = updateFile({
+      id: 'file-1',
+      name: 'after.md',
+      kind: 'file',
+      path: '/workspace/after.md',
+    })
+
+    expect(renamedFile).toEqual({
+      id: 'file-1',
+      name: 'after.md',
+      kind: 'file',
+      path: '/workspace/after.md',
+      ext: 'md',
+      content: 'cached content',
+    })
+    expect(deletePathEntry).toHaveBeenCalledWith('/workspace/before.md')
+    expect(setFileObject).toHaveBeenCalledWith('file-1', renamedFile)
+    expect(setFileObjectByPath).toHaveBeenCalledWith('/workspace/after.md', renamedFile)
   })
 })

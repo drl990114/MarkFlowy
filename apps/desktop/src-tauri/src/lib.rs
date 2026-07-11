@@ -120,7 +120,7 @@ fn clear_opened_urls(opened_urls: &OpenedUrls) {
 }
 
 fn update_window_opened_urls(window: &tauri::WebviewWindow, opened_urls: &str) {
-    if let Ok(script_opened_urls) = serde_json::to_string(opened_urls) {
+    if let Ok(script_opened_urls) = window_manager::serialize_javascript_string(opened_urls) {
         let _ = window.eval(&format!(
             r#"
             (() => {{
@@ -976,6 +976,8 @@ pub fn run() {
             fc::cmd::open_folder_async,
             fc::cmd::get_file_content,
             fc::cmd::write_file,
+            fc::cmd::get_file_write_revision,
+            fc::cmd::conditional_write_file,
             fc::cmd::write_u8_array_to_file,
             fc::cmd::read_u8_array_from_file,
             fc::cmd::delete_file,
@@ -989,6 +991,8 @@ pub fn run() {
             fc::cmd::get_md_relative_path,
             fc::cmd::convert_text,
             fc::cmd::rename_fs,
+            fc::cmd::paths_refer_to_same_file,
+            fc::cmd::paths_refer_to_same_directory_entry,
             fc::cmd::trash_delete,
             fc::cmd::export_html_to_path,
             fc::cmd::is_dir,

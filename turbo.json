@@ -9,7 +9,7 @@
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**", "dist-types/**", "lib/**", "esm/**", "build/**", ".next/**", "!.next/cache/**"],
-      "inputs": ["src/**", "package.json", "tsconfig.json", "tsconfig.*.json", "rollup.config.*", "esbuild.config.*"]
+      "inputs": ["$TURBO_DEFAULT$", "vite.config.*", "index.html", "tsconfig.json", "tsconfig.*.json", "rollup.config.*", "esbuild.config.*"]
     },
     "deploy": {
       "dependsOn": ["build", "test", "lint"]

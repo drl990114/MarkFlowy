@@ -2,10 +2,12 @@ import { invoke } from '@tauri-apps/api/core'
 import { revealItemInDir } from '@tauri-apps/plugin-opener'
 import { nanoid } from 'nanoid'
 import { useMemo, type FC, type ReactNode } from 'react'
+import { flushSync } from 'react-dom'
 import {
   FileSystemContext,
   FileSystemContextValue,
   MoveFileInfo,
+  type RunFileMutation,
 } from '@markflowy/interface'
 import { logger } from '@/helper/logger'
 import { resolveFileExcludePatterns } from '@/helper/file-exclude'
@@ -17,10 +19,19 @@ import {
 } from '@/helper/files'
 import { useEditorStore } from '@/stores'
 import useAppSettingStore from '@/stores/useAppSettingStore'
+import { savePathCoordinator } from '@/components/EditorArea/savePathCoordinator'
 
 interface FileSystemAdapterProps {
   children: ReactNode
 }
+
+const runFileMutation: RunFileMutation = (operation) =>
+  savePathCoordinator.runFileMutation((lease) =>
+    operation({
+      protectFileIds: (fileIds) => flushSync(() => lease.protectFileIds(fileIds)),
+      protectPaths: (paths) => flushSync(() => lease.protectPaths(paths)),
+    }),
+  )
 
 export const TauriFileSystemProvider: FC<FileSystemAdapterProps> = ({ children }) => {
   const fileExcludePatterns = useAppSettingStore((state) =>
@@ -28,6 +39,8 @@ export const TauriFileSystemProvider: FC<FileSystemAdapterProps> = ({ children }
   )
 
   const value: FileSystemContextValue = useMemo(() => ({
+    runFileMutation,
+
     readDirectory: async (folderPath: string): Promise<IFile[]> => {
       const result = await invoke<FileSysResult>('open_folder_async', {
         folderPath,
@@ -51,6 +64,9 @@ export const TauriFileSystemProvider: FC<FileSystemAdapterProps> = ({ children }
       })
       if (result.code !== FileResultCode.Success) {
         logger.error(`Failed to read subdirectory at ${folderPath}: ${result.code}`)
+        return []
+      }
+      if ((useEditorStore.getState().getRootPath() || folderPath) !== rootPath) {
         return []
       }
       const files = JSON.parse(result.content) as IFile[]

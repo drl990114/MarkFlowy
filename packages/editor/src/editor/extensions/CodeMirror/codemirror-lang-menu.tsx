@@ -289,7 +289,7 @@ const createCodeMirrorMenuDecorations = (
     destoryCallbacks.length = 0
 
     if (isBrowser()) {
-      document.removeEventListener('click', handleBlurClick)
+      document.removeEventListener('click', handleBlurClick, true)
     }
   }
 

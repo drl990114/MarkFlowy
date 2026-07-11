@@ -3,12 +3,13 @@ use chrono::{DateTime, Local};
 use mf_utils::is_supported_file_name;
 use natural_sort_rs::Natural;
 use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha256};
+use std::collections::HashMap;
 #[cfg(target_os = "macos")]
 use std::collections::HashSet;
 use std::fs;
-use std::future::Future;
+use std::io::Write;
 use std::path::{Path, PathBuf};
-#[cfg(target_os = "macos")]
 use std::sync::Mutex;
 
 use crate::task_system::error::SystemError;
@@ -27,6 +28,11 @@ lazy_static::lazy_static! {
     static ref ACTIVE_SECURITY_SCOPES: Mutex<HashSet<PathBuf>> = Mutex::new(HashSet::new());
     /// 工作区根路径的安全范围，打开文件夹时预激活并持续保持
     static ref WORKSPACE_ROOT_SCOPE: Mutex<Option<PathBuf>> = Mutex::new(None);
+}
+
+lazy_static::lazy_static! {
+    static ref FILE_WRITE_MUTEX: Mutex<()> = Mutex::new(());
+    static ref FILE_WRITE_GENERATIONS: Mutex<HashMap<String, u64>> = Mutex::new(HashMap::new());
 }
 
 #[cfg(target_os = "macos")]
@@ -373,7 +379,7 @@ pub struct Post {
     author: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub enum FileResultCode {
     Success = 0,
     NotFound = -1,
@@ -387,6 +393,20 @@ pub enum FileResultCode {
 pub struct FileResult {
     pub code: FileResultCode,
     pub content: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub enum ConditionalWriteStatus {
+    Success,
+    Conflict,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ConditionalWriteResult {
+    pub status: ConditionalWriteStatus,
+    pub revision: String,
 }
 
 pub fn read_directory(dir_path: &str) -> Result<Vec<FileInfo>, FileResultCode> {
@@ -713,8 +733,7 @@ pub fn is_text_file(path: &str) -> bool {
     std::str::from_utf8(chunk).is_ok()
 }
 
-// update file and create new file
-pub fn write_file(path: &str, content: &str) -> FileResult {
+fn write_file_unlocked(path: &str, content: &str) -> FileResult {
     let file_path = Path::new(path);
     match fs::write(file_path, content) {
         Ok(()) => FileResult {
@@ -733,6 +752,228 @@ pub fn write_file(path: &str, content: &str) -> FileResult {
             }
         }
     }
+}
+
+// update file and create new file
+pub fn write_file(path: &str, content: &str) -> FileResult {
+    let Ok(_guard) = FILE_WRITE_MUTEX.lock() else {
+        return FileResult {
+            code: FileResultCode::UnknownError,
+            content: String::from("File write lock is unavailable"),
+        };
+    };
+
+    let result = write_file_unlocked(path, content);
+    if result.code == FileResultCode::Success {
+        let _ = bump_file_write_generation(Path::new(path));
+    }
+    result
+}
+
+fn revision_for_content(content: &[u8]) -> String {
+    let digest = Sha256::digest(content);
+    format!("sha256:{digest:x}")
+}
+
+fn path_revision_key(path: &Path) -> String {
+    let absolute_path = if path.is_absolute() {
+        path.to_path_buf()
+    } else {
+        std::env::current_dir()
+            .map(|current_dir| current_dir.join(path))
+            .unwrap_or_else(|_| path.to_path_buf())
+    };
+    let resolved_parent = absolute_path
+        .parent()
+        .and_then(|parent| fs::canonicalize(parent).ok())
+        .unwrap_or_else(|| {
+            absolute_path
+                .parent()
+                .unwrap_or_else(|| Path::new("."))
+                .to_path_buf()
+        });
+    let file_name = absolute_path.file_name().unwrap_or_default();
+    format!("path:{}", resolved_parent.join(file_name).to_string_lossy())
+}
+
+fn revision_key(path: &Path, metadata: Option<&fs::Metadata>) -> String {
+    #[cfg(unix)]
+    if let Some(metadata) = metadata {
+        use std::os::unix::fs::MetadataExt;
+        return format!("file:{}:{}", metadata.dev(), metadata.ino());
+    }
+
+    path_revision_key(path)
+}
+
+fn file_write_revision_unlocked(path: &Path) -> AnyResult<String> {
+    match fs::read(path) {
+        Ok(content) => {
+            let metadata = fs::metadata(path)?;
+            let modified_nanos = metadata
+                .modified()
+                .ok()
+                .and_then(|modified| modified.duration_since(std::time::UNIX_EPOCH).ok())
+                .map(|duration| duration.as_nanos())
+                .unwrap_or_default();
+
+            #[cfg(unix)]
+            {
+                use std::os::unix::fs::MetadataExt;
+                let fingerprint = format!(
+                    "existing:{}:{}:{}:{}:{}",
+                    metadata.dev(),
+                    metadata.ino(),
+                    metadata.len(),
+                    modified_nanos,
+                    revision_for_content(&content)
+                );
+                let path_key = path_revision_key(path);
+                let file_key = revision_key(path, Some(&metadata));
+                let generations = FILE_WRITE_GENERATIONS
+                    .lock()
+                    .map_err(|_| anyhow::anyhow!("File revision lock is unavailable"))?;
+                let path_generation = generations.get(&path_key).copied().unwrap_or_default();
+                let file_generation = generations.get(&file_key).copied().unwrap_or_default();
+                Ok(format!(
+                    "{fingerprint}:path-generation:{path_generation}:file-generation:{file_generation}"
+                ))
+            }
+
+            #[cfg(not(unix))]
+            {
+                let fingerprint = format!(
+                    "existing:{}:{}:{}",
+                    metadata.len(),
+                    modified_nanos,
+                    revision_for_content(&content)
+                );
+                let path_key = path_revision_key(path);
+                let file_key = revision_key(path, Some(&metadata));
+                let generations = FILE_WRITE_GENERATIONS
+                    .lock()
+                    .map_err(|_| anyhow::anyhow!("File revision lock is unavailable"))?;
+                let path_generation = generations.get(&path_key).copied().unwrap_or_default();
+                let file_generation = generations.get(&file_key).copied().unwrap_or_default();
+                Ok(format!(
+                    "{fingerprint}:path-generation:{path_generation}:file-generation:{file_generation}"
+                ))
+            }
+        }
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
+            let generation = FILE_WRITE_GENERATIONS
+                .lock()
+                .map_err(|_| anyhow::anyhow!("File revision lock is unavailable"))?
+                .get(&revision_key(path, None))
+                .copied()
+                .unwrap_or_default();
+            Ok(format!("missing:generation:{generation}"))
+        }
+        Err(error) => Err(error.into()),
+    }
+}
+
+pub fn get_file_write_revision(path: &Path) -> AnyResult<String> {
+    let _guard = FILE_WRITE_MUTEX
+        .lock()
+        .map_err(|_| anyhow::anyhow!("File write lock is unavailable"))?;
+    file_write_revision_unlocked(path)
+}
+
+fn bump_file_write_generation(path: &Path) -> AnyResult<()> {
+    let metadata = fs::metadata(path).ok();
+    let path_key = path_revision_key(path);
+    let file_key = revision_key(path, metadata.as_ref());
+    let mut generations = FILE_WRITE_GENERATIONS
+        .lock()
+        .map_err(|_| anyhow::anyhow!("File revision lock is unavailable"))?;
+    let path_generation = generations.entry(path_key.clone()).or_default();
+    *path_generation = path_generation.wrapping_add(1);
+    if file_key != path_key {
+        let file_generation = generations.entry(file_key).or_default();
+        *file_generation = file_generation.wrapping_add(1);
+    }
+    Ok(())
+}
+
+fn atomic_write_file_unlocked(path: &Path, content: &[u8]) -> AnyResult<()> {
+    let parent = path
+        .parent()
+        .filter(|parent| !parent.as_os_str().is_empty())
+        .unwrap_or_else(|| Path::new("."));
+    let mut temp_file_builder = tempfile::Builder::new();
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        temp_file_builder.permissions(fs::Permissions::from_mode(0o666));
+    }
+    let mut temp_file = temp_file_builder.tempfile_in(parent)?;
+
+    if let Ok(metadata) = fs::metadata(path) {
+        temp_file
+            .as_file()
+            .set_permissions(metadata.permissions())?;
+    }
+
+    temp_file.write_all(content)?;
+    temp_file.as_file_mut().sync_all()?;
+    temp_file.persist(path).map_err(|error| error.error)?;
+
+    #[cfg(unix)]
+    fs::File::open(parent)?.sync_all()?;
+
+    Ok(())
+}
+
+fn write_file_in_place_unlocked(path: &Path, content: &[u8], create: bool) -> AnyResult<()> {
+    let mut options = fs::OpenOptions::new();
+    options.write(true).truncate(true).create(create);
+    let mut file = options.open(path)?;
+    file.write_all(content)?;
+    file.sync_all()?;
+    Ok(())
+}
+
+pub fn conditional_write_file(
+    path: &Path,
+    content: &[u8],
+    expected_revision: &str,
+) -> AnyResult<ConditionalWriteResult> {
+    let _guard = FILE_WRITE_MUTEX
+        .lock()
+        .map_err(|_| anyhow::anyhow!("File write lock is unavailable"))?;
+    let current_revision = file_write_revision_unlocked(path)?;
+
+    if current_revision != expected_revision {
+        return Ok(ConditionalWriteResult {
+            status: ConditionalWriteStatus::Conflict,
+            revision: current_revision,
+        });
+    }
+
+    match fs::metadata(path) {
+        Ok(_) => {
+            // Preserve the inode, hardlinks, xattrs, and the existing `fs::write`
+            // behavior of following symlinks. The process mutex keeps CAS atomic.
+            write_file_in_place_unlocked(path, content, false)?;
+        }
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
+            let is_dangling_symlink = fs::symlink_metadata(path)
+                .map(|metadata| metadata.file_type().is_symlink())
+                .unwrap_or(false);
+            if is_dangling_symlink {
+                write_file_in_place_unlocked(path, content, true)?;
+            } else {
+                atomic_write_file_unlocked(path, content)?;
+            }
+        }
+        Err(error) => return Err(error.into()),
+    }
+    bump_file_write_generation(path)?;
+    Ok(ConditionalWriteResult {
+        status: ConditionalWriteStatus::Success,
+        revision: file_write_revision_unlocked(path)?,
+    })
 }
 
 pub fn exists(path: &Path) -> bool {
@@ -842,37 +1083,155 @@ pub struct MoveFileInfo {
 }
 
 pub fn rename_fs(old_path: &Path, new_path: &Path) -> AnyResult<MoveFileInfo> {
-    fs::rename(old_path, new_path)?;
+    // Capture the kind before rename: after a successful move, querying old_path is invalid.
+    let is_folder = fs::metadata(old_path)?.is_dir();
 
-    let is_folder = new_path.is_dir();
-
-    if is_folder {
-        let res = read_directory(new_path.to_str().unwrap_or(""));
-
-        let files: Option<Vec<FileInfo>> = match res {
-            Ok(files) => Some(files),
-            Err(_) => None,
-        };
-        if files.is_none() {
-            return Err(anyhow::anyhow!("Failed to read directory"));
-        }
-
-        Ok(MoveFileInfo {
-            old_path: old_path.to_str().unwrap_or("").to_string(),
-            new_path: new_path.to_str().unwrap_or("").to_string(),
-            is_folder: is_folder,
-            children: files,
-            is_replaced: Some(false),
-        })
-    } else {
-        Ok(MoveFileInfo {
-            old_path: old_path.to_str().unwrap_or("").to_string(),
-            new_path: new_path.to_str().unwrap_or("").to_string(),
-            is_folder: is_folder,
-            children: None,
-            is_replaced: Some(false),
-        })
+    if old_path != new_path {
+        fs::rename(old_path, new_path)?;
     }
+
+    Ok(MoveFileInfo {
+        old_path: old_path.to_string_lossy().into_owned(),
+        new_path: new_path.to_string_lossy().into_owned(),
+        is_folder,
+        // The frontend rebases already-loaded descendants and does not consume this field.
+        // Avoid scanning a potentially large directory on the synchronous rename path.
+        children: None,
+        is_replaced: Some(false),
+    })
+}
+
+pub fn paths_refer_to_same_file(path1: &Path, path2: &Path) -> bool {
+    path1.exists() && path2.exists() && same_file::is_same_file(path1, path2).unwrap_or(false)
+}
+
+fn resolved_directory_entry(path: &Path) -> Option<PathBuf> {
+    let parent = path.parent()?;
+    let requested_name = path.file_name()?;
+    let mut matching_entries = fs::read_dir(parent)
+        .ok()?
+        .filter_map(Result::ok)
+        .filter(|entry| paths_refer_to_same_file(&entry.path(), path))
+        .collect::<Vec<_>>();
+
+    if let Some(exact_entry) = matching_entries
+        .iter()
+        .find(|entry| entry.file_name() == requested_name)
+    {
+        return Some(exact_entry.path());
+    }
+
+    if matching_entries.len() == 1 {
+        return matching_entries.pop().map(|entry| entry.path());
+    }
+
+    None
+}
+
+/// Distinguishes a case/Unicode alias of one directory entry from a different
+/// hardlink or symlink that happens to resolve to the same physical file.
+pub fn paths_refer_to_same_directory_entry(path1: &Path, path2: &Path) -> bool {
+    if !paths_refer_to_same_file(path1, path2) {
+        return false;
+    }
+
+    let (Some(parent1), Some(parent2)) = (path1.parent(), path2.parent()) else {
+        return false;
+    };
+    if !paths_refer_to_same_file(parent1, parent2) {
+        return false;
+    }
+
+    let (Some(entry1), Some(entry2)) = (
+        resolved_directory_entry(path1),
+        resolved_directory_entry(path2),
+    ) else {
+        return false;
+    };
+
+    entry1.file_name() == entry2.file_name()
+}
+
+fn unique_replace_backup_path(target_path: &Path) -> AnyResult<PathBuf> {
+    let parent = target_path
+        .parent()
+        .ok_or_else(|| anyhow::anyhow!("Replacement target has no parent"))?;
+    let file_name = target_path
+        .file_name()
+        .ok_or_else(|| anyhow::anyhow!("Replacement target has no file name"))?;
+
+    for _ in 0..16 {
+        let mut backup_name = std::ffi::OsString::from(".");
+        backup_name.push(file_name);
+        backup_name.push(format!(".markflowy-replace-{}.bak", uuid::Uuid::new_v4()));
+        let backup_path = parent.join(backup_name);
+        if !backup_path.exists() {
+            return Ok(backup_path);
+        }
+    }
+
+    Err(anyhow::anyhow!(
+        "Failed to allocate a unique replacement backup path"
+    ))
+}
+
+fn remove_path(path: &Path, is_folder: bool) -> std::io::Result<()> {
+    if is_folder {
+        fs::remove_dir_all(path)
+    } else {
+        fs::remove_file(path)
+    }
+}
+
+fn replace_path(source_path: &Path, target_path: &Path) -> AnyResult<Vec<MoveFileInfo>> {
+    if paths_refer_to_same_file(source_path, target_path) {
+        return Ok(Vec::new());
+    }
+
+    let target_is_folder = fs::metadata(target_path)?.is_dir();
+    let backup_path = unique_replace_backup_path(target_path)?;
+    fs::rename(target_path, &backup_path)?;
+
+    let moved = match rename_fs(source_path, target_path) {
+        Ok(moved) => moved,
+        Err(move_error) => {
+            return match fs::rename(&backup_path, target_path) {
+                Ok(()) => Err(anyhow::anyhow!(
+                    "Failed to replace {}: {}; the original target was restored",
+                    target_path.display(),
+                    move_error
+                )),
+                Err(rollback_error) => Err(anyhow::anyhow!(
+                    "Failed to replace {}: {}; rollback also failed: {}. Original target remains at {}",
+                    target_path.display(),
+                    move_error,
+                    rollback_error,
+                    backup_path.display()
+                )),
+            };
+        }
+    };
+
+    if let Err(error) = remove_path(&backup_path, target_is_folder) {
+        // The requested replacement is already complete. Reporting failure here would leave the
+        // frontend stale, so retain the backup and surface the cleanup issue diagnostically.
+        log::warn!(
+            "Replacement succeeded but backup cleanup failed for {}: {}",
+            backup_path.display(),
+            error
+        );
+    }
+
+    Ok(vec![
+        MoveFileInfo {
+            old_path: target_path.to_string_lossy().into_owned(),
+            new_path: String::new(),
+            is_folder: target_is_folder,
+            children: None,
+            is_replaced: Some(true),
+        },
+        moved,
+    ])
 }
 
 pub fn move_files_to_target_folder(
@@ -881,37 +1240,51 @@ pub fn move_files_to_target_folder(
     replace_exist: bool,
 ) -> AnyResult<Vec<MoveFileInfo>> {
     let mut path_map_old_to_new = vec![];
+    let mut move_errors = vec![];
 
     for file in files {
         let file_path = Path::new(&file);
         let file_name = match file_path.file_name() {
             Some(name) => name,
-            None => continue,
+            None => {
+                move_errors.push(format!("Invalid source path: {}", file_path.display()));
+                continue;
+            }
         };
         let target_path = Path::new(target_folder).join(file_name);
 
-        if target_path.exists() {
-            if replace_exist {
-                if target_path.is_dir() {
-                    fs::remove_dir_all(target_path.clone())?;
-                } else {
-                    fs::remove_file(target_path.clone())?;
-                }
-
-                path_map_old_to_new.push(MoveFileInfo {
-                    old_path: target_path.to_str().unwrap_or("").to_string(),
-                    new_path: "".to_string(),
-                    is_folder: target_path.is_dir(),
-                    children: None,
-                    is_replaced: Some(true),
-                });
-            } else {
-                continue;
-            }
+        if paths_refer_to_same_file(file_path, &target_path) {
+            continue;
         }
 
-        let move_file_info = rename_fs(file_path, Path::new(&target_path))?;
-        path_map_old_to_new.push(move_file_info);
+        let move_result = if target_path.exists() {
+            if !replace_exist {
+                continue;
+            }
+            replace_path(file_path, &target_path)
+        } else {
+            rename_fs(file_path, &target_path).map(|move_info| vec![move_info])
+        };
+
+        match move_result {
+            Ok(move_infos) => path_map_old_to_new.extend(move_infos),
+            Err(error) => {
+                let message = format!(
+                    "Failed to move {} to {}: {}",
+                    file_path.display(),
+                    target_path.display(),
+                    error
+                );
+                log::warn!("{}", message);
+                move_errors.push(message);
+            }
+        }
+    }
+
+    // Keep already completed moves observable to the frontend. If every attempted move failed,
+    // reject the command so callers still receive a real error instead of a misleading null.
+    if path_map_old_to_new.is_empty() && !move_errors.is_empty() {
+        return Err(anyhow::anyhow!(move_errors.join("; ")));
     }
 
     Ok(path_map_old_to_new)
@@ -1004,88 +1377,25 @@ pub fn get_file_normal_info(path_str: &str) -> FileNormalInfo {
     }
 }
 
-pub fn convert_text_async(
-    text: String,
-    variant: String,
-) -> impl Future<Output = Result<String, SystemError>> {
-    use crate::task_system::{
-        error::SystemError,
-        system::System,
-        task::{ExecStatus, Interrupter, Task, TaskId, TaskOutput},
-    };
-    use async_trait::async_trait;
-    use thiserror::Error;
+pub async fn convert_text_async(text: String, variant: String) -> Result<String, SystemError> {
     use zhconv::{zhconv, Variant};
 
-    #[derive(Debug, Error)]
-    enum ConvertError {
-        #[error("System error: {0}")]
-        SystemError(#[from] SystemError),
-    }
-
-    #[derive(Debug)]
-    struct ConvertTextTask {
-        id: TaskId,
-        text: String,
-        variant: String,
-    }
-
-    impl ConvertTextTask {
-        fn new(text: String, variant: String) -> Self {
-            Self {
-                id: TaskId::new_v4(),
-                text,
-                variant,
-            }
-        }
-    }
-
-    #[async_trait]
-    impl Task<ConvertError> for ConvertTextTask {
-        fn id(&self) -> TaskId {
-            self.id
-        }
-
-        fn with_priority(&self) -> bool {
-            true
-        }
-
-        async fn run(&mut self, _interrupter: &Interrupter) -> Result<ExecStatus, ConvertError> {
-            let variant_enum = match self.variant.as_str() {
-                "zh-TW" => Variant::ZhTW,
-                "zh-HK" => Variant::ZhHK,
-                "zh-CN" => Variant::ZhCN,
-                "zh-Hans" => Variant::ZhHans,
-                _ => Variant::ZhTW,
-            };
-            let result = zhconv(&self.text, variant_enum);
-            Ok(ExecStatus::Done(TaskOutput::Out(Box::new(result))))
-        }
-    }
-
-    async move {
-        let system = System::<ConvertError>::new();
-        let task = ConvertTextTask::new(text, variant);
-        let handle = system
-            .dispatch(task)
-            .await
-            .map_err(|_| SystemError::TaskAborted(TaskId::nil()))?;
-
-        match handle.await {
-            Ok(crate::task_system::task::TaskStatus::Done((_, TaskOutput::Out(out)))) => {
-                let text = out
-                    .downcast::<String>()
-                    .map_err(|_| SystemError::TaskAborted(TaskId::nil()))?;
-                Ok(*text)
-            }
-            Ok(crate::task_system::task::TaskStatus::Error(ConvertError::SystemError(e))) => Err(e),
-            _ => Err(SystemError::TaskAborted(TaskId::nil())),
-        }
-    }
+    tokio::task::spawn_blocking(move || {
+        let variant = match variant.as_str() {
+            "zh-TW" => Variant::ZhTW,
+            "zh-HK" => Variant::ZhHK,
+            "zh-CN" => Variant::ZhCN,
+            "zh-Hans" => Variant::ZhHans,
+            _ => Variant::ZhTW,
+        };
+        zhconv(&text, variant)
+    })
+    .await
+    .map_err(|_| SystemError::TaskAborted(uuid::Uuid::nil()))
 }
 
 pub mod cmd {
-    use crate::fc::{self, FileNormalInfo, FileResultCode};
+    use crate::fc::{self, ConditionalWriteResult, FileNormalInfo, FileResultCode};
     use base64::engine::Engine;
     use base64::prelude::BASE64_STANDARD;
     use regex::Regex;
@@ -1130,8 +1440,36 @@ pub mod cmd {
     }
 
     #[tauri::command]
-    pub fn write_file(file_path: &str, content: &str) -> FileResult {
-        fc::write_file(file_path, content)
+    pub async fn write_file(file_path: String, content: String) -> Result<FileResult, String> {
+        tokio::task::spawn_blocking(move || fc::write_file(&file_path, &content))
+            .await
+            .map_err(|error| error.to_string())
+    }
+
+    #[tauri::command]
+    pub async fn get_file_write_revision(file_path: String) -> Result<String, String> {
+        tokio::task::spawn_blocking(move || fc::get_file_write_revision(Path::new(&file_path)))
+            .await
+            .map_err(|error| error.to_string())?
+            .map_err(|error| error.to_string())
+    }
+
+    #[tauri::command]
+    pub async fn conditional_write_file(
+        file_path: String,
+        content: String,
+        expected_revision: String,
+    ) -> Result<ConditionalWriteResult, String> {
+        tokio::task::spawn_blocking(move || {
+            fc::conditional_write_file(
+                Path::new(&file_path),
+                content.as_bytes(),
+                &expected_revision,
+            )
+        })
+        .await
+        .map_err(|error| error.to_string())?
+        .map_err(|error| error.to_string())
     }
 
     #[tauri::command]
@@ -1226,13 +1564,9 @@ pub mod cmd {
         files: Vec<String>,
         target_folder: &str,
         replace_exist: bool,
-    ) -> Option<Vec<MoveFileInfo>> {
-        let res = fc::move_files_to_target_folder(files, target_folder, replace_exist);
-
-        match res {
-            Ok(path_map_old_to_new) => Some(path_map_old_to_new),
-            Err(_) => None,
-        }
+    ) -> Result<Vec<MoveFileInfo>, String> {
+        fc::move_files_to_target_folder(files, target_folder, replace_exist)
+            .map_err(|error| error.to_string())
     }
 
     #[tauri::command]
@@ -1242,10 +1576,20 @@ pub mod cmd {
     }
 
     #[tauri::command]
-    pub fn rename_fs(old_path: &str, new_path: &str) -> Option<MoveFileInfo> {
+    pub fn rename_fs(old_path: &str, new_path: &str) -> Result<MoveFileInfo, String> {
         let path = Path::new(old_path);
         let new_path = Path::new(new_path);
-        fc::rename_fs(path, new_path).ok()
+        fc::rename_fs(path, new_path).map_err(|error| error.to_string())
+    }
+
+    #[tauri::command]
+    pub fn paths_refer_to_same_file(path1: &str, path2: &str) -> bool {
+        fc::paths_refer_to_same_file(Path::new(path1), Path::new(path2))
+    }
+
+    #[tauri::command]
+    pub fn paths_refer_to_same_directory_entry(path1: &str, path2: &str) -> bool {
+        fc::paths_refer_to_same_directory_entry(Path::new(path1), Path::new(path2))
     }
 
     #[tauri::command]
@@ -1565,5 +1909,321 @@ mod tests {
             .collect::<Vec<_>>();
 
         assert_eq!(names, vec!["src", "keep.tmp"]);
+    }
+
+    #[test]
+    fn directory_rename_does_not_rescan_children() {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let old_path = temp_dir.path().join("old");
+        let new_path = temp_dir.path().join("new");
+        fs::create_dir(&old_path).unwrap();
+        fs::write(old_path.join("child.md"), "content").unwrap();
+
+        let moved = rename_fs(&old_path, &new_path).unwrap();
+
+        assert!(moved.is_folder);
+        assert!(moved.children.is_none());
+        assert!(!old_path.exists());
+        assert!(new_path.join("child.md").exists());
+    }
+
+    #[test]
+    fn replacing_a_path_with_itself_is_a_noop() {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let file_path = temp_dir.path().join("note.md");
+        fs::write(&file_path, "keep me").unwrap();
+
+        let moved = move_files_to_target_folder(
+            vec![file_path.to_string_lossy().into_owned()],
+            &temp_dir.path().to_string_lossy(),
+            true,
+        )
+        .unwrap();
+
+        assert!(moved.is_empty());
+        assert_eq!(fs::read_to_string(file_path).unwrap(), "keep me");
+    }
+
+    #[test]
+    fn detects_distinct_paths_that_refer_to_the_same_file() {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let original_path = temp_dir.path().join("original.md");
+        let alias_path = temp_dir.path().join("alias.md");
+        fs::write(&original_path, "content").unwrap();
+        fs::hard_link(&original_path, &alias_path).unwrap();
+
+        assert!(paths_refer_to_same_file(&original_path, &alias_path));
+        assert!(!paths_refer_to_same_file(
+            &original_path,
+            &temp_dir.path().join("missing.md")
+        ));
+        assert!(!paths_refer_to_same_directory_entry(
+            &original_path,
+            &alias_path
+        ));
+        assert!(paths_refer_to_same_directory_entry(
+            &original_path,
+            &original_path
+        ));
+    }
+
+    #[test]
+    fn detects_case_aliases_without_merging_case_sensitive_entries() {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let original_path = temp_dir.path().join("CaseAlias.md");
+        let alias_path = temp_dir.path().join("casealias.md");
+        fs::write(&original_path, "content").unwrap();
+
+        if paths_refer_to_same_file(&original_path, &alias_path) {
+            assert!(paths_refer_to_same_directory_entry(
+                &original_path,
+                &alias_path
+            ));
+        } else {
+            fs::write(&alias_path, "other content").unwrap();
+            assert!(!paths_refer_to_same_directory_entry(
+                &original_path,
+                &alias_path
+            ));
+        }
+    }
+
+    #[test]
+    fn conditional_atomic_write_rejects_a_stale_revision() {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let file_path = temp_dir.path().join("note.md");
+        fs::write(&file_path, "initial").unwrap();
+        let expected_revision = get_file_write_revision(&file_path).unwrap();
+
+        let first = conditional_write_file(&file_path, b"first", &expected_revision).unwrap();
+        let second = conditional_write_file(&file_path, b"second", &expected_revision).unwrap();
+
+        assert_eq!(first.status, ConditionalWriteStatus::Success);
+        assert_eq!(second.status, ConditionalWriteStatus::Conflict);
+        assert_eq!(fs::read_to_string(file_path).unwrap(), "first");
+    }
+
+    #[test]
+    fn conditional_atomic_write_advances_revision_for_identical_content() {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let file_path = temp_dir.path().join("note.md");
+        fs::write(&file_path, "same").unwrap();
+        let expected_revision = get_file_write_revision(&file_path).unwrap();
+
+        let first = conditional_write_file(&file_path, b"same", &expected_revision).unwrap();
+        let second = conditional_write_file(&file_path, b"other", &expected_revision).unwrap();
+
+        assert_eq!(first.status, ConditionalWriteStatus::Success);
+        assert_eq!(second.status, ConditionalWriteStatus::Conflict);
+        assert_eq!(fs::read_to_string(file_path).unwrap(), "same");
+    }
+
+    #[test]
+    fn conditional_atomic_write_distinguishes_a_missing_target() {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let file_path = temp_dir.path().join("new.md");
+        let missing_revision = get_file_write_revision(&file_path).unwrap();
+        assert!(missing_revision.starts_with("missing:generation:"));
+
+        let first = conditional_write_file(&file_path, b"created", &missing_revision).unwrap();
+        let second = conditional_write_file(&file_path, b"replaced", &missing_revision).unwrap();
+
+        assert_eq!(first.status, ConditionalWriteStatus::Success);
+        assert_eq!(second.status, ConditionalWriteStatus::Conflict);
+        assert_eq!(fs::read_to_string(file_path).unwrap(), "created");
+    }
+
+    #[test]
+    fn conditional_write_rejects_a_missing_path_aba_revision() {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let file_path = temp_dir.path().join("created-then-deleted.md");
+        let missing_revision = get_file_write_revision(&file_path).unwrap();
+
+        conditional_write_file(&file_path, b"temporary", &missing_revision).unwrap();
+        fs::remove_file(&file_path).unwrap();
+        let current_missing_revision = get_file_write_revision(&file_path).unwrap();
+        let stale_write = conditional_write_file(&file_path, b"stale", &missing_revision).unwrap();
+
+        assert_ne!(current_missing_revision, missing_revision);
+        assert_eq!(stale_write.status, ConditionalWriteStatus::Conflict);
+        assert!(!file_path.exists());
+    }
+
+    #[test]
+    fn conditional_write_updates_hardlinks_in_place() {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let selected_path = temp_dir.path().join("selected.md");
+        let other_link = temp_dir.path().join("other-link.md");
+        fs::write(&selected_path, "old").unwrap();
+        fs::hard_link(&selected_path, &other_link).unwrap();
+        let original_metadata = fs::metadata(&selected_path).unwrap();
+        let revision = get_file_write_revision(&selected_path).unwrap();
+
+        let result = conditional_write_file(&selected_path, b"new", &revision).unwrap();
+
+        assert_eq!(result.status, ConditionalWriteStatus::Success);
+        assert_eq!(fs::read_to_string(&selected_path).unwrap(), "new");
+        assert_eq!(fs::read_to_string(&other_link).unwrap(), "new");
+        assert!(paths_refer_to_same_file(&selected_path, &other_link));
+
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::MetadataExt;
+            assert_eq!(
+                fs::metadata(selected_path).unwrap().ino(),
+                original_metadata.ino()
+            );
+        }
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn conditional_atomic_write_follows_symlink_without_replacing_it() {
+        use std::os::unix::fs::symlink;
+
+        let temp_dir = tempfile::tempdir().unwrap();
+        let target_path = temp_dir.path().join("target.md");
+        let link_path = temp_dir.path().join("link.md");
+        fs::write(&target_path, "old").unwrap();
+        symlink(&target_path, &link_path).unwrap();
+        let revision = get_file_write_revision(&link_path).unwrap();
+
+        let result = conditional_write_file(&link_path, b"new", &revision).unwrap();
+
+        assert_eq!(result.status, ConditionalWriteStatus::Success);
+        assert!(fs::symlink_metadata(&link_path)
+            .unwrap()
+            .file_type()
+            .is_symlink());
+        assert_eq!(fs::read_link(&link_path).unwrap(), target_path);
+        assert_eq!(fs::read_to_string(&link_path).unwrap(), "new");
+        assert_eq!(fs::read_to_string(&target_path).unwrap(), "new");
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn conditional_write_keeps_a_dangling_symlink_entry() {
+        use std::os::unix::fs::symlink;
+
+        let temp_dir = tempfile::tempdir().unwrap();
+        let target_path = temp_dir.path().join("created-target.md");
+        let link_path = temp_dir.path().join("dangling-link.md");
+        symlink(&target_path, &link_path).unwrap();
+        let revision = get_file_write_revision(&link_path).unwrap();
+
+        conditional_write_file(&link_path, b"created", &revision).unwrap();
+
+        assert!(fs::symlink_metadata(&link_path)
+            .unwrap()
+            .file_type()
+            .is_symlink());
+        assert_eq!(fs::read_to_string(target_path).unwrap(), "created");
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn conditional_atomic_write_preserves_existing_permissions() {
+        use std::os::unix::fs::{MetadataExt, PermissionsExt};
+
+        let temp_dir = tempfile::tempdir().unwrap();
+        let file_path = temp_dir.path().join("permissions.md");
+        fs::write(&file_path, "old").unwrap();
+        fs::set_permissions(&file_path, fs::Permissions::from_mode(0o640)).unwrap();
+        let revision = get_file_write_revision(&file_path).unwrap();
+
+        conditional_write_file(&file_path, b"new", &revision).unwrap();
+
+        assert_eq!(fs::metadata(file_path).unwrap().mode() & 0o777, 0o640);
+    }
+
+    #[test]
+    fn replace_moves_source_and_cleans_the_backup() {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let source_dir = temp_dir.path().join("source");
+        let target_dir = temp_dir.path().join("target");
+        fs::create_dir(&source_dir).unwrap();
+        fs::create_dir(&target_dir).unwrap();
+        let source_path = source_dir.join("note.md");
+        let target_path = target_dir.join("note.md");
+        fs::write(&source_path, "new content").unwrap();
+        fs::write(&target_path, "old content").unwrap();
+
+        let moved = move_files_to_target_folder(
+            vec![source_path.to_string_lossy().into_owned()],
+            &target_dir.to_string_lossy(),
+            true,
+        )
+        .unwrap();
+
+        assert_eq!(moved.len(), 2);
+        assert_eq!(moved[0].is_replaced, Some(true));
+        assert_eq!(moved[0].old_path, target_path.to_string_lossy());
+        assert_eq!(moved[1].old_path, source_path.to_string_lossy());
+        assert!(!source_path.exists());
+        assert_eq!(fs::read_to_string(&target_path).unwrap(), "new content");
+        assert_eq!(fs::read_dir(&target_dir).unwrap().count(), 1);
+    }
+
+    #[test]
+    fn failed_replace_restores_the_original_target() {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let source_dir = temp_dir.path().join("source");
+        let target_dir = temp_dir.path().join("target");
+        fs::create_dir(&source_dir).unwrap();
+        fs::create_dir(&target_dir).unwrap();
+        let missing_source = source_dir.join("note.md");
+        let target_path = target_dir.join("note.md");
+        fs::write(&target_path, "original content").unwrap();
+
+        let result = move_files_to_target_folder(
+            vec![missing_source.to_string_lossy().into_owned()],
+            &target_dir.to_string_lossy(),
+            true,
+        );
+
+        assert!(result.is_err());
+        assert_eq!(
+            fs::read_to_string(&target_path).unwrap(),
+            "original content"
+        );
+        assert_eq!(fs::read_dir(&target_dir).unwrap().count(), 1);
+    }
+
+    #[test]
+    fn multi_move_returns_successes_when_a_later_item_fails() {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let source_dir = temp_dir.path().join("source");
+        let target_dir = temp_dir.path().join("target");
+        fs::create_dir(&source_dir).unwrap();
+        fs::create_dir(&target_dir).unwrap();
+        let source_path = source_dir.join("good.md");
+        let missing_source = source_dir.join("missing.md");
+        fs::write(&source_path, "moved content").unwrap();
+
+        let moved = move_files_to_target_folder(
+            vec![
+                source_path.to_string_lossy().into_owned(),
+                missing_source.to_string_lossy().into_owned(),
+            ],
+            &target_dir.to_string_lossy(),
+            false,
+        )
+        .unwrap();
+
+        assert_eq!(moved.len(), 1);
+        assert_eq!(moved[0].old_path, source_path.to_string_lossy());
+        assert_eq!(
+            fs::read_to_string(target_dir.join("good.md")).unwrap(),
+            "moved content"
+        );
+    }
+
+    #[tokio::test]
+    async fn converts_text_on_the_shared_blocking_pool() {
+        let converted = convert_text_async("汉语".to_string(), "zh-TW".to_string())
+            .await
+            .unwrap();
+
+        assert_eq!(converted, "漢語");
     }
 }

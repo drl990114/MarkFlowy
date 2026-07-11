@@ -121,8 +121,6 @@ const SearchMatchSnippet = memo(
     const start = Math.max(0, currentMatch.start - prefixWindow)
     const end = Math.min(content.length, currentMatch.end + suffixWindow)
 
-    const snippet = content.slice(start, end)
-
     const renderSnippet = () => {
       const result: React.ReactNode[] = []
       let lastIndex = start

@@ -1,4 +1,3 @@
-import { ProsemirrorDevTools } from '@rme-sdk/dev'
 import type { Extension, RemirrorEventListener } from '@rme-sdk/main'
 import { Remirror } from '@rme-sdk/react'
 import React, { memo, useCallback, useMemo } from 'react'
@@ -6,7 +5,9 @@ import { createContextState } from '../../hooks/create-context-state'
 import { SourceCodeThemeWrapper } from '../../theme'
 import type { EditorDelegate } from '../../types'
 import { defaultStyleToken, type EditorProps } from '../Editor'
+import { EditorDevTools } from '../EditorDevTools'
 import ErrorBoundary from '../ErrorBoundary'
+import { useInitialEditorContent } from '../useInitialEditorContent'
 import Text from './Text'
 import { createSourceCodeDelegate } from './delegate'
 
@@ -35,12 +36,9 @@ const SourceCodeEditorCore = memo(
     const { markdownToolBar, styleToken, textContainerProps = {} } = props
     const { content, markText, hooks, isTesting, editable } = useSourceCodeEditor()
 
-    let initialCntent
-
-    try {
-      initialCntent = markText.stringToDoc(content!)
-    } catch (error) {
-      return <ErrorBoundary hasError error={error} {...(props.errorHandler || {})} />
+    const initialContent = useInitialEditorContent(markText, content!)
+    if (!initialContent.ok) {
+      return <ErrorBoundary hasError error={initialContent.error} {...(props.errorHandler || {})} />
     }
 
     return (
@@ -48,7 +46,7 @@ const SourceCodeEditorCore = memo(
         <SourceCodeThemeWrapper {...styleToken}>
           <Remirror
             manager={markText.manager}
-            initialContent={initialCntent}
+            initialContent={initialContent.doc}
             hooks={hooks}
             editable={editable}
             onChange={props.onChange}
@@ -56,7 +54,7 @@ const SourceCodeEditorCore = memo(
           >
             <Text {...textContainerProps} />
             {markdownToolBar || null}
-            {isTesting ? <ProsemirrorDevTools /> : null}
+            {isTesting ? <EditorDevTools /> : null}
           </Remirror>
         </SourceCodeThemeWrapper>
       </ErrorBoundary>
@@ -75,7 +73,9 @@ const SourceEditor: React.FC<EditorProps> = (props) => {
     hooks,
     markdownToolBar,
     styleToken = defaultStyleToken,
-    sourceCodeTextContainerProps = {}
+    sourceCodeTextContainerProps = {},
+    onChange,
+    editable = true,
   } = props
 
   const editorDelegate = useMemo(() => delegate ?? createSourceCodeDelegate(), [delegate])
@@ -84,12 +84,12 @@ const SourceEditor: React.FC<EditorProps> = (props) => {
     (params) => {
       try {
         // const textContent = editorDelegate.docToString(params.state.doc)
-        props.onChange?.(params)
+        onChange?.(params)
       } catch (error) {
         console.error(error)
       }
     },
-    [editorDelegate, props],
+    [onChange],
   )
 
   return (
@@ -98,6 +98,7 @@ const SourceEditor: React.FC<EditorProps> = (props) => {
       isTesting={isTesting}
       markText={editorDelegate}
       hooks={hooks}
+      editable={editable}
     >
       <SourceCodeEditorCore
         styleToken={styleToken}

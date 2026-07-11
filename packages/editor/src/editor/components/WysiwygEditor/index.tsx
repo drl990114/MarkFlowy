@@ -1,5 +1,4 @@
 import type { Extension, RemirrorEventListener } from '@rme-sdk/core'
-import { ProsemirrorDevTools } from '@rme-sdk/dev'
 import { Remirror } from '@rme-sdk/react'
 import { memo, useCallback, useEffect, useMemo, type FC } from 'react'
 import { TransformerExtension } from '../../extensions/Transformer/transformer-extension'
@@ -10,7 +9,9 @@ import { SlashMenu } from '../../toolbar/SlashMenu'
 import TableToolbar from '../../toolbar/TableToolbar'
 import { WysiwygToolbar } from '../../toolbar/toolbar'
 import { defaultStyleToken, type EditorProps } from '../Editor'
+import { EditorDevTools } from '../EditorDevTools'
 import ErrorBoundary from '../ErrorBoundary'
+import { useInitialEditorContent } from '../useInitialEditorContent'
 import Text from './Text'
 import { createWysiwygDelegate } from './delegate'
 
@@ -26,6 +27,7 @@ const WysiwygEditor: FC<EditorProps> = (props) => {
     blockHandlerOptions,
     styleToken = defaultStyleToken,
     wysiwygTextContainerProps = {},
+    onChange,
   } = props
 
   const editorDelegate = useMemo(() => delegate ?? createWysiwygDelegate(), [delegate])
@@ -34,12 +36,12 @@ const WysiwygEditor: FC<EditorProps> = (props) => {
     (params) => {
       try {
         // const textContent = editorDelegate.docToString(params.state.doc)
-        props.onChange?.(params)
+        onChange?.(params)
       } catch (error) {
         console.error(error)
       }
     },
-    [editorDelegate, props],
+    [onChange],
   )
 
   useEffect(() => {
@@ -55,11 +57,9 @@ const WysiwygEditor: FC<EditorProps> = (props) => {
     }
   }, [editorDelegate])
 
-  let initialContent
-  try {
-    initialContent = editorDelegate.stringToDoc(content)
-  } catch (error) {
-    return <ErrorBoundary hasError error={error} {...(props.errorHandler || {})} />
+  const initialContent = useInitialEditorContent(editorDelegate, content)
+  if (!initialContent.ok) {
+    return <ErrorBoundary hasError error={initialContent.error} {...(props.errorHandler || {})} />
   }
 
   return (
@@ -67,7 +67,7 @@ const WysiwygEditor: FC<EditorProps> = (props) => {
       <WysiwygThemeWrapper {...styleToken}>
         <Remirror
           manager={editorDelegate.manager}
-          initialContent={initialContent}
+          initialContent={initialContent.doc}
           hooks={hooks}
           editable={editable}
           onChange={handleChange}
@@ -82,7 +82,7 @@ const WysiwygEditor: FC<EditorProps> = (props) => {
           <SlashMenu />
           <LinkHoverIcon handleLinkClick={props.delegateOptions?.handleLinkClick} />
           {wysiwygToolBar || null}
-          {isTesting ? <ProsemirrorDevTools /> : null}
+          {isTesting ? <EditorDevTools /> : null}
         </Remirror>
       </WysiwygThemeWrapper>
     </ErrorBoundary>

@@ -6,6 +6,8 @@ import { invoke } from '@tauri-apps/api/core'
 import { nanoid } from 'nanoid'
 import { resolveFileExcludePatterns } from './file-exclude'
 import {
+  deletePathEntry,
+  getFileObject,
   getFileObjectByPath,
   setFileObject,
   setFileObjectByPath,
@@ -66,10 +68,23 @@ export const createFile = (opt?: Partial<IFile>): IFile => {
   return file
 }
 
-export const updateFile = (file: IFile): IFile => {
-  setFileObject(file.id, file)
-  setFileObjectByPath(file.path!, file)
-  return file
+export const updateFile = (changes: Partial<IFile> & Pick<IFile, 'id'>): IFile => {
+  const currentFile = getFileObject(changes.id)
+  const nextFile = { ...currentFile, ...changes } as IFile
+
+  if (!currentFile && (!nextFile.name || !nextFile.kind)) {
+    throw new Error(`Cannot update unknown file: ${changes.id}`)
+  }
+
+  if (currentFile?.path && currentFile.path !== nextFile.path) {
+    deletePathEntry(currentFile.path)
+  }
+
+  setFileObject(nextFile.id, nextFile)
+  if (nextFile.path) {
+    setFileObjectByPath(nextFile.path, nextFile)
+  }
+  return nextFile
 }
 
 export const createUntitledFile = (): IFile => {

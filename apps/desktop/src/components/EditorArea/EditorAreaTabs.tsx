@@ -1,7 +1,6 @@
 import { EVENT } from '@/constants'
-import { getFileObject, getSaveOpenedEditorEntries } from '@/helper/files'
-import type { IFile } from '@/helper/filesys'
-import { checkUnsavedFiles } from '@/services/checkUnsavedFiles'
+import useFileCacheStore from '@/helper/files'
+import { checkUnsavedFiles, saveUnsavedFiles } from '@/services/checkUnsavedFiles'
 import { useEditorStateStore, useEditorStore } from '@/stores'
 import { memo, type DragEvent, useCallback, useEffect, useRef } from 'react'
 import { useTranslation } from '@/i18n'
@@ -72,15 +71,12 @@ interface EditorAreaTabsProps {
 interface EditorAreaTabProps {
   active: boolean
   close: (ev: React.MouseEvent<HTMLElement, MouseEvent> | undefined, id: string) => void
-  closeAllFilesInGroup: (groupId: string) => void
-  closeOtherFilesInGroup: (groupId: string, id: string) => void
   compact: boolean
   groupId: string
   handleDragOver: (e: DragEvent<HTMLElement>) => void
   handleDrop: (e: DragEvent<HTMLElement>) => void
   id: string
   onSelect: (id: string) => void
-  opened: string[]
 }
 
 function getTabLabel(fileName: string, compact: boolean) {
@@ -96,24 +92,21 @@ const EditorAreaTab = memo((props: EditorAreaTabProps) => {
   const {
     active,
     close,
-    closeAllFilesInGroup,
-    closeOtherFilesInGroup,
     compact,
     groupId,
     handleDragOver,
     handleDrop,
     id,
     onSelect,
-    opened,
   } = props
   const hasUnsavedChanges = useEditorStateStore(
     (state) => state.idStateMap.get(id)?.hasUnsavedChanges ?? false,
   )
   const { t } = useTranslation()
-  const file = getFileObject(id) as IFile
-  if (!file) return null
+  const fileName = useFileCacheStore((state) => state.entries[id]?.name)
+  if (!fileName) return null
 
-  const tabLabel = getTabLabel(file.name, compact)
+  const tabLabel = getTabLabel(fileName, compact)
 
   const handleMiddleClick = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
     // 鼠标中键点击关闭标签页
@@ -124,9 +117,9 @@ const EditorAreaTab = memo((props: EditorAreaTabProps) => {
       checkUnsavedFiles({
         fileIds: [id],
         onSaveAndClose: async () => {
-          const saveHandler = getSaveOpenedEditorEntries(id)
-          await saveHandler?.()
-          close(e, id)
+          if (await saveUnsavedFiles([id])) {
+            close(e, id)
+          }
         },
         onUnsavedAndClose: () => {
           close(e, id)
@@ -154,9 +147,9 @@ const EditorAreaTab = memo((props: EditorAreaTabProps) => {
               checkUnsavedFiles({
                 fileIds: [id],
                 onSaveAndClose: async () => {
-                  const saveHandler = getSaveOpenedEditorEntries(id)
-                  await saveHandler?.()
-                  close(e, id)
+                  if (await saveUnsavedFiles([id])) {
+                    close(e, id)
+                  }
                 },
                 onUnsavedAndClose: () => {
                   close(e, id)
@@ -172,16 +165,17 @@ const EditorAreaTab = memo((props: EditorAreaTabProps) => {
           label: t('contextmenu.editor_tab.close_others'),
           value: 'close_others',
           handler: () => {
-            const otherIds = opened.filter((openedId) => openedId !== id)
+            const { closeOtherFilesInGroup, getGroup } = useEditorStore.getState()
+            const otherIds = (getGroup(groupId)?.opened || []).filter(
+              (openedId) => openedId !== id,
+            )
             if (
               checkUnsavedFiles({
                 fileIds: otherIds,
                 onSaveAndClose: async (hasUnsavedFileIds) => {
-                  const saves = hasUnsavedFileIds.map((otherId) =>
-                    getSaveOpenedEditorEntries(otherId),
-                  )
-                  await Promise.all(saves.map((saveHandler) => saveHandler?.()))
-                  closeOtherFilesInGroup(groupId, id)
+                  if (await saveUnsavedFiles(hasUnsavedFileIds)) {
+                    closeOtherFilesInGroup(groupId, id)
+                  }
                 },
                 onUnsavedAndClose: () => {
                   closeOtherFilesInGroup(groupId, id)
@@ -197,15 +191,15 @@ const EditorAreaTab = memo((props: EditorAreaTabProps) => {
           label: t('contextmenu.editor_tab.close_all'),
           value: 'close_all',
           handler: () => {
+            const { closeAllFilesInGroup, getGroup } = useEditorStore.getState()
+            const openedIds = getGroup(groupId)?.opened || []
             if (
               checkUnsavedFiles({
-                fileIds: opened,
+                fileIds: openedIds,
                 onSaveAndClose: async (hasUnsavedFileIds) => {
-                  const saves = hasUnsavedFileIds.map((otherId) =>
-                    getSaveOpenedEditorEntries(otherId),
-                  )
-                  await Promise.all(saves.map((saveHandler) => saveHandler?.()))
-                  closeAllFilesInGroup(groupId)
+                  if (await saveUnsavedFiles(hasUnsavedFileIds)) {
+                    closeAllFilesInGroup(groupId)
+                  }
                 },
                 onUnsavedAndClose: () => {
                   closeAllFilesInGroup(groupId)
@@ -226,15 +220,15 @@ const EditorAreaTab = memo((props: EditorAreaTabProps) => {
       sourceGroupId: groupId,
       fileId: id,
     })
-    e.dataTransfer.setData('text/plain', file.name)
+    e.dataTransfer.setData('text/plain', fileName)
   }
 
   return (
-    <Tooltip title={file.name}>
+    <Tooltip title={fileName}>
       <TabItem
         active={active}
         draggable
-        onClick={() => onSelect(file.id)}
+        onClick={() => onSelect(id)}
         onContextMenu={handleContextMenu}
         onDragOver={handleDragOver}
         onDragStart={handleDragStart}
@@ -275,8 +269,6 @@ const EditorAreaTabs = memo((props: EditorAreaTabsProps) => {
   const { compact = false, groupId } = props
   const group = useEditorStore((state) => state.getGroup(groupId))
   const openFileInGroup = useEditorStore((state) => state.openFileInGroup)
-  const closeOtherFilesInGroup = useEditorStore((state) => state.closeOtherFilesInGroup)
-  const closeAllFilesInGroup = useEditorStore((state) => state.closeAllFilesInGroup)
   const moveFileToGroup = useEditorStore((state) => state.moveFileToGroup)
   const htmlRef = useRef<HTMLDivElement>(null)
   const opened = group?.opened ?? []
@@ -370,8 +362,6 @@ const EditorAreaTabs = memo((props: EditorAreaTabsProps) => {
           <EditorAreaTab
             active={activeId === id}
             close={close}
-            closeAllFilesInGroup={closeAllFilesInGroup}
-            closeOtherFilesInGroup={closeOtherFilesInGroup}
             compact={compact}
             groupId={groupId}
             handleDragOver={handleDragOver}
@@ -379,7 +369,6 @@ const EditorAreaTabs = memo((props: EditorAreaTabsProps) => {
             id={id}
             key={id}
             onSelect={onSelectItem}
-            opened={opened}
           />
         ))}
       </div>

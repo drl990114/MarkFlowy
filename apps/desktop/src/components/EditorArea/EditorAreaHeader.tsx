@@ -1,5 +1,9 @@
-import { getFileObject, getSaveOpenedEditorEntries } from '@/helper/files'
-import { checkUnsavedFiles, guardUnsavedFiles } from '@/services/checkUnsavedFiles'
+import { getFileObject } from '@/helper/files'
+import {
+  checkUnsavedFiles,
+  guardUnsavedFiles,
+  saveUnsavedFiles,
+} from '@/services/checkUnsavedFiles'
 import { addEmptyEditorTab } from '@/services/editor-file'
 import { useEditorStore } from '@/stores'
 import { memo, useCallback, useRef } from 'react'
@@ -70,11 +74,9 @@ export const EditorAreaHeader = memo((props: EditorAreaHeaderProps) => {
               checkUnsavedFiles({
                 fileIds: opened,
                 onSaveAndClose: async (hasUnsavedFileIds) => {
-                  const saves = hasUnsavedFileIds.map((otherId) =>
-                    getSaveOpenedEditorEntries(otherId),
-                  )
-                  await Promise.all(saves.map((saveHandler) => saveHandler?.()))
-                  closeAllFilesInGroup(groupId)
+                  if (await saveUnsavedFiles(hasUnsavedFileIds)) {
+                    closeAllFilesInGroup(groupId)
+                  }
                 },
                 onUnsavedAndClose: () => {
                   closeAllFilesInGroup(groupId)

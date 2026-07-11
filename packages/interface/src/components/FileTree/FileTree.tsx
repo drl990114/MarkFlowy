@@ -1,4 +1,4 @@
-import React, { memo, useMemo, useRef, type FC } from 'react'
+import React, { memo, useCallback, useMemo, useRef, type FC } from 'react'
 import { Tree, TreeApi } from 'react-arborist'
 import type { TreeProps } from 'react-arborist/dist/module/types/tree-props'
 import type { MoveFileInfo } from '../../contexts/FileSystemContext'
@@ -6,6 +6,13 @@ import { useFileSystem } from '../../contexts/FileSystemContext'
 import { useFileTree } from '../../contexts/FileTreeContext'
 import type { IFile } from '../../types/file'
 import FileNode, { ContextMenuItem } from './FileNode'
+import {
+  captureFileMutationTarget,
+  collectFileMutationProtection,
+  getCurrentFileMutationNode,
+  getCurrentFileMutationNodeInRoot,
+  getCurrentFileMutationNodes,
+} from './file-mutation'
 import { moveFileNode } from './file-operator'
 import { SimpleTree } from './types'
 
@@ -29,6 +36,13 @@ export interface FileTreeProps {
   setFileObject?: (id: string, file: IFile) => void
   setFileObjectByPath?: (path: string, file: IFile) => void
   deletePathEntry?: (path: string) => void
+  getFileIdsByPathPrefix?: (path: string) => string[]
+  moveFileObjectsByPathPrefix?: (oldRootPath: string, newRootPath: string) => void
+  deleteFileObjectsByIds?: (fileIds: string[]) => void
+  deleteFileObjectsByPathPrefix?: (rootPath: string) => void
+  onBeforeReplace?: (path: string) =>
+    | { allowed: boolean; targetIds: string[] }
+    | Promise<{ allowed: boolean; targetIds: string[] }>
   createFile?: (opt?: Partial<IFile>) => IFile
   updateFile?: (file: IFile) => IFile
   iconButtonComponent?: React.ComponentType<any>
@@ -59,16 +73,25 @@ const FileTree: FC<FileTreeProps> = (props) => {
     setFileObject,
     setFileObjectByPath,
     deletePathEntry,
+    getFileIdsByPathPrefix,
+    moveFileObjectsByPathPrefix,
+    deleteFileObjectsByIds,
+    deleteFileObjectsByPathPrefix,
+    onBeforeReplace,
     createFile,
     updateFile,
     iconButtonComponent,
   } = props
 
   const { activeId, setFolderDataPure } = useFileTree()
-  const { pathJoin, fileExists, moveFilesToTargetFolder, readSubdirectory } = useFileSystem()
+  const { runFileMutation, pathJoin, fileExists, moveFilesToTargetFolder, readSubdirectory } =
+    useFileSystem()
   const tree = useMemo(() => new SimpleTree<IFile>(data), [data])
   const treeRef = useRef<TreeApi<IFile> | null>(null)
   const loadedDirsRef = useRef<Set<string>>(new Set())
+  const currentDataRef = useRef(data)
+  currentDataRef.current = data
+  const getCurrentFolderData = useCallback(() => currentDataRef.current, [])
 
   if (data === null || data.length === 0) return null
 
@@ -78,16 +101,28 @@ const FileTree: FC<FileTreeProps> = (props) => {
 
     const nodeData = node.data as IFile
     if (nodeData.kind !== 'dir' || !nodeData.path) return
+    const rootId = data[0]?.id
+    const target = captureFileMutationTarget(nodeData)
+    if (!rootId || !target) return
 
     if (loadedDirsRef.current.has(nodeData.path)) return
 
     if (!nodeData.children || nodeData.children.length === 0) {
       try {
         const children = await readSubdirectory(nodeData.path)
+        const currentTree = new SimpleTree(currentDataRef.current)
+        const currentNode = getCurrentFileMutationNodeInRoot(
+          currentTree,
+          getFileObject,
+          target,
+          rootId,
+        )
+        if (!currentNode || currentNode.data.kind !== 'dir') return
+        if (loadedDirsRef.current.has(target.path)) return
         if (children.length > 0) {
-          nodeData.children = children
-          loadedDirsRef.current.add(nodeData.path)
-          setFolderDataPure([...tree.data])
+          currentNode.data.children = children
+          loadedDirsRef.current.add(target.path)
+          setFolderDataPure([...currentTree.data])
         }
       } catch (error) {
         console.error('Failed to load subdirectory:', error)
@@ -102,50 +137,127 @@ const FileTree: FC<FileTreeProps> = (props) => {
     const _dragNode = _dragNodes[0]
     const parentNode = args.parentNode
 
-    if (!parentNode || _dragNode.parent?.id === parentNode.id) {
+    if (!_dragNode || !parentNode || _dragNode.parent?.id === parentNode.id) {
       return
     }
-    const targetPath = await pathJoin(parentNode.data.path || '', _dragNode.data.name)
-    const isExist = await fileExists(targetPath)
+    const sourceTargets = _dragNodes.map((dragNode) => captureFileMutationTarget(dragNode.data))
+    const parentTarget = captureFileMutationTarget(parentNode.data)
+    if (sourceTargets.some((target) => !target) || !parentTarget) return
+
+    const capturedSourceTargets = sourceTargets.filter(
+      (target): target is NonNullable<typeof target> => Boolean(target),
+    )
+    const targetPaths = await Promise.all(
+      _dragNodes.map((dragNode) => pathJoin(parentTarget.path, dragNode.data.name)),
+    )
+    const isExist = (await Promise.all(targetPaths.map(fileExists))).some(Boolean)
+
+    const move = async (replace = false) => {
+      await runFileMutation(async (lease) => {
+        const mutationTree = new SimpleTree(getCurrentFolderData())
+        const currentParent = getCurrentFileMutationNode(mutationTree, getFileObject, parentTarget)
+        const verifiedDragNodes = getCurrentFileMutationNodes(
+          mutationTree,
+          getFileObject,
+          capturedSourceTargets,
+        )
+        if (!currentParent || !verifiedDragNodes) return
+        if (verifiedDragNodes.some((dragNode) => dragNode.parent?.id === parentTarget.id)) return
+        const sourceProtection = collectFileMutationProtection(
+          verifiedDragNodes.map((dragNode) => dragNode.data),
+          getFileObject,
+          getFileIdsByPathPrefix,
+        )
+        lease.protectFileIds(sourceProtection.fileIds)
+        lease.protectPaths(sourceProtection.paths)
+
+        const currentTargetPaths = await Promise.all(
+          verifiedDragNodes.map((dragNode) => pathJoin(parentTarget.path, dragNode.data.name)),
+        )
+        lease.protectPaths(currentTargetPaths)
+        const existingTargetPaths = (
+          await Promise.all(
+            currentTargetPaths.map(async (path) => ({
+              exists: await fileExists(path),
+              path,
+            })),
+          )
+        ).filter(({ exists }) => exists)
+
+        if (!replace && existingTargetPaths.length > 0) {
+          onShowConfirm({
+            title: `Replace ${verifiedDragNodes[0].data.name}?`,
+            onConfirm: () => void move(true),
+          })
+          return
+        }
+
+        const replacementIdsByPath = new Map<string, string[]>()
+        if (replace && onBeforeReplace) {
+          for (const { path } of existingTargetPaths) {
+            const preflight = await onBeforeReplace(path)
+            replacementIdsByPath.set(path, preflight.targetIds)
+            lease.protectFileIds(preflight.targetIds)
+            lease.protectPaths(
+              preflight.targetIds
+                .map((id) => getFileObject(id)?.path)
+                .filter((path): path is string => !!path),
+            )
+            if (!preflight.allowed) return
+          }
+        }
+
+        const res = await moveFilesToTargetFolder({
+          files: capturedSourceTargets.map((target) => target.path),
+          targetFolder: parentTarget.path,
+          replaceExist: replace,
+        })
+
+        if (Array.isArray(res)) {
+          const successfulSourcePaths = new Set(
+            res.filter((moveFileInfo) => !moveFileInfo.is_replaced).map(({ old_path }) => old_path),
+          )
+          const dragIds = capturedSourceTargets
+            .filter((target) => successfulSourcePaths.has(target.path))
+            .map((target) => target.id)
+
+          res.forEach((moveFileInfo) => {
+            moveFileNode(
+              mutationTree,
+              moveFileInfo as MoveFileInfo,
+              getFileObject,
+              getFileObjectByPath,
+              deletePathEntry,
+              setFileObjectByPath,
+              setFileObject,
+              moveFileObjectsByPathPrefix,
+              deleteFileObjectsByPathPrefix,
+              {
+                deleteFileObjectsByIds,
+                replacementIds: replacementIdsByPath.get(moveFileInfo.old_path),
+              },
+            )
+          })
+
+          for (const id of dragIds) {
+            mutationTree.move({ id, parentId: parentTarget.id, index: args.index })
+          }
+          loadedDirsRef.current.clear()
+          setFolderDataPure(mutationTree.data)
+        }
+      })
+    }
 
     if (isExist) {
       onShowConfirm({
         title: `Replace ${_dragNode.data.name}?`,
-        onConfirm: () => move(true),
+        onConfirm: () => void move(true),
       })
     } else {
       onShowConfirm({
         title: `Move ${_dragNode.data.name}?`,
-        onConfirm: () => move(),
+        onConfirm: () => void move(),
       })
-    }
-
-    const move = async (replace = false) => {
-      const res = await moveFilesToTargetFolder({
-        files: _dragNodes.map((node) => node.data.path || ''),
-        targetFolder: parentNode.data.path || '',
-        replaceExist: replace,
-      })
-
-      if (Array.isArray(res)) {
-        res.forEach((moveFileInfo) => {
-          moveFileNode(
-            tree,
-            moveFileInfo as MoveFileInfo,
-            getFileObject,
-            getFileObjectByPath,
-            deletePathEntry,
-            setFileObjectByPath,
-            setFileObject,
-          )
-        })
-
-        const _dragIds = _dragNodes.map((node) => node.data.id)
-        for (const id of _dragIds) {
-          tree.move({ id, parentId: args.parentId, index: args.index })
-        }
-        setFolderDataPure(tree.data)
-      }
     }
   }
 
@@ -247,7 +359,7 @@ const FileTree: FC<FileTreeProps> = (props) => {
             return (
               <FileNode
                 {...nodeProps}
-                simpleTree={tree}
+                getCurrentFolderData={getCurrentFolderData}
                 setFolderData={setFolderDataPure}
                 isRoot={isRoot}
                 onShowConfirm={onShowConfirm}
@@ -258,6 +370,9 @@ const FileTree: FC<FileTreeProps> = (props) => {
                 setFileObject={setFileObject}
                 setFileObjectByPath={setFileObjectByPath}
                 deletePathEntry={deletePathEntry}
+                getFileIdsByPathPrefix={getFileIdsByPathPrefix}
+                moveFileObjectsByPathPrefix={moveFileObjectsByPathPrefix}
+                deleteFileObjectsByPathPrefix={deleteFileObjectsByPathPrefix}
                 createFile={createFile}
                 updateFile={updateFile}
                 fileTreeHandler={fileTreeHandler}

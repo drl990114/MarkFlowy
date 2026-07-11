@@ -1,9 +1,9 @@
-import { getFileNameFromPath, readDirectory } from '@/helper/filesys'
+import { getFileNameFromPath } from '@/helper/filesys'
 import { logger } from '@/helper/logger'
 import { dialog } from '@/services/dialog'
 import { addExistingMarkdownFileEdit } from '@/services/editor-file'
+import { switchWorkspaceInCurrentWindow } from '@/services/workspace-switch'
 import { currentWindow } from '@/services/windows'
-import { useEditorStore } from '@/stores'
 import useOpenedCacheStore from '@/stores/useOpenedCacheStore'
 import { invoke } from '@tauri-apps/api/core'
 import { open } from '@tauri-apps/plugin-dialog'
@@ -37,6 +37,7 @@ const useOpen = () => {
 
         if (action === 'newWindow') {
           try {
+            await invoke<boolean>('save_security_bookmark', { path: dir })
             await invoke('create_new_window', {
               path: dir,
             })
@@ -67,9 +68,8 @@ const useOpen = () => {
               return
             }
 
-            const res = await readDirectory(dir)
-            addRecentWorkspaces({ path: dir })
-            useEditorStore.getState().setFolderData(res)
+            const didSwitch = await switchWorkspaceInCurrentWindow(dir)
+            if (!didSwitch) return
 
             logger.info('Opening folder in current window:', dir)
           } catch (error) {
@@ -92,10 +92,7 @@ const useOpen = () => {
 
     if (typeof dir !== 'string') return
 
-    await invoke<boolean>('save_security_bookmark', { path: dir })
-    await invoke<boolean>('activate_workspace_root', { rootPath: dir })
-
-    openFolder(dir)
+    await openFolder(dir)
   }, [openFolder])
 
   const openFile = useCallback(async () => {

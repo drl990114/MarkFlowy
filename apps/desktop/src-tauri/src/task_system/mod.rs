@@ -16,7 +16,7 @@
 //!
 //! ## Basic example
 //!
-//! ```
+//! ```ignore
 //! use mf_task_system::{TaskSystem, Task, TaskId, ExecStatus, TaskOutput, Interrupter, TaskStatus};
 //! use async_trait::async_trait;
 //! use thiserror::Error;

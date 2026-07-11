@@ -17,6 +17,15 @@ fn get_webview_url(path: &str) -> WebviewUrl {
     }
 }
 
+pub(crate) fn serialize_javascript_string(value: &str) -> Result<String, serde_json::Error> {
+    let serialized = serde_json::to_string(value)?;
+
+    Ok(serialized
+        .replace('<', "\\u003c")
+        .replace('\u{2028}', "\\u2028")
+        .replace('\u{2029}', "\\u2029"))
+}
+
 /// 获取所有窗口实例信息
 #[command]
 pub fn get_window_instances() -> Result<std::collections::HashMap<String, String>, String> {
@@ -101,17 +110,14 @@ pub fn create_new_window(_app: AppHandle, path: Option<String>) -> Result<String
         .map(|p| p.to_str().unwrap_or("").to_string())
         .unwrap_or("".into());
 
-    // 使用JSON序列化确保路径中的特殊字符被正确转义
-    let escaped_urls = serde_json::to_string(&opened_urls).unwrap_or_else(|_| opened_urls.clone());
+    let serialized_urls =
+        serialize_javascript_string(&opened_urls).map_err(|error| error.to_string())?;
+    let initialization_script = format!("window.openedUrls = {serialized_urls};");
 
-    println!("opened_urls:{}", opened_urls);
-    println!("escaped_urls:{}", escaped_urls);
-    println!("path:{}", path.as_ref().unwrap());
     tauri::async_runtime::spawn(async move {
         let mut new_win =
             WebviewWindowBuilder::new(&_app, window_label, get_webview_url("index.html"))
-                .initialization_script(&format!("window.openedUrls = {escaped_urls}"))
-                .initialization_script(&format!("console.log('window.openedUrl:{}')", escaped_urls))
+                .initialization_script(&initialization_script)
                 .title("MarkFlowy")
                 .resizable(true)
                 .fullscreen(false)
@@ -224,5 +230,49 @@ pub fn focus_window_by_label(_app: AppHandle, window_label: String) -> Result<bo
         Ok(true)
     } else {
         Err("Window not found".to_string())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::serialize_javascript_string;
+
+    #[test]
+    fn javascript_string_round_trips_paths_with_script_characters() {
+        let path = "/tmp/project'); globalThis.injected = true; //\n\"quoted\"\\folder";
+        let serialized_path = serialize_javascript_string(path).unwrap();
+
+        assert_eq!(
+            serde_json::from_str::<String>(&serialized_path).unwrap(),
+            path
+        );
+    }
+
+    #[test]
+    fn javascript_string_escapes_raw_script_terminators() {
+        let path = "/tmp/</script><script>globalThis.injected = true</script>.md";
+        let serialized_path = serialize_javascript_string(path).unwrap();
+
+        assert!(!serialized_path.contains('<'));
+        assert!(serialized_path.contains("\\u003c/script>"));
+        assert_eq!(
+            serde_json::from_str::<String>(&serialized_path).unwrap(),
+            path
+        );
+    }
+
+    #[test]
+    fn javascript_string_escapes_unicode_line_separators() {
+        let path = "/tmp/line\u{2028}paragraph\u{2029}separator.md";
+        let serialized_path = serialize_javascript_string(path).unwrap();
+
+        assert!(!serialized_path.contains('\u{2028}'));
+        assert!(!serialized_path.contains('\u{2029}'));
+        assert!(serialized_path.contains("\\u2028"));
+        assert!(serialized_path.contains("\\u2029"));
+        assert_eq!(
+            serde_json::from_str::<String>(&serialized_path).unwrap(),
+            path
+        );
     }
 }
