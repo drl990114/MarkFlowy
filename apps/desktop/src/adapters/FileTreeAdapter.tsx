@@ -1,4 +1,4 @@
-import type { FC, ReactNode } from 'react'
+import { useCallback, useMemo, type FC, type ReactNode } from 'react'
 import { FileTreeContext, FileTreeContextValue, fileTreeHandler } from '@markflowy/interface'
 import { useEditorStore } from '@/stores'
 import { readDirectory } from '@/helper/filesys'
@@ -8,26 +8,46 @@ interface FileTreeAdapterProps {
 }
 
 export const FileTreeProvider: FC<FileTreeAdapterProps> = ({ children }) => {
-  const editorStore = useEditorStore()
+  const activeId = useEditorStore((state) => state.activeId)
+  const folderData = useEditorStore((state) => state.folderData)
+  const setFolderData = useEditorStore((state) => state.setFolderData)
+  const setFolderDataPure = useEditorStore((state) => state.setFolderDataPure)
+  const deleteNode = useEditorStore((state) => state.deleteNode)
+  const trashNode = useEditorStore((state) => state.trashNode)
+  const getRootPath = useEditorStore((state) => state.getRootPath)
 
-  const value: FileTreeContextValue = {
-    activeId: editorStore.activeId,
-    folderData: editorStore.folderData,
-    setFolderData: editorStore.setFolderData,
-    setFolderDataPure: editorStore.setFolderDataPure,
-    deleteNode: editorStore.deleteNode,
-    trashNode: editorStore.trashNode,
-    getRootPath: editorStore.getRootPath,
-    refreshFolder: async () => {
-      const rootPath = editorStore.getRootPath()
-      if (!rootPath) {
-        throw new Error('No workspace found')
-      }
-      fileTreeHandler.clearLoadedDirsCache?.()
-      const res = await readDirectory(rootPath)
-      editorStore.setFolderDataPure(res)
-    },
-  }
+  const refreshFolder = useCallback(async () => {
+    const rootPath = getRootPath()
+    if (!rootPath) {
+      throw new Error('No workspace found')
+    }
+    fileTreeHandler.clearLoadedDirsCache?.()
+    const res = await readDirectory(rootPath)
+    setFolderDataPure(res)
+  }, [getRootPath, setFolderDataPure])
+
+  const value: FileTreeContextValue = useMemo(
+    () => ({
+      activeId,
+      folderData,
+      setFolderData,
+      setFolderDataPure,
+      deleteNode,
+      trashNode,
+      getRootPath,
+      refreshFolder,
+    }),
+    [
+      activeId,
+      deleteNode,
+      folderData,
+      getRootPath,
+      refreshFolder,
+      setFolderData,
+      setFolderDataPure,
+      trashNode,
+    ],
+  )
 
   return <FileTreeContext.Provider value={value}>{children}</FileTreeContext.Provider>
 }

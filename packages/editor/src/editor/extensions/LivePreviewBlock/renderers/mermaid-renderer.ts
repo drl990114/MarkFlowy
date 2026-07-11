@@ -1,6 +1,6 @@
 import type { Extension as CodeMirrorExtension } from '@codemirror/state'
-import mermaid from 'mermaid'
 import { eventBus } from '../../../utils/eventbus'
+import { loadMermaid } from '../../../utils/mermaid'
 import { minimalSetup } from '../../CodeMirror/setup'
 import type { LivePreviewNodeViewApi, LivePreviewRenderer } from '../live-preview-types'
 
@@ -25,6 +25,7 @@ export function createMermaidRenderer(options: {
       renderCount.count++
       const id = `mermaid-${renderCount.count}`
       try {
+        const mermaid = await loadMermaid()
         const { svg, bindFunctions } = await mermaid.render(id, source)
         container.innerHTML = svg
         bindFunctions?.(container)

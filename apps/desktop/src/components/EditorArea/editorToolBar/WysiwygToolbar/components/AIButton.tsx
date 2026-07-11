@@ -15,7 +15,8 @@ interface AIButtonProps {
 
 export const AIButton = (props: AIButtonProps) => {
   const { editorId } = props
-  const { activeId, getEditorContent } = useEditorStore()
+  const activeId = useEditorStore((state) => state.activeId)
+  const getEditorContent = useEditorStore((state) => state.getEditorContent)
   const targetEditorId = editorId ?? activeId
   const { getPostSummary, getPostTranslate, aiProvider } = useAiChatStore()
   const { addAppTask } = useAppTasksStore()

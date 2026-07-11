@@ -5,12 +5,12 @@ use tauri::{utils::config::WebviewUrl, AppHandle, Emitter, WebviewWindowBuilder}
 use tauri::TitleBarStyle;
 
 pub fn init(app_handle: AppHandle, opened_urls: String) -> Result<(), Box<dyn std::error::Error>> {
-    let escaped_urls = serde_json::to_string(&opened_urls)?;
+    let serialized_urls = window_manager::serialize_javascript_string(&opened_urls)?;
+    let initialization_script = format!("window.openedUrls = {serialized_urls};");
 
     // 首先检查是否已经存在窗口
     if let Some(existing_window) = window_manager::get_last_opened_window(&app_handle) {
-        let script = format!("window.openedUrls = {escaped_urls}; console.log('[setup.rs] Updated openedUrls:', window.openedUrls);");
-        let _ = existing_window.eval(&script);
+        let _ = existing_window.eval(&initialization_script);
         let _ = existing_window.emit("opened-urls", opened_urls.clone());
 
         // 确保窗口被聚焦
@@ -25,8 +25,7 @@ pub fn init(app_handle: AppHandle, opened_urls: String) -> Result<(), Box<dyn st
         "main".to_string(),
         WebviewUrl::App("index.html".into()),
     )
-    .initialization_script(&format!("window.openedUrls = {escaped_urls}"))
-    .initialization_script("console.log('[setup.rs] window.openedUrls set to:', window.openedUrls)")
+    .initialization_script(&initialization_script)
     .title("MarkFlowy")
     .resizable(true)
     .fullscreen(false)
@@ -52,10 +51,11 @@ pub fn init(app_handle: AppHandle, opened_urls: String) -> Result<(), Box<dyn st
 
     // 存储窗口实例信息到全局缓存
     if !workspace_path.is_empty() {
-        use std::path::PathBuf;
         use crate::WINDOW_INSTANCES;
+        use std::path::PathBuf;
 
-        let mut instances = WINDOW_INSTANCES.lock()
+        let mut instances = WINDOW_INSTANCES
+            .lock()
             .map_err(|e| format!("Failed to lock window instances: {}", e))?;
         instances.insert(window_label, PathBuf::from(workspace_path));
     }

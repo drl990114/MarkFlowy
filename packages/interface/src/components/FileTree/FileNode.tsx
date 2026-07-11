@@ -4,14 +4,19 @@ import { toast } from 'zens'
 import { useFileSystem } from '../../contexts/FileSystemContext'
 import { useFileTree } from '../../contexts/FileTreeContext'
 import type { IFile } from '../../types/file'
+import {
+  captureFileMutationTarget,
+  collectFileMutationProtection,
+  getCurrentFileMutationNode,
+} from './file-mutation'
 import { moveFileNode } from './file-operator'
 import NewFileInput from './NewFileInput'
 import { NodeContainer } from './styles'
-import type { SimpleTree } from './types'
+import { SimpleTree } from './types'
 import { getFileNameFromPath } from './verify-file-name'
 
 export interface FileNodeComponentProps extends NodeRendererProps<IFile> {
-  simpleTree: SimpleTree<IFile>
+  getCurrentFolderData: () => IFile[]
   setFolderData: (data: IFile[]) => void
   isRoot?: boolean
   onShowConfirm: (params: { title: string; onConfirm: () => void }) => void
@@ -28,12 +33,17 @@ export interface FileNodeComponentProps extends NodeRendererProps<IFile> {
   setFileObject?: (id: string, file: IFile) => void
   setFileObjectByPath?: (path: string, file: IFile) => void
   deletePathEntry?: (path: string) => void
+  getFileIdsByPathPrefix?: (path: string) => string[]
+  moveFileObjectsByPathPrefix?: (oldRootPath: string, newRootPath: string) => void
+  deleteFileObjectsByPathPrefix?: (rootPath: string) => void
   createFile?: (opt?: Partial<IFile>) => IFile
   updateFile?: (file: IFile) => IFile
   fileTreeHandler?: {
     rootTree: any
     updateTreeView: ((params: { data: IFile[] }) => void) | undefined
+    clearLoadedDirsCache?: () => void
   }
+  disableFileOperations?: boolean
   iconButtonComponent?: FC<any>
 }
 
@@ -62,7 +72,7 @@ function FileNode({
   node,
   dragHandle,
   tree,
-  simpleTree,
+  getCurrentFolderData,
   setFolderData,
   isRoot = false,
   onShowConfirm,
@@ -73,11 +83,19 @@ function FileNode({
   createFile,
   updateFile,
   deletePathEntry,
+  getFileIdsByPathPrefix,
+  setFileObject,
+  setFileObjectByPath,
+  moveFileObjectsByPathPrefix,
+  deleteFileObjectsByPathPrefix,
+  fileTreeHandler,
+  disableFileOperations = false,
   iconButtonComponent: IconButton,
 }: FileNodeComponentProps) {
   const indentSize = Number.parseFloat(`${style.paddingLeft || 0}`)
   const { deleteNode, trashNode, activeId, refreshFolder, closeAll, scrollTo } = useFileTree()
   const {
+    runFileMutation,
     renameFile,
     copyFile,
     createFolder,
@@ -87,9 +105,29 @@ function FileNode({
   } = useFileSystem()
 
   const delFileHandler = () => {
-    deleteNode(node.data).then(() => {
-      simpleTree.drop({ id: node.id })
-      setFolderData(simpleTree.data)
+    const target = captureFileMutationTarget(node.data)
+    if (!target) return Promise.resolve()
+
+    return runFileMutation(async (lease) => {
+      const mutationTree = new SimpleTree(getCurrentFolderData())
+      const currentNode = getCurrentFileMutationNode(mutationTree, getFileObject, target)
+      if (!currentNode) return
+      const protection = collectFileMutationProtection(
+        [currentNode.data],
+        getFileObject,
+        getFileIdsByPathPrefix,
+      )
+      lease.protectFileIds(protection.fileIds)
+      lease.protectPaths(protection.paths)
+
+      await deleteNode(currentNode.data)
+      mutationTree.drop({ id: target.id })
+      if (deleteFileObjectsByPathPrefix) {
+        deleteFileObjectsByPathPrefix(target.path)
+      } else {
+        deletePathEntry?.(target.path)
+      }
+      setFolderData(mutationTree.data)
     })
   }
 
@@ -107,53 +145,106 @@ function FileNode({
     node.data.kind === 'pending_edit_folder' || node.data.kind === 'pending_edit_file'
 
   const createFileHandler = async (file: IFile) => {
-    if (inputType === 'dir') {
-      await createFolder(file.path!)
-    } else {
-      await writeFile(file.path!, '')
-    }
+    const pendingId = node.id
+    const pendingKind = node.data.kind
+    const parentTarget = node.parent ? captureFileMutationTarget(node.parent.data) : undefined
+    if (!file.path || !parentTarget) return
 
-    const targetFile = createFile
-      ? createFile({
-          path: file.path,
-          name: file.name,
-          content: '',
-          id: node.id,
-          kind: file.kind,
-        })
-      : { ...file, content: '' }
+    await runFileMutation(async () => {
+      const mutationTree = new SimpleTree(getCurrentFolderData())
+      const pendingNode = mutationTree.find(pendingId)
+      const currentParent = getCurrentFileMutationNode(mutationTree, getFileObject, parentTarget)
+      if (!pendingNode || pendingNode.data.kind !== pendingKind || !currentParent) return
 
-    simpleTree.update({
-      id: node.id,
-      changes: { ...node.data, ...targetFile },
+      if (await fileExists(file.path!)) {
+        toast.error('File already exists')
+        return
+      }
+
+      if (inputType === 'dir') {
+        await createFolder(file.path!)
+      } else {
+        await writeFile(file.path!, '')
+      }
+
+      const targetFile = createFile
+        ? createFile({
+            path: file.path,
+            name: file.name,
+            content: '',
+            id: pendingId,
+            kind: file.kind,
+          })
+        : { ...file, content: '' }
+
+      mutationTree.update({
+        id: pendingId,
+        changes: { ...pendingNode.data, ...targetFile },
+      })
+      setFolderData(mutationTree.data)
     })
-    setFolderData(simpleTree.data)
   }
 
   const renameFileHandler = async (file: IFile) => {
-    const move_file_info = await renameFile(node.data.path!, file.path!)
+    const target = captureFileMutationTarget(node.data)
+    const nextPath = file.path
+    if (!target || !nextPath) return
 
-    moveFileNode(simpleTree, move_file_info, getFileObject, getFileObjectByPath, deletePathEntry)
+    await runFileMutation(async (lease) => {
+      const mutationTree = new SimpleTree(getCurrentFolderData())
+      const currentNode = getCurrentFileMutationNode(mutationTree, getFileObject, target)
+      if (!currentNode) return
+      const protection = collectFileMutationProtection(
+        [currentNode.data],
+        getFileObject,
+        getFileIdsByPathPrefix,
+      )
+      lease.protectFileIds(protection.fileIds)
+      lease.protectPaths(protection.paths)
+      lease.protectPaths([nextPath])
 
-    if (updateFile) {
-      updateFile({
-        path: file.path,
-        name: file.name,
-        id: node.id,
-        kind: file.kind,
+      if (target.path !== nextPath && (await fileExists(nextPath))) {
+        toast.error('File already exists')
+        return
+      }
+
+      const moveFileInfo = await renameFile(target.path, nextPath)
+
+      moveFileNode(
+        mutationTree,
+        moveFileInfo,
+        getFileObject,
+        getFileObjectByPath,
+        deletePathEntry,
+        setFileObjectByPath,
+        setFileObject,
+        moveFileObjectsByPathPrefix,
+        deleteFileObjectsByPathPrefix,
+      )
+      fileTreeHandler?.clearLoadedDirsCache?.()
+
+      if (updateFile) {
+        updateFile({
+          path: nextPath,
+          name: file.name,
+          id: target.id,
+          kind: file.kind,
+        })
+      }
+
+      mutationTree.update({
+        id: target.id,
+        changes: { kind: file.kind, name: file.name },
       })
-    }
-
-    simpleTree.update({
-      id: node.id,
-      changes: { kind: file.kind, name: file.name },
+      setFolderData(mutationTree.data)
     })
-    setFolderData(simpleTree.data)
   }
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.stopPropagation()
     e.preventDefault()
+    if (disableFileOperations) return
+
     const items: ContextMenuItem[] = []
 
     if (node.parent) {
@@ -163,22 +254,30 @@ function FileNode({
           value: 'new_file',
           handler: () => {
             if (node.parent) {
-              const data = { id: `pending-${Date.now()}`, name: '', kind: 'pending_new_file' } as IFile
+              const mutationTree = new SimpleTree(getCurrentFolderData())
+              const parentData = node.isInternal ? node.data : node.parent.data
+              const parentTarget = captureFileMutationTarget(parentData)
+              if (
+                !parentTarget ||
+                !getCurrentFileMutationNode(mutationTree, getFileObject, parentTarget)
+              ) {
+                return
+              }
+
+              const data = {
+                id: `pending-${Date.now()}`,
+                name: '',
+                kind: 'pending_new_file',
+              } as IFile
               if (node.isInternal) {
                 node.open()
               }
-              const parentId = node.isInternal ? node.id : node.parent.id
 
-              simpleTree.create({
-                parentId,
+              mutationTree.create({
+                parentId: parentTarget.id,
                 data,
               })
-              tree.create({
-                parentId,
-                index: 0,
-              })
-
-              setFolderData(simpleTree.data)
+              setFolderData(mutationTree.data)
             }
           },
         },
@@ -187,6 +286,16 @@ function FileNode({
           value: 'new_folder',
           handler: () => {
             if (node.parent) {
+              const mutationTree = new SimpleTree(getCurrentFolderData())
+              const parentData = node.isInternal ? node.data : node.parent.data
+              const parentTarget = captureFileMutationTarget(parentData)
+              if (
+                !parentTarget ||
+                !getCurrentFileMutationNode(mutationTree, getFileObject, parentTarget)
+              ) {
+                return
+              }
+
               const data = {
                 id: `pending-${Date.now()}`,
                 name: '',
@@ -196,19 +305,12 @@ function FileNode({
               if (node.isInternal) {
                 node.open()
               }
-              const parentId = node.isInternal ? node.id : node.parent.id
 
-              simpleTree.create({
-                parentId,
+              mutationTree.create({
+                parentId: parentTarget.id,
                 data,
               })
-              tree.create({
-                parentId,
-                index: 0,
-                type: 'internal',
-              })
-
-              setFolderData(simpleTree.data)
+              setFolderData(mutationTree.data)
             }
           },
         },
@@ -220,14 +322,19 @@ function FileNode({
         label: 'Rename',
         value: 'rename',
         handler: () => {
-          if (node.parent) {
-            simpleTree.update({
-              id: node.id,
+          const target = captureFileMutationTarget(node.data)
+          if (node.parent && target) {
+            const mutationTree = new SimpleTree(getCurrentFolderData())
+            const currentNode = getCurrentFileMutationNode(mutationTree, getFileObject, target)
+            if (!currentNode) return
+
+            mutationTree.update({
+              id: target.id,
               changes: {
-                kind: node.data.kind === 'dir' ? 'pending_edit_folder' : 'pending_edit_file',
+                kind: currentNode.data.kind === 'dir' ? 'pending_edit_folder' : 'pending_edit_file',
               },
             })
-            setFolderData(simpleTree.data)
+            setFolderData(mutationTree.data)
           }
         },
       })
@@ -249,27 +356,46 @@ function FileNode({
         value: 'copy',
         label: 'Copy',
         handler: () => {
-          copyFile(node.data.path!).then((targetPath) => {
-            if (node.parent) {
+          const target = captureFileMutationTarget(node.data)
+          const parentTarget = node.parent ? captureFileMutationTarget(node.parent.data) : undefined
+          if (!target || !parentTarget) return
+
+          void runFileMutation(async (lease) => {
+            const mutationTree = new SimpleTree(getCurrentFolderData())
+            const currentNode = getCurrentFileMutationNode(mutationTree, getFileObject, target)
+            const currentParent = getCurrentFileMutationNode(
+              mutationTree,
+              getFileObject,
+              parentTarget,
+            )
+            if (!currentNode || !currentParent) return
+            const protection = collectFileMutationProtection(
+              [currentNode.data],
+              getFileObject,
+              getFileIdsByPathPrefix,
+            )
+            lease.protectFileIds(protection.fileIds)
+            lease.protectPaths(protection.paths)
+
+            const targetPath = await copyFile(target.path)
+            if (targetPath) {
               const file = createFile
                 ? createFile({
                     name: getFileNameFromPath(targetPath),
                     path: targetPath,
                   })
-                : ({ name: getFileNameFromPath(targetPath), path: targetPath, kind: 'file' } as IFile)
+                : ({
+                    name: getFileNameFromPath(targetPath),
+                    path: targetPath,
+                    kind: 'file',
+                  } as IFile)
 
-              const parentId = node.parent.id
-
-              simpleTree.create({
-                parentId,
+              mutationTree.create({
+                parentId: parentTarget.id,
                 data: file,
-                index: node.rowIndex,
+                index: currentNode.childIndex,
               })
-              tree.create({
-                parentId,
-                index: node.rowIndex,
-              })
-              setFolderData(simpleTree.data)
+              setFolderData(mutationTree.data)
             }
           })
         },
@@ -283,9 +409,29 @@ function FileNode({
         onShowConfirm({
           title: `Are you sure you want to move ${node.data.name} to trash?`,
           onConfirm: () => {
-            trashNode(node.data).then(() => {
-              simpleTree.drop({ id: node.id })
-              setFolderData(simpleTree.data)
+            const target = captureFileMutationTarget(node.data)
+            if (!target) return
+
+            void runFileMutation(async (lease) => {
+              const mutationTree = new SimpleTree(getCurrentFolderData())
+              const currentNode = getCurrentFileMutationNode(mutationTree, getFileObject, target)
+              if (!currentNode) return
+              const protection = collectFileMutationProtection(
+                [currentNode.data],
+                getFileObject,
+                getFileIdsByPathPrefix,
+              )
+              lease.protectFileIds(protection.fileIds)
+              lease.protectPaths(protection.paths)
+
+              await trashNode(currentNode.data)
+              mutationTree.drop({ id: target.id })
+              if (deleteFileObjectsByPathPrefix) {
+                deleteFileObjectsByPathPrefix(target.path)
+              } else {
+                deletePathEntry?.(target.path)
+              }
+              setFolderData(mutationTree.data)
             })
           },
         })
@@ -321,10 +467,12 @@ function FileNode({
   return (
     <NodeContainer
       style={style}
-      highlight={!!(
-        tree.dragDestinationParent?.isAncestorOf(node) &&
-        tree.dragDestinationParent?.id !== tree.dragNode?.parent?.id
-      )}
+      highlight={
+        !!(
+          tree.dragDestinationParent?.isAncestorOf(node) &&
+          tree.dragDestinationParent?.id !== tree.dragNode?.parent?.id
+        )
+      }
       selected={activeId === node.id}
       onContextMenu={handleContextMenu}
       onClick={(e) => {
@@ -367,16 +515,22 @@ function FileNode({
             }}
             onCancel={(fileInfo) => {
               const cancelInput = () => {
+                const mutationTree = new SimpleTree(getCurrentFolderData())
+                const pendingNode = mutationTree.find(node.id)
+                if (!pendingNode) return
+
                 if (isUpdate) {
-                  simpleTree.update({
+                  mutationTree.update({
                     id: node.id,
-                    changes: { kind: node.data.kind === 'pending_edit_folder' ? 'dir' : 'file' },
+                    changes: {
+                      kind: pendingNode.data.kind === 'pending_edit_folder' ? 'dir' : 'file',
+                    },
                   })
                 } else {
-                  simpleTree.drop({ id: node.id })
+                  mutationTree.drop({ id: node.id })
                 }
 
-                setFolderData(simpleTree.data)
+                setFolderData(mutationTree.data)
               }
 
               if (!fileInfo) {
@@ -414,7 +568,15 @@ function FileNode({
               alignItems: 'center',
             }}
           >
-            <div style={{ flex: 1, display: 'flex', alignItems: 'center', overflow: 'hidden', minWidth: 0 }}>
+            <div
+              style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                overflow: 'hidden',
+                minWidth: 0,
+              }}
+            >
               {node.data?.kind === 'dir' ? (
                 <i
                   className={`${node.isOpen ? 'ri-folder-5-fill' : 'ri-folder-3-fill'} file-icon`}

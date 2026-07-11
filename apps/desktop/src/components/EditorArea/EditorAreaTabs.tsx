@@ -1,7 +1,6 @@
 import { EVENT } from '@/constants'
-import { getFileObject, getSaveOpenedEditorEntries } from '@/helper/files'
-import type { IFile } from '@/helper/filesys'
-import { checkUnsavedFiles } from '@/services/checkUnsavedFiles'
+import useFileCacheStore from '@/helper/files'
+import { checkUnsavedFiles, saveUnsavedFiles } from '@/services/checkUnsavedFiles'
 import { useEditorStateStore, useEditorStore } from '@/stores'
 import { memo, type DragEvent, useCallback, useEffect, useRef } from 'react'
 import { useTranslation } from '@/i18n'
@@ -69,6 +68,17 @@ interface EditorAreaTabsProps {
   groupId: string
 }
 
+interface EditorAreaTabProps {
+  active: boolean
+  close: (ev: React.MouseEvent<HTMLElement, MouseEvent> | undefined, id: string) => void
+  compact: boolean
+  groupId: string
+  handleDragOver: (e: DragEvent<HTMLElement>) => void
+  handleDrop: (e: DragEvent<HTMLElement>) => void
+  id: string
+  onSelect: (id: string) => void
+}
+
 function getTabLabel(fileName: string, compact: boolean) {
   if (!compact) return fileName
 
@@ -78,14 +88,189 @@ function getTabLabel(fileName: string, compact: boolean) {
   return fileName.slice(0, extensionIndex)
 }
 
+const EditorAreaTab = memo((props: EditorAreaTabProps) => {
+  const {
+    active,
+    close,
+    compact,
+    groupId,
+    handleDragOver,
+    handleDrop,
+    id,
+    onSelect,
+  } = props
+  const hasUnsavedChanges = useEditorStateStore(
+    (state) => state.idStateMap.get(id)?.hasUnsavedChanges ?? false,
+  )
+  const { t } = useTranslation()
+  const fileName = useFileCacheStore((state) => state.entries[id]?.name)
+  if (!fileName) return null
+
+  const tabLabel = getTabLabel(fileName, compact)
+
+  const handleMiddleClick = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+    // 鼠标中键点击关闭标签页
+    if (e.button !== 1) return
+    e.stopPropagation()
+    e.preventDefault()
+    if (
+      checkUnsavedFiles({
+        fileIds: [id],
+        onSaveAndClose: async () => {
+          if (await saveUnsavedFiles([id])) {
+            close(e, id)
+          }
+        },
+        onUnsavedAndClose: () => {
+          close(e, id)
+        },
+      }) > 0
+    ) {
+      return
+    }
+    close(e, id)
+  }
+
+  const handleContextMenu = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+    e.stopPropagation()
+    e.preventDefault()
+    showContextMenu({
+      x: e.clientX,
+      y: e.clientY,
+      items: [
+        {
+          label: t('contextmenu.editor_tab.close'),
+          value: 'close',
+          commandId: EVENT.app_closeCurrentEditorTab,
+          handler: () => {
+            if (
+              checkUnsavedFiles({
+                fileIds: [id],
+                onSaveAndClose: async () => {
+                  if (await saveUnsavedFiles([id])) {
+                    close(e, id)
+                  }
+                },
+                onUnsavedAndClose: () => {
+                  close(e, id)
+                },
+              }) > 0
+            ) {
+              return
+            }
+            close(e, id)
+          },
+        },
+        {
+          label: t('contextmenu.editor_tab.close_others'),
+          value: 'close_others',
+          handler: () => {
+            const { closeOtherFilesInGroup, getGroup } = useEditorStore.getState()
+            const otherIds = (getGroup(groupId)?.opened || []).filter(
+              (openedId) => openedId !== id,
+            )
+            if (
+              checkUnsavedFiles({
+                fileIds: otherIds,
+                onSaveAndClose: async (hasUnsavedFileIds) => {
+                  if (await saveUnsavedFiles(hasUnsavedFileIds)) {
+                    closeOtherFilesInGroup(groupId, id)
+                  }
+                },
+                onUnsavedAndClose: () => {
+                  closeOtherFilesInGroup(groupId, id)
+                },
+              }) > 0
+            ) {
+              return
+            }
+            closeOtherFilesInGroup(groupId, id)
+          },
+        },
+        {
+          label: t('contextmenu.editor_tab.close_all'),
+          value: 'close_all',
+          handler: () => {
+            const { closeAllFilesInGroup, getGroup } = useEditorStore.getState()
+            const openedIds = getGroup(groupId)?.opened || []
+            if (
+              checkUnsavedFiles({
+                fileIds: openedIds,
+                onSaveAndClose: async (hasUnsavedFileIds) => {
+                  if (await saveUnsavedFiles(hasUnsavedFileIds)) {
+                    closeAllFilesInGroup(groupId)
+                  }
+                },
+                onUnsavedAndClose: () => {
+                  closeAllFilesInGroup(groupId)
+                },
+              }) > 0
+            ) {
+              return
+            }
+            closeAllFilesInGroup(groupId)
+          },
+        },
+      ],
+    })
+  }
+
+  const handleDragStart = (e: DragEvent<HTMLElement>) => {
+    writeEditorTabDragData(e.dataTransfer, {
+      sourceGroupId: groupId,
+      fileId: id,
+    })
+    e.dataTransfer.setData('text/plain', fileName)
+  }
+
+  return (
+    <Tooltip title={fileName}>
+      <TabItem
+        active={active}
+        draggable
+        onClick={() => onSelect(id)}
+        onContextMenu={handleContextMenu}
+        onDragOver={handleDragOver}
+        onDragStart={handleDragStart}
+        onDrop={handleDrop}
+        onMouseDown={handleMiddleClick}
+      >
+        <span
+          style={{
+            maxWidth: compact ? '112px' : '160px',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}
+        >
+          {tabLabel}
+        </span>
+
+        <div className='tab-items__right'>
+          {hasUnsavedChanges ? (
+            <Dot />
+          ) : (
+            <MfIconButton
+              icon='ri-close-line'
+              size='small'
+              rounded='rounded'
+              className='close'
+              onClick={(ev: React.MouseEvent<HTMLElement, MouseEvent> | undefined) =>
+                close(ev, id)
+              }
+            />
+          )}
+        </div>
+      </TabItem>
+    </Tooltip>
+  )
+})
+
 const EditorAreaTabs = memo((props: EditorAreaTabsProps) => {
   const { compact = false, groupId } = props
   const group = useEditorStore((state) => state.getGroup(groupId))
-  const { openFileInGroup, closeOtherFilesInGroup, closeAllFilesInGroup, moveFileToGroup } =
-    useEditorStore()
-  const { idStateMap } = useEditorStateStore()
+  const openFileInGroup = useEditorStore((state) => state.openFileInGroup)
+  const moveFileToGroup = useEditorStore((state) => state.moveFileToGroup)
   const htmlRef = useRef<HTMLDivElement>(null)
-  const { t } = useTranslation()
   const opened = group?.opened ?? []
   const activeId = group?.activeId
 
@@ -97,9 +282,12 @@ const EditorAreaTabs = memo((props: EditorAreaTabsProps) => {
     }
   }, [])
 
-  const onSelectItem = (id: string) => {
-    openFileInGroup(groupId, id)
-  }
+  const onSelectItem = useCallback(
+    (id: string) => {
+      openFileInGroup(groupId, id)
+    },
+    [groupId, openFileInGroup],
+  )
 
   const handleDragOver = useCallback((e: DragEvent<HTMLElement>) => {
     if (!hasEditorTabDragData(e.dataTransfer)) return
@@ -170,169 +358,19 @@ const EditorAreaTabs = memo((props: EditorAreaTabsProps) => {
         />
       </div>
       <div className='tab-items' ref={htmlRef}>
-        {opened.map((id) => {
-          const file = getFileObject(id) as IFile
-          if (!file) return null
-          const active = activeId === id
-          const editorState = idStateMap.get(id)
-          const tabLabel = getTabLabel(file.name, compact)
-
-          const handleMiddleClick = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
-            // 鼠标中键点击关闭标签页
-            if (e.button !== 1) return
-            e.stopPropagation()
-            e.preventDefault()
-            if (
-              checkUnsavedFiles({
-                fileIds: [id],
-                onSaveAndClose: async () => {
-                  const saveHandler = getSaveOpenedEditorEntries(id)
-                  await saveHandler?.()
-                  close(e, id)
-                },
-                onUnsavedAndClose: () => {
-                  close(e, id)
-                },
-              }) > 0
-            ) {
-              return
-            }
-            close(e, id)
-          }
-
-          const handleContextMenu = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
-            e.stopPropagation()
-            e.preventDefault()
-            showContextMenu({
-              x: e.clientX,
-              y: e.clientY,
-              items: [
-                {
-                  label: t('contextmenu.editor_tab.close'),
-                  value: 'close',
-                  commandId: EVENT.app_closeCurrentEditorTab,
-                  handler: () => {
-                    if (
-                      checkUnsavedFiles({
-                        fileIds: [id],
-                        onSaveAndClose: async () => {
-                          const saveHandler = getSaveOpenedEditorEntries(id)
-                          await saveHandler?.()
-                          close(e, id)
-                        },
-                        onUnsavedAndClose: () => {
-                          close(e, id)
-                        },
-                      }) > 0
-                    ) {
-                      return
-                    }
-                    close(e, id)
-                  },
-                },
-                {
-                  label: t('contextmenu.editor_tab.close_others'),
-                  value: 'close_others',
-                  handler: () => {
-                    const otherIds = opened.filter((openedId) => openedId !== id)
-                    if (
-                      checkUnsavedFiles({
-                        fileIds: otherIds,
-                        onSaveAndClose: async (hasUnsavedFileIds) => {
-                          const saves = hasUnsavedFileIds.map((otherId) =>
-                            getSaveOpenedEditorEntries(otherId),
-                          )
-                          await Promise.all(saves.map((saveHandler) => saveHandler?.()))
-                          closeOtherFilesInGroup(groupId, id)
-                        },
-                        onUnsavedAndClose: () => {
-                          closeOtherFilesInGroup(groupId, id)
-                        },
-                      }) > 0
-                    ) {
-                      return
-                    }
-                    closeOtherFilesInGroup(groupId, id)
-                  },
-                },
-                {
-                  label: t('contextmenu.editor_tab.close_all'),
-                  value: 'close_all',
-                  handler: () => {
-                    if (
-                      checkUnsavedFiles({
-                        fileIds: opened,
-                        onSaveAndClose: async (hasUnsavedFileIds) => {
-                          const saves = hasUnsavedFileIds.map((otherId) =>
-                            getSaveOpenedEditorEntries(otherId),
-                          )
-                          await Promise.all(saves.map((saveHandler) => saveHandler?.()))
-                          closeAllFilesInGroup(groupId)
-                        },
-                        onUnsavedAndClose: () => {
-                          closeAllFilesInGroup(groupId)
-                        },
-                      }) > 0
-                    ) {
-                      return
-                    }
-                    closeAllFilesInGroup(groupId)
-                  },
-                },
-              ],
-            })
-          }
-
-          const handleDragStart = (e: DragEvent<HTMLElement>) => {
-            writeEditorTabDragData(e.dataTransfer, {
-              sourceGroupId: groupId,
-              fileId: id,
-            })
-            e.dataTransfer.setData('text/plain', file.name)
-          }
-
-          return (
-            <Tooltip title={file.name} key={id}>
-              <TabItem
-                active={active}
-                draggable
-                onClick={() => onSelectItem(file.id)}
-                key={id}
-                onContextMenu={handleContextMenu}
-                onDragOver={handleDragOver}
-                onDragStart={handleDragStart}
-                onDrop={handleDrop}
-                onMouseDown={handleMiddleClick}
-              >
-                <span
-                  style={{
-                    maxWidth: compact ? '112px' : '160px',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                  }}
-                >
-                  {tabLabel}
-                </span>
-
-                <div className='tab-items__right'>
-                  {editorState?.hasUnsavedChanges ? (
-                    <Dot />
-                  ) : (
-                    <MfIconButton
-                      icon='ri-close-line'
-                      size='small'
-                      rounded='rounded'
-                      className='close'
-                      onClick={(ev: React.MouseEvent<HTMLElement, MouseEvent> | undefined) =>
-                        close(ev, id)
-                      }
-                    />
-                  )}
-                </div>
-              </TabItem>
-            </Tooltip>
-          )
-        })}
+        {opened.map((id) => (
+          <EditorAreaTab
+            active={activeId === id}
+            close={close}
+            compact={compact}
+            groupId={groupId}
+            handleDragOver={handleDragOver}
+            handleDrop={handleDrop}
+            id={id}
+            key={id}
+            onSelect={onSelectItem}
+          />
+        ))}
       </div>
       <div className='tab-filling' onDragOver={handleDragOver} onDrop={handleDrop} />
       <EditorAreaHeader groupId={groupId} />

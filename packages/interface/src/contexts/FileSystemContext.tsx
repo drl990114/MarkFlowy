@@ -4,12 +4,23 @@ import type { IFile } from '../types/file'
 export interface MoveFileInfo {
   old_path: string
   new_path: string
-  children: IFile[]
+  children: IFile[] | null
   is_folder: boolean
   is_replaced?: boolean
 }
 
+export interface FileMutationLease {
+  protectFileIds: (fileIds: string[]) => void
+  protectPaths: (paths: string[]) => void
+}
+
+export type RunFileMutation = <T>(
+  operation: (lease: FileMutationLease) => Promise<T>,
+) => Promise<T>
+
 export interface FileSystemContextValue {
+  /** Run a complete backend + tree/cache filesystem mutation atomically. */
+  runFileMutation: RunFileMutation
   /** Read a directory and return file tree */
   readDirectory: (folderPath: string) => Promise<IFile[]>
   /** Read a subdirectory and return file tree (for lazy loading) */
@@ -31,7 +42,15 @@ export interface FileSystemContextValue {
     files: string[]
     targetFolder: string
     replaceExist?: boolean
-  }) => Promise<Array<{ old_path: string; new_path: string; children: IFile[]; is_folder: boolean; is_replaced?: boolean }>>
+  }) => Promise<
+    Array<{
+      old_path: string
+      new_path: string
+      children: IFile[] | null
+      is_folder: boolean
+      is_replaced?: boolean
+    }>
+  >
   /** Join paths */
   pathJoin: (path1: string, path2: string) => Promise<string>
   /** Get file name from path */

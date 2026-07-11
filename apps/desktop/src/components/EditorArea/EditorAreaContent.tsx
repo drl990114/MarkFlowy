@@ -5,7 +5,7 @@ import EditorLayoutView from './EditorLayoutView'
 import { Container, EditorPanel, OverlayScrollbarStyles } from './styles'
 
 function EditorAreaContent() {
-  const { editorLayout } = useEditorStore()
+  const editorLayout = useEditorStore((state) => state.editorLayout)
 
   return (
     <Container className='w-full h-full editor-area-container'>

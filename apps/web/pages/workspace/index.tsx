@@ -1,4 +1,9 @@
 import { githubService } from 'features/githubWorkspace/services/githubService'
+import { useGitHubWorkspaceImport } from 'features/githubWorkspace/hooks/useGitHubWorkspaceImport'
+import {
+  getGitHubWorkspaceErrorMessage,
+  type GitHubRepo,
+} from 'features/githubWorkspace/services/workspaceGitHubService'
 import { useAuth } from 'hooks/useAuth'
 import type { GitHubConfig } from '@markflowy/types'
 import Link from 'next/link'
@@ -6,16 +11,6 @@ import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { apiClient } from 'utils/apiClient'
 import rem from 'utils/rem'
-
-interface GitHubRepo {
-  id: number
-  full_name: string
-  name: string
-  owner: { login: string }
-  description: string | null
-  private: boolean
-  updated_at: string
-}
 
 interface WorkspaceMember {
   id: string
@@ -61,6 +56,7 @@ export default function WorkspaceListPage() {
 
   const [workspaces, setWorkspaces] = useState<Workspace[]>([])
   const [loadingWorkspaces, setLoadingWorkspaces] = useState(false)
+  const [workspaceError, setWorkspaceError] = useState('')
 
   const [repos, setRepos] = useState<GitHubRepo[]>([])
   const [githubConfig, setGithubConfig] = useState<GitHubConfig | null>(null)
@@ -71,7 +67,8 @@ export default function WorkspaceListPage() {
   const [selectedRepoFullName, setSelectedRepoFullName] = useState('')
 
   const [showImportModal, setShowImportModal] = useState(false)
-  const [importingRepo, setImportingRepo] = useState<string | null>(null)
+  const { importingRepo, importError, clearImportError, importRepository } =
+    useGitHubWorkspaceImport()
 
   useEffect(() => {
     if (!isAuthenticated || authLoading) return
@@ -80,11 +77,12 @@ export default function WorkspaceListPage() {
 
   const loadWorkspaces = async () => {
     setLoadingWorkspaces(true)
+    setWorkspaceError('')
     try {
       const data = await apiClient.get<Workspace[]>('/workspaces')
       setWorkspaces(data)
-    } catch {
-      // ignore
+    } catch (error) {
+      setWorkspaceError(getGitHubWorkspaceErrorMessage(error, 'Failed to load workspaces'))
     } finally {
       setLoadingWorkspaces(false)
     }
@@ -123,6 +121,7 @@ export default function WorkspaceListPage() {
     setShowImportModal(true)
     setSelectedRepoFullName('')
     setRepoError('')
+    clearImportError()
 
     const data = await loadGitHubConfig()
     if (data?.hasToken) {
@@ -133,20 +132,11 @@ export default function WorkspaceListPage() {
   }
 
   const handleImportRepo = async (repo: GitHubRepo) => {
-    setImportingRepo(repo.full_name)
-    try {
-      await apiClient.post('/workspaces', {
-        name: repo.name,
-        type: 'GITHUB',
-        sourceUrl: `https://github.com/${repo.owner.login}/${repo.name}`,
-      })
-      await loadWorkspaces()
-      setShowImportModal(false)
-    } catch (err: any) {
-      alert(err?.message || 'Failed to import repository')
-    } finally {
-      setImportingRepo(null)
-    }
+    const workspace = await importRepository(repo)
+    if (!workspace) return
+
+    await loadWorkspaces()
+    setShowImportModal(false)
   }
 
   const handleDeleteWorkspace = async (workspaceId: string) => {
@@ -238,6 +228,12 @@ export default function WorkspaceListPage() {
 
       <Content>
         <WorkspaceShell>
+          {workspaceError && (
+            <ErrorPanel>
+              <i className='ri-error-warning-line' />
+              <span>{workspaceError}</span>
+            </ErrorPanel>
+          )}
           <SectionStack>
             <Section>
               <SectionHeader>
@@ -419,10 +415,10 @@ export default function WorkspaceListPage() {
                     </RepoSelect>
                   </ImportField>
 
-                  {repoError && (
+                  {(repoError || importError) && (
                     <ErrorPanel>
                       <i className='ri-error-warning-line' />
-                      <span>{repoError}</span>
+                      <span>{repoError || importError}</span>
                     </ErrorPanel>
                   )}
 

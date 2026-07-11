@@ -6,6 +6,11 @@ import {
 } from '@markflowy/interface'
 import type { IFile } from '@markflowy/interface'
 
+const directFileMutationLease = {
+  protectFileIds: () => {},
+  protectPaths: () => {},
+}
+
 interface FileSystemAdapterProps {
   children: ReactNode
   readSubdirectory?: (folderPath: string) => Promise<IFile[]>
@@ -17,6 +22,8 @@ interface FileSystemAdapterProps {
  */
 export const WebFileSystemProvider: FC<FileSystemAdapterProps> = ({ children, readSubdirectory }) => {
   const value: FileSystemContextValue = {
+    runFileMutation: (operation) => operation(directFileMutationLease),
+
     readDirectory: async (): Promise<IFile[]> => {
       return []
     },

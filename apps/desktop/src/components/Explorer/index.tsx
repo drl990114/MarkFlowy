@@ -2,6 +2,7 @@ import { Empty, FileTree, ContextMenuItem } from '@markflowy/interface'
 import type { IFile } from '@/helper/filesys'
 import { useOpen } from '@/hooks'
 import { dialog } from '@/services/dialog'
+import { getUnsavedFileIds } from '@/services/checkUnsavedFiles'
 import { createNewWindow } from '@/services/windows'
 import { useEditorStore } from '@/stores'
 import useOpenedCacheStore from '@/stores/useOpenedCacheStore'
@@ -23,6 +24,11 @@ import {
   setFileObject,
   setFileObjectByPath,
   deletePathEntry,
+  deleteFileObjectsByIds,
+  deleteFileObjectsByPathPrefix,
+  getFileIdsByPathPrefix,
+  getReplacementTargetIds,
+  moveFileObjectsByPathPrefix,
 } from '@/helper/files'
 import { createFile, updateFile } from '@/helper/filesys'
 
@@ -240,6 +246,43 @@ const Explorer: FC<ExplorerProps> = (props) => {
     [],
   )
 
+  const handleBeforeReplace = useCallback(
+    async (path: string) => {
+      const targetIds = await getReplacementTargetIds(path)
+      const unsavedIds = getUnsavedFileIds(targetIds)
+      if (unsavedIds.length === 0) return { allowed: true, targetIds }
+
+      await dialog.info({
+        title: t('confirm.close.title'),
+        content: (
+          <div>
+            {t('confirm.close.description')}
+            <div style={{ marginTop: '0.5em' }}>
+              {unsavedIds.map((id) => (
+                <div key={id}>{getFileObject(id)?.name}</div>
+              ))}
+            </div>
+          </div>
+        ),
+      })
+      return { allowed: false, targetIds }
+    },
+    [t],
+  )
+
+  const handleDeleteReplacedCache = useCallback((rootPath: string) => {
+    const deletedIds = getFileIdsByPathPrefix(rootPath)
+    const { delOpenedFile } = useEditorStore.getState()
+    deletedIds.forEach((id) => delOpenedFile(id))
+    deleteFileObjectsByPathPrefix(rootPath)
+  }, [])
+
+  const handleDeleteReplacedIds = useCallback((fileIds: string[]) => {
+    const { delOpenedFile } = useEditorStore.getState()
+    fileIds.forEach((id) => delOpenedFile(id))
+    deleteFileObjectsByIds(fileIds)
+  }, [])
+
   const recentWorkspaceItems = useMemo(
     () =>
       recentWorkspaces.map((history: { path: string }) => ({
@@ -274,6 +317,11 @@ const Explorer: FC<ExplorerProps> = (props) => {
             setFileObject={setFileObject}
             setFileObjectByPath={setFileObjectByPath}
             deletePathEntry={deletePathEntry}
+            getFileIdsByPathPrefix={getFileIdsByPathPrefix}
+            moveFileObjectsByPathPrefix={moveFileObjectsByPathPrefix}
+            deleteFileObjectsByIds={handleDeleteReplacedIds}
+            deleteFileObjectsByPathPrefix={handleDeleteReplacedCache}
+            onBeforeReplace={handleBeforeReplace}
             createFile={createFile}
             updateFile={updateFile}
             iconButtonComponent={MfIconButton}

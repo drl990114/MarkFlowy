@@ -3,8 +3,12 @@ import { EVENT } from '@/constants'
 import { clipboardRead } from '@/helper/clipboard'
 import bus from '@/helper/eventBus'
 import {
+  deleteFileObject,
   delSaveOpenedEditorEntries,
+  getFileIdsByPathIdentity,
   getFileObject,
+  getFileObjectByPath,
+  getFileObjects,
   setSaveOpenedEditorEntries,
   updateFileObject,
 } from '@/helper/files'
@@ -14,10 +18,18 @@ import {
   FileSysResult,
   getFileNameFromPath,
   getFolderPathFromPath,
+  updateFile,
+  type IFile,
 } from '@/helper/filesys'
 import { FileTypeConfig } from '@/helper/fileTypeHandler'
 import { getExportableImageSrc } from '@/helper/image'
 import { logger } from '@/helper/logger'
+import {
+  comparePathRelation,
+  findPathCollisions,
+  memoizePathRelationResolver,
+  type PathRelationResolver,
+} from '@/helper/physicalPathIdentity'
 import { useEditorKeybindingStore } from '@/hooks/useKeyboard'
 import { useTranslation } from '@/i18n'
 import { useEditorStateStore, useEditorStore } from '@/stores'
@@ -28,11 +40,19 @@ import * as Sentry from '@sentry/react'
 import { invoke } from '@tauri-apps/api/core'
 import { save } from '@tauri-apps/plugin-dialog'
 import classNames from 'classnames'
-import html2canvas from 'html2canvas'
 import { debounce, DebouncedFunc, throttle } from 'lodash'
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react'
+import { flushSync } from 'react-dom'
 import { useUnmount } from 'react-use'
-import type { CreateWysiwygDelegateOptions } from 'rme'
+import type { CreateWysiwygDelegateOptions, EditorDelegate } from 'rme'
 import {
   createSourceCodeDelegate,
   createWysiwygDelegate,
@@ -50,15 +70,27 @@ import {
   createWysiwygDelegateOptions,
   getCurrentEditorInsertDateFormat,
 } from './createWysiwygDelegateOptions'
+import { closeCleanPhysicalAliases } from './closeCleanPhysicalAliases'
 import { EditorWrapper } from './EditorWrapper'
+import { conditionalWriteExpected, getFileWriteRevision } from './conditionalFileWrite'
+import { EditorInstanceLifecycle } from './editorInstanceLifecycle'
+import { FileSaveCoordinator } from './fileSaveCoordinator'
+import { InstanceResourceRegistry, type ResourceRemoval } from './instanceResourceRegistry'
+import { runReservedSaveAs, type SaveAsCollisionSet } from './runReservedSaveAs'
+import { runQueuedFileWrite } from './runQueuedFileWrite'
+import { runSaveOperation } from './runSaveOperation'
+import { getSaveAsCollisionIds } from './saveAsCollision'
+import { savePathCoordinator } from './savePathCoordinator'
 import { EditorSkeleton, WarningHeader } from './styles'
 
 const delegateOptionsCache = new Map<string, CreateWysiwygDelegateOptions>()
 const LARGE_MARKDOWN_SOURCE_MODE_THRESHOLD = 200_000
 const TEXT_EDITOR_CONTENT_SYNC_EVENT = 'editor_content_sync'
-const mountedTextEditorCounts = new Map<string, number>()
-const textEditorSaveHandlers = new Map<string, Map<string, () => Promise<void>>>()
+const editorInstanceLifecycle = new EditorInstanceLifecycle()
+const fileSaveCoordinator = new FileSaveCoordinator()
 let textEditorInstanceSeq = 0
+type Html2Canvas = (typeof import('html2canvas'))['default']
+let html2canvasPromise: Promise<Html2Canvas> | undefined
 
 interface TextEditorContentSyncPayload {
   fileId: string
@@ -66,31 +98,98 @@ interface TextEditorContentSyncPayload {
   content: string
 }
 
+function collectTreeFiles(files: IFile[]): IFile[] {
+  return files.flatMap((file) => [file, ...collectTreeFiles(file.children ?? [])])
+}
+
+function getPhysicalIdentityCandidates(path: string): { files: IFile[]; signature: string } {
+  const editorStore = useEditorStore.getState()
+  const identitySensitiveIds = new Set(editorStore.opened)
+  useEditorStateStore.getState().idStateMap.forEach((state, fileId) => {
+    if (state.hasUnsavedChanges) identitySensitiveIds.add(fileId)
+  })
+  const targetNameKey = getFileNameFromPath(path).normalize('NFC').toLocaleLowerCase('en-US')
+  const files = [...getFileObjects(), ...collectTreeFiles(editorStore.folderData ?? [])].filter(
+    (file) => {
+      if (identitySensitiveIds.has(file.id)) return true
+      if (!file.path) return false
+
+      // Case/Unicode aliases share a filename key, while the backend identity
+      // check remains the final authority and avoids false positives on a
+      // case-sensitive POSIX volume.
+      return (
+        getFileNameFromPath(file.path).normalize('NFC').toLocaleLowerCase('en-US') === targetNameKey
+      )
+    },
+  )
+
+  const signature = Array.from(
+    new Map(files.map((file) => [file.id, `${file.id}\0${file.path ?? ''}`])).values(),
+  )
+    .sort()
+    .join('\0')
+  return { files, signature }
+}
+
+function collectSaveAsReplaceIds(path: string, sourceId: string): string[] {
+  const editorStore = useEditorStore.getState()
+  return getSaveAsCollisionIds({
+    cachedTargetId: getFileObjectByPath(path)?.id,
+    pathTargetIds: getFileIdsByPathIdentity(path),
+    sourceId,
+    treeTargetId: editorStore.getFileNodeByPath(path)?.id,
+  })
+}
+
+async function collectSaveAsCollisions(
+  path: string,
+  sourceId: string,
+  comparePaths: PathRelationResolver,
+): Promise<SaveAsCollisionSet> {
+  let physicalCollisions: Awaited<ReturnType<typeof findPathCollisions>>
+
+  while (true) {
+    const candidates = getPhysicalIdentityCandidates(path)
+    physicalCollisions = await findPathCollisions(path, candidates.files, comparePaths)
+    if (getPhysicalIdentityCandidates(path).signature === candidates.signature) break
+  }
+
+  const replaceIds = Array.from(
+    new Set([
+      ...collectSaveAsReplaceIds(path, sourceId),
+      ...physicalCollisions.replaceFiles.map((file) => file.id),
+    ]),
+  )
+  return {
+    protectedIds: Array.from(
+      new Set([...replaceIds, ...physicalCollisions.protectedFiles.map((file) => file.id)]),
+    ),
+    replaceIds,
+  }
+}
+
 function setTextEditorSaveHandler(
   fileId: string,
   instanceId: string,
-  saveHandler: () => Promise<void>,
+  saveHandler: () => Promise<boolean>,
+  shouldPromote: boolean,
 ) {
-  const handlers = textEditorSaveHandlers.get(fileId) ?? new Map<string, () => Promise<void>>()
-  handlers.set(instanceId, saveHandler)
-  textEditorSaveHandlers.set(fileId, handlers)
-  setSaveOpenedEditorEntries(fileId, saveHandler)
+  const registration = textEditorSaveHandlerRegistry.register(fileId, instanceId, saveHandler)
+  const current = shouldPromote
+    ? textEditorSaveHandlerRegistry.promote(fileId, instanceId)
+    : registration.currentChanged
+      ? registration.current
+      : undefined
+
+  if (current) setSaveOpenedEditorEntries(fileId, current)
 }
 
 function deleteTextEditorSaveHandler(fileId: string, instanceId: string) {
-  const handlers = textEditorSaveHandlers.get(fileId)
-  if (!handlers) return
+  const removal = textEditorSaveHandlerRegistry.remove(fileId, instanceId)
+  if (!removal.currentChanged) return
 
-  handlers.delete(instanceId)
-
-  const nextHandler = Array.from(handlers.values()).at(-1)
-  if (nextHandler) {
-    setSaveOpenedEditorEntries(fileId, nextHandler)
-    return
-  }
-
-  textEditorSaveHandlers.delete(fileId)
-  delSaveOpenedEditorEntries(fileId)
+  if (removal.current) setSaveOpenedEditorEntries(fileId, removal.current)
+  else delSaveOpenedEditorEntries(fileId)
 }
 
 const requestIdle = (callback: () => void): number => {
@@ -138,17 +237,149 @@ enum TextEditorStatus {
 
 export const sourceCodeCodemirrorViewMap: Map<string, MfCodemirrorView> = new Map()
 
+const editorDelegateRegistry = new InstanceResourceRegistry<EditorDelegate<any>>()
+const editorContextRegistry = new InstanceResourceRegistry<EditorContext>()
+const sourceCodeViewRegistry = new InstanceResourceRegistry<MfCodemirrorView>()
+const textEditorSaveHandlerRegistry = new InstanceResourceRegistry<() => Promise<boolean>>()
+
+function registerCompatibilityResource<T>(
+  registry: InstanceResourceRegistry<T>,
+  fileId: string,
+  instanceId: string,
+  resource: T,
+  shouldPromote: boolean,
+  setCurrent: (current: T) => void,
+) {
+  const registration = registry.register(fileId, instanceId, resource)
+  const current = shouldPromote
+    ? registry.promote(fileId, instanceId)
+    : registration.currentChanged
+      ? registration.current
+      : undefined
+
+  if (current !== undefined) {
+    setCurrent(current)
+  }
+}
+
+function registerEditorDelegateResource(
+  fileId: string,
+  instanceId: string,
+  delegate: EditorDelegate<any>,
+  shouldPromote: boolean,
+) {
+  registerCompatibilityResource(
+    editorDelegateRegistry,
+    fileId,
+    instanceId,
+    delegate,
+    shouldPromote,
+    (current) => useEditorStore.getState().setEditorDelegate(fileId, current),
+  )
+}
+
+function registerEditorContextResource(
+  fileId: string,
+  instanceId: string,
+  context: EditorContext,
+  shouldPromote: boolean,
+) {
+  registerCompatibilityResource(
+    editorContextRegistry,
+    fileId,
+    instanceId,
+    context,
+    shouldPromote,
+    (current) => useEditorStore.getState().setEditorCtx(fileId, current),
+  )
+}
+
+function registerSourceCodeViewResource(
+  fileId: string,
+  instanceId: string,
+  view: MfCodemirrorView,
+  shouldPromote: boolean,
+) {
+  registerCompatibilityResource(
+    sourceCodeViewRegistry,
+    fileId,
+    instanceId,
+    view,
+    shouldPromote,
+    (current) => sourceCodeCodemirrorViewMap.set(fileId, current),
+  )
+}
+
+function promoteEditorInstanceResources(fileId: string, instanceId: string) {
+  const store = useEditorStore.getState()
+  const delegate = editorDelegateRegistry.promote(fileId, instanceId)
+  const context = editorContextRegistry.promote(fileId, instanceId)
+  const sourceCodeView = sourceCodeViewRegistry.promote(fileId, instanceId)
+
+  if (delegate === undefined) store.clearEditorDelegate(fileId)
+  else store.setEditorDelegate(fileId, delegate)
+
+  if (context === undefined) store.clearEditorCtx(fileId)
+  else store.setEditorCtx(fileId, context)
+
+  if (sourceCodeView === undefined) sourceCodeCodemirrorViewMap.delete(fileId)
+  else sourceCodeCodemirrorViewMap.set(fileId, sourceCodeView)
+
+  const saveHandler = textEditorSaveHandlerRegistry.promote(fileId, instanceId)
+  if (saveHandler === undefined) delSaveOpenedEditorEntries(fileId)
+  else setSaveOpenedEditorEntries(fileId, saveHandler)
+}
+
+function syncResourceRemoval<T>(
+  removal: ResourceRemoval<T>,
+  setCurrent: (current: T) => void,
+  clearCurrent: () => void,
+) {
+  if (!removal.currentChanged) return
+
+  if (removal.current === undefined) {
+    clearCurrent()
+  } else {
+    setCurrent(removal.current)
+  }
+}
+
+function unregisterSourceCodeViewResource(fileId: string, instanceId: string) {
+  const removal = sourceCodeViewRegistry.remove(fileId, instanceId)
+  syncResourceRemoval(
+    removal,
+    (current) => sourceCodeCodemirrorViewMap.set(fileId, current),
+    () => sourceCodeCodemirrorViewMap.delete(fileId),
+  )
+}
+
+function unregisterEditorInstanceResources(fileId: string, instanceId: string) {
+  const delegateRemoval = editorDelegateRegistry.remove(fileId, instanceId)
+  const contextRemoval = editorContextRegistry.remove(fileId, instanceId)
+  const sourceCodeViewRemoval = sourceCodeViewRegistry.remove(fileId, instanceId)
+
+  const store = useEditorStore.getState()
+  syncResourceRemoval(
+    delegateRemoval,
+    (current) => store.setEditorDelegate(fileId, current),
+    () => store.clearEditorDelegate(fileId),
+  )
+  syncResourceRemoval(
+    contextRemoval,
+    (current) => store.setEditorCtx(fileId, current),
+    () => store.clearEditorCtx(fileId),
+  )
+  syncResourceRemoval(
+    sourceCodeViewRemoval,
+    (current) => sourceCodeCodemirrorViewMap.set(fileId, current),
+    () => sourceCodeCodemirrorViewMap.delete(fileId),
+  )
+}
+
 async function readFileContent(filePath: string): Promise<FileSysResult> {
-  const invokeStartTime = performance.now()
-  const res = await invoke<FileSysResult>('get_file_content', {
+  return invoke<FileSysResult>('get_file_content', {
     filePath,
   })
-  console.log(
-    'Finished loading file content via get_file_content, time taken:',
-    performance.now() - invokeStartTime,
-    'ms',
-  )
-  return res
 }
 
 async function waitForImageLoad(img: HTMLImageElement, src: string) {
@@ -169,11 +400,14 @@ async function waitForImageLoad(img: HTMLImageElement, src: string) {
     img.src = src
 
     if (img.decode) {
-      img.decode().then(finish).catch(() => {
-        if (img.complete) {
-          finish()
-        }
-      })
+      img
+        .decode()
+        .then(finish)
+        .catch(() => {
+          if (img.complete) {
+            finish()
+          }
+        })
     } else if (img.complete) {
       finish()
     }
@@ -233,7 +467,12 @@ async function replaceCssImageUrls(
     const matchIndex = match.index ?? 0
     const matchedText = match[0]
     const rawUrl = match[2]
-    const exportSrc = await getCanvasSafeImageSrc(rawUrl, fileFolderPath, undefined, fallbackElement)
+    const exportSrc = await getCanvasSafeImageSrc(
+      rawUrl,
+      fileFolderPath,
+      undefined,
+      fallbackElement,
+    )
 
     nextValue += value.slice(lastIndex, matchIndex)
     nextValue += `url("${exportSrc.replace(/"/g, '\\"')}")`
@@ -251,10 +490,7 @@ async function prepareImagesForExport(root: HTMLElement, fileFolderPath?: string
   await Promise.all(
     images.map(async (img) => {
       const originalSrc =
-        img.getAttribute('data-rme-original-src') ||
-        img.getAttribute('src') ||
-        img.currentSrc ||
-        ''
+        img.getAttribute('data-rme-original-src') || img.getAttribute('src') || img.currentSrc || ''
       const renderedSrc = img.currentSrc || img.src
       const exportSrc = await getCanvasSafeImageSrc(originalSrc, fileFolderPath, renderedSrc, img)
 
@@ -464,10 +700,24 @@ function canvasToExportDataUrl(canvas: HTMLCanvasElement) {
   return canvas.toDataURL('image/jpeg', 0.95)
 }
 
+async function loadHtml2Canvas() {
+  html2canvasPromise ??= import('html2canvas')
+    .then((module) => module.default)
+    .catch((error) => {
+      html2canvasPromise = undefined
+      throw error
+    })
+
+  return html2canvasPromise
+}
+
 function renderTextFallbackImageDataUrl(element: HTMLElement) {
   const rect = element.getBoundingClientRect()
   const width = Math.max(320, Math.min(4096, Math.ceil(rect.width || element.scrollWidth || 800)))
-  const height = Math.max(240, Math.min(12000, Math.ceil(element.scrollHeight || rect.height || 600)))
+  const height = Math.max(
+    240,
+    Math.min(12000, Math.ceil(element.scrollHeight || rect.height || 600)),
+  )
   const canvas = document.createElement('canvas')
   canvas.width = width
   canvas.height = height
@@ -485,7 +735,10 @@ function renderTextFallbackImageDataUrl(element: HTMLElement) {
   ctx.textBaseline = 'top'
 
   const maxLineWidth = width - 48
-  const words = (element.innerText || element.textContent || '').replace(/\s+/g, ' ').trim().split(' ')
+  const words = (element.innerText || element.textContent || '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .split(' ')
   let line = ''
   let y = 24
 
@@ -509,7 +762,8 @@ function renderTextFallbackImageDataUrl(element: HTMLElement) {
 }
 
 async function renderElementToImageDataUrl(element: HTMLElement) {
-  const html2canvasOptions: Parameters<typeof html2canvas>[1] = {
+  const html2canvas = await loadHtml2Canvas()
+  const html2canvasOptions: Parameters<Html2Canvas>[1] = {
     allowTaint: false,
     foreignObjectRendering: false,
     imageTimeout: 15000,
@@ -549,12 +803,28 @@ async function renderElementToImageDataUrl(element: HTMLElement) {
 
 function TextEditor(props: TextEditorProps) {
   const { id, active, visible = active, fileTypeConfig } = props
-  const curFile = getFileObject(id)
+  const cachedFile = getFileObject(id)
+  const lastKnownFileRef = useRef<IFile | undefined>(cachedFile)
+  if (cachedFile) {
+    lastKnownFileRef.current = cachedFile
+  }
+  const curFile = cachedFile ?? lastKnownFileRef.current!
   const instanceIdRef = useRef<string | undefined>(undefined)
   if (!instanceIdRef.current) {
     textEditorInstanceSeq += 1
     instanceIdRef.current = `text-editor-${textEditorInstanceSeq}`
   }
+  const activeRef = useRef(active)
+  activeRef.current = active
+  const getSavePathReservationSnapshot = useCallback(
+    () => savePathCoordinator.isFileReserved(id, getFileObject(id)?.path),
+    [id],
+  )
+  const savePathReserved = useSyncExternalStore(
+    savePathCoordinator.subscribe,
+    getSavePathReservationSnapshot,
+    () => false,
+  )
   const createDelegate = useCallback(
     (editorViewType = EditorViewType.WYSIWYG, sourceCodeLanguage?: string) => {
       const currentSettingData = useAppSettingStore.getState().settingData
@@ -566,7 +836,7 @@ function TextEditor(props: TextEditorProps) {
           clipboardReadFunction: clipboardRead,
           currentDateFormat: getCurrentEditorInsertDateFormat,
           onCodemirrorViewLoad: (cmView) => {
-            sourceCodeCodemirrorViewMap.set(id, cmView)
+            registerSourceCodeViewResource(id, instanceIdRef.current!, cmView, activeRef.current)
           },
           typewriterScroll: {
             enabled: currentSettingData.editor_typewriter_scroll,
@@ -580,10 +850,25 @@ function TextEditor(props: TextEditorProps) {
   )
   const [status, setStatus] = useState(TextEditorStatus.LOADING)
 
-  const { setEditorDelegate, setEditorCtx, getEditorContent, insertNodeToFolderData } =
-    useEditorStore()
+  const insertNodeToFolderData = useEditorStore((state) => state.insertNodeToFolderData)
   const { t } = useTranslation()
-  const { settingData } = useAppSettingStore()
+  const autosave = useAppSettingStore((state) => state.settingData.autosave)
+  const autosaveInterval = useAppSettingStore((state) => state.settingData.autosave_interval)
+  const editorFullWidth = useAppSettingStore((state) => state.settingData.editor_full_width)
+  const editorPlaceholder = useAppSettingStore((state) => state.settingData.editor_placeholder)
+  const editorRootFontSize = useAppSettingStore((state) => state.settingData.editor_root_font_size)
+  const editorRootLineHeight = useAppSettingStore(
+    (state) => state.settingData.editor_root_line_height,
+  )
+  const editorTypewriterScroll = useAppSettingStore(
+    (state) => state.settingData.editor_typewriter_scroll,
+  )
+  const sourceCodeEditorSpellcheck = useAppSettingStore(
+    (state) => state.settingData.source_code_editor_spellcheck,
+  )
+  const wysiwygEditorSpellcheck = useAppSettingStore(
+    (state) => state.settingData.wysiwyg_editor_spellcheck,
+  )
   const [currentViewType, setCurrentViewType] = useState<EditorViewType>(fileTypeConfig.defaultMode)
   const [content, setContent] = useState<string | undefined>()
   const [delegate, setDelegate] = useState<ReturnType<typeof createDelegate> | null>(null)
@@ -600,7 +885,7 @@ function TextEditor(props: TextEditorProps) {
     return fileTypeConfig.defaultMode
   }, [content, fileTypeConfig])
 
-  const debounceSaveHandlerCacheRef = useRef<DebouncedFunc<() => Promise<void>>>(null)
+  const debounceSaveHandlerCacheRef = useRef<DebouncedFunc<() => Promise<boolean>>>(null)
   const noFileSaveingRef = useRef(false)
   const editorRef = useRef<EditorRef>(null)
   const editorContextRef = useRef<EditorChangeEventParams>(null)
@@ -608,6 +893,8 @@ function TextEditor(props: TextEditorProps) {
   const isApplyingRemoteContentRef = useRef(false)
   const latestContentRef = useRef<string | undefined>(undefined)
   const remoteContentResetHandleRef = useRef<number | null>(null)
+  const rejectedReservedChangeRef = useRef(false)
+  const wasSavePathReservedRef = useRef(false)
 
   useUnmount(() => {
     if (counterIdleHandleRef.current !== null) {
@@ -621,31 +908,46 @@ function TextEditor(props: TextEditorProps) {
   })
 
   useEffect(() => {
-    mountedTextEditorCounts.set(id, (mountedTextEditorCounts.get(id) ?? 0) + 1)
+    const instanceId = instanceIdRef.current!
+    editorInstanceLifecycle.mount(id)
 
     return () => {
-      const nextCount = (mountedTextEditorCounts.get(id) ?? 1) - 1
-
-      if (nextCount > 0) {
-        mountedTextEditorCounts.set(id, nextCount)
-        return
-      }
-
-      mountedTextEditorCounts.delete(id)
-      useEditorCounterStore.getState().deleteEditorCounter({ id })
-      useEditorStateStore.getState().delIdStateMap(id)
+      unregisterEditorInstanceResources(id, instanceId)
+      editorInstanceLifecycle.unmount(id, () => {
+        void fileSaveCoordinator.releaseWhenIdle(
+          id,
+          () => !editorInstanceLifecycle.hasInstances(id),
+          () => {
+            useEditorCounterStore.getState().deleteEditorCounter({ id })
+            useEditorStateStore.getState().delIdStateMap(id)
+            useEditorStore.getState().clearEditorResources(id)
+            sourceCodeCodemirrorViewMap.delete(id)
+            delegateOptionsCache.delete(id)
+          },
+        )
+      })
     }
   }, [id])
 
-  const updateCachedFileContent = useCallback((nextContent: string) => {
-    const file = getFileObject(id)
-    if (!file) return
+  useEffect(() => {
+    if (active) {
+      promoteEditorInstanceResources(id, instanceIdRef.current!)
+    }
+  }, [active, id])
 
-    updateFileObject(id, {
-      ...file,
-      content: nextContent,
-    })
-  }, [id])
+  const updateCachedFileContent = useCallback(
+    (nextContent: string) => {
+      fileSaveCoordinator.recordContent(id, nextContent)
+      const file = getFileObject(id)
+      if (!file) return
+
+      updateFileObject(id, {
+        ...file,
+        content: nextContent,
+      })
+    },
+    [id],
+  )
 
   const emitContentSync = useCallback(
     (nextContent: string) => {
@@ -685,6 +987,21 @@ function TextEditor(props: TextEditorProps) {
   }, [content])
 
   useEffect(() => {
+    const wasReserved = wasSavePathReservedRef.current
+    wasSavePathReservedRef.current = savePathReserved
+    if (!wasReserved || savePathReserved) return
+    if (!rejectedReservedChangeRef.current) return
+    rejectedReservedChangeRef.current = false
+
+    const cachedContent = getFileObject(id)?.content
+    if (typeof cachedContent !== 'string') return
+
+    latestContentRef.current = cachedContent
+    editorRef.current?.setContent(cachedContent)
+    setContent(cachedContent)
+  }, [id, savePathReserved])
+
+  useEffect(() => {
     const handleContentSync = (payload: TextEditorContentSyncPayload) => {
       if (payload.fileId !== id) return
       if (payload.sourceInstanceId === instanceIdRef.current) return
@@ -707,15 +1024,13 @@ function TextEditor(props: TextEditorProps) {
       const editorState = useEditorStateStore.getState().idStateMap.get(file.id)
 
       if (editorState?.hasUnsavedChanges && typeof file.content === 'string') {
+        fileSaveCoordinator.recordContent(id, file.content)
         setContent(file.content)
         return setStatus(TextEditorStatus.SUCCESS)
       }
 
       if (file.path) {
-        console.log('Loading file content from path:', file.path)
-        const startTime = performance.now()
         const res = await readFileContent(file.path)
-        console.log('Finished loading file content total, time taken:', performance.now() - startTime, 'ms')
         if (canceled) return
         if (res.code === FileResultCode.NotFound) {
           return setStatus(TextEditorStatus.NOTEXIST)
@@ -731,6 +1046,7 @@ function TextEditor(props: TextEditorProps) {
         updateCachedFileContent(res.content)
       } else if (file.content !== undefined) {
         if (canceled) return
+        fileSaveCoordinator.recordContent(id, file.content)
         setContent(file.content)
       }
 
@@ -747,152 +1063,200 @@ function TextEditor(props: TextEditorProps) {
     if (status !== TextEditorStatus.SUCCESS || delegate) return
     const newDelegate = createDelegate(effectiveDefaultViewType, fileTypeConfig.type)
     setDelegate(newDelegate)
-    setEditorDelegate(id, newDelegate)
+    registerEditorDelegateResource(id, instanceIdRef.current!, newDelegate, activeRef.current)
     setCurrentViewType(effectiveDefaultViewType)
     useEditorViewTypeStore.getState().setEditorViewType(id, effectiveDefaultViewType)
-  }, [
-    status,
-    delegate,
-    id,
-    fileTypeConfig,
-    effectiveDefaultViewType,
-    createDelegate,
-    setEditorDelegate,
-  ])
+  }, [status, delegate, id, fileTypeConfig, effectiveDefaultViewType, createDelegate])
 
   const saveHandler = useCallback(
     async (params: SaveHandlerParams = {}) => {
-      const { onSuccess, onFinally } = params
-      const runFinally = () => {
-        onFinally?.()
-      }
-      const runSuccess = () => {
-        try {
-          onSuccess?.()
-        } finally {
-          runFinally()
-        }
-      }
+      return runSaveOperation(async () => {
+        if (!active && !params.active) return false
 
-      if (!active && !params.active) {
-        runFinally()
-        return
-      }
-      const curFile = getFileObject(id)
-      if (!curFile) {
-        runFinally()
-        return
-      }
+        const initialFile = getFileObject(id) ?? curFile
+        if (!initialFile) return false
 
-      const { idStateMap, setIdStateMap } = useEditorStateStore.getState()
+        const curEditorState = useEditorStateStore.getState().idStateMap.get(initialFile.id)
 
-      const curEditorState = idStateMap.get(curFile.id)
+        if (!curEditorState?.hasUnsavedChanges) return true
 
-      if (!curEditorState?.hasUnsavedChanges) {
-        runSuccess()
-        return
-      }
+        const sharedContent =
+          typeof initialFile.content === 'string'
+            ? initialFile.content
+            : editorContextRef.current?.state.doc && delegate
+              ? delegate.docToString(editorContextRef.current.state.doc)
+              : undefined
+        if (typeof sharedContent !== 'string') return false
 
-      if (!editorContextRef.current?.state.doc && !curFile.content) {
-        // Unexpected
-        runFinally()
-        return
-      }
+        fileSaveCoordinator.recordContent(id, sharedContent)
+        let selectedSaveAsPath: string | undefined
 
-      const fileContent = editorContextRef.current?.state.doc && delegate
-        ? delegate.docToString(editorContextRef.current.state.doc)
-        : curFile.content
+        return fileSaveCoordinator.saveLatest(
+          id,
+          async ({ content: fileContent }) => {
+            const curFile = getFileObject(id) ?? initialFile
+            if (!curFile || typeof fileContent !== 'string') return false
 
-      logger.info('editorContent', fileContent)
+            if (!useEditorStateStore.getState().idStateMap.get(id)?.hasUnsavedChanges) {
+              return true
+            }
 
-      try {
-        if (!curFile.path) {
-          if (noFileSaveingRef.current === true) {
-            runFinally()
-            return
-          }
+            try {
+              if (!curFile.path) {
+                if (!selectedSaveAsPath) {
+                  if (noFileSaveingRef.current) return false
 
-          noFileSaveingRef.current = true
-          save({
-            title: 'Save File',
-            defaultPath: curFile.name ?? `${t('file.untitled')}.md`,
-          })
-            .then((path) => {
-              noFileSaveingRef.current = false
-
-              if (path === null) {
-                runFinally()
-                return
-              }
-              const filename = getFileNameFromPath(path)
-              const savedFileContent = typeof fileContent === 'string' ? fileContent : curFile.content
-              updateFileObject(curFile.id, {
-                ...curFile,
-                path,
-                name: filename,
-                content: savedFileContent,
-              })
-              insertNodeToFolderData({
-                ...curFile,
-                name: filename,
-                content: savedFileContent,
-                path,
-              })
-              invoke<FileSysResult>('write_file', { filePath: path, content: fileContent }).then(
-                (res) => {
-                  if (res.code !== FileResultCode.Success) {
-                    runFinally()
-                    return toast.error(res.content)
+                  noFileSaveingRef.current = true
+                  let selectedPath: string | null
+                  try {
+                    selectedPath = await save({
+                      title: 'Save File',
+                      defaultPath: curFile.name ?? `${t('file.untitled')}.md`,
+                    })
+                  } finally {
+                    noFileSaveingRef.current = false
                   }
-                  runSuccess()
-                },
-              ).catch((error) => {
-                toast.error(String(error))
-                runFinally()
-              })
-              setIdStateMap(curFile.id, {
-                hasUnsavedChanges: false,
-              })
-            })
-            .catch((error) => {
-              noFileSaveingRef.current = false
-              toast.error(String(error))
-              runFinally()
-            })
-        } else {
-          invoke<FileSysResult>('write_file', {
-            filePath: curFile.path,
-            content: fileContent,
-          }).then((res) => {
-            if (res.code !== FileResultCode.Success) {
-              runFinally()
-              return toast.error(res.content)
-            }
-            if (typeof fileContent === 'string') {
-              setContent(fileContent)
-              updateCachedFileContent(fileContent)
-            }
-            runSuccess()
-          }).catch((error) => {
-            toast.error(String(error))
-            runFinally()
-          })
 
-          setIdStateMap(curFile.id, {
-            hasUnsavedChanges: false,
-          })
-        }
-      } catch (error) {
-        toast.error(String(error))
-        runFinally()
-      }
+                  if (!selectedPath) return false
+                  selectedSaveAsPath = selectedPath
+                }
+
+                const targetPath = selectedSaveAsPath
+                const comparePaths = memoizePathRelationResolver(comparePathRelation)
+                let blockedByDirtyTarget = false
+                let expectedRevision: string | undefined
+                let writeConflict = false
+                const saved = await runReservedSaveAs({
+                  applyReservationUpdate: (update) => flushSync(update),
+                  collectCollisions: () => collectSaveAsCollisions(targetPath, id, comparePaths),
+                  collectPostWriteReplaceIds: () => collectSaveAsReplaceIds(targetPath, id),
+                  coordinator: savePathCoordinator,
+                  isDirty: (fileId) => {
+                    const dirty = !!useEditorStateStore.getState().idStateMap.get(fileId)
+                      ?.hasUnsavedChanges
+                    blockedByDirtyTarget ||= dirty
+                    return dirty
+                  },
+                  ownerFileId: id,
+                  onUnexpectedDirty: () => {
+                    toast.error('The target changed during saving and was kept open.')
+                  },
+                  path: targetPath,
+                  prepareWrite: async () => {
+                    expectedRevision = await getFileWriteRevision(targetPath)
+                  },
+                  replaceCollisions: (collisionIds) => {
+                    const editorStore = useEditorStore.getState()
+                    const editorStateStore = useEditorStateStore.getState()
+                    collisionIds.forEach((collisionId) => {
+                      editorStore.delOpenedFile(collisionId)
+                      editorStateStore.delIdStateMap(collisionId)
+                      deleteFileObject(collisionId)
+                    })
+
+                    const filename = getFileNameFromPath(targetPath)
+                    const savedFile = getFileObject(curFile.id)
+                      ? updateFile({
+                          id: curFile.id,
+                          path: targetPath,
+                          name: filename,
+                        })
+                      : updateFile({
+                          ...curFile,
+                          content: fileContent,
+                          path: targetPath,
+                          name: filename,
+                        })
+                    insertNodeToFolderData(savedFile, collisionIds)
+                  },
+                  syncProtectedAliases: (aliasIds) => {
+                    const editorStore = useEditorStore.getState()
+                    closeCleanPhysicalAliases({
+                      aliasIds: aliasIds.filter((aliasId) =>
+                        editorStore.opened.includes(aliasId),
+                      ),
+                      closeTab: editorStore.delOpenedFile,
+                      content: fileContent,
+                      getFile: getFileObject,
+                      updateFile: (file) => {
+                        updateFile(file)
+                      },
+                    })
+                  },
+                  write: async () => {
+                    if (!expectedRevision) return false
+                    const writeResult = await conditionalWriteExpected(
+                      targetPath,
+                      fileContent,
+                      expectedRevision,
+                    )
+                    if (writeResult.status === 'conflict') {
+                      writeConflict = true
+                      return false
+                    }
+                    return true
+                  },
+                })
+
+                if (!saved && blockedByDirtyTarget) {
+                  toast.error('Save the target file before overwriting it.')
+                } else if (!saved && writeConflict) {
+                  toast.error('The target changed in another window. Save again to retry.')
+                }
+                return saved
+              } else {
+                const queuedWrite = await runQueuedFileWrite({
+                  coordinator: savePathCoordinator,
+                  getCurrentPath: () => getFileObject(id)?.path,
+                  write: (currentPath) =>
+                    invoke<FileSysResult>('write_file', {
+                      filePath: currentPath,
+                      content: fileContent,
+                    }),
+                })
+                if (queuedWrite.status === 'missing-path') return false
+                if (queuedWrite.value.code !== FileResultCode.Success) {
+                  toast.error(queuedWrite.value.content)
+                  return false
+                }
+              }
+
+              return true
+            } catch (error) {
+              toast.error(String(error))
+              return false
+            }
+          },
+          (snapshot) => {
+            if (typeof snapshot.content === 'string') {
+              const cachedFile = getFileObject(id)
+              if (cachedFile) {
+                updateFileObject(id, {
+                  ...cachedFile,
+                  content: snapshot.content,
+                })
+              } else {
+                updateFile({
+                  ...initialFile,
+                  content: snapshot.content,
+                })
+              }
+              latestContentRef.current = snapshot.content
+              setContent(snapshot.content)
+            }
+            useEditorStateStore.getState().setIdStateMap(id, {
+              hasUnsavedChanges: false,
+            })
+          },
+        )
+      }, params)
     },
-    [active, id, delegate, t, insertNodeToFolderData, updateCachedFileContent],
+    [active, id, delegate, t, insertNodeToFolderData],
   )
 
   const debounceSave = useMemo(() => {
-    return debounce(() => saveHandler({ active: true }), settingData.autosave_interval)
-  }, [settingData.autosave_interval, saveHandler])
+    return debounce(() => saveHandler({ active: true }), autosaveInterval)
+  }, [autosaveInterval, saveHandler])
 
   const debounceRefreshToc = useMemo(
     () =>
@@ -903,6 +1267,19 @@ function TextEditor(props: TextEditorProps) {
       }, 1000),
     [fileTypeConfig.type],
   )
+
+  useEffect(() => {
+    return () => {
+      debounceSave.cancel()
+      if (debounceSaveHandlerCacheRef.current === debounceSave) {
+        debounceSaveHandlerCacheRef.current = null
+      }
+    }
+  }, [debounceSave])
+
+  useEffect(() => {
+    return () => debounceRefreshToc.cancel()
+  }, [debounceRefreshToc])
 
   const debounceSaveHandler = useCallback(() => {
     if (debounceSave) {
@@ -915,7 +1292,7 @@ function TextEditor(props: TextEditorProps) {
 
   useEffect(() => {
     const instanceId = instanceIdRef.current!
-    setTextEditorSaveHandler(id, instanceId, () => saveHandler({ active: true }))
+    setTextEditorSaveHandler(id, instanceId, () => saveHandler({ active: true }), activeRef.current)
 
     return () => {
       deleteTextEditorSaveHandler(id, instanceId)
@@ -924,12 +1301,12 @@ function TextEditor(props: TextEditorProps) {
 
   const setContentHandler = useCallback(
     (newContent: string) => {
-      if (!active) return
+      if (!active || savePathReserved) return
       editorRef.current?.setContent(newContent)
       setContent(newContent)
       latestContentRef.current = newContent
       updateCachedFileContent(newContent)
-      
+
       // Set save state to unsaved after content change
       const { setIdStateMap } = useEditorStateStore.getState()
       setIdStateMap(id, {
@@ -937,7 +1314,7 @@ function TextEditor(props: TextEditorProps) {
       })
       emitContentSync(newContent)
     },
-    [active, emitContentSync, id, updateCachedFileContent],
+    [active, emitContentSync, id, savePathReserved, updateCachedFileContent],
   )
 
   const editorTypeSwitchingRef = useRef(false)
@@ -946,73 +1323,96 @@ function TextEditor(props: TextEditorProps) {
     if (!active) return
     const ctx = useEditorStore.getState().getEditorCtx(id)
     if (ctx?.commands?.toggleTypewriterScroll) {
-      ctx.commands.toggleTypewriterScroll(settingData.editor_typewriter_scroll)
+      ctx.commands.toggleTypewriterScroll(editorTypewriterScroll)
     }
-  }, [settingData.editor_typewriter_scroll, delegate, id, active])
+  }, [editorTypewriterScroll, delegate, id, active])
 
   useEffect(() => {
     if (!active) return
     const ctx = useEditorStore.getState().getEditorCtx(id)
     if (ctx?.commands?.togglePlaceholder) {
-      ctx.commands.togglePlaceholder(settingData.editor_placeholder)
+      ctx.commands.togglePlaceholder(editorPlaceholder)
     }
-  }, [settingData.editor_placeholder, delegate, id, active])
+  }, [editorPlaceholder, delegate, id, active])
 
   useEffect(() => {
     delegateOptionsCache.clear()
-  }, [settingData.editor_typewriter_scroll, settingData.editor_placeholder])
+  }, [editorTypewriterScroll, editorPlaceholder])
 
   useEffect(() => {
-    const cb = throttle((payload: EditorViewType) => {
-      if (active) {
-        if (editorTypeSwitchingRef.current) {
-          return
-        }
+    const cb = throttle(
+      (payload: EditorViewType) => {
+        if (active) {
+          if (editorTypeSwitchingRef.current) {
+            return
+          }
 
-        if (editorRef.current?.getType() === payload) {
-          return
-        }
+          if (editorRef.current?.getType() === payload) {
+            return
+          }
 
-        editorTypeSwitchingRef.current = true
-        bus.emit(EVENT.app_save, undefined, {
-          onSuccess: () => {
-            if (payload === EditorViewType.SOURCECODE) {
-              const currentSettingData = useAppSettingStore.getState().settingData
-              const sourceCodeDelegate = createSourceCodeDelegate({
-                disableAllBuildInShortcuts: true,
-                overrideShortcutMap: useEditorKeybindingStore.getState().editorKeybingMap,
-                clipboardReadFunction: clipboardRead,
-                currentDateFormat: getCurrentEditorInsertDateFormat,
-                onCodemirrorViewLoad: (cmView) => {
-                  sourceCodeCodemirrorViewMap.set(curFile.id, cmView)
-                  debounceRefreshToc()
-                },
-                typewriterScroll: {
-                  enabled: currentSettingData.editor_typewriter_scroll,
-                },
-              })
-              setEditorDelegate(curFile.id, sourceCodeDelegate)
-              setDelegate(sourceCodeDelegate)
-            } else if (payload === EditorViewType.PREVIEW) {
-              debounceRefreshToc()
-            } else {
-              const wysiwygDelegate = createWysiwygDelegate(
-                getOrCreateDelegateOptions(curFile.id),
-              )
-              setEditorDelegate(curFile.id, wysiwygDelegate)
-              setDelegate(wysiwygDelegate)
-              debounceRefreshToc()
-            }
-            useEditorViewTypeStore.getState().setEditorViewType(curFile.id, payload)
-            setCurrentViewType(payload)
-            editorRef.current?.toggleType(payload)
-          },
-          onFinally: () => {
-            editorTypeSwitchingRef.current = false
-          },
-        })
-      }
-    }, 300, { leading: true, trailing: false })
+          editorTypeSwitchingRef.current = true
+          bus.emit(EVENT.app_save, undefined, {
+            onSuccess: () => {
+              if (payload !== EditorViewType.SOURCECODE) {
+                unregisterSourceCodeViewResource(curFile.id, instanceIdRef.current!)
+              }
+
+              if (payload === EditorViewType.SOURCECODE) {
+                const currentSettingData = useAppSettingStore.getState().settingData
+                const sourceCodeDelegate = createSourceCodeDelegate({
+                  disableAllBuildInShortcuts: true,
+                  overrideShortcutMap: useEditorKeybindingStore.getState().editorKeybingMap,
+                  clipboardReadFunction: clipboardRead,
+                  currentDateFormat: getCurrentEditorInsertDateFormat,
+                  onCodemirrorViewLoad: (cmView) => {
+                    registerSourceCodeViewResource(
+                      curFile.id,
+                      instanceIdRef.current!,
+                      cmView,
+                      activeRef.current,
+                    )
+                    debounceRefreshToc()
+                  },
+                  typewriterScroll: {
+                    enabled: currentSettingData.editor_typewriter_scroll,
+                  },
+                })
+                registerEditorDelegateResource(
+                  curFile.id,
+                  instanceIdRef.current!,
+                  sourceCodeDelegate,
+                  activeRef.current,
+                )
+                setDelegate(sourceCodeDelegate)
+              } else if (payload === EditorViewType.PREVIEW) {
+                debounceRefreshToc()
+              } else {
+                const wysiwygDelegate = createWysiwygDelegate(
+                  getOrCreateDelegateOptions(curFile.id),
+                )
+                registerEditorDelegateResource(
+                  curFile.id,
+                  instanceIdRef.current!,
+                  wysiwygDelegate,
+                  activeRef.current,
+                )
+                setDelegate(wysiwygDelegate)
+                debounceRefreshToc()
+              }
+              useEditorViewTypeStore.getState().setEditorViewType(curFile.id, payload)
+              setCurrentViewType(payload)
+              editorRef.current?.toggleType(payload)
+            },
+            onFinally: () => {
+              editorTypeSwitchingRef.current = false
+            },
+          })
+        }
+      },
+      300,
+      { leading: true, trailing: false },
+    )
 
     bus.on('editor_toggle_type', cb)
 
@@ -1020,7 +1420,7 @@ function TextEditor(props: TextEditorProps) {
       cb.cancel()
       bus.detach('editor_toggle_type', cb)
     }
-  }, [active, curFile, setEditorDelegate, getEditorContent, debounceRefreshToc])
+  }, [active, curFile, debounceRefreshToc])
 
   useEffect(() => {
     const exportImageHandler = async () => {
@@ -1028,10 +1428,13 @@ function TextEditor(props: TextEditorProps) {
         return
       }
 
+      const file = getFileObject(id)
+      if (!file) return
+
       try {
         const path = await save({
           title: t('contextmenu.editor_tab.export_image'),
-          defaultPath: curFile.name.split('.')?.[0] + '.jpg',
+          defaultPath: file.name.split('.')?.[0] + '.jpg',
         })
         if (!path) return
 
@@ -1046,7 +1449,7 @@ function TextEditor(props: TextEditorProps) {
 
           restoreExportResources = await prepareResourcesForExport(
             exportElement,
-            getFolderPathFromPath(curFile.path),
+            getFolderPathFromPath(getFileObject(id)?.path ?? file.path),
           )
           const image = await renderElementToImageDataUrl(exportElement)
           const data = canvasDataToBinary(image)
@@ -1077,9 +1480,12 @@ function TextEditor(props: TextEditorProps) {
         return
       }
 
+      const file = getFileObject(id)
+      if (!file) return
+
       save({
         title: t('contextmenu.editor_tab.export_html'),
-        defaultPath: curFile.name.split('.')?.[0] + '.html',
+        defaultPath: file.name.split('.')?.[0] + '.html',
       })
         .then(async (path) => {
           if (!path) return
@@ -1127,7 +1533,7 @@ function TextEditor(props: TextEditorProps) {
       bus.detach('editor_export_image', exportImageHandler)
       bus.detach('editor_set_content', setContentHandler)
     }
-  }, [active, curFile.name, curFile.path, id, setContentHandler, t])
+  }, [active, id, setContentHandler, t])
 
   useEffect(() => {
     if (active) {
@@ -1182,28 +1588,24 @@ function TextEditor(props: TextEditorProps) {
     [delegate],
   )
 
-  const rootFontSize =
-    !settingData.editor_root_font_size || settingData.editor_root_font_size === 15
-      ? 16
-      : settingData.editor_root_font_size
+  const rootFontSize = !editorRootFontSize || editorRootFontSize === 15 ? 16 : editorRootFontSize
   const rootLineHeight =
-    !settingData.editor_root_line_height || settingData.editor_root_line_height === '1.6'
-      ? '1.65'
-      : settingData.editor_root_line_height
+    !editorRootLineHeight || editorRootLineHeight === '1.6' ? '1.65' : editorRootLineHeight
 
   const editorProps: MfEditorProps = useMemo(
     () => ({
       initialType: effectiveDefaultViewType,
       content: content!,
       delegate: delegate!,
+      editable: !savePathReserved,
       style: {
         height: '100%',
       },
       wysiwygTextContainerProps: {
-        spellCheck: settingData.wysiwyg_editor_spellcheck,
+        spellCheck: wysiwygEditorSpellcheck,
       },
       sourceCodeTextContainerProps: {
-        spellCheck: settingData.source_code_editor_spellcheck,
+        spellCheck: sourceCodeEditorSpellcheck,
       },
       offset: { top: 10, left: 16 },
       styleToken: {
@@ -1212,7 +1614,7 @@ function TextEditor(props: TextEditorProps) {
         rootLineHeight,
       },
       onContextMounted: (context: EditorContext) => {
-        setEditorCtx(id, context)
+        registerEditorContextResource(id, instanceIdRef.current!, context, activeRef.current)
       },
       delegateOptions: getOrCreateDelegateOptions(curFile.id),
       wysiwygToolBarOptions: {
@@ -1229,14 +1631,14 @@ function TextEditor(props: TextEditorProps) {
     [
       content,
       delegate,
-      setEditorCtx,
       id,
-      active,
-      settingData,
+      sourceCodeEditorSpellcheck,
+      wysiwygEditorSpellcheck,
       fileTypeConfig,
       effectiveDefaultViewType,
       rootFontSize,
       rootLineHeight,
+      savePathReserved,
     ],
   )
 
@@ -1244,6 +1646,21 @@ function TextEditor(props: TextEditorProps) {
     (params) => {
       const { tr, helpers } = params
       editorContextRef.current = params
+
+      if (savePathReserved && tr?.docChanged) {
+        const cachedContent = getFileObject(id)?.content
+        const changedContent = delegate?.docToString(params.state.doc)
+        if (typeof cachedContent === 'string' && changedContent !== cachedContent) {
+          rejectedReservedChangeRef.current = true
+          queueMicrotask(() => {
+            latestContentRef.current = cachedContent
+            editorRef.current?.setContent(cachedContent)
+            setContent(cachedContent)
+            rejectedReservedChangeRef.current = false
+          })
+        }
+        return
+      }
 
       if (active && counterIdleHandleRef.current !== null) {
         cancelIdle(counterIdleHandleRef.current)
@@ -1285,7 +1702,7 @@ function TextEditor(props: TextEditorProps) {
           }
 
           const curFile = getFileObject(id)
-          if (settingData.autosave && curFile?.path) {
+          if (autosave && curFile?.path) {
             debounceSaveHandler()
           }
         }
@@ -1298,8 +1715,9 @@ function TextEditor(props: TextEditorProps) {
       active,
       debounceRefreshToc,
       emitContentSync,
-      settingData,
+      autosave,
       updateCachedFileContent,
+      savePathReserved,
     ],
   )
 
@@ -1333,7 +1751,7 @@ function TextEditor(props: TextEditorProps) {
     <EditorWrapper
       id='editorarea-wrapper'
       className={cls}
-      fullWidth={settingData.editor_full_width}
+      fullWidth={editorFullWidth}
       active={active}
       $visible={visible}
       onClick={handleWrapperClick}

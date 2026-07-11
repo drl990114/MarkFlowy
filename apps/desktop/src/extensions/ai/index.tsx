@@ -3,7 +3,6 @@ import type { RightBarItem } from '@/components/SideBar'
 import type { RightNavItem } from '@/components/SideBar/SideBarHeader'
 import SideBarHeader from '@/components/SideBar/SideBarHeader'
 import { EVENT, RIGHTBARITEMKEYS } from '@/constants'
-import { logger } from '@/helper/logger'
 import { addNewMarkdownFileEdit } from '@/services/editor-file'
 import type { BubbleItemType } from '@ant-design/x'
 import { Actions, Bubble, Sender } from '@ant-design/x'
@@ -86,7 +85,6 @@ const ChatList: React.FC<ChatListProps> = (props) => {
         },
         loadingRender: () => <Spin indicator={<Icon.LoadingOutlined spin />} />,
         contentRender(content) {
-          logger.info('content', content)
           return (
             <ErrorBoundary>
               <XMarkdown>{content.content}</XMarkdown>
@@ -208,10 +206,7 @@ const ChatList: React.FC<ChatListProps> = (props) => {
     setAskInput(value)
   }, [])
 
-  const openSettingWindow = useCallback(
-    () => commandRegistry.execute(EVENT.app_openSetting),
-    [],
-  )
+  const openSettingWindow = useCallback(() => commandRegistry.execute(EVENT.app_openSetting), [])
 
   return (
     <Container {...props}>

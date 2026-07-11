@@ -1,11 +1,13 @@
 import { invoke } from '@tauri-apps/api/core'
 import { revealItemInDir } from '@tauri-apps/plugin-opener'
 import { nanoid } from 'nanoid'
-import type { FC, ReactNode } from 'react'
+import { useMemo, type FC, type ReactNode } from 'react'
+import { flushSync } from 'react-dom'
 import {
   FileSystemContext,
   FileSystemContextValue,
   MoveFileInfo,
+  type RunFileMutation,
 } from '@markflowy/interface'
 import { logger } from '@/helper/logger'
 import { resolveFileExcludePatterns } from '@/helper/file-exclude'
@@ -17,16 +19,28 @@ import {
 } from '@/helper/files'
 import { useEditorStore } from '@/stores'
 import useAppSettingStore from '@/stores/useAppSettingStore'
+import { savePathCoordinator } from '@/components/EditorArea/savePathCoordinator'
 
 interface FileSystemAdapterProps {
   children: ReactNode
 }
 
-export const TauriFileSystemProvider: FC<FileSystemAdapterProps> = ({ children }) => {
-  const settingData = useAppSettingStore((state) => state.settingData)
-  const fileExcludePatterns = resolveFileExcludePatterns(settingData)
+const runFileMutation: RunFileMutation = (operation) =>
+  savePathCoordinator.runFileMutation((lease) =>
+    operation({
+      protectFileIds: (fileIds) => flushSync(() => lease.protectFileIds(fileIds)),
+      protectPaths: (paths) => flushSync(() => lease.protectPaths(paths)),
+    }),
+  )
 
-  const value: FileSystemContextValue = {
+export const TauriFileSystemProvider: FC<FileSystemAdapterProps> = ({ children }) => {
+  const fileExcludePatterns = useAppSettingStore((state) =>
+    resolveFileExcludePatterns(state.settingData),
+  )
+
+  const value: FileSystemContextValue = useMemo(() => ({
+    runFileMutation,
+
     readDirectory: async (folderPath: string): Promise<IFile[]> => {
       const result = await invoke<FileSysResult>('open_folder_async', {
         folderPath,
@@ -50,6 +64,9 @@ export const TauriFileSystemProvider: FC<FileSystemAdapterProps> = ({ children }
       })
       if (result.code !== FileResultCode.Success) {
         logger.error(`Failed to read subdirectory at ${folderPath}: ${result.code}`)
+        return []
+      }
+      if ((useEditorStore.getState().getRootPath() || folderPath) !== rootPath) {
         return []
       }
       const files = JSON.parse(result.content) as IFile[]
@@ -159,7 +176,7 @@ export const TauriFileSystemProvider: FC<FileSystemAdapterProps> = ({ children }
     revealInFolder: async (path: string): Promise<void> => {
       await revealItemInDir(path)
     },
-  }
+  }), [fileExcludePatterns])
 
   return <FileSystemContext.Provider value={value}>{children}</FileSystemContext.Provider>
 }

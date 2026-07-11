@@ -15,7 +15,7 @@ interface ViewSwitcherProps {
 
 export const ViewSwitcher = (props: ViewSwitcherProps) => {
   const { editorId } = props
-  const { activeId } = useEditorStore()
+  const activeId = useEditorStore((state) => state.activeId)
   const targetEditorId = editorId ?? activeId
   const { editorViewTypeMap } = useEditorViewTypeStore()
   const { t } = useTranslation()

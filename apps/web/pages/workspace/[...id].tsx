@@ -31,6 +31,8 @@ const WorkspaceDetailCSRPage = dynamic(() => Promise.resolve(WorkspaceDetailPage
   ),
 })
 
+const ignoreFileTreeContextMenu = () => {}
+
 export default function WorkspaceDetailPage() {
   return <WorkspaceDetailCSRPage />
 }
@@ -174,9 +176,12 @@ function WorkspaceDetailPageContent() {
                         onSelect={handleSelect}
                         dndRootElement={fileTreeRef.current}
                         disableDrag={true}
+                        disableFileOperations={isGithubWorkspace}
                         fillFlexParentComponent={FillFlexParent}
                         onShowConfirm={handleShowConfirm}
-                        onShowContextMenu={handleShowContextMenu}
+                        onShowContextMenu={
+                          isGithubWorkspace ? ignoreFileTreeContextMenu : handleShowContextMenu
+                        }
                         getFileObject={getFileObject}
                         getFileObjectByPath={getFileObjectByPath}
                       />

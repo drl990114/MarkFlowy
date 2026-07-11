@@ -18,13 +18,14 @@ const EMPTY_FILE_NORMAL_INFO: FileNormalInfo = {
 }
 
 export const FileInfo = memo(() => {
-  const { activeId } = useEditorStore()
+  const activeId = useEditorStore((state) => state.activeId)
   const { t } = useTranslation()
   const [fileNormalInfo, setFileNormalInfo] = useState<FileNormalInfo>(EMPTY_FILE_NORMAL_INFO)
-  const { idStateMap } = useEditorStateStore()
   
   const curFile = activeId ? getFileObject(activeId) : undefined
-  const editorState = activeId ? idStateMap.get(activeId) : undefined
+  const hasUnsavedChanges = useEditorStateStore((state) =>
+    activeId ? state.idStateMap.get(activeId)?.hasUnsavedChanges : undefined,
+  )
 
   const getFileNormalInfo = useCallback(
     debounce(async () => {
@@ -52,7 +53,7 @@ export const FileInfo = memo(() => {
     return () => {
       getFileNormalInfo.cancel()
     }
-  }, [editorState?.hasUnsavedChanges, getFileNormalInfo])
+  }, [hasUnsavedChanges, getFileNormalInfo])
 
   const showFileInfo = async () => {
     let latestFileNormalInfo = fileNormalInfo

@@ -3,7 +3,7 @@ import { MfIconLabelButton } from '@/components/ui-v2/Button/icon-label-button'
 import { showContextMenu } from '@/components/ui-v2/ContextMenu'
 import useBookMarksStore from '@/extensions/bookmarks/useBookMarksStore'
 import bus from '@/helper/eventBus'
-import { getFileObject } from '@/helper/files'
+import useFileCacheStore, { getFileObject } from '@/helper/files'
 import { FileResultCode } from '@/helper/filesys'
 import { writeSettingData } from '@/services/app-setting'
 import { dialog } from '@/services/dialog'
@@ -71,31 +71,43 @@ export const MenuList = memo((props: MenuListProps) => {
     rounded,
   } = props
 
-  const { activeId, getEditorContent } = useEditorStore()
+  const activeId = useEditorStore((state) => state.activeId)
+  const getEditorContent = useEditorStore((state) => state.getEditorContent)
   const targetEditorId = editorId ?? activeId
-  const { editorViewTypeMap } = useEditorViewTypeStore()
-  const { settingData } = useAppSettingStore()
+  const fileName = useFileCacheStore((state) =>
+    targetEditorId ? state.entries[targetEditorId]?.name : undefined,
+  )
+  const filePath = useFileCacheStore((state) =>
+    targetEditorId ? state.entries[targetEditorId]?.path : undefined,
+  )
+  const editorViewType = useEditorViewTypeStore((state) =>
+    targetEditorId ? state.editorViewTypeMap.get(targetEditorId) || 'wysiwyg' : 'wysiwyg',
+  )
+  const editorTypewriterScroll = useAppSettingStore(
+    (state) => state.settingData.editor_typewriter_scroll,
+  )
+  const editorPlaceholder = useAppSettingStore(
+    (state) => state.settingData.editor_placeholder,
+  )
   const { t } = useTranslation()
   const ref = useRef<any>(null)
 
   const [fileNormalInfo, setFileNormalInfo] = useState<FileNormalInfo>(EMPTY_FILE_NORMAL_INFO)
 
-  const curFile = targetEditorId ? getFileObject(targetEditorId) : undefined
-  const editorViewType = editorViewTypeMap.get(curFile?.id || '') || 'wysiwyg'
-
-  const { idStateMap } = useEditorStateStore()
-  const editorState = targetEditorId ? idStateMap.get(targetEditorId) : undefined
+  const hasUnsavedChanges = useEditorStateStore((state) =>
+    targetEditorId ? state.idStateMap.get(targetEditorId)?.hasUnsavedChanges : undefined,
+  )
 
   const getFileNormalInfo = useCallback(
     debounce(async () => {
-      if (!curFile?.path) {
+      if (!filePath) {
         setFileNormalInfo(EMPTY_FILE_NORMAL_INFO)
         return
       }
 
       try {
         const res = await invoke<FileNormalInfo>('get_file_normal_info', {
-          path: curFile.path,
+          path: filePath,
         })
 
         setFileNormalInfo(res)
@@ -103,7 +115,7 @@ export const MenuList = memo((props: MenuListProps) => {
         toast.error((error as Error).message)
       }
     }, 500),
-    [curFile],
+    [filePath],
   )
 
   useEffect(() => {
@@ -112,11 +124,11 @@ export const MenuList = memo((props: MenuListProps) => {
     return () => {
       getFileNormalInfo.cancel()
     }
-  }, [editorState?.hasUnsavedChanges, getFileNormalInfo])
+  }, [hasUnsavedChanges, getFileNormalInfo])
 
   const convertText = useCallback(
     async (variant: string) => {
-      const content = getEditorContent(curFile?.id || '')
+      const content = getEditorContent(targetEditorId || '')
       try {
         const res = await invoke<{ code: FileResultCode; content: string }>('convert_text', {
           text: content || '',
@@ -131,14 +143,17 @@ export const MenuList = memo((props: MenuListProps) => {
         toast.error(String(error))
       }
     },
-    [curFile?.id, getEditorContent],
+    [getEditorContent, targetEditorId],
   )
 
   const buildMenuItems = useCallback((): MenuItemData[] => {
+    const latestFile = targetEditorId ? getFileObject(targetEditorId) : undefined
+    const latestFileName = latestFile?.name || fileName
+    const latestFilePath = latestFile?.path || filePath
     const { getFileTypeConfigById } = useFileTypeConfigStore.getState()
-    const curFileTypeConfig = getFileTypeConfigById(curFile?.id || '')
+    const curFileTypeConfig = getFileTypeConfigById(targetEditorId || '')
     const { findMark } = useBookMarksStore.getState()
-    const curBookMark = findMark(curFile?.path || '')
+    const curBookMark = findMark(latestFilePath || '')
 
     const items: MenuItemData[] = []
 
@@ -186,11 +201,11 @@ export const MenuList = memo((props: MenuListProps) => {
       items.push({
         label: t('settings.editor.behavior.typewriter_scroll.label'),
         value: 'typewriter_scroll',
-        checked: settingData.editor_typewriter_scroll,
+        checked: editorTypewriterScroll,
         handler: () => {
           writeSettingData(
             { key: 'editor_typewriter_scroll' },
-            !settingData.editor_typewriter_scroll,
+            !editorTypewriterScroll,
           )
         },
       })
@@ -201,11 +216,11 @@ export const MenuList = memo((props: MenuListProps) => {
     items.push({
       label: t('settings.editor.behavior.placeholder.label'),
       value: 'placeholder',
-      checked: settingData.editor_placeholder,
+      checked: editorPlaceholder,
       handler: () => {
         writeSettingData(
           { key: 'editor_placeholder' },
-          !settingData.editor_placeholder,
+          !editorPlaceholder,
         )
       },
     })
@@ -218,11 +233,14 @@ export const MenuList = memo((props: MenuListProps) => {
         value: 'file_info',
         handler: async () => {
           let latestFileNormalInfo = fileNormalInfo
+          const infoFilePath = targetEditorId
+            ? getFileObject(targetEditorId)?.path
+            : latestFilePath
 
-          if (curFile?.path) {
+          if (infoFilePath) {
             try {
               latestFileNormalInfo = await invoke<FileNormalInfo>('get_file_normal_info', {
-                path: curFile.path,
+                path: infoFilePath,
               })
               setFileNormalInfo(latestFileNormalInfo)
             } catch (error: unknown) {
@@ -242,7 +260,7 @@ export const MenuList = memo((props: MenuListProps) => {
                   {t('file.size')}: {latestFileNormalInfo.size}
                 </span>
                 <span>
-                  {t('file.path')}: {curFile?.path}
+                  {t('file.path')}: {infoFilePath}
                 </span>
               </Space>
             ),
@@ -262,7 +280,12 @@ export const MenuList = memo((props: MenuListProps) => {
           if (curBookMark) {
             commandRegistry.execute('edit_bookmark_dialog', curBookMark)
           } else {
-            commandRegistry.execute('open_bookmark_dialog', curFile)
+            const bookmarkFile = targetEditorId ? getFileObject(targetEditorId) : undefined
+            commandRegistry.execute('open_bookmark_dialog', bookmarkFile || {
+              id: targetEditorId,
+              name: latestFileName,
+              path: latestFilePath,
+            })
           }
         },
       })
@@ -328,10 +351,13 @@ export const MenuList = memo((props: MenuListProps) => {
 
     return customItems || items
   }, [
-    curFile,
+    targetEditorId,
+    fileName,
+    filePath,
     editorViewType,
     fileNormalInfo,
-    settingData.editor_typewriter_scroll,
+    editorTypewriterScroll,
+    editorPlaceholder,
     t,
     convertText,
     showViewSwitcher,
@@ -356,7 +382,7 @@ export const MenuList = memo((props: MenuListProps) => {
     })
   }, [buildMenuItems])
 
-  if (!curFile) return null
+  if (!targetEditorId || !fileName) return null
 
   return (
     <MfIconLabelButton

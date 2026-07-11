@@ -1,9 +1,11 @@
 import { createFile, getFolderPathFromPath, isMdFile, releaseSecurityScope, type IFile } from '@/helper/filesys';
+import { getPathIdentityKey } from '@/helper/pathIdentity';
 import { isEmptyEditor } from '@/services/editor-file';
 import { invoke } from '@tauri-apps/api/core';
 import { nanoid } from 'nanoid';
 import type { EditorContext, EditorDelegate } from 'rme';
 import { create } from 'zustand';
+import { subscribeWithSelector } from 'zustand/middleware';
 
 const findParentNode = (fileNode: IFile, rootFile: IFile) => {
   const dfs = (file: IFile): undefined | IFile => {
@@ -45,6 +47,17 @@ const findParentNodeByPath = (path: string, rootFile: IFile) => {
   }
 
   return dfs(rootFile)
+}
+
+const findFileNodeByPath = (path: string, rootFile?: IFile): IFile | undefined => {
+  if (!rootFile) return undefined
+  const identity = getPathIdentityKey(path)
+  if (rootFile.path && getPathIdentityKey(rootFile.path) === identity) return rootFile
+
+  for (const child of rootFile.children ?? []) {
+    const match = findFileNodeByPath(path, child)
+    if (match) return match
+  }
 }
 
 type BaseIFile = { name: string; kind: IFile['kind'] }
@@ -369,7 +382,7 @@ const commitEditorLayoutState = (layout: EditorLayoutNode, activeGroupId?: strin
   }
 }
 
-const useEditorStore = create<EditorStore>((set, get) => {
+const useEditorStore = create<EditorStore>()(subscribeWithSelector((set, get) => {
   const initialEditorLayout = createDefaultEditorLayout()
 
   return {
@@ -419,32 +432,88 @@ const useEditorStore = create<EditorStore>((set, get) => {
       }
     },
 
-    insertNodeToFolderData: (fileNode) => {
-      const { folderData } = get()
-      if (fileNode && folderData) {
-        const parent =
-          fileNode.kind === 'dir' ? fileNode : findParentNodeByPath(fileNode.path!, folderData![0])
+    insertNodeToFolderData: (fileNode, replacedIds = []) => {
+      set((state) => {
+        const root = state.folderData?.[0]
+        if (!fileNode || !root) return state
 
-        if (!parent) return false
-        let sameFile = parent.children?.find((file) => isSameFile(file, fileNode))
-        if (sameFile) {
-          sameFile = {
-            ...sameFile,
-            ...fileNode,
+        const replacementIds = new Set(replacedIds.filter((id) => id !== fileNode.id))
+        let replacement:
+          | { index: number; parent: IFile; previousFile: IFile }
+          | undefined
+        const removeReplacementNodes = (parent: IFile) => {
+          if (!parent.children) return
+
+          for (let index = parent.children.length - 1; index >= 0; index -= 1) {
+            const child = parent.children[index]
+            if (replacementIds.has(child.id)) {
+              replacement ??= { index, parent, previousFile: child }
+              parent.children.splice(index, 1)
+            } else {
+              removeReplacementNodes(child)
+            }
           }
-        } else {
-          parent.children!.push(fileNode)
         }
+        removeReplacementNodes(root)
 
-        set((state) => {
+        if (replacement) {
+          const { index, parent, previousFile } = replacement
+          parent.children ??= []
+          parent.children.splice(Math.min(index, parent.children.length), 0, {
+            ...previousFile,
+            ...fileNode,
+          })
+          replacementIds.forEach((id) => removeFileFromAllGroups(state.editorLayout, id))
+          const synced = commitEditorLayoutState(state.editorLayout, state.activeGroupId)
+
           return {
             ...state,
-            opened: sameFile ? state.opened.filter((id) => id !== sameFile!.id) : state.opened,
-            folderData: [...(state.folderData || [])],
+            ...synced,
+            folderData: [...state.folderData!],
           }
+        }
+
+        const parent =
+          fileNode.kind === 'dir' ? fileNode : findParentNodeByPath(fileNode.path!, root)
+        if (!parent) return state
+
+        parent.children ??= []
+        const sameFileIndex = parent.children.findIndex((file) => {
+          if (fileNode.path && file.path === fileNode.path) return true
+          return isSameFile(file, fileNode)
         })
-      }
+
+        if (sameFileIndex < 0) {
+          parent.children.push(fileNode)
+          return {
+            ...state,
+            folderData: [...state.folderData!],
+          }
+        }
+
+        const previousFile = parent.children[sameFileIndex]
+        parent.children[sameFileIndex] = {
+          ...previousFile,
+          ...fileNode,
+        }
+
+        const synced =
+          previousFile.id === fileNode.id
+            ? {}
+            : (() => {
+                removeFileFromAllGroups(state.editorLayout, previousFile.id)
+                return commitEditorLayoutState(state.editorLayout, state.activeGroupId)
+              })()
+
+        return {
+          ...state,
+          ...synced,
+          folderData: [...state.folderData!],
+        }
+      })
     },
+
+    getFileNodeByPath: (path) => findFileNodeByPath(path, get().folderData?.[0]),
 
     deleteNode: async (fileNode) => {
       const { folderData, activeId, delOpenedFile, opened } = get()
@@ -756,6 +825,15 @@ const useEditorStore = create<EditorStore>((set, get) => {
         return state
       }),
 
+    clearEditorDelegate: (id) =>
+      set((state) => {
+        if (!state.editorDelegateMap.has(id)) return state
+
+        const editorDelegateMap = new Map(state.editorDelegateMap)
+        editorDelegateMap.delete(id)
+        return { ...state, editorDelegateMap }
+      }),
+
     setFolderData: (folderData) => {
       const prevRootPath = get().getRootPath()
       const nextRootPath = folderData?.[0]?.path
@@ -790,6 +868,33 @@ const useEditorStore = create<EditorStore>((set, get) => {
         }
       }),
 
+    clearEditorCtx: (id) =>
+      set((state) => {
+        if (!state.editorCtxMap.has(id)) return state
+
+        const editorCtxMap = new Map(state.editorCtxMap)
+        editorCtxMap.delete(id)
+        return { ...state, editorCtxMap }
+      }),
+
+    clearEditorResources: (id) =>
+      set((state) => {
+        if (!state.editorCtxMap.has(id) && !state.editorDelegateMap.has(id)) {
+          return state
+        }
+
+        const editorCtxMap = new Map(state.editorCtxMap)
+        const editorDelegateMap = new Map(state.editorDelegateMap)
+        editorCtxMap.delete(id)
+        editorDelegateMap.delete(id)
+
+        return {
+          ...state,
+          editorCtxMap,
+          editorDelegateMap,
+        }
+      }),
+
     getEditorCtx: (id) => {
       const editorCtxMap = get().editorCtxMap
       const curCtx = editorCtxMap.get(id)
@@ -797,7 +902,7 @@ const useEditorStore = create<EditorStore>((set, get) => {
       return curCtx
     },
   }
-})
+}))
 
 type EditorStore = {
   opened: string[]
@@ -813,7 +918,8 @@ type EditorStore = {
   getRootPath: () => string | undefined
   setActiveId: (id: string) => void
   addFile: (file: IFile, target: BaseIFile) => Promise<void | IFile>
-  insertNodeToFolderData: (fileNode: IFile) => void
+  insertNodeToFolderData: (fileNode: IFile, replacedIds?: string[]) => void
+  getFileNodeByPath: (path: string) => IFile | undefined
   deleteNode: (fileNode: IFile) => Promise<void>
   trashNode: (fileNode: IFile) => Promise<void>
   addOpenedFile: (id: string) => void
@@ -841,7 +947,7 @@ type EditorStore = {
   closeGroup: (groupId: string) => void
   setBranchSizes: (branchId: string, sizes: number[]) => void
   setEditorLayout: (editorLayout: EditorLayoutNode, activeGroupId?: string) => void
-  setFolderData: (folderData: IFile[]) => void
+  setFolderData: (folderData: IFile[] | null) => void
   /**
    * dont change opened and activeId
    * @param folderData
@@ -849,9 +955,12 @@ type EditorStore = {
    */
   setFolderDataPure: (folderData: IFile[]) => void
   setEditorDelegate: (id: string, delegate: EditorDelegate<any>) => void
+  clearEditorDelegate: (id: string) => void
   getEditorContent: (id: string) => string
   getEditorDelegate: (id: string) => EditorDelegate<any> | undefined
   setEditorCtx: (id: string, ctx: EditorContext) => void
+  clearEditorCtx: (id: string) => void
+  clearEditorResources: (id: string) => void
   getEditorCtx: (id: string) => EditorContext | undefined
 }
 

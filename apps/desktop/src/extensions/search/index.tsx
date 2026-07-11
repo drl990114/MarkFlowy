@@ -27,30 +27,93 @@ const escapeRegExp = (string: string) => {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
+type MatchPosition = {
+  end: number
+  start: number
+}
+
+type NormalizedSearchMatch = SearchInfo['matches'][number] & {
+  matchCount: number
+  positions: MatchPosition[]
+}
+
+type NormalizedSearchInfo = Omit<SearchInfo, 'matches'> & {
+  matchCount: number
+  matches: NormalizedSearchMatch[]
+}
+
+const createSearchRegex = (keyword: string, caseSensitive: boolean) => {
+  if (!keyword) return undefined
+  return new RegExp(escapeRegExp(keyword), caseSensitive ? 'g' : 'gi')
+}
+
+const getMatchPositions = (
+  content: string,
+  keyword: string,
+  caseSensitive: boolean,
+): MatchPosition[] => {
+  const regex = createSearchRegex(keyword, caseSensitive)
+  if (!regex) return []
+
+  const positions: MatchPosition[] = []
+  let match: RegExpExecArray | null
+
+  while ((match = regex.exec(content)) !== null) {
+    positions.push({ start: match.index, end: regex.lastIndex })
+  }
+
+  return positions
+}
+
+const normalizeSearchResults = (
+  resultList: SearchInfo[],
+  keyword: string,
+  caseSensitive: boolean,
+): NormalizedSearchInfo[] => {
+  if (!keyword) {
+    return resultList.map((searchInfo) => ({
+      ...searchInfo,
+      matchCount: 0,
+      matches: searchInfo.matches.map((match) => ({
+        ...match,
+        matchCount: 0,
+        positions: [],
+      })),
+    }))
+  }
+
+  return resultList.map((searchInfo) => {
+    let fileMatchCount = 0
+    const matches = searchInfo.matches.map((match) => {
+      const positions = getMatchPositions(match.content, keyword, caseSensitive)
+      fileMatchCount += positions.length
+
+      return {
+        ...match,
+        matchCount: positions.length,
+        positions,
+      }
+    })
+
+    return {
+      ...searchInfo,
+      matchCount: fileMatchCount,
+      matches,
+    }
+  })
+}
+
 interface SearchMatchSnippetProps {
   content: string
-  keyword: string
   matchIndexInLine: number
-  caseSensitive: boolean
+  positions: MatchPosition[]
 }
 
 const SearchMatchSnippet = memo(
-  ({ content, keyword, matchIndexInLine, caseSensitive }: SearchMatchSnippetProps) => {
+  ({ content, matchIndexInLine, positions }: SearchMatchSnippetProps) => {
     const prefixWindow = 10 // 前置字符减少，确保在窄屏下 active 项靠左显示
     const suffixWindow = 50 // 后置字符可以多一些
 
-    const getMatchPositions = (text: string, query: string) => {
-      if (!query) return []
-      const regex = new RegExp(escapeRegExp(query), caseSensitive ? 'g' : 'gi')
-      const positions: { start: number; end: number }[] = []
-      let match
-      while ((match = regex.exec(text)) !== null) {
-        positions.push({ start: match.index, end: regex.lastIndex })
-      }
-      return positions
-    }
-
-    const positions = getMatchPositions(content, keyword)
     const currentMatch = positions[matchIndexInLine]
 
     if (!currentMatch) return <span className="snippet-text">{content}</span>
@@ -58,26 +121,27 @@ const SearchMatchSnippet = memo(
     const start = Math.max(0, currentMatch.start - prefixWindow)
     const end = Math.min(content.length, currentMatch.end + suffixWindow)
 
-    const snippet = content.slice(start, end)
-
     const renderSnippet = () => {
-      const regex = new RegExp(escapeRegExp(keyword), caseSensitive ? 'g' : 'gi')
-      const result = []
-      let lastIndex = 0
-      let match
+      const result: React.ReactNode[] = []
+      let lastIndex = start
 
-      while ((match = regex.exec(snippet)) !== null) {
-        result.push(snippet.slice(lastIndex, match.index))
+      positions.forEach((position) => {
+        if (position.start < start || position.end > end) {
+          return
+        }
 
-        const isCurrentMatch = match.index + start === currentMatch.start
+        result.push(content.slice(lastIndex, position.start))
+
+        const isCurrentMatch = position.start === currentMatch.start
         result.push(
-          <mark key={match.index} className={isCurrentMatch ? 'active' : ''}>
-            {match[0]}
+          <mark key={`${position.start}-${position.end}`} className={isCurrentMatch ? 'active' : ''}>
+            {content.slice(position.start, position.end)}
           </mark>,
         )
-        lastIndex = regex.lastIndex
-      }
-      result.push(snippet.slice(lastIndex))
+        lastIndex = position.end
+      })
+
+      result.push(content.slice(lastIndex, end))
       return result
     }
 
@@ -92,10 +156,20 @@ const SearchMatchSnippet = memo(
 )
 
 const SearchView = memo(() => {
-  const { resultList, addSearchResult, searchKeyword, caseSensitive, activeIndex, setSearchState } =
-    useSearchStore()
-  const { addOpenedFile, setActiveId, folderData, editorCtxMap, activeId } = useEditorStore()
-  const settingData = useAppSettingStore((state) => state.settingData)
+  const resultList = useSearchStore((state) => state.resultList)
+  const addSearchResult = useSearchStore((state) => state.addSearchResult)
+  const searchKeyword = useSearchStore((state) => state.searchKeyword)
+  const caseSensitive = useSearchStore((state) => state.caseSensitive)
+  const activeIndex = useSearchStore((state) => state.activeIndex)
+  const setSearchState = useSearchStore((state) => state.setSearchState)
+  const addOpenedFile = useEditorStore((state) => state.addOpenedFile)
+  const setActiveId = useEditorStore((state) => state.setActiveId)
+  const folderData = useEditorStore((state) => state.folderData)
+  const editorCtxMap = useEditorStore((state) => state.editorCtxMap)
+  const activeId = useEditorStore((state) => state.activeId)
+  const fileExcludePatterns = useAppSettingStore((state) =>
+    resolveFileExcludePatterns(state.settingData),
+  )
   const [expandIdMap, setExpandIdMap] = useState<Record<string, boolean>>({})
   const [isSearching, setIsSearching] = useState(false)
   const [hasSearched, setHasSearched] = useState(false)
@@ -104,23 +178,18 @@ const SearchView = memo(() => {
   const parentRef = useRef<HTMLDivElement>(null)
   const searchRequestIdRef = useRef(0)
 
-  const getMatchCount = useCallback(
-    (text: string, keyword: string) => {
-      if (!keyword) return 0
-      const regex = new RegExp(escapeRegExp(keyword), caseSensitive ? 'g' : 'gi')
-      const matches = text.match(regex)
-      return matches ? matches.length : 0
-    },
-    [caseSensitive],
+  const normalizedResultList = useMemo(
+    () => normalizeSearchResults(resultList, searchKeyword, caseSensitive),
+    [caseSensitive, resultList, searchKeyword],
   )
 
   const flattenedData = useMemo(() => {
     const data: Array<
-      | { type: 'header'; searchInfo: SearchInfo; id: string }
+      | { type: 'header'; searchInfo: NormalizedSearchInfo; id: string }
       | {
           type: 'match'
-          searchInfo: SearchInfo
-          match: any
+          searchInfo: NormalizedSearchInfo
+          match: NormalizedSearchMatch
           matchIndexInLine: number
           globalIndex: number
           isActive: boolean
@@ -128,7 +197,7 @@ const SearchView = memo(() => {
         }
     > = []
 
-    resultList.forEach((searchInfo) => {
+    normalizedResultList.forEach((searchInfo) => {
       data.push({
         type: 'header',
         searchInfo,
@@ -139,8 +208,7 @@ const SearchView = memo(() => {
         const isCurrentFileActive = getFileObjectByPath(searchInfo.path)?.id === activeId
         let fileIndexRef = 0
         searchInfo.matches.forEach((match) => {
-          const count = getMatchCount(match.content, searchKeyword)
-          for (let i = 0; i < count; i++) {
+          for (let i = 0; i < match.matchCount; i++) {
             const currentIndex = fileIndexRef + i
             data.push({
               type: 'match',
@@ -152,13 +220,13 @@ const SearchView = memo(() => {
               id: `match-${match.id}-${i}`,
             })
           }
-          fileIndexRef += count
+          fileIndexRef += match.matchCount
         })
       }
     })
 
     return data
-  }, [resultList, expandIdMap, activeId, activeIndex, searchKeyword, getMatchCount])
+  }, [normalizedResultList, expandIdMap, activeId, activeIndex])
 
   const rowVirtualizer = useVirtualizer({
     count: flattenedData.length,
@@ -169,23 +237,10 @@ const SearchView = memo(() => {
 
   const isAllExpand = resultList.length > 0 && resultList.every((item) => expandIdMap[item.id])
   const trimmedKeyword = searchKeyword.trim()
-  const fileExcludePatterns = useMemo(
-    () => resolveFileExcludePatterns(settingData),
-    [settingData],
-  )
   const resultFileCount = resultList.length
   const resultMatchCount = useMemo(
-    () =>
-      resultList.reduce(
-        (total, searchInfo) =>
-          total +
-          searchInfo.matches.reduce(
-            (matchTotal, match) => matchTotal + getMatchCount(match.content, searchKeyword),
-            0,
-          ),
-        0,
-      ),
-    [getMatchCount, resultList, searchKeyword],
+    () => normalizedResultList.reduce((total, searchInfo) => total + searchInfo.matchCount, 0),
+    [normalizedResultList],
   )
 
   const toggleAllExpand = useCallback(() => {
@@ -546,9 +601,8 @@ const SearchView = memo(() => {
                   <div className='search-info__content'>
                     <SearchMatchSnippet
                       content={item.match.content}
-                      keyword={searchKeyword}
                       matchIndexInLine={item.matchIndexInLine}
-                      caseSensitive={caseSensitive}
+                      positions={item.match.positions}
                     />
                   </div>
                 </div>

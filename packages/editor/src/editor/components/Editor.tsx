@@ -1,8 +1,20 @@
 /* eslint-disable react-hooks/rules-of-hooks */
-import { prosemirrorNodeToHtml, type Extension, type RemirrorEventListenerProps } from '@rme-sdk/main'
+import {
+  prosemirrorNodeToHtml,
+  type Extension,
+  type RemirrorEventListenerProps,
+} from '@rme-sdk/main'
 import { Slice } from '@rme-sdk/pm'
 import { type Node } from '@rme-sdk/pm/model'
-import { forwardRef, memo, useCallback, useImperativeHandle, useMemo, useRef, useState } from 'react'
+import {
+  forwardRef,
+  memo,
+  useCallback,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import {
   EditorViewType,
   HTMLAstNode,
@@ -51,6 +63,9 @@ export const Editor = memo(
         }
         const delegate = resolveDelegate()
         const nextDoc = delegate.stringToDoc(nextContent)
+        if (view.state.doc.eq(nextDoc)) {
+          return
+        }
         const tr = view.state.tr.replace(
           0,
           view.state.doc.content.size,
@@ -75,9 +90,6 @@ export const Editor = memo(
         setType(targetType)
       },
       setContent: (nextContent: string) => {
-        if (nextContent === otherProps.content) {
-          return
-        }
         applyContentToView(nextContent)
       },
       exportHtml: async () => {

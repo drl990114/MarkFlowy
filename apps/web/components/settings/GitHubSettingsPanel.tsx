@@ -19,6 +19,7 @@ export function GitHubSettingsPanel({ isAuthenticated, authLoading }: GitHubSett
     repos,
     loadingRepos,
     repoError,
+    importingRepo,
     handleSave,
     handleDelete,
     handleOpenWorkspace,
@@ -91,7 +92,9 @@ export function GitHubSettingsPanel({ isAuthenticated, authLoading }: GitHubSett
                 >
                   GitHub Settings
                 </TokenHintLink>
-                . Required scopes: <code>repo</code>, <code>user</code>.
+                . Prefer a fine-grained token with <code>Metadata: Read</code> and{' '}
+                <code>Contents: Read and write</code>. Editing workflow files also requires{' '}
+                <code>Workflows: Read and write</code>.
               </TokenHint>
             </TokenSection>
 
@@ -135,9 +138,12 @@ export function GitHubSettingsPanel({ isAuthenticated, authLoading }: GitHubSett
                     </RepoUpdated>
                   </RepoMeta>
                 </RepoInfo>
-                <OpenButton onClick={() => handleOpenWorkspace(repo)}>
+                <OpenButton
+                  onClick={() => handleOpenWorkspace(repo)}
+                  disabled={Boolean(importingRepo)}
+                >
                   <i className='ri-folder-open-line' />
-                  Open
+                  {importingRepo === repo.full_name ? 'Opening...' : 'Open'}
                 </OpenButton>
               </RepoItem>
             ))}
@@ -160,7 +166,9 @@ export function GitHubSettingsPanel({ isAuthenticated, authLoading }: GitHubSett
           </HelpItem>
           <HelpItem>
             <HelpNumber>2</HelpNumber>
-            <HelpText>Generate a classic token with repo and user scopes.</HelpText>
+            <HelpText>
+              Generate a fine-grained token with Metadata read and Contents read/write access.
+            </HelpText>
           </HelpItem>
           <HelpItem>
             <HelpNumber>3</HelpNumber>
@@ -517,9 +525,14 @@ const OpenButton = styled.button`
     background-color 0.16s ease,
     border-color 0.16s ease;
 
-  &:hover {
+  &:hover:not(:disabled) {
     background: ${(props) => props.theme.hoverColor};
     border-color: ${(props) => props.theme.borderColorFocused};
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
   }
 `
 

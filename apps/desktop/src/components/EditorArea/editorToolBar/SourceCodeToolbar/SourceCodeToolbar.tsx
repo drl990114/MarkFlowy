@@ -22,7 +22,7 @@ interface SourceCodeToolbarProps {
 
 export const SourceCodeToolbar: FC<SourceCodeToolbarProps> = (props) => {
   const { editorId } = props
-  const { activeId } = useEditorStore()
+  const activeId = useEditorStore((state) => state.activeId)
   const { getEditorViewType } = useEditorViewTypeStore()
   const { t } = useTranslation()
   const targetEditorId = editorId ?? activeId

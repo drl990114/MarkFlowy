@@ -33,7 +33,9 @@ const EMPTY_FILE_NORMAL_INFO: FileNormalInfo = {
 }
 
 export const EditorInfoBar = memo(() => {
-  const { activeId, folderData, getEditorDelegate, getEditorContent } = useEditorStore()
+  const activeId = useEditorStore((state) => state.activeId)
+  const folderData = useEditorStore((state) => state.folderData)
+  const getEditorContent = useEditorStore((state) => state.getEditorContent)
   const [workspace, setWorkspace] = useState<WorkSpace | null>(null)
 
   const { editorViewTypeMap } = useEditorViewTypeStore()
@@ -45,8 +47,9 @@ export const EditorInfoBar = memo(() => {
   const ref1 = useRef<HTMLDivElement>(null)
   const curFile = activeId ? getFileObject(activeId) : undefined
   const [fileNormalInfo, setFileNormalInfo] = useState<FileNormalInfo>(EMPTY_FILE_NORMAL_INFO)
-  const { idStateMap } = useEditorStateStore()
-  const editorState = activeId ? idStateMap.get(activeId) : undefined
+  const hasUnsavedChanges = useEditorStateStore((state) =>
+    activeId ? state.idStateMap.get(activeId)?.hasUnsavedChanges : undefined,
+  )
 
   useEffect(() => {
     getWorkspace().then((workspace) => {
@@ -80,7 +83,7 @@ export const EditorInfoBar = memo(() => {
     return () => {
       getFileNormalInfo.cancel()
     }
-  }, [editorState?.hasUnsavedChanges, getFileNormalInfo])
+  }, [hasUnsavedChanges, getFileNormalInfo])
 
   useEffect(() => {
     const unsubscribe = currentWindow.listen<{
@@ -263,7 +266,6 @@ ${res}
     })
   }, [
     curFile,
-    getEditorDelegate,
     t,
     fetchCurFileSummary,
     fetchCurFileTranslate,

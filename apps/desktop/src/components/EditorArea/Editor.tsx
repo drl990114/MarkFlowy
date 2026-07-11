@@ -1,5 +1,5 @@
 import { commandRegistry } from '@/commands'
-import { getFileObject } from '@/helper/files'
+import useFileCacheStore, { getFileObject } from '@/helper/files'
 import { getFileTypeConfig, isTextfileType } from '@/helper/fileTypeHandler'
 import { logger } from '@/helper/logger'
 import { isEmptyEditor } from '@/services/editor-file'
@@ -19,8 +19,8 @@ import { UnsupportedFileType } from './UnsupportedFileType'
 const overlayScrollbarsOptions = {
   scrollbars: {
     theme: 'os-theme-markflowy',
-    autoHide: 'leave',
-    autoHideDelay: 300,
+    visibility: 'auto',
+    autoHide: 'never',
     dragScroll: true,
     clickScroll: true,
   },
@@ -33,23 +33,52 @@ const overlayScrollbarsOptions = {
 function Editor(props: EditorProps) {
   const { id, active, visible = active } = props
   const [shouldMountContent, setShouldMountContent] = useState(visible)
-  const curFile = getFileObject(id)
-
-  const { getFileTypeConfigById, setFileTypeConfig } = useFileTypeConfigStore()
-  const curFileTypeConfig = getFileTypeConfigById(id)
+  const fileName = useFileCacheStore((state) => state.entries[id]?.name)
+  const filePath = useFileCacheStore((state) => state.entries[id]?.path)
+  const curFileTypeConfig = useFileTypeConfigStore(
+    (state) => state.fileTypeConfigMap.get(id) ?? null,
+  )
+  const setFileTypeConfig = useFileTypeConfigStore((state) => state.setFileTypeConfig)
 
   useMount(async () => {
+    const curFile = getFileObject(id)
+    if (!curFile) return
+
     const mountStart = Date.now()
-    logger.info('[Editor] useMount start', { id, fileName: curFile.name, path: curFile.path, mountStart })
+    logger.info('[Editor] useMount start', {
+      id,
+      fileName: curFile.name,
+      path: curFile.path,
+      mountStart,
+    })
     let fileTypeConfig = await getFileTypeConfig(curFile).catch((err) => {
-      logger.error('[Editor] getFileTypeConfig rejected', { id, fileName: curFile.name, error: String(err) })
+      logger.error('[Editor] getFileTypeConfig rejected', {
+        id,
+        fileName: curFile.name,
+        error: String(err),
+      })
       return null
     })
     if (!fileTypeConfig) {
-      logger.warn('[Editor] getFileTypeConfig returned null, using unsupported fallback', { id, fileName: curFile.name })
-      fileTypeConfig = { type: 'unsupported' as const, supportedModes: [], defaultMode: EditorViewType.PREVIEW }
+      logger.warn('[Editor] getFileTypeConfig returned null, using unsupported fallback', {
+        id,
+        fileName: curFile.name,
+      })
+      fileTypeConfig = {
+        type: 'unsupported' as const,
+        supportedModes: [],
+        defaultMode: EditorViewType.PREVIEW,
+      }
     }
-    logger.info(`[Editor] fileTypeConfig resolved at ${Date.now()}, elapsed=${Date.now() - mountStart}ms`, { id, fileName: curFile.name, type: fileTypeConfig.type, defaultMode: fileTypeConfig.defaultMode })
+    logger.info(
+      `[Editor] fileTypeConfig resolved at ${Date.now()}, elapsed=${Date.now() - mountStart}ms`,
+      {
+        id,
+        fileName: curFile.name,
+        type: fileTypeConfig.type,
+        defaultMode: fileTypeConfig.defaultMode,
+      },
+    )
     useEditorViewTypeStore.getState().setEditorViewType(curFile.id, fileTypeConfig.defaultMode)
     setFileTypeConfig(curFile.id, fileTypeConfig)
     if (fileTypeConfig.type === 'markdown') {
@@ -65,7 +94,7 @@ function Editor(props: EditorProps) {
     }
   }, [visible])
 
-  if (isEmptyEditor(curFile.id)) {
+  if (isEmptyEditor(id)) {
     if (visible) {
       return <EmptyState />
     } else {
@@ -87,7 +116,7 @@ function Editor(props: EditorProps) {
       >
         <div className={'code-contents'}>
           {!shouldMountContent ? null : curFileTypeConfig.type === 'unsupported' ? (
-            <UnsupportedFileType fileName={curFile.name} />
+            <UnsupportedFileType fileName={fileName || ''} />
           ) : isTextfileType(curFileTypeConfig) ? (
             <TextEditor
               fileTypeConfig={curFileTypeConfig}
@@ -98,7 +127,7 @@ function Editor(props: EditorProps) {
           ) : (
             <PreviewContent
               type={curFileTypeConfig.type}
-              filePath={curFile.path}
+              filePath={filePath}
               active={active}
               visible={visible}
             />

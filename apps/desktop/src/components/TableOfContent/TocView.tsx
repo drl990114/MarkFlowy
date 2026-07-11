@@ -88,9 +88,10 @@ const jumpToHeading = (
 }
 
 const getActiveEditorScrollEl = (activeId: string): HTMLElement | null => {
-  const activeEditor = Array.from(
-    document.querySelectorAll<HTMLElement>('[data-editor-active="true"][data-editor-id]'),
-  ).find((element) => element.dataset.editorId === activeId)
+  const activeEditor =
+    Array.from(
+      document.querySelectorAll<HTMLElement>('[data-editor-active="true"][data-editor-id]'),
+    ).find((element) => element.dataset.editorId === activeId) ?? null
 
   return (
     (activeEditor?.querySelector('[data-overlayscrollbars-viewport]') as HTMLElement | null) ||

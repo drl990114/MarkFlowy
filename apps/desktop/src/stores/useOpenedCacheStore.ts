@@ -43,8 +43,8 @@ const useOpenedCacheStore = create<OpenedCacheStore>((set) => {
 type OpenedCacheStore = {
   recentWorkspaces: WorkspaceInfo[]
   setRecentWorkspaces: (workspaces: WorkspaceInfo[]) => void
-  addRecentWorkspaces: (workspace: WorkspaceInfo) => void
-  clearRecentWorkspaces: () => void
+  addRecentWorkspaces: (workspace: WorkspaceInfo) => Promise<void>
+  clearRecentWorkspaces: () => Promise<void>
 }
 
 export default useOpenedCacheStore

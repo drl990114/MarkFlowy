@@ -13,7 +13,7 @@ import { EmptyState } from './EmptyState'
 const EditorAreaContent = lazy(() => import('./EditorAreaContent'))
 
 function EditorArea() {
-  const { opened } = useEditorStore()
+  const openedCount = useEditorStore((state) => state.opened.length)
 
   useEffect(() => {
     const toggleEditorTypeDisposable = commandRegistry.registerCommand({
@@ -99,7 +99,7 @@ function EditorArea() {
     }
   }, [])
 
-  if (opened.length === 0) {
+  if (openedCount === 0) {
     return <EmptyState />
   }
 

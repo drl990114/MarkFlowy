@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "vite --host --force",
     "build": "vite build",
-    "build:types": "tsc --tsconfig ./tsconfig.types.json",
+    "build:analyze": "vite build --mode analyze",
+    "build:types": "tsc -p ./tsconfig.json --noEmit",
     "updater": "tr updater",
     "preview": "vite preview",
     "tauri:build": "tauri build --features custom-protocol",
@@ -87,19 +88,20 @@
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "@types/react-test-renderer": "^19.1.0",
-    "@vitejs/plugin-react": "^6.0.1",
-    "@vitest/ui": "^4.1.2",
+    "@vitejs/plugin-react": "^6.0.3",
+    "@vitest/ui": "^4.1.10",
     "babel-plugin-react-compiler": "^1.0.0",
     "esbuild": "^0.27.0",
     "eslint": "9.13.0",
     "happy-dom": "^17.1.8",
     "react-test-renderer": "^19.2.0",
     "rimraf": "^6.0.1",
+    "rollup-plugin-visualizer": "^7.0.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.3",
     "url": "^0.11.4",
-    "vite": "^8.0.14",
+    "vite": "8.1.2",
     "vite-plugin-svgr": "^5.2.0",
-    "vitest": "^4.1.2"
+    "vitest": "^4.1.10"
   }
 }
