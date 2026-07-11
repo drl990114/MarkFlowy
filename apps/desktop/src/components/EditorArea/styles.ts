@@ -80,8 +80,7 @@ export const Container = styled.div`
     align-items: center;
     justify-content: flex-end;
     gap: 4px;
-    height: 32px;
-    min-height: 32px;
+    height: 33px;
     padding: 0 6px;
     box-sizing: border-box;
     border-bottom: 1px solid ${(props) => props.theme.borderColor};
