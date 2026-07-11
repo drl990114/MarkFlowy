@@ -1,0 +1,296 @@
+/*
+ * assistant-ui is a lazy RightBar extension. Import only Tailwind's theme and
+ * utilities layers here: preflight/base is deliberately omitted so existing
+ * styled-components, Ant Design and editor styles remain untouched.
+ */
+@layer theme, components, utilities;
+
+/*
+ * Keep preflight disabled and scan only this extension. Do not wrap utilities
+ * in native @scope: older desktop WebViews discard the entire rule, leaving
+ * assistant-ui primitives rendered as unstyled native controls.
+ */
+@tailwind utilities source(none);
+
+@source './**/*.{ts,tsx}';
+
+@custom-variant dark (&:where([data-aui-theme='dark'], [data-aui-theme='dark'] *));
+
+@theme inline {
+  --spacing: var(--aui-space-unit);
+  --container-md: 28rem;
+  --container-3xl: 48rem;
+  --text-xs: var(--aui-font-xs);
+  --text-xs--line-height: 1.5;
+  --text-sm: var(--aui-font-sm);
+  --text-sm--line-height: 1.55;
+  --text-base: var(--aui-font-base);
+  --text-base--line-height: 1.6;
+  --text-lg: var(--aui-font-lg);
+  --text-lg--line-height: 1.5;
+  --text-xl: var(--aui-font-xl);
+  --text-xl--line-height: 1.45;
+  --text-2xl: var(--aui-font-2xl);
+  --text-2xl--line-height: 1.4;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --leading-relaxed: var(--aui-line-height);
+  --default-transition-duration: 150ms;
+  --default-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  --animate-spin: aui-spin 1s linear infinite;
+  --animate-pulse: aui-pulse 1.6s ease-in-out infinite;
+  --color-background: var(--aui-background);
+  --color-foreground: var(--aui-foreground);
+  --color-foreground-secondary: var(--aui-foreground-secondary);
+  --color-card: var(--aui-card);
+  --color-card-foreground: var(--aui-card-foreground);
+  --color-popover: var(--aui-popover);
+  --color-popover-foreground: var(--aui-popover-foreground);
+  --color-tooltip: var(--aui-tooltip);
+  --color-primary: var(--aui-primary);
+  --color-primary-foreground: var(--aui-primary-foreground);
+  --color-primary-soft: var(--aui-primary-soft);
+  --color-secondary: var(--aui-secondary);
+  --color-secondary-foreground: var(--aui-secondary-foreground);
+  --color-muted: var(--aui-muted);
+  --color-muted-foreground: var(--aui-muted-foreground);
+  --color-disabled-foreground: var(--aui-disabled-foreground);
+  --color-accent: var(--aui-accent);
+  --color-accent-foreground: var(--aui-accent-foreground);
+  --color-destructive: var(--aui-destructive);
+  --color-destructive-foreground: var(--aui-destructive-foreground);
+  --color-success: var(--aui-success);
+  --color-warning: var(--aui-warning);
+  --color-border: var(--aui-border);
+  --color-input: var(--aui-input);
+  --color-ring: var(--aui-ring);
+  --font-sans: var(--aui-font-sans);
+  --font-mono: var(--aui-font-mono);
+  --radius-sm: var(--aui-radius-sm);
+  --radius-md: var(--aui-radius-sm);
+  --radius-lg: var(--aui-radius);
+  --radius-xl: var(--aui-radius-lg);
+  --radius-2xl: var(--aui-radius-lg);
+  --shadow-sm: 0 1px 2px var(--aui-shadow-color);
+  --shadow-md: 0 4px 12px var(--aui-shadow-color);
+  --shadow-lg: 0 10px 24px var(--aui-shadow-color);
+}
+
+@keyframes aui-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes aui-pulse {
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@property --aui-dot-matrix-hi {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 1;
+}
+
+@property --aui-dot-matrix-lo {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 0.15;
+}
+
+@keyframes aui-dot-matrix-blink {
+  0%,
+  100% {
+    opacity: var(--aui-dot-matrix-hi, 1);
+  }
+  50% {
+    opacity: var(--aui-dot-matrix-lo, 0.15);
+  }
+}
+
+@keyframes aui-enter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes aui-popover-in {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Minimal scoped preflight required by the shadcn-style registry components. */
+@layer components {
+  .aui-theme,
+  .aui-theme *,
+  .aui-theme::before,
+  .aui-theme::after,
+  [data-aui-portal],
+  [data-aui-portal] *,
+  [data-aui-portal]::before,
+  [data-aui-portal]::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border: 0 solid;
+  }
+
+  .aui-theme button,
+  .aui-theme input,
+  .aui-theme select,
+  .aui-theme textarea,
+  [data-aui-portal] button,
+  [data-aui-portal] input,
+  [data-aui-portal] select,
+  [data-aui-portal] textarea {
+    color: inherit;
+    font: inherit;
+    letter-spacing: inherit;
+  }
+
+  .aui-theme button,
+  .aui-theme input:where([type='button'], [type='reset'], [type='submit']),
+  [data-aui-portal] button,
+  [data-aui-portal] input:where([type='button'], [type='reset'], [type='submit']) {
+    appearance: none;
+    background-color: transparent;
+    background-image: none;
+  }
+
+  .aui-theme img,
+  .aui-theme svg,
+  [data-aui-portal] img,
+  [data-aui-portal] svg {
+    display: block;
+    vertical-align: middle;
+  }
+}
+
+.aui-theme {
+  --aui-background: #fff;
+  --aui-foreground: #111;
+  --aui-foreground-secondary: #505050;
+  --aui-card: #fff;
+  --aui-card-foreground: #111;
+  --aui-popover: #fff;
+  --aui-popover-foreground: #111;
+  --aui-tooltip: #e7e7e7;
+  --aui-primary: #0369a1;
+  --aui-primary-foreground: #fff;
+  --aui-primary-soft: #eef4fa;
+  --aui-secondary: #e7e7e7;
+  --aui-secondary-foreground: #111;
+  --aui-muted: #f6f7f9;
+  --aui-muted-foreground: #6b7280;
+  --aui-disabled-foreground: #9ca3af;
+  --aui-accent: #eef4fa;
+  --aui-accent-foreground: #111;
+  --aui-destructive: #dc2626;
+  --aui-destructive-foreground: #fff;
+  --aui-success: #00c853;
+  --aui-warning: #e2b340;
+  --aui-border: #d2d2d2;
+  --aui-input: #d2d2d2;
+  --aui-ring: #0369a1;
+  --aui-shadow-color: rgba(0, 0, 0, 0.08);
+  --aui-scrollbar-thumb: #c4c4c4;
+  --aui-scrollbar-track: #e4e4e7;
+  --aui-radius-sm: 4px;
+  --aui-radius: 8px;
+  --aui-radius-lg: 12px;
+  --aui-font-xs: 12px;
+  --aui-font-sm: 13px;
+  --aui-font-base: 14px;
+  --aui-font-lg: 16px;
+  --aui-font-xl: 18px;
+  --aui-font-2xl: 20px;
+  --aui-line-height: 1.6;
+  --aui-space-unit: 4px;
+  --aui-font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --aui-font-mono: 'SFMono-Regular', Consolas, monospace;
+
+  min-height: 0;
+  color: var(--aui-foreground);
+  font-family: var(--aui-font-sans);
+  font-size: var(--aui-font-sm);
+  line-height: var(--aui-line-height);
+}
+
+[data-aui-portal] {
+  color: var(--aui-foreground);
+  font-family: var(--aui-font-sans);
+  font-size: var(--aui-font-sm);
+  line-height: var(--aui-line-height);
+}
+
+.aui-message,
+.aui-welcome {
+  animation: aui-enter 180ms ease-out both;
+}
+
+.aui-popover-content[data-state='open'] {
+  transform-origin: var(--radix-popover-content-transform-origin, center);
+  animation: aui-popover-in 120ms ease-out both;
+}
+
+.aui-tooltip-content[data-state='delayed-open'],
+.aui-tooltip-content[data-state='instant-open'] {
+  transform-origin: var(--radix-tooltip-content-transform-origin, center);
+  animation: aui-popover-in 120ms ease-out both;
+}
+
+.aui-dot-matrix-dot {
+  animation-name: aui-dot-matrix-blink;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  transition:
+    --aui-dot-matrix-hi 300ms,
+    --aui-dot-matrix-lo 300ms,
+    opacity 300ms;
+}
+
+.aui-thread-viewport,
+.aui-command-list {
+  scrollbar-color: var(--aui-scrollbar-thumb) var(--aui-scrollbar-track);
+  scrollbar-width: thin;
+}
+
+.aui-md {
+  overflow-wrap: anywhere;
+}
+
+.aui-md > :first-child {
+  margin-top: 0;
+}
+
+.aui-md > :last-child {
+  margin-bottom: 0;
+}
+
+.aui-md pre code {
+  font-family: var(--aui-font-mono);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aui-message,
+  .aui-welcome,
+  .aui-popover-content,
+  .aui-tooltip-content,
+  .aui-dot-matrix-dot {
+    animation: none !important;
+  }
+}

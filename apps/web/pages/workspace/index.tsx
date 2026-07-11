@@ -1,9 +1,6 @@
-import { githubService } from 'features/githubWorkspace/services/githubService'
+import { githubService, type GitHubRepo } from 'features/githubWorkspace/services/githubService'
 import { useGitHubWorkspaceImport } from 'features/githubWorkspace/hooks/useGitHubWorkspaceImport'
-import {
-  getGitHubWorkspaceErrorMessage,
-  type GitHubRepo,
-} from 'features/githubWorkspace/services/workspaceGitHubService'
+import { getRemoteWorkspaceErrorMessage } from 'features/workspace/services/remoteWorkspaceService'
 import { useAuth } from 'hooks/useAuth'
 import type { GitHubConfig } from '@markflowy/types'
 import Link from 'next/link'
@@ -82,7 +79,7 @@ export default function WorkspaceListPage() {
       const data = await apiClient.get<Workspace[]>('/workspaces')
       setWorkspaces(data)
     } catch (error) {
-      setWorkspaceError(getGitHubWorkspaceErrorMessage(error, 'Failed to load workspaces'))
+      setWorkspaceError(getRemoteWorkspaceErrorMessage(error, 'Failed to load workspaces'))
     } finally {
       setLoadingWorkspaces(false)
     }

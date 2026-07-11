@@ -1,5 +1,6 @@
 import { commandRegistry } from '@/commands'
 import { EVENT } from '@/constants'
+import type { OpenSettingTarget } from '@/extensions/ai/aiProvidersService'
 import { Setting } from '@/router'
 import { memo, useCallback, useEffect, useState } from 'react'
 import { useTranslation } from '@/i18n'
@@ -19,11 +20,11 @@ const SettingDialogWrapper = styled(Dialog)`
     height: calc(100% - 60px);
     overflow-y: auto;
     padding: 0 24px;
-    
+
     &::-webkit-scrollbar {
       width: 6px;
     }
-    
+
     &::-webkit-scrollbar-thumb {
       background-color: ${(props) => props.theme.borderColor};
       border-radius: 3px;
@@ -33,12 +34,20 @@ const SettingDialogWrapper = styled(Dialog)`
 
 export const SettingDialog = memo(() => {
   const [open, setOpen] = useState(false)
+  const [navigationRequest, setNavigationRequest] = useState<{
+    id: number
+    target?: OpenSettingTarget
+  }>({ id: 0 })
   const { t } = useTranslation()
 
   useEffect(() => {
     const disposable = commandRegistry.registerCommand({
       id: EVENT.app_openSetting,
-      handler: () => {
+      handler: (target?: OpenSettingTarget) => {
+        setNavigationRequest((current) => ({
+          id: current.id + 1,
+          target: target?.category === 'ai' ? { ...target } : undefined,
+        }))
         setOpen(true)
       },
     })
@@ -55,7 +64,7 @@ export const SettingDialog = memo(() => {
       open={open}
       onClose={handleClose}
     >
-      <Setting />
+      <Setting key={navigationRequest.id} navigationRequest={navigationRequest} />
     </SettingDialogWrapper>
   )
 })

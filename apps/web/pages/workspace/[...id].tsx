@@ -57,8 +57,9 @@ function WorkspaceDetailPageContent() {
     loadingFile,
     saving,
     error,
-    branches,
-    currentBranch,
+    refs,
+    currentRef,
+    canWrite,
     commitMessage,
     setCommitMessage,
     handleSelect,
@@ -66,7 +67,7 @@ function WorkspaceDetailPageContent() {
     handleSave,
     handleShowConfirm,
     handleShowContextMenu,
-    handleBranchChange,
+    handleRefChange,
     handleReadSubdirectory,
     getFileObject,
     getFileObjectByPath,
@@ -98,8 +99,22 @@ function WorkspaceDetailPageContent() {
     )
   }
 
-  const isGithubWorkspace = adapter?.type === 'github'
+  const isRemoteWorkspace = adapter?.type === 'remote'
+  const isGitHubProvider = isRemoteWorkspace && adapter.provider.toLowerCase() === 'github'
+  const supportsRefs = isRemoteWorkspace && adapter.capabilities.refs
+  const refLabel = isGitHubProvider ? 'Branch' : 'Ref'
   const workspaceTitle = adapter?.title || id || 'Workspace'
+  let workspaceIconClass = 'ri-folder-3-line'
+  let statusIconClass = 'ri-hard-drive-2-line'
+  let statusText = 'Local'
+
+  if (isRemoteWorkspace) {
+    workspaceIconClass = isGitHubProvider ? 'ri-github-fill' : 'ri-cloud-line'
+    statusIconClass = supportsRefs ? 'ri-git-branch-line' : 'ri-cloud-line'
+    statusText = supportsRefs
+      ? `${refLabel}: ${currentRef || 'Default'}`
+      : adapter.provider || 'Remote'
+  }
 
   return (
     <WebFileSystemProvider readSubdirectory={handleReadSubdirectory}>
@@ -120,17 +135,20 @@ function WorkspaceDetailPageContent() {
             <ToolbarCenter>
               <WorkspaceInfo>
                 <WorkspaceIcon>
-                  <i className={isGithubWorkspace ? 'ri-github-fill' : 'ri-folder-3-line'} />
+                  <i className={workspaceIconClass} />
                 </WorkspaceIcon>
                 <WorkspaceTitle>{workspaceTitle}</WorkspaceTitle>
-                {isGithubWorkspace && branches.length > 0 && (
+                {supportsRefs && refs.length > 0 && (
                   <BranchSelect
-                    value={currentBranch || branches[0] || ''}
-                    onChange={(e) => handleBranchChange(e.target.value)}
+                    aria-label={`${refLabel} selector`}
+                    title={refLabel}
+                    value={currentRef || refs[0]?.name || ''}
+                    disabled={loadingTree || saving}
+                    onChange={(e) => handleRefChange(e.target.value)}
                   >
-                    {branches.map((b) => (
-                      <option key={b} value={b}>
-                        {b}
+                    {refs.map((ref) => (
+                      <option key={ref.name} value={ref.name}>
+                        {ref.name}
                       </option>
                     ))}
                   </BranchSelect>
@@ -144,12 +162,12 @@ function WorkspaceDetailPageContent() {
                   {currentFileName}
                   {currentFileState?.isDirty && ' *'}
                 </FileChip>
-                {isGithubWorkspace && activeId && currentFileState && (
+                {canWrite && activeId && currentFileState && (
                   <>
                     <CommitInput
                       value={commitMessage}
                       onChange={(e) => setCommitMessage(e.target.value)}
-                      placeholder='Commit message'
+                      placeholder={isGitHubProvider ? 'Commit message' : 'Save message'}
                     />
                     <SaveButton onClick={handleSave} disabled={saving || !currentFileState.isDirty}>
                       {saving ? 'Saving...' : 'Save'}
@@ -176,11 +194,11 @@ function WorkspaceDetailPageContent() {
                         onSelect={handleSelect}
                         dndRootElement={fileTreeRef.current}
                         disableDrag={true}
-                        disableFileOperations={isGithubWorkspace}
+                        disableFileOperations={isRemoteWorkspace}
                         fillFlexParentComponent={FillFlexParent}
                         onShowConfirm={handleShowConfirm}
                         onShowContextMenu={
-                          isGithubWorkspace ? ignoreFileTreeContextMenu : handleShowContextMenu
+                          isRemoteWorkspace ? ignoreFileTreeContextMenu : handleShowContextMenu
                         }
                         getFileObject={getFileObject}
                         getFileObjectByPath={getFileObjectByPath}
@@ -219,6 +237,7 @@ function WorkspaceDetailPageContent() {
                           onChange={(content) => handleChange(fileId, content)}
                           viewType={viewType}
                           active={activeId === fileId}
+                          editable={!isRemoteWorkspace || canWrite}
                         />
                       </EditorWrapper>
                     )
@@ -246,8 +265,8 @@ function WorkspaceDetailPageContent() {
           <StatusBar>
             <StatusLeft>
               <StatusItem>
-                <i className={isGithubWorkspace ? 'ri-git-branch-line' : 'ri-hard-drive-2-line'} />
-                {isGithubWorkspace ? currentBranch || 'main' : 'Local'}
+                <i className={statusIconClass} />
+                {statusText}
               </StatusItem>
               {currentFileState?.isDirty && <StatusItem $accent>Unsaved</StatusItem>}
             </StatusLeft>

@@ -1,6 +1,16 @@
-import { AIGenerateTextParams } from '@/extensions/ai/aiProvidersService'
+import { getPreferredAIModelKey } from '@/extensions/ai/aiModelPreference'
+import {
+  resolveCopilotModelConfig,
+  resolveSelectedAIModelConfig,
+} from '@/extensions/ai/copilotModelConfig'
+import {
+  aiProviderRegistry,
+  aiProviders,
+  isCloudProviderConfigured,
+  parseAIModelKey,
+  parseConfiguredModels,
+} from '@/extensions/ai/aiProvidersService'
 import { aiGenerateTextRequest } from '@/extensions/ai/api'
-import useAiChatStore, { getCurrentAISettingData } from '@/extensions/ai/useAiChatStore'
 import { sleep } from '@/helper'
 import { clipboardRead } from '@/helper/clipboard'
 import { getFileObject } from '@/helper/files'
@@ -22,16 +32,25 @@ export const getCurrentEditorInsertDateFormat = () => {
 }
 
 export const createWysiwygDelegateOptions = (fileId?: string): CreateWysiwygDelegateOptions => {
-  const aiStoreState = useAiChatStore.getState()
-  const aiProviderModelsMap = aiStoreState.aiProviderModelsMap
-  let supportProviderInfosMap: AIOptions['supportProviderInfosMap'] = {}
+  const settingData = useAppSettingStore.getState().settingData
+  const supportProviderInfosMap: AIOptions['supportProviderInfosMap'] = {}
 
-  Object.entries(aiProviderModelsMap).map(([provider, models]) => {
-    supportProviderInfosMap[provider] = {
-      models: models,
+  aiProviders.forEach((providerId) => {
+    if (providerId === 'ollama' || !isCloudProviderConfigured(providerId, settingData)) return
+
+    supportProviderInfosMap[providerId] = {
+      models: parseConfiguredModels(settingData[aiProviderRegistry[providerId].settingKeys.models]),
     }
   })
-  const settingData = useAppSettingStore.getState().settingData
+
+  const preferredProvider = parseAIModelKey(getPreferredAIModelKey())?.providerId
+  const firstConfiguredProvider = aiProviders.find(
+    (providerId) => supportProviderInfosMap[providerId]?.models.length,
+  )
+  const defaultSelectProvider =
+    (preferredProvider && supportProviderInfosMap[preferredProvider]
+      ? preferredProvider
+      : firstConfiguredProvider) ?? 'openai'
 
   return {
     disableAllBuildInShortcuts: true,
@@ -65,7 +84,7 @@ export const createWysiwygDelegateOptions = (fileId?: string): CreateWysiwygDele
       return url
     },
     ai: {
-      defaultSelectProvider: aiStoreState.aiProvider,
+      defaultSelectProvider,
       supportProviderInfosMap,
       copilot: settingData.copilot_enabled
         ? {
@@ -80,10 +99,8 @@ export const createWysiwygDelegateOptions = (fileId?: string): CreateWysiwygDele
                 nodeType: string
               }
             }) => {
-              const aiSettingData = getCurrentAISettingData()
-              const apiBase = aiSettingData.apiBase
-              const apiKey = aiSettingData.apiKey
-              const headers = aiSettingData.headers
+              const currentSettingData = useAppSettingStore.getState().settingData
+              const modelConfig = resolveCopilotModelConfig(currentSettingData)
 
               const contextPrompt = [
                 context.prevParagraph ? `Previous paragraph: ${context.prevParagraph}` : '',
@@ -97,10 +114,10 @@ export const createWysiwygDelegateOptions = (fileId?: string): CreateWysiwygDele
 
               logger.info('copilot', contextPrompt)
               const text = await aiGenerateTextRequest({
-                sdkProvider: (settingData.copilot_provider as string)?.toLowerCase() as AIGenerateTextParams['sdkProvider'],
-                url: apiBase,
-                apiKey,
-                model: settingData.copilot_model,
+                sdkProvider: modelConfig.providerId,
+                url: modelConfig.apiBase,
+                apiKey: modelConfig.apiKey,
+                model: modelConfig.modelId,
                 messages: [
                   {
                     role: 'system',
@@ -114,7 +131,7 @@ export const createWysiwygDelegateOptions = (fileId?: string): CreateWysiwygDele
                       '- Output ONLY the missing continuation immediately after the cursor, not a full rewrite.\n' +
                       '- Never repeat or paraphrase any part of the existing text before or after the cursor.\n' +
                       '- Write in the same language as the user input (auto-detect from the context). If unclear, default to ' +
-                      `${locales[settingData.language as keyof typeof locales]}.\n` +
+                      `${locales[currentSettingData.language as keyof typeof locales]}.\n` +
                       '- Continue the writing style and tone of the existing text.\n' +
                       '- Use Markdown only if already present in the paragraph; do not introduce new headings or lists.\n' +
                       '- Complete ONLY the current paragraph. Do not start a new paragraph or add unrelated content.\n' +
@@ -133,22 +150,24 @@ export const createWysiwygDelegateOptions = (fileId?: string): CreateWysiwygDele
                     content: 'Context:\n' + '---\n' + contextPrompt + '\n' + '---\n',
                   },
                 ],
-                headers,
+                headers: modelConfig.headers,
               })
               return text
             },
           }
         : undefined,
       generateText: async (params) => {
-        const aiSettingData = getCurrentAISettingData()
-        const apiBase = aiSettingData.apiBase
-        const apiKey = aiSettingData.apiKey
-        const headers = aiSettingData.headers
+        const currentSettingData = useAppSettingStore.getState().settingData
+        const modelConfig = resolveSelectedAIModelConfig(
+          params.provider,
+          params.model,
+          currentSettingData,
+        )
         const text = await aiGenerateTextRequest({
-          sdkProvider: params.provider as AIGenerateTextParams['sdkProvider'],
-          url: apiBase,
-          apiKey,
-          model: params.model,
+          sdkProvider: modelConfig.providerId,
+          url: modelConfig.apiBase,
+          apiKey: modelConfig.apiKey,
+          model: modelConfig.modelId,
           messages: [
             {
               role: 'system',
@@ -160,7 +179,7 @@ export const createWysiwygDelegateOptions = (fileId?: string): CreateWysiwygDele
               content: params.prompt,
             },
           ],
-          headers,
+          headers: modelConfig.headers,
         })
 
         return text

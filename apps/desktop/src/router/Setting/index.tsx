@@ -1,4 +1,5 @@
 import Logo from '@/assets/logo.svg?react'
+import type { OpenSettingTarget } from '@/extensions/ai/aiProvidersService'
 import { installUpdate } from '@/helper/updater'
 import type { SettingData } from '@/router/Setting/settingMap'
 import { getSettingMap } from '@/router/Setting/settingMap'
@@ -41,8 +42,16 @@ function isSettingGroup(
   return typeof group === 'object'
 }
 
-function Setting() {
-  const [value, setValue] = useState(0)
+export interface SettingNavigationRequest {
+  id: number
+  target?: OpenSettingTarget
+}
+
+interface SettingProps {
+  navigationRequest?: SettingNavigationRequest
+}
+
+function Setting({ navigationRequest }: SettingProps) {
   const { appInfo } = useAppInfoStore()
   const { t } = useTranslation()
   const [update, setUpdate] = useState<Update | null>(null)
@@ -72,10 +81,11 @@ function Setting() {
   const settingDataGroupsKeys = Object.keys(settingMap).filter(
     (key) => key !== 'i18nKey',
   ) as (keyof typeof settingMap)[]
-  const curGroupKey = settingDataGroupsKeys[value] as Exclude<
-    keyof SettingData,
-    'i18nKey' | 'iconName' | 'desc'
-  >
+  type SettingCategoryKey = Exclude<keyof SettingData, 'i18nKey' | 'iconName' | 'desc'>
+  const [curGroupKey, setCurGroupKey] = useState<SettingCategoryKey>(
+    navigationRequest?.target?.category ?? (settingDataGroupsKeys[0] as SettingCategoryKey),
+  )
+  const value = settingDataGroupsKeys.indexOf(curGroupKey)
   const curGroup = settingMap[curGroupKey] as Setting.SettingGroup
   const curGroupKeys = Object.keys(curGroup).filter(
     (key) => key !== 'i18nKey' && key !== 'iconName' && key !== 'desc',
@@ -114,7 +124,15 @@ function Setting() {
         return <ThemeSetting key={key} />
       }
       if (isSettingGroup(group)) {
-        return <SettingGroup key={key} group={group} groupKey={key} categoryKey={curGroupKey} />
+        return (
+          <SettingGroup
+            key={key}
+            group={group}
+            groupKey={key}
+            categoryKey={curGroupKey}
+            activeChildId={curGroupKey === 'ai' ? navigationRequest?.target?.providerId : undefined}
+          />
+        )
       }
     })
   }
@@ -165,7 +183,7 @@ function Setting() {
                   })}
                   {...a11yProps(index)}
                   onClick={() => {
-                    setValue(index)
+                    setCurGroupKey(groupKey as SettingCategoryKey)
                   }}
                 >
                   <div>

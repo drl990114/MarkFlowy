@@ -3,7 +3,6 @@ import {
   FILE_MUTATION_QUEUE_KEY,
   savePathCoordinator,
 } from '@/components/EditorArea/savePathCoordinator'
-import useAiChatStore from '@/extensions/ai/useAiChatStore'
 import bus from '@/helper/eventBus'
 import { loadLocalThemeCss } from '@/helper/extensions'
 import { hasFileExcludePatternsChanged } from '@/helper/file-exclude'
@@ -722,7 +721,6 @@ const listener = (event: MessageEvent) => {
 
 const useMainStoreSetup = () => {
   useAppSettingStore()
-  useAiChatStore()
 }
 
 const appSetup = once(async function () {

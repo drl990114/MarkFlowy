@@ -1,5 +1,9 @@
 import { commandRegistry } from '@/commands'
-import useAiChatStore, { getCurrentAISettingData } from '@/extensions/ai/useAiChatStore'
+import {
+  getCurrentAIProviderDisplayName,
+  summarizeAIText,
+  translateAIText,
+} from '@/extensions/ai/aiTextActions'
 import useBookMarksStore from '@/extensions/bookmarks/useBookMarksStore'
 import bus from '@/helper/eventBus'
 import { getFileObject } from '@/helper/files'
@@ -9,7 +13,6 @@ import { addNewMarkdownFileEdit, isEmptyEditor } from '@/services/editor-file'
 import { currentWindow } from '@/services/windows'
 import { getWorkspace, WorkSpace } from '@/services/workspace'
 import { useEditorStateStore, useEditorStore } from '@/stores'
-import useAppSettingStore from '@/stores/useAppSettingStore'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
 import useAppTasksStore from '@/stores/useTasksStore'
@@ -39,8 +42,6 @@ export const EditorInfoBar = memo(() => {
   const [workspace, setWorkspace] = useState<WorkSpace | null>(null)
 
   const { editorViewTypeMap } = useEditorViewTypeStore()
-  const { getPostSummary, getPostTranslate } = useAiChatStore()
-  const { settingData } = useAppSettingStore()
   const { addAppTask } = useAppTasksStore()
   const { t } = useTranslation()
   const ref = useRef<HTMLDivElement>(null)
@@ -105,10 +106,9 @@ export const EditorInfoBar = memo(() => {
 
   const fetchCurFileSummary = useCallback(async () => {
     const content = getEditorContent(curFile?.id || '')
-    const aiSettingData = getCurrentAISettingData()
-    const res = await addAppTask<ReturnType<typeof getPostSummary>>({
+    const res = await addAppTask<ReturnType<typeof summarizeAIText>>({
       title: 'AI: Retrieving article abstract',
-      promise: getPostSummary(content || '', aiSettingData),
+      promise: summarizeAIText(content || ''),
     })
     addNewMarkdownFileEdit({
       fileName: 'summary.md',
@@ -122,18 +122,14 @@ ${res}
     addAppTask,
     curFile?.id,
     getEditorContent,
-    getPostSummary,
-    settingData.extensions_chatgpt_apikey,
   ])
 
   const fetchCurFileTranslate = useCallback(
     async (targetLang: string) => {
       const content = getEditorContent(curFile?.id || '')
-      const aiSettingData = getCurrentAISettingData()
-
       const res = await addAppTask({
         title: 'AI: Translating article',
-        promise: getPostTranslate(content || '', aiSettingData, targetLang),
+        promise: translateAIText(content || '', targetLang),
       })
 
       addNewMarkdownFileEdit({
@@ -145,8 +141,6 @@ ${res}
       addAppTask,
       curFile?.id,
       getEditorContent,
-      getPostTranslate,
-      settingData.extensions_chatgpt_apikey,
     ],
   )
 
@@ -176,7 +170,7 @@ ${res}
     const { findMark } = useBookMarksStore.getState()
     const curBookMark = findMark(curFile?.path || '')
 
-    const { aiProvider } = useAiChatStore.getState()
+    const aiProvider = getCurrentAIProviderDisplayName()
 
     showContextMenu({
       x: rect.x,

@@ -3,7 +3,7 @@ import { useRouter } from 'next/router'
 import { apiClient } from 'utils/apiClient'
 import type { GitHubConfig } from '@markflowy/types'
 import { useGitHubWorkspaceImport } from 'features/githubWorkspace/hooks/useGitHubWorkspaceImport'
-import type { GitHubRepo } from 'features/githubWorkspace/services/workspaceGitHubService'
+import type { GitHubRepo } from 'features/githubWorkspace/services/githubService'
 
 export function useGitHubSettings(isAuthenticated: boolean, authLoading: boolean) {
   const router = useRouter()

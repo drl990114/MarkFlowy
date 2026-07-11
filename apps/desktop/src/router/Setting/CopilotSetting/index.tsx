@@ -1,6 +1,12 @@
+import {
+  aiProviderRegistry,
+  normalizeAIProviderId,
+  parseConfiguredModels,
+} from '@/extensions/ai/aiProvidersService'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import { useMemo } from 'react'
 import { SettingGroupContainer } from '../component/SettingGroup/styles'
+import InputSettingItem from '../component/SettingItems/Input'
 import SelectSettingItem from '../component/SettingItems/Select'
 import SwitchSettingItem from '../component/SettingItems/Switch'
 import { getSettingMap } from '../settingMap'
@@ -13,35 +19,17 @@ export const CopilotSetting = () => {
   const copilotConfig = (settingMap as any).copilot
 
   // Get current provider models
+  const providerId = normalizeAIProviderId(settingData['copilot_provider'])
   const currentProviderModels = useMemo(() => {
-    const provider = settingData['copilot_provider']
-    let modelsStr = ''
+    if (!providerId || providerId === 'ollama') return []
 
-    switch (provider) {
-      case 'ChatGPT':
-        modelsStr = settingData['extensions_chatgpt_models'] || ''
-        break
-      case 'DeepSeek':
-        modelsStr = settingData['extensions_deepseek_models'] || ''
-        break
-      case 'Ollama':
-        modelsStr = settingData['extensions_ollama_models'] || ''
-        break
-      case 'Google':
-        modelsStr = settingData['extensions_google_models'] || ''
-        break
-    }
-
-    return modelsStr
-      .split(',')
-      .map((s) => s.trim())
-      .filter(Boolean)
-      .map((m) => ({ value: m, title: m }))
+    return parseConfiguredModels(
+      settingData[aiProviderRegistry[providerId].settingKeys.models],
+    ).map((m) => ({ value: m, title: m }))
   }, [
-    settingData['copilot_provider'],
+    providerId,
     settingData['extensions_chatgpt_models'],
     settingData['extensions_deepseek_models'],
-    settingData['extensions_ollama_models'],
     settingData['extensions_google_models'],
   ])
 
@@ -51,12 +39,21 @@ export const CopilotSetting = () => {
 
       <SelectSettingItem item={copilotConfig.provider} />
 
-      <SelectSettingItem
-        item={{
-          ...copilotConfig.model,
-          options: currentProviderModels,
-        }}
-      />
+      {providerId === 'ollama' ? (
+        <InputSettingItem
+          item={{
+            ...copilotConfig.model,
+            type: 'input',
+          }}
+        />
+      ) : (
+        <SelectSettingItem
+          item={{
+            ...copilotConfig.model,
+            options: currentProviderModels,
+          }}
+        />
+      )}
     </SettingGroupContainer>
   )
 }

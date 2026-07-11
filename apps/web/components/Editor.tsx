@@ -123,10 +123,11 @@ interface WebEditorProps {
   initialContent?: string
   onChange?: (content: string) => void
   active?: boolean
+  editable?: boolean
 }
 
 export const WebEditor = forwardRef<WebEditorRef, WebEditorProps>(function WebEditor(props, ref) {
-  const { viewType, initialContent, onChange } = props
+  const { viewType, initialContent, onChange, editable = true } = props
   const {
     Editor,
     EditorViewType,
@@ -281,6 +282,7 @@ export const WebEditor = forwardRef<WebEditorRef, WebEditorProps>(function WebEd
           ref={editorRef}
           {...editorProps}
           delegate={delegate!}
+          editable={editable}
           onChange={handleChange}
         />
       </EditorContainer>

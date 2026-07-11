@@ -1,6 +1,7 @@
 /// <reference types="vitest/config" />
 
 import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
 import { fileURLToPath, URL } from 'url'
 import { defineConfig } from 'vite'
 import svgr from 'vite-plugin-svgr'
@@ -31,6 +32,10 @@ export default defineConfig(async ({ mode }) => {
       exclude: ['rme'],
     },
     plugins: [
+      // Tailwind is only activated by the AI extension's lazy-loaded stylesheet.
+      // That stylesheet imports theme + utilities explicitly and intentionally
+      // omits Tailwind's global preflight layer.
+      tailwindcss(),
       react({
         babel: {
           plugins: [

@@ -326,6 +326,7 @@ export const getSettingMap = () => {
         i18nKey: 'settings.ai.model.label',
         children: [
           {
+            providerId: 'openai' as const,
             i18nKey: 'settings.ai.ChatGPT.label',
             ApiBase: {
               key: 'extensions_chatgpt_apibase',
@@ -372,6 +373,7 @@ export const getSettingMap = () => {
             },
           },
           {
+            providerId: 'deepseek' as const,
             i18nKey: 'settings.ai.DeepSeek.label',
             ApiBase: {
               key: 'extensions_deepseek_apibase',
@@ -418,6 +420,7 @@ export const getSettingMap = () => {
             },
           },
           {
+            providerId: 'ollama' as const,
             i18nKey: 'settings.ai.Ollama.label',
             ApiBase: {
               key: 'extensions_ollama_apibase',
@@ -427,16 +430,6 @@ export const getSettingMap = () => {
               },
               desc: {
                 i18nKey: 'settings.ai.Ollama.api_base.desc',
-              },
-            },
-            models: {
-              key: 'extensions_ollama_models',
-              type: 'input',
-              title: {
-                i18nKey: 'settings.ai.Ollama.models.label',
-              },
-              desc: {
-                i18nKey: 'settings.ai.Ollama.models.desc',
               },
             },
             requestHeaders: {
@@ -454,6 +447,7 @@ export const getSettingMap = () => {
             },
           },
           {
+            providerId: 'google' as const,
             i18nKey: 'settings.ai.Google.label',
             ApiBase: {
               key: 'extensions_google_apibase',
