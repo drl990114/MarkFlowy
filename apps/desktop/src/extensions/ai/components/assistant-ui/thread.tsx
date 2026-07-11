@@ -23,10 +23,12 @@ import {
 } from 'lucide-react'
 import {
   createContext,
+  useCallback,
   useContext,
   type ComponentProps,
   type FC,
   type FormEventHandler,
+  type KeyboardEventHandler,
   type ReactNode,
 } from 'react'
 import { cn } from '../lib/cn'
@@ -213,6 +215,19 @@ export function Composer() {
     onComposerSubmit,
     attachmentErrors,
   } = useContext(ThreadContext)
+  const canSend = useAuiState((state) => state.composer.canSend)
+  const handleComposerKeyDown = useCallback<KeyboardEventHandler<HTMLTextAreaElement>>(
+    (event) => {
+      const isShiftEnter =
+        event.key === 'Enter' && event.shiftKey && !event.ctrlKey && !event.metaKey && !event.altKey
+      if (!isShiftEnter || event.defaultPrevented || event.nativeEvent.isComposing) return
+
+      event.preventDefault()
+      if (event.repeat || !canSend) return
+      event.currentTarget.form?.requestSubmit()
+    },
+    [canSend],
+  )
 
   return (
     <ComposerPrimitive.Unstable_TriggerPopoverRoot>
@@ -233,9 +248,11 @@ export function Composer() {
           autoFocus
           className='max-h-32 min-h-8 w-full resize-none bg-transparent px-2 py-1 text-sm text-foreground outline-none placeholder:text-muted-foreground'
           disabled={composerDisabled}
-          enterKeyHint='send'
+          enterKeyHint='enter'
+          onKeyDown={handleComposerKeyDown}
           placeholder={labels.composerPlaceholder}
           rows={1}
+          submitMode='none'
         />
         <div className='flex min-h-7 items-center justify-between gap-1.5'>
           <div className='flex min-w-0 flex-1 items-center gap-1 overflow-x-auto'>
