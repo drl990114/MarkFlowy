@@ -1,7 +1,12 @@
 import styled, { createGlobalStyle } from 'styled-components'
 
 export const OverlayScrollbarStyles = createGlobalStyle`
-  .os-theme-markflowy {
+  /*
+   * OverlayScrollbars defines its zero-value defaults on the os-scrollbar class.
+   * Include that base class so this theme continues to win when the lazy
+   * editor CSS chunk is injected after styled-components global styles.
+   */
+  .os-scrollbar.os-theme-markflowy {
     box-sizing: border-box;
     --os-size: 8px;
     --os-padding-perpendicular: 2px;
@@ -10,6 +15,9 @@ export const OverlayScrollbarStyles = createGlobalStyle`
     --os-handle-border-radius: 4px;
     --os-handle-interactive-area-offset: 4px;
 
+    --os-track-bg: ${(props) => props.theme.scrollbarTrackColor};
+    --os-track-bg-hover: ${(props) => props.theme.scrollbarTrackColor};
+    --os-track-bg-active: ${(props) => props.theme.scrollbarTrackColor};
     --os-handle-bg: ${(props) => props.theme.scrollbarThumbColor};
     --os-handle-bg-hover: ${(props) => props.theme.scrollbarThumbColor};
     --os-handle-bg-active: ${(props) => props.theme.scrollbarThumbColor};

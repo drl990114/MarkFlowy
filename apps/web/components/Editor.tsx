@@ -1,7 +1,15 @@
 import RmeProvider from 'components/RmeProvider'
 import { useRmeEditor } from 'hooks/useRme'
 import Markdown from 'markdown-to-jsx'
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import type { EditorChangeEventParams, EditorRef } from 'rme'
 import styled from 'styled-components'
 
@@ -26,7 +34,12 @@ const PreviewContainer = styled.div`
   font-weight: 400;
   line-height: 1.6;
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     margin-top: 1.5em;
     margin-bottom: 0.5em;
     font-family: var(--sans);
@@ -36,7 +49,8 @@ const PreviewContainer = styled.div`
     margin-bottom: 1em;
   }
 
-  ul, ol {
+  ul,
+  ol {
     margin-bottom: 1em;
     padding-left: 2em;
   }
@@ -77,7 +91,8 @@ const PreviewContainer = styled.div`
     width: 100%;
     margin-bottom: 1em;
 
-    th, td {
+    th,
+    td {
       border: 1px solid var(--line);
       padding: 0.5em;
     }
@@ -110,153 +125,168 @@ interface WebEditorProps {
   active?: boolean
 }
 
-export const WebEditor = forwardRef<WebEditorRef, WebEditorProps>(
-  function WebEditor(props, ref) {
-    const { fileId, viewType, initialContent, onChange, active = true } = props
-    const { Editor, EditorViewType, createWysiwygDelegate, createSourceCodeDelegate, loading, error } = useRmeEditor()
-    const [content, setContent] = useState(initialContent || '')
-    const editorRef = useRef<EditorRef>(null)
+export const WebEditor = forwardRef<WebEditorRef, WebEditorProps>(function WebEditor(props, ref) {
+  const { viewType, initialContent, onChange } = props
+  const {
+    Editor,
+    EditorViewType,
+    createWysiwygDelegate,
+    createSourceCodeDelegate,
+    loading,
+    error,
+  } = useRmeEditor()
+  const [content, setContent] = useState(initialContent || '')
+  const editorRef = useRef<EditorRef>(null)
 
-    const [currentViewType, setCurrentViewType] = useState(viewType || 'wysiwyg')
+  const [currentViewType, setCurrentViewType] = useState(viewType || 'wysiwyg')
 
-    const [editorKey, setEditorKey] = useState(0)
+  const [editorKey, setEditorKey] = useState(0)
 
-    const [isReady, setIsReady] = useState(false)
+  const [isReady, setIsReady] = useState(false)
 
-    const createDelegate = useCallback((viewType: string) => {
+  const createDelegate = useCallback(
+    (nextViewType: string) => {
       if (!createWysiwygDelegate || !createSourceCodeDelegate) {
         return null
       }
-      return viewType === 'wysiwyg'
+      return nextViewType === 'wysiwyg'
         ? createWysiwygDelegate()
         : createSourceCodeDelegate({
             language: 'markdown',
             onCodemirrorViewLoad: () => {},
           })
-    }, [createWysiwygDelegate, createSourceCodeDelegate])
+    },
+    [createWysiwygDelegate, createSourceCodeDelegate],
+  )
 
-    const [delegate, setDelegate] = useState(() => createDelegate(viewType || 'wysiwyg'))
+  const [delegate, setDelegate] = useState(() => createDelegate(viewType || 'wysiwyg'))
 
-    useEffect(() => {
-      if (!delegate && createWysiwygDelegate && createSourceCodeDelegate) {
-        const newDelegate = createDelegate(currentViewType)
+  useEffect(() => {
+    if (!delegate && createWysiwygDelegate && createSourceCodeDelegate) {
+      const newDelegate = createDelegate(currentViewType)
+      if (newDelegate) {
+        setDelegate(newDelegate)
+      }
+    }
+  }, [delegate, createWysiwygDelegate, createSourceCodeDelegate, currentViewType, createDelegate])
+
+  const defaultContent =
+    initialContent === undefined ? '##### Welcome to MarkFlowy!' : initialContent
+
+  useEffect(() => {
+    setIsReady(true)
+  }, [])
+
+  useEffect(() => {
+    if (initialContent !== undefined && initialContent !== content) {
+      setContent(initialContent)
+      setEditorKey((prev) => prev + 1)
+    }
+  }, [content, initialContent])
+
+  useEffect(() => {
+    if (viewType && viewType !== currentViewType) {
+      setCurrentViewType(viewType)
+
+      if (viewType === 'wysiwyg' || viewType === 'source') {
+        const newDelegate = createDelegate(viewType)
         if (newDelegate) {
           setDelegate(newDelegate)
+          setEditorKey((prev) => prev + 1)
         }
       }
-    }, [delegate, createWysiwygDelegate, createSourceCodeDelegate, currentViewType, createDelegate])
+    }
+  }, [viewType, currentViewType, createDelegate])
 
-    const defaultContent = initialContent || `##### Welcome to MarkFlowy!`
-
-    useEffect(() => {
-      setIsReady(true)
-    }, [])
-
-    useEffect(() => {
-      if (initialContent !== undefined && initialContent !== content) {
-        setContent(initialContent)
-        setEditorKey(prev => prev + 1)
+  const handleChange = useCallback(
+    (params: EditorChangeEventParams) => {
+      if (!params || !params.state) {
+        return
       }
-    }, [initialContent])
 
-    useEffect(() => {
-      if (viewType && viewType !== currentViewType) {
-        setCurrentViewType(viewType)
-
-        if (viewType === 'wysiwyg' || viewType === 'source') {
-          const newDelegate = createDelegate(viewType)
-          if (newDelegate) {
-            setDelegate(newDelegate)
-            setEditorKey(prev => prev + 1)
+      if (delegate && typeof delegate.docToString === 'function') {
+        try {
+          const newContent = delegate.docToString(params.state.doc)
+          if (newContent !== undefined) {
+            setContent(newContent)
+            onChange?.(newContent)
           }
-        }
+        } catch {}
       }
-    }, [viewType, currentViewType, createDelegate])
+    },
+    [delegate, onChange],
+  )
 
-    const handleChange = useCallback(
-      (params: EditorChangeEventParams) => {
-        if (!params || !params.state) {
-          return
+  useImperativeHandle(
+    ref,
+    () => ({
+      getContent: () => {
+        if (!delegate || !editorRef.current) {
+          return undefined
         }
-
-        if (delegate && typeof delegate.docToString === 'function') {
-          try {
-            const newContent = delegate.docToString(params.state.doc)
-            if (newContent !== undefined) {
-              setContent(newContent)
-              onChange?.(newContent)
-            }
-          } catch {
+        try {
+          const editor = editorRef.current as any
+          if (editor.state?.doc && typeof delegate.docToString === 'function') {
+            return delegate.docToString(editor.state.doc)
           }
+          return undefined
+        } catch {
+          return undefined
         }
       },
-      [delegate, onChange],
-    )
+    }),
+    [delegate],
+  )
 
-    useImperativeHandle(
-      ref,
-      () => ({
-        getContent: () => {
-          if (!delegate || !editorRef.current) {
-            return undefined
-          }
-          try {
-            const editor = editorRef.current as any
-            if (editor.state?.doc && typeof delegate.docToString === 'function') {
-              return delegate.docToString(editor.state.doc)
-            }
-            return undefined
-          } catch {
-            return undefined
-          }
-        },
-      }),
-      [delegate],
-    )
-
-    const editorProps = useMemo(() => ({
-      initialType: (currentViewType === 'wysiwyg' && EditorViewType ? EditorViewType.WYSIWYG : (EditorViewType?.SOURCE_CODE || 'sourceCode')) as any,
-      content: content || defaultContent,
+  const editorProps = useMemo(
+    () => ({
+      initialType: (currentViewType === 'wysiwyg' && EditorViewType
+        ? EditorViewType.WYSIWYG
+        : EditorViewType?.SOURCE_CODE || 'sourceCode') as any,
+      content: content === '' && initialContent === undefined ? defaultContent : content,
       delegate,
-    }), [currentViewType, EditorViewType, content, defaultContent, delegate])
+    }),
+    [currentViewType, EditorViewType, content, defaultContent, delegate, initialContent],
+  )
 
-    if (!isReady || loading) {
-      return <LoadingContainer>Loading Editor...</LoadingContainer>
-    }
+  if (!isReady || loading) {
+    return <LoadingContainer>Loading Editor...</LoadingContainer>
+  }
 
-    if (error) {
-      return <LoadingContainer>Error loading editor: {error.message}</LoadingContainer>
-    }
+  if (error) {
+    return <LoadingContainer>Error loading editor: {error.message}</LoadingContainer>
+  }
 
-    if (currentViewType === 'preview') {
-      return (
-        <RmeProvider>
-          <PreviewContainer>
-            <Markdown>{content || defaultContent}</Markdown>
-          </PreviewContainer>
-        </RmeProvider>
-      )
-    }
-
-    if (!Editor || !EditorViewType || !delegate) {
-      return <LoadingContainer>Loading Editor...</LoadingContainer>
-    }
-
+  if (currentViewType === 'preview') {
     return (
       <RmeProvider>
-        <EditorContainer>
-          <Editor
-            key={editorKey}
-            ref={editorRef}
-            {...editorProps}
-            delegate={delegate!}
-            onChange={handleChange}
-          />
-        </EditorContainer>
+        <PreviewContainer>
+          <Markdown>
+            {content === '' && initialContent === undefined ? defaultContent : content}
+          </Markdown>
+        </PreviewContainer>
       </RmeProvider>
     )
-  },
-)
+  }
+
+  if (!Editor || !EditorViewType || !delegate) {
+    return <LoadingContainer>Loading Editor...</LoadingContainer>
+  }
+
+  return (
+    <RmeProvider>
+      <EditorContainer>
+        <Editor
+          key={editorKey}
+          ref={editorRef}
+          {...editorProps}
+          delegate={delegate!}
+          onChange={handleChange}
+        />
+      </EditorContainer>
+    </RmeProvider>
+  )
+})
 
 export default WebEditor
 

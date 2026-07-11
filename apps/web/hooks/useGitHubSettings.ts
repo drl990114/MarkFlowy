@@ -2,16 +2,8 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { apiClient } from 'utils/apiClient'
 import type { GitHubConfig } from '@markflowy/types'
-
-export interface GitHubRepo {
-  id: number
-  full_name: string
-  name: string
-  owner: { login: string }
-  description: string | null
-  private: boolean
-  updated_at: string
-}
+import { useGitHubWorkspaceImport } from 'features/githubWorkspace/hooks/useGitHubWorkspaceImport'
+import type { GitHubRepo } from 'features/githubWorkspace/services/workspaceGitHubService'
 
 export function useGitHubSettings(isAuthenticated: boolean, authLoading: boolean) {
   const router = useRouter()
@@ -19,11 +11,12 @@ export function useGitHubSettings(isAuthenticated: boolean, authLoading: boolean
   const [loading, setLoading] = useState(true)
   const [token, setToken] = useState('')
   const [saving, setSaving] = useState(false)
-  const [error, setError] = useState('')
+  const [settingsError, setSettingsError] = useState('')
   const [success, setSuccess] = useState('')
   const [repos, setRepos] = useState<GitHubRepo[]>([])
   const [loadingRepos, setLoadingRepos] = useState(false)
   const [repoError, setRepoError] = useState('')
+  const { importingRepo, importError, importRepository } = useGitHubWorkspaceImport()
 
   useEffect(() => {
     if (!isAuthenticated || authLoading) return
@@ -42,7 +35,7 @@ export function useGitHubSettings(isAuthenticated: boolean, authLoading: boolean
       setConfig(data)
       setLoading(false)
     } catch (err: any) {
-      setError(err?.message || 'Failed to load GitHub configuration')
+      setSettingsError(err?.message || 'Failed to load GitHub configuration')
       setLoading(false)
     }
   }
@@ -62,21 +55,21 @@ export function useGitHubSettings(isAuthenticated: boolean, authLoading: boolean
 
   const handleSave = async () => {
     if (!token.trim()) {
-      setError('Please enter a valid GitHub token')
+      setSettingsError('Please enter a valid GitHub token')
       return
     }
 
     setSaving(true)
-    setError('')
+    setSettingsError('')
     setSuccess('')
 
     try {
       await apiClient.post('/github/config', { token: token.trim() })
       setSuccess('GitHub token saved successfully!')
       setToken('')
-      loadConfig()
+      await loadConfig()
     } catch (err: any) {
-      setError(err?.message || 'Failed to save GitHub token')
+      setSettingsError(err?.message || 'Failed to save GitHub token')
     } finally {
       setSaving(false)
     }
@@ -88,7 +81,7 @@ export function useGitHubSettings(isAuthenticated: boolean, authLoading: boolean
     }
 
     setSaving(true)
-    setError('')
+    setSettingsError('')
     setSuccess('')
 
     try {
@@ -97,27 +90,17 @@ export function useGitHubSettings(isAuthenticated: boolean, authLoading: boolean
       setConfig({ hasToken: false })
       setRepos([])
     } catch (err: any) {
-      setError(err?.message || 'Failed to remove GitHub token')
+      setSettingsError(err?.message || 'Failed to remove GitHub token')
     } finally {
       setSaving(false)
     }
   }
 
   const handleOpenWorkspace = async (repo: GitHubRepo) => {
-    const existing = await apiClient.get<any[]>('/workspaces')
-    const found = existing.find(
-      (w) => w.type === 'GITHUB' && w.sourceUrl === `https://github.com/${repo.owner.login}/${repo.name}`,
-    )
-    if (found) {
-      router.push(`/workspace/${encodeURIComponent(found.id)}`)
-      return
+    const workspace = await importRepository(repo)
+    if (workspace) {
+      router.push(`/workspace/${encodeURIComponent(workspace.id)}`)
     }
-    const created = await apiClient.post<any>('/workspaces', {
-      name: repo.name,
-      type: 'GITHUB',
-      sourceUrl: `https://github.com/${repo.owner.login}/${repo.name}`,
-    })
-    router.push(`/workspace/${encodeURIComponent(created.id)}`)
   }
 
   return {
@@ -126,11 +109,12 @@ export function useGitHubSettings(isAuthenticated: boolean, authLoading: boolean
     token,
     setToken,
     saving,
-    error,
+    error: settingsError || importError,
     success,
     repos,
     loadingRepos,
     repoError,
+    importingRepo,
     handleSave,
     handleDelete,
     handleOpenWorkspace,

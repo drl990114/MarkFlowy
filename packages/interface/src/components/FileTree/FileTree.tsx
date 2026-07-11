@@ -1,11 +1,13 @@
 import React, { memo, useCallback, useMemo, useRef, type FC } from 'react'
-import { Tree, TreeApi } from 'react-arborist'
+import { Tree } from 'react-arborist'
+import type { TreeApi } from 'react-arborist'
 import type { TreeProps } from 'react-arborist/dist/module/types/tree-props'
 import type { MoveFileInfo } from '../../contexts/FileSystemContext'
 import { useFileSystem } from '../../contexts/FileSystemContext'
 import { useFileTree } from '../../contexts/FileTreeContext'
 import type { IFile } from '../../types/file'
-import FileNode, { ContextMenuItem } from './FileNode'
+import FileNode from './FileNode'
+import type { ContextMenuItem } from './FileNode'
 import {
   captureFileMutationTarget,
   collectFileMutationProtection,
@@ -21,7 +23,11 @@ export interface FileTreeProps {
   onSelect: (file: IFile) => void
   dndRootElement?: Node | null
   disableDrag?: boolean
-  fillFlexParentComponent: FC<{ children: (dimens: { width: number; height: number }) => React.ReactNode }>
+  /** Hide tree operations when the backing adapter only supports reading existing files. */
+  disableFileOperations?: boolean
+  fillFlexParentComponent: FC<{
+    children: (dimens: { width: number; height: number }) => React.ReactNode
+  }>
   onShowConfirm: (params: { title: string; onConfirm: () => void }) => void
   onShowInputConfirm?: (params: {
     title: string
@@ -40,7 +46,9 @@ export interface FileTreeProps {
   moveFileObjectsByPathPrefix?: (oldRootPath: string, newRootPath: string) => void
   deleteFileObjectsByIds?: (fileIds: string[]) => void
   deleteFileObjectsByPathPrefix?: (rootPath: string) => void
-  onBeforeReplace?: (path: string) =>
+  onBeforeReplace?: (
+    path: string,
+  ) =>
     | { allowed: boolean; targetIds: string[] }
     | Promise<{ allowed: boolean; targetIds: string[] }>
   createFile?: (opt?: Partial<IFile>) => IFile
@@ -64,6 +72,7 @@ const FileTree: FC<FileTreeProps> = (props) => {
     onSelect,
     dndRootElement,
     disableDrag = false,
+    disableFileOperations = false,
     fillFlexParentComponent: FillFlexParent,
     onShowConfirm,
     onShowInputConfirm,
@@ -131,6 +140,8 @@ const FileTree: FC<FileTreeProps> = (props) => {
   }
 
   const onMove: TreeProps<IFile>['onMove'] = async (args) => {
+    if (disableFileOperations) return
+
     const _dragNodes = args.dragNodes.filter((node) => {
       return !args.dragIds.includes(node.parent?.id || '')
     })
@@ -201,7 +212,7 @@ const FileTree: FC<FileTreeProps> = (props) => {
             lease.protectPaths(
               preflight.targetIds
                 .map((id) => getFileObject(id)?.path)
-                .filter((path): path is string => !!path),
+                .filter((candidatePath): candidatePath is string => !!candidatePath),
             )
             if (!preflight.allowed) return
           }
@@ -283,6 +294,8 @@ const FileTree: FC<FileTreeProps> = (props) => {
           onMove={onMove}
           onToggle={onToggle}
           onContextMenu={(e) => {
+            if (disableFileOperations) return
+
             const items: ContextMenuItem[] = []
             const workspaceRoot = data[0]
             if (workspaceRoot) {
@@ -291,7 +304,11 @@ const FileTree: FC<FileTreeProps> = (props) => {
                   label: 'New File',
                   value: 'new_file',
                   handler: () => {
-                    const newData = { id: `pending-${Date.now()}`, name: '', kind: 'pending_new_file' } as IFile
+                    const newData = {
+                      id: `pending-${Date.now()}`,
+                      name: '',
+                      kind: 'pending_new_file',
+                    } as IFile
                     treeRef.current?.open(workspaceRoot.id)
                     tree.create({
                       parentId: workspaceRoot.id,
@@ -376,6 +393,7 @@ const FileTree: FC<FileTreeProps> = (props) => {
                 createFile={createFile}
                 updateFile={updateFile}
                 fileTreeHandler={fileTreeHandler}
+                disableFileOperations={disableFileOperations}
                 iconButtonComponent={iconButtonComponent as FC<any>}
               />
             )

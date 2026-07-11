@@ -14,6 +14,16 @@ interface RefreshTokenResponse {
   refreshToken: string
 }
 
+export class ApiClientError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+  ) {
+    super(message)
+    this.name = 'ApiClientError'
+  }
+}
+
 class ApiClient {
   private baseUrl: string
   private isRefreshing = false
@@ -138,7 +148,7 @@ class ApiClient {
   private async handleResponse<T>(response: Response, retryRequest?: () => Promise<T>): Promise<T> {
     if (!response.ok) {
       let errorMessage = 'Request failed'
-      
+
       try {
         const errorData = await response.json()
         errorMessage = errorData.message || errorData.error || errorMessage
@@ -156,14 +166,14 @@ class ApiClient {
         throw new Error('Session expired')
       }
 
-      throw new Error(errorMessage)
+      throw new ApiClientError(errorMessage, response.status)
     }
 
     const contentType = response.headers.get('content-type')
     if (contentType && contentType.includes('application/json')) {
       return response.json()
     }
-    
+
     return response.text() as Promise<T>
   }
 
@@ -173,7 +183,7 @@ class ApiClient {
     if (!skipAuth) {
       await this.ensureFreshAccessToken()
     }
-    
+
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
       ...customHeaders,
@@ -182,7 +192,7 @@ class ApiClient {
     if (!skipAuth) {
       const token = this.getAuthToken()
       if (token) {
-        ;(headers as Record<string, string>)['Authorization'] = `Bearer ${token}`
+        ;(headers as Record<string, string>).Authorization = `Bearer ${token}`
       }
     }
 
@@ -190,7 +200,7 @@ class ApiClient {
       if (!skipAuth) {
         const token = this.getAuthToken()
         if (token) {
-          ;(headers as Record<string, string>)['Authorization'] = `Bearer ${token}`
+          ;(headers as Record<string, string>).Authorization = `Bearer ${token}`
         }
       }
 
@@ -202,7 +212,9 @@ class ApiClient {
     }
 
     const response = await makeRequest()
-    return this.handleResponse<T>(response, () => makeRequest().then(r => this.handleResponse<T>(r)))
+    return this.handleResponse<T>(response, () =>
+      makeRequest().then((r) => this.handleResponse<T>(r)),
+    )
   }
 
   async get<T = any>(endpoint: string, options?: ApiClientOptions): Promise<T> {
@@ -252,7 +264,7 @@ class ApiClient {
     if (!skipAuth) {
       await this.ensureFreshAccessToken()
     }
-    
+
     const headers: Record<string, string> = {
       ...customHeaders,
     }
@@ -260,7 +272,7 @@ class ApiClient {
     if (!skipAuth) {
       const token = this.getAuthToken()
       if (token) {
-        headers['Authorization'] = `Bearer ${token}`
+        headers.Authorization = `Bearer ${token}`
       }
     }
 

@@ -43,6 +43,7 @@ export interface FileNodeComponentProps extends NodeRendererProps<IFile> {
     updateTreeView: ((params: { data: IFile[] }) => void) | undefined
     clearLoadedDirsCache?: () => void
   }
+  disableFileOperations?: boolean
   iconButtonComponent?: FC<any>
 }
 
@@ -88,6 +89,7 @@ function FileNode({
   moveFileObjectsByPathPrefix,
   deleteFileObjectsByPathPrefix,
   fileTreeHandler,
+  disableFileOperations = false,
   iconButtonComponent: IconButton,
 }: FileNodeComponentProps) {
   const indentSize = Number.parseFloat(`${style.paddingLeft || 0}`)
@@ -241,6 +243,8 @@ function FileNode({
   const handleContextMenu = (e: React.MouseEvent) => {
     e.stopPropagation()
     e.preventDefault()
+    if (disableFileOperations) return
+
     const items: ContextMenuItem[] = []
 
     if (node.parent) {
@@ -260,7 +264,11 @@ function FileNode({
                 return
               }
 
-              const data = { id: `pending-${Date.now()}`, name: '', kind: 'pending_new_file' } as IFile
+              const data = {
+                id: `pending-${Date.now()}`,
+                name: '',
+                kind: 'pending_new_file',
+              } as IFile
               if (node.isInternal) {
                 node.open()
               }
@@ -323,10 +331,7 @@ function FileNode({
             mutationTree.update({
               id: target.id,
               changes: {
-                kind:
-                  currentNode.data.kind === 'dir'
-                    ? 'pending_edit_folder'
-                    : 'pending_edit_file',
+                kind: currentNode.data.kind === 'dir' ? 'pending_edit_folder' : 'pending_edit_file',
               },
             })
             setFolderData(mutationTree.data)
@@ -379,7 +384,11 @@ function FileNode({
                     name: getFileNameFromPath(targetPath),
                     path: targetPath,
                   })
-                : ({ name: getFileNameFromPath(targetPath), path: targetPath, kind: 'file' } as IFile)
+                : ({
+                    name: getFileNameFromPath(targetPath),
+                    path: targetPath,
+                    kind: 'file',
+                  } as IFile)
 
               mutationTree.create({
                 parentId: parentTarget.id,
@@ -458,10 +467,12 @@ function FileNode({
   return (
     <NodeContainer
       style={style}
-      highlight={!!(
-        tree.dragDestinationParent?.isAncestorOf(node) &&
-        tree.dragDestinationParent?.id !== tree.dragNode?.parent?.id
-      )}
+      highlight={
+        !!(
+          tree.dragDestinationParent?.isAncestorOf(node) &&
+          tree.dragDestinationParent?.id !== tree.dragNode?.parent?.id
+        )
+      }
       selected={activeId === node.id}
       onContextMenu={handleContextMenu}
       onClick={(e) => {
@@ -557,7 +568,15 @@ function FileNode({
               alignItems: 'center',
             }}
           >
-            <div style={{ flex: 1, display: 'flex', alignItems: 'center', overflow: 'hidden', minWidth: 0 }}>
+            <div
+              style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                overflow: 'hidden',
+                minWidth: 0,
+              }}
+            >
               {node.data?.kind === 'dir' ? (
                 <i
                   className={`${node.isOpen ? 'ri-folder-5-fill' : 'ri-folder-3-fill'} file-icon`}

@@ -19,8 +19,8 @@ import { UnsupportedFileType } from './UnsupportedFileType'
 const overlayScrollbarsOptions = {
   scrollbars: {
     theme: 'os-theme-markflowy',
-    autoHide: 'leave',
-    autoHideDelay: 300,
+    visibility: 'auto',
+    autoHide: 'never',
     dragScroll: true,
     clickScroll: true,
   },
