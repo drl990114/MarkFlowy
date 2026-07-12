@@ -1,5 +1,5 @@
 import { CheckIcon, ChevronsUpDownIcon } from 'lucide-react'
-import { useState, type CSSProperties } from 'react'
+import { useCallback, useState, type CSSProperties } from 'react'
 import { cn } from '@/lib/cn'
 import { Button } from '@/components/ui/button'
 import {
@@ -52,7 +52,11 @@ export function SearchableSelect({
   value,
 }: SearchableSelectProps) {
   const [open, setOpen] = useState(false)
+  const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null)
   const selectedOption = options.find((option) => option.value === value)
+  const setTriggerRef = useCallback((node: HTMLButtonElement | null) => {
+    setPortalContainer(node?.closest<HTMLElement>('[data-slot="dialog-content"]') ?? null)
+  }, [])
 
   return (
     <Popover.Root open={open} onOpenChange={setOpen}>
@@ -65,6 +69,7 @@ export function SearchableSelect({
           data-slot='searchable-select-trigger'
           disabled={disabled}
           id={id}
+          ref={setTriggerRef}
           role='combobox'
           style={style}
           variant='outline'
@@ -78,6 +83,7 @@ export function SearchableSelect({
       <Popover.Content
         align='start'
         className={cn('w-[var(--radix-popover-trigger-width)] p-0', contentClassName)}
+        container={portalContainer ?? undefined}
       >
         <Command.Root defaultValue={value} label={searchPlaceholder}>
           <CommandInput onValueChange={onSearch} placeholder={searchPlaceholder} />
