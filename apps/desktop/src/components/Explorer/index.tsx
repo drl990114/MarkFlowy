@@ -181,6 +181,7 @@ const Explorer: FC<ExplorerProps> = (props) => {
   const { openFolderDialog } = useOpen()
   const [dndRootElement, setDndRootElement] = useState<HTMLDivElement | null>(null)
   const [homePath, setHomePath] = useState<string>('')
+  const [isRecentPopoverOpen, setIsRecentPopoverOpen] = useState(false)
 
   useEffect(() => {
     homeDir().then(setHomePath)
@@ -194,6 +195,7 @@ const Explorer: FC<ExplorerProps> = (props) => {
   }
 
   const handleClearRecent = () => {
+    setIsRecentPopoverOpen(false)
     clearRecentWorkspaces()
   }
 
@@ -319,7 +321,11 @@ const Explorer: FC<ExplorerProps> = (props) => {
   const containerCLs = classNames(props.className)
 
   return (
-    <Container className={containerCLs} onContextMenu={handleContextMenu}>
+    <Container
+      className={containerCLs}
+      data-recent-popover-open={isRecentPopoverOpen || undefined}
+      onContextMenu={handleContextMenu}
+    >
       <div className='h-full w-full overflow-hidden' ref={(ref) => setDndRootElement(ref)}>
         {folderData && folderData.length > 0 ? (
           <FileTree
@@ -357,7 +363,7 @@ const Explorer: FC<ExplorerProps> = (props) => {
           {t('file.openDir')}
         </span>
         {recentWorkspaceItems.length > 0 ? (
-          <Popover.Root>
+          <Popover.Root open={isRecentPopoverOpen} onOpenChange={setIsRecentPopoverOpen}>
             <Popover.Trigger asChild>
               <RecentWorkspacesTrigger type='button' aria-label={t('file.recentDir')}>
                 <i className='ri-more-2-fill' aria-hidden='true' />
