@@ -38,7 +38,7 @@
 
 <h4 align="center"> <a href="https://github.com/drl990114/MarkFlowy">English</a> | <strong>简体中文</strong> | <a href="./README_JA.md">日本語</a></h4>
 
-<img src="./public/show-zh.png" alt="screenshot" />
+<img src="./public/home.png" alt="screenshot" />
 
 ## MarkFlowy 目前处于 Beta 阶段 ⚠️
 

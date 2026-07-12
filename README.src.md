@@ -3,9 +3,9 @@
 <!--@nrg.fileNamePattern.zh=README_CN.md-->
 <!--@nrg.fileNamePattern.ja=README_JA.md-->
 
-<!--@screenshot=./public/show-en.png-->
-<!--@screenshot.zh=./public/show-zh.png-->
-<!--@screenshot.ja=./public/home-en1.png-->
+<!--@screenshot=./public/home.png-->
+<!--@screenshot.zh=./public/home.png-->
+<!--@screenshot.ja=./public/home.png-->
 <div align="center">
   <img align="center" src="./public/logo.png" width="120" height="120" />
 </div>
