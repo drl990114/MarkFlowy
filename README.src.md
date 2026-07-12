@@ -133,21 +133,21 @@ sh install-linux.sh --uninstall
 > - Open your terminal<!--en-->
 > - Go to the `Applications` directory. .e.g `/Applications`.<!--en-->
 > - Run `xattr -cr MarkFlowy.app` and open the app again<!--en-->
-> - Please make sure you download from `github releases` or [UpgradeLink](https://download.upgrade.toolsetlink.com/download?appKey=xpn68m4j5qU0Y1rfDYFHaA).<!--en-->
+> - Please make sure you download from `github releases`.<!--en-->
 > 因为苹果安全策略对于没有开发者认证软件的限制，导致 **macOS aarch64** 版本无法直接安装. 你可以通过一下步骤忽略该限制:<!--zh-->
 > - 打开终端<!--zh-->
 > - 进入到 `应用` 的目录下. 例如 `/Applications`.<!--zh-->
 > - 执行 `xattr -cr MarkFlowy.app` 然后打开 app 即可<!--zh-->
-> - 请确保下载来源: `github releases` 或 [UpgradeLink](https://download.upgrade.toolsetlink.com/download?appKey=xpn68m4j5qU0Y1rfDYFHaA).<!--zh-->
+> - 请确保下载来源为 `github releases`。<!--zh-->
 > Appleのセキュリティポリシーにより、開発者認証のないソフトウェアは**macOS aarch64**版を直接ダウンロードして使用できません。以下の手順で制限を回避できます。<!--ja-->
 > - terminal を開く<!--ja-->
 > - `Applications` ディレクトリに移動します。例: `/Applications`。<!--ja-->
 > - `xattr -cr MarkFlowy.app` を実行し、再度アプリを開きます。<!--ja-->
-> - `github releases` または [UpgradeLink](https://download.upgrade.toolsetlink.com/download?appKey=xpn68m4j5qU0Y1rfDYFHaA) からダウンロードしてください。<!--ja-->
+> - `github releases` からダウンロードしてください。<!--ja-->
 
-You can download it from the [UpgradeLink download page](https://download.upgrade.toolsetlink.com/download?appKey=xpn68m4j5qU0Y1rfDYFHaA) or [GitHub Release](https://github.com/drl990114/MarkFlowy/releases)<!--en-->
-你可以通过 [UpgradeLink 下载页面](https://download.upgrade.toolsetlink.com/download?appKey=xpn68m4j5qU0Y1rfDYFHaA) 或 [GitHub Release](https://github.com/drl990114/MarkFlowy/releases) 下载.<!--zh-->
-[UpgradeLink ダウンロードページ](https://download.upgrade.toolsetlink.com/download?appKey=xpn68m4j5qU0Y1rfDYFHaA) または [GitHub Release](https://github.com/drl990114/MarkFlowy/releases) からダウンロードできます。<!--ja-->
+You can download it from [GitHub Releases](https://github.com/drl990114/MarkFlowy/releases).<!--en-->
+你可以通过 [GitHub Releases](https://github.com/drl990114/MarkFlowy/releases) 下载。<!--zh-->
+[GitHub Releases](https://github.com/drl990114/MarkFlowy/releases) からダウンロードできます。<!--ja-->
 
 ## ${en:'Why', zh:'为什么开发', ja:'動機'}
 
@@ -205,16 +205,6 @@ In addition, you can sponsor me through WeChat or Alipay, which will greatly enc
 | WeChat appreciates | Alipay appreciates |<!--ja-->
 | :-: | :-: |<!--ja-->
 | <img src="https://drl990114.github.io/images/wxpay.png" alt="WeChat QRcode" width=200> <br><small>Let's have a bottle of wine~</small> | <img src="https://drl990114.github.io/images/alipay.png" alt="Wechat QRcode" width=200> <br><small>Have a cup of coffee~</small> | --><!--ja-->
-
-## ${en:'Sponsors', zh:'赞助商', ja:'Sponsors'}
-
-<a href="https://www.toolsetlink.com">
-  <img height="54" alt="UpgradeLink" src="./public/sponsors/UpgradeLink_1.png" />
-</a>
-
-${en:'Thanks to [UpgradeLink](https://www.toolsetlink.com) for providing reliable installation and upgrade services, ensuring seamless software updates for MarkFlowy users.', zh:'感谢 [UpgradeLink](https://www.toolsetlink.com) 提供可靠的安装与升级服务，确保 MarkFlowy 用户获得无缝的软件更新体验。', ja:'[UpgradeLink](https://www.toolsetlink.com) が信頼性の高いインストールおよびアップグレードサービスを提供し、MarkFlowy ユーザーにシームレスなソフトウェアアップデートを保証してくれたことに感謝します。'}<!--en-->
-感谢 [UpgradeLink](https://www.toolsetlink.com) 提供可靠的安装与升级服务，确保 MarkFlowy 用户获得无缝的软件更新体验。<!--zh-->
-[UpgradeLink](https://www.toolsetlink.com) が信頼性の高いインストールおよびアップグレードサービスを提供し、MarkFlowy ユーザーにシームレスなソフトウェアアップデートを保証してくれたことに感謝します。<!--ja-->
 
 ## ${en:'Special Thanks', zh:'特别感谢', ja:'特別な感謝'}
 

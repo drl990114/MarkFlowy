@@ -45,9 +45,9 @@ sh install-linux.sh --uninstall
 > - Open your terminal
 > - Go to the `Applications` directory. .e.g `/Applications`.
 > - Run `xattr -cr MarkFlowy.app` and open the app again
-> - Please make sure you download from `github releases` or [UpgradeLink](https://download.upgrade.toolsetlink.com/download?appKey=xpn68m4j5qU0Y1rfDYFHaA).
+> - Please make sure you download from `github releases`.
 
-You can download it from the [UpgradeLink download page](https://download.upgrade.toolsetlink.com/download?appKey=xpn68m4j5qU0Y1rfDYFHaA) or [GitHub Release](https://github.com/drl990114/MarkFlowy/releases)
+You can download it from [GitHub Releases](https://github.com/drl990114/MarkFlowy/releases).
 
 ## Why
 
@@ -64,4 +64,3 @@ You can read [CONTRIBUTING](./Community/CONTRIBUTING) to know how to start the p
 ## Support
 
 MarkFlowy is completely and permanently open source, if you want to support MarkFlowy, you can `star` this project. This will give me great support and help, love you.
-

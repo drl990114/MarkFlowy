@@ -120,9 +120,7 @@ export default function Index({
                 <HeroActions>
                   <HoverBorderGradient
                     onClick={() => {
-                      window.open(
-                        'https://download.upgrade.toolsetlink.com/download?appKey=xpn68m4j5qU0Y1rfDYFHaA',
-                      )
+                      window.open('https://github.com/drl990114/MarkFlowy/releases')
                     }}
                   >
                     <span style={{ display: 'flex', alignItems: 'center' }}>
@@ -236,9 +234,7 @@ export default function Index({
             <CTADesc>{t('home.hero.subtitle')}</CTADesc>
             <CTAButton
               onClick={() => {
-                window.open(
-                  'https://download.upgrade.toolsetlink.com/download?appKey=xpn68m4j5qU0Y1rfDYFHaA',
-                )
+                window.open('https://github.com/drl990114/MarkFlowy/releases')
               }}
             >
               {t('home.hero.download')}

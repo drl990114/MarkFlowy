@@ -21,14 +21,7 @@ export default function Releases({ releases, sidebarPages }: ReleasesProps) {
     en: (
       <p>
         Here are the latest releases of Markflowy. Click on each version to see the detailed changes
-        and updates. You can download it from the {' '}
-        <HighlightLink
-          href='https://download.upgrade.toolsetlink.com/download?appKey=xpn68m4j5qU0Y1rfDYFHaA'
-          target='_blank'
-        >
-          {' '}UpgradeLink download page{' '}
-        </HighlightLink>
-        or the
+        and updates. You can download it from the
         <HighlightLink href='https://github.com/drl990114/MarkFlowy/releases' target='_blank'>
           {' '}GitHub Release{' '}
         </HighlightLink>
@@ -37,14 +30,7 @@ export default function Releases({ releases, sidebarPages }: ReleasesProps) {
     ),
     zh: (
       <p>
-        以下是 Markflowy 的最新版本发布。点击每个版本可以查看详细的变更和更新内容。你可以从
-        <HighlightLink
-          href='https://download.upgrade.toolsetlink.com/download?appKey=xpn68m4j5qU0Y1rfDYFHaA'
-          target='_blank'
-        >
-          {' '}UpgradeLink 下载页面{' '}
-        </HighlightLink>
-        或者{' '}
+        以下是 Markflowy 的最新版本发布。点击每个版本可以查看详细的变更和更新内容。你可以从{' '}
         <HighlightLink href='https://github.com/drl990114/MarkFlowy/releases' target='_blank'>
           {' '}GitHub Release{' '}
         </HighlightLink>

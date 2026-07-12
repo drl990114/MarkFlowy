@@ -252,8 +252,6 @@ jobs:
 
           ---
 
-          中国地区支持加速下载：请[点击](https://download.upgrade.toolsetlink.com/download?appKey=xpn68m4j5qU0Y1rfDYFHaA).
-
           <details>
 
           <summary> FAQ | 常见问题 </summary>
@@ -328,32 +326,3 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./apps/desktop/updater
           # force_orphan: true
- 
-  upgradeLink-upload:
-    needs: release
-    permissions:
-      contents: write
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Query version number
-        run: echo "version=${GITHUB_REF:11}" >> $GITHUB_ENV
-
-      - name: Generate release tag
-        id: save_tag
-        run: |
-          # 调试输出
-          echo ${{ env.version }}
-
-      - name: Send a request to UpgradeLink
-        uses: toolsetlink/upgradelink-action@3.0.2
-        with:
-          access_key: ${{ secrets.UPGRADE_LINK_ACCESS_KEY }}  # ACCESS_KEY  密钥key
-          access_secret: ${{ secrets.UPGRADE_LINK_ACCESS_SECRET }}
-          config: |
-            {
-              "app_type": "tauri",
-              "request": {
-                "app_key": "${{ secrets.UPGRADE_LINK_TAURI_KEY }}",
-                "latest_json_url": "https://github.com/drl990114/MarkFlowy/releases/download/v${{ env.version }}/install.json"
-              }
-            }

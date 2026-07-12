@@ -87,9 +87,9 @@ sh install-linux.sh --uninstall
 > - 打开终端
 > - 进入到 `应用` 的目录下. 例如 `/Applications`.
 > - 执行 `xattr -cr MarkFlowy.app` 然后打开 app 即可
-> - 请确保下载来源: `github releases` 或 [UpgradeLink](https://download.upgrade.toolsetlink.com/download?appKey=xpn68m4j5qU0Y1rfDYFHaA).
+> - 请确保下载来源为 `github releases`。
 
-你可以通过 [UpgradeLink 下载页面](https://download.upgrade.toolsetlink.com/download?appKey=xpn68m4j5qU0Y1rfDYFHaA) 或 [GitHub Release](https://github.com/drl990114/MarkFlowy/releases) 下载.
+你可以通过 [GitHub Releases](https://github.com/drl990114/MarkFlowy/releases) 下载。
 
 ## 为什么开发
 
@@ -118,14 +118,6 @@ MarkFlowy 是完全永久开源的，如果你想支持 MarkFlowy，你可以`st
 | 微信赞助 | 支付宝赞助 |
 | :-: | :-: |
 | <img src="https://drl990114.github.io/images/wxpay.png" alt="WeChat QRcode" width=200> <br><small>来瓶酒~</small> | <img src="https://drl990114.github.io/images/alipay.png" alt="Wechat QRcode" width=200> <br><small>来杯咖啡~</small> | -->
-
-## 赞助商
-
-<a href="https://www.toolsetlink.com">
-  <img height="54" alt="UpgradeLink" src="./public/sponsors/UpgradeLink_1.png" />
-</a>
-
-感谢 [UpgradeLink](https://www.toolsetlink.com) 提供可靠的安装与升级服务，确保 MarkFlowy 用户获得无缝的软件更新体验。
 
 ## 特别感谢
 

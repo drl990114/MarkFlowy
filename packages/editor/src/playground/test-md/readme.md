@@ -68,9 +68,9 @@ Available for Linux, macOS and Windows.
 > - Open your terminal
 > - Go to the `Applications` directory. .e.g `/Applications`.
 > - Run `xattr -cr MarkFlowy.app` and open the app again
-> - Please make sure you download from `github releases` or [UpgradeLink](https://download.upgrade.toolsetlink.com/download?appKey=xpn68m4j5qU0Y1rfDYFHaA).
+> - Please make sure you download from `github releases`.
 
-You can download it from the [UpgradeLink download page](https://download.upgrade.toolsetlink.com/download?appKey=xpn68m4j5qU0Y1rfDYFHaA) or [GitHub Release](https://github.com/drl990114/MarkFlowy/releases)
+You can download it from [GitHub Releases](https://github.com/drl990114/MarkFlowy/releases).
 
 ## Why
 
@@ -99,12 +99,6 @@ In addition, you can sponsor me through WeChat or Alipay, which will greatly enc
 | WeChat appreciates | Alipay appreciates |
 | :-: | :-: |
 | <img src="https://drl990114.github.io/images/wxpay.png" alt="WeChat QRcode" width=200> <br><small>Let's have a bottle of wine~</small> | <img src="https://drl990114.github.io/images/alipay.png" alt="Wechat QRcode" width=200> <br><small>Have a cup of coffee~</small> |
-
-## Sponsors
-
-<a href="https://www.toolsetlink.com">
-  <img height="54" alt="UpgradeLink" src="./public/sponsors/UpgradeLink_1.png" />
-</a>
 
 ## Contributors
 

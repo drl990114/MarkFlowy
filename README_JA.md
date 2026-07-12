@@ -94,9 +94,9 @@ sh install-linux.sh --uninstall
 > - terminal を開く
 > - `Applications` ディレクトリに移動します。例: `/Applications`。
 > - `xattr -cr MarkFlowy.app` を実行し、再度アプリを開きます。
-> - `github releases` または [UpgradeLink](https://download.upgrade.toolsetlink.com/download?appKey=xpn68m4j5qU0Y1rfDYFHaA) からダウンロードしてください。
+> - `github releases` からダウンロードしてください。
 
-[UpgradeLink ダウンロードページ](https://download.upgrade.toolsetlink.com/download?appKey=xpn68m4j5qU0Y1rfDYFHaA) または [GitHub Release](https://github.com/drl990114/MarkFlowy/releases) からダウンロードできます。
+[GitHub Releases](https://github.com/drl990114/MarkFlowy/releases) からダウンロードできます。
 
 ## 動機
 
@@ -126,14 +126,6 @@ MarkFlowyは完全にオープンソースであり、MarkFlowyをサポート�
 | WeChat appreciates | Alipay appreciates |
 | :-: | :-: |
 | <img src="https://drl990114.github.io/images/wxpay.png" alt="WeChat QRcode" width=200> <br><small>Let's have a bottle of wine~</small> | <img src="https://drl990114.github.io/images/alipay.png" alt="Wechat QRcode" width=200> <br><small>Have a cup of coffee~</small> | -->
-
-## Sponsors
-
-<a href="https://www.toolsetlink.com">
-  <img height="54" alt="UpgradeLink" src="./public/sponsors/UpgradeLink_1.png" />
-</a>
-
-[UpgradeLink](https://www.toolsetlink.com) が信頼性の高いインストールおよびアップグレードサービスを提供し、MarkFlowy ユーザーにシームレスなソフトウェアアップデートを保証してくれたことに感謝します。
 
 ## 特別な感謝
 
