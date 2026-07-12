@@ -1,39 +1,23 @@
+import { Button } from '@/components/ui/button'
+import { Dialog } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
 import { logger } from '@/helper/logger'
 import { useGlobalKeyboard } from '@/hooks'
-import { KeyboardInfo } from '@/hooks/useKeyboard'
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
+import type { KeyboardInfo } from '@/hooks/useKeyboard'
 import { useTranslation } from '@/i18n'
-import styled from 'styled-components'
-import { Button, Dialog, Input } from 'zens'
+import type { KeyboardEvent as ReactKeyboardEvent, Ref } from 'react'
+import { useImperativeHandle, useRef, useState } from 'react'
 import { recordKey, transferKey } from './record-key'
 
-const FormLabel = styled.div`
-  display: block;
-  font-size: 0.875rem;
-  font-weight: 500;
-  margin-top: 16px;
-  margin-bottom: 8px;
-  color: ${(props) => props.theme.labelFontColor};
-`
-
-const FormValue = styled.div`
-  margin-bottom: 8px;
-  color: ${(props) => props.theme.primaryFontColor};
-`
-
-const FormActions = styled.div`
-  display: flex;
-  gap: 8px;
-  margin-top: 24px;
-  justify-content: flex-end;
-`
-
-interface RecordKeysModalProps {}
 export interface RecordKeysModalRef {
   open: (command: KeyboardInfo) => void
 }
 
-export const RecordKeysModal = forwardRef<RecordKeysModalRef, RecordKeysModalProps>((_, ref) => {
+interface RecordKeysModalProps {
+  ref?: Ref<RecordKeysModalRef>
+}
+
+export function RecordKeysModal({ ref }: RecordKeysModalProps) {
   const { updateKeyBinding } = useGlobalKeyboard()
   const [open, setOpen] = useState(false)
   const [newKeyBinding, setNewKeyBinding] = useState<string[]>([])
@@ -41,28 +25,12 @@ export const RecordKeysModal = forwardRef<RecordKeysModalRef, RecordKeysModalPro
   const { t } = useTranslation()
   const modalRef = useRef<HTMLInputElement>(null)
 
-  useImperativeHandle(ref, () => {
-    return {
-      open: (command) => {
-        setSelectedCommand(command)
-        setOpen(true)
-      },
-    }
-  })
-
-  useEffect(() => {
-    const modalElement = modalRef.current
-    if (modalElement && open) {
-      setTimeout(() => modalRef.current?.focus(), 100)
-      modalElement.addEventListener('keydown', handleKeyDown, true)
-    }
-
-    return () => {
-      if (modalElement) {
-        modalElement.removeEventListener('keydown', handleKeyDown, true)
-      }
-    }
-  }, [open])
+  useImperativeHandle(ref, () => ({
+    open: (command) => {
+      setSelectedCommand(command)
+      setOpen(true)
+    },
+  }))
 
   const handleClose = () => {
     setSelectedCommand(null)
@@ -70,10 +38,10 @@ export const RecordKeysModal = forwardRef<RecordKeysModalRef, RecordKeysModalPro
     setOpen(false)
   }
 
-  const handleKeyDown = (event: KeyboardEvent) => {
+  const handleKeyDown = (event: ReactKeyboardEvent<HTMLInputElement>) => {
     if (!selectedCommand) return
 
-    const { keys, isExit} = recordKey(event)
+    const { keys, isExit } = recordKey(event.nativeEvent)
 
     if (keys === null || isExit) {
       setNewKeyBinding([])
@@ -94,27 +62,66 @@ export const RecordKeysModal = forwardRef<RecordKeysModalRef, RecordKeysModalPro
   }
 
   return (
-    <Dialog open={open} onClose={handleClose} title='Edit Shortcut'>
-      <div>
+    <Dialog.Root
+      open={open}
+      onOpenChange={(nextOpen) => {
+        if (!nextOpen) handleClose()
+      }}
+    >
+      <Dialog.Content
+        aria-describedby={undefined}
+        closeLabel={t('common.close')}
+        onEscapeKeyDown={(event) => event.preventDefault()}
+        onOpenAutoFocus={(event) => {
+          event.preventDefault()
+          modalRef.current?.focus()
+        }}
+      >
+        <Dialog.Header>
+          <Dialog.Title>Edit Shortcut</Dialog.Title>
+        </Dialog.Header>
+
         {selectedCommand && (
-          <div>
-            <FormLabel>Command:</FormLabel>
-            <FormValue>{selectedCommand.id}</FormValue>
+          <Dialog.Body>
+            <div className='grid grid-cols-[7rem_minmax(0,1fr)] items-center gap-x-3 gap-y-4'>
+              <span className='text-right text-xs font-medium text-foreground-secondary'>
+                Command
+              </span>
+              <span className='min-w-0 break-all text-foreground'>{selectedCommand.id}</span>
 
-            <FormLabel>Description:</FormLabel>
-            <FormValue>{t(selectedCommand.id)}</FormValue>
+              <span className='text-right text-xs font-medium text-foreground-secondary'>
+                Description
+              </span>
+              <span className='min-w-0 text-foreground'>{t(selectedCommand.id)}</span>
 
-            <FormLabel>Shortcut:</FormLabel>
-            <Input inputRef={modalRef} placeholder='请按下快捷键' value={newKeyBinding.length ? transferKey(newKeyBinding.join('+')) : ''} readOnly />
-
-            <FormActions>
-              <Button onClick={handleSave} btnType='primary'>
-                Save
-              </Button>
-            </FormActions>
-          </div>
+              <label
+                className='text-right text-xs font-medium text-foreground-secondary'
+                htmlFor='shortcut-input'
+              >
+                Shortcut
+              </label>
+              <Input
+                aria-label='Shortcut'
+                id='shortcut-input'
+                onKeyDown={handleKeyDown}
+                placeholder='请按下快捷键'
+                readOnly
+                ref={modalRef}
+                value={newKeyBinding.length ? transferKey(newKeyBinding.join('+')) : ''}
+              />
+            </div>
+          </Dialog.Body>
         )}
-      </div>
-    </Dialog>
+
+        <Dialog.Footer>
+          <Button onClick={handleClose} variant='outline'>
+            {t('common.cancel')}
+          </Button>
+          <Button disabled={!selectedCommand} onClick={() => void handleSave()}>
+            Save
+          </Button>
+        </Dialog.Footer>
+      </Dialog.Content>
+    </Dialog.Root>
   )
-})
+}

@@ -1,8 +1,27 @@
-export { Modal as default, Confirm, Info, InputConfirm, MODAL_CONFIRM_ID, MODAL_INFO_ID, MODAL_INPUT_ID } from '@markflowy/interface'
-export type {
-  ConfirmModalProps,
-  DialogAction,
-  DialogRememberOptions,
-  InfoModalProps,
-  InputConfirmModalProps,
-} from '@markflowy/interface'
+import { Confirm } from './Confirm'
+import { Info } from './Info'
+import { InputConfirm } from './InputConfirm'
+
+export {
+  Confirm,
+  ConfirmModal,
+  MODAL_CONFIRM_ID,
+  type ConfirmModalProps,
+  type DialogAction,
+  type DialogRememberOptions,
+} from './Confirm'
+export { Info, InfoModal, MODAL_INFO_ID, type InfoModalProps } from './Info'
+export {
+  InputConfirm,
+  InputConfirmModal,
+  MODAL_INPUT_ID,
+  type InputConfirmModalProps,
+} from './InputConfirm'
+
+export const Modal = {
+  Confirm,
+  Info,
+  InputConfirm,
+}
+
+export default Modal

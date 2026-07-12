@@ -1,10 +1,10 @@
+import { Input } from '@/components/ui/input'
 import appSettingService from '@/services/app-setting'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import {
   parseFileExcludePatternLines,
   stringifyFileExcludePatternLines,
 } from '@/helper/file-exclude'
-import { Input } from 'antd'
 import { nanoid } from 'nanoid'
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from '@/i18n'
@@ -63,7 +63,7 @@ const FileExcludeRowItem = memo<FileExcludeRowItemProps>(
         {isEditing ? (
           <Input
             autoFocus
-            size='small'
+            inputSize='sm'
             value={editingValue}
             placeholder={placeholder || 'Enter value...'}
             onChange={(e) => setEditingValue(e.target.value)}
@@ -135,7 +135,7 @@ const AddingExcludeRowItem = memo<AddingExcludeRowItemProps>(
       <RowWrapper>
         <Input
           autoFocus
-          size='small'
+          inputSize='sm'
           value={addValue}
           placeholder={placeholder || 'Enter value...'}
           onChange={(e) => setAddValue(e.target.value)}

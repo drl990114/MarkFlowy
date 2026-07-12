@@ -10,7 +10,7 @@ module.exports = withSvgr(
     },
     i18n: { ...i18n, },
     output: 'standalone',
-    transpilePackages: ['@markflowy/interface', 'zens', 'antd', '@ant-design/x'],
+    transpilePackages: ['@markflowy/interface', 'zens'],
     turbopack: {},
   }),
 )

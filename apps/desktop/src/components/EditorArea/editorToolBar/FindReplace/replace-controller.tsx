@@ -1,4 +1,5 @@
-import { Radio } from 'antd'
+import { Button } from '@/components/ui/button'
+import { ButtonGroup } from '@/components/ui/button-group'
 import type { FC } from 'react'
 
 export const ReplaceController: FC<{
@@ -6,13 +7,13 @@ export const ReplaceController: FC<{
   replaceAll: () => void
 }> = ({ replace, replaceAll }) => {
   return (
-    <Radio.Group size='small' style={{ display: 'flex' }}>
-      <Radio.Button checked value='replace' onClick={replace}>
+    <ButtonGroup.Root>
+      <Button className='h-6' type='button' variant='outline' size='sm' onClick={replace}>
         Replace
-      </Radio.Button>
-      <Radio.Button checked value='replaceAll' onClick={replaceAll}>
+      </Button>
+      <Button className='h-6' type='button' variant='outline' size='sm' onClick={replaceAll}>
         All
-      </Radio.Button>
-    </Radio.Group>
+      </Button>
+    </ButtonGroup.Root>
   )
 }

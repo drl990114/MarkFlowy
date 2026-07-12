@@ -231,7 +231,7 @@ impl AppConf {
             extensions_deepseek_apibase: Some("".to_string()),
             extensions_deepseek_apikey: Some("".to_string()),
             extensions_deepseek_request_headers: Some(HashMap::new()),
-            extensions_ollama_models: Some("llama3.3".to_string()),
+            extensions_ollama_models: Some(String::new()),
             extensions_ollama_apibase: Some("".to_string()),
             extensions_ollama_request_headers: Some(HashMap::new()),
             extensions_google_models: Some("gemini-2.5-flash".to_string()),

@@ -1,19 +1,20 @@
-import { CSSProperties } from "react"
+import type { CSSProperties } from "react"
 import { useTranslation } from "@/i18n"
 import styled from "styled-components"
 
 interface SettingLabelProps {
   item: Setting.BaseSettingItem
+  htmlFor?: string
   style?: CSSProperties
 }
 
 export const SettingLabel = (props: SettingLabelProps) => {
-  const { item, style } = props
+  const { htmlFor, item, style } = props
   const { t } = useTranslation()
 
   return <Container style={style}>
-    <label className="setting-item__title">{t(item.title.i18nKey)}</label>
-    {item.desc ? <label className="setting-item__label">{t((item.desc.i18nKey))}</label> : null}
+    <label className="setting-item__title" htmlFor={htmlFor}>{t(item.title.i18nKey)}</label>
+    {item.desc ? <span className="setting-item__label">{t((item.desc.i18nKey))}</span> : null}
   </Container>
 }
 

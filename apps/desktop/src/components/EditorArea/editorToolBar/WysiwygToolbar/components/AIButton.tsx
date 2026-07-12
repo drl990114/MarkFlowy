@@ -1,5 +1,10 @@
 import { MfIconLabelButton } from '@/components/ui-v2/Button/icon-label-button'
-import useAiChatStore, { getCurrentAISettingData } from '@/extensions/ai/useAiChatStore'
+import {
+  getCurrentAIProviderDisplayName,
+  summarizeAIText,
+  translateAIText,
+} from '@/extensions/ai/aiTextActions'
+import { useAIModelPreference } from '@/extensions/ai/aiModelPreference'
 import { getFileObject } from '@/helper/files'
 import { dialog } from '@/services/dialog'
 import { addNewMarkdownFileEdit } from '@/services/editor-file'
@@ -18,7 +23,8 @@ export const AIButton = (props: AIButtonProps) => {
   const activeId = useEditorStore((state) => state.activeId)
   const getEditorContent = useEditorStore((state) => state.getEditorContent)
   const targetEditorId = editorId ?? activeId
-  const { getPostSummary, getPostTranslate, aiProvider } = useAiChatStore()
+  useAIModelPreference((state) => state.selectedModelKey)
+  const aiProvider = getCurrentAIProviderDisplayName()
   const { addAppTask } = useAppTasksStore()
   const { t } = useTranslation()
   const ref = useRef<any>(null)
@@ -27,10 +33,9 @@ export const AIButton = (props: AIButtonProps) => {
 
   const fetchCurFileSummary = useCallback(async () => {
     const content = getEditorContent(curFile?.id || '')
-    const aiSettingData = getCurrentAISettingData()
-    const res = await addAppTask<ReturnType<typeof getPostSummary>>({
+    const res = await addAppTask<ReturnType<typeof summarizeAIText>>({
       title: 'AI: Retrieving article abstract',
-      promise: getPostSummary(content || '', aiSettingData),
+      promise: summarizeAIText(content || ''),
     })
     addNewMarkdownFileEdit({
       fileName: 'summary.md',
@@ -44,17 +49,14 @@ ${res}
     addAppTask,
     curFile?.id,
     getEditorContent,
-    getPostSummary,
   ])
 
   const fetchCurFileTranslate = useCallback(
     async (targetLang: string) => {
       const content = getEditorContent(curFile?.id || '')
-      const aiSettingData = getCurrentAISettingData()
-
       const res = await addAppTask({
         title: 'AI: Translating article',
-        promise: getPostTranslate(content || '', aiSettingData, targetLang),
+        promise: translateAIText(content || '', targetLang),
       })
 
       addNewMarkdownFileEdit({
@@ -66,7 +68,6 @@ ${res}
       addAppTask,
       curFile?.id,
       getEditorContent,
-      getPostTranslate,
     ],
   )
 

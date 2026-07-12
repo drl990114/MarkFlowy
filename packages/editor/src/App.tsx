@@ -1,4 +1,3 @@
-import 'antd/dist/antd.css'
 import React, { FC, useCallback, useRef, useState } from 'react'
 import 'remixicon/fonts/remixicon.css'
 import { ThemeProvider as ZThemeProvider } from 'zens'

@@ -5,7 +5,7 @@ export const SettingGroupContainer = styled.div`
   margin: 16px 0;
   min-width: fit-content;
   font-size: 0.875rem;
-  background-color: ${(props) => props.theme.bgColorSecondary};
+  background-color: color-mix(in srgb, var(--mf-dialog) 94%, var(--mf-foreground));
   box-sizing: border-box;
   border-radius: 6px;
   transition: background-color 0.3s ease;

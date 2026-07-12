@@ -1,7 +1,6 @@
-import { Icon } from '@/index';
-
 import ErrorTip from './ErrorTip';
-import Img, { ImgProps as RcImageProps } from './Img';
+import Img, { type ImgProps as RcImageProps } from './Img';
+import { Loading } from '../Loading';
 
 interface ImageProps extends RcImageProps {
   errorTip?: string;
@@ -13,7 +12,7 @@ const ImageView = (props: ImageProps) => {
   const { errorTip = 'load error' } = props;
   return (
     <Img
-      loader={<Icon.Loading3QuartersOutlined spin size={40} />}
+      loader={<Loading size={40} />}
       unloader={<ErrorTip errortip={errorTip} />}
       {...props}
     />

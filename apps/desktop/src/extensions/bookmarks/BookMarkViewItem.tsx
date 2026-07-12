@@ -1,4 +1,4 @@
-import { Flex, Tag } from 'antd'
+import { Badge } from '@/components/ui/badge'
 import type { BookMarkItem } from './useBookMarksStore'
 
 interface BookMarkViewItemProps {
@@ -21,11 +21,13 @@ export const BookMarkViewItem = (props: BookMarkViewItemProps) => {
     >
       {bookmark.title}
       {showTags && bookmark.tags.length > 0 ? (
-        <Flex data-id={bookmark.id} gap={4}>
+        <div className='flex gap-1' data-id={bookmark.id}>
           {bookmark.tags.map((tag) => (
-            <Tag key={tag} color='#0369a1' variant='solid'>{tag}</Tag>
+            <Badge key={tag} variant='default'>
+              {tag}
+            </Badge>
           ))}
-        </Flex>
+        </div>
       ) : null}
     </div>
   )

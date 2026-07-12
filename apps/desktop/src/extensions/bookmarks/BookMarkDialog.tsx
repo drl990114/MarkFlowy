@@ -1,44 +1,17 @@
 import { commandRegistry } from '@/commands'
-import { Select } from 'antd'
+import { Button } from '@/components/ui/button'
+import { Dialog } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { TagCombobox } from '@/components/ui/tag-combobox'
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from '@/i18n'
-import styled from 'styled-components'
-import { Button, Dialog, Input } from 'zens'
 import useBookMarksStore from './useBookMarksStore'
-
-const ItemWrapper = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
-  font-size: 0.9rem;
-
-  label {
-    text-align: right;
-    min-width: 40px;
-  }
-
-  .ant-select,
-  input {
-    flex: 1;
-  }
-
-  .ant-select-selector {
-    padding: 4px 8px !important;
-    min-height: 32px !important;
-  }
-
-  .ant-select-selection-placeholder {
-    line-height: 32px !important;
-  }
-`
 
 export const BookMarkDialog: React.FC = () => {
   const [open, setOpen] = useState(false)
   const [name, setName] = useState('')
   const [path, setPath] = useState('')
   const [tags, setTags] = useState<string[]>([])
-  const [newTag, setNewTag] = useState<string>('')
   const { tagList, addBookMark } = useBookMarksStore()
   const { t } = useTranslation()
 
@@ -72,9 +45,6 @@ export const BookMarkDialog: React.FC = () => {
     setName(e.target.value)
   }
 
-  const handleNewTagInput = (value: string) => {
-    setNewTag(value)
-  }
   const handleConfirm = () => {
     addBookMark({
       title: name,
@@ -92,44 +62,67 @@ export const BookMarkDialog: React.FC = () => {
     setTags(newValue)
   }
 
-  const renderTagList = useMemo(() => {
-    return newTag && !tagList.includes(newTag) ? [newTag, ...tagList] : tagList
-  }, [newTag, tagList])
+  const tagOptions = useMemo(
+    () => tagList.map((tag) => ({ value: tag, label: tag })),
+    [tagList],
+  )
 
   return (
-    <Dialog
-      title='bookmark'
-      footer={[
-        <Button key='ok' onClick={handleClose}>
-          {t('common.cancel')}
-        </Button>,
-        <Button key='copy' btnType='primary' onClick={handleConfirm}>
-          {t('common.confirm')}
-        </Button>,
-      ]}
+    <Dialog.Root
       open={open}
-      onClose={handleClose}
+      onOpenChange={(nextOpen) => {
+        if (!nextOpen) handleClose()
+      }}
     >
-      <ItemWrapper>
-        <span>path</span>
-        <span>{path}</span>
-      </ItemWrapper>
-      <ItemWrapper>
-        <span>name</span>
-        <Input value={name} onChange={handleNameChange} />
-      </ItemWrapper>
-      <ItemWrapper>
-        <span>tags</span>
-        <Select
-          mode="tags"
-          style={{ width: '100%' }}
-          placeholder="Tag"
-          value={tags}
-          onChange={handleTagChange}
-          options={renderTagList.map(tag => ({ value: tag, label: tag }))}
-          onSearch={handleNewTagInput}
-        />
-      </ItemWrapper>
-    </Dialog>
+      <Dialog.Content aria-describedby={undefined} closeLabel={t('common.close')}>
+        <Dialog.Header>
+          <Dialog.Title>{t('action.bookmark')}</Dialog.Title>
+        </Dialog.Header>
+
+        <Dialog.Body>
+          <div className='grid grid-cols-[4.5rem_minmax(0,1fr)] items-center gap-x-3 gap-y-4'>
+            <span className='text-right text-xs font-medium text-foreground-secondary'>Path</span>
+            <span
+              className='min-w-0 break-all rounded-md border border-border bg-muted px-2.5 py-1.5 text-xs text-foreground'
+              title={path}
+            >
+              {path}
+            </span>
+
+            <label
+              className='text-right text-xs font-medium text-foreground-secondary'
+              htmlFor='bookmark-name'
+            >
+              Name
+            </label>
+            <Input id='bookmark-name' value={name} onChange={handleNameChange} />
+
+            <span
+              className='text-right text-xs font-medium text-foreground-secondary'
+              id='bookmark-tags-label'
+            >
+              Tags
+            </span>
+            <div className='min-w-0'>
+              <TagCombobox
+                allowCreate
+                aria-labelledby='bookmark-tags-label'
+                onValuesChange={handleTagChange}
+                options={tagOptions}
+                placeholder='Tag'
+                values={tags}
+              />
+            </div>
+          </div>
+        </Dialog.Body>
+
+        <Dialog.Footer>
+          <Button onClick={handleClose} variant='outline'>
+            {t('common.cancel')}
+          </Button>
+          <Button onClick={handleConfirm}>{t('common.confirm')}</Button>
+        </Dialog.Footer>
+      </Dialog.Content>
+    </Dialog.Root>
   )
 }

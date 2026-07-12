@@ -1,13 +1,14 @@
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import { loadLocalThemeCss } from '@/helper/extensions'
 import { logger } from '@/helper/logger'
+import { useTranslation } from '@/i18n'
 import { dialog } from '@/services/dialog'
 import useExtensionsManagerStore from '@/stores/useExtensionsManagerStore'
 import useThemeStore from '@/stores/useThemeStore'
 import { invoke } from '@tauri-apps/api/core'
 import { open } from '@tauri-apps/plugin-dialog'
-import { Button, Checkbox } from 'antd'
-import { useEffect, useState } from 'react'
-import { useTranslation } from '@/i18n'
+import { useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import themeData from '../../../../../../community-themes.json'
 
@@ -123,6 +124,15 @@ const Toolbar = styled.div`
   align-items: center;
 `
 
+const InstalledOnlyControl = styled.label`
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: ${(props) => props.theme.primaryFontColor};
+  cursor: pointer;
+  font-size: 13px;
+`
+
 export interface ThemeItem {
   name: string
   mode: ('dark' | 'light')[]
@@ -146,18 +156,18 @@ export function ThemeStore() {
   const [localThemes, setLocalThemes] = useState<LocalTheme[]>([])
   const { t } = useTranslation()
 
-  useEffect(() => {
-    loadLocalThemes()
-  }, [])
-
-  const loadLocalThemes = async () => {
+  const loadLocalThemes = useCallback(async () => {
     try {
-      const themes = await invoke<LocalTheme[]>('load_local_themes')
-      setLocalThemes(themes)
+      const loadedThemes = await invoke<LocalTheme[]>('load_local_themes')
+      setLocalThemes(loadedThemes)
     } catch (error) {
       logger.error('Failed to load local themes:', error)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    void loadLocalThemes()
+  }, [loadLocalThemes])
 
   const handleImportLocalTheme = async () => {
     try {
@@ -168,7 +178,7 @@ export function ThemeStore() {
             extensions: ['css'],
           },
         ],
-        fileAccessMode: 'scoped'
+        fileAccessMode: 'scoped',
       })
 
       if (selected) {
@@ -177,7 +187,7 @@ export function ThemeStore() {
         })
         const updatedThemes = [...localThemes, newTheme]
         setLocalThemes(updatedThemes)
-        loadLocalThemeCss(updatedThemes.map((t) => t.css_content))
+        loadLocalThemeCss(updatedThemes.map((themeItem) => themeItem.css_content))
       }
     } catch (error) {
       logger.error('Failed to import local theme:', error)
@@ -198,9 +208,9 @@ export function ThemeStore() {
 
     try {
       await invoke('remove_local_theme', { id: localTheme.id })
-      const updatedThemes = localThemes.filter((t) => t.id !== localTheme.id)
+      const updatedThemes = localThemes.filter((themeItem) => themeItem.id !== localTheme.id)
       setLocalThemes(updatedThemes)
-      loadLocalThemeCss(updatedThemes.map((t) => t.css_content))
+      loadLocalThemeCss(updatedThemes.map((themeItem) => themeItem.css_content))
     } catch (error) {
       logger.error('Failed to remove local theme:', error)
     }
@@ -210,9 +220,10 @@ export function ThemeStore() {
     // Check if theme exists in installed themes by checking if any installed theme matches the name
     // Note: Ideally we should match by package name but current theme store only has name
     return installedThemes.some(
-      (t: any) =>
-        t.name === packageName ||
-        t.name === storeThemes.find((st) => st.packageName === packageName)?.name,
+      (installedTheme) =>
+        installedTheme.name === packageName ||
+        installedTheme.name ===
+          storeThemes.find((storeTheme) => storeTheme.packageName === packageName)?.name,
     )
   }
 
@@ -257,9 +268,8 @@ export function ThemeStore() {
       await invoke('remove_theme', { name: theme.packageName })
 
       const installedTheme = installedThemes.find(
-        (t: any) =>
-          t.name === theme.packageName ||
-          t.name === theme.name
+        (candidateTheme) =>
+          candidateTheme.name === theme.packageName || candidateTheme.name === theme.name,
       )
 
       if (installedTheme) {
@@ -285,7 +295,7 @@ export function ThemeStore() {
       <SectionTitle>{t('settings.themeStore.local_css_files')}</SectionTitle>
       <LocalThemeContainer>
         <Toolbar>
-          <Button size='small' onClick={handleImportLocalTheme}>
+          <Button type='button' size='sm' variant='outline' onClick={handleImportLocalTheme}>
             {t('common.import')} CSS
           </Button>
         </Toolbar>
@@ -301,8 +311,9 @@ export function ThemeStore() {
               </LocalThemeInfo>
               <LocalThemeActions>
                 <Button
-                  size='small'
-                  danger
+                  type='button'
+                  size='sm'
+                  variant='destructive'
                   onClick={() => handleRemoveLocalTheme(localTheme)}
                 >
                   {t('common.delete')}
@@ -316,46 +327,61 @@ export function ThemeStore() {
       <SectionTitle>{t('settings.themeStore.online_themes')}</SectionTitle>
       <TableContainer>
         <Toolbar>
-          <Checkbox checked={onlyInstalled} onChange={(e) => setOnlyInstalled(e.target.checked)}>
-            {t('settings.themeStore.only_installed')}
-          </Checkbox>
+          <InstalledOnlyControl htmlFor='theme-store-only-installed'>
+            <Checkbox
+              id='theme-store-only-installed'
+              checked={onlyInstalled}
+              onCheckedChange={(checked) => setOnlyInstalled(checked === true)}
+            />
+            <span>{t('settings.themeStore.only_installed')}</span>
+          </InstalledOnlyControl>
         </Toolbar>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell width='20%'>{t('settings.themeStore.name')}</TableCell>
-            <TableCell width='10%'>{t('settings.themeStore.mode')}</TableCell>
-            <TableCell width='15%'>{t('settings.themeStore.author')}</TableCell>
-            <TableCell width='35%'>{t('settings.themeStore.description')}</TableCell>
-            <TableCell width='10%'>{t('settings.themeStore.action')}</TableCell>
-          </TableRow>
-        </TableHead>
-        <tbody>
-          {filteredThemes.map((theme) => {
-            const installed = isInstalled(theme.packageName)
-            return (
-              <TableRow key={theme.packageName}>
-                <TableDataCell>{theme.name}</TableDataCell>
-                <TableDataCell>{theme.mode.join(', ')}</TableDataCell>
-                <TableDataCell>{theme.author}</TableDataCell>
-                <TableDataCell>{theme.description}</TableDataCell>
-                <TableDataCell>
-                  {installed ? (
-                    <Button size='small' danger onClick={() => handleUninstall(theme)}>
-                      {t('settings.themeStore.uninstall')}
-                    </Button>
-                  ) : (
-                    <Button size='small' onClick={() => handleInstall(theme)}>
-                      {t('settings.themeStore.download')}
-                    </Button>
-                  )}
-                </TableDataCell>
-              </TableRow>
-            )
-          })}
-        </tbody>
-      </Table>
-    </TableContainer>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell width='20%'>{t('settings.themeStore.name')}</TableCell>
+              <TableCell width='10%'>{t('settings.themeStore.mode')}</TableCell>
+              <TableCell width='15%'>{t('settings.themeStore.author')}</TableCell>
+              <TableCell width='35%'>{t('settings.themeStore.description')}</TableCell>
+              <TableCell width='10%'>{t('settings.themeStore.action')}</TableCell>
+            </TableRow>
+          </TableHead>
+          <tbody>
+            {filteredThemes.map((theme) => {
+              const installed = isInstalled(theme.packageName)
+              return (
+                <TableRow key={theme.packageName}>
+                  <TableDataCell>{theme.name}</TableDataCell>
+                  <TableDataCell>{theme.mode.join(', ')}</TableDataCell>
+                  <TableDataCell>{theme.author}</TableDataCell>
+                  <TableDataCell>{theme.description}</TableDataCell>
+                  <TableDataCell>
+                    {installed ? (
+                      <Button
+                        type='button'
+                        size='sm'
+                        variant='destructive'
+                        onClick={() => handleUninstall(theme)}
+                      >
+                        {t('settings.themeStore.uninstall')}
+                      </Button>
+                    ) : (
+                      <Button
+                        type='button'
+                        size='sm'
+                        variant='outline'
+                        onClick={() => handleInstall(theme)}
+                      >
+                        {t('settings.themeStore.download')}
+                      </Button>
+                    )}
+                  </TableDataCell>
+                </TableRow>
+              )
+            })}
+          </tbody>
+        </Table>
+      </TableContainer>
     </div>
   )
 }

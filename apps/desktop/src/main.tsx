@@ -1,7 +1,6 @@
 import { lightTheme } from '@markflowy/theme'
 import * as Sentry from '@sentry/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import 'antd/dist/antd.css'
 import { HoxRoot } from 'hox'
 import { enableMapSet } from 'immer'
 import { StrictMode, Suspense } from 'react'
@@ -12,6 +11,7 @@ import { Spinners } from 'zens'
 import App from './App'
 import './atom.css'
 import './normalize.css'
+import './ui.css'
 
 Sentry.init({
   dsn: import.meta.env.VITE_SENTRY_DSN,

@@ -1,3 +1,8 @@
+import {
+  aiProviderRegistry,
+  normalizeAIProviderId,
+  parseConfiguredModels,
+} from '@/extensions/ai/aiProvidersService'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import { useMemo } from 'react'
 import { SettingGroupContainer } from '../component/SettingGroup/styles'
@@ -13,37 +18,18 @@ export const CopilotSetting = () => {
   const copilotConfig = (settingMap as any).copilot
 
   // Get current provider models
+  const providerId = normalizeAIProviderId(settingData.copilot_provider)
+  const providerModels = providerId
+    ? settingData[aiProviderRegistry[providerId].settingKeys.models]
+    : undefined
   const currentProviderModels = useMemo(() => {
-    const provider = settingData['copilot_provider']
-    let modelsStr = ''
+    if (!providerId) return []
 
-    switch (provider) {
-      case 'ChatGPT':
-        modelsStr = settingData['extensions_chatgpt_models'] || ''
-        break
-      case 'DeepSeek':
-        modelsStr = settingData['extensions_deepseek_models'] || ''
-        break
-      case 'Ollama':
-        modelsStr = settingData['extensions_ollama_models'] || ''
-        break
-      case 'Google':
-        modelsStr = settingData['extensions_google_models'] || ''
-        break
-    }
-
-    return modelsStr
-      .split(',')
-      .map((s) => s.trim())
-      .filter(Boolean)
-      .map((m) => ({ value: m, title: m }))
-  }, [
-    settingData['copilot_provider'],
-    settingData['extensions_chatgpt_models'],
-    settingData['extensions_deepseek_models'],
-    settingData['extensions_ollama_models'],
-    settingData['extensions_google_models'],
-  ])
+    return parseConfiguredModels(providerModels).map((model) => ({
+      value: model,
+      title: model,
+    }))
+  }, [providerId, providerModels])
 
   return (
     <SettingGroupContainer>

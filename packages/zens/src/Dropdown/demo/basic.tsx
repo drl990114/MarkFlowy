@@ -1,14 +1,6 @@
 import { Dropdown } from 'zens';
 
-import {
-  AlignCenterOutlined,
-  CheckSquareOutlined,
-  CodeOutlined,
-  DownOutlined,
-  FormatPainterOutlined,
-  OrderedListOutlined,
-  UnorderedListOutlined,
-} from '@ant-design/icons';
+const DemoIcon = ({ children }: { children: string }) => <span aria-hidden="true">{children}</span>;
 
 const toolbarItems = [
   { key: 'text', icon: <span style={{ fontWeight: 'bold' }}>T</span>, label: '文本' },
@@ -19,14 +11,14 @@ const toolbarItems = [
   { key: 'h5', icon: <span>H5</span>, label: '标题5' },
   { key: 'h6', icon: <span>H6</span>, label: '标题6' },
   { type: 'divider' as const },
-  { key: 'ol', icon: <OrderedListOutlined />, label: '有序列表' },
-  { key: 'ul', icon: <UnorderedListOutlined />, label: '无序列表' },
-  { key: 'checklist', icon: <CheckSquareOutlined />, label: '任务列表' },
-  { key: 'quote', icon: <CodeOutlined />, label: '引用' },
-  { key: 'code', icon: <CodeOutlined />, label: '代码块' },
-  { key: 'align-center', icon: <AlignCenterOutlined />, label: '居中对齐' },
+  { key: 'ol', icon: <DemoIcon>1.</DemoIcon>, label: '有序列表' },
+  { key: 'ul', icon: <DemoIcon>•</DemoIcon>, label: '无序列表' },
+  { key: 'checklist', icon: <DemoIcon>☑</DemoIcon>, label: '任务列表' },
+  { key: 'quote', icon: <DemoIcon>“</DemoIcon>, label: '引用' },
+  { key: 'code', icon: <DemoIcon>&lt;/&gt;</DemoIcon>, label: '代码块' },
+  { key: 'align-center', icon: <DemoIcon>≡</DemoIcon>, label: '居中对齐' },
   { type: 'divider' as const },
-  { key: 'code-block', icon: <CodeOutlined />, label: '代码块' },
+  { key: 'code-block', icon: <DemoIcon>{'{ }'}</DemoIcon>, label: '代码块' },
   { key: 'brace', icon: <span>{ }</span>, label: '括号' },
 ];
 
@@ -34,12 +26,12 @@ const menuItems = [
   {
     key: 'color',
     label: '段落颜色',
-    icon: <FormatPainterOutlined />,
+    icon: <DemoIcon>◐</DemoIcon>,
   },
   {
     key: 'indent',
     label: '缩进和对齐',
-    icon: <OrderedListOutlined />,
+    icon: <DemoIcon>↹</DemoIcon>,
   },
 ];
 
@@ -61,7 +53,7 @@ export default () => {
       trigger={['click']}
     >
       <span>
-        格式化 <DownOutlined />
+        格式化 <DemoIcon>▾</DemoIcon>
       </span>
     </Dropdown>
   );

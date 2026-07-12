@@ -1,4 +1,3 @@
-import { Flex } from 'antd'
 import { type FC } from 'react'
 import type { EditorContext } from 'rme'
 import { FindController } from './find-controller'
@@ -30,8 +29,8 @@ export const FindReplaceComponent: FC<FindReplaceComponentProps> = ({ onDismiss,
   } = useFindReplace(editorCtx)
 
   return (
-    <Flex gap={8} vertical wrap={false}>
-      <Flex gap={4} wrap={false}>
+    <div className='flex flex-col gap-2'>
+      <div className='flex flex-nowrap gap-1'>
         <FindInput query={query} setQuery={setQuery} total={total} activeIndex={activeIndex} />
         <FindController
           findPrev={findPrev}
@@ -41,11 +40,11 @@ export const FindReplaceComponent: FC<FindReplaceComponentProps> = ({ onDismiss,
           stopFind={stopFind}
           onDismiss={onDismiss}
         />
-      </Flex>
-      <Flex gap={4} wrap={false}>
+      </div>
+      <div className='flex flex-nowrap gap-1'>
         <ReplaceInput replacement={replacement} setReplacement={setReplacement} />
         <ReplaceController replace={replace} replaceAll={replaceAll} />
-      </Flex>
-    </Flex>
+      </div>
+    </div>
   )
 }

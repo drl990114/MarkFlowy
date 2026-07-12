@@ -1,7 +1,14 @@
 import type { ContextMenuItem, IFile, IHeadingData } from '@markflowy/interface'
 import { fileTreeHandler, showContextMenu } from '@markflowy/interface'
-import { createAdapterFromId, createServerWorkspaceAdapter, type WorkspaceAdapter } from 'adapters'
-import { getGitHubWorkspaceErrorMessage } from 'features/githubWorkspace/services/workspaceGitHubService'
+import {
+  createWorkspaceAdapter,
+  type WorkspaceAdapter,
+  workspaceRequiresAuthentication,
+} from 'adapters'
+import {
+  getRemoteWorkspaceErrorMessage,
+  type RemoteWorkspaceRef,
+} from 'features/workspace/services/remoteWorkspaceService'
 import { useAuth } from 'hooks/useAuth'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { MenuItemData } from 'zens'
@@ -10,7 +17,7 @@ export type ViewType = 'wysiwyg' | 'source' | 'preview'
 
 export interface FileState {
   content: string
-  sha?: string
+  version?: string
   isDirty: boolean
 }
 
@@ -48,6 +55,17 @@ const extractHeadingsForFile = (content: string, fileId: string): IHeadingData[]
   return headings
 }
 
+const findFirstFile = (items: IFile[]): IFile | undefined => {
+  for (const item of items) {
+    if (item.kind === 'file') return item
+    if (item.children) {
+      const found = findFirstFile(item.children)
+      if (found) return found
+    }
+  }
+  return undefined
+}
+
 export function useWorkspaceState(id: string) {
   const { loading: authLoading, isAuthenticated } = useAuth(false)
 
@@ -63,21 +81,15 @@ export function useWorkspaceState(id: string) {
   const [loadingFile, setLoadingFile] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
-  const [branches, setBranches] = useState<string[]>([])
-  const [currentBranch, setCurrentBranch] = useState<string>('')
+  const [refs, setRefs] = useState<RemoteWorkspaceRef[]>([])
+  const [currentRef, setCurrentRef] = useState<string | null>(null)
   const [commitMessage, setCommitMessage] = useState('Update via MarkFlowy')
   const treeLoadVersionRef = useRef(0)
-
-  const findFirstFile = useCallback((items: IFile[]): IFile | undefined => {
-    for (const item of items) {
-      if (item.kind === 'file') return item
-      if (item.children) {
-        const found = findFirstFile(item.children)
-        if (found) return found
-      }
-    }
-    return undefined
-  }, [])
+  const fileLoadVersionRef = useRef(0)
+  const saveVersionRef = useRef(0)
+  const workspaceContextVersionRef = useRef(0)
+  const fileStateMapRef = useRef(fileStateMap)
+  fileStateMapRef.current = fileStateMap
 
   useEffect(() => {
     setIsClient(true)
@@ -86,38 +98,45 @@ export function useWorkspaceState(id: string) {
   useEffect(() => {
     if (!id || authLoading) return
 
-    if (id !== 'demo-workspace' && !isAuthenticated) {
-      setAdapter(null)
+    const contextVersion = ++workspaceContextVersionRef.current
+    treeLoadVersionRef.current += 1
+    fileLoadVersionRef.current += 1
+    saveVersionRef.current += 1
+    fileTreeHandler.clearLoadedDirsCache?.()
+    setAdapter(null)
+    setFolderData([])
+    setActiveId('')
+    setOpened([])
+    setFileStateMap({})
+    setHeadingsDataMap({})
+    setRefs([])
+    setCurrentRef(null)
+    setLoadingFile(false)
+    setSaving(false)
+
+    if (workspaceRequiresAuthentication(id) && !isAuthenticated) {
+      setLoadingTree(false)
       setError('Sign in to open this workspace.')
       return
     }
 
     let cancelled = false
+    setLoadingTree(true)
+    setError('')
 
     const initAdapter = async () => {
       try {
-        const newAdapter =
-          id === 'demo-workspace' ? createAdapterFromId(id) : await createServerWorkspaceAdapter(id)
+        const newAdapter = await createWorkspaceAdapter(id)
 
-        if (cancelled) return
+        if (cancelled || contextVersion !== workspaceContextVersionRef.current) return
 
-        treeLoadVersionRef.current += 1
-        fileTreeHandler.clearLoadedDirsCache?.()
         setAdapter(newAdapter)
-        setFolderData([])
-        setActiveId('')
-        setOpened([])
-        setFileStateMap({})
-        setHeadingsDataMap({})
-        setBranches([])
-        setCurrentBranch(newAdapter.getCurrentBranch?.() || '')
-        setError('')
+        setCurrentRef(newAdapter.type === 'remote' ? newAdapter.defaultRef : null)
       } catch (caughtError) {
-        if (cancelled) return
+        if (cancelled || contextVersion !== workspaceContextVersionRef.current) return
 
-        setAdapter(null)
-        setFolderData([])
-        setError(getGitHubWorkspaceErrorMessage(caughtError, 'Failed to open workspace'))
+        setLoadingTree(false)
+        setError(getRemoteWorkspaceErrorMessage(caughtError, 'Failed to open workspace'))
       }
     }
 
@@ -125,23 +144,24 @@ export function useWorkspaceState(id: string) {
 
     return () => {
       cancelled = true
+      workspaceContextVersionRef.current += 1
       treeLoadVersionRef.current += 1
+      fileLoadVersionRef.current += 1
+      saveVersionRef.current += 1
     }
   }, [authLoading, id, isAuthenticated])
 
   useEffect(() => {
     if (!adapter) return
-    if (adapter.requiresAuth && authLoading) return
-
-    if (adapter.requiresAuth && !isAuthenticated) {
-      setError('Sign in to open this workspace.')
-      setLoadingTree(false)
-      setLoadingFile(false)
-      return
-    }
 
     let cancelled = false
+    const contextVersion = workspaceContextVersionRef.current
     const loadVersion = ++treeLoadVersionRef.current
+
+    const isCurrentLoad = () =>
+      !cancelled &&
+      contextVersion === workspaceContextVersionRef.current &&
+      loadVersion === treeLoadVersionRef.current
 
     const load = async () => {
       setLoadingTree(true)
@@ -150,51 +170,38 @@ export function useWorkspaceState(id: string) {
       try {
         if (adapter.type === 'local') {
           const files = await adapter.loadTree()
-          if (cancelled || loadVersion !== treeLoadVersionRef.current) return
+          if (!isCurrentLoad()) return
 
           setFolderData(files)
           const firstFile = findFirstFile(files)
           if (!firstFile) return
 
-          const { content } = await adapter.loadFileContent(firstFile)
-          if (cancelled || loadVersion !== treeLoadVersionRef.current) return
+          const { content, version } = await adapter.loadFileContent(firstFile)
+          if (!isCurrentLoad()) return
 
           setActiveId(firstFile.id)
           setOpened([firstFile.id])
-          setFileStateMap({ [firstFile.id]: { content, isDirty: false } })
+          setFileStateMap({ [firstFile.id]: { content, version, isDirty: false } })
           setHeadingsDataMap({
             [firstFile.id]: extractHeadingsForFile(content, firstFile.id),
           })
           return
         }
 
-        if (adapter.loadTreeWithBranches) {
-          const { branch, branches: branchList, files } = await adapter.loadTreeWithBranches()
-          if (cancelled || loadVersion !== treeLoadVersionRef.current) return
-
-          setFolderData(files)
-          setBranches(branchList)
-          setCurrentBranch(branch)
-          return
-        }
-
-        const files = await adapter.loadTree()
-        if (cancelled || loadVersion !== treeLoadVersionRef.current) return
+        const ref = adapter.defaultRef
+        const refsPromise = adapter.capabilities.refs ? adapter.getRefs() : Promise.resolve([])
+        const [files, remoteRefs] = await Promise.all([adapter.loadTree(ref), refsPromise])
+        if (!isCurrentLoad()) return
 
         setFolderData(files)
-        if (adapter.getBranches) {
-          const branchList = await adapter.getBranches()
-          if (cancelled || loadVersion !== treeLoadVersionRef.current) return
-
-          setBranches(branchList)
-          setCurrentBranch(adapter.getCurrentBranch?.() || branchList[0] || '')
-        }
+        setRefs(remoteRefs)
+        setCurrentRef(ref)
       } catch (caughtError) {
-        if (!cancelled && loadVersion === treeLoadVersionRef.current) {
-          setError(getGitHubWorkspaceErrorMessage(caughtError, 'Failed to load workspace tree'))
+        if (isCurrentLoad()) {
+          setError(getRemoteWorkspaceErrorMessage(caughtError, 'Failed to load workspace tree'))
         }
       } finally {
-        if (!cancelled && loadVersion === treeLoadVersionRef.current) {
+        if (isCurrentLoad()) {
           setLoadingTree(false)
         }
       }
@@ -205,7 +212,7 @@ export function useWorkspaceState(id: string) {
     return () => {
       cancelled = true
     }
-  }, [adapter, authLoading, findFirstFile, isAuthenticated])
+  }, [adapter])
 
   const getFileObject = useCallback(
     (fileId: string): IFile | undefined => {
@@ -246,10 +253,17 @@ export function useWorkspaceState(id: string) {
       if (!adapter || !file.path) return
 
       const fileId = file.id
+      const loadVersion = ++fileLoadVersionRef.current
+      const contextVersion = workspaceContextVersionRef.current
+      const isCurrentLoad = () =>
+        loadVersion === fileLoadVersionRef.current &&
+        contextVersion === workspaceContextVersionRef.current
 
-      if (fileStateMap[fileId]) {
-        setActiveId(fileId)
-        setOpened((prev) => (prev.includes(fileId) ? prev : [...prev, fileId]))
+      setActiveId(fileId)
+      setOpened((previous) => (previous.includes(fileId) ? previous : [...previous, fileId]))
+
+      if (fileStateMapRef.current[fileId]) {
+        setLoadingFile(false)
         return
       }
 
@@ -257,81 +271,109 @@ export function useWorkspaceState(id: string) {
       setError('')
 
       try {
-        const { content, sha } = await adapter.loadFileContent(file)
-        setFileStateMap((prev) => ({
-          ...prev,
-          [fileId]: { content, sha, isDirty: false },
+        const { content, version } = await adapter.loadFileContent(
+          file,
+          adapter.type === 'remote' ? currentRef : null,
+        )
+        if (!isCurrentLoad()) return
+
+        setFileStateMap((previous) => ({
+          ...previous,
+          [fileId]: { content, version, isDirty: false },
         }))
-        setHeadingsDataMap((prev) => ({
-          ...prev,
+        setHeadingsDataMap((previous) => ({
+          ...previous,
           [fileId]: extractHeadingsForFile(content, fileId),
         }))
-        setActiveId(fileId)
-        setOpened((prev) => (prev.includes(fileId) ? prev : [...prev, fileId]))
       } catch (caughtError) {
-        setError(getGitHubWorkspaceErrorMessage(caughtError, 'Failed to load file content'))
+        if (isCurrentLoad()) {
+          setError(getRemoteWorkspaceErrorMessage(caughtError, 'Failed to load file content'))
+        }
       } finally {
-        setLoadingFile(false)
+        if (isCurrentLoad()) {
+          setLoadingFile(false)
+        }
       }
     },
-    [adapter, fileStateMap],
+    [adapter, currentRef],
   )
 
   const handleSelect = useCallback(
     (file: IFile | undefined) => {
-      if (file && file.kind === 'file') {
-        loadFileContent(file)
+      if (file?.kind === 'file') {
+        void loadFileContent(file)
       }
     },
     [loadFileContent],
   )
 
   const handleChange = useCallback((fileId: string, newContent: string) => {
-    setFileStateMap((prev) => {
-      const current = prev[fileId]
-      if (!current) return prev
+    setFileStateMap((previous) => {
+      const current = previous[fileId]
+      if (!current) return previous
       return {
-        ...prev,
+        ...previous,
         [fileId]: { ...current, content: newContent, isDirty: true },
       }
     })
 
-    const headings = extractHeadingsForFile(newContent, fileId)
-    setHeadingsDataMap((prev) => ({
-      ...prev,
-      [fileId]: headings,
+    setHeadingsDataMap((previous) => ({
+      ...previous,
+      [fileId]: extractHeadingsForFile(newContent, fileId),
     }))
   }, [])
 
   const handleSave = useCallback(async () => {
-    if (!adapter || !activeId || !adapter.saveFileContent) return
+    if (!adapter || !activeId || !adapter.capabilities.write || !adapter.saveFileContent) return
 
     const fileState = fileStateMap[activeId]
     const file = getFileObject(activeId)
 
-    if (!fileState || !file || !file.path) return
+    if (!fileState || !file?.path) return
+
+    const saveVersion = ++saveVersionRef.current
+    const contextVersion = workspaceContextVersionRef.current
+    const savedContent = fileState.content
+    const isCurrentSave = () =>
+      saveVersion === saveVersionRef.current &&
+      contextVersion === workspaceContextVersionRef.current
 
     setSaving(true)
     setError('')
 
     try {
-      const result = await adapter.saveFileContent(file, fileState.content, {
+      const result = await adapter.saveFileContent(file, savedContent, {
         message: commitMessage || 'Update via MarkFlowy',
-        sha: fileState.sha,
+        version: fileState.version,
+        ref: adapter.type === 'remote' ? currentRef : null,
       })
+      if (!isCurrentSave()) return
 
-      setFileStateMap((prev) => ({
-        ...prev,
-        [activeId]: { ...fileState, sha: result?.content?.sha || fileState.sha, isDirty: false },
-      }))
+      setFileStateMap((previous) => {
+        const current = previous[activeId]
+        if (!current) return previous
+
+        return {
+          ...previous,
+          [activeId]: {
+            ...current,
+            version: result.version ?? current.version,
+            isDirty: current.content !== savedContent,
+          },
+        }
+      })
 
       alert('Saved successfully')
     } catch (caughtError) {
-      setError(getGitHubWorkspaceErrorMessage(caughtError, 'Failed to save file'))
+      if (isCurrentSave()) {
+        setError(getRemoteWorkspaceErrorMessage(caughtError, 'Failed to save file'))
+      }
     } finally {
-      setSaving(false)
+      if (isCurrentSave()) {
+        setSaving(false)
+      }
     }
-  }, [adapter, activeId, fileStateMap, getFileObject, commitMessage])
+  }, [adapter, activeId, commitMessage, currentRef, fileStateMap, getFileObject])
 
   const handleShowConfirm = ({ title, onConfirm }: { title: string; onConfirm: () => void }) => {
     if (confirm(title)) {
@@ -356,73 +398,96 @@ export function useWorkspaceState(id: string) {
     showContextMenu({ x, y, items: menuItems })
   }
 
-  const currentHeadings = useMemo(() => {
-    return headingsDataMap[activeId] || []
-  }, [headingsDataMap, activeId])
+  const currentHeadings = headingsDataMap[activeId] || []
 
   const currentFileName = useMemo(() => {
     const file = getFileObject(activeId)
     return file?.name || 'Untitled'
   }, [activeId, getFileObject])
 
-  const currentFileState = useMemo(() => {
-    return fileStateMap[activeId]
-  }, [fileStateMap, activeId])
+  const currentFileState = fileStateMap[activeId]
 
-  const handleBranchChange = useCallback(
-    (branch: string) => {
-      if (!adapter || adapter.type !== 'github' || !adapter.setBranch || branch === currentBranch)
-        return
-
-      const hasUnsavedChanges = Object.values(fileStateMap).some((file) => file.isDirty)
+  const handleRefChange = useCallback(
+    (ref: string) => {
       if (
-        hasUnsavedChanges &&
-        !confirm('You have unsaved changes. Switch branches and discard them?')
+        !adapter ||
+        adapter.type !== 'remote' ||
+        !adapter.capabilities.refs ||
+        ref === currentRef
       ) {
         return
       }
 
-      const previousBranch = currentBranch
+      const hasUnsavedChanges = Object.values(fileStateMapRef.current).some((file) => file.isDirty)
+      if (
+        hasUnsavedChanges &&
+        !confirm('You have unsaved changes. Switch refs and discard them?')
+      ) {
+        return
+      }
+
+      workspaceContextVersionRef.current += 1
+      fileLoadVersionRef.current += 1
+      saveVersionRef.current += 1
+      const contextVersion = workspaceContextVersionRef.current
       const loadVersion = ++treeLoadVersionRef.current
-      adapter.setBranch(branch)
-      fileTreeHandler.clearLoadedDirsCache?.()
-      setCurrentBranch(branch)
-      setFileStateMap({})
-      setHeadingsDataMap({})
-      setActiveId('')
-      setOpened([])
+      setLoadingFile(false)
+      setSaving(false)
       setLoadingTree(true)
       setError('')
 
       void adapter
-        .loadTree()
+        .loadTree(ref)
         .then((files) => {
-          if (loadVersion !== treeLoadVersionRef.current) return
+          if (
+            loadVersion !== treeLoadVersionRef.current ||
+            contextVersion !== workspaceContextVersionRef.current
+          ) {
+            return
+          }
+          fileTreeHandler.clearLoadedDirsCache?.()
           setFolderData(files)
+          setCurrentRef(ref)
+          setFileStateMap({})
+          setHeadingsDataMap({})
+          setActiveId('')
+          setOpened([])
         })
         .catch((caughtError) => {
-          if (loadVersion !== treeLoadVersionRef.current) return
-          adapter.setBranch?.(previousBranch)
-          setCurrentBranch(previousBranch)
-          setError(getGitHubWorkspaceErrorMessage(caughtError, 'Failed to load branch'))
+          if (
+            loadVersion !== treeLoadVersionRef.current ||
+            contextVersion !== workspaceContextVersionRef.current
+          ) {
+            return
+          }
+          setError(getRemoteWorkspaceErrorMessage(caughtError, 'Failed to load ref'))
         })
         .finally(() => {
-          if (loadVersion === treeLoadVersionRef.current) {
+          if (
+            loadVersion === treeLoadVersionRef.current &&
+            contextVersion === workspaceContextVersionRef.current
+          ) {
             setLoadingTree(false)
           }
         })
     },
-    [adapter, currentBranch, fileStateMap],
+    [adapter, currentRef],
   )
 
   const handleReadSubdirectory = useCallback(
     async (folderPath: string): Promise<IFile[]> => {
-      if (adapter?.loadSubdirectory) {
-        return adapter.loadSubdirectory(folderPath)
-      }
-      return []
+      const currentAdapter = adapter
+      if (!currentAdapter?.loadSubdirectory) return []
+
+      const contextVersion = workspaceContextVersionRef.current
+      const children = await currentAdapter.loadSubdirectory(
+        folderPath,
+        currentAdapter.type === 'remote' ? currentRef : null,
+      )
+
+      return contextVersion === workspaceContextVersionRef.current ? children : []
     },
-    [adapter],
+    [adapter, currentRef],
   )
 
   return {
@@ -442,8 +507,9 @@ export function useWorkspaceState(id: string) {
     loadingFile,
     saving,
     error,
-    branches,
-    currentBranch,
+    refs,
+    currentRef,
+    canWrite: Boolean(!loadingTree && adapter?.capabilities.write && adapter.saveFileContent),
     commitMessage,
     setCommitMessage,
     handleSelect,
@@ -451,7 +517,7 @@ export function useWorkspaceState(id: string) {
     handleSave,
     handleShowConfirm,
     handleShowContextMenu,
-    handleBranchChange,
+    handleRefChange,
     handleReadSubdirectory,
     getFileObject,
     getFileObjectByPath,

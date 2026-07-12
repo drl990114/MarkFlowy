@@ -1,4 +1,4 @@
-import { changeLng, i18n, Langs, locales } from '@/i18n'
+import { changeLng, i18n, locales, type Langs } from '@/i18n'
 import { currentWebview } from '@/services/windows'
 import { DEFAULT_CURRENT_DATE_FORMAT, EditorViewType } from 'rme'
 
@@ -326,6 +326,7 @@ export const getSettingMap = () => {
         i18nKey: 'settings.ai.model.label',
         children: [
           {
+            providerId: 'openai' as const,
             i18nKey: 'settings.ai.ChatGPT.label',
             ApiBase: {
               key: 'extensions_chatgpt_apibase',
@@ -372,6 +373,7 @@ export const getSettingMap = () => {
             },
           },
           {
+            providerId: 'deepseek' as const,
             i18nKey: 'settings.ai.DeepSeek.label',
             ApiBase: {
               key: 'extensions_deepseek_apibase',
@@ -418,6 +420,7 @@ export const getSettingMap = () => {
             },
           },
           {
+            providerId: 'ollama' as const,
             i18nKey: 'settings.ai.Ollama.label',
             ApiBase: {
               key: 'extensions_ollama_apibase',
@@ -454,6 +457,7 @@ export const getSettingMap = () => {
             },
           },
           {
+            providerId: 'google' as const,
             i18nKey: 'settings.ai.Google.label',
             ApiBase: {
               key: 'extensions_google_apibase',

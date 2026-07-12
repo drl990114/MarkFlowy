@@ -1,12 +1,13 @@
 import NiceModal from '@ebay/nice-modal-react'
 import isPropValid from '@emotion/is-prop-valid'
-import { useMemo } from 'react'
-import { ConfigProvider, theme as antdTheme, type ThemeConfig } from 'antd'
+import { desktopDarkTheme, desktopLightTheme } from '@markflowy/theme'
+import { useEffect, useMemo } from 'react'
 import { ThemeProvider as EditorProvider } from 'rme'
-import { IStyleSheetContext, StyleSheetManager, ThemeProvider } from 'styled-components'
+import { type IStyleSheetContext, StyleSheetManager, ThemeProvider } from 'styled-components'
 import { ThemeProvider as ZensThemeProvider } from 'zens'
 import { GlobalStyles, DesktopSpecificStyles } from './globalStyles'
 import {
+  getReadableForeground,
   isThemeAccentColorOverride,
   resolveThemeAccentColor,
   THEME_ACCENT_COLOR_SETTING_KEY,
@@ -39,33 +40,41 @@ const AppThemeProvider: React.FC<BaseComponentProps> = function ({ children }) {
   const { curTheme } = useThemeStore()
   const { settingData } = useAppSettingStore()
 
+  const themeWithDefaults = useMemo(
+    () => ({
+      ...(curTheme.mode === 'dark' ? desktopDarkTheme : desktopLightTheme),
+      ...curTheme.styledConstants,
+    }),
+    [curTheme.mode, curTheme.styledConstants],
+  )
+
   const rootFontFamily =
     !settingData.editor_root_font_family ||
     settingData.editor_root_font_family === LEGACY_DEFAULT_ROOT_FONT_FAMILY ||
     settingData.editor_root_font_family === SYSTEM_DEFAULT_FONT_FAMILY
-      ? curTheme.styledConstants.fontFamily
+      ? themeWithDefaults.fontFamily
       : normalizeFontFamily(settingData.editor_root_font_family)
   const codeFontFamily =
     !settingData.editor_code_font_family ||
     settingData.editor_code_font_family === LEGACY_DEFAULT_CODE_FONT_FAMILY ||
     settingData.editor_code_font_family === DEFAULT_MONOSPACE_FONT_FAMILY
-      ? curTheme.styledConstants.codemirrorFontFamily
+      ? themeWithDefaults.codemirrorFontFamily
       : normalizeFontFamily(settingData.editor_code_font_family)
 
   const accentColorSetting = settingData[THEME_ACCENT_COLOR_SETTING_KEY]
   const hasAccentColorOverride = isThemeAccentColorOverride(accentColorSetting)
-  const accentColor = resolveThemeAccentColor(curTheme.styledConstants.accentColor, accentColorSetting)
+  const accentColor = resolveThemeAccentColor(themeWithDefaults.accentColor, accentColorSetting)
   const theme = useMemo(
     () => ({
-      ...curTheme.styledConstants,
+      ...themeWithDefaults,
       accentColor,
       accentColorFocused: hasAccentColorOverride
         ? `${accentColor}18`
-        : curTheme.styledConstants.accentColorFocused,
+        : themeWithDefaults.accentColorFocused,
       fontFamily: rootFontFamily,
       codemirrorFontFamily: codeFontFamily,
     }),
-    [curTheme.styledConstants, accentColor, hasAccentColorOverride, rootFontFamily, codeFontFamily],
+    [themeWithDefaults, accentColor, hasAccentColorOverride, rootFontFamily, codeFontFamily],
   )
 
   const themeProp = useMemo(
@@ -76,48 +85,6 @@ const AppThemeProvider: React.FC<BaseComponentProps> = function ({ children }) {
     [curTheme.mode, theme],
   )
 
-  const antdThemeProp = useMemo<ThemeConfig>(
-    () => ({
-      algorithm: curTheme.mode === 'dark' ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
-      token: {
-        colorPrimary: theme.accentColor,
-        colorInfo: theme.accentColor,
-        colorSuccess: theme.successColor,
-        colorError: theme.dangerColor,
-        colorWarning: theme.warnColor,
-        colorText: theme.primaryFontColor,
-        colorTextSecondary: theme.labelFontColor,
-        colorTextTertiary: theme.disabledFontColor,
-        colorBgBase: theme.bgColor,
-        colorBgContainer: theme.bgColor,
-        colorBgElevated: theme.contextMenuBgColor,
-        colorBgLayout: theme.bgColor,
-        colorBorder: theme.borderColor,
-        colorBorderSecondary: theme.borderColor,
-        colorFillSecondary: theme.hoverColor,
-        colorFillTertiary: theme.contextMenuBgColorHover,
-        borderRadius: 6,
-        borderRadiusLG: 8,
-        fontFamily: rootFontFamily,
-        fontSize: 12,
-        controlHeight: 28,
-        controlHeightSM: 24,
-        controlHeightLG: 32,
-        boxShadowSecondary: `0 10px 24px ${theme.boxShadowColor}`,
-      },
-      components: {
-        Popover: {
-          colorBgElevated: theme.contextMenuBgColor,
-        },
-        Tooltip: {
-          colorBgSpotlight: theme.tooltipBgColor,
-          colorTextLightSolid: theme.primaryFontColor,
-        },
-      },
-    }),
-    [curTheme.mode, theme, rootFontFamily],
-  )
-
   const i18nProp = useMemo(
     () => ({
       language: settingData.language,
@@ -125,19 +92,40 @@ const AppThemeProvider: React.FC<BaseComponentProps> = function ({ children }) {
     [settingData.language],
   )
 
+  const primaryForeground = useMemo(
+    () => getReadableForeground(theme.accentColor, '#ffffff', '#111111'),
+    [theme.accentColor],
+  )
+  const destructiveForeground = useMemo(
+    () => getReadableForeground(theme.dangerColor, '#ffffff', '#111111'),
+    [theme.dangerColor],
+  )
+
+  useEffect(() => {
+    const root = document.documentElement
+    const previousTheme = root.dataset.mfTheme
+    root.dataset.mfTheme = curTheme.mode
+
+    return () => {
+      if (previousTheme === undefined) delete root.dataset.mfTheme
+      else root.dataset.mfTheme = previousTheme
+    }
+  }, [curTheme.mode])
+
   return (
     <StyleSheetManager shouldForwardProp={shouldForwardProp}>
       <ThemeProvider theme={theme}>
-        <ConfigProvider theme={antdThemeProp}>
-          <ZensThemeProvider theme={themeProp}>
-            <EditorProvider theme={themeProp} i18n={i18nProp}>
-              <InjectFonts />
-              <GlobalStyles />
-              <DesktopSpecificStyles />
-              <NiceModal.Provider>{children}</NiceModal.Provider>
-            </EditorProvider>
-          </ZensThemeProvider>
-        </ConfigProvider>
+        <ZensThemeProvider theme={themeProp}>
+          <EditorProvider theme={themeProp} i18n={i18nProp}>
+            <InjectFonts />
+            <GlobalStyles />
+            <DesktopSpecificStyles
+              $destructiveForeground={destructiveForeground}
+              $primaryForeground={primaryForeground}
+            />
+            <NiceModal.Provider>{children}</NiceModal.Provider>
+          </EditorProvider>
+        </ZensThemeProvider>
       </ThemeProvider>
     </StyleSheetManager>
   )

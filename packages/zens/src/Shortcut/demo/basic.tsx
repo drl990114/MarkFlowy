@@ -1,4 +1,3 @@
-import { MacCommandFilled } from '@ant-design/icons';
 import { Shortcut } from 'zens';
 
 export default () => {
@@ -14,7 +13,7 @@ export default () => {
   ];
 
   const withIcons = [
-    { keybindings: [{ key: 'Cmd' }], icon: <MacCommandFilled />, desc: 'Command' },
+    { keybindings: [{ key: 'Cmd' }], icon: <span aria-hidden="true">⌘</span>, desc: 'Command' },
     { keybindings: [{ key: 'Space' }], desc: '空格' },
   ];
 

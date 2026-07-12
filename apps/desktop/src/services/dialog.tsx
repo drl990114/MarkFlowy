@@ -14,6 +14,24 @@ import useAppSettingStore from '@/stores/useAppSettingStore'
 
 type DialogPreferences = Record<string, string>
 
+let modalQueueTail = Promise.resolve()
+
+// Radix restores focus in a timer after Content unmounts. Give React one more
+// task to commit NiceModal removal before reusing a static modal id.
+const waitForModalCleanup = () =>
+  new Promise<void>((resolve) => {
+    setTimeout(resolve, 0)
+  })
+
+const enqueueModal = <T,>(show: () => Promise<T>) => {
+  const result = modalQueueTail.then(show, show)
+  modalQueueTail = result.then(
+    () => waitForModalCleanup(),
+    () => waitForModalCleanup(),
+  )
+  return result
+}
+
 export interface ConfirmOptions {
   title?: string
   content?: React.ReactNode
@@ -76,41 +94,32 @@ const confirm = async (options: ConfirmOptions) => {
     return rememberedAction
   }
 
-  return new Promise<string | null>((resolve) => {
-    const props: ConfirmModalProps = {
-      ...options,
-      onRemember: async (actionId) => {
-        if (options.remember?.key) {
-          await saveDialogPreference(options.remember.key, actionId)
-        }
-      },
-      onResolve: resolve,
-    }
+  const props: ConfirmModalProps = {
+    ...options,
+    onRemember: async (actionId) => {
+      if (options.remember?.key) {
+        await saveDialogPreference(options.remember.key, actionId)
+      }
+    },
+  }
 
-    NiceModal.show(MODAL_CONFIRM_ID, props)
-  })
+  return enqueueModal(() =>
+    NiceModal.show<string | null, ConfirmModalProps>(MODAL_CONFIRM_ID, props),
+  )
 }
 
 const info = async (options: InfoOptions) => {
-  return new Promise<void>((resolve) => {
-    const props: InfoModalProps = {
-      ...options,
-      onResolve: resolve,
-    }
-
-    NiceModal.show(MODAL_INFO_ID, props)
-  })
+  const props: InfoModalProps = { ...options }
+  return enqueueModal(() =>
+    NiceModal.show<void, InfoModalProps>(MODAL_INFO_ID, props),
+  )
 }
 
 const inputConfirm = async (options: InputConfirmOptions) => {
-  return new Promise<string | null>((resolve) => {
-    const props: InputConfirmModalProps = {
-      ...options,
-      onResolve: resolve,
-    }
-
-    NiceModal.show(MODAL_INPUT_ID, props)
-  })
+  const props: InputConfirmModalProps = { ...options }
+  return enqueueModal(() =>
+    NiceModal.show<string | null, InputConfirmModalProps>(MODAL_INPUT_ID, props),
+  )
 }
 
 export const dialog = {

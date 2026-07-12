@@ -1,53 +1,26 @@
 import { commandRegistry } from '@/commands'
-import { getWorkspace, WorkSpace } from '@/services/workspace'
+import { Dialog } from '@/components/ui/dialog'
+import { getWorkspace, type WorkSpace } from '@/services/workspace'
 import { t } from '@/i18n'
+import { LoaderCircleIcon } from 'lucide-react'
 import { memo, useCallback, useEffect, useState } from 'react'
-import styled from 'styled-components'
-import { Dialog } from 'zens'
-
-const WorkspaceDialogWrapper = styled(Dialog)`
-  max-width: 800px;
-  min-width: 500px;
-  max-height: 700px;
-  overflow: hidden;
-  background-color: ${(props) => props.theme.bgColor};
-  transition: all 0.3s ease-in-out;
-
-  .dialog-content {
-    height: calc(100% - 60px);
-    overflow-y: auto;
-    padding: 0 24px;
-
-    &::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background-color: ${(props) => props.theme.borderColor};
-      border-radius: 3px;
-    }
-  }
-`
-
-const WorkspaceMainContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin: 6px 0;
-`
 
 export const WorkspaceDialog = memo(() => {
   const [open, setOpen] = useState(false)
   const [workspace, setWorkspace] = useState<WorkSpace | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
     const disposable = commandRegistry.registerCommand({
       id: 'open_workspace_dialog',
       handler: () => {
+        setIsLoading(true)
         setOpen(true)
-        getWorkspace().then((workspace) => {
-          setWorkspace(workspace)
-        })
+        void getWorkspace()
+          .then((nextWorkspace) => {
+            setWorkspace(nextWorkspace)
+          })
+          .finally(() => setIsLoading(false))
       },
     })
 
@@ -57,17 +30,39 @@ export const WorkspaceDialog = memo(() => {
   const handleClose = useCallback(() => setOpen(false), [])
 
   return (
-    <WorkspaceDialogWrapper title={t('workspace.info')} open={open} onClose={handleClose}>
-      {workspace ? (
-        <WorkspaceMainContainer>
-          <div>
-            <i className='ri-folder-5-line'></i>:{' '}
-            <span style={{ fontSize: '0.9em' }}>{workspace.rootPath}</span>
-          </div>
-        </WorkspaceMainContainer>
-      ) : (
-        <div>{t('workspace.none')}</div>
-      )}
-    </WorkspaceDialogWrapper>
+    <Dialog.Root
+      open={open}
+      onOpenChange={(nextOpen) => {
+        if (!nextOpen) handleClose()
+      }}
+    >
+      <Dialog.Content aria-describedby={undefined} closeLabel={t('common.close')} size='lg'>
+        <Dialog.Header>
+          <Dialog.Title>{t('workspace.info')}</Dialog.Title>
+        </Dialog.Header>
+        <Dialog.Body aria-busy={isLoading} aria-live='polite'>
+          {isLoading ? (
+            <div
+              className='flex items-center gap-2 rounded-lg border border-border bg-muted p-4 text-foreground-secondary'
+            >
+              <LoaderCircleIcon className='size-4 animate-spin' aria-hidden='true' />
+              <span>{t('common.fetching')}</span>
+            </div>
+          ) : workspace?.rootPath ? (
+            <div className='flex items-start gap-3 rounded-lg border border-border bg-muted p-4'>
+              <i
+                aria-hidden='true'
+                className='ri-folder-5-line mt-0.5 shrink-0 text-base text-primary'
+              />
+              <span className='min-w-0 break-all text-foreground'>{workspace.rootPath}</span>
+            </div>
+          ) : (
+            <div className='rounded-lg border border-border bg-muted p-4 text-foreground-secondary'>
+              {t('workspace.none')}
+            </div>
+          )}
+        </Dialog.Body>
+      </Dialog.Content>
+    </Dialog.Root>
   )
 })

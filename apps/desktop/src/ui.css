@@ -1,0 +1,181 @@
+/*
+ * Desktop-wide Tailwind entry point. Theme and utility layers are generated
+ * without Tailwind preflight so legacy styled-components and editor styles
+ * keep their existing element defaults.
+ */
+@layer theme, base, components, utilities;
+
+@tailwind utilities source(none);
+
+@source './**/*.{ts,tsx}';
+
+@custom-variant dark (&:where([data-mf-theme='dark'], [data-mf-theme='dark'] *));
+
+@theme inline {
+  --spacing: var(--mf-space-unit);
+  --container-md: 28rem;
+  --container-3xl: 48rem;
+  --text-xs: var(--mf-font-xs);
+  --text-xs--line-height: 1.5;
+  --text-sm: var(--mf-font-sm);
+  --text-sm--line-height: 1.55;
+  --text-base: var(--mf-font-base);
+  --text-base--line-height: 1.6;
+  --text-lg: var(--mf-font-lg);
+  --text-lg--line-height: 1.5;
+  --text-xl: var(--mf-font-xl);
+  --text-xl--line-height: 1.45;
+  --text-2xl: var(--mf-font-2xl);
+  --text-2xl--line-height: 1.4;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --leading-relaxed: var(--mf-line-height);
+  --default-transition-duration: 150ms;
+  --default-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  --animate-spin: aui-spin 1s linear infinite;
+  --animate-pulse: aui-pulse 1.6s ease-in-out infinite;
+  --color-background: var(--mf-background);
+  --color-foreground: var(--mf-foreground);
+  --color-foreground-secondary: var(--mf-foreground-secondary);
+  --color-card: var(--mf-card);
+  --color-card-foreground: var(--mf-card-foreground);
+  --color-dialog: var(--mf-dialog);
+  --color-dialog-overlay: var(--mf-dialog-overlay);
+  --color-popover: var(--mf-popover);
+  --color-popover-foreground: var(--mf-popover-foreground);
+  --color-tooltip: var(--mf-tooltip);
+  --color-primary: var(--mf-primary);
+  --color-primary-foreground: var(--mf-primary-foreground);
+  --color-primary-soft: var(--mf-primary-soft);
+  --color-secondary: var(--mf-secondary);
+  --color-secondary-foreground: var(--mf-secondary-foreground);
+  --color-muted: var(--mf-muted);
+  --color-muted-foreground: var(--mf-muted-foreground);
+  --color-disabled-foreground: var(--mf-disabled-foreground);
+  --color-accent: var(--mf-accent);
+  --color-accent-foreground: var(--mf-accent-foreground);
+  --color-destructive: var(--mf-destructive);
+  --color-destructive-foreground: var(--mf-destructive-foreground);
+  --color-success: var(--mf-success);
+  --color-warning: var(--mf-warning);
+  --color-border: var(--mf-border);
+  --color-input: var(--mf-input);
+  --color-ring: var(--mf-ring);
+  --font-sans: var(--mf-font-sans);
+  --font-mono: var(--mf-font-mono);
+  --radius-sm: var(--mf-radius-sm);
+  --radius-md: var(--mf-radius-sm);
+  --radius-lg: var(--mf-radius);
+  --radius-xl: var(--mf-radius-lg);
+  --radius-2xl: var(--mf-radius-lg);
+  --shadow-sm: 0 1px 2px var(--mf-shadow-color);
+  --shadow-md: 0 4px 12px var(--mf-shadow-color);
+  --shadow-lg: 0 10px 24px var(--mf-shadow-color);
+}
+
+:root {
+  --mf-background: #fff;
+  --mf-rightbar-background: #fff;
+  --mf-foreground: #111;
+  --mf-foreground-secondary: #505050;
+  --mf-card: #fff;
+  --mf-card-foreground: #111;
+  --mf-dialog: #fff;
+  --mf-dialog-overlay: rgb(0 0 0 / 42%);
+  --mf-popover: #fff;
+  --mf-popover-foreground: #111;
+  --mf-tooltip: #e7e7e7;
+  --mf-primary: #0369a1;
+  --mf-primary-foreground: #fff;
+  --mf-primary-soft: #eef4fa;
+  --mf-secondary: #e7e7e7;
+  --mf-secondary-foreground: #111;
+  --mf-muted: #f6f7f9;
+  --mf-muted-foreground: #6b7280;
+  --mf-disabled-foreground: #9ca3af;
+  --mf-accent: #eef4fa;
+  --mf-accent-foreground: #111;
+  --mf-destructive: #dc2626;
+  --mf-destructive-foreground: #fff;
+  --mf-success: #00c853;
+  --mf-warning: #e2b340;
+  --mf-border: #d2d2d2;
+  --mf-input: #d2d2d2;
+  --mf-ring: #0369a1;
+  --mf-shadow-color: rgb(0 0 0 / 8%);
+  --mf-scrollbar-thumb: #c4c4c4;
+  --mf-scrollbar-track: #e4e4e7;
+  --mf-radius-sm: 4px;
+  --mf-radius: 8px;
+  --mf-radius-lg: 12px;
+  --mf-font-xs: 12px;
+  --mf-font-sm: 13px;
+  --mf-font-base: 14px;
+  --mf-font-lg: 16px;
+  --mf-font-xl: 18px;
+  --mf-font-2xl: 20px;
+  --mf-line-height: 1.6;
+  --mf-space-unit: 4px;
+  --mf-font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --mf-font-mono: 'SFMono-Regular', Consolas, monospace;
+}
+
+@layer components {
+  [data-slot],
+  [data-slot] *,
+  [data-slot]::before,
+  [data-slot]::after,
+  [data-slot] *::before,
+  [data-slot] *::after,
+  [data-mf-portal],
+  [data-mf-portal] *,
+  [data-mf-portal]::before,
+  [data-mf-portal]::after,
+  [data-mf-portal] *::before,
+  [data-mf-portal] *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border: 0 solid;
+  }
+
+  [data-slot] button,
+  [data-slot] input,
+  [data-slot] select,
+  [data-slot] textarea,
+  [data-mf-portal] button,
+  [data-mf-portal] input,
+  [data-mf-portal] select,
+  [data-mf-portal] textarea {
+    color: inherit;
+    font: inherit;
+    letter-spacing: inherit;
+  }
+
+  button[data-slot],
+  input[data-slot]:where([type='button'], [type='reset'], [type='submit']),
+  [data-slot] button,
+  [data-slot] input:where([type='button'], [type='reset'], [type='submit']),
+  [data-mf-portal] button,
+  [data-mf-portal] input:where([type='button'], [type='reset'], [type='submit']) {
+    appearance: none;
+    background-color: transparent;
+    background-image: none;
+  }
+
+  [data-slot] img,
+  [data-slot] svg,
+  [data-mf-portal] img,
+  [data-mf-portal] svg {
+    display: block;
+    vertical-align: middle;
+  }
+}
+
+[data-mf-portal] {
+  color: var(--mf-foreground);
+  font-family: var(--mf-font-sans);
+  font-size: var(--mf-font-sm);
+  line-height: var(--mf-line-height);
+}

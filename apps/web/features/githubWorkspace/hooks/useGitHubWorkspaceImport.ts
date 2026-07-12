@@ -1,27 +1,36 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
+import { getRemoteWorkspaceErrorMessage } from '../../workspace/services/remoteWorkspaceService'
 import {
-  getGitHubWorkspaceErrorMessage,
+  githubService,
   type GitHubRepo,
   type ImportedGitHubWorkspace,
-  workspaceGitHubService,
-} from '../services/workspaceGitHubService'
+} from '../services/githubService'
 
 export function useGitHubWorkspaceImport() {
   const [importingRepo, setImportingRepo] = useState<string | null>(null)
   const [importError, setImportError] = useState('')
+  const importRequestVersionRef = useRef(0)
 
   const importRepository = useCallback(
     async (repo: GitHubRepo): Promise<ImportedGitHubWorkspace | null> => {
+      const requestVersion = ++importRequestVersionRef.current
       setImportingRepo(repo.full_name)
       setImportError('')
 
       try {
-        return await workspaceGitHubService.importRepository(repo.owner.login, repo.name)
+        const workspace = await githubService.importRepository(repo.owner.login, repo.name)
+        return requestVersion === importRequestVersionRef.current ? workspace : null
       } catch (error) {
-        setImportError(getGitHubWorkspaceErrorMessage(error, 'Failed to import GitHub repository'))
+        if (requestVersion === importRequestVersionRef.current) {
+          setImportError(
+            getRemoteWorkspaceErrorMessage(error, 'Failed to import GitHub repository'),
+          )
+        }
         return null
       } finally {
-        setImportingRepo(null)
+        if (requestVersion === importRequestVersionRef.current) {
+          setImportingRepo(null)
+        }
       }
     },
     [],

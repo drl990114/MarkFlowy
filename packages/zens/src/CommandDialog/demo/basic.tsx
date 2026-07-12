@@ -1,6 +1,8 @@
 import React, { useCallback, useState } from 'react';
 
-import { Button, CommandAction, CommandDialog, Icon } from 'zens';
+import { Button, CommandDialog, type CommandAction } from 'zens';
+
+const DemoIcon = ({ children }: { children: string }) => <span aria-hidden="true">{children}</span>;
 
 const BasicDemo: React.FC = () => {
   const [open, setOpen] = useState(false);
@@ -18,7 +20,7 @@ const BasicDemo: React.FC = () => {
       id: 'new-file',
       label: 'New File',
       description: 'Create a new file',
-      icon: <Icon.FileAddOutlined />,
+      icon: <DemoIcon>＋</DemoIcon>,
       shortcut: [{ keybindings: [{ key: '⌘' }, { key: 'N' }] }],
       group: 'File',
       onSelect: () => {
@@ -29,7 +31,7 @@ const BasicDemo: React.FC = () => {
       id: 'open-file',
       label: 'Open File',
       description: 'Open an existing file',
-      icon: <Icon.FolderOpenOutlined />,
+      icon: <DemoIcon>▣</DemoIcon>,
       shortcut: [{ keybindings: [{ key: '⌘' }, { key: 'O' }] }],
       group: 'File',
       onSelect: () => {
@@ -40,7 +42,7 @@ const BasicDemo: React.FC = () => {
       id: 'save-file',
       label: 'Save File',
       description: 'Save the current file',
-      icon: <Icon.SaveOutlined />,
+      icon: <DemoIcon>↓</DemoIcon>,
       shortcut: [{ keybindings: [{ key: '⌘' }, { key: 'S' }] }],
       group: 'File',
       onSelect: () => {
@@ -51,7 +53,7 @@ const BasicDemo: React.FC = () => {
       id: 'copy',
       label: 'Copy',
       description: 'Copy selected content',
-      icon: <Icon.CopyOutlined />,
+      icon: <DemoIcon>⧉</DemoIcon>,
       shortcut: [{ keybindings: [{ key: '⌘' }, { key: 'C' }] }],
       group: 'Edit',
       onSelect: () => {
@@ -62,7 +64,7 @@ const BasicDemo: React.FC = () => {
       id: 'cut',
       label: 'Cut',
       description: 'Cut selected content',
-      icon: <Icon.ScissorOutlined />,
+      icon: <DemoIcon>✂</DemoIcon>,
       shortcut: [{ keybindings: [{ key: '⌘' }, { key: 'X' }] }],
       group: 'Edit',
       onSelect: () => {
@@ -83,7 +85,7 @@ const BasicDemo: React.FC = () => {
       id: 'find',
       label: 'Find',
       description: 'Find in current file',
-      icon: <Icon.SearchOutlined />,
+      icon: <DemoIcon>⌕</DemoIcon>,
       shortcut: [{ keybindings: [{ key: '⌘' }, { key: 'F' }] }],
       group: 'Search',
       onSelect: () => {
@@ -104,7 +106,7 @@ const BasicDemo: React.FC = () => {
       id: 'delete',
       label: 'Delete',
       description: 'Delete selected content',
-      icon: <Icon.DeleteOutlined />,
+      icon: <DemoIcon>×</DemoIcon>,
       shortcut: [{ keybindings: [{ key: 'delete' }] }],
       group: 'Edit',
       onSelect: () => {
@@ -115,7 +117,7 @@ const BasicDemo: React.FC = () => {
       id: 'find-replace',
       label: 'Find & Replace',
       description: 'Find and replace in file',
-      icon: <Icon.FormOutlined />,
+      icon: <DemoIcon>↔</DemoIcon>,
       shortcut: [{ keybindings: [{ key: '⌘' }, { key: 'R' }] }],
       group: 'Search',
       onSelect: () => {
@@ -126,7 +128,7 @@ const BasicDemo: React.FC = () => {
       id: 'find-all',
       label: 'Find in All Files',
       description: 'Find in all files',
-      icon: <Icon.SearchOutlined />,
+      icon: <DemoIcon>⌕</DemoIcon>,
       shortcut: [{ keybindings: [{ key: '⇧' }, { key: '⌘' }, { key: 'F' }] }],
       group: 'Search',
       onSelect: () => {
@@ -137,7 +139,7 @@ const BasicDemo: React.FC = () => {
       id: 'settings',
       label: 'Settings',
       description: 'Open application settings',
-      icon: <Icon.SettingOutlined />,
+      icon: <DemoIcon>⚙</DemoIcon>,
       shortcut: [{ keybindings: [{ key: '⌘' }, { key: ',' }] }],
       group: 'Preferences',
       onSelect: () => {

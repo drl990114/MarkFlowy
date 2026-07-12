@@ -1,14 +1,7 @@
 import { useState } from 'react';
 import { Dropdown, type DropdownMenuItem, type MenuItemType } from 'zens';
-import {
-  DownOutlined,
-  FileOutlined,
-  FolderOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  ShareAltOutlined,
-  DownloadOutlined,
-} from '@ant-design/icons';
+
+const DemoIcon = ({ children }: { children: string }) => <span aria-hidden="true">{children}</span>;
 
 /**
  * 嵌套子菜单示例
@@ -21,12 +14,12 @@ export default () => {
     {
       key: 'file',
       label: '文件',
-      icon: <FileOutlined />,
+      icon: <DemoIcon>▤</DemoIcon>,
       children: [
         {
           key: 'new',
           label: '新建',
-          icon: <FileOutlined />,
+          icon: <DemoIcon>＋</DemoIcon>,
           children: [
             { key: 'new-file', label: '新建文件' },
             { key: 'new-folder', label: '新建文件夹' },
@@ -36,7 +29,7 @@ export default () => {
         {
           key: 'open',
           label: '打开',
-          icon: <FolderOutlined />,
+          icon: <DemoIcon>▣</DemoIcon>,
           children: [
             { key: 'open-recent', label: '最近打开' },
             { key: 'open-folder', label: '打开文件夹' },
@@ -50,7 +43,7 @@ export default () => {
     {
       key: 'edit',
       label: '编辑',
-      icon: <EditOutlined />,
+      icon: <DemoIcon>✎</DemoIcon>,
       children: [
         { key: 'cut', label: '剪切' },
         { key: 'copy', label: '复制' },
@@ -70,7 +63,7 @@ export default () => {
     {
       key: 'share',
       label: '分享',
-      icon: <ShareAltOutlined />,
+      icon: <DemoIcon>↗</DemoIcon>,
       children: [
         { key: 'share-link', label: '复制链接' },
         { key: 'share-email', label: '邮件分享' },
@@ -79,13 +72,13 @@ export default () => {
     {
       key: 'download',
       label: '下载',
-      icon: <DownloadOutlined />,
+      icon: <DemoIcon>↓</DemoIcon>,
     },
     { type: 'divider' },
     {
       key: 'delete',
       label: '删除',
-      icon: <DeleteOutlined />,
+      icon: <DemoIcon>×</DemoIcon>,
       danger: true,
     },
   ];
@@ -109,7 +102,7 @@ export default () => {
         placement="bottomLeft"
       >
         <span style={{ cursor: 'pointer', color: '#1890ff' }}>
-          点击打开菜单 <DownOutlined />
+          点击打开菜单 <DemoIcon>▾</DemoIcon>
         </span>
       </Dropdown>
 

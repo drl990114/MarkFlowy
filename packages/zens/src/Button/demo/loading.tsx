@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Button, Space } from 'zens';
-import { PoweroffOutlined } from '@ant-design/icons';
 
 export default () => {
   const [loading1, setLoading1] = useState(true);
@@ -81,7 +80,7 @@ export default () => {
       {/* 自定义 Loading 图标 */}
       <Space>
         <Button
-          loading={{ icon: <PoweroffOutlined spin /> }}
+          loading={{ icon: <span aria-hidden="true">↻</span> }}
           btnType="primary"
         >
           自定义图标

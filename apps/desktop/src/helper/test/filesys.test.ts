@@ -12,8 +12,6 @@ vi.mock('@tauri-apps/api/core', () => ({
 
 vi.mock('rme', () => ({}))
 
-vi.mock('antd', () => ({}))
-
 vi.mock('@markflowy/interface', () => ({
   FileResultCode: { Success: 0 },
 }))

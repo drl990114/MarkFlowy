@@ -1,4 +1,3 @@
-import { DownOutlined, UserOutlined } from '@ant-design/icons';
 import { Dropdown, Space } from 'zens';
 
 const items = [

@@ -1,6 +1,5 @@
 import * as Spinners from 'react-spinners';
 
-import * as Icon from '@ant-design/icons';
 import * as Ariakit from '@ariakit/react';
 
 export { default as Button } from './Button';
@@ -28,4 +27,4 @@ export * from './Theme';
 export * from './Toast';
 export * from './Tooltip';
 
-export { Ariakit, Icon, Spinners };
+export { Ariakit, Spinners };

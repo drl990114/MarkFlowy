@@ -1,4 +1,5 @@
-import { Empty, FileTree, ContextMenuItem } from '@markflowy/interface'
+import { Empty, FileTree } from '@markflowy/interface'
+import type { ContextMenuItem } from '@markflowy/interface'
 import type { IFile } from '@/helper/filesys'
 import { useOpen } from '@/hooks'
 import { dialog } from '@/services/dialog'
@@ -7,7 +8,7 @@ import { createNewWindow } from '@/services/windows'
 import { useEditorStore } from '@/stores'
 import useOpenedCacheStore from '@/stores/useOpenedCacheStore'
 import { homeDir } from '@tauri-apps/api/path'
-import { Popover } from 'antd'
+import { Popover } from '@/components/ui/popover'
 import classNames from 'classnames'
 import type { FC, MouseEventHandler } from 'react'
 import { memo, useCallback, useEffect, useMemo, useState } from 'react'
@@ -54,6 +55,27 @@ const RecentListBottom = styled.button`
   &:hover {
     background-color: ${(props) => props.theme.hoverColor};
     color: ${(props) => props.theme.primaryFontColor};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${(props) => props.theme.accentColor};
+    outline-offset: 2px;
+  }
+`
+
+const RecentWorkspacesTrigger = styled.button`
+  margin-left: 8px;
+  padding: 6px;
+  border: 0;
+  border-radius: ${(props) => props.theme.smallBorderRadius};
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  line-height: 1;
+  cursor: pointer;
+
+  &:hover {
+    background-color: ${(props) => props.theme.borderColor};
   }
 
   &:focus-visible {
@@ -334,42 +356,39 @@ const Explorer: FC<ExplorerProps> = (props) => {
         <span className='explorer-bottom__action cursor-pointer' onClick={openFolderDialog}>
           {t('file.openDir')}
         </span>
-        <Popover
-          styles={{
-            content: {
-              padding: 0,
-            },
-          }}
-          placement='bottomRight'
-          content={
-            <RecentWorkspacesContent>
-              <h5 className='recent-workspaces__title'>{t('file.recentDir')}</h5>
-              <div className='recent-workspaces__list'>
-                {recentWorkspaceItems.map((item) => (
-                  <Tooltip key={item.key} title={item.tooltip} placement='right'>
-                    <button
-                      type='button'
-                      className='recent-workspaces__item'
-                      onClick={() => handleOpenHistoryListItemClick(item.key)}
-                    >
-                      <i className={`${item.iconCls} recent-workspaces__icon`} aria-hidden='true' />
-                      <span className='recent-workspaces__text'>
-                        <span className='recent-workspaces__name'>{item.title}</span>
-                      </span>
-                    </button>
-                  </Tooltip>
-                ))}
-              </div>
-              <RecentListBottom type='button' onClick={handleClearRecent}>
-                {t('file.clearRecent')}
-              </RecentListBottom>
-            </RecentWorkspacesContent>
-          }
-        >
-          {recentWorkspaceItems.length > 0 ? (
-            <i className='ri-more-2-fill explorer-bottom__action__icon' />
-          ) : null}
-        </Popover>
+        {recentWorkspaceItems.length > 0 ? (
+          <Popover.Root>
+            <Popover.Trigger asChild>
+              <RecentWorkspacesTrigger type='button' aria-label={t('file.recentDir')}>
+                <i className='ri-more-2-fill' aria-hidden='true' />
+              </RecentWorkspacesTrigger>
+            </Popover.Trigger>
+            <Popover.Content side='bottom' align='end' className='p-0'>
+              <RecentWorkspacesContent>
+                <h5 className='recent-workspaces__title'>{t('file.recentDir')}</h5>
+                <div className='recent-workspaces__list'>
+                  {recentWorkspaceItems.map((item) => (
+                    <Tooltip key={item.key} title={item.tooltip} placement='right'>
+                      <button
+                        type='button'
+                        className='recent-workspaces__item'
+                        onClick={() => handleOpenHistoryListItemClick(item.key)}
+                      >
+                        <i className={`${item.iconCls} recent-workspaces__icon`} aria-hidden='true' />
+                        <span className='recent-workspaces__text'>
+                          <span className='recent-workspaces__name'>{item.title}</span>
+                        </span>
+                      </button>
+                    </Tooltip>
+                  ))}
+                </div>
+                <RecentListBottom type='button' onClick={handleClearRecent}>
+                  {t('file.clearRecent')}
+                </RecentListBottom>
+              </RecentWorkspacesContent>
+            </Popover.Content>
+          </Popover.Root>
+        ) : null}
       </div>
     </Container>
   )
