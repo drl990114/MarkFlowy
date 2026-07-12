@@ -6,8 +6,8 @@ import {
 } from '@assistant-ui/react'
 import { AlertCircleIcon, FileTextIcon, LoaderCircleIcon, XIcon } from 'lucide-react'
 import type { FC } from 'react'
-import { cn } from '../lib/cn'
-import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
+import { cn } from '@/lib/cn'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { TooltipIconButton } from './tooltip-icon-button'
 
 export type AttachmentChipProps = {
@@ -60,7 +60,7 @@ export const AttachmentChip: FC<AttachmentChipProps> = ({
           </AttachmentPrimitive.Remove>
         )}
       </AttachmentPrimitive.Root>
-      <TooltipContent side='top'>
+      <TooltipContent className='aui-tooltip-content' side='top'>
         <AttachmentPrimitive.Name />
         {errorMessage ? <span className='ms-1 text-destructive'>{errorMessage}</span> : null}
       </TooltipContent>

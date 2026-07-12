@@ -1,10 +1,17 @@
 import { commandRegistry } from '@/commands'
-import { Select } from 'antd'
+import { TagCombobox } from '@/components/ui/tag-combobox'
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from '@/i18n'
 import styled from 'styled-components'
 import { Button, Dialog, Input } from 'zens'
 import useBookMarksStore from './useBookMarksStore'
+
+const hasOpenRadixLayer = () =>
+  Boolean(
+    document.querySelector(
+      "[data-slot='select-content'][data-state='open'], [data-slot='popover-content'][data-state='open']",
+    ),
+  )
 
 const ItemWrapper = styled.div`
   display: flex;
@@ -18,18 +25,13 @@ const ItemWrapper = styled.div`
     min-width: 40px;
   }
 
-  .ant-select,
   input {
     flex: 1;
   }
 
-  .ant-select-selector {
-    padding: 4px 8px !important;
-    min-height: 32px !important;
-  }
-
-  .ant-select-selection-placeholder {
-    line-height: 32px !important;
+  .bookmark-tags {
+    min-width: 0;
+    flex: 1;
   }
 `
 
@@ -38,7 +40,6 @@ export const BookMarkDialog: React.FC = () => {
   const [name, setName] = useState('')
   const [path, setPath] = useState('')
   const [tags, setTags] = useState<string[]>([])
-  const [newTag, setNewTag] = useState<string>('')
   const { tagList, addBookMark } = useBookMarksStore()
   const { t } = useTranslation()
 
@@ -72,9 +73,6 @@ export const BookMarkDialog: React.FC = () => {
     setName(e.target.value)
   }
 
-  const handleNewTagInput = (value: string) => {
-    setNewTag(value)
-  }
   const handleConfirm = () => {
     addBookMark({
       title: name,
@@ -92,9 +90,10 @@ export const BookMarkDialog: React.FC = () => {
     setTags(newValue)
   }
 
-  const renderTagList = useMemo(() => {
-    return newTag && !tagList.includes(newTag) ? [newTag, ...tagList] : tagList
-  }, [newTag, tagList])
+  const tagOptions = useMemo(
+    () => tagList.map((tag) => ({ value: tag, label: tag })),
+    [tagList],
+  )
 
   return (
     <Dialog
@@ -109,26 +108,28 @@ export const BookMarkDialog: React.FC = () => {
       ]}
       open={open}
       onClose={handleClose}
+      hideOnEscape={() => !hasOpenRadixLayer()}
     >
       <ItemWrapper>
         <span>path</span>
         <span>{path}</span>
       </ItemWrapper>
       <ItemWrapper>
-        <span>name</span>
-        <Input value={name} onChange={handleNameChange} />
+        <label htmlFor='bookmark-name'>name</label>
+        <Input id='bookmark-name' value={name} onChange={handleNameChange} />
       </ItemWrapper>
       <ItemWrapper>
-        <span>tags</span>
-        <Select
-          mode="tags"
-          style={{ width: '100%' }}
-          placeholder="Tag"
-          value={tags}
-          onChange={handleTagChange}
-          options={renderTagList.map(tag => ({ value: tag, label: tag }))}
-          onSearch={handleNewTagInput}
-        />
+        <span id='bookmark-tags-label'>tags</span>
+        <div className='bookmark-tags'>
+          <TagCombobox
+            aria-labelledby='bookmark-tags-label'
+            placeholder='Tag'
+            values={tags}
+            onValuesChange={handleTagChange}
+            options={tagOptions}
+            allowCreate
+          />
+        </div>
       </ItemWrapper>
     </Dialog>
   )

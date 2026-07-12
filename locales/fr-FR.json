@@ -315,7 +315,7 @@
         },
         "models": {
           "label": "Liste des modèles",
-          "desc": "Liste de modèles, avec un nom de modèle divisé par une virgule, par défaut \"\""
+          "desc": "Les modèles disponibles sont détectés automatiquement par défaut ; ce champ ne nécessite donc généralement aucune configuration. Utilisez une liste séparée par des virgules uniquement pour la compatibilité ou comme solution de secours si la détection est indisponible."
         }
       },
       "Google": {

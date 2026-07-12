@@ -2,7 +2,7 @@ import {
   aiProviderRegistry,
   aiProviders,
   createAIModelKey,
-  isCloudProviderConfigured,
+  isAIProviderConfigured,
   parseAIModelKey,
   parseConfiguredModels,
 } from './aiProvidersService'
@@ -42,19 +42,35 @@ export function buildAIModelCatalog(
 
   for (const providerId of aiProviders) {
     if (providerId === 'ollama') {
+      const configuredModelIds = parseConfiguredModels(
+        settings[aiProviderRegistry.ollama.settingKeys.models],
+      )
+      const configuredModelIdSet = new Set(configuredModelIds)
+      modelsByProvider.ollama = configuredModelIds.map((modelId) => ({
+        key: createAIModelKey('ollama', modelId),
+        providerId: 'ollama',
+        modelId,
+        source: 'configured',
+        status: 'ready',
+      }))
+
       if (options.ollamaStatus === 'success') {
-        modelsByProvider.ollama = (options.ollamaModels ?? []).map((model) => ({
-          key: createAIModelKey('ollama', model.modelId),
-          providerId: 'ollama',
-          modelId: model.modelId,
-          source: 'discovered',
-          status: 'ready',
-        }))
+        modelsByProvider.ollama.push(
+          ...(options.ollamaModels ?? [])
+            .filter((model) => !configuredModelIdSet.has(model.modelId))
+            .map((model) => ({
+              key: createAIModelKey('ollama', model.modelId),
+              providerId: 'ollama' as const,
+              modelId: model.modelId,
+              source: 'discovered' as const,
+              status: 'ready' as const,
+            })),
+        )
       }
       continue
     }
 
-    if (!isCloudProviderConfigured(providerId, settings)) continue
+    if (!isAIProviderConfigured(providerId, settings)) continue
 
     const registration = aiProviderRegistry[providerId]
     modelsByProvider[providerId] = parseConfiguredModels(

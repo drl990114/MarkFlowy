@@ -22,11 +22,11 @@ describe('AI setting map', () => {
     expect(providers).toEqual(['openai', 'deepseek', 'ollama', 'google'])
   })
 
-  it('keeps legacy Ollama models out of the visible settings form', () => {
+  it('keeps Ollama model configuration visible alongside discovery', () => {
     const ollama = getSettingMap().ai.model.children.find((child) => child.providerId === 'ollama')
 
     expect(ollama).toBeDefined()
-    expect(ollama).not.toHaveProperty('models')
+    expect(ollama).toHaveProperty('models')
     expect(ollama).toHaveProperty('ApiBase')
     expect(ollama).toHaveProperty('requestHeaders')
   })

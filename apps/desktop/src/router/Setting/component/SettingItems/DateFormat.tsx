@@ -1,6 +1,6 @@
+import { Input } from '@/components/ui/input'
 import appSettingService from '@/services/app-setting'
 import useAppSettingStore from '@/stores/useAppSettingStore'
-import { Input } from 'antd'
 import { debounce } from 'lodash'
 import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import { DEFAULT_CURRENT_DATE_FORMAT, formatCurrentDate } from 'rme'
@@ -31,6 +31,7 @@ const DateFormatSettingItem: React.FC<SettingItemProps<Setting.DateFormatSetting
 ) => {
   const { item } = props
   const { t } = useTranslation()
+  const inputId = `setting-${item.key}`
   const storedValue = useAppSettingStore((state) => state.settingData[item.key] as string | undefined)
   const curValue = storedValue || DEFAULT_CURRENT_DATE_FORMAT
   const [inputValue, setInputValue] = useState(curValue)
@@ -52,7 +53,7 @@ const DateFormatSettingItem: React.FC<SettingItemProps<Setting.DateFormatSetting
 
   useEffect(() => {
     return () => {
-      writeSettingData.cancel()
+      writeSettingData.flush()
     }
   }, [writeSettingData])
 
@@ -66,10 +67,12 @@ const DateFormatSettingItem: React.FC<SettingItemProps<Setting.DateFormatSetting
 
   return (
     <SettingItemContainer>
-      <SettingLabel item={item} />
+      <SettingLabel htmlFor={inputId} item={item} />
       <ControlWrap>
         <Input
+          id={inputId}
           value={inputValue}
+          onBlur={() => writeSettingData.flush()}
           onChange={handleChange}
           placeholder={item.placeholder || DEFAULT_CURRENT_DATE_FORMAT}
         />

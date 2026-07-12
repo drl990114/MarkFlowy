@@ -359,7 +359,7 @@
         },
         "models": {
           "label": "Models",
-          "desc": "A model list separated by commas, default is \"\""
+          "desc": "Available models are discovered automatically by default, so this usually does not need to be configured. Use a comma-separated list only for compatibility or as a fallback when discovery is unavailable."
         }
       },
       "Google": {

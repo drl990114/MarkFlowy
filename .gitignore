@@ -2,6 +2,7 @@
 dist
 dist-types
 target
+*.tsbuildinfo
 
 .DS_Store
 

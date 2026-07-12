@@ -1,4 +1,4 @@
-import { changeLng, i18n, Langs, locales } from '@/i18n'
+import { changeLng, i18n, locales, type Langs } from '@/i18n'
 import { currentWebview } from '@/services/windows'
 import { DEFAULT_CURRENT_DATE_FORMAT, EditorViewType } from 'rme'
 
@@ -430,6 +430,16 @@ export const getSettingMap = () => {
               },
               desc: {
                 i18nKey: 'settings.ai.Ollama.api_base.desc',
+              },
+            },
+            models: {
+              key: 'extensions_ollama_models',
+              type: 'input',
+              title: {
+                i18nKey: 'settings.ai.Ollama.models.label',
+              },
+              desc: {
+                i18nKey: 'settings.ai.Ollama.models.desc',
               },
             },
             requestHeaders: {

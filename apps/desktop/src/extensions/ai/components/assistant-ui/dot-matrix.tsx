@@ -1,5 +1,5 @@
 import type { ComponentProps, CSSProperties } from 'react'
-import { cn } from '../lib/cn'
+import { cn } from '@/lib/cn'
 
 const GRID_SIZE = 5
 const DOT_INDEXES = Array.from({ length: GRID_SIZE * GRID_SIZE }, (_, index) => index)

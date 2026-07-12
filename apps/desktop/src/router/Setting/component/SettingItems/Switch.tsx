@@ -1,6 +1,7 @@
+import { Switch } from '@/components/ui/switch'
+import { useTranslation } from '@/i18n'
 import appSettingService from '@/services/app-setting'
 import useAppSettingStore from '@/stores/useAppSettingStore'
-import { Switch } from 'antd'
 import { useCallback } from 'react'
 import type { SettingItemProps } from '.'
 import { SettingItemContainer } from './Container'
@@ -9,7 +10,8 @@ import { SettingLabel } from './Label'
 const SwitchSettingItem: React.FC<SettingItemProps<Setting.SwitchSettingItem>> = (props) => {
   const { item } = props
   const { settingData } = useAppSettingStore()
-  const curValue = settingData[item.key] as unknown as boolean
+  const { t } = useTranslation()
+  const curValue = Boolean(settingData[item.key])
 
   const handleChange = useCallback(
     (checked: boolean) => {
@@ -21,7 +23,11 @@ const SwitchSettingItem: React.FC<SettingItemProps<Setting.SwitchSettingItem>> =
   return (
     <SettingItemContainer>
       <SettingLabel item={item} />
-      <Switch checked={curValue} onChange={handleChange} />
+      <Switch
+        aria-label={t(item.title.i18nKey)}
+        checked={curValue}
+        onCheckedChange={handleChange}
+      />
     </SettingItemContainer>
   )
 }

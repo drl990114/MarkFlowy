@@ -1,6 +1,6 @@
 import type { ComponentProps } from 'react'
-import { Button } from '../ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
+import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
 export type TooltipIconButtonProps = ComponentProps<typeof Button> & {
   tooltip: string
@@ -19,7 +19,9 @@ export function TooltipIconButton({ tooltip, side = 'top', ...props }: TooltipIc
           {...props}
         />
       </TooltipTrigger>
-      <TooltipContent side={side}>{tooltip}</TooltipContent>
+      <TooltipContent className='aui-tooltip-content' side={side}>
+        {tooltip}
+      </TooltipContent>
     </Tooltip>
   )
 }

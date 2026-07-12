@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import styled, { css } from 'styled-components';
 
-import { LoadingOutlined } from '@ant-design/icons';
 import type { ButtonProps as AkButtonProps } from '@ariakit/react';
 import { Button as AkButton } from '@ariakit/react';
 
@@ -100,7 +99,6 @@ const defaultProps: Partial<ButtonProps> = {
 // 获取按钮类型对应的背景色和文字颜色
 const getButtonTypeStyles = (props: ButtonProps & { theme: any }) => {
   const { btnType, danger, ghost, theme } = props;
-  const btnTypeValue: ButtonType = (btnType as ButtonType) || 'default';
   const dangerValue: boolean = danger || false;
   const ghostValue: boolean = ghost || false;
 
@@ -302,6 +300,11 @@ const LoadingIconWrapper = styled.span`
   }
 
   .loading-icon {
+    display: inline-block;
+    box-sizing: border-box;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 9999px;
     animation: spin 1s linear infinite;
   }
 `;
@@ -339,7 +342,11 @@ const Button: React.FC<ButtonProps> = (props) => {
 
     return (
       <LoadingIconWrapper>
-        <LoadingOutlined className="loading-icon" style={{ fontSize: iconSize }} />
+        <span
+          aria-hidden="true"
+          className="loading-icon"
+          style={{ height: iconSize, width: iconSize }}
+        />
       </LoadingIconWrapper>
     );
   };

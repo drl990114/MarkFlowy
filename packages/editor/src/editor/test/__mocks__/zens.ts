@@ -1,7 +1,9 @@
 const forwardRef = (fn: any) => fn
 
 function createMockComponent(name: string) {
-  return forwardRef((props: any) => null)
+  const component = forwardRef(() => null)
+  component.displayName = name
+  return component
 }
 
 export const Button = createMockComponent('Button')
@@ -16,12 +18,11 @@ export const Image = createMockComponent('Image')
 export const Popover = createMockComponent('Popover')
 export const CommandDialog = createMockComponent('CommandDialog')
 export const Spinners = {}
-export const Icon = {}
 export const Ariakit = {}
 export const Loading = createMockComponent('Loading')
 export const Shortcut = createMockComponent('Shortcut')
 export const TableOfContent = createMockComponent('TableOfContent')
-export const ThemeProvider = (props: any) => null
+export const ThemeProvider = () => null
 export const ThemeContext = {}
 export const toast = () => {}
 export const useMenuStore = () => ({})

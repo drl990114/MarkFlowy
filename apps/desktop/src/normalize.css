@@ -1,5 +1,9 @@
 /*! normalize.css v8.0.1 | MIT License | github.com/necolas/normalize.css */
 
+@layer theme, base, components, utilities;
+
+@layer base {
+
 /* Document
    ========================================================================== */
 
@@ -346,4 +350,5 @@ template {
 
 [hidden] {
   display: none;
+}
 }

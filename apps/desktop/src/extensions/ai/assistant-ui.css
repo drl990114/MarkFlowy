@@ -1,80 +1,46 @@
-/*
- * assistant-ui is a lazy RightBar extension. Import only Tailwind's theme and
- * utilities layers here: preflight/base is deliberately omitted so existing
- * styled-components, Ant Design and editor styles remain untouched.
- */
-@layer theme, components, utilities;
-
-/*
- * Keep preflight disabled and scan only this extension. Do not wrap utilities
- * in native @scope: older desktop WebViews discard the entire rule, leaving
- * assistant-ui primitives rendered as unstyled native controls.
- */
-@tailwind utilities source(none);
-
-@source './**/*.{ts,tsx}';
-
-@custom-variant dark (&:where([data-aui-theme='dark'], [data-aui-theme='dark'] *));
-
-@theme inline {
-  --spacing: var(--aui-space-unit);
-  --container-md: 28rem;
-  --container-3xl: 48rem;
-  --text-xs: var(--aui-font-xs);
-  --text-xs--line-height: 1.5;
-  --text-sm: var(--aui-font-sm);
-  --text-sm--line-height: 1.55;
-  --text-base: var(--aui-font-base);
-  --text-base--line-height: 1.6;
-  --text-lg: var(--aui-font-lg);
-  --text-lg--line-height: 1.5;
-  --text-xl: var(--aui-font-xl);
-  --text-xl--line-height: 1.45;
-  --text-2xl: var(--aui-font-2xl);
-  --text-2xl--line-height: 1.4;
-  --font-weight-normal: 400;
-  --font-weight-medium: 500;
-  --font-weight-semibold: 600;
-  --leading-relaxed: var(--aui-line-height);
-  --default-transition-duration: 150ms;
-  --default-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  --animate-spin: aui-spin 1s linear infinite;
-  --animate-pulse: aui-pulse 1.6s ease-in-out infinite;
-  --color-background: var(--aui-background);
-  --color-foreground: var(--aui-foreground);
-  --color-foreground-secondary: var(--aui-foreground-secondary);
-  --color-card: var(--aui-card);
-  --color-card-foreground: var(--aui-card-foreground);
-  --color-popover: var(--aui-popover);
-  --color-popover-foreground: var(--aui-popover-foreground);
-  --color-tooltip: var(--aui-tooltip);
-  --color-primary: var(--aui-primary);
-  --color-primary-foreground: var(--aui-primary-foreground);
-  --color-primary-soft: var(--aui-primary-soft);
-  --color-secondary: var(--aui-secondary);
-  --color-secondary-foreground: var(--aui-secondary-foreground);
-  --color-muted: var(--aui-muted);
-  --color-muted-foreground: var(--aui-muted-foreground);
-  --color-disabled-foreground: var(--aui-disabled-foreground);
-  --color-accent: var(--aui-accent);
-  --color-accent-foreground: var(--aui-accent-foreground);
-  --color-destructive: var(--aui-destructive);
-  --color-destructive-foreground: var(--aui-destructive-foreground);
-  --color-success: var(--aui-success);
-  --color-warning: var(--aui-warning);
-  --color-border: var(--aui-border);
-  --color-input: var(--aui-input);
-  --color-ring: var(--aui-ring);
-  --font-sans: var(--aui-font-sans);
-  --font-mono: var(--aui-font-mono);
-  --radius-sm: var(--aui-radius-sm);
-  --radius-md: var(--aui-radius-sm);
-  --radius-lg: var(--aui-radius);
-  --radius-xl: var(--aui-radius-lg);
-  --radius-2xl: var(--aui-radius-lg);
-  --shadow-sm: 0 1px 2px var(--aui-shadow-color);
-  --shadow-md: 0 4px 12px var(--aui-shadow-color);
-  --shadow-lg: 0 10px 24px var(--aui-shadow-color);
+/* assistant-ui-only aliases, reset, and motion. Tailwind lives in src/ui.css. */
+:root {
+  --aui-background: var(--mf-rightbar-background, var(--mf-background));
+  --aui-foreground: var(--mf-foreground);
+  --aui-foreground-secondary: var(--mf-foreground-secondary);
+  --aui-card: var(--mf-card);
+  --aui-card-foreground: var(--mf-card-foreground);
+  --aui-popover: var(--mf-popover);
+  --aui-popover-foreground: var(--mf-popover-foreground);
+  --aui-tooltip: var(--mf-tooltip);
+  --aui-primary: var(--mf-primary);
+  --aui-primary-foreground: var(--mf-primary-foreground);
+  --aui-primary-soft: var(--mf-primary-soft);
+  --aui-secondary: var(--mf-secondary);
+  --aui-secondary-foreground: var(--mf-secondary-foreground);
+  --aui-muted: var(--mf-muted);
+  --aui-muted-foreground: var(--mf-muted-foreground);
+  --aui-disabled-foreground: var(--mf-disabled-foreground);
+  --aui-accent: var(--mf-accent);
+  --aui-accent-foreground: var(--mf-accent-foreground);
+  --aui-destructive: var(--mf-destructive);
+  --aui-destructive-foreground: var(--mf-destructive-foreground);
+  --aui-success: var(--mf-success);
+  --aui-warning: var(--mf-warning);
+  --aui-border: var(--mf-border);
+  --aui-input: var(--mf-input);
+  --aui-ring: var(--mf-ring);
+  --aui-shadow-color: var(--mf-shadow-color);
+  --aui-scrollbar-thumb: var(--mf-scrollbar-thumb);
+  --aui-scrollbar-track: var(--mf-scrollbar-track);
+  --aui-radius-sm: var(--mf-radius-sm);
+  --aui-radius: var(--mf-radius);
+  --aui-radius-lg: var(--mf-radius-lg);
+  --aui-font-xs: var(--mf-font-xs);
+  --aui-font-sm: var(--mf-font-sm);
+  --aui-font-base: var(--mf-font-base);
+  --aui-font-lg: var(--mf-font-lg);
+  --aui-font-xl: var(--mf-font-xl);
+  --aui-font-2xl: var(--mf-font-2xl);
+  --aui-line-height: var(--mf-line-height);
+  --aui-space-unit: var(--mf-space-unit);
+  --aui-font-sans: var(--mf-font-sans);
+  --aui-font-mono: var(--mf-font-mono);
 }
 
 @keyframes aui-spin {
@@ -133,16 +99,14 @@
   }
 }
 
-/* Minimal scoped preflight required by the shadcn-style registry components. */
+/* Minimal reset for raw assistant-ui primitives that do not use data-slot. */
 @layer components {
   .aui-theme,
   .aui-theme *,
   .aui-theme::before,
   .aui-theme::after,
-  [data-aui-portal],
-  [data-aui-portal] *,
-  [data-aui-portal]::before,
-  [data-aui-portal]::after {
+  .aui-theme *::before,
+  .aui-theme *::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
@@ -152,85 +116,30 @@
   .aui-theme button,
   .aui-theme input,
   .aui-theme select,
-  .aui-theme textarea,
-  [data-aui-portal] button,
-  [data-aui-portal] input,
-  [data-aui-portal] select,
-  [data-aui-portal] textarea {
+  .aui-theme textarea {
     color: inherit;
     font: inherit;
     letter-spacing: inherit;
   }
 
   .aui-theme button,
-  .aui-theme input:where([type='button'], [type='reset'], [type='submit']),
-  [data-aui-portal] button,
-  [data-aui-portal] input:where([type='button'], [type='reset'], [type='submit']) {
+  .aui-theme input:where([type='button'], [type='reset'], [type='submit']) {
     appearance: none;
     background-color: transparent;
     background-image: none;
   }
 
   .aui-theme img,
-  .aui-theme svg,
-  [data-aui-portal] img,
-  [data-aui-portal] svg {
+  .aui-theme svg {
     display: block;
     vertical-align: middle;
   }
 }
 
 .aui-theme {
-  --aui-background: #fff;
-  --aui-foreground: #111;
-  --aui-foreground-secondary: #505050;
-  --aui-card: #fff;
-  --aui-card-foreground: #111;
-  --aui-popover: #fff;
-  --aui-popover-foreground: #111;
-  --aui-tooltip: #e7e7e7;
-  --aui-primary: #0369a1;
-  --aui-primary-foreground: #fff;
-  --aui-primary-soft: #eef4fa;
-  --aui-secondary: #e7e7e7;
-  --aui-secondary-foreground: #111;
-  --aui-muted: #f6f7f9;
-  --aui-muted-foreground: #6b7280;
-  --aui-disabled-foreground: #9ca3af;
-  --aui-accent: #eef4fa;
-  --aui-accent-foreground: #111;
-  --aui-destructive: #dc2626;
-  --aui-destructive-foreground: #fff;
-  --aui-success: #00c853;
-  --aui-warning: #e2b340;
-  --aui-border: #d2d2d2;
-  --aui-input: #d2d2d2;
-  --aui-ring: #0369a1;
-  --aui-shadow-color: rgba(0, 0, 0, 0.08);
-  --aui-scrollbar-thumb: #c4c4c4;
-  --aui-scrollbar-track: #e4e4e7;
-  --aui-radius-sm: 4px;
-  --aui-radius: 8px;
-  --aui-radius-lg: 12px;
-  --aui-font-xs: 12px;
-  --aui-font-sm: 13px;
-  --aui-font-base: 14px;
-  --aui-font-lg: 16px;
-  --aui-font-xl: 18px;
-  --aui-font-2xl: 20px;
-  --aui-line-height: 1.6;
-  --aui-space-unit: 4px;
-  --aui-font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --aui-font-mono: 'SFMono-Regular', Consolas, monospace;
-
+  --mf-background: var(--mf-rightbar-background);
   min-height: 0;
-  color: var(--aui-foreground);
-  font-family: var(--aui-font-sans);
-  font-size: var(--aui-font-sm);
-  line-height: var(--aui-line-height);
-}
-
-[data-aui-portal] {
+  background-color: var(--aui-background);
   color: var(--aui-foreground);
   font-family: var(--aui-font-sans);
   font-size: var(--aui-font-sm);

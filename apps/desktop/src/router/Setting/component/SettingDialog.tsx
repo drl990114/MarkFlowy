@@ -7,6 +7,13 @@ import { useTranslation } from '@/i18n'
 import styled from 'styled-components'
 import { Dialog } from 'zens'
 
+const hasOpenRadixLayer = () =>
+  Boolean(
+    document.querySelector(
+      "[data-slot='select-content'][data-state='open'], [data-slot='popover-content'][data-state='open']",
+    ),
+  )
+
 const SettingDialogWrapper = styled(Dialog)`
   width: 86vw;
   max-width: 1280px;
@@ -63,6 +70,7 @@ export const SettingDialog = memo(() => {
       title={t('settings.label')}
       open={open}
       onClose={handleClose}
+      hideOnEscape={() => !hasOpenRadixLayer()}
     >
       <Setting key={navigationRequest.id} navigationRequest={navigationRequest} />
     </SettingDialogWrapper>

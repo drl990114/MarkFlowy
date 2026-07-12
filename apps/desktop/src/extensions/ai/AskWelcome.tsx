@@ -3,7 +3,7 @@ import useEditorStore from '@/stores/useEditorStore'
 import { useAui } from '@assistant-ui/react'
 import { FileTextIcon, LightbulbIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
-import { Button } from './components/ui/button'
+import { Button } from '@/components/ui/button'
 import {
   getActiveEditorContextReference,
   getEditorContextIdentity,

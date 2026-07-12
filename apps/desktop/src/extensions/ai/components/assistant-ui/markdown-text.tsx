@@ -21,7 +21,7 @@ import {
   type PropsWithChildren,
 } from 'react'
 import remarkGfm from 'remark-gfm'
-import { cn } from '../lib/cn'
+import { cn } from '@/lib/cn'
 import { TooltipIconButton } from './tooltip-icon-button'
 import { useAssistantLink } from './link-context'
 

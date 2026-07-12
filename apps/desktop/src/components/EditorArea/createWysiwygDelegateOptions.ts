@@ -6,7 +6,7 @@ import {
 import {
   aiProviderRegistry,
   aiProviders,
-  isCloudProviderConfigured,
+  isAIProviderConfigured,
   parseAIModelKey,
   parseConfiguredModels,
 } from '@/extensions/ai/aiProvidersService'
@@ -36,7 +36,7 @@ export const createWysiwygDelegateOptions = (fileId?: string): CreateWysiwygDele
   const supportProviderInfosMap: AIOptions['supportProviderInfosMap'] = {}
 
   aiProviders.forEach((providerId) => {
-    if (providerId === 'ollama' || !isCloudProviderConfigured(providerId, settingData)) return
+    if (!isAIProviderConfigured(providerId, settingData)) return
 
     supportProviderInfosMap[providerId] = {
       models: parseConfiguredModels(settingData[aiProviderRegistry[providerId].settingKeys.models]),

@@ -37,7 +37,7 @@ export type AIProviderRegistryEntry = {
   id: AIProviderId
   displayName: string
   settingKeys: AIProviderSettingKeys
-  modelSource: 'configured' | 'discovered'
+  modelSource: 'configured' | 'discovered' | 'hybrid'
   defaultBaseUrl?: string
   runtimeFactory: () => Promise<AIProviderRuntimeHandler>
 }
@@ -99,12 +99,12 @@ export const aiProviderRegistry: Record<AIProviderId, AIProviderRegistryEntry> =
     displayName: 'Ollama',
     settingKeys: {
       apibase: 'extensions_ollama_apibase',
-      // Kept solely for persisted-data compatibility. Ollama availability is
-      // derived from /api/tags rather than this value.
       models: 'extensions_ollama_models',
       requestHeaders: 'extensions_ollama_request_headers',
     },
-    modelSource: 'discovered',
+    // Explicit models remain usable while Ollama is offline; /api/tags adds
+    // locally available models without forcing users to maintain the list.
+    modelSource: 'hybrid',
     defaultBaseUrl: DEFAULT_OLLAMA_API_BASE_URL,
     runtimeFactory: async () =>
       (await import('./aiProvidersRuntime')).generateTextHandlerMap.ollama,
@@ -229,6 +229,16 @@ export function isCloudProviderConfigured(
   const hasCustomBaseUrl = Boolean(getSettingString(settings, keys.apibase))
   const headers = normalizeRequestHeaders(settings[keys.requestHeaders ?? ''])
   return hasApiKey || hasCustomBaseUrl || Object.keys(headers).length > 0
+}
+
+export function isAIProviderConfigured(
+  providerId: AIProviderId,
+  settings: Record<string, unknown>,
+): boolean {
+  const registration = aiProviderRegistry[providerId]
+  if (parseConfiguredModels(settings[registration.settingKeys.models]).length === 0) return false
+
+  return providerId === 'ollama' || isCloudProviderConfigured(providerId, settings)
 }
 
 export function normalizeOllamaApiBaseUrl(value: unknown): string {

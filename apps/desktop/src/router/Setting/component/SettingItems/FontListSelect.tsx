@@ -1,8 +1,9 @@
+import { SearchableSelect } from '@/components/ui/searchable-select'
 import { logger } from '@/helper/logger'
+import { useTranslation } from '@/i18n'
 import appSettingService from '@/services/app-setting'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import { invoke } from '@tauri-apps/api/core'
-import { Select } from 'antd'
 import { useEffect, useState } from 'react'
 import type { SettingItemProps } from '.'
 import { SettingItemContainer } from './Container'
@@ -16,13 +17,14 @@ const FontListSelectSettingItem: React.FC<SettingItemProps<Setting.FontListSelec
 ) => {
   const { item } = props
   const { settingData } = useAppSettingStore()
+  const { t } = useTranslation()
 
   const [fontList, setFontList] = useState<string[]>([])
-  const curValue = settingData[item.key]
+  const curValue = String(settingData[item.key] ?? '')
 
   useEffect(() => {
-    invoke<string[]>('font_list').then((fontList) => {
-      setFontList(fontList)
+    invoke<string[]>('font_list').then((availableFonts) => {
+      setFontList(availableFonts)
     })
   }, [])
 
@@ -52,12 +54,13 @@ const FontListSelectSettingItem: React.FC<SettingItemProps<Setting.FontListSelec
   return (
     <SettingItemContainer>
       <SettingLabel item={item} />
-      <Select
+      <SearchableSelect
+        aria-label={t(item.title.i18nKey)}
         value={curValue}
-        onChange={handleChange}
+        onValueChange={handleChange}
         options={options}
-        showSearch={{ optionFilterProp: 'label', onSearch: handleSearch }}
-        style={{ width: '220px' }}
+        onSearch={handleSearch}
+        style={{ width: 220 }}
         placeholder='Select a font'
       />
     </SettingItemContainer>

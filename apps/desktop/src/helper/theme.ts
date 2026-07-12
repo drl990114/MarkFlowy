@@ -1,11 +1,96 @@
 import useThemeStore from '@/stores/useThemeStore'
 import { darken, lighten } from '@markflowy/theme'
+import Color from 'color'
 
 export const THEME_ACCENT_COLOR_SETTING_KEY = 'theme_accent_color'
 export const FOLLOW_THEME_ACCENT_COLOR = 'system'
 export const DEFAULT_THEME_ACCENT_COLOR = '#0369a1'
 
 const HEX_COLOR_RE = /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i
+const ACCENT_PREVIEW_STYLE_ID = 'mf-accent-color-preview'
+
+let accentPreviewColor: string | undefined
+let accentPreviewFrame: number | undefined
+let accentPreviewOwner: symbol | undefined
+let accentPreviewRule: CSSStyleRule | undefined
+
+export const getReadableForeground = (background: string, light: string, dark: string) => {
+  try {
+    const surface = Color(background)
+    return surface.contrast(Color(light)) >= surface.contrast(Color(dark)) ? light : dark
+  } catch {
+    return light
+  }
+}
+
+const getAccentPreviewRule = () => {
+  if (accentPreviewRule?.parentStyleSheet) return accentPreviewRule
+  if (typeof document === 'undefined') return undefined
+
+  let styleElement = document.getElementById(ACCENT_PREVIEW_STYLE_ID) as HTMLStyleElement | null
+  if (!styleElement) {
+    styleElement = document.createElement('style')
+    styleElement.id = ACCENT_PREVIEW_STYLE_ID
+    styleElement.textContent = ':root {}'
+    document.head.appendChild(styleElement)
+  }
+
+  const rule = styleElement.sheet?.cssRules.item(0)
+  accentPreviewRule =
+    typeof CSSStyleRule !== 'undefined' && rule instanceof CSSStyleRule ? rule : undefined
+  return accentPreviewRule
+}
+
+const applyAccentColorPreview = () => {
+  accentPreviewFrame = undefined
+  if (!accentPreviewColor) return
+
+  const rule = getAccentPreviewRule()
+  if (!rule) return
+
+  rule.style.setProperty('--mf-primary', accentPreviewColor)
+  rule.style.setProperty(
+    '--mf-primary-foreground',
+    getReadableForeground(accentPreviewColor, '#ffffff', '#111111'),
+  )
+  rule.style.setProperty('--mf-primary-soft', `${accentPreviewColor}18`)
+}
+
+export const scheduleThemeAccentColorPreview = (value: string, owner: symbol) => {
+  const color = normalizeThemeAccentColor(value)
+  if (color === FOLLOW_THEME_ACCENT_COLOR || typeof window === 'undefined') return
+
+  accentPreviewOwner = owner
+  accentPreviewColor = color
+  if (accentPreviewFrame !== undefined) return
+
+  if (typeof window.requestAnimationFrame !== 'function') {
+    applyAccentColorPreview()
+    return
+  }
+
+  accentPreviewFrame = window.requestAnimationFrame(applyAccentColorPreview)
+}
+
+export const clearThemeAccentColorPreview = (owner: symbol) => {
+  if (accentPreviewOwner !== owner) return
+
+  accentPreviewOwner = undefined
+  accentPreviewColor = undefined
+  if (
+    accentPreviewFrame !== undefined &&
+    typeof window !== 'undefined' &&
+    typeof window.cancelAnimationFrame === 'function'
+  ) {
+    window.cancelAnimationFrame(accentPreviewFrame)
+  }
+  accentPreviewFrame = undefined
+  accentPreviewRule = undefined
+
+  if (typeof document !== 'undefined') {
+    document.getElementById(ACCENT_PREVIEW_STYLE_ID)?.remove()
+  }
+}
 
 export const normalizeThemeAccentColor = (value: unknown) => {
   if (typeof value !== 'string') {

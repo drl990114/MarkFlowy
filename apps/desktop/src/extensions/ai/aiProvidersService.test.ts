@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   createAIModelKey,
+  isAIProviderConfigured,
   isCloudProviderConfigured,
   normalizeAIProviderId,
   normalizeOllamaApiBaseUrl,
@@ -47,6 +48,15 @@ describe('AI provider registry helpers', () => {
         extensions_chatgpt_request_headers: { Authorization: 'Bearer token' },
       }),
     ).toBe(true)
+  })
+
+  it('accepts explicitly configured Ollama models without cloud credentials', () => {
+    expect(
+      isAIProviderConfigured('ollama', {
+        extensions_ollama_models: 'llama3.3',
+      }),
+    ).toBe(true)
+    expect(isAIProviderConfigured('ollama', { extensions_ollama_models: '' })).toBe(false)
   })
 
   it('resolves the matching provider credentials and Ollama zero-config base URL', () => {

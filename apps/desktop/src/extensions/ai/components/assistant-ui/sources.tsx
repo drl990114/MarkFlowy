@@ -1,8 +1,8 @@
 import type { SourceMessagePartComponent } from '@assistant-ui/react'
 import { FileTextIcon, GlobeIcon } from 'lucide-react'
 import { memo, type ComponentProps } from 'react'
-import { cn } from '../lib/cn'
-import { Badge, type BadgeProps } from '../ui/badge'
+import { cn } from '@/lib/cn'
+import { Badge, type BadgeProps } from '@/components/ui/badge'
 import { useAssistantLink } from './link-context'
 
 function extractDomain(url: string): string {

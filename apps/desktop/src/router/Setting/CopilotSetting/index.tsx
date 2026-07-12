@@ -6,7 +6,6 @@ import {
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import { useMemo } from 'react'
 import { SettingGroupContainer } from '../component/SettingGroup/styles'
-import InputSettingItem from '../component/SettingItems/Input'
 import SelectSettingItem from '../component/SettingItems/Select'
 import SwitchSettingItem from '../component/SettingItems/Switch'
 import { getSettingMap } from '../settingMap'
@@ -19,19 +18,18 @@ export const CopilotSetting = () => {
   const copilotConfig = (settingMap as any).copilot
 
   // Get current provider models
-  const providerId = normalizeAIProviderId(settingData['copilot_provider'])
+  const providerId = normalizeAIProviderId(settingData.copilot_provider)
+  const providerModels = providerId
+    ? settingData[aiProviderRegistry[providerId].settingKeys.models]
+    : undefined
   const currentProviderModels = useMemo(() => {
-    if (!providerId || providerId === 'ollama') return []
+    if (!providerId) return []
 
-    return parseConfiguredModels(
-      settingData[aiProviderRegistry[providerId].settingKeys.models],
-    ).map((m) => ({ value: m, title: m }))
-  }, [
-    providerId,
-    settingData['extensions_chatgpt_models'],
-    settingData['extensions_deepseek_models'],
-    settingData['extensions_google_models'],
-  ])
+    return parseConfiguredModels(providerModels).map((model) => ({
+      value: model,
+      title: model,
+    }))
+  }, [providerId, providerModels])
 
   return (
     <SettingGroupContainer>
@@ -39,21 +37,12 @@ export const CopilotSetting = () => {
 
       <SelectSettingItem item={copilotConfig.provider} />
 
-      {providerId === 'ollama' ? (
-        <InputSettingItem
-          item={{
-            ...copilotConfig.model,
-            type: 'input',
-          }}
-        />
-      ) : (
-        <SelectSettingItem
-          item={{
-            ...copilotConfig.model,
-            options: currentProviderModels,
-          }}
-        />
-      )}
+      <SelectSettingItem
+        item={{
+          ...copilotConfig.model,
+          options: currentProviderModels,
+        }}
+      />
     </SettingGroupContainer>
   )
 }

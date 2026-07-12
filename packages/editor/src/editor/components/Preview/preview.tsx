@@ -1,10 +1,10 @@
 import { type Node } from '@rme-sdk/pm/model'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Icon } from 'zens'
+import { Loading } from 'zens'
 import type { LinkClickHandler } from '../../extensions/LinkClick'
 import { WysiwygThemeWrapper } from '../../theme'
 import { rmeProsemirrorNodeToHtml } from '../../utils/prosemirrorNodeToHtml'
-import { defaultStyleToken, EditorProps } from '../Editor'
+import { defaultStyleToken, type EditorProps } from '../Editor'
 import { createWysiwygDelegate } from '../WysiwygEditor'
 
 interface PreviewProps {
@@ -23,7 +23,7 @@ export type HTMLAstNode = {
   content?: string
 }
 
-const defaultLinkClickHandler: LinkClickHandler = (href: string, event: MouseEvent) => {
+const defaultLinkClickHandler: LinkClickHandler = (href: string) => {
   window.open(href, '_blank', 'noopener,noreferrer')
   return true
 }
@@ -107,7 +107,7 @@ export const Preview: React.FC<PreviewProps> = (props) => {
           alignItems: 'center',
         }}
       >
-        <Icon.Loading3QuartersOutlined spin size={40} />
+        <Loading size={40} />
       </div>
     )
   }

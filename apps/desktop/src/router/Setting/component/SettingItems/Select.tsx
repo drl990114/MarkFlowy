@@ -1,6 +1,13 @@
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { useTranslation } from '@/i18n'
 import appSettingService from '@/services/app-setting'
 import useAppSettingStore from '@/stores/useAppSettingStore'
-import { Select } from 'antd'
 import type { SettingItemProps } from '.'
 import { SettingItemContainer } from './Container'
 import { SettingLabel } from './Label'
@@ -8,26 +15,29 @@ import { SettingLabel } from './Label'
 const SelectSettingItem: React.FC<SettingItemProps<Setting.SelectSettingItem>> = (props) => {
   const { item } = props
   const { settingData } = useAppSettingStore()
-  const options = item.options
-  const currentValue = settingData[item.key]
-
-  const selectOptions = options.map(option => ({
-    value: option.value,
-    label: option.title
-  }))
+  const { t } = useTranslation()
+  const currentValue = String(settingData[item.key] ?? '')
 
   return (
     <SettingItemContainer>
       <SettingLabel item={item} />
       <Select
         value={currentValue}
-        options={selectOptions}
-        onChange={(value) => {
+        onValueChange={(value) => {
           appSettingService.writeSettingData(item, value)
         }}
-        style={{ width: 220 }}
-        placeholder="请选择"
-      />
+      >
+        <SelectTrigger aria-label={t(item.title.i18nKey)} style={{ width: 220 }}>
+          <SelectValue placeholder='请选择' />
+        </SelectTrigger>
+        <SelectContent>
+          {item.options.map((option) => (
+            <SelectItem key={String(option.value)} value={String(option.value)}>
+              {option.title}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </SettingItemContainer>
   )
 }

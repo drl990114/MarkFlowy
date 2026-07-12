@@ -31,8 +31,8 @@ import {
   type KeyboardEventHandler,
   type ReactNode,
 } from 'react'
-import { cn } from '../lib/cn'
-import { Button } from '../ui/button'
+import { cn } from '@/lib/cn'
+import { Button } from '@/components/ui/button'
 import { ComposerAttachments, UserMessageAttachments } from './attachment'
 import { DotMatrix } from './dot-matrix'
 import { MarkdownText } from './markdown-text'
@@ -343,24 +343,31 @@ export function AssistantMessage() {
   )
 }
 
+const ASSISTANT_ACTION_BUTTON_CLASS_NAME =
+  'size-[22px] rounded-md text-muted-foreground hover:text-foreground [&_svg]:size-3'
+
 function AssistantActionBar() {
   const { composerDisabled, labels } = useContext(ThreadContext)
 
   return (
     <ActionBarPrimitive.Root
       autohide='not-last'
-      className='flex items-center gap-0.5 text-muted-foreground'
+      className='flex items-center gap-px text-muted-foreground'
       hideWhenRunning
     >
       <ActionBarPrimitive.Copy asChild>
-        <CopyAction />
+        <CopyAction className={ASSISTANT_ACTION_BUTTON_CLASS_NAME} />
       </ActionBarPrimitive.Copy>
       <ActionBarPrimitive.Reload asChild>
-        <TooltipIconButton disabled={composerDisabled} tooltip={labels.regenerate}>
-          <RefreshCwIcon className='size-3.5' />
+        <TooltipIconButton
+          className={ASSISTANT_ACTION_BUTTON_CLASS_NAME}
+          disabled={composerDisabled}
+          tooltip={labels.regenerate}
+        >
+          <RefreshCwIcon />
         </TooltipIconButton>
       </ActionBarPrimitive.Reload>
-      <DeleteTurnButton />
+      <DeleteTurnButton className={ASSISTANT_ACTION_BUTTON_CLASS_NAME} />
     </ActionBarPrimitive.Root>
   )
 }
@@ -413,13 +420,14 @@ function CopyAction(props: Omit<ComponentProps<typeof TooltipIconButton>, 'toolt
   )
 }
 
-function DeleteTurnButton() {
+function DeleteTurnButton({ className }: { className?: string } = {}) {
   const messageId = useAuiState((state) => state.message.id)
   const { composerDisabled, labels, onDeleteTurn } = useContext(ThreadContext)
   if (!onDeleteTurn) return null
 
   return (
     <TooltipIconButton
+      className={className}
       disabled={composerDisabled}
       onClick={() => onDeleteTurn(messageId)}
       tooltip={labels.deleteTurn}

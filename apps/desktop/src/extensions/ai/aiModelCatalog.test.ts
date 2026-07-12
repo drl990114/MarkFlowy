@@ -40,6 +40,43 @@ describe('AI model catalog', () => {
     expect(resolvePreferredAIModel(catalog, undefined, 'success')).toBe('openai:shared')
   })
 
+  it('merges configured Ollama models before discovered models and de-duplicates them', () => {
+    const catalog = buildAIModelCatalog(
+      {
+        ...settings,
+        extensions_ollama_models: 'manual-model,shared,manual-model',
+      },
+      {
+        ollamaStatus: 'success',
+        ollamaModels: [
+          { modelId: 'shared', capability: 'completion' },
+          { modelId: 'discovered-model', capability: 'completion' },
+        ],
+      },
+    )
+
+    expect(catalog.modelsByProvider.ollama).toEqual([
+      expect.objectContaining({ modelId: 'manual-model', source: 'configured', status: 'ready' }),
+      expect.objectContaining({ modelId: 'shared', source: 'configured', status: 'ready' }),
+      expect.objectContaining({
+        modelId: 'discovered-model',
+        source: 'discovered',
+        status: 'ready',
+      }),
+    ])
+  })
+
+  it('keeps configured Ollama models ready when discovery is unavailable', () => {
+    const catalog = buildAIModelCatalog(
+      { ...settings, extensions_ollama_models: 'manual-model' },
+      { ollamaStatus: 'error' },
+    )
+
+    expect(catalog.modelsByProvider.ollama).toEqual([
+      expect.objectContaining({ modelId: 'manual-model', source: 'configured', status: 'ready' }),
+    ])
+  })
+
   it('keeps an offline selected Ollama model unavailable without cloud fallback', () => {
     const catalog = buildAIModelCatalog(settings, {
       ollamaStatus: 'error',

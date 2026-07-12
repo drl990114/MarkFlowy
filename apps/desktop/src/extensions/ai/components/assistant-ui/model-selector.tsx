@@ -13,7 +13,7 @@ import {
   type ComponentPropsWithoutRef,
   type ReactNode,
 } from 'react'
-import { cn } from '../lib/cn'
+import { cn } from '@/lib/cn'
 import {
   Command,
   CommandEmpty,
@@ -22,8 +22,8 @@ import {
   CommandItem,
   CommandList,
   CommandSeparator,
-} from '../ui/command'
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover'
+} from '@/components/ui/command'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 
 export type ModelOption = {
   id: string
@@ -221,12 +221,14 @@ function ModelSelectorContent({
     <PopoverContent
       align={align}
       className={cn(
-        'w-72 min-w-[var(--radix-popover-trigger-width)] overflow-hidden p-0',
+        'aui-popover-content w-72 min-w-[var(--radix-popover-trigger-width)] overflow-hidden p-0',
         className,
       )}
       {...props}
     >
-      <Command defaultValue={value}>{children}</Command>
+      <Command defaultValue={value} label='Search models'>
+        {children}
+      </Command>
     </PopoverContent>
   )
 }

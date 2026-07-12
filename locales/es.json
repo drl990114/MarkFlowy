@@ -318,7 +318,7 @@
         },
         "models": {
           "label": "Lista de modelos",
-          "desc": "Lista de modelos, divida el nombre del modelo con comas, el valor predeterminado es \"\""
+          "desc": "De forma predeterminada, los modelos disponibles se detectan automáticamente, por lo que normalmente no es necesario configurar esta opción. Use una lista separada por comas solo por compatibilidad o como alternativa cuando la detección no esté disponible."
         }
       },
       "Google": {
