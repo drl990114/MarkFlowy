@@ -1,5 +1,41 @@
 # UPDATE LOG
 
+## v0.83.0
+
+Features:
+
+- Redesigned Chat AI with a new conversation interface, workspace-based history, conversation export, and controls for editing, regenerating, branching, and deleting messages.
+
+- Chat AI can now use the current document or multiple open files as context, discover available models automatically, and connect to local Ollama models more easily.
+
+- Refreshed Settings, theme controls, dialogs, and common form components for a more consistent and accessible experience.
+
+Improvements and fixes:
+
+- Improved editor and file explorer performance, especially when working with multiple tabs, searches, and larger workspaces.
+
+- Made saving, Save As, workspace switching, and file rename, move, delete, and drag-and-drop operations safer and more reliable, including better handling of concurrent changes and path conflicts.
+
+- Fixed flickering during file rename validation and improved editor layout stability.
+
+---
+
+特性：
+
+- 全新设计 Chat AI 对话界面，支持按工作区保存对话历史、导出对话，以及编辑、重新生成、切换分支和删除消息。
+
+- Chat AI 现在可以将当前文档或多个已打开文件作为上下文，支持自动发现可用模型，并优化了本地 Ollama 模型的连接体验。
+
+- 更新设置页、主题配置、弹窗及常用表单组件，提供更加统一且易用的交互体验。
+
+改进与修复：
+
+- 优化编辑器和文件树性能，在多标签、搜索及大型工作区场景下更加流畅。
+
+- 提升保存、另存为、工作区切换，以及文件重命名、移动、删除和拖拽操作的安全性与可靠性，更好地处理并发修改和路径冲突，降低内容丢失风险。
+
+- 修复文件重命名校验时的闪烁问题，并提升编辑区域布局稳定性。
+
 ## v0.82.1
 
 Features:
