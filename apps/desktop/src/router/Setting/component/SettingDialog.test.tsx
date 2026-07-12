@@ -1,4 +1,4 @@
-import { act } from 'react'
+import { act, type ReactNode } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { OpenSettingTarget } from '@/extensions/ai/aiProvidersService'
@@ -30,10 +30,21 @@ vi.mock('@/router', () => ({
     />
   ),
 }))
-vi.mock('zens', () => ({
-  Dialog: ({ children, open }: { children: React.ReactNode; open: boolean }) =>
-    open ? <div>{children}</div> : null,
-}))
+vi.mock('@/components/ui/dialog', () => {
+  const DialogPart = ({ children }: { children?: ReactNode }) => <>{children}</>
+  const DialogRoot = ({ children, open }: { children?: ReactNode; open: boolean }) =>
+    open ? <>{children}</> : null
+
+  return {
+    Dialog: {
+      Root: DialogRoot,
+      Content: DialogPart,
+      Header: DialogPart,
+      Body: DialogPart,
+      Title: DialogPart,
+    },
+  }
+})
 
 const reactActEnvironment = globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
 

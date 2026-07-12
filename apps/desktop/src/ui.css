@@ -40,6 +40,8 @@
   --color-foreground-secondary: var(--mf-foreground-secondary);
   --color-card: var(--mf-card);
   --color-card-foreground: var(--mf-card-foreground);
+  --color-dialog: var(--mf-dialog);
+  --color-dialog-overlay: var(--mf-dialog-overlay);
   --color-popover: var(--mf-popover);
   --color-popover-foreground: var(--mf-popover-foreground);
   --color-tooltip: var(--mf-tooltip);
@@ -79,6 +81,8 @@
   --mf-foreground-secondary: #505050;
   --mf-card: #fff;
   --mf-card-foreground: #111;
+  --mf-dialog: #fff;
+  --mf-dialog-overlay: rgb(0 0 0 / 42%);
   --mf-popover: #fff;
   --mf-popover-foreground: #111;
   --mf-tooltip: #e7e7e7;
