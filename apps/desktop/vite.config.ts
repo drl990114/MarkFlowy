@@ -68,7 +68,7 @@ export default defineConfig(async ({ mode }) => {
         { find: '@', replacement: fileURLToPath(new URL('./src', import.meta.url)) },
         {
           find: '@markflowy/i18n',
-          replacement: fileURLToPath(new URL('../../packages/i18n/dist/index.js', import.meta.url)),
+          replacement: fileURLToPath(new URL('../../packages/i18n/src/index.ts', import.meta.url)),
         },
       ],
       dedupe: ['react', 'react-dom'],
