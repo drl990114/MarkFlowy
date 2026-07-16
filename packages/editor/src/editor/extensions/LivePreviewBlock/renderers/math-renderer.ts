@@ -1,6 +1,7 @@
 import type { Extension as CodeMirrorExtension } from '@codemirror/state'
 import { latex } from 'codemirror-lang-latex'
 import { tex2svgDisplay } from '../../Math/mathjax'
+import { sanitizeGeneratedHtml } from '../../../utils/sanitize-html'
 import type { LivePreviewRenderer } from '../live-preview-types'
 
 export function createMathRenderer(options: {
@@ -21,7 +22,7 @@ export function createMathRenderer(options: {
 
       const rendered = document.createElement('div')
       rendered.setAttribute('data-type', 'math-block')
-      rendered.innerHTML = tex2svgDisplay(source)
+      rendered.innerHTML = sanitizeGeneratedHtml(tex2svgDisplay(source))
       if (rendered.childElementCount === 1 && rendered.firstElementChild) {
         container.appendChild(rendered.firstElementChild)
       } else {

@@ -3,6 +3,11 @@ import type { Extension as CodeMirrorExtension } from '@codemirror/state'
 import MarkdownIt from 'markdown-it'
 import type { ExtensionsOptions } from '../../index'
 import { isImageElement } from '../../../utils/html'
+import {
+  clearPreviewImageSource,
+  getPreviewImageSource,
+  sanitizeMarkdownHtml,
+} from '../../../utils/sanitize-html'
 import type { LivePreviewRenderer } from '../live-preview-types'
 
 const markdownHtmlRenderer = MarkdownIt('commonmark', { html: true })
@@ -40,13 +45,14 @@ function removeFormattingWhitespace(root: HTMLElement) {
 export function createHtmlRenderer(options: {
   codemirrorExtensions?: CodeMirrorExtension[]
   handleViewImgSrcUrl?: ExtensionsOptions['handleViewImgSrcUrl']
+  preserveImageSources?: boolean
 }): LivePreviewRenderer {
   return {
     languageName: 'html',
     displayName: 'HTML',
     className: 'mf-live-preview-html',
     getCodeMirrorExtensions: () => [html(), ...(options.codemirrorExtensions ?? [])],
-    render: (content, container) => {
+    render: async (content, container) => {
       const source = content.trim()
       container.replaceChildren()
 
@@ -54,28 +60,43 @@ export function createHtmlRenderer(options: {
         return
       }
 
-      const htmlContent = markdownHtmlRenderer.render(source)
+      const htmlContent = sanitizeMarkdownHtml(markdownHtmlRenderer.render(source), {
+        preserveImageSources: Boolean(
+          options.handleViewImgSrcUrl || options.preserveImageSources,
+        ),
+      })
       const domParser = new DOMParser()
       const doc = domParser.parseFromString(htmlContent, 'text/html')
       removeFormattingWhitespace(doc.body)
+      const imageTasks: Promise<void>[] = []
 
       if (options.handleViewImgSrcUrl) {
         const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_ELEMENT)
         let child = walker.nextNode()
         while (child) {
-          if (isImageElement(child) && child.src) {
-            let targetUrl = child.src
-            if (child.src.includes(location.origin)) {
-              targetUrl = child.src.split(location.origin)[1]
+          if (isImageElement(child) && getPreviewImageSource(child)) {
+            const image = child
+            let targetUrl = getPreviewImageSource(image) || ''
+            if (targetUrl.includes(location.origin)) {
+              targetUrl = targetUrl.split(location.origin)[1]
             }
-            void options.handleViewImgSrcUrl(targetUrl).then((newHref) => {
-              child.src = newHref
-            })
+            imageTasks.push(
+              options.handleViewImgSrcUrl(targetUrl).then((newHref) => {
+                image.src = newHref
+                clearPreviewImageSource(image)
+              }).catch(() => {
+                image.removeAttribute('src')
+                clearPreviewImageSource(image)
+              }),
+            )
           }
           child = walker.nextNode()
         }
       }
 
+      if (imageTasks.length) {
+        await Promise.all(imageTasks)
+      }
       container.append(...Array.from(doc.body.childNodes))
     },
   }

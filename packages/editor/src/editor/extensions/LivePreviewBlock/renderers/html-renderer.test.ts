@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest'
 import { createHtmlRenderer } from './html-renderer'
 
 describe('createHtmlRenderer', () => {
-  test('renders markdown inside details html blocks', () => {
+  test('renders markdown inside details html blocks', async () => {
     const renderer = createHtmlRenderer({})
     const container = document.createElement('div')
     const input = [
@@ -20,7 +20,7 @@ describe('createHtmlRenderer', () => {
       '</details>',
     ].join('\n')
 
-    renderer.render(input, container, {} as never)
+    await renderer.render(input, container, {} as never)
 
     const details = container.querySelector('details')
     const listItems = Array.from(container.querySelectorAll('li')).map((item) =>

@@ -1,6 +1,8 @@
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import { apiClient } from '../utils/apiClient'
+import { saveAuthSession } from '../utils/authSession'
+import type { AuthSession } from '@markflowy/types'
 
 export enum AuthMode {
   LOGIN = 'login',
@@ -95,11 +97,15 @@ export function useAuthForm() {
     setError('')
 
     try {
-      await apiClient.post('/auth/email/send-code', {
-        email,
-        purpose: isRegister ? 'register' : 'login',
-        ...(isRegister && displayName ? { displayName } : {}),
-      }, { skipAuth: true })
+      await apiClient.post(
+        '/auth/email/send-code',
+        {
+          email,
+          purpose: isRegister ? 'register' : 'login',
+          ...(isRegister && displayName ? { displayName } : {}),
+        },
+        { skipAuth: true },
+      )
 
       setStep(Step.CODE)
       startCountdown(email)
@@ -116,15 +122,17 @@ export function useAuthForm() {
     setError('')
 
     try {
-      const data = await apiClient.post('/auth/email/verify-code', {
-        email,
-        code,
-        ...(isRegister && displayName ? { displayName } : {}),
-      }, { skipAuth: true })
+      const data = await apiClient.post<AuthSession>(
+        '/auth/email/verify-code',
+        {
+          email,
+          code,
+          ...(isRegister && displayName ? { displayName } : {}),
+        },
+        { skipAuth: true },
+      )
 
-      localStorage.setItem('accessToken', data.accessToken)
-      localStorage.setItem('refreshToken', data.refreshToken)
-      localStorage.setItem('user', JSON.stringify(data.user))
+      saveAuthSession(data)
 
       clearCountdownEndTime(email)
       router.push('/workspace')

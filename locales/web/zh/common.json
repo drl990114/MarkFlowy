@@ -124,6 +124,15 @@
     "createAccount": "创建账号",
     "changeEmail": "更换",
     "autoRegisterHint": "未注册的邮箱将自动注册",
-    "backToHome": "返回首页"
+    "backToHome": "返回首页",
+    "continueWithGitHub": "使用 GitHub 继续",
+    "githubRedirecting": "正在跳转到 GitHub...",
+    "githubLoginError": "无法发起 GitHub 登录",
+    "orContinueWithEmail": "或使用邮箱继续",
+    "githubCompleting": "正在完成 GitHub 登录",
+    "githubCallbackFailed": "GitHub 登录失败",
+    "githubCallbackError": "GitHub 登录链接无效或已过期，请重试。",
+    "githubAccountLinkRequired": "该邮箱已注册，请先使用邮箱登录，再到设置中绑定 GitHub。",
+    "backToSignIn": "返回登录"
   }
 }

@@ -124,6 +124,15 @@
     "createAccount": "アカウント作成",
     "changeEmail": "変更",
     "autoRegisterHint": "未登録のメールアドレスは自動的に登録されます",
-    "backToHome": "ホームに戻る"
+    "backToHome": "ホームに戻る",
+    "continueWithGitHub": "GitHub で続行",
+    "githubRedirecting": "GitHub に移動しています...",
+    "githubLoginError": "GitHub ログインを開始できません",
+    "orContinueWithEmail": "またはメールで続行",
+    "githubCompleting": "GitHub ログインを完了しています",
+    "githubCallbackFailed": "GitHub ログインに失敗しました",
+    "githubCallbackError": "GitHub ログインリンクが無効か期限切れです。もう一度お試しください。",
+    "githubAccountLinkRequired": "このメールアドレスのアカウントは既に存在します。メールでログインしてから、設定で GitHub を連携してください。",
+    "backToSignIn": "ログインに戻る"
   }
 }

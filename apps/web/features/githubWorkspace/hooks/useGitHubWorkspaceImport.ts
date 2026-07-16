@@ -18,7 +18,7 @@ export function useGitHubWorkspaceImport() {
       setImportError('')
 
       try {
-        const workspace = await githubService.importRepository(repo.owner.login, repo.name)
+        const workspace = await githubService.importRepository(repo.id, repo.installationId)
         return requestVersion === importRequestVersionRef.current ? workspace : null
       } catch (error) {
         if (requestVersion === importRequestVersionRef.current) {

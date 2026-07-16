@@ -1,17 +1,17 @@
 // prosemirror imports
 import { history, redo, undo } from '@rme-sdk/pm/history'
 import { keymap } from '@rme-sdk/pm/keymap'
-import { Node as ProseNode } from '@rme-sdk/pm/model'
+import type { Node as ProseNode } from '@rme-sdk/pm/model'
+import { EditorState, Plugin, TextSelection } from '@rme-sdk/pm/state'
+import type { Command, Transaction } from '@rme-sdk/pm/state'
+import { EditorView } from '@rme-sdk/pm/view'
+import type { NodeView } from '@rme-sdk/pm/view'
+import type { ExtensionsOptions } from '..'
 import {
-  Command,
-  EditorState,
-  Plugin,
-  TextSelection,
-  Transaction
-} from '@rme-sdk/pm/state'
-import { Decoration, EditorView, NodeView } from '@rme-sdk/pm/view'
-import { ExtensionsOptions } from '..'
-import { isImageElement } from '../../utils/html'
+  clearPreviewImageSource,
+  getPreviewImageSource,
+  sanitizeMarkdownHtml,
+} from '../../utils/sanitize-html'
 
 /**
  * A ProseMirror command for determining whether to exit a math block, based on
@@ -34,17 +34,15 @@ export function collapseCmd(
   onSave?: (text: string) => void,
 ): Command {
   return (innerState: EditorState, dispatch: ((tr: Transaction) => void) | undefined) => {
-    let outerState: EditorState = outerView.state
-    let { to: outerTo, from: outerFrom } = outerState.selection
-    let { to: innerTo, from: innerFrom } = innerState.selection
+    const { to: innerTo, from: innerFrom } = innerState.selection
 
     if (requireEmptySelection && innerTo !== innerFrom) {
       return false
     }
-    let currentPos: number = dir > 0 ? innerTo : innerFrom
+    const currentPos: number = dir > 0 ? innerTo : innerFrom
 
     if (requireOnBorder) {
-      let nodeSize = innerState.doc.nodeSize - 2
+      const nodeSize = innerState.doc.nodeSize - 2
 
       if (dir > 0 && currentPos < nodeSize) {
         return false
@@ -61,7 +59,7 @@ export function collapseCmd(
 
       const updatedOuterState = outerView.state
       const { to: updatedOuterTo, from: updatedOuterFrom } = updatedOuterState.selection
-      let targetPos: number = dir > 0 ? updatedOuterTo : updatedOuterFrom
+      const targetPos: number = dir > 0 ? updatedOuterTo : updatedOuterFrom
 
       outerView.dispatch(
         updatedOuterState.tr.setSelection(TextSelection.create(updatedOuterState.doc, targetPos)),
@@ -94,13 +92,19 @@ export class HTMLInlineView implements NodeView {
   private _tagName: string
   private _isEditing: boolean
 
-  options: IHtmlInlineViewOptions = {}
+  options: IHtmlInlineViewOptions
 
-  constructor(node: ProseNode, view: EditorView, getPos: () => number | undefined) {
+  constructor(
+    node: ProseNode,
+    view: EditorView,
+    getPos: () => number | undefined,
+    options: IHtmlInlineViewOptions = {},
+  ) {
     // store arguments
     this._node = node
     this._outerView = view
     this._getPos = getPos
+    this.options = options
 
     // editing state
     this._isEditing = false
@@ -160,7 +164,7 @@ export class HTMLInlineView implements NodeView {
 
   // == Updates ======================================= //
 
-  update(node: ProseNode, decorations: readonly Decoration[]) {
+  update(node: ProseNode) {
     if (!node.sameMarkup(this._node)) return false
     this._node = node
     console.log('update', node)
@@ -209,8 +213,10 @@ export class HTMLInlineView implements NodeView {
       return
     }
 
-    let content = this._innerView?.state.doc.textContent || this._node.attrs?.htmlText || ''
-    let texString = content.trim()
+    const content = this._innerView?.state.doc.textContent || this._node.attrs?.htmlText || ''
+    const html = sanitizeMarkdownHtml(content.trim(), {
+      preserveImageSources: Boolean(this.options.handleViewImgSrcUrl),
+    })
 
     try {
       while (this._htmlRenderElt.firstChild) {
@@ -218,20 +224,28 @@ export class HTMLInlineView implements NodeView {
       }
 
       const domParser = new DOMParser()
-      const doc = domParser.parseFromString(texString, 'text/html')
+      const doc = domParser.parseFromString(html, 'text/html')
       const childNodes: Node[] = []
-      doc.body.childNodes.forEach((child) => {
-        if (isImageElement(child) && child.src && this.options.handleViewImgSrcUrl) {
-          let targetUrl = child.src
+      doc.body.querySelectorAll('img').forEach((image) => {
+        const source = getPreviewImageSource(image)
+        if (source && this.options.handleViewImgSrcUrl) {
+          const targetUrl = source.includes(location.origin)
+            ? source.split(location.origin)[1]
+            : source
 
-          if (child.src.includes(location.origin)) {
-            targetUrl = child.src.split(location.origin)[1]
-          }
-
-          this.options.handleViewImgSrcUrl(targetUrl).then((newHref) => {
-            child.src = newHref
-          })
+          void this.options
+            .handleViewImgSrcUrl(targetUrl)
+            .then((newHref) => {
+              image.setAttribute('src', newHref)
+              clearPreviewImageSource(image)
+            })
+            .catch(() => {
+              image.removeAttribute('src')
+              clearPreviewImageSource(image)
+            })
         }
+      })
+      doc.body.childNodes.forEach((child) => {
         childNodes.push(child)
       })
 
@@ -246,7 +260,7 @@ export class HTMLInlineView implements NodeView {
     } catch (err) {
       console.error(err)
       this._htmlRenderElt?.classList.add('parse-error')
-      this.dom.setAttribute('title', (err as any).toString())
+      this.dom.setAttribute('title', err instanceof Error ? err.message : String(err))
     }
   }
 
@@ -257,7 +271,7 @@ export class HTMLInlineView implements NodeView {
       return
     }
 
-    let { state } = this._innerView.state.applyTransaction(tr)
+    const { state } = this._innerView.state.applyTransaction(tr)
     this._innerView.updateState(state)
 
     this.renderHtml(true)
@@ -308,7 +322,7 @@ export class HTMLInlineView implements NodeView {
           new Plugin({
             props: {
               handleDOMEvents: {
-                blur: (view) => {
+                blur: () => {
                   const pos = this._getPos()
                   if (pos !== undefined) {
                     const text = this._innerView?.state.doc.textContent || ''
@@ -331,10 +345,10 @@ export class HTMLInlineView implements NodeView {
     this._innerView.dom.classList.remove('ProseMirror')
 
     // focus element
-    let innerState = this._innerView.state
+    const innerState = this._innerView.state
     this._innerView.focus()
 
-    let innerPos = innerState.doc.textContent.length || 0
+    const innerPos = innerState.doc.textContent.length || 0
 
     this._innerView.dispatch(
       innerState.tr.setSelection(TextSelection.create(innerState.doc, innerPos)),
@@ -353,16 +367,7 @@ export class HTMLInlineView implements NodeView {
    */
   closeEditor(render: boolean = true) {
     if (this._innerView) {
-      const pos = this._getPos()
-      if (pos !== undefined) {
-        const text = this._innerView.state.doc.textContent || ''
-        // const tr = this._outerView.state.tr
-        // console.log('text', text)
-        // console.log('pos', pos)
-        // tr.setNodeAttribute(pos - 1, 'htmlText', text)
-        // this._outerView.dispatch(tr)
-      }
-      this._innerView?.destroy()
+      this._innerView.destroy()
       this._innerView = undefined
     }
 

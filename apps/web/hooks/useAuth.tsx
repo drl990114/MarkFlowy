@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { apiClient } from '../utils/apiClient'
+import { clearAuthSession } from '../utils/authSession'
 import type { User } from '@markflowy/types'
 
 interface AuthState {
@@ -20,66 +21,25 @@ export function useAuth(requireAuth = false) {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const token = localStorage.getItem('accessToken')
+        const user = await apiClient.get<User>('/me')
+        localStorage.setItem('user', JSON.stringify(user))
 
-        if (!token) {
-          setAuthState({
-            user: null,
-            loading: false,
-            isAuthenticated: false,
-          })
-          
-          if (requireAuth) {
-            router.push('/auth')
-          }
-          return
-        }
-
-        try {
-          const user = await apiClient.get<User>('/me')
-          localStorage.setItem('user', JSON.stringify(user))
-          
-          setAuthState({
-            user,
-            loading: false,
-            isAuthenticated: true,
-          })
-        } catch (error) {
-          console.error('Failed to fetch user:', error)
-          
-          const userStr = localStorage.getItem('user')
-          if (userStr) {
-            const user = JSON.parse(userStr) as User
-            setAuthState({
-              user,
-              loading: false,
-              isAuthenticated: true,
-            })
-          } else {
-            setAuthState({
-              user: null,
-              loading: false,
-              isAuthenticated: false,
-            })
-            
-            if (requireAuth) {
-              router.push('/auth')
-            }
-          }
-        }
+        setAuthState({
+          user,
+          loading: false,
+          isAuthenticated: true,
+        })
       } catch (error) {
         console.error('Auth check failed:', error)
-        
-        localStorage.removeItem('accessToken')
-        localStorage.removeItem('refreshToken')
-        localStorage.removeItem('user')
-        
+
+        clearAuthSession()
+
         setAuthState({
           user: null,
           loading: false,
           isAuthenticated: false,
         })
-        
+
         if (requireAuth) {
           router.push('/auth')
         }
@@ -90,26 +50,20 @@ export function useAuth(requireAuth = false) {
   }, [requireAuth, router])
 
   const logout = async () => {
-    const refreshToken = localStorage.getItem('refreshToken')
-    
-    if (refreshToken) {
-      try {
-        await apiClient.post('/auth/logout', { refreshToken })
-      } catch (error) {
-        console.error('Logout request failed:', error)
-      }
+    try {
+      await apiClient.logoutSession()
+    } catch (error) {
+      console.error('Logout request failed:', error)
     }
-    
-    localStorage.removeItem('accessToken')
-    localStorage.removeItem('refreshToken')
-    localStorage.removeItem('user')
-    
+
+    clearAuthSession()
+
     setAuthState({
       user: null,
       loading: false,
       isAuthenticated: false,
     })
-    
+
     router.push('/auth')
   }
 
@@ -124,18 +78,18 @@ export function useRedirectIfAuthenticated() {
   const [checking, setChecking] = useState(true)
 
   useEffect(() => {
-    const checkAuth = () => {
-      const token = localStorage.getItem('accessToken')
-      const userStr = localStorage.getItem('user')
-
-      if (token && userStr) {
-        router.push('/workspace')
-      } else {
+    const checkAuth = async () => {
+      try {
+        if (await apiClient.restoreSession()) {
+          await router.push('/workspace')
+          return
+        }
+      } finally {
         setChecking(false)
       }
     }
 
-    checkAuth()
+    void checkAuth()
   }, [router])
 
   return checking

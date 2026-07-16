@@ -192,14 +192,16 @@ export class LivePreviewNodeView implements NodeView, LivePreviewNodeViewApi {
   }
 
   private async renderContent(content: string, version: number): Promise<void> {
-    this.previewElt.classList.remove('mf-live-preview-render-error')
-    this.previewElt.removeAttribute('title')
+    const staging = document.createElement('div')
     try {
-      await this.renderer.render(content, this.previewElt, {
+      await this.renderer.render(content, staging, {
         node: this.node,
         view: this.view,
       })
       if (this.destroying || version !== this.renderVersion) return
+      this.previewElt.classList.remove('mf-live-preview-render-error')
+      this.previewElt.removeAttribute('title')
+      this.previewElt.replaceChildren(...staging.childNodes)
     } catch (err) {
       if (this.destroying || version !== this.renderVersion) return
       this.previewElt.replaceChildren()

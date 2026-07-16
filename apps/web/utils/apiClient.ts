@@ -1,4 +1,9 @@
 import { getApiBaseUrl } from './apiBaseUrl'
+import {
+  clearAuthSession,
+  getAuthAccessToken,
+  setAuthAccessToken,
+} from './authSession'
 
 interface ApiClientOptions {
   headers?: Record<string, string>
@@ -11,7 +16,6 @@ interface RequestConfig extends RequestInit {
 
 interface RefreshTokenResponse {
   accessToken: string
-  refreshToken: string
 }
 
 export class ApiClientError extends Error {
@@ -34,13 +38,7 @@ class ApiClient {
   }
 
   private getAuthToken(): string | null {
-    if (typeof window === 'undefined') return null
-    return localStorage.getItem('accessToken')
-  }
-
-  private getRefreshToken(): string | null {
-    if (typeof window === 'undefined') return null
-    return localStorage.getItem('refreshToken')
+    return typeof window === 'undefined' ? null : getAuthAccessToken()
   }
 
   private getTokenExpiry(token: string): number | null {
@@ -57,9 +55,6 @@ class ApiClient {
   }
 
   private shouldRefreshAccessToken(): boolean {
-    const refreshToken = this.getRefreshToken()
-    if (!refreshToken) return false
-
     const accessToken = this.getAuthToken()
     if (!accessToken) return true
 
@@ -73,38 +68,29 @@ class ApiClient {
     return (
       typeof data === 'object' &&
       data !== null &&
-      typeof (data as RefreshTokenResponse).accessToken === 'string' &&
-      typeof (data as RefreshTokenResponse).refreshToken === 'string'
+      typeof (data as RefreshTokenResponse).accessToken === 'string'
     )
   }
 
-  private setTokens(accessToken: string, refreshToken: string) {
+  private setAccessToken(accessToken: string) {
     if (typeof window !== 'undefined') {
-      localStorage.setItem('accessToken', accessToken)
-      localStorage.setItem('refreshToken', refreshToken)
+      setAuthAccessToken(accessToken)
     }
   }
 
   private clearAuth() {
     if (typeof window !== 'undefined') {
-      localStorage.removeItem('accessToken')
-      localStorage.removeItem('refreshToken')
-      localStorage.removeItem('user')
+      clearAuthSession()
       window.location.href = '/auth'
     }
   }
 
   private async refreshAccessToken(): Promise<RefreshTokenResponse | null> {
-    const refreshToken = this.getRefreshToken()
-    if (!refreshToken) {
-      return null
-    }
-
     try {
       const response = await fetch(`${this.baseUrl}/auth/refresh`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refreshToken }),
+        body: '{}',
         credentials: 'include',
       })
 
@@ -117,16 +103,21 @@ class ApiClient {
         return null
       }
 
-      this.setTokens(data.accessToken, data.refreshToken)
+      this.setAccessToken(data.accessToken)
       return data
     } catch {
       return null
     }
   }
 
-  private async refreshWithLock(): Promise<RefreshTokenResponse | null> {
+  private async refreshWithinTabLock(force: boolean): Promise<RefreshTokenResponse | null> {
     if (this.isRefreshing && this.refreshPromise) {
       return this.refreshPromise
+    }
+
+    if (!force && !this.shouldRefreshAccessToken()) {
+      const accessToken = this.getAuthToken()
+      return accessToken ? { accessToken } : null
     }
 
     this.isRefreshing = true
@@ -140,9 +131,41 @@ class ApiClient {
     }
   }
 
+  private async refreshWithLock(force = false): Promise<RefreshTokenResponse | null> {
+    if (typeof navigator !== 'undefined' && navigator.locks) {
+      return navigator.locks.request('markflowy-auth-refresh', () =>
+        this.refreshWithinTabLock(force),
+      )
+    }
+
+    return this.refreshWithinTabLock(force)
+  }
+
   private async ensureFreshAccessToken() {
     if (!this.shouldRefreshAccessToken()) return
     await this.refreshWithLock()
+  }
+
+  async restoreSession() {
+    return Boolean(await this.refreshWithLock())
+  }
+
+  async logoutSession() {
+    const logout = async () => {
+      const response = await fetch(`${this.baseUrl}/auth/logout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: '{}',
+        credentials: 'include',
+      })
+      return this.handleResponse<{ success: boolean }>(response)
+    }
+
+    if (typeof navigator !== 'undefined' && navigator.locks) {
+      return navigator.locks.request('markflowy-auth-refresh', logout)
+    }
+
+    return logout()
   }
 
   private async handleResponse<T>(response: Response, retryRequest?: () => Promise<T>): Promise<T> {
@@ -157,7 +180,7 @@ class ApiClient {
       }
 
       if (response.status === 401 && retryRequest) {
-        const result = await this.refreshWithLock()
+        const result = await this.refreshWithLock(true)
         if (result) {
           return retryRequest()
         }

@@ -9,21 +9,26 @@ interface GitHubSettingsPanelProps {
 
 export function GitHubSettingsPanel({ isAuthenticated, authLoading }: GitHubSettingsPanelProps) {
   const {
-    config,
+    connection,
     loading,
-    token,
-    setToken,
-    saving,
+    startingAction,
+    disconnecting,
+    deletingInstallationId,
     error,
     success,
     repos,
     loadingRepos,
     repoError,
     importingRepo,
-    handleSave,
-    handleDelete,
+    handleStartConnection,
+    handleStartInstallation,
+    handleDeleteConnection,
+    handleDeleteInstallation,
     handleOpenWorkspace,
   } = useGitHubSettings(isAuthenticated, authLoading)
+  const linked = connection?.linked === true
+  const hasInstallations = Boolean(connection?.installations.length)
+  const busy = Boolean(startingAction || disconnecting || deletingInstallationId)
 
   return (
     <Panel id='github'>
@@ -34,8 +39,8 @@ export function GitHubSettingsPanel({ isAuthenticated, authLoading }: GitHubSett
         </PanelKicker>
         <PanelTitle>GitHub Integration</PanelTitle>
         <PanelDesc>
-          Connect a Personal Access Token so MarkFlowy can list repositories and import them as
-          workspaces.
+          Link your GitHub identity, then authorize the GitHub App for the repositories you want to
+          use in MarkFlowy. Personal access tokens are not required.
         </PanelDesc>
       </PanelHeader>
 
@@ -45,66 +50,52 @@ export function GitHubSettingsPanel({ isAuthenticated, authLoading }: GitHubSett
         {error && <ErrorBanner>{error}</ErrorBanner>}
         {success && <SuccessBanner>{success}</SuccessBanner>}
 
-        {!loading && config && (
+        {!loading && connection && (
           <>
             <StatusGrid>
               <StatusItem>
-                <StatusLabel>Status</StatusLabel>
-                <StatusValue $connected={config.hasToken}>
-                  <StatusDot $connected={config.hasToken} />
-                  {config.hasToken ? 'Connected' : 'Not connected'}
+                <StatusLabel>GitHub identity</StatusLabel>
+                <StatusValue $connected={linked}>
+                  <StatusDot $connected={linked} />
+                  {linked ? 'Linked' : 'Not linked'}
                 </StatusValue>
               </StatusItem>
 
-              {config.hasToken && config.username && (
+              {linked && connection.login && (
                 <StatusItem>
-                  <StatusLabel>Connected account</StatusLabel>
-                  <StatusText>@{config.username}</StatusText>
+                  <StatusLabel>Linked account</StatusLabel>
+                  <AccountSummary>
+                    {connection.avatarUrl && (
+                      <AccountAvatar src={connection.avatarUrl} alt='' aria-hidden='true' />
+                    )}
+                    <StatusText>@{connection.login}</StatusText>
+                  </AccountSummary>
                 </StatusItem>
               )}
 
-              {config.hasToken && config.createdAt && (
+              {linked && (
                 <StatusItem>
-                  <StatusLabel>Connected at</StatusLabel>
-                  <StatusText>{new Date(config.createdAt).toLocaleString()}</StatusText>
+                  <StatusLabel>Repository authorizations</StatusLabel>
+                  <StatusText>{connection.installations.length}</StatusText>
+                </StatusItem>
+              )}
+
+              {linked && connection.linkedAt && (
+                <StatusItem>
+                  <StatusLabel>Linked at</StatusLabel>
+                  <StatusText>{new Date(connection.linkedAt).toLocaleString()}</StatusText>
                 </StatusItem>
               )}
             </StatusGrid>
 
-            <TokenSection>
-              <TokenLabel htmlFor='github-token'>
-                {config.hasToken ? 'Update token' : 'Add token'}
-              </TokenLabel>
-              <TokenInput
-                id='github-token'
-                type='password'
-                value={token}
-                onChange={(event) => setToken(event.target.value)}
-                placeholder='ghp_xxxxxxxxxxxxxxxxxxxx'
-                disabled={saving}
-              />
-              <TokenHint>
-                Create a token in{' '}
-                <TokenHintLink
-                  href='https://github.com/settings/tokens/new'
-                  target='_blank'
-                  rel='noopener noreferrer'
-                >
-                  GitHub Settings
-                </TokenHintLink>
-                . Prefer a fine-grained token with <code>Metadata: Read</code> and{' '}
-                <code>Contents: Read and write</code>. Editing workflow files also requires{' '}
-                <code>Workflows: Read and write</code>.
-              </TokenHint>
-            </TokenSection>
-
             <Actions>
-              <SaveButton onClick={handleSave} disabled={saving || !token.trim()}>
-                {saving ? 'Saving...' : config.hasToken ? 'Update Token' : 'Save Token'}
-              </SaveButton>
-              {config.hasToken && (
-                <DeleteButton onClick={handleDelete} disabled={saving}>
-                  Remove Token
+              {!linked ? (
+                <SaveButton type='button' onClick={handleStartConnection} disabled={busy}>
+                  {startingAction === 'connection' ? 'Opening GitHub...' : 'Link GitHub Account'}
+                </SaveButton>
+              ) : (
+                <DeleteButton type='button' onClick={handleDeleteConnection} disabled={busy}>
+                  {disconnecting ? 'Unlinking...' : 'Unlink GitHub Account'}
                 </DeleteButton>
               )}
             </Actions>
@@ -112,10 +103,63 @@ export function GitHubSettingsPanel({ isAuthenticated, authLoading }: GitHubSett
         )}
       </PanelBody>
 
-      {config?.hasToken && (
+      {linked && connection && (
+        <InstallationBody>
+          <RepositoryHeader>
+            <RepositoryTitle>Repository Access</RepositoryTitle>
+            <RepositoryDesc>
+              Install the MarkFlowy GitHub App for a personal account or organization, and choose
+              which repositories it can access.
+            </RepositoryDesc>
+          </RepositoryHeader>
+
+          {connection.installations.length === 0 ? (
+            <EmptyText>No GitHub App repository access has been authorized yet.</EmptyText>
+          ) : (
+            <InstallationList>
+              {connection.installations.map((installation) => (
+                <InstallationItem key={installation.installationId}>
+                  <InstallationInfo>
+                    <RepoName>{installation.accountLogin}</RepoName>
+                    <RepoMeta>
+                      <AccessTag>{installation.accountType}</AccessTag>
+                      <RepoUpdated>
+                        {installation.repositorySelection === 'all'
+                          ? 'All repositories'
+                          : 'Selected repositories'}
+                      </RepoUpdated>
+                    </RepoMeta>
+                  </InstallationInfo>
+                  <DeleteButton
+                    type='button'
+                    onClick={() => handleDeleteInstallation(installation.installationId)}
+                    disabled={busy}
+                  >
+                    {deletingInstallationId === installation.installationId
+                      ? 'Removing from MarkFlowy...'
+                      : 'Remove from MarkFlowy'}
+                  </DeleteButton>
+                </InstallationItem>
+              ))}
+            </InstallationList>
+          )}
+
+          <Actions>
+            <SaveButton type='button' onClick={handleStartInstallation} disabled={busy}>
+              {startingAction === 'installation'
+                ? 'Opening GitHub...'
+                : hasInstallations
+                  ? 'Add or Update Repository Access'
+                  : 'Authorize Repositories'}
+            </SaveButton>
+          </Actions>
+        </InstallationBody>
+      )}
+
+      {linked && hasInstallations && (
         <RepositoryBody>
           <RepositoryHeader>
-            <RepositoryTitle>Your Repositories</RepositoryTitle>
+            <RepositoryTitle>Authorized Repositories</RepositoryTitle>
             <RepositoryDesc>Select a repository to open or create a workspace.</RepositoryDesc>
           </RepositoryHeader>
 
@@ -127,7 +171,7 @@ export function GitHubSettingsPanel({ isAuthenticated, authLoading }: GitHubSett
 
           <RepoList>
             {repos.map((repo) => (
-              <RepoItem key={repo.id}>
+              <RepoItem key={`${repo.installationId}:${repo.id}`}>
                 <RepoInfo>
                   <RepoName>{repo.full_name}</RepoName>
                   {repo.description && <RepoDesc>{repo.description}</RepoDesc>}
@@ -139,6 +183,7 @@ export function GitHubSettingsPanel({ isAuthenticated, authLoading }: GitHubSett
                   </RepoMeta>
                 </RepoInfo>
                 <OpenButton
+                  type='button'
                   onClick={() => handleOpenWorkspace(repo)}
                   disabled={Boolean(importingRepo)}
                 >
@@ -152,31 +197,34 @@ export function GitHubSettingsPanel({ isAuthenticated, authLoading }: GitHubSett
       )}
 
       <HelpBody>
-        <HelpTitle>Token setup</HelpTitle>
+        <HelpTitle>How GitHub access works</HelpTitle>
         <HelpGrid>
           <HelpItem>
             <HelpNumber>1</HelpNumber>
-            <HelpText>
-              Open{' '}
-              <HelpLink href='https://github.com/settings/tokens' target='_blank'>
-                GitHub Personal access tokens
-              </HelpLink>
-              .
-            </HelpText>
+            <HelpText>Link your GitHub identity to your MarkFlowy account.</HelpText>
           </HelpItem>
           <HelpItem>
             <HelpNumber>2</HelpNumber>
-            <HelpText>
-              Generate a fine-grained token with Metadata read and Contents read/write access.
-            </HelpText>
+            <HelpText>Install the MarkFlowy GitHub App and select repository access.</HelpText>
           </HelpItem>
           <HelpItem>
             <HelpNumber>3</HelpNumber>
             <HelpText>
-              Paste the token above, then return to Workspaces to import a repository.
+              Import an authorized repository as a workspace. Tokens stay server-side.
             </HelpText>
           </HelpItem>
         </HelpGrid>
+        <HelpNote>
+          To revoke or change access on GitHub, manage or uninstall the app in{' '}
+          <HelpLink
+            href='https://github.com/settings/installations'
+            target='_blank'
+            rel='noopener noreferrer'
+          >
+            GitHub Settings
+          </HelpLink>
+          .
+        </HelpNote>
       </HelpBody>
     </Panel>
   )
@@ -299,61 +347,17 @@ const StatusText = styled.div`
   overflow-wrap: anywhere;
 `
 
-const TokenSection = styled.div`
-  margin-top: ${rem(20)};
+const AccountSummary = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${rem(7)};
+  min-width: 0;
 `
 
-const TokenLabel = styled.label`
-  display: block;
-  font-size: ${(props) => props.theme.fontSm};
-  font-weight: 600;
-  margin-bottom: ${rem(8)};
-`
-
-const TokenInput = styled.input`
-  width: 100%;
-  min-height: ${rem(36)};
-  padding: 0 ${rem(12)};
-  background: ${(props) => props.theme.bgColor};
-  border: 1px solid ${(props) => props.theme.borderColor};
-  border-radius: ${(props) => props.theme.midBorderRadius};
-  color: ${(props) => props.theme.primaryFontColor};
-  font-size: ${(props) => props.theme.fontSm};
-  outline: none;
-  transition: border-color 0.16s ease;
-
-  &:focus {
-    border-color: ${(props) => props.theme.borderColorFocused};
-  }
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-`
-
-const TokenHint = styled.p`
-  color: ${(props) => props.theme.disabledFontColor};
-  font-size: ${(props) => props.theme.fontXs};
-  line-height: 1.6;
-  margin: ${rem(8)} 0 0;
-
-  code {
-    background: ${(props) => props.theme.bgColor};
-    border: 1px solid ${(props) => props.theme.borderColor};
-    border-radius: ${(props) => props.theme.smallBorderRadius};
-    padding: ${rem(1)} ${rem(5)};
-    font-size: ${(props) => props.theme.fontXs};
-  }
-`
-
-const TokenHintLink = styled.a`
-  color: ${(props) => props.theme.accentColor};
-  text-decoration: none;
-
-  &:hover {
-    text-decoration: underline;
-  }
+const AccountAvatar = styled.img`
+  width: ${rem(22)};
+  height: ${rem(22)};
+  border-radius: 50%;
 `
 
 const Actions = styled.div`
@@ -408,6 +412,49 @@ const DeleteButton = styled.button`
     opacity: 0.55;
     cursor: not-allowed;
   }
+`
+
+const InstallationBody = styled.div`
+  padding: ${rem(20)};
+  border-top: 1px solid ${(props) => props.theme.borderColor};
+`
+
+const InstallationList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${rem(8)};
+`
+
+const InstallationItem = styled.div`
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: ${rem(12)};
+  padding: ${rem(10)} ${rem(12)};
+  background: ${(props) => props.theme.bgColor};
+  border: 1px solid ${(props) => props.theme.borderColor};
+  border-radius: ${(props) => props.theme.midBorderRadius};
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+`
+
+const InstallationInfo = styled.div`
+  min-width: 0;
+`
+
+const AccessTag = styled.span`
+  display: inline-flex;
+  align-items: center;
+  min-height: ${rem(20)};
+  padding: 0 ${rem(7)};
+  background: rgba(82, 196, 26, 0.1);
+  border: 1px solid rgba(82, 196, 26, 0.2);
+  border-radius: ${(props) => props.theme.smallBorderRadius};
+  color: #73d13d;
+  font-size: ${(props) => props.theme.fontXs};
+  font-weight: 600;
 `
 
 const RepositoryBody = styled.div`
@@ -584,11 +631,23 @@ const HelpText = styled.span`
   line-height: 1.55;
 `
 
+const HelpNote = styled.p`
+  margin: ${rem(14)} 0 0;
+  color: ${(props) => props.theme.disabledFontColor};
+  font-size: ${(props) => props.theme.fontSm};
+  line-height: 1.55;
+`
+
 const HelpLink = styled.a`
   color: ${(props) => props.theme.accentColor};
   text-decoration: none;
 
   &:hover {
     text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${(props) => props.theme.accentColor};
+    outline-offset: 2px;
   }
 `

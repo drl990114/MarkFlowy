@@ -1,4 +1,5 @@
 import type {
+  DOMOutputSpec,
   InputRule,
   NodeExtensionSpec,
   NodeViewMethod
@@ -10,7 +11,7 @@ import {
   nodeInputRule
 } from '@rme-sdk/main'
 import block_names from 'markdown-it/lib/common/html_blocks.mjs'
-import { NodeSerializerOptions, ParserRuleType } from '../../transform'
+import { type NodeSerializerOptions, ParserRuleType } from '../../transform'
 import {
   needSplitInlineHtmlTokenTags
 } from '../../transform/markdown-it-html-inline'
@@ -78,13 +79,16 @@ export class HtmlInlineNodeExtension extends NodeExtension<LineHtmlInlineExtensi
         dom.classList.add('inline-input-render')
         dom.innerHTML = node.attrs.htmlText
 
-        return dom
+        return dom as unknown as DOMOutputSpec
       },
     }
   }
 
   createNodeViews(): NodeViewMethod | Record<string, NodeViewMethod> {
-    return (node, view, getPos) => new HTMLInlineView(node, view, getPos)
+    return (node, view, getPos) =>
+      new HTMLInlineView(node, view, getPos, {
+        handleViewImgSrcUrl: this.options.handleViewImgSrcUrl,
+      })
   }
 
   createInputRules(): InputRule[] {
@@ -98,7 +102,7 @@ export class HtmlInlineNodeExtension extends NodeExtension<LineHtmlInlineExtensi
             fromInput: true,
           }
         },
-        beforeDispatch: ({ tr, start, match }) => {
+        beforeDispatch: ({ tr, start }) => {
           const $pos = tr.doc.resolve(start)
           const node = $pos.node(1)
           console.log('last', node.lastChild)

@@ -1,16 +1,24 @@
-import { useState, useEffect } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
-import { apiClient } from 'utils/apiClient'
-import type { GitHubConfig } from '@markflowy/types'
+import type { GitHubConnectionStatus } from '@markflowy/types'
 import { useGitHubWorkspaceImport } from 'features/githubWorkspace/hooks/useGitHubWorkspaceImport'
-import type { GitHubRepo } from 'features/githubWorkspace/services/githubService'
+import { githubService, type GitHubRepo } from 'features/githubWorkspace/services/githubService'
+import { redirectToGitHub } from 'utils/githubAuthorization'
+
+type StartingAction = 'connection' | 'installation' | null
+
+const disconnectedStatus: GitHubConnectionStatus = {
+  linked: false,
+  installations: [],
+}
 
 export function useGitHubSettings(isAuthenticated: boolean, authLoading: boolean) {
   const router = useRouter()
-  const [config, setConfig] = useState<GitHubConfig | null>(null)
+  const [connection, setConnection] = useState<GitHubConnectionStatus | null>(null)
   const [loading, setLoading] = useState(true)
-  const [token, setToken] = useState('')
-  const [saving, setSaving] = useState(false)
+  const [startingAction, setStartingAction] = useState<StartingAction>(null)
+  const [disconnecting, setDisconnecting] = useState(false)
+  const [deletingInstallationId, setDeletingInstallationId] = useState<string | null>(null)
   const [settingsError, setSettingsError] = useState('')
   const [success, setSuccess] = useState('')
   const [repos, setRepos] = useState<GitHubRepo[]>([])
@@ -18,105 +26,164 @@ export function useGitHubSettings(isAuthenticated: boolean, authLoading: boolean
   const [repoError, setRepoError] = useState('')
   const { importingRepo, importError, importRepository } = useGitHubWorkspaceImport()
 
-  useEffect(() => {
-    if (!isAuthenticated || authLoading) return
-    loadConfig()
-  }, [isAuthenticated, authLoading])
-
-  useEffect(() => {
-    if (config?.hasToken) {
-      loadRepos()
-    }
-  }, [config?.hasToken])
-
-  const loadConfig = async () => {
-    try {
-      const data = await apiClient.get<GitHubConfig>('/github/config')
-      setConfig(data)
-      setLoading(false)
-    } catch (err: any) {
-      setSettingsError(err?.message || 'Failed to load GitHub configuration')
-      setLoading(false)
-    }
-  }
-
-  const loadRepos = async () => {
+  const loadRepos = useCallback(async () => {
     setLoadingRepos(true)
     setRepoError('')
+
     try {
-      const data = await apiClient.get<GitHubRepo[]>('/github/repos?per_page=100')
+      const data = await githubService.listRepos(1, 100)
       setRepos(data)
-    } catch (err: any) {
-      setRepoError(err?.message || 'Failed to load repositories')
+    } catch (caughtError) {
+      setRepoError(
+        caughtError instanceof Error && caughtError.message
+          ? caughtError.message
+          : 'Failed to load repositories',
+      )
     } finally {
       setLoadingRepos(false)
     }
-  }
+  }, [])
 
-  const handleSave = async () => {
-    if (!token.trim()) {
-      setSettingsError('Please enter a valid GitHub token')
-      return
-    }
-
-    setSaving(true)
+  const loadConnection = useCallback(async () => {
+    setLoading(true)
     setSettingsError('')
-    setSuccess('')
 
     try {
-      await apiClient.post('/github/config', { token: token.trim() })
-      setSuccess('GitHub token saved successfully!')
-      setToken('')
-      await loadConfig()
-    } catch (err: any) {
-      setSettingsError(err?.message || 'Failed to save GitHub token')
+      const data = await githubService.getConnection()
+      setConnection(data)
+
+      if (data.linked && data.installations.length > 0) {
+        void loadRepos()
+      } else {
+        setRepos([])
+        setRepoError('')
+      }
+    } catch (caughtError) {
+      setSettingsError(
+        caughtError instanceof Error && caughtError.message
+          ? caughtError.message
+          : 'Failed to load GitHub connection',
+      )
     } finally {
-      setSaving(false)
+      setLoading(false)
     }
-  }
+  }, [loadRepos])
 
-  const handleDelete = async () => {
-    if (!confirm('Are you sure you want to remove your GitHub token?')) {
-      return
+  useEffect(() => {
+    if (!isAuthenticated || authLoading) return
+    void loadConnection()
+  }, [authLoading, isAuthenticated, loadConnection])
+
+  useEffect(() => {
+    if (!router.isReady) return
+
+    if (router.query.github === 'linked') {
+      setSuccess('GitHub account linked successfully.')
+    } else if (router.query.github === 'installed') {
+      setSuccess('GitHub repository access authorized successfully.')
+    } else if (typeof router.query.github_error === 'string') {
+      setSettingsError('GitHub authorization was not completed. Please try again.')
     }
+  }, [router.isReady, router.query.github, router.query.github_error])
 
-    setSaving(true)
+  const startAuthorization = async (action: Exclude<StartingAction, null>) => {
+    if (startingAction) return
+
+    setStartingAction(action)
     setSettingsError('')
     setSuccess('')
 
     try {
-      await apiClient.delete('/github/config')
-      setSuccess('GitHub token removed successfully!')
-      setConfig({ hasToken: false })
+      const { authorizeUrl } =
+        action === 'connection'
+          ? await githubService.startConnection()
+          : await githubService.startInstallation()
+      redirectToGitHub(authorizeUrl)
+    } catch (caughtError) {
+      setSettingsError(
+        caughtError instanceof Error && caughtError.message
+          ? caughtError.message
+          : 'Failed to start GitHub authorization',
+      )
+      setStartingAction(null)
+    }
+  }
+
+  const handleDeleteConnection = async () => {
+    if (!confirm('Unlink this GitHub account from MarkFlowy?')) return
+
+    setDisconnecting(true)
+    setSettingsError('')
+    setSuccess('')
+
+    try {
+      await githubService.deleteConnection()
+      setConnection(disconnectedStatus)
       setRepos([])
-    } catch (err: any) {
-      setSettingsError(err?.message || 'Failed to remove GitHub token')
+      setSuccess('GitHub account unlinked successfully.')
+    } catch (caughtError) {
+      setSettingsError(
+        caughtError instanceof Error && caughtError.message
+          ? caughtError.message
+          : 'Failed to unlink GitHub account',
+      )
     } finally {
-      setSaving(false)
+      setDisconnecting(false)
+    }
+  }
+
+  const handleDeleteInstallation = async (installationId: string) => {
+    if (
+      !confirm(
+        'Remove this authorization record from your MarkFlowy account? This does not uninstall the GitHub App or change access on GitHub.',
+      )
+    )
+      return
+
+    setDeletingInstallationId(installationId)
+    setSettingsError('')
+    setSuccess('')
+
+    try {
+      await githubService.deleteInstallation(installationId)
+      setSuccess(
+        'GitHub repository authorization removed from this MarkFlowy account. The GitHub App remains installed.',
+      )
+      await loadConnection()
+    } catch (caughtError) {
+      setSettingsError(
+        caughtError instanceof Error && caughtError.message
+          ? caughtError.message
+          : 'Failed to remove the GitHub authorization from MarkFlowy',
+      )
+    } finally {
+      setDeletingInstallationId(null)
     }
   }
 
   const handleOpenWorkspace = async (repo: GitHubRepo) => {
     const workspace = await importRepository(repo)
     if (workspace) {
-      router.push(`/workspace/${encodeURIComponent(workspace.id)}`)
+      await router.push(`/workspace/${encodeURIComponent(workspace.id)}`)
     }
   }
 
   return {
-    config,
+    connection,
     loading,
-    token,
-    setToken,
-    saving,
+    startingAction,
+    disconnecting,
+    deletingInstallationId,
     error: settingsError || importError,
     success,
     repos,
     loadingRepos,
     repoError,
     importingRepo,
-    handleSave,
-    handleDelete,
+    handleStartConnection: () => startAuthorization('connection'),
+    handleStartInstallation: () => startAuthorization('installation'),
+    handleDeleteConnection,
+    handleDeleteInstallation,
     handleOpenWorkspace,
   }
 }

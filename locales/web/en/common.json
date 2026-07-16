@@ -124,6 +124,15 @@
     "createAccount": "Create Account",
     "changeEmail": "Change",
     "autoRegisterHint": "Unregistered emails will be signed up automatically",
-    "backToHome": "Back to Home"
+    "backToHome": "Back to Home",
+    "continueWithGitHub": "Continue with GitHub",
+    "githubRedirecting": "Redirecting to GitHub...",
+    "githubLoginError": "Unable to start GitHub sign in",
+    "orContinueWithEmail": "or continue with email",
+    "githubCompleting": "Completing GitHub sign in",
+    "githubCallbackFailed": "GitHub sign in failed",
+    "githubCallbackError": "The GitHub sign-in link is invalid or has expired. Please try again.",
+    "githubAccountLinkRequired": "An account with this email already exists. Sign in with email, then link GitHub in Settings.",
+    "backToSignIn": "Back to sign in"
   }
 }

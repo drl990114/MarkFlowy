@@ -534,6 +534,103 @@ export const WysiwygThemeWrapper = styled.div.attrs<WrapperProps>((p) => ({
     border: 0;
   }
 
+  & .mf-preview-block {
+    max-width: 100%;
+    margin-bottom: 16px;
+    white-space: normal;
+  }
+
+  & .mf-preview-html {
+    overflow-wrap: anywhere;
+  }
+
+  & .mf-preview-mermaid,
+  & .mf-preview-math {
+    display: flex;
+    justify-content: center;
+    overflow-x: auto;
+  }
+
+  & .mf-preview-mermaid svg,
+  & .mf-preview-math svg,
+  & .mf-preview-math-inline svg {
+    max-width: 100%;
+    height: auto;
+  }
+
+  & .mf-preview-math-inline {
+    display: inline-flex;
+    max-width: 100%;
+    vertical-align: middle;
+  }
+
+  & .mf-preview-math-display {
+    display: flex;
+    justify-content: center;
+    margin: 1em 0;
+    overflow-x: auto;
+  }
+
+  & .mf-preview-error,
+  & .mf-math-error {
+    color: ${(props) => props.theme.dangerColor};
+  }
+
+  & .mf-preview-block-error {
+    display: block;
+  }
+
+  & .tok-link {
+    color: ${(props) => props.theme.accentColor};
+    text-decoration: underline;
+  }
+
+  & .tok-heading,
+  & .tok-strong {
+    color: ${(props) => props.theme.strongFontColor};
+    font-weight: 700;
+  }
+
+  & .tok-emphasis {
+    font-style: italic;
+  }
+
+  & .tok-keyword,
+  & .tok-typeName,
+  & .tok-namespace,
+  & .tok-macroName,
+  & .tok-deleted,
+  & .tok-invalid {
+    color: ${(props) => props.theme.dangerColor};
+  }
+
+  & .tok-atom,
+  & .tok-bool,
+  & .tok-number,
+  & .tok-literal {
+    color: ${(props) => props.theme.warnColor};
+  }
+
+  & .tok-string,
+  & .tok-string2,
+  & .tok-inserted {
+    color: ${(props) => props.theme.successColor};
+  }
+
+  & .tok-variableName,
+  & .tok-variableName2,
+  & .tok-propertyName,
+  & .tok-className,
+  & .tok-labelName,
+  & .tok-url {
+    color: ${(props) => props.theme.accentColor};
+  }
+
+  & .tok-comment,
+  & .tok-meta {
+    color: ${(props) => props.theme.labelFontColor};
+  }
+
   & ul[data-task-list] {
     padding: 0;
     list-style-type: none;

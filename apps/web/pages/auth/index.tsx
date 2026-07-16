@@ -4,11 +4,17 @@ import Link from 'next/link'
 import styled, { css } from 'styled-components'
 import SeoHead from '../../components/SeoHead'
 import { AuthMode, Step, useAuthForm } from '../../hooks/useAuthForm'
+import { useGitHubLogin } from '../../hooks/useGitHubLogin'
 import { mobile } from '../../utils/media'
 import rem from '../../utils/rem'
 
 export default function AuthPage() {
   const { t } = useTranslation('common')
+  const {
+    loading: githubLoading,
+    error: githubError,
+    startLogin: startGitHubLogin,
+  } = useGitHubLogin(t('auth.githubLoginError'), t('auth.githubAccountLinkRequired'))
   const {
     mode,
     step,
@@ -45,11 +51,19 @@ export default function AuthPage() {
           </LogoSection>
 
           <AuthCard>
+            <SocialAuthSection>
+              <GitHubButton type='button' onClick={startGitHubLogin} disabled={githubLoading}>
+                <i className='ri-github-fill' aria-hidden='true' />
+                {githubLoading ? t('auth.githubRedirecting') : t('auth.continueWithGitHub')}
+              </GitHubButton>
+              {githubError && <ErrorMessage>{githubError}</ErrorMessage>}
+              <AuthDivider>
+                <span>{t('auth.orContinueWithEmail')}</span>
+              </AuthDivider>
+            </SocialAuthSection>
+
             <TabContainer>
-              <Tab
-                $active={mode === AuthMode.LOGIN}
-                onClick={() => switchMode(AuthMode.LOGIN)}
-              >
+              <Tab $active={mode === AuthMode.LOGIN} onClick={() => switchMode(AuthMode.LOGIN)}>
                 {t('auth.login')}
               </Tab>
               <Tab
@@ -86,9 +100,7 @@ export default function AuthPage() {
                     />
                   </InputGroup>
 
-                  {!isRegister && (
-                    <HintMessage>{t('auth.autoRegisterHint')}</HintMessage>
-                  )}
+                  {!isRegister && <HintMessage>{t('auth.autoRegisterHint')}</HintMessage>}
 
                   {error && <ErrorMessage>{error}</ErrorMessage>}
 
@@ -146,9 +158,7 @@ export default function AuthPage() {
                     {countdown > 0 ? (
                       <ResendText>{t('auth.resendCode', { seconds: countdown })}</ResendText>
                     ) : (
-                      <ResendButton onClick={handleResendCode}>
-                        {t('auth.resend')}
-                      </ResendButton>
+                      <ResendButton onClick={handleResendCode}>{t('auth.resend')}</ResendButton>
                     )}
                   </ResendSection>
                 </>
@@ -219,6 +229,69 @@ const AuthCard = styled.div`
   overflow: hidden;
 `
 
+const SocialAuthSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${rem(12)};
+  padding: ${rem(20)} ${rem(20)} 0;
+
+  ${mobile(css`
+    padding: ${rem(16)} ${rem(16)} 0;
+  `)}
+`
+
+const GitHubButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: ${rem(8)};
+  width: 100%;
+  min-height: ${rem(40)};
+  padding: 0 ${rem(16)};
+  background: ${(props) => props.theme.primaryFontColor};
+  border: 1px solid ${(props) => props.theme.primaryFontColor};
+  border-radius: ${rem(6)};
+  color: ${(props) => props.theme.bgColor};
+  font-size: ${rem(14)};
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+
+  i {
+    font-size: ${rem(18)};
+  }
+
+  &:hover:not(:disabled) {
+    opacity: 0.9;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #d4564a;
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+`
+
+const AuthDivider = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${rem(10)};
+  color: ${(props) => props.theme.disabledFontColor};
+  font-size: ${rem(12)};
+
+  &::before,
+  &::after {
+    content: '';
+    height: 1px;
+    flex: 1;
+    background: ${(props) => props.theme.borderColor};
+  }
+`
+
 const TabContainer = styled.div`
   display: flex;
   border-bottom: 1px solid ${(props) => props.theme.borderColor};
@@ -287,7 +360,7 @@ const Input = styled.input`
   }
 
   &::placeholder {
-    color: ${(props) => props.theme.disabledFontColor}
+    color: ${(props) => props.theme.disabledFontColor};
   }
 `
 

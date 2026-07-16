@@ -2,7 +2,7 @@ import { githubService, type GitHubRepo } from 'features/githubWorkspace/service
 import { useGitHubWorkspaceImport } from 'features/githubWorkspace/hooks/useGitHubWorkspaceImport'
 import { getRemoteWorkspaceErrorMessage } from 'features/workspace/services/remoteWorkspaceService'
 import { useAuth } from 'hooks/useAuth'
-import type { GitHubConfig } from '@markflowy/types'
+import type { GitHubConnectionStatus } from '@markflowy/types'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
@@ -30,6 +30,7 @@ interface Workspace {
   type: 'LOCAL' | 'SYNCED' | 'SHARED' | 'GITHUB'
   folderFingerprint: string | null
   sourceUrl: string | null
+  githubRepoId: string | null
   ownerId: string
   createdAt: string
   updatedAt: string
@@ -48,6 +49,8 @@ const formatWorkspaceDate = (value?: string) => {
   })
 }
 
+const getRepoKey = (repo: GitHubRepo) => `${repo.installationId}:${repo.id}`
+
 export default function WorkspaceListPage() {
   const { loading: authLoading, isAuthenticated } = useAuth(false)
 
@@ -56,12 +59,12 @@ export default function WorkspaceListPage() {
   const [workspaceError, setWorkspaceError] = useState('')
 
   const [repos, setRepos] = useState<GitHubRepo[]>([])
-  const [githubConfig, setGithubConfig] = useState<GitHubConfig | null>(null)
-  const [loadingGitHubConfig, setLoadingGitHubConfig] = useState(false)
-  const [githubConfigError, setGitHubConfigError] = useState('')
+  const [githubConnection, setGithubConnection] = useState<GitHubConnectionStatus | null>(null)
+  const [loadingGitHubConnection, setLoadingGitHubConnection] = useState(false)
+  const [githubConnectionError, setGitHubConnectionError] = useState('')
   const [loadingRepos, setLoadingRepos] = useState(false)
   const [repoError, setRepoError] = useState('')
-  const [selectedRepoFullName, setSelectedRepoFullName] = useState('')
+  const [selectedRepoKey, setSelectedRepoKey] = useState('')
 
   const [showImportModal, setShowImportModal] = useState(false)
   const { importingRepo, importError, clearImportError, importRepository } =
@@ -98,30 +101,34 @@ export default function WorkspaceListPage() {
     }
   }
 
-  const loadGitHubConfig = async () => {
-    setLoadingGitHubConfig(true)
-    setGitHubConfigError('')
+  const loadGitHubConnection = async () => {
+    setLoadingGitHubConnection(true)
+    setGitHubConnectionError('')
     try {
-      const data = await apiClient.get<GitHubConfig>('/github/config')
-      setGithubConfig(data)
+      const data = await githubService.getConnection()
+      setGithubConnection(data)
       return data
-    } catch (err: any) {
-      setGithubConfig(null)
-      setGitHubConfigError(err?.message || 'Failed to load GitHub configuration')
+    } catch (caughtError) {
+      setGithubConnection(null)
+      setGitHubConnectionError(
+        caughtError instanceof Error && caughtError.message
+          ? caughtError.message
+          : 'Failed to load GitHub connection',
+      )
       return null
     } finally {
-      setLoadingGitHubConfig(false)
+      setLoadingGitHubConnection(false)
     }
   }
 
   const handleOpenImportModal = async () => {
     setShowImportModal(true)
-    setSelectedRepoFullName('')
+    setSelectedRepoKey('')
     setRepoError('')
     clearImportError()
 
-    const data = await loadGitHubConfig()
-    if (data?.hasToken) {
+    const data = await loadGitHubConnection()
+    if (data?.linked && data.installations.length > 0) {
       await loadRepos()
     } else {
       setRepos([])
@@ -165,16 +172,9 @@ export default function WorkspaceListPage() {
     }
   }
 
-  const getRepoSourceUrl = (repo: GitHubRepo) => {
-    return `https://github.com/${repo.owner.login}/${repo.name}`
-  }
-
   const getImportedWorkspace = (repo: GitHubRepo) => {
     return workspaces.find(
-      (workspace) =>
-        workspace.type === 'GITHUB' &&
-        (workspace.sourceUrl === getRepoSourceUrl(repo) ||
-          Boolean(workspace.sourceUrl?.includes(repo.full_name))),
+      (workspace) => workspace.type === 'GITHUB' && workspace.githubRepoId === repo.id,
     )
   }
 
@@ -188,7 +188,7 @@ export default function WorkspaceListPage() {
 
   const myWorkspaces = workspaces.filter((w) => w.type !== 'GITHUB')
   const githubWorkspaces = workspaces.filter((w) => w.type === 'GITHUB')
-  const selectedRepo = repos.find((repo) => repo.full_name === selectedRepoFullName)
+  const selectedRepo = repos.find((repo) => getRepoKey(repo) === selectedRepoKey)
   const selectedImportedWorkspace = selectedRepo ? getImportedWorkspace(selectedRepo) : undefined
 
   return (
@@ -363,16 +363,16 @@ export default function WorkspaceListPage() {
               </ModalClose>
             </ModalHeader>
             <ModalBody>
-              {loadingGitHubConfig && <LoadingText>Checking GitHub configuration...</LoadingText>}
+              {loadingGitHubConnection && <LoadingText>Checking GitHub connection...</LoadingText>}
 
-              {!loadingGitHubConfig && githubConfigError && (
+              {!loadingGitHubConnection && githubConnectionError && (
                 <ErrorPanel>
                   <i className='ri-error-warning-line' />
-                  <span>{githubConfigError}</span>
+                  <span>{githubConnectionError}</span>
                 </ErrorPanel>
               )}
 
-              {!loadingGitHubConfig && !githubConfigError && !githubConfig?.hasToken && (
+              {!loadingGitHubConnection && !githubConnectionError && !githubConnection?.linked && (
                 <SetupPanel>
                   <SetupIcon>
                     <i className='ri-github-fill' />
@@ -380,90 +380,114 @@ export default function WorkspaceListPage() {
                   <SetupCopy>
                     <SetupTitle>Connect GitHub first</SetupTitle>
                     <SetupText>
-                      Add a GitHub Personal Access Token in personal settings before importing a
-                      repository workspace.
+                      Link your GitHub account in personal settings before importing a repository
+                      workspace.
                     </SetupText>
                   </SetupCopy>
                   <SetupLink href='/settings#github'>
-                    Configure Token
+                    Link GitHub
                     <i className='ri-arrow-right-line' />
                   </SetupLink>
                 </SetupPanel>
               )}
 
-              {!loadingGitHubConfig && githubConfig?.hasToken && (
-                <ImportForm>
-                  <ImportField>
-                    <FieldLabel htmlFor='github-repo-select'>GitHub repository</FieldLabel>
-                    <RepoSelect
-                      id='github-repo-select'
-                      value={selectedRepoFullName}
-                      onChange={(e) => setSelectedRepoFullName(e.target.value)}
-                      disabled={loadingRepos || !!importingRepo}
-                    >
-                      <option value=''>
-                        {loadingRepos ? 'Loading repositories...' : 'Select a repository'}
-                      </option>
-                      {repos.map((repo) => (
-                        <option key={repo.id} value={repo.full_name}>
-                          {repo.full_name}
+              {!loadingGitHubConnection &&
+                !githubConnectionError &&
+                githubConnection?.linked &&
+                githubConnection.installations.length === 0 && (
+                  <SetupPanel>
+                    <SetupIcon>
+                      <i className='ri-github-fill' />
+                    </SetupIcon>
+                    <SetupCopy>
+                      <SetupTitle>Authorize repository access</SetupTitle>
+                      <SetupText>
+                        Install the MarkFlowy GitHub App and choose the repositories you want to
+                        import.
+                      </SetupText>
+                    </SetupCopy>
+                    <SetupLink href='/settings#github'>
+                      Authorize Repositories
+                      <i className='ri-arrow-right-line' />
+                    </SetupLink>
+                  </SetupPanel>
+                )}
+
+              {!loadingGitHubConnection &&
+                githubConnection?.linked &&
+                githubConnection.installations.length > 0 && (
+                  <ImportForm>
+                    <ImportField>
+                      <FieldLabel htmlFor='github-repo-select'>GitHub repository</FieldLabel>
+                      <RepoSelect
+                        id='github-repo-select'
+                        value={selectedRepoKey}
+                        onChange={(e) => setSelectedRepoKey(e.target.value)}
+                        disabled={loadingRepos || !!importingRepo}
+                      >
+                        <option value=''>
+                          {loadingRepos ? 'Loading repositories...' : 'Select a repository'}
                         </option>
-                      ))}
-                    </RepoSelect>
-                  </ImportField>
+                        {repos.map((repo) => (
+                          <option key={getRepoKey(repo)} value={getRepoKey(repo)}>
+                            {repo.full_name}
+                          </option>
+                        ))}
+                      </RepoSelect>
+                    </ImportField>
 
-                  {(repoError || importError) && (
-                    <ErrorPanel>
-                      <i className='ri-error-warning-line' />
-                      <span>{repoError || importError}</span>
-                    </ErrorPanel>
-                  )}
+                    {(repoError || importError) && (
+                      <ErrorPanel>
+                        <i className='ri-error-warning-line' />
+                        <span>{repoError || importError}</span>
+                      </ErrorPanel>
+                    )}
 
-                  {!loadingRepos && repos.length === 0 && !repoError && (
-                    <EmptyText>No GitHub repositories found.</EmptyText>
-                  )}
+                    {!loadingRepos && repos.length === 0 && !repoError && (
+                      <EmptyText>No GitHub repositories found.</EmptyText>
+                    )}
 
-                  {selectedRepo && (
-                    <SelectedRepoPanel>
-                      <RepoInfo>
-                        <RepoName>{selectedRepo.full_name}</RepoName>
-                        {selectedRepo.description && (
-                          <RepoDesc>{selectedRepo.description}</RepoDesc>
-                        )}
-                        <RepoMeta>
-                          <RepoTag $private={selectedRepo.private}>
-                            {selectedRepo.private ? 'Private' : 'Public'}
-                          </RepoTag>
-                          <RepoUpdated>
-                            Updated {new Date(selectedRepo.updated_at).toLocaleDateString()}
-                          </RepoUpdated>
-                        </RepoMeta>
-                      </RepoInfo>
-                    </SelectedRepoPanel>
-                  )}
+                    {selectedRepo && (
+                      <SelectedRepoPanel>
+                        <RepoInfo>
+                          <RepoName>{selectedRepo.full_name}</RepoName>
+                          {selectedRepo.description && (
+                            <RepoDesc>{selectedRepo.description}</RepoDesc>
+                          )}
+                          <RepoMeta>
+                            <RepoTag $private={selectedRepo.private}>
+                              {selectedRepo.private ? 'Private' : 'Public'}
+                            </RepoTag>
+                            <RepoUpdated>
+                              Updated {new Date(selectedRepo.updated_at).toLocaleDateString()}
+                            </RepoUpdated>
+                          </RepoMeta>
+                        </RepoInfo>
+                      </SelectedRepoPanel>
+                    )}
 
-                  {selectedImportedWorkspace && (
-                    <NoticePanel>
-                      <i className='ri-checkbox-circle-line' />
-                      <span>This repository is already imported.</span>
-                      <ExistingWorkspaceLink href={getWorkspaceHref(selectedImportedWorkspace)}>
-                        Open
-                      </ExistingWorkspaceLink>
-                    </NoticePanel>
-                  )}
+                    {selectedImportedWorkspace && (
+                      <NoticePanel>
+                        <i className='ri-checkbox-circle-line' />
+                        <span>This repository is already imported.</span>
+                        <ExistingWorkspaceLink href={getWorkspaceHref(selectedImportedWorkspace)}>
+                          Open
+                        </ExistingWorkspaceLink>
+                      </NoticePanel>
+                    )}
 
-                  <ModalActions>
-                    <ImportRepoButton
-                      onClick={() => selectedRepo && handleImportRepo(selectedRepo)}
-                      disabled={!selectedRepo || !!selectedImportedWorkspace || !!importingRepo}
-                    >
-                      {importingRepo === selectedRepo?.full_name
-                        ? 'Importing...'
-                        : 'Import Repository'}
-                    </ImportRepoButton>
-                  </ModalActions>
-                </ImportForm>
-              )}
+                    <ModalActions>
+                      <ImportRepoButton
+                        onClick={() => selectedRepo && handleImportRepo(selectedRepo)}
+                        disabled={!selectedRepo || !!selectedImportedWorkspace || !!importingRepo}
+                      >
+                        {importingRepo === selectedRepo?.full_name
+                          ? 'Importing...'
+                          : 'Import Repository'}
+                      </ImportRepoButton>
+                    </ModalActions>
+                  </ImportForm>
+                )}
             </ModalBody>
           </ModalContent>
         </ModalOverlay>

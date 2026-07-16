@@ -9,10 +9,15 @@ const rule = (state: any) => {
   for (let i = 0; i <= tokensLength - 1; i++) {
     const curToken = tokens[i] as Token
 
-    if (curToken.type === 'math_block') {
+    if (
+      curToken.type === 'math_block' ||
+      (curToken.type === 'fence' && curToken.info.trim().toLowerCase() === 'math')
+    ) {
       const originalContent = curToken.content || ''
       const mathToken = new Token('math_block', '', 0)
-      ;(mathToken as any).attrs = { tex: curToken.attrs?.[0]?.[1] || '' }
+      ;(mathToken as any).attrs = {
+        tex: curToken.type === 'math_block' ? curToken.attrs?.[0]?.[1] || '' : originalContent,
+      }
 
       mathToken.content = originalContent
       mathToken.block = true
@@ -22,10 +27,10 @@ const rule = (state: any) => {
       edited = true
     }
 
-    let newTokens: Token[] = []
     if (curToken.type === 'inline' && curToken.children && curToken.children.some(t => t.type === 'math_inline')) {
       const inlineTokens = curToken.children
-      inlineTokens.forEach(t => {
+      const newTokens: Token[] = []
+      for (const t of inlineTokens) {
         if (t.type === 'math_inline') {
           const tex = (t.attrs as any)?.tex || ''
           const display = (t.attrs as any)?.display || false
@@ -38,7 +43,7 @@ const rule = (state: any) => {
         } else {
           newTokens.push(t)
         }
-      })
+      }
 
       tokens.splice(i, 1, ...newTokens)
       tokensLength += newTokens.length - 1
@@ -119,7 +124,7 @@ export default function MarkdownItMath(md: MarkdownIt) {
     for (;;) {
       nextLine++
       if (nextLine >= endLine) break
-      let lineStart = state.bMarks[nextLine] + state.tShift[nextLine]
+      const lineStart = state.bMarks[nextLine] + state.tShift[nextLine]
       if (
         state.src.charCodeAt(lineStart) === 0x24 &&
         state.src.charCodeAt(lineStart + 1) === 0x24
