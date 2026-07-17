@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { apiClient } from 'utils/apiClient'
+import { redirectToGitHub } from 'utils/githubAuthorization'
 import rem from 'utils/rem'
 
 interface WorkspaceMember {
@@ -65,6 +66,7 @@ export default function WorkspaceListPage() {
   const [loadingRepos, setLoadingRepos] = useState(false)
   const [repoError, setRepoError] = useState('')
   const [selectedRepoKey, setSelectedRepoKey] = useState('')
+  const [authorizingRepositories, setAuthorizingRepositories] = useState(false)
 
   const [showImportModal, setShowImportModal] = useState(false)
   const { importingRepo, importError, clearImportError, importRepository } =
@@ -124,14 +126,32 @@ export default function WorkspaceListPage() {
   const handleOpenImportModal = async () => {
     setShowImportModal(true)
     setSelectedRepoKey('')
+    setRepos([])
     setRepoError('')
     clearImportError()
 
     const data = await loadGitHubConnection()
-    if (data?.linked && data.installations.length > 0) {
+    if (data?.linked) {
       await loadRepos()
-    } else {
-      setRepos([])
+    }
+  }
+
+  const handleAuthorizeRepositories = async () => {
+    if (authorizingRepositories) return
+
+    setAuthorizingRepositories(true)
+    setRepoError('')
+
+    try {
+      const { authorizeUrl } = await githubService.startInstallation('/workspace')
+      redirectToGitHub(authorizeUrl)
+    } catch (caughtError) {
+      setRepoError(
+        caughtError instanceof Error && caughtError.message
+          ? caughtError.message
+          : 'Failed to start GitHub repository authorization',
+      )
+      setAuthorizingRepositories(false)
     }
   }
 
@@ -393,29 +413,7 @@ export default function WorkspaceListPage() {
 
               {!loadingGitHubConnection &&
                 !githubConnectionError &&
-                githubConnection?.linked &&
-                githubConnection.installations.length === 0 && (
-                  <SetupPanel>
-                    <SetupIcon>
-                      <i className='ri-github-fill' />
-                    </SetupIcon>
-                    <SetupCopy>
-                      <SetupTitle>Authorize repository access</SetupTitle>
-                      <SetupText>
-                        Install the MarkFlowy GitHub App and choose the repositories you want to
-                        import.
-                      </SetupText>
-                    </SetupCopy>
-                    <SetupLink href='/settings#github'>
-                      Authorize Repositories
-                      <i className='ri-arrow-right-line' />
-                    </SetupLink>
-                  </SetupPanel>
-                )}
-
-              {!loadingGitHubConnection &&
-                githubConnection?.linked &&
-                githubConnection.installations.length > 0 && (
+                githubConnection?.linked && (
                   <ImportForm>
                     <ImportField>
                       <FieldLabel htmlFor='github-repo-select'>GitHub repository</FieldLabel>
@@ -423,7 +421,7 @@ export default function WorkspaceListPage() {
                         id='github-repo-select'
                         value={selectedRepoKey}
                         onChange={(e) => setSelectedRepoKey(e.target.value)}
-                        disabled={loadingRepos || !!importingRepo}
+                        disabled={loadingRepos || authorizingRepositories || !!importingRepo}
                       >
                         <option value=''>
                           {loadingRepos ? 'Loading repositories...' : 'Select a repository'}
@@ -444,7 +442,24 @@ export default function WorkspaceListPage() {
                     )}
 
                     {!loadingRepos && repos.length === 0 && !repoError && (
-                      <EmptyText>No GitHub repositories found.</EmptyText>
+                      <SetupPanel>
+                        <SetupIcon>
+                          <i className='ri-github-fill' />
+                        </SetupIcon>
+                        <SetupCopy>
+                          <SetupTitle>No authorized repositories found</SetupTitle>
+                          <SetupText>
+                            Choose the GitHub repositories that MarkFlowy can import and edit.
+                          </SetupText>
+                        </SetupCopy>
+                        <ImportRepoButton
+                          type='button'
+                          onClick={handleAuthorizeRepositories}
+                          disabled={authorizingRepositories}
+                        >
+                          {authorizingRepositories ? 'Opening GitHub...' : 'Choose Repositories'}
+                        </ImportRepoButton>
+                      </SetupPanel>
                     )}
 
                     {selectedRepo && (
@@ -479,7 +494,12 @@ export default function WorkspaceListPage() {
                     <ModalActions>
                       <ImportRepoButton
                         onClick={() => selectedRepo && handleImportRepo(selectedRepo)}
-                        disabled={!selectedRepo || !!selectedImportedWorkspace || !!importingRepo}
+                        disabled={
+                          !selectedRepo ||
+                          !!selectedImportedWorkspace ||
+                          authorizingRepositories ||
+                          !!importingRepo
+                        }
                       >
                         {importingRepo === selectedRepo?.full_name
                           ? 'Importing...'
@@ -853,13 +873,6 @@ const WorkspaceTag = styled.span`
   font-weight: 600;
   border-radius: ${rem(6)};
   white-space: nowrap;
-`
-
-const EmptyText = styled.div`
-  font-size: ${rem(14)};
-  color: ${workspacePalette.textMuted};
-  text-align: center;
-  padding: ${rem(22)} 0;
 `
 
 const EmptyPanel = styled.div`

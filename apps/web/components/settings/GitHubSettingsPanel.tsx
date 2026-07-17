@@ -156,7 +156,7 @@ export function GitHubSettingsPanel({ isAuthenticated, authLoading }: GitHubSett
         </InstallationBody>
       )}
 
-      {linked && hasInstallations && (
+      {linked && (
         <RepositoryBody>
           <RepositoryHeader>
             <RepositoryTitle>Authorized Repositories</RepositoryTitle>

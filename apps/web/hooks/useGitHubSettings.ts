@@ -52,7 +52,7 @@ export function useGitHubSettings(isAuthenticated: boolean, authLoading: boolean
       const data = await githubService.getConnection()
       setConnection(data)
 
-      if (data.linked && data.installations.length > 0) {
+      if (data.linked) {
         void loadRepos()
       } else {
         setRepos([])

@@ -52,8 +52,8 @@ export const githubService = {
     return apiClient.delete<{ success: boolean }>('/github/connection')
   },
 
-  startInstallation() {
-    return apiClient.post<GitHubAuthorizeResponse>('/github/installations/start')
+  startInstallation(returnTo?: string) {
+    return apiClient.post<GitHubAuthorizeResponse>('/github/installations/start', { returnTo })
   },
 
   deleteInstallation(installationId: string) {
