@@ -35,7 +35,8 @@ export function useGitHubLogin(fallbackError: string, accountLinkRequiredError: 
 
     try {
       const browserNonce = createGitHubLoginBrowserNonce()
-      const { authorizeUrl } = await githubService.startLogin('/workspace', browserNonce)
+      const locale = router.locale === router.defaultLocale ? undefined : router.locale
+      const { authorizeUrl } = await githubService.startLogin('/workspace', browserNonce, locale)
       redirectToGitHub(authorizeUrl)
     } catch (caughtError) {
       clearGitHubLoginBrowserNonce()

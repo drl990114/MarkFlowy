@@ -94,10 +94,11 @@ export function useGitHubSettings(isAuthenticated: boolean, authLoading: boolean
     setSuccess('')
 
     try {
+      const locale = router.locale === router.defaultLocale ? undefined : router.locale
       const { authorizeUrl } =
         action === 'connection'
-          ? await githubService.startConnection()
-          : await githubService.startInstallation()
+          ? await githubService.startConnection(locale)
+          : await githubService.startInstallation(undefined, locale)
       redirectToGitHub(authorizeUrl)
     } catch (caughtError) {
       setSettingsError(

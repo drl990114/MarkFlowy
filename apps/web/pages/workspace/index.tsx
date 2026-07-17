@@ -4,6 +4,7 @@ import { getRemoteWorkspaceErrorMessage } from 'features/workspace/services/remo
 import { useAuth } from 'hooks/useAuth'
 import type { GitHubConnectionStatus } from '@markflowy/types'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { apiClient } from 'utils/apiClient'
@@ -53,6 +54,7 @@ const formatWorkspaceDate = (value?: string) => {
 const getRepoKey = (repo: GitHubRepo) => `${repo.installationId}:${repo.id}`
 
 export default function WorkspaceListPage() {
+  const router = useRouter()
   const { loading: authLoading, isAuthenticated } = useAuth(false)
 
   const [workspaces, setWorkspaces] = useState<Workspace[]>([])
@@ -143,7 +145,8 @@ export default function WorkspaceListPage() {
     setRepoError('')
 
     try {
-      const { authorizeUrl } = await githubService.startInstallation('/workspace')
+      const locale = router.locale === router.defaultLocale ? undefined : router.locale
+      const { authorizeUrl } = await githubService.startInstallation('/workspace', locale)
       redirectToGitHub(authorizeUrl)
     } catch (caughtError) {
       setRepoError(

@@ -23,10 +23,14 @@ interface GitHubAuthorizeResponse {
   authorizeUrl: string
 }
 
+function withLocale(endpoint: string, locale?: string) {
+  return locale ? `${endpoint}?locale=${encodeURIComponent(locale)}` : endpoint
+}
+
 export const githubService = {
-  startLogin(returnTo: string, browserNonce: string) {
+  startLogin(returnTo: string, browserNonce: string, locale?: string) {
     return apiClient.post<GitHubAuthorizeResponse>(
-      '/auth/github/start',
+      withLocale('/auth/github/start', locale),
       { returnTo, browserNonce },
       { skipAuth: true },
     )
@@ -44,16 +48,21 @@ export const githubService = {
     return apiClient.get<GitHubConnectionStatus>('/github/connection')
   },
 
-  startConnection() {
-    return apiClient.post<GitHubAuthorizeResponse>('/github/connection/start')
+  startConnection(locale?: string) {
+    return apiClient.post<GitHubAuthorizeResponse>(
+      withLocale('/github/connection/start', locale),
+    )
   },
 
   deleteConnection() {
     return apiClient.delete<{ success: boolean }>('/github/connection')
   },
 
-  startInstallation(returnTo?: string) {
-    return apiClient.post<GitHubAuthorizeResponse>('/github/installations/start', { returnTo })
+  startInstallation(returnTo?: string, locale?: string) {
+    return apiClient.post<GitHubAuthorizeResponse>(
+      withLocale('/github/installations/start', locale),
+      { returnTo },
+    )
   },
 
   deleteInstallation(installationId: string) {
