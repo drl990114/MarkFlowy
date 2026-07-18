@@ -1,4 +1,4 @@
-import { motion } from 'motion/react'
+import { motion, useReducedMotion } from 'motion/react'
 import { useTranslation } from 'next-i18next'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -190,11 +190,20 @@ const LearnMoreLink = styled(Link)`
   display: inline-flex;
   align-items: center;
   gap: ${rem(6)};
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
 
-  &:hover {
-    opacity: 0.85;
-    transform: translateX(4px);
+  &:focus-visible {
+    outline: 2px solid var(--seal);
+    outline-offset: 3px;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      opacity: 0.85;
+      transform: translateX(4px);
+    }
   }
 
   &::after {
@@ -204,6 +213,7 @@ const LearnMoreLink = styled(Link)`
 
 const ImageColumn = styled(motion.div)`
   position: relative;
+  min-width: 0;
 `
 
 const ImageFrame = styled.div`
@@ -238,13 +248,18 @@ const CapabilityCard = styled(motion.div)`
   display: flex;
   flex-direction: column;
   gap: ${rem(12)};
-  transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+  transition:
+    border-color 0.25s ease,
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
   cursor: default;
 
-  &:hover {
-    border-color: var(--seal);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      border-color: var(--seal);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
   }
 
   ${mobile(css`
@@ -301,16 +316,17 @@ const CapabilityBody = styled.p`
 `
 
 const FeatureRow = ({ title, descs, img, imagePosition = 'right', link }: FeatureItemProps) => {
+  const shouldReduceMotion = useReducedMotion()
   const textElement = (
     <TextColumn
-      initial={{ opacity: 0, x: imagePosition === 'right' ? -30 : 30 }}
+      initial={shouldReduceMotion ? false : { opacity: 0, x: imagePosition === 'right' ? -30 : 30 }}
       whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true }}
-      transition={{ duration: 0.6 }}
+      transition={{ duration: shouldReduceMotion ? 0 : 0.6 }}
     >
       <FeatureTitle>{title}</FeatureTitle>
-      {descs.map((desc, index) => (
-        <FeatureDesc key={index}>{desc}</FeatureDesc>
+      {descs.map((desc) => (
+        <FeatureDesc key={`${title}-${desc}`}>{desc}</FeatureDesc>
       ))}
       {link && <LearnMoreLink href={link.href}>{link.text}</LearnMoreLink>}
     </TextColumn>
@@ -318,18 +334,18 @@ const FeatureRow = ({ title, descs, img, imagePosition = 'right', link }: Featur
 
   const imageElement = (
     <ImageColumn
-      initial={{ opacity: 0, x: imagePosition === 'right' ? 30 : -30 }}
+      initial={shouldReduceMotion ? false : { opacity: 0, x: imagePosition === 'right' ? 30 : -30 }}
       whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true }}
-      transition={{ duration: 0.6, delay: 0.15 }}
+      transition={{ duration: shouldReduceMotion ? 0 : 0.6, delay: shouldReduceMotion ? 0 : 0.15 }}
     >
       <ImageFrame>
         <Image
           src={img}
           alt={title}
-          width={800}
-          height={500}
-          style={{ width: '100%', height: 'auto', display: 'block' }}
+          fill
+          sizes='(max-width: 1000px) calc(100vw - 40px), (max-width: 1200px) 46vw, 548px'
+          style={{ objectFit: 'cover' }}
         />
       </ImageFrame>
     </ImageColumn>
@@ -354,6 +370,7 @@ const FeatureRow = ({ title, descs, img, imagePosition = 'right', link }: Featur
 
 export default function FeatureList() {
   const { t } = useTranslation()
+  const shouldReduceMotion = useReducedMotion()
 
   const features: FeatureItemProps[] = [
     {
@@ -414,13 +431,14 @@ export default function FeatureList() {
         <SectionLabel>Features</SectionLabel>
         <DisplayTitle>
           Built for <ItalicEmphasis>writers</ItalicEmphasis>,<br />
-          designed for <ItalicEmphasis>flow</ItalicEmphasis><SealDot>.</SealDot>
+          designed for <ItalicEmphasis>flow</ItalicEmphasis>
+          <SealDot>.</SealDot>
         </DisplayTitle>
         <LeadParagraph>{t('home.features.lead')}</LeadParagraph>
       </SectionHeader>
 
-      {features.map((feature, index) => (
-        <FeatureRow key={index} {...feature} />
+      {features.map((feature) => (
+        <FeatureRow key={feature.title} {...feature} />
       ))}
 
       <SectionRule>
@@ -431,11 +449,14 @@ export default function FeatureList() {
       <CapabilityGrid>
         {capabilities.map((cap, index) => (
           <CapabilityCard
-            key={index}
-            initial={{ opacity: 0, y: 16 }}
+            key={cap.number}
+            initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.45, delay: index * 0.08 }}
+            transition={{
+              duration: shouldReduceMotion ? 0 : 0.45,
+              delay: shouldReduceMotion ? 0 : index * 0.08,
+            }}
           >
             <CapabilityNumber>{cap.number}</CapabilityNumber>
             <CapabilityTag>{cap.tag}</CapabilityTag>

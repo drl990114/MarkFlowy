@@ -1,19 +1,20 @@
 import FeatureList from 'components/FeatureList'
-import { motion } from 'motion/react'
-import { GetStaticProps } from 'next'
+import { motion, useReducedMotion } from 'motion/react'
+import type { GetStaticProps } from 'next'
 import { i18n, useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import React from 'react'
 import styled, { css, keyframes } from 'styled-components'
+import ContributorGlobe from '../components/ContributorGlobe'
 import Nav from '../components/HomeNav'
 import { HoverBorderGradient } from '../components/HoverBorderGradient'
 import SeoHead from '../components/SeoHead'
 import { useRedirectIfAuthenticated } from '../hooks/useAuth'
 import { useMockFiles } from '../hooks/useMockFiles'
 import { useSystemType } from '../hooks/useSystemType'
-import { mobile } from '../utils/media'
+import { mobile, phone } from '../utils/media'
 import rem from '../utils/rem'
 
 type Contributor = {
@@ -38,16 +39,44 @@ const HomeEditorPreview = dynamic(() => Promise.resolve(HomeEditorPreviewContent
 })
 
 const WIRE_ITEMS_ROW_A = [
-  'Markdown', 'WYSIWYG', 'AI Copilot', 'Source Code', 'Themes',
-  'Hotkeys', 'Tauri', 'Cross-Platform', 'File Manager', 'JSON',
-  'Custom Themes', 'Base64', 'Search', 'Multilingual',
+  'Markdown',
+  'WYSIWYG',
+  'AI Copilot',
+  'Source Code',
+  'Themes',
+  'Hotkeys',
+  'Tauri',
+  'Cross-Platform',
+  'File Manager',
+  'JSON',
+  'Custom Themes',
+  'Base64',
+  'Search',
+  'Multilingual',
 ]
 
 const WIRE_ITEMS_ROW_B = [
-  'Lightweight', 'Dark Mode', 'Extensions', 'Ollama', 'ChatGPT',
-  'DeepSeek', 'Translation', 'Summary', 'Shortcuts', 'Tree View',
-  'Smart Images', 'TXT', 'Code Blocks', 'Syntax Highlight',
+  'Lightweight',
+  'Dark Mode',
+  'Extensions',
+  'Ollama',
+  'ChatGPT',
+  'DeepSeek',
+  'Translation',
+  'Summary',
+  'Shortcuts',
+  'Tree View',
+  'Smart Images',
+  'TXT',
+  'Code Blocks',
+  'Syntax Highlight',
 ]
+
+const createWireLoop = (items: string[]) =>
+  ['first', 'second'].flatMap((loop) => items.map((label) => ({ key: `${loop}-${label}`, label })))
+
+const WIRE_LOOP_ROW_A = createWireLoop(WIRE_ITEMS_ROW_A)
+const WIRE_LOOP_ROW_B = createWireLoop(WIRE_ITEMS_ROW_B)
 
 export default function Index({
   contributors = [] as Contributor[],
@@ -58,6 +87,11 @@ export default function Index({
   const { t } = useTranslation()
   const [isMobileNavFolded, setIsMobileNavFolded] = React.useState(true)
   const systemType = useSystemType()
+  const shouldReduceMotion = useReducedMotion()
+  const handleMobileNavToggle = React.useCallback(
+    () => setIsMobileNavFolded((isFolded) => !isFolded),
+    [],
+  )
 
   if (checkingAuth) {
     return (
@@ -90,33 +124,57 @@ export default function Index({
         <Nav
           showSideNav={false}
           isMobileNavFolded={isMobileNavFolded}
-          onMobileNavToggle={() => setIsMobileNavFolded((x) => !x)}
+          onMobileNavToggle={handleMobileNavToggle}
         />
 
         <HeroSection>
           <HeroGrid>
             <HeroLeft
-              initial={{ opacity: 0, y: 30 }}
+              initial={shouldReduceMotion ? false : { opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, ease: [0.22, 0.61, 0.36, 1] }}
+              transition={{
+                duration: shouldReduceMotion ? 0 : 0.7,
+                ease: [0.22, 0.61, 0.36, 1],
+              }}
             >
-              <motion.div whileInView={{ opacity: 1, y: 0 }} initial={{ opacity: 0, y: 12 }} viewport={{ once: true }} transition={{ duration: 0.5, ease: [0.22, 0.61, 0.36, 1] }}>
-                <HeroLabel>
-                  <LabelLine />
-                  I &middot; MARKDOWN EDITOR
-                </HeroLabel>
-              </motion.div>
-              <motion.div whileInView={{ opacity: 1, y: 0 }} initial={{ opacity: 0, y: 16 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.05, ease: [0.22, 0.61, 0.36, 1] }}>
+              <motion.div
+                whileInView={{ opacity: 1, y: 0 }}
+                initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
+                viewport={{ once: true }}
+                transition={{
+                  duration: shouldReduceMotion ? 0 : 0.6,
+                  delay: shouldReduceMotion ? 0 : 0.05,
+                  ease: [0.22, 0.61, 0.36, 1],
+                }}
+              >
                 <HeroTitle>
                   <TitleMain>Mark</TitleMain>
                   <FlowyText />
-                  <TitleDot />
+                  <TitleDot aria-hidden='true' />
                 </HeroTitle>
               </motion.div>
-              <motion.div whileInView={{ opacity: 1, y: 0 }} initial={{ opacity: 0, y: 16 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.1, ease: [0.22, 0.61, 0.36, 1] }}>
+              <motion.div
+                whileInView={{ opacity: 1, y: 0 }}
+                initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
+                viewport={{ once: true }}
+                transition={{
+                  duration: shouldReduceMotion ? 0 : 0.6,
+                  delay: shouldReduceMotion ? 0 : 0.1,
+                  ease: [0.22, 0.61, 0.36, 1],
+                }}
+              >
                 <HeroLead>{t('home.hero.subtitle')}</HeroLead>
               </motion.div>
-              <motion.div whileInView={{ opacity: 1, y: 0 }} initial={{ opacity: 0, y: 16 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.15, ease: [0.22, 0.61, 0.36, 1] }}>
+              <motion.div
+                whileInView={{ opacity: 1, y: 0 }}
+                initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
+                viewport={{ once: true }}
+                transition={{
+                  duration: shouldReduceMotion ? 0 : 0.6,
+                  delay: shouldReduceMotion ? 0 : 0.15,
+                  ease: [0.22, 0.61, 0.36, 1],
+                }}
+              >
                 <HeroActions>
                   <HoverBorderGradient
                     onClick={() => {
@@ -134,7 +192,16 @@ export default function Index({
                   </GhostButton>
                 </HeroActions>
               </motion.div>
-              <motion.div whileInView={{ opacity: 1, y: 0 }} initial={{ opacity: 0, y: 16 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.2, ease: [0.22, 0.61, 0.36, 1] }}>
+              <motion.div
+                whileInView={{ opacity: 1, y: 0 }}
+                initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
+                viewport={{ once: true }}
+                transition={{
+                  duration: shouldReduceMotion ? 0 : 0.6,
+                  delay: shouldReduceMotion ? 0 : 0.2,
+                  ease: [0.22, 0.61, 0.36, 1],
+                }}
+              >
                 <StatRings>
                   <StatRing $percent={85}>
                     <RingBg />
@@ -159,9 +226,13 @@ export default function Index({
             </HeroLeft>
 
             <HeroRight
-              initial={{ opacity: 0, y: 30, scale: 0.96 }}
+              initial={shouldReduceMotion ? false : { opacity: 0, y: 30, scale: 0.96 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.15, ease: [0.22, 0.61, 0.36, 1] }}
+              transition={{
+                duration: shouldReduceMotion ? 0 : 0.8,
+                delay: shouldReduceMotion ? 0 : 0.15,
+                ease: [0.22, 0.61, 0.36, 1],
+              }}
             >
               <HomeEditorPreview />
             </HeroRight>
@@ -172,20 +243,20 @@ export default function Index({
           <WireTrack>
             <WireRowA>
               <WireScrollA>
-                {[...WIRE_ITEMS_ROW_A, ...WIRE_ITEMS_ROW_A].map((item, i) => (
-                  <React.Fragment key={i}>
-                    <WireItem>{item}</WireItem>
-                    {i < WIRE_ITEMS_ROW_A.length * 2 - 1 && <WireDot />}
+                {WIRE_LOOP_ROW_A.map((item) => (
+                  <React.Fragment key={item.key}>
+                    <WireItem>{item.label}</WireItem>
+                    <WireDot />
                   </React.Fragment>
                 ))}
               </WireScrollA>
             </WireRowA>
             <WireRowB>
               <WireScrollB>
-                {[...WIRE_ITEMS_ROW_B, ...WIRE_ITEMS_ROW_B].map((item, i) => (
-                  <React.Fragment key={i}>
-                    <WireItem>{item}</WireItem>
-                    {i < WIRE_ITEMS_ROW_B.length * 2 - 1 && <WireDot />}
+                {WIRE_LOOP_ROW_B.map((item) => (
+                  <React.Fragment key={item.key}>
+                    <WireItem>{item.label}</WireItem>
+                    <WireDot />
                   </React.Fragment>
                 ))}
               </WireScrollB>
@@ -197,30 +268,35 @@ export default function Index({
           <FeatureList />
         </SectionWrapper>
 
-        <ContributorsSection>
-          <ContribLabel>
-            <LabelLine />
-            II &middot; CONTRIBUTORS
-          </ContribLabel>
-          <ContribTitle>
-            {t('home.contributors.title').split(' ').slice(0, -1).join(' ')}{' '}
-            <ContribItalic>{t('home.contributors.title').split(' ').slice(-1)}</ContribItalic>
-          </ContribTitle>
-          <ContribDesc>{t('home.contributors.description')}</ContribDesc>
-          <ContribGrid>
-            {contributors.map((c) => (
-              <ContribItem
-                key={c.id}
-                href={c.html_url}
-                target='_blank'
-                rel='noopener noreferrer'
-              >
-                <ContribAvatar src={c.avatar_url} alt={c.login} />
-                <ContribName>{c.login}</ContribName>
-              </ContribItem>
-            ))}
-          </ContribGrid>
-        </ContributorsSection>
+        {contributors.length > 0 && (
+          <ContributorsSection aria-labelledby='contributors-heading'>
+            <ContribLayout>
+              <ContribCopy>
+                <ContribMeta>
+                  <ContribMetaDot />
+                  {t('home.contributors.count', {
+                    count: Math.min(contributors.length, 16),
+                  })}
+                </ContribMeta>
+                <ContribTitle id='contributors-heading'>
+                  {t('home.contributors.titleLead')}{' '}
+                  <ContribItalic>{t('home.contributors.titleAccent')}</ContribItalic>
+                </ContribTitle>
+                <ContribDesc>{t('home.contributors.description')}</ContribDesc>
+                <ContribLink
+                  href='https://github.com/drl990114/MarkFlowy/graphs/contributors'
+                  target='_blank'
+                  rel='noopener noreferrer'
+                >
+                  {t('home.contributors.viewAll')}
+                  <span aria-hidden='true'>↗</span>
+                </ContribLink>
+              </ContribCopy>
+
+              <ContributorGlobe contributors={contributors} />
+            </ContribLayout>
+          </ContributorsSection>
+        )}
 
         <CTASection>
           <CTAInner>
@@ -248,14 +324,15 @@ export default function Index({
               <FooterBrand>
                 <FooterLogo src='/logo.svg' alt='MarkFlowy' />
                 <FooterAppName>MarkFlowy</FooterAppName>
-                <FooterTagline>
-                  Next-generation professional editor driven by AI.
-                </FooterTagline>
+                <FooterTagline>Next-generation professional editor driven by AI.</FooterTagline>
               </FooterBrand>
               <FooterColumns>
                 <FooterCol>
                   <FooterColTitle>Product</FooterColTitle>
-                  <FooterLink href='https://github.com/drl990114/MarkFlowy/releases' target='_blank'>
+                  <FooterLink
+                    href='https://github.com/drl990114/MarkFlowy/releases'
+                    target='_blank'
+                  >
                     Releases
                   </FooterLink>
                   <FooterLink href='/docs'>Documentation</FooterLink>
@@ -280,13 +357,22 @@ export default function Index({
                 </FooterCol>
                 <FooterCol>
                   <FooterColTitle>Resources</FooterColTitle>
-                  <FooterLink href='https://github.com/drl990114/MarkFlowy/blob/main/CONTRIBUTING.md' target='_blank'>
+                  <FooterLink
+                    href='https://github.com/drl990114/MarkFlowy/blob/main/CONTRIBUTING.md'
+                    target='_blank'
+                  >
                     Contributing
                   </FooterLink>
-                  <FooterLink href='https://github.com/drl990114/MarkFlowy/blob/main/CODE_OF_CONDUCT.md' target='_blank'>
+                  <FooterLink
+                    href='https://github.com/drl990114/MarkFlowy/blob/main/CODE_OF_CONDUCT.md'
+                    target='_blank'
+                  >
                     Code of Conduct
                   </FooterLink>
-                  <FooterLink href='https://github.com/drl990114/MarkFlowy/blob/main/LICENSE' target='_blank'>
+                  <FooterLink
+                    href='https://github.com/drl990114/MarkFlowy/blob/main/LICENSE'
+                    target='_blank'
+                  >
                     License
                   </FooterLink>
                 </FooterCol>
@@ -295,7 +381,8 @@ export default function Index({
             <FooterDivider />
             <FooterBottom>
               <FooterCopyright>
-                &copy;2023 &ndash; present <Link href='https://github.com/drl990114'>drl990114</Link>. All Rights Reserved.
+                &copy;2023 &ndash; present{' '}
+                <Link href='https://github.com/drl990114'>drl990114</Link>. All Rights Reserved.
               </FooterCopyright>
               <FooterKicker>Flow</FooterKicker>
             </FooterBottom>
@@ -313,28 +400,34 @@ function HomeEditorPreviewContent() {
   return (
     <MacWindow>
       <MacTitleBar>
-        <MacButtons>
+        <MacButtons aria-hidden='true'>
           <MacButton $red />
           <MacButton $yellow />
           <MacButton $green />
         </MacButtons>
         <MacTitle>MarkFlowy</MacTitle>
       </MacTitleBar>
-      <EditorTabs>
+      <EditorTabs role='tablist' aria-label='Editor preview files'>
         <EditorTab
           $active={activeTab === 'wysiwyg'}
+          role='tab'
+          aria-selected={activeTab === 'wysiwyg'}
+          aria-controls='home-markdown-preview'
           onClick={() => setActiveTab('wysiwyg')}
         >
           README.md
         </EditorTab>
         <EditorTab
           $active={activeTab === 'source'}
+          role='tab'
+          aria-selected={activeTab === 'source'}
+          aria-controls='home-source-preview'
           onClick={() => setActiveTab('source')}
         >
           config.json
         </EditorTab>
       </EditorTabs>
-      <EditorWrapper $visible={activeTab === 'wysiwyg'}>
+      <EditorWrapper id='home-markdown-preview' role='tabpanel' $visible={activeTab === 'wysiwyg'}>
         <Editor
           fileId='home-markdown'
           key={`${i18n?.language}_wysiwyg`}
@@ -342,7 +435,11 @@ function HomeEditorPreviewContent() {
           initialContent={markdownContent}
         />
       </EditorWrapper>
-      <SourceEditorWrapper $visible={activeTab === 'source'}>
+      <SourceEditorWrapper
+        id='home-source-preview'
+        role='tabpanel'
+        $visible={activeTab === 'source'}
+      >
         <Editor
           fileId='home-json'
           key={`${i18n?.language}_source_code`}
@@ -379,23 +476,36 @@ const PageLayout = styled.div`
   min-height: 100vh;
   width: 100%;
   position: relative;
+  overflow-x: hidden;
+  overflow-x: clip;
 `
 
 const HeroSection = styled.section`
+  width: 100%;
+  box-sizing: border-box;
   max-width: ${rem(1200)};
   margin: 0 auto;
-  padding: ${rem(140)} ${rem(24)} ${rem(80)};
+  padding: calc(clamp(${rem(112)}, 10vw, ${rem(140)}) + env(safe-area-inset-top))
+    clamp(${rem(16)}, 4vw, ${rem(24)}) clamp(${rem(56)}, 7vw, ${rem(80)});
   min-height: 90vh;
   display: flex;
   align-items: center;
 
   ${mobile(css`
-    padding: ${rem(100)} ${rem(20)} ${rem(48)};
+    padding-top: calc(${rem(96)} + env(safe-area-inset-top));
+    padding-bottom: ${rem(48)};
     min-height: auto;
+  `)}
+
+  ${phone(css`
+    padding-left: ${rem(20)};
+    padding-right: ${rem(20)};
   `)}
 `
 
 const HeroGrid = styled.div`
+  width: 100%;
+  min-width: 0;
   display: grid;
   grid-template-columns: 0.78fr 1.22fr;
   gap: ${rem(60)};
@@ -408,49 +518,51 @@ const HeroGrid = styled.div`
 `
 
 const HeroLeft = styled(motion.div)`
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: ${rem(28)};
-`
-
-const HeroLabel = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${rem(12)};
-  font-family: var(--sans);
-  font-size: ${rem(11)};
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-`
-
-const LabelLine = styled.span`
-  display: inline-block;
-  width: ${rem(24)};
-  height: 1px;
-  background: var(--seal);
+  gap: clamp(${rem(20)}, 3vw, ${rem(28)});
 `
 
 const HeroTitle = styled.h1`
   font-family: var(--sans);
   font-size: clamp(${rem(42)}, 5.5vw, ${rem(72)});
-  font-weight: 700;
-  line-height: 1.05;
+  font-weight: 600;
+  line-height: 1;
   letter-spacing: -0.03em;
   color: var(--ink);
   margin: 0;
   display: flex;
   align-items: center;
-  gap: ${rem(4)};
+  gap: 0;
+  max-width: 100%;
+
+  ${phone(css`
+    font-size: clamp(${rem(36)}, 13vw, ${rem(48)});
+  `)}
 `
 
-const TitleMain = styled.span``
+const TitleMain = styled.span`
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+`
 
-const TitleItalic = styled.span`
-  font-family: var(--serif);
-  font-style: italic;
-  font-weight: 400;
+const FlowyMark = styled(motion.span)`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 1em;
+  line-height: 1;
+  transform: translateY(${rem(4)});
+  flex-shrink: 0;
+`
+
+const FlowySvg = styled(motion.svg)`
+  display: block;
+  width: auto;
+  height: calc(1.04em + 4px);
+  overflow: visible;
 `
 
 const TitleDot = styled.span`
@@ -460,14 +572,14 @@ const TitleDot = styled.span`
   border-radius: 50%;
   background: var(--seal);
   box-shadow: 0 0 12px rgba(212, 86, 74, 0.4);
-  margin-left: ${rem(4)};
+  margin-left: ${rem(6)};
   flex-shrink: 0;
   align-self: center;
 `
 
 const HeroLead = styled.p`
   font-family: var(--body);
-  font-size: ${rem(18)};
+  font-size: clamp(${rem(15)}, 1.8vw, ${rem(18)});
   line-height: 1.75;
   color: var(--ink-soft);
   margin: 0;
@@ -482,11 +594,19 @@ const HeroActions = styled.div`
   gap: ${rem(16)};
   flex-wrap: wrap;
   align-items: center;
+
+  @media (max-width: 26.25em) {
+    display: grid;
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
 `
 
 const GhostButton = styled.a`
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  min-height: 44px;
   padding: ${rem(8)} ${rem(24)};
   border: 1px solid var(--line);
   border-radius: 9999px;
@@ -497,27 +617,44 @@ const GhostButton = styled.a`
   text-decoration: none;
   background: transparent;
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.22, 0.61, 0.36, 1);
-
-  &:hover {
-    border-color: var(--seal);
-    color: var(--seal);
-    background: rgba(212, 86, 74, 0.08);
-  }
+  transition:
+    border-color 0.25s ease,
+    color 0.25s ease,
+    background 0.25s ease,
+    transform 0.18s cubic-bezier(0.23, 1, 0.32, 1);
 
   &:focus-visible {
     outline: 2px solid var(--seal);
     outline-offset: 2px;
   }
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      border-color: var(--seal);
+      color: var(--seal);
+      background: rgba(212, 86, 74, 0.08);
+    }
+  }
+
+  @media (max-width: 26.25em) {
+    width: 100%;
+    box-sizing: border-box;
+  }
 `
 
 const StatRings = styled.div`
   display: flex;
-  gap: ${rem(32)};
+  gap: clamp(${rem(8)}, 3vw, ${rem(32)});
   margin-top: ${rem(8)};
+  max-width: 100%;
 
   ${mobile(css`
-    gap: ${rem(20)};
+    width: min(100%, ${rem(320)});
+    justify-content: space-between;
   `)}
 `
 
@@ -541,7 +678,11 @@ const RingBg = styled.div`
   border-radius: 50%;
   background: var(--line-soft);
   mask: radial-gradient(farthest-side, transparent calc(100% - 3px), black calc(100% - 3px));
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), black calc(100% - 3px));
+  -webkit-mask: radial-gradient(
+    farthest-side,
+    transparent calc(100% - 3px),
+    black calc(100% - 3px)
+  );
 `
 
 const RingFill = styled.div<{ $percent: number }>`
@@ -554,7 +695,11 @@ const RingFill = styled.div<{ $percent: number }>`
   border-radius: 50%;
   background: conic-gradient(var(--seal) ${(p) => p.$percent}%, transparent ${(p) => p.$percent}%);
   mask: radial-gradient(farthest-side, transparent calc(100% - 3px), black calc(100% - 3px));
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), black calc(100% - 3px));
+  -webkit-mask: radial-gradient(
+    farthest-side,
+    transparent calc(100% - 3px),
+    black calc(100% - 3px)
+  );
 `
 
 const RingNumber = styled.span`
@@ -592,16 +737,26 @@ const HeroRight = styled(motion.div)`
 
 const MacWindow = styled.div`
   width: 100%;
-  min-width: 592px;
-  height: ${rem(540)};
+  min-width: 0;
+  height: clamp(${rem(440)}, 48vw, ${rem(540)});
   background: var(--paper-warm);
   border-radius: ${rem(12)};
-  box-shadow: 0 32px 80px -20px var(--shadow), 0 0 0 1px var(--line-faint) inset;
+  box-shadow:
+    0 32px 80px -20px var(--shadow),
+    0 0 0 1px var(--line-faint) inset;
   overflow: hidden;
   position: relative;
 
   ${mobile(css`
-    height: ${rem(400)};
+    height: clamp(${rem(360)}, 58vw, ${rem(440)});
+  `)}
+
+  ${phone(css`
+    height: clamp(${rem(320)}, 105vw, ${rem(400)});
+    border-radius: ${rem(8)};
+    box-shadow:
+      0 20px 48px -20px var(--shadow),
+      0 0 0 1px var(--line-faint) inset;
   `)}
 `
 
@@ -623,17 +778,27 @@ const MacButtons = styled.div`
   z-index: 2;
 `
 
-const MacButton = styled.button<{ $red?: boolean; $yellow?: boolean; $green?: boolean }>`
+const MacButton = styled.span<{ $red?: boolean; $yellow?: boolean; $green?: boolean }>`
+  display: block;
   width: ${rem(12)};
   height: ${rem(12)};
   border-radius: 50%;
-  border: none;
-  cursor: pointer;
-  padding: 0;
 
-  ${(props) => props.$red && css`background: #ff5f57;`}
-  ${(props) => props.$yellow && css`background: #ffbd2e;`}
-  ${(props) => props.$green && css`background: #28c840;`}
+  ${(props) =>
+    props.$red &&
+    css`
+      background: #ff5f57;
+    `}
+  ${(props) =>
+    props.$yellow &&
+    css`
+      background: #ffbd2e;
+    `}
+  ${(props) =>
+    props.$green &&
+    css`
+      background: #28c840;
+    `}
 `
 
 const MacTitle = styled.div`
@@ -651,9 +816,15 @@ const EditorTabs = styled.div`
   background: var(--paper-deep);
   border-bottom: 1px solid var(--line-faint);
   height: ${rem(36)};
+
+  ${phone(css`
+    height: 46px;
+  `)}
 `
 
-const EditorTab = styled.div<{ $active: boolean }>`
+const EditorTab = styled.button.attrs(() => ({
+  type: 'button',
+}))<{ $active: boolean }>`
   font-family: var(--sans);
   font-size: ${rem(12)};
   font-weight: 500;
@@ -662,11 +833,15 @@ const EditorTab = styled.div<{ $active: boolean }>`
   cursor: pointer;
   padding: 0 ${rem(20)};
   background: ${(props) => (props.$active ? 'var(--paper-warm)' : 'transparent')};
+  border: 0;
   border-right: 1px solid var(--line-faint);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: color 0.2s, background 0.2s, border-color 0.2s;
+  transition:
+    color 0.2s,
+    background 0.2s,
+    border-color 0.2s;
   position: relative;
 
   ${(props) =>
@@ -684,8 +859,16 @@ const EditorTab = styled.div<{ $active: boolean }>`
       }
     `}
 
-  &:hover {
-    ${(props) => !props.$active && 'background: var(--line-faint); color: var(--ink-soft);'}
+  &:focus-visible {
+    outline: 2px solid var(--seal);
+    outline-offset: -2px;
+    z-index: 1;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      ${(props) => !props.$active && 'background: var(--line-faint); color: var(--ink-soft);'}
+    }
   }
 `
 
@@ -707,6 +890,10 @@ const EditorWrapper = styled.div<{ $visible: boolean }>`
     background: linear-gradient(to bottom, transparent, var(--paper-warm));
     z-index: 3;
   }
+
+  ${phone(css`
+    height: calc(100% - ${rem(36)} - 46px);
+  `)}
 `
 
 const SourceEditorWrapper = styled.div<{ $visible: boolean }>`
@@ -729,6 +916,10 @@ const SourceEditorWrapper = styled.div<{ $visible: boolean }>`
     background: linear-gradient(to bottom, transparent, var(--paper-warm));
     z-index: 3;
   }
+
+  ${phone(css`
+    height: calc(100% - ${rem(36)} - 46px);
+  `)}
 `
 
 const shimmer = keyframes`
@@ -758,7 +949,12 @@ const EditorLoading = styled.div`
     width: ${rem(56)};
     height: ${rem(24)};
     border-radius: ${rem(4)};
-    background: linear-gradient(90deg, rgba(232,230,227,0.04) 25%, rgba(232,230,227,0.08) 50%, rgba(232,230,227,0.04) 75%);
+    background: linear-gradient(
+      90deg,
+      rgba(232, 230, 227, 0.04) 25%,
+      rgba(232, 230, 227, 0.08) 50%,
+      rgba(232, 230, 227, 0.04) 75%
+    );
     background-size: 200% 100%;
     animation: ${shimmer} 1.8s infinite linear;
   }
@@ -766,7 +962,12 @@ const EditorLoading = styled.div`
   .skel-line {
     height: ${rem(12)};
     border-radius: ${rem(3)};
-    background: linear-gradient(90deg, rgba(232,230,227,0.04) 25%, rgba(232,230,227,0.08) 50%, rgba(232,230,227,0.04) 75%);
+    background: linear-gradient(
+      90deg,
+      rgba(232, 230, 227, 0.04) 25%,
+      rgba(232, 230, 227, 0.08) 50%,
+      rgba(232, 230, 227, 0.04) 75%
+    );
     background-size: 200% 100%;
     animation: ${shimmer} 1.8s infinite linear;
   }
@@ -775,7 +976,12 @@ const EditorLoading = styled.div`
     height: ${rem(20)};
     width: 45%;
     border-radius: ${rem(3)};
-    background: linear-gradient(90deg, rgba(232,230,227,0.04) 25%, rgba(232,230,227,0.08) 50%, rgba(232,230,227,0.04) 75%);
+    background: linear-gradient(
+      90deg,
+      rgba(232, 230, 227, 0.04) 25%,
+      rgba(232, 230, 227, 0.08) 50%,
+      rgba(232, 230, 227, 0.04) 75%
+    );
     background-size: 200% 100%;
     animation: ${shimmer} 1.8s infinite linear;
     margin-bottom: ${rem(8)};
@@ -798,7 +1004,12 @@ const EditorLoading = styled.div`
     span {
       height: ${rem(12)};
       border-radius: ${rem(2)};
-      background: linear-gradient(90deg, var(--line-faint) 25%, var(--line-soft) 50%, var(--line-faint) 75%);
+      background: linear-gradient(
+        90deg,
+        var(--line-faint) 25%,
+        var(--line-soft) 50%,
+        var(--line-faint) 75%
+      );
       background-size: 200% 100%;
       animation: ${shimmer} 1.8s infinite linear;
       opacity: 0.4;
@@ -811,6 +1022,15 @@ const EditorLoading = styled.div`
     gap: ${rem(8)};
     flex: 1;
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    .skel-btn,
+    .skel-line,
+    .skel-heading,
+    .skel-gutter span {
+      animation: none;
+    }
+  }
 `
 
 const WireSection = styled.div`
@@ -820,8 +1040,10 @@ const WireSection = styled.div`
   background: var(--paper-warm);
   padding: ${rem(20)} 0;
 
-  &:hover ${() => WireScrollA}, &:hover ${() => WireScrollB} {
-    animation-play-state: paused;
+  @media (hover: hover) and (pointer: fine) {
+    &:hover ${() => WireScrollA}, &:hover ${() => WireScrollB} {
+      animation-play-state: paused;
+    }
   }
 `
 
@@ -857,6 +1079,10 @@ const WireScrollA = styled.div`
   gap: ${rem(20)};
   width: max-content;
   animation: ${scrollLeft} 40s linear infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
 `
 
 const WireScrollB = styled.div`
@@ -865,6 +1091,11 @@ const WireScrollB = styled.div`
   gap: ${rem(20)};
   width: max-content;
   animation: ${scrollRight} 40s linear infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+    transform: translateX(-50%);
+  }
 `
 
 const WireItem = styled.span`
@@ -887,32 +1118,66 @@ const WireDot = styled.span`
 `
 
 const SectionWrapper = styled.div`
+  width: 100%;
+  box-sizing: border-box;
   max-width: ${rem(1200)};
   margin: 0 auto;
-  padding: 0 ${rem(24)};
+  padding: 0 clamp(${rem(20)}, 4vw, ${rem(24)});
 `
 
 const ContributorsSection = styled.section`
+  width: 100%;
+  box-sizing: border-box;
   max-width: ${rem(1200)};
   margin: 0 auto;
-  padding: ${rem(100)} ${rem(24)};
+  padding: clamp(${rem(60)}, 8vw, ${rem(100)}) clamp(${rem(20)}, 4vw, ${rem(24)});
 
   ${mobile(css`
     padding: ${rem(60)} ${rem(20)};
   `)}
 `
 
-const ContribLabel = styled.div`
-  display: flex;
+const ContribLayout = styled.div`
+  display: grid;
+  grid-template-columns: minmax(0, 0.78fr) minmax(0, 1.22fr);
   align-items: center;
-  gap: ${rem(12)};
-  font-family: var(--sans);
+  gap: clamp(${rem(28)}, 6vw, ${rem(76)});
+
+  ${mobile(css`
+    grid-template-columns: minmax(0, 1fr);
+    gap: ${rem(36)};
+  `)}
+`
+
+const ContribCopy = styled.div`
+  min-width: 0;
+  max-width: ${rem(520)};
+
+  ${mobile(css`
+    max-width: ${rem(640)};
+  `)}
+`
+
+const ContribMeta = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: ${rem(9)};
+  margin-bottom: ${rem(20)};
+  color: var(--ink-mute);
+  font-family: var(--mono);
   font-size: ${rem(11)};
   font-weight: 600;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.12em;
+  line-height: 1.4;
   text-transform: uppercase;
-  color: var(--ink-soft);
-  margin-bottom: ${rem(20)};
+`
+
+const ContribMetaDot = styled.span`
+  width: ${rem(7)};
+  height: ${rem(7)};
+  border-radius: 50%;
+  background: var(--seal);
+  box-shadow: 0 0 ${rem(12)} color-mix(in srgb, var(--seal) 62%, transparent);
 `
 
 const ContribTitle = styled.h2`
@@ -936,65 +1201,60 @@ const ContribDesc = styled.p`
   font-size: ${rem(17)};
   line-height: 1.7;
   color: var(--ink-soft);
-  margin: 0 0 ${rem(48)};
+  margin: 0 0 ${rem(28)};
   max-width: ${rem(540)};
 
   ${mobile(css`
-    margin-bottom: ${rem(32)};
+    margin-bottom: ${rem(24)};
   `)}
 `
 
-const ContribGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(${rem(140)}, 1fr));
-  gap: ${rem(16)};
-
-  ${mobile(css`
-    grid-template-columns: repeat(auto-fill, minmax(${rem(100)}, 1fr));
-    gap: ${rem(12)};
-  `)}
-`
-
-const ContribItem = styled.a`
-  display: flex;
-  flex-direction: column;
+const ContribLink = styled.a`
+  display: inline-flex;
   align-items: center;
-  padding: ${rem(16)} ${rem(12)};
-  background: var(--paper-warm);
-  border: 1px solid var(--line-faint);
-  border-radius: ${rem(10)};
+  justify-content: center;
+  min-height: 44px;
+  gap: ${rem(8)};
+  padding: 0 ${rem(18)};
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: ${rem(14)};
+  font-weight: 650;
   text-decoration: none;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition:
+    border-color 0.25s ease,
+    color 0.25s ease,
+    background 0.25s ease,
+    transform 0.25s cubic-bezier(0.23, 1, 0.32, 1),
+    box-shadow 0.25s ease;
 
-  &:hover {
-    border-color: var(--seal);
-    transform: translateY(-2px);
-    box-shadow: 0 ${rem(8)} ${rem(24)} var(--shadow);
+  span {
+    color: var(--seal);
+    transition: transform 180ms cubic-bezier(0.23, 1, 0.32, 1);
   }
-`
 
-const ContribAvatar = styled.img`
-  width: ${rem(52)};
-  height: ${rem(52)};
-  border-radius: 50%;
-  margin-bottom: ${rem(10)};
-  border: 2px solid transparent;
-  transition: border-color 0.3s ease;
-
-  ${ContribItem}:hover & {
-    border-color: var(--seal);
+  &:focus-visible {
+    outline: 2px solid var(--seal);
+    outline-offset: 3px;
   }
-`
 
-const ContribName = styled.span`
-  font-family: var(--mono);
-  font-size: ${rem(12)};
-  font-weight: 500;
-  color: var(--ink-soft);
-  transition: color 0.3s ease;
+  &:active {
+    transform: scale(0.97);
+  }
 
-  ${ContribItem}:hover & {
-    color: var(--ink);
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      border-color: var(--seal);
+      color: var(--seal);
+      background: color-mix(in srgb, var(--seal) 8%, transparent);
+      box-shadow: 0 ${rem(10)} ${rem(26)} ${rem(-16)} var(--seal);
+
+      span {
+        transform: translate(${rem(2)}, ${rem(-2)});
+      }
+    }
   }
 `
 
@@ -1067,6 +1327,8 @@ const CTADesc = styled.p`
 const CTAButton = styled.button`
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  min-height: 48px;
   gap: ${rem(8)};
   padding: ${rem(14)} ${rem(36)};
   background: var(--seal);
@@ -1078,18 +1340,32 @@ const CTAButton = styled.button`
   font-weight: 700;
   letter-spacing: 0.02em;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 
-  &:hover {
-    transform: scale(1.04);
-    box-shadow: 0 ${rem(8)} ${rem(32)} rgba(212, 86, 74, 0.4);
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--paper);
+    outline-offset: 3px;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      transform: scale(1.04);
+      box-shadow: 0 ${rem(8)} ${rem(32)} rgba(212, 86, 74, 0.4);
+    }
   }
 `
 
 const Footer = styled.footer`
   background: var(--ink);
   color: var(--paper);
-  padding: ${rem(80)} ${rem(24)} ${rem(40)};
+  padding: clamp(${rem(56)}, 7vw, ${rem(80)}) clamp(${rem(20)}, 4vw, ${rem(24)})
+    calc(${rem(40)} + env(safe-area-inset-bottom));
   border-top: 1px solid var(--on-paper-light-line-soft);
 `
 
@@ -1165,14 +1441,24 @@ const FooterColTitle = styled.span`
 `
 
 const FooterLink = styled.a`
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   font-family: var(--body);
   font-size: ${rem(14)};
   color: var(--on-paper-light-soft);
   text-decoration: none;
   transition: color 0.2s ease;
 
-  &:hover {
-    color: var(--seal);
+  &:focus-visible {
+    outline: 2px solid var(--seal);
+    outline-offset: 2px;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      color: var(--seal);
+    }
   }
 `
 
@@ -1186,6 +1472,12 @@ const FooterBottom = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
+
+  ${phone(css`
+    align-items: flex-start;
+    flex-direction: column;
+    gap: ${rem(20)};
+  `)}
 `
 
 const FooterCopyright = styled.p`
@@ -1199,8 +1491,21 @@ const FooterCopyright = styled.p`
     text-decoration: none;
     transition: color 0.2s ease;
 
-    &:hover {
-      color: var(--seal);
+    ${phone(css`
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+    `)}
+
+    &:focus-visible {
+      outline: 2px solid var(--seal);
+      outline-offset: 2px;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      &:hover {
+        color: var(--seal);
+      }
     }
   }
 `
@@ -1227,120 +1532,118 @@ const LoadingContainer = styled.div`
   background: var(--paper);
 `
 
+type FlowyStroke = {
+  id: string
+  d: string
+  width: number
+}
+
+const FLOWY_STROKES: readonly FlowyStroke[] = [
+  {
+    id: 'f-stem',
+    d: 'M11 56 C13 55 16 55 18 56 M16 56 C19 44 20 29 24 16 M18 17 C26 12 38 12 45 16',
+    width: 2.55,
+  },
+  {
+    id: 'f-crossbar',
+    d: 'M19 34 C26 31 34 32 40 34',
+    width: 2.1,
+  },
+  {
+    id: 'l',
+    d: 'M45 49 C49 39 51 26 54 16 C55 12 59 12 59 16 C59 25 54 37 51 43 C49 48 51 52 55 52 C58 52 60 49 62 45',
+    width: 2.5,
+  },
+  {
+    id: 'o',
+    d: 'M64 41 C65 32 70 27 77 28 C84 29 86 37 83 44 C80 51 73 54 67 50 C63 47 62 43 64 41 Z',
+    width: 2.55,
+  },
+  {
+    id: 'w',
+    d: 'M88 30 C89 40 88 50 93 52 C98 53 101 41 102 30 C102 40 103 51 108 52 C114 53 117 40 119 29',
+    width: 2.5,
+  },
+  {
+    id: 'y',
+    d: 'M122 30 C123 41 124 50 129 52 C134 53 138 40 140 29 C138 43 136 55 131 61 C128 65 123 65 122 62 C121 58 126 55 136 53',
+    width: 2.5,
+  },
+]
+
+const FlowyPathSet = ({
+  stroke = 'var(--ink)',
+  widthScale = 1,
+}: {
+  stroke?: string
+  widthScale?: number
+}) => (
+  <g fill='none' stroke={stroke} strokeLinecap='round' strokeLinejoin='round'>
+    {FLOWY_STROKES.map((path) => (
+      <path key={path.id} d={path.d} strokeWidth={path.width * widthScale} />
+    ))}
+  </g>
+)
+
+const FlowyRibbonMotion = ({ replayKey }: { replayKey: number }) => (
+  <>
+    <motion.g
+      initial={{ opacity: 0, transform: 'scaleX(0.96)' }}
+      animate={{ opacity: 1, transform: 'scaleX(1)' }}
+      transition={{ duration: 0.38, ease: [0.23, 1, 0.32, 1] }}
+      style={{ transformBox: 'fill-box', transformOrigin: 'center' }}
+    >
+      <FlowyPathSet />
+    </motion.g>
+    <g
+      key={replayKey}
+      fill='none'
+      stroke='var(--seal)'
+      strokeLinecap='round'
+      strokeLinejoin='round'
+      style={{ filter: 'drop-shadow(0 0 2px var(--seal))' }}
+    >
+      {FLOWY_STROKES.map((stroke, index) => (
+        <motion.path
+          key={stroke.id}
+          d={stroke.d}
+          strokeWidth={stroke.width * 1.08}
+          initial={{ pathLength: 0.16, pathOffset: 0, opacity: 0 }}
+          animate={{ pathLength: 0.16, pathOffset: 0.84, opacity: [0, 0.95, 0] }}
+          transition={{
+            pathOffset: {
+              duration: 1.05,
+              delay: 0.16 + index * 0.08,
+              ease: [0.77, 0, 0.175, 1],
+            },
+            opacity: {
+              duration: 1.05,
+              delay: 0.16 + index * 0.08,
+              times: [0, 0.18, 1],
+              ease: 'easeOut',
+            },
+          }}
+        />
+      ))}
+    </g>
+  </>
+)
+
 const FlowyText = () => {
-  const charDelay = 0.18
-  const charDuration = 0.5
+  const shouldReduceMotion = useReducedMotion()
+  const [ribbonReplayKey, setRibbonReplayKey] = React.useState(0)
+
+  const replayRibbon = () => {
+    if (shouldReduceMotion) return
+    setRibbonReplayKey((currentKey) => currentKey + 1)
+  }
+
   return (
-    <TitleItalic as="span" style={{ display: 'inline-flex', alignItems: 'baseline' }}>
-      <motion.svg
-        viewBox="0 0 130 60"
-        style={{
-          display: 'inline-block',
-          width: 'auto',
-          height: '1em',
-          verticalAlign: 'baseline',
-          overflow: 'visible',
-        }}
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.3, delay: 0.2 }}
-      >
-        <defs>
-          <filter id="flowy-glow">
-            <feGaussianBlur stdDeviation="1.2" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-        </defs>
-
-        <g
-          fill="none"
-          stroke="var(--ink)"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          {/* F */}
-          <motion.path
-            d="M10 53 L12 17 L34 17 M12 35 L30 35"
-            initial={{ pathLength: 0, opacity: 0 }}
-            whileInView={{ pathLength: 1, opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: charDuration, delay: 0.2, ease: [0.33, 1, 0.68, 1] }}
-          />
-
-          {/* l */}
-          <motion.path
-            d="M46 15 Q47 15 48 20 L50 53"
-            initial={{ pathLength: 0, opacity: 0 }}
-            whileInView={{ pathLength: 1, opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: charDuration * 0.7, delay: 0.2 + charDelay, ease: [0.33, 1, 0.68, 1] }}
-          />
-
-          {/* o */}
-          <motion.path
-            d="M58 37 Q58 25 68 23 Q78 21 80 33 Q82 45 72 47 Q62 49 60 38"
-            initial={{ pathLength: 0, opacity: 0 }}
-            whileInView={{ pathLength: 1, opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: charDuration * 0.85, delay: 0.2 + charDelay * 2, ease: [0.33, 1, 0.68, 1] }}
-          />
-
-          {/* w */}
-          <motion.path
-            d="M86 17 L92 47 L98 33 L104 47 L110 17"
-            initial={{ pathLength: 0, opacity: 0 }}
-            whileInView={{ pathLength: 1, opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: charDuration * 0.95, delay: 0.2 + charDelay * 3, ease: [0.33, 1, 0.68, 1] }}
-          />
-
-          {/* y — upper V */}
-          <motion.path
-            d="M115 17 L120 40 L126 17"
-            initial={{ pathLength: 0, opacity: 0 }}
-            whileInView={{ pathLength: 1, opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: charDuration * 0.7, delay: 0.2 + charDelay * 4, ease: [0.33, 1, 0.68, 1] }}
-          />
-
-          {/* y — descending */}
-          <motion.path
-            d="M120 40 Q118 50 117 57"
-            initial={{ pathLength: 0, opacity: 0 }}
-            whileInView={{ pathLength: 1, opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: charDuration * 0.6, delay: 0.2 + charDelay * 4.3, ease: [0.33, 1, 0.68, 1] }}
-          />
-        </g>
-
-        {/* Brand reveal glow overlay */}
-        <motion.g
-          filter="url(#flowy-glow)"
-          opacity="0"
-          fill="none"
-          stroke="var(--seal)"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          initial={false}
-          whileInView={{ opacity: [0, 0.45, 0] }}
-          viewport={{ once: true }}
-          transition={{ duration: 1.4, delay: 0.15, ease: 'easeOut' }}
-        >
-          <path d="M10 53 L12 17 L34 17 M12 35 L30 35" />
-          <path d="M46 15 Q47 15 48 20 L50 53" />
-          <path d="M58 37 Q58 25 68 23 Q78 21 80 33 Q82 45 72 47 Q62 49 60 38" />
-          <path d="M86 17 L92 47 L98 33 L104 47 L110 17" />
-          <path d="M115 17 L120 40 L126 17" />
-          <path d="M120 40 Q118 50 117 57" />
-        </motion.g>
-      </motion.svg>
-    </TitleItalic>
+    <FlowyMark aria-label='Flowy' onHoverStart={replayRibbon} onHoverEnd={replayRibbon}>
+      <FlowySvg viewBox='4 4 141 68' shapeRendering='geometricPrecision' aria-hidden='true'>
+        {shouldReduceMotion ? <FlowyPathSet /> : <FlowyRibbonMotion replayKey={ribbonReplayKey} />}
+      </FlowySvg>
+    </FlowyMark>
   )
 }
 
@@ -1357,26 +1660,43 @@ const LoadingSpinner = styled.div`
       transform: rotate(360deg);
     }
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
 `
 
 const BOTS_ID = [49699333, 29139614, 41898282, 29791463]
 
+const isContributor = (value: unknown): value is Contributor => {
+  if (!value || typeof value !== 'object') return false
+
+  const contributor = value as Record<string, unknown>
+  return (
+    typeof contributor.id === 'number' &&
+    typeof contributor.login === 'string' &&
+    typeof contributor.avatar_url === 'string' &&
+    typeof contributor.html_url === 'string'
+  )
+}
+
 export const getStaticProps: GetStaticProps = async ({ locale }) => {
   let contributors: Contributor[] = []
   try {
-    const res = await fetch('https://api.github.com/repos/drl990114/MarkFlowy/contributors')
+    const res = await fetch('https://api.github.com/repos/drl990114/MarkFlowy/contributors', {
+      headers: { Accept: 'application/vnd.github+json' },
+      signal: AbortSignal.timeout(8000),
+    })
     if (res.ok) {
-      const data = await res.json()
+      const data: unknown = await res.json()
       contributors = (Array.isArray(data) ? data : [])
-        .map((c: any) => ({
-          id: c.id,
-          login: c.login,
-          avatar_url: c.avatar_url,
-          html_url: c.html_url,
-        }))
-        .filter((c) => !BOTS_ID.includes(c.id))
+        .filter(isContributor)
+        .filter((contributor) => !BOTS_ID.includes(contributor.id))
+        .slice(0, 24)
     }
-  } catch (_) {}
+  } catch {
+    contributors = []
+  }
   return {
     props: {
       ...(await serverSideTranslations(locale || 'en', ['common'])),

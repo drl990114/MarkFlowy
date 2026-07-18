@@ -86,7 +86,13 @@
     },
     "contributors": {
       "title": "由众多贡献者共同构建",
-      "description": "感谢所有为 MarkFlowy 做出贡献的开发者"
+      "titleLead": "由众多贡献者",
+      "titleAccent": "共同构建",
+      "description": "感谢所有为 MarkFlowy 做出贡献的开发者",
+      "count": "{{count}} 位贡献者环绕其中",
+      "viewAll": "查看全部贡献者",
+      "globeLabel": "MarkFlowy 全球贡献者地球",
+      "orbitLabel": "环绕地球的贡献者资料链接"
     }
   },
   "navigation": {
@@ -96,6 +102,8 @@
     "github": "GitHub",
     "theme": "主题",
     "language": "语言",
+    "openMenu": "打开菜单",
+    "closeMenu": "关闭菜单",
     "releases": "版本发布"
   },
   "fileTitle": {

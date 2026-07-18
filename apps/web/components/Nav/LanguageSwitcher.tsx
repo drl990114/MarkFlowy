@@ -28,15 +28,14 @@ const languages = [
 ]
 
 export default function LanguageSwitcher({ className, style }: LanguageSwitcherProps) {
+  const { t } = useTranslation()
   const router = useRouter()
   const currentLocale = router.locale || 'en'
 
   const handleLanguageChange = (locale: string) => {
     const { pathname, asPath, query } = router
-    router.push({ pathname, query }, asPath, { locale })
+    void router.push({ pathname, query }, asPath, { locale })
   }
-
-  const currentLanguage = languages.find((lang) => lang.code === currentLocale) || languages[0]
 
   const [isOpen, setIsOpen] = React.useState(false)
   const containerRef = React.useRef<HTMLDivElement>(null)
@@ -51,9 +50,22 @@ export default function LanguageSwitcher({ className, style }: LanguageSwitcherP
     return () => document.removeEventListener('mousedown', onClickOutside)
   }, [])
 
+  React.useEffect(() => {
+    if (!isOpen) return
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsOpen(false)
+    }
+
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [isOpen])
+
   return (
     <Container ref={containerRef} className={className} style={style}>
       <TriggerButton
+        type='button'
+        aria-label={t('navigation.language')}
         aria-haspopup='listbox'
         aria-expanded={isOpen}
         onClick={() => setIsOpen((v) => !v)}
@@ -89,26 +101,38 @@ const Container = styled.div`
   align-items: center;
 `
 
-const TriggerButton = styled.div`
+const TriggerButton = styled.button`
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  width: 44px;
+  height: 44px;
   background: transparent;
   color: var(--ink-soft);
   font-size: ${rem(14)};
-  padding: ${rem(6)} ${rem(8)};
+  padding: 0;
+  border: 0;
   cursor: pointer;
   outline: none;
   border-radius: ${rem(6)};
-  transition: color 0.15s ease, background 0.15s ease;
+  transition:
+    color 0.15s ease,
+    background 0.15s ease;
 
-  &:hover {
-    color: var(--ink);
-    background: rgba(232, 230, 227, 0.06);
+  &:focus-visible {
+    outline: 2px solid var(--seal);
+    outline-offset: 2px;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      color: var(--ink);
+      background: rgba(232, 230, 227, 0.06);
+    }
   }
 `
 
-const Menu = styled.ul`
+const Menu = styled.div`
   position: absolute;
   top: calc(100% + ${rem(6)});
   right: 0;
@@ -119,20 +143,33 @@ const Menu = styled.ul`
   border-radius: ${rem(8)};
   padding: ${rem(6)} 0;
   margin: 0;
-  list-style: none;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
   z-index: 1000;
 `
 
-const MenuItem = styled.li`
+const MenuItem = styled.button`
   display: flex;
   align-items: center;
+  width: 100%;
+  min-height: 44px;
   padding: ${rem(8)} ${rem(12)};
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
   cursor: pointer;
   user-select: none;
   transition: background 0.15s ease;
 
-  &:hover {
-    background: rgba(232, 230, 227, 0.06);
+  &:focus-visible {
+    outline: 2px solid var(--seal);
+    outline-offset: -2px;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background: rgba(232, 230, 227, 0.06);
+    }
   }
 `

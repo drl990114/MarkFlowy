@@ -35,11 +35,15 @@ const NavLink = styled(Link).attrs((/* props */) => ({
   }
 `
 
-const NavLinks = () => {
+interface NavLinksProps {
+  className?: string
+}
+
+const NavLinks = ({ className }: NavLinksProps) => {
   const { t } = useTranslation()
   return (
-    <Wrapper>
-      <NavLink href='/docs'>{t("navigation.docs")}</NavLink>
+    <Wrapper className={className}>
+      <NavLink href='/docs'>{t('navigation.docs')}</NavLink>
       <NavSeparator />
       <NavLink href='/releases'>{t('navigation.releases')}</NavLink>
     </Wrapper>

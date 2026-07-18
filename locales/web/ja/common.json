@@ -86,7 +86,13 @@
     },
     "contributors": {
       "title": "多くの貢献者によって構築",
-      "description": "MarkFlowy に貢献してくださったすべての開発者に感謝します"
+      "titleLead": "多くの貢献者により",
+      "titleAccent": "構築",
+      "description": "MarkFlowy に貢献してくださったすべての開発者に感謝します",
+      "count": "貢献者 {{count}} 人が周回中",
+      "viewAll": "すべての貢献者を見る",
+      "globeLabel": "MarkFlowy のグローバル貢献者グローブ",
+      "orbitLabel": "地球を周回する貢献者プロフィールへのリンク"
     }
   },
   "navigation": {

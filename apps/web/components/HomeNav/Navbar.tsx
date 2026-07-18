@@ -1,4 +1,4 @@
-import { i18n, useTranslation } from 'next-i18next'
+import { i18n } from 'next-i18next'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import styled, { css } from 'styled-components'
 import { mobile } from '../../utils/media'
@@ -19,10 +19,10 @@ export interface NavbarProps {
 }
 
 export default function Navbar({ onMobileNavToggle, isMobileNavFolded }: NavbarProps) {
-  const { t } = useTranslation()
   const [navState, setNavState] = useState<'visible' | 'hidden' | 'scrolled'>('visible')
   const lastScrollY = useRef(0)
   const ticking = useRef(false)
+  const isMobileMenuOpen = isMobileNavFolded === false
 
   const updateNavState = useCallback(() => {
     const scrollY = window.scrollY
@@ -54,7 +54,7 @@ export default function Navbar({ onMobileNavToggle, isMobileNavFolded }: NavbarP
   }, [updateNavState])
 
   return (
-    <Wrapper $state={navState}>
+    <Wrapper $state={isMobileMenuOpen ? 'scrolled' : navState}>
       <MainBarRow>
         <NavInner>
           <MobileNavbar
@@ -95,12 +95,13 @@ const Wrapper = styled.nav<{ $state: 'visible' | 'hidden' | 'scrolled' }>`
   left: 0;
   right: 0;
   z-index: 50;
+  padding-top: env(safe-area-inset-top);
   background: color-mix(in srgb, var(--paper) 92%, transparent);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   transform: translateY(0);
   transition:
-    transform 400ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 240ms cubic-bezier(0.23, 1, 0.32, 1),
     box-shadow 200ms ease,
     border-color 200ms ease;
 
@@ -124,7 +125,7 @@ const MainBarRow = styled.div`
 const NavInner = styled.div`
   max-width: ${rem(1200)};
   margin: 0 auto;
-  padding: 0 ${rem(24)};
+  padding: 0 clamp(${rem(16)}, 4vw, ${rem(24)});
   height: 100%;
   display: flex;
   align-items: center;
@@ -152,45 +153,23 @@ const DesktopEnd = styled.div`
   `)}
 `
 
-const LoginLink = styled(Link).attrs(() => ({
-  unstyled: true,
-}))`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: ${rem(34)};
-  padding: 0 ${rem(14)};
-  border: 1px solid var(--line);
-  border-radius: ${rem(6)};
-  background: color-mix(in srgb, var(--paper-warm) 70%, transparent);
-  color: var(--ink);
-  font-family: var(--sans);
-  font-size: ${rem(14)};
-  font-weight: 600;
-  text-decoration: none;
-  transition:
-    background 150ms ease,
-    border-color 150ms ease,
-    color 150ms ease;
-
-  &:hover,
-  &:focus-visible {
-    border-color: color-mix(in srgb, var(--seal) 50%, var(--line));
-    background: color-mix(in srgb, var(--seal) 10%, transparent);
-    color: var(--seal);
-  }
-`
-
 const LogoLink = styled(Link).attrs(() => ({
   unstyled: true,
   href: '/',
 }))`
   display: flex;
   align-items: center;
+  min-height: 44px;
   gap: ${rem(8)};
   margin-right: ${rem(32)};
   color: var(--ink);
   text-decoration: none;
+
+  &:focus-visible {
+    outline: 2px solid var(--seal);
+    outline-offset: 3px;
+    border-radius: ${rem(4)};
+  }
 `
 
 const BrandName = styled.strong`
@@ -209,8 +188,15 @@ const StyledNavLinks = styled(NavLinks)`
     color: var(--ink-soft);
     transition: color 150ms ease;
 
-    &:hover {
-      color: var(--seal);
+    &:focus-visible {
+      outline: 2px solid var(--seal);
+      outline-offset: 3px;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      &:hover {
+        color: var(--seal);
+      }
     }
   }
 `
@@ -221,8 +207,10 @@ const StyledSocial = styled(Social)`
     color: var(--ink-soft);
     transition: color 150ms ease;
 
-    &:hover {
-      color: var(--seal);
+    @media (hover: hover) and (pointer: fine) {
+      &:hover {
+        color: var(--seal);
+      }
     }
   }
 `

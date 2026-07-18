@@ -61,7 +61,8 @@ const INKWASH_EDITOR_TOKENS = {
   scrollbarThumbColor: '#3a3a3e',
   scrollbarTrackColor: '#141416',
 
-  fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'PingFang SC Light', 'PingFang SC', 'Microsoft YaHei Light', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+  fontFamily:
+    "'Inter', -apple-system, BlinkMacSystemFont, 'PingFang SC Light', 'PingFang SC', 'Microsoft YaHei Light', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif",
   codemirrorFontFamily: "'JetBrains Mono', 'Fira Code', 'Menlo', 'Monaco', 'Consolas', monospace",
 
   nodeSelectedColor: 'rgba(212, 86, 74, 0.15)',
@@ -131,6 +132,17 @@ const RmeProvider: React.FC<RmeProviderProps> = ({ themeTokens, children }) => {
     [router.locale],
   )
 
+  const theme = useMemo(
+    () => ({
+      ...THEME_CONFIG,
+      token: {
+        ...THEME_CONFIG.token,
+        ...(themeTokens || {}),
+      },
+    }),
+    [themeTokens],
+  )
+
   useEffect(() => {
     const run = async () => {
       if (!editorI18nInstance.isInitialized) {
@@ -188,14 +200,6 @@ const RmeProvider: React.FC<RmeProviderProps> = ({ themeTokens, children }) => {
 
   if (!ThemeProvider) {
     return <Loading />
-  }
-
-  const theme = {
-    ...THEME_CONFIG,
-    token: {
-      ...THEME_CONFIG.token,
-      ...(themeTokens || {}),
-    },
   }
 
   return (

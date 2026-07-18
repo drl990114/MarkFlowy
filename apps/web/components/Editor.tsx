@@ -137,6 +137,7 @@ export const WebEditor = forwardRef<WebEditorRef, WebEditorProps>(function WebEd
     error,
   } = useRmeEditor()
   const [content, setContent] = useState(initialContent || '')
+  const previousInitialContentRef = useRef(initialContent)
   const editorRef = useRef<EditorRef>(null)
 
   const [currentViewType, setCurrentViewType] = useState(viewType || 'wysiwyg')
@@ -179,11 +180,12 @@ export const WebEditor = forwardRef<WebEditorRef, WebEditorProps>(function WebEd
   }, [])
 
   useEffect(() => {
-    if (initialContent !== undefined && initialContent !== content) {
+    if (initialContent !== undefined && initialContent !== previousInitialContentRef.current) {
       setContent(initialContent)
       setEditorKey((prev) => prev + 1)
     }
-  }, [content, initialContent])
+    previousInitialContentRef.current = initialContent
+  }, [initialContent])
 
   useEffect(() => {
     if (viewType && viewType !== currentViewType) {

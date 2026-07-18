@@ -86,7 +86,13 @@
     },
     "contributors": {
       "title": "Built by Many Contributors",
-      "description": "Thanks to all the developers who have contributed to MarkFlowy"
+      "titleLead": "Built by Many",
+      "titleAccent": "Contributors",
+      "description": "Thanks to all the developers who have contributed to MarkFlowy",
+      "count": "{{count}} contributors in orbit",
+      "viewAll": "View all contributors",
+      "globeLabel": "MarkFlowy global contributor globe",
+      "orbitLabel": "Contributor profile links orbiting the globe"
     }
   },
   "navigation": {
@@ -96,6 +102,8 @@
     "github": "GitHub",
     "theme": "Theme",
     "language": "Language",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
     "releases": "Releases"
   },
   "fileTitle": {

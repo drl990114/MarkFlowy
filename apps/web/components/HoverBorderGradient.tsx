@@ -1,40 +1,68 @@
 'use client'
-import { motion } from 'motion/react'
+import { motion, useReducedMotion } from 'motion/react'
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import rem from 'utils/rem'
 
 type Direction = 'TOP' | 'LEFT' | 'BOTTOM' | 'RIGHT'
+const DIRECTIONS: Direction[] = ['TOP', 'LEFT', 'BOTTOM', 'RIGHT']
 
-type HoverBorderGradientProps = {
-  as?: React.ElementType
-  duration?: number
-  clockwise?: boolean
-  children: React.ReactNode
-  onClick?: () => void
+const rotateDirection = (currentDirection: Direction, clockwise: boolean): Direction => {
+  const currentIndex = DIRECTIONS.indexOf(currentDirection)
+  const nextIndex = clockwise
+    ? (currentIndex - 1 + DIRECTIONS.length) % DIRECTIONS.length
+    : (currentIndex + 1) % DIRECTIONS.length
+  return DIRECTIONS[nextIndex]
 }
 
-const Container = styled.div`
+type HoverBorderGradientProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
+  duration?: number
+  clockwise?: boolean
+}
+
+const Container = styled.button`
   position: relative;
   display: inline-flex;
   border-radius: 9999px;
+  border: 0;
   background-color: var(--ink);
-  transition: transform 0.4s cubic-bezier(0.22, 0.61, 0.36, 1),
-              box-shadow 0.4s cubic-bezier(0.22, 0.61, 0.36, 1);
+  color: inherit;
+  font: inherit;
+  transition:
+    transform 0.4s cubic-bezier(0.22, 0.61, 0.36, 1),
+    box-shadow 0.4s cubic-bezier(0.22, 0.61, 0.36, 1);
   align-items: center;
   justify-content: center;
+  min-height: 44px;
   overflow: visible;
   padding: 1.5px;
   width: fit-content;
   cursor: pointer;
 
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(212, 86, 74, 0.15);
+  &:focus-visible {
+    outline: 2px solid var(--seal);
+    outline-offset: 3px;
   }
 
   &:active {
     transform: translateY(-1px);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        0 2px 8px rgba(212, 86, 74, 0.15);
+    }
+  }
+
+  @media (max-width: 26.25em) {
+    width: 100%;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
   }
 `
 
@@ -50,8 +78,14 @@ const Content = styled.div`
   font-size: ${rem(14)};
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: ${rem(8)};
   letter-spacing: 0.01em;
+  pointer-events: none;
+
+  @media (max-width: 26.25em) {
+    width: 100%;
+  }
 `
 
 const MotionBackground = styled(motion.div)`
@@ -75,57 +109,54 @@ const InnerBackground = styled.div`
 
 export function HoverBorderGradient({
   children,
-  as: Tag = 'button',
   duration = 1.5,
   clockwise = true,
-  onClick,
   ...props
 }: HoverBorderGradientProps) {
+  const shouldReduceMotion = useReducedMotion()
   const [hovered, setHovered] = useState<boolean>(false)
   const [direction, setDirection] = useState<Direction>('TOP')
-
-  const rotateDirection = (currentDirection: Direction): Direction => {
-    const directions: Direction[] = ['TOP', 'LEFT', 'BOTTOM', 'RIGHT']
-    const currentIndex = directions.indexOf(currentDirection)
-    const nextIndex = clockwise
-      ? (currentIndex - 1 + directions.length) % directions.length
-      : (currentIndex + 1) % directions.length
-    return directions[nextIndex]
-  }
 
   const movingMap: Record<Direction, string> = {
     TOP: 'radial-gradient(30% 60% at 50% 0%, #d4564a 0%, #d4564a 35%, rgba(212, 86, 74, 0) 100%)',
     LEFT: 'radial-gradient(25% 55% at 0% 50%, #d4564a 0%, #d4564a 35%, rgba(212, 86, 74, 0) 100%)',
-    BOTTOM: 'radial-gradient(30% 60% at 50% 100%, #d4564a 0%, #d4564a 35%, rgba(212, 86, 74, 0) 100%)',
-    RIGHT: 'radial-gradient(25% 55% at 100% 50%, #d4564a 0%, #d4564a 35%, rgba(212, 86, 74, 0) 100%)',
+    BOTTOM:
+      'radial-gradient(30% 60% at 50% 100%, #d4564a 0%, #d4564a 35%, rgba(212, 86, 74, 0) 100%)',
+    RIGHT:
+      'radial-gradient(25% 55% at 100% 50%, #d4564a 0%, #d4564a 35%, rgba(212, 86, 74, 0) 100%)',
   }
 
-  const highlight = 'radial-gradient(80% 180% at 50% 50%, #e06b5f 0%, #d4564a 30%, rgba(212, 86, 74, 0) 100%)'
+  const highlight =
+    'radial-gradient(80% 180% at 50% 50%, #e06b5f 0%, #d4564a 30%, rgba(212, 86, 74, 0) 100%)'
 
   useEffect(() => {
-    if (!hovered) {
+    if (!hovered && !shouldReduceMotion) {
       const interval = setInterval(() => {
-        setDirection((prevState) => rotateDirection(prevState))
+        if (!document.hidden) {
+          setDirection((prevState) => rotateDirection(prevState, clockwise))
+        }
       }, duration * 1000)
       return () => clearInterval(interval)
     }
-  }, [hovered, duration])
+  }, [clockwise, duration, hovered, shouldReduceMotion])
 
   return (
     <Container
-      as={Tag}
+      type='button'
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      onClick={onClick}
       {...props}
     >
       <Content>{children}</Content>
       <MotionBackground
-        initial={{ background: movingMap[direction] }}
+        initial={false}
         animate={{
-          background: hovered ? [movingMap[direction], highlight] : movingMap[direction],
+          background:
+            hovered && !shouldReduceMotion
+              ? [movingMap[direction], highlight]
+              : movingMap[direction],
         }}
-        transition={{ ease: 'linear', duration: duration ?? 1 }}
+        transition={{ ease: 'linear', duration: shouldReduceMotion ? 0 : duration }}
       />
       <InnerBackground />
     </Container>
