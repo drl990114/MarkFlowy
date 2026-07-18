@@ -3,12 +3,30 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import Link from 'next/link'
 import styled, { css } from 'styled-components'
 import SeoHead from '../../components/SeoHead'
+import { useRedirectIfAuthenticated } from '../../hooks/useAuth'
 import { AuthMode, Step, useAuthForm } from '../../hooks/useAuthForm'
 import { useGitHubLogin } from '../../hooks/useGitHubLogin'
 import { mobile } from '../../utils/media'
 import rem from '../../utils/rem'
 
 export default function AuthPage() {
+  const checkingAuth = useRedirectIfAuthenticated()
+
+  if (checkingAuth) {
+    return (
+      <>
+        <SeoHead title='Sign In - MarkFlowy' />
+        <AuthLayout aria-busy='true'>
+          <LoadingSpinner role='status' aria-label='Checking login status' />
+        </AuthLayout>
+      </>
+    )
+  }
+
+  return <AuthForm />
+}
+
+function AuthForm() {
   const { t } = useTranslation('common')
   const {
     loading: githubLoading,

@@ -78,18 +78,28 @@ export function useRedirectIfAuthenticated() {
   const [checking, setChecking] = useState(true)
 
   useEffect(() => {
+    let cancelled = false
+
     const checkAuth = async () => {
       try {
         if (await apiClient.restoreSession()) {
-          await router.push('/workspace')
+          if (!cancelled) {
+            await router.replace('/workspace')
+          }
           return
         }
       } finally {
-        setChecking(false)
+        if (!cancelled) {
+          setChecking(false)
+        }
       }
     }
 
     void checkAuth()
+
+    return () => {
+      cancelled = true
+    }
   }, [router])
 
   return checking
