@@ -1,5 +1,33 @@
 # UPDATE LOG
 
+## v0.84.0
+
+Features:
+
+- Upgraded Preview mode with richer rendering for syntax-highlighted code, HTML, Mermaid diagrams, and inline and block math, including fenced math blocks and theme-aware Mermaid diagrams.
+
+- HTML, Mermaid, and block math live previews now use a preview-first workflow. Source code opens while editing or in fullscreen, collapses after editing, and can optionally remain side by side with the preview.
+
+Improvements and fixes:
+
+- Improved preview image loading with skeleton and progress feedback, lazy asynchronous decoding, and more reliable handling of local, remote, and reference images. Image export now waits for pending preview resources.
+
+- Improved preview security and reliability with safer HTML and Mermaid rendering, isolated block errors, interactive HTML content, better text wrapping, keyboard and focus handling, and accessibility.
+
+---
+
+特性：
+
+- 升级预览模式，增强代码高亮、HTML、Mermaid 图表及行内和块级公式的渲染，并支持围栏式数学公式和跟随主题变化的 Mermaid 图表。
+
+- HTML、Mermaid 和块级公式实时预览采用“预览优先”交互：编辑或进入全屏时显示源代码，编辑结束后自动收起，也可在设置中选择始终并排显示源码和预览。
+
+改进与修复：
+
+- 优化预览图片加载，新增骨架屏和加载进度提示、懒加载及异步解码，并提升本地、远程和引用式图片的处理可靠性；导出图片时会等待预览资源加载完成。
+
+- 提升预览的安全性与稳定性，包括更安全的 HTML 和 Mermaid 渲染、错误块隔离、可交互的 HTML 内容，以及更好的文本换行、键盘焦点和无障碍体验。
+
 ## v0.83.0
 
 Features:
