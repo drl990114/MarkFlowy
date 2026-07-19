@@ -1,9 +1,9 @@
 import type { Extension as CodeMirrorExtension } from '@codemirror/state'
 import type { EditorView, ProsemirrorNode } from '@rme-sdk/pm'
-import type { MfCodemirrorView } from '../../codemirror'
 import type { CustomCopyFunction } from '../CodeMirror/codemirror-types'
 
 export type LivePreviewMode = 'split' | 'preview'
+export type LivePreviewBlockBehavior = 'auto' | 'always-split'
 
 export interface LivePreviewRenderContext {
   node: ProsemirrorNode
@@ -34,6 +34,7 @@ export interface LivePreviewNodeViewOptions {
   getPos: () => number
   renderer: LivePreviewRenderer
   customCopyFunction?: CustomCopyFunction
+  behavior?: LivePreviewBlockBehavior
   defaultMode?: LivePreviewMode
   openOnMount?: boolean
 }
@@ -41,4 +42,10 @@ export interface LivePreviewNodeViewOptions {
 export interface LivePreviewBlockCommonOptions {
   customCopyFunction?: CustomCopyFunction
   codemirrorExtensions?: CodeMirrorExtension[]
+  /**
+   * `auto` shows source only for the active block. `always-split` keeps source
+   * and preview visible side by side.
+   * @default 'auto'
+   */
+  behavior?: LivePreviewBlockBehavior
 }

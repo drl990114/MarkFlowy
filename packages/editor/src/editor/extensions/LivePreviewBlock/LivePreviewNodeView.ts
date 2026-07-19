@@ -4,7 +4,13 @@ import { NodeSelection } from '@rme-sdk/pm/state'
 import type { EditorView } from '@rme-sdk/pm/view'
 import { MfCodemirrorView } from '../../codemirror'
 import { isBrowser } from '../../utils/common'
+import {
+  registerLivePreviewBehaviorTarget,
+  unregisterLivePreviewBehaviorTarget,
+  type LivePreviewBehaviorTarget,
+} from './live-preview-registry'
 import type {
+  LivePreviewBlockBehavior,
   LivePreviewMode,
   LivePreviewNodeViewApi,
   LivePreviewNodeViewOptions,
@@ -12,8 +18,10 @@ import type {
 } from './live-preview-types'
 
 const renderDelay = 120
+let editorId = 0
 
-export class LivePreviewNodeView implements NodeView, LivePreviewNodeViewApi {
+export class LivePreviewNodeView
+  implements NodeView, LivePreviewNodeViewApi, LivePreviewBehaviorTarget {
   dom: HTMLElement
 
   private node: ProsemirrorNode
@@ -28,11 +36,16 @@ export class LivePreviewNodeView implements NodeView, LivePreviewNodeViewApi {
   private readonly copyButton: HTMLButtonElement
   private cmView?: CodeMirrorEditorView
   private mfCodemirrorView?: MfCodemirrorView
+  private behavior: LivePreviewBlockBehavior
+  private focusOpen: boolean
+  private searchOpen = false
   private mode: LivePreviewMode
-  private modeBeforePreviewZoom: LivePreviewMode | undefined
   private fullscreen = false
   private lastCodeMirrorSelectionHead: number | undefined
   private renderTimer: ReturnType<typeof setTimeout> | undefined
+  private focusFrame: number | undefined
+  private collapseFrame: number | undefined
+  private waitingForWindowFocus = false
   private renderVersion = 0
   private destroying = false
   private readonly customCopyFunction?: LivePreviewNodeViewOptions['customCopyFunction']
@@ -42,12 +55,22 @@ export class LivePreviewNodeView implements NodeView, LivePreviewNodeViewApi {
     this.view = options.view
     this.getPos = options.getPos
     this.renderer = options.renderer
-    this.mode = options.defaultMode ?? 'split'
+    this.behavior = registerLivePreviewBehaviorTarget(
+      this.view,
+      this,
+      options.behavior ?? 'auto',
+    )
+    this.focusOpen =
+      options.defaultMode !== undefined
+        ? options.defaultMode === 'split'
+        : Boolean(options.openOnMount || this.node.textContent.length === 0)
+    this.mode = this.resolveMode()
     this.customCopyFunction = options.customCopyFunction
 
     this.dom = document.createElement('div')
     this.dom.classList.add('mf-live-preview-block', this.renderer.className)
     this.dom.dataset.mode = this.mode
+    this.dom.dataset.behavior = this.behavior
 
     const header = document.createElement('div')
     header.className = 'mf-live-preview-header'
@@ -60,10 +83,10 @@ export class LivePreviewNodeView implements NodeView, LivePreviewNodeViewApi {
     toolbar.className = 'mf-live-preview-toolbar'
 
     this.copyButton = this.createToolbarButton('ri-file-copy-line', 'Copy source')
-    this.toggleButton = this.createToolbarButton('ri-layout-right-line', 'Preview only')
+    this.toggleButton = this.createToolbarButton('ri-code-s-slash-line', 'Edit source')
     this.fullscreenButton = this.createToolbarButton('ri-fullscreen-line', 'Fullscreen')
 
-    toolbar.append(this.copyButton, this.toggleButton, this.fullscreenButton)
+    toolbar.append(this.toggleButton, this.copyButton, this.fullscreenButton)
     header.append(language, toolbar)
 
     this.bodyElt = document.createElement('div')
@@ -71,12 +94,11 @@ export class LivePreviewNodeView implements NodeView, LivePreviewNodeViewApi {
 
     this.editorElt = document.createElement('div')
     this.editorElt.className = 'mf-live-preview-editor'
+    this.editorElt.id = `mf-live-preview-editor-${++editorId}`
 
-    const divider = document.createElement('button')
+    const divider = document.createElement('div')
     divider.className = 'mf-live-preview-divider'
-    divider.type = 'button'
-    divider.title = 'Toggle preview'
-    divider.innerHTML = '<i class="ri-arrow-left-s-line"></i>'
+    divider.setAttribute('aria-hidden', 'true')
 
     this.previewElt = document.createElement('div')
     this.previewElt.className = 'mf-live-preview-render'
@@ -86,12 +108,13 @@ export class LivePreviewNodeView implements NodeView, LivePreviewNodeViewApi {
 
     this.copyButton.addEventListener('click', this.copySource)
     this.toggleButton.addEventListener('click', this.toggleMode)
-    divider.addEventListener('click', this.toggleMode)
     this.fullscreenButton.addEventListener('click', this.toggleFullscreen)
     toolbar.addEventListener('mousedown', this.stopToolbarMouseDown)
     header.addEventListener('mousedown', this.selectWholeNode)
-    this.previewElt.addEventListener('click', this.zoomPreview)
     this.dom.addEventListener('mousedown', this.ensureFocus)
+    this.dom.addEventListener('focusin', this.handleFocusIn)
+    this.dom.addEventListener('focusout', this.handleFocusOut)
+    this.dom.addEventListener('keydown', this.handleKeydown)
 
     this.createCodeMirror()
     this.applyMode()
@@ -99,7 +122,7 @@ export class LivePreviewNodeView implements NodeView, LivePreviewNodeViewApi {
     this.renderer.onMount?.(this)
 
     if (options.openOnMount) {
-      this.focus()
+      this.editSource()
     }
   }
 
@@ -114,12 +137,34 @@ export class LivePreviewNodeView implements NodeView, LivePreviewNodeViewApi {
   }
 
   setSelection(anchor: number, head: number): void {
+    this.focusOpen = true
+    this.applyMode()
+    this.cmView?.requestMeasure()
     this.mfCodemirrorView?.setSelection(anchor, head)
   }
 
   focus(): void {
-    this.cmView?.focus()
-    this.mfCodemirrorView?.forwardSelection()
+    this.editSource()
+  }
+
+  getPosition(): number {
+    return this.getPos()
+  }
+
+  editSource = (): void => {
+    this.focusOpen = true
+    this.applyMode()
+    this.focusCodeMirrorAtStoredPosition()
+  }
+
+  setBehavior(behavior: LivePreviewBlockBehavior): void {
+    if (this.behavior === behavior) {
+      return
+    }
+
+    this.behavior = behavior
+    this.dom.dataset.behavior = behavior
+    this.applyMode()
   }
 
   stopEvent(): boolean {
@@ -143,7 +188,15 @@ export class LivePreviewNodeView implements NodeView, LivePreviewNodeViewApi {
     if (this.renderTimer) {
       clearTimeout(this.renderTimer)
     }
+    if (this.focusFrame !== undefined) {
+      cancelAnimationFrame(this.focusFrame)
+    }
+    if (this.collapseFrame !== undefined) {
+      cancelAnimationFrame(this.collapseFrame)
+    }
+    this.stopWaitingForWindowFocus()
     this.setFullscreen(false)
+    unregisterLivePreviewBehaviorTarget(this.view, this)
     this.renderer.onDestroy?.(this)
     this.mfCodemirrorView?.destroy()
     this.mfCodemirrorView = undefined
@@ -174,6 +227,7 @@ export class LivePreviewNodeView implements NodeView, LivePreviewNodeViewApi {
           this.recordCodeMirrorSelection()
           this.scheduleRender(value)
         },
+        onSearchActiveChange: this.handleSearchActiveChange,
       },
     })
     this.cmView = this.mfCodemirrorView.cm
@@ -200,17 +254,22 @@ export class LivePreviewNodeView implements NodeView, LivePreviewNodeViewApi {
       })
       if (this.destroying || version !== this.renderVersion) return
       this.previewElt.classList.remove('mf-live-preview-render-error')
-      this.previewElt.removeAttribute('title')
       this.previewElt.replaceChildren(...staging.childNodes)
     } catch (err) {
       if (this.destroying || version !== this.renderVersion) return
-      this.previewElt.replaceChildren()
+      const errorCard = document.createElement('div')
+      errorCard.className = 'mf-live-preview-error-card'
       const error = document.createElement('pre')
       error.className = 'mf-live-preview-error'
       error.textContent = err instanceof Error ? err.message : String(err)
-      this.previewElt.appendChild(error)
+      const editButton = document.createElement('button')
+      editButton.className = 'mf-live-preview-error-action'
+      editButton.type = 'button'
+      editButton.textContent = 'Edit source'
+      editButton.addEventListener('click', this.handleErrorEdit)
+      errorCard.append(error, editButton)
+      this.previewElt.replaceChildren(errorCard)
       this.previewElt.classList.add('mf-live-preview-render-error')
-      this.previewElt.setAttribute('title', error.textContent)
     }
   }
 
@@ -235,23 +294,51 @@ export class LivePreviewNodeView implements NodeView, LivePreviewNodeViewApi {
   private toggleMode = (event: MouseEvent): void => {
     event.preventDefault()
     event.stopPropagation()
-    this.mode = this.mode === 'split' ? 'preview' : 'split'
+
+    if (this.mode === 'preview') {
+      this.editSource()
+      return
+    }
+
+    this.recordCodeMirrorSelection()
+    this.focusOpen = false
     this.applyMode()
   }
 
   private applyMode(): void {
+    const previousMode = this.mode
+    this.mode = this.resolveMode()
     this.dom.dataset.mode = this.mode
     const previewOnly = this.mode === 'preview'
-    this.toggleButton.title = previewOnly ? 'Show editor' : 'Preview only'
-    this.toggleButton.innerHTML = previewOnly
-      ? '<i class="ri-layout-left-line"></i>'
-      : '<i class="ri-layout-right-line"></i>'
+    const alwaysSplit = this.behavior === 'always-split'
+    const searchLocked = this.searchOpen
+    const label = alwaysSplit
+      ? 'Source always visible'
+      : searchLocked
+        ? 'Source shown for search result'
+        : previewOnly
+          ? 'Edit source'
+          : 'Hide source'
+    this.setToolbarButtonContent(
+      this.toggleButton,
+      previewOnly || alwaysSplit || searchLocked
+        ? 'ri-code-s-slash-line'
+        : 'ri-eye-line',
+      label,
+    )
+    this.toggleButton.disabled = alwaysSplit || searchLocked
+    this.toggleButton.setAttribute('aria-expanded', String(!previewOnly))
+    this.toggleButton.setAttribute('aria-controls', this.editorElt.id)
+    this.editorElt.setAttribute('aria-hidden', String(previewOnly))
+
+    if (previousMode === 'preview' && this.mode === 'split') {
+      this.requestCodeMirrorMeasure()
+    }
   }
 
   private toggleFullscreen = (event: MouseEvent): void => {
     event.preventDefault()
     event.stopPropagation()
-    this.modeBeforePreviewZoom = undefined
     this.setFullscreen(!this.fullscreen)
   }
 
@@ -259,12 +346,22 @@ export class LivePreviewNodeView implements NodeView, LivePreviewNodeViewApi {
     if (this.fullscreen === fullscreen) {
       return
     }
+
+    if (fullscreen) {
+      this.focusOpen = true
+    } else {
+      this.recordCodeMirrorSelection()
+      this.focusOpen = false
+    }
+
     this.fullscreen = fullscreen
+    this.applyMode()
     this.dom.classList.toggle('mf-live-preview-fullscreen', this.fullscreen)
-    this.fullscreenButton.title = this.fullscreen ? 'Exit fullscreen' : 'Fullscreen'
-    this.fullscreenButton.innerHTML = this.fullscreen
-      ? '<i class="ri-fullscreen-exit-line"></i>'
-      : '<i class="ri-fullscreen-line"></i>'
+    this.setToolbarButtonContent(
+      this.fullscreenButton,
+      this.fullscreen ? 'ri-fullscreen-exit-line' : 'ri-fullscreen-line',
+      this.fullscreen ? 'Exit fullscreen' : 'Fullscreen',
+    )
     const method = this.fullscreen ? 'addEventListener' : 'removeEventListener'
     document[method]('keydown', this.handleDocumentKeydown as EventListener, true)
 
@@ -276,12 +373,6 @@ export class LivePreviewNodeView implements NodeView, LivePreviewNodeViewApi {
     if (this.fullscreen && this.mode !== 'preview') {
       this.focusCodeMirrorAtStoredPosition()
     }
-
-    if (!this.fullscreen && this.modeBeforePreviewZoom) {
-      this.mode = this.modeBeforePreviewZoom
-      this.modeBeforePreviewZoom = undefined
-      this.applyMode()
-    }
   }
 
   private handleDocumentKeydown = (event: KeyboardEvent): void => {
@@ -291,6 +382,33 @@ export class LivePreviewNodeView implements NodeView, LivePreviewNodeViewApi {
     event.preventDefault()
     event.stopPropagation()
     this.setFullscreen(false)
+    if (this.mode === 'preview') {
+      this.fullscreenButton.focus()
+    }
+  }
+
+  private handleKeydown = (event: KeyboardEvent): void => {
+    if (
+      event.defaultPrevented ||
+      event.isComposing ||
+      event.key !== 'Escape' ||
+      this.fullscreen ||
+      this.mode === 'preview' ||
+      !this.isEventFromEditor(event)
+    ) {
+      return
+    }
+
+    event.preventDefault()
+    event.stopPropagation()
+    this.recordCodeMirrorSelection()
+    this.focusOpen = false
+    this.applyMode()
+
+    const pos = this.getPos()
+    const tr = this.view.state.tr.setSelection(NodeSelection.create(this.view.state.doc, pos))
+    this.view.dispatch(tr.scrollIntoView())
+    this.view.focus()
   }
 
   private selectWholeNode = (event: MouseEvent): void => {
@@ -308,28 +426,12 @@ export class LivePreviewNodeView implements NodeView, LivePreviewNodeViewApi {
     this.view.focus()
   }
 
-  private zoomPreview = (event: MouseEvent): void => {
-    if (this.fullscreen) {
-      return
-    }
-    event.preventDefault()
-    event.stopPropagation()
-    this.modeBeforePreviewZoom = this.mode
-    this.mode = 'preview'
-    this.applyMode()
-    this.setFullscreen(true)
-  }
-
   private stopToolbarMouseDown = (event: MouseEvent): void => {
     event.stopPropagation()
   }
 
   private recordCodeMirrorSelection(): void {
     if (!this.cmView) {
-      return
-    }
-    if (!this.cmView.hasFocus) {
-      this.lastCodeMirrorSelectionHead = undefined
       return
     }
     this.lastCodeMirrorSelectionHead = this.cmView.state.selection.main.head
@@ -339,11 +441,16 @@ export class LivePreviewNodeView implements NodeView, LivePreviewNodeViewApi {
     if (!this.cmView || !isBrowser()) {
       return
     }
-    requestAnimationFrame(() => {
-      if (!this.cmView || !this.fullscreen || this.mode === 'preview') {
+    if (this.focusFrame !== undefined) {
+      cancelAnimationFrame(this.focusFrame)
+    }
+    this.focusFrame = requestAnimationFrame(() => {
+      this.focusFrame = undefined
+      if (!this.cmView || this.mode === 'preview' || this.destroying) {
         return
       }
 
+      this.cmView.requestMeasure()
       const docLength = this.cmView.state.doc.length
       const currentSelection = this.cmView.state.selection.main
       const storedHead = this.lastCodeMirrorSelectionHead
@@ -366,6 +473,100 @@ export class LivePreviewNodeView implements NodeView, LivePreviewNodeViewApi {
     })
   }
 
+  private handleFocusIn = (event: FocusEvent): void => {
+    if (!(event.target instanceof Node) || !this.editorElt.contains(event.target)) {
+      return
+    }
+
+    this.focusOpen = true
+    this.applyMode()
+  }
+
+  private handleFocusOut = (): void => {
+    this.scheduleCollapseCheck()
+  }
+
+  private scheduleCollapseCheck(): void {
+    if (!isBrowser()) {
+      return
+    }
+    if (this.collapseFrame !== undefined) {
+      cancelAnimationFrame(this.collapseFrame)
+    }
+
+    this.collapseFrame = requestAnimationFrame(() => {
+      this.collapseFrame = undefined
+      if (this.destroying || this.fullscreen) {
+        return
+      }
+      if (!this.dom.ownerDocument.hasFocus()) {
+        this.waitForWindowFocus()
+        return
+      }
+      this.stopWaitingForWindowFocus()
+
+      const activeElement = this.view.root?.activeElement ?? this.dom.ownerDocument.activeElement
+      if (
+        (activeElement && this.dom.contains(activeElement)) ||
+        this.cmView?.hasFocus
+      ) {
+        return
+      }
+
+      this.recordCodeMirrorSelection()
+      this.focusOpen = false
+      this.applyMode()
+    })
+  }
+
+  private waitForWindowFocus(): void {
+    if (this.waitingForWindowFocus) {
+      return
+    }
+    this.waitingForWindowFocus = true
+    this.dom.ownerDocument.defaultView?.addEventListener('focus', this.handleWindowFocus, {
+      once: true,
+    })
+  }
+
+  private stopWaitingForWindowFocus(): void {
+    if (!this.waitingForWindowFocus) {
+      return
+    }
+    this.waitingForWindowFocus = false
+    this.dom.ownerDocument.defaultView?.removeEventListener('focus', this.handleWindowFocus)
+  }
+
+  private handleWindowFocus = (): void => {
+    this.waitingForWindowFocus = false
+    this.scheduleCollapseCheck()
+  }
+
+  private handleSearchActiveChange = (active: boolean): void => {
+    this.searchOpen = active
+    this.applyMode()
+  }
+
+  private handleErrorEdit = (event: MouseEvent): void => {
+    event.preventDefault()
+    event.stopPropagation()
+    this.editSource()
+  }
+
+  private resolveMode(): LivePreviewMode {
+    return this.behavior === 'always-split' || this.focusOpen || this.searchOpen
+      ? 'split'
+      : 'preview'
+  }
+
+  private requestCodeMirrorMeasure(): void {
+    this.cmView?.requestMeasure()
+  }
+
+  private isEventFromEditor(event: Event): boolean {
+    return event.target instanceof Node && this.editorElt.contains(event.target)
+  }
+
   private copySource = async (event: MouseEvent): Promise<void> => {
     event.preventDefault()
     event.stopPropagation()
@@ -386,13 +587,11 @@ export class LivePreviewNodeView implements NodeView, LivePreviewNodeViewApi {
   }
 
   private showCopySuccess(): void {
-    const original = this.copyButton.innerHTML
-    const originalTitle = this.copyButton.title
-    this.copyButton.innerHTML = '<i class="ri-check-line"></i>'
-    this.copyButton.title = 'Copied'
+    this.setToolbarButtonContent(this.copyButton, 'ri-check-line', 'Copied')
     setTimeout(() => {
-      this.copyButton.innerHTML = original
-      this.copyButton.title = originalTitle
+      if (!this.destroying) {
+        this.setToolbarButtonContent(this.copyButton, 'ri-file-copy-line', 'Copy source')
+      }
     }, 1200)
   }
 
@@ -400,8 +599,20 @@ export class LivePreviewNodeView implements NodeView, LivePreviewNodeViewApi {
     const button = document.createElement('button')
     button.className = 'mf-live-preview-tool'
     button.type = 'button'
-    button.title = title
-    button.innerHTML = `<i class="${icon}"></i>`
+    this.setToolbarButtonContent(button, icon, title)
     return button
+  }
+
+  private setToolbarButtonContent(
+    button: HTMLButtonElement,
+    icon: string,
+    label: string,
+  ): void {
+    const iconElt = document.createElement('i')
+    iconElt.className = icon
+    iconElt.setAttribute('aria-hidden', 'true')
+    button.replaceChildren(iconElt)
+    button.title = label
+    button.setAttribute('aria-label', label)
   }
 }

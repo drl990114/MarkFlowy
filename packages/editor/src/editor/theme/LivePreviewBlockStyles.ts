@@ -6,7 +6,6 @@ export const livePreviewBlockStyles = css`
     position: relative;
     display: flex;
     flex-direction: column;
-    min-height: 200px;
     margin: 0.5em 0 0.75em;
     overflow: hidden;
     border: 1px solid ${(props) => props.theme.borderColor};
@@ -71,6 +70,22 @@ export const livePreviewBlockStyles = css`
       border-color: ${(props) => props.theme.borderColor};
       background: ${(props) => props.theme.hoverColor};
     }
+
+    &:focus-visible {
+      outline: 2px solid ${(props) => props.theme.accentColor};
+      outline-offset: -2px;
+    }
+
+    &:disabled {
+      opacity: 0.55;
+      cursor: default;
+    }
+
+    &:disabled:hover {
+      color: ${(props) => props.theme.labelFontColor};
+      border-color: transparent;
+      background: transparent;
+    }
   }
 
   .mf-live-preview-body {
@@ -78,18 +93,18 @@ export const livePreviewBlockStyles = css`
     display: grid;
     grid-template-columns: minmax(0, 1fr) 1px minmax(0, 1fr);
     flex: 1;
-    min-height: 168px;
+    min-height: 0;
   }
 
   .mf-live-preview-editor {
     min-width: 0;
-    min-height: 168px;
+    min-height: 0;
     overflow: hidden;
     background: ${(props) => props.theme.preBgColor};
 
     .cm-editor {
       height: 100%;
-      min-height: 168px;
+      min-height: 0;
       margin: 0;
       padding: 6px 0;
       border-radius: 0;
@@ -110,35 +125,12 @@ export const livePreviewBlockStyles = css`
     border: 0;
     border-left: 1px solid ${(props) => props.theme.borderColor};
     background: ${(props) => props.theme.borderColor};
-    color: ${(props) => props.theme.labelFontColor};
-    cursor: pointer;
-
-    i {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 16px;
-      height: 34px;
-      transform: translate(-50%, -50%);
-      border: 1px solid ${(props) => props.theme.borderColor};
-      border-radius: 6px;
-      background: ${(props) => props.theme.bgColor};
-      font-size: 13px;
-    }
-
-    &:hover i {
-      color: ${(props) => props.theme.primaryFontColor};
-      background: ${(props) => props.theme.hoverColor};
-    }
   }
 
   .mf-live-preview-render {
     box-sizing: border-box;
     min-width: 0;
-    min-height: 168px;
+    min-height: 0;
     padding: 14px 16px;
     overflow: auto;
     color: inherit;
@@ -146,7 +138,7 @@ export const livePreviewBlockStyles = css`
     font-size: inherit;
     line-height: inherit;
     background: ${(props) => props.theme.bgColor};
-    cursor: zoom-in;
+    cursor: default;
   }
 
   .mf-live-preview-render > * {
@@ -186,14 +178,53 @@ export const livePreviewBlockStyles = css`
     line-height: 1.5;
   }
 
+  .mf-live-preview-error-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .mf-live-preview-error-action {
+    min-height: 24px;
+    padding: 2px 8px;
+    border: 1px solid ${(props) => props.theme.borderColor};
+    border-radius: ${(props) => props.theme.smallBorderRadius};
+    color: ${(props) => props.theme.primaryFontColor};
+    background: ${(props) => props.theme.bgColor};
+    cursor: pointer;
+    font: inherit;
+    font-size: 12px;
+
+    &:hover {
+      background: ${(props) => props.theme.hoverColor};
+    }
+
+    &:focus-visible {
+      outline: 2px solid ${(props) => props.theme.accentColor};
+      outline-offset: 1px;
+    }
+  }
+
   .mf-live-preview-render-error {
     background: ${(props) => props.theme.tipsBgColor};
+  }
+
+  .mf-live-preview-block[data-mode='split'] {
+    min-height: 200px;
+
+    .mf-live-preview-body,
+    .mf-live-preview-editor,
+    .mf-live-preview-render,
+    .mf-live-preview-editor .cm-editor {
+      min-height: 168px;
+    }
   }
 
   .mf-live-preview-block[data-mode='preview'] {
     .mf-live-preview-body {
       display: block;
-      min-height: 168px;
+      min-height: 0;
     }
 
     .mf-live-preview-editor {
@@ -201,25 +232,12 @@ export const livePreviewBlockStyles = css`
     }
 
     .mf-live-preview-divider {
-      position: absolute;
-      top: 50%;
-      left: 0;
-      width: 0;
-      height: 0;
-      border: 0;
-      background: transparent;
-      transform: translateY(-50%);
-    }
-
-    .mf-live-preview-divider i {
-      left: 0;
-      transform: translate(-50%, -50%) rotate(180deg);
-      background: ${(props) => props.theme.preBgColor};
+      display: none;
     }
 
     .mf-live-preview-render {
       width: 100%;
-      min-height: 168px;
+      min-height: 0;
       padding: 14px 16px;
     }
   }
@@ -240,9 +258,16 @@ export const livePreviewBlockStyles = css`
     .mf-live-preview-editor .cm-editor {
       min-height: 0;
     }
+  }
 
-    .mf-live-preview-render {
-      cursor: default;
+  .mf-live-preview-fullscreen[data-mode='split'] {
+    min-height: 0;
+
+    .mf-live-preview-body,
+    .mf-live-preview-editor,
+    .mf-live-preview-render,
+    .mf-live-preview-editor .cm-editor {
+      min-height: 0;
     }
   }
 

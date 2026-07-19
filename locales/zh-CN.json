@@ -327,6 +327,14 @@
           "label": "代码块换行",
           "desc": "代码块中的行字数超出时是否换行。"
         },
+        "live_preview_block_behavior": {
+          "label": "实时预览块",
+          "desc": "设置 HTML、Mermaid 和块级公式何时显示源代码。",
+          "options": {
+            "auto": "仅编辑时显示源代码",
+            "always_split": "始终并排显示源代码和预览"
+          }
+        },
         "spellcheck": {
           "label": "拼写检查",
           "desc": "是否在Wysiwyg模式下启用拼写检查。"

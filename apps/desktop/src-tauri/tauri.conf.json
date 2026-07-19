@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "MarkFlowy",
-  "version": "0.83.0",
+  "version": "0.83.1",
   "identifier": "com.drl990114.markflowy",
   "build": {
     "beforeDevCommand": "yarn dev",
@@ -131,9 +131,8 @@
     },
     "updater": {
       "endpoints": [
-        "http://api.upgrade.toolsetlink.com/v1/tauri/upgrade?tauriKey=xpn68m4j5qU0Y1rfDYFHaA&versionName={{current_version}}&appointVersionName=&devModelKey=&devKey=&target={{target}}&arch={{arch}}",
-        "https://drl990114.github.io/MarkFlowy/install.json",
-        "https://github.com/drl990114/MarkFlowy/releases/latest/download/install.json"
+        "https://github.com/drl990114/MarkFlowy/releases/latest/download/install.json",
+        "https://drl990114.github.io/MarkFlowy/install.json"
       ],
       "dangerousInsecureTransportProtocol": true,
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDg3M0ZEQUYyOEMyNjVCNTIKUldSU1d5YU04dG8vaDFTemY1RVdrTWNNTUdvMlQ3K05nMnJSQzc5cldQZXM4N2N1ejF3UnJsM1kK",

@@ -261,6 +261,14 @@
           "label": "コードブロック改行",
           "desc": "コードブロック中の行の文字数が時を超えて改行しますか?"
         },
+        "live_preview_block_behavior": {
+          "label": "ライブプレビューブロック",
+          "desc": "HTML、Mermaid、ブロック数式でソースコードを表示するタイミングを設定します。",
+          "options": {
+            "auto": "編集中のみソースを表示",
+            "always_split": "ソースとプレビューを常に並べて表示"
+          }
+        },
         "spellcheck": {
           "label": "スペルチェック",
           "desc": "Wysiwygモードでスペルチェックを有効にするかどうか。"

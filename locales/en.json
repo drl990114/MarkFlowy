@@ -297,6 +297,14 @@
           "label": "Code block wrap",
           "desc": "Whether the line breaks when the number of line words in the code block exceeds."
         },
+        "live_preview_block_behavior": {
+          "label": "Live preview blocks",
+          "desc": "Choose when source code is shown for HTML, Mermaid, and block math.",
+          "options": {
+            "auto": "Show source only while editing",
+            "always_split": "Always show source and preview"
+          }
+        },
         "spellcheck": {
           "label": "Spellcheck",
           "desc": "Whether to enable spellcheck in Wysiwyg mode."

@@ -145,20 +145,28 @@ export const changeTheme = (theme: CreateThemeOptions): void => {
   })
 }
 
-export const updateCodemirrorSearchQuery = (query: string, caseSensitive = false): void => {
-  updateCodemirrorSearchState(query, caseSensitive, null)
+export const updateCodemirrorSearchQuery = (
+  query: string,
+  caseSensitive = false,
+  ownerView?: EditorView,
+): void => {
+  updateCodemirrorSearchState(query, caseSensitive, null, ownerView)
 }
 
 export const updateCodemirrorSearchState = (
   query: string,
   caseSensitive = false,
   activeMatch?: { from: number; to: number } | null,
+  ownerView?: EditorView,
 ): void => {
   const searchQuery = new SearchQuery({
     search: query,
     caseSensitive,
   })
   cmInstanceMap.forEach((mfCmView) => {
+    if (ownerView && !mfCmView.isOwnedBy(ownerView)) {
+      return
+    }
     const range = mfCmView.getProsemirrorContentRange()
     const active =
       activeMatch &&
@@ -172,12 +180,16 @@ export const updateCodemirrorSearchState = (
 
 export const scrollCodemirrorToMatch = (
   activeMatch?: { from: number; to: number } | null,
+  ownerView?: EditorView,
 ): boolean => {
   if (!activeMatch) {
     return false
   }
   let scrolled = false
   cmInstanceMap.forEach((mfCmView) => {
+    if (ownerView && !mfCmView.isOwnedBy(ownerView)) {
+      return
+    }
     const range = mfCmView.getProsemirrorContentRange()
     if (activeMatch.from >= range.from && activeMatch.to <= range.to) {
       mfCmView.scrollToPosition(activeMatch.from - range.from)
@@ -212,6 +224,8 @@ export type CreateCodemirrorOptions = {
   codemirrorEditorViewConfig?: CodeMirrorEditorViewConfig
 
   onValueChange?: (value: string) => void
+
+  onSearchActiveChange?: (active: boolean) => void
 
   /**
    * Copy button configuration options
@@ -265,6 +279,8 @@ export class MfCodemirrorView {
   loadLanguage: LoadLanguage
 
   options?: CreateCodemirrorOptions
+
+  private searchActive = false
 
   private copyButton: HTMLDivElement | null = null
   private copyButtonContainer: HTMLElement | null = null
@@ -391,6 +407,11 @@ export class MfCodemirrorView {
 
   setSearchState(query: SearchQuery, active: { from: number; to: number } | null): void {
     this.cm.dispatch({ effects: setSearchHighlight.of({ query, active }) })
+    const searchActive = active !== null
+    if (searchActive !== this.searchActive) {
+      this.searchActive = searchActive
+      this.options?.onSearchActiveChange?.(searchActive)
+    }
   }
 
   scrollToPosition(pos: number): void {
@@ -401,6 +422,10 @@ export class MfCodemirrorView {
   getProsemirrorContentRange(): { from: number; to: number } {
     const start = this.getPos() + 1
     return { from: start, to: start + this.node.content.size }
+  }
+
+  isOwnedBy(view: EditorView): boolean {
+    return this.view === view
   }
 
   forwardSelection() {

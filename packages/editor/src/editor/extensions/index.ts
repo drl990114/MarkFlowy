@@ -52,9 +52,14 @@ import { LineTextExtension } from './Text'
 import { TransformerExtension } from './Transformer/transformer-extension'
 import { TypewriterScrollExtension, TypewriterScrollOptions } from './TypewriterScroll'
 import { LinkClickExtension, LinkClickHandler } from './LinkClick'
+import {
+  LivePreviewBlockExtension,
+  type LivePreviewBlockBehavior,
+} from './LivePreviewBlock'
 
 export * from './Image'
 export * from './List'
+export type { LivePreviewBlockBehavior } from './LivePreviewBlock'
 
 export type ExtensionsOptions = {
   disableAllBuildInShortcuts?: boolean
@@ -74,6 +79,10 @@ export type ExtensionsOptions = {
   clipboardReadFunction?: ClipboardReadFunction
 
   codemirrorOptions?: CodemirrorOptions
+
+  livePreviewBlock?: {
+    behavior?: LivePreviewBlockBehavior
+  }
 
   uploadImageHandler?: (files: FileWithProgress[]) => DelayedImage[]
 
@@ -109,6 +118,7 @@ function extensions(options: ExtensionsOptions): any[] {
 
   const codemirrorNodeCommonOptions = {
     customCopyFunction,
+    behavior: options.livePreviewBlock?.behavior,
     codemirrorExtensions: [
       ...getSetupByCodemirrorOptions({
         ...codemirrorOptions,
@@ -175,6 +185,7 @@ function extensions(options: ExtensionsOptions): any[] {
       decoration: { style: 'background-color: yellow; color: black' },
       activeDecoration: { style: 'background-color: orange; color: black' },
     }),
+    new LivePreviewBlockExtension(options.livePreviewBlock ?? {}),
     new HtmlInlineNodeExtension({
       handleViewImgSrcUrl,
     }),

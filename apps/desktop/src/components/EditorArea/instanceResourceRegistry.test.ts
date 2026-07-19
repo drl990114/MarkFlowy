@@ -49,6 +49,19 @@ describe('InstanceResourceRegistry', () => {
     })
   })
 
+  it('reads resources by instance without changing the current owner', () => {
+    const registry = new InstanceResourceRegistry<string>()
+    registry.register('file', 'first', 'first-resource')
+    registry.register('file', 'second', 'second-resource')
+
+    expect(registry.get('file', 'second')).toBe('second-resource')
+    expect(registry.remove('file', 'second')).toEqual({
+      current: 'first-resource',
+      currentChanged: false,
+      empty: false,
+    })
+  })
+
   it('reserves ownership for an active instance until its resource is ready', () => {
     const registry = new InstanceResourceRegistry<string>()
     registry.register('file', 'mounted', 'mounted-resource')

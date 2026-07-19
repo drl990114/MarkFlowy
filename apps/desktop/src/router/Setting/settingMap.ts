@@ -242,6 +242,30 @@ export const getSettingMap = () => {
             i18nKey: 'settings.editor.wysiwyg.codemirror_linewrap.desc',
           },
         },
+        livePreviewBlockBehavior: {
+          key: 'wysiwyg_editor_live_preview_block_behavior',
+          type: 'select',
+          title: {
+            i18nKey: 'settings.editor.wysiwyg.live_preview_block_behavior.label',
+          },
+          desc: {
+            i18nKey: 'settings.editor.wysiwyg.live_preview_block_behavior.desc',
+          },
+          options: [
+            {
+              value: 'auto',
+              title: i18n.t(
+                'settings.editor.wysiwyg.live_preview_block_behavior.options.auto',
+              ),
+            },
+            {
+              value: 'always-split',
+              title: i18n.t(
+                'settings.editor.wysiwyg.live_preview_block_behavior.options.always_split',
+              ),
+            },
+          ],
+        },
         spellcheck: {
           key: 'wysiwyg_editor_spellcheck',
           type: 'switch',

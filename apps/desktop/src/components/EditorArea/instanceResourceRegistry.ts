@@ -35,6 +35,10 @@ export class InstanceResourceRegistry<T> {
     return current === undefined ? { currentChanged: false } : { current, currentChanged: false }
   }
 
+  get(fileId: string, instanceId: string): T | undefined {
+    return this.entries.get(fileId)?.get(instanceId)
+  }
+
   promote(fileId: string, instanceId: string): T | undefined {
     const resource = this.entries.get(fileId)?.get(instanceId)
     this.currentOwners.set(fileId, instanceId)

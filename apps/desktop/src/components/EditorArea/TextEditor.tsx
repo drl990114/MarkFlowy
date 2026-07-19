@@ -69,6 +69,7 @@ import { toast } from 'zens'
 import {
   createWysiwygDelegateOptions,
   getCurrentEditorInsertDateFormat,
+  normalizeLivePreviewBlockBehavior,
 } from './createWysiwygDelegateOptions'
 import { closeCleanPhysicalAliases } from './closeCleanPhysicalAliases'
 import { EditorWrapper } from './EditorWrapper'
@@ -890,6 +891,11 @@ function TextEditor(props: TextEditorProps) {
   const editorTypewriterScroll = useAppSettingStore(
     (state) => state.settingData.editor_typewriter_scroll,
   )
+  const livePreviewBlockBehavior = useAppSettingStore((state) =>
+    normalizeLivePreviewBlockBehavior(
+      state.settingData.wysiwyg_editor_live_preview_block_behavior,
+    ),
+  )
   const sourceCodeEditorSpellcheck = useAppSettingStore(
     (state) => state.settingData.source_code_editor_spellcheck,
   )
@@ -1369,8 +1375,15 @@ function TextEditor(props: TextEditorProps) {
   }, [editorPlaceholder, delegate, id, active])
 
   useEffect(() => {
+    const ctx = editorContextRegistry.get(id, instanceIdRef.current!)
+    if (ctx?.commands?.setLivePreviewBlockBehavior) {
+      ctx.commands.setLivePreviewBlockBehavior(livePreviewBlockBehavior)
+    }
+  }, [delegate, id, livePreviewBlockBehavior])
+
+  useEffect(() => {
     delegateOptionsCache.clear()
-  }, [editorTypewriterScroll, editorPlaceholder])
+  }, [editorPlaceholder, editorTypewriterScroll, livePreviewBlockBehavior])
 
   useEffect(() => {
     const cb = throttle(

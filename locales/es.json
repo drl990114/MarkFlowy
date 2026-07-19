@@ -256,6 +256,14 @@
           "label": "Salto de línea de bloque de código",
           "desc": "Si el número de líneas en el bloque de código excede la línea."
         },
+        "live_preview_block_behavior": {
+          "label": "Bloques de vista previa en vivo",
+          "desc": "Elige cuándo se muestra el código fuente de HTML, Mermaid y las fórmulas en bloque.",
+          "options": {
+            "auto": "Mostrar el código solo durante la edición",
+            "always_split": "Mostrar siempre el código y la vista previa"
+          }
+        },
         "spellcheck": {
           "label": "Comprobación ortografía",
           "desc": "Si desea activar la revisión ortografía en el modo Wysiwyg."

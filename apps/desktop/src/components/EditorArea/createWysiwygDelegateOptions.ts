@@ -26,12 +26,24 @@ import type { CreateWysiwygDelegateOptions } from 'rme'
 import { handleImagePaste, handleUploadImage } from './imageHandlers'
 
 type AIOptions = NonNullable<CreateWysiwygDelegateOptions['ai']>
+type LivePreviewBlockBehavior = 'auto' | 'always-split'
+// rme/dist is generated and ignored, so Desktop can type-check this source option
+// before the local rme declaration bundle is refreshed.
+type WysiwygDelegateOptions = CreateWysiwygDelegateOptions & {
+  livePreviewBlock?: {
+    behavior?: LivePreviewBlockBehavior
+  }
+}
+
+export const normalizeLivePreviewBlockBehavior = (
+  value: unknown,
+): LivePreviewBlockBehavior => (value === 'always-split' ? 'always-split' : 'auto')
 
 export const getCurrentEditorInsertDateFormat = () => {
   return useAppSettingStore.getState().settingData.editor_insert_date_format as string | undefined
 }
 
-export const createWysiwygDelegateOptions = (fileId?: string): CreateWysiwygDelegateOptions => {
+export const createWysiwygDelegateOptions = (fileId?: string): WysiwygDelegateOptions => {
   const settingData = useAppSettingStore.getState().settingData
   const supportProviderInfosMap: AIOptions['supportProviderInfosMap'] = {}
 
@@ -57,6 +69,11 @@ export const createWysiwygDelegateOptions = (fileId?: string): CreateWysiwygDele
     overrideShortcutMap: useEditorKeybindingStore.getState().editorKeybingMap,
     codemirrorOptions: {
       lineWrapping: settingData.wysiwyg_editor_codemirror_line_wrap,
+    },
+    livePreviewBlock: {
+      behavior: normalizeLivePreviewBlockBehavior(
+        settingData.wysiwyg_editor_live_preview_block_behavior,
+      ),
     },
     typewriterScroll: {
       enabled: settingData.editor_typewriter_scroll,

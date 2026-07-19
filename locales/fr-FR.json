@@ -253,6 +253,14 @@
           "label": "Jets de ligne de bloc de code",
           "desc": "Si vous changez de ligne lorsque le nombre de mots dans le bloc de code dépasse."
         },
+        "live_preview_block_behavior": {
+          "label": "Blocs d’aperçu en direct",
+          "desc": "Choisissez quand afficher le code source pour HTML, Mermaid et les formules en bloc.",
+          "options": {
+            "auto": "Afficher le code uniquement pendant la modification",
+            "always_split": "Toujours afficher le code et l’aperçu"
+          }
+        },
         "spellcheck": {
           "label": "Spellcheck",
           "desc": "Indique si l'orthographe doit être activé en mode Wysiwyg."

@@ -1,9 +1,6 @@
-import { Extension } from "@codemirror/state";
-import { CustomCopyFunction } from "../CodeMirror/codemirror-types";
-import type { ExtensionsOptions } from "../index";
+import type { ExtensionsOptions } from '../index'
+import type { LivePreviewBlockCommonOptions } from '../LivePreviewBlock'
 
-export interface LineHtmlBlockExtensionOptions {
-  customCopyFunction?: CustomCopyFunction
-  codemirrorExtensions?: Extension[]
+export interface LineHtmlBlockExtensionOptions extends LivePreviewBlockCommonOptions {
   handleViewImgSrcUrl?: ExtensionsOptions['handleViewImgSrcUrl']
 }

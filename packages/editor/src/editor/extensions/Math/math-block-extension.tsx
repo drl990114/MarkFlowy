@@ -1,4 +1,3 @@
-import { Extension } from '@codemirror/state'
 import type {
   ApplySchemaAttributes,
   CommandFunction,
@@ -11,13 +10,13 @@ import { convertCommand, extension, ExtensionTag, NodeExtension, nodeInputRule }
 import { setBlockType } from '@rme-sdk/pm/commands'
 import type { NodeSerializerOptions } from '../../transform'
 import { ParserRuleType } from '../../transform'
-import { CustomCopyFunction } from '../CodeMirror/codemirror-types'
-import { createMathRenderer, LivePreviewNodeView } from '../LivePreviewBlock'
+import {
+  createMathRenderer,
+  type LivePreviewBlockCommonOptions,
+  LivePreviewNodeView,
+} from '../LivePreviewBlock'
 
-export interface MathBlockExtensionOptions {
-  customCopyFunction?: CustomCopyFunction
-  codemirrorExtensions?: Extension[]
-}
+export type MathBlockExtensionOptions = LivePreviewBlockCommonOptions
 @extension({
   defaultOptions: {},
 })
@@ -65,6 +64,7 @@ export class MathBlockExtension extends NodeExtension<MathBlockExtensionOptions>
           codemirrorExtensions: this.options.codemirrorExtensions,
         }),
         customCopyFunction: this.options.customCopyFunction,
+        behavior: this.options.behavior,
         openOnMount: Boolean((node.attrs as any).fromInput),
       })
   }

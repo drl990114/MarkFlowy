@@ -66,7 +66,12 @@ export class FindExtension extends PlainExtension<FindOptions> {
       }
 
       dispatch(tr)
-      updateCodemirrorSearchState(query, caseSensitive ?? false, activeMatch)
+      updateCodemirrorSearchState(
+        query,
+        caseSensitive ?? false,
+        activeMatch,
+        this.store.view,
+      )
       this.scrollToActiveResult(activeMatch)
       return true
     }
@@ -80,7 +85,7 @@ export class FindExtension extends PlainExtension<FindOptions> {
 
       setSearchState(tr, new SearchQuery({ search: '' }))
       dispatch(tr)
-      updateCodemirrorSearchState('', false, null)
+      updateCodemirrorSearchState('', false, null, this.store.view)
       return true
     }
   }
@@ -110,7 +115,12 @@ export class FindExtension extends PlainExtension<FindOptions> {
       if (!results.length) {
         setSearchState(tr, searchQuery)
         dispatch(tr)
-        updateCodemirrorSearchState(query, caseSensitive ?? false, null)
+        updateCodemirrorSearchState(
+          query,
+          caseSensitive ?? false,
+          null,
+          this.store.view,
+        )
         return false
       }
 
@@ -138,7 +148,12 @@ export class FindExtension extends PlainExtension<FindOptions> {
       tr.setSelection(TextSelection.create(tr.doc, mappedFrom, mappedTo)).scrollIntoView()
 
       dispatch(tr)
-      updateCodemirrorSearchState(query, caseSensitive ?? false, { from: mappedFrom, to: mappedTo })
+      updateCodemirrorSearchState(
+        query,
+        caseSensitive ?? false,
+        { from: mappedFrom, to: mappedTo },
+        this.store.view,
+      )
       this.scrollToActiveResult({ from: mappedFrom, to: mappedTo })
       return true
     }
@@ -177,7 +192,12 @@ export class FindExtension extends PlainExtension<FindOptions> {
       }
 
       dispatch(tr)
-      updateCodemirrorSearchState(query, caseSensitive ?? false, null)
+      updateCodemirrorSearchState(
+        query,
+        caseSensitive ?? false,
+        null,
+        this.store.view,
+      )
       return true
     }
   }
@@ -243,7 +263,7 @@ export class FindExtension extends PlainExtension<FindOptions> {
       return
     }
 
-    if (scrollCodemirrorToMatch(activeMatch)) {
+    if (scrollCodemirrorToMatch(activeMatch, this.store.view)) {
       return
     }
 

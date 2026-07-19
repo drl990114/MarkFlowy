@@ -1,4 +1,3 @@
-import { Extension } from '@codemirror/state'
 import type {
   ApplySchemaAttributes,
   CommandFunction,
@@ -13,13 +12,13 @@ import type { InputRule } from '@rme-sdk/pm/inputrules'
 import { TextSelection } from '@rme-sdk/pm/state'
 import type { NodeSerializerOptions } from '../../transform'
 import { ParserRuleType } from '../../transform'
-import { CustomCopyFunction } from '../CodeMirror/codemirror-types'
-import { createMermaidRenderer, LivePreviewNodeView } from '../LivePreviewBlock'
+import {
+  createMermaidRenderer,
+  type LivePreviewBlockCommonOptions,
+  LivePreviewNodeView,
+} from '../LivePreviewBlock'
 
-export interface MermaidExtensionOptions {
-  customCopyFunction?: CustomCopyFunction
-  codemirrorExtensions?: Extension[]
-}
+export type MermaidExtensionOptions = LivePreviewBlockCommonOptions
 @extension<MermaidExtensionOptions>({
   defaultOptions: {
     customCopyFunction: undefined,
@@ -68,6 +67,7 @@ export class MermaidBlockExtension extends NodeExtension<MermaidExtensionOptions
           codemirrorExtensions: this.options.codemirrorExtensions,
         }),
         customCopyFunction: this.options.customCopyFunction,
+        behavior: this.options.behavior,
       })
     }
   }
@@ -79,7 +79,7 @@ export class MermaidBlockExtension extends NodeExtension<MermaidExtensionOptions
       nodeInputRule({
         regexp: /^```mermaid$/,
         type: this.type,
-        beforeDispatch: ({ tr, start, match }) => {
+        beforeDispatch: ({ tr, start }) => {
           const $pos = tr.doc.resolve(start)
           tr.setSelection(TextSelection.near($pos))
         },

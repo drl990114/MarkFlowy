@@ -42,4 +42,11 @@ describe('Editor setting map', () => {
       'preview',
     ])
   })
+
+  it('offers automatic and always-split live preview block behaviors', () => {
+    const setting = getSettingMap().editor.Wysiwyg.livePreviewBlockBehavior
+
+    expect(setting.key).toBe('wysiwyg_editor_live_preview_block_behavior')
+    expect(setting.options.map((option) => option.value)).toEqual(['auto', 'always-split'])
+  })
 })

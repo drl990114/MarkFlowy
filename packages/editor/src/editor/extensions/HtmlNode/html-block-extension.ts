@@ -65,6 +65,7 @@ export class LineHtmlBlockExtension extends NodeExtension<LineHtmlBlockExtension
           handleViewImgSrcUrl: this.options.handleViewImgSrcUrl,
         }),
         customCopyFunction: this.options.customCopyFunction,
+        behavior: this.options.behavior,
       })
     }
   }
