@@ -165,6 +165,11 @@ export const livePreviewBlockStyles = css`
     margin-top: 0.5em;
   }
 
+  .mf-live-preview-html .mf-live-preview-render {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
   .mf-live-preview-math .mf-live-preview-render,
   .mf-live-preview-mermaid .mf-live-preview-render {
     display: flex;
