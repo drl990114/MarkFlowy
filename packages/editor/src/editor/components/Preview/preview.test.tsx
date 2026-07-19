@@ -3,14 +3,14 @@ import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { eventBus } from '../../utils/eventbus'
-import { Preview } from './preview'
+import { Preview, type PreviewImageHydration } from './preview'
 
 const harness = vi.hoisted(() => ({
   renderPreview: vi.fn(),
 }))
 
-vi.mock('zens', () => ({
-  Loading: () => <span data-loading='true' />,
+vi.mock('@markflowy/i18n', () => ({
+  useTranslation: () => ({ t: (key: string) => key }),
 }))
 
 vi.mock('../../theme', () => ({
@@ -20,7 +20,12 @@ vi.mock('../../theme', () => ({
 }))
 
 vi.mock('../../utils/prosemirrorNodeToHtml', () => ({
-  rmeProsemirrorNodeToHtml: harness.renderPreview,
+  prepareProsemirrorPreview: async (...args: unknown[]) => {
+    const result = await harness.renderPreview(...args)
+    return typeof result === 'string'
+      ? { html: result, imageSources: new Map<string, string>() }
+      : result
+  },
 }))
 
 vi.mock('../Editor', () => ({
@@ -56,6 +61,11 @@ async function flushScheduledRender() {
   await act(async () => {
     vi.runOnlyPendingTimers()
     await Promise.resolve()
+    await Promise.resolve()
+    await Promise.resolve()
+  })
+  await act(async () => {
+    await Promise.resolve()
   })
 }
 
@@ -64,6 +74,7 @@ describe('Preview', () => {
   let root: Root
 
   beforeEach(() => {
+    vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
     vi.useFakeTimers()
     harness.renderPreview.mockReset()
     container = document.createElement('div')
@@ -73,6 +84,7 @@ describe('Preview', () => {
   afterEach(() => {
     act(() => root.unmount())
     vi.useRealTimers()
+    vi.unstubAllGlobals()
   })
 
   test('does not let an older document render overwrite the latest document', async () => {
@@ -132,15 +144,14 @@ describe('Preview', () => {
 
   test('reuses resolved images when a Mermaid theme rerender is required', async () => {
     const resolveImage = vi.fn(async (source: string) => `asset://local/${source}`)
-    harness.renderPreview.mockImplementation(
-      async (
-        _doc: ProsemirrorNode,
-        options?: { handleViewImgSrcUrl?: (source: string) => Promise<string> },
-      ) => {
-        await options?.handleViewImgSrcUrl?.('image.png')
-        return '<p>diagram</p>'
-      },
-    )
+    harness.renderPreview.mockImplementation(async () => ({
+      html: [
+        '<p>diagram</p>',
+        '<p><img src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs="',
+        ' data-mf-preview-image-id="image-1"></p>',
+      ].join(''),
+      imageSources: new Map([['image-1', 'image.png']]),
+    }))
 
     act(() =>
       root.render(
@@ -160,13 +171,91 @@ describe('Preview', () => {
     expect(resolveImage).toHaveBeenCalledOnce()
   })
 
+  test('does not let the inert placeholder settle the real image request', async () => {
+    const imageResolution = deferred<string>()
+    const hydrationStarted = deferred<void>()
+    let imageHydration: PreviewImageHydration | null = null
+    const resolveImage = vi.fn(() => {
+      hydrationStarted.resolve()
+      return imageResolution.promise
+    })
+    harness.renderPreview.mockResolvedValue({
+      html: [
+        '<img src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs="',
+        ' data-mf-preview-image-id="image-1">',
+      ].join(''),
+      imageSources: new Map([['image-1', 'image.png']]),
+    })
+
+    act(() =>
+      root.render(
+        <Preview
+          doc={createDoc()}
+          delegateOptions={{ handleViewImgSrcUrl: resolveImage }}
+          onImageHydrationChange={(hydration) => {
+            imageHydration = hydration
+          }}
+        />,
+      ),
+    )
+    await flushScheduledRender()
+    await act(async () => hydrationStarted.promise)
+
+    const activeHydration = imageHydration as PreviewImageHydration | null
+    expect(activeHydration).not.toBeNull()
+    let hydrationSettled = false
+    void activeHydration?.settled.then(() => {
+      hydrationSettled = true
+    })
+    await act(async () => Promise.resolve())
+    expect(hydrationSettled).toBe(false)
+
+    const image = container.querySelector('img')
+    expect(image).not.toBeNull()
+    expect(image?.hasAttribute('loading')).toBe(false)
+    expect(image?.getAttribute('decoding')).toBe('async')
+    expect(image?.getAttribute('aria-busy')).toBe('true')
+    act(() => image?.dispatchEvent(new Event('load')))
+    expect(image?.classList.contains('mf-preview-image-loading')).toBe(true)
+    const removeAttribute = vi.spyOn(image as HTMLImageElement, 'removeAttribute')
+
+    await act(async () => {
+      imageResolution.resolve('asset://localhost/image.png')
+      await activeHydration?.settled
+    })
+    const hydratedImage = container.querySelector('img')
+    expect(hydratedImage).toBe(image)
+    expect(hydratedImage?.getAttribute('src')).toBe('asset://localhost/image.png')
+    expect(hydrationSettled).toBe(true)
+    expect(removeAttribute).not.toHaveBeenCalledWith('src')
+
+    act(() => hydratedImage?.dispatchEvent(new Event('error')))
+    expect(hydratedImage?.hasAttribute('src')).toBe(false)
+    expect(hydratedImage?.classList.contains('mf-preview-image-loading')).toBe(false)
+  })
+
+  test('keeps native lazy loading for direct images that do not replace placeholders', async () => {
+    harness.renderPreview.mockResolvedValue({
+      html: '<img src="https://example.com/direct.png">',
+      imageSources: new Map(),
+    })
+
+    act(() => root.render(<Preview doc={createDoc()} />))
+    await flushScheduledRender()
+
+    const image = container.querySelector('img')
+    expect(image?.getAttribute('src')).toBe('https://example.com/direct.png')
+    expect(image?.getAttribute('loading')).toBe('lazy')
+    expect(image?.getAttribute('decoding')).toBe('async')
+  })
+
   test('finishes loading when the rendered document is empty', async () => {
     harness.renderPreview.mockResolvedValue('')
 
     act(() => root.render(<Preview doc={createDoc()} />))
     await flushScheduledRender()
 
-    expect(container.querySelector('[data-loading="true"]')).toBeNull()
+    expect(container.querySelector('.mf-preview-loading')).toBeNull()
     expect(container.querySelector('.mf-preview-content')).not.toBeNull()
   })
 })

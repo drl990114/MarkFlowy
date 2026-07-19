@@ -1,9 +1,5 @@
 import { getPreferredAIModelKey } from '@/extensions/ai/aiModelPreference'
 import {
-  resolveCopilotModelConfig,
-  resolveSelectedAIModelConfig,
-} from '@/extensions/ai/copilotModelConfig'
-import {
   aiProviderRegistry,
   aiProviders,
   isAIProviderConfigured,
@@ -11,6 +7,10 @@ import {
   parseConfiguredModels,
 } from '@/extensions/ai/aiProvidersService'
 import { aiGenerateTextRequest } from '@/extensions/ai/api'
+import {
+  resolveCopilotModelConfig,
+  resolveSelectedAIModelConfig,
+} from '@/extensions/ai/copilotModelConfig'
 import { sleep } from '@/helper'
 import { clipboardRead } from '@/helper/clipboard'
 import { getFileObject } from '@/helper/files'
@@ -23,7 +23,7 @@ import useAppSettingStore from '@/stores/useAppSettingStore'
 import { writeText } from '@tauri-apps/plugin-clipboard-manager'
 import { openUrl } from '@tauri-apps/plugin-opener'
 import type { CreateWysiwygDelegateOptions } from 'rme'
-import { handleUploadImage, handleImagePaste } from './imageHandlers'
+import { handleImagePaste, handleUploadImage } from './imageHandlers'
 
 type AIOptions = NonNullable<CreateWysiwygDelegateOptions['ai']>
 

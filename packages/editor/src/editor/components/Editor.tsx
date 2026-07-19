@@ -23,6 +23,7 @@ import {
   type CreateWysiwygDelegateOptions,
   type EditorContext,
   type EditorDelegate,
+  type PreviewImageHydration,
 } from '../..'
 import SourceEditor, { createSourceCodeDelegate } from './SourceEditor'
 import { useContextMounted } from './useContextMounted'
@@ -44,6 +45,7 @@ export const Editor = memo(
     } = props
     const [type, setType] = useState<EditorViewType>(initialType)
     const editorContextRef = useRef<EditorContext | null>(null)
+    const previewImageHydrationRef = useRef<PreviewImageHydration | null>(null)
 
     const resolveDelegate = useCallback(() => {
       if (otherProps.delegate) {
@@ -84,6 +86,23 @@ export const Editor = memo(
       [onContextMounted],
     )
 
+    const handlePreviewImageHydrationChange = useCallback(
+      (hydration: PreviewImageHydration | null) => {
+        previewImageHydrationRef.current = hydration
+      },
+      [],
+    )
+
+    const waitForPendingResources = useCallback(async () => {
+      while (previewImageHydrationRef.current) {
+        const hydration = previewImageHydrationRef.current
+        await hydration.settled
+        if (previewImageHydrationRef.current === hydration) {
+          return
+        }
+      }
+    }, [])
+
     useImperativeHandle(ref, () => ({
       getType: () => type,
       toggleType: (targetType: EditorViewType) => {
@@ -92,6 +111,7 @@ export const Editor = memo(
       setContent: (nextContent: string) => {
         applyContentToView(nextContent)
       },
+      waitForPendingResources,
       exportHtml: async () => {
         return new Promise<string>((resolve) => {
           let targetDoc: Node | string = otherProps.content
@@ -138,7 +158,7 @@ export const Editor = memo(
 
           handleHtmlText(fullAst)
           Promise.all(imageLoadTasks)
-            .then((res) => {
+            .then(() => {
               resolve(HTML.stringify(fullAst))
             })
             .catch(() => {
@@ -156,8 +176,12 @@ export const Editor = memo(
       return (
         <Preview
           doc={otherProps.content}
+          delegate={
+            otherProps.delegate?.view === 'Wysiwyg' ? otherProps.delegate : undefined
+          }
           delegateOptions={otherProps.delegateOptions}
           handleLinkClick={otherProps.delegateOptions?.handleLinkClick}
+          onImageHydrationChange={handlePreviewImageHydrationChange}
           styleToken={otherProps.styleToken}
         />
       )
@@ -179,6 +203,7 @@ export type EditorRef = {
   getType: () => EditorViewType
   exportHtml: () => Promise<string>
   setContent: (nextContent: string) => void
+  waitForPendingResources: () => Promise<void>
 }
 
 export const defaultStyleToken = {

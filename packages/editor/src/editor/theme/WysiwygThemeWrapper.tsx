@@ -534,6 +534,103 @@ export const WysiwygThemeWrapper = styled.div.attrs<WrapperProps>((p) => ({
     border: 0;
   }
 
+  & .mf-preview-loading {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 220px;
+    padding: 28px var(--rme-editor-inline-padding, clamp(16px, 5vw, 40px));
+  }
+
+  & .mf-preview-loading-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 24px;
+    color: ${(props) => props.theme.labelFontColor};
+    font-size: 0.85em;
+  }
+
+  & .mf-preview-loading-spinner {
+    display: inline-block;
+    flex: 0 0 auto;
+    width: 14px;
+    height: 14px;
+    box-sizing: border-box;
+    border: 2px solid ${(props) => props.theme.borderColor};
+    border-top-color: ${(props) => props.theme.accentColor};
+    border-radius: 50%;
+    animation: mf-preview-loading-spin 650ms linear infinite;
+  }
+
+  & .mf-preview-loading-lines {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  & .mf-preview-loading-lines > span {
+    display: block;
+    height: 12px;
+    max-width: 100%;
+    border-radius: 6px;
+    background-color: ${(props) => props.theme.borderColor};
+    animation: mf-preview-loading-pulse 1.4s ease-in-out infinite;
+  }
+
+  & .mf-preview-loading-lines > span:nth-child(2n) {
+    animation-delay: 100ms;
+  }
+
+  & .mf-preview-image-progress {
+    position: sticky;
+    top: 12px;
+    z-index: 1;
+    height: 0;
+    display: flex;
+    justify-content: flex-end;
+    padding-right: var(--rme-editor-inline-padding, clamp(16px, 5vw, 40px));
+    pointer-events: none;
+  }
+
+  & .mf-preview-image-progress > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 10px;
+    border: 1px solid ${(props) => props.theme.borderColor};
+    border-radius: 999px;
+    background-color: ${(props) => props.theme.tipsBgColor};
+    color: ${(props) => props.theme.labelFontColor};
+    box-shadow: 0 4px 12px ${(props) => props.theme.boxShadowColor};
+    font-size: 0.8em;
+    line-height: 1;
+    opacity: 1;
+    transform: translateY(0);
+    transition:
+      opacity 160ms cubic-bezier(0.23, 1, 0.32, 1),
+      transform 160ms cubic-bezier(0.23, 1, 0.32, 1);
+
+    @starting-style {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+  }
+
+  & .mf-preview-image-loading {
+    opacity: 0.35;
+    transition: opacity 180ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  & .mf-preview-content > p > .mf-preview-image-loading:only-child {
+    display: block;
+    width: 100%;
+    min-height: clamp(120px, 30vh, 260px);
+    border-radius: 6px;
+    background-color: ${(props) => props.theme.borderColor};
+    object-fit: contain;
+    animation: mf-preview-loading-pulse 1.4s ease-in-out infinite;
+  }
+
   & .mf-preview-block {
     max-width: 100%;
     margin-bottom: 16px;
@@ -578,6 +675,51 @@ export const WysiwygThemeWrapper = styled.div.attrs<WrapperProps>((p) => ({
 
   & .mf-preview-block-error {
     display: block;
+  }
+
+  @keyframes mf-preview-loading-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes mf-preview-loading-pulse {
+    0%,
+    100% {
+      opacity: 0.85;
+    }
+
+    50% {
+      opacity: 0.35;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    & .mf-preview-loading-spinner {
+      animation: mf-preview-loading-pulse 1.4s ease-in-out infinite;
+    }
+
+    & .mf-preview-loading-lines > span {
+      animation: none;
+      opacity: 0.55;
+    }
+
+    & .mf-preview-image-progress > span {
+      transform: none;
+      transition: opacity 120ms ease;
+
+      @starting-style {
+        transform: none;
+      }
+    }
+
+    & .mf-preview-image-loading {
+      transition-duration: 0ms;
+    }
+
+    & .mf-preview-content > p > .mf-preview-image-loading:only-child {
+      animation: none;
+    }
   }
 
   & .tok-link {

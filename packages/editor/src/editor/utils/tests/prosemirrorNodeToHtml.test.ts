@@ -18,6 +18,7 @@ vi.mock('../mermaid', () => ({
 
 import {
   enhanceProsemirrorHtml,
+  prepareProsemirrorPreview,
   rmeProsemirrorNodeToHtml,
 } from '../prosemirrorNodeToHtml'
 
@@ -259,6 +260,56 @@ describe('enhanceProsemirrorHtml', () => {
     } finally {
       setAttribute.mockRestore()
     }
+  })
+
+  test('prepares image hydration without waiting or exposing the source in live HTML', async () => {
+    const source = 'http://127.0.0.1/private.png'
+    const handleViewImgSrcUrl = vi.fn(async () => 'asset://local/private.png')
+    const doc = createWysiwygDelegate().stringToDoc(`![private](${source})`)
+
+    const preview = await prepareProsemirrorPreview(doc, { handleViewImgSrcUrl })
+    const container = parseHtml(preview.html)
+    const image = container.querySelector('img')
+    const imageId = image?.dataset.mfPreviewImageId
+
+    expect(handleViewImgSrcUrl).not.toHaveBeenCalled()
+    expect(image?.getAttribute('src')).toMatch(/^data:image\/gif/)
+    expect(imageId).toBeTruthy()
+    expect(image?.hasAttribute('data-mf-preview-image-source')).toBe(false)
+    expect(preview.html).not.toContain(source)
+    expect(preview.html).not.toContain(encodeURIComponent(source))
+    expect(preview.imageSources.get(imageId || '')).toBe(source)
+  })
+
+  test('preserves encoded remote HTML image URLs for deferred hydration', async () => {
+    const source =
+      'https://img.shields.io/badge/platforms-macOS%20%7C%20Linux-475569?style=flat-square'
+    const handleViewImgSrcUrl = vi.fn(async () => 'blob:preview-image')
+    const doc = createWysiwygDelegate().stringToDoc(
+      `<div><img alt="Platforms" src="${source}"></div>`,
+    )
+
+    const preview = await prepareProsemirrorPreview(doc, { handleViewImgSrcUrl })
+    const image = parseHtml(preview.html).querySelector('img')
+    const imageId = image?.dataset.mfPreviewImageId
+
+    expect(handleViewImgSrcUrl).not.toHaveBeenCalled()
+    expect(imageId).toBeTruthy()
+    expect(preview.imageSources.get(imageId || '')).toBe(source)
+  })
+
+  test('marks direct preview images for lazy asynchronous decoding', async () => {
+    const source = 'https://example.com/image.png'
+    const doc = createWysiwygDelegate().stringToDoc(`![image](${source})`)
+
+    const preview = await prepareProsemirrorPreview(doc, {})
+    const image = parseHtml(preview.html).querySelector('img')
+
+    expect(image?.getAttribute('src')).toBe(source)
+    expect(image?.getAttribute('loading')).toBe('lazy')
+    expect(image?.getAttribute('decoding')).toBe('async')
+    expect(image?.hasAttribute('data-mf-preview-image-id')).toBe(false)
+    expect(preview.imageSources.size).toBe(0)
   })
 
   test('does not restore unsafe image sources without a host URL resolver', async () => {

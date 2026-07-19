@@ -2,11 +2,14 @@ import type { Node } from '@rme-sdk/pm/model'
 import { act, createRef } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import type { EditorDelegate } from '../types'
+import { EditorViewType, type EditorDelegate } from '../types'
 import { Editor, type EditorRef } from './Editor'
 
 const harness = vi.hoisted(() => ({
   context: undefined as unknown,
+  previewHydrationChange: undefined as
+    | ((hydration: { settled: Promise<void> } | null) => void)
+    | undefined,
 }))
 
 vi.mock('../..', () => ({
@@ -15,7 +18,14 @@ vi.mock('../..', () => ({
     SOURCECODE: 'sourceCode',
     PREVIEW: 'preview',
   },
-  Preview: () => null,
+  Preview: (props: {
+    onImageHydrationChange?: (
+      hydration: { settled: Promise<void> } | null,
+    ) => void
+  }) => {
+    harness.previewHydrationChange = props.onImageHydrationChange
+    return null
+  },
 }))
 
 vi.mock('./useContextMounted', () => ({
@@ -26,7 +36,7 @@ vi.mock('./useContextMounted', () => ({
 
 vi.mock('./SourceEditor', () => ({
   createSourceCodeDelegate: vi.fn(),
-  default: ({ hooks = [] }: { hooks?: Array<() => void> }) => {
+  default: ({ hooks = [] }: { hooks?: (() => void)[] }) => {
     hooks.forEach((useHook) => useHook())
     return null
   },
@@ -34,7 +44,7 @@ vi.mock('./SourceEditor', () => ({
 
 vi.mock('./WysiwygEditor', () => ({
   createWysiwygDelegate: vi.fn(),
-  default: ({ hooks = [] }: { hooks?: Array<() => void> }) => {
+  default: ({ hooks = [] }: { hooks?: (() => void)[] }) => {
     hooks.forEach((useHook) => useHook())
     return null
   },
@@ -45,6 +55,8 @@ describe('EditorRef.setContent', () => {
   let root: Root
 
   beforeEach(() => {
+    harness.context = undefined
+    harness.previewHydrationChange = undefined
     container = document.createElement('div')
     root = createRoot(container)
   })
@@ -116,5 +128,48 @@ describe('EditorRef.setContent', () => {
     expect(currentDoc.eq).toHaveBeenCalledWith(nextDoc)
     expect(replace).not.toHaveBeenCalled()
     expect(dispatch).not.toHaveBeenCalled()
+  })
+
+  it('waits for the latest Preview image hydration generation', async () => {
+    let resolveFirst!: () => void
+    let resolveSecond!: () => void
+    const firstSettled = new Promise<void>((resolve) => {
+      resolveFirst = resolve
+    })
+    const secondSettled = new Promise<void>((resolve) => {
+      resolveSecond = resolve
+    })
+    const editorRef = createRef<EditorRef>()
+
+    act(() =>
+      root.render(
+        <Editor
+          ref={editorRef}
+          content='preview'
+          initialType={EditorViewType.PREVIEW}
+        />,
+      ),
+    )
+    act(() => {
+      harness.previewHydrationChange?.({ settled: firstSettled })
+    })
+
+    let waitFinished = false
+    const waitForResources = editorRef.current!.waitForPendingResources().then(() => {
+      waitFinished = true
+    })
+
+    act(() => {
+      harness.previewHydrationChange?.({ settled: secondSettled })
+      resolveFirst()
+    })
+    await act(async () => Promise.resolve())
+    expect(waitFinished).toBe(false)
+
+    await act(async () => {
+      resolveSecond()
+      await waitForResources
+    })
+    expect(waitFinished).toBe(true)
   })
 })

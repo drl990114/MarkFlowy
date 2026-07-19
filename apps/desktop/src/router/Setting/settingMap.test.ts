@@ -10,7 +10,7 @@ vi.mock('@/i18n', () => ({
 }))
 vi.mock('rme', () => ({
   DEFAULT_CURRENT_DATE_FORMAT: 'yyyy-MM-dd',
-  EditorViewType: { WYSIWYG: 'wysiwyg', SOURCECODE: 'sourcecode' },
+  EditorViewType: { WYSIWYG: 'wysiwyg', SOURCECODE: 'sourceCode', PREVIEW: 'preview' },
 }))
 
 import { getSettingMap } from './settingMap'
@@ -29,5 +29,17 @@ describe('AI setting map', () => {
     expect(ollama).toHaveProperty('models')
     expect(ollama).toHaveProperty('ApiBase')
     expect(ollama).toHaveProperty('requestHeaders')
+  })
+})
+
+describe('Editor setting map', () => {
+  it('offers Preview as a Markdown default mode', () => {
+    const options = getSettingMap().editor.Behavior.mdDefaultMode.options
+
+    expect(options.map((option) => option.value)).toEqual([
+      'wysiwyg',
+      'sourceCode',
+      'preview',
+    ])
   })
 })

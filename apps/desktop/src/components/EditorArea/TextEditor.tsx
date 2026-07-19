@@ -86,6 +86,7 @@ import { EditorSkeleton, WarningHeader } from './styles'
 const delegateOptionsCache = new Map<string, CreateWysiwygDelegateOptions>()
 const LARGE_MARKDOWN_SOURCE_MODE_THRESHOLD = 200_000
 const TEXT_EDITOR_CONTENT_SYNC_EVENT = 'editor_content_sync'
+const EXPORT_RESOURCE_TIMEOUT_MS = 15_000
 const editorInstanceLifecycle = new EditorInstanceLifecycle()
 const fileSaveCoordinator = new FileSaveCoordinator()
 let textEditorInstanceSeq = 0
@@ -96,6 +97,32 @@ interface TextEditorContentSyncPayload {
   fileId: string
   sourceInstanceId: string
   content: string
+}
+
+type TextEditorRef = EditorRef & {
+  waitForPendingResources: () => Promise<void>
+}
+
+async function waitForEditorResourcesForExport(editor: TextEditorRef | null): Promise<void> {
+  const pendingResources = editor?.waitForPendingResources()
+  if (!pendingResources) {
+    return
+  }
+
+  let timeoutHandle: number | undefined
+  const timeout = new Promise<never>((_, reject) => {
+    timeoutHandle = window.setTimeout(() => {
+      reject(new Error('Timed out waiting for Preview images'))
+    }, EXPORT_RESOURCE_TIMEOUT_MS)
+  })
+
+  try {
+    await Promise.race([pendingResources, timeout])
+  } finally {
+    if (timeoutHandle !== undefined) {
+      window.clearTimeout(timeoutHandle)
+    }
+  }
 }
 
 function collectTreeFiles(files: IFile[]): IFile[] {
@@ -484,7 +511,7 @@ async function replaceCssImageUrls(
 }
 
 async function prepareImagesForExport(root: HTMLElement, fileFolderPath?: string) {
-  const restoreFns: Array<() => void> = []
+  const restoreFns: (() => void)[] = []
   const images = Array.from(root.querySelectorAll('img'))
 
   await Promise.all(
@@ -526,7 +553,7 @@ async function prepareImagesForExport(root: HTMLElement, fileFolderPath?: string
 }
 
 async function prepareCssImagesForExport(root: HTMLElement, fileFolderPath?: string) {
-  const restoreFns: Array<() => void> = []
+  const restoreFns: (() => void)[] = []
   const cssImageProperties = [
     'background-image',
     'border-image-source',
@@ -574,7 +601,7 @@ async function prepareCssImagesForExport(root: HTMLElement, fileFolderPath?: str
 }
 
 async function prepareSvgImagesForExport(root: HTMLElement, fileFolderPath?: string) {
-  const restoreFns: Array<() => void> = []
+  const restoreFns: (() => void)[] = []
   const svgImages = Array.from(root.querySelectorAll('svg image'))
 
   await Promise.all(
@@ -613,7 +640,7 @@ async function prepareSvgImagesForExport(root: HTMLElement, fileFolderPath?: str
 }
 
 function prepareEmbeddedMediaForExport(root: HTMLElement) {
-  const restoreFns: Array<() => void> = []
+  const restoreFns: (() => void)[] = []
   const canvases = Array.from(root.querySelectorAll('canvas')) as HTMLCanvasElement[]
   const embeddedFrames = Array.from(root.querySelectorAll('iframe, video'))
 
@@ -766,10 +793,10 @@ async function renderElementToImageDataUrl(element: HTMLElement) {
   const html2canvasOptions: Parameters<Html2Canvas>[1] = {
     allowTaint: false,
     foreignObjectRendering: false,
-    imageTimeout: 15000,
+    imageTimeout: EXPORT_RESOURCE_TIMEOUT_MS,
     logging: false,
     useCORS: true,
-    ignoreElements: (element: Element) => element.tagName.toLowerCase() === 'iframe',
+    ignoreElements: (candidate: Element) => candidate.tagName.toLowerCase() === 'iframe',
   }
 
   try {
@@ -875,6 +902,7 @@ function TextEditor(props: TextEditorProps) {
   const effectiveDefaultViewType = useMemo(() => {
     if (
       fileTypeConfig.type === 'markdown' &&
+      fileTypeConfig.defaultMode === EditorViewType.WYSIWYG &&
       typeof content === 'string' &&
       content.length > LARGE_MARKDOWN_SOURCE_MODE_THRESHOLD &&
       fileTypeConfig.supportedModes.includes(EditorViewType.SOURCECODE)
@@ -887,7 +915,7 @@ function TextEditor(props: TextEditorProps) {
 
   const debounceSaveHandlerCacheRef = useRef<DebouncedFunc<() => Promise<boolean>>>(null)
   const noFileSaveingRef = useRef(false)
-  const editorRef = useRef<EditorRef>(null)
+  const editorRef = useRef<TextEditorRef>(null)
   const editorContextRef = useRef<EditorChangeEventParams>(null)
   const counterIdleHandleRef = useRef<number | null>(null)
   const isApplyingRemoteContentRef = useRef(false)
@@ -1061,11 +1089,16 @@ function TextEditor(props: TextEditorProps) {
 
   useEffect(() => {
     if (status !== TextEditorStatus.SUCCESS || delegate) return
+    setCurrentViewType(effectiveDefaultViewType)
+    useEditorViewTypeStore.getState().setEditorViewType(id, effectiveDefaultViewType)
+
+    if (effectiveDefaultViewType === EditorViewType.PREVIEW) {
+      return
+    }
+
     const newDelegate = createDelegate(effectiveDefaultViewType, fileTypeConfig.type)
     setDelegate(newDelegate)
     registerEditorDelegateResource(id, instanceIdRef.current!, newDelegate, activeRef.current)
-    setCurrentViewType(effectiveDefaultViewType)
-    useEditorViewTypeStore.getState().setEditorViewType(id, effectiveDefaultViewType)
   }, [status, delegate, id, fileTypeConfig, effectiveDefaultViewType, createDelegate])
 
   const saveHandler = useCallback(
@@ -1094,15 +1127,15 @@ function TextEditor(props: TextEditorProps) {
         return fileSaveCoordinator.saveLatest(
           id,
           async ({ content: fileContent }) => {
-            const curFile = getFileObject(id) ?? initialFile
-            if (!curFile || typeof fileContent !== 'string') return false
+            const fileToSave = getFileObject(id) ?? initialFile
+            if (!fileToSave || typeof fileContent !== 'string') return false
 
             if (!useEditorStateStore.getState().idStateMap.get(id)?.hasUnsavedChanges) {
               return true
             }
 
             try {
-              if (!curFile.path) {
+              if (!fileToSave.path) {
                 if (!selectedSaveAsPath) {
                   if (noFileSaveingRef.current) return false
 
@@ -1111,7 +1144,7 @@ function TextEditor(props: TextEditorProps) {
                   try {
                     selectedPath = await save({
                       title: 'Save File',
-                      defaultPath: curFile.name ?? `${t('file.untitled')}.md`,
+                      defaultPath: fileToSave.name ?? `${t('file.untitled')}.md`,
                     })
                   } finally {
                     noFileSaveingRef.current = false
@@ -1155,14 +1188,14 @@ function TextEditor(props: TextEditorProps) {
                     })
 
                     const filename = getFileNameFromPath(targetPath)
-                    const savedFile = getFileObject(curFile.id)
+                    const savedFile = getFileObject(fileToSave.id)
                       ? updateFile({
-                          id: curFile.id,
+                          id: fileToSave.id,
                           path: targetPath,
                           name: filename,
                         })
                       : updateFile({
-                          ...curFile,
+                          ...fileToSave,
                           content: fileContent,
                           path: targetPath,
                           name: filename,
@@ -1229,10 +1262,10 @@ function TextEditor(props: TextEditorProps) {
           },
           (snapshot) => {
             if (typeof snapshot.content === 'string') {
-              const cachedFile = getFileObject(id)
-              if (cachedFile) {
+              const latestCachedFile = getFileObject(id)
+              if (latestCachedFile) {
                 updateFileObject(id, {
-                  ...cachedFile,
+                  ...latestCachedFile,
                   content: snapshot.content,
                 })
               } else {
@@ -1442,6 +1475,7 @@ function TextEditor(props: TextEditorProps) {
         let restoreExportResources: (() => void) | undefined
 
         try {
+          await waitForEditorResourcesForExport(editorRef.current)
           const exportElement = document.getElementById(id)
           if (!exportElement) {
             throw new Error('Editor element not found')
@@ -1577,7 +1611,13 @@ function TextEditor(props: TextEditorProps) {
 
   const handleWrapperClick: React.MouseEventHandler<HTMLDivElement> = useCallback(
     (e) => {
-      if (!delegate) return
+      if (
+        currentViewType === EditorViewType.PREVIEW ||
+        !delegate ||
+        !delegate.manager.mounted
+      ) {
+        return
+      }
       if (
         (e.target as HTMLElement)?.id === 'editorarea-wrapper' ||
         (e.target as HTMLElement).parentElement?.id === 'editorarea-wrapper'
@@ -1585,7 +1625,7 @@ function TextEditor(props: TextEditorProps) {
         delegate.manager.view.focus()
       }
     },
-    [delegate],
+    [currentViewType, delegate],
   )
 
   const rootFontSize = !editorRootFontSize || editorRootFontSize === 15 ? 16 : editorRootFontSize
@@ -1596,7 +1636,7 @@ function TextEditor(props: TextEditorProps) {
     () => ({
       initialType: effectiveDefaultViewType,
       content: content!,
-      delegate: delegate!,
+      delegate: delegate ?? undefined,
       editable: !savePathReserved,
       style: {
         height: '100%',
@@ -1701,8 +1741,8 @@ function TextEditor(props: TextEditorProps) {
             debounceRefreshToc()
           }
 
-          const curFile = getFileObject(id)
-          if (autosave && curFile?.path) {
+          const latestFile = getFileObject(id)
+          if (autosave && latestFile?.path) {
             debounceSaveHandler()
           }
         }
@@ -1733,7 +1773,10 @@ function TextEditor(props: TextEditorProps) {
     return <WarningHeader>Binary file cannot be opened as text</WarningHeader>
   }
 
-  if (typeof content !== 'string' || !delegate) {
+  if (
+    typeof content !== 'string' ||
+    (!delegate && effectiveDefaultViewType !== EditorViewType.PREVIEW)
+  ) {
     return (
       <EditorSkeleton>
         {Array.from({ length: 12 }).map((_, i) => (

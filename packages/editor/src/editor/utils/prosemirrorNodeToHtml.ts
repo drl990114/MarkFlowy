@@ -36,6 +36,15 @@ export interface EnhancePreviewHtmlOptions {
   referenceDefinitions?: ReadonlyMap<string, ReferenceDefinition>
 }
 
+export interface PreparedProsemirrorPreview {
+  html: string
+  /**
+   * Sources stay outside live HTML until the host resolves them. The HTML
+   * contains only inert image placeholders keyed by their random ids.
+   */
+  imageSources: ReadonlyMap<string, string>
+}
+
 const staticRenderContext = {} as LivePreviewRenderContext
 
 type TrustedAttribute = readonly [name: string, value: string]
@@ -266,11 +275,10 @@ async function highlightCodeBlock(block: HTMLElement): Promise<void> {
   }
 }
 
-async function resolveImage(
+function getResolvedImageSource(
   image: HTMLImageElement,
-  delegateOptions: DelegateOptions,
   referenceDefinitions: ReadonlyMap<string, ReferenceDefinition>,
-): Promise<void> {
+): string | null {
   let source = getPreviewImageSource(image)
   const referenceLabel = image.dataset.referLabel
   if (referenceLabel) {
@@ -287,6 +295,19 @@ async function resolveImage(
   if (!source) {
     clearPreviewImageSource(image)
     image.removeAttribute('src')
+    return null
+  }
+
+  return source
+}
+
+async function resolveImage(
+  image: HTMLImageElement,
+  delegateOptions: DelegateOptions,
+  referenceDefinitions: ReadonlyMap<string, ReferenceDefinition>,
+): Promise<void> {
+  const source = getResolvedImageSource(image, referenceDefinitions)
+  if (!source) {
     return
   }
 
@@ -308,6 +329,41 @@ async function resolveImage(
     image.removeAttribute('src')
   }
   clearPreviewImageSource(image)
+}
+
+function deferImageResolution(
+  image: HTMLImageElement,
+  delegateOptions: DelegateOptions,
+  referenceDefinitions: ReadonlyMap<string, ReferenceDefinition>,
+  imageSources: Map<string, string>,
+): void {
+  const source = getResolvedImageSource(image, referenceDefinitions)
+  if (!source) {
+    return
+  }
+
+  if (!delegateOptions?.handleViewImgSrcUrl) {
+    const safeSource = sanitizeImageSource(source)
+    if (safeSource) {
+      image.setAttribute('loading', 'lazy')
+      image.setAttribute('decoding', 'async')
+      image.setAttribute('src', safeSource)
+    } else {
+      image.removeAttribute('src')
+    }
+    clearPreviewImageSource(image)
+    return
+  }
+
+  let imageId = image.dataset.mfPreviewImageId
+  if (!imageId) {
+    const attributes = createInertPreviewImageAttributes(source)
+    imageId = attributes['data-mf-preview-image-id']
+    image.setAttribute('src', attributes.src)
+    image.dataset.mfPreviewImageId = imageId
+  }
+  delete image.dataset.mfPreviewImageSource
+  imageSources.set(imageId, source)
 }
 
 function collectReferenceDefinitions(doc: ProsemirrorNode): Map<string, ReferenceDefinition> {
@@ -406,15 +462,19 @@ function serializePreviewDocument(doc: ProsemirrorNode): string {
  * User-authored HTML must enter through the marked HTML nodes so it cannot be
  * mistaken for trusted serializer attributes.
  */
-export async function enhanceProsemirrorHtml(
+async function enhanceProsemirrorHtmlInternal(
   html: string,
   options: EnhancePreviewHtmlOptions = {},
-): Promise<string> {
+  deferImages = false,
+): Promise<PreparedProsemirrorPreview> {
   if (typeof document === 'undefined') {
-    return html
+    return { html, imageSources: new Map() }
   }
 
-  const preserveImageSources = Boolean(options.delegateOptions?.handleViewImgSrcUrl)
+  // Deferred previews keep every source inert through async block rendering.
+  // The real source is restored only after lazy-loading attributes are present.
+  const preserveImageSources =
+    deferImages || Boolean(options.delegateOptions?.handleViewImgSrcUrl)
   const container = document.createElement('div')
   container.innerHTML = preparePreviewHtml(html, preserveImageSources)
   restoreListOrderStyles(container)
@@ -444,9 +504,23 @@ export async function enhanceProsemirrorHtml(
 
   const referenceDefinitions =
     options.referenceDefinitions ?? new Map<string, ReferenceDefinition>()
-  const imageTasks = Array.from(container.querySelectorAll<HTMLImageElement>('img'), (image) =>
-    resolveImage(image, options.delegateOptions, referenceDefinitions),
-  )
+  const images = Array.from(container.querySelectorAll<HTMLImageElement>('img'))
+  const imageSources = new Map<string, string>()
+  const imageTasks = deferImages
+    ? []
+    : images.map((image) =>
+        resolveImage(image, options.delegateOptions, referenceDefinitions),
+      )
+  if (deferImages) {
+    images.forEach((image) => {
+      deferImageResolution(
+        image,
+        options.delegateOptions,
+        referenceDefinitions,
+        imageSources,
+      )
+    })
+  }
   const codeTasks = Array.from(container.querySelectorAll<HTMLElement>('pre'))
     .filter((block) => getDirectCodeElement(block) !== null)
     .map(highlightCodeBlock)
@@ -460,7 +534,32 @@ export async function enhanceProsemirrorHtml(
       control.disabled = true
     })
 
-  return container.innerHTML
+  return { html: container.innerHTML, imageSources }
+}
+
+export async function enhanceProsemirrorHtml(
+  html: string,
+  options: EnhancePreviewHtmlOptions = {},
+): Promise<string> {
+  return (await enhanceProsemirrorHtmlInternal(html, options)).html
+}
+
+export async function prepareProsemirrorPreview(
+  doc: ProsemirrorNode,
+  delegateOptions: DelegateOptions,
+): Promise<PreparedProsemirrorPreview> {
+  const html =
+    typeof document === 'undefined'
+      ? prosemirrorNodeToHtml(doc)
+      : serializePreviewDocument(doc)
+  return enhanceProsemirrorHtmlInternal(
+    html,
+    {
+      delegateOptions,
+      referenceDefinitions: collectReferenceDefinitions(doc),
+    },
+    true,
+  )
 }
 
 export async function rmeProsemirrorNodeToHtml(
@@ -471,8 +570,10 @@ export async function rmeProsemirrorNodeToHtml(
     typeof document === 'undefined'
       ? prosemirrorNodeToHtml(doc)
       : serializePreviewDocument(doc)
-  return enhanceProsemirrorHtml(html, {
-    delegateOptions,
-    referenceDefinitions: collectReferenceDefinitions(doc),
-  })
+  return (
+    await enhanceProsemirrorHtmlInternal(html, {
+      delegateOptions,
+      referenceDefinitions: collectReferenceDefinitions(doc),
+    })
+  ).html
 }

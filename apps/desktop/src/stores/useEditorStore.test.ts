@@ -1,4 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { deleteFileObject, setFileObject } from '@/helper/files'
+import type { EditorDelegate } from 'rme'
 import useEditorStore, { type EditorLayoutNode } from './useEditorStore'
 
 vi.mock('@/helper/filesys', () => ({
@@ -141,5 +143,62 @@ describe('useEditorStore.insertNodeToFolderData', () => {
       }),
     ])
     expect(useEditorStore.getState().opened).toEqual(['source', 'other'])
+  })
+})
+
+describe('useEditorStore.getEditorContent', () => {
+  const fileId = 'preview-file'
+
+  beforeEach(() => {
+    deleteFileObject(fileId)
+    setFileObject(fileId, {
+      id: fileId,
+      name: 'preview.md',
+      kind: 'file',
+      path: '/workspace/preview.md',
+      content: 'cached markdown',
+    })
+    useEditorStore.setState({
+      editorCtxMap: new Map(),
+      editorDelegateMap: new Map(),
+    })
+  })
+
+  it('returns cached Markdown when Preview has no mounted delegate', () => {
+    expect(useEditorStore.getState().getEditorContent(fileId)).toBe('cached markdown')
+  })
+
+  it('does not read state from an unmounted delegate', () => {
+    const getState = vi.fn(() => {
+      throw new Error('manager phase error')
+    })
+    const delegate = {
+      manager: { getState, mounted: false },
+      docToString: vi.fn(),
+      stringToDoc: vi.fn(),
+      view: 'Wysiwyg',
+    } as unknown as EditorDelegate
+    useEditorStore.getState().setEditorDelegate(fileId, delegate)
+
+    expect(useEditorStore.getState().getEditorContent(fileId)).toBe('cached markdown')
+    expect(getState).not.toHaveBeenCalled()
+  })
+
+  it('prefers live content from a mounted editor delegate', () => {
+    const doc = {}
+    const docToString = vi.fn(() => 'live markdown')
+    const delegate = {
+      manager: {
+        mounted: true,
+        view: { state: { doc } },
+      },
+      docToString,
+      stringToDoc: vi.fn(),
+      view: 'Wysiwyg',
+    } as unknown as EditorDelegate
+    useEditorStore.getState().setEditorDelegate(fileId, delegate)
+
+    expect(useEditorStore.getState().getEditorContent(fileId)).toBe('live markdown')
+    expect(docToString).toHaveBeenCalledWith(doc)
   })
 })

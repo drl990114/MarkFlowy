@@ -2,7 +2,7 @@ import { useEditorStore } from '@/stores'
 import { convertFileSrc, invoke } from '@tauri-apps/api/core'
 import { join } from '@tauri-apps/api/path'
 import { fetch } from '@tauri-apps/plugin-http'
-import { FileResultCode, FileSysResult } from './filesys'
+import { FileResultCode, type FileSysResult } from './filesys'
 import { logger } from './logger'
 
 const convertHttpToBase64 = async (url: string): Promise<string> => {
@@ -39,6 +39,19 @@ const convertHttpToBase64 = async (url: string): Promise<string> => {
 }
 
 const isHttpUrl = (src: string) => /^https?:\/\//i.test(src)
+
+const getRemoteHttpUrl = (src: string): string | null => {
+  if (isHttpUrl(src)) {
+    return src
+  }
+
+  if (!src.startsWith('//')) {
+    return null
+  }
+
+  const protocol = location.protocol === 'http:' ? 'http:' : 'https:'
+  return `${protocol}${src}`
+}
 
 const isAbsoluteLocalPath = (src: string) => /^(?:\/|\\\\|[a-zA-Z]:[\\/]).+/.test(src)
 
@@ -438,36 +451,41 @@ const base64ToBlob = (base64: string, mimeType: string): Blob => {
 export const getImageUrlInTauri = async (url: string, fileFolderPath?: string) => {
   if (!url) return url
 
-  if (isHttpUrl(url) && !url.includes(location.origin)) {
-    try {
-      const response = await fetch(url, {
-        method: 'GET',
-        mode: 'cors'
-      })
-
-      const blob = await response.blob()
-      const objectURL = URL.createObjectURL(blob)
-
-      return objectURL
-    } catch (error) {
-      return url
-    }
+  const remoteUrl = getRemoteHttpUrl(url)
+  if (remoteUrl) {
+    return remoteUrl
   }
 
-  if (url.startsWith('data:')) {
+  if (/^(?:data|blob):/i.test(url)) {
     return url
+  }
+
+  if (getLocalPathFromTauriAssetUrl(url)) {
+    return url
+  }
+
+  const fileUrlPath = getLocalPathFromFileUrl(url)
+  if (fileUrlPath) {
+    return convertFileSrc(fileUrlPath)
+  }
+
+  // Markdown URLs encode path characters, but decoding an HTTP URL here can
+  // change signed URLs and object-storage keys. Decode only local paths.
+  const localUrl = safeDecodeURIComponent(url)
+  if (isAbsoluteLocalPath(localUrl)) {
+    return convertFileSrc(localUrl)
   }
 
   const dirPath = fileFolderPath || useEditorStore.getState().folderData?.[0]?.path
 
   if (dirPath) {
     try {
-      const relativeUrl = await join(dirPath, url)
+      const relativeUrl = await join(dirPath, localUrl)
       const isExists = await invoke('file_exists', { filePath: relativeUrl })
       if (isExists) {
         return convertFileSrc(relativeUrl)
       } else {
-        return convertFileSrc(url)
+        return convertFileSrc(localUrl)
       }
     } catch (error) {
       return url
@@ -475,7 +493,7 @@ export const getImageUrlInTauri = async (url: string, fileFolderPath?: string) =
   }
 
   try {
-    return convertFileSrc(url)
+    return convertFileSrc(localUrl)
   } catch (error) {
     return url
   }

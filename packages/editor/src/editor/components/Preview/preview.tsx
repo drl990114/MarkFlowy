@@ -1,17 +1,38 @@
 import { type Node } from '@rme-sdk/pm/model'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Loading } from 'zens'
+import { useTranslation } from '@markflowy/i18n'
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import type { LinkClickHandler } from '../../extensions/LinkClick'
 import { WysiwygThemeWrapper } from '../../theme'
 import { eventBus } from '../../utils/eventbus'
-import { rmeProsemirrorNodeToHtml } from '../../utils/prosemirrorNodeToHtml'
+import {
+  prepareProsemirrorPreview,
+  type PreparedProsemirrorPreview,
+} from '../../utils/prosemirrorNodeToHtml'
+import { clearPreviewImageSource } from '../../utils/sanitize-html'
 import { defaultStyleToken, type EditorProps } from '../Editor'
 import { createWysiwygDelegate } from '../WysiwygEditor'
 
+export interface PreviewImageHydration {
+  readonly settled: Promise<void>
+}
+
+interface PreviewImageHydrationController extends PreviewImageHydration {
+  settle: () => void
+}
+
 interface PreviewProps {
   doc: Node | string
+  delegate?: EditorProps['delegate']
   delegateOptions?: EditorProps['delegateOptions']
   onError?: (e: Error) => void
+  onImageHydrationChange?: (hydration: PreviewImageHydration | null) => void
   handleLinkClick?: LinkClickHandler
   styleToken?: EditorProps['styleToken']
 }
@@ -30,6 +51,29 @@ const defaultLinkClickHandler: LinkClickHandler = (href: string) => {
 }
 
 const mermaidFencePattern = /^ {0,3}(?:`{3,}|~{3,})[\t ]*mermaid(?:[\t ].*)?$/im
+const previewSkeletonLineWidths = ['42%', '88%', '76%', '94%', '67%', '82%']
+const useIsomorphicLayoutEffect =
+  typeof document === 'undefined' ? useEffect : useLayoutEffect
+
+function createImageHydrationController(): PreviewImageHydrationController {
+  let isSettled = false
+  let resolveSettled!: () => void
+  const settled = new Promise<void>((resolve) => {
+    resolveSettled = resolve
+  })
+
+  return {
+    settled,
+    settle: () => {
+      if (isSettled) {
+        return
+      }
+
+      isSettled = true
+      resolveSettled()
+    },
+  }
+}
 
 function containsMermaid(doc: Node | string): boolean {
   if (typeof doc === 'string') {
@@ -77,20 +121,161 @@ function createPreviewDelegateOptions(
   }
 }
 
+function hydratePreviewImages(
+  container: HTMLElement,
+  imageSources: ReadonlyMap<string, string>,
+  resolveImage: NonNullable<PreviewProps['delegateOptions']>['handleViewImgSrcUrl'],
+  onPendingChange: (count: number) => void,
+  onComplete: () => void,
+): () => void {
+  let active = true
+  let pendingCount = 0
+  let completed = false
+  const cleanups: (() => void)[] = []
+  const resolvedImages = new WeakSet<HTMLImageElement>()
+  const settledImages = new WeakSet<HTMLImageElement>()
+  const images = Array.from(container.querySelectorAll<HTMLImageElement>('img'))
+
+  const completeIfReady = () => {
+    if (!active || completed || pendingCount !== 0) {
+      return
+    }
+
+    completed = true
+    onComplete()
+  }
+
+  images.forEach((image) => {
+    image.setAttribute('decoding', 'async')
+
+    const imageId = image.dataset.mfPreviewImageId
+    const source = imageId ? imageSources.get(imageId) : undefined
+    if (!source || !resolveImage) {
+      image.setAttribute('loading', 'lazy')
+      return
+    }
+
+    // WebKit can keep displaying the initial data-URI placeholder when a
+    // native-lazy image has its src replaced. Host-resolved images already
+    // hydrate after Preview is visible, so native lazy loading adds no value.
+    image.removeAttribute('loading')
+    pendingCount += 1
+    image.classList.add('mf-preview-image-loading')
+    image.setAttribute('aria-busy', 'true')
+
+    const settleResolution = () => {
+      if (!active || resolvedImages.has(image)) {
+        return
+      }
+
+      resolvedImages.add(image)
+      pendingCount -= 1
+      onPendingChange(pendingCount)
+      completeIfReady()
+    }
+    const settleImage = (loaded: boolean) => {
+      if (!active || settledImages.has(image)) {
+        return
+      }
+
+      settledImages.add(image)
+      image.classList.remove('mf-preview-image-loading')
+      image.removeAttribute('aria-busy')
+      if (!loaded) {
+        image.removeAttribute('src')
+      }
+    }
+    const handleLoad = () => settleImage(true)
+    const handleError = () => settleImage(false)
+
+    void Promise.resolve()
+      .then(() => resolveImage(source))
+      .then((resolvedSource) => {
+        if (!active) {
+          return
+        }
+        if (!container.contains(image)) {
+          settleResolution()
+          return
+        }
+
+        clearPreviewImageSource(image)
+        if (!resolvedSource) {
+          image.removeAttribute('src')
+          settleResolution()
+          settleImage(false)
+          return
+        }
+
+        // Replace the inert placeholder without an intermediate missing-src state.
+        // Removing src first can queue a stale error in WebKit that fires after
+        // the real source and its listeners have already been installed.
+        image.addEventListener('load', handleLoad, { once: true })
+        image.addEventListener('error', handleError, { once: true })
+        cleanups.push(() => {
+          image.removeEventListener('load', handleLoad)
+          image.removeEventListener('error', handleError)
+        })
+        image.setAttribute('src', resolvedSource)
+        settleResolution()
+      })
+      .catch(() => {
+        if (!active) {
+          return
+        }
+        if (!container.contains(image)) {
+          settleResolution()
+          return
+        }
+        clearPreviewImageSource(image)
+        settleResolution()
+        settleImage(false)
+      })
+  })
+
+  onPendingChange(pendingCount)
+  completeIfReady()
+
+  return () => {
+    active = false
+    cleanups.forEach((cleanup) => cleanup())
+  }
+}
+
 export const Preview: React.FC<PreviewProps> = (props) => {
-  const { doc, delegateOptions, handleLinkClick, styleToken = defaultStyleToken } = props
-  const [processedHtml, setProcessedHtml] = useState('')
+  const {
+    doc,
+    delegate,
+    delegateOptions,
+    handleLinkClick,
+    styleToken = defaultStyleToken,
+  } = props
+  const { t } = useTranslation()
+  const [preparedPreview, setPreparedPreview] =
+    useState<{
+      hydration: PreviewImageHydrationController
+      preview: PreparedProsemirrorPreview
+    } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [pendingImageCount, setPendingImageCount] = useState(0)
   const [renderError, setRenderError] = useState<Error | null>(null)
   const [themeGeneration, setThemeGeneration] = useState(0)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const activeHydrationRef = useRef<PreviewImageHydrationController | null>(null)
   const onErrorRef = useRef(props.onError)
+  const onImageHydrationChangeRef = useRef(props.onImageHydrationChange)
   const hasMermaid = useMemo(() => containsMermaid(doc), [doc])
+  const previewHtml = preparedPreview?.preview.html ?? ''
+  // React compares the dangerouslySetInnerHTML wrapper by identity. Keep it
+  // stable so progress updates do not replace images being hydrated in place.
+  const previewInnerHtml = useMemo(() => ({ __html: previewHtml }), [previewHtml])
   const previewDelegateOptions = useMemo(
     () => createPreviewDelegateOptions(delegateOptions, doc),
     [delegateOptions, doc],
   )
 
   onErrorRef.current = props.onError
+  onImageHydrationChangeRef.current = props.onImageHydrationChange
 
   useEffect(() => {
     const handleThemeChange = () => {
@@ -105,23 +290,43 @@ export const Preview: React.FC<PreviewProps> = (props) => {
     }
   }, [hasMermaid])
 
+  useIsomorphicLayoutEffect(() => {
+    const hydration = createImageHydrationController()
+    activeHydrationRef.current = hydration
+    onImageHydrationChangeRef.current?.(hydration)
+
+    return () => {
+      hydration.settle()
+      if (activeHydrationRef.current === hydration) {
+        activeHydrationRef.current = null
+        onImageHydrationChangeRef.current?.(null)
+      }
+    }
+  }, [delegate, doc, previewDelegateOptions, themeGeneration])
+
   useEffect(() => {
     let canceled = false
+    const hydration = activeHydrationRef.current
     setIsLoading(true)
+    setPendingImageCount(0)
     setRenderError(null)
-    setProcessedHtml('')
+    setPreparedPreview(null)
 
     const handle = window.setTimeout(() => {
       try {
         const targetDoc =
           typeof doc === 'string'
-            ? createWysiwygDelegate(previewDelegateOptions).stringToDoc(doc)
+            ? (
+                delegate?.view === 'Wysiwyg'
+                  ? delegate
+                  : createWysiwygDelegate(previewDelegateOptions)
+              ).stringToDoc(doc)
             : doc
 
-        rmeProsemirrorNodeToHtml(targetDoc, previewDelegateOptions)
-          .then((html) => {
-            if (!canceled) {
-              setProcessedHtml(html)
+        prepareProsemirrorPreview(targetDoc, previewDelegateOptions)
+          .then((preview) => {
+            if (!canceled && hydration && activeHydrationRef.current === hydration) {
+              setPreparedPreview({ hydration, preview })
               setIsLoading(false)
             }
           })
@@ -130,6 +335,7 @@ export const Preview: React.FC<PreviewProps> = (props) => {
               const error = e instanceof Error ? e : new Error(String(e))
               setRenderError(error)
               setIsLoading(false)
+              hydration?.settle()
               onErrorRef.current?.(error)
               console.error(error)
             }
@@ -139,6 +345,7 @@ export const Preview: React.FC<PreviewProps> = (props) => {
           const error = e instanceof Error ? e : new Error(String(e))
           setRenderError(error)
           setIsLoading(false)
+          hydration?.settle()
           onErrorRef.current?.(error)
           console.error(error)
         }
@@ -149,7 +356,31 @@ export const Preview: React.FC<PreviewProps> = (props) => {
       canceled = true
       window.clearTimeout(handle)
     }
-  }, [doc, previewDelegateOptions, themeGeneration])
+  }, [delegate, doc, previewDelegateOptions, themeGeneration])
+
+  const handlePendingImageChange = useCallback((count: number) => {
+    setPendingImageCount(count)
+  }, [])
+
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container || !preparedPreview) {
+      return
+    }
+
+    try {
+      return hydratePreviewImages(
+        container,
+        preparedPreview.preview.imageSources,
+        previewDelegateOptions?.handleViewImgSrcUrl,
+        handlePendingImageChange,
+        preparedPreview.hydration.settle,
+      )
+    } catch (error) {
+      preparedPreview.hydration.settle()
+      throw error
+    }
+  }, [handlePendingImageChange, preparedPreview, previewDelegateOptions])
 
   const handleClick = useCallback(
     (event: React.MouseEvent) => {
@@ -176,17 +407,24 @@ export const Preview: React.FC<PreviewProps> = (props) => {
 
   if (isLoading) {
     return (
-      <div
-        style={{
-          width: '100%',
-          minHeight: '60px',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-      >
-        <Loading size={40} />
-      </div>
+      <WysiwygThemeWrapper {...styleToken}>
+        <div
+          className='mf-preview-loading'
+          role='status'
+          aria-live='polite'
+          aria-label={t('common.loading')}
+        >
+          <div className='mf-preview-loading-label' aria-hidden='true'>
+            <span className='mf-preview-loading-spinner' />
+            <span>{t('common.loading')}</span>
+          </div>
+          <div className='mf-preview-loading-lines' aria-hidden='true'>
+            {previewSkeletonLineWidths.map((width) => (
+              <span key={width} style={{ width }} />
+            ))}
+          </div>
+        </div>
+      </WysiwygThemeWrapper>
     )
   }
 
@@ -201,14 +439,32 @@ export const Preview: React.FC<PreviewProps> = (props) => {
   }
 
   return (
-    <WysiwygThemeWrapper {...styleToken}>
+    <WysiwygThemeWrapper
+      {...styleToken}
+      aria-busy={pendingImageCount > 0 ? 'true' : undefined}
+    >
+      {pendingImageCount > 0 ? (
+        <div
+          key='image-progress'
+          className='mf-preview-image-progress'
+          role='status'
+          aria-live='polite'
+        >
+          <span>
+            <i className='mf-preview-loading-spinner' aria-hidden='true' />
+            {t('common.loading')}
+          </span>
+        </div>
+      ) : null}
       <div
+        key='preview-content'
+        ref={containerRef}
         className='mf-preview-content'
         onClick={handleClick}
         style={{
           padding: '0 var(--rme-editor-inline-padding, clamp(16px, 5vw, 40px))',
         }}
-        dangerouslySetInnerHTML={{ __html: processedHtml }}
+        dangerouslySetInnerHTML={previewInnerHtml}
       />
     </WysiwygThemeWrapper>
   )

@@ -1,11 +1,12 @@
-import { createFile, getFolderPathFromPath, isMdFile, releaseSecurityScope, type IFile } from '@/helper/filesys';
-import { getPathIdentityKey } from '@/helper/pathIdentity';
-import { isEmptyEditor } from '@/services/editor-file';
-import { invoke } from '@tauri-apps/api/core';
-import { nanoid } from 'nanoid';
-import type { EditorContext, EditorDelegate } from 'rme';
-import { create } from 'zustand';
-import { subscribeWithSelector } from 'zustand/middleware';
+import { getFileObject } from '@/helper/files'
+import { createFile, getFolderPathFromPath, isMdFile, releaseSecurityScope, type IFile } from '@/helper/filesys'
+import { getPathIdentityKey } from '@/helper/pathIdentity'
+import { isEmptyEditor } from '@/services/editor-file'
+import { invoke } from '@tauri-apps/api/core'
+import { nanoid } from 'nanoid'
+import type { EditorContext, EditorDelegate } from 'rme'
+import { create } from 'zustand'
+import { subscribeWithSelector } from 'zustand/middleware'
 
 const findParentNode = (fileNode: IFile, rootFile: IFile) => {
   const dfs = (file: IFile): undefined | IFile => {
@@ -803,13 +804,13 @@ const useEditorStore = create<EditorStore>()(subscribeWithSelector((set, get) =>
     },
 
     getEditorContent: (id: string) => {
+      const cachedContent = getFileObject(id)?.content ?? ''
       const curDelegate = get().getEditorDelegate(id)
-      if (!curDelegate) {
-        return ''
-      } else {
-        // @ts-ignore
-        return curDelegate.docToString(curDelegate.manager.getState()?.doc)
+      if (!curDelegate?.manager.mounted) {
+        return cachedContent
       }
+
+      return curDelegate.docToString(curDelegate.manager.view.state.doc)
     },
 
     getEditorDelegate: (id: string) => {

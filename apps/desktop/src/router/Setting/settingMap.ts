@@ -195,6 +195,7 @@ export const getSettingMap = () => {
           options: [
             { value: EditorViewType.WYSIWYG, title: i18n.t('view.wysiwyg') },
             { value: EditorViewType.SOURCECODE, title: i18n.t('view.source_code') },
+            { value: EditorViewType.PREVIEW, title: i18n.t('view.preview') },
           ],
         },
         typewriterScroll: {
