@@ -262,15 +262,51 @@ fn is_process_alive(pid: u32) -> bool {
 
 #[cfg(windows)]
 fn is_process_alive(pid: u32) -> bool {
-    if pid == 0 || pid == std::process::id() {
+    use windows_sys::Win32::{
+        Foundation::{CloseHandle, WAIT_TIMEOUT},
+        System::Threading::{OpenProcess, WaitForSingleObject, PROCESS_SYNCHRONIZE},
+    };
+
+    if pid == 0 {
         return false;
     }
 
-    std::process::Command::new("tasklist")
-        .args(["/FI", &format!("PID eq {pid}"), "/NH"])
-        .output()
-        .map(|output| String::from_utf8_lossy(&output.stdout).contains(&pid.to_string()))
-        .unwrap_or(false)
+    if pid == std::process::id() {
+        return true;
+    }
+
+    // Query the process object directly instead of spawning `tasklist.exe`.
+    // Besides avoiding a console flash, the zero-timeout wait keeps this
+    // startup-path check synchronous but non-blocking.
+    let process_handle = unsafe { OpenProcess(PROCESS_SYNCHRONIZE, 0, pid) };
+    if process_handle.is_null() {
+        return false;
+    }
+
+    // SAFETY: `process_handle` is a valid owned handle from `OpenProcess`.
+    // It is closed exactly once after the non-blocking wait.
+    let wait_result = unsafe {
+        let result = WaitForSingleObject(process_handle, 0);
+        let _ = CloseHandle(process_handle);
+        result
+    };
+
+    wait_result == WAIT_TIMEOUT
+}
+
+#[cfg(all(test, windows))]
+mod windows_process_tests {
+    use super::is_process_alive;
+
+    #[test]
+    fn rejects_the_reserved_zero_pid() {
+        assert!(!is_process_alive(0));
+    }
+
+    #[test]
+    fn keeps_the_current_process_runtime_state_alive() {
+        assert!(is_process_alive(std::process::id()));
+    }
 }
 
 fn empty_cli_runtime_state() -> CliRuntimeState {
