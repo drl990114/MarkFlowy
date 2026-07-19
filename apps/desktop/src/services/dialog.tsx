@@ -37,6 +37,7 @@ export interface ConfirmOptions {
   content?: React.ReactNode
   actions?: DialogAction[]
   remember?: DialogRememberOptions
+  size?: ConfirmModalProps['size']
 }
 
 export interface InfoOptions {

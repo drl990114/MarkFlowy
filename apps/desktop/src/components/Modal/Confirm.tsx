@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Dialog } from '@/components/ui/dialog'
+import { Dialog, type DialogContentProps } from '@/components/ui/dialog'
 import { useTranslation } from '@/i18n'
 
 export interface DialogAction {
@@ -25,6 +25,7 @@ export interface ConfirmModalProps {
   title?: string
   content?: ReactNode
   describeContent?: boolean
+  size?: DialogContentProps['size']
   actions?: DialogAction[]
   remember?: DialogRememberOptions
   onResolve?: (actionId: string | null) => void
@@ -37,6 +38,7 @@ export function ConfirmModal({
   title,
   content,
   describeContent,
+  size,
   actions,
   remember,
   onResolve,
@@ -137,6 +139,7 @@ export function ConfirmModal({
           event.preventDefault()
           autoFocusTarget.focus()
         }}
+        size={size}
       >
         <Dialog.Header>
           <Dialog.Title>{title ?? t('app_name')}</Dialog.Title>

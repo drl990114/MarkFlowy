@@ -1,9 +1,9 @@
 import { dialog } from '@/services/dialog'
+import { UpdateDialogContent } from '@/components/UpdateDialogContent'
 import { invoke } from '@tauri-apps/api/core'
 import type { Update } from '@tauri-apps/plugin-updater'
 import { check } from '@tauri-apps/plugin-updater'
 import { getI18n } from '@/i18n'
-import Markdown from 'react-markdown'
 import { toast } from 'zens'
 import { logger } from './logger'
 
@@ -55,18 +55,18 @@ export const checkUpdate = async (opt: { install: boolean } = { install: false }
       if (opt.install) {
         installUpdate(update)
       } else {
-        const dateString = (update?.date || '').split('.')[0]
-
         const action = await dialog.confirm({
-          title: `New version ${update.version}`,
+          title: i18n.t('about.newVersion'),
           content: (
-            <div>
-              <Markdown>{update.body}</Markdown>
-              <p>
-                <small>{dateString}</small>
-              </p>
-            </div>
+            <UpdateDialogContent
+              body={update.body}
+              locale={i18n.resolvedLanguage ?? i18n.language}
+              releaseDate={update.date}
+              releaseDateLabel={i18n.t('about.release')}
+              version={update.version}
+            />
           ),
+          size: 'lg',
           actions: [
             { id: 'cancel', label: i18n.t('common.cancel') },
             { id: 'install', label: i18n.t('about.install'), primary: true },
