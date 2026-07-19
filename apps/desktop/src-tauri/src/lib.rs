@@ -711,12 +711,17 @@ fn generate_wrapper_script(exe_path: &std::path::Path) -> String {
 }
 
 /// 生成 Windows wrapper .cmd 文件内容
-#[cfg(windows)]
-fn generate_wrapper_script(exe_path: &std::path::Path) -> String {
+#[cfg(any(windows, test))]
+fn generate_windows_wrapper_script(exe_path: &std::path::Path) -> String {
     let exe_str = exe_path.to_string_lossy();
     format!(
         "@echo off\r\nrem MarkFlowy CLI wrapper - auto-generated, do not edit\r\n\"{exe_str}\" %*\r\n"
     )
+}
+
+#[cfg(windows)]
+fn generate_wrapper_script(exe_path: &std::path::Path) -> String {
+    generate_windows_wrapper_script(exe_path)
 }
 
 /// 安装 CLI wrapper（替代原来的 symlink/copy）
@@ -730,6 +735,14 @@ fn install_cli_wrapper(
 
     // 先删除旧文件（可能是 symlink 或旧 wrapper）
     // 必须先删除，否则 fs::write 会跟随 symlink 写入到目标文件
+    #[cfg(windows)]
+    match fs::symlink_metadata(target_path) {
+        Ok(_) => fs::remove_file(target_path)?,
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+        Err(error) => return Err(error),
+    }
+
+    #[cfg(not(windows))]
     let _ = fs::remove_file(target_path);
 
     let script = generate_wrapper_script(current_exe);
@@ -744,10 +757,207 @@ fn install_cli_wrapper(
     Ok(())
 }
 
+#[cfg(any(windows, test))]
+fn cli_installation_is_current(
+    target_dir: &std::path::Path,
+    expected_version: &str,
+    wrapper_name: &str,
+    expected_wrapper: &str,
+    shadowing_binary_name: Option<&str>,
+) -> bool {
+    if read_installed_cli_version(target_dir).as_deref() != Some(expected_version) {
+        return false;
+    }
+
+    match fs::read_to_string(target_dir.join(wrapper_name)) {
+        Ok(wrapper) if wrapper == expected_wrapper => {}
+        _ => return false,
+    }
+
+    if let Some(binary_name) = shadowing_binary_name {
+        match fs::symlink_metadata(target_dir.join(binary_name)) {
+            Ok(_) => return false,
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+            Err(_) => return false,
+        }
+    }
+
+    true
+}
+
 /// 检查已安装的 wrapper 是否是最新版本
+#[cfg(windows)]
+fn is_cli_up_to_date(target_dir: &std::path::Path, current_exe: &std::path::Path) -> bool {
+    let app_version = env!("CARGO_PKG_VERSION");
+    let expected_wrapper = generate_wrapper_script(current_exe);
+
+    cli_installation_is_current(
+        target_dir,
+        app_version,
+        cli_wrapper_name(),
+        &expected_wrapper,
+        Some(cli_binary_name()),
+    )
+}
+
+#[cfg(not(windows))]
 fn is_cli_up_to_date(target_dir: &std::path::Path, _current_exe: &std::path::Path) -> bool {
     let app_version = env!("CARGO_PKG_VERSION");
     read_installed_cli_version(target_dir).as_deref() == Some(app_version)
+}
+
+#[cfg(test)]
+mod cli_installation_tests {
+    use super::{
+        cli_installation_is_current, generate_windows_wrapper_script, prioritize_path_entries,
+        remove_legacy_cli_binary,
+    };
+    use std::{
+        fs,
+        path::{Path, PathBuf},
+    };
+    use tempfile::tempdir;
+
+    const VERSION: &str = env!("CARGO_PKG_VERSION");
+    const WRAPPER_NAME: &str = "markflowy.cmd";
+    const LEGACY_BINARY_NAME: &str = "markflowy.exe";
+
+    fn write_current_windows_installation(target_dir: &Path, current_exe: &Path) -> String {
+        let wrapper = generate_windows_wrapper_script(current_exe);
+        fs::write(target_dir.join(".markflowy-cli-version"), VERSION).unwrap();
+        fs::write(target_dir.join(WRAPPER_NAME), &wrapper).unwrap();
+        wrapper
+    }
+
+    #[test]
+    fn accepts_matching_windows_cli_wrapper_without_legacy_exe() {
+        let target_dir = tempdir().unwrap();
+        let current_exe = Path::new(r"C:\Program Files\MarkFlowy\markflowy.exe");
+        let wrapper = write_current_windows_installation(target_dir.path(), current_exe);
+
+        assert!(cli_installation_is_current(
+            target_dir.path(),
+            VERSION,
+            WRAPPER_NAME,
+            &wrapper,
+            Some(LEGACY_BINARY_NAME),
+        ));
+    }
+
+    #[test]
+    fn rejects_matching_version_when_windows_wrapper_targets_old_gui() {
+        let target_dir = tempdir().unwrap();
+        let current_exe = Path::new(r"C:\Program Files\MarkFlowy\markflowy.exe");
+        let expected_wrapper = generate_windows_wrapper_script(current_exe);
+        let old_wrapper =
+            generate_windows_wrapper_script(Path::new(r"C:\OldMarkFlowy\markflowy.exe"));
+        fs::write(target_dir.path().join(".markflowy-cli-version"), VERSION).unwrap();
+        fs::write(target_dir.path().join(WRAPPER_NAME), old_wrapper).unwrap();
+
+        assert!(!cli_installation_is_current(
+            target_dir.path(),
+            VERSION,
+            WRAPPER_NAME,
+            &expected_wrapper,
+            Some(LEGACY_BINARY_NAME),
+        ));
+    }
+
+    #[test]
+    fn rejects_windows_wrapper_shadowed_by_legacy_exe() {
+        let target_dir = tempdir().unwrap();
+        let current_exe = Path::new(r"C:\Program Files\MarkFlowy\markflowy.exe");
+        let wrapper = write_current_windows_installation(target_dir.path(), current_exe);
+        fs::write(target_dir.path().join(LEGACY_BINARY_NAME), b"legacy").unwrap();
+
+        assert!(!cli_installation_is_current(
+            target_dir.path(),
+            VERSION,
+            WRAPPER_NAME,
+            &wrapper,
+            Some(LEGACY_BINARY_NAME),
+        ));
+    }
+
+    #[test]
+    fn rejects_missing_or_corrupt_windows_cli_state() {
+        let target_dir = tempdir().unwrap();
+        let current_exe = Path::new(r"C:\Program Files\MarkFlowy\markflowy.exe");
+        let expected_wrapper = generate_windows_wrapper_script(current_exe);
+
+        assert!(!cli_installation_is_current(
+            target_dir.path(),
+            VERSION,
+            WRAPPER_NAME,
+            &expected_wrapper,
+            Some(LEGACY_BINARY_NAME),
+        ));
+
+        fs::write(target_dir.path().join(".markflowy-cli-version"), VERSION).unwrap();
+        fs::write(target_dir.path().join(WRAPPER_NAME), "corrupt").unwrap();
+
+        assert!(!cli_installation_is_current(
+            target_dir.path(),
+            VERSION,
+            WRAPPER_NAME,
+            &expected_wrapper,
+            Some(LEGACY_BINARY_NAME),
+        ));
+    }
+
+    #[test]
+    fn removes_managed_legacy_cli_binary() {
+        let target_dir = tempdir().unwrap();
+        let legacy_exe = target_dir.path().join(LEGACY_BINARY_NAME);
+        fs::write(&legacy_exe, b"legacy").unwrap();
+
+        assert!(remove_legacy_cli_binary(&legacy_exe, Path::new("/installed/markflowy")).unwrap());
+        assert!(!legacy_exe.exists());
+    }
+
+    #[test]
+    fn refuses_to_repair_from_the_running_legacy_copy() {
+        let target_dir = tempdir().unwrap();
+        let legacy_exe = target_dir.path().join(LEGACY_BINARY_NAME);
+        fs::write(&legacy_exe, b"legacy").unwrap();
+
+        assert!(remove_legacy_cli_binary(&legacy_exe, &legacy_exe).is_err());
+        assert!(legacy_exe.exists());
+    }
+
+    #[test]
+    fn prioritizes_and_deduplicates_the_managed_cli_path() {
+        let managed_dir = Path::new("/managed/bin");
+        let entries = vec![
+            PathBuf::from("/old/bin"),
+            managed_dir.to_path_buf(),
+            PathBuf::from("/other/bin"),
+            managed_dir.to_path_buf(),
+        ];
+
+        let reordered =
+            prioritize_path_entries(entries, managed_dir, |entry| entry == managed_dir).unwrap();
+
+        assert_eq!(
+            reordered,
+            vec![
+                managed_dir.to_path_buf(),
+                PathBuf::from("/old/bin"),
+                PathBuf::from("/other/bin"),
+            ]
+        );
+    }
+
+    #[test]
+    fn leaves_an_already_preferred_cli_path_unchanged() {
+        let managed_dir = Path::new("/managed/bin");
+        let entries = vec![managed_dir.to_path_buf(), PathBuf::from("/other/bin")];
+
+        assert!(
+            prioritize_path_entries(entries, managed_dir, |entry| { entry == managed_dir })
+                .is_none()
+        );
+    }
 }
 
 macro_rules! cli_debug {
@@ -787,17 +997,41 @@ fn cleanup_old_cli_symlinks(home_dir: &std::path::Path, current_exe: &std::path:
 }
 
 /// Windows 上清理旧版本 copy 的二进制文件
+#[cfg(any(windows, test))]
+fn remove_legacy_cli_binary(
+    old_exe: &std::path::Path,
+    current_exe: &std::path::Path,
+) -> std::io::Result<bool> {
+    match fs::symlink_metadata(old_exe) {
+        Ok(_) => {}
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(false),
+        Err(error) => return Err(error),
+    }
+
+    // When the legacy copy launches itself, Windows keeps the executable locked.
+    // Refuse to generate a wrapper that points back to that stale copy and leave
+    // the version marker untouched so the installed GUI can retry the repair.
+    if same_path(old_exe, current_exe) {
+        return Err(std::io::Error::other(
+            "cannot repair CLI while running from the legacy markflowy.exe copy",
+        ));
+    }
+
+    fs::remove_file(old_exe)?;
+    Ok(true)
+}
+
 #[cfg(windows)]
-fn cleanup_old_cli_symlinks(home_dir: &std::path::Path, _current_exe: &std::path::Path) {
-    let old_dir = cli_install_dir(home_dir);
-    // 旧代码 copy 了 markflowy.exe 到安装目录，新代码用 markflowy.cmd wrapper
-    // 删除旧的 markflowy.exe（如果存在且不是当前 exe）
-    let old_exe = old_dir.join(cli_binary_name());
-    if old_exe.exists() && !old_exe.is_symlink() {
-        // 检查是否是旧版本 copy 的（大小可能与应用二进制不同则保留）
-        let _ = fs::remove_file(&old_exe);
+fn cleanup_old_cli_symlinks(
+    home_dir: &std::path::Path,
+    current_exe: &std::path::Path,
+) -> std::io::Result<()> {
+    let old_exe = cli_install_dir(home_dir).join(cli_binary_name());
+    if remove_legacy_cli_binary(&old_exe, current_exe)? {
         cli_debug!("cleaned up old CLI copy: {:?}", old_exe);
     }
+
+    Ok(())
 }
 
 #[cfg(windows)]
@@ -805,12 +1039,52 @@ fn normalize_path_for_env(path: &std::path::Path) -> String {
     path.to_string_lossy().trim_end_matches('\\').to_string()
 }
 
-#[cfg(windows)]
-fn user_path_contains_dir(user_path: &str, dir: &std::path::Path) -> bool {
-    let dir = normalize_path_for_env(dir);
+#[cfg(any(windows, test))]
+fn prioritize_path_entries<F>(
+    entries: Vec<PathBuf>,
+    dir: &std::path::Path,
+    matches_dir: F,
+) -> Option<Vec<PathBuf>>
+where
+    F: Fn(&std::path::Path) -> bool,
+{
+    let already_preferred = entries.first().is_some_and(|entry| matches_dir(entry))
+        && entries.iter().filter(|entry| matches_dir(entry)).count() == 1;
+    if already_preferred {
+        return None;
+    }
 
-    env::split_paths(user_path)
-        .any(|entry| normalize_path_for_env(&entry).eq_ignore_ascii_case(&dir))
+    Some(
+        std::iter::once(dir.to_path_buf())
+            .chain(
+                entries
+                    .into_iter()
+                    .filter(|entry| !matches_dir(entry.as_path())),
+            )
+            .collect(),
+    )
+}
+
+#[cfg(windows)]
+fn prioritize_user_path_dir(
+    user_path: &str,
+    dir: &std::path::Path,
+) -> Result<Option<String>, env::JoinPathsError> {
+    let entries: Vec<PathBuf> = if user_path.is_empty() {
+        Vec::new()
+    } else {
+        env::split_paths(user_path).collect()
+    };
+    let matches_dir = |entry: &std::path::Path| {
+        normalize_path_for_env(entry).eq_ignore_ascii_case(&normalize_path_for_env(dir))
+    };
+
+    let Some(reordered) = prioritize_path_entries(entries, dir, matches_dir) else {
+        return Ok(None);
+    };
+    let new_path = env::join_paths(reordered)?;
+
+    Ok(Some(new_path.to_string_lossy().into_owned()))
 }
 
 #[cfg(windows)]
@@ -832,27 +1106,42 @@ fn broadcast_environment_change() {
 
 #[cfg(windows)]
 fn ensure_user_path_contains_dir(dir: &std::path::Path) -> Result<(), Box<dyn std::error::Error>> {
-    use winreg::enums::{HKEY_CURRENT_USER, KEY_READ, KEY_WRITE};
+    use winreg::enums::{HKEY_CURRENT_USER, KEY_READ, KEY_WRITE, REG_EXPAND_SZ, REG_SZ};
+    use winreg::types::{FromRegValue, ToRegValue};
     use winreg::RegKey;
 
     let hkcu = RegKey::predef(HKEY_CURRENT_USER);
     let environment = hkcu.open_subkey_with_flags("Environment", KEY_READ | KEY_WRITE)?;
-    let current_path = environment
-        .get_value::<String, _>("Path")
-        .unwrap_or_default();
-
-    if user_path_contains_dir(&current_path, dir) {
-        return Ok(());
+    let current_value = match environment.get_raw_value("Path") {
+        Ok(value) => Some(value),
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => None,
+        Err(error) => return Err(Box::new(error)),
+    };
+    if let Some(current_value) = &current_value {
+        if current_value.vtype != REG_SZ && current_value.vtype != REG_EXPAND_SZ {
+            return Err(Box::new(std::io::Error::new(
+                std::io::ErrorKind::InvalidData,
+                "user Path registry value must be REG_SZ or REG_EXPAND_SZ",
+            )));
+        }
     }
 
-    let dir = normalize_path_for_env(dir);
-    let new_path = if current_path.trim().is_empty() {
-        dir
-    } else {
-        format!("{};{}", current_path.trim_end_matches(';'), dir)
+    let current_path = current_value
+        .as_ref()
+        .map(String::from_reg_value)
+        .transpose()?
+        .unwrap_or_default();
+
+    let Some(new_path) = prioritize_user_path_dir(&current_path, dir)? else {
+        return Ok(());
     };
 
-    environment.set_value("Path", &new_path)?;
+    let mut new_value = new_path.to_reg_value();
+    if let Some(current_value) = current_value {
+        new_value.vtype = current_value.vtype;
+    }
+
+    environment.set_raw_value("Path", &new_value)?;
     broadcast_environment_change();
 
     Ok(())
@@ -890,6 +1179,29 @@ fn install_cli_in_background(app: &tauri::App) {
             }
         };
 
+        #[cfg(windows)]
+        {
+            if let Err(error) = fs::create_dir_all(&install_dir) {
+                cli_debug!("failed to create install dir: {:?}", error);
+                return;
+            }
+
+            // Always retry the managed legacy-exe cleanup before trusting the
+            // version marker. An earlier update may have failed because the old
+            // executable was still running and locked by Windows.
+            if let Err(error) = cleanup_old_cli_symlinks(&home_dir, &current_exe) {
+                cli_debug!("failed to clean up old CLI copy: {:?}", error);
+                return;
+            }
+
+            // Keep the managed CLI directory first in the user PATH. This makes
+            // the maintained wrapper win over copies left in older PATH entries
+            // without deleting files outside MarkFlowy's managed directory.
+            if let Err(error) = ensure_user_path_contains_dir(&install_dir) {
+                cli_debug!("failed to prioritize CLI dir in PATH: {:?}", error);
+            }
+        }
+
         // 版本和路径都匹配，无需更新。版本标记读取也在后台执行。
         if is_cli_up_to_date(&install_dir, &current_exe) {
             cli_debug!("CLI wrapper is up to date, skipping install");
@@ -898,9 +1210,10 @@ fn install_cli_in_background(app: &tauri::App) {
 
         let app_version = env!("CARGO_PKG_VERSION").to_string();
 
-        // 先清理旧版本安装的 symlink
+        #[cfg(unix)]
         cleanup_old_cli_symlinks(&home_dir, &current_exe);
 
+        #[cfg(unix)]
         if let Err(error) = fs::create_dir_all(&install_dir) {
             cli_debug!("failed to create install dir: {:?}", error);
             return;
@@ -910,11 +1223,31 @@ fn install_cli_in_background(app: &tauri::App) {
 
         match install_cli_wrapper(&target_path, &current_exe) {
             Ok(_) => {
-                // 写入版本标记
-                if let Err(error) = write_installed_cli_version(&install_dir, &app_version) {
-                    cli_debug!("failed to write CLI version file: {:?}", error);
+                #[cfg(windows)]
+                {
+                    let expected_wrapper = generate_wrapper_script(&current_exe);
+                    match fs::read_to_string(&target_path) {
+                        Ok(wrapper) if wrapper == expected_wrapper => {}
+                        Ok(_) => {
+                            cli_debug!("installed CLI wrapper verification failed");
+                            return;
+                        }
+                        Err(error) => {
+                            cli_debug!("failed to verify installed CLI wrapper: {:?}", error);
+                            return;
+                        }
+                    }
                 }
 
+                // The marker is the final success record for the managed files
+                // on Windows. Cleanup, wrapper installation, and verification
+                // must succeed first so a partial update is retried next launch.
+                if let Err(error) = write_installed_cli_version(&install_dir, &app_version) {
+                    cli_debug!("failed to write CLI version file: {:?}", error);
+                    return;
+                }
+
+                #[cfg(not(windows))]
                 if let Err(error) = ensure_user_path_contains_dir(&install_dir) {
                     cli_debug!("failed to add CLI dir to PATH: {:?}", error);
                 }
