@@ -11,6 +11,7 @@ import {
 } from './file-mutation'
 import { moveFileNode } from './file-operator'
 import NewFileInput from './NewFileInput'
+import { hasRenameConflict } from './rename-conflict'
 import { NodeContainer } from './styles'
 import { SimpleTree } from './types'
 import { getFileNameFromPath } from './verify-file-name'
@@ -101,6 +102,7 @@ function FileNode({
     createFolder,
     writeFile,
     fileExists,
+    pathsReferToSameDirectoryEntry,
     revealInFolder,
   } = useFileSystem()
 
@@ -203,7 +205,14 @@ function FileNode({
       lease.protectPaths(protection.paths)
       lease.protectPaths([nextPath])
 
-      if (target.path !== nextPath && (await fileExists(nextPath))) {
+      if (
+        await hasRenameConflict({
+          currentPath: target.path,
+          candidatePath: nextPath,
+          fileExists,
+          pathsReferToSameDirectoryEntry,
+        })
+      ) {
         toast.error('File already exists')
         return
       }

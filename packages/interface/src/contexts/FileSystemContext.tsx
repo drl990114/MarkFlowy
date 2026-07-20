@@ -37,6 +37,8 @@ export interface FileSystemContextValue {
   isDir: (path: string) => Promise<boolean>
   /** Check if a file exists */
   fileExists: (filePath: string) => Promise<boolean>
+  /** Check if two paths are case/Unicode aliases of the same directory entry (not merely hard links to the same file) */
+  pathsReferToSameDirectoryEntry: (path1: string, path2: string) => Promise<boolean>
   /** Move files to target folder */
   moveFilesToTargetFolder: (params: {
     files: string[]
