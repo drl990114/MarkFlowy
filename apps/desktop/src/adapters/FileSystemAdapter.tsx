@@ -121,6 +121,10 @@ export const TauriFileSystemProvider: FC<FileSystemAdapterProps> = ({ children }
       return await invoke<boolean>('file_exists', { filePath })
     },
 
+    pathsReferToSameDirectoryEntry: async (path1: string, path2: string): Promise<boolean> => {
+      return await invoke<boolean>('paths_refer_to_same_directory_entry', { path1, path2 })
+    },
+
     moveFilesToTargetFolder: async (params: {
       files: string[]
       targetFolder: string

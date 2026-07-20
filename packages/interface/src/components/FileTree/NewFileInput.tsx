@@ -3,6 +3,7 @@ import { Input, Tooltip } from 'zens'
 import type { IFile } from '../../types/file'
 import { useFileSystem } from '../../contexts/FileSystemContext'
 import { isMdFile, unVerifiedFileNameChars, verifyFileName } from './verify-file-name'
+import { hasRenameConflict } from './rename-conflict'
 
 const NewFileInput = (
   props: HTMLAttributes<HTMLInputElement> & {
@@ -26,7 +27,7 @@ const NewFileInput = (
     ...otherProps
   } = props
 
-  const { pathJoin, fileExists } = useFileSystem()
+  const { pathJoin, fileExists, pathsReferToSameDirectoryEntry } = useFileSystem()
 
   const InvalidTextMap = {
     same: createType === 'file' ? 'has same file' : 'has same folder',
@@ -107,9 +108,17 @@ const NewFileInput = (
           const fileInfo = await getFileInfo(fileName)
 
           if (fileInfo.path) {
-            const exists = await fileExists(fileInfo.path)
+            // For newly created nodes fileNode.path is unset; an empty currentPath
+            // can never be the same file as the candidate, so this degrades to a
+            // plain existence check.
+            const conflict = await hasRenameConflict({
+              currentPath: fileNode.path ?? '',
+              candidatePath: fileInfo.path,
+              fileExists,
+              pathsReferToSameDirectoryEntry,
+            })
 
-            if (exists) {
+            if (conflict) {
               setInvalidText(InvalidTextMap.same)
               setInvalidState(true)
             } else {
@@ -121,7 +130,7 @@ const NewFileInput = (
 
       verifing.current = false
     },
-    [getFileInfo, fileExists],
+    [getFileInfo, fileExists, pathsReferToSameDirectoryEntry, fileNode],
   )
 
   const handleChange: React.ChangeEventHandler<HTMLInputElement> = useCallback(

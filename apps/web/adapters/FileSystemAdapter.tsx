@@ -59,6 +59,10 @@ export const WebFileSystemProvider: FC<FileSystemAdapterProps> = ({ children, re
       return false
     },
 
+    pathsReferToSameDirectoryEntry: async (path1: string, path2: string): Promise<boolean> => {
+      return path1 === path2
+    },
+
     moveFilesToTargetFolder: async (): Promise<Array<MoveFileInfo>> => {
       return []
     },
