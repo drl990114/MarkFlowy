@@ -24,12 +24,14 @@ import { writeText } from '@tauri-apps/plugin-clipboard-manager'
 import { openUrl } from '@tauri-apps/plugin-opener'
 import type { CreateWysiwygDelegateOptions } from 'rme'
 import { handleImagePaste, handleUploadImage } from './imageHandlers'
+import { requestImageInsert } from './requestImageInsert'
 
 type AIOptions = NonNullable<CreateWysiwygDelegateOptions['ai']>
 type LivePreviewBlockBehavior = 'auto' | 'always-split'
 // rme/dist is generated and ignored, so Desktop can type-check this source option
 // before the local rme declaration bundle is refreshed.
 type WysiwygDelegateOptions = CreateWysiwygDelegateOptions & {
+  imageInsertHandler?: () => ReturnType<typeof requestImageInsert>
   livePreviewBlock?: {
     behavior?: LivePreviewBlockBehavior
   }
@@ -83,6 +85,7 @@ export const createWysiwygDelegateOptions = (fileId?: string): WysiwygDelegateOp
       enabled: settingData.editor_placeholder,
     },
     clipboardReadFunction: clipboardRead,
+    imageInsertHandler: () => requestImageInsert(fileId),
     uploadImageHandler: (files) => handleUploadImage(files, fileId),
     imagePasteHandler: (src) => handleImagePaste(src, fileId),
     handleViewImgSrcUrl: async (url) => {

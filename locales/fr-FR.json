@@ -20,7 +20,8 @@
     "value": "Valeur",
     "success": "Succès",
     "import": "Importer",
-    "menu": "Menu"
+    "menu": "Menu",
+    "or": "ou"
   },
   "dialog": {
     "remember_choice": "Se souvenir de ce choix"
@@ -50,6 +51,19 @@
     "bulletList": "Liste à puces",
     "orderedList": "Liste numérotée",
     "taskList": "Liste de tâches"
+  },
+  "image_insert": {
+    "title": "Insérer une image",
+    "description": "Saisissez l’URL d’une image ou choisissez une image sur votre ordinateur.",
+    "url_label": "URL de l’image",
+    "url_placeholder": "https://example.com/image.png",
+    "insert_url": "Insérer",
+    "invalid_url": "Saisissez une URL d’image HTTP ou HTTPS valide.",
+    "local_filter": "Images",
+    "select_local": "Choisir une image locale",
+    "selecting_local": "Sélection en cours...",
+    "local_error": "Impossible d’ouvrir ou de lire l’image sélectionnée. Réessayez.",
+    "local_behavior_hint": "Les images locales suivent Réglages > Image > Comportement d’insertion des images locales."
   },
   "action": {
     "bookmark": "favori",
@@ -376,13 +390,14 @@
           "desc": "Variables supportées: ${documentPath} (chemin du dossier parent du fichier actuel), ${fileName} (nom du fichier actuel sans extension). Exemple: ${documentPath}/photo/${fileName}"
         }
       },
-      "upload_img": {
-        "label": "Télécharger un fichier image",
-        "when_upload_image": {
-          "label": "Télécharger le comportement de l'image",
-          "desc": "Sélectionnez le comportement lors du téléchargement du fichier image dans l'éditeur (le comportement de téléchargement comprend: glisser-déposer le fichier image, y compris le collage du logiciel de capture d'écran)",
-          "options": {
-            "save_to_local_absolute": "Enregistrer le chemin absolu global",
+    "upload_img": {
+      "label": "Insérer une image locale",
+      "when_upload_image": {
+        "label": "Comportement d’insertion des images locales",
+        "desc": "Choisissez le comportement par défaut des images locales sélectionnées, déposées dans l’éditeur ou collées depuis un logiciel de capture.",
+        "options": {
+          "insert_path": "Insérer le chemin du fichier d’origine",
+          "save_to_local_absolute": "Enregistrer le chemin absolu global",
             "save_to_local_relative": "Enregistrer le chemin relatif de la zone de travail",
             "paste_as_base64": "Collez pour l'encodage Base64",
             "save_to_file_relative": "Enregistrer le chemin d'accès au fichier actuel relatif"

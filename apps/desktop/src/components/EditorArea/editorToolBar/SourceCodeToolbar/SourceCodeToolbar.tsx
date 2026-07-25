@@ -1,6 +1,6 @@
 import { useEditorStore } from '@/stores'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
-import { FC, useMemo } from 'react'
+import { type FC, useMemo } from 'react'
 import { useTranslation } from '@/i18n'
 import { EditorViewType } from 'rme'
 import {
@@ -9,12 +9,15 @@ import {
   ToolbarWrapper,
   ToolbarDivider,
   CodeCommandButton,
-  ClipboardReadFunction,
+  type ClipboardReadFunction,
 } from '@markflowy/interface'
+import { Button } from '@/components/ui/button'
+import { Tooltip } from '@/components/ui/tooltip'
 import { MenuList } from '../components/MenuList'
 import { AIButton } from '../WysiwygToolbar/components/AIButton'
 import { sourceCodeCodemirrorViewMap } from '../../TextEditor'
 import { clipboardRead } from '@/helper/clipboard'
+import { requestImageInsert } from '../../requestImageInsert'
 
 interface SourceCodeToolbarProps {
   editorId?: string
@@ -26,6 +29,7 @@ export const SourceCodeToolbar: FC<SourceCodeToolbarProps> = (props) => {
   const { getEditorViewType } = useEditorViewTypeStore()
   const { t } = useTranslation()
   const targetEditorId = editorId ?? activeId
+  const imageLabel = t('toolbar.image') || 'Image'
 
   const viewType = targetEditorId ? getEditorViewType(targetEditorId) : EditorViewType.WYSIWYG
 
@@ -47,6 +51,30 @@ export const SourceCodeToolbar: FC<SourceCodeToolbarProps> = (props) => {
 
   const clipboardReadFn: ClipboardReadFunction = async () => {
     return clipboardRead()
+  }
+
+  const handleInsertImage = async () => {
+    const view = getEditorView()
+    if (!view) return
+
+    const attributes = await requestImageInsert(targetEditorId)
+    if (!attributes) {
+      view.focus()
+      return
+    }
+
+    const { from, to } = view.state.selection.main
+    const selectedText = view.state.sliceDoc(from, to)
+    const alt = (selectedText || attributes.alt || '').replace(/([\\\]])/g, '\\$1')
+    const src = /\s/.test(attributes.src)
+      ? `<${attributes.src.replace(/>/g, '%3E')}>`
+      : attributes.src.replace(/([()])/g, '\\$1')
+    const title = attributes.title
+      ? ` "${attributes.title.replace(/([\\"])/g, '\\$1')}"`
+      : ''
+
+    view.dispatch(view.state.replaceSelection(`![${alt}](${src}${title})`))
+    view.focus()
   }
 
   if (viewType !== EditorViewType.SOURCECODE) {
@@ -138,13 +166,21 @@ export const SourceCodeToolbar: FC<SourceCodeToolbarProps> = (props) => {
           getEditorView={getEditorView}
           clipboardRead={clipboardReadFn}
         />
-        <CodeCommandButton
-          commandName='insertImage'
-          icon='ri-image-line'
-          label={t('toolbar.image') || 'Image'}
-          getEditorView={getEditorView}
-          clipboardRead={clipboardReadFn}
-        />
+        <Tooltip.Provider>
+          <Tooltip.Root>
+            <Tooltip.Trigger asChild>
+              <Button
+                aria-label={imageLabel}
+                onClick={() => void handleInsertImage()}
+                size='icon-sm'
+                variant='ghost'
+              >
+                <i className='ri-image-line' aria-hidden='true' />
+              </Button>
+            </Tooltip.Trigger>
+            <Tooltip.Content>{imageLabel}</Tooltip.Content>
+          </Tooltip.Root>
+        </Tooltip.Provider>
       </ToolbarSection>
 
       <ToolbarSection id="blocks" registerWidth={registerItemWidth} hidden={hiddenIds.has('blocks')}>

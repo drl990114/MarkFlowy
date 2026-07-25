@@ -20,7 +20,8 @@
     "value": "值",
     "success": "成功",
     "import": "导入",
-    "menu": "菜单"
+    "menu": "菜单",
+    "or": "或者"
   },
   "dialog": {
     "remember_choice": "记住此选择"
@@ -50,6 +51,19 @@
     "bulletList": "符号列表",
     "orderedList": "有序列表",
     "taskList": "任务列表"
+  },
+  "image_insert": {
+    "title": "插入图片",
+    "description": "输入网络图片 URL，或从电脑选择本地图片。",
+    "url_label": "图片 URL",
+    "url_placeholder": "https://example.com/image.png",
+    "insert_url": "插入",
+    "invalid_url": "请输入有效的 HTTP 或 HTTPS 图片 URL。",
+    "local_filter": "图片",
+    "select_local": "选择本地图片",
+    "selecting_local": "正在选择...",
+    "local_error": "无法打开或读取所选图片，请重试。",
+    "local_behavior_hint": "本地图片将按“设置 > 图片 > 插入本地图片行为”处理。"
   },
   "action": {
     "bookmark": "收藏",
@@ -377,13 +391,14 @@
           "desc": "支持变量：${documentPath}（当前文件所在文件夹路径）、${fileName}（当前文件名，不含扩展名）。例如：${documentPath}/photo/${fileName}"
         }
       },
-      "upload_img": {
-        "label": "上传图片文件",
-        "when_upload_image": {
-          "label": "上传图片行为",
-          "desc": "选择在编辑器中处理上传图片文件时的行为(上传行为包括：拖放图片文件、也包括截图软件粘贴)",
-          "options": {
-            "save_to_local_absolute": "保存到全局绝对路径",
+    "upload_img": {
+      "label": "插入本地图片",
+      "when_upload_image": {
+        "label": "插入本地图片行为",
+        "desc": "选择从电脑选取、拖放或通过截图软件粘贴本地图片时的默认行为。",
+        "options": {
+          "insert_path": "直接插入原文件路径",
+          "save_to_local_absolute": "保存到全局绝对路径",
             "save_to_local_relative": "保存到工作区相对路径",
             "paste_as_base64": "粘贴为 Base64 编码",
             "save_to_file_relative": "保存到相对当前文件的路径"

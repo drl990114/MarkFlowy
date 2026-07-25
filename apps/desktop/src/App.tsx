@@ -4,7 +4,12 @@ import { Notifications } from 'zens'
 import { FileTreeProvider, TauriFileSystemProvider } from './adapters'
 import AppThemeProvider from './AppThemeProvider'
 import { Modal } from './components'
-import { MODAL_CONFIRM_ID, MODAL_INFO_ID, MODAL_INPUT_ID } from './components/Modal'
+import {
+  MODAL_CONFIRM_ID,
+  MODAL_IMAGE_INSERT_ID,
+  MODAL_INFO_ID,
+  MODAL_INPUT_ID,
+} from './components/Modal'
 import { ContextMenu } from './components/ui-v2/ContextMenu/ContextMenu'
 import { useAppSetup } from './hooks'
 
@@ -20,6 +25,7 @@ function App() {
           <Modal.InputConfirm id={MODAL_INPUT_ID} />
           <Modal.Info id={MODAL_INFO_ID} />
           <Modal.Confirm id={MODAL_CONFIRM_ID} />
+          <Modal.ImageInsert id={MODAL_IMAGE_INSERT_ID} />
           <Routes>
             <Route index path='/' element={<Root />} />
           </Routes>

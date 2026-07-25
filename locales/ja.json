@@ -20,7 +20,8 @@
     "value": "値",
     "success": "成功",
     "import": "インポート",
-    "menu": "メニュー"
+    "menu": "メニュー",
+    "or": "または"
   },
   "dialog": {
     "remember_choice": "この選択を記憶"
@@ -50,6 +51,19 @@
     "bulletList": "箇条書き",
     "orderedList": "番号付きリスト",
     "taskList": "タスクリスト"
+  },
+  "image_insert": {
+    "title": "画像を挿入",
+    "description": "画像の URL を入力するか、コンピューターから画像を選択します。",
+    "url_label": "画像 URL",
+    "url_placeholder": "https://example.com/image.png",
+    "insert_url": "挿入",
+    "invalid_url": "有効な HTTP または HTTPS の画像 URL を入力してください。",
+    "local_filter": "画像",
+    "select_local": "ローカル画像を選択",
+    "selecting_local": "選択中...",
+    "local_error": "選択した画像を開くか読み込むことができませんでした。もう一度お試しください。",
+    "local_behavior_hint": "ローカル画像には「設定 > 画像 > ローカル画像の挿入動作」が適用されます。"
   },
   "action": {
     "bookmark": "ブックマーク",
@@ -384,13 +398,14 @@
           "desc": "サポートされる変数：${documentPath}（現在のファイルの親フォルダパス）、${fileName}（拡張子なしの現在のファイル名）。例：${documentPath}/photo/${fileName}"
         }
       },
-      "upload_img": {
-        "label": "画像ファイルをアップロードする",
-        "when_upload_image": {
-          "label": "画像をアップロードする行為",
-          "desc": "エディターで画像ファイルをアップロードする時の動作を処理することを選択します。",
-          "options": {
-            "save_to_local_absolute": "グローバル絶対パスに保存",
+    "upload_img": {
+      "label": "ローカル画像を挿入",
+      "when_upload_image": {
+        "label": "ローカル画像の挿入動作",
+        "desc": "コンピューターから選択、エディターへドロップ、またはスクリーンショットソフトから貼り付けたローカル画像の既定の動作を選択します。",
+        "options": {
+          "insert_path": "元のファイルパスを直接挿入",
+          "save_to_local_absolute": "グローバル絶対パスに保存",
             "save_to_local_relative": "作業エリアへの相対パスを保存します",
             "paste_as_base64": "Base64エンコードに貼り付けます",
             "save_to_file_relative": "相対的な現在のファイルへのパスを保存します"

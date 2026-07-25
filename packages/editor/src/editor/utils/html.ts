@@ -38,19 +38,23 @@ interface HTMLAst {
   voidElement: boolean
 }
 
-export function buildMarkdownTextFromNode(node: { attrs: { [key: string]: any } }) {
+export function buildMarkdownTextFromNode(node: { attrs: Record<string, any> }) {
   const { attrs } = node
+  const escapeLabel = (value: string) => value.replace(/([\\\]])/g, '\\$1')
 
   // 如果是引用图片，生成引用语法
   if (attrs['data-refer-label']) {
-    const alt = attrs.alt || ''
+    const alt = escapeLabel(attrs.alt || '')
     return `![${alt}][${attrs['data-refer-label']}]`
   }
 
   // 否则生成标准的 Markdown 图片语法
-  const alt = attrs.alt || ''
-  const src = attrs.src || ''
-  const title = attrs.title ? ` "${attrs.title}"` : ''
+  const alt = escapeLabel(attrs.alt || '')
+  const rawSrc = attrs.src || ''
+  const src = /\s/.test(rawSrc)
+    ? `<${rawSrc.replace(/>/g, '%3E')}>`
+    : rawSrc.replace(/([()])/g, '\\$1')
+  const title = attrs.title ? ` "${String(attrs.title).replace(/([\\"])/g, '\\$1')}"` : ''
   return `![${alt}](${src}${title})`
 }
 

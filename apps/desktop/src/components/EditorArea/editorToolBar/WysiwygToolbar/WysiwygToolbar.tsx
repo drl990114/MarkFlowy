@@ -1,6 +1,6 @@
 import { useEditorStore } from '@/stores'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
-import { FC, useMemo } from 'react'
+import { type FC, useMemo } from 'react'
 import { useTranslation } from '@/i18n'
 import { EditorViewType } from 'rme'
 import {
@@ -10,6 +10,8 @@ import {
   ToolbarDivider,
   CommandButton,
 } from '@markflowy/interface'
+import { Button } from '@/components/ui/button'
+import { Tooltip } from '@/components/ui/tooltip'
 import { MenuList } from '../components/MenuList'
 import { AIButton } from './components/AIButton'
 
@@ -23,6 +25,7 @@ export const WysiwygToolbar: FC<WysiwygToolbarProps> = (props) => {
   const { getEditorViewType } = useEditorViewTypeStore()
   const { t } = useTranslation()
   const targetEditorId = editorId ?? activeId
+  const imageLabel = t('toolbar.image') || 'Image'
 
   const editorCtx = useEditorStore((state) => state.editorCtxMap.get(targetEditorId ?? ''))
   const viewType = targetEditorId ? getEditorViewType(targetEditorId) : EditorViewType.WYSIWYG
@@ -33,6 +36,7 @@ export const WysiwygToolbar: FC<WysiwygToolbarProps> = (props) => {
       { id: 'history', priority: 90 },
       { id: 'headings', priority: 60 },
       { id: 'formatting', priority: 50 },
+      { id: 'insert', priority: 40 },
       { id: 'blocks', priority: 30 },
     ],
     [],
@@ -45,6 +49,13 @@ export const WysiwygToolbar: FC<WysiwygToolbarProps> = (props) => {
 
   if (!editorCtx || viewType !== EditorViewType.WYSIWYG) {
     return null
+  }
+
+  const handleInsertImage = () => {
+    const commands = editorCtx.commands as typeof editorCtx.commands & {
+      requestImageInsert?: () => boolean
+    }
+    commands.requestImageInsert?.()
   }
 
   return (
@@ -131,6 +142,29 @@ export const WysiwygToolbar: FC<WysiwygToolbarProps> = (props) => {
           icon='ri-code-line'
           label={t('toolbar.code') || 'Inline Code'}
         />
+      </ToolbarSection>
+
+      <ToolbarSection
+        id='insert'
+        registerWidth={registerItemWidth}
+        hidden={hiddenIds.has('insert')}
+      >
+        <ToolbarDivider />
+        <Tooltip.Provider>
+          <Tooltip.Root>
+            <Tooltip.Trigger asChild>
+              <Button
+                aria-label={imageLabel}
+                onClick={handleInsertImage}
+                size='icon-sm'
+                variant='ghost'
+              >
+                <i className='ri-image-line' aria-hidden='true' />
+              </Button>
+            </Tooltip.Trigger>
+            <Tooltip.Content>{imageLabel}</Tooltip.Content>
+          </Tooltip.Root>
+        </Tooltip.Provider>
       </ToolbarSection>
 
       <ToolbarSection

@@ -22,8 +22,8 @@ import {
   nodeInputRule,
   omitExtraAttributes,
 } from '@rme-sdk/core'
-import { InputRule } from '@rme-sdk/pm/inputrules'
-import { PasteRule } from '@rme-sdk/pm/paste-rules'
+import type { InputRule } from '@rme-sdk/pm/inputrules'
+import type { PasteRule } from '@rme-sdk/pm/paste-rules'
 import { insertPoint } from '@rme-sdk/pm/transform'
 import type { ComponentType } from 'react'
 import type { ExtensionsOptions } from '..'
@@ -46,6 +46,7 @@ interface ImageOptions {
   ) => void
   handleViewImgSrcUrl?: ExtensionsOptions['handleViewImgSrcUrl']
   imagePasteHandler?: ExtensionsOptions['imagePasteHandler']
+  imageInsertHandler?: ExtensionsOptions['imageInsertHandler']
   destroyPlaceholder?: (view: EditorView, element: HTMLElement) => void
   /**
    * The upload handler for the image extension.
@@ -110,6 +111,7 @@ type SetProgress = (progress: number) => void
     destroyPlaceholder: () => {},
     uploadHandler,
     imageHostingHandler: async (src: string) => src,
+    imageInsertHandler: async () => null,
     preferPastedTextContent: true,
     defaultInlineNode: 'div',
   },
@@ -186,15 +188,35 @@ export class MdImgUriExtension extends NodeExtension<ImageOptions> {
     }
   }
 
-  insertMarkdownImage(
+  insertMarkdownImage = (
     attributes: ImageAttributes,
     selection?: PrimitiveSelection,
-  ): CommandFunction {
+  ): CommandFunction => {
     return ({ tr, dispatch }) => {
       const { from, to } = getTextSelection(selection ?? tr.selection, tr.doc)
       const node = this.type.create(attributes)
 
       dispatch?.(tr.replaceRangeWith(from, to, node))
+
+      return true
+    }
+  }
+
+  requestImageInsert = (): CommandFunction => {
+    return ({ tr }) => {
+      const selection = tr.selection
+
+      void this.options
+        .imageInsertHandler()
+        .then((attributes) => {
+          if (attributes) {
+            this.store.commands.insertMarkdownImage(attributes, selection)
+          }
+          this.store.view.focus()
+        })
+        .catch(() => {
+          this.store.view.focus()
+        })
 
       return true
     }
@@ -259,6 +281,8 @@ export class MdImgUriExtension extends NodeExtension<ImageOptions> {
    */
   createCommands(): ExtensionCommandReturn {
     return {
+      insertMarkdownImage: this.insertMarkdownImage,
+      requestImageInsert: this.requestImageInsert,
       uploadImage: this.uploadImage,
       uploadFiles: this.uploadFiles,
     }
@@ -369,25 +393,6 @@ interface ImageExtensionAttributes {
 
   /** The file name used to create the image. */
   'data-file-name'?: string
-}
-
-/**
- * The set of valid image files.
- */
-const IMAGE_FILE_TYPES = new Set([
-  'image/jpeg',
-  'image/gif',
-  'image/png',
-  'image/jpg',
-  'image/svg',
-  'image/webp',
-])
-
-/**
- * True when the provided file is an image file.
- */
-function isImageFileType(file: File): boolean {
-  return IMAGE_FILE_TYPES.has(file.type)
 }
 
 /**

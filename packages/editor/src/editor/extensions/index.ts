@@ -9,16 +9,16 @@ import { LineTableCellExtension, LineTableHeaderCellExtension } from './Table/ta
 import { CountExtension } from '@rme-sdk/extension-count'
 import { corePreset } from '@rme-sdk/preset-core'
 import { ReactComponentExtension } from '@rme-sdk/react'
-import { ClipboardReadFunction, clipboardRead } from '../utils/clipboard-read'
+import { type ClipboardReadFunction, clipboardRead } from '../utils/clipboard-read'
 import { isBrowser } from '../utils/common'
-import { CurrentDateFormatOption } from '../utils/date'
+import type { CurrentDateFormatOption } from '../utils/date'
 import { AIExtension } from './Ai'
-import { AIOptions } from './Ai/ai-types'
+import type { AIOptions } from './Ai/ai-types'
 import { LineBlockquoteExtension } from './BlockQuote'
 import { ClipboardExtension } from './Clipboard'
 import { LineCodeMirrorExtension } from './CodeMirror/codemirror-extension'
-import { CustomCopyFunction } from './CodeMirror/codemirror-types'
-import { CodemirrorOptions, getSetupByCodemirrorOptions } from './CodeMirror/setup'
+import type { CustomCopyFunction } from './CodeMirror/codemirror-types'
+import { type CodemirrorOptions, getSetupByCodemirrorOptions } from './CodeMirror/setup'
 import { CommonKeymapExtension } from './CommonKeymap'
 import { CopilotExtension } from './Copilot/copilot-extension'
 import { DateExtension } from './Date'
@@ -32,14 +32,18 @@ import { LineHtmlBlockExtension } from './HtmlNode/html-block-extension'
 import { HtmlInlineNodeExtension } from './HtmlNode/html-inline-node'
 import { IframeExtension } from './Iframe'
 import { HtmlImageExtension } from './Image'
-import { DelayedImage, FileWithProgress, MdImgUriExtension } from './Image/md-image-extension'
+import {
+  type DelayedImage,
+  type FileWithProgress,
+  MdImgUriExtension,
+} from './Image/md-image-extension'
 import { LineInlineDecorationExtension, LineInlineMarkExtension, markExtensions } from './Inline'
 import { LineListExtension } from './List'
 import { MathBlockExtension, MathInlineExtension } from './Math'
 import { MermaidBlockExtension } from './Mermaid'
 import { NodeIndicatorExtension } from './NodeIndicator'
 import { LineParagraphExtension } from './Paragraph'
-import { PlaceholderExtension, PlaceholderOptions } from './Placeholder'
+import { PlaceholderExtension, type PlaceholderOptions } from './Placeholder'
 import {
   ReferenceDefinitionExtension,
   ReferenceHrefExtension,
@@ -50,8 +54,8 @@ import { SlashMenuExtension } from './SlashMenu'
 import { LineTableExtension, LineTableRowExtension } from './Table'
 import { LineTextExtension } from './Text'
 import { TransformerExtension } from './Transformer/transformer-extension'
-import { TypewriterScrollExtension, TypewriterScrollOptions } from './TypewriterScroll'
-import { LinkClickExtension, LinkClickHandler } from './LinkClick'
+import { TypewriterScrollExtension, type TypewriterScrollOptions } from './TypewriterScroll'
+import { LinkClickExtension, type LinkClickHandler } from './LinkClick'
 import {
   LivePreviewBlockExtension,
   type LivePreviewBlockBehavior,
@@ -61,6 +65,13 @@ export * from './Image'
 export * from './List'
 export type { LivePreviewBlockBehavior } from './LivePreviewBlock'
 
+export type ImageInsertAttributes = {
+  src: string
+  alt?: string
+  title?: string
+  'data-file-name'?: string
+}
+
 export type ExtensionsOptions = {
   disableAllBuildInShortcuts?: boolean
 
@@ -69,6 +80,8 @@ export type ExtensionsOptions = {
   imageHostingHandler?: (src: string) => Promise<string>
 
   imagePasteHandler?: (src: string) => Promise<string>
+
+  imageInsertHandler?: () => Promise<ImageInsertAttributes | null>
 
   ai?: AIOptions
 
@@ -150,6 +163,7 @@ function extensions(options: ExtensionsOptions): any[] {
       handleViewImgSrcUrl,
       imageHostingHandler,
       imagePasteHandler,
+      imageInsertHandler: options.imageInsertHandler ?? (async () => null),
       uploadHandler: options.uploadImageHandler,
     }),
     new HandleInputExtension(),

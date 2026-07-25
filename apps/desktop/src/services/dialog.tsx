@@ -6,10 +6,16 @@ import type {
   DialogAction,
   DialogRememberOptions,
   ConfirmModalProps,
+  ImageInsertSelection,
   InfoModalProps,
   InputConfirmModalProps,
 } from '@/components/Modal'
-import { MODAL_CONFIRM_ID, MODAL_INFO_ID, MODAL_INPUT_ID } from '@/components/Modal'
+import {
+  MODAL_CONFIRM_ID,
+  MODAL_IMAGE_INSERT_ID,
+  MODAL_INFO_ID,
+  MODAL_INPUT_ID,
+} from '@/components/Modal'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 
 type DialogPreferences = Record<string, string>
@@ -123,8 +129,14 @@ const inputConfirm = async (options: InputConfirmOptions) => {
   )
 }
 
+const imageInsert = async () =>
+  enqueueModal(() =>
+    NiceModal.show<ImageInsertSelection | null>(MODAL_IMAGE_INSERT_ID),
+  )
+
 export const dialog = {
   confirm,
+  imageInsert,
   info,
   inputConfirm,
 }

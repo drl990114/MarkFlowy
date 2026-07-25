@@ -42,6 +42,7 @@
     "slashMenu": {
       "searchPlaceholder": "Search menu items...",
       "noResults": "No results",
+      "image": "Image",
       "toNavigate": "to navigate",
       "toSelect": "to select",
       "toCancel": "to cancel"

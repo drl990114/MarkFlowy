@@ -20,7 +20,8 @@
     "value": "Valor",
     "success": "Éxito",
     "import": "Importar",
-    "menu": "Menú"
+    "menu": "Menú",
+    "or": "o"
   },
   "dialog": {
     "remember_choice": "Recordar esta elección"
@@ -50,6 +51,19 @@
     "bulletList": "Lista de viñetas",
     "orderedList": "Lista numerada",
     "taskList": "Lista de tareas"
+  },
+  "image_insert": {
+    "title": "Insertar imagen",
+    "description": "Introduce la URL de una imagen o elige una imagen de tu equipo.",
+    "url_label": "URL de la imagen",
+    "url_placeholder": "https://example.com/image.png",
+    "insert_url": "Insertar",
+    "invalid_url": "Introduce una URL de imagen HTTP o HTTPS válida.",
+    "local_filter": "Imágenes",
+    "select_local": "Elegir imagen local",
+    "selecting_local": "Seleccionando...",
+    "local_error": "No se pudo abrir o leer la imagen seleccionada. Inténtalo de nuevo.",
+    "local_behavior_hint": "Las imágenes locales siguen Ajustes > Imágenes > Comportamiento de inserción de imágenes locales."
   },
   "action": {
     "bookmark": "marcador",
@@ -379,13 +393,14 @@
           "desc": "Variables soportadas: ${documentPath} (ruta de la carpeta padre del archivo actual), ${fileName} (nombre del archivo actual sin extensión). Ejemplo: ${documentPath}/photo/${fileName}"
         }
       },
-      "upload_img": {
-        "label": "Subir archivo de imagen",
-        "when_upload_image": {
-          "label": "Subir el comportamiento de la imagen",
-          "desc": "Seleccione el comportamiento al cargar archivos de imagen en el editor (el comportamiento de carga incluye: arrastrar y soltar archivos de imagen y pegar con software de captura de pantalla)",
-          "options": {
-            "save_to_local_absolute": "Guardar en la ruta absoluta global",
+    "upload_img": {
+      "label": "Insertar imagen local",
+      "when_upload_image": {
+        "label": "Comportamiento de inserción de imágenes locales",
+        "desc": "Elige el comportamiento predeterminado para las imágenes locales seleccionadas, arrastradas al editor o pegadas desde un programa de captura.",
+        "options": {
+          "insert_path": "Insertar la ruta del archivo original",
+          "save_to_local_absolute": "Guardar en la ruta absoluta global",
             "save_to_local_relative": "Ruta relativa guardada en el área de trabajo",
             "paste_as_base64": "Pegar como código Base64",
             "save_to_file_relative": "Ruta guardada en el archivo actual relativo"

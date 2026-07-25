@@ -20,7 +20,8 @@
     "value": "Value",
     "success": "Success",
     "import": "Import",
-    "menu": "Menu"
+    "menu": "Menu",
+    "or": "or"
   },
   "dialog": {
     "remember_choice": "Remember this choice"
@@ -50,6 +51,19 @@
     "bulletList": "Bullet List",
     "orderedList": "Ordered List",
     "taskList": "Task List"
+  },
+  "image_insert": {
+    "title": "Insert Image",
+    "description": "Enter an image URL or choose an image from your computer.",
+    "url_label": "Image URL",
+    "url_placeholder": "https://example.com/image.png",
+    "insert_url": "Insert",
+    "invalid_url": "Enter a valid HTTP or HTTPS image URL.",
+    "local_filter": "Images",
+    "select_local": "Choose Local Image",
+    "selecting_local": "Choosing...",
+    "local_error": "The selected image could not be opened or read. Try again.",
+    "local_behavior_hint": "Local images follow Settings > Image > Local image insertion behavior."
   },
   "action": {
     "bookmark": "bookmark",
@@ -420,13 +434,14 @@
           "desc": "Supported variables: ${documentPath} (parent folder path of current file), ${fileName} (current file name without extension). Example: ${documentPath}/photo/${fileName}"
         }
       },
-      "upload_img": {
-        "label": "Upload image file",
-        "when_upload_image": {
-          "label": "Upload Image Behavior",
-          "desc": "Select the behavior when uploading image files in the editor (upload behavior includes: drag and drop image files, but also screenshot software paste)",
-          "options": {
-            "save_to_local_absolute": "Save to Global Absolute Path",
+    "upload_img": {
+      "label": "Insert local image",
+      "when_upload_image": {
+        "label": "Local image insertion behavior",
+        "desc": "Choose the default behavior for local images selected from your computer, dropped into the editor, or pasted by screenshot software.",
+        "options": {
+          "insert_path": "Insert the original file path",
+          "save_to_local_absolute": "Save to Global Absolute Path",
             "save_to_local_relative": "Save to workspace relative path",
             "paste_as_base64": "Paste as Base64 encoding",
             "save_to_file_relative": "Save to a path relative to the current file"

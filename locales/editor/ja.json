@@ -42,6 +42,7 @@
     "slashMenu": {
       "searchPlaceholder": "メニュー項目を検索します...",
       "noResults": "結果がありません",
+      "image": "画像",
       "toNavigate": "ナビゲーション用",
       "toSelect": "選択用",
       "toCancel": "キャンセル用"

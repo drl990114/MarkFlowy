@@ -98,6 +98,14 @@ export const SlashMenuRoot: React.FC<SlashMenuRootProps> = memo(
           },
         },
         {
+          title: t('slashMenu.image'),
+          id: 'image',
+          iconName: 'ri-image-line',
+          handler: () => {
+            commands.requestImageInsert()
+          },
+        },
+        {
           title: 'Code Block',
           id: 'code-block',
           iconName: nodeTypeIconMap.codeMirror,
@@ -144,7 +152,7 @@ export const SlashMenuRoot: React.FC<SlashMenuRootProps> = memo(
           handler: () => {
             commands.insertHorizontalRule()
           },
-        }
+        },
       ]
 
       if (commands.createAiBlock) {
@@ -158,7 +166,7 @@ export const SlashMenuRoot: React.FC<SlashMenuRootProps> = memo(
         })
       }
       return res
-    }, [closeMenu, commands])
+    }, [closeMenu, commands, t])
 
     // 筛选菜单项
     const filteredMenuItems = useMemo(() => {
@@ -189,8 +197,6 @@ export const SlashMenuRoot: React.FC<SlashMenuRootProps> = memo(
         })
         .map((item) => {
           if (item.children && searchText.trim()) {
-            const searchLower = searchText.toLowerCase()
-
             // 如果父菜单项匹配，显示所有子元素
             if (item.title.toLowerCase().includes(searchLower)) {
               return item
@@ -209,9 +215,7 @@ export const SlashMenuRoot: React.FC<SlashMenuRootProps> = memo(
         })
     }, [menuItems, searchText])
 
-    const [activeGroupId, setActiveGroupId] = useState<string | undefined>(
-      filteredMenuItems[0]?.id,
-    )
+    const [activeGroupId, setActiveGroupId] = useState<string | undefined>(filteredMenuItems[0]?.id)
     const [activeItemId, setActiveItemId] = useState<string | undefined>()
 
     // 当筛选结果改变时，重置选中状态
@@ -316,29 +320,32 @@ export const SlashMenuRoot: React.FC<SlashMenuRootProps> = memo(
       closeMenu()
     }, [activeItemId, closeMenu, currentMenuItem])
 
-    const handleNavigationKey = useCallback((event: KeyboardEvent) => {
-      const keyHandlers: Record<string, () => void> = {
-        ArrowDown: handleDown,
-        ArrowUp: handleUp,
-        ArrowRight: handleRight,
-        ArrowLeft: handleLeft,
-      }
+    const handleNavigationKey = useCallback(
+      (event: KeyboardEvent) => {
+        const keyHandlers: Record<string, () => void> = {
+          ArrowDown: handleDown,
+          ArrowUp: handleUp,
+          ArrowRight: handleRight,
+          ArrowLeft: handleLeft,
+        }
 
-      const handler = keyHandlers[event.key]
-      if (handler) {
-        handler()
-        return true
-      }
+        const handler = keyHandlers[event.key]
+        if (handler) {
+          handler()
+          return true
+        }
 
-      if (event.key === 'Enter') {
-        event.preventDefault()
-        event.stopPropagation()
-        handleEnterKey()
-        return true
-      }
+        if (event.key === 'Enter') {
+          event.preventDefault()
+          event.stopPropagation()
+          handleEnterKey()
+          return true
+        }
 
-      return false
-    }, [handleDown, handleUp, handleRight, handleLeft, handleEnterKey])
+        return false
+      },
+      [handleDown, handleUp, handleRight, handleLeft, handleEnterKey],
+    )
 
     useEffect(() => {
       const keydownHandler = (event: KeyboardEvent) => {
@@ -400,8 +407,8 @@ export const SlashMenuRoot: React.FC<SlashMenuRootProps> = memo(
         <SearchContainer>
           <Input
             inputRef={searchInputRef}
-            type="text"
-            size="small"
+            type='text'
+            size='small'
             style={{
               width: '100%',
             }}
@@ -426,7 +433,7 @@ export const SlashMenuRoot: React.FC<SlashMenuRootProps> = memo(
           />
         </SearchContainer>
         <MenuContainer>
-          <MenuPanel active location="left">
+          <MenuPanel active location='left'>
             {filteredMenuItems.map((item) => {
               const selected = item.id === activeGroupId
               return (
@@ -453,7 +460,7 @@ export const SlashMenuRoot: React.FC<SlashMenuRootProps> = memo(
                   selected={selected}
                 >
                   <Space size={4}>
-                    <i className={item.iconName} /> {item.title}
+                    <i className={item.iconName} aria-hidden='true' /> {item.title}
                   </Space>
                 </MenuItem>
               )
@@ -465,7 +472,7 @@ export const SlashMenuRoot: React.FC<SlashMenuRootProps> = memo(
             )}
           </MenuPanel>
           {currentMenuItem?.children || currentMenuItem?.Renderer?.Component ? (
-            <MenuPanel active={!!activeItemId} location="right">
+            <MenuPanel active={!!activeItemId} location='right'>
               {currentMenuItem?.Renderer
                 ? currentMenuItem.Renderer.Component
                 : currentMenuItem?.children?.map((item) => {
@@ -499,66 +506,66 @@ export const SlashMenuRoot: React.FC<SlashMenuRootProps> = memo(
                 <span> + </span>
               </>
             ) : null}
-            <kbd aria-label="Up Arrow">
+            <kbd aria-label='Up Arrow'>
               <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+                width='14'
+                height='14'
+                viewBox='0 0 24 24'
+                fill='none'
+                stroke='currentColor'
+                strokeWidth='2'
+                strokeLinecap='round'
+                strokeLinejoin='round'
               >
-                <path d="m5 12 7-7 7 7"></path>
-                <path d="M12 19V5"></path>
+                <path d='m5 12 7-7 7 7'></path>
+                <path d='M12 19V5'></path>
               </svg>
             </kbd>
-            <kbd aria-label="Down Arrow">
+            <kbd aria-label='Down Arrow'>
               <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+                width='14'
+                height='14'
+                viewBox='0 0 24 24'
+                fill='none'
+                stroke='currentColor'
+                strokeWidth='2'
+                strokeLinecap='round'
+                strokeLinejoin='round'
               >
-                <path d="M12 5v14"></path>
-                <path d="m19 12-7 7-7-7"></path>
+                <path d='M12 5v14'></path>
+                <path d='m19 12-7 7-7-7'></path>
               </svg>
             </kbd>
             {currentMenuItem?.children || currentMenuItem?.Renderer ? (
               <>
-                <kbd aria-label="Left Arrow">
+                <kbd aria-label='Left Arrow'>
                   <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+                    width='14'
+                    height='14'
+                    viewBox='0 0 24 24'
+                    fill='none'
+                    stroke='currentColor'
+                    strokeWidth='2'
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
                   >
-                    <path d="m12 19-7-7 7-7"></path>
-                    <path d="M19 12H5"></path>
+                    <path d='m12 19-7-7 7-7'></path>
+                    <path d='M19 12H5'></path>
                   </svg>
                 </kbd>
-                <kbd aria-label="Right Arrow">
+                <kbd aria-label='Right Arrow'>
                   <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+                    width='14'
+                    height='14'
+                    viewBox='0 0 24 24'
+                    fill='none'
+                    stroke='currentColor'
+                    strokeWidth='2'
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
                   >
-                    <path d="M5 12h14"></path>
-                    <path d="m12 5 7 7-7 7"></path>
+                    <path d='M5 12h14'></path>
+                    <path d='m12 5 7 7-7 7'></path>
                   </svg>
                 </kbd>
               </>
@@ -573,19 +580,19 @@ export const SlashMenuRoot: React.FC<SlashMenuRootProps> = memo(
                 <span> + </span>
               </>
             ) : null}
-            <kbd aria-label="Enter">
+            <kbd aria-label='Enter'>
               <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+                width='14'
+                height='14'
+                viewBox='0 0 24 24'
+                fill='none'
+                stroke='currentColor'
+                strokeWidth='2'
+                strokeLinecap='round'
+                strokeLinejoin='round'
               >
-                <polyline points="9 10 4 15 9 20"></polyline>
-                <path d="M20 4v7a4 4 0 0 1-4 4H4"></path>
+                <polyline points='9 10 4 15 9 20'></polyline>
+                <path d='M20 4v7a4 4 0 0 1-4 4H4'></path>
               </svg>
             </kbd>
             {t('slashMenu.toSelect')}

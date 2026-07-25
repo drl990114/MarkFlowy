@@ -4,6 +4,7 @@ import type { IFile } from '@/helper/filesys'
 import {
   convertImageToBase64,
   moveImageToLocalFolder,
+  readImageFileAsDataUrl,
   readFileAsBase64,
 } from '@/helper/image'
 import { logger } from '@/helper/logger'
@@ -46,6 +47,100 @@ export const getFileNameWithoutExt = (fileName?: string): string => {
   return fileName.substring(0, lastDotIndex)
 }
 
+export type InsertedImageAttributes = {
+  src: string
+  alt?: string
+  title?: string
+  'data-file-name'?: string
+}
+
+const createImageAttributes = (
+  src: string,
+  fileName?: string,
+): InsertedImageAttributes => {
+  const normalizedSrc = /^[a-zA-Z]:\\/.test(src) ? src.replace(/\\/g, '/') : src
+
+  return {
+    src: normalizedSrc,
+    alt: getFileNameWithoutExt(fileName),
+    'data-file-name': fileName,
+  }
+}
+
+export const handleInsertLocalImage = async (
+  filePath: string,
+  fileId?: string,
+): Promise<InsertedImageAttributes> => {
+  const { fileObject, fileFolderPath, workspaceRoot, settingData, isTextbundle } =
+    getImageHandlerContext(fileId)
+  const fileName = filePath.split(/[\\/]/).pop()
+
+  try {
+    if (isTextbundle) {
+      const relativeTo = fileFolderPath || workspaceRoot
+      if (relativeTo) {
+        const fullPath = await moveImageToLocalFolder(filePath, `${relativeTo}/assets`)
+        return createImageAttributes(
+          await getMdRelativePath(fullPath, relativeTo),
+          fileName,
+        )
+      }
+    }
+
+    if (settingData.when_upload_image === 'save_to_local_relative') {
+      const targetPath = await join(
+        workspaceRoot || '',
+        settingData.upload_image_save_relative_path || 'assets/images',
+      )
+      const fullPath = await moveImageToLocalFolder(filePath, targetPath)
+      const src = workspaceRoot
+        ? await getMdRelativePath(fullPath, fileFolderPath || workspaceRoot)
+        : fullPath
+      return createImageAttributes(src, fileName)
+    }
+
+    if (
+      settingData.when_upload_image === 'save_to_local_absolute' &&
+      settingData.upload_image_save_absolute_path
+    ) {
+      const fullPath = await moveImageToLocalFolder(
+        filePath,
+        settingData.upload_image_save_absolute_path,
+      )
+      return createImageAttributes(fullPath, fileName)
+    }
+
+    if (settingData.when_upload_image === 'save_to_file_relative') {
+      const basePath = fileFolderPath || workspaceRoot
+      if (basePath) {
+        const targetPath = replacePathVariables(
+          settingData.upload_image_save_relative_path_rule ||
+            '${documentPath}/assets',
+          basePath,
+          getFileNameWithoutExt(fileObject?.name),
+        )
+        const fullPath = await moveImageToLocalFolder(filePath, targetPath)
+        const src = workspaceRoot
+          ? await getMdRelativePath(fullPath, fileFolderPath || workspaceRoot)
+          : fullPath
+        return createImageAttributes(src, fileName)
+      }
+    }
+
+    if (
+      settingData.when_upload_image === 'paste_as_base64' ||
+      settingData.when_upload_image === 'upload_as_base64'
+    ) {
+      const dataUrl = await readImageFileAsDataUrl(filePath)
+      return createImageAttributes(dataUrl || filePath, fileName)
+    }
+  } catch (error) {
+    logger.error('Local image insertion failed:', error)
+  }
+
+  return createImageAttributes(filePath, fileName)
+}
+
 /**
  * Replace variables in path rule
  * Supported variables:
@@ -69,6 +164,7 @@ export const handleUploadImage = (files: any[], fileId?: string) => {
   const promises: any[] = []
 
   for (const { file, progress } of files) {
+    // eslint-disable-next-line @typescript-eslint/no-loop-func
     promises.push(async () => {
       try {
         const { fileObject, fileFolderPath, workspaceRoot, settingData, isTextbundle } =
@@ -88,7 +184,10 @@ export const handleUploadImage = (files: any[], fileId?: string) => {
           }
         }
 
-        if (settingData.when_upload_image === 'paste_as_base64') {
+        if (
+          settingData.when_upload_image === 'paste_as_base64' ||
+          settingData.when_upload_image === 'upload_as_base64'
+        ) {
           const src = await readFileAsBase64(file)
           completed += 1
           progress(completed / files.length)
@@ -169,8 +268,24 @@ export const handleUploadImage = (files: any[], fileId?: string) => {
           }
         }
 
-        if (settingData.when_upload_image === 'upload_as_base64') {
+        if (settingData.when_upload_image === 'insert_path') {
           const src = await readFileAsBase64(file)
+          const fallbackTarget =
+            settingData.upload_image_save_absolute_path ||
+            (fileFolderPath || workspaceRoot
+              ? `${fileFolderPath || workspaceRoot}/assets`
+              : undefined)
+
+          if (fallbackTarget) {
+            const fullPath = await moveImageToLocalFolder(src, fallbackTarget)
+            completed += 1
+            progress(completed / files.length)
+            return {
+              src: fullPath,
+              'data-file-name': file.name,
+            }
+          }
+
           completed += 1
           progress(completed / files.length)
           return {

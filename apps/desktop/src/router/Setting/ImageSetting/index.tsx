@@ -102,6 +102,10 @@ export const ImageSetting = () => {
             desc: { i18nKey: 'settings.image.upload_img.when_upload_image.desc' },
             options: [
               {
+                value: 'insert_path',
+                title: t('settings.image.upload_img.when_upload_image.options.insert_path'),
+              },
+              {
                 value: 'save_to_local_absolute',
                 title: t(
                   'settings.image.upload_img.when_upload_image.options.save_to_local_absolute',
