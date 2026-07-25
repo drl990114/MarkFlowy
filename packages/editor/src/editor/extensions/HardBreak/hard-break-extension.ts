@@ -4,6 +4,7 @@ import { baseKeymap, exitCode } from '@rme-sdk/pm/commands'
 
 import { chainCommands } from '@rme-sdk/pm'
 import type { NodeSerializerOptions } from '../../transform'
+import { exitTable } from '../Table/table-utils'
 
 const needUseBrNodeNames = ['tableCell']
 
@@ -25,7 +26,7 @@ export class LineHardBreakExtension extends HardBreakExtension {
 
     const enterCommand = convertCommand(baseKeymap.Enter)
 
-    const command = chainCommands(convertCommand(exitCode), (params) => {
+    const insertLineBreak = (params: Parameters<ReturnType<typeof convertCommand>>[0]) => {
       const { state, tr, dispatch } = params
       const { $from, $to, from, to } = state.selection
       const canReplace =
@@ -36,7 +37,7 @@ export class LineHardBreakExtension extends HardBreakExtension {
         const schema = state.schema
 
         if (needUseBrNodeNames.includes(nodeName)) {
-          dispatch?.(tr.replaceRangeWith(from, to, schema.nodes['html_br'].create()))
+          dispatch?.(tr.replaceRangeWith(from, to, schema.nodes.html_br.create()))
         } else {
           dispatch?.(tr.replaceRangeWith(from, to, schema.text('\n')))
         }
@@ -45,11 +46,13 @@ export class LineHardBreakExtension extends HardBreakExtension {
         // If the parent doesn't allow HardBreak type (Heading for example), then fall back to `Enter` command
         return enterCommand(params)
       }
-    })
+    }
+
+    const exitCodeCommand = convertCommand(exitCode)
 
     return {
-      'Mod-Enter': command,
-      'Shift-Enter': command,
+      'Mod-Enter': chainCommands(exitCodeCommand, convertCommand(exitTable), insertLineBreak),
+      'Shift-Enter': chainCommands(exitCodeCommand, insertLineBreak),
     }
   }
 }

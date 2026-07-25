@@ -1,10 +1,36 @@
-import { findParentNodeOfType, FindProsemirrorNodeResult, NodeWithPosition } from '@rme-sdk/core'
-import { TableSchemaSpec } from '@rme-sdk/extension-tables'
-import { EditorState, NodeType, ResolvedPos, Selection } from '@rme-sdk/pm'
-import { CellSelection, Rect, TableMap } from '@rme-sdk/pm/tables'
+import { findParentNodeOfType } from '@rme-sdk/core'
+import type { FindProsemirrorNodeResult, NodeWithPosition } from '@rme-sdk/core'
+import type { TableSchemaSpec } from '@rme-sdk/extension-tables'
+import type { EditorState, NodeType, ResolvedPos, Selection } from '@rme-sdk/pm'
+import { TextSelection } from '@rme-sdk/pm/state'
+import type { Command } from '@rme-sdk/pm/state'
+import { TableMap } from '@rme-sdk/pm/tables'
+import type { CellSelection, Rect } from '@rme-sdk/pm/tables'
 
 export function findTable(selection: EditorState | Selection | ResolvedPos) {
   return findParentNodeOfType({ selection, types: 'table' })
+}
+
+export const exitTable: Command = (state, dispatch) => {
+  const table = findTable(state.selection)
+  if (!table) return false
+
+  const paragraphType = state.schema.nodes.paragraph
+  const paragraph = paragraphType?.createAndFill()
+  if (!paragraph) return false
+
+  const parentDepth = table.depth - 1
+  const parent = state.selection.$from.node(parentDepth)
+  const insertIndex = state.selection.$from.indexAfter(parentDepth)
+  if (!parent.canReplaceWith(insertIndex, insertIndex, paragraphType)) return false
+
+  if (dispatch) {
+    const tr = state.tr.insert(table.end, paragraph)
+    tr.setSelection(TextSelection.near(tr.doc.resolve(table.end + 1), 1))
+    dispatch(tr.scrollIntoView())
+  }
+
+  return true
 }
 
 function findCellsInReat(
