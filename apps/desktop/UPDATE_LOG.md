@@ -1,5 +1,37 @@
 # UPDATE LOG
 
+## v0.85.0
+
+Features:
+
+- Added a unified image insertion flow to both Source Code and WYSIWYG modes. Images can now be inserted from an HTTP/HTTPS URL or selected from the local computer through the toolbar and slash menu, with local files handled according to the image settings.
+
+- Improved table keyboard navigation: use Mod + Enter to leave the current table and continue writing in a new paragraph below it, while Shift + Enter continues to insert a line break inside the current cell.
+
+Improvements and fixes:
+
+- Redesigned the update dialog with clearer version and release date information, rich Markdown release notes, and support for opening external links.
+
+- Fixed case-only file and folder renames on case-insensitive file systems while preserving conflict detection for existing paths.
+
+- Improved Windows CLI installation and update reliability by repairing outdated wrappers, prioritizing the managed CLI path, cleaning up legacy executables, and avoiding console flashes during process checks.
+
+---
+
+特性：
+
+- 为源码模式和所见即所得模式新增统一的图片插入流程。现在可通过工具栏或斜杠菜单插入 HTTP/HTTPS 网络图片，或从电脑选择本地图片；本地图片会按照图片设置中的规则进行处理。
+
+- 优化表格键盘操作：使用 Mod + Enter 可退出当前表格，并在表格下方的新段落中继续输入；Shift + Enter 仍会在当前单元格内插入换行。
+
+改进与修复：
+
+- 重新设计更新提示弹窗，更清晰地展示版本号、发布日期和 Markdown 格式的更新说明，并支持打开外部链接。
+
+- 修复在大小写不敏感的文件系统上仅修改文件或文件夹名称大小写时被误判为名称冲突的问题，同时保留对真实路径冲突的检测。
+
+- 提升 Windows CLI 的安装和更新可靠性，可修复过期的命令包装器、优先使用 MarkFlowy 管理的 CLI 路径、清理旧版可执行文件，并避免进程检测时出现控制台闪烁。
+
 ## v0.84.0
 
 Features:
