@@ -6531,7 +6531,7 @@ __metadata:
     "@types/react-dom": "npm:^19.2.2"
     classnames: "npm:^2.5.1"
     eslint: "npm:9.13.0"
-    postcss: "npm:^8.4.47"
+    postcss: "npm:^8.5.18"
     react: "npm:^19.2.4"
     react-arborist: "npm:^3.4.3"
     react-dom: "npm:^19.2.4"
@@ -6584,7 +6584,7 @@ __metadata:
     "@types/color": "npm:^4.2.0"
     color: "npm:^4.2.3"
     eslint: "npm:9.13.0"
-    postcss: "npm:^8.4.47"
+    postcss: "npm:^8.5.18"
     postcss-import: "npm:^16.1.1"
     postcss-nested: "npm:^7.0.2"
     react: "npm:^19.2.4"
@@ -29397,7 +29397,7 @@ __metadata:
     eslint: "npm:9.13.0"
     fast-glob: "npm:^3.3.2"
     patch-package: "npm:^8.0.0"
-    postcss: "npm:^8.4.47"
+    postcss: "npm:^8.5.18"
     postcss-import: "npm:^16.1.1"
     postcss-nested: "npm:^7.0.2"
     prettier: "npm:^3.3.3"
@@ -34783,7 +34783,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"postcss@npm:^8.1.2, postcss@npm:^8.2.14, postcss@npm:^8.3.11, postcss@npm:^8.3.6, postcss@npm:^8.4.21, postcss@npm:^8.4.27, postcss@npm:^8.4.28, postcss@npm:^8.4.33, postcss@npm:^8.4.47, postcss@npm:^8.4.7, postcss@npm:^8.5.15, postcss@npm:^8.5.6":
+"postcss@npm:^8.1.2, postcss@npm:^8.2.14, postcss@npm:^8.3.11, postcss@npm:^8.3.6, postcss@npm:^8.4.21, postcss@npm:^8.4.27, postcss@npm:^8.4.28, postcss@npm:^8.4.33, postcss@npm:^8.4.7, postcss@npm:^8.5.15, postcss@npm:^8.5.6":
   version: 8.5.15
   resolution: "postcss@npm:8.5.15"
   dependencies:
@@ -34802,6 +34802,17 @@ __metadata:
     picocolors: "npm:^1.1.1"
     source-map-js: "npm:^1.2.1"
   checksum: 10/b39408900aa394bce6f567d539b7361e71c07f361313e5b01e40481c5120309a570e7a54c6a0c6ea5f0c0c06ff8c12b560beeebcc29ea173ad42ec74bae86069
+  languageName: node
+  linkType: hard
+
+"postcss@npm:^8.5.18":
+  version: 8.5.18
+  resolution: "postcss@npm:8.5.18"
+  dependencies:
+    nanoid: "npm:^3.3.12"
+    picocolors: "npm:^1.1.1"
+    source-map-js: "npm:^1.2.1"
+  checksum: 10/b43f2d2493d82dc43fa50d21cf184bf3b66229e7f53fa1dedc7b8a7c4cecd7ac8ee18fad099f47570da7f78bbf46997a4c6e6c87d8d8ece683dc1f32cda6db3b
   languageName: node
   linkType: hard
 
@@ -37631,7 +37642,7 @@ __metadata:
     micromark-extension-gfm-strikethrough: "npm:^1.0.7"
     nanoid: "npm:^5.1.6"
     parse5: "npm:^7.3.0"
-    postcss: "npm:^8.5.6"
+    postcss: "npm:^8.5.18"
     prettier: "npm:3.3.3"
     process: "npm:^0.11.10"
     prosemirror-commands: "npm:^1.7.1"

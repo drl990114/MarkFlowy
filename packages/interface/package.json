@@ -36,7 +36,7 @@
     "@popperjs/core": "^2.11.8",
     "@tanstack/react-virtual": "^3.13.18",
     "classnames": "^2.5.1",
-    "postcss": "^8.4.47",
+    "postcss": "^8.5.18",
     "react": "^19.2.4",
     "react-arborist": "^3.4.3",
     "react-dom": "^19.2.4",
