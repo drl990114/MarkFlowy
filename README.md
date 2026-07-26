@@ -258,7 +258,7 @@ The development of **MarkFlowy** cannot be separated from these contributors. Th
 [commit-badge]: https://img.shields.io/github/commit-activity/m/drl990114/MarkFlowy?color=%23ff9900&style=flat-square&labelColor=black
 [commit]: https://github.com/drl990114/MarkFlowy?labelColor=black
 [version-badge]: https://img.shields.io/github/v/release/drl990114/MarkFlowy?color=%239accfe&label=version&style=flat-square&labelColor=black
-[rust-version-icon]: https://img.shields.io/badge/Rust-1.85.0-dea584?style=flat-square&labelColor=black
+[rust-version-icon]: https://img.shields.io/badge/Rust-1.96.0-dea584?style=flat-square&labelColor=black
 [typescript-version-icon]: https://img.shields.io/github/package-json/dependency-version/drl990114/MarkFlowy/dev/typescript?label=TypeScript&style=flat-square&labelColor=black
 [issues-closed]: https://img.shields.io/github/issues-closed/drl990114/MarkFlowy.svg?style=flat-square&labelColor=black
 [codefactor]: https://www.codefactor.io/repository/github/drl990114/markflowy/badge/main?style=flat-square&labelColor=black
