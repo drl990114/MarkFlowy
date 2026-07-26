@@ -1,21 +1,24 @@
-import UnstyledLink, { LinkProps as UnstyledLinkProps } from 'next/link';
-import React from 'react';
-import styled from 'styled-components';
-import { lightGrey, red } from '../utils/colors';
-import rem from '../utils/rem';
+import UnstyledLink, { type LinkProps as UnstyledLinkProps } from 'next/link'
+import React from 'react'
+import styled from 'styled-components'
+import { lightGrey, red } from '../utils/colors'
+import rem from '../utils/rem'
 
-type AnchorProps = JSX.IntrinsicElements['a'];
+type AnchorProps = JSX.IntrinsicElements['a']
 
-export interface LinkProps extends UnstyledLinkProps, Omit<AnchorProps, keyof UnstyledLinkProps | 'ref'> {
-  inline?: boolean;
-  ref?: React.Ref<HTMLAnchorElement>;
-  unstyled?: boolean;
-  white?: boolean;
-  target?: '_self' | '_blank' | '_parent' | '_top';
+export interface LinkProps
+  extends UnstyledLinkProps,
+    Omit<AnchorProps, keyof UnstyledLinkProps | 'ref'> {
+  inline?: boolean
+  ref?: React.Ref<HTMLAnchorElement>
+  unstyled?: boolean
+  white?: boolean
+  target?: '_self' | '_blank' | '_parent' | '_top'
 }
 
 export default function Link({
   ['aria-label']: ariaLabel,
+  ['aria-current']: ariaCurrent,
   children,
   className,
   inline,
@@ -25,26 +28,33 @@ export default function Link({
   target,
   ...rest
 }: LinkProps) {
-  let Child: keyof JSX.IntrinsicElements | React.ComponentType<any> = StyledLink;
+  let Child: keyof JSX.IntrinsicElements | React.ComponentType<any> = StyledLink
 
   if (inline) {
-    Child = InlineLink;
+    Child = InlineLink
   } else if (unstyled) {
-    Child = 'a';
+    Child = 'a'
   }
 
-  let dataAttrs;
+  let dataAttrs
   if (white) {
-    dataAttrs = { 'data-white': white };
+    dataAttrs = { 'data-white': white }
   }
 
   return (
     <UnstyledLink passHref legacyBehavior {...rest}>
-      <Child aria-label={ariaLabel} className={className} title={title} {...dataAttrs} target={target}>
+      <Child
+        aria-current={ariaCurrent}
+        aria-label={ariaLabel}
+        className={className}
+        title={title}
+        {...dataAttrs}
+        target={target}
+      >
         {children as React.ReactNode}
       </Child>
     </UnstyledLink>
-  );
+  )
 }
 
 export const StyledLink = styled.a`
@@ -61,7 +71,7 @@ export const StyledLink = styled.a`
       background: ${lightGrey};
     }
   }
-`;
+`
 
 export const InlineLink = styled.a.attrs((/* props */) => ({
   target: '_blank',
@@ -77,4 +87,4 @@ export const InlineLink = styled.a.attrs((/* props */) => ({
   &[data-white] {
     color: white !important;
   }
-`;
+`

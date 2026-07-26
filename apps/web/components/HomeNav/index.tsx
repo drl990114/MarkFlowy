@@ -1,5 +1,9 @@
 import Sidebar from '../Nav/Sidebar'
-import { DocsSidebarMenu, SimpleSidebarMenu, SimpleSidebarMenuProps } from '../Nav/SidebarMenus'
+import {
+  DocsSidebarMenu,
+  SimpleSidebarMenu,
+  type SimpleSidebarMenuProps,
+} from '../Nav/SidebarMenus'
 import Navbar from './Navbar'
 
 export interface NavProps {
@@ -35,7 +39,7 @@ const Nav = (props: NavProps) => {
 
       {showSideNav !== false && (
         <Sidebar $isFolded={isSideFolded}>
-          {useDocsSidebarMenu !== false ? <DocsSidebarMenu /> : <SimpleSidebarMenu />}
+          {useDocsSidebarMenu !== false ? <DocsSidebarMenu /> : <SimpleSidebarMenu pages={pages} />}
         </Sidebar>
       )}
     </div>

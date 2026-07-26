@@ -1,0 +1,15 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "env": ["MARKFLOWY_CLOUD_API_URL"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/docs/**",
+        "!$TURBO_ROOT$/docs/**/.DS_Store",
+        "!.contentlayer/**"
+      ]
+    }
+  }
+}

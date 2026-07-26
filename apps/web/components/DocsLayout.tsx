@@ -1,47 +1,49 @@
-import { useRouter } from 'next/router';
-import React from 'react';
-import Footer from './Footer';
-import { Container, Content, Title } from './Layout';
-import Nav, { NavProps } from './Nav';
-import Head from './SeoHead';
+import { useRouter } from 'next/router'
+import React from 'react'
+import Footer from './Footer'
+import { Container, Content, Title } from './Layout'
+import Nav, { type NavProps } from './Nav'
+import Head from './SeoHead'
 
 export interface DocsLayoutProps {
-  description?: string;
-  pages?: NavProps['pages'];
-  title?: string;
-  useDocsSidebarMenu?: boolean;
+  description?: string
+  hasTableOfContents?: boolean
+  pages?: NavProps['pages']
+  title?: string
+  useDocsSidebarMenu?: boolean
 }
 
 export default function DocsLayout({
   children,
   title = '',
   description = '',
+  hasTableOfContents = false,
   useDocsSidebarMenu = true,
   pages,
 }: React.PropsWithChildren<DocsLayoutProps>) {
-  const router = useRouter();
-  const [isSideFolded, setIsSideFolded] = React.useState(true);
-  const [isMobileNavFolded, setIsMobileNavFolded] = React.useState(true);
+  const router = useRouter()
+  const [isSideFolded, setIsSideFolded] = React.useState(true)
+  const [isMobileNavFolded, setIsMobileNavFolded] = React.useState(true)
 
   const onSideToggle = React.useCallback(() => {
-    setIsMobileNavFolded(true);
-    setIsSideFolded(x => !x);
-  }, []);
+    setIsMobileNavFolded(true)
+    setIsSideFolded((x) => !x)
+  }, [])
 
   const onMobileNavToggle = React.useCallback(() => {
-    setIsMobileNavFolded(x => !x);
-    setIsSideFolded(true);
-  }, []);
+    setIsMobileNavFolded((x) => !x)
+    setIsSideFolded(true)
+  }, [])
 
   React.useEffect(() => {
-    setIsMobileNavFolded(true);
-    setIsSideFolded(true);
-  }, [router.asPath]);
+    setIsMobileNavFolded(true)
+    setIsSideFolded(true)
+  }, [router.asPath])
 
   return (
     <Container>
       <Head title={`MarkFlowy${title ? `: ${title}` : ''}`} description={description}>
-        <meta name="robots" content="noodp" />
+        <meta name='robots' content='noodp' />
       </Head>
 
       <Nav
@@ -53,13 +55,19 @@ export default function DocsLayout({
         onMobileNavToggle={onMobileNavToggle}
       />
 
-      <Content $moveRight={!isSideFolded} data-e2e-id="content">
-        <Title>{title}</Title>
+      <Content
+        as='main'
+        id='docs-content'
+        $hasTableOfContents={hasTableOfContents}
+        $moveRight={!isSideFolded}
+        data-e2e-id='content'
+      >
+        {title && <Title>{title}</Title>}
 
         {children}
       </Content>
 
       <Footer />
     </Container>
-  );
+  )
 }

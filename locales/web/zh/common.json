@@ -6,6 +6,7 @@
     "title": "试试 Playground"
   },
   "docs": {
+    "tableOfContents": "本页目录",
     "sidebar": {
       "gettingStarted": "快速开始"
     }

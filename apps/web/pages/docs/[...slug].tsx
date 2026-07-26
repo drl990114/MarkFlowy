@@ -1,46 +1,28 @@
-import Loading from 'components/Loading'
 import { allMarkdowns } from 'contentlayer/generated'
-import { GetStaticPaths, GetStaticProps } from 'next'
-import { useTranslation } from 'next-i18next'
+import type { GetStaticPaths, GetStaticProps } from 'next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
-import dynamic from 'next/dynamic'
-import { useRouter } from 'next/router'
+import DocsContent from '../../components/DocsContent'
 import DocsLayout from '../../components/DocsLayout'
+import {
+  buildDocsTableOfContents,
+  type DocsTableOfContentsItem,
+} from '../../utils/docsTableOfContents'
 
-const DynamicDocsRmeContent = dynamic(() => import('../../components/DocsRmeContent'), {
-  ssr: false,
-  loading: () => <Loading />,
-})
-
-const PostLayout = () => {
-  const router = useRouter()
-  const { t } = useTranslation()
-  const currentLocale = router.locale || 'en'
-  const slug = Array.isArray(router.query?.slug) ? router.query.slug.join('/') : ''
-
-  // Find markdown by locale and slug
-  const markdown = allMarkdowns.find((markdown) => {
-    const pathParts = markdown._raw.flattenedPath.split('/')
-    const docLocale = pathParts[0]
-    const docSlug = pathParts.slice(1).join('/')
-    return docLocale === currentLocale && docSlug === slug
-  })
-
-  if (markdown) {
-    return (
-      <DocsLayout>
-        <DynamicDocsRmeContent html={markdown.body.html} />
-      </DocsLayout>
-    )
-  } else {
-    return <div>{t('docs.content.notFound')}</div>
-  }
+interface PostLayoutProps {
+  html: string
+  tableOfContents: DocsTableOfContentsItem[]
 }
+
+const PostLayout = ({ html, tableOfContents }: PostLayoutProps) => (
+  <DocsLayout hasTableOfContents>
+    <DocsContent html={html} tableOfContents={tableOfContents} />
+  </DocsLayout>
+)
 
 export default PostLayout
 
 export const getStaticPaths: GetStaticPaths = async ({ locales = [] }) => {
-  const paths: Array<{ params: { slug: string[] }; locale: string }> = []
+  const paths: { params: { slug: string[] }; locale: string }[] = []
 
   allMarkdowns.forEach((markdown) => {
     const pathParts = markdown._raw.flattenedPath.split('/')
@@ -61,9 +43,28 @@ export const getStaticPaths: GetStaticPaths = async ({ locales = [] }) => {
   }
 }
 
-export const getStaticProps: GetStaticProps = async ({ locale }) => {
+export const getStaticProps: GetStaticProps<PostLayoutProps> = async ({ locale, params }) => {
+  const slug = Array.isArray(params?.slug) ? params.slug.join('/') : ''
+  const markdown = allMarkdowns.find((document) => {
+    const pathParts = document._raw.flattenedPath.split('/')
+    const documentLocale = pathParts[0]
+    const documentSlug = pathParts.slice(1).join('/')
+
+    return documentLocale === (locale || 'en') && documentSlug === slug
+  })
+
+  if (!markdown) {
+    return {
+      notFound: true,
+    }
+  }
+
+  const { html, items } = buildDocsTableOfContents(markdown.body.html)
+
   return {
     props: {
+      html,
+      tableOfContents: items,
       ...(await serverSideTranslations(locale || 'en', ['common'])),
     },
   }

@@ -4,7 +4,7 @@ import rem from '../utils/rem'
 import { footerHeight, sidebarWidth } from '../utils/sizes'
 
 export const Container = styled.div`
-  padding-left: ${rem(sidebarWidth)};
+  padding-left: ${sidebarWidth / 16}rem;
   background-color: var(--paper);
 
   ${mobile(css`
@@ -12,14 +12,19 @@ export const Container = styled.div`
   `)};
 `
 
-export const Content = styled.div<{ $hero?: boolean; $moveRight?: boolean; $footer?: boolean }>`
+export const Content = styled.div<{
+  $footer?: boolean
+  $hasTableOfContents?: boolean
+  $hero?: boolean
+  $moveRight?: boolean
+}>`
   box-sizing: border-box;
   font-family: var(--body);
-  margin: 0 auto;
-  min-height: ${(props) =>
-    props.$footer ? '0' : `calc(100vh - ${rem(footerHeight)})`};
-  max-width: ${(props) => (props.$hero ? '100ch' : '120ch')};
-  padding: ${(props) => (props.$footer ? '0' : `${rem(90)} ${rem(60)} 0 ${rem(60)}`)};
+  margin: 0;
+  width: 100%;
+  min-height: ${(props) => (props.$footer ? '0' : `calc(100vh - ${rem(footerHeight)})`)};
+  max-width: ${(props) => (props.$hero ? '100ch' : '48.625rem')};
+  padding: ${(props) => (props.$footer ? '0' : '4.25rem 1rem 0')};
   transition: transform 150ms ease-out;
 
   @layer base {
@@ -29,27 +34,43 @@ export const Content = styled.div<{ $hero?: boolean; $moveRight?: boolean; $foot
     }
   }
 
+  ${mobile(css`
+    max-width: 100%;
+    padding: 4.25rem 1rem 1.875rem;
+    transform: none;
+  `)};
+
   ${(p) =>
-    mobile(css`
-      padding: ${rem(100)} ${rem(36)} ${rem(30)} ${rem(36)};
-      transform: translateX(${p.$moveRight ? rem(sidebarWidth) : 0});
-    `)};
+    p.$hasTableOfContents &&
+    css`
+      width: calc(100% - 15rem);
+      max-width: 72rem;
+
+      @media (max-width: 75.999rem) {
+        width: 100%;
+        max-width: none;
+      }
+    `};
 
   ${(p) =>
     p.$hero &&
     !p.$footer &&
     css`
-      padding: ${rem(100)} ${rem(60)} 0 ${rem(60)};
+      padding: ${rem(84)} ${rem(32)} 0;
     `};
 `
 
 export const Title = styled.h1`
-  text-align: left;
   width: 100%;
+  margin: 0 0 1.5rem;
   color: var(--ink);
-  font-size: ${rem(42)};
-  font-weight: bold;
   font-family: var(--sans);
+  font-size: 1.5rem;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  line-height: 2rem;
+  text-align: left;
+  text-wrap: balance;
 
   + h2 {
     margin-top: -0.5em;

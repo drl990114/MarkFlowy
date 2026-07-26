@@ -1,4 +1,5 @@
 import { KeyboardArrowDown } from '@styled-icons/material/KeyboardArrowDown/KeyboardArrowDown'
+import { useTranslation } from 'next-i18next'
 import styled, { css } from 'styled-components'
 import { mobile } from '../../utils/media'
 import rem from '../../utils/rem'
@@ -25,20 +26,49 @@ export default function MobileNavbar({
   onSideToggle,
   showSideNav,
 }: React.PropsWithChildren<MobileNavbarProps>) {
+  const { t } = useTranslation()
+  const isSidebarOpen = isSideFolded === false
+  const isPrimaryMenuOpen = isMobileNavFolded === false
+
   return (
     <Wrapper>
       {showSideNav !== false && (
-        <NavButton onClick={onSideToggle}>{isSideFolded ? <FoldIcon /> : <CloseIcon />}</NavButton>
+        <NavButton
+          type='button'
+          aria-label={`${t('common.docs')}: ${t(
+            isSidebarOpen ? 'navigation.closeMenu' : 'navigation.openMenu',
+            {
+              defaultValue: isSidebarOpen ? 'Close menu' : 'Open menu',
+            },
+          )}`}
+          aria-controls='docs-sidebar'
+          aria-expanded={isSidebarOpen}
+          onClick={onSideToggle}
+        >
+          {isSideFolded ? <FoldIcon /> : <CloseIcon />}
+        </NavButton>
       )}
       <Logo />
       <Brand>MarkFlowy</Brand>
       {children}
-      <MenuToggle onClick={onMobileNavToggle}>
+      <MenuToggle
+        type='button'
+        aria-label={t(isPrimaryMenuOpen ? 'navigation.closeMenu' : 'navigation.openMenu', {
+          defaultValue: isPrimaryMenuOpen ? 'Close menu' : 'Open menu',
+        })}
+        aria-controls='mobile-primary-navigation'
+        aria-expanded={isPrimaryMenuOpen}
+        onClick={onMobileNavToggle}
+      >
         <ArrowWrapper $shouldRotate={!isMobileNavFolded}>
           <StyledIcon as={KeyboardArrowDown} $size={36} />
         </ArrowWrapper>
       </MenuToggle>
-      <SecondaryMenu $isOpen={!isMobileNavFolded}>
+      <SecondaryMenu
+        id='mobile-primary-navigation'
+        aria-hidden={!isPrimaryMenuOpen}
+        $isOpen={isPrimaryMenuOpen}
+      >
         <NavLinks />
       </SecondaryMenu>
     </Wrapper>

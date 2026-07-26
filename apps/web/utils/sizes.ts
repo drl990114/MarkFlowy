@@ -1,4 +1,4 @@
-export const sidebarWidth = 300;
-export const navbarHeight = 52;
-export const searchModalWidth = 400;
-export const footerHeight = 120;
+export const sidebarWidth = 260
+export const navbarHeight = 54
+export const searchModalWidth = 400
+export const footerHeight = 120

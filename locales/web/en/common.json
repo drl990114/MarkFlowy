@@ -6,6 +6,7 @@
     "title": "Try Playground"
   },
   "docs": {
+    "tableOfContents": "On this page",
     "sidebar": {
       "gettingStarted": "Getting Started"
     }
