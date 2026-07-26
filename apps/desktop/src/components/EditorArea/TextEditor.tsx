@@ -72,6 +72,13 @@ import {
   normalizeLivePreviewBlockBehavior,
 } from './createWysiwygDelegateOptions'
 import { closeCleanPhysicalAliases } from './closeCleanPhysicalAliases'
+import { createDeferredLatestPublisher } from './deferredLatestPublisher'
+import {
+  measureEditorSnapshot,
+  recordEditorInteractionMeasurement,
+  shouldCoalesceEditorSnapshots,
+  startEditorInteractionMeasurement,
+} from './editorPerformanceDiagnostics'
 import { EditorWrapper } from './EditorWrapper'
 import { conditionalWriteExpected, getFileWriteRevision } from './conditionalFileWrite'
 import { EditorInstanceLifecycle } from './editorInstanceLifecycle'
@@ -88,6 +95,8 @@ const delegateOptionsCache = new Map<string, CreateWysiwygDelegateOptions>()
 const LARGE_MARKDOWN_SOURCE_MODE_THRESHOLD = 200_000
 const TEXT_EDITOR_CONTENT_SYNC_EVENT = 'editor_content_sync'
 const EXPORT_RESOURCE_TIMEOUT_MS = 15_000
+const EDITOR_SNAPSHOT_DEBOUNCE_MS = 50
+const EDITOR_SNAPSHOT_MAX_WAIT_MS = 250
 const editorInstanceLifecycle = new EditorInstanceLifecycle()
 const fileSaveCoordinator = new FileSaveCoordinator()
 let textEditorInstanceSeq = 0
@@ -98,6 +107,12 @@ interface TextEditorContentSyncPayload {
   fileId: string
   sourceInstanceId: string
   content: string
+}
+
+interface PendingEditorSnapshot {
+  delegate: EditorDelegate
+  doc: EditorChangeEventParams['state']['doc']
+  mode: 'coalesced' | 'immediate'
 }
 
 type TextEditorRef = EditorRef & {
@@ -929,6 +944,31 @@ function TextEditor(props: TextEditorProps) {
   const remoteContentResetHandleRef = useRef<number | null>(null)
   const rejectedReservedChangeRef = useRef(false)
   const wasSavePathReservedRef = useRef(false)
+  const interactionStartedAtRef = useRef<number | undefined>(undefined)
+  const isUnmountingRef = useRef(false)
+  const publishEditorSnapshotRef = useRef<(snapshot: PendingEditorSnapshot) => boolean>(
+    () => false,
+  )
+  const snapshotPublisher = useMemo(
+    () =>
+      createDeferredLatestPublisher(
+        (snapshot: PendingEditorSnapshot) => publishEditorSnapshotRef.current(snapshot),
+        {
+          wait: EDITOR_SNAPSHOT_DEBOUNCE_MS,
+          maxWait: EDITOR_SNAPSHOT_MAX_WAIT_MS,
+        },
+      ),
+    [],
+  )
+
+  useEffect(() => {
+    isUnmountingRef.current = false
+    return () => {
+      isUnmountingRef.current = true
+      snapshotPublisher.flush()
+      snapshotPublisher.cancel()
+    }
+  }, [snapshotPublisher])
 
   useUnmount(() => {
     if (counterIdleHandleRef.current !== null) {
@@ -997,7 +1037,11 @@ function TextEditor(props: TextEditorProps) {
   const applySyncedContent = useCallback(
     (nextContent: string) => {
       if (latestContentRef.current === nextContent) return
+      // A newer local edit wins this race. Its pending publication will bring
+      // the sibling instance back to the same content.
+      if (snapshotPublisher.hasPending()) return
 
+      snapshotPublisher.cancel()
       if (remoteContentResetHandleRef.current !== null) {
         window.clearTimeout(remoteContentResetHandleRef.current)
       }
@@ -1013,7 +1057,7 @@ function TextEditor(props: TextEditorProps) {
         remoteContentResetHandleRef.current = null
       }, 0)
     },
-    [updateCachedFileContent],
+    [snapshotPublisher, updateCachedFileContent],
   )
 
   useEffect(() => {
@@ -1021,9 +1065,19 @@ function TextEditor(props: TextEditorProps) {
   }, [content])
 
   useEffect(() => {
+    if (!active) {
+      snapshotPublisher.flush()
+    }
+  }, [active, snapshotPublisher])
+
+  useEffect(() => {
     const wasReserved = wasSavePathReservedRef.current
     wasSavePathReservedRef.current = savePathReserved
-    if (!wasReserved || savePathReserved) return
+    if (savePathReserved) {
+      snapshotPublisher.flush()
+      return
+    }
+    if (!wasReserved) return
     if (!rejectedReservedChangeRef.current) return
     rejectedReservedChangeRef.current = false
 
@@ -1033,7 +1087,7 @@ function TextEditor(props: TextEditorProps) {
     latestContentRef.current = cachedContent
     editorRef.current?.setContent(cachedContent)
     setContent(cachedContent)
-  }, [id, savePathReserved])
+  }, [id, savePathReserved, snapshotPublisher])
 
   useEffect(() => {
     const handleContentSync = (payload: TextEditorContentSyncPayload) => {
@@ -1112,13 +1166,15 @@ function TextEditor(props: TextEditorProps) {
       return runSaveOperation(async () => {
         if (!active && !params.active) return false
 
-        const initialFile = getFileObject(id) ?? curFile
-        if (!initialFile) return false
+        const fileBeforeFlush = getFileObject(id) ?? curFile
+        if (!fileBeforeFlush) return false
 
-        const curEditorState = useEditorStateStore.getState().idStateMap.get(initialFile.id)
+        const curEditorState = useEditorStateStore.getState().idStateMap.get(fileBeforeFlush.id)
 
         if (!curEditorState?.hasUnsavedChanges) return true
 
+        if (!snapshotPublisher.flush()) return false
+        const initialFile = getFileObject(id) ?? fileBeforeFlush
         const sharedContent =
           typeof initialFile.content === 'string'
             ? initialFile.content
@@ -1290,7 +1346,7 @@ function TextEditor(props: TextEditorProps) {
         )
       }, params)
     },
-    [active, id, delegate, t, insertNodeToFolderData],
+    [active, id, delegate, t, insertNodeToFolderData, snapshotPublisher],
   )
 
   const debounceSave = useMemo(() => {
@@ -1341,6 +1397,7 @@ function TextEditor(props: TextEditorProps) {
   const setContentHandler = useCallback(
     (newContent: string) => {
       if (!active || savePathReserved) return
+      snapshotPublisher.cancel()
       editorRef.current?.setContent(newContent)
       setContent(newContent)
       latestContentRef.current = newContent
@@ -1353,7 +1410,7 @@ function TextEditor(props: TextEditorProps) {
       })
       emitContentSync(newContent)
     },
-    [active, emitContentSync, id, savePathReserved, updateCachedFileContent],
+    [active, emitContentSync, id, savePathReserved, snapshotPublisher, updateCachedFileContent],
   )
 
   const editorTypeSwitchingRef = useRef(false)
@@ -1695,12 +1752,49 @@ function TextEditor(props: TextEditorProps) {
     ],
   )
 
+  publishEditorSnapshotRef.current = (snapshot) => {
+    try {
+      const serialize = () => snapshot.delegate.docToString(snapshot.doc)
+      const nextContent =
+        snapshot.delegate.view === 'Wysiwyg'
+          ? measureEditorSnapshot(id, snapshot.doc.content.size, snapshot.mode, serialize)
+          : serialize()
+
+      latestContentRef.current = nextContent
+      if (!isUnmountingRef.current) {
+        setContent(nextContent)
+      }
+      updateCachedFileContent(nextContent)
+      emitContentSync(nextContent)
+
+      if (!isUnmountingRef.current) {
+        if (activeRef.current) {
+          debounceRefreshToc()
+        }
+
+        const latestFile = getFileObject(id)
+        if (autosave && latestFile?.path) {
+          debounceSaveHandler()
+        }
+      }
+      return true
+    } catch (error) {
+      Sentry.captureException(error)
+      return false
+    }
+  }
+
+  const handleBeforeInputCapture = useCallback(() => {
+    interactionStartedAtRef.current = startEditorInteractionMeasurement()
+  }, [])
+
   const handleChange: EditorChangeHandler = useCallback(
     (params) => {
       const { tr, helpers } = params
       editorContextRef.current = params
 
       if (savePathReserved && tr?.docChanged) {
+        snapshotPublisher.flush()
         const cachedContent = getFileObject(id)?.content
         const changedContent = delegate?.docToString(params.state.doc)
         if (typeof cachedContent === 'string' && changedContent !== cachedContent) {
@@ -1712,6 +1806,7 @@ function TextEditor(props: TextEditorProps) {
             rejectedReservedChangeRef.current = false
           })
         }
+        interactionStartedAtRef.current = undefined
         return
       }
 
@@ -1733,45 +1828,33 @@ function TextEditor(props: TextEditorProps) {
       }
 
       if (tr?.docChanged && !tr.getMeta('APPLY_MARKS')) {
-        const nextContent = delegate?.docToString(params.state.doc)
-        if (typeof nextContent !== 'string') return
-
-        latestContentRef.current = nextContent
-        setContent(nextContent)
-        updateCachedFileContent(nextContent)
-
-        if (!isApplyingRemoteContentRef.current) {
-          const state = {
-            hasUnsavedChanges: true,
-            undoDepth: helpers.undoDepth(),
-          }
-          const { setIdStateMap } = useEditorStateStore.getState()
-
-          setIdStateMap(id, state)
-          emitContentSync(nextContent)
-
-          if (active) {
-            debounceRefreshToc()
-          }
-
-          const latestFile = getFileObject(id)
-          if (autosave && latestFile?.path) {
-            debounceSaveHandler()
-          }
+        if (isApplyingRemoteContentRef.current || !delegate) {
+          interactionStartedAtRef.current = undefined
+          return
         }
+
+        useEditorStateStore.getState().setIdStateMap(id, {
+          hasUnsavedChanges: true,
+          undoDepth: helpers.undoDepth(),
+        })
+
+        const coalesce = delegate.view === 'Wysiwyg' && shouldCoalesceEditorSnapshots()
+        const snapshot: PendingEditorSnapshot = {
+          delegate,
+          doc: params.state.doc,
+          mode: coalesce ? 'coalesced' : 'immediate',
+        }
+
+        snapshotPublisher.schedule(snapshot)
+        if (!coalesce) {
+          snapshotPublisher.flush()
+        }
+
+        recordEditorInteractionMeasurement(id, interactionStartedAtRef.current)
+        interactionStartedAtRef.current = undefined
       }
     },
-    [
-      id,
-      delegate,
-      debounceSaveHandler,
-      active,
-      debounceRefreshToc,
-      emitContentSync,
-      autosave,
-      updateCachedFileContent,
-      savePathReserved,
-    ],
+    [id, delegate, active, savePathReserved, snapshotPublisher],
   )
 
   if (status === TextEditorStatus.NOTEXIST) {
@@ -1810,6 +1893,7 @@ function TextEditor(props: TextEditorProps) {
       fullWidth={editorFullWidth}
       active={active}
       $visible={visible}
+      onBeforeInputCapture={handleBeforeInputCapture}
       onClick={handleWrapperClick}
       editorViewType={currentViewType}
       fileType={fileTypeConfig.type}
