@@ -12,7 +12,7 @@ import {
 import { moveFileNode } from './file-operator'
 import NewFileInput from './NewFileInput'
 import { hasRenameConflict } from './rename-conflict'
-import { NodeContainer } from './styles'
+import { LoadingIcon, NodeContainer } from './styles'
 import { SimpleTree } from './types'
 import { getFileNameFromPath } from './verify-file-name'
 
@@ -46,6 +46,7 @@ export interface FileNodeComponentProps extends NodeRendererProps<IFile> {
   }
   disableFileOperations?: boolean
   iconButtonComponent?: FC<any>
+  isLoading?: boolean
 }
 
 export interface ContextMenuItem {
@@ -92,6 +93,7 @@ function FileNode({
   fileTreeHandler,
   disableFileOperations = false,
   iconButtonComponent: IconButton,
+  isLoading = false,
 }: FileNodeComponentProps) {
   const indentSize = Number.parseFloat(`${style.paddingLeft || 0}`)
   const { deleteNode, trashNode, activeId, refreshFolder, closeAll, scrollTo } = useFileTree()
@@ -483,6 +485,7 @@ function FileNode({
         )
       }
       selected={activeId === node.id}
+      aria-busy={isLoading || undefined}
       onContextMenu={handleContextMenu}
       onClick={(e) => {
         if (isPending) {
@@ -587,9 +590,17 @@ function FileNode({
               }}
             >
               {node.data?.kind === 'dir' ? (
-                <i
-                  className={`${node.isOpen ? 'ri-folder-5-fill' : 'ri-folder-3-fill'} file-icon`}
-                />
+                isLoading ? (
+                  <LoadingIcon
+                    className='ri-loader-4-line file-icon'
+                    role='status'
+                    aria-label={`Loading ${node.data.name}`}
+                  />
+                ) : (
+                  <i
+                    className={`${node.isOpen ? 'ri-folder-5-fill' : 'ri-folder-3-fill'} file-icon`}
+                  />
+                )
               ) : (
                 <i className={`${getFileIconClass(node.data)} file-icon`} />
               )}

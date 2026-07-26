@@ -30,6 +30,7 @@ export default defineConfig(async ({ mode }) => {
     clearScreen: false,
     optimizeDeps: {
       exclude: ['rme'],
+      include: ['zens'],
     },
     plugins: [
       // Tailwind is only activated by the AI extension's lazy-loaded stylesheet.

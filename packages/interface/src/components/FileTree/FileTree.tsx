@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useMemo, useRef, type FC } from 'react'
+import React, { memo, useCallback, useMemo, useRef, useState, type FC } from 'react'
 import { Tree } from 'react-arborist'
 import type { TreeApi } from 'react-arborist'
 import type { TreeProps } from 'react-arborist/dist/module/types/tree-props'
@@ -98,6 +98,9 @@ const FileTree: FC<FileTreeProps> = (props) => {
   const tree = useMemo(() => new SimpleTree<IFile>(data), [data])
   const treeRef = useRef<TreeApi<IFile> | null>(null)
   const loadedDirsRef = useRef<Set<string>>(new Set())
+  const loadingDirsRef = useRef<Set<string>>(new Set())
+  const loadedDirsCacheVersionRef = useRef(0)
+  const [loadingDirIds, setLoadingDirIds] = useState<ReadonlySet<string>>(() => new Set())
   const currentDataRef = useRef(data)
   currentDataRef.current = data
   const getCurrentFolderData = useCallback(() => currentDataRef.current, [])
@@ -110,15 +113,24 @@ const FileTree: FC<FileTreeProps> = (props) => {
 
     const nodeData = node.data as IFile
     if (nodeData.kind !== 'dir' || !nodeData.path) return
+    if (!treeRef.current?.isOpen(id)) return
     const rootId = data[0]?.id
     const target = captureFileMutationTarget(nodeData)
     if (!rootId || !target) return
 
-    if (loadedDirsRef.current.has(nodeData.path)) return
+    if (loadedDirsRef.current.has(nodeData.path) || loadingDirsRef.current.has(nodeData.path)) {
+      return
+    }
 
     if (!nodeData.children || nodeData.children.length === 0) {
+      const cacheVersion = loadedDirsCacheVersionRef.current
+      loadingDirsRef.current.add(target.path)
+      setLoadingDirIds((current) => new Set(current).add(target.id))
+
       try {
         const children = await readSubdirectory(nodeData.path)
+        if (cacheVersion !== loadedDirsCacheVersionRef.current) return
+
         const currentTree = new SimpleTree(currentDataRef.current)
         const currentNode = getCurrentFileMutationNodeInRoot(
           currentTree,
@@ -128,13 +140,25 @@ const FileTree: FC<FileTreeProps> = (props) => {
         )
         if (!currentNode || currentNode.data.kind !== 'dir') return
         if (loadedDirsRef.current.has(target.path)) return
+
+        loadedDirsRef.current.add(target.path)
         if (children.length > 0) {
           currentNode.data.children = children
-          loadedDirsRef.current.add(target.path)
           setFolderDataPure([...currentTree.data])
         }
       } catch (error) {
         console.error('Failed to load subdirectory:', error)
+      } finally {
+        if (cacheVersion === loadedDirsCacheVersionRef.current) {
+          loadingDirsRef.current.delete(target.path)
+          setLoadingDirIds((current) => {
+            if (!current.has(target.id)) return current
+
+            const next = new Set(current)
+            next.delete(target.id)
+            return next
+          })
+        }
       }
     }
   }
@@ -370,7 +394,10 @@ const FileTree: FC<FileTreeProps> = (props) => {
                 setFolderDataPure(params.data)
               }
               fileTreeHandler.clearLoadedDirsCache = () => {
+                loadedDirsCacheVersionRef.current += 1
                 loadedDirsRef.current.clear()
+                loadingDirsRef.current.clear()
+                setLoadingDirIds((current) => (current.size === 0 ? current : new Set()))
               }
             }
             return (
@@ -395,6 +422,7 @@ const FileTree: FC<FileTreeProps> = (props) => {
                 fileTreeHandler={fileTreeHandler}
                 disableFileOperations={disableFileOperations}
                 iconButtonComponent={iconButtonComponent as FC<any>}
+                isLoading={loadingDirIds.has(nodeProps.node.id)}
               />
             )
           }}

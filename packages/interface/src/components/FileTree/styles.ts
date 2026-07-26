@@ -1,9 +1,23 @@
-import styled from 'styled-components'
+import styled, { keyframes } from 'styled-components'
 
 type NodeContainerProps = {
   highlight: boolean
   selected: boolean
 }
+
+const fileTreeSpin = keyframes`
+  to {
+    transform: rotate(360deg);
+  }
+`
+
+export const LoadingIcon = styled.i`
+  animation: ${fileTreeSpin} 0.8s linear infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+`
 
 export const NodeContainer = styled.div<NodeContainerProps>`
   font-size: ${(props) => props.theme.fontSm};
