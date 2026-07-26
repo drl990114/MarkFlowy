@@ -68,8 +68,6 @@ const toWorkspacePath = (workspaceId: string) => `/workspaces/${encodeURICompone
 
 const toRemoteWorkspacePath = (workspaceId: string) => `${toWorkspacePath(workspaceId)}/remote`
 
-const encodeContentPath = (path: string) => path.split('/').map(encodeURIComponent).join('/')
-
 const toFileId = (workspaceId: string, path: string) =>
   `remote-workspace-${workspaceId}-${path || 'root'}`
 
@@ -154,7 +152,7 @@ export const remoteWorkspaceService = {
     const { ref, ...content } = data
 
     return apiClient.put<RemoteWorkspaceSaveResult>(
-      `${toRemoteWorkspacePath(workspaceId)}/contents/${encodeContentPath(path)}`,
+      `${toRemoteWorkspacePath(workspaceId)}/contents`,
       {
         path,
         ...content,
