@@ -156,6 +156,7 @@ export const remoteWorkspaceService = {
     return apiClient.put<RemoteWorkspaceSaveResult>(
       `${toRemoteWorkspacePath(workspaceId)}/contents/${encodeContentPath(path)}`,
       {
+        path,
         ...content,
         ...(ref ? { ref } : {}),
       },

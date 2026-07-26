@@ -136,9 +136,14 @@ export const WebEditor = forwardRef<WebEditorRef, WebEditorProps>(function WebEd
     loading,
     error,
   } = useRmeEditor()
-  const [content, setContent] = useState(initialContent || '')
-  const previousInitialContentRef = useRef(initialContent)
+  const [content, setContent] = useState(
+    initialContent === undefined ? '##### Welcome to MarkFlowy!' : initialContent,
+  )
+  const latestContentRef = useRef(content)
+  const isApplyingExternalContentRef = useRef(false)
+  const onChangeRef = useRef(onChange)
   const editorRef = useRef<EditorRef>(null)
+  onChangeRef.current = onChange
 
   const [currentViewType, setCurrentViewType] = useState(viewType || 'wysiwyg')
 
@@ -172,19 +177,26 @@ export const WebEditor = forwardRef<WebEditorRef, WebEditorProps>(function WebEd
     }
   }, [delegate, createWysiwygDelegate, createSourceCodeDelegate, currentViewType, createDelegate])
 
-  const defaultContent =
-    initialContent === undefined ? '##### Welcome to MarkFlowy!' : initialContent
-
   useEffect(() => {
     setIsReady(true)
   }, [])
 
   useEffect(() => {
-    if (initialContent !== undefined && initialContent !== previousInitialContentRef.current) {
-      setContent(initialContent)
-      setEditorKey((prev) => prev + 1)
+    if (initialContent === undefined || initialContent === latestContentRef.current) {
+      return
     }
-    previousInitialContentRef.current = initialContent
+
+    latestContentRef.current = initialContent
+    setContent(initialContent)
+
+    if (editorRef.current) {
+      isApplyingExternalContentRef.current = true
+      try {
+        editorRef.current.setContent(initialContent)
+      } finally {
+        isApplyingExternalContentRef.current = false
+      }
+    }
   }, [initialContent])
 
   useEffect(() => {
@@ -211,34 +223,25 @@ export const WebEditor = forwardRef<WebEditorRef, WebEditorProps>(function WebEd
         try {
           const newContent = delegate.docToString(params.state.doc)
           if (newContent !== undefined) {
+            const isExternalContent = isApplyingExternalContentRef.current
+            latestContentRef.current = newContent
             setContent(newContent)
-            onChange?.(newContent)
+            if (!isExternalContent) {
+              onChangeRef.current?.(newContent)
+            }
           }
         } catch {}
       }
     },
-    [delegate, onChange],
+    [delegate],
   )
 
   useImperativeHandle(
     ref,
     () => ({
-      getContent: () => {
-        if (!delegate || !editorRef.current) {
-          return undefined
-        }
-        try {
-          const editor = editorRef.current as any
-          if (editor.state?.doc && typeof delegate.docToString === 'function') {
-            return delegate.docToString(editor.state.doc)
-          }
-          return undefined
-        } catch {
-          return undefined
-        }
-      },
+      getContent: () => latestContentRef.current,
     }),
-    [delegate],
+    [],
   )
 
   const editorProps = useMemo(
@@ -246,10 +249,10 @@ export const WebEditor = forwardRef<WebEditorRef, WebEditorProps>(function WebEd
       initialType: (currentViewType === 'wysiwyg' && EditorViewType
         ? EditorViewType.WYSIWYG
         : EditorViewType?.SOURCE_CODE || 'sourceCode') as any,
-      content: content === '' && initialContent === undefined ? defaultContent : content,
+      content,
       delegate,
     }),
-    [currentViewType, EditorViewType, content, defaultContent, delegate, initialContent],
+    [currentViewType, EditorViewType, content, delegate],
   )
 
   if (!isReady || loading) {
@@ -264,9 +267,7 @@ export const WebEditor = forwardRef<WebEditorRef, WebEditorProps>(function WebEd
     return (
       <RmeProvider>
         <PreviewContainer>
-          <Markdown>
-            {content === '' && initialContent === undefined ? defaultContent : content}
-          </Markdown>
+          <Markdown>{content}</Markdown>
         </PreviewContainer>
       </RmeProvider>
     )
