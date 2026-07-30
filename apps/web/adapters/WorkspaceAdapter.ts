@@ -26,6 +26,13 @@ interface WorkspaceAdapterBase {
     content: string,
     options?: { message?: string; version?: string; ref?: string | null },
   ) => Promise<{ version?: string }>
+  saveFiles?: (
+    files: { file: IFile; content: string; version?: string }[],
+    options?: { message?: string; ref?: string | null },
+  ) => Promise<{
+    files: { path: string; version?: string }[]
+    commitVersion?: string
+  }>
   loadSubdirectory?: (path: string, ref?: string | null) => Promise<IFile[]>
 }
 
@@ -51,6 +58,7 @@ export interface LocalWorkspaceBackend {
   loadTree: () => Promise<IFile[]>
   loadFileContent: (file: IFile) => Promise<{ content: string; version?: string }>
   saveFileContent?: WorkspaceAdapterBase['saveFileContent']
+  saveFiles?: WorkspaceAdapterBase['saveFiles']
   loadSubdirectory?: (path: string) => Promise<IFile[]>
 }
 
@@ -212,6 +220,29 @@ export function createLocalAdapter(backend: LocalWorkspaceBackend): LocalWorkspa
     adapter.saveFileContent = (file, content, options) => saveFileContent(file, content, options)
   }
 
+  const saveFiles = backend.saveFiles
+  if (backend.capabilities.write && saveFiles) {
+    adapter.saveFiles = (files, options) => saveFiles(files, options)
+  } else if (backend.capabilities.write && saveFileContent) {
+    adapter.saveFiles = async (files, options) => {
+      const savedFiles = []
+
+      for (const file of files) {
+        const result = await saveFileContent(file.file, file.content, {
+          message: options?.message,
+          version: file.version,
+          ref: options?.ref,
+        })
+        savedFiles.push({
+          path: file.file.path || file.file.id,
+          version: result.version,
+        })
+      }
+
+      return { files: savedFiles }
+    }
+  }
+
   return adapter
 }
 
@@ -260,6 +291,22 @@ export function createRemoteAdapter(
         message: options?.message || 'Update via MarkFlowy',
         content,
         version: options?.version,
+        ref: options?.ref ?? descriptor.defaultRef,
+      })
+    }
+
+    adapter.saveFiles = async (files, options) => {
+      return remoteWorkspaceService.saveFileContents(workspaceId, {
+        message: options?.message || 'Update via MarkFlowy',
+        files: files.map(({ file, content, version }) => {
+          if (!file.path) throw new Error('File path is required')
+
+          return {
+            path: file.path,
+            content,
+            version,
+          }
+        }),
         ref: options?.ref ?? descriptor.defaultRef,
       })
     }

@@ -1,6 +1,5 @@
 import RmeProvider from 'components/RmeProvider'
 import { useRmeEditor } from 'hooks/useRme'
-import Markdown from 'markdown-to-jsx'
 import {
   forwardRef,
   useCallback,
@@ -26,81 +25,20 @@ const EditorContainer = styled.div`
   }
 `
 
-const PreviewContainer = styled.div`
-  padding: 1rem;
+const PreviewScroller = styled.div`
   width: 100%;
   height: 100%;
   overflow: auto;
-  font-weight: 400;
-  line-height: 1.6;
+`
 
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    margin-top: 1.5em;
-    margin-bottom: 0.5em;
-    font-family: var(--sans);
-  }
-
-  p {
-    margin-bottom: 1em;
-  }
-
-  ul,
-  ol {
-    margin-bottom: 1em;
-    padding-left: 2em;
-  }
-
-  code {
-    background: var(--paper-warm);
-    padding: 0.2em 0.4em;
-    border-radius: 3px;
-    font-family: var(--mono);
-    font-size: 0.9em;
-  }
-
-  pre {
-    background: var(--paper-warm);
-    padding: 1em;
-    border-radius: 6px;
-    overflow-x: auto;
-
-    code {
-      background: none;
-      padding: 0;
-    }
-  }
-
-  blockquote {
-    border-left: 3px solid var(--seal);
-    padding-left: 1em;
-    margin-left: 0;
-    color: var(--ink-mute);
-  }
-
-  img {
-    max-width: 100%;
-  }
-
-  table {
-    border-collapse: collapse;
-    width: 100%;
-    margin-bottom: 1em;
-
-    th,
-    td {
-      border: 1px solid var(--line);
-      padding: 0.5em;
-    }
-
-    th {
-      background: var(--paper-warm);
-    }
-  }
+const PreviewWidth = styled.div`
+  width: 100%;
+  max-width: 800px;
+  min-height: 100%;
+  margin: 0 auto;
+  padding-bottom: 3rem;
+  box-sizing: border-box;
+  --rme-editor-inline-padding: clamp(16px, 5vw, 40px);
 `
 
 const LoadingContainer = styled.div`
@@ -246,9 +184,10 @@ export const WebEditor = forwardRef<WebEditorRef, WebEditorProps>(function WebEd
 
   const editorProps = useMemo(
     () => ({
-      initialType: (currentViewType === 'wysiwyg' && EditorViewType
-        ? EditorViewType.WYSIWYG
-        : EditorViewType?.SOURCE_CODE || 'sourceCode') as any,
+      initialType:
+        currentViewType === 'wysiwyg' && EditorViewType
+          ? EditorViewType.WYSIWYG
+          : EditorViewType?.SOURCE_CODE || 'sourceCode',
       content,
       delegate,
     }),
@@ -263,18 +202,27 @@ export const WebEditor = forwardRef<WebEditorRef, WebEditorProps>(function WebEd
     return <LoadingContainer>Error loading editor: {error.message}</LoadingContainer>
   }
 
+  if (!Editor || !EditorViewType || !delegate) {
+    return <LoadingContainer>Loading Editor...</LoadingContainer>
+  }
+
   if (currentViewType === 'preview') {
     return (
       <RmeProvider>
-        <PreviewContainer>
-          <Markdown>{content}</Markdown>
-        </PreviewContainer>
+        <PreviewScroller>
+          <PreviewWidth>
+            <Editor
+              key={`preview-${editorKey}`}
+              ref={editorRef}
+              {...editorProps}
+              initialType='preview'
+              delegate={delegate}
+              editable={false}
+            />
+          </PreviewWidth>
+        </PreviewScroller>
       </RmeProvider>
     )
-  }
-
-  if (!Editor || !EditorViewType || !delegate) {
-    return <LoadingContainer>Loading Editor...</LoadingContainer>
   }
 
   return (

@@ -64,6 +64,15 @@ export interface RemoteWorkspaceSaveResult {
   commitVersion?: string
 }
 
+export interface RemoteWorkspaceBatchSaveResult {
+  files: {
+    path: string
+    version?: string
+  }[]
+  ref?: string
+  commitVersion?: string
+}
+
 const toWorkspacePath = (workspaceId: string) => `/workspaces/${encodeURIComponent(workspaceId)}`
 
 const toRemoteWorkspacePath = (workspaceId: string) => `${toWorkspacePath(workspaceId)}/remote`
@@ -103,7 +112,7 @@ export function getRemoteWorkspaceErrorMessage(error: unknown, fallback: string)
       return error.message
     }
 
-    return 'This file changed in the remote workspace. Reload it before retrying your save.'
+    return 'One or more staged files changed in the remote workspace. Reload them before retrying.'
   }
 
   if (status === 404) {
@@ -155,6 +164,25 @@ export const remoteWorkspaceService = {
       `${toRemoteWorkspacePath(workspaceId)}/contents`,
       {
         path,
+        ...content,
+        ...(ref ? { ref } : {}),
+      },
+    )
+  },
+
+  saveFileContents(
+    workspaceId: string,
+    data: {
+      message: string
+      files: { path: string; content: string; version?: string }[]
+      ref?: string | null
+    },
+  ) {
+    const { ref, ...content } = data
+
+    return apiClient.put<RemoteWorkspaceBatchSaveResult>(
+      `${toRemoteWorkspacePath(workspaceId)}/contents/batch`,
+      {
         ...content,
         ...(ref ? { ref } : {}),
       },

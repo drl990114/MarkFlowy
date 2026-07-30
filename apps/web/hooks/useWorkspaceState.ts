@@ -17,9 +17,12 @@ export type ViewType = 'wysiwyg' | 'source' | 'preview'
 
 export interface FileState {
   content: string
+  savedContent: string
   version?: string
   isDirty: boolean
 }
+
+export type SaveStatus = 'idle' | 'saving' | 'saved'
 
 export function normalizeWorkspaceIdParam(id?: string | string[]) {
   if (Array.isArray(id)) {
@@ -79,7 +82,7 @@ export function useWorkspaceState(id: string) {
   const [isClient, setIsClient] = useState(false)
   const [loadingTree, setLoadingTree] = useState(false)
   const [loadingFile, setLoadingFile] = useState(false)
-  const [saving, setSaving] = useState(false)
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle')
   const [error, setError] = useState('')
   const [refs, setRefs] = useState<RemoteWorkspaceRef[]>([])
   const [currentRef, setCurrentRef] = useState<string | null>(null)
@@ -112,7 +115,7 @@ export function useWorkspaceState(id: string) {
     setRefs([])
     setCurrentRef(null)
     setLoadingFile(false)
-    setSaving(false)
+    setSaveStatus('idle')
 
     if (workspaceRequiresAuthentication(id) && !isAuthenticated) {
       setLoadingTree(false)
@@ -181,7 +184,9 @@ export function useWorkspaceState(id: string) {
 
           setActiveId(firstFile.id)
           setOpened([firstFile.id])
-          setFileStateMap({ [firstFile.id]: { content, version, isDirty: false } })
+          setFileStateMap({
+            [firstFile.id]: { content, savedContent: content, version, isDirty: false },
+          })
           setHeadingsDataMap({
             [firstFile.id]: extractHeadingsForFile(content, firstFile.id),
           })
@@ -279,7 +284,7 @@ export function useWorkspaceState(id: string) {
 
         setFileStateMap((previous) => ({
           ...previous,
-          [fileId]: { content, version, isDirty: false },
+          [fileId]: { content, savedContent: content, version, isDirty: false },
         }))
         setHeadingsDataMap((previous) => ({
           ...previous,
@@ -308,12 +313,17 @@ export function useWorkspaceState(id: string) {
   )
 
   const handleChange = useCallback((fileId: string, newContent: string) => {
+    setSaveStatus('idle')
     setFileStateMap((previous) => {
       const current = previous[fileId]
       if (!current) return previous
       return {
         ...previous,
-        [fileId]: { ...current, content: newContent, isDirty: true },
+        [fileId]: {
+          ...current,
+          content: newContent,
+          isDirty: newContent !== current.savedContent,
+        },
       }
     })
 
@@ -324,56 +334,79 @@ export function useWorkspaceState(id: string) {
   }, [])
 
   const handleSave = useCallback(async () => {
-    if (!adapter || !activeId || !adapter.capabilities.write || !adapter.saveFileContent) return
+    if (!adapter?.capabilities.write || !adapter.saveFiles) return
 
-    const fileState = fileStateMap[activeId]
-    const file = getFileObject(activeId)
+    const snapshots = Object.entries(fileStateMapRef.current).flatMap(([fileId, fileState]) => {
+      if (!fileState.isDirty) return []
 
-    if (!fileState || !file?.path) return
+      const file = getFileObject(fileId)
+      if (!file?.path) return []
+
+      return [
+        {
+          fileId,
+          file,
+          content: fileState.content,
+          version: fileState.version,
+        },
+      ]
+    })
+
+    if (snapshots.length === 0) return
 
     const saveVersion = ++saveVersionRef.current
     const contextVersion = workspaceContextVersionRef.current
-    const savedContent = fileState.content
     const isCurrentSave = () =>
       saveVersion === saveVersionRef.current &&
       contextVersion === workspaceContextVersionRef.current
 
-    setSaving(true)
+    setSaveStatus('saving')
     setError('')
 
     try {
-      const result = await adapter.saveFileContent(file, savedContent, {
-        message: commitMessage || 'Update via MarkFlowy',
-        version: fileState.version,
-        ref: adapter.type === 'remote' ? currentRef : null,
-      })
+      const result = await adapter.saveFiles(
+        snapshots.map(({ file, content, version }) => ({ file, content, version })),
+        {
+          message: commitMessage || 'Update via MarkFlowy',
+          ref: adapter.type === 'remote' ? currentRef : null,
+        },
+      )
       if (!isCurrentSave()) return
 
-      setFileStateMap((previous) => {
-        const current = previous[activeId]
-        if (!current) return previous
+      const versionsByPath = new Map(result.files.map((file) => [file.path, file.version]))
+      const snapshotsById = new Map(snapshots.map((snapshot) => [snapshot.fileId, snapshot]))
+      const changedDuringSave = snapshots.some(
+        (snapshot) => fileStateMapRef.current[snapshot.fileId]?.content !== snapshot.content,
+      )
 
-        return {
-          ...previous,
-          [activeId]: {
+      setFileStateMap((previous) => {
+        let changed = false
+        const next = { ...previous }
+
+        for (const [fileId, snapshot] of snapshotsById) {
+          const current = previous[fileId]
+          if (!current) continue
+
+          changed = true
+          next[fileId] = {
             ...current,
-            version: result.version ?? current.version,
-            isDirty: current.content !== savedContent,
-          },
+            savedContent: snapshot.content,
+            version: versionsByPath.get(snapshot.file.path || '') ?? current.version,
+            isDirty: current.content !== snapshot.content,
+          }
         }
+
+        return changed ? next : previous
       })
 
-      alert('Saved successfully')
+      setSaveStatus(changedDuringSave ? 'idle' : 'saved')
     } catch (caughtError) {
       if (isCurrentSave()) {
-        setError(getRemoteWorkspaceErrorMessage(caughtError, 'Failed to save file'))
-      }
-    } finally {
-      if (isCurrentSave()) {
-        setSaving(false)
+        setSaveStatus('idle')
+        setError(getRemoteWorkspaceErrorMessage(caughtError, 'Failed to save staged files'))
       }
     }
-  }, [adapter, activeId, commitMessage, currentRef, fileStateMap, getFileObject])
+  }, [adapter, commitMessage, currentRef, getFileObject])
 
   const handleShowConfirm = ({ title, onConfirm }: { title: string; onConfirm: () => void }) => {
     if (confirm(title)) {
@@ -406,6 +439,16 @@ export function useWorkspaceState(id: string) {
   }, [activeId, getFileObject])
 
   const currentFileState = fileStateMap[activeId]
+  const stagedFiles = useMemo(
+    () =>
+      opened.flatMap((fileId) => {
+        if (!fileStateMap[fileId]?.isDirty) return []
+        const file = getFileObject(fileId)
+        return file ? [{ file, fileId }] : []
+      }),
+    [fileStateMap, getFileObject, opened],
+  )
+  const saving = saveStatus === 'saving'
 
   const handleRefChange = useCallback(
     (ref: string) => {
@@ -432,7 +475,7 @@ export function useWorkspaceState(id: string) {
       const contextVersion = workspaceContextVersionRef.current
       const loadVersion = ++treeLoadVersionRef.current
       setLoadingFile(false)
-      setSaving(false)
+      setSaveStatus('idle')
       setLoadingTree(true)
       setError('')
 
@@ -509,9 +552,11 @@ export function useWorkspaceState(id: string) {
     error,
     refs,
     currentRef,
-    canWrite: Boolean(!loadingTree && adapter?.capabilities.write && adapter.saveFileContent),
+    canWrite: Boolean(!loadingTree && adapter?.capabilities.write && adapter.saveFiles),
     commitMessage,
     setCommitMessage,
+    saveStatus,
+    stagedFiles,
     handleSelect,
     handleChange,
     handleSave,

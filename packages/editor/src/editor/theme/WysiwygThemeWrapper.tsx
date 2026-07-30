@@ -16,11 +16,17 @@ interface WrapperProps {
   rootLineHeight?: string
 }
 
-export const WysiwygThemeWrapper = styled.div.attrs<WrapperProps>((p) => ({
-  rootFontSize: '15px',
-  rootLineHeight: '1.6',
-  ...p,
-}))`
+const styleOnlyProps = new Set(['codeEditor', 'dark', 'rootFontSize', 'rootLineHeight'])
+
+export const WysiwygThemeWrapper = styled.div
+  .withConfig({
+    shouldForwardProp: (prop) => !styleOnlyProps.has(prop),
+  })
+  .attrs<WrapperProps>((p) => ({
+    rootFontSize: '15px',
+    rootLineHeight: '1.6',
+    ...p,
+  }))`
   width: 100%;
   position: relative;
   /* white-space: pre-wrap; */

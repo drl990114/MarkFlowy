@@ -17,8 +17,6 @@ type CopilotMeta =
   | { type: 'ready'; pos: number; suggestion: string; requestId: number }
   | { type: 'clear'; requestId: number }
 
-console.log('123')
-
 @extension<CopilotOptions>({
   defaultOptions: {},
   staticKeys: [],

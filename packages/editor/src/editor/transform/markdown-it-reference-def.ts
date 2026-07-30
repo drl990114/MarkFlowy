@@ -1,5 +1,5 @@
-import MarkdownIt from 'markdown-it'
-import { Core, StateCore } from 'markdown-it/index.js'
+import type MarkdownIt from 'markdown-it'
+import type { Core, StateCore } from 'markdown-it/index.js'
 import { isSpace, normalizeReference } from 'markdown-it/lib/common/utils.mjs'
 import Token from 'markdown-it/lib/token.mjs'
 
@@ -17,10 +17,10 @@ export function reference(state, startLine, _endLine, silent) {
     return false
   }
 
-  function getNextLine(nextLine) {
+  function getNextLine(lineNumber) {
     const endLine = state.lineMax
 
-    if (nextLine >= endLine || state.isEmpty(nextLine)) {
+    if (lineNumber >= endLine || state.isEmpty(lineNumber)) {
       // empty line or end of input
       return null
     }
@@ -29,12 +29,12 @@ export function reference(state, startLine, _endLine, silent) {
 
     // this would be a code block normally, but after paragraph
     // it's considered a lazy continuation regardless of what's there
-    if (state.sCount[nextLine] - state.blkIndent > 3) {
+    if (state.sCount[lineNumber] - state.blkIndent > 3) {
       isContinuation = true
     }
 
     // quirk for blockquotes, this line should already be checked by that rule
-    if (state.sCount[nextLine] < 0) {
+    if (state.sCount[lineNumber] < 0) {
       isContinuation = true
     }
 
@@ -46,7 +46,7 @@ export function reference(state, startLine, _endLine, silent) {
       // Some tags can terminate paragraph without empty line.
       let terminate = false
       for (let i = 0, l = terminatorRules.length; i < l; i++) {
-        if (terminatorRules[i](state, nextLine, endLine, true)) {
+        if (terminatorRules[i](state, lineNumber, endLine, true)) {
           terminate = true
           break
         }
@@ -59,11 +59,11 @@ export function reference(state, startLine, _endLine, silent) {
       }
     }
 
-    const pos = state.bMarks[nextLine] + state.tShift[nextLine]
-    const max = state.eMarks[nextLine]
+    const lineStart = state.bMarks[lineNumber] + state.tShift[lineNumber]
+    const lineEnd = state.eMarks[lineNumber]
 
-    // max + 1 explicitly includes the newline
-    return state.src.slice(pos, max + 1)
+    // lineEnd + 1 explicitly includes the newline
+    return state.src.slice(lineStart, lineEnd + 1)
   }
 
   let str = state.src.slice(pos, max + 1)
@@ -255,7 +255,6 @@ const rule: Core.RuleCore = (state: StateCore) => {
     const curToken = tokens[i]
 
     if (curToken.type === 'reference_def') {
-      console.log('reference_def', curToken)
       const label = curToken.attrs?.find((attr) => attr[0] === 'label')?.[1] || ''
       const href = curToken.attrs?.find((attr) => attr[0] === 'href')?.[1] || ''
       const title = curToken.attrs?.find((attr) => attr[0] === 'title')?.[1] || ''

@@ -62,6 +62,8 @@ function WorkspaceDetailPageContent() {
     canWrite,
     commitMessage,
     setCommitMessage,
+    saveStatus,
+    stagedFiles,
     handleSelect,
     handleChange,
     handleSave,
@@ -169,9 +171,43 @@ function WorkspaceDetailPageContent() {
                       onChange={(e) => setCommitMessage(e.target.value)}
                       placeholder={isGitHubProvider ? 'Commit message' : 'Save message'}
                     />
-                    <SaveButton onClick={handleSave} disabled={saving || !currentFileState.isDirty}>
-                      {saving ? 'Saving...' : 'Save'}
+                    <SaveButton
+                      type='button'
+                      onClick={handleSave}
+                      disabled={saving}
+                      aria-disabled={saving || stagedFiles.length === 0}
+                      $status={saveStatus}
+                      aria-label={
+                        saveStatus === 'saving'
+                          ? `Saving ${stagedFiles.length} staged files`
+                          : saveStatus === 'saved'
+                            ? 'All staged files saved'
+                            : stagedFiles.length === 0
+                              ? 'No staged files to save'
+                              : `Save ${stagedFiles.length} staged files`
+                      }
+                    >
+                      <SaveButtonViewport aria-hidden='true'>
+                        <SaveButtonState $visible={saveStatus === 'idle'}>
+                          Save{stagedFiles.length > 1 ? ` ${stagedFiles.length}` : ''}
+                        </SaveButtonState>
+                        <SaveButtonState $visible={saveStatus === 'saving'}>
+                          <SaveSpinner className='ri-loader-4-line' />
+                          Saving
+                        </SaveButtonState>
+                        <SaveButtonState $visible={saveStatus === 'saved'}>
+                          <i className='ri-check-line' />
+                          Saved
+                        </SaveButtonState>
+                      </SaveButtonViewport>
                     </SaveButton>
+                    <SaveAnnouncement role='status' aria-live='polite'>
+                      {saveStatus === 'saving'
+                        ? 'Saving staged files'
+                        : saveStatus === 'saved'
+                          ? 'All staged files saved'
+                          : ''}
+                    </SaveAnnouncement>
                   </>
                 )}
               </Actions>
@@ -206,6 +242,40 @@ function WorkspaceDetailPageContent() {
                     )
                   )}
                 </FileTreeWrapper>
+                <StagedPanel aria-label='Staged changes'>
+                  <StagedHeader>
+                    <StagedTitle>
+                      <i className='ri-git-commit-line' aria-hidden='true' />
+                      Staged Changes
+                    </StagedTitle>
+                    <StagedCount>{stagedFiles.length}</StagedCount>
+                  </StagedHeader>
+                  <StagedList>
+                    {stagedFiles.length === 0 ? (
+                      <StagedEmpty>Edited files will appear here</StagedEmpty>
+                    ) : (
+                      stagedFiles.map(({ file, fileId }) => (
+                        <StagedItemButton
+                          key={fileId}
+                          type='button'
+                          $active={activeId === fileId}
+                          onClick={() => handleSelect(file)}
+                          aria-current={activeId === fileId ? 'page' : undefined}
+                          title={file.path}
+                        >
+                          <StagedFileIcon className='ri-file-text-line' aria-hidden='true' />
+                          <StagedFileText>
+                            <StagedFileName>{file.name}</StagedFileName>
+                            {file.path && file.path !== file.name && (
+                              <StagedFilePath>{file.path}</StagedFilePath>
+                            )}
+                          </StagedFileText>
+                          <StagedDot aria-hidden='true' />
+                        </StagedItemButton>
+                      ))
+                    )}
+                  </StagedList>
+                </StagedPanel>
               </LeftSidebar>
             </Panel>
 
@@ -268,7 +338,11 @@ function WorkspaceDetailPageContent() {
                 <i className={statusIconClass} />
                 {statusText}
               </StatusItem>
-              {currentFileState?.isDirty && <StatusItem $accent>Unsaved</StatusItem>}
+              {stagedFiles.length > 0 && (
+                <StatusItem $accent>
+                  {stagedFiles.length} staged {stagedFiles.length === 1 ? 'file' : 'files'}
+                </StatusItem>
+              )}
             </StatusLeft>
             <StatusRight>
               <StatusItem>{viewType}</StatusItem>
@@ -433,26 +507,117 @@ const CommitInput = styled.input`
   }
 `
 
-const SaveButton = styled.button`
+const SaveButton = styled.button<{ $status: 'idle' | 'saving' | 'saved' }>`
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   height: ${rem(26)};
   padding: 0 ${rem(10)};
   font-size: ${(props) => props.theme.fontXs};
   font-weight: 500;
-  background: ${(props) => props.theme.accentColor};
+  background: ${(props) =>
+    props.$status === 'saved' ? props.theme.successColor : props.theme.accentColor};
   color: white;
-  border: 1px solid ${(props) => props.theme.accentColor};
+  border: 1px solid
+    ${(props) => (props.$status === 'saved' ? props.theme.successColor : props.theme.accentColor)};
   border-radius: ${(props) => props.theme.smallBorderRadius};
   cursor: pointer;
-  transition: opacity 0.16s ease;
+  transform: scale(1);
+  transition:
+    background-color 180ms cubic-bezier(0.23, 1, 0.32, 1),
+    border-color 180ms cubic-bezier(0.23, 1, 0.32, 1),
+    opacity 160ms ease,
+    transform 140ms cubic-bezier(0.23, 1, 0.32, 1);
 
-  &:hover:not(:disabled) {
-    opacity: 0.9;
+  &:active:not(:disabled):not([aria-disabled='true']) {
+    transform: scale(0.97);
   }
 
-  &:disabled {
-    opacity: 0.5;
+  &:focus-visible {
+    outline: 2px solid ${(props) => props.theme.borderColorFocused};
+    outline-offset: 2px;
+  }
+
+  &:disabled,
+  &[aria-disabled='true'] {
+    opacity: ${(props) => (props.$status === 'saved' ? 1 : 0.65)};
     cursor: not-allowed;
   }
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover:not(:disabled):not([aria-disabled='true']) {
+      opacity: 0.9;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transform: none;
+    transition:
+      background-color 120ms ease,
+      border-color 120ms ease,
+      opacity 120ms ease;
+
+    &:active:not(:disabled):not([aria-disabled='true']) {
+      transform: none;
+    }
+  }
+`
+
+const SaveButtonViewport = styled.span`
+  position: relative;
+  display: block;
+  width: ${rem(64)};
+  height: 1em;
+  line-height: 1;
+`
+
+const SaveButtonState = styled.span<{ $visible: boolean }>`
+  position: absolute;
+  inset: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: ${rem(4)};
+  opacity: ${(props) => (props.$visible ? 1 : 0)};
+  filter: ${(props) => (props.$visible ? 'blur(0)' : 'blur(2px)')};
+  transform: ${(props) => (props.$visible ? 'translateY(0)' : 'translateY(4px)')};
+  transition:
+    opacity 180ms cubic-bezier(0.23, 1, 0.32, 1),
+    filter 180ms ease,
+    transform 180ms cubic-bezier(0.23, 1, 0.32, 1);
+
+  @media (prefers-reduced-motion: reduce) {
+    filter: none;
+    transform: none;
+    transition: opacity 120ms ease;
+  }
+`
+
+const SaveSpinner = styled.i`
+  animation: mf-web-save-spin 700ms linear infinite;
+
+  @keyframes mf-web-save-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    animation-duration: 1.4s;
+  }
+`
+
+const SaveAnnouncement = styled.span`
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 `
 
 const ErrorBanner = styled.div`
@@ -503,6 +668,155 @@ const FileTreeWrapper = styled.div`
   flex-direction: column;
   overflow: hidden;
   padding: ${rem(6)} 0;
+`
+
+const StagedPanel = styled.section`
+  flex: 0 0 auto;
+  min-height: 0;
+  border-top: 1px solid ${(props) => props.theme.borderColor};
+  background: ${(props) => props.theme.sideBarBgColor};
+`
+
+const StagedHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: ${rem(30)};
+  padding: 0 ${rem(10)};
+`
+
+const StagedTitle = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: ${rem(6)};
+  min-width: 0;
+  color: ${(props) => props.theme.disabledFontColor};
+  font-size: ${(props) => props.theme.fontXs};
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+`
+
+const StagedCount = styled.span`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: ${rem(18)};
+  height: ${rem(18)};
+  padding: 0 ${rem(5)};
+  border-radius: 999px;
+  background: ${(props) => props.theme.accentColorFocused};
+  color: ${(props) => props.theme.accentColor};
+  font-size: ${(props) => props.theme.fontXs};
+  line-height: 1;
+`
+
+const StagedList = styled.div`
+  max-height: ${rem(230)};
+  overflow: auto;
+  padding: 0 ${rem(6)} ${rem(7)};
+`
+
+const StagedEmpty = styled.div`
+  padding: ${rem(8)} ${rem(6)} ${rem(10)};
+  color: ${(props) => props.theme.disabledFontColor};
+  font-size: ${(props) => props.theme.fontXs};
+`
+
+const StagedItemButton = styled.button<{ $active: boolean }>`
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: ${rem(7)};
+  padding: ${rem(6)} ${rem(7)};
+  border: 0;
+  border-radius: ${(props) => props.theme.smallBorderRadius};
+  background: ${(props) => (props.$active ? props.theme.fileTreeSelectedBgColor : 'transparent')};
+  color: ${(props) => props.theme.primaryFontColor};
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    background-color 150ms ease,
+    opacity 180ms cubic-bezier(0.23, 1, 0.32, 1),
+    transform 180ms cubic-bezier(0.23, 1, 0.32, 1);
+
+  @starting-style {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${(props) => props.theme.borderColorFocused};
+    outline-offset: -2px;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background: ${(props) =>
+        props.$active ? props.theme.fileTreeSelectedBgColor : props.theme.hoverColor};
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transform: none;
+    transition: background-color 120ms ease;
+
+    @starting-style {
+      opacity: 1;
+      transform: none;
+    }
+
+    &:active {
+      transform: none;
+    }
+  }
+`
+
+const StagedFileIcon = styled.i`
+  flex: 0 0 auto;
+  color: ${(props) => props.theme.disabledFontColor};
+  font-size: ${rem(14)};
+`
+
+const StagedFileText = styled.span`
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: ${rem(1)};
+`
+
+const StagedFileName = styled.span`
+  overflow: hidden;
+  color: ${(props) => props.theme.primaryFontColor};
+  font-size: ${(props) => props.theme.fontXs};
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`
+
+const StagedFilePath = styled.span`
+  overflow: hidden;
+  color: ${(props) => props.theme.disabledFontColor};
+  font-size: ${(props) => props.theme.fontXs};
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`
+
+const StagedDot = styled.span`
+  flex: 0 0 auto;
+  width: ${rem(6)};
+  height: ${rem(6)};
+  border-radius: 50%;
+  background: ${(props) => props.theme.accentColor};
+  box-shadow: 0 0 0 ${rem(3)} ${(props) => props.theme.accentColorFocused};
 `
 
 const CenterArea = styled.div`
