@@ -43,8 +43,9 @@ export interface LivePreviewBlockCommonOptions {
   customCopyFunction?: CustomCopyFunction
   codemirrorExtensions?: CodeMirrorExtension[]
   /**
-   * `auto` shows source only for the active block. `always-split` keeps source
-   * and preview visible side by side.
+   * `auto` shows source only for the active block. `always-split` defaults to
+   * showing source and preview side by side, while allowing a block to be
+   * collapsed manually.
    * @default 'auto'
    */
   behavior?: LivePreviewBlockBehavior

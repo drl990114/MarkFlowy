@@ -243,6 +243,14 @@ function getToolbarButtons(nodeView: LivePreviewNodeView) {
   }
 }
 
+function getCollapseButton(nodeView: LivePreviewNodeView) {
+  const button = nodeView.dom.querySelector<HTMLButtonElement>(
+    '.mf-live-preview-collapse',
+  )
+  expect(button).not.toBeNull()
+  return button!
+}
+
 function setSearchActive(codemirror: MockMfCodemirrorInstance, active: boolean) {
   const onSearchActiveChange = codemirror.options.options.onSearchActiveChange
   expect(onSearchActiveChange).toBeTypeOf('function')
@@ -294,9 +302,10 @@ describe('LivePreviewNodeView', () => {
     const { toggle } = getToolbarButtons(nodeView)
 
     expect(nodeView.dom.dataset.mode).toBe('split')
-    expect(toggle.getAttribute('aria-label')).toBe('Source always visible')
+    expect(toggle.getAttribute('aria-label')).toBe('Hide source')
     expect(toggle.getAttribute('aria-expanded')).toBe('true')
-    expect(toggle.disabled).toBe(true)
+    expect(toggle.disabled).toBe(false)
+    expect(getCollapseButton(nodeView).hidden).toBe(false)
   })
 
   test('opens the source before focusing when openOnMount is requested', async () => {
@@ -338,6 +347,31 @@ describe('LivePreviewNodeView', () => {
     expect(toggle.getAttribute('aria-expanded')).toBe('false')
     expect(document.activeElement).toBe(toggle)
     expect(view.focus).not.toHaveBeenCalled()
+  })
+
+  test('collapses source from the center divider and restores focus to the toolbar', async () => {
+    const { nodeView } = createNodeView({ behavior: 'always-split' })
+    const { toggle } = getToolbarButtons(nodeView)
+    const collapse = getCollapseButton(nodeView)
+
+    expect(collapse.type).toBe('button')
+    expect(collapse.getAttribute('aria-label')).toBe('Hide source')
+    expect(collapse.getAttribute('aria-controls')).toBe(
+      nodeView.dom.querySelector<HTMLElement>('.mf-live-preview-editor')?.id,
+    )
+    expect(collapse.hidden).toBe(false)
+    collapse.focus()
+    collapse.click()
+
+    expect(nodeView.dom.dataset.mode).toBe('preview')
+    expect(collapse.hidden).toBe(true)
+    expect(document.activeElement).toBe(toggle)
+
+    toggle.click()
+    await flushRender(20)
+
+    expect(nodeView.dom.dataset.mode).toBe('split')
+    expect(collapse.hidden).toBe(false)
   })
 
   test('reveals the source before forwarding an outer editor selection', () => {

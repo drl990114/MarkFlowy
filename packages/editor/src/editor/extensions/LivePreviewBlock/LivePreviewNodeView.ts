@@ -32,12 +32,14 @@ export class LivePreviewNodeView
   private readonly previewElt: HTMLElement
   private readonly bodyElt: HTMLElement
   private readonly toggleButton: HTMLButtonElement
+  private readonly collapseButton: HTMLButtonElement
   private readonly fullscreenButton: HTMLButtonElement
   private readonly copyButton: HTMLButtonElement
   private cmView?: CodeMirrorEditorView
   private mfCodemirrorView?: MfCodemirrorView
   private behavior: LivePreviewBlockBehavior
   private focusOpen: boolean
+  private manuallyCollapsed = false
   private searchOpen = false
   private mode: LivePreviewMode
   private fullscreen = false
@@ -98,7 +100,11 @@ export class LivePreviewNodeView
 
     const divider = document.createElement('div')
     divider.className = 'mf-live-preview-divider'
-    divider.setAttribute('aria-hidden', 'true')
+
+    this.collapseButton = this.createToolbarButton('ri-arrow-left-s-line', 'Hide source')
+    this.collapseButton.classList.add('mf-live-preview-collapse')
+    this.collapseButton.setAttribute('aria-controls', this.editorElt.id)
+    divider.append(this.collapseButton)
 
     this.previewElt = document.createElement('div')
     this.previewElt.className = 'mf-live-preview-render'
@@ -108,6 +114,7 @@ export class LivePreviewNodeView
 
     this.copyButton.addEventListener('click', this.copySource)
     this.toggleButton.addEventListener('click', this.toggleMode)
+    this.collapseButton.addEventListener('click', this.collapseSource)
     this.fullscreenButton.addEventListener('click', this.toggleFullscreen)
     toolbar.addEventListener('mousedown', this.stopToolbarMouseDown)
     header.addEventListener('mousedown', this.selectWholeNode)
@@ -137,6 +144,7 @@ export class LivePreviewNodeView
   }
 
   setSelection(anchor: number, head: number): void {
+    this.manuallyCollapsed = false
     this.focusOpen = true
     this.applyMode()
     this.cmView?.requestMeasure()
@@ -152,6 +160,7 @@ export class LivePreviewNodeView
   }
 
   editSource = (): void => {
+    this.manuallyCollapsed = false
     this.focusOpen = true
     this.applyMode()
     this.focusCodeMirrorAtStoredPosition()
@@ -163,6 +172,7 @@ export class LivePreviewNodeView
     }
 
     this.behavior = behavior
+    this.manuallyCollapsed = false
     this.dom.dataset.behavior = behavior
     this.applyMode()
   }
@@ -301,7 +311,23 @@ export class LivePreviewNodeView
     }
 
     this.recordCodeMirrorSelection()
+    this.manuallyCollapsed = true
     this.focusOpen = false
+    this.applyMode()
+  }
+
+  private collapseSource = (event: MouseEvent): void => {
+    event.preventDefault()
+    event.stopPropagation()
+
+    if (this.mode === 'preview' || this.searchOpen) {
+      return
+    }
+
+    this.recordCodeMirrorSelection()
+    this.manuallyCollapsed = true
+    this.focusOpen = false
+    this.toggleButton.focus()
     this.applyMode()
   }
 
@@ -310,25 +336,21 @@ export class LivePreviewNodeView
     this.mode = this.resolveMode()
     this.dom.dataset.mode = this.mode
     const previewOnly = this.mode === 'preview'
-    const alwaysSplit = this.behavior === 'always-split'
     const searchLocked = this.searchOpen
-    const label = alwaysSplit
-      ? 'Source always visible'
-      : searchLocked
-        ? 'Source shown for search result'
-        : previewOnly
-          ? 'Edit source'
-          : 'Hide source'
+    const label = searchLocked
+      ? 'Source shown for search result'
+      : previewOnly
+        ? 'Edit source'
+        : 'Hide source'
     this.setToolbarButtonContent(
       this.toggleButton,
-      previewOnly || alwaysSplit || searchLocked
-        ? 'ri-code-s-slash-line'
-        : 'ri-eye-line',
+      previewOnly || searchLocked ? 'ri-code-s-slash-line' : 'ri-eye-line',
       label,
     )
-    this.toggleButton.disabled = alwaysSplit || searchLocked
+    this.toggleButton.disabled = searchLocked
     this.toggleButton.setAttribute('aria-expanded', String(!previewOnly))
     this.toggleButton.setAttribute('aria-controls', this.editorElt.id)
+    this.collapseButton.hidden = previewOnly || searchLocked
     this.editorElt.setAttribute('aria-hidden', String(previewOnly))
 
     if (previousMode === 'preview' && this.mode === 'split') {
@@ -402,6 +424,7 @@ export class LivePreviewNodeView
     event.preventDefault()
     event.stopPropagation()
     this.recordCodeMirrorSelection()
+    this.manuallyCollapsed = true
     this.focusOpen = false
     this.applyMode()
 
@@ -478,6 +501,7 @@ export class LivePreviewNodeView
       return
     }
 
+    this.manuallyCollapsed = false
     this.focusOpen = true
     this.applyMode()
   }
@@ -554,9 +578,8 @@ export class LivePreviewNodeView
   }
 
   private resolveMode(): LivePreviewMode {
-    return this.behavior === 'always-split' || this.focusOpen || this.searchOpen
-      ? 'split'
-      : 'preview'
+    const alwaysSplit = this.behavior === 'always-split' && !this.manuallyCollapsed
+    return alwaysSplit || this.focusOpen || this.searchOpen ? 'split' : 'preview'
   }
 
   private requestCodeMirrorMeasure(): void {

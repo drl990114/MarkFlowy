@@ -127,6 +127,26 @@ export const livePreviewBlockStyles = css`
     background: ${(props) => props.theme.borderColor};
   }
 
+  .mf-live-preview-collapse {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 32px;
+    border-color: ${(props) => props.theme.borderColor};
+    border-radius: ${(props) => props.theme.smallBorderRadius};
+    background: ${(props) => props.theme.bgColor};
+    transform: translate(-50%, -50%);
+
+    &[hidden] {
+      display: none;
+    }
+
+    &:hover {
+      background: ${(props) => props.theme.hoverColor};
+    }
+  }
+
   .mf-live-preview-render {
     box-sizing: border-box;
     min-width: 0;
