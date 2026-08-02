@@ -1,11 +1,21 @@
 import type { Extension as CodeMirrorExtension } from '@codemirror/state'
 import { eventBus } from '../../../utils/eventbus'
-import { loadMermaid } from '../../../utils/mermaid'
+import { loadMermaid, prepareMermaidSource } from '../../../utils/mermaid'
 import { minimalSetup } from '../../CodeMirror/setup'
 import type { LivePreviewNodeViewApi, LivePreviewRenderer } from '../live-preview-types'
 
 const renderCount = { count: 0 }
+let renderQueue: Promise<void> = Promise.resolve()
 const unsafeMermaidResourcePattern = /(?:<\s*img\b|\burl\s*\()/i
+
+function runInRenderQueue<T>(render: () => Promise<T>): Promise<T> {
+  const result = renderQueue.then(render)
+  renderQueue = result.then(
+    () => undefined,
+    () => undefined,
+  )
+  return result
+}
 
 function assertSafeMermaidSource(source: string): void {
   if (unsafeMermaidResourcePattern.test(source)) {
@@ -28,9 +38,7 @@ function assertSafeMermaidDiagram(diagram: unknown): void {
         : []
   const hasImageShape = values.some(
     (vertex) =>
-      vertex !== null &&
-      typeof vertex === 'object' &&
-      Boolean((vertex as { img?: unknown }).img),
+      vertex !== null && typeof vertex === 'object' && Boolean((vertex as { img?: unknown }).img),
   )
   if (hasImageShape) {
     throw new Error('Mermaid image shapes are not allowed in previews.')
@@ -57,10 +65,13 @@ export function createMermaidRenderer(options: {
       renderCount.count++
       const id = `mermaid-${renderCount.count}`
       try {
-        const mermaid = await loadMermaid()
-        const diagram = await mermaid.mermaidAPI.getDiagramFromText(source)
-        assertSafeMermaidDiagram(diagram)
-        const { svg } = await mermaid.render(id, source)
+        const svg = await runInRenderQueue(async () => {
+          const { externalLayout, renderSource } = prepareMermaidSource(source)
+          const mermaid = await loadMermaid({ externalLayout })
+          const diagram = await mermaid.mermaidAPI.getDiagramFromText(renderSource)
+          assertSafeMermaidDiagram(diagram)
+          return (await mermaid.render(id, renderSource)).svg
+        })
         const template = document.createElement('template')
         template.innerHTML = svg
         template.content.querySelectorAll('image').forEach((image) => image.remove())
