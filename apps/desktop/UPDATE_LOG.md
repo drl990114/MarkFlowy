@@ -1,5 +1,21 @@
 # UPDATE LOG
 
+## v0.85.2
+
+Features:
+
+- Expanded Mermaid support with ELK and tidy-tree layouts, Lucide and Logos icon packs, and better rendering for complex directional subgraphs.
+
+- Added a manual collapse control for Live Preview source panels, so the source can be hidden when it is no longer needed, including in the always-split layout.
+
+---
+
+特性：
+
+- 扩展 Mermaid 支持，新增 ELK 与 tidy-tree 布局、Lucide 与 Logos 图标包，并优化复杂方向子图的渲染效果。
+
+- 为实时预览的源码面板新增手动收起操作；不再需要查看源码时可直接隐藏，在始终分栏布局下也可以使用。
+
 ## v0.85.0
 
 Features:
