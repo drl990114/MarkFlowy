@@ -1,7 +1,3 @@
----
-sidebar_label: 'Code Of Conduct'
----
-
 # Contributor Covenant Code of Conduct
 
 ## Our Pledge
