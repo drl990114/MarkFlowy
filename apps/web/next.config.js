@@ -3,20 +3,14 @@ const { i18n } = require('./next-i18next.config.js')
 const withSvgr = require('@newhighsco/next-plugin-svgr')
 
 const LOCAL_CLOUD_API_URL = 'http://localhost:8787'
+const PRODUCTION_CLOUD_API_URL = 'https://api.markflowy.cc'
 
 function getCloudApiUrl() {
   const configuredUrl =
     process.env.MARKFLOWY_CLOUD_API_URL?.trim() ||
     // Backward compatibility for existing deployments. The browser no longer reads this value.
-    process.env.NEXT_PUBLIC_API_URL?.trim()
-
-  if (!configuredUrl) {
-    if (process.env.NODE_ENV === 'development') {
-      return LOCAL_CLOUD_API_URL
-    }
-
-    throw new Error('MARKFLOWY_CLOUD_API_URL is required outside development')
-  }
+    process.env.NEXT_PUBLIC_API_URL?.trim() ||
+    (process.env.NODE_ENV === 'development' ? LOCAL_CLOUD_API_URL : PRODUCTION_CLOUD_API_URL)
 
   const url = new URL(configuredUrl)
   if (url.protocol !== 'http:' && url.protocol !== 'https:') {
