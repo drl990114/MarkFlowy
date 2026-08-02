@@ -9,12 +9,17 @@ const mermaidHarness = vi.hoisted(() => ({
   render: vi.fn(),
 }))
 
-vi.mock('../mermaid', () => ({
-  loadMermaid: async () => ({
+vi.mock(import('../mermaid'), async (importOriginal) => {
+  const original = await importOriginal()
+  const loadMermaid = async () => ({
     mermaidAPI: { getDiagramFromText: mermaidHarness.getDiagramFromText },
     render: mermaidHarness.render,
-  }),
-}))
+  })
+  return {
+    ...original,
+    loadMermaid: loadMermaid as unknown as typeof original.loadMermaid,
+  }
+})
 
 import {
   enhanceProsemirrorHtml,
