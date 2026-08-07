@@ -112,7 +112,12 @@
   "sidebar": {
     "explorer": "explorador",
     "search": "buscar",
-    "table_of_contents": "Tabla de Contenidos"
+    "table_of_contents": "Tabla de Contenidos",
+    "no_heading_lines": "No se encontraron líneas de encabezado"
+  },
+  "bookmarks": {
+    "empty": "No hay marcadores",
+    "emptyTags": "No hay marcadores con etiquetas"
   },
   "file": {
     "untitled": "sin título",
@@ -120,6 +125,7 @@
     "openDir": "Abrir Carpeta",
     "recentDir": "Carpetas abiertas recientemente",
     "emptyOpened": "No hay archivos abiertos",
+    "emptyFolder": "Carpeta vacía",
     "openFile": "Abrir archivo",
     "unsupportedFileType": "Tipos de archivos no compatibles",
     "unsupportedFileTypeDesc": "Este formato de archivo no es compatible actualmente para su visualización o edición.",

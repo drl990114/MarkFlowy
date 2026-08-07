@@ -118,7 +118,12 @@
   "sidebar": {
     "explorer": "探索",
     "search": "搜索",
-    "table_of_contents": "目录"
+    "table_of_contents": "目录",
+    "no_heading_lines": "未找到小标题行"
+  },
+  "bookmarks": {
+    "empty": "暂无书签",
+    "emptyTags": "暂无带标签的书签"
   },
   "statusBar": {
     "words": "词",
@@ -132,6 +137,7 @@
     "openFile": "打开文件",
     "recentDir": "最近打开的文件夹",
     "emptyOpened": "没有打开的文件",
+    "emptyFolder": "空文件夹",
     "unsupportedFileType": "不支持的文件类型",
     "unsupportedFileTypeDesc": "暂不支持该文件格式的查看或编辑。",
     "unsupportedFileTypeLink": "在 GitHub 提交需求",

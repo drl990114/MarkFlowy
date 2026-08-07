@@ -101,6 +101,7 @@ const FileTree: FC<FileTreeProps> = (props) => {
   const loadingDirsRef = useRef<Set<string>>(new Set())
   const loadedDirsCacheVersionRef = useRef(0)
   const [loadingDirIds, setLoadingDirIds] = useState<ReadonlySet<string>>(() => new Set())
+  const [loadedDirPaths, setLoadedDirPaths] = useState<ReadonlySet<string>>(() => new Set())
   const currentDataRef = useRef(data)
   currentDataRef.current = data
   const getCurrentFolderData = useCallback(() => currentDataRef.current, [])
@@ -142,6 +143,7 @@ const FileTree: FC<FileTreeProps> = (props) => {
         if (loadedDirsRef.current.has(target.path)) return
 
         loadedDirsRef.current.add(target.path)
+        setLoadedDirPaths((current) => new Set(current).add(target.path))
         if (children.length > 0) {
           currentNode.data.children = children
           setFolderDataPure([...currentTree.data])
@@ -278,6 +280,7 @@ const FileTree: FC<FileTreeProps> = (props) => {
             mutationTree.move({ id, parentId: parentTarget.id, index: args.index })
           }
           loadedDirsRef.current.clear()
+          setLoadedDirPaths((current) => (current.size === 0 ? current : new Set()))
           setFolderDataPure(mutationTree.data)
         }
       })
@@ -398,6 +401,7 @@ const FileTree: FC<FileTreeProps> = (props) => {
                 loadedDirsRef.current.clear()
                 loadingDirsRef.current.clear()
                 setLoadingDirIds((current) => (current.size === 0 ? current : new Set()))
+                setLoadedDirPaths((current) => (current.size === 0 ? current : new Set()))
               }
             }
             return (
@@ -423,6 +427,12 @@ const FileTree: FC<FileTreeProps> = (props) => {
                 disableFileOperations={disableFileOperations}
                 iconButtonComponent={iconButtonComponent as FC<any>}
                 isLoading={loadingDirIds.has(nodeProps.node.id)}
+                isEmpty={
+                  nodeProps.node.isOpen &&
+                  !!nodeProps.node.data.path &&
+                  loadedDirPaths.has(nodeProps.node.data.path) &&
+                  nodeProps.node.data.children?.length === 0
+                }
               />
             )
           }}

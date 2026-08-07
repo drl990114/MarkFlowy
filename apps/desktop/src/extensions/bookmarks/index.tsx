@@ -2,8 +2,10 @@ import { commandRegistry } from '@/commands'
 import type { RightBarItem } from '@/components/SideBar'
 import type { RightNavItem } from '@/components/SideBar/SideBarHeader'
 import SideBarHeader from '@/components/SideBar/SideBarHeader'
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { showContextMenu } from '@/components/ui-v2/ContextMenu/ContextMenu'
 import { RIGHTBARITEMKEYS } from '@/constants'
+import { useTranslation } from '@/i18n'
 import { useCallback, useEffect, useState } from 'react'
 import { BookMarkViewItem } from './BookMarkViewItem'
 import { Container } from './styles'
@@ -19,6 +21,7 @@ export interface TagView {
 }
 
 const BookMarksList: React.FC<ChatListProps> = (props) => {
+  const { t } = useTranslation()
   const { bookMarkList, openBookMark } = useBookMarksStore()
   const [tagsViewList, setTagsViewList] = useState<TagView[]>([])
   const [viewMode, setViewMode] = useState<BookMarkViewMode>('list')
@@ -99,6 +102,44 @@ const BookMarksList: React.FC<ChatListProps> = (props) => {
     [toggleViewMode],
   )
 
+  const renderBookmarksContent = () => {
+    if (viewMode === 'list') {
+      if (bookMarkList.length === 0) {
+        return (
+          <Empty role='status'>
+            <EmptyHeader>
+              <EmptyMedia>
+                <i className='ri-bookmark-line' aria-hidden='true' />
+              </EmptyMedia>
+              <EmptyTitle>{t('bookmarks.empty')}</EmptyTitle>
+            </EmptyHeader>
+          </Empty>
+        )
+      }
+
+      return bookMarkList.map((bookmark) => {
+        return <BookMarkViewItem key={bookmark.id} bookmark={bookmark} onClick={openBookMark} />
+      })
+    }
+
+    if (tagsViewList.length === 0) {
+      return (
+        <Empty role='status'>
+          <EmptyHeader>
+            <EmptyMedia>
+              <i className='ri-price-tag-3-line' aria-hidden='true' />
+            </EmptyMedia>
+            <EmptyTitle>{t('bookmarks.emptyTags')}</EmptyTitle>
+          </EmptyHeader>
+        </Empty>
+      )
+    }
+
+    return tagsViewList.map((tagView) => {
+      return <TagsViewItem tagView={tagView} key={tagView.tag} />
+    })
+  }
+
   return (
     <Container {...props}>
       <SideBarHeader
@@ -113,15 +154,7 @@ const BookMarksList: React.FC<ChatListProps> = (props) => {
         ]}
       />
       <div className='bookmark-list' onContextMenu={handleContextMenu}>
-        {viewMode === 'list'
-          ? bookMarkList.map((bookmark) => {
-              return (
-                <BookMarkViewItem key={bookmark.id} bookmark={bookmark} onClick={openBookMark} />
-              )
-            })
-          : tagsViewList.map((tagView) => {
-              return <TagsViewItem tagView={tagView} key={tagView.tag} />
-            })}
+        {renderBookmarksContent()}
       </div>
     </Container>
   )

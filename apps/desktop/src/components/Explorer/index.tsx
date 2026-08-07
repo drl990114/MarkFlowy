@@ -1,4 +1,4 @@
-import { Empty, FileTree } from '@markflowy/interface'
+import { FileTree } from '@markflowy/interface'
 import type { ContextMenuItem } from '@markflowy/interface'
 import type { IFile } from '@/helper/filesys'
 import { useOpen } from '@/hooks'
@@ -9,6 +9,7 @@ import { useEditorStore } from '@/stores'
 import useOpenedCacheStore from '@/stores/useOpenedCacheStore'
 import { homeDir } from '@tauri-apps/api/path'
 import { Popover } from '@/components/ui/popover'
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import classNames from 'classnames'
 import type { FC, MouseEventHandler } from 'react'
 import { memo, useCallback, useEffect, useMemo, useState } from 'react'
@@ -355,7 +356,14 @@ const Explorer: FC<ExplorerProps> = (props) => {
             iconButtonComponent={MfIconButton}
           />
         ) : (
-          <Empty />
+          <Empty role='status'>
+            <EmptyHeader>
+              <EmptyMedia>
+                <i className='ri-folder-open-line' aria-hidden='true' />
+              </EmptyMedia>
+              <EmptyTitle>{t('workspace.none')}</EmptyTitle>
+            </EmptyHeader>
+          </Empty>
         )}
       </div>
       <div className='explorer-bottom'>

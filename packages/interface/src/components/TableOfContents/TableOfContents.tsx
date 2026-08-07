@@ -71,6 +71,7 @@ const TableOfContents = forwardRef<TableOfContentsRef, TableOfContentsProps>((pr
     toolbar,
     toolbarFixed = false,
     activeId,
+    Empty = null,
   } = props;
   const [headings, setHeadings] = useState(headingsData);
   const [headingTree, setHeadingTree] = useState<HeadingTree>();
@@ -368,7 +369,7 @@ const TableOfContents = forwardRef<TableOfContentsRef, TableOfContentsProps>((pr
       <div className={`toc-list ${!compact || pinned ? 'toc-list--expanded' : ''}`}>
         {toolbar}
         {headingTree?.getRoot()?.children?.length === 0 ? (
-          null
+          Empty
         ) : (
           <>{renderHeadings()}</>
         )}

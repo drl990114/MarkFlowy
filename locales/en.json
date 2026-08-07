@@ -112,7 +112,12 @@
   "sidebar": {
     "explorer": "explorer",
     "search": "search",
-    "table_of_contents": "Table of Contents"
+    "table_of_contents": "Table of Contents",
+    "no_heading_lines": "No heading lines found"
+  },
+  "bookmarks": {
+    "empty": "No bookmarks",
+    "emptyTags": "No tagged bookmarks"
   },
   "statusBar": {
     "words": "words",
@@ -131,6 +136,7 @@
     "openFile": "Open a File",
     "recentDir": "Recently opened folders",
     "emptyOpened": "No files opened",
+    "emptyFolder": "Empty folder",
     "unsupportedFileType": "Unsupported file type",
     "unsupportedFileTypeDesc": "This file format is not currently supported for viewing or editing.",
     "unsupportedFileTypeLink": "Request support on GitHub",

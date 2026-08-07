@@ -4,6 +4,12 @@ import { useEditorStore } from '@/stores'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import { TableOfContents, TableOfContentsRef, IHeadingData } from '@markflowy/interface'
 import { t } from '@/i18n'
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@/components/ui/empty'
 import type { Node as ProseMirrorNode } from 'prosemirror-model'
 import { TextSelection } from 'prosemirror-state'
 import type { EditorView } from 'prosemirror-view'
@@ -466,6 +472,18 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
           pinned
           activeId={activeHeadingId ?? undefined}
           toolbarFixed
+          Empty={
+            activeId ? (
+              <Empty role='status'>
+                <EmptyHeader>
+                  <EmptyMedia>
+                    <i className='ri-list-unordered' aria-hidden='true' />
+                  </EmptyMedia>
+                  <EmptyTitle>{t('sidebar.no_heading_lines')}</EmptyTitle>
+                </EmptyHeader>
+              </Empty>
+            ) : null
+          }
         />
       </div>
     </TocViewContainer>

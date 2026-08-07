@@ -343,7 +343,7 @@ export function AssistantMessage() {
   )
 }
 
-const ASSISTANT_ACTION_BUTTON_CLASS_NAME =
+const MESSAGE_ACTION_BUTTON_CLASS_NAME =
   'size-[22px] rounded-md text-muted-foreground hover:text-foreground [&_svg]:size-3'
 
 function AssistantActionBar() {
@@ -356,18 +356,18 @@ function AssistantActionBar() {
       hideWhenRunning
     >
       <ActionBarPrimitive.Copy asChild>
-        <CopyAction className={ASSISTANT_ACTION_BUTTON_CLASS_NAME} />
+        <CopyAction className={MESSAGE_ACTION_BUTTON_CLASS_NAME} />
       </ActionBarPrimitive.Copy>
       <ActionBarPrimitive.Reload asChild>
         <TooltipIconButton
-          className={ASSISTANT_ACTION_BUTTON_CLASS_NAME}
+          className={MESSAGE_ACTION_BUTTON_CLASS_NAME}
           disabled={composerDisabled}
           tooltip={labels.regenerate}
         >
           <RefreshCwIcon />
         </TooltipIconButton>
       </ActionBarPrimitive.Reload>
-      <DeleteTurnButton className={ASSISTANT_ACTION_BUTTON_CLASS_NAME} />
+      <DeleteTurnButton className={MESSAGE_ACTION_BUTTON_CLASS_NAME} />
     </ActionBarPrimitive.Root>
   )
 }
@@ -376,15 +376,15 @@ export function UserMessage() {
   return (
     <MessagePrimitive.Root className='aui-message group grid grid-cols-[minmax(4rem,1fr)_auto] gap-y-1 px-0.5 [content-visibility:auto]'>
       <UserMessageAttachments />
-      <div className='relative col-start-2 min-w-0 max-w-full'>
+      <div className='relative col-start-2 min-w-0 max-w-full pb-6'>
         <div className='rounded-lg bg-muted px-2.5 py-1.5 text-sm text-foreground'>
           <MessagePrimitive.Parts components={messagePartComponents} />
         </div>
-        <div className='absolute end-full top-1/2 me-1.5 -translate-y-1/2'>
+        <div className='absolute end-0 bottom-0 flex min-h-6 w-max items-center'>
+          <BranchPicker />
           <UserActionBar />
         </div>
       </div>
-      <BranchPicker className='col-span-full justify-end' />
     </MessagePrimitive.Root>
   )
 }
@@ -394,18 +394,22 @@ function UserActionBar() {
   return (
     <ActionBarPrimitive.Root
       autohide='not-last'
-      className='flex items-center gap-0.5 text-muted-foreground'
+      className='flex items-center gap-px text-muted-foreground'
       hideWhenRunning
     >
       <ActionBarPrimitive.Copy asChild>
-        <CopyAction />
+        <CopyAction className={MESSAGE_ACTION_BUTTON_CLASS_NAME} />
       </ActionBarPrimitive.Copy>
       <ActionBarPrimitive.Edit asChild>
-        <TooltipIconButton disabled={composerDisabled} tooltip={labels.edit}>
-          <PencilIcon className='size-3.5' />
+        <TooltipIconButton
+          className={MESSAGE_ACTION_BUTTON_CLASS_NAME}
+          disabled={composerDisabled}
+          tooltip={labels.edit}
+        >
+          <PencilIcon />
         </TooltipIconButton>
       </ActionBarPrimitive.Edit>
-      <DeleteTurnButton />
+      <DeleteTurnButton className={MESSAGE_ACTION_BUTTON_CLASS_NAME} />
     </ActionBarPrimitive.Root>
   )
 }
@@ -484,21 +488,32 @@ export function BranchPicker({
 
   return (
     <BranchPickerPrimitive.Root
-      className={cn('flex items-center text-xs text-muted-foreground', className)}
+      className={cn(
+        'flex shrink-0 items-center whitespace-nowrap text-xs text-muted-foreground',
+        className,
+      )}
       hideWhenSingleBranch
       {...props}
     >
       <BranchPickerPrimitive.Previous asChild>
-        <TooltipIconButton disabled={composerDisabled} tooltip={labels.previousBranch}>
-          <ChevronLeftIcon className='size-3.5' />
+        <TooltipIconButton
+          className={MESSAGE_ACTION_BUTTON_CLASS_NAME}
+          disabled={composerDisabled}
+          tooltip={labels.previousBranch}
+        >
+          <ChevronLeftIcon />
         </TooltipIconButton>
       </BranchPickerPrimitive.Previous>
-      <span className='px-0.5 font-medium'>
+      <span className='shrink-0 whitespace-nowrap px-0.5 font-medium'>
         <BranchPickerPrimitive.Number /> / <BranchPickerPrimitive.Count />
       </span>
       <BranchPickerPrimitive.Next asChild>
-        <TooltipIconButton disabled={composerDisabled} tooltip={labels.nextBranch}>
-          <ChevronRightIcon className='size-3.5' />
+        <TooltipIconButton
+          className={MESSAGE_ACTION_BUTTON_CLASS_NAME}
+          disabled={composerDisabled}
+          tooltip={labels.nextBranch}
+        >
+          <ChevronRightIcon />
         </TooltipIconButton>
       </BranchPickerPrimitive.Next>
     </BranchPickerPrimitive.Root>

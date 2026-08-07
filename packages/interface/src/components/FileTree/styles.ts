@@ -19,6 +19,26 @@ export const LoadingIcon = styled.i`
   }
 `
 
+export const EmptyFolderStatus = styled.span`
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 5px;
+  margin-left: 8px;
+  color: ${(props) => props.theme.labelFontColor};
+  font-size: ${(props) => props.theme.fontXs};
+  line-height: 1;
+
+  &::before {
+    width: 3px;
+    height: 3px;
+    border-radius: 9999px;
+    background: currentColor;
+    content: '';
+    opacity: 0.7;
+  }
+`
+
 export const NodeContainer = styled.div<NodeContainerProps>`
   font-size: ${(props) => props.theme.fontSm};
   display: flex;

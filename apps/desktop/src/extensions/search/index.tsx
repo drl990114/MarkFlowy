@@ -1,4 +1,11 @@
 import type { RightBarItem } from '@/components/SideBar'
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@/components/ui/empty'
 import { MfIconButton } from '@/components/ui-v2/Button'
 import { RIGHTBARITEMKEYS } from '@/constants'
 import { resolveFileExcludePatterns } from '@/helper/file-exclude'
@@ -439,25 +446,29 @@ const SearchView = memo(() => {
 
       if (!trimmedKeyword) {
         return (
-          <SearchStateBox>
-            <div className='search-state__icon'>
-              <i className='ri-search-2-line' />
-            </div>
-            <div className='search-state__title'>{t('search.ready')}</div>
-            <div className='search-state__desc'>{t('search.readyDesc')}</div>
-          </SearchStateBox>
+          <Empty role='status'>
+            <EmptyHeader>
+              <EmptyMedia>
+                <i className='ri-search-2-line' aria-hidden='true' />
+              </EmptyMedia>
+              <EmptyTitle>{t('search.ready')}</EmptyTitle>
+              <EmptyDescription>{t('search.readyDesc')}</EmptyDescription>
+            </EmptyHeader>
+          </Empty>
         )
       }
 
       if (hasSearched && resultList.length === 0) {
         return (
-          <SearchStateBox>
-            <div className='search-state__icon'>
-              <i className='ri-file-search-line' />
-            </div>
-            <div className='search-state__title'>{t('search.search_empty')}</div>
-            <div className='search-state__desc'>{t('search.emptyDesc')}</div>
-          </SearchStateBox>
+          <Empty role='status'>
+            <EmptyHeader>
+              <EmptyMedia>
+                <i className='ri-file-search-line' aria-hidden='true' />
+              </EmptyMedia>
+              <EmptyTitle>{t('search.search_empty')}</EmptyTitle>
+              <EmptyDescription>{t('search.emptyDesc')}</EmptyDescription>
+            </EmptyHeader>
+          </Empty>
         )
       }
 

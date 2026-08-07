@@ -112,7 +112,12 @@
   "sidebar": {
     "explorer": "エクスプローラー",
     "search": "検索",
-    "table_of_contents": "目次"
+    "table_of_contents": "目次",
+    "no_heading_lines": "見出し行が見つかりません"
+  },
+  "bookmarks": {
+    "empty": "ブックマークはありません",
+    "emptyTags": "タグ付きブックマークはありません"
   },
   "explorer": {
     "collapse_folders": "フォルダーを折りたたむ",
@@ -126,6 +131,7 @@
     "openFile": "ファイルを開く",
     "recentDir": "最近開いたフォルダー",
     "emptyOpened": "開いているファイルはありません",
+    "emptyFolder": "空のフォルダー",
     "unsupportedFileType": "サポート外のファイル形式です",
     "unsupportedFileTypeDesc": "このファイル形式の表示または編集は現在サポートされていません。",
     "unsupportedFileTypeLink": "GitHubでサポートをリクエスト",

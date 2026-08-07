@@ -1,4 +1,5 @@
 import React, { type FC } from 'react'
+import { useTranslation } from '@markflowy/i18n'
 import type { NodeRendererProps } from 'react-arborist'
 import { toast } from 'zens'
 import { useFileSystem } from '../../contexts/FileSystemContext'
@@ -12,7 +13,7 @@ import {
 import { moveFileNode } from './file-operator'
 import NewFileInput from './NewFileInput'
 import { hasRenameConflict } from './rename-conflict'
-import { LoadingIcon, NodeContainer } from './styles'
+import { EmptyFolderStatus, LoadingIcon, NodeContainer } from './styles'
 import { SimpleTree } from './types'
 import { getFileNameFromPath } from './verify-file-name'
 
@@ -47,6 +48,7 @@ export interface FileNodeComponentProps extends NodeRendererProps<IFile> {
   disableFileOperations?: boolean
   iconButtonComponent?: FC<any>
   isLoading?: boolean
+  isEmpty?: boolean
 }
 
 export interface ContextMenuItem {
@@ -94,7 +96,9 @@ function FileNode({
   disableFileOperations = false,
   iconButtonComponent: IconButton,
   isLoading = false,
+  isEmpty = false,
 }: FileNodeComponentProps) {
+  const { t } = useTranslation()
   const indentSize = Number.parseFloat(`${style.paddingLeft || 0}`)
   const { deleteNode, trashNode, activeId, refreshFolder, closeAll, scrollTo } = useFileTree()
   const {
@@ -613,6 +617,9 @@ function FileNode({
               >
                 {node.data.name}
               </span>
+              {isEmpty ? (
+                <EmptyFolderStatus role='status'>{t('file.emptyFolder')}</EmptyFolderStatus>
+              ) : null}
             </div>
 
             {isRoot && IconButton ? (

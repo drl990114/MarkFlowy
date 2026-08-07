@@ -109,7 +109,12 @@
   "sidebar": {
     "explorer": "explorer",
     "search": "chercher",
-    "table_of_contents": "sommaire"
+    "table_of_contents": "sommaire",
+    "no_heading_lines": "Aucune ligne de titre trouvée"
+  },
+  "bookmarks": {
+    "empty": "Aucun favori",
+    "emptyTags": "Aucun favori étiqueté"
   },
   "file": {
     "untitled": "sans titre",
@@ -117,6 +122,7 @@
     "openDir": "ouvrir le dossier",
     "recentDir": "Dossiers récemment ouverts",
     "emptyOpened": "Aucun fichier ouvert",
+    "emptyFolder": "Dossier vide",
     "openFile": "Ouvrir un fichier",
     "unsupportedFileType": "Types de fichiers non pris en charge",
     "unsupportedFileTypeDesc": "Ce format de fichier n'est actuellement pas pris en charge pour l'affichage ou l'édition.",
