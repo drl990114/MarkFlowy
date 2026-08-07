@@ -1,19 +1,14 @@
-import { excludeHtmlInlineNodes } from '@/editor/transform/markdown-it-html-inline'
-import { Node } from '@rme-sdk/sdk/pm/model'
-import pkg from 'lodash'
-import mdast from 'mdast'
+import type mdast from 'mdast'
 import type { Options as FromMarkdownOptions } from 'mdast-util-from-markdown'
 import { fromMarkdown } from 'mdast-util-from-markdown'
 import { gfmAutolinkLiteralFromMarkdown } from 'mdast-util-gfm-autolink-literal'
 import { gfmStrikethroughFromMarkdown } from 'mdast-util-gfm-strikethrough'
 import { gfmAutolinkLiteral } from 'micromark-extension-gfm-autolink-literal'
 import { gfmStrikethrough } from 'micromark-extension-gfm-strikethrough'
-import { Transform } from 'prosemirror-transform'
+import type { Transform } from 'prosemirror-transform'
 import { isBrowser } from '../../utils/common'
 import type { LineMarkName } from './inline-mark-extensions'
 import type { InlineToken } from './inline-types'
-const { cloneDeep } = pkg
-
 gfmAutolinkLiteralFromMarkdown.transforms = []
 
 function fixMarkNames(marks: LineMarkName[]): LineMarkName[] {
@@ -35,7 +30,11 @@ function flatText(mdastToken: mdast.Text, depth: number): InlineToken[] {
   ]
 }
 
-function flatStrong(mdastToken: mdast.Strong, depth: number, node?: Node): InlineToken[] {
+function flatStrong(
+  mdastToken: mdast.Strong,
+  depth: number,
+  excludedTextOffsets: readonly number[],
+): InlineToken[] {
   const inlineTokens: InlineToken[] = [
     {
       marks: ['mdMark'],
@@ -45,7 +44,11 @@ function flatStrong(mdastToken: mdast.Strong, depth: number, node?: Node): Inlin
     },
   ]
   for (const childMdastToken of mdastToken.children) {
-    for (const inlineToken of flatPhrasingContent(childMdastToken, depth + 1, node)) {
+    for (const inlineToken of flatPhrasingContent(
+      childMdastToken,
+      depth + 1,
+      excludedTextOffsets,
+    )) {
       inlineToken.marks.push('mdStrong')
       inlineTokens.push(inlineToken)
     }
@@ -59,7 +62,11 @@ function flatStrong(mdastToken: mdast.Strong, depth: number, node?: Node): Inlin
   return inlineTokens
 }
 
-function flatEmphasis(mdastToken: mdast.Emphasis, depth: number, node?: Node): InlineToken[] {
+function flatEmphasis(
+  mdastToken: mdast.Emphasis,
+  depth: number,
+  excludedTextOffsets: readonly number[],
+): InlineToken[] {
   const inlineTokens: InlineToken[] = [
     {
       marks: ['mdMark'],
@@ -69,7 +76,11 @@ function flatEmphasis(mdastToken: mdast.Emphasis, depth: number, node?: Node): I
     },
   ]
   for (const childMdastToken of mdastToken.children) {
-    for (const inlineToken of flatPhrasingContent(childMdastToken, depth + 1, node)) {
+    for (const inlineToken of flatPhrasingContent(
+      childMdastToken,
+      depth + 1,
+      excludedTextOffsets,
+    )) {
       inlineToken.marks.push('mdEm')
       inlineTokens.push(inlineToken)
     }
@@ -83,7 +94,11 @@ function flatEmphasis(mdastToken: mdast.Emphasis, depth: number, node?: Node): I
   return inlineTokens
 }
 
-function flatDelete(mdastToken: mdast.Delete, depth: number, node?: Node): InlineToken[] {
+function flatDelete(
+  mdastToken: mdast.Delete,
+  depth: number,
+  excludedTextOffsets: readonly number[],
+): InlineToken[] {
   const inlineTokens: InlineToken[] = [
     {
       marks: ['mdMark'],
@@ -93,7 +108,11 @@ function flatDelete(mdastToken: mdast.Delete, depth: number, node?: Node): Inlin
     },
   ]
   for (const childMdastToken of mdastToken.children) {
-    for (const inlineToken of flatPhrasingContent(childMdastToken, depth + 1, node)) {
+    for (const inlineToken of flatPhrasingContent(
+      childMdastToken,
+      depth + 1,
+      excludedTextOffsets,
+    )) {
       inlineToken.marks.push('mdDel')
       inlineTokens.push(inlineToken)
     }
@@ -152,41 +171,73 @@ function flatAutoLinkLiteral(mdastToken: mdast.Link, depth: number): InlineToken
   ]
 }
 
-function flatLink(
-  mdastToken: mdast.Link,
+function hasAtomicLinkLabel(
+  mdastToken: mdast.Link | mdast.LinkReference,
+  excludedTextOffsets: readonly number[],
+): boolean {
+  const labelContentOffset = mdastToken.position!.start.offset! + 1
+  return excludedTextOffsets.includes(labelContentOffset)
+}
+
+function flatAtomicLinkLabel(
+  mdastToken: mdast.Link | mdast.LinkReference,
   depth: number,
-  node?: Node,
+  linkHref?: string,
 ): InlineToken[] {
-  let parentStartPos = mdastToken.position!.start.offset!
-  let parentEndPos = mdastToken.position!.end.offset!
+  const start = mdastToken.position!.start.offset!
+  const end = mdastToken.position!.end.offset!
+  const commonAttrs = { depth, ignoreWhenCopy: true, linkHref }
+  const inlineTokens: InlineToken[] = [
+    {
+      marks: ['mdMark'],
+      attrs: { ...commonAttrs, first: true },
+      start,
+      end: start + 1,
+    },
+  ]
 
-  let offset = 0
-  if (node) {
-    let currentChildPos = 0
-
-    node.forEach((child) => {
-      if (
-        excludeHtmlInlineNodes.includes(child.type.name) &&
-        parentStartPos <= currentChildPos &&
-        currentChildPos < parentEndPos
-      ) {
-        offset++
-      }
-      currentChildPos += child.nodeSize
+  if (start + 1 < end) {
+    inlineTokens.push({
+      marks: ['mdMark'],
+      attrs: { ...commonAttrs, last: start + 2 >= end },
+      start: start + 1,
+      end: Math.min(start + 2, end),
+    })
+  }
+  if (start + 2 < end) {
+    inlineTokens.push({
+      marks: ['mdMark'],
+      attrs: { ...commonAttrs, last: true },
+      start: start + 2,
+      end,
     })
   }
 
+  return inlineTokens
+}
+
+function flatLink(
+  mdastToken: mdast.Link,
+  depth: number,
+  excludedTextOffsets: readonly number[],
+): InlineToken[] {
+  const parentStartPos = mdastToken.position!.start.offset!
+  const parentEndPos = mdastToken.position!.end.offset!
+
   if (mdastToken.children.length === 0) {
+    if (hasAtomicLinkLabel(mdastToken, excludedTextOffsets)) {
+      return flatAtomicLinkLabel(mdastToken, depth, mdastToken.url)
+    }
     // process [](https://example.com)
     return [
       {
-        marks: [offset > 0 ? 'mdMark' : 'mdText'],
+        marks: ['mdText'],
         attrs: { depth, first: true, last: false, ignoreWhenCopy: true, linkHref: mdastToken.url },
         start: mdastToken.position!.start.offset!,
         end: mdastToken.position!.start.offset! + 2,
       },
       {
-        marks: [offset > 0 ? 'mdMark' : 'mdText'],
+        marks: ['mdText'],
         attrs: { depth, first: false, last: true, ignoreWhenCopy: true, linkHref: mdastToken.url },
         start: mdastToken.position!.start.offset! + 2,
         end: parentEndPos,
@@ -194,11 +245,7 @@ function flatLink(
     ]
   }
   const childrenStartPos = mdastToken.children[0].position!.start.offset!
-  let childrenEndPos = mdastToken.children[mdastToken.children.length - 1].position!.end.offset!
-
-  if (offset > 0) {
-    childrenEndPos += offset
-  }
+  const childrenEndPos = mdastToken.children[mdastToken.children.length - 1].position!.end.offset!
 
   if (parentStartPos === childrenStartPos && parentEndPos === childrenEndPos) {
     return flatAutoLinkLiteral(mdastToken, depth)
@@ -214,7 +261,11 @@ function flatLink(
     },
   ]
   for (const childMdastToken of mdastToken.children) {
-    for (const inlineToken of flatPhrasingContent(childMdastToken, depth + 1, node)) {
+    for (const inlineToken of flatPhrasingContent(
+      childMdastToken,
+      depth + 1,
+      excludedTextOffsets,
+    )) {
       inlineToken.marks.push('mdLinkText')
       inlineToken.attrs.href = mdastToken.url
       inlineTokens.push(inlineToken)
@@ -253,50 +304,31 @@ function flatLink(
 function flatLinkReference(
   mdastToken: mdast.LinkReference,
   depth: number,
-  node?: Node,
+  excludedTextOffsets: readonly number[],
 ): InlineToken[] {
-  let parentStartPos = mdastToken.position!.start.offset!
-  let parentEndPos = mdastToken.position!.end.offset!
-
-  let offset = 0
-  if (node) {
-    let currentChildPos = 0
-
-    node.forEach((child) => {
-      if (
-        excludeHtmlInlineNodes.includes(child.type.name) &&
-        parentStartPos <= currentChildPos &&
-        currentChildPos < parentEndPos
-      ) {
-        offset++
-      }
-      currentChildPos += child.nodeSize
-    })
-  }
+  const parentEndPos = mdastToken.position!.end.offset!
 
   if (mdastToken.children.length === 0) {
+    if (hasAtomicLinkLabel(mdastToken, excludedTextOffsets)) {
+      return flatAtomicLinkLabel(mdastToken, depth)
+    }
     // process [](https://example.com)
     return [
       {
-        marks: [offset > 0 ? 'mdMark' : 'mdText'],
+        marks: ['mdText'],
         attrs: { depth, first: true, last: false, ignoreWhenCopy: true },
         start: mdastToken.position!.start.offset!,
         end: mdastToken.position!.start.offset! + 2,
       },
       {
-        marks: [offset > 0 ? 'mdMark' : 'mdText'],
+        marks: ['mdText'],
         attrs: { depth, first: false, last: true, ignoreWhenCopy: true },
         start: mdastToken.position!.start.offset! + 2,
         end: parentEndPos,
       },
     ]
   }
-  const childrenStartPos = mdastToken.children[0].position!.start.offset!
-  let childrenEndPos = mdastToken.children[mdastToken.children.length - 1].position!.end.offset!
-
-  if (offset > 0) {
-    childrenEndPos += offset
-  }
+  const childrenEndPos = mdastToken.children[mdastToken.children.length - 1].position!.end.offset!
 
   const inlineTokens: InlineToken[] = [
     // match "<" for autolinks or "[" for links
@@ -308,7 +340,11 @@ function flatLinkReference(
     },
   ]
   for (const childMdastToken of mdastToken.children) {
-    for (const inlineToken of flatPhrasingContent(childMdastToken, depth + 1, node)) {
+    for (const inlineToken of flatPhrasingContent(
+      childMdastToken,
+      depth + 1,
+      excludedTextOffsets,
+    )) {
       inlineToken.marks.push('mdLinkText')
       inlineTokens.push(inlineToken)
     }
@@ -346,17 +382,17 @@ function flatLinkReference(
 function flatPhrasingContent(
   mdastToken: mdast.PhrasingContent,
   depth: number,
-  node?: Node,
+  excludedTextOffsets: readonly number[],
 ): InlineToken[] {
   switch (mdastToken.type) {
     case 'text':
       return flatText(mdastToken, depth)
     case 'strong':
-      return flatStrong(mdastToken, depth, node)
+      return flatStrong(mdastToken, depth, excludedTextOffsets)
     case 'emphasis':
-      return flatEmphasis(mdastToken, depth, node)
+      return flatEmphasis(mdastToken, depth, excludedTextOffsets)
     case 'delete':
-      return flatDelete(mdastToken, depth, node)
+      return flatDelete(mdastToken, depth, excludedTextOffsets)
     case 'inlineCode':
       return flatInlineCode(mdastToken, depth)
     case 'html':
@@ -372,9 +408,9 @@ function flatPhrasingContent(
     case 'footnoteReference':
       return []
     case 'link':
-      return flatLink(mdastToken, depth, node)
+      return flatLink(mdastToken, depth, excludedTextOffsets)
     case 'linkReference':
-      return flatLinkReference(mdastToken, depth, node)
+      return flatLinkReference(mdastToken, depth, excludedTextOffsets)
     default:
       console.warn('unknow mdast token:', mdastToken)
       return []
@@ -456,16 +492,24 @@ function fixTokensMarkNames(tokens: InlineToken[]) {
   return tokens
 }
 
-function parseMdInline(phrasingContents: mdast.PhrasingContent[], node?: Node, depth = 1) {
+function parseMdInline(
+  phrasingContents: mdast.PhrasingContent[],
+  excludedTextOffsets: readonly number[],
+  depth = 1,
+) {
   let tokens: InlineToken[] = []
   for (const token of phrasingContents) {
-    tokens = tokens.concat(flatPhrasingContent(token, depth, node))
+    tokens = tokens.concat(flatPhrasingContent(token, depth, excludedTextOffsets))
   }
 
   return fixTokensMarkNames(tokens)
 }
 
-export function fromInlineMarkdown(tr: Transform, text: string, node?: Node): InlineToken[] {
+export function fromInlineMarkdown(
+  tr: Transform,
+  text: string,
+  excludedTextOffsets: readonly number[] = [],
+): InlineToken[] {
   const references = tr.doc.content.content.filter((node) => node.type?.name === 'reference_def')
   const refercencesText = references
     .map((refer) => {
@@ -475,7 +519,7 @@ export function fromInlineMarkdown(tr: Transform, text: string, node?: Node): In
 
   const phrasingContents = parseInlineMarkdown(`${text}\n\n${refercencesText}`)
 
-  const res = parseMdInline(phrasingContents, node)
+  const res = parseMdInline(phrasingContents, excludedTextOffsets)
 
   return res
 }

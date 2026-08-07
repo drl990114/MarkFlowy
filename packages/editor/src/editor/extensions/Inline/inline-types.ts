@@ -15,5 +15,5 @@ export interface InlineToken {
     // end position
     end: number
 
-    attrs: LineMarkAttrs
+    attrs: LineMarkAttrs & { linkHref?: string | null }
 }

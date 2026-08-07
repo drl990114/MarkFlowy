@@ -11,26 +11,65 @@ import { iterNode, iterNodeRange } from '../../utils/iter-node'
 import { fromInlineMarkdown } from './from-inline-markdown'
 import { InlineDecorateType } from './inline-types'
 
-/**
- * 处理相邻标记块之间的边界情况
- * 当排除节点位于前一个标记块的结束位置时，需要调整前一个标记块的范围
- * 测试用例: *mark*<span>`qwe`
- */
-function adjustAdjacentChunkBoundary(
-  output: MarkChunk[],
-  excludedPositionsInRange: number[],
-): void {
-  if (excludedPositionsInRange.length === 0 || output.length === 0) {
-    return
+type ExcludedInlineNode = {
+  nodeSize: number
+  textOffset: number
+}
+
+function mapTextOffsetToDocOffset(
+  textOffset: number,
+  excludedNodes: ExcludedInlineNode[],
+  includeNodesAtOffset: boolean,
+): number {
+  // Excluded inline atoms sit between text offsets. A range ending at that
+  // offset stays before the atoms, while a range starting there moves after them.
+  let docOffset = textOffset
+
+  for (const excludedNode of excludedNodes) {
+    if (
+      excludedNode.textOffset > textOffset ||
+      (!includeNodesAtOffset && excludedNode.textOffset === textOffset)
+    ) {
+      break
+    }
+    docOffset += excludedNode.nodeSize
   }
 
-  const lastChunk = output[output.length - 1]
-  const firstExcludedPos = excludedPositionsInRange[0]
+  return docOffset
+}
 
-  // 如果排除节点正好位于前一个标记块的结束位置，扩展前一个标记块的范围
-  if (lastChunk[1] - 1 === firstExcludedPos) {
-    lastChunk[0] += 1
-    lastChunk[1] += 1
+function appendTokenChunks(
+  output: MarkChunk[],
+  startPos: number,
+  tokenStart: number,
+  tokenEnd: number,
+  expectedMarks: MarkChunk[2],
+  excludedNodes: ExcludedInlineNode[],
+): void {
+  let segmentStart = mapTextOffsetToDocOffset(tokenStart, excludedNodes, true)
+  let previousExcludedOffset = -1
+
+  for (const excludedNode of excludedNodes) {
+    const excludedOffset = excludedNode.textOffset
+    if (
+      excludedOffset <= tokenStart ||
+      excludedOffset >= tokenEnd ||
+      excludedOffset === previousExcludedOffset
+    ) {
+      continue
+    }
+
+    const segmentEnd = mapTextOffsetToDocOffset(excludedOffset, excludedNodes, false)
+    if (segmentStart < segmentEnd) {
+      output.push([startPos + segmentStart, startPos + segmentEnd, expectedMarks])
+    }
+    segmentStart = mapTextOffsetToDocOffset(excludedOffset, excludedNodes, true)
+    previousExcludedOffset = excludedOffset
+  }
+
+  const segmentEnd = mapTextOffsetToDocOffset(tokenEnd, excludedNodes, false)
+  if (segmentStart < segmentEnd) {
+    output.push([startPos + segmentStart, startPos + segmentEnd, expectedMarks])
   }
 }
 
@@ -39,56 +78,42 @@ function parseTextBlock(tr: Transform, schema: Schema, node: Node, startPos: num
     return
   }
 
-  // 收集需要排除的 HTML 内联节点的位置
-  const excludedNodePositions: number[] = []
-  let currentPos = -1
+  const excludedNodes: ExcludedInlineNode[] = []
+  let textOffset = 0
 
   for (let i = 0; i < node.childCount; i++) {
     const child = node.child(i)
-    currentPos += child.nodeSize
 
     if (excludeHtmlInlineNodes.includes(child.type.name)) {
-      excludedNodePositions.push(currentPos)
+      excludedNodes.push({ nodeSize: child.nodeSize, textOffset })
+    } else {
+      textOffset += child.textContent.length
     }
   }
 
-  if (node.type.name === "reference_def") {
+  if (node.type.name === 'reference_def') {
     return
   }
-  const tokens = fromInlineMarkdown(tr, node.textContent, node)
+  const tokens = fromInlineMarkdown(
+    tr,
+    node.textContent,
+    excludedNodes.map((excludedNode) => excludedNode.textOffset),
+  )
 
   if (tokens.length === 0) {
     return
   }
 
-  let totalOffset = 0
-
   for (const token of tokens) {
-    // 创建标记对象
     const expectedMarks = token.marks.map((markName) => schema.marks[markName].create(token.attrs))
-
-    // 计算当前 token 在文本中的位置（考虑之前的偏移量）
-    const tokenStart = token.start + totalOffset
-    const tokenEnd = token.end + totalOffset
-
-    // 找出在当前 token 范围内的排除节点位置
-    const excludedPositionsInRange = excludedNodePositions.filter(
-      (pos) => pos >= tokenStart && pos < tokenEnd,
-    )
-    const offset = excludedPositionsInRange.length
-
-
-    // 处理相邻标记块之间的边界情况
-    adjustAdjacentChunkBoundary(output, excludedPositionsInRange)
-
-    // 添加新的标记块到输出
-    output.push([
-      startPos + token.start + totalOffset,
-      startPos + token.end + totalOffset + offset,
+    appendTokenChunks(
+      output,
+      startPos,
+      token.start,
+      token.end,
       expectedMarks,
-    ])
-
-    totalOffset += offset
+      excludedNodes,
+    )
   }
 }
 

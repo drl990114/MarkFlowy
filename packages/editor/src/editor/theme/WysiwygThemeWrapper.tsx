@@ -830,8 +830,23 @@ export const WysiwygThemeWrapper = styled.div
   }
 
   .md-mark {
-    color: ${(props) => props.theme.accentColor};
+    color: ${(props) => props.theme.labelFontColor};
     font-size: 0;
+  }
+
+  .md-mark.show {
+    padding: 0.06em 0.18em;
+    color: ${(props) => props.theme.labelFontColor};
+    font-family: ${(props) => props.theme.codemirrorFontFamily};
+    font-size: 0.88em;
+    font-weight: 500;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+    background-color: ${(props) => props.theme.tipsBgColor};
+    border-radius: ${(props) => props.theme.smallBorderRadius};
+    box-shadow: inset 0 0 0 1px ${(props) => props.theme.borderColor};
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
   }
 
   & .inline-loading {

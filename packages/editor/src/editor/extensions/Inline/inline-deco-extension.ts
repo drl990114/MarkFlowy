@@ -1,5 +1,5 @@
 import type { CreateExtensionPlugin } from '@rme-sdk/sdk/core'
-import { isTextSelection, PlainExtension } from '@rme-sdk/sdk/core'
+import { isNodeSelection, isTextSelection, PlainExtension } from '@rme-sdk/sdk/core'
 import type { Node as ProsemirrorNode } from '@rme-sdk/sdk/pm/model'
 import type { EditorState } from '@rme-sdk/sdk/pm/state'
 import { Decoration, DecorationSet } from '@rme-sdk/sdk/pm/view'
@@ -62,10 +62,42 @@ function findVisibleMarks(
   return posPairs
 }
 
+function createVisibleMarkDecorations(
+  state: EditorState,
+  posPairs: [number, number][],
+): DecorationSet {
+  return DecorationSet.create(
+    state.doc,
+    posPairs.map(([from, to]) => Decoration.inline(from, to, { class: 'show' })),
+  )
+}
+
 function createDecorationPlugin(): CreateExtensionPlugin {
   return {
     props: {
       decorations: (state: EditorState) => {
+        if (isNodeSelection(state.selection)) {
+          const { $from, node } = state.selection
+          const textBlock = $from.parent
+          if (
+            !textBlock.isTextblock ||
+            !node.isInline ||
+            !excludeHtmlInlineNodes.includes(node.type.name)
+          ) {
+            return null
+          }
+
+          return createVisibleMarkDecorations(
+            state,
+            findVisibleMarks(
+              textBlock,
+              $from.pos,
+              $from.index($from.depth),
+              true,
+            ),
+          )
+        }
+
         if (!isTextSelection(state.selection)) return null
 
         const $pos = state.selection.$anchor
@@ -93,10 +125,7 @@ function createDecorationPlugin(): CreateExtensionPlugin {
           )
         }
 
-        return DecorationSet.create(
-          state.doc,
-          posPairs.map(([from, to]) => Decoration.inline(from, to, { class: 'show' })),
-        )
+        return createVisibleMarkDecorations(state, posPairs)
       },
     },
   }
