@@ -1,84 +1,272 @@
-import { exec, execSync, spawn } from 'child_process'
-import { promisify } from 'util'
+import { spawn, spawnSync } from 'node:child_process'
+import { existsSync } from 'node:fs'
+import { createRequire } from 'node:module'
+import { dirname, resolve } from 'node:path'
+import process from 'node:process'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 
-const execAsync = promisify(exec)
+const ROOT_DIR = resolve(dirname(fileURLToPath(import.meta.url)), '..')
+const DESKTOP_DIR = resolve(ROOT_DIR, 'apps/desktop')
+const GRACE_PERIOD_MS = 2_000
+const FORCE_KILL_WAIT_MS = 500
+const ARTIFACT_WAIT_TIMEOUT_MS = 120_000
+const isWindows = process.platform === 'win32'
 
-const procs = []
+const requiredArtifacts = [
+  'packages/api-client/dist/index.mjs',
+  'packages/editor/dist/index.mjs',
+  'packages/github-api/dist/index.mjs',
+  'packages/interface/dist/index.mjs',
+  'packages/theme/dist/index.mjs',
+  'packages/zens/esm/index.js',
+].map((path) => resolve(ROOT_DIR, path))
 
-const killPort = async (port) => {
-  const platform = process.platform
+const require = createRequire(import.meta.url)
+const turboCli = require.resolve('turbo/bin/turbo')
+const tauriCli = require.resolve('@tauri-apps/cli/tauri.js')
+
+const delay = (milliseconds) =>
+  new Promise((resolveDelay) => setTimeout(resolveDelay, milliseconds))
+
+const isProcessRunning = (pid) => {
   try {
-    if (platform === 'win32') {
-      const { stdout } = await execAsync(`netstat -ano | findstr :${port}`)
-      const lines = stdout.split('\n').filter((line) => line.trim())
-      for (const line of lines) {
-        const parts = line.trim().split(/\s+/)
-        const pid = parts[parts.length - 1]
-        if (pid && pid !== '0') {
-          try {
-            execSync(`taskkill /F /PID ${pid}`, { stdio: 'ignore' })
-          } catch {}
-        }
-      }
-    } else {
-      execSync(`lsof -ti :${port} | xargs kill -TERM 2>/dev/null || true`, { stdio: 'ignore' })
-    }
-  } catch {}
+    process.kill(pid, 0)
+    return true
+  } catch (error) {
+    return error?.code === 'EPERM'
+  }
 }
 
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
+const listProcessTree = (rootPid) => {
+  if (isWindows) return [rootPid]
 
-const cleanup = () => {
-  procs.forEach((p) => {
-    try {
-      process.kill(-p.pid, 'SIGTERM')
-    } catch {}
+  const result = spawnSync('ps', ['-A', '-o', 'ppid=,pid='], {
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'ignore'],
   })
 
-  setTimeout(() => {
-    procs.forEach((p) => {
-      try {
-        process.kill(-p.pid, 'SIGKILL')
-      } catch {}
+  if (result.status !== 0 || !result.stdout) return [rootPid]
+
+  const childrenByParent = new Map()
+
+  for (const line of result.stdout.split('\n')) {
+    const [parentValue, pidValue] = line.trim().split(/\s+/)
+    const parentPid = Number(parentValue)
+    const pid = Number(pidValue)
+
+    if (!Number.isInteger(parentPid) || !Number.isInteger(pid)) continue
+
+    const children = childrenByParent.get(parentPid) ?? []
+    children.push(pid)
+    childrenByParent.set(parentPid, children)
+  }
+
+  const processTree = [rootPid]
+
+  for (let index = 0; index < processTree.length; index += 1) {
+    const children = childrenByParent.get(processTree[index]) ?? []
+    processTree.push(...children)
+  }
+
+  return processTree
+}
+
+const signalProcess = (pid, signal) => {
+  try {
+    process.kill(pid, signal)
+  } catch (error) {
+    if (error?.code !== 'ESRCH') throw error
+  }
+}
+
+const waitForProcessesToExit = async (pids, timeoutMs) => {
+  const deadline = Date.now() + timeoutMs
+  let remaining = pids.filter(isProcessRunning)
+
+  while (remaining.length > 0 && Date.now() < deadline) {
+    await delay(50)
+    remaining = remaining.filter(isProcessRunning)
+  }
+
+  return remaining
+}
+
+const waitForRequiredArtifacts = async (isCancelled) => {
+  const deadline = Date.now() + ARTIFACT_WAIT_TIMEOUT_MS
+  let missingArtifacts = requiredArtifacts.filter((path) => !existsSync(path))
+
+  while (missingArtifacts.length > 0 && Date.now() < deadline && !isCancelled()) {
+    await delay(100)
+    missingArtifacts = requiredArtifacts.filter((path) => !existsSync(path))
+  }
+
+  if (isCancelled() || missingArtifacts.length === 0) return
+
+  const relativePaths = missingArtifacts.map((path) => path.slice(ROOT_DIR.length + 1))
+  throw new Error(`Timed out waiting for Desktop dependencies: ${relativePaths.join(', ')}`)
+}
+
+export const terminateProcessTree = async (
+  rootPid,
+  { forceKillWaitMs = FORCE_KILL_WAIT_MS, gracePeriodMs = GRACE_PERIOD_MS } = {},
+) => {
+  if (!Number.isInteger(rootPid) || rootPid <= 0 || rootPid === process.pid) return
+
+  if (isWindows) {
+    spawnSync('taskkill', ['/PID', String(rootPid), '/T'], {
+      stdio: 'ignore',
+      windowsHide: true,
     })
-    killPort(3000)
-    killPort(3030)
-    killPort(1420)
-    killPort(8000)
-    process.exit(0)
-  }, 2000)
+
+    const remaining = await waitForProcessesToExit([rootPid], gracePeriodMs)
+    if (remaining.length === 0) return
+
+    spawnSync('taskkill', ['/F', '/PID', String(rootPid), '/T'], {
+      stdio: 'ignore',
+      windowsHide: true,
+    })
+    await waitForProcessesToExit(remaining, forceKillWaitMs)
+    return
+  }
+
+  // Turbo starts each persistent task in its own process group. Snapshot the
+  // full descendant tree before signaling the root so re-parenting cannot
+  // leave TypeScript/esbuild watchers behind.
+  const processTree = listProcessTree(rootPid)
+  const descendants = processTree.slice(1).reverse()
+
+  signalProcess(rootPid, 'SIGTERM')
+  for (const pid of descendants) signalProcess(pid, 'SIGTERM')
+
+  const remaining = await waitForProcessesToExit(processTree, gracePeriodMs)
+  for (const pid of remaining.reverse()) signalProcess(pid, 'SIGKILL')
+  await waitForProcessesToExit(remaining, forceKillWaitMs)
 }
 
-let cleanedUp = false
-const safeCleanup = () => {
-  if (cleanedUp) return
-  cleanedUp = true
-  cleanup()
+const exitCodeFor = (code, signal) => {
+  if (typeof code === 'number') return code
+  if (signal === 'SIGINT') return 130
+  if (signal === 'SIGHUP') return 129
+  if (signal === 'SIGTERM') return 143
+  return 1
 }
 
-process.on('SIGINT', safeCleanup)
-process.on('SIGTERM', safeCleanup)
+export const runDevDesktop = async () => {
+  const children = new Map()
+  let shuttingDown = false
+  let resolveShutdownStarted
+  let shutdownPromise
 
-await killPort(3000)
-await killPort(3030)
-await killPort(1420)
-await killPort(8000)
-await sleep(500)
+  const shutdownStarted = new Promise((resolveStarted) => {
+    resolveShutdownStarted = resolveStarted
+  })
 
-const turboProc = spawn(
-  'yarn',
-  ['turbo', 'run', 'dev', '--filter=!@markflowy/desktop', '--filter=!@markflowy/web'],
-  { stdio: 'inherit', shell: true },
-)
-procs.push(turboProc)
+  const spawnManaged = (label, cli, args, cwd) => {
+    const child = spawn(process.execPath, [cli, ...args], {
+      cwd,
+      detached: !isWindows,
+      env: process.env,
+      shell: false,
+      stdio: 'inherit',
+      windowsHide: true,
+    })
 
-await sleep(8000)
+    if (child.pid) children.set(child.pid, { label })
+    child.once('exit', () => {
+      if (child.pid) children.delete(child.pid)
+    })
 
-const tauriProc = spawn('yarn', ['workspace', '@markflowy/desktop', 'tauri:dev'], {
-  stdio: 'inherit',
-  shell: true,
-})
-procs.push(tauriProc)
+    return child
+  }
 
-tauriProc.on('exit', safeCleanup)
-turboProc.on('exit', () => {})
+  const requestShutdown = (exitCode, reason) => {
+    if (shutdownPromise) return shutdownPromise
+
+    shuttingDown = true
+    resolveShutdownStarted()
+    console.log(`\n[dev:desktop] Stopping (${reason})...`)
+
+    const activeChildren = [...children.entries()]
+    shutdownPromise = Promise.allSettled(
+      activeChildren.map(async ([pid, { label }]) => {
+        await terminateProcessTree(pid)
+        console.log(`[dev:desktop] Stopped ${label}`)
+      }),
+    ).then((results) => {
+      results.forEach((result, index) => {
+        if (result.status === 'rejected') {
+          const label = activeChildren[index][1].label
+          console.error(`[dev:desktop] Failed to stop ${label}:`, result.reason)
+        }
+      })
+      return exitCode
+    })
+
+    return shutdownPromise
+  }
+
+  const signalHandlers = new Map([
+    ['SIGINT', () => void requestShutdown(130, 'SIGINT')],
+    ['SIGTERM', () => void requestShutdown(143, 'SIGTERM')],
+  ])
+
+  if (!isWindows) {
+    signalHandlers.set('SIGHUP', () => void requestShutdown(129, 'SIGHUP'))
+  }
+
+  for (const [signal, handler] of signalHandlers) process.on(signal, handler)
+
+  try {
+    console.log('[dev:desktop] Starting dependency watchers...')
+    const turboProcess = spawnManaged(
+      'dependency watchers',
+      turboCli,
+      [
+        'run',
+        'dev',
+        '--filter=@markflowy/desktop^...',
+        '--filter=!zens',
+        '--no-update-notifier',
+        '--output-logs=new-only',
+        '--ui=stream',
+      ],
+      ROOT_DIR,
+    )
+
+    turboProcess.once('error', (error) => {
+      console.error(`[dev:desktop] Failed to start dependency watchers: ${error.message}`)
+    })
+    turboProcess.once('exit', (code, signal) => {
+      if (!shuttingDown) {
+        void requestShutdown(exitCodeFor(code, signal), 'dependency watchers exited')
+      }
+    })
+
+    await waitForRequiredArtifacts(() => shuttingDown)
+    if (shuttingDown) return await shutdownPromise
+
+    console.log('[dev:desktop] Starting Tauri...')
+    const tauriProcess = spawnManaged('Tauri', tauriCli, ['dev'], DESKTOP_DIR)
+
+    tauriProcess.once('error', (error) => {
+      console.error(`[dev:desktop] Failed to start Tauri: ${error.message}`)
+    })
+    tauriProcess.once('exit', (code, signal) => {
+      if (!shuttingDown) void requestShutdown(exitCodeFor(code, signal), 'Tauri exited')
+    })
+
+    await shutdownStarted
+    return await shutdownPromise
+  } catch (error) {
+    console.error('[dev:desktop] Unexpected failure:', error)
+    return await requestShutdown(1, 'unexpected failure')
+  } finally {
+    for (const [signal, handler] of signalHandlers) process.off(signal, handler)
+  }
+}
+
+const isMainModule = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href
+
+if (isMainModule) {
+  process.exitCode = await runDevDesktop()
+}
