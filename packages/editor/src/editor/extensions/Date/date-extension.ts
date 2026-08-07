@@ -1,5 +1,5 @@
-import type { CommandFunction } from '@rme-sdk/core'
-import { extension, PlainExtension } from '@rme-sdk/core'
+import type { CommandFunction } from '@rme-sdk/sdk/core'
+import { extension, PlainExtension } from '@rme-sdk/sdk/core'
 import { CurrentDateFormatOption, formatCurrentDate } from '../../utils/date'
 
 type DateExtensionOptions = {
@@ -7,7 +7,7 @@ type DateExtensionOptions = {
 }
 
 @extension<DateExtensionOptions>({
-  defaultOptions: {},
+  defaultOptions: { currentDateFormat: undefined },
   staticKeys: [],
   handlerKeys: [],
   customHandlerKeys: [],

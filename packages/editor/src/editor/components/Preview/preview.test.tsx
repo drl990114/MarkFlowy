@@ -1,4 +1,4 @@
-import type { Node as ProsemirrorNode } from '@rme-sdk/pm/model'
+import type { Node as ProsemirrorNode } from '@rme-sdk/sdk/pm/model'
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'

@@ -1,4 +1,4 @@
-import { CoreIcon, isString } from '@rme-sdk/core'
+import { CoreIcon, isString } from '@rme-sdk/sdk/core'
 import { FC, JSX, MouseEvent, ReactNode, useCallback } from 'react'
 
 import styled from 'styled-components'

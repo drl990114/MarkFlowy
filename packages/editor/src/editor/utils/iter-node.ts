@@ -1,5 +1,5 @@
-import type { ProsemirrorNode } from "@rme-sdk/core"
-import type { NodeRange } from "@rme-sdk/pm/model"
+import type { ProsemirrorNode } from "@rme-sdk/sdk/core"
+import type { NodeRange } from "@rme-sdk/sdk/pm/model"
 
 /**
  * Iterate all children from a parent node. Yield child node, its

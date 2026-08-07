@@ -1,6 +1,6 @@
-import type { CommandFunction, CommandFunctionProps, ProsemirrorNode } from '@rme-sdk/core'
-import type { Transaction } from '@rme-sdk/pm/state'
-import { TextSelection } from '@rme-sdk/pm/state'
+import type { CommandFunction, CommandFunctionProps, ProsemirrorNode } from '@rme-sdk/sdk/core'
+import type { Transaction } from '@rme-sdk/sdk/pm/state'
+import { TextSelection } from '@rme-sdk/sdk/pm/state'
 
 import { updateRangeMarks } from './inline-mark-helpers'
 

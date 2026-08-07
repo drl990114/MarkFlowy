@@ -1,4 +1,4 @@
-import { useRemirrorContext } from '@rme-sdk/react'
+import { useRemirrorContext } from '@rme-sdk/sdk/react'
 import type { CSSProperties, FC } from 'react'
 import React, { memo } from 'react'
 

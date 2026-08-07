@@ -4,16 +4,16 @@ import type {
     Fragment,
     KeyBindings,
     NodeSpecOverride,
-} from '@rme-sdk/core'
-import { findParentNodeOfType } from '@rme-sdk/core'
-import type { TableSchemaSpec } from '@rme-sdk/extension-tables'
+} from '@rme-sdk/sdk/core'
+import { findParentNodeOfType } from '@rme-sdk/sdk/core'
+import type { TableSchemaSpec } from '@rme-sdk/sdk/extensions/tables'
 import {
     TableCellExtension,
     TableExtension,
     TableHeaderCellExtension,
     TableRowExtension,
-} from '@rme-sdk/extension-tables'
-import { TextSelection } from '@rme-sdk/pm/state'
+} from '@rme-sdk/sdk/extensions/tables'
+import { TextSelection } from '@rme-sdk/sdk/pm/state'
 
 import {
   addRow,
@@ -26,8 +26,8 @@ import {
   selectedRect,
   TableMap,
   TableView,
-} from '@rme-sdk/pm/tables'
-import type { Node as ProsemirrorNode } from '@rme-sdk/pm/model'
+} from '@rme-sdk/sdk/pm/tables'
+import type { Node as ProsemirrorNode } from '@rme-sdk/sdk/pm/model'
 import type { NodeSerializerOptions } from '../../transform'
 import { ParserRuleType } from '../../transform'
 import { buildBlockEnterKeymap } from '../../utils/build-block-enter-keymap'

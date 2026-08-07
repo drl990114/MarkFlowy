@@ -1,4 +1,4 @@
-import type { NodeViewComponentProps } from '@rme-sdk/react'
+import type { NodeViewComponentProps } from '@rme-sdk/sdk/react'
 import { omit } from 'lodash'
 import { normalizeReference } from 'markdown-it/lib/common/utils.mjs'
 import { useCallback, useEffect, useEffectEvent, useMemo, useRef } from 'react'

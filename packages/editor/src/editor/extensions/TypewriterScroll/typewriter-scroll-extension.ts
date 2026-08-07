@@ -1,8 +1,8 @@
 import type { Extension as CodeMirrorExtension } from '@codemirror/state'
 import { ViewPlugin, ViewUpdate } from '@codemirror/view'
-import type { CommandFunction, CreateExtensionPlugin } from '@rme-sdk/core'
-import { extension, isTextSelection, PlainExtension } from '@rme-sdk/core'
-import type { EditorView } from '@rme-sdk/pm/view'
+import type { CommandFunction, CreateExtensionPlugin } from '@rme-sdk/sdk/core'
+import { extension, isTextSelection, PlainExtension } from '@rme-sdk/sdk/core'
+import type { EditorView } from '@rme-sdk/sdk/pm/view'
 import { isBrowser } from '../../utils/common'
 
 const DEAD_ZONE_PX = 32

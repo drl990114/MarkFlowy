@@ -1,7 +1,7 @@
-import type { DispatchFunction, KeyBindings, ProsemirrorNode } from "@rme-sdk/core";
-import { convertCommand, isTextSelection } from "@rme-sdk/core";
-import { Fragment } from "@rme-sdk/pm/model";
-import type { EditorState, Transaction } from "@rme-sdk/pm/state";
+import type { DispatchFunction, KeyBindings, ProsemirrorNode } from "@rme-sdk/sdk/core";
+import { convertCommand, isTextSelection } from "@rme-sdk/sdk/core";
+import { Fragment } from "@rme-sdk/sdk/pm/model";
+import type { EditorState, Transaction } from "@rme-sdk/sdk/pm/state";
 
 export function buildBlockEnterKeymap<Node extends ProsemirrorNode>(
     regex: RegExp,

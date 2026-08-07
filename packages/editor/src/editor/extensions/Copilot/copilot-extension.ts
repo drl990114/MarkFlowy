@@ -1,7 +1,7 @@
-import type { CreateExtensionPlugin } from '@rme-sdk/core'
-import { extension, isTextSelection, PlainExtension } from '@rme-sdk/core'
-import type { EditorView } from '@rme-sdk/pm/view'
-import { Decoration, DecorationSet } from '@rme-sdk/pm/view'
+import type { CreateExtensionPlugin } from '@rme-sdk/sdk/core'
+import { extension, isTextSelection, PlainExtension } from '@rme-sdk/sdk/core'
+import type { EditorView } from '@rme-sdk/sdk/pm/view'
+import { Decoration, DecorationSet } from '@rme-sdk/sdk/pm/view'
 import { isBrowser } from '../../utils/common'
 import { type CopilotContext, type CopilotOptions } from '../Ai/ai-types'
 
@@ -18,7 +18,12 @@ type CopilotMeta =
   | { type: 'clear'; requestId: number }
 
 @extension<CopilotOptions>({
-  defaultOptions: {},
+  defaultOptions: {
+    generateText: undefined,
+    debounceMs: undefined,
+    maxContextChars: undefined,
+    maxSuggestionChars: undefined,
+  },
   staticKeys: [],
   handlerKeys: [],
   customHandlerKeys: [],

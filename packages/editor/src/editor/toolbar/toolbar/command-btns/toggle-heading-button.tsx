@@ -1,5 +1,5 @@
-import { HeadingExtension, HeadingExtensionAttributes } from '@rme-sdk/extension-heading';
-import { useActive, useCommands } from '@rme-sdk/react-core';
+import { HeadingExtension, HeadingExtensionAttributes } from '@rme-sdk/sdk/extensions/heading';
+import { useActive, useCommands } from '@rme-sdk/sdk/react';
 import { FC, useCallback } from 'react';
 
 import { t } from '@markflowy/i18n';

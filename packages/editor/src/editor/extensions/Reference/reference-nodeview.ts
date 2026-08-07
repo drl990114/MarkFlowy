@@ -1,7 +1,7 @@
 // prosemirror imports
-import { Node as ProseNode } from '@rme-sdk/pm/model'
-import { TextSelection } from '@rme-sdk/pm/state'
-import { EditorView, NodeView } from '@rme-sdk/pm/view'
+import { Node as ProseNode } from '@rme-sdk/sdk/pm/model'
+import { TextSelection } from '@rme-sdk/sdk/pm/state'
+import { EditorView, NodeView } from '@rme-sdk/sdk/pm/view'
 import { isBrowser } from '../../utils/common'
 
 export class ReferenceNodeView implements NodeView {

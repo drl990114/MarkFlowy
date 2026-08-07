@@ -1,5 +1,5 @@
 import type { Extension as CodeMirrorExtension } from '@codemirror/state'
-import type { ProsemirrorAttributes } from '@rme-sdk/core'
+import type { ProsemirrorAttributes } from '@rme-sdk/sdk/core'
 import { MfCodemirrorView } from '../../codemirror/codemirror'
 import type { CommandKeymapOptions } from './keymap'
 

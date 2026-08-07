@@ -1,4 +1,4 @@
-import type { NodeViewComponentProps } from '@rme-sdk/react'
+import type { NodeViewComponentProps } from '@rme-sdk/sdk/react'
 import { useRef } from 'react'
 import { Popover } from 'zens'
 import { Resizable } from '../../components/Resizable'

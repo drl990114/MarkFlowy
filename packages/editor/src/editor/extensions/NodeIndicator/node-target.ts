@@ -4,8 +4,8 @@ import {
   isHTMLElement,
   isTextNode,
 } from '@ocavue/utils'
-import type { Node as ProseMirrorNode } from '@rme-sdk/pm/model'
-import type { EditorView } from '@rme-sdk/pm/view'
+import type { Node as ProseMirrorNode } from '@rme-sdk/sdk/pm/model'
+import type { EditorView } from '@rme-sdk/sdk/pm/view'
 
 import { getClientRect } from '../../utils/get-client-rect'
 import { Rect } from './types'

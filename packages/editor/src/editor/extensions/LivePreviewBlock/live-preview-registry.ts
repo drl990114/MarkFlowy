@@ -1,4 +1,4 @@
-import type { EditorView } from '@rme-sdk/pm/view'
+import type { EditorView } from '@rme-sdk/sdk/pm/view'
 import type { LivePreviewBlockBehavior } from './live-preview-types'
 
 export interface LivePreviewBehaviorTarget {

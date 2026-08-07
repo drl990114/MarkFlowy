@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-shadow */
-import type { AnyExtension, CommandsFromExtensions } from '@rme-sdk/main'
+import type { AnyExtension, CommandsFromExtensions } from '@rme-sdk/sdk'
 import { useImperativeHandle, useState } from 'react'
 import styled from 'styled-components'
 import { ChildrenHandlerNext } from './SlashMenuRoot'

@@ -1,7 +1,7 @@
-import type { ProsemirrorNode } from '@rme-sdk/pm'
-import { Schema } from '@rme-sdk/pm/model'
-import { EditorState, NodeSelection, TextSelection } from '@rme-sdk/pm/state'
-import type { EditorView } from '@rme-sdk/pm/view'
+import type { ProsemirrorNode } from '@rme-sdk/sdk/pm'
+import { Schema } from '@rme-sdk/sdk/pm/model'
+import { EditorState, NodeSelection, TextSelection } from '@rme-sdk/sdk/pm/state'
+import type { EditorView } from '@rme-sdk/sdk/pm/view'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import type { LivePreviewNodeViewOptions, LivePreviewRenderer } from './live-preview-types'
 

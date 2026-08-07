@@ -1,5 +1,5 @@
-import type { Extension, RemirrorEventListener } from '@rme-sdk/main'
-import { Remirror } from '@rme-sdk/react'
+import type { Extension, RemirrorEventListener } from '@rme-sdk/sdk'
+import { Remirror } from '@rme-sdk/sdk/react'
 import React, { memo, useCallback, useMemo } from 'react'
 import { createContextState } from '../../hooks/create-context-state'
 import { SourceCodeThemeWrapper } from '../../theme'

@@ -1,5 +1,5 @@
-import type { ApplySchemaAttributes, InputRule, NodeExtensionSpec, NodeSpecOverride, NodeViewMethod, ProsemirrorAttributes } from '@rme-sdk/core'
-import { extension, ExtensionTag, NodeExtension, nodeInputRule, omitExtraAttributes } from '@rme-sdk/core'
+import type { ApplySchemaAttributes, InputRule, NodeExtensionSpec, NodeSpecOverride, NodeViewMethod, ProsemirrorAttributes } from '@rme-sdk/sdk/core'
+import { extension, ExtensionTag, NodeExtension, nodeInputRule, omitExtraAttributes } from '@rme-sdk/sdk/core'
 import { getInlineMathInputRule } from '../../inline-input-regex'
 import type { NodeSerializerOptions } from '../../transform'
 import { ParserRuleType } from '../../transform'

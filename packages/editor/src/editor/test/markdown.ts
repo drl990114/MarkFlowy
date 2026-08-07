@@ -4,7 +4,7 @@ import {
   htmlToProsemirrorNode,
   isProsemirrorNode,
   type ProsemirrorNode,
-} from '@rme-sdk/core'
+} from '@rme-sdk/sdk/core'
 import dedent from 'dedent'
 import type {
   RemirrorTestChain,

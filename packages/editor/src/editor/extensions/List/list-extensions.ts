@@ -1,5 +1,5 @@
-import type { InputRule, ProsemirrorNode } from '@rme-sdk/core'
-import { isString } from '@rme-sdk/core'
+import type { InputRule, ProsemirrorNode } from '@rme-sdk/sdk/core'
+import { isString } from '@rme-sdk/sdk/core'
 import type Token from 'markdown-it/lib/token.mjs'
 import type {
   MarkdownParseState,
@@ -23,8 +23,8 @@ import {
   type NodeExtensionSpec,
   type ProsemirrorPlugin,
   type ExtensionCommandReturn,
-} from '@rme-sdk/core'
-import type { NodeRange } from '@rme-sdk/pm/model'
+} from '@rme-sdk/sdk/core'
+import type { NodeRange } from '@rme-sdk/sdk/pm/model'
 import {
   createDedentListCommand,
   createIndentListCommand,
@@ -42,7 +42,7 @@ import {
   protectCollapsed,
   type ToggleCollapsedOptions,
   type UnwrapListOptions,
-} from '@rme-sdk/prosemirror-flat-list'
+} from '@rme-sdk/sdk/flat-list'
 import { defaultMarkerGetter } from './input-rule/schema/to-dom'
 import { ListAttributes } from './input-rule/types'
 

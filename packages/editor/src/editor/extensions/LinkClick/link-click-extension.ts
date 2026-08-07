@@ -1,5 +1,5 @@
-import type { CreateExtensionPlugin } from '@rme-sdk/core'
-import { PlainExtension, extension } from '@rme-sdk/core'
+import type { CreateExtensionPlugin } from '@rme-sdk/sdk/core'
+import { PlainExtension, extension } from '@rme-sdk/sdk/core'
 import { isBrowser } from '../../utils/common'
 
 export type LinkClickHandler = (href: string, event: MouseEvent) => void | boolean
@@ -9,7 +9,7 @@ export interface LinkClickOptions {
 }
 
 @extension<LinkClickOptions>({
-  defaultOptions: {},
+  defaultOptions: { handleLinkClick: undefined },
   staticKeys: [],
   handlerKeys: [],
   customHandlerKeys: [],

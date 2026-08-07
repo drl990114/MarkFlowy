@@ -3,13 +3,13 @@ import type {
   InputRule,
   NodeExtensionSpec,
   NodeViewMethod
-} from '@rme-sdk/main'
+} from '@rme-sdk/sdk'
 import {
   ExtensionTag,
   NodeExtension,
   extension,
   nodeInputRule
-} from '@rme-sdk/main'
+} from '@rme-sdk/sdk'
 import block_names from 'markdown-it/lib/common/html_blocks.mjs'
 import { type NodeSerializerOptions, ParserRuleType } from '../../transform'
 import {

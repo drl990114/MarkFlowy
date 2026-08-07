@@ -1,6 +1,6 @@
-import type { Node, Schema } from '@rme-sdk/pm/model'
-import { Fragment, Mark, NodeRange, Slice } from '@rme-sdk/pm/model'
-import { Step, StepResult } from '@rme-sdk/pm/transform'
+import type { Node, Schema } from '@rme-sdk/sdk/pm/model'
+import { Fragment, Mark, NodeRange, Slice } from '@rme-sdk/sdk/pm/model'
+import { Step, StepResult } from '@rme-sdk/sdk/pm/transform'
 
 import { ReplaceDocStep } from "./replace-doc-step"
 

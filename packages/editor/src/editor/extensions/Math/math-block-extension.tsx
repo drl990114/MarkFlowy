@@ -5,9 +5,9 @@ import type {
   NodeExtensionSpec,
   NodeSpecOverride,
   NodeViewMethod
-} from '@rme-sdk/core'
-import { convertCommand, extension, ExtensionTag, NodeExtension, nodeInputRule } from '@rme-sdk/core'
-import { setBlockType } from '@rme-sdk/pm/commands'
+} from '@rme-sdk/sdk/core'
+import { convertCommand, extension, ExtensionTag, NodeExtension, nodeInputRule } from '@rme-sdk/sdk/core'
+import { setBlockType } from '@rme-sdk/sdk/pm/commands'
 import type { NodeSerializerOptions } from '../../transform'
 import { ParserRuleType } from '../../transform'
 import {

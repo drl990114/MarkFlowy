@@ -1,7 +1,7 @@
-import type { CreateExtensionPlugin } from '@rme-sdk/core'
-import { PlainExtension } from '@rme-sdk/core'
-import type { Node as ProsemirrorNode } from '@rme-sdk/pm/model'
-import type { Transaction } from '@rme-sdk/pm/state'
+import type { CreateExtensionPlugin } from '@rme-sdk/sdk/core'
+import { PlainExtension } from '@rme-sdk/sdk/core'
+import type { Node as ProsemirrorNode } from '@rme-sdk/sdk/pm/model'
+import type { Transaction } from '@rme-sdk/sdk/pm/state'
 import {
   getHtmlImageInputRule,
   getInlineMathInputRule,

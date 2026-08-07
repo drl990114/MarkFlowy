@@ -1,4 +1,4 @@
-import type { EditorView } from '@rme-sdk/pm/view'
+import type { EditorView } from '@rme-sdk/sdk/pm/view'
 import type { OpeningConditions, SlashMenuState } from './type'
 import { isSlashKey } from './utils'
 

@@ -1,5 +1,5 @@
-import type { CreateExtensionPlugin } from '@rme-sdk/core';
-import { PlainExtension, extension } from '@rme-sdk/core';
+import type { CreateExtensionPlugin } from '@rme-sdk/sdk/core';
+import { PlainExtension, extension } from '@rme-sdk/sdk/core';
 import { DocToString, StringToDoc } from '../../types/index';
 
 export type TransformerMenuState = {

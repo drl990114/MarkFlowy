@@ -1,4 +1,4 @@
-import { useRemirrorContext } from '@rme-sdk/react-core'
+import { useRemirrorContext } from '@rme-sdk/sdk/react'
 import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 import type { LinkClickHandler } from '../../extensions/LinkClick'

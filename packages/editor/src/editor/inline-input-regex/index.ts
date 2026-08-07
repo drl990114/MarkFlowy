@@ -1,4 +1,4 @@
-import { NodeType } from '@rme-sdk/pm'
+import { NodeType } from '@rme-sdk/sdk/pm'
 import { getAttrsBySignalHtmlContent } from '../utils/html'
 
 export const getMdImageInputRule = <T extends NodeType | string>(nodeType: T) => [

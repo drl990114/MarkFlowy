@@ -1,5 +1,5 @@
 import { useTranslation } from '@markflowy/i18n'
-import type { AnyExtension, CommandsFromExtensions } from '@rme-sdk/main'
+import type { AnyExtension, CommandsFromExtensions } from '@rme-sdk/sdk'
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import styled, { css } from 'styled-components'
 import { Input, Space } from 'zens'

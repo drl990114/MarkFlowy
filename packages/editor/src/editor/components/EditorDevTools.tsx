@@ -1,7 +1,7 @@
 import { lazy, Suspense } from 'react'
 
 const LazyProsemirrorDevTools = lazy(() =>
-  import('@rme-sdk/dev').then((module) => ({
+  import('@rme-sdk/sdk/dev').then((module) => ({
     default: module.ProsemirrorDevTools,
   })),
 )

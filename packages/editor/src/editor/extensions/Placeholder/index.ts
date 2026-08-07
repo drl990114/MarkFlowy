@@ -3,10 +3,10 @@ import type {
   CreateExtensionPlugin,
   OnSetOptionsProps,
   ProsemirrorAttributes,
-} from '@rme-sdk/core'
-import { extension, ManagerPhase, PlainExtension } from '@rme-sdk/core'
-import type { EditorState } from '@rme-sdk/pm/state'
-import { Decoration, DecorationSet } from '@rme-sdk/pm/view'
+} from '@rme-sdk/sdk/core'
+import { extension, ManagerPhase, PlainExtension } from '@rme-sdk/sdk/core'
+import type { EditorState } from '@rme-sdk/sdk/pm/state'
+import { Decoration, DecorationSet } from '@rme-sdk/sdk/pm/view'
 
 export interface PlaceholderOptions {
   placeholder?: string
@@ -21,6 +21,7 @@ export interface PlaceholderPluginState extends Required<PlaceholderOptions> {
 @extension<PlaceholderOptions>({
   defaultOptions: {
     placeholder: '',
+    emptyNodeClass: undefined,
     enabled: true,
   },
   staticKeys: [],

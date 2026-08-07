@@ -1,5 +1,5 @@
-import { isTextSelection } from '@rme-sdk/core'
-import { useExtension, useRemirrorContext } from '@rme-sdk/react-core'
+import { isTextSelection } from '@rme-sdk/sdk/core'
+import { useExtension, useRemirrorContext } from '@rme-sdk/sdk/react'
 import { useMemo, useState } from 'react'
 import { usePopper } from 'react-popper'
 import styled from 'styled-components'

@@ -1,7 +1,7 @@
 import { EditorView as CodeMirrorEditorView } from '@codemirror/view'
-import type { NodeView, ProsemirrorNode } from '@rme-sdk/pm'
-import { NodeSelection } from '@rme-sdk/pm/state'
-import type { EditorView } from '@rme-sdk/pm/view'
+import type { NodeView, ProsemirrorNode } from '@rme-sdk/sdk/pm'
+import { NodeSelection } from '@rme-sdk/sdk/pm/state'
+import type { EditorView } from '@rme-sdk/sdk/pm/view'
 import { MfCodemirrorView } from '../../codemirror'
 import { isBrowser } from '../../utils/common'
 import {

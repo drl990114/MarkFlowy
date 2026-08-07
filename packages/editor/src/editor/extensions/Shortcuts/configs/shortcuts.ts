@@ -1,5 +1,5 @@
-import { ExtensionStore } from '@rme-sdk/main'
-import { Command } from '@rme-sdk/pm/state'
+import { ExtensionStore } from '@rme-sdk/sdk'
+import { Command } from '@rme-sdk/sdk/pm/state'
 import pkg from 'lodash'
 import { rmeDefaultKeymap } from './keymap'
 const { cloneDeep } = pkg

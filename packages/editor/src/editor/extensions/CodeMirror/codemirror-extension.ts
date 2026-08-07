@@ -13,7 +13,7 @@ import type {
   NodeSpecOverride,
   NodeViewMethod,
   ProsemirrorNode
-} from '@rme-sdk/core'
+} from '@rme-sdk/sdk/core'
 import {
   extension,
   findParentNodeOfType,
@@ -23,10 +23,10 @@ import {
   NodeExtension,
   nodeInputRule,
   setBlockType,
-} from '@rme-sdk/core'
-import type { EditorState } from '@rme-sdk/main'
-import { TextSelection } from '@rme-sdk/pm/state'
-import { Decoration, DecorationSet } from '@rme-sdk/pm/view'
+} from '@rme-sdk/sdk/core'
+import type { EditorState } from '@rme-sdk/sdk'
+import { TextSelection } from '@rme-sdk/sdk/pm/state'
+import { Decoration, DecorationSet } from '@rme-sdk/sdk/pm/view'
 import { t } from '@markflowy/i18n'
 import type { NodeSerializerOptions } from '../../transform'
 import { ParserRuleType } from '../../transform'
@@ -44,6 +44,8 @@ export const fakeIndentedLanguage = 'indent-code'
     useProsemirrorHistoryKey: false,
     onCodemirrorViewLoad: () => {},
     showCopyButton: true,
+    customCopyFunction: undefined,
+    commandKeymapOptions: undefined,
   },
   staticKeys: [],
   handlerKeys: [],

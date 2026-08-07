@@ -1,7 +1,7 @@
 import type { LanguageSupport } from '@codemirror/language'
 import type { Extension as CodeMirrorExtension } from '@codemirror/state'
 import { EditorView as CodeMirrorEditorView } from '@codemirror/view'
-import type { EditorView, NodeView, ProsemirrorNode } from '@rme-sdk/pm'
+import type { EditorView, NodeView, ProsemirrorNode } from '@rme-sdk/sdk/pm'
 import { CreateCodemirrorOptions, MfCodemirrorView } from '../../codemirror/codemirror'
 
 export type LoadLanguage = (lang: string) => Promise<LanguageSupport> | LanguageSupport | void

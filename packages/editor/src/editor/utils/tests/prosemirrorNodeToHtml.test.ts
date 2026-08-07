@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { normalizeReference } from 'markdown-it/lib/common/utils.mjs'
-import { prosemirrorNodeToHtml } from '@rme-sdk/main'
+import { prosemirrorNodeToHtml } from '@rme-sdk/sdk'
 import { createWysiwygDelegate } from '../../components/WysiwygEditor/delegate'
 
 const mermaidHarness = vi.hoisted(() => ({

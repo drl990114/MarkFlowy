@@ -1,4 +1,4 @@
-import { useCommands, useHelpers, useKeymap, useRemirrorContext } from '@rme-sdk/react'
+import { useCommands, useHelpers, useKeymap, useRemirrorContext } from '@rme-sdk/sdk/react'
 
 
 export {

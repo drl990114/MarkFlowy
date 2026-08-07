@@ -1,5 +1,5 @@
-import type { Node, Schema } from '@rme-sdk/pm/model'
-import { Step, StepMap, StepResult } from '@rme-sdk/pm/transform'
+import type { Node, Schema } from '@rme-sdk/sdk/pm/model'
+import { Step, StepMap, StepResult } from '@rme-sdk/sdk/pm/transform'
 
 // Replace the document with a new document.
 export class ReplaceDocStep extends Step {

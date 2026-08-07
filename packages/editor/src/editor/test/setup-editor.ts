@@ -1,5 +1,5 @@
-import '@rme-sdk/pm'
-import '@rme-sdk/preset-core'
+import '@rme-sdk/sdk/pm'
+import '@rme-sdk/sdk/presets/core'
 import 'jest-prosemirror'
 
 import { renderEditor, type TaggedProsemirrorNode } from 'jest-remirror'

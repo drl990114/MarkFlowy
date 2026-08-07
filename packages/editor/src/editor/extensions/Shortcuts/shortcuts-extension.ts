@@ -1,5 +1,5 @@
-import { EditorView, extension, PlainExtension } from '@rme-sdk/core'
-import { keymap } from '@rme-sdk/pm/keymap'
+import { EditorView, extension, PlainExtension } from '@rme-sdk/sdk/core'
+import { keymap } from '@rme-sdk/sdk/pm/keymap'
 import { ShortcutManager } from './configs/shortcuts'
 
 type ShortcutsExtensionOptions = {

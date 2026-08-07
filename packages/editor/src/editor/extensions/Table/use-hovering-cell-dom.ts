@@ -1,5 +1,5 @@
-import { ProsemirrorNode } from "@rme-sdk/core";
-import { useEditorView } from "@rme-sdk/react-core";
+import { ProsemirrorNode } from "@rme-sdk/sdk/core";
+import { useEditorView } from "@rme-sdk/sdk/react";
 
 import { useHoveringCell } from "./use-hovering-cell";
 

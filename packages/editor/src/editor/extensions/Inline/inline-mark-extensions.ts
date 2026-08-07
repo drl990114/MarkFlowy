@@ -3,8 +3,8 @@ import type {
   MarkExtensionSpec,
   NodeView,
   NodeViewMethod,
-} from '@rme-sdk/core'
-import { MarkExtension, extension } from '@rme-sdk/core'
+} from '@rme-sdk/sdk/core'
+import { MarkExtension, extension } from '@rme-sdk/sdk/core'
 import { isBrowser } from '../../utils/common'
 
 import { formatHref } from './format-href'

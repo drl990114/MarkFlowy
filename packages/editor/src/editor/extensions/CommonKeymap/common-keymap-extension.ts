@@ -1,4 +1,4 @@
-import { extension, PlainExtension, PrioritizedKeyBindings } from '@rme-sdk/core'
+import { extension, PlainExtension, PrioritizedKeyBindings } from '@rme-sdk/sdk/core'
 import { arrowHandler } from '../CodeMirror/codemirror-utils'
 
 type ClipboardExtensionOptions = {}

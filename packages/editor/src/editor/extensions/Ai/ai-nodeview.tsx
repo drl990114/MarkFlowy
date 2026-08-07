@@ -1,4 +1,4 @@
-import type { NodeViewComponentProps } from '@rme-sdk/react'
+import type { NodeViewComponentProps } from '@rme-sdk/sdk/react'
 import { t } from '@markflowy/i18n'
 import { useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'

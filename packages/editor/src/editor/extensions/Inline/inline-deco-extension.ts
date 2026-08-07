@@ -1,8 +1,8 @@
-import type { CreateExtensionPlugin } from '@rme-sdk/core'
-import { isTextSelection, PlainExtension } from '@rme-sdk/core'
-import type { Node as ProsemirrorNode } from '@rme-sdk/pm/model'
-import type { EditorState } from '@rme-sdk/pm/state'
-import { Decoration, DecorationSet } from '@rme-sdk/pm/view'
+import type { CreateExtensionPlugin } from '@rme-sdk/sdk/core'
+import { isTextSelection, PlainExtension } from '@rme-sdk/sdk/core'
+import type { Node as ProsemirrorNode } from '@rme-sdk/sdk/pm/model'
+import type { EditorState } from '@rme-sdk/sdk/pm/state'
+import { Decoration, DecorationSet } from '@rme-sdk/sdk/pm/view'
 
 import { excludeHtmlInlineNodes } from '../../transform/markdown-it-html-inline'
 import type { LineMarkAttrs } from './inline-mark-extensions'

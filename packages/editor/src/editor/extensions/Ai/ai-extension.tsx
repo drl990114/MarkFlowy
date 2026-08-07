@@ -3,16 +3,18 @@ import type {
     ExtensionCommandReturn,
     NodeExtensionSpec,
     NodeSpecOverride
-} from '@rme-sdk/core'
-import { extension, ExtensionTag, NodeExtension } from '@rme-sdk/core'
-import { TextSelection } from '@rme-sdk/pm/state'
-import type { NodeViewComponentProps } from '@rme-sdk/react'
+} from '@rme-sdk/sdk/core'
+import { extension, ExtensionTag, NodeExtension } from '@rme-sdk/sdk/core'
+import { TextSelection } from '@rme-sdk/sdk/pm/state'
+import type { NodeViewComponentProps } from '@rme-sdk/sdk/react'
 import type { ComponentType } from 'react'
 import { AINodeView } from './ai-nodeview'
 import type { AIOptions } from './ai-types'
 
 @extension<AIOptions>({
   defaultOptions: {
+    defaultSelectProvider: undefined,
+    copilot: undefined,
     supportProviderInfosMap: {
       openai: {
         models: ['gpt-3.5-turbo', 'gpt-4']

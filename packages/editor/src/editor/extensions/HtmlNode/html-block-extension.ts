@@ -4,11 +4,11 @@ import type {
   NodeExtensionSpec,
   NodeSpecOverride,
   NodeViewMethod
-} from '@rme-sdk/core'
-import { convertCommand, extension, isElementDomNode, NodeExtension, nodeInputRule } from '@rme-sdk/core'
-import { setBlockType } from '@rme-sdk/pm/commands'
-import type { InputRule } from '@rme-sdk/pm/inputrules'
-import { TextSelection } from '@rme-sdk/pm/state'
+} from '@rme-sdk/sdk/core'
+import { convertCommand, extension, isElementDomNode, NodeExtension, nodeInputRule } from '@rme-sdk/sdk/core'
+import { setBlockType } from '@rme-sdk/sdk/pm/commands'
+import type { InputRule } from '@rme-sdk/sdk/pm/inputrules'
+import { TextSelection } from '@rme-sdk/sdk/pm/state'
 import block_names from 'markdown-it/lib/common/html_blocks.mjs'
 import type { NodeSerializerOptions } from '../../transform'
 import { ParserRuleType } from '../../transform'
@@ -18,7 +18,12 @@ import type { LineHtmlBlockExtensionOptions } from './html-block-types'
 import { createHtmlRenderer, LivePreviewNodeView } from '../LivePreviewBlock'
 
 @extension<LineHtmlBlockExtensionOptions>({
-  defaultOptions: {},
+  defaultOptions: {
+    customCopyFunction: undefined,
+    codemirrorExtensions: undefined,
+    behavior: undefined,
+    handleViewImgSrcUrl: undefined,
+  },
   staticKeys: [],
   handlerKeys: [],
   customHandlerKeys: [],

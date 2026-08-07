@@ -4,8 +4,8 @@ import type {
   KeyBindings,
   NodeExtensionSpec,
   NodeSpecOverride,
-} from '@rme-sdk/core'
-import { extension, ExtensionTag, NodeExtension } from '@rme-sdk/core'
+} from '@rme-sdk/sdk/core'
+import { extension, ExtensionTag, NodeExtension } from '@rme-sdk/sdk/core'
 import { Token } from 'markdown-it/index.js'
 
 @extension({

@@ -4,7 +4,7 @@ import type {
   InputRule,
   NodeExtensionSpec,
   NodeSpecOverride,
-} from '@rme-sdk/core'
+} from '@rme-sdk/sdk/core'
 import {
   extension,
   ExtensionTag,
@@ -12,8 +12,8 @@ import {
   isElementDomNode,
   NodeExtension,
   nodeInputRule,
-} from '@rme-sdk/core'
-import { Decoration, DecorationSet } from '@rme-sdk/pm/view'
+} from '@rme-sdk/sdk/core'
+import { Decoration, DecorationSet } from '@rme-sdk/sdk/pm/view'
 import { Token } from 'markdown-it/index.js'
 import type { NodeSerializerOptions } from '../../transform'
 import { ParserRuleType } from '../../transform'

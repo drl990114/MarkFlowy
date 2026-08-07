@@ -1,4 +1,4 @@
-import { useCommands, type UseMultiPositionerReturn } from '@rme-sdk/react'
+import { useCommands, type UseMultiPositionerReturn } from '@rme-sdk/sdk/react'
 import { useRef, useState } from 'react'
 import { useTranslation } from '@markflowy/i18n'
 import { Dropdown, DropdownMenuItem } from 'zens'

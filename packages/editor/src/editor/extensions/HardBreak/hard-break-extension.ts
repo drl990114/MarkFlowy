@@ -1,8 +1,8 @@
-import { convertCommand } from '@rme-sdk/core'
-import { HardBreakExtension } from '@rme-sdk/main/extensions'
-import { baseKeymap, exitCode } from '@rme-sdk/pm/commands'
+import { convertCommand } from '@rme-sdk/sdk/core'
+import { HardBreakExtension } from '@rme-sdk/sdk/extensions'
+import { baseKeymap, exitCode } from '@rme-sdk/sdk/pm/commands'
 
-import { chainCommands } from '@rme-sdk/pm'
+import { chainCommands } from '@rme-sdk/sdk/pm'
 import type { NodeSerializerOptions } from '../../transform'
 import { exitTable } from '../Table/table-utils'
 

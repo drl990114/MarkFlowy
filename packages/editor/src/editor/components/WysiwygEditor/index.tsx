@@ -1,5 +1,5 @@
-import type { Extension, RemirrorEventListener } from '@rme-sdk/core'
-import { Remirror } from '@rme-sdk/react'
+import type { Extension, RemirrorEventListener } from '@rme-sdk/sdk/core'
+import { Remirror } from '@rme-sdk/sdk/react'
 import { memo, useCallback, useEffect, useMemo, type FC } from 'react'
 import { TransformerExtension } from '../../extensions/Transformer/transformer-extension'
 import { WysiwygThemeWrapper } from '../../theme'

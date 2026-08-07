@@ -1,8 +1,8 @@
-import { history, redo, undo } from '@rme-sdk/pm/history'
-import { keymap } from '@rme-sdk/pm/keymap'
-import { Node as ProseNode } from '@rme-sdk/pm/model'
-import { Command, EditorState, Plugin, TextSelection, Transaction } from '@rme-sdk/pm/state'
-import { Decoration, EditorView, NodeView } from '@rme-sdk/pm/view'
+import { history, redo, undo } from '@rme-sdk/sdk/pm/history'
+import { keymap } from '@rme-sdk/sdk/pm/keymap'
+import { Node as ProseNode } from '@rme-sdk/sdk/pm/model'
+import { Command, EditorState, Plugin, TextSelection, Transaction } from '@rme-sdk/sdk/pm/state'
+import { Decoration, EditorView, NodeView } from '@rme-sdk/sdk/pm/view'
 import { tex2svg, tex2svgInline, tex2svgDisplay } from './mathjax'
 
 function collapseCmd(

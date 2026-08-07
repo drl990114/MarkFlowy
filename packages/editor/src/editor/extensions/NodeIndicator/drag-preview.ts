@@ -1,6 +1,6 @@
 import { isHTMLElement } from '@ocavue/utils'
-import { EditorView, Fragment, Slice } from '@rme-sdk/pm'
-import { NodeSelection } from '@rme-sdk/pm/state'
+import { EditorView, Fragment, Slice } from '@rme-sdk/sdk/pm'
+import { NodeSelection } from '@rme-sdk/sdk/pm/state'
 import { NodeIndicatorState } from '.'
 import { getBoxElement } from '../../utils/get-box-element'
 import { setDragPreview } from './set-drag-preview'

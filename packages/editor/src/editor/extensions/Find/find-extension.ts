@@ -1,8 +1,8 @@
-import type { CommandFunction, FromToProps, Helper, ProsemirrorPlugin } from '@rme-sdk/core'
-import { extension, PlainExtension } from '@rme-sdk/core'
-import type { EditorState } from '@rme-sdk/pm/state'
-import { TextSelection } from '@rme-sdk/pm/state'
-import type { DecorationAttrs } from '@rme-sdk/pm/view'
+import type { CommandFunction, FromToProps, Helper, ProsemirrorPlugin } from '@rme-sdk/sdk/core'
+import { extension, PlainExtension } from '@rme-sdk/sdk/core'
+import type { EditorState } from '@rme-sdk/sdk/pm/state'
+import { TextSelection } from '@rme-sdk/sdk/pm/state'
+import type { DecorationAttrs } from '@rme-sdk/sdk/pm/view'
 import type { SearchResult } from 'prosemirror-search'
 import {
   getMatchHighlights,
@@ -22,6 +22,8 @@ export interface FindOptions {
 
 @extension<FindOptions>({
   defaultOptions: {
+    decoration: undefined,
+    activeDecoration: undefined,
     alwaysFind: false,
   },
   staticKeys: [],

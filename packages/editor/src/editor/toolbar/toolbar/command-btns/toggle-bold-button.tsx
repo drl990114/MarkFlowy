@@ -1,5 +1,5 @@
-import { BoldExtension } from '@rme-sdk/extension-bold';
-import { useActive, useCommands } from '@rme-sdk/react-core';
+import { BoldExtension } from '@rme-sdk/sdk/extensions/bold';
+import { useActive, useCommands } from '@rme-sdk/sdk/react';
 import { FC, useCallback } from 'react';
 
 import { t } from '@markflowy/i18n';

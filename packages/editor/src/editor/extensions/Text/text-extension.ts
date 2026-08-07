@@ -1,4 +1,4 @@
-import { TextExtension } from '@rme-sdk/main/extensions'
+import { TextExtension } from '@rme-sdk/sdk/extensions'
 import type Token from 'markdown-it/lib/token.mjs'
 
 import type { NodeSerializerOptions } from '../../transform'

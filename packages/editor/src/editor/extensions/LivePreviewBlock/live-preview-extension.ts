@@ -1,6 +1,6 @@
-import type { CommandFunction, KeyBindings } from '@rme-sdk/core'
-import { extension, PlainExtension } from '@rme-sdk/core'
-import { NodeSelection } from '@rme-sdk/pm/state'
+import type { CommandFunction, KeyBindings } from '@rme-sdk/sdk/core'
+import { extension, PlainExtension } from '@rme-sdk/sdk/core'
+import { NodeSelection } from '@rme-sdk/sdk/pm/state'
 import {
   editLivePreviewSourceAt,
   updateLivePreviewBlockBehavior,

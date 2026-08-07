@@ -12,9 +12,9 @@ import {
   nodeInputRule,
   NodeSpecOverride,
   Transaction,
-} from '@rme-sdk/core'
-import { ExtensionCommandReturn } from '@rme-sdk/main'
-import { TextSelection } from '@rme-sdk/pm/state'
+} from '@rme-sdk/sdk/core'
+import { ExtensionCommandReturn } from '@rme-sdk/sdk'
+import { TextSelection } from '@rme-sdk/sdk/pm/state'
 import type { NodeSerializerOptions } from '../../transform'
 import { ParserRuleType } from '../../transform'
 

@@ -1,5 +1,5 @@
-import { ItalicExtension } from '@rme-sdk/extension-italic'
-import { useActive, useCommands } from '@rme-sdk/react-core'
+import { ItalicExtension } from '@rme-sdk/sdk/extensions/italic'
+import { useActive, useCommands } from '@rme-sdk/sdk/react'
 import { FC, useCallback } from 'react'
 
 import { t } from '@markflowy/i18n'

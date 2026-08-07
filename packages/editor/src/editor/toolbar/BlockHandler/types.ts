@@ -1,4 +1,4 @@
-import type { EditorView, ProsemirrorNode } from '@rme-sdk/core'
+import type { EditorView, ProsemirrorNode } from '@rme-sdk/sdk/core'
 
 export interface NodeTransformContext {
   view: EditorView

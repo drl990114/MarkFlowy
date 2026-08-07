@@ -1,11 +1,11 @@
 // prosemirror imports
-import { history, redo, undo } from '@rme-sdk/pm/history'
-import { keymap } from '@rme-sdk/pm/keymap'
-import type { Node as ProseNode } from '@rme-sdk/pm/model'
-import { EditorState, Plugin, TextSelection } from '@rme-sdk/pm/state'
-import type { Command, Transaction } from '@rme-sdk/pm/state'
-import { EditorView } from '@rme-sdk/pm/view'
-import type { NodeView } from '@rme-sdk/pm/view'
+import { history, redo, undo } from '@rme-sdk/sdk/pm/history'
+import { keymap } from '@rme-sdk/sdk/pm/keymap'
+import type { Node as ProseNode } from '@rme-sdk/sdk/pm/model'
+import { EditorState, Plugin, TextSelection } from '@rme-sdk/sdk/pm/state'
+import type { Command, Transaction } from '@rme-sdk/sdk/pm/state'
+import { EditorView } from '@rme-sdk/sdk/pm/view'
+import type { NodeView } from '@rme-sdk/sdk/pm/view'
 import type { ExtensionsOptions } from '..'
 import {
   clearPreviewImageSource,

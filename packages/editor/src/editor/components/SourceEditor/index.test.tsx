@@ -1,4 +1,4 @@
-import type { Node } from '@rme-sdk/pm/model'
+import type { Node } from '@rme-sdk/sdk/pm/model'
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -7,8 +7,8 @@ import SourceEditor from '.'
 
 const remirrorSpy = vi.hoisted(() => vi.fn())
 
-vi.mock('@rme-sdk/react', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@rme-sdk/react')>()
+vi.mock('@rme-sdk/sdk/react', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@rme-sdk/sdk/react')>()
 
   return {
     ...actual,

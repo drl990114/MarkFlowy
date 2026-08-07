@@ -1,4 +1,4 @@
-import type { Node } from '@rme-sdk/pm/model'
+import type { Node } from '@rme-sdk/sdk/pm/model'
 import { act, createRef } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'

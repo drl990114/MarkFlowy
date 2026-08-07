@@ -1,7 +1,7 @@
 import { isHTMLElement } from '@ocavue/utils'
-import type { Node as ProseMirrorNode } from '@rme-sdk/pm/model'
-import { NodeSelection } from '@rme-sdk/pm/state'
-import type { EditorView } from '@rme-sdk/pm/view'
+import type { Node as ProseMirrorNode } from '@rme-sdk/sdk/pm/model'
+import { NodeSelection } from '@rme-sdk/sdk/pm/state'
+import type { EditorView } from '@rme-sdk/sdk/pm/view'
 
 import type { DragEventHandler } from './types'
 

@@ -1,5 +1,5 @@
 import type { Extension as CodeMirrorExtension } from '@codemirror/state'
-import type { EditorView, ProsemirrorNode } from '@rme-sdk/pm'
+import type { EditorView, ProsemirrorNode } from '@rme-sdk/sdk/pm'
 import type { CustomCopyFunction } from '../CodeMirror/codemirror-types'
 
 export type LivePreviewMode = 'split' | 'preview'

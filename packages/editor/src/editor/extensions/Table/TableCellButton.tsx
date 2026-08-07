@@ -1,5 +1,5 @@
 import { autoUpdate, useFloating, VirtualElement } from '@floating-ui/react'
-import { useCommands } from '@rme-sdk/react'
+import { useCommands } from '@rme-sdk/sdk/react'
 import React, { useCallback, useEffect } from 'react'
 
 import { editorZIndex } from '../../theme/z-index'

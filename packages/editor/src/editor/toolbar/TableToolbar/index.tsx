@@ -1,4 +1,4 @@
-import { PositionerPortal, useCommands, useMultiPositioner } from '@rme-sdk/react'
+import { PositionerPortal, useCommands, useMultiPositioner } from '@rme-sdk/sdk/react'
 import { useEffect } from 'react'
 import ActiveCellMenu from './ActiveCellMenu'
 import TitleBar from './TableBar'

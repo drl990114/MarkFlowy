@@ -9,7 +9,7 @@ import type {
   NodeSpecOverride,
   PrimitiveSelection,
   ProsemirrorAttributes,
-} from '@rme-sdk/core'
+} from '@rme-sdk/sdk/core'
 import {
   ErrorConstant,
   extension,
@@ -21,10 +21,10 @@ import {
   NodeExtension,
   nodeInputRule,
   omitExtraAttributes,
-} from '@rme-sdk/core'
-import type { InputRule } from '@rme-sdk/pm/inputrules'
-import type { PasteRule } from '@rme-sdk/pm/paste-rules'
-import { insertPoint } from '@rme-sdk/pm/transform'
+} from '@rme-sdk/sdk/core'
+import type { InputRule } from '@rme-sdk/sdk/pm/inputrules'
+import type { PasteRule } from '@rme-sdk/sdk/pm/paste-rules'
+import { insertPoint } from '@rme-sdk/sdk/pm/transform'
 import type { ComponentType } from 'react'
 import type { ExtensionsOptions } from '..'
 import { getMdImageInputRule } from '../../inline-input-regex'
@@ -37,6 +37,7 @@ import { ImageNodeView } from './image-nodeview'
 export type DelayedImage = DelayedPromiseCreator<ImageAttributes>
 
 interface ImageOptions {
+  defaultInlineNode?: keyof HTMLElementTagNameMap
   createPlaceholder?: (view: EditorView, pos: number) => HTMLElement
   updatePlaceholder?: (
     view: EditorView,
@@ -107,6 +108,7 @@ type SetProgress = (progress: number) => void
   defaultOptions: {
     createPlaceholder,
     handleViewImgSrcUrl: async (src: string) => src,
+    imagePasteHandler: undefined,
     updatePlaceholder: () => {},
     destroyPlaceholder: () => {},
     uploadHandler,

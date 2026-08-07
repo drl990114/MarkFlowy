@@ -3,9 +3,9 @@ import {
   prosemirrorNodeToHtml,
   type Extension,
   type RemirrorEventListenerProps,
-} from '@rme-sdk/main'
-import { Slice } from '@rme-sdk/pm'
-import { type Node } from '@rme-sdk/pm/model'
+} from '@rme-sdk/sdk'
+import { Slice } from '@rme-sdk/sdk/pm'
+import { type Node } from '@rme-sdk/sdk/pm/model'
 import {
   forwardRef,
   memo,

@@ -1,6 +1,6 @@
 import { renderEditor } from 'jest-remirror'
 import { describe, expect, it, vi } from 'vitest'
-import type { Node as ProsemirrorNode } from '@rme-sdk/pm/model'
+import type { Node as ProsemirrorNode } from '@rme-sdk/sdk/pm/model'
 import type { ImageInsertAttributes } from '..'
 import { MdImgUriExtension } from './md-image-extension'
 

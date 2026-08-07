@@ -1,8 +1,8 @@
-import type { EditorSchema, ProsemirrorNode } from '@rme-sdk/pm'
-import type { Node, Schema } from '@rme-sdk/pm/model'
-import type { Transaction } from '@rme-sdk/pm/state'
-import { Transform } from '@rme-sdk/pm/transform'
-import type { EditorView } from '@rme-sdk/pm/view'
+import type { EditorSchema, ProsemirrorNode } from '@rme-sdk/sdk/pm'
+import type { Node, Schema } from '@rme-sdk/sdk/pm/model'
+import type { Transaction } from '@rme-sdk/sdk/pm/state'
+import { Transform } from '@rme-sdk/sdk/pm/transform'
+import type { EditorView } from '@rme-sdk/sdk/pm/view'
 
 import type { MarkChunk } from '../../steps/batch-mark-step'
 import { BatchSetMarkStep } from '../../steps/batch-mark-step'

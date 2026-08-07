@@ -3,8 +3,8 @@ import type {
     InputRule,
     NodeExtensionSpec,
     NodeSpecOverride,
-} from '@rme-sdk/core'
-import { extension, ExtensionTag, NodeExtension, nodeInputRule } from '@rme-sdk/core'
+} from '@rme-sdk/sdk/core'
+import { extension, ExtensionTag, NodeExtension, nodeInputRule } from '@rme-sdk/sdk/core'
 import type { NodeSerializerOptions } from '../../transform'
 import { ParserRuleType } from '../../transform'
 

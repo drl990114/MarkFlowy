@@ -5202,15 +5202,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@icons/material@npm:^0.2.4":
-  version: 0.2.4
-  resolution: "@icons/material@npm:0.2.4"
-  peerDependencies:
-    react: "*"
-  checksum: 10/6c248fdb2d226e5af76bb0203d05fd7b9c77003f0197a5ae4baead3d014a27cfb539921fceed89a72e02fa0b583debe3b26b76d84d6f7cb354d3cb2ac00e9353
-  languageName: node
-  linkType: hard
-
 "@img/colour@npm:^1.0.0":
   version: 1.0.0
   resolution: "@img/colour@npm:1.0.0"
@@ -9471,975 +9462,58 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rme-sdk/core-constants@npm:1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/core-constants@npm:1.5.0"
-  checksum: 10/7051a176906b75ec20e7b6c1dfbbab9d0393aa0329ad5c0d39bff23d5be6e630815d3b83449cfd7031de3cc7fccefe8946069c14ceda2b74c6f456c9d9e7b183
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/core-helpers@npm:1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/core-helpers@npm:1.5.0"
+"@rme-sdk/sdk@npm:1.0.0-beta.2":
+  version: 1.0.0-beta.2
+  resolution: "@rme-sdk/sdk@npm:1.0.0-beta.2"
   dependencies:
-    "@rme-sdk/core-constants": "npm:1.5.0"
-    "@rme-sdk/types": "npm:1.5.0"
-    "@types/object.omit": "npm:^3.0.0"
-    "@types/object.pick": "npm:^1.3.2"
-    "@types/throttle-debounce": "npm:^2.1.0"
-    case-anything: "npm:^2.1.13"
-    clsx: "npm:^2.1.1"
-    dash-get: "npm:^1.0.2"
-    deepmerge: "npm:^4.3.1"
-    fast-deep-equal: "npm:^3.1.3"
-    make-error: "npm:^1.3.6"
-    object.omit: "npm:^3.0.0"
-    object.pick: "npm:^1.3.0"
-    throttle-debounce: "npm:^3.0.1"
-  checksum: 10/90901919d269babfac0b8e9c83bbc6cefcf69ff4fd81e1312344a74c40090c019960396edc7ffadf68cf5f2f942ae3cf5a422e5d9f73d752c76d4a02fbebac3b
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/core-types@npm:1.5.0, @rme-sdk/core-types@npm:^1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/core-types@npm:1.5.0"
-  dependencies:
-    "@rme-sdk/core-constants": "npm:1.5.0"
-    "@rme-sdk/types": "npm:1.5.0"
-  peerDependencies:
-    "@rme-sdk/pm": 1.5.0
-  checksum: 10/f228739b4b0722c4e885e745127cd0133e57de8fa5908103b70daf6e7eff6b29026d725998340427ba40c255c80d9867179dd6b3cfd91a0d2091c807b663a326
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/core-utils@npm:1.5.0, @rme-sdk/core-utils@npm:^1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/core-utils@npm:1.5.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@rme-sdk/core-constants": "npm:1.5.0"
-    "@rme-sdk/core-helpers": "npm:1.5.0"
-    "@rme-sdk/core-types": "npm:1.5.0"
-    "@rme-sdk/messages": "npm:1.5.0"
-    "@types/min-document": "npm:^2.19.0"
-    css-in-js-utils: "npm:^3.1.0"
-    get-dom-document: "npm:^0.1.3"
-    min-document: "npm:^2.19.0"
-    parenthesis: "npm:^3.1.8"
-  peerDependencies:
-    "@rme-sdk/pm": 1.5.0
-    "@types/node": "*"
-  peerDependenciesMeta:
-    "@types/node":
-      optional: true
-  checksum: 10/eca6c65c7aeaf38678aed724d3591ea5d523f3786c5019dde8cf56def4dda2d8b16d25e5049b293e9b2cdec1ffd120b7b1660cd1f10768c49f87353daf25a36a
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/core@npm:1.5.0, @rme-sdk/core@npm:^1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/core@npm:1.5.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@rme-sdk/core-constants": "npm:1.5.0"
-    "@rme-sdk/core-helpers": "npm:1.5.0"
-    "@rme-sdk/core-types": "npm:1.5.0"
-    "@rme-sdk/core-utils": "npm:1.5.0"
-    "@rme-sdk/icons": "npm:1.5.0"
-    "@rme-sdk/messages": "npm:1.5.0"
-    "@rme-sdk/pm": "npm:1.5.0"
-    nanoevents: "npm:^5.1.13"
-    tiny-warning: "npm:^1.0.3"
-  checksum: 10/52e1871bc4b872b4173d4b71b73c25c1acacefce8b3f049fe8fb1ead3121b0219686e956bbe31b59bacca9a8097627106c70a0896f66d1955dfd19efb73147e7
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/dev@npm:^1.5.1":
-  version: 1.5.1
-  resolution: "@rme-sdk/dev@npm:1.5.1"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@rme-sdk/react-core": "npm:1.5.1"
-    prosemirror-dev-toolkit: "npm:^1.1.8"
-  peerDependencies:
-    "@rme-sdk/pm": 1.5.0
-    "@types/react": ^16.14.0 || ^17 || ^18
-    "@types/react-dom": ^16.9.0 || ^17 || ^18
-    react: ^16.14.0 || ^17 || ^18 || ^19
-    react-dom: ^16.14.0 || ^17 || ^18 || ^19
-  peerDependenciesMeta:
-    "@types/react":
-      optional: true
-    "@types/react-dom":
-      optional: true
-  checksum: 10/7ea67df0b44bdb996ea717e4290a3ccf756d6afc89960a33ce6227a94963061bb1e8560a780a739e453a35978886b39fd0749d27077f3f7c089fa2746e3860a4
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/dom@npm:1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/dom@npm:1.5.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@rme-sdk/core": "npm:1.5.0"
-    "@rme-sdk/preset-core": "npm:1.5.0"
-  peerDependencies:
-    "@rme-sdk/pm": 1.5.0
-  checksum: 10/ac80b4596c8d5492de5434bdc4de2cb0fe235fc6ecaae08e2975eb56e1899c8571d90aa3d1fbab080f087427f440a7775868fea34d1e6d5f1e61c9e0b05ba3e3
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/extension-annotation@npm:1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/extension-annotation@npm:1.5.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@rme-sdk/core": "npm:1.5.0"
-    "@rme-sdk/extension-positioner": "npm:1.5.0"
-    "@rme-sdk/messages": "npm:1.5.0"
-  peerDependencies:
-    "@rme-sdk/pm": 1.5.0
-  checksum: 10/8d165b9c9702c790b7bf00ffacfd395c0997180692055833773dfd9700aede7f621b1f0205572ce598045db99bb8ef0679d431dbb2f06f6040adc3cdd461610a
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/extension-bidi@npm:1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/extension-bidi@npm:1.5.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@rme-sdk/core": "npm:1.5.0"
-    "@rme-sdk/messages": "npm:1.5.0"
-    "@types/direction": "npm:^1.0.0"
-    direction: "npm:^1.0.4"
-  peerDependencies:
-    "@rme-sdk/pm": 1.5.0
-  checksum: 10/03b1ca40b76dbd4c1fae7d4e67925804c224302310f2fa204b8f6eb38f4cc6e15b27d55c28bf4302d6fb4e73575efeebba7bb2de7402730817269b69353b94a2
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/extension-blockquote@npm:1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/extension-blockquote@npm:1.5.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@rme-sdk/core": "npm:1.5.0"
-    "@rme-sdk/messages": "npm:1.5.0"
-  peerDependencies:
-    "@rme-sdk/pm": 1.5.0
-  checksum: 10/f64ab2c93a54edb5cf904152df1ca4782af78b1162b89366a72e73744b5d1564f1870712c52528c08137b182970ae3b5ea7a499f688cc25db77d505575ab4dc1
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/extension-bold@npm:1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/extension-bold@npm:1.5.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@rme-sdk/core": "npm:1.5.0"
-    "@rme-sdk/messages": "npm:1.5.0"
-  peerDependencies:
-    "@rme-sdk/pm": 1.5.0
-  checksum: 10/51bc543a65d8e84e2e0c9ab60cae463f59ec1bc60f69f4e29c653507d23a74c3d574a2612b7657f803652e8d437a079edf31604ed1ec233279fac6edf865c8c4
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/extension-code@npm:1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/extension-code@npm:1.5.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@rme-sdk/core": "npm:1.5.0"
-    "@rme-sdk/messages": "npm:1.5.0"
-  peerDependencies:
-    "@rme-sdk/pm": 1.5.0
-  checksum: 10/b3267981c335e27e1eb2606b29c5711a5ef30fd46afdfcc4895e15de6f829c5e11f07dd1b36c44cdf84d176f5b293b859be5bcc49090772f349b4f7fa93005d5
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/extension-codemirror6@npm:^1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/extension-codemirror6@npm:1.5.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
     "@codemirror/language": "npm:^6.11.3"
     "@codemirror/state": "npm:^6.5.2"
     "@codemirror/view": "npm:^6.38.4"
-    "@rme-sdk/core": "npm:1.5.0"
-  peerDependencies:
-    "@rme-sdk/pm": 1.5.0
-  checksum: 10/f711c93fdf02dc620224a5b99a212794c212ad0d1fcf5ece125ace4574129f9817a7eb0453aa966b702d1d7b772265c05ca322a28dcbf815426d03bbdb992152
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/extension-columns@npm:1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/extension-columns@npm:1.5.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@rme-sdk/core": "npm:1.5.0"
-    "@rme-sdk/messages": "npm:1.5.0"
-  peerDependencies:
-    "@rme-sdk/pm": 1.5.0
-  checksum: 10/fa94d72313389226bb711b1ca4481cde16381cbbb6975a3cbb7691475cbc60b1df610bc9a4f94edacd54630afd07ec9b284121fcfc6af5673e48dbac9d78ff37
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/extension-count@npm:^1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/extension-count@npm:1.5.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@rme-sdk/core": "npm:1.5.0"
-  peerDependencies:
-    "@rme-sdk/pm": 1.5.0
-  checksum: 10/d3103527a9e2712fa22262a206e48c5e1e82fd1a8cf665c913c9c35f49a3326ca3e0a6e25bfa74fc5581293ffefd56b24e5a747c024a510545450ec8993b7d71
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/extension-diff@npm:1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/extension-diff@npm:1.5.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@rme-sdk/core": "npm:1.5.0"
-    "@rme-sdk/messages": "npm:1.5.0"
-  peerDependencies:
-    "@rme-sdk/pm": 1.5.0
-  checksum: 10/8b172d226aac713a14869398b107d0f3c045cc2121655fa78042935989bb5931c57904b2e1b444421d468eb697b54b1c693892d88ac81c41acc5682fca52e6d0
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/extension-doc@npm:1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/extension-doc@npm:1.5.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@rme-sdk/core": "npm:1.5.0"
-    "@rme-sdk/messages": "npm:1.5.0"
-  peerDependencies:
-    "@rme-sdk/pm": 1.5.0
-  checksum: 10/63925ce765cdf6b80321a554d5caae462def05e89b1584a4db90f7b1a1130c559b34f46295a75744520942d9983b695c2b7780670da05f33f3150a5c08ae1acf
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/extension-drop-cursor@npm:1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/extension-drop-cursor@npm:1.5.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@rme-sdk/core": "npm:1.5.0"
-    "@rme-sdk/messages": "npm:1.5.0"
-  peerDependencies:
-    "@rme-sdk/pm": 1.5.0
-  checksum: 10/36406336842b8df0e695e942905c71b25b3a613e9ab206b4fae64f28f4962699f5e5dfb9f78fb0791bf1b332e3fcf5f61d565272d5ea1ac33a6ce0004a9bb58c
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/extension-emoji@npm:1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/extension-emoji@npm:1.5.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
+    "@floating-ui/react": "npm:^0.24.3"
     "@ocavue/svgmoji-cjs": "npm:^0.1.1"
-    "@rme-sdk/core": "npm:1.5.0"
-    "@rme-sdk/messages": "npm:1.5.0"
-    "@rme-sdk/pm": "npm:1.5.0"
-    emojibase: "npm:^6.1.0"
-    emojibase-data: "npm:^6.2.0"
+    "@seznam/compose-react-refs": "npm:^1.0.6"
+    case-anything: "npm:^2.1.13"
+    clsx: "npm:^2.1.1"
+    color2k: "npm:^2.0.2"
+    compute-scroll-into-view: "npm:^1.0.20"
+    css-in-js-utils: "npm:^3.1.0"
+    deepmerge: "npm:^4.3.1"
+    direction: "npm:^1.0.4"
     emojibase-regex: "npm:^6.0.1"
     escape-string-regexp: "npm:^4.0.0"
-    svgmoji: "npm:^3.2.0"
-  peerDependencies:
-    "@rme-sdk/pm": 1.5.0
-  checksum: 10/eab63c0ca19feda52b9ba58e2a82ee15b5be8bc6ad1fe0b0cd66838bf00cfb5eed0d576b678c7a949e4d3a554cde1d01b51a417ce79d59e21ce2ede5fe8441ae
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/extension-epic-mode@npm:1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/extension-epic-mode@npm:1.5.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@rme-sdk/core": "npm:1.5.0"
-    "@rme-sdk/messages": "npm:1.5.0"
-  peerDependencies:
-    "@rme-sdk/pm": 1.5.0
-  checksum: 10/63c17e0ee91af3f02c17fe86c733cf57b9e9c196003342dc9ce8f20ba890e820be53c96617d5dd4ea9df3ce9a6f307a0959ffc27650b7c2dc82d629831b52afb
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/extension-events@npm:1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/extension-events@npm:1.5.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@rme-sdk/core": "npm:1.5.0"
-    "@rme-sdk/messages": "npm:1.5.0"
-  peerDependencies:
-    "@rme-sdk/pm": 1.5.0
-  checksum: 10/fd29472b669eeb03f8ae669747bf9aa6ac147be3bcde010786adcdc8bb29db134b30dba77636c2797436f9a5e8fa58a8484abac3b49f0e7e31abb668bea01fe8
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/extension-font-size@npm:1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/extension-font-size@npm:1.5.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@rme-sdk/core": "npm:1.5.0"
-    "@rme-sdk/messages": "npm:1.5.0"
-    round: "npm:^2.0.1"
-  peerDependencies:
-    "@rme-sdk/pm": 1.5.0
-  checksum: 10/7b5d6f7e7991bb77363697060df402b425438db6bdf654347127822af4a63a1bd5aa5c5aa1f194bb993f4a0370efc332d2757f562d56b7e826de7f5053f0c0b8
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/extension-gap-cursor@npm:1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/extension-gap-cursor@npm:1.5.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@rme-sdk/core": "npm:1.5.0"
-    "@rme-sdk/messages": "npm:1.5.0"
-  peerDependencies:
-    "@rme-sdk/pm": 1.5.0
-  checksum: 10/f924214427d4808d0420c8f363803db674dfa10041d7e48c231ac13391397c889f73f49c40b77bf0b6615d96b51260dec0f6148c34e0ba7041c7e12d811a599d
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/extension-hard-break@npm:1.5.0, @rme-sdk/extension-hard-break@npm:^1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/extension-hard-break@npm:1.5.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@rme-sdk/core": "npm:1.5.0"
-    "@rme-sdk/messages": "npm:1.5.0"
-  peerDependencies:
-    "@rme-sdk/pm": 1.5.0
-  checksum: 10/41ceeb5d38c533aaf018079071c095f3b7c10ad20b83973aa137375f7b0de3d3805347484c98a7240e8acd37c0c626d7129460b6bbc8c8eb586e6c610c19a415
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/extension-heading@npm:1.5.0, @rme-sdk/extension-heading@npm:^1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/extension-heading@npm:1.5.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@rme-sdk/core": "npm:1.5.0"
-    "@rme-sdk/messages": "npm:1.5.0"
-  peerDependencies:
-    "@rme-sdk/pm": 1.5.0
-  checksum: 10/5962ac1021a40eff482a7ca153402f4774a7ca1359504e8ea20f2919be4a0cf5964bfcb6cd4ee8d61ae9b7ae914cea7bd3fb1adc5da44eb91fd334233aea0766
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/extension-history@npm:1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/extension-history@npm:1.5.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@rme-sdk/core": "npm:1.5.0"
-    "@rme-sdk/messages": "npm:1.5.0"
-  peerDependencies:
-    "@rme-sdk/pm": 1.5.0
-  checksum: 10/5aea2de9baa3ca5cd432639bca6435042ba6e1e38384a756c90d07002c1cdd22da84f1a6f8536e04ff75730b73dcb5b52a5ce8a221f793e75c433e0619b3d28c
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/extension-horizontal-rule@npm:1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/extension-horizontal-rule@npm:1.5.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@rme-sdk/core": "npm:1.5.0"
-    "@rme-sdk/messages": "npm:1.5.0"
-  peerDependencies:
-    "@rme-sdk/pm": 1.5.0
-  checksum: 10/c34cbc4a3476a364ca4d464061a83137dded6c09f9d4b6ec170a8256f96d49a088c962699299057f36edac6510341648dfc2bcd170dc753b00a02a6daaf8cbf1
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/extension-italic@npm:1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/extension-italic@npm:1.5.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@rme-sdk/core": "npm:1.5.0"
-    "@rme-sdk/messages": "npm:1.5.0"
-  peerDependencies:
-    "@rme-sdk/pm": 1.5.0
-  checksum: 10/d0a8ad005b1bfbacbdf01b701d546f5e5cbcb0ef30661f5f395f6765535d79b3452116ade58c2bd3cf012fbb9d1610a7a0b54d80832651725472cf2aeaba3b9d
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/extension-link@npm:1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/extension-link@npm:1.5.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@rme-sdk/core": "npm:1.5.0"
-    "@rme-sdk/extension-events": "npm:1.5.0"
-    "@rme-sdk/messages": "npm:1.5.0"
     extract-domain: "npm:2.2.1"
-  peerDependencies:
-    "@rme-sdk/pm": 1.5.0
-  checksum: 10/0417512d83f5ca2b0c61000096244fcce6c5acc55d9887aa9b485581bdf801210ea59b1cebe65d84828d62ad4b5d4ed2feef6f2dbc680380299c5c4cafbb77ff
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/extension-node-formatting@npm:1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/extension-node-formatting@npm:1.5.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@rme-sdk/core": "npm:1.5.0"
-    "@rme-sdk/messages": "npm:1.5.0"
-  peerDependencies:
-    "@rme-sdk/pm": 1.5.0
-  checksum: 10/7eedaba82fab139ede2140bf0520667e2f37f2d739c109a92eeb282e67cb75951360e4fb4f5341ac3effdc8f4f238c11b5fe0e0951e118b340798322157a50db
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/extension-paragraph@npm:1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/extension-paragraph@npm:1.5.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@rme-sdk/core": "npm:1.5.0"
-    "@rme-sdk/messages": "npm:1.5.0"
-  peerDependencies:
-    "@rme-sdk/pm": 1.5.0
-  checksum: 10/22c522859e157d531680bc4113004a2c89061b5618644cd8cfdafabd4f29aa4a2064d4b7c55263169ab94d08a8b6b7895ce5d016120d9d2e37cea5f9d1e6aa20
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/extension-placeholder@npm:1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/extension-placeholder@npm:1.5.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@rme-sdk/core": "npm:1.5.0"
-    "@rme-sdk/messages": "npm:1.5.0"
-  peerDependencies:
-    "@rme-sdk/pm": 1.5.0
-  checksum: 10/43d27d5b285971cc9671ba0e5ef542f13443a41ea822bdf8eebf41af0248cb8c12083260aa95dc96f1fdecc64da8147d1a11492e76728ec70594154b577f6d9a
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/extension-positioner@npm:1.5.0, @rme-sdk/extension-positioner@npm:^1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/extension-positioner@npm:1.5.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@rme-sdk/core": "npm:1.5.0"
-    "@rme-sdk/extension-events": "npm:1.5.0"
-    "@rme-sdk/messages": "npm:1.5.0"
+    fast-deep-equal: "npm:^3.1.3"
+    get-dom-document: "npm:^0.1.3"
+    make-error: "npm:^1.3.6"
     nanoevents: "npm:^5.1.13"
-  peerDependencies:
-    "@rme-sdk/pm": 1.5.0
-  checksum: 10/58d8bb5486de8159d02616386d0c5c65ec6c81393b6fd8f12d2a8b9cbb1e0ec5c044858fee311308b6a603c53ecc817662c918f2a6cb3374e6661fd86b8da978
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/extension-react-component@npm:1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/extension-react-component@npm:1.5.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@rme-sdk/core": "npm:1.5.0"
-    "@rme-sdk/core-constants": "npm:1.5.0"
-    "@rme-sdk/core-helpers": "npm:1.5.0"
-    "@rme-sdk/core-types": "npm:1.5.0"
-    "@rme-sdk/core-utils": "npm:1.5.0"
-    "@rme-sdk/messages": "npm:1.5.0"
-    nanoevents: "npm:^5.1.13"
-  peerDependencies:
-    "@rme-sdk/pm": 1.5.0
-    "@types/react": ^16.14.0 || ^17 || ^18 || ^19
-    "@types/react-dom": ^16.9.0 || ^17 || ^18 || ^19
-    react: ^16.14.0 || ^17 || ^18 || ^19
-    react-dom: ^16.14.0 || ^17 || ^18 || ^19
-  checksum: 10/7c06bbd17ac3d3f3762bfeca59cbde4a02345605b1171bc50d1cad2a41af47f15cfdf28d124f67c25b26e2bdbb475bd7f4a0ef38a53d410fa1fcf87ad021b45a
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/extension-shortcuts@npm:1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/extension-shortcuts@npm:1.5.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@rme-sdk/core": "npm:1.5.0"
-  peerDependencies:
-    "@rme-sdk/pm": 1.5.0
-  checksum: 10/38e2d285481a9629af96156d257d951d5c469d8dcf3926e2ed0bd8b159c7af334561b4b615fef2fc7566404ef4ca80e8658baf675ef8eaee9a6f265988552d9b
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/extension-tables@npm:1.5.0, @rme-sdk/extension-tables@npm:^1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/extension-tables@npm:1.5.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@rme-sdk/core": "npm:1.5.0"
-    "@rme-sdk/extension-events": "npm:1.5.0"
-    "@rme-sdk/extension-positioner": "npm:1.5.0"
-    "@rme-sdk/messages": "npm:1.5.0"
-  peerDependencies:
-    "@rme-sdk/pm": 1.5.0
-  checksum: 10/8c56a71837a29f84452ddb910da8426f4b8e31e532cf736937570de0be0e582fccfff27a6022a9b2de950bbeb9c58fd0fd788cc5093fb4d9b745ace48718c2d9
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/extension-text-color@npm:1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/extension-text-color@npm:1.5.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@rme-sdk/core": "npm:1.5.0"
-    "@rme-sdk/messages": "npm:1.5.0"
-    color2k: "npm:^2.0.2"
-  peerDependencies:
-    "@rme-sdk/pm": 1.5.0
-  checksum: 10/4c34d4784e03052b668b30099b475f270dce41f89e4ba15a03f36a0020df06e83ae60faaa67aa390cc35012fdf1442f00dcbbc44e27f6fd321313c2ae0dd4048
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/extension-text-highlight@npm:1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/extension-text-highlight@npm:1.5.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@rme-sdk/core": "npm:1.5.0"
-    "@rme-sdk/extension-text-color": "npm:1.5.0"
-    "@rme-sdk/messages": "npm:1.5.0"
-  peerDependencies:
-    "@rme-sdk/pm": 1.5.0
-  checksum: 10/d2551f550018f7f19e835218986974abf0fe7509771eb6f6738430f75416cea964b2f79c3c87555f4131cae89ad265ef816968f06c5f75c18020b472912d4bee
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/extension-text@npm:1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/extension-text@npm:1.5.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@rme-sdk/core": "npm:1.5.0"
-    "@rme-sdk/messages": "npm:1.5.0"
-  peerDependencies:
-    "@rme-sdk/pm": 1.5.0
-  checksum: 10/336e3b6e13b16b610f13dee753d0fbb834b2691bdd46ada31a7f679d62703506db62064b802c11da20e0e1763447175228d054117b47b8e9acb643c327ef31f9
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/extension-trailing-node@npm:1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/extension-trailing-node@npm:1.5.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@rme-sdk/core": "npm:1.5.0"
-    "@rme-sdk/messages": "npm:1.5.0"
-  peerDependencies:
-    "@rme-sdk/pm": 1.5.0
-  checksum: 10/5ba7abc18875e4db1c3c72ba73ac51366ca8dd19ad0c9313e444e3a2ccdc90b9c82c5bb189db5149ac9d5ab69204dfc29f16450b4f7e4c82d072349c2b1ebb30
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/extension-underline@npm:1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/extension-underline@npm:1.5.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@rme-sdk/core": "npm:1.5.0"
-    "@rme-sdk/messages": "npm:1.5.0"
-  peerDependencies:
-    "@rme-sdk/pm": 1.5.0
-  checksum: 10/2e26a5b658479e4b882cf585e4099bbc3052f1cfc70f4f4ce37d56605717c70477cbd72adcb63cd70693df35cdb2560f043f56cf760d94993002c687deff8c0e
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/extension-whitespace@npm:1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/extension-whitespace@npm:1.5.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@rme-sdk/core": "npm:1.5.0"
-    "@rme-sdk/messages": "npm:1.5.0"
-  peerDependencies:
-    "@rme-sdk/pm": 1.5.0
-  checksum: 10/afe16f9c134a34a9da906c3651938eb9853c9f79547207c8a9398f9f3c02f2ceda261f9ee82b4543e937dae93dcd627e7f43b987c0692a3e2648837d4e7730bf
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/icons@npm:1.5.0, @rme-sdk/icons@npm:^1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/icons@npm:1.5.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@rme-sdk/core-helpers": "npm:1.5.0"
-  checksum: 10/ebfb23051155e804b21cbafb55cbc6861af7b80d65809a2c21a154223ae66083549d585d200e38f014e2e5976fd1a75429c0762cea7e33bf984de3891dc19466
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/main@npm:1.5.0, @rme-sdk/main@npm:^1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/main@npm:1.5.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@rme-sdk/core": "npm:1.5.0"
-    "@rme-sdk/core-constants": "npm:1.5.0"
-    "@rme-sdk/core-helpers": "npm:1.5.0"
-    "@rme-sdk/core-types": "npm:1.5.0"
-    "@rme-sdk/core-utils": "npm:1.5.0"
-    "@rme-sdk/dom": "npm:1.5.0"
-    "@rme-sdk/extension-annotation": "npm:1.5.0"
-    "@rme-sdk/extension-bidi": "npm:1.5.0"
-    "@rme-sdk/extension-blockquote": "npm:1.5.0"
-    "@rme-sdk/extension-bold": "npm:1.5.0"
-    "@rme-sdk/extension-code": "npm:1.5.0"
-    "@rme-sdk/extension-columns": "npm:1.5.0"
-    "@rme-sdk/extension-diff": "npm:1.5.0"
-    "@rme-sdk/extension-doc": "npm:1.5.0"
-    "@rme-sdk/extension-drop-cursor": "npm:1.5.0"
-    "@rme-sdk/extension-emoji": "npm:1.5.0"
-    "@rme-sdk/extension-epic-mode": "npm:1.5.0"
-    "@rme-sdk/extension-events": "npm:1.5.0"
-    "@rme-sdk/extension-font-size": "npm:1.5.0"
-    "@rme-sdk/extension-gap-cursor": "npm:1.5.0"
-    "@rme-sdk/extension-hard-break": "npm:1.5.0"
-    "@rme-sdk/extension-heading": "npm:1.5.0"
-    "@rme-sdk/extension-history": "npm:1.5.0"
-    "@rme-sdk/extension-horizontal-rule": "npm:1.5.0"
-    "@rme-sdk/extension-italic": "npm:1.5.0"
-    "@rme-sdk/extension-link": "npm:1.5.0"
-    "@rme-sdk/extension-node-formatting": "npm:1.5.0"
-    "@rme-sdk/extension-paragraph": "npm:1.5.0"
-    "@rme-sdk/extension-placeholder": "npm:1.5.0"
-    "@rme-sdk/extension-positioner": "npm:1.5.0"
-    "@rme-sdk/extension-shortcuts": "npm:1.5.0"
-    "@rme-sdk/extension-tables": "npm:1.5.0"
-    "@rme-sdk/extension-text": "npm:1.5.0"
-    "@rme-sdk/extension-text-color": "npm:1.5.0"
-    "@rme-sdk/extension-text-highlight": "npm:1.5.0"
-    "@rme-sdk/extension-trailing-node": "npm:1.5.0"
-    "@rme-sdk/extension-underline": "npm:1.5.0"
-    "@rme-sdk/extension-whitespace": "npm:1.5.0"
-    "@rme-sdk/icons": "npm:1.5.0"
-    "@rme-sdk/preset-core": "npm:1.5.0"
-    "@types/refractor": "npm:^3.0.2"
-    refractor: "npm:^3.6.0"
-  peerDependencies:
-    "@rme-sdk/pm": 1.5.0
-    prettier: ^3.2.0
-  peerDependenciesMeta:
-    prettier:
-      optional: true
-  checksum: 10/e4969c1038f1c9fc54c00eb21e38a25ae88ebfc933608e3924f6170f7c01c7803d17381bbd5e218f2cbc1a2653b8cd7e9c8de247b89669c84a80dd12d7829c09
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/messages@npm:1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/messages@npm:1.5.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@rme-sdk/core-helpers": "npm:1.5.0"
-    "@rme-sdk/core-types": "npm:1.5.0"
-  checksum: 10/75d491f10ed709aa96e7de5bfb3d50465d2fcc33334a2c0f897cc7a5c331d2951b9ed899a1d275dff8bdb289aca2aabc0776fccfceece07ae50f52c20688f98d
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/multishift@npm:1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/multishift@npm:1.5.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@rme-sdk/core-helpers": "npm:1.5.0"
-    "@rme-sdk/core-types": "npm:1.5.0"
-    "@seznam/compose-react-refs": "npm:^1.0.6"
-    a11y-status: "npm:2.0.2"
-    compute-scroll-into-view: "npm:^1.0.20"
-    tiny-warning: "npm:^1.0.3"
-    w3c-keyname: "npm:^2.2.7"
-  peerDependencies:
-    "@types/react": ^16.14.0 || ^17 || ^18 || ^19
-    react: ^16.14.0 || ^17 || ^18 || ^19
-  peerDependenciesMeta:
-    "@types/react":
-      optional: true
-  checksum: 10/fdaa0578ff9ac53567ed8abcce87dadb1b1df525062f3486528d2511be194ff34892f2964e27dac5124a77e95e15477502c2edf9be0c0823488e4b90ce099b66
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/pm@npm:1.5.0, @rme-sdk/pm@npm:^1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/pm@npm:1.5.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@rme-sdk/core-constants": "npm:1.5.0"
-    "@rme-sdk/core-helpers": "npm:1.5.0"
-    "@rme-sdk/prosemirror-suggest": "npm:1.5.0"
+    object.omit: "npm:^3.0.0"
+    object.pick: "npm:^1.3.0"
+    parenthesis: "npm:^3.1.8"
     prosemirror-collab: "npm:^1.3.1"
     prosemirror-commands: "npm:^1.7.1"
+    prosemirror-dev-toolkit: "npm:^1.1.8"
     prosemirror-dropcursor: "npm:^1.8.2"
     prosemirror-gapcursor: "npm:^1.3.2"
     prosemirror-history: "npm:^1.4.1"
     prosemirror-inputrules: "npm:^1.5.0"
     prosemirror-keymap: "npm:^1.2.2"
     prosemirror-model: "npm:^1.25.1"
-    prosemirror-paste-rules: "npm:3.0.0"
+    prosemirror-safari-ime-span: "npm:^1.0.2"
     prosemirror-schema-list: "npm:^1.5.1"
     prosemirror-state: "npm:^1.4.3"
     prosemirror-tables: "npm:^1.7.1"
-    prosemirror-trailing-node: "npm:3.0.0"
     prosemirror-transform: "npm:^1.10.4"
     prosemirror-view: "npm:^1.39.2"
-  checksum: 10/2069389f04ba2ae86a81691f2ebd2b88e58ba71cfc36d22ebfbf0131c5aba960355f96d2b5ea699f403ed232d6aeb9e9a6fa5f2db3b9184f8fba23e805c16a7d
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/preset-core@npm:1.5.0, @rme-sdk/preset-core@npm:^1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/preset-core@npm:1.5.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@rme-sdk/core": "npm:1.5.0"
-    "@rme-sdk/extension-doc": "npm:1.5.0"
-    "@rme-sdk/extension-events": "npm:1.5.0"
-    "@rme-sdk/extension-gap-cursor": "npm:1.5.0"
-    "@rme-sdk/extension-history": "npm:1.5.0"
-    "@rme-sdk/extension-paragraph": "npm:1.5.0"
-    "@rme-sdk/extension-positioner": "npm:1.5.0"
-    "@rme-sdk/extension-text": "npm:1.5.0"
-  peerDependencies:
-    "@rme-sdk/pm": 1.5.0
-  checksum: 10/527207891b1767c7ed475fe7d7ed198ccf13a57c5bda3d9cef4dc0ef757e6854f3438bdfea24103bf2b869074a2201f0886194fd21ce1b6a586a317fab0b7b25
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/preset-react@npm:1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/preset-react@npm:1.5.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@rme-sdk/core": "npm:1.5.0"
-    "@rme-sdk/extension-placeholder": "npm:1.5.0"
-    "@rme-sdk/extension-react-component": "npm:1.5.0"
-    "@rme-sdk/react-utils": "npm:1.5.0"
-  peerDependencies:
-    "@rme-sdk/pm": 1.5.0
-    "@types/react": ^16.14.0 || ^17 || ^18 || ^19
-    "@types/react-dom": ^16.9.0 || ^17 || ^18 || ^19
-    react: ^16.14.0 || ^17 || ^18 || ^19
-    react-dom: ^16.14.0 || ^17 || ^18 || ^19
-  peerDependenciesMeta:
-    "@types/react":
-      optional: true
-    "@types/react-dom":
-      optional: true
-  checksum: 10/e6d0e37c4621226f9fa12ffff7d684af07801c9fb6206d33770c2cd0e6484b5950df66c1d5ce9405cc90a1639774804a5555612d8a568248272abe949a2925a0
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/prosemirror-flat-list@npm:^1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/prosemirror-flat-list@npm:1.5.0"
-  dependencies:
-    "@rme-sdk/core": "npm:1.5.0"
-    "@rme-sdk/main": "npm:1.5.0"
-    "@rme-sdk/pm": "npm:1.5.0"
-    "@rme-sdk/preset-core": "npm:1.5.0"
-    prosemirror-safari-ime-span: "npm:^1.0.2"
-  checksum: 10/ef0463c8e810b5742ece798f8171a82f8c40fefa8864f88d69d73f878553049de8aa01d58a8c9c2c8ecdccad51c9268bb208225b6578ad1a5397838d5704478e
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/prosemirror-suggest@npm:1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/prosemirror-suggest@npm:1.5.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@rme-sdk/core-constants": "npm:1.5.0"
-    "@rme-sdk/core-helpers": "npm:1.5.0"
-    "@rme-sdk/types": "npm:1.5.0"
-    escape-string-regexp: "npm:^4.0.0"
-  peerDependencies:
-    prosemirror-model: ^1.22.1
-    prosemirror-state: ^1.4.2
-    prosemirror-view: ^1.33.8
-  checksum: 10/7bda61900974a1639d663c3ef06b44cc1a533dd3375cb4a319667eda0a797cbcc3143cf11e590137415a44b1cef7f8af69c8934a138a7f8e51dc211daf0c755b
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/react-components@npm:1.5.1, @rme-sdk/react-components@npm:^1.5.1":
-  version: 1.5.1
-  resolution: "@rme-sdk/react-components@npm:1.5.1"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@floating-ui/react": "npm:^0.24.3"
-    "@rme-sdk/core": "npm:1.5.0"
-    "@rme-sdk/extension-positioner": "npm:1.5.0"
-    "@rme-sdk/icons": "npm:1.5.0"
-    "@rme-sdk/messages": "npm:1.5.0"
-    "@rme-sdk/multishift": "npm:1.5.0"
-    "@rme-sdk/react-core": "npm:1.5.1"
-    "@rme-sdk/react-hooks": "npm:1.5.1"
-    "@rme-sdk/react-utils": "npm:1.5.0"
-    "@seznam/compose-react-refs": "npm:^1.0.6"
-    "@types/react-color": "npm:^3.0.6"
-    match-sorter: "npm:^6.3.1"
-    react-color: "npm:^2.19.3"
-  peerDependencies:
-    "@rme-sdk/pm": 1.5.0
-    "@types/react": ^16.14.0 || ^17 || ^18 || ^19
-    "@types/react-dom": ^16.9.0 || ^17 || ^18 || ^19
-    react: ^16.14.0 || ^17 || ^18 || ^19
-    react-dom: ^16.14.0 || ^17 || ^18 || ^19
-  peerDependenciesMeta:
-    "@types/react":
-      optional: true
-    "@types/react-dom":
-      optional: true
-  checksum: 10/eb386307187f65a17b54a069a901affd02be4ecfa4760ebb73b55203da94490e030551808b6b0a74bc30f3ecf59bfc2386d84024620dd4698dd3aafd8d879ced
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/react-core@npm:1.5.1, @rme-sdk/react-core@npm:^1.5.1":
-  version: 1.5.1
-  resolution: "@rme-sdk/react-core@npm:1.5.1"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@rme-sdk/core": "npm:1.5.0"
-    "@rme-sdk/extension-positioner": "npm:1.5.0"
-    "@rme-sdk/extension-react-component": "npm:1.5.0"
-    "@rme-sdk/preset-core": "npm:1.5.0"
-    "@rme-sdk/preset-react": "npm:1.5.0"
-    "@rme-sdk/react-renderer": "npm:1.5.0"
-    "@rme-sdk/react-utils": "npm:1.5.0"
-    "@seznam/compose-react-refs": "npm:^1.0.6"
-    fast-deep-equal: "npm:^3.1.3"
-    resize-observer-polyfill: "npm:^1.5.1"
+    round: "npm:^2.0.1"
+    svgmoji: "npm:^3.2.0"
+    throttle-debounce: "npm:^3.0.1"
     tiny-warning: "npm:^1.0.3"
-  peerDependencies:
-    "@rme-sdk/pm": 1.5.0
-    "@types/react": ^16.14.0 || ^17 || ^18 || ^19
-    "@types/react-dom": ^16.9.0 || ^17 || ^18 || ^19
-    react: ^16.14.0 || ^17 || ^18 || ^19
-    react-dom: ^16.14.0 || ^17 || ^18 || ^19
-  peerDependenciesMeta:
-    "@types/react":
-      optional: true
-    "@types/react-dom":
-      optional: true
-  checksum: 10/0d52bc64d82fce9f9c6fb0bd97c2c415904f25e60b924d080c13c071e50d1883929b023e39a02d9b42a0cd102b604fece789da3278075fb93f6df10d6a49c96f
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/react-hooks@npm:1.5.1":
-  version: 1.5.1
-  resolution: "@rme-sdk/react-hooks@npm:1.5.1"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@rme-sdk/core": "npm:1.5.0"
-    "@rme-sdk/core-constants": "npm:1.5.0"
-    "@rme-sdk/core-helpers": "npm:1.5.0"
-    "@rme-sdk/extension-emoji": "npm:1.5.0"
-    "@rme-sdk/extension-events": "npm:1.5.0"
-    "@rme-sdk/extension-history": "npm:1.5.0"
-    "@rme-sdk/extension-positioner": "npm:1.5.0"
-    "@rme-sdk/multishift": "npm:1.5.0"
-    "@rme-sdk/react-core": "npm:1.5.1"
-    "@rme-sdk/react-utils": "npm:1.5.0"
-    use-isomorphic-layout-effect: "npm:^1.1.2"
-    use-previous: "npm:^1.2.0"
-  peerDependencies:
-    "@rme-sdk/pm": 1.5.0
-    "@types/react": ^16.14.0 || ^17 || ^18 || ^19
-    "@types/react-dom": ^16.9.0 || ^17 || ^18 || ^19
-    react: ^16.14.0 || ^17 || ^18 || ^19
-    react-dom: ^16.14.0 || ^17 || ^18 || ^19
-  peerDependenciesMeta:
-    "@types/react":
-      optional: true
-    "@types/react-dom":
-      optional: true
-    react:
-      optional: true
-    react-dom:
-      optional: true
-  checksum: 10/433fe242e3d0078abf46d844fe3c5f5416ab4d679652314f3c75e2ffe52205ca5ca2730a1b3b29dc762ad06d7e683d739130c749a785834d26389cc3a0ec964b
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/react-renderer@npm:1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/react-renderer@npm:1.5.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@rme-sdk/core": "npm:1.5.0"
-  peerDependencies:
-    "@types/react": ^16.14.0 || ^17 || ^18 || ^19
-    react: ^16.14.0 || ^17 || ^18 || ^19
-  peerDependenciesMeta:
-    "@types/react":
-      optional: true
-  checksum: 10/50ae119981a4d7e4d3d55efec2d4543e808f9f1ecccce561cd8e442c18b0f8e1e9116409dccba6c94743f2fe53a6bfff7a82b77b8f3bf08d5025d620958f5d8a
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/react-utils@npm:1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/react-utils@npm:1.5.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@rme-sdk/core-constants": "npm:1.5.0"
-    "@rme-sdk/core-helpers": "npm:1.5.0"
-    "@rme-sdk/core-types": "npm:1.5.0"
-  peerDependencies:
-    "@types/react": ^16.14.0 || ^17 || ^18 || ^19
-    react: ^16.14.0 || ^17 || ^18 || ^19
-  peerDependenciesMeta:
-    "@types/react":
-      optional: true
-  checksum: 10/84797c479a89755e743f6320223e5ae3d589da33399d0712f5cf923c313c3e7c35da6b19555ff484ff2cc4af40e2cc17bbfe791cf22f230ebfd9ec2f499bb53d
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/react@npm:^1.5.1":
-  version: 1.5.1
-  resolution: "@rme-sdk/react@npm:1.5.1"
-  dependencies:
-    "@babel/runtime": "npm:^7.27.0"
-    "@rme-sdk/extension-placeholder": "npm:1.5.0"
-    "@rme-sdk/extension-positioner": "npm:1.5.0"
-    "@rme-sdk/extension-react-component": "npm:1.5.0"
-    "@rme-sdk/preset-react": "npm:1.5.0"
-    "@rme-sdk/react-components": "npm:1.5.1"
-    "@rme-sdk/react-core": "npm:1.5.1"
-    "@rme-sdk/react-hooks": "npm:1.5.1"
-    "@rme-sdk/react-renderer": "npm:1.5.0"
-    "@rme-sdk/react-utils": "npm:1.5.0"
-  peerDependencies:
-    "@types/react": ^16.14.0 || ^17 || ^18 || ^19
-    "@types/react-dom": ^16.9.0 || ^17 || ^18 || ^19
-    react: ^16.14.0 || ^17 || ^18 || ^19
-    react-dom: ^16.14.0 || ^17 || ^18 || ^19
-  peerDependenciesMeta:
-    "@types/react":
-      optional: true
-    "@types/react-dom":
-      optional: true
-  checksum: 10/a97fc7a23e011c79b26f53b941ded9165e635f1701b93b5800691bcd8084a8be1e0c7b7a415b3743fd2ba11502e26d0148b999b801064d51cb7631530fb9311e
-  languageName: node
-  linkType: hard
-
-"@rme-sdk/types@npm:1.5.0, @rme-sdk/types@npm:^1.5.0":
-  version: 1.5.0
-  resolution: "@rme-sdk/types@npm:1.5.0"
-  dependencies:
     type-fest: "npm:^3.10.0"
-  checksum: 10/a51559130537ac44c617cd99193653f69d67824c5ffd95b36d9ce27014f690a287ca9c4ba79f8f061f1177726f7dfe86607afb1a24320ca2c62f7abbefd69fcc
+    w3c-keyname: "npm:^2.2.7"
+  peerDependencies:
+    react: ^19.0.0
+    react-dom: ^19.0.0
+  checksum: 10/799207856cbc386be424067879e62bc2f1b3668829f91166b0d2fdf2a578555c5d5fe15be0f4cd55eb1386109cd59fa103bed1100f6fbfcd94a99aa93af4ce4d
   languageName: node
   linkType: hard
 
@@ -12809,13 +11883,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/direction@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "@types/direction@npm:1.0.0"
-  checksum: 10/6a9c2af4690cadaf39291d9983e24576b8b4ecd9dbe07dff3e471980f128e777c082a468f8a2f8a476a68d80945014a60e5bb6d08699dfd0ff24869b25d8183a
-  languageName: node
-  linkType: hard
-
 "@types/enzyme@npm:^3.10.18":
   version: 3.10.18
   resolution: "@types/enzyme@npm:3.10.18"
@@ -13219,13 +12286,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/prismjs@npm:*":
-  version: 1.26.5
-  resolution: "@types/prismjs@npm:1.26.5"
-  checksum: 10/617099479db9550119d0f84272dc79d64b2cf3e0d7a17167fe740d55fdf0f155697d935409464392d164e62080c2c88d649cf4bc4fdd30a87127337536657277
-  languageName: node
-  linkType: hard
-
 "@types/prop-types@npm:*":
   version: 15.7.13
   resolution: "@types/prop-types@npm:15.7.13"
@@ -13253,16 +12313,6 @@ __metadata:
   dependencies:
     types-ramda: "npm:^0.29.4"
   checksum: 10/172b18d62473d4bffb1e4e92fa293e56fa4f85fcf91b1b2c9178955f775e34065cc408e93f1171436b52e240599ecb1be51955dab07ca389bf2da98f85f820a9
-  languageName: node
-  linkType: hard
-
-"@types/react-color@npm:^3.0.6":
-  version: 3.0.12
-  resolution: "@types/react-color@npm:3.0.12"
-  dependencies:
-    "@types/react": "npm:*"
-    "@types/reactcss": "npm:*"
-  checksum: 10/d8ed71d297d026faded787588720ee5e158edfa45ee23c5e517d8bb1441ccaa25f8a0c88069fd63829f7263bbbdc78a7ae2df5957061847a2d2c6351c46c13dd
   languageName: node
   linkType: hard
 
@@ -13329,24 +12379,6 @@ __metadata:
     "@types/prop-types": "npm:*"
     csstype: "npm:^3.2.2"
   checksum: 10/6db7bb7f19957ee9f530baa7d143527f8befedad1585b064eb80777be0d84621157de75aba4f499ff429b10c5ef0c7d13e89be6bca3296ef71c80472894ff0eb
-  languageName: node
-  linkType: hard
-
-"@types/reactcss@npm:*":
-  version: 1.2.12
-  resolution: "@types/reactcss@npm:1.2.12"
-  dependencies:
-    "@types/react": "npm:*"
-  checksum: 10/d04c087376daa503e187b390e416530904152046a7ac79a1c94e43cb4855fc8078ba8947792b88f3aff953defd9cae331c44fba717ebd650f40556e8f4bbb2a2
-  languageName: node
-  linkType: hard
-
-"@types/refractor@npm:^3.0.2":
-  version: 3.4.1
-  resolution: "@types/refractor@npm:3.4.1"
-  dependencies:
-    "@types/prismjs": "npm:*"
-  checksum: 10/6c585603361e50bbc986cc0ae712703cc2ae53be654833cf17c734ebff682c37c2c8f5cf8b35256249c28778de9d6d37d9a4d3ba91daba7abfe60dd946a02580
   languageName: node
   linkType: hard
 
@@ -15178,17 +14210,6 @@ __metadata:
   bin:
     JSONStream: ./bin.js
   checksum: 10/e30daf7b9b2da23076181d9a0e4bec33bc1d97e8c0385b949f1b16ba3366a1d241ec6f077850c01fe32379b5ebb8b96b65496984bc1545a93a5150bf4c267439
-  languageName: node
-  linkType: hard
-
-"a11y-status@npm:2.0.2":
-  version: 2.0.2
-  resolution: "a11y-status@npm:2.0.2"
-  dependencies:
-    "@babel/runtime": "npm:^7.22.3"
-    "@types/throttle-debounce": "npm:^2.1.0"
-    throttle-debounce: "npm:^3.0.1"
-  checksum: 10/d8ed74141a3815aface32201b48902230e70945a4c7df3bfe521e39e203eea1f6c5097f52e0ac42e323bc432c94f655bb3d90fb9351a787993a6ea3defc62667
   languageName: node
   linkType: hard
 
@@ -17836,13 +16857,6 @@ __metadata:
   version: 4.4.2
   resolution: "comlink@npm:4.4.2"
   checksum: 10/ecee53b5b4536b3aa3f7636c383f831e68fbc013def77665cc7fad873d72cfa23b994e1ec4b49e83e4e909c1089a03acae03a523e33a5e5ed938cdb613456434
-  languageName: node
-  linkType: hard
-
-"comma-separated-tokens@npm:^1.0.0":
-  version: 1.0.8
-  resolution: "comma-separated-tokens@npm:1.0.8"
-  checksum: 10/0adcb07174fa4d08cf0f5c8e3aec40a36b5ff0c2c720e5e23f50fe02e6789d1d00a67036c80e0c1e1539f41d3e7f0101b074039dd833b4e4a59031b659d6ca0d
   languageName: node
   linkType: hard
 
@@ -20629,15 +19643,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"emojibase-data@npm:^6.2.0":
-  version: 6.2.0
-  resolution: "emojibase-data@npm:6.2.0"
-  peerDependencies:
-    emojibase: "*"
-  checksum: 10/055af9d9f952f5ae0d3aee63f0d8936dfd41b041c974d33ebca21fb5befee3ea8bcb37510502175265eca7129cf31a2a8a796cd7747017b040cc9af5795ec6ed
-  languageName: node
-  linkType: hard
-
 "emojibase-regex@npm:^5.1.1":
   version: 5.1.3
   resolution: "emojibase-regex@npm:5.1.3"
@@ -20656,13 +19661,6 @@ __metadata:
   version: 5.2.0
   resolution: "emojibase@npm:5.2.0"
   checksum: 10/eb480e5645c646fa2fad9bc2e9ecaa2d18ee45ce73c9034afd1ad95031becc6f251bf400e1c699c386bac8c092be9021fe9d161e48a5aef00e44df3a82cb8c73
-  languageName: node
-  linkType: hard
-
-"emojibase@npm:^6.1.0":
-  version: 6.1.0
-  resolution: "emojibase@npm:6.1.0"
-  checksum: 10/40368af4be024183e2e78b4fd7f9e69098c1d8d16c666a04ae5a42c50bb148c169097704401558580130ccdc6e896ee72176ae4084456d8347500ee943dd2b4b
   languageName: node
   linkType: hard
 
@@ -24692,13 +23690,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"hast-util-parse-selector@npm:^2.0.0":
-  version: 2.2.5
-  resolution: "hast-util-parse-selector@npm:2.2.5"
-  checksum: 10/22ee4afbd11754562144cb3c4f3ec52524dafba4d90ee52512902d17cf11066d83b38f7bdf6ca571bbc2541f07ba30db0d234657b6ecb8ca4631587466459605
-  languageName: node
-  linkType: hard
-
 "hast-util-parse-selector@npm:^3.0.0":
   version: 3.1.1
   resolution: "hast-util-parse-selector@npm:3.1.1"
@@ -24900,19 +23891,6 @@ __metadata:
   dependencies:
     "@types/hast": "npm:^3.0.0"
   checksum: 10/8c7e9eeb8131fc18702f3a42623eb6b0b09d470347aa8badacac70e6d91f79657ab8c6b57c4c6fee3658cff405fac30e816d1cdfb3ed1fbf6045d0a4555cf4d4
-  languageName: node
-  linkType: hard
-
-"hastscript@npm:^6.0.0":
-  version: 6.0.0
-  resolution: "hastscript@npm:6.0.0"
-  dependencies:
-    "@types/hast": "npm:^2.0.0"
-    comma-separated-tokens: "npm:^1.0.0"
-    hast-util-parse-selector: "npm:^2.0.0"
-    property-information: "npm:^5.0.0"
-    space-separated-tokens: "npm:^1.0.0"
-  checksum: 10/78f91b71e50506f7499c8275d67645f9f4f130e6f12b038853261d1fa7393432da4113baf3508c41b79d933f255089d6d593beea9d4cda89dfd34d0a498cf378
   languageName: node
   linkType: hard
 
@@ -28788,7 +27766,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash-es@npm:^4.17.15, lodash-es@npm:^4.17.21":
+"lodash-es@npm:^4.17.21":
   version: 4.17.21
   resolution: "lodash-es@npm:4.17.21"
   checksum: 10/03f39878ea1e42b3199bd3f478150ab723f93cc8730ad86fec1f2804f4a07c6e30deaac73cad53a88e9c3db33348bb8ceeb274552390e7a75d7849021c02df43
@@ -28935,7 +27913,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash@npm:^4.0.1, lodash@npm:^4.17.10, lodash@npm:^4.17.12, lodash@npm:^4.17.15, lodash@npm:^4.17.19, lodash@npm:^4.17.20, lodash@npm:^4.17.21, lodash@npm:^4.17.23":
+"lodash@npm:^4.17.10, lodash@npm:^4.17.12, lodash@npm:^4.17.15, lodash@npm:^4.17.19, lodash@npm:^4.17.20, lodash@npm:^4.17.21, lodash@npm:^4.17.23":
   version: 4.18.1
   resolution: "lodash@npm:4.18.1"
   checksum: 10/306fea53dfd39dad1f03d45ba654a2405aebd35797b673077f401edb7df2543623dc44b9effbb98f69b32152295fff725a4cec99c684098947430600c6af0c3f
@@ -29331,20 +28309,13 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"match-sorter@npm:^6.2.0, match-sorter@npm:^6.3.1":
+"match-sorter@npm:^6.2.0":
   version: 6.3.4
   resolution: "match-sorter@npm:6.3.4"
   dependencies:
     "@babel/runtime": "npm:^7.23.8"
     remove-accents: "npm:0.5.0"
   checksum: 10/80b6cb04415b68b32cc7ec1242cc125f95ca6a8739a787dbc5e8058a120aaf5cb4ff8f8467b6f9949a8d8a6430a44d64659894d26138a03a8c0dd6ba239d5519
-  languageName: node
-  linkType: hard
-
-"material-colors@npm:^1.2.1":
-  version: 1.2.6
-  resolution: "material-colors@npm:1.2.6"
-  checksum: 10/7ad6df7ee7de15d8b8f95191c2310db6b99934ce01b592b38d7c6e2ce119fc6d37699356fb148dd3e6ba63a5ec68cc16d466b972d96fc5364ab85238a3fe2429
   languageName: node
   linkType: hard
 
@@ -34918,13 +33889,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prismjs@npm:~1.27.0":
-  version: 1.27.0
-  resolution: "prismjs@npm:1.27.0"
-  checksum: 10/dc83e2e09170b53526182f5435fae056fc200b109cac39faa88eb48d992311c7f59b94990318962fa93299190a9b33a404920ed150e5b364ce48c897f2ba1e8e
-  languageName: node
-  linkType: hard
-
 "proc-log@npm:^3.0.0":
   version: 3.0.0
   resolution: "proc-log@npm:3.0.0"
@@ -34994,7 +33958,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prop-types@npm:^15.5.10, prop-types@npm:^15.7.2, prop-types@npm:^15.8.1":
+"prop-types@npm:^15.7.2, prop-types@npm:^15.8.1":
   version: 15.8.1
   resolution: "prop-types@npm:15.8.1"
   dependencies:
@@ -35002,15 +33966,6 @@ __metadata:
     object-assign: "npm:^4.1.1"
     react-is: "npm:^16.13.1"
   checksum: 10/7d959caec002bc964c86cdc461ec93108b27337dabe6192fb97d69e16a0c799a03462713868b40749bfc1caf5f57ef80ac3e4ffad3effa636ee667582a75e2c0
-  languageName: node
-  linkType: hard
-
-"property-information@npm:^5.0.0":
-  version: 5.6.0
-  resolution: "property-information@npm:5.6.0"
-  dependencies:
-    xtend: "npm:^4.0.0"
-  checksum: 10/e4f45b100fec5968126b08102f9567f1b5fc3442aecbb5b4cdeca401f1f447672e7638a08c81c05dd3979c62d084e0cc6acbe2d8b053c05280ac5abaaf666a68
   languageName: node
   linkType: hard
 
@@ -35116,7 +34071,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prosemirror-paste-rules@npm:3.0.0, prosemirror-paste-rules@npm:^3.0.0":
+"prosemirror-paste-rules@npm:3.0.0":
   version: 3.0.0
   resolution: "prosemirror-paste-rules@npm:3.0.0"
   dependencies:
@@ -35864,23 +34819,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-color@npm:^2.19.3":
-  version: 2.19.3
-  resolution: "react-color@npm:2.19.3"
-  dependencies:
-    "@icons/material": "npm:^0.2.4"
-    lodash: "npm:^4.17.15"
-    lodash-es: "npm:^4.17.15"
-    material-colors: "npm:^1.2.1"
-    prop-types: "npm:^15.5.10"
-    reactcss: "npm:^1.2.0"
-    tinycolor2: "npm:^1.4.1"
-  peerDependencies:
-    react: "*"
-  checksum: 10/7d3e01a735e91896795422af20187afae79df9301d0658ac017cfff75d905af27dac25f5009c68c29b3e0d8ce03d220360ba0fe8ee0379cbb8a3535e73de934b
-  languageName: node
-  linkType: hard
-
 "react-colorful@npm:^5.7.0":
   version: 5.7.0
   resolution: "react-colorful@npm:5.7.0"
@@ -36348,15 +35286,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"reactcss@npm:^1.2.0":
-  version: 1.2.3
-  resolution: "reactcss@npm:1.2.3"
-  dependencies:
-    lodash: "npm:^4.0.1"
-  checksum: 10/af811015b102b5551c9e22d61203d08b9e026ad1e40f810afb2d03d13abe6610a2e2a52e3511837a385b79633d67591c8e0c32fb58e3fd7bb42ddc6a618bb065
-  languageName: node
-  linkType: hard
-
 "read-cache@npm:^1.0.0":
   version: 1.0.0
   resolution: "read-cache@npm:1.0.0"
@@ -36633,17 +35562,6 @@ __metadata:
     get-proto: "npm:^1.0.1"
     which-builtin-type: "npm:^1.2.1"
   checksum: 10/80a4e2be716f4fe46a89a08ccad0863b47e8ce0f49616cab2d65dab0fbd53c6fdba0f52935fd41d37a2e4e22355c272004f920d63070de849f66eea7aeb4a081
-  languageName: node
-  linkType: hard
-
-"refractor@npm:^3.6.0":
-  version: 3.6.0
-  resolution: "refractor@npm:3.6.0"
-  dependencies:
-    hastscript: "npm:^6.0.0"
-    parse-entities: "npm:^2.0.0"
-    prismjs: "npm:~1.27.0"
-  checksum: 10/671bbcf5ae1b4e207f98b9a3dc2cbae215be30effe9f3bdcfd10f565f45fecfe97334cf38c8e4f52d6cc012ff2ec7fb627d3d5678efc388751c8b1e1f7ca2a6c
   languageName: node
   linkType: hard
 
@@ -37467,25 +36385,7 @@ __metadata:
     "@mermaid-js/layout-elk": "npm:^0.2.2"
     "@mermaid-js/layout-tidy-tree": "npm:^0.2.2"
     "@ocavue/utils": "npm:^0.7.1"
-    "@rme-sdk/core": "npm:^1.5.0"
-    "@rme-sdk/core-types": "npm:^1.5.0"
-    "@rme-sdk/core-utils": "npm:^1.5.0"
-    "@rme-sdk/dev": "npm:^1.5.1"
-    "@rme-sdk/extension-codemirror6": "npm:^1.5.0"
-    "@rme-sdk/extension-count": "npm:^1.5.0"
-    "@rme-sdk/extension-hard-break": "npm:^1.5.0"
-    "@rme-sdk/extension-heading": "npm:^1.5.0"
-    "@rme-sdk/extension-positioner": "npm:^1.5.0"
-    "@rme-sdk/extension-tables": "npm:^1.5.0"
-    "@rme-sdk/icons": "npm:^1.5.0"
-    "@rme-sdk/main": "npm:^1.5.0"
-    "@rme-sdk/pm": "npm:^1.5.0"
-    "@rme-sdk/preset-core": "npm:^1.5.0"
-    "@rme-sdk/prosemirror-flat-list": "npm:^1.5.0"
-    "@rme-sdk/react": "npm:^1.5.1"
-    "@rme-sdk/react-components": "npm:^1.5.1"
-    "@rme-sdk/react-core": "npm:^1.5.1"
-    "@rme-sdk/types": "npm:^1.5.0"
+    "@rme-sdk/sdk": "npm:1.0.0-beta.2"
     "@rollup/plugin-alias": "npm:^5.1.1"
     "@rollup/plugin-commonjs": "npm:28.0.1"
     "@rollup/plugin-json": "npm:^6.1.0"
@@ -37562,7 +36462,6 @@ __metadata:
     process: "npm:^0.11.10"
     prosemirror-commands: "npm:^1.7.1"
     prosemirror-inputrules: "npm:^1.5.1"
-    prosemirror-paste-rules: "npm:^3.0.0"
     prosemirror-search: "npm:^1.1.0"
     prosemirror-transform: "npm:^1.10.4"
     react: "npm:^19.2.0"
@@ -39081,13 +37980,6 @@ __metadata:
   version: 0.7.6
   resolution: "source-map@npm:0.7.6"
   checksum: 10/c8d2da7c57c14f3fd7568f764b39ad49bbf9dd7632b86df3542b31fed117d4af2fb74a4f886fc06baf7a510fee68e37998efc3080aacdac951c36211dc29a7a3
-  languageName: node
-  linkType: hard
-
-"space-separated-tokens@npm:^1.0.0":
-  version: 1.1.5
-  resolution: "space-separated-tokens@npm:1.1.5"
-  checksum: 10/8ef68f1cfa8ccad316b7f8d0df0919d0f1f6d32101e8faeee34ea3a923ce8509c1ad562f57388585ee4951e92d27afa211ed0a077d3d5995b5ba9180331be708
   languageName: node
   linkType: hard
 
@@ -40646,13 +39538,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tinycolor2@npm:^1.4.1":
-  version: 1.6.0
-  resolution: "tinycolor2@npm:1.6.0"
-  checksum: 10/066c3acf4f82b81c58a0d3ab85f49407efe95ba87afc3c7a16b1d77625193dfbe10dd46c26d0a263c1137361dd5a6a68bff2fb71def5fb9b9aec940fb030bcd4
-  languageName: node
-  linkType: hard
-
 "tinyexec@npm:^1.0.0, tinyexec@npm:^1.0.1, tinyexec@npm:^1.0.2":
   version: 1.2.3
   resolution: "tinyexec@npm:1.2.3"
@@ -41926,7 +40811,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"use-isomorphic-layout-effect@npm:^1.1.0, use-isomorphic-layout-effect@npm:^1.1.1, use-isomorphic-layout-effect@npm:^1.1.2":
+"use-isomorphic-layout-effect@npm:^1.1.1":
   version: 1.2.1
   resolution: "use-isomorphic-layout-effect@npm:1.2.1"
   peerDependencies:
@@ -41949,17 +40834,6 @@ __metadata:
     "@types/react":
       optional: true
   checksum: 10/913e95c272b67743ff1a0df61375058ae6ead368fd5631748e33699b2341aa89b07be03aa4cde4140a856adae70a6e0f299920cc1ad326f4afd310ba250604bd
-  languageName: node
-  linkType: hard
-
-"use-previous@npm:^1.2.0":
-  version: 1.2.0
-  resolution: "use-previous@npm:1.2.0"
-  dependencies:
-    use-isomorphic-layout-effect: "npm:^1.1.0"
-  peerDependencies:
-    react: ^16.8.0 || ^17.0.0 || ^18.0.0
-  checksum: 10/2305b8f71684a4b81999e3dacaac9c9400556dbda6f1d8b3b537883a4563eedd2e7f3c21b2db9719ec1462797756dbf726249da644b83f944cd4a9900fb66ed1
   languageName: node
   linkType: hard
 

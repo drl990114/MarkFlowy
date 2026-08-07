@@ -1,5 +1,5 @@
-import type { CommandFunction } from '@rme-sdk/core'
-import { Selection } from '@rme-sdk/pm/state'
+import type { CommandFunction } from '@rme-sdk/sdk/core'
+import { Selection } from '@rme-sdk/sdk/pm/state'
 
 /**
  * Handling cursor motion from the outer to the inner editor must be done with a

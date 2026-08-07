@@ -1,4 +1,4 @@
-import type { Static } from '@rme-sdk/core';
+import type { Static } from '@rme-sdk/sdk/core';
 
 export interface IframeOptions {
   /**

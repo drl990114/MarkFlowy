@@ -1,4 +1,4 @@
-import type { Node } from '@rme-sdk/pm/model'
+import type { Node } from '@rme-sdk/sdk/pm/model'
 import { useMemo } from 'react'
 import type { EditorDelegate } from '../types'
 

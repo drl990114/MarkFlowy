@@ -1,5 +1,5 @@
-import type { Node, NodeType, Schema } from '@rme-sdk/pm/model'
-import { Mark } from '@rme-sdk/pm/model'
+import type { Node, NodeType, Schema } from '@rme-sdk/sdk/pm/model'
+import { Mark } from '@rme-sdk/sdk/pm/model'
 import MarkdownIt from 'markdown-it'
 
 import MarkdownItListCheckbox from './markdown-it-list-checkbox'

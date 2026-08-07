@@ -1,5 +1,5 @@
-import type { UseMultiPositionerReturn } from '@rme-sdk/react'
-import { useCommands } from '@rme-sdk/react'
+import type { UseMultiPositionerReturn } from '@rme-sdk/sdk/react'
+import { useCommands } from '@rme-sdk/sdk/react'
 import styled from 'styled-components'
 import { Tooltip } from 'zens'
 

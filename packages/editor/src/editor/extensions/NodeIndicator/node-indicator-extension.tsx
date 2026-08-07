@@ -1,6 +1,6 @@
 import { isHTMLElement } from '@ocavue/utils'
-import { CreateExtensionPlugin, EditorView, PlainExtension, ResolvedPos } from '@rme-sdk/core'
-import { NodeSelection, PluginKey, TextSelection } from '@rme-sdk/pm/state'
+import { CreateExtensionPlugin, EditorView, PlainExtension, ResolvedPos } from '@rme-sdk/sdk/core'
+import { NodeSelection, PluginKey, TextSelection } from '@rme-sdk/sdk/pm/state'
 import { buildGetTarget, GetTarget } from './drop-target'
 import { findBlockByCoords, findFirstLineRect } from './node-target'
 import type { NodeIndicatorState, ViewDragging } from './types'

@@ -1,5 +1,5 @@
-import { NodeWithPosition } from "@rme-sdk/core"
-import { useHover } from "@rme-sdk/react"
+import { NodeWithPosition } from "@rme-sdk/sdk/core"
+import { useHover } from "@rme-sdk/sdk/react"
 import React, { useCallback } from "react"
 
 import { isCellType } from "./table-utils"

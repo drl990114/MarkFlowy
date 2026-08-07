@@ -3,12 +3,12 @@ import {
   // BulletListExtension,
   // CodeBlockExtension,
   DropCursorExtension,
-} from '@rme-sdk/main/extensions'
+} from '@rme-sdk/sdk/extensions'
 import { LineTableCellExtension, LineTableHeaderCellExtension } from './Table/table-extension'
 // import data from 'svgmoji/emoji.json'
-import { CountExtension } from '@rme-sdk/extension-count'
-import { corePreset } from '@rme-sdk/preset-core'
-import { ReactComponentExtension } from '@rme-sdk/react'
+import { CountExtension } from '@rme-sdk/sdk/extensions/count'
+import { corePreset } from '@rme-sdk/sdk/presets/core'
+import { ReactComponentExtension } from '@rme-sdk/sdk/react'
 import { type ClipboardReadFunction, clipboardRead } from '../utils/clipboard-read'
 import { isBrowser } from '../utils/common'
 import type { CurrentDateFormatOption } from '../utils/date'

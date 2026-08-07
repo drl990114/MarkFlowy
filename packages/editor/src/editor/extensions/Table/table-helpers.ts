@@ -1,6 +1,6 @@
-import { findParentNodeOfType } from '@rme-sdk/core'
-import { Transaction } from '@rme-sdk/pm/state'
-import { CellSelection, TableMap } from '@rme-sdk/pm/tables'
+import { findParentNodeOfType } from '@rme-sdk/sdk/core'
+import { Transaction } from '@rme-sdk/sdk/pm/state'
+import { CellSelection, TableMap } from '@rme-sdk/sdk/pm/tables'
 
 export function selectRow(tr: Transaction, pos: number): boolean {
   const cell = findParentNodeOfType({ selection: tr.doc.resolve(pos), types: 'tableCell' })

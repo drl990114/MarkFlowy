@@ -1,7 +1,7 @@
 import { ClipboardReadFunction } from '@/editor/utils/clipboard-read'
-import type { CommandFunction, CreateExtensionPlugin, EditorView } from '@rme-sdk/core'
-import { extension, PlainExtension } from '@rme-sdk/core'
-import { DOMParser, Fragment, Node, Slice } from '@rme-sdk/pm/model'
+import type { CommandFunction, CreateExtensionPlugin, EditorView } from '@rme-sdk/sdk/core'
+import { extension, PlainExtension } from '@rme-sdk/sdk/core'
+import { DOMParser, Fragment, Node, Slice } from '@rme-sdk/sdk/pm/model'
 import { isBrowser } from '../../utils/common'
 import { getTransformerByView } from '../Transformer/utils'
 
@@ -40,7 +40,11 @@ type ClipboardExtensionOptions = {
 }
 
 @extension<ClipboardExtensionOptions>({
-  defaultOptions: { ignoredNodeTypes: [] },
+  defaultOptions: {
+    imagePasteHandler: undefined,
+    clipboardReadFunction: undefined,
+    ignoredNodeTypes: [],
+  },
   staticKeys: [],
   handlerKeys: [],
   customHandlerKeys: [],

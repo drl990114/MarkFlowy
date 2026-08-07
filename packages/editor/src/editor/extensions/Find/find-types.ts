@@ -1,4 +1,4 @@
-import type { FromToProps } from '@rme-sdk/core';
+import type { FromToProps } from '@rme-sdk/sdk/core';
 
 export interface FindResult {
   /**

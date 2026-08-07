@@ -1,5 +1,5 @@
-import { CodeExtension } from '@rme-sdk/extension-code'
-import { useActive, useCommands } from '@rme-sdk/react-core'
+import { CodeExtension } from '@rme-sdk/sdk/extensions/code'
+import { useActive, useCommands } from '@rme-sdk/sdk/react'
 import { FC, useCallback } from 'react'
 
 import { t } from '@markflowy/i18n'

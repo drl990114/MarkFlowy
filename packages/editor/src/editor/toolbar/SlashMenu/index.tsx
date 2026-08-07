@@ -1,4 +1,4 @@
-import { useExtension, useRemirrorContext } from '@rme-sdk/react-core'
+import { useExtension, useRemirrorContext } from '@rme-sdk/sdk/react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { usePopper } from 'react-popper'
 import styled from 'styled-components'

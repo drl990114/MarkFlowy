@@ -1,6 +1,6 @@
-import { PlainExtension } from "@rme-sdk/core"
-import { EditorState } from "@rme-sdk/pm/state"
-import { DecorationSet } from "@rme-sdk/pm/view"
+import { PlainExtension } from "@rme-sdk/sdk/core"
+import { EditorState } from "@rme-sdk/sdk/pm/state"
+import { DecorationSet } from "@rme-sdk/sdk/pm/view"
 
 import { createSelectorDecorations } from "./table-selector"
 

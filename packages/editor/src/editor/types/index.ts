@@ -1,6 +1,6 @@
-import type { AnyExtension, RemirrorManager } from '@rme-sdk/core'
-import type { Node } from '@rme-sdk/pm/model'
-import type { ReactFrameworkOutput } from '@rme-sdk/react-core'
+import type { AnyExtension, RemirrorManager } from '@rme-sdk/sdk/core'
+import type { Node } from '@rme-sdk/sdk/pm/model'
+import type { ReactFrameworkOutput } from '@rme-sdk/sdk/react'
 
 export type StringToDoc = (content: string) => Node
 export type DocToString = (doc: Node) => string

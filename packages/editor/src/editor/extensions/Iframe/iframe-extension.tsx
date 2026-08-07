@@ -6,7 +6,7 @@ import type {
   NodeExtensionSpec,
   NodeSpecOverride,
   ProsemirrorAttributes,
-} from '@rme-sdk/core'
+} from '@rme-sdk/sdk/core'
 import {
   cx,
   extension,
@@ -14,8 +14,8 @@ import {
   NodeExtension,
   nodeInputRule,
   omitExtraAttributes,
-} from '@rme-sdk/core'
-import type { NodeViewComponentProps } from '@rme-sdk/react'
+} from '@rme-sdk/sdk/core'
+import type { NodeViewComponentProps } from '@rme-sdk/sdk/react'
 import type { ComponentType } from 'react'
 import type { NodeSerializerOptions } from '../../transform'
 import { ParserRuleType } from '../../transform'

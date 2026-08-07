@@ -1,11 +1,11 @@
-import { findParentNodeOfType } from '@rme-sdk/core'
-import type { FindProsemirrorNodeResult, NodeWithPosition } from '@rme-sdk/core'
-import type { TableSchemaSpec } from '@rme-sdk/extension-tables'
-import type { EditorState, NodeType, ResolvedPos, Selection } from '@rme-sdk/pm'
-import { TextSelection } from '@rme-sdk/pm/state'
-import type { Command } from '@rme-sdk/pm/state'
-import { TableMap } from '@rme-sdk/pm/tables'
-import type { CellSelection, Rect } from '@rme-sdk/pm/tables'
+import { findParentNodeOfType } from '@rme-sdk/sdk/core'
+import type { FindProsemirrorNodeResult, NodeWithPosition } from '@rme-sdk/sdk/core'
+import type { TableSchemaSpec } from '@rme-sdk/sdk/extensions/tables'
+import type { EditorState, NodeType, ResolvedPos, Selection } from '@rme-sdk/sdk/pm'
+import { TextSelection } from '@rme-sdk/sdk/pm/state'
+import type { Command } from '@rme-sdk/sdk/pm/state'
+import { TableMap } from '@rme-sdk/sdk/pm/tables'
+import type { CellSelection, Rect } from '@rme-sdk/sdk/pm/tables'
 
 export function findTable(selection: EditorState | Selection | ResolvedPos) {
   return findParentNodeOfType({ selection, types: 'table' })

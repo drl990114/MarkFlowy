@@ -1,4 +1,4 @@
-import { BlockquoteExtension } from '@rme-sdk/main/extensions'
+import { BlockquoteExtension } from '@rme-sdk/sdk/extensions'
 
 import type { NodeSerializerOptions } from '../../transform'
 import { ParserRuleType } from '../../transform'

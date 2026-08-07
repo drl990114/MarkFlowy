@@ -1,5 +1,5 @@
 import { excludeHtmlInlineNodes } from '@/editor/transform/markdown-it-html-inline'
-import { Node } from '@rme-sdk/pm/model'
+import { Node } from '@rme-sdk/sdk/pm/model'
 import pkg from 'lodash'
 import mdast from 'mdast'
 import type { Options as FromMarkdownOptions } from 'mdast-util-from-markdown'
