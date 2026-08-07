@@ -125,13 +125,13 @@ export class LineListExtension extends NodeExtension {
       {
         type: ParserRuleType.free,
         token: 'list_item_open',
-        handler: (state: MarkdownParseState, token: Token): void => {
+        handler: (state: MarkdownParseState): void => {
           switch (state.topContext()) {
             case 'ordered_list':
-              const token = state.topContextToken()
+              const contextToken = state.topContextToken()
               let startOrder
-              if (token?.type === 'ordered_list_open') {
-                token?.attrs?.some(([name, value]) => {
+              if (contextToken?.type === 'ordered_list_open') {
+                contextToken.attrs?.some(([name, value]) => {
                   if (name === 'order') {
                     startOrder = parseInt(value, 10)
                     state.closeContextToken()
@@ -188,7 +188,7 @@ export class LineListExtension extends NodeExtension {
     ] as const
   }
 
-  public toMarkdown({ state, node, counter }: NodeSerializerOptions) {
+  public toMarkdown({ state, node, parent, index, counter }: NodeSerializerOptions) {
     const attrs = node.attrs as ListAttributes
     let firstDelim = ''
     if (attrs.kind === 'ordered') {
@@ -201,6 +201,12 @@ export class LineListExtension extends NodeExtension {
       firstDelim = attrs.checked ? '- [x] ' : '- [ ] '
     } else if (attrs.kind === 'bullet') {
       firstDelim = '- '
+    }
+
+    // Flat lists store each item as a sibling list node. Keep adjacent items
+    // tight while preserving the normal blank-line boundary around the list.
+    if (index > 0 && parent.child(index - 1).type === node.type) {
+      state.flushClose(1)
     }
 
     state.wrapBlock('  ', firstDelim, node, () =>
