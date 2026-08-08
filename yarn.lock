@@ -9462,9 +9462,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rme-sdk/sdk@npm:1.0.0-beta.2":
-  version: 1.0.0-beta.2
-  resolution: "@rme-sdk/sdk@npm:1.0.0-beta.2"
+"@rme-sdk/sdk@npm:1.0.0-beta.3":
+  version: 1.0.0-beta.3
+  resolution: "@rme-sdk/sdk@npm:1.0.0-beta.3"
   dependencies:
     "@codemirror/language": "npm:^6.11.3"
     "@codemirror/state": "npm:^6.5.2"
@@ -9513,7 +9513,7 @@ __metadata:
   peerDependencies:
     react: ^19.0.0
     react-dom: ^19.0.0
-  checksum: 10/799207856cbc386be424067879e62bc2f1b3668829f91166b0d2fdf2a578555c5d5fe15be0f4cd55eb1386109cd59fa103bed1100f6fbfcd94a99aa93af4ce4d
+  checksum: 10/ad9da9046f3acc38b4e14b60dcb0717654c90a70bb4f9a9e78db42d52aeb4823e82e2ada902407405ed71e9f9339d6ac9931330349267dc6319c849768f98f5b
   languageName: node
   linkType: hard
 
@@ -36385,7 +36385,7 @@ __metadata:
     "@mermaid-js/layout-elk": "npm:^0.2.2"
     "@mermaid-js/layout-tidy-tree": "npm:^0.2.2"
     "@ocavue/utils": "npm:^0.7.1"
-    "@rme-sdk/sdk": "npm:1.0.0-beta.2"
+    "@rme-sdk/sdk": "npm:1.0.0-beta.3"
     "@rollup/plugin-alias": "npm:^5.1.1"
     "@rollup/plugin-commonjs": "npm:28.0.1"
     "@rollup/plugin-json": "npm:^6.1.0"
