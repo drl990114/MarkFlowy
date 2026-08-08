@@ -132,7 +132,7 @@
     "lint-staged": "15.2.10",
     "np": "^10.0.7",
     "plop": "^4",
-    "postcss": "8.4.47",
+    "postcss": "8.5.23",
     "prettier": "3.3.3",
     "prettier-plugin-packagejson": "^2.5.3",
     "process": "^0.11.10",
