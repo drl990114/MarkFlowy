@@ -6439,7 +6439,7 @@ __metadata:
     jsx-dom-cjs: "npm:^8.1.6"
     lodash: "npm:^4.17.23"
     lucide-react: "npm:^1.24.0"
-    nanoid: "npm:^5.1.5"
+    nanoid: "npm:^5.1.16"
     ollama-ai-provider-v2: "npm:^1.5.4"
     overlayscrollbars: "npm:^2.16.0"
     overlayscrollbars-react: "npm:^0.5.6"
@@ -30549,21 +30549,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nanoid@npm:^5.1.15":
+"nanoid@npm:^5.1.15, nanoid@npm:^5.1.16":
   version: 5.1.16
   resolution: "nanoid@npm:5.1.16"
   bin:
     nanoid: bin/nanoid.js
   checksum: 10/b1e702e2b7072e74ac2ae880907d0a291853a36617ec5c3d27d81ab04965ebc0d4d0f707cf9220928cf93d5370b1f561c930efee853dc9c1a3facaefdf1a42ee
-  languageName: node
-  linkType: hard
-
-"nanoid@npm:^5.1.5, nanoid@npm:^5.1.6":
-  version: 5.1.6
-  resolution: "nanoid@npm:5.1.6"
-  bin:
-    nanoid: bin/nanoid.js
-  checksum: 10/4109dbcf596d7f297a9b42f459b8f01694a03ebbdd2f41408d963ad54e5ec7234cbe7b4acad137751f31add11bb4fb3415a3e688082516745812811f05570014
   languageName: node
   linkType: hard
 
@@ -36455,7 +36446,7 @@ __metadata:
     mermaid: "npm:^11.16.0"
     micromark-extension-gfm-autolink-literal: "npm:^1.0.5"
     micromark-extension-gfm-strikethrough: "npm:^1.0.7"
-    nanoid: "npm:^5.1.6"
+    nanoid: "npm:^5.1.16"
     parse5: "npm:^7.3.0"
     postcss: "npm:^8.5.6"
     prettier: "npm:3.3.3"

@@ -62,7 +62,7 @@
     "jsx-dom-cjs": "^8.1.6",
     "lodash": "^4.17.23",
     "lucide-react": "^1.24.0",
-    "nanoid": "^5.1.5",
+    "nanoid": "^5.1.16",
     "ollama-ai-provider-v2": "^1.5.4",
     "overlayscrollbars": "^2.16.0",
     "overlayscrollbars-react": "^0.5.6",
