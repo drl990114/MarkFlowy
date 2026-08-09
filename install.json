@@ -1,35 +1,35 @@
 {
-  "version": "v0.85.2",
-  "notes": "Features:\n\n- Expanded Mermaid support with ELK and tidy-tree layouts, Lucide and Logos icon packs, and better rendering for complex directional subgraphs.\n\n- Added a manual collapse control for Live Preview source panels, so the source can be hidden when it is no longer needed, including in the always-split layout.\n\n---\n\n特性：\n\n- 扩展 Mermaid 支持，新增 ELK 与 tidy-tree 布局、Lucide 与 Logos 图标包，并优化复杂方向子图的渲染效果。\n\n- 为实时预览的源码面板新增手动收起操作；不再需要查看源码时可直接隐藏，在始终分栏布局下也可以使用。",
-  "pub_date": "2026-08-02T11:21:47.894Z",
+  "version": "v0.86.0",
+  "notes": "Features:\n\n- 🌟🌟🌟🌟🌟🌟 The web version is now officially launched, supporting online editing of GitHub repositories and local browser editing. We look forward to your use and feedback! https://www.markflowy.cc\n\nImprovements and Fixes:\n\n- Improved WYSIWYG Markdown handling for inline links and quotes containing only images, enhancing the display and selection reliability of source code markers surrounding inline images, links, autolinks, and other atomic inline content.\n\n- Fixed an issue that incorrectly inserted blank lines between adjacent items in unordered lists, ordered lists, and task lists when serializing Markdown in WYSIWYG mode.\n\n- Improved editor initialization and lifecycle stability, and fixed a module initialization issue that could prevent the editor from rendering.\n\n- Optimize the style and loading logic of image nodes.\n\n---\n\n特性：\n\n- 🌟🌟🌟🌟🌟🌟 Web 端正式上线，支持在线编辑 github repo 以及纯浏览器本地编辑，期待大家的使用与反馈！https://www.markflowy.cc/zh\n\n改进与修复：\n\n- 改进所见即所得模式对仅包含图片的行内链接和引用式链接的 Markdown 处理，提升行内图片、链接、自动链接及其他原子行内内容周围源码标记的显示与选区可靠性。\n\n- 修复所见即所得模式序列化 Markdown 时，在无序列表、有序列表和任务列表的相邻条目之间错误插入空行的问题。\n\n- 提升编辑器初始化与生命周期稳定性，并修复可能导致编辑器无法渲染的模块初始化问题。\n\n- 优化图片节点的样式和加载逻辑",
+  "pub_date": "2026-08-09T10:33:38.672Z",
   "platforms": {
     "win64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSU1d5YU04dG8vaHdoaUpWTmlraFg1T3IxaGZNS2czdUU4cnFUTjNjSGtMREZsL3lyRHpSYm5KRFJVc2FRd0xmWDA0bUxHT1FVNWlSaXk0bHpZdEYveDlKd2VIRXpJaVE0PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg1NjY5MjcwCWZpbGU6TWFya0Zsb3d5XzAuODUuMl94NjRfZW4tVVMubXNpCnpPcC8wTGNnRlNCeTJiUWpGMElxVU1GK0ttQnhpS1RqSTVVMnNVaUFINEdXSXY0Z0cwWVN0R1k2RkJrTFowbCtwL0hPdWNjOWZvY1ZDRFdMSHRnUERnPT0K",
-      "url": "https://github.com/drl990114/MarkFlowy/releases/download/v0.85.2/MarkFlowy_v0.85.2_x64.msi"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSU1d5YU04dG8vaDd5dkpxT1UzMlJFNmRQZ1lqK0RBeTFXdXlpaUxWUTFZN2pvRmZSVzZxeU5lV1lEc0tVN3FWblpvcFJlRUx5M2pvdm95THNSY2ZLQkkzU3p5TGlwM3dFPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg2MjcxMjg3CWZpbGU6TWFya0Zsb3d5XzAuODYuMF94NjRfZW4tVVMubXNpCnJHQlYwcGhaTzRvNFB3Y1FwZFZtNUtNM2puT0Z0eXZZMk9KVnQvazBJTmUyZzE3MzdQRkg3WkVsenQ2ckZoTjlkMS8yb0s1bUVkdDRxSWdmV0IrbUJ3PT0K",
+      "url": "https://github.com/drl990114/MarkFlowy/releases/download/v0.86.0/MarkFlowy_v0.86.0_x64.msi"
     },
     "linux": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSU1d5YU04dG8vaDJvU3VKSlN1WnZsVU1taTB6enl0MzU1NlgvSkcvTzFleVFjMHJKc2ZCUzF6ZHNmSXpEbkFHWGsvRkhUT0dQWGUvcWpYd3FUMmphOS9Iblc5WVdhT1FrPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg1NjY5MjUwCWZpbGU6TWFya0Zsb3d5XzAuODUuMl9hbWQ2NC5BcHBJbWFnZQpjTmY1aUxldTVEcjltcVAzMWN2MzFTeWpiRWFNUkpsWmFoNTFUVXQvamRxQllveDQ5MVppamVmcmU0UjBVYUpkL0RQd0lPK21XR3pCVC9zSEJWT1lCQT09Cg==",
-      "url": "https://github.com/drl990114/MarkFlowy/releases/download/v0.85.2/MarkFlowy_v0.85.2_amd64.AppImage"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSU1d5YU04dG8vaDkwRjU0YjAwbjNhdlhFWjhMUTFPOTByOXBGV0phNDBZeUplazlnOEN2YXJGRGFXbEJ1WE90aHpEaDhGYzhvK1ZsV0xPcXZVZjhxUVVhSERtV2J3dFEwPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg2MjcxMTg2CWZpbGU6TWFya0Zsb3d5XzAuODYuMF9hbWQ2NC5BcHBJbWFnZQoxTnhNMUVnNlFvMVI0T3NjdHNLd1BJRUxnenZ0cnBDUWJhcDJjY29YUUh1aVJObmpkVldJc2xwUFFydDRSZDNETHJhbWEzQWNEMlIyUlVZR2p6K01BZz09Cg==",
+      "url": "https://github.com/drl990114/MarkFlowy/releases/download/v0.86.0/MarkFlowy_v0.86.0_amd64.AppImage"
     },
     "darwin": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSU1d5YU04dG8vaHcxeDl1STc1emZ4VFlGNklTQi9MNnNUTmlMWEpkdnROdFJzZW93ZytsV0szYkZ2dElXTlMwbnpkL3U2cVVCTFNZQTlJY3BCQlFySTk5YjkxL0JRZWdVPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg1NjY4ODk1CWZpbGU6TWFya0Zsb3d5LmFwcC50YXIuZ3oKWXlRRlhqOGdQcURVM1prRm5ZeTdEZlR3VU5ybHc4OVo4SHZIVm9FSFVTNUh2REd2SE00T1N0RDl1YTRXSm15VmRsanQwTFpnSjl0a3JESDI4UnpjQkE9PQo=",
-      "url": "https://github.com/drl990114/MarkFlowy/releases/download/v0.85.2/MarkFlowy_x64.app.tar.gz"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSU1d5YU04dG8vaHg2L3hEUDR1WVJwbDVKUHdHTC9ZRUhyb3pMQTNvZURKNFlWQkZ4Nk1DOHJRMzZRL0QxTlZEUERNcDEzWUNabEtBcVFVWTRSYjdLb3RpQmNueGF6blFZPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg2MjcxMDIxCWZpbGU6TWFya0Zsb3d5LmFwcC50YXIuZ3oKNXR1ZCt3T0FrSE1rTGg4QWc3MjQrLzBzYlZVNWtiTGdvYXdtRXVZM1R4TWxiYzVEWmdvakZFUXFoeDFVWDVMSkNDMkE1cGh0Umt6WUl0dFRON3p5Q0E9PQo=",
+      "url": "https://github.com/drl990114/MarkFlowy/releases/download/v0.86.0/MarkFlowy_x64.app.tar.gz"
     },
     "darwin-aarch64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSU1d5YU04dG8vaHhaUjVJazZTd2c5cE1KU0ZuQ0JMNTdRMWlqOUgrOUFUeUZ0V0V2ZUJ3YmhwV1UzbitWZ296cWZuU2VqT2JxeHhncW9uQzNRWGlTRXRuK0N4RCsySWdRPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg1NjY5MTA1CWZpbGU6TWFya0Zsb3d5LmFwcC50YXIuZ3oKWUUxTXRBb3NFbzNIVkNBQ2hiVmZVVVo3VWZlZXhpTlk5eElpcWx2NnFnbGpoR3JrdUdTS01JMitIV1lyZGxQQm9pRXRtUUVPOFBaZHZSWkVoeUl0RGc9PQo=",
-      "url": "https://github.com/drl990114/MarkFlowy/releases/download/v0.85.2/MarkFlowy_aarch64.app.tar.gz"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSU1d5YU04dG8vaDh1WUFJVFlQdVlkM0VZMzFjbXR5djlvbWVWR2xCTWxzSnYyRDc4VWxpcFJPMTVETnQ3KzF6NVkxRGkxQ0o1NU1uMzdvcFpWb3dZV2diS2gyNUtsOHc0PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg2MjcwODU3CWZpbGU6TWFya0Zsb3d5LmFwcC50YXIuZ3oKczRwOTN5WTNHQS83cExCRmFJRUk4eVB5U21LalVuamlYUFZTSFg5aUZ2bEl0bGdWbGNxNkl0M0dVMUhMdjQ0VWZDb3lNdVdJSk12YXhsckhSYUZ3RHc9PQo=",
+      "url": "https://github.com/drl990114/MarkFlowy/releases/download/v0.86.0/MarkFlowy_aarch64.app.tar.gz"
     },
     "darwin-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSU1d5YU04dG8vaHcxeDl1STc1emZ4VFlGNklTQi9MNnNUTmlMWEpkdnROdFJzZW93ZytsV0szYkZ2dElXTlMwbnpkL3U2cVVCTFNZQTlJY3BCQlFySTk5YjkxL0JRZWdVPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg1NjY4ODk1CWZpbGU6TWFya0Zsb3d5LmFwcC50YXIuZ3oKWXlRRlhqOGdQcURVM1prRm5ZeTdEZlR3VU5ybHc4OVo4SHZIVm9FSFVTNUh2REd2SE00T1N0RDl1YTRXSm15VmRsanQwTFpnSjl0a3JESDI4UnpjQkE9PQo=",
-      "url": "https://github.com/drl990114/MarkFlowy/releases/download/v0.85.2/MarkFlowy_x64.app.tar.gz"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSU1d5YU04dG8vaHg2L3hEUDR1WVJwbDVKUHdHTC9ZRUhyb3pMQTNvZURKNFlWQkZ4Nk1DOHJRMzZRL0QxTlZEUERNcDEzWUNabEtBcVFVWTRSYjdLb3RpQmNueGF6blFZPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg2MjcxMDIxCWZpbGU6TWFya0Zsb3d5LmFwcC50YXIuZ3oKNXR1ZCt3T0FrSE1rTGg4QWc3MjQrLzBzYlZVNWtiTGdvYXdtRXVZM1R4TWxiYzVEWmdvakZFUXFoeDFVWDVMSkNDMkE1cGh0Umt6WUl0dFRON3p5Q0E9PQo=",
+      "url": "https://github.com/drl990114/MarkFlowy/releases/download/v0.86.0/MarkFlowy_x64.app.tar.gz"
     },
     "linux-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSU1d5YU04dG8vaDJvU3VKSlN1WnZsVU1taTB6enl0MzU1NlgvSkcvTzFleVFjMHJKc2ZCUzF6ZHNmSXpEbkFHWGsvRkhUT0dQWGUvcWpYd3FUMmphOS9Iblc5WVdhT1FrPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg1NjY5MjUwCWZpbGU6TWFya0Zsb3d5XzAuODUuMl9hbWQ2NC5BcHBJbWFnZQpjTmY1aUxldTVEcjltcVAzMWN2MzFTeWpiRWFNUkpsWmFoNTFUVXQvamRxQllveDQ5MVppamVmcmU0UjBVYUpkL0RQd0lPK21XR3pCVC9zSEJWT1lCQT09Cg==",
-      "url": "https://github.com/drl990114/MarkFlowy/releases/download/v0.85.2/MarkFlowy_v0.85.2_amd64.AppImage"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSU1d5YU04dG8vaDkwRjU0YjAwbjNhdlhFWjhMUTFPOTByOXBGV0phNDBZeUplazlnOEN2YXJGRGFXbEJ1WE90aHpEaDhGYzhvK1ZsV0xPcXZVZjhxUVVhSERtV2J3dFEwPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg2MjcxMTg2CWZpbGU6TWFya0Zsb3d5XzAuODYuMF9hbWQ2NC5BcHBJbWFnZQoxTnhNMUVnNlFvMVI0T3NjdHNLd1BJRUxnenZ0cnBDUWJhcDJjY29YUUh1aVJObmpkVldJc2xwUFFydDRSZDNETHJhbWEzQWNEMlIyUlVZR2p6K01BZz09Cg==",
+      "url": "https://github.com/drl990114/MarkFlowy/releases/download/v0.86.0/MarkFlowy_v0.86.0_amd64.AppImage"
     },
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSU1d5YU04dG8vaHdoaUpWTmlraFg1T3IxaGZNS2czdUU4cnFUTjNjSGtMREZsL3lyRHpSYm5KRFJVc2FRd0xmWDA0bUxHT1FVNWlSaXk0bHpZdEYveDlKd2VIRXpJaVE0PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg1NjY5MjcwCWZpbGU6TWFya0Zsb3d5XzAuODUuMl94NjRfZW4tVVMubXNpCnpPcC8wTGNnRlNCeTJiUWpGMElxVU1GK0ttQnhpS1RqSTVVMnNVaUFINEdXSXY0Z0cwWVN0R1k2RkJrTFowbCtwL0hPdWNjOWZvY1ZDRFdMSHRnUERnPT0K",
-      "url": "https://github.com/drl990114/MarkFlowy/releases/download/v0.85.2/MarkFlowy_v0.85.2_x64.msi"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSU1d5YU04dG8vaDd5dkpxT1UzMlJFNmRQZ1lqK0RBeTFXdXlpaUxWUTFZN2pvRmZSVzZxeU5lV1lEc0tVN3FWblpvcFJlRUx5M2pvdm95THNSY2ZLQkkzU3p5TGlwM3dFPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg2MjcxMjg3CWZpbGU6TWFya0Zsb3d5XzAuODYuMF94NjRfZW4tVVMubXNpCnJHQlYwcGhaTzRvNFB3Y1FwZFZtNUtNM2puT0Z0eXZZMk9KVnQvazBJTmUyZzE3MzdQRkg3WkVsenQ2ckZoTjlkMS8yb0s1bUVkdDRxSWdmV0IrbUJ3PT0K",
+      "url": "https://github.com/drl990114/MarkFlowy/releases/download/v0.86.0/MarkFlowy_v0.86.0_x64.msi"
     }
   }
 }
