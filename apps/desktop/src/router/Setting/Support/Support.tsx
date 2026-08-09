@@ -7,18 +7,18 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   width: 100%;
-  padding: 2px 22px;
+  padding: 0 16px;
   background-color: var(--mf-card);
   border: 1px solid var(--mf-border);
-  border-radius: var(--mf-radius-lg);
+  border-radius: var(--mf-radius);
   box-sizing: border-box;
 `
 
 const SupportItem = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 18px 2px;
+  gap: 4px;
+  padding: 12px 0;
   border-bottom: 1px solid var(--mf-border);
 
   &:last-child {
@@ -27,19 +27,19 @@ const SupportItem = styled.div`
 `
 
 const Title = styled.div`
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
   color: ${(props) => props.theme.primaryFontColor};
 `
 
 const Description = styled.div`
-  font-size: 14px;
+  font-size: 13px;
   color: ${(props) => props.theme.labelFontColor};
   line-height: 1.5;
 `
 
 const ButtonContainer = styled.div`
-  margin-top: 8px;
+  margin-top: 4px;
 `
 
 export function Support() {

@@ -178,11 +178,11 @@ function Setting({ navigationRequest }: SettingProps) {
 
   return (
     <div className='box-border flex h-screen w-screen min-w-0 overflow-hidden bg-background text-foreground'>
-      <aside className='box-border flex w-[15.5rem] shrink-0 flex-col border-r border-border bg-muted/50 max-lg:w-[14rem] max-md:w-[12.5rem]'>
-        <div className='shrink-0 px-3 pt-4 pb-3'>
+      <aside className='box-border flex w-[13.5rem] shrink-0 flex-col border-r border-border bg-muted/50 max-lg:w-[13rem] max-md:w-48'>
+        <div className='shrink-0 px-2 pt-2 pb-2'>
           <Button
             asChild
-            className='w-full justify-start px-2 font-normal text-muted-foreground shadow-none'
+            className='h-7 w-full justify-start px-2 text-xs font-normal text-muted-foreground shadow-none'
             variant='ghost'
           >
             <Link to='/'>
@@ -193,13 +193,13 @@ function Setting({ navigationRequest }: SettingProps) {
           <label className='sr-only' htmlFor='setting-search'>
             {t('settings.search_placeholder')}
           </label>
-          <div className='relative mt-3'>
+          <div className='relative mt-2'>
             <Search
               aria-hidden
-              className='pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground'
+              className='pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground'
             />
             <Input
-              className='h-9 rounded-lg bg-background/80 pl-9 shadow-none'
+              className='h-7 rounded-md bg-background/80 pl-8 text-xs shadow-none'
               id='setting-search'
               placeholder={t('settings.search_placeholder')}
               type='search'
@@ -208,8 +208,8 @@ function Setting({ navigationRequest }: SettingProps) {
             />
           </div>
         </div>
-        <nav aria-label={t('settings.label')} className='min-h-0 flex-1 overflow-y-auto px-3 py-2'>
-          <div className='px-2 pb-2 text-xs font-medium text-muted-foreground'>
+        <nav aria-label={t('settings.label')} className='min-h-0 flex-1 overflow-y-auto px-2 py-1'>
+          <div className='px-2 pt-1 pb-1.5 text-xs font-medium text-muted-foreground'>
             {t('settings.label')}
           </div>
           <ul className='m-0 list-none p-0'>
@@ -221,7 +221,7 @@ function Setting({ navigationRequest }: SettingProps) {
                   <Button
                     aria-current={index === value ? 'page' : undefined}
                     className={classNames(
-                      'my-0.5 w-full justify-start gap-2 rounded-md px-2.5 text-left font-normal text-foreground shadow-none focus-visible:ring-offset-0',
+                      'my-px h-7 w-full justify-start gap-2 rounded-md px-2 text-left text-xs font-normal text-foreground shadow-none focus-visible:ring-offset-0',
                       index === value
                         ? 'bg-accent font-medium text-accent-foreground hover:bg-accent'
                         : 'bg-transparent hover:bg-accent/70 hover:text-accent-foreground',
@@ -229,7 +229,7 @@ function Setting({ navigationRequest }: SettingProps) {
                     variant='ghost'
                     onClick={() => setCurGroupKey(groupKey as SettingCategoryKey)}
                   >
-                    <i aria-hidden className={classNames(group.iconName, 'text-base')} />
+                    <i aria-hidden className={classNames(group.iconName, 'text-sm')} />
                     <span className='min-w-0 truncate'>{t(group.i18nKey)}</span>
                   </Button>
                 </li>
@@ -242,7 +242,7 @@ function Setting({ navigationRequest }: SettingProps) {
             ) : null}
           </ul>
         </nav>
-        <footer className='shrink-0 border-t border-border px-4 py-3 text-xs text-muted-foreground'>
+        <footer className='shrink-0 border-t border-border px-3 py-2 text-xs text-muted-foreground'>
           {appInfo.version ? (
             <div className='mb-2'>
               {t('about.version')}: {appInfo.version}
@@ -264,11 +264,11 @@ function Setting({ navigationRequest }: SettingProps) {
         </footer>
       </aside>
       <main className='box-border min-w-0 flex-1 overflow-x-hidden overflow-y-auto bg-background'>
-        <div className='box-border mx-auto w-full max-w-[56rem] px-8 pt-10 pb-16 max-lg:px-6 max-md:px-5 max-md:pt-8'>
-          <header className='mb-7 flex items-start justify-between gap-5'>
+        <div className='box-border mx-auto w-full max-w-[54rem] px-6 pt-7 pb-12 max-md:px-4 max-md:pt-5'>
+          <header className='mb-5 flex items-start justify-between gap-4'>
             <div className='min-w-0'>
-              <h1 className='m-0 text-2xl font-semibold text-foreground'>{t(curGroup.i18nKey)}</h1>
-              <p className='mt-2 mb-0 text-sm leading-relaxed text-muted-foreground'>
+              <h1 className='m-0 text-xl font-semibold text-foreground'>{t(curGroup.i18nKey)}</h1>
+              <p className='mt-1 mb-0 text-sm leading-relaxed text-muted-foreground'>
                 {t(curGroup.desc?.i18nKey)}
               </p>
             </div>

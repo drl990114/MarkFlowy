@@ -28,15 +28,16 @@ const Container = styled.div`
   min-width: 0;
 
   .setting-item__title {
-    margin-bottom: 4px;
-    font-size: 14px;
+    margin-bottom: 2px;
+    font-size: 13px;
     font-weight: 500;
     color: ${({ theme }) => theme.primaryFontColor};
   }
 
   .setting-item__label {
     white-space: pre-wrap;
-    font-size: 13px;
+    font-size: 12px;
+    line-height: 1.4;
     color: ${({ theme }) => theme.labelFontColor};
   }
 `

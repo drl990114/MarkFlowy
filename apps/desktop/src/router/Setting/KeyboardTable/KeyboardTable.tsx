@@ -1,18 +1,21 @@
+import { Button } from '@/components/ui/button'
 import { useGlobalKeyboard } from '@/hooks'
-import { KeyboardInfo } from '@/hooks/useKeyboard'
+import type { KeyboardInfo } from '@/hooks/useKeyboard'
 import { useRef } from 'react'
 import { useTranslation } from '@/i18n'
 import styled from 'styled-components'
-import { Button, Tooltip } from 'zens'
-import { RecordKeysModal, RecordKeysModalRef } from './RecordKeysModal'
+import { Tooltip } from 'zens'
+import { RecordKeysModal, type RecordKeysModalRef } from './RecordKeysModal'
 import { transferKey } from './record-key'
 
-// Styled components
 const TableContainer = styled.div`
-  border: 1px solid ${(props) => props.theme.borderColor};
-  border-radius: 8px;
-  overflow: auto;
-  background-color: ${(props) => props.theme.bgColor};
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  background-color: var(--mf-card);
+  border: 1px solid var(--mf-border);
+  border-radius: var(--mf-radius);
+  box-sizing: border-box;
   margin-bottom: 16px;
 
   &::-webkit-scrollbar {
@@ -20,42 +23,47 @@ const TableContainer = styled.div`
   }
 
   &::-webkit-scrollbar-track {
-    background: ${(props) => props.theme.tipsBgColor};
+    background: var(--mf-scrollbar-track);
     border-radius: 4px;
   }
 
   &::-webkit-scrollbar-thumb {
-    background: ${(props) => props.theme.borderColor};
+    background: var(--mf-scrollbar-thumb);
     border-radius: 4px;
   }
 `
 
 const Table = styled.table`
   width: 100%;
+  min-width: 620px;
   border-collapse: collapse;
-  font-size: ${(props) => props.theme.fontSm};
+  font-size: 12px;
 `
 
 const TableHead = styled.thead`
-  background-color: ${(props) => props.theme.tipsBgColor};
+  background-color: var(--mf-muted);
 `
 
 const TableRow = styled.tr`
-  border-bottom: 1px solid ${(props) => props.theme.borderColor};
+  border-bottom: 1px solid var(--mf-border);
+
+  &:last-child {
+    border-bottom: 0;
+  }
 
   &:hover {
-    background-color: ${(props) => props.theme.tipsBgColor};
+    background-color: var(--mf-muted);
   }
 `
 
 const TableCell = styled.th`
-  padding: 12px 16px;
+  padding: 7px 10px;
   text-align: left;
   font-weight: 600;
 `
 
 const TableDataCell = styled.td`
-  padding: 12px 16px;
+  padding: 7px 10px;
   text-align: left;
 `
 
@@ -89,12 +97,12 @@ export function KeyboardTable() {
                 <TableDataCell>
                   {row.when === 'disabled' ? (
                     <Tooltip title='This shortcut is disabled and cannot be edited'>
-                      <Button size='small' disabled>
+                      <Button size='sm' disabled>
                         Edit
                       </Button>
                     </Tooltip>
                   ) : (
-                    <Button size='small' onClick={() => handleOpen(row)}>
+                    <Button size='sm' onClick={() => handleOpen(row)}>
                       Edit
                     </Button>
                   )}

@@ -27,7 +27,7 @@ import { SettingLabel } from '../component/SettingItems/Label'
 
 type AccentColorMode = 'system' | 'custom'
 
-const SELECT_WIDTH = 220
+const SELECT_WIDTH = 200
 
 const AccentColorControls = styled.div`
   display: flex;
@@ -294,7 +294,7 @@ export const ThemeSetting = memo(() => {
           >
             <SelectTrigger
               aria-label={t('settings.display.theme.accent_color.label')}
-              style={{ width: 140 }}
+              style={{ width: 128 }}
             >
               <SelectValue />
             </SelectTrigger>

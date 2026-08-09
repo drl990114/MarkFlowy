@@ -13,9 +13,9 @@ import styled from 'styled-components'
 import themeData from '../../../../../../community-themes.json'
 
 const SectionTitle = styled.h3`
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
-  margin: 24px 0 10px;
+  margin: 16px 0 8px;
   color: var(--mf-muted-foreground);
 
   &:first-child {
@@ -35,7 +35,7 @@ const LocalThemeContainer = styled.div`
   overflow: hidden;
   background-color: var(--mf-card);
   border: 1px solid var(--mf-border);
-  border-radius: var(--mf-radius-lg);
+  border-radius: var(--mf-radius);
   box-sizing: border-box;
 `
 
@@ -43,9 +43,9 @@ const LocalThemeRow = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 12px;
   min-width: 0;
-  padding: 12px 16px;
+  padding: 8px 12px;
   border-bottom: 1px solid var(--mf-border);
 
   &:last-child {
@@ -65,7 +65,7 @@ const LocalThemeInfo = styled.div`
 `
 
 const LocalThemeName = styled.span`
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--mf-foreground);
   overflow: hidden;
@@ -87,7 +87,7 @@ const TableContainer = styled.div`
   overflow-y: hidden;
   background-color: var(--mf-card);
   border: 1px solid var(--mf-border);
-  border-radius: var(--mf-radius-lg);
+  border-radius: var(--mf-radius);
   box-sizing: border-box;
 
   &::-webkit-scrollbar {
@@ -107,7 +107,7 @@ const TableContainer = styled.div`
 
 const Table = styled.table`
   width: 100%;
-  min-width: 680px;
+  min-width: 620px;
   border-collapse: collapse;
   font-size: var(--mf-font-sm);
   table-layout: fixed;
@@ -131,19 +131,19 @@ const TableRow = styled.tr`
 
 const TableCell = styled.th<{ width?: string }>`
   width: ${(props) => props.width || 'auto'};
-  padding: 10px 12px;
+  padding: 7px 10px;
   text-align: left;
   font-weight: 600;
   white-space: nowrap;
-  font-size: 13px;
+  font-size: 12px;
   color: var(--mf-foreground);
   box-sizing: border-box;
 `
 
 const TableDataCell = styled.td`
-  padding: 10px 12px;
+  padding: 7px 10px;
   text-align: left;
-  font-size: 13px;
+  font-size: 12px;
   color: var(--mf-foreground);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -154,8 +154,8 @@ const Toolbar = styled.div`
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  min-height: 44px;
-  padding: 8px 12px;
+  min-height: 36px;
+  padding: 4px 8px;
   border-bottom: 1px solid var(--mf-border);
   box-sizing: border-box;
 `
@@ -166,13 +166,13 @@ const InstalledOnlyControl = styled.label`
   gap: 8px;
   color: var(--mf-foreground);
   cursor: pointer;
-  font-size: 13px;
+  font-size: 12px;
 `
 
 const EmptyState = styled.div`
-  padding: 20px 16px;
+  padding: 14px 12px;
   color: var(--mf-muted-foreground);
-  font-size: 13px;
+  font-size: 12px;
   text-align: center;
 `
 

@@ -8,10 +8,10 @@ export const SettingItemContainer = styled.div<SettingItemContainerProps>`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
+  gap: 16px;
   min-width: 0;
   margin: 0;
-  padding: 16px 2px;
+  padding: 10px 0;
   border-bottom: 1px solid var(--mf-border);
 
   &:last-child {
@@ -38,7 +38,7 @@ export const SettingItemContainer = styled.div<SettingItemContainerProps>`
   @media (max-width: 720px) {
     align-items: stretch;
     flex-direction: column;
-    gap: 12px;
+    gap: 8px;
 
     > :last-child {
       align-self: flex-start;
