@@ -3,6 +3,7 @@ import type { Extension as CodeMirrorExtension } from '@codemirror/state'
 import MarkdownIt from 'markdown-it'
 import type { ExtensionsOptions } from '../../index'
 import { isImageElement } from '../../../utils/html'
+import { applyImageRequestPolicy } from '../../../utils/image-loading'
 import {
   clearPreviewImageSource,
   getPreviewImageSource,
@@ -61,13 +62,12 @@ export function createHtmlRenderer(options: {
       }
 
       const htmlContent = sanitizeMarkdownHtml(markdownHtmlRenderer.render(source), {
-        preserveImageSources: Boolean(
-          options.handleViewImgSrcUrl || options.preserveImageSources,
-        ),
+        preserveImageSources: Boolean(options.handleViewImgSrcUrl || options.preserveImageSources),
       })
       const domParser = new DOMParser()
       const doc = domParser.parseFromString(htmlContent, 'text/html')
       removeFormattingWhitespace(doc.body)
+      doc.body.querySelectorAll('img').forEach(applyImageRequestPolicy)
       const imageTasks: Promise<void>[] = []
 
       if (options.handleViewImgSrcUrl) {
@@ -81,13 +81,16 @@ export function createHtmlRenderer(options: {
               targetUrl = targetUrl.split(location.origin)[1]
             }
             imageTasks.push(
-              options.handleViewImgSrcUrl(targetUrl).then((newHref) => {
-                image.src = newHref
-                clearPreviewImageSource(image)
-              }).catch(() => {
-                image.removeAttribute('src')
-                clearPreviewImageSource(image)
-              }),
+              options
+                .handleViewImgSrcUrl(targetUrl)
+                .then((newHref) => {
+                  image.src = newHref
+                  clearPreviewImageSource(image)
+                })
+                .catch(() => {
+                  image.removeAttribute('src')
+                  clearPreviewImageSource(image)
+                }),
             )
           }
           child = walker.nextNode()

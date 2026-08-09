@@ -16,6 +16,25 @@
       "loading": "読み込み中",
       "accept": "承認"
     },
+    "image": {
+      "source": "画像の参照元",
+      "sourcePlaceholder": "画像の URL またはパスを入力",
+      "embeddedSource": "埋め込み画像",
+      "replaceSource": "置き換え",
+      "replaceSourcePlaceholder": "新しい URL、パス、またはデータ URL を貼り付け",
+      "alt": "代替テキスト",
+      "altPlaceholder": "画像の内容を説明",
+      "referenceLabel": "参照ラベル",
+      "referenceLabelPlaceholder": "参照ラベルを入力",
+      "cancel": "キャンセル",
+      "apply": "適用",
+      "saving": "保存中...",
+      "updateError": "画像の参照元を更新できませんでした。もう一度お試しください。",
+      "emptyTitle": "画像の参照元がありません",
+      "emptyDescription": "クリックして追加",
+      "errorTitle": "画像を読み込めません",
+      "errorDescription": "クリックして参照元を編集"
+    },
     "ai": {
       "generate": "生成",
       "stop": "停止",

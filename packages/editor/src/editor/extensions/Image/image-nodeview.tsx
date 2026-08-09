@@ -8,6 +8,12 @@ import type { ExtensionsOptions } from '..'
 import { Resizable } from '../../components/Resizable'
 import { editorZIndex } from '../../theme/z-index'
 import { isBrowser } from '../../utils/common'
+import {
+  IMAGE_REFERRER_POLICY,
+  normalizeImageSourceForBrowser,
+  preloadImageSource,
+} from './image-source'
+import { ImagePlaceholder } from './image-placeholder'
 import { ImageToolTips } from './image-tool-tips'
 
 export interface ImageNodeViewProps extends NodeViewComponentProps {
@@ -21,9 +27,6 @@ export interface ImageNodeViewProps extends NodeViewComponentProps {
 export type ReferInfo = {
   label?: string
 }
-const warningFallBack =
-  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAADICAAAAACIM/FCAAAChElEQVR4Ae3aMW/TQBxAcb70k91AAiGuGlZAtOlQApWaDiSdklZq2RPUTm1xUWL3PgqSpygkXlh88N54nn7S2Trd3y/CP5IQIUKECBEiRIgQIUKECBEiRIgQIUKECBEiRIgQIUKECBEiRIgQIUKECBEiRIgQIUKECBEiRIgQIUKECPmPIEKECBEiRIgQIeX82+FBO0naB4eTRRkt5P7sNWt1Rw9RQvKThI2SYR4f5OoVW2rfRAYpT6hqHc8WeVHki9mgRdWwiAmyfA9AdrlaW5tlAHxcxQMpK8feRbGxPEkrSREN5ARg/y780V0GMIwFcgXwLg9byvsAN3FA8lfAfr7jYQZ0nqKAfAb21vYVwNruSoEvMUDuE+Ai7IKECZA+RAA5A7JiN6TMgFHzIeUb4DLshoQZ0H1uPGQOvFzVQZYtYNF4yBg4DnWQMAAmjYccArN6yBQ4ajzkAFjUQ+ZAv/GQNpDXQ3Kg03hIAhT1kAJIhLi1/vJl39Ic6Mf3+a2K8PM7BgahtgEwjuKI0lqGjSI8opRdYFb3sk/jODSGEZCVuyFFDzgPzYc8JMBkN2QMpI8RQMIQ2LvdBblNgdM4Lh/aQJaHrf3sAe2nKCDhGqCfb3VEcx1UNQTItlzQ3fYAvoZYIMUHgHRSbiyPU4BPZUSX2JWEbLZcW5v2qByrmMYKxZCq1mA6z4sin08HLapOy8gGPddtttT5HuHobZiwUXr6K85h6KjLWm/PH+MdTy/GR/12knb6g8mPZ38YECJEiBAhQoQIESJEiBAhQoQIESJEiBAhQoQIESJEiBAhQoQIESJEiBAhQoQIESJEiBAhQoQIESJEiBAhQoQIESJEiBAh0fUb5q7oCGreEVEAAAAASUVORK5CYII='
-
 export function ImageNodeView(props: ImageNodeViewProps) {
   const {
     node,
@@ -38,17 +41,12 @@ export function ImageNodeView(props: ImageNodeViewProps) {
   const popoverStore = useRef<PopoverStore>(null)
   const popoverRef = useRef<HTMLDivElement>(null)
   const fromPaste = node.attrs['data-rme-from-paste'] === 'true'
-  const refers = view.state.doc.content.content.filter((node) => node.type.name === 'reference_def')
+  const referLabel = node.attrs['data-refer-label'] as string | undefined
   const curRefer = useMemo(() => {
-    let res:
-      | {
-          href?: string
-          title?: string
-          label?: string
-        }
-      | undefined
+    if (!referLabel) return undefined
 
-    refers.forEach((refer) => {
+    for (const refer of view.state.doc.content.content) {
+      if (refer.type.name !== 'reference_def') continue
       const labelNode = refer.content.content.find(
         (contentNode) => contentNode.type.name === 'reference_label',
       )
@@ -58,23 +56,18 @@ export function ImageNodeView(props: ImageNodeViewProps) {
       const titleNode = refer.content.content.find(
         (contentNode) => contentNode.type.name === 'reference_title',
       )
-      if (!labelNode?.textContent || !node.attrs['data-refer-label']) {
-        return
-      }
-      if (
-        normalizeReference(labelNode?.textContent) ===
-        normalizeReference(node.attrs['data-refer-label'])
-      ) {
-        res = {
+      if (!labelNode?.textContent) continue
+      if (normalizeReference(labelNode?.textContent) === normalizeReference(referLabel)) {
+        return {
           href: hrefNode?.textContent || '',
           title: titleNode?.textContent || '',
           label: labelNode?.textContent || '',
         }
       }
-    })
+    }
 
-    return res
-  }, [refers])
+    return undefined
+  }, [referLabel, view.state.doc])
 
   const handlePasteEvent = useEffectEvent(async () => {
     let src = node.attrs.src || ''
@@ -94,11 +87,13 @@ export function ImageNodeView(props: ImageNodeViewProps) {
     if (fromPaste) {
       handlePasteEvent()
     }
+    // React Effect Events intentionally stay outside effect dependencies.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fromPaste])
 
-  const handleStoreChange = (store: PopoverStore) => {
+  const handleStoreChange = useCallback((store: PopoverStore) => {
     popoverStore.current = store
-  }
+  }, [])
 
   useEffect(() => {
     const handleOutsideClick = (event: MouseEvent) => {
@@ -121,15 +116,45 @@ export function ImageNodeView(props: ImageNodeViewProps) {
     }
   }, [selected])
 
-  const handleResize = useCallback(() => {
-    updateAttributes({
-      ['data-rme-type']: 'html',
-    })
-  }, [updateAttributes])
+  const handleResizeAttributes = useCallback(() => ({ 'data-rme-type': 'html' }), [])
+  const handleControlInit = useCallback((init: () => void) => {
+    initRef.current = init
+  }, [])
+  const closePopover = useCallback(() => {
+    popoverStore.current?.setOpen(false)
+  }, [])
+  const loadImageSource = useCallback(
+    async (source: string) => {
+      let resolvedSource = source
+      if (handleViewImgSrcUrl) {
+        try {
+          resolvedSource = await handleViewImgSrcUrl(source)
+        } catch {
+          resolvedSource = source
+        }
+      }
+
+      const candidates = new Set([
+        normalizeImageSourceForBrowser(resolvedSource),
+        normalizeImageSourceForBrowser(source),
+      ])
+      for (const candidate of candidates) {
+        if (!candidate) continue
+        try {
+          return await preloadImageSource(candidate)
+        } catch {
+          // Try the original source when a rendered local or remote URL fails.
+        }
+      }
+
+      throw new Error('Unable to load image source')
+    },
+    [handleViewImgSrcUrl],
+  )
 
   const Loading = (
-    <span className="inline-loading">
-      <i className="inline-loading-icon ri-loader-4-line"></i>
+    <span className='inline-loading'>
+      <i className='inline-loading-icon ri-loader-4-line'></i>
     </span>
   )
 
@@ -138,15 +163,18 @@ export function ImageNodeView(props: ImageNodeViewProps) {
   }
 
   const originSrc = curRefer?.href || node.attrs.src || ''
+  const placeholderStyle = {
+    height: node.attrs.height ? '100%' : 112,
+    width: node.attrs.width ? '100%' : 220,
+  }
   const otherAttrs = {
     ...omit(node.attrs, 'data-refer-label'),
     'data-rme-original-src': originSrc,
   }
   const Main = (
     <Resizable
-      key={`${node.attrs.src}`}
-      controlInit={(init) => (initRef.current = init)}
-      onResize={handleResize}
+      controlInit={handleControlInit}
+      getResizeAttributes={handleResizeAttributes}
       {...props}
     >
       <ZensImage
@@ -154,34 +182,13 @@ export function ImageNodeView(props: ImageNodeViewProps) {
         onLoad={() => initRef.current?.()}
         src={originSrc}
         loader={Loading}
-        imgPromise={() => {
-          return new Promise(async (resolve, reject) => {
-            let targetSrc = originSrc
-            if (handleViewImgSrcUrl) {
-              try {
-                targetSrc = await handleViewImgSrcUrl(targetSrc)
-              } catch (error) {}
-            }
-
-            const makeImageLoad = (targetSrc: string) => {
-              const img = new Image()
-              img.src = targetSrc
-              img.onload = () => {
-                resolve(targetSrc)
-              }
-              img.onerror = () => {
-                if (targetSrc === originSrc) {
-                  reject(warningFallBack)
-                } else {
-                  makeImageLoad(originSrc)
-                }
-              }
-            }
-
-            makeImageLoad(targetSrc)
-          })
-        }}
+        emptyImage={<ImagePlaceholder style={placeholderStyle} variant='empty' />}
+        unloader={<ImagePlaceholder style={placeholderStyle} variant='error' />}
+        unloaderStyle={{ background: 'transparent', border: 'none' }}
+        imgPromise={loadImageSource}
+        referrerPolicy={IMAGE_REFERRER_POLICY}
         style={{
+          display: 'block',
           width: '100%',
           height: '100%',
         }}
@@ -192,19 +199,20 @@ export function ImageNodeView(props: ImageNodeViewProps) {
   return (
     <div
       ref={popoverRef}
-      style={{ position: 'relative', zIndex: selected ? editorZIndex.imageSelected : 'auto', lineHeight: 0 }}
+      style={{
+        position: 'relative',
+        zIndex: selected ? editorZIndex.imageSelected : 'auto',
+        lineHeight: 0,
+      }}
     >
       <Popover
         customContent={
           <ImageToolTips
-            key={`${node.attrs.src}`}
             node={node}
             referInfo={curRefer}
             imageHostingHandler={imageHostingHandler}
-            updateAttributes={(...args) => {
-              updateAttributes(...args)
-              popoverStore.current?.setOpen(false)
-            }}
+            onRequestClose={closePopover}
+            updateAttributes={updateAttributes}
           />
         }
         boxProps={{
@@ -212,10 +220,13 @@ export function ImageNodeView(props: ImageNodeViewProps) {
             display: 'inline-flex',
           },
         }}
-        placement="top-start"
+        placement='top-start'
+        arrow={false}
+        hideOnEscape={false}
         onStoreChange={handleStoreChange}
         toggleOnClick
-        style={{ zIndex: editorZIndex.imageToolbar }}
+        unmountOnHide
+        style={{ zIndex: editorZIndex.imageToolbar, padding: 0 }}
       >
         {Main}
       </Popover>

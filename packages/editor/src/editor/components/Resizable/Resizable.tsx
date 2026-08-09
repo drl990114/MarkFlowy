@@ -1,293 +1,373 @@
 import type { NodeViewComponentProps } from '@rme-sdk/sdk/react'
 import { memo, useCallback, useEffect, useRef, useState, type FC } from 'react'
-import styled from 'styled-components'
-import { isBrowser } from '../../utils/common'
+import styled, { css } from 'styled-components'
 import { ResizableHandle, ResizableHandleType } from './ResizableHandle'
-
-const throttle = (delay: number, noTrailing: boolean, callback: (...args: any[]) => void) => {
-  let timeoutId: ReturnType<typeof setTimeout> | null = null
-  let lastExec = 0
-
-  return function (...args: any[]) {
-    const elapsed = Date.now() - lastExec
-
-    const execute = () => {
-      lastExec = Date.now()
-      callback(...args)
-    }
-
-    if (timeoutId) {
-      clearTimeout(timeoutId)
-    }
-
-    if (elapsed > delay) {
-      execute()
-    } else if (!noTrailing) {
-      timeoutId = setTimeout(execute, delay - elapsed)
-    }
-  }
-}
 
 export enum ResizableRatioType {
   Fixed,
   Flexible,
 }
 
-const ResizableContainer = styled.div`
+export interface ResizableDimensions {
+  height: number
+  width: number
+}
+
+interface CalculateDimensionsOptions {
+  aspectRatio: ResizableRatioType
+  deltaX: number
+  deltaY: number
+  handleType: ResizableHandleType
+  maxWidth?: number
+  minSize?: number
+  startHeight: number
+  startWidth: number
+}
+
+const MIN_SIZE = 20
+
+export function calculateResizableDimensions({
+  aspectRatio,
+  deltaX,
+  deltaY,
+  handleType,
+  maxWidth,
+  minSize = MIN_SIZE,
+  startHeight,
+  startWidth,
+}: CalculateDimensionsOptions): ResizableDimensions {
+  const isLeft =
+    handleType === ResizableHandleType.Left ||
+    handleType === ResizableHandleType.TopLeft ||
+    handleType === ResizableHandleType.BottomLeft
+  const isRight =
+    handleType === ResizableHandleType.Right ||
+    handleType === ResizableHandleType.TopRight ||
+    handleType === ResizableHandleType.BottomRight
+  const isTop =
+    handleType === ResizableHandleType.Top ||
+    handleType === ResizableHandleType.TopLeft ||
+    handleType === ResizableHandleType.TopRight
+  const isBottom =
+    handleType === ResizableHandleType.Bottom ||
+    handleType === ResizableHandleType.BottomLeft ||
+    handleType === ResizableHandleType.BottomRight
+
+  let width = startWidth + (isLeft ? -deltaX : isRight ? deltaX : 0)
+  let height = startHeight + (isTop ? -deltaY : isBottom ? deltaY : 0)
+
+  if (aspectRatio === ResizableRatioType.Fixed && startWidth > 0 && startHeight > 0) {
+    const ratio = startHeight / startWidth
+
+    if (handleType === ResizableHandleType.Top || handleType === ResizableHandleType.Bottom) {
+      height = Math.max(minSize, height)
+      width = height / ratio
+    } else {
+      width = Math.max(minSize, width)
+      height = width * ratio
+    }
+  } else {
+    width = Math.max(minSize, width)
+    height = Math.max(minSize, height)
+  }
+
+  if (maxWidth && width > maxWidth) {
+    if (aspectRatio === ResizableRatioType.Fixed && width > 0) {
+      height *= maxWidth / width
+    }
+    width = maxWidth
+  }
+
+  return {
+    height: Math.round(height),
+    width: Math.round(width),
+  }
+}
+
+const ResizableContainer = styled.div<{ $selected: boolean }>`
   display: inline-flex;
   position: relative;
   max-width: 100%;
+  border-radius: ${(props) => props.theme.smallBorderRadius};
+  outline: 2px solid transparent;
+  outline-offset: 2px;
   user-select: none;
-  -webkit-user-select: none; /* Safari */
-  -moz-user-select: none; /* Firefox */
-  -ms-user-select: none; /* Edge, IE */
-  border-radius: 2px;
-  transition: all 0.15s ease-out;
+  vertical-align: bottom;
+  -webkit-user-select: none;
+
+  ${(props) =>
+    props.$selected &&
+    css`
+      outline-color: ${props.theme.accentColor};
+    `}
+
+  &[data-resize-state='true'] {
+    cursor: nwse-resize;
+  }
+
+  &[data-resize-state='true'] .rme-resizable-handle {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  & > img,
+  & > iframe {
+    border-radius: inherit;
+  }
 `
+
+type ResizeAttributes = Parameters<NodeViewComponentProps['updateAttributes']>[0]
 
 interface ResizableProps extends BaseComponentProps, NodeViewComponentProps {
   selected: boolean
   aspectRatio?: ResizableRatioType
   defaultSize?: { width: number; height: number }
   controlInit?: (init: () => void) => void
-  onResize?: (e: React.MouseEvent<Element, MouseEvent>) => void
+  getResizeAttributes?: (dimensions: ResizableDimensions) => ResizeAttributes
 }
 
-const MIN_WIDTH = 20
+interface ResizeSession {
+  cleanup: () => void
+}
+
+function toCssSize(value: unknown): string | undefined {
+  if (typeof value === 'number') return `${value}px`
+  if (typeof value === 'string' && value)
+    return /^\d+(?:\.\d+)?$/.test(value) ? `${value}px` : value
+  return undefined
+}
 
 export const Resizable: FC<ResizableProps> = memo((props) => {
   const {
     node,
     aspectRatio = ResizableRatioType.Fixed,
+    defaultSize,
     updateAttributes,
     selected,
     controlInit,
-    onResize,
+    getResizeAttributes,
+    view,
   } = props
 
-  const [size, setSize] = useState<{ width?: number; height?: number }>({})
   const [inNode, setInNode] = useState(false)
-  const [hasChanged, setHasChanged] = useState(false)
-  const destoryList = useRef<(() => void)[]>([])
   const containerRef = useRef<HTMLDivElement>(null)
-  const startWidthRef = useRef(0)
-  const startHeightRef = useRef(0)
   const currentWidthRef = useRef(0)
   const currentHeightRef = useRef(0)
-  const isResizingRef = useRef(false)
+  const resizeSessionRef = useRef<ResizeSession | null>(null)
+
+  const initializeDimensions = useCallback(() => {
+    if (!containerRef.current) return
+    const { width, height } = containerRef.current.getBoundingClientRect()
+    currentWidthRef.current = width
+    currentHeightRef.current = height
+  }, [])
 
   const startResizing = useCallback(
-    (e: React.MouseEvent<Element, MouseEvent>, handleType: ResizableHandleType) => {
-      e.preventDefault()
+    (event: React.PointerEvent<Element>, handleType: ResizableHandleType) => {
+      event.preventDefault()
+      event.stopPropagation()
+      resizeSessionRef.current?.cleanup()
 
-      const startX = e.pageX
-      const startY = e.pageY
-      const startWidth = startWidthRef.current || 0
-      const startHeight = startHeightRef.current || 0
+      const container = containerRef.current
+      const target = event.currentTarget
+      if (!container || !(target instanceof HTMLElement)) return
 
-      // Initialize current dimensions and start resizing
-      currentWidthRef.current = startWidth
-      currentHeightRef.current = startHeight
-      isResizingRef.current = true
+      const rect = container.getBoundingClientRect()
+      const startWidth = currentWidthRef.current || rect.width
+      const startHeight = currentHeightRef.current || rect.height
+      if (!startWidth || !startHeight) return
 
-      const onMouseMove = throttle(100, false, (event: any) => {
-        // Only process if still resizing
-        if (!isResizingRef.current) return
-        const currentX = event.pageX
-        const currentY = event.pageY
-        const diffX = currentX - startX
-        const diffY = currentY - startY
-        let newWidth: number | null = null
-        let newHeight: number | null = null
+      const pointerId = event.pointerId
+      const startX = event.clientX
+      const startY = event.clientY
+      const editorWidth = view.dom.getBoundingClientRect().width
+      let latestX = startX
+      let latestY = startY
+      let frameId: number | null = null
+      let active = true
 
-        if (aspectRatio === ResizableRatioType.Fixed && startWidth && startHeight) {
-          switch (handleType) {
-            case ResizableHandleType.Right:
-            case ResizableHandleType.TopRight:
-            case ResizableHandleType.BottomRight:
-              newWidth = startWidth + diffX
-              newHeight = (startHeight / startWidth) * newWidth!
-              break
-            case ResizableHandleType.Left:
-            case ResizableHandleType.TopLeft:
-            case ResizableHandleType.BottomLeft:
-              newWidth = startWidth - diffX
-              newHeight = (startHeight / startWidth) * newWidth
-              break
-            case ResizableHandleType.Bottom:
-              newHeight = startHeight + diffY
-              newWidth = (startWidth / startHeight) * newHeight!
-              break
-            case ResizableHandleType.Top:
-              newHeight = startHeight - diffY
-              newWidth = (startWidth / startHeight) * newHeight!
-              break
-          }
-        } else if (aspectRatio === ResizableRatioType.Flexible) {
-          switch (handleType) {
-            case ResizableHandleType.Right:
-              newWidth = startWidth + diffX
-              break
-            case ResizableHandleType.Left:
-              newWidth = startWidth - diffX
-              break
-            case ResizableHandleType.Bottom:
-              newHeight = startHeight + diffY
-              break
-            case ResizableHandleType.Top:
-              newHeight = startHeight - diffY
-              break
-            case ResizableHandleType.BottomRight:
-            case ResizableHandleType.TopRight:
-              newWidth = startWidth + diffX
-              newHeight = startHeight + diffY
-              break
-            case ResizableHandleType.BottomLeft:
-            case ResizableHandleType.TopLeft:
-              newWidth = startWidth - diffX
-              newHeight = startHeight + diffY
-              break
-          }
-        }
+      const applyLatestDimensions = () => {
+        frameId = null
+        if (!active) return
 
-        if (typeof newWidth === 'number' && newWidth < MIN_WIDTH) {
-          if (aspectRatio === ResizableRatioType.Fixed && startWidth && startHeight) {
-            newWidth = MIN_WIDTH
-            newHeight = (startHeight / startWidth) * newWidth
-          } else if (aspectRatio === ResizableRatioType.Flexible) {
-            newWidth = MIN_WIDTH
-          }
-        }
-
-        if (newWidth && containerRef.current && isResizingRef.current) {
-          currentWidthRef.current = Math.round(newWidth!)
-          setSize((prev) => ({ ...prev, width: currentWidthRef.current }))
-        }
-
-        if (newHeight && isResizingRef.current) {
-          currentHeightRef.current = Math.round(newHeight!)
-          setSize((prev) => ({ ...prev, height: currentHeightRef.current }))
-        }
-      })
-
-      const onMouseUp = (event: any) => {
-        event.preventDefault()
-        event.stopPropagation()
-
-        // Stop resizing immediately to prevent further mousemove updates
-        isResizingRef.current = false
-
-        if (isBrowser()) {
-          document.removeEventListener('mousemove', onMouseMove)
-          document.removeEventListener('mouseup', onMouseUp)
-        }
-
-        // Use the ref values which are always up to date
-        const finalWidth = currentWidthRef.current
-        const finalHeight = currentHeightRef.current
-
-        startWidthRef.current = finalWidth
-        startHeightRef.current = finalHeight
-        setSize({ width: finalWidth, height: finalHeight })
-
-        updateAttributes({
-          ...node.attrs,
-          width: finalWidth,
-          height: finalHeight,
+        const dimensions = calculateResizableDimensions({
+          aspectRatio,
+          deltaX: latestX - startX,
+          deltaY: latestY - startY,
+          handleType,
+          maxWidth: editorWidth || undefined,
+          startHeight,
+          startWidth,
         })
-        onResize?.(event)
+
+        currentWidthRef.current = dimensions.width
+        currentHeightRef.current = dimensions.height
+        container.style.width = `${dimensions.width}px`
+        container.style.height = `${dimensions.height}px`
       }
 
-      if (isBrowser()) {
-        document.addEventListener('mousemove', onMouseMove)
-        document.addEventListener('mouseup', onMouseUp)
+      const flushPendingFrame = () => {
+        if (frameId !== null) {
+          cancelAnimationFrame(frameId)
+          frameId = null
+        }
+        applyLatestDimensions()
       }
 
-      destoryList.current.push(() => {
-        isResizingRef.current = false
-        if (isBrowser()) {
-          document.removeEventListener('mousemove', onMouseMove)
+      const restoreStartingDimensions = () => {
+        currentWidthRef.current = startWidth
+        currentHeightRef.current = startHeight
+        container.style.width = `${startWidth}px`
+        container.style.height = `${startHeight}px`
+      }
+
+      const onPointerMove = (pointerEvent: PointerEvent) => {
+        if (!active || pointerEvent.pointerId !== pointerId) return
+        pointerEvent.preventDefault()
+        latestX = pointerEvent.clientX
+        latestY = pointerEvent.clientY
+
+        if (frameId === null) {
+          frameId = requestAnimationFrame(applyLatestDimensions)
         }
-      })
-      destoryList.current.push(() => {
-        if (isBrowser()) {
-          document.removeEventListener('mouseup', onMouseUp)
+      }
+
+      const cleanup = () => {
+        if (!active) return
+        active = false
+        if (frameId !== null) cancelAnimationFrame(frameId)
+        target.removeEventListener('pointermove', onPointerMove)
+        target.removeEventListener('pointerup', onPointerUp)
+        target.removeEventListener('pointercancel', onPointerCancel)
+        target.removeEventListener('lostpointercapture', onLostPointerCapture)
+        document.removeEventListener('pointermove', onPointerMove)
+        document.removeEventListener('pointerup', onPointerUp)
+        document.removeEventListener('pointercancel', onPointerCancel)
+        try {
+          if (target.hasPointerCapture?.(pointerId)) target.releasePointerCapture(pointerId)
+        } catch {
+          // The browser may have already released capture during cancellation.
         }
-      })
+        container.dataset.resizeState = 'false'
+        resizeSessionRef.current = null
+      }
+
+      const finishResize = (pointerEvent: PointerEvent, commit: boolean) => {
+        if (!active || pointerEvent.pointerId !== pointerId) return
+        pointerEvent.preventDefault()
+        pointerEvent.stopPropagation()
+        latestX = pointerEvent.clientX
+        latestY = pointerEvent.clientY
+        if (commit) {
+          flushPendingFrame()
+        } else {
+          restoreStartingDimensions()
+        }
+
+        const dimensions = {
+          height: currentHeightRef.current,
+          width: currentWidthRef.current,
+        }
+        const extraAttributes = getResizeAttributes?.(dimensions) ?? {}
+        cleanup()
+
+        if (commit) {
+          updateAttributes({
+            height: dimensions.height,
+            width: dimensions.width,
+            ...extraAttributes,
+          })
+        }
+      }
+
+      function onPointerUp(pointerEvent: PointerEvent) {
+        finishResize(pointerEvent, true)
+      }
+
+      function onPointerCancel(pointerEvent: PointerEvent) {
+        finishResize(pointerEvent, false)
+      }
+
+      function onLostPointerCapture(pointerEvent: PointerEvent) {
+        if (active && pointerEvent.pointerId === pointerId) {
+          restoreStartingDimensions()
+          cleanup()
+        }
+      }
+
+      container.dataset.resizeState = 'true'
+      target.addEventListener('pointermove', onPointerMove)
+      target.addEventListener('pointerup', onPointerUp)
+      target.addEventListener('pointercancel', onPointerCancel)
+      target.addEventListener('lostpointercapture', onLostPointerCapture)
+      const attachDocumentFallback = () => {
+        target.removeEventListener('pointermove', onPointerMove)
+        target.removeEventListener('pointerup', onPointerUp)
+        target.removeEventListener('pointercancel', onPointerCancel)
+        document.addEventListener('pointermove', onPointerMove)
+        document.addEventListener('pointerup', onPointerUp)
+        document.addEventListener('pointercancel', onPointerCancel)
+      }
+      if (target.setPointerCapture) {
+        try {
+          target.setPointerCapture(pointerId)
+        } catch {
+          attachDocumentFallback()
+        }
+      } else {
+        attachDocumentFallback()
+      }
+      resizeSessionRef.current = { cleanup }
     },
-    [aspectRatio, node.attrs, updateAttributes, onResize],
+    [aspectRatio, getResizeAttributes, updateAttributes, view.dom],
   )
 
-  const handleResizing = useCallback(
-    (e: React.MouseEvent, handleType: ResizableHandleType) => {
-      setHasChanged(true)
-      startResizing(e, handleType)
-    },
-    [startResizing],
-  )
   useEffect(() => {
-    const init = () => {
-      if (containerRef.current) {
-        const { width, height } = containerRef.current.getBoundingClientRect()
-        startWidthRef.current = width
-        startHeightRef.current = height
-        currentWidthRef.current = width
-        currentHeightRef.current = height
-        setSize({ width, height })
-      }
-    }
-
     if (controlInit) {
-      controlInit(init)
+      controlInit(initializeDimensions)
     } else {
-      init()
+      initializeDimensions()
     }
 
-    return () => {
-      destoryList.current.forEach((destory) => destory())
-      destoryList.current = []
-    }
-  }, [controlInit])
+    return () => resizeSessionRef.current?.cleanup()
+  }, [controlInit, initializeDimensions])
 
   const handleVisible = selected || inNode
+  const width = toCssSize(node.attrs.width ?? defaultSize?.width)
+  const height = toCssSize(node.attrs.height ?? defaultSize?.height)
 
   return (
     <ResizableContainer
+      $selected={selected}
+      data-rme-resizable='true'
+      data-resize-state='false'
       ref={containerRef}
-      style={
-        hasChanged
-          ? {
-              width: `${size.width}px`,
-              height: `${size.height}px`,
-              aspectRatio: `${size.width} / ${size.height}`,
-            }
-          : undefined
-      }
-      onMouseOver={() => setInNode(true)}
-      onMouseOut={() => setInNode(false)}
+      style={{ height, width }}
+      onPointerEnter={() => setInNode(true)}
+      onPointerLeave={() => setInNode(false)}
     >
       <ResizableHandle
         visible={handleVisible}
         selected={selected}
-        onResizing={handleResizing}
+        onResizing={startResizing}
         handleType={ResizableHandleType.TopLeft}
       />
       <ResizableHandle
         visible={handleVisible}
         selected={selected}
-        onResizing={handleResizing}
+        onResizing={startResizing}
         handleType={ResizableHandleType.TopRight}
       />
       <ResizableHandle
         visible={handleVisible}
         selected={selected}
-        onResizing={handleResizing}
+        onResizing={startResizing}
         handleType={ResizableHandleType.BottomLeft}
       />
       <ResizableHandle
         visible={handleVisible}
         selected={selected}
-        onResizing={handleResizing}
+        onResizing={startResizing}
         handleType={ResizableHandleType.BottomRight}
       />
       {props.children}

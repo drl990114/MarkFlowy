@@ -16,6 +16,25 @@
       "loading": "Cargando",
       "accept": "Aceptar"
     },
+    "image": {
+      "source": "Origen",
+      "sourcePlaceholder": "Introduce una URL o ruta de imagen",
+      "embeddedSource": "Imagen integrada",
+      "replaceSource": "Reemplazar",
+      "replaceSourcePlaceholder": "Pega una URL, ruta o URL de datos nueva",
+      "alt": "Texto alternativo",
+      "altPlaceholder": "Describe esta imagen",
+      "referenceLabel": "Etiqueta de referencia",
+      "referenceLabelPlaceholder": "Introduce una etiqueta de referencia",
+      "cancel": "Cancelar",
+      "apply": "Aplicar",
+      "saving": "Guardando...",
+      "updateError": "No se pudo actualizar el origen de la imagen. Inténtalo de nuevo.",
+      "emptyTitle": "Sin origen de imagen",
+      "emptyDescription": "Haz clic para añadir uno",
+      "errorTitle": "Imagen no disponible",
+      "errorDescription": "Haz clic para editar el origen"
+    },
     "ai": {
       "generate": "Generar",
       "stop": "Paren",

@@ -27,6 +27,7 @@ import { getHtmlImageInputRule } from '../../inline-input-regex'
 import type { NodeSerializerOptions } from '../../transform'
 import { ParserRuleType } from '../../transform'
 import { buildHtmlStringFromAst } from '../../utils/html'
+import { IMAGE_REFERRER_POLICY } from '../../utils/image-loading'
 import type { ImageNodeViewProps } from './image-nodeview'
 import { ImageNodeView } from './image-nodeview'
 
@@ -178,7 +179,7 @@ export class HtmlImageExtension extends NodeExtension<ImageOptions> {
       ],
       toDOM: (node) => {
         const attrs = omitExtraAttributes(node.attrs, extra)
-        return ['img', { ...extra.dom(node), ...attrs }]
+        return ['img', { ...extra.dom(node), ...attrs, referrerpolicy: IMAGE_REFERRER_POLICY }]
       },
     }
   }

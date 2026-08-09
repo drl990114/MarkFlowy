@@ -4,6 +4,25 @@
       "loading": "加载中",
       "accept": "接受"
     },
+    "image": {
+      "source": "来源",
+      "sourcePlaceholder": "输入图片 URL 或路径",
+      "embeddedSource": "内嵌图片",
+      "replaceSource": "替换",
+      "replaceSourcePlaceholder": "粘贴新的 URL、路径或 Data URL",
+      "alt": "替代文本",
+      "altPlaceholder": "描述这张图片",
+      "referenceLabel": "引用标签",
+      "referenceLabelPlaceholder": "输入引用标签",
+      "cancel": "取消",
+      "apply": "应用",
+      "saving": "保存中...",
+      "updateError": "无法更新图片来源，请重试。",
+      "emptyTitle": "暂无图片来源",
+      "emptyDescription": "点击添加图片",
+      "errorTitle": "图片无法加载",
+      "errorDescription": "点击编辑图片来源"
+    },
     "table": {
       "insertColumnAfter": "向后插入列",
       "insertColumnBefore": "向前插入列",

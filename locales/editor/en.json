@@ -4,6 +4,25 @@
       "loading": "Loading",
       "accept": "Accept"
     },
+    "image": {
+      "source": "Source",
+      "sourcePlaceholder": "Enter an image URL or path",
+      "embeddedSource": "Embedded image",
+      "replaceSource": "Replace",
+      "replaceSourcePlaceholder": "Paste a replacement URL, path, or data URL",
+      "alt": "Alternative text",
+      "altPlaceholder": "Describe this image",
+      "referenceLabel": "Reference label",
+      "referenceLabelPlaceholder": "Enter a reference label",
+      "cancel": "Cancel",
+      "apply": "Apply",
+      "saving": "Saving...",
+      "updateError": "Couldn't update the image source. Try again.",
+      "emptyTitle": "No image source",
+      "emptyDescription": "Click to add one",
+      "errorTitle": "Image unavailable",
+      "errorDescription": "Click to edit the source"
+    },
     "table": {
       "insertColumnAfter": "insert column after",
       "insertColumnBefore": "insert column before",

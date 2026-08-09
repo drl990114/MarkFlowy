@@ -4,7 +4,7 @@ import { ThemeContext } from 'styled-components';
 
 import { ImageEmpty } from './ImageEmpty';
 import imagePromiseFactory from './imagePromiseFactory';
-import useImage, { useImageProps } from './use-image';
+import useImage, { type useImageProps } from './use-image';
 
 export type ImgProps = Omit<
   React.DetailedHTMLProps<React.ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement>,
@@ -79,8 +79,10 @@ function Img(
   ref,
 ): JSX.Element | null {
   const theme = useContext(ThemeContext);
-  imgPromise = imgPromise || imagePromiseFactory({ decode, crossOrigin: crossorigin });
+  const resolvedImgPromise =
+    imgPromise || imagePromiseFactory({ decode, crossOrigin: crossorigin });
   const [isInView, setIsInView] = useState(!lazy);
+  const [failedRenderedSrc, setFailedRenderedSrc] = useState<string | null>(null);
   const lazyRef = useRef<HTMLSpanElement | null>(null);
   const shouldLoad = !lazy || isInView;
   const resolvedSrcList = shouldLoad ? srcList : [];
@@ -131,9 +133,9 @@ function Img(
     loading: imgProps.loading ?? (lazy ? 'lazy' : imgProps.loading),
   };
 
-  const { src, isLoading, error } = useImage({
+  const { src, isLoading } = useImage({
     srcList: resolvedSrcList,
-    imgPromise,
+    imgPromise: resolvedImgPromise,
     useSuspense,
   });
 
@@ -180,8 +182,19 @@ function Img(
     return container(emptyNode);
   }
 
-  if (src) {
-    return container(<img src={src} {...resolvedImgProps} ref={ref} />);
+  if (src && failedRenderedSrc !== src) {
+    const { onError, ...imageProps } = resolvedImgProps;
+    return container(
+      <img
+        {...imageProps}
+        ref={ref}
+        src={src}
+        onError={(event) => {
+          setFailedRenderedSrc(src);
+          onError?.(event);
+        }}
+      />,
+    );
   }
 
   if (!useSuspense && isLoading) {

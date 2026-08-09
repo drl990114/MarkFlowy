@@ -17,126 +17,111 @@ interface ResizableHandleProps extends BaseComponentProps {
   visible: boolean
   handleType: ResizableHandleType
   selected?: boolean
-  onResizing?: (e: React.MouseEvent, handleType: ResizableHandleType) => void
+  onResizing?: (event: React.PointerEvent, handleType: ResizableHandleType) => void
 }
 
-const ResizableHandleContainer = styled.span<ResizableHandleProps>`
+const ResizableHandleContainer = styled.span<{
+  $handleType: ResizableHandleType
+  $selected: boolean
+  $visible: boolean
+}>`
   position: absolute;
-  border-radius: 12px;
-  border: 2px solid #fff;
-  background: rgba(0, 0, 0, 0.65);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  border-radius: 6px;
-  transition: opacity ${props => props.selected ? '100ms' : '300ms'} ease-in 0s;
+  width: 20px;
+  height: 20px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  opacity: ${(props) => (props.$visible ? 1 : 0)};
+  pointer-events: ${(props) => (props.$visible ? 'auto' : 'none')};
+  touch-action: none;
+  transition: opacity 120ms ease-out;
   z-index: ${editorZIndex.resizableHandle};
 
-  ${(props) => {
-    if (props.visible) {
-      return css`
-        opacity: 1;
-        ${props.selected ? 'transform: scale(1.1);' : ''}
-      `
-    } else {
-      return css`
-        opacity: 0;
-      `
-    }
-  }}
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 5px;
+    box-sizing: border-box;
+    border: 2px solid ${(props) => props.theme.accentColor};
+    border-radius: 50%;
+    background: ${(props) => props.theme.bgColor};
+    box-shadow: 0 1px 3px ${(props) => props.theme.boxShadowColor};
+    transform: scale(${(props) => (props.$selected ? 1 : 0.82)});
+    transition: transform 120ms ease-out;
+  }
 
   ${(props) => {
-    switch (props.handleType) {
+    switch (props.$handleType) {
       case ResizableHandleType.BottomLeft:
         return css`
-          left: -6px;
-          bottom: -6px;
-          height: 6px;
-          width: 6px;
-          border-radius: 6px;
-          background-color: ${props.theme.accentColor};
+          left: -10px;
+          bottom: -10px;
           cursor: sw-resize;
         `
       case ResizableHandleType.BottomRight:
         return css`
-          right: -6px;
-          bottom: -6px;
-          height: 6px;
-          width: 6px;
-          border-radius: 6px;
-          background-color: ${props.theme.accentColor};
+          right: -10px;
+          bottom: -10px;
           cursor: se-resize;
         `
       case ResizableHandleType.TopLeft:
         return css`
-          left: -6px;
-          top: -6px;
-          height: 6px;
-          width: 6px;
-          border-radius: 6px;
-          background-color: ${props.theme.accentColor};
+          left: -10px;
+          top: -10px;
           cursor: nw-resize;
         `
       case ResizableHandleType.TopRight:
         return css`
-          right: -6px;
-          top: -6px;
-          height: 6px;
-          width: 6px;
-          border-radius: 6px;
-          background-color: ${props.theme.accentColor};
+          right: -10px;
+          top: -10px;
           cursor: ne-resize;
         `
       case ResizableHandleType.Left:
         return css`
-          left: 6px;
-          top: calc(50% - 20px);
-          height: 30px;
-          width: 6px;
+          left: -10px;
+          top: calc(50% - 10px);
           cursor: col-resize;
         `
       case ResizableHandleType.Right:
         return css`
-          right: 6px;
-          top: calc(50% - 20px);
-          height: 30px;
-          width: 6px;
+          right: -10px;
+          top: calc(50% - 10px);
           cursor: col-resize;
         `
       case ResizableHandleType.Top:
         return css`
-          left: calc(50% - 20px);
-          top: 6px;
-          height: 6px;
-          width: 30px;
+          left: calc(50% - 10px);
+          top: -10px;
           cursor: row-resize;
         `
       case ResizableHandleType.Bottom:
         return css`
-          right: calc(50% - 20px);
-          bottom: 6px;
-          height: 6px;
-          width: 30px;
+          left: calc(50% - 10px);
+          bottom: -10px;
           cursor: row-resize;
         `
-      default:
-        break
     }
   }}
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+
+    &::after {
+      transition: none;
+    }
+  }
 `
 
 export const ResizableHandle: FC<ResizableHandleProps> = (props) => {
-  const handleResizing: React.MouseEventHandler = (e) => {
-    if (props.onResizing) {
-      props.onResizing(e, props.handleType)
-    }
-  }
-
   return (
     <ResizableHandleContainer
-      className='resizeable-handle'
-      visible={props.visible}
-      selected={props.selected}
-      handleType={props.handleType}
-      onMouseDown={handleResizing}
+      $handleType={props.handleType}
+      $selected={!!props.selected}
+      $visible={props.visible}
+      aria-hidden='true'
+      className='rme-resizable-handle'
+      contentEditable={false}
+      onPointerDown={(event) => props.onResizing?.(event, props.handleType)}
     />
   )
 }

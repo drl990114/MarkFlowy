@@ -49,9 +49,7 @@ function deferred<T>() {
 
 function createDoc(...nodeNames: string[]): ProsemirrorNode {
   return {
-    descendants: (
-      callback: (node: { type: { name: string } }) => boolean | undefined | void,
-    ) => {
+    descendants: (callback: (node: { type: { name: string } }) => boolean | undefined | void) => {
       nodeNames.forEach((name) => callback({ type: { name } }))
     },
   } as unknown as ProsemirrorNode
@@ -214,6 +212,7 @@ describe('Preview', () => {
     expect(image).not.toBeNull()
     expect(image?.hasAttribute('loading')).toBe(false)
     expect(image?.getAttribute('decoding')).toBe('async')
+    expect(image?.referrerPolicy).toBe('no-referrer')
     expect(image?.getAttribute('aria-busy')).toBe('true')
     act(() => image?.dispatchEvent(new Event('load')))
     expect(image?.classList.contains('mf-preview-image-loading')).toBe(true)
@@ -247,6 +246,7 @@ describe('Preview', () => {
     expect(image?.getAttribute('src')).toBe('https://example.com/direct.png')
     expect(image?.getAttribute('loading')).toBe('lazy')
     expect(image?.getAttribute('decoding')).toBe('async')
+    expect(image?.referrerPolicy).toBe('no-referrer')
   })
 
   test('finishes loading when the rendered document is empty', async () => {

@@ -198,7 +198,9 @@ describe('enhanceProsemirrorHtml', () => {
     ].join('')
 
     const container = parseHtml(
-      await enhanceProsemirrorHtml(html, { delegateOptions: { handleViewImgSrcUrl } }),
+      await enhanceProsemirrorHtml(html, {
+        delegateOptions: { handleViewImgSrcUrl },
+      }),
     )
 
     expect(handleViewImgSrcUrl).toHaveBeenCalledWith('images/demo.png')
@@ -209,6 +211,11 @@ describe('enhanceProsemirrorHtml', () => {
     expect(container.querySelectorAll('img')[1].getAttribute('src')).toBe(
       'asset://local/file:///tmp/local.png',
     )
+    expect(
+      Array.from(container.querySelectorAll('img')).every(
+        (image) => image.getAttribute('referrerpolicy') === 'no-referrer',
+      ),
+    ).toBe(true)
     expect(container.querySelector('input')?.disabled).toBe(true)
     expect(container.querySelector('input')?.checked).toBe(true)
     expect(container.innerHTML).not.toContain('data-mf-preview-image')
@@ -231,9 +238,7 @@ describe('enhanceProsemirrorHtml', () => {
 
       expect(handleViewImgSrcUrl).toHaveBeenCalledWith(source)
       expect(setAttribute).not.toHaveBeenCalledWith('src', source)
-      expect(container.querySelector('img')?.getAttribute('src')).toBe(
-        'asset://local/private.png',
-      )
+      expect(container.querySelector('img')?.getAttribute('src')).toBe('asset://local/private.png')
       expect(container.querySelector('img')?.getAttribute('title')).toBe('Private')
       expect(container.querySelector('[data-refer-label]')).toBeNull()
     } finally {
@@ -258,9 +263,7 @@ describe('enhanceProsemirrorHtml', () => {
 
       resolution.resolve('asset://local/private.png')
       const container = parseHtml(await preview)
-      expect(container.querySelector('img')?.getAttribute('src')).toBe(
-        'asset://local/private.png',
-      )
+      expect(container.querySelector('img')?.getAttribute('src')).toBe('asset://local/private.png')
       expect(container.innerHTML).not.toContain('data-mf-preview-image')
     } finally {
       setAttribute.mockRestore()
@@ -272,7 +275,9 @@ describe('enhanceProsemirrorHtml', () => {
     const handleViewImgSrcUrl = vi.fn(async () => 'asset://local/private.png')
     const doc = createWysiwygDelegate().stringToDoc(`![private](${source})`)
 
-    const preview = await prepareProsemirrorPreview(doc, { handleViewImgSrcUrl })
+    const preview = await prepareProsemirrorPreview(doc, {
+      handleViewImgSrcUrl,
+    })
     const container = parseHtml(preview.html)
     const image = container.querySelector('img')
     const imageId = image?.dataset.mfPreviewImageId
@@ -294,7 +299,9 @@ describe('enhanceProsemirrorHtml', () => {
       `<div><img alt="Platforms" src="${source}"></div>`,
     )
 
-    const preview = await prepareProsemirrorPreview(doc, { handleViewImgSrcUrl })
+    const preview = await prepareProsemirrorPreview(doc, {
+      handleViewImgSrcUrl,
+    })
     const image = parseHtml(preview.html).querySelector('img')
     const imageId = image?.dataset.mfPreviewImageId
 
@@ -324,8 +331,9 @@ describe('enhanceProsemirrorHtml', () => {
       ),
     )
 
-    expect(Array.from(container.querySelectorAll('img')).every((image) => !image.hasAttribute('src')))
-      .toBe(true)
+    expect(
+      Array.from(container.querySelectorAll('img')).every((image) => !image.hasAttribute('src')),
+    ).toBe(true)
   })
 
   test('removes image sources and private metadata when host resolution fails', async () => {
@@ -375,9 +383,7 @@ describe('enhanceProsemirrorHtml', () => {
     expect(container.querySelector('kbd')?.textContent).toBe('Ctrl')
     expect(container.querySelector('[data-type="html-inline"]')).toBeNull()
     expect(container.querySelector('svg[data-rendered="mermaid"]')).not.toBeNull()
-    expect(container.querySelector('img[alt="Logo"]')?.getAttribute('src')).toBe(
-      'images/logo.png',
-    )
+    expect(container.querySelector('img[alt="Logo"]')?.getAttribute('src')).toBe('images/logo.png')
     expect(container.querySelector('.reference-def')).toBeNull()
   })
 

@@ -1,16 +1,10 @@
 import { type Node } from '@rme-sdk/sdk/pm/model'
 import { useTranslation } from '@markflowy/i18n'
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { LinkClickHandler } from '../../extensions/LinkClick'
 import { WysiwygThemeWrapper } from '../../theme'
 import { eventBus } from '../../utils/eventbus'
+import { applyImageRequestPolicy } from '../../utils/image-loading'
 import {
   prepareProsemirrorPreview,
   type PreparedProsemirrorPreview,
@@ -52,8 +46,7 @@ const defaultLinkClickHandler: LinkClickHandler = (href: string) => {
 
 const mermaidFencePattern = /^ {0,3}(?:`{3,}|~{3,})[\t ]*mermaid(?:[\t ].*)?$/im
 const previewSkeletonLineWidths = ['42%', '88%', '76%', '94%', '67%', '82%']
-const useIsomorphicLayoutEffect =
-  typeof document === 'undefined' ? useEffect : useLayoutEffect
+const useIsomorphicLayoutEffect = typeof document === 'undefined' ? useEffect : useLayoutEffect
 
 function createImageHydrationController(): PreviewImageHydrationController {
   let isSettled = false
@@ -146,6 +139,7 @@ function hydratePreviewImages(
   }
 
   images.forEach((image) => {
+    applyImageRequestPolicy(image)
     image.setAttribute('decoding', 'async')
 
     const imageId = image.dataset.mfPreviewImageId
@@ -243,19 +237,12 @@ function hydratePreviewImages(
 }
 
 export const Preview: React.FC<PreviewProps> = (props) => {
-  const {
-    doc,
-    delegate,
-    delegateOptions,
-    handleLinkClick,
-    styleToken = defaultStyleToken,
-  } = props
+  const { doc, delegate, delegateOptions, handleLinkClick, styleToken = defaultStyleToken } = props
   const { t } = useTranslation()
-  const [preparedPreview, setPreparedPreview] =
-    useState<{
-      hydration: PreviewImageHydrationController
-      preview: PreparedProsemirrorPreview
-    } | null>(null)
+  const [preparedPreview, setPreparedPreview] = useState<{
+    hydration: PreviewImageHydrationController
+    preview: PreparedProsemirrorPreview
+  } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [pendingImageCount, setPendingImageCount] = useState(0)
   const [renderError, setRenderError] = useState<Error | null>(null)
@@ -316,10 +303,9 @@ export const Preview: React.FC<PreviewProps> = (props) => {
       try {
         const targetDoc =
           typeof doc === 'string'
-            ? (
-                delegate?.view === 'Wysiwyg'
-                  ? delegate
-                  : createWysiwygDelegate(previewDelegateOptions)
+            ? (delegate?.view === 'Wysiwyg'
+                ? delegate
+                : createWysiwygDelegate(previewDelegateOptions)
               ).stringToDoc(doc)
             : doc
 
@@ -439,10 +425,7 @@ export const Preview: React.FC<PreviewProps> = (props) => {
   }
 
   return (
-    <WysiwygThemeWrapper
-      {...styleToken}
-      aria-busy={pendingImageCount > 0 ? 'true' : undefined}
-    >
+    <WysiwygThemeWrapper {...styleToken} aria-busy={pendingImageCount > 0 ? 'true' : undefined}>
       {pendingImageCount > 0 ? (
         <div
           key='image-progress'

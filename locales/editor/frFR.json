@@ -16,6 +16,25 @@
       "loading": "Chargement en",
       "accept": "Accepter"
     },
+    "image": {
+      "source": "Source",
+      "sourcePlaceholder": "Saisissez une URL ou un chemin d’image",
+      "embeddedSource": "Image intégrée",
+      "replaceSource": "Remplacer",
+      "replaceSourcePlaceholder": "Collez une nouvelle URL, un chemin ou une URL de données",
+      "alt": "Texte alternatif",
+      "altPlaceholder": "Décrivez cette image",
+      "referenceLabel": "Libellé de référence",
+      "referenceLabelPlaceholder": "Saisissez un libellé de référence",
+      "cancel": "Annuler",
+      "apply": "Appliquer",
+      "saving": "Enregistrement...",
+      "updateError": "Impossible de mettre à jour la source de l’image. Réessayez.",
+      "emptyTitle": "Aucune source d’image",
+      "emptyDescription": "Cliquez pour en ajouter une",
+      "errorTitle": "Image indisponible",
+      "errorDescription": "Cliquez pour modifier la source"
+    },
     "ai": {
       "generate": "Générer",
       "stop": "Arrêter",

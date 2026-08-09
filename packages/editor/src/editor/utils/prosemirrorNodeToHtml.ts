@@ -15,6 +15,7 @@ import type {
   LivePreviewRenderer,
 } from '../extensions/LivePreviewBlock/live-preview-types'
 import { tex2svgDisplay, tex2svgInline } from '../extensions/Math/mathjax'
+import { applyImageRequestPolicy } from './image-loading'
 import {
   clearPreviewImageSource,
   createInertPreviewImageAttributes,
@@ -54,9 +55,7 @@ interface TrustedPreviewState {
   nodesByToken: ReadonlyMap<string, Element>
 }
 
-function protectTrustedPreviewAttributes(
-  root: DocumentFragment,
-): TrustedPreviewState {
+function protectTrustedPreviewAttributes(root: DocumentFragment): TrustedPreviewState {
   const attributesByToken = new Map<string, readonly TrustedAttribute[]>()
   const nodesByToken = new Map<string, Element>()
 
@@ -81,8 +80,7 @@ function protectTrustedPreviewAttributes(
     const attributes = Array.from(element.attributes)
       .filter(
         ({ name }) =>
-          name === 'class' ||
-          (name.startsWith('data-') && !name.startsWith('data-mf-preview-')),
+          name === 'class' || (name.startsWith('data-') && !name.startsWith('data-mf-preview-')),
       )
       .map(({ name, value }) => [name, value] as const)
     if (!attributes.length) {
@@ -98,21 +96,16 @@ function protectTrustedPreviewAttributes(
   return { attributesByToken, nodesByToken }
 }
 
-function restoreTrustedPreviewAttributes(
-  html: string,
-  state: TrustedPreviewState,
-): string {
+function restoreTrustedPreviewAttributes(html: string, state: TrustedPreviewState): string {
   const template = document.createElement('template')
   template.innerHTML = html
 
-  template.content
-    .querySelectorAll<HTMLElement>('[data-mf-preview-trusted]')
-    .forEach((element) => {
-      const token = element.dataset.mfPreviewTrusted || ''
-      const attributes = state.attributesByToken.get(token)
-      element.removeAttribute('data-mf-preview-trusted')
-      attributes?.forEach(([name, value]) => element.setAttribute(name, value))
-    })
+  template.content.querySelectorAll<HTMLElement>('[data-mf-preview-trusted]').forEach((element) => {
+    const token = element.dataset.mfPreviewTrusted || ''
+    const attributes = state.attributesByToken.get(token)
+    element.removeAttribute('data-mf-preview-trusted')
+    attributes?.forEach(([name, value]) => element.setAttribute(name, value))
+  })
   template.content
     .querySelectorAll<HTMLElement>('[data-mf-preview-trusted-node]')
     .forEach((placeholder) => {
@@ -156,7 +149,9 @@ function preparePreviewHtml(html: string, preserveImageSources: boolean): string
   replacements.forEach((replacement) => {
     restoredHtml = restoredHtml.split(replacement.placeholder).join(replacement.html)
   })
-  const sanitizedHtml = sanitizeMarkdownHtml(restoredHtml, { preserveImageSources })
+  const sanitizedHtml = sanitizeMarkdownHtml(restoredHtml, {
+    preserveImageSources,
+  })
   return restoreTrustedPreviewAttributes(sanitizedHtml, trustedState)
 }
 
@@ -195,9 +190,7 @@ async function renderBlock(
 }
 
 function renderInlineMath(container: HTMLElement): void {
-  const mathNodes = Array.from(
-    container.querySelectorAll<HTMLElement>('[data-type="math-inline"]'),
-  )
+  const mathNodes = Array.from(container.querySelectorAll<HTMLElement>('[data-type="math-inline"]'))
 
   mathNodes.forEach((mathNode) => {
     const tex = (mathNode.dataset.tex || '').replace(/\u200b/g, '').trim()
@@ -306,6 +299,7 @@ async function resolveImage(
   delegateOptions: DelegateOptions,
   referenceDefinitions: ReadonlyMap<string, ReferenceDefinition>,
 ): Promise<void> {
+  applyImageRequestPolicy(image)
   const source = getResolvedImageSource(image, referenceDefinitions)
   if (!source) {
     return
@@ -337,6 +331,7 @@ function deferImageResolution(
   referenceDefinitions: ReadonlyMap<string, ReferenceDefinition>,
   imageSources: Map<string, string>,
 ): void {
+  applyImageRequestPolicy(image)
   const source = getResolvedImageSource(image, referenceDefinitions)
   if (!source) {
     return
@@ -426,9 +421,7 @@ function serializePreviewDocument(doc: ProsemirrorNode): string {
         {
           ...node.attrs,
           src: undefined,
-          ...(node.attrs.src
-            ? createInertPreviewImageAttributes(String(node.attrs.src))
-            : {}),
+          ...(node.attrs.src ? createInertPreviewImageAttributes(String(node.attrs.src)) : {}),
         },
       ],
       math_block: (node) => [
@@ -444,9 +437,7 @@ function serializePreviewDocument(doc: ProsemirrorNode): string {
         {
           ...node.attrs,
           src: undefined,
-          ...(node.attrs.src
-            ? createInertPreviewImageAttributes(String(node.attrs.src))
-            : {}),
+          ...(node.attrs.src ? createInertPreviewImageAttributes(String(node.attrs.src)) : {}),
         },
       ],
     },
@@ -473,8 +464,7 @@ async function enhanceProsemirrorHtmlInternal(
 
   // Deferred previews keep every source inert through async block rendering.
   // The real source is restored only after lazy-loading attributes are present.
-  const preserveImageSources =
-    deferImages || Boolean(options.delegateOptions?.handleViewImgSrcUrl)
+  const preserveImageSources = deferImages || Boolean(options.delegateOptions?.handleViewImgSrcUrl)
   const container = document.createElement('div')
   container.innerHTML = preparePreviewHtml(html, preserveImageSources)
   restoreListOrderStyles(container)
@@ -484,18 +474,14 @@ async function enhanceProsemirrorHtmlInternal(
   const mathRenderer = createMathRenderer({})
   const mermaidRenderer = createMermaidRenderer({})
   const specialBlockTasks = [
-    ...Array.from(
-      container.querySelectorAll<HTMLElement>('pre[data-type="html-block"]'),
-      (block) => renderBlock(block, 'html', htmlRenderer),
+    ...Array.from(container.querySelectorAll<HTMLElement>('pre[data-type="html-block"]'), (block) =>
+      renderBlock(block, 'html', htmlRenderer),
     ),
-    ...Array.from(
-      container.querySelectorAll<HTMLElement>('[data-type="math-block"]'),
-      (block) =>
-        renderBlock(block, 'math', mathRenderer, block.textContent || block.dataset.tex || ''),
+    ...Array.from(container.querySelectorAll<HTMLElement>('[data-type="math-block"]'), (block) =>
+      renderBlock(block, 'math', mathRenderer, block.textContent || block.dataset.tex || ''),
     ),
-    ...Array.from(
-      container.querySelectorAll<HTMLElement>('pre[data-type="mermaid"]'),
-      (block) => renderBlock(block, 'mermaid', mermaidRenderer),
+    ...Array.from(container.querySelectorAll<HTMLElement>('pre[data-type="mermaid"]'), (block) =>
+      renderBlock(block, 'mermaid', mermaidRenderer),
     ),
   ]
 
@@ -508,17 +494,10 @@ async function enhanceProsemirrorHtmlInternal(
   const imageSources = new Map<string, string>()
   const imageTasks = deferImages
     ? []
-    : images.map((image) =>
-        resolveImage(image, options.delegateOptions, referenceDefinitions),
-      )
+    : images.map((image) => resolveImage(image, options.delegateOptions, referenceDefinitions))
   if (deferImages) {
     images.forEach((image) => {
-      deferImageResolution(
-        image,
-        options.delegateOptions,
-        referenceDefinitions,
-        imageSources,
-      )
+      deferImageResolution(image, options.delegateOptions, referenceDefinitions, imageSources)
     })
   }
   const codeTasks = Array.from(container.querySelectorAll<HTMLElement>('pre'))
@@ -527,9 +506,9 @@ async function enhanceProsemirrorHtmlInternal(
 
   await Promise.all([...imageTasks, ...codeTasks])
   container
-    .querySelectorAll<HTMLInputElement | HTMLButtonElement | HTMLSelectElement | HTMLTextAreaElement>(
-      'input, button, select, textarea',
-    )
+    .querySelectorAll<
+      HTMLInputElement | HTMLButtonElement | HTMLSelectElement | HTMLTextAreaElement
+    >('input, button, select, textarea')
     .forEach((control) => {
       control.disabled = true
     })
@@ -549,9 +528,7 @@ export async function prepareProsemirrorPreview(
   delegateOptions: DelegateOptions,
 ): Promise<PreparedProsemirrorPreview> {
   const html =
-    typeof document === 'undefined'
-      ? prosemirrorNodeToHtml(doc)
-      : serializePreviewDocument(doc)
+    typeof document === 'undefined' ? prosemirrorNodeToHtml(doc) : serializePreviewDocument(doc)
   return enhanceProsemirrorHtmlInternal(
     html,
     {
@@ -567,9 +544,7 @@ export async function rmeProsemirrorNodeToHtml(
   delegateOptions: DelegateOptions,
 ): Promise<string> {
   const html =
-    typeof document === 'undefined'
-      ? prosemirrorNodeToHtml(doc)
-      : serializePreviewDocument(doc)
+    typeof document === 'undefined' ? prosemirrorNodeToHtml(doc) : serializePreviewDocument(doc)
   return (
     await enhanceProsemirrorHtmlInternal(html, {
       delegateOptions,

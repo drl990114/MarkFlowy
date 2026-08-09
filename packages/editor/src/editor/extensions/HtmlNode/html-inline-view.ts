@@ -7,6 +7,7 @@ import type { Command, Transaction } from '@rme-sdk/sdk/pm/state'
 import { EditorView } from '@rme-sdk/sdk/pm/view'
 import type { NodeView } from '@rme-sdk/sdk/pm/view'
 import type { ExtensionsOptions } from '..'
+import { applyImageRequestPolicy } from '../../utils/image-loading'
 import {
   clearPreviewImageSource,
   getPreviewImageSource,
@@ -71,7 +72,6 @@ export function collapseCmd(
     return true
   }
 }
-
 
 interface IHtmlInlineViewOptions {
   handleViewImgSrcUrl?: ExtensionsOptions['handleViewImgSrcUrl']
@@ -227,6 +227,7 @@ export class HTMLInlineView implements NodeView {
       const doc = domParser.parseFromString(html, 'text/html')
       const childNodes: Node[] = []
       doc.body.querySelectorAll('img').forEach((image) => {
+        applyImageRequestPolicy(image)
         const source = getPreviewImageSource(image)
         if (source && this.options.handleViewImgSrcUrl) {
           const targetUrl = source.includes(location.origin)
@@ -256,7 +257,6 @@ export class HTMLInlineView implements NodeView {
       if (preview) {
         this._htmlRenderElt.classList.add('inline-input-preview')
       }
-
     } catch (err) {
       console.error(err)
       this._htmlRenderElt?.classList.add('parse-error')

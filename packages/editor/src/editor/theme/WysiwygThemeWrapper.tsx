@@ -1307,6 +1307,12 @@ export const WysiwygThemeWrapper = styled.div
     background-color: ${(props) => props.theme.nodeSelectedColor};
   }
 
+  & .html-image-node-view-wrapper.ProseMirror-selectednode,
+  & .md-image-node-view-wrapper.ProseMirror-selectednode {
+    outline: none;
+    background-color: transparent;
+  }
+
   .rme-dragging {
     & .ProseMirror-selectednode {
       outline-color: transparent !important;

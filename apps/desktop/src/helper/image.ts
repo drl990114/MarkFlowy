@@ -40,6 +40,40 @@ const convertHttpToBase64 = async (url: string): Promise<string> => {
 
 const isHttpUrl = (src: string) => /^https?:\/\//i.test(src)
 
+// Renderers cache the returned blob URL, so keep it valid for the app session.
+const remoteImageObjectUrlCache = new Map<string, Promise<string>>()
+
+const getRemoteImageObjectUrl = async (url: string): Promise<string> => {
+  const cachedObjectUrl = remoteImageObjectUrlCache.get(url)
+  if (cachedObjectUrl) {
+    return await cachedObjectUrl
+  }
+
+  const objectUrlPromise = (async () => {
+    const response = await fetch(url, {
+      maxRedirections: 5,
+      method: 'GET',
+      mode: 'cors',
+    })
+    if (!response.ok) {
+      throw new Error(`Failed to fetch remote image: ${response.status}`)
+    }
+
+    return URL.createObjectURL(await response.blob())
+  })()
+
+  remoteImageObjectUrlCache.set(url, objectUrlPromise)
+
+  try {
+    return await objectUrlPromise
+  } catch (error) {
+    if (remoteImageObjectUrlCache.get(url) === objectUrlPromise) {
+      remoteImageObjectUrlCache.delete(url)
+    }
+    throw error
+  }
+}
+
 const getRemoteHttpUrl = (src: string): string | null => {
   if (isHttpUrl(src)) {
     return src
@@ -453,7 +487,12 @@ export const getImageUrlInTauri = async (url: string, fileFolderPath?: string) =
 
   const remoteUrl = getRemoteHttpUrl(url)
   if (remoteUrl) {
-    return remoteUrl
+    try {
+      return await getRemoteImageObjectUrl(remoteUrl)
+    } catch (error) {
+      logger.warn('Failed to load remote image through Tauri HTTP:', error)
+      return remoteUrl
+    }
   }
 
   if (/^(?:data|blob):/i.test(url)) {
