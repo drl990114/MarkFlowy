@@ -92,7 +92,7 @@ export function useAuth(requireAuth = false) {
       isAuthenticated: false,
     })
 
-    router.push('/auth')
+    await router.push('/auth')
   }
 
   return {

@@ -1,6 +1,7 @@
 import { GitHubSettingsPanel } from 'components/settings/GitHubSettingsPanel'
 import { useAuth } from 'hooks/useAuth'
 import Link from 'next/link'
+import { useState } from 'react'
 import styled from 'styled-components'
 import rem from 'utils/rem'
 
@@ -20,7 +21,15 @@ function getInitials(value: string) {
 }
 
 export default function PersonalSettingsPage() {
-  const { loading: authLoading, isAuthenticated, user } = useAuth(true)
+  const { loading: authLoading, isAuthenticated, logout, user } = useAuth(true)
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
+
+  const handleLogout = async () => {
+    if (isLoggingOut) return
+
+    setIsLoggingOut(true)
+    await logout()
+  }
 
   if (authLoading) {
     return (
@@ -64,6 +73,10 @@ export default function PersonalSettingsPage() {
           <SidebarLink href='#github'>
             <i className='ri-github-fill' />
             GitHub
+          </SidebarLink>
+          <SidebarLink href='#session'>
+            <i className='ri-logout-box-r-line' />
+            Session
           </SidebarLink>
         </Sidebar>
 
@@ -117,6 +130,38 @@ export default function PersonalSettingsPage() {
           </ProfilePanel>
 
           <GitHubSettingsPanel isAuthenticated={isAuthenticated} authLoading={authLoading} />
+
+          <ProfilePanel id='session'>
+            <PanelHeader>
+              <PanelKicker>
+                <i className='ri-shield-user-line' />
+                Session
+              </PanelKicker>
+              <PanelTitle>Sign out</PanelTitle>
+              <PanelDesc>End this browser session without changing your account data.</PanelDesc>
+            </PanelHeader>
+
+            <PanelBody>
+              <SessionAction>
+                <SessionCopy>
+                  <SessionTitle>Signed in as {user.email}</SessionTitle>
+                  <SessionDescription>
+                    You will need to sign in again to access remote workspaces and connected
+                    services.
+                  </SessionDescription>
+                </SessionCopy>
+                <SignOutButton
+                  type='button'
+                  onClick={handleLogout}
+                  disabled={isLoggingOut}
+                  aria-busy={isLoggingOut}
+                >
+                  <i className={isLoggingOut ? 'ri-loader-4-line' : 'ri-logout-box-r-line'} />
+                  {isLoggingOut ? 'Signing out…' : 'Sign out'}
+                </SignOutButton>
+              </SessionAction>
+            </PanelBody>
+          </ProfilePanel>
         </Main>
       </Shell>
     </Container>
@@ -367,6 +412,74 @@ const InfoValue = styled.div`
   font-size: ${(props) => props.theme.fontSm};
   font-weight: 600;
   overflow-wrap: anywhere;
+`
+
+const SessionAction = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: ${rem(18)};
+
+  @media (max-width: 680px) {
+    align-items: stretch;
+    flex-direction: column;
+  }
+`
+
+const SessionCopy = styled.div`
+  min-width: 0;
+`
+
+const SessionTitle = styled.div`
+  color: ${(props) => props.theme.primaryFontColor};
+  font-size: ${(props) => props.theme.fontSm};
+  font-weight: 700;
+  overflow-wrap: anywhere;
+`
+
+const SessionDescription = styled.p`
+  margin: ${rem(5)} 0 0;
+  color: ${(props) => props.theme.disabledFontColor};
+  font-size: ${(props) => props.theme.fontXs};
+  line-height: 1.5;
+`
+
+const SignOutButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: ${rem(7)};
+  min-height: ${rem(34)};
+  padding: 0 ${rem(14)};
+  background: transparent;
+  color: ${(props) => props.theme.dangerColor};
+  border: 1px solid ${(props) => props.theme.dangerColor};
+  border-radius: ${(props) => props.theme.smallBorderRadius};
+  font-size: ${(props) => props.theme.fontSm};
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background-color 0.16s ease,
+    opacity 0.16s ease;
+
+  &:hover:not(:disabled) {
+    background: ${(props) => props.theme.accentColorFocused};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${(props) => props.theme.dangerColor};
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+
+  &[aria-busy='true'] i {
+    animation: spin 0.8s linear infinite;
+  }
 `
 
 const LoadingContainer = styled.div`
