@@ -47,13 +47,14 @@ export class LineHtmlBlockExtension extends NodeExtension<LineHtmlBlockExtension
       },
       parseDOM: [
         {
-          tag: 'pre',
+          tag: 'pre[data-type="html-block"]',
+          priority: 60,
           getAttrs: (node) => (isElementDomNode(node) ? extra.parse(node) : false),
         },
         ...(override.parseDOM ?? []),
       ],
-      toDOM() {
-        return ['pre', ['code', 0]]
+      toDOM(node) {
+        return ['pre', { ...extra.dom(node), 'data-type': 'html-block' }, ['code', 0]]
       },
       isolating: true,
     }

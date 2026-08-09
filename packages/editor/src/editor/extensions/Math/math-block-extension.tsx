@@ -45,11 +45,22 @@ export class MathBlockExtension extends NodeExtension<MathBlockExtensionOptions>
       parseDOM: [
         {
           tag: 'div[data-type="math-block"]',
-          getAttrs: (dom) => extra.parse(dom),
+          getAttrs: (dom) => ({
+            ...extra.parse(dom),
+            tex: dom.getAttribute('data-tex') ?? '',
+          }),
         },
         ...(override.parseDOM ?? []),
       ],
-      toDOM: () => ['div', { 'data-type': 'math-block' }, 0],
+      toDOM: (node) => [
+        'div',
+        {
+          ...extra.dom(node),
+          'data-tex': node.attrs.tex,
+          'data-type': 'math-block',
+        },
+        0,
+      ],
       isolating: true,
     }
   }

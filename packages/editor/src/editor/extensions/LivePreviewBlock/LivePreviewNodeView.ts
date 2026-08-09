@@ -3,6 +3,7 @@ import type { NodeView, ProsemirrorNode } from '@rme-sdk/sdk/pm'
 import { NodeSelection } from '@rme-sdk/sdk/pm/state'
 import type { EditorView } from '@rme-sdk/sdk/pm/view'
 import { MfCodemirrorView } from '../../codemirror'
+import { shouldStopNodeViewEvent } from '../../codemirror/stop-event'
 import { isBrowser } from '../../utils/common'
 import {
   registerLivePreviewBehaviorTarget,
@@ -177,8 +178,8 @@ export class LivePreviewNodeView
     this.applyMode()
   }
 
-  stopEvent(): boolean {
-    return true
+  stopEvent(event: Event): boolean {
+    return shouldStopNodeViewEvent(event, this.view, this.getPos, this.node)
   }
 
   ignoreMutation(): boolean {

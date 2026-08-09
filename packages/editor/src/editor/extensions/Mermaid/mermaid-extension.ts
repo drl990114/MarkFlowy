@@ -47,13 +47,14 @@ export class MermaidBlockExtension extends NodeExtension<MermaidExtensionOptions
       },
       parseDOM: [
         {
-          tag: 'pre',
+          tag: 'pre[data-type="mermaid"]',
+          priority: 60,
           getAttrs: (node) => (isElementDomNode(node) ? extra.parse(node) : false),
         },
         ...(override.parseDOM ?? []),
       ],
-      toDOM() {
-        return ['pre', { 'data-type': 'mermaid' }, 0]
+      toDOM(node) {
+        return ['pre', { ...extra.dom(node), 'data-type': 'mermaid' }, 0]
       },
       isolating: true,
     }

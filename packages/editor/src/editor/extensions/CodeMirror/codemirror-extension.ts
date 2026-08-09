@@ -75,12 +75,29 @@ export class LineCodeMirrorExtension extends NodeExtension<CodeMirrorExtensionOp
       parseDOM: [
         {
           tag: 'pre',
-          getAttrs: (node) => (isElementDomNode(node) ? extra.parse(node) : false),
+          getAttrs: (node) => {
+            if (!isElementDomNode(node)) return false
+
+            return {
+              ...extra.parse(node),
+              'front-matter': node.getAttribute('data-front-matter') === 'true',
+              language: node.getAttribute('data-language') ?? '',
+            }
+          },
         },
         ...(override.parseDOM ?? []),
       ],
-      toDOM() {
-        return ['pre', ['code', 0]]
+      toDOM(node) {
+        return [
+          'pre',
+          {
+            ...extra.dom(node),
+            'data-front-matter': node.attrs['front-matter'] ? 'true' : 'false',
+            'data-language': node.attrs.language,
+            'data-type': 'code-mirror',
+          },
+          ['code', 0],
+        ]
       },
       isolating: true,
     }

@@ -3,6 +3,7 @@ import type { Extension as CodeMirrorExtension } from '@codemirror/state'
 import { EditorView as CodeMirrorEditorView } from '@codemirror/view'
 import type { EditorView, NodeView, ProsemirrorNode } from '@rme-sdk/sdk/pm'
 import { CreateCodemirrorOptions, MfCodemirrorView } from '../../codemirror/codemirror'
+import { shouldStopNodeViewEvent } from '../../codemirror/stop-event'
 
 export type LoadLanguage = (lang: string) => Promise<LanguageSupport> | LanguageSupport | void
 
@@ -74,8 +75,8 @@ export class CodeMirror6NodeView implements NodeView {
     this.mfCodemirrorView.forwardSelection()
   }
 
-  stopEvent(): boolean {
-    return true
+  stopEvent(event: Event): boolean {
+    return shouldStopNodeViewEvent(event, this.view, this.getPos, this.node)
   }
 
   destroy(): void {

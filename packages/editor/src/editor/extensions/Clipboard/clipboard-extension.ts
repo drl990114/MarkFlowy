@@ -1,23 +1,9 @@
-import { ClipboardReadFunction } from '@/editor/utils/clipboard-read'
+import type { ClipboardReadFunction } from '@/editor/utils/clipboard-read'
 import type { CommandFunction, CreateExtensionPlugin, EditorView } from '@rme-sdk/sdk/core'
 import { extension, PlainExtension } from '@rme-sdk/sdk/core'
-import { DOMParser, Fragment, Node, Slice } from '@rme-sdk/sdk/pm/model'
+import { DOMParser, Fragment, Slice, type Node, type Schema } from '@rme-sdk/sdk/pm/model'
 import { isBrowser } from '../../utils/common'
 import { getTransformerByView } from '../Transformer/utils'
-
-type UnknownRecord = Record<string, unknown>
-function isPureText(content: UnknownRecord | UnknownRecord[] | undefined | null): boolean {
-  if (!content) return false
-  if (Array.isArray(content)) {
-    if (content.length > 1) return false
-    return isPureText(content[0])
-  }
-
-  const child = content.content
-  if (child) return isPureText(child as UnknownRecord[])
-
-  return content.type === 'text'
-}
 
 function isTextOnlySlice(slice: Slice): Node | false {
   if (slice.content.childCount === 1) {
@@ -31,6 +17,16 @@ function isTextOnlySlice(slice: Slice): Node | false {
   }
 
   return false
+}
+
+function createClipboardDocument(slice: Slice, schema: Schema): Node | null {
+  const document = schema.topNodeType.createAndFill(undefined, slice.content)
+  if (document) return document
+
+  const paragraph = schema.nodes.paragraph?.createAndFill(undefined, slice.content)
+  if (!paragraph) return null
+
+  return schema.topNodeType.createAndFill(undefined, paragraph)
 }
 
 type ClipboardExtensionOptions = {
@@ -75,11 +71,10 @@ export class ClipboardExtension extends PlainExtension<ClipboardExtensionOptions
           const schema = view.state.schema
           const transformer = getTransformerByView(view)
           const serializer = transformer.docToString
-          const isText = isPureText(slice.content.toJSON())
-          if (isText)
-            return (slice.content as unknown as Node).textBetween(0, slice.content.size, '\n\n')
+          const textNode = isTextOnlySlice(slice)
+          if (textNode) return textNode.textContent
 
-          const doc = schema.topNodeType.createAndFill(undefined, slice.content)
+          const doc = createClipboardDocument(slice, schema)
           if (!doc) return ''
           const value = serializer?.(doc) || ''
 
