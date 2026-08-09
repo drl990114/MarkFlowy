@@ -1,5 +1,9 @@
 // contentlayer.config.js
-import { defineDocumentType, makeSource } from "contentlayer2/source-files";
+import {
+  contentDirExcludeDefault,
+  defineDocumentType,
+  makeSource
+} from "contentlayer2/source-files";
 import rehypeSlug from "rehype-slug";
 import remarkGfm from "remark-gfm";
 var Post = defineDocumentType(() => ({
@@ -79,6 +83,11 @@ var Markdown = defineDocumentType(() => ({
 }));
 var contentlayer_config_default = makeSource({
   contentDirPath: "../../docs",
+  contentDirExclude: [
+    ...contentDirExcludeDefault,
+    "github-api-encoding-bug-report.md",
+    "github-workspace-bug-report.md"
+  ],
   documentTypes: [Post, Markdown],
   mdx: {
     esbuildOptions(options) {
@@ -94,4 +103,4 @@ export {
   Post,
   contentlayer_config_default as default
 };
-//# sourceMappingURL=compiled-contentlayer-config-JUJOV2UW.mjs.map
+//# sourceMappingURL=compiled-contentlayer-config-NH5AGXLO.mjs.map

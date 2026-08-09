@@ -19,9 +19,31 @@ export function useAuth(requireAuth = false) {
   })
 
   useEffect(() => {
+    let cancelled = false
+
     const checkAuth = async () => {
       try {
+        const sessionRestored = await apiClient.restoreSession()
+        if (!sessionRestored) {
+          clearAuthSession()
+
+          if (!cancelled) {
+            setAuthState({
+              user: null,
+              loading: false,
+              isAuthenticated: false,
+            })
+
+            if (requireAuth) {
+              await router.push('/auth')
+            }
+          }
+          return
+        }
+
         const user = await apiClient.get<User>('/me')
+        if (cancelled) return
+
         localStorage.setItem('user', JSON.stringify(user))
 
         setAuthState({
@@ -34,19 +56,25 @@ export function useAuth(requireAuth = false) {
 
         clearAuthSession()
 
-        setAuthState({
-          user: null,
-          loading: false,
-          isAuthenticated: false,
-        })
+        if (!cancelled) {
+          setAuthState({
+            user: null,
+            loading: false,
+            isAuthenticated: false,
+          })
 
-        if (requireAuth) {
-          router.push('/auth')
+          if (requireAuth) {
+            await router.push('/auth')
+          }
         }
       }
     }
 
-    checkAuth()
+    void checkAuth()
+
+    return () => {
+      cancelled = true
+    }
   }, [requireAuth, router])
 
   const logout = async () => {

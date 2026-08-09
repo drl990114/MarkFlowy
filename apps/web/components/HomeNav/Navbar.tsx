@@ -1,4 +1,5 @@
-import { i18n } from 'next-i18next'
+import { i18n, useTranslation } from 'next-i18next'
+import NextLink from 'next/link'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import styled, { css } from 'styled-components'
 import { mobile } from '../../utils/media'
@@ -9,6 +10,7 @@ import { Logo } from '../Nav/Logo'
 import NavLinks from '../Nav/NavLinks'
 import Social from '../Nav/Social'
 import MobileNavbar from './MobileNavbar'
+import WebAppBetaTag from './WebAppBetaTag'
 
 export interface NavbarProps {
   onSideToggle?: () => void
@@ -19,6 +21,7 @@ export interface NavbarProps {
 }
 
 export default function Navbar({ onMobileNavToggle, isMobileNavFolded }: NavbarProps) {
+  const { t } = useTranslation()
   const [navState, setNavState] = useState<'visible' | 'hidden' | 'scrolled'>('visible')
   const lastScrollY = useRef(0)
   const ticking = useRef(false)
@@ -71,9 +74,13 @@ export default function Navbar({ onMobileNavToggle, isMobileNavFolded }: NavbarP
           </DesktopStart>
 
           <DesktopEnd>
-            {/* <LoginLink href='/auth'>{t('auth.login')}</LoginLink> */}
             <LanguageSwitcher />
             <StyledSocial />
+            <WebAppLink href='/workspace'>
+              {t('navigation.webApp')}
+              <WebAppBetaTag>Beta</WebAppBetaTag>
+              <i className='ri-arrow-right-up-line' aria-hidden='true' />
+            </WebAppLink>
           </DesktopEnd>
         </NavInner>
       </MainBarRow>
@@ -212,5 +219,46 @@ const StyledSocial = styled(Social)`
         color: var(--seal);
       }
     }
+  }
+`
+
+const WebAppLink = styled(NextLink)`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: ${rem(36)};
+  gap: ${rem(6)};
+  padding: 0 ${rem(14)};
+  border: 1px solid var(--seal);
+  border-radius: ${rem(8)};
+  background: var(--seal);
+  color: var(--paper);
+  font-family: var(--sans);
+  font-size: ${rem(13)};
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    filter 160ms ease,
+    transform 140ms cubic-bezier(0.23, 1, 0.32, 1);
+
+  &:active {
+    transform: scale(0.97);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--seal);
+    outline-offset: 3px;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      filter: brightness(1.08);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
   }
 `

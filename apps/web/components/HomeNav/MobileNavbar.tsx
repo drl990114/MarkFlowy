@@ -1,3 +1,4 @@
+import NextLink from 'next/link'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 import { useCallback, useEffect, useRef } from 'react'
@@ -9,6 +10,7 @@ import Link from '../Link'
 import LanguageSwitcher from '../Nav/LanguageSwitcher'
 import { Logo } from '../Nav/Logo'
 import NavLinks from '../Nav/NavLinks'
+import WebAppBetaTag from './WebAppBetaTag'
 
 export interface MobileNavbarProps {
   isMobileNavFolded?: boolean
@@ -78,6 +80,12 @@ export default function MobileNavbar({
 
       <DropdownMenu id='home-mobile-navigation' $isOpen={isOpen} aria-hidden={!isOpen}>
         <DropdownLinks />
+        <MobileWebAppLink href='/workspace'>
+          <i className='ri-play-circle-line' aria-hidden='true' />
+          {t('navigation.webApp')}
+          <WebAppBetaTag>Beta</WebAppBetaTag>
+          <i className='ri-arrow-right-line' aria-hidden='true' />
+        </MobileWebAppLink>
         <MobileActions>
           <LanguageSwitcher />
           <MobileGitHubLink
@@ -268,6 +276,41 @@ const MobileActions = styled.div`
   gap: ${rem(12)};
   padding-top: ${rem(12)};
   border-top: 1px solid var(--line-soft);
+`
+
+const MobileWebAppLink = styled(NextLink)`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  gap: ${rem(8)};
+  margin: ${rem(8)} 0 ${rem(12)};
+  padding: 0 ${rem(16)};
+  border: 1px solid var(--seal);
+  border-radius: ${rem(8)};
+  background: var(--seal);
+  color: var(--paper);
+  font-family: var(--sans);
+  font-size: ${rem(14)};
+  font-weight: 700;
+  text-decoration: none;
+
+  i:last-child {
+    margin-left: auto;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--seal);
+    outline-offset: 2px;
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transform: none;
+  }
 `
 
 const MobileGitHubLink = styled.a`

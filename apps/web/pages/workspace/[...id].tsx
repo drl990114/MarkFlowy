@@ -3,6 +3,7 @@ import { FileTreeProvider, WebFileSystemProvider } from 'adapters'
 import { EditorToolbar } from 'components/workspace/EditorToolbar'
 import { FillFlexParent } from 'components/FillFlexParent'
 import { normalizeWorkspaceIdParam, useWorkspaceState } from 'hooks/useWorkspaceState'
+import type { GetServerSideProps } from 'next'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -32,6 +33,8 @@ const WorkspaceDetailCSRPage = dynamic(() => Promise.resolve(WorkspaceDetailPage
 })
 
 const ignoreFileTreeContextMenu = () => {}
+
+export const getServerSideProps: GetServerSideProps = async () => ({ props: {} })
 
 export default function WorkspaceDetailPage() {
   return <WorkspaceDetailCSRPage />

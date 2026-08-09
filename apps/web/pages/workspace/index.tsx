@@ -218,35 +218,55 @@ export default function WorkspaceListPage() {
     <Container>
       <Header>
         <HeaderInner>
-          <HeaderLeft>
-            <ProductMark>
-              <i className='ri-folder-3-line' />
-            </ProductMark>
-            <HeaderCopy>
-              <Title>Workspaces</Title>
-              <Subtitle>
-                {workspaces.length} synced workspace{workspaces.length === 1 ? '' : 's'}
-              </Subtitle>
-            </HeaderCopy>
-          </HeaderLeft>
+          <HeaderNavigation aria-label='Workspace navigation'>
+            <BrandLink href='/' aria-label='Go to MarkFlowy home'>
+              <BrandLogo src='/logo.svg' alt='' />
+              <BrandName>MarkFlowy</BrandName>
+            </BrandLink>
+            <NavigationDivider aria-hidden='true' />
+            <CurrentLocation aria-current='page'>
+              <i className='ri-folder-3-line' aria-hidden='true' />
+              Workspaces
+            </CurrentLocation>
+          </HeaderNavigation>
           <HeaderRight>
-            {isAuthenticated && (
+            {isAuthenticated ? (
               <>
                 <SettingsLink href='/settings'>
-                  <i className='ri-user-settings-line' />
-                  Settings
+                  <i className='ri-user-settings-line' aria-hidden='true' />
+                  <span>Settings</span>
                 </SettingsLink>
-                <ImportButton onClick={handleOpenImportModal}>
-                  <i className='ri-add-line' />
+                <ImportButton type='button' onClick={handleOpenImportModal}>
+                  <i className='ri-add-line' aria-hidden='true' />
                   Import Workspace
                 </ImportButton>
               </>
+            ) : (
+              <GitHubSignInLink href='/auth'>
+                <i className='ri-github-fill' aria-hidden='true' />
+                Sign in
+              </GitHubSignInLink>
             )}
           </HeaderRight>
         </HeaderInner>
       </Header>
 
       <Content>
+        <PageIntro>
+          <PageIntroCopy>
+            <PageEyebrow>Workspace hub</PageEyebrow>
+            <Title>Workspaces</Title>
+            <Subtitle>
+              Open the local demo or connect GitHub repositories for focused Markdown editing.
+            </Subtitle>
+          </PageIntroCopy>
+          <PageStatus>
+            <StatusDot aria-hidden='true' />
+            {isAuthenticated
+              ? `${workspaces.length} synced workspace${workspaces.length === 1 ? '' : 's'}`
+              : 'Demo workspace ready'}
+          </PageStatus>
+        </PageIntro>
         <WorkspaceShell>
           {workspaceError && (
             <ErrorPanel>
@@ -255,33 +275,66 @@ export default function WorkspaceListPage() {
             </ErrorPanel>
           )}
           <SectionStack>
-            <Section>
-              <SectionHeader>
-                <SectionTitle>Recent</SectionTitle>
-                <SectionMeta>Pinned preview</SectionMeta>
-              </SectionHeader>
-              <WorkspaceList>
-                <WorkspaceRow href='/workspace/demo-workspace'>
-                  <WorkspaceIcon $variant='demo'>
-                    <i className='ri-folder-3-line' />
+            {!isAuthenticated && (
+              <Section>
+                <SectionHeader>
+                  <SectionHeading>
+                    <SectionIcon className='ri-history-line' aria-hidden='true' />
+                    <SectionTitle>Recent</SectionTitle>
+                  </SectionHeading>
+                  <SectionMeta>Pinned preview</SectionMeta>
+                </SectionHeader>
+                <WorkspaceList>
+                  <WorkspaceRow href='/workspace/demo-workspace'>
+                    <WorkspaceIcon $variant='demo'>
+                      <i className='ri-folder-3-line' />
+                    </WorkspaceIcon>
+                    <WorkspaceMain>
+                      <WorkspaceName>Demo Workspace</WorkspaceName>
+                      <WorkspacePath>/workspace/demo-workspace</WorkspacePath>
+                    </WorkspaceMain>
+                    <WorkspaceTags>
+                      <WorkspaceTag>Demo</WorkspaceTag>
+                      <WorkspaceTag>Local</WorkspaceTag>
+                    </WorkspaceTags>
+                    <OpenIndicator className='ri-arrow-right-s-line' />
+                  </WorkspaceRow>
+                </WorkspaceList>
+              </Section>
+            )}
+
+            {!isAuthenticated && (
+              <Section aria-labelledby='github-workspaces-heading'>
+                <SectionHeader>
+                  <SectionHeading>
+                    <SectionIcon className='ri-github-fill' aria-hidden='true' />
+                    <SectionTitle id='github-workspaces-heading'>GitHub</SectionTitle>
+                  </SectionHeading>
+                  <SectionMeta>Sign-in required</SectionMeta>
+                </SectionHeader>
+                <GitHubLockedState>
+                  <WorkspaceIcon $variant='github'>
+                    <i className='ri-github-fill' aria-hidden='true' />
                   </WorkspaceIcon>
-                  <WorkspaceMain>
-                    <WorkspaceName>Demo Workspace</WorkspaceName>
-                    <WorkspacePath>/workspace/demo-workspace</WorkspacePath>
-                  </WorkspaceMain>
-                  <WorkspaceTags>
-                    <WorkspaceTag>Demo</WorkspaceTag>
-                    <WorkspaceTag>Local</WorkspaceTag>
-                  </WorkspaceTags>
-                  <OpenIndicator className='ri-arrow-right-s-line' />
-                </WorkspaceRow>
-              </WorkspaceList>
-            </Section>
+                  <GitHubLockedCopy>
+                    <WorkspaceName>Open a GitHub repository as a workspace</WorkspaceName>
+                    <EmptyTextLine>
+                      Sign in first, then connect GitHub and choose the repositories MarkFlowy may
+                      access.
+                    </EmptyTextLine>
+                  </GitHubLockedCopy>
+                  <GitHubLockedLink href='/auth'>Sign in</GitHubLockedLink>
+                </GitHubLockedState>
+              </Section>
+            )}
 
             {isAuthenticated && myWorkspaces.length > 0 && (
               <Section>
                 <SectionHeader>
-                  <SectionTitle>Local & Shared</SectionTitle>
+                  <SectionHeading>
+                    <SectionIcon className='ri-folder-shared-line' aria-hidden='true' />
+                    <SectionTitle>Local & Shared</SectionTitle>
+                  </SectionHeading>
                   <SectionMeta>
                     {myWorkspaces.length} workspace{myWorkspaces.length === 1 ? '' : 's'}
                   </SectionMeta>
@@ -320,7 +373,10 @@ export default function WorkspaceListPage() {
             {isAuthenticated && githubWorkspaces.length > 0 && (
               <Section>
                 <SectionHeader>
-                  <SectionTitle>GitHub</SectionTitle>
+                  <SectionHeading>
+                    <SectionIcon className='ri-github-fill' aria-hidden='true' />
+                    <SectionTitle>GitHub</SectionTitle>
+                  </SectionHeading>
                   <SectionMeta>
                     {githubWorkspaces.length} repository workspace
                     {githubWorkspaces.length === 1 ? '' : 's'}
@@ -520,13 +576,13 @@ export default function WorkspaceListPage() {
 }
 
 const workspacePalette = {
-  page: '#101012',
-  header: 'rgba(16, 16, 18, 0.96)',
-  surface: '#151518',
-  surfaceRaised: '#1a1b1f',
-  surfaceMuted: '#121214',
-  line: 'rgba(232, 230, 227, 0.10)',
-  lineStrong: 'rgba(232, 230, 227, 0.16)',
+  page: '#0d0d0f',
+  header: 'rgba(13, 13, 15, 0.86)',
+  surface: '#141416',
+  surfaceRaised: '#1b1b1f',
+  surfaceMuted: '#111113',
+  line: 'rgba(232, 230, 227, 0.09)',
+  lineStrong: 'rgba(232, 230, 227, 0.15)',
   text: '#ececea',
   textMuted: '#a0a09c',
   textFaint: '#777873',
@@ -539,7 +595,9 @@ const workspacePalette = {
 
 const Container = styled.div`
   min-height: 100vh;
-  background: ${workspacePalette.page};
+  background:
+    radial-gradient(circle at 50% ${rem(-260)}, rgba(212, 86, 74, 0.13), transparent ${rem(520)}),
+    ${workspacePalette.page};
   color: ${workspacePalette.text};
   font-family: ${(props) => props.theme.fontFamily};
 `
@@ -551,6 +609,7 @@ const Header = styled.header`
   border-bottom: 1px solid ${workspacePalette.line};
   background: ${workspacePalette.header};
   backdrop-filter: blur(${rem(18)});
+  -webkit-backdrop-filter: blur(${rem(18)});
 `
 
 const HeaderInner = styled.div`
@@ -559,106 +618,141 @@ const HeaderInner = styled.div`
   justify-content: space-between;
   width: 100%;
   max-width: ${rem(1180)};
-  min-height: ${rem(78)};
+  min-height: ${rem(64)};
   margin: 0 auto;
   padding: 0 ${rem(28)};
   gap: ${rem(18)};
 
   @media (max-width: 720px) {
-    align-items: stretch;
-    flex-direction: column;
-    min-height: auto;
-    padding: ${rem(16)} ${rem(14)};
+    min-height: ${rem(58)};
+    padding: 0 ${rem(14)};
+    gap: ${rem(10)};
   }
 `
 
-const HeaderLeft = styled.div`
+const HeaderNavigation = styled.nav`
   display: flex;
   align-items: center;
-  gap: ${rem(12)};
+  gap: ${rem(10)};
   min-width: 0;
 `
 
-const ProductMark = styled.div`
-  display: flex;
+const BrandLink = styled(Link)`
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  width: ${rem(36)};
-  height: ${rem(36)};
-  color: ${workspacePalette.accent};
-  background: ${workspacePalette.surfaceRaised};
-  border: 1px solid ${workspacePalette.lineStrong};
+  min-height: ${rem(40)};
+  gap: ${rem(9)};
+  color: ${workspacePalette.text};
+  text-decoration: none;
   border-radius: ${rem(8)};
+
+  &:focus-visible {
+    outline: 2px solid ${workspacePalette.accent};
+    outline-offset: 3px;
+  }
+`
+
+const BrandLogo = styled.img`
+  width: ${rem(25)};
+  height: ${rem(25)};
   flex: 0 0 auto;
-  font-size: ${rem(19)};
 `
 
-const HeaderCopy = styled.div`
-  min-width: 0;
-`
-
-const Title = styled.h1`
-  font-size: ${rem(24)};
+const BrandName = styled.strong`
+  font-size: ${rem(15)};
   font-weight: 700;
-  line-height: 1.2;
-  letter-spacing: 0;
-  margin: 0;
+  letter-spacing: -0.01em;
+
+  @media (max-width: 350px) {
+    display: none;
+  }
 `
 
-const Subtitle = styled.p`
-  font-size: ${rem(13)};
+const NavigationDivider = styled.span`
+  width: 1px;
+  height: ${rem(20)};
+  background: ${workspacePalette.lineStrong};
+
+  @media (max-width: 720px) {
+    display: none;
+  }
+`
+
+const CurrentLocation = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: ${rem(7)};
   color: ${workspacePalette.textMuted};
-  margin: ${rem(3)} 0 0;
+  font-size: ${rem(13)};
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+
+  i {
+    color: ${workspacePalette.accent};
+    font-size: ${rem(15)};
+  }
+
+  @media (max-width: 720px) {
+    display: none;
+  }
 `
 
 const HeaderRight = styled.div`
   display: flex;
   align-items: center;
-  gap: ${rem(10)};
+  gap: ${rem(8)};
   flex-shrink: 0;
-
-  @media (max-width: 720px) {
-    width: 100%;
-  }
 `
 
-const SettingsLink = styled(Link)`
+const HeaderActionLink = styled(Link)`
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: ${rem(7)};
-  min-width: ${rem(110)};
   height: ${rem(36)};
   padding: 0 ${rem(13)};
   background: ${workspacePalette.surfaceRaised};
   border: 1px solid ${workspacePalette.lineStrong};
-  border-radius: ${rem(7)};
-  font-size: ${rem(14)};
+  border-radius: ${rem(8)};
+  font-size: ${rem(13)};
   font-weight: 600;
   color: ${workspacePalette.text};
   text-decoration: none;
   transition:
-    background-color 0.16s ease,
-    border-color 0.16s ease,
-    color 0.16s ease;
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 140ms cubic-bezier(0.23, 1, 0.32, 1);
   white-space: nowrap;
 
-  &:hover {
-    background: #202127;
-    border-color: rgba(232, 230, 227, 0.22);
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background: #202127;
+      border-color: rgba(232, 230, 227, 0.22);
+      color: #ffffff;
+    }
+  }
+
+  &:active {
+    transform: scale(0.97);
   }
 
   &:focus-visible {
     outline: 2px solid ${workspacePalette.accent};
     outline-offset: 2px;
   }
+`
+
+const SettingsLink = styled(HeaderActionLink)`
+  min-width: ${rem(104)};
 
   @media (max-width: 720px) {
-    flex: 1;
-    min-width: 0;
+    width: ${rem(36)};
+    min-width: ${rem(36)};
+    padding: 0;
+
+    span {
+      display: none;
+    }
   }
 `
 
@@ -667,24 +761,31 @@ const ImportButton = styled.button`
   align-items: center;
   justify-content: center;
   gap: ${rem(7)};
-  min-width: ${rem(164)};
+  min-width: ${rem(156)};
   height: ${rem(36)};
   padding: 0 ${rem(15)};
   background: ${workspacePalette.accent};
   border: 1px solid ${workspacePalette.accent};
-  border-radius: ${rem(7)};
-  font-size: ${rem(14)};
+  border-radius: ${rem(8)};
+  font-size: ${rem(13)};
   font-weight: 700;
   color: #ffffff;
   cursor: pointer;
   transition:
-    background-color 0.16s ease,
-    border-color 0.16s ease;
+    background-color 160ms ease,
+    border-color 160ms ease,
+    transform 140ms cubic-bezier(0.23, 1, 0.32, 1);
   white-space: nowrap;
 
-  &:hover {
-    background: ${workspacePalette.accentHover};
-    border-color: ${workspacePalette.accentHover};
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background: ${workspacePalette.accentHover};
+      border-color: ${workspacePalette.accentHover};
+    }
+  }
+
+  &:active {
+    transform: scale(0.97);
   }
 
   &:focus-visible {
@@ -693,19 +794,128 @@ const ImportButton = styled.button`
   }
 
   @media (max-width: 720px) {
-    flex: 1.2;
-    min-width: 0;
+    min-width: ${rem(132)};
   }
+`
+
+const GitHubSignInLink = styled(Link)`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: ${rem(7)};
+  min-width: ${rem(94)};
+  height: ${rem(36)};
+  padding: 0 ${rem(15)};
+  background: ${workspacePalette.accent};
+  border: 1px solid ${workspacePalette.accent};
+  border-radius: ${rem(8)};
+  color: #ffffff;
+  font-size: ${rem(13)};
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    transform 140ms cubic-bezier(0.23, 1, 0.32, 1);
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background: ${workspacePalette.accentHover};
+      border-color: ${workspacePalette.accentHover};
+    }
+  }
+
+  &:active {
+    transform: scale(0.97);
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${workspacePalette.accent};
+    outline-offset: 2px;
+  }
+
+`
+
+const PageIntro = styled.div`
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: ${rem(28)};
+  margin-bottom: ${rem(28)};
+  padding: ${rem(8)} ${rem(2)} 0;
+
+  @media (max-width: 720px) {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: ${rem(14)};
+    margin-bottom: ${rem(22)};
+    padding-top: ${rem(2)};
+  }
+`
+
+const PageIntroCopy = styled.div`
+  min-width: 0;
+`
+
+const PageEyebrow = styled.div`
+  margin-bottom: ${rem(8)};
+  color: ${workspacePalette.accent};
+  font-size: ${rem(11)};
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  line-height: 1;
+  text-transform: uppercase;
+`
+
+const Title = styled.h1`
+  margin: 0;
+  color: ${workspacePalette.text};
+  font-size: clamp(${rem(30)}, 4vw, ${rem(36)});
+  font-weight: 720;
+  letter-spacing: -0.035em;
+  line-height: 1.08;
+`
+
+const Subtitle = styled.p`
+  max-width: ${rem(690)};
+  margin: ${rem(10)} 0 0;
+  color: ${workspacePalette.textMuted};
+  font-size: ${rem(14)};
+  line-height: 1.6;
+`
+
+const PageStatus = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: ${rem(8)};
+  min-height: ${rem(30)};
+  padding: 0 ${rem(11)};
+  border: 1px solid ${workspacePalette.line};
+  border-radius: ${rem(999)};
+  background: rgba(20, 20, 22, 0.72);
+  color: ${workspacePalette.textMuted};
+  font-size: ${rem(12)};
+  font-weight: 600;
+  white-space: nowrap;
+`
+
+const StatusDot = styled.span`
+  width: ${rem(7)};
+  height: ${rem(7)};
+  border-radius: 50%;
+  background: ${workspacePalette.success};
+  box-shadow: 0 0 0 ${rem(3)} rgba(115, 201, 145, 0.12);
 `
 
 const Content = styled.main`
   width: 100%;
   max-width: ${rem(1180)};
   margin: 0 auto;
-  padding: ${rem(28)} ${rem(28)} ${rem(44)};
+  padding: ${rem(38)} ${rem(28)} ${rem(52)};
 
   @media (max-width: 720px) {
-    padding: ${rem(18)} ${rem(14)} ${rem(28)};
+    padding: ${rem(24)} ${rem(14)} ${rem(32)};
   }
 `
 
@@ -716,7 +926,59 @@ const WorkspaceShell = styled.div`
 const SectionStack = styled.div`
   display: flex;
   flex-direction: column;
+  gap: ${rem(16)};
+`
+
+const GitHubLockedState = styled.div`
+  display: flex;
+  align-items: center;
   gap: ${rem(14)};
+  min-height: ${rem(88)};
+  padding: ${rem(16)} ${rem(18)};
+
+  @media (max-width: 640px) {
+    align-items: stretch;
+    flex-direction: column;
+  }
+`
+
+const GitHubLockedCopy = styled.div`
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: ${rem(3)};
+  min-width: 0;
+`
+
+const GitHubLockedLink = styled(Link)`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: ${rem(92)};
+  min-height: ${rem(34)};
+  padding: 0 ${rem(13)};
+  border: 1px solid ${workspacePalette.lineStrong};
+  border-radius: ${rem(7)};
+  background: ${workspacePalette.surfaceRaised};
+  color: ${workspacePalette.text};
+  font-size: ${rem(13)};
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+
+  &:hover {
+    border-color: ${workspacePalette.accent};
+    color: ${workspacePalette.accent};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${workspacePalette.accent};
+    outline-offset: 2px;
+  }
+
+  @media (max-width: 640px) {
+    width: 100%;
+  }
 `
 
 const LoadingContainer = styled.div`
@@ -743,25 +1005,47 @@ const LoadingSpinner = styled.div`
 `
 
 const Section = styled.section`
-  border: 1px solid ${workspacePalette.line};
-  background: ${workspacePalette.surface};
-  border-radius: ${rem(8)};
+  border: 1px solid ${workspacePalette.lineStrong};
+  background: rgba(20, 20, 22, 0.92);
+  border-radius: ${rem(12)};
   overflow: hidden;
+  box-shadow: 0 ${rem(12)} ${rem(36)} rgba(0, 0, 0, 0.12);
 `
 
 const SectionHeader = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: ${rem(46)};
-  padding: 0 ${rem(16)};
+  min-height: ${rem(52)};
+  padding: 0 ${rem(18)};
   border-bottom: 1px solid ${workspacePalette.line};
-  background: ${workspacePalette.surfaceMuted};
-  gap: ${rem(10)};
+  background: rgba(17, 17, 19, 0.78);
+  gap: ${rem(12)};
+`
+
+const SectionHeading = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${rem(9)};
+  min-width: 0;
+`
+
+const SectionIcon = styled.i`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: ${rem(26)};
+  height: ${rem(26)};
+  border: 1px solid rgba(212, 86, 74, 0.2);
+  border-radius: ${rem(7)};
+  background: ${workspacePalette.accentSoft};
+  color: ${workspacePalette.accent};
+  font-size: ${rem(14)};
+  flex: 0 0 auto;
 `
 
 const SectionTitle = styled.h2`
-  font-size: ${rem(14)};
+  font-size: ${rem(13)};
   font-weight: 700;
   line-height: 1.35;
   margin: 0;
@@ -769,7 +1053,14 @@ const SectionTitle = styled.h2`
 `
 
 const SectionMeta = styled.span`
-  font-size: ${rem(12)};
+  min-height: ${rem(24)};
+  display: inline-flex;
+  align-items: center;
+  padding: 0 ${rem(8)};
+  border: 1px solid ${workspacePalette.line};
+  border-radius: ${rem(999)};
+  background: rgba(27, 27, 31, 0.64);
+  font-size: ${rem(11)};
   color: ${workspacePalette.textFaint};
   white-space: nowrap;
 `
@@ -783,9 +1074,9 @@ const WorkspaceRow = styled(Link)`
   display: grid;
   grid-template-columns: ${rem(38)} minmax(0, 1fr) auto ${rem(32)};
   align-items: center;
-  gap: ${rem(12)};
-  min-height: ${rem(66)};
-  padding: ${rem(12)} ${rem(14)};
+  gap: ${rem(14)};
+  min-height: ${rem(72)};
+  padding: ${rem(14)} ${rem(18)};
   color: inherit;
   text-decoration: none;
   border-bottom: 1px solid ${workspacePalette.line};
@@ -797,8 +1088,10 @@ const WorkspaceRow = styled(Link)`
     border-bottom: 0;
   }
 
-  &:hover {
-    background: ${workspacePalette.surfaceRaised};
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background: rgba(27, 27, 31, 0.9);
+    }
   }
 
   &:focus-visible {
@@ -809,6 +1102,7 @@ const WorkspaceRow = styled(Link)`
   @media (max-width: 720px) {
     grid-template-columns: ${rem(38)} minmax(0, 1fr) ${rem(32)};
     gap: ${rem(10)};
+    padding: ${rem(13)} ${rem(14)};
   }
 `
 
@@ -822,7 +1116,7 @@ const WorkspaceIcon = styled.div<{ $variant: 'demo' | 'local' | 'github' }>`
   border: 1px solid
     ${(props) =>
       props.$variant === 'github' ? 'rgba(232, 230, 227, 0.14)' : 'rgba(212, 86, 74, 0.28)'};
-  border-radius: ${rem(8)};
+  border-radius: ${rem(10)};
   color: ${(props) =>
     props.$variant === 'github' ? workspacePalette.text : workspacePalette.accent};
   font-size: ${rem(18)};
@@ -869,12 +1163,12 @@ const WorkspaceTag = styled.span`
   align-items: center;
   min-height: ${rem(24)};
   padding: 0 ${rem(8)};
-  background: #101012;
+  background: rgba(13, 13, 15, 0.72);
   border: 1px solid ${workspacePalette.line};
   color: ${workspacePalette.textMuted};
   font-size: ${rem(12)};
   font-weight: 600;
-  border-radius: ${rem(6)};
+  border-radius: ${rem(999)};
   white-space: nowrap;
 `
 

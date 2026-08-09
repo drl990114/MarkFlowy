@@ -11,7 +11,6 @@ import ContributorGlobe from '../components/ContributorGlobe'
 import Nav from '../components/HomeNav'
 import { HoverBorderGradient } from '../components/HoverBorderGradient'
 import SeoHead from '../components/SeoHead'
-import { useRedirectIfAuthenticated } from '../hooks/useAuth'
 import { useMockFiles } from '../hooks/useMockFiles'
 import { useSystemType } from '../hooks/useSystemType'
 import { mobile, phone } from '../utils/media'
@@ -83,7 +82,6 @@ export default function Index({
 }: {
   contributors?: Contributor[]
 }) {
-  const checkingAuth = useRedirectIfAuthenticated()
   const { t } = useTranslation()
   const [isMobileNavFolded, setIsMobileNavFolded] = React.useState(true)
   const systemType = useSystemType()
@@ -92,14 +90,6 @@ export default function Index({
     () => setIsMobileNavFolded((isFolded) => !isFolded),
     [],
   )
-
-  if (checkingAuth) {
-    return (
-      <LoadingContainer>
-        <LoadingSpinner />
-      </LoadingContainer>
-    )
-  }
 
   const renderSystemIcon = () => {
     switch (systemType) {
@@ -1524,14 +1514,6 @@ const FooterKicker = styled.span`
   `)}
 `
 
-const LoadingContainer = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  background: var(--paper);
-`
-
 type FlowyStroke = {
   id: string
   d: string
@@ -1570,6 +1552,8 @@ const FLOWY_STROKES: readonly FlowyStroke[] = [
     width: 2.5,
   },
 ]
+
+const FLOWY_REPLAY_INTERVAL_MS = 8_000
 
 const FlowyPathSet = ({
   stroke = 'var(--ink)',
@@ -1633,10 +1617,39 @@ const FlowyText = () => {
   const shouldReduceMotion = useReducedMotion()
   const [ribbonReplayKey, setRibbonReplayKey] = React.useState(0)
 
-  const replayRibbon = () => {
+  const replayRibbon = React.useCallback(() => {
     if (shouldReduceMotion) return
     setRibbonReplayKey((currentKey) => currentKey + 1)
-  }
+  }, [shouldReduceMotion])
+
+  React.useEffect(() => {
+    if (shouldReduceMotion) return
+
+    let replayTimerId: number | undefined
+
+    const clearReplayTimer = () => {
+      if (replayTimerId === undefined) return
+      window.clearTimeout(replayTimerId)
+      replayTimerId = undefined
+    }
+
+    const scheduleReplay = () => {
+      clearReplayTimer()
+      if (document.visibilityState !== 'visible') return
+
+      replayTimerId = window.setTimeout(() => {
+        setRibbonReplayKey((currentKey) => currentKey + 1)
+      }, FLOWY_REPLAY_INTERVAL_MS)
+    }
+
+    scheduleReplay()
+    document.addEventListener('visibilitychange', scheduleReplay)
+
+    return () => {
+      clearReplayTimer()
+      document.removeEventListener('visibilitychange', scheduleReplay)
+    }
+  }, [ribbonReplayKey, shouldReduceMotion])
 
   return (
     <FlowyMark aria-label='Flowy' onHoverStart={replayRibbon} onHoverEnd={replayRibbon}>
@@ -1646,25 +1659,6 @@ const FlowyText = () => {
     </FlowyMark>
   )
 }
-
-const LoadingSpinner = styled.div`
-  width: ${rem(40)};
-  height: ${rem(40)};
-  border: 3px solid var(--line-soft);
-  border-top-color: var(--seal);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    animation: none;
-  }
-`
 
 const BOTS_ID = [49699333, 29139614, 41898282, 29791463]
 

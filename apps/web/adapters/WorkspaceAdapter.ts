@@ -9,6 +9,7 @@ import {
   type WorkspaceMetadata,
   workspaceService,
 } from 'features/workspace/services/workspaceService'
+import { loadDemoWorkspaceFile, saveDemoWorkspaceFile } from './demoWorkspaceStorage'
 
 interface WorkspaceAdapterBase {
   type: 'local' | 'remote'
@@ -68,109 +69,24 @@ export interface WorkspaceAdapterFactoryOptions {
   ) => LocalWorkspaceBackend | null | Promise<LocalWorkspaceBackend | null>
 }
 
-const mockFolderData: IFile[] = [
+const DEMO_FILE_ID = 'demo-file'
+
+const demoFolderData: IFile[] = [
   {
-    id: 'workspace-root',
-    name: 'Workspace',
-    kind: 'dir',
-    path: '/workspace',
-    children: [
-      {
-        id: 'file-readme',
-        name: 'README.md',
-        kind: 'file',
-        path: '/workspace/README.md',
-        ext: 'md',
-      },
-      {
-        id: 'folder-docs',
-        name: 'docs',
-        kind: 'dir',
-        path: '/workspace/docs',
-        children: [
-          {
-            id: 'file-intro',
-            name: 'intro.md',
-            kind: 'file',
-            path: '/workspace/docs/intro.md',
-            ext: 'md',
-          },
-          {
-            id: 'file-guide',
-            name: 'guide.md',
-            kind: 'file',
-            path: '/workspace/docs/guide.md',
-            ext: 'md',
-          },
-        ],
-      },
-      {
-        id: 'folder-src',
-        name: 'src',
-        kind: 'dir',
-        path: '/workspace/src',
-        children: [],
-      },
-    ],
+    id: DEMO_FILE_ID,
+    name: 'demo.md',
+    kind: 'file',
+    path: '/demo.md',
+    ext: 'md',
   },
 ]
 
 const defaultContents: Record<string, string> = {
-  'file-readme': `# Welcome to Workspace
+  [DEMO_FILE_ID]: `# MarkFlowy Demo
 
-This is a **workspace** for managing your markdown files.
+Edit this file and click Save.
 
-## Features
-
-- 📁 File tree with lazy loading
-- 📝 Full markdown editor
-- 📑 Outline navigation
-- 🎨 Resizable panels
-
-## Getting Started
-
-1. Select a file from the file tree on the left
-2. Edit the content in the editor
-3. Use the outline panel on the right to navigate
-
-## File Structure
-
-\`\`\`
-workspace/
-├── README.md
-├── docs/
-│   ├── intro.md
-│   └── guide.md
-└── src/
-\`\`\`
-
----
-
-*Happy writing! ✍️*
-`,
-  'file-intro': `# Introduction
-
-Welcome to the introduction file.
-
-## Overview
-
-This is an overview section.
-
-## Details
-
-More details here...
-`,
-  'file-guide': `# Guide
-
-This is a guide file.
-
-## Step 1
-
-First step...
-
-## Step 2
-
-Second step...
+Your changes stay in this browser's IndexedDB after refresh.
 `,
 }
 
@@ -184,14 +100,24 @@ const demoLocalWorkspaceBackend: LocalWorkspaceBackend = {
   requiresAuth: false,
   capabilities: {
     refs: false,
-    write: false,
+    write: true,
     delete: false,
   },
   async loadTree() {
-    return mockFolderData
+    return demoFolderData
   },
   async loadFileContent(file: IFile) {
-    return { content: getDefaultContent(file.id) }
+    const storedFile = await loadDemoWorkspaceFile(file.id)
+    return storedFile
+      ? { content: storedFile.content, version: storedFile.version }
+      : { content: getDefaultContent(file.id) }
+  },
+  async saveFileContent(file, content) {
+    if (file.id !== DEMO_FILE_ID) {
+      throw new Error(`Unknown demo workspace file: ${file.id}`)
+    }
+
+    return { version: await saveDemoWorkspaceFile(file.id, content) }
   },
 }
 
