@@ -27,6 +27,7 @@ export const styledDarkTheme = {
   tableTdBorderColor: '#303030',
   tableTrBgColor: '#1e1e1e',
   tableTrDeepBgColor: '#252526',
+  tableHeaderBgColor: 'rgba(255, 255, 255, 0.07)',
   tableTrBorderColor: '#303030',
   tableSelectorBgColor: '#252526',
   tableSelectorBgHoverColor: '#2a2d2e',

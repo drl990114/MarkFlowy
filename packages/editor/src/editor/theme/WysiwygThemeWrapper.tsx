@@ -471,7 +471,25 @@ export const WysiwygThemeWrapper = styled.div
   }
 
   & table th {
+    text-align: left;
     font-weight: 600;
+    background-color: ${(props) =>
+      props.theme.tableHeaderBgColor ?? props.theme.tableTrDeepBgColor};
+  }
+
+  & table th[data-table-align='left'],
+  & table td[data-table-align='left'] {
+    text-align: left;
+  }
+
+  & table th[data-table-align='center'],
+  & table td[data-table-align='center'] {
+    text-align: center;
+  }
+
+  & table th[data-table-align='right'],
+  & table td[data-table-align='right'] {
+    text-align: right;
   }
 
   & table th,

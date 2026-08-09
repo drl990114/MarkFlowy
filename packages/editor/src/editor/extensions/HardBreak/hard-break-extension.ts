@@ -6,7 +6,7 @@ import { chainCommands } from '@rme-sdk/sdk/pm'
 import type { NodeSerializerOptions } from '../../transform'
 import { exitTable } from '../Table/table-utils'
 
-const needUseBrNodeNames = ['tableCell']
+const needUseBrNodeNames = ['tableCell', 'tableHeaderCell']
 
 export class LineHardBreakExtension extends HardBreakExtension {
   fromMarkdown() {

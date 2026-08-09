@@ -74,6 +74,14 @@ export const createWysiwygDelegate = (
     Object.assign(overrideShortcutMap, defaultOverrideShortcutMap)
   }
 
+  const customSelectAllShortcut = overrideShortcutMap.selectAll
+  if (customSelectAllShortcut) {
+    // RME applies command overrides after extension keymaps. Route a custom
+    // select-all shortcut through the table-aware command at that final layer.
+    overrideShortcutMap.selectAllInStages = customSelectAllShortcut
+    delete overrideShortcutMap.selectAll
+  }
+
   // if (overrideShortcutMap?.paste?.toLowerCase() === 'mod-v') {
   delete overrideShortcutMap.paste
   // }

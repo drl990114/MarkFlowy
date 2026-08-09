@@ -1,11 +1,12 @@
 import type {
-    ApplySchemaAttributes,
-    CommandFunction,
-    Fragment,
-    KeyBindings,
-    NodeSpecOverride,
+  ApplySchemaAttributes,
+  CommandFunction,
+  Fragment,
+  KeyBindings,
+  NodeSpecOverride,
+  SchemaAttributes,
 } from '@rme-sdk/sdk/core'
-import { findParentNodeOfType } from '@rme-sdk/sdk/core'
+import { findParentNodeOfType, NamedShortcut } from '@rme-sdk/sdk/core'
 import type { TableSchemaSpec } from '@rme-sdk/sdk/extensions/tables'
 import {
     TableCellExtension,
@@ -28,21 +29,51 @@ import {
   TableView,
 } from '@rme-sdk/sdk/pm/tables'
 import type { Node as ProsemirrorNode } from '@rme-sdk/sdk/pm/model'
+import type Token from 'markdown-it/lib/token.mjs'
 import type { NodeSerializerOptions } from '../../transform'
 import { ParserRuleType } from '../../transform'
 import { buildBlockEnterKeymap } from '../../utils/build-block-enter-keymap'
 import { selectCell } from './table-helpers'
 import { TableSelectorExtension } from './table-selector-extension'
-import { findTable, getCellSelectionType } from './table-utils'
-
-enum TABLE_ALIGEN {
-  DEFAULT = 1,
-  CENTER = 2,
-  RIGHT = 3,
-  LEFT = 4,
-}
+import {
+  addTableRowWithAlignment,
+  applyTableRowColumnAlignments,
+  findTable,
+  getCellSelectionType,
+  getTableColumnAlignments,
+  normalizeTableAlignment,
+  selectAllInStages,
+  selectTableInStages,
+  setTableColumnAlignment,
+  type TableAlignment,
+} from './table-utils'
 
 const DEFAULT_TABLE_CELL_MIN_WIDTH = 100
+
+export const tableCellExtraAttributes = {
+  align: {
+    default: null,
+    parseDOM: (domNode) =>
+      normalizeTableAlignment(
+        domNode.getAttribute('data-table-align') ?? domNode.style.textAlign,
+      ),
+    toDOM: (attrs) => {
+      const alignment = normalizeTableAlignment(attrs.align)
+      return alignment
+        ? {
+            'data-table-align': alignment,
+            style: `text-align: ${alignment};`,
+          }
+        : undefined
+    },
+  },
+} satisfies SchemaAttributes
+
+function getMarkdownTableCellAttrs(token: Token) {
+  return {
+    align: normalizeTableAlignment(token.attrGet('style')),
+  }
+}
 
 export class LineTableExtension extends TableExtension {
   get name() {
@@ -69,7 +100,7 @@ export class LineTableExtension extends TableExtension {
               return schema.text(text)
             })
 
-          const cells1 = texts.map((text) => schema.nodes.tableCell.create(null, text)) // first row
+          const cells1 = texts.map((text) => schema.nodes.tableHeaderCell.create(null, text)) // first row
           const cells2 = texts.map(() => schema.nodes.tableCell.create(null)) // second row
           const row1 = schema.nodes.tableRow.create(null, cells1)
           const row2 = schema.nodes.tableRow.create(null, cells2)
@@ -92,7 +123,10 @@ export class LineTableExtension extends TableExtension {
         const { selection } = state
         const { $head } = selection
         // 检查是否在表格单元格内
-        const cell = findParentNodeOfType({ selection: $head, types: 'tableCell' })
+        const cell = findParentNodeOfType({
+          selection: $head,
+          types: ['tableHeaderCell', 'tableCell'],
+        })
         if (!cell) return false
 
         // 检查光标是否在单元格内容的第一行
@@ -104,7 +138,7 @@ export class LineTableExtension extends TableExtension {
         const nodePositions = getNodePositionByCellContent(cellContent)
 
         // 检查光标是否在第一行
-        let isAtFirstLine = posInCell <= nodePositions[0].end
+        const isAtFirstLine = posInCell <= nodePositions[0].end
         // 如果不是在第一行 ，让默认行为处理（在单元格内上移）
         if (!isAtFirstLine) return false
 
@@ -149,7 +183,10 @@ export class LineTableExtension extends TableExtension {
         const { selection } = state
         const { $head } = selection
         // 检查是否在表格单元格内
-        const cell = findParentNodeOfType({ selection: $head, types: 'tableCell' })
+        const cell = findParentNodeOfType({
+          selection: $head,
+          types: ['tableHeaderCell', 'tableCell'],
+        })
         if (!cell) return false
 
         // 检查光标是否在单元格内容的最后一行
@@ -160,7 +197,7 @@ export class LineTableExtension extends TableExtension {
         const nodePositions = getNodePositionByCellContent(cellContent)
 
         // 检查光标是否在第一行
-        let isAtLastLine = posInCell >= nodePositions[nodePositions.length - 1].start
+        const isAtLastLine = posInCell >= nodePositions[nodePositions.length - 1].start
         // 如果不是最后一行，让默认行为处理（在单元格内下移）
         if (!isAtLastLine) return false
 
@@ -208,12 +245,36 @@ export class LineTableExtension extends TableExtension {
         if (!findTable(state.selection)) return false
         return goToNextCell(-1)(state, dispatch)
       },
+      [NamedShortcut.SelectAll]: ({ state, dispatch }) => {
+        return selectTableInStages(state, dispatch)
+      },
       Backspace: ({ state, dispatch }) => {
         return handleDeleteCellSelection(state, dispatch)
       },
       Delete: ({ state, dispatch }) => {
         return handleDeleteCellSelection(state, dispatch)
       },
+    }
+  }
+
+  createCommands() {
+    return {
+      selectAllInStages:
+        (): CommandFunction =>
+        ({ state, dispatch }) =>
+          selectAllInStages(state, dispatch),
+      setTableColumnAlignment:
+        (alignment: TableAlignment): CommandFunction =>
+        ({ state, dispatch }) =>
+          setTableColumnAlignment(alignment)(state, dispatch),
+      addTableRowBeforeWithAlignment:
+        (): CommandFunction =>
+        ({ state, dispatch }) =>
+          addTableRowWithAlignment('before')(state, dispatch),
+      addTableRowAfterWithAlignment:
+        (): CommandFunction =>
+        ({ state, dispatch }) =>
+          addTableRowWithAlignment('after')(state, dispatch),
     }
   }
 
@@ -234,13 +295,13 @@ export class LineTableExtension extends TableExtension {
 
   public toMarkdown({ state, node }: NodeSerializerOptions) {
     const table: string[][] = []
-    const colAligns: TABLE_ALIGEN[] = []
+    const colAligns: (TableAlignment | null)[] = []
     node.forEach((rowNode, _, rowIndex) => {
       const row: string[] = []
       rowNode.forEach((cellNode, __, colIndex) => {
         let cellText = ''
         for (let i = 0; i < cellNode.childCount; i++) {
-          let child = cellNode.child(i)
+          const child = cellNode.child(i)
           if (child.textContent) {
             cellText += child.textContent
           } else if (child.type.name === 'html_br') {
@@ -249,7 +310,7 @@ export class LineTableExtension extends TableExtension {
         }
         row.push(replaceNewLines(cellText.trim()))
         if (rowIndex === 0) {
-          colAligns[colIndex] = TABLE_ALIGEN.DEFAULT
+          colAligns[colIndex] = normalizeTableAlignment(cellNode.attrs.align)
         }
       })
       table.push(row)
@@ -263,17 +324,22 @@ export class LineTableExtension extends TableExtension {
         colWidths[colIndex] = Math.max(cell.length, colWidths[colIndex])
       })
     })
+    colWidths.forEach((width, colIndex) => {
+      const alignment = colAligns[colIndex]
+      const minimumWidth = alignment === 'center' ? 5 : alignment ? 4 : 3
+      colWidths[colIndex] = Math.max(width, minimumWidth)
+    })
 
     const spliter: string[] = new Array(colNumber)
     colWidths.forEach((width, colIndex) => {
       switch (colAligns[colIndex]) {
-        case TABLE_ALIGEN.LEFT:
+        case 'left':
           spliter[colIndex] = ':' + '-'.repeat(width - 1)
           break
-        case TABLE_ALIGEN.RIGHT:
+        case 'right':
           spliter[colIndex] = '-'.repeat(width - 1) + ':'
           break
-        case TABLE_ALIGEN.CENTER:
+        case 'center':
           spliter[colIndex] = ':' + '-'.repeat(width - 2) + ':'
           break
         default:
@@ -288,10 +354,10 @@ export class LineTableExtension extends TableExtension {
       row.forEach((cell, col) => {
         text += '| '
         const width = colWidths[col]
-        if (colAligns[col] === TABLE_ALIGEN.CENTER) {
+        if (colAligns[col] === 'center') {
           const pad = ' '.repeat(Math.round((width - cell.length) / 2))
           text += (pad + cell + pad).padEnd(width)
-        } else if (colAligns[col] === TABLE_ALIGEN.RIGHT) {
+        } else if (colAligns[col] === 'right') {
           text += cell.padStart(width)
         } else {
           text += cell.padEnd(width)
@@ -342,8 +408,23 @@ export class LineTableHeaderCellExtension extends TableHeaderCellExtension {
     return 'tableHeaderCell' as const
   }
 
+  createNodeSpec(extra: ApplySchemaAttributes, override: NodeSpecOverride): TableSchemaSpec {
+    return {
+      ...super.createNodeSpec(extra, override),
+      content: 'inline*',
+    }
+  }
+
   public fromMarkdown() {
-    return [] as const
+    return [
+      {
+        type: ParserRuleType.block,
+        token: 'th',
+        node: this.name,
+        hasOpenClose: true,
+        getAttrs: getMarkdownTableCellAttrs,
+      },
+    ] as const
   }
 
   public toMarkdown() {}
@@ -387,15 +468,10 @@ export class LineTableCellExtension extends TableCellExtension {
     return [
       {
         type: ParserRuleType.block,
-        token: 'th',
-        node: this.name,
-        hasOpenClose: true,
-      },
-      {
-        type: ParserRuleType.block,
         token: 'td',
         node: this.name,
         hasOpenClose: true,
+        getAttrs: getMarkdownTableCellAttrs,
       },
     ] as const
   }
@@ -474,7 +550,9 @@ function handleTableTab(
   }
 
   const rect = selectedRect(state)
+  const alignments = getTableColumnAlignments(rect.table, rect.map)
   const tr = addRow(state.tr, rect, rect.bottom)
+  applyTableRowColumnAlignments(tr, rect.tableStart, rect.bottom, alignments)
   const table = tr.doc.nodeAt(rect.tableStart - 1)
   if (!table) return false
 

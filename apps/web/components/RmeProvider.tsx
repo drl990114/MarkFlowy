@@ -80,6 +80,7 @@ const INKWASH_EDITOR_TOKENS = {
   tableTdBorderColor: 'rgba(232, 230, 227, 0.10)',
   tableTrBgColor: '#1c1c20',
   tableTrDeepBgColor: '#141416',
+  tableHeaderBgColor: 'rgba(232, 230, 227, 0.07)',
   tableTrBorderColor: 'rgba(232, 230, 227, 0.06)',
   tableSelectorBgColor: 'rgba(232, 230, 227, 0.06)',
   tableSelectorBgHoverColor: 'rgba(232, 230, 227, 0.08)',

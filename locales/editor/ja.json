@@ -5,6 +5,9 @@
       "insertColumnBefore": "列を挿入",
       "insertRowAfter": "行を挿入",
       "insertRowBefore": "行を挿入",
+      "alignLeft": "左揃え",
+      "alignCenter": "中央揃え",
+      "alignRight": "右揃え",
       "deleteColumn": "列を削除",
       "deleteRow": "行を削除"
     },

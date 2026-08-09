@@ -28,6 +28,9 @@
       "insertColumnBefore": "向前插入列",
       "insertRowAfter": "向后插入行",
       "insertRowBefore": "向前插入行",
+      "alignLeft": "左对齐",
+      "alignCenter": "居中对齐",
+      "alignRight": "右对齐",
       "deleteColumn": "删除列",
       "deleteRow": "删除行"
     },

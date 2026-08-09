@@ -31,7 +31,7 @@ const TablePanel = (props: TablePanelProps) => {
 
   useImperativeHandle(ref, () => ({
     createTable: () => {
-      commands.createTable({ rowsCount, columnsCount, withHeaderRow: false })
+      commands.createTable({ rowsCount, columnsCount, withHeaderRow: true })
     },
     handleKeyDown: (e) => {
       const handleRight = () => {
@@ -93,7 +93,7 @@ const TablePanel = (props: TablePanelProps) => {
                     commands.createTable({
                       rowsCount: i,
                       columnsCount: j,
-                      withHeaderRow: false,
+                      withHeaderRow: true,
                     })
                     closeMenu()
                   }}

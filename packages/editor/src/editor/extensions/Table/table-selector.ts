@@ -1,7 +1,8 @@
 import { cx } from '@rme-sdk/sdk/core'
-import { EditorState } from '@rme-sdk/sdk/pm'
+import type { EditorState } from '@rme-sdk/sdk/pm'
 import { isCellSelection, TableMap } from '@rme-sdk/sdk/pm/tables'
-import { Decoration, DecorationSet, EditorView } from '@rme-sdk/sdk/pm/view'
+import { Decoration, DecorationSet } from '@rme-sdk/sdk/pm/view'
+import type { EditorView } from '@rme-sdk/sdk/pm/view'
 import { createElement as h } from '../../utils/dom'
 import { selectColumn, selectRow, selectTable } from './table-helpers'
 import {

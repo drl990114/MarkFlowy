@@ -1,9 +1,12 @@
 import { findParentNodeOfType } from '@rme-sdk/sdk/core'
-import { Transaction } from '@rme-sdk/sdk/pm/state'
+import type { Transaction } from '@rme-sdk/sdk/pm/state'
 import { CellSelection, TableMap } from '@rme-sdk/sdk/pm/tables'
 
 export function selectRow(tr: Transaction, pos: number): boolean {
-  const cell = findParentNodeOfType({ selection: tr.doc.resolve(pos), types: 'tableCell' })
+  const cell = findParentNodeOfType({
+    selection: tr.doc.resolve(pos),
+    types: ['tableHeaderCell', 'tableCell'],
+  })
 
   if (!cell) {
     return false
@@ -14,7 +17,10 @@ export function selectRow(tr: Transaction, pos: number): boolean {
 }
 
 export function selectColumn(tr: Transaction, pos: number): boolean {
-  const cell = findParentNodeOfType({ selection: tr.doc.resolve(pos), types: 'tableCell' })
+  const cell = findParentNodeOfType({
+    selection: tr.doc.resolve(pos),
+    types: ['tableHeaderCell', 'tableCell'],
+  })
 
   if (!cell) {
     return false
@@ -41,7 +47,7 @@ export function selectTable(tr: Transaction, pos: number): boolean {
   const lastCellPos = map.map[map.map.length - 1]
 
   tr.setSelection(
-    CellSelection.create(tr.doc, table.start + firstCellPos, table.start + lastCellPos),
+    CellSelection.create(tr.doc, table.start + lastCellPos, table.start + firstCellPos),
   )
   return true
 }

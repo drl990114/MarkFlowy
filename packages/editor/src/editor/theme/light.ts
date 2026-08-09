@@ -16,4 +16,5 @@ export const styledLightTheme = {
   contextMenuBgColorHover: '#E8E8EC',
 
   ...editorSpecificTokens,
+  tableHeaderBgColor: 'rgba(31, 35, 40, 0.07)',
 }

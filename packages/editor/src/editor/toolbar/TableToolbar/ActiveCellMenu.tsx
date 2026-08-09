@@ -1,15 +1,23 @@
-import { useCommands, type UseMultiPositionerReturn } from '@rme-sdk/sdk/react'
-import { useRef, useState } from 'react'
 import { useTranslation } from '@markflowy/i18n'
-import { Dropdown, DropdownMenuItem } from 'zens'
+import { useCommands, useRemirrorContext, type UseMultiPositionerReturn } from '@rme-sdk/sdk/react'
+import { useRef, useState } from 'react'
+import { Dropdown, type DropdownMenuItem, type MenuItemType } from 'zens'
+import type { LineTableExtension } from '../../extensions/Table'
+import {
+  getSelectedTableColumnAlignment,
+  type TableAlignment,
+} from '../../extensions/Table/table-utils'
 import { editorZIndex } from '../../theme/z-index'
 
 const ActiveCellMenu = (props: ActiveCellMenuProps) => {
   const { positioner } = props
-  const commands = useCommands()
+  const commands = useCommands<LineTableExtension>()
+  const { getState } = useRemirrorContext({ autoUpdate: true })
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const triggerRef = useRef<HTMLDivElement>(null)
+  const selectedAlignment = getSelectedTableColumnAlignment(getState())
+  const activeAlignment = selectedAlignment === null ? 'left' : selectedAlignment
 
   const menuItems: DropdownMenuItem[] = [
     {
@@ -43,7 +51,7 @@ const ActiveCellMenu = (props: ActiveCellMenuProps) => {
     },
   ]
 
-  const handleMenuClick = (item: { key: string }) => {
+  const handleMenuClick = (item: MenuItemType) => {
     switch (item.key) {
       case 'insertColumnBefore':
         commands.addTableColumnBefore?.()
@@ -52,10 +60,10 @@ const ActiveCellMenu = (props: ActiveCellMenuProps) => {
         commands.addTableColumnAfter?.()
         break
       case 'insertRowBefore':
-        commands.addTableRowBefore?.()
+        commands.addTableRowBeforeWithAlignment?.()
         break
       case 'insertRowAfter':
-        commands.addTableRowAfter?.()
+        commands.addTableRowAfterWithAlignment?.()
         break
       case 'deleteColumn':
         commands.deleteTableColumn?.()
@@ -64,6 +72,10 @@ const ActiveCellMenu = (props: ActiveCellMenuProps) => {
         commands.deleteTableRow?.()
         break
     }
+  }
+
+  const handleAlignmentClick = (alignment: TableAlignment) => {
+    commands.setTableColumnAlignment?.(alignment)
   }
 
   const { ref, key, x, y } = positioner
@@ -85,6 +97,29 @@ const ActiveCellMenu = (props: ActiveCellMenuProps) => {
         menu={{
           items: menuItems,
           onClick: handleMenuClick,
+          toolbar: {
+            items: [
+              {
+                key: 'left',
+                icon: <i className='ri-align-left' aria-hidden />,
+                label: t('table.alignLeft'),
+                active: activeAlignment === 'left',
+              },
+              {
+                key: 'center',
+                icon: <i className='ri-align-center' aria-hidden />,
+                label: t('table.alignCenter'),
+                active: activeAlignment === 'center',
+              },
+              {
+                key: 'right',
+                icon: <i className='ri-align-right' aria-hidden />,
+                label: t('table.alignRight'),
+                active: activeAlignment === 'right',
+              },
+            ],
+            onClick: (item) => handleAlignmentClick(item.key as TableAlignment),
+          },
         }}
         trigger={['click']}
         raw
@@ -98,7 +133,7 @@ const ActiveCellMenu = (props: ActiveCellMenuProps) => {
           onMouseDown={(e) => {
             e.preventDefault()
           }}
-          onClick={() => setOpen(!open)}
+          onClick={() => setOpen((currentOpen) => !currentOpen)}
           style={{ cursor: 'pointer' }}
         >
           <i className="ri-equalizer-line"></i>

@@ -28,6 +28,9 @@
       "insertColumnBefore": "insert column before",
       "insertRowAfter": "insert row after",
       "insertRowBefore": "insert row before",
+      "alignLeft": "Align left",
+      "alignCenter": "Align center",
+      "alignRight": "Align right",
       "deleteColumn": "delete column",
       "deleteRow": "delete row"
     },

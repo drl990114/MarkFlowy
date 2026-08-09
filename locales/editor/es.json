@@ -5,6 +5,9 @@
       "insertColumnBefore": "Insertar columna antes",
       "insertRowAfter": "Insertar fila debajo",
       "insertRowBefore": "Insertar fila encima",
+      "alignLeft": "Alinear a la izquierda",
+      "alignCenter": "Centrar",
+      "alignRight": "Alinear a la derecha",
       "deleteColumn": "Eliminar columna",
       "deleteRow": "Eliminar fila"
     },

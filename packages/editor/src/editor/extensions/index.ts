@@ -4,7 +4,11 @@ import {
   // CodeBlockExtension,
   DropCursorExtension,
 } from '@rme-sdk/sdk/extensions'
-import { LineTableCellExtension, LineTableHeaderCellExtension } from './Table/table-extension'
+import {
+  LineTableCellExtension,
+  LineTableHeaderCellExtension,
+  tableCellExtraAttributes,
+} from './Table/table-extension'
 // import data from 'svgmoji/emoji.json'
 import { CountExtension } from '@rme-sdk/sdk/extensions/count'
 import { corePreset } from '@rme-sdk/sdk/presets/core'
@@ -192,9 +196,9 @@ function extensions(options: ExtensionsOptions): any[] {
     }),
     new LineHorizontalRuleExtension({}),
     new LineTableExtension({ resizable: false }),
-    new LineTableHeaderCellExtension(),
+    new LineTableHeaderCellExtension({ extraAttributes: tableCellExtraAttributes }),
     new LineTableRowExtension(),
-    new LineTableCellExtension(),
+    new LineTableCellExtension({ extraAttributes: tableCellExtraAttributes }),
     new FindExtension({
       decoration: { style: 'background-color: yellow; color: black' },
       activeDecoration: { style: 'background-color: orange; color: black' },

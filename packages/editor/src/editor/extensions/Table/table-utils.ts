@@ -2,10 +2,28 @@ import { findParentNodeOfType } from '@rme-sdk/sdk/core'
 import type { FindProsemirrorNodeResult, NodeWithPosition } from '@rme-sdk/sdk/core'
 import type { TableSchemaSpec } from '@rme-sdk/sdk/extensions/tables'
 import type { EditorState, NodeType, ResolvedPos, Selection } from '@rme-sdk/sdk/pm'
-import { TextSelection } from '@rme-sdk/sdk/pm/state'
-import type { Command } from '@rme-sdk/sdk/pm/state'
-import { TableMap } from '@rme-sdk/sdk/pm/tables'
-import type { CellSelection, Rect } from '@rme-sdk/sdk/pm/tables'
+import { selectAll } from '@rme-sdk/sdk/pm/commands'
+import type { Node as ProsemirrorNode } from '@rme-sdk/sdk/pm/model'
+import { AllSelection, TextSelection } from '@rme-sdk/sdk/pm/state'
+import type { Command, Transaction } from '@rme-sdk/sdk/pm/state'
+import { addRow, CellSelection, isCellSelection, selectedRect, TableMap } from '@rme-sdk/sdk/pm/tables'
+import type { Rect } from '@rme-sdk/sdk/pm/tables'
+
+export const TABLE_ALIGNMENTS = ['left', 'center', 'right'] as const
+
+export type TableAlignment = (typeof TABLE_ALIGNMENTS)[number]
+
+export function normalizeTableAlignment(value: unknown): TableAlignment | null {
+  if (typeof value !== 'string') return null
+
+  const normalized = value.trim().toLowerCase()
+  if (TABLE_ALIGNMENTS.includes(normalized as TableAlignment)) {
+    return normalized as TableAlignment
+  }
+
+  const styleMatch = normalized.match(/(?:^|;)\s*text-align\s*:\s*(left|center|right)\s*(?:;|$)/)
+  return styleMatch ? (styleMatch[1] as TableAlignment) : null
+}
 
 export function findTable(selection: EditorState | Selection | ResolvedPos) {
   return findParentNodeOfType({ selection, types: 'table' })
@@ -31,6 +49,182 @@ export const exitTable: Command = (state, dispatch) => {
   }
 
   return true
+}
+
+export function getTableColumnAlignments(
+  table: ProsemirrorNode,
+  map = TableMap.get(table),
+): (TableAlignment | null)[] {
+  const alignments: (TableAlignment | null)[] = []
+
+  for (let columnIndex = 0; columnIndex < map.width; columnIndex++) {
+    const cell = table.nodeAt(map.map[columnIndex])
+    alignments.push(normalizeTableAlignment(cell?.attrs.align))
+  }
+
+  return alignments
+}
+
+export function applyTableRowColumnAlignments(
+  tr: Transaction,
+  tableStart: number,
+  rowIndex: number,
+  alignments: readonly (TableAlignment | null)[],
+): Transaction {
+  const table = tr.doc.nodeAt(tableStart - 1)
+  if (!table) return tr
+
+  const map = TableMap.get(table)
+  const seenCells = new Set<number>()
+
+  for (let columnIndex = 0; columnIndex < map.width; columnIndex++) {
+    const cellPos = map.positionAt(rowIndex, columnIndex, table)
+    if (seenCells.has(cellPos)) continue
+    seenCells.add(cellPos)
+
+    const cell = table.nodeAt(cellPos)
+    const alignment = alignments[columnIndex] ?? null
+    if (!cell || normalizeTableAlignment(cell.attrs.align) === alignment) continue
+
+    tr.setNodeMarkup(tableStart + cellPos, undefined, {
+      ...cell.attrs,
+      align: alignment,
+    })
+  }
+
+  return tr
+}
+
+export function addTableRowWithAlignment(position: 'before' | 'after'): Command {
+  return (state, dispatch) => {
+    if (!findTable(state.selection)) return false
+
+    if (dispatch) {
+      const rect = selectedRect(state)
+      const rowIndex = position === 'before' ? rect.top : rect.bottom
+      const alignments = getTableColumnAlignments(rect.table, rect.map)
+      const tr = addRow(state.tr, rect, rowIndex)
+      applyTableRowColumnAlignments(tr, rect.tableStart, rowIndex, alignments)
+      dispatch(tr)
+    }
+
+    return true
+  }
+}
+
+export function setTableColumnAlignment(alignment: TableAlignment): Command {
+  return (state, dispatch) => {
+    if (!findTable(state.selection)) return false
+
+    const rect = selectedRect(state)
+    const cellPositions = rect.map.cellsInRect({
+      top: 0,
+      bottom: rect.map.height,
+      left: rect.left,
+      right: rect.right,
+    })
+    const changedCells = cellPositions.filter((cellPos) => {
+      const cell = rect.table.nodeAt(cellPos)
+      return cell && normalizeTableAlignment(cell.attrs.align) !== alignment
+    })
+
+    if (changedCells.length === 0) return false
+
+    if (dispatch) {
+      const tr = state.tr
+      for (const cellPos of changedCells) {
+        const cell = rect.table.nodeAt(cellPos)
+        if (!cell) continue
+        tr.setNodeMarkup(rect.tableStart + cellPos, undefined, {
+          ...cell.attrs,
+          align: alignment,
+        })
+      }
+      dispatch(tr)
+    }
+
+    return true
+  }
+}
+
+export function getSelectedTableColumnAlignment(
+  state: EditorState,
+): TableAlignment | null | undefined {
+  if (!findTable(state.selection)) return undefined
+
+  const rect = selectedRect(state)
+  const alignments = getTableColumnAlignments(rect.table, rect.map).slice(rect.left, rect.right)
+  const firstAlignment = alignments[0] ?? null
+  return alignments.every((alignment) => alignment === firstAlignment)
+    ? firstAlignment
+    : undefined
+}
+
+function selectCompleteTable(
+  state: EditorState,
+  dispatch: Parameters<Command>[1],
+  table: FindProsemirrorNodeResult,
+) {
+  if (dispatch) {
+    const map = TableMap.get(table.node)
+    const firstCellPos = map.map[0]
+    const lastCellPos = map.map[map.map.length - 1]
+    dispatch(
+      state.tr
+        .setSelection(
+          // Keep the primary range on the top-left cell. The custom copy shortcut
+          // uses execCommand, which can skip copying when the head cell is empty.
+          CellSelection.create(
+            state.doc,
+            table.start + lastCellPos,
+            table.start + firstCellPos,
+          ),
+        )
+        .scrollIntoView(),
+    )
+  }
+  return true
+}
+
+export const selectTableInStages: Command = (state, dispatch) => {
+  const { selection } = state
+  const table = findTable(selection)
+  if (!table) return false
+
+  if (!isCellSelection(selection)) {
+    const endTable = findTable(selection.$to)
+    if (!endTable || endTable.pos !== table.pos) return false
+  }
+
+  if (isCellSelection(selection) && getCellSelectionType(selection) === 'table') {
+    dispatch?.(
+      state.tr
+        .setSelection(new AllSelection(state.doc))
+        .scrollIntoView(),
+    )
+    return true
+  }
+
+  if (isCellSelection(selection)) {
+    return selectCompleteTable(state, dispatch, table)
+  }
+
+  const cell = findParentNodeOfType({
+    selection: selection.$head,
+    types: ['tableHeaderCell', 'tableCell'],
+  })
+  if (!cell) return false
+
+  dispatch?.(
+    state.tr
+      .setSelection(CellSelection.create(state.doc, cell.pos))
+      .scrollIntoView(),
+  )
+  return true
+}
+
+export const selectAllInStages: Command = (state, dispatch) => {
+  return selectTableInStages(state, dispatch) || selectAll(state, dispatch)
 }
 
 function findCellsInReat(
