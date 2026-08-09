@@ -169,7 +169,11 @@ export function GitHubSettingsPanel({ isAuthenticated, authLoading }: GitHubSett
             <EmptyText>No repositories found.</EmptyText>
           )}
 
-          <RepoList>
+          <RepoList
+            role='region'
+            aria-label='Authorized repositories'
+            tabIndex={repos.length > 0 ? 0 : undefined}
+          >
             {repos.map((repo) => (
               <RepoItem key={`${repo.installationId}:${repo.id}`}>
                 <RepoInfo>
@@ -488,6 +492,22 @@ const RepoList = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${rem(8)};
+  max-height: min(50vh, ${rem(360)});
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: ${rem(4)};
+  scrollbar-color: ${(props) => props.theme.scrollbarThumbColor}
+    ${(props) => props.theme.scrollbarTrackColor};
+  scrollbar-width: thin;
+
+  &:focus-visible {
+    outline: 2px solid ${(props) => props.theme.borderColorFocused};
+    outline-offset: ${rem(2)};
+  }
+
+  @media (max-width: 640px) {
+    max-height: min(52vh, ${rem(320)});
+  }
 `
 
 const RepoItem = styled.div`

@@ -22,12 +22,13 @@ function getInitials(value: string) {
 
 export default function PersonalSettingsPage() {
   const { loading: authLoading, isAuthenticated, logout, user } = useAuth(true)
-  const [isLoggingOut, setIsLoggingOut] = useState(false)
+  const [logoutState, setLogoutState] = useState<'idle' | 'confirming' | 'logging-out'>('idle')
+  const isLoggingOut = logoutState === 'logging-out'
 
-  const handleLogout = async () => {
+  const handleLogoutConfirm = async () => {
     if (isLoggingOut) return
 
-    setIsLoggingOut(true)
+    setLogoutState('logging-out')
     await logout()
   }
 
@@ -150,15 +151,38 @@ export default function PersonalSettingsPage() {
                     services.
                   </SessionDescription>
                 </SessionCopy>
-                <SignOutButton
-                  type='button'
-                  onClick={handleLogout}
-                  disabled={isLoggingOut}
-                  aria-busy={isLoggingOut}
-                >
-                  <i className={isLoggingOut ? 'ri-loader-4-line' : 'ri-logout-box-r-line'} />
-                  {isLoggingOut ? 'Signing out…' : 'Sign out'}
-                </SignOutButton>
+                {logoutState === 'idle' ? (
+                  <SignOutButton type='button' onClick={() => setLogoutState('confirming')}>
+                    <i className='ri-logout-box-r-line' aria-hidden='true' />
+                    Sign out
+                  </SignOutButton>
+                ) : (
+                  <LogoutConfirmation role='group' aria-label='Confirm sign out'>
+                    <LogoutConfirmText>Are you sure you want to sign out?</LogoutConfirmText>
+                    <LogoutConfirmActions>
+                      <CancelLogoutButton
+                        type='button'
+                        onClick={() => setLogoutState('idle')}
+                        disabled={isLoggingOut}
+                        autoFocus
+                      >
+                        Cancel
+                      </CancelLogoutButton>
+                      <SignOutButton
+                        type='button'
+                        onClick={handleLogoutConfirm}
+                        disabled={isLoggingOut}
+                        aria-busy={isLoggingOut}
+                      >
+                        <i
+                          className={isLoggingOut ? 'ri-loader-4-line' : 'ri-logout-box-r-line'}
+                          aria-hidden='true'
+                        />
+                        {isLoggingOut ? 'Signing out…' : 'Confirm sign out'}
+                      </SignOutButton>
+                    </LogoutConfirmActions>
+                  </LogoutConfirmation>
+                )}
               </SessionAction>
             </PanelBody>
           </ProfilePanel>
@@ -442,6 +466,60 @@ const SessionDescription = styled.p`
   color: ${(props) => props.theme.disabledFontColor};
   font-size: ${(props) => props.theme.fontXs};
   line-height: 1.5;
+`
+
+const LogoutConfirmation = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: ${rem(7)};
+
+  @media (max-width: 680px) {
+    align-items: stretch;
+  }
+`
+
+const LogoutConfirmText = styled.div`
+  color: ${(props) => props.theme.primaryFontColor};
+  font-size: ${(props) => props.theme.fontXs};
+  font-weight: 700;
+`
+
+const LogoutConfirmActions = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: ${rem(8)};
+`
+
+const CancelLogoutButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: ${rem(34)};
+  padding: 0 ${rem(14)};
+  background: ${(props) => props.theme.buttonBgColor};
+  color: ${(props) => props.theme.primaryFontColor};
+  border: 1px solid ${(props) => props.theme.borderColor};
+  border-radius: ${(props) => props.theme.smallBorderRadius};
+  font-size: ${(props) => props.theme.fontSm};
+  font-weight: 700;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: ${(props) => props.theme.hoverColor};
+    border-color: ${(props) => props.theme.borderColorFocused};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${(props) => props.theme.borderColorFocused};
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
 `
 
 const SignOutButton = styled.button`
