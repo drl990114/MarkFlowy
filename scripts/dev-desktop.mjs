@@ -10,6 +10,8 @@ const DESKTOP_DIR = resolve(ROOT_DIR, 'apps/desktop')
 const GRACE_PERIOD_MS = 2_000
 const FORCE_KILL_WAIT_MS = 500
 const ARTIFACT_WAIT_TIMEOUT_MS = 120_000
+const ARTIFACT_STABILITY_MS = 1_000
+const ARTIFACT_POLL_INTERVAL_MS = 100
 const isWindows = process.platform === 'win32'
 
 const requiredArtifacts = [
@@ -19,6 +21,11 @@ const requiredArtifacts = [
   'packages/interface/dist/index.mjs',
   'packages/theme/dist/index.mjs',
   'packages/zens/esm/index.js',
+  'packages/zens/esm/Box/index.js',
+  'packages/zens/esm/Dialog/styles.js',
+  'packages/zens/esm/Dropdown/styles.js',
+  'packages/zens/esm/Popover/styles.js',
+  'packages/zens/esm/Shortcut/styles.js',
 ].map((path) => resolve(ROOT_DIR, path))
 
 const require = createRequire(import.meta.url)
@@ -91,16 +98,37 @@ const waitForProcessesToExit = async (pids, timeoutMs) => {
   return remaining
 }
 
-const waitForRequiredArtifacts = async (isCancelled) => {
-  const deadline = Date.now() + ARTIFACT_WAIT_TIMEOUT_MS
-  let missingArtifacts = requiredArtifacts.filter((path) => !existsSync(path))
+export const waitForRequiredArtifacts = async (
+  isCancelled,
+  {
+    artifacts = requiredArtifacts,
+    pollIntervalMs = ARTIFACT_POLL_INTERVAL_MS,
+    stabilityMs = ARTIFACT_STABILITY_MS,
+    timeoutMs = ARTIFACT_WAIT_TIMEOUT_MS,
+  } = {},
+) => {
+  const deadline = Date.now() + timeoutMs
+  let readySince = null
+  let missingArtifacts = artifacts.filter((path) => !existsSync(path))
 
-  while (missingArtifacts.length > 0 && Date.now() < deadline && !isCancelled()) {
-    await delay(100)
-    missingArtifacts = requiredArtifacts.filter((path) => !existsSync(path))
+  while (Date.now() < deadline && !isCancelled()) {
+    missingArtifacts = artifacts.filter((path) => !existsSync(path))
+
+    if (missingArtifacts.length === 0) {
+      readySince ??= Date.now()
+      if (Date.now() - readySince >= stabilityMs) return
+    } else {
+      readySince = null
+    }
+
+    await delay(pollIntervalMs)
   }
 
-  if (isCancelled() || missingArtifacts.length === 0) return
+  if (isCancelled()) return
+
+  if (missingArtifacts.length === 0) {
+    throw new Error('Timed out waiting for Desktop dependency artifacts to stabilize')
+  }
 
   const relativePaths = missingArtifacts.map((path) => path.slice(ROOT_DIR.length + 1))
   throw new Error(`Timed out waiting for Desktop dependencies: ${relativePaths.join(', ')}`)

@@ -197,6 +197,9 @@
   },
   "settings": {
     "label": "設定",
+    "back_to_app": "アプリに戻る",
+    "search_placeholder": "設定を検索...",
+    "search_empty": "一致する設定がありません",
     "general": {
       "label": "一般",
       "app": {

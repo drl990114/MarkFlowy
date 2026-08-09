@@ -71,7 +71,6 @@ export function RecordKeysModal({ ref }: RecordKeysModalProps) {
       <Dialog.Content
         aria-describedby={undefined}
         closeLabel={t('common.close')}
-        onEscapeKeyDown={(event) => event.preventDefault()}
         onOpenAutoFocus={(event) => {
           event.preventDefault()
           modalRef.current?.focus()

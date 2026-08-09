@@ -189,6 +189,9 @@
   },
   "settings": {
     "label": "Configuration",
+    "back_to_app": "Retour à l’application",
+    "search_placeholder": "Rechercher dans les réglages...",
+    "search_empty": "Aucun réglage correspondant",
     "general": {
       "label": "général",
       "app": {

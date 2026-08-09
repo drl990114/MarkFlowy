@@ -192,6 +192,9 @@
   },
   "settings": {
     "label": "Preferencias",
+    "back_to_app": "Volver a la aplicación",
+    "search_placeholder": "Buscar preferencias...",
+    "search_empty": "No hay preferencias coincidentes",
     "general": {
       "label": "general",
       "app": {

@@ -52,6 +52,8 @@ const FileExcludeRowItem = memo<FileExcludeRowItemProps>(
         if (event.key === 'Enter') {
           event.currentTarget.blur()
         } else if (event.key === 'Escape') {
+          event.preventDefault()
+          event.stopPropagation()
           handleCancel()
         }
       },
@@ -125,6 +127,8 @@ const AddingExcludeRowItem = memo<AddingExcludeRowItemProps>(
         if (event.key === 'Enter') {
           event.currentTarget.blur()
         } else if (event.key === 'Escape') {
+          event.preventDefault()
+          event.stopPropagation()
           handleCancel()
         }
       },

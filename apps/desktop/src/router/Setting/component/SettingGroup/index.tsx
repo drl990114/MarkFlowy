@@ -44,18 +44,25 @@ const SettingGroup: React.FC<SettingGroupProps> = (props) => {
     return (
       <SettingGroupContainer>
         <div className='setting-group__title'>{t(group.i18nKey)}</div>
-        <div style={{ display: 'flex', justifyItems: 'flex-start', alignItems: 'center' }}>
+        <div
+          aria-label={t(group.i18nKey)}
+          role='tablist'
+          style={{ display: 'flex', justifyItems: 'flex-start', alignItems: 'center' }}
+        >
           {children.map((item, index) => (
             <TabItem
               $active={tabIndex === index}
+              aria-selected={tabIndex === index}
               key={childId(item, index)}
+              role='tab'
+              type='button'
               onClick={() => setSelectedChildId(childId(item, index))}
             >
               {t(item.i18nKey)}
             </TabItem>
           ))}
         </div>
-        {renderParams(children[tabIndex], { titleVisible: false })}
+        <div role='tabpanel'>{renderParams(children[tabIndex], { titleVisible: false })}</div>
       </SettingGroupContainer>
     )
   } else {
@@ -63,7 +70,13 @@ const SettingGroup: React.FC<SettingGroupProps> = (props) => {
   }
 }
 
-const TabItem = styled.div<{ $active: boolean }>`
+const TabItem = styled.button<{ $active: boolean }>`
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-top: 3px solid ${(props) =>
+    props.$active ? props.theme.accentColor : 'transparent'};
+  font-family: inherit;
   margin-right: 6px;
   margin-bottom: 20px;
   padding-top: 6px;
@@ -71,7 +84,11 @@ const TabItem = styled.div<{ $active: boolean }>`
   font-weight: 600;
   cursor: pointer;
   color: ${(props) => (props.$active ? props.theme.primaryFontColor : props.theme.labelFontColor)};
-  border-top: 3px solid ${(props) => (props.$active ? props.theme.accentColor : 'transparent')};
+
+  &:focus-visible {
+    outline: 2px solid ${(props) => props.theme.accentColor};
+    outline-offset: 2px;
+  }
 `
 
 interface SettingGroupProps {

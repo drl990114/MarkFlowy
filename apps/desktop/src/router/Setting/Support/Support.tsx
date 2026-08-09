@@ -1,19 +1,29 @@
 import { openUrl } from '@tauri-apps/plugin-opener'
+import { Button } from '@/components/ui/button'
 import { useTranslation } from '@/i18n'
 import styled from 'styled-components'
-import { Button } from 'zens'
 
 const Container = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  padding: 16px;
+  width: 100%;
+  padding: 2px 22px;
+  background-color: var(--mf-card);
+  border: 1px solid var(--mf-border);
+  border-radius: var(--mf-radius-lg);
+  box-sizing: border-box;
 `
 
 const SupportItem = styled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
+  padding: 18px 2px;
+  border-bottom: 1px solid var(--mf-border);
+
+  &:last-child {
+    border-bottom: 0;
+  }
 `
 
 const Title = styled.div`
@@ -49,8 +59,8 @@ export function Support() {
         <Title>{t('settings.support.github_star')}</Title>
         <Description>{t('settings.support.github_star_desc')}</Description>
         <ButtonContainer>
-          <Button onClick={handleOpenGithubStar}>
-            <i className="ri-github-fill" style={{ marginRight: '8px' }} />
+          <Button size='sm' onClick={handleOpenGithubStar}>
+            <i aria-hidden className='ri-github-fill' />
             GitHub Star
           </Button>
         </ButtonContainer>
@@ -60,8 +70,8 @@ export function Support() {
         <Title>{t('settings.support.github_issue')}</Title>
         <Description>{t('settings.support.github_issue_desc')}</Description>
         <ButtonContainer>
-          <Button onClick={handleOpenGithubIssue}>
-            <i className="ri-question-line" style={{ marginRight: '8px' }} />
+          <Button size='sm' variant='outline' onClick={handleOpenGithubIssue}>
+            <i aria-hidden className='ri-question-line' />
             {t('settings.support.github_issue')}
           </Button>
         </ButtonContainer>

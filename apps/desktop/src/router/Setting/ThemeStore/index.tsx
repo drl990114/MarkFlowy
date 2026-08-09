@@ -15,31 +15,45 @@ import themeData from '../../../../../../community-themes.json'
 const SectionTitle = styled.h3`
   font-size: 14px;
   font-weight: 600;
-  margin: 16px 0 12px;
-  color: ${(props) => props.theme.labelFontColor};
+  margin: 24px 0 10px;
+  color: var(--mf-muted-foreground);
+
+  &:first-child {
+    margin-top: 0;
+  }
+`
+
+const ThemeStoreContent = styled.div`
+  min-width: 0;
+  max-width: 100%;
 `
 
 const LocalThemeContainer = styled.div`
-  border: 1px solid ${(props) => props.theme.borderColor};
-  border-radius: 8px;
-  overflow: auto;
-  background-color: ${(props) => props.theme.bgColor};
+  width: 100%;
+  max-width: 100%;
   margin-bottom: 16px;
+  overflow: hidden;
+  background-color: var(--mf-card);
+  border: 1px solid var(--mf-border);
+  border-radius: var(--mf-radius-lg);
+  box-sizing: border-box;
 `
 
 const LocalThemeRow = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 12px;
-  border-bottom: 1px solid ${(props) => props.theme.borderColor};
+  gap: 16px;
+  min-width: 0;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--mf-border);
 
   &:last-child {
     border-bottom: none;
   }
 
   &:hover {
-    background-color: ${(props) => props.theme.tipsBgColor};
+    background-color: var(--mf-muted);
   }
 `
 
@@ -47,90 +61,119 @@ const LocalThemeInfo = styled.div`
   display: flex;
   align-items: center;
   gap: 12px;
+  min-width: 0;
 `
 
 const LocalThemeName = styled.span`
   font-size: 13px;
   font-weight: 500;
-  color: ${(props) => props.theme.labelFontColor};
+  color: var(--mf-foreground);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `
 
 const LocalThemeActions = styled.div`
   display: flex;
+  flex-shrink: 0;
   gap: 8px;
 `
 
 const TableContainer = styled.div`
-  border: 1px solid ${(props) => props.theme.borderColor};
-  border-radius: 8px;
-  overflow: auto;
-  background-color: ${(props) => props.theme.bgColor};
+  width: 100%;
+  max-width: 100%;
   margin-bottom: 16px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  background-color: var(--mf-card);
+  border: 1px solid var(--mf-border);
+  border-radius: var(--mf-radius-lg);
+  box-sizing: border-box;
 
   &::-webkit-scrollbar {
     height: 8px;
   }
 
   &::-webkit-scrollbar-track {
-    background: ${(props) => props.theme.tipsBgColor};
+    background: var(--mf-scrollbar-track);
     border-radius: 4px;
   }
 
   &::-webkit-scrollbar-thumb {
-    background: ${(props) => props.theme.borderColor};
+    background: var(--mf-scrollbar-thumb);
     border-radius: 4px;
   }
 `
 
 const Table = styled.table`
   width: 100%;
+  min-width: 680px;
   border-collapse: collapse;
-  font-size: ${(props) => props.theme.fontSm};
+  font-size: var(--mf-font-sm);
   table-layout: fixed;
 `
 
 const TableHead = styled.thead`
-  background-color: ${(props) => props.theme.tipsBgColor};
+  background-color: var(--mf-muted);
 `
 
 const TableRow = styled.tr`
-  border-bottom: 1px solid ${(props) => props.theme.borderColor};
+  border-bottom: 1px solid var(--mf-border);
+
+  &:last-child {
+    border-bottom: 0;
+  }
 
   &:hover {
-    background-color: ${(props) => props.theme.tipsBgColor};
+    background-color: var(--mf-muted);
   }
 `
 
 const TableCell = styled.th<{ width?: string }>`
-  padding: 8px 12px;
+  width: ${(props) => props.width || 'auto'};
+  padding: 10px 12px;
   text-align: left;
   font-weight: 600;
   white-space: nowrap;
   font-size: 13px;
-  width: ${(props) => props.width || 'auto'};
+  color: var(--mf-foreground);
+  box-sizing: border-box;
 `
 
 const TableDataCell = styled.td`
-  padding: 8px 12px;
+  padding: 10px 12px;
   text-align: left;
   font-size: 13px;
+  color: var(--mf-foreground);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `
 
 const Toolbar = styled.div`
-  padding: 8px 12px;
-  border-bottom: 1px solid ${(props) => props.theme.borderColor};
   display: flex;
   justify-content: flex-end;
   align-items: center;
+  min-height: 44px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--mf-border);
+  box-sizing: border-box;
 `
 
 const InstalledOnlyControl = styled.label`
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  color: ${(props) => props.theme.primaryFontColor};
+  color: var(--mf-foreground);
   cursor: pointer;
   font-size: 13px;
+`
+
+const EmptyState = styled.div`
+  padding: 20px 16px;
+  color: var(--mf-muted-foreground);
+  font-size: 13px;
+  text-align: center;
 `
 
 export interface ThemeItem {
@@ -291,7 +334,7 @@ export function ThemeStore() {
   })
 
   return (
-    <div>
+    <ThemeStoreContent>
       <SectionTitle>{t('settings.themeStore.local_css_files')}</SectionTitle>
       <LocalThemeContainer>
         <Toolbar>
@@ -300,9 +343,7 @@ export function ThemeStore() {
           </Button>
         </Toolbar>
         {localThemes.length === 0 ? (
-          <div style={{ padding: '16px', textAlign: 'center', color: '#888' }}>
-            {t('settings.themeStore.no_local_themes')}.
-          </div>
+          <EmptyState>{t('settings.themeStore.no_local_themes')}.</EmptyState>
         ) : (
           localThemes.map((localTheme) => (
             <LocalThemeRow key={localTheme.id}>
@@ -382,6 +423,6 @@ export function ThemeStore() {
           </tbody>
         </Table>
       </TableContainer>
-    </div>
+    </ThemeStoreContent>
   )
 }

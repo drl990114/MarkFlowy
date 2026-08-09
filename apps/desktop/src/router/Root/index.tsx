@@ -7,12 +7,10 @@ import StatusBar from '@/components/StatusBar'
 import { WorkspaceDialog } from '@/components/WorkspaceDialog'
 import { BookMarkDialog } from '@/extensions/bookmarks/BookMarkDialog'
 import useBookMarksStore from '@/extensions/bookmarks/useBookMarksStore'
-import { useCommandInit } from '@/hooks/useCommandInit'
-import { appInfoStoreSetup } from '@/services/app-info'
 import useLayoutStore from '@/stores/useLayoutStore'
-import { memo, useEffect, useRef } from 'react'
-import { Group, Panel, PanelImperativeHandle, useDefaultLayout } from 'react-resizable-panels'
-import { SettingDialog } from '../Setting/component/SettingDialog'
+import { memo, useCallback, useEffect, useRef } from 'react'
+import type { PanelImperativeHandle } from 'react-resizable-panels'
+import { Group, Panel, useDefaultLayout } from 'react-resizable-panels'
 import { StyleSeparator } from './styles'
 
 export const RESIZE_PANEL_STORAGE_KEY = 'root-resize-panel'
@@ -27,7 +25,7 @@ function Root() {
   const leftPanelRef = useRef<PanelImperativeHandle>(null)
   const rightPanelRef = useRef<PanelImperativeHandle>(null)
 
-  const toggleLeftPanelVisible = () => {
+  const toggleLeftPanelVisible = useCallback(() => {
     const panel = leftPanelRef.current
     if (panel) {
       if (panel.isCollapsed()) {
@@ -38,9 +36,9 @@ function Root() {
         setLeftBarVisible(false)
       }
     }
-  }
+  }, [setLeftBarVisible])
 
-  const toggleRightPanelVisible = () => {
+  const toggleRightPanelVisible = useCallback(() => {
     const panel = rightPanelRef.current
     if (panel) {
       if (panel.isCollapsed()) {
@@ -51,14 +49,11 @@ function Root() {
         setRightBarVisible(false)
       }
     }
-  }
+  }, [setRightBarVisible])
 
   const { getBookMarkList } = useBookMarksStore()
 
-  useCommandInit()
-
   useEffect(() => {
-    appInfoStoreSetup()
     const d1 = commandRegistry.registerCommand({
       id: 'app_toggleLeftsidebarVisible',
       handler: toggleLeftPanelVisible,
@@ -68,18 +63,21 @@ function Root() {
       handler: toggleRightPanelVisible,
     })
 
-    leftPanelRef.current?.isCollapsed() ? setLeftBarVisible(false) : setLeftBarVisible(true)
-    rightPanelRef.current?.isCollapsed() ? setRightBarVisible(false) : setRightBarVisible(true)
+    if (leftPanelRef.current?.isCollapsed()) setLeftBarVisible(false)
+    else setLeftBarVisible(true)
+
+    if (rightPanelRef.current?.isCollapsed()) setRightBarVisible(false)
+    else setRightBarVisible(true)
 
     return () => {
       d1.dispose()
       d2.dispose()
     }
-  }, [])
+  }, [setLeftBarVisible, setRightBarVisible, toggleLeftPanelVisible, toggleRightPanelVisible])
 
   useEffect(() => {
     getBookMarkList()
-  }, [])
+  }, [getBookMarkList])
 
   // Listen for live-preview fullscreen events from editor package
   // to adjust sidebar/statusbar z-index so fullscreen content is not obscured
@@ -142,11 +140,8 @@ function Root() {
       <div className='app-status-bar'>
         <StatusBar />
       </div>
-
-      {/* global dialogs */}
       <AppInfoDialog />
       <BookMarkDialog />
-      <SettingDialog />
       <WorkspaceDialog />
     </PageLayout>
   )

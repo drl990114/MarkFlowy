@@ -233,6 +233,9 @@
   },
   "settings": {
     "label": "Setting",
+    "back_to_app": "Back to app",
+    "search_placeholder": "Search settings...",
+    "search_empty": "No matching settings",
     "general": {
       "label": "general",
       "app": {

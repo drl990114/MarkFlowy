@@ -1,8 +1,15 @@
 import { spawn } from 'node:child_process'
 import assert from 'node:assert/strict'
+import { existsSync } from 'node:fs'
+import { mkdtemp, rm, unlink, writeFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { test } from 'node:test'
 
-import { terminateProcessTree } from './dev-desktop.mjs'
+import { terminateProcessTree, waitForRequiredArtifacts } from './dev-desktop.mjs'
+
+const delay = (milliseconds) =>
+  new Promise((resolveDelay) => setTimeout(resolveDelay, milliseconds))
 
 const isRunning = (pid) => {
   try {
@@ -67,3 +74,34 @@ test(
     assert.equal(isRunning(descendantPid), false)
   },
 )
+
+test('waitForRequiredArtifacts ignores stale outputs that are cleaned and rebuilt', async (t) => {
+  const artifactDirectory = await mkdtemp(join(tmpdir(), 'markflowy-dev-artifacts-'))
+  const entryArtifact = join(artifactDirectory, 'index.js')
+  const dependencyArtifact = join(artifactDirectory, 'styles.js')
+
+  t.after(() => rm(artifactDirectory, { force: true, recursive: true }))
+
+  await Promise.all([
+    writeFile(entryArtifact, 'stale entry'),
+    writeFile(dependencyArtifact, 'stale dependency'),
+  ])
+
+  const waitForArtifacts = waitForRequiredArtifacts(() => false, {
+    artifacts: [entryArtifact, dependencyArtifact],
+    pollIntervalMs: 5,
+    stabilityMs: 80,
+    timeoutMs: 1_000,
+  })
+
+  await delay(20)
+  await Promise.all([unlink(entryArtifact), unlink(dependencyArtifact)])
+  await delay(20)
+  await writeFile(entryArtifact, 'rebuilt entry')
+  await delay(20)
+  await writeFile(dependencyArtifact, 'rebuilt dependency')
+
+  await waitForArtifacts
+  assert.equal(existsSync(entryArtifact), true)
+  assert.equal(existsSync(dependencyArtifact), true)
+})
