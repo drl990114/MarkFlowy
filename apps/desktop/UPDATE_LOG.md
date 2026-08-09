@@ -1,5 +1,37 @@
 # UPDATE LOG
 
+## v0.86.0
+
+Features:
+
+- 🌟🌟🌟🌟🌟🌟 The web version is now officially launched, supporting online editing of GitHub repositories and local browser editing. We look forward to your use and feedback! https://www.markflowy.cc
+
+Improvements and Fixes:
+
+- Improved WYSIWYG Markdown handling for inline links and quotes containing only images, enhancing the display and selection reliability of source code markers surrounding inline images, links, autolinks, and other atomic inline content.
+
+- Fixed an issue that incorrectly inserted blank lines between adjacent items in unordered lists, ordered lists, and task lists when serializing Markdown in WYSIWYG mode.
+
+- Improved editor initialization and lifecycle stability, and fixed a module initialization issue that could prevent the editor from rendering.
+
+- Optimize the style and loading logic of image nodes.
+
+---
+
+特性：
+
+- 🌟🌟🌟🌟🌟🌟 Web 端正式上线，支持在线编辑 github repo 以及纯浏览器本地编辑，期待大家的使用与反馈！https://www.markflowy.cc/zh
+
+改进与修复：
+
+- 改进所见即所得模式对仅包含图片的行内链接和引用式链接的 Markdown 处理，提升行内图片、链接、自动链接及其他原子行内内容周围源码标记的显示与选区可靠性。
+
+- 修复所见即所得模式序列化 Markdown 时，在无序列表、有序列表和任务列表的相邻条目之间错误插入空行的问题。
+
+- 提升编辑器初始化与生命周期稳定性，并修复可能导致编辑器无法渲染的模块初始化问题。
+
+- 优化图片节点的样式和加载逻辑
+
 ## v0.85.2
 
 Features:
