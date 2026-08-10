@@ -1,5 +1,41 @@
 # UPDATE LOG
 
+## v0.87.0
+
+Features:
+
+- Added Zen Mode for distraction-free writing. With a document open, click the focus icon at the far right of the bottom status bar, or press Cmd/Ctrl + Shift + F. Zen Mode hides sidebars, tabs, toolbars, the status bar, and inactive split panes while preserving the current editor and layout state. Press the same shortcut or Escape twice to exit and restore the previous layout.
+
+- Redesigned Settings as a dedicated full-page experience with search, clearer category navigation, a more compact responsive layout, and improved accessibility. Use Back to App or press Escape to return to the editor.
+
+- Enhanced WYSIWYG table editing with header rows and left, center, and right column alignment. New tables now start with a header row, inserted rows retain column alignment, and Markdown alignment is preserved when opening and saving documents. Repeatedly pressing Cmd/Ctrl + A inside a table now selects the current cell, then the table, then the whole document.
+
+Improvements and Fixes:
+
+- Reorganized editor-group actions around the tab bar, making new-tab, split-editor, group, and sidebar controls easier to find and use in multi-pane layouts.
+
+- Improved copy, cut, and paste behavior around embedded code, HTML, Mermaid, and math editors. Cross-block selections now preserve their Markdown structure and block metadata more reliably, while selections contained inside an embedded editor continue to behave locally.
+
+- Fixed Preview images that could render as fallback text, especially remote SVG badges. Image loading now preserves source information, retries the original remote URL when needed, and uses a subtler non-blocking progress indicator.
+
+---
+
+特性：
+
+- 新增 Zen Mode（禅模式），提供更专注的写作空间。打开文档后，可点击底部状态栏最右侧的专注图标，或按下 Cmd/Ctrl + Shift + F 进入；进入后会隐藏侧栏、标签栏、工具栏、状态栏及非活动分屏，同时保留当前编辑器和布局状态。再次使用同一快捷键或连续按两次 Esc，即可退出并恢复此前布局。
+
+- 将设置改版为独立的全页面体验，新增设置搜索和更清晰的分类导航，并优化紧凑布局、响应式显示及无障碍体验。可点击“返回应用”或按下 Esc 回到编辑器。
+
+- 增强所见即所得表格编辑，支持表头行以及左对齐、居中和右对齐。新建表格默认包含表头，插入新行时会继承列对齐方式，打开和保存文档时也会保留 Markdown 表格对齐信息。在表格内连续按 Cmd/Ctrl + A，会依次选中当前单元格、整张表格和整个文档。
+
+改进与修复：
+
+- 重新整理标签栏附近的编辑器分组操作，让新建标签、拆分编辑器、分组操作及侧栏开关在多分屏布局中更易发现和使用。
+
+- 改进代码、HTML、Mermaid 和数学公式等嵌套编辑器周围的复制、剪切与粘贴行为。跨块选区现在能更可靠地保留 Markdown 结构和块元数据，嵌套编辑器内部的局部选区仍保持原有操作方式。
+
+- 修复预览图片可能显示为替代文字的问题，尤其是远程 SVG 徽章图片；现在会保留图片源信息，必要时回退到原始远程地址，并使用更轻量且不遮挡内容的加载进度提示。
+
 ## v0.86.0
 
 Features:
