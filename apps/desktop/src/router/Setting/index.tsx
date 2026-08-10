@@ -185,7 +185,7 @@ function Setting({ navigationRequest }: SettingProps) {
             className='h-7 w-full justify-start px-2 text-xs font-normal text-muted-foreground shadow-none'
             variant='ghost'
           >
-            <Link to='/'>
+            <Link className='no-underline' to='/'>
               <ArrowLeft aria-hidden className='size-4' />
               {t('settings.back_to_app')}
             </Link>
