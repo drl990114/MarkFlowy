@@ -22,8 +22,12 @@ class KeybindingRegistryImpl {
 
   formatKeybinding(commandId: string): string | undefined {
     const kb = this.keybindings.get(commandId)
-    if (!kb || kb.keyMap.length === 0) return undefined
-    return formatKeyMap(kb.keyMap)
+    return kb ? this.formatKeyMap(kb.keyMap) : undefined
+  }
+
+  formatKeyMap(keyMap: string[]): string | undefined {
+    if (keyMap.length === 0) return undefined
+    return formatKeyMap(keyMap)
   }
 
   updateKeybinding(commandId: string, newKeyMap: string[]): void {

@@ -2,49 +2,84 @@ import { useEditorStore } from '@/stores'
 import type { EditorLayoutNode } from '@/stores/useEditorStore'
 import { memo, type DragEvent, useCallback, useState } from 'react'
 import { Group, Panel, Separator } from 'react-resizable-panels'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 import Editor from './Editor'
 import EditorAreaTabs from './EditorAreaTabs'
 import EditorGroupToolbar from './EditorGroupToolbar'
 import { EmptyState } from './EmptyState'
 import { hasEditorTabDragData, readEditorTabDragData } from './editorDragData'
+import { containsEditorGroup } from './editorLayoutActionGroups'
 import { EditorPanel } from './styles'
 
 interface EditorLayoutViewProps {
+  activeGroupId?: string
+  leftSidebarGroupId?: string
   node: EditorLayoutNode
+  rightSidebarGroupId?: string
+  zenModeActive: boolean
 }
 
 function EditorLayoutView(props: EditorLayoutViewProps) {
-  const { node } = props
+  const {
+    activeGroupId,
+    leftSidebarGroupId,
+    node,
+    rightSidebarGroupId,
+    zenModeActive,
+  } = props
 
   if (node.type === 'leaf') {
-    return <EditorGroupPane groupId={node.id} />
+    return (
+      <EditorGroupPane
+        groupId={node.id}
+        showLeftSidebarToggle={node.id === leftSidebarGroupId}
+        showRightSidebarToggle={node.id === rightSidebarGroupId}
+        zenModeActive={zenModeActive}
+      />
+    )
   }
 
-  return <EditorBranch node={node} />
+  return (
+    <EditorBranch
+      activeGroupId={activeGroupId}
+      leftSidebarGroupId={leftSidebarGroupId}
+      node={node}
+      rightSidebarGroupId={rightSidebarGroupId}
+      zenModeActive={zenModeActive}
+    />
+  )
 }
 
-interface EditorBranchProps {
+type EditorBranchProps = EditorLayoutViewProps & {
   node: Extract<EditorLayoutNode, { type: 'branch' }>
 }
 
 const EditorBranch = memo((props: EditorBranchProps) => {
-  const { node } = props
+  const {
+    activeGroupId,
+    leftSidebarGroupId,
+    node,
+    rightSidebarGroupId,
+    zenModeActive,
+  } = props
   const setBranchSizes = useEditorStore((state) => state.setBranchSizes)
 
   const handleLayoutChanged = useCallback(
     (layout: Record<string, number>) => {
+      if (zenModeActive) return
+
       const sizes = node.children.map((child) => layout[getPanelId(child)])
       if (sizes.every((size) => typeof size === 'number')) {
         setBranchSizes(node.id, sizes)
       }
     },
-    [node.children, node.id, setBranchSizes],
+    [node.children, node.id, setBranchSizes, zenModeActive],
   )
 
   return (
     <SplitGroup
       id={`editor-split-${node.id}`}
+      disabled={zenModeActive}
       orientation={node.direction}
       defaultLayout={Object.fromEntries(
         node.children.map((child, index) => [getPanelId(child), node.sizes[index] || 100]),
@@ -56,7 +91,11 @@ const EditorBranch = memo((props: EditorBranchProps) => {
           child={child}
           index={index}
           key={child.id}
+          activeGroupId={activeGroupId}
+          leftSidebarGroupId={leftSidebarGroupId}
           node={node}
+          rightSidebarGroupId={rightSidebarGroupId}
+          zenModeActive={zenModeActive}
         />
       ))}
     </SplitGroup>
@@ -64,37 +103,66 @@ const EditorBranch = memo((props: EditorBranchProps) => {
 })
 
 interface PanelWithSeparatorProps {
+  activeGroupId?: string
   child: EditorLayoutNode
   index: number
+  leftSidebarGroupId?: string
   node: Extract<EditorLayoutNode, { type: 'branch' }>
+  rightSidebarGroupId?: string
+  zenModeActive: boolean
 }
 
 function PanelWithSeparator(props: PanelWithSeparatorProps) {
-  const { child, index, node } = props
+  const {
+    activeGroupId,
+    child,
+    index,
+    leftSidebarGroupId,
+    node,
+    rightSidebarGroupId,
+    zenModeActive,
+  } = props
   const showSeparator = index < node.children.length - 1
   const defaultSize = node.sizes[index] || 100 / node.children.length
+  const containsActiveGroup = containsEditorGroup(child, activeGroupId)
+  const hiddenInZen = zenModeActive && Boolean(activeGroupId) && !containsActiveGroup
+  const zenPath = zenModeActive && (!activeGroupId || containsActiveGroup)
 
   return (
     <>
-      <Panel
+      <SplitPanel
+        $hiddenInZen={hiddenInZen}
+        $zenPath={zenPath}
+        data-mf-zen-path={zenPath ? '' : undefined}
         id={getPanelId(child)}
         defaultSize={`${defaultSize}%`}
         minSize='180px'
         groupResizeBehavior='preserve-relative-size'
       >
-        <EditorLayoutView node={child} />
-      </Panel>
-      {showSeparator ? <SplitSeparator $orientation={node.direction} /> : null}
+        <EditorLayoutView
+          activeGroupId={activeGroupId}
+          leftSidebarGroupId={leftSidebarGroupId}
+          node={child}
+          rightSidebarGroupId={rightSidebarGroupId}
+          zenModeActive={zenModeActive}
+        />
+      </SplitPanel>
+      {showSeparator ? (
+        <SplitSeparator $orientation={node.direction} $zenMode={zenModeActive} />
+      ) : null}
     </>
   )
 }
 
 interface EditorGroupPaneProps {
   groupId: string
+  showLeftSidebarToggle: boolean
+  showRightSidebarToggle: boolean
+  zenModeActive: boolean
 }
 
 const EditorGroupPane = memo((props: EditorGroupPaneProps) => {
-  const { groupId } = props
+  const { groupId, showLeftSidebarToggle, showRightSidebarToggle, zenModeActive } = props
   const [isDropTarget, setIsDropTarget] = useState(false)
   const group = useEditorStore((state) => state.getGroup(groupId))
   const activeGroupId = useEditorStore((state) => state.activeGroupId)
@@ -152,6 +220,8 @@ const EditorGroupPane = memo((props: EditorGroupPaneProps) => {
     <GroupPane
       $active={isActiveGroup}
       $dropTarget={isDropTarget}
+      $zenMode={zenModeActive}
+      data-mf-zen-active={zenModeActive && isActiveGroup ? '' : undefined}
       onDragEnterCapture={handleDragEnter}
       onDragLeaveCapture={handleDragLeave}
       onDragOverCapture={handleDragOver}
@@ -159,7 +229,12 @@ const EditorGroupPane = memo((props: EditorGroupPaneProps) => {
       onFocusCapture={handleActivateGroup}
       onMouseDownCapture={handleActivateGroup}
     >
-      <EditorAreaTabs compact={isSplitMode} groupId={groupId} />
+      <EditorAreaTabs
+        compact={isSplitMode}
+        groupId={groupId}
+        showLeftSidebarToggle={showLeftSidebarToggle}
+        showRightSidebarToggle={showRightSidebarToggle}
+      />
       <EditorGroupToolbar editorId={activeFileId} />
       <EditorPanel id={`editor-panel-${groupId}`}>
         {group.opened.length === 0 ? (
@@ -192,10 +267,34 @@ const SplitGroup = styled(Group)`
   min-height: 0;
 `
 
-const SplitSeparator = styled(Separator)<{ $orientation: 'horizontal' | 'vertical' }>`
+const SplitPanel = styled(Panel)<{ $hiddenInZen: boolean; $zenPath: boolean }>`
+  ${(props) =>
+    props.$hiddenInZen &&
+    css`
+      display: none !important;
+    `}
+
+  ${(props) =>
+    props.$zenPath &&
+    css`
+      flex: 1 1 100% !important;
+      width: 100%;
+    `}
+`
+
+const SplitSeparator = styled(Separator)<{
+  $orientation: 'horizontal' | 'vertical'
+  $zenMode: boolean
+}>`
   flex: 0 0 auto;
   background-color: ${(props) => props.theme.borderColor};
   transition: background-color 0.16s ease;
+
+  ${(props) =>
+    props.$zenMode &&
+    css`
+      display: none !important;
+    `}
 
   ${(props) =>
     props.$orientation === 'horizontal'
@@ -218,7 +317,7 @@ const SplitSeparator = styled(Separator)<{ $orientation: 'horizontal' | 'vertica
   }
 `
 
-const GroupPane = styled.div<{ $active: boolean; $dropTarget: boolean }>`
+const GroupPane = styled.div<{ $active: boolean; $dropTarget: boolean; $zenMode: boolean }>`
   position: relative;
   display: flex;
   flex-direction: column;
@@ -229,6 +328,15 @@ const GroupPane = styled.div<{ $active: boolean; $dropTarget: boolean }>`
   overflow: hidden;
   outline: ${(props) => (props.$dropTarget ? `1px solid ${props.theme.accentColor}` : 'none')};
   outline-offset: -1px;
+
+  ${(props) =>
+    props.$zenMode &&
+    css`
+      > .editor-area-tabs,
+      > .editor-group-toolbar {
+        display: none;
+      }
+    `}
 
   &::after {
     content: '';

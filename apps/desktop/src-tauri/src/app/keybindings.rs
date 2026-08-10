@@ -44,6 +44,15 @@ impl Keybindings {
                 "always".to_string(),
             ),
             KeybindingInfo::new(
+                "app_toggleZenMode".to_string(),
+                vec![
+                    "CommandOrCtrl".to_string(),
+                    "Shift".to_string(),
+                    "f".to_string(),
+                ],
+                "always".to_string(),
+            ),
+            KeybindingInfo::new(
                 "app_save".to_string(),
                 vec!["CommandOrCtrl".to_string(), "s".to_string()],
                 "always".to_string(),
@@ -170,6 +179,21 @@ impl Keybindings {
         Self { cmds }
     }
 
+    fn merge_user_keybindings(mut defaults: Self, user_keybindings: Self) -> Self {
+        for user_cmd in user_keybindings.cmds {
+            if let Some(default_cmd) = defaults
+                .cmds
+                .iter_mut()
+                .find(|command| command.id == user_cmd.id)
+            {
+                // Only the editable key map is user-owned. Conditions continue to come from defaults.
+                default_cmd.key_map = user_cmd.key_map;
+            }
+        }
+
+        defaults
+    }
+
     pub fn update_keybinding(mut self, id: String, new_key_map: Vec<String>) -> bool {
         if let Some(cmd) = self.cmds.iter_mut().find(|cmd| cmd.id == id) {
             cmd.key_map = new_key_map;
@@ -185,26 +209,15 @@ impl Keybindings {
 
     pub fn read() -> Self {
         let default_key_bindings = Self::default();
-        
+
         if !Self::get_path().exists() {
             return default_key_bindings.write();
         }
-        
+
         match std::fs::read_to_string(Self::get_path()) {
             Ok(v) => {
                 if let Ok(user_keybindings) = serde_json::from_str::<Keybindings>(&v) {
-                    // 创建一个新的keybindings，基于默认配置
-                    let mut merged_keybindings = default_key_bindings.clone();
-                    
-                    // 只合并用户自定义的快捷键配置
-                    for user_cmd in user_keybindings.cmds {
-                        if let Some(default_cmd) = merged_keybindings.cmds.iter_mut().find(|cmd| cmd.id == user_cmd.id) {
-                            // 只更新key_map，保持其他字段（如when）使用默认值
-                            default_cmd.key_map = user_cmd.key_map;
-                        }
-                    }
-                    
-                    merged_keybindings
+                    Self::merge_user_keybindings(default_key_bindings, user_keybindings)
                 } else {
                     default_key_bindings
                 }
@@ -221,12 +234,14 @@ impl Keybindings {
 
         // 获取默认配置，用于过滤
         let default_keybindings = Self::default();
-        
+
         // 只保存与默认配置不同的快捷键
-        let user_defined_cmds: Vec<KeybindingInfo> = self.cmds
+        let user_defined_cmds: Vec<KeybindingInfo> = self
+            .cmds
             .iter()
             .filter_map(|cmd| {
-                if let Some(default_cmd) = default_keybindings.cmds.iter().find(|d| d.id == cmd.id) {
+                if let Some(default_cmd) = default_keybindings.cmds.iter().find(|d| d.id == cmd.id)
+                {
                     // 只保存key_map不同的配置
                     if cmd.key_map != default_cmd.key_map {
                         Some(KeybindingInfo {
@@ -244,7 +259,9 @@ impl Keybindings {
             })
             .collect();
 
-        let user_keybindings = Keybindings { cmds: user_defined_cmds };
+        let user_keybindings = Keybindings {
+            cmds: user_defined_cmds,
+        };
 
         if let Ok(v) = serde_json::to_string_pretty(&user_keybindings) {
             std::fs::write(path, v).unwrap_or_else(|_err| {
@@ -274,5 +291,51 @@ pub mod cmd {
     #[command]
     pub fn update_keybinding(id: String, new_key_map: Vec<String>) -> bool {
         Keybindings::read().update_keybinding(id, new_key_map)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{KeybindingInfo, Keybindings};
+
+    #[test]
+    fn zen_mode_has_an_editable_default_keybinding() {
+        let keybindings = Keybindings::default();
+        let zen_mode = keybindings
+            .cmds
+            .iter()
+            .find(|command| command.id == "app_toggleZenMode")
+            .expect("Zen Mode keybinding should be registered");
+
+        assert_eq!(zen_mode.key_map, ["CommandOrCtrl", "Shift", "f"]);
+        assert_eq!(zen_mode.when, "always");
+    }
+
+    #[test]
+    fn new_zen_mode_default_is_merged_with_existing_user_keybindings() {
+        let existing_user_keybindings = Keybindings {
+            cmds: vec![KeybindingInfo::new(
+                "app_toggleLeftsidebarVisible".to_string(),
+                vec!["Alt".to_string(), "l".to_string()],
+                "stale-condition".to_string(),
+            )],
+        };
+
+        let merged =
+            Keybindings::merge_user_keybindings(Keybindings::default(), existing_user_keybindings);
+        let left_sidebar = merged
+            .cmds
+            .iter()
+            .find(|command| command.id == "app_toggleLeftsidebarVisible")
+            .expect("existing user keybinding should remain available");
+        let zen_mode = merged
+            .cmds
+            .iter()
+            .find(|command| command.id == "app_toggleZenMode")
+            .expect("new default should be added during merge");
+
+        assert_eq!(left_sidebar.key_map, ["Alt", "l"]);
+        assert_eq!(left_sidebar.when, "always");
+        assert_eq!(zen_mode.key_map, ["CommandOrCtrl", "Shift", "f"]);
     }
 }

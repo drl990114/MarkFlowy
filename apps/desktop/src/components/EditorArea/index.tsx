@@ -8,13 +8,10 @@ import { useEditorStore } from '@/stores'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
 import { lazy, memo, Suspense, useEffect } from 'react'
-import { EmptyState } from './EmptyState'
 
 const EditorAreaContent = lazy(() => import('./EditorAreaContent'))
 
 function EditorArea() {
-  const openedCount = useEditorStore((state) => state.opened.length)
-
   useEffect(() => {
     const toggleEditorTypeDisposable = commandRegistry.registerCommand({
       id: EVENT.app_toggleEditorType,
@@ -98,10 +95,6 @@ function EditorArea() {
       splitEditorDownDisposable.dispose()
     }
   }, [])
-
-  if (openedCount === 0) {
-    return <EmptyState />
-  }
 
   return (
     <Suspense fallback={null}>

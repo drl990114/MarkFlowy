@@ -173,6 +173,8 @@
     },
     "editor_tab": {
       "close": "閉じる",
+      "previous": "前のタブ",
+      "next": "次のタブ",
       "close_others": "他を閉じる",
       "close_right": "右を閉じる",
       "close_all": "すべて閉じる",
@@ -546,6 +548,7 @@
       "app_openSetting": "設定ウィンドウを開く",
       "app_toggleLeftsidebarVisible": "左サイドバーを切り替えて表示",
       "app_toggleRightsidebarVisible": "表示される右サイドバーの切り替え",
+      "app_toggleZenMode": "Zenモードを切り替え",
       "app_save": "現在のアクティブな編集ファイルを保存する",
       "app_findReplaceEditor": "エディタで見つけて置き換える",
       "app_closeCurrentEditorTab": "現在のエディタタブを閉じる",
@@ -653,5 +656,10 @@
     "words": "ワード",
     "chars": "文字",
     "displaySettings": "表示設定"
+  },
+  "zenMode": {
+    "openFileFirst": "Zenモードに入るにはドキュメントを開いてください",
+    "exitHint": "Zenモード · {{shortcut}} または Esc を2回押して終了",
+    "shortcutFallback": "Cmd/Ctrl+Shift+F"
   }
 }

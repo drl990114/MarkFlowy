@@ -130,6 +130,11 @@
     "chars": "字符",
     "displaySettings": "显示设置"
   },
+  "zenMode": {
+    "openFileFirst": "请先打开文档再进入 Zen 模式",
+    "exitHint": "Zen 模式 · 按 {{shortcut}} 或连续按两次 Esc 退出",
+    "shortcutFallback": "Cmd/Ctrl+Shift+F"
+  },
   "file": {
     "untitled": "未命名",
     "not_found": "文件不存在",
@@ -179,6 +184,8 @@
     },
     "editor_tab": {
       "close": "关闭",
+      "previous": "上一个标签页",
+      "next": "下一个标签页",
       "close_others": "关闭其他",
       "close_right": "关闭右侧",
       "close_all": "关闭全部",
@@ -557,6 +564,7 @@
       "app_openSetting": "打开设置窗口",
       "app_toggleLeftsidebarVisible": "切换左侧边栏可见",
       "app_toggleRightsidebarVisible": "切换右侧边栏可见",
+      "app_toggleZenMode": "切换 Zen 模式",
       "app_save": "保存当前活动的编辑文件",
       "app_findReplaceEditor": "在编辑器中查找和替换",
       "app_closeCurrentEditorTab": "关闭当前编辑器选项卡",

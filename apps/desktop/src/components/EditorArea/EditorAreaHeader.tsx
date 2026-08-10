@@ -8,22 +8,26 @@ import { addEmptyEditorTab } from '@/services/editor-file'
 import { useEditorStore } from '@/stores'
 import { memo, useCallback, useRef } from 'react'
 import { useTranslation } from '@/i18n'
-import { MfIconButton } from '../ui-v2/Button'
 import { showContextMenu } from '../ui-v2/ContextMenu'
+import { EditorAreaActionButton, EditorAreaActionSeparator } from './EditorAreaAction'
+import { SidebarToggleButton } from './SidebarToggleButton'
 
 interface EditorAreaHeaderProps {
   groupId: string
+  showRightSidebarToggle?: boolean
 }
 
+const EMPTY_OPENED_IDS: string[] = []
+
 export const EditorAreaHeader = memo((props: EditorAreaHeaderProps) => {
-  const { groupId } = props
+  const { groupId, showRightSidebarToggle = false } = props
   const group = useEditorStore((state) => state.getGroup(groupId))
   const setActiveGroupId = useEditorStore((state) => state.setActiveGroupId)
   const closeAllFilesInGroup = useEditorStore((state) => state.closeAllFilesInGroup)
   const splitGroup = useEditorStore((state) => state.splitGroup)
   const { t } = useTranslation()
-  const ref = useRef<HTMLDivElement>(null)
-  const opened = group?.opened ?? []
+  const ref = useRef<HTMLButtonElement>(null)
+  const opened = group?.opened ?? EMPTY_OPENED_IDS
   const activeId = group?.activeId
   const curFile = activeId ? getFileObject(activeId) : undefined
 
@@ -32,7 +36,7 @@ export const EditorAreaHeader = memo((props: EditorAreaHeaderProps) => {
     addEmptyEditorTab()
   }, [groupId, setActiveGroupId])
 
-  const handleSplitRight = useCallback(() => {
+  const handleSplit = useCallback((direction: 'horizontal' | 'vertical') => {
     guardUnsavedFiles({
       fileIds: activeId ? [activeId] : [],
       labels: {
@@ -40,23 +44,14 @@ export const EditorAreaHeader = memo((props: EditorAreaHeaderProps) => {
         unsaved: t('action.continue_without_save'),
       },
       onContinue: () => {
-        splitGroup(groupId, 'horizontal', 'after')
+        splitGroup(groupId, direction, 'after')
       },
     })
   }, [activeId, groupId, splitGroup, t])
 
-  const handleSplitDown = useCallback(() => {
-    guardUnsavedFiles({
-      fileIds: activeId ? [activeId] : [],
-      labels: {
-        save: t('action.save_and_continue'),
-        unsaved: t('action.continue_without_save'),
-      },
-      onContinue: () => {
-        splitGroup(groupId, 'vertical', 'after')
-      },
-    })
-  }, [activeId, groupId, splitGroup, t])
+  const splitRightLabel = t('command.id_descriptions.app_splitEditorRight')
+  const splitDownLabel = t('command.id_descriptions.app_splitEditorDown')
+  const splitLabel = `${splitRightLabel} · Alt: ${splitDownLabel}`
 
   const handleClick = useCallback(() => {
     const rect = ref.current?.getBoundingClientRect()
@@ -90,39 +85,32 @@ export const EditorAreaHeader = memo((props: EditorAreaHeaderProps) => {
         },
       ],
     })
-  }, [closeAllFilesInGroup, curFile, groupId, opened, t])
+  }, [closeAllFilesInGroup, groupId, opened, t])
 
   return (
     <div className='editor-area-header'>
-      <MfIconButton
-        icon={'ri-add-line'}
-        rounded='smooth'
-        size='small'
+      <EditorAreaActionButton
+        icon='ri-add-line'
+        label={t('file.newTab')}
         onClick={handleAddTab}
       />
-      <MfIconButton
-        icon={'ri-layout-right-line'}
-        rounded='smooth'
-        size='small'
-        onClick={handleSplitRight}
-        tooltipProps={{ title: t('command.id_descriptions.app_splitEditorRight') }}
-      />
-      <MfIconButton
-        icon={'ri-layout-bottom-line'}
-        rounded='smooth'
-        size='small'
-        onClick={handleSplitDown}
-        tooltipProps={{ title: t('command.id_descriptions.app_splitEditorDown') }}
+      <EditorAreaActionButton
+        icon='ri-split-cells-horizontal'
+        label={splitLabel}
+        onClick={(event) => handleSplit(event.altKey ? 'vertical' : 'horizontal')}
       />
       {curFile ? (
+        <EditorAreaActionButton
+          ref={ref}
+          icon='ri-more-2-fill'
+          label={t('action.more')}
+          onClick={handleClick}
+        />
+      ) : null}
+      {showRightSidebarToggle ? (
         <>
-          <MfIconButton
-            iconRef={ref}
-            icon={'ri-more-2-fill'}
-            rounded='smooth'
-            size='small'
-            onClick={handleClick}
-          />
+          <EditorAreaActionSeparator />
+          <SidebarToggleButton side='right' />
         </>
       ) : null}
     </div>

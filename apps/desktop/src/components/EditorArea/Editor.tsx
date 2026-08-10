@@ -109,6 +109,7 @@ function Editor(props: EditorProps) {
       data-editor-id={id}
       data-editor-active={active ? 'true' : 'false'}
       style={visible ? undefined : { display: 'none' }}
+      tabIndex={-1}
     >
       <OverlayScrollbarsComponent
         options={overlayScrollbarsOptions}

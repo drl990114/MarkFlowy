@@ -168,6 +168,8 @@
     },
     "editor_tab": {
       "close": "Cerrar",
+      "previous": "Pestaña anterior",
+      "next": "Pestaña siguiente",
       "close_others": "Cerrar otros",
       "close_right": "Cerrar a la derecha",
       "close_all": "Cerrar todo",
@@ -546,6 +548,7 @@
       "app_openSetting": "Abrir la ventana de configuración",
       "app_toggleLeftsidebarVisible": "Alternar barra lateral izquierda visible",
       "app_toggleRightsidebarVisible": "Alternar barra lateral derecha visible",
+      "app_toggleZenMode": "Alternar modo Zen",
       "app_save": "Guardar archivo de edición activo actual",
       "app_findReplaceEditor": "Buscar y reemplazar en el editor",
       "app_closeCurrentEditorTab": "Cerrar la pestaña actual del editor",
@@ -653,5 +656,10 @@
     "words": "Palabras",
     "chars": "Caracteres",
     "displaySettings": "Configuración de pantalla"
+  },
+  "zenMode": {
+    "openFileFirst": "Abre un documento para entrar en el modo Zen",
+    "exitHint": "Modo Zen · Pulsa {{shortcut}} o Escape dos veces para salir",
+    "shortcutFallback": "Cmd/Ctrl+Mayús+F"
   }
 }

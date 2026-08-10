@@ -165,6 +165,8 @@
     },
     "editor_tab": {
       "close": "Fermer",
+      "previous": "Onglet précédent",
+      "next": "Onglet suivant",
       "close_others": "Fermer les autres",
       "close_right": "Fermer à droite",
       "close_all": "Tout fermer",
@@ -546,6 +548,7 @@
       "app_openSetting": "Ouvrir la fenêtre des paramètres",
       "app_toggleLeftsidebarVisible": "Basculer la barre latérale gauche visible",
       "app_toggleRightsidebarVisible": "Basculer la barre latérale droite visible",
+      "app_toggleZenMode": "Activer ou désactiver le mode Zen",
       "app_save": "Enregistrer le fichier de modification actif actuel",
       "app_findReplaceEditor": "Rechercher et remplacer dans l'éditeur",
       "app_closeCurrentEditorTab": "Fermer l'onglet de l'éditeur actuel",
@@ -653,5 +656,10 @@
     "words": "Mots",
     "chars": "Caractères",
     "displaySettings": "Paramètres d'affichage"
+  },
+  "zenMode": {
+    "openFileFirst": "Ouvrez un document pour activer le mode Zen",
+    "exitHint": "Mode Zen · Appuyez sur {{shortcut}} ou deux fois sur Échap pour quitter",
+    "shortcutFallback": "Cmd/Ctrl+Maj+F"
   }
 }

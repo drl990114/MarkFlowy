@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
 
 const useLayoutStore = create(
-  immer<EditorViewTypeStore>((set) => {
+  immer<LayoutStore>((set) => {
     return {
       leftBar: {
         visible: true,
@@ -10,6 +10,7 @@ const useLayoutStore = create(
       rightBar: {
         visible: true,
       },
+      zenModeActive: false,
 
       setLeftBarVisible: (visible: boolean) => {
         set((state) => {
@@ -21,7 +22,19 @@ const useLayoutStore = create(
         set((state) => {
           state.rightBar.visible = visible
         })
-      }
+      },
+
+      setZenModeActive: (active: boolean) => {
+        set((state) => {
+          state.zenModeActive = active
+        })
+      },
+
+      toggleZenMode: () => {
+        set((state) => {
+          state.zenModeActive = !state.zenModeActive
+        })
+      },
     }
   }),
 )
@@ -29,11 +42,14 @@ const useLayoutStore = create(
 type LayoutItem = {
   visible: boolean
 }
-type EditorViewTypeStore = {
+type LayoutStore = {
   leftBar: LayoutItem
   rightBar: LayoutItem
+  zenModeActive: boolean
   setLeftBarVisible: (visible: boolean) => void
   setRightBarVisible: (visible: boolean) => void
+  setZenModeActive: (active: boolean) => void
+  toggleZenMode: () => void
 }
 
 export default useLayoutStore

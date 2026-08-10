@@ -1,6 +1,9 @@
 import { useRemirrorContext } from '@rme-sdk/sdk/react'
 import type { CSSProperties, FC } from 'react'
 import React, { memo } from 'react'
+import { BLOCK_HANDLER_GUTTER_SIZE } from '../../const/block-handler-layout'
+
+const EDITOR_INLINE_PADDING = 'var(--rme-editor-inline-padding, clamp(16px, 5vw, 40px))'
 
 export interface ITextProps extends React.HTMLAttributes<HTMLDivElement> {
   children?: React.ReactNode
@@ -16,7 +19,9 @@ const Text: FC<ITextProps> = memo(({ children, ...props }) => {
   const style = Object.assign(
     {
       position: 'relative',
-      padding: '0 var(--rme-editor-inline-padding, clamp(16px, 5vw, 40px))',
+      paddingBlock: 0,
+      paddingLeft: `max(${BLOCK_HANDLER_GUTTER_SIZE}px, ${EDITOR_INLINE_PADDING})`,
+      paddingRight: EDITOR_INLINE_PADDING,
     },
     props.style,
   )

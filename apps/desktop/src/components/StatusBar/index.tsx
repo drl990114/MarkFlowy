@@ -1,9 +1,9 @@
 import { TaskList } from '../TaskList/TaskList'
 import { EditorCount } from './EditorCount'
-import { LayoutLeftBtn, LayoutRightBtn } from './LayoutBtn'
 import { CenterMenu } from './SettingBtn'
 import { Container, LeftContainer, RightContainer } from './styled'
 import { WorkspaceBtn } from './WorkspaceBtn'
+import { ZenModeButton } from './ZenModeButton'
 
 export default function StatusBar() {
   return (
@@ -15,8 +15,7 @@ export default function StatusBar() {
       <RightContainer>
         <TaskList />
         <EditorCount />
-        <LayoutLeftBtn />
-        <LayoutRightBtn />
+        <ZenModeButton />
       </RightContainer>
     </Container>
   )

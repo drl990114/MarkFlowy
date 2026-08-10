@@ -124,11 +124,15 @@ export const TabItem = styled.div<TabItemProps>`
   }
 
   .close {
+    width: 20px;
+    height: 20px;
+    padding: 0;
     cursor: pointer;
     opacity: 0;
   }
 
-  &:hover {
+  &:hover,
+  &:focus-within {
     .close {
       opacity: 1;
     }

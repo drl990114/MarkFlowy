@@ -6,13 +6,12 @@ import { useCommands, useExtension, useRemirrorContext } from '@rme-sdk/sdk/reac
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import styled, { createGlobalStyle } from 'styled-components'
 import { Dropdown, type DropdownMenuItem, type MenuItemType } from 'zens'
+import { BLOCK_HANDLER_INLINE_SIZE, getBlockHandlerLeft } from '../../const/block-handler-layout'
 import { nodeTypeIconMap } from '../../const'
-import { LineListExtension } from '../../extensions'
+import type { LineListExtension } from '../../extensions'
 import { createDraggingPreview, setViewDragging } from '../../extensions/NodeIndicator/drag-preview'
-import {
-  NodeIndicatorExtension,
-  NodeIndicatorState,
-} from '../../extensions/NodeIndicator/node-indicator-extension'
+import { NodeIndicatorExtension } from '../../extensions/NodeIndicator/node-indicator-extension'
+import type { NodeIndicatorState } from '../../extensions/NodeIndicator/node-indicator-extension'
 import { editorZIndex } from '../../theme/z-index'
 import { useBlockTypeOptions } from './useBlockTypeOptions'
 
@@ -143,7 +142,7 @@ export const BlockHandler = memo(({ getMenuBoundary }: BlockHandlerProps) => {
       const currentState = displayStateRef.current
       if (currentState?.rect) {
         setFixedPosition({
-          left: currentState.rect.left - 38,
+          left: getBlockHandlerLeft(currentState.rect.left),
           top: currentState.rect.top,
         })
       }
@@ -257,7 +256,7 @@ export const BlockHandler = memo(({ getMenuBoundary }: BlockHandlerProps) => {
       list: t('blockTypeGroup.list') || 'List',
       other: t('blockTypeGroup.other') || 'Other',
     }),
-    [t],
+    [],
   )
 
   const menuItems: DropdownMenuItem[] = useMemo(() => {
@@ -370,7 +369,7 @@ export const BlockHandler = memo(({ getMenuBoundary }: BlockHandlerProps) => {
         onDragEnd={handleDragEnd}
         style={{
           position: 'fixed',
-          left: `${fixedPosition?.left ?? (state?.rect?.left ? state.rect.left - 38 : 0)}px`,
+          left: `${fixedPosition?.left ?? (state?.rect?.left ? getBlockHandlerLeft(state.rect.left) : 0)}px`,
           top: `${fixedPosition?.top ?? state?.rect?.top ?? 0}px`,
         }}
       >
@@ -386,6 +385,8 @@ export const BlockHandler = memo(({ getMenuBoundary }: BlockHandlerProps) => {
 
 const Container = styled.div`
   display: flex;
+  width: ${BLOCK_HANDLER_INLINE_SIZE}px;
+  box-sizing: border-box;
   align-items: center;
   justify-content: center;
   padding: 0 2px;
