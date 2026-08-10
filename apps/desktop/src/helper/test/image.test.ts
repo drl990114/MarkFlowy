@@ -2,7 +2,10 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vites
 
 const mocks = vi.hoisted(() => ({
   convertFileSrc: vi.fn((path: string) => `asset://localhost/${path}`),
-  createObjectURL: vi.fn(() => 'blob:remote-image'),
+  createObjectURL: vi.fn((blob: Blob) => {
+    void blob
+    return 'blob:remote-image'
+  }),
   fetch: vi.fn(),
   invoke: vi.fn(),
   join: vi.fn(),
@@ -69,6 +72,7 @@ describe('getImageUrlInTauri', () => {
     const blob = new Blob(['image'], { type: 'image/jpeg' })
     mocks.fetch.mockResolvedValue({
       blob: vi.fn().mockResolvedValue(blob),
+      headers: new Headers({ 'content-type': 'image/jpeg' }),
       ok: true,
     })
 
@@ -87,6 +91,7 @@ describe('getImageUrlInTauri', () => {
     const blob = new Blob(['image'], { type: 'image/svg+xml' })
     mocks.fetch.mockResolvedValue({
       blob: vi.fn().mockResolvedValue(blob),
+      headers: new Headers({ 'content-type': 'image/svg+xml' }),
       ok: true,
     })
 
@@ -102,11 +107,28 @@ describe('getImageUrlInTauri', () => {
     expect(mocks.fetch).toHaveBeenCalledOnce()
   })
 
+  it('restores an SVG MIME type omitted by the Tauri response Blob', async () => {
+    const source = 'https://img.shields.io/badge/build-passing-brightgreen.svg'
+    const untypedBlob = new Blob(['<svg xmlns="http://www.w3.org/2000/svg"/>'])
+    mocks.fetch.mockResolvedValue({
+      blob: vi.fn().mockResolvedValue(untypedBlob),
+      headers: new Headers({ 'content-type': 'image/svg+xml;charset=utf-8' }),
+      ok: true,
+    })
+
+    await expect(getImageUrlInTauri(source)).resolves.toBe('blob:remote-image')
+
+    const renderedBlob = mocks.createObjectURL.mock.calls[0]?.[0]
+    expect(renderedBlob).not.toBe(untypedBlob)
+    expect(renderedBlob?.type).toBe('image/svg+xml')
+  })
+
   it('normalizes protocol-relative URLs before loading them through Tauri HTTP', async () => {
     const source = '//img.shields.io/badge/Rust-1.94-000000?style=flat-square'
     const expectedProtocol = location.protocol === 'http:' ? 'http:' : 'https:'
     mocks.fetch.mockResolvedValue({
       blob: vi.fn().mockResolvedValue(new Blob(['image'])),
+      headers: new Headers({ 'content-type': 'image/png' }),
       ok: true,
     })
 

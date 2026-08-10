@@ -59,7 +59,20 @@ const getRemoteImageObjectUrl = async (url: string): Promise<string> => {
       throw new Error(`Failed to fetch remote image: ${response.status}`)
     }
 
-    return URL.createObjectURL(await response.blob())
+    // plugin-http exposes native response headers separately from the browser
+    // Response internals, so WebKit can receive an untyped Blob for remote SVGs.
+    const responseBlob = await response.blob()
+    const declaredContentType = response.headers
+      .get('content-type')
+      ?.split(';', 1)[0]
+      .trim()
+      .toLowerCase()
+    const imageBlob =
+      responseBlob.type || !declaredContentType?.startsWith('image/')
+        ? responseBlob
+        : new Blob([responseBlob], { type: declaredContentType })
+
+    return URL.createObjectURL(imageBlob)
   })()
 
   remoteImageObjectUrlCache.set(url, objectUrlPromise)

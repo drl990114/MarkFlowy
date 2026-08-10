@@ -214,6 +214,10 @@ describe('Preview', () => {
     expect(image?.getAttribute('decoding')).toBe('async')
     expect(image?.referrerPolicy).toBe('no-referrer')
     expect(image?.getAttribute('aria-busy')).toBe('true')
+    const imageProgress = container.querySelector('.mf-preview-image-progress')
+    expect(imageProgress?.getAttribute('aria-label')).toBe('common.loading')
+    expect(imageProgress?.textContent).toBe('')
+    expect(imageProgress?.querySelector('.mf-preview-image-progress-track')).not.toBeNull()
     act(() => image?.dispatchEvent(new Event('load')))
     expect(image?.classList.contains('mf-preview-image-loading')).toBe(true)
     const removeAttribute = vi.spyOn(image as HTMLImageElement, 'removeAttribute')
@@ -247,6 +251,41 @@ describe('Preview', () => {
     expect(image?.getAttribute('loading')).toBe('lazy')
     expect(image?.getAttribute('decoding')).toBe('async')
     expect(image?.referrerPolicy).toBe('no-referrer')
+  })
+
+  test('falls back to the encoded remote source when its resolved Blob cannot render', async () => {
+    const source =
+      'https://img.shields.io/github/commit-activity/m/drl990114/MarkFlowy?color=%23ff9900'
+    const resolveImage = vi.fn(async () => 'blob:preview-badge')
+    harness.renderPreview.mockResolvedValue({
+      html: [
+        '<img alt="Commit Activity"',
+        ' src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs="',
+        ' data-mf-preview-image-id="image-1">',
+      ].join(''),
+      imageSources: new Map([['image-1', source]]),
+    })
+
+    act(() =>
+      root.render(
+        <Preview
+          doc={createDoc()}
+          delegateOptions={{ handleViewImgSrcUrl: resolveImage }}
+        />,
+      ),
+    )
+    await flushScheduledRender()
+
+    const image = container.querySelector('img')
+    expect(image?.getAttribute('src')).toBe('blob:preview-badge')
+
+    act(() => image?.dispatchEvent(new Event('error')))
+    expect(image?.getAttribute('src')).toBe(source)
+    expect(image?.classList.contains('mf-preview-image-loading')).toBe(true)
+
+    act(() => image?.dispatchEvent(new Event('load')))
+    expect(image?.getAttribute('src')).toBe(source)
+    expect(image?.classList.contains('mf-preview-image-loading')).toBe(false)
   })
 
   test('finishes loading when the rendered document is empty', async () => {

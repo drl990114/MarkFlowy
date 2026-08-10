@@ -607,7 +607,7 @@ export const WysiwygThemeWrapper = styled.div
 
   & .mf-preview-image-progress {
     position: sticky;
-    top: 12px;
+    top: 10px;
     z-index: 1;
     height: 0;
     display: flex;
@@ -616,28 +616,26 @@ export const WysiwygThemeWrapper = styled.div
     pointer-events: none;
   }
 
-  & .mf-preview-image-progress > span {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    padding: 6px 10px;
-    border: 1px solid ${(props) => props.theme.borderColor};
+  & .mf-preview-image-progress-track {
+    position: relative;
+    display: block;
+    width: 36px;
+    height: 3px;
+    overflow: hidden;
     border-radius: 999px;
-    background-color: ${(props) => props.theme.tipsBgColor};
-    color: ${(props) => props.theme.labelFontColor};
-    box-shadow: 0 4px 12px ${(props) => props.theme.boxShadowColor};
-    font-size: 0.8em;
-    line-height: 1;
-    opacity: 1;
-    transform: translateY(0);
-    transition:
-      opacity 160ms cubic-bezier(0.23, 1, 0.32, 1),
-      transform 160ms cubic-bezier(0.23, 1, 0.32, 1);
+    background-color: ${(props) => props.theme.borderColor};
+    opacity: 0.72;
+  }
 
-    @starting-style {
-      opacity: 0;
-      transform: translateY(-4px);
-    }
+  & .mf-preview-image-progress-track::after {
+    position: absolute;
+    inset: 0;
+    width: 45%;
+    border-radius: inherit;
+    background-color: ${(props) => props.theme.accentColor};
+    content: '';
+    transform: translateX(-120%);
+    animation: mf-preview-image-progress 780ms linear infinite;
   }
 
   & .mf-preview-image-loading {
@@ -718,6 +716,12 @@ export const WysiwygThemeWrapper = styled.div
     }
   }
 
+  @keyframes mf-preview-image-progress {
+    to {
+      transform: translateX(260%);
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     & .mf-preview-loading-spinner {
       animation: mf-preview-loading-pulse 1.4s ease-in-out infinite;
@@ -728,13 +732,10 @@ export const WysiwygThemeWrapper = styled.div
       opacity: 0.55;
     }
 
-    & .mf-preview-image-progress > span {
+    & .mf-preview-image-progress-track::after {
+      width: 100%;
+      animation: mf-preview-loading-pulse 1.4s ease-in-out infinite;
       transform: none;
-      transition: opacity 120ms ease;
-
-      @starting-style {
-        transform: none;
-      }
     }
 
     & .mf-preview-image-loading {

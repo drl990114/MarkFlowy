@@ -47,6 +47,7 @@ const defaultLinkClickHandler: LinkClickHandler = (href: string) => {
 const mermaidFencePattern = /^ {0,3}(?:`{3,}|~{3,})[\t ]*mermaid(?:[\t ].*)?$/im
 const previewSkeletonLineWidths = ['42%', '88%', '76%', '94%', '67%', '82%']
 const useIsomorphicLayoutEffect = typeof document === 'undefined' ? useEffect : useLayoutEffect
+const remoteImageSourcePattern = /^(?:https?:)?\/\//i
 
 function createImageHydrationController(): PreviewImageHydrationController {
   let isSettled = false
@@ -139,6 +140,7 @@ function hydratePreviewImages(
   }
 
   images.forEach((image) => {
+    let fallbackSource: string | null = null
     applyImageRequestPolicy(image)
     image.setAttribute('decoding', 'async')
 
@@ -180,7 +182,17 @@ function hydratePreviewImages(
       }
     }
     const handleLoad = () => settleImage(true)
-    const handleError = () => settleImage(false)
+    const handleError = () => {
+      const nextSource = fallbackSource
+      fallbackSource = null
+      if (nextSource && active && container.contains(image)) {
+        image.addEventListener('error', handleError, { once: true })
+        image.setAttribute('src', nextSource)
+        return
+      }
+
+      settleImage(false)
+    }
 
     void Promise.resolve()
       .then(() => resolveImage(source))
@@ -210,6 +222,8 @@ function hydratePreviewImages(
           image.removeEventListener('load', handleLoad)
           image.removeEventListener('error', handleError)
         })
+        fallbackSource =
+          resolvedSource !== source && remoteImageSourcePattern.test(source) ? source : null
         image.setAttribute('src', resolvedSource)
         settleResolution()
       })
@@ -432,11 +446,9 @@ export const Preview: React.FC<PreviewProps> = (props) => {
           className='mf-preview-image-progress'
           role='status'
           aria-live='polite'
+          aria-label={t('common.loading')}
         >
-          <span>
-            <i className='mf-preview-loading-spinner' aria-hidden='true' />
-            {t('common.loading')}
-          </span>
+          <span className='mf-preview-image-progress-track' aria-hidden='true' />
         </div>
       ) : null}
       <div
