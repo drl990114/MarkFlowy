@@ -30,6 +30,7 @@ import { FindExtension } from './Find/find-extension'
 import { HandleInputExtension } from './HandleInput/handle-input-extension'
 import { LineHardBreakExtension } from './HardBreak'
 import { LineHeadingExtension } from './Heading'
+import { HeadingNumberingExtension } from './HeadingNumbering'
 import { LineHorizontalRuleExtension } from './HorizontalRule'
 import { HtmlBrExtension } from './HtmlBr/br-extension'
 import { LineHtmlBlockExtension } from './HtmlNode/html-block-extension'
@@ -67,6 +68,7 @@ import {
 
 export * from './Image'
 export * from './List'
+export * from './HeadingNumbering'
 export type { LivePreviewBlockBehavior } from './LivePreviewBlock'
 
 export type ImageInsertAttributes = {
@@ -185,6 +187,7 @@ function extensions(options: ExtensionsOptions): any[] {
     new LineHardBreakExtension(),
     new LineBlockquoteExtension(),
     new LineHeadingExtension({}),
+    new HeadingNumberingExtension(),
     new LineListExtension(),
     new LineCodeMirrorExtension({
       extensions: [

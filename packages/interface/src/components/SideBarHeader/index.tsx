@@ -29,6 +29,7 @@ const SideBarHeader: FC<SideBarHeaderProps> = (props) => {
     <Container>
       <small className='sidebar-header__name'>{props.name}</small>
       <div className='flex'>
+        {props.actions}
         {props.rightNavItems?.map((item) => {
           return item.tooltip ? (
             <Tooltip {...item.tooltip} key={item.key}>
@@ -60,6 +61,7 @@ export interface RightNavItem {
 }
 
 export interface SideBarHeaderProps {
+  actions?: React.ReactNode
   name: React.ReactNode
   onRightNavItemClick?: (item: RightNavItem) => void
   rightNavItems?: RightNavItem[]

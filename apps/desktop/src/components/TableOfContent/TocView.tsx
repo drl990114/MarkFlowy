@@ -13,11 +13,21 @@ import {
 import type { Node as ProseMirrorNode } from 'prosemirror-model'
 import { TextSelection } from 'prosemirror-state'
 import type { EditorView } from 'prosemirror-view'
+import type { ComponentProps, ComponentType, ReactNode } from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import * as Rme from 'rme'
 import { EditorViewType, extractMatches } from 'rme'
 import { sourceCodeCodemirrorViewMap } from '../EditorArea/TextEditor'
 import SideBarHeader from '../SideBar/SideBarHeader'
+import { HeadingNumberingButton } from './HeadingNumberingButton'
 import { TocViewContainer } from './styles'
+
+type TocSideBarHeaderProps = ComponentProps<typeof SideBarHeader> & {
+  actions?: ReactNode
+}
+
+// packages/interface/dist is generated and may not yet include the source-level actions prop.
+const TocSideBarHeader = SideBarHeader as ComponentType<TocSideBarHeaderProps>
 
 type HeadingInfo = {
   node: ProseMirrorNode
@@ -37,6 +47,29 @@ type SourceHeadingInfo = {
 type HeadingViewportCoords = {
   top: number
   bottom?: number
+}
+
+const getHeadingChapterData = (
+  headings: readonly { depth: number; value: string }[],
+): { chapter?: string; value: string }[] => {
+  const { analyzeHeadingNumbering } = Rme as typeof Rme & {
+    analyzeHeadingNumbering: (inputs: readonly { level: number; text: string }[]) => {
+      complete: boolean
+      entries: { prefix: string | null; title: string }[]
+    }
+  }
+  const analysis = analyzeHeadingNumbering(
+    headings.map((heading) => ({ level: heading.depth, text: heading.value })),
+  )
+
+  if (!analysis.complete) {
+    return headings.map((heading) => ({ value: heading.value }))
+  }
+
+  return analysis.entries.map((entry) => ({
+    chapter: entry.prefix ?? undefined,
+    value: entry.title,
+  }))
 }
 
 const getAllHeadings = (doc: ProseMirrorNode): HeadingInfo[] => {
@@ -177,6 +210,10 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
   const rafRef = useRef<number | null>(null)
   const scheduleActiveHeadingUpdateRef = useRef<() => void>(() => {})
   const activeId = useEditorStore((state) => state.activeId)
+  const editorCtx = useEditorStore((state) => state.editorCtxMap.get(activeId ?? ''))
+  const activeViewType = useEditorViewTypeStore((state) =>
+    activeId ? state.editorViewTypeMap.get(activeId) : undefined,
+  )
 
   const calculateActiveHeadingId = useCallback(() => {
     const activeId = useEditorStore.getState().activeId
@@ -298,6 +335,7 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
             })
 
             sourceHeadingsRef.current = sourceHeadings
+            const chapterData = getHeadingChapterData(sourceHeadings)
             const nextScrollEl = resolveSourceScrollEl(activeId, codemirrorView.cm.scrollDOM)
             sourceScrollElRef.current = nextScrollEl
             setSourceScrollEl(nextScrollEl)
@@ -305,10 +343,11 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
             wysiwygScrollElRef.current = null
             setWysiwygScrollEl(null)
 
-            const headings: IHeadingData[] = sourceHeadings.map((heading) => {
+            const headings: IHeadingData[] = sourceHeadings.map((heading, index) => {
               return {
                 depth: heading.depth,
-                value: heading.value,
+                value: chapterData[index]?.value ?? heading.value,
+                chapter: chapterData[index]?.chapter,
                 id: heading.id,
                 htmlNode: null,
                 onClick: () => {
@@ -348,15 +387,19 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
             setEditorPanelEl(editorPanelEl)
 
             const headingInfos = getAllHeadings(editorView.state.doc)
+            const chapterData = getHeadingChapterData(
+              headingInfos.map((heading) => ({ depth: heading.level, value: heading.text })),
+            )
             wysiwygHeadingsRef.current = headingInfos
             sourceHeadingsRef.current = []
             sourceScrollElRef.current = null
             setSourceScrollEl(null)
 
-            const headings = headingInfos.map((heading) => {
+            const headings = headingInfos.map((heading, index) => {
               return {
                 depth: heading.level,
-                value: heading.text,
+                value: chapterData[index]?.value ?? heading.text,
+                chapter: chapterData[index]?.chapter,
                 id: heading.id,
                 htmlNode: null,
                 onClick: () => {
@@ -461,7 +504,14 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
 
   return (
     <TocViewContainer variant={variant}>
-      <SideBarHeader name={t('sidebar.table_of_contents')} />
+      <TocSideBarHeader
+        actions={
+          editorCtx && activeViewType === EditorViewType.WYSIWYG ? (
+            <HeadingNumberingButton editorCtx={editorCtx} />
+          ) : null
+        }
+        name={t('sidebar.table_of_contents')}
+      />
       <div style={{ height: 'calc(100% - 40px)', boxSizing: 'border-box' }}>
         <TableOfContents
           ref={tocRef}

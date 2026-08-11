@@ -110,6 +110,7 @@
     "explorer": "explorer",
     "search": "chercher",
     "table_of_contents": "sommaire",
+    "heading_numbering": "Activer la numérotation des titres",
     "no_heading_lines": "Aucune ligne de titre trouvée"
   },
   "bookmarks": {

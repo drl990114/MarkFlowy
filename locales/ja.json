@@ -113,6 +113,7 @@
     "explorer": "エクスプローラー",
     "search": "検索",
     "table_of_contents": "目次",
+    "heading_numbering": "見出し番号を切り替え",
     "no_heading_lines": "見出し行が見つかりません"
   },
   "bookmarks": {

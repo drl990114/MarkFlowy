@@ -113,6 +113,7 @@
     "explorer": "explorer",
     "search": "search",
     "table_of_contents": "Table of Contents",
+    "heading_numbering": "Toggle heading numbering",
     "no_heading_lines": "No heading lines found"
   },
   "bookmarks": {

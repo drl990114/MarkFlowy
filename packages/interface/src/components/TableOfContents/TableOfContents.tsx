@@ -57,6 +57,11 @@ export interface TableOfContentsProps {
    * Force active heading id when provided
    */
   activeId?: string;
+  /**
+   * Whether to render chapter text before each heading title.
+   * @default true
+   */
+  showChapter?: boolean;
 }
 
 const TableOfContents = forwardRef<TableOfContentsRef, TableOfContentsProps>((props, ref) => {
@@ -71,6 +76,7 @@ const TableOfContents = forwardRef<TableOfContentsRef, TableOfContentsProps>((pr
     toolbar,
     toolbarFixed = false,
     activeId,
+    showChapter = true,
     Empty = null,
   } = props;
   const [headings, setHeadings] = useState(headingsData);
@@ -310,7 +316,9 @@ const TableOfContents = forwardRef<TableOfContentsRef, TableOfContentsProps>((pr
               }
             }}
           >
-            <span className="toc-link__chapter">{h.chapter}</span>
+            {showChapter && h.h.chapter !== null ? (
+              <span className="toc-link__chapter">{h.h.chapter ?? h.chapter}</span>
+            ) : null}
             <span className="toc-link__title">{h.title}</span>
           </TocLink>
         </TocListItem>

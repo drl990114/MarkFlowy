@@ -9,6 +9,11 @@ export enum TraverseResult {
 export interface IHeadingData {
   depth: number; // h2 => 2, h3 => 3, etc
   value: string;
+  /**
+   * Optional chapter text supplied by the heading source.
+   * Use null to hide the chapter for this heading.
+   */
+  chapter?: string | null;
   id: string;
   htmlNode: HTMLElement | null;
   onClick?: (headingItem: IHeadingData) => void;
@@ -70,6 +75,10 @@ export class HeadingTree {
           }
           diff--;
         }
+      }
+
+      if (typeof node.h.chapter === 'string') {
+        node.chapter = node.h.chapter;
       }
 
       nodeStack.push(node);
