@@ -656,6 +656,8 @@
   "statusBar": {
     "words": "ワード",
     "chars": "文字",
+    "pureChars": "純文字",
+    "pureCharsOption": "純文字（空白・改行を除く）",
     "displaySettings": "表示設定"
   },
   "zenMode": {

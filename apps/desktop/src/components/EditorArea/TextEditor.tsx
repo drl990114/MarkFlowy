@@ -1,6 +1,7 @@
 import { commandRegistry } from '@/commands'
 import { EVENT } from '@/constants'
 import { clipboardRead } from '@/helper/clipboard'
+import { countNonWhitespaceCharacters } from '@/helper/editorCounter'
 import bus from '@/helper/eventBus'
 import {
   deleteFileObject,
@@ -1821,6 +1822,9 @@ function TextEditor(props: TextEditorProps) {
             id,
             data: {
               characterCount: helpers.getCharacterCount(),
+              nonWhitespaceCharacterCount: countNonWhitespaceCharacters(
+                params.state.doc.textContent,
+              ),
               wordCount: helpers.getWordCount(),
             },
           })

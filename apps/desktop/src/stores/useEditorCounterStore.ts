@@ -41,5 +41,6 @@ type EditorCounterMap = Record<string, EditorCounterData>
 
 interface EditorCounterData {
   characterCount: number
+  nonWhitespaceCharacterCount: number
   wordCount: number
 }

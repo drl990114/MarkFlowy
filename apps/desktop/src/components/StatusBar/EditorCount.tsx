@@ -49,7 +49,7 @@ const RadioOption = styled.label`
   cursor: pointer;
 `
 
-type DisplayMode = 'words' | 'chars'
+type DisplayMode = 'words' | 'chars' | 'pureChars'
 
 export const EditorCount = () => {
   const { t } = useTranslation()
@@ -68,7 +68,7 @@ export const EditorCount = () => {
     return null
   }
 
-  const { wordCount, characterCount } = counter
+  const { wordCount, characterCount, nonWhitespaceCharacterCount } = counter
 
   const displayParts: string[] = []
   if (displayMode === 'words') {
@@ -77,13 +77,16 @@ export const EditorCount = () => {
   if (displayMode === 'chars') {
     displayParts.push(`${characterCount} ${t('statusBar.chars')}`)
   }
+  if (displayMode === 'pureChars') {
+    displayParts.push(`${nonWhitespaceCharacterCount} ${t('statusBar.pureChars')}`)
+  }
 
   if (displayParts.length === 0) {
     return null
   }
 
   const handleDisplayModeChange = (value: string) => {
-    if (value === 'words' || value === 'chars') {
+    if (value === 'words' || value === 'chars' || value === 'pureChars') {
       setDisplayMode(value)
     }
   }
@@ -113,6 +116,10 @@ export const EditorCount = () => {
             <RadioOption>
               <RadioGroup.Item value='chars' />
               {t('statusBar.chars')}
+            </RadioOption>
+            <RadioOption>
+              <RadioGroup.Item value='pureChars' />
+              {t('statusBar.pureCharsOption')}
             </RadioOption>
           </RadioGroup.Root>
         </PopoverContent>

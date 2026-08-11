@@ -129,6 +129,8 @@
   "statusBar": {
     "words": "词",
     "chars": "字符",
+    "pureChars": "纯字符",
+    "pureCharsOption": "纯字符（不含空格换行）",
     "displaySettings": "显示设置"
   },
   "zenMode": {

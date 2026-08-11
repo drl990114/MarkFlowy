@@ -123,6 +123,8 @@
   "statusBar": {
     "words": "words",
     "chars": "chars",
+    "pureChars": "pure chars",
+    "pureCharsOption": "pure chars (no spaces or line breaks)",
     "displaySettings": "Display Settings"
   },
   "zenMode": {

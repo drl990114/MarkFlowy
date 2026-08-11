@@ -656,6 +656,8 @@
   "statusBar": {
     "words": "Palabras",
     "chars": "Caracteres",
+    "pureChars": "Caracteres puros",
+    "pureCharsOption": "Caracteres puros (sin espacios ni saltos de línea)",
     "displaySettings": "Configuración de pantalla"
   },
   "zenMode": {
