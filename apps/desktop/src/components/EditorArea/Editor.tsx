@@ -7,10 +7,14 @@ import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-react'
 import 'overlayscrollbars/overlayscrollbars.css'
-import { memo, useEffect, useState } from 'react'
+import { memo, useEffect, useState, type MouseEventHandler } from 'react'
 import { useMount } from 'react-use'
 import { EditorViewType } from 'rme'
 import { EmptyState } from './EmptyState'
+import {
+  isEditorPanelBlankTarget,
+  scheduleActiveEditorFocus,
+} from './focusActiveEditor'
 import { PreviewContent } from './preview/PreviewContent'
 import { EditorScrollContainer } from './styles'
 import TextEditor from './TextEditor'
@@ -29,6 +33,12 @@ const overlayScrollbarsOptions = {
     y: 'scroll',
   },
 } as const
+
+const handleEditorPanelClick: MouseEventHandler<HTMLDivElement> = (event) => {
+  if (!isEditorPanelBlankTarget(event.target, event.currentTarget)) return
+
+  scheduleActiveEditorFocus()
+}
 
 function Editor(props: EditorProps) {
   const { id, active, visible = active } = props
@@ -110,6 +120,7 @@ function Editor(props: EditorProps) {
       data-editor-active={active ? 'true' : 'false'}
       style={visible ? undefined : { display: 'none' }}
       tabIndex={-1}
+      onClick={handleEditorPanelClick}
     >
       <OverlayScrollbarsComponent
         options={overlayScrollbarsOptions}
