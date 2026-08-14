@@ -51,17 +51,35 @@ export const NodeContainer = styled.div<NodeContainerProps>`
     props.highlight || props.selected
       ? props.theme.primaryFontColor
       : props.theme.unselectedFontColor};
-  background-color: ${(props) =>
-    props.highlight
-      ? props.theme.accentColorFocused
-      : props.selected
-        ? props.theme.fileTreeSelectedBgColor
-        : 'transparent'};
-  border: 1px solid ${(props) => (props.selected ? props.theme.borderColorFocused : 'transparent')};
+  background-color: transparent;
+  border: 1px solid transparent;
   box-sizing: border-box;
 
+  > .mf-file-tree-row {
+    display: flex;
+    align-items: center;
+    width: calc(100% - 8px);
+    height: calc(100% - 2px);
+    margin: 1px 4px;
+    padding: 0 6px;
+    border-radius: ${(props) => props.theme.smallBorderRadius};
+    background-color: ${(props) =>
+      props.highlight
+        ? props.theme.accentColorFocused
+        : props.selected
+          ? `color-mix(in srgb, ${props.theme.fileTreeSelectedBgColor} 82%, transparent)`
+          : 'transparent'};
+    box-sizing: border-box;
+  }
+
+  &:hover > .mf-file-tree-row {
+    background-color: ${(props) =>
+      props.selected
+        ? `color-mix(in srgb, ${props.theme.fileTreeSelectedBgColor} 82%, transparent)`
+        : `color-mix(in srgb, ${props.theme.hoverColor} 86%, transparent)`};
+  }
+
   &:hover {
-    background-color: ${(props) => props.theme.fileTreeSelectedBgColor};
     color: ${(props) => props.theme.primaryFontColor};
   }
 

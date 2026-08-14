@@ -510,7 +510,7 @@ function FileNode({
       }}
       ref={isPending ? null : dragHandle}
     >
-      <div style={{ display: 'flex', padding: '0 6px', width: '100%', boxSizing: 'border-box' }}>
+      <div className='mf-file-tree-row'>
         <div className='indentLines'>
           {new Array(indentSize / 16).fill(0).map((_, index) => {
             return <div key={index}></div>

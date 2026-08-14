@@ -2,11 +2,21 @@ import { Tooltip as TooltipPrimitive } from 'radix-ui'
 import type { ComponentProps } from 'react'
 import { cn } from '@/lib/cn'
 
-export function TooltipProvider(props: ComponentProps<typeof TooltipPrimitive.Provider>) {
-  return <TooltipPrimitive.Provider {...props} />
+export function TooltipProvider({
+  delayDuration = 0,
+  skipDelayDuration = 0,
+  ...props
+}: ComponentProps<typeof TooltipPrimitive.Provider>) {
+  return (
+    <TooltipPrimitive.Provider
+      delayDuration={delayDuration}
+      skipDelayDuration={skipDelayDuration}
+      {...props}
+    />
+  )
 }
 
-export function TooltipRoot(props: ComponentProps<typeof TooltipPrimitive.Root>) {
+export function Tooltip(props: ComponentProps<typeof TooltipPrimitive.Root>) {
   return <TooltipPrimitive.Root {...props} />
 }
 
@@ -28,7 +38,7 @@ export function TooltipContent({
     <TooltipPrimitive.Portal container={container}>
       <TooltipPrimitive.Content
         className={cn(
-          'z-[1001] rounded-md border border-border bg-tooltip px-2 py-1 text-xs text-foreground shadow-sm',
+          'z-[1001] rounded-md border border-border bg-tooltip px-2 py-1 text-ui-caption tracking-[var(--mf-ui-tracking-caption)] text-foreground shadow-sm',
           className,
         )}
         data-mf-portal=''
@@ -39,10 +49,3 @@ export function TooltipContent({
     </TooltipPrimitive.Portal>
   )
 }
-
-export const Tooltip = Object.assign(TooltipRoot, {
-  Root: TooltipRoot,
-  Provider: TooltipProvider,
-  Trigger: TooltipTrigger,
-  Content: TooltipContent,
-})

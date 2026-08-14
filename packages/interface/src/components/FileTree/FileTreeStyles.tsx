@@ -41,7 +41,9 @@ const IndentLines = styled.div<{ $level: number }>`
   & > div {
     height: 100%;
     padding-left: 10px;
-    border-right: 1px solid ${(props) => props.theme.fileTreeIndentLineColor || props.theme.borderColor};
+    border-right: 1px solid
+      ${(props) =>
+        `color-mix(in srgb, ${props.theme.fileTreeIndentLineColor || props.theme.borderColor} 58%, transparent)`};
     margin-right: calc(var(--indent-size) - 10px - 1px);
     z-index: 1;
   }
@@ -64,15 +66,18 @@ const FileTreeItemWrapper = styled.div<{ $active?: boolean }>`
       : props.theme.unselectedFontColor};
   background-color: ${(props) =>
     props.$active
-      ? props.theme.fileTreeSelectedBgColor
+      ? `color-mix(in srgb, ${props.theme.fileTreeSelectedBgColor} 82%, transparent)`
       : 'transparent'};
-  border: 1px solid ${(props) => (props.$active ? props.theme.borderColorFocused : 'transparent')};
+  border: 1px solid transparent;
   border-radius: ${(props) => props.theme.smallBorderRadius || '4px'};
   box-sizing: border-box;
   position: relative;
 
   &:hover {
-    background-color: ${(props) => props.theme.fileTreeSelectedBgColor};
+    background-color: ${(props) =>
+      props.$active
+        ? `color-mix(in srgb, ${props.theme.fileTreeSelectedBgColor} 82%, transparent)`
+        : `color-mix(in srgb, ${props.theme.hoverColor} 86%, transparent)`};
     color: ${(props) => props.theme.primaryFontColor};
   }
 `
@@ -117,7 +122,7 @@ const getFileIconClass = (file: FileTreeItemData) => {
   return 'ri-file-line'
 }
 
-const renderDefaultItem = (item: FileTreeItemData, _isActive: boolean): ReactNode => {
+const renderDefaultItem = (item: FileTreeItemData): ReactNode => {
   const isDir = item.kind === 'dir'
   return (
     <>
@@ -171,9 +176,9 @@ export const FileTreeStyles: FC<FileTreeStylesProps> = ({
 }) => {
   // 计算最大层级用于显示缩进线
   const maxLevel = React.useMemo(() => {
-    const getMaxLevel = (items: FileTreeItemData[], level = 0): number => {
+    const getMaxLevel = (treeItems: FileTreeItemData[], level = 0): number => {
       let max = level
-      items.forEach((item) => {
+      treeItems.forEach((item) => {
         if (item.children && item.children.length > 0) {
           max = Math.max(max, getMaxLevel(item.children, level + 1))
         }

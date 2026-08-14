@@ -27,6 +27,16 @@
   --text-xl--line-height: 1.45;
   --text-2xl: var(--mf-font-2xl);
   --text-2xl--line-height: 1.4;
+  --text-ui-caption: var(--mf-ui-font-caption);
+  --text-ui-caption--line-height: var(--mf-ui-line-height-caption);
+  --text-ui-control: var(--mf-ui-font-control);
+  --text-ui-control--line-height: var(--mf-ui-line-height-control);
+  --text-ui-body: var(--mf-ui-font-body);
+  --text-ui-body--line-height: var(--mf-ui-line-height-body);
+  --text-ui-title: var(--mf-ui-font-title);
+  --text-ui-title--line-height: var(--mf-ui-line-height-title);
+  --text-ui-heading: var(--mf-ui-font-heading);
+  --text-ui-heading--line-height: var(--mf-ui-line-height-heading);
   --font-weight-normal: 400;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
@@ -116,9 +126,31 @@
   --mf-font-xl: 18px;
   --mf-font-2xl: 20px;
   --mf-line-height: 1.6;
+  --mf-ui-font-caption: 12px;
+  --mf-ui-font-control: 13px;
+  --mf-ui-font-body: 14px;
+  --mf-ui-font-title: 16px;
+  --mf-ui-font-heading: 18px;
+  --mf-ui-line-height-caption: 16px;
+  --mf-ui-line-height-control: 18px;
+  --mf-ui-line-height-body: 20px;
+  --mf-ui-line-height-title: 22px;
+  --mf-ui-line-height-heading: 24px;
+  --mf-ui-tracking-caption: 0.01em;
+  --mf-ui-tracking-control: 0;
+  --mf-ui-tracking-body: 0;
+  --mf-ui-tracking-title: -0.01em;
+  --mf-ui-tracking-heading: -0.015em;
+  --mf-ui-border-subtle: color-mix(in srgb, var(--mf-border) 72%, transparent);
+  --mf-ui-border-muted: color-mix(in srgb, var(--mf-border) 56%, transparent);
+  --mf-ui-control-hover-bg: var(--mf-accent);
+  --mf-ui-control-selected-bg: var(--mf-accent);
   --mf-space-unit: 4px;
+  --mf-ui-status-bar-height: 24px;
   --mf-font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --mf-font-mono: 'SFMono-Regular', Consolas, monospace;
+  --mf-ui-font-family: var(--mf-font-sans);
+  --mf-ui-font-mono: var(--mf-font-mono);
 }
 
 @layer components {
@@ -175,7 +207,13 @@
 
 [data-mf-portal] {
   color: var(--mf-foreground);
-  font-family: var(--mf-font-sans);
-  font-size: var(--mf-font-sm);
-  line-height: var(--mf-line-height);
+  font-family: var(--mf-ui-font-family);
+  font-size: var(--mf-ui-font-control);
+  font-optical-sizing: auto;
+  line-height: var(--mf-ui-line-height-control);
+  letter-spacing: var(--mf-ui-tracking-control);
+}
+
+[data-slot='tooltip-content'] {
+  transform-origin: var(--radix-tooltip-content-transform-origin);
 }

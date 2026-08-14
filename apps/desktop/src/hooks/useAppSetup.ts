@@ -92,11 +92,11 @@ type WorkspaceCacheDraft = {
   activeGroupId?: string
   activeId?: string
   editorLayout: EditorLayoutNode
-  openedFiles: Array<{
+  openedFiles: {
     id: string
     name?: string
     path?: string
-  }>
+  }[]
   rootPath?: string
 }
 
@@ -515,7 +515,7 @@ async function appThemeExtensionsSetup() {
     logger.debug('Local themes loaded:', localThemes.length)
 
     if (localThemes.length > 0) {
-      const cssContents = localThemes.map((t) => t.css_content)
+      const cssContents = localThemes.map((localTheme) => localTheme.css_content)
       loadLocalThemeCss(cssContents)
     }
 
@@ -748,18 +748,6 @@ const appSetup = once(async function () {
   return settingData
 })
 
-const useFontfamilySetup = () => {
-  const { osType } = useGlobalOSInfo()
-
-  if (osType === 'macos') {
-    document.body.style.fontFamily = 'SF Pro,-apple-system,BlinkMacSystemFont,sans-serif'
-  } else if (osType === 'windows') {
-    document.body.style.fontFamily = 'Segoe UI, Roboto, Helvetica, Arial, sans-serif'
-  } else if (osType === 'linux') {
-    document.body.style.fontFamily = 'Ubuntu, Roboto, Helvetica, Arial, sans-serif'
-  }
-}
-
 const useAppSetup = () => {
   const eventInit = useCallback(() => {
     let closeWindowPromise: Promise<boolean> | undefined
@@ -926,7 +914,6 @@ const useAppSetup = () => {
   useGlobalOSInfo()
   useGlobalKeyboard()
   useWorkspaceWatcher()
-  useFontfamilySetup()
 }
 
 export default useAppSetup

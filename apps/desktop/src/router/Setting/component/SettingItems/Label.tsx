@@ -29,15 +29,17 @@ const Container = styled.div`
 
   .setting-item__title {
     margin-bottom: 2px;
-    font-size: 13px;
+    font-size: var(--mf-ui-font-control);
     font-weight: 500;
+    line-height: var(--mf-ui-line-height-control);
     color: ${({ theme }) => theme.primaryFontColor};
   }
 
   .setting-item__label {
     white-space: pre-wrap;
-    font-size: 12px;
-    line-height: 1.4;
+    font-size: var(--mf-ui-font-caption);
+    line-height: var(--mf-ui-line-height-caption);
+    letter-spacing: var(--mf-ui-tracking-caption);
     color: ${({ theme }) => theme.labelFontColor};
   }
 `

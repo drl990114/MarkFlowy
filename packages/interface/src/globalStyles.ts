@@ -10,7 +10,10 @@ export const GlobalStyles = createGlobalStyle`
     width: 32px;
     font-size: 1rem;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition:
+      color 100ms ease,
+      background-color 100ms ease,
+      opacity 100ms ease;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
@@ -18,13 +21,12 @@ export const GlobalStyles = createGlobalStyle`
     font-display: swap;
 
     &:hover {
-      color: ${(props) => props.theme.accentColor};
+      color: ${(props) => props.theme.primaryFontColor};
       background-color: ${(props) => props.theme.hoverColor};
     }
 
     &--active {
       color: ${(props) => props.theme.accentColor};
-      font-weight: 1000;
     }
 
     &-unselected {
@@ -40,19 +42,19 @@ export const GlobalStyles = createGlobalStyle`
   .icon-small {
     height: 22px;
     width: 22px;
-    font-size: 0.85rem;
+    font-size: 14px;
   }
 
   .icon-medium {
     height: 32px;
     width: 32px;
-    font-size: 1rem;
+    font-size: 16px;
   }
 
   .icon-large {
     height: 40px;
     width: 40px;
-    font-size: 1.2rem;
+    font-size: 18px;
   }
 
   .icon-rounded {

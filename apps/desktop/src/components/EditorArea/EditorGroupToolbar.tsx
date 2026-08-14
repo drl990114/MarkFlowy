@@ -25,6 +25,23 @@ function EditorGroupToolbar(props: EditorGroupToolbarProps) {
 const ToolbarHost = styled.div`
   flex: 0 0 auto;
   min-width: 0;
+
+  .mf-editor-toolbar {
+    min-height: 30px;
+    padding: 3px 8px;
+
+    .icon,
+    [data-slot='button'],
+    [data-slot='tooltip-trigger'] {
+      border-radius: 5px;
+    }
+
+    .icon,
+    [data-slot='button'] i,
+    [data-slot='tooltip-trigger'] i {
+      font-size: 15px;
+    }
+  }
 `
 
 export default memo(EditorGroupToolbar)

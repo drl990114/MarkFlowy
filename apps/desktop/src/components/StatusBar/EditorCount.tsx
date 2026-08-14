@@ -7,21 +7,32 @@ import { useTranslation } from '@/i18n'
 import styled from 'styled-components'
 
 const Container = styled.button`
-  padding: 8px 12px 8px 8px;
+  height: 22px;
+  padding: 0 8px;
   border: 0;
   z-index: 2;
-  opacity: 0.8;
-  font-size: 0.85rem;
+  font-size: var(--mf-ui-font-caption);
+  line-height: var(--mf-ui-line-height-caption);
+  letter-spacing: var(--mf-ui-tracking-caption);
   user-select: none;
   box-sizing: border-box;
   cursor: pointer;
   background-color: ${(props) => props.theme.statusBarBgColor};
-  color: inherit;
+  color: ${(props) => props.theme.labelFontColor};
   font-family: inherit;
   font-weight: inherit;
+  border-radius: ${(props) => props.theme.smallBorderRadius};
   white-space: nowrap;
   overflow: hidden;
   max-width: 100%;
+  transition:
+    color 100ms ease,
+    background-color 100ms ease;
+
+  &:hover {
+    color: ${(props) => props.theme.primaryFontColor};
+    background-color: ${(props) => props.theme.hoverColor};
+  }
 
   &:focus-visible {
     outline: 2px solid ${(props) => props.theme.accentColor};
@@ -37,7 +48,9 @@ const PopoverContent = styled.div`
 `
 
 const PopoverTitle = styled.div`
-  font-size: 0.75rem;
+  font-size: var(--mf-ui-font-caption);
+  line-height: var(--mf-ui-line-height-caption);
+  letter-spacing: var(--mf-ui-tracking-caption);
   color: ${(props) => props.theme.labelFontColor};
   margin-bottom: 4px;
 `
@@ -98,7 +111,7 @@ export const EditorCount = () => {
           type='button'
           aria-label={`${displayParts.join(' ')}, ${t('statusBar.displaySettings')}`}
         >
-          <span style={{ opacity: 0.8, cursor: 'pointer' }}>{displayParts.join(' ')}</span>
+          <span>{displayParts.join(' ')}</span>
         </Container>
       </Popover.Trigger>
       <Popover.Content side='top' align='end'>

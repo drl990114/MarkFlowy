@@ -19,10 +19,10 @@ export const RootPageLayout = styled(PageLayout)`
 `
 
 export const StyleSeparator = styled(Separator)`
-  background-color: ${(props) => props.theme.borderColor};
+  background-color: var(--mf-ui-border-subtle);
   cursor: col-resize !important;
   width: 1px;
-  transition: all 0.2s ease;
+  transition: background-color 100ms ease;
   position: relative;
 
   &:focus {

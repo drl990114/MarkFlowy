@@ -1,9 +1,8 @@
 import { Explorer } from '@/components'
 import { RIGHTBARITEMKEYS } from '@/constants'
-import classNames from 'classnames'
 import { lazy, memo, Suspense, useMemo, useState } from 'react'
-import { Tooltip } from 'zens'
 import { Container as SideBarContainer, SideBarHeader } from './styles'
+import { SideBarModeButton } from './SideBarModeButton'
 
 const SearchExtension = lazy(async () => {
   const { Search } = await import('@/extensions/search')
@@ -25,13 +24,13 @@ function SideBar() {
       {
         title: RIGHTBARITEMKEYS.Explorer,
         key: RIGHTBARITEMKEYS.Explorer,
-        icon: <i className='ri-file-list-3-line' />,
+        icon: <i aria-hidden='true' className='ri-file-list-3-line' />,
         components: <Explorer />,
       },
       {
         title: RIGHTBARITEMKEYS.Search,
         key: RIGHTBARITEMKEYS.Search,
-        icon: <i className='ri-search-2-line' />,
+        icon: <i aria-hidden='true' className='ri-search-2-line' />,
         components: (
           <Suspense fallback={null}>
             <SearchExtension />
@@ -41,7 +40,7 @@ function SideBar() {
       {
         title: RIGHTBARITEMKEYS.BookMarks,
         key: RIGHTBARITEMKEYS.BookMarks,
-        icon: <i className='ri-bookmark-line' />,
+        icon: <i aria-hidden='true' className='ri-bookmark-line' />,
         components: (
           <Suspense fallback={null}>
             <BookMarksExtension />
@@ -62,24 +61,15 @@ function SideBar() {
     <SideBarContainer noActiveItem={noActiveItem}>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', width: '100%' }}>
         <SideBarHeader>
-          {leftBarDataSource.map((item) => {
-            const cls = classNames('icon', 'icon-small', 'icon-smooth', {
-              'app-sidebar-active': activeRightBarItemKey === item.key,
-              'icon-unselected': activeRightBarItemKey !== item.key
-            })
-
-            const handleRightBarItemClick = () => {
-              setActiveRightBarItemKey(item.key)
-            }
-
-            return (
-              <Tooltip key={item.key} title={item.title}>
-                <div className={cls} onClick={handleRightBarItemClick}>
-                  {item.icon}
-                </div>
-              </Tooltip>
-            )
-          })}
+          {leftBarDataSource.map((item) => (
+            <SideBarModeButton
+              active={activeRightBarItemKey === item.key}
+              icon={item.icon}
+              key={item.key}
+              label={item.title}
+              onClick={() => setActiveRightBarItemKey(item.key)}
+            />
+          ))}
         </SideBarHeader>
         {activeRightBarItem?.components ?? null}
       </div>
@@ -91,7 +81,7 @@ export interface RightBarItem {
   title: RIGHTBARITEMKEYS
   key: RIGHTBARITEMKEYS
   icon: React.ReactNode
-  components: any
+  components: React.ReactNode
 }
 
 export default memo(SideBar)

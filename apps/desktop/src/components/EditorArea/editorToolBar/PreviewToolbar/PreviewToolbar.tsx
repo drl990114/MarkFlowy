@@ -1,6 +1,6 @@
 import { useEditorStore } from '@/stores'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
-import { FC, useMemo } from 'react'
+import { type FC, useMemo } from 'react'
 import { EditorViewType } from 'rme'
 import {
   ToolbarSection,
@@ -33,7 +33,7 @@ export const PreviewToolbar: FC<PreviewToolbarProps> = (props) => {
   }
 
   return (
-    <ToolbarWrapper ref={containerRef}>
+    <ToolbarWrapper className='mf-editor-toolbar' ref={containerRef}>
       <ToolbarSection id="common" registerWidth={registerItemWidth} hidden={hiddenIds.has('common')}>
         <MenuList editorId={targetEditorId} />
         <ViewSwitcher editorId={targetEditorId} />

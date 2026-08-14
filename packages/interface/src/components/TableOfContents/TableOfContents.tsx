@@ -11,6 +11,7 @@ import React, {
 import type { IHeadingData } from './HeadingTree';
 import { HeadingTree, TraverseResult } from './HeadingTree';
 import type HeadingNode from './HeadingTreeNode';
+import { isTableOfContentsHeadingActive } from './activeHeading';
 import { TocDiv, TocLink, TocListItem } from './styles';
 
 export type TableOfContentsRef = {
@@ -287,11 +288,13 @@ const TableOfContents = forwardRef<TableOfContentsRef, TableOfContentsProps>((pr
     }
 
     const renderItem = (h: HeadingNode) => {
-      const isActive = activeId
-        ? h.id === activeId
-        : !scroll
-          ? true
-          : !!(activeNodeState && activeNodeState.key === h.key);
+      const isActive = isTableOfContentsHeadingActive({
+        activeId,
+        activeNodeKey: activeNodeState?.key,
+        firstHeadingKey: flattenedHeadings[0]?.key,
+        headingId: h.id,
+        headingKey: h.key,
+      });
       const titleLength = h.title?.length || 0;
       const baseBarWidth = Math.min(160, Math.max(16, 10 + titleLength * 4 - h.depth * 3));
       const headingLevel = h.h?.depth ?? h.depth + 1;

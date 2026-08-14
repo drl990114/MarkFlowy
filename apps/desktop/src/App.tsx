@@ -14,6 +14,7 @@ import {
   MODAL_INFO_ID,
   MODAL_INPUT_ID,
 } from './components/Modal'
+import { TooltipProvider } from './components/ui/tooltip'
 import { ContextMenu } from './components/ui-v2/ContextMenu/ContextMenu'
 import { useAppSetup } from './hooks'
 import { useCommandInit } from './hooks/useCommandInit'
@@ -56,17 +57,19 @@ function App() {
 
   return (
     <AppThemeProvider>
-      <TauriFileSystemProvider>
-        <FileTreeProvider>
-          <ContextMenu />
-          <Notifications />
-          <Modal.InputConfirm id={MODAL_INPUT_ID} />
-          <Modal.Info id={MODAL_INFO_ID} />
-          <Modal.Confirm id={MODAL_CONFIRM_ID} />
-          <Modal.ImageInsert id={MODAL_IMAGE_INSERT_ID} />
-          <AppRoutes />
-        </FileTreeProvider>
-      </TauriFileSystemProvider>
+      <TooltipProvider>
+        <TauriFileSystemProvider>
+          <FileTreeProvider>
+            <ContextMenu />
+            <Notifications />
+            <Modal.InputConfirm id={MODAL_INPUT_ID} />
+            <Modal.Info id={MODAL_INFO_ID} />
+            <Modal.Confirm id={MODAL_CONFIRM_ID} />
+            <Modal.ImageInsert id={MODAL_IMAGE_INSERT_ID} />
+            <AppRoutes />
+          </FileTreeProvider>
+        </TauriFileSystemProvider>
+      </TooltipProvider>
     </AppThemeProvider>
   )
 }

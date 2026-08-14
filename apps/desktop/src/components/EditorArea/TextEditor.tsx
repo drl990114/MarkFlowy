@@ -1,4 +1,5 @@
 import { commandRegistry } from '@/commands'
+import { AppEditorThemeProvider } from '@/AppThemeProvider'
 import { EVENT } from '@/constants'
 import { clipboardRead } from '@/helper/clipboard'
 import { countNonWhitespaceCharacters } from '@/helper/editorCounter'
@@ -1902,7 +1903,9 @@ function TextEditor(props: TextEditorProps) {
       editorViewType={currentViewType}
       fileType={fileTypeConfig.type}
     >
-      <MfEditor ref={editorRef} onChange={handleChange} {...editorProps} />
+      <AppEditorThemeProvider>
+        <MfEditor ref={editorRef} onChange={handleChange} {...editorProps} />
+      </AppEditorThemeProvider>
     </EditorWrapper>
   )
 }

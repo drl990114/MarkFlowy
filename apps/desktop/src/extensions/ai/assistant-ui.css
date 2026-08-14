@@ -37,10 +37,10 @@
   --aui-font-lg: var(--mf-font-lg);
   --aui-font-xl: var(--mf-font-xl);
   --aui-font-2xl: var(--mf-font-2xl);
-  --aui-line-height: var(--mf-line-height);
+  --aui-line-height: var(--mf-ui-line-height-control);
   --aui-space-unit: var(--mf-space-unit);
-  --aui-font-sans: var(--mf-font-sans);
-  --aui-font-mono: var(--mf-font-mono);
+  --aui-font-sans: var(--mf-ui-font-family);
+  --aui-font-mono: var(--mf-ui-font-mono);
 }
 
 @keyframes aui-spin {
@@ -144,6 +144,7 @@
   font-family: var(--aui-font-sans);
   font-size: var(--aui-font-sm);
   line-height: var(--aui-line-height);
+  letter-spacing: var(--mf-ui-tracking-control);
 }
 
 .aui-message,

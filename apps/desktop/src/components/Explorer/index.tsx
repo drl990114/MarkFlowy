@@ -10,12 +10,12 @@ import useOpenedCacheStore from '@/stores/useOpenedCacheStore'
 import { homeDir } from '@tauri-apps/api/path'
 import { Popover } from '@/components/ui/popover'
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import classNames from 'classnames'
 import type { FC, MouseEventHandler } from 'react'
 import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from '@/i18n'
 import styled from 'styled-components'
-import { Tooltip } from 'zens'
 import { Container } from './styles'
 import { FillFlexParent } from '../fill-flex-parent'
 import { showContextMenu } from '../ui-v2/ContextMenu'
@@ -382,17 +382,23 @@ const Explorer: FC<ExplorerProps> = (props) => {
                 <h5 className='recent-workspaces__title'>{t('file.recentDir')}</h5>
                 <div className='recent-workspaces__list'>
                   {recentWorkspaceItems.map((item) => (
-                    <Tooltip key={item.key} title={item.tooltip} placement='right'>
-                      <button
-                        type='button'
-                        className='recent-workspaces__item'
-                        onClick={() => handleOpenHistoryListItemClick(item.key)}
-                      >
-                        <i className={`${item.iconCls} recent-workspaces__icon`} aria-hidden='true' />
-                        <span className='recent-workspaces__text'>
-                          <span className='recent-workspaces__name'>{item.title}</span>
-                        </span>
-                      </button>
+                    <Tooltip key={item.key}>
+                      <TooltipTrigger asChild>
+                        <button
+                          type='button'
+                          className='recent-workspaces__item'
+                          onClick={() => handleOpenHistoryListItemClick(item.key)}
+                        >
+                          <i
+                            className={`${item.iconCls} recent-workspaces__icon`}
+                            aria-hidden='true'
+                          />
+                          <span className='recent-workspaces__text'>
+                            <span className='recent-workspaces__name'>{item.title}</span>
+                          </span>
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side='right'>{item.tooltip}</TooltipContent>
                     </Tooltip>
                   ))}
                 </div>

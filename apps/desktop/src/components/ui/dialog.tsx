@@ -131,7 +131,7 @@ export function DialogBody({ className, ...props }: ComponentProps<'div'>) {
   return (
     <div
       className={cn(
-        'min-h-0 flex-1 overflow-y-auto text-sm leading-relaxed text-foreground-secondary',
+        'min-h-0 flex-1 overflow-y-auto text-ui-body tracking-[var(--mf-ui-tracking-body)] text-foreground-secondary',
         className,
       )}
       data-slot='dialog-body'
@@ -156,7 +156,10 @@ export function DialogTitle({
 }: ComponentProps<typeof DialogPrimitive.Title>) {
   return (
     <DialogPrimitive.Title
-      className={cn('text-lg leading-none font-semibold tracking-tight', className)}
+      className={cn(
+        'text-ui-title font-semibold tracking-[var(--mf-ui-tracking-title)]',
+        className,
+      )}
       data-slot='dialog-title'
       {...props}
     />
@@ -169,7 +172,10 @@ export function DialogDescription({
 }: ComponentProps<typeof DialogPrimitive.Description>) {
   return (
     <DialogPrimitive.Description
-      className={cn('text-sm leading-relaxed text-foreground-secondary', className)}
+      className={cn(
+        'text-ui-body tracking-[var(--mf-ui-tracking-body)] text-foreground-secondary',
+        className,
+      )}
       data-slot='dialog-description'
       {...props}
     />

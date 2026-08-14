@@ -9,7 +9,7 @@ import styled from 'styled-components'
 import { showContextMenu } from '../ui-v2/ContextMenu/ContextMenu'
 
 export const CenterMenu = memo(() => {
-  const ref = useRef<HTMLDivElement>(null)
+  const ref = useRef<HTMLButtonElement>(null)
   const { themeMode, setThemeMode } = useThemeStore()
   const { t } = useTranslation()
 
@@ -72,21 +72,40 @@ export const CenterMenu = memo(() => {
   }
 
   return (
-    <Container className='icon-small icon-smooth' ref={ref} onClick={handleClick}>
-      <i className='ri-settings-3-line'></i>
+    <Container
+      aria-label={t('settings.label')}
+      className='icon-small icon-smooth'
+      ref={ref}
+      onClick={handleClick}
+      type='button'
+    >
+      <i aria-hidden='true' className='ri-settings-3-line' />
     </Container>
   )
 })
 
-const Container = styled.div`
+const Container = styled.button`
+  padding: 0;
+  border: 0;
   display: flex;
   flex-direction: row;
   justify-content: center;
   align-items: center;
   cursor: pointer;
-  transition: background-color 0.3s ease-in-out;
+  color: ${(props) => props.theme.labelFontColor};
+  background: transparent;
+  border-radius: ${(props) => props.theme.smallBorderRadius};
+  transition:
+    color 100ms ease,
+    background-color 100ms ease;
 
   &:hover {
+    color: ${(props) => props.theme.primaryFontColor};
     background-color: ${(props) => props.theme.hoverColor};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${(props) => props.theme.accentColor};
+    outline-offset: -2px;
   }
 `

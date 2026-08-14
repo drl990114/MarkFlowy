@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react'
+import React, { type ReactElement } from 'react'
 import styled from 'styled-components'
 import useResizeObserver from 'use-resize-observer'
 import mergeRefs from './merge-refs'
@@ -35,7 +35,9 @@ const Container = styled.div`
   .indentLines > div {
     height: 100%;
     padding-left: 10px;
-    border-right: 1px solid ${props => props.theme.fileTreeIndentLineColor};
+    border-right: 1px solid
+      ${(props) =>
+        `color-mix(in srgb, ${props.theme.fileTreeIndentLineColor} 58%, transparent)`};
     margin-right: calc(var(--indent-size) - 10px - 1px);
     z-index: 1;
   }

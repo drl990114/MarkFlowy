@@ -40,6 +40,10 @@ const Tooltip = ({
   placement = fixed ? 'top' : 'bottom',
   open,
   popover: _popover,
+  hideTimeout = 0,
+  showTimeout = 0,
+  skipTimeout = 0,
+  timeout = 0,
   ...rest
 }: TooltipProps) => {
   const child = (children as JSX.Element)?.props?.disabled
@@ -52,7 +56,14 @@ const Tooltip = ({
   }
 
   return (
-    <Ariakit.TooltipProvider placement={placement} open={open}>
+    <Ariakit.TooltipProvider
+      hideTimeout={hideTimeout}
+      open={open}
+      placement={placement}
+      showTimeout={showTimeout}
+      skipTimeout={skipTimeout}
+      timeout={timeout}
+    >
       <Ariakit.TooltipAnchor render={child} />
       <Ariakit.Tooltip render={p => {
         const { popover: __, ...boxProps } = p;

@@ -135,7 +135,8 @@ const Input = styled.input`
   border-radius: 4px;
   background-color: ${({ theme }) => theme.bgColor};
   color: ${({ theme }) => theme.primaryFontColor};
-  font-size: 13px;
+  font-size: var(--mf-ui-font-control);
+  line-height: var(--mf-ui-line-height-control);
 
   &:focus {
     outline: none;
@@ -158,7 +159,10 @@ const DeleteButton = styled.button`
   background-color: transparent;
   color: ${({ theme }) => theme.primaryFontColor};
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition:
+    color 100ms ease,
+    background-color 100ms ease,
+    border-color 100ms ease;
 
   &:hover {
     background-color: ${({ theme }) => theme.hoverColor};
@@ -182,8 +186,12 @@ const AddButton = styled.button`
   background-color: transparent;
   color: ${({ theme }) => theme.primaryFontColor};
   cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 13px;
+  transition:
+    color 100ms ease,
+    background-color 100ms ease,
+    border-color 100ms ease;
+  font-size: var(--mf-ui-font-control);
+  line-height: var(--mf-ui-line-height-control);
 
   &:hover {
     background-color: ${({ theme }) => theme.hoverColor};

@@ -1,3 +1,4 @@
+import { TooltipProvider } from '@/components/ui/tooltip'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ZenModeButton } from './ZenModeButton'
@@ -44,14 +45,22 @@ beforeEach(() => {
   zenModeButtonState.keyMap = ['CommandOrCtrl', 'Shift', 'f']
 })
 
+function renderZenModeButton() {
+  return renderToStaticMarkup(
+    <TooltipProvider>
+      <ZenModeButton />
+    </TooltipProvider>,
+  )
+}
+
 describe('ZenModeButton', () => {
   it('stays hidden when no document is active', () => {
-    expect(renderToStaticMarkup(<ZenModeButton />)).toBe('')
+    expect(renderZenModeButton()).toBe('')
   })
 
   it('renders an accessible status-bar action for the active document', () => {
     zenModeButtonState.activeId = 'document-1'
-    const markup = renderToStaticMarkup(<ZenModeButton />)
+    const markup = renderZenModeButton()
 
     expect(markup).toContain('<button')
     expect(markup).toContain('type="button"')
@@ -74,7 +83,7 @@ describe('ZenModeButton', () => {
     zenModeButtonState.activeId = 'document-1'
     zenModeButtonState.keyMap = ['Alt', 'k']
 
-    expect(renderToStaticMarkup(<ZenModeButton />)).toContain(
+    expect(renderZenModeButton()).toContain(
       'aria-label="Toggle Zen Mode (⌥K)"',
     )
   })

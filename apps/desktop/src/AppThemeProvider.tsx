@@ -1,10 +1,11 @@
 import NiceModal from '@ebay/nice-modal-react'
 import isPropValid from '@emotion/is-prop-valid'
 import { desktopDarkTheme, desktopLightTheme } from '@markflowy/theme'
-import { useEffect, useMemo } from 'react'
+import { createContext, useContext, useEffect, useMemo } from 'react'
 import { ThemeProvider as EditorProvider } from 'rme'
 import { type IStyleSheetContext, StyleSheetManager, ThemeProvider } from 'styled-components'
 import { ThemeProvider as ZensThemeProvider } from 'zens'
+import { resolveAppThemeTokens } from './appThemeTokens'
 import { GlobalStyles, DesktopSpecificStyles } from './globalStyles'
 import {
   getReadableForeground,
@@ -16,24 +17,15 @@ import { InjectFonts } from './injectFonts'
 import useAppSettingStore from './stores/useAppSettingStore'
 import useThemeStore from './stores/useThemeStore'
 
-const LEGACY_DEFAULT_ROOT_FONT_FAMILY = 'Open Sans'
-const LEGACY_DEFAULT_CODE_FONT_FAMILY = 'Fira Code'
-const SYSTEM_DEFAULT_FONT_FAMILY = 'System Default'
-const DEFAULT_MONOSPACE_FONT_FAMILY = 'Default Monospace'
+type EditorThemeToken = typeof desktopLightTheme
 
-function normalizeFontFamily(fontFamily: string): string {
-  const trimmed = fontFamily.trim()
-  if (!trimmed || /^['"].*['"]$/.test(trimmed)) return trimmed
+const AppEditorThemeContext = createContext<EditorThemeToken | null>(null)
 
-  // CSS font-family names that are not valid identifiers (e.g. contain spaces)
-  // must be quoted, otherwise the declaration is invalid and the font won't apply.
-  const isValidCssIdentifier =
-    /^[a-zA-Z0-9\-_\u0080-\uFFFF]+$/.test(trimmed) &&
-    !/^\d/.test(trimmed) &&
-    !/^-\d/.test(trimmed)
-  if (isValidCssIdentifier) return trimmed
+export function AppEditorThemeProvider({ children }: BaseComponentProps) {
+  const editorTheme = useContext(AppEditorThemeContext)
+  if (!editorTheme) return children
 
-  return `"${trimmed.replace(/"/g, '\\"')}"`
+  return <ThemeProvider theme={editorTheme}>{children}</ThemeProvider>
 }
 
 const AppThemeProvider: React.FC<BaseComponentProps> = function ({ children }) {
@@ -48,41 +40,35 @@ const AppThemeProvider: React.FC<BaseComponentProps> = function ({ children }) {
     [curTheme.mode, curTheme.styledConstants],
   )
 
-  const rootFontFamily =
-    !settingData.editor_root_font_family ||
-    settingData.editor_root_font_family === LEGACY_DEFAULT_ROOT_FONT_FAMILY ||
-    settingData.editor_root_font_family === SYSTEM_DEFAULT_FONT_FAMILY
-      ? themeWithDefaults.fontFamily
-      : normalizeFontFamily(settingData.editor_root_font_family)
-  const codeFontFamily =
-    !settingData.editor_code_font_family ||
-    settingData.editor_code_font_family === LEGACY_DEFAULT_CODE_FONT_FAMILY ||
-    settingData.editor_code_font_family === DEFAULT_MONOSPACE_FONT_FAMILY
-      ? themeWithDefaults.codemirrorFontFamily
-      : normalizeFontFamily(settingData.editor_code_font_family)
-
   const accentColorSetting = settingData[THEME_ACCENT_COLOR_SETTING_KEY]
   const hasAccentColorOverride = isThemeAccentColorOverride(accentColorSetting)
   const accentColor = resolveThemeAccentColor(themeWithDefaults.accentColor, accentColorSetting)
-  const theme = useMemo(
-    () => ({
-      ...themeWithDefaults,
+  const { editorTheme, uiTheme } = useMemo(
+    () =>
+      resolveAppThemeTokens({
+        accentColor,
+        fontSettings: {
+          editorCodeFontFamily: settingData.editor_code_font_family,
+          editorRootFontFamily: settingData.editor_root_font_family,
+        },
+        hasAccentColorOverride,
+        theme: themeWithDefaults,
+      }),
+    [
       accentColor,
-      accentColorFocused: hasAccentColorOverride
-        ? `${accentColor}18`
-        : themeWithDefaults.accentColorFocused,
-      fontFamily: rootFontFamily,
-      codemirrorFontFamily: codeFontFamily,
-    }),
-    [themeWithDefaults, accentColor, hasAccentColorOverride, rootFontFamily, codeFontFamily],
+      hasAccentColorOverride,
+      settingData.editor_code_font_family,
+      settingData.editor_root_font_family,
+      themeWithDefaults,
+    ],
   )
 
   const themeProp = useMemo(
     () => ({
       mode: curTheme.mode,
-      token: theme,
+      token: uiTheme,
     }),
-    [curTheme.mode, theme],
+    [curTheme.mode, uiTheme],
   )
 
   const i18nProp = useMemo(
@@ -93,12 +79,12 @@ const AppThemeProvider: React.FC<BaseComponentProps> = function ({ children }) {
   )
 
   const primaryForeground = useMemo(
-    () => getReadableForeground(theme.accentColor, '#ffffff', '#111111'),
-    [theme.accentColor],
+    () => getReadableForeground(uiTheme.accentColor, '#ffffff', '#111111'),
+    [uiTheme.accentColor],
   )
   const destructiveForeground = useMemo(
-    () => getReadableForeground(theme.dangerColor, '#ffffff', '#111111'),
-    [theme.dangerColor],
+    () => getReadableForeground(uiTheme.dangerColor, '#ffffff', '#111111'),
+    [uiTheme.dangerColor],
   )
 
   useEffect(() => {
@@ -114,16 +100,18 @@ const AppThemeProvider: React.FC<BaseComponentProps> = function ({ children }) {
 
   return (
     <StyleSheetManager shouldForwardProp={shouldForwardProp}>
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={uiTheme}>
         <ZensThemeProvider theme={themeProp}>
           <EditorProvider theme={themeProp} i18n={i18nProp}>
-            <InjectFonts />
-            <GlobalStyles />
-            <DesktopSpecificStyles
-              $destructiveForeground={destructiveForeground}
-              $primaryForeground={primaryForeground}
-            />
-            <NiceModal.Provider>{children}</NiceModal.Provider>
+            <AppEditorThemeContext.Provider value={editorTheme}>
+              <InjectFonts />
+              <GlobalStyles />
+              <DesktopSpecificStyles
+                $destructiveForeground={destructiveForeground}
+                $primaryForeground={primaryForeground}
+              />
+              <NiceModal.Provider>{children}</NiceModal.Provider>
+            </AppEditorThemeContext.Provider>
           </EditorProvider>
         </ZensThemeProvider>
       </ThemeProvider>

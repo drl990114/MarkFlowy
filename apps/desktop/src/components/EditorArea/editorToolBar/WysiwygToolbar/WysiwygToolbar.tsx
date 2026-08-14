@@ -11,7 +11,7 @@ import {
   CommandButton,
 } from '@markflowy/interface'
 import { Button } from '@/components/ui/button'
-import { Tooltip } from '@/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { MenuList } from '../components/MenuList'
 import { AIButton } from './components/AIButton'
 
@@ -59,7 +59,7 @@ export const WysiwygToolbar: FC<WysiwygToolbarProps> = (props) => {
   }
 
   return (
-    <ToolbarWrapper ref={containerRef}>
+    <ToolbarWrapper className='mf-editor-toolbar' ref={containerRef}>
       <ToolbarSection
         id='common'
         registerWidth={registerItemWidth}
@@ -150,21 +150,20 @@ export const WysiwygToolbar: FC<WysiwygToolbarProps> = (props) => {
         hidden={hiddenIds.has('insert')}
       >
         <ToolbarDivider />
-        <Tooltip.Provider>
-          <Tooltip.Root>
-            <Tooltip.Trigger asChild>
-              <Button
-                aria-label={imageLabel}
-                onClick={handleInsertImage}
-                size='icon-sm'
-                variant='ghost'
-              >
-                <i className='ri-image-line' aria-hidden='true' />
-              </Button>
-            </Tooltip.Trigger>
-            <Tooltip.Content>{imageLabel}</Tooltip.Content>
-          </Tooltip.Root>
-        </Tooltip.Provider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              aria-label={imageLabel}
+              className='size-6 rounded-sm'
+              onClick={handleInsertImage}
+              size='icon-sm'
+              variant='ghost'
+            >
+              <i className='ri-image-line' aria-hidden='true' />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>{imageLabel}</TooltipContent>
+        </Tooltip>
       </ToolbarSection>
 
       <ToolbarSection

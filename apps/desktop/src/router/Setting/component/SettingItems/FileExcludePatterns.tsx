@@ -298,7 +298,8 @@ const RowWrapper = styled.div`
 const RowText = styled.div`
   flex: 1;
   font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
-  font-size: 13px;
+  font-size: var(--mf-ui-font-control);
+  line-height: var(--mf-ui-line-height-control);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -310,7 +311,8 @@ const EmptyHint = styled.div`
   justify-content: center;
   height: 40px;
   color: ${({ theme }) => theme.labelFontColor};
-  font-size: 13px;
+  font-size: var(--mf-ui-font-control);
+  line-height: var(--mf-ui-line-height-control);
 `
 
 const IconButton = styled.button`
@@ -325,7 +327,9 @@ const IconButton = styled.button`
   background: transparent;
   color: ${({ theme }) => theme.labelFontColor};
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition:
+    color 100ms ease,
+    background-color 100ms ease;
 
   &:hover {
     background: ${({ theme }) => theme.bgColor};
@@ -348,8 +352,12 @@ const AddButton = styled.button`
   background-color: transparent;
   color: ${({ theme }) => theme.primaryFontColor};
   cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 13px;
+  transition:
+    color 100ms ease,
+    background-color 100ms ease,
+    border-color 100ms ease;
+  font-size: var(--mf-ui-font-control);
+  line-height: var(--mf-ui-line-height-control);
 
   &:hover {
     background-color: ${({ theme }) => theme.hoverColor};

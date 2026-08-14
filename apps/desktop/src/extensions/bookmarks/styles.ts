@@ -4,11 +4,12 @@ export const Container = styled.div`
   width: 100%;
   height: 100%;
   overflow: hidden;
-  font-size: 0.8rem;
-  line-height: 1.25rem;
+  font-size: var(--mf-ui-font-control);
+  line-height: var(--mf-ui-line-height-control);
+  letter-spacing: var(--mf-ui-tracking-control);
 
   .bookmark-list {
-    height: calc(100% - 40px);
+    height: calc(100% - 32px);
     padding: 0.2rem 0.4rem;
     overflow: auto;
     box-sizing: border-box;
@@ -19,7 +20,7 @@ export const Container = styled.div`
       cursor: pointer;
       border-radius: 4px;
       user-select: none;
-      transition: all 0.2s ease-in-out;
+      transition: background-color 100ms ease;
 
       &:hover {
         background-color: ${(props) => props.theme.tipsBgColor};
@@ -30,7 +31,8 @@ export const Container = styled.div`
       padding: 2px 4px;
       margin-right: 4px;
       border-radius: 4px;
-      font-size: 0.6rem;
+      font-size: var(--mf-ui-font-caption);
+      line-height: var(--mf-ui-line-height-caption);
     }
   }
 `

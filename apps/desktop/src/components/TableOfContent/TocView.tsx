@@ -2,7 +2,8 @@ import { commandRegistry } from '@/commands'
 import { getHeadingValue } from '@/helper/string'
 import { useEditorStore } from '@/stores'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
-import { TableOfContents, TableOfContentsRef, IHeadingData } from '@markflowy/interface'
+import { TableOfContents } from '@markflowy/interface'
+import type { IHeadingData, TableOfContentsRef } from '@markflowy/interface'
 import { t } from '@/i18n'
 import {
   Empty,
@@ -148,7 +149,7 @@ const resolveSourceScrollEl = (activeId: string, codemirrorScrollEl: HTMLElement
 }
 
 const resolveActiveHeadingId = (params: {
-  headings: Array<{ pos: number; id: string }>
+  headings: { pos: number; id: string }[]
   scrollEl: HTMLElement | null
   getCoords: (pos: number) => HeadingViewportCoords | null
   offset?: number
@@ -216,14 +217,14 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
   )
 
   const calculateActiveHeadingId = useCallback(() => {
-    const activeId = useEditorStore.getState().activeId
-    if (!activeId) return null
+    const currentActiveId = useEditorStore.getState().activeId
+    if (!currentActiveId) return null
 
     const editorViewTypeMap = useEditorViewTypeStore.getState().editorViewTypeMap
-    const viewType = editorViewTypeMap.get(activeId)
+    const viewType = editorViewTypeMap.get(currentActiveId)
 
     if (viewType === EditorViewType.WYSIWYG) {
-      const editorDelegate = useEditorStore.getState().getEditorDelegate(activeId)
+      const editorDelegate = useEditorStore.getState().getEditorDelegate(currentActiveId)
       const editorView = editorDelegate?.manager?.view
       if (!editorView) {
         return null
@@ -240,7 +241,7 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
     }
 
     if (viewType === EditorViewType.SOURCECODE) {
-      const codemirrorView = sourceCodeCodemirrorViewMap.get(activeId)
+      const codemirrorView = sourceCodeCodemirrorViewMap.get(currentActiveId)
       if (!codemirrorView) {
         return null
       }
@@ -299,19 +300,19 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
     const disposable = commandRegistry.registerCommand({
       id: 'app:toc_refresh',
       handler: () => {
-        const activeId = useEditorStore.getState().activeId
+        const currentActiveId = useEditorStore.getState().activeId
         const editorViewTypeMap = useEditorViewTypeStore.getState().editorViewTypeMap
 
-        if (!activeId) {
+        if (!currentActiveId) {
           tocRef.current?.refreshByHeadings({ newHeadings: [] })
           setActiveHeadingId(null)
           return
         }
 
-        const viewType = editorViewTypeMap.get(activeId)
+        const viewType = editorViewTypeMap.get(currentActiveId)
 
         if (viewType === EditorViewType.SOURCECODE) {
-          const codemirrorView = sourceCodeCodemirrorViewMap.get(activeId)
+          const codemirrorView = sourceCodeCodemirrorViewMap.get(currentActiveId)
           if (!codemirrorView) {
             setTimeout(() => {
               commandRegistry.execute('app:toc_refresh')
@@ -336,7 +337,10 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
 
             sourceHeadingsRef.current = sourceHeadings
             const chapterData = getHeadingChapterData(sourceHeadings)
-            const nextScrollEl = resolveSourceScrollEl(activeId, codemirrorView.cm.scrollDOM)
+            const nextScrollEl = resolveSourceScrollEl(
+              currentActiveId,
+              codemirrorView.cm.scrollDOM,
+            )
             sourceScrollElRef.current = nextScrollEl
             setSourceScrollEl(nextScrollEl)
             wysiwygHeadingsRef.current = []
@@ -370,7 +374,7 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
         }
 
         if (viewType === EditorViewType.WYSIWYG) {
-          const editorDelegate = useEditorStore.getState().getEditorDelegate(activeId)
+          const editorDelegate = useEditorStore.getState().getEditorDelegate(currentActiveId)
           const editorView = editorDelegate?.manager?.view
           if (!editorView) {
             setTimeout(() => {
@@ -380,11 +384,14 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
           }
 
           setTimeout(() => {
-            const editorPanelEl = document.querySelector('#editor-panel') as HTMLElement | null
-            const nextScrollEl = getActiveEditorScrollEl(activeId) ?? editorPanelEl
+            const currentEditorPanelEl = document.querySelector(
+              '#editor-panel',
+            ) as HTMLElement | null
+            const nextScrollEl =
+              getActiveEditorScrollEl(currentActiveId) ?? currentEditorPanelEl
             wysiwygScrollElRef.current = nextScrollEl
             setWysiwygScrollEl(nextScrollEl)
-            setEditorPanelEl(editorPanelEl)
+            setEditorPanelEl(currentEditorPanelEl)
 
             const headingInfos = getAllHeadings(editorView.state.doc)
             const chapterData = getHeadingChapterData(
@@ -430,9 +437,9 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
   }, [])
 
   useEffect(() => {
-    const editorPanelEl = document.querySelector('#editor-panel') as HTMLElement | null
+    const currentEditorPanelEl = document.querySelector('#editor-panel') as HTMLElement | null
     const scrollEl = activeId ? getActiveEditorScrollEl(activeId) : null
-    setEditorPanelEl(editorPanelEl)
+    setEditorPanelEl(currentEditorPanelEl)
     if (!scrollEl) {
       wysiwygScrollElRef.current = null
       setWysiwygScrollEl(null)
@@ -458,8 +465,10 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
     if (!sourceScrollEl) return
 
     const handleScroll = () => scheduleActiveHeadingUpdate()
-    const activeId = useEditorStore.getState().activeId
-    const codemirrorView = activeId ? sourceCodeCodemirrorViewMap.get(activeId) : null
+    const currentActiveId = useEditorStore.getState().activeId
+    const codemirrorView = currentActiveId
+      ? sourceCodeCodemirrorViewMap.get(currentActiveId)
+      : null
     const scrollTargets = Array.from(
       new Set([sourceScrollEl, codemirrorView?.cm.scrollDOM].filter(Boolean)),
     ) as HTMLElement[]
@@ -512,7 +521,7 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
         }
         name={t('sidebar.table_of_contents')}
       />
-      <div style={{ height: 'calc(100% - 40px)', boxSizing: 'border-box' }}>
+      <div style={{ height: 'calc(100% - 32px)', boxSizing: 'border-box' }}>
         <TableOfContents
           ref={tocRef}
           containerEl={editorPanelEl ?? undefined}

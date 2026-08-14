@@ -6,7 +6,9 @@ export const Container = styled.div`
   flex-direction: column;
   user-select: none;
   overflow: auto;
-  font-size: 0.8rem;
+  font-size: var(--mf-ui-font-control);
+  line-height: var(--mf-ui-line-height-control);
+  letter-spacing: var(--mf-ui-tracking-control);
 
   &:hover,
   &:focus-within,

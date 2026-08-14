@@ -10,11 +10,13 @@ export const Container = styled.div`
   justify-content: space-between;
   align-items: center;
   gap: ${(props) => props.theme.spaceSm};
-  height: ${(props) => props.theme.statusBarHeight};
+  height: var(--mf-ui-status-bar-height);
   background: ${(props) => props.theme.statusBarBgColor};
-  border-top: 1px solid ${(props) => props.theme.borderColor};
+  border-top: 1px solid var(--mf-ui-border-subtle);
   user-select: none;
-  font-size: 0.8rem;
+  font-size: var(--mf-ui-font-caption);
+  line-height: var(--mf-ui-line-height-caption);
+  letter-spacing: var(--mf-ui-tracking-caption);
 `
 
 export const LeftContainer = styled.div`
@@ -26,10 +28,11 @@ export const LeftContainer = styled.div`
   justify-content: flex-start;
   align-items: center;
   gap: ${(props) => props.theme.spaceSm};
-  height: ${(props) => props.theme.statusBarHeight};
+  height: var(--mf-ui-status-bar-height);
   background: ${(props) => props.theme.statusBarBgColor};
   user-select: none;
-  font-size: 0.8rem;
+  font-size: inherit;
+  line-height: inherit;
 `
 
 export const RightContainer = styled.div`
@@ -41,8 +44,9 @@ export const RightContainer = styled.div`
   justify-content: flex-end;
   align-items: center;
   gap: ${(props) => props.theme.spaceSm};
-  height: ${(props) => props.theme.statusBarHeight};
+  height: var(--mf-ui-status-bar-height);
   background: ${(props) => props.theme.statusBarBgColor};
   user-select: none;
-  font-size: 0.8rem;
+  font-size: inherit;
+  line-height: inherit;
 `

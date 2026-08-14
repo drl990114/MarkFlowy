@@ -5,8 +5,8 @@ import { useEditorStateStore, useEditorStore } from '@/stores'
 import { memo, type DragEvent, useCallback, useEffect, useRef } from 'react'
 import { useTranslation } from '@/i18n'
 import styled from 'styled-components'
-import { Tooltip } from 'zens'
 import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { showContextMenu } from '../ui-v2/ContextMenu'
 import { EditorAreaHeader } from './EditorAreaHeader'
 import { EditorAreaActionButton, EditorAreaActionSeparator } from './EditorAreaAction'
@@ -232,46 +232,60 @@ const EditorAreaTab = memo((props: EditorAreaTabProps) => {
     e.dataTransfer.setData('text/plain', fileName)
   }
 
-  return (
-    <Tooltip title={fileName}>
-      <TabItem
-        active={active}
-        draggable
-        onClick={() => onSelect(id)}
-        onContextMenu={handleContextMenu}
-        onDragOver={handleDragOver}
-        onDragStart={handleDragStart}
-        onDrop={handleDrop}
-        onMouseDown={handleMiddleClick}
-      >
-        <span
-          style={{
-            maxWidth: compact ? '112px' : '160px',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-          }}
-        >
-          {tabLabel}
-        </span>
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
+    if (e.target !== e.currentTarget || (e.key !== 'Enter' && e.key !== ' ')) return
 
-        <div className='tab-items__right'>
-          {hasUnsavedChanges ? (
-            <Dot />
-          ) : (
-            <Button
-              aria-label={t('contextmenu.editor_tab.close')}
-              className='close'
-              onClick={(ev: React.MouseEvent<HTMLElement, MouseEvent> | undefined) =>
-                close(ev, id)
-              }
-              size='icon-sm'
-              variant='ghost'
-            >
-              <i aria-hidden='true' className='ri-close-line' />
-            </Button>
-          )}
-        </div>
-      </TabItem>
+    e.preventDefault()
+    onSelect(id)
+  }
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <TabItem
+          active={active}
+          aria-selected={active}
+          draggable
+          onClick={() => onSelect(id)}
+          onContextMenu={handleContextMenu}
+          onDragOver={handleDragOver}
+          onDragStart={handleDragStart}
+          onDrop={handleDrop}
+          onKeyDown={handleKeyDown}
+          onMouseDown={handleMiddleClick}
+          role='tab'
+          tabIndex={active ? 0 : -1}
+        >
+          <span
+            style={{
+              maxWidth: compact ? '112px' : '160px',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}
+          >
+            {tabLabel}
+          </span>
+
+          <div className='tab-items__right'>
+            {hasUnsavedChanges ? (
+              <Dot />
+            ) : (
+              <Button
+                aria-label={t('contextmenu.editor_tab.close')}
+                className='close'
+                onClick={(ev: React.MouseEvent<HTMLElement, MouseEvent> | undefined) =>
+                  close(ev, id)
+                }
+                size='icon-sm'
+                variant='ghost'
+              >
+                <i aria-hidden='true' className='ri-close-line' />
+              </Button>
+            )}
+          </div>
+        </TabItem>
+      </TooltipTrigger>
+      <TooltipContent>{fileName}</TooltipContent>
     </Tooltip>
   )
 })
@@ -366,7 +380,7 @@ const EditorAreaTabs = memo((props: EditorAreaTabsProps) => {
   }
 
   return (
-    <Container $compact={compact} className='editor-area-tabs'>
+    <Container $compact={compact} className='editor-area-tabs' role='tablist'>
       {showLeftSidebarToggle || showTabNavigation ? (
         <div className='tab-control'>
           {showLeftSidebarToggle ? <SidebarToggleButton side='left' /> : null}

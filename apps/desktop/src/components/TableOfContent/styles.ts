@@ -1,4 +1,4 @@
-import { darken, ScThemeProps } from '@markflowy/theme'
+import { darken, type ScThemeProps } from '@markflowy/theme'
 import styled, { css } from 'styled-components'
 import type { ITocListProps } from './type'
 
@@ -381,6 +381,37 @@ export const TocViewContainer = styled.div<ContainerProps>`
   background: ${(props) => props.theme.rightBarBgColor};
   color: ${(props) => props.theme.primaryFontColor};
   overflow: hidden;
+
+  ${(props) =>
+    props.variant !== 'editor' &&
+    css`
+      .toc-list {
+        font-size: var(--mf-ui-font-control);
+        line-height: var(--mf-ui-line-height-control);
+        letter-spacing: var(--mf-ui-tracking-control);
+      }
+
+      .toc-list a {
+        min-height: 26px;
+      }
+
+      .toc-toolbar__title {
+        font-size: var(--mf-ui-font-control);
+        line-height: var(--mf-ui-line-height-control);
+      }
+
+      .toc-link__chapter {
+        color: var(--mf-muted-foreground);
+        font-size: var(--mf-ui-font-caption);
+        font-weight: 500;
+        line-height: var(--mf-ui-line-height-caption);
+        letter-spacing: var(--mf-ui-tracking-caption);
+      }
+
+      .toc-link__title {
+        font-weight: 400;
+      }
+    `}
 
   ${(props) =>
     props.variant === 'editor' &&

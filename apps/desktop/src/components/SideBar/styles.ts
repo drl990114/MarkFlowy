@@ -7,9 +7,10 @@ export const SideBarHeader = styled.div`
   padding: 4px;
   gap: 4px;
   flex-shrink: 0;
-  height: 24px;
+  height: 32px;
+  box-sizing: border-box;
   background-color: ${(props) => props.theme.sideBarHeaderBgColor};
-  border-bottom: 1px solid ${(props) => props.theme.borderColor};
+  border-bottom: 1px solid var(--mf-ui-border-subtle);
 `
 
 export const Container = styled.div<ContainerProps>`
@@ -26,14 +27,40 @@ export const Container = styled.div<ContainerProps>`
 
   .app-sidebar {
     &__item {
-      width: 20px;
-      height: 20px;
+      appearance: none;
+      padding: 0;
+      border: 0;
+      width: 22px;
+      height: 22px;
       cursor: pointer;
       font-size: 16px;
-    }
+      line-height: 1;
+      color: ${(props) => props.theme.unselectedFontColor};
+      background: transparent;
+      border-radius: 5px;
+      transition:
+        color 100ms ease,
+        background-color 100ms ease,
+        box-shadow 100ms ease;
 
-    &-active {
-      color: ${(props) => props.theme.accentColor};
+      &:hover {
+        color: ${(props) => props.theme.primaryFontColor};
+        background-color: var(--mf-ui-control-hover-bg);
+      }
+
+      &[aria-pressed='true'] {
+        color: ${(props) => props.theme.primaryFontColor};
+        background-color: color-mix(
+          in srgb,
+          var(--mf-ui-control-selected-bg) 62%,
+          transparent
+        );
+      }
+
+      &:focus-visible {
+        outline: 2px solid ${(props) => props.theme.accentColor};
+        outline-offset: -2px;
+      }
     }
 
     &-content {

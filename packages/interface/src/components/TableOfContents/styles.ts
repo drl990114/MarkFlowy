@@ -320,8 +320,8 @@ export const TocLink = styled.a<TocListProps & { theme?: any }>`
   background: transparent;
   box-sizing: border-box;
   transition:
-    color 0.18s ease,
-    background 0.18s ease;
+    color 100ms ease,
+    background 100ms ease;
 
   &:hover {
     color: ${(props) => props.theme.primaryFontColor};

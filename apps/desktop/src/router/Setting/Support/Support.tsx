@@ -27,15 +27,16 @@ const SupportItem = styled.div`
 `
 
 const Title = styled.div`
-  font-size: 14px;
+  font-size: var(--mf-ui-font-body);
   font-weight: 600;
+  line-height: var(--mf-ui-line-height-body);
   color: ${(props) => props.theme.primaryFontColor};
 `
 
 const Description = styled.div`
-  font-size: 13px;
+  font-size: var(--mf-ui-font-control);
   color: ${(props) => props.theme.labelFontColor};
-  line-height: 1.5;
+  line-height: var(--mf-ui-line-height-control);
 `
 
 const ButtonContainer = styled.div`

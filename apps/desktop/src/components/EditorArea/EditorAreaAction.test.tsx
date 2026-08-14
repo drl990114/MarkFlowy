@@ -1,3 +1,4 @@
+import { TooltipProvider } from '@/components/ui/tooltip'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 import { EditorAreaActionButton } from './EditorAreaAction'
@@ -5,7 +6,9 @@ import { EditorAreaActionButton } from './EditorAreaAction'
 describe('EditorAreaActionButton', () => {
   it('renders an accessible native button with a decorative icon', () => {
     const markup = renderToStaticMarkup(
-      <EditorAreaActionButton icon='ri-add-line' label='New tab' />,
+      <TooltipProvider>
+        <EditorAreaActionButton icon='ri-add-line' label='New tab' />
+      </TooltipProvider>,
     )
 
     expect(markup).toContain('<button')

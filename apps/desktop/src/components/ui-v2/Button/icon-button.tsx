@@ -1,6 +1,11 @@
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import type { TooltipContentProps } from '@/components/ui/tooltip'
 import classNames from 'classnames'
-import type { TooltipProps } from 'zens'
-import { Tooltip } from 'zens'
+import type { ReactNode } from 'react'
+
+type MfTooltipProps = Omit<TooltipContentProps, 'children'> & {
+  title: ReactNode
+}
 
 interface MfIconButtonProps {
   icon: string
@@ -8,9 +13,7 @@ interface MfIconButtonProps {
   onClick: (e?: React.MouseEvent<HTMLElement>) => void
   iconRef?: React.RefObject<any>
   active?: boolean
-  tooltipProps?: Omit<TooltipProps, 'children'> & {
-    style?: React.CSSProperties
-  }
+  tooltipProps?: MfTooltipProps
   disabled?: boolean
   unselected?: boolean
   size?: 'small' | 'medium' | 'large'
@@ -39,9 +42,16 @@ export const MfIconButton = (props: MfIconButtonProps) => {
   })
 
   if (tooltipProps) {
+    const { title, ...contentProps } = tooltipProps
+
+    if (!title) return <i ref={iconRef} className={iconCls} onClick={onClick}></i>
+
     return (
-      <Tooltip style={{ zIndex: 11 }} {...tooltipProps}>
-        <i ref={iconRef} className={iconCls} onClick={onClick}></i>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <i ref={iconRef} className={iconCls} onClick={onClick}></i>
+        </TooltipTrigger>
+        <TooltipContent {...contentProps}>{title}</TooltipContent>
       </Tooltip>
     )
   }

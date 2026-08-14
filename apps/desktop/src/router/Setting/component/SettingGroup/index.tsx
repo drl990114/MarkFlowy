@@ -80,7 +80,9 @@ const TabItem = styled.button<{ $active: boolean }>`
   margin-right: 6px;
   margin-bottom: 20px;
   padding-top: 6px;
-  font-size: 14px;
+  font-size: var(--mf-ui-font-body);
+  line-height: var(--mf-ui-line-height-body);
+  letter-spacing: var(--mf-ui-tracking-body);
   font-weight: 600;
   cursor: pointer;
   color: ${(props) => (props.$active ? props.theme.primaryFontColor : props.theme.labelFontColor)};

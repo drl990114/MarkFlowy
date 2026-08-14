@@ -287,8 +287,8 @@ const SplitSeparator = styled(Separator)<{
   $zenMode: boolean
 }>`
   flex: 0 0 auto;
-  background-color: ${(props) => props.theme.borderColor};
-  transition: background-color 0.16s ease;
+  background-color: var(--mf-ui-border-subtle);
+  transition: background-color 100ms ease;
 
   ${(props) =>
     props.$zenMode &&

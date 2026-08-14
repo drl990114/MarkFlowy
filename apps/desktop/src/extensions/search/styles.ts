@@ -24,7 +24,8 @@ export const SearchInput = styled.div`
   flex-direction: row;
   justify-content: flex-start;
   align-items: center;
-  font-size: ${({ theme }) => theme.fontBase};
+  font-size: var(--mf-ui-font-control);
+  line-height: var(--mf-ui-line-height-control);
   box-sizing: border-box;
   flex-shrink: 0;
   gap: 6px;
@@ -99,7 +100,9 @@ export const SearchMeta = styled.div`
   box-sizing: border-box;
   border-bottom: 1px solid ${({ theme }) => theme.borderColor};
   color: ${({ theme }) => theme.labelFontColor};
-  font-size: 12px;
+  font-size: var(--mf-ui-font-caption);
+  line-height: var(--mf-ui-line-height-caption);
+  letter-spacing: var(--mf-ui-tracking-caption);
   background: ${({ theme }) => theme.bgColorSecondary};
 
   .search-meta__content {
@@ -122,8 +125,9 @@ export const SearchStateBox = styled.div`
   box-sizing: border-box;
   text-align: center;
   color: ${({ theme }) => theme.labelFontColor};
-  font-size: 12px;
-  line-height: 1.5;
+  font-size: var(--mf-ui-font-body);
+  line-height: var(--mf-ui-line-height-body);
+  letter-spacing: var(--mf-ui-tracking-body);
 
   .search-state__icon {
     display: flex;
@@ -164,7 +168,8 @@ export const SearchInfoBox = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  font-size: 12px;
+  font-size: var(--mf-ui-font-control);
+  line-height: var(--mf-ui-line-height-control);
   width: 100%;
 
   .search-info__path {
@@ -174,13 +179,17 @@ export const SearchInfoBox = styled.div`
     gap: 5px;
     padding: 0 10px;
     height: 34px;
-    font-size: 12px;
+    font-size: var(--mf-ui-font-caption);
+    line-height: var(--mf-ui-line-height-caption);
+    letter-spacing: var(--mf-ui-tracking-caption);
     font-weight: 600;
     cursor: pointer;
     color: ${({ theme }) => theme.labelFontColor};
     background-color: ${({ theme }) => theme.bgColorSecondary};
     border-bottom: 1px solid transparent;
-    transition: all 0.2s ease;
+    transition:
+      color 100ms ease,
+      background-color 100ms ease;
     user-select: none;
     white-space: nowrap;
     overflow: hidden;
@@ -230,7 +239,9 @@ export const SearchInfoBox = styled.div`
     align-items: flex-start;
     padding: 6px 16px;
     cursor: pointer;
-    transition: all 0.15s ease-in-out;
+    transition:
+      background-color 100ms ease,
+      border-color 100ms ease;
     overflow: hidden;
     box-sizing: border-box;
     border-left: 2px solid transparent;
@@ -252,7 +263,8 @@ export const SearchInfoBox = styled.div`
       min-width: 44px;
       text-align: right;
       font-family: monospace;
-      font-size: 11px;
+      font-size: var(--mf-ui-font-caption);
+      line-height: var(--mf-ui-line-height-caption);
       opacity: 0.8;
       margin-top: 2px;
     }
@@ -261,8 +273,8 @@ export const SearchInfoBox = styled.div`
       flex: 1;
       overflow: hidden;
       color: ${({ theme }) => theme.primaryFontColor};
-      line-height: 1.5;
-      font-size: 12px;
+      line-height: var(--mf-ui-line-height-control);
+      font-size: var(--mf-ui-font-control);
 
       .snippet-text {
         display: block;

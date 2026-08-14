@@ -1,10 +1,10 @@
 import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useGlobalKeyboard } from '@/hooks'
 import type { KeyboardInfo } from '@/hooks/useKeyboard'
 import { useRef } from 'react'
 import { useTranslation } from '@/i18n'
 import styled from 'styled-components'
-import { Tooltip } from 'zens'
 import { RecordKeysModal, type RecordKeysModalRef } from './RecordKeysModal'
 import { transferKey } from './record-key'
 
@@ -37,7 +37,9 @@ const Table = styled.table`
   width: 100%;
   min-width: 620px;
   border-collapse: collapse;
-  font-size: 12px;
+  font-size: var(--mf-ui-font-caption);
+  line-height: var(--mf-ui-line-height-caption);
+  letter-spacing: var(--mf-ui-tracking-caption);
 `
 
 const TableHead = styled.thead`
@@ -96,10 +98,15 @@ export function KeyboardTable() {
                 <TableDataCell>{row.key_map.map((v) => transferKey(v)).join(' + ')}</TableDataCell>
                 <TableDataCell>
                   {row.when === 'disabled' ? (
-                    <Tooltip title='This shortcut is disabled and cannot be edited'>
-                      <Button size='sm' disabled>
-                        Edit
-                      </Button>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className='inline-flex' tabIndex={0}>
+                          <Button size='sm' disabled>
+                            Edit
+                          </Button>
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent>This shortcut is disabled and cannot be edited</TooltipContent>
                     </Tooltip>
                   ) : (
                     <Button size='sm' onClick={() => handleOpen(row)}>
