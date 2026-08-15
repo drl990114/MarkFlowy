@@ -12,6 +12,10 @@ const fileTreeSpin = keyframes`
 `
 
 export const LoadingIcon = styled.i`
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  line-height: 1;
   animation: ${fileTreeSpin} 0.8s linear infinite;
 
   @media (prefers-reduced-motion: reduce) {
