@@ -25,6 +25,7 @@ import styled from 'styled-components'
 import { Space, toast } from 'zens'
 import { MfIconButton } from '../ui-v2/Button'
 import { showContextMenu } from '../ui-v2/ContextMenu'
+import { createPdfPrintMenuItem } from './pdf-print/pdfPrintMenuItem'
 
 type FileNormalInfo = {
   size: string
@@ -53,8 +54,8 @@ export const EditorInfoBar = memo(() => {
   )
 
   useEffect(() => {
-    getWorkspace().then((workspace) => {
-      setWorkspace(workspace)
+    getWorkspace().then((nextWorkspace) => {
+      setWorkspace(nextWorkspace)
     })
   }, [folderData])
 
@@ -169,6 +170,9 @@ ${res}
     if (rect === undefined) return
     const { findMark } = useBookMarksStore.getState()
     const curBookMark = findMark(curFile?.path || '')
+    const curFileTypeConfig = useFileTypeConfigStore
+      .getState()
+      .getFileTypeConfigById(curFile?.id || '')
 
     const aiProvider = getCurrentAIProviderDisplayName()
 
@@ -225,6 +229,9 @@ ${res}
             bus.emit('editor_export_html')
           },
         },
+        ...(curFileTypeConfig?.type === 'markdown'
+          ? [createPdfPrintMenuItem(t('contextmenu.editor_tab.export_pdf'))]
+          : []),
         {
           value: 'export_image',
           label: t('contextmenu.editor_tab.export_image'),

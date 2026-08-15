@@ -180,6 +180,10 @@
       "close_right": "右を閉じる",
       "close_all": "すべて閉じる",
       "export_html": "HTMLにエクスポート",
+      "export_pdf": "印刷 / PDFにエクスポート",
+      "export_pdf_failed": "この文書を印刷用に準備できませんでした。",
+      "export_pdf_image_warning": "{{count}} 個の画像を読み込めませんでした。代替テキストを印刷します。",
+      "export_pdf_embedded_media": "インタラクティブコンテンツ",
       "export_image": "画像にエクスポート"
     }
   },

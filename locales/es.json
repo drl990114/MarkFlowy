@@ -175,6 +175,10 @@
       "close_right": "Cerrar a la derecha",
       "close_all": "Cerrar todo",
       "export_html": "Exportar a HTML",
+      "export_pdf": "Imprimir / Exportar PDF",
+      "export_pdf_failed": "No se pudo preparar este documento para imprimirlo.",
+      "export_pdf_image_warning": "No se pudieron cargar {{count}} imagen(es). Se imprimirá su texto alternativo.",
+      "export_pdf_embedded_media": "Contenido interactivo",
       "export_image": "Exportar como imagen"
     }
   },

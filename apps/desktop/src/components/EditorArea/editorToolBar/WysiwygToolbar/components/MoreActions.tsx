@@ -10,6 +10,7 @@ import { useTranslation } from '@/i18n'
 import { toast } from 'zens'
 import { MfIconButton } from '../../../../ui-v2/Button'
 import { showContextMenu } from '../../../../ui-v2/ContextMenu'
+import { createPdfPrintMenuItem } from '../../../pdf-print/pdfPrintMenuItem'
 
 export const MoreActions = () => {
   const activeId = useEditorStore((state) => state.activeId)
@@ -71,6 +72,7 @@ export const MoreActions = () => {
             bus.emit('editor_export_html')
           },
         },
+        createPdfPrintMenuItem(t('contextmenu.editor_tab.export_pdf')),
         {
           value: 'export_image',
           label: t('contextmenu.editor_tab.export_image'),

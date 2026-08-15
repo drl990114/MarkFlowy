@@ -1,0 +1,187 @@
+.mf-pdf-print-root {
+  position: fixed;
+  inset-block-start: 0;
+  inset-inline-start: -100000px;
+  z-index: -1;
+  width: 816px;
+  min-height: 1px;
+  overflow: visible;
+  visibility: hidden;
+  pointer-events: none;
+  background: #fff;
+  color: #000;
+}
+
+html.mf-pdf-print-window,
+body.mf-pdf-print-window,
+body.mf-pdf-print-window > #root {
+  height: auto !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+  background: #fff !important;
+  color: #000 !important;
+}
+
+body.mf-pdf-print-window {
+  margin: 0 !important;
+}
+
+body.mf-pdf-print-window .mf-pdf-window-root {
+  position: static !important;
+  inset: auto !important;
+  z-index: auto !important;
+  display: block !important;
+  width: auto !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  background: #fff !important;
+  color: #000 !important;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.mf-pdf-media-placeholder {
+  display: grid;
+  gap: 4px;
+  margin-block: 12px;
+  padding: 12px;
+  overflow-wrap: anywhere;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  background: #f6f8fa;
+  color: #24292f;
+}
+
+.mf-pdf-media-placeholder a {
+  color: #0969da;
+  text-decoration: underline;
+}
+
+.mf-pdf-print-root > div,
+.mf-pdf-print-root .mf-preview-content {
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  overflow-wrap: anywhere;
+}
+
+.mf-pdf-print-root .mf-preview-loading,
+.mf-pdf-print-root .mf-preview-image-progress,
+.mf-pdf-print-root [role='toolbar'],
+.mf-pdf-print-root [data-radix-popper-content-wrapper] {
+  display: none !important;
+}
+
+.mf-pdf-print-root h1,
+.mf-pdf-print-root h2,
+.mf-pdf-print-root h3,
+.mf-pdf-print-root h4,
+.mf-pdf-print-root h5,
+.mf-pdf-print-root h6 {
+  break-after: avoid-page;
+  page-break-after: avoid;
+}
+
+.mf-pdf-print-root img,
+.mf-pdf-print-root svg,
+.mf-pdf-print-root figure,
+.mf-pdf-print-root tr,
+.mf-pdf-print-root .mf-pdf-media-placeholder {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.mf-pdf-print-root img,
+.mf-pdf-print-root svg {
+  max-width: 100% !important;
+  max-height: 100vh !important;
+  height: auto !important;
+}
+
+.mf-pdf-print-root img:not([src]) {
+  display: inline;
+}
+
+.mf-pdf-print-root pre,
+.mf-pdf-print-root code {
+  white-space: pre-wrap !important;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.mf-pdf-print-root pre {
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+.mf-pdf-print-root table {
+  display: table !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  table-layout: auto;
+  overflow: visible !important;
+}
+
+.mf-pdf-print-root thead {
+  display: table-header-group;
+}
+
+.mf-pdf-print-root tfoot {
+  display: table-footer-group;
+}
+
+.mf-pdf-print-root th,
+.mf-pdf-print-root td {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.mf-pdf-print-root a {
+  overflow-wrap: anywhere;
+  text-decoration: underline;
+}
+
+.mf-pdf-print-root input[type='checkbox'] {
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.mf-pdf-print-root .mf-pdf-list-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent !important;
+  -webkit-mask-image: none !important;
+  mask-image: none !important;
+}
+
+.mf-pdf-print-root .mf-pdf-list-marker-icon {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  color: currentColor;
+}
+
+.mf-pdf-print-root ::selection {
+  background: transparent;
+}
+
+@media print {
+  @page {
+    margin: 16mm;
+  }
+
+  html.mf-pdf-print-window,
+  body.mf-pdf-print-window,
+  body.mf-pdf-print-window > #root {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    background: #fff !important;
+    color: #000 !important;
+  }
+}

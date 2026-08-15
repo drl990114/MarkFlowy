@@ -17,6 +17,7 @@ import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from '@/i18n'
 import { EditorViewType } from 'rme'
 import { isDivider, Space, toast, type MenuItemData } from 'zens'
+import { createPdfPrintMenuItem } from '../../pdf-print/pdfPrintMenuItem'
 
 type FileNormalInfo = {
   size: string
@@ -301,6 +302,9 @@ export const MenuList = memo((props: MenuListProps) => {
           bus.emit('editor_export_html')
         },
       })
+      if (curFileTypeConfig?.type === 'markdown') {
+        items.push(createPdfPrintMenuItem(t('contextmenu.editor_tab.export_pdf')))
+      }
       items.push({
         value: 'export_image',
         label: t('contextmenu.editor_tab.export_image'),

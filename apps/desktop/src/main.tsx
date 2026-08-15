@@ -9,6 +9,8 @@ import { BrowserRouter } from 'react-router'
 import 'remixicon/fonts/remixicon.css'
 import { Spinners } from 'zens'
 import App from './App'
+import { PdfPrintWindowApp } from './components/EditorArea/pdf-print/PdfPrintWindowApp'
+import { getPdfPrintWindowRequest } from './components/EditorArea/pdf-print/pdfPrintWindow'
 import './atom.css'
 import './normalize.css'
 import './ui.css'
@@ -45,6 +47,7 @@ const Main = () => {
 }
 
 const rootElement = document.getElementById('root')!
+const pdfPrintWindowRequest = getPdfPrintWindowRequest()
 rootElement.addEventListener('dragover', (e) => {
   e.preventDefault()
 })
@@ -52,14 +55,20 @@ rootElement.addEventListener('drop', (event) => {
   event.preventDefault()
 })
 
-ReactDOM.createRoot(rootElement).render(
-  <StrictMode>
-    <HoxRoot>
-      <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          <Main />
-        </BrowserRouter>
-      </QueryClientProvider>
-    </HoxRoot>
-  </StrictMode>,
-)
+if (pdfPrintWindowRequest) {
+  document.documentElement.classList.add('mf-pdf-print-window')
+  document.body.classList.add('mf-pdf-print-window')
+  ReactDOM.createRoot(rootElement).render(<PdfPrintWindowApp request={pdfPrintWindowRequest} />)
+} else {
+  ReactDOM.createRoot(rootElement).render(
+    <StrictMode>
+      <HoxRoot>
+        <QueryClientProvider client={queryClient}>
+          <BrowserRouter>
+            <Main />
+          </BrowserRouter>
+        </QueryClientProvider>
+      </HoxRoot>
+    </StrictMode>,
+  )
+}

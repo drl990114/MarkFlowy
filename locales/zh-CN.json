@@ -193,6 +193,10 @@
       "close_right": "关闭右侧",
       "close_all": "关闭全部",
       "export_html": "导出为 HTML",
+      "export_pdf": "打印 / 导出 PDF",
+      "export_pdf_failed": "无法准备此文档进行打印。",
+      "export_pdf_image_warning": "有 {{count}} 张图片加载失败，将改为打印替代文本。",
+      "export_pdf_embedded_media": "交互式内容",
       "export_image": "导出为图片"
     }
   },

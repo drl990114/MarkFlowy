@@ -192,6 +192,10 @@
       "close_right": "Close right",
       "close_all": "Close all",
       "export_html": "Export to HTML",
+      "export_pdf": "Print / Export PDF",
+      "export_pdf_failed": "Unable to prepare this document for printing.",
+      "export_pdf_image_warning": "{{count}} image(s) could not be loaded. Their alternative text will be printed instead.",
+      "export_pdf_embedded_media": "Interactive content",
       "export_image": "Export to Image"
     }
   },

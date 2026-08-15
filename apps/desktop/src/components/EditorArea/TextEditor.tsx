@@ -91,6 +91,7 @@ import { runQueuedFileWrite } from './runQueuedFileWrite'
 import { runSaveOperation } from './runSaveOperation'
 import { getSaveAsCollisionIds } from './saveAsCollision'
 import { savePathCoordinator } from './savePathCoordinator'
+import { PdfPrintController } from './pdf-print/PdfPrintController'
 import { EditorSkeleton, WarningHeader } from './styles'
 
 const delegateOptionsCache = new Map<string, CreateWysiwygDelegateOptions>()
@@ -1862,6 +1863,11 @@ function TextEditor(props: TextEditorProps) {
     [id, delegate, active, savePathReserved, snapshotPublisher],
   )
 
+  const getPdfPrintContent = useCallback(() => {
+    snapshotPublisher.flush()
+    return latestContentRef.current ?? content ?? ''
+  }, [content, snapshotPublisher])
+
   if (status === TextEditorStatus.NOTEXIST) {
     return <WarningHeader>File is not exist</WarningHeader>
   }
@@ -1892,21 +1898,31 @@ function TextEditor(props: TextEditorProps) {
   })
 
   return (
-    <EditorWrapper
-      id='editorarea-wrapper'
-      className={cls}
-      fullWidth={editorFullWidth}
-      active={active}
-      $visible={visible}
-      onBeforeInputCapture={handleBeforeInputCapture}
-      onClick={handleWrapperClick}
-      editorViewType={currentViewType}
-      fileType={fileTypeConfig.type}
-    >
-      <AppEditorThemeProvider>
-        <MfEditor ref={editorRef} onChange={handleChange} {...editorProps} />
-      </AppEditorThemeProvider>
-    </EditorWrapper>
+    <>
+      <EditorWrapper
+        id='editorarea-wrapper'
+        className={cls}
+        fullWidth={editorFullWidth}
+        active={active}
+        $visible={visible}
+        onBeforeInputCapture={handleBeforeInputCapture}
+        onClick={handleWrapperClick}
+        editorViewType={currentViewType}
+        fileType={fileTypeConfig.type}
+      >
+        <AppEditorThemeProvider>
+          <MfEditor ref={editorRef} onChange={handleChange} {...editorProps} />
+        </AppEditorThemeProvider>
+      </EditorWrapper>
+      <PdfPrintController
+        active={active}
+        enabled={fileTypeConfig.type === 'markdown'}
+        fileName={curFile.name}
+        getContent={getPdfPrintContent}
+        delegateOptions={editorProps.delegateOptions!}
+        styleToken={editorProps.styleToken}
+      />
+    </>
   )
 }
 
