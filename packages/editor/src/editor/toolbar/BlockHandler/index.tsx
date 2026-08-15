@@ -1,5 +1,4 @@
 import { t } from '@markflowy/i18n'
-import { isHTMLElement } from '@ocavue/utils'
 import type { EditorView } from '@rme-sdk/sdk/core'
 import { NodeSelection } from '@rme-sdk/sdk/pm/state'
 import { useCommands, useExtension, useRemirrorContext } from '@rme-sdk/sdk/react'
@@ -13,7 +12,10 @@ import {
 } from '../../const/block-handler-layout'
 import { nodeTypeIconMap } from '../../const'
 import type { LineListExtension } from '../../extensions'
-import { createDraggingPreview, setViewDragging } from '../../extensions/NodeIndicator/drag-preview'
+import {
+  clearViewDragging,
+  startViewDragging,
+} from '../../extensions/NodeIndicator/drag-preview'
 import { NodeIndicatorExtension } from '../../extensions/NodeIndicator/node-indicator-extension'
 import type { NodeIndicatorState } from '../../extensions/NodeIndicator/node-indicator-extension'
 import { editorZIndex } from '../../theme/z-index'
@@ -69,11 +71,17 @@ export const BlockHandler = memo(({ getMenuBoundary }: BlockHandlerProps) => {
   const triggerRef = useRef<HTMLDivElement>(null)
   const displayStateRef = useRef<NodeIndicatorState | undefined>(state)
 
-  const handleClick = useCallback(() => {
+  const handleBlockPointerDown = useCallback(() => {
     if (editorView && nodeIndicatorExtension && state && state.pos !== null && state.node) {
       const tr = editorView.state.tr
       tr.setSelection(NodeSelection.create(tr.doc, state.pos))
       editorView.dispatch(tr)
+
+      requestAnimationFrame(() => {
+        if (!editorView.isDestroyed) {
+          editorView.focus()
+        }
+      })
     }
   }, [editorView, nodeIndicatorExtension, state])
 
@@ -81,26 +89,16 @@ export const BlockHandler = memo(({ getMenuBoundary }: BlockHandlerProps) => {
     (event: React.DragEvent<HTMLDivElement>) => {
       if (editorView && state && state.pos !== null && state.node && state.node.isBlock) {
         editorView.dom.classList.add('rme-dragging')
-
-        handleClick()
-        const dom = editorView.nodeDOM(state.pos)
-
-        if (dom && isHTMLElement(dom)) {
-          if (event.dataTransfer) {
-            event.dataTransfer.effectAllowed = 'move'
-          }
-
-          createDraggingPreview(editorView, state, event)
-          setViewDragging(editorView, state)
-        }
+        startViewDragging(editorView, state, event)
       }
     },
-    [editorView, state, handleClick],
+    [editorView, state],
   )
 
   const handleDragEnd = useCallback(() => {
     if (editorView) {
       editorView.dom.classList.remove('rme-dragging')
+      clearViewDragging(editorView)
     }
   }, [editorView])
 
@@ -368,6 +366,7 @@ export const BlockHandler = memo(({ getMenuBoundary }: BlockHandlerProps) => {
         key="rme-block-handler"
         className="rme-block-handler"
         draggable="true"
+        onPointerDown={handleBlockPointerDown}
         onClick={() => setDropdownOpen(!dropdownOpen)}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
@@ -377,7 +376,7 @@ export const BlockHandler = memo(({ getMenuBoundary }: BlockHandlerProps) => {
           top: `${fixedPosition?.top ?? state?.rect?.top ?? 0}px`,
         }}
       >
-        <IconButton onClick={handleClick}>{renderIcon()}</IconButton>
+        <IconButton>{renderIcon()}</IconButton>
 
         <div className="rme-draggable-handler">
           <i className="ri-draggable" />

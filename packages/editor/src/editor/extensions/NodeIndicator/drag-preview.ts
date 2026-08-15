@@ -1,51 +1,56 @@
 import { isHTMLElement } from '@ocavue/utils'
-import { EditorView, Fragment, Slice } from '@rme-sdk/sdk/pm'
+import { Fragment, Slice } from '@rme-sdk/sdk/pm/model'
 import { NodeSelection } from '@rme-sdk/sdk/pm/state'
-import { NodeIndicatorState } from '.'
+import type { EditorView } from '@rme-sdk/sdk/pm/view'
+import type { NodeIndicatorState, ViewDragging } from './types'
 import { getBoxElement } from '../../utils/get-box-element'
 import { setDragPreview } from './set-drag-preview'
 
-export function createDraggingPreview(
+export function startViewDragging(
   view: EditorView,
   hoverState: NodeIndicatorState,
   event: React.DragEvent<HTMLDivElement>,
 ): void {
-  if (!event.dataTransfer) {
-    return
-  }
-
-  const { pos } = hoverState
-
-  if (pos == null) {
-    return
-  }
-
-  const element = view.nodeDOM(pos)
-  if (!element || !isHTMLElement(element)) {
-    return
-  }
-
-  const boxElement = getBoxElement(element)
-  if (!boxElement || !isHTMLElement(boxElement)) {
-    return
-  }
-
-  event.dataTransfer.clearData()
-  event.dataTransfer.setData('text/html', boxElement.outerHTML)
-  event.dataTransfer.effectAllowed = 'copyMove'
-  setDragPreview(event, boxElement)
-
-  return
-}
-
-export function setViewDragging(view: EditorView, hoverState: any): void {
   const { node, pos } = hoverState
+  if (!node || pos == null) {
+    return
+  }
 
-  const dragging = {
-    slice: new Slice(Fragment.from(node), 0, 0),
+  const { dom, text, slice } = view.serializeForClipboard(
+    new Slice(Fragment.from(node), 0, 0),
+  )
+
+  if (event.dataTransfer) {
+    event.dataTransfer.clearData()
+    event.dataTransfer.setData('text/html', dom.innerHTML)
+    event.dataTransfer.setData('text/plain', text)
+    event.dataTransfer.effectAllowed = 'copyMove'
+
+    const element = view.nodeDOM(pos)
+    if (element && isHTMLElement(element)) {
+      const boxElement = getBoxElement(element)
+      if (boxElement && isHTMLElement(boxElement)) {
+        setDragPreview(event, boxElement)
+      }
+    }
+  }
+
+  const dragging: ViewDragging = {
+    slice,
     move: true,
     node: NodeSelection.create(view.state.doc, pos),
   }
 
   view.dragging = dragging
+}
+
+export function clearViewDragging(view: EditorView): void {
+  const dragging = view.dragging
+  if (!dragging) return
+
+  window.setTimeout(() => {
+    if (view.dragging === dragging) {
+      view.dragging = null
+    }
+  }, 50)
 }
