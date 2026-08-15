@@ -1,5 +1,41 @@
 # UPDATE LOG
 
+## v0.88.0
+
+Features:
+
+- Added hierarchical heading numbering in WYSIWYG mode. Open the Table of Contents panel on the right, then click the ordered-list button in the upper-right corner of its header to add or remove Arabic prefixes such as `1、` and `1.1、`; numbered documents keep their heading paths synchronized when headings are inserted or reordered.
+
+- Added Print / Export PDF for Markdown documents. 
+
+- Added a pure-character count mode to the status bar, excluding spaces, line breaks, and other whitespace.
+
+- Added a Windows x64 Portable ZIP that can be extracted and run without installation. It uses the system WebView2 Runtime and keeps MarkFlowy's existing user-level data location.
+
+Improvements and Fixes:
+
+- Improved WYSIWYG block dragging with more reliable block selection, drag previews, and editor-native HTML and plain-text transfer data when moving or copying content.
+
+- Polished the compact Desktop interface across tabs, sidebars, toolbars, the status bar, Settings, and workspace information, with more consistent tooltips, control styling, and keyboard-accessible tabs.
+
+---
+
+特性：
+
+- 所见即所得模式新增层级标题编号。打开右侧“目录”面板，点击面板标题栏右上角的有序列表按钮，即可一键添加或移除 `1、`、`1.1、` 等阿拉伯数字前缀；在已编号文档中插入或重排标题时，层级路径会自动同步。
+
+- Markdown 文档新增“打印 / 导出 PDF”。
+
+- 底部状态栏新增“纯字符”统计模式，不计空格、换行和其他空白字符。
+
+- 新增 Windows x64 Portable ZIP，解压后即可运行，无需安装；该版本使用系统 WebView2 Runtime，并继续使用 MarkFlowy 现有的用户级数据目录。
+
+改进与修复：
+
+- 改进所见即所得模式的块拖拽，提升块选中、拖拽预览以及移动或复制内容时 HTML 和纯文本传输的可靠性。
+
+- 统一标签栏、侧边栏、工具栏、状态栏、设置页及工作区信息的紧凑视觉和交互，并改进 Tooltip、控件样式及标签页的键盘操作。
+
 ## v0.87.0
 
 Features:
