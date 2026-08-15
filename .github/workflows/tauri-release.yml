@@ -84,6 +84,31 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
 
+      - name: Package Windows portable zip
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+
+          $version = $env:GITHUB_REF_NAME -replace '^v', ''
+          $releaseDir = Join-Path "target/${{ matrix.target }}" "release"
+          $exe = Join-Path $releaseDir "markflowy.exe"
+
+          if (-not (Test-Path -LiteralPath $exe -PathType Leaf)) {
+            throw "Release executable not found: $exe"
+          }
+
+          $portableRoot = Join-Path $env:RUNNER_TEMP "MarkFlowy-portable-package"
+          $portableDir = Join-Path $portableRoot "MarkFlowy-portable"
+          $portableOutput = Join-Path $releaseDir "bundle/portable"
+          $portableZip = Join-Path $portableOutput "MarkFlowy_${version}_x64_portable.zip"
+
+          Remove-Item -LiteralPath $portableRoot -Recurse -Force -ErrorAction SilentlyContinue
+          New-Item -ItemType Directory -Path $portableDir -Force | Out-Null
+          New-Item -ItemType Directory -Path $portableOutput -Force | Out-Null
+          Copy-Item -LiteralPath $exe -Destination (Join-Path $portableDir "MarkFlowy.exe")
+          Compress-Archive -Path $portableDir -DestinationPath $portableZip -Force
+
       - uses: actions/upload-artifact@v4
         if: matrix.os == 'ubuntu-22.04'
         with:
@@ -117,6 +142,7 @@ jobs:
           path: |
             ./target/${{ matrix.target }}/release/bundle/msi/**
             ./target/${{ matrix.target }}/release/bundle/nsis/**
+            ./target/${{ matrix.target }}/release/bundle/portable/**.zip
 
   build-offline-installer:
     permissions:
@@ -241,6 +267,8 @@ jobs:
           mv "artifacts/x86_64/nsis/MarkFlowy_${{ env.version }}_x64-setup.exe" "artifacts/MarkFlowy_v${{ env.version }}_x64-setup.exe"
           mv "artifacts/x86_64/nsis/MarkFlowy_${{ env.version }}_x64-setup.exe.sig" "artifacts/MarkFlowy_v${{ env.version }}_x64-setup.exe.sig"
 
+          mv "artifacts/x86_64/portable/MarkFlowy_${{ env.version }}_x64_portable.zip" "artifacts/MarkFlowy_v${{ env.version }}_x64_portable.zip"
+
           mv "artifacts/offline-installer/msi/MarkFlowy_${{ env.version }}_x64_en-US.msi" "artifacts/MarkFlowy_v${{ env.version }}_offline_installer_x64.msi"
           mv "artifacts/offline-installer/msi/MarkFlowy_${{ env.version }}_x64_en-US.msi.sig" "artifacts/MarkFlowy_v${{ env.version }}_offline_installer_x64.msi.sig"
 
@@ -260,6 +288,7 @@ jobs:
 
           ### Windows users
           - We provide an Offline Installer with built-in ​​WebView2 Runtime​​ for devices that cannot automatically install WebView2 online or are in a no-network environment. Please note that this installer is relatively large in size and is recommended to be used only when necessary.
+          - The Portable ZIP can be extracted and run without installation. It uses the system WebView2 Runtime and keeps MarkFlowy's existing user-level data location.
 
           ### macOS users
           - ​​macOS x86_64 version​​: When you launch the app for the first time, you may see a prompt saying "Cannot open the application" because the app is from an unidentified developer. Please go to "System Preferences" > "Security & Privacy", and click "Open Anyway" in the "General" tab.
@@ -270,6 +299,7 @@ jobs:
 
           ### Windows 用户
           - 我们提供了内置 ​​WebView2 运行时​​的离线安装包（Offline Installer），适用于无法自动在线安装 WebView2 或处于无网络环境的设备。请注意，此安装包体积较大，建议仅在必要时使用.
+          - Portable ZIP 解压后即可运行，无需安装；它使用系统 WebView2 Runtime，并继续使用 MarkFlowy 现有的用户级数据目录。
 
           ### macOS 用户
           - ​​macOS x86_64 版本​​：首次启动应用时，系统可能会提示“无法打开应用程序”，这是因为应用来自未识别的开发者。请前往“系统偏好设置” > “安全性与隐私”，在“通用”标签页中点击“仍要打开”即可.
