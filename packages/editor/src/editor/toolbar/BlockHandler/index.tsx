@@ -6,7 +6,11 @@ import { useCommands, useExtension, useRemirrorContext } from '@rme-sdk/sdk/reac
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import styled, { createGlobalStyle } from 'styled-components'
 import { Dropdown, type DropdownMenuItem, type MenuItemType } from 'zens'
-import { BLOCK_HANDLER_INLINE_SIZE, getBlockHandlerLeft } from '../../const/block-handler-layout'
+import {
+  BLOCK_HANDLER_CONTENT_GAP,
+  BLOCK_HANDLER_INLINE_SIZE,
+  getBlockHandlerLeft,
+} from '../../const/block-handler-layout'
 import { nodeTypeIconMap } from '../../const'
 import type { LineListExtension } from '../../extensions'
 import { createDraggingPreview, setViewDragging } from '../../extensions/NodeIndicator/drag-preview'
@@ -396,6 +400,15 @@ const Container = styled.div`
   z-index: ${editorZIndex.blockHandler};
   background-color: ${(props) => props.theme.bgColor};
   cursor: pointer;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    left: 100%;
+    width: ${BLOCK_HANDLER_CONTENT_GAP}px;
+    pointer-events: auto;
+  }
 
   &:hover {
     background-color: ${(props) => props.theme.contextMenuBgColorHover};

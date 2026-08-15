@@ -1,3 +1,4 @@
+import Logo from '@/assets/logo.svg?react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import type { OpenSettingTarget } from '@/extensions/ai/aiProvidersService'
@@ -178,8 +179,8 @@ function Setting({ navigationRequest }: SettingProps) {
 
   return (
     <div className='box-border flex h-screen w-screen min-w-0 overflow-hidden bg-background text-foreground'>
-      <aside className='box-border flex w-[13.5rem] shrink-0 flex-col border-r border-border bg-muted/50 max-lg:w-[13rem] max-md:w-48'>
-        <div className='shrink-0 px-2 pt-2 pb-2'>
+      <aside className='box-border flex w-[15.5rem] shrink-0 flex-col border-r border-border bg-muted/50 max-lg:w-56 max-md:w-52'>
+        <div className='shrink-0 px-3 pt-3 pb-2'>
           <Button
             asChild
             className='h-7 w-full justify-start px-2 text-xs font-normal text-muted-foreground shadow-none'
@@ -208,7 +209,7 @@ function Setting({ navigationRequest }: SettingProps) {
             />
           </div>
         </div>
-        <nav aria-label={t('settings.label')} className='min-h-0 flex-1 overflow-y-auto px-2 py-1'>
+        <nav aria-label={t('settings.label')} className='min-h-0 flex-1 overflow-y-auto px-3 py-1'>
           <div className='px-2 pt-1 pb-1.5 text-xs font-medium text-muted-foreground'>
             {t('settings.label')}
           </div>
@@ -242,29 +243,44 @@ function Setting({ navigationRequest }: SettingProps) {
             ) : null}
           </ul>
         </nav>
-        <footer className='shrink-0 border-t border-border px-3 py-2 text-xs text-muted-foreground'>
-          {appInfo.version ? (
-            <div className='mb-2'>
-              {t('about.version')}: {appInfo.version}
+        <footer className='shrink-0 border-t border-border/80 px-3 py-3'>
+          <div className='flex min-w-0 items-center gap-2'>
+            <Logo aria-hidden='true' className='size-6 shrink-0' focusable='false' />
+            <div aria-live='polite' className='min-w-0 flex-1'>
+              <div className='flex min-w-0 items-baseline gap-1.5'>
+                <span className='truncate text-xs font-medium text-foreground'>
+                  {appInfo.name || t('app_name')}
+                </span>
+                {appInfo.version ? (
+                  <span className='shrink-0 text-[11px] tabular-nums text-muted-foreground'>
+                    v{appInfo.version}
+                  </span>
+                ) : null}
+              </div>
+              {update ? (
+                <p className='m-0 mt-0.5 truncate text-[11px] leading-4 text-muted-foreground'>
+                  {t('about.newVersion')} · v{update.version}
+                </p>
+              ) : null}
             </div>
-          ) : null}
-          {update ? (
-            <Button
-              className='h-auto w-full justify-start py-2 text-left whitespace-normal'
-              size='sm'
-              onClick={() => {
-                installUpdate(update)
-                setUpdate(null)
-              }}
-            >
-              {t('about.install')}
-              {t('about.newVersion')}: {update.version}
-            </Button>
-          ) : null}
+            {update ? (
+              <Button
+                className='h-7 shrink-0 px-2 text-xs text-primary shadow-none hover:text-primary'
+                size='sm'
+                variant='ghost'
+                onClick={() => {
+                  installUpdate(update)
+                  setUpdate(null)
+                }}
+              >
+                {t('about.install')}
+              </Button>
+            ) : null}
+          </div>
         </footer>
       </aside>
       <main className='box-border min-w-0 flex-1 overflow-x-hidden overflow-y-auto bg-background'>
-        <div className='box-border mx-auto w-full max-w-[54rem] px-6 pt-7 pb-12 max-md:px-4 max-md:pt-5'>
+        <div className='box-border mx-auto w-full max-w-[58rem] px-8 pt-7 pb-12 max-lg:px-6 max-md:px-4 max-md:pt-5'>
           <header className='mb-5 flex items-start justify-between gap-4'>
             <div className='min-w-0'>
               <h1 className='m-0 text-xl font-semibold text-foreground'>{t(curGroup.i18nKey)}</h1>

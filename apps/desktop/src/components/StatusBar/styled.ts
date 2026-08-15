@@ -5,7 +5,7 @@ export const Container = styled.div`
   top: 0;
   left: 0;
   right: 0;
-  padding: 0 8px;
+  padding: 0 6px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -20,33 +20,23 @@ export const Container = styled.div`
 `
 
 export const LeftContainer = styled.div`
-  position: relative;
-  top: 0;
-  left: 0;
-  right: 0;
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  gap: ${(props) => props.theme.spaceSm};
+  gap: 2px;
+  min-width: 0;
   height: var(--mf-ui-status-bar-height);
-  background: ${(props) => props.theme.statusBarBgColor};
-  user-select: none;
   font-size: inherit;
   line-height: inherit;
 `
 
 export const RightContainer = styled.div`
-  position: relative;
-  top: 0;
-  left: 0;
-  right: 0;
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  gap: ${(props) => props.theme.spaceSm};
+  gap: 2px;
+  min-width: 0;
   height: var(--mf-ui-status-bar-height);
-  background: ${(props) => props.theme.statusBarBgColor};
-  user-select: none;
   font-size: inherit;
   line-height: inherit;
 `

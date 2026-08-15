@@ -1,5 +1,4 @@
 import { commandRegistry, keybindingRegistry } from '@/commands'
-import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { EVENT } from '@/constants'
 import { useGlobalKeyboard } from '@/hooks'
@@ -7,6 +6,7 @@ import { useTranslation } from '@/i18n'
 import { useEditorStore } from '@/stores'
 import { useState } from 'react'
 import { ZenModeIcon } from './ZenModeIcon'
+import { StatusBarButton } from './StatusBarButton'
 
 export function ZenModeButton() {
   const activeId = useEditorStore((state) => state.activeId)
@@ -26,18 +26,16 @@ export function ZenModeButton() {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Button
+        <StatusBarButton
           aria-label={accessibleLabel}
-          className='size-6 rounded-sm text-foreground-secondary'
           data-zen-mode-toggle=''
+          format='icon'
           onClick={() => commandRegistry.execute(EVENT.app_toggleZenMode)}
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
-          size='icon-sm'
-          variant='ghost'
         >
           <ZenModeIcon rotating={hovered} />
-        </Button>
+        </StatusBarButton>
       </TooltipTrigger>
       <TooltipContent side='top'>{accessibleLabel}</TooltipContent>
     </Tooltip>
