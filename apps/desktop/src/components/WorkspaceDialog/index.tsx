@@ -36,30 +36,28 @@ export const WorkspaceDialog = memo(() => {
         if (!nextOpen) handleClose()
       }}
     >
-      <Dialog.Content aria-describedby={undefined} closeLabel={t('common.close')} size='lg'>
+      <Dialog.Content aria-describedby={undefined} closeLabel={t('common.close')}>
         <Dialog.Header>
           <Dialog.Title>{t('workspace.info')}</Dialog.Title>
         </Dialog.Header>
         <Dialog.Body aria-busy={isLoading} aria-live='polite'>
           {isLoading ? (
-            <div
-              className='flex items-center gap-2 rounded-lg border border-border bg-muted p-4 text-foreground-secondary'
-            >
+            <div className='flex items-center gap-2 text-foreground-secondary'>
               <LoaderCircleIcon className='size-4 animate-spin' aria-hidden='true' />
               <span>{t('common.fetching')}</span>
             </div>
           ) : workspace?.rootPath ? (
-            <div className='flex items-start gap-3 rounded-lg border border-border bg-muted p-4'>
-              <i
-                aria-hidden='true'
-                className='ri-folder-5-line mt-0.5 shrink-0 text-base text-primary'
-              />
-              <span className='min-w-0 break-all text-foreground'>{workspace.rootPath}</span>
+            <div className='flex min-w-0 items-start gap-2'>
+              <span className='shrink-0'>{t('file.path')}:</span>
+              <span
+                className='min-w-0 select-text text-foreground [overflow-wrap:anywhere]'
+                dir='ltr'
+              >
+                {workspace.rootPath}
+              </span>
             </div>
           ) : (
-            <div className='rounded-lg border border-border bg-muted p-4 text-foreground-secondary'>
-              {t('workspace.none')}
-            </div>
+            <span>{t('workspace.none')}</span>
           )}
         </Dialog.Body>
       </Dialog.Content>

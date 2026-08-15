@@ -35,7 +35,7 @@ export const Container = styled.div<ContainerProps>`
       cursor: pointer;
       font-size: 16px;
       line-height: 1;
-      color: ${(props) => props.theme.unselectedFontColor};
+      color: ${(props) => props.theme.labelFontColor};
       background: transparent;
       border-radius: 5px;
       transition:
