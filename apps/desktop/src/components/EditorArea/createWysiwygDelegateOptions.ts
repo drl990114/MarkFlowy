@@ -21,9 +21,9 @@ import { useEditorKeybindingStore } from '@/hooks/useKeyboard'
 import { locales } from '@/i18n'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import { writeText } from '@tauri-apps/plugin-clipboard-manager'
-import { openUrl } from '@tauri-apps/plugin-opener'
 import type { CreateWysiwygDelegateOptions } from 'rme'
 import { handleImagePaste, handleUploadImage } from './imageHandlers'
+import { openEditorLink } from './openEditorLink'
 import { requestImageInsert } from './requestImageInsert'
 
 type AIOptions = NonNullable<CreateWysiwygDelegateOptions['ai']>
@@ -213,7 +213,7 @@ export const createWysiwygDelegateOptions = (fileId?: string): WysiwygDelegateOp
       }
     },
     handleLinkClick: (href) => {
-      openUrl(href)
+      void openEditorLink(href, fileId)
       return true
     },
   }
