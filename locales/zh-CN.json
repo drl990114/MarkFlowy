@@ -65,6 +65,13 @@
     "local_error": "无法打开或读取所选图片，请重试。",
     "local_behavior_hint": "本地图片将按“设置 > 图片 > 插入本地图片行为”处理。"
   },
+  "image_preview": {
+    "toolbar": "图片预览工具栏",
+    "zoom_out": "缩小",
+    "zoom_in": "放大",
+    "actual_size": "原始尺寸",
+    "fit_to_window": "适应窗口"
+  },
   "action": {
     "bookmark": "收藏",
     "bookmarked": "已收藏",

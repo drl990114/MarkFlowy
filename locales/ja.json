@@ -65,6 +65,13 @@
     "local_error": "選択した画像を開くか読み込むことができませんでした。もう一度お試しください。",
     "local_behavior_hint": "ローカル画像には「設定 > 画像 > ローカル画像の挿入動作」が適用されます。"
   },
+  "image_preview": {
+    "toolbar": "画像プレビューのコントロール",
+    "zoom_out": "縮小",
+    "zoom_in": "拡大",
+    "actual_size": "実寸表示",
+    "fit_to_window": "ウィンドウに合わせる"
+  },
   "action": {
     "bookmark": "ブックマーク",
     "bookmarked": "ブックマーク済み",

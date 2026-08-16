@@ -1,13 +1,5 @@
-import styled from 'styled-components'
-import { FileType } from '@/helper/fileTypeHandler'
+import type { FileType } from '@/helper/fileTypeHandler'
 import { ImagePreview } from './ImagePreview'
-
-const PreviewContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 20px;
-`
 
 interface PreviewContentProps {
   type: FileType
@@ -19,14 +11,14 @@ interface PreviewContentProps {
 export function PreviewContent({ type, filePath, active, visible = active }: PreviewContentProps) {
   if (!visible) return null
 
-  const renderContent = () => {
-    switch (type) {
-      case 'image':
-        return <ImagePreview filePath={filePath} />
-      default:
-        return null
-    }
+  switch (type) {
+    case 'image':
+      return (
+        <div className='relative min-h-0 w-full flex-1 overflow-hidden'>
+          <ImagePreview filePath={filePath} />
+        </div>
+      )
+    default:
+      return null
   }
-
-  return <PreviewContainer>{renderContent()}</PreviewContainer>
 }

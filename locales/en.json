@@ -65,6 +65,13 @@
     "local_error": "The selected image could not be opened or read. Try again.",
     "local_behavior_hint": "Local images follow Settings > Image > Local image insertion behavior."
   },
+  "image_preview": {
+    "toolbar": "Image preview controls",
+    "zoom_out": "Zoom out",
+    "zoom_in": "Zoom in",
+    "actual_size": "Actual size",
+    "fit_to_window": "Fit to window"
+  },
   "action": {
     "bookmark": "bookmark",
     "bookmarked": "bookmarked",

@@ -65,6 +65,13 @@
     "local_error": "Impossible d’ouvrir ou de lire l’image sélectionnée. Réessayez.",
     "local_behavior_hint": "Les images locales suivent Réglages > Image > Comportement d’insertion des images locales."
   },
+  "image_preview": {
+    "toolbar": "Commandes de l’aperçu de l’image",
+    "zoom_out": "Réduire",
+    "zoom_in": "Agrandir",
+    "actual_size": "Taille réelle",
+    "fit_to_window": "Ajuster à la fenêtre"
+  },
   "action": {
     "bookmark": "favori",
     "bookmarked": "ajouté aux favoris",
