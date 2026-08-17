@@ -58,38 +58,50 @@
 
 ## 下载
 
-支持平台 Linux, macOS 和 Windows.
+支持 Windows、macOS 和 Linux，可从 [latest release](https://github.com/drl990114/MarkFlowy/releases/latest) 下载。
 
-### Linux 安装脚本
+### Windows
 
-在 Linux 上，你可以直接下载并运行 `scripts/install-linux.sh`：
+下载并运行任意一个 x64 安装包：
+
+- `MarkFlowy_v<version>_x64-setup.exe` 或 `MarkFlowy_v<version>_x64.msi` — 安装程序。
+- `MarkFlowy_v<version>_offline_installer_x64-setup.exe` / `.msi` — 同上，内置 WebView2 运行时。
+- `MarkFlowy_v<version>_x64_portable.zip` — 解压即用，无需安装。
+
+### macOS
+
+下载 `MarkFlowy_v<version>_aarch64.dmg`（Apple silicon）或 `MarkFlowy_v<version>_x64.dmg`（Intel）。
+
+> [!NOTE]
+> 因为苹果安全策略对于没有开发者认证软件的限制，导致 **macOS aarch64** 版本无法直接安装。你可以通过以下步骤忽略该限制：
+> - 打开终端
+> - 进入到 `应用` 的目录下. 例如 `/Applications`.
+> - 执行 `xattr -cr MarkFlowy.app` 然后打开 app 即可
+> - 请确保下载来源为 `github releases`。
+
+### Linux
+
+目前仅提供 x86_64 版本。
+
+#### Flatpak
+
+已上架 [FlatPark](https://flatpark.org) — [应用页面](https://flatpark.org/apps/io.github.drl990114.MarkFlowy)：
+
+```sh
+flatpak remote-add --if-not-exists flatpark https://dl.flatpark.org/flatpark.flatpakrepo
+flatpak install flatpark io.github.drl990114.MarkFlowy
+```
+
+#### 安装脚本
+
+按发行版安装 `.deb` 或 `.rpm`，无法识别发行版时安装 AppImage：
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/drl990114/MarkFlowy/main/scripts/install-linux.sh -o install-linux.sh
 sh install-linux.sh
 ```
 
-如果没有 `curl`，可以改用 `wget`：
-
-```sh
-wget -O install-linux.sh https://raw.githubusercontent.com/drl990114/MarkFlowy/main/scripts/install-linux.sh
-sh install-linux.sh
-```
-
-脚本会下载适配当前架构的 AppImage，安装到 `~/.local/share/markflowy`，并创建 `~/.local/bin/markflowy` 命令。卸载可执行：
-
-```sh
-sh install-linux.sh --uninstall
-```
-
-> [!NOTE]
-> 因为苹果安全策略对于没有开发者认证软件的限制，导致 **macOS aarch64** 版本无法直接安装. 你可以通过一下步骤忽略该限制:
-> - 打开终端
-> - 进入到 `应用` 的目录下. 例如 `/Applications`.
-> - 执行 `xattr -cr MarkFlowy.app` 然后打开 app 即可
-> - 请确保下载来源为 `github releases`。
-
-你可以通过 [GitHub Releases](https://github.com/drl990114/MarkFlowy/releases) 下载。
+没有 `curl` 时可用 `wget -O install-linux.sh <url>`。加 `--appimage` 强制使用 AppImage，加 `--uninstall` 卸载。
 
 ## 为什么开发
 

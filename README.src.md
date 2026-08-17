@@ -102,52 +102,138 @@ At present, MarkFlowy needs about 3 - 6 months to perform reconstruction, which 
 
 ## ${en:'Download', zh:'下载', ja:'ダウンロード'}
 
-Available for Linux, macOS and Windows.<!--en-->
-支持平台 Linux, macOS 和 Windows.<!--zh-->
-Linux、macOS、Windows向けに利用可能です。<!--ja-->
-
-### ${en:'Linux installer', zh:'Linux 安装脚本', ja:'Linux インストールスクリプト'}
-
-${en:'On Linux, you can download and run `scripts/install-linux.sh` directly:', zh:'在 Linux 上，你可以直接下载并运行 `scripts/install-linux.sh`：', ja:'Linux では、`scripts/install-linux.sh` を直接ダウンロードして実行できます。'}
-
-```sh
-curl -fsSL https://raw.githubusercontent.com/drl990114/MarkFlowy/main/scripts/install-linux.sh -o install-linux.sh
-sh install-linux.sh
-```
-
-${en:'If `curl` is unavailable, use `wget` instead:', zh:'如果没有 `curl`，可以改用 `wget`：', ja:'`curl` が利用できない場合は、代わりに `wget` を使用します。'}
-
-```sh
-wget -O install-linux.sh https://raw.githubusercontent.com/drl990114/MarkFlowy/main/scripts/install-linux.sh
-sh install-linux.sh
-```
-
-${en:'The script downloads the AppImage for your architecture, installs it to `~/.local/share/markflowy`, and creates the `~/.local/bin/markflowy` command. To uninstall:', zh:'脚本会下载适配当前架构的 AppImage，安装到 `~/.local/share/markflowy`，并创建 `~/.local/bin/markflowy` 命令。卸载可执行：', ja:'このスクリプトは現在のアーキテクチャに対応する AppImage をダウンロードし、`~/.local/share/markflowy` にインストールして、`~/.local/bin/markflowy` コマンドを作成します。アンインストールするには:'}
-
-```sh
-sh install-linux.sh --uninstall
-```
-
-> [!NOTE]
+Available for Windows, macOS and Linux, from the [latest release](https://github.com/drl990114/MarkFlowy/releases/latest).<!--en-->
+<!--en-->
+### Windows<!--en-->
+<!--en-->
+Download and run one of the x64 builds:<!--en-->
+<!--en-->
+- `MarkFlowy_v<version>_x64-setup.exe` or `MarkFlowy_v<version>_x64.msi` — installer.<!--en-->
+- `MarkFlowy_v<version>_offline_installer_x64-setup.exe` / `.msi` — same, with the WebView2 runtime bundled.<!--en-->
+- `MarkFlowy_v<version>_x64_portable.zip` — unpack and run, no installation.<!--en-->
+<!--en-->
+### macOS<!--en-->
+<!--en-->
+Download `MarkFlowy_v<version>_aarch64.dmg` (Apple silicon) or `MarkFlowy_v<version>_x64.dmg` (Intel).<!--en-->
+<!--en-->
+> [!NOTE]<!--en-->
 > Because of Apple’s security policy restrictions on software without developer certification, the **macOS aarch64** version cannot be downloaded and used directly. You can ignore the limit by doing the following:<!--en-->
 > - Open your terminal<!--en-->
 > - Go to the `Applications` directory. .e.g `/Applications`.<!--en-->
 > - Run `xattr -cr MarkFlowy.app` and open the app again<!--en-->
 > - Please make sure you download from `github releases`.<!--en-->
-> 因为苹果安全策略对于没有开发者认证软件的限制，导致 **macOS aarch64** 版本无法直接安装. 你可以通过一下步骤忽略该限制:<!--zh-->
+<!--en-->
+### Linux<!--en-->
+<!--en-->
+x86_64 only for now.<!--en-->
+<!--en-->
+#### Flatpak<!--en-->
+<!--en-->
+On [FlatPark](https://flatpark.org) — [app page](https://flatpark.org/apps/io.github.drl990114.MarkFlowy):<!--en-->
+<!--en-->
+```sh<!--en-->
+flatpak remote-add --if-not-exists flatpark https://dl.flatpark.org/flatpark.flatpakrepo<!--en-->
+flatpak install flatpark io.github.drl990114.MarkFlowy<!--en-->
+```<!--en-->
+<!--en-->
+#### Install script<!--en-->
+<!--en-->
+Installs the `.deb` or `.rpm` for your distribution, or the AppImage if it is not recognized:<!--en-->
+<!--en-->
+```sh<!--en-->
+curl -fsSL https://raw.githubusercontent.com/drl990114/MarkFlowy/main/scripts/install-linux.sh -o install-linux.sh<!--en-->
+sh install-linux.sh<!--en-->
+```<!--en-->
+<!--en-->
+Use `wget -O install-linux.sh <url>` if `curl` is unavailable. Add `--appimage` to force the AppImage, or `--uninstall` to remove MarkFlowy.<!--en-->
+支持 Windows、macOS 和 Linux，可从 [latest release](https://github.com/drl990114/MarkFlowy/releases/latest) 下载。<!--zh-->
+<!--zh-->
+### Windows<!--zh-->
+<!--zh-->
+下载并运行任意一个 x64 安装包：<!--zh-->
+<!--zh-->
+- `MarkFlowy_v<version>_x64-setup.exe` 或 `MarkFlowy_v<version>_x64.msi` — 安装程序。<!--zh-->
+- `MarkFlowy_v<version>_offline_installer_x64-setup.exe` / `.msi` — 同上，内置 WebView2 运行时。<!--zh-->
+- `MarkFlowy_v<version>_x64_portable.zip` — 解压即用，无需安装。<!--zh-->
+<!--zh-->
+### macOS<!--zh-->
+<!--zh-->
+下载 `MarkFlowy_v<version>_aarch64.dmg`（Apple silicon）或 `MarkFlowy_v<version>_x64.dmg`（Intel）。<!--zh-->
+<!--zh-->
+> [!NOTE]<!--zh-->
+> 因为苹果安全策略对于没有开发者认证软件的限制，导致 **macOS aarch64** 版本无法直接安装。你可以通过以下步骤忽略该限制：<!--zh-->
 > - 打开终端<!--zh-->
 > - 进入到 `应用` 的目录下. 例如 `/Applications`.<!--zh-->
 > - 执行 `xattr -cr MarkFlowy.app` 然后打开 app 即可<!--zh-->
 > - 请确保下载来源为 `github releases`。<!--zh-->
+<!--zh-->
+### Linux<!--zh-->
+<!--zh-->
+目前仅提供 x86_64 版本。<!--zh-->
+<!--zh-->
+#### Flatpak<!--zh-->
+<!--zh-->
+已上架 [FlatPark](https://flatpark.org) — [应用页面](https://flatpark.org/apps/io.github.drl990114.MarkFlowy)：<!--zh-->
+<!--zh-->
+```sh<!--zh-->
+flatpak remote-add --if-not-exists flatpark https://dl.flatpark.org/flatpark.flatpakrepo<!--zh-->
+flatpak install flatpark io.github.drl990114.MarkFlowy<!--zh-->
+```<!--zh-->
+<!--zh-->
+#### 安装脚本<!--zh-->
+<!--zh-->
+按发行版安装 `.deb` 或 `.rpm`，无法识别发行版时安装 AppImage：<!--zh-->
+<!--zh-->
+```sh<!--zh-->
+curl -fsSL https://raw.githubusercontent.com/drl990114/MarkFlowy/main/scripts/install-linux.sh -o install-linux.sh<!--zh-->
+sh install-linux.sh<!--zh-->
+```<!--zh-->
+<!--zh-->
+没有 `curl` 时可用 `wget -O install-linux.sh <url>`。加 `--appimage` 强制使用 AppImage，加 `--uninstall` 卸载。<!--zh-->
+Windows、macOS、Linux 向けに利用可能です。[latest release](https://github.com/drl990114/MarkFlowy/releases/latest) からダウンロードできます。<!--ja-->
+<!--ja-->
+### Windows<!--ja-->
+<!--ja-->
+x64 ビルドのいずれかをダウンロードして実行します。<!--ja-->
+<!--ja-->
+- `MarkFlowy_v<version>_x64-setup.exe` または `MarkFlowy_v<version>_x64.msi` — インストーラー。<!--ja-->
+- `MarkFlowy_v<version>_offline_installer_x64-setup.exe` / `.msi` — 同上、WebView2 ランタイム同梱。<!--ja-->
+- `MarkFlowy_v<version>_x64_portable.zip` — 展開してそのまま実行、インストール不要。<!--ja-->
+<!--ja-->
+### macOS<!--ja-->
+<!--ja-->
+`MarkFlowy_v<version>_aarch64.dmg`（Apple silicon）または `MarkFlowy_v<version>_x64.dmg`（Intel）をダウンロードします。<!--ja-->
+<!--ja-->
+> [!NOTE]<!--ja-->
 > Appleのセキュリティポリシーにより、開発者認証のないソフトウェアは**macOS aarch64**版を直接ダウンロードして使用できません。以下の手順で制限を回避できます。<!--ja-->
 > - terminal を開く<!--ja-->
 > - `Applications` ディレクトリに移動します。例: `/Applications`。<!--ja-->
 > - `xattr -cr MarkFlowy.app` を実行し、再度アプリを開きます。<!--ja-->
 > - `github releases` からダウンロードしてください。<!--ja-->
-
-You can download it from [GitHub Releases](https://github.com/drl990114/MarkFlowy/releases).<!--en-->
-你可以通过 [GitHub Releases](https://github.com/drl990114/MarkFlowy/releases) 下载。<!--zh-->
-[GitHub Releases](https://github.com/drl990114/MarkFlowy/releases) からダウンロードできます。<!--ja-->
+<!--ja-->
+### Linux<!--ja-->
+<!--ja-->
+現在は x86_64 のみ提供しています。<!--ja-->
+<!--ja-->
+#### Flatpak<!--ja-->
+<!--ja-->
+[FlatPark](https://flatpark.org) で公開しています — [アプリページ](https://flatpark.org/apps/io.github.drl990114.MarkFlowy):<!--ja-->
+<!--ja-->
+```sh<!--ja-->
+flatpak remote-add --if-not-exists flatpark https://dl.flatpark.org/flatpark.flatpakrepo<!--ja-->
+flatpak install flatpark io.github.drl990114.MarkFlowy<!--ja-->
+```<!--ja-->
+<!--ja-->
+#### インストールスクリプト<!--ja-->
+<!--ja-->
+ディストリビューションに応じて `.deb` または `.rpm` をインストールし、判別できない場合は AppImage をインストールします。<!--ja-->
+<!--ja-->
+```sh<!--ja-->
+curl -fsSL https://raw.githubusercontent.com/drl990114/MarkFlowy/main/scripts/install-linux.sh -o install-linux.sh<!--ja-->
+sh install-linux.sh<!--ja-->
+```<!--ja-->
+<!--ja-->
+`curl` が利用できない場合は `wget -O install-linux.sh <url>` を使用します。`--appimage` を付けると AppImage を強制的にインストールし、`--uninstall` でアンインストールします。<!--ja-->
 
 ## ${en:'Why', zh:'为什么开发', ja:'動機'}
 

@@ -13,29 +13,19 @@ Currently, MarkFlowy is in the beta stage, and it is recommended to use it with 
 
 ## Download
 
-Available for Linux, macOS and Windows.
+Available for Windows, macOS and Linux, from the [latest release](https://github.com/drl990114/MarkFlowy/releases/latest).
 
-### Linux installer
+### Windows
 
-On Linux, you can download and run `scripts/install-linux.sh` directly:
+Download and run one of the x64 builds:
 
-```sh
-curl -fsSL https://raw.githubusercontent.com/drl990114/MarkFlowy/main/scripts/install-linux.sh -o install-linux.sh
-sh install-linux.sh
-```
+- `MarkFlowy_v<version>_x64-setup.exe` or `MarkFlowy_v<version>_x64.msi` — installer.
+- `MarkFlowy_v<version>_offline_installer_x64-setup.exe` / `.msi` — same, with the WebView2 runtime bundled.
+- `MarkFlowy_v<version>_x64_portable.zip` — unpack and run, no installation.
 
-If `curl` is unavailable, use `wget` instead:
+### macOS
 
-```sh
-wget -O install-linux.sh https://raw.githubusercontent.com/drl990114/MarkFlowy/main/scripts/install-linux.sh
-sh install-linux.sh
-```
-
-The script downloads the AppImage for your architecture, installs it to `~/.local/share/markflowy`, and creates the `~/.local/bin/markflowy` command. To uninstall:
-
-```sh
-sh install-linux.sh --uninstall
-```
+Download `MarkFlowy_v<version>_aarch64.dmg` (Apple silicon) or `MarkFlowy_v<version>_x64.dmg` (Intel).
 
 > [!NOTE]
 > Because of Apple’s security policy restrictions on software without developer certification, the **macOS aarch64** version cannot be downloaded and used directly. You can ignore the limit by doing the following:
@@ -44,7 +34,29 @@ sh install-linux.sh --uninstall
 > - Run `xattr -cr MarkFlowy.app` and open the app again
 > - Please make sure you download from `github releases`.
 
-You can download it from [GitHub Releases](https://github.com/drl990114/MarkFlowy/releases).
+### Linux
+
+x86_64 only for now.
+
+#### Flatpak
+
+On [FlatPark](https://flatpark.org) — [app page](https://flatpark.org/apps/io.github.drl990114.MarkFlowy):
+
+```sh
+flatpak remote-add --if-not-exists flatpark https://dl.flatpark.org/flatpark.flatpakrepo
+flatpak install flatpark io.github.drl990114.MarkFlowy
+```
+
+#### Install script
+
+Installs the `.deb` or `.rpm` for your distribution, or the AppImage if it is not recognized:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/drl990114/MarkFlowy/main/scripts/install-linux.sh -o install-linux.sh
+sh install-linux.sh
+```
+
+Use `wget -O install-linux.sh <url>` if `curl` is unavailable. Add `--appimage` to force the AppImage, or `--uninstall` to remove MarkFlowy.
 
 ## Why
 
