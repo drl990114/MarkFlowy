@@ -196,13 +196,20 @@ The development of **MarkFlowy** cannot be separated from these contributors. Th
         </a>
     </td>
     <td align="center">
+        <a href="https://github.com/jing2uo">
+            <img src="https://avatars.githubusercontent.com/u/3081432?v=4" width="90;" alt="jing2uo"/>
+            <br />
+            <sub><b>Komh</b></sub>
+        </a>
+    </td></tr>
+<tr>
+    <td align="center">
         <a href="https://github.com/marianoesteban">
             <img src="https://avatars.githubusercontent.com/u/3076449?v=4" width="90;" alt="marianoesteban"/>
             <br />
             <sub><b>Mariano Esteban</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/Raven-1027">
             <img src="https://avatars.githubusercontent.com/u/83693755?v=4" width="90;" alt="Raven-1027"/>
@@ -244,7 +251,8 @@ The development of **MarkFlowy** cannot be separated from these contributors. Th
             <br />
             <sub><b>Null</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/punkyard">
             <img src="https://avatars.githubusercontent.com/u/59349105?v=4" width="90;" alt="punkyard"/>
