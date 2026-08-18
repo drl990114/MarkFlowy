@@ -65,29 +65,19 @@
 
 ## ダウンロード
 
-Linux、macOS、Windows向けに利用可能です。
+Windows、macOS、Linux 向けに利用可能です。[latest release](https://github.com/drl990114/MarkFlowy/releases/latest) からダウンロードできます。
 
-### Linux インストールスクリプト
+### Windows
 
-Linux では、`scripts/install-linux.sh` を直接ダウンロードして実行できます。
+x64 ビルドのいずれかをダウンロードして実行します。
 
-```sh
-curl -fsSL https://raw.githubusercontent.com/drl990114/MarkFlowy/main/scripts/install-linux.sh -o install-linux.sh
-sh install-linux.sh
-```
+- `MarkFlowy_v<version>_x64-setup.exe` または `MarkFlowy_v<version>_x64.msi` — インストーラー。
+- `MarkFlowy_v<version>_offline_installer_x64-setup.exe` / `.msi` — 同上、WebView2 ランタイム同梱。
+- `MarkFlowy_v<version>_x64_portable.zip` — 展開してそのまま実行、インストール不要。
 
-`curl` が利用できない場合は、代わりに `wget` を使用します。
+### macOS
 
-```sh
-wget -O install-linux.sh https://raw.githubusercontent.com/drl990114/MarkFlowy/main/scripts/install-linux.sh
-sh install-linux.sh
-```
-
-このスクリプトは現在のアーキテクチャに対応する AppImage をダウンロードし、`~/.local/share/markflowy` にインストールして、`~/.local/bin/markflowy` コマンドを作成します。アンインストールするには:
-
-```sh
-sh install-linux.sh --uninstall
-```
+`MarkFlowy_v<version>_aarch64.dmg`（Apple silicon）または `MarkFlowy_v<version>_x64.dmg`（Intel）をダウンロードします。
 
 > [!NOTE]
 > Appleのセキュリティポリシーにより、開発者認証のないソフトウェアは**macOS aarch64**版を直接ダウンロードして使用できません。以下の手順で制限を回避できます。
@@ -96,7 +86,29 @@ sh install-linux.sh --uninstall
 > - `xattr -cr MarkFlowy.app` を実行し、再度アプリを開きます。
 > - `github releases` からダウンロードしてください。
 
-[GitHub Releases](https://github.com/drl990114/MarkFlowy/releases) からダウンロードできます。
+### Linux
+
+現在は x86_64 のみ提供しています。
+
+#### Flatpak
+
+[FlatPark](https://flatpark.org) で公開しています — [アプリページ](https://flatpark.org/apps/io.github.drl990114.MarkFlowy):
+
+```sh
+flatpak remote-add --if-not-exists flatpark https://dl.flatpark.org/flatpark.flatpakrepo
+flatpak install flatpark io.github.drl990114.MarkFlowy
+```
+
+#### インストールスクリプト
+
+ディストリビューションに応じて `.deb` または `.rpm` をインストールし、判別できない場合は AppImage をインストールします。
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/drl990114/MarkFlowy/main/scripts/install-linux.sh -o install-linux.sh
+sh install-linux.sh
+```
+
+`curl` が利用できない場合は `wget -O install-linux.sh <url>` を使用します。`--appimage` を付けると AppImage を強制的にインストールし、`--uninstall` でアンインストールします。
 
 ## 動機
 
