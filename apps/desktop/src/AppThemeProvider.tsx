@@ -10,7 +10,7 @@ import {
 } from 'rme'
 import { type IStyleSheetContext, StyleSheetManager, ThemeProvider } from 'styled-components'
 import { ThemeProvider as ZensThemeProvider } from 'zens'
-import { alignCodeMirrorTheme, resolveAppThemeTokens } from './appThemeTokens'
+import { alignCodeMirrorTheme, resolveAppThemeTokens, resolveUIFontFamily } from './appThemeTokens'
 import { GlobalStyles, DesktopSpecificStyles } from './globalStyles'
 import {
   getReadableForeground,
@@ -18,6 +18,7 @@ import {
   resolveThemeAccentColor,
   THEME_ACCENT_COLOR_SETTING_KEY,
 } from './helper/theme'
+import useGlobalOSInfo from './hooks/useOSInfo'
 import { InjectFonts } from './injectFonts'
 import useAppSettingStore from './stores/useAppSettingStore'
 import useThemeStore, {
@@ -39,13 +40,15 @@ export function AppEditorThemeProvider({ children }: BaseComponentProps) {
 const AppThemeProvider: React.FC<BaseComponentProps> = function ({ children }) {
   const curTheme = useThemeStore((state) => state.curTheme)
   const settingData = useAppSettingStore((state) => state.settingData)
+  const { osType } = useGlobalOSInfo()
 
   const themeWithDefaults = useMemo(
     () => ({
       ...(curTheme.mode === 'dark' ? desktopDarkTheme : desktopLightTheme),
       ...curTheme.styledConstants,
+      fontFamily: resolveUIFontFamily(osType),
     }),
-    [curTheme.mode, curTheme.styledConstants],
+    [curTheme.mode, curTheme.styledConstants, osType],
   )
 
   const accentColorSetting = settingData[THEME_ACCENT_COLOR_SETTING_KEY]

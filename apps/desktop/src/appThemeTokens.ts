@@ -6,6 +6,28 @@ const LEGACY_DEFAULT_CODE_FONT_FAMILY = 'Fira Code'
 const SYSTEM_DEFAULT_FONT_FAMILY = 'System Default'
 const DEFAULT_MONOSPACE_FONT_FAMILY = 'Default Monospace'
 
+const DEFAULT_UI_FONT_FAMILY =
+  "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', 'Noto Sans CJK SC', 'Microsoft YaHei UI', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif"
+const WINDOWS_UI_FONT_FAMILY =
+  "'Segoe UI Variable', 'Segoe UI', 'Microsoft YaHei UI', 'Microsoft YaHei', sans-serif"
+const MACOS_UI_FONT_FAMILY =
+  "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', 'PingFang SC', 'Hiragino Sans GB', Arial, sans-serif"
+const LINUX_UI_FONT_FAMILY =
+  "'Noto Sans', 'Noto Sans CJK SC', 'Source Han Sans SC', 'WenQuanYi Micro Hei', 'PingFang SC', sans-serif"
+
+export function resolveUIFontFamily(osType?: string): string {
+  switch (osType) {
+    case 'windows':
+      return WINDOWS_UI_FONT_FAMILY
+    case 'macos':
+      return MACOS_UI_FONT_FAMILY
+    case 'linux':
+      return LINUX_UI_FONT_FAMILY
+    default:
+      return DEFAULT_UI_FONT_FAMILY
+  }
+}
+
 interface AppThemeFontSettings {
   editorCodeFontFamily?: string
   editorRootFontFamily?: string

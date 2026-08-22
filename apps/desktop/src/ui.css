@@ -220,7 +220,7 @@
   --mf-space-unit: 4px;
   --mf-ui-title-bar-height: 34px;
   --mf-ui-status-bar-height: 32px;
-  --mf-font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --mf-font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', 'Noto Sans CJK SC', 'Microsoft YaHei UI', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
   --mf-font-mono: 'SFMono-Regular', Consolas, monospace;
   --mf-ui-font-family: var(--mf-font-sans);
   --mf-ui-font-mono: var(--mf-font-mono);

@@ -121,7 +121,6 @@ export const DesktopSpecificStyles = createGlobalStyle<{
     font-optical-sizing: auto;
     line-height: var(--mf-ui-line-height-control);
     letter-spacing: var(--mf-ui-tracking-control);
-    -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
 
