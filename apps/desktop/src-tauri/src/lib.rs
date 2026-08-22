@@ -1533,6 +1533,14 @@ pub fn run() {
                 // persisting them only grows the startup state file indefinitely.
                 .with_filename(WINDOW_STATE_FILENAME)
                 .with_filter(window_manager::should_persist_window_state)
+                // Windows renders a custom frameless title bar. Restoring the
+                // saved `decorated` flag from a previous run re-enables the
+                // native title bar, stacking a second title bar on top of the
+                // custom one.
+                .with_state_flags(
+                    tauri_plugin_window_state::StateFlags::all()
+                        & !tauri_plugin_window_state::StateFlags::DECORATIONS,
+                )
                 .build(),
         )
         .plugin(tauri_plugin_opener::init())
