@@ -34,7 +34,7 @@ export function PopoverContent({
       <PopoverPrimitive.Content
         align={align}
         className={cn(
-          'z-[1000] rounded-lg border border-border bg-popover p-2 text-popover-foreground shadow-lg outline-none',
+          'z-[var(--mf-layer-popover)] rounded-lg border border-control-border bg-surface-overlay p-2 text-content-primary shadow-lg outline-none',
           className,
         )}
         data-mf-portal=''

@@ -1,8 +1,10 @@
 import { Explorer } from '@/components'
-import { RIGHTBARITEMKEYS } from '@/constants'
-import { lazy, memo, Suspense, useMemo, useState } from 'react'
-import { Container as SideBarContainer, SideBarHeader } from './styles'
-import { SideBarModeButton } from './SideBarModeButton'
+import { AsyncSurface } from '@/components/AsyncSurface'
+import type { RIGHTBARITEMKEYS } from '@/constants'
+import { useTranslation } from '@/i18n'
+import useLayoutStore from '@/stores/useLayoutStore'
+import { lazy, memo, Suspense, type ReactNode } from 'react'
+import { Container as SideBarContainer, DockPanelBody } from './styles'
 
 const SearchExtension = lazy(async () => {
   const { Search } = await import('@/extensions/search')
@@ -15,73 +17,47 @@ const BookMarksExtension = lazy(async () => {
 })
 
 function SideBar() {
-  const [activeRightBarItemKey, setActiveRightBarItemKey] = useState<RIGHTBARITEMKEYS>(
-    RIGHTBARITEMKEYS.Explorer,
+  const { t } = useTranslation()
+  const activePanelId = useLayoutStore((state) => state.leftBar.activePanelId)
+
+  const lazyFallback = (
+    <AsyncSurface
+      state={{ status: 'loading', label: t('common.fetching') }}
+    >
+      {() => null}
+    </AsyncSurface>
   )
 
-  const leftBarDataSource: RightBarItem[] = useMemo(() => {
-    return [
-      {
-        title: RIGHTBARITEMKEYS.Explorer,
-        key: RIGHTBARITEMKEYS.Explorer,
-        icon: <i aria-hidden='true' className='ri-file-list-3-line' />,
-        components: <Explorer />,
-      },
-      {
-        title: RIGHTBARITEMKEYS.Search,
-        key: RIGHTBARITEMKEYS.Search,
-        icon: <i aria-hidden='true' className='ri-search-2-line' />,
-        components: (
-          <Suspense fallback={null}>
-            <SearchExtension />
-          </Suspense>
-        ),
-      },
-      {
-        title: RIGHTBARITEMKEYS.BookMarks,
-        key: RIGHTBARITEMKEYS.BookMarks,
-        icon: <i aria-hidden='true' className='ri-bookmark-line' />,
-        components: (
-          <Suspense fallback={null}>
-            <BookMarksExtension />
-          </Suspense>
-        ),
-      },
-    ]
-  }, [])
-
-  const activeRightBarItem = useMemo(() => {
-    const activeItem = leftBarDataSource.find((item) => item.key === activeRightBarItemKey)
-    return activeItem
-  }, [activeRightBarItemKey, leftBarDataSource])
-
-  const noActiveItem = !activeRightBarItemKey
+  let content
+  if (activePanelId === 'search') {
+    content = (
+      <Suspense fallback={lazyFallback}>
+        <SearchExtension />
+      </Suspense>
+    )
+  } else if (activePanelId === 'bookmarks') {
+    content = (
+      <Suspense fallback={lazyFallback}>
+        <BookMarksExtension />
+      </Suspense>
+    )
+  } else {
+    content = <Explorer />
+  }
 
   return (
-    <SideBarContainer noActiveItem={noActiveItem}>
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', width: '100%' }}>
-        <SideBarHeader>
-          {leftBarDataSource.map((item) => (
-            <SideBarModeButton
-              active={activeRightBarItemKey === item.key}
-              icon={item.icon}
-              key={item.key}
-              label={item.title}
-              onClick={() => setActiveRightBarItemKey(item.key)}
-            />
-          ))}
-        </SideBarHeader>
-        {activeRightBarItem?.components ?? null}
-      </div>
+    <SideBarContainer $side='left' data-mf-dock-panel={activePanelId}>
+      <DockPanelBody key={activePanelId}>{content}</DockPanelBody>
     </SideBarContainer>
   )
 }
 
+export default memo(SideBar)
+
+/** @deprecated Dock rendering now uses DockPanelDefinition; retained for extension compatibility. */
 export interface RightBarItem {
   title: RIGHTBARITEMKEYS
   key: RIGHTBARITEMKEYS
-  icon: React.ReactNode
-  components: React.ReactNode
+  icon: ReactNode
+  components: ReactNode
 }
-
-export default memo(SideBar)

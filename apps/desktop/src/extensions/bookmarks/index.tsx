@@ -1,16 +1,23 @@
 import { commandRegistry } from '@/commands'
+import { AsyncSurface, type AsyncSurfaceState } from '@/components/AsyncSurface'
+import { scheduleActiveEditorFocus } from '@/components/EditorArea/focusActiveEditor'
 import type { RightBarItem } from '@/components/SideBar'
-import type { RightNavItem } from '@/components/SideBar/SideBarHeader'
-import SideBarHeader from '@/components/SideBar/SideBarHeader'
-import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
+import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { showContextMenu } from '@/components/ui-v2/ContextMenu/ContextMenu'
 import { RIGHTBARITEMKEYS } from '@/constants'
 import { useTranslation } from '@/i18n'
-import { useCallback, useEffect, useState } from 'react'
+import { closeCompactLeftDockAfterSelection } from '@/stores/useLayoutStore'
+import { BookmarkIcon, ListIcon, TagsIcon } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { toast } from 'zens'
 import { BookMarkViewItem } from './BookMarkViewItem'
 import { Container } from './styles'
 import { TagsViewItem } from './TagsViewItem'
-import type { BookMarkItem } from './useBookMarksStore'
+import {
+  BOOKMARK_UNDO_DURATION_MS,
+  type BookMarkItem,
+} from './useBookMarksStore'
 import useBookMarksStore from './useBookMarksStore'
 
 type BookMarkViewMode = 'list' | 'tags'
@@ -20,154 +27,194 @@ export interface TagView {
   bookmarks: BookMarkItem[]
 }
 
-const BookMarksList: React.FC<ChatListProps> = (props) => {
-  const { t } = useTranslation()
-  const { bookMarkList, openBookMark } = useBookMarksStore()
-  const [tagsViewList, setTagsViewList] = useState<TagView[]>([])
-  const [viewMode, setViewMode] = useState<BookMarkViewMode>('list')
-
-  const getTagsViewList = useCallback(() => {
-    const targetTagsViewList: TagView[] = []
-    bookMarkList.forEach((bookmark) => {
-      if (bookmark.tags.length > 0) {
-        bookmark.tags.forEach((tag) => {
-          const tagView = targetTagsViewList.find((item) => item.tag === tag)
-          if (tagView) {
-            tagView.bookmarks.push(bookmark)
-          } else {
-            targetTagsViewList.push({
-              tag,
-              bookmarks: [bookmark],
-            })
-          }
-        })
-      }
+function buildTagsViewList(bookmarks: BookMarkItem[]) {
+  const tagViews = new Map<string, BookMarkItem[]>()
+  bookmarks.forEach((bookmark) => {
+    bookmark.tags.forEach((tag) => {
+      tagViews.set(tag, [...(tagViews.get(tag) ?? []), bookmark])
     })
-    setTagsViewList(targetTagsViewList)
-  }, [bookMarkList])
+  })
 
-  const handleContextMenu = useCallback(
-    (
-      e: React.MouseEvent<HTMLDivElement, MouseEvent> & {
-        target: { dataset: Record<string, any> }
-      },
-    ) => {
-      e.preventDefault()
-      e.stopPropagation()
-      const bookMarkId = e.target?.dataset?.id
-      if (bookMarkId) {
-        const bookmark = bookMarkList.find((item) => item.id === bookMarkId)
-        if (bookmark) {
-          showContextMenu({
-            x: e.clientX,
-            y: e.clientY,
-            items: [
-              {
-                value: 'edit',
-                label: 'Edit',
-                handler: () => {
-                  commandRegistry.execute('edit_bookmark_dialog', bookmark)
-                }
-              },
-              {
-                value: 'remove',
-                label: 'Remove',
-                handler: () => {
-                  useBookMarksStore.getState().removeBookMark(bookmark.id)
-                  
-                },
-              }
-            ]
-          })
-        }
-      }
-    },
-    [bookMarkList],
-  )
-  const toggleViewMode = useCallback(() => {
-    setViewMode((prev) => (prev === 'list' ? 'tags' : 'list'))
-    getTagsViewList()
-  }, [getTagsViewList])
+  return [...tagViews].map(([tag, taggedBookmarks]) => ({
+    tag,
+    bookmarks: taggedBookmarks,
+  }))
+}
+
+export const BookMarksList = (props: BookMarksListProps) => {
+  const { t } = useTranslation()
+  const bookMarkList = useBookMarksStore((state) => state.bookMarkList)
+  const getBookMarkList = useBookMarksStore((state) => state.getBookMarkList)
+  const loadError = useBookMarksStore((state) => state.loadError)
+  const loadStatus = useBookMarksStore((state) => state.loadStatus)
+  const mutationError = useBookMarksStore((state) => state.mutationError)
+  const openBookMark = useBookMarksStore((state) => state.openBookMark)
+  const retryBookMarkRemoval = useBookMarksStore((state) => state.retryBookMarkRemoval)
+  const [viewMode, setViewMode] = useState<BookMarkViewMode>('list')
+  const tagsViewList = useMemo(() => buildTagsViewList(bookMarkList), [bookMarkList])
 
   useEffect(() => {
-    getTagsViewList()
-  }, [getTagsViewList])
+    if (loadStatus === 'idle') void getBookMarkList()
+  }, [getBookMarkList, loadStatus])
 
-  const handleRightNavItemClick = useCallback(
-    (item: RightNavItem) => {
-      if (item.key === 'toggleViewMode') {
-        toggleViewMode()
-      }
+  const removeBookMarkWithUndo = useCallback(
+    (bookmark: BookMarkItem) => {
+      const store = useBookMarksStore.getState()
+      const removedBookmark = store.removeBookMark(bookmark.id)
+      if (!removedBookmark) return
+
+      toast(t('bookmarks.removed', { title: removedBookmark.title }), {
+        action: {
+          label: t('bookmarks.undo'),
+          onClick: () => {
+            store.undoRemoveBookMark(removedBookmark.id)
+          },
+        },
+        duration: BOOKMARK_UNDO_DURATION_MS,
+      })
     },
-    [toggleViewMode],
+    [t],
   )
 
-  const renderBookmarksContent = () => {
-    if (viewMode === 'list') {
-      if (bookMarkList.length === 0) {
-        return (
-          <Empty role='status'>
-            <EmptyHeader>
-              <EmptyMedia>
-                <i className='ri-bookmark-line' aria-hidden='true' />
-              </EmptyMedia>
-              <EmptyTitle>{t('bookmarks.empty')}</EmptyTitle>
-            </EmptyHeader>
-          </Empty>
-        )
-      }
+  const handleContextMenu = useCallback(
+    (event: React.MouseEvent<HTMLDivElement>) => {
+      const target = event.target
+      if (!(target instanceof Element)) return
 
-      return bookMarkList.map((bookmark) => {
-        return <BookMarkViewItem key={bookmark.id} bookmark={bookmark} onClick={openBookMark} />
+      const bookmarkButton = target.closest<HTMLElement>('[data-bookmark-id]')
+      const bookMarkId = bookmarkButton?.dataset.bookmarkId
+      if (!bookMarkId) return
+
+      const bookmark = bookMarkList.find((item) => item.id === bookMarkId)
+      if (!bookmark) return
+
+      event.preventDefault()
+      event.stopPropagation()
+      showContextMenu({
+        x: event.clientX,
+        y: event.clientY,
+        items: [
+          {
+            value: 'edit',
+            label: t('action.edit'),
+            handler: () => {
+              commandRegistry.execute('edit_bookmark_dialog', bookmark)
+            },
+          },
+          {
+            value: 'remove',
+            label: t('common.delete'),
+            handler: () => removeBookMarkWithUndo(bookmark),
+          },
+        ],
       })
-    }
+    },
+    [bookMarkList, removeBookMarkWithUndo, t],
+  )
 
-    if (tagsViewList.length === 0) {
-      return (
-        <Empty role='status'>
-          <EmptyHeader>
-            <EmptyMedia>
-              <i className='ri-price-tag-3-line' aria-hidden='true' />
-            </EmptyMedia>
-            <EmptyTitle>{t('bookmarks.emptyTags')}</EmptyTitle>
-          </EmptyHeader>
-        </Empty>
-      )
-    }
+  const toggleViewMode = useCallback(() => {
+    setViewMode((previousViewMode) => (previousViewMode === 'list' ? 'tags' : 'list'))
+  }, [])
 
-    return tagsViewList.map((tagView) => {
-      return <TagsViewItem tagView={tagView} key={tagView.tag} />
-    })
-  }
+  const handleOpenBookMark = useCallback(
+    (bookmark: BookMarkItem) => {
+      openBookMark(bookmark)
+      if (closeCompactLeftDockAfterSelection()) scheduleActiveEditorFocus()
+    },
+    [openBookMark],
+  )
+
+  const visibleItems = viewMode === 'list' ? bookMarkList : tagsViewList
+  const surfaceState = useMemo<AsyncSurfaceState<BookMarkViewMode>>(() => {
+    if (loadStatus === 'idle' || loadStatus === 'loading') {
+      return { status: 'loading', label: t('bookmarks.loading') }
+    }
+    if (loadStatus === 'error') {
+      return {
+        status: 'error',
+        title: t('bookmarks.loadError'),
+        description: loadError,
+        retry: () => void getBookMarkList(),
+      }
+    }
+    if (visibleItems.length === 0) {
+      return {
+        status: 'empty',
+        title: t(viewMode === 'list' ? 'bookmarks.empty' : 'bookmarks.emptyTags'),
+      }
+    }
+    return { status: 'ready', data: viewMode }
+  }, [getBookMarkList, loadError, loadStatus, t, viewMode, visibleItems.length])
 
   return (
     <Container {...props}>
-      <SideBarHeader
-        name='BookMarks'
-        onRightNavItemClick={handleRightNavItemClick}
-        rightNavItems={[
-          {
-            iconCls: viewMode === 'list' ? 'ri-price-tag-3-line' : 'ri-list-unordered',
-            key: 'toggleViewMode',
-            tooltip: { title: 'toogle view mode' },
-          },
-        ]}
-      />
       <div className='bookmark-list' onContextMenu={handleContextMenu}>
-        {renderBookmarksContent()}
+        <div className='bookmark-list__toolbar'>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                aria-label={t(
+                  viewMode === 'list' ? 'bookmarks.viewByTags' : 'bookmarks.viewAsList',
+                )}
+                data-mf-dock-initial-focus=''
+                onClick={toggleViewMode}
+                size='icon-chrome'
+                variant='chrome'
+              >
+                {viewMode === 'list' ? (
+                  <TagsIcon aria-hidden='true' size={14} strokeWidth={1.75} />
+                ) : (
+                  <ListIcon aria-hidden='true' size={14} strokeWidth={1.75} />
+                )}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              {t(viewMode === 'list' ? 'bookmarks.viewByTags' : 'bookmarks.viewAsList')}
+            </TooltipContent>
+          </Tooltip>
+        </div>
+        <div className='bookmark-list__content'>
+          {mutationError ? (
+            <div className='bookmark-list__error' role='alert' title={mutationError.message}>
+              <span>{t('bookmarks.removeFailed')}</span>
+              <Button
+                onClick={() => void retryBookMarkRemoval(mutationError.bookmarkId)}
+                size='sm'
+                variant='outline'
+              >
+                {t('bookmarks.retry')}
+              </Button>
+            </div>
+          ) : null}
+          <AsyncSurface retryLabel={t('bookmarks.retry')} state={surfaceState}>
+            {(readyViewMode) =>
+              readyViewMode === 'list'
+                ? bookMarkList.map((bookmark) => (
+                    <BookMarkViewItem
+                      bookmark={bookmark}
+                      key={bookmark.id}
+                      onClick={handleOpenBookMark}
+                    />
+                  ))
+                : tagsViewList.map((tagView) => (
+                    <TagsViewItem key={tagView.tag} onOpen={handleOpenBookMark} tagView={tagView} />
+                  ))
+            }
+          </AsyncSurface>
+        </div>
       </div>
     </Container>
   )
 }
 
-interface ChatListProps {
+interface BookMarksListProps {
   className?: string
 }
 
 const BookMarks = {
   title: RIGHTBARITEMKEYS.BookMarks,
   key: RIGHTBARITEMKEYS.BookMarks,
-  icon: <i className='ri-bookmark-line' />,
+  icon: <BookmarkIcon aria-hidden='true' size={14} strokeWidth={1.75} />,
   components: <BookMarksList />,
 } as RightBarItem
 

@@ -29,17 +29,17 @@ const Container = styled.div`
 
   .setting-item__title {
     margin-bottom: 2px;
-    font-size: var(--mf-ui-font-control);
+    font-size: var(--mf-ui-font-body);
     font-weight: 500;
-    line-height: var(--mf-ui-line-height-control);
+    line-height: var(--mf-ui-line-height-body);
     color: ${({ theme }) => theme.primaryFontColor};
   }
 
   .setting-item__label {
     white-space: pre-wrap;
-    font-size: var(--mf-ui-font-caption);
-    line-height: var(--mf-ui-line-height-caption);
-    letter-spacing: var(--mf-ui-tracking-caption);
+    font-size: var(--mf-ui-font-control);
+    line-height: var(--mf-ui-line-height-control);
+    letter-spacing: var(--mf-ui-tracking-control);
     color: ${({ theme }) => theme.labelFontColor};
   }
 `

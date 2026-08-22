@@ -1,17 +1,18 @@
-import { memo, useState } from 'react'
-import type { TagView } from '.'
-import styled from 'styled-components'
 import classNames from 'classnames'
+import { ChevronRightIcon } from 'lucide-react'
+import { memo, useState } from 'react'
+import styled from 'styled-components'
+import type { TagView } from '.'
 import { BookMarkViewItem } from './BookMarkViewItem'
-import useBookMarksStore from './useBookMarksStore'
+import type { BookMarkItem } from './useBookMarksStore'
 
 interface TagsViewItemProps {
+  onOpen: (bookmark: BookMarkItem) => void
   tagView: TagView
 }
 
 export const TagsViewItem = memo((props: TagsViewItemProps) => {
-  const { tagView } = props
-  const { openBookMark } = useBookMarksStore()
+  const { onOpen, tagView } = props
   const [expand, setExpand] = useState(false)
 
   const toggleExpand = () => {
@@ -24,12 +25,17 @@ export const TagsViewItem = memo((props: TagsViewItemProps) => {
 
   return (
     <Container key={tagView.tag}>
-      <div className='bookmark-tagsview__header bookmark-list__item' onClick={toggleExpand}>
-        <div className={tagViewIconCls}>
-          <i className='ri-arrow-drop-right-line'></i>
-        </div>
-        <div>{tagView.tag}</div>
-      </div>
+      <button
+        aria-expanded={expand}
+        className='bookmark-tagsview__header bookmark-list__item'
+        onClick={toggleExpand}
+        type='button'
+      >
+        <span aria-hidden='true' className={tagViewIconCls}>
+          <ChevronRightIcon size={14} strokeWidth={1.75} />
+        </span>
+        <span>{tagView.tag}</span>
+      </button>
       {expand ? (
         <div className='bookmark-tagsview__child'>
           {tagView.bookmarks.map((bookmark) => {
@@ -37,7 +43,7 @@ export const TagsViewItem = memo((props: TagsViewItemProps) => {
               <BookMarkViewItem
                 key={bookmark.id}
                 bookmark={bookmark}
-                onClick={openBookMark}
+                onClick={onOpen}
                 showTags={false}
               />
             )
@@ -64,12 +70,22 @@ const Container = styled.div`
   }
 
   .arrow-icon {
-    display: inline-block;
-    font-size: 1.4rem;
-    line-height: normal;
+    display: inline-flex;
+    flex: 0 0 14px;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    transition: transform var(--mf-motion-duration-fast, 120ms)
+      var(--mf-motion-ease-out, cubic-bezier(0.23, 1, 0.32, 1));
 
     &__down {
       transform: rotate(90deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .arrow-icon {
+      transition: none;
     }
   }
 `

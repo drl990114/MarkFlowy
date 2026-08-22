@@ -3,25 +3,25 @@ import useFileCacheStore from '@/helper/files'
 import { checkUnsavedFiles, saveUnsavedFiles } from '@/services/checkUnsavedFiles'
 import { useEditorStateStore, useEditorStore } from '@/stores'
 import { memo, type DragEvent, useCallback, useEffect, useRef } from 'react'
+import { ArrowLeftIcon, ArrowRightIcon, XIcon } from 'lucide-react'
 import { useTranslation } from '@/i18n'
 import styled from 'styled-components'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { showContextMenu } from '../ui-v2/ContextMenu'
 import { EditorAreaHeader } from './EditorAreaHeader'
-import { EditorAreaActionButton, EditorAreaActionSeparator } from './EditorAreaAction'
+import { EditorAreaActionButton } from './EditorAreaAction'
 import {
   hasEditorTabDragData,
   readEditorTabDragData,
   writeEditorTabDragData,
 } from './editorDragData'
 import { Dot, TabItem } from './styles'
-import { SidebarToggleButton } from './SidebarToggleButton'
 
 const Container = styled.div<{ $compact: boolean }>`
   display: flex;
   flex: 0 0 auto;
-  height: 33px;
+  height: 32px;
   min-width: 0;
   background-color: ${(props) => props.theme.editorTabBgColor};
 
@@ -59,6 +59,7 @@ const Container = styled.div<{ $compact: boolean }>`
   .tab-navigation {
     display: flex;
     align-items: center;
+    gap: 4px;
   }
 
   .tab-filling {
@@ -73,8 +74,6 @@ const Container = styled.div<{ $compact: boolean }>`
 interface EditorAreaTabsProps {
   compact?: boolean
   groupId: string
-  showLeftSidebarToggle?: boolean
-  showRightSidebarToggle?: boolean
 }
 
 interface EditorAreaTabProps {
@@ -95,6 +94,20 @@ function getTabLabel(fileName: string, compact: boolean) {
   if (extensionIndex <= 0) return fileName
 
   return fileName.slice(0, extensionIndex)
+}
+
+export type EditorTabNavigationKey = 'ArrowLeft' | 'ArrowRight' | 'Home' | 'End'
+
+export function getNextTabIndex(
+  currentIndex: number,
+  length: number,
+  key: EditorTabNavigationKey,
+): number {
+  if (length <= 0 || currentIndex < 0 || currentIndex >= length) return -1
+  if (key === 'Home') return 0
+  if (key === 'End') return length - 1
+  if (key === 'ArrowLeft') return currentIndex === 0 ? length - 1 : currentIndex - 1
+  return currentIndex === length - 1 ? 0 : currentIndex + 1
 }
 
 const EditorAreaTab = memo((props: EditorAreaTabProps) => {
@@ -232,71 +245,71 @@ const EditorAreaTab = memo((props: EditorAreaTabProps) => {
     e.dataTransfer.setData('text/plain', fileName)
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
-    if (e.target !== e.currentTarget || (e.key !== 'Enter' && e.key !== ' ')) return
-
-    e.preventDefault()
-    onSelect(id)
-  }
-
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <TabItem
-          active={active}
-          aria-selected={active}
-          draggable
-          onClick={() => onSelect(id)}
-          onContextMenu={handleContextMenu}
-          onDragOver={handleDragOver}
-          onDragStart={handleDragStart}
-          onDrop={handleDrop}
-          onKeyDown={handleKeyDown}
-          onMouseDown={handleMiddleClick}
-          role='tab'
-          tabIndex={active ? 0 : -1}
-        >
-          <span
-            style={{
-              maxWidth: compact ? '112px' : '160px',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-            }}
+    <TabItem
+      $active={active}
+      draggable
+      onContextMenu={handleContextMenu}
+      onDragOver={handleDragOver}
+      onDragStart={handleDragStart}
+      onDrop={handleDrop}
+      onMouseDown={handleMiddleClick}
+    >
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            aria-label={
+              hasUnsavedChanges
+                ? `${fileName}, ${t('contextmenu.editor_tab.unsaved', {
+                    defaultValue: 'Unsaved changes',
+                  })}`
+                : fileName
+            }
+            aria-selected={active}
+            className='tab-select'
+            data-mf-editor-tab-id={id}
+            onClick={() => onSelect(id)}
+            role='tab'
+            tabIndex={active ? 0 : -1}
+            type='button'
           >
-            {tabLabel}
-          </span>
+            <span
+              style={{
+                maxWidth: compact ? '112px' : '160px',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}
+            >
+              {tabLabel}
+            </span>
+            {active && hasUnsavedChanges ? (
+              <span aria-live='polite' className='sr-only' role='status'>
+                {t('contextmenu.editor_tab.unsaved', { defaultValue: 'Unsaved changes' })}
+              </span>
+            ) : null}
 
-          <div className='tab-items__right'>
-            {hasUnsavedChanges ? (
-              <Dot />
-            ) : (
-              <Button
-                aria-label={t('contextmenu.editor_tab.close')}
-                className='close'
-                onClick={(ev: React.MouseEvent<HTMLElement, MouseEvent> | undefined) =>
-                  close(ev, id)
-                }
-                size='icon-sm'
-                variant='ghost'
-              >
-                <i aria-hidden='true' className='ri-close-line' />
-              </Button>
-            )}
-          </div>
-        </TabItem>
-      </TooltipTrigger>
-      <TooltipContent>{fileName}</TooltipContent>
-    </Tooltip>
+            {hasUnsavedChanges ? <Dot /> : null}
+          </button>
+        </TooltipTrigger>
+        <TooltipContent>{fileName}</TooltipContent>
+      </Tooltip>
+      {hasUnsavedChanges ? null : (
+        <Button
+          aria-label={t('contextmenu.editor_tab.close')}
+          className='close'
+          onClick={(ev: React.MouseEvent<HTMLElement, MouseEvent> | undefined) => close(ev, id)}
+          size='icon-chrome'
+          variant='chrome'
+        >
+          <XIcon aria-hidden='true' size={14} strokeWidth={1.75} />
+        </Button>
+      )}
+    </TabItem>
   )
 })
 
 const EditorAreaTabs = memo((props: EditorAreaTabsProps) => {
-  const {
-    compact = false,
-    groupId,
-    showLeftSidebarToggle = false,
-    showRightSidebarToggle = false,
-  } = props
+  const { compact = false, groupId } = props
   const group = useEditorStore((state) => state.getGroup(groupId))
   const openFileInGroup = useEditorStore((state) => state.openFileInGroup)
   const moveFileToGroup = useEditorStore((state) => state.moveFileToGroup)
@@ -313,6 +326,15 @@ const EditorAreaTabs = memo((props: EditorAreaTabsProps) => {
       htmlRef.current!.scrollLeft += ev.deltaY
     }
   }, [])
+
+  useEffect(() => {
+    if (!activeId) return
+
+    const activeTab = Array.from(
+      htmlRef.current?.querySelectorAll<HTMLElement>('[data-mf-editor-tab-id]') ?? [],
+    ).find((tab) => tab.dataset.mfEditorTabId === activeId)
+    activeTab?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' })
+  }, [activeId])
 
   const onSelectItem = useCallback(
     (id: string) => {
@@ -344,8 +366,48 @@ const EditorAreaTabs = memo((props: EditorAreaTabsProps) => {
     (ev: React.MouseEvent<HTMLElement, MouseEvent> | undefined, id: string) => {
       ev?.stopPropagation()
       useEditorStore.getState().closeFileInGroup(groupId, id)
+      window.requestAnimationFrame(() => {
+        const nextActiveId = useEditorStore.getState().getGroup(groupId)?.activeId
+        if (!nextActiveId) return
+
+        const nextTab = Array.from(
+          htmlRef.current?.querySelectorAll<HTMLElement>('[data-mf-editor-tab-id]') ?? [],
+        ).find((tab) => tab.dataset.mfEditorTabId === nextActiveId)
+        nextTab?.focus({ preventScroll: true })
+        nextTab?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' })
+      })
     },
     [groupId],
+  )
+
+  const handleTabListKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLDivElement>) => {
+      const target = event.target
+      if (!(target instanceof HTMLElement) || target.getAttribute('role') !== 'tab') return
+      if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return
+
+      const tabs = Array.from(
+        event.currentTarget.querySelectorAll<HTMLElement>('[data-mf-editor-tab-id]'),
+      )
+      const currentIndex = tabs.indexOf(target)
+      if (currentIndex < 0 || tabs.length === 0) return
+
+      const nextIndex = getNextTabIndex(
+        currentIndex,
+        tabs.length,
+        event.key as EditorTabNavigationKey,
+      )
+
+      const nextTab = tabs[nextIndex]
+      const nextId = nextTab.dataset.mfEditorTabId
+      if (!nextId) return
+
+      event.preventDefault()
+      nextTab.focus({ preventScroll: true })
+      nextTab.scrollIntoView?.({ block: 'nearest', inline: 'nearest' })
+      openFileInGroup(groupId, nextId)
+    },
+    [groupId, openFileInGroup],
   )
 
   const moveActiveTab = (dir: 'left' | 'right') => {
@@ -381,27 +443,23 @@ const EditorAreaTabs = memo((props: EditorAreaTabsProps) => {
 
   return (
     <Container $compact={compact} className='editor-area-tabs' role='tablist'>
-      {showLeftSidebarToggle || showTabNavigation ? (
+      {showTabNavigation ? (
         <div className='tab-control'>
-          {showLeftSidebarToggle ? <SidebarToggleButton side='left' /> : null}
-          {showLeftSidebarToggle && showTabNavigation ? <EditorAreaActionSeparator /> : null}
-          {showTabNavigation ? (
-            <div className='tab-navigation'>
-              <EditorAreaActionButton
-                icon='ri-arrow-left-line'
-                label={t('contextmenu.editor_tab.previous')}
-                onClick={() => moveActiveTab('left')}
-              />
-              <EditorAreaActionButton
-                icon='ri-arrow-right-line'
-                label={t('contextmenu.editor_tab.next')}
-                onClick={() => moveActiveTab('right')}
-              />
-            </div>
-          ) : null}
+          <div className='tab-navigation'>
+            <EditorAreaActionButton
+              icon={ArrowLeftIcon}
+              label={t('contextmenu.editor_tab.previous')}
+              onClick={() => moveActiveTab('left')}
+            />
+            <EditorAreaActionButton
+              icon={ArrowRightIcon}
+              label={t('contextmenu.editor_tab.next')}
+              onClick={() => moveActiveTab('right')}
+            />
+          </div>
         </div>
       ) : null}
-      <div className='tab-items' ref={htmlRef}>
+      <div className='tab-items' onKeyDown={handleTabListKeyDown} ref={htmlRef}>
         {opened.map((id) => (
           <EditorAreaTab
             active={activeId === id}
@@ -417,7 +475,7 @@ const EditorAreaTabs = memo((props: EditorAreaTabsProps) => {
         ))}
       </div>
       <div className='tab-filling' onDragOver={handleDragOver} onDrop={handleDrop} />
-      <EditorAreaHeader groupId={groupId} showRightSidebarToggle={showRightSidebarToggle} />
+      <EditorAreaHeader groupId={groupId} />
     </Container>
   )
 })

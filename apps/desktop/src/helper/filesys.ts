@@ -1,6 +1,6 @@
 import { useEditorStore } from '@/stores'
 import useAppSettingStore from '@/stores/useAppSettingStore'
-import type { FileEntry, FileSysResult, IFile } from '@markflowy/interface'
+import type { IFile } from '@markflowy/interface'
 import { FileResultCode } from '@markflowy/interface'
 import { invoke } from '@tauri-apps/api/core'
 import { nanoid } from 'nanoid'
@@ -18,35 +18,66 @@ import {
 export { FileResultCode } from '@markflowy/interface'
 export type { FileEntry, FileSysResult, IFile } from '@markflowy/interface'
 
+export interface DirectoryReadEntry {
+  name: string
+  kind: 'file' | 'dir'
+  path: string
+  children: DirectoryReadEntry[] | null
+  ext: string
+}
+
+export interface DirectoryReadResult {
+  code: FileResultCode
+  entries: DirectoryReadEntry[]
+  message?: string
+}
+
 // 安全范围管理已移至 Rust 后端（fc.rs），macOS 上 plugin-fs 的 start/stopAccessingSecurityScopedResource 为 no-op
 export async function releaseSecurityScope(path?: string) {
   if (!path) return
   await invoke('release_security_scopes', { path })
 }
 
-const wrapFiles = (entries: FileEntry[]) => {
-  const idEntries: Array<{ id: string; file: IFile }> = []
-  const pathEntries: Array<{ path: string; file: IFile }> = []
+export const hydrateDirectoryEntries = (entries: DirectoryReadEntry[]): IFile[] => {
+  const idEntries: { id: string; file: IFile }[] = []
+  const pathEntries: { path: string; file: IFile }[] = []
 
-  const visit = (items: FileEntry[]) => {
-    items.forEach((entry) => {
-      const file = entry as IFile
-      file.id = getFileObjectByPath(entry.path)?.id || nanoid()
+  const visit = (items: DirectoryReadEntry[]): IFile[] => {
+    return items.map((entry) => {
+      const file: IFile = {
+        id: getFileObjectByPath(entry.path)?.id || nanoid(),
+        name: entry.name,
+        kind: entry.kind,
+        path: entry.path,
+        ext: entry.ext,
+      }
 
       idEntries.push({ id: file.id, file })
-      if (entry.path) {
-        pathEntries.push({ path: entry.path, file })
-      }
+      pathEntries.push({ path: entry.path, file })
 
       if (entry.children) {
-        visit(entry.children)
+        file.children = visit(entry.children)
       }
+
+      return file
     })
   }
 
-  visit(entries)
+  const files = visit(entries)
   setFileObjects(idEntries)
   setFileObjectsByPath(pathEntries)
+  return files
+}
+
+export const unwrapDirectoryReadResult = (
+  result: DirectoryReadResult,
+): DirectoryReadEntry[] => {
+  if (result.code !== FileResultCode.Success) {
+    const detail = result.message ? ` (${result.message})` : ''
+    throw new Error(`Failed to read directory: ${result.code}${detail}`)
+  }
+
+  return result.entries
 }
 
 export const createFile = (opt?: Partial<IFile>): IFile => {
@@ -94,29 +125,24 @@ export const createUntitledFile = (): IFile => {
 const readDirectoryEntries = async (
   folderPath: string,
   rootPath = folderPath,
-): Promise<IFile[]> => {
-  const result = await invoke<FileSysResult>('open_folder_async', {
+): Promise<DirectoryReadEntry[]> => {
+  const result = await invoke<DirectoryReadResult>('open_folder_async', {
     folderPath,
     rootPath,
     fileExcludePatterns: getCurrentFileExcludePatterns(),
   })
 
-  if (result.code !== FileResultCode.Success) {
-    throw new Error(`Failed to read directory: ${result.code}`)
-  }
-
-  return JSON.parse(result.content) as IFile[]
+  return unwrapDirectoryReadResult(result)
 }
 
 export const readDirectory = async (folderPath: string): Promise<IFile[]> => {
   try {
-    const entries = await readDirectoryEntries(folderPath)
-    wrapFiles(entries)
-    
+    const entries = hydrateDirectoryEntries(await readDirectoryEntries(folderPath))
+
     const folderName = await invoke<string>('get_path_name', {
       path: folderPath,
     })
-    
+
     const root: IFile = {
       id: getFileObjectByPath(folderPath)?.id || nanoid(),
       name: folderName,
@@ -124,10 +150,10 @@ export const readDirectory = async (folderPath: string): Promise<IFile[]> => {
       kind: 'dir',
       children: entries,
     }
-    
+
     setFileObjectByPath(folderPath, root)
     setFileObject(root.id, root)
-    
+
     return [root]
   } catch (err) {
     throw new Error(`Failed to read directory: ${err}`)
@@ -136,9 +162,10 @@ export const readDirectory = async (folderPath: string): Promise<IFile[]> => {
 
 export const readSubdirectory = async (folderPath: string): Promise<IFile[]> => {
   try {
-    const entries = await readDirectoryEntries(folderPath, getFileExcludeRootPath(folderPath))
-    wrapFiles(entries)
-    
+    const entries = hydrateDirectoryEntries(
+      await readDirectoryEntries(folderPath, getFileExcludeRootPath(folderPath)),
+    )
+
     return entries
   } catch (err) {
     return []
@@ -223,7 +250,7 @@ export async function getMdRelativePath(filePath: string, relativeTo: string) {
     return filePath
   }
 
-  let res = await invoke<{ code: FileResultCode; content: string }>('get_md_relative_path', {
+  const res = await invoke<{ code: FileResultCode; content: string }>('get_md_relative_path', {
     filePath,
     relativeTo,
   })

@@ -14,7 +14,7 @@ import {
 import type { Node as ProseMirrorNode } from 'prosemirror-model'
 import { TextSelection } from 'prosemirror-state'
 import type { EditorView } from 'prosemirror-view'
-import type { ComponentProps, ComponentType, ReactNode } from 'react'
+import { ListIcon } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import * as Rme from 'rme'
 import { EditorViewType, extractMatches } from 'rme'
@@ -22,13 +22,6 @@ import { sourceCodeCodemirrorViewMap } from '../EditorArea/TextEditor'
 import SideBarHeader from '../SideBar/SideBarHeader'
 import { HeadingNumberingButton } from './HeadingNumberingButton'
 import { TocViewContainer } from './styles'
-
-type TocSideBarHeaderProps = ComponentProps<typeof SideBarHeader> & {
-  actions?: ReactNode
-}
-
-// packages/interface/dist is generated and may not yet include the source-level actions prop.
-const TocSideBarHeader = SideBarHeader as ComponentType<TocSideBarHeaderProps>
 
 type HeadingInfo = {
   node: ProseMirrorNode
@@ -93,6 +86,15 @@ const getAllHeadings = (doc: ProseMirrorNode): HeadingInfo[] => {
   return headings
 }
 
+const getTocScrollBehavior = (): ScrollBehavior => {
+  const prefersReducedMotion =
+    typeof window !== 'undefined' &&
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+  return prefersReducedMotion ? 'auto' : 'smooth'
+}
+
 const jumpToHeading = (
   editorView: EditorView,
   headingPos: number,
@@ -110,20 +112,21 @@ const jumpToHeading = (
 
   const { from } = editorView.state.selection
   const coords = editorView.coordsAtPos(from)
+  const behavior = getTocScrollBehavior()
 
   if (scrollEl) {
     const containerTop = scrollEl.getBoundingClientRect().top
     const targetTop = coords.top - containerTop + scrollEl.scrollTop - 100
     scrollEl.scrollTo({
       top: targetTop,
-      behavior: 'smooth',
+      behavior,
     })
     return
   }
 
   window.scrollTo({
     top: coords.top - 100, // 偏移 100px，避免被固定导航遮挡
-    behavior: 'smooth',
+    behavior,
   })
 }
 
@@ -511,17 +514,25 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
     return () => clearTimeout(timer)
   }, [activeId])
 
+  const headingNumberingAction =
+    editorCtx && activeViewType === EditorViewType.WYSIWYG ? (
+      <HeadingNumberingButton editorCtx={editorCtx} />
+    ) : null
+
   return (
     <TocViewContainer variant={variant}>
-      <TocSideBarHeader
-        actions={
-          editorCtx && activeViewType === EditorViewType.WYSIWYG ? (
-            <HeadingNumberingButton editorCtx={editorCtx} />
-          ) : null
-        }
-        name={t('sidebar.table_of_contents')}
-      />
-      <div style={{ height: 'calc(100% - 32px)', boxSizing: 'border-box' }}>
+      {headingNumberingAction ? (
+        <SideBarHeader
+          actions={headingNumberingAction}
+          name={t('sidebar.table_of_contents')}
+        />
+      ) : null}
+      <div
+        style={{
+          height: headingNumberingAction ? 'calc(100% - 32px)' : '100%',
+          boxSizing: 'border-box',
+        }}
+      >
         <TableOfContents
           ref={tocRef}
           containerEl={editorPanelEl ?? undefined}
@@ -536,7 +547,7 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
               <Empty role='status'>
                 <EmptyHeader>
                   <EmptyMedia>
-                    <i className='ri-list-unordered' aria-hidden='true' />
+                    <ListIcon aria-hidden='true' className='size-5' strokeWidth={1.5} />
                   </EmptyMedia>
                   <EmptyTitle>{t('sidebar.no_heading_lines')}</EmptyTitle>
                 </EmptyHeader>

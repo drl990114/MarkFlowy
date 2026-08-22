@@ -6,21 +6,20 @@ import {
 } from '@/services/checkUnsavedFiles'
 import { addEmptyEditorTab } from '@/services/editor-file'
 import { useEditorStore } from '@/stores'
+import { Columns2Icon, EllipsisIcon, PlusIcon } from 'lucide-react'
 import { memo, useCallback, useRef } from 'react'
 import { useTranslation } from '@/i18n'
 import { showContextMenu } from '../ui-v2/ContextMenu'
-import { EditorAreaActionButton, EditorAreaActionSeparator } from './EditorAreaAction'
-import { SidebarToggleButton } from './SidebarToggleButton'
+import { EditorAreaActionButton } from './EditorAreaAction'
 
 interface EditorAreaHeaderProps {
   groupId: string
-  showRightSidebarToggle?: boolean
 }
 
 const EMPTY_OPENED_IDS: string[] = []
 
 export const EditorAreaHeader = memo((props: EditorAreaHeaderProps) => {
-  const { groupId, showRightSidebarToggle = false } = props
+  const { groupId } = props
   const group = useEditorStore((state) => state.getGroup(groupId))
   const setActiveGroupId = useEditorStore((state) => state.setActiveGroupId)
   const closeAllFilesInGroup = useEditorStore((state) => state.closeAllFilesInGroup)
@@ -90,28 +89,22 @@ export const EditorAreaHeader = memo((props: EditorAreaHeaderProps) => {
   return (
     <div className='editor-area-header'>
       <EditorAreaActionButton
-        icon='ri-add-line'
+        icon={PlusIcon}
         label={t('file.newTab')}
         onClick={handleAddTab}
       />
       <EditorAreaActionButton
-        icon='ri-split-cells-horizontal'
+        icon={Columns2Icon}
         label={splitLabel}
         onClick={(event) => handleSplit(event.altKey ? 'vertical' : 'horizontal')}
       />
       {curFile ? (
         <EditorAreaActionButton
           ref={ref}
-          icon='ri-more-2-fill'
+          icon={EllipsisIcon}
           label={t('action.more')}
           onClick={handleClick}
         />
-      ) : null}
-      {showRightSidebarToggle ? (
-        <>
-          <EditorAreaActionSeparator />
-          <SidebarToggleButton side='right' />
-        </>
       ) : null}
     </div>
   )

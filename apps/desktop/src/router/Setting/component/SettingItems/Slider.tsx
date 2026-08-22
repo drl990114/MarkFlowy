@@ -140,7 +140,7 @@ const SliderSettingItem: React.FC<SettingItemProps<Setting.SliderSettingItem>> =
   const accessibleName = t(item.title.i18nKey)
 
   return (
-    <SettingItemContainer>
+    <SettingItemContainer $settingKey={item.key}>
       <SettingLabel item={item} />
       {Array.isArray(rawValue) ? (
         <RangeSliderControl

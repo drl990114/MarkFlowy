@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 vi.mock('@/stores', () => ({
   useEditorStore: {
@@ -13,7 +13,10 @@ vi.mock('@tauri-apps/api/core', () => ({
 vi.mock('rme', () => ({}))
 
 vi.mock('@markflowy/interface', () => ({
-  FileResultCode: { Success: 0 },
+  FileResultCode: {
+    Success: 'Success',
+    NotFound: 'NotFound',
+  },
 }))
 
 vi.mock('../files', () => ({
@@ -29,12 +32,29 @@ vi.mock('../files', () => ({
 import {
   deletePathEntry,
   getFileObject,
+  getFileObjectByPath,
   setFileObject,
   setFileObjectByPath,
+  setFileObjects,
+  setFileObjectsByPath,
 } from '../files'
-import { getFileNameFromPath, getFolderPathFromPath, isMdFile, updateFile } from '../filesys'
+import {
+  FileResultCode,
+  getFileNameFromPath,
+  getFolderPathFromPath,
+  hydrateDirectoryEntries,
+  isMdFile,
+  unwrapDirectoryReadResult,
+  updateFile,
+  type DirectoryReadEntry,
+} from '../filesys'
 
 describe('test helper/filesys ', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.mocked(getFileObjectByPath).mockReturnValue(undefined)
+  })
+
   it('getFileNameFromPath', () => {
     const macPath = '/path/to/myfile.txt'
     const winPath = 'C:\\path\\to\\myfile.txt'
@@ -89,5 +109,73 @@ describe('test helper/filesys ', () => {
     expect(deletePathEntry).toHaveBeenCalledWith('/workspace/before.md')
     expect(setFileObject).toHaveBeenCalledWith('file-1', renamedFile)
     expect(setFileObjectByPath).toHaveBeenCalledWith('/workspace/after.md', renamedFile)
+  })
+
+  it('unwraps the structured directory result without parsing JSON', () => {
+    const entries: DirectoryReadEntry[] = [
+      {
+        name: 'notes.md',
+        kind: 'file',
+        path: '/workspace/notes.md',
+        children: null,
+        ext: 'md',
+      },
+    ]
+
+    expect(unwrapDirectoryReadResult({ code: FileResultCode.Success, entries })).toBe(entries)
+  })
+
+  it('keeps directory read failures explicit', () => {
+    expect(() =>
+      unwrapDirectoryReadResult({
+        code: FileResultCode.NotFound,
+        entries: [],
+        message: 'Failed to read directory',
+      }),
+    ).toThrow('Failed to read directory: NotFound (Failed to read directory)')
+  })
+
+  it('hydrates nested directory entries and preserves cached ids', () => {
+    vi.mocked(getFileObjectByPath).mockImplementation((path) =>
+      path === '/workspace/folder/notes.md'
+        ? {
+            id: 'cached-file-id',
+            name: 'notes.md',
+            kind: 'file',
+            path,
+            ext: 'md',
+          }
+        : undefined,
+    )
+
+    const files = hydrateDirectoryEntries([
+      {
+        name: 'folder',
+        kind: 'dir',
+        path: '/workspace/folder',
+        children: [
+          {
+            name: 'notes.md',
+            kind: 'file',
+            path: '/workspace/folder/notes.md',
+            children: null,
+            ext: 'md',
+          },
+        ],
+        ext: '',
+      },
+    ])
+
+    expect(files[0].id).toEqual(expect.any(String))
+    expect(files[0].children?.[0].id).toBe('cached-file-id')
+    expect(files[0].children?.[0].children).toBeUndefined()
+    expect(setFileObjects).toHaveBeenCalledWith([
+      { id: files[0].id, file: files[0] },
+      { id: 'cached-file-id', file: files[0].children?.[0] },
+    ])
+    expect(setFileObjectsByPath).toHaveBeenCalledWith([
+      { path: '/workspace/folder', file: files[0] },
+      { path: '/workspace/folder/notes.md', file: files[0].children?.[0] },
+    ])
   })
 })

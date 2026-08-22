@@ -30,7 +30,7 @@ export function DialogOverlay({
   // paints both pieces above an earlier dialog while remaining below popovers.
   return (
     <DialogPrimitive.Overlay
-      className={cn('fixed inset-0 z-[900] bg-dialog-overlay', className)}
+      className={cn('fixed inset-0 z-[var(--mf-layer-dialog)] bg-dialog-overlay', className)}
       data-mf-portal=''
       data-slot='dialog-overlay'
       {...props}
@@ -39,7 +39,7 @@ export function DialogOverlay({
 }
 
 const dialogContentVariants = cva(
-  'fixed top-1/2 left-1/2 z-[900] flex max-h-[calc(100vh-2rem)] w-[calc(100vw-2rem)] -translate-x-1/2 -translate-y-1/2 flex-col gap-4 overflow-hidden rounded-lg border border-border bg-dialog p-5 text-foreground shadow-lg outline-none',
+  'fixed top-1/2 left-1/2 z-[var(--mf-layer-dialog)] flex max-h-[calc(100vh-2rem)] w-[calc(100vw-2rem)] -translate-x-1/2 -translate-y-1/2 flex-col gap-4 overflow-hidden rounded-lg border border-control-border bg-surface-elevated p-5 text-content-primary shadow-lg outline-none',
   {
     variants: {
       size: {
@@ -104,7 +104,7 @@ export function DialogContent({
         <DialogPrimitive.Close asChild>
           <Button
             aria-label={closeLabel}
-            className='absolute top-3 right-3 text-foreground-secondary hover:text-foreground'
+            className='absolute top-3 right-3 text-content-secondary hover:text-content-primary'
             data-slot='dialog-close'
             size='icon-sm'
             variant='ghost'
@@ -131,7 +131,7 @@ export function DialogBody({ className, ...props }: ComponentProps<'div'>) {
   return (
     <div
       className={cn(
-        'min-h-0 flex-1 overflow-y-auto text-ui-body tracking-[var(--mf-ui-tracking-body)] text-foreground-secondary',
+        'min-h-0 flex-1 overflow-y-auto text-ui-body tracking-[var(--mf-ui-tracking-body)] text-content-secondary',
         className,
       )}
       data-slot='dialog-body'
@@ -173,7 +173,7 @@ export function DialogDescription({
   return (
     <DialogPrimitive.Description
       className={cn(
-        'text-ui-body tracking-[var(--mf-ui-tracking-body)] text-foreground-secondary',
+        'text-ui-body tracking-[var(--mf-ui-tracking-body)] text-content-secondary',
         className,
       )}
       data-slot='dialog-description'

@@ -1,7 +1,8 @@
-import { RIGHTBARITEMKEYS } from '@/constants'
-import { lazy, memo, Suspense, useMemo, useState } from 'react'
-import { Container as SideBarContainer, SideBarHeader } from './styles'
-import { SideBarModeButton } from './SideBarModeButton'
+import { AsyncSurface } from '@/components/AsyncSurface'
+import { useTranslation } from '@/i18n'
+import useLayoutStore from '@/stores/useLayoutStore'
+import { lazy, memo, Suspense } from 'react'
+import { Container as SideBarContainer, DockPanelBody } from './styles'
 
 const TableOfContentExtension = lazy(async () => {
   const { default: TABLEOFCONTENT } = await import('@/extensions/table-of-content')
@@ -14,67 +15,31 @@ const AIExtension = lazy(async () => {
 })
 
 function RightBar() {
-  const [activeRightBarItemKey, setActiveRightBarItemKey] = useState<RIGHTBARITEMKEYS>(
-    RIGHTBARITEMKEYS.TableOfContent,
+  const { t } = useTranslation()
+  const activePanelId = useLayoutStore((state) => state.rightBar.activePanelId)
+  const lazyFallback = (
+    <AsyncSurface
+      state={{ status: 'loading', label: t('common.fetching') }}
+    >
+      {() => null}
+    </AsyncSurface>
   )
-
-  const rightBarDataSource: RightBarItem[] = useMemo(() => {
-    return [
-      {
-        title: RIGHTBARITEMKEYS.TableOfContent,
-        key: RIGHTBARITEMKEYS.TableOfContent,
-        icon: <i aria-hidden='true' className='ri-list-unordered' />,
-        components: (
-          <Suspense fallback={null}>
-            <TableOfContentExtension />
-          </Suspense>
-        ),
-      },
-      {
-        title: RIGHTBARITEMKEYS.AI,
-        key: RIGHTBARITEMKEYS.AI,
-        icon: <i aria-hidden='true' className='ri-chat-smile-ai-line' />,
-        components: (
-          <Suspense fallback={null}>
-            <AIExtension />
-          </Suspense>
-        ),
-      },
-    ]
-  }, [])
-
-  const activeRightBarItem = useMemo(() => {
-    const activeItem = rightBarDataSource.find((item) => item.key === activeRightBarItemKey)
-    return activeItem
-  }, [activeRightBarItemKey, rightBarDataSource])
-
-  const noActiveItem = !activeRightBarItemKey
 
   return (
-    <SideBarContainer noActiveItem={noActiveItem}>
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', width: '100%' }}>
-        <SideBarHeader>
-          {rightBarDataSource.map((item) => (
-            <SideBarModeButton
-              active={activeRightBarItemKey === item.key}
-              icon={item.icon}
-              key={item.key}
-              label={item.title}
-              onClick={() => setActiveRightBarItemKey(item.key)}
-            />
-          ))}
-        </SideBarHeader>
-        {activeRightBarItem?.components ?? null}
-      </div>
+    <SideBarContainer $side='right' data-mf-dock-panel={activePanelId}>
+      <DockPanelBody key={activePanelId}>
+        {activePanelId === 'ai' ? (
+          <Suspense fallback={lazyFallback}>
+            <AIExtension />
+          </Suspense>
+        ) : (
+          <Suspense fallback={lazyFallback}>
+            <TableOfContentExtension />
+          </Suspense>
+        )}
+      </DockPanelBody>
     </SideBarContainer>
   )
-}
-
-export interface RightBarItem {
-  title: RIGHTBARITEMKEYS
-  key: RIGHTBARITEMKEYS
-  icon: React.ReactNode
-  components: React.ReactNode
 }
 
 export default memo(RightBar)

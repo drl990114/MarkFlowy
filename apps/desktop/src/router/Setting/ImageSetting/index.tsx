@@ -4,12 +4,13 @@ import { SettingGroupContainer } from '../component/SettingGroup/styles'
 import InputSettingItem from '../component/SettingItems/Input'
 import PathSelectSettingItem from '../component/SettingItems/PathSelect'
 import SelectSettingItem from '../component/SettingItems/Select'
+import { getSettingGroupAnchorId } from '../settingSearch'
 
 export const ImageSetting = () => {
   const { settingData } = useAppSettingStore()
   return (
     <>
-      <SettingGroupContainer>
+      <SettingGroupContainer $anchorId={getSettingGroupAnchorId('image', 'paste_event')}>
         <div className='setting-group__title'>{t('settings.image.paste_event.label')}</div>
         <SelectSettingItem
           item={{
@@ -92,7 +93,7 @@ export const ImageSetting = () => {
         ) : null}
       </SettingGroupContainer>
 
-      <SettingGroupContainer>
+      <SettingGroupContainer $anchorId={getSettingGroupAnchorId('image', 'upload_img')}>
         <div className='setting-group__title'>{t('settings.image.upload_img.label')}</div>
         <SelectSettingItem
           item={{

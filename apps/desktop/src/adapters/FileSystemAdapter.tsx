@@ -1,22 +1,23 @@
 import { invoke } from '@tauri-apps/api/core'
 import { revealItemInDir } from '@tauri-apps/plugin-opener'
-import { nanoid } from 'nanoid'
 import { useMemo, type FC, type ReactNode } from 'react'
 import { flushSync } from 'react-dom'
 import {
   FileSystemContext,
-  FileSystemContextValue,
-  MoveFileInfo,
+  type FileSystemContextValue,
+  type MoveFileInfo,
   type RunFileMutation,
 } from '@markflowy/interface'
 import { logger } from '@/helper/logger'
 import { resolveFileExcludePatterns } from '@/helper/file-exclude'
-import { FileResultCode, FileSysResult, IFile } from '@/helper/filesys'
 import {
-  getFileObjectByPath,
-  setFileObjects,
-  setFileObjectsByPath,
-} from '@/helper/files'
+  FileResultCode,
+  hydrateDirectoryEntries,
+  unwrapDirectoryReadResult,
+  type DirectoryReadEntry,
+  type DirectoryReadResult,
+  type IFile,
+} from '@/helper/filesys'
 import { useEditorStore } from '@/stores'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import { savePathCoordinator } from '@/components/EditorArea/savePathCoordinator'
@@ -42,59 +43,34 @@ export const TauriFileSystemProvider: FC<FileSystemAdapterProps> = ({ children }
     runFileMutation,
 
     readDirectory: async (folderPath: string): Promise<IFile[]> => {
-      const result = await invoke<FileSysResult>('open_folder_async', {
+      const result = await invoke<DirectoryReadResult>('open_folder_async', {
         folderPath,
         rootPath: folderPath,
         fileExcludePatterns,
       })
-      if (result.code !== FileResultCode.Success) {
-        throw new Error(`Failed to read directory: ${result.code}`)
-      }
-      const files = JSON.parse(result.content) as IFile[]
-      // Note: wrapFiles logic should be handled by the caller
-      return files
+      return hydrateDirectoryEntries(unwrapDirectoryReadResult(result))
     },
 
     readSubdirectory: async (folderPath: string): Promise<IFile[]> => {
       const rootPath = useEditorStore.getState().getRootPath() || folderPath
-      const result = await invoke<FileSysResult>('open_folder_async', {
+      const result = await invoke<DirectoryReadResult>('open_folder_async', {
         folderPath,
         rootPath,
         fileExcludePatterns,
       })
-      if (result.code !== FileResultCode.Success) {
-        logger.error(`Failed to read subdirectory at ${folderPath}: ${result.code}`)
+
+      let entries: DirectoryReadEntry[]
+      try {
+        entries = unwrapDirectoryReadResult(result)
+      } catch (error) {
+        logger.error(`Failed to read subdirectory at ${folderPath}`, error)
         return []
       }
+
       if ((useEditorStore.getState().getRootPath() || folderPath) !== rootPath) {
         return []
       }
-      const files = JSON.parse(result.content) as IFile[]
-
-      const wrapFiles = (entries: IFile[]) => {
-        const idEntries: Array<{ id: string; file: IFile }> = []
-        const pathEntries: Array<{ path: string; file: IFile }> = []
-
-        const visit = (items: IFile[]) => {
-          items.forEach((entry) => {
-            entry.id = getFileObjectByPath(entry.path)?.id || nanoid()
-            idEntries.push({ id: entry.id, file: entry })
-            if (entry.path) {
-              pathEntries.push({ path: entry.path, file: entry })
-            }
-            if (entry.children) {
-              visit(entry.children)
-            }
-          })
-        }
-
-        visit(entries)
-        setFileObjects(idEntries)
-        setFileObjectsByPath(pathEntries)
-      }
-      wrapFiles(files)
-
-      return files
+      return hydrateDirectoryEntries(entries)
     },
 
     writeFile: async (filePath: string, content: string): Promise<void> => {
@@ -129,7 +105,7 @@ export const TauriFileSystemProvider: FC<FileSystemAdapterProps> = ({ children }
       files: string[]
       targetFolder: string
       replaceExist?: boolean
-    }): Promise<Array<MoveFileInfo>> => {
+    }): Promise<MoveFileInfo[]> => {
       return await invoke('move_files_to_target_folder', {
         files: params.files,
         targetFolder: params.targetFolder,

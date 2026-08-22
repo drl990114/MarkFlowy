@@ -1,22 +1,3 @@
-import type { IFile } from '../../types/file'
-
-export interface FileTreeProps {
-  data: IFile[]
-  activeId?: string
-  onSelect: (file: IFile) => void
-  dndRootElement: Node
-}
-
-export interface FileNodeProps {
-  node: any
-  tree: any
-  style: React.CSSProperties
-  dragHandle: React.RefObject<HTMLDivElement>
-  simpleTree: SimpleTree<IFile>
-  setFolderData: (data: IFile[]) => void
-  isRoot?: boolean
-}
-
 export type SimpleData = { id: string; name: string; children?: SimpleData[] }
 
 export class SimpleNode<T extends SimpleData> {
@@ -121,7 +102,7 @@ export class SimpleTree<T extends SimpleData> {
     if (!node) return null
     if (node.id === id) return node as SimpleNode<T>
     if (node.children) {
-      for (let child of node.children) {
+      for (const child of node.children) {
         const found = this.find(id, child)
         if (found) return found
       }

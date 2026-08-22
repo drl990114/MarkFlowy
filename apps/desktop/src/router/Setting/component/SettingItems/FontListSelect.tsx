@@ -52,7 +52,7 @@ const FontListSelectSettingItem: React.FC<SettingItemProps<Setting.FontListSelec
   ]
 
   return (
-    <SettingItemContainer>
+    <SettingItemContainer $settingKey={item.key}>
       <SettingLabel item={item} />
       <SearchableSelect
         aria-label={t(item.title.i18nKey)}

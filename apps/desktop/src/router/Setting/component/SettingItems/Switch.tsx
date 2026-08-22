@@ -21,7 +21,7 @@ const SwitchSettingItem: React.FC<SettingItemProps<Setting.SwitchSettingItem>> =
   )
 
   return (
-    <SettingItemContainer>
+    <SettingItemContainer $settingKey={item.key}>
       <SettingLabel item={item} />
       <Switch
         aria-label={t(item.title.i18nKey)}

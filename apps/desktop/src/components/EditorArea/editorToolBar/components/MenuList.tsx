@@ -1,5 +1,4 @@
 import { commandRegistry } from '@/commands'
-import { MfIconLabelButton } from '@/components/ui-v2/Button/icon-label-button'
 import { showContextMenu } from '@/components/ui-v2/ContextMenu'
 import useBookMarksStore from '@/extensions/bookmarks/useBookMarksStore'
 import bus from '@/helper/eventBus'
@@ -15,8 +14,10 @@ import { invoke } from '@tauri-apps/api/core'
 import { debounce } from 'lodash'
 import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from '@/i18n'
+import { MenuIcon } from 'lucide-react'
 import { EditorViewType } from 'rme'
 import { isDivider, Space, toast, type MenuItemData } from 'zens'
+import { EditorAreaActionButton } from '../../EditorAreaAction'
 import { createPdfPrintMenuItem } from '../../pdf-print/pdfPrintMenuItem'
 
 type FileNormalInfo = {
@@ -50,10 +51,6 @@ export interface MenuListProps {
   prependItems?: MenuItemData[]
   /** 在标准菜单项之后插入的菜单项 */
   appendItems?: MenuItemData[]
-  /** 按钮大小 */
-  size?: 'small' | 'medium' | 'large'
-  /** 按钮圆角 */
-  rounded?: 'smooth' | 'rounded' | 'square'
 }
 
 export const MenuList = memo((props: MenuListProps) => {
@@ -68,8 +65,6 @@ export const MenuList = memo((props: MenuListProps) => {
     customItems,
     prependItems,
     appendItems,
-    size,
-    rounded,
   } = props
 
   const activeId = useEditorStore((state) => state.activeId)
@@ -91,7 +86,7 @@ export const MenuList = memo((props: MenuListProps) => {
     (state) => state.settingData.editor_placeholder,
   )
   const { t } = useTranslation()
-  const ref = useRef<any>(null)
+  const ref = useRef<HTMLButtonElement>(null)
 
   const [fileNormalInfo, setFileNormalInfo] = useState<FileNormalInfo>(EMPTY_FILE_NORMAL_INFO)
 
@@ -389,14 +384,12 @@ export const MenuList = memo((props: MenuListProps) => {
   if (!targetEditorId || !fileName) return null
 
   return (
-    <MfIconLabelButton
-      iconRef={ref}
-      icon={'ri-menu-line'}
+    <EditorAreaActionButton
+      aria-haspopup='menu'
+      icon={MenuIcon}
+      label={t('action.more')}
       onClick={handleMenuClick}
-      tooltipProps={{ title: t('action.more') }}
-      label={t('common.menu')}
-      size={size}
-      rounded={rounded}
+      ref={ref}
     />
   )
 })

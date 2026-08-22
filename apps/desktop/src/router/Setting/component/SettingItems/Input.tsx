@@ -44,7 +44,7 @@ const InputSettingItem: React.FC<SettingItemProps<Setting.InputSettingItem>> = m
   }, [writeSettingData])
 
   return (
-    <SettingItemContainer>
+    <SettingItemContainer $settingKey={item.key}>
       <SettingLabel htmlFor={inputId} item={item} />
       {item.prefix || item.suffix ? (
         <InputGroup style={{ maxWidth: '260px' }}>

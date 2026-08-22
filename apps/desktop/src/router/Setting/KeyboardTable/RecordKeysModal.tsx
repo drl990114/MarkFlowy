@@ -83,18 +83,18 @@ export function RecordKeysModal({ ref }: RecordKeysModalProps) {
         {selectedCommand && (
           <Dialog.Body>
             <div className='grid grid-cols-[7rem_minmax(0,1fr)] items-center gap-x-3 gap-y-4'>
-              <span className='text-right text-xs font-medium text-foreground-secondary'>
+              <span className='text-right text-ui-control font-medium text-foreground-secondary'>
                 Command
               </span>
               <span className='min-w-0 break-all text-foreground'>{selectedCommand.id}</span>
 
-              <span className='text-right text-xs font-medium text-foreground-secondary'>
+              <span className='text-right text-ui-control font-medium text-foreground-secondary'>
                 Description
               </span>
               <span className='min-w-0 text-foreground'>{t(selectedCommand.id)}</span>
 
               <label
-                className='text-right text-xs font-medium text-foreground-secondary'
+                className='text-right text-ui-control font-medium text-foreground-secondary'
                 htmlFor='shortcut-input'
               >
                 Shortcut

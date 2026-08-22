@@ -2,12 +2,295 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="color-scheme" content="light dark" />
+    <script>
+      ;(() => {
+        const storageKey = 'markflowy:startup-appearance:v1'
+        const sessionStorageKey = 'markflowy:startup-appearance:session:v1'
+        const fallbackPalettes = {
+          light: {
+            surfaceApp: '#FFFFFF',
+            surfacePanel: '#F9F9F9',
+            surfaceToolbar: '#FEFEFE',
+            foreground: '#000000',
+            mutedForeground: '#505050',
+            border: '#D2D2D2',
+            accent: '#1F6AE2',
+          },
+          dark: {
+            surfaceApp: '#131313',
+            surfacePanel: '#1E1D1E',
+            surfaceToolbar: '#323232',
+            foreground: '#CACCCA',
+            mutedForeground: '#9E9E9E',
+            border: '#404040',
+            accent: '#3794ff',
+          },
+        }
+        const paletteProperties = {
+          surfaceApp: '--mf-boot-surface-app',
+          surfacePanel: '--mf-boot-surface-panel',
+          surfaceToolbar: '--mf-boot-surface-toolbar',
+          foreground: '--mf-boot-foreground',
+          mutedForeground: '--mf-boot-muted-foreground',
+          border: '--mf-boot-border',
+          accent: '--mf-boot-accent',
+        }
+        const safeColor = /^#(?:[0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/i
+        const safeOpaqueColor = /^#(?:[0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{3}f|[0-9a-f]{6}ff)$/i
+        const bootstrap =
+          window.__MARKFLOWY_BOOTSTRAP__ && typeof window.__MARKFLOWY_BOOTSTRAP__ === 'object'
+            ? window.__MARKFLOWY_BOOTSTRAP__
+            : {}
+        let rawAppearance
+        try {
+          const sessionAppearance = window.sessionStorage.getItem(sessionStorageKey)
+          rawAppearance = sessionAppearance ? JSON.parse(sessionAppearance) : undefined
+        } catch {
+          rawAppearance = undefined
+        }
+
+        rawAppearance =
+          rawAppearance &&
+          typeof rawAppearance === 'object' &&
+          !Array.isArray(rawAppearance) &&
+          rawAppearance.schemaVersion === 1
+            ? rawAppearance
+            : undefined
+
+        if (!rawAppearance) {
+          rawAppearance =
+            bootstrap.appearance && typeof bootstrap.appearance === 'object'
+              ? bootstrap.appearance
+              : undefined
+        }
+
+        if (!rawAppearance && !('__TAURI_INTERNALS__' in window)) {
+          try {
+            const storedAppearance = window.localStorage.getItem(storageKey)
+            rawAppearance = storedAppearance ? JSON.parse(storedAppearance) : undefined
+          } catch {
+            rawAppearance = undefined
+          }
+        }
+
+        rawAppearance =
+          rawAppearance &&
+          typeof rawAppearance === 'object' &&
+          !Array.isArray(rawAppearance) &&
+          rawAppearance.schemaVersion === 1
+            ? rawAppearance
+            : {}
+
+        const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches === true
+        const preference = ['light', 'dark', 'system'].includes(rawAppearance.preference)
+          ? rawAppearance.preference
+          : 'system'
+        const cachedResolvedMode = ['light', 'dark'].includes(rawAppearance.resolvedMode)
+          ? rawAppearance.resolvedMode
+          : undefined
+        const hasNativeBootstrap =
+          typeof bootstrap.sessionId === 'string' && bootstrap.sessionId !== 'browser-preview'
+        let resolvedMode =
+          preference === 'system'
+            ? hasNativeBootstrap && cachedResolvedMode
+              ? cachedResolvedMode
+              : prefersDark
+                ? 'dark'
+                : 'light'
+            : preference
+        const search = new URLSearchParams(window.location.search)
+        const isPdfPrintWindow =
+          search.has('mf-pdf-print-job') && search.has('mf-pdf-print-source')
+
+        if (isPdfPrintWindow) resolvedMode = 'light'
+
+        const fallbackPalette = fallbackPalettes[resolvedMode]
+        const canReuseCachedPalette =
+          !isPdfPrintWindow && cachedResolvedMode === resolvedMode
+        const rawPalette =
+          canReuseCachedPalette &&
+          rawAppearance.palette &&
+          typeof rawAppearance.palette === 'object' &&
+          !Array.isArray(rawAppearance.palette)
+            ? rawAppearance.palette
+            : {}
+        const palette = {}
+        Object.keys(paletteProperties).forEach((key) => {
+          const validator = key === 'surfaceApp' ? safeOpaqueColor : safeColor
+          palette[key] = validator.test(rawPalette[key]) ? rawPalette[key] : fallbackPalette[key]
+        })
+
+        const rawThemeId =
+          canReuseCachedPalette && typeof rawAppearance.themeId === 'string'
+            ? rawAppearance.themeId.trim()
+            : ''
+        const themeIdIsSafe =
+          rawThemeId.length > 0 &&
+          rawThemeId.length <= 128 &&
+          !/[\u0000-\u001f\u007f]/.test(rawThemeId)
+        const openedUrls = Array.isArray(bootstrap.openedUrls)
+          ? bootstrap.openedUrls.filter(
+              (url) => typeof url === 'string' && url.length > 0,
+            )
+          : typeof bootstrap.openedUrls === 'string'
+            ? bootstrap.openedUrls.split(',').filter(Boolean)
+            : []
+        const appearance = {
+          schemaVersion: 1,
+          preference,
+          resolvedMode,
+          themeId: themeIdIsSafe
+            ? rawThemeId
+            : resolvedMode === 'dark'
+              ? 'MarkFlowy Dark'
+              : 'MarkFlowy Light',
+          palette,
+        }
+
+        window.__MARKFLOWY_BOOTSTRAP__ = {
+          sessionId:
+            typeof bootstrap.sessionId === 'string' ? bootstrap.sessionId : 'browser-preview',
+          openedUrls,
+          appearance,
+        }
+        window.openedUrls = openedUrls
+
+        if (!isPdfPrintWindow) {
+          try {
+            window.sessionStorage.setItem(sessionStorageKey, JSON.stringify(appearance))
+          } catch {
+            // A native bootstrap still provides the startup palette when storage is unavailable.
+          }
+        }
+
+        const root = document.documentElement
+        root.dataset.mfTheme = resolvedMode
+        root.style.colorScheme = resolvedMode
+        Object.keys(paletteProperties).forEach((key) => {
+          root.style.setProperty(paletteProperties[key], palette[key])
+        })
+        window.performance?.mark?.('mf:bootstrap')
+
+        if (isPdfPrintWindow) {
+          root.classList.add('mf-pdf-print-window')
+          return
+        }
+      })()
+    </script>
+    <style>
+      :root {
+        --mf-boot-surface-app: #ffffff;
+        --mf-boot-surface-panel: #f9f9f9;
+        --mf-boot-surface-toolbar: #fefefe;
+        --mf-boot-foreground: #000000;
+        --mf-boot-muted-foreground: #505050;
+        --mf-boot-border: #d2d2d2;
+        --mf-boot-accent: #1f6ae2;
+        /* Temporary startup layer, immediately above the persistent tooltip layer (1001). */
+        --mf-boot-layer: 1002;
+        background: var(--mf-boot-surface-app);
+      }
+
+      html,
+      body,
+      #root {
+        width: 100%;
+        height: 100%;
+      }
+
+      body {
+        margin: 0;
+        background: var(--mf-boot-surface-app);
+        color: var(--mf-boot-foreground);
+      }
+
+      #mf-boot-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: var(--mf-boot-layer);
+        display: grid;
+        place-items: center;
+        box-sizing: border-box;
+        background: var(--mf-boot-surface-app);
+        color: var(--mf-boot-foreground);
+        opacity: 1;
+        transition: opacity 120ms cubic-bezier(0.23, 1, 0.32, 1);
+      }
+
+      #mf-boot-overlay[data-state='hiding'] {
+        pointer-events: none;
+        opacity: 0;
+      }
+
+      .mf-boot-progress {
+        position: relative;
+        width: min(160px, 42vw);
+        height: 2px;
+        overflow: hidden;
+        border-radius: 999px;
+        background: var(--mf-boot-border);
+        contain: layout paint;
+        opacity: 0;
+        animation: mf-boot-reveal 1ms linear 120ms forwards;
+      }
+
+      .mf-boot-progress::after {
+        position: absolute;
+        inset: 0 auto 0 0;
+        width: 42%;
+        border-radius: inherit;
+        background: var(--mf-boot-accent);
+        content: '';
+        transform: translate3d(-120%, 0, 0);
+        will-change: transform;
+        animation: mf-boot-progress 1.15s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+      }
+
+      html.mf-pdf-print-window #mf-boot-overlay {
+        display: none;
+      }
+
+      @keyframes mf-boot-progress {
+        from {
+          transform: translate3d(-120%, 0, 0);
+        }
+        to {
+          transform: translate3d(340%, 0, 0);
+        }
+      }
+
+      @keyframes mf-boot-reveal {
+        to {
+          opacity: 1;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        #mf-boot-overlay {
+          transition: none;
+        }
+
+        .mf-boot-progress::after {
+          animation: none;
+          transform: translate3d(70%, 0, 0);
+        }
+      }
+    </style>
     <link rel="icon" type="image/svg+xml" href="/src/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MarkFlowy</title>
   </head>
-  <body class="dark">
+  <body>
     <div id="root"></div>
+    <div
+      id="mf-boot-overlay"
+      role="status"
+      aria-live="polite"
+      aria-label="MarkFlowy is starting"
+    >
+      <div class="mf-boot-progress" aria-hidden="true"></div>
+    </div>
     <script>
       console.log('%cMarkFlowy Developer Console', 'color:#016ab3; font-size:40px; font-weight:bold;')
     </script>

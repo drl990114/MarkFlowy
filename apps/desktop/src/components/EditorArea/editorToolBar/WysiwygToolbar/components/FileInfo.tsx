@@ -3,10 +3,11 @@ import { dialog } from '@/services/dialog'
 import { useEditorStateStore, useEditorStore } from '@/stores'
 import { invoke } from '@tauri-apps/api/core'
 import { debounce } from 'lodash'
+import { FileTextIcon } from 'lucide-react'
 import { memo, useCallback, useEffect, useState } from 'react'
 import { useTranslation } from '@/i18n'
 import { Space, toast } from 'zens'
-import { MfIconButton } from '../../../../ui-v2/Button'
+import { EditorAreaActionButton } from '../../../EditorAreaAction'
 
 type FileNormalInfo = {
   size: string
@@ -21,7 +22,7 @@ export const FileInfo = memo(() => {
   const activeId = useEditorStore((state) => state.activeId)
   const { t } = useTranslation()
   const [fileNormalInfo, setFileNormalInfo] = useState<FileNormalInfo>(EMPTY_FILE_NORMAL_INFO)
-  
+
   const curFile = activeId ? getFileObject(activeId) : undefined
   const hasUnsavedChanges = useEditorStateStore((state) =>
     activeId ? state.idStateMap.get(activeId)?.hasUnsavedChanges : undefined,
@@ -89,13 +90,11 @@ export const FileInfo = memo(() => {
   }
 
   return (
-    <Space>
-      <MfIconButton
-        size='small'
-        rounded='smooth'
-        icon='ri-file-info-line'
-        onClick={showFileInfo}
-      />
-    </Space>
+    <EditorAreaActionButton
+      aria-haspopup='dialog'
+      icon={FileTextIcon}
+      label={t('file.info')}
+      onClick={showFileInfo}
+    />
   )
 })

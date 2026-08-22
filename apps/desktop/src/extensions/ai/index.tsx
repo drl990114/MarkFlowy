@@ -1,7 +1,9 @@
 import { commandRegistry } from '@/commands'
 import type { RightBarItem } from '@/components/SideBar'
+import { AsyncSurface, type AsyncSurfaceState } from '@/components/AsyncSurface'
 import type { RightNavItem } from '@/components/SideBar/SideBarHeader'
 import SideBarHeader from '@/components/SideBar/SideBarHeader'
+import { Button } from '@/components/ui/button'
 import { EVENT, RIGHTBARITEMKEYS } from '@/constants'
 import { useTranslation } from '@/i18n'
 import { dialog } from '@/services/dialog'
@@ -15,6 +17,7 @@ import {
   type AssistantRuntime,
   type ThreadHistoryAdapter,
 } from '@assistant-ui/react'
+import { FileDownIcon, PlusIcon, Settings2Icon, SparklesIcon } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import { AskComposerTools, AskComposerTriggers } from './AskComposerTools'
 import { AskSuggestions, AskWelcome } from './AskWelcome'
@@ -26,6 +29,7 @@ import {
   migrateLegacyAskStorage,
 } from './askHistory'
 import { createAskModelAdapter } from './askModelAdapter'
+import { resolveAskModelSurfaceStatus } from './askModelSurfaceState'
 import {
   AssistantLinkProvider,
   AssistantUIThemeProvider,
@@ -324,6 +328,35 @@ function AskWorkspaceContent({
   )
 
   const interactionDisabled = isPreparing || isMutatingHistory
+  const { refreshOllama } = modelState
+  const modelSurfaceStatus = resolveAskModelSurfaceStatus({
+    hasReadyModel: modelState.catalog.models.some((model) => model.status === 'ready'),
+    ollamaStatus: modelState.ollamaStatus,
+  })
+  const modelSurfaceState = useMemo<AsyncSurfaceState<true>>(() => {
+    if (modelSurfaceStatus === 'ready') return { status: 'ready', data: true }
+    if (modelSurfaceStatus === 'loading') {
+      return { status: 'loading', label: t('ai.ollama_connecting') }
+    }
+    if (modelSurfaceStatus === 'error') {
+      return {
+        status: 'error',
+        title: t('ai.ollama_offline'),
+        description: t('ai.model_unavailable'),
+        retry: () => void refreshOllama(),
+      }
+    }
+    return {
+      status: 'blocked',
+      title: t('ai.no_models_configured'),
+      description: t('ai.select_available_model'),
+      action: (
+        <Button onClick={() => commandRegistry.execute(EVENT.app_openSetting, { category: 'ai' })}>
+          {t('ai.manage_providers')}
+        </Button>
+      ),
+    }
+  }, [modelSurfaceStatus, refreshOllama, t])
 
   return (
     <Container>
@@ -332,61 +365,68 @@ function AskWorkspaceContent({
         onRightNavItemClick={handleRightNavItemClick}
         rightNavItems={[
           {
-            iconCls: 'ri-add-line',
+            icon: PlusIcon,
             key: 'newChat',
             tooltip: { title: t('ai.new_chat') },
           },
           {
-            iconCls: 'ri-file-download-line',
+            icon: FileDownIcon,
             key: 'exportChats',
             tooltip: { title: t('ai.export_conversation') },
           },
           {
-            iconCls: 'ri-settings-3-line',
+            icon: Settings2Icon,
             key: 'settings',
             tooltip: { title: t('ai.settings') },
           },
         ]}
       />
       <div className='content'>
-        <Thread
-          attachmentErrors={attachmentErrors}
-          composerDisabled={!readyToSend || interactionDisabled}
-          composerTriggers={
-            <AskComposerTriggers
-              attachmentAdapter={attachmentAdapter}
-              disabled={interactionDisabled}
+        <AsyncSurface retryLabel={t('ai.ollama_retry')} state={modelSurfaceState}>
+          {() => (
+            <Thread
+              attachmentErrors={attachmentErrors}
+              composerDisabled={!readyToSend || interactionDisabled}
+              composerTriggers={
+                <AskComposerTriggers
+                  attachmentAdapter={attachmentAdapter}
+                  disabled={interactionDisabled}
+                />
+              }
+              composerTools={
+                <AskComposerTools disabled={interactionDisabled} modelState={modelState} />
+              }
+              attachmentsRemovable={!interactionDisabled}
+              labels={{
+                scrollToBottom: t('ai.scroll_to_bottom'),
+                composerPlaceholder: t('ai.ask_placeholder'),
+                send: t('ai.send'),
+                stop: t('ai.stop'),
+                working: t('ai.working'),
+                copy: t('ai.copy'),
+                copied: t('ai.copied'),
+                regenerate: t('ai.regenerate'),
+                edit: t('ai.edit'),
+                deleteTurn: t('ai.delete'),
+                previousBranch: t('ai.previous_branch'),
+                nextBranch: t('ai.next_branch'),
+                cancel: t('ai.cancel_edit'),
+                update: t('ai.save_edit'),
+                removeAttachment: t('ai.delete'),
+                attachmentUnavailable: t('ai.attachment_unreadable'),
+              }}
+              onComposerSubmit={handleComposerSubmit}
+              onDeleteTurn={handleDeleteTurn}
+              welcome={<AskWelcome />}
+              suggestions={
+                <AskSuggestions
+                  attachmentAdapter={attachmentAdapter}
+                  disabled={interactionDisabled}
+                />
+              }
             />
-          }
-          composerTools={
-            <AskComposerTools disabled={interactionDisabled} modelState={modelState} />
-          }
-          attachmentsRemovable={!interactionDisabled}
-          labels={{
-            scrollToBottom: t('ai.scroll_to_bottom'),
-            composerPlaceholder: t('ai.ask_placeholder'),
-            send: t('ai.send'),
-            stop: t('ai.stop'),
-            working: t('ai.working'),
-            copy: t('ai.copy'),
-            copied: t('ai.copied'),
-            regenerate: t('ai.regenerate'),
-            edit: t('ai.edit'),
-            deleteTurn: t('ai.delete'),
-            previousBranch: t('ai.previous_branch'),
-            nextBranch: t('ai.next_branch'),
-            cancel: t('ai.cancel_edit'),
-            update: t('ai.save_edit'),
-            removeAttachment: t('ai.delete'),
-            attachmentUnavailable: t('ai.attachment_unreadable'),
-          }}
-          onComposerSubmit={handleComposerSubmit}
-          onDeleteTurn={handleDeleteTurn}
-          welcome={<AskWelcome />}
-          suggestions={
-            <AskSuggestions attachmentAdapter={attachmentAdapter} disabled={interactionDisabled} />
-          }
-        />
+          )}
+        </AsyncSurface>
       </div>
     </Container>
   )
@@ -427,7 +467,7 @@ function getAttachmentError(
 const AI = {
   title: RIGHTBARITEMKEYS.AI,
   key: RIGHTBARITEMKEYS.AI,
-  icon: <i className='ri-chat-smile-ai-line' />,
+  icon: <SparklesIcon aria-hidden='true' className='size-4' strokeWidth={1.75} />,
   components: <AskPanel />,
 } as RightBarItem
 

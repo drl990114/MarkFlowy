@@ -18,14 +18,25 @@ vi.mock('radix-ui', () => ({
 }))
 
 describe('TooltipProvider', () => {
-  it('shows tooltips immediately by default', () => {
+  it('uses a readable default delay and a short skip window', () => {
     const markup = renderToStaticMarkup(
       <TooltipProvider>
         <span>Trigger</span>
       </TooltipProvider>,
     )
 
-    expect(markup).toContain('data-delay="0"')
-    expect(markup).toContain('data-skip-delay="0"')
+    expect(markup).toContain('data-delay="350"')
+    expect(markup).toContain('data-skip-delay="80"')
+  })
+
+  it('allows callers to override both delays', () => {
+    const markup = renderToStaticMarkup(
+      <TooltipProvider delayDuration={500} skipDelayDuration={120}>
+        <span>Trigger</span>
+      </TooltipProvider>,
+    )
+
+    expect(markup).toContain('data-delay="500"')
+    expect(markup).toContain('data-skip-delay="120"')
   })
 })

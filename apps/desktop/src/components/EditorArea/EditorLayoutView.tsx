@@ -13,38 +13,21 @@ import { EditorPanel } from './styles'
 
 interface EditorLayoutViewProps {
   activeGroupId?: string
-  leftSidebarGroupId?: string
   node: EditorLayoutNode
-  rightSidebarGroupId?: string
   zenModeActive: boolean
 }
 
 function EditorLayoutView(props: EditorLayoutViewProps) {
-  const {
-    activeGroupId,
-    leftSidebarGroupId,
-    node,
-    rightSidebarGroupId,
-    zenModeActive,
-  } = props
+  const { activeGroupId, node, zenModeActive } = props
 
   if (node.type === 'leaf') {
-    return (
-      <EditorGroupPane
-        groupId={node.id}
-        showLeftSidebarToggle={node.id === leftSidebarGroupId}
-        showRightSidebarToggle={node.id === rightSidebarGroupId}
-        zenModeActive={zenModeActive}
-      />
-    )
+    return <EditorGroupPane groupId={node.id} zenModeActive={zenModeActive} />
   }
 
   return (
     <EditorBranch
       activeGroupId={activeGroupId}
-      leftSidebarGroupId={leftSidebarGroupId}
       node={node}
-      rightSidebarGroupId={rightSidebarGroupId}
       zenModeActive={zenModeActive}
     />
   )
@@ -55,13 +38,7 @@ type EditorBranchProps = EditorLayoutViewProps & {
 }
 
 const EditorBranch = memo((props: EditorBranchProps) => {
-  const {
-    activeGroupId,
-    leftSidebarGroupId,
-    node,
-    rightSidebarGroupId,
-    zenModeActive,
-  } = props
+  const { activeGroupId, node, zenModeActive } = props
   const setBranchSizes = useEditorStore((state) => state.setBranchSizes)
 
   const handleLayoutChanged = useCallback(
@@ -92,9 +69,7 @@ const EditorBranch = memo((props: EditorBranchProps) => {
           index={index}
           key={child.id}
           activeGroupId={activeGroupId}
-          leftSidebarGroupId={leftSidebarGroupId}
           node={node}
-          rightSidebarGroupId={rightSidebarGroupId}
           zenModeActive={zenModeActive}
         />
       ))}
@@ -106,9 +81,7 @@ interface PanelWithSeparatorProps {
   activeGroupId?: string
   child: EditorLayoutNode
   index: number
-  leftSidebarGroupId?: string
   node: Extract<EditorLayoutNode, { type: 'branch' }>
-  rightSidebarGroupId?: string
   zenModeActive: boolean
 }
 
@@ -117,9 +90,7 @@ function PanelWithSeparator(props: PanelWithSeparatorProps) {
     activeGroupId,
     child,
     index,
-    leftSidebarGroupId,
     node,
-    rightSidebarGroupId,
     zenModeActive,
   } = props
   const showSeparator = index < node.children.length - 1
@@ -141,9 +112,7 @@ function PanelWithSeparator(props: PanelWithSeparatorProps) {
       >
         <EditorLayoutView
           activeGroupId={activeGroupId}
-          leftSidebarGroupId={leftSidebarGroupId}
           node={child}
-          rightSidebarGroupId={rightSidebarGroupId}
           zenModeActive={zenModeActive}
         />
       </SplitPanel>
@@ -156,13 +125,11 @@ function PanelWithSeparator(props: PanelWithSeparatorProps) {
 
 interface EditorGroupPaneProps {
   groupId: string
-  showLeftSidebarToggle: boolean
-  showRightSidebarToggle: boolean
   zenModeActive: boolean
 }
 
 const EditorGroupPane = memo((props: EditorGroupPaneProps) => {
-  const { groupId, showLeftSidebarToggle, showRightSidebarToggle, zenModeActive } = props
+  const { groupId, zenModeActive } = props
   const [isDropTarget, setIsDropTarget] = useState(false)
   const group = useEditorStore((state) => state.getGroup(groupId))
   const activeGroupId = useEditorStore((state) => state.activeGroupId)
@@ -232,8 +199,6 @@ const EditorGroupPane = memo((props: EditorGroupPaneProps) => {
       <EditorAreaTabs
         compact={isSplitMode}
         groupId={groupId}
-        showLeftSidebarToggle={showLeftSidebarToggle}
-        showRightSidebarToggle={showRightSidebarToggle}
       />
       <EditorGroupToolbar editorId={activeFileId} />
       <EditorPanel id={`editor-panel-${groupId}`}>

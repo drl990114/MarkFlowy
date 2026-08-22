@@ -15,6 +15,5 @@ export const Container = styled.div`
     flex: 1;
     flex-direction: column;
     overflow: hidden;
-    border-top: 1px solid ${(props) => props.theme.borderColor};
   }
 `

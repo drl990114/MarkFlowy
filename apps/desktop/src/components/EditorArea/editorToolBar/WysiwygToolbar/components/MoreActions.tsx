@@ -5,10 +5,11 @@ import { getFileObject } from '@/helper/files'
 import { FileResultCode } from '@/helper/filesys'
 import { useEditorStore } from '@/stores'
 import { invoke } from '@tauri-apps/api/core'
+import { EllipsisIcon } from 'lucide-react'
 import { useCallback, useRef } from 'react'
 import { useTranslation } from '@/i18n'
 import { toast } from 'zens'
-import { MfIconButton } from '../../../../ui-v2/Button'
+import { EditorAreaActionButton } from '../../../EditorAreaAction'
 import { showContextMenu } from '../../../../ui-v2/ContextMenu'
 import { createPdfPrintMenuItem } from '../../../pdf-print/pdfPrintMenuItem'
 
@@ -16,8 +17,8 @@ export const MoreActions = () => {
   const activeId = useEditorStore((state) => state.activeId)
   const getEditorContent = useEditorStore((state) => state.getEditorContent)
   const { t } = useTranslation()
-  const ref = useRef<any>(null)
-  
+  const ref = useRef<HTMLButtonElement>(null)
+
   const curFile = activeId ? getFileObject(activeId) : undefined
 
   const convertText = useCallback(
@@ -111,12 +112,12 @@ export const MoreActions = () => {
   if (!curFile) return null
 
   return (
-    <MfIconButton
-      size='small'
-      rounded='smooth'
-      iconRef={ref}
-      icon={'ri-more-fill'}
+    <EditorAreaActionButton
+      aria-haspopup='menu'
+      icon={EllipsisIcon}
+      label={t('action.more')}
       onClick={handleMoreAction}
+      ref={ref}
     />
   )
 }

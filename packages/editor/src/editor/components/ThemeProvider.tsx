@@ -2,10 +2,11 @@ import type { Langs } from '@markflowy/i18n'
 import { changeLng, i18nInit, isInitialized, locales } from '@markflowy/i18n'
 import { memo, useEffect, useRef } from 'react'
 import { ThemeProvider as ScThemeProvider } from 'styled-components'
-import { CreateThemeOptions, changeTheme } from '../codemirror'
+import { type CreateThemeOptions, changeTheme } from '../codemirror'
 import { darkTheme, lightTheme } from '../theme'
 import { eventBus } from '../utils/eventbus'
 import { setMermaidTheme } from '../utils/mermaid'
+import { resolveCodeMirrorTheme } from './resolve-code-mirror-theme'
 
 export * from './Editor'
 
@@ -43,15 +44,12 @@ export const ThemeProvider: React.FC<Props> = memo(({ theme, i18n, children }: P
   }, [i18n?.language])
 
   useEffect(() => {
-    const codemirrorTheme =
-      theme?.codemirrorTheme || mode === 'dark'
-        ? darkTheme.codemirrorTheme
-        : lightTheme.codemirrorTheme
+    const codemirrorTheme = resolveCodeMirrorTheme(mode, theme?.codemirrorTheme)
     changeTheme(codemirrorTheme)
 
     setMermaidTheme(mode === 'dark' ? 'dark' : 'default')
     eventBus.emit('change-theme')
-  }, [mode, theme?.codemirrorTheme, changeTheme])
+  }, [mode, theme?.codemirrorTheme])
 
   return <ScThemeProvider theme={themeToken}>{children}</ScThemeProvider>
 })

@@ -66,7 +66,7 @@ const DateFormatSettingItem: React.FC<SettingItemProps<Setting.DateFormatSetting
   const preview = useMemo(() => formatCurrentDate(inputValue), [inputValue])
 
   return (
-    <SettingItemContainer>
+    <SettingItemContainer $settingKey={item.key}>
       <SettingLabel htmlFor={inputId} item={item} />
       <ControlWrap>
         <Input

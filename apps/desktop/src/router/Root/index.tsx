@@ -1,21 +1,28 @@
 import { commandRegistry } from '@/commands'
-import { AppInfoDialog, SideBar } from '@/components'
+import { SideBar } from '@/components'
 import { scheduleActiveEditorFocus } from '@/components/EditorArea/focusActiveEditor'
 import EditorArea from '@/components/EditorArea'
+import { scheduleDockFocus } from '@/components/SideBar/DockSwitcher'
 import RightBar from '@/components/SideBar/RightBar'
 import StatusBar from '@/components/StatusBar'
-import { WorkspaceDialog } from '@/components/WorkspaceDialog'
 import { BookMarkDialog } from '@/extensions/bookmarks/BookMarkDialog'
 import useBookMarksStore from '@/extensions/bookmarks/useBookMarksStore'
+import { useDockViewportMode } from '@/hooks/useDockViewportMode'
 import { useTranslation } from '@/i18n'
 import { useEditorStore } from '@/stores'
-import useLayoutStore from '@/stores/useLayoutStore'
-import { memo, useCallback, useEffect, useRef } from 'react'
+import useLayoutStore, {
+  MAX_LEFT_DOCK_SIZE,
+  MAX_RIGHT_DOCK_SIZE,
+  MIN_LEFT_DOCK_SIZE,
+  MIN_RIGHT_DOCK_SIZE,
+} from '@/stores/useLayoutStore'
+import { memo, useCallback, useEffect, useLayoutEffect, useRef } from 'react'
 import type { PanelImperativeHandle } from 'react-resizable-panels'
 import { Group, Panel, useDefaultLayout } from 'react-resizable-panels'
 import { toast } from 'zens'
-import { RootPageLayout, StyleSeparator } from './styles'
+import { DockOverlayContainer, RootPageLayout, StyleSeparator } from './styles'
 import { ZenModeHint } from './ZenModeHint'
+import { hasOpenInteractiveLayer } from './dockOverlayDismissal'
 import {
   queueDoubleEscapeResolution,
   registerZenModeCommand,
@@ -23,9 +30,19 @@ import {
 } from './zenMode'
 
 export const RESIZE_PANEL_STORAGE_KEY = 'root-resize-panel'
+const LEFT_DOCK_LABEL_KEYS = {
+  explorer: 'sidebar.explorer',
+  search: 'sidebar.search',
+  bookmarks: 'sidebar.bookmarks',
+} as const
+const RIGHT_DOCK_LABEL_KEYS = {
+  toc: 'sidebar.table_of_contents',
+  ai: 'ai.assistant',
+} as const
 
 function Root() {
   const { t } = useTranslation()
+  const viewportMode = useDockViewportMode()
   const { defaultLayout, onLayoutChanged } = useDefaultLayout({
     id: RESIZE_PANEL_STORAGE_KEY,
     storage: localStorage,
@@ -33,40 +50,48 @@ function Root() {
 
   const setLeftBarVisible = useLayoutStore((state) => state.setLeftBarVisible)
   const setRightBarVisible = useLayoutStore((state) => state.setRightBarVisible)
+  const syncDockPanelFromResize = useLayoutStore((state) => state.syncDockPanelFromResize)
+  const setOverlayDock = useLayoutStore((state) => state.setOverlayDock)
+  const setViewportMode = useLayoutStore((state) => state.setViewportMode)
+  const leftActivePanelId = useLayoutStore((state) => state.leftBar.activePanelId)
+  const rightActivePanelId = useLayoutStore((state) => state.rightBar.activePanelId)
+  const leftBarVisible = useLayoutStore((state) => state.leftBar.visible)
+  const rightBarVisible = useLayoutStore((state) => state.rightBar.visible)
+  const overlayDock = useLayoutStore((state) => state.overlayDock)
   const zenModeActive = useLayoutStore((state) => state.zenModeActive)
   const leftPanelRef = useRef<PanelImperativeHandle>(null)
   const rightPanelRef = useRef<PanelImperativeHandle>(null)
+  const initialDockSizesRef = useRef({
+    left: useLayoutStore.getState().leftBar.size,
+    right: useLayoutStore.getState().rightBar.size,
+  })
+  const initializedPanelStateRef = useRef(false)
   const lastEscapeAtRef = useRef<number | null>(null)
+  const pointerStartedWithInteractiveLayerRef = useRef(false)
+  const leftDockLabel = t(LEFT_DOCK_LABEL_KEYS[leftActivePanelId])
+  const rightDockLabel = t(RIGHT_DOCK_LABEL_KEYS[rightActivePanelId])
 
   const toggleLeftPanelVisible = useCallback(() => {
-    if (useLayoutStore.getState().zenModeActive) return
+    const state = useLayoutStore.getState()
+    if (state.zenModeActive) return
 
-    const panel = leftPanelRef.current
-    if (panel) {
-      if (panel.isCollapsed()) {
-        panel.expand()
-        setLeftBarVisible(true)
-      } else {
-        panel.collapse()
-        setLeftBarVisible(false)
-      }
-    }
-  }, [setLeftBarVisible])
+    const usesOverlay = state.viewportMode === 'compact'
+    const wasVisible = usesOverlay ? state.overlayDock === 'left' : state.leftBar.visible
+    state.toggleDockPanel('left', state.leftBar.activePanelId)
+    if (wasVisible) scheduleActiveEditorFocus()
+    else scheduleDockFocus('left')
+  }, [])
 
   const toggleRightPanelVisible = useCallback(() => {
-    if (useLayoutStore.getState().zenModeActive) return
+    const state = useLayoutStore.getState()
+    if (state.zenModeActive) return
 
-    const panel = rightPanelRef.current
-    if (panel) {
-      if (panel.isCollapsed()) {
-        panel.expand()
-        setRightBarVisible(true)
-      } else {
-        panel.collapse()
-        setRightBarVisible(false)
-      }
-    }
-  }, [setRightBarVisible])
+    const usesOverlay = state.viewportMode !== 'wide'
+    const wasVisible = usesOverlay ? state.overlayDock === 'right' : state.rightBar.visible
+    state.toggleDockPanel('right', state.rightBar.activePanelId)
+    if (wasVisible) scheduleActiveEditorFocus()
+    else scheduleDockFocus('right')
+  }, [])
 
   const toggleZenMode = useCallback(() => {
     const layoutState = useLayoutStore.getState()
@@ -85,13 +110,46 @@ function Root() {
 
   const handleRootLayoutChanged = useCallback(
     (layout: Parameters<typeof onLayoutChanged>[0]) => {
-      if (useLayoutStore.getState().zenModeActive) return
+      const state = useLayoutStore.getState()
+      if (state.zenModeActive || state.viewportMode !== 'wide') return
       onLayoutChanged(layout)
     },
     [onLayoutChanged],
   )
 
   const { getBookMarkList } = useBookMarksStore()
+
+  useLayoutEffect(() => {
+    setViewportMode(viewportMode)
+
+    const leftPanel = leftPanelRef.current
+    const rightPanel = rightPanelRef.current
+    if (!leftPanel || !rightPanel || zenModeActive) return
+
+    if (!initializedPanelStateRef.current) {
+      setLeftBarVisible(!leftPanel.isCollapsed())
+      setRightBarVisible(!rightPanel.isCollapsed())
+      initializedPanelStateRef.current = true
+    }
+
+    const layoutState = useLayoutStore.getState()
+    const leftDocked = viewportMode !== 'compact'
+    const rightDocked = viewportMode === 'wide'
+
+    if (leftDocked && layoutState.leftBar.visible) leftPanel.expand()
+    else leftPanel.collapse()
+
+    if (rightDocked && layoutState.rightBar.visible) rightPanel.expand()
+    else rightPanel.collapse()
+  }, [
+    leftBarVisible,
+    rightBarVisible,
+    setLeftBarVisible,
+    setRightBarVisible,
+    setViewportMode,
+    viewportMode,
+    zenModeActive,
+  ])
 
   useEffect(() => {
     const d1 = commandRegistry.registerCommand({
@@ -103,17 +161,62 @@ function Root() {
       handler: toggleRightPanelVisible,
     })
 
-    if (leftPanelRef.current?.isCollapsed()) setLeftBarVisible(false)
-    else setLeftBarVisible(true)
-
-    if (rightPanelRef.current?.isCollapsed()) setRightBarVisible(false)
-    else setRightBarVisible(true)
-
     return () => {
       d1.dispose()
       d2.dispose()
     }
-  }, [setLeftBarVisible, setRightBarVisible, toggleLeftPanelVisible, toggleRightPanelVisible])
+  }, [toggleLeftPanelVisible, toggleRightPanelVisible])
+
+  useEffect(() => {
+    if (!overlayDock || zenModeActive) return
+
+    const handlePointerDownCapture = () => {
+      pointerStartedWithInteractiveLayerRef.current = hasOpenInteractiveLayer()
+    }
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (pointerStartedWithInteractiveLayerRef.current) {
+        pointerStartedWithInteractiveLayerRef.current = false
+        return
+      }
+
+      const target = event.target
+      if (!(target instanceof Element)) return
+      if (
+        target.closest(`[data-mf-dock-overlay="${overlayDock}"]`) ||
+        target.closest('[data-mf-dock-trigger]') ||
+        target.closest('[data-mf-portal]')
+      ) {
+        return
+      }
+
+      setOverlayDock(null)
+      scheduleActiveEditorFocus()
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (
+        event.key !== 'Escape' ||
+        event.defaultPrevented ||
+        event.isComposing ||
+        event.repeat
+      ) {
+        return
+      }
+
+      setOverlayDock(null)
+      scheduleActiveEditorFocus()
+    }
+
+    window.addEventListener('pointerdown', handlePointerDownCapture, true)
+    window.addEventListener('pointerdown', handlePointerDown)
+    window.addEventListener('keydown', handleKeyDown)
+    return () => {
+      window.removeEventListener('pointerdown', handlePointerDownCapture, true)
+      window.removeEventListener('pointerdown', handlePointerDown)
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [overlayDock, setOverlayDock, zenModeActive])
 
   useEffect(() => {
     const disposable = registerZenModeCommand(commandRegistry, {
@@ -168,8 +271,9 @@ function Root() {
       const leftPanel = document.getElementById('root-left')
       const rightPanel = document.getElementById('root-right')
       const statusBar = document.querySelector('.app-status-bar')
+      const dockOverlays = document.querySelectorAll('[data-mf-dock-overlay]')
 
-      ;[leftPanel, rightPanel, statusBar].forEach((el) => {
+      ;[leftPanel, rightPanel, statusBar, ...dockOverlays].forEach((el) => {
         if (!el) return
         if (active) {
           el.setAttribute('data-mf-hidden', '')
@@ -184,45 +288,110 @@ function Root() {
 
   return (
     <RootPageLayout data-mf-zen-mode={zenModeActive ? '' : undefined}>
-      {/* <TitleBar /> */}
       <Group
         defaultLayout={defaultLayout}
         disabled={zenModeActive}
-        onLayoutChange={handleRootLayoutChanged}
+        onLayoutChanged={handleRootLayoutChanged}
+        resizeTargetMinimumSize={{ coarse: 20, fine: 7 }}
       >
         <Panel
+          aria-label={leftDockLabel}
+          data-mf-dock-side='left'
+          data-mf-dock-visible={viewportMode !== 'compact' && leftBarVisible ? 'true' : 'false'}
           id='root-left'
           collapsible
           collapsedSize={0}
-          defaultSize={20}
-          minSize={160}
+          defaultSize={`${initialDockSizesRef.current.left}px`}
+          groupResizeBehavior='preserve-pixel-size'
+          maxSize={`${MAX_LEFT_DOCK_SIZE}px`}
+          minSize={`${MIN_LEFT_DOCK_SIZE}px`}
+          onResize={(size) => {
+            syncDockPanelFromResize('left', size.inPixels)
+          }}
           panelRef={leftPanelRef}
+          role='complementary'
+          tabIndex={-1}
         >
-          <SideBar />
+          {viewportMode !== 'compact' ? <SideBar /> : null}
         </Panel>
-        <StyleSeparator data-mf-root-separator='' />
-        <Panel id='root-center' defaultSize={60} minSize={40}>
+        <StyleSeparator
+          aria-hidden={viewportMode === 'compact'}
+          data-mf-hidden={viewportMode === 'compact' ? '' : undefined}
+          data-mf-root-separator=''
+          disabled={viewportMode === 'compact' || zenModeActive}
+        />
+        <Panel
+          id='root-center'
+          groupResizeBehavior='preserve-relative-size'
+          minSize='320px'
+          role='main'
+        >
           <EditorArea />
         </Panel>
-        <StyleSeparator data-mf-root-separator='' />
+        <StyleSeparator
+          aria-hidden={viewportMode !== 'wide'}
+          data-mf-hidden={viewportMode !== 'wide' ? '' : undefined}
+          data-mf-root-separator=''
+          disabled={viewportMode !== 'wide' || zenModeActive}
+        />
         <Panel
+          aria-label={rightDockLabel}
+          data-mf-dock-side='right'
+          data-mf-dock-visible={viewportMode === 'wide' && rightBarVisible ? 'true' : 'false'}
           id='root-right'
           collapsible
           collapsedSize={0}
-          defaultSize={20}
-          minSize={160}
+          defaultSize={`${initialDockSizesRef.current.right}px`}
+          groupResizeBehavior='preserve-pixel-size'
+          maxSize={`${MAX_RIGHT_DOCK_SIZE}px`}
+          minSize={`${MIN_RIGHT_DOCK_SIZE}px`}
+          onResize={(size) => {
+            syncDockPanelFromResize('right', size.inPixels)
+          }}
           panelRef={rightPanelRef}
+          role='complementary'
+          tabIndex={-1}
         >
-          <RightBar />
+          {viewportMode === 'wide' ? <RightBar /> : null}
         </Panel>
       </Group>
+      {viewportMode === 'compact' ? (
+        <DockOverlayContainer
+          $side='left'
+          $visible={overlayDock === 'left'}
+          aria-label={leftDockLabel}
+          aria-hidden={overlayDock !== 'left'}
+          data-mf-dock-overlay='left'
+          data-mf-dock-side='left'
+          data-mf-dock-visible={overlayDock === 'left' ? 'true' : 'false'}
+          inert={overlayDock !== 'left'}
+          role='complementary'
+          tabIndex={-1}
+        >
+          <SideBar />
+        </DockOverlayContainer>
+      ) : null}
+      {viewportMode !== 'wide' ? (
+        <DockOverlayContainer
+          $side='right'
+          $visible={overlayDock === 'right'}
+          aria-label={rightDockLabel}
+          aria-hidden={overlayDock !== 'right'}
+          data-mf-dock-overlay='right'
+          data-mf-dock-side='right'
+          data-mf-dock-visible={overlayDock === 'right' ? 'true' : 'false'}
+          inert={overlayDock !== 'right'}
+          role='complementary'
+          tabIndex={-1}
+        >
+          <RightBar />
+        </DockOverlayContainer>
+      ) : null}
       <div className='app-status-bar'>
         <StatusBar />
       </div>
       <ZenModeHint active={zenModeActive} />
-      <AppInfoDialog />
       <BookMarkDialog />
-      <WorkspaceDialog />
     </RootPageLayout>
   )
 }

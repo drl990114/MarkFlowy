@@ -1,6 +1,9 @@
 import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { commandRegistry } from '@/commands'
 import { useTranslation } from '@/i18n'
+import { ListOrderedIcon } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import type { EditorContext } from 'rme'
 
 type HeadingNumberingCommands = {
@@ -27,28 +30,47 @@ export function HeadingNumberingButton(props: { editorCtx: EditorContext }) {
   const { editorCtx } = props
   const { t } = useTranslation()
   const label = t('sidebar.heading_numbering') || 'Heading numbering'
+  const [numberingEnabled, setNumberingEnabled] = useState(
+    () => getAnalysis(editorCtx).complete,
+  )
+
+  useEffect(() => {
+    const syncNumberingState = () => {
+      setNumberingEnabled(getAnalysis(editorCtx).complete)
+    }
+
+    syncNumberingState()
+    return editorCtx.addHandler('updated', syncNumberingState)
+  }, [editorCtx])
 
   const handleClick = () => {
     const commands = getCommands(editorCtx)
-    if (getAnalysis(editorCtx).complete) {
-      commands.removeHeadingNumbering()
-    } else {
-      commands.applyHeadingNumbering()
+    const wasEnabled = getAnalysis(editorCtx).complete
+    const changed = wasEnabled
+      ? commands.removeHeadingNumbering()
+      : commands.applyHeadingNumbering()
+
+    if (changed) {
+      setNumberingEnabled(!wasEnabled)
     }
     commandRegistry.execute('app:toc_refresh')
     editorCtx.view.focus()
   }
 
   return (
-    <Button
-      aria-label={label}
-      className='icon icon-small icon-smooth size-[22px] rounded-md text-[0.85rem]'
-      onClick={handleClick}
-      size='icon-sm'
-      title={label}
-      variant='ghost'
-    >
-      <i className='ri-list-ordered-2' aria-hidden='true' />
-    </Button>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          aria-label={label}
+          aria-pressed={numberingEnabled}
+          onClick={handleClick}
+          size='icon-chrome'
+          variant='chrome'
+        >
+          <ListOrderedIcon aria-hidden='true' strokeWidth={1.75} />
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>{label}</TooltipContent>
+    </Tooltip>
   )
 }

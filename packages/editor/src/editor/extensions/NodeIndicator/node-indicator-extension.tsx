@@ -1,8 +1,15 @@
 import { isHTMLElement } from '@ocavue/utils'
-import { CreateExtensionPlugin, EditorView, PlainExtension, ResolvedPos } from '@rme-sdk/sdk/core'
-import { NodeSelection, PluginKey, TextSelection } from '@rme-sdk/sdk/pm/state'
-import { buildGetTarget, GetTarget } from './drop-target'
-import { findBlockByCoords, findFirstLineRect } from './node-target'
+import { PlainExtension } from '@rme-sdk/sdk/core'
+import type { CreateExtensionPlugin, EditorView, ResolvedPos } from '@rme-sdk/sdk/core'
+import { NodeSelection, TextSelection } from '@rme-sdk/sdk/pm/state'
+import type { PluginKey } from '@rme-sdk/sdk/pm/state'
+import { buildGetTarget } from './drop-target'
+import type { GetTarget } from './drop-target'
+import {
+  findBlockByCoords,
+  findBlockInteractionRect,
+  findFirstLineRect,
+} from './node-target'
 import type { NodeIndicatorState, ViewDragging } from './types'
 
 export class NodeIndicatorExtension extends PlainExtension {
@@ -17,6 +24,7 @@ export class NodeIndicatorExtension extends PlainExtension {
       node: null,
       pos: null,
       rect: null,
+      interactionRect: null,
     }
     return {
       initialState,
@@ -51,26 +59,26 @@ export class NodeIndicatorExtension extends PlainExtension {
           }
 
           event.preventDefault()
-          let insertPos = target[0]
+          const insertPos = target[0]
 
-          let tr = view.state.tr
+          const tr = view.state.tr
 
           if (move) {
-            let { node } = (view.dragging as ViewDragging | null) || {}
+            const { node } = (view.dragging as ViewDragging | null) || {}
             if (node) node.replace(tr)
             else tr.deleteSelection()
           }
 
-          let pos = tr.mapping.map(insertPos)
-          let isNode = slice.openStart == 0 && slice.openEnd == 0 && slice.content.childCount == 1
-          let beforeInsert = tr.doc
+          const pos = tr.mapping.map(insertPos)
+          const isNode = slice.openStart == 0 && slice.openEnd == 0 && slice.content.childCount == 1
+          const beforeInsert = tr.doc
           if (isNode) tr.replaceRangeWith(pos, pos, slice.content.firstChild!)
           else tr.replaceRange(pos, pos, slice)
           if (tr.doc.eq(beforeInsert)) {
             return false
           }
 
-          let $pos = tr.doc.resolve(pos)
+          const $pos = tr.doc.resolve(pos)
           if (
             isNode &&
             NodeSelection.isSelectable(slice.content.firstChild!) &&
@@ -103,7 +111,14 @@ export class NodeIndicatorExtension extends PlainExtension {
             }
             const currentState = this.pluginKey.getState(view.state)
             if (currentState?.node !== null) {
-              view.dispatch(view.state.tr.setMeta(this.pluginKey, { node: null, pos: null, rect: null }))
+              view.dispatch(
+                view.state.tr.setMeta(this.pluginKey, {
+                  node: null,
+                  pos: null,
+                  rect: null,
+                  interactionRect: null,
+                }),
+              )
             }
             return false
           },
@@ -143,7 +158,14 @@ function handlePointerMove(view: EditorView, event: Event, pluginKey: PluginKey)
 
   if (!block) {
     if (currentState?.node !== null) {
-      view.dispatch(view.state.tr.setMeta(pluginKey, { node: null, pos: null, rect: null }))
+      view.dispatch(
+        view.state.tr.setMeta(pluginKey, {
+          node: null,
+          pos: null,
+          rect: null,
+          interactionRect: null,
+        }),
+      )
     }
     return
   }
@@ -152,7 +174,14 @@ function handlePointerMove(view: EditorView, event: Event, pluginKey: PluginKey)
   const element = view.nodeDOM(pos)
   if (!element || !isHTMLElement(element)) {
     if (currentState?.node !== null) {
-      view.dispatch(view.state.tr.setMeta(pluginKey, { node: null, pos: null, rect: null }))
+      view.dispatch(
+        view.state.tr.setMeta(pluginKey, {
+          node: null,
+          pos: null,
+          rect: null,
+          interactionRect: null,
+        }),
+      )
     }
     return
   }
@@ -189,10 +218,10 @@ function handlePointerMove(view: EditorView, event: Event, pluginKey: PluginKey)
     view.state.tr.setMeta(pluginKey, {
       node: newNode,
       pos: newPos,
-      rect: rect || {},
+      rect: rect || null,
+      interactionRect: findBlockInteractionRect(newElement) || rect || null,
     }),
   )
 }
 
 export type { NodeIndicatorPluginOptions, NodeIndicatorState } from './types'
-

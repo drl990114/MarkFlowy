@@ -13,9 +13,9 @@ import styled from 'styled-components'
 import themeData from '../../../../../../community-themes.json'
 
 const SectionTitle = styled.h3`
-  font-size: var(--mf-ui-font-control);
+  font-size: var(--mf-ui-font-body);
   font-weight: 600;
-  line-height: var(--mf-ui-line-height-control);
+  line-height: var(--mf-ui-line-height-body);
   margin: 16px 0 8px;
   color: var(--mf-muted-foreground);
 
@@ -66,8 +66,8 @@ const LocalThemeInfo = styled.div`
 `
 
 const LocalThemeName = styled.span`
-  font-size: var(--mf-ui-font-caption);
-  line-height: var(--mf-ui-line-height-caption);
+  font-size: var(--mf-ui-font-control);
+  line-height: var(--mf-ui-line-height-control);
   font-weight: 500;
   color: var(--mf-foreground);
   overflow: hidden;
@@ -137,8 +137,8 @@ const TableCell = styled.th<{ width?: string }>`
   text-align: left;
   font-weight: 600;
   white-space: nowrap;
-  font-size: var(--mf-ui-font-caption);
-  line-height: var(--mf-ui-line-height-caption);
+  font-size: var(--mf-ui-font-control);
+  line-height: var(--mf-ui-line-height-control);
   color: var(--mf-foreground);
   box-sizing: border-box;
 `
@@ -146,8 +146,8 @@ const TableCell = styled.th<{ width?: string }>`
 const TableDataCell = styled.td`
   padding: 7px 10px;
   text-align: left;
-  font-size: var(--mf-ui-font-caption);
-  line-height: var(--mf-ui-line-height-caption);
+  font-size: var(--mf-ui-font-control);
+  line-height: var(--mf-ui-line-height-control);
   color: var(--mf-foreground);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -170,15 +170,15 @@ const InstalledOnlyControl = styled.label`
   gap: 8px;
   color: var(--mf-foreground);
   cursor: pointer;
-  font-size: var(--mf-ui-font-caption);
-  line-height: var(--mf-ui-line-height-caption);
+  font-size: var(--mf-ui-font-control);
+  line-height: var(--mf-ui-line-height-control);
 `
 
 const EmptyState = styled.div`
   padding: 14px 12px;
   color: var(--mf-muted-foreground);
-  font-size: var(--mf-ui-font-caption);
-  line-height: var(--mf-ui-line-height-caption);
+  font-size: var(--mf-ui-font-control);
+  line-height: var(--mf-ui-line-height-control);
   text-align: center;
 `
 

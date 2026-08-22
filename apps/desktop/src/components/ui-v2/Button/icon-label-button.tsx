@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import type { TooltipContentProps } from '@/components/ui/tooltip'
 import classNames from 'classnames'
@@ -8,71 +9,81 @@ type MfTooltipProps = Omit<TooltipContentProps, 'children'> & {
   title: ReactNode
 }
 
-interface MfIconLabelButtonProps {
-  icon: string
-  label?: string
-  className?: string
-  onClick: (e?: React.MouseEvent<HTMLElement>) => void
-  iconRef?: React.RefObject<any>
-  tooltipProps?: MfTooltipProps
-  disabled?: boolean
-  unselected?: boolean
+interface MfIconLabelButtonBaseProps {
   active?: boolean
-  size?: 'small' | 'medium' | 'large'
+  className?: string
+  disabled?: boolean
+  icon: string
+  iconRef?: React.RefObject<any>
+  onClick: (event?: React.MouseEvent<HTMLElement>) => void
   rounded?: 'smooth' | 'rounded' | 'square'
+  size?: 'small' | 'medium' | 'large'
+  tooltipProps?: MfTooltipProps
+  unselected?: boolean
 }
 
-const Wrapper = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 4px;
-  border-radius: ${(props) => props.theme.smallBorderRadius};
-  font-size: ${(props) => props.theme.fontXs};
-  gap: 4px;
-  cursor: pointer;
+type MfIconLabelButtonAccessibleName =
+  | { ariaLabel?: string; label: string; tooltipProps?: MfTooltipProps }
+  | { ariaLabel: string; label?: undefined; tooltipProps?: MfTooltipProps }
+  | {
+      ariaLabel?: undefined
+      label?: undefined
+      tooltipProps: MfTooltipProps & { title: string }
+    }
 
+export type MfIconLabelButtonProps = MfIconLabelButtonBaseProps &
+  MfIconLabelButtonAccessibleName
+
+const Wrapper = styled(Button)`
+  height: auto;
+  padding: 4px;
+  border: 0;
+  border-radius: ${(props) => props.theme.smallBorderRadius};
+  background: transparent;
+  color: inherit;
+  font-size: ${(props) => props.theme.fontXs};
 
   &:hover {
-    color: ${(props) => props.theme.accentColor};
-    background-color: ${(props) => props.theme.hoverColor};
+    color: var(--mf-text-primary, ${(props) => props.theme.primaryFontColor});
+    background-color: var(--mf-control-ghost-hover, ${(props) => props.theme.hoverColor});
   }
 
   .btn-icon {
     font-size: 1rem;
   }
 `
-export const MfIconLabelButton = (props: MfIconLabelButtonProps) => {
-  const {
-    label,
-    onClick,
-    tooltipProps,
-    iconRef,
-    disabled = false,
-    icon,
-  } = props
 
-  const iconCls = classNames('btn-icon', icon)
+/** Compatibility adapter for legacy callers. New code should use the Desktop Button facade. */
+export function MfIconLabelButton(props: MfIconLabelButtonProps) {
+  const { ariaLabel, disabled = false, icon, iconRef, label, onClick, tooltipProps } = props
+  const iconClassName = classNames('btn-icon', icon)
+  const accessibleName =
+    ariaLabel ??
+    label ??
+    (typeof tooltipProps?.title === 'string' ? tooltipProps.title : undefined)
 
   const content = (
-    <Wrapper onClick={disabled ? undefined : onClick}>
-      <i ref={iconRef} className={iconCls}></i>
-      {label && <span className='icon-label'>{label}</span>}
+    <Wrapper
+      ref={iconRef}
+      aria-label={accessibleName}
+      aria-pressed={typeof props.active === 'boolean' ? props.active : undefined}
+      className={props.className}
+      disabled={disabled}
+      onClick={(event) => onClick(event)}
+      variant='ghost'
+    >
+      <i aria-hidden='true' className={iconClassName} />
+      {label ? <span className='icon-label'>{label}</span> : null}
     </Wrapper>
   )
 
-  if (tooltipProps) {
-    const { title, ...contentProps } = tooltipProps
+  if (!tooltipProps?.title) return content
 
-    if (!title) return content
-
-    return (
-      <Tooltip>
-        <TooltipTrigger asChild>{content}</TooltipTrigger>
-        <TooltipContent {...contentProps}>{title}</TooltipContent>
-      </Tooltip>
-    )
-  }
-
-  return content
+  const { title, ...contentProps } = tooltipProps
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>{content}</TooltipTrigger>
+      <TooltipContent {...contentProps}>{title}</TooltipContent>
+    </Tooltip>
+  )
 }

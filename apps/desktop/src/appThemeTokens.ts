@@ -1,3 +1,6 @@
+import Color from 'color'
+import type { CreateThemeOptions } from 'rme'
+
 const LEGACY_DEFAULT_ROOT_FONT_FAMILY = 'Open Sans'
 const LEGACY_DEFAULT_CODE_FONT_FAMILY = 'Fira Code'
 const SYSTEM_DEFAULT_FONT_FAMILY = 'System Default'
@@ -19,7 +22,70 @@ interface ResolveAppThemeTokensOptions<T extends AppThemeTokenShape> {
   accentColor: string
   fontSettings: AppThemeFontSettings
   hasAccentColorOverride: boolean
+  mode: 'dark' | 'light'
   theme: T
+}
+
+interface CodeMirrorPalette {
+  accentColorFocused: string
+  bgColor: string
+  labelFontColor: string
+  primaryFontColor: string
+  statusBarBgColor: string
+}
+
+export function alignCodeMirrorTheme({
+  baseTheme,
+  mode,
+  theme,
+}: {
+  baseTheme: CreateThemeOptions
+  mode: 'dark' | 'light'
+  theme: CodeMirrorPalette
+}): CreateThemeOptions {
+  const foreground = mode === 'dark' ? '#DDDDDD' : theme.primaryFontColor
+
+  return {
+    ...baseTheme,
+    settings: {
+      ...baseTheme.settings,
+      background: theme.bgColor,
+      caret: foreground,
+      foreground,
+      gutterBackground: theme.bgColor,
+      gutterForeground: theme.labelFontColor,
+      lineHighlight: mode === 'dark' ? theme.statusBarBgColor : '#F0F0F0',
+      selection: theme.accentColorFocused,
+    },
+  }
+}
+
+export function resolveAccentSoftColor({
+  accentColor,
+  mode,
+  themeAccentColor,
+  themeAccentColorFocused,
+}: {
+  accentColor: string
+  mode: 'dark' | 'light'
+  themeAccentColor?: string
+  themeAccentColorFocused?: string
+}): string {
+  if (
+    themeAccentColorFocused &&
+    accentColor.trim().toLowerCase() === themeAccentColor?.trim().toLowerCase()
+  ) {
+    return themeAccentColorFocused
+  }
+
+  try {
+    return Color(accentColor)
+      .alpha(mode === 'dark' ? 0.18 : 0.24)
+      .rgb()
+      .string()
+  } catch {
+    return accentColor
+  }
 }
 
 export function normalizeFontFamily(fontFamily: string): string {
@@ -50,13 +116,19 @@ export function resolveAppThemeTokens<T extends AppThemeTokenShape>({
   accentColor,
   fontSettings,
   hasAccentColorOverride,
+  mode,
   theme,
 }: ResolveAppThemeTokensOptions<T>) {
   const uiTheme = {
     ...theme,
     accentColor,
     accentColorFocused: hasAccentColorOverride
-      ? `${accentColor}18`
+      ? resolveAccentSoftColor({
+          accentColor,
+          mode,
+          themeAccentColor: theme.accentColor,
+          themeAccentColorFocused: theme.accentColorFocused,
+        })
       : theme.accentColorFocused,
   }
   const editorTheme = {

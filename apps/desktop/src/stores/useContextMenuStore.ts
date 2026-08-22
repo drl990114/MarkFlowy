@@ -1,5 +1,12 @@
-import type { MenuItemData } from 'zens'
+import type { MenuDividerType, MenuGroupType } from 'zens'
 import { create } from 'zustand'
+
+export type DesktopMenuGroupType = Omit<MenuGroupType, 'children'> & {
+  children?: DesktopMenuItemData[]
+  disabled?: boolean
+}
+
+export type DesktopMenuItemData = DesktopMenuGroupType | MenuDividerType
 
 const useContextMenuStore = create<ContextMenuStore>((set) => {
   return {
@@ -19,14 +26,14 @@ const useContextMenuStore = create<ContextMenuStore>((set) => {
 export interface IShowContextMenuParams {
   x: number
   y: number
-  items: MenuItemData[]
+  items: DesktopMenuItemData[]
 }
 
 interface ContextMenuStore {
   x: number
   y: number
   open: boolean
-  items: MenuItemData[]
+  items: DesktopMenuItemData[]
   show: (params: IShowContextMenuParams) => void
   hide: () => void
 }

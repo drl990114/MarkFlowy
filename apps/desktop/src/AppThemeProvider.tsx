@@ -1,11 +1,16 @@
 import NiceModal from '@ebay/nice-modal-react'
 import isPropValid from '@emotion/is-prop-valid'
 import { desktopDarkTheme, desktopLightTheme } from '@markflowy/theme'
-import { createContext, useContext, useEffect, useMemo } from 'react'
-import { ThemeProvider as EditorProvider } from 'rme'
+import { releaseStartupPalette } from '@/startup/appearance'
+import { createContext, useContext, useLayoutEffect, useMemo } from 'react'
+import {
+  darkTheme as defaultEditorDarkTheme,
+  lightTheme as defaultEditorLightTheme,
+  ThemeProvider as EditorProvider,
+} from 'rme'
 import { type IStyleSheetContext, StyleSheetManager, ThemeProvider } from 'styled-components'
 import { ThemeProvider as ZensThemeProvider } from 'zens'
-import { resolveAppThemeTokens } from './appThemeTokens'
+import { alignCodeMirrorTheme, resolveAppThemeTokens } from './appThemeTokens'
 import { GlobalStyles, DesktopSpecificStyles } from './globalStyles'
 import {
   getReadableForeground,
@@ -15,7 +20,10 @@ import {
 } from './helper/theme'
 import { InjectFonts } from './injectFonts'
 import useAppSettingStore from './stores/useAppSettingStore'
-import useThemeStore from './stores/useThemeStore'
+import useThemeStore, {
+  FALLBACK_DARK_THEME,
+  FALLBACK_LIGHT_THEME,
+} from './stores/useThemeStore'
 
 type EditorThemeToken = typeof desktopLightTheme
 
@@ -29,8 +37,8 @@ export function AppEditorThemeProvider({ children }: BaseComponentProps) {
 }
 
 const AppThemeProvider: React.FC<BaseComponentProps> = function ({ children }) {
-  const { curTheme } = useThemeStore()
-  const { settingData } = useAppSettingStore()
+  const curTheme = useThemeStore((state) => state.curTheme)
+  const settingData = useAppSettingStore((state) => state.settingData)
 
   const themeWithDefaults = useMemo(
     () => ({
@@ -52,11 +60,13 @@ const AppThemeProvider: React.FC<BaseComponentProps> = function ({ children }) {
           editorRootFontFamily: settingData.editor_root_font_family,
         },
         hasAccentColorOverride,
+        mode: curTheme.mode,
         theme: themeWithDefaults,
       }),
     [
       accentColor,
       hasAccentColorOverride,
+      curTheme.mode,
       settingData.editor_code_font_family,
       settingData.editor_root_font_family,
       themeWithDefaults,
@@ -64,11 +74,30 @@ const AppThemeProvider: React.FC<BaseComponentProps> = function ({ children }) {
   )
 
   const themeProp = useMemo(
-    () => ({
-      mode: curTheme.mode,
-      token: uiTheme,
-    }),
-    [curTheme.mode, uiTheme],
+    () => {
+      const isDefaultMarkflowyTheme =
+        curTheme.name === FALLBACK_LIGHT_THEME || curTheme.name === FALLBACK_DARK_THEME
+      const baseCodeMirrorTheme =
+        curTheme.mode === 'dark'
+          ? defaultEditorDarkTheme.codemirrorTheme
+          : defaultEditorLightTheme.codemirrorTheme
+      const codemirrorTheme =
+        curTheme.codemirrorTheme ??
+        (isDefaultMarkflowyTheme
+          ? alignCodeMirrorTheme({
+              baseTheme: baseCodeMirrorTheme,
+              mode: curTheme.mode,
+              theme: uiTheme,
+            })
+          : undefined)
+
+      return {
+        codemirrorTheme,
+        mode: curTheme.mode,
+        token: uiTheme,
+      }
+    },
+    [curTheme.codemirrorTheme, curTheme.mode, curTheme.name, uiTheme],
   )
 
   const i18nProp = useMemo(
@@ -87,16 +116,9 @@ const AppThemeProvider: React.FC<BaseComponentProps> = function ({ children }) {
     [uiTheme.dangerColor],
   )
 
-  useEffect(() => {
-    const root = document.documentElement
-    const previousTheme = root.dataset.mfTheme
-    root.dataset.mfTheme = curTheme.mode
-
-    return () => {
-      if (previousTheme === undefined) delete root.dataset.mfTheme
-      else root.dataset.mfTheme = previousTheme
-    }
-  }, [curTheme.mode])
+  useLayoutEffect(() => {
+    releaseStartupPalette()
+  }, [])
 
   return (
     <StyleSheetManager shouldForwardProp={shouldForwardProp}>

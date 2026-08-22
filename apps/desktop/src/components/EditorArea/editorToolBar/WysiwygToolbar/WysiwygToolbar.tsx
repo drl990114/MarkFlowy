@@ -1,23 +1,53 @@
 import { useEditorStore } from '@/stores'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
-import { type FC, useMemo } from 'react'
+import { type FC, useCallback, useMemo } from 'react'
 import { useTranslation } from '@/i18n'
 import { EditorViewType } from 'rme'
+import {
+  BoldIcon,
+  Code2Icon,
+  Heading1Icon,
+  Heading2Icon,
+  Heading3Icon,
+  ImageIcon,
+  ItalicIcon,
+  ListIcon,
+  ListOrderedIcon,
+  ListTodoIcon,
+  QuoteIcon,
+  Redo2Icon,
+  Undo2Icon,
+} from 'lucide-react'
 import {
   ToolbarSection,
   usePriorityHidden,
   ToolbarWrapper,
   ToolbarDivider,
-  CommandButton,
 } from '@markflowy/interface'
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { MenuList } from '../components/MenuList'
+import {
+  getOverflowToolbarActions,
+  MenuList,
+  ToolbarActionButton,
+  toOverflowMenuItems,
+  type ToolbarAction,
+} from '../components'
 import { AIButton } from './components/AIButton'
 
 interface WysiwygToolbarProps {
   editorId?: string
 }
+
+type ToolbarCommand = (attrs?: Record<string, unknown>) => unknown
+
+const TOOLBAR_GROUPS = [
+  { id: 'history', priority: 90 },
+  { id: 'headings', priority: 60 },
+  { id: 'formatting', priority: 50 },
+  { id: 'insert', priority: 40 },
+  { id: 'blocks', priority: 30 },
+]
+
+const TOOLBAR_SECTIONS = [{ id: 'common', priority: 100 }, ...TOOLBAR_GROUPS]
 
 export const WysiwygToolbar: FC<WysiwygToolbarProps> = (props) => {
   const { editorId } = props
@@ -30,32 +60,152 @@ export const WysiwygToolbar: FC<WysiwygToolbarProps> = (props) => {
   const editorCtx = useEditorStore((state) => state.editorCtxMap.get(targetEditorId ?? ''))
   const viewType = targetEditorId ? getEditorViewType(targetEditorId) : EditorViewType.WYSIWYG
 
-  const sections = useMemo(
-    () => [
-      { id: 'common', priority: 100 },
-      { id: 'history', priority: 90 },
-      { id: 'headings', priority: 60 },
-      { id: 'formatting', priority: 50 },
-      { id: 'insert', priority: 40 },
-      { id: 'blocks', priority: 30 },
-    ],
-    [],
-  )
-
   const { containerRef, hiddenIds, registerItemWidth } = usePriorityHidden({
-    items: sections,
+    items: TOOLBAR_SECTIONS,
     gap: 0,
   })
 
-  if (!editorCtx || viewType !== EditorViewType.WYSIWYG) {
-    return null
-  }
+  const runEditorCommand = useCallback(
+    (commandName: string, attrs?: Record<string, unknown>) => {
+      if (!editorCtx) return
+      const commands = editorCtx.commands as unknown as Record<
+        string,
+        ToolbarCommand | undefined
+      >
+      const command = commands[commandName]
+      if (!command) return
 
-  const handleInsertImage = () => {
+      command(attrs)
+      editorCtx.view.focus()
+    },
+    [editorCtx],
+  )
+
+  const handleInsertImage = useCallback(() => {
+    if (!editorCtx) return
     const commands = editorCtx.commands as typeof editorCtx.commands & {
       requestImageInsert?: () => boolean
     }
     commands.requestImageInsert?.()
+  }, [editorCtx])
+
+  const actions = useMemo<ToolbarAction[]>(
+    () => [
+      {
+        id: 'undo',
+        group: 'history',
+        priority: 90,
+        label: t('toolbar.undo') || 'Undo',
+        icon: Undo2Icon,
+        run: () => runEditorCommand('undo'),
+      },
+      {
+        id: 'redo',
+        group: 'history',
+        priority: 90,
+        label: t('toolbar.redo') || 'Redo',
+        icon: Redo2Icon,
+        run: () => runEditorCommand('redo'),
+      },
+      {
+        id: 'heading-1',
+        group: 'headings',
+        priority: 60,
+        label: t('toolbar.h1') || 'Heading 1',
+        icon: Heading1Icon,
+        run: () => runEditorCommand('toggleHeading', { level: 1 }),
+      },
+      {
+        id: 'heading-2',
+        group: 'headings',
+        priority: 60,
+        label: t('toolbar.h2') || 'Heading 2',
+        icon: Heading2Icon,
+        run: () => runEditorCommand('toggleHeading', { level: 2 }),
+      },
+      {
+        id: 'heading-3',
+        group: 'headings',
+        priority: 60,
+        label: t('toolbar.h3') || 'Heading 3',
+        icon: Heading3Icon,
+        run: () => runEditorCommand('toggleHeading', { level: 3 }),
+      },
+      {
+        id: 'bold',
+        group: 'formatting',
+        priority: 50,
+        label: t('toolbar.bold') || 'Bold',
+        icon: BoldIcon,
+        run: () => runEditorCommand('toggleStrong'),
+      },
+      {
+        id: 'italic',
+        group: 'formatting',
+        priority: 50,
+        label: t('toolbar.italic') || 'Italic',
+        icon: ItalicIcon,
+        run: () => runEditorCommand('toggleEmphasis'),
+      },
+      {
+        id: 'inline-code',
+        group: 'formatting',
+        priority: 50,
+        label: t('toolbar.code') || 'Inline Code',
+        icon: Code2Icon,
+        run: () => runEditorCommand('toggleCodeText'),
+      },
+      {
+        id: 'image',
+        group: 'insert',
+        priority: 40,
+        label: imageLabel,
+        icon: ImageIcon,
+        run: handleInsertImage,
+      },
+      {
+        id: 'blockquote',
+        group: 'blocks',
+        priority: 30,
+        label: t('toolbar.quote') || 'Blockquote',
+        icon: QuoteIcon,
+        run: () => runEditorCommand('toggleBlockquote'),
+      },
+      {
+        id: 'bullet-list',
+        group: 'blocks',
+        priority: 30,
+        label: t('toolbar.bulletList') || 'Bullet List',
+        icon: ListIcon,
+        run: () => runEditorCommand('toggleList', { kind: 'bullet' }),
+      },
+      {
+        id: 'ordered-list',
+        group: 'blocks',
+        priority: 30,
+        label: t('toolbar.orderedList') || 'Ordered List',
+        icon: ListOrderedIcon,
+        run: () => runEditorCommand('toggleList', { kind: 'ordered' }),
+      },
+      {
+        id: 'task-list',
+        group: 'blocks',
+        priority: 30,
+        label: t('toolbar.taskList') || 'Task List',
+        icon: ListTodoIcon,
+        run: () => runEditorCommand('toggleList', { kind: 'task' }),
+      },
+    ],
+    [handleInsertImage, imageLabel, runEditorCommand, t],
+  )
+
+  const overflowMenuItems = useMemo(
+    () => toOverflowMenuItems(getOverflowToolbarActions(actions, hiddenIds)),
+    [actions, hiddenIds],
+  )
+
+  if (!editorCtx || viewType !== EditorViewType.WYSIWYG) {
+    return null
   }
 
   return (
@@ -63,143 +213,31 @@ export const WysiwygToolbar: FC<WysiwygToolbarProps> = (props) => {
       <ToolbarSection
         id='common'
         registerWidth={registerItemWidth}
-        hidden={hiddenIds.has('common')}
+        hidden={false}
       >
-        <MenuList editorId={targetEditorId} showTypewriterScroll />
+        <MenuList
+          editorId={targetEditorId}
+          prependItems={overflowMenuItems}
+          showTypewriterScroll
+        />
         <AIButton editorId={targetEditorId} />
       </ToolbarSection>
 
-      <ToolbarSection
-        id='history'
-        registerWidth={registerItemWidth}
-        hidden={hiddenIds.has('history')}
-      >
-        <ToolbarDivider />
-        <CommandButton
-          editorCtx={editorCtx}
-          commandName='undo'
-          icon='ri-arrow-go-back-line'
-          label={t('toolbar.undo') || 'Undo'}
-        />
-        <CommandButton
-          editorCtx={editorCtx}
-          commandName='redo'
-          icon='ri-arrow-go-forward-line'
-          label={t('toolbar.redo') || 'Redo'}
-        />
-      </ToolbarSection>
-
-      <ToolbarSection
-        id='headings'
-        registerWidth={registerItemWidth}
-        hidden={hiddenIds.has('headings')}
-      >
-        <ToolbarDivider />
-        <CommandButton
-          editorCtx={editorCtx}
-          commandName='toggleHeading'
-          attrs={{ level: 1 }}
-          icon='ri-h-1'
-          label={t('toolbar.h1') || 'Heading 1'}
-        />
-        <CommandButton
-          editorCtx={editorCtx}
-          commandName='toggleHeading'
-          attrs={{ level: 2 }}
-          icon='ri-h-2'
-          label={t('toolbar.h2') || 'Heading 2'}
-        />
-        <CommandButton
-          editorCtx={editorCtx}
-          commandName='toggleHeading'
-          attrs={{ level: 3 }}
-          icon='ri-h-3'
-          label={t('toolbar.h3') || 'Heading 3'}
-        />
-      </ToolbarSection>
-
-      <ToolbarSection
-        id='formatting'
-        registerWidth={registerItemWidth}
-        hidden={hiddenIds.has('formatting')}
-      >
-        <ToolbarDivider />
-        <CommandButton
-          editorCtx={editorCtx}
-          commandName='toggleStrong'
-          icon='ri-bold'
-          label={t('toolbar.bold') || 'Bold'}
-        />
-        <CommandButton
-          editorCtx={editorCtx}
-          commandName='toggleEmphasis'
-          icon='ri-italic'
-          label={t('toolbar.italic') || 'Italic'}
-        />
-        <CommandButton
-          editorCtx={editorCtx}
-          commandName='toggleCodeText'
-          icon='ri-code-line'
-          label={t('toolbar.code') || 'Inline Code'}
-        />
-      </ToolbarSection>
-
-      <ToolbarSection
-        id='insert'
-        registerWidth={registerItemWidth}
-        hidden={hiddenIds.has('insert')}
-      >
-        <ToolbarDivider />
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              aria-label={imageLabel}
-              className='size-6 rounded-sm'
-              onClick={handleInsertImage}
-              size='icon-sm'
-              variant='ghost'
-            >
-              <i className='ri-image-line' aria-hidden='true' />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>{imageLabel}</TooltipContent>
-        </Tooltip>
-      </ToolbarSection>
-
-      <ToolbarSection
-        id='blocks'
-        registerWidth={registerItemWidth}
-        hidden={hiddenIds.has('blocks')}
-      >
-        <ToolbarDivider />
-        <CommandButton
-          editorCtx={editorCtx}
-          commandName='toggleBlockquote'
-          icon='ri-double-quotes-l'
-          label={t('toolbar.quote') || 'Blockquote'}
-        />
-        <CommandButton
-          editorCtx={editorCtx}
-          commandName='toggleList'
-          attrs={{ kind: 'bullet' }}
-          icon='ri-list-unordered'
-          label={t('toolbar.bulletList') || 'Bullet List'}
-        />
-        <CommandButton
-          editorCtx={editorCtx}
-          commandName='toggleList'
-          attrs={{ kind: 'ordered' }}
-          icon='ri-list-ordered'
-          label={t('toolbar.orderedList') || 'Ordered List'}
-        />
-        <CommandButton
-          editorCtx={editorCtx}
-          commandName='toggleList'
-          attrs={{ kind: 'task' }}
-          icon='ri-checkbox-line'
-          label={t('toolbar.taskList') || 'Task List'}
-        />
-      </ToolbarSection>
+      {TOOLBAR_GROUPS.map((group) => (
+        <ToolbarSection
+          hidden={hiddenIds.has(group.id)}
+          id={group.id}
+          key={group.id}
+          registerWidth={registerItemWidth}
+        >
+          <ToolbarDivider />
+          {actions
+            .filter((action) => action.group === group.id)
+            .map((action) => (
+              <ToolbarActionButton action={action} key={action.id} />
+            ))}
+        </ToolbarSection>
+      ))}
     </ToolbarWrapper>
   )
 }

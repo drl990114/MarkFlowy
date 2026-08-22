@@ -11,9 +11,10 @@ mod search;
 mod setup;
 mod task_system;
 
-use std::path::PathBuf;
+use std::io::Write;
+use std::path::{Path, PathBuf};
 use std::sync;
-use std::{collections::HashMap, sync::Mutex};
+use std::{collections::HashMap, sync::Mutex, sync::OnceLock};
 use std::{env, fs};
 
 use app::{
@@ -25,7 +26,6 @@ use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
 use tauri::{Emitter, Manager, State};
 use tauri_plugin_cli::CliExt;
-use tauri_plugin_window_state::{AppHandleExt, StateFlags};
 use tracing_subscriber;
 
 #[cfg(windows)]
@@ -52,7 +52,12 @@ lazy_static! {
 
 struct OpenedUrls(Mutex<Option<Vec<url::Url>>>);
 
+static CLI_RUNTIME_WRITER: OnceLock<tokio::sync::mpsc::UnboundedSender<CliRuntimePatch>> =
+    OnceLock::new();
+
 const CLI_GUI_CHILD_ENV: &str = "MARKFLOWY_CLI_GUI_CHILD";
+const LEGACY_WINDOW_STATE_FILENAME: &str = ".window-state.json";
+const WINDOW_STATE_FILENAME: &str = ".window-state-v2.json";
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
@@ -91,15 +96,19 @@ struct CliCommandPayload {
     id: String,
 }
 
-fn opened_urls_to_string(urls: &[url::Url]) -> String {
+enum CliRuntimePatch {
+    Windows(Vec<CliWindowState>),
+    Commands(Vec<CliCommandState>),
+}
+
+fn opened_urls_to_paths(urls: &[url::Url]) -> Vec<String> {
     urls.iter()
         .map(|u| {
             urlencoding::decode(u.as_str())
-                .unwrap()
-                .replace("\\", "\\\\")
+                .map(|decoded| decoded.into_owned())
+                .unwrap_or_else(|_| u.as_str().to_string())
         })
-        .collect::<Vec<_>>()
-        .join(",")
+        .collect()
 }
 
 fn append_opened_urls(opened_urls: &OpenedUrls, urls: &[url::Url]) -> Vec<url::Url> {
@@ -119,20 +128,151 @@ fn clear_opened_urls(opened_urls: &OpenedUrls) {
     opened_urls.0.lock().unwrap().take();
 }
 
-fn update_window_opened_urls(window: &tauri::WebviewWindow, opened_urls: &str) {
-    if let Ok(script_opened_urls) = window_manager::serialize_javascript_string(opened_urls) {
-        let _ = window.eval(&format!(
-            r#"
+fn opened_urls_update_script(opened_urls: &[String]) -> Result<String, serde_json::Error> {
+    let script_opened_urls = window_manager::serialize_javascript_value(&opened_urls)?;
+    Ok(format!(
+        r#"
             (() => {{
                 const incoming = {script_opened_urls};
-                const current = typeof window.openedUrls === 'string' && window.openedUrls
-                    ? window.openedUrls.split(',')
-                    : [];
-                const merged = [...current, ...incoming.split(',')].filter(Boolean);
-                window.openedUrls = [...new Set(merged)].join(',');
+                const current = Array.isArray(window.openedUrls)
+                    ? window.openedUrls.filter((value) => typeof value === 'string' && value.length > 0)
+                    : typeof window.openedUrls === 'string' && window.openedUrls
+                      ? window.openedUrls.split(',').filter(Boolean)
+                      : [];
+                window.openedUrls = [...new Set([...current, ...incoming])];
             }})();
             "#
-        ));
+    ))
+}
+
+pub(crate) fn update_window_opened_urls(window: &tauri::WebviewWindow, opened_urls: &[String]) {
+    if let Ok(script) = opened_urls_update_script(opened_urls) {
+        let _ = window.eval(&script);
+    }
+}
+
+fn migrate_window_state_file(config_dir: &Path) -> Result<bool, String> {
+    let target_path = config_dir.join(WINDOW_STATE_FILENAME);
+    if target_path.exists() {
+        return Ok(false);
+    }
+
+    let legacy_path = config_dir.join(LEGACY_WINDOW_STATE_FILENAME);
+    if !legacy_path.exists() {
+        return Ok(false);
+    }
+
+    let legacy_content = fs::read(&legacy_path)
+        .map_err(|error| format!("Failed to read legacy window state: {error}"))?;
+    let stable_states = match serde_json::from_slice::<serde_json::Value>(&legacy_content) {
+        Ok(serde_json::Value::Object(states)) => states
+            .into_iter()
+            .filter(|(label, _)| window_manager::should_persist_window_state(label))
+            .collect::<serde_json::Map<_, _>>(),
+        Ok(_) => serde_json::Map::new(),
+        Err(error) => {
+            tracing::warn!("Ignoring invalid legacy window state during migration: {error}");
+            serde_json::Map::new()
+        }
+    };
+
+    fs::create_dir_all(config_dir)
+        .map_err(|error| format!("Failed to create window state directory: {error}"))?;
+    let content = serde_json::to_vec_pretty(&stable_states)
+        .map_err(|error| format!("Failed to serialize migrated window state: {error}"))?;
+    let mut temp_file = tempfile::Builder::new()
+        .prefix(".window-state-migration-")
+        .tempfile_in(config_dir)
+        .map_err(|error| format!("Failed to create window state migration file: {error}"))?;
+    temp_file
+        .write_all(&content)
+        .map_err(|error| format!("Failed to write migrated window state: {error}"))?;
+    temp_file
+        .as_file_mut()
+        .sync_all()
+        .map_err(|error| format!("Failed to sync migrated window state: {error}"))?;
+    temp_file
+        .persist(&target_path)
+        .map_err(|error| format!("Failed to persist migrated window state: {}", error.error))?;
+
+    #[cfg(unix)]
+    fs::File::open(config_dir)
+        .and_then(|directory| directory.sync_all())
+        .map_err(|error| format!("Failed to sync window state directory: {error}"))?;
+
+    Ok(true)
+}
+
+fn window_state_migration_plugin<R: tauri::Runtime>() -> tauri::plugin::TauriPlugin<R> {
+    tauri::plugin::Builder::new("window-state-migration")
+        .setup(|app, _api| {
+            let config_dir = app.path().app_config_dir()?;
+            if let Err(error) = migrate_window_state_file(&config_dir) {
+                tracing::warn!("Window-state migration was skipped: {error}");
+            }
+            Ok(())
+        })
+        .build()
+}
+
+#[cfg(test)]
+mod opened_url_tests {
+    use super::{
+        migrate_window_state_file, opened_urls_to_paths, opened_urls_update_script,
+        LEGACY_WINDOW_STATE_FILENAME, WINDOW_STATE_FILENAME,
+    };
+
+    #[test]
+    fn opened_url_paths_preserve_commas_as_one_array_entry() {
+        let urls = vec![url::Url::parse("file:///tmp/notes%2C2026.md").unwrap()];
+
+        assert_eq!(
+            opened_urls_to_paths(&urls),
+            vec!["file:///tmp/notes,2026.md".to_string()]
+        );
+    }
+
+    #[test]
+    fn opened_url_update_merges_pending_paths_instead_of_replacing_them() {
+        let script = opened_urls_update_script(&["file:///tmp/B,2.md".to_string()])
+            .expect("serialize update");
+
+        assert!(script.contains("Array.isArray(window.openedUrls)"));
+        assert!(script.contains("[...new Set([...current, ...incoming])]"));
+        assert!(script.contains("file:///tmp/B,2.md"));
+        assert!(!script.contains("__MARKFLOWY_BOOTSTRAP__ ="));
+    }
+
+    #[test]
+    fn window_state_migration_keeps_only_stable_labels() {
+        let directory = tempfile::tempdir().expect("tempdir");
+        std::fs::write(
+            directory.path().join(LEGACY_WINDOW_STATE_FILENAME),
+            r#"{
+              "main": {"width":1200,"height":800,"x":0,"y":0,"prev_x":0,"prev_y":0,"maximized":false,"visible":true,"decorated":true,"fullscreen":false},
+              "conf": {"width":900,"height":600,"x":20,"y":20,"prev_x":20,"prev_y":20,"maximized":false,"visible":true,"decorated":true,"fullscreen":false},
+              "main_550e8400-e29b-41d4-a716-446655440000": {"width":700,"height":500,"x":40,"y":40,"prev_x":40,"prev_y":40,"maximized":false,"visible":true,"decorated":true,"fullscreen":false},
+              "mf-pdf-print-1": {"width":500,"height":500,"x":0,"y":0,"prev_x":0,"prev_y":0,"maximized":false,"visible":true,"decorated":true,"fullscreen":false}
+            }"#,
+        )
+        .expect("write legacy state");
+
+        assert!(migrate_window_state_file(directory.path()).expect("migrate state"));
+        let migrated: serde_json::Value = serde_json::from_slice(
+            &std::fs::read(directory.path().join(WINDOW_STATE_FILENAME))
+                .expect("read migrated state"),
+        )
+        .expect("parse migrated state");
+        let states = migrated.as_object().expect("state map");
+        assert_eq!(states.len(), 2);
+        assert!(states.contains_key("main"));
+        assert!(states.contains_key("conf"));
+        assert!(!states.keys().any(|label| label.starts_with("main_")));
+        assert!(!states
+            .keys()
+            .any(|label| label.starts_with("mf-pdf-print-")));
+
+        assert!(!migrate_window_state_file(directory.path()).expect("migration is idempotent"));
     }
 }
 
@@ -338,20 +478,25 @@ fn write_cli_runtime_state(state: &CliRuntimeState) -> Result<(), String> {
     fs::write(path, content).map_err(|e| e.to_string())
 }
 
-fn sync_cli_runtime_windows(app: &tauri::AppHandle) {
-    let mut state = read_cli_runtime_state();
-    state.version = env!("CARGO_PKG_VERSION").to_string();
-    state.pid = Some(std::process::id());
-
+fn collect_cli_runtime_windows(app: &tauri::AppHandle) -> Vec<CliWindowState> {
     let mut windows = Vec::new();
-    if let Ok(instances) = WINDOW_INSTANCES.lock() {
-        for (label, path) in instances.iter() {
-            if app.get_webview_window(label).is_some() {
-                windows.push(CliWindowState {
-                    id: label.clone(),
-                    workspace_path: path.to_string_lossy().to_string(),
-                });
-            }
+
+    let instances = WINDOW_INSTANCES
+        .lock()
+        .map(|instances| {
+            instances
+                .iter()
+                .map(|(label, path)| (label.clone(), path.clone()))
+                .collect::<Vec<_>>()
+        })
+        .unwrap_or_default();
+
+    for (label, path) in instances {
+        if app.get_webview_window(&label).is_some() {
+            windows.push(CliWindowState {
+                id: label,
+                workspace_path: path.to_string_lossy().to_string(),
+            });
         }
     }
 
@@ -364,8 +509,103 @@ fn sync_cli_runtime_windows(app: &tauri::AppHandle) {
     }
 
     windows.sort_by(|a, b| a.id.cmp(&b.id));
-    state.windows = windows;
-    let _ = write_cli_runtime_state(&state);
+    windows
+}
+
+fn apply_cli_runtime_patch(state: &mut CliRuntimeState, patch: CliRuntimePatch) {
+    state.version = env!("CARGO_PKG_VERSION").to_string();
+    state.pid = Some(std::process::id());
+
+    match patch {
+        CliRuntimePatch::Windows(windows) => state.windows = windows,
+        CliRuntimePatch::Commands(mut commands) => {
+            commands.sort_by(|a, b| a.id.cmp(&b.id));
+            state.commands = commands;
+        }
+    }
+}
+
+async fn run_cli_runtime_writer(
+    mut receiver: tokio::sync::mpsc::UnboundedReceiver<CliRuntimePatch>,
+) {
+    let mut state = match app::startup_io::run(read_cli_runtime_state).await {
+        Ok(state) => state,
+        Err(error) => {
+            tracing::warn!("Failed to join CLI runtime state reader: {error}");
+            empty_cli_runtime_state()
+        }
+    };
+
+    while let Some(patch) = receiver.recv().await {
+        apply_cli_runtime_patch(&mut state, patch);
+        while let Ok(patch) = receiver.try_recv() {
+            apply_cli_runtime_patch(&mut state, patch);
+        }
+
+        let snapshot = state.clone();
+        match app::startup_io::run(move || write_cli_runtime_state(&snapshot)).await {
+            Ok(Ok(())) => {}
+            Ok(Err(error)) => tracing::warn!("Failed to write CLI runtime state: {error}"),
+            Err(error) => tracing::warn!("Failed to join CLI runtime state writer: {error}"),
+        }
+    }
+}
+
+fn enqueue_cli_runtime_patch(patch: CliRuntimePatch) -> Result<(), String> {
+    let writer = CLI_RUNTIME_WRITER.get_or_init(|| {
+        let (sender, receiver) = tokio::sync::mpsc::unbounded_channel();
+        tauri::async_runtime::spawn(run_cli_runtime_writer(receiver));
+        sender
+    });
+
+    writer
+        .send(patch)
+        .map_err(|_| "CLI runtime state writer is unavailable".to_string())
+}
+
+fn sync_cli_runtime_windows(app: &tauri::AppHandle) -> Result<(), String> {
+    enqueue_cli_runtime_patch(CliRuntimePatch::Windows(collect_cli_runtime_windows(app)))
+}
+
+#[cfg(test)]
+mod cli_runtime_writer_tests {
+    use super::{
+        apply_cli_runtime_patch, CliCommandState, CliRuntimePatch, CliRuntimeState, CliWindowState,
+    };
+
+    #[test]
+    fn runtime_patches_merge_without_dropping_other_fields() {
+        let mut state = CliRuntimeState::default();
+
+        apply_cli_runtime_patch(
+            &mut state,
+            CliRuntimePatch::Windows(vec![CliWindowState {
+                id: "main".to_string(),
+                workspace_path: "/workspace".to_string(),
+            }]),
+        );
+        apply_cli_runtime_patch(
+            &mut state,
+            CliRuntimePatch::Commands(vec![
+                CliCommandState {
+                    id: "z-command".to_string(),
+                    label: None,
+                    category: None,
+                },
+                CliCommandState {
+                    id: "a-command".to_string(),
+                    label: None,
+                    category: None,
+                },
+            ]),
+        );
+
+        assert_eq!(state.windows.len(), 1);
+        assert_eq!(state.windows[0].id, "main");
+        assert_eq!(state.commands[0].id, "a-command");
+        assert_eq!(state.commands[1].id, "z-command");
+        assert_eq!(state.pid, Some(std::process::id()));
+    }
 }
 
 fn print_json<T: Serialize>(value: &T) {
@@ -593,17 +833,12 @@ fn update_cli_window_state(
         }
     }
 
-    sync_cli_runtime_windows(&app);
-    Ok(())
+    sync_cli_runtime_windows(&app)
 }
 
 #[tauri::command]
 fn update_cli_command_state(commands: Vec<CliCommandState>) -> Result<(), String> {
-    let mut state = read_cli_runtime_state();
-    state.version = env!("CARGO_PKG_VERSION").to_string();
-    state.commands = commands;
-    state.commands.sort_by(|a, b| a.id.cmp(&b.id));
-    write_cli_runtime_state(&state)
+    enqueue_cli_runtime_patch(CliRuntimePatch::Commands(commands))
 }
 
 /// CLI wrapper 的文件名
@@ -1291,7 +1526,15 @@ pub fn run() {
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_notification::init())
-        .plugin(tauri_plugin_window_state::Builder::default().build())
+        .plugin(window_state_migration_plugin())
+        .plugin(
+            tauri_plugin_window_state::Builder::default()
+                // Dynamic workspace and print-window labels are never reused, so
+                // persisting them only grows the startup state file indefinitely.
+                .with_filename(WINDOW_STATE_FILENAME)
+                .with_filter(window_manager::should_persist_window_state)
+                .build(),
+        )
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_persisted_scope::init())
@@ -1317,8 +1560,7 @@ pub fn run() {
                                 .skip(2)
                                 .filter(|arg| !arg.starts_with("--window"))
                                 .map(|p| path_to_file_url(p, Some(&cwd)))
-                                .collect::<Vec<_>>()
-                                .join(",");
+                                .collect::<Vec<_>>();
                             if let Err(e) = crate::setup::init(app_handle.clone(), opened_urls) {
                                 println!("CLI open failed: {:?}", e);
                             }
@@ -1328,8 +1570,7 @@ pub fn run() {
                                 .iter()
                                 .skip(1)
                                 .map(|p| path_to_file_url(p, Some(&cwd)))
-                                .collect::<Vec<_>>()
-                                .join(",");
+                                .collect::<Vec<_>>();
                             if !opened_urls.is_empty() {
                                 if let Err(e) = crate::setup::init(app_handle.clone(), opened_urls)
                                 {
@@ -1371,6 +1612,7 @@ pub fn run() {
             conf::cmd::get_app_conf,
             conf::cmd::reset_app_conf,
             conf::cmd::save_app_conf,
+            conf::cmd::save_startup_appearance,
             conf::cmd::get_system_theme,
             conf::cmd::open_conf_window,
             app::window_manager::create_new_window,
@@ -1392,6 +1634,7 @@ pub fn run() {
             extensions::cmd::extensions_init,
             process::app_exit,
             process::app_restart,
+            themes::cmd::load_theme_catalog,
             themes::cmd::load_themes,
             themes::cmd::download_theme,
             themes::cmd::remove_theme,
@@ -1530,9 +1773,9 @@ pub fn run() {
             }
 
             let opened_urls = if let Some(urls) = &*file_urls.0.lock().unwrap() {
-                opened_urls_to_string(urls)
+                opened_urls_to_paths(urls)
             } else {
-                "".into()
+                Vec::new()
             };
 
             setup::init(app.handle().clone(), opened_urls).map_err(|error| {
@@ -1542,7 +1785,7 @@ pub fn run() {
                 );
                 error
             })?;
-            sync_cli_runtime_windows(app.handle());
+            let _ = sync_cli_runtime_windows(app.handle());
 
             #[cfg(target_os = "macos")]
             menu::generate_menu(app).expect("failed to generate menu");
@@ -1551,18 +1794,24 @@ pub fn run() {
         })
         .on_window_event(|window, event| {
             let app = window.app_handle();
-            let _ = app.save_window_state(StateFlags::all());
 
-            if let tauri::WindowEvent::Destroyed = event {
-                let window_label = window.label();
-                if let Ok(mut instances) = WINDOW_INSTANCES.lock() {
-                    instances.remove(window_label);
-                    println!(
-                        "Removed window '{}' from WINDOW_INSTANCES on close",
-                        window_label
-                    );
+            match event {
+                tauri::WindowEvent::Focused(true) => {
+                    window_manager::mark_window_recent(window.label());
                 }
-                sync_cli_runtime_windows(app);
+                tauri::WindowEvent::Destroyed => {
+                    let window_label = window.label();
+                    window_manager::forget_window_recency(window_label);
+                    if let Ok(mut instances) = WINDOW_INSTANCES.lock() {
+                        instances.remove(window_label);
+                        println!(
+                            "Removed window '{}' from WINDOW_INSTANCES on close",
+                            window_label
+                        );
+                    }
+                    let _ = sync_cli_runtime_windows(app);
+                }
+                _ => {}
             }
         })
         .build(context);
@@ -1589,15 +1838,15 @@ pub fn run() {
                 } else {
                     urls.clone()
                 };
-                let urls_str = opened_urls_to_string(&urls);
+                let opened_url_paths = opened_urls_to_paths(&urls);
 
-                println!("Processed URLs string: {}", urls_str);
+                println!("Processed {} opened URL(s)", opened_url_paths.len());
 
                 if let Some(window) = window_manager::get_focused_window(app) {
                     use tauri::Emitter;
                     println!("Emitting to focused window: {}", window.label());
-                    update_window_opened_urls(&window, &urls_str);
-                    let result = window.emit("opened-urls", urls_str.clone());
+                    update_window_opened_urls(&window, &opened_url_paths);
+                    let result = window.emit("opened-urls", opened_url_paths.clone());
                     if let Some(opened_urls) = &opened_urls {
                         clear_opened_urls(opened_urls.inner());
                     }
@@ -1606,8 +1855,8 @@ pub fn run() {
                     if let Some(window) = window_manager::get_last_opened_window(app) {
                         use tauri::Emitter;
                         println!("Emitting to last opened window: {}", window.label());
-                        update_window_opened_urls(&window, &urls_str);
-                        let result = window.emit("opened-urls", urls_str.clone());
+                        update_window_opened_urls(&window, &opened_url_paths);
+                        let result = window.emit("opened-urls", opened_url_paths.clone());
                         if let Some(opened_urls) = &opened_urls {
                             clear_opened_urls(opened_urls.inner());
                         }

@@ -1,4 +1,5 @@
-import { MfIconLabelButton } from '@/components/ui-v2/Button/icon-label-button'
+import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import {
   getCurrentAIProviderDisplayName,
   summarizeAIText,
@@ -10,6 +11,7 @@ import { dialog } from '@/services/dialog'
 import { addNewMarkdownFileEdit } from '@/services/editor-file'
 import { useEditorStore } from '@/stores'
 import useAppTasksStore from '@/stores/useTasksStore'
+import { SparklesIcon } from 'lucide-react'
 import { useCallback, useRef } from 'react'
 import { useTranslation } from '@/i18n'
 import { showContextMenu } from '../../../../ui-v2/ContextMenu'
@@ -27,8 +29,8 @@ export const AIButton = (props: AIButtonProps) => {
   const aiProvider = getCurrentAIProviderDisplayName()
   const { addAppTask } = useAppTasksStore()
   const { t } = useTranslation()
-  const ref = useRef<any>(null)
-  
+  const ref = useRef<HTMLButtonElement>(null)
+
   const curFile = targetEditorId ? getFileObject(targetEditorId) : undefined
 
   const fetchCurFileSummary = useCallback(async () => {
@@ -107,14 +109,22 @@ ${res}
   if (!curFile) return null
 
   return (
-    <MfIconLabelButton
-      size='small'
-      rounded='smooth'
-      iconRef={ref}
-      icon={'ri-quill-pen-ai-line'}
-      onClick={handleAIClick}
-      tooltipProps={{ title: `AI (${aiProvider})` }}
-      label={`AI`}
-    />
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          aria-haspopup='menu'
+          aria-label={`AI (${aiProvider})`}
+          className='h-[22px] gap-1 rounded-sm px-1.5 text-xs font-normal [&_svg]:size-3.5'
+          onClick={handleAIClick}
+          ref={ref}
+          size='sm'
+          variant='chrome'
+        >
+          <SparklesIcon aria-hidden='true' size={14} strokeWidth={1.75} />
+          <span>AI</span>
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>{`AI (${aiProvider})`}</TooltipContent>
+    </Tooltip>
   )
 }

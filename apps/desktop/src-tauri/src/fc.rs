@@ -1,7 +1,7 @@
 use anyhow::Result as AnyResult;
 use chrono::{DateTime, Local};
 use mf_utils::is_supported_file_name;
-use natural_sort_rs::Natural;
+use natural_sort_rs::natural_cmp;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::collections::HashMap;
@@ -362,11 +362,11 @@ mod security_bookmark {
 // #[warn(dead_code)]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct FileInfo {
-    name: String,
-    kind: String,
-    path: String,
-    children: Option<Vec<FileInfo>>,
-    ext: String,
+    pub name: String,
+    pub kind: String,
+    pub path: String,
+    pub children: Option<Vec<FileInfo>>,
+    pub ext: String,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -393,6 +393,15 @@ pub enum FileResultCode {
 pub struct FileResult {
     pub code: FileResultCode,
     pub content: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DirectoryReadResult {
+    pub code: FileResultCode,
+    pub entries: Vec<FileInfo>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub message: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
@@ -491,27 +500,8 @@ pub fn sort_files_by_kind_and_name(files: &mut Vec<FileInfo>) {
             };
         }
 
-        if Natural::str(a.name.clone()) < Natural::str(b.name.clone()) {
-            Ordering::Less
-        } else if Natural::str(a.name.clone()) > Natural::str(b.name.clone()) {
-            Ordering::Greater
-        } else {
-            Ordering::Equal
-        }
+        natural_cmp::<str, _>(&a.name, &b.name)
     });
-}
-
-pub fn files_to_json(files: Vec<FileInfo>) -> FileResult {
-    match serde_json::to_string(&files) {
-        Ok(content) => FileResult {
-            code: FileResultCode::Success,
-            content,
-        },
-        Err(e) => FileResult {
-            code: FileResultCode::UnknownError,
-            content: format!("Failed to serialize files: {}", e),
-        },
-    }
 }
 
 pub fn filter_files_by_exclude_patterns(
@@ -1395,23 +1385,27 @@ pub async fn convert_text_async(text: String, variant: String) -> Result<String,
 }
 
 pub mod cmd {
+    use crate::app::startup_io;
     use crate::fc::{self, ConditionalWriteResult, FileNormalInfo, FileResultCode};
     use base64::engine::Engine;
     use base64::prelude::BASE64_STANDARD;
     use regex::Regex;
     use std::fs;
     use std::path::Path;
+    use std::time::Instant;
     use trash;
 
-    use super::{FileResult, MoveFileInfo};
+    use super::{DirectoryReadResult, FileResult, MoveFileInfo};
 
     #[tauri::command]
-    pub fn open_folder_async(
-        folder_path: &str,
+    pub async fn open_folder_async(
+        folder_path: String,
         root_path: Option<String>,
         file_exclude_patterns: Option<String>,
-    ) -> FileResult {
-        match fc::read_directory(folder_path) {
+    ) -> DirectoryReadResult {
+        let started_at = Instant::now();
+        let task_folder_path = folder_path.clone();
+        let result = match startup_io::run(move || match fc::read_directory(&task_folder_path) {
             Ok(files) => {
                 let mut files = files;
                 if let Some(patterns) = file_exclude_patterns
@@ -1420,18 +1414,41 @@ pub mod cmd {
                 {
                     files = fc::filter_files_by_exclude_patterns(
                         files,
-                        root_path.as_deref().unwrap_or(folder_path),
+                        root_path.as_deref().unwrap_or(&task_folder_path),
                         patterns,
                     );
                 }
 
-                fc::files_to_json(files)
+                DirectoryReadResult {
+                    code: FileResultCode::Success,
+                    entries: files,
+                    message: None,
+                }
             }
-            Err(code) => FileResult {
+            Err(code) => DirectoryReadResult {
                 code,
-                content: String::from("Failed to read directory"),
+                entries: Vec::new(),
+                message: Some(String::from("Failed to read directory")),
             },
-        }
+        })
+        .await
+        {
+            Ok(result) => result,
+            Err(error) => DirectoryReadResult {
+                code: FileResultCode::UnknownError,
+                entries: Vec::new(),
+                message: Some(format!(
+                    "Failed to join directory reader for {folder_path}: {error}"
+                )),
+            },
+        };
+        tracing::debug!(
+            marker = "directory-loaded",
+            elapsed_ms = started_at.elapsed().as_millis() as u64,
+            success = result.code == FileResultCode::Success,
+            "Directory read completed"
+        );
+        result
     }
 
     #[tauri::command]
@@ -1889,6 +1906,20 @@ mod tests {
                 .unwrap_or("")
                 .to_string(),
         }
+    }
+
+    #[test]
+    fn directory_read_result_serializes_entries_without_nested_json() {
+        let result = DirectoryReadResult {
+            code: FileResultCode::Success,
+            entries: vec![test_file("notes.md", "file", "/workspace/notes.md")],
+            message: None,
+        };
+
+        let value = serde_json::to_value(result).unwrap();
+        assert_eq!(value["code"], "Success");
+        assert_eq!(value["entries"][0]["name"], "notes.md");
+        assert!(value.get("message").is_none());
     }
 
     #[test]

@@ -146,9 +146,10 @@ export const modelSelectorTriggerVariants = cva(
   {
     variants: {
       variant: {
-        outline: 'border border-border bg-transparent hover:bg-accent hover:text-accent-foreground',
-        ghost: 'hover:bg-accent hover:text-accent-foreground',
-        muted: 'bg-secondary text-secondary-foreground hover:bg-accent',
+        outline:
+          'border border-border bg-transparent hover:bg-control-ghost-hover hover:text-content-primary',
+        ghost: 'hover:bg-control-ghost-hover hover:text-content-primary',
+        muted: 'bg-secondary text-secondary-foreground hover:bg-control-ghost-hover',
       },
       size: {
         default: 'h-8 px-2.5',

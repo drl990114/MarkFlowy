@@ -246,7 +246,7 @@ export function Composer() {
           addAttachmentOnPaste={false}
           aria-label={labels.composerPlaceholder}
           autoFocus
-          className='max-h-32 min-h-8 w-full resize-none bg-transparent px-2 py-1 text-sm text-foreground outline-none placeholder:text-muted-foreground'
+          className='max-h-32 min-h-8 w-full resize-none bg-transparent px-2 py-1 text-ui-body text-foreground outline-none placeholder:text-muted-foreground'
           disabled={composerDisabled}
           enterKeyHint='enter'
           onKeyDown={handleComposerKeyDown}
@@ -324,7 +324,7 @@ export function AssistantMessage() {
   const { labels } = useContext(ThreadContext)
 
   return (
-    <MessagePrimitive.Root className='aui-message group relative px-0.5 pb-6 text-sm [content-visibility:auto]'>
+    <MessagePrimitive.Root className='aui-message group relative px-0.5 pb-6 text-ui-body [content-visibility:auto]'>
       <div className='leading-relaxed text-foreground'>
         {isWaiting ? (
           <div className='flex min-h-6 items-center text-primary'>
@@ -377,7 +377,7 @@ export function UserMessage() {
     <MessagePrimitive.Root className='aui-message group grid grid-cols-[minmax(4rem,1fr)_auto] gap-y-1 px-0.5 [content-visibility:auto]'>
       <UserMessageAttachments />
       <div className='relative col-start-2 min-w-0 max-w-full pb-6'>
-        <div className='rounded-lg bg-muted px-2.5 py-1.5 text-sm text-foreground'>
+        <div className='rounded-lg bg-muted px-2.5 py-1.5 text-ui-body text-foreground'>
           <MessagePrimitive.Parts components={messagePartComponents} />
         </div>
         <div className='absolute end-0 bottom-0 flex min-h-6 w-max items-center'>
@@ -460,7 +460,7 @@ export function EditComposer() {
         <ComposerPrimitive.Input
           addAttachmentOnPaste={false}
           autoFocus
-          className='min-h-12 w-full resize-none bg-transparent px-2 py-1 text-sm outline-none'
+          className='min-h-12 w-full resize-none bg-transparent px-2 py-1 text-ui-body outline-none'
           disabled={composerDisabled}
         />
         <div className='mt-1 flex justify-end gap-1.5'>

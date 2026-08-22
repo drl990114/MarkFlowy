@@ -1,16 +1,15 @@
-use crate::app::{conf::AppConf, window_manager};
-use tauri::{utils::config::WebviewUrl, AppHandle, Emitter, WebviewWindowBuilder};
+use crate::app::window_manager;
+use tauri::{utils::config::WebviewUrl, AppHandle, Emitter};
 
-#[cfg(target_os = "macos")]
-use tauri::TitleBarStyle;
-
-pub fn init(app_handle: AppHandle, opened_urls: String) -> Result<(), Box<dyn std::error::Error>> {
-    let serialized_urls = window_manager::serialize_javascript_string(&opened_urls)?;
-    let initialization_script = format!("window.openedUrls = {serialized_urls};");
-
+pub fn init(
+    app_handle: AppHandle,
+    opened_urls: Vec<String>,
+) -> Result<(), Box<dyn std::error::Error>> {
     // 首先检查是否已经存在窗口
     if let Some(existing_window) = window_manager::get_last_opened_window(&app_handle) {
-        let _ = existing_window.eval(&initialization_script);
+        // The existing renderer may not have consumed its initial paths yet.
+        // Merge only the pending paths; never replace its appearance/session bootstrap.
+        crate::update_window_opened_urls(&existing_window, &opened_urls);
         let _ = existing_window.emit("opened-urls", opened_urls.clone());
 
         // 确保窗口被聚焦
@@ -18,36 +17,17 @@ pub fn init(app_handle: AppHandle, opened_urls: String) -> Result<(), Box<dyn st
         return Ok(());
     }
 
-    let theme = AppConf::theme_mode_for_window(&app_handle.clone());
-
-    let mut main_win = WebviewWindowBuilder::new(
+    let window = window_manager::build_main_window(
         &app_handle,
         "main".to_string(),
         WebviewUrl::App("index.html".into()),
+        opened_urls.clone(),
     )
-    .initialization_script(&initialization_script)
-    .title("MarkFlowy")
-    .resizable(true)
-    .fullscreen(false)
-    .theme(theme)
-    .disable_drag_drop_handler()
-    .inner_size(1200.0, 800.0)
-    .min_inner_size(400.0, 400.0);
-
-    #[cfg(target_os = "macos")]
-    {
-        main_win = main_win.title_bar_style(TitleBarStyle::Transparent);
-    }
-
-    let window = main_win.build()?;
+    .map_err(std::io::Error::other)?;
 
     // 将初始窗口添加到全局窗口实例缓存中
     let window_label = window.label().to_string();
-    let workspace_path = if !opened_urls.is_empty() {
-        opened_urls.split(',').next().unwrap_or("").to_string()
-    } else {
-        "".to_string()
-    };
+    let workspace_path = opened_urls.first().cloned().unwrap_or_default();
 
     // 存储窗口实例信息到全局缓存
     if !workspace_path.is_empty() {

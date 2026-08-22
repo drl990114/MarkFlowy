@@ -1,24 +1,25 @@
-import { lightTheme } from '@markflowy/theme'
-import * as Sentry from '@sentry/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { HoxRoot } from 'hox'
 import { enableMapSet } from 'immer'
-import { StrictMode, Suspense } from 'react'
+import { StrictMode, useLayoutEffect } from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router'
 import 'remixicon/fonts/remixicon.css'
-import { Spinners } from 'zens'
 import App from './App'
+import AppThemeProvider from './AppThemeProvider'
+import { AsyncSurface } from './components/AsyncSurface'
+import { RenderErrorBoundary } from './components/RenderErrorBoundary'
 import { PdfPrintWindowApp } from './components/EditorArea/pdf-print/PdfPrintWindowApp'
 import { getPdfPrintWindowRequest } from './components/EditorArea/pdf-print/pdfPrintWindow'
+import { startAppSetup } from './hooks'
+import { applyStartupAppearance, readWindowBootstrap } from './startup/appearance'
+import { markBootShellReady } from './startup/boot'
+import { initSentryAfterShell } from './startup/sentry'
 import './atom.css'
 import './normalize.css'
 import './ui.css'
 
-Sentry.init({
-  dsn: import.meta.env.VITE_SENTRY_DSN,
-  integrations: [],
-})
+applyStartupAppearance(readWindowBootstrap())
 
 enableMapSet()
 
@@ -26,23 +27,30 @@ const queryClient = new QueryClient()
 
 const Main = () => {
   return (
-    <Suspense
-      fallback={
-        <div
-          style={{
-            height: '100vh',
-            width: '100vw',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Spinners.BarLoader color={lightTheme.styledConstants.accentColor} width={200} />
-        </div>
-      }
-    >
+    <AppThemeProvider>
       <App />
-    </Suspense>
+    </AppThemeProvider>
+  )
+}
+
+const AppRenderFailure = ({ error, reset }: { error: unknown; reset: () => void }) => {
+  useLayoutEffect(() => {
+    markBootShellReady()
+  }, [])
+
+  return (
+    <div className='flex h-screen w-screen'>
+      <AsyncSurface
+        state={{
+          status: 'error',
+          title: 'Unable to render MarkFlowy',
+          description: error instanceof Error ? error.message : undefined,
+          retry: reset,
+        }}
+      >
+        {() => null}
+      </AsyncSurface>
+    </div>
   )
 }
 
@@ -58,14 +66,23 @@ rootElement.addEventListener('drop', (event) => {
 if (pdfPrintWindowRequest) {
   document.documentElement.classList.add('mf-pdf-print-window')
   document.body.classList.add('mf-pdf-print-window')
+  markBootShellReady()
   ReactDOM.createRoot(rootElement).render(<PdfPrintWindowApp request={pdfPrintWindowRequest} />)
 } else {
+  initSentryAfterShell()
+  void startAppSetup()
   ReactDOM.createRoot(rootElement).render(
     <StrictMode>
       <HoxRoot>
         <QueryClientProvider client={queryClient}>
           <BrowserRouter>
-            <Main />
+            <RenderErrorBoundary
+              fallback={({ error, reset }) => (
+                <AppRenderFailure error={error} reset={reset} />
+              )}
+            >
+              <Main />
+            </RenderErrorBoundary>
           </BrowserRouter>
         </QueryClientProvider>
       </HoxRoot>

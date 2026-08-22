@@ -66,7 +66,7 @@ const FileTreeItemWrapper = styled.div<{ $active?: boolean }>`
       : props.theme.unselectedFontColor};
   background-color: ${(props) =>
     props.$active
-      ? `color-mix(in srgb, ${props.theme.fileTreeSelectedBgColor} 82%, transparent)`
+      ? `color-mix(in srgb, ${props.theme.hoverColor} 86%, transparent)`
       : 'transparent'};
   border: 1px solid transparent;
   border-radius: ${(props) => props.theme.smallBorderRadius || '4px'};
@@ -75,9 +75,7 @@ const FileTreeItemWrapper = styled.div<{ $active?: boolean }>`
 
   &:hover {
     background-color: ${(props) =>
-      props.$active
-        ? `color-mix(in srgb, ${props.theme.fileTreeSelectedBgColor} 82%, transparent)`
-        : `color-mix(in srgb, ${props.theme.hoverColor} 86%, transparent)`};
+      `color-mix(in srgb, ${props.theme.hoverColor} 86%, transparent)`};
     color: ${(props) => props.theme.primaryFontColor};
   }
 `

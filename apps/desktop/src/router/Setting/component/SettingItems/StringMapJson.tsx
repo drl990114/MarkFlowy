@@ -2,7 +2,7 @@ import appSettingService from '@/services/app-setting'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import { debounce } from 'lodash'
 import { nanoid } from 'nanoid'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from '@/i18n'
 import styled from 'styled-components'
 import type { SettingItemProps } from '.'
@@ -32,18 +32,21 @@ const StringMapJsonSettingItem: React.FC<SettingItemProps<Setting.StringMapJsonS
     }))
   })
 
-  const updateSetting = useCallback(
-    debounce((newPairs: KeyValuePair[]) => {
-      const newValue: Record<string, string> = {}
-      newPairs.forEach(({ key, value }) => {
-        if (key.trim()) {
-          newValue[key.trim()] = value.trim()
-        }
-      })
-      appSettingService.writeSettingData(item, newValue)
-    }, 1000),
+  const updateSetting = useMemo(
+    () =>
+      debounce((newPairs: KeyValuePair[]) => {
+        const newValue: Record<string, string> = {}
+        newPairs.forEach(({ key, value }) => {
+          if (key.trim()) {
+            newValue[key.trim()] = value.trim()
+          }
+        })
+        appSettingService.writeSettingData(item, newValue)
+      }, 1000),
     [item],
   )
+
+  useEffect(() => () => updateSetting.flush(), [updateSetting])
 
   const handleAddPair = useCallback(() => {
     const newPairs = [...pairs, { id: nanoid(), key: '', value: '' }]
@@ -78,7 +81,7 @@ const StringMapJsonSettingItem: React.FC<SettingItemProps<Setting.StringMapJsonS
   )
 
   return (
-    <SettingItemContainer $direction='column'>
+    <SettingItemContainer $direction='column' $settingKey={item.key}>
       <SettingLabel item={item} style={{ marginBottom: '8px' }} />
       <ContentContainer>
         <PairsContainer>
@@ -102,7 +105,7 @@ const StringMapJsonSettingItem: React.FC<SettingItemProps<Setting.StringMapJsonS
         </PairsContainer>
         <AddButton onClick={handleAddPair}>
           <i className='ri-add-line'></i>
-         {t(item.i18nProps.add)}
+          {t(item.i18nProps.add)}
         </AddButton>
       </ContentContainer>
     </SettingItemContainer>

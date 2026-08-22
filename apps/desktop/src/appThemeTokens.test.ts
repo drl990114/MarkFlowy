@@ -1,6 +1,11 @@
-import { desktopDarkTheme } from '@markflowy/theme'
+import { desktopDarkTheme, desktopLightTheme } from '@markflowy/theme'
+import { darkTheme as defaultEditorDarkTheme } from 'rme'
 import { describe, expect, it } from 'vitest'
-import { normalizeFontFamily, resolveAppThemeTokens } from './appThemeTokens'
+import {
+  alignCodeMirrorTheme,
+  normalizeFontFamily,
+  resolveAppThemeTokens,
+} from './appThemeTokens'
 
 describe('resolveAppThemeTokens', () => {
   it('keeps editor font preferences out of the application UI theme', () => {
@@ -11,6 +16,7 @@ describe('resolveAppThemeTokens', () => {
         editorRootFontFamily: 'LXGW WenKai',
       },
       hasAccentColorOverride: false,
+      mode: 'dark',
       theme: desktopDarkTheme,
     })
 
@@ -28,13 +34,38 @@ describe('resolveAppThemeTokens', () => {
         editorRootFontFamily: 'System Default',
       },
       hasAccentColorOverride: true,
+      mode: 'dark',
       theme: desktopDarkTheme,
     })
 
     expect(editorTheme.fontFamily).toBe(desktopDarkTheme.fontFamily)
     expect(editorTheme.codemirrorFontFamily).toBe(desktopDarkTheme.codemirrorFontFamily)
     expect(editorTheme.accentColor).toBe('#ff00aa')
-    expect(editorTheme.accentColorFocused).toBe('#ff00aa18')
+    expect(editorTheme.accentColorFocused).toBe('rgba(255, 0, 170, 0.18)')
+  })
+
+  it('does not change the soft selection when an override equals the theme accent', () => {
+    const { editorTheme } = resolveAppThemeTokens({
+      accentColor: desktopDarkTheme.accentColor,
+      fontSettings: {},
+      hasAccentColorOverride: true,
+      mode: 'dark',
+      theme: desktopDarkTheme,
+    })
+
+    expect(editorTheme.accentColorFocused).toBe(desktopDarkTheme.accentColorFocused)
+  })
+
+  it('uses a visible light-mode soft selection for a custom accent', () => {
+    const { editorTheme } = resolveAppThemeTokens({
+      accentColor: '#ff00aa',
+      fontSettings: {},
+      hasAccentColorOverride: true,
+      mode: 'light',
+      theme: desktopLightTheme,
+    })
+
+    expect(editorTheme.accentColorFocused).toBe('rgba(255, 0, 170, 0.24)')
   })
 })
 
@@ -43,5 +74,37 @@ describe('normalizeFontFamily', () => {
     expect(normalizeFontFamily('IBM Plex Sans')).toBe('"IBM Plex Sans"')
     expect(normalizeFontFamily('Inter')).toBe('Inter')
     expect(normalizeFontFamily("'Noto Sans'")).toBe("'Noto Sans'")
+  })
+})
+
+describe('alignCodeMirrorTheme', () => {
+  it('aligns editor chrome without replacing syntax styles or match colors', () => {
+    const baseTheme = {
+      ...defaultEditorDarkTheme.codemirrorTheme,
+      settings: {
+        ...defaultEditorDarkTheme.codemirrorTheme.settings,
+        background: '#111111',
+        selectionMatch: '#ffee00',
+      },
+    }
+
+    const result = alignCodeMirrorTheme({
+      baseTheme,
+      mode: 'dark',
+      theme: desktopDarkTheme,
+    })
+
+    expect(result).toMatchObject({
+      settings: {
+        background: '#131313',
+        foreground: '#DDDDDD',
+        gutterBackground: '#131313',
+        gutterForeground: '#8F8F8F',
+        lineHighlight: '#272727',
+        selection: 'rgba(55, 148, 255, 0.18)',
+        selectionMatch: '#ffee00',
+      },
+      styles: baseTheme.styles,
+    })
   })
 })

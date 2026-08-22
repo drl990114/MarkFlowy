@@ -62,4 +62,37 @@ describe('SettingGroup semantic tab selection', () => {
     expect(container.querySelector('[data-setting-key="google-field"]')).not.toBeNull()
     expect(container.querySelector('[data-setting-key="openai-field"]')).toBeNull()
   })
+
+  it('switches provider when a new search or navigation target arrives', () => {
+    const group = {
+      i18nKey: 'settings.ai.model.label',
+      children: [
+        {
+          providerId: 'openai',
+          i18nKey: 'settings.ai.ChatGPT.label',
+          field: { key: 'openai-field', type: 'input', title: { i18nKey: 'openai' } },
+        },
+        {
+          providerId: 'google',
+          i18nKey: 'settings.ai.Google.label',
+          field: { key: 'google-field', type: 'input', title: { i18nKey: 'google' } },
+        },
+      ],
+    } as unknown as Setting.SettingGroup
+
+    act(() => {
+      root.render(
+        <SettingGroup group={group} groupKey='model' categoryKey='ai' activeChildId='openai' />,
+      )
+    })
+    expect(container.querySelector('[data-setting-key="openai-field"]')).not.toBeNull()
+
+    act(() => {
+      root.render(
+        <SettingGroup group={group} groupKey='model' categoryKey='ai' activeChildId='google' />,
+      )
+    })
+    expect(container.querySelector('[data-setting-key="google-field"]')).not.toBeNull()
+    expect(container.querySelector('[data-setting-key="openai-field"]')).toBeNull()
+  })
 })

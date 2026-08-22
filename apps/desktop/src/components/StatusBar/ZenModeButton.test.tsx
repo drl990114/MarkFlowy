@@ -12,6 +12,7 @@ import {
 const zenModeButtonState = vi.hoisted(() => ({
   activeId: undefined as string | undefined,
   keyMap: ['CommandOrCtrl', 'Shift', 'f'] as string[],
+  zenModeActive: false,
 }))
 
 vi.mock('@/commands', () => ({
@@ -40,9 +41,15 @@ vi.mock('@/stores', () => ({
     selector({ activeId: zenModeButtonState.activeId }),
 }))
 
+vi.mock('@/stores/useLayoutStore', () => ({
+  default: (selector: (state: { zenModeActive: boolean }) => unknown) =>
+    selector({ zenModeActive: zenModeButtonState.zenModeActive }),
+}))
+
 beforeEach(() => {
   zenModeButtonState.activeId = undefined
   zenModeButtonState.keyMap = ['CommandOrCtrl', 'Shift', 'f']
+  zenModeButtonState.zenModeActive = false
 })
 
 function renderZenModeButton() {
@@ -65,6 +72,7 @@ describe('ZenModeButton', () => {
     expect(markup).toContain('<button')
     expect(markup).toContain('type="button"')
     expect(markup).toContain('aria-label="Toggle Zen Mode (⌘⇧F)"')
+    expect(markup).toContain('aria-pressed="false"')
     expect(markup).toContain('data-zen-mode-toggle=""')
     expect(markup).toContain('data-mf-zen-mode-icon=""')
     expect(markup).toContain('data-mf-zen-mode-icon-rotor=""')
@@ -86,6 +94,16 @@ describe('ZenModeButton', () => {
     expect(renderZenModeButton()).toContain(
       'aria-label="Toggle Zen Mode (⌥K)"',
     )
+  })
+
+  it('exposes the active Zen state and uses the shared selected foreground', () => {
+    zenModeButtonState.activeId = 'document-1'
+    zenModeButtonState.zenModeActive = true
+
+    const markup = renderZenModeButton()
+
+    expect(markup).toContain('aria-pressed="true"')
+    expect(markup).toContain('aria-pressed:text-primary')
   })
 })
 

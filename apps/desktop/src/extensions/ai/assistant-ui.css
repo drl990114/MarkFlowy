@@ -1,30 +1,30 @@
 /* assistant-ui-only aliases, reset, and motion. Tailwind lives in src/ui.css. */
 :root {
-  --aui-background: var(--mf-rightbar-background, var(--mf-background));
-  --aui-foreground: var(--mf-foreground);
-  --aui-foreground-secondary: var(--mf-foreground-secondary);
-  --aui-card: var(--mf-card);
-  --aui-card-foreground: var(--mf-card-foreground);
-  --aui-popover: var(--mf-popover);
-  --aui-popover-foreground: var(--mf-popover-foreground);
-  --aui-tooltip: var(--mf-tooltip);
+  --aui-background: var(--mf-surface-panel-right, var(--mf-rightbar-background));
+  --aui-foreground: var(--mf-text-primary, var(--mf-foreground));
+  --aui-foreground-secondary: var(--mf-text-secondary, var(--mf-foreground-secondary));
+  --aui-card: var(--mf-surface-app, var(--mf-card));
+  --aui-card-foreground: var(--mf-text-primary, var(--mf-card-foreground));
+  --aui-popover: var(--mf-surface-overlay, var(--mf-popover));
+  --aui-popover-foreground: var(--mf-text-primary, var(--mf-popover-foreground));
+  --aui-tooltip: var(--mf-surface-tooltip, var(--mf-tooltip));
   --aui-primary: var(--mf-primary);
   --aui-primary-foreground: var(--mf-primary-foreground);
   --aui-primary-soft: var(--mf-primary-soft);
-  --aui-secondary: var(--mf-secondary);
-  --aui-secondary-foreground: var(--mf-secondary-foreground);
-  --aui-muted: var(--mf-muted);
-  --aui-muted-foreground: var(--mf-muted-foreground);
-  --aui-disabled-foreground: var(--mf-disabled-foreground);
-  --aui-accent: var(--mf-accent);
-  --aui-accent-foreground: var(--mf-accent-foreground);
+  --aui-secondary: var(--mf-control-surface, var(--mf-secondary));
+  --aui-secondary-foreground: var(--mf-text-primary, var(--mf-secondary-foreground));
+  --aui-muted: var(--mf-surface-muted, var(--mf-muted));
+  --aui-muted-foreground: var(--mf-text-muted, var(--mf-muted-foreground));
+  --aui-disabled-foreground: var(--mf-text-disabled, var(--mf-disabled-foreground));
+  --aui-accent: var(--mf-control-ghost-hover, var(--mf-accent));
+  --aui-accent-foreground: var(--mf-text-primary, var(--mf-accent-foreground));
   --aui-destructive: var(--mf-destructive);
   --aui-destructive-foreground: var(--mf-destructive-foreground);
   --aui-success: var(--mf-success);
   --aui-warning: var(--mf-warning);
-  --aui-border: var(--mf-border);
-  --aui-input: var(--mf-input);
-  --aui-ring: var(--mf-ring);
+  --aui-border: var(--mf-control-border, var(--mf-border));
+  --aui-input: var(--mf-control-border, var(--mf-input));
+  --aui-ring: var(--mf-control-focus, var(--mf-ring));
   --aui-shadow-color: var(--mf-shadow-color);
   --aui-scrollbar-thumb: var(--mf-scrollbar-thumb);
   --aui-scrollbar-track: var(--mf-scrollbar-track);
@@ -88,17 +88,6 @@
   }
 }
 
-@keyframes aui-popover-in {
-  from {
-    opacity: 0;
-    transform: scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
 /* Minimal reset for raw assistant-ui primitives that do not use data-slot. */
 @layer components {
   .aui-theme,
@@ -137,7 +126,7 @@
 }
 
 .aui-theme {
-  --mf-background: var(--mf-rightbar-background);
+  --mf-background: var(--mf-surface-panel-right);
   min-height: 0;
   background-color: var(--aui-background);
   color: var(--aui-foreground);
@@ -149,18 +138,34 @@
 
 .aui-message,
 .aui-welcome {
-  animation: aui-enter 180ms ease-out both;
+  animation: aui-enter var(--mf-motion-duration-overlay) var(--mf-motion-ease-out) both;
+}
+
+.aui-popover-content {
+  z-index: var(--mf-layer-popover);
+}
+
+.aui-tooltip-content {
+  z-index: var(--mf-layer-tooltip);
 }
 
 .aui-popover-content[data-state='open'] {
   transform-origin: var(--radix-popover-content-transform-origin, center);
-  animation: aui-popover-in 120ms ease-out both;
+  animation: mf-surface-in var(--mf-motion-duration-base) var(--mf-motion-ease-out) both;
 }
 
-.aui-tooltip-content[data-state='delayed-open'],
-.aui-tooltip-content[data-state='instant-open'] {
+.aui-popover-content[data-state='closed'] {
+  transform-origin: var(--radix-popover-content-transform-origin, center);
+  animation: mf-surface-out var(--mf-motion-duration-fast) var(--mf-motion-ease-in) both;
+}
+
+.aui-tooltip-content[data-state='delayed-open'] {
   transform-origin: var(--radix-tooltip-content-transform-origin, center);
-  animation: aui-popover-in 120ms ease-out both;
+  animation: mf-surface-in var(--mf-motion-duration-fast) var(--mf-motion-ease-out) both;
+}
+
+.aui-tooltip-content[data-state='instant-open'] {
+  animation: none;
 }
 
 .aui-dot-matrix-dot {
@@ -168,9 +173,9 @@
   animation-timing-function: ease-in-out;
   animation-iteration-count: infinite;
   transition:
-    --aui-dot-matrix-hi 300ms,
-    --aui-dot-matrix-lo 300ms,
-    opacity 300ms;
+    --aui-dot-matrix-hi var(--mf-motion-duration-overlay),
+    --aui-dot-matrix-lo var(--mf-motion-duration-overlay),
+    opacity var(--mf-motion-duration-overlay);
 }
 
 .aui-thread-viewport,
@@ -198,8 +203,16 @@
 @media (prefers-reduced-motion: reduce) {
   .aui-message,
   .aui-welcome,
-  .aui-popover-content,
-  .aui-tooltip-content,
+  .aui-popover-content[data-state='open'],
+  .aui-tooltip-content[data-state='delayed-open'] {
+    animation: mf-fade-in var(--mf-motion-duration-fast) var(--mf-motion-ease-out) both !important;
+  }
+
+  .aui-popover-content[data-state='closed'] {
+    animation: mf-fade-out var(--mf-motion-duration-fast) var(--mf-motion-ease-in) both !important;
+  }
+
+  .aui-tooltip-content[data-state='instant-open'],
   .aui-dot-matrix-dot {
     animation: none !important;
   }

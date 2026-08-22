@@ -1,4 +1,6 @@
 import { commandRegistry } from '@/commands'
+import { AsyncSurface } from '@/components/AsyncSurface'
+import { RenderErrorBoundary } from '@/components/RenderErrorBoundary'
 import { EditorViewType } from '@/constants/editorViewType'
 import { EVENT } from '@/constants'
 import bus from '@/helper/eventBus'
@@ -97,9 +99,31 @@ function EditorArea() {
   }, [])
 
   return (
-    <Suspense fallback={null}>
-      <EditorAreaContent />
-    </Suspense>
+    <RenderErrorBoundary
+      fallback={({ error, reset }) => (
+        <AsyncSurface
+          retryLabel={t('common.retry')}
+          state={{
+            status: 'error',
+            title: 'Unable to render the editor',
+            description: error instanceof Error ? error.message : undefined,
+            retry: reset,
+          }}
+        >
+          {() => null}
+        </AsyncSurface>
+      )}
+    >
+      <Suspense
+        fallback={
+          <AsyncSurface state={{ status: 'loading', label: t('common.fetching') }}>
+            {() => null}
+          </AsyncSurface>
+        }
+      >
+        <EditorAreaContent />
+      </Suspense>
+    </RenderErrorBoundary>
   )
 }
 

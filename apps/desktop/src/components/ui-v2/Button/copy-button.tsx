@@ -3,19 +3,21 @@ import styled from 'styled-components'
 import type { FC } from 'react'
 import { useCallback, useState } from 'react'
 import { writeText } from '@tauri-apps/plugin-clipboard-manager'
+import { Button } from '@/components/ui/button'
 
 type CopyBtnProps = {
   text: string
 }
 
 type ContainerProps = {
-  checking: boolean
+  $checking: boolean
 }
 
-const Container = styled.span<ContainerProps>`
+const Container = styled(Button)<ContainerProps>`
   padding: 4px;
   cursor: pointer;
-  color: ${(props) => (props.checking ? props.theme.successColor : props.theme.primaryFontColor)};
+  color: ${(props) =>
+    props.$checking ? props.theme.successColor : props.theme.primaryFontColor};
 `
 
 export const CopyButton: FC<CopyBtnProps> = (props) => {
@@ -40,8 +42,14 @@ export const CopyButton: FC<CopyBtnProps> = (props) => {
   })
 
   return (
-    <Container checking={checking} onClick={copy}>
-      <i className={iconCls}></i>
+    <Container
+      aria-label={checking ? 'Copied' : 'Copy'}
+      $checking={checking}
+      onClick={copy}
+      size='icon-sm'
+      variant='ghost'
+    >
+      <i aria-hidden='true' className={iconCls} />
     </Container>
   )
 }

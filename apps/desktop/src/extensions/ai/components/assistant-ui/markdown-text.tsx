@@ -206,7 +206,7 @@ const markdownComponents = memoizeMarkdownComponents({
 function MarkdownTextImpl() {
   return (
     <MarkdownTextPrimitive
-      className='aui-md text-sm'
+      className='aui-md text-ui-body'
       components={markdownComponents}
       defer
       remarkPlugins={[remarkGfm]}

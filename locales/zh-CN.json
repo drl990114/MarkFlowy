@@ -125,20 +125,48 @@
   "sidebar": {
     "explorer": "探索",
     "search": "搜索",
+    "bookmarks": "书签",
+    "leftDock": "左侧面板",
+    "rightDock": "右侧面板",
     "table_of_contents": "目录",
     "heading_numbering": "切换标题序号",
     "no_heading_lines": "未找到小标题行"
   },
   "bookmarks": {
     "empty": "暂无书签",
-    "emptyTags": "暂无带标签的书签"
+    "emptyTags": "暂无带标签的书签",
+    "loading": "正在加载书签…",
+    "loadError": "无法加载书签",
+    "retry": "重试",
+    "viewByTags": "按标签分组",
+    "viewAsList": "以列表显示",
+    "removed": "已删除“{{title}}”",
+    "undo": "撤销",
+    "removeFailed": "无法删除书签",
+    "saving": "正在保存…",
+    "saveError": "无法保存书签。"
+  },
+  "welcome": {
+    "title": "欢迎回到 {{appName}}",
+    "subtitle": "专注、轻盈的 Markdown 工作区",
+    "getStarted": "快速开始",
+    "recentWorkspaces": "最近工作区",
+    "emptyEditorDescription": "从文件树选择文档，或新建一个文档。",
+    "openWorkspaceError": "无法打开此工作区"
   },
   "statusBar": {
+    "label": "状态栏",
     "words": "词",
     "chars": "字符",
     "pureChars": "纯字符",
     "pureCharsOption": "纯字符（不含空格换行）",
     "displaySettings": "显示设置"
+  },
+  "titleBar": {
+    "label": "窗口标题栏",
+    "minimize": "最小化窗口",
+    "maximize": "最大化窗口",
+    "restore": "还原窗口"
   },
   "zenMode": {
     "openFileFirst": "请先打开文档再进入 Zen 模式",
@@ -194,6 +222,7 @@
     },
     "editor_tab": {
       "close": "关闭",
+      "unsaved": "未保存的更改",
       "previous": "上一个标签页",
       "next": "下一个标签页",
       "close_others": "关闭其他",
@@ -212,6 +241,7 @@
     "label": "书",
     "info": "工作区信息",
     "none": "未打开工作区",
+    "searchPlaceholder": "搜索工作区…",
     "sync_mode": {
       "git_local": {
         "name": "Git 本地",
@@ -244,8 +274,10 @@
   "settings": {
     "label": "设置",
     "back_to_app": "返回应用",
+    "back_to_settings": "返回设置",
     "search_placeholder": "搜索设置...",
     "search_empty": "没有匹配的设置",
+    "search_results": "{{count}} 个结果",
     "resetAppConf": {
       "label": "重置应用配置",
       "desc": "重置应用配置，恢复默认设置。此操作将重置所有设置，包括主题、语言、自动保存等，且不可恢复。",

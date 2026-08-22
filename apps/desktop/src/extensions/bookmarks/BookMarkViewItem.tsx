@@ -13,22 +13,28 @@ export const BookMarkViewItem = (props: BookMarkViewItemProps) => {
   const handleClick = () => onClick(bookmark)
 
   return (
-    <div
+    <button
+      aria-label={bookmark.title}
       className='bookmark-list__item'
-      data-id={bookmark.id}
-      key={bookmark.id}
+      data-bookmark-id={bookmark.id}
       onClick={handleClick}
+      type='button'
     >
-      {bookmark.title}
+      <span className='bookmark-list__title'>{bookmark.title}</span>
       {showTags && bookmark.tags.length > 0 ? (
-        <div className='flex gap-1' data-id={bookmark.id}>
+        <span className='bookmark-list__tags'>
           {bookmark.tags.map((tag) => (
-            <Badge key={tag} variant='default'>
+            <Badge
+              className='h-4 rounded-sm px-1 py-0 text-[10px] font-normal'
+              key={tag}
+              size='sm'
+              variant='outline'
+            >
               {tag}
             </Badge>
           ))}
-        </div>
+        </span>
       ) : null}
-    </div>
+    </button>
   )
 }

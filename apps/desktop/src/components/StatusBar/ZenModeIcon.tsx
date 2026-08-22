@@ -122,7 +122,7 @@ export function ZenModeIcon(props: ZenModeIconProps) {
   return (
     <svg
       aria-hidden='true'
-      className={cn('size-4', className)}
+      className={cn('size-3.5', className)}
       data-mf-zen-mode-icon=''
       fill='none'
       focusable='false'

@@ -6,6 +6,7 @@ pub mod file_watcher;
 pub mod keybindings;
 pub mod opened_cache;
 pub mod process;
+pub(crate) mod startup_io;
 pub mod themes;
 pub mod window_manager;
 pub mod workspace;

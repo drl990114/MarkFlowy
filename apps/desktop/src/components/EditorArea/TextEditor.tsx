@@ -34,11 +34,11 @@ import {
 } from '@/helper/physicalPathIdentity'
 import { useEditorKeybindingStore } from '@/hooks/useKeyboard'
 import { useTranslation } from '@/i18n'
+import { captureException } from '@/services/error-reporting'
 import { useEditorStateStore, useEditorStore } from '@/stores'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import useEditorCounterStore from '@/stores/useEditorCounterStore'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
-import * as Sentry from '@sentry/react'
 import { invoke } from '@tauri-apps/api/core'
 import { save } from '@tauri-apps/plugin-dialog'
 import classNames from 'classnames'
@@ -1704,6 +1704,8 @@ function TextEditor(props: TextEditorProps) {
   const rootFontSize = !editorRootFontSize || editorRootFontSize === 15 ? 16 : editorRootFontSize
   const rootLineHeight =
     !editorRootLineHeight || editorRootLineHeight === '1.6' ? '1.65' : editorRootLineHeight
+  const wysiwygRootLineHeight =
+    !editorRootLineHeight || editorRootLineHeight === '1.6' ? '1.7' : editorRootLineHeight
 
   const editorProps: MfEditorProps = useMemo(
     () => ({
@@ -1736,7 +1738,7 @@ function TextEditor(props: TextEditorProps) {
       errorHandler: {
         onError(params) {
           if (params.error) {
-            Sentry.captureException(params.error)
+            captureException(params.error)
           }
         },
       },
@@ -1754,7 +1756,6 @@ function TextEditor(props: TextEditorProps) {
       savePathReserved,
     ],
   )
-
   publishEditorSnapshotRef.current = (snapshot) => {
     try {
       const serialize = () => snapshot.delegate.docToString(snapshot.doc)
@@ -1782,7 +1783,7 @@ function TextEditor(props: TextEditorProps) {
       }
       return true
     } catch (error) {
-      Sentry.captureException(error)
+      captureException(error)
       return false
     }
   }
@@ -1902,13 +1903,13 @@ function TextEditor(props: TextEditorProps) {
       <EditorWrapper
         id='editorarea-wrapper'
         className={cls}
-        fullWidth={editorFullWidth}
-        active={active}
+        $editorViewType={currentViewType}
+        $fileType={fileTypeConfig.type}
+        $fullWidth={editorFullWidth}
+        $rootLineHeight={wysiwygRootLineHeight}
         $visible={visible}
         onBeforeInputCapture={handleBeforeInputCapture}
         onClick={handleWrapperClick}
-        editorViewType={currentViewType}
-        fileType={fileTypeConfig.type}
       >
         <AppEditorThemeProvider>
           <MfEditor ref={editorRef} onChange={handleChange} {...editorProps} />

@@ -1,20 +1,38 @@
 import { loadThemeCss, removeInsertedTheme } from '@/helper/extensions'
+import {
+  applyResolvedAppearance,
+  cacheStartupAppearance,
+  normalizeStartupAppearance,
+  normalizeStartupPalette,
+  persistStartupAppearance,
+  readWindowBootstrap,
+  type StartupAppearancePersistence,
+} from '@/startup/appearance'
+import { mergeRegisteredTheme, resolveStartupTheme } from '@/startup/appearanceTheme'
+import {
+  discardStaleStartupTheme,
+  runWithoutThemeTransitions,
+} from '@/startup/staleThemeFallback'
 import { builtInThemes, darkTheme, lightTheme, type MfTheme } from '@markflowy/theme'
 import { invoke } from '@tauri-apps/api/core'
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import { create } from 'zustand'
 import appSettingService from '@/services/app-setting'
+import useAppSettingStore from '@/stores/useAppSettingStore'
 
 export const FALLBACK_LIGHT_THEME = 'MarkFlowy Light'
 export const FALLBACK_DARK_THEME = 'MarkFlowy Dark'
 
 export type ThemeMode = 'light' | 'dark' | 'system'
 type SystemTheme = Exclude<ThemeMode, 'system'>
+export type ThemePreviewSelection = {
+  themeMode?: ThemeMode
+  lightThemeName?: string
+  darkThemeName?: string
+}
 type ThemeSyncWindow = Window & {
   __markflowyThemeSyncSetup?: boolean
 }
-
-const SYSTEM_THEME_SYNC_INTERVAL_MS = 1000
 
 export const isBuiltInTheme = (themeName: string) => {
   return builtInThemes.some((theme) => theme.name === themeName)
@@ -51,21 +69,22 @@ const getNativeSystemTheme = async (): Promise<SystemTheme | undefined> => {
   }
 }
 
-const resolveTheme = (themes: MfTheme[], themeName: string, fallbackName: string): MfTheme | undefined => {
-  return themes.find((t) => t.name === themeName) || themes.find((t) => t.name === fallbackName)
-}
+const resolveTheme = (
+  themes: MfTheme[],
+  themeName: string,
+  fallbackName: string,
+  mode: SystemTheme,
+): MfTheme | undefined =>
+  themes.find((theme) => theme.name === themeName && theme.mode === mode) ||
+  themes.find((theme) => theme.name === fallbackName && theme.mode === mode)
 
 const applyThemeToDOM = (targetTheme: MfTheme, themeMode: ThemeMode) => {
+  applyResolvedAppearance(targetTheme.mode)
+
   if (targetTheme.globalStyleText) {
     loadThemeCss(targetTheme.globalStyleText)
   } else {
     removeInsertedTheme()
-  }
-
-  if (targetTheme.mode === 'dark') {
-    document.body.style.colorScheme = 'dark'
-  } else {
-    document.body.style.colorScheme = 'light'
   }
 
   try {
@@ -83,6 +102,89 @@ const applyThemeToDOM = (targetTheme: MfTheme, themeMode: ThemeMode) => {
   }
 }
 
+const resolveStartupAccentColor = (
+  themeAccent: string | undefined,
+  setting = useAppSettingStore.getState().settingData.theme_accent_color,
+) => {
+  if (typeof setting !== 'string' || setting === 'system') return themeAccent
+
+  const color = setting.trim()
+  if (/^#[0-9a-f]{6}$/i.test(color)) return color.toLowerCase()
+  if (/^#[0-9a-f]{3}$/i.test(color)) {
+    const [, red, green, blue] = color
+    return `#${red}${red}${green}${green}${blue}${blue}`.toLowerCase()
+  }
+
+  return themeAccent
+}
+
+const createAppliedThemeAppearance = (
+  targetTheme: MfTheme,
+  themeMode: ThemeMode,
+  accentColorSetting?: unknown,
+) => {
+  const tokens = targetTheme.styledConstants
+  const palette = normalizeStartupPalette(
+    {
+      surfaceApp: tokens.bgColor,
+      surfacePanel: tokens.sideBarBgColor,
+      surfaceToolbar: tokens.titleBarBgColor,
+      foreground: tokens.primaryFontColor,
+      mutedForeground: tokens.unselectedFontColor,
+      border: tokens.borderColor,
+      accent: resolveStartupAccentColor(tokens.accentColor, accentColorSetting),
+    },
+    targetTheme.mode,
+  )
+
+  return normalizeStartupAppearance(
+    {
+      schemaVersion: 1,
+      preference: themeMode,
+      resolvedMode: targetTheme.mode,
+      themeId: targetTheme.name,
+      palette,
+    },
+    targetTheme.mode,
+  )
+}
+
+const cacheAppliedTheme = (
+  targetTheme: MfTheme,
+  themeMode: ThemeMode,
+  accentColorSetting?: unknown,
+) =>
+  cacheStartupAppearance(createAppliedThemeAppearance(targetTheme, themeMode, accentColorSetting))
+
+const persistAppliedTheme = (
+  targetTheme: MfTheme,
+  themeMode: ThemeMode,
+  accentColorSetting?: unknown,
+): Promise<StartupAppearancePersistence> =>
+  persistStartupAppearance(createAppliedThemeAppearance(targetTheme, themeMode, accentColorSetting))
+
+const resolveSelectedTheme = (
+  state: Pick<
+    ThemeStore,
+    'darkThemeName' | 'lightThemeName' | 'systemTheme' | 'themeMode' | 'themes'
+  >,
+  selection: ThemePreviewSelection = {},
+) => {
+  const themeMode = selection.themeMode ?? state.themeMode
+  const lightThemeName = selection.lightThemeName ?? state.lightThemeName
+  const darkThemeName = selection.darkThemeName ?? state.darkThemeName
+  const isDark = themeMode === 'dark' || (themeMode === 'system' && state.systemTheme === 'dark')
+  const targetName = isDark ? darkThemeName : lightThemeName
+  const fallbackName = isDark ? FALLBACK_DARK_THEME : FALLBACK_LIGHT_THEME
+
+  return {
+    targetTheme:
+      resolveTheme(state.themes, targetName, fallbackName, isDark ? 'dark' : 'light') ??
+      (isDark ? darkTheme : lightTheme),
+    themeMode,
+  }
+}
+
 type ThemeStore = {
   curTheme: MfTheme
   themes: MfTheme[]
@@ -97,37 +199,64 @@ type ThemeStore = {
   setThemeMode: (mode: ThemeMode) => void
   setLightTheme: (themeName: string) => void
   setDarkTheme: (themeName: string) => void
+  previewTheme: (selection: ThemePreviewSelection) => void
+  restoreThemePreview: () => void
   setSystemTheme: (theme: SystemTheme) => void
   syncSystemTheme: () => Promise<SystemTheme>
-  applyTheme: () => void
+  applyTheme: (persistAppearance?: boolean) => void
+  persistCurrentAppearance: (
+    accentColorSetting?: unknown,
+  ) => Promise<StartupAppearancePersistence>
+  commitAccentColor: (value: string) => Promise<StartupAppearancePersistence>
+  fallbackStaleStartupTheme: () => MfTheme | undefined
   initFromSettings: (settingData: Record<string, any>) => Promise<void>
 }
 
+const startupAppearance = readWindowBootstrap()
+const { synthetic: hasSyntheticStartupTheme, theme: startupTheme } =
+  resolveStartupTheme(startupAppearance)
+const initialThemes = hasSyntheticStartupTheme
+  ? [...builtInThemes, startupTheme]
+  : [...builtInThemes]
+
 const useThemeStore = create<ThemeStore>((set, get) => {
+  const persistSettingThenAppearance = (
+    key: 'dark_theme' | 'light_theme' | 'theme_mode',
+    value: string,
+    afterConfigCommit?: () => Promise<unknown>,
+  ) => {
+    const { targetTheme, themeMode } = resolveSelectedTheme(get())
+    cacheAppliedTheme(targetTheme, themeMode)
+
+    void appSettingService
+      .writeSettingData({ key }, value)
+      .then(async () => {
+        await afterConfigCommit?.()
+        return get().persistCurrentAppearance()
+      })
+      // writeSettingData already logs and rolls back its optimistic settings update.
+      .catch(() => undefined)
+  }
+
   return {
-    curTheme: lightTheme,
-    themes: [...builtInThemes],
-    themeMode: 'system',
-    systemTheme: getBrowserSystemTheme(),
-    lightThemeName: FALLBACK_LIGHT_THEME,
-    darkThemeName: FALLBACK_DARK_THEME,
+    curTheme: startupTheme,
+    themes: initialThemes,
+    themeMode: startupAppearance.preference,
+    systemTheme: startupAppearance.resolvedMode,
+    lightThemeName:
+      startupAppearance.resolvedMode === 'light'
+        ? startupAppearance.themeId
+        : FALLBACK_LIGHT_THEME,
+    darkThemeName:
+      startupAppearance.resolvedMode === 'dark'
+        ? startupAppearance.themeId
+        : FALLBACK_DARK_THEME,
 
-    applyTheme: () => {
-      const { themeMode, systemTheme, lightThemeName, darkThemeName, themes } = get()
-
-      const isDark = themeMode === 'dark' || (themeMode === 'system' && systemTheme === 'dark')
-
-      const targetName = isDark ? darkThemeName : lightThemeName
-      const fallbackName = isDark ? FALLBACK_DARK_THEME : FALLBACK_LIGHT_THEME
-
-      let targetTheme = resolveTheme(themes, targetName, fallbackName)
-
-      // 终极兜底
-      if (!targetTheme) {
-        targetTheme = isDark ? darkTheme : lightTheme
-      }
+    applyTheme: (persistAppearance = true) => {
+      const { targetTheme, themeMode } = resolveSelectedTheme(get())
 
       applyThemeToDOM(targetTheme, themeMode)
+      if (persistAppearance) void persistAppliedTheme(targetTheme, themeMode)
 
       set((prev) => ({
         ...prev,
@@ -135,9 +264,48 @@ const useThemeStore = create<ThemeStore>((set, get) => {
       }))
     },
 
+    persistCurrentAppearance: (accentColorSetting) => {
+      const { targetTheme, themeMode } = resolveSelectedTheme(get())
+      return persistAppliedTheme(targetTheme, themeMode, accentColorSetting)
+    },
+
+    commitAccentColor: async (value) => {
+      const { targetTheme, themeMode } = resolveSelectedTheme(get())
+      cacheAppliedTheme(targetTheme, themeMode, value)
+      await appSettingService.writeSettingData({ key: 'theme_accent_color' }, value)
+      return get().persistCurrentAppearance(value)
+    },
+
+    fallbackStaleStartupTheme: () => {
+      if (!hasSyntheticStartupTheme) return undefined
+
+      const nextThemes = discardStaleStartupTheme(get().themes, startupTheme)
+      if (!nextThemes) return undefined
+
+      runWithoutThemeTransitions(() => {
+        set((prev) => ({ ...prev, themes: nextThemes }))
+        get().applyTheme()
+      })
+
+      return startupTheme
+    },
+
+    previewTheme: (selection) => {
+      const { targetTheme, themeMode } = resolveSelectedTheme(get(), selection)
+      applyThemeToDOM(targetTheme, themeMode)
+      set((prev) => ({ ...prev, curTheme: targetTheme }))
+    },
+
+    restoreThemePreview: () => {
+      get().applyTheme()
+    },
+
     setCurThemeByName: (themeName) => {
-      const { themes, themeMode } = get()
-      const targetTheme = themes.find((theme) => theme.name === themeName)
+      const { systemTheme, themes, themeMode } = get()
+      const resolvedMode = themeMode === 'system' ? systemTheme : themeMode
+      const targetTheme = themes.find(
+        (theme) => theme.name === themeName && theme.mode === resolvedMode,
+      )
 
       if (targetTheme) {
         applyThemeToDOM(targetTheme, themeMode)
@@ -148,26 +316,51 @@ const useThemeStore = create<ThemeStore>((set, get) => {
         }
         if (targetTheme.mode === 'light') {
           updates.lightThemeName = targetTheme.name
-          appSettingService.writeSettingData({ key: 'light_theme' }, targetTheme.name)
         } else if (targetTheme.mode === 'dark') {
           updates.darkThemeName = targetTheme.name
-          appSettingService.writeSettingData({ key: 'dark_theme' }, targetTheme.name)
         }
 
         set((prev) => ({ ...prev, ...updates }))
+        persistSettingThenAppearance(
+          targetTheme.mode === 'light' ? 'light_theme' : 'dark_theme',
+          targetTheme.name,
+        )
       }
     },
 
     getCurTheme: () => {
       const { themes, curTheme } = get()
-      return themes.find((theme) => theme.name === curTheme.name)
+      return themes.find(
+        (theme) => theme.name === curTheme.name && theme.mode === curTheme.mode,
+      )
     },
 
     insertTheme: (targetTheme) => {
       const { themes } = get()
+      const nextThemes = mergeRegisteredTheme(
+        themes,
+        targetTheme,
+        hasSyntheticStartupTheme ? startupTheme : undefined,
+      )
 
-      if (!themes.find((theme) => theme.name === targetTheme.name)) {
-        set((prev) => ({ ...prev, themes: [...themes, targetTheme] }))
+      if (nextThemes) {
+        const { targetTheme: selectedTheme } = resolveSelectedTheme({
+          ...get(),
+          themes: nextThemes,
+        })
+        const commitThemeRegistration = () => {
+          set((prev) => ({ ...prev, themes: nextThemes }))
+          get().applyTheme()
+        }
+
+        if (
+          selectedTheme.name === targetTheme.name &&
+          selectedTheme.mode === targetTheme.mode
+        ) {
+          runWithoutThemeTransitions(commitThemeRegistration)
+        } else {
+          set((prev) => ({ ...prev, themes: nextThemes }))
+        }
       }
     },
 
@@ -178,17 +371,28 @@ const useThemeStore = create<ThemeStore>((set, get) => {
 
       let newLight = lightThemeName
       let newDark = darkThemeName
+      const configWrites: Promise<void>[] = []
 
       // 兜底：被删除的是当前配置的亮色主题
       if (delThemeName === lightThemeName) {
         newLight = FALLBACK_LIGHT_THEME
-        appSettingService.writeSettingData({ key: 'light_theme' }, FALLBACK_LIGHT_THEME)
+        configWrites.push(
+          appSettingService.writeSettingData(
+            { key: 'light_theme' },
+            FALLBACK_LIGHT_THEME,
+          ),
+        )
       }
 
       // 兜底：被删除的是当前配置的暗色主题
       if (delThemeName === darkThemeName) {
         newDark = FALLBACK_DARK_THEME
-        appSettingService.writeSettingData({ key: 'dark_theme' }, FALLBACK_DARK_THEME)
+        configWrites.push(
+          appSettingService.writeSettingData(
+            { key: 'dark_theme' },
+            FALLBACK_DARK_THEME,
+          ),
+        )
       }
 
       set((prev) => ({
@@ -200,29 +404,35 @@ const useThemeStore = create<ThemeStore>((set, get) => {
 
       // 如果当前正在使用被删除的主题，立即切换
       if (delThemeName === curTheme.name) {
-        get().applyTheme()
+        get().applyTheme(false)
+      }
+      if (configWrites.length > 0) {
+        void Promise.all(configWrites)
+          .then(() => get().persistCurrentAppearance())
+          .catch(() => undefined)
       }
     },
 
     setThemeMode: (mode) => {
-      appSettingService.writeSettingData({ key: 'theme_mode' }, mode)
       set((prev) => ({ ...prev, themeMode: mode }))
-      if (mode === 'system') {
-        void get().syncSystemTheme()
-      }
-      get().applyTheme()
+      get().applyTheme(false)
+      persistSettingThenAppearance(
+        'theme_mode',
+        mode,
+        mode === 'system' ? () => get().syncSystemTheme() : undefined,
+      )
     },
 
     setLightTheme: (themeName) => {
-      appSettingService.writeSettingData({ key: 'light_theme' }, themeName)
       set((prev) => ({ ...prev, lightThemeName: themeName }))
-      get().applyTheme()
+      get().applyTheme(false)
+      persistSettingThenAppearance('light_theme', themeName)
     },
 
     setDarkTheme: (themeName) => {
-      appSettingService.writeSettingData({ key: 'dark_theme' }, themeName)
       set((prev) => ({ ...prev, darkThemeName: themeName }))
-      get().applyTheme()
+      get().applyTheme(false)
+      persistSettingThenAppearance('dark_theme', themeName)
     },
 
     setSystemTheme: (theme) => {
@@ -261,9 +471,8 @@ const useThemeStore = create<ThemeStore>((set, get) => {
 
       if (themeMode === 'system') {
         await get().syncSystemTheme()
-      } else {
-        get().applyTheme()
       }
+      get().applyTheme()
     },
   }
 })
@@ -322,8 +531,6 @@ const setupSystemThemeSync = () => {
       }
     })
   }
-
-  window.setInterval(syncSystemThemeIfNeeded, SYSTEM_THEME_SYNC_INTERVAL_MS)
 }
 
 setupSystemThemeSync()

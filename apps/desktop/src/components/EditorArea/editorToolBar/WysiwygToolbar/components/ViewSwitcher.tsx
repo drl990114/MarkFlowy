@@ -3,14 +3,22 @@ import { getFileObject } from '@/helper/files'
 import { useEditorStore } from '@/stores'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
+import type { LucideIcon } from 'lucide-react'
+import { CodeXmlIcon, EyeIcon, PenLineIcon } from 'lucide-react'
 import { useCallback, useRef } from 'react'
 import { useTranslation } from '@/i18n'
 import { EditorViewType } from 'rme'
-import { MfIconButton } from '../../../../ui-v2/Button'
+import { EditorAreaActionButton } from '../../../EditorAreaAction'
 import { showContextMenu } from '../../../../ui-v2/ContextMenu'
 
 interface ViewSwitcherProps {
   editorId?: string
+}
+
+const VIEW_TYPE_ICONS: Record<EditorViewType, LucideIcon> = {
+  [EditorViewType.SOURCECODE]: CodeXmlIcon,
+  [EditorViewType.WYSIWYG]: PenLineIcon,
+  [EditorViewType.PREVIEW]: EyeIcon,
 }
 
 export const ViewSwitcher = (props: ViewSwitcherProps) => {
@@ -19,21 +27,15 @@ export const ViewSwitcher = (props: ViewSwitcherProps) => {
   const targetEditorId = editorId ?? activeId
   const { editorViewTypeMap } = useEditorViewTypeStore()
   const { t } = useTranslation()
-  const ref = useRef<any>(null)
-  
-  const curFile = targetEditorId ? getFileObject(targetEditorId) : undefined
-  const editorViewType = editorViewTypeMap.get(curFile?.id || '') || 'wysiwyg'
+  const ref = useRef<HTMLButtonElement>(null)
 
-  const viewTypeIconMap: Record<string, string> = {
-    sourceCode: 'ri-code-s-slash-line',
-    wysiwyg: 'ri-edit-2-line',
-    preview: 'ri-eye-line',
-  }
+  const curFile = targetEditorId ? getFileObject(targetEditorId) : undefined
+  const editorViewType = editorViewTypeMap.get(curFile?.id || '') || EditorViewType.WYSIWYG
 
   const handleViewClick = useCallback(() => {
     const rect = ref.current?.getBoundingClientRect()
     if (rect === undefined) return
-    
+
     const { getFileTypeConfigById } = useFileTypeConfigStore.getState()
     const curFileTypeConfig = getFileTypeConfigById(curFile?.id || '')
 
@@ -69,13 +71,20 @@ export const ViewSwitcher = (props: ViewSwitcherProps) => {
 
   if (!curFile) return null
 
+  const label =
+    editorViewType === EditorViewType.SOURCECODE
+      ? t('view.source_code')
+      : editorViewType === EditorViewType.PREVIEW
+        ? t('view.preview')
+        : t('view.wysiwyg')
+
   return (
-    <MfIconButton
-      size='small'
-      rounded='smooth'
-      iconRef={ref}
-      icon={viewTypeIconMap[editorViewType]}
+    <EditorAreaActionButton
+      aria-haspopup='menu'
+      icon={VIEW_TYPE_ICONS[editorViewType]}
+      label={label}
       onClick={handleViewClick}
+      ref={ref}
     />
   )
 }

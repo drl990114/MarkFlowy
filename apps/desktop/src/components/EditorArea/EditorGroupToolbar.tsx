@@ -27,20 +27,8 @@ const ToolbarHost = styled.div`
   min-width: 0;
 
   .mf-editor-toolbar {
-    min-height: 30px;
+    min-height: 32px;
     padding: 3px 8px;
-
-    .icon,
-    [data-slot='button'],
-    [data-slot='tooltip-trigger'] {
-      border-radius: 5px;
-    }
-
-    .icon,
-    [data-slot='button'] i,
-    [data-slot='tooltip-trigger'] i {
-      font-size: 15px;
-    }
   }
 `
 

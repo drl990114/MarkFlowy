@@ -4,12 +4,14 @@ import { EVENT } from '@/constants'
 import { useGlobalKeyboard } from '@/hooks'
 import { useTranslation } from '@/i18n'
 import { useEditorStore } from '@/stores'
+import useLayoutStore from '@/stores/useLayoutStore'
 import { useState } from 'react'
 import { ZenModeIcon } from './ZenModeIcon'
 import { StatusBarButton } from './StatusBarButton'
 
 export function ZenModeButton() {
   const activeId = useEditorStore((state) => state.activeId)
+  const zenModeActive = useLayoutStore((state) => state.zenModeActive)
   const { keyboardInfos } = useGlobalKeyboard()
   const { t } = useTranslation()
   const [hovered, setHovered] = useState(false)
@@ -28,6 +30,7 @@ export function ZenModeButton() {
       <TooltipTrigger asChild>
         <StatusBarButton
           aria-label={accessibleLabel}
+          aria-pressed={zenModeActive}
           data-zen-mode-toggle=''
           format='icon'
           onClick={() => commandRegistry.execute(EVENT.app_toggleZenMode)}

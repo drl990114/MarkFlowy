@@ -6,9 +6,11 @@ import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useStat
 import styled, { createGlobalStyle } from 'styled-components'
 import { Dropdown, type DropdownMenuItem, type MenuItemType } from 'zens'
 import {
-  BLOCK_HANDLER_CONTENT_GAP,
+  BLOCK_HANDLER_CONTROL_BLOCK_SIZE,
+  BLOCK_HANDLER_GUTTER_SIZE,
   BLOCK_HANDLER_INLINE_SIZE,
   getBlockHandlerLeft,
+  getBlockHandlerVerticalGeometry,
 } from '../../const/block-handler-layout'
 import { nodeTypeIconMap } from '../../const'
 import type { LineListExtension } from '../../extensions'
@@ -65,7 +67,6 @@ export const BlockHandler = memo(({ getMenuBoundary }: BlockHandlerProps) => {
   const nodeIndicatorExtension = useExtension(NodeIndicatorExtension)
   const state = nodeIndicatorExtension?.getPluginState() as NodeIndicatorState | undefined
   const [dropdownOpen, setDropdownOpen] = useState(false)
-  const [fixedPosition, setFixedPosition] = useState<{ left: number; top: number } | null>(null)
   const commands = useCommands<LineListExtension>()
   const blockTypeOptions = useBlockTypeOptions(t, commands)
   const triggerRef = useRef<HTMLDivElement>(null)
@@ -139,20 +140,6 @@ export const BlockHandler = memo(({ getMenuBoundary }: BlockHandlerProps) => {
     }
   }, [state, dropdownOpen])
 
-  useEffect(() => {
-    if (dropdownOpen) {
-      const currentState = displayStateRef.current
-      if (currentState?.rect) {
-        setFixedPosition({
-          left: getBlockHandlerLeft(currentState.rect.left),
-          top: currentState.rect.top,
-        })
-      }
-    } else {
-      setFixedPosition(null)
-    }
-  }, [dropdownOpen])
-
   useLayoutEffect(() => {
     if (!dropdownOpen || !editorView) return
 
@@ -210,6 +197,32 @@ export const BlockHandler = memo(({ getMenuBoundary }: BlockHandlerProps) => {
   }, [dropdownOpen])
 
   const displayState = dropdownOpen ? displayStateRef.current : state
+
+  const handleHitAreaPointerLeave = useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      if (!editorView || !nodeIndicatorExtension || dropdownOpen) return
+      if (editorView.dom.classList.contains('rme-dragging')) return
+
+      const relatedTarget = event.relatedTarget
+      if (relatedTarget instanceof Node && editorView.dom.contains(relatedTarget)) return
+      if (
+        relatedTarget instanceof Element &&
+        relatedTarget.closest('.rme-block-handler-menu')
+      ) {
+        return
+      }
+
+      editorView.dispatch(
+        editorView.state.tr.setMeta(nodeIndicatorExtension.pluginKey, {
+          node: null,
+          pos: null,
+          rect: null,
+          interactionRect: null,
+        }),
+      )
+    },
+    [dropdownOpen, editorView, nodeIndicatorExtension],
+  )
 
   const transformOptions = useMemo(() => {
     const currentNode = displayState?.node
@@ -340,9 +353,17 @@ export const BlockHandler = memo(({ getMenuBoundary }: BlockHandlerProps) => {
     return null
   }, [displayState?.node])
 
-  if (!editorView || !displayState?.node) {
+  if (!editorView || !displayState?.node || !displayState.rect) {
     return null
   }
+
+  const interactionRect = displayState.interactionRect ?? displayState.rect
+  const verticalGeometry = getBlockHandlerVerticalGeometry(
+    displayState.rect.top,
+    displayState.rect.bottom,
+    interactionRect.top,
+    interactionRect.bottom,
+  )
 
   return (
     <Dropdown
@@ -361,34 +382,49 @@ export const BlockHandler = memo(({ getMenuBoundary }: BlockHandlerProps) => {
       triggerRef={triggerRef}
     >
       <BlockHandlerMenuStyle />
-      <Container
-        ref={triggerRef}
+      <HitArea
         key="rme-block-handler"
         className="rme-block-handler"
-        draggable="true"
-        onPointerDown={handleBlockPointerDown}
-        onClick={() => setDropdownOpen(!dropdownOpen)}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
+        onPointerLeave={handleHitAreaPointerLeave}
         style={{
-          position: 'fixed',
-          left: `${fixedPosition?.left ?? (state?.rect?.left ? getBlockHandlerLeft(state.rect.left) : 0)}px`,
-          top: `${fixedPosition?.top ?? state?.rect?.top ?? 0}px`,
+          height: `${verticalGeometry.hitAreaBlockSize}px`,
+          left: `${getBlockHandlerLeft(displayState.rect.left)}px`,
+          top: `${verticalGeometry.hitAreaTop}px`,
         }}
       >
-        <IconButton>{renderIcon()}</IconButton>
+        <Container
+          ref={triggerRef}
+          draggable="true"
+          onPointerDown={handleBlockPointerDown}
+          onClick={() => setDropdownOpen(!dropdownOpen)}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+          style={{ top: `${verticalGeometry.controlOffsetTop}px` }}
+        >
+          <IconButton>{renderIcon()}</IconButton>
 
-        <div className="rme-draggable-handler">
-          <i className="ri-draggable" />
-        </div>
-      </Container>
+          <div className="rme-draggable-handler">
+            <i className="ri-draggable" />
+          </div>
+        </Container>
+      </HitArea>
     </Dropdown>
   )
 })
 
+const HitArea = styled.div`
+  position: fixed;
+  width: ${BLOCK_HANDLER_GUTTER_SIZE}px;
+  z-index: ${editorZIndex.blockHandler};
+  pointer-events: auto;
+`
+
 const Container = styled.div`
+  position: absolute;
+  left: 0;
   display: flex;
   width: ${BLOCK_HANDLER_INLINE_SIZE}px;
+  height: ${BLOCK_HANDLER_CONTROL_BLOCK_SIZE}px;
   box-sizing: border-box;
   align-items: center;
   justify-content: center;
@@ -396,18 +432,8 @@ const Container = styled.div`
   border: 1px solid ${(props) => props.theme.borderColor};
   border-radius: ${(props) => props.theme.smallBorderRadius};
   font-size: ${(props) => props.theme.fontXs};
-  z-index: ${editorZIndex.blockHandler};
   background-color: ${(props) => props.theme.bgColor};
   cursor: pointer;
-
-  &::after {
-    content: '';
-    position: absolute;
-    inset-block: 0;
-    left: 100%;
-    width: ${BLOCK_HANDLER_CONTENT_GAP}px;
-    pointer-events: auto;
-  }
 
   &:hover {
     background-color: ${(props) => props.theme.contextMenuBgColorHover};
@@ -478,7 +504,7 @@ const BlockHandlerMenuStyle = createGlobalStyle`
     padding: 5px 7px 2px;
     background-color: transparent;
     color: ${(props) => props.theme.labelFontColor};
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 600;
     letter-spacing: 0;
     opacity: 1;

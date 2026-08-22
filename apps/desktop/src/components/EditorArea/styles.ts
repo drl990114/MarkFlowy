@@ -80,7 +80,7 @@ export const Container = styled.div`
     align-items: center;
     justify-content: flex-end;
     gap: 4px;
-    height: 33px;
+    height: 32px;
     padding: 0 6px;
     box-sizing: border-box;
     border-bottom: 1px solid ${(props) => props.theme.borderColor};
@@ -103,38 +103,97 @@ export const TabItem = styled.div<TabItemProps>`
   align-items: center;
   position: relative;
   height: 100%;
-  padding-left: ${(props) => props.theme.spaceXl};
   padding-right: ${(props) => props.theme.spaceXs};
-  font-size: ${(props) => props.theme.fontXs};
-  border-left: 1px solid ${(props) => props.theme.borderColor};
+  font-size: var(--mf-ui-font-control);
+  color: ${(props) =>
+    props.$active
+      ? 'var(--mf-text-primary, var(--mf-foreground))'
+      : 'var(--mf-text-secondary, var(--mf-foreground-secondary))'};
+  border-left: 1px solid var(--mf-ui-border-subtle);
   background-color: ${(props) =>
-    props.active ? props.theme.editorTabActiveBgColor : props.theme.editorTabBgColor};
+    props.$active
+      ? props.theme.editorTabActiveBgColor
+      : props.theme.editorTabBgColor};
   border-bottom: 1px solid
-    ${(props) => (props.active ? props.theme.editorTabActiveBgColor : props.theme.borderColor)};
+    ${(props) =>
+      props.$active
+        ? props.theme.editorTabActiveBgColor
+        : 'var(--mf-ui-border-subtle)'};
   box-sizing: border-box;
   white-space: nowrap;
-  cursor: pointer;
   user-select: none;
   -webkit-user-select: none; /* Safari */
   -moz-user-select: none; /* Firefox */
   -ms-user-select: none; /* Edge, IE */
+
+  &:hover {
+    background-color: ${(props) =>
+      props.$active
+        ? props.theme.editorTabActiveBgColor
+        : 'var(--mf-control-ghost-hover, var(--mf-ui-control-hover-bg))'};
+  }
+
+  &:focus-within {
+    z-index: 1;
+  }
+
+  .tab-select {
+    display: flex;
+    min-width: 0;
+    height: 100%;
+    align-items: center;
+    gap: 2px;
+    padding: 0 0 0 ${(props) => props.theme.spaceXl};
+    border: 0;
+    color: inherit;
+    background: transparent;
+    cursor: pointer;
+    font: inherit;
+    white-space: inherit;
+  }
+
+  .tab-select:focus-visible {
+    outline: 1px solid var(--mf-control-focus, ${(props) => props.theme.accentColor});
+    outline-offset: -2px;
+  }
 
   &:first-child {
     border-left: none;
   }
 
   .close {
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
     padding: 0;
+    color: var(--mf-text-secondary, var(--mf-foreground-secondary));
     cursor: pointer;
     opacity: 0;
+    transition:
+      color var(--mf-motion-duration-fast, 120ms)
+        var(--mf-motion-ease-out, cubic-bezier(0.23, 1, 0.32, 1)),
+      opacity var(--mf-motion-duration-fast, 120ms)
+      var(--mf-motion-ease-out, cubic-bezier(0.23, 1, 0.32, 1));
+  }
+
+  .close:hover {
+    color: var(--mf-text-primary, var(--mf-foreground));
+  }
+
+  .close:active {
+    background-color: var(--mf-control-ghost-pressed, var(--mf-control-selected));
+    transform: none;
   }
 
   &:hover,
   &:focus-within {
     .close {
       opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .close {
+      transition-duration: 0ms;
     }
   }
 `
@@ -152,7 +211,7 @@ export const Dot = styled.div<DotProps>`
 `
 
 interface TabItemProps {
-  active: boolean
+  $active: boolean
 }
 
 export const WarningHeader = styled.h3`
@@ -206,6 +265,12 @@ export const EditorSkeleton = styled.div`
     @keyframes skeleton-pulse {
       0%, 100% { opacity: 1; }
       50% { opacity: 0.4; }
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .skeleton-line {
+      animation: none;
     }
   }
 `

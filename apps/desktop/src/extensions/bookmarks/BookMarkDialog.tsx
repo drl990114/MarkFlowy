@@ -11,6 +11,8 @@ export const BookMarkDialog: React.FC = () => {
   const [open, setOpen] = useState(false)
   const [name, setName] = useState('')
   const [path, setPath] = useState('')
+  const [saveError, setSaveError] = useState<string | null>(null)
+  const [saving, setSaving] = useState(false)
   const [tags, setTags] = useState<string[]>([])
   const { tagList, addBookMark } = useBookMarksStore()
   const { t } = useTranslation()
@@ -21,6 +23,8 @@ export const BookMarkDialog: React.FC = () => {
       handler: (file) => {
         setPath(file.path)
         setName(file.name)
+        setTags([])
+        setSaveError(null)
         setOpen(true)
       },
     })
@@ -31,6 +35,7 @@ export const BookMarkDialog: React.FC = () => {
         setPath(bookmark.path)
         setName(bookmark.title)
         setTags(bookmark.tags)
+        setSaveError(null)
         setOpen(true)
       },
     })
@@ -45,16 +50,25 @@ export const BookMarkDialog: React.FC = () => {
     setName(e.target.value)
   }
 
-  const handleConfirm = () => {
-    addBookMark({
-      title: name,
-      path,
-      tags,
-    })
-    setOpen(false)
+  const handleConfirm = async () => {
+    setSaveError(null)
+    setSaving(true)
+    try {
+      await addBookMark({
+        title: name,
+        path,
+        tags,
+      })
+      setOpen(false)
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : String(error))
+    } finally {
+      setSaving(false)
+    }
   }
 
   const handleClose = () => {
+    setSaveError(null)
     setOpen(false)
   }
 
@@ -95,7 +109,13 @@ export const BookMarkDialog: React.FC = () => {
             >
               Name
             </label>
-            <Input id='bookmark-name' value={name} onChange={handleNameChange} />
+            <Input
+              aria-invalid={saveError ? true : undefined}
+              disabled={saving}
+              id='bookmark-name'
+              value={name}
+              onChange={handleNameChange}
+            />
 
             <span
               className='text-right text-xs font-medium text-foreground-secondary'
@@ -107,20 +127,32 @@ export const BookMarkDialog: React.FC = () => {
               <TagCombobox
                 allowCreate
                 aria-labelledby='bookmark-tags-label'
+                disabled={saving}
                 onValuesChange={handleTagChange}
                 options={tagOptions}
                 placeholder='Tag'
                 values={tags}
               />
             </div>
+            {saveError ? (
+              <div
+                className='col-span-2 rounded-md border border-destructive/45 bg-destructive/10 px-2.5 py-2 text-xs text-destructive'
+                role='alert'
+              >
+                <span className='font-medium'>{t('bookmarks.saveError')}</span>
+                <span className='ml-1 break-all'>{saveError}</span>
+              </div>
+            ) : null}
           </div>
         </Dialog.Body>
 
         <Dialog.Footer>
-          <Button onClick={handleClose} variant='outline'>
+          <Button disabled={saving} onClick={handleClose} variant='outline'>
             {t('common.cancel')}
           </Button>
-          <Button onClick={handleConfirm}>{t('common.confirm')}</Button>
+          <Button disabled={saving || name.trim().length === 0} onClick={() => void handleConfirm()}>
+            {saving ? t('bookmarks.saving') : t('common.confirm')}
+          </Button>
         </Dialog.Footer>
       </Dialog.Content>
     </Dialog.Root>

@@ -1,24 +1,35 @@
 import type { RightBarItem } from '@/components/SideBar'
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from '@/components/ui/empty'
-import { MfIconButton } from '@/components/ui-v2/Button'
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { RIGHTBARITEMKEYS } from '@/constants'
 import { resolveFileExcludePatterns } from '@/helper/file-exclude'
 import { getFileObjectByPath } from '@/helper/files'
 import { logger } from '@/helper/logger'
 import { useEditorStore } from '@/stores'
+import { scheduleActiveEditorFocus } from '@/components/EditorArea/focusActiveEditor'
+import { closeCompactLeftDockAfterSelection } from '@/stores/useLayoutStore'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { invoke } from '@tauri-apps/api/core'
 import classNames from 'classnames'
+import type { LucideIcon } from 'lucide-react'
+import {
+  CaseSensitiveIcon,
+  ChevronRightIcon,
+  ChevronsDownUpIcon,
+  ChevronsUpDownIcon,
+  CircleAlertIcon,
+  FileSearchIcon,
+  FileTextIcon,
+  FolderOpenIcon,
+  LoaderCircleIcon,
+  SearchIcon,
+  XIcon,
+} from 'lucide-react'
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from '@/i18n'
-import { Input } from 'zens'
 import {
   SearchContainer,
   SearchInfoBox,
@@ -47,6 +58,56 @@ type NormalizedSearchMatch = SearchInfo['matches'][number] & {
 type NormalizedSearchInfo = Omit<SearchInfo, 'matches'> & {
   matchCount: number
   matches: NormalizedSearchMatch[]
+}
+
+type SearchNavigationKey = 'ArrowDown' | 'ArrowUp' | 'End' | 'Home'
+
+export function getNextSearchRowIndex(
+  currentIndex: number,
+  rowCount: number,
+  key: SearchNavigationKey,
+): number | null {
+  if (rowCount <= 0) return null
+  if (key === 'Home') return 0
+  if (key === 'End') return rowCount - 1
+  if (key === 'ArrowDown') return Math.min(currentIndex + 1, rowCount - 1)
+  return Math.max(currentIndex - 1, 0)
+}
+
+interface SearchActionButtonProps {
+  icon: LucideIcon
+  label: string
+  onClick: () => void
+  pressed?: boolean
+  spinning?: boolean
+}
+
+export function SearchActionButton(props: SearchActionButtonProps) {
+  const { icon: Icon, label, onClick, pressed, spinning = false } = props
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          aria-label={label}
+          aria-busy={spinning || undefined}
+          aria-pressed={pressed === undefined ? undefined : pressed}
+          className='search-input__action'
+          onClick={onClick}
+          size='icon-chrome'
+          variant='chrome'
+        >
+          <Icon
+            aria-hidden='true'
+            className={spinning ? 'search-icon--spin' : undefined}
+            size={14}
+            strokeWidth={1.75}
+          />
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>{label}</TooltipContent>
+    </Tooltip>
+  )
 }
 
 const createSearchRegex = (keyword: string, caseSensitive: boolean) => {
@@ -123,7 +184,7 @@ const SearchMatchSnippet = memo(
 
     const currentMatch = positions[matchIndexInLine]
 
-    if (!currentMatch) return <span className="snippet-text">{content}</span>
+    if (!currentMatch) return <span className='snippet-text'>{content}</span>
 
     const start = Math.max(0, currentMatch.start - prefixWindow)
     const end = Math.min(content.length, currentMatch.end + suffixWindow)
@@ -141,7 +202,10 @@ const SearchMatchSnippet = memo(
 
         const isCurrentMatch = position.start === currentMatch.start
         result.push(
-          <mark key={`${position.start}-${position.end}`} className={isCurrentMatch ? 'active' : ''}>
+          <mark
+            key={`${position.start}-${position.end}`}
+            className={isCurrentMatch ? 'active' : ''}
+          >
             {content.slice(position.start, position.end)}
           </mark>,
         )
@@ -153,7 +217,7 @@ const SearchMatchSnippet = memo(
     }
 
     return (
-      <span className="snippet-text">
+      <span className='snippet-text'>
         {start > 0 && '...'}
         {renderSnippet()}
         {end < content.length && '...'}
@@ -181,8 +245,10 @@ const SearchView = memo(() => {
   const [isSearching, setIsSearching] = useState(false)
   const [hasSearched, setHasSearched] = useState(false)
   const [searchError, setSearchError] = useState('')
+  const [focusedRowIndex, setFocusedRowIndex] = useState(0)
   const { t } = useTranslation()
   const parentRef = useRef<HTMLDivElement>(null)
+  const focusRequestFrameRef = useRef<number | null>(null)
   const searchRequestIdRef = useRef(0)
 
   const normalizedResultList = useMemo(
@@ -191,7 +257,7 @@ const SearchView = memo(() => {
   )
 
   const flattenedData = useMemo(() => {
-    const data: Array<
+    const data: (
       | { type: 'header'; searchInfo: NormalizedSearchInfo; id: string }
       | {
           type: 'match'
@@ -202,7 +268,7 @@ const SearchView = memo(() => {
           isActive: boolean
           id: string
         }
-    > = []
+    )[] = []
 
     normalizedResultList.forEach((searchInfo) => {
       data.push({
@@ -238,9 +304,79 @@ const SearchView = memo(() => {
   const rowVirtualizer = useVirtualizer({
     count: flattenedData.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: (index: number) => (flattenedData[index].type === 'header' ? 34 : 44),
+    estimateSize: (index: number) => (flattenedData[index].type === 'header' ? 24 : 32),
     overscan: 10,
   })
+
+  useEffect(() => {
+    if (flattenedData.length === 0) {
+      setFocusedRowIndex(0)
+      return
+    }
+
+    setFocusedRowIndex((currentIndex) => Math.min(currentIndex, flattenedData.length - 1))
+  }, [flattenedData.length])
+
+  useEffect(() => {
+    return () => {
+      if (focusRequestFrameRef.current !== null) {
+        window.cancelAnimationFrame(focusRequestFrameRef.current)
+      }
+    }
+  }, [])
+
+  const focusSearchRow = useCallback(
+    (rowIndex: number) => {
+      setFocusedRowIndex(rowIndex)
+      rowVirtualizer.scrollToIndex(rowIndex, { align: 'auto' })
+
+      if (focusRequestFrameRef.current !== null) {
+        window.cancelAnimationFrame(focusRequestFrameRef.current)
+      }
+
+      const focusMountedRow = (remainingAttempts: number) => {
+        const target = parentRef.current?.querySelector<HTMLButtonElement>(
+          `[data-search-row-index="${rowIndex}"]`,
+        )
+        if (target) {
+          target.focus({ preventScroll: true })
+          focusRequestFrameRef.current = null
+          return
+        }
+
+        if (remainingAttempts > 0) {
+          focusRequestFrameRef.current = window.requestAnimationFrame(() => {
+            focusMountedRow(remainingAttempts - 1)
+          })
+        } else {
+          focusRequestFrameRef.current = null
+        }
+      }
+
+      focusRequestFrameRef.current = window.requestAnimationFrame(() => focusMountedRow(1))
+    },
+    [rowVirtualizer],
+  )
+
+  const handleSearchRowKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLButtonElement>, rowIndex: number) => {
+      if (
+        event.key !== 'ArrowDown' &&
+        event.key !== 'ArrowUp' &&
+        event.key !== 'Home' &&
+        event.key !== 'End'
+      ) {
+        return
+      }
+
+      const nextIndex = getNextSearchRowIndex(rowIndex, flattenedData.length, event.key)
+      if (nextIndex === null) return
+
+      event.preventDefault()
+      focusSearchRow(nextIndex)
+    },
+    [flattenedData.length, focusSearchRow],
+  )
 
   const isAllExpand = resultList.length > 0 && resultList.every((item) => expandIdMap[item.id])
   const trimmedKeyword = searchKeyword.trim()
@@ -341,7 +477,14 @@ const SearchView = memo(() => {
         setIsSearching(false)
       }
     }
-  }, [folderData, searchKeyword, caseSensitive, fileExcludePatterns, setSearchState, addSearchResult])
+  }, [
+    folderData,
+    searchKeyword,
+    caseSensitive,
+    fileExcludePatterns,
+    setSearchState,
+    addSearchResult,
+  ])
 
   const toggleCaseSensitive = useCallback(() => {
     searchRequestIdRef.current += 1
@@ -356,9 +499,12 @@ const SearchView = memo(() => {
     }
   }, [activeId, caseSensitive, editorCtxMap, setSearchState])
 
-  const handleKeyDown = useCallback(() => {
-    handleSearch()
-  }, [handleSearch])
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLInputElement>) => {
+      if (event.key === 'Enter') void handleSearch()
+    },
+    [handleSearch],
+  )
 
   const handleFileInfoClick = useCallback(
     (p: string, index: number) => {
@@ -378,6 +524,7 @@ const SearchView = memo(() => {
         setSearchState({
           activeIndex: index,
         })
+        if (closeCompactLeftDockAfterSelection()) scheduleActiveEditorFocus()
       }
     },
     [addOpenedFile, setActiveId, caseSensitive, searchKeyword, setSearchState, editorCtxMap],
@@ -418,119 +565,129 @@ const SearchView = memo(() => {
     }
   }, [activeId, editorCtxMap, setSearchState])
 
-  const renderSearchState = useCallback(
-    () => {
-      if (isSearching && resultList.length === 0) {
-        return (
-          <SearchStateBox>
-            <div className='search-state__icon'>
-              <i className='ri-loader-4-line' />
-            </div>
-            <div className='search-state__title'>{t('search.searching')}</div>
-            <div className='search-state__desc'>{t('search.searchingDesc')}</div>
-          </SearchStateBox>
-        )
-      }
+  const renderSearchState = useCallback(() => {
+    if (isSearching && resultList.length === 0) {
+      return (
+        <SearchStateBox aria-live='polite' role='status'>
+          <div className='search-state__icon'>
+            <LoaderCircleIcon
+              aria-hidden='true'
+              className='search-icon--spin'
+              size={18}
+              strokeWidth={1.5}
+            />
+          </div>
+          <div className='search-state__title'>{t('search.searching')}</div>
+          <div className='search-state__desc'>{t('search.searchingDesc')}</div>
+        </SearchStateBox>
+      )
+    }
 
-      if (searchError) {
-        return (
-          <SearchStateBox>
-            <div className='search-state__icon'>
-              <i className='ri-error-warning-line' />
-            </div>
-            <div className='search-state__title'>{t('search.search_failed')}</div>
-            <div className='search-state__desc'>{searchError}</div>
-          </SearchStateBox>
-        )
-      }
+    if (searchError) {
+      return (
+        <SearchStateBox aria-live='assertive' role='alert'>
+          <div className='search-state__icon'>
+            <CircleAlertIcon aria-hidden='true' size={18} strokeWidth={1.5} />
+          </div>
+          <div className='search-state__title'>{t('search.search_failed')}</div>
+          <div className='search-state__desc'>{searchError}</div>
+          <Button onClick={() => void handleSearch()} size='sm' variant='outline'>
+            {t('common.retry')}
+          </Button>
+        </SearchStateBox>
+      )
+    }
 
-      if (!trimmedKeyword) {
-        return (
-          <Empty role='status'>
-            <EmptyHeader>
-              <EmptyMedia>
-                <i className='ri-search-2-line' aria-hidden='true' />
-              </EmptyMedia>
-              <EmptyTitle>{t('search.ready')}</EmptyTitle>
-              <EmptyDescription>{t('search.readyDesc')}</EmptyDescription>
-            </EmptyHeader>
-          </Empty>
-        )
-      }
+    if (!folderData?.[0]) {
+      return (
+        <Empty role='status'>
+          <EmptyHeader>
+            <EmptyMedia>
+              <FolderOpenIcon aria-hidden='true' size={18} strokeWidth={1.5} />
+            </EmptyMedia>
+            <EmptyTitle>{t('workspace.none')}</EmptyTitle>
+            <EmptyDescription>{t('search.readyDesc')}</EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      )
+    }
 
-      if (hasSearched && resultList.length === 0) {
-        return (
-          <Empty role='status'>
-            <EmptyHeader>
-              <EmptyMedia>
-                <i className='ri-file-search-line' aria-hidden='true' />
-              </EmptyMedia>
-              <EmptyTitle>{t('search.search_empty')}</EmptyTitle>
-              <EmptyDescription>{t('search.emptyDesc')}</EmptyDescription>
-            </EmptyHeader>
-          </Empty>
-        )
-      }
+    if (!trimmedKeyword) {
+      return (
+        <Empty role='status'>
+          <EmptyHeader>
+            <EmptyMedia>
+              <SearchIcon aria-hidden='true' size={18} strokeWidth={1.5} />
+            </EmptyMedia>
+            <EmptyTitle>{t('search.ready')}</EmptyTitle>
+            <EmptyDescription>{t('search.readyDesc')}</EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      )
+    }
 
-      return null
-    },
-    [hasSearched, isSearching, resultList.length, searchError, t, trimmedKeyword],
-  )
+    if (hasSearched && resultList.length === 0) {
+      return (
+        <Empty role='status'>
+          <EmptyHeader>
+            <EmptyMedia>
+              <FileSearchIcon aria-hidden='true' size={18} strokeWidth={1.5} />
+            </EmptyMedia>
+            <EmptyTitle>{t('search.search_empty')}</EmptyTitle>
+            <EmptyDescription>{t('search.emptyDesc')}</EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      )
+    }
+
+    return null
+  }, [
+    folderData,
+    handleSearch,
+    hasSearched,
+    isSearching,
+    resultList.length,
+    searchError,
+    t,
+    trimmedKeyword,
+  ])
+  const virtualItems = rowVirtualizer.getVirtualItems()
+  const tabbableRowIndex = virtualItems.some((item) => item.index === focusedRowIndex)
+    ? focusedRowIndex
+    : (virtualItems[0]?.index ?? 0)
 
   return (
     <SearchContainer>
       <SearchInput>
         <Input
-          size='small'
-          className='search-input'
-          onPressEnter={handleKeyDown}
+          aria-label={t('search.text')}
+          className='search-input h-6'
+          inputSize='sm'
+          onKeyDown={handleKeyDown}
           value={searchKeyword}
           placeholder={t('search.text')}
           onChange={handleSearchTextChange}
         />
         {searchKeyword ? (
-          <MfIconButton
-            className='search-input__action'
-            size='small'
-            rounded='smooth'
-            onClick={handleClearSearch}
-            icon='ri-close-line'
-            tooltipProps={{
-              title: t('common.close'),
-            }}
-          />
+          <SearchActionButton icon={XIcon} label={t('common.close')} onClick={handleClearSearch} />
         ) : null}
-        <MfIconButton
-          className='search-input__action'
+        <SearchActionButton
+          icon={CaseSensitiveIcon}
+          label={t('search.caseSensitive')}
           onClick={toggleCaseSensitive}
-          active={caseSensitive}
-          icon='ri-font-size'
-          size='small'
-          rounded='smooth'
-          tooltipProps={{
-            title: t('search.caseSensitive'),
-          }}
+          pressed={caseSensitive}
         />
-        <MfIconButton
-          className='search-input__action'
-          size='small'
-          rounded='smooth'
+        <SearchActionButton
+          icon={isAllExpand ? ChevronsDownUpIcon : ChevronsUpDownIcon}
+          label={t('search.toggleExpandAll')}
           onClick={toggleAllExpand}
-          icon={isAllExpand ? 'ri-contract-up-down-line' : 'ri-expand-up-down-line'}
-          tooltipProps={{
-            title: t('search.toggleExpandAll'),
-          }}
+          pressed={isAllExpand}
         />
-        <MfIconButton
-          className='search-input__action'
-          size='small'
-          rounded='smooth'
-          onClick={handleSearch}
-          icon={isSearching ? 'ri-loader-4-line' : 'ri-search-line'}
-          active={isSearching}
-          tooltipProps={{
-            title: t('search.text'),
-          }}
+        <SearchActionButton
+          icon={isSearching ? LoaderCircleIcon : SearchIcon}
+          label={t('search.text')}
+          onClick={() => void handleSearch()}
+          spinning={isSearching}
         />
         {isSearching ? <div className='search-input__progress' /> : null}
       </SearchInput>
@@ -540,31 +697,73 @@ const SearchView = memo(() => {
             {isSearching
               ? t('search.searchingWithKeyword', { keyword: trimmedKeyword })
               : t('search.resultSummary', {
-                files: resultFileCount,
-                matches: resultMatchCount,
-                keyword: trimmedKeyword,
-              })}
+                  files: resultFileCount,
+                  matches: resultMatchCount,
+                  keyword: trimmedKeyword,
+                })}
           </div>
         </SearchMeta>
       ) : null}
       <SearchList ref={parentRef}>
         {renderSearchState() ?? (
-        <div
-          style={{
-            height: `${rowVirtualizer.getTotalSize()}px`,
-            width: '100%',
-            position: 'relative',
-          }}
-        >
-          {rowVirtualizer.getVirtualItems().map((virtualItem) => {
-            const item = flattenedData[virtualItem.index]
+          <div
+            style={{
+              height: `${rowVirtualizer.getTotalSize()}px`,
+              width: '100%',
+              position: 'relative',
+            }}
+          >
+            {virtualItems.map((virtualItem) => {
+              const item = flattenedData[virtualItem.index]
 
-            if (item.type === 'header') {
-              const isExpand = expandIdMap[item.searchInfo.id]
-              const iconCls = classNames('search-info__icon', {
-                'ri-arrow-down-s-line': isExpand,
-                'ri-arrow-right-s-line': !isExpand,
-              })
+              if (item.type === 'header') {
+                const isExpand = expandIdMap[item.searchInfo.id]
+
+                return (
+                  <SearchInfoBox
+                    key={virtualItem.key}
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: `${virtualItem.size}px`,
+                      transform: `translateY(${virtualItem.start}px)`,
+                    }}
+                  >
+                    <button
+                      aria-expanded={Boolean(isExpand)}
+                      className='search-info__path'
+                      data-search-row-index={virtualItem.index}
+                      onClick={() => toggleSearchInfoExpand(item.searchInfo.id)}
+                      onFocus={() => setFocusedRowIndex(virtualItem.index)}
+                      onKeyDown={(event) => handleSearchRowKeyDown(event, virtualItem.index)}
+                      tabIndex={virtualItem.index === tabbableRowIndex ? 0 : -1}
+                      title={item.searchInfo.path}
+                      type='button'
+                    >
+                      <ChevronRightIcon
+                        aria-hidden='true'
+                        className={classNames('search-info__icon', {
+                          'search-info__icon--expanded': isExpand,
+                        })}
+                        size={14}
+                        strokeWidth={1.75}
+                      />
+                      <FileTextIcon
+                        aria-hidden='true'
+                        className='search-info__file-icon'
+                        size={14}
+                        strokeWidth={1.75}
+                      />
+                      <span className='search-info__path-text'>
+                        {item.searchInfo.relative_path}
+                      </span>
+                      <span className='search-info__badge'>{item.searchInfo.matches.length}</span>
+                    </button>
+                  </SearchInfoBox>
+                )
+              }
 
               return (
                 <SearchInfoBox
@@ -578,49 +777,29 @@ const SearchView = memo(() => {
                     transform: `translateY(${virtualItem.start}px)`,
                   }}
                 >
-                  <div
-                    className='search-info__path'
-                    onClick={() => toggleSearchInfoExpand(item.searchInfo.id)}
-                    title={item.searchInfo.path}
+                  <button
+                    aria-current={item.isActive ? 'true' : undefined}
+                    className={classNames('search-info', { active: item.isActive })}
+                    data-search-row-index={virtualItem.index}
+                    onClick={() => handleFileInfoClick(item.searchInfo.path, item.globalIndex)}
+                    onFocus={() => setFocusedRowIndex(virtualItem.index)}
+                    onKeyDown={(event) => handleSearchRowKeyDown(event, virtualItem.index)}
+                    tabIndex={virtualItem.index === tabbableRowIndex ? 0 : -1}
+                    type='button'
                   >
-                    <i className={iconCls} />
-                    <i className='ri-file-list-2-line search-info__file-icon' />
-                    <span className='search-info__path-text'>{item.searchInfo.relative_path}</span>
-                    <span className='search-info__badge'>{item.searchInfo.matches.length}</span>
-                  </div>
+                    <div className='search-info__linenumber'>line {item.match.line}:</div>
+                    <div className='search-info__content'>
+                      <SearchMatchSnippet
+                        content={item.match.content}
+                        matchIndexInLine={item.matchIndexInLine}
+                        positions={item.match.positions}
+                      />
+                    </div>
+                  </button>
                 </SearchInfoBox>
               )
-            }
-
-            return (
-              <SearchInfoBox
-                key={virtualItem.key}
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  height: `${virtualItem.size}px`,
-                  transform: `translateY(${virtualItem.start}px)`,
-                }}
-              >
-                <div
-                  className={classNames('search-info', { active: item.isActive })}
-                  onClick={() => handleFileInfoClick(item.searchInfo.path, item.globalIndex)}
-                >
-                  <div className='search-info__linenumber'>line {item.match.line}:</div>
-                  <div className='search-info__content'>
-                    <SearchMatchSnippet
-                      content={item.match.content}
-                      matchIndexInLine={item.matchIndexInLine}
-                      positions={item.match.positions}
-                    />
-                  </div>
-                </div>
-              </SearchInfoBox>
-            )
-          })}
-        </div>
+            })}
+          </div>
         )}
       </SearchList>
     </SearchContainer>
@@ -630,6 +809,6 @@ const SearchView = memo(() => {
 export const Search = {
   title: RIGHTBARITEMKEYS.Search,
   key: RIGHTBARITEMKEYS.Search,
-  icon: <i className='ri-search-2-line' />,
+  icon: <SearchIcon aria-hidden='true' size={14} strokeWidth={1.75} />,
   components: <SearchView />,
 } as RightBarItem

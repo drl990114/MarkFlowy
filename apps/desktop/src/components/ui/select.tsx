@@ -28,8 +28,8 @@ export function SelectTrigger({
   return (
     <SelectPrimitive.Trigger
       className={cn(
-        'flex min-w-0 items-center justify-between gap-2 rounded-md border border-input bg-background px-2.5 text-sm text-foreground shadow-sm outline-none transition-[color,box-shadow,border-color] focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/25 disabled:pointer-events-none disabled:text-disabled-foreground disabled:opacity-60 data-[placeholder]:text-muted-foreground [&>span]:truncate [&_svg]:pointer-events-none [&_svg]:size-3.5 [&_svg]:shrink-0',
-        size === 'sm' ? 'h-7 text-xs' : 'h-8',
+        'flex min-w-0 items-center justify-between gap-2 rounded-md border border-control-border bg-surface-app px-2.5 text-ui-control text-content-primary shadow-sm outline-none transition-[color,box-shadow,border-color] duration-[var(--mf-motion-duration-fast)] ease-[var(--mf-motion-ease-out)] focus-visible:border-control-focus focus-visible:ring-2 focus-visible:ring-control-focus/25 disabled:pointer-events-none disabled:text-content-disabled disabled:opacity-60 motion-reduce:transition-none data-[placeholder]:text-content-muted [&>span]:truncate [&_svg]:pointer-events-none [&_svg]:size-3.5 [&_svg]:shrink-0',
+        size === 'sm' ? 'h-7' : 'h-8',
         className,
       )}
       data-size={size}
@@ -60,7 +60,7 @@ export function SelectContent({
     <SelectPrimitive.Portal container={container}>
       <SelectPrimitive.Content
         className={cn(
-          'relative z-[1000] max-h-[var(--radix-select-content-available-height)] min-w-[8rem] overflow-hidden rounded-md border border-border bg-popover text-popover-foreground shadow-lg outline-none',
+          'relative z-[var(--mf-layer-select)] max-h-[var(--radix-select-content-available-height)] min-w-[8rem] overflow-hidden rounded-md border border-control-border bg-surface-overlay text-content-primary shadow-lg outline-none',
           position === 'popper' &&
             'min-w-[var(--radix-select-trigger-width)] data-[side=bottom]:translate-y-1 data-[side=top]:-translate-y-1',
           className,
@@ -87,7 +87,7 @@ export function SelectContent({
 export function SelectLabel({ className, ...props }: ComponentProps<typeof SelectPrimitive.Label>) {
   return (
     <SelectPrimitive.Label
-      className={cn('px-2 py-1.5 text-xs font-medium text-muted-foreground', className)}
+      className={cn('px-2 py-1.5 text-xs font-medium text-content-muted', className)}
       data-slot='select-label'
       {...props}
     />
@@ -102,7 +102,7 @@ export function SelectItem({
   return (
     <SelectPrimitive.Item
       className={cn(
-        'relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pr-8 pl-2 text-xs outline-none data-[disabled]:pointer-events-none data-[disabled]:text-disabled-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground',
+        'relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pr-8 pl-2 text-ui-control outline-none data-[disabled]:pointer-events-none data-[disabled]:text-content-disabled data-[highlighted]:bg-control-hover data-[highlighted]:text-content-primary',
         className,
       )}
       data-slot='select-item'
@@ -124,7 +124,7 @@ export function SelectSeparator({
 }: ComponentProps<typeof SelectPrimitive.Separator>) {
   return (
     <SelectPrimitive.Separator
-      className={cn('-mx-1 my-1 h-px bg-border', className)}
+      className={cn('-mx-1 my-1 h-px bg-control-border', className)}
       data-slot='select-separator'
       {...props}
     />
@@ -137,7 +137,7 @@ export function SelectScrollUpButton({
 }: ComponentProps<typeof SelectPrimitive.ScrollUpButton>) {
   return (
     <SelectPrimitive.ScrollUpButton
-      className={cn('flex cursor-default items-center justify-center py-1 text-muted-foreground', className)}
+      className={cn('flex cursor-default items-center justify-center py-1 text-content-muted', className)}
       data-slot='select-scroll-up-button'
       {...props}
     >
@@ -152,7 +152,7 @@ export function SelectScrollDownButton({
 }: ComponentProps<typeof SelectPrimitive.ScrollDownButton>) {
   return (
     <SelectPrimitive.ScrollDownButton
-      className={cn('flex cursor-default items-center justify-center py-1 text-muted-foreground', className)}
+      className={cn('flex cursor-default items-center justify-center py-1 text-content-muted', className)}
       data-slot='select-scroll-down-button'
       {...props}
     >

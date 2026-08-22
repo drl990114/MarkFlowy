@@ -35,12 +35,13 @@ export const WysiwygThemeWrapper = styled.div
   margin: 0;
   font-family: ${(props) => props.theme.fontFamily};
   font-size: ${(props) => props.rootFontSize};
-  line-height: ${(props) => props.rootLineHeight};
+  line-height: var(--rme-editor-line-height, ${(props) => props.rootLineHeight});
   background-color: ${(props) => props.theme.bgColor};
   color: ${(props) => props.theme.primaryFontColor};
   word-wrap: break-word;
   white-space: pre-wrap;
-  padding-bottom: 1em;
+  padding-block: var(--rme-editor-block-padding-start, 0)
+    var(--rme-editor-block-padding-end, 1em);
   box-sizing: border-box;
   outline: none;
 
@@ -142,9 +143,9 @@ export const WysiwygThemeWrapper = styled.div
   & tt {
     padding: 0.2em 0.4em;
     margin: 0;
-    font-size: 0.85em;
+    font-size: 0.9em;
     white-space: break-spaces;
-    background-color: ${(props) => props.theme.codeBgColor};
+    background-color: var(--rme-editor-inline-code-bg, ${(props) => props.theme.codeBgColor});
     border-radius: 6px;
   }
 
@@ -153,7 +154,6 @@ export const WysiwygThemeWrapper = styled.div
   & kbd,
   & pre,
   & samp {
-    font-size: 0.85em;
     font-family: ${(props) => props.theme.codemirrorFontFamily};
   }
 
@@ -298,38 +298,44 @@ export const WysiwygThemeWrapper = styled.div
 
   & h1 {
     font-weight: 600;
-    margin: 0.6em 0 1.2em 0;
-    font-size: 1.875em;
+    margin: var(--rme-editor-heading-margin-block-start, 0.6em) 0
+      var(--rme-editor-heading-margin-block-end, 1.2em) 0;
+    font-size: var(--rme-editor-heading-1-size, 1.875em);
   }
 
   & h2 {
     font-weight: 600;
-    margin: 0.55em 0 1.1em 0;
-    font-size: 1.75em;
+    margin: var(--rme-editor-heading-margin-block-start, 0.55em) 0
+      var(--rme-editor-heading-margin-block-end, 1.1em) 0;
+    font-size: var(--rme-editor-heading-2-size, 1.75em);
   }
 
   & h3 {
     font-weight: 600;
-    margin: 0.5em 0 1em 0;
-    font-size: 1.6em;
+    margin: var(--rme-editor-heading-margin-block-start, 0.5em) 0
+      var(--rme-editor-heading-margin-block-end, 1em) 0;
+    font-size: var(--rme-editor-heading-3-size, 1.6em);
   }
 
   & h4 {
     font-weight: 600;
-    margin: 0.45em 0 0.9em 0;
-    font-size: 1.46em;
+    margin: var(--rme-editor-heading-margin-block-start, 0.45em) 0
+      var(--rme-editor-heading-margin-block-end, 0.9em) 0;
+    font-size: var(--rme-editor-heading-4-size, 1.46em);
   }
 
   & h5 {
     font-weight: 600;
-    margin: 0.4em 0 0.8em 0;
-    font-size: 1.3em;
+    margin: var(--rme-editor-heading-margin-block-start, 0.4em) 0
+      var(--rme-editor-heading-margin-block-end, 0.8em) 0;
+    font-size: var(--rme-editor-heading-5-size, 1.3em);
   }
 
   & h6 {
     font-weight: 600;
-    margin: 0.4em 0 0.8em 0;
-    font-size: 1.2em;
+    margin: var(--rme-editor-heading-margin-block-start, 0.4em) 0
+      var(--rme-editor-heading-margin-block-end, 0.8em) 0;
+    font-size: var(--rme-editor-heading-6-size, 1.2em);
   }
 
   & p {
@@ -340,8 +346,12 @@ export const WysiwygThemeWrapper = styled.div
   & blockquote {
     margin: 0;
     padding: 0 1em;
-    color: ${(props) => props.theme.blockquoteFontColor};
-    border-left: 0.25em solid ${(props) => props.theme.blockquoteBorderColor};
+    color: var(--rme-editor-blockquote-color, ${(props) => props.theme.blockquoteFontColor});
+    border-left: var(--rme-editor-blockquote-border-width, 0.25em) solid
+      var(
+        --rme-editor-blockquote-border-color,
+        ${(props) => props.theme.blockquoteBorderColor}
+      );
   }
 
   & ul,
@@ -389,7 +399,9 @@ export const WysiwygThemeWrapper = styled.div
     content: '';
   }
 
-  & > *:first-child {
+  & > *:first-child,
+  & .remirror-editor > :is(h1, h2, h3, h4, h5, h6):first-child,
+  & .mf-preview-content > :is(h1, h2, h3, h4, h5, h6):first-child {
     margin-top: 0 !important;
   }
 
@@ -473,8 +485,10 @@ export const WysiwygThemeWrapper = styled.div
   & table th {
     text-align: left;
     font-weight: 600;
-    background-color: ${(props) =>
-      props.theme.tableHeaderBgColor ?? props.theme.tableTrDeepBgColor};
+    background-color: var(
+      --rme-editor-table-header-bg,
+      ${(props) => props.theme.tableHeaderBgColor ?? props.theme.tableTrDeepBgColor}
+    );
   }
 
   & table th[data-table-align='left'],
@@ -495,7 +509,8 @@ export const WysiwygThemeWrapper = styled.div
   & table th,
   & table td {
     min-width: 60px;
-    padding: 6px 20px;
+    padding: var(--rme-editor-table-cell-padding-block, 6px)
+      var(--rme-editor-table-cell-padding-inline, 20px);
   }
 
   & table img {
@@ -519,6 +534,7 @@ export const WysiwygThemeWrapper = styled.div
     text-decoration: inherit;
   }
 
+  & kbd,
   & samp {
     font-size: 0.85em;
   }
@@ -537,12 +553,14 @@ export const WysiwygThemeWrapper = styled.div
   }
 
   & pre {
-    padding: 16px;
+    padding: var(--rme-editor-code-block-padding, 16px);
     overflow: auto;
-    font-size: 0.85em;
+    font-size: 0.9em;
     line-height: 1.45;
-    background-color: ${(props) => props.theme.preBgColor};
-    border-radius: 6px;
+    background-color: var(--rme-editor-code-block-bg, ${(props) => props.theme.preBgColor});
+    border: var(--rme-editor-code-block-border-width, 0) solid
+      var(--rme-editor-code-block-border-color, transparent);
+    border-radius: var(--rme-editor-code-block-radius, 6px);
   }
 
   & pre code,
@@ -724,7 +742,8 @@ export const WysiwygThemeWrapper = styled.div
 
   @media (prefers-reduced-motion: reduce) {
     & .mf-preview-loading-spinner {
-      animation: mf-preview-loading-pulse 1.4s ease-in-out infinite;
+      animation: none;
+      opacity: 0.65;
     }
 
     & .mf-preview-loading-lines > span {
@@ -734,7 +753,8 @@ export const WysiwygThemeWrapper = styled.div
 
     & .mf-preview-image-progress-track::after {
       width: 100%;
-      animation: mf-preview-loading-pulse 1.4s ease-in-out infinite;
+      animation: none;
+      opacity: 0.55;
       transform: none;
     }
 
@@ -873,7 +893,7 @@ export const WysiwygThemeWrapper = styled.div
     height: min-content;
     display: inline-block;
     font-size: 16px;
-    line-height: ${(props) => props.rootLineHeight};
+    line-height: var(--rme-editor-line-height, ${(props) => props.rootLineHeight});
     animation: loading-icon-spin 1s linear infinite;
   }
 
@@ -898,7 +918,7 @@ export const WysiwygThemeWrapper = styled.div
     margin: 0;
     font-size: 0.85em;
     white-space: break-spaces;
-    background-color: ${(props) => props.theme.codeBgColor};
+    background-color: var(--rme-editor-inline-code-bg, ${(props) => props.theme.codeBgColor});
     border-radius: 6px;
   }
 
@@ -984,7 +1004,9 @@ export const WysiwygThemeWrapper = styled.div
     padding: 0.4em 0.75em;
     font-size: 1em;
     cursor: pointer;
-    transition: all 0.3s;
+    transition:
+      color 120ms cubic-bezier(0.23, 1, 0.32, 1),
+      background-color 120ms cubic-bezier(0.23, 1, 0.32, 1);
     border-radius: 6px;
     margin: 0 4px;
     display: flex;
@@ -1019,7 +1041,6 @@ export const WysiwygThemeWrapper = styled.div
   .node-show {
     display: block;
     margin-bottom: 0;
-    transition: all 0.3s;
   }
 
   .inline-node-show {
@@ -1034,7 +1055,7 @@ export const WysiwygThemeWrapper = styled.div
     display: inline;
     padding: 0.2em 0.4em;
     margin: 0;
-    background-color: ${(props) => props.theme.codeBgColor};
+    background-color: var(--rme-editor-inline-code-bg, ${(props) => props.theme.codeBgColor});
     border-radius: 6px;
     br {
       display: none;
@@ -1149,7 +1170,9 @@ export const WysiwygThemeWrapper = styled.div
     align-items: center;
     gap: 4px;
     opacity: 0;
-    transition: all 0.3s;
+    transition:
+      opacity 120ms cubic-bezier(0.23, 1, 0.32, 1),
+      background-color 120ms cubic-bezier(0.23, 1, 0.32, 1);
     font-size: 12px;
     cursor: pointer;
     color: ${(props) => props.theme.labelFontColor};
@@ -1178,7 +1201,6 @@ export const WysiwygThemeWrapper = styled.div
     top: 6px;
     right: 6px;
     padding: 4px 8px;
-    transition: all 0.3s;
     font-size: small;
     border-radius: ${(props) => props.theme.smallBorderRadius};
     cursor: pointer;
@@ -1194,11 +1216,16 @@ export const WysiwygThemeWrapper = styled.div
     max-width: 100%;
     padding: 12px 0;
     margin-bottom: 1em;
-    line-height: ${(props) => props.rootLineHeight};
+    line-height: var(--rme-editor-line-height, ${(props) => props.rootLineHeight});
     font-size: ${(props) => props.rootFontSize};
     font-family: ${(props) => props.theme.codemirrorFontFamily} !important;
-    border-radius: ${(props) => props.theme.smallBorderRadius};
-    background-color: ${(props) => props.theme.preBgColor};
+    border: var(--rme-editor-code-block-border-width, 0) solid
+      var(--rme-editor-code-block-border-color, transparent);
+    border-radius: var(
+      --rme-editor-code-block-radius,
+      ${(props) => props.theme.smallBorderRadius}
+    );
+    background-color: var(--rme-editor-code-block-bg, ${(props) => props.theme.preBgColor});
     overflow: auto;
     box-sizing: border-box;
 
@@ -1209,16 +1236,16 @@ export const WysiwygThemeWrapper = styled.div
     }
     .cm-line {
       padding: 2px 2px 2px 6px;
-      font-size: 0.85em;
+      font-size: 1em;
       font-family: ${(props) => props.theme.codemirrorFontFamily};
 
       span {
-        line-height: ${(props) => props.rootLineHeight};
+        line-height: var(--rme-editor-line-height, ${(props) => props.rootLineHeight});
       }
     }
 
     .cm-content {
-      background-color: ${(props) => props.theme.preBgColor};
+      background-color: var(--rme-editor-code-block-bg, ${(props) => props.theme.preBgColor});
     }
     .cm-scroller {
       width: 100%;
@@ -1227,14 +1254,14 @@ export const WysiwygThemeWrapper = styled.div
     }
     .cm-scroller .cm-gutters {
       font-family: inherit;
-      background-color: ${(props) => props.theme.preBgColor};
+      background-color: var(--rme-editor-code-block-bg, ${(props) => props.theme.preBgColor});
     }
     .cm-lineNumbers .cm-gutterElement {
       margin: 0;
       display: flex;
       justify-content: center;
       align-items: center;
-      background-color: ${(props) => props.theme.preBgColor};
+      background-color: var(--rme-editor-code-block-bg, ${(props) => props.theme.preBgColor});
     }
 
     .cm-gutters {
@@ -1321,20 +1348,27 @@ export const WysiwygThemeWrapper = styled.div
   }
 
   & .ProseMirror-selectednode {
-    outline: 1px solid ${(props) => props.theme.nodeSelectedColor};
+    outline: none;
+    box-shadow: 0 0 0 3px
+      var(
+        --rme-editor-selection-halo,
+        var(--rme-editor-selection-bg, ${(props) => props.theme.nodeSelectedColor})
+      );
     border-radius: 6px;
-    background-color: ${(props) => props.theme.nodeSelectedColor};
+    background-color: var(
+      --rme-editor-selection-bg,
+      ${(props) => props.theme.nodeSelectedColor}
+    );
   }
 
   & .html-image-node-view-wrapper.ProseMirror-selectednode,
   & .md-image-node-view-wrapper.ProseMirror-selectednode {
-    outline: none;
     background-color: transparent;
   }
 
   .rme-dragging {
     & .ProseMirror-selectednode {
-      outline-color: transparent !important;
+      box-shadow: none !important;
       background-color: transparent !important;
     }
   }
@@ -1346,8 +1380,14 @@ export const WysiwygThemeWrapper = styled.div
   & .ProseMirror th.selectedCell,
   & .ProseMirror td.selectedCell {
     border-style: double;
-    border-color: ${(props) => props.theme.tableSelectorCellBorderColor};
-    background-color: ${(props) => props.theme.tableSelectorCellBgColor};
+    border-color: var(
+      --rme-editor-cell-selection-border,
+      ${(props) => props.theme.tableSelectorCellBorderColor}
+    );
+    background-color: var(
+      --rme-editor-cell-selection-bg,
+      ${(props) => props.theme.tableSelectorCellBgColor}
+    );
   }
 
   & .ProseMirror .tableWrapper {
@@ -1419,6 +1459,19 @@ export const WysiwygThemeWrapper = styled.div
 
   /* Import flat list styles */
   ${FlatListStyles}
+
+  @media (prefers-reduced-motion: reduce) {
+    & input[type='checkbox']::before,
+    & .code-block__language,
+    & .cm-render-node-label,
+    & .rme-table-selector {
+      transition: none;
+    }
+
+    & .loading-icon {
+      animation: none;
+    }
+  }
 
   ${(props) =>
     props.dark &&

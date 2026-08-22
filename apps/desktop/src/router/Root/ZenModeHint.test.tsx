@@ -46,6 +46,10 @@ describe('ZenModeHint', () => {
     const hint = container.querySelector('[data-mf-zen-mode-hint]')
     expect(hint?.getAttribute('role')).toBe('status')
     expect(hint?.textContent).toContain('⌘⇧F')
+    expect(hint?.classList.contains('absolute')).toBe(true)
+    expect(hint?.classList.contains('fixed')).toBe(false)
+    expect(hint?.classList.contains('top-3')).toBe(true)
+    expect(hint?.classList.contains('z-10')).toBe(true)
 
     act(() => vi.advanceTimersByTime(ZEN_MODE_HINT_DURATION_MS))
     expect(container.querySelector('[data-mf-zen-mode-hint]')).toBeNull()

@@ -11,20 +11,28 @@ import { FileResultCode } from '@/helper/filesys'
 import { dialog } from '@/services/dialog'
 import { addNewMarkdownFileEdit, isEmptyEditor } from '@/services/editor-file'
 import { currentWindow } from '@/services/windows'
-import { getWorkspace, WorkSpace } from '@/services/workspace'
+import { getWorkspace, type WorkSpace } from '@/services/workspace'
 import { useEditorStateStore, useEditorStore } from '@/stores'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
 import useAppTasksStore from '@/stores/useTasksStore'
 import { invoke } from '@tauri-apps/api/core'
 import { debounce } from 'lodash'
+import {
+  Code2Icon,
+  EllipsisIcon,
+  EyeIcon,
+  FileTextIcon,
+  PencilLineIcon,
+  type LucideIcon,
+} from 'lucide-react'
 import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from '@/i18n'
 import { EditorViewType } from 'rme'
 import styled from 'styled-components'
 import { Space, toast } from 'zens'
-import { MfIconButton } from '../ui-v2/Button'
 import { showContextMenu } from '../ui-v2/ContextMenu'
+import { EditorAreaActionButton } from './EditorAreaAction'
 import { createPdfPrintMenuItem } from './pdf-print/pdfPrintMenuItem'
 
 type FileNormalInfo = {
@@ -45,8 +53,8 @@ export const EditorInfoBar = memo(() => {
   const { editorViewTypeMap } = useEditorViewTypeStore()
   const { addAppTask } = useAppTasksStore()
   const { t } = useTranslation()
-  const ref = useRef<HTMLDivElement>(null)
-  const ref1 = useRef<HTMLDivElement>(null)
+  const ref = useRef<HTMLButtonElement>(null)
+  const ref1 = useRef<HTMLButtonElement>(null)
   const curFile = activeId ? getFileObject(activeId) : undefined
   const [fileNormalInfo, setFileNormalInfo] = useState<FileNormalInfo>(EMPTY_FILE_NORMAL_INFO)
   const hasUnsavedChanges = useEditorStateStore((state) =>
@@ -312,11 +320,12 @@ ${res}
 
   const editorViewType = editorViewTypeMap.get(curFile?.id || '') || 'wysiwyg'
 
-  const viewTypeIconMap = {
-    sourceCode: 'ri-code-s-slash-line',
-    wysiwyg: 'ri-edit-2-line',
-    preview: 'ri-eye-line',
+  const viewTypeIconMap: Record<EditorViewType, LucideIcon> = {
+    [EditorViewType.SOURCECODE]: Code2Icon,
+    [EditorViewType.WYSIWYG]: PencilLineIcon,
+    [EditorViewType.PREVIEW]: EyeIcon,
   }
+  const ViewTypeIcon = viewTypeIconMap[editorViewType]
 
   if (!activeId || !curFile || isEmptyEditor(curFile.id)) return null
 
@@ -327,48 +336,51 @@ ${res}
           <span>
             {t('file.lastModified')}: {fileNormalInfo.last_modified}
           </span>
-          <MfIconButton
-          size='small'
-          rounded='smooth'
-          icon='ri-file-info-line'
-          onClick={() => {
-            dialog.info({
-              title: t('file.info'),
-              width: '600px',
-              content: (
-                <Space direction='vertical'>
-                  <span>
-                    {t('file.lastModified')}: {fileNormalInfo.last_modified}
-                  </span>
-                  <span>
-                    {t('file.size')}: {fileNormalInfo.size}
-                  </span>
-                  <span>
-                    {t('file.path')}: {curFile.path}
-                  </span>
-                </Space>
-              ),
-            })
-          }}
-        />
+          <EditorAreaActionButton
+            icon={FileTextIcon}
+            label={t('file.info')}
+            onClick={() => {
+              dialog.info({
+                title: t('file.info'),
+                width: '600px',
+                content: (
+                  <Space direction='vertical'>
+                    <span>
+                      {t('file.lastModified')}: {fileNormalInfo.last_modified}
+                    </span>
+                    <span>
+                      {t('file.size')}: {fileNormalInfo.size}
+                    </span>
+                    <span>
+                      {t('file.path')}: {curFile.path}
+                    </span>
+                  </Space>
+                ),
+              })
+            }}
+          />
         </Space>
       ) : (
         <div />
       )}
 
       <Space>
-        <MfIconButton
-          size='small'
-          rounded='smooth'
-          iconRef={ref}
-          icon={viewTypeIconMap[editorViewType]}
+        <EditorAreaActionButton
+          icon={ViewTypeIcon}
+          label={
+            editorViewType === EditorViewType.SOURCECODE
+              ? t('view.source_code')
+              : editorViewType === EditorViewType.PREVIEW
+                ? t('view.preview')
+                : t('view.wysiwyg')
+          }
+          ref={ref}
           onClick={handleViewClick}
         />
-        <MfIconButton
-          size='small'
-          rounded='smooth'
-          iconRef={ref1}
-          icon={'ri-more-fill'}
+        <EditorAreaActionButton
+          icon={EllipsisIcon}
+          label={t('action.more')}
+          ref={ref1}
           onClick={handleMoreAction}
         />
       </Space>

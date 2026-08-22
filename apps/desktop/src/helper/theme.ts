@@ -1,10 +1,11 @@
+import { resolveAccentSoftColor } from '@/appThemeTokens'
 import useThemeStore from '@/stores/useThemeStore'
 import { darken, lighten } from '@markflowy/theme'
 import Color from 'color'
 
 export const THEME_ACCENT_COLOR_SETTING_KEY = 'theme_accent_color'
 export const FOLLOW_THEME_ACCENT_COLOR = 'system'
-export const DEFAULT_THEME_ACCENT_COLOR = '#0369a1'
+export const DEFAULT_THEME_ACCENT_COLOR = '#1F6AE2'
 
 const HEX_COLOR_RE = /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i
 const ACCENT_PREVIEW_STYLE_ID = 'mf-accent-color-preview'
@@ -48,12 +49,22 @@ const applyAccentColorPreview = () => {
   const rule = getAccentPreviewRule()
   if (!rule) return
 
+  const { curTheme } = useThemeStore.getState()
+
   rule.style.setProperty('--mf-primary', accentPreviewColor)
   rule.style.setProperty(
     '--mf-primary-foreground',
     getReadableForeground(accentPreviewColor, '#ffffff', '#111111'),
   )
-  rule.style.setProperty('--mf-primary-soft', `${accentPreviewColor}18`)
+  rule.style.setProperty(
+    '--mf-primary-soft',
+    resolveAccentSoftColor({
+      accentColor: accentPreviewColor,
+      mode: curTheme.mode,
+      themeAccentColor: curTheme.styledConstants.accentColor,
+      themeAccentColorFocused: curTheme.styledConstants.accentColorFocused,
+    }),
+  )
 }
 
 export const scheduleThemeAccentColorPreview = (value: string, owner: symbol) => {

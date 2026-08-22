@@ -119,20 +119,48 @@
   "sidebar": {
     "explorer": "explorer",
     "search": "search",
+    "bookmarks": "Bookmarks",
+    "leftDock": "Left Dock",
+    "rightDock": "Right Dock",
     "table_of_contents": "Table of Contents",
     "heading_numbering": "Toggle heading numbering",
     "no_heading_lines": "No heading lines found"
   },
   "bookmarks": {
     "empty": "No bookmarks",
-    "emptyTags": "No tagged bookmarks"
+    "emptyTags": "No tagged bookmarks",
+    "loading": "Loading bookmarks…",
+    "loadError": "Couldn’t load bookmarks",
+    "retry": "Retry",
+    "viewByTags": "Group by tag",
+    "viewAsList": "Show as list",
+    "removed": "“{{title}}” removed",
+    "undo": "Undo",
+    "removeFailed": "Couldn’t delete the bookmark",
+    "saving": "Saving…",
+    "saveError": "Couldn’t save the bookmark."
+  },
+  "welcome": {
+    "title": "Welcome back to {{appName}}",
+    "subtitle": "A focused workspace for Markdown",
+    "getStarted": "Get Started",
+    "recentWorkspaces": "Recent Workspaces",
+    "emptyEditorDescription": "Choose a file from the sidebar or start a new document.",
+    "openWorkspaceError": "Couldn’t open this workspace"
   },
   "statusBar": {
+    "label": "Status bar",
     "words": "words",
     "chars": "chars",
     "pureChars": "pure chars",
     "pureCharsOption": "pure chars (no spaces or line breaks)",
     "displaySettings": "Display Settings"
+  },
+  "titleBar": {
+    "label": "Window title bar",
+    "minimize": "Minimize window",
+    "maximize": "Maximize window",
+    "restore": "Restore window"
   },
   "zenMode": {
     "openFileFirst": "Open a document to enter Zen Mode",
@@ -193,6 +221,7 @@
     },
     "editor_tab": {
       "close": "Close",
+      "unsaved": "Unsaved changes",
       "previous": "Previous tab",
       "next": "Next tab",
       "close_others": "Close others",
@@ -256,8 +285,10 @@
   "settings": {
     "label": "Setting",
     "back_to_app": "Back to app",
+    "back_to_settings": "Back to settings",
     "search_placeholder": "Search settings...",
     "search_empty": "No matching settings",
+    "search_results": "{{count}} results",
     "general": {
       "label": "general",
       "app": {
@@ -582,6 +613,7 @@
   "workspace": {
     "info": "Workspace Information",
     "none": "Workspace is not open",
+    "searchPlaceholder": "Search workspaces…",
     "sync_mode": {
       "git_local": {
         "name": "Git Local",

@@ -47,9 +47,17 @@ export interface FileNodeComponentProps extends NodeRendererProps<IFile> {
   }
   disableFileOperations?: boolean
   iconButtonComponent?: FC<any>
+  renderNodeIcon?: FileTreeNodeIconRenderer
   isLoading?: boolean
   isEmpty?: boolean
+  isStickyRoot?: boolean
+  isRootSuppressed?: boolean
 }
+
+export type FileTreeNodeIconRenderer = (
+  file: IFile,
+  state: { isLoading: boolean; isOpen: boolean },
+) => React.ReactNode
 
 export interface ContextMenuItem {
   label: string
@@ -95,11 +103,13 @@ function FileNode({
   fileTreeHandler,
   disableFileOperations = false,
   iconButtonComponent: IconButton,
+  renderNodeIcon,
   isLoading = false,
   isEmpty = false,
+  isStickyRoot = false,
+  isRootSuppressed = false,
 }: FileNodeComponentProps) {
   const { t } = useTranslation()
-  const indentSize = Number.parseFloat(`${style.paddingLeft || 0}`)
   const { deleteNode, trashNode, activeId, refreshFolder, closeAll, scrollTo } = useFileTree()
   const {
     runFileMutation,
@@ -479,16 +489,24 @@ function FileNode({
     })
   }
 
+  const isDropHighlighted = !!(
+    tree.dragDestinationParent?.isAncestorOf(node) &&
+    tree.dragDestinationParent?.id !== tree.dragNode?.parent?.id
+  )
+  const isSelected = activeId === node.id
+
   return (
     <NodeContainer
       style={style}
-      highlight={
-        !!(
-          tree.dragDestinationParent?.isAncestorOf(node) &&
-          tree.dragDestinationParent?.id !== tree.dragNode?.parent?.id
-        )
-      }
-      selected={activeId === node.id}
+      data-mf-file-tree-drop-highlight={isDropHighlighted || undefined}
+      data-mf-file-tree-node=''
+      data-mf-file-tree-root={isRoot || undefined}
+      data-mf-file-tree-sticky-root={isStickyRoot || undefined}
+      data-mf-file-tree-root-suppressed={isRootSuppressed || undefined}
+      aria-hidden={isRootSuppressed || undefined}
+      inert={isRootSuppressed || undefined}
+      highlight={isDropHighlighted}
+      selected={isSelected}
       aria-busy={isLoading || undefined}
       onContextMenu={handleContextMenu}
       onClick={(e) => {
@@ -512,12 +530,13 @@ function FileNode({
     >
       <div className='mf-file-tree-row'>
         <div className='indentLines'>
-          {new Array(indentSize / 16).fill(0).map((_, index) => {
-            return <div key={index}></div>
+          {Array.from({ length: node.level }, (_, level) => `indent-${level + 1}`).map((key) => {
+            return <div key={key}></div>
           })}
         </div>
         {isPending ? (
           <NewFileInput
+            className='mf-file-tree-name-input'
             style={{ paddingTop: 0, paddingBottom: 0 }}
             fileNode={node.data}
             inputType={inputType}
@@ -585,6 +604,7 @@ function FileNode({
             }}
           >
             <div
+              aria-hidden={isStickyRoot || undefined}
               style={{
                 flex: 1,
                 display: 'flex',
@@ -593,12 +613,20 @@ function FileNode({
                 minWidth: 0,
               }}
             >
-              {node.data?.kind === 'dir' ? (
+              {renderNodeIcon ? (
+                <span
+                  aria-label={isLoading ? `${t('common.fetching')} ${node.data.name}` : undefined}
+                  className='file-icon mf-file-tree-icon'
+                  role={isLoading ? 'status' : undefined}
+                >
+                  {renderNodeIcon(node.data, { isLoading, isOpen: node.isOpen })}
+                </span>
+              ) : node.data?.kind === 'dir' ? (
                 isLoading ? (
                   <LoadingIcon
                     className='ri-loader-4-line file-icon'
                     role='status'
-                    aria-label={`Loading ${node.data.name}`}
+                    aria-label={`${t('common.fetching')} ${node.data.name}`}
                   />
                 ) : (
                   <i

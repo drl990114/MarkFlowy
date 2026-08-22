@@ -20,6 +20,37 @@ const useOpen = () => {
   const { addRecentWorkspaces } = useOpenedCacheStore()
   const { t } = useTranslation()
 
+  const openFolderInCurrentWindow = useCallback(
+    async (dir: string) => {
+      const existingWindowLabel = (await invoke('check_window_by_path', {
+        path: dir,
+      })) as string | null
+
+      if (existingWindowLabel) {
+        if (currentWindow.label === existingWindowLabel) {
+          return true
+        }
+
+        await invoke('focus_window_by_label', {
+          windowLabel: existingWindowLabel,
+        })
+        await addRecentWorkspaces({ path: dir }).catch((error) =>
+          logger.error('Failed to update recent workspaces:', error),
+        )
+
+        logger.info('Focused existing window for path:', existingWindowLabel)
+        return true
+      }
+
+      const didSwitch = await switchWorkspaceInCurrentWindow(dir)
+      if (!didSwitch) return false
+
+      logger.info('Opening folder in current window:', dir)
+      return true
+    },
+    [addRecentWorkspaces],
+  )
+
   const openFolder = useCallback(
     async (dir: string) => {
       try {
@@ -50,28 +81,7 @@ const useOpen = () => {
 
         if (action === 'currentWindow') {
           try {
-            const existingWindowLabel = (await invoke('check_window_by_path', {
-              path: dir,
-            })) as string | null
-
-            if (existingWindowLabel) {
-              if (currentWindow.label === existingWindowLabel) {
-                return
-              }
-
-              await invoke('focus_window_by_label', {
-                windowLabel: existingWindowLabel,
-              })
-              addRecentWorkspaces({ path: dir })
-
-              logger.info('Focused existing window for path:', existingWindowLabel)
-              return
-            }
-
-            const didSwitch = await switchWorkspaceInCurrentWindow(dir)
-            if (!didSwitch) return
-
-            logger.info('Opening folder in current window:', dir)
+            await openFolderInCurrentWindow(dir)
           } catch (error) {
             logger.error('Error opening folder in current window:', error)
           }
@@ -80,14 +90,14 @@ const useOpen = () => {
         logger.error('Error showing folder open modal:', error)
       }
     },
-    [addRecentWorkspaces, t],
+    [addRecentWorkspaces, openFolderInCurrentWindow, t],
   )
 
   const openFolderDialog = useCallback(async () => {
-    const dir = await open({ 
-      directory: true, 
+    const dir = await open({
+      directory: true,
       recursive: true,
-      fileAccessMode: 'scoped'
+      fileAccessMode: 'scoped',
     })
 
     if (typeof dir !== 'string') return
@@ -113,11 +123,12 @@ const useOpen = () => {
       ext: getExtFromPath(file),
       path: file,
     })
-  }, [addRecentWorkspaces])
+  }, [])
 
   return {
     openFolderDialog,
     openFolder,
+    openFolderInCurrentWindow,
     openFile,
   }
 }

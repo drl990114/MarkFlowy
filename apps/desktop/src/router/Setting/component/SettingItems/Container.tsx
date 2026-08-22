@@ -2,9 +2,13 @@ import styled from 'styled-components'
 
 interface SettingItemContainerProps {
   $direction?: 'row' | 'column'
+  $settingKey?: string
 }
 
-export const SettingItemContainer = styled.div<SettingItemContainerProps>`
+export const SettingItemContainer = styled.div.attrs<SettingItemContainerProps>((props) => ({
+  'data-setting-key': props.$settingKey,
+  tabIndex: props.$settingKey ? -1 : undefined,
+}))`
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -13,6 +17,13 @@ export const SettingItemContainer = styled.div<SettingItemContainerProps>`
   margin: 0;
   padding: 10px 0;
   border-bottom: 1px solid var(--mf-border);
+  scroll-margin-top: 24px;
+
+  &:focus {
+    border-radius: var(--mf-radius-sm, 4px);
+    outline: 2px solid ${(props) => props.theme.accentColor};
+    outline-offset: 2px;
+  }
 
   &:last-child {
     border-bottom: 0;

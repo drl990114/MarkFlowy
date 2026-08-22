@@ -1,7 +1,9 @@
 use super::conf;
-use crate::fc::{create_file, exists};
 use serde::{Deserialize, Serialize};
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
+use std::sync::Mutex;
+
+static OPENED_CACHE_LOCK: Mutex<()> = Mutex::new(());
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct WorkspaceInfo {
@@ -19,13 +21,13 @@ pub struct OpenedCache {
     recent_workspaces: Vec<WorkspaceInfo>,
 }
 
+#[derive(Serialize, Debug, Clone)]
+pub struct OpenedCacheReadResult {
+    recent_workspaces: Vec<WorkspaceInfo>,
+}
+
 impl OpenedCache {
     pub fn new() -> Self {
-        let path = &Self::get_path();
-        if !exists(path) {
-            create_file(path);
-        }
-
         Self {
             recent_workspaces: vec![],
         }
@@ -38,7 +40,7 @@ impl OpenedCache {
     pub fn add_recent_workspace(mut self, workspace: WorkspaceInfo) -> Self {
         let workspace_path = workspace.path.clone();
         let mut recent_workspaces = self.recent_workspaces.clone();
-        if recent_workspaces.len() > 12 {
+        if recent_workspaces.len() >= 12 {
             recent_workspaces.pop();
         }
         if let Some(index) = recent_workspaces
@@ -58,21 +60,32 @@ impl OpenedCache {
         self.write()
     }
 
-    pub fn read() -> Self {
+    fn read_result() -> OpenedCacheReadResult {
         match std::fs::read_to_string(Self::get_path()) {
             Ok(v) => {
-                if let Ok(mut v2) = serde_json::from_str::<OpenedCache>(&v) {
-                    v2.recent_workspaces
-                        .retain(|item| exists(Path::new(&item.path)));
-                    v2.write()
+                if let Ok(cache) = serde_json::from_str::<OpenedCache>(&v) {
+                    OpenedCacheReadResult {
+                        recent_workspaces: cache.recent_workspaces,
+                    }
                 } else {
-                    Self::default()
+                    OpenedCacheReadResult {
+                        recent_workspaces: vec![],
+                    }
                 }
             }
             Err(err) => {
                 println!("err: {:?}", err);
-                Self::default()
+                OpenedCacheReadResult {
+                    recent_workspaces: vec![],
+                }
             }
+        }
+    }
+
+    pub fn read() -> Self {
+        let result = Self::read_result();
+        Self {
+            recent_workspaces: result.recent_workspaces,
         }
     }
 
@@ -81,9 +94,7 @@ impl OpenedCache {
         if let Ok(v) = serde_json::to_string_pretty(&self) {
             std::fs::write(path, v).unwrap_or_else(|err| {
                 println!("err: {:?}", err);
-                Self::default().write();
             });
-        } else {
         }
         self
     }
@@ -96,21 +107,43 @@ impl Default for OpenedCache {
 }
 
 pub mod cmd {
-    use super::{OpenedCache, WorkspaceInfo};
+    use super::{OpenedCache, OpenedCacheReadResult, WorkspaceInfo, OPENED_CACHE_LOCK};
+    use crate::app::startup_io;
     use tauri::command;
 
     #[command]
-    pub fn get_opened_cache() -> OpenedCache {
-        OpenedCache::read()
+    pub async fn get_opened_cache() -> Result<OpenedCacheReadResult, String> {
+        startup_io::run(|| {
+            let _guard = OPENED_CACHE_LOCK
+                .lock()
+                .unwrap_or_else(|error| error.into_inner());
+            OpenedCache::read_result()
+        })
+        .await
+        .map_err(|error| format!("Failed to join recent-workspace reader: {error}"))
     }
 
     #[command]
-    pub fn add_recent_workspace(workspace: WorkspaceInfo) -> OpenedCache {
-        OpenedCache::read().add_recent_workspace(workspace)
+    pub async fn add_recent_workspace(workspace: WorkspaceInfo) -> Result<OpenedCache, String> {
+        startup_io::run(move || {
+            let _guard = OPENED_CACHE_LOCK
+                .lock()
+                .unwrap_or_else(|error| error.into_inner());
+            OpenedCache::read().add_recent_workspace(workspace)
+        })
+        .await
+        .map_err(|error| format!("Failed to join recent-workspace writer: {error}"))
     }
 
     #[command]
-    pub fn clear_recent_workspaces() -> OpenedCache {
-        OpenedCache::read().clear_recent_workspaces()
+    pub async fn clear_recent_workspaces() -> Result<OpenedCache, String> {
+        startup_io::run(|| {
+            let _guard = OPENED_CACHE_LOCK
+                .lock()
+                .unwrap_or_else(|error| error.into_inner());
+            OpenedCache::read().clear_recent_workspaces()
+        })
+        .await
+        .map_err(|error| format!("Failed to join recent-workspace writer: {error}"))
     }
 }

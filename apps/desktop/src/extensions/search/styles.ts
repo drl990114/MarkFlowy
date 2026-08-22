@@ -14,37 +14,38 @@ export const SearchList = styled.div`
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  background: ${({ theme }) => theme.bgColor};
+  background: var(--mf-surface-panel, ${({ theme }) => theme.sideBarBgColor});
 `
 
 export const SearchInput = styled.div`
   position: relative;
-  padding: 8px 12px 10px;
   display: flex;
+  flex: 0 0 32px;
   flex-direction: row;
   justify-content: flex-start;
   align-items: center;
+  min-height: 32px;
+  padding: 4px 6px;
   font-size: var(--mf-ui-font-control);
   line-height: var(--mf-ui-line-height-control);
   box-sizing: border-box;
   flex-shrink: 0;
-  gap: 6px;
-  border-bottom: 1px solid ${({ theme }) => theme.borderColor};
-  background: ${({ theme }) => theme.sideBarBgColor};
+  gap: 2px;
+  border-bottom: 1px solid var(--mf-ui-border-subtle);
+  background: var(--mf-surface-panel, ${({ theme }) => theme.sideBarBgColor});
 
   .search-input {
     flex: 1;
-    background: ${({ theme }) => theme.bgColor};
-    border-radius: 6px;
-    border: 1px solid ${({ theme }) => theme.borderColor};
-    
+    height: 24px;
+    padding: 0 6px;
+    border: 1px solid var(--mf-control-border, ${({ theme }) => theme.borderColor});
+    border-radius: 4px;
+    background: transparent;
+    box-shadow: none;
+
     &:focus-within {
       border-color: ${({ theme }) => theme.accentColor};
     }
-  }
-
-  .search-input__action {
-    flex-shrink: 0;
   }
 
   .search-input__progress {
@@ -54,7 +55,11 @@ export const SearchInput = styled.div`
     bottom: -1px;
     height: 2px;
     overflow: hidden;
-    background: ${({ theme }) => `${theme.accentColor}18`};
+    background: color-mix(
+      in srgb,
+      var(--mf-control-focus, ${({ theme }) => theme.accentColor}) 9%,
+      transparent
+    );
 
     &::after {
       content: '';
@@ -69,7 +74,7 @@ export const SearchInput = styled.div`
     }
   }
 
-  .ri-loader-4-line {
+  .search-icon--spin {
     animation: search-spin 0.9s linear infinite;
   }
 
@@ -90,20 +95,33 @@ export const SearchInput = styled.div`
       transform: rotate(360deg);
     }
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    .search-input__progress::after {
+      left: 0;
+      width: 100%;
+      animation: none;
+      opacity: 0.55;
+    }
+
+    .search-icon--spin {
+      animation: none;
+    }
+  }
 `
 
 export const SearchMeta = styled.div`
   display: flex;
   align-items: center;
   min-height: 28px;
-  padding: 0 12px;
+  padding: 0 6px;
   box-sizing: border-box;
-  border-bottom: 1px solid ${({ theme }) => theme.borderColor};
-  color: ${({ theme }) => theme.labelFontColor};
+  border-bottom: 1px solid var(--mf-ui-border-subtle);
+  color: var(--mf-text-muted, ${({ theme }) => theme.unselectedFontColor});
   font-size: var(--mf-ui-font-caption);
   line-height: var(--mf-ui-line-height-caption);
   letter-spacing: var(--mf-ui-tracking-caption);
-  background: ${({ theme }) => theme.bgColorSecondary};
+  background: var(--mf-surface-panel, ${({ theme }) => theme.sideBarBgColor});
 
   .search-meta__content {
     min-width: 0;
@@ -124,24 +142,19 @@ export const SearchStateBox = styled.div`
   padding: 24px 18px;
   box-sizing: border-box;
   text-align: center;
-  color: ${({ theme }) => theme.labelFontColor};
+  color: var(--mf-text-muted, ${({ theme }) => theme.unselectedFontColor});
   font-size: var(--mf-ui-font-body);
   line-height: var(--mf-ui-line-height-body);
   letter-spacing: var(--mf-ui-tracking-body);
 
   .search-state__icon {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 34px;
-    height: 34px;
-    border-radius: 8px;
-    color: ${({ theme }) => theme.accentColor};
-    background: ${({ theme }) => `${theme.accentColor}12`};
-    font-size: 18px;
+    color: var(--mf-text-muted, ${({ theme }) => theme.unselectedFontColor});
   }
 
-  .ri-loader-4-line {
+  .search-icon--spin {
     animation: search-state-spin 0.9s linear infinite;
   }
 
@@ -151,6 +164,12 @@ export const SearchStateBox = styled.div`
     }
     to {
       transform: rotate(360deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .search-icon--spin {
+      animation: none;
     }
   }
 
@@ -176,39 +195,56 @@ export const SearchInfoBox = styled.div`
     display: flex;
     justify-content: flex-start;
     align-items: center;
-    gap: 5px;
-    padding: 0 10px;
-    height: 34px;
-    font-size: var(--mf-ui-font-caption);
-    line-height: var(--mf-ui-line-height-caption);
-    letter-spacing: var(--mf-ui-tracking-caption);
-    font-weight: 600;
+    gap: 4px;
+    width: 100%;
+    padding: 0 6px;
+    border: 0;
+    height: 24px;
+    font-size: var(--mf-ui-font-control);
+    line-height: var(--mf-ui-line-height-control);
+    letter-spacing: var(--mf-ui-tracking-control);
+    font-weight: 500;
     cursor: pointer;
-    color: ${({ theme }) => theme.labelFontColor};
-    background-color: ${({ theme }) => theme.bgColorSecondary};
+    color: var(--mf-text-muted, ${({ theme }) => theme.unselectedFontColor});
+    background-color: transparent;
     border-bottom: 1px solid transparent;
     transition:
       color 100ms ease,
       background-color 100ms ease;
     user-select: none;
+    font-family: inherit;
+    text-align: left;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 
     &:hover {
-      background-color: ${({ theme }) => theme.bgColor};
+      background-color: var(--mf-control-ghost-hover, ${({ theme }) => theme.hoverColor});
       color: ${({ theme }) => theme.primaryFontColor};
     }
 
+    &:active {
+      background-color: var(--mf-control-ghost-pressed, ${({ theme }) => theme.hoverColor});
+    }
+
+    &:focus-visible {
+      outline: 1px solid var(--mf-control-focus, ${({ theme }) => theme.accentColor});
+      outline-offset: -2px;
+    }
+
     .search-info__icon {
-      font-size: 16px;
-      color: ${({ theme }) => theme.labelFontColor};
-      transition: transform 0.2s ease;
+      flex: 0 0 14px;
+      color: var(--mf-text-muted, ${({ theme }) => theme.unselectedFontColor});
+      transition: transform var(--mf-motion-duration-base, 180ms)
+        var(--mf-motion-ease-out, cubic-bezier(0.23, 1, 0.32, 1));
+    }
+
+    .search-info__icon--expanded {
+      transform: rotate(90deg);
     }
 
     .search-info__file-icon {
       flex-shrink: 0;
-      font-size: 14px;
       opacity: 0.72;
     }
 
@@ -221,10 +257,10 @@ export const SearchInfoBox = styled.div`
 
     .search-info__badge {
       flex-shrink: 0;
-      min-width: 18px;
-      padding: 1px 6px;
-      border-radius: 999px;
-      color: ${({ theme }) => theme.labelFontColor};
+      min-width: 16px;
+      padding: 0 2px;
+      border-radius: 2px;
+      color: var(--mf-text-muted, ${({ theme }) => theme.unselectedFontColor});
       background: ${({ theme }) => theme.tipsBgColor};
       font-size: 11px;
       font-weight: 600;
@@ -236,37 +272,53 @@ export const SearchInfoBox = styled.div`
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
-    align-items: flex-start;
-    padding: 6px 16px;
+    align-items: center;
+    width: 100%;
+    min-height: 32px;
+    padding: 4px 6px 4px 24px;
+    border-top: 0;
+    border-right: 0;
+    border-bottom: 0;
     cursor: pointer;
     transition:
       background-color 100ms ease,
       border-color 100ms ease;
     overflow: hidden;
     box-sizing: border-box;
-    border-left: 2px solid transparent;
-    background: ${({ theme }) => theme.bgColor};
+    border-left: 0;
+    background: transparent;
+    color: inherit;
+    font-family: inherit;
+    text-align: left;
 
     &:hover {
-      background-color: ${({ theme }) => theme.tipsBgColor};
+      background-color: var(--mf-control-ghost-hover, ${({ theme }) => theme.hoverColor});
+    }
+
+    &:active {
+      background-color: var(--mf-control-ghost-pressed, ${({ theme }) => theme.hoverColor});
+    }
+
+    &:focus-visible {
+      outline: 1px solid var(--mf-control-focus, ${({ theme }) => theme.accentColor});
+      outline-offset: -2px;
     }
 
     &.active {
-      background-color: ${({ theme }) => theme.accentColor}15; // 15% opacity
-      border-left-color: ${({ theme }) => theme.accentColor};
+      background-color: var(--mf-control-selected, ${({ theme }) => theme.accentColorFocused});
     }
 
     &__linenumber {
-      color: ${({ theme }) => theme.labelFontColor};
+      color: var(--mf-text-muted, ${({ theme }) => theme.unselectedFontColor});
       font-weight: 500;
-      margin-right: 10px;
-      min-width: 44px;
+      margin-right: 8px;
+      min-width: 40px;
       text-align: right;
       font-family: monospace;
       font-size: var(--mf-ui-font-caption);
       line-height: var(--mf-ui-line-height-caption);
       opacity: 0.8;
-      margin-top: 2px;
+      margin-top: 0;
     }
 
     &__content {
@@ -285,7 +337,11 @@ export const SearchInfoBox = styled.div`
 
       mark {
         color: ${({ theme }) => theme.primaryFontColor};
-        background-color: ${({ theme }) => `${theme.accentColor}38`};
+        background-color: color-mix(
+          in srgb,
+          var(--mf-control-focus, ${({ theme }) => theme.accentColor}) 22%,
+          transparent
+        );
         font-weight: bold;
         padding: 0 1px;
         border-radius: 2px;
@@ -295,6 +351,14 @@ export const SearchInfoBox = styled.div`
           background-color: ${({ theme }) => theme.accentColor};
         }
       }
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .search-info__path,
+    .search-info,
+    .search-info__icon {
+      transition: none;
     }
   }
 `

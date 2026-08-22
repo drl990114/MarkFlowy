@@ -1,14 +1,13 @@
 import type { VirtualElement } from '@floating-ui/dom'
 import {
   isElement,
-  isHTMLElement,
   isTextNode,
 } from '@ocavue/utils'
 import type { Node as ProseMirrorNode } from '@rme-sdk/sdk/pm/model'
 import type { EditorView } from '@rme-sdk/sdk/pm/view'
 
 import { getClientRect } from '../../utils/get-client-rect'
-import { Rect } from './types'
+import type { Rect } from './types'
 
 export interface HoverState {
   node: ProseMirrorNode
@@ -38,9 +37,10 @@ export function findBlockByCoords(view: EditorView, x: number, y: number): { nod
     // Collect all children and their positions
     const children: ProseMirrorNode[] = []
     const positions: number[] = []
+    const parentPos = pos
     parent.forEach((child, offset) => {
       children.push(child)
-      positions.push(offset + pos + 1)
+      positions.push(offset + parentPos + 1)
     })
 
     let lo = 0
@@ -77,6 +77,10 @@ function getNodeRect(node: Node | null | undefined): Rect | undefined {
   if (node && isElement(node) && node.isConnected) {
     return getClientRect(node)
   }
+}
+
+export function findBlockInteractionRect(node: Node | null | undefined): Rect | undefined {
+  return getNodeRect(node)
 }
 
 function isWithinRect(rect: Rect, x: number, y: number) {

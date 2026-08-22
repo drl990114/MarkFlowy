@@ -1,16 +1,11 @@
-use crate::app::conf::AppConf;
-use crate::app::keybindings::Keybindings;
 use crate::app::window_manager::get_focused_window;
 use tauri::menu::{
     CheckMenuItem, CheckMenuItemBuilder, Menu, MenuEvent, MenuItem, MenuItemBuilder,
     PredefinedMenuItem, Submenu,
 };
-use tauri::{App, AppHandle, Emitter, Manager};
+use tauri::{App, AppHandle, Emitter};
 
 pub fn generate_menu(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
-    let app_conf = AppConf::read_with_app(&app.handle());
-    let _keyboard_infos = Keybindings::read();
-
     // let is_dark = app_conf.clone().theme_check("dark");
 
     // let theme_menu_light_item = CheckMenuItemBuilder::new("Light")
@@ -71,9 +66,7 @@ pub fn generate_menu(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
                     &MenuItemBuilder::new("About MarkFlowy")
                         .id("About")
                         .build(app)?,
-                    &MenuItemBuilder::new("Settings")
-                        .id("Settings")
-                        .build(app)?,
+                    &MenuItemBuilder::new("Settings").id("Settings").build(app)?,
                     &PredefinedMenuItem::quit(app, Some("Quit"))?,
                 ],
             )?,

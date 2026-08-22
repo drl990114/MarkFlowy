@@ -386,13 +386,24 @@ export const TocViewContainer = styled.div<ContainerProps>`
     props.variant !== 'editor' &&
     css`
       .toc-list {
+        gap: 0;
+        padding: 4px 0;
         font-size: var(--mf-ui-font-control);
         line-height: var(--mf-ui-line-height-control);
         letter-spacing: var(--mf-ui-tracking-control);
       }
 
+      .toc-list ul {
+        gap: 0;
+      }
+
       .toc-list a {
-        min-height: 26px;
+        min-height: 28px;
+        border-radius: 0;
+      }
+
+      .toc-list a:active {
+        background: var(--mf-control-ghost-pressed, ${props.theme.fileTreeSelectedBgColor});
       }
 
       .toc-toolbar__title {

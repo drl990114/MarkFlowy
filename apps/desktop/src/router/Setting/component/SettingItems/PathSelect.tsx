@@ -14,7 +14,7 @@ const PathSelectSettingItem: React.FC<SettingItemProps<Setting.PathSelectSetting
   const curValue = settingData[item.key]
 
   return (
-    <SettingItemContainer>
+    <SettingItemContainer $settingKey={item.key}>
       <SettingLabel item={item} />
       <div className='flex w-1/2 min-w-0 flex-col items-end gap-1 max-[720px]:w-full'>
         <Button

@@ -53,3 +53,13 @@ export function EmptyDescription({ className, ...props }: ComponentProps<'div'>)
     />
   )
 }
+
+export function EmptyContent({ className, ...props }: ComponentProps<'div'>) {
+  return (
+    <div
+      className={cn('mt-3 flex items-center justify-center gap-2', className)}
+      data-slot='empty-content'
+      {...props}
+    />
+  )
+}

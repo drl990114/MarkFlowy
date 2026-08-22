@@ -21,7 +21,7 @@ const Container = styled.div`
   }
 
   .indentLines {
-    --indent-size: 16px;
+    --indent-size: 20px;
 
     position: absolute;
     top: 0;

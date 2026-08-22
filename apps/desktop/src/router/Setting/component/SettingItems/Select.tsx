@@ -19,7 +19,7 @@ const SelectSettingItem: React.FC<SettingItemProps<Setting.SelectSettingItem>> =
   const currentValue = String(settingData[item.key] ?? '')
 
   return (
-    <SettingItemContainer>
+    <SettingItemContainer $settingKey={item.key}>
       <SettingLabel item={item} />
       <Select
         value={currentValue}

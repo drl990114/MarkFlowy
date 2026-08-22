@@ -37,9 +37,9 @@ const Table = styled.table`
   width: 100%;
   min-width: 620px;
   border-collapse: collapse;
-  font-size: var(--mf-ui-font-caption);
-  line-height: var(--mf-ui-line-height-caption);
-  letter-spacing: var(--mf-ui-tracking-caption);
+  font-size: var(--mf-ui-font-control);
+  line-height: var(--mf-ui-line-height-control);
+  letter-spacing: var(--mf-ui-tracking-control);
 `
 
 const TableHead = styled.thead`

@@ -26,24 +26,37 @@ import {
 } from '@/services/workspace-switch'
 import { createNewWindow, currentWindow } from '@/services/windows'
 import { useEditorStore } from '@/stores'
+import {
+  consumeOpenedUrls,
+  normalizeOpenedUrls,
+  restoreOpenedUrls,
+} from '@/startup/appearance'
+import { createStartupCoordinator } from '@/startup/startupCoordinator'
+import { createOpenedUrlQueue } from '@/startup/openedUrlQueue'
+import {
+  scheduleStaleStartupThemeFallback,
+  STALE_STARTUP_THEME_TIMEOUT_MS,
+} from '@/startup/staleThemeFallback'
+import {
+  loadThemeExtensionsIncrementally,
+  type ThemeExtension,
+} from '@/startup/themeExtensionScheduler'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import type { EditorLayoutNode } from '@/stores/useEditorStore'
 import type { WorkspaceInfo } from '@/stores/useOpenedCacheStore'
 import useOpenedCacheStore from '@/stores/useOpenedCacheStore'
-import { useSuspenseQuery } from '@tanstack/react-query'
 import { invoke } from '@tauri-apps/api/core'
 import { getCurrentWebview } from '@tauri-apps/api/webview'
 import { LazyStore } from '@tauri-apps/plugin-store'
-import { once } from 'lodash'
 import { nanoid } from 'nanoid'
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useSyncExternalStore } from 'react'
 import { flushSync } from 'react-dom'
 import { toast } from 'zens'
-import { useGlobalKeyboard, useGlobalOSInfo } from '.'
 import __MF__ from '../context'
-import { isArray } from '../helper'
 import useExtensionsManagerStore from '../stores/useExtensionsManagerStore'
-import useThemeStore from '../stores/useThemeStore'
+import useThemeStore, { isBuiltInTheme } from '../stores/useThemeStore'
+import useGlobalKeyboard from './useKeyboard'
+import useGlobalOSInfo from './useOSInfo'
 import useWorkspaceWatcher from './useWorkspaceWatcher'
 import { fileTreeHandler } from '@markflowy/interface'
 
@@ -52,6 +65,15 @@ interface LocalTheme {
   name: string
   path: string
   css_content: string
+}
+
+interface ThemeCatalog {
+  localThemes: LocalTheme[]
+  themes: ThemeExtension[]
+}
+
+interface OpenedCacheReadResult {
+  recent_workspaces: WorkspaceInfo[]
 }
 
 interface CliOpenPayload {
@@ -420,7 +442,7 @@ async function performWorkspaceSwitch(path: string) {
     throw new Error('Workspace persistence is not ready')
   }
 
-  return guardUnsavedFilesAsync({
+  const didSwitch = await guardUnsavedFilesAsync({
     fileIds: useEditorStore.getState().opened,
     labels: {
       save: t('action.save_and_continue'),
@@ -481,37 +503,53 @@ async function performWorkspaceSwitch(path: string) {
         },
       ),
   })
+
+  if (didSwitch) appStartupCoordinator.recoverWorkspace(undefined)
+  return didSwitch
+}
+
+const initThemeFromSettings = async (settingData: Record<string, any>) => {
+  // Migrate the legacy field before React mounts the themed application shell.
+  if (!settingData.theme_mode) {
+    const oldTheme = settingData.theme || 'light'
+    if (oldTheme === 'system' || oldTheme === 'light') {
+      settingData.theme_mode = 'system'
+    } else {
+      const isDark = oldTheme.toLowerCase().includes('dark')
+      settingData.theme_mode = isDark ? 'dark' : 'light'
+    }
+    if (!settingData.light_theme) {
+      settingData.light_theme = 'MarkFlowy Light'
+    }
+    if (!settingData.dark_theme) {
+      settingData.dark_theme = 'MarkFlowy Dark'
+    }
+  }
+
+  await useThemeStore.getState().initFromSettings(settingData)
 }
 
 async function appThemeExtensionsSetup() {
+  // Capture before starting the timeout or catalog I/O. If either takes over a
+  // second, the synthetic theme may already have fallen back by the time the
+  // catalog arrives, but its real extension must still be registered first.
+  const startupTheme = useThemeStore.getState().curTheme
+  const startupCustomTheme = isBuiltInTheme(startupTheme.name)
+    ? undefined
+    : { name: startupTheme.name, mode: startupTheme.mode }
+
+  scheduleStaleStartupThemeFallback({
+    fallback: () => useThemeStore.getState().fallbackStaleStartupTheme(),
+    onFallback: (staleTheme) => {
+      logger.warn(
+        `Startup theme "${staleTheme.name}" did not register within ${STALE_STARTUP_THEME_TIMEOUT_MS}ms; using the built-in ${staleTheme.mode} theme.`,
+      )
+    },
+  })
+
   try {
-    const { initFromSettings } = useThemeStore.getState()
-    const { settingData } = useAppSettingStore.getState()
-
-    // 迁移旧配置：如果没有 theme_mode，从旧 theme 字段推断
-    if (!settingData.theme_mode) {
-      const oldTheme = settingData.theme || 'light'
-      if (oldTheme === 'system') {
-        settingData.theme_mode = 'system'
-      } else if (oldTheme === 'light') {
-        // 旧默认值 "light" 迁移为 "system"，让新用户默认跟随系统
-        settingData.theme_mode = 'system'
-      } else {
-        const isDark = oldTheme.toLowerCase().includes('dark')
-        settingData.theme_mode = isDark ? 'dark' : 'light'
-      }
-      if (!settingData.light_theme) {
-        settingData.light_theme = 'MarkFlowy Light'
-      }
-      if (!settingData.dark_theme) {
-        settingData.dark_theme = 'MarkFlowy Dark'
-      }
-    }
-
-    await initFromSettings(settingData)
-
-    logger.debug('Loading local themes...')
-    const localThemes = await invoke<LocalTheme[]>('load_local_themes')
+    logger.debug('Loading theme catalog...')
+    const { localThemes, themes } = await invoke<ThemeCatalog>('load_theme_catalog')
     logger.debug('Local themes loaded:', localThemes.length)
 
     if (localThemes.length > 0) {
@@ -519,31 +557,21 @@ async function appThemeExtensionsSetup() {
       loadLocalThemeCss(cssContents)
     }
 
-    logger.debug('Loading themes...')
-    try {
-      const res = await invoke<Record<string, any>>('load_themes')
-      logger.debug('Themes loaded:', res)
-      if (isArray(res)) {
-        try {
-          res.map((extension) => {
-            useExtensionsManagerStore.getState().loadExtension(extension)
-          })
-        } catch (error) {
-          logger.error('Failed to load extensions:', error)
-          toast.error(`Failed to load extensions: ${error}`)
-        } finally {
-          useThemeStore.getState().applyTheme()
-        }
-      } else {
-        useThemeStore.getState().applyTheme()
-      }
-    } catch (error) {
-      logger.error('Failed to invoke load_themes:', error)
-      useThemeStore.getState().applyTheme()
-    }
+    logger.debug('Theme catalog loaded:', themes.length)
+    await loadThemeExtensionsIncrementally({
+      extensions: themes,
+      currentTheme: startupCustomTheme,
+      loadExtension: (extension) => {
+        useExtensionsManagerStore.getState().loadExtension(extension)
+      },
+      onError: (extension, error) => {
+        logger.error(`Failed to load theme extension "${extension.id}"`, error)
+      },
+    })
   } catch (error) {
-    logger.error('Failed to setup theme extensions:', error)
+    logger.error('Failed to load theme catalog:', error)
     logger.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace')
+  } finally {
     useThemeStore.getState().applyTheme()
   }
 }
@@ -589,6 +617,21 @@ async function handleOpenedPaths(openedPaths: string[]) {
   }
 }
 
+const openedUrlQueue = createOpenedUrlQueue(async (openedUrls) => {
+  const openedPaths = openedUrls.map((path) =>
+    path.startsWith('file://') ? path.slice(7) : path,
+  )
+  try {
+    await handleOpenedPaths(openedPaths)
+    // Also consume after success in case native eval completed just after the
+    // event callback claimed this batch.
+    consumeOpenedUrls(openedUrls)
+  } catch (error) {
+    restoreOpenedUrls(openedUrls)
+    throw error
+  }
+})
+
 async function openWorkspaceInCurrentWindow(path: string) {
   await requestWorkspaceSwitch(path)
 }
@@ -617,8 +660,14 @@ async function handleCliOpen(payload: CliOpenPayload) {
   currentWindow.setFocus()
 }
 
-async function appWorkspaceSetup() {
-  const { setRecentWorkspaces, clearRecentWorkspaces } = useOpenedCacheStore.getState()
+const throwIfStartupCancelled = (signal: AbortSignal) => {
+  if (!signal.aborted) return
+
+  throw signal.reason instanceof Error ? signal.reason : new Error('Startup cancelled')
+}
+
+async function appWorkspaceSetup(signal: AbortSignal) {
+  const { setRecentWorkspaces } = useOpenedCacheStore.getState()
   const { setFolderData } = useEditorStore.getState()
   logger.debug('==== appWorkspaceSetup: Checking window.openedUrls ===')
   logger.debug('window.openedUrls', window.openedUrls)
@@ -628,8 +677,9 @@ async function appWorkspaceSetup() {
     logger.debug('Invoking get_opened_cache...')
     const [cacheStore, getOpenedCacheRes] = await Promise.all([
       new LazyStore('.markflowy_workspaces.dat', { defaults: {}, autoSave: false }),
-      invoke<{ recent_workspaces: WorkspaceInfo[] }>('get_opened_cache'),
+      invoke<OpenedCacheReadResult>('get_opened_cache'),
     ])
+    throwIfStartupCancelled(signal)
     logger.debug('LazyStore created successfully')
     logger.debug('get_opened_cache result:', getOpenedCacheRes)
 
@@ -637,19 +687,27 @@ async function appWorkspaceSetup() {
     setRecentWorkspaces(recentWorkspaces)
     await setupWorkspaceCachePersistence(cacheStore)
 
-    if (window.openedUrls) {
-      logger.debug('Processing window.openedUrls:', window.openedUrls)
-      const openedPaths = window.openedUrls?.split(',').map((p) => {
-        if (p.startsWith('file://')) {
-          p = p.slice(7)
-        }
+    let handledOpenedPaths = false
+    for (;;) {
+      // Claim the current batch before awaiting. Native open events merge any
+      // later paths into the now-empty queue, so they cannot be erased when
+      // this batch completes.
+      const openedUrls = consumeOpenedUrls(window.openedUrls)
+      if (openedUrls.length > 0) {
+        logger.debug('Processing window.openedUrls:', openedUrls)
+        await openedUrlQueue.enqueue(openedUrls)
+        handledOpenedPaths = true
+        throwIfStartupCancelled(signal)
+        continue
+      }
 
-        return p
-      })
-
-      window.openedUrls = null
-
-      await handleOpenedPaths(openedPaths)
+      // A mounted runtime listener may have claimed a native-open batch while
+      // the startup batch was still running. Do not publish workspace-ready
+      // until that serialized work has also settled.
+      await openedUrlQueue.drain()
+      if (normalizeOpenedUrls(window.openedUrls).length === 0) break
+    }
+    if (handledOpenedPaths) {
       return
     }
 
@@ -664,6 +722,7 @@ async function appWorkspaceSetup() {
           cacheStore.get<WorkspaceCache>(targetWorkspacePath),
           readDirectory(targetWorkspacePath),
         ])
+        throwIfStartupCancelled(signal)
         logger.debug('Cache store init result:', workspaceCache)
         const hydratedWorkspaceCache = hydrateWorkspaceCache(workspaceCache)
 
@@ -673,11 +732,7 @@ async function appWorkspaceSetup() {
       } catch (error) {
         logger.error('Failed to read directory:', targetWorkspacePath, error)
         logger.error('This might be due to sandbox restrictions or the directory no longer exists')
-        logger.error('Clearing recent workspaces cache...')
-
-        await clearRecentWorkspaces()
-
-        toast.error('无法访问上次的工作区，请重新选择文件夹。这可能是由于沙盒权限限制导致的。')
+        throw error
       }
     } else {
       logger.debug('No recent workspaces found')
@@ -685,6 +740,7 @@ async function appWorkspaceSetup() {
   } catch (error) {
     logger.error('Failed to load workspace', error)
     logger.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace')
+    throw error
   }
 }
 
@@ -719,36 +775,60 @@ const listener = (event: MessageEvent) => {
   }
 }
 
-const useMainStoreSetup = () => {
-  useAppSettingStore()
-}
+type AppShellData = Record<string, any>
 
-const appSetup = once(async function () {
-  useMainStoreSetup()
-
+const appShellSetup = async (signal: AbortSignal): Promise<AppShellData> => {
   const settingData = await appSettingStoreSetup()
+  throwIfStartupCancelled(signal)
 
   window.removeEventListener('message', listener)
   window.addEventListener('message', listener)
 
-  // Initialize zoom level based on webview_zoom setting
-  if (settingData.webview_zoom) {
-    const webview = getCurrentWebview()
-    webview.setZoom(Number(settingData.webview_zoom))
-  }
-
+  const zoomSetup = settingData.webview_zoom
+    ? getCurrentWebview().setZoom(Number(settingData.webview_zoom))
+    : Promise.resolve()
   await Promise.all([
-    appThemeExtensionsSetup(),
+    initThemeFromSettings(settingData),
     i18nInit({ lng: settingData.language }),
-    appWorkspaceSetup(),
+    zoomSetup,
   ])
-
-  checkUpdate({ install: settingData.auto_update })
+  throwIfStartupCancelled(signal)
 
   return settingData
+}
+
+const appStartupCoordinator = createStartupCoordinator<AppShellData, void>({
+  loadShell: appShellSetup,
+  loadWorkspace: async (_shell, signal) => {
+    await appWorkspaceSetup(signal)
+  },
 })
 
-const useAppSetup = () => {
+export const startAppSetup = () => appStartupCoordinator.start()
+
+let deferredAppSetupPromise: Promise<void> | undefined
+
+type DeferredSetupWindow = Window & {
+  cancelIdleCallback?: (handle: number) => void
+  requestIdleCallback?: (
+    callback: IdleRequestCallback,
+    options?: IdleRequestOptions,
+  ) => number
+}
+
+const startDeferredAppSetup = () => {
+  if (!deferredAppSetupPromise) {
+    const { settingData } = useAppSettingStore.getState()
+    deferredAppSetupPromise = Promise.all([
+      appThemeExtensionsSetup(),
+      checkUpdate({ install: settingData.auto_update }),
+    ]).then(() => undefined)
+  }
+
+  return deferredAppSetupPromise
+}
+
+export const useAppRuntimeSetup = () => {
   const eventInit = useCallback(() => {
     let closeWindowPromise: Promise<boolean> | undefined
     const closeRequest = currentWindow.listen('tauri://close-requested', async () => {
@@ -763,6 +843,7 @@ const useAppSetup = () => {
             fileIds: useEditorStore.getState().opened,
             onContinue: async () => {
               const rootPath = useEditorStore.getState().getRootPath()
+              appStartupCoordinator.cancel()
               await disposeWorkspaceCachePersistence()
               await releaseSecurityScope(rootPath)
               const unlistenCloseRequest = await closeRequest
@@ -796,30 +877,26 @@ const useAppSetup = () => {
       }
     })
 
-    const themeChanged = currentWindow.onThemeChanged(({ payload }) => {
-      if (payload === 'dark' || payload === 'light') {
-        useThemeStore.getState().setSystemTheme(payload)
-      }
-    })
-
     const unListenMenu = currentWindow.listen<string>('native:menu', ({ payload }) => {
       bus.emit(payload)
       commandRegistry.execute(payload)
     })
 
-    const unListenOpenedUrls = currentWindow.listen<string>('opened-urls', async ({ payload }) => {
-      logger.debug('Received opened-urls event:', payload)
-      if (payload) {
-        const openedPaths = payload.split(',').map((p) => {
-          if (p.startsWith('file://')) {
-            return p.slice(7)
+    const unListenOpenedUrls = currentWindow.listen<string[] | string>(
+      'opened-urls',
+      async ({ payload }) => {
+        logger.debug('Received opened-urls event:', payload)
+        const openedUrls = consumeOpenedUrls(payload)
+        if (openedUrls.length > 0) {
+          try {
+            await openedUrlQueue.enqueue(openedUrls)
+            currentWindow.setFocus()
+          } catch (error) {
+            logger.error('Failed to handle opened paths', error)
           }
-          return p
-        })
-        await handleOpenedPaths(openedPaths)
-        currentWindow.setFocus()
-      }
-    })
+        }
+      },
+    )
 
     const unListenCliOpen = currentWindow.listen<CliOpenPayload>(
       'cli:open',
@@ -852,7 +929,6 @@ const useAppSetup = () => {
       unListenCliOpen.then((fn) => fn())
       unListenCliCommand.then((fn) => fn())
       settingDataUpdate.then((fn) => fn())
-      themeChanged.then((fn) => fn())
     }
   }, [])
 
@@ -865,10 +941,37 @@ const useAppSetup = () => {
     }
   }, [eventInit])
 
-  useSuspenseQuery({
-    queryKey: ['appSetup'],
-    queryFn: appSetup,
-  })
+  useEffect(() => {
+    const targetWindow = window as DeferredSetupWindow
+    let secondFrameId: number | undefined
+    let idleCallbackId: number | undefined
+    let fallbackTimeoutId: number | undefined
+    const startDeferredWork = () => {
+      try {
+        performance.mark('mf:startup:deferred-start')
+      } catch {
+        // Startup diagnostics must never become a startup dependency.
+      }
+      void startDeferredAppSetup()
+    }
+    const firstFrameId = targetWindow.requestAnimationFrame(() => {
+      secondFrameId = targetWindow.requestAnimationFrame(() => {
+        if (typeof targetWindow.requestIdleCallback === 'function') {
+          idleCallbackId = targetWindow.requestIdleCallback(startDeferredWork, { timeout: 500 })
+          return
+        }
+
+        fallbackTimeoutId = targetWindow.setTimeout(startDeferredWork, 120)
+      })
+    })
+
+    return () => {
+      targetWindow.cancelAnimationFrame(firstFrameId)
+      if (secondFrameId !== undefined) targetWindow.cancelAnimationFrame(secondFrameId)
+      if (idleCallbackId !== undefined) targetWindow.cancelIdleCallback?.(idleCallbackId)
+      if (fallbackTimeoutId !== undefined) targetWindow.clearTimeout(fallbackTimeoutId)
+    }
+  }, [])
 
   useEffect(() => {
     const updateWindowState = (workspacePath?: string) => {
@@ -914,6 +1017,24 @@ const useAppSetup = () => {
   useGlobalOSInfo()
   useGlobalKeyboard()
   useWorkspaceWatcher()
+}
+
+const useAppSetup = () => {
+  const snapshot = useSyncExternalStore(
+    appStartupCoordinator.subscribe,
+    appStartupCoordinator.getSnapshot,
+    appStartupCoordinator.getSnapshot,
+  )
+
+  useEffect(() => {
+    void startAppSetup()
+  }, [])
+
+  return {
+    ...snapshot,
+    cancel: appStartupCoordinator.cancel,
+    retry: appStartupCoordinator.retry,
+  }
 }
 
 export default useAppSetup

@@ -219,7 +219,7 @@ const FileExcludePatternsSettingItem: React.FC<
   )
 
   return (
-    <SettingItemContainer $direction='column'>
+    <SettingItemContainer $direction='column' $settingKey={item.key}>
       <SettingLabel item={item} style={{ marginBottom: '8px' }} />
       <ContainerWrapper>
         <ListWrapper>

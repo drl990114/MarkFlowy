@@ -116,13 +116,26 @@
   "sidebar": {
     "explorer": "explorer",
     "search": "chercher",
+    "bookmarks": "Favoris",
+    "leftDock": "Panneau gauche",
+    "rightDock": "Panneau droit",
     "table_of_contents": "sommaire",
     "heading_numbering": "Activer la numérotation des titres",
     "no_heading_lines": "Aucune ligne de titre trouvée"
   },
   "bookmarks": {
     "empty": "Aucun favori",
-    "emptyTags": "Aucun favori étiqueté"
+    "emptyTags": "Aucun favori étiqueté",
+    "loading": "Chargement des favoris…",
+    "loadError": "Impossible de charger les favoris",
+    "retry": "Réessayer",
+    "viewByTags": "Grouper par étiquette",
+    "viewAsList": "Afficher en liste",
+    "removed": "« {{title}} » supprimé",
+    "undo": "Annuler",
+    "removeFailed": "Impossible de supprimer le favori",
+    "saving": "Enregistrement…",
+    "saveError": "Impossible d’enregistrer le favori."
   },
   "file": {
     "untitled": "sans titre",
@@ -173,6 +186,7 @@
     },
     "editor_tab": {
       "close": "Fermer",
+      "unsaved": "Modifications non enregistrées",
       "previous": "Onglet précédent",
       "next": "Onglet suivant",
       "close_others": "Fermer les autres",
@@ -204,8 +218,10 @@
   "settings": {
     "label": "Configuration",
     "back_to_app": "Retour à l’application",
+    "back_to_settings": "Retour aux réglages",
     "search_placeholder": "Rechercher dans les réglages...",
     "search_empty": "Aucun réglage correspondant",
+    "search_results": "{{count}} résultats",
     "general": {
       "label": "général",
       "app": {
@@ -538,6 +554,7 @@
   "workspace": {
     "info": "Informations sur la zone de travail",
     "none": "Espace de travail non ouvert",
+    "searchPlaceholder": "Rechercher des espaces de travail…",
     "sync_mode": {
       "git_local": {
         "name": "Git local",
@@ -664,12 +681,27 @@
     "cancel": "Annuler",
     "export_empty": "Il n’y a aucune conversation à exporter"
   },
+  "welcome": {
+    "title": "Bienvenue dans {{appName}}",
+    "subtitle": "Un espace de travail épuré pour Markdown",
+    "getStarted": "Premiers pas",
+    "recentWorkspaces": "Espaces de travail récents",
+    "emptyEditorDescription": "Choisissez un fichier dans la barre latérale ou créez un nouveau document.",
+    "openWorkspaceError": "Impossible d’ouvrir cet espace de travail"
+  },
   "statusBar": {
+    "label": "Barre d’état",
     "words": "Mots",
     "chars": "Caractères",
     "pureChars": "Caractères purs",
     "pureCharsOption": "Caractères purs (sans espaces ni sauts de ligne)",
     "displaySettings": "Paramètres d'affichage"
+  },
+  "titleBar": {
+    "label": "Barre de titre de la fenêtre",
+    "minimize": "Réduire la fenêtre",
+    "maximize": "Agrandir la fenêtre",
+    "restore": "Restaurer la fenêtre"
   },
   "zenMode": {
     "openFileFirst": "Ouvrez un document pour activer le mode Zen",

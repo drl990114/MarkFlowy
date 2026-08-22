@@ -1,6 +1,7 @@
 import { commandRegistry } from '@/commands'
 import { useTranslation } from '@/i18n'
 import useLayoutStore from '@/stores/useLayoutStore'
+import { PanelLeftIcon, PanelRightIcon } from 'lucide-react'
 import { EditorAreaActionButton } from './EditorAreaAction'
 
 interface SidebarToggleButtonProps {
@@ -10,13 +11,11 @@ interface SidebarToggleButtonProps {
 const sidebarToggleConfig = {
   left: {
     commandId: 'app_toggleLeftsidebarVisible',
-    activeIcon: 'ri-layout-left-fill',
-    inactiveIcon: 'ri-layout-left-line',
+    icon: PanelLeftIcon,
   },
   right: {
     commandId: 'app_toggleRightsidebarVisible',
-    activeIcon: 'ri-layout-right-fill',
-    inactiveIcon: 'ri-layout-right-line',
+    icon: PanelRightIcon,
   },
 } as const
 
@@ -27,13 +26,12 @@ export function SidebarToggleButton({ side }: SidebarToggleButtonProps) {
   const { t } = useTranslation()
   const config = sidebarToggleConfig[side]
   const label = t(`command.id_descriptions.${config.commandId}`)
-  const icon = visible ? config.activeIcon : config.inactiveIcon
 
   return (
     <EditorAreaActionButton
       aria-pressed={visible}
       data-sidebar-toggle={side}
-      icon={icon}
+      icon={config.icon}
       label={label}
       onClick={() => commandRegistry.execute(config.commandId)}
     />

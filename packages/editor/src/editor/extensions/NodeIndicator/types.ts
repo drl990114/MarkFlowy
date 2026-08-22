@@ -1,6 +1,6 @@
-import type { Node as ProseMirrorNode, Slice } from '@rme-sdk/sdk/pm/model';
-import { NodeSelection } from '@rme-sdk/sdk/pm/state';
-import type { EditorView } from '@rme-sdk/sdk/pm/view';
+import type { Node as ProseMirrorNode, Slice } from '@rme-sdk/sdk/pm/model'
+import type { NodeSelection } from '@rme-sdk/sdk/pm/state'
+import type { EditorView } from '@rme-sdk/sdk/pm/view'
 
 export type DragEventHandler = (options: DragEventHandlerOptions) => boolean
 /**
@@ -27,9 +27,10 @@ export interface DragEventHandlerOptions {
  * 节点指示器的状态接口
  */
 export interface NodeIndicatorState {
-  node: ProseMirrorNode | null;
-  pos: number | null;
-  rect: Rect | null;
+  node: ProseMirrorNode | null
+  pos: number | null
+  rect: Rect | null
+  interactionRect?: Rect | null
 }
 
 export interface Rect {
@@ -44,21 +45,21 @@ export interface Rect {
  * 显示处理函数的选项
  */
 export interface ShowHandlerOptions {
-  view: EditorView;
-  pos: number;
-  node: ProseMirrorNode;
-  line: Line;
+  view: EditorView
+  pos: number
+  node: ProseMirrorNode
+  line: Line
 }
 
 /**
  * 显示处理函数类型
  */
-export type ShowHandler = (options: ShowHandlerOptions) => void;
+export type ShowHandler = (options: ShowHandlerOptions) => void
 
 /**
  * 隐藏处理函数类型
  */
-export type HideHandler = () => void;
+export type HideHandler = () => void
 
 /**
  * 点接口

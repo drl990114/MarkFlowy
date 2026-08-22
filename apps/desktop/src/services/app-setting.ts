@@ -9,7 +9,7 @@ export const appSettingStoreSetup = async () => {
   try {
     logger.debug('Invoking get_app_conf...')
     const settingData = await invoke<Record<string, any>>('get_app_conf')
-    logger.info('Loaded app setting data:', settingData)
+    logger.info('Loaded app settings')
     setSettingData(settingData)
     return settingData
   } catch (error) {

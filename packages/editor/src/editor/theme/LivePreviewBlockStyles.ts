@@ -9,14 +9,17 @@ export const livePreviewBlockStyles = css`
     margin: 0.5em 0 0.75em;
     overflow: hidden;
     border: 1px solid ${(props) => props.theme.borderColor};
-    border-radius: 6px;
+    border-radius: var(--rme-editor-code-block-radius, 6px);
     background: ${(props) => props.theme.bgColor};
     box-shadow: 0 1px 2px rgb(0 0 0 / 4%);
   }
 
   .mf-live-preview-selected {
-    border-color: ${(props) => props.theme.accentColor};
-    box-shadow: 0 0 0 1px ${(props) => props.theme.accentColor};
+    box-shadow: 0 0 0 3px
+      var(
+        --rme-editor-selection-halo,
+        var(--rme-editor-selection-bg, ${(props) => props.theme.nodeSelectedColor})
+      );
   }
 
   .mf-live-preview-header {
@@ -26,7 +29,7 @@ export const livePreviewBlockStyles = css`
     min-height: 30px;
     padding: 0 6px 0 10px;
     border-bottom: 1px solid ${(props) => props.theme.borderColor};
-    background: ${(props) => props.theme.preBgColor};
+    background: var(--rme-editor-code-block-bg, ${(props) => props.theme.preBgColor});
   }
 
   .mf-live-preview-language {
@@ -35,7 +38,7 @@ export const livePreviewBlockStyles = css`
     min-width: 0;
     height: 100%;
     color: ${(props) => props.theme.labelFontColor};
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 500;
     letter-spacing: 0;
     text-transform: uppercase;
@@ -100,15 +103,16 @@ export const livePreviewBlockStyles = css`
     min-width: 0;
     min-height: 0;
     overflow: hidden;
-    background: ${(props) => props.theme.preBgColor};
+    background: var(--rme-editor-code-block-bg, ${(props) => props.theme.preBgColor});
 
     .cm-editor {
       height: 100%;
       min-height: 0;
       margin: 0;
       padding: 6px 0;
+      border: 0;
       border-radius: 0;
-      background: ${(props) => props.theme.preBgColor};
+      background: var(--rme-editor-code-block-bg, ${(props) => props.theme.preBgColor});
     }
 
     .cm-scroller {

@@ -62,6 +62,7 @@ export function PdfPrintController({
         accentColor: editorLightTheme.accentColor,
         fontSettings: { editorCodeFontFamily, editorRootFontFamily },
         hasAccentColorOverride: false,
+        mode: 'light',
         theme: editorLightTheme,
       }).editorTheme,
     [editorCodeFontFamily, editorRootFontFamily],

@@ -43,6 +43,7 @@ export function PdfPrintWindowApp({ request }: PdfPrintWindowAppProps) {
         editorRootFontFamily: payload.editorRootFontFamily,
       },
       hasAccentColorOverride: false,
+      mode: 'light',
       theme: editorLightTheme,
     }).editorTheme
   }, [payload])

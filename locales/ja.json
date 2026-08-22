@@ -119,13 +119,26 @@
   "sidebar": {
     "explorer": "エクスプローラー",
     "search": "検索",
+    "bookmarks": "ブックマーク",
+    "leftDock": "左ドック",
+    "rightDock": "右ドック",
     "table_of_contents": "目次",
     "heading_numbering": "見出し番号を切り替え",
     "no_heading_lines": "見出し行が見つかりません"
   },
   "bookmarks": {
     "empty": "ブックマークはありません",
-    "emptyTags": "タグ付きブックマークはありません"
+    "emptyTags": "タグ付きブックマークはありません",
+    "loading": "ブックマークを読み込み中…",
+    "loadError": "ブックマークを読み込めませんでした",
+    "retry": "再試行",
+    "viewByTags": "タグでグループ化",
+    "viewAsList": "リストで表示",
+    "removed": "「{{title}}」を削除しました",
+    "undo": "元に戻す",
+    "removeFailed": "ブックマークを削除できませんでした",
+    "saving": "保存中…",
+    "saveError": "ブックマークを保存できませんでした。"
   },
   "explorer": {
     "collapse_folders": "フォルダーを折りたたむ",
@@ -181,6 +194,7 @@
     },
     "editor_tab": {
       "close": "閉じる",
+      "unsaved": "未保存の変更",
       "previous": "前のタブ",
       "next": "次のタブ",
       "close_others": "他を閉じる",
@@ -212,8 +226,10 @@
   "settings": {
     "label": "設定",
     "back_to_app": "アプリに戻る",
+    "back_to_settings": "設定一覧に戻る",
     "search_placeholder": "設定を検索...",
     "search_empty": "一致する設定がありません",
+    "search_results": "{{count}}件の結果",
     "general": {
       "label": "一般",
       "app": {
@@ -538,6 +554,7 @@
   "workspace": {
     "info": "ワークスペース情報",
     "none": "ワークスペースは開いていません",
+    "searchPlaceholder": "ワークスペースを検索…",
     "sync_mode": {
       "git_local": {
         "name": "Git Local",
@@ -664,12 +681,27 @@
     "cancel": "キャンセル",
     "export_empty": "エクスポートする会話がありません"
   },
+  "welcome": {
+    "title": "{{appName}} へようこそ",
+    "subtitle": "Markdown に集中できるワークスペース",
+    "getStarted": "はじめる",
+    "recentWorkspaces": "最近のワークスペース",
+    "emptyEditorDescription": "サイドバーからファイルを選ぶか、新しい文書を作成してください。",
+    "openWorkspaceError": "このワークスペースを開けませんでした"
+  },
   "statusBar": {
+    "label": "ステータスバー",
     "words": "ワード",
     "chars": "文字",
     "pureChars": "純文字",
     "pureCharsOption": "純文字（空白・改行を除く）",
     "displaySettings": "表示設定"
+  },
+  "titleBar": {
+    "label": "ウィンドウのタイトルバー",
+    "minimize": "ウィンドウを最小化",
+    "maximize": "ウィンドウを最大化",
+    "restore": "ウィンドウを元のサイズに戻す"
   },
   "zenMode": {
     "openFileFirst": "Zenモードに入るにはドキュメントを開いてください",

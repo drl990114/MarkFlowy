@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from '@/i18n'
 import styled from 'styled-components'
+import { getSettingGroupAnchorId } from '../../settingSearch'
 import SettingItem from '../SettingItems'
 import { SettingGroupContainer } from './styles'
 
@@ -8,7 +9,10 @@ const SettingGroup: React.FC<SettingGroupProps> = (props) => {
   const { activeChildId, group } = props
   const { t } = useTranslation()
 
-  const children = Array.isArray(group.children) ? group.children : []
+  const children = useMemo(
+    () => (Array.isArray(group.children) ? group.children : []),
+    [group.children],
+  )
   const childId = (item: Setting.SettingGroup, index: number) =>
     String((item as Setting.SettingGroup & { providerId?: string }).providerId ?? index)
   const [selectedChildId, setSelectedChildId] = useState(() =>
@@ -22,6 +26,12 @@ const SettingGroup: React.FC<SettingGroupProps> = (props) => {
     0,
     children.findIndex((item, index) => childId(item, index) === selectedChildId),
   )
+
+  useEffect(() => {
+    if (activeChildId && children.some((item, index) => childId(item, index) === activeChildId)) {
+      setSelectedChildId(activeChildId)
+    }
+  }, [activeChildId, children])
 
   const renderParams = (groupItem: Setting.SettingGroup, config = { titleVisible: true }) => {
     const itemKeys = Object.keys(groupItem).filter(
@@ -42,7 +52,9 @@ const SettingGroup: React.FC<SettingGroupProps> = (props) => {
 
   if (children.length > 0) {
     return (
-      <SettingGroupContainer>
+      <SettingGroupContainer
+        $anchorId={getSettingGroupAnchorId(props.categoryKey, props.groupKey, selectedChildId)}
+      >
         <div className='setting-group__title'>{t(group.i18nKey)}</div>
         <div
           aria-label={t(group.i18nKey)}
@@ -66,7 +78,11 @@ const SettingGroup: React.FC<SettingGroupProps> = (props) => {
       </SettingGroupContainer>
     )
   } else {
-    return <SettingGroupContainer>{renderParams(group)}</SettingGroupContainer>
+    return (
+      <SettingGroupContainer $anchorId={getSettingGroupAnchorId(props.categoryKey, props.groupKey)}>
+        {renderParams(group)}
+      </SettingGroupContainer>
+    )
   }
 }
 
