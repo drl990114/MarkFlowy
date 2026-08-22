@@ -1,5 +1,5 @@
 import styled, { css } from 'styled-components'
-import { FlatListStyles } from './FlatListStyles'
+import { StandardListStyles } from './StandardListStyles'
 import { livePreviewBlockStyles } from './LivePreviewBlockStyles'
 import { editorZIndex } from './z-index'
 
@@ -354,25 +354,6 @@ export const WysiwygThemeWrapper = styled.div
       );
   }
 
-  & ul,
-  & ol {
-    margin-top: 0;
-    margin-bottom: 0;
-    padding-left: 1.5em;
-  }
-
-  & ol ol,
-  & ul ol {
-    list-style-type: lower-roman;
-  }
-
-  & ul ul ol,
-  & ul ol ol,
-  & ol ul ol,
-  & ol ol ol {
-    list-style-type: lower-alpha;
-  }
-
   & dd {
     margin-left: 0;
   }
@@ -447,22 +428,6 @@ export const WysiwygThemeWrapper = styled.div
   & h6 code {
     padding: 0 0.2em;
     font-size: inherit;
-  }
-
-  & ul ul,
-  & ul ol,
-  & ol ol,
-  & ol ul {
-    margin-top: 0;
-    margin-bottom: 0;
-  }
-
-  & li > p {
-    margin-top: 16px;
-  }
-
-  & li + li {
-    margin-top: 0.25em;
   }
 
   & dl {
@@ -1457,8 +1422,7 @@ export const WysiwygThemeWrapper = styled.div
     }
   }
 
-  /* Import flat list styles */
-  ${FlatListStyles}
+  ${StandardListStyles}
 
   @media (prefers-reduced-motion: reduce) {
     & input[type='checkbox']::before,

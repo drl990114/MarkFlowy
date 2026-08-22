@@ -6,31 +6,30 @@ import { renderEditor, type TaggedProsemirrorNode } from 'jest-remirror'
 import type { Command } from 'prosemirror-state'
 import { expect } from 'vitest'
 
-
-import { ListAttributes } from '../extensions/List/input-rule/types'
 import { ListExtension } from './extension'
 import { markdownToTaggedDoc } from './markdown'
 
 export function setupTestingEditor() {
-  const extensions = [
-    new ListExtension(),
-  ]
-  const editor = renderEditor(extensions, {})
+  const extensions = [new ListExtension()]
+  // jest-remirror bundles Remirror's nominal extension type separately from RME.
+  // Runtime compatibility is covered by the Markdown tests using this helper.
+  const editor = renderEditor(extensions as unknown as Parameters<typeof renderEditor>[0], {})
   const {
     view,
     add,
     nodes: { doc, p },
-    attributeNodes: { list: untypedList },
+    attributeNodes: {
+      bulletList: untypedBulletList,
+      orderedList: untypedOrderedList,
+      listItem: untypedListItem,
+    },
     manager,
     schema,
   } = editor
 
-  const markdown = (
-    strings: TemplateStringsArray,
-    ...values: unknown[]
-  ): TaggedProsemirrorNode => {
-    const markdown = String.raw({ raw: strings }, ...values)
-    return markdownToTaggedDoc(editor, markdown)
+  const markdown = (strings: TemplateStringsArray, ...values: unknown[]): TaggedProsemirrorNode => {
+    const source = String.raw({ raw: strings }, ...values)
+    return markdownToTaggedDoc(editor, source)
   }
 
   const dispatchCommand = (command: Command) => {
@@ -51,17 +50,12 @@ export function setupTestingEditor() {
     }
   }
 
-  const list = (attributes: ListAttributes) => {
-    return untypedList(attributes as Record<string, unknown>)
-  }
-
-  const bulletList = list({ kind: 'bullet' })
-  const orderedList = list({ kind: 'ordered' })
-  const ordered99List = list({ kind: 'ordered', order: 99 })
-  const checkedTaskList = list({ kind: 'task', checked: true })
-  const uncheckedTaskList = list({ kind: 'task', checked: false })
-  const collapsedToggleList = list({ kind: 'toggle', collapsed: true })
-  const expandedToggleList = list({ kind: 'toggle', collapsed: false })
+  const bulletList = untypedBulletList({ tight: true })
+  const orderedList = untypedOrderedList({ order: 1, tight: true })
+  const ordered99List = untypedOrderedList({ order: 99, tight: true })
+  const listItem = untypedListItem({ checked: null })
+  const checkedTaskItem = untypedListItem({ checked: true })
+  const uncheckedTaskItem = untypedListItem({ checked: false })
 
   return {
     manager,
@@ -78,14 +72,11 @@ export function setupTestingEditor() {
 
     bulletList,
     orderedList,
-    checkedTaskList,
-    uncheckedTaskList,
-    collapsedToggleList,
-    expandedToggleList,
+    listItem,
+    checkedTaskItem,
+    uncheckedTaskItem,
     ordered99List,
   }
 }
 
-export type TestingEditor = ReturnType<
-  ReturnType<typeof setupTestingEditor>['add']
->
+export type TestingEditor = ReturnType<ReturnType<typeof setupTestingEditor>['add']>

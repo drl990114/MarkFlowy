@@ -399,6 +399,15 @@ function unregisterSourceCodeViewResource(fileId: string, instanceId: string) {
   )
 }
 
+function clearSwitchingEditorContextResource(fileId: string, instanceId: string) {
+  const switchingContext = editorContextRegistry.get(fileId, instanceId)
+  const store = useEditorStore.getState()
+
+  if (switchingContext && store.getEditorCtx(fileId) === switchingContext) {
+    store.clearEditorCtx(fileId)
+  }
+}
+
 function unregisterEditorInstanceResources(fileId: string, instanceId: string) {
   const delegateRemoval = editorDelegateRegistry.remove(fileId, instanceId)
   const contextRemoval = editorContextRegistry.remove(fileId, instanceId)
@@ -1460,6 +1469,10 @@ function TextEditor(props: TextEditorProps) {
           editorTypeSwitchingRef.current = true
           bus.emit(EVENT.app_save, undefined, {
             onSuccess: () => {
+              // A new Remirror manager mounts asynchronously. Do not expose the
+              // previous mode's extension-specific helpers during that gap.
+              clearSwitchingEditorContextResource(curFile.id, instanceIdRef.current!)
+
               if (payload !== EditorViewType.SOURCECODE) {
                 unregisterSourceCodeViewResource(curFile.id, instanceIdRef.current!)
               }

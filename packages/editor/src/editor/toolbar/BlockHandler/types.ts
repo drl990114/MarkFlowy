@@ -12,8 +12,8 @@ export interface BlockTypeOption {
   label: string
   icon: string
   group: 'transform' | 'actions'
-  isActive?: (node: ProsemirrorNode) => boolean
-  isAvailable?: (node: ProsemirrorNode) => boolean
+  isActive?: (context: NodeTransformContext) => boolean
+  isAvailable?: (context: NodeTransformContext) => boolean
   transform?: (context: NodeTransformContext) => boolean
   action?: (context: NodeTransformContext) => boolean
 }

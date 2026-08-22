@@ -2,7 +2,16 @@ import { t } from '@markflowy/i18n'
 import type { EditorView } from '@rme-sdk/sdk/core'
 import { NodeSelection } from '@rme-sdk/sdk/pm/state'
 import { useCommands, useExtension, useRemirrorContext } from '@rme-sdk/sdk/react'
-import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react'
 import styled, { createGlobalStyle } from 'styled-components'
 import { Dropdown, type DropdownMenuItem, type MenuItemType } from 'zens'
 import {
@@ -13,11 +22,7 @@ import {
   getBlockHandlerVerticalGeometry,
 } from '../../const/block-handler-layout'
 import { nodeTypeIconMap } from '../../const'
-import type { LineListExtension } from '../../extensions'
-import {
-  clearViewDragging,
-  startViewDragging,
-} from '../../extensions/NodeIndicator/drag-preview'
+import { clearViewDragging, startViewDragging } from '../../extensions/NodeIndicator/drag-preview'
 import { NodeIndicatorExtension } from '../../extensions/NodeIndicator/node-indicator-extension'
 import type { NodeIndicatorState } from '../../extensions/NodeIndicator/node-indicator-extension'
 import { editorZIndex } from '../../theme/z-index'
@@ -33,14 +38,14 @@ export interface BlockHandlerProps {
 }
 
 const getBoundaryRect = (boundary: MenuBoundary): DOMRect => {
-  return boundary instanceof HTMLElement ? boundary.getBoundingClientRect() : (boundary as unknown as DOMRect)
+  return boundary instanceof HTMLElement
+    ? boundary.getBoundingClientRect()
+    : (boundary as unknown as DOMRect)
 }
 
 const updateBlockHandlerMenuHeight = (boundary: MenuBoundary) => {
   const boundaryRect = getBoundaryRect(boundary)
-  const menus = Array.from(
-    document.querySelectorAll<HTMLElement>('.rme-block-handler-menu'),
-  )
+  const menus = Array.from(document.querySelectorAll<HTMLElement>('.rme-block-handler-menu'))
 
   menus.forEach((menu) => {
     const rect = menu.getBoundingClientRect()
@@ -62,12 +67,23 @@ const updateBlockHandlerMenuHeight = (boundary: MenuBoundary) => {
   })
 }
 
+function getEditorContentLeft(editorView: EditorView): number {
+  const rect = editorView.dom.getBoundingClientRect()
+  const styles = editorView.dom.ownerDocument.defaultView?.getComputedStyle(editorView.dom)
+  const paddingLeft = Number.parseFloat(styles?.paddingLeft ?? '')
+  return rect.left + (Number.isFinite(paddingLeft) ? paddingLeft : 0)
+}
+
 export const BlockHandler = memo(({ getMenuBoundary }: BlockHandlerProps) => {
-  const { view: editorView } = useRemirrorContext({ autoUpdate: true })
+  const { view: editorView } = useRemirrorContext()
   const nodeIndicatorExtension = useExtension(NodeIndicatorExtension)
-  const state = nodeIndicatorExtension?.getPluginState() as NodeIndicatorState | undefined
+  const state = useSyncExternalStore(
+    nodeIndicatorExtension.subscribeToNodeIndicatorState,
+    nodeIndicatorExtension.getNodeIndicatorState,
+    nodeIndicatorExtension.getNodeIndicatorState,
+  )
   const [dropdownOpen, setDropdownOpen] = useState(false)
-  const commands = useCommands<LineListExtension>()
+  const commands = useCommands()
   const blockTypeOptions = useBlockTypeOptions(t, commands)
   const triggerRef = useRef<HTMLDivElement>(null)
   const displayStateRef = useRef<NodeIndicatorState | undefined>(state)
@@ -205,46 +221,52 @@ export const BlockHandler = memo(({ getMenuBoundary }: BlockHandlerProps) => {
 
       const relatedTarget = event.relatedTarget
       if (relatedTarget instanceof Node && editorView.dom.contains(relatedTarget)) return
-      if (
-        relatedTarget instanceof Element &&
-        relatedTarget.closest('.rme-block-handler-menu')
-      ) {
+      if (relatedTarget instanceof Element && relatedTarget.closest('.rme-block-handler-menu')) {
         return
       }
 
-      editorView.dispatch(
-        editorView.state.tr.setMeta(nodeIndicatorExtension.pluginKey, {
-          node: null,
-          pos: null,
-          rect: null,
-          interactionRect: null,
-        }),
-      )
+      nodeIndicatorExtension.clearNodeIndicatorState()
     },
     [dropdownOpen, editorView, nodeIndicatorExtension],
   )
 
   const transformOptions = useMemo(() => {
     const currentNode = displayState?.node
-    if (!currentNode) return []
+    const currentPos = displayState?.pos
+    if (!editorView || !currentNode || currentPos === null || currentPos === undefined) return []
+
+    const context = {
+      view: editorView,
+      pos: currentPos,
+      node: currentNode,
+      tr: editorView.state.tr,
+    }
 
     return blockTypeOptions.filter(
       (option) =>
         option.group === 'transform' &&
-        (!option.isActive || !option.isActive(currentNode)) &&
-        (!option.isAvailable || option.isAvailable(currentNode)),
+        (!option.isActive || !option.isActive(context)) &&
+        (!option.isAvailable || option.isAvailable(context)),
     )
-  }, [blockTypeOptions, displayState?.node])
+  }, [blockTypeOptions, displayState?.node, displayState?.pos, editorView])
 
   const actionOptions = useMemo(() => {
     const currentNode = displayState?.node
-    if (!currentNode) return []
+    const currentPos = displayState?.pos
+    if (!editorView || !currentNode || currentPos === null || currentPos === undefined) return []
+
+    const context = {
+      view: editorView,
+      pos: currentPos,
+      node: currentNode,
+      tr: editorView.state.tr,
+    }
 
     return blockTypeOptions.filter(
       (option) =>
-        option.group === 'actions' && (!option.isAvailable || option.isAvailable(currentNode)),
+        option.group === 'actions' && (!option.isAvailable || option.isAvailable(context)),
     )
-  }, [blockTypeOptions, displayState?.node])
+  }, [blockTypeOptions, displayState?.node, displayState?.pos, editorView])
 
   const groupedTransformOptions = useMemo(() => {
     return transformOptions.reduce(
@@ -288,7 +310,7 @@ export const BlockHandler = memo(({ getMenuBoundary }: BlockHandlerProps) => {
 
       transformSubMenuItems.push({
         key: `group-${groupKey}`,
-        label: <span className="rme-block-handler-menu-group-label">{groupLabels[groupKey]}</span>,
+        label: <span className='rme-block-handler-menu-group-label'>{groupLabels[groupKey]}</span>,
         disabled: true,
       })
 
@@ -305,7 +327,7 @@ export const BlockHandler = memo(({ getMenuBoundary }: BlockHandlerProps) => {
       items.push({
         key: 'transform',
         label: t('blockType.transformTo') || 'Transform to',
-        icon: <i className="ri-exchange-line" />,
+        icon: <i className='ri-exchange-line' />,
         children: transformSubMenuItems as MenuItemType[],
       })
     }
@@ -341,8 +363,15 @@ export const BlockHandler = memo(({ getMenuBoundary }: BlockHandlerProps) => {
       key = `heading-${displayState.node.attrs?.level}`
     }
 
-    if (displayState.node.type?.name === 'list') {
-      key = `list-${displayState.node.attrs?.kind}`
+    if (displayState.node.type?.name === 'listItem' && displayState.pos !== null) {
+      const parent = editorView.state.doc.resolve(displayState.pos).parent
+      const kind =
+        displayState.node.attrs.checked !== null
+          ? 'task'
+          : parent.type.name === 'orderedList'
+            ? 'ordered'
+            : 'bullet'
+      key = `list-${kind}`
     }
 
     const iconName = nodeTypeIconMap[key]
@@ -351,13 +380,15 @@ export const BlockHandler = memo(({ getMenuBoundary }: BlockHandlerProps) => {
     }
 
     return null
-  }, [displayState?.node])
+  }, [displayState?.node, displayState?.pos, editorView])
 
   if (!editorView || !displayState?.node || !displayState.rect) {
     return null
   }
 
   const interactionRect = displayState.interactionRect ?? displayState.rect
+  const rootContentLeft =
+    displayState.node.type.name === 'listItem' ? getEditorContentLeft(editorView) : undefined
   const verticalGeometry = getBlockHandlerVerticalGeometry(
     displayState.rect.top,
     displayState.rect.bottom,
@@ -371,10 +402,10 @@ export const BlockHandler = memo(({ getMenuBoundary }: BlockHandlerProps) => {
         items: menuItems,
         onClick: handleMenuClick,
       }}
-      overlayClassName="rme-block-handler-menu"
+      overlayClassName='rme-block-handler-menu'
       overlayStyle={{ zIndex: editorZIndex.blockHandler + 1 }}
       trigger={['click']}
-      placement="bottomLeft"
+      placement='bottomLeft'
       getPopupContainer={() => document.body}
       raw
       open={dropdownOpen}
@@ -383,18 +414,18 @@ export const BlockHandler = memo(({ getMenuBoundary }: BlockHandlerProps) => {
     >
       <BlockHandlerMenuStyle />
       <HitArea
-        key="rme-block-handler"
-        className="rme-block-handler"
+        key='rme-block-handler'
+        className='rme-block-handler'
         onPointerLeave={handleHitAreaPointerLeave}
         style={{
           height: `${verticalGeometry.hitAreaBlockSize}px`,
-          left: `${getBlockHandlerLeft(displayState.rect.left)}px`,
+          left: `${getBlockHandlerLeft(displayState.rect.left, rootContentLeft)}px`,
           top: `${verticalGeometry.hitAreaTop}px`,
         }}
       >
         <Container
           ref={triggerRef}
-          draggable="true"
+          draggable='true'
           onPointerDown={handleBlockPointerDown}
           onClick={() => setDropdownOpen(!dropdownOpen)}
           onDragStart={handleDragStart}
@@ -403,8 +434,8 @@ export const BlockHandler = memo(({ getMenuBoundary }: BlockHandlerProps) => {
         >
           <IconButton>{renderIcon()}</IconButton>
 
-          <div className="rme-draggable-handler">
-            <i className="ri-draggable" />
+          <div className='rme-draggable-handler'>
+            <i className='ri-draggable' />
           </div>
         </Container>
       </HitArea>

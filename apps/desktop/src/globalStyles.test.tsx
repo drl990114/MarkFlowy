@@ -31,7 +31,7 @@ describe('DesktopSpecificStyles theme semantics', () => {
     container.remove()
   })
 
-  it('keeps menu, ghost, titlebar, and pressed surfaces independent', () => {
+  it('keeps chrome, menu, ghost, and pressed surfaces independent', () => {
     const theme = {
       ...markflowyLightTheme,
       contextMenuBgColorHover: '#303030',
@@ -56,6 +56,8 @@ describe('DesktopSpecificStyles theme semantics', () => {
     expect(styles).toContain('--mf-control-ghost-hover:#101010')
     expect(styles).toContain('--mf-control-titlebar-hover:#202020')
     expect(styles).toContain('--mf-control-ghost-pressed:#404040')
+    expect(styles).toContain(`--mf-surface-titlebar:${theme.titleBarBgColor}`)
+    expect(styles).toContain(`--mf-surface-statusbar:${theme.statusBarBgColor}`)
   })
 
   it('keeps Sepia chrome hover visible when its menu hover matches the chrome surface', () => {

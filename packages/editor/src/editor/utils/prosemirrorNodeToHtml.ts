@@ -155,15 +155,6 @@ function preparePreviewHtml(html: string, preserveImageSources: boolean): string
   return restoreTrustedPreviewAttributes(sanitizedHtml, trustedState)
 }
 
-function restoreListOrderStyles(container: HTMLElement): void {
-  container.querySelectorAll<HTMLElement>('[data-list-order]').forEach((listItem) => {
-    const order = Number.parseInt(listItem.dataset.listOrder || '', 10)
-    if (Number.isSafeInteger(order)) {
-      listItem.style.setProperty('--prosemirror-flat-list-order', String(order))
-    }
-  })
-}
-
 function renderBlockError(container: HTMLElement, error: unknown): void {
   const errorElement = document.createElement('pre')
   errorElement.className = 'mf-preview-error'
@@ -467,7 +458,6 @@ async function enhanceProsemirrorHtmlInternal(
   const preserveImageSources = deferImages || Boolean(options.delegateOptions?.handleViewImgSrcUrl)
   const container = document.createElement('div')
   container.innerHTML = preparePreviewHtml(html, preserveImageSources)
-  restoreListOrderStyles(container)
   container.querySelectorAll('.reference-def').forEach((definition) => definition.remove())
 
   const htmlRenderer = createHtmlRenderer({ preserveImageSources })

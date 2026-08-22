@@ -1,6 +1,10 @@
-import type { InputRule, ProsemirrorNode } from '@rme-sdk/sdk/core'
-import { isString } from '@rme-sdk/sdk/core'
 import type Token from 'markdown-it/lib/token.mjs'
+import {
+  BulletListExtension,
+  ListItemExtension,
+  OrderedListExtension,
+} from '@rme-sdk/sdk/extensions/list'
+
 import type {
   MarkdownParseState,
   NodeSerializerOptions,
@@ -8,229 +12,104 @@ import type {
   ParserRule,
 } from '../../transform'
 import { ParserRuleType } from '../../transform'
-import { listInputRules } from './input-rule'
 
 export abstract class MarkdownNodeExtension {
   abstract fromMarkdown: () => readonly ParserRule[]
   abstract toMarkdown: NodeSerializerSpec
 }
 
-import {
-  convertCommand,
-  ExtensionTag,
-  type KeyBindings,
-  NodeExtension,
-  type NodeExtensionSpec,
-  type ProsemirrorPlugin,
-  type ExtensionCommandReturn,
-} from '@rme-sdk/sdk/core'
-import type { NodeRange } from '@rme-sdk/sdk/pm/model'
-import {
-  createDedentListCommand,
-  createIndentListCommand,
-  createListPlugins,
-  createListSpec,
-  createMoveListCommand,
-  createSplitListCommand,
-  createToggleCollapsedCommand,
-  createToggleListCommand,
-  createUnwrapListCommand,
-  createWrapInListCommand,
-  type DedentListOptions,
-  type IndentListOptions,
-  listKeymap,
-  protectCollapsed,
-  type ToggleCollapsedOptions,
-  type UnwrapListOptions,
-} from '@rme-sdk/sdk/flat-list'
-import { defaultMarkerGetter } from './input-rule/schema/to-dom'
-import { ListAttributes } from './input-rule/types'
+function getListTight(token: Token): boolean {
+  return token.meta?.tight !== false
+}
 
-/**
- * A Remirror extension for creating lists. It's a simple wrapper around the API from `prosemirror-flat-list`.
- *
- * @public
- */
-export class LineListExtension extends NodeExtension {
-  static disableExtraAttributes = true
+function getOrderedListStart(token: Token): number {
+  const start = Number(token.attrGet('start') ?? token.attrGet('order') ?? 1)
+  return Number.isSafeInteger(start) && start >= 1 ? start : 1
+}
 
-  get name() {
-    return 'list' as const
-  }
+function getTaskMarker(checked: unknown): string {
+  return checked === null || checked === undefined ? '' : checked ? '[x] ' : '[ ] '
+}
 
-  createInputRules(): InputRule[] {
-    return listInputRules
-  }
-
-  createTags() {
-    return [ExtensionTag.Block]
-  }
-
-  createNodeSpec(): NodeExtensionSpec {
-    // @ts-expect-error: incompatible type
-    return createListSpec({ toDomParams: { nativeList: false, getMarkers: defaultMarkerGetter } })
-  }
-
-  createKeymap(): KeyBindings {
-    const bindings: KeyBindings = {}
-    for (const [key, command] of Object.entries(listKeymap)) {
-      bindings[key] = convertCommand(command)
-    }
-    bindings['Tab'] = alwaysTrue(bindings['Mod-]'])
-    bindings['Shift-Tab'] = alwaysTrue(bindings['Mod-['])
-    return bindings
-  }
-
-  createExternalPlugins(): ProsemirrorPlugin[] {
-    return createListPlugins({ schema: this.store.schema })
-  }
-
-  createCommands(): ExtensionCommandReturn {
-    return {
-      indentList: (props?: IndentListOptions) => {
-        return convertCommand(createIndentListCommand(props))
-      },
-      dedentList: (props?: DedentListOptions) => {
-        return convertCommand(createDedentListCommand(props))
-      },
-
-      unwrapList: (options?: UnwrapListOptions) => {
-        return convertCommand(createUnwrapListCommand(options))
-      },
-
-      wrapInList: (getAttrs: ListAttributes | ((range: NodeRange) => ListAttributes | null)) => {
-        return convertCommand(createWrapInListCommand<ListAttributes>(getAttrs))
-      },
-
-      moveList: (direction: 'up' | 'down') => {
-        return convertCommand(createMoveListCommand(direction))
-      },
-
-      splitList: () => convertCommand(createSplitListCommand()),
-
-      protectCollapsed: () => convertCommand(protectCollapsed),
-
-      toggleCollapsed: (props?: ToggleCollapsedOptions) => {
-        return convertCommand(createToggleCollapsedCommand(props))
-      },
-
-      toggleList: (attrs: ListAttributes) => {
-        return convertCommand(createToggleListCommand(attrs))
-      },
-    }
-  }
-
+export class LineBulletListExtension extends BulletListExtension {
   public fromMarkdown() {
     return [
       {
-        type: ParserRuleType.free,
-        token: 'list_item_open',
-        handler: (state: MarkdownParseState): void => {
-          switch (state.topContext()) {
-            case 'ordered_list':
-              const contextToken = state.topContextToken()
-              let startOrder
-              if (contextToken?.type === 'ordered_list_open') {
-                contextToken.attrs?.some(([name, value]) => {
-                  if (name === 'order') {
-                    startOrder = parseInt(value, 10)
-                    state.closeContextToken()
-                    return true
-                  }
-                  return false
-                })
-              }
-
-              state.openNode(this.type, {
-                kind: 'ordered',
-                order: startOrder,
-              } satisfies ListAttributes)
-              break
-            case 'bullet_list':
-              state.openNode(this.type, { kind: 'bullet' } satisfies ListAttributes)
-              break
-            default:
-              throw new Error('unknown context')
-          }
-        },
-      },
-      {
-        type: ParserRuleType.free,
-        token: 'list_checkbox',
-        handler: (state: MarkdownParseState, tok: Token) => {
-          const parent = state.stack[state.stack.length - 1]
-          if (parent?.type.name === 'list') {
-            const checked: null | string | boolean = tok.attrGet('checked')
-            const attrs: ListAttributes = { kind: 'task', checked: isString(checked) || !!checked }
-            parent.attrs = attrs
-          } else {
-            console.warn(`expect list but got ${parent?.type.name}`)
-          }
-        },
-      },
-      {
-        type: ParserRuleType.free,
-        token: 'list_item_close',
-        handler: (state: MarkdownParseState): void => {
-          state.closeNode()
-        },
-      },
-      {
-        type: ParserRuleType.context,
+        type: ParserRuleType.block,
         token: 'bullet_list',
-        context: 'bullet_list',
-      },
-      {
-        type: ParserRuleType.context,
-        token: 'ordered_list',
-        context: 'ordered_list',
+        node: this.name,
+        hasOpenClose: true,
+        getAttrs: (token: Token) => ({ tight: getListTight(token) }),
       },
     ] as const
   }
 
-  public toMarkdown({ state, node, parent, index, counter }: NodeSerializerOptions) {
-    const attrs = node.attrs as ListAttributes
-    let firstDelim = ''
-    if (attrs.kind === 'ordered') {
-      // If node has custom order attribute, use it (consistent with CSS)
-      // Otherwise use counter value which is already calculated correctly in serializer
-      // to match CSS counter logic (resets when previous sibling is not an ordered list)
-      const order = attrs.order != null ? attrs.order : counter
-      firstDelim = `${order}. `
-    } else if (attrs.kind === 'task') {
-      firstDelim = attrs.checked ? '- [x] ' : '- [ ] '
-    } else if (attrs.kind === 'bullet') {
-      firstDelim = '- '
-    }
-
-    // Flat lists store each item as a sibling list node. Keep adjacent items
-    // tight while preserving the normal blank-line boundary around the list.
-    if (index > 0 && parent.child(index - 1).type === node.type) {
-      state.flushClose(1)
-    }
-
-    state.wrapBlock('  ', firstDelim, node, () =>
-      state.renderContent(node),
+  public toMarkdown({ state, node }: NodeSerializerOptions) {
+    state.renderList(
+      node,
+      () => '    ',
+      (index) => `- ${getTaskMarker(node.child(index).attrs.checked)}`,
     )
   }
 }
 
-/**
- * Wrap the giving command function so that it always returns `true`. This is
- * useful when we want pressing `Tab` and `Shift-Tab` won't blur the editor even
- * if the keybinding command returns `false`
- *
- * @public
- */
-export function alwaysTrue<T extends unknown[]>(
-  func: (...args: T) => boolean,
-): (...args: T) => boolean {
-  return (...args) => {
-    func(...args)
-    return true
+export class LineOrderedListExtension extends OrderedListExtension {
+  public fromMarkdown() {
+    return [
+      {
+        type: ParserRuleType.block,
+        token: 'ordered_list',
+        node: this.name,
+        hasOpenClose: true,
+        getAttrs: (token: Token) => ({
+          order: getOrderedListStart(token),
+          tight: getListTight(token),
+        }),
+      },
+    ] as const
+  }
+
+  public toMarkdown({ state, node }: NodeSerializerOptions) {
+    const start = Number(node.attrs.order ?? 1)
+    const marker = (index: number) => `${start + index}. `
+
+    state.renderList(
+      node,
+      (index) => state.repeat(' ', Math.max(4, marker(index).length)),
+      (index) => `${marker(index)}${getTaskMarker(node.child(index).attrs.checked)}`,
+    )
   }
 }
 
-export function isOrderedListNode(node: ProsemirrorNode): boolean {
-  return node.type.name === 'list' && (node.attrs as ListAttributes).kind === 'ordered'
+export class LineListItemExtension extends ListItemExtension {
+  public fromMarkdown() {
+    return [
+      {
+        type: ParserRuleType.block,
+        token: 'list_item',
+        node: this.name,
+        hasOpenClose: true,
+        getAttrs: () => ({ checked: null }),
+      },
+      {
+        type: ParserRuleType.free,
+        token: 'list_checkbox',
+        handler: (state: MarkdownParseState, token: Token) => {
+          const item = state.top()
+          if (item.type.name !== this.name) {
+            throw new Error(`Expected ${this.name} while parsing a task marker`)
+          }
+
+          item.attrs = {
+            ...item.attrs,
+            checked: token.attrGet('checked') !== null,
+          }
+        },
+      },
+    ] as const
+  }
+
+  public toMarkdown({ state, node }: NodeSerializerOptions) {
+    state.renderContent(node)
+  }
 }

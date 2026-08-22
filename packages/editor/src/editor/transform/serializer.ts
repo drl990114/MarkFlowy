@@ -1,13 +1,10 @@
 import type { Node } from '@rme-sdk/sdk/pm/model'
-import { isOrderedListNode } from '../extensions'
-import type { ListAttributes } from '../extensions/List/input-rule/types'
 
 export type NodeSerializerOptions = {
   state: MarkdownSerializerState
   node: Node
   parent: Node
   index: number
-  counter: number
 }
 export type NodeSerializerSpec = (options: NodeSerializerOptions) => void
 export type NodeSerializerSpecs = Record<string, NodeSerializerSpec>
@@ -89,55 +86,21 @@ export class MarkdownSerializerState {
   }
 
   // Render the given node as a block.
-  public render(node: Node, parent: Node, index: number, counter = 0) {
+  public render(node: Node, parent: Node, index: number) {
     const spec = this.nodes[node.type.name]
     if (!spec) return
     if (!spec) throw new Error(`Can't find node spec for type '${node.type.name}'`)
-    spec({ state: this, node, parent, index, counter })
+    spec({ state: this, node, parent, index })
   }
 
   // Render the contents of `parent` as block nodes.
   public renderContent(parent: Node) {
-    let counter = 0
     if (parent.forEach) {
       parent.forEach((node, offset, index) => {
-        // Check if current node is an ordered list
-        if (isOrderedListNode(node)) {
-          // Check if previous sibling is also an ordered list
-          // If not, reset counter to 0 (consistent with CSS logic)
-          const prevSibling = index > 0 ? parent.child(index - 1) : null
-          if (prevSibling && !isOrderedListNode(prevSibling)) {
-            counter = 0
-          }
-
-          // If node has custom order attribute, use it as starting value (consistent with CSS)
-          // Otherwise increment counter
-          const attrs = node.attrs as ListAttributes
-          if (attrs.order != null) {
-            counter = attrs.order
-          } else {
-            counter += 1
-          }
-        } else {
-          // Reset counter when encountering non-ordered-list node
-          counter = 0
-        }
-
-        this.render(node, parent, index, counter)
+        this.render(node, parent, index)
       })
     } else {
-      if (isOrderedListNode(parent)) {
-        const attrs = parent.attrs as ListAttributes
-        if (attrs.order != null) {
-          counter = attrs.order
-        } else {
-          counter += 1
-        }
-      } else {
-        counter = 0
-      }
-
-      this.render(parent, parent, 0, counter)
+      this.render(parent, parent, 0)
     }
   }
 
@@ -153,20 +116,24 @@ export class MarkdownSerializerState {
   // indentation added to all lines except the first in an item,
   // `firstDelim` is a function going from an item index to a
   // delimiter for the first line of the item.
-  public renderList(node: Node, delim: string, firstDelim: (n: number) => string): void {
+  public renderList(
+    node: Node,
+    delim: string | ((index: number) => string),
+    firstDelim: (index: number) => string,
+  ): void {
     if (this.closed && this.closed.type === node.type) {
       this.flushClose(3)
     } else if (this.inTightList) {
       this.flushClose(1)
-    } else {
-      this.flushClose(2)
     }
 
+    const isTight = node.attrs.tight !== false
     const prevTight = this.inTightList
-    this.inTightList = true
+    this.inTightList = isTight
     node.forEach((child, _, i) => {
-      if (i) this.flushClose(1)
-      this.wrapBlock(delim, firstDelim(i), node, () => this.render(child, node, i))
+      if (i && isTight) this.flushClose(1)
+      const itemDelimiter = typeof delim === 'string' ? delim : delim(i)
+      this.wrapBlock(itemDelimiter, firstDelim(i), node, () => this.render(child, node, i))
     })
     this.inTightList = prevTight
   }

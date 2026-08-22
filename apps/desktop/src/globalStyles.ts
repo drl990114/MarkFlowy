@@ -7,6 +7,7 @@ export const DesktopSpecificStyles = createGlobalStyle<{
   :root {
     --mf-surface-app: ${(props) => props.theme.bgColor};
     --mf-surface-titlebar: ${(props) => props.theme.titleBarBgColor};
+    --mf-surface-statusbar: ${(props) => props.theme.statusBarBgColor};
     --mf-surface-panel: ${(props) => props.theme.sideBarBgColor};
     --mf-surface-panel-left: ${(props) => props.theme.sideBarBgColor};
     --mf-surface-panel-right: ${(props) => props.theme.rightBarBgColor};

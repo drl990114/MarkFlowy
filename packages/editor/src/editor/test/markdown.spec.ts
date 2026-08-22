@@ -12,7 +12,7 @@ describe('markdownToTaggedDoc', () => {
     `
     const output = markdownToTaggedDoc(t.editor, input)
     expect(output.toString()).toMatchInlineSnapshot(
-      `"doc(list(paragraph("A1")), list(paragraph("A2")))"`,
+      `"doc(bulletList(listItem(paragraph("A1")), listItem(paragraph("A2"))))"`,
     )
   })
 
@@ -24,8 +24,8 @@ describe('markdownToTaggedDoc', () => {
     `
     const output = markdownToTaggedDoc(t.editor, input)
     const editor = t.add(output)
-    expect(editor.state.selection.from).toEqual(9)
-    expect(editor.state.selection.to).toEqual(10)
+    expect(editor.state.selection.from).toEqual(10)
+    expect(editor.state.selection.to).toEqual(11)
   })
 
   it('can prase task list', () => {
@@ -36,11 +36,7 @@ describe('markdownToTaggedDoc', () => {
     `
     const output = markdownToTaggedDoc(t.editor, input)
     expect(output).toEqualRemirrorDocument(
-      t.doc(
-        //
-        t.uncheckedTaskList(t.p('A1')),
-        t.checkedTaskList(t.p('A2')),
-      ),
+      t.doc(t.bulletList(t.uncheckedTaskItem(t.p('A1')), t.checkedTaskItem(t.p('A2')))),
     )
   })
 
@@ -52,11 +48,7 @@ describe('markdownToTaggedDoc', () => {
     `
     const output = markdownToTaggedDoc(t.editor, input)
     expect(output).toEqualRemirrorDocument(
-      t.doc(
-        //
-        t.orderedList(t.p('A1')),
-        t.orderedList(t.p('A2')),
-      ),
+      t.doc(t.orderedList(t.listItem(t.p('A1')), t.listItem(t.p('A2')))),
     )
   })
 })

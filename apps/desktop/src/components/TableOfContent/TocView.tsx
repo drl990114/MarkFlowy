@@ -20,7 +20,10 @@ import * as Rme from 'rme'
 import { EditorViewType, extractMatches } from 'rme'
 import { sourceCodeCodemirrorViewMap } from '../EditorArea/TextEditor'
 import SideBarHeader from '../SideBar/SideBarHeader'
-import { HeadingNumberingButton } from './HeadingNumberingButton'
+import {
+  hasHeadingNumberingCapability,
+  HeadingNumberingButton,
+} from './HeadingNumberingButton'
 import { TocViewContainer } from './styles'
 
 type HeadingInfo = {
@@ -515,7 +518,9 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
   }, [activeId])
 
   const headingNumberingAction =
-    editorCtx && activeViewType === EditorViewType.WYSIWYG ? (
+    editorCtx &&
+    activeViewType === EditorViewType.WYSIWYG &&
+    hasHeadingNumberingCapability(editorCtx) ? (
       <HeadingNumberingButton editorCtx={editorCtx} />
     ) : null
 

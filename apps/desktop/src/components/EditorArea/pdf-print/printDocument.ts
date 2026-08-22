@@ -131,49 +131,6 @@ function getSafeWebUrl(source: string, doc: Document): string | null {
   }
 }
 
-function createListMarkerIcon(kind: 'bullet' | 'toggle', doc: Document): SVGSVGElement {
-  const svgNamespace = 'http://www.w3.org/2000/svg'
-  const svg = doc.createElementNS(svgNamespace, 'svg')
-  svg.classList.add('mf-pdf-list-marker-icon')
-  svg.setAttribute('viewBox', '0 0 24 24')
-  svg.setAttribute('aria-hidden', 'true')
-  svg.setAttribute('focusable', 'false')
-
-  if (kind === 'bullet') {
-    const circle = doc.createElementNS(svgNamespace, 'circle')
-    circle.setAttribute('cx', '12')
-    circle.setAttribute('cy', '12')
-    circle.setAttribute('r', '2.5')
-    circle.setAttribute('fill', 'currentColor')
-    svg.append(circle)
-  } else {
-    const polygon = doc.createElementNS(svgNamespace, 'polygon')
-    polygon.setAttribute('points', '8,10 12,14 16,10')
-    polygon.setAttribute('fill', 'currentColor')
-    svg.append(polygon)
-  }
-
-  return svg
-}
-
-function replaceUnsupportedListMarkers(root: HTMLElement, doc: Document): void {
-  root
-    .querySelectorAll<HTMLElement>(
-      ".prosemirror-flat-list[data-list-kind='bullet'] > .list-marker, " +
-        ".prosemirror-flat-list[data-list-kind='toggle'] > .list-marker",
-    )
-    .forEach((marker) => {
-      const list = marker.parentElement
-      if (!list) return
-      const kind = list.dataset.listKind
-      if (kind !== 'bullet' && kind !== 'toggle') return
-
-      if (kind === 'toggle') list.removeAttribute('data-list-collapsed')
-      marker.classList.add('mf-pdf-list-marker')
-      marker.replaceChildren(createListMarkerIcon(kind, doc))
-    })
-}
-
 export function replaceInteractiveMedia(
   root: HTMLElement,
   label: string,
@@ -263,11 +220,7 @@ async function waitForFonts(doc: Document, signal: AbortSignal): Promise<void> {
   }
 }
 
-async function waitForLayout(
-  root: HTMLElement,
-  win: Window,
-  signal: AbortSignal,
-): Promise<void> {
+async function waitForLayout(root: HTMLElement, win: Window, signal: AbortSignal): Promise<void> {
   throwIfAborted(signal)
   void root.offsetHeight
 
@@ -314,9 +267,7 @@ export async function makePrintDocumentTransferable(
   root: HTMLElement,
   signal: AbortSignal,
 ): Promise<void> {
-  const blobImages = Array.from(
-    root.querySelectorAll<HTMLImageElement>('img[src^="blob:"]'),
-  )
+  const blobImages = Array.from(root.querySelectorAll<HTMLImageElement>('img[src^="blob:"]'))
 
   await Promise.all(
     blobImages.map(async (image) => {
@@ -356,8 +307,6 @@ export async function preparePrintDocument({
           throw new Error(renderError.textContent?.trim() || 'Preview rendering failed')
         }
         replaceInteractiveMedia(root, interactiveMediaLabel, doc)
-        replaceUnsupportedListMarkers(root, doc)
-
         const [failedImageCount] = await Promise.all([
           waitForImages(root, taskAbortController.signal),
           waitForFonts(doc, taskAbortController.signal),

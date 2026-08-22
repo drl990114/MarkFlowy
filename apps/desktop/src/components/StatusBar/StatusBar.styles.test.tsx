@@ -40,8 +40,10 @@ describe('StatusBar responsive density', () => {
     const css = renderStatusBarStyles().replaceAll(/\s/g, '')
 
     expect(desktopUiStyles).toContain('--mf-ui-status-bar-height: 32px')
+    expect(desktopUiStyles).toContain('--color-surface-statusbar: var(--mf-surface-statusbar)')
     expect(desktopUiStyles).not.toContain('--mf-ui-status-bar-height: 36px')
     expect(css).toContain('height:var(--mf-ui-status-bar-height)')
+    expect(css).toContain('background:var(--mf-surface-statusbar)')
     expect(css).toContain('padding:4px6px5px')
     expect(css).toContain('height:22px')
     expect(css.match(/overflow:hidden/g)).toHaveLength(1)

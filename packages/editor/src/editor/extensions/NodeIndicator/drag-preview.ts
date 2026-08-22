@@ -1,4 +1,5 @@
 import { isHTMLElement } from '@ocavue/utils'
+import { createListItemDragSlice, isListItemNode } from '@rme-sdk/sdk/extensions/list'
 import { Fragment, Slice } from '@rme-sdk/sdk/pm/model'
 import { NodeSelection } from '@rme-sdk/sdk/pm/state'
 import type { EditorView } from '@rme-sdk/sdk/pm/view'
@@ -16,9 +17,12 @@ export function startViewDragging(
     return
   }
 
-  const { dom, text, slice } = view.serializeForClipboard(
-    new Slice(Fragment.from(node), 0, 0),
-  )
+  const sourceSlice = isListItemNode(node)
+    ? createListItemDragSlice(view.state.doc, pos)
+    : new Slice(Fragment.from(node), 0, 0)
+  if (!sourceSlice) return
+
+  const { dom, text, slice } = view.serializeForClipboard(sourceSlice)
 
   if (event.dataTransfer) {
     event.dataTransfer.clearData()

@@ -398,4 +398,24 @@ describe('enhanceProsemirrorHtml', () => {
     expect(sharedHtml).not.toContain('data-type="code-block"')
     expect(sharedHtml).not.toContain('data-html=')
   })
+
+  test('renders native ordered and task list markup in preview HTML', async () => {
+    const delegate = createWysiwygDelegate()
+
+    try {
+      const doc = delegate.stringToDoc('9. normal\n10. [x] done')
+      const container = parseHtml(await rmeProsemirrorNodeToHtml(doc, {}))
+      const list = container.querySelector('ol')
+      const items = container.querySelectorAll('li')
+
+      expect(list?.getAttribute('start')).toBe('9')
+      expect(list?.getAttribute('data-tight')).toBe('true')
+      expect(items).toHaveLength(2)
+      expect(items[1]?.getAttribute('data-checked')).toBe('true')
+      expect(items[1]?.querySelector('input[type="checkbox"]')?.hasAttribute('disabled')).toBe(true)
+      expect(container.querySelector('.prosemirror-flat-list')).toBeNull()
+    } finally {
+      delegate.manager.destroy()
+    }
+  })
 })

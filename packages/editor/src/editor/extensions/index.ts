@@ -43,7 +43,7 @@ import {
   MdImgUriExtension,
 } from './Image/md-image-extension'
 import { LineInlineDecorationExtension, LineInlineMarkExtension, markExtensions } from './Inline'
-import { LineListExtension } from './List'
+import { LineBulletListExtension, LineListItemExtension, LineOrderedListExtension } from './List'
 import { MathBlockExtension, MathInlineExtension } from './Math'
 import { MermaidBlockExtension } from './Mermaid'
 import { NodeIndicatorExtension } from './NodeIndicator'
@@ -61,10 +61,7 @@ import { LineTextExtension } from './Text'
 import { TransformerExtension } from './Transformer/transformer-extension'
 import { TypewriterScrollExtension, type TypewriterScrollOptions } from './TypewriterScroll'
 import { LinkClickExtension, type LinkClickHandler } from './LinkClick'
-import {
-  LivePreviewBlockExtension,
-  type LivePreviewBlockBehavior,
-} from './LivePreviewBlock'
+import { LivePreviewBlockExtension, type LivePreviewBlockBehavior } from './LivePreviewBlock'
 
 export * from './Image'
 export * from './List'
@@ -188,7 +185,9 @@ function extensions(options: ExtensionsOptions): any[] {
     new LineBlockquoteExtension(),
     new LineHeadingExtension({}),
     new HeadingNumberingExtension(),
-    new LineListExtension(),
+    new LineBulletListExtension(),
+    new LineOrderedListExtension(),
+    new LineListItemExtension(),
     new LineCodeMirrorExtension({
       extensions: [
         ...getSetupByCodemirrorOptions({ ...codemirrorOptions, lineNumbers: true }),

@@ -11,18 +11,20 @@ import {
 
 describe('block handler layout', () => {
   it('keeps the visible handler outside the content with a stable gap', () => {
-    expect(BLOCK_HANDLER_GUTTER_SIZE).toBe(
-      BLOCK_HANDLER_INLINE_SIZE + BLOCK_HANDLER_CONTENT_GAP,
-    )
+    expect(BLOCK_HANDLER_GUTTER_SIZE).toBe(BLOCK_HANDLER_INLINE_SIZE + BLOCK_HANDLER_CONTENT_GAP)
     expect(getBlockHandlerLeft(100) + BLOCK_HANDLER_INLINE_SIZE).toBe(
       100 - BLOCK_HANDLER_CONTENT_GAP,
     )
   })
 
   it('covers the full gutter with the handler interaction area', () => {
-    expect(
-      getBlockHandlerLeft(100) + BLOCK_HANDLER_INLINE_SIZE + BLOCK_HANDLER_CONTENT_GAP,
-    ).toBe(100)
+    expect(getBlockHandlerLeft(100) + BLOCK_HANDLER_INLINE_SIZE + BLOCK_HANDLER_CONTENT_GAP).toBe(
+      100,
+    )
+  })
+
+  it('keeps list-item handlers in the root gutter instead of the marker lane', () => {
+    expect(getBlockHandlerLeft(148, 100) + BLOCK_HANDLER_GUTTER_SIZE).toBe(100)
   })
 
   it('centers the visible control while padding the pointer hit area', () => {
@@ -30,8 +32,7 @@ describe('block handler layout', () => {
 
     expect(geometry).toEqual({
       controlOffsetTop: BLOCK_HANDLER_HIT_PADDING_BLOCK,
-      hitAreaBlockSize:
-        BLOCK_HANDLER_CONTROL_BLOCK_SIZE + BLOCK_HANDLER_HIT_PADDING_BLOCK * 2,
+      hitAreaBlockSize: BLOCK_HANDLER_CONTROL_BLOCK_SIZE + BLOCK_HANDLER_HIT_PADDING_BLOCK * 2,
       hitAreaTop: 100 - BLOCK_HANDLER_HIT_PADDING_BLOCK,
     })
   })

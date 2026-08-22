@@ -13,6 +13,24 @@ vi.mock('@/i18n', () => ({
 }))
 
 describe('HeadingNumberingButton', () => {
+  it('stays hidden while the source editor context is being replaced', () => {
+    const editorCtx = {
+      addHandler: vi.fn(),
+      commands: {},
+      helpers: {},
+      view: { focus: vi.fn() },
+    } as unknown as EditorContext
+
+    render(
+      <TooltipProvider>
+        <HeadingNumberingButton editorCtx={editorCtx} />
+      </TooltipProvider>,
+    )
+
+    expect(screen.queryByRole('button', { name: 'sidebar.heading_numbering' })).toBeNull()
+    expect(editorCtx.addHandler).not.toHaveBeenCalled()
+  })
+
   it('reflects the heading-numbering toggle state and command result', () => {
     let complete = false
     let handleEditorUpdate: (() => void) | undefined

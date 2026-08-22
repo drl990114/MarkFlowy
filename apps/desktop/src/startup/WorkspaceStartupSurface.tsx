@@ -81,7 +81,7 @@ export function WorkspaceStartupSurface({
       </div>
       <div
         aria-hidden='true'
-        className='h-[var(--mf-ui-status-bar-height)] shrink-0 border-t border-border bg-surface-titlebar'
+        className='h-[var(--mf-ui-status-bar-height)] shrink-0 border-t border-border bg-surface-statusbar'
         data-mf-workspace-shell='status-bar'
       />
     </div>

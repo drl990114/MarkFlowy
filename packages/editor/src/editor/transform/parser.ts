@@ -5,7 +5,7 @@ import MarkdownIt from 'markdown-it'
 import MarkdownItListCheckbox from './markdown-it-list-checkbox'
 import MarkdownItReferenceImage from './markdown-it-reference-image'
 
-import { Token } from 'markdown-it/index.js'
+import type { Token } from 'markdown-it/index.js'
 import { front_matter_plugin } from './markdown-it-front-matter'
 import MarkdownItHtmlInline from './markdown-it-html-inline'
 import MarkdownItImage from './markdown-it-image'
@@ -260,6 +260,113 @@ function buildTokenHandlers(schema: Schema, parserRules: ParserRule[]): TokenHan
   return handlers
 }
 
+function isListOpenToken(token: Token): boolean {
+  return token.type === 'bullet_list_open' || token.type === 'ordered_list_open'
+}
+
+function isListCloseToken(token: Token): boolean {
+  return token.type === 'bullet_list_close' || token.type === 'ordered_list_close'
+}
+
+function containsOnlyTopLevelLists(tokens: Token[]): boolean {
+  let listDepth = 0
+  let sawList = false
+
+  for (const token of tokens) {
+    if (listDepth === 0) {
+      if (!isListOpenToken(token)) return false
+      listDepth = 1
+      sawList = true
+      continue
+    }
+
+    if (isListOpenToken(token)) {
+      listDepth += 1
+    } else if (isListCloseToken(token)) {
+      listDepth -= 1
+      if (listDepth < 0) return false
+    }
+  }
+
+  return sawList && listDepth === 0
+}
+
+function stripFourSpaceIndent(sourceLines: string[]): string | null {
+  const firstContentLine = sourceLines.find((line) => line.trim().length > 0)
+  if (!firstContentLine?.startsWith('    ')) return null
+
+  const stripped: string[] = []
+  for (const line of sourceLines) {
+    if (line.trim().length === 0) {
+      stripped.push('')
+      continue
+    }
+    if (!line.startsWith('    ')) return null
+    stripped.push(line.slice(4))
+  }
+
+  return stripped.join('\n')
+}
+
+function looksLikeCanonicalListSource(source: string): boolean {
+  const rootListMarker = /^(?:[-+*]|\d{1,9}[.)])[ \t]+/
+  return source.split('\n').every((line) => {
+    return line.trim().length === 0 || line.startsWith('    ') || rootListMarker.test(line)
+  })
+}
+
+function replaceRootIndentedLists(tokenizer: MarkdownIt, source: string, tokens: Token[]): Token[] {
+  const sourceLines = source.split(/\r?\n/)
+  const normalized: Token[] = []
+
+  for (const token of tokens) {
+    if (token.type !== 'code_block' || token.level !== 0 || !token.map) {
+      normalized.push(token)
+      continue
+    }
+
+    const candidate = stripFourSpaceIndent(sourceLines.slice(token.map[0], token.map[1]))
+    if (candidate === null || !looksLikeCanonicalListSource(candidate)) {
+      normalized.push(token)
+      continue
+    }
+
+    const candidateTokens = tokenizer.parse(candidate, {})
+    if (!containsOnlyTopLevelLists(candidateTokens)) {
+      normalized.push(token)
+      continue
+    }
+
+    normalized.push(...candidateTokens)
+  }
+
+  return normalized
+}
+
+function annotateListTightness(tokens: Token[]): void {
+  const listStack: Token[] = []
+
+  for (const token of tokens) {
+    if (isListOpenToken(token)) {
+      token.meta = { ...token.meta, tight: true }
+      listStack.push(token)
+      continue
+    }
+
+    if (token.type === 'paragraph_open' && token.hidden === false) {
+      const list = listStack[listStack.length - 1]
+      if (list && token.level === list.level + 2) {
+        list.meta = { ...list.meta, tight: false }
+      }
+      continue
+    }
+
+    if (isListCloseToken(token)) {
+      listStack.pop()
+    }
+  }
+}
+
 export class MarkdownParser {
   private schema: Schema
   private tokenizer: MarkdownIt
@@ -302,7 +409,8 @@ export class MarkdownParser {
   public parse(text: string): Node {
     const state = new MarkdownParseState(this.schema, this.tokenHandlers)
     let doc: Node
-    const mdTokens: Token[] = this.tokenizer.parse(text, {})
+    const mdTokens = replaceRootIndentedLists(this.tokenizer, text, this.tokenizer.parse(text, {}))
+    annotateListTightness(mdTokens)
     state.parseTokens(mdTokens)
     do {
       doc = state.closeNode()

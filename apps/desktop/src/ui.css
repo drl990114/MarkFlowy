@@ -47,6 +47,7 @@
   --animate-pulse: mf-pulse 1.6s ease-in-out infinite;
   --color-surface-app: var(--mf-surface-app);
   --color-surface-titlebar: var(--mf-surface-titlebar);
+  --color-surface-statusbar: var(--mf-surface-statusbar);
   --color-surface-panel: var(--mf-surface-panel);
   --color-surface-panel-left: var(--mf-surface-panel-left);
   --color-surface-panel-right: var(--mf-surface-panel-right);
@@ -117,6 +118,7 @@
 :root {
   --mf-surface-app: var(--mf-boot-surface-app, #fff);
   --mf-surface-titlebar: var(--mf-boot-surface-toolbar, #fefefe);
+  --mf-surface-statusbar: #e9e9e9;
   --mf-surface-panel: var(--mf-boot-surface-panel, #f9f9f9);
   --mf-surface-panel-left: var(--mf-boot-surface-panel, #f9f9f9);
   --mf-surface-panel-right: var(--mf-boot-surface-panel, #f9f9f9);

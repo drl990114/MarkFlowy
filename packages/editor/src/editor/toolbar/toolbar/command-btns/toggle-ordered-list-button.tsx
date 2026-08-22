@@ -1,34 +1,39 @@
-import { useActive, useCommands } from '@rme-sdk/sdk/react'
-import { FC, useCallback } from 'react'
+import { isListKindActive } from '@rme-sdk/sdk/extensions/list'
+import { useCommands, useEditorState } from '@rme-sdk/sdk/react'
+import { useCallback } from 'react'
+import type { FC } from 'react'
 
 import { t } from '@markflowy/i18n'
-import { LineListExtension } from '../../../extensions'
-import { CommandButton, CommandButtonProps } from './command-button'
+import type { LineOrderedListExtension } from '../../../extensions'
+import { CommandButton } from './command-button'
+import type { CommandButtonProps } from './command-button'
 
-export interface ToggleOrderedListButtonProps
-  extends Omit<CommandButtonProps, 'commandName' | 'active' | 'enabled' | 'attrs' | 'onSelect'> {}
+export type ToggleOrderedListButtonProps = Omit<
+  CommandButtonProps,
+  'commandName' | 'active' | 'enabled' | 'attrs' | 'onSelect' | 'pressed'
+>
 
 export const ToggleOrderedListButton: FC<ToggleOrderedListButtonProps> = (props) => {
-  const { toggleList } = useCommands<LineListExtension>()
+  const { toggleOrderedList } = useCommands<LineOrderedListExtension>()
+  const state = useEditorState()
 
   const handleSelect = useCallback(() => {
-    if (toggleList) {
-      toggleList({
-        kind: 'ordered',
-      })
+    if (toggleOrderedList.enabled()) {
+      toggleOrderedList()
     }
-  }, [toggleList])
+  }, [toggleOrderedList])
 
-  const active = useActive<LineListExtension>().list()
-  const enabled = true
+  const active = isListKindActive(state, 'ordered')
+  const enabled = toggleOrderedList.enabled()
 
   return (
     <CommandButton
       {...props}
       label={t('toolbar.orderedList')}
-      icon="ri-list-ordered"
-      commandName="toggleList"
+      icon='ri-list-ordered'
+      commandName='toggleOrderedList'
       active={active}
+      pressed={active}
       enabled={enabled}
       onSelect={handleSelect}
     />

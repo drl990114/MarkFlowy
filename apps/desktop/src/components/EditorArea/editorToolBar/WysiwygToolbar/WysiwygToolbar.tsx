@@ -1,6 +1,6 @@
 import { useEditorStore } from '@/stores'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
-import { type FC, useCallback, useMemo } from 'react'
+import { type FC, useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from '@/i18n'
 import { EditorViewType } from 'rme'
 import {
@@ -18,6 +18,7 @@ import {
   Redo2Icon,
   Undo2Icon,
 } from 'lucide-react'
+import type { EditorContext } from 'rme'
 import {
   ToolbarSection,
   usePriorityHidden,
@@ -38,6 +39,33 @@ interface WysiwygToolbarProps {
 }
 
 type ToolbarCommand = (attrs?: Record<string, unknown>) => unknown
+type StandardListKind = 'bullet' | 'ordered' | 'task'
+
+function getActiveListKind(editorCtx: EditorContext): StandardListKind | null {
+  const { doc, selection } = editorCtx.view.state
+  const kinds = new Set<StandardListKind>()
+  const addItemKind = (checked: unknown, parentName: string) => {
+    kinds.add(checked !== null ? 'task' : parentName === 'orderedList' ? 'ordered' : 'bullet')
+  }
+
+  for (let depth = selection.$from.depth; depth > 0; depth -= 1) {
+    const node = selection.$from.node(depth)
+    if (node.type.name === 'listItem') {
+      addItemKind(node.attrs.checked, selection.$from.node(depth - 1).type.name)
+      break
+    }
+  }
+
+  if (!selection.empty) {
+    doc.nodesBetween(selection.from, selection.to, (node, _pos, parent) => {
+      if (node.type.name !== 'listItem') return true
+      addItemKind(node.attrs.checked, parent?.type.name ?? '')
+      return false
+    })
+  }
+
+  return kinds.size === 1 ? [...kinds][0] : null
+}
 
 const TOOLBAR_GROUPS = [
   { id: 'history', priority: 90 },
@@ -59,6 +87,21 @@ export const WysiwygToolbar: FC<WysiwygToolbarProps> = (props) => {
 
   const editorCtx = useEditorStore((state) => state.editorCtxMap.get(targetEditorId ?? ''))
   const viewType = targetEditorId ? getEditorViewType(targetEditorId) : EditorViewType.WYSIWYG
+  const [activeListKind, setActiveListKind] = useState<StandardListKind | null>(null)
+
+  useEffect(() => {
+    if (!editorCtx) {
+      setActiveListKind(null)
+      return
+    }
+
+    const syncActiveListKind = () => {
+      setActiveListKind(getActiveListKind(editorCtx))
+    }
+
+    syncActiveListKind()
+    return editorCtx.addHandler('updated', syncActiveListKind)
+  }, [editorCtx])
 
   const { containerRef, hiddenIds, registerItemWidth } = usePriorityHidden({
     items: TOOLBAR_SECTIONS,
@@ -68,14 +111,12 @@ export const WysiwygToolbar: FC<WysiwygToolbarProps> = (props) => {
   const runEditorCommand = useCallback(
     (commandName: string, attrs?: Record<string, unknown>) => {
       if (!editorCtx) return
-      const commands = editorCtx.commands as unknown as Record<
-        string,
-        ToolbarCommand | undefined
-      >
+      const commands = editorCtx.commands as unknown as Record<string, ToolbarCommand | undefined>
       const command = commands[commandName]
       if (!command) return
 
-      command(attrs)
+      if (attrs === undefined) command()
+      else command(attrs)
       editorCtx.view.focus()
     },
     [editorCtx],
@@ -177,7 +218,8 @@ export const WysiwygToolbar: FC<WysiwygToolbarProps> = (props) => {
         priority: 30,
         label: t('toolbar.bulletList') || 'Bullet List',
         icon: ListIcon,
-        run: () => runEditorCommand('toggleList', { kind: 'bullet' }),
+        pressed: activeListKind === 'bullet',
+        run: () => runEditorCommand('toggleBulletList'),
       },
       {
         id: 'ordered-list',
@@ -185,7 +227,8 @@ export const WysiwygToolbar: FC<WysiwygToolbarProps> = (props) => {
         priority: 30,
         label: t('toolbar.orderedList') || 'Ordered List',
         icon: ListOrderedIcon,
-        run: () => runEditorCommand('toggleList', { kind: 'ordered' }),
+        pressed: activeListKind === 'ordered',
+        run: () => runEditorCommand('toggleOrderedList'),
       },
       {
         id: 'task-list',
@@ -193,10 +236,11 @@ export const WysiwygToolbar: FC<WysiwygToolbarProps> = (props) => {
         priority: 30,
         label: t('toolbar.taskList') || 'Task List',
         icon: ListTodoIcon,
-        run: () => runEditorCommand('toggleList', { kind: 'task' }),
+        pressed: activeListKind === 'task',
+        run: () => runEditorCommand('toggleTaskList'),
       },
     ],
-    [handleInsertImage, imageLabel, runEditorCommand, t],
+    [activeListKind, handleInsertImage, imageLabel, runEditorCommand, t],
   )
 
   const overflowMenuItems = useMemo(
@@ -210,16 +254,8 @@ export const WysiwygToolbar: FC<WysiwygToolbarProps> = (props) => {
 
   return (
     <ToolbarWrapper className='mf-editor-toolbar' ref={containerRef}>
-      <ToolbarSection
-        id='common'
-        registerWidth={registerItemWidth}
-        hidden={false}
-      >
-        <MenuList
-          editorId={targetEditorId}
-          prependItems={overflowMenuItems}
-          showTypewriterScroll
-        />
+      <ToolbarSection id='common' registerWidth={registerItemWidth} hidden={false}>
+        <MenuList editorId={targetEditorId} prependItems={overflowMenuItems} showTypewriterScroll />
         <AIButton editorId={targetEditorId} />
       </ToolbarSection>
 

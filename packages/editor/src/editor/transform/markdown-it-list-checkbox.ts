@@ -1,9 +1,9 @@
 import type MarkdownIt from 'markdown-it'
-import { Core, StateCore } from 'markdown-it/index.js'
+import type { Core, StateCore } from 'markdown-it/index.js'
 import Token from 'markdown-it/lib/token.mjs'
 
-function isBulletListItemToken(t: Token) {
-  return t.type === 'list_item_open' && ['*', '-'].includes(t.markup)
+function isListItemToken(t: Token) {
+  return t.type === 'list_item_open'
 }
 function isParagraphOpenToken(t: Token) {
   return t.type === 'paragraph_open'
@@ -18,29 +18,16 @@ const rule: Core.RuleCore = (state: StateCore) => {
   const tokensLength = tokens.length
   for (let i = tokensLength - 3; i >= 0; i--) {
     const curToken = tokens[i]
-    if (curToken.type === 'ordered_list_open') {
-      curToken.attrs?.some(([name, value]) => {
-        if (name === 'start') {
-          const startNum = parseInt(value, 10)
-          if (!isNaN(startNum) && startNum >= 1) {
-            // 设置自定义的 order 属性以供后续处理
-            curToken.attrPush(['order', value])
-          }
-          return true
-        }
-        return false
-      })
-    }
     if (
-      isBulletListItemToken(curToken) &&
+      isListItemToken(curToken) &&
       isParagraphOpenToken(tokens[i + 1]) &&
       isInlineToken(tokens[i + 2])
     ) {
       const inlineToken = tokens[i + 2]
-      const match = /^\[([ |x])\]\s?/.exec(inlineToken.content)
+      const match = /^\[([ xX])\](?:[ \t]+|$)/.exec(inlineToken.content)
 
       if (match) {
-        const checked = match[1] === 'x'
+        const checked = match[1].toLowerCase() === 'x'
         const checkboxPrefix = match[0]
 
         // 更新 inlineToken.content，移除checkbox标记
@@ -48,7 +35,7 @@ const rule: Core.RuleCore = (state: StateCore) => {
 
         // 更新第一个text子节点的内容，避免重复
         if (inlineToken.children && inlineToken.children.length > 0) {
-          const firstTextChild = inlineToken.children.find(child => child.type === 'text')
+          const firstTextChild = inlineToken.children.find((child) => child.type === 'text')
           if (firstTextChild) {
             // 确保只修改一次，避免重复赋值
             const originalContent = firstTextChild.content
@@ -59,6 +46,7 @@ const rule: Core.RuleCore = (state: StateCore) => {
         }
 
         const checkboxToken = new Token('list_checkbox', 'input', 0)
+        checkboxToken.level = tokens[i + 1].level
         checkboxToken.attrPush(['type', 'checkbox'])
         if (checked) {
           checkboxToken.attrPush(['checked', ''])

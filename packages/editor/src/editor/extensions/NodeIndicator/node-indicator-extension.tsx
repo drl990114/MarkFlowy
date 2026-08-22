@@ -1,50 +1,82 @@
 import { isHTMLElement } from '@ocavue/utils'
 import { PlainExtension } from '@rme-sdk/sdk/core'
 import type { CreateExtensionPlugin, EditorView, ResolvedPos } from '@rme-sdk/sdk/core'
-import { NodeSelection, TextSelection } from '@rme-sdk/sdk/pm/state'
-import type { PluginKey } from '@rme-sdk/sdk/pm/state'
+import { NodeSelection, TextSelection, type EditorState } from '@rme-sdk/sdk/pm/state'
+import type { Transaction } from '@rme-sdk/sdk/pm/state'
+import type { Slice } from '@rme-sdk/sdk/pm/model'
 import { buildGetTarget } from './drop-target'
 import type { GetTarget } from './drop-target'
-import {
-  findBlockByCoords,
-  findBlockInteractionRect,
-  findFirstLineRect,
-} from './node-target'
+import { findBlockByCoords, findBlockInteractionRect, findFirstLineRect } from './node-target'
 import type { NodeIndicatorState, ViewDragging } from './types'
 
+const EMPTY_NODE_INDICATOR_STATE: NodeIndicatorState = {
+  node: null,
+  pos: null,
+  rect: null,
+  interactionRect: null,
+}
+
 export class NodeIndicatorExtension extends PlainExtension {
+  private nodeIndicatorState = EMPTY_NODE_INDICATOR_STATE
+  private readonly nodeIndicatorStateListeners = new Set<() => void>()
+
   get name() {
     return 'nodeIndicator' as const
   }
 
-  createPlugin(): CreateExtensionPlugin<NodeIndicatorState> {
-    let getTarget: GetTarget | undefined
+  readonly getNodeIndicatorState = (): NodeIndicatorState => this.nodeIndicatorState
 
-    const initialState: NodeIndicatorState = {
-      node: null,
-      pos: null,
-      rect: null,
-      interactionRect: null,
+  readonly subscribeToNodeIndicatorState = (listener: () => void): (() => void) => {
+    this.nodeIndicatorStateListeners.add(listener)
+    return () => this.nodeIndicatorStateListeners.delete(listener)
+  }
+
+  clearNodeIndicatorState = (): void => {
+    this.setNodeIndicatorState(EMPTY_NODE_INDICATOR_STATE)
+  }
+
+  private setNodeIndicatorState(nextState: NodeIndicatorState): void {
+    if (
+      this.nodeIndicatorState.node === nextState.node &&
+      this.nodeIndicatorState.pos === nextState.pos &&
+      this.nodeIndicatorState.rect === nextState.rect &&
+      this.nodeIndicatorState.interactionRect === nextState.interactionRect
+    ) {
+      return
     }
-    return {
-      initialState,
-      state: {
-        init: () => initialState,
-        apply: (tr, value) => {
-          const meta = tr.getMeta(this.pluginKey)
-          if (meta) {
-            return { ...value, ...meta }
-          }
 
-          if (tr.docChanged) {
-            return { ...value }
-          }
-          return value
-        },
-      },
+    this.nodeIndicatorState = nextState
+    this.nodeIndicatorStateListeners.forEach((listener) => listener())
+  }
+
+  createPlugin(): CreateExtensionPlugin {
+    let getTarget: GetTarget | undefined
+    let pointerMoveFrame: number | undefined
+    let latestPointerMove: PointerEvent | undefined
+
+    const cancelScheduledPointerMove = () => {
+      if (pointerMoveFrame !== undefined) {
+        cancelAnimationFrame(pointerMoveFrame)
+        pointerMoveFrame = undefined
+      }
+      latestPointerMove = undefined
+    }
+
+    return {
       view: (view) => {
         getTarget = buildGetTarget(view)
-        return {}
+        return {
+          update: (updatedView: EditorView, previousState: EditorState) => {
+            if (!updatedView.state.doc.eq(previousState.doc)) {
+              this.clearNodeIndicatorState()
+            }
+          },
+          destroy: () => {
+            cancelScheduledPointerMove()
+            this.clearNodeIndicatorState()
+            getTarget = undefined
+          },
+        }
       },
       props: {
         handleDrop: (view, event, slice, move): boolean => {
@@ -61,38 +93,8 @@ export class NodeIndicatorExtension extends PlainExtension {
           event.preventDefault()
           const insertPos = target[0]
 
-          const tr = view.state.tr
-
-          if (move) {
-            const { node } = (view.dragging as ViewDragging | null) || {}
-            if (node) node.replace(tr)
-            else tr.deleteSelection()
-          }
-
-          const pos = tr.mapping.map(insertPos)
-          const isNode = slice.openStart == 0 && slice.openEnd == 0 && slice.content.childCount == 1
-          const beforeInsert = tr.doc
-          if (isNode) tr.replaceRangeWith(pos, pos, slice.content.firstChild!)
-          else tr.replaceRange(pos, pos, slice)
-          if (tr.doc.eq(beforeInsert)) {
-            return false
-          }
-
-          const $pos = tr.doc.resolve(pos)
-          if (
-            isNode &&
-            NodeSelection.isSelectable(slice.content.firstChild!) &&
-            $pos.nodeAfter &&
-            $pos.nodeAfter.sameMarkup(slice.content.firstChild!)
-          ) {
-            tr.setSelection(new NodeSelection($pos))
-          } else {
-            let end = tr.mapping.map(insertPos)
-            tr.mapping.maps[tr.mapping.maps.length - 1].forEach(
-              (_from, _to, _newFrom, newTo) => (end = newTo),
-            )
-            tr.setSelection(selectionBetween(view, $pos, tr.doc.resolve(end)))
-          }
+          const tr = createBlockDropTransaction(view, slice, move, insertPos)
+          if (!tr) return false
           view.focus()
           view.dispatch(tr.setMeta('uiEvent', 'drop'))
           return true
@@ -109,33 +111,74 @@ export class NodeIndicatorExtension extends PlainExtension {
                 return false
               }
             }
-            const currentState = this.pluginKey.getState(view.state)
-            if (currentState?.node !== null) {
-              view.dispatch(
-                view.state.tr.setMeta(this.pluginKey, {
-                  node: null,
-                  pos: null,
-                  rect: null,
-                  interactionRect: null,
-                }),
-              )
-            }
+            cancelScheduledPointerMove()
+            this.clearNodeIndicatorState()
             return false
           },
           pointermove: (view, event) => {
-            if ((view as any).__nodeIndicatorThrottled) {
-              return
-            }
-            ;(view as any).__nodeIndicatorThrottled = true
-            requestAnimationFrame(() => {
-              ;(view as any).__nodeIndicatorThrottled = false
-              handlePointerMove(view, event, this.pluginKey)
+            latestPointerMove = event as PointerEvent
+            if (pointerMoveFrame !== undefined) return false
+
+            pointerMoveFrame = requestAnimationFrame(() => {
+              pointerMoveFrame = undefined
+              const latestEvent = latestPointerMove
+              latestPointerMove = undefined
+              if (latestEvent) {
+                this.setNodeIndicatorState(
+                  getNodeIndicatorStateAtPointer(
+                    view,
+                    latestEvent,
+                    this.getNodeIndicatorState(),
+                  ),
+                )
+              }
             })
+            return false
           },
         },
       },
     }
   }
+}
+
+export function createBlockDropTransaction(
+  view: EditorView,
+  slice: Slice,
+  move: boolean,
+  insertPos: number,
+): Transaction | null {
+  const tr = view.state.tr
+
+  if (move) {
+    const { node } = (view.dragging as ViewDragging | null) || {}
+    if (node) node.replace(tr)
+    else tr.deleteSelection()
+  }
+
+  const pos = tr.mapping.map(insertPos)
+  const isNode = slice.openStart === 0 && slice.openEnd === 0 && slice.content.childCount === 1
+  const beforeInsert = tr.doc
+  if (isNode) tr.replaceRangeWith(pos, pos, slice.content.firstChild!)
+  else tr.replaceRange(pos, pos, slice)
+  if (tr.doc.eq(beforeInsert)) return null
+
+  const $pos = tr.doc.resolve(pos)
+  if (
+    isNode &&
+    NodeSelection.isSelectable(slice.content.firstChild!) &&
+    $pos.nodeAfter &&
+    $pos.nodeAfter.sameMarkup(slice.content.firstChild!)
+  ) {
+    tr.setSelection(new NodeSelection($pos))
+  } else {
+    let end = tr.mapping.map(insertPos)
+    tr.mapping.maps[tr.mapping.maps.length - 1]?.forEach(
+      (_from, _to, _newFrom, newTo) => (end = newTo),
+    )
+    tr.setSelection(selectionBetween(view, $pos, tr.doc.resolve(end)))
+  }
+
+  return tr
 }
 
 function selectionBetween(
@@ -150,40 +193,23 @@ function selectionBetween(
   )
 }
 
-function handlePointerMove(view: EditorView, event: Event, pluginKey: PluginKey) {
-  const currentState = pluginKey.getState(view.state)
-  const { x, y } = event as PointerEvent
+function getNodeIndicatorStateAtPointer(
+  view: EditorView,
+  event: PointerEvent,
+  currentState: NodeIndicatorState,
+): NodeIndicatorState {
+  const { x, y } = event
 
   const block = findBlockByCoords(view, x, y)
 
   if (!block) {
-    if (currentState?.node !== null) {
-      view.dispatch(
-        view.state.tr.setMeta(pluginKey, {
-          node: null,
-          pos: null,
-          rect: null,
-          interactionRect: null,
-        }),
-      )
-    }
-    return
+    return EMPTY_NODE_INDICATOR_STATE
   }
 
   const { node, pos } = block
   const element = view.nodeDOM(pos)
   if (!element || !isHTMLElement(element)) {
-    if (currentState?.node !== null) {
-      view.dispatch(
-        view.state.tr.setMeta(pluginKey, {
-          node: null,
-          pos: null,
-          rect: null,
-          interactionRect: null,
-        }),
-      )
-    }
-    return
+    return EMPTY_NODE_INDICATOR_STATE
   }
 
   let newNode = node
@@ -197,13 +223,17 @@ function handlePointerMove(view: EditorView, event: Event, pluginKey: PluginKey)
     newPos = parentPos
   }
 
-  if (currentState?.pos === newPos && currentState?.node && newNode.type === currentState?.node.type) {
-    return
+  if (
+    currentState.pos === newPos &&
+    currentState.node &&
+    newNode.type === currentState.node.type
+  ) {
+    return currentState
   }
 
   const newElement = view.nodeDOM(newPos)
   if (!newElement || !isHTMLElement(newElement)) {
-    return
+    return currentState
   }
 
   let rect
@@ -214,14 +244,12 @@ function handlePointerMove(view: EditorView, event: Event, pluginKey: PluginKey)
     rect = findFirstLineRect(undefined, newElement)
   }
 
-  view.dispatch(
-    view.state.tr.setMeta(pluginKey, {
-      node: newNode,
-      pos: newPos,
-      rect: rect || null,
-      interactionRect: findBlockInteractionRect(newElement) || rect || null,
-    }),
-  )
+  return {
+    node: newNode,
+    pos: newPos,
+    rect: rect || null,
+    interactionRect: findBlockInteractionRect(newElement) || rect || null,
+  }
 }
 
 export type { NodeIndicatorPluginOptions, NodeIndicatorState } from './types'

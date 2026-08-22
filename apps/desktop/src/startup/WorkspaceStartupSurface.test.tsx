@@ -26,7 +26,9 @@ describe('WorkspaceStartupSurface', () => {
     expect(document.querySelector('.animate-spin')).toBeNull()
     expect(screen.queryByText('Workspace welcome')).toBeNull()
     expect(document.querySelector('[data-mf-workspace-shell="editor"]')).toBeTruthy()
-    expect(document.querySelector('[data-mf-workspace-shell="status-bar"]')).toBeTruthy()
+    const statusBar = document.querySelector('[data-mf-workspace-shell="status-bar"]')
+    expect(statusBar?.classList.contains('bg-surface-statusbar')).toBe(true)
+    expect(statusBar?.classList.contains('bg-surface-titlebar')).toBe(false)
   })
 
   it('renders workspace content only when ready', () => {

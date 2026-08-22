@@ -1,32 +1,39 @@
-import { useActive, useCommands } from '@rme-sdk/sdk/react'
-import { FC, useCallback } from 'react'
+import { isListKindActive } from '@rme-sdk/sdk/extensions/list'
+import { useCommands, useEditorState } from '@rme-sdk/sdk/react'
+import { useCallback } from 'react'
+import type { FC } from 'react'
 
 import { t } from '@markflowy/i18n'
-import { LineListExtension } from '../../../extensions'
-import { CommandButton, CommandButtonProps } from './command-button'
+import type { LineBulletListExtension } from '../../../extensions'
+import { CommandButton } from './command-button'
+import type { CommandButtonProps } from './command-button'
 
-export interface ToggleBulletListButtonProps
-  extends Omit<CommandButtonProps, 'commandName' | 'active' | 'enabled' | 'attrs' | 'onSelect'> {}
+export type ToggleBulletListButtonProps = Omit<
+  CommandButtonProps,
+  'commandName' | 'active' | 'enabled' | 'attrs' | 'onSelect' | 'pressed'
+>
 
 export const ToggleBulletListButton: FC<ToggleBulletListButtonProps> = (props) => {
-  const { toggleList } = useCommands<LineListExtension>()
+  const { toggleBulletList } = useCommands<LineBulletListExtension>()
+  const state = useEditorState()
 
   const handleSelect = useCallback(() => {
-    if (toggleList) {
-      toggleList({})
+    if (toggleBulletList.enabled()) {
+      toggleBulletList()
     }
-  }, [toggleList])
+  }, [toggleBulletList])
 
-  const active = useActive<LineListExtension>().list()
-  const enabled = true
+  const active = isListKindActive(state, 'bullet')
+  const enabled = toggleBulletList.enabled()
 
   return (
     <CommandButton
       {...props}
       label={t('toolbar.bulletList')}
-      icon="ri-list-unordered"
-      commandName="toggleList"
+      icon='ri-list-unordered'
+      commandName='toggleBulletList'
       active={active}
+      pressed={active}
       enabled={enabled}
       onSelect={handleSelect}
     />

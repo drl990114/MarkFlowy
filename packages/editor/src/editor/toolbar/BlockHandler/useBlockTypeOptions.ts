@@ -1,46 +1,67 @@
+import { useTranslation } from '@markflowy/i18n'
 import type { ProsemirrorNode } from '@rme-sdk/sdk/core'
-import { TextSelection } from '@rme-sdk/sdk/pm/state'
+import type { StandardListKind } from '@rme-sdk/sdk/extensions/list'
+import { setBlockType, wrapIn } from '@rme-sdk/sdk/pm/commands'
+import { liftListItem } from '@rme-sdk/sdk/pm/schema-list'
+import { NodeSelection, TextSelection } from '@rme-sdk/sdk/pm/state'
 import { useCommands } from '@rme-sdk/sdk/react'
 import { useMemo } from 'react'
-import { useTranslation } from '@markflowy/i18n'
-import { LineListExtension } from '../../extensions'
-import type { ListAttributes } from '../../extensions/List/input-rule/types'
+
 import { nodeTypeIconMap } from '../../const'
 import type { BlockTypeGroup, BlockTypeOption, NodeTransformContext } from './types'
 
-const isHeading = (level: number) => (node: ProsemirrorNode) =>
-  node.type.name === 'heading' && node.attrs.level === level
+type EditorCommands = ReturnType<typeof useCommands>
 
-const isParagraph = (node: ProsemirrorNode) => node.type.name === 'paragraph'
-
-const isCodeBlock = (node: ProsemirrorNode) => node.type.name === 'codeMirror'
-
-const isBlockquote = (node: ProsemirrorNode) => node.type.name === 'blockquote'
-
-const isList = (kind: string) => (node: ProsemirrorNode) =>
-  node.type.name === 'list' && node.attrs.kind === kind
-
-const canSetTextBlockType = (node: ProsemirrorNode) => {
-  return ['paragraph', 'heading', 'codeMirror'].includes(node.type.name)
+function getContentBlock(context: NodeTransformContext): ProsemirrorNode | null {
+  if (context.node.type.name !== 'listItem') return context.node
+  return context.node.childCount === 1 ? context.node.firstChild : null
 }
 
-const canTransformToTextBlock = (node: ProsemirrorNode) => {
-  return canSetTextBlockType(node)
+const isHeading = (level: number) => (context: NodeTransformContext) => {
+  const node = getContentBlock(context)
+  return node?.type.name === 'heading' && node.attrs.level === level
 }
 
-const canTransformToList = (node: ProsemirrorNode) => {
-  return ['paragraph', 'heading', 'list'].includes(node.type.name)
+const isNodeType = (type: string) => (context: NodeTransformContext) => {
+  return getContentBlock(context)?.type.name === type
 }
 
-const canTransformToCodeBlock = (node: ProsemirrorNode) => {
-  return ['paragraph', 'heading'].includes(node.type.name)
+function getListKind(context: NodeTransformContext): StandardListKind | null {
+  if (context.node.type.name !== 'listItem') return null
+  if (context.node.attrs.checked !== null) return 'task'
+
+  const parent = context.view.state.doc.resolve(context.pos).parent
+  return parent.type.name === 'orderedList' ? 'ordered' : 'bullet'
 }
 
-const canTransformToBlockquote = (node: ProsemirrorNode) => {
-  return ['paragraph', 'heading'].includes(node.type.name)
+const isList = (kind: StandardListKind) => (context: NodeTransformContext) => {
+  return getListKind(context) === kind
 }
 
-const selectInsideNode = ({ view, pos }: NodeTransformContext) => {
+function canSetTextBlockType(context: NodeTransformContext): boolean {
+  const node = getContentBlock(context)
+  return !!node && ['paragraph', 'heading', 'codeMirror'].includes(node.type.name)
+}
+
+function canTransformToList(context: NodeTransformContext): boolean {
+  const node = getContentBlock(context)
+  return (
+    context.node.type.name === 'listItem' ||
+    (!!node && ['paragraph', 'heading'].includes(node.type.name))
+  )
+}
+
+function canTransformToCodeBlock(context: NodeTransformContext): boolean {
+  const node = getContentBlock(context)
+  return !!node && ['paragraph', 'heading'].includes(node.type.name)
+}
+
+function canTransformToBlockquote(context: NodeTransformContext): boolean {
+  const node = getContentBlock(context)
+  return !!node && ['paragraph', 'heading'].includes(node.type.name)
+}
+
+function selectInsideNode({ view, pos }: NodeTransformContext): void {
   const docSize = view.state.doc.content.size
   const textPos = Math.max(0, Math.min(pos + 1, docSize))
   const selection = TextSelection.near(view.state.doc.resolve(textPos), 1)
@@ -48,99 +69,85 @@ const selectInsideNode = ({ view, pos }: NodeTransformContext) => {
   view.focus()
 }
 
-const setSelectionInsideTransformedNode = (
-  tr: NodeTransformContext['tr'],
-  pos: number,
-) => {
-  const textPos = Math.max(0, Math.min(pos + 1, tr.doc.content.size))
-  tr.setSelection(TextSelection.near(tr.doc.resolve(textPos), 1))
+function liftSelectedListItem(context: NodeTransformContext): boolean {
+  if (context.node.type.name !== 'listItem') return true
+
+  const { view } = context
+  const listItemType = view.state.schema.nodes.listItem
+  return !!listItemType && liftListItem(listItemType)(view.state, view.dispatch, view)
 }
 
-const deleteNode = (context: NodeTransformContext) => {
-  const { view, pos, node, tr } = context
-
-  tr.delete(pos, pos + node.nodeSize)
-
-  const newPos = Math.max(0, Math.min(pos, tr.doc.content.size))
-  tr.setSelection(TextSelection.create(tr.doc, newPos))
-
-  view.dispatch(tr)
-  view.focus()
-
-  return true
+function prepareTextBlock(context: NodeTransformContext): boolean {
+  selectInsideNode(context)
+  return liftSelectedListItem(context)
 }
 
-const transformToHeading = (level: number) => (context: NodeTransformContext) => {
+function deleteNode(context: NodeTransformContext): boolean {
   const { view, pos, tr } = context
-  const headingType = view.state.schema.nodes.heading
-  if (!headingType) return false
+  const selection = NodeSelection.create(tr.doc, pos)
+  selection.replace(tr)
 
-  tr.setBlockType(pos, pos + context.node.nodeSize, headingType, { level })
-  setSelectionInsideTransformedNode(tr, pos)
+  const nextPos = Math.max(0, Math.min(tr.mapping.map(pos), tr.doc.content.size))
+  tr.setSelection(TextSelection.near(tr.doc.resolve(nextPos), -1))
   view.dispatch(tr)
   view.focus()
   return true
 }
 
-const transformToParagraph = (context: NodeTransformContext) => {
-  const { view, pos, tr } = context
+function transformToTextBlock(
+  context: NodeTransformContext,
+  typeName: 'paragraph' | 'heading' | 'codeMirror',
+  attrs?: Record<string, unknown>,
+): boolean {
+  if (!prepareTextBlock(context)) return false
+
+  const { view } = context
+  const type = view.state.schema.nodes[typeName]
+  if (!type) return false
+
+  const transformed = setBlockType(type, attrs)(view.state, view.dispatch, view)
+  if (transformed) view.focus()
+  return transformed
+}
+
+function transformToBlockquote(context: NodeTransformContext): boolean {
+  if (!prepareTextBlock(context)) return false
+
+  const { view } = context
   const paragraphType = view.state.schema.nodes.paragraph
-  if (!paragraphType) return false
-
-  tr.setBlockType(pos, pos + context.node.nodeSize, paragraphType)
-  setSelectionInsideTransformedNode(tr, pos)
-  view.dispatch(tr)
-  view.focus()
-  return true
-}
-
-const transformToCodeBlock = (context: NodeTransformContext) => {
-  const { view, pos, node, tr } = context
-  const codeMirrorType = view.state.schema.nodes.codeMirror
-  if (!codeMirrorType) return false
-
-  tr.setBlockType(pos, pos + node.nodeSize, codeMirrorType, { language: '' })
-  setSelectionInsideTransformedNode(tr, pos)
-
-  view.dispatch(tr)
-  view.focus()
-  return true
-}
-
-const transformToBlockquote = (context: NodeTransformContext) => {
-  const { view, pos, node, tr } = context
   const blockquoteType = view.state.schema.nodes.blockquote
-  const paragraphType = view.state.schema.nodes.paragraph
-  if (!blockquoteType || !paragraphType) return false
+  if (!paragraphType || !blockquoteType) return false
 
-  const content = node.content
-  const paragraph = paragraphType.create(null, content)
-  const blockquote = blockquoteType.create(null, paragraph)
+  setBlockType(paragraphType)(view.state, view.dispatch, view)
+  const transformed = wrapIn(blockquoteType)(view.state, view.dispatch, view)
+  if (transformed) view.focus()
+  return transformed
+}
 
-  tr.delete(pos, pos + node.nodeSize)
-  tr.insert(pos, blockquote)
+function runListCommand(
+  kind: StandardListKind,
+  commands: EditorCommands,
+  context: NodeTransformContext,
+): boolean {
+  selectInsideNode(context)
+  const command =
+    kind === 'ordered'
+      ? commands.toggleOrderedList
+      : kind === 'task'
+        ? commands.toggleTaskList
+        : commands.toggleBulletList
 
-  setSelectionInsideTransformedNode(tr, pos)
-
-  view.dispatch(tr)
-  view.focus()
+  if (!command?.enabled()) return false
+  command()
+  context.view.focus()
   return true
 }
 
 export const useBlockTypeOptions = (
   t: (key: string, options?: any) => string,
-  commands: ReturnType<typeof useCommands<LineListExtension>>,
+  commands: EditorCommands,
 ): BlockTypeOption[] => {
-  const options = useMemo<BlockTypeOption[]>(() => {
-    const transformToList = (attrs: ListAttributes) => (context: NodeTransformContext) => {
-      if (!commands.toggleList) return false
-
-      selectInsideNode(context)
-      commands.toggleList(attrs)
-      context.view.focus()
-      return true
-    }
-
+  return useMemo<BlockTypeOption[]>(() => {
     const headingOptions: BlockTypeOption[] = Array.from({ length: 6 }, (_, i) => {
       const level = i + 1
       return {
@@ -149,8 +156,8 @@ export const useBlockTypeOptions = (
         icon: nodeTypeIconMap[`heading-${level}`] || 'ri-heading',
         group: 'transform' as const,
         isActive: isHeading(level),
-        isAvailable: canTransformToTextBlock,
-        transform: transformToHeading(level),
+        isAvailable: canSetTextBlockType,
+        transform: (context) => transformToTextBlock(context, 'heading', { level }),
       }
     })
 
@@ -159,73 +166,59 @@ export const useBlockTypeOptions = (
         key: 'paragraph',
         label: t('blockType.paragraph') || 'Paragraph',
         icon: nodeTypeIconMap.paragraph,
-        group: 'transform' as const,
-        isActive: isParagraph,
-        isAvailable: canTransformToTextBlock,
-        transform: transformToParagraph,
+        group: 'transform',
+        isActive: isNodeType('paragraph'),
+        isAvailable: canSetTextBlockType,
+        transform: (context) => transformToTextBlock(context, 'paragraph'),
       },
       ...headingOptions,
       {
         key: 'code-block',
         label: t('blockType.codeBlock') || 'Code Block',
         icon: nodeTypeIconMap.codeMirror,
-        group: 'transform' as const,
-        isActive: isCodeBlock,
+        group: 'transform',
+        isActive: isNodeType('codeMirror'),
         isAvailable: canTransformToCodeBlock,
-        transform: transformToCodeBlock,
+        transform: (context) => transformToTextBlock(context, 'codeMirror', { language: '' }),
       },
       {
         key: 'blockquote',
         label: t('blockType.blockquote') || 'Quote',
         icon: nodeTypeIconMap.blockquote,
-        group: 'transform' as const,
-        isActive: isBlockquote,
+        group: 'transform',
+        isActive: isNodeType('blockquote'),
         isAvailable: canTransformToBlockquote,
         transform: transformToBlockquote,
       },
-      {
-        key: 'bullet-list',
-        label: t('blockType.bulletList') || 'Bullet List',
-        icon: nodeTypeIconMap['list-bullet'],
-        group: 'transform' as const,
-        isActive: isList('bullet'),
-        isAvailable: canTransformToList,
-        transform: transformToList({}),
-      },
-      {
-        key: 'ordered-list',
-        label: t('blockType.orderedList') || 'Ordered List',
-        icon: nodeTypeIconMap['list-ordered'],
-        group: 'transform' as const,
-        isActive: isList('ordered'),
-        isAvailable: canTransformToList,
-        transform: transformToList({ kind: 'ordered' }),
-      },
-      {
-        key: 'task-list',
-        label: t('blockType.taskList') || 'Task List',
-        icon: nodeTypeIconMap['list-task'],
-        group: 'transform' as const,
-        isActive: isList('task'),
-        isAvailable: canTransformToList,
-        transform: transformToList({ kind: 'task' }),
-      },
+      ...(['bullet', 'ordered', 'task'] as const).map(
+        (kind): BlockTypeOption => ({
+          key: `${kind}-list`,
+          label:
+            kind === 'bullet'
+              ? t('blockType.bulletList') || 'Bullet List'
+              : kind === 'ordered'
+                ? t('blockType.orderedList') || 'Ordered List'
+                : t('blockType.taskList') || 'Task List',
+          icon: nodeTypeIconMap[`list-${kind}`],
+          group: 'transform',
+          isActive: isList(kind),
+          isAvailable: canTransformToList,
+          transform: (context) => runListCommand(kind, commands, context),
+        }),
+      ),
     ]
 
-    const actionOptions: BlockTypeOption[] = [
+    return [
+      ...baseOptions,
       {
         key: 'delete',
         label: t('blockType.delete') || 'Delete',
         icon: 'ri-delete-bin-line',
-        group: 'actions' as const,
+        group: 'actions',
         action: deleteNode,
       },
     ]
-
-    return [...baseOptions, ...actionOptions]
   }, [t, commands])
-
-  return options
 }
 
 export const useBlockTypeGroups = (): BlockTypeGroup[] => {
@@ -241,10 +234,9 @@ export const useBlockTypeGroups = (): BlockTypeGroup[] => {
       {
         key: 'text',
         label: t('blockTypeGroup.text') || 'Text',
-        children: [
-          otherOptions.find((opt) => opt.key === 'paragraph')!,
-          ...headingOptions,
-        ].filter(Boolean),
+        children: [otherOptions.find((opt) => opt.key === 'paragraph')!, ...headingOptions].filter(
+          Boolean,
+        ),
       },
       {
         key: 'list',
@@ -262,6 +254,11 @@ export const useBlockTypeGroups = (): BlockTypeGroup[] => {
           otherOptions.find((opt) => opt.key === 'code-block')!,
           otherOptions.find((opt) => opt.key === 'blockquote')!,
         ].filter(Boolean),
+      },
+      {
+        key: 'actions',
+        label: '',
+        children: options.filter((opt) => opt.group === 'actions'),
       },
     ]
   }, [options, t])

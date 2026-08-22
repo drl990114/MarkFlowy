@@ -7,36 +7,62 @@ import { useEffect, useState } from 'react'
 import type { EditorContext } from 'rme'
 
 type HeadingNumberingCommands = {
-  applyHeadingNumbering: () => boolean
-  removeHeadingNumbering: () => boolean
+  applyHeadingNumbering?: () => boolean
+  removeHeadingNumbering?: () => boolean
 }
 
 type HeadingNumberingHelpers = {
-  getHeadingNumbering: () => {
+  getHeadingNumbering?: () => {
     complete: boolean
   }
 }
 
-function getCommands(editorCtx: EditorContext): HeadingNumberingCommands {
-  return editorCtx.commands as unknown as HeadingNumberingCommands
+type HeadingNumberingApi = {
+  apply: () => boolean
+  getAnalysis: () => { complete: boolean }
+  remove: () => boolean
 }
 
-function getAnalysis(editorCtx: EditorContext) {
+function getHeadingNumberingApi(editorCtx: EditorContext): HeadingNumberingApi | null {
+  const commands = editorCtx.commands as unknown as HeadingNumberingCommands
   const helpers = editorCtx.helpers as unknown as HeadingNumberingHelpers
-  return helpers.getHeadingNumbering()
+
+  if (
+    typeof commands.applyHeadingNumbering !== 'function' ||
+    typeof commands.removeHeadingNumbering !== 'function' ||
+    typeof helpers.getHeadingNumbering !== 'function'
+  ) {
+    return null
+  }
+
+  return {
+    apply: commands.applyHeadingNumbering,
+    getAnalysis: helpers.getHeadingNumbering,
+    remove: commands.removeHeadingNumbering,
+  }
+}
+
+export function hasHeadingNumberingCapability(editorCtx: EditorContext): boolean {
+  return getHeadingNumberingApi(editorCtx) !== null
 }
 
 export function HeadingNumberingButton(props: { editorCtx: EditorContext }) {
+  return hasHeadingNumberingCapability(props.editorCtx) ? (
+    <HeadingNumberingButtonReady editorCtx={props.editorCtx} />
+  ) : null
+}
+
+function HeadingNumberingButtonReady(props: { editorCtx: EditorContext }) {
   const { editorCtx } = props
   const { t } = useTranslation()
   const label = t('sidebar.heading_numbering') || 'Heading numbering'
   const [numberingEnabled, setNumberingEnabled] = useState(
-    () => getAnalysis(editorCtx).complete,
+    () => getHeadingNumberingApi(editorCtx)!.getAnalysis().complete,
   )
 
   useEffect(() => {
     const syncNumberingState = () => {
-      setNumberingEnabled(getAnalysis(editorCtx).complete)
+      setNumberingEnabled(getHeadingNumberingApi(editorCtx)!.getAnalysis().complete)
     }
 
     syncNumberingState()
@@ -44,11 +70,9 @@ export function HeadingNumberingButton(props: { editorCtx: EditorContext }) {
   }, [editorCtx])
 
   const handleClick = () => {
-    const commands = getCommands(editorCtx)
-    const wasEnabled = getAnalysis(editorCtx).complete
-    const changed = wasEnabled
-      ? commands.removeHeadingNumbering()
-      : commands.applyHeadingNumbering()
+    const api = getHeadingNumberingApi(editorCtx)!
+    const wasEnabled = api.getAnalysis().complete
+    const changed = wasEnabled ? api.remove() : api.apply()
 
     if (changed) {
       setNumberingEnabled(!wasEnabled)

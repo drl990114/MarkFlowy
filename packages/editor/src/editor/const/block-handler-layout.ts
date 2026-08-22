@@ -10,8 +10,12 @@ export interface BlockHandlerVerticalGeometry {
   hitAreaTop: number
 }
 
-export function getBlockHandlerLeft(blockLeft: number): number {
-  return blockLeft - BLOCK_HANDLER_GUTTER_SIZE
+/**
+ * List markers sit between the root content edge and the indented list text.
+ * Passing the root content edge keeps a list item's handler out of that lane.
+ */
+export function getBlockHandlerLeft(blockLeft: number, rootContentLeft?: number): number {
+  return (rootContentLeft ?? blockLeft) - BLOCK_HANDLER_GUTTER_SIZE
 }
 
 export function getBlockHandlerVerticalGeometry(

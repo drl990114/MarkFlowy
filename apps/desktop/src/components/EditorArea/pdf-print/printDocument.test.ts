@@ -148,17 +148,11 @@ describe('preparePrintDocument', () => {
     await rejection
   })
 
-  it('replaces mask-based flat-list markers with printable inline SVG icons', async () => {
+  it('keeps native list structure for browser printing', async () => {
     const root = document.createElement('div')
     root.innerHTML = `
-      <div class="prosemirror-flat-list" data-list-kind="bullet">
-        <div class="list-marker"></div>
-        <div class="list-content">Bullet</div>
-      </div>
-      <div class="prosemirror-flat-list" data-list-kind="toggle" data-list-collapsed>
-        <div class="list-marker"></div>
-        <div class="list-content">Toggle</div>
-      </div>
+      <ul data-tight="true"><li>Bullet</li></ul>
+      <ol start="9" data-tight="true"><li>Ordered</li></ol>
     `
 
     await preparePrintDocument({
@@ -168,13 +162,9 @@ describe('preparePrintDocument', () => {
       timeoutMs: 100,
     })
 
-    const markers = root.querySelectorAll('.mf-pdf-list-marker')
-    expect(markers).toHaveLength(2)
-    expect(markers[0]?.querySelector('svg circle')).not.toBeNull()
-    expect(markers[1]?.querySelector('svg polygon')).not.toBeNull()
-    expect(root.querySelector('[data-list-kind="toggle"]')?.hasAttribute('data-list-collapsed')).toBe(
-      false,
-    )
+    expect(root.querySelector('ul > li')?.textContent).toBe('Bullet')
+    expect(root.querySelector('ol')?.getAttribute('start')).toBe('9')
+    expect(root.querySelector('.mf-pdf-list-marker')).toBeNull()
   })
 })
 

@@ -12,7 +12,7 @@ export const Container = styled.div`
   gap: ${(props) => props.theme.spaceSm};
   height: var(--mf-ui-status-bar-height);
   box-sizing: border-box;
-  background: ${(props) => props.theme.statusBarBgColor};
+  background: var(--mf-surface-statusbar);
   border-top: 1px solid var(--mf-ui-border-subtle);
   user-select: none;
   font-size: var(--mf-ui-font-caption);
