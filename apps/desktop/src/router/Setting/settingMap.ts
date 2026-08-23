@@ -298,6 +298,13 @@ export const getSettingMap = () => {
         i18nKey: 'settings.image.desc',
       },
     },
+    export: {
+      i18nKey: 'settings.export.label',
+      iconName: 'ri-file-transfer-line',
+      desc: {
+        i18nKey: 'settings.export.desc',
+      },
+    },
     copilot: {
       i18nKey: 'settings.copilot.label',
       iconName: 'ri-magic-line',

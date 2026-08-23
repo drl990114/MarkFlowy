@@ -19,6 +19,7 @@ import { EditorViewType } from 'rme'
 import { isDivider, Space, toast, type MenuItemData } from 'zens'
 import { EditorAreaActionButton } from '../../EditorAreaAction'
 import { createPdfPrintMenuItem } from '../../pdf-print/pdfPrintMenuItem'
+import { createPandocExportMenuItem } from '../../pandoc-export/pandocExportMenuItem'
 
 type FileNormalInfo = {
   size: string
@@ -299,6 +300,7 @@ export const MenuList = memo((props: MenuListProps) => {
       })
       if (curFileTypeConfig?.type === 'markdown') {
         items.push(createPdfPrintMenuItem(t('contextmenu.editor_tab.export_pdf')))
+        items.push(createPandocExportMenuItem(t))
       }
       items.push({
         value: 'export_image',

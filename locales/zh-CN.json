@@ -233,6 +233,32 @@
       "export_pdf_failed": "无法准备此文档进行打印。",
       "export_pdf_image_warning": "有 {{count}} 张图片加载失败，将改为打印替代文本。",
       "export_pdf_embedded_media": "交互式内容",
+      "export_pandoc": "使用 Pandoc 导出",
+      "export_pandoc_docx": "Word 文档 (.docx)",
+      "export_pandoc_odt": "OpenDocument 文本 (.odt)",
+      "export_pandoc_epub": "EPUB 电子书 (.epub)",
+      "export_pandoc_format": "导出为 {{format}}",
+      "export_pandoc_exporting": "正在导出为 {{format}}...",
+      "export_pandoc_success": "已导出到 {{path}}",
+      "export_pandoc_warning": "已导出到 {{path}}，但 Pandoc 返回了 {{count}} 条警告。",
+      "export_pandoc_setup_title": "Pandoc 不可用",
+      "export_pandoc_setup_desc": "安装 Pandoc 或选择其可执行文件，即可导出 DOCX、ODT 和 EPUB。",
+      "export_pandoc_install": "安装说明",
+      "export_pandoc_select": "选择可执行文件",
+      "export_pandoc_error_not_found": "未找到 Pandoc。请安装，或在“导出”设置中配置可执行文件路径。",
+      "export_pandoc_error_invalid_executable": "所选文件不是有效的 Pandoc 可执行文件。",
+      "export_pandoc_error_unsupported_format": "当前 Pandoc 不支持所选导出格式。",
+      "export_pandoc_error_conversion_failed": "Pandoc 无法转换此文档。",
+      "export_pandoc_error_timed_out": "Pandoc 导出超过 120 秒，已终止。",
+      "export_pandoc_error_output_commit_failed": "无法用转换后的文件替换目标文件。",
+      "export_pandoc_failed_title": "Pandoc 导出失败",
+      "export_pandoc_copy_error": "复制错误详情",
+      "export_pandoc_copied": "错误详情已复制",
+      "export_pandoc_copy_failed": "无法复制错误详情。",
+      "export_pandoc_error_code": "错误代码",
+      "export_pandoc_exit_code": "退出代码",
+      "export_pandoc_error_message": "错误信息",
+      "export_pandoc_error_details": "详细信息",
       "export_image": "导出为图片"
     }
   },
@@ -478,6 +504,28 @@
           "label": "路径规则",
           "desc": "支持变量：${documentPath}（当前文件所在文件夹路径）、${fileName}（当前文件名，不含扩展名）。例如：${documentPath}/photo/${fileName}"
         }
+      }
+    },
+    "export": {
+      "label": "导出",
+      "desc": "配置文档导出使用的可选工具。",
+      "pandoc": {
+        "label": "Pandoc",
+        "executable": {
+          "label": "Pandoc 可执行文件",
+          "desc": "MarkFlowy 不内置 Pandoc。可使用自动探测，或选择本机可执行文件。"
+        },
+        "status": {
+          "checking": "正在检测 Pandoc...",
+          "ready": "Pandoc {{version}} 已就绪。",
+          "invalid_executable": "配置的路径不是有效的 Pandoc 可执行文件。",
+          "incompatible": "已找到 Pandoc，但它不支持全部所需格式。",
+          "not_found": "未找到 Pandoc。"
+        },
+        "select": "选择可执行文件",
+        "automatic": "使用自动探测",
+        "check_again": "重新检测",
+        "install_guide": "安装说明"
       }
     },
     "keyboard": {

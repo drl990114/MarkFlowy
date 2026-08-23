@@ -92,6 +92,7 @@ import { runSaveOperation } from './runSaveOperation'
 import { getSaveAsCollisionIds } from './saveAsCollision'
 import { savePathCoordinator } from './savePathCoordinator'
 import { PdfPrintController } from './pdf-print/PdfPrintController'
+import { PandocExportController } from './pandoc-export/PandocExportController'
 import { EditorSkeleton, WarningHeader } from './styles'
 
 const delegateOptionsCache = new Map<string, CreateWysiwygDelegateOptions>()
@@ -1877,7 +1878,7 @@ function TextEditor(props: TextEditorProps) {
     [id, delegate, active, savePathReserved, snapshotPublisher],
   )
 
-  const getPdfPrintContent = useCallback(() => {
+  const getExportContent = useCallback(() => {
     snapshotPublisher.flush()
     return latestContentRef.current ?? content ?? ''
   }, [content, snapshotPublisher])
@@ -1932,9 +1933,16 @@ function TextEditor(props: TextEditorProps) {
         active={active}
         enabled={fileTypeConfig.type === 'markdown'}
         fileName={curFile.name}
-        getContent={getPdfPrintContent}
+        getContent={getExportContent}
         delegateOptions={editorProps.delegateOptions!}
         styleToken={editorProps.styleToken}
+      />
+      <PandocExportController
+        active={active}
+        enabled={fileTypeConfig.type === 'markdown'}
+        fileName={curFile.name}
+        filePath={curFile.path}
+        getContent={getExportContent}
       />
     </>
   )

@@ -232,6 +232,32 @@
       "export_pdf_failed": "Unable to prepare this document for printing.",
       "export_pdf_image_warning": "{{count}} image(s) could not be loaded. Their alternative text will be printed instead.",
       "export_pdf_embedded_media": "Interactive content",
+      "export_pandoc": "Export with Pandoc",
+      "export_pandoc_docx": "Word document (.docx)",
+      "export_pandoc_odt": "OpenDocument text (.odt)",
+      "export_pandoc_epub": "EPUB book (.epub)",
+      "export_pandoc_format": "Export to {{format}}",
+      "export_pandoc_exporting": "Exporting to {{format}}...",
+      "export_pandoc_success": "Exported to {{path}}",
+      "export_pandoc_warning": "Exported to {{path}}, but Pandoc returned {{count}} warning(s).",
+      "export_pandoc_setup_title": "Pandoc is not available",
+      "export_pandoc_setup_desc": "Install Pandoc or select its executable to export DOCX, ODT, and EPUB files.",
+      "export_pandoc_install": "Installation guide",
+      "export_pandoc_select": "Select executable",
+      "export_pandoc_error_not_found": "Pandoc was not found. Install it or configure its executable path in Export settings.",
+      "export_pandoc_error_invalid_executable": "The selected file is not a valid Pandoc executable.",
+      "export_pandoc_error_unsupported_format": "This Pandoc installation does not support the selected export format.",
+      "export_pandoc_error_conversion_failed": "Pandoc could not convert this document.",
+      "export_pandoc_error_timed_out": "Pandoc export timed out after 120 seconds.",
+      "export_pandoc_error_output_commit_failed": "The converted file could not replace the destination file.",
+      "export_pandoc_failed_title": "Pandoc export failed",
+      "export_pandoc_copy_error": "Copy error details",
+      "export_pandoc_copied": "Error details copied",
+      "export_pandoc_copy_failed": "Could not copy error details.",
+      "export_pandoc_error_code": "Error code",
+      "export_pandoc_exit_code": "Exit code",
+      "export_pandoc_error_message": "Message",
+      "export_pandoc_error_details": "Details",
       "export_image": "Export to Image"
     }
   },
@@ -523,6 +549,28 @@
         }
       },
       "desc": "Configuring image processing and upload, including pasting images, saving paths and behavior settings for uploading image files."
+    },
+    "export": {
+      "label": "Export",
+      "desc": "Configure optional tools used to export documents.",
+      "pandoc": {
+        "label": "Pandoc",
+        "executable": {
+          "label": "Pandoc executable",
+          "desc": "Pandoc is not bundled with MarkFlowy. Use automatic detection or select a local executable."
+        },
+        "status": {
+          "checking": "Checking for Pandoc...",
+          "ready": "Pandoc {{version}} is ready.",
+          "invalid_executable": "The configured path is not a valid Pandoc executable.",
+          "incompatible": "Pandoc was found, but it does not support all required formats.",
+          "not_found": "Pandoc was not found."
+        },
+        "select": "Select executable",
+        "automatic": "Use automatic detection",
+        "check_again": "Check again",
+        "install_guide": "Installation guide"
+      }
     },
     "display": {
       "label": "Appearance",

@@ -12,6 +12,7 @@ import { toast } from 'zens'
 import { EditorAreaActionButton } from '../../../EditorAreaAction'
 import { showContextMenu } from '../../../../ui-v2/ContextMenu'
 import { createPdfPrintMenuItem } from '../../../pdf-print/pdfPrintMenuItem'
+import { createPandocExportMenuItem } from '../../../pandoc-export/pandocExportMenuItem'
 
 export const MoreActions = () => {
   const activeId = useEditorStore((state) => state.activeId)
@@ -74,6 +75,7 @@ export const MoreActions = () => {
           },
         },
         createPdfPrintMenuItem(t('contextmenu.editor_tab.export_pdf')),
+        createPandocExportMenuItem(t),
         {
           value: 'export_image',
           label: t('contextmenu.editor_tab.export_image'),

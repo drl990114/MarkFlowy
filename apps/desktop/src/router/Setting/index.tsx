@@ -18,6 +18,7 @@ import { Link } from 'react-router'
 import { toast } from 'zens'
 import SettingGroup from './component/SettingGroup'
 import { CopilotSetting } from './CopilotSetting'
+import { ExportSetting } from './ExportSetting'
 import { ImageSetting } from './ImageSetting'
 import { KeyboardTable } from './KeyboardTable'
 import { getSettingMap } from './settingMap'
@@ -230,6 +231,7 @@ function Setting({ navigationRequest }: SettingProps) {
     if (curGroupKey === 'keyboard') return <KeyboardTable />
     if (curGroupKey === 'themeStore') return <ThemeStore />
     if (curGroupKey === 'image') return <ImageSetting />
+    if (curGroupKey === 'export') return <ExportSetting />
     if (curGroupKey === 'support') return <Support />
     if (curGroupKey === 'copilot') return <CopilotSetting />
 

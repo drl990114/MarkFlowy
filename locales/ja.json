@@ -205,6 +205,32 @@
       "export_pdf_failed": "この文書を印刷用に準備できませんでした。",
       "export_pdf_image_warning": "{{count}} 個の画像を読み込めませんでした。代替テキストを印刷します。",
       "export_pdf_embedded_media": "インタラクティブコンテンツ",
+      "export_pandoc": "Pandoc でエクスポート",
+      "export_pandoc_docx": "Word 文書 (.docx)",
+      "export_pandoc_odt": "OpenDocument テキスト (.odt)",
+      "export_pandoc_epub": "EPUB ブック (.epub)",
+      "export_pandoc_format": "{{format}} にエクスポート",
+      "export_pandoc_exporting": "{{format}} にエクスポートしています...",
+      "export_pandoc_success": "{{path}} にエクスポートしました",
+      "export_pandoc_warning": "{{path}} にエクスポートしましたが、Pandoc から {{count}} 件の警告がありました。",
+      "export_pandoc_setup_title": "Pandoc を使用できません",
+      "export_pandoc_setup_desc": "Pandoc をインストールするか実行ファイルを選択すると、DOCX、ODT、EPUB をエクスポートできます。",
+      "export_pandoc_install": "インストールガイド",
+      "export_pandoc_select": "実行ファイルを選択",
+      "export_pandoc_error_not_found": "Pandoc が見つかりません。インストールするか、エクスポート設定で実行ファイルを指定してください。",
+      "export_pandoc_error_invalid_executable": "選択したファイルは有効な Pandoc 実行ファイルではありません。",
+      "export_pandoc_error_unsupported_format": "この Pandoc は選択したエクスポート形式に対応していません。",
+      "export_pandoc_error_conversion_failed": "Pandoc でこの文書を変換できませんでした。",
+      "export_pandoc_error_timed_out": "Pandoc のエクスポートが 120 秒でタイムアウトしました。",
+      "export_pandoc_error_output_commit_failed": "変換したファイルを出力先に保存できませんでした。",
+      "export_pandoc_failed_title": "Pandoc のエクスポートに失敗しました",
+      "export_pandoc_copy_error": "エラー詳細をコピー",
+      "export_pandoc_copied": "エラー詳細をコピーしました",
+      "export_pandoc_copy_failed": "エラー詳細をコピーできませんでした。",
+      "export_pandoc_error_code": "エラーコード",
+      "export_pandoc_exit_code": "終了コード",
+      "export_pandoc_error_message": "メッセージ",
+      "export_pandoc_error_details": "詳細",
       "export_image": "画像にエクスポート"
     }
   },
@@ -464,6 +490,28 @@
         }
       },
       "desc": "画像処理とアップロードの設定には、画像の貼り付け、画像ファイルの保存パスと動作設定が含まれます。"
+    },
+    "export": {
+      "label": "エクスポート",
+      "desc": "文書のエクスポートに使用するオプションツールを設定します。",
+      "pandoc": {
+        "label": "Pandoc",
+        "executable": {
+          "label": "Pandoc 実行ファイル",
+          "desc": "Pandoc は MarkFlowy に同梱されていません。自動検出を使うか、ローカルの実行ファイルを選択してください。"
+        },
+        "status": {
+          "checking": "Pandoc を確認しています...",
+          "ready": "Pandoc {{version}} を使用できます。",
+          "invalid_executable": "設定されたパスは有効な Pandoc 実行ファイルではありません。",
+          "incompatible": "Pandoc は見つかりましたが、必要な形式の一部に対応していません。",
+          "not_found": "Pandoc が見つかりません。"
+        },
+        "select": "実行ファイルを選択",
+        "automatic": "自動検出を使用",
+        "check_again": "再確認",
+        "install_guide": "インストールガイド"
+      }
     },
     "display": {
       "label": "外観",

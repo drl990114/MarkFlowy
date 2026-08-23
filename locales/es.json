@@ -200,6 +200,32 @@
       "export_pdf_failed": "No se pudo preparar este documento para imprimirlo.",
       "export_pdf_image_warning": "No se pudieron cargar {{count}} imagen(es). Se imprimirá su texto alternativo.",
       "export_pdf_embedded_media": "Contenido interactivo",
+      "export_pandoc": "Exportar con Pandoc",
+      "export_pandoc_docx": "Documento de Word (.docx)",
+      "export_pandoc_odt": "Texto OpenDocument (.odt)",
+      "export_pandoc_epub": "Libro EPUB (.epub)",
+      "export_pandoc_format": "Exportar a {{format}}",
+      "export_pandoc_exporting": "Exportando a {{format}}...",
+      "export_pandoc_success": "Exportado a {{path}}",
+      "export_pandoc_warning": "Se exportó a {{path}}, pero Pandoc devolvió {{count}} advertencia(s).",
+      "export_pandoc_setup_title": "Pandoc no está disponible",
+      "export_pandoc_setup_desc": "Instala Pandoc o selecciona su ejecutable para exportar archivos DOCX, ODT y EPUB.",
+      "export_pandoc_install": "Guía de instalación",
+      "export_pandoc_select": "Seleccionar ejecutable",
+      "export_pandoc_error_not_found": "No se encontró Pandoc. Instálalo o configura la ruta del ejecutable en los ajustes de exportación.",
+      "export_pandoc_error_invalid_executable": "El archivo seleccionado no es un ejecutable válido de Pandoc.",
+      "export_pandoc_error_unsupported_format": "Esta instalación de Pandoc no admite el formato de exportación seleccionado.",
+      "export_pandoc_error_conversion_failed": "Pandoc no pudo convertir este documento.",
+      "export_pandoc_error_timed_out": "La exportación con Pandoc superó los 120 segundos.",
+      "export_pandoc_error_output_commit_failed": "No se pudo guardar el archivo convertido en el destino.",
+      "export_pandoc_failed_title": "Error al exportar con Pandoc",
+      "export_pandoc_copy_error": "Copiar detalles del error",
+      "export_pandoc_copied": "Detalles del error copiados",
+      "export_pandoc_copy_failed": "No se pudieron copiar los detalles del error.",
+      "export_pandoc_error_code": "Código de error",
+      "export_pandoc_exit_code": "Código de salida",
+      "export_pandoc_error_message": "Mensaje",
+      "export_pandoc_error_details": "Detalles",
       "export_image": "Exportar como imagen"
     }
   },
@@ -459,6 +485,28 @@
         }
       },
       "desc": "Configuración de procesamiento y carga de imágenes, incluida la ruta de guardado y la configuración de comportamiento para pegar imágenes, cargar archivos de imágenes."
+    },
+    "export": {
+      "label": "Exportación",
+      "desc": "Configura las herramientas opcionales utilizadas para exportar documentos.",
+      "pandoc": {
+        "label": "Pandoc",
+        "executable": {
+          "label": "Ejecutable de Pandoc",
+          "desc": "Pandoc no se incluye con MarkFlowy. Usa la detección automática o selecciona un ejecutable local."
+        },
+        "status": {
+          "checking": "Buscando Pandoc...",
+          "ready": "Pandoc {{version}} está listo.",
+          "invalid_executable": "La ruta configurada no es un ejecutable válido de Pandoc.",
+          "incompatible": "Se encontró Pandoc, pero no admite todos los formatos necesarios.",
+          "not_found": "No se encontró Pandoc."
+        },
+        "select": "Seleccionar ejecutable",
+        "automatic": "Usar detección automática",
+        "check_again": "Comprobar de nuevo",
+        "install_guide": "Guía de instalación"
+      }
     },
     "display": {
       "label": "Apariencia",

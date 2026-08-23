@@ -34,6 +34,7 @@ import { Space, toast } from 'zens'
 import { showContextMenu } from '../ui-v2/ContextMenu'
 import { EditorAreaActionButton } from './EditorAreaAction'
 import { createPdfPrintMenuItem } from './pdf-print/pdfPrintMenuItem'
+import { createPandocExportMenuItem } from './pandoc-export/pandocExportMenuItem'
 
 type FileNormalInfo = {
   size: string
@@ -238,7 +239,10 @@ ${res}
           },
         },
         ...(curFileTypeConfig?.type === 'markdown'
-          ? [createPdfPrintMenuItem(t('contextmenu.editor_tab.export_pdf'))]
+          ? [
+              createPdfPrintMenuItem(t('contextmenu.editor_tab.export_pdf')),
+              createPandocExportMenuItem(t),
+            ]
           : []),
         {
           value: 'export_image',

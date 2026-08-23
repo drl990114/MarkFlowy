@@ -50,3 +50,13 @@ describe('Editor setting map', () => {
     expect(setting.options.map((option) => option.value)).toEqual(['auto', 'always-split'])
   })
 })
+
+describe('Export setting map', () => {
+  it('registers the compact Pandoc export page', () => {
+    expect(getSettingMap().export).toMatchObject({
+      i18nKey: 'settings.export.label',
+      iconName: 'ri-file-transfer-line',
+      desc: { i18nKey: 'settings.export.desc' },
+    })
+  })
+})

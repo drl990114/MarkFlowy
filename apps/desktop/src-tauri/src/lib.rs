@@ -7,6 +7,7 @@ mod app;
 mod fc;
 mod font;
 mod menu;
+mod pandoc;
 mod search;
 mod setup;
 mod task_system;
@@ -1613,6 +1614,8 @@ pub fn run() {
             fc::cmd::paths_refer_to_same_directory_entry,
             fc::cmd::trash_delete,
             fc::cmd::export_html_to_path,
+            pandoc::probe_pandoc,
+            pandoc::export_markdown_with_pandoc,
             fc::cmd::is_dir,
             fc::cmd::get_path_name,
             fc::cmd::get_file_normal_info,
