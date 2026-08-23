@@ -23,6 +23,22 @@ function parseMarkdown(markdown: string): Node {
   }
 }
 
+describe('standard list registration', () => {
+  it('registers only the Standard List aggregate', () => {
+    const delegate = createWysiwygDelegate()
+
+    try {
+      const extensionNames = delegate.manager.extensions.map((extension) => extension.name)
+
+      expect(extensionNames).toContain('standardList')
+      expect(extensionNames).not.toContain('list')
+      expect(delegate.manager.schema.nodes.list).toBeUndefined()
+    } finally {
+      delegate.manager.destroy()
+    }
+  })
+})
+
 describe('list markdown serialization', () => {
   it.each([
     {

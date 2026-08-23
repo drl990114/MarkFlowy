@@ -1,6 +1,6 @@
 import { useTranslation } from '@markflowy/i18n'
 import type { ProsemirrorNode } from '@rme-sdk/sdk/core'
-import type { StandardListKind } from '@rme-sdk/sdk/extensions/list'
+import type { StandardListExtension, StandardListKind } from '@rme-sdk/sdk/extensions/list'
 import { setBlockType, wrapIn } from '@rme-sdk/sdk/pm/commands'
 import { liftListItem } from '@rme-sdk/sdk/pm/schema-list'
 import { NodeSelection, TextSelection } from '@rme-sdk/sdk/pm/state'
@@ -8,9 +8,9 @@ import { useCommands } from '@rme-sdk/sdk/react'
 import { useMemo } from 'react'
 
 import { nodeTypeIconMap } from '../../const'
+import { runStandardListCommand } from '../../extensions'
+import type { StandardListCommands } from '../../extensions'
 import type { BlockTypeGroup, BlockTypeOption, NodeTransformContext } from './types'
-
-type EditorCommands = ReturnType<typeof useCommands>
 
 function getContentBlock(context: NodeTransformContext): ProsemirrorNode | null {
   if (context.node.type.name !== 'listItem') return context.node
@@ -126,26 +126,18 @@ function transformToBlockquote(context: NodeTransformContext): boolean {
 
 function runListCommand(
   kind: StandardListKind,
-  commands: EditorCommands,
+  commands: StandardListCommands,
   context: NodeTransformContext,
 ): boolean {
   selectInsideNode(context)
-  const command =
-    kind === 'ordered'
-      ? commands.toggleOrderedList
-      : kind === 'task'
-        ? commands.toggleTaskList
-        : commands.toggleBulletList
-
-  if (!command?.enabled()) return false
-  command()
+  if (!runStandardListCommand(commands, kind)) return false
   context.view.focus()
   return true
 }
 
 export const useBlockTypeOptions = (
   t: (key: string, options?: any) => string,
-  commands: EditorCommands,
+  commands: StandardListCommands,
 ): BlockTypeOption[] => {
   return useMemo<BlockTypeOption[]>(() => {
     const headingOptions: BlockTypeOption[] = Array.from({ length: 6 }, (_, i) => {
@@ -223,7 +215,7 @@ export const useBlockTypeOptions = (
 
 export const useBlockTypeGroups = (): BlockTypeGroup[] => {
   const { t } = useTranslation()
-  const commands = useCommands()
+  const commands = useCommands<StandardListExtension>()
   const options = useBlockTypeOptions(t, commands)
 
   return useMemo(() => {

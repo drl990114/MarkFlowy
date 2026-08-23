@@ -2,7 +2,12 @@ import { useEditorStore } from '@/stores'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import { type FC, useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from '@/i18n'
-import { EditorViewType } from 'rme'
+import {
+  EditorViewType,
+  getActiveListKind,
+  type EditorContext,
+  type StandardListKind,
+} from 'rme'
 import {
   BoldIcon,
   Code2Icon,
@@ -18,7 +23,6 @@ import {
   Redo2Icon,
   Undo2Icon,
 } from 'lucide-react'
-import type { EditorContext } from 'rme'
 import {
   ToolbarSection,
   usePriorityHidden,
@@ -39,32 +43,20 @@ interface WysiwygToolbarProps {
 }
 
 type ToolbarCommand = (attrs?: Record<string, unknown>) => unknown
-type StandardListKind = 'bullet' | 'ordered' | 'task'
+type StandardListCommandName = 'toggleBulletList' | 'toggleOrderedList' | 'toggleTaskList'
 
-function getActiveListKind(editorCtx: EditorContext): StandardListKind | null {
-  const { doc, selection } = editorCtx.view.state
-  const kinds = new Set<StandardListKind>()
-  const addItemKind = (checked: unknown, parentName: string) => {
-    kinds.add(checked !== null ? 'task' : parentName === 'orderedList' ? 'ordered' : 'bullet')
-  }
+const STANDARD_LIST_COMMAND_BY_KIND = {
+  bullet: 'toggleBulletList',
+  ordered: 'toggleOrderedList',
+  task: 'toggleTaskList',
+} as const satisfies Record<StandardListKind, StandardListCommandName>
 
-  for (let depth = selection.$from.depth; depth > 0; depth -= 1) {
-    const node = selection.$from.node(depth)
-    if (node.type.name === 'listItem') {
-      addItemKind(node.attrs.checked, selection.$from.node(depth - 1).type.name)
-      break
-    }
-  }
+function runStandardListCommand(editorCtx: EditorContext, kind: StandardListKind): boolean {
+  const command = editorCtx.commands[STANDARD_LIST_COMMAND_BY_KIND[kind]]
+  if (!command.enabled()) return false
 
-  if (!selection.empty) {
-    doc.nodesBetween(selection.from, selection.to, (node, _pos, parent) => {
-      if (node.type.name !== 'listItem') return true
-      addItemKind(node.attrs.checked, parent?.type.name ?? '')
-      return false
-    })
-  }
-
-  return kinds.size === 1 ? [...kinds][0] : null
+  command()
+  return true
 }
 
 const TOOLBAR_GROUPS = [
@@ -96,7 +88,7 @@ export const WysiwygToolbar: FC<WysiwygToolbarProps> = (props) => {
     }
 
     const syncActiveListKind = () => {
-      setActiveListKind(getActiveListKind(editorCtx))
+      setActiveListKind(getActiveListKind(editorCtx.view.state))
     }
 
     syncActiveListKind()
@@ -118,6 +110,16 @@ export const WysiwygToolbar: FC<WysiwygToolbarProps> = (props) => {
       if (attrs === undefined) command()
       else command(attrs)
       editorCtx.view.focus()
+    },
+    [editorCtx],
+  )
+
+  const runListCommand = useCallback(
+    (kind: StandardListKind) => {
+      if (!editorCtx) return
+      if (runStandardListCommand(editorCtx, kind)) {
+        editorCtx.view.focus()
+      }
     },
     [editorCtx],
   )
@@ -219,7 +221,7 @@ export const WysiwygToolbar: FC<WysiwygToolbarProps> = (props) => {
         label: t('toolbar.bulletList') || 'Bullet List',
         icon: ListIcon,
         pressed: activeListKind === 'bullet',
-        run: () => runEditorCommand('toggleBulletList'),
+        run: () => runListCommand('bullet'),
       },
       {
         id: 'ordered-list',
@@ -228,7 +230,7 @@ export const WysiwygToolbar: FC<WysiwygToolbarProps> = (props) => {
         label: t('toolbar.orderedList') || 'Ordered List',
         icon: ListOrderedIcon,
         pressed: activeListKind === 'ordered',
-        run: () => runEditorCommand('toggleOrderedList'),
+        run: () => runListCommand('ordered'),
       },
       {
         id: 'task-list',
@@ -237,10 +239,10 @@ export const WysiwygToolbar: FC<WysiwygToolbarProps> = (props) => {
         label: t('toolbar.taskList') || 'Task List',
         icon: ListTodoIcon,
         pressed: activeListKind === 'task',
-        run: () => runEditorCommand('toggleTaskList'),
+        run: () => runListCommand('task'),
       },
     ],
-    [activeListKind, handleInsertImage, imageLabel, runEditorCommand, t],
+    [activeListKind, handleInsertImage, imageLabel, runEditorCommand, runListCommand, t],
   )
 
   const overflowMenuItems = useMemo(

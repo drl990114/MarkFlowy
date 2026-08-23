@@ -2,15 +2,15 @@ import '@rme-sdk/sdk/pm'
 import '@rme-sdk/sdk/presets/core'
 import 'jest-prosemirror'
 
+import { StandardListExtension } from '@rme-sdk/sdk/extensions/list'
 import { renderEditor, type TaggedProsemirrorNode } from 'jest-remirror'
 import type { Command } from 'prosemirror-state'
 import { expect } from 'vitest'
 
-import { ListExtension } from './extension'
 import { markdownToTaggedDoc } from './markdown'
 
 export function setupTestingEditor() {
-  const extensions = [new ListExtension()]
+  const extensions = [new StandardListExtension()]
   // jest-remirror bundles Remirror's nominal extension type separately from RME.
   // Runtime compatibility is covered by the Markdown tests using this helper.
   const editor = renderEditor(extensions as unknown as Parameters<typeof renderEditor>[0], {})

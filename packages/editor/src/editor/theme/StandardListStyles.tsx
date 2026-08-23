@@ -8,7 +8,6 @@ export const StandardListStyles = css`
     --rme-nested-list-guide-offset: 1em;
     --rme-bullet-list-guide-offset: 0.9em;
     --rme-task-checkbox-size: 1em;
-    --rme-task-checkbox-offset: 0.3em;
     --rme-task-checkbox-foreground: var(--mf-primary-foreground, #fff);
     margin-top: 0;
     margin-bottom: 16px;
@@ -81,14 +80,23 @@ export const StandardListStyles = css`
   }
 
   & li[data-checked] {
-    position: relative;
+    display: grid;
+    grid-template-columns: var(--rme-task-checkbox-size) minmax(0, 1fr);
+    column-gap: 0.5em;
+    margin-left: -1.5em;
     list-style: none;
   }
 
-  & li[data-checked] > input[data-rme-task-checkbox] {
-    position: absolute;
-    top: var(--rme-task-checkbox-offset);
-    left: -1.5em;
+  & li[data-checked] > [data-rme-task-checkbox-control] {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--rme-task-checkbox-size);
+    height: 1lh;
+  }
+
+  & li[data-checked] > [data-rme-task-checkbox-control] > input[data-rme-task-checkbox] {
+    flex: none;
     box-sizing: border-box;
     width: var(--rme-task-checkbox-size);
     height: var(--rme-task-checkbox-size);
@@ -102,20 +110,26 @@ export const StandardListStyles = css`
       background-color var(--mf-motion-duration-fast, 120ms) ease;
   }
 
-  & li[data-checked] > input[data-rme-task-checkbox]:hover:not(:disabled) {
+  & li[data-checked]
+    > [data-rme-task-checkbox-control]
+    > input[data-rme-task-checkbox]:hover:not(:disabled) {
     border-color: ${(props) => props.theme.accentColor};
   }
 
-  & li[data-checked] > input[data-rme-task-checkbox]:checked {
+  & li[data-checked]
+    > [data-rme-task-checkbox-control]
+    > input[data-rme-task-checkbox]:checked {
     border-color: ${(props) => props.theme.accentColor};
     background-color: ${(props) => props.theme.accentColor};
   }
 
-  & li[data-checked] > input[data-rme-task-checkbox]::before {
+  & li[data-checked]
+    > [data-rme-task-checkbox-control]
+    > input[data-rme-task-checkbox]::before {
     width: 0.56em;
     height: 0.3em;
     border: solid var(--rme-task-checkbox-foreground);
-    border-width: 0 0 0.1em 0.1em;
+    border-width: 0 0 calc(0.1em + 1px) calc(0.1em + 1px);
     border-radius: 1px;
     background: transparent;
     clip-path: none;
@@ -123,11 +137,15 @@ export const StandardListStyles = css`
     transform-origin: center;
   }
 
-  & li[data-checked] > input[data-rme-task-checkbox]:checked::before {
+  & li[data-checked]
+    > [data-rme-task-checkbox-control]
+    > input[data-rme-task-checkbox]:checked::before {
     transform: translateY(-0.05em) rotate(-45deg) scale(1);
   }
 
-  & li[data-checked] > input[data-rme-task-checkbox]:disabled {
+  & li[data-checked]
+    > [data-rme-task-checkbox-control]
+    > input[data-rme-task-checkbox]:disabled {
     cursor: default;
   }
 

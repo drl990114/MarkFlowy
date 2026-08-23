@@ -1,4 +1,5 @@
 export * from './list-extensions'
+export * from './standard-list-commands'
 export {
   getActiveListKind,
   isListKindActive,

@@ -3,6 +3,7 @@ import {
   BulletListExtension,
   ListItemExtension,
   OrderedListExtension,
+  StandardListExtension,
 } from '@rme-sdk/sdk/extensions/list'
 
 import type {
@@ -31,7 +32,7 @@ function getTaskMarker(checked: unknown): string {
   return checked === null || checked === undefined ? '' : checked ? '[x] ' : '[ ] '
 }
 
-export class LineBulletListExtension extends BulletListExtension {
+class LineBulletListExtension extends BulletListExtension {
   public fromMarkdown() {
     return [
       {
@@ -53,7 +54,7 @@ export class LineBulletListExtension extends BulletListExtension {
   }
 }
 
-export class LineOrderedListExtension extends OrderedListExtension {
+class LineOrderedListExtension extends OrderedListExtension {
   public fromMarkdown() {
     return [
       {
@@ -81,7 +82,7 @@ export class LineOrderedListExtension extends OrderedListExtension {
   }
 }
 
-export class LineListItemExtension extends ListItemExtension {
+class LineListItemExtension extends ListItemExtension {
   public fromMarkdown() {
     return [
       {
@@ -125,5 +126,15 @@ export class LineListItemExtension extends ListItemExtension {
     for (let index = contentStart; index < node.childCount; index += 1) {
       state.render(node.child(index), node, index)
     }
+  }
+}
+
+export class LineStandardListExtension extends StandardListExtension {
+  public createExtensions() {
+    return [
+      new LineBulletListExtension(),
+      new LineOrderedListExtension(),
+      new LineListItemExtension(),
+    ]
   }
 }

@@ -1,10 +1,11 @@
 import { isListKindActive } from '@rme-sdk/sdk/extensions/list'
+import type { StandardListExtension } from '@rme-sdk/sdk/extensions/list'
 import { useCommands, useEditorState } from '@rme-sdk/sdk/react'
 import { useCallback } from 'react'
 import type { FC } from 'react'
 
 import { t } from '@markflowy/i18n'
-import type { LineOrderedListExtension } from '../../../extensions'
+import { getStandardListCommand } from '../../../extensions'
 import { CommandButton } from './command-button'
 import type { CommandButtonProps } from './command-button'
 
@@ -14,7 +15,8 @@ export type ToggleOrderedListButtonProps = Omit<
 >
 
 export const ToggleOrderedListButton: FC<ToggleOrderedListButtonProps> = (props) => {
-  const { toggleOrderedList } = useCommands<LineOrderedListExtension>()
+  const commands = useCommands<StandardListExtension>()
+  const toggleOrderedList = getStandardListCommand(commands, 'ordered')
   const state = useEditorState()
 
   const handleSelect = useCallback(() => {

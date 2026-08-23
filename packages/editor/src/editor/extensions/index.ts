@@ -43,7 +43,7 @@ import {
   MdImgUriExtension,
 } from './Image/md-image-extension'
 import { LineInlineDecorationExtension, LineInlineMarkExtension, markExtensions } from './Inline'
-import { LineBulletListExtension, LineListItemExtension, LineOrderedListExtension } from './List'
+import { LineStandardListExtension } from './List'
 import { MathBlockExtension, MathInlineExtension } from './Math'
 import { MermaidBlockExtension } from './Mermaid'
 import { NodeIndicatorExtension } from './NodeIndicator'
@@ -185,9 +185,7 @@ function extensions(options: ExtensionsOptions): any[] {
     new LineBlockquoteExtension(),
     new LineHeadingExtension({}),
     new HeadingNumberingExtension(),
-    new LineBulletListExtension(),
-    new LineOrderedListExtension(),
-    new LineListItemExtension(),
+    new LineStandardListExtension(),
     new LineCodeMirrorExtension({
       extensions: [
         ...getSetupByCodemirrorOptions({ ...codemirrorOptions, lineNumbers: true }),

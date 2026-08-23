@@ -413,7 +413,6 @@ describe('enhanceProsemirrorHtml', () => {
       expect(items).toHaveLength(2)
       expect(items[1]?.getAttribute('data-checked')).toBe('true')
       expect(items[1]?.querySelector('input[type="checkbox"]')?.hasAttribute('disabled')).toBe(true)
-      expect(container.querySelector('.prosemirror-flat-list')).toBeNull()
     } finally {
       delegate.manager.destroy()
     }

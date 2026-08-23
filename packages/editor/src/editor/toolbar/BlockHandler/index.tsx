@@ -1,5 +1,6 @@
 import { t } from '@markflowy/i18n'
 import type { EditorView } from '@rme-sdk/sdk/core'
+import type { StandardListExtension } from '@rme-sdk/sdk/extensions/list'
 import { NodeSelection } from '@rme-sdk/sdk/pm/state'
 import { useCommands, useExtension, useRemirrorContext } from '@rme-sdk/sdk/react'
 import {
@@ -83,7 +84,7 @@ export const BlockHandler = memo(({ getMenuBoundary }: BlockHandlerProps) => {
     nodeIndicatorExtension.getNodeIndicatorState,
   )
   const [dropdownOpen, setDropdownOpen] = useState(false)
-  const commands = useCommands()
+  const commands = useCommands<StandardListExtension>()
   const blockTypeOptions = useBlockTypeOptions(t, commands)
   const triggerRef = useRef<HTMLDivElement>(null)
   const displayStateRef = useRef<NodeIndicatorState | undefined>(state)

@@ -78,13 +78,20 @@ describe('WysiwygThemeWrapper visual overrides', () => {
     const css = renderWrapperStyles()
 
     expect(css).toContain('--rme-task-checkbox-size:1em')
-    expect(css).toContain('--rme-task-checkbox-offset:0.3em')
     expect(css).toContain('--rme-task-checkbox-foreground:var(--mf-primary-foreground,#fff)')
-    expect(css).toContain("li[data-checked]>input[data-rme-task-checkbox]{position:absolute")
-    expect(css).toContain('top:var(--rme-task-checkbox-offset)')
+    expect(css).toContain(
+      'li[data-checked]{display:grid;grid-template-columns:var(--rme-task-checkbox-size)minmax(0,1fr);column-gap:0.5em;margin-left:-1.5em',
+    )
+    expect(css).toContain(
+      'li[data-checked]>[data-rme-task-checkbox-control]{display:flex;align-items:center;justify-content:center;width:var(--rme-task-checkbox-size);height:1lh',
+    )
+    expect(css).toContain(
+      'li[data-checked]>[data-rme-task-checkbox-control]>input[data-rme-task-checkbox]{flex:none',
+    )
     expect(css).toContain('width:var(--rme-task-checkbox-size)')
     expect(css).toContain('border:1.5pxsolid#9ca3af')
     expect(css).toContain('border:solidvar(--rme-task-checkbox-foreground)')
+    expect(css).toContain('border-width:00calc(0.1em+1px)calc(0.1em+1px)')
     expect(css).toContain(
       "li[data-checked='true']>[data-rme-list-item-content]>:first-child{color:#9ca3af;text-decoration:line-through",
     )
