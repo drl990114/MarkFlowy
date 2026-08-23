@@ -1,13 +1,31 @@
-import { LineTextExtension } from '../Text/text-extension';
-import { LineParagraphExtension } from '../Paragraph/paragraph-extension';
-import { fakeIndentedLanguage, LineCodeMirrorExtension } from './codemirror-extension';
+import { LineTextExtension } from '../Text/text-extension'
+import { LineParagraphExtension } from '../Paragraph/paragraph-extension'
+import { fakeIndentedLanguage, LineCodeMirrorExtension } from './codemirror-extension'
 import { renderEditor } from "jest-remirror"
 import { describe, expect, test } from "vitest"
-import { buildMarkdownParser, buildMarkdownSerializer } from '@/editor/components/WysiwygEditor/delegate';
-import { dedent } from '@/editor/utils/common';
+import { buildMarkdownParser, buildMarkdownSerializer } from '@/editor/components/WysiwygEditor/delegate'
+import { dedent } from '@/editor/utils/common'
 
-const setup = () => {
-    const editor = renderEditor([new LineParagraphExtension(), new LineTextExtension(), new LineCodeMirrorExtension({})])
+class StaticLineCodeMirrorExtension extends LineCodeMirrorExtension {
+    createNodeViews() {
+        return () => {
+            const dom = document.createElement('pre')
+            const contentDOM = document.createElement('code')
+            dom.append(contentDOM)
+            return { contentDOM, dom }
+        }
+    }
+}
+
+const setup = ({ staticCodeMirror = false } = {}) => {
+    const codeMirrorExtension = staticCodeMirror
+        ? new StaticLineCodeMirrorExtension({ hideDecoration: true })
+        : new LineCodeMirrorExtension({})
+    const editor = renderEditor([
+        new LineParagraphExtension(),
+        new LineTextExtension(),
+        codeMirrorExtension,
+    ])
     const {
         view,
         add,
@@ -201,5 +219,26 @@ describe("toMarkdown", () => {
                 )
             })
         })
+    })
+})
+
+describe('keyboard shortcuts', () => {
+    test('turns a document-leading code fence into a regular code block on Enter', () => {
+        const { add, doc, manager, p, view } = setup({ staticCodeMirror: true })
+
+        try {
+            add(doc(p('```<cursor>')))
+            view.dom.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'Enter' }))
+
+            expect(view.state.doc.firstChild?.type.name).toBe('codeMirror')
+            expect(view.state.doc.firstChild?.attrs).toMatchObject({
+                'front-matter': false,
+                language: '',
+            })
+            expect(view.state.selection.$from.parent.type.name).toBe('codeMirror')
+            expect(view.state.selection.$from.parentOffset).toBe(0)
+        } finally {
+            manager.destroy()
+        }
     })
 })

@@ -9,6 +9,7 @@ import type {
   GetAttributes,
   InputRule,
   KeyBindingProps,
+  KeyBindings,
   NodeExtensionSpec,
   NodeSpecOverride,
   NodeViewMethod,
@@ -147,7 +148,7 @@ export class LineCodeMirrorExtension extends NodeExtension<CodeMirrorExtensionOp
 
     const getAttributes: GetAttributes = (match) => {
       const language = match[1] ?? ''
-      return { language }
+      return { 'front-matter': false, language }
     }
 
     return [
@@ -174,6 +175,12 @@ export class LineCodeMirrorExtension extends NodeExtension<CodeMirrorExtensionOp
         getAttributes: getAttributes,
       }),
     ]
+  }
+
+  createKeymap(): KeyBindings {
+    return {
+      Enter: this.enterKey,
+    }
   }
 
   enterKey = ({ dispatch, tr }: KeyBindingProps): boolean => {
@@ -206,7 +213,7 @@ export class LineCodeMirrorExtension extends NodeExtension<CodeMirrorExtensionOp
 
     const pos = tr.selection.$from.before()
     const end = pos + nodeSize + 1 // +1 to account for the extra pos a node takes up
-    tr.replaceWith(pos, end, this.type.create({ language }))
+    tr.replaceWith(pos, end, this.type.create({ 'front-matter': false, language }))
 
     // Set the selection to within the codeBlock
     tr.setSelection(TextSelection.near(tr.doc.resolve(pos + 1)))
