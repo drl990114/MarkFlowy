@@ -128,6 +128,10 @@ interface EditorGroupPaneProps {
   zenModeActive: boolean
 }
 
+function isInsideEditorTabBar(target: EventTarget | null) {
+  return target instanceof Element && target.closest('.editor-area-tabs') !== null
+}
+
 const EditorGroupPane = memo((props: EditorGroupPaneProps) => {
   const { groupId, zenModeActive } = props
   const [isDropTarget, setIsDropTarget] = useState(false)
@@ -143,6 +147,7 @@ const EditorGroupPane = memo((props: EditorGroupPaneProps) => {
 
   const handleDragOver = useCallback((e: DragEvent<HTMLElement>) => {
     if (!hasEditorTabDragData(e.dataTransfer)) return
+    if (isInsideEditorTabBar(e.target)) return
 
     e.preventDefault()
     e.stopPropagation()
@@ -151,6 +156,10 @@ const EditorGroupPane = memo((props: EditorGroupPaneProps) => {
 
   const handleDragEnter = useCallback((e: DragEvent<HTMLElement>) => {
     if (!hasEditorTabDragData(e.dataTransfer)) return
+    if (isInsideEditorTabBar(e.target)) {
+      setIsDropTarget(false)
+      return
+    }
 
     e.preventDefault()
     setIsDropTarget(true)
@@ -170,6 +179,7 @@ const EditorGroupPane = memo((props: EditorGroupPaneProps) => {
       const dragData = readEditorTabDragData(e.dataTransfer)
       setIsDropTarget(false)
       if (!dragData) return
+      if (isInsideEditorTabBar(e.target)) return
 
       e.preventDefault()
       e.stopPropagation()

@@ -55,6 +55,68 @@ const splitLayout = (): EditorLayoutNode => ({
   ],
 })
 
+const tabLayout = (): EditorLayoutNode => ({
+  type: 'leaf',
+  id: 'tab-group',
+  opened: ['a', 'b', 'c', 'd'],
+  activeId: 'a',
+})
+
+describe('useEditorStore.moveFileToGroup', () => {
+  beforeEach(() => {
+    useEditorStore.setState({
+      activeGroupId: 'tab-group',
+      activeId: 'a',
+      editorLayout: tabLayout(),
+      opened: ['a', 'b', 'c', 'd'],
+    })
+  })
+
+  it('reorders a tab into an insertion slot in the same group', () => {
+    useEditorStore.getState().moveFileToGroup('tab-group', 'tab-group', 'b', 3)
+
+    expect(useEditorStore.getState().getGroup('tab-group')).toMatchObject({
+      opened: ['a', 'c', 'b', 'd'],
+      activeId: 'b',
+    })
+  })
+
+  it('moves a tab left and keeps drops beside itself stable', () => {
+    const editorStore = useEditorStore.getState()
+    editorStore.moveFileToGroup('tab-group', 'tab-group', 'c', 0)
+    expect(useEditorStore.getState().getGroup('tab-group')?.opened).toEqual([
+      'c',
+      'a',
+      'b',
+      'd',
+    ])
+
+    useEditorStore.getState().moveFileToGroup('tab-group', 'tab-group', 'c', 1)
+    expect(useEditorStore.getState().getGroup('tab-group')?.opened).toEqual([
+      'c',
+      'a',
+      'b',
+      'd',
+    ])
+  })
+
+  it('inserts a moved tab at the requested position in another group', () => {
+    useEditorStore.setState({
+      activeGroupId: 'source-group',
+      activeId: 'source',
+      editorLayout: splitLayout(),
+      opened: ['source', 'target-old', 'other'],
+    })
+
+    useEditorStore.getState().moveFileToGroup('source-group', 'target-group', 'source', 1)
+
+    expect(useEditorStore.getState().getGroup('target-group')).toMatchObject({
+      opened: ['target-old', 'source', 'other'],
+      activeId: 'source',
+    })
+  })
+})
+
 describe('useEditorStore.insertNodeToFolderData', () => {
   beforeEach(() => {
     useEditorStore.setState({

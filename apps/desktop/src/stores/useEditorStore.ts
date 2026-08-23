@@ -733,6 +733,22 @@ const useEditorStore = create<EditorStore>()(subscribeWithSelector((set, get) =>
         if (!sourceGroup || !targetGroup || !sourceGroup.opened.includes(id)) return state
 
         if (sourceGroup.id === targetGroup.id) {
+          if (typeof targetIndex === 'number') {
+            const sourceIndex = targetGroup.opened.indexOf(id)
+            let insertIndex = Math.max(0, Math.min(targetIndex, targetGroup.opened.length))
+
+            // The drop index describes a slot in the list before removing the dragged tab.
+            // Account for the removed item when moving it towards the right.
+            if (sourceIndex < insertIndex) {
+              insertIndex--
+            }
+
+            if (sourceIndex !== insertIndex) {
+              targetGroup.opened.splice(sourceIndex, 1)
+              targetGroup.opened.splice(insertIndex, 0, id)
+            }
+          }
+
           targetGroup.activeId = id
         } else {
           closeFileInGroup(sourceGroup, id)

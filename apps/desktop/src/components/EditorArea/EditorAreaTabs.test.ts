@@ -3,7 +3,11 @@ import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { ServerStyleSheet, ThemeProvider } from 'styled-components'
 import { describe, expect, it } from 'vitest'
-import { getNextTabIndex } from './EditorAreaTabs'
+import {
+  getEditorTabDropIndex,
+  getEditorTabScrollAdjustment,
+  getNextTabIndex,
+} from './EditorAreaTabs'
 import { TabItem } from './styles'
 
 function getTabStyles(active: boolean) {
@@ -51,5 +55,20 @@ describe('getNextTabIndex', () => {
   it('uses the dedicated active and inactive tab surfaces', () => {
     expect(getTabStyles(true)).toContain('background-color:#abcdef')
     expect(getTabStyles(false)).toContain('background-color:#fedcba')
+  })
+})
+
+describe('editor tab overflow and drag placement', () => {
+  it('uses the pointer half to choose the insertion slot', () => {
+    expect(getEditorTabDropIndex(2, 119, 100, 40)).toBe(2)
+    expect(getEditorTabDropIndex(2, 120, 100, 40)).toBe(2)
+    expect(getEditorTabDropIndex(2, 121, 100, 40)).toBe(3)
+  })
+
+  it('scrolls only by the distance needed to reveal a tab', () => {
+    expect(getEditorTabScrollAdjustment(100, 300, 260, 340)).toBe(40)
+    expect(getEditorTabScrollAdjustment(100, 300, 60, 140)).toBe(-40)
+    expect(getEditorTabScrollAdjustment(100, 300, 140, 260)).toBe(0)
+    expect(getEditorTabScrollAdjustment(100, 180, 140, 260)).toBe(40)
   })
 })

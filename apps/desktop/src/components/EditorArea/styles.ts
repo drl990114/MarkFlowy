@@ -126,6 +126,30 @@ export const TabItem = styled.div<TabItemProps>`
   -moz-user-select: none; /* Firefox */
   -ms-user-select: none; /* Edge, IE */
 
+  &.mf-tab-dragging {
+    opacity: 0.55;
+  }
+
+  &.mf-tab-drop-before::before,
+  &.mf-tab-drop-after::after {
+    position: absolute;
+    inset-block: 3px;
+    z-index: 2;
+    width: 2px;
+    border-radius: 1px;
+    background: var(--mf-control-focus, ${(props) => props.theme.accentColor});
+    content: '';
+    pointer-events: none;
+  }
+
+  &.mf-tab-drop-before::before {
+    left: -1px;
+  }
+
+  &.mf-tab-drop-after::after {
+    right: -1px;
+  }
+
   &:hover {
     background-color: ${(props) =>
       props.$active
