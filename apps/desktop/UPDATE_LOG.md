@@ -1,5 +1,41 @@
 # UPDATE LOG
 
+## v0.89.0
+
+Features:
+
+- Added interactive image preview controls for zooming in or out, viewing at actual size, and fitting images to the editor window.
+
+- Local file links in Markdown now open directly in the current editor group, with relative paths resolved from the current document; web links continue to open in the browser.
+
+- Added a compact workspace switcher in the title bar or status bar, with search for recent workspaces and quick actions to open another folder or clear recent history.
+
+Improvements and Fixes:
+
+- Reworked WYSIWYG lists around the standard nested-list model, improving bullet, ordered, and task list conversion, Markdown round-tripping, Enter and Backspace behavior, and task checkbox alignment.
+
+- Improved File Tree navigation with a workspace root that stays visible while scrolling and clearer file and folder icons.
+
+- Refined startup and appearance restoration so the selected theme and application shell are restored more consistently while a workspace loads, with clearer retry and workspace-change states.
+
+---
+
+特性：
+
+- 图片预览新增交互式缩放控制，支持放大、缩小、按实际尺寸显示以及适应编辑器窗口。
+
+- Markdown 中的本地文件链接现在会直接在当前编辑器分组内打开，相对路径会基于当前文档解析；网页链接仍会在浏览器中打开。
+
+- 标题栏或状态栏新增紧凑的工作区切换器，可搜索最近使用的工作区，并快速打开其他文件夹或清空最近记录。
+
+改进与修复：
+
+- 将所见即所得列表统一迁移到标准嵌套列表模型，改进无序列表、有序列表和任务列表的转换、Markdown 往返序列化、Enter 与 Backspace 行为，以及任务复选框的对齐。
+
+- 改进文件树导航，滚动时保持工作区根节点可见，并提供更清晰的文件与文件夹图标。
+
+- 优化启动与外观恢复逻辑，在工作区加载期间更一致地恢复所选主题和应用框架，并提供更清晰的重试与切换工作区状态。
+
 ## v0.88.0
 
 Features:
