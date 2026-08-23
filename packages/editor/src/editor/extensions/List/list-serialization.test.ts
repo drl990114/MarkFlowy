@@ -130,7 +130,7 @@ describe('list markdown serialization', () => {
 
     expect(
       Array.from({ length: item.childCount }, (_, index) => item.child(index).type.name),
-    ).toEqual(['heading', 'blockquote', 'codeMirror'])
+    ).toEqual(['paragraph', 'heading', 'blockquote', 'codeMirror'])
     expect(serializeMarkdown(markdown)).toBe(
       ['- # Heading', '', '    > Quote', '', '        const value = 1', ''].join('\n'),
     )

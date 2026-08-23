@@ -99,7 +99,7 @@ describe('standard list Enter behavior in the MarkFlowy editor', () => {
     }
   })
 
-  it('keeps a non-empty root paragraph after a list on Backspace', async () => {
+  it('merges a non-empty root paragraph into the previous list item on Backspace', async () => {
     const delegate = createWysiwygDelegate()
     const initialContent = delegate.stringToDoc('- item\n\nparagraph')
     let paragraphStart = 0
@@ -126,14 +126,11 @@ describe('standard list Enter behavior in the MarkFlowy editor', () => {
         pressBackspace(view.dom)
       })
 
-      expect(
-        Array.from(
-          { length: view.state.doc.childCount },
-          (_, index) => view.state.doc.child(index).type.name,
-        ),
-      ).toEqual(['bulletList', 'paragraph'])
-      expect(view.state.doc.child(1).textContent).toBe('paragraph')
+      expect(view.state.doc.childCount).toBe(1)
+      expect(view.state.doc.firstChild?.type.name).toBe('bulletList')
+      expect(view.state.doc.firstChild?.firstChild?.textContent).toBe('itemparagraph')
       expect(view.state.selection.$from.parent.type.name).toBe('paragraph')
+      expect(view.state.selection.$from.parentOffset).toBe(4)
     } finally {
       await act(async () => root.unmount())
       delegate.manager.destroy()

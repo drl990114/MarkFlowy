@@ -110,6 +110,20 @@ export class LineListItemExtension extends ListItemExtension {
   }
 
   public toMarkdown({ state, node }: NodeSerializerOptions) {
-    state.renderContent(node)
+    const firstChild = node.firstChild
+    const contentStart =
+      node.childCount > 1 &&
+      firstChild?.type.name === 'paragraph' &&
+      firstChild.content.size === 0
+        ? 1
+        : 0
+
+    // The standard list schema requires a leading paragraph and inserts an
+    // empty one when Markdown starts with another block (for example, a
+    // heading). That paragraph has no source representation, so omit it when
+    // serializing the rest of the list item.
+    for (let index = contentStart; index < node.childCount; index += 1) {
+      state.render(node.child(index), node, index)
+    }
   }
 }
