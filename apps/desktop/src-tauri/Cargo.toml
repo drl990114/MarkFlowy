@@ -16,7 +16,7 @@ crate-type = [
 ]
 
 [build-dependencies.tauri-build]
-version = "2.5.6"
+version = "2.6.3"
 features = []
 
 [dependencies]
@@ -24,18 +24,18 @@ serde_json = "1.0"
 anyhow = "1.0.86"
 dark-light = "1.1.1"
 log = "0.4.21"
-tauri-plugin-updater = "2.9.0"
-tauri-plugin-http = "2.5.8"
+tauri-plugin-updater = "2.10.1"
+tauri-plugin-http = "2.5.9"
 tauri-plugin-window-state = "2.4.1"
-tauri-plugin-store = "2.4.2"
+tauri-plugin-store = "2.4.4"
 tauri-plugin-os = "2.3.2"
 tauri-plugin-shell = "2.3.5"
-tauri-plugin-dialog = "2.7.0"
-tauri-plugin-cli = "2"
+tauri-plugin-dialog = "2.7.2"
+tauri-plugin-cli = "2.4.1"
 tauri-plugin-clipboard-manager = "2.3.2"
-tauri-plugin-opener = "2.5.3"
-tauri-plugin-fs = "2.5.0"
-tauri-plugin-persisted-scope = "2.3.6"
+tauri-plugin-opener = "2.5.4"
+tauri-plugin-fs = "2.5.1"
+tauri-plugin-persisted-scope = "2.3.7"
 regex = "1.10.4"
 same-file = "1.0.6"
 sha2 = "0.10"
@@ -109,7 +109,7 @@ version = "1.0"
 features = ["derive"]
 
 [dependencies.tauri]
-version = "2.10.3"
+version = "2.11.5"
 features = [
     "protocol-asset",
     "devtools",
@@ -141,7 +141,7 @@ features = [
 ]
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
-tauri-plugin-single-instance = "2"
+tauri-plugin-single-instance = "2.4.3"
 
 [features]
 custom-protocol = ["tauri/custom-protocol"]
