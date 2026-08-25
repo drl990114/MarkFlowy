@@ -221,6 +221,7 @@
   },
   "contextmenu": {
     "explorer": {
+      "new": "新建",
       "add_file": "新建文件",
       "add_folder": "新建文件夹",
       "rename": "重命名",
@@ -228,6 +229,9 @@
       "delete_folder": "删除文件夹",
       "moveto_trash": "移动到回收站",
       "copy": "复制",
+      "duplicate_file": "复制文件",
+      "copy_path": "复制路径",
+      "copy_relative_path": "复制相对路径",
       "show_in_folder": "打开文件所在位置"
     },
     "editor_tab": {

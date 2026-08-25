@@ -2,6 +2,7 @@ import React, { type FC } from 'react'
 import { useTranslation } from '@markflowy/i18n'
 import type { NodeRendererProps } from 'react-arborist'
 import { toast } from 'zens'
+import { AppContext } from '../../contexts/AppContext'
 import { useFileSystem } from '../../contexts/FileSystemContext'
 import { useFileTree } from '../../contexts/FileTreeContext'
 import type { IFile } from '../../types/file'
@@ -62,7 +63,46 @@ export type FileTreeNodeIconRenderer = (
 export interface ContextMenuItem {
   label: string
   value: string
-  handler: () => void
+  handler?: () => void
+  children?: ContextMenuItem[]
+}
+
+export type FileTreePathCopyType = 'absolute' | 'relative'
+
+export function createPathCopyMenuItems(
+  path: string,
+  onCopyPath: (path: string, type: FileTreePathCopyType) => Promise<void> | void,
+  labels: { absolute: string; relative: string },
+): ContextMenuItem[] {
+  return [
+    {
+      value: 'copy_path',
+      label: labels.absolute,
+      handler: () => void onCopyPath(path, 'absolute'),
+    },
+    {
+      value: 'copy_relative_path',
+      label: labels.relative,
+      handler: () => void onCopyPath(path, 'relative'),
+    },
+  ]
+}
+
+export async function copyFileTreePath({
+  path,
+  type,
+  rootPath,
+  copyText,
+  getRelativePath,
+}: {
+  path: string
+  type: FileTreePathCopyType
+  rootPath?: string
+  copyText: (text: string) => Promise<void> | void
+  getRelativePath: (path: string, rootPath: string) => Promise<string>
+}) {
+  const text = type === 'relative' && rootPath ? await getRelativePath(path, rootPath) : path
+  await copyText(text)
 }
 
 const extFileIconClassMap: Record<string, string> = {
@@ -110,7 +150,9 @@ function FileNode({
   isRootSuppressed = false,
 }: FileNodeComponentProps) {
   const { t } = useTranslation()
-  const { deleteNode, trashNode, activeId, refreshFolder, closeAll, scrollTo } = useFileTree()
+  const appContext = React.useContext(AppContext)
+  const { deleteNode, trashNode, activeId, refreshFolder, closeAll, scrollTo, getRootPath } =
+    useFileTree()
   const {
     runFileMutation,
     renameFile,
@@ -118,6 +160,7 @@ function FileNode({
     createFolder,
     writeFile,
     fileExists,
+    getMdRelativePath,
     pathsReferToSameDirectoryEntry,
     revealInFolder,
   } = useFileSystem()
@@ -273,78 +316,82 @@ function FileNode({
     const items: ContextMenuItem[] = []
 
     if (node.parent) {
-      items.push(
-        {
-          label: 'New File',
-          value: 'new_file',
-          handler: () => {
-            if (node.parent) {
-              const mutationTree = new SimpleTree(getCurrentFolderData())
-              const parentData = node.isInternal ? node.data : node.parent.data
-              const parentTarget = captureFileMutationTarget(parentData)
-              if (
-                !parentTarget ||
-                !getCurrentFileMutationNode(mutationTree, getFileObject, parentTarget)
-              ) {
-                return
-              }
+      items.push({
+        label: t('contextmenu.explorer.new'),
+        value: 'new',
+        children: [
+          {
+            label: t('contextmenu.explorer.add_file'),
+            value: 'new_file',
+            handler: () => {
+              if (node.parent) {
+                const mutationTree = new SimpleTree(getCurrentFolderData())
+                const parentData = node.isInternal ? node.data : node.parent.data
+                const parentTarget = captureFileMutationTarget(parentData)
+                if (
+                  !parentTarget ||
+                  !getCurrentFileMutationNode(mutationTree, getFileObject, parentTarget)
+                ) {
+                  return
+                }
 
-              const data = {
-                id: `pending-${Date.now()}`,
-                name: '',
-                kind: 'pending_new_file',
-              } as IFile
-              if (node.isInternal) {
-                node.open()
-              }
+                const data = {
+                  id: `pending-${Date.now()}`,
+                  name: '',
+                  kind: 'pending_new_file',
+                } as IFile
+                if (node.isInternal) {
+                  node.open()
+                }
 
-              mutationTree.create({
-                parentId: parentTarget.id,
-                data,
-              })
-              setFolderData(mutationTree.data)
-            }
+                mutationTree.create({
+                  parentId: parentTarget.id,
+                  data,
+                })
+                setFolderData(mutationTree.data)
+              }
+            },
           },
-        },
-        {
-          label: 'New Folder',
-          value: 'new_folder',
-          handler: () => {
-            if (node.parent) {
-              const mutationTree = new SimpleTree(getCurrentFolderData())
-              const parentData = node.isInternal ? node.data : node.parent.data
-              const parentTarget = captureFileMutationTarget(parentData)
-              if (
-                !parentTarget ||
-                !getCurrentFileMutationNode(mutationTree, getFileObject, parentTarget)
-              ) {
-                return
-              }
+          {
+            label: t('contextmenu.explorer.add_folder'),
+            value: 'new_folder',
+            handler: () => {
+              if (node.parent) {
+                const mutationTree = new SimpleTree(getCurrentFolderData())
+                const parentData = node.isInternal ? node.data : node.parent.data
+                const parentTarget = captureFileMutationTarget(parentData)
+                if (
+                  !parentTarget ||
+                  !getCurrentFileMutationNode(mutationTree, getFileObject, parentTarget)
+                ) {
+                  return
+                }
 
-              const data = {
-                id: `pending-${Date.now()}`,
-                name: '',
-                kind: 'pending_new_folder',
-                children: [],
-              } as IFile
-              if (node.isInternal) {
-                node.open()
-              }
+                const data = {
+                  id: `pending-${Date.now()}`,
+                  name: '',
+                  kind: 'pending_new_folder',
+                  children: [],
+                } as IFile
+                if (node.isInternal) {
+                  node.open()
+                }
 
-              mutationTree.create({
-                parentId: parentTarget.id,
-                data,
-              })
-              setFolderData(mutationTree.data)
-            }
+                mutationTree.create({
+                  parentId: parentTarget.id,
+                  data,
+                })
+                setFolderData(mutationTree.data)
+              }
+            },
           },
-        },
-      )
+        ],
+      })
     }
 
     if (node.data.kind === 'dir' || node.data.ext === 'md') {
       items.push({
-        label: 'Rename',
+        label: t('contextmenu.explorer.rename'),
         value: 'rename',
         handler: () => {
           const target = captureFileMutationTarget(node.data)
@@ -365,21 +412,12 @@ function FileNode({
       })
     }
 
-    items.push({
-      value: node.data.kind === 'dir' ? 'delete_folder' : 'delete_file',
-      label: node.data.kind === 'dir' ? 'Delete Folder' : 'Delete File',
-      handler: () => {
-        onShowConfirm({
-          title: `Are you sure you want to delete ${node.data.name}?`,
-          onConfirm: delFileHandler,
-        })
-      },
-    })
+    const copyItems: ContextMenuItem[] = []
 
     if (node.data.kind === 'file') {
-      items.push({
-        value: 'copy',
-        label: 'Copy',
+      copyItems.push({
+        value: 'duplicate_file',
+        label: t('contextmenu.explorer.duplicate_file'),
         handler: () => {
           const target = captureFileMutationTarget(node.data)
           const parentTarget = node.parent ? captureFileMutationTarget(node.parent.data) : undefined
@@ -427,9 +465,57 @@ function FileNode({
       })
     }
 
+    if (node.data.path && appContext?.copyText) {
+      const copyText = appContext.copyText
+      copyItems.push(
+        ...createPathCopyMenuItems(
+          node.data.path,
+          async (path, type) => {
+            try {
+              await copyFileTreePath({
+                path,
+                type,
+                rootPath: getRootPath(),
+                copyText,
+                getRelativePath: getMdRelativePath,
+              })
+            } catch (error) {
+              toast.error(error instanceof Error ? error.message : String(error))
+            }
+          },
+          {
+            absolute: t('contextmenu.explorer.copy_path'),
+            relative: t('contextmenu.explorer.copy_relative_path'),
+          },
+        ),
+      )
+    }
+
+    if (copyItems.length > 0) {
+      items.push({
+        value: 'copy',
+        label: t('contextmenu.explorer.copy'),
+        children: copyItems,
+      })
+    }
+
+    items.push({
+      value: node.data.kind === 'dir' ? 'delete_folder' : 'delete_file',
+      label:
+        node.data.kind === 'dir'
+          ? t('contextmenu.explorer.delete_folder')
+          : t('contextmenu.explorer.delete_file'),
+      handler: () => {
+        onShowConfirm({
+          title: `Are you sure you want to delete ${node.data.name}?`,
+          onConfirm: delFileHandler,
+        })
+      },
+    })
+
     items.push({
       value: 'trash',
-      label: 'Move to Trash',
+      label: t('contextmenu.explorer.moveto_trash'),
       handler: () => {
         onShowConfirm({
           title: `Are you sure you want to move ${node.data.name} to trash?`,
@@ -466,7 +552,7 @@ function FileNode({
     if (revealInFolder) {
       items.push({
         value: 'show_in_folder',
-        label: 'Show in Folder',
+        label: t('contextmenu.explorer.show_in_folder'),
         handler: async () => {
           try {
             const exists = await fileExists(node.data.path!)

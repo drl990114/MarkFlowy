@@ -220,6 +220,7 @@
   },
   "contextmenu": {
     "explorer": {
+      "new": "New",
       "add_file": "New file",
       "add_folder": "New folder",
       "rename": "Rename",
@@ -227,6 +228,9 @@
       "delete_folder": "Delete folder",
       "moveto_trash": "Move to trash",
       "copy": "Copy",
+      "duplicate_file": "Duplicate file",
+      "copy_path": "Copy path",
+      "copy_relative_path": "Copy relative path",
       "show_in_folder": "Show in Folder"
     },
     "editor_tab": {

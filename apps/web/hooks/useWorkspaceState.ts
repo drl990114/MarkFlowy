@@ -423,11 +423,7 @@ export function useWorkspaceState(id: string) {
     y: number
     items: ContextMenuItem[]
   }) => {
-    const menuItems: MenuItemData[] = items.map((item) => ({
-      label: item.label,
-      value: item.value,
-      handler: item.handler,
-    }))
+    const menuItems: MenuItemData[] = items
     showContextMenu({ x, y, items: menuItems })
   }
 

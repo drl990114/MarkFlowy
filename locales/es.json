@@ -188,6 +188,7 @@
   },
   "contextmenu": {
     "explorer": {
+      "new": "Nuevo",
       "add_file": "Nuevo archivo",
       "add_folder": "Nueva carpeta",
       "rename": "Renombrar",
@@ -195,6 +196,9 @@
       "delete_folder": "Eliminar archivo",
       "moveto_trash": "Mover a la papelera",
       "copy": "Copiar",
+      "duplicate_file": "Duplicar archivo",
+      "copy_path": "Copiar ruta",
+      "copy_relative_path": "Copiar ruta relativa",
       "show_in_folder": "Mostrar en carpeta"
     },
     "editor_tab": {

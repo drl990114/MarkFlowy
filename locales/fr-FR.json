@@ -185,6 +185,7 @@
   },
   "contextmenu": {
     "explorer": {
+      "new": "Nouveau",
       "add_file": "Nouveau fichier",
       "add_folder": "Nouveau dossier",
       "delete_file": "Supprimer le fichier",
@@ -192,6 +193,9 @@
       "rename": "Renommer",
       "moveto_trash": "Déplacer vers la corbeille",
       "copy": "Réplication",
+      "duplicate_file": "Dupliquer le fichier",
+      "copy_path": "Copier le chemin",
+      "copy_relative_path": "Copier le chemin relatif",
       "show_in_folder": "Afficher dans le dossier"
     },
     "editor_tab": {

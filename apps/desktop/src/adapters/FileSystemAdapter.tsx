@@ -1,9 +1,12 @@
 import { invoke } from '@tauri-apps/api/core'
+import { writeText } from '@tauri-apps/plugin-clipboard-manager'
 import { revealItemInDir } from '@tauri-apps/plugin-opener'
 import { useMemo, type FC, type ReactNode } from 'react'
 import { flushSync } from 'react-dom'
 import {
+  AppContext,
   FileSystemContext,
+  type AppContextValue,
   type FileSystemContextValue,
   type MoveFileInfo,
   type RunFileMutation,
@@ -25,6 +28,8 @@ import { savePathCoordinator } from '@/components/EditorArea/savePathCoordinator
 interface FileSystemAdapterProps {
   children: ReactNode
 }
+
+const desktopAppContextValue = { copyText: writeText } satisfies AppContextValue
 
 const runFileMutation: RunFileMutation = (operation) =>
   savePathCoordinator.runFileMutation((lease) =>
@@ -158,5 +163,9 @@ export const TauriFileSystemProvider: FC<FileSystemAdapterProps> = ({ children }
     },
   }), [fileExcludePatterns])
 
-  return <FileSystemContext.Provider value={value}>{children}</FileSystemContext.Provider>
+  return (
+    <AppContext.Provider value={desktopAppContextValue}>
+      <FileSystemContext.Provider value={value}>{children}</FileSystemContext.Provider>
+    </AppContext.Provider>
+  )
 }

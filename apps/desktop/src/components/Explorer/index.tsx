@@ -192,11 +192,7 @@ const Explorer: FC<ExplorerProps> = (props) => {
       showContextMenu({
         x,
         y,
-        items: items.map((item) => ({
-          label: item.label,
-          value: item.value,
-          handler: item.handler,
-        })),
+        items,
       })
     },
     [],

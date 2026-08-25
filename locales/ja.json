@@ -193,6 +193,7 @@
   },
   "contextmenu": {
     "explorer": {
+      "new": "新規作成",
       "add_file": "新しいファイル",
       "add_folder": "新しいフォルダー",
       "rename": "名前の変更",
@@ -200,6 +201,9 @@
       "delete_folder": "フォルダーの削除",
       "moveto_trash": "ゴミ箱に移動",
       "copy": "コピー",
+      "duplicate_file": "ファイルを複製",
+      "copy_path": "パスをコピー",
+      "copy_relative_path": "相対パスをコピー",
       "show_in_folder": "Finderで表示"
     },
     "editor_tab": {

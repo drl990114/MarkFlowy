@@ -1,8 +1,10 @@
 import type { FC, ReactNode } from 'react'
 import {
+  AppContext,
   FileSystemContext,
-  FileSystemContextValue,
-  MoveFileInfo,
+  type AppContextValue,
+  type FileSystemContextValue,
+  type MoveFileInfo,
 } from '@markflowy/interface'
 import type { IFile } from '@markflowy/interface'
 
@@ -14,6 +16,13 @@ const directFileMutationLease = {
 interface FileSystemAdapterProps {
   children: ReactNode
   readSubdirectory?: (folderPath: string) => Promise<IFile[]>
+}
+
+const webAppContextValue: AppContextValue = {
+  copyText: async (text) => {
+    if (!navigator.clipboard) throw new Error('Clipboard API is unavailable')
+    await navigator.clipboard.writeText(text)
+  },
 }
 
 /**
@@ -63,7 +72,7 @@ export const WebFileSystemProvider: FC<FileSystemAdapterProps> = ({ children, re
       return path1 === path2
     },
 
-    moveFilesToTargetFolder: async (): Promise<Array<MoveFileInfo>> => {
+    moveFilesToTargetFolder: async (): Promise<MoveFileInfo[]> => {
       return []
     },
 
@@ -108,5 +117,9 @@ export const WebFileSystemProvider: FC<FileSystemAdapterProps> = ({ children, re
     // revealInFolder is not available in web
   }
 
-  return <FileSystemContext.Provider value={value}>{children}</FileSystemContext.Provider>
+  return (
+    <AppContext.Provider value={webAppContextValue}>
+      <FileSystemContext.Provider value={value}>{children}</FileSystemContext.Provider>
+    </AppContext.Provider>
+  )
 }
