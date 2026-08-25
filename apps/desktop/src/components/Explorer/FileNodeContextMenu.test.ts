@@ -1,10 +1,22 @@
 import { describe, expect, it, vi } from 'vitest'
 import {
+  collapseAllFileTreeFolders,
   copyFileTreePath,
   createPathCopyMenuItems,
 } from '../../../../../packages/interface/src/components/FileTree/FileNode'
 
-describe('FileTree path copy menu items', () => {
+describe('FileTree node actions', () => {
+  it('collapses the current tree and keeps the workspace root open', () => {
+    const closeAll = vi.fn()
+    const open = vi.fn()
+
+    collapseAllFileTreeFolders({ closeAll }, { open })
+
+    expect(closeAll).toHaveBeenCalledOnce()
+    expect(open).toHaveBeenCalledOnce()
+    expect(closeAll.mock.invocationCallOrder[0]).toBeLessThan(open.mock.invocationCallOrder[0])
+  })
+
   it('creates absolute and workspace-relative path actions', () => {
     const onCopyPath = vi.fn()
     const items = createPathCopyMenuItems('/workspace/docs/note.md', onCopyPath, {

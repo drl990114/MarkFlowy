@@ -105,6 +105,14 @@ export async function copyFileTreePath({
   await copyText(text)
 }
 
+export function collapseAllFileTreeFolders(
+  tree: Pick<NodeRendererProps<IFile>['tree'], 'closeAll'>,
+  workspaceRoot: Pick<NodeRendererProps<IFile>['node'], 'open'>,
+) {
+  tree.closeAll()
+  workspaceRoot.open()
+}
+
 const extFileIconClassMap: Record<string, string> = {
   md: 'ri-markdown-line',
   markdown: 'ri-markdown-line',
@@ -151,8 +159,7 @@ function FileNode({
 }: FileNodeComponentProps) {
   const { t } = useTranslation()
   const appContext = React.useContext(AppContext)
-  const { deleteNode, trashNode, activeId, refreshFolder, closeAll, scrollTo, getRootPath } =
-    useFileTree()
+  const { deleteNode, trashNode, activeId, refreshFolder, scrollTo, getRootPath } = useFileTree()
   const {
     runFileMutation,
     renameFile,
@@ -769,10 +776,7 @@ function FileNode({
                   onClick={(e?: React.MouseEvent) => {
                     e?.stopPropagation()
                     e?.preventDefault()
-                    if (closeAll) {
-                      closeAll()
-                    }
-                    node.open()
+                    collapseAllFileTreeFolders(tree, node)
                   }}
                   tooltipProps={{ title: 'Collapse All' }}
                 />

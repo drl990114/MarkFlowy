@@ -147,6 +147,7 @@ const FileTree: FC<FileTreeProps> = (props) => {
   currentDataRef.current = data
   const getCurrentFolderData = useCallback(() => currentDataRef.current, [])
   const rootId = data[0]?.id
+  const initialOpenState = useMemo(() => (rootId ? { [rootId]: true } : {}), [rootId])
   const revealRoot = useCallback(() => setShowStickyRoot(false), [])
   const fileTreeRowState = useMemo<FileTreeRowState>(
     () => ({ revealRoot, rootId, suppressRoot: stickyRoot && showStickyRoot }),
@@ -411,10 +412,12 @@ const FileTree: FC<FileTreeProps> = (props) => {
       {(dimens) => {
         const treeElement = (
           <Tree
+            key={rootId}
             {...dimens}
             data={data}
             dndRootElement={dndRootElement}
             disableDrag={disableDrag}
+            initialOpenState={initialOpenState}
             openByDefault={false}
             selection={activeId}
             indent={indentSize}

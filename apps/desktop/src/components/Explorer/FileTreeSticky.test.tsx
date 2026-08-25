@@ -24,8 +24,10 @@ type MockTreeProps = {
   }) => ReactNode
   data: IFile[]
   indent?: number
+  initialOpenState?: Record<string, boolean>
   onScroll?: (state: { scrollOffset: number }) => void
   onToggle?: (id: string) => void
+  openByDefault?: boolean
   rowClassName?: string
   rowHeight?: number
 }
@@ -176,6 +178,60 @@ describe('FileTree sticky workspace root', () => {
     expect(shouldShowFileTreeStickyRoot(0)).toBe(false)
     expect(shouldShowFileTreeStickyRoot(0.5)).toBe(true)
     expect(shouldShowFileTreeStickyRoot(24)).toBe(true)
+  })
+
+  it('opens only the first workspace root by default', () => {
+    const secondRoot: IFile = {
+      id: 'second-root',
+      kind: 'dir',
+      name: 'second',
+      path: '/workspace/second',
+    }
+
+    render(
+      <ThemeProvider theme={desktopLightTheme}>
+        <FileTree
+          data={[rootFile, secondRoot]}
+          fillFlexParentComponent={({ children }) => children({ height: 120, width: 240 })}
+          getFileObject={() => undefined}
+          getFileObjectByPath={() => undefined}
+          onSelect={vi.fn()}
+          onShowConfirm={vi.fn()}
+          onShowContextMenu={vi.fn()}
+        />
+      </ThemeProvider>,
+    )
+
+    expect(treeHarness.props?.openByDefault).toBe(false)
+    expect(treeHarness.props?.initialOpenState).toEqual({ [rootFile.id]: true })
+  })
+
+  it('initially opens the new root after switching workspaces', () => {
+    const nextRoot: IFile = {
+      id: 'next-workspace-root',
+      kind: 'dir',
+      name: 'next',
+      path: '/workspace/next',
+    }
+    const renderTree = (data: IFile[]) => (
+      <ThemeProvider theme={desktopLightTheme}>
+        <FileTree
+          data={data}
+          fillFlexParentComponent={({ children }) => children({ height: 120, width: 240 })}
+          getFileObject={() => undefined}
+          getFileObjectByPath={() => undefined}
+          onSelect={vi.fn()}
+          onShowConfirm={vi.fn()}
+          onShowContextMenu={vi.fn()}
+        />
+      </ThemeProvider>
+    )
+    const view = render(renderTree([rootFile]))
+
+    view.rerender(renderTree([nextRoot]))
+
+    expect(treeHarness.root?.id).toBe(nextRoot.id)
+    expect(treeHarness.props?.initialOpenState).toEqual({ [nextRoot.id]: true })
   })
 
   it('forwards host density to the virtual list and pinned root', () => {
