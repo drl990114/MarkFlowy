@@ -1,5 +1,37 @@
 # UPDATE LOG
 
+## v0.90.0
+
+Features:
+
+- Added Pandoc export for Markdown documents in DOCX, ODT, and EPUB formats. Open a Markdown document, choose **More → Export with Pandoc** from the editor toolbar, then select a format; Pandoc can be detected automatically or configured under **Settings → Export**.
+
+- Added drag-and-drop tab management. Drag a tab along the tab bar to reorder it, or drop it onto another split editor's tab bar to move the document between editor groups; drop indicators and edge auto-scrolling help with longer tab lists.
+
+- Added external file-change synchronization for open documents. Clean documents reload automatically when changed by another application; if the document also has local edits, use the alert below the editor to **Update** from disk or **Overwrite** the disk version with the current content.
+
+- Added path-copy actions to the File Tree. Right-click a file or folder, then choose **Copy → Copy path** or **Copy relative path** to copy its absolute path or its path relative to the current workspace.
+
+Improvements and Fixes:
+
+- Improved File Tree startup and folder collapsing. The workspace root now opens automatically, and the **Collapse All** button on the right side of the root row reliably closes every subfolder while keeping the workspace root visible.
+
+---
+
+特性：
+
+- Markdown 文档新增 Pandoc 导出，支持 DOCX、ODT 和 EPUB 格式。打开 Markdown 文档后，在编辑器工具栏的“更多”菜单中选择“使用 Pandoc 导出”，再选择目标格式；可自动检测 Pandoc，也可前往“设置 → 导出”配置其可执行文件。
+
+- 新增标签页拖拽管理。拖动顶部标签页可调整同一分组内的顺序，也可将其拖到其他分屏的标签栏，在编辑器分组之间移动文档；较长的标签列表还支持落点提示和边缘自动滚动。
+
+- 新增已打开文档的外部文件变更同步。文档没有本地修改时，会自动载入其他应用写入的最新内容；如果同时存在本地编辑，可在编辑器底部提示条中选择“更新”以载入磁盘版本，或选择“覆盖”以用当前内容替换磁盘版本。
+
+- 文件树新增路径复制操作。右键点击文件或文件夹，在“复制”子菜单中选择“复制路径”或“复制相对路径”，即可复制绝对路径或相对于当前工作区的路径。
+
+改进与修复：
+
+- 改进文件树的初始展开与文件夹收起行为。工作区根节点现在会自动展开；点击根节点右侧的“折叠全部”按钮，可可靠收起所有子文件夹并保持工作区根节点可见。
+
 ## v0.89.0
 
 Features:
