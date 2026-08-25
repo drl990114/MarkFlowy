@@ -104,6 +104,7 @@ import { runQueuedFileWrite } from './runQueuedFileWrite'
 import { runSaveOperation } from './runSaveOperation'
 import { getSaveAsCollisionIds } from './saveAsCollision'
 import { savePathCoordinator } from './savePathCoordinator'
+import { useDebouncedAutosave } from './useDebouncedAutosave'
 import { PdfPrintController } from './pdf-print/PdfPrintController'
 import { PandocExportController } from './pandoc-export/PandocExportController'
 import { EditorSkeleton, WarningHeader } from './styles'
@@ -1428,9 +1429,11 @@ function TextEditor(props: TextEditorProps) {
     [active, id, delegate, t, insertNodeToFolderData, snapshotPublisher],
   )
 
-  const debounceSave = useMemo(() => {
-    return debounce(() => saveHandler({ active: true }), autosaveInterval)
-  }, [autosaveInterval, saveHandler])
+  const debounceSave = useDebouncedAutosave(() => saveHandler({ active: true }), {
+    active,
+    flushOnDeactivate: autosave && Boolean(getFileObject(id)?.path),
+    wait: autosaveInterval,
+  })
 
   const debounceRefreshToc = useMemo(
     () =>
@@ -1444,7 +1447,6 @@ function TextEditor(props: TextEditorProps) {
 
   useEffect(() => {
     return () => {
-      debounceSave.cancel()
       if (debounceSaveHandlerCacheRef.current === debounceSave) {
         debounceSaveHandlerCacheRef.current = null
       }
