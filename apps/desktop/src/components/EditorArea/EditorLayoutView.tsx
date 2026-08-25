@@ -6,6 +6,7 @@ import styled, { css } from 'styled-components'
 import Editor from './Editor'
 import EditorAreaTabs from './EditorAreaTabs'
 import EditorGroupToolbar from './EditorGroupToolbar'
+import { ExternalFileChangeAlert } from './ExternalFileChangeAlert'
 import { EmptyState } from './EmptyState'
 import { hasEditorTabDragData, readEditorTabDragData } from './editorDragData'
 import { containsEditorGroup } from './editorLayoutActionGroups'
@@ -227,6 +228,7 @@ const EditorGroupPane = memo((props: EditorGroupPaneProps) => {
           ))
         )}
       </EditorPanel>
+      <ExternalFileChangeAlert fileId={activeFileId} />
     </GroupPane>
   )
 })

@@ -3,6 +3,7 @@ import { EVENT } from '@/constants'
 import { Root, Setting } from '@/router'
 import { SettingRouteController } from '@/router/Setting/component/SettingRouteController'
 import type { SettingRouteState } from '@/router/Setting/component/SettingRouteController'
+import { WorkspaceRouteSurface } from '@/router/Setting/component/WorkspaceRouteSurface'
 import { appInfoStoreSetup } from '@/services/app-info'
 import { markBootShellReady } from '@/startup/boot'
 import { StartupProgress } from '@/startup/StartupProgress'
@@ -11,7 +12,7 @@ import {
   getStartupErrorDescription,
   WorkspaceStartupSurface,
 } from '@/startup/WorkspaceStartupSurface'
-import { Activity, useEffect, useLayoutEffect } from 'react'
+import { useEffect, useLayoutEffect } from 'react'
 import { Route, Routes, useLocation, useMatch } from 'react-router'
 import { Notifications } from 'zens'
 import { FileTreeProvider, TauriFileSystemProvider } from './adapters'
@@ -47,7 +48,7 @@ function AppRoutes({ chooseWorkspace, retryWorkspace, workspace }: AppRoutesProp
       <TitleBar />
       <div className='relative min-h-0 min-w-0 flex-1 overflow-hidden'>
         <SettingRouteController />
-        <Activity mode={settingsMatch ? 'hidden' : 'visible'}>
+        <WorkspaceRouteSurface inactive={Boolean(settingsMatch)}>
           <RenderErrorBoundary
             fallback={({ error, reset }) => (
               <WorkspaceStartupSurface
@@ -70,16 +71,21 @@ function AppRoutes({ chooseWorkspace, retryWorkspace, workspace }: AppRoutesProp
               <Root />
             </WorkspaceStartupSurface>
           </RenderErrorBoundary>
-        </Activity>
+        </WorkspaceRouteSurface>
         <Routes>
           <Route path='/' element={null} />
           <Route
             path='/settings'
             element={
-              <Setting
-                key={navigationRequest?.id ?? 'settings'}
-                navigationRequest={navigationRequest}
-              />
+              <div
+                className='absolute inset-0 isolate min-h-0 min-w-0 overflow-hidden'
+                data-mf-settings-surface=''
+              >
+                <Setting
+                  key={navigationRequest?.id ?? 'settings'}
+                  navigationRequest={navigationRequest}
+                />
+              </div>
             }
           />
         </Routes>

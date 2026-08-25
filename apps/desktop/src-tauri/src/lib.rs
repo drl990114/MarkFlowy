@@ -19,7 +19,7 @@ use std::{collections::HashMap, sync::Mutex, sync::OnceLock};
 use std::{env, fs};
 
 use app::{
-    bookmarks, conf, extensions, file_watcher, keybindings, opened_cache, process, themes,
+    bookmarks, conf, extensions, keybindings, opened_cache, process, themes,
     window_manager, workspace,
 };
 use dotenv;
@@ -1654,9 +1654,6 @@ pub fn run() {
             themes::cmd::remove_local_theme,
             font::cmd::font_list,
             workspace::cmd::is_git_repository,
-            file_watcher::cmd::watch_file,
-            file_watcher::cmd::stop_file_watcher,
-            file_watcher::cmd::stop_all_file_watchers,
             app::clipboard::get_clipboard_html,
             app::clipboard::get_clipboard_text,
             fc::cmd::save_security_bookmark,

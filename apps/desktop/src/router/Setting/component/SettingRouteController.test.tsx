@@ -9,6 +9,7 @@ import { SettingRouteController } from './SettingRouteController'
 const command = vi.hoisted(() => ({
   handler: undefined as ((target?: OpenSettingTarget) => void) | undefined,
 }))
+const focus = vi.hoisted(() => ({ scheduleActiveEditorFocus: vi.fn() }))
 
 vi.mock('@/commands', () => ({
   commandRegistry: {
@@ -18,6 +19,8 @@ vi.mock('@/commands', () => ({
     },
   },
 }))
+
+vi.mock('@/components/EditorArea/focusActiveEditor', () => focus)
 
 function LocationProbe() {
   const location = useLocation()
@@ -50,6 +53,7 @@ describe('SettingRouteController navigation command', () => {
 
   beforeEach(() => {
     command.handler = undefined
+    focus.scheduleActiveEditorFocus.mockReset()
     container = document.createElement('div')
     root = createRoot(container)
     act(() => {
@@ -70,6 +74,7 @@ describe('SettingRouteController navigation command', () => {
     expect(command.handler).toBeTypeOf('function')
 
     act(() => command.handler?.({ category: 'ai', providerId: 'google' }))
+    expect(focus.scheduleActiveEditorFocus).not.toHaveBeenCalled()
     expect(container.querySelector('[data-pathname="/settings"]')).not.toBeNull()
     expect(container.querySelector('[data-provider="google"]')).not.toBeNull()
     const firstRequestId = container
@@ -107,5 +112,6 @@ describe('SettingRouteController navigation command', () => {
       )
     })
     expect(container.querySelector('[data-pathname="/"]')).not.toBeNull()
+    expect(focus.scheduleActiveEditorFocus).toHaveBeenCalledOnce()
   })
 })

@@ -26,6 +26,16 @@
   "dialog": {
     "remember_choice": "记住此选择"
   },
+  "external_file_change": {
+    "conflict": "文件已在外部修改",
+    "conflict_description": "已暂停自动保存。更新会载入磁盘版本；覆盖会用当前内容替换磁盘版本。",
+    "update": "更新",
+    "overwrite": "覆盖",
+    "reloaded": "已载入外部更新",
+    "overwritten": "已覆盖磁盘版本",
+    "read_failed": "无法读取最新磁盘版本，请重试。",
+    "resolve_failed": "无法处理文件变更，当前内容已保留。"
+  },
   "view": {
     "label": "视图",
     "theme": {

@@ -13,6 +13,10 @@ interface FileSaveState {
 
 type SaveAttempt = (snapshot: FileSaveSnapshot) => Promise<boolean>
 
+interface FileSaveOptions {
+  canAttempt?: () => boolean
+}
+
 /**
  * Serializes every save for one file and retries with the newest shared
  * content when the document changes while an older write is in flight.
@@ -57,6 +61,18 @@ export class FileSaveCoordinator {
     this.getOrCreateState(fileId).diskRevision = diskRevision
   }
 
+  async waitForIdle(fileId: string): Promise<void> {
+    while (true) {
+      const state = this.states.get(fileId)
+      if (!state) return
+
+      const observedTail = state.tail
+      await observedTail
+
+      if (this.states.get(fileId) === state && state.tail === observedTail) return
+    }
+  }
+
   async releaseWhenIdle(
     fileId: string,
     canRelease: () => boolean,
@@ -86,11 +102,14 @@ export class FileSaveCoordinator {
     fileId: string,
     attempt: SaveAttempt,
     onLatestSaved?: (snapshot: FileSaveSnapshot) => void,
+    options?: FileSaveOptions,
   ): Promise<boolean> {
     const state = this.getOrCreateState(fileId)
 
     const task = state.tail.then(async () => {
       while (true) {
+        if (options?.canAttempt && !options.canAttempt()) return false
+
         const snapshot = {
           content: state.content,
           revision: state.revision,
@@ -98,6 +117,7 @@ export class FileSaveCoordinator {
         const saved = await attempt(snapshot)
 
         if (!saved) return false
+        if (options?.canAttempt && !options.canAttempt()) return false
         if (state.revision !== snapshot.revision) continue
 
         onLatestSaved?.(snapshot)
@@ -114,3 +134,5 @@ export class FileSaveCoordinator {
     return task
   }
 }
+
+export const fileSaveCoordinator = new FileSaveCoordinator()

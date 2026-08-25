@@ -1,10 +1,15 @@
+import {
+  handleExternalWatchEvent,
+  resetExternalFileChanges,
+} from '@/components/EditorArea/externalFileChanges'
 import { logger } from '@/helper/logger'
 import { currentWindow } from '@/services/windows'
-import { getWorkspace, WorkSpace } from '@/services/workspace'
+import { getWorkspace, type WorkSpace } from '@/services/workspace'
 import { useEditorStore } from '@/stores'
 import { invoke } from '@tauri-apps/api/core'
+import { watch, type UnwatchFn } from '@tauri-apps/plugin-fs'
 import { createGlobalStore } from 'hox'
-import { useEffect, useRef } from 'react'
+import { useEffect } from 'react'
 import { create } from 'zustand'
 
 export const useWorkspaceStore = create<WorkSpaceStore>((set) => {
@@ -25,20 +30,16 @@ interface WorkSpaceStore {
   setWorkspace: (ws: WorkSpace | null) => void
 }
 
-const useWorkspaceWatcher = () => {
-  const { folderData } = useEditorStore()
-  const { setWorkspace } = useWorkspaceStore()
+export const useWorkspaceWatcher = () => {
+  const folderData = useEditorStore((state) => state.folderData)
+  const setWorkspace = useWorkspaceStore((state) => state.setWorkspace)
 
   const rootPath = folderData?.[0]?.path
-  const prevRootPathRef = useRef<string | undefined>(undefined)
 
   useEffect(() => {
-    if (rootPath === prevRootPathRef.current) {
-      return
-    }
-    prevRootPathRef.current = rootPath
-
     let stopped = false
+    let unwatch: UnwatchFn | undefined
+    resetExternalFileChanges()
 
     const updateWorkspaceAndWatcher = async () => {
       const ws = await getWorkspace()
@@ -50,31 +51,39 @@ const useWorkspaceWatcher = () => {
           windowLabel: currentWindow.label,
           newPath: rootPath,
         })
-      } catch (error) { }
+      } catch (error) {
+        logger.warn('Failed to update the window workspace path', error)
+      }
 
       if (rootPath) {
         logger.info('rootPath', rootPath)
         try {
-          await invoke('stop_file_watcher', {
-            key: 'workspace',
-          })
-        } catch (error) { }
-
-        await invoke('watch_file', {
-          key: 'workspace',
-          path: rootPath,
-          windowLabel: currentWindow.label,
-        })
+          const stopWatching = await watch(
+            rootPath,
+            (event) => {
+              void handleExternalWatchEvent(event)
+            },
+            {
+              delayMs: 1000,
+              recursive: true,
+            },
+          )
+          if (stopped) {
+            stopWatching()
+          } else {
+            unwatch = stopWatching
+          }
+        } catch (error) {
+          logger.error('Failed to watch workspace files', error)
+        }
       }
     }
 
-    updateWorkspaceAndWatcher()
+    void updateWorkspaceAndWatcher()
 
     return () => {
       stopped = true
-      invoke('stop_file_watcher', {
-        key: 'workspace',
-      })
+      unwatch?.()
     }
   }, [rootPath, setWorkspace])
 }

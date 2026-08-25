@@ -39,11 +39,104 @@ describe('FileSaveCoordinator', () => {
     expect(events).toEqual(['first:start:first', 'first:end', 'second:first'])
   })
 
+  it('waits until the current and newly queued saves are both idle', async () => {
+    const coordinator = new FileSaveCoordinator()
+    coordinator.recordContent('file', 'content')
+    let finishFirst: (() => void) | undefined
+    let finishSecond: (() => void) | undefined
+
+    const first = coordinator.saveLatest('file', async () => {
+      await new Promise<void>((resolve) => {
+        finishFirst = resolve
+      })
+      return true
+    })
+    const idle = coordinator.waitForIdle('file')
+    const second = coordinator.saveLatest('file', async () => {
+      await new Promise<void>((resolve) => {
+        finishSecond = resolve
+      })
+      return true
+    })
+
+    let reachedIdle = false
+    void idle.then(() => {
+      reachedIdle = true
+    })
+
+    await Promise.resolve()
+    finishFirst?.()
+    await first
+    await Promise.resolve()
+    expect(reachedIdle).toBe(false)
+
+    finishSecond?.()
+    await second
+    await idle
+    expect(reachedIdle).toBe(true)
+  })
+
+  it('does not start a queued save after its conflict guard closes', async () => {
+    const coordinator = new FileSaveCoordinator()
+    coordinator.recordContent('file', 'content')
+    let finishFirst: (() => void) | undefined
+    let canAttempt = true
+
+    const first = coordinator.saveLatest('file', async () => {
+      await new Promise<void>((resolve) => {
+        finishFirst = resolve
+      })
+      return true
+    })
+    const queuedAttempt = vi.fn(async () => true)
+    const queued = coordinator.saveLatest(
+      'file',
+      queuedAttempt,
+      undefined,
+      { canAttempt: () => canAttempt },
+    )
+
+    await Promise.resolve()
+    canAttempt = false
+    finishFirst?.()
+
+    await expect(first).resolves.toBe(true)
+    await expect(queued).resolves.toBe(false)
+    expect(queuedAttempt).not.toHaveBeenCalled()
+  })
+
+  it('does not publish a save as complete when the conflict guard closes during it', async () => {
+    const coordinator = new FileSaveCoordinator()
+    coordinator.recordContent('file', 'content')
+    let finishWrite: (() => void) | undefined
+    let canAttempt = true
+    const onLatestSaved = vi.fn()
+
+    const save = coordinator.saveLatest(
+      'file',
+      async () => {
+        await new Promise<void>((resolve) => {
+          finishWrite = resolve
+        })
+        return true
+      },
+      onLatestSaved,
+      { canAttempt: () => canAttempt },
+    )
+
+    await Promise.resolve()
+    canAttempt = false
+    finishWrite?.()
+
+    await expect(save).resolves.toBe(false)
+    expect(onLatestSaved).not.toHaveBeenCalled()
+  })
+
   it('retries with current content when an edit happens during a write', async () => {
     const coordinator = new FileSaveCoordinator()
     coordinator.recordContent('file', 'old')
     let finishOldWrite: (() => void) | undefined
-    const written: Array<string | undefined> = []
+    const written: (string | undefined)[] = []
     const onLatestSaved = vi.fn()
 
     const save = coordinator.saveLatest(
@@ -136,7 +229,7 @@ describe('FileSaveCoordinator', () => {
     const coordinator = new FileSaveCoordinator()
     let cachedContent: string | undefined
     let finishFirstWrite: (() => void) | undefined
-    const written: Array<string | undefined> = []
+    const written: (string | undefined)[] = []
 
     coordinator.recordContent('file', 'old')
     const save = coordinator.saveLatest(

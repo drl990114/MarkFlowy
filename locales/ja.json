@@ -26,6 +26,16 @@
   "dialog": {
     "remember_choice": "この選択を記憶"
   },
+  "external_file_change": {
+    "conflict": "外部での変更を検出しました",
+    "conflict_description": "自動保存を一時停止しました。更新するとディスク版を読み込み、上書きすると現在の内容で置き換えます。",
+    "update": "更新",
+    "overwrite": "上書き",
+    "reloaded": "外部の変更を読み込みました",
+    "overwritten": "ディスク版を上書きしました",
+    "read_failed": "最新のディスク版を読み込めませんでした。もう一度お試しください。",
+    "resolve_failed": "ファイルの変更を解決できませんでした。現在の内容は保持されています。"
+  },
   "view": {
     "label": "表示",
     "theme": {

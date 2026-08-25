@@ -10,8 +10,6 @@ import { getFileObject } from '@/helper/files'
 import { FileResultCode } from '@/helper/filesys'
 import { dialog } from '@/services/dialog'
 import { addNewMarkdownFileEdit, isEmptyEditor } from '@/services/editor-file'
-import { currentWindow } from '@/services/windows'
-import { getWorkspace, type WorkSpace } from '@/services/workspace'
 import { useEditorStateStore, useEditorStore } from '@/stores'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
@@ -47,9 +45,7 @@ const EMPTY_FILE_NORMAL_INFO: FileNormalInfo = {
 
 export const EditorInfoBar = memo(() => {
   const activeId = useEditorStore((state) => state.activeId)
-  const folderData = useEditorStore((state) => state.folderData)
   const getEditorContent = useEditorStore((state) => state.getEditorContent)
-  const [workspace, setWorkspace] = useState<WorkSpace | null>(null)
 
   const { editorViewTypeMap } = useEditorViewTypeStore()
   const { addAppTask } = useAppTasksStore()
@@ -61,12 +57,6 @@ export const EditorInfoBar = memo(() => {
   const hasUnsavedChanges = useEditorStateStore((state) =>
     activeId ? state.idStateMap.get(activeId)?.hasUnsavedChanges : undefined,
   )
-
-  useEffect(() => {
-    getWorkspace().then((nextWorkspace) => {
-      setWorkspace(nextWorkspace)
-    })
-  }, [folderData])
 
   const getFileNormalInfo = useCallback(
     debounce(async () => {
@@ -95,24 +85,6 @@ export const EditorInfoBar = memo(() => {
       getFileNormalInfo.cancel()
     }
   }, [hasUnsavedChanges, getFileNormalInfo])
-
-  useEffect(() => {
-    const unsubscribe = currentWindow.listen<{
-      paths: string[]
-    }>('file_watcher_event', async (res) => {
-      if (!curFile?.path) {
-        return
-      }
-      if (Array.isArray(res.payload?.paths) && res.payload.paths.includes(curFile.path)) {
-        getFileNormalInfo()
-      }
-    })
-
-    return () => {
-      getFileNormalInfo.cancel()
-      unsubscribe.then((f) => f())
-    }
-  }, [workspace?.syncMode, getFileNormalInfo])
 
   const fetchCurFileSummary = useCallback(async () => {
     const content = getEditorContent(curFile?.id || '')

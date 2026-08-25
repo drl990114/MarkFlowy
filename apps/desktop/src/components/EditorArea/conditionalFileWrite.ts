@@ -5,6 +5,10 @@ export interface ConditionalWriteResult {
   status: 'conflict' | 'success'
 }
 
+export type GuardedConditionalWriteResult =
+  | ConditionalWriteResult
+  | { status: 'blocked' }
+
 type InvokeCommand = <T>(command: string, args: Record<string, unknown>) => Promise<T>
 
 /** Captures an expected revision before asking Rust to conditionally replace the target. */
@@ -28,6 +32,22 @@ export async function conditionalWriteExpected(
     expectedRevision,
     filePath,
   })
+}
+
+export async function conditionalWriteExpectedIfAllowed(
+  filePath: string,
+  content: string,
+  expectedRevision: string,
+  canWrite: () => boolean,
+  invokeCommand: InvokeCommand = invoke,
+): Promise<GuardedConditionalWriteResult> {
+  if (!canWrite()) return { status: 'blocked' }
+  return conditionalWriteExpected(
+    filePath,
+    content,
+    expectedRevision,
+    invokeCommand,
+  )
 }
 
 export async function conditionalWriteWithRevision(

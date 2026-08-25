@@ -26,6 +26,16 @@
   "dialog": {
     "remember_choice": "Recordar esta elección"
   },
+  "external_file_change": {
+    "conflict": "Se detectaron cambios externos",
+    "conflict_description": "El guardado automático está pausado. Actualizar carga la versión del disco; Sobrescribir la reemplaza con el contenido actual.",
+    "update": "Actualizar",
+    "overwrite": "Sobrescribir",
+    "reloaded": "Se cargaron los cambios externos",
+    "overwritten": "Se sobrescribió la versión del disco",
+    "read_failed": "No se pudo leer la última versión del disco. Inténtalo de nuevo.",
+    "resolve_failed": "No se pudo resolver el cambio. Se conservó el contenido actual."
+  },
   "view": {
     "label": "Vista",
     "theme": {

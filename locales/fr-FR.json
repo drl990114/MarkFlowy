@@ -26,6 +26,16 @@
   "dialog": {
     "remember_choice": "Se souvenir de ce choix"
   },
+  "external_file_change": {
+    "conflict": "Modifications externes détectées",
+    "conflict_description": "L’enregistrement automatique est suspendu. Mettre à jour charge la version du disque ; Écraser la remplace par le contenu actuel.",
+    "update": "Mettre à jour",
+    "overwrite": "Écraser",
+    "reloaded": "Modifications externes chargées",
+    "overwritten": "Version du disque écrasée",
+    "read_failed": "Impossible de lire la dernière version du disque. Réessayez.",
+    "resolve_failed": "Impossible de résoudre la modification. Le contenu actuel a été conservé."
+  },
   "view": {
     "label": "vue",
     "theme": {

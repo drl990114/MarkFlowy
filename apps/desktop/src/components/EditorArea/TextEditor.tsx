@@ -39,6 +39,9 @@ import { useEditorStateStore, useEditorStore } from '@/stores'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import useEditorCounterStore from '@/stores/useEditorCounterStore'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
+import useExternalFileChangeStore, {
+  isExternalFileSaveBlocked,
+} from '@/stores/useExternalFileChangeStore'
 import { invoke } from '@tauri-apps/api/core'
 import { save } from '@tauri-apps/plugin-dialog'
 import classNames from 'classnames'
@@ -82,9 +85,19 @@ import {
   startEditorInteractionMeasurement,
 } from './editorPerformanceDiagnostics'
 import { EditorWrapper } from './EditorWrapper'
-import { conditionalWriteExpected, getFileWriteRevision } from './conditionalFileWrite'
+import {
+  conditionalWriteExpectedIfAllowed,
+  getFileWriteRevision,
+} from './conditionalFileWrite'
 import { EditorInstanceLifecycle } from './editorInstanceLifecycle'
-import { FileSaveCoordinator } from './fileSaveCoordinator'
+import {
+  EXTERNAL_FILE_CONTENT_SYNC_EVENT,
+  type ExternalFileContentSyncPayload,
+  markExternalFileConflict,
+  releaseExternalFileChange,
+} from './externalFileChanges'
+import { fileSaveCoordinator } from './fileSaveCoordinator'
+import { readStableFileSnapshot } from './fileSnapshot'
 import { InstanceResourceRegistry, type ResourceRemoval } from './instanceResourceRegistry'
 import { runReservedSaveAs, type SaveAsCollisionSet } from './runReservedSaveAs'
 import { runQueuedFileWrite } from './runQueuedFileWrite'
@@ -102,7 +115,6 @@ const EXPORT_RESOURCE_TIMEOUT_MS = 15_000
 const EDITOR_SNAPSHOT_DEBOUNCE_MS = 50
 const EDITOR_SNAPSHOT_MAX_WAIT_MS = 250
 const editorInstanceLifecycle = new EditorInstanceLifecycle()
-const fileSaveCoordinator = new FileSaveCoordinator()
 let textEditorInstanceSeq = 0
 type Html2Canvas = (typeof import('html2canvas'))['default']
 let html2canvasPromise: Promise<Html2Canvas> | undefined
@@ -430,12 +442,6 @@ function unregisterEditorInstanceResources(fileId: string, instanceId: string) {
     (current) => sourceCodeCodemirrorViewMap.set(fileId, current),
     () => sourceCodeCodemirrorViewMap.delete(fileId),
   )
-}
-
-async function readFileContent(filePath: string): Promise<FileSysResult> {
-  return invoke<FileSysResult>('get_file_content', {
-    filePath,
-  })
 }
 
 async function waitForImageLoad(img: HTMLImageElement, src: string) {
@@ -930,6 +936,13 @@ function TextEditor(props: TextEditorProps) {
   const wysiwygEditorSpellcheck = useAppSettingStore(
     (state) => state.settingData.wysiwyg_editor_spellcheck,
   )
+  const externalChangeState = useExternalFileChangeStore((state) => {
+    const notice = state.notices[id]
+    if (notice?.kind !== 'conflict') return 'none'
+    return notice.resolving ?? 'pending'
+  })
+  const externalChangeResolving =
+    externalChangeState === 'reload' || externalChangeState === 'overwrite'
   const [currentViewType, setCurrentViewType] = useState<EditorViewType>(fileTypeConfig.defaultMode)
   const [content, setContent] = useState<string | undefined>()
   const [delegate, setDelegate] = useState<ReturnType<typeof createDelegate> | null>(null)
@@ -1010,6 +1023,7 @@ function TextEditor(props: TextEditorProps) {
             useEditorStore.getState().clearEditorResources(id)
             sourceCodeCodemirrorViewMap.delete(id)
             delegateOptionsCache.delete(id)
+            releaseExternalFileChange(id)
           },
         )
       })
@@ -1048,11 +1062,11 @@ function TextEditor(props: TextEditorProps) {
   )
 
   const applySyncedContent = useCallback(
-    (nextContent: string) => {
+    (nextContent: string, force = false) => {
       if (latestContentRef.current === nextContent) return
       // A newer local edit wins this race. Its pending publication will bring
       // the sibling instance back to the same content.
-      if (snapshotPublisher.hasPending()) return
+      if (!force && snapshotPublisher.hasPending()) return
 
       snapshotPublisher.cancel()
       if (remoteContentResetHandleRef.current !== null) {
@@ -1118,6 +1132,19 @@ function TextEditor(props: TextEditorProps) {
   }, [applySyncedContent, id])
 
   useEffect(() => {
+    const handleExternalContentSync = (payload: ExternalFileContentSyncPayload) => {
+      if (payload.fileId !== id) return
+      applySyncedContent(payload.content, true)
+    }
+
+    bus.on(EXTERNAL_FILE_CONTENT_SYNC_EVENT, handleExternalContentSync)
+
+    return () => {
+      bus.detach(EXTERNAL_FILE_CONTENT_SYNC_EVENT, handleExternalContentSync)
+    }
+  }, [applySyncedContent, id])
+
+  useEffect(() => {
     let canceled = false
 
     const init = async () => {
@@ -1131,8 +1158,20 @@ function TextEditor(props: TextEditorProps) {
       }
 
       if (file.path) {
-        const res = await readFileContent(file.path)
+        const snapshot = await readStableFileSnapshot(file.path)
         if (canceled) return
+        if (snapshot.status === 'unstable') {
+          toast.error(t('external_file_change.read_failed'))
+          return setStatus(TextEditorStatus.READERROR)
+        }
+        if (snapshot.status === 'success') {
+          fileSaveCoordinator.setDiskRevision(id, snapshot.revision)
+          setContent(snapshot.content)
+          updateCachedFileContent(snapshot.content)
+          return setStatus(TextEditorStatus.SUCCESS)
+        }
+
+        const res = snapshot.result
         if (res.code === FileResultCode.NotFound) {
           return setStatus(TextEditorStatus.NOTEXIST)
         }
@@ -1143,8 +1182,6 @@ function TextEditor(props: TextEditorProps) {
           toast.error(res.content)
           return setStatus(TextEditorStatus.READERROR)
         }
-        setContent(res.content)
-        updateCachedFileContent(res.content)
       } else if (file.content !== undefined) {
         if (canceled) return
         fileSaveCoordinator.recordContent(id, file.content)
@@ -1158,7 +1195,7 @@ function TextEditor(props: TextEditorProps) {
     return () => {
       canceled = true
     }
-  }, [curFile, updateCachedFileContent])
+  }, [curFile, id, t, updateCachedFileContent])
 
   useEffect(() => {
     if (status !== TextEditorStatus.SUCCESS || delegate) return
@@ -1185,6 +1222,7 @@ function TextEditor(props: TextEditorProps) {
         const curEditorState = useEditorStateStore.getState().idStateMap.get(fileBeforeFlush.id)
 
         if (!curEditorState?.hasUnsavedChanges) return true
+        if (isExternalFileSaveBlocked(id)) return false
 
         if (!snapshotPublisher.flush()) return false
         const initialFile = getFileObject(id) ?? fileBeforeFlush
@@ -1202,6 +1240,8 @@ function TextEditor(props: TextEditorProps) {
         return fileSaveCoordinator.saveLatest(
           id,
           async ({ content: fileContent }) => {
+            if (isExternalFileSaveBlocked(id)) return false
+
             const fileToSave = getFileObject(id) ?? initialFile
             if (!fileToSave || typeof fileContent !== 'string') return false
 
@@ -1234,6 +1274,7 @@ function TextEditor(props: TextEditorProps) {
                 let blockedByDirtyTarget = false
                 let expectedRevision: string | undefined
                 let writeConflict = false
+                let writtenRevision: string | undefined
                 const saved = await runReservedSaveAs({
                   applyReservationUpdate: (update) => flushSync(update),
                   collectCollisions: () => collectSaveAsCollisions(targetPath, id, comparePaths),
@@ -1293,18 +1334,25 @@ function TextEditor(props: TextEditorProps) {
                   },
                   write: async () => {
                     if (!expectedRevision) return false
-                    const writeResult = await conditionalWriteExpected(
+                    const writeResult = await conditionalWriteExpectedIfAllowed(
                       targetPath,
                       fileContent,
                       expectedRevision,
+                      () => !isExternalFileSaveBlocked(id),
                     )
+                    if (writeResult.status === 'blocked') return false
                     if (writeResult.status === 'conflict') {
                       writeConflict = true
                       return false
                     }
+                    writtenRevision = writeResult.revision
                     return true
                   },
                 })
+
+                if (saved && writtenRevision) {
+                  fileSaveCoordinator.setDiskRevision(id, writtenRevision)
+                }
 
                 if (!saved && blockedByDirtyTarget) {
                   toast.error('Save the target file before overwriting it.')
@@ -1313,20 +1361,35 @@ function TextEditor(props: TextEditorProps) {
                 }
                 return saved
               } else {
+                const expectedRevision = fileSaveCoordinator.getDiskRevision(id)
+                if (!expectedRevision) {
+                  const diskSnapshot = await readStableFileSnapshot(fileToSave.path)
+                  if (diskSnapshot.status === 'success') {
+                    markExternalFileConflict(id, diskSnapshot.revision)
+                  } else {
+                    toast.error(t('external_file_change.read_failed'))
+                  }
+                  return false
+                }
+
                 const queuedWrite = await runQueuedFileWrite({
                   coordinator: savePathCoordinator,
                   getCurrentPath: () => getFileObject(id)?.path,
                   write: (currentPath) =>
-                    invoke<FileSysResult>('write_file', {
-                      filePath: currentPath,
-                      content: fileContent,
-                    }),
+                    conditionalWriteExpectedIfAllowed(
+                      currentPath,
+                      fileContent,
+                      expectedRevision,
+                      () => !isExternalFileSaveBlocked(id),
+                    ),
                 })
                 if (queuedWrite.status === 'missing-path') return false
-                if (queuedWrite.value.code !== FileResultCode.Success) {
-                  toast.error(queuedWrite.value.content)
+                if (queuedWrite.value.status === 'blocked') return false
+                if (queuedWrite.value.status === 'conflict') {
+                  markExternalFileConflict(id, queuedWrite.value.revision)
                   return false
                 }
+                fileSaveCoordinator.setDiskRevision(id, queuedWrite.value.revision)
               }
 
               return true
@@ -1355,6 +1418,9 @@ function TextEditor(props: TextEditorProps) {
             useEditorStateStore.getState().setIdStateMap(id, {
               hasUnsavedChanges: false,
             })
+          },
+          {
+            canAttempt: () => !isExternalFileSaveBlocked(id),
           },
         )
       }, params)
@@ -1386,17 +1452,26 @@ function TextEditor(props: TextEditorProps) {
   }, [debounceSave])
 
   useEffect(() => {
+    if (externalChangeState !== 'none') {
+      debounceSave.cancel()
+      if (debounceSaveHandlerCacheRef.current === debounceSave) {
+        debounceSaveHandlerCacheRef.current = null
+      }
+    }
+  }, [debounceSave, externalChangeState])
+
+  useEffect(() => {
     return () => debounceRefreshToc.cancel()
   }, [debounceRefreshToc])
 
   const debounceSaveHandler = useCallback(() => {
-    if (debounceSave) {
+    if (debounceSave && !isExternalFileSaveBlocked(id)) {
       debounceSaveHandlerCacheRef.current?.cancel()
 
       debounceSaveHandlerCacheRef.current = debounceSave
       debounceSave()
     }
-  }, [debounceSave])
+  }, [debounceSave, id])
 
   useEffect(() => {
     const instanceId = instanceIdRef.current!
@@ -1409,7 +1484,7 @@ function TextEditor(props: TextEditorProps) {
 
   const setContentHandler = useCallback(
     (newContent: string) => {
-      if (!active || savePathReserved) return
+      if (!active || savePathReserved || externalChangeResolving) return
       snapshotPublisher.cancel()
       editorRef.current?.setContent(newContent)
       setContent(newContent)
@@ -1423,7 +1498,15 @@ function TextEditor(props: TextEditorProps) {
       })
       emitContentSync(newContent)
     },
-    [active, emitContentSync, id, savePathReserved, snapshotPublisher, updateCachedFileContent],
+    [
+      active,
+      emitContentSync,
+      externalChangeResolving,
+      id,
+      savePathReserved,
+      snapshotPublisher,
+      updateCachedFileContent,
+    ],
   )
 
   const editorTypeSwitchingRef = useRef(false)
@@ -1726,7 +1809,7 @@ function TextEditor(props: TextEditorProps) {
       initialType: effectiveDefaultViewType,
       content: content!,
       delegate: delegate ?? undefined,
-      editable: !savePathReserved,
+      editable: !savePathReserved && !externalChangeResolving,
       style: {
         height: '100%',
       },
@@ -1768,6 +1851,7 @@ function TextEditor(props: TextEditorProps) {
       rootFontSize,
       rootLineHeight,
       savePathReserved,
+      externalChangeResolving,
     ],
   )
   publishEditorSnapshotRef.current = (snapshot) => {

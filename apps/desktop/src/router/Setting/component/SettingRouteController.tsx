@@ -1,4 +1,5 @@
 import { commandRegistry } from '@/commands'
+import { scheduleActiveEditorFocus } from '@/components/EditorArea/focusActiveEditor'
 import { EVENT } from '@/constants'
 import type { OpenSettingTarget } from '@/extensions/ai/aiProvidersService'
 import type { SettingNavigationRequest } from '@/router/Setting'
@@ -13,6 +14,7 @@ export function SettingRouteController() {
   const location = useLocation()
   const navigate = useNavigate()
   const requestIdRef = useRef(0)
+  const wasSettingsRouteRef = useRef(location.pathname === '/settings')
 
   useEffect(() => {
     const disposable = commandRegistry.registerCommand({
@@ -32,6 +34,16 @@ export function SettingRouteController() {
 
     return () => disposable.dispose()
   }, [navigate])
+
+  useEffect(() => {
+    const isSettingsRoute = location.pathname === '/settings'
+
+    if (wasSettingsRouteRef.current && !isSettingsRoute) {
+      scheduleActiveEditorFocus()
+    }
+
+    wasSettingsRouteRef.current = isSettingsRoute
+  }, [location.pathname])
 
   useEffect(() => {
     if (location.pathname !== '/settings') return

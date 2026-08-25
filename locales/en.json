@@ -26,6 +26,16 @@
   "dialog": {
     "remember_choice": "Remember this choice"
   },
+  "external_file_change": {
+    "conflict": "External changes detected",
+    "conflict_description": "Auto-save is paused. Update loads the disk version; Overwrite replaces it with your current content.",
+    "update": "Update",
+    "overwrite": "Overwrite",
+    "reloaded": "Loaded external changes",
+    "overwritten": "Overwrote the disk version",
+    "read_failed": "The latest disk version could not be read. Try again.",
+    "resolve_failed": "The file change could not be resolved. Your current content was kept."
+  },
   "view": {
     "label": "View",
     "theme": {
