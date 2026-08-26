@@ -19,6 +19,10 @@ const markNames = [
   'mdCodeText',
   'mdCodeSpace',
   'mdDel',
+  'mdHighlight',
+  'mdSubscript',
+  'mdSuperscript',
+  'mdEmoji',
   'mdLinkText',
   'mdLinkUri',
   'mdImgText',
@@ -27,6 +31,7 @@ const markNames = [
 const markAttrs = {
   class: { default: '' },
   depth: { default: 0 },
+  emoji: { default: '' },
   first: { default: false },
   href: { default: '' },
   ignoreWhenCopy: { default: false },
@@ -195,6 +200,10 @@ const inlineSyntaxCases = [
   { expectedMarks: ['mdStrong'], markdown: '**strong**', name: 'asterisk strong' },
   { expectedMarks: ['mdStrong'], markdown: '__strong__', name: 'underscore strong' },
   { expectedMarks: ['mdDel'], markdown: '~~deleted~~', name: 'strikethrough' },
+  { expectedMarks: ['mdHighlight'], markdown: '==highlight==', name: 'highlight' },
+  { expectedMarks: ['mdSubscript'], markdown: 'H~2~O', name: 'subscript' },
+  { expectedMarks: ['mdSuperscript'], markdown: '2^10^ = 1024', name: 'superscript' },
+  { expectedMarks: ['mdEmoji'], markdown: ':rocket:', name: 'emoji shortcode' },
   { expectedMarks: ['mdCodeText'], markdown: '`code`', name: 'inline code' },
   {
     expectedMarks: ['mdCodeText'],
@@ -388,6 +397,48 @@ describe('initDocMarks', () => {
         for (const node of findNodes(doc, 'html_inline_node')) expect(node.marks).toHaveLength(0)
       },
     )
+
+    it('preserves source delimiters while applying the four extended syntaxes', () => {
+      const markdown = '==highlight== H~2~O 2^10^ = 1024 :rocket: :tada: :white_check_mark:'
+      const doc = parseWithMarks(markdown)
+      const actualMarkNames = collectMarkNames(doc)
+
+      expect(doc.textContent).toBe(markdown)
+      for (const markName of ['mdHighlight', 'mdSubscript', 'mdSuperscript', 'mdEmoji', 'mdMark']) {
+        expect(actualMarkNames).toContain(markName)
+      }
+
+      const emojis: string[] = []
+      doc.descendants((node) => {
+        for (const mark of node.marks) {
+          if (mark.type.name === 'mdEmoji') emojis.push(mark.attrs.emoji)
+        }
+      })
+      expect(emojis).toEqual(['🚀', '🎉', '✅'])
+    })
+
+    it('does not parse escaped, whitespace-containing, unknown, or code literal forms', () => {
+      const markdown = String.raw`\==plain== H~two words~ 2^two words^ :not_a_real_emoji: \:rocket: \~2~ \^10^`
+      const doc = markInlineSegments([markdown])
+      const codeDoc = parseWithMarks('`:rocket:`')
+      const actualMarkNames = collectMarkNames(doc)
+
+      expect(actualMarkNames).not.toContain('mdHighlight')
+      expect(actualMarkNames).not.toContain('mdSubscript')
+      expect(actualMarkNames).not.toContain('mdSuperscript')
+      expect(actualMarkNames).not.toContain('mdEmoji')
+      expect(collectMarkNames(codeDoc)).toContain('mdCodeText')
+      expect(collectMarkNames(codeDoc)).not.toContain('mdEmoji')
+    })
+
+    it('composes highlight with existing and extended inline marks', () => {
+      const doc = parseWithMarks('==**H~2~O** and 2^10^==')
+      const actualMarkNames = collectMarkNames(doc)
+
+      for (const markName of ['mdHighlight', 'mdStrong', 'mdSubscript', 'mdSuperscript']) {
+        expect(actualMarkNames).toContain(markName)
+      }
+    })
 
     it.each(referenceSyntaxCases)('splits $name labels around an inline atom', ({ markdown }) => {
       const splitAt = Math.max(1, markdown.indexOf(']') - 1)

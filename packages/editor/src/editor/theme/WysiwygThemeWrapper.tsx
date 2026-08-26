@@ -853,6 +853,71 @@ export const WysiwygThemeWrapper = styled.div
     box-decoration-break: clone;
   }
 
+  .md-emoji {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1em;
+    height: 1em;
+    overflow: visible;
+    color: transparent;
+    line-height: 1;
+    text-indent: -9999px;
+    vertical-align: -0.1em;
+    white-space: nowrap;
+  }
+
+  .md-emoji::after {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: ${(props) => props.theme.primaryFontColor};
+    font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
+    font-size: 0.9em;
+    line-height: 1;
+    text-indent: 0;
+    content: attr(data-emoji);
+  }
+
+  .md-emoji.show,
+  .md-emoji:has(.show) {
+    position: static;
+    display: inline;
+    width: auto;
+    height: auto;
+    padding: 0.06em 0.18em;
+    overflow: visible;
+    color: ${(props) => props.theme.labelFontColor};
+    font-family: ${(props) => props.theme.codemirrorFontFamily};
+    font-size: 0.88em;
+    font-weight: 500;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+    text-indent: 0;
+    vertical-align: baseline;
+    caret-color: ${(props) => props.theme.accentColor};
+    background-color: ${(props) => props.theme.tipsBgColor};
+    border-radius: ${(props) => props.theme.smallBorderRadius};
+    box-shadow: inset 0 0 0 1px ${(props) => props.theme.borderColor};
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+
+  .md-emoji.show::after,
+  .md-emoji:has(.show)::after {
+    content: none;
+  }
+
+  .md-emoji:has(.show) .show {
+    /* Safari hides contenteditable carets inside positioned inline ancestors. */
+    font-size: inherit;
+    caret-color: ${(props) => props.theme.accentColor};
+    background: transparent;
+  }
+
   & .inline-loading {
     width: min-content;
     height: min-content;
@@ -1016,12 +1081,25 @@ export const WysiwygThemeWrapper = styled.div
     position: relative;
   }
 
-  .inline-input-src {
+  .inline-input-source-shell {
+    position: relative;
+    isolation: isolate;
     display: inline;
     padding: 0.2em 0.4em;
     margin: 0;
     background-color: var(--rme-editor-inline-code-bg, ${(props) => props.theme.codeBgColor});
     border-radius: 6px;
+  }
+
+  .inline-input-src {
+    position: relative;
+    z-index: 1;
+    display: inline;
+    padding: 0;
+    margin: 0;
+    caret-color: ${(props) => props.theme.accentColor};
+    background: transparent;
+
     br {
       display: none;
     }

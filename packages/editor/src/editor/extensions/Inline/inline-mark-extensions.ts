@@ -148,6 +148,69 @@ class Delete extends MarkExtension {
   }
 }
 
+class Highlight extends MarkExtension {
+  static disableExtraAttributes = true
+  get name() {
+    return 'mdHighlight' as const
+  }
+  createMarkSpec(): MarkExtensionSpec {
+    return {
+      attrs: commonAttrs,
+      toDOM: () => ['mark', 0],
+    }
+  }
+}
+
+class Subscript extends MarkExtension {
+  static disableExtraAttributes = true
+  get name() {
+    return 'mdSubscript' as const
+  }
+  createMarkSpec(): MarkExtensionSpec {
+    return {
+      attrs: commonAttrs,
+      toDOM: () => ['sub', 0],
+    }
+  }
+}
+
+class Superscript extends MarkExtension {
+  static disableExtraAttributes = true
+  get name() {
+    return 'mdSuperscript' as const
+  }
+  createMarkSpec(): MarkExtensionSpec {
+    return {
+      attrs: commonAttrs,
+      toDOM: () => ['sup', 0],
+    }
+  }
+}
+
+class EmojiShortcode extends MarkExtension {
+  static disableExtraAttributes = true
+  get name() {
+    return 'mdEmoji' as const
+  }
+  createMarkSpec(): MarkExtensionSpec {
+    return {
+      attrs: {
+        ...endpointAttrs,
+        emoji: { default: '' },
+      },
+      inclusive: false,
+      toDOM: (mark) => [
+        'span',
+        {
+          class: 'md-emoji',
+          'data-emoji': mark.attrs.emoji,
+        },
+        0,
+      ],
+    }
+  }
+}
+
 class LinkText extends MarkExtension {
   static disableExtraAttributes = true
   get name() {
@@ -268,6 +331,7 @@ class ImgUri extends MarkExtension<MfImgOptions> {
 
 const autoHideMarks: Record<string, true> = {
   mdMark: true,
+  mdEmoji: true,
   mdLinkUri: true,
   mdImgText: true,
   mdHtmlInline: true,
@@ -290,6 +354,10 @@ export const markExtensions = (options: LineMarkExtensionOptions = {}) => [
   new CodeText(),
   new CodeSpace(),
   new Delete(),
+  new Highlight(),
+  new Subscript(),
+  new Superscript(),
+  new EmojiShortcode(),
   new LinkText(),
   new LinkUri(),
   new ImgText(),
@@ -321,4 +389,6 @@ export type LineMarkAttrs = {
    * class name
    */
   class?: string
+
+  emoji?: string
 }

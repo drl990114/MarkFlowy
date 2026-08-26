@@ -38,6 +38,38 @@ describe('WysiwygThemeWrapper visual overrides', () => {
     expect(css).toMatch(/\.mf-live-preview-language\{[^}]*font-size:12px/)
   })
 
+  it('keeps emoji shortcodes stable and paints their edit surface behind the caret', () => {
+    const css = renderWrapperStyles()
+
+    expect(css).toMatch(
+      /\.md-emoji\{[^}]*display:inline-flex;[^}]*width:1em;height:1em;overflow:visible;[^}]*line-height:1;[^}]*vertical-align:-0\.1em/,
+    )
+    expect(css).toMatch(
+      /\.md-emoji::after\{[^}]*inset:0;[^}]*font-family:'AppleColorEmoji','SegoeUIEmoji','NotoColorEmoji',sans-serif;[^}]*font-size:0\.9em;line-height:1/,
+    )
+    expect(css).toMatch(
+      /\.md-emoji\.show,[^{]*\.md-emoji:has\(\.show\)\{position:static;display:inline;width:auto;height:auto;padding:0\.06em0\.18em;[^}]*text-indent:0;vertical-align:baseline;[^}]*background-color:/,
+    )
+    expect(css).toMatch(
+      /\.md-emoji\.show::after,[^{]*\.md-emoji:has\(\.show\)::after\{content:none/,
+    )
+    expect(css).toMatch(
+      /\.md-emoji:has\(\.show\)\.show\{font-size:inherit;caret-color:[^;]+;background:transparent/,
+    )
+    expect(css).not.toMatch(/\.md-emoji:has\(\.show\)\.show\{[^}]*(?:isolation|z-index|position):/)
+  })
+
+  it('separates nested inline input surfaces from the contenteditable caret layer', () => {
+    const css = renderWrapperStyles()
+
+    expect(css).toMatch(
+      /\.inline-input-source-shell\{position:relative;isolation:isolate;display:inline;padding:0\.2em0\.4em;margin:0;background-color:/,
+    )
+    expect(css).toMatch(
+      /\.inline-input-src\{position:relative;z-index:1;display:inline;padding:0;margin:0;caret-color:[^;]+;background:transparent/,
+    )
+  })
+
   it('removes only a document-leading heading margin in editor and preview content', () => {
     const css = renderWrapperStyles()
 

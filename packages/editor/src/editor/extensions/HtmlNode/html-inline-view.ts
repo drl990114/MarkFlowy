@@ -122,7 +122,9 @@ export class HTMLInlineView implements NodeView {
     this.dom.appendChild(this._htmlRenderElt)
 
     this._htmlSrcElt = document.createElement('span')
+    this._htmlSrcElt.classList.add('inline-input-source-shell')
     this._htmlSrcElt.spellcheck = false
+    this._htmlSrcElt.style.display = 'none'
     this.dom.appendChild(this._htmlSrcElt)
 
     // ensure
@@ -343,6 +345,7 @@ export class HTMLInlineView implements NodeView {
 
     this._innerView.dom.classList.add('inline-input-src')
     this._innerView.dom.classList.remove('ProseMirror')
+    this._htmlSrcElt!.style.display = 'inline'
 
     // focus element
     const innerState = this._innerView.state
@@ -366,6 +369,9 @@ export class HTMLInlineView implements NodeView {
    *    is generally what we want to do, since the user is done editing!)
    */
   closeEditor(render: boolean = true) {
+    if (this._htmlSrcElt) {
+      this._htmlSrcElt.style.display = 'none'
+    }
     if (this._innerView) {
       this._innerView.destroy()
       this._innerView = undefined

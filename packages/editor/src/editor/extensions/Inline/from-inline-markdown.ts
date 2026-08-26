@@ -7,6 +7,7 @@ import { gfmAutolinkLiteral } from 'micromark-extension-gfm-autolink-literal'
 import { gfmStrikethrough } from 'micromark-extension-gfm-strikethrough'
 import type { Transform } from 'prosemirror-transform'
 import { isBrowser } from '../../utils/common'
+import { applyExtendedInlineSyntax } from './extended-inline-syntax'
 import type { LineMarkName } from './inline-mark-extensions'
 import type { InlineToken } from './inline-types'
 gfmAutolinkLiteralFromMarkdown.transforms = []
@@ -519,7 +520,7 @@ export function fromInlineMarkdown(
 
   const phrasingContents = parseInlineMarkdown(`${text}\n\n${refercencesText}`)
 
-  const res = parseMdInline(phrasingContents, excludedTextOffsets)
+  const res = applyExtendedInlineSyntax(parseMdInline(phrasingContents, excludedTextOffsets), text)
 
   return res
 }

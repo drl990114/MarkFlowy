@@ -1,9 +1,12 @@
 import { history, redo, undo } from '@rme-sdk/sdk/pm/history'
 import { keymap } from '@rme-sdk/sdk/pm/keymap'
-import { Node as ProseNode } from '@rme-sdk/sdk/pm/model'
-import { Command, EditorState, Plugin, TextSelection, Transaction } from '@rme-sdk/sdk/pm/state'
-import { Decoration, EditorView, NodeView } from '@rme-sdk/sdk/pm/view'
-import { tex2svg, tex2svgInline, tex2svgDisplay } from './mathjax'
+import type { Node as ProseNode } from '@rme-sdk/sdk/pm/model'
+import type { Command, Transaction } from '@rme-sdk/sdk/pm/state'
+import { EditorState, Plugin, TextSelection } from '@rme-sdk/sdk/pm/state'
+import type { NodeView } from '@rme-sdk/sdk/pm/view'
+import { EditorView } from '@rme-sdk/sdk/pm/view'
+
+import { tex2svgDisplay, tex2svgInline } from './mathjax'
 
 function collapseCmd(
   outerView: EditorView,
@@ -61,6 +64,7 @@ export class MathInlineView implements NodeView {
     this.dom.appendChild(this._renderElt)
 
     this._srcElt = document.createElement('span')
+    this._srcElt.classList.add('inline-input-source-shell')
     this._srcElt.spellcheck = false
     this._srcElt.style.display = 'none'
     this.dom.appendChild(this._srcElt)
@@ -93,7 +97,7 @@ export class MathInlineView implements NodeView {
     }
   }
 
-  update(node: ProseNode, _decorations: readonly Decoration[]) {
+  update(node: ProseNode) {
     if (!node.sameMarkup(this._node)) return false
     this._node = node
     if (!this._isEditing) this.renderTex()

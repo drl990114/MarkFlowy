@@ -7,6 +7,7 @@ import { Editor, type EditorRef } from './Editor'
 
 const harness = vi.hoisted(() => ({
   context: undefined as unknown,
+  previewDoc: undefined as string | undefined,
   previewHydrationChange: undefined as
     | ((hydration: { settled: Promise<void> } | null) => void)
     | undefined,
@@ -19,10 +20,10 @@ vi.mock('../..', () => ({
     PREVIEW: 'preview',
   },
   Preview: (props: {
-    onImageHydrationChange?: (
-      hydration: { settled: Promise<void> } | null,
-    ) => void
+    doc: string
+    onImageHydrationChange?: (hydration: { settled: Promise<void> } | null) => void
   }) => {
+    harness.previewDoc = props.doc
     harness.previewHydrationChange = props.onImageHydrationChange
     return null
   },
@@ -50,12 +51,13 @@ vi.mock('./WysiwygEditor', () => ({
   },
 }))
 
-describe('EditorRef.setContent', () => {
+describe('Editor content synchronization', () => {
   let container: HTMLDivElement
   let root: Root
 
   beforeEach(() => {
     harness.context = undefined
+    harness.previewDoc = undefined
     harness.previewHydrationChange = undefined
     container = document.createElement('div')
     root = createRoot(container)
@@ -130,6 +132,59 @@ describe('EditorRef.setContent', () => {
     expect(dispatch).not.toHaveBeenCalled()
   })
 
+  it('pushes externally synchronized content into the Source Code view', () => {
+    const nextDoc = { content: {} } as unknown as Node
+    const currentDoc = {
+      content: { size: 7 },
+      eq: vi.fn(() => false),
+    }
+    const transaction = {}
+    const replace = vi.fn(() => transaction)
+    const dispatch = vi.fn()
+    const stringToDoc = vi.fn(() => nextDoc)
+    const delegate = {
+      manager: {},
+      stringToDoc,
+      docToString: vi.fn(),
+      view: 'SourceCode',
+    } as unknown as EditorDelegate
+
+    harness.context = {
+      view: {
+        state: { doc: currentDoc, tr: { replace } },
+        dispatch,
+      },
+    }
+
+    const editorRef = createRef<EditorRef>()
+    act(() =>
+      root.render(
+        <Editor
+          ref={editorRef}
+          content='local source'
+          delegate={delegate}
+          initialType={EditorViewType.SOURCECODE}
+        />,
+      ),
+    )
+    act(() => editorRef.current?.setContent('external source'))
+
+    expect(stringToDoc).toHaveBeenCalledWith('external source')
+    expect(replace).toHaveBeenCalledOnce()
+    expect(dispatch).toHaveBeenCalledWith(transaction)
+  })
+
+  it('rerenders Preview when externally synchronized content updates its prop', () => {
+    act(() => root.render(<Editor content='local preview' initialType={EditorViewType.PREVIEW} />))
+    expect(harness.previewDoc).toBe('local preview')
+
+    act(() =>
+      root.render(<Editor content='external preview' initialType={EditorViewType.PREVIEW} />),
+    )
+
+    expect(harness.previewDoc).toBe('external preview')
+  })
+
   it('waits for the latest Preview image hydration generation', async () => {
     let resolveFirst!: () => void
     let resolveSecond!: () => void
@@ -143,11 +198,7 @@ describe('EditorRef.setContent', () => {
 
     act(() =>
       root.render(
-        <Editor
-          ref={editorRef}
-          content='preview'
-          initialType={EditorViewType.PREVIEW}
-        />,
+        <Editor ref={editorRef} content='preview' initialType={EditorViewType.PREVIEW} />,
       ),
     )
     act(() => {
