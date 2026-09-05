@@ -19,8 +19,8 @@ use std::{collections::HashMap, sync::Mutex, sync::OnceLock};
 use std::{env, fs};
 
 use app::{
-    bookmarks, conf, extensions, keybindings, opened_cache, process, themes,
-    window_manager, workspace,
+    bookmarks, conf, extensions, keybindings, opened_cache, process, themes, window_manager,
+    workspace,
 };
 use dotenv;
 use lazy_static::lazy_static;
@@ -1594,6 +1594,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             fc::cmd::open_folder_async,
             fc::cmd::get_file_content,
+            fc::cmd::get_file_snapshot,
             fc::cmd::write_file,
             fc::cmd::get_file_write_revision,
             fc::cmd::conditional_write_file,

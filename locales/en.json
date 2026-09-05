@@ -769,5 +769,66 @@
     "new_chat_confirm": "Start new conversation",
     "cancel": "Cancel",
     "export_empty": "There is no conversation to export"
+  },
+  "capricorn": {
+    "clipboard": {
+      "copied_markdown": "Copied as Markdown",
+      "cut_markdown": "Cut as Markdown",
+      "retained": "Copied. The original content was kept.",
+      "failed": "Clipboard write failed. The original was kept."
+    },
+    "livePreview": {
+      "largeDeferred": "Large preview is paused. Full source remains available.",
+      "renderLarge": "Render large preview (may take a while)"
+    },
+    "sourceFallback": {
+      "longLine": "Very long lines scroll horizontally to keep the source responsive.",
+      "loading": "Preparing source view…",
+      "truncated": "Only the initial excerpt is shown while the complete source view loads."
+    },
+    "link": {
+      "open": "Open link",
+      "actions": "Link actions",
+      "edit": "Edit link",
+      "text": "Text",
+      "address": "Address",
+      "save": "Save link",
+      "cancel": "Cancel",
+      "invalidAddress": "Enter a valid link address."
+    },
+    "image": {
+      "unavailable": "Image unavailable",
+      "loading": "Loading image…",
+      "edit": "Edit address"
+    },
+    "preview": { "retry": "Retry" }
+  },
+  "inline_insert": {
+    "insert_link": "Insert link",
+    "edit_link": "Edit link",
+    "insert_image": "Insert image",
+    "edit_image": "Edit image",
+    "address": "Address",
+    "text": "Text",
+    "alt": "Description",
+    "optional": "Optional",
+    "choose_image": "Choose local image…",
+    "change": "Change",
+    "replace_image": "Replace image",
+    "edit_alt": "Edit description",
+    "remove": "Remove",
+    "unlink": "Remove link",
+    "insert": "Insert",
+    "save": "Save",
+    "close": "Close",
+    "inserting": "Inserting…",
+    "open": "Open link",
+    "copy": "Copy address",
+    "invalid_address": "Enter a valid address or file path.",
+    "local_error": "Unable to select this image. Try again.",
+    "insert_error": "Unable to insert. Your input has been kept.",
+    "open_error": "Unable to open this link.",
+    "copy_error": "Unable to copy this address.",
+    "single_block": "Select text within one paragraph or table cell."
   }
 }

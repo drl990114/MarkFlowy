@@ -77,9 +77,7 @@ if (pdfPrintWindowRequest) {
         <QueryClientProvider client={queryClient}>
           <BrowserRouter>
             <RenderErrorBoundary
-              fallback={({ error, reset }) => (
-                <AppRenderFailure error={error} reset={reset} />
-              )}
+              fallback={({ error, reset }) => <AppRenderFailure error={error} reset={reset} />}
             >
               <Main />
             </RenderErrorBoundary>

@@ -26,7 +26,7 @@ export class HeadingTree {
 
   constructor(headings: IHeadingData[]) {
     // Make depths of nodes relative
-    const minDepth = Math.min(...headings.map((h) => h.depth));
+    const minDepth = headings.reduce((depth, heading) => Math.min(depth, heading.depth), Infinity);
     const offsetCacheVersion = 0;
 
     const headingNodes: HeadingNode[] = headings.map((h, i) => {
@@ -48,6 +48,7 @@ export class HeadingTree {
         chapter: '0',
       }),
     ]; // init with root node
+    const siblingCounts = new Map<HeadingNode, Map<number, number>>()
     headingNodes.forEach((node) => {
       while (nodeStack.length && nodeStack[nodeStack.length - 1].depth >= node.depth) {
         nodeStack.pop();
@@ -56,20 +57,26 @@ export class HeadingTree {
       nodeStack[nodeStack.length - 1].children.push(node);
       node.parent = nodeStack[nodeStack.length - 1];
 
-      const sameDepthSiblings = node.parent.children.filter((n) => n.depth === node.depth);
+      let countsByDepth = siblingCounts.get(node.parent);
+      if (!countsByDepth) {
+        countsByDepth = new Map()
+        siblingCounts.set(node.parent, countsByDepth)
+      }
+      const siblingNumber = (countsByDepth.get(node.depth) ?? 0) + 1
+      countsByDepth.set(node.depth, siblingNumber)
 
       let diff = node.depth - Math.max(node.parent.depth, 0);
       if (diff === 0) {
-        node.chapter = String(sameDepthSiblings.length);
+        node.chapter = String(siblingNumber);
       } else if (diff === 1) {
-        node.chapter = `${node.parent.chapter}.${sameDepthSiblings.length}`;
+        node.chapter = `${node.parent.chapter}.${siblingNumber}`;
       } else {
         node.chapter = node.parent.chapter;
 
         while (diff >= 1) {
           node.chapter += '.';
           if (diff === 1) {
-            node.chapter += sameDepthSiblings.length;
+            node.chapter += siblingNumber;
           } else {
             node.chapter += 0;
           }

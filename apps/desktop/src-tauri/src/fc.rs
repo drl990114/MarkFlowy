@@ -8,7 +8,7 @@ use std::collections::HashMap;
 #[cfg(target_os = "macos")]
 use std::collections::HashSet;
 use std::fs;
-use std::io::Write;
+use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 
@@ -393,6 +393,14 @@ pub enum FileResultCode {
 pub struct FileResult {
     pub code: FileResultCode,
     pub content: String,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(tag = "status", rename_all = "camelCase")]
+pub enum FileSnapshotResult {
+    Success { content: String, revision: String },
+    Unavailable { result: FileResult },
+    Unstable,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -796,59 +804,73 @@ fn revision_key(path: &Path, metadata: Option<&fs::Metadata>) -> String {
     path_revision_key(path)
 }
 
+#[derive(Debug, PartialEq, Eq)]
+struct FileWriteGenerations {
+    path: u64,
+    file: u64,
+}
+
+fn file_write_generations(path: &Path, metadata: &fs::Metadata) -> AnyResult<FileWriteGenerations> {
+    let path_key = path_revision_key(path);
+    let file_key = revision_key(path, Some(metadata));
+    let generations = FILE_WRITE_GENERATIONS
+        .lock()
+        .map_err(|_| anyhow::anyhow!("File revision lock is unavailable"))?;
+    Ok(FileWriteGenerations {
+        path: generations.get(&path_key).copied().unwrap_or_default(),
+        file: generations.get(&file_key).copied().unwrap_or_default(),
+    })
+}
+
+// Keep the wire revision identical for snapshots and conditional writes. The
+// digest always describes the original disk bytes, before BOM removal/decoding.
+fn format_file_write_revision(
+    metadata: &fs::Metadata,
+    content: &[u8],
+    generations: &FileWriteGenerations,
+) -> String {
+    let modified_nanos = metadata
+        .modified()
+        .ok()
+        .and_then(|modified| modified.duration_since(std::time::UNIX_EPOCH).ok())
+        .map(|duration| duration.as_nanos())
+        .unwrap_or_default();
+
+    #[cfg(unix)]
+    let fingerprint = {
+        use std::os::unix::fs::MetadataExt;
+        format!(
+            "existing:{}:{}:{}:{}:{}",
+            metadata.dev(),
+            metadata.ino(),
+            metadata.len(),
+            modified_nanos,
+            revision_for_content(content)
+        )
+    };
+    #[cfg(not(unix))]
+    let fingerprint = format!(
+        "existing:{}:{}:{}",
+        metadata.len(),
+        modified_nanos,
+        revision_for_content(content)
+    );
+    format!(
+        "{fingerprint}:path-generation:{}:file-generation:{}",
+        generations.path, generations.file
+    )
+}
+
 fn file_write_revision_unlocked(path: &Path) -> AnyResult<String> {
     match fs::read(path) {
         Ok(content) => {
             let metadata = fs::metadata(path)?;
-            let modified_nanos = metadata
-                .modified()
-                .ok()
-                .and_then(|modified| modified.duration_since(std::time::UNIX_EPOCH).ok())
-                .map(|duration| duration.as_nanos())
-                .unwrap_or_default();
-
-            #[cfg(unix)]
-            {
-                use std::os::unix::fs::MetadataExt;
-                let fingerprint = format!(
-                    "existing:{}:{}:{}:{}:{}",
-                    metadata.dev(),
-                    metadata.ino(),
-                    metadata.len(),
-                    modified_nanos,
-                    revision_for_content(&content)
-                );
-                let path_key = path_revision_key(path);
-                let file_key = revision_key(path, Some(&metadata));
-                let generations = FILE_WRITE_GENERATIONS
-                    .lock()
-                    .map_err(|_| anyhow::anyhow!("File revision lock is unavailable"))?;
-                let path_generation = generations.get(&path_key).copied().unwrap_or_default();
-                let file_generation = generations.get(&file_key).copied().unwrap_or_default();
-                Ok(format!(
-                    "{fingerprint}:path-generation:{path_generation}:file-generation:{file_generation}"
-                ))
-            }
-
-            #[cfg(not(unix))]
-            {
-                let fingerprint = format!(
-                    "existing:{}:{}:{}",
-                    metadata.len(),
-                    modified_nanos,
-                    revision_for_content(&content)
-                );
-                let path_key = path_revision_key(path);
-                let file_key = revision_key(path, Some(&metadata));
-                let generations = FILE_WRITE_GENERATIONS
-                    .lock()
-                    .map_err(|_| anyhow::anyhow!("File revision lock is unavailable"))?;
-                let path_generation = generations.get(&path_key).copied().unwrap_or_default();
-                let file_generation = generations.get(&file_key).copied().unwrap_or_default();
-                Ok(format!(
-                    "{fingerprint}:path-generation:{path_generation}:file-generation:{file_generation}"
-                ))
-            }
+            let generations = file_write_generations(path, &metadata)?;
+            Ok(format_file_write_revision(
+                &metadata,
+                &content,
+                &generations,
+            ))
         }
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
             let generation = FILE_WRITE_GENERATIONS
@@ -868,6 +890,137 @@ pub fn get_file_write_revision(path: &Path) -> AnyResult<String> {
         .lock()
         .map_err(|_| anyhow::anyhow!("File write lock is unavailable"))?;
     file_write_revision_unlocked(path)
+}
+
+struct FileSample {
+    bytes: Vec<u8>,
+    metadata: fs::Metadata,
+    generations: FileWriteGenerations,
+    identity: same_file::Handle,
+}
+
+fn snapshot_metadata_matches(before: &fs::Metadata, after: &fs::Metadata) -> bool {
+    if before.len() != after.len() || before.modified().ok() != after.modified().ok() {
+        return false;
+    }
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::MetadataExt;
+        // ctime helps detect in-place writes even when an external writer
+        // restores mtime. It is a stability check, not part of the CAS token.
+        if before.dev() != after.dev()
+            || before.ino() != after.ino()
+            || before.ctime() != after.ctime()
+            || before.ctime_nsec() != after.ctime_nsec()
+        {
+            return false;
+        }
+    }
+    true
+}
+
+fn file_read_error(error: std::io::Error) -> FileResult {
+    let code = match error.kind() {
+        std::io::ErrorKind::NotFound => FileResultCode::NotFound,
+        std::io::ErrorKind::PermissionDenied => FileResultCode::PermissionDenied,
+        _ => FileResultCode::UnknownError,
+    };
+    FileResult {
+        code,
+        content: format!("Failed to read file: {error}"),
+    }
+}
+
+fn read_file_sample_once(path: &Path) -> std::io::Result<Option<FileSample>> {
+    // Match the existing writer's lock boundary, releasing it between samples
+    // and before byte comparison, hashing, or decoding.
+    let _guard = FILE_WRITE_MUTEX
+        .lock()
+        .map_err(|_| std::io::Error::other("File write lock is unavailable"))?;
+    let mut identity = same_file::Handle::from_file(fs::File::open(path)?)?;
+    let before = identity.as_file().metadata()?;
+    let mut bytes = Vec::new();
+    if let Ok(size) = usize::try_from(before.len()) {
+        bytes
+            .try_reserve_exact(size)
+            .map_err(std::io::Error::other)?;
+    }
+    identity.as_file_mut().read_to_end(&mut bytes)?;
+    let metadata = identity.as_file().metadata()?;
+    if bytes.len() as u64 != metadata.len() || !snapshot_metadata_matches(&before, &metadata) {
+        return Ok(None);
+    }
+    // Opening the path again only checks identity; it does not read its bytes.
+    // Keeping the sampled handle alive also prevents inode reuse between reads.
+    let current_identity = match same_file::Handle::from_path(path) {
+        Ok(handle) => handle,
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(None),
+        Err(error) => return Err(error),
+    };
+    if identity != current_identity
+        || !snapshot_metadata_matches(&metadata, &current_identity.as_file().metadata()?)
+    {
+        return Ok(None);
+    }
+    let generations = file_write_generations(path, &metadata).map_err(std::io::Error::other)?;
+    Ok(Some(FileSample {
+        bytes,
+        metadata,
+        generations,
+        identity,
+    }))
+}
+
+fn read_file_sample(path: &Path) -> Result<Option<FileSample>, FileResult> {
+    match read_file_sample_once(path) {
+        Err(error) if error.kind() == std::io::ErrorKind::PermissionDenied => {
+            acquire_security_scope(path);
+            // Preserve the existing read command's one retry and original
+            // permission error if restoring access does not fix the read.
+            read_file_sample_once(path).map_err(|_| file_read_error(error))
+        }
+        result => result.map_err(file_read_error),
+    }
+}
+
+fn read_file_snapshot_with_reader<F>(path: &Path, mut reader: F) -> FileSnapshotResult
+where
+    F: FnMut(&Path) -> Result<Option<FileSample>, FileResult>,
+{
+    for _ in 0..3 {
+        let first = match reader(path) {
+            Ok(Some(sample)) => sample,
+            Ok(None) => continue,
+            Err(result) => return FileSnapshotResult::Unavailable { result },
+        };
+        let second = match reader(path) {
+            Ok(Some(sample)) => sample,
+            Ok(None) => continue,
+            Err(result) => return FileSnapshotResult::Unavailable { result },
+        };
+        if first.identity != second.identity
+            || first.generations != second.generations
+            || !snapshot_metadata_matches(&first.metadata, &second.metadata)
+            || first.bytes != second.bytes
+        {
+            continue;
+        }
+        // Two content observations are still required. Exact comparison lets
+        // us avoid hashing both copies, and only one buffer survives decoding.
+        drop(second);
+        let revision =
+            format_file_write_revision(&first.metadata, &first.bytes, &first.generations);
+        return match decode_text_bytes(first.bytes) {
+            Ok(content) => FileSnapshotResult::Success { content, revision },
+            Err(result) => FileSnapshotResult::Unavailable { result },
+        };
+    }
+    FileSnapshotResult::Unstable
+}
+
+pub fn read_file_snapshot(path: &Path) -> FileSnapshotResult {
+    ensure_workspace_scope_active(path);
+    read_file_snapshot_with_reader(path, read_file_sample)
 }
 
 fn bump_file_write_generation(path: &Path) -> AnyResult<()> {
@@ -1457,6 +1610,13 @@ pub mod cmd {
     }
 
     #[tauri::command]
+    pub async fn get_file_snapshot(file_path: String) -> Result<fc::FileSnapshotResult, String> {
+        tokio::task::spawn_blocking(move || fc::read_file_snapshot(Path::new(&file_path)))
+            .await
+            .map_err(|error| error.to_string())
+    }
+
+    #[tauri::command]
     pub async fn write_file(file_path: String, content: String) -> Result<FileResult, String> {
         tokio::task::spawn_blocking(move || fc::write_file(&file_path, &content))
             .await
@@ -1889,6 +2049,8 @@ pub mod cmd {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    include!("fc_snapshot_tests.rs");
 
     fn test_file(name: &str, kind: &str, path: &str) -> FileInfo {
         FileInfo {

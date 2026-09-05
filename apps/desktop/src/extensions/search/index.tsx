@@ -9,6 +9,10 @@ import { getFileObjectByPath } from '@/helper/files'
 import { logger } from '@/helper/logger'
 import { useEditorStore } from '@/stores'
 import { scheduleActiveEditorFocus } from '@/components/EditorArea/focusActiveEditor'
+import {
+  getCapricornEditor,
+  subscribeCapricornEditors,
+} from '@/components/EditorArea/capricornEditorRegistry'
 import { closeCompactLeftDockAfterSelection } from '@/stores/useLayoutStore'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import { useVirtualizer } from '@tanstack/react-virtual'
@@ -28,7 +32,15 @@ import {
   SearchIcon,
   XIcon,
 } from 'lucide-react'
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react'
 import { useTranslation } from '@/i18n'
 import {
   SearchContainer,
@@ -238,6 +250,15 @@ const SearchView = memo(() => {
   const folderData = useEditorStore((state) => state.folderData)
   const editorCtxMap = useEditorStore((state) => state.editorCtxMap)
   const activeId = useEditorStore((state) => state.activeId)
+  const getCapricornSnapshot = useCallback(
+    () => (activeId ? getCapricornEditor(activeId) : undefined),
+    [activeId],
+  )
+  const capricornEditor = useSyncExternalStore(
+    subscribeCapricornEditors,
+    getCapricornSnapshot,
+    getCapricornSnapshot,
+  )
   const fileExcludePatterns = useAppSettingStore((state) =>
     resolveFileExcludePatterns(state.settingData),
   )
@@ -399,13 +420,15 @@ const SearchView = memo(() => {
     )
   }, [isAllExpand, resultList])
 
+  const stopActiveFind = useCallback(() => {
+    if (!activeId) return
+    editorCtxMap.get(activeId)?.commands?.stopFind?.()
+    capricornEditor?.find.close()
+  }, [activeId, capricornEditor, editorCtxMap])
+
   useEffect(() => {
-    return () => {
-      if (activeId) {
-        editorCtxMap.get(activeId)?.commands?.stopFind?.()
-      }
-    }
-  }, [activeId, editorCtxMap])
+    return stopActiveFind
+  }, [stopActiveFind])
 
   useEffect(() => {
     if (activeId && resultList.length > 0 && searchKeyword) {
@@ -416,11 +439,24 @@ const SearchView = memo(() => {
         activeIndex: activeIndex,
       }
 
-      // findRanges twice to make sure scroll to activeIndex
-      ctx?.helpers.findRanges?.(searchParams)
-      ctx?.helpers.findRanges?.(searchParams)
+      if (capricornEditor) {
+        capricornEditor.find.open()
+        capricornEditor.find.search(searchParams)
+      } else {
+        // findRanges twice to make sure the legacy Source editor scrolls to activeIndex.
+        ctx?.helpers.findRanges?.(searchParams)
+        ctx?.helpers.findRanges?.(searchParams)
+      }
     }
-  }, [activeIndex, caseSensitive, activeId, searchKeyword, editorCtxMap, resultList])
+  }, [
+    activeIndex,
+    caseSensitive,
+    activeId,
+    capricornEditor,
+    searchKeyword,
+    editorCtxMap,
+    resultList,
+  ])
 
   const handleSearch = useCallback(async () => {
     if (!folderData?.[0]) return
@@ -494,10 +530,8 @@ const SearchView = memo(() => {
     setExpandIdMap({})
     setSearchState({ caseSensitive: !caseSensitive, resultList: [], activeIndex: 0 })
 
-    if (activeId) {
-      editorCtxMap.get(activeId)?.commands?.stopFind?.()
-    }
-  }, [activeId, caseSensitive, editorCtxMap, setSearchState])
+    stopActiveFind()
+  }, [caseSensitive, setSearchState, stopActiveFind])
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -519,7 +553,13 @@ const SearchView = memo(() => {
           activeIndex: index,
         }
 
-        editorCtxMap.get(curFile.id)?.helpers.findRanges?.(searchParams)
+        const targetCapricornEditor = getCapricornEditor(curFile.id)
+        if (targetCapricornEditor) {
+          targetCapricornEditor.find.open()
+          targetCapricornEditor.find.search(searchParams)
+        } else {
+          editorCtxMap.get(curFile.id)?.helpers.findRanges?.(searchParams)
+        }
 
         setSearchState({
           activeIndex: index,
@@ -546,11 +586,9 @@ const SearchView = memo(() => {
       setExpandIdMap({})
       setSearchState({ searchKeyword: nextKeyword, resultList: [], activeIndex: 0 })
 
-      if (activeId) {
-        editorCtxMap.get(activeId)?.commands?.stopFind?.()
-      }
+      stopActiveFind()
     },
-    [activeId, editorCtxMap, setSearchState],
+    [setSearchState, stopActiveFind],
   )
 
   const handleClearSearch = useCallback(() => {
@@ -560,10 +598,8 @@ const SearchView = memo(() => {
     setSearchError('')
     setExpandIdMap({})
     setSearchState({ searchKeyword: '', resultList: [], activeIndex: 0 })
-    if (activeId) {
-      editorCtxMap.get(activeId)?.commands?.stopFind?.()
-    }
-  }, [activeId, editorCtxMap, setSearchState])
+    stopActiveFind()
+  }, [setSearchState, stopActiveFind])
 
   const renderSearchState = useCallback(() => {
     if (isSearching && resultList.length === 0) {

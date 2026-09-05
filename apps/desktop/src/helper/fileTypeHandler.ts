@@ -1,14 +1,18 @@
+import {
+  EditorViewType,
+  isCapricornRuntimeAvailable,
+  type EditorViewTypeValue,
+} from '@/constants/editorViewType'
 import useAppSettingStore from '@/stores/useAppSettingStore'
-import { EditorViewType } from '@/constants/editorViewType'
-import { IFile } from './filesys'
+import type { IFile } from './filesys'
 
 export type FileType = 'markdown' | 'image' | 'json' | 'text' | 'unsupported'
 
 export interface FileTypeConfig {
   type: FileType
-  supportedModes: Array<EditorViewType>
-  defaultMode: EditorViewType
-  exporters?: Array<string>
+  supportedModes: EditorViewTypeValue[]
+  defaultMode: EditorViewTypeValue
+  exporters?: string[]
 }
 
 export const isTextfileType = (fileTypeConfig: FileTypeConfig): boolean => {
@@ -16,63 +20,200 @@ export const isTextfileType = (fileTypeConfig: FileTypeConfig): boolean => {
 }
 
 const TEXT_EXTENSIONS = new Set([
-  'txt', 'log', 'csv', 'tsv',
-  'js', 'jsx', 'ts', 'tsx', 'mjs', 'cjs',
-  'py', 'pyw', 'pyi',
-  'rb', 'rs', 'go', 'java', 'c', 'cpp', 'h', 'hpp', 'cs', 'php',
-  'swift', 'kt', 'kts', 'scala', 'r', 'm', 'mm',
-  'pl', 'pm', 'lua', 'vim', 'el', 'clj', 'hs', 'ml', 'fs', 'dart', 'groovy',
-  'sh', 'bash', 'zsh', 'fish', 'ps1', 'bat', 'cmd',
-  'html', 'htm', 'css', 'scss', 'sass', 'less', 'styl',
-  'vue', 'svelte', 'astro',
-  'yaml', 'yml', 'toml', 'ini', 'cfg', 'conf', 'env', 'properties',
-  'xml', 'plist', 'gradle', 'cmake',
-  'sql', 'graphql', 'gql',
-  'mdx', 'tex', 'org', 'adoc', 'rst',
-  'diff', 'patch',
-  'dockerfile', 'makefile',
-  'gitignore', 'editorconfig', 'prettierrc', 'eslintrc', 'babelrc',
-  'npmrc', 'nvmrc', 'node-version',
+  'txt',
+  'log',
+  'csv',
+  'tsv',
+  'js',
+  'jsx',
+  'ts',
+  'tsx',
+  'mjs',
+  'cjs',
+  'py',
+  'pyw',
+  'pyi',
+  'rb',
+  'rs',
+  'go',
+  'java',
+  'c',
+  'cpp',
+  'h',
+  'hpp',
+  'cs',
+  'php',
+  'swift',
+  'kt',
+  'kts',
+  'scala',
+  'r',
+  'm',
+  'mm',
+  'pl',
+  'pm',
+  'lua',
+  'vim',
+  'el',
+  'clj',
+  'hs',
+  'ml',
+  'fs',
+  'dart',
+  'groovy',
+  'sh',
+  'bash',
+  'zsh',
+  'fish',
+  'ps1',
+  'bat',
+  'cmd',
+  'html',
+  'htm',
+  'css',
+  'scss',
+  'sass',
+  'less',
+  'styl',
+  'vue',
+  'svelte',
+  'astro',
+  'yaml',
+  'yml',
+  'toml',
+  'ini',
+  'cfg',
+  'conf',
+  'env',
+  'properties',
+  'xml',
+  'plist',
+  'gradle',
+  'cmake',
+  'sql',
+  'graphql',
+  'gql',
+  'mdx',
+  'tex',
+  'org',
+  'adoc',
+  'rst',
+  'diff',
+  'patch',
+  'dockerfile',
+  'makefile',
+  'gitignore',
+  'editorconfig',
+  'prettierrc',
+  'eslintrc',
+  'babelrc',
+  'npmrc',
+  'nvmrc',
+  'node-version',
   'lock',
-  'tf', 'tfvars', 'hcl',
-  'proto', 'graphqls',
-  'res', 'resi',
-  'ex', 'exs',
+  'tf',
+  'tfvars',
+  'hcl',
+  'proto',
+  'graphqls',
+  'res',
+  'resi',
+  'ex',
+  'exs',
   'erl',
   'sol',
-  'asm', 's',
-  'v', 'sv', 'svh',
-  'vhd', 'vhdl',
+  'asm',
+  's',
+  'v',
+  'sv',
+  'svh',
+  'vhd',
+  'vhdl',
   'tcl',
-  'rake', 'gemspec',
+  'rake',
+  'gemspec',
   'podspec',
   'cmake',
   'meson',
-  'bazel', 'bzl',
+  'bazel',
+  'bzl',
   'snippets',
   'toml',
 ])
 
 const IMAGE_EXTENSIONS = new Set([
-  'jpg', 'jpeg', 'png', 'gif', 'svg', 'webp', 'bmp', 'ico', 'tiff', 'tif', 'avif',
+  'jpg',
+  'jpeg',
+  'png',
+  'gif',
+  'svg',
+  'webp',
+  'bmp',
+  'ico',
+  'tiff',
+  'tif',
+  'avif',
 ])
 
 const BINARY_EXTENSIONS = new Set([
-  'exe', 'dll', 'so', 'dylib',
-  'zip', 'tar', 'gz', 'bz2', 'xz', '7z', 'rar', 'dmg', 'iso',
-  'mp3', 'mp4', 'avi', 'mov', 'mkv', 'flv', 'wmv', 'webm',
-  'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx',
-  'psd', 'ai', 'eps',
-  'ttf', 'otf', 'woff', 'woff2',
-  'sqlite', 'db',
-  'pyc', 'class', 'o', 'obj',
-  'bin', 'dat', 'wasm',
+  'exe',
+  'dll',
+  'so',
+  'dylib',
+  'zip',
+  'tar',
+  'gz',
+  'bz2',
+  'xz',
+  '7z',
+  'rar',
+  'dmg',
+  'iso',
+  'mp3',
+  'mp4',
+  'avi',
+  'mov',
+  'mkv',
+  'flv',
+  'wmv',
+  'webm',
+  'pdf',
+  'doc',
+  'docx',
+  'xls',
+  'xlsx',
+  'ppt',
+  'pptx',
+  'psd',
+  'ai',
+  'eps',
+  'ttf',
+  'otf',
+  'woff',
+  'woff2',
+  'sqlite',
+  'db',
+  'pyc',
+  'class',
+  'o',
+  'obj',
+  'bin',
+  'dat',
+  'wasm',
 ])
 
 const FILES_WITHOUT_EXT = new Set([
-  'dockerfile', 'makefile', 'rakefile', 'gemfile', 'procfile',
-  'vagrantfile', 'brewfile', 'podfile', 'fastfile',
-  'cmakelists', 'jenkinsfile',
+  'dockerfile',
+  'makefile',
+  'rakefile',
+  'gemfile',
+  'procfile',
+  'vagrantfile',
+  'brewfile',
+  'podfile',
+  'fastfile',
+  'cmakelists',
+  'jenkinsfile',
 ])
 
 function isTextExtension(ext: string): boolean {
@@ -112,15 +253,34 @@ const UNSUPPORTED_FILE_TYPE_CONFIG: FileTypeConfig = {
   defaultMode: EditorViewType.PREVIEW,
 }
 
+export function getMarkdownSupportedModes(
+  capricornAvailable = isCapricornRuntimeAvailable,
+): EditorViewTypeValue[] {
+  return capricornAvailable
+    ? [EditorViewType.PREVIEW, EditorViewType.WYSIWYG, EditorViewType.SOURCECODE]
+    : [EditorViewType.PREVIEW, EditorViewType.SOURCECODE]
+}
+
+export function getMarkdownDefaultMode(
+  preferredMode: unknown,
+  capricornAvailable = isCapricornRuntimeAvailable,
+): EditorViewTypeValue {
+  const supportedModes = getMarkdownSupportedModes(capricornAvailable)
+  const preferred = supportedModes.find((mode) => mode === preferredMode)
+  if (preferred) return preferred
+  return capricornAvailable ? EditorViewType.WYSIWYG : EditorViewType.SOURCECODE
+}
+
 export async function getFileTypeConfig(file: IFile): Promise<FileTypeConfig> {
   const extLower = (file.ext || file.name?.split('.').pop() || '').toLowerCase()
   const { settingData } = useAppSettingStore.getState()
 
   if (extLower === 'md' || extLower === 'markdown') {
+    const supportedModes = getMarkdownSupportedModes()
     return {
       type: 'markdown',
-      supportedModes: [EditorViewType.PREVIEW, EditorViewType.WYSIWYG, EditorViewType.SOURCECODE],
-      defaultMode: settingData.md_editor_default_mode || EditorViewType.WYSIWYG,
+      supportedModes,
+      defaultMode: getMarkdownDefaultMode(settingData.md_editor_default_mode),
       exporters: ['Html', 'Image'],
     }
   }
@@ -157,5 +317,5 @@ export async function getFileTypeConfig(file: IFile): Promise<FileTypeConfig> {
 }
 
 export function isSupportedMode(config: FileTypeConfig, mode: string): boolean {
-  return config.supportedModes.includes(mode as any)
+  return config.supportedModes.some((supportedMode) => supportedMode === mode)
 }

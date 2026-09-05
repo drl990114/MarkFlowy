@@ -221,6 +221,7 @@ const EditorGroupPane = memo((props: EditorGroupPaneProps) => {
           group.opened.map((id) => (
             <Editor
               active={isActiveGroup && id === activeFileId}
+              groupId={groupId}
               id={id}
               key={`${groupId}-${id}`}
               visible={id === activeFileId}

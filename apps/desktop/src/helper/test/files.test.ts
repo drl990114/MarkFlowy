@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import useFileCacheStore, {
   deleteFileObject,
   deleteFileObjectsByPathPrefix,
@@ -34,6 +34,34 @@ describe('file cache metadata revision', () => {
     setFileObject(FILE.id, { ...FILE, content: 'updated' })
 
     expect(useFileCacheStore.getState().metadataRevision).toBe(revision)
+  })
+
+  it('retains the cache identity for equal files but publishes metadata and child changes', () => {
+    setFileObject(FILE.id, FILE)
+    const original = useFileCacheStore.getState()
+    const listener = vi.fn()
+    const unsubscribe = useFileCacheStore.subscribe(listener)
+    try {
+      setFileObject(FILE.id, { ...FILE })
+      expect(useFileCacheStore.getState()).toBe(original)
+      expect(listener).not.toHaveBeenCalled()
+
+      const withExtension = { ...FILE, ext: 'md' }
+      setFileObject(FILE.id, withExtension)
+      expect(useFileCacheStore.getState().entries[FILE.id]).toBe(withExtension)
+
+      const pending = { ...withExtension, kind: 'pending_edit_file' as const }
+      setFileObject(FILE.id, pending)
+      const withChildren = { ...pending, children: [{ ...FILE, id: 'child' }] }
+      setFileObject(FILE.id, withChildren)
+      const replacedChildren = { ...withChildren, children: [{ ...FILE, id: 'other-child' }] }
+      setFileObject(FILE.id, replacedChildren)
+      expect(listener).toHaveBeenCalledTimes(4)
+      expect(useFileCacheStore.getState().entries[FILE.id]).toBe(replacedChildren)
+      expect(useFileCacheStore.getState().metadataRevision).toBe(original.metadataRevision)
+    } finally {
+      unsubscribe()
+    }
   })
 
   it('changes when an opened-file name or path can change', () => {

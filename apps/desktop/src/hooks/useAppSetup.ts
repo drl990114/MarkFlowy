@@ -31,7 +31,7 @@ import {
   normalizeOpenedUrls,
   restoreOpenedUrls,
 } from '@/startup/appearance'
-import { createStartupCoordinator } from '@/startup/startupCoordinator'
+import { createAppStartupCoordinator } from '@/startup/appStartupCoordinator'
 import { createOpenedUrlQueue } from '@/startup/openedUrlQueue'
 import {
   scheduleStaleStartupThemeFallback,
@@ -797,7 +797,7 @@ const appShellSetup = async (signal: AbortSignal): Promise<AppShellData> => {
   return settingData
 }
 
-const appStartupCoordinator = createStartupCoordinator<AppShellData, void>({
+const appStartupCoordinator = createAppStartupCoordinator<AppShellData, void>({
   loadShell: appShellSetup,
   loadWorkspace: async (_shell, signal) => {
     await appWorkspaceSetup(signal)

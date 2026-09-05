@@ -6,6 +6,13 @@ const useEditorCounterStore = create<EditorCountStore>((set) => {
 
     addEditorCounter: ({ id, data }) => {
       set((state) => {
+        const previous = state.editorCounterMap[id]
+        if (
+          previous?.characterCount === data.characterCount &&
+          previous.nonWhitespaceCharacterCount === data.nonWhitespaceCharacterCount &&
+          previous.wordCount === data.wordCount
+        ) return state
+
         return {
           ...state,
           editorCounterMap: {

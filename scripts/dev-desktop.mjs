@@ -1,7 +1,8 @@
 import { spawn, spawnSync } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { createRequire } from 'node:module'
-import { dirname, resolve } from 'node:path'
+import { homedir } from 'node:os'
+import { delimiter, dirname, join, resolve } from 'node:path'
 import process from 'node:process'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
@@ -34,6 +35,80 @@ const tauriCli = require.resolve('@tauri-apps/cli/tauri.js')
 
 const delay = (milliseconds) =>
   new Promise((resolveDelay) => setTimeout(resolveDelay, milliseconds))
+
+export const withCargoOnPath = (
+  env = process.env,
+  {
+    homeDirectory = homedir(),
+    pathDelimiter = delimiter,
+    pathExists = existsSync,
+    platform = process.platform,
+  } = {},
+) => {
+  const pathKey = Object.keys(env).find((key) => key.toLowerCase() === 'path') ?? 'PATH'
+  const currentPath = env[pathKey] ?? ''
+  const cargoExecutable = platform === 'win32' ? 'cargo.exe' : 'cargo'
+  const rustcExecutable = platform === 'win32' ? 'rustc.exe' : 'rustc'
+  const pathEntries = currentPath.split(pathDelimiter).filter(Boolean)
+
+  if (
+    pathEntries.some(
+      (entry) =>
+        pathExists(join(entry, cargoExecutable)) && pathExists(join(entry, rustcExecutable)),
+    )
+  ) {
+    return { ...env }
+  }
+
+  const cargoHome = env.CARGO_HOME || join(homeDirectory, '.cargo')
+  const cargoBin = join(cargoHome, 'bin')
+  if (
+    !pathExists(join(cargoBin, cargoExecutable)) ||
+    !pathExists(join(cargoBin, rustcExecutable))
+  ) {
+    return { ...env }
+  }
+
+  return {
+    ...env,
+    [pathKey]: [cargoBin, currentPath].filter(Boolean).join(pathDelimiter),
+  }
+}
+
+export const assertRustToolchainAvailable = (
+  env,
+  { runCommand = spawnSync, platform = process.platform } = {},
+) => {
+  const executableSuffix = platform === 'win32' ? '.exe' : ''
+  const checks = [
+    { command: `cargo${executableSuffix}`, args: ['--version'], label: 'Cargo' },
+    { command: `rustc${executableSuffix}`, args: ['-vV'], label: 'Rust compiler' },
+  ]
+
+  for (const { command, args, label } of checks) {
+    const result = runCommand(command, args, {
+      cwd: ROOT_DIR,
+      encoding: 'utf8',
+      env,
+      shell: false,
+      stdio: ['ignore', 'pipe', 'pipe'],
+      timeout: 30_000,
+      windowsHide: true,
+    })
+    const hasRustHost = command.startsWith('rustc')
+      ? result.stdout?.split('\n').some((line) => line.startsWith('host:'))
+      : true
+
+    if (result.status === 0 && hasRustHost) continue
+
+    const details = result.stderr?.trim() || result.error?.message
+    throw new Error(
+      `${label} is unavailable or incomplete. Reinstall the Rust version declared in ` +
+        '`rust-toolchain.toml` with rustup, or fix PATH' +
+        `${details ? `: ${details}` : '.'}`,
+    )
+  }
+}
 
 const isProcessRunning = (pid) => {
   try {
@@ -180,6 +255,7 @@ const exitCodeFor = (code, signal) => {
 }
 
 export const runDevDesktop = async () => {
+  const devEnvironment = withCargoOnPath()
   const children = new Map()
   let shuttingDown = false
   let resolveShutdownStarted
@@ -193,7 +269,7 @@ export const runDevDesktop = async () => {
     const child = spawn(process.execPath, [cli, ...args], {
       cwd,
       detached: !isWindows,
-      env: process.env,
+      env: devEnvironment,
       shell: false,
       stdio: 'inherit',
       windowsHide: true,
@@ -245,6 +321,7 @@ export const runDevDesktop = async () => {
   for (const [signal, handler] of signalHandlers) process.on(signal, handler)
 
   try {
+    assertRustToolchainAvailable(devEnvironment)
     console.log('[dev:desktop] Starting dependency watchers...')
     const turboProcess = spawnManaged(
       'dependency watchers',

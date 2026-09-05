@@ -24,8 +24,8 @@ export const MoreActions = () => {
 
   const convertText = useCallback(
     async (variant: string) => {
-      const content = getEditorContent(curFile?.id || '')
       try {
+        const content = getEditorContent(curFile?.id || '')
         const res = await invoke<{ code: FileResultCode; content: string }>('convert_text', {
           text: content || '',
           variant,
@@ -36,7 +36,7 @@ export const MoreActions = () => {
           toast.error(res.content)
         }
       } catch (error) {
-        toast.error(String(error))
+        toast.error(error instanceof Error ? error.message : String(error))
       }
     },
     [curFile?.id, getEditorContent],

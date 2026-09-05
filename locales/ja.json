@@ -769,5 +769,66 @@
     "openFileFirst": "Zenモードに入るにはドキュメントを開いてください",
     "exitHint": "Zenモード · {{shortcut}} または Esc を2回押して終了",
     "shortcutFallback": "Cmd/Ctrl+Shift+F"
+  },
+  "capricorn": {
+    "clipboard": {
+      "copied_markdown": "Markdown としてコピーしました",
+      "cut_markdown": "Markdown として切り取りました",
+      "retained": "コピーしました。元の内容は保持されました。",
+      "failed": "クリップボードへの書き込みに失敗しました。元の内容は保持されました。"
+    },
+    "livePreview": {
+      "largeDeferred": "大きなプレビューは一時停止中です。ソース全体は引き続き利用できます。",
+      "renderLarge": "大きなプレビューを描画（時間がかかる場合があります）"
+    },
+    "sourceFallback": {
+      "longLine": "非常に長い行は横スクロール表示にして、ソース編集の応答性を保ちます。",
+      "loading": "ソース表示を準備しています…",
+      "truncated": "ソース全体の表示を読み込み中のため、冒頭のみ表示しています。"
+    },
+    "link": {
+      "open": "リンクを開く",
+      "actions": "リンク操作",
+      "edit": "リンクを編集",
+      "text": "テキスト",
+      "address": "アドレス",
+      "save": "リンクを保存",
+      "cancel": "キャンセル",
+      "invalidAddress": "有効なリンク先アドレスを入力してください。"
+    },
+    "image": {
+      "unavailable": "Image unavailable",
+      "loading": "Loading image…",
+      "edit": "Edit address"
+    },
+    "preview": { "retry": "Retry" }
+  },
+  "inline_insert": {
+    "insert_link": "Insert link",
+    "edit_link": "Edit link",
+    "insert_image": "Insert image",
+    "edit_image": "Edit image",
+    "address": "Address",
+    "text": "Text",
+    "alt": "Description",
+    "optional": "Optional",
+    "choose_image": "Choose local image…",
+    "change": "Change",
+    "replace_image": "Replace image",
+    "edit_alt": "Edit description",
+    "remove": "Remove",
+    "unlink": "Remove link",
+    "insert": "Insert",
+    "save": "Save",
+    "close": "Close",
+    "inserting": "Inserting…",
+    "open": "Open link",
+    "copy": "Copy address",
+    "invalid_address": "Enter a valid address or file path.",
+    "local_error": "Unable to select this image. Try again.",
+    "insert_error": "Unable to insert. Your input has been kept.",
+    "open_error": "Unable to open this link.",
+    "copy_error": "Unable to copy this address.",
+    "single_block": "Select text within one paragraph or table cell."
   }
 }

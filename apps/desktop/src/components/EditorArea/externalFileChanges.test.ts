@@ -17,6 +17,7 @@ import {
   type ExternalFileContentSyncPayload,
 } from './externalFileChanges'
 import { fileSaveCoordinator } from './fileSaveCoordinator'
+import { editorSnapshotRegistry } from './editorSnapshotRegistry'
 
 enableMapSet()
 
@@ -44,9 +45,8 @@ const createFile = (content: string): IFile => ({
 
 function mockStableDisk(content: string, revision: string) {
   invoke.mockImplementation(async (command: string) => {
-    if (command === 'get_file_write_revision') return revision
-    if (command === 'get_file_content') {
-      return { code: FileResultCode.Success, content }
+    if (command === 'get_file_snapshot') {
+      return { status: 'success', content, revision }
     }
     throw new Error(`Unexpected command: ${command}`)
   })
@@ -68,7 +68,11 @@ describe('external file changes', () => {
     deleteFileObject(fileId)
     useEditorStore.setState({ opened: [fileId] })
     useEditorStateStore.getState().delIdStateMap(fileId)
-    await fileSaveCoordinator.releaseWhenIdle(fileId, () => true, () => undefined)
+    await fileSaveCoordinator.releaseWhenIdle(
+      fileId,
+      () => true,
+      () => undefined,
+    )
     setFileObject(fileId, createFile('local'))
     fileSaveCoordinator.recordContent(fileId, 'local')
     fileSaveCoordinator.setDiskRevision(fileId, 'disk:old')
@@ -89,6 +93,7 @@ describe('external file changes', () => {
 
     expect(getFileObject(fileId).content).toBe('external')
     expect(fileSaveCoordinator.getDiskRevision(fileId)).toBe('disk:new')
+    expect(invoke).toHaveBeenCalledExactlyOnceWith('get_file_snapshot', { filePath })
     expect(contentSync).toHaveBeenCalledWith({ content: 'external', fileId })
     expect(useExternalFileChangeStore.getState().notices[fileId]).toMatchObject({
       kind: 'updated',
@@ -126,6 +131,47 @@ describe('external file changes', () => {
     expect(useExternalFileChangeStore.getState().notices[fileId]?.kind).toBe('conflict')
   })
 
+  it('protects local content when the live reader cannot publish during composition', async () => {
+    useEditorStateStore.getState().setIdStateMap(fileId, { hasUnsavedChanges: true })
+    mockStableDisk('external', 'disk:new')
+    const unregister = editorSnapshotRegistry.register(fileId, 'composing', {
+      canRead: () => false,
+      flush: vi.fn(() => false),
+      hasPending: () => true,
+      isVisible: () => true,
+      onSyncDemandChanged: () => {},
+    })
+    try {
+      await emitChange()
+      expect(getFileObject(fileId).content).toBe('local')
+      expect(useEditorStateStore.getState().idStateMap.get(fileId)?.hasUnsavedChanges).toBe(true)
+      expect(useExternalFileChangeStore.getState().notices[fileId]).toMatchObject({
+        kind: 'conflict',
+        diskRevision: 'disk:new',
+      })
+    } finally {
+      unregister()
+    }
+  })
+
+  it.each([FileResultCode.NotFound, FileResultCode.PermissionDenied])(
+    'preserves local state when an external %s snapshot is unavailable',
+    async (code) => {
+      useEditorStateStore.getState().setIdStateMap(fileId, { hasUnsavedChanges: true })
+      invoke.mockResolvedValue({
+        status: 'unavailable',
+        result: { code, content: '' },
+      })
+
+      await emitChange()
+
+      expect(getFileObject(fileId).content).toBe('local')
+      expect(fileSaveCoordinator.getDiskRevision(fileId)).toBe('disk:old')
+      expect(useEditorStateStore.getState().idStateMap.get(fileId)?.hasUnsavedChanges).toBe(true)
+      expect(useExternalFileChangeStore.getState().notices[fileId]).toBeUndefined()
+    },
+  )
+
   it('loads the newest disk snapshot when the user chooses Update', async () => {
     useEditorStateStore.getState().setIdStateMap(fileId, { hasUnsavedChanges: true })
     markExternalFileConflict(fileId, 'disk:noticed')
@@ -143,9 +189,8 @@ describe('external file changes', () => {
     useEditorStateStore.getState().setIdStateMap(fileId, { hasUnsavedChanges: true })
     markExternalFileConflict(fileId, 'disk:noticed')
     invoke.mockImplementation(async (command: string, args?: Record<string, unknown>) => {
-      if (command === 'get_file_write_revision') return 'disk:newest'
-      if (command === 'get_file_content') {
-        return { code: FileResultCode.Success, content: 'external' }
+      if (command === 'get_file_snapshot') {
+        return { status: 'success', content: 'external', revision: 'disk:newest' }
       }
       if (command === 'conditional_write_file') {
         expect(args).toMatchObject({
@@ -171,9 +216,8 @@ describe('external file changes', () => {
     useEditorStateStore.getState().setIdStateMap(fileId, { hasUnsavedChanges: true })
     markExternalFileConflict(fileId, 'disk:noticed')
     invoke.mockImplementation(async (command: string) => {
-      if (command === 'get_file_write_revision') return 'disk:newest'
-      if (command === 'get_file_content') {
-        return { code: FileResultCode.Success, content: 'external' }
+      if (command === 'get_file_snapshot') {
+        return { status: 'success', content: 'external', revision: 'disk:newest' }
       }
       if (command === 'conditional_write_file') {
         return { revision: 'disk:changed-again', status: 'conflict' }

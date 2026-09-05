@@ -1,4 +1,5 @@
 import { commandRegistry } from '@/commands'
+import { EditorViewType, type EditorViewTypeValue } from '@/constants/editorViewType'
 import {
   getCurrentAIProviderDisplayName,
   summarizeAIText,
@@ -26,7 +27,6 @@ import {
 } from 'lucide-react'
 import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from '@/i18n'
-import { EditorViewType } from 'rme'
 import styled from 'styled-components'
 import { Space, toast } from 'zens'
 import { showContextMenu } from '../ui-v2/ContextMenu'
@@ -87,7 +87,13 @@ export const EditorInfoBar = memo(() => {
   }, [hasUnsavedChanges, getFileNormalInfo])
 
   const fetchCurFileSummary = useCallback(async () => {
-    const content = getEditorContent(curFile?.id || '')
+    let content: string
+    try {
+      content = getEditorContent(curFile?.id || '')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : String(error))
+      return
+    }
     const res = await addAppTask<ReturnType<typeof summarizeAIText>>({
       title: 'AI: Retrieving article abstract',
       promise: summarizeAIText(content || ''),
@@ -100,15 +106,17 @@ export const EditorInfoBar = memo(() => {
 ${res}
     `,
     })
-  }, [
-    addAppTask,
-    curFile?.id,
-    getEditorContent,
-  ])
+  }, [addAppTask, curFile?.id, getEditorContent])
 
   const fetchCurFileTranslate = useCallback(
     async (targetLang: string) => {
-      const content = getEditorContent(curFile?.id || '')
+      let content: string
+      try {
+        content = getEditorContent(curFile?.id || '')
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : String(error))
+        return
+      }
       const res = await addAppTask({
         title: 'AI: Translating article',
         promise: translateAIText(content || '', targetLang),
@@ -119,17 +127,13 @@ ${res}
         content: `${res}`,
       })
     },
-    [
-      addAppTask,
-      curFile?.id,
-      getEditorContent,
-    ],
+    [addAppTask, curFile?.id, getEditorContent],
   )
 
   const convertText = useCallback(
     async (variant: string) => {
-      const content = getEditorContent(curFile?.id || '')
       try {
+        const content = getEditorContent(curFile?.id || '')
         const res = await invoke<{ code: FileResultCode; content: string }>('convert_text', {
           text: content || '',
           variant,
@@ -140,7 +144,7 @@ ${res}
           toast.error(res.content)
         }
       } catch (error) {
-        toast.error(String(error))
+        toast.error(error instanceof Error ? error.message : String(error))
       }
     },
     [curFile?.id, getEditorContent],
@@ -249,13 +253,7 @@ ${res}
         },
       ],
     })
-  }, [
-    curFile,
-    t,
-    fetchCurFileSummary,
-    fetchCurFileTranslate,
-    convertText,
-  ])
+  }, [curFile, t, fetchCurFileSummary, fetchCurFileTranslate, convertText])
 
   const handleViewClick = useCallback(() => {
     const rect = ref.current?.getBoundingClientRect()
@@ -296,7 +294,7 @@ ${res}
 
   const editorViewType = editorViewTypeMap.get(curFile?.id || '') || 'wysiwyg'
 
-  const viewTypeIconMap: Record<EditorViewType, LucideIcon> = {
+  const viewTypeIconMap: Record<EditorViewTypeValue, LucideIcon> = {
     [EditorViewType.SOURCECODE]: Code2Icon,
     [EditorViewType.WYSIWYG]: PencilLineIcon,
     [EditorViewType.PREVIEW]: EyeIcon,

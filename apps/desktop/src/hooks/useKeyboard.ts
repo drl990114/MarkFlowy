@@ -11,15 +11,18 @@ import { create } from 'zustand'
 export type KeyBindingMap = Record<string, (event: KeyboardEvent) => void>
 
 interface EditorKeybindingStore {
+  editorKeybindingsLoaded: boolean
   editorKeybingMap: Record<string, string>
   setEditorKeybingMap: (keymap: Record<string, string>) => void
 }
 export const useEditorKeybindingStore = create<EditorKeybindingStore>((set) => {
   return {
+    editorKeybindingsLoaded: false,
     editorKeybingMap: {},
     setEditorKeybingMap: (keymap) => {
       set(() => {
         return {
+          editorKeybindingsLoaded: true,
           editorKeybingMap: keymap,
         }
       })
@@ -68,7 +71,7 @@ function useKeyboard() {
       }
     })
 
-    setEditorKeybingMap(editorKeybingMap)
+    if (keyboardInfos.length > 0) setEditorKeybingMap(editorKeybingMap)
 
     const handler = createKeybindingsHandler(keybindingMap)
 
@@ -77,7 +80,7 @@ function useKeyboard() {
     return () => {
       window.removeEventListener('keydown', handler)
     }
-  }, [keyboardInfos])
+  }, [keyboardInfos, setEditorKeybingMap])
 
   const checkKeyConflict = (commandId: string, newKeyMap: string[]) => {
     const curCommand = keyboardInfos.find(info => info.id === commandId)

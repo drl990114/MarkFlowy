@@ -98,22 +98,29 @@ export function PdfPrintController({
       if (!releaseTask) return
 
       releaseTaskRef.current = releaseTask
-      taskAbortControllerRef.current = new AbortController()
-      rendererErrorRef.current = null
-      jobSequenceRef.current += 1
-      setJob({
-        id: jobSequenceRef.current,
-        content: getContent(),
-        fileName,
-        windowJobId: `${Date.now().toString(36)}-${jobSequenceRef.current}`,
-      })
+      try {
+        const content = getContent()
+        taskAbortControllerRef.current = new AbortController()
+        rendererErrorRef.current = null
+        jobSequenceRef.current += 1
+        setJob({
+          id: jobSequenceRef.current,
+          content,
+          fileName,
+          windowJobId: `${Date.now().toString(36)}-${jobSequenceRef.current}`,
+        })
+      } catch (error) {
+        finishTask()
+        logger.error('Failed to read PDF print content:', error)
+        toast.error(error instanceof Error ? error.message : String(error))
+      }
     }
 
     bus.on(PDF_PRINT_EVENT, handlePrintRequest)
     return () => {
       bus.detach(PDF_PRINT_EVENT, handlePrintRequest)
     }
-  }, [active, enabled, fileName, getContent])
+  }, [active, enabled, fileName, finishTask, getContent])
 
   useEffect(() => {
     mountedRef.current = true

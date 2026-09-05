@@ -1,9 +1,9 @@
 import styled, { css } from 'styled-components'
-import { EditorViewType } from 'rme'
+import { EditorViewType, type EditorViewTypeValue } from '@/constants/editorViewType'
 import type { FileType } from '@/helper/fileTypeHandler'
 
 interface EditorWrapperProps {
-  $editorViewType?: EditorViewType
+  $editorViewType?: EditorViewTypeValue
   $fileType?: FileType
   $fullWidth: boolean
   $rootLineHeight: string

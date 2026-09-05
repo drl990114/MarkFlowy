@@ -1,38 +1,29 @@
 import { commandRegistry } from '@/commands'
+import { EditorViewType } from '@/constants/editorViewType'
 import { getHeadingValue } from '@/helper/string'
 import { useEditorStore } from '@/stores'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import { TableOfContents } from '@markflowy/interface'
 import type { IHeadingData, TableOfContentsRef } from '@markflowy/interface'
 import { t } from '@/i18n'
-import {
-  Empty,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from '@/components/ui/empty'
-import type { Node as ProseMirrorNode } from 'prosemirror-model'
-import { TextSelection } from 'prosemirror-state'
-import type { EditorView } from 'prosemirror-view'
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { ListIcon } from 'lucide-react'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import * as Rme from 'rme'
-import { EditorViewType, extractMatches } from 'rme'
+import { extractMatches } from 'rme'
+import {
+  getCapricornEditor,
+  subscribeCapricornEditors,
+} from '../EditorArea/capricornEditorRegistry'
+import type {
+  CapricornHeading,
+  CapricornRuntimeAdapter,
+} from '../EditorArea/capricornRuntimeAdapter'
 import { sourceCodeCodemirrorViewMap } from '../EditorArea/TextEditor'
 import SideBarHeader from '../SideBar/SideBarHeader'
-import {
-  hasHeadingNumberingCapability,
-  HeadingNumberingButton,
-} from './HeadingNumberingButton'
+import { CapricornHeadingNumberingButton } from './HeadingNumberingButton'
 import { TocViewContainer } from './styles'
-
-type HeadingInfo = {
-  node: ProseMirrorNode
-  pos: number
-  level: number
-  text: string
-  id: string
-}
+import { scheduleOutlineAfterPaint } from './scheduleOutlineAfterPaint'
 
 type SourceHeadingInfo = {
   pos: number
@@ -44,6 +35,14 @@ type SourceHeadingInfo = {
 type HeadingViewportCoords = {
   top: number
   bottom?: number
+}
+
+type PendingCapricornOutline = {
+  activeId: string
+  editor: CapricornRuntimeAdapter
+  deferred: boolean
+  snapshot?: CapricornHeading[]
+  cancel: () => void
 }
 
 const getHeadingChapterData = (
@@ -67,70 +66,6 @@ const getHeadingChapterData = (
     chapter: entry.prefix ?? undefined,
     value: entry.title,
   }))
-}
-
-const getAllHeadings = (doc: ProseMirrorNode): HeadingInfo[] => {
-  const headings: HeadingInfo[] = []
-
-  doc.descendants((node, pos) => {
-    if (node.type.name === 'heading') {
-      headings.push({
-        node,
-        pos, // 节点在文档中的位置
-        level: node.attrs.level as number, // heading 级别 (1-6)
-        text: node.textContent, // 标题文本内容
-        id: `heading-${pos}`,
-      })
-      // 返回 false 表示不进入该节点的子节点（heading 通常没有子节点需要遍历）
-      return false
-    }
-  })
-
-  return headings
-}
-
-const getTocScrollBehavior = (): ScrollBehavior => {
-  const prefersReducedMotion =
-    typeof window !== 'undefined' &&
-    typeof window.matchMedia === 'function' &&
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
-  return prefersReducedMotion ? 'auto' : 'smooth'
-}
-
-const jumpToHeading = (
-  editorView: EditorView,
-  headingPos: number,
-  scrollEl?: HTMLElement | null,
-) => {
-  const { state, dispatch } = editorView
-
-  const tr = state.tr
-  const selection = TextSelection.create(tr.doc, headingPos + 1)
-  tr.setSelection(selection)
-
-  dispatch(tr.scrollIntoView())
-
-  editorView.focus()
-
-  const { from } = editorView.state.selection
-  const coords = editorView.coordsAtPos(from)
-  const behavior = getTocScrollBehavior()
-
-  if (scrollEl) {
-    const containerTop = scrollEl.getBoundingClientRect().top
-    const targetTop = coords.top - containerTop + scrollEl.scrollTop - 100
-    scrollEl.scrollTo({
-      top: targetTop,
-      behavior,
-    })
-    return
-  }
-
-  window.scrollTo({
-    top: coords.top - 100, // 偏移 100px，避免被固定导航遮挡
-    behavior,
-  })
 }
 
 const getActiveEditorScrollEl = (activeId: string): HTMLElement | null => {
@@ -208,19 +143,50 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
   const tocRef = useRef<TableOfContentsRef>(null)
   const [activeHeadingId, setActiveHeadingId] = useState<string | null>(null)
   const [editorPanelEl, setEditorPanelEl] = useState<HTMLElement | null>(null)
-  const wysiwygHeadingsRef = useRef<HeadingInfo[]>([])
+  const [outlineSource, setOutlineSource] = useState<{
+    id: string
+    editor: CapricornRuntimeAdapter
+  } | null>(null)
   const sourceHeadingsRef = useRef<SourceHeadingInfo[]>([])
+  const capricornOutlineRef = useRef<{
+    id: string
+    editor: CapricornRuntimeAdapter
+    headings: CapricornHeading[]
+  } | null>(null)
   const wysiwygScrollElRef = useRef<HTMLElement | null>(null)
   const [wysiwygScrollEl, setWysiwygScrollEl] = useState<HTMLElement | null>(null)
   const sourceScrollElRef = useRef<HTMLElement | null>(null)
   const [sourceScrollEl, setSourceScrollEl] = useState<HTMLElement | null>(null)
   const rafRef = useRef<number | null>(null)
+  const sourceRefreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const capricornRefreshRef = useRef<PendingCapricornOutline | null>(null)
   const scheduleActiveHeadingUpdateRef = useRef<() => void>(() => {})
   const activeId = useEditorStore((state) => state.activeId)
-  const editorCtx = useEditorStore((state) => state.editorCtxMap.get(activeId ?? ''))
   const activeViewType = useEditorViewTypeStore((state) =>
     activeId ? state.editorViewTypeMap.get(activeId) : undefined,
   )
+  const getCapricornSnapshot = useCallback(
+    () => (activeId ? getCapricornEditor(activeId) : undefined),
+    [activeId],
+  )
+  const capricornEditor = useSyncExternalStore(
+    subscribeCapricornEditors,
+    getCapricornSnapshot,
+    getCapricornSnapshot,
+  )
+
+  useEffect(() => {
+    const outline = capricornOutlineRef.current
+    if (
+      outline &&
+      (outline.id !== activeId ||
+        outline.editor !== capricornEditor ||
+        activeViewType !== EditorViewType.WYSIWYG)
+    ) {
+      capricornOutlineRef.current = null
+      setActiveHeadingId(null)
+    }
+  }, [activeId, activeViewType, capricornEditor])
 
   const calculateActiveHeadingId = useCallback(() => {
     const currentActiveId = useEditorStore.getState().activeId
@@ -230,20 +196,16 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
     const viewType = editorViewTypeMap.get(currentActiveId)
 
     if (viewType === EditorViewType.WYSIWYG) {
-      const editorDelegate = useEditorStore.getState().getEditorDelegate(currentActiveId)
-      const editorView = editorDelegate?.manager?.view
-      if (!editorView) {
+      const outline = capricornOutlineRef.current
+      const scrollEl = wysiwygScrollElRef.current
+      if (
+        !outline ||
+        outline.id !== currentActiveId ||
+        !scrollEl ||
+        getCapricornEditor(currentActiveId) !== outline.editor
+      )
         return null
-      }
-
-      return resolveActiveHeadingId({
-        headings: wysiwygHeadingsRef.current,
-        scrollEl: wysiwygScrollElRef.current,
-        getCoords: (pos) => {
-          const coords = editorView.coordsAtPos(pos)
-          return { top: coords.top, bottom: coords.bottom }
-        },
-      })
+      return outline.editor.getActiveHeadingId?.(outline.headings, scrollEl) ?? null
     }
 
     if (viewType === EditorViewType.SOURCECODE) {
@@ -302,10 +264,93 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
     scheduleActiveHeadingUpdateRef.current = scheduleActiveHeadingUpdate
   }, [scheduleActiveHeadingUpdate])
 
+  const scheduleCapricornHeadingRefresh = useCallback(
+    (currentActiveId: string, editor: CapricornRuntimeAdapter, snapshot?: CapricornHeading[]) => {
+      const isCurrentEditor = () =>
+        useEditorStore.getState().activeId === currentActiveId &&
+        useEditorViewTypeStore.getState().editorViewTypeMap.get(currentActiveId) ===
+          EditorViewType.WYSIWYG &&
+        getCapricornEditor(currentActiveId) === editor
+      // An already queued old-editor notification must not cancel the new
+      // editor's valid deferred initial scan after subscription cleanup.
+      if (!isCurrentEditor()) return
+      const pending = capricornRefreshRef.current
+      if (pending?.activeId === currentActiveId && pending.editor === editor) {
+        // A notification arriving before first paint replaces the pending
+        // snapshot, but must not pull outline work back onto the opening path.
+        if (pending.deferred || snapshot === undefined) {
+          if (snapshot !== undefined) pending.snapshot = snapshot
+          return
+        }
+      }
+      pending?.cancel()
+      const refresh: PendingCapricornOutline = {
+        activeId: currentActiveId,
+        editor,
+        deferred: snapshot === undefined,
+        snapshot,
+        cancel: () => {},
+      }
+      capricornRefreshRef.current = refresh
+      // A burst only renders its latest outline. The runtime already analyzed a
+      // notification snapshot, so reading it again would rescan the whole file.
+      const run = () => {
+        if (capricornRefreshRef.current !== refresh) return
+        capricornRefreshRef.current = null
+        if (!isCurrentEditor()) return
+        const currentEditorPanelEl = document.querySelector('#editor-panel') as HTMLElement | null
+        const nextScrollEl = getActiveEditorScrollEl(currentActiveId) ?? currentEditorPanelEl
+        wysiwygScrollElRef.current = nextScrollEl
+        setWysiwygScrollEl(nextScrollEl)
+        setEditorPanelEl(currentEditorPanelEl)
+
+        sourceHeadingsRef.current = []
+        sourceScrollElRef.current = null
+        setSourceScrollEl(null)
+
+        const currentHeadings = refresh.snapshot ?? editor.headings.getAll()
+        capricornOutlineRef.current = { id: currentActiveId, editor, headings: currentHeadings }
+        const headings = currentHeadings.map((heading) => {
+          return {
+            depth: heading.level,
+            value: heading.title || heading.text,
+            chapter: heading.number ?? undefined,
+            id: heading.id,
+            htmlNode: null,
+            onClick: () => {
+              void editor.headings.jumpTo(heading.id, { offset: 100 }).then(() => {
+                scheduleActiveHeadingUpdateRef.current()
+              })
+            },
+          } as IHeadingData
+        })
+
+        tocRef.current?.refreshByHeadings({ newHeadings: headings })
+        setOutlineSource((current) =>
+          current?.id === currentActiveId && current.editor === editor
+            ? current
+            : { id: currentActiveId, editor },
+        )
+        scheduleActiveHeadingUpdateRef.current()
+      }
+      if (refresh.deferred) {
+        refresh.cancel = scheduleOutlineAfterPaint(run)
+      } else {
+        const timer = setTimeout(run, 0)
+        refresh.cancel = () => clearTimeout(timer)
+      }
+    },
+    [],
+  )
+
   useEffect(() => {
     const disposable = commandRegistry.registerCommand({
       id: 'app:toc_refresh',
       handler: () => {
+        if (sourceRefreshTimerRef.current !== null) {
+          clearTimeout(sourceRefreshTimerRef.current)
+          sourceRefreshTimerRef.current = null
+        }
         const currentActiveId = useEditorStore.getState().activeId
         const editorViewTypeMap = useEditorViewTypeStore.getState().editorViewTypeMap
 
@@ -320,13 +365,22 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
         if (viewType === EditorViewType.SOURCECODE) {
           const codemirrorView = sourceCodeCodemirrorViewMap.get(currentActiveId)
           if (!codemirrorView) {
-            setTimeout(() => {
-              commandRegistry.execute('app:toc_refresh')
-            }, 500)
+            // TextEditor publishes another refresh when CodeMirror finishes
+            // loading. Avoid an unowned retry loop after a tab closes or its
+            // mode changes.
             return
           }
 
-          setTimeout(() => {
+          sourceRefreshTimerRef.current = setTimeout(() => {
+            sourceRefreshTimerRef.current = null
+            if (
+              useEditorStore.getState().activeId !== currentActiveId ||
+              useEditorViewTypeStore.getState().editorViewTypeMap.get(currentActiveId) !==
+                EditorViewType.SOURCECODE ||
+              sourceCodeCodemirrorViewMap.get(currentActiveId) !== codemirrorView
+            ) {
+              return
+            }
             const matches = extractMatches(codemirrorView.cm)
             const sourceHeadings: SourceHeadingInfo[] = matches.map((match) => {
               const depth = Number(match.type.split('ATXHeading')?.[1]) || 1
@@ -343,13 +397,9 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
 
             sourceHeadingsRef.current = sourceHeadings
             const chapterData = getHeadingChapterData(sourceHeadings)
-            const nextScrollEl = resolveSourceScrollEl(
-              currentActiveId,
-              codemirrorView.cm.scrollDOM,
-            )
+            const nextScrollEl = resolveSourceScrollEl(currentActiveId, codemirrorView.cm.scrollDOM)
             sourceScrollElRef.current = nextScrollEl
             setSourceScrollEl(nextScrollEl)
-            wysiwygHeadingsRef.current = []
             wysiwygScrollElRef.current = null
             setWysiwygScrollEl(null)
 
@@ -380,57 +430,19 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
         }
 
         if (viewType === EditorViewType.WYSIWYG) {
-          const editorDelegate = useEditorStore.getState().getEditorDelegate(currentActiveId)
-          const editorView = editorDelegate?.manager?.view
-          if (!editorView) {
-            setTimeout(() => {
-              commandRegistry.execute('app:toc_refresh')
-            }, 500)
+          const editor = getCapricornEditor(currentActiveId)
+          if (!editor) {
+            // The Capricorn registry subscription below schedules the initial
+            // outline once the exact active runtime is ready.
             return
           }
 
-          setTimeout(() => {
-            const currentEditorPanelEl = document.querySelector(
-              '#editor-panel',
-            ) as HTMLElement | null
-            const nextScrollEl =
-              getActiveEditorScrollEl(currentActiveId) ?? currentEditorPanelEl
-            wysiwygScrollElRef.current = nextScrollEl
-            setWysiwygScrollEl(nextScrollEl)
-            setEditorPanelEl(currentEditorPanelEl)
-
-            const headingInfos = getAllHeadings(editorView.state.doc)
-            const chapterData = getHeadingChapterData(
-              headingInfos.map((heading) => ({ depth: heading.level, value: heading.text })),
-            )
-            wysiwygHeadingsRef.current = headingInfos
-            sourceHeadingsRef.current = []
-            sourceScrollElRef.current = null
-            setSourceScrollEl(null)
-
-            const headings = headingInfos.map((heading, index) => {
-              return {
-                depth: heading.level,
-                value: chapterData[index]?.value ?? heading.text,
-                chapter: chapterData[index]?.chapter,
-                id: heading.id,
-                htmlNode: null,
-                onClick: () => {
-                  jumpToHeading(editorView, heading.pos, wysiwygScrollElRef.current)
-                  scheduleActiveHeadingUpdateRef.current()
-                },
-              } as IHeadingData
-            })
-
-            tocRef.current?.refreshByHeadings({ newHeadings: headings })
-            scheduleActiveHeadingUpdateRef.current()
-          }, 0)
+          scheduleCapricornHeadingRefresh(currentActiveId, editor)
           return
         }
 
         tocRef.current?.refreshByHeadings({ newHeadings: [] })
         setActiveHeadingId(null)
-        wysiwygHeadingsRef.current = []
         wysiwygScrollElRef.current = null
         setWysiwygScrollEl(null)
         sourceHeadingsRef.current = []
@@ -440,7 +452,7 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
     })
 
     return () => disposable.dispose()
-  }, [])
+  }, [scheduleCapricornHeadingRefresh])
 
   useEffect(() => {
     const currentEditorPanelEl = document.querySelector('#editor-panel') as HTMLElement | null
@@ -460,21 +472,28 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
     if (!wysiwygScrollEl) return
     const handleScroll = () => scheduleActiveHeadingUpdate()
     wysiwygScrollEl.addEventListener('scroll', handleScroll, { passive: true })
+    // Virtualized blocks may mount after the scroll frame. Re-evaluate the
+    // visible anchor then, using the same cached outline.
+    const content = wysiwygScrollEl.querySelector('[data-cap-content]')
+    const observer = new MutationObserver(handleScroll)
+    if (content) observer.observe(content, { childList: true, subtree: true })
+    const resizeObserver = new ResizeObserver(handleScroll)
+    if (content) resizeObserver.observe(content)
     handleScroll()
 
     return () => {
       wysiwygScrollEl.removeEventListener('scroll', handleScroll)
+      observer.disconnect()
+      resizeObserver.disconnect()
     }
-  }, [wysiwygScrollEl, scheduleActiveHeadingUpdate])
+  }, [wysiwygScrollEl, scheduleActiveHeadingUpdate, capricornEditor, activeViewType])
 
   useEffect(() => {
     if (!sourceScrollEl) return
 
     const handleScroll = () => scheduleActiveHeadingUpdate()
     const currentActiveId = useEditorStore.getState().activeId
-    const codemirrorView = currentActiveId
-      ? sourceCodeCodemirrorViewMap.get(currentActiveId)
-      : null
+    const codemirrorView = currentActiveId ? sourceCodeCodemirrorViewMap.get(currentActiveId) : null
     const scrollTargets = Array.from(
       new Set([sourceScrollEl, codemirrorView?.cm.scrollDOM].filter(Boolean)),
     ) as HTMLElement[]
@@ -496,6 +515,12 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
       if (rafRef.current) {
         cancelAnimationFrame(rafRef.current)
       }
+      if (sourceRefreshTimerRef.current !== null) {
+        clearTimeout(sourceRefreshTimerRef.current)
+        sourceRefreshTimerRef.current = null
+      }
+      capricornRefreshRef.current?.cancel()
+      capricornRefreshRef.current = null
     }
   }, [])
 
@@ -503,7 +528,6 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
     if (!activeId) {
       tocRef.current?.refreshByHeadings({ newHeadings: [] })
       setActiveHeadingId(null)
-      wysiwygHeadingsRef.current = []
       wysiwygScrollElRef.current = null
       setWysiwygScrollEl(null)
       sourceHeadingsRef.current = []
@@ -511,26 +535,39 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
       setSourceScrollEl(null)
       return
     }
+    if (activeViewType === EditorViewType.WYSIWYG) return
     const timer = setTimeout(() => {
       commandRegistry.execute('app:toc_refresh')
     }, 300)
     return () => clearTimeout(timer)
-  }, [activeId])
+  }, [activeId, activeViewType])
+
+  useEffect(() => {
+    if (!activeId || !capricornEditor || activeViewType !== EditorViewType.WYSIWYG) return
+
+    scheduleCapricornHeadingRefresh(activeId, capricornEditor)
+    const unsubscribe = capricornEditor.headings.subscribe((headings) => {
+      scheduleCapricornHeadingRefresh(activeId, capricornEditor, headings)
+    })
+    return () => {
+      unsubscribe()
+      capricornRefreshRef.current?.cancel()
+      capricornRefreshRef.current = null
+    }
+  }, [activeId, activeViewType, capricornEditor, scheduleCapricornHeadingRefresh])
 
   const headingNumberingAction =
-    editorCtx &&
+    capricornEditor &&
     activeViewType === EditorViewType.WYSIWYG &&
-    hasHeadingNumberingCapability(editorCtx) ? (
-      <HeadingNumberingButton editorCtx={editorCtx} />
+    outlineSource?.id === activeId &&
+    outlineSource?.editor === capricornEditor ? (
+      <CapricornHeadingNumberingButton editor={capricornEditor} />
     ) : null
 
   return (
     <TocViewContainer variant={variant}>
       {headingNumberingAction ? (
-        <SideBarHeader
-          actions={headingNumberingAction}
-          name={t('sidebar.table_of_contents')}
-        />
+        <SideBarHeader actions={headingNumberingAction} name={t('sidebar.table_of_contents')} />
       ) : null}
       <div
         style={{

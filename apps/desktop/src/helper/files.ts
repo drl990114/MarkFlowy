@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { shallow } from 'zustand/vanilla/shallow'
 import type { IFile } from '@/helper/filesys'
 import { getPathIdentityKey } from '@/helper/pathIdentity'
 import {
@@ -49,11 +50,18 @@ const rebasePath = (path: string | undefined, oldRootPath: string, newRootPath: 
 }
 
 export function setFileObject(id: string, file: IFile): void {
-  useFileCacheStore.setState((state) => ({
-    entries: { ...state.entries, [id]: file },
-    metadataRevision:
-      state.metadataRevision + (hasFileMetadataChanged(state.entries[id], file) ? 1 : 0),
-  }))
+  useFileCacheStore.setState((state) => {
+    const previousFile = state.entries[id]
+    // Sibling editors can publish the same snapshot. Compare every file field
+    // so metadata and children updates still propagate with unchanged content.
+    if (shallow(previousFile, file)) return state
+
+    return {
+      entries: { ...state.entries, [id]: file },
+      metadataRevision:
+        state.metadataRevision + (hasFileMetadataChanged(previousFile, file) ? 1 : 0),
+    }
+  })
 }
 
 export function setFileObjects(files: Array<{ id: string; file: IFile }>): void {

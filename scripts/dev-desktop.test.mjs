@@ -6,7 +6,12 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { test } from 'node:test'
 
-import { terminateProcessTree, waitForRequiredArtifacts } from './dev-desktop.mjs'
+import {
+  assertRustToolchainAvailable,
+  terminateProcessTree,
+  waitForRequiredArtifacts,
+  withCargoOnPath,
+} from './dev-desktop.mjs'
 
 const delay = (milliseconds) =>
   new Promise((resolveDelay) => setTimeout(resolveDelay, milliseconds))
@@ -38,6 +43,67 @@ const readPid = (stream) =>
     stream.on('data', onData)
     stream.once('error', rejectPid)
   })
+
+test('withCargoOnPath adds the standard rustup proxy directory when needed', () => {
+  const homeDirectory = '/test/home'
+  const cargoBin = join(homeDirectory, '.cargo', 'bin')
+  const cargoExecutable = join(cargoBin, 'cargo')
+  const rustcExecutable = join(cargoBin, 'rustc')
+  const env = withCargoOnPath(
+    { PATH: '/usr/local/bin:/usr/bin' },
+    {
+      homeDirectory,
+      pathDelimiter: ':',
+      pathExists: (path) => path === cargoExecutable || path === rustcExecutable,
+      platform: 'darwin',
+    },
+  )
+
+  assert.equal(env.PATH, `${cargoBin}:/usr/local/bin:/usr/bin`)
+})
+
+test('withCargoOnPath preserves an existing Cargo resolution', () => {
+  const initialEnvironment = { CARGO_HOME: '/alternate/cargo', PATH: '/toolchain/bin:/usr/bin' }
+  const env = withCargoOnPath(initialEnvironment, {
+    homeDirectory: '/test/home',
+    pathDelimiter: ':',
+    pathExists: (path) => ['/toolchain/bin/cargo', '/toolchain/bin/rustc'].includes(path),
+    platform: 'darwin',
+  })
+
+  assert.deepEqual(env, initialEnvironment)
+})
+
+test('assertRustToolchainAvailable rejects an incomplete rustup toolchain', () => {
+  const commands = []
+  const runCommand = (command) => {
+    commands.push(command)
+    if (command === 'cargo') return { status: 0, stdout: 'cargo 1.96.0\n', stderr: '' }
+
+    return {
+      status: 1,
+      stdout: '',
+      stderr: "error: missing manifest in toolchain '1.96-aarch64-apple-darwin'",
+    }
+  }
+
+  assert.throws(
+    () => assertRustToolchainAvailable({ PATH: '/toolchain/bin' }, { runCommand }),
+    /Rust compiler is unavailable or incomplete.*missing manifest/s,
+  )
+  assert.deepEqual(commands, ['cargo', 'rustc'])
+})
+
+test('assertRustToolchainAvailable accepts cargo and rustc with a host triple', () => {
+  const runCommand = (command) =>
+    command === 'cargo'
+      ? { status: 0, stdout: 'cargo 1.96.0\n', stderr: '' }
+      : { status: 0, stdout: 'rustc 1.96.0\nhost: aarch64-apple-darwin\n', stderr: '' }
+
+  assert.doesNotThrow(() =>
+    assertRustToolchainAvailable({ PATH: '/toolchain/bin' }, { runCommand }),
+  )
+})
 
 test(
   'terminateProcessTree stops descendants in separate process groups',

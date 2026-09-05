@@ -1,12 +1,8 @@
 import { useEditorStore } from '@/stores'
+import { EditorViewType } from '@/constants/editorViewType'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import { type FC, useMemo } from 'react'
-import { EditorViewType } from 'rme'
-import {
-  ToolbarSection,
-  usePriorityHidden,
-  ToolbarWrapper,
-} from '@markflowy/interface'
+import { ToolbarSection, usePriorityHidden, ToolbarWrapper } from '@markflowy/interface'
 import { MenuList } from '../components/MenuList'
 import { ViewSwitcher } from '../WysiwygToolbar/components/ViewSwitcher'
 
@@ -22,11 +18,12 @@ export const PreviewToolbar: FC<PreviewToolbarProps> = (props) => {
 
   const viewType = targetEditorId ? getEditorViewType(targetEditorId) : EditorViewType.WYSIWYG
 
-  const sections = useMemo(() => [
-    { id: 'common', priority: 100 },
-  ], [])
+  const sections = useMemo(() => [{ id: 'common', priority: 100 }], [])
 
-  const { containerRef, hiddenIds, registerItemWidth } = usePriorityHidden({ items: sections, gap: 0 })
+  const { containerRef, hiddenIds, registerItemWidth } = usePriorityHidden({
+    items: sections,
+    gap: 0,
+  })
 
   if (viewType !== EditorViewType.PREVIEW) {
     return null
@@ -34,7 +31,11 @@ export const PreviewToolbar: FC<PreviewToolbarProps> = (props) => {
 
   return (
     <ToolbarWrapper className='mf-editor-toolbar' ref={containerRef}>
-      <ToolbarSection id="common" registerWidth={registerItemWidth} hidden={hiddenIds.has('common')}>
+      <ToolbarSection
+        id='common'
+        registerWidth={registerItemWidth}
+        hidden={hiddenIds.has('common')}
+      >
         <MenuList editorId={targetEditorId} />
         <ViewSwitcher editorId={targetEditorId} />
       </ToolbarSection>

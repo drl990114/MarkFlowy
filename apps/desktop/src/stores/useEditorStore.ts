@@ -1,4 +1,6 @@
 import { getFileObject } from '@/helper/files'
+import { beginEditorOpenMeasurement } from '@/components/EditorArea/editorPerformanceDiagnostics'
+import { editorSnapshotRegistry } from '@/components/EditorArea/editorSnapshotRegistry'
 import { createFile, getFolderPathFromPath, isMdFile, releaseSecurityScope, type IFile } from '@/helper/filesys'
 import { getPathIdentityKey } from '@/helper/pathIdentity'
 import { isEmptyEditor } from '@/services/editor-file'
@@ -7,6 +9,7 @@ import { nanoid } from 'nanoid'
 import type { EditorContext, EditorDelegate } from 'rme'
 import { create } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
+import { toast } from 'zens'
 
 const findParentNode = (fileNode: IFile, rootFile: IFile) => {
   const dfs = (file: IFile): undefined | IFile => {
@@ -383,8 +386,60 @@ const commitEditorLayoutState = (layout: EditorLayoutNode, activeGroupId?: strin
   }
 }
 
+// EditorLayoutView keys each panel by its child ID. Changing a leaf's ancestor
+// path remounts its editors, including visited tabs that are currently hidden.
+// Compare only this transient layout metadata; document data stays in the live
+// editors and existing shared file cache.
+const getEditorGroupPaths = (layout: EditorLayoutNode) => {
+  const paths = new Map<string, string>()
+  const visit = (node: EditorLayoutNode, ancestors: string[]) => {
+    const path = [...ancestors, node.id]
+    if (isEditorLeaf(node)) paths.set(node.id, JSON.stringify(path))
+    else node.children.forEach((child) => visit(child, path))
+  }
+  visit(layout, [])
+  return paths
+}
+
+const flushBeforeEditorRemount = (
+  previous: EditorLayoutNode,
+  next: EditorLayoutNode,
+  requiredFileIds: string[],
+) => {
+  const previousPaths = getEditorGroupPaths(previous)
+  const nextPaths = getEditorGroupPaths(next)
+  const fileIds = new Set(requiredFileIds)
+  for (const group of getAllGroups(next)) {
+    if (previousPaths.has(group.id) && previousPaths.get(group.id) !== nextPaths.get(group.id)) {
+      group.opened.forEach((id) => fileIds.add(id))
+    }
+  }
+
+  try {
+    for (const id of fileIds) editorSnapshotRegistry.flushForRead(id)
+    return true
+  } catch (error) {
+    toast.error(error instanceof Error ? error.message : String(error))
+    return false
+  }
+}
+
 const useEditorStore = create<EditorStore>()(subscribeWithSelector((set, get) => {
   const initialEditorLayout = createDefaultEditorLayout()
+  const applyLayoutChange = (
+    previous: EditorLayoutNode,
+    next: EditorLayoutNode,
+    activeGroupId?: string,
+    requiredFileIds: string[] = [],
+  ) => {
+    const synced = commitEditorLayoutState(next, activeGroupId)
+    if (!flushBeforeEditorRemount(previous, synced.editorLayout, requiredFileIds)) return false
+    // A snapshot publication can synchronously notify subscribers. Do not
+    // overwrite a layout change made by one of those subscribers while reading.
+    if (get().editorLayout !== previous) return false
+    set((state) => ({ ...state, ...synced }))
+    return true
+  }
 
   return {
     opened: [],
@@ -555,6 +610,13 @@ const useEditorStore = create<EditorStore>()(subscribeWithSelector((set, get) =>
     },
 
     setActiveId: (id: string) => {
+      const previous = get()
+      const previousTarget = findGroup(previous.editorLayout, previous.activeGroupId) ||
+        findGroupContainingFile(previous.editorLayout, id) || getFirstGroup(previous.editorLayout)
+      if (previousTarget && previousTarget.activeId !== id) beginEditorOpenMeasurement(id, {
+        viewId: previousTarget.id,
+        kind: previousTarget.opened.includes(id) ? 'switch' : 'open',
+      })
       set((state) => {
         const targetGroup =
           findGroup(state.editorLayout, state.activeGroupId) ||
@@ -580,6 +642,11 @@ const useEditorStore = create<EditorStore>()(subscribeWithSelector((set, get) =>
         const activeGroup =
           findGroup(state.editorLayout, state.activeGroupId) || getFirstGroup(state.editorLayout)
         const replacedEmptyTab = activeGroup ? addFileToGroup(activeGroup, id) : false
+        if (replacedEmptyTab && activeGroup) {
+          // Replacing the empty tab activates here; the following setActiveId
+          // is a no-op and cannot be the opening measurement's start.
+          beginEditorOpenMeasurement(id, { viewId: activeGroup.id, kind: 'open' })
+        }
         const synced = commitEditorLayoutState(state.editorLayout, state.activeGroupId)
 
         return {
@@ -591,35 +658,24 @@ const useEditorStore = create<EditorStore>()(subscribeWithSelector((set, get) =>
     },
 
     delOpenedFile: (id: string) => {
-      set((state) => {
-        removeFileFromAllGroups(state.editorLayout, id)
-        const synced = commitEditorLayoutState(state.editorLayout, state.activeGroupId)
-
-        return {
-          ...state,
-          ...synced,
-        }
-      })
+      const state = get()
+      const layout = cloneEditorLayout(state.editorLayout)
+      removeFileFromAllGroups(layout, id)
+      applyLayoutChange(state.editorLayout, layout, state.activeGroupId)
     },
 
     delOtherOpenedFile: (id: string) => {
-      set((state) => {
-        const activeGroup =
-          findGroup(state.editorLayout, state.activeGroupId) ||
-          findGroupContainingFile(state.editorLayout, id)
+      const state = get()
+      const layout = cloneEditorLayout(state.editorLayout)
+      const activeGroup =
+        findGroup(layout, state.activeGroupId) || findGroupContainingFile(layout, id)
 
-        if (activeGroup) {
-          activeGroup.opened = activeGroup.opened.includes(id) ? [id] : []
-          activeGroup.activeId = activeGroup.opened[0]
-        }
+      if (activeGroup) {
+        activeGroup.opened = activeGroup.opened.includes(id) ? [id] : []
+        activeGroup.activeId = activeGroup.opened[0]
+      }
 
-        const synced = commitEditorLayoutState(state.editorLayout, activeGroup?.id)
-
-        return {
-          ...state,
-          ...synced,
-        }
-      })
+      applyLayoutChange(state.editorLayout, layout, activeGroup?.id)
     },
 
     delAllOpenedFile: () => {
@@ -637,6 +693,11 @@ const useEditorStore = create<EditorStore>()(subscribeWithSelector((set, get) =>
     },
 
     setActiveGroupId: (groupId) => {
+      const previous = get()
+      const nextId = findGroup(previous.editorLayout, groupId)?.activeId
+      if (nextId && previous.activeGroupId !== groupId) {
+        beginEditorOpenMeasurement(nextId, { viewId: groupId, kind: 'switch' })
+      }
       set((state) => {
         const synced = commitEditorLayoutState(state.editorLayout, groupId)
 
@@ -657,6 +718,11 @@ const useEditorStore = create<EditorStore>()(subscribeWithSelector((set, get) =>
     },
 
     openFileInGroup: (groupId, id, options = {}) => {
+      const previous = get()
+      const previousGroup = findGroup(previous.editorLayout, groupId) || getFirstGroup(previous.editorLayout)
+      if (previousGroup && options.activate !== false && previousGroup.activeId !== id) {
+        beginEditorOpenMeasurement(id, { viewId: previousGroup.id, kind: previousGroup.opened.includes(id) ? 'switch' : 'open' })
+      }
       set((state) => {
         const group = findGroup(state.editorLayout, groupId) || getFirstGroup(state.editorLayout)
         if (!group) return state
@@ -679,123 +745,100 @@ const useEditorStore = create<EditorStore>()(subscribeWithSelector((set, get) =>
     },
 
     closeFileInGroup: (groupId, id) => {
-      set((state) => {
-        const group = findGroup(state.editorLayout, groupId)
-        if (!group) return state
+      const state = get()
+      const layout = cloneEditorLayout(state.editorLayout)
+      const group = findGroup(layout, groupId)
+      if (!group) return
 
-        closeFileInGroup(group, id)
-        const synced = commitEditorLayoutState(state.editorLayout, group.id)
-
-        return {
-          ...state,
-          ...synced,
-        }
-      })
+      closeFileInGroup(group, id)
+      applyLayoutChange(state.editorLayout, layout, group.id)
     },
 
     closeOtherFilesInGroup: (groupId, id) => {
-      set((state) => {
-        const group = findGroup(state.editorLayout, groupId)
-        if (!group) return state
+      const state = get()
+      const layout = cloneEditorLayout(state.editorLayout)
+      const group = findGroup(layout, groupId)
+      if (!group) return
 
-        group.opened = group.opened.includes(id) ? [id] : []
-        group.activeId = group.opened[0]
-        const synced = commitEditorLayoutState(state.editorLayout, group.id)
-
-        return {
-          ...state,
-          ...synced,
-        }
-      })
+      group.opened = group.opened.includes(id) ? [id] : []
+      group.activeId = group.opened[0]
+      applyLayoutChange(state.editorLayout, layout, group.id)
     },
 
     closeAllFilesInGroup: (groupId) => {
-      set((state) => {
-        const group = findGroup(state.editorLayout, groupId)
-        if (!group) return state
+      const state = get()
+      const layout = cloneEditorLayout(state.editorLayout)
+      const group = findGroup(layout, groupId)
+      if (!group) return
 
-        group.opened = []
-        group.activeId = undefined
-        const synced = commitEditorLayoutState(state.editorLayout, group.id)
-
-        return {
-          ...state,
-          ...synced,
-        }
-      })
+      group.opened = []
+      group.activeId = undefined
+      applyLayoutChange(state.editorLayout, layout, group.id)
     },
 
     moveFileToGroup: (sourceGroupId, targetGroupId, id, targetIndex) => {
-      set((state) => {
-        const sourceGroup = findGroup(state.editorLayout, sourceGroupId)
-        const targetGroup = findGroup(state.editorLayout, targetGroupId)
+      const state = get()
+      const layout = cloneEditorLayout(state.editorLayout)
+      const sourceGroup = findGroup(layout, sourceGroupId)
+      const targetGroup = findGroup(layout, targetGroupId)
 
-        if (!sourceGroup || !targetGroup || !sourceGroup.opened.includes(id)) return state
+      if (!sourceGroup || !targetGroup || !sourceGroup.opened.includes(id)) return
 
-        if (sourceGroup.id === targetGroup.id) {
-          if (typeof targetIndex === 'number') {
-            const sourceIndex = targetGroup.opened.indexOf(id)
-            let insertIndex = Math.max(0, Math.min(targetIndex, targetGroup.opened.length))
+      if (sourceGroup.id === targetGroup.id) {
+        if (typeof targetIndex === 'number') {
+          const sourceIndex = targetGroup.opened.indexOf(id)
+          let insertIndex = Math.max(0, Math.min(targetIndex, targetGroup.opened.length))
 
-            // The drop index describes a slot in the list before removing the dragged tab.
-            // Account for the removed item when moving it towards the right.
-            if (sourceIndex < insertIndex) {
-              insertIndex--
-            }
-
-            if (sourceIndex !== insertIndex) {
-              targetGroup.opened.splice(sourceIndex, 1)
-              targetGroup.opened.splice(insertIndex, 0, id)
-            }
+          // The drop index describes a slot in the list before removing the dragged tab.
+          // Account for the removed item when moving it towards the right.
+          if (sourceIndex < insertIndex) {
+            insertIndex--
           }
 
-          targetGroup.activeId = id
-        } else {
-          closeFileInGroup(sourceGroup, id)
-          insertFileToGroup(targetGroup, id, targetIndex)
-          targetGroup.activeId = id
+          if (sourceIndex !== insertIndex) {
+            targetGroup.opened.splice(sourceIndex, 1)
+            targetGroup.opened.splice(insertIndex, 0, id)
+          }
         }
 
-        const synced = commitEditorLayoutState(state.editorLayout, targetGroup.id)
+        targetGroup.activeId = id
+      } else {
+        closeFileInGroup(sourceGroup, id)
+        insertFileToGroup(targetGroup, id, targetIndex)
+        targetGroup.activeId = id
+      }
 
-        return {
-          ...state,
-          ...synced,
-        }
-      })
+      applyLayoutChange(
+        state.editorLayout,
+        layout,
+        targetGroup.id,
+        sourceGroup.id === targetGroup.id ? [] : [id],
+      )
     },
 
     splitGroup: (groupId, direction, insertion = 'after') => {
-      let createdGroupId: string | undefined
+      const state = get()
+      const sourceGroup = findGroup(state.editorLayout, groupId)
+      if (!sourceGroup) return
+      const result = splitGroupInLayout(state.editorLayout, groupId, direction, insertion)
+      if (!result.newGroup) return
 
-      set((state) => {
-        const result = splitGroupInLayout(state.editorLayout, groupId, direction, insertion)
-        if (!result.newGroup) return state
-
-        createdGroupId = result.newGroup.id
-        const synced = commitEditorLayoutState(result.node, result.newGroup.id)
-
-        return {
-          ...state,
-          ...synced,
-        }
-      })
-
-      return createdGroupId
+      // A new sibling needs the latest source, and wrapping the source leaf in
+      // a branch can also remount its previously visited hidden tabs.
+      if (!applyLayoutChange(state.editorLayout, result.node, result.newGroup.id, sourceGroup.opened)) {
+        return
+      }
+      return result.newGroup.id
     },
 
     closeGroup: (groupId) => {
-      set((state) => {
-        const result = removeGroupFromLayout(state.editorLayout, groupId)
-        if (!result.removed) return state
+      const state = get()
+      const result = removeGroupFromLayout(state.editorLayout, groupId)
+      if (!result.removed) return
 
-        const synced = commitEditorLayoutState(result.node, state.activeGroupId)
-
-        return {
-          ...state,
-          ...synced,
-        }
-      })
+      // Closed files were already saved or explicitly discarded by the caller.
+      // Only surviving groups whose ancestor path collapses need protection.
+      applyLayoutChange(state.editorLayout, result.node, state.activeGroupId)
     },
 
     setBranchSizes: (branchId, sizes) => {
@@ -820,6 +863,7 @@ const useEditorStore = create<EditorStore>()(subscribeWithSelector((set, get) =>
     },
 
     getEditorContent: (id: string) => {
+      editorSnapshotRegistry.flushForRead(id)
       const cachedContent = getFileObject(id)?.content ?? ''
       const curDelegate = get().getEditorDelegate(id)
       if (!curDelegate?.manager.mounted) {

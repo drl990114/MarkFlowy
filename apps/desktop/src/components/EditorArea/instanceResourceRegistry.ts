@@ -39,6 +39,10 @@ export class InstanceResourceRegistry<T> {
     return this.entries.get(fileId)?.get(instanceId)
   }
 
+  getAll(fileId: string): T[] {
+    return Array.from(this.entries.get(fileId)?.values() ?? [])
+  }
+
   promote(fileId: string, instanceId: string): T | undefined {
     const resource = this.entries.get(fileId)?.get(instanceId)
     this.currentOwners.set(fileId, instanceId)

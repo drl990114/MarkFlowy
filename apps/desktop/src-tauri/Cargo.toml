@@ -114,7 +114,6 @@ features = ["derive"]
 version = "2.11.5"
 features = [
     "protocol-asset",
-    "devtools",
 ]
 
 [dependencies.mf-utils]

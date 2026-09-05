@@ -1,6 +1,5 @@
-import { FileResultCode, type FileSysResult } from '@/helper/filesys'
+import type { FileSysResult } from '@/helper/filesys'
 import { invoke } from '@tauri-apps/api/core'
-import { getFileWriteRevision } from './conditionalFileWrite'
 
 export interface StableFileSnapshot {
   content: string
@@ -13,42 +12,25 @@ export type FileSnapshotResult =
   | { result: FileSysResult; status: 'unavailable' }
   | { status: 'unstable' }
 
-export interface FileSnapshotReader {
-  getRevision: (filePath: string) => Promise<string>
-  readContent: (filePath: string) => Promise<FileSysResult>
-}
+const openingSnapshots = new Map<string, Promise<FileSnapshotResult>>()
 
-const defaultReader: FileSnapshotReader = {
-  getRevision: getFileWriteRevision,
-  readContent: (filePath) =>
-    invoke<FileSysResult>('get_file_content', {
-      filePath,
-    }),
-}
-
-/** Reads content between two matching revisions so watcher events never apply a partial write. */
-export async function readStableFileSnapshot(
+/**
+ * Rust validates the raw bytes and captures the matching write revision in one command.
+ * Only sibling opens may share a pending read. Save/watch checks must observe disk
+ * anew, including when an earlier open is still in flight. Never cache settled reads.
+ */
+export function readStableFileSnapshot(
   filePath: string,
-  reader: FileSnapshotReader = defaultReader,
-  attempts = 3,
+  options: { reuseInFlight?: boolean } = {},
 ): Promise<FileSnapshotResult> {
-  for (let attempt = 0; attempt < attempts; attempt += 1) {
-    const revisionBefore = await reader.getRevision(filePath)
-    const result = await reader.readContent(filePath)
-
-    if (result.code !== FileResultCode.Success) {
-      return { result, status: 'unavailable' }
-    }
-
-    const revisionAfter = await reader.getRevision(filePath)
-    if (revisionBefore === revisionAfter) {
-      return {
-        content: result.content,
-        revision: revisionAfter,
-        status: 'success',
-      }
-    }
+  if (!options.reuseInFlight) {
+    return invoke<FileSnapshotResult>('get_file_snapshot', { filePath })
   }
-
-  return { status: 'unstable' }
+  const pending = openingSnapshots.get(filePath)
+  if (pending) return pending
+  const snapshot = invoke<FileSnapshotResult>('get_file_snapshot', { filePath }).finally(() => {
+    if (openingSnapshots.get(filePath) === snapshot) openingSnapshots.delete(filePath)
+  })
+  openingSnapshots.set(filePath, snapshot)
+  return snapshot
 }

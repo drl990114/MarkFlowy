@@ -228,6 +228,32 @@ describe('PdfPrintController', () => {
     expect(document.querySelector('.mf-pdf-print-root')).toBeNull()
   })
 
+  it.each([
+    new Error('Finish composing before using this action.'),
+    'Snapshot unavailable',
+  ])('releases the print task when content cannot be read: %s', async (error) => {
+    const getContent = vi.fn((): string => {
+      // External editor implementations can throw non-Error values.
+      // eslint-disable-next-line @typescript-eslint/no-throw-literal
+      throw error
+    })
+    await renderController(getContent)
+
+    act(() => {
+      expect(() => bus.emit(PDF_PRINT_EVENT)).not.toThrow()
+    })
+    expect(toastMocks.error).toHaveBeenCalledWith(error instanceof Error ? error.message : error)
+    expect(previewState.docs).toEqual([])
+    expect(printMocks.preparePrintDocument).not.toHaveBeenCalled()
+    expect(printMocks.openPdfPrintWindow).not.toHaveBeenCalled()
+    expect(document.querySelector('.mf-pdf-print-root')).toBeNull()
+
+    getContent.mockReturnValue('# Committed after retry')
+    await requestPrint()
+    expect(getContent).toHaveBeenCalledTimes(2)
+    expect(printMocks.openPdfPrintWindow.mock.calls[0]?.[0].html).toContain('Committed after retry')
+  })
+
   it('rejects duplicate print requests while one task is preparing', async () => {
     let finishPreparation!: (value: { failedImageCount: number }) => void
     printMocks.preparePrintDocument.mockReturnValue(

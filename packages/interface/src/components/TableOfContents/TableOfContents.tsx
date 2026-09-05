@@ -328,7 +328,7 @@ const TableOfContents = forwardRef<TableOfContentsRef, TableOfContentsProps>((pr
       );
     };
 
-    if (flattenedHeadings.length > 50 && rowVirtualizer.getVirtualItems().length > 0) {
+    if (flattenedHeadings.length > 50) {
       const handleScrollWheel = (e: React.WheelEvent) => {
         e.stopPropagation();
       };
@@ -344,32 +344,33 @@ const TableOfContents = forwardRef<TableOfContentsRef, TableOfContentsProps>((pr
           ref={navRef}
           onWheel={handleScrollWheel}
           className={!compact || pinned ? 'show-scrollbar' : ''}
-          style={navStyle}
         >
-          {rowVirtualizer.getVirtualItems().map((virtualItem) => {
-            const h = flattenedHeadings[virtualItem.index];
-            return (
-              <div
-                key={virtualItem.key}
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  height: `${virtualItem.size}px`,
-                  transform: `translateY(${virtualItem.start}px)`,
-                }}
-              >
-                {renderItem(h)}
-              </div>
-            );
-          })}
+          <div style={navStyle}>
+            {rowVirtualizer.getVirtualItems().map((virtualItem) => {
+              const h = flattenedHeadings[virtualItem.index];
+              return (
+                <div
+                  key={virtualItem.key}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: `${virtualItem.size}px`,
+                    transform: `translateY(${virtualItem.start}px)`,
+                  }}
+                >
+                  {renderItem(h)}
+                </div>
+              );
+            })}
+          </div>
         </nav>
       );
     }
 
     return (
-      <nav className={!compact || pinned ? 'show-scrollbar' : ''}>
+      <nav ref={navRef} className={!compact || pinned ? 'show-scrollbar' : ''}>
         <ul>{flattenedHeadings.map(renderItem)}</ul>
       </nav>
     );

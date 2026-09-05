@@ -44,11 +44,7 @@ vi.mock('@tauri-apps/api/path', () => ({
 }))
 vi.mock('@tauri-apps/plugin-opener', () => ({ openUrl: mocks.openUrl }))
 
-import {
-  isLocalFileLink,
-  openEditorLink,
-  resolveLocalFileLinkPath,
-} from './openEditorLink'
+import { isLocalFileLink, openEditorLink, resolveLocalFileLinkPath } from './openEditorLink'
 
 describe('editor links', () => {
   beforeEach(() => {
@@ -92,6 +88,17 @@ describe('editor links', () => {
     expect(mocks.dirname).toHaveBeenCalledWith('/workspace/notes/source.md')
     expect(mocks.resolve).toHaveBeenCalledWith('/workspace/notes', './subfolder/test.md')
   })
+
+  it.each(['../关于.md', '../%E5%85%B3%E4%BA%8E.md'])(
+    'resolves Chinese document links from %s',
+    async (href) => {
+      mocks.resolve.mockResolvedValue('/workspace/关于.md')
+      await expect(resolveLocalFileLinkPath(href, '/workspace/notes/source.md')).resolves.toBe(
+        '/workspace/关于.md',
+      )
+      expect(mocks.resolve).toHaveBeenCalledWith('/workspace/notes', '../关于.md')
+    },
+  )
 
   it('opens an existing relative file in the current editor group', async () => {
     const targetFile = {

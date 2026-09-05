@@ -1,9 +1,11 @@
-import type { EditorViewType as RmeEditorViewType } from 'rme'
+import { EditorViewType as RmeEditorViewType } from 'rme'
 
 export const EditorViewType = {
-  WYSIWYG: 'wysiwyg' as RmeEditorViewType,
-  SOURCECODE: 'sourceCode' as RmeEditorViewType,
-  PREVIEW: 'preview' as RmeEditorViewType,
+  WYSIWYG: RmeEditorViewType.WYSIWYG,
+  SOURCECODE: RmeEditorViewType.SOURCECODE,
+  PREVIEW: RmeEditorViewType.PREVIEW,
 } as const
 
-export type EditorViewType = RmeEditorViewType
+export type EditorViewTypeValue = RmeEditorViewType
+
+export { isCapricornRuntimeAvailable } from './capricornRuntime'

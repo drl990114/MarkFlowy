@@ -1,10 +1,12 @@
 import { type FC } from 'react'
 import type { EditorContext } from 'rme'
+import type { CapricornRuntimeAdapter } from '../../capricornRuntimeAdapter'
 import { FindController } from './find-controller'
 import { FindInput } from './find-input'
 import { ReplaceController } from './replace-controller'
 import { ReplaceInput } from './replace-input'
 import { useFindReplace } from './use-find-replace'
+import { useCapricornFindReplace } from './use-capricorn-find-replace'
 
 export interface FindReplaceComponentProps {
   onDismiss?: () => void
@@ -12,6 +14,24 @@ export interface FindReplaceComponentProps {
 }
 
 export const FindReplaceComponent: FC<FindReplaceComponentProps> = ({ onDismiss, editorCtx }) => {
+  const controller = useFindReplace(editorCtx)
+  return <FindReplaceControls controller={controller} onDismiss={onDismiss} />
+}
+
+export const CapricornFindReplaceComponent: FC<{
+  editor: CapricornRuntimeAdapter
+  onDismiss?: () => void
+}> = ({ editor, onDismiss }) => {
+  const controller = useCapricornFindReplace(editor)
+  return <FindReplaceControls controller={controller} onDismiss={onDismiss} />
+}
+
+type FindReplaceControlsProps = {
+  controller: ReturnType<typeof useFindReplace> | ReturnType<typeof useCapricornFindReplace>
+  onDismiss?: () => void
+}
+
+function FindReplaceControls({ controller, onDismiss }: FindReplaceControlsProps) {
   const {
     query,
     setQuery,
@@ -26,7 +46,7 @@ export const FindReplaceComponent: FC<FindReplaceComponentProps> = ({ onDismiss,
     stopFind,
     replace,
     replaceAll,
-  } = useFindReplace(editorCtx)
+  } = controller
 
   return (
     <div className='flex flex-col gap-2'>

@@ -1,8 +1,8 @@
 import { useEditorStore } from '@/stores'
+import { EditorViewType } from '@/constants/editorViewType'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import { type FC, useCallback, useMemo } from 'react'
 import { useTranslation } from '@/i18n'
-import { EditorViewType } from 'rme'
 import {
   BoldIcon,
   Code2Icon,

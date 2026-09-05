@@ -5,6 +5,7 @@ import { useTranslation } from '@/i18n'
 import { ListOrderedIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import type { EditorContext } from 'rme'
+import type { CapricornRuntimeAdapter } from '../EditorArea/capricornRuntimeAdapter'
 
 type HeadingNumberingCommands = {
   applyHeadingNumbering?: () => boolean
@@ -50,6 +51,53 @@ export function HeadingNumberingButton(props: { editorCtx: EditorContext }) {
   return hasHeadingNumberingCapability(props.editorCtx) ? (
     <HeadingNumberingButtonReady editorCtx={props.editorCtx} />
   ) : null
+}
+
+export function CapricornHeadingNumberingButton(props: { editor: CapricornRuntimeAdapter }) {
+  const { editor } = props
+  const { t } = useTranslation()
+  const label = t('sidebar.heading_numbering') || 'Heading numbering'
+  const [numberingEnabled, setNumberingEnabled] = useState(
+    () => editor.headings.getNumbering().complete,
+  )
+
+  useEffect(() => {
+    const syncNumberingState = () => {
+      setNumberingEnabled(editor.headings.getNumbering().complete)
+    }
+
+    syncNumberingState()
+    return editor.headings.subscribe((headings) => {
+      setNumberingEnabled(
+        headings.length > 0 && headings.every((heading) => Boolean(heading.number)),
+      )
+    })
+  }, [editor])
+
+  const handleClick = () => {
+    const wasEnabled = editor.headings.getNumbering().complete
+    const state = wasEnabled ? editor.headings.removeNumbering() : editor.headings.applyNumbering()
+
+    setNumberingEnabled(state.complete)
+    editor.focus()
+  }
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          aria-label={label}
+          aria-pressed={numberingEnabled}
+          onClick={handleClick}
+          size='icon-chrome'
+          variant='chrome'
+        >
+          <ListOrderedIcon aria-hidden='true' strokeWidth={1.75} />
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>{label}</TooltipContent>
+    </Tooltip>
+  )
 }
 
 function HeadingNumberingButtonReady(props: { editorCtx: EditorContext }) {

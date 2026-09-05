@@ -1,4 +1,5 @@
 import { commandRegistry } from '@/commands'
+import { EditorViewType } from '@/constants/editorViewType'
 import { showContextMenu } from '@/components/ui-v2/ContextMenu'
 import useBookMarksStore from '@/extensions/bookmarks/useBookMarksStore'
 import bus from '@/helper/eventBus'
@@ -15,7 +16,6 @@ import { debounce } from 'lodash'
 import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from '@/i18n'
 import { MenuIcon } from 'lucide-react'
-import { EditorViewType } from 'rme'
 import { isDivider, Space, toast, type MenuItemData } from 'zens'
 import { EditorAreaActionButton } from '../../EditorAreaAction'
 import { createPdfPrintMenuItem } from '../../pdf-print/pdfPrintMenuItem'
@@ -83,9 +83,7 @@ export const MenuList = memo((props: MenuListProps) => {
   const editorTypewriterScroll = useAppSettingStore(
     (state) => state.settingData.editor_typewriter_scroll,
   )
-  const editorPlaceholder = useAppSettingStore(
-    (state) => state.settingData.editor_placeholder,
-  )
+  const editorPlaceholder = useAppSettingStore((state) => state.settingData.editor_placeholder)
   const { t } = useTranslation()
   const ref = useRef<HTMLButtonElement>(null)
 
@@ -125,8 +123,8 @@ export const MenuList = memo((props: MenuListProps) => {
 
   const convertText = useCallback(
     async (variant: string) => {
-      const content = getEditorContent(targetEditorId || '')
       try {
+        const content = getEditorContent(targetEditorId || '')
         const res = await invoke<{ code: FileResultCode; content: string }>('convert_text', {
           text: content || '',
           variant,
@@ -137,7 +135,7 @@ export const MenuList = memo((props: MenuListProps) => {
           toast.error(res.content)
         }
       } catch (error) {
-        toast.error(String(error))
+        toast.error(error instanceof Error ? error.message : String(error))
       }
     },
     [getEditorContent, targetEditorId],
@@ -200,10 +198,7 @@ export const MenuList = memo((props: MenuListProps) => {
         value: 'typewriter_scroll',
         checked: editorTypewriterScroll,
         handler: () => {
-          writeSettingData(
-            { key: 'editor_typewriter_scroll' },
-            !editorTypewriterScroll,
-          )
+          writeSettingData({ key: 'editor_typewriter_scroll' }, !editorTypewriterScroll)
         },
       })
       items.push({ type: 'divider' })
@@ -215,10 +210,7 @@ export const MenuList = memo((props: MenuListProps) => {
       value: 'placeholder',
       checked: editorPlaceholder,
       handler: () => {
-        writeSettingData(
-          { key: 'editor_placeholder' },
-          !editorPlaceholder,
-        )
+        writeSettingData({ key: 'editor_placeholder' }, !editorPlaceholder)
       },
     })
     items.push({ type: 'divider' })
@@ -230,9 +222,7 @@ export const MenuList = memo((props: MenuListProps) => {
         value: 'file_info',
         handler: async () => {
           let latestFileNormalInfo = fileNormalInfo
-          const infoFilePath = targetEditorId
-            ? getFileObject(targetEditorId)?.path
-            : latestFilePath
+          const infoFilePath = targetEditorId ? getFileObject(targetEditorId)?.path : latestFilePath
 
           if (infoFilePath) {
             try {
@@ -278,11 +268,14 @@ export const MenuList = memo((props: MenuListProps) => {
             commandRegistry.execute('edit_bookmark_dialog', curBookMark)
           } else {
             const bookmarkFile = targetEditorId ? getFileObject(targetEditorId) : undefined
-            commandRegistry.execute('open_bookmark_dialog', bookmarkFile || {
-              id: targetEditorId,
-              name: latestFileName,
-              path: latestFilePath,
-            })
+            commandRegistry.execute(
+              'open_bookmark_dialog',
+              bookmarkFile || {
+                id: targetEditorId,
+                name: latestFileName,
+                path: latestFilePath,
+              },
+            )
           }
         },
       })

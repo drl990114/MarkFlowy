@@ -16,10 +16,16 @@ type EditorStateStoreAction = {
 }
 
 const useEditorStateStore = create(
-  immer<EditorStateStoreState & EditorStateStoreAction>((set) => ({
+  immer<EditorStateStoreState & EditorStateStoreAction>((set, get) => ({
     idStateMap: new Map(),
 
     setIdStateMap: (id, editorState) => {
+      const previous = get().idStateMap.get(id)
+      if (
+        previous?.hasUnsavedChanges === editorState.hasUnsavedChanges &&
+        previous.undoDepth === editorState.undoDepth
+      ) return
+
       set((state) => {
         state.idStateMap?.set(id, editorState)
       })

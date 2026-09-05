@@ -14,6 +14,7 @@ import useAppTasksStore from '@/stores/useTasksStore'
 import { SparklesIcon } from 'lucide-react'
 import { useCallback, useRef } from 'react'
 import { useTranslation } from '@/i18n'
+import { toast } from 'zens'
 import { showContextMenu } from '../../../../ui-v2/ContextMenu'
 
 interface AIButtonProps {
@@ -34,7 +35,13 @@ export const AIButton = (props: AIButtonProps) => {
   const curFile = targetEditorId ? getFileObject(targetEditorId) : undefined
 
   const fetchCurFileSummary = useCallback(async () => {
-    const content = getEditorContent(curFile?.id || '')
+    let content: string
+    try {
+      content = getEditorContent(curFile?.id || '')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : String(error))
+      return
+    }
     const res = await addAppTask<ReturnType<typeof summarizeAIText>>({
       title: 'AI: Retrieving article abstract',
       promise: summarizeAIText(content || ''),
@@ -55,7 +62,13 @@ ${res}
 
   const fetchCurFileTranslate = useCallback(
     async (targetLang: string) => {
-      const content = getEditorContent(curFile?.id || '')
+      let content: string
+      try {
+        content = getEditorContent(curFile?.id || '')
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : String(error))
+        return
+      }
       const res = await addAppTask({
         title: 'AI: Translating article',
         promise: translateAIText(content || '', targetLang),

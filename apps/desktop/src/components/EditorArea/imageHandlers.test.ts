@@ -74,6 +74,12 @@ describe('handleInsertLocalImage', () => {
     expect(mocks.moveImageToLocalFolder).not.toHaveBeenCalled()
   })
 
+  it('reports storage failures to the insertion form when strict handling is requested', async () => {
+    mocks.settingData.when_upload_image = 'save_to_local_relative'
+    mocks.moveImageToLocalFolder.mockRejectedValueOnce(new Error('storage failed'))
+    await expect(handleInsertLocalImage('/photos/picture.png', 'note-id', { throwOnError: true })).rejects.toThrow('storage failed')
+  })
+
   it('normalizes Windows drive paths for Markdown', async () => {
     await expect(
       handleInsertLocalImage('C:\\Photos\\summer.png', 'note-id'),

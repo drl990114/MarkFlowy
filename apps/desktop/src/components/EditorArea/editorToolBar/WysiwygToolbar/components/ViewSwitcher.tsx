@@ -1,4 +1,5 @@
 import bus from '@/helper/eventBus'
+import { EditorViewType, type EditorViewTypeValue } from '@/constants/editorViewType'
 import { getFileObject } from '@/helper/files'
 import { useEditorStore } from '@/stores'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
@@ -7,7 +8,6 @@ import type { LucideIcon } from 'lucide-react'
 import { CodeXmlIcon, EyeIcon, PenLineIcon } from 'lucide-react'
 import { useCallback, useRef } from 'react'
 import { useTranslation } from '@/i18n'
-import { EditorViewType } from 'rme'
 import { EditorAreaActionButton } from '../../../EditorAreaAction'
 import { showContextMenu } from '../../../../ui-v2/ContextMenu'
 
@@ -15,7 +15,7 @@ interface ViewSwitcherProps {
   editorId?: string
 }
 
-const VIEW_TYPE_ICONS: Record<EditorViewType, LucideIcon> = {
+const VIEW_TYPE_ICONS: Record<EditorViewTypeValue, LucideIcon> = {
   [EditorViewType.SOURCECODE]: CodeXmlIcon,
   [EditorViewType.WYSIWYG]: PenLineIcon,
   [EditorViewType.PREVIEW]: EyeIcon,

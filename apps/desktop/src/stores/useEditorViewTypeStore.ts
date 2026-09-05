@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { EditorViewType } from '@/constants/editorViewType'
+import { EditorViewType, type EditorViewTypeValue } from '@/constants/editorViewType'
 import { immer } from 'zustand/middleware/immer'
 
 const useEditorViewTypeStore = create(
@@ -26,9 +26,9 @@ const useEditorViewTypeStore = create(
 )
 
 type EditorViewTypeStore = {
-  editorViewTypeMap: Map<string, EditorViewType>
-  setEditorViewType: (id: string, viewType: EditorViewType) => void
-  getEditorViewType: (id: string) => EditorViewType
+  editorViewTypeMap: Map<string, EditorViewTypeValue>
+  setEditorViewType: (id: string, viewType: EditorViewTypeValue) => void
+  getEditorViewType: (id: string) => EditorViewTypeValue
 }
 
 export default useEditorViewTypeStore

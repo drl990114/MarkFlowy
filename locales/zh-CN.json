@@ -769,5 +769,62 @@
     "new_chat_confirm": "开始新对话",
     "cancel": "取消",
     "export_empty": "当前没有可导出的对话"
+  },
+  "capricorn": {
+    "clipboard": {
+      "copied_markdown": "已按 Markdown 复制",
+      "cut_markdown": "已按 Markdown 剪切",
+      "retained": "内容已复制，原文已保留。",
+      "failed": "剪贴板写入失败，原文已保留。"
+    },
+    "livePreview": {
+      "largeDeferred": "大型预览已暂停，仍可浏览、编辑和复制完整源码。",
+      "renderLarge": "渲染大型预览（可能需要较长时间）"
+    },
+    "sourceFallback": {
+      "longLine": "超长行采用横向滚动，以保持源码编辑流畅。",
+      "loading": "正在准备源码视图…",
+      "truncated": "当前只显示开头片段，完整源码视图正在加载。"
+    },
+    "link": {
+      "open": "打开链接",
+      "actions": "链接操作",
+      "edit": "编辑链接",
+      "text": "文字",
+      "address": "地址",
+      "save": "保存链接",
+      "cancel": "取消",
+      "invalidAddress": "请输入有效的链接地址。"
+    },
+    "image": { "unavailable": "图片无法加载", "loading": "正在加载图片…", "edit": "修改地址" },
+    "preview": { "retry": "重试" }
+  },
+  "inline_insert": {
+    "insert_link": "插入链接",
+    "edit_link": "编辑链接",
+    "insert_image": "插入图片",
+    "edit_image": "编辑图片",
+    "address": "地址",
+    "text": "文字",
+    "alt": "说明",
+    "optional": "可选",
+    "choose_image": "选择本地图片…",
+    "change": "更换",
+    "replace_image": "更换图片",
+    "edit_alt": "编辑说明",
+    "remove": "移除",
+    "unlink": "移除链接",
+    "insert": "插入",
+    "save": "保存",
+    "close": "关闭",
+    "inserting": "正在插入…",
+    "open": "打开链接",
+    "copy": "复制地址",
+    "invalid_address": "请输入有效地址或文件路径。",
+    "local_error": "无法选择这张图片，请重试。",
+    "insert_error": "插入失败，已保留填写内容，请重试。",
+    "open_error": "无法打开此链接。",
+    "copy_error": "无法复制地址。",
+    "single_block": "请在同一段落或表格单元格内选择文字。"
   }
 }

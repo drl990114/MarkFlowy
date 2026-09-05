@@ -769,5 +769,66 @@
     "openFileFirst": "Ouvrez un document pour activer le mode Zen",
     "exitHint": "Mode Zen · Appuyez sur {{shortcut}} ou deux fois sur Échap pour quitter",
     "shortcutFallback": "Cmd/Ctrl+Maj+F"
+  },
+  "capricorn": {
+    "clipboard": {
+      "copied_markdown": "Copié au format Markdown",
+      "cut_markdown": "Coupé au format Markdown",
+      "retained": "Copié. Le contenu original a été conservé.",
+      "failed": "Échec de la copie dans le presse-papiers. Le contenu original a été conservé."
+    },
+    "livePreview": {
+      "largeDeferred": "L’aperçu volumineux est en pause. Le code source complet reste disponible.",
+      "renderLarge": "Afficher l’aperçu volumineux (peut prendre du temps)"
+    },
+    "sourceFallback": {
+      "longLine": "Les lignes très longues défilent horizontalement pour préserver la fluidité de l’édition.",
+      "loading": "Préparation de la vue du code source…",
+      "truncated": "Seul le début est affiché pendant le chargement de la vue complète."
+    },
+    "link": {
+      "open": "Ouvrir le lien",
+      "actions": "Actions du lien",
+      "edit": "Modifier le lien",
+      "text": "Texte",
+      "address": "Adresse",
+      "save": "Enregistrer le lien",
+      "cancel": "Annuler",
+      "invalidAddress": "Saisissez une adresse de lien valide."
+    },
+    "image": {
+      "unavailable": "Image unavailable",
+      "loading": "Loading image…",
+      "edit": "Edit address"
+    },
+    "preview": { "retry": "Retry" }
+  },
+  "inline_insert": {
+    "insert_link": "Insert link",
+    "edit_link": "Edit link",
+    "insert_image": "Insert image",
+    "edit_image": "Edit image",
+    "address": "Address",
+    "text": "Text",
+    "alt": "Description",
+    "optional": "Optional",
+    "choose_image": "Choose local image…",
+    "change": "Change",
+    "replace_image": "Replace image",
+    "edit_alt": "Edit description",
+    "remove": "Remove",
+    "unlink": "Remove link",
+    "insert": "Insert",
+    "save": "Save",
+    "close": "Close",
+    "inserting": "Inserting…",
+    "open": "Open link",
+    "copy": "Copy address",
+    "invalid_address": "Enter a valid address or file path.",
+    "local_error": "Unable to select this image. Try again.",
+    "insert_error": "Unable to insert. Your input has been kept.",
+    "open_error": "Unable to open this link.",
+    "copy_error": "Unable to copy this address.",
+    "single_block": "Select text within one paragraph or table cell."
   }
 }

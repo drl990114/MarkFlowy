@@ -70,6 +70,7 @@ const createImageAttributes = (
 export const handleInsertLocalImage = async (
   filePath: string,
   fileId?: string,
+  options: { throwOnError?: boolean } = {},
 ): Promise<InsertedImageAttributes> => {
   const { fileObject, fileFolderPath, workspaceRoot, settingData, isTextbundle } =
     getImageHandlerContext(fileId)
@@ -136,6 +137,7 @@ export const handleInsertLocalImage = async (
     }
   } catch (error) {
     logger.error('Local image insertion failed:', error)
+    if (options.throwOnError) throw error
   }
 
   return createImageAttributes(filePath, fileName)

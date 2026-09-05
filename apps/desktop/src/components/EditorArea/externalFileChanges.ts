@@ -111,7 +111,16 @@ async function inspectExternalPath(fileId: string, filePath: string, generation:
   if (knownDiskRevision === snapshot.revision) return
 
   const editorStore = useEditorStore.getState()
-  const localContent = editorStore.getEditorContent(fileId)
+  let localContent: string
+  try {
+    localContent = editorStore.getEditorContent(fileId)
+  } catch (error) {
+    // A composing or failed live reader must not be treated as the cached
+    // version on disk. Keep local edits protected until comparison can retry.
+    logger.error('Failed to read local content for an external file change', error)
+    markExternalFileConflict(fileId, snapshot.revision)
+    return
+  }
   const isDirty =
     useEditorStateStore.getState().idStateMap.get(fileId)?.hasUnsavedChanges ?? false
 

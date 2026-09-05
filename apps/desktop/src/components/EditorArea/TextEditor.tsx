@@ -1,10 +1,13 @@
 import { commandRegistry } from '@/commands'
+import { capricornClipboard, handleCapricornClipboardResult } from './capricornClipboard'
 import { AppEditorThemeProvider } from '@/AppThemeProvider'
 import { EVENT } from '@/constants'
+import { EditorViewType, type EditorViewTypeValue } from '@/constants/editorViewType'
+import { capricornRuntimeEntrySha256, capricornRuntimeVersion } from '@/constants/capricornRuntime'
 import { clipboardRead } from '@/helper/clipboard'
 import { countNonWhitespaceCharacters } from '@/helper/editorCounter'
 import bus from '@/helper/eventBus'
-import {
+import useFileCacheStore, {
   deleteFileObject,
   delSaveOpenedEditorEntries,
   getFileIdsByPathIdentity,
@@ -33,7 +36,12 @@ import {
   type PathRelationResolver,
 } from '@/helper/physicalPathIdentity'
 import { useEditorKeybindingStore } from '@/hooks/useKeyboard'
-import { useTranslation } from '@/i18n'
+import {
+  capricornClipboardCommands,
+  createCapricornKeybindingConfiguration,
+} from './capricornKeybindings'
+import { normalizeClonedExportColors } from './exportColors'
+import { i18n, useTranslation } from '@/i18n'
 import { captureException } from '@/services/error-reporting'
 import { useEditorStateStore, useEditorStore } from '@/stores'
 import useAppSettingStore from '@/stores/useAppSettingStore'
@@ -42,6 +50,7 @@ import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import useExternalFileChangeStore, {
   isExternalFileSaveBlocked,
 } from '@/stores/useExternalFileChangeStore'
+import useThemeStore from '@/stores/useThemeStore'
 import { invoke } from '@tauri-apps/api/core'
 import { save } from '@tauri-apps/plugin-dialog'
 import classNames from 'classnames'
@@ -50,6 +59,7 @@ import {
   memo,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -60,12 +70,10 @@ import { useUnmount } from 'react-use'
 import type { CreateWysiwygDelegateOptions, EditorDelegate } from 'rme'
 import {
   createSourceCodeDelegate,
-  createWysiwygDelegate,
   EditorChangeEventParams,
   EditorChangeHandler,
   EditorContext,
   EditorRef,
-  EditorViewType,
   MfCodemirrorView,
   Editor as MfEditor,
   EditorProps as MfEditorProps,
@@ -78,17 +86,38 @@ import {
 } from './createWysiwygDelegateOptions'
 import { closeCleanPhysicalAliases } from './closeCleanPhysicalAliases'
 import { createDeferredLatestPublisher } from './deferredLatestPublisher'
+import { getEditorSnapshotTiming } from './editorSnapshotTiming'
+import { editorSnapshotRegistry } from './editorSnapshotRegistry'
 import {
+  beginEditorOpenMeasurement,
+  finishEditorOpenMeasurement,
+  getEditorOpenMeasurement,
   measureEditorSnapshot,
+  observeEditorFirstPaint,
   recordEditorInteractionMeasurement,
+  recordEditorOpenContent,
+  recordEditorOpenStage,
   shouldCoalesceEditorSnapshots,
   startEditorInteractionMeasurement,
 } from './editorPerformanceDiagnostics'
 import { EditorWrapper } from './EditorWrapper'
 import {
-  conditionalWriteExpectedIfAllowed,
-  getFileWriteRevision,
-} from './conditionalFileWrite'
+  CapricornEditor,
+  type CapricornEditorHandle,
+  type CapricornRuntimeRequestIdentity,
+} from './CapricornEditor'
+import {
+  CAPRICORN_DESKTOP_VIRTUALIZE_OPTIONS,
+  type CapricornEditorChangeEvent,
+  type CapricornLocalizationAdapter,
+  type CapricornRuntimeAdapter,
+  type CapricornRuntimeOptions,
+  type CapricornRuntimeProgress,
+} from './capricornRuntimeAdapter'
+import { createCapricornStatisticsScheduler } from './capricornStatisticsScheduler'
+import { setCapricornEditor } from './capricornEditorRegistry'
+import { openEditorLink } from './openEditorLink'
+import { conditionalWriteExpectedIfAllowed, getFileWriteRevision } from './conditionalFileWrite'
 import { EditorInstanceLifecycle } from './editorInstanceLifecycle'
 import {
   EXTERNAL_FILE_CONTENT_SYNC_EVENT,
@@ -110,15 +139,23 @@ import { PandocExportController } from './pandoc-export/PandocExportController'
 import { EditorSkeleton, WarningHeader } from './styles'
 
 const delegateOptionsCache = new Map<string, CreateWysiwygDelegateOptions>()
-const LARGE_MARKDOWN_SOURCE_MODE_THRESHOLD = 200_000
 const TEXT_EDITOR_CONTENT_SYNC_EVENT = 'editor_content_sync'
 const EXPORT_RESOURCE_TIMEOUT_MS = 15_000
-const EDITOR_SNAPSHOT_DEBOUNCE_MS = 50
-const EDITOR_SNAPSHOT_MAX_WAIT_MS = 250
 const editorInstanceLifecycle = new EditorInstanceLifecycle()
 let textEditorInstanceSeq = 0
 type Html2Canvas = (typeof import('html2canvas'))['default']
 let html2canvasPromise: Promise<Html2Canvas> | undefined
+
+const capricornLocalization: CapricornLocalizationAdapter = {
+  getDirection: () => (i18n.dir() === 'rtl' ? 'rtl' : 'ltr'),
+  getLocale: () => i18n.resolvedLanguage || i18n.language || 'en',
+  subscribe(listener) {
+    i18n.on('languageChanged', listener)
+    return () => i18n.off('languageChanged', listener)
+  },
+  translate: ({ defaultValue, key, values }) =>
+    i18n.t(`capricorn.${key}`, { defaultValue, ...values }),
+}
 
 interface TextEditorContentSyncPayload {
   fileId: string
@@ -126,11 +163,21 @@ interface TextEditorContentSyncPayload {
   content: string
 }
 
-interface PendingEditorSnapshot {
+interface PendingRmeEditorSnapshot {
   delegate: EditorDelegate
   doc: EditorChangeEventParams['state']['doc']
+  kind: 'rme'
   mode: 'coalesced' | 'immediate'
 }
+
+interface PendingCapricornEditorSnapshot {
+  documentSize: number
+  getMarkdown: () => string
+  kind: 'capricorn'
+  mode: 'coalesced'
+}
+
+type PendingEditorSnapshot = PendingCapricornEditorSnapshot | PendingRmeEditorSnapshot
 
 type TextEditorRef = EditorRef & {
   waitForPendingResources: () => Promise<void>
@@ -299,6 +346,7 @@ export const sourceCodeCodemirrorViewMap: Map<string, MfCodemirrorView> = new Ma
 
 const editorDelegateRegistry = new InstanceResourceRegistry<EditorDelegate<any>>()
 const editorContextRegistry = new InstanceResourceRegistry<EditorContext>()
+const capricornEditorInstanceRegistry = new InstanceResourceRegistry<CapricornRuntimeAdapter>()
 const sourceCodeViewRegistry = new InstanceResourceRegistry<MfCodemirrorView>()
 const textEditorSaveHandlerRegistry = new InstanceResourceRegistry<() => Promise<boolean>>()
 
@@ -370,11 +418,28 @@ function registerSourceCodeViewResource(
   )
 }
 
+function registerCapricornEditorResource(
+  fileId: string,
+  instanceId: string,
+  editor: CapricornRuntimeAdapter,
+  shouldPromote: boolean,
+) {
+  registerCompatibilityResource(
+    capricornEditorInstanceRegistry,
+    fileId,
+    instanceId,
+    editor,
+    shouldPromote,
+    (current) => setCapricornEditor(fileId, current),
+  )
+}
+
 function promoteEditorInstanceResources(fileId: string, instanceId: string) {
   const store = useEditorStore.getState()
   const delegate = editorDelegateRegistry.promote(fileId, instanceId)
   const context = editorContextRegistry.promote(fileId, instanceId)
   const sourceCodeView = sourceCodeViewRegistry.promote(fileId, instanceId)
+  const capricornEditor = capricornEditorInstanceRegistry.promote(fileId, instanceId)
 
   if (delegate === undefined) store.clearEditorDelegate(fileId)
   else store.setEditorDelegate(fileId, delegate)
@@ -384,6 +449,8 @@ function promoteEditorInstanceResources(fileId: string, instanceId: string) {
 
   if (sourceCodeView === undefined) sourceCodeCodemirrorViewMap.delete(fileId)
   else sourceCodeCodemirrorViewMap.set(fileId, sourceCodeView)
+
+  setCapricornEditor(fileId, capricornEditor)
 
   const saveHandler = textEditorSaveHandlerRegistry.promote(fileId, instanceId)
   if (saveHandler === undefined) delSaveOpenedEditorEntries(fileId)
@@ -413,6 +480,15 @@ function unregisterSourceCodeViewResource(fileId: string, instanceId: string) {
   )
 }
 
+function unregisterCapricornEditorResource(fileId: string, instanceId: string) {
+  const removal = capricornEditorInstanceRegistry.remove(fileId, instanceId)
+  syncResourceRemoval(
+    removal,
+    (current) => setCapricornEditor(fileId, current),
+    () => setCapricornEditor(fileId, undefined),
+  )
+}
+
 function clearSwitchingEditorContextResource(fileId: string, instanceId: string) {
   const switchingContext = editorContextRegistry.get(fileId, instanceId)
   const store = useEditorStore.getState()
@@ -422,10 +498,28 @@ function clearSwitchingEditorContextResource(fileId: string, instanceId: string)
   }
 }
 
+function unregisterRmeEditorResources(fileId: string, instanceId: string) {
+  const delegateRemoval = editorDelegateRegistry.remove(fileId, instanceId)
+  const contextRemoval = editorContextRegistry.remove(fileId, instanceId)
+  const store = useEditorStore.getState()
+
+  syncResourceRemoval(
+    delegateRemoval,
+    (current) => store.setEditorDelegate(fileId, current),
+    () => store.clearEditorDelegate(fileId),
+  )
+  syncResourceRemoval(
+    contextRemoval,
+    (current) => store.setEditorCtx(fileId, current),
+    () => store.clearEditorCtx(fileId),
+  )
+}
+
 function unregisterEditorInstanceResources(fileId: string, instanceId: string) {
   const delegateRemoval = editorDelegateRegistry.remove(fileId, instanceId)
   const contextRemoval = editorContextRegistry.remove(fileId, instanceId)
   const sourceCodeViewRemoval = sourceCodeViewRegistry.remove(fileId, instanceId)
+  const capricornEditorRemoval = capricornEditorInstanceRegistry.remove(fileId, instanceId)
 
   const store = useEditorStore.getState()
   syncResourceRemoval(
@@ -442,6 +536,11 @@ function unregisterEditorInstanceResources(fileId: string, instanceId: string) {
     sourceCodeViewRemoval,
     (current) => sourceCodeCodemirrorViewMap.set(fileId, current),
     () => sourceCodeCodemirrorViewMap.delete(fileId),
+  )
+  syncResourceRemoval(
+    capricornEditorRemoval,
+    (current) => setCapricornEditor(fileId, current),
+    () => setCapricornEditor(fileId, undefined),
   )
 }
 
@@ -833,6 +932,7 @@ async function renderElementToImageDataUrl(element: HTMLElement) {
     logging: false,
     useCORS: true,
     ignoreElements: (candidate: Element) => candidate.tagName.toLowerCase() === 'iframe',
+    onclone: normalizeClonedExportColors,
   }
 
   try {
@@ -850,7 +950,10 @@ async function renderElementToImageDataUrl(element: HTMLElement) {
     const fallbackCanvas = await html2canvas(element, {
       ...html2canvasOptions,
       ignoreElements: ignoreRiskyExportElement,
-      onclone: sanitizeClonedExportDocument,
+      onclone: (clonedDocument, clonedElement) => {
+        sanitizeClonedExportDocument(clonedDocument)
+        normalizeClonedExportColors(clonedDocument, clonedElement)
+      },
     })
 
     return canvasToExportDataUrl(fallbackCanvas)
@@ -865,13 +968,14 @@ async function renderElementToImageDataUrl(element: HTMLElement) {
 }
 
 function TextEditor(props: TextEditorProps) {
-  const { id, active, visible = active, fileTypeConfig } = props
+  const { id, active, visible = active, fileTypeConfig, groupId } = props
   const cachedFile = getFileObject(id)
   const lastKnownFileRef = useRef<IFile | undefined>(cachedFile)
   if (cachedFile) {
     lastKnownFileRef.current = cachedFile
   }
   const curFile = cachedFile ?? lastKnownFileRef.current!
+  const filePath = useFileCacheStore((state) => state.entries[id]?.path)
   const instanceIdRef = useRef<string | undefined>(undefined)
   if (!instanceIdRef.current) {
     textEditorInstanceSeq += 1
@@ -879,6 +983,8 @@ function TextEditor(props: TextEditorProps) {
   }
   const activeRef = useRef(active)
   activeRef.current = active
+  const visibleRef = useRef(visible)
+  visibleRef.current = visible
   const getSavePathReservationSnapshot = useCallback(
     () => savePathCoordinator.isFileReserved(id, getFileObject(id)?.path),
     [id],
@@ -889,25 +995,21 @@ function TextEditor(props: TextEditorProps) {
     () => false,
   )
   const createDelegate = useCallback(
-    (editorViewType = EditorViewType.WYSIWYG, sourceCodeLanguage?: string) => {
+    (sourceCodeLanguage?: string) => {
       const currentSettingData = useAppSettingStore.getState().settingData
-      if (editorViewType === 'sourceCode') {
-        return createSourceCodeDelegate({
-          language: sourceCodeLanguage,
-          disableAllBuildInShortcuts: true,
-          overrideShortcutMap: useEditorKeybindingStore.getState().editorKeybingMap,
-          clipboardReadFunction: clipboardRead,
-          currentDateFormat: getCurrentEditorInsertDateFormat,
-          onCodemirrorViewLoad: (cmView) => {
-            registerSourceCodeViewResource(id, instanceIdRef.current!, cmView, activeRef.current)
-          },
-          typewriterScroll: {
-            enabled: currentSettingData.editor_typewriter_scroll,
-          },
-        })
-      } else {
-        return createWysiwygDelegate(getOrCreateDelegateOptions(id))
-      }
+      return createSourceCodeDelegate({
+        language: sourceCodeLanguage,
+        disableAllBuildInShortcuts: true,
+        overrideShortcutMap: useEditorKeybindingStore.getState().editorKeybingMap,
+        clipboardReadFunction: clipboardRead,
+        currentDateFormat: getCurrentEditorInsertDateFormat,
+        onCodemirrorViewLoad: (cmView) => {
+          registerSourceCodeViewResource(id, instanceIdRef.current!, cmView, activeRef.current)
+        },
+        typewriterScroll: {
+          enabled: currentSettingData.editor_typewriter_scroll,
+        },
+      })
     },
     [id],
   )
@@ -927,9 +1029,7 @@ function TextEditor(props: TextEditorProps) {
     (state) => state.settingData.editor_typewriter_scroll,
   )
   const livePreviewBlockBehavior = useAppSettingStore((state) =>
-    normalizeLivePreviewBlockBehavior(
-      state.settingData.wysiwyg_editor_live_preview_block_behavior,
-    ),
+    normalizeLivePreviewBlockBehavior(state.settingData.wysiwyg_editor_live_preview_block_behavior),
   )
   const sourceCodeEditorSpellcheck = useAppSettingStore(
     (state) => state.settingData.source_code_editor_spellcheck,
@@ -937,6 +1037,9 @@ function TextEditor(props: TextEditorProps) {
   const wysiwygEditorSpellcheck = useAppSettingStore(
     (state) => state.settingData.wysiwyg_editor_spellcheck,
   )
+  const editorColorScheme = useThemeStore((state) => state.curTheme.mode)
+  const editorKeybingMap = useEditorKeybindingStore((state) => state.editorKeybingMap)
+  const editorKeybindingsLoaded = useEditorKeybindingStore((state) => state.editorKeybindingsLoaded)
   const externalChangeState = useExternalFileChangeStore((state) => {
     const notice = state.notices[id]
     if (notice?.kind !== 'conflict') return 'none'
@@ -944,60 +1047,153 @@ function TextEditor(props: TextEditorProps) {
   })
   const externalChangeResolving =
     externalChangeState === 'reload' || externalChangeState === 'overwrite'
-  const [currentViewType, setCurrentViewType] = useState<EditorViewType>(fileTypeConfig.defaultMode)
+  const [currentViewType, setCurrentViewType] = useState<EditorViewTypeValue>(
+    fileTypeConfig.defaultMode,
+  )
+  const currentViewTypeRef = useRef(currentViewType)
+  currentViewTypeRef.current = currentViewType
   const [content, setContent] = useState<string | undefined>()
   const [delegate, setDelegate] = useState<ReturnType<typeof createDelegate> | null>(null)
-  const effectiveDefaultViewType = useMemo(() => {
-    if (
-      fileTypeConfig.type === 'markdown' &&
-      fileTypeConfig.defaultMode === EditorViewType.WYSIWYG &&
-      typeof content === 'string' &&
-      content.length > LARGE_MARKDOWN_SOURCE_MODE_THRESHOLD &&
-      fileTypeConfig.supportedModes.includes(EditorViewType.SOURCECODE)
-    ) {
-      return EditorViewType.SOURCECODE
-    }
-
-    return fileTypeConfig.defaultMode
-  }, [content, fileTypeConfig])
 
   const debounceSaveHandlerCacheRef = useRef<DebouncedFunc<() => Promise<boolean>>>(null)
   const noFileSaveingRef = useRef(false)
   const editorRef = useRef<TextEditorRef>(null)
+  const capricornEditorRef = useRef<CapricornEditorHandle>(null)
+  const capricornRuntimeAdapterRef = useRef<CapricornRuntimeAdapter | null>(null)
+  const stopFirstPaintObservationRef = useRef<(() => void) | undefined>(undefined)
+  const editorInitializedRef = useRef(false)
   const editorContextRef = useRef<EditorChangeEventParams>(null)
   const counterIdleHandleRef = useRef<number | null>(null)
+  const counterDocumentRef = useRef<EditorChangeEventParams['state']['doc'] | null>(null)
   const isApplyingRemoteContentRef = useRef(false)
+  const needsMountedContentSyncRef = useRef(false)
   const latestContentRef = useRef<string | undefined>(undefined)
   const remoteContentResetHandleRef = useRef<number | null>(null)
   const rejectedReservedChangeRef = useRef(false)
   const wasSavePathReservedRef = useRef(false)
   const interactionStartedAtRef = useRef<number | undefined>(undefined)
+  const interactionOpenRequestIdRef = useRef<string | undefined>(undefined)
   const isUnmountingRef = useRef(false)
-  const publishEditorSnapshotRef = useRef<(snapshot: PendingEditorSnapshot) => boolean>(
-    () => false,
+  const publishEditorSnapshotRef = useRef<(snapshot: PendingEditorSnapshot) => boolean>(() => false)
+  const hasVisibleSiblingRef = useRef(false)
+  const snapshotDemandHandlerRef = useRef<(hasVisibleSibling: boolean) => void>(() => {})
+  const wasActiveSnapshotRef = useRef(active)
+  const compositionDirtyRef = useRef<{
+    wasDirty: boolean
+    documentChanged: boolean
+    hadPending: boolean
+    contentRevision: number
+  } | null>(null)
+
+  const capricornStatisticsScheduler = useMemo(
+    () =>
+      createCapricornStatisticsScheduler(
+        (statistics) => {
+          if (
+            !activeRef.current ||
+            !visibleRef.current ||
+            currentViewTypeRef.current !== EditorViewType.WYSIWYG
+          )
+            return
+          useEditorCounterStore.getState().addEditorCounter({ id, data: statistics })
+        },
+        { onError: captureException },
+      ),
+    [id],
+  )
+
+  const scheduleEditorCounter = useCallback(
+    (params: EditorChangeEventParams) => {
+      const { doc } = params.state
+      // Selection transactions reuse the immutable document. Keep its pending
+      // count instead of repeatedly traversing it or delaying the first result.
+      if (counterDocumentRef.current === doc) return
+      if (counterIdleHandleRef.current !== null) {
+        cancelIdle(counterIdleHandleRef.current)
+      }
+      counterDocumentRef.current = doc
+      counterIdleHandleRef.current = requestIdle(() => {
+        counterIdleHandleRef.current = null
+        useEditorCounterStore.getState().addEditorCounter({
+          id,
+          data: {
+            characterCount: params.helpers.getCharacterCount(),
+            nonWhitespaceCharacterCount: countNonWhitespaceCharacters(doc.textContent),
+            wordCount: params.helpers.getWordCount(),
+          },
+        })
+      })
+    },
+    [id],
+  )
+
+  useEffect(() => {
+    if (active && currentViewType !== EditorViewType.WYSIWYG) {
+      if (editorContextRef.current) scheduleEditorCounter(editorContextRef.current)
+      return
+    }
+    if (counterIdleHandleRef.current !== null) {
+      cancelIdle(counterIdleHandleRef.current)
+      counterIdleHandleRef.current = null
+    }
+    counterDocumentRef.current = null
+  }, [active, currentViewType, scheduleEditorCounter])
+
+  const setMountedEditorContent = useCallback(
+    (nextContent: string) => {
+      editorRef.current?.setContent(nextContent)
+      capricornEditorRef.current?.setMarkdown(nextContent, fileSaveCoordinator.getRevision(id))
+    },
+    [id],
   )
   const snapshotPublisher = useMemo(
     () =>
       createDeferredLatestPublisher(
         (snapshot: PendingEditorSnapshot) => publishEditorSnapshotRef.current(snapshot),
-        {
-          wait: EDITOR_SNAPSHOT_DEBOUNCE_MS,
-          maxWait: EDITOR_SNAPSHOT_MAX_WAIT_MS,
-        },
+        () => getEditorSnapshotTiming(latestContentRef.current?.length ?? 0),
       ),
     [],
   )
 
+  snapshotDemandHandlerRef.current = (hasVisibleSibling) => {
+    hasVisibleSiblingRef.current = hasVisibleSibling
+    if (currentViewType !== EditorViewType.WYSIWYG) return
+    const canRead = editorSnapshotRegistry.canRead(id)
+    if (hasVisibleSibling && canRead) {
+      snapshotPublisher.resume()
+    } else {
+      snapshotPublisher.pause()
+    }
+    if (!canRead) debounceSave.cancel()
+    else if (snapshotPublisher.hasPending() && autosave && getFileObject(id)?.path) {
+      debounceSaveHandler()
+    }
+  }
+
   useEffect(() => {
     isUnmountingRef.current = false
+    const unregister = editorSnapshotRegistry.register(id, instanceIdRef.current!, {
+      canRead: () => !capricornEditorRef.current?.isComposing(),
+      flush: () => snapshotPublisher.flush(),
+      hasPending: () => snapshotPublisher.hasPending(),
+      isVisible: () => activeRef.current || visibleRef.current,
+      onSyncDemandChanged: (hasVisibleSibling) =>
+        snapshotDemandHandlerRef.current(hasVisibleSibling),
+    })
     return () => {
       isUnmountingRef.current = true
-      snapshotPublisher.flush()
-      snapshotPublisher.cancel()
+      snapshotPublisher.pause()
+      if (editorSnapshotRegistry.flush(id)) snapshotPublisher.cancel()
+      unregister()
     }
-  }, [snapshotPublisher])
+  }, [id, snapshotPublisher])
+
+  useEffect(() => {
+    editorSnapshotRegistry.updateVisibility(id)
+  }, [id, active, visible, currentViewType])
 
   useUnmount(() => {
+    capricornStatisticsScheduler.cancel()
     if (counterIdleHandleRef.current !== null) {
       cancelIdle(counterIdleHandleRef.current)
       counterIdleHandleRef.current = null
@@ -1064,45 +1260,74 @@ function TextEditor(props: TextEditorProps) {
 
   const applySyncedContent = useCallback(
     (nextContent: string, force = false) => {
-      if (latestContentRef.current === nextContent) return
       // A newer local edit wins this race. Its pending publication will bring
       // the sibling instance back to the same content.
       if (!force && snapshotPublisher.hasPending()) return
+      if (!force && latestContentRef.current === nextContent) return
 
       snapshotPublisher.cancel()
       if (remoteContentResetHandleRef.current !== null) {
         window.clearTimeout(remoteContentResetHandleRef.current)
+        remoteContentResetHandleRef.current = null
       }
 
       isApplyingRemoteContentRef.current = true
       latestContentRef.current = nextContent
-      editorRef.current?.setContent(nextContent)
       setContent(nextContent)
       updateCachedFileContent(nextContent)
 
+      // Capricorn treats content as a remount seed. Keep the shared host value
+      // current without parsing every sibling edit into an invisible runtime.
+      // Suppress late callbacks from its old document until it catches up.
+      if (currentViewType === EditorViewType.WYSIWYG && !activeRef.current && !visibleRef.current) {
+        needsMountedContentSyncRef.current = true
+        return
+      }
+
+      needsMountedContentSyncRef.current = false
+      setMountedEditorContent(nextContent)
       remoteContentResetHandleRef.current = window.setTimeout(() => {
         isApplyingRemoteContentRef.current = false
         remoteContentResetHandleRef.current = null
       }, 0)
     },
-    [snapshotPublisher, updateCachedFileContent],
+    [currentViewType, setMountedEditorContent, snapshotPublisher, updateCachedFileContent],
   )
+
+  useLayoutEffect(() => {
+    if (!active && !visible) return
+    // Capricorn flushes its separate React root synchronously. Leave this
+    // commit before replacing its document, then catch up before native input.
+    let canceled = false
+    queueMicrotask(() => {
+      if (canceled || (!activeRef.current && !visibleRef.current)) return
+      if (!editorSnapshotRegistry.flush(id)) return
+      if (needsMountedContentSyncRef.current) {
+        applySyncedContent(latestContentRef.current ?? '', true)
+      }
+    })
+    return () => {
+      canceled = true
+    }
+  }, [id, active, visible, applySyncedContent])
 
   useEffect(() => {
     latestContentRef.current = content
   }, [content])
 
   useEffect(() => {
-    if (!active) {
-      snapshotPublisher.flush()
+    const wasActive = wasActiveSnapshotRef.current
+    wasActiveSnapshotRef.current = active
+    if (wasActive && !active) {
+      editorSnapshotRegistry.flush(id)
     }
-  }, [active, snapshotPublisher])
+  }, [id, active])
 
   useEffect(() => {
     const wasReserved = wasSavePathReservedRef.current
     wasSavePathReservedRef.current = savePathReserved
     if (savePathReserved) {
-      snapshotPublisher.flush()
+      editorSnapshotRegistry.flush(id)
       return
     }
     if (!wasReserved) return
@@ -1113,9 +1338,9 @@ function TextEditor(props: TextEditorProps) {
     if (typeof cachedContent !== 'string') return
 
     latestContentRef.current = cachedContent
-    editorRef.current?.setContent(cachedContent)
+    setMountedEditorContent(cachedContent)
     setContent(cachedContent)
-  }, [id, savePathReserved, snapshotPublisher])
+  }, [id, savePathReserved, setMountedEditorContent, snapshotPublisher])
 
   useEffect(() => {
     const handleContentSync = (payload: TextEditorContentSyncPayload) => {
@@ -1147,32 +1372,87 @@ function TextEditor(props: TextEditorProps) {
 
   useEffect(() => {
     let canceled = false
+    const file = getFileObject(id) ?? lastKnownFileRef.current
+    if (!file || file.path !== filePath) return
+    const openRequestId =
+      getEditorOpenMeasurement(id, groupId) ??
+      beginEditorOpenMeasurement(id, { viewId: groupId, origin: 'mount' })
+    recordEditorOpenStage(openRequestId, 'host-content-start', {
+      contentRevision: fileSaveCoordinator.getRevision(id),
+      kind: 'open',
+    })
+    const contentRevision = fileSaveCoordinator.getRevision(id)
+    const diskRevision = fileSaveCoordinator.getDiskRevision(id)
+
+    // Loading a sibling or changing paths must not overwrite an edit or a
+    // newer watcher/save publication that arrived while the read was pending.
+    const keepNewerContent = () => {
+      const currentFile = getFileObject(id)
+      if (canceled || !currentFile || currentFile.path !== filePath) return true
+      const currentState = useEditorStateStore.getState().idStateMap.get(id)
+      if (
+        (currentState?.hasUnsavedChanges && typeof currentFile.content === 'string') ||
+        editorSnapshotRegistry.hasPending(id) ||
+        !editorSnapshotRegistry.canRead(id) ||
+        currentFile.content !== file.content ||
+        fileSaveCoordinator.getRevision(id) !== contentRevision ||
+        fileSaveCoordinator.getDiskRevision(id) !== diskRevision
+      ) {
+        if (typeof currentFile.content === 'string') {
+          recordEditorOpenContent(openRequestId, currentFile.content)
+          recordEditorOpenStage(openRequestId, 'host-content-ready', {
+            contentRevision: fileSaveCoordinator.getRevision(id),
+          })
+          setContent(currentFile.content)
+          setStatus(TextEditorStatus.SUCCESS)
+        }
+        return true
+      }
+      return false
+    }
 
     const init = async () => {
-      const file = curFile
       const editorState = useEditorStateStore.getState().idStateMap.get(file.id)
 
-      if (editorState?.hasUnsavedChanges && typeof file.content === 'string') {
+      if (
+        (editorState?.hasUnsavedChanges ||
+          editorSnapshotRegistry.hasPending(id) ||
+          !editorSnapshotRegistry.canRead(id)) &&
+        typeof file.content === 'string'
+      ) {
         fileSaveCoordinator.recordContent(id, file.content)
+        recordEditorOpenStage(openRequestId, 'cache-ready')
+        recordEditorOpenContent(openRequestId, file.content)
+        recordEditorOpenStage(openRequestId, 'host-content-ready', {
+          contentRevision: fileSaveCoordinator.getRevision(id),
+        })
         setContent(file.content)
         return setStatus(TextEditorStatus.SUCCESS)
       }
 
       if (file.path) {
-        const snapshot = await readStableFileSnapshot(file.path)
-        if (canceled) return
+        recordEditorOpenStage(openRequestId, 'read-start')
+        const snapshot = await readStableFileSnapshot(file.path, { reuseInFlight: true })
+        recordEditorOpenStage(openRequestId, 'read-end')
+        if (keepNewerContent()) return
         if (snapshot.status === 'unstable') {
-          toast.error(t('external_file_change.read_failed'))
+          finishEditorOpenMeasurement(openRequestId, 'error')
+          toast.error(i18n.t('external_file_change.read_failed'))
           return setStatus(TextEditorStatus.READERROR)
         }
         if (snapshot.status === 'success') {
+          recordEditorOpenContent(openRequestId, snapshot.content)
           fileSaveCoordinator.setDiskRevision(id, snapshot.revision)
           setContent(snapshot.content)
           updateCachedFileContent(snapshot.content)
+          recordEditorOpenStage(openRequestId, 'host-content-ready', {
+            contentRevision: fileSaveCoordinator.getRevision(id),
+          })
           return setStatus(TextEditorStatus.SUCCESS)
         }
 
         const res = snapshot.result
+        finishEditorOpenMeasurement(openRequestId, 'error')
         if (res.code === FileResultCode.NotFound) {
           return setStatus(TextEditorStatus.NOTEXIST)
         }
@@ -1186,31 +1466,43 @@ function TextEditor(props: TextEditorProps) {
       } else if (file.content !== undefined) {
         if (canceled) return
         fileSaveCoordinator.recordContent(id, file.content)
+        recordEditorOpenStage(openRequestId, 'cache-ready')
+        recordEditorOpenContent(openRequestId, file.content)
+        recordEditorOpenStage(openRequestId, 'host-content-ready', {
+          contentRevision: fileSaveCoordinator.getRevision(id),
+        })
         setContent(file.content)
       }
 
       return setStatus(TextEditorStatus.SUCCESS)
     }
-    init()
+    void init().catch((error) => {
+      if (keepNewerContent()) return
+      finishEditorOpenMeasurement(openRequestId, 'error')
+      logger.error('Failed to read file snapshot', error)
+      toast.error(i18n.t('external_file_change.read_failed'))
+      setStatus(TextEditorStatus.READERROR)
+    })
 
     return () => {
       canceled = true
     }
-  }, [curFile, id, t, updateCachedFileContent])
+  }, [filePath, groupId, id, updateCachedFileContent])
 
   useEffect(() => {
-    if (status !== TextEditorStatus.SUCCESS || delegate) return
-    setCurrentViewType(effectiveDefaultViewType)
-    useEditorViewTypeStore.getState().setEditorViewType(id, effectiveDefaultViewType)
+    if (status !== TextEditorStatus.SUCCESS || editorInitializedRef.current) return
+    editorInitializedRef.current = true
+    setCurrentViewType(fileTypeConfig.defaultMode)
+    useEditorViewTypeStore.getState().setEditorViewType(id, fileTypeConfig.defaultMode)
 
-    if (effectiveDefaultViewType === EditorViewType.PREVIEW) {
+    if (fileTypeConfig.defaultMode !== EditorViewType.SOURCECODE) {
       return
     }
 
-    const newDelegate = createDelegate(effectiveDefaultViewType, fileTypeConfig.type)
+    const newDelegate = createDelegate(fileTypeConfig.type)
     setDelegate(newDelegate)
     registerEditorDelegateResource(id, instanceIdRef.current!, newDelegate, activeRef.current)
-  }, [status, delegate, id, fileTypeConfig, effectiveDefaultViewType, createDelegate])
+  }, [status, id, fileTypeConfig, createDelegate])
 
   const saveHandler = useCallback(
     async (params: SaveHandlerParams = {}) => {
@@ -1222,10 +1514,11 @@ function TextEditor(props: TextEditorProps) {
 
         const curEditorState = useEditorStateStore.getState().idStateMap.get(fileBeforeFlush.id)
 
+        if (!editorSnapshotRegistry.canRead(id)) return false
         if (!curEditorState?.hasUnsavedChanges) return true
         if (isExternalFileSaveBlocked(id)) return false
 
-        if (!snapshotPublisher.flush()) return false
+        if (!editorSnapshotRegistry.flush(id)) return false
         const initialFile = getFileObject(id) ?? fileBeforeFlush
         const sharedContent =
           typeof initialFile.content === 'string'
@@ -1322,9 +1615,7 @@ function TextEditor(props: TextEditorProps) {
                   syncProtectedAliases: (aliasIds) => {
                     const editorStore = useEditorStore.getState()
                     closeCleanPhysicalAliases({
-                      aliasIds: aliasIds.filter((aliasId) =>
-                        editorStore.opened.includes(aliasId),
-                      ),
+                      aliasIds: aliasIds.filter((aliasId) => editorStore.opened.includes(aliasId)),
                       closeTab: editorStore.delOpenedFile,
                       content: fileContent,
                       getFile: getFileObject,
@@ -1421,7 +1712,10 @@ function TextEditor(props: TextEditorProps) {
             })
           },
           {
-            canAttempt: () => !isExternalFileSaveBlocked(id),
+            canAttempt: () =>
+              !isExternalFileSaveBlocked(id) &&
+              editorSnapshotRegistry.canRead(id) &&
+              !editorSnapshotRegistry.hasPending(id),
           },
         )
       }, params)
@@ -1488,7 +1782,7 @@ function TextEditor(props: TextEditorProps) {
     (newContent: string) => {
       if (!active || savePathReserved || externalChangeResolving) return
       snapshotPublisher.cancel()
-      editorRef.current?.setContent(newContent)
+      setMountedEditorContent(newContent)
       setContent(newContent)
       latestContentRef.current = newContent
       updateCachedFileContent(newContent)
@@ -1506,6 +1800,7 @@ function TextEditor(props: TextEditorProps) {
       externalChangeResolving,
       id,
       savePathReserved,
+      setMountedEditorContent,
       snapshotPublisher,
       updateCachedFileContent,
     ],
@@ -1542,15 +1837,14 @@ function TextEditor(props: TextEditorProps) {
 
   useEffect(() => {
     const cb = throttle(
-      (payload: EditorViewType) => {
+      (payload: EditorViewTypeValue) => {
         if (active) {
           if (editorTypeSwitchingRef.current) {
             return
           }
 
-          if (editorRef.current?.getType() === payload) {
-            return
-          }
+          if (currentViewType === payload) return
+          if (!fileTypeConfig.supportedModes.includes(payload)) return
 
           editorTypeSwitchingRef.current = true
           bus.emit(EVENT.app_save, undefined, {
@@ -1563,7 +1857,13 @@ function TextEditor(props: TextEditorProps) {
                 unregisterSourceCodeViewResource(curFile.id, instanceIdRef.current!)
               }
 
-              if (payload === EditorViewType.SOURCECODE) {
+              const switchingFromWysiwyg = currentViewType === EditorViewType.WYSIWYG
+
+              if (payload === EditorViewType.WYSIWYG) {
+                unregisterRmeEditorResources(curFile.id, instanceIdRef.current!)
+                editorContextRef.current = null
+                setDelegate(null)
+              } else if (payload === EditorViewType.SOURCECODE) {
                 const currentSettingData = useAppSettingStore.getState().settingData
                 const sourceCodeDelegate = createSourceCodeDelegate({
                   disableAllBuildInShortcuts: true,
@@ -1592,22 +1892,12 @@ function TextEditor(props: TextEditorProps) {
                 setDelegate(sourceCodeDelegate)
               } else if (payload === EditorViewType.PREVIEW) {
                 debounceRefreshToc()
-              } else {
-                const wysiwygDelegate = createWysiwygDelegate(
-                  getOrCreateDelegateOptions(curFile.id),
-                )
-                registerEditorDelegateResource(
-                  curFile.id,
-                  instanceIdRef.current!,
-                  wysiwygDelegate,
-                  activeRef.current,
-                )
-                setDelegate(wysiwygDelegate)
-                debounceRefreshToc()
               }
               useEditorViewTypeStore.getState().setEditorViewType(curFile.id, payload)
               setCurrentViewType(payload)
-              editorRef.current?.toggleType(payload)
+              if (!switchingFromWysiwyg && payload !== EditorViewType.WYSIWYG) {
+                editorRef.current?.toggleType(payload)
+              }
             },
             onFinally: () => {
               editorTypeSwitchingRef.current = false
@@ -1625,7 +1915,7 @@ function TextEditor(props: TextEditorProps) {
       cb.cancel()
       bus.detach('editor_toggle_type', cb)
     }
-  }, [active, curFile, debounceRefreshToc])
+  }, [active, curFile, currentViewType, debounceRefreshToc, fileTypeConfig.supportedModes])
 
   useEffect(() => {
     const exportImageHandler = async () => {
@@ -1637,6 +1927,9 @@ function TextEditor(props: TextEditorProps) {
       if (!file) return
 
       try {
+        const markdown = useEditorStore.getState().getEditorContent(id)
+        const capricornEditor =
+          currentViewType === EditorViewType.WYSIWYG ? capricornEditorRef.current : null
         const path = await save({
           title: t('contextmenu.editor_tab.export_image'),
           defaultPath: file.name.split('.')?.[0] + '.jpg',
@@ -1645,10 +1938,19 @@ function TextEditor(props: TextEditorProps) {
 
         const n = toast.loading(t('contextmenu.editor_tab.export_image') + '...')
         let restoreExportResources: (() => void) | undefined
+        let disposeExportSurface: (() => void) | undefined
 
         try {
-          await waitForEditorResourcesForExport(editorRef.current)
-          const exportElement = document.getElementById(id)
+          let exportElement: HTMLElement | null
+          if (currentViewType === EditorViewType.WYSIWYG) {
+            if (!capricornEditor) throw new Error('Editor is not ready.')
+            const surface = await capricornEditor.createExportSurface(markdown)
+            disposeExportSurface = surface.dispose
+            exportElement = surface.element
+          } else {
+            await waitForEditorResourcesForExport(editorRef.current)
+            exportElement = document.getElementById(id)
+          }
           if (!exportElement) {
             throw new Error('Editor element not found')
           }
@@ -1673,8 +1975,12 @@ function TextEditor(props: TextEditorProps) {
           logger.error('Failed to export image:', error)
           toast.error(String(error))
         } finally {
-          restoreExportResources?.()
-          toast.dismiss(n)
+          try {
+            restoreExportResources?.()
+          } finally {
+            disposeExportSurface?.()
+            toast.dismiss(n)
+          }
         }
       } catch (error) {
         toast.error(String(error))
@@ -1696,8 +2002,12 @@ function TextEditor(props: TextEditorProps) {
         .then(async (path) => {
           if (!path) return
 
+          editorSnapshotRegistry.flushForRead(id)
           const n = toast.loading(t('contextmenu.editor_tab.export_html') + '...')
-          const res = await editorRef.current?.exportHtml()
+          const res =
+            currentViewType === EditorViewType.WYSIWYG
+              ? await capricornEditorRef.current?.export('html')
+              : await editorRef.current?.exportHtml()
           const scStyled = document.head.querySelectorAll('style[data-styled]')
 
           const html = `
@@ -1739,7 +2049,7 @@ function TextEditor(props: TextEditorProps) {
       bus.detach('editor_export_image', exportImageHandler)
       bus.detach('editor_set_content', setContentHandler)
     }
-  }, [active, id, setContentHandler, t])
+  }, [active, currentViewType, id, setContentHandler, t])
 
   useEffect(() => {
     if (active) {
@@ -1783,11 +2093,16 @@ function TextEditor(props: TextEditorProps) {
 
   const handleWrapperClick: React.MouseEventHandler<HTMLDivElement> = useCallback(
     (e) => {
-      if (
-        currentViewType === EditorViewType.PREVIEW ||
-        !delegate ||
-        !delegate.manager.mounted
-      ) {
+      if (currentViewType === EditorViewType.WYSIWYG) {
+        if (
+          e.target === e.currentTarget ||
+          (e.target as HTMLElement).parentElement === e.currentTarget
+        ) {
+          capricornEditorRef.current?.focus()
+        }
+        return
+      }
+      if (currentViewType === EditorViewType.PREVIEW || !delegate || !delegate.manager.mounted) {
         return
       }
       if (
@@ -1808,7 +2123,7 @@ function TextEditor(props: TextEditorProps) {
 
   const editorProps: MfEditorProps = useMemo(
     () => ({
-      initialType: effectiveDefaultViewType,
+      initialType: currentViewType,
       content: content!,
       delegate: delegate ?? undefined,
       editable: !savePathReserved && !externalChangeResolving,
@@ -1849,48 +2164,57 @@ function TextEditor(props: TextEditorProps) {
       sourceCodeEditorSpellcheck,
       wysiwygEditorSpellcheck,
       fileTypeConfig,
-      effectiveDefaultViewType,
+      currentViewType,
       rootFontSize,
       rootLineHeight,
       savePathReserved,
       externalChangeResolving,
     ],
   )
-  publishEditorSnapshotRef.current = (snapshot) => {
-    try {
-      const serialize = () => snapshot.delegate.docToString(snapshot.doc)
-      const nextContent =
-        snapshot.delegate.view === 'Wysiwyg'
-          ? measureEditorSnapshot(id, snapshot.doc.content.size, snapshot.mode, serialize)
+  publishEditorSnapshotRef.current = (snapshot) =>
+    editorSnapshotRegistry.publish(id, instanceIdRef.current!, () => {
+      try {
+        const serialize =
+          snapshot.kind === 'capricorn'
+            ? snapshot.getMarkdown
+            : () => snapshot.delegate.docToString(snapshot.doc)
+        const shouldMeasure = snapshot.kind === 'capricorn' || snapshot.delegate.view === 'Wysiwyg'
+        const documentSize =
+          snapshot.kind === 'capricorn' ? snapshot.documentSize : snapshot.doc.content.size
+        const nextContent = shouldMeasure
+          ? measureEditorSnapshot(id, documentSize, snapshot.mode, serialize)
           : serialize()
 
-      latestContentRef.current = nextContent
-      if (!isUnmountingRef.current) {
-        setContent(nextContent)
-      }
-      updateCachedFileContent(nextContent)
-      emitContentSync(nextContent)
-
-      if (!isUnmountingRef.current) {
-        if (activeRef.current) {
-          debounceRefreshToc()
+        latestContentRef.current = nextContent
+        if (!isUnmountingRef.current) {
+          setContent(nextContent)
         }
+        updateCachedFileContent(nextContent)
+        emitContentSync(nextContent)
 
-        const latestFile = getFileObject(id)
-        if (autosave && latestFile?.path) {
-          debounceSaveHandler()
+        if (!isUnmountingRef.current) {
+          // Capricorn's heading subscription already publishes actual outline
+          // changes; plain text snapshots must not rebuild its full directory.
+          if (activeRef.current && snapshot.kind !== 'capricorn') {
+            debounceRefreshToc()
+          }
+
+          const latestFile = getFileObject(id)
+          if (snapshot.kind !== 'capricorn' && autosave && latestFile?.path) {
+            debounceSaveHandler()
+          }
         }
+        return true
+      } catch (error) {
+        captureException(error)
+        return false
       }
-      return true
-    } catch (error) {
-      captureException(error)
-      return false
-    }
-  }
+    })
 
   const handleBeforeInputCapture = useCallback(() => {
     interactionStartedAtRef.current = startEditorInteractionMeasurement()
-  }, [])
+    interactionOpenRequestIdRef.current = getEditorOpenMeasurement(id, groupId)
+  }, [groupId, id])
 
   const handleChange: EditorChangeHandler = useCallback(
     (params) => {
@@ -1905,38 +2229,24 @@ function TextEditor(props: TextEditorProps) {
           rejectedReservedChangeRef.current = true
           queueMicrotask(() => {
             latestContentRef.current = cachedContent
-            editorRef.current?.setContent(cachedContent)
+            setMountedEditorContent(cachedContent)
             setContent(cachedContent)
             rejectedReservedChangeRef.current = false
           })
         }
         interactionStartedAtRef.current = undefined
+        interactionOpenRequestIdRef.current = undefined
         return
       }
 
-      if (active && counterIdleHandleRef.current !== null) {
-        cancelIdle(counterIdleHandleRef.current)
-      }
-
       if (active) {
-        counterIdleHandleRef.current = requestIdle(() => {
-          counterIdleHandleRef.current = null
-          useEditorCounterStore.getState().addEditorCounter({
-            id,
-            data: {
-              characterCount: helpers.getCharacterCount(),
-              nonWhitespaceCharacterCount: countNonWhitespaceCharacters(
-                params.state.doc.textContent,
-              ),
-              wordCount: helpers.getWordCount(),
-            },
-          })
-        })
+        scheduleEditorCounter(params)
       }
 
       if (tr?.docChanged && !tr.getMeta('APPLY_MARKS')) {
         if (isApplyingRemoteContentRef.current || !delegate) {
           interactionStartedAtRef.current = undefined
+          interactionOpenRequestIdRef.current = undefined
           return
         }
 
@@ -1944,11 +2254,13 @@ function TextEditor(props: TextEditorProps) {
           hasUnsavedChanges: true,
           undoDepth: helpers.undoDepth(),
         })
+        editorSnapshotRegistry.changed(id, instanceIdRef.current!)
 
         const coalesce = delegate.view === 'Wysiwyg' && shouldCoalesceEditorSnapshots()
         const snapshot: PendingEditorSnapshot = {
           delegate,
           doc: params.state.doc,
+          kind: 'rme',
           mode: coalesce ? 'coalesced' : 'immediate',
         }
 
@@ -1957,17 +2269,338 @@ function TextEditor(props: TextEditorProps) {
           snapshotPublisher.flush()
         }
 
-        recordEditorInteractionMeasurement(id, interactionStartedAtRef.current)
+        recordEditorInteractionMeasurement(
+          id,
+          interactionStartedAtRef.current,
+          groupId,
+          'visual-feedback',
+          interactionOpenRequestIdRef.current,
+        )
         interactionStartedAtRef.current = undefined
+        interactionOpenRequestIdRef.current = undefined
       }
     },
-    [id, delegate, active, savePathReserved, snapshotPublisher],
+    [
+      id,
+      groupId,
+      delegate,
+      active,
+      savePathReserved,
+      scheduleEditorCounter,
+      setMountedEditorContent,
+      snapshotPublisher,
+    ],
+  )
+
+  const handleCapricornChange = useCallback(
+    (event?: CapricornEditorChangeEvent) => {
+      if (isApplyingRemoteContentRef.current || isUnmountingRef.current) {
+        interactionStartedAtRef.current = undefined
+        interactionOpenRequestIdRef.current = undefined
+        return
+      }
+
+      if (savePathReserved || externalChangeResolving) {
+        const cachedContent = getFileObject(id)?.content
+        if (typeof cachedContent === 'string') {
+          capricornEditorRef.current?.setMarkdown(
+            cachedContent,
+            fileSaveCoordinator.getRevision(id),
+          )
+        }
+        interactionStartedAtRef.current = undefined
+        interactionOpenRequestIdRef.current = undefined
+        return
+      }
+
+      if (event?.composing && !compositionDirtyRef.current) {
+        compositionDirtyRef.current = {
+          wasDirty: useEditorStateStore.getState().idStateMap.get(id)?.hasUnsavedChanges ?? false,
+          documentChanged: false,
+          hadPending: snapshotPublisher.hasPending(),
+          contentRevision: fileSaveCoordinator.getRevision(id),
+        }
+      }
+      if (event?.documentChanged !== false && compositionDirtyRef.current) {
+        compositionDirtyRef.current.documentChanged = true
+      }
+      if (event?.composing === false && compositionDirtyRef.current) {
+        const composition = compositionDirtyRef.current
+        compositionDirtyRef.current = null
+        if (!composition.documentChanged && !composition.hadPending) {
+          snapshotPublisher.cancel()
+          if (
+            !composition.wasDirty &&
+            !editorSnapshotRegistry.hasPending(id) &&
+            composition.contentRevision === fileSaveCoordinator.getRevision(id)
+          ) {
+            useEditorStateStore.getState().setIdStateMap(id, { hasUnsavedChanges: false })
+          }
+          editorSnapshotRegistry.updateVisibility(id)
+          if (
+            autosave &&
+            getFileObject(id)?.path &&
+            useEditorStateStore.getState().idStateMap.get(id)?.hasUnsavedChanges
+          )
+            debounceSaveHandler()
+          interactionStartedAtRef.current = undefined
+          interactionOpenRequestIdRef.current = undefined
+          return
+        }
+      }
+
+      if (event?.documentChanged === false && !event.composing && !snapshotPublisher.hasPending()) {
+        interactionStartedAtRef.current = undefined
+        interactionOpenRequestIdRef.current = undefined
+        return
+      }
+
+      if (event?.documentChanged !== false || event?.composing) {
+        useEditorStateStore.getState().setIdStateMap(id, {
+          hasUnsavedChanges: true,
+        })
+      }
+      if (event?.documentChanged !== false)
+        editorSnapshotRegistry.changed(id, instanceIdRef.current!)
+      if (event?.documentChanged !== false && activeRef.current) {
+        capricornStatisticsScheduler.schedule(capricornRuntimeAdapterRef.current)
+      }
+      // React detaches imperative refs before the parent's final snapshot flush.
+      const editor = capricornEditorRef.current
+      const snapshot: PendingEditorSnapshot = {
+        documentSize: latestContentRef.current?.length ?? 0,
+        getMarkdown: () => {
+          if (editor?.isComposing()) throw new Error('Finish composing before using this action.')
+          return editor?.getMarkdown() ?? latestContentRef.current ?? ''
+        },
+        kind: 'capricorn',
+        mode: 'coalesced',
+      }
+      snapshotPublisher.stage(snapshot)
+      if (event?.composing || editor?.isComposing()) {
+        debounceSave.cancel()
+      } else {
+        if (!event?.pending && hasVisibleSiblingRef.current) snapshotPublisher.resume()
+        if (autosave && getFileObject(id)?.path) debounceSaveHandler()
+      }
+      if (event?.composing !== undefined) editorSnapshotRegistry.updateVisibility(id)
+      // Visible feedback is measured from the editor DOM mutation. Retain the
+      // same start separately until the intentionally debounced model commit.
+      if (!event?.pending) {
+        recordEditorInteractionMeasurement(
+          id,
+          interactionStartedAtRef.current,
+          groupId,
+          'commit',
+          interactionOpenRequestIdRef.current,
+        )
+        interactionStartedAtRef.current = undefined
+        interactionOpenRequestIdRef.current = undefined
+      }
+    },
+    [
+      autosave,
+      debounceSave,
+      debounceSaveHandler,
+      externalChangeResolving,
+      groupId,
+      id,
+      savePathReserved,
+      snapshotPublisher,
+      capricornStatisticsScheduler,
+    ],
+  )
+
+  const capricornRuntimeOptions = useMemo<
+    Omit<CapricornRuntimeOptions, 'autoFocus' | 'markdown' | 'onError'>
+  >(() => {
+    const hostOptions = getOrCreateDelegateOptions(curFile.id)
+    const generateCopilotText = hostOptions.ai?.copilot?.generateText
+
+    return {
+      clipboard: capricornClipboard,
+      commands: capricornClipboardCommands,
+      keybindingConfiguration: createCapricornKeybindingConfiguration(
+        editorKeybingMap,
+        editorKeybindingsLoaded,
+      ),
+      onClipboardResult: handleCapricornClipboardResult,
+      colorScheme: editorColorScheme,
+      copilot: generateCopilotText
+        ? {
+            generateText: ({ currentBlockAfter, currentBlockBefore, nextBlock, previousBlock }) =>
+              generateCopilotText({
+                context: {
+                  nextParagraph: nextBlock || null,
+                  nodeType: 'paragraph',
+                  prevParagraph: previousBlock || null,
+                  textAfter: currentBlockAfter,
+                  textBefore: currentBlockBefore,
+                },
+              }),
+          }
+        : false,
+      density: 'compact',
+      handleLinkClick: async (href) => {
+        await openEditorLink(href, curFile.id)
+      },
+      handleViewImgSrcUrl: hostOptions.handleViewImgSrcUrl,
+      imageInsertHandler: hostOptions.imageInsertHandler,
+      imagePasteHandler: hostOptions.imagePasteHandler,
+      localization: capricornLocalization,
+      readOnly: savePathReserved || externalChangeResolving,
+      spellCheck: wysiwygEditorSpellcheck,
+      style: {
+        fontSize: editorRootFontSize || 16,
+        lineHeight: editorRootLineHeight || '1.7',
+        // Preserve the runtime's 14px code / 16px body ratio as text scales.
+        '--cap-code-font-size': `${(editorRootFontSize || 16) * 0.875}px`,
+      },
+      typewriter: { enabled: editorTypewriterScroll },
+      uploadImageHandler:
+        hostOptions.uploadImageHandler as CapricornRuntimeOptions['uploadImageHandler'],
+      virtualize: CAPRICORN_DESKTOP_VIRTUALIZE_OPTIONS,
+    }
+  }, [
+    curFile.id,
+    editorColorScheme,
+    editorKeybingMap,
+    editorKeybindingsLoaded,
+    editorRootFontSize,
+    editorRootLineHeight,
+    editorTypewriterScroll,
+    externalChangeResolving,
+    savePathReserved,
+    wysiwygEditorSpellcheck,
+  ])
+
+  const handleCapricornError = useCallback(
+    (error: unknown) => {
+      finishEditorOpenMeasurement(getEditorOpenMeasurement(id, groupId), 'error')
+      captureException(error)
+      logger.error('Capricorn editor runtime error', error)
+    },
+    [groupId, id],
+  )
+
+  const handleCapricornOpenProgress = useCallback(
+    (progress: CapricornRuntimeProgress, identity: CapricornRuntimeRequestIdentity) => {
+      // The file-read, tab-switch or retry path owns measurement creation.
+      // Late progress from the pane's previously visible file must not cancel
+      // and replace the newer file's request.
+      const requestId = getEditorOpenMeasurement(id, groupId)
+      if (identity.contentRevision !== fileSaveCoordinator.getRevision(id)) return
+      if (progress.stage === 'module-ready') {
+        recordEditorOpenContent(requestId, latestContentRef.current ?? '', { onlyIfMissing: true })
+      }
+      recordEditorOpenStage(requestId, progress.stage, {
+        contentRevision: identity.contentRevision,
+        mode: EditorViewType.WYSIWYG,
+        runtimeVersion: capricornRuntimeVersion,
+        runtimeEntrySha256: capricornRuntimeEntrySha256,
+        runtimeElapsedMs: progress.elapsedMs,
+        durationMs: progress.durationMs,
+        ...(progress.moduleState !== undefined ? { moduleState: progress.moduleState } : {}),
+        ...(progress.blockCount !== undefined ? { blockCount: progress.blockCount } : {}),
+      })
+    },
+    [groupId, id],
+  )
+
+  const handleCapricornRuntimeReady = useCallback(
+    (container: HTMLElement, identity: CapricornRuntimeRequestIdentity) => {
+      if (!visibleRef.current) return
+      const requestId = getEditorOpenMeasurement(id, groupId)
+      recordEditorOpenContent(requestId, latestContentRef.current ?? '', { onlyIfMissing: true })
+      recordEditorOpenStage(requestId, 'runtime-ready', {
+        contentRevision: identity.contentRevision,
+        mode: EditorViewType.WYSIWYG,
+        runtimeVersion: capricornRuntimeVersion,
+        runtimeEntrySha256: capricornRuntimeEntrySha256,
+      })
+      stopFirstPaintObservationRef.current?.()
+      stopFirstPaintObservationRef.current = observeEditorFirstPaint({
+        requestId,
+        fileId: id,
+        container,
+        isCurrent: () =>
+          visibleRef.current &&
+          getEditorOpenMeasurement(id, groupId) === requestId &&
+          container.dataset.mfCapricornRuntimeRequest === String(identity.runtimeRequestSequence),
+        onBeforeInput: () => {
+          interactionStartedAtRef.current = startEditorInteractionMeasurement()
+          interactionOpenRequestIdRef.current = requestId
+        },
+      })
+      if (activeRef.current) {
+        capricornStatisticsScheduler.schedule(capricornRuntimeAdapterRef.current)
+      }
+    },
+    [capricornStatisticsScheduler, groupId, id],
+  )
+
+  const handleCapricornRetry = useCallback(() => {
+    beginEditorOpenMeasurement(id, {
+      viewId: groupId,
+      origin: 'command',
+      kind: 'open',
+    })
+  }, [groupId, id])
+
+  useEffect(() => {
+    if (!active || !visible || currentViewType !== EditorViewType.WYSIWYG) {
+      capricornStatisticsScheduler.cancel()
+    }
+  }, [active, capricornStatisticsScheduler, currentViewType, visible])
+
+  useEffect(() => {
+    if (!visible) {
+      interactionStartedAtRef.current = undefined
+      interactionOpenRequestIdRef.current = undefined
+      stopFirstPaintObservationRef.current?.()
+      finishEditorOpenMeasurement(getEditorOpenMeasurement(id, groupId), 'canceled')
+    } else if (currentViewType !== EditorViewType.WYSIWYG) {
+      const requestId = getEditorOpenMeasurement(id, groupId)
+      recordEditorOpenStage(requestId, 'outside-wysiwyg-scope', { mode: currentViewType })
+      finishEditorOpenMeasurement(requestId, 'unverified')
+    }
+  }, [active, currentViewType, groupId, id, visible])
+
+  useEffect(
+    () => () => {
+      stopFirstPaintObservationRef.current?.()
+      finishEditorOpenMeasurement(getEditorOpenMeasurement(id, groupId), 'canceled')
+    },
+    [groupId, id],
+  )
+
+  const handleCapricornUnavailable = useCallback(
+    (error: unknown) => {
+      handleCapricornError(error)
+      if (activeRef.current) {
+        bus.emit('editor_toggle_type', undefined, EditorViewType.SOURCECODE)
+      }
+    },
+    [handleCapricornError],
+  )
+
+  const handleCapricornEditorChange = useCallback(
+    (editor: CapricornRuntimeAdapter | null) => {
+      const instanceId = instanceIdRef.current!
+      capricornRuntimeAdapterRef.current = editor
+      if (editor) {
+        registerCapricornEditorResource(id, instanceId, editor, activeRef.current)
+      } else {
+        capricornStatisticsScheduler.cancel()
+        unregisterCapricornEditorResource(id, instanceId)
+      }
+    },
+    [capricornStatisticsScheduler, id],
   )
 
   const getExportContent = useCallback(() => {
-    snapshotPublisher.flush()
-    return latestContentRef.current ?? content ?? ''
-  }, [content, snapshotPublisher])
+    return useEditorStore.getState().getEditorContent(id)
+  }, [id])
 
   if (status === TextEditorStatus.NOTEXIST) {
     return <WarningHeader>File is not exist</WarningHeader>
@@ -1981,10 +2614,7 @@ function TextEditor(props: TextEditorProps) {
     return <WarningHeader>Binary file cannot be opened as text</WarningHeader>
   }
 
-  if (
-    typeof content !== 'string' ||
-    (!delegate && effectiveDefaultViewType !== EditorViewType.PREVIEW)
-  ) {
+  if (typeof content !== 'string' || (!delegate && currentViewType === EditorViewType.SOURCECODE)) {
     return (
       <EditorSkeleton>
         {Array.from({ length: 12 }).map((_, i) => (
@@ -2012,7 +2642,26 @@ function TextEditor(props: TextEditorProps) {
         onClick={handleWrapperClick}
       >
         <AppEditorThemeProvider>
-          <MfEditor ref={editorRef} onChange={handleChange} {...editorProps} />
+          {currentViewType === EditorViewType.WYSIWYG ? (
+            <CapricornEditor
+              active={active}
+              contentRevision={fileSaveCoordinator.getRevision(id)}
+              visible={visible}
+              editorId={id}
+              initialMarkdown={content}
+              onChange={handleCapricornChange}
+              onError={handleCapricornError}
+              onOpenProgress={handleCapricornOpenProgress}
+              onRetry={handleCapricornRetry}
+              onRuntimeReady={handleCapricornRuntimeReady}
+              onEditorChange={handleCapricornEditorChange}
+              onUnavailable={handleCapricornUnavailable}
+              options={capricornRuntimeOptions}
+              ref={capricornEditorRef}
+            />
+          ) : (
+            <MfEditor ref={editorRef} onChange={handleChange} {...editorProps} />
+          )}
         </AppEditorThemeProvider>
       </EditorWrapper>
       <PdfPrintController
@@ -2036,6 +2685,7 @@ function TextEditor(props: TextEditorProps) {
 
 export interface TextEditorProps {
   id: string
+  groupId?: string
   active: boolean
   visible?: boolean
   fileTypeConfig: FileTypeConfig

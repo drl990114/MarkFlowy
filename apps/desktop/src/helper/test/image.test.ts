@@ -85,6 +85,32 @@ describe('getImageUrlInTauri', () => {
     expect(mocks.createObjectURL).toHaveBeenCalledWith(blob)
   })
 
+  it.each(['./图片/中文.png', './%E5%9B%BE%E7%89%87/%E4%B8%AD%E6%96%87.png'])(
+    'resolves the local Chinese image path %s before Tauri encodes it',
+    async (source) => {
+      mocks.join.mockResolvedValue('/workspace/图片/中文.png')
+      mocks.invoke.mockResolvedValue(true)
+      await expect(getImageUrlInTauri(source, '/workspace')).resolves.toBe(
+        'asset://localhost//workspace/图片/中文.png',
+      )
+      expect(mocks.join).toHaveBeenCalledWith('/workspace', './图片/中文.png')
+      expect(mocks.invoke).toHaveBeenCalledWith('file_exists', {
+        filePath: '/workspace/图片/中文.png',
+      })
+      expect(mocks.convertFileSrc).toHaveBeenCalledWith('/workspace/图片/中文.png')
+      expect(mocks.fetch).not.toHaveBeenCalled()
+    },
+  )
+
+  it('passes Base64 images through without native file or network requests', async () => {
+    const source =
+      'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a8L8AAAAASUVORK5CYII='
+    await expect(getImageUrlInTauri(source, '/workspace')).resolves.toBe(source)
+    expect(mocks.fetch).not.toHaveBeenCalled()
+    expect(mocks.invoke).not.toHaveBeenCalled()
+    expect(mocks.convertFileSrc).not.toHaveBeenCalled()
+  })
+
   it('loads encoded remote image URLs through Tauri HTTP without changing the source', async () => {
     const source =
       'https://img.shields.io/badge/platforms-macOS%20%7C%20Linux-475569?style=flat-square'

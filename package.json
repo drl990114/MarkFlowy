@@ -14,6 +14,7 @@
     "dev": "turbo dev",
     "dev:desktop": "node scripts/dev-desktop.mjs",
     "test:dev-desktop": "node --test scripts/dev-desktop.test.mjs",
+    "install:capricorn-runtime": "node --env-file-if-exists=.env scripts/install-capricorn-runtime.mjs",
     "build": "turbo build --concurrency=2",
     "build:web": "yarn turbo build --filter=!@markflowy/desktop",
     "build:desktop": "yarn turbo build --filter=!@markflowy/web && yarn workspace @markflowy/desktop tauri:build",

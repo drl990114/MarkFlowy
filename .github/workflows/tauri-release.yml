@@ -9,6 +9,7 @@ jobs:
   build:
     permissions:
       contents: write
+      packages: read
     strategy:
       fail-fast: false
       matrix:
@@ -65,6 +66,11 @@ jobs:
 
       - name: Install dependencies
         run: yarn install --immutable
+
+      - name: Install verified Capricorn runtime
+        run: yarn install:capricorn-runtime
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
 
       - name: Setup
         run: yarn setup
@@ -147,6 +153,7 @@ jobs:
   build-offline-installer:
     permissions:
       contents: write
+      packages: read
     strategy:
       fail-fast: false
       matrix:
@@ -185,6 +192,11 @@ jobs:
 
       - name: Install dependencies
         run: yarn install --immutable
+
+      - name: Install verified Capricorn runtime
+        run: yarn install:capricorn-runtime
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
 
       - name: Setup
         run: yarn setup

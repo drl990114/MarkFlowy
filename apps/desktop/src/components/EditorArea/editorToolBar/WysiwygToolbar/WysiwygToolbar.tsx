@@ -1,13 +1,10 @@
 import { useEditorStore } from '@/stores'
+import { EditorViewType } from '@/constants/editorViewType'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
-import { type FC, useCallback, useEffect, useMemo, useState } from 'react'
+import { type FC, useCallback, useMemo, useSyncExternalStore } from 'react'
 import { useTranslation } from '@/i18n'
-import {
-  EditorViewType,
-  getActiveListKind,
-  type EditorContext,
-  type StandardListKind,
-} from 'rme'
+import { getCapricornEditor, subscribeCapricornEditors } from '../../capricornEditorRegistry'
+import type { CapricornBlockType, CapricornMarkType } from '../../capricornRuntimeAdapter'
 import {
   BoldIcon,
   Code2Icon,
@@ -15,6 +12,7 @@ import {
   Heading2Icon,
   Heading3Icon,
   ImageIcon,
+  LinkIcon,
   ItalicIcon,
   ListIcon,
   ListOrderedIcon,
@@ -42,23 +40,6 @@ interface WysiwygToolbarProps {
   editorId?: string
 }
 
-type ToolbarCommand = (attrs?: Record<string, unknown>) => unknown
-type StandardListCommandName = 'toggleBulletList' | 'toggleOrderedList' | 'toggleTaskList'
-
-const STANDARD_LIST_COMMAND_BY_KIND = {
-  bullet: 'toggleBulletList',
-  ordered: 'toggleOrderedList',
-  task: 'toggleTaskList',
-} as const satisfies Record<StandardListKind, StandardListCommandName>
-
-function runStandardListCommand(editorCtx: EditorContext, kind: StandardListKind): boolean {
-  const command = editorCtx.commands[STANDARD_LIST_COMMAND_BY_KIND[kind]]
-  if (!command.enabled()) return false
-
-  command()
-  return true
-}
-
 const TOOLBAR_GROUPS = [
   { id: 'history', priority: 90 },
   { id: 'headings', priority: 60 },
@@ -77,23 +58,22 @@ export const WysiwygToolbar: FC<WysiwygToolbarProps> = (props) => {
   const targetEditorId = editorId ?? activeId
   const imageLabel = t('toolbar.image') || 'Image'
 
-  const editorCtx = useEditorStore((state) => state.editorCtxMap.get(targetEditorId ?? ''))
   const viewType = targetEditorId ? getEditorViewType(targetEditorId) : EditorViewType.WYSIWYG
-  const [activeListKind, setActiveListKind] = useState<StandardListKind | null>(null)
-
-  useEffect(() => {
-    if (!editorCtx) {
-      setActiveListKind(null)
-      return
-    }
-
-    const syncActiveListKind = () => {
-      setActiveListKind(getActiveListKind(editorCtx.view.state))
-    }
-
-    syncActiveListKind()
-    return editorCtx.addHandler('updated', syncActiveListKind)
-  }, [editorCtx])
+  const getEditorSnapshot = useCallback(
+    () => (targetEditorId ? getCapricornEditor(targetEditorId) : undefined),
+    [targetEditorId],
+  )
+  const editor = useSyncExternalStore(
+    subscribeCapricornEditors,
+    getEditorSnapshot,
+    getEditorSnapshot,
+  )
+  const getUiStateSnapshot = useCallback(() => editor?.getUiState() ?? null, [editor])
+  const subscribeUiState = useCallback(
+    (listener: () => void) => editor?.subscribeUiState(listener) ?? (() => undefined),
+    [editor],
+  )
+  const uiState = useSyncExternalStore(subscribeUiState, getUiStateSnapshot, getUiStateSnapshot)
 
   const { containerRef, hiddenIds, registerItemWidth } = usePriorityHidden({
     items: TOOLBAR_SECTIONS,
@@ -101,36 +81,44 @@ export const WysiwygToolbar: FC<WysiwygToolbarProps> = (props) => {
   })
 
   const runEditorCommand = useCallback(
-    (commandName: string, attrs?: Record<string, unknown>) => {
-      if (!editorCtx) return
-      const commands = editorCtx.commands as unknown as Record<string, ToolbarCommand | undefined>
-      const command = commands[commandName]
-      if (!command) return
-
-      if (attrs === undefined) command()
-      else command(attrs)
-      editorCtx.view.focus()
+    (command: () => void) => {
+      command()
+      editor?.focus()
     },
-    [editorCtx],
+    [editor],
   )
 
   const runListCommand = useCallback(
-    (kind: StandardListKind) => {
-      if (!editorCtx) return
-      if (runStandardListCommand(editorCtx, kind)) {
-        editorCtx.view.focus()
-      }
+    (kind: 'bullet' | 'ordered' | 'task') => {
+      if (!editor) return
+      runEditorCommand(() => editor.commands.toggleList(kind))
     },
-    [editorCtx],
+    [editor, runEditorCommand],
+  )
+
+  const setBlockType = useCallback(
+    (blockType: CapricornBlockType) => {
+      if (!editor) return
+      runEditorCommand(() => editor.commands.setBlockType(blockType))
+    },
+    [editor, runEditorCommand],
+  )
+
+  const toggleMark = useCallback(
+    (mark: CapricornMarkType) => {
+      if (!editor) return
+      runEditorCommand(() => editor.commands.toggleMark(mark))
+    },
+    [editor, runEditorCommand],
   )
 
   const handleInsertImage = useCallback(() => {
-    if (!editorCtx) return
-    const commands = editorCtx.commands as typeof editorCtx.commands & {
-      requestImageInsert?: () => boolean
+    if (editor?.selection) {
+      editor.requestInlineEdit?.('image')
+      return
     }
-    commands.requestImageInsert?.()
-  }, [editorCtx])
+    void editor?.requestImageInsert().finally(() => editor.focus())
+  }, [editor])
 
   const actions = useMemo<ToolbarAction[]>(
     () => [
@@ -140,7 +128,8 @@ export const WysiwygToolbar: FC<WysiwygToolbarProps> = (props) => {
         priority: 90,
         label: t('toolbar.undo') || 'Undo',
         icon: Undo2Icon,
-        run: () => runEditorCommand('undo'),
+        disabled: !uiState?.canUndo,
+        run: () => editor && runEditorCommand(editor.commands.undo),
       },
       {
         id: 'redo',
@@ -148,7 +137,8 @@ export const WysiwygToolbar: FC<WysiwygToolbarProps> = (props) => {
         priority: 90,
         label: t('toolbar.redo') || 'Redo',
         icon: Redo2Icon,
-        run: () => runEditorCommand('redo'),
+        disabled: !uiState?.canRedo,
+        run: () => editor && runEditorCommand(editor.commands.redo),
       },
       {
         id: 'heading-1',
@@ -156,7 +146,8 @@ export const WysiwygToolbar: FC<WysiwygToolbarProps> = (props) => {
         priority: 60,
         label: t('toolbar.h1') || 'Heading 1',
         icon: Heading1Icon,
-        run: () => runEditorCommand('toggleHeading', { level: 1 }),
+        pressed: uiState?.currentBlockType === 'heading-1',
+        run: () => setBlockType('heading-1'),
       },
       {
         id: 'heading-2',
@@ -164,7 +155,8 @@ export const WysiwygToolbar: FC<WysiwygToolbarProps> = (props) => {
         priority: 60,
         label: t('toolbar.h2') || 'Heading 2',
         icon: Heading2Icon,
-        run: () => runEditorCommand('toggleHeading', { level: 2 }),
+        pressed: uiState?.currentBlockType === 'heading-2',
+        run: () => setBlockType('heading-2'),
       },
       {
         id: 'heading-3',
@@ -172,7 +164,8 @@ export const WysiwygToolbar: FC<WysiwygToolbarProps> = (props) => {
         priority: 60,
         label: t('toolbar.h3') || 'Heading 3',
         icon: Heading3Icon,
-        run: () => runEditorCommand('toggleHeading', { level: 3 }),
+        pressed: uiState?.currentBlockType === 'heading-3',
+        run: () => setBlockType('heading-3'),
       },
       {
         id: 'bold',
@@ -180,7 +173,8 @@ export const WysiwygToolbar: FC<WysiwygToolbarProps> = (props) => {
         priority: 50,
         label: t('toolbar.bold') || 'Bold',
         icon: BoldIcon,
-        run: () => runEditorCommand('toggleStrong'),
+        pressed: uiState?.markStates.bold === 'active',
+        run: () => toggleMark('bold'),
       },
       {
         id: 'italic',
@@ -188,7 +182,8 @@ export const WysiwygToolbar: FC<WysiwygToolbarProps> = (props) => {
         priority: 50,
         label: t('toolbar.italic') || 'Italic',
         icon: ItalicIcon,
-        run: () => runEditorCommand('toggleEmphasis'),
+        pressed: uiState?.markStates.italic === 'active',
+        run: () => toggleMark('italic'),
       },
       {
         id: 'inline-code',
@@ -196,7 +191,20 @@ export const WysiwygToolbar: FC<WysiwygToolbarProps> = (props) => {
         priority: 50,
         label: t('toolbar.code') || 'Inline Code',
         icon: Code2Icon,
-        run: () => runEditorCommand('toggleCodeText'),
+        pressed: uiState?.markStates.code === 'active',
+        run: () => toggleMark('code'),
+      },
+      {
+        id: 'link',
+        group: 'insert',
+        priority: 40,
+        label: t('inline_insert.insert_link'),
+        icon: LinkIcon,
+        pressed: Boolean(uiState?.link),
+        disabled: !editor?.selection || !editor.commands.insertLink || uiState?.readOnly,
+        run: () => {
+          editor?.requestInlineEdit?.('link')
+        },
       },
       {
         id: 'image',
@@ -204,6 +212,7 @@ export const WysiwygToolbar: FC<WysiwygToolbarProps> = (props) => {
         priority: 40,
         label: imageLabel,
         icon: ImageIcon,
+        disabled: !editor || uiState?.readOnly,
         run: handleInsertImage,
       },
       {
@@ -212,7 +221,8 @@ export const WysiwygToolbar: FC<WysiwygToolbarProps> = (props) => {
         priority: 30,
         label: t('toolbar.quote') || 'Blockquote',
         icon: QuoteIcon,
-        run: () => runEditorCommand('toggleBlockquote'),
+        pressed: uiState?.currentBlockType === 'blockquote',
+        run: () => editor && runEditorCommand(editor.commands.toggleBlockquote),
       },
       {
         id: 'bullet-list',
@@ -220,7 +230,7 @@ export const WysiwygToolbar: FC<WysiwygToolbarProps> = (props) => {
         priority: 30,
         label: t('toolbar.bulletList') || 'Bullet List',
         icon: ListIcon,
-        pressed: activeListKind === 'bullet',
+        pressed: uiState?.listType === 'bullet',
         run: () => runListCommand('bullet'),
       },
       {
@@ -229,7 +239,7 @@ export const WysiwygToolbar: FC<WysiwygToolbarProps> = (props) => {
         priority: 30,
         label: t('toolbar.orderedList') || 'Ordered List',
         icon: ListOrderedIcon,
-        pressed: activeListKind === 'ordered',
+        pressed: uiState?.listType === 'ordered',
         run: () => runListCommand('ordered'),
       },
       {
@@ -238,11 +248,21 @@ export const WysiwygToolbar: FC<WysiwygToolbarProps> = (props) => {
         priority: 30,
         label: t('toolbar.taskList') || 'Task List',
         icon: ListTodoIcon,
-        pressed: activeListKind === 'task',
+        pressed: uiState?.listType === 'task',
         run: () => runListCommand('task'),
       },
     ],
-    [activeListKind, handleInsertImage, imageLabel, runEditorCommand, runListCommand, t],
+    [
+      editor,
+      handleInsertImage,
+      imageLabel,
+      runEditorCommand,
+      runListCommand,
+      setBlockType,
+      t,
+      toggleMark,
+      uiState,
+    ],
   )
 
   const overflowMenuItems = useMemo(
@@ -250,7 +270,7 @@ export const WysiwygToolbar: FC<WysiwygToolbarProps> = (props) => {
     [actions, hiddenIds],
   )
 
-  if (!editorCtx || viewType !== EditorViewType.WYSIWYG) {
+  if (!editor || viewType !== EditorViewType.WYSIWYG) {
     return null
   }
 

@@ -33,16 +33,16 @@ type DisplayMode = 'words' | 'chars' | 'pureChars'
 
 export const EditorCount = () => {
   const { t } = useTranslation()
-  const { editorCounterMap } = useEditorCounterStore()
-  const { activeId } = useEditorStore()
+  const activeId = useEditorStore((state) => state.activeId)
+  const counter = useEditorCounterStore((state) =>
+    activeId ? state.editorCounterMap[activeId] : undefined,
+  )
   const [popoverVisible, setPopoverVisible] = useState(false)
   const [displayMode, setDisplayMode] = useState<DisplayMode>('chars')
 
   if (!activeId) {
     return null
   }
-
-  const counter = editorCounterMap[activeId]
 
   if (!counter) {
     return null
