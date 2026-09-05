@@ -9,7 +9,7 @@ import React, {
   type FC,
 } from 'react'
 import { Tree } from 'react-arborist'
-import type { RowRendererProps, TreeApi } from 'react-arborist'
+import type { NodeRendererProps, RowRendererProps, TreeApi } from 'react-arborist'
 import type { TreeProps } from 'react-arborist/dist/module/types/tree-props'
 import type { MoveFileInfo } from '../../contexts/FileSystemContext'
 import { useFileSystem } from '../../contexts/FileSystemContext'
@@ -38,6 +38,17 @@ type FileTreeRowState = {
 }
 
 const FileTreeRowStateContext = createContext<FileTreeRowState>({ suppressRoot: false })
+
+const FileTreeNodeRendererContext = createContext<
+  ((props: NodeRendererProps<IFile>) => React.ReactNode) | null
+>(null)
+
+// Arborist mounts its children as a component. Keep that component type stable
+// while host props and directory-loading state change, preserving inline edits.
+function FileTreeNodeRenderer(props: NodeRendererProps<IFile>) {
+  const renderNode = useContext(FileTreeNodeRendererContext)
+  return renderNode?.(props)
+}
 
 export interface FileTreeProps {
   data: IFile[]
@@ -207,7 +218,18 @@ const FileTree: FC<FileTreeProps> = (props) => {
         loadedDirsRef.current.add(target.path)
         setLoadedDirPaths((current) => new Set(current).add(target.path))
         if (children.length > 0) {
-          currentNode.data.children = children
+          // Creating a node also opens its parent. Preserve drafts (and any
+          // completed creations) inserted while this directory read was pending.
+          const currentChildren = currentNode.data.children ?? []
+          const currentIds = new Set(currentChildren.map((child) => child.id))
+          const currentPaths = new Set(currentChildren.map((child) => child.path).filter(Boolean))
+          currentNode.data.children = [
+            ...currentChildren,
+            ...children.filter(
+              (child) =>
+                !currentIds.has(child.id) && (!child.path || !currentPaths.has(child.path)),
+            ),
+          ]
           setFolderDataPure([...currentTree.data])
         }
       } catch (error) {
@@ -407,195 +429,186 @@ const FileTree: FC<FileTreeProps> = (props) => {
     />
   )
 
+  const renderTreeNode = (nodeProps: NodeRendererProps<IFile>) => {
+    const isRoot = nodeProps.node.id === rootId
+    if (isRoot) {
+      treeRef.current = nodeProps.tree
+      fileTreeHandler.rootTree = nodeProps.tree
+      fileTreeHandler.updateTreeView = (params) => {
+        fileTreeHandler.rootTree?.update({ data: params.data })
+        setFolderDataPure(params.data)
+      }
+      fileTreeHandler.clearLoadedDirsCache = () => {
+        loadedDirsCacheVersionRef.current += 1
+        loadedDirsRef.current.clear()
+        loadingDirsRef.current.clear()
+        setLoadingDirIds((current) => (current.size === 0 ? current : new Set()))
+        setLoadedDirPaths((current) => (current.size === 0 ? current : new Set()))
+      }
+    }
+    return renderFileNode(nodeProps, isRoot, false, isRoot && showStickyRoot)
+  }
+
   return (
-    <FillFlexParent>
-      {(dimens) => {
-        const treeElement = (
-          <Tree
-            key={rootId}
-            {...dimens}
-            data={data}
-            dndRootElement={dndRootElement}
-            disableDrag={disableDrag}
-            initialOpenState={initialOpenState}
-            openByDefault={false}
-            selection={activeId}
-            indent={indentSize}
-            rowHeight={rowHeight}
-            rowClassName='mf-file-tree-item'
-            renderRow={stickyRoot ? FileTreeRow : undefined}
-            disableMultiSelection
-            onSelect={handleSelect}
-            onMove={onMove}
-            onToggle={onToggle}
-            onScroll={stickyRoot ? handleScroll : undefined}
-            onContextMenu={(e) => {
-              if (disableFileOperations) return
+    <FileTreeNodeRendererContext.Provider value={renderTreeNode}>
+      <FillFlexParent>
+        {(dimens) => {
+          const treeElement = (
+            <Tree
+              key={rootId}
+              {...dimens}
+              data={data}
+              dndRootElement={dndRootElement}
+              disableDrag={disableDrag}
+              initialOpenState={initialOpenState}
+              openByDefault={false}
+              selection={activeId}
+              indent={indentSize}
+              rowHeight={rowHeight}
+              rowClassName='mf-file-tree-item'
+              renderRow={stickyRoot ? FileTreeRow : undefined}
+              disableMultiSelection
+              onSelect={handleSelect}
+              onMove={onMove}
+              onToggle={onToggle}
+              onScroll={stickyRoot ? handleScroll : undefined}
+              onContextMenu={(e) => {
+                if (disableFileOperations) return
 
-              const items: ContextMenuItem[] = []
-              const workspaceRoot = data[0]
-              if (workspaceRoot) {
-                items.push(
-                  {
-                    label: 'New File',
-                    value: 'new_file',
-                    handler: () => {
-                      const newData = {
-                        id: `pending-${Date.now()}`,
-                        name: '',
-                        kind: 'pending_new_file',
-                      } as IFile
-                      treeRef.current?.open(workspaceRoot.id)
-                      tree.create({
-                        parentId: workspaceRoot.id,
-                        data: newData,
-                      })
-                      treeRef.current?.create({
-                        parentId: workspaceRoot.id,
-                        index: 0,
-                      })
-
-                      setFolderDataPure(tree.data)
-                    },
-                  },
-                  {
-                    label: 'New Folder',
-                    value: 'new_folder',
-                    handler: () => {
-                      const newData = {
-                        id: `pending-${Date.now()}`,
-                        name: '',
-                        kind: 'pending_new_folder',
-                        children: [],
-                      } as IFile
-                      treeRef.current?.open(workspaceRoot.id)
-
-                      tree.create({
-                        parentId: workspaceRoot.id,
-                        data: newData,
-                      })
-                      treeRef.current?.create({
-                        parentId: workspaceRoot.id,
-                        index: 0,
-                        type: 'internal',
-                      })
-
-                      setFolderDataPure(tree.data)
-                    },
-                  },
-                )
-              }
-
-              if (items.length === 0) return
-              onShowContextMenu({
-                x: e.clientX,
-                y: e.clientY,
-                items,
-              })
-            }}
-          >
-            {(nodeProps) => {
-              const isRoot = nodeProps.node.id === data[0]?.id
-              if (isRoot) {
-                treeRef.current = nodeProps.tree
-                fileTreeHandler.rootTree = nodeProps.tree
-                fileTreeHandler.updateTreeView = (params) => {
-                  fileTreeHandler.rootTree?.update({
-                    data: params.data,
-                  })
-                  setFolderDataPure(params.data)
-                }
-                fileTreeHandler.clearLoadedDirsCache = () => {
-                  loadedDirsCacheVersionRef.current += 1
-                  loadedDirsRef.current.clear()
-                  loadingDirsRef.current.clear()
-                  setLoadingDirIds((current) => (current.size === 0 ? current : new Set()))
-                  setLoadedDirPaths((current) => (current.size === 0 ? current : new Set()))
-                }
-              }
-              return renderFileNode(nodeProps, isRoot, false, isRoot && showStickyRoot)
-            }}
-          </Tree>
-        )
-
-        if (!stickyRoot) return treeElement
-
-        const rootTree = treeRef.current
-        const rootNode = rootTree?.get(rootId ?? null)
-        return (
-          <FileTreeRowStateContext.Provider value={fileTreeRowState}>
-            <FileTreeStickyViewport style={dimens}>
-              {treeElement}
-              {showStickyRoot && rootNode && rootTree ? (
-                <FileTreeStickyRoot
-                  aria-label={rootNode.data.name}
-                  data-mf-file-tree-sticky-layer=''
-                  role='tree'
-                  style={{ height: rowHeight }}
-                >
-                  <div
-                    aria-expanded={rootNode.isInternal ? rootNode.isOpen : undefined}
-                    aria-label={rootNode.data.name}
-                    aria-level={1}
-                    aria-selected={rootNode.isSelected}
-                    className='mf-file-tree-item'
-                    data-mf-file-tree-sticky-item=''
-                    onClick={rootNode.handleClick}
-                    onKeyDown={(event) => {
-                      if (event.target !== event.currentTarget) return
-
-                      if (event.key === 'Enter' || event.key === ' ') {
-                        event.preventDefault()
-                        event.stopPropagation()
-                        rootNode.select()
-                        rootNode.activate()
-                        rootNode.toggle()
-                        return
-                      }
-
-                      if (event.key === 'ArrowLeft') {
-                        event.preventDefault()
-                        event.stopPropagation()
-                        if (rootNode.isInternal && rootNode.isOpen) rootNode.close()
-                        return
-                      }
-
-                      if (event.key === 'ArrowRight') {
-                        event.preventDefault()
-                        event.stopPropagation()
-                        if (rootNode.isInternal && !rootNode.isOpen) rootNode.open()
-                        return
-                      }
-
-                      if (event.key === 'Home' || event.key === 'ArrowUp') {
-                        event.preventDefault()
-                        event.stopPropagation()
-                        revealRoot()
-                        rootTree.focus(rootNode)
-                      }
-                    }}
-                    role='treeitem'
-                    style={{ height: '100%' }}
-                    tabIndex={0}
-                  >
-                    {renderFileNode(
-                      {
-                        dragHandle: undefined,
-                        node: rootNode,
-                        style: { paddingLeft: 0 },
-                        tree: rootTree,
+                const items: ContextMenuItem[] = []
+                const workspaceRoot = data[0]
+                if (workspaceRoot) {
+                  items.push(
+                    {
+                      label: 'New File',
+                      value: 'new_file',
+                      handler: () => {
+                        const newData = {
+                          id: `pending-${Date.now()}`,
+                          name: '',
+                          kind: 'pending_new_file',
+                        } as IFile
+                        treeRef.current?.open(workspaceRoot.id)
+                        tree.create({
+                          parentId: workspaceRoot.id,
+                          data: newData,
+                        })
+                        setFolderDataPure(tree.data)
                       },
-                      true,
-                      true,
-                    )}
-                  </div>
-                </FileTreeStickyRoot>
-              ) : null}
-            </FileTreeStickyViewport>
-          </FileTreeRowStateContext.Provider>
-        )
-      }}
-    </FillFlexParent>
+                    },
+                    {
+                      label: 'New Folder',
+                      value: 'new_folder',
+                      handler: () => {
+                        const newData = {
+                          id: `pending-${Date.now()}`,
+                          name: '',
+                          kind: 'pending_new_folder',
+                          children: [],
+                        } as IFile
+                        treeRef.current?.open(workspaceRoot.id)
+
+                        tree.create({
+                          parentId: workspaceRoot.id,
+                          data: newData,
+                        })
+                        setFolderDataPure(tree.data)
+                      },
+                    },
+                  )
+                }
+
+                if (items.length === 0) return
+                onShowContextMenu({
+                  x: e.clientX,
+                  y: e.clientY,
+                  items,
+                })
+              }}
+            >
+              {FileTreeNodeRenderer}
+            </Tree>
+          )
+
+          if (!stickyRoot) return treeElement
+
+          const rootTree = treeRef.current
+          const rootNode = rootTree?.get(rootId ?? null)
+          return (
+            <FileTreeRowStateContext.Provider value={fileTreeRowState}>
+              <FileTreeStickyViewport style={dimens}>
+                {treeElement}
+                {showStickyRoot && rootNode && rootTree ? (
+                  <FileTreeStickyRoot
+                    aria-label={rootNode.data.name}
+                    data-mf-file-tree-sticky-layer=''
+                    role='tree'
+                    style={{ height: rowHeight }}
+                  >
+                    <div
+                      aria-expanded={rootNode.isInternal ? rootNode.isOpen : undefined}
+                      aria-label={rootNode.data.name}
+                      aria-level={1}
+                      aria-selected={rootNode.isSelected}
+                      className='mf-file-tree-item'
+                      data-mf-file-tree-sticky-item=''
+                      onClick={rootNode.handleClick}
+                      onKeyDown={(event) => {
+                        if (event.target !== event.currentTarget) return
+
+                        if (event.key === 'Enter' || event.key === ' ') {
+                          event.preventDefault()
+                          event.stopPropagation()
+                          rootNode.select()
+                          rootNode.activate()
+                          rootNode.toggle()
+                          return
+                        }
+
+                        if (event.key === 'ArrowLeft') {
+                          event.preventDefault()
+                          event.stopPropagation()
+                          if (rootNode.isInternal && rootNode.isOpen) rootNode.close()
+                          return
+                        }
+
+                        if (event.key === 'ArrowRight') {
+                          event.preventDefault()
+                          event.stopPropagation()
+                          if (rootNode.isInternal && !rootNode.isOpen) rootNode.open()
+                          return
+                        }
+
+                        if (event.key === 'Home' || event.key === 'ArrowUp') {
+                          event.preventDefault()
+                          event.stopPropagation()
+                          revealRoot()
+                          rootTree.focus(rootNode)
+                        }
+                      }}
+                      role='treeitem'
+                      style={{ height: '100%' }}
+                      tabIndex={0}
+                    >
+                      {renderFileNode(
+                        {
+                          dragHandle: undefined,
+                          node: rootNode,
+                          style: { paddingLeft: 0 },
+                          tree: rootTree,
+                        },
+                        true,
+                        true,
+                      )}
+                    </div>
+                  </FileTreeStickyRoot>
+                ) : null}
+              </FileTreeStickyViewport>
+            </FileTreeRowStateContext.Provider>
+          )
+        }}
+      </FillFlexParent>
+    </FileTreeNodeRendererContext.Provider>
   )
 }
 

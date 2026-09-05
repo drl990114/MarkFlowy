@@ -40,11 +40,12 @@ const NewFileInput = (
   const [invalidState, setInvalidState] = useState(false)
   const [invalidText, setInvalidText] = useState(InvalidTextMap.same)
   const verifing = useRef(false)
+  const validationVersion = useRef(0)
   const creating = useRef(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const isComposing = useRef(false)
 
-  const handleBlur = useCallback(() => {
+  const handleBlur = () => {
     if (creating.current === true) {
       return
     }
@@ -63,18 +64,18 @@ const NewFileInput = (
     } else {
       onCancel?.()
     }
-  }, [onCancel, initialName, invalidState])
+  }
 
   useEffect(() => {
-    setTimeout(() => {
-      inputRef.current?.focus()
-      verify(initialName)
+    const timer = setTimeout(() => {
+      inputRef.current?.focus({ preventScroll: true })
     })
+    return () => clearTimeout(timer)
   }, [initialName])
 
   const getFileInfo = useCallback(
     async (fileName: string): Promise<IFile> => {
-      let path1 = parentNode?.path
+      const path1 = parentNode?.path
 
       if (createType === 'file' && !isMdFile(fileName)) {
         fileName = `${fileName}.md`
@@ -94,6 +95,7 @@ const NewFileInput = (
 
   const verify = useCallback(
     async (name: string) => {
+      const version = ++validationVersion.current
       verifing.current = true
 
       try {
@@ -101,9 +103,11 @@ const NewFileInput = (
         if (fileName === '') {
           setInvalidText(InvalidTextMap.empty)
           setInvalidState(true)
+          return
         } else if (verifyFileName(fileName) === false) {
           setInvalidText(InvalidTextMap.invalid)
           setInvalidState(true)
+          return
         } else {
           const fileInfo = await getFileInfo(fileName)
 
@@ -118,25 +122,40 @@ const NewFileInput = (
               pathsReferToSameDirectoryEntry,
             })
 
+            if (version !== validationVersion.current) return
             if (conflict) {
               setInvalidText(InvalidTextMap.same)
               setInvalidState(true)
             } else {
               setInvalidState(false)
+              return fileInfo
             }
           }
         }
-      } catch (error) {}
-
-      verifing.current = false
+      } catch (error) {
+        if (version === validationVersion.current) {
+          setInvalidText(error instanceof Error ? error.message : String(error))
+          setInvalidState(true)
+        }
+      } finally {
+        if (version === validationVersion.current) verifing.current = false
+      }
     },
-    [getFileInfo, fileExists, pathsReferToSameDirectoryEntry, fileNode],
+    [
+      getFileInfo,
+      fileExists,
+      pathsReferToSameDirectoryEntry,
+      fileNode,
+      InvalidTextMap.empty,
+      InvalidTextMap.invalid,
+      InvalidTextMap.same,
+    ],
   )
 
   const handleChange: React.ChangeEventHandler<HTMLInputElement> = useCallback(
     async (e) => {
       e.stopPropagation()
-      let fileName = e.target.value
+      const fileName = e.target.value
       setInputName(fileName)
 
       if (!isComposing.current) {
@@ -166,20 +185,37 @@ const NewFileInput = (
         size='small'
         inputRef={inputRef}
         value={inputName}
+        aria-invalid={invalidState || undefined}
+        data-error={invalidState || undefined}
         onChange={handleChange}
         onCompositionStart={handleCompositionStart}
         onCompositionEnd={handleCompositionEnd}
         spellCheck={false}
         onClick={(e) => e.stopPropagation()}
-        onKeyDown={(e) => e.stopPropagation()}
+        onKeyDown={(e) => {
+          e.stopPropagation()
+          if (
+            e.key === 'Escape' &&
+            !isComposing.current &&
+            !e.nativeEvent.isComposing &&
+            e.keyCode !== 229
+          ) {
+            e.preventDefault()
+            if (!creating.current) onCancel()
+          }
+        }}
         onPressEnter={async (e) => {
-          if (e.isComposing) return
-          if (invalidState === false && verifing.current === false) {
-            const fileInfo = await getFileInfo(inputName)
-            creating.current = true
-            onCreate(fileInfo).finally(() => {
-              creating.current = false
-            })
+          if (e.isComposing || isComposing.current || e.keyCode === 229 || creating.current) return
+          e.preventDefault()
+          creating.current = true
+          try {
+            const fileInfo = await verify(inputRef.current?.value ?? inputName)
+            if (fileInfo) await onCreate(fileInfo)
+          } catch (error) {
+            setInvalidText(error instanceof Error ? error.message : String(error))
+            setInvalidState(true)
+          } finally {
+            creating.current = false
           }
         }}
         onBlur={handleBlur}

@@ -124,4 +124,12 @@ export const NodeContainer = styled.div<NodeContainerProps>`
     flex-shrink: 0;
     margin-right: 4px;
   }
+
+  .mf-file-tree-name-input {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    padding: 0 4px;
+    font: inherit;
+  }
 `

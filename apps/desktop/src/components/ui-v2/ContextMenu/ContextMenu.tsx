@@ -69,7 +69,15 @@ export const hideContextMenu = () => {
   useContextMenuStore.getState().hide()
 }
 
-function MenuItems({ items, path = 'root' }: { items: DesktopMenuItemData[]; path?: string }) {
+function MenuItems({
+  items,
+  onAction,
+  path = 'root',
+}: {
+  items: DesktopMenuItemData[]
+  onAction: (handler: DesktopMenuGroupType['handler']) => void
+  path?: string
+}) {
   return items.map((item, index) => {
     const key = `${path}-${index}`
     if ('type' in item && item.type === 'divider') {
@@ -91,7 +99,11 @@ function MenuItems({ items, path = 'root' }: { items: DesktopMenuItemData[]; pat
             {shortcut}
           </ContextMenuSubTrigger>
           <ContextMenuSubContent>
-            <MenuItems items={menuItem.children} path={`${key}-${menuItem.value}`} />
+            <MenuItems
+              items={menuItem.children}
+              onAction={onAction}
+              path={`${key}-${menuItem.value}`}
+            />
           </ContextMenuSubContent>
         </ContextMenuSub>
       )
@@ -103,7 +115,7 @@ function MenuItems({ items, path = 'root' }: { items: DesktopMenuItemData[]; pat
           checked={menuItem.checked}
           disabled={menuItem.disabled}
           key={`${key}-${menuItem.value}`}
-          onSelect={menuItem.handler}
+          onSelect={() => onAction(menuItem.handler)}
         >
           {label}
           {shortcut}
@@ -115,7 +127,7 @@ function MenuItems({ items, path = 'root' }: { items: DesktopMenuItemData[]; pat
       <ContextMenuItem
         disabled={menuItem.disabled}
         key={`${key}-${menuItem.value}`}
-        onSelect={menuItem.handler}
+        onSelect={() => onAction(menuItem.handler)}
       >
         <span className='size-3.5 shrink-0' aria-hidden='true' />
         {label}
@@ -129,8 +141,19 @@ export const ContextMenu = memo(() => {
   const { items, open, x, y } = useContextMenuStore()
   const triggerRef = useRef<HTMLSpanElement>(null)
   const radixOpenRef = useRef(false)
+  const pendingActionRef = useRef<DesktopMenuGroupType['handler']>(undefined)
   const [radixOpen, setRadixOpen] = useState(false)
   const resolvedItems = useMemo(() => resolveMenuItems(items), [items])
+  const handleAction = useCallback((handler: DesktopMenuGroupType['handler']) => {
+    pendingActionRef.current = handler
+  }, [])
+  const handleCloseAutoFocus = useCallback(() => {
+    const action = pendingActionRef.current
+    pendingActionRef.current = undefined
+    // Let Radix finish restoring focus and removing its focus scope before an
+    // action mounts an input or dialog. Otherwise close autofocus blurs it.
+    if (action) queueMicrotask(action)
+  }, [])
 
   const handleOpenChange = useCallback((nextOpen: boolean) => {
     radixOpenRef.current = nextOpen
@@ -190,8 +213,8 @@ export const ContextMenu = memo(() => {
           width: 0,
         }}
       />
-      <ContextMenuContent aria-label='Context menu'>
-        <MenuItems items={resolvedItems} />
+      <ContextMenuContent aria-label='Context menu' onCloseAutoFocus={handleCloseAutoFocus}>
+        <MenuItems items={resolvedItems} onAction={handleAction} />
       </ContextMenuContent>
     </ContextMenuPrimitive>
   )

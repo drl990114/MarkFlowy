@@ -2,11 +2,7 @@ import { desktopLightTheme } from '@markflowy/theme'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { ServerStyleSheet, StyleSheetManager, ThemeProvider } from 'styled-components'
 import { describe, expect, it } from 'vitest'
-import {
-  Container,
-  EXPLORER_FILE_TREE_INDENT_SIZE,
-  EXPLORER_FILE_TREE_ROW_HEIGHT,
-} from './styles'
+import { Container, EXPLORER_FILE_TREE_INDENT_SIZE, EXPLORER_FILE_TREE_ROW_HEIGHT } from './styles'
 
 function renderExplorerStyles() {
   const sheet = new ServerStyleSheet()
@@ -50,7 +46,7 @@ describe('Explorer file tree density', () => {
     expect(css).toContain('letter-spacing:var(--mf-ui-tracking-body)')
     expect(css).toContain('width:16px;height:16px;line-height:0')
     expect(css).toContain(
-      'height:24px;padding:06px;font-size:var(--mf-ui-font-body);line-height:var(--mf-ui-line-height-body)',
+      'height:22px;padding:04px;font-size:var(--mf-ui-font-body);line-height:var(--mf-ui-line-height-body)',
     )
   })
 

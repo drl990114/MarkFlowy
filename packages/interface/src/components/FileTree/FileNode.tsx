@@ -593,6 +593,7 @@ function FileNode({
       style={style}
       data-mf-file-tree-drop-highlight={isDropHighlighted || undefined}
       data-mf-file-tree-node=''
+      data-mf-file-tree-editing={isPending || undefined}
       data-mf-file-tree-root={isRoot || undefined}
       data-mf-file-tree-sticky-root={isStickyRoot || undefined}
       data-mf-file-tree-root-suppressed={isRootSuppressed || undefined}
@@ -628,65 +629,90 @@ function FileNode({
           })}
         </div>
         {isPending ? (
-          <NewFileInput
-            className='mf-file-tree-name-input'
-            style={{ paddingTop: 0, paddingBottom: 0 }}
-            fileNode={node.data}
-            inputType={inputType}
-            parentNode={node.parent?.data}
-            onCreate={async (file) => {
-              if (isUpdate) {
-                await renameFileHandler(file)
-              } else {
-                await createFileHandler(file)
-              }
-            }}
-            onCancel={(fileInfo) => {
-              const cancelInput = () => {
-                const mutationTree = new SimpleTree(getCurrentFolderData())
-                const pendingNode = mutationTree.find(node.id)
-                if (!pendingNode) return
-
+          <>
+            <span aria-hidden='true' className='file-icon mf-file-tree-icon'>
+              {renderNodeIcon ? (
+                renderNodeIcon(
+                  {
+                    ...node.data,
+                    kind: inputType,
+                    ext: node.data.ext ?? (inputType === 'file' ? 'md' : undefined),
+                  },
+                  { isLoading: false, isOpen: false },
+                )
+              ) : (
+                <i
+                  className={inputType === 'dir' ? 'ri-folder-3-fill' : getFileIconClass(node.data)}
+                />
+              )}
+            </span>
+            <NewFileInput
+              key={node.id}
+              aria-label={t(
+                isUpdate
+                  ? 'contextmenu.explorer.rename'
+                  : inputType === 'dir'
+                    ? 'contextmenu.explorer.add_folder'
+                    : 'contextmenu.explorer.add_file',
+              )}
+              className='mf-file-tree-name-input'
+              fileNode={node.data}
+              inputType={inputType}
+              parentNode={node.parent?.data}
+              onCreate={async (file) => {
                 if (isUpdate) {
-                  mutationTree.update({
-                    id: node.id,
-                    changes: {
-                      kind: pendingNode.data.kind === 'pending_edit_folder' ? 'dir' : 'file',
+                  await renameFileHandler(file)
+                } else {
+                  await createFileHandler(file)
+                }
+              }}
+              onCancel={(fileInfo) => {
+                const cancelInput = () => {
+                  const mutationTree = new SimpleTree(getCurrentFolderData())
+                  const pendingNode = mutationTree.find(node.id)
+                  if (!pendingNode) return
+
+                  if (isUpdate) {
+                    mutationTree.update({
+                      id: node.id,
+                      changes: {
+                        kind: pendingNode.data.kind === 'pending_edit_folder' ? 'dir' : 'file',
+                      },
+                    })
+                  } else {
+                    mutationTree.drop({ id: node.id })
+                  }
+
+                  setFolderData(mutationTree.data)
+                }
+
+                if (!fileInfo) {
+                  cancelInput()
+                  return
+                }
+
+                if (onShowInputConfirm) {
+                  onShowInputConfirm({
+                    title: 'Save changes?',
+                    confirmText: 'Save',
+                    cancelText: 'Discard',
+                    onConfirm: async () => {
+                      if (isUpdate) {
+                        await renameFileHandler(fileInfo)
+                      } else {
+                        await createFileHandler(fileInfo)
+                      }
+                    },
+                    onClose: () => {
+                      cancelInput()
                     },
                   })
                 } else {
-                  mutationTree.drop({ id: node.id })
+                  cancelInput()
                 }
-
-                setFolderData(mutationTree.data)
-              }
-
-              if (!fileInfo) {
-                cancelInput()
-                return
-              }
-
-              if (onShowInputConfirm) {
-                onShowInputConfirm({
-                  title: 'Save changes?',
-                  confirmText: 'Save',
-                  cancelText: 'Discard',
-                  onConfirm: async () => {
-                    if (isUpdate) {
-                      await renameFileHandler(fileInfo)
-                    } else {
-                      await createFileHandler(fileInfo)
-                    }
-                  },
-                  onClose: () => {
-                    cancelInput()
-                  },
-                })
-              } else {
-                cancelInput()
-              }
-            }}
-          />
+              }}
+            />
+          </>
         ) : (
           <div
             style={{

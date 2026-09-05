@@ -56,7 +56,8 @@ describe('imperative ContextMenu compatibility', () => {
     expect(await screen.findByRole('menuitem', { name: 'Child action' })).not.toBeNull()
 
     fireEvent.click(screen.getByRole('menuitem', { name: /Run command/ }))
-    expect(commandMocks.execute).toHaveBeenCalledWith('test_command')
+    await waitFor(() => expect(commandMocks.execute).toHaveBeenCalledWith('test_command'))
+    expect(commandMocks.execute).toHaveBeenCalledTimes(1)
     await waitFor(() => expect(useContextMenuStore.getState().open).toBe(false))
   })
 
@@ -98,5 +99,31 @@ describe('imperative ContextMenu compatibility', () => {
     fireEvent.click(item)
     expect(handler).not.toHaveBeenCalled()
     expect(useContextMenuStore.getState().open).toBe(true)
+  })
+
+  it('runs checkbox actions after closing and preserves normal focus restoration', async () => {
+    const handler = vi.fn(() => {
+      expect(screen.queryByRole('menu')).toBeNull()
+      expect(document.activeElement).toBe(trigger)
+    })
+    render(
+      <>
+        <button type='button'>Open actions</button>
+        <ContextMenu />
+      </>,
+    )
+    const trigger = screen.getByRole('button', { name: 'Open actions' })
+    act(() => trigger.focus())
+    act(() => {
+      showContextMenu({
+        x: 12,
+        y: 16,
+        items: [{ checked: false, handler, label: 'Pinned', value: 'pinned' }],
+      })
+    })
+
+    fireEvent.click(await screen.findByRole('menuitemcheckbox', { name: 'Pinned' }))
+
+    await waitFor(() => expect(handler).toHaveBeenCalledTimes(1))
   })
 })

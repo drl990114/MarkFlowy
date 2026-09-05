@@ -25,10 +25,7 @@ export const Container = styled.div`
   }
 
   && .mf-file-tree-item:hover > [data-mf-file-tree-node] {
-    background-color: var(
-      --mf-ui-control-hover-bg,
-      ${(props) => props.theme.hoverColor}
-    );
+    background-color: var(--mf-ui-control-hover-bg, ${(props) => props.theme.hoverColor});
   }
 
   && .mf-file-tree-item:focus-visible {
@@ -39,17 +36,13 @@ export const Container = styled.div`
     border-color: var(--mf-control-focus, ${(props) => props.theme.accentColor});
   }
 
+  && .mf-file-tree-item > [data-mf-file-tree-node][data-mf-file-tree-editing='true'],
   && .mf-file-tree-item[aria-selected='true'] > [data-mf-file-tree-node],
   && .mf-file-tree-item[aria-selected='true']:hover > [data-mf-file-tree-node] {
-    background-color: var(
-      --mf-ui-control-hover-bg,
-      ${(props) => props.theme.hoverColor}
-    );
+    background-color: var(--mf-ui-control-hover-bg, ${(props) => props.theme.hoverColor});
   }
 
-  &&
-    .mf-file-tree-item
-    > [data-mf-file-tree-node][data-mf-file-tree-drop-highlight='true'] {
+  && .mf-file-tree-item > [data-mf-file-tree-node][data-mf-file-tree-drop-highlight='true'] {
     background-color: var(--mf-primary-soft, ${(props) => props.theme.accentColorFocused});
   }
 
@@ -84,10 +77,25 @@ export const Container = styled.div`
   }
 
   && .mf-file-tree-row .mf-file-tree-name-input {
-    height: 24px;
-    padding: 0 6px;
+    height: 22px;
+    padding: 0 4px;
     font-size: var(--mf-ui-font-body);
     line-height: var(--mf-ui-line-height-body);
+    letter-spacing: inherit;
+    border-radius: var(--mf-radius-sm, ${(props) => props.theme.smallBorderRadius});
+    border-color: var(--mf-ui-border-subtle, ${(props) => props.theme.borderColor});
+    background: var(--mf-surface-panel-left, ${(props) => props.theme.sideBarBgColor});
+    box-shadow: none;
+    transition: none;
+  }
+
+  && .mf-file-tree-row .mf-file-tree-name-input:focus {
+    border-color: var(--mf-control-focus, ${(props) => props.theme.accentColor});
+    box-shadow: none;
+  }
+
+  && .mf-file-tree-row .mf-file-tree-name-input[aria-invalid='true'] {
+    border-color: var(--mf-destructive, ${(props) => props.theme.dangerColor});
   }
 
   .border-t-1-solid {
