@@ -1,6 +1,6 @@
 [package]
 name = "markflowy"
-version = "0.90.0"
+version = "0.100.0"
 description = "A Markdown Editor App"
 authors = ["drl990114"]
 license = " AGPL-3.0"
@@ -112,9 +112,7 @@ features = ["derive"]
 
 [dependencies.tauri]
 version = "2.11.5"
-features = [
-    "protocol-asset",
-]
+features = ["protocol-asset"]
 
 [dependencies.mf-utils]
 path = "../../../crates/utils"
