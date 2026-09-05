@@ -1,5 +1,25 @@
 # UPDATE LOG
 
+## v0.100.0
+
+⚠️Breaking Changes⚠️:
+
+- **This release introduces substantial breaking changes.** The editor core has been rebuilt, and some editing behaviors and interactions may differ from earlier versions.
+
+Highlights:
+
+- **A huge leap in editor performance.** The most exciting result of this rewrite is how quickly large Markdown documents open: **a 2 MB Markdown file opened in around 1 second in testing**, so you can start working on long documents much sooner.
+
+---
+
+⚠️破坏性变更⚠️：
+
+- **这是一次包含较大破坏性变更的版本更新。** 本次对编辑器核心进行了重构，部分编辑行为和交互体验可能与旧版有所不同。
+
+亮点更新：
+
+- **全新编辑器，超高性能。** 这次重构最让人兴奋的变化，就是大文件打开速度的大幅提升：**实测 2 MB 的 Markdown 文件可在 1 秒左右打开**，让长文档写作也能快速开始。
+
 ## v0.90.0
 
 Features:
