@@ -1,17 +1,20 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+// Register once so queued mock overrides cannot race while resolving the same module.
+const runtimeAvailability = vi.hoisted(() => ({ isCapricornRuntimeAvailable: true }))
+vi.mock('@/constants/capricornRuntime', () => runtimeAvailability)
+
 interface RuntimeModule {
   createCapricornRuntime: unknown
 }
 
 beforeEach(() => {
   vi.resetModules()
-  vi.doMock('@/constants/capricornRuntime', () => ({ isCapricornRuntimeAvailable: true }))
+  runtimeAvailability.isCapricornRuntimeAvailable = true
 })
 
 afterEach(() => {
   vi.doUnmock('virtual:markflowy-capricorn-runtime')
-  vi.doUnmock('@/constants/capricornRuntime')
 })
 
 describe('Capricorn runtime preloading', () => {
@@ -136,7 +139,7 @@ describe('Capricorn runtime preloading', () => {
   })
 
   it('skips preloading an unavailable dependency without importing its stub', async () => {
-    vi.doMock('@/constants/capricornRuntime', () => ({ isCapricornRuntimeAvailable: false }))
+    runtimeAvailability.isCapricornRuntimeAvailable = false
     const importRuntime = vi.fn(() => ({ createCapricornRuntime: vi.fn() }))
     vi.doMock('virtual:markflowy-capricorn-runtime', importRuntime)
     const {

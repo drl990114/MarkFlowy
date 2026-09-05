@@ -1,5 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+// Register once so queued mock overrides cannot race while resolving the same module.
+const runtimeAvailability = vi.hoisted(() => ({ isCapricornRuntimeAvailable: true }))
+vi.mock('@/constants/capricornRuntime', () => runtimeAvailability)
+
 const deferred = <T>() => {
   let resolve!: (value: T) => void
   let reject!: (error: unknown) => void
@@ -12,13 +16,12 @@ const deferred = <T>() => {
 
 beforeEach(() => {
   vi.resetModules()
-  vi.doMock('@/constants/capricornRuntime', () => ({ isCapricornRuntimeAvailable: true }))
+  runtimeAvailability.isCapricornRuntimeAvailable = true
 })
 
 afterEach(() => {
   vi.useRealTimers()
   vi.doUnmock('virtual:markflowy-capricorn-runtime')
-  vi.doUnmock('@/constants/capricornRuntime')
 })
 
 describe('app startup editor preparation', () => {
@@ -92,7 +95,7 @@ describe('app startup editor preparation', () => {
   })
 
   it('skips the unavailable optional runtime without importing its stub', async () => {
-    vi.doMock('@/constants/capricornRuntime', () => ({ isCapricornRuntimeAvailable: false }))
+    runtimeAvailability.isCapricornRuntimeAvailable = false
     const importRuntime = vi.fn(() => ({ createCapricornRuntime: vi.fn() }))
     vi.doMock('virtual:markflowy-capricorn-runtime', importRuntime)
     const { createAppStartupCoordinator } = await import('./appStartupCoordinator')

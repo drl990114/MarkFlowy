@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs'
 import { act, cleanup, render, waitFor } from '@testing-library/react'
 import { createRef } from 'react'
 import { afterEach, expect, it, vi } from 'vitest'
+import { isCapricornRuntimeAvailable } from '@/constants/capricornRuntime'
 import { CapricornEditor, type CapricornEditorHandle } from './CapricornEditor'
 import {
   CAPRICORN_DESKTOP_VIRTUALIZE_OPTIONS,
@@ -10,7 +11,8 @@ import {
 
 afterEach(cleanup)
 
-it.each([
+// These probes use the private runtime, which is optional in public checkouts and CI.
+it.skipIf(!isCapricornRuntimeAvailable).each([
   ['empty', ''],
   ['plain', 'Hello\n'],
   ['paragraphs', '# Title\n\nHello **world**.\n\nSecond paragraph.\n'],
