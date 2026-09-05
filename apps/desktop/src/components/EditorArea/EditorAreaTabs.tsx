@@ -6,7 +6,6 @@ import { memo, type DragEvent, useCallback, useEffect, useRef } from 'react'
 import { ArrowLeftIcon, ArrowRightIcon, XIcon } from 'lucide-react'
 import { useTranslation } from '@/i18n'
 import styled from 'styled-components'
-import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { showContextMenu } from '../ui-v2/ContextMenu'
 import { EditorAreaHeader } from './EditorAreaHeader'
@@ -365,15 +364,12 @@ const EditorAreaTab = memo((props: EditorAreaTabProps) => {
         <TooltipContent>{fileName}</TooltipContent>
       </Tooltip>
       {hasUnsavedChanges ? null : (
-        <Button
-          aria-label={t('contextmenu.editor_tab.close')}
-          className='close'
+        <EditorAreaActionButton
+          className='mf-editor-tab-close'
+          icon={XIcon}
+          label={t('contextmenu.editor_tab.close')}
           onClick={(ev: React.MouseEvent<HTMLElement, MouseEvent> | undefined) => close(ev, id)}
-          size='icon-chrome'
-          variant='chrome'
-        >
-          <XIcon aria-hidden='true' size={14} strokeWidth={1.75} />
-        </Button>
+        />
       )}
     </TabItem>
   )

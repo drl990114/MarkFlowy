@@ -101,6 +101,7 @@ export const TabItem = styled.div<TabItemProps>`
   flex: 0 0 auto;
   justify-content: center;
   align-items: center;
+  gap: ${(props) => props.theme.spaceSm};
   position: relative;
   height: 100%;
   padding-right: ${(props) => props.theme.spaceXs};
@@ -185,39 +186,14 @@ export const TabItem = styled.div<TabItemProps>`
     border-left: none;
   }
 
-  .close {
-    width: 22px;
-    height: 22px;
-    padding: 0;
-    color: var(--mf-text-secondary, var(--mf-foreground-secondary));
-    cursor: pointer;
+  .mf-editor-tab-close {
     opacity: 0;
-    transition:
-      color var(--mf-motion-duration-fast, 120ms)
-        var(--mf-motion-ease-out, cubic-bezier(0.23, 1, 0.32, 1)),
-      opacity var(--mf-motion-duration-fast, 120ms)
-      var(--mf-motion-ease-out, cubic-bezier(0.23, 1, 0.32, 1));
-  }
-
-  .close:hover {
-    color: var(--mf-text-primary, var(--mf-foreground));
-  }
-
-  .close:active {
-    background-color: var(--mf-control-ghost-pressed, var(--mf-control-selected));
-    transform: none;
   }
 
   &:hover,
   &:focus-within {
-    .close {
+    .mf-editor-tab-close {
       opacity: 1;
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .close {
-      transition-duration: 0ms;
     }
   }
 `
