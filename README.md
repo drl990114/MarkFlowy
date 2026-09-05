@@ -39,11 +39,9 @@
 
 <img src="./public/home.png" alt="screenshot" />
 
-## MarkFlowy is in the reconstruction phase ⚠️
-
-At present, MarkFlowy needs about 3 - 6 months to perform reconstruction, which will bring an exciting new version. If there is no major bug in the three months, the new version will not be released.
-
 ## Features
+
+- **High Performance:** The rebuilt editor dramatically improves opening speed for large documents. **A 2 MB Markdown file opened in around 1 second in testing.**
 
 - **Built-in AI:** Currently supports Copilot, one-click export of dialogues, translation of articles to any language, and article summaries. It supports large models like `DeepSeek` and `Chatgpt`, making them your intelligent assistant.
 

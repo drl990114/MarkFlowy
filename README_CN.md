@@ -40,12 +40,9 @@
 
 <img src="./public/home.png" alt="screenshot" />
 
-## MarkFlowy 目前处于 Beta 阶段 ⚠️
-
-目前 MarkFlowy 处于 beta 阶段，建议在有数据备份的情况下使用。
-
 ## 功能特性
 
+- **超高性能**：全新重构的编辑器大幅提升大文件打开速度，**实测 2 MB 的 Markdown 文件可在 1 秒左右打开**。
 - **内置 AI**：当前支持Copilot、一键导出对话、翻译文章到任何语言以及获取文章摘要，支持`DeepSeek`、`Chatgpt`等大模型让他们成为你的智能助手。
 - **超轻量**：MarkFlowy 基于 tauri, 拥有小于 20MB 的体积和更好的性能。
 - **多编辑模式**：MarkFlowy 使用 prosemirror 作为编辑器核心, 不仅扩展性高，编辑体验也很好。并支持多种编辑模式，如`source code`, `wysiwyg`。

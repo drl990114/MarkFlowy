@@ -48,14 +48,10 @@
 
 <img src="${screenshot}" alt="screenshot" />
 
-## ${en:'MarkFlowy is in the reconstruction phase ⚠️', zh:'MarkFlowy 目前处于 Beta 阶段 ⚠️', ja:'MarkFlowy はベータ版です ⚠️'}
-
-At present, MarkFlowy needs about 3 - 6 months to perform reconstruction, which will bring an exciting new version. If there is no major bug in the three months, the new version will not be released.<!--en-->
-目前 MarkFlowy 处于 beta 阶段，建议在有数据备份的情况下使用。<!--zh-->
-現在、MarkFlowy はベータ版であり、データのバックアップを取ることをお勧めします。<!--ja-->
-
 ## ${en:'Features', zh:'功能特性', ja:'機能'}
 
+- **High Performance:** The rebuilt editor dramatically improves opening speed for large documents. **A 2 MB Markdown file opened in around 1 second in testing.**<!--en-->
+<!--en-->
 - **Built-in AI:** Currently supports Copilot, one-click export of dialogues, translation of articles to any language, and article summaries. It supports large models like `DeepSeek` and `Chatgpt`, making them your intelligent assistant.<!--en-->
 <!--en-->
 - **lightweight:** MarkFlowy is based on Tauri, boasting a size of less than 20MB and improved performance.<!--en-->
@@ -73,6 +69,7 @@ At present, MarkFlowy needs about 3 - 6 months to perform reconstruction, which 
 - **File Management**: A powerful file tree that supports drag-and-drop movement, global search, and other common functions.<!--en-->
 <!--en-->
 - **Multi-language support:** Supports multiple languages ​​including Chinese, English, Spanish, Japanese, and French.<!--en-->
+- **超高性能**：全新重构的编辑器大幅提升大文件打开速度，**实测 2 MB 的 Markdown 文件可在 1 秒左右打开**。<!--zh-->
 - **内置 AI**：当前支持Copilot、一键导出对话、翻译文章到任何语言以及获取文章摘要，支持`DeepSeek`、`Chatgpt`等大模型让他们成为你的智能助手。<!--zh-->
 - **超轻量**：MarkFlowy 基于 tauri, 拥有小于 20MB 的体积和更好的性能。<!--zh-->
 - **多编辑模式**：MarkFlowy 使用 prosemirror 作为编辑器核心, 不仅扩展性高，编辑体验也很好。并支持多种编辑模式，如`source code`, `wysiwyg`。<!--zh-->
@@ -82,6 +79,8 @@ At present, MarkFlowy needs about 3 - 6 months to perform reconstruction, which 
 - **图片处理**：当你粘贴图片到 MarkFlowy，可以选择粘贴到指定的路径，或者转为 `base64`。<!--zh-->
 - **文件管理**：功能强大的文件树，支持拖拽移动、全局搜索等常用功能。<!--zh-->
 - **多语言支持**：支持中文、英文、西班牙语、日语、法语等多种语言。<!--zh-->
+- **高いパフォーマンス:** エディターの刷新により、大きな Markdown ファイルもすばやく開けます。**実測では 2 MB の Markdown ファイルを約 1 秒で開けました。**<!--ja-->
+<!--ja-->
 - **AI搭載:** 現在はCopilot、ワンタッチで会話をエクスポートし、文章を任意の言語に翻訳し、記事の要約を取得することをサポートしており、「DeepSeek `」、「Chatgpt」などの大きなモデルをサポートして、彼らをスマートアシスタントにしています。<!--ja-->
 <!--ja-->
 - **軽量:** MarkFlowyはTauriをベースにしており、20MB未満のサイズと優れたパフォーマンスを誇ります。<!--ja-->
