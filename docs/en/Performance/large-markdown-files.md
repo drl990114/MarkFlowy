@@ -39,12 +39,6 @@ Choose files that resemble your work. Keep source and visual editing results sep
 
 A recording can provide an informal observation. Precise results need consistent instrumentation and a description of what starts and ends each measurement. Do not mix manual and instrumented timings in one distribution.
 
-## Desktop measurements and development checks
-
-The website Playground uses RME for a basic editing trial. It does not establish desktop editor performance. A Node or simulated-DOM check cannot measure Tauri file access, native WebView layout, or visible input feedback.
-
-The repository includes [fixture export](https://github.com/drl990114/MarkFlowy/blob/main/scripts/export-editor-opening-fixtures.mjs) and [opening-report tooling](https://github.com/drl990114/MarkFlowy/blob/main/scripts/report-editor-opening.mjs) for contributors. Tooling and passing tests are not substitutes for desktop measurements.
-
 ## Keep AI timing separate
 
 AI requests include model loading, network time when applicable, and generation. Record provider, model, and context size. A slower model response does not on its own demonstrate slower editor opening or typing.

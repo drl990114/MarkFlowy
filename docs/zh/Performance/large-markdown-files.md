@@ -39,12 +39,6 @@ MarkFlowy 专注大 Markdown 文档的编辑响应。v0.100.0 更新说明记录
 
 录像可以提供粗略观察；精确结果需要一致的计时方式，并说明开始与结束时刻。手动计时与自动采集的结果不应混在同一分布中。
 
-## 桌面测量与开发检查的区别
-
-官网 Playground 使用 RME，用于基础编辑体验，不能证明桌面版编辑器的性能。Node 或模拟 DOM 检查同样无法测量 Tauri 文件访问、原生 WebView 布局或可见的输入反馈。
-
-仓库提供了[测试文件导出](https://github.com/drl990114/MarkFlowy/blob/main/scripts/export-editor-opening-fixtures.mjs)与[打开性能报告工具](https://github.com/drl990114/MarkFlowy/blob/main/scripts/report-editor-opening.mjs)，供贡献者使用。工具存在或测试通过，不等于取得了桌面实测结果。
-
 ## AI 耗时单独记录
 
 AI 请求涉及模型加载、必要时的网络传输和生成耗时。评估时记录服务商、模型和上下文大小；模型回答慢，本身不能证明编辑器打开或输入响应慢。

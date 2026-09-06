@@ -67,6 +67,7 @@ function createActionHarness(source: string, name: string, failure: unknown) {
   })
   const bindings = {
     getEditorContent,
+    t: vi.fn((key: string) => `translated:${key}`),
     curFile: { id: 'file' },
     targetEditorId: 'file',
     toast: { error: vi.fn() },
@@ -106,9 +107,19 @@ describe('editor actions require a readable current snapshot', () => {
       await harness.action('zh-Hans')
       expect(harness.toast.error).toHaveBeenCalledOnce()
       if (kind === 'summary') {
+        expect(harness.t).toHaveBeenCalledWith('ai.task_summarizing')
+        expect(harness.addAppTask).toHaveBeenCalledExactlyOnceWith({
+          title: 'translated:ai.task_summarizing',
+          promise: expect.any(Promise),
+        })
         expect(harness.summarizeAIText).toHaveBeenCalledWith('latest committed Markdown')
         expect(harness.addNewMarkdownFileEdit).toHaveBeenCalledOnce()
       } else if (kind === 'translation') {
+        expect(harness.t).toHaveBeenCalledWith('ai.task_translating')
+        expect(harness.addAppTask).toHaveBeenCalledExactlyOnceWith({
+          title: 'translated:ai.task_translating',
+          promise: expect.any(Promise),
+        })
         expect(harness.translateAIText).toHaveBeenCalledWith('latest committed Markdown', 'zh-Hans')
         expect(harness.addNewMarkdownFileEdit).toHaveBeenCalledOnce()
       } else {
