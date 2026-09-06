@@ -3,6 +3,20 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { FindController } from './find-controller'
 
+vi.mock('@/i18n', () => ({
+  useTranslation: () => ({
+    t: (key: string) =>
+      (
+        {
+          'find_replace.close': 'Close find and replace',
+          'find_replace.match_case': 'Match case',
+          'find_replace.next_match': 'Find next match',
+          'find_replace.previous_match': 'Find previous match',
+        } as Record<string, string>
+      )[key] ?? key,
+  }),
+}))
+
 afterEach(cleanup)
 
 describe('FindController', () => {

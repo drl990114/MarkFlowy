@@ -21,6 +21,22 @@ import { createDeferredLatestPublisher } from './deferredLatestPublisher'
 import { createCapricornKeybindingConfiguration } from './capricornKeybindings'
 import textEditorSource from './TextEditor.tsx?raw'
 
+vi.mock('@/i18n', () => ({
+  useTranslation: () => ({
+    t: (key: string) =>
+      (
+        {
+          'capricorn.editor.load_failed': 'Unable to load the Capricorn editor',
+          'capricorn.editor.loading': 'Loading Capricorn editor',
+          'capricorn.editor.opening': 'Opening document',
+          'capricorn.editor.preparation_failed':
+            'Background document preparation failed. Please retry.',
+          'common.retry': 'Retry',
+        } as Record<string, string>
+      )[key] ?? key,
+  }),
+}))
+
 function createHostChangeHandler(bindings: Record<string, unknown>) {
   const source = ts.createSourceFile(
     'TextEditor.tsx',

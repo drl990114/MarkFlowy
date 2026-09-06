@@ -43,7 +43,7 @@ export const AIButton = (props: AIButtonProps) => {
       return
     }
     const res = await addAppTask<ReturnType<typeof summarizeAIText>>({
-      title: 'AI: Retrieving article abstract',
+      title: t('ai.task_summarizing'),
       promise: summarizeAIText(content || ''),
     })
     addNewMarkdownFileEdit({
@@ -58,6 +58,7 @@ ${res}
     addAppTask,
     curFile?.id,
     getEditorContent,
+    t,
   ])
 
   const fetchCurFileTranslate = useCallback(
@@ -70,7 +71,7 @@ ${res}
         return
       }
       const res = await addAppTask({
-        title: 'AI: Translating article',
+        title: t('ai.task_translating'),
         promise: translateAIText(content || '', targetLang),
       })
 
@@ -83,6 +84,7 @@ ${res}
       addAppTask,
       curFile?.id,
       getEditorContent,
+      t,
     ],
   )
 

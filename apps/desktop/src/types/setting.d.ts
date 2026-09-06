@@ -61,6 +61,7 @@ declare namespace Setting {
   type FileExcludePatternsSettingItem = {
     type: 'listInput' | 'list-input' | 'file-exclude-patterns'
     placeholder?: string
+    placeholderI18nKey?: string
     i18nProps?: {
       add?: string
     }

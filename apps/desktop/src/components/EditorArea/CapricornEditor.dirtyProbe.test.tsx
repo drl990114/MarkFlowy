@@ -9,6 +9,22 @@ import {
   type CapricornRuntimeAdapter,
 } from './capricornRuntimeAdapter'
 
+vi.mock('@/i18n', () => ({
+  useTranslation: () => ({
+    t: (key: string) =>
+      (
+        {
+          'capricorn.editor.load_failed': 'Unable to load the Capricorn editor',
+          'capricorn.editor.loading': 'Loading Capricorn editor',
+          'capricorn.editor.opening': 'Opening document',
+          'capricorn.editor.preparation_failed':
+            'Background document preparation failed. Please retry.',
+          'common.retry': 'Retry',
+        } as Record<string, string>
+      )[key] ?? key,
+  }),
+}))
+
 afterEach(cleanup)
 
 // These probes use the private runtime, which is optional in public checkouts and CI.

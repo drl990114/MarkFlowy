@@ -1,5 +1,22 @@
 {
   "app_name": "MarkFlowy",
+  "editor": {
+    "render_failed": "无法渲染编辑器"
+  },
+  "find_replace": {
+    "find": "查找",
+    "replace": "替换",
+    "replace_with": "替换为",
+    "replace_all": "全部替换",
+    "previous_match": "查找上一个匹配项",
+    "next_match": "查找下一个匹配项",
+    "match_case": "区分大小写",
+    "close": "关闭查找和替换",
+    "result_count": "第 {{current}} 个，共 {{total}} 个"
+  },
+  "startup": {
+    "workspace_open_failed": "无法打开工作区"
+  },
   "common": {
     "none": "無",
     "name": "名称",
@@ -21,7 +38,8 @@
     "success": "成功",
     "import": "导入",
     "menu": "菜单",
-    "or": "或者"
+    "or": "或者",
+    "retry": "重试"
   },
   "dialog": {
     "remember_choice": "记住此选择"
@@ -97,7 +115,10 @@
     "summary": "摘要",
     "create_file": "新建文件",
     "unsave": "取消保存",
-    "convert_text": "简繁转换"
+    "convert_text": "简繁转换",
+    "convert_simplified_to_traditional_tw": "简 → 繁（台湾）",
+    "convert_simplified_to_traditional_hk": "简 → 繁（香港）",
+    "convert_traditional_to_simplified": "繁 → 简"
   },
   "request": {
     "headers_config": {
@@ -143,6 +164,13 @@
     "no_heading_lines": "未找到小标题行"
   },
   "bookmarks": {
+    "path": "路径",
+    "name": "名称",
+    "tags": "标签",
+    "tag_placeholder": "添加标签",
+    "create_tag": "新建",
+    "remove_tag": "移除 {{tag}}",
+    "no_tags_found": "未找到标签。",
     "empty": "暂无书签",
     "emptyTags": "暂无带标签的书签",
     "loading": "正在加载书签…",
@@ -184,6 +212,9 @@
     "shortcutFallback": "Cmd/Ctrl+Shift+F"
   },
   "file": {
+    "save_dialog_title": "保存文件",
+    "read_failed": "无法读取文件内容",
+    "binary_not_openable": "二进制文件无法以文本方式打开",
     "untitled": "未命名",
     "not_found": "文件不存在",
     "openDir": "打开文件夹",
@@ -207,6 +238,8 @@
     }
   },
   "about": {
+    "description": "AI 驱动的跨平台 Markdown 编辑器。",
+    "powered_by_tauri": "由 Tauri {{version}} 驱动",
     "label": "关于",
     "version": "版本",
     "newVersion": "新版本",
@@ -220,6 +253,7 @@
     "issues": "问题"
   },
   "contextmenu": {
+    "label": "上下文菜单",
     "explorer": {
       "new": "新建",
       "add_file": "新建文件",
@@ -305,6 +339,7 @@
     }
   },
   "search": {
+    "line": "第 {{number}} 行：",
     "search_empty": "无法找到符合这些搜索词的任何内容",
     "text": "搜索",
     "caseSensitive": "大小写敏感",
@@ -319,6 +354,12 @@
     "search_failed": "搜索失败"
   },
   "settings": {
+    "select_placeholder": "请选择",
+    "font_placeholder": "选择字体",
+    "select_folder": "选择文件夹",
+    "value_placeholder": "输入内容…",
+    "edit_item": "编辑此项",
+    "delete_item": "删除此项",
     "label": "设置",
     "back_to_app": "返回应用",
     "back_to_settings": "返回设置",
@@ -359,7 +400,8 @@
         },
         "file_exclude_patterns": {
           "label": "文件排除列表",
-          "desc": "从侧边栏和搜索中排除匹配的文件或目录。每行一个类似 .gitignore 的规则。"
+          "desc": "从侧边栏和搜索中排除匹配的文件或目录。每行一个类似 .gitignore 的规则。",
+          "placeholder": "例如：**/node_modules/*"
         }
       }
     },
@@ -552,7 +594,18 @@
     "keyboard": {
       "label": "键盘",
       "desc": "键盘快捷键和按键行为的配置，包括快捷键冲突检测等相关设置。",
-      "shortcut_conflict": "该快捷键已被占用"
+      "shortcut_conflict": "该快捷键已被占用",
+      "table_label": "快捷键表格",
+      "command": "命令",
+      "description": "说明",
+      "keybinding": "快捷键",
+      "action": "操作",
+      "edit": "编辑",
+      "disabled": "此快捷键已禁用，无法编辑",
+      "edit_shortcut": "编辑快捷键",
+      "shortcut": "快捷键",
+      "record_placeholder": "请按下快捷键",
+      "save": "保存"
     },
     "support": {
       "label": "支持",
@@ -598,7 +651,11 @@
       "no_local_themes": "无本地主题",
       "remove_local_theme": "确认移除本地主题\"{{name}}\" 吗？这会删除文件夹下的文件。",
       "online_themes": "在线主题",
-      "local_css_files": "本地 CSS 文件"
+      "local_css_files": "本地 CSS 文件",
+      "install_theme": "安装主题",
+      "install_theme_confirm": "确定要安装 {{name}} 吗？",
+      "uninstall_theme": "卸载主题",
+      "uninstall_theme_confirm": "确定要卸载 {{name}} 吗？"
     },
     "ai": {
       "label": "AI",
@@ -666,7 +723,12 @@
   },
   "updater": {
     "install": "安装",
-    "download_and_install": "下载并安装"
+    "download_and_install": "下载并安装",
+    "downloading": "正在下载新版本…",
+    "install_success": "更新安装成功。",
+    "restart": "重新启动",
+    "install_failed": "无法安装更新：{{error}}",
+    "check_failed": "无法检查更新：{{error}}"
   },
   "explorer": {
     "refresh_folder_data": "刷新文件夹数据",
@@ -706,6 +768,8 @@
     }
   },
   "ai": {
+    "task_summarizing": "AI：正在生成文章摘要",
+    "task_translating": "AI：正在翻译文章",
     "capabilities": "功能",
     "export_conversation": "导出对话",
     "assistant": "Chat AI",
@@ -807,7 +871,13 @@
       "invalidAddress": "请输入有效的链接地址。"
     },
     "image": { "unavailable": "图片无法加载", "loading": "正在加载图片…", "edit": "修改地址" },
-    "preview": { "retry": "重试" }
+    "preview": { "retry": "重试" },
+    "editor": {
+      "loading": "正在加载 Capricorn 编辑器",
+      "opening": "正在打开文档",
+      "load_failed": "无法加载 Capricorn 编辑器",
+      "preparation_failed": "后台文档准备失败，请重试。"
+    }
   },
   "inline_insert": {
     "insert_link": "插入链接",

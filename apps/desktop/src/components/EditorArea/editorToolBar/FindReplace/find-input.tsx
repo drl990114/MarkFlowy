@@ -1,5 +1,6 @@
 import { InputGroup } from '@/components/ui/input-group'
 import type { FC } from 'react'
+import { useTranslation } from '@/i18n'
 
 export const FindInput: FC<{
   query: string
@@ -7,14 +8,18 @@ export const FindInput: FC<{
   total: number
   activeIndex?: number | null
 }> = ({ query, setQuery, total, activeIndex }) => {
-  const counterLabel = `${total && activeIndex != null ? activeIndex + 1 : 0} of ${total}`
+  const { t } = useTranslation()
+  const counterLabel = t('find_replace.result_count', {
+    current: total && activeIndex != null ? activeIndex + 1 : 0,
+    total,
+  })
 
   return (
     <InputGroup.Root>
       <InputGroup.Input
-        aria-label='Find'
+        aria-label={t('find_replace.find')}
         className='h-6'
-        placeholder='Find'
+        placeholder={t('find_replace.find')}
         value={query}
         onChange={(event) => setQuery(event.target.value)}
       />

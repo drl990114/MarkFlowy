@@ -26,8 +26,10 @@ export type TagComboboxProps = {
   onSearch?: (value: string) => void
   onSearchChange?: (value: string) => void
   allowCreate?: boolean
+  createLabel?: string
   placeholder?: string
   emptyText?: string
+  removeLabel?: (tag: string) => string
   disabled?: boolean
   className?: string
   contentClassName?: string
@@ -49,6 +51,7 @@ export function TagCombobox({
   allowCreate = true,
   className,
   contentClassName,
+  createLabel = 'Create',
   disabled = false,
   emptyText = 'No tags found.',
   id,
@@ -58,6 +61,7 @@ export function TagCombobox({
   onValuesChange,
   options,
   placeholder = 'Add a tag',
+  removeLabel,
   style,
   value,
   values,
@@ -184,7 +188,7 @@ export function TagCombobox({
                 >
                   <span className='truncate'>{label}</span>
                   <button
-                    aria-label={`Remove ${label}`}
+                    aria-label={removeLabel?.(label) ?? `Remove ${label}`}
                     className='rounded-sm text-muted-foreground outline-none hover:text-foreground focus-visible:ring-1 focus-visible:ring-ring'
                     data-slot='tag-combobox-remove'
                     disabled={disabled}
@@ -240,7 +244,7 @@ export function TagCombobox({
                 value={`create:${query.trim()}`}
               >
                 <PlusIcon className='size-3.5' aria-hidden='true' />
-                <span>Create “{query.trim()}”</span>
+                <span>{createLabel} “{query.trim()}”</span>
               </CommandPrimitive.Item>
             ) : null}
             {filteredOptions.map((option) => (

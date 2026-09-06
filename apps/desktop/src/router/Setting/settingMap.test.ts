@@ -51,6 +51,14 @@ describe('Editor setting map', () => {
   })
 })
 
+describe('General setting map', () => {
+  it('uses a translation key for the file-exclusion placeholder', () => {
+    expect(getSettingMap().general.Misc.fileExcludePatterns.placeholderI18nKey).toBe(
+      'settings.general.misc.file_exclude_patterns.placeholder',
+    )
+  })
+})
+
 describe('Export setting map', () => {
   it('registers the compact Pandoc export page', () => {
     expect(getSettingMap().export).toMatchObject({

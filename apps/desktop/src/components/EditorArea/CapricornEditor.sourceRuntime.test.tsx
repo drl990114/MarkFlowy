@@ -11,6 +11,22 @@ import {
   type CapricornRuntimeFactory,
 } from './capricornRuntimeAdapter'
 
+vi.mock('@/i18n', () => ({
+  useTranslation: () => ({
+    t: (key: string) =>
+      (
+        {
+          'capricorn.editor.load_failed': 'Unable to load the Capricorn editor',
+          'capricorn.editor.loading': 'Loading Capricorn editor',
+          'capricorn.editor.opening': 'Opening document',
+          'capricorn.editor.preparation_failed':
+            'Background document preparation failed. Please retry.',
+          'common.retry': 'Retry',
+        } as Record<string, string>
+      )[key] ?? key,
+  }),
+}))
+
 // Opt in to a local source checkout for cross-repository unit tests. Production
 // resolution and the pinned private package always keep their normal boundary.
 const sourceRoot = process.env.MARKFLOWY_CAPRICORN_SOURCE_ROOT

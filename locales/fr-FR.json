@@ -1,5 +1,22 @@
 {
   "app_name": "MarkFlowy",
+  "editor": {
+    "render_failed": "Impossible d’afficher l’éditeur"
+  },
+  "find_replace": {
+    "find": "Rechercher",
+    "replace": "Remplacer",
+    "replace_with": "Remplacer par",
+    "replace_all": "Tout",
+    "previous_match": "Rechercher la correspondance précédente",
+    "next_match": "Rechercher la correspondance suivante",
+    "match_case": "Respecter la casse",
+    "close": "Fermer la recherche et le remplacement",
+    "result_count": "{{current}} sur {{total}}"
+  },
+  "startup": {
+    "workspace_open_failed": "Impossible d’ouvrir l’espace de travail"
+  },
   "common": {
     "none": "aucun",
     "name": "nom",
@@ -21,7 +38,8 @@
     "success": "Succès",
     "import": "Importer",
     "menu": "Menu",
-    "or": "ou"
+    "or": "ou",
+    "retry": "Réessayer"
   },
   "dialog": {
     "remember_choice": "Se souvenir de ce choix"
@@ -97,7 +115,10 @@
     "save_and_continue": "Enregistrer et continuer",
     "unsave_and_close": "Fermeture directe",
     "continue_without_save": "Continuer sans enregistrer",
-    "convert_text": "Conversion simple et complexe"
+    "convert_text": "Conversion chinoise simplifiée/traditionnelle",
+    "convert_simplified_to_traditional_tw": "Chinois simplifié → traditionnel (Taïwan)",
+    "convert_simplified_to_traditional_hk": "Chinois simplifié → traditionnel (Hong Kong)",
+    "convert_traditional_to_simplified": "Chinois traditionnel → simplifié"
   },
   "confirm": {
     "delete": {
@@ -134,6 +155,13 @@
     "no_heading_lines": "Aucune ligne de titre trouvée"
   },
   "bookmarks": {
+    "path": "Chemin",
+    "name": "Nom",
+    "tags": "Étiquettes",
+    "tag_placeholder": "Ajouter une étiquette",
+    "create_tag": "Créer",
+    "remove_tag": "Supprimer {{tag}}",
+    "no_tags_found": "Aucune étiquette trouvée.",
     "empty": "Aucun favori",
     "emptyTags": "Aucun favori étiqueté",
     "loading": "Chargement des favoris…",
@@ -148,6 +176,9 @@
     "saveError": "Impossible d’enregistrer le favori."
   },
   "file": {
+    "save_dialog_title": "Enregistrer le fichier",
+    "read_failed": "Impossible de lire le contenu du fichier",
+    "binary_not_openable": "Les fichiers binaires ne peuvent pas être ouverts comme texte",
     "untitled": "sans titre",
     "not_found": "Fichier introuvable",
     "openDir": "ouvrir le dossier",
@@ -171,6 +202,8 @@
     }
   },
   "about": {
+    "description": "Éditeur Markdown multiplateforme propulsé par l’IA.",
+    "powered_by_tauri": "Propulsé par Tauri {{version}}",
     "label": "À propos",
     "version": "Version",
     "newVersion": "Nouvelle version",
@@ -184,6 +217,7 @@
     "current": "version actuelle"
   },
   "contextmenu": {
+    "label": "Menu contextuel",
     "explorer": {
       "new": "Nouveau",
       "add_file": "Nouveau fichier",
@@ -249,6 +283,7 @@
   },
   "notification": {},
   "search": {
+    "line": "Ligne {{number}} :",
     "search_empty": "Pas de résultats avec ces termes",
     "text": "Chercher",
     "caseSensitive": "Sensible à la casse",
@@ -263,6 +298,12 @@
     "search_failed": "La recherche a échoué"
   },
   "settings": {
+    "select_placeholder": "Sélectionnez une option",
+    "font_placeholder": "Sélectionnez une police",
+    "select_folder": "Sélectionner un dossier",
+    "value_placeholder": "Saisissez une valeur…",
+    "edit_item": "Modifier l’élément",
+    "delete_item": "Supprimer l’élément",
     "label": "Configuration",
     "back_to_app": "Retour à l’application",
     "back_to_settings": "Retour aux réglages",
@@ -297,7 +338,8 @@
         },
         "file_exclude_patterns": {
           "label": "Liste d'exclusion de fichiers",
-          "desc": "Exclure les fichiers et dossiers correspondants de l'explorateur et de la recherche. Un motif de type gitignore par ligne."
+          "desc": "Exclure les fichiers et dossiers correspondants de l'explorateur et de la recherche. Un motif de type gitignore par ligne.",
+          "placeholder": "p. ex. **/node_modules/*"
         }
       },
       "desc": "Paramètres universels de l'application."
@@ -378,7 +420,18 @@
     "keyboard": {
       "label": "clavier",
       "shortcut_conflict": "Le raccourci a été occupé",
-      "desc": "Configuration des raccourcis clavier et du comportement des touches, y compris les paramètres associés tels que la détection des conflits de raccourcis."
+      "desc": "Configuration des raccourcis clavier et du comportement des touches, y compris les paramètres associés tels que la détection des conflits de raccourcis.",
+      "table_label": "Table des raccourcis clavier",
+      "command": "Commande",
+      "description": "Description",
+      "keybinding": "Raccourci",
+      "action": "Action",
+      "edit": "Modifier",
+      "disabled": "Ce raccourci est désactivé et ne peut pas être modifié",
+      "edit_shortcut": "Modifier le raccourci",
+      "shortcut": "Raccourci",
+      "record_placeholder": "Appuyez sur un raccourci",
+      "save": "Enregistrer"
     },
     "ai": {
       "label": "AI",
@@ -605,12 +658,21 @@
       "no_local_themes": "Aucun thème local",
       "remove_local_theme": "Confirmez la suppression du thème local \"{{name}}\"? Cela supprime les fichiers sous le dossier.",
       "online_themes": "Thèmes en ligne",
-      "local_css_files": "Fichiers CSS locaux"
+      "local_css_files": "Fichiers CSS locaux",
+      "install_theme": "Installer le thème",
+      "install_theme_confirm": "Voulez-vous vraiment installer {{name}} ?",
+      "uninstall_theme": "Désinstaller le thème",
+      "uninstall_theme_confirm": "Voulez-vous vraiment désinstaller {{name}} ?"
     }
   },
   "updater": {
     "install": "installer",
-    "download_and_install": "Télécharger et installer"
+    "download_and_install": "Télécharger et installer",
+    "downloading": "Téléchargement de la nouvelle version…",
+    "install_success": "Mise à jour installée.",
+    "restart": "Redémarrer",
+    "install_failed": "Impossible d’installer la mise à jour : {{error}}",
+    "check_failed": "Impossible de rechercher les mises à jour : {{error}}"
   },
   "placeholder": {
     "translate": "Veuillez saisir la langue cible"
@@ -679,6 +741,8 @@
     }
   },
   "ai": {
+    "task_summarizing": "IA : génération du résumé de l’article",
+    "task_translating": "IA : traduction de l’article",
     "capabilities": "Fonctions",
     "export_conversation": "Exporter la conversation",
     "assistant": "Chat AI",
@@ -778,6 +842,12 @@
     "shortcutFallback": "Cmd/Ctrl+Maj+F"
   },
   "capricorn": {
+    "editor": {
+      "loading": "Chargement de l’éditeur Capricorn",
+      "opening": "Ouverture du document",
+      "load_failed": "Impossible de charger l’éditeur Capricorn",
+      "preparation_failed": "La préparation du document en arrière-plan a échoué. Réessayez."
+    },
     "placeholder": {
       "default": "Tapez « / » pour afficher les commandes"
     },

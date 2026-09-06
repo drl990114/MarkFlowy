@@ -14,6 +14,7 @@ import {
   type ReactNode,
 } from 'react'
 import { cn } from '@/lib/cn'
+import { useTranslation } from '@/i18n'
 import {
   Command,
   CommandEmpty,
@@ -192,11 +193,13 @@ export type ModelSelectorValueProps = {
   placeholder?: ReactNode
 }
 
-function ModelSelectorValue({ className, placeholder = 'Select model' }: ModelSelectorValueProps) {
+function ModelSelectorValue({ className, placeholder }: ModelSelectorValueProps) {
   const { selectedModel } = useModelSelectorContext()
+  const { t } = useTranslation()
+  const placeholderText = placeholder ?? t('ai.select_model')
 
   if (!selectedModel)
-    return <span className={cn('text-muted-foreground', className)}>{placeholder}</span>
+    return <span className={cn('text-muted-foreground', className)}>{placeholderText}</span>
 
   return (
     <span className={cn('flex min-w-0 items-center gap-1.5', className)}>
@@ -217,6 +220,7 @@ function ModelSelectorContent({
   ...props
 }: ModelSelectorContentProps) {
   const { value } = useModelSelectorContext()
+  const { t } = useTranslation()
 
   return (
     <PopoverContent
@@ -227,7 +231,7 @@ function ModelSelectorContent({
       )}
       {...props}
     >
-      <Command defaultValue={value} label='Search models'>
+      <Command defaultValue={value} label={t('ai.search_models')}>
         {children}
       </Command>
     </PopoverContent>
@@ -236,11 +240,11 @@ function ModelSelectorContent({
 
 export type ModelSelectorSearchProps = ComponentPropsWithoutRef<typeof CommandInput>
 
-function ModelSelectorSearch({
-  placeholder = 'Search models…',
-  ...props
-}: ModelSelectorSearchProps) {
-  return <CommandInput aria-label={placeholder} placeholder={placeholder} {...props} />
+function ModelSelectorSearch({ placeholder, ...props }: ModelSelectorSearchProps) {
+  const { t } = useTranslation()
+  const placeholderText = placeholder ?? t('ai.search_models')
+
+  return <CommandInput aria-label={placeholderText} placeholder={placeholderText} {...props} />
 }
 
 function ModelSelectorList({

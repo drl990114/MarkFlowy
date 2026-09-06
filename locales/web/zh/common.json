@@ -7,6 +7,9 @@
   },
   "docs": {
     "tableOfContents": "本页目录",
+    "content": {
+      "description": "浏览 MarkFlowy 文档。"
+    },
     "sidebar": {
       "gettingStarted": "快速开始"
     }
@@ -95,6 +98,14 @@
       "globeLabel": "MarkFlowy 全球贡献者地球",
       "orbitLabel": "环绕地球的贡献者资料链接"
     }
+  },
+  "releases": {
+    "title": "版本发布",
+    "meta_description": "MarkFlowy 版本更新说明。",
+    "description_before_link": "这里汇总了 MarkFlowy 的最新版本。点击版本可查看详细变更与更新，可前往",
+    "github_link": "GitHub Releases",
+    "description_after_link": "下载。",
+    "see_details": "查看详情"
   },
   "navigation": {
     "home": "首页",

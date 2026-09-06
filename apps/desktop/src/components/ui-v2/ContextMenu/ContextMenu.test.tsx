@@ -12,6 +12,11 @@ vi.mock('@/commands', () => ({
   commandRegistry: { execute: commandMocks.execute },
   keybindingRegistry: { formatKeybinding: commandMocks.formatKeybinding },
 }))
+vi.mock('@/i18n', () => ({
+  useTranslation: () => ({
+    t: (key: string) => (key === 'contextmenu.label' ? 'Context menu' : key),
+  }),
+}))
 
 afterEach(() => {
   hideContextMenu()

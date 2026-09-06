@@ -81,13 +81,13 @@ export function KeyboardTable() {
   return (
     <>
       <TableContainer>
-        <Table aria-label='keyboard shortcuts table'>
+        <Table aria-label={t('settings.keyboard.table_label')}>
           <TableHead>
             <TableRow>
-              <TableCell>Command</TableCell>
-              <TableCell>Description</TableCell>
-              <TableCell>Keybinding</TableCell>
-              <TableCell>Action</TableCell>
+              <TableCell>{t('settings.keyboard.command')}</TableCell>
+              <TableCell>{t('settings.keyboard.description')}</TableCell>
+              <TableCell>{t('settings.keyboard.keybinding')}</TableCell>
+              <TableCell>{t('settings.keyboard.action')}</TableCell>
             </TableRow>
           </TableHead>
           <tbody>
@@ -102,15 +102,15 @@ export function KeyboardTable() {
                       <TooltipTrigger asChild>
                         <span className='inline-flex' tabIndex={0}>
                           <Button size='sm' disabled>
-                            Edit
+                            {t('settings.keyboard.edit')}
                           </Button>
                         </span>
                       </TooltipTrigger>
-                      <TooltipContent>This shortcut is disabled and cannot be edited</TooltipContent>
+                      <TooltipContent>{t('settings.keyboard.disabled')}</TooltipContent>
                     </Tooltip>
                   ) : (
                     <Button size='sm' onClick={() => handleOpen(row)}>
-                      Edit
+                      {t('settings.keyboard.edit')}
                     </Button>
                   )}
                 </TableDataCell>

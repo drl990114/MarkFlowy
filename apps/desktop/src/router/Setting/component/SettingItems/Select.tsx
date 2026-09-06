@@ -28,7 +28,7 @@ const SelectSettingItem: React.FC<SettingItemProps<Setting.SelectSettingItem>> =
         }}
       >
         <SelectTrigger aria-label={t(item.title.i18nKey)} style={{ width: 200 }}>
-          <SelectValue placeholder='请选择' />
+          <SelectValue placeholder={t('settings.select_placeholder')} />
         </SelectTrigger>
         <SelectContent>
           {item.options.map((option) => (

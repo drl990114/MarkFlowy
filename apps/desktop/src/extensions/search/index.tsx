@@ -823,7 +823,9 @@ const SearchView = memo(() => {
                     tabIndex={virtualItem.index === tabbableRowIndex ? 0 : -1}
                     type='button'
                   >
-                    <div className='search-info__linenumber'>line {item.match.line}:</div>
+                    <div className='search-info__linenumber'>
+                      {t('search.line', { number: item.match.line })}
+                    </div>
                     <div className='search-info__content'>
                       <SearchMatchSnippet
                         content={item.match.content}

@@ -69,7 +69,7 @@ export const getSettingMap = () => {
         fileExcludePatterns: {
           key: 'file_exclude_patterns',
           type: 'listInput',
-          placeholder: 'e.g. **/node_modules/*',
+          placeholderI18nKey: 'settings.general.misc.file_exclude_patterns.placeholder',
           title: {
             i18nKey: 'settings.general.misc.file_exclude_patterns.label',
           },

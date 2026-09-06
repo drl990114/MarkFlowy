@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button'
+import { useTranslation } from '@/i18n'
 import appSettingService from '@/services/app-setting'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import { open } from '@tauri-apps/plugin-dialog'
@@ -11,6 +12,7 @@ const PathSelectSettingItem: React.FC<SettingItemProps<Setting.PathSelectSetting
 ) => {
   const { item } = props
   const { settingData } = useAppSettingStore()
+  const { t } = useTranslation()
   const curValue = settingData[item.key]
 
   return (
@@ -30,7 +32,7 @@ const PathSelectSettingItem: React.FC<SettingItemProps<Setting.PathSelectSetting
             appSettingService.writeSettingData(item, dir)
           }}
         >
-          Select Folder
+          {t('settings.select_folder')}
         </Button>
         <span className='max-w-full break-all text-right text-xs text-muted-foreground'>
           {curValue}

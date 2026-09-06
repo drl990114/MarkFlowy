@@ -1,9 +1,6 @@
 const fs = require('fs')
 const path = require('path')
 
-const langDir = path.join(__dirname, '../locales')
-const baseFile = 'en.json'
-
 function getAllKeys(obj, prefix = '') {
   let keys = new Set()
   for (const key in obj) {
@@ -34,25 +31,53 @@ function compareKeys(baseKeys, targetKeys, langFile) {
   return missingKeys.length === 0 && extraKeys.length === 0
 }
 
-function main() {
-  const baseFilePath = path.join(langDir, baseFile)
+function checkLocaleGroup({ directory, baseFile, files, label }) {
+  const baseFilePath = path.join(directory, baseFile)
   const baseContent = JSON.parse(fs.readFileSync(baseFilePath, 'utf8'))
   const baseKeys = getAllKeys(baseContent)
+  let allValid = true
+  const targetFiles =
+    files || fs.readdirSync(directory).filter((file) => file !== baseFile && file.endsWith('.json'))
 
-  const files = fs.readdirSync(langDir)
+  targetFiles.forEach((file) => {
+    console.log(`\n检查 ${label}/${file}...`)
+    const filePath = path.join(directory, file)
+    const content = JSON.parse(fs.readFileSync(filePath, 'utf8'))
+    const keys = getAllKeys(content)
+
+    const isValid = compareKeys(baseKeys, keys, `${label}/${file}`)
+    if (!isValid) {
+      allValid = false
+    }
+  })
+
+  return allValid
+}
+
+function main() {
+  const localeGroups = [
+    {
+      directory: path.join(__dirname, '../locales'),
+      baseFile: 'en.json',
+      label: 'desktop',
+    },
+    {
+      directory: path.join(__dirname, '../locales/editor'),
+      baseFile: 'en.json',
+      label: 'editor',
+    },
+    {
+      directory: path.join(__dirname, '../locales/web'),
+      baseFile: 'en/common.json',
+      files: ['zh/common.json', 'ja/common.json'],
+      label: 'web',
+    },
+  ]
   let allValid = true
 
-  files.forEach(file => {
-    if (file !== baseFile && file.endsWith('.json')) {
-      console.log(`\n检查 ${file}...`)
-      const filePath = path.join(langDir, file)
-      const content = JSON.parse(fs.readFileSync(filePath, 'utf8'))
-      const keys = getAllKeys(content)
-
-      const isValid = compareKeys(baseKeys, keys, file)
-      if (!isValid) {
-        allValid = false
-      }
+  localeGroups.forEach((localeGroup) => {
+    if (!checkLocaleGroup(localeGroup)) {
+      allValid = false
     }
   })
 
@@ -65,5 +90,4 @@ function main() {
 }
 
 main()
-
 

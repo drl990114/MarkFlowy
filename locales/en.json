@@ -1,5 +1,22 @@
 {
   "app_name": "MarkFlowy",
+  "editor": {
+    "render_failed": "Unable to render the editor"
+  },
+  "find_replace": {
+    "find": "Find",
+    "replace": "Replace",
+    "replace_with": "Replace with",
+    "replace_all": "All",
+    "previous_match": "Find previous match",
+    "next_match": "Find next match",
+    "match_case": "Match case",
+    "close": "Close find and replace",
+    "result_count": "{{current}} of {{total}}"
+  },
+  "startup": {
+    "workspace_open_failed": "Unable to open the workspace"
+  },
   "common": {
     "none": "None",
     "name": "name",
@@ -21,7 +38,8 @@
     "success": "Success",
     "import": "Import",
     "menu": "Menu",
-    "or": "or"
+    "or": "or",
+    "retry": "Retry"
   },
   "dialog": {
     "remember_choice": "Remember this choice"
@@ -97,7 +115,10 @@
     "save_and_continue": "Save and continue",
     "unsave_and_close": "Direct Close",
     "continue_without_save": "Continue without saving",
-    "convert_text": "Simplified transformation"
+    "convert_text": "Simplified transformation",
+    "convert_simplified_to_traditional_tw": "Simplified → Traditional (Taiwan)",
+    "convert_simplified_to_traditional_hk": "Simplified → Traditional (Hong Kong)",
+    "convert_traditional_to_simplified": "Traditional → Simplified"
   },
   "placeholder": {
     "translate": "Please enter target language"
@@ -137,6 +158,13 @@
     "no_heading_lines": "No heading lines found"
   },
   "bookmarks": {
+    "path": "Path",
+    "name": "Name",
+    "tags": "Tags",
+    "tag_placeholder": "Add a tag",
+    "create_tag": "Create",
+    "remove_tag": "Remove {{tag}}",
+    "no_tags_found": "No tags found.",
     "empty": "No bookmarks",
     "emptyTags": "No tagged bookmarks",
     "loading": "Loading bookmarks…",
@@ -183,6 +211,9 @@
     "focus_active_file": "Focus on the current file"
   },
   "file": {
+    "save_dialog_title": "Save File",
+    "read_failed": "Failed to read file content",
+    "binary_not_openable": "Binary files cannot be opened as text",
     "untitled": "untitled",
     "not_found": "File not found",
     "openDir": "Open Folder",
@@ -206,6 +237,8 @@
     }
   },
   "about": {
+    "description": "AI-powered cross-platform Markdown editor.",
+    "powered_by_tauri": "Powered by Tauri {{version}}",
     "label": "About",
     "version": "Version",
     "newVersion": "New version",
@@ -219,6 +252,7 @@
     "current": "current version"
   },
   "contextmenu": {
+    "label": "Context menu",
     "explorer": {
       "new": "New",
       "add_file": "New file",
@@ -284,6 +318,7 @@
   },
   "notification": {},
   "search": {
+    "line": "Line {{number}}:",
     "search_empty": "Nothing found matching these search terms",
     "text": "Search",
     "caseSensitive": "Case sensitive",
@@ -330,6 +365,12 @@
     }
   },
   "settings": {
+    "select_placeholder": "Select an option",
+    "font_placeholder": "Select a font",
+    "select_folder": "Select Folder",
+    "value_placeholder": "Enter a value…",
+    "edit_item": "Edit item",
+    "delete_item": "Delete item",
     "label": "Setting",
     "back_to_app": "Back to app",
     "back_to_settings": "Back to settings",
@@ -364,7 +405,8 @@
         },
         "file_exclude_patterns": {
           "label": "File exclusion list",
-          "desc": "Exclude matching files and folders from the explorer and search. One gitignore-style pattern per line."
+          "desc": "Exclude matching files and folders from the explorer and search. One gitignore-style pattern per line.",
+          "placeholder": "e.g. **/node_modules/*"
         }
       },
       "desc": "Common settings for the application."
@@ -445,7 +487,18 @@
     "keyboard": {
       "label": "keyboard",
       "shortcut_conflict": "This shortcut is already occupied",
-      "desc": "Configuration of keyboard shortcuts and key behavior, including settings related to shortcut conflict detection."
+      "desc": "Configuration of keyboard shortcuts and key behavior, including settings related to shortcut conflict detection.",
+      "table_label": "Keyboard shortcuts table",
+      "command": "Command",
+      "description": "Description",
+      "keybinding": "Keybinding",
+      "action": "Action",
+      "edit": "Edit",
+      "disabled": "This shortcut is disabled and cannot be edited",
+      "edit_shortcut": "Edit Shortcut",
+      "shortcut": "Shortcut",
+      "record_placeholder": "Press a shortcut",
+      "save": "Save"
     },
     "ai": {
       "label": "AI",
@@ -672,12 +725,21 @@
       "no_local_themes": "No local theme",
       "remove_local_theme": "Are you sure you want to remove the local theme \"{{name}}\"? This will delete the files under the folder.",
       "online_themes": "Online Themes",
-      "local_css_files": "Local CSS file"
+      "local_css_files": "Local CSS file",
+      "install_theme": "Install Theme",
+      "install_theme_confirm": "Are you sure you want to install {{name}}?",
+      "uninstall_theme": "Uninstall Theme",
+      "uninstall_theme_confirm": "Are you sure you want to uninstall {{name}}?"
     }
   },
   "updater": {
     "install": "install",
-    "download_and_install": "Download and install"
+    "download_and_install": "Download and install",
+    "downloading": "Downloading new version…",
+    "install_success": "Update installed successfully.",
+    "restart": "Restart",
+    "install_failed": "Unable to install the update: {{error}}",
+    "check_failed": "Unable to check for updates: {{error}}"
   },
   "workspace": {
     "info": "Workspace Information",
@@ -706,6 +768,8 @@
     }
   },
   "ai": {
+    "task_summarizing": "AI: Retrieving article summary",
+    "task_translating": "AI: Translating article",
     "capabilities": "Function",
     "export_conversation": "Export conversation",
     "assistant": "Chat AI",
@@ -811,7 +875,13 @@
       "loading": "Loading image…",
       "edit": "Edit address"
     },
-    "preview": { "retry": "Retry" }
+    "preview": { "retry": "Retry" },
+    "editor": {
+      "loading": "Loading Capricorn editor",
+      "opening": "Opening document",
+      "load_failed": "Unable to load the Capricorn editor",
+      "preparation_failed": "Background document preparation failed. Please retry."
+    }
   },
   "inline_insert": {
     "insert_link": "Insert link",

@@ -105,7 +105,7 @@ function EditorArea() {
           retryLabel={t('common.retry')}
           state={{
             status: 'error',
-            title: 'Unable to render the editor',
+            title: t('editor.render_failed'),
             description: error instanceof Error ? error.message : undefined,
             retry: reset,
           }}

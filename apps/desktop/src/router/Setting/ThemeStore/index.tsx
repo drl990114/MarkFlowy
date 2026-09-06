@@ -278,8 +278,8 @@ export function ThemeStore() {
 
   const handleInstall = async (theme: ThemeItem) => {
     const action = await dialog.confirm({
-      title: 'Install Theme',
-      content: `Are you sure you want to install ${theme.name}?`,
+      title: t('settings.themeStore.install_theme'),
+      content: t('settings.themeStore.install_theme_confirm', { name: theme.name }),
       actions: [
         { id: 'cancel', label: t('common.cancel') },
         { id: 'confirm', label: t('common.confirm'), primary: true },
@@ -303,8 +303,8 @@ export function ThemeStore() {
 
   const handleUninstall = async (theme: ThemeItem) => {
     const action = await dialog.confirm({
-      title: 'Uninstall Theme',
-      content: `Are you sure you want to uninstall ${theme.name}?`,
+      title: t('settings.themeStore.uninstall_theme'),
+      content: t('settings.themeStore.uninstall_theme_confirm', { name: theme.name }),
       actions: [
         { id: 'cancel', label: t('common.cancel') },
         { id: 'confirm', label: t('common.confirm'), primary: true, danger: true },

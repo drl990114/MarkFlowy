@@ -1,4 +1,5 @@
 import { AsyncSurface } from '@/components/AsyncSurface'
+import { useTranslation } from '@/i18n'
 import { InlineInsertPopover } from './InlineInsertPopover'
 import type { Ref } from 'react'
 import {
@@ -81,6 +82,7 @@ export function CapricornEditor({
   ref,
 }: CapricornEditorProps) {
   const editorTheme = useContext(ThemeContext)
+  const { t } = useTranslation()
   // The private runtime has its own React root, so bridge the host editor
   // theme through its style API (including inline code and CodeMirror blocks).
   const runtimeStyle = useMemo(
@@ -556,7 +558,10 @@ export function CapricornEditor({
           <AsyncSurface
             state={{
               status: 'loading',
-              label: state === 'loading' ? 'Loading Capricorn editor' : 'Opening document',
+              label:
+                state === 'loading'
+                  ? t('capricorn.editor.loading')
+                  : t('capricorn.editor.opening'),
             }}
           >
             {() => null}
@@ -565,14 +570,14 @@ export function CapricornEditor({
       ) : state === 'error' ? (
         <div style={{ gridColumn: 1, gridRow: 1 }}>
           <AsyncSurface
-            retryLabel='Retry'
+            retryLabel={t('common.retry')}
             state={{
               status: 'error',
-              title: 'Unable to load the Capricorn editor',
+              title: t('capricorn.editor.load_failed'),
               description: loadErrorRef.current?.asynchronous
                 ? loadErrorRef.current.error instanceof Error
                   ? loadErrorRef.current.error.message
-                  : 'Background document preparation failed. Please retry.'
+                  : t('capricorn.editor.preparation_failed')
                 : undefined,
               retry,
             }}

@@ -62,7 +62,7 @@ export function Support() {
         <ButtonContainer>
           <Button size='sm' onClick={handleOpenGithubStar}>
             <i aria-hidden className='ri-github-fill' />
-            GitHub Star
+            {t('settings.support.github_star')}
           </Button>
         </ButtonContainer>
       </SupportItem>

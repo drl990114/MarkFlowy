@@ -60,14 +60,12 @@ TauriVersion: ${appInfo.tauriVersion}
           <Dialog.Description asChild>
             <div className='flex flex-col items-center gap-4 text-sm text-foreground-secondary'>
               <div className='flex flex-col items-center gap-0.5'>
-                <span className='font-medium text-foreground'>
-                  AI-powered cross-platform Markdown editor.
-                </span>
+                <span className='font-medium text-foreground'>{t('about.description')}</span>
                 <span>
                   {t('about.version')} {appInfo.version}
                 </span>
               </div>
-              <span>Powered by Tauri {appInfo.tauriVersion}</span>
+              <span>{t('about.powered_by_tauri', { version: appInfo.tauriVersion })}</span>
               <span className='text-xs'>© 2023–present drl990114</span>
             </div>
           </Dialog.Description>

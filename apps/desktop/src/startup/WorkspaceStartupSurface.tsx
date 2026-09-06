@@ -36,7 +36,7 @@ export function WorkspaceStartupSurface({
     state.status === 'error'
       ? {
           status: 'error' as const,
-          title: 'Unable to open the workspace',
+          title: t('startup.workspace_open_failed'),
           description: getStartupErrorDescription(state.error),
           retry,
           action: chooseWorkspace ? (

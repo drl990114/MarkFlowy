@@ -312,17 +312,17 @@ export const MenuList = memo((props: MenuListProps) => {
         value: 'convert_text',
         children: [
           {
-            label: '简 -> 繁 (台湾)',
+            label: t('action.convert_simplified_to_traditional_tw'),
             value: 'zh-TW',
             handler: () => convertText('zh-TW'),
           },
           {
-            label: '简 -> 繁 (香港)',
+            label: t('action.convert_simplified_to_traditional_hk'),
             value: 'zh-HK',
             handler: () => convertText('zh-HK'),
           },
           {
-            label: '繁 -> 简',
+            label: t('action.convert_traditional_to_simplified'),
             value: 'zh-Hans',
             handler: () => convertText('zh-Hans'),
           },

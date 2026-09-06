@@ -119,7 +119,7 @@ export function PandocExportController({
         await showPandocError(
           info.error ?? {
             code: 'unsupported_format',
-            message: 'Unsupported Pandoc output format.',
+            message: t('contextmenu.editor_tab.export_pandoc_error_unsupported_format'),
           },
         )
         return null
@@ -156,7 +156,7 @@ export function PandocExportController({
       await showPandocError(
         info.error ?? {
           code: 'invalid_executable',
-          message: 'Invalid Pandoc executable.',
+          message: t('contextmenu.editor_tab.export_pandoc_error_invalid_executable'),
         },
       )
       return null

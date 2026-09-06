@@ -7,6 +7,9 @@
   },
   "docs": {
     "tableOfContents": "On this page",
+    "content": {
+      "description": "Browse the MarkFlowy documentation."
+    },
     "sidebar": {
       "gettingStarted": "Getting Started"
     }
@@ -95,6 +98,14 @@
       "globeLabel": "MarkFlowy global contributor globe",
       "orbitLabel": "Contributor profile links orbiting the globe"
     }
+  },
+  "releases": {
+    "title": "Releases",
+    "meta_description": "MarkFlowy release notes.",
+    "description_before_link": "Here are the latest releases of MarkFlowy. Click a version to see its detailed changes and updates. Download it from",
+    "github_link": "GitHub Releases",
+    "description_after_link": ".",
+    "see_details": "See details"
   },
   "navigation": {
     "home": "Home",

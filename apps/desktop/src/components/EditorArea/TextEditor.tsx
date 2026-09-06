@@ -1552,7 +1552,7 @@ function TextEditor(props: TextEditorProps) {
                   let selectedPath: string | null
                   try {
                     selectedPath = await save({
-                      title: 'Save File',
+                      title: t('file.save_dialog_title'),
                       defaultPath: fileToSave.name ?? `${t('file.untitled')}.md`,
                     })
                   } finally {
@@ -2605,15 +2605,15 @@ function TextEditor(props: TextEditorProps) {
   }, [id])
 
   if (status === TextEditorStatus.NOTEXIST) {
-    return <WarningHeader>File is not exist</WarningHeader>
+    return <WarningHeader>{t('file.not_found')}</WarningHeader>
   }
 
   if (status === TextEditorStatus.READERROR) {
-    return <WarningHeader>Failed to read file content</WarningHeader>
+    return <WarningHeader>{t('file.read_failed')}</WarningHeader>
   }
 
   if (status === TextEditorStatus.BINARY) {
-    return <WarningHeader>Binary file cannot be opened as text</WarningHeader>
+    return <WarningHeader>{t('file.binary_not_openable')}</WarningHeader>
   }
 
   if (typeof content !== 'string' || (!delegate && currentViewType === EditorViewType.SOURCECODE)) {

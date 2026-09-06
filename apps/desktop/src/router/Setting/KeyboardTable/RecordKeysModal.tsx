@@ -77,19 +77,19 @@ export function RecordKeysModal({ ref }: RecordKeysModalProps) {
         }}
       >
         <Dialog.Header>
-          <Dialog.Title>Edit Shortcut</Dialog.Title>
+          <Dialog.Title>{t('settings.keyboard.edit_shortcut')}</Dialog.Title>
         </Dialog.Header>
 
         {selectedCommand && (
           <Dialog.Body>
             <div className='grid grid-cols-[7rem_minmax(0,1fr)] items-center gap-x-3 gap-y-4'>
               <span className='text-right text-ui-control font-medium text-foreground-secondary'>
-                Command
+                {t('settings.keyboard.command')}
               </span>
               <span className='min-w-0 break-all text-foreground'>{selectedCommand.id}</span>
 
               <span className='text-right text-ui-control font-medium text-foreground-secondary'>
-                Description
+                {t('settings.keyboard.description')}
               </span>
               <span className='min-w-0 text-foreground'>{t(selectedCommand.id)}</span>
 
@@ -97,13 +97,13 @@ export function RecordKeysModal({ ref }: RecordKeysModalProps) {
                 className='text-right text-ui-control font-medium text-foreground-secondary'
                 htmlFor='shortcut-input'
               >
-                Shortcut
+                {t('settings.keyboard.shortcut')}
               </label>
               <Input
-                aria-label='Shortcut'
+                aria-label={t('settings.keyboard.shortcut')}
                 id='shortcut-input'
                 onKeyDown={handleKeyDown}
-                placeholder='请按下快捷键'
+                placeholder={t('settings.keyboard.record_placeholder')}
                 readOnly
                 ref={modalRef}
                 value={newKeyBinding.length ? transferKey(newKeyBinding.join('+')) : ''}
@@ -117,7 +117,7 @@ export function RecordKeysModal({ ref }: RecordKeysModalProps) {
             {t('common.cancel')}
           </Button>
           <Button disabled={!selectedCommand} onClick={() => void handleSave()}>
-            Save
+            {t('settings.keyboard.save')}
           </Button>
         </Dialog.Footer>
       </Dialog.Content>

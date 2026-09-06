@@ -6,6 +6,10 @@
     "title": "Playground を試す"
   },
   "docs": {
+    "tableOfContents": "このページの目次",
+    "content": {
+      "description": "MarkFlowy のドキュメントを閲覧します。"
+    },
     "sidebar": {
       "gettingStarted": "はじめに"
     }
@@ -95,6 +99,14 @@
       "orbitLabel": "地球を周回する貢献者プロフィールへのリンク"
     }
   },
+  "releases": {
+    "title": "リリース",
+    "meta_description": "MarkFlowy のリリースノート。",
+    "description_before_link": "MarkFlowy の最新リリースです。各バージョンをクリックすると変更内容を確認できます。ダウンロードは",
+    "github_link": "GitHub Releases",
+    "description_after_link": "から行えます。",
+    "see_details": "詳細を見る"
+  },
   "navigation": {
     "home": "ホーム",
     "docs": "ドキュメント",
@@ -102,6 +114,9 @@
     "github": "GitHub",
     "theme": "テーマ",
     "language": "言語",
+    "openMenu": "メニューを開く",
+    "closeMenu": "メニューを閉じる",
+    "webApp": "Web アプリ",
     "releases": "リリース"
   },
   "fileTitle": {

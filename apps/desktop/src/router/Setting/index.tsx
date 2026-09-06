@@ -372,7 +372,7 @@ function Setting({ navigationRequest }: SettingProps) {
                           onClick={() => handleCategorySelect(groupKey, navigationItemId)}
                         >
                           <i aria-hidden className={classNames(group.iconName, 'text-sm')} />
-                          <span className='min-w-0 truncate'>{t(group.i18nKey)}</span>
+                          <span className='min-w-0 truncate capitalize'>{t(group.i18nKey)}</span>
                         </Button>
                       </li>
                     )

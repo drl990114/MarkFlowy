@@ -95,7 +95,7 @@ export const EditorInfoBar = memo(() => {
       return
     }
     const res = await addAppTask<ReturnType<typeof summarizeAIText>>({
-      title: 'AI: Retrieving article abstract',
+      title: t('ai.task_summarizing'),
       promise: summarizeAIText(content || ''),
     })
     addNewMarkdownFileEdit({
@@ -106,7 +106,7 @@ export const EditorInfoBar = memo(() => {
 ${res}
     `,
     })
-  }, [addAppTask, curFile?.id, getEditorContent])
+  }, [addAppTask, curFile?.id, getEditorContent, t])
 
   const fetchCurFileTranslate = useCallback(
     async (targetLang: string) => {
@@ -118,7 +118,7 @@ ${res}
         return
       }
       const res = await addAppTask({
-        title: 'AI: Translating article',
+        title: t('ai.task_translating'),
         promise: translateAIText(content || '', targetLang),
       })
 
@@ -127,7 +127,7 @@ ${res}
         content: `${res}`,
       })
     },
-    [addAppTask, curFile?.id, getEditorContent],
+    [addAppTask, curFile?.id, getEditorContent, t],
   )
 
   const convertText = useCallback(
@@ -231,21 +231,21 @@ ${res}
           type: 'divider' as const,
         },
         {
-          label: '简繁转换',
+          label: t('action.convert_text'),
           value: 'convert_text',
           children: [
             {
-              label: '简 -> 繁 (台湾)',
+              label: t('action.convert_simplified_to_traditional_tw'),
               value: 'zh-TW',
               handler: () => convertText('zh-TW'),
             },
             {
-              label: '简 -> 繁 (香港)',
+              label: t('action.convert_simplified_to_traditional_hk'),
               value: 'zh-HK',
               handler: () => convertText('zh-HK'),
             },
             {
-              label: '繁 -> 简',
+              label: t('action.convert_traditional_to_simplified'),
               value: 'zh-Hans',
               handler: () => convertText('zh-Hans'),
             },

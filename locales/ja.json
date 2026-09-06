@@ -1,5 +1,22 @@
 {
   "app_name": "MarkFlowy",
+  "editor": {
+    "render_failed": "エディタを表示できません"
+  },
+  "find_replace": {
+    "find": "検索",
+    "replace": "置換",
+    "replace_with": "置換後",
+    "replace_all": "すべて",
+    "previous_match": "前の一致を検索",
+    "next_match": "次の一致を検索",
+    "match_case": "大文字と小文字を区別",
+    "close": "検索と置換を閉じる",
+    "result_count": "{{current}} / {{total}}"
+  },
+  "startup": {
+    "workspace_open_failed": "ワークスペースを開けません"
+  },
   "common": {
     "none": "なし",
     "name": "名前",
@@ -21,7 +38,8 @@
     "success": "成功",
     "import": "インポート",
     "menu": "メニュー",
-    "or": "または"
+    "or": "または",
+    "retry": "再試行"
   },
   "dialog": {
     "remember_choice": "この選択を記憶"
@@ -97,7 +115,10 @@
     "save_and_continue": "保存して続行",
     "unsave_and_close": "直接閉じる",
     "continue_without_save": "保存せずに続行",
-    "convert_text": "簡単に変換する"
+    "convert_text": "簡繁変換",
+    "convert_simplified_to_traditional_tw": "簡体字 → 繁体字（台湾）",
+    "convert_simplified_to_traditional_hk": "簡体字 → 繁体字（香港）",
+    "convert_traditional_to_simplified": "繁体字 → 簡体字"
   },
   "placeholder": {
     "translate": "ターゲット言語を入力してください"
@@ -137,6 +158,13 @@
     "no_heading_lines": "見出し行が見つかりません"
   },
   "bookmarks": {
+    "path": "パス",
+    "name": "名前",
+    "tags": "タグ",
+    "tag_placeholder": "タグを追加",
+    "create_tag": "作成",
+    "remove_tag": "{{tag}} を削除",
+    "no_tags_found": "タグが見つかりません。",
     "empty": "ブックマークはありません",
     "emptyTags": "タグ付きブックマークはありません",
     "loading": "ブックマークを読み込み中…",
@@ -156,6 +184,9 @@
     "focus_active_file": "現在のファイルにフォーカス"
   },
   "file": {
+    "save_dialog_title": "ファイルを保存",
+    "read_failed": "ファイルの内容を読み込めませんでした",
+    "binary_not_openable": "バイナリファイルはテキストとして開けません",
     "untitled": "無題",
     "not_found": "ファイルが見つかりません",
     "openDir": "フォルダーを開く",
@@ -179,6 +210,8 @@
     }
   },
   "about": {
+    "description": "AI 搭載のクロスプラットフォーム Markdown エディタ。",
+    "powered_by_tauri": "Tauri {{version}} を使用",
     "label": "About",
     "version": "バージョン",
     "newVersion": "新しいバージョン",
@@ -192,6 +225,7 @@
     "current": "現在のバージョン"
   },
   "contextmenu": {
+    "label": "コンテキストメニュー",
     "explorer": {
       "new": "新規作成",
       "add_file": "新しいファイル",
@@ -257,6 +291,7 @@
   },
   "notification": {},
   "search": {
+    "line": "{{number}} 行目:",
     "search_empty": "一致する検索結果が見つかりませんでした",
     "text": "検索",
     "caseSensitive": "大文字と小文字を区別",
@@ -271,6 +306,12 @@
     "search_failed": "検索に失敗しました"
   },
   "settings": {
+    "select_placeholder": "項目を選択",
+    "font_placeholder": "フォントを選択",
+    "select_folder": "フォルダーを選択",
+    "value_placeholder": "値を入力…",
+    "edit_item": "項目を編集",
+    "delete_item": "項目を削除",
     "label": "設定",
     "back_to_app": "アプリに戻る",
     "back_to_settings": "設定一覧に戻る",
@@ -305,7 +346,8 @@
         },
         "file_exclude_patterns": {
           "label": "ファイル除外リスト",
-          "desc": "エクスプローラーと検索から一致するファイルやフォルダーを除外します。1 行に 1 つの gitignore 形式のパターンを入力します。"
+          "desc": "エクスプローラーと検索から一致するファイルやフォルダーを除外します。1 行に 1 つの gitignore 形式のパターンを入力します。",
+          "placeholder": "例: **/node_modules/*"
         }
       },
       "desc": "アプリケーションの共通設定。"
@@ -386,6 +428,17 @@
     "keyboard": {
       "label": "キーボード",
       "shortcut_conflict": "このショートカットキーはすでに占有されています",
+      "table_label": "キーボードショートカット表",
+      "command": "コマンド",
+      "description": "説明",
+      "keybinding": "ショートカット",
+      "action": "操作",
+      "edit": "編集",
+      "disabled": "このショートカットは無効のため編集できません",
+      "edit_shortcut": "ショートカットを編集",
+      "shortcut": "ショートカット",
+      "record_placeholder": "ショートカットキーを押してください",
+      "save": "保存",
       "desc": "キーボードショートカットとキー動作の設定には、ショートカットキーの競合検出などの設定が含まれます。"
     },
     "ai": {
@@ -613,12 +666,21 @@
       "no_local_themes": "ローカルテーマなし",
       "remove_local_theme": "ローカルトピック \"{{name}}\" を削除しますか?これにより、フォルダの下のファイルが削除されます。",
       "online_themes": "オンラインテーマ",
-      "local_css_files": "ローカルCSSファイル"
+      "local_css_files": "ローカルCSSファイル",
+      "install_theme": "テーマをインストール",
+      "install_theme_confirm": "{{name}} をインストールしますか？",
+      "uninstall_theme": "テーマをアンインストール",
+      "uninstall_theme_confirm": "{{name}} をアンインストールしますか？"
     }
   },
   "updater": {
     "install": "インストール",
-    "download_and_install": "ダウンロードしてインストール"
+    "download_and_install": "ダウンロードしてインストール",
+    "downloading": "新しいバージョンをダウンロードしています…",
+    "install_success": "アップデートをインストールしました。",
+    "restart": "再起動",
+    "install_failed": "アップデートをインストールできませんでした: {{error}}",
+    "check_failed": "アップデートを確認できませんでした: {{error}}"
   },
   "workspace": {
     "info": "ワークスペース情報",
@@ -679,6 +741,8 @@
     }
   },
   "ai": {
+    "task_summarizing": "AI：記事の要約を生成中",
+    "task_translating": "AI：記事を翻訳中",
     "capabilities": "機能",
     "export_conversation": "会話をエクスポート",
     "assistant": "Chat AI",
@@ -778,6 +842,12 @@
     "shortcutFallback": "Cmd/Ctrl+Shift+F"
   },
   "capricorn": {
+    "editor": {
+      "loading": "Capricorn エディタを読み込んでいます",
+      "opening": "ドキュメントを開いています",
+      "load_failed": "Capricorn エディタを読み込めませんでした",
+      "preparation_failed": "バックグラウンドでのドキュメント準備に失敗しました。再試行してください。"
+    },
     "placeholder": {
       "default": "「/」でコマンドを表示"
     },

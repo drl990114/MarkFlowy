@@ -27,6 +27,7 @@ interface FileExcludeRowItemProps {
 
 const FileExcludeRowItem = memo<FileExcludeRowItemProps>(
   ({ value, placeholder, onSave, onDelete }) => {
+    const { t } = useTranslation()
     const [isEditing, setIsEditing] = useState(false)
     const [editingValue, setEditingValue] = useState(value)
     const isCancelledRef = useRef(false)
@@ -68,7 +69,7 @@ const FileExcludeRowItem = memo<FileExcludeRowItemProps>(
             data-mf-settings-escape-cancel=''
             inputSize='sm'
             value={editingValue}
-            placeholder={placeholder || 'Enter value...'}
+            placeholder={placeholder || t('settings.value_placeholder')}
             onChange={(e) => setEditingValue(e.target.value)}
             onKeyDown={handleKeyDown}
             onBlur={handleCommit}
@@ -79,7 +80,7 @@ const FileExcludeRowItem = memo<FileExcludeRowItemProps>(
             <RowText>{value}</RowText>
             <RowActions className='row-actions'>
               <IconButton
-                aria-label='Edit item'
+                aria-label={t('settings.edit_item')}
                 onClick={() => {
                   setEditingValue(value)
                   setIsEditing(true)
@@ -87,7 +88,7 @@ const FileExcludeRowItem = memo<FileExcludeRowItemProps>(
               >
                 <i className='ri-pencil-line' />
               </IconButton>
-              <IconButton aria-label='Delete item' onClick={onDelete}>
+              <IconButton aria-label={t('settings.delete_item')} onClick={onDelete}>
                 <i className='ri-close-line' />
               </IconButton>
             </RowActions>
@@ -106,6 +107,7 @@ interface AddingExcludeRowItemProps {
 
 const AddingExcludeRowItem = memo<AddingExcludeRowItemProps>(
   ({ placeholder, onSave, onCancel }) => {
+    const { t } = useTranslation()
     const [addValue, setAddValue] = useState('')
     const isCancelledRef = useRef(false)
 
@@ -143,7 +145,7 @@ const AddingExcludeRowItem = memo<AddingExcludeRowItemProps>(
           data-mf-settings-escape-cancel=''
           inputSize='sm'
           value={addValue}
-          placeholder={placeholder || 'Enter value...'}
+          placeholder={placeholder || t('settings.value_placeholder')}
           onChange={(e) => setAddValue(e.target.value)}
           onKeyDown={handleKeyDown}
           onBlur={handleCommit}
@@ -160,6 +162,7 @@ const FileExcludePatternsSettingItem: React.FC<
   const { item } = props
   const { settingData } = useAppSettingStore()
   const { t } = useTranslation()
+  const placeholder = item.placeholderI18nKey ? t(item.placeholderI18nKey) : item.placeholder
   const curValue = (settingData[item.key] as unknown as string) || ''
 
   const parsedLines = useMemo(() => parseFileExcludePatternLines(curValue), [curValue])
@@ -231,7 +234,7 @@ const FileExcludePatternsSettingItem: React.FC<
             <FileExcludeRowItem
               key={listItem.id}
               value={listItem.value}
-              placeholder={item.placeholder}
+              placeholder={placeholder}
               onSave={(newValue) => handleItemSave(listItem.id, newValue)}
               onDelete={() => handleItemDelete(listItem.id)}
             />
@@ -239,7 +242,7 @@ const FileExcludePatternsSettingItem: React.FC<
 
           {adding && (
             <AddingExcludeRowItem
-              placeholder={item.placeholder}
+              placeholder={placeholder}
               onSave={handleAddSave}
               onCancel={() => setAdding(false)}
             />

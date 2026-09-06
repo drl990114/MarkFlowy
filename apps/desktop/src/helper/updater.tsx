@@ -3,19 +3,19 @@ import { UpdateDialogContent } from '@/components/UpdateDialogContent'
 import { invoke } from '@tauri-apps/api/core'
 import type { Update } from '@tauri-apps/plugin-updater'
 import { check } from '@tauri-apps/plugin-updater'
-import { getI18n } from '@/i18n'
+import { i18n } from '@/i18n'
 import { toast } from 'zens'
 import { logger } from './logger'
 
 export const installUpdate = async (update: Update) => {
-  const id = toast.loading('Downloading new version...')
+  const id = toast.loading(i18n.t('updater.downloading'))
 
   try {
     await update.downloadAndInstall()
     toast.dismiss(id)
-    toast.success('Update new version success!', {
+    toast.success(i18n.t('updater.install_success'), {
       action: {
-        label: 'Restart',
+        label: i18n.t('updater.restart'),
         onClick: () => {
           invoke('app_restart')
         },
@@ -23,14 +23,12 @@ export const installUpdate = async (update: Update) => {
     })
   } catch (error) {
     toast.dismiss(id)
-    toast.error(`Update new version error: ${error}`)
+    toast.error(i18n.t('updater.install_failed', { error: String(error) }))
   }
 }
 
 export const checkUpdate = async (opt: { install: boolean } = { install: false }) => {
   try {
-    const i18n = getI18n()
-
     let update = null
 
     try {
@@ -45,7 +43,7 @@ export const checkUpdate = async (opt: { install: boolean } = { install: false }
       try {
         update = await check()
       } catch (e) {
-        toast.error(`Check update error: ${e}`)
+        toast.error(i18n.t('updater.check_failed', { error: String(e) }))
         logger.error('Check update error2:', e)
       }
       return
@@ -79,6 +77,6 @@ export const checkUpdate = async (opt: { install: boolean } = { install: false }
       }
     }
   } catch (error) {
-    toast.error(`Update new version error: ${error}`)
+    toast.error(i18n.t('updater.check_failed', { error: String(error) }))
   }
 }

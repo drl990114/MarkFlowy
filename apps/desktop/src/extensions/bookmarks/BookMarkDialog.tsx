@@ -95,7 +95,9 @@ export const BookMarkDialog: React.FC = () => {
 
         <Dialog.Body>
           <div className='grid grid-cols-[4.5rem_minmax(0,1fr)] items-center gap-x-3 gap-y-4'>
-            <span className='text-right text-xs font-medium text-foreground-secondary'>Path</span>
+            <span className='text-right text-xs font-medium text-foreground-secondary'>
+              {t('bookmarks.path')}
+            </span>
             <span
               className='min-w-0 break-all rounded-md border border-border bg-muted px-2.5 py-1.5 text-xs text-foreground'
               title={path}
@@ -107,7 +109,7 @@ export const BookMarkDialog: React.FC = () => {
               className='text-right text-xs font-medium text-foreground-secondary'
               htmlFor='bookmark-name'
             >
-              Name
+              {t('bookmarks.name')}
             </label>
             <Input
               aria-invalid={saveError ? true : undefined}
@@ -121,16 +123,19 @@ export const BookMarkDialog: React.FC = () => {
               className='text-right text-xs font-medium text-foreground-secondary'
               id='bookmark-tags-label'
             >
-              Tags
+              {t('bookmarks.tags')}
             </span>
             <div className='min-w-0'>
               <TagCombobox
                 allowCreate
                 aria-labelledby='bookmark-tags-label'
+                createLabel={t('bookmarks.create_tag')}
                 disabled={saving}
+                emptyText={t('bookmarks.no_tags_found')}
                 onValuesChange={handleTagChange}
                 options={tagOptions}
-                placeholder='Tag'
+                placeholder={t('bookmarks.tag_placeholder')}
+                removeLabel={(tag) => t('bookmarks.remove_tag', { tag })}
                 values={tags}
               />
             </div>

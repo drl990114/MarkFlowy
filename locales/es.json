@@ -1,5 +1,22 @@
 {
   "app_name": "MarkFlowy",
+  "editor": {
+    "render_failed": "No se pudo renderizar el editor"
+  },
+  "find_replace": {
+    "find": "Buscar",
+    "replace": "Reemplazar",
+    "replace_with": "Reemplazar con",
+    "replace_all": "Todo",
+    "previous_match": "Buscar coincidencia anterior",
+    "next_match": "Buscar coincidencia siguiente",
+    "match_case": "Distinguir mayúsculas y minúsculas",
+    "close": "Cerrar buscar y reemplazar",
+    "result_count": "{{current}} de {{total}}"
+  },
+  "startup": {
+    "workspace_open_failed": "No se pudo abrir el espacio de trabajo"
+  },
   "common": {
     "none": "Nada",
     "name": "nombre",
@@ -21,7 +38,8 @@
     "success": "Éxito",
     "import": "Importar",
     "menu": "Menú",
-    "or": "o"
+    "or": "o",
+    "retry": "Reintentar"
   },
   "dialog": {
     "remember_choice": "Recordar esta elección"
@@ -97,7 +115,10 @@
     "save_and_continue": "Guardar y continuar",
     "unsave_and_close": "Cierre directo",
     "continue_without_save": "Continuar sin guardar",
-    "convert_text": "Conversión simplificada y tradicional"
+    "convert_text": "Conversión simplificada y tradicional",
+    "convert_simplified_to_traditional_tw": "Simplificado → Tradicional (Taiwán)",
+    "convert_simplified_to_traditional_hk": "Simplificado → Tradicional (Hong Kong)",
+    "convert_traditional_to_simplified": "Tradicional → Simplificado"
   },
   "placeholder": {
     "translate": "Idioma destino"
@@ -137,6 +158,13 @@
     "no_heading_lines": "No se encontraron líneas de encabezado"
   },
   "bookmarks": {
+    "path": "Ruta",
+    "name": "Nombre",
+    "tags": "Etiquetas",
+    "tag_placeholder": "Añadir una etiqueta",
+    "create_tag": "Crear",
+    "remove_tag": "Eliminar {{tag}}",
+    "no_tags_found": "No se encontraron etiquetas.",
     "empty": "No hay marcadores",
     "emptyTags": "No hay marcadores con etiquetas",
     "loading": "Cargando marcadores…",
@@ -151,6 +179,9 @@
     "saveError": "No se pudo guardar el marcador."
   },
   "file": {
+    "save_dialog_title": "Guardar archivo",
+    "read_failed": "No se pudo leer el contenido del archivo",
+    "binary_not_openable": "Los archivos binarios no se pueden abrir como texto",
     "untitled": "sin título",
     "not_found": "Archivo no encontrado",
     "openDir": "Abrir Carpeta",
@@ -174,6 +205,8 @@
     }
   },
   "about": {
+    "description": "Editor Markdown multiplataforma con IA.",
+    "powered_by_tauri": "Con tecnología de Tauri {{version}}",
     "label": "Acerca de",
     "version": "Versión",
     "newVersion": "Nueva versión",
@@ -187,6 +220,7 @@
     "current": "versión actual"
   },
   "contextmenu": {
+    "label": "Menú contextual",
     "explorer": {
       "new": "Nuevo",
       "add_file": "Nuevo archivo",
@@ -252,6 +286,7 @@
   },
   "notification": {},
   "search": {
+    "line": "Línea {{number}}:",
     "search_empty": "No se encontró ninguna coincidencia con los términos de búsqueda",
     "text": "Buscar",
     "caseSensitive": "Distinguir mayúsculas y minúsculas",
@@ -266,6 +301,12 @@
     "search_failed": "La búsqueda falló"
   },
   "settings": {
+    "select_placeholder": "Selecciona una opción",
+    "font_placeholder": "Selecciona una fuente",
+    "select_folder": "Seleccionar carpeta",
+    "value_placeholder": "Introduce un valor…",
+    "edit_item": "Editar elemento",
+    "delete_item": "Eliminar elemento",
     "label": "Preferencias",
     "back_to_app": "Volver a la aplicación",
     "back_to_settings": "Volver a preferencias",
@@ -300,7 +341,8 @@
         },
         "file_exclude_patterns": {
           "label": "Lista de exclusión de archivos",
-          "desc": "Excluir archivos y carpetas coincidentes del explorador y la búsqueda. Un patrón tipo gitignore por línea."
+          "desc": "Excluir archivos y carpetas coincidentes del explorador y la búsqueda. Un patrón tipo gitignore por línea.",
+          "placeholder": "p. ej. **/node_modules/*"
         }
       },
       "desc": "Configuración universal de la aplicación."
@@ -381,6 +423,17 @@
     "keyboard": {
       "label": "teclado",
       "shortcut_conflict": "La tecla de acceso directo está ocupada",
+      "table_label": "Tabla de atajos de teclado",
+      "command": "Comando",
+      "description": "Descripción",
+      "keybinding": "Atajo",
+      "action": "Acción",
+      "edit": "Editar",
+      "disabled": "Este atajo está deshabilitado y no se puede editar",
+      "edit_shortcut": "Editar atajo",
+      "shortcut": "Atajo",
+      "record_placeholder": "Pulsa un atajo",
+      "save": "Guardar",
       "desc": "Configuración de los atajos de teclado y el comportamiento de las teclas, incluidas las configuraciones relacionadas, como la detección de conflictos de atajos."
     },
     "ai": {
@@ -608,12 +661,21 @@
       "no_local_themes": "Sin tema local",
       "remove_local_theme": "¿Confirmo para eliminar el tema local \"{{name}}\"? Esto elimina los archivos debajo de la carpeta.",
       "online_themes": "Temas en línea",
-      "local_css_files": "Archivos CSS locales"
+      "local_css_files": "Archivos CSS locales",
+      "install_theme": "Instalar tema",
+      "install_theme_confirm": "¿Quieres instalar {{name}}?",
+      "uninstall_theme": "Desinstalar tema",
+      "uninstall_theme_confirm": "¿Quieres desinstalar {{name}}?"
     }
   },
   "updater": {
     "install": "instalar",
-    "download_and_install": "Descargar e instalar"
+    "download_and_install": "Descargar e instalar",
+    "downloading": "Descargando nueva versión…",
+    "install_success": "La actualización se instaló correctamente.",
+    "restart": "Reiniciar",
+    "install_failed": "No se pudo instalar la actualización: {{error}}",
+    "check_failed": "No se pudieron buscar actualizaciones: {{error}}"
   },
   "explorer": {
     "collapse_folders": "Contraer carpetas",
@@ -679,6 +741,8 @@
     }
   },
   "ai": {
+    "task_summarizing": "IA: generando resumen del artículo",
+    "task_translating": "IA: traduciendo artículo",
     "capabilities": "Función",
     "export_conversation": "Exportar conversación",
     "assistant": "Chat AI",
@@ -778,6 +842,12 @@
     "shortcutFallback": "Cmd/Ctrl+Mayús+F"
   },
   "capricorn": {
+    "editor": {
+      "loading": "Cargando el editor Capricorn",
+      "opening": "Abriendo documento",
+      "load_failed": "No se pudo cargar el editor Capricorn",
+      "preparation_failed": "Falló la preparación del documento en segundo plano. Vuelve a intentarlo."
+    },
     "placeholder": {
       "default": "Escribe '/' para ver los comandos"
     },

@@ -11,6 +11,7 @@ import {
   ContextMenuTrigger,
 } from '@/components/ui/context-menu'
 import { commandRegistry, keybindingRegistry } from '@/commands'
+import { useTranslation } from '@/i18n'
 import type {
   DesktopMenuGroupType,
   DesktopMenuItemData,
@@ -139,6 +140,7 @@ function MenuItems({
 
 export const ContextMenu = memo(() => {
   const { items, open, x, y } = useContextMenuStore()
+  const { t } = useTranslation()
   const triggerRef = useRef<HTMLSpanElement>(null)
   const radixOpenRef = useRef(false)
   const pendingActionRef = useRef<DesktopMenuGroupType['handler']>(undefined)
@@ -213,7 +215,7 @@ export const ContextMenu = memo(() => {
           width: 0,
         }}
       />
-      <ContextMenuContent aria-label='Context menu' onCloseAutoFocus={handleCloseAutoFocus}>
+      <ContextMenuContent aria-label={t('contextmenu.label')} onCloseAutoFocus={handleCloseAutoFocus}>
         <MenuItems items={resolvedItems} onAction={handleAction} />
       </ContextMenuContent>
     </ContextMenuPrimitive>

@@ -1,11 +1,11 @@
 import HighlightLink from 'components/HighLightLink'
 import Markdown from 'markdown-to-jsx'
-import { GetStaticProps } from 'next'
-import { i18n } from 'next-i18next'
+import type { GetStaticProps } from 'next'
+import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import styled from 'styled-components'
 import Anchor from '../components/Anchor'
-import DocsLayout, { DocsLayoutProps } from '../components/DocsLayout'
+import DocsLayout, { type DocsLayoutProps } from '../components/DocsLayout'
 import Link from '../components/Link'
 import Loading from '../components/Loading'
 import { getReleases } from '../utils/githubApi'
@@ -17,40 +17,22 @@ export interface ReleasesProps {
 }
 
 export default function Releases({ releases, sidebarPages }: ReleasesProps) {
-  const localesDescMap = {
-    en: (
-      <p>
-        Here are the latest releases of Markflowy. Click on each version to see the detailed changes
-        and updates. You can download it from the
-        <HighlightLink href='https://github.com/drl990114/MarkFlowy/releases' target='_blank'>
-          {' '}GitHub Release{' '}
-        </HighlightLink>
-        .
-      </p>
-    ),
-    zh: (
-      <p>
-        以下是 Markflowy 的最新版本发布。点击每个版本可以查看详细的变更和更新内容。你可以从{' '}
-        <HighlightLink href='https://github.com/drl990114/MarkFlowy/releases' target='_blank'>
-          {' '}GitHub Release{' '}
-        </HighlightLink>
-        下载。
-      </p>
-    ),
-  }
-
-  const currentLanguage = i18n?.language || 'en'
-  const currentLocaleDesc =
-    localesDescMap[currentLanguage as keyof typeof localesDescMap] || localesDescMap.en
+  const { t } = useTranslation()
 
   return (
     <DocsLayout
       useDocsSidebarMenu={false}
       pages={sidebarPages}
-      title='Releases'
-      description='Styled Components Releases'
+      title={t('releases.title')}
+      description={t('releases.meta_description')}
     >
-      {currentLocaleDesc}
+      <p>
+        {t('releases.description_before_link')}{' '}
+        <HighlightLink href='https://github.com/drl990114/MarkFlowy/releases' target='_blank'>
+          {t('releases.github_link')}
+        </HighlightLink>{' '}
+        {t('releases.description_after_link')}
+      </p>
 
       {releases ? (
         releases.map((release) => (
@@ -62,7 +44,7 @@ export default function Releases({ releases, sidebarPages }: ReleasesProps) {
               {release.name}
             </ReleaseAnchor>
             <Link href={release.html_url} target='_blank'>
-              see details
+              {t('releases.see_details')}
             </Link>
             {release.body && <Markdown css='padding-left: 1em;'>{release.body}</Markdown>}
           </section>

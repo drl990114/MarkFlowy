@@ -28,7 +28,12 @@ vi.mock('@/commands', () => ({
     },
   },
 }))
-vi.mock('@/i18n', () => ({ useTranslation: () => ({ t: (key: string) => key }) }))
+vi.mock('@/i18n', () => ({
+  useTranslation: () => ({
+    t: (key: string) =>
+      ({ 'settings.delete_item': 'Delete item', 'settings.edit_item': 'Edit item' })[key] ?? key,
+  }),
+}))
 vi.mock('@/helper/updater', () => ({ installUpdate: vi.fn() }))
 vi.mock('@/services/dialog', () => ({ dialog: { confirm: vi.fn() } }))
 vi.mock('@/services/app-setting', () => ({
@@ -202,6 +207,18 @@ describe('Settings dialog integration', () => {
     expect(container.querySelector('[data-mf-workspace-surface]')?.hasAttribute('inert')).toBe(
       false,
     )
+  })
+
+  it('uses CSS capitalization for category labels', async () => {
+    render(
+      <MemoryRouter>
+        <AppProbe />
+      </MemoryRouter>,
+    )
+    const dialog = await openSettings()
+    const category = within(dialog).getByRole('button', { name: 'General' })
+
+    expect(category.querySelector('span')?.classList.contains('capitalize')).toBe(true)
   })
 
   it('closes a nested dialog before settings and restores focus to its trigger', async () => {
