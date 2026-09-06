@@ -24,6 +24,7 @@ import {
 import { useEditorStore } from '@/stores'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import { savePathCoordinator } from '@/components/EditorArea/savePathCoordinator'
+import { copySavedFile, selectCopyDirectory } from './fileCopy'
 
 interface FileSystemAdapterProps {
   children: ReactNode
@@ -154,9 +155,8 @@ export const TauriFileSystemProvider: FC<FileSystemAdapterProps> = ({ children }
       return await invoke<MoveFileInfo>('rename_fs', { oldPath, newPath })
     },
 
-    copyFile: async (from: string): Promise<string> => {
-      return await invoke<string>('copy_file_by_from', { from })
-    },
+    copyFile: copySavedFile,
+    selectCopyDirectory,
 
     revealInFolder: async (path: string): Promise<void> => {
       await revealItemInDir(path)

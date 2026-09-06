@@ -12,6 +12,7 @@ import {
   getCurrentFileMutationNode,
 } from './file-mutation'
 import { moveFileNode } from './file-operator'
+import { copyFileTreeNode, getCopyParentPath } from './file-copy'
 import NewFileInput from './NewFileInput'
 import { hasRenameConflict } from './rename-conflict'
 import { EmptyFolderStatus, LoadingIcon, NodeContainer } from './styles'
@@ -20,6 +21,7 @@ import { getFileNameFromPath } from './verify-file-name'
 
 export interface FileNodeComponentProps extends NodeRendererProps<IFile> {
   getCurrentFolderData: () => IFile[]
+  canInsertIntoDirectory?: (directory: IFile) => boolean
   setFolderData: (data: IFile[]) => void
   isRoot?: boolean
   onShowConfirm: (params: { title: string; onConfirm: () => void }) => void
@@ -133,6 +135,7 @@ function FileNode({
   dragHandle,
   tree,
   getCurrentFolderData,
+  canInsertIntoDirectory = (directory) => Boolean(directory.children?.length),
   setFolderData,
   isRoot = false,
   onShowConfirm,
@@ -164,6 +167,7 @@ function FileNode({
     runFileMutation,
     renameFile,
     copyFile,
+    selectCopyDirectory,
     createFolder,
     writeFile,
     fileExists,
@@ -419,63 +423,67 @@ function FileNode({
       })
     }
 
-    const copyItems: ContextMenuItem[] = []
-
     if (node.data.kind === 'file') {
-      copyItems.push({
+      const source = captureFileMutationTarget(node.data)
+      const parent = node.parent ? captureFileMutationTarget(node.parent.data) : undefined
+      const rootData = getCurrentFolderData()[0]
+      const root = rootData ? captureFileMutationTarget(rootData) : undefined
+      const copy = async (mode: 'duplicate' | 'copy-to') => {
+        if (!source || !parent || !root) return
+        try {
+          const copiedPath = await copyFileTreeNode({
+            source,
+            parent,
+            root,
+            mode,
+            fileSystem: { runFileMutation, copyFile, selectCopyDirectory },
+            getCurrentFolderData,
+            setFolderData,
+            getFileObject,
+            getFileObjectByPath,
+            getFileIdsByPathPrefix,
+            createFile,
+            canInsertIntoDirectory,
+          })
+          if (copiedPath) {
+            toast.success(
+              t(
+                mode === 'duplicate'
+                  ? 'contextmenu.explorer.duplicate_success'
+                  : 'contextmenu.explorer.copy_to_success',
+                { name: getFileNameFromPath(copiedPath), folder: getCopyParentPath(copiedPath) },
+              ),
+            )
+          }
+        } catch (error) {
+          toast.error(
+            t('contextmenu.explorer.copy_failed', {
+              reason: error instanceof Error ? error.message : String(error),
+            }),
+          )
+        }
+      }
+
+      items.push({
         value: 'duplicate_file',
         label: t('contextmenu.explorer.duplicate_file'),
-        handler: () => {
-          const target = captureFileMutationTarget(node.data)
-          const parentTarget = node.parent ? captureFileMutationTarget(node.parent.data) : undefined
-          if (!target || !parentTarget) return
-
-          void runFileMutation(async (lease) => {
-            const mutationTree = new SimpleTree(getCurrentFolderData())
-            const currentNode = getCurrentFileMutationNode(mutationTree, getFileObject, target)
-            const currentParent = getCurrentFileMutationNode(
-              mutationTree,
-              getFileObject,
-              parentTarget,
-            )
-            if (!currentNode || !currentParent) return
-            const protection = collectFileMutationProtection(
-              [currentNode.data],
-              getFileObject,
-              getFileIdsByPathPrefix,
-            )
-            lease.protectFileIds(protection.fileIds)
-            lease.protectPaths(protection.paths)
-
-            const targetPath = await copyFile(target.path)
-            if (targetPath) {
-              const file = createFile
-                ? createFile({
-                    name: getFileNameFromPath(targetPath),
-                    path: targetPath,
-                  })
-                : ({
-                    name: getFileNameFromPath(targetPath),
-                    path: targetPath,
-                    kind: 'file',
-                  } as IFile)
-
-              mutationTree.create({
-                parentId: parentTarget.id,
-                data: file,
-                index: currentNode.childIndex,
-              })
-              setFolderData(mutationTree.data)
-            }
-          })
-        },
+        handler: () => void copy('duplicate'),
       })
+      if (selectCopyDirectory) {
+        items.push({
+          value: 'copy_to',
+          label: t('contextmenu.explorer.copy_to'),
+          handler: () => void copy('copy-to'),
+        })
+      }
     }
 
     if (node.data.path && appContext?.copyText) {
       const copyText = appContext.copyText
-      copyItems.push(
-        ...createPathCopyMenuItems(
+      items.push({
+        value: 'copy_paths',
+        label: t('contextmenu.explorer.copy_path'),
+        children: createPathCopyMenuItems(
           node.data.path,
           async (path, type) => {
             try {
@@ -491,18 +499,10 @@ function FileNode({
             }
           },
           {
-            absolute: t('contextmenu.explorer.copy_path'),
-            relative: t('contextmenu.explorer.copy_relative_path'),
+            absolute: t('contextmenu.explorer.absolute_path'),
+            relative: t('contextmenu.explorer.relative_path'),
           },
         ),
-      )
-    }
-
-    if (copyItems.length > 0) {
-      items.push({
-        value: 'copy',
-        label: t('contextmenu.explorer.copy'),
-        children: copyItems,
       })
     }
 

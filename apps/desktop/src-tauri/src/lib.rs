@@ -5,6 +5,7 @@
 
 mod app;
 mod fc;
+mod file_copy;
 mod font;
 mod menu;
 mod pandoc;

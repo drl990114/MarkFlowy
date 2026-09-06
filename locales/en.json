@@ -229,6 +229,13 @@
       "moveto_trash": "Move to trash",
       "copy": "Copy",
       "duplicate_file": "Duplicate file",
+      "copy_to": "Copy to…",
+      "copy_to_title": "Copy to folder",
+      "absolute_path": "Absolute path",
+      "relative_path": "Relative path",
+      "duplicate_success": "Created copy: {{name}}",
+      "copy_to_success": "Copied {{name}} to {{folder}}",
+      "copy_failed": "Could not copy file: {{reason}}",
       "copy_path": "Copy path",
       "copy_relative_path": "Copy relative path",
       "show_in_folder": "Show in Folder"

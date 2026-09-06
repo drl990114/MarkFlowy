@@ -1861,30 +1861,26 @@ pub mod cmd {
     }
 
     #[tauri::command]
-    pub fn copy_file_by_from(from: &str) -> Option<String> {
-        let from_path = Path::new(from);
-        let parent_path = from_path.parent()?;
-        let mut to_path_name = from_path.file_stem()?.to_str()?.to_string();
-
-        let file_ext = from_path.extension()?;
-
-        while parent_path
-            .join(&format!(
-                "{}.{}",
-                to_path_name.clone(),
-                file_ext.to_str().unwrap_or("")
-            ))
-            .exists()
-        {
-            to_path_name.push_str(" copy");
-        }
-
-        to_path_name.push_str(format!(".{}", file_ext.to_str().unwrap_or("")).as_str());
-
-        let to_path = parent_path.join(&to_path_name);
-        fs::copy(from_path, to_path.clone()).ok()?;
-
-        Some(to_path.to_str()?.to_string())
+    pub async fn copy_file_by_from(
+        from: String,
+        target_folder: Option<String>,
+    ) -> Result<String, String> {
+        tauri::async_runtime::spawn_blocking(move || {
+            let _guard = super::FILE_WRITE_MUTEX
+                .lock()
+                .map_err(|error| error.to_string())?;
+            let source = Path::new(&from);
+            super::acquire_security_scope(source);
+            let directory = target_folder.as_deref().map(Path::new);
+            if let Some(directory) = directory {
+                super::acquire_security_scope(directory);
+            }
+            crate::file_copy::copy_file_without_overwrite(source, directory)
+                .map(|path| path.to_string_lossy().into_owned())
+                .map_err(|error| format!("Could not copy '{}': {}", from, error))
+        })
+        .await
+        .map_err(|error| error.to_string())?
     }
 
     #[tauri::command]

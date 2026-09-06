@@ -45,13 +45,13 @@ export interface FileSystemContextValue {
     targetFolder: string
     replaceExist?: boolean
   }) => Promise<
-    Array<{
+    {
       old_path: string
       new_path: string
       children: IFile[] | null
       is_folder: boolean
       is_replaced?: boolean
-    }>
+    }[]
   >
   /** Join paths */
   pathJoin: (path1: string, path2: string) => Promise<string>
@@ -65,8 +65,10 @@ export interface FileSystemContextValue {
   createFolder: (path: string) => Promise<void>
   /** Rename/Move file */
   renameFile: (oldPath: string, newPath: string) => Promise<MoveFileInfo>
-  /** Copy file */
-  copyFile: (from: string) => Promise<string>
+  /** Copy saved bytes without overwriting; omit the folder to duplicate beside the source. */
+  copyFile: (from: string, targetFolder?: string) => Promise<string>
+  /** Select a destination folder; null means cancellation. Not available in every host. */
+  selectCopyDirectory?: (from: string) => Promise<string | null>
   /** Reveal item in folder (optional, may not be available in web) */
   revealInFolder?: (path: string) => Promise<void>
 }

@@ -157,6 +157,16 @@ const FileTree: FC<FileTreeProps> = (props) => {
   const currentDataRef = useRef(data)
   currentDataRef.current = data
   const getCurrentFolderData = useCallback(() => currentDataRef.current, [])
+  const canInsertIntoDirectory = useCallback(
+    (directory: IFile) =>
+      Boolean(
+        directory.children?.length ||
+          (directory.path &&
+            (loadedDirsRef.current.has(directory.path) ||
+              loadingDirsRef.current.has(directory.path))),
+      ),
+    [],
+  )
   const rootId = data[0]?.id
   const initialOpenState = useMemo(() => (rootId ? { [rootId]: true } : {}), [rootId])
   const revealRoot = useCallback(() => setShowStickyRoot(false), [])
@@ -398,6 +408,7 @@ const FileTree: FC<FileTreeProps> = (props) => {
     <FileNode
       {...nodeProps}
       getCurrentFolderData={getCurrentFolderData}
+      canInsertIntoDirectory={canInsertIntoDirectory}
       setFolderData={setFolderDataPure}
       isRoot={isRoot}
       onShowConfirm={onShowConfirm}
