@@ -1,5 +1,37 @@
 # UPDATE LOG
 
+## v0.100.1
+
+Features:
+
+- Added **Copy to…** to the File Tree context menu, allowing files to be copied to a chosen folder. **Duplicate file** creates a copy in the same folder, and name conflicts are handled automatically without overwriting existing files. Absolute and relative paths are now grouped under **Copy path**.
+
+Improvements and Fixes:
+
+- Fixed the **Full Width** setting in WYSIWYG mode. The editor now switches between a centered reading column and full width immediately, without reopening the document.
+
+- Restored the **Placeholder** setting in WYSIWYG mode. Empty paragraphs can show localized hints such as “Type '/' for commands,” and the setting takes effect immediately.
+
+- Improved list indentation with Tab / Shift + Tab and Cmd/Ctrl + ] / [. Nested content, task states, and undo/redo are preserved, while bullet markers distinguish nesting levels more clearly.
+
+- Improved automatic Markdown formatting while typing tables, task lists, callouts, inline math, and links. Typing `---` at the start of a document creates Front Matter, while typing it after a paragraph creates a horizontal rule; Backspace can undo the Front Matter conversion.
+
+---
+
+特性：
+
+- 文件树右键菜单新增“复制到…”，可将文件复制到指定文件夹。“创建副本”可在当前文件夹生成副本，遇到重名时会自动调整名称，避免覆盖已有文件；绝对路径和相对路径统一收纳到“复制路径”子菜单。
+
+改进与修复：
+
+- 修复所见即所得模式下“全宽”设置不生效的问题。现在可即时切换居中阅读栏与全宽布局，无需重新打开文档。
+
+- 恢复所见即所得模式的“占位符提示”设置。空段落可显示“输入 / 使用命令”等本地化提示，开关即时生效。
+
+- 改进列表的 Tab / Shift + Tab 和 Cmd/Ctrl + ] / [ 缩进操作，保留嵌套内容、任务勾选状态及撤销重做记录，并通过不同的项目符号更清晰地区分列表层级。
+
+- 改进输入表格、任务列表、提示块、行内公式和链接时的 Markdown 自动格式转换。在文档开头输入 `---` 会创建 Front Matter，在段落后输入则生成分隔线；按 Backspace 可撤销 Front Matter 转换。
+
 ## v0.100.0
 
 ⚠️Breaking Changes⚠️:
