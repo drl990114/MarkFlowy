@@ -19,7 +19,7 @@ export const EditorWrapper = styled.div<EditorWrapperProps>`
   position: relative;
   display: grid;
   grid-template-columns: 1fr;
-  --rme-editor-content-width: 760px;
+  --rme-editor-content-width: ${(props) => (props.$fullWidth ? '100%' : '760px')};
   --rme-editor-inline-padding: clamp(20px, 5vw, 48px);
   --rme-editor-line-height: ${(props) => props.$rootLineHeight};
   /* .code-contents keeps an 8px-compatible top inset for source and non-Markdown views. */
@@ -48,6 +48,11 @@ export const EditorWrapper = styled.div<EditorWrapperProps>`
   --rme-editor-selection-bg: var(--mf-primary-soft);
   --rme-editor-cell-selection-bg: var(--mf-primary-soft);
   --rme-editor-cell-selection-border: var(--mf-ring);
+
+  /* Keep the runtime's inner reading column in sync with the host layout. */
+  [data-cap-content] {
+    --cap-editor-content-width: var(--rme-editor-content-width);
+  }
 
   > * {
     grid-column: 1;
