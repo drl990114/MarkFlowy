@@ -25,7 +25,7 @@ export function getCapricornActiveHeadingId(
   }
   if (!anchorKey || !session.query) return null
 
-  // The pinned 0.1.17 runtime forwards query callbacks to Controller.query,
+  // Since 0.1.17, the runtime forwards query callbacks to Controller.query,
   // though its legacy declaration only lists query names. Isolate that bridge
   // here until the release exposes a typed viewport API. getPath uses the
   // existing model index: no serialization, document scan or offscreen mount.

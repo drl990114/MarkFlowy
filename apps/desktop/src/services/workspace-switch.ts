@@ -1,3 +1,7 @@
+import useLayoutStore from '@/stores/useLayoutStore'
+
+export const OPEN_WORKSPACE_EXPLORER_EVENT = 'workspace:open-explorer'
+
 type WorkspaceSwitchHandler = (path: string) => Promise<boolean>
 
 let workspaceSwitchHandler: WorkspaceSwitchHandler | undefined
@@ -13,7 +17,9 @@ export const switchWorkspaceInCurrentWindow = async (path: string) => {
       throw new Error('Workspace persistence is not ready')
     }
 
-    return workspaceSwitchHandler(path)
+    const didSwitch = await workspaceSwitchHandler(path)
+    if (didSwitch) useLayoutStore.getState().openExplorer()
+    return didSwitch
   })
 
   workspaceSwitchQueue = switchOperation.then(

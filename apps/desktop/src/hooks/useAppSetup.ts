@@ -20,6 +20,7 @@ import { appSettingStoreSetup } from '@/services/app-setting'
 import { guardUnsavedFilesAsync } from '@/services/checkUnsavedFiles'
 import { addExistingMarkdownFileEdit } from '@/services/editor-file'
 import {
+  OPEN_WORKSPACE_EXPLORER_EVENT,
   setWorkspaceSwitchHandler,
   switchWorkspaceInCurrentWindow as requestWorkspaceSwitch,
   waitForWorkspaceSwitches,
@@ -42,6 +43,7 @@ import {
   type ThemeExtension,
 } from '@/startup/themeExtensionScheduler'
 import useAppSettingStore from '@/stores/useAppSettingStore'
+import useLayoutStore from '@/stores/useLayoutStore'
 import type { EditorLayoutNode } from '@/stores/useEditorStore'
 import type { WorkspaceInfo } from '@/stores/useOpenedCacheStore'
 import useOpenedCacheStore from '@/stores/useOpenedCacheStore'
@@ -587,6 +589,7 @@ async function handleOpenedPaths(openedPaths: string[]) {
     if (isDir) {
       const rootPath = useEditorStore.getState().getRootPath()
       if (openedPath === rootPath) {
+        await requestWorkspaceSwitch(openedPath)
         return
       }
       if (rootPath || openedPaths.length > 1) {
@@ -910,6 +913,10 @@ export const useAppRuntimeSetup = () => {
       },
     )
 
+    const unListenOpenExplorer = currentWindow.listen(OPEN_WORKSPACE_EXPLORER_EVENT, () => {
+      useLayoutStore.getState().openExplorer()
+    })
+
     const unListenCliCommand = currentWindow.listen<CliCommandPayload>(
       'cli:command',
       async ({ payload }) => {
@@ -927,6 +934,7 @@ export const useAppRuntimeSetup = () => {
       closeRequest.then((fn) => fn())
       unListenOpenedUrls.then((fn) => fn())
       unListenCliOpen.then((fn) => fn())
+      unListenOpenExplorer.then((fn) => fn())
       unListenCliCommand.then((fn) => fn())
       settingDataUpdate.then((fn) => fn())
     }

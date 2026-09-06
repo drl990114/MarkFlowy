@@ -18,7 +18,7 @@ import useLayoutStore, {
 } from '@/stores/useLayoutStore'
 import { memo, useCallback, useEffect, useLayoutEffect, useRef } from 'react'
 import type { PanelImperativeHandle } from 'react-resizable-panels'
-import { Group, Panel, useDefaultLayout } from 'react-resizable-panels'
+import { Group, Panel } from 'react-resizable-panels'
 import { toast } from 'zens'
 import { DockOverlayContainer, RootPageLayout, StyleSeparator } from './styles'
 import { ZenModeHint } from './ZenModeHint'
@@ -29,7 +29,6 @@ import {
   requestZenModeToggle,
 } from './zenMode'
 
-export const RESIZE_PANEL_STORAGE_KEY = 'root-resize-panel'
 const LEFT_DOCK_LABEL_KEYS = {
   explorer: 'sidebar.explorer',
   search: 'sidebar.search',
@@ -43,13 +42,6 @@ const RIGHT_DOCK_LABEL_KEYS = {
 function Root() {
   const { t } = useTranslation()
   const viewportMode = useDockViewportMode()
-  const { defaultLayout, onLayoutChanged } = useDefaultLayout({
-    id: RESIZE_PANEL_STORAGE_KEY,
-    storage: localStorage,
-  })
-
-  const setLeftBarVisible = useLayoutStore((state) => state.setLeftBarVisible)
-  const setRightBarVisible = useLayoutStore((state) => state.setRightBarVisible)
   const syncDockPanelFromResize = useLayoutStore((state) => state.syncDockPanelFromResize)
   const setOverlayDock = useLayoutStore((state) => state.setOverlayDock)
   const setViewportMode = useLayoutStore((state) => state.setViewportMode)
@@ -65,7 +57,6 @@ function Root() {
     left: useLayoutStore.getState().leftBar.size,
     right: useLayoutStore.getState().rightBar.size,
   })
-  const initializedPanelStateRef = useRef(false)
   const lastEscapeAtRef = useRef<number | null>(null)
   const pointerStartedWithInteractiveLayerRef = useRef(false)
   const leftDockLabel = t(LEFT_DOCK_LABEL_KEYS[leftActivePanelId])
@@ -108,15 +99,6 @@ function Root() {
     })
   }, [t])
 
-  const handleRootLayoutChanged = useCallback(
-    (layout: Parameters<typeof onLayoutChanged>[0]) => {
-      const state = useLayoutStore.getState()
-      if (state.zenModeActive || state.viewportMode !== 'wide') return
-      onLayoutChanged(layout)
-    },
-    [onLayoutChanged],
-  )
-
   const { getBookMarkList } = useBookMarksStore()
 
   useLayoutEffect(() => {
@@ -125,12 +107,6 @@ function Root() {
     const leftPanel = leftPanelRef.current
     const rightPanel = rightPanelRef.current
     if (!leftPanel || !rightPanel || zenModeActive) return
-
-    if (!initializedPanelStateRef.current) {
-      setLeftBarVisible(!leftPanel.isCollapsed())
-      setRightBarVisible(!rightPanel.isCollapsed())
-      initializedPanelStateRef.current = true
-    }
 
     const layoutState = useLayoutStore.getState()
     const leftDocked = viewportMode !== 'compact'
@@ -141,15 +117,7 @@ function Root() {
 
     if (rightDocked && layoutState.rightBar.visible) rightPanel.expand()
     else rightPanel.collapse()
-  }, [
-    leftBarVisible,
-    rightBarVisible,
-    setLeftBarVisible,
-    setRightBarVisible,
-    setViewportMode,
-    viewportMode,
-    zenModeActive,
-  ])
+  }, [leftBarVisible, rightBarVisible, setViewportMode, viewportMode, zenModeActive])
 
   useEffect(() => {
     const d1 = commandRegistry.registerCommand({
@@ -288,12 +256,7 @@ function Root() {
 
   return (
     <RootPageLayout data-mf-zen-mode={zenModeActive ? '' : undefined}>
-      <Group
-        defaultLayout={defaultLayout}
-        disabled={zenModeActive}
-        onLayoutChanged={handleRootLayoutChanged}
-        resizeTargetMinimumSize={{ coarse: 20, fine: 7 }}
-      >
+      <Group disabled={zenModeActive} resizeTargetMinimumSize={{ coarse: 20, fine: 7 }}>
         <Panel
           aria-label={leftDockLabel}
           data-mf-dock-side='left'

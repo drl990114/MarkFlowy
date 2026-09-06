@@ -97,17 +97,25 @@ const useLayoutStore = create(
     return {
       leftBar: {
         visible: true,
-        activePanelId: preferences?.left.activePanelId ?? 'explorer',
+        activePanelId: 'explorer',
         size: preferences?.left.size ?? DEFAULT_LEFT_DOCK_SIZE,
       },
       rightBar: {
         visible: true,
-        activePanelId: preferences?.right.activePanelId ?? 'toc',
+        activePanelId: 'toc',
         size: preferences?.right.size ?? DEFAULT_RIGHT_DOCK_SIZE,
       },
       overlayDock: null,
       viewportMode: 'wide',
       zenModeActive: false,
+
+      openExplorer: () => {
+        set((state) => {
+          state.leftBar.activePanelId = 'explorer'
+          state.leftBar.visible = true
+          if (state.viewportMode === 'compact') state.overlayDock = 'left'
+        })
+      },
 
       setLeftBarVisible: (visible: boolean) => {
         set((state) => {
@@ -240,6 +248,7 @@ type LayoutStore = {
   overlayDock: DockSide | null
   viewportMode: DockViewportMode
   zenModeActive: boolean
+  openExplorer: () => void
   setLeftBarVisible: (visible: boolean) => void
   setRightBarVisible: (visible: boolean) => void
   setDockPanel: (side: DockSide, panelId: DockPanelId) => void

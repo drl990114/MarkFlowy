@@ -2,8 +2,12 @@ import { getFileNameFromPath } from '@/helper/filesys'
 import { logger } from '@/helper/logger'
 import { dialog } from '@/services/dialog'
 import { addExistingMarkdownFileEdit } from '@/services/editor-file'
-import { switchWorkspaceInCurrentWindow } from '@/services/workspace-switch'
+import {
+  OPEN_WORKSPACE_EXPLORER_EVENT,
+  switchWorkspaceInCurrentWindow,
+} from '@/services/workspace-switch'
 import { currentWindow } from '@/services/windows'
+import useLayoutStore from '@/stores/useLayoutStore'
 import useOpenedCacheStore from '@/stores/useOpenedCacheStore'
 import { invoke } from '@tauri-apps/api/core'
 import { open } from '@tauri-apps/plugin-dialog'
@@ -14,6 +18,15 @@ const getExtFromPath = (path: string) => {
   const fileName = getFileNameFromPath(path) || ''
   const dotIndex = fileName.lastIndexOf('.')
   return dotIndex > -1 ? fileName.slice(dotIndex + 1) : ''
+}
+
+const openExplorerInWindow = async (windowLabel: string) => {
+  if (windowLabel === currentWindow.label) {
+    useLayoutStore.getState().openExplorer()
+    return
+  }
+
+  await currentWindow.emitTo(windowLabel, OPEN_WORKSPACE_EXPLORER_EVENT)
 }
 
 const useOpen = () => {
@@ -28,12 +41,14 @@ const useOpen = () => {
 
       if (existingWindowLabel) {
         if (currentWindow.label === existingWindowLabel) {
+          await openExplorerInWindow(existingWindowLabel)
           return true
         }
 
         await invoke('focus_window_by_label', {
           windowLabel: existingWindowLabel,
         })
+        await openExplorerInWindow(existingWindowLabel)
         await addRecentWorkspaces({ path: dir }).catch((error) =>
           logger.error('Failed to update recent workspaces:', error),
         )
@@ -69,9 +84,10 @@ const useOpen = () => {
         if (action === 'newWindow') {
           try {
             await invoke<boolean>('save_security_bookmark', { path: dir })
-            await invoke('create_new_window', {
+            const windowLabel = await invoke<string>('create_new_window', {
               path: dir,
             })
+            await openExplorerInWindow(windowLabel)
             addRecentWorkspaces({ path: dir })
           } catch (error) {
             logger.error('Error creating new window:', error)

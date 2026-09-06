@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import useLayoutStore, {
   closeCompactLeftDockAfterSelection,
   DOCK_PREFERENCES_STORAGE_KEY,
@@ -70,6 +70,30 @@ describe('useLayoutStore Zen Mode state', () => {
 })
 
 describe('useLayoutStore Dock state', () => {
+  it('restores saved widths while starting with the file tree and table of contents open', async () => {
+    localStorage.setItem(
+      DOCK_PREFERENCES_STORAGE_KEY,
+      JSON.stringify({
+        version: 1,
+        left: { activePanelId: 'search', size: 304 },
+        right: { activePanelId: 'ai', size: 336 },
+      }),
+    )
+    vi.resetModules()
+    const { default: reloadedLayoutStore } = await import('./useLayoutStore')
+
+    expect(reloadedLayoutStore.getState().leftBar).toEqual({
+      activePanelId: 'explorer',
+      size: 304,
+      visible: true,
+    })
+    expect(reloadedLayoutStore.getState().rightBar).toEqual({
+      activePanelId: 'toc',
+      size: 336,
+      visible: true,
+    })
+  })
+
   it('switches panels within a Dock and toggles the active panel closed', () => {
     useLayoutStore.getState().toggleDockPanel('left', 'search')
 

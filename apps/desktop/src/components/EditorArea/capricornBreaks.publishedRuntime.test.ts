@@ -92,7 +92,7 @@ describe.skipIf(!isCapricornRuntimeAvailable)('published Capricorn breaks in Des
     },
   )
 
-  it.each(['---', '—-', '___ ', '*** '])(
+  it.each(['—-', '___ ', '*** ', '- - -', '* * * '])(
     'converts %s and keeps subsequent text editable',
     async (prefix) => {
       const { container, input } = await mount('')
@@ -103,6 +103,100 @@ describe.skipIf(!isCapricornRuntimeAvailable)('published Capricorn breaks in Des
       expect(document.activeElement).toBe(input)
     },
   )
+
+  it.each(['keyboard', 'input'])(
+    'converts the first document line to Front Matter and restores the source with Backspace via %s',
+    async (mode) => {
+      const { container, input } = await mount('')
+      await type(input, '---')
+      expect(container.querySelector('[data-markdown-block="frontmatter"]')).not.toBeNull()
+      expect(container.querySelector('hr')).toBeNull()
+
+      await act(async () => {
+        if (mode === 'keyboard') {
+          const event = new KeyboardEvent('keydown', {
+            key: 'Backspace',
+            keyCode: 8,
+            bubbles: true,
+            cancelable: true,
+          })
+          input.dispatchEvent(event)
+          expect(event.defaultPrevented).toBe(true)
+          input.dispatchEvent(new KeyboardEvent('keyup', { key: 'Backspace', bubbles: true }))
+        } else {
+          expect(input.value.length).toBeGreaterThan(0)
+          setNativeValue.call(input, input.value.slice(0, -1))
+          input.dispatchEvent(
+            new InputEvent('input', {
+              inputType: 'deleteContentBackward',
+              bubbles: true,
+            }),
+          )
+        }
+      })
+      expect(container.querySelector('[data-markdown-block="frontmatter"]')).toBeNull()
+      expect(container.querySelector('[data-markdown-block="paragraph"]')?.textContent).toBe('---')
+      await type(input, 'literal')
+      expect(session!.getMarkdown()).toBe('---literal')
+    },
+  )
+
+  it.each(['keyboard', 'beforeinput'])(
+    'keeps a horizontal rule after an ordinary paragraph via %s',
+    async (mode) => {
+      const { container, input } = await mount('')
+      await type(input, 'Body')
+      await enter(input, mode)
+      await type(input, '---')
+      expect(container.querySelectorAll('hr')).toHaveLength(1)
+      expect(container.querySelector('[data-markdown-block="frontmatter"]')).toBeNull()
+      await type(input, 'after')
+      expect(session!.getMarkdown()).toBe('Body\n\n---\n\nafter')
+    },
+  )
+
+  it.each(['keyboard', 'beforeinput'])(
+    'creates a table from a typed header and delimiter row via %s',
+    async (mode) => {
+      const { container, input } = await mount('')
+      await type(input, '| A | B |')
+      await enter(input, mode)
+      await type(input, '| :--- | ---: |')
+      await enter(input, mode)
+      expect(container.querySelectorAll('[data-markdown-block="table-row"]')).toHaveLength(2)
+      await type(input, 'body')
+      expect(session!.getMarkdown()).toBe('| A | B |\n| :--- | ---: |\n| body |  |')
+    },
+  )
+
+  it.each(['- [x] ', '[ ] ', '2. [x] '])('creates a task while typing %s', async (prefix) => {
+    const { container, input } = await mount('')
+    await type(input, `${prefix}task`)
+    const checkbox = container.querySelector<HTMLInputElement>('[data-markdown-task="true"] input')
+    expect(checkbox).not.toBeNull()
+    expect(checkbox!.checked).toBe(prefix.includes('x'))
+    expect(session!.getMarkdown()).toBe(`- [${prefix.includes('x') ? 'x' : ' '}] task`)
+  })
+
+  it.each([
+    ['$x+1$', 'math-inline'],
+    ['https://example.com ', 'autolink'],
+    ['user@example.com ', 'autolink'],
+  ])('converts %s through the native input path', async (source, kind) => {
+    const { container, input } = await mount('')
+    await type(input, source)
+    expect(container.querySelector(`[data-markdown-inline="${kind}"]`)).not.toBeNull()
+    expect(document.activeElement).toBe(input)
+  })
+
+  it.each(['keyboard', 'beforeinput'])('continues a typed callout via %s', async (mode) => {
+    const { container, input } = await mount('')
+    await type(input, '> [!NOTE]')
+    await enter(input, mode)
+    await type(input, 'Body')
+    expect(container.querySelector('[data-markdown-callout-heading="true"]')).not.toBeNull()
+    expect(session!.getMarkdown()).toBe('> [!NOTE]\n> Body')
+  })
 
   it.each([
     ['keyboard', false],
