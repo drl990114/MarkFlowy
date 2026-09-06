@@ -1,3 +1,8 @@
+---
+seoTitle: "MarkFlowy license"
+description: "Read the GNU Affero General Public License version 3 text included in the MarkFlowy repository."
+---
+
                     GNU AFFERO GENERAL PUBLIC LICENSE
                        Version 3, 19 November 2007
 

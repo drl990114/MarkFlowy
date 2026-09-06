@@ -1,8 +1,9 @@
 import Nav from 'components/Nav'
-import { GetStaticProps } from 'next'
+import type { GetStaticProps } from 'next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
+import { useTranslation } from 'next-i18next'
 import dynamic from 'next/dynamic'
-import Head from 'next/head'
+import SeoHead from '../components/SeoHead'
 import { useState } from 'react'
 import styled from 'styled-components'
 
@@ -22,14 +23,12 @@ const LoadingContainer = styled.div`
 `
 
 const Playground = () => {
+  const { t } = useTranslation()
   const [isMobileNavFolded, setIsMobileNavFolded] = useState(true)
 
   return (
     <>
-      <Head>
-        <title>Playground - Markflowy</title>
-        <meta name='description' content='Experiment with the RME editor in Markflowy playground' />
-      </Head>
+      <SeoHead title={`${t('playground.title')} | MarkFlowy`} description={t('playground.description')} />
       <Nav
         showSideNav={false}
         isMobileNavFolded={isMobileNavFolded}

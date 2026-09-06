@@ -1,95 +1,64 @@
-# Using Copilot with Ollama
-
-Since Copilot requires real-time performance and works well with smaller parameter models, I recommend using it with Ollama. This article mainly introduces common issues you may encounter when using them together.
-
-## Issue 1: Ollama Request Fails?
-
-This is because Ollama requests need to be configured with cross-origin headers. You can refer to the operations below. However, due to the nature of this information, it may become outdated at any time. I also recommend searching on AI for "how to configure Ollama API to support cross-origin requests".
-
-### 1. Windows System
-
-### Setting Environment Variables (Allow Cross-Origin/Remote Access)
-
-**GUI Method** (Permanent):
-
-1. **Completely quit Ollama** (click the taskbar icon to exit)
-
-2. **Win + S** search for **"Edit environment variables"** → open
-
-3. Click **"Environment Variables"** → **"New"** (User variables):
-
-- Variable name: `OLLAMA_ORIGINS`
-
-- Variable value: `*` (allow all origins)
-
-4. If you need remote access, add another:
-
-- Variable name: `OLLAMA_HOST`
-
-- Variable value: `0.0.0.0`
-
-5. Click **OK** to save
-
-6. **Restart Ollama** to take effect
-
-**Command Line Method** (Administrator privileges):
-
-```powershell
-# Set environment variable (permanent)
-setx OLLAMA_ORIGINS "*" /M
-
-# Verify
-echo %OLLAMA_ORIGINS%
-```
-
-> ⚠️ **Note**: After setting with `setx`, you need to open a new terminal or restart your computer for it to take effect.
-
+---
+seoTitle: "Use Ollama and Copilot in MarkFlowy"
+description: "Configure local Ollama models for MarkFlowy Desktop chat and Copilot, understand document context, and troubleshoot connection or model issues."
+updatedAt: "2026-09-06"
 ---
 
-## 2. macOS System
+# Use Ollama and Copilot in MarkFlowy
 
-### Setting Environment Variables (Allow Cross-Origin/Remote Access)
+MarkFlowy Desktop can connect to Ollama for AI chat and Copilot completion. Local inference requires both a local endpoint and a downloaded local model. A cloud model or remote endpoint changes where requests are processed.
 
-**Using `launchctl` command** (Recommended):
+This guide describes the desktop configuration in v0.100.1. It was checked against the application source and Ollama documentation on September 6, 2026; it is not a new end-to-end test on all three operating systems. The browser Playground is a separate editor demonstration.
 
-```bash
-# Set environment variable (current session)
-launchctl setenv OLLAMA_ORIGINS "*"
-launchctl setenv OLLAMA_HOST "0.0.0.0"
+## 1. Start Ollama and check a model
 
-# Restart Ollama app to take effect
+Install Ollama using its [official instructions](https://docs.ollama.com/quickstart). Start the application or service, download a local text-generation model suitable for your hardware, and confirm that it responds in Ollama before configuring MarkFlowy.
+
+```sh
+ollama list
 ```
 
-**Permanent effect** (Write to shell configuration file):
+Keep the exact model name shown in the list, including its tag. Use the same name in MarkFlowy. Speed and memory use depend on your hardware, model, and context size; try a smaller model for short completions and compare its suggestions on your own writing.
 
-```bash
-# Edit configuration file (depending on your shell)
-nano ~/.zshrc   # or ~/.bash_profile
+The default local host is `http://localhost:11434`. MarkFlowy accepts this host or an address ending in `/api` and normalizes the request URL. Check the model list endpoint:
 
-# Add the following content
-export OLLAMA_ORIGINS="*"
-export OLLAMA_HOST="0.0.0.0"
-
-# Save and apply
-source ~/.zshrc
+```sh
+curl http://localhost:11434/api/tags
 ```
 
-**Verify settings**:
+## 2. Configure AI chat
 
-```bash
-launchctl getenv OLLAMA_ORIGINS
-# Should return: *
-```
+1. Open MarkFlowy Desktop settings and find the Ollama configuration in the AI section.
+2. Use the default local address, or enter your own Ollama endpoint. Standard local Ollama does not require a cloud provider API key; an authenticated remote gateway may require custom request headers.
+3. Open AI chat and select Ollama and a text-generation model. MarkFlowy discovers models from Ollama; you can also explicitly configure model names if discovery is unavailable.
+4. Send a short prompt without document context first, then add a small document as context and try a summary.
 
-## How to Use Copilot
+For example, prepare a sample document with three meeting decisions and ask: “Summarize these decisions as three Markdown bullets. Preserve the owners and dates.” Check the response against the document before using it.
 
-Copilot can work with any AI provider already supported by MarkFlowy. You need to configure it in the AI section of `Settings`, and make sure it works normally in AI chat. Then you can select the provider and model you configured in Copilot settings.
+## 3. Configure Copilot separately
 
-### Copilot's Trigger Mechanism
+Enable Copilot in settings, then choose its provider and model. The chat selection does not replace Copilot's own configuration. You can use Ollama for both or choose different configurations.
 
-Typically, after entering some text in a paragraph, MarkFlowy will take the characters around your cursor as context and have AI provide some suggestions. It looks something like this:
-![](https://raw.githubusercontent.com/drl990114/MarkFlowy/refs/heads/main/public/copilot.png)
+Write a few sentences in a Markdown paragraph and pause at the end of the text. Copilot uses text before and after the cursor and neighboring paragraphs to request a short continuation. Start with a small example to distinguish a configuration failure from a slow model.
 
-### Recommendations
+If chat works but completion does not, check Copilot's enabled state, provider, exact model name, and the model's text-generation capability.
 
-It is recommended to choose a model with around 1b - 2b parameters to achieve a balance between speed and quality.
+## What is sent to the model?
+
+Chat uses the conversation and document context you select. Copilot requests include surrounding paragraph text. Treat both as document content when choosing an endpoint.
+
+Local processing requires both a local model and a local endpoint. Ollama also supports cloud features; its [FAQ explains how to disable them](https://docs.ollama.com/faq#how-do-i-disable-ollama-cloud-features). Cloud providers and remote Ollama servers have their own data handling and usage costs.
+
+## Troubleshooting
+
+| Symptom | Check |
+| --- | --- |
+| Ollama is unavailable | Check that the service is running and `/api/tags` responds at the configured address. |
+| The model is missing | Compare the exact name with `ollama list`; check discovery and text-generation capability. |
+| Chat works but Copilot does not | Check Copilot's separate provider, model, and enabled state. |
+| A remote service returns 401 or 403 | Check the address and required authentication headers. |
+| Replies are slow | Try a shorter context and smaller local model; compare the same prompt directly in Ollama. |
+
+Current desktop AI requests and model discovery use Tauri's native HTTP client. Do not begin troubleshooting by setting `OLLAMA_ORIGINS=*` or exposing Ollama on all network interfaces. If an older browser-based client reports a cross-origin error, follow Ollama's [origin configuration guidance](https://docs.ollama.com/faq#how-can-i-allow-additional-web-origins-to-access-ollama) for that client. Connecting to another machine is a separate network configuration, not a requirement for local use.
+
+See the [product introduction](../intro), [performance notes](../Performance/large-markdown-files), and [current desktop release](https://github.com/drl990114/MarkFlowy/releases/latest).

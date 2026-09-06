@@ -3,7 +3,8 @@
     "docs": "文档"
   },
   "playground": {
-    "title": "试试 Playground"
+    "title": "试试 Playground",
+    "description": "在浏览器中体验基础 Markdown 编辑。此 RME 演示不代表桌面版编辑器的性能或 AI 功能。"
   },
   "docs": {
     "tableOfContents": "本页目录",
@@ -20,7 +21,7 @@
       "ai_label": "AI 驱动：",
       "ai_desc": "内置 Copilot、翻译、摘要功能，支持 DeepSeek/ChatGPT 等主流模型。",
       "lightweight_label": "轻量化：",
-      "lightweight_desc": "基于 Tauri 架构，体积小于 20MB。",
+      "lightweight_desc": "使用 Tauri 构建，支持 macOS、Windows 和 Linux；安装包大小随平台和安装方式而异。",
       "modes_label": "编辑模式：",
       "modes_desc": "支持所见即所得与源码模式切换。",
       "files_label": "文件支持：",
@@ -38,20 +39,21 @@
       "footer": "尽情体验编辑器吧！"
     },
     "config": {
-      "description": "下一代 AI 驱动的专业文本编辑器。"
+      "description": "本地优先的 Markdown 编辑器，专注大文档编辑与可选的 AI 辅助。"
     }
   },
   "home": {
     "hero": {
       "title": "MarkFlowy",
-      "subtitle": "MarkFlowy 致力于高效舒适的 Markdown 创作，\n由 AI 驱动的新一代专业编辑器。",
-      "description": "",
-      "download": "立即下载"
+      "subtitle": "本地优先的 Markdown 编辑器，专注大文档编辑与可选的 AI 辅助。",
+      "description": "MarkFlowy 是面向 macOS、Windows 和 Linux 的本地优先 Markdown 编辑器，专注大文档编辑，可选接入云端 AI 或本地 Ollama 模型。",
+      "download": "立即下载",
+      "metaTitle": "MarkFlowy — Markdown 编辑、大文档性能与可选 AI"
     },
     "statRings": {
-      "users": "用户",
-      "years": "年迭代",
-      "githubStars": "Stars"
+      "platforms": "桌面平台",
+      "files": "本地文件",
+      "optional": "按需启用"
     },
     "features": {
       "lead": "极简而强大的编辑器，将 AI 智能与精炼的写作体验结合——为专注与匠心而生。",
@@ -75,12 +77,12 @@
       "capability2": {
         "tag": "AI",
         "title": "Copilot 智能助手",
-        "body": "内置 AI 助手，支持 ChatGPT、DeepSeek、Ollama 等模型。生成文本、翻译、摘要、对话——一切尽在编辑器中。"
+        "body": "按需配置 AI 服务，用于对话、翻译、摘要与 Copilot。可以选择云端服务，也可以通过 Ollama 运行本地模型。"
       },
       "capability3": {
         "tag": "性能",
-        "title": "轻量 & 跨平台",
-        "body": "基于 Tauri 构建，体积不足 20MB，在 macOS、Windows 和 Linux 上提供原生性能。"
+        "title": "大文档编辑",
+        "body": "v0.100.0 更新说明记录了一份 2 MB Markdown 文件在测试中约 1 秒打开的结果。比较性能前，请先查看测试背景和适用范围。"
       },
       "capability4": {
         "tag": "定制",
@@ -97,6 +99,11 @@
       "viewAll": "查看全部贡献者",
       "globeLabel": "MarkFlowy 全球贡献者地球",
       "orbitLabel": "环绕地球的贡献者资料链接"
+    },
+    "guides": {
+      "performanceLink": "查看性能说明",
+      "ollamaLink": "配置本地 AI",
+      "introLink": "阅读产品介绍"
     }
   },
   "releases": {
@@ -127,7 +134,9 @@
     "Community": "社区准则",
     "Extension": "扩展指南",
     "License": "许可证",
-    "UseCopilotWithOllama": "使用 Ollama 的 Copilot"
+    "UseCopilotWithOllama": "使用 Ollama 的 Copilot",
+    "Performance": "性能",
+    "large-markdown-files": "大 Markdown 文档"
   },
   "auth": {
     "login": "登录",

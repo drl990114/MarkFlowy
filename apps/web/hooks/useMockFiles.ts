@@ -1,4 +1,5 @@
 import { useTranslation } from 'next-i18next'
+import { SITE_ORIGIN } from '../utils/publicContent'
 
 export const useMockFiles = () => {
   const { t } = useTranslation('common')
@@ -7,7 +8,7 @@ export const useMockFiles = () => {
 ##### ${t('mock.intro.title', 'Welcome to MarkFlowy!')}
 
 - [x] 🧠 **${t('mock.intro.ai_label', 'AI-Powered:')}** ${t('mock.intro.ai_desc', 'Built-in translation, summary, and DeepSeek/ChatGPT support.')}
-- [x] ⚡ **${t('mock.intro.lightweight_label', 'Lightweight:')}** ${t('mock.intro.lightweight_desc', 'Tauri-based architecture, under 20MB.')}
+- [x] ⚡ **${t('mock.intro.lightweight_label', 'Lightweight:')}** ${t('mock.intro.lightweight_desc', 'Built with Tauri for macOS, Windows, and Linux. Package size varies by platform and installer.')}
 - [x] ✍️ **${t('mock.intro.modes_label', 'Editing Modes:')}** ${t('mock.intro.modes_desc', 'Switch between WYSIWYG and Source Code.')}
 - [x] 📄 **${t('mock.intro.files_label', 'File Support:')}** ${t('mock.intro.files_desc', 'Handles Markdown, JSON, TXT, and more.')}
 - [x] 🎨 **${t('mock.intro.themes_label', 'Custom Themes:')}** ${t('mock.intro.themes_desc', 'Design and share your own editor styles.')}
@@ -21,8 +22,8 @@ ${t('mock.intro.footer', 'Enjoy experimenting with the editor!')}
 
   const jsonContent = `{
   "name": "MarkFlowy",
-  "description": "${t('mock.config.description', 'Next-generation professional text editor designed for AI.')}",
-  "homepage": "https://markflowy.cc",
+  "description": "${t('mock.config.description', 'A local-first Markdown editor focused on large documents and optional AI.')}",
+  "homepage": "${SITE_ORIGIN}",
   "author": {
     "name": "drl990114",
     "email": "drl990114@gmail.com",

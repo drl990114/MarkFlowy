@@ -3,6 +3,8 @@ import type { GetStaticPaths, GetStaticProps } from 'next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import DocsContent from '../../components/DocsContent'
 import DocsLayout from '../../components/DocsLayout'
+import type { DocsLayoutProps } from '../../components/DocsLayout'
+import { createPublicDocuments, getDocumentLocales } from '../../utils/publicContent'
 import {
   buildDocsTableOfContents,
   type DocsTableOfContentsItem,
@@ -11,10 +13,12 @@ import {
 interface PostLayoutProps {
   html: string
   tableOfContents: DocsTableOfContentsItem[]
+  seo: DocsLayoutProps['seo']
+  description: string
 }
 
-const PostLayout = ({ html, tableOfContents }: PostLayoutProps) => (
-  <DocsLayout hasTableOfContents>
+const PostLayout = ({ html, tableOfContents, seo, description }: PostLayoutProps) => (
+  <DocsLayout hasTableOfContents seo={seo} description={description}>
     <DocsContent html={html} tableOfContents={tableOfContents} />
   </DocsLayout>
 )
@@ -60,11 +64,22 @@ export const getStaticProps: GetStaticProps<PostLayoutProps> = async ({ locale, 
   }
 
   const { html, items } = buildDocsTableOfContents(markdown.body.html)
+  const documents = createPublicDocuments(allMarkdowns)
+  const document = documents.find(
+    (candidate) => candidate.slug === markdown.slug && candidate.locale === markdown.locale,
+  )!
 
   return {
     props: {
       html,
       tableOfContents: items,
+      description: document.description,
+      seo: {
+        title: document.title,
+        canonical: document.url,
+        markdownUrl: document.markdownUrl,
+        availableLocales: getDocumentLocales(document, documents),
+      },
       ...(await serverSideTranslations(locale || 'en', ['common'])),
     },
   }

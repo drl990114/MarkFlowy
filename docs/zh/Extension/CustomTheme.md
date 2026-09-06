@@ -1,3 +1,8 @@
+---
+seoTitle: "自定义 MarkFlowy 主题"
+description: "了解 MarkFlowy 的自定义主题配置和主题设置。"
+---
+
 # 自定义主题
 
 MarkFlowy 支持自定义主题，你还可以与他人分享你的主题。

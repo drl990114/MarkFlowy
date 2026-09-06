@@ -30,13 +30,36 @@ module.exports = withSvgr(
     output: 'standalone',
     transpilePackages: ['@markflowy/interface', 'zens'],
     turbopack: {},
+    async redirects() {
+      return [{ source: '/zh/privacy', destination: '/privacy', permanent: true, locale: false }]
+    },
     async rewrites() {
-      return [
-        {
-          source: '/api/cloud/:path*',
-          destination: `${getCloudApiUrl()}/:path*`,
-        },
-      ]
+      return {
+        // Run before the static docs catch-all, whose fallback:false would return 404.
+        beforeFiles: [
+          {
+            source: '/docs/:path*.md',
+            destination: '/en/raw-docs/en/:path*',
+            locale: false,
+          },
+          {
+            source: '/en/docs/:path*.md',
+            destination: '/en/raw-docs/en/:path*',
+            locale: false,
+          },
+          {
+            source: '/zh/docs/:path*.md',
+            destination: '/zh/raw-docs/zh/:path*',
+            locale: false,
+          },
+        ],
+        afterFiles: [
+          {
+            source: '/api/cloud/:path*',
+            destination: `${getCloudApiUrl()}/:path*`,
+          },
+        ],
+      }
     },
     async headers() {
       return [

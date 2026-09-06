@@ -13,6 +13,9 @@ export type Markdown = {
   _id: string
   _raw: Local.RawDocumentData
   type: 'Markdown'
+  seoTitle: string
+  description: string
+  updatedAt?: string | undefined
   /** Markdown file body */
   body: Markdown
   slug: string

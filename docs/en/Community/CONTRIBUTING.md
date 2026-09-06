@@ -1,3 +1,8 @@
+---
+seoTitle: "Contribute to MarkFlowy"
+description: "Set up the MarkFlowy development environment and learn how to contribute changes to the project."
+---
+
 # Contributing to MarkFlowy
 
 Welcome, and thank you for your interest in contributing to MarkFlowy!

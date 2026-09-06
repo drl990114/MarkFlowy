@@ -1,0 +1,6 @@
+# Public documentation is available to search and retrieval crawlers.
+# Search access and model-training preferences are independent settings.
+User-agent: *
+Allow: /
+
+Sitemap: https://www.markflowy.cc/sitemap.xml

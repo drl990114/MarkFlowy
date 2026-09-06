@@ -43,10 +43,11 @@ export const Markdown = defineDocumentType(() => ({
   contentType: 'markdown',
   // Location of Post source files (relative to `contentDirPath`)
   filePathPattern: './*/**/*.md',
-  // At the time of writing, we also have to define the `fields`
-  // option to prevent an error on generation. We'll discuss
-  // this option later. For now, we'll add an empty object.
-  fields: {},
+  fields: {
+    seoTitle: { type: 'string', required: true },
+    description: { type: 'string', required: true },
+    updatedAt: { type: 'string' },
+  },
   computedFields: {
     slug: {
       type: 'string',
@@ -93,6 +94,10 @@ export default makeSource({
     'github-workspace-bug-report.md',
   ],
   documentTypes: [Post, Markdown],
+  markdown: {
+    remarkPlugins: [remarkGfm],
+    rehypePlugins: [rehypeSlug],
+  },
   mdx: {
     esbuildOptions(options) {
       options.target = 'esnext'

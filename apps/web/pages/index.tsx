@@ -106,9 +106,7 @@ export default function Index({
 
   return (
     <>
-      <SeoHead title='MarkFlowy'>
-        <meta name='robots' content='noodp' />
-      </SeoHead>
+      <SeoHead title={t('home.hero.metaTitle')} description={t('home.hero.description')} />
 
       <PageLayout>
         <Nav
@@ -196,20 +194,20 @@ export default function Index({
                   <StatRing $percent={85}>
                     <RingBg />
                     <RingFill $percent={85} />
-                    <RingNumber>10K+</RingNumber>
-                    <RingLabel>{t('home.statRings.users')}</RingLabel>
+                    <RingNumber>3</RingNumber>
+                    <RingLabel>{t('home.statRings.platforms')}</RingLabel>
                   </StatRing>
                   <StatRing $percent={72}>
                     <RingBg />
                     <RingFill $percent={72} />
-                    <RingNumber>3</RingNumber>
-                    <RingLabel>{t('home.statRings.years')}</RingLabel>
+                    <RingNumber>MD</RingNumber>
+                    <RingLabel>{t('home.statRings.files')}</RingLabel>
                   </StatRing>
                   <StatRing $percent={60}>
                     <RingBg />
                     <RingFill $percent={60} />
-                    <RingNumber>2K+</RingNumber>
-                    <RingLabel>{t('home.statRings.githubStars')}</RingLabel>
+                    <RingNumber>AI</RingNumber>
+                    <RingLabel>{t('home.statRings.optional')}</RingLabel>
                   </StatRing>
                 </StatRings>
               </motion.div>
@@ -314,7 +312,7 @@ export default function Index({
               <FooterBrand>
                 <FooterLogo src='/logo.svg' alt='MarkFlowy' />
                 <FooterAppName>MarkFlowy</FooterAppName>
-                <FooterTagline>Next-generation professional editor driven by AI.</FooterTagline>
+                <FooterTagline>{t('home.hero.subtitle')}</FooterTagline>
               </FooterBrand>
               <FooterColumns>
                 <FooterCol>

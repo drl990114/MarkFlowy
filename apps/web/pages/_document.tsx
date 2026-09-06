@@ -1,8 +1,6 @@
 import ThemeProvider from 'components/ThemeProvider'
-import { GetStaticProps } from 'next'
-import { i18n } from 'next-i18next'
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
-import Document, { DocumentContext, Head, Html, Main, NextScript } from 'next/document'
+import Document, { Head, Html, Main, NextScript } from 'next/document'
+import type { DocumentContext } from 'next/document'
 import { ServerStyleSheet } from 'styled-components'
 
 export default class MyDocument extends Document {
@@ -28,7 +26,7 @@ export default class MyDocument extends Document {
 
   render() {
     return (
-      <Html data-theme='dark' lang={i18n?.language || 'en'}>
+      <Html data-theme='dark' lang={this.props.__NEXT_DATA__.locale || 'en'}>
         <Head>
           <link rel='stylesheet' type='text/css' href='/dmvendor.css' />
           <link rel='preconnect' href='https://fonts.googleapis.com' />
@@ -49,13 +47,5 @@ export default class MyDocument extends Document {
         </body>
       </Html>
     )
-  }
-}
-
-export const getStaticProps: GetStaticProps = async ({ locale }) => {
-  return {
-    props: {
-      ...(await serverSideTranslations(locale || 'en', ['common'])),
-    },
   }
 }

@@ -1,3 +1,8 @@
+---
+seoTitle: "Customize a MarkFlowy theme"
+description: "Create and configure custom themes for MarkFlowy using the documented theme settings."
+---
+
 # Custom Theme
 
 MarkFlowy supports custom themes, and you can also share your themes with others.

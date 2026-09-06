@@ -3,7 +3,8 @@
     "docs": "ドキュメント"
   },
   "playground": {
-    "title": "Playground を試す"
+    "title": "Playground を試す",
+    "description": "ブラウザーで基本的な Markdown 編集を試せます。この RME デモはデスクトップ版の性能や AI 機能を示すものではありません。"
   },
   "docs": {
     "tableOfContents": "このページの目次",
@@ -20,7 +21,7 @@
       "ai_label": "AI 搭載：",
       "ai_desc": "内蔵 Copilot、翻訳、要約機能。DeepSeek/ChatGPT などの主要モデルに対応。",
       "lightweight_label": "軽量：",
-      "lightweight_desc": "Tauri ベースのアーキテクチャ、20MB 以下。",
+      "lightweight_desc": "Tauri を使用し、macOS、Windows、Linux に対応。サイズは OS とインストーラーによって異なります。",
       "modes_label": "編集モード：",
       "modes_desc": "WYSIWYG とソースコードモードの切り替えに対応。",
       "files_label": "ファイルサポート：",
@@ -38,20 +39,21 @@
       "footer": "エディタをお楽しみください！"
     },
     "config": {
-      "description": "AI 駆動の次世代プロフェッショナルテキストエディタ。"
+      "description": "大きな文書の編集とオプションの AI 支援に注力する、ローカルファーストの Markdown エディター。"
     }
   },
   "home": {
     "hero": {
       "title": "MarkFlowy",
-      "subtitle": "MarkFlowy は効率的で快適な Markdown 創作に取り組んでいます。\nAI 駆動の次世代プロフェッショナルエディタ。",
-      "description": "",
-      "download": "今すぐダウンロード"
+      "subtitle": "大きな文書の編集とオプションの AI 支援に注力する、ローカルファーストの Markdown エディター。",
+      "description": "MarkFlowy は macOS、Windows、Linux 向けの Markdown エディターです。大きな文書の編集に注力し、クラウド AI や Ollama のローカルモデルを必要に応じて設定できます。",
+      "download": "今すぐダウンロード",
+      "metaTitle": "MarkFlowy — Markdown 編集、性能、オプションの AI"
     },
     "statRings": {
-      "users": "ユーザー",
-      "years": "年開発",
-      "githubStars": "Stars"
+      "platforms": "対応 OS",
+      "files": "ローカルファイル",
+      "optional": "任意で利用"
     },
     "features": {
       "lead": "ミニマルで強力なエディタ。AI の知性と洗練された執筆体験を融合——集中と匠の技のために。",
@@ -75,12 +77,12 @@
       "capability2": {
         "tag": "AI",
         "title": "Copilot & スマートアシスト",
-        "body": "ChatGPT、DeepSeek、Ollama を搭載した AI アシスタント。テキスト生成、翻訳、要約、対話——すべてエディタ内で。"
+        "body": "チャット、翻訳、要約、Copilot に AI を必要に応じて設定できます。クラウドサービスや Ollama のローカルモデルを選べます。"
       },
       "capability3": {
         "tag": "パフォーマンス",
-        "title": "軽量 & クロスプラットフォーム",
-        "body": "Tauri ベースで 20MB 以下。macOS、Windows、Linux でネイティブパフォーマンスを提供。"
+        "title": "大きな文書の編集",
+        "body": "v0.100.0 のリリースノートには、2 MB の Markdown ファイルがテストで約 1 秒で開いたと記録されています。比較の前に測定の背景と制限をご確認ください。"
       },
       "capability4": {
         "tag": "カスタマイズ",
@@ -97,6 +99,11 @@
       "viewAll": "すべての貢献者を見る",
       "globeLabel": "MarkFlowy のグローバル貢献者グローブ",
       "orbitLabel": "地球を周回する貢献者プロフィールへのリンク"
+    },
+    "guides": {
+      "performanceLink": "性能について",
+      "ollamaLink": "ローカル AI の設定",
+      "introLink": "製品紹介を読む"
     }
   },
   "releases": {
@@ -127,7 +134,9 @@
     "Community": "コミュニティガイドライン",
     "Extension": "拡張ガイド",
     "License": "ライセンス",
-    "UseCopilotWithOllama": "Ollama で Copilot を使用"
+    "UseCopilotWithOllama": "Ollama で Copilot を使用",
+    "Performance": "性能",
+    "large-markdown-files": "大きな Markdown 文書"
   },
   "auth": {
     "login": "ログイン",

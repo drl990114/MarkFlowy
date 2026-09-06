@@ -2,6 +2,13 @@
   "$schema": "https://turbo.build/schema.json",
   "extends": ["//"],
   "tasks": {
+    "test": {
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/docs/**",
+        "$TURBO_ROOT$/scripts/web-geo*.test.mjs"
+      ]
+    },
     "build": {
       "env": ["MARKFLOWY_CLOUD_API_URL"],
       "inputs": [

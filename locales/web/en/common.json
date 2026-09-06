@@ -3,7 +3,8 @@
     "docs": "Documentation"
   },
   "playground": {
-    "title": "Try Playground"
+    "title": "Try Playground",
+    "description": "Try basic Markdown editing in the browser. This RME playground does not represent the desktop editor’s performance or AI features."
   },
   "docs": {
     "tableOfContents": "On this page",
@@ -20,7 +21,7 @@
       "ai_label": "AI-Powered:",
       "ai_desc": "Built-in Copilot, translation, summary, and DeepSeek/ChatGPT and other mainstream models support.",
       "lightweight_label": "Lightweight:",
-      "lightweight_desc": "Tauri-based architecture, under 20MB.",
+      "lightweight_desc": "Built with Tauri for macOS, Windows, and Linux. Package size varies by platform and installer.",
       "modes_label": "Editing Modes:",
       "modes_desc": "Switch between WYSIWYG and Source Code.",
       "files_label": "File Support:",
@@ -38,20 +39,21 @@
       "footer": "Enjoy experimenting with the editor!"
     },
     "config": {
-      "description": "Next-generation professional text editor designed for AI."
+      "description": "A local-first Markdown editor focused on large documents and optional AI."
     }
   },
   "home": {
     "hero": {
       "title": "MarkFlowy",
-      "subtitle": "MarkFlowy is committed to efficient and comfortable Markdown creation,\nThe next generation professional editor driven by AI.",
-      "description": "",
-      "download": "Download Now"
+      "subtitle": "A local-first Markdown editor focused on large documents and optional AI.",
+      "description": "A local-first Markdown editor for macOS, Windows, and Linux, focused on large documents and optional AI with cloud providers or local Ollama models.",
+      "download": "Download Now",
+      "metaTitle": "MarkFlowy — Markdown editing, performance, and optional AI"
     },
     "statRings": {
-      "users": "Users",
-      "years": "Years",
-      "githubStars": "Stars"
+      "platforms": "Platforms",
+      "files": "Local files",
+      "optional": "Optional"
     },
     "features": {
       "lead": "A minimalist yet powerful editor that combines AI intelligence with refined writing experience — built for those who value focus and craft.",
@@ -75,12 +77,12 @@
       "capability2": {
         "tag": "AI",
         "title": "Copilot & Smart Assist",
-        "body": "Built-in AI assistant powered by ChatGPT, DeepSeek, and Ollama. Generate text, translate, summarize, and chat — all within the editor."
+        "body": "Connect optional AI providers for chat, translation, summaries, and Copilot. Choose cloud services or run a local model with Ollama."
       },
       "capability3": {
         "tag": "Performance",
-        "title": "Lightweight & Cross-Platform",
-        "body": "Built on Tauri for minimal footprint — under 20MB. Native performance on macOS, Windows, and Linux."
+        "title": "Large-document editing",
+        "body": "The v0.100.0 release notes report a 2 MB Markdown file opening in around 1 second in testing. See the test context and limits before comparing results."
       },
       "capability4": {
         "tag": "Customization",
@@ -97,6 +99,11 @@
       "viewAll": "View all contributors",
       "globeLabel": "MarkFlowy global contributor globe",
       "orbitLabel": "Contributor profile links orbiting the globe"
+    },
+    "guides": {
+      "performanceLink": "Performance notes",
+      "ollamaLink": "Set up local AI",
+      "introLink": "Read the introduction"
     }
   },
   "releases": {
@@ -127,7 +134,9 @@
     "Community": "Community Guidelines",
     "Extension": "Extensions Guide",
     "License": "License",
-    "UseCopilotWithOllama": "Using Copilot with Ollama"
+    "UseCopilotWithOllama": "Using Copilot with Ollama",
+    "Performance": "Performance",
+    "large-markdown-files": "Large Markdown documents"
   },
   "auth": {
     "login": "Sign In",

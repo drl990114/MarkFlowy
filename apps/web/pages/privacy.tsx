@@ -1,5 +1,4 @@
-import { GetStaticProps } from 'next'
-import { useTranslation } from 'next-i18next'
+import type { GetStaticProps } from 'next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import React from 'react'
 import styled, { css } from 'styled-components'
@@ -11,11 +10,11 @@ import rem from '../utils/rem'
 
 interface PrivacySection {
   title: string
-  content: Array<{
+  content: {
     type: 'paragraph' | 'list'
     text?: string
-    items?: Array<string | { text: string; isHtml?: boolean }>
-  }>
+    items?: (string | { text: string; isHtml?: boolean })[]
+  }[]
 }
 
 const privacySections: PrivacySection[] = [
@@ -207,14 +206,15 @@ function renderContentItem(item: PrivacySection['content'][number], index: numbe
 }
 
 export default function PrivacyPage() {
-  const { t } = useTranslation()
   const [isMobileNavFolded, setIsMobileNavFolded] = React.useState(true)
 
   return (
     <>
-      <SeoHead title='Privacy Policy - MarkFlowy'>
-        <meta name='robots' content='noodp' />
-      </SeoHead>
+      <SeoHead
+        title='Privacy Policy - MarkFlowy'
+        description='Read the MarkFlowy privacy policy, including local storage and optional AI services.'
+        availableLocales={['en']}
+      />
 
       <PageLayout>
         <HeaderWrapper>

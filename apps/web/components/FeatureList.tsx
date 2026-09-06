@@ -399,18 +399,21 @@ export default function FeatureList() {
       tag: t('home.features.capability1.tag'),
       title: t('home.features.capability1.title'),
       body: t('home.features.capability1.body'),
+      link: { href: '/docs/intro', text: t('home.guides.introLink') },
     },
     {
       number: '02',
       tag: t('home.features.capability2.tag'),
       title: t('home.features.capability2.title'),
       body: t('home.features.capability2.body'),
+      link: { href: '/docs/Extension/UseCopilotWithOllama', text: t('home.guides.ollamaLink') },
     },
     {
       number: '03',
       tag: t('home.features.capability3.tag'),
       title: t('home.features.capability3.title'),
       body: t('home.features.capability3.body'),
+      link: { href: '/docs/Performance/large-markdown-files', text: t('home.guides.performanceLink') },
     },
     {
       number: '04',
@@ -462,6 +465,7 @@ export default function FeatureList() {
             <CapabilityTag>{cap.tag}</CapabilityTag>
             <CapabilityTitle>{cap.title}</CapabilityTitle>
             <CapabilityBody>{cap.body}</CapabilityBody>
+            {cap.link && <LearnMoreLink href={cap.link.href}>{cap.link.text}</LearnMoreLink>}
           </CapabilityCard>
         ))}
       </CapabilityGrid>

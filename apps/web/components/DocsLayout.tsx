@@ -4,6 +4,7 @@ import Footer from './Footer'
 import { Container, Content, Title } from './Layout'
 import Nav, { type NavProps } from './Nav'
 import Head from './SeoHead'
+import type { SeoHeadProps } from './SeoHead'
 
 export interface DocsLayoutProps {
   description?: string
@@ -11,6 +12,7 @@ export interface DocsLayoutProps {
   pages?: NavProps['pages']
   title?: string
   useDocsSidebarMenu?: boolean
+  seo?: Pick<SeoHeadProps, 'title' | 'canonical' | 'markdownUrl' | 'availableLocales'>
 }
 
 export default function DocsLayout({
@@ -20,6 +22,7 @@ export default function DocsLayout({
   hasTableOfContents = false,
   useDocsSidebarMenu = true,
   pages,
+  seo,
 }: React.PropsWithChildren<DocsLayoutProps>) {
   const router = useRouter()
   const [isSideFolded, setIsSideFolded] = React.useState(true)
@@ -42,9 +45,7 @@ export default function DocsLayout({
 
   return (
     <Container>
-      <Head title={`MarkFlowy${title ? `: ${title}` : ''}`} description={description}>
-        <meta name='robots' content='noodp' />
-      </Head>
+      <Head title={`MarkFlowy${title ? `: ${title}` : ''}`} description={description} {...seo} />
 
       <Nav
         useDocsSidebarMenu={useDocsSidebarMenu}

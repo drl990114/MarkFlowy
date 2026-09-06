@@ -1,3 +1,8 @@
+---
+seoTitle: "MarkFlowy 许可证"
+description: "阅读 MarkFlowy 仓库附带的 GNU Affero General Public License 第 3 版原文。"
+---
+
                     GNU AFFERO GENERAL PUBLIC LICENSE
                        Version 3, 19 November 2007
 

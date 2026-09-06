@@ -1,3 +1,8 @@
+---
+seoTitle: "MarkFlowy code of conduct"
+description: "Read the community code of conduct and reporting guidance for MarkFlowy contributors."
+---
+
 # Contributor Covenant Code of Conduct
 
 ## Our Pledge

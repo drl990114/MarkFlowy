@@ -1,3 +1,8 @@
+---
+seoTitle: "参与 MarkFlowy 开发"
+description: "了解如何配置 MarkFlowy 开发环境并向项目贡献改进。"
+---
+
 # 为 MarkFlowy 做贡献
 
 欢迎，并感谢你对 MarkFlowy 的关注与贡献！

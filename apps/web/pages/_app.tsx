@@ -27,6 +27,9 @@ class MyApp extends App {
           />
 
           <meta name='theme-color' content='#141416' />
+          {/^\/(auth|workspace|settings)(\/|$)/.test(this.props.router.pathname) && (
+            <meta name='robots' content='noindex, nofollow' key='robots' />
+          )}
         </Head>
 
         <ThemeProvider data-theme='dark'>

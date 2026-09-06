@@ -1,3 +1,8 @@
+---
+seoTitle: "MarkFlowy 社区行为准则"
+description: "阅读 MarkFlowy 社区行为准则及问题报告指引。"
+---
+
 # 行为准则
 
 ## 我们的承诺
