@@ -11,7 +11,7 @@ export function WorkspaceRouteSurface({ children, inactive }: WorkspaceRouteSurf
       aria-hidden={inactive || undefined}
       className={cn(
         'absolute inset-0 isolate min-h-0 min-w-0 overflow-hidden',
-        inactive && 'invisible pointer-events-none',
+        inactive && 'pointer-events-none',
       )}
       data-mf-workspace-surface=''
       inert={inactive || undefined}

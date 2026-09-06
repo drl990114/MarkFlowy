@@ -778,6 +778,9 @@
     "shortcutFallback": "Cmd/Ctrl+Maj+F"
   },
   "capricorn": {
+    "placeholder": {
+      "default": "Tapez « / » pour afficher les commandes"
+    },
     "clipboard": {
       "copied_markdown": "Copié au format Markdown",
       "cut_markdown": "Coupé au format Markdown",

@@ -71,6 +71,35 @@ function createMountAdapter(markdown = '# Markdown') {
 }
 
 describe('CapricornEditor typography', () => {
+  it('updates placeholder settings on the mounted editor without publishing content', async () => {
+    const adapter = createMountAdapter('Unsaved text')
+    vi.mocked(loadCapricornRuntimeFactory).mockResolvedValue(vi.fn())
+    vi.mocked(createCapricornRuntimeAdapter).mockReturnValue(adapter)
+    const props = {
+      active: true,
+      initialMarkdown: 'Unsaved text',
+      onChange: vi.fn(),
+      onError: vi.fn(),
+      onUnavailable: vi.fn(),
+    }
+    const { rerender } = render(<CapricornEditor {...props} options={{ placeholder: false }} />)
+    await waitFor(() => expect(createCapricornRuntimeAdapter).toHaveBeenCalledOnce())
+    expect(createCapricornRuntimeAdapter).toHaveBeenCalledWith(
+      expect.objectContaining({
+        options: expect.objectContaining({ placeholder: false }),
+      }),
+    )
+    for (const placeholder of [{ enabled: true, placeholder: 'Write here' }, false, 'New hint']) {
+      rerender(<CapricornEditor {...props} options={{ placeholder }} />)
+      expect(adapter.updateSettings).toHaveBeenLastCalledWith(
+        expect.objectContaining({ placeholder }),
+      )
+    }
+    expect(createCapricornRuntimeAdapter).toHaveBeenCalledOnce()
+    expect(adapter.destroy).not.toHaveBeenCalled()
+    expect(adapter.getMarkdown()).toBe('Unsaved text')
+    expect(props.onChange).not.toHaveBeenCalled()
+  })
   it.each([false, true])(
     'applies editor fonts and updates settings without remounting (preloaded=%s)',
     async (preloaded) => {
@@ -149,6 +178,28 @@ describe('CapricornEditor background preparation', () => {
     onError: vi.fn(),
     onUnavailable: vi.fn(),
     options: {},
+  })
+
+  it('applies placeholder settings changed during preparation without remounting', async () => {
+    const adapter = createMountAdapter(largeMarkdown)
+    let complete!: (adapter: CapricornRuntimeAdapter) => void
+    vi.mocked(loadCapricornRuntimeAsyncFactory).mockResolvedValue(vi.fn())
+    vi.mocked(createCapricornRuntimeAdapterAsync).mockReturnValue(
+      new Promise((resolve) => {
+        complete = resolve
+      }),
+    )
+    const props = baseProps()
+    const { rerender } = render(<CapricornEditor {...props} options={{ placeholder: true }} />)
+    await waitFor(() => expect(createCapricornRuntimeAdapterAsync).toHaveBeenCalledOnce())
+    rerender(<CapricornEditor {...props} options={{ placeholder: false }} />)
+    await act(async () => complete(adapter))
+    expect(adapter.updateSettings).toHaveBeenLastCalledWith(
+      expect.objectContaining({ placeholder: false }),
+    )
+    expect(createCapricornRuntimeAdapterAsync).toHaveBeenCalledOnce()
+    expect(adapter.destroy).not.toHaveBeenCalled()
+    expect(props.onChange).not.toHaveBeenCalled()
   })
 
   it('applies shortcut settings changed during preparation and after attachment without remounting', async () => {

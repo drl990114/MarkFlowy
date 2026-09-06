@@ -1,6 +1,6 @@
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
-import { MemoryRouter, useLocation } from 'react-router'
+import { MemoryRouter, useLocation, useNavigate } from 'react-router'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { OpenSettingTarget } from '@/extensions/ai/aiProvidersService'
 import type { SettingRouteState } from './SettingRouteController'
@@ -24,6 +24,7 @@ vi.mock('@/components/EditorArea/focusActiveEditor', () => focus)
 
 function LocationProbe() {
   const location = useLocation()
+  const navigate = useNavigate()
   const routeState = location.state as SettingRouteState | null
   const navigationRequest = routeState?.navigationRequest
 
@@ -33,7 +34,14 @@ function LocationProbe() {
       data-pathname={location.pathname}
       data-provider={navigationRequest?.target?.providerId}
       data-request-id={navigationRequest?.id}
-    />
+    >
+      <button onClick={() => navigate('/')} type='button'>
+        Close settings
+      </button>
+      <button onClick={() => navigate(-1)} type='button'>
+        Back
+      </button>
+    </div>
   )
 }
 
@@ -88,30 +96,20 @@ describe('SettingRouteController navigation command', () => {
     )
   })
 
-  it('lets an open layer consume Escape before returning to the app', () => {
+  it('restores editor focus after leaving settings', () => {
     act(() => command.handler?.())
     expect(container.querySelector('[data-pathname="/settings"]')).not.toBeNull()
 
-    const closeLayer = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') event.preventDefault()
-    }
-    document.addEventListener('keydown', closeLayer, { capture: true })
-
-    act(() => {
-      document.body.dispatchEvent(
-        new KeyboardEvent('keydown', { bubbles: true, cancelable: true, key: 'Escape' }),
-      )
-    })
-    document.removeEventListener('keydown', closeLayer, { capture: true })
-
-    expect(container.querySelector('[data-pathname="/settings"]')).not.toBeNull()
-
-    act(() => {
-      document.body.dispatchEvent(
-        new KeyboardEvent('keydown', { bubbles: true, cancelable: true, key: 'Escape' }),
-      )
-    })
+    act(() => container.querySelector<HTMLButtonElement>('button')?.click())
     expect(container.querySelector('[data-pathname="/"]')).not.toBeNull()
     expect(focus.scheduleActiveEditorFocus).toHaveBeenCalledOnce()
+  })
+
+  it('keeps repeated settings requests in the same history entry', () => {
+    act(() => command.handler?.({ category: 'ai', providerId: 'google' }))
+    act(() => command.handler?.({ category: 'ai', providerId: 'ollama' }))
+
+    act(() => container.querySelector<HTMLButtonElement>('button:last-child')?.click())
+    expect(container.querySelector('[data-pathname="/"]')).not.toBeNull()
   })
 })

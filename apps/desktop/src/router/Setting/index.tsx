@@ -14,8 +14,8 @@ import { check } from '@tauri-apps/plugin-updater'
 import classNames from 'classnames'
 import { ArrowLeft, Search } from 'lucide-react'
 import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
-import { Link } from 'react-router'
 import { toast } from 'zens'
+import { SettingDialog } from './component/SettingDialog'
 import SettingGroup from './component/SettingGroup'
 import { CopilotSetting } from './CopilotSetting'
 import { ExportSetting } from './ExportSetting'
@@ -130,6 +130,8 @@ function Setting({ navigationRequest }: SettingProps) {
     const target = navigationRequest?.target
     if (!target) return
 
+    setSearchQuery('')
+    setSelectedSearchEntryId(undefined)
     setCurGroupKey(target.category)
     setActiveChildId(target.providerId)
     setMobileDetailOpen(true)
@@ -179,27 +181,21 @@ function Setting({ navigationRequest }: SettingProps) {
     })
   }, [mobileReturnFocusId])
 
-  useEffect(() => {
-    if (!mobileDetailOpen) return
+  const handleEscapeKeyDown = (event: KeyboardEvent) => {
+    // Radix handles Escape during capture, before an inline input can cancel its edit.
+    if (
+      event.target instanceof HTMLElement &&
+      event.target.closest('[data-mf-settings-escape-cancel]')
+    ) {
+      event.preventDefault()
+      return
+    }
 
-    const handleEscape = (event: KeyboardEvent) => {
-      if (
-        event.key !== 'Escape' ||
-        event.defaultPrevented ||
-        event.isComposing ||
-        event.repeat ||
-        !isNarrowSettingsViewport()
-      ) {
-        return
-      }
-
+    if (mobileDetailOpen && isNarrowSettingsViewport()) {
       event.preventDefault()
       closeMobileDetail()
     }
-
-    document.addEventListener('keydown', handleEscape)
-    return () => document.removeEventListener('keydown', handleEscape)
-  }, [closeMobileDetail, mobileDetailOpen])
+  }
 
   const handleCategorySelect = (groupKey: SettingCategoryKey, navigationItemId: string) => {
     setCurGroupKey(groupKey)
@@ -279,191 +275,191 @@ function Setting({ navigationRequest }: SettingProps) {
   }
 
   return (
-    <div className='box-border flex h-full w-full min-w-0 overflow-hidden bg-background text-foreground'>
-      <aside
-        className={classNames(
-          'box-border flex w-full shrink-0 flex-col border-border bg-muted/50 min-[720px]:w-[15.5rem] min-[720px]:border-r max-lg:min-[720px]:w-56',
-          mobileDetailOpen && 'max-[719px]:hidden',
-        )}
-      >
-        <div className='shrink-0 px-3 pt-3 pb-2'>
-          <Button
-            asChild
-            className='h-7 w-full justify-start px-2 text-ui-control font-normal text-muted-foreground shadow-none'
-            variant='ghost'
-          >
-            <Link className='no-underline' to='/'>
-              <ArrowLeft aria-hidden className='size-4' />
-              {t('settings.back_to_app')}
-            </Link>
-          </Button>
-          <label className='sr-only' htmlFor='setting-search'>
-            {t('settings.search_placeholder')}
-          </label>
-          <div className='relative mt-2'>
-            <Search
-              aria-hidden
-              className='pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground'
-            />
-            <Input
-              autoComplete='off'
-              className='h-7 rounded-md bg-background/80 pl-8 text-ui-control leading-[var(--mf-ui-line-height-control)] shadow-none'
-              id='setting-search'
-              name='settings-search'
-              placeholder={t('settings.search_placeholder')}
-              spellCheck={false}
-              type='search'
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
-            />
+    <SettingDialog onEscapeKeyDown={handleEscapeKeyDown}>
+      <div className='box-border flex h-full w-full min-w-0 overflow-hidden bg-background text-foreground'>
+        <aside
+          className={classNames(
+            'box-border flex w-full shrink-0 flex-col border-border bg-muted/50 min-[720px]:w-[15.5rem] min-[720px]:border-r max-lg:min-[720px]:w-56',
+            mobileDetailOpen && 'max-[719px]:hidden',
+          )}
+        >
+          <div className='shrink-0 px-3 pt-5 pb-2'>
+            <h2 className='m-0 px-2 pr-8 text-ui-body font-semibold'>{t('settings.label')}</h2>
+            <label className='sr-only' htmlFor='setting-search'>
+              {t('settings.search_placeholder')}
+            </label>
+            <div className='relative mt-2'>
+              <Search
+                aria-hidden
+                className='pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground'
+              />
+              <Input
+                autoComplete='off'
+                className='h-7 rounded-md bg-background/80 pl-8 text-ui-control leading-[var(--mf-ui-line-height-control)] shadow-none'
+                id='setting-search'
+                name='settings-search'
+                placeholder={t('settings.search_placeholder')}
+                spellCheck={false}
+                type='search'
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+              />
+            </div>
           </div>
-        </div>
-        <nav aria-label={t('settings.label')} className='min-h-0 flex-1 overflow-y-auto px-3 py-1'>
-          <div
-            aria-live='polite'
-            className='px-2 pt-1 pb-1.5 text-ui-control font-medium text-muted-foreground'
+          <nav
+            aria-label={t('settings.label')}
+            className='min-h-0 flex-1 overflow-y-auto px-3 py-1'
           >
-            {normalizedSearchQuery
-              ? t('settings.search_results', { count: searchResults.length })
-              : t('settings.label')}
-          </div>
-          <ul className='m-0 list-none p-0'>
-            {normalizedSearchQuery
-              ? searchResults.map((entry) => {
-                  const navigationItemId = getNavigationItemId('setting-search-result', entry.id)
-                  const path = [t('settings.label'), ...getSettingSearchPath(entry, t)]
-
-                  return (
-                    <li key={entry.id}>
-                      <Button
-                        aria-current={selectedSearchEntryId === entry.id ? 'location' : undefined}
-                        className={classNames(
-                          'my-px h-auto min-h-10 w-full flex-col items-start gap-0 rounded-md px-2 py-1.5 text-left font-normal text-foreground shadow-none focus-visible:ring-offset-0',
-                          selectedSearchEntryId === entry.id
-                            ? 'bg-control-selected text-content-primary hover:bg-control-selected'
-                            : 'bg-transparent hover:bg-control-ghost-hover hover:text-content-primary',
-                        )}
-                        id={navigationItemId}
-                        variant='ghost'
-                        onClick={() => handleSearchResultSelect(entry, navigationItemId)}
-                      >
-                        <span className='block w-full truncate text-ui-control font-medium'>
-                          {t(entry.titleI18nKey)}
-                        </span>
-                        {entry.descI18nKey ? (
-                          <span className='mt-0.5 block w-full truncate text-ui-caption text-muted-foreground'>
-                            {t(entry.descI18nKey)}
-                          </span>
-                        ) : null}
-                        <span className='mt-0.5 block w-full truncate text-ui-caption text-muted-foreground'>
-                          {path.join(' › ')}
-                        </span>
-                      </Button>
-                    </li>
-                  )
-                })
-              : settingDataGroupsKeys.map((groupKey) => {
-                  const group = settingMap[groupKey] as Setting.SettingGroup
-                  const index = settingDataGroupsKeys.indexOf(groupKey)
-                  const navigationItemId = getNavigationItemId('setting-category', groupKey)
-                  return (
-                    <li key={groupKey}>
-                      <Button
-                        aria-current={index === value ? 'page' : undefined}
-                        className={classNames(
-                          'my-px h-7 w-full justify-start gap-2 rounded-md px-2 text-left text-ui-control font-normal text-foreground shadow-none focus-visible:ring-offset-0',
-                          index === value
-                            ? 'bg-control-selected font-medium text-content-primary hover:bg-control-selected'
-                            : 'bg-transparent hover:bg-control-ghost-hover hover:text-content-primary',
-                        )}
-                        id={navigationItemId}
-                        variant='ghost'
-                        onClick={() => handleCategorySelect(groupKey, navigationItemId)}
-                      >
-                        <i aria-hidden className={classNames(group.iconName, 'text-sm')} />
-                        <span className='min-w-0 truncate'>{t(group.i18nKey)}</span>
-                      </Button>
-                    </li>
-                  )
-                })}
-            {normalizedSearchQuery && searchResults.length === 0 ? (
-              <li className='px-2 py-6 text-center text-sm text-muted-foreground' role='status'>
-                {t('settings.search_empty')}
-              </li>
+            {normalizedSearchQuery ? (
+              <div
+                aria-live='polite'
+                className='px-2 pt-1 pb-1.5 text-ui-control font-medium text-muted-foreground'
+              >
+                {t('settings.search_results', { count: searchResults.length })}
+              </div>
             ) : null}
-          </ul>
-        </nav>
-        <footer className='shrink-0 border-t border-border/80 px-3 py-3'>
-          <div className='flex min-w-0 items-center gap-2'>
-            <Logo aria-hidden='true' className='size-6 shrink-0' focusable='false' />
-            <div aria-live='polite' className='min-w-0 flex-1'>
-              <div className='flex min-w-0 items-baseline gap-1.5'>
-                <span className='truncate text-ui-control font-medium text-foreground'>
-                  {appInfo.name || t('app_name')}
-                </span>
-                {appInfo.version ? (
-                  <span className='shrink-0 text-ui-caption tabular-nums text-muted-foreground'>
-                    v{appInfo.version}
+            <ul className='m-0 list-none p-0'>
+              {normalizedSearchQuery
+                ? searchResults.map((entry) => {
+                    const navigationItemId = getNavigationItemId('setting-search-result', entry.id)
+                    const path = [t('settings.label'), ...getSettingSearchPath(entry, t)]
+
+                    return (
+                      <li key={entry.id}>
+                        <Button
+                          aria-current={selectedSearchEntryId === entry.id ? 'location' : undefined}
+                          className={classNames(
+                            'my-px h-auto min-h-10 w-full flex-col items-start gap-0 rounded-md px-2 py-1.5 text-left font-normal text-foreground shadow-none focus-visible:ring-offset-0',
+                            selectedSearchEntryId === entry.id
+                              ? 'bg-control-selected text-content-primary hover:bg-control-selected'
+                              : 'bg-transparent hover:bg-control-ghost-hover hover:text-content-primary',
+                          )}
+                          id={navigationItemId}
+                          variant='ghost'
+                          onClick={() => handleSearchResultSelect(entry, navigationItemId)}
+                        >
+                          <span className='block w-full truncate text-ui-control font-medium'>
+                            {t(entry.titleI18nKey)}
+                          </span>
+                          {entry.descI18nKey ? (
+                            <span className='mt-0.5 block w-full truncate text-ui-caption text-muted-foreground'>
+                              {t(entry.descI18nKey)}
+                            </span>
+                          ) : null}
+                          <span className='mt-0.5 block w-full truncate text-ui-caption text-muted-foreground'>
+                            {path.join(' › ')}
+                          </span>
+                        </Button>
+                      </li>
+                    )
+                  })
+                : settingDataGroupsKeys.map((groupKey) => {
+                    const group = settingMap[groupKey] as Setting.SettingGroup
+                    const index = settingDataGroupsKeys.indexOf(groupKey)
+                    const navigationItemId = getNavigationItemId('setting-category', groupKey)
+                    return (
+                      <li key={groupKey}>
+                        <Button
+                          aria-current={index === value ? 'page' : undefined}
+                          className={classNames(
+                            'my-px h-7 w-full justify-start gap-2 rounded-md px-2 text-left text-ui-control font-normal text-foreground shadow-none focus-visible:ring-offset-0',
+                            index === value
+                              ? 'bg-control-selected font-medium text-content-primary hover:bg-control-selected'
+                              : 'bg-transparent hover:bg-control-ghost-hover hover:text-content-primary',
+                          )}
+                          id={navigationItemId}
+                          variant='ghost'
+                          onClick={() => handleCategorySelect(groupKey, navigationItemId)}
+                        >
+                          <i aria-hidden className={classNames(group.iconName, 'text-sm')} />
+                          <span className='min-w-0 truncate'>{t(group.i18nKey)}</span>
+                        </Button>
+                      </li>
+                    )
+                  })}
+              {normalizedSearchQuery && searchResults.length === 0 ? (
+                <li className='px-2 py-6 text-center text-sm text-muted-foreground' role='status'>
+                  {t('settings.search_empty')}
+                </li>
+              ) : null}
+            </ul>
+          </nav>
+          <footer className='shrink-0 border-t border-border/80 px-3 py-3'>
+            <div className='flex min-w-0 items-center gap-2'>
+              <Logo aria-hidden='true' className='size-6 shrink-0' focusable='false' />
+              <div aria-live='polite' className='min-w-0 flex-1'>
+                <div className='flex min-w-0 items-baseline gap-1.5'>
+                  <span className='truncate text-ui-control font-medium text-foreground'>
+                    {appInfo.name || t('app_name')}
                   </span>
+                  {appInfo.version ? (
+                    <span className='shrink-0 text-ui-caption tabular-nums text-muted-foreground'>
+                      v{appInfo.version}
+                    </span>
+                  ) : null}
+                </div>
+                {update ? (
+                  <p className='m-0 mt-0.5 truncate text-ui-caption text-muted-foreground'>
+                    {t('about.newVersion')} · v{update.version}
+                  </p>
                 ) : null}
               </div>
               {update ? (
-                <p className='m-0 mt-0.5 truncate text-ui-caption text-muted-foreground'>
-                  {t('about.newVersion')} · v{update.version}
-                </p>
+                <Button
+                  className='shrink-0 px-2 text-primary shadow-none hover:text-primary'
+                  size='sm'
+                  variant='ghost'
+                  onClick={() => {
+                    installUpdate(update)
+                    setUpdate(null)
+                  }}
+                >
+                  {t('about.install')}
+                </Button>
               ) : null}
             </div>
-            {update ? (
-              <Button
-                className='shrink-0 px-2 text-primary shadow-none hover:text-primary'
-                size='sm'
-                variant='ghost'
-                onClick={() => {
-                  installUpdate(update)
-                  setUpdate(null)
-                }}
-              >
-                {t('about.install')}
-              </Button>
-            ) : null}
+          </footer>
+        </aside>
+        <main
+          className={classNames(
+            'box-border flex min-h-0 min-w-0 flex-1 flex-col bg-background',
+            !mobileDetailOpen && 'max-[719px]:hidden',
+          )}
+        >
+          <div className='box-border mx-auto w-full max-w-[58rem] shrink-0 px-8 pt-7 max-lg:px-6 max-[719px]:px-4 max-[719px]:pt-3'>
+            <Button
+              className='mb-3 px-2 text-muted-foreground min-[720px]:hidden'
+              size='sm'
+              variant='ghost'
+              onClick={closeMobileDetail}
+            >
+              <ArrowLeft aria-hidden className='size-4' />
+              {t('settings.back_to_settings')}
+            </Button>
+            <header className='mb-5 flex items-start justify-between gap-4 pr-8 max-[719px]:pr-0'>
+              <div className='min-w-0'>
+                <h1
+                  className='m-0 text-xl font-semibold text-foreground focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary'
+                  ref={categoryHeadingRef}
+                  tabIndex={-1}
+                >
+                  {t(curGroup.i18nKey)}
+                </h1>
+                <p className='mt-1 mb-0 text-ui-body leading-relaxed text-muted-foreground'>
+                  {t(curGroup.desc?.i18nKey)}
+                </p>
+              </div>
+              <div className='flex shrink-0 items-center gap-2'>{renderAction()}</div>
+            </header>
           </div>
-        </footer>
-      </aside>
-      <main
-        className={classNames(
-          'box-border min-w-0 flex-1 overflow-x-hidden overflow-y-auto bg-background',
-          !mobileDetailOpen && 'max-[719px]:hidden',
-        )}
-      >
-        <div className='box-border mx-auto w-full max-w-[58rem] px-8 pt-7 pb-12 max-lg:px-6 max-[719px]:px-4 max-[719px]:pt-3'>
-          <Button
-            className='mb-3 px-2 text-muted-foreground min-[720px]:hidden'
-            size='sm'
-            variant='ghost'
-            onClick={closeMobileDetail}
-          >
-            <ArrowLeft aria-hidden className='size-4' />
-            {t('settings.back_to_settings')}
-          </Button>
-          <header className='mb-5 flex items-start justify-between gap-4'>
-            <div className='min-w-0'>
-              <h1
-                className='m-0 text-xl font-semibold text-foreground focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary'
-                ref={categoryHeadingRef}
-                tabIndex={-1}
-              >
-                {t(curGroup.i18nKey)}
-              </h1>
-              <p className='mt-1 mb-0 text-ui-body leading-relaxed text-muted-foreground'>
-                {t(curGroup.desc?.i18nKey)}
-              </p>
+          <div className='min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain'>
+            <div className='box-border mx-auto w-full max-w-[58rem] px-8 pb-12 max-lg:px-6 max-[719px]:px-4'>
+              {renderCurrentSettingData()}
             </div>
-            <div className='flex shrink-0 items-center gap-2'>{renderAction()}</div>
-          </header>
-          <div className='min-w-0'>{renderCurrentSettingData()}</div>
-        </div>
-      </main>
-    </div>
+          </div>
+        </main>
+      </div>
+    </SettingDialog>
   )
 }
 

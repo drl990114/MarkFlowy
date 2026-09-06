@@ -778,6 +778,9 @@
     "export_empty": "There is no conversation to export"
   },
   "capricorn": {
+    "placeholder": {
+      "default": "Type '/' for commands"
+    },
     "clipboard": {
       "copied_markdown": "Copied as Markdown",
       "cut_markdown": "Cut as Markdown",

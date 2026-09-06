@@ -116,10 +116,27 @@ export interface CapricornEditorSettings {
   colorScheme?: 'dark' | 'light' | 'system'
   density?: 'comfortable' | 'compact'
   keybindingConfiguration?: CapricornKeybindingConfiguration
+  placeholder?: boolean | string | CapricornPlaceholderOptions
   readOnly?: boolean
   spellCheck?: boolean
   style?: React.CSSProperties
   typewriter?: boolean | { enabled?: boolean }
+}
+
+export interface CapricornPlaceholderOptions {
+  enabled?: boolean
+  placeholder?:
+    | string
+    | ((context: {
+        node: { type: string; data: Readonly<Record<string, unknown>> }
+        hasAnchor: boolean
+        isEditorEmpty: boolean
+      }) => string)
+  showOnlyCurrent?: boolean
+  showOnlyWhenEditable?: boolean
+  includeChildren?: boolean
+  emptyEditorClass?: string
+  emptyNodeClass?: string
 }
 
 export interface CapricornLocalizationAdapter {

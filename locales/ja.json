@@ -778,6 +778,9 @@
     "shortcutFallback": "Cmd/Ctrl+Shift+F"
   },
   "capricorn": {
+    "placeholder": {
+      "default": "「/」でコマンドを表示"
+    },
     "clipboard": {
       "copied_markdown": "Markdown としてコピーしました",
       "cut_markdown": "Markdown として切り取りました",

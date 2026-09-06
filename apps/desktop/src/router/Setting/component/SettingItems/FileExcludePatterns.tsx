@@ -65,6 +65,7 @@ const FileExcludeRowItem = memo<FileExcludeRowItemProps>(
         {isEditing ? (
           <Input
             autoFocus
+            data-mf-settings-escape-cancel=''
             inputSize='sm'
             value={editingValue}
             placeholder={placeholder || 'Enter value...'}
@@ -139,6 +140,7 @@ const AddingExcludeRowItem = memo<AddingExcludeRowItemProps>(
       <RowWrapper>
         <Input
           autoFocus
+          data-mf-settings-escape-cancel=''
           inputSize='sm'
           value={addValue}
           placeholder={placeholder || 'Enter value...'}

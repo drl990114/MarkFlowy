@@ -27,6 +27,7 @@ if (!editor?.body) throw new Error('TextEditor implementation was not found')
 const names = new Set([
   'editorRootFontSize',
   'editorRootLineHeight',
+  'editorPlaceholder',
   'editorKeybingMap',
   'editorKeybindingsLoaded',
   'capricornRuntimeOptions',
@@ -71,7 +72,11 @@ const Harness = runInNewContext(compiled, {
   emptyKeymap: {},
   CAPRICORN_DESKTOP_VIRTUALIZE_OPTIONS: {},
 }) as ComponentType<{
-  settings: { editor_root_font_size?: number; editor_root_line_height?: string }
+  settings: {
+    editor_root_font_size?: number
+    editor_root_line_height?: string
+    editor_placeholder?: boolean
+  }
   keymap?: Record<string, string>
   onOptions: (options: CapricornRuntimeOptions) => void
 }>
@@ -79,6 +84,15 @@ const Harness = runInNewContext(compiled, {
 afterEach(cleanup)
 
 describe('TextEditor Capricorn typography settings', () => {
+  it('forwards the placeholder switch and reacts when it changes', () => {
+    const onOptions = vi.fn()
+    const { rerender } = render(
+      <Harness settings={{ editor_placeholder: false }} onOptions={onOptions} />,
+    )
+    expect(onOptions.mock.lastCall?.[0].placeholder).toEqual({ enabled: false })
+    rerender(<Harness settings={{ editor_placeholder: true }} onOptions={onOptions} />)
+    expect(onOptions.mock.lastCall?.[0].placeholder).toEqual({ enabled: true })
+  })
   it('subscribes to shortcut changes and includes them in the memoized runtime options', () => {
     const onOptions = vi.fn()
     const { rerender } = render(<Harness settings={{}} onOptions={onOptions} />)

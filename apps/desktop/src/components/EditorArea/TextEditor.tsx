@@ -2448,6 +2448,7 @@ function TextEditor(props: TextEditorProps) {
       imageInsertHandler: hostOptions.imageInsertHandler,
       imagePasteHandler: hostOptions.imagePasteHandler,
       localization: capricornLocalization,
+      placeholder: { enabled: editorPlaceholder },
       readOnly: savePathReserved || externalChangeResolving,
       spellCheck: wysiwygEditorSpellcheck,
       style: {
@@ -2466,6 +2467,7 @@ function TextEditor(props: TextEditorProps) {
     editorColorScheme,
     editorKeybingMap,
     editorKeybindingsLoaded,
+    editorPlaceholder,
     editorRootFontSize,
     editorRootLineHeight,
     editorTypewriterScroll,

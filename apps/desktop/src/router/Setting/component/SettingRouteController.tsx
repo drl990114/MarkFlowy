@@ -22,6 +22,7 @@ export function SettingRouteController() {
       handler: (target?: OpenSettingTarget) => {
         requestIdRef.current += 1
         navigate('/settings', {
+          replace: location.pathname === '/settings',
           state: {
             navigationRequest: {
               id: requestIdRef.current,
@@ -33,7 +34,7 @@ export function SettingRouteController() {
     })
 
     return () => disposable.dispose()
-  }, [navigate])
+  }, [location.pathname, navigate])
 
   useEffect(() => {
     const isSettingsRoute = location.pathname === '/settings'
@@ -44,21 +45,6 @@ export function SettingRouteController() {
 
     wasSettingsRouteRef.current = isSettingsRoute
   }, [location.pathname])
-
-  useEffect(() => {
-    if (location.pathname !== '/settings') return
-
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape' || event.defaultPrevented || event.isComposing || event.repeat) {
-        return
-      }
-
-      navigate('/')
-    }
-
-    window.addEventListener('keydown', handleEscape)
-    return () => window.removeEventListener('keydown', handleEscape)
-  }, [location.pathname, navigate])
 
   return null
 }

@@ -74,20 +74,7 @@ function AppRoutes({ chooseWorkspace, retryWorkspace, workspace }: AppRoutesProp
         </WorkspaceRouteSurface>
         <Routes>
           <Route path='/' element={null} />
-          <Route
-            path='/settings'
-            element={
-              <div
-                className='absolute inset-0 isolate min-h-0 min-w-0 overflow-hidden'
-                data-mf-settings-surface=''
-              >
-                <Setting
-                  key={navigationRequest?.id ?? 'settings'}
-                  navigationRequest={navigationRequest}
-                />
-              </div>
-            }
-          />
+          <Route path='/settings' element={<Setting navigationRequest={navigationRequest} />} />
         </Routes>
       </div>
     </div>
