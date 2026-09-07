@@ -4,6 +4,9 @@
     "render_failed": "No se pudo renderizar el editor"
   },
   "find_replace": {
+    "navigation_unsupported": "Esta versión no permite ir a la posición exacta del resultado. Actualiza la aplicación e inténtalo de nuevo.",
+    "navigation_stale": "El contenido del resultado ha cambiado. Repita la búsqueda.",
+    "navigation_failed": "No se pudo ir al resultado. Inténtelo después de cargar el documento.",
     "find": "Buscar",
     "replace": "Reemplazar",
     "replace_with": "Reemplazar con",

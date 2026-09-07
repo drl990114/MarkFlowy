@@ -4,6 +4,9 @@
     "render_failed": "Impossible d’afficher l’éditeur"
   },
   "find_replace": {
+    "navigation_unsupported": "Cette version ne permet pas d’accéder à la position exacte du résultat. Mettez l’application à jour et réessayez.",
+    "navigation_stale": "Le contenu du résultat a changé. Relancez la recherche.",
+    "navigation_failed": "Impossible de rejoindre ce résultat. Réessayez après le chargement du document.",
     "find": "Rechercher",
     "replace": "Remplacer",
     "replace_with": "Remplacer par",

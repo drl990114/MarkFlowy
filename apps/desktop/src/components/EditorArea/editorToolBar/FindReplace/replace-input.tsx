@@ -10,6 +10,7 @@ export const ReplaceInput: FC<{
 
   return (
     <Input
+      data-mf-replace-input=''
       aria-label={t('find_replace.replace_with')}
       className='h-6'
       placeholder={t('find_replace.replace')}

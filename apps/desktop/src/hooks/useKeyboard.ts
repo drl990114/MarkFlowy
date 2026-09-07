@@ -1,3 +1,7 @@
+import { createFindShortcutHandler } from '@/helper/findShortcut'
+import { openDocumentSearch } from '@/components/EditorArea/editorSearchStore'
+import { getCapricornEditor } from '@/components/EditorArea/capricornEditorRegistry'
+import useEditorStore from '@/stores/useEditorStore'
 import { commandRegistry, keybindingRegistry } from '@/commands'
 import { createKeybindingsHandler } from '@/helper/bindkeys'
 import { logger } from '@/helper/logger'
@@ -56,6 +60,7 @@ function useKeyboard() {
     const editorKeybingMap: Record<string, string> = {}
 
     keyboardInfos.forEach((keyboardInfo) => {
+      if (keyboardInfo.id === 'app_findReplaceEditor') return
       if (keyboardInfo.key_map.length > 0) {
         if (keyboardInfo.id.startsWith('editor_')) {
           const keybind = keybindingRegistry.getKeyBindingString(keyboardInfo.key_map)
@@ -75,19 +80,34 @@ function useKeyboard() {
 
     const handler = createKeybindingsHandler(keybindingMap)
 
+    const findBinding = keyboardInfos.find((binding) => binding.id === 'app_findReplaceEditor')
+    const findShortcut = findBinding
+      ? keybindingRegistry.getKeyBindingString(findBinding.key_map)
+      : keyboardInfos.length
+        ? ''
+        : 'mod-f'
+    const findHandler = createFindShortcutHandler(findShortcut, () => {
+      const { activeId } = useEditorStore.getState()
+      if (activeId && getCapricornEditor(activeId)?.isComposing()) return false
+      return openDocumentSearch()
+    })
+    window.addEventListener('keydown', findHandler, true)
     window.addEventListener('keydown', handler)
 
     return () => {
+      window.removeEventListener('keydown', findHandler, true)
       window.removeEventListener('keydown', handler)
     }
   }, [keyboardInfos, setEditorKeybingMap])
 
   const checkKeyConflict = (commandId: string, newKeyMap: string[]) => {
-    const curCommand = keyboardInfos.find(info => info.id === commandId)
+    const curCommand = keyboardInfos.find((info) => info.id === commandId)
     if (!curCommand) {
       return false
     }
-    return keyboardInfos.filter(info => info.when === curCommand.when).some((cmd) => {
+    return keyboardInfos
+      .filter((info) => info.when === curCommand.when)
+      .some((cmd) => {
         if (cmd.key_map.length > 0) {
           const existingKeybinding = keybindingRegistry.getKeyBindingString(cmd.key_map)
           const newKeybinding = keybindingRegistry.getKeyBindingString(newKeyMap)

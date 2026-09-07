@@ -4,6 +4,9 @@
     "render_failed": "无法渲染编辑器"
   },
   "find_replace": {
+    "navigation_unsupported": "当前版本暂不支持精确定位，请更新应用后重试。",
+    "navigation_stale": "搜索结果对应的内容已变化，请重新搜索。",
+    "navigation_failed": "无法定位到此结果，请等待文档加载后重试。",
     "find": "查找",
     "replace": "替换",
     "replace_with": "替换为",

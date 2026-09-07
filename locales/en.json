@@ -4,6 +4,9 @@
     "render_failed": "Unable to render the editor"
   },
   "find_replace": {
+    "navigation_unsupported": "This version does not support precise search navigation. Update the app and try again.",
+    "navigation_stale": "The search result has changed. Run the search again.",
+    "navigation_failed": "Unable to navigate to this result. Try again after the document loads.",
     "find": "Find",
     "replace": "Replace",
     "replace_with": "Replace with",

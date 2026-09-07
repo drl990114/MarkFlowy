@@ -125,6 +125,14 @@ export default defineConfig(async ({ mode }) => {
     test: {
       environment: 'happy-dom',
       reporters: ['verbose'],
+      // Use the theme's ESM entry so real RME tests share CodeMirror's classes
+      // instead of mixing the externalized CommonJS and ESM state packages.
+      server: { deps: { inline: ['rme', '@drl990114/codemirror-themes'] } },
+      alias: {
+        '@drl990114/codemirror-themes': fileURLToPath(
+          new URL('../../node_modules/@drl990114/codemirror-themes/esm/index.js', import.meta.url),
+        ),
+      },
     },
   }
 })

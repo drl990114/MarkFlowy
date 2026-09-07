@@ -1,3 +1,5 @@
+import { setSourceCodeEditor } from './sourceCodeEditorRegistry'
+import { reportEditorSearchLoadFailure } from './editorSearchStore'
 import { commandRegistry } from '@/commands'
 import { capricornClipboard, handleCapricornClipboardResult } from './capricornClipboard'
 import { AppEditorThemeProvider } from '@/AppThemeProvider'
@@ -342,7 +344,7 @@ enum TextEditorStatus {
   BINARY,
 }
 
-export const sourceCodeCodemirrorViewMap: Map<string, MfCodemirrorView> = new Map()
+export { sourceCodeCodemirrorViewMap } from './sourceCodeEditorRegistry'
 
 const editorDelegateRegistry = new InstanceResourceRegistry<EditorDelegate<any>>()
 const editorContextRegistry = new InstanceResourceRegistry<EditorContext>()
@@ -414,7 +416,7 @@ function registerSourceCodeViewResource(
     instanceId,
     view,
     shouldPromote,
-    (current) => sourceCodeCodemirrorViewMap.set(fileId, current),
+    (current) => setSourceCodeEditor(fileId, current),
   )
 }
 
@@ -447,8 +449,8 @@ function promoteEditorInstanceResources(fileId: string, instanceId: string) {
   if (context === undefined) store.clearEditorCtx(fileId)
   else store.setEditorCtx(fileId, context)
 
-  if (sourceCodeView === undefined) sourceCodeCodemirrorViewMap.delete(fileId)
-  else sourceCodeCodemirrorViewMap.set(fileId, sourceCodeView)
+  if (sourceCodeView === undefined) setSourceCodeEditor(fileId, undefined)
+  else setSourceCodeEditor(fileId, sourceCodeView)
 
   setCapricornEditor(fileId, capricornEditor)
 
@@ -475,8 +477,8 @@ function unregisterSourceCodeViewResource(fileId: string, instanceId: string) {
   const removal = sourceCodeViewRegistry.remove(fileId, instanceId)
   syncResourceRemoval(
     removal,
-    (current) => sourceCodeCodemirrorViewMap.set(fileId, current),
-    () => sourceCodeCodemirrorViewMap.delete(fileId),
+    (current) => setSourceCodeEditor(fileId, current),
+    () => setSourceCodeEditor(fileId, undefined),
   )
 }
 
@@ -534,8 +536,8 @@ function unregisterEditorInstanceResources(fileId: string, instanceId: string) {
   )
   syncResourceRemoval(
     sourceCodeViewRemoval,
-    (current) => sourceCodeCodemirrorViewMap.set(fileId, current),
-    () => sourceCodeCodemirrorViewMap.delete(fileId),
+    (current) => setSourceCodeEditor(fileId, current),
+    () => setSourceCodeEditor(fileId, undefined),
   )
   syncResourceRemoval(
     capricornEditorRemoval,
@@ -1014,6 +1016,11 @@ function TextEditor(props: TextEditorProps) {
     [id],
   )
   const [status, setStatus] = useState(TextEditorStatus.LOADING)
+  useEffect(() => {
+    if (active && status !== TextEditorStatus.LOADING && status !== TextEditorStatus.SUCCESS) {
+      reportEditorSearchLoadFailure(id, groupId)
+    }
+  }, [active, status, id, groupId])
 
   const insertNodeToFolderData = useEditorStore((state) => state.insertNodeToFolderData)
   const { t } = useTranslation()
@@ -1218,7 +1225,7 @@ function TextEditor(props: TextEditorProps) {
             useEditorCounterStore.getState().deleteEditorCounter({ id })
             useEditorStateStore.getState().delIdStateMap(id)
             useEditorStore.getState().clearEditorResources(id)
-            sourceCodeCodemirrorViewMap.delete(id)
+            setSourceCodeEditor(id, undefined)
             delegateOptionsCache.delete(id)
             releaseExternalFileChange(id)
           },
@@ -2478,6 +2485,7 @@ function TextEditor(props: TextEditorProps) {
 
   const handleCapricornError = useCallback(
     (error: unknown) => {
+      if (activeRef.current) reportEditorSearchLoadFailure(id, groupId)
       finishEditorOpenMeasurement(getEditorOpenMeasurement(id, groupId), 'error')
       captureException(error)
       logger.error('Capricorn editor runtime error', error)

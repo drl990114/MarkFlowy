@@ -11,6 +11,7 @@ import { EmptyState } from './EmptyState'
 import { hasEditorTabDragData, readEditorTabDragData } from './editorDragData'
 import { containsEditorGroup } from './editorLayoutActionGroups'
 import { EditorPanel } from './styles'
+import { FindReplace } from './editorToolBar/FindReplace'
 
 interface EditorLayoutViewProps {
   activeGroupId?: string
@@ -211,6 +212,7 @@ const EditorGroupPane = memo((props: EditorGroupPaneProps) => {
         compact={isSplitMode}
         groupId={groupId}
       />
+      {isActiveGroup ? <FindReplace /> : null}
       <EditorGroupToolbar editorId={activeFileId} />
       <EditorPanel id={`editor-panel-${groupId}`}>
         {group.opened.length === 0 ? (

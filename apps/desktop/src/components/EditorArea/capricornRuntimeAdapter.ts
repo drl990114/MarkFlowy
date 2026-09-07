@@ -61,7 +61,27 @@ export interface CapricornFindState {
   query: string
 }
 
+export interface EditorSourceMatchRequest {
+  line: number
+  startColumn: number
+  endColumn: number
+  lineText: string
+  query: string
+  caseSensitive?: boolean
+}
+export interface EditorSourceMatchResult {
+  status: 'exact' | 'block' | 'stale' | 'not-found'
+}
 export interface CapricornFindApi {
+  searchAsync?: (
+    request: { query: string; caseSensitive?: boolean; activeIndex?: number },
+    options?: { signal?: AbortSignal },
+  ) => Promise<CapricornFindState | null>
+  navigateTo?: (index: number, options?: { signal?: AbortSignal }) => Promise<unknown>
+  revealSourceMatch?: (
+    request: EditorSourceMatchRequest,
+    options?: { signal?: AbortSignal },
+  ) => Promise<EditorSourceMatchResult | null>
   clear: () => CapricornFindState
   close: () => CapricornFindState
   getState: () => CapricornFindState

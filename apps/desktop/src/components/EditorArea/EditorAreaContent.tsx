@@ -1,4 +1,3 @@
-import { FindReplace } from '@/components/EditorArea/editorToolBar/FindReplace'
 import { useEditorStore } from '@/stores'
 import useLayoutStore from '@/stores/useLayoutStore'
 import { memo } from 'react'
@@ -13,7 +12,6 @@ function EditorAreaContent() {
   return (
     <Container className='w-full h-full editor-area-container'>
       <OverlayScrollbarStyles />
-      <FindReplace />
       <EditorPanel id='editor-panel'>
         <EditorLayoutView
           activeGroupId={activeGroupId}

@@ -17,7 +17,7 @@ describe('host keybinding translation', () => {
   })
 
   it('retains startup defaults and disables cleared bindings after settings load', () => {
-    expect(createCapricornKeybindingConfiguration({}, false).customizations).toEqual([])
+    expect(createCapricornKeybindingConfiguration({}, false).customizations).toEqual([{ type: 'disable', targetRuleId: 'editor.find.open.default' }])
     const configuration = createCapricornKeybindingConfiguration({}, true)
     expect(configuration.inheritDefaults).toBe(true)
     expect(configuration.customizations).toContainEqual({

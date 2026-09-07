@@ -5,14 +5,15 @@ import { Input } from '@/components/ui/input'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { RIGHTBARITEMKEYS } from '@/constants'
 import { resolveFileExcludePatterns } from '@/helper/file-exclude'
-import { getFileObjectByPath } from '@/helper/files'
+import { getFileObject, getFileObjectByPath, setFileObjectByPath } from '@/helper/files'
+import { createFile } from '@/helper/filesys'
 import { logger } from '@/helper/logger'
 import { useEditorStore } from '@/stores'
 import { scheduleActiveEditorFocus } from '@/components/EditorArea/focusActiveEditor'
 import {
-  getCapricornEditor,
-  subscribeCapricornEditors,
-} from '@/components/EditorArea/capricornEditorRegistry'
+  closeEditorSearch,
+  requestSearchNavigation,
+} from '@/components/EditorArea/editorSearchStore'
 import { closeCompactLeftDockAfterSelection } from '@/stores/useLayoutStore'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import { useVirtualizer } from '@tanstack/react-virtual'
@@ -32,15 +33,7 @@ import {
   SearchIcon,
   XIcon,
 } from 'lucide-react'
-import {
-  memo,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  useSyncExternalStore,
-} from 'react'
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from '@/i18n'
 import {
   SearchContainer,
@@ -124,7 +117,7 @@ export function SearchActionButton(props: SearchActionButtonProps) {
 
 const createSearchRegex = (keyword: string, caseSensitive: boolean) => {
   if (!keyword) return undefined
-  return new RegExp(escapeRegExp(keyword), caseSensitive ? 'g' : 'gi')
+  return new RegExp(escapeRegExp(keyword), caseSensitive ? 'gu' : 'giu')
 }
 
 const getMatchPositions = (
@@ -244,21 +237,13 @@ const SearchView = memo(() => {
   const searchKeyword = useSearchStore((state) => state.searchKeyword)
   const caseSensitive = useSearchStore((state) => state.caseSensitive)
   const activeIndex = useSearchStore((state) => state.activeIndex)
+  const resultQuery = useSearchStore((state) => state.resultQuery)
+  const resultCaseSensitive = useSearchStore((state) => state.resultCaseSensitive)
   const setSearchState = useSearchStore((state) => state.setSearchState)
   const addOpenedFile = useEditorStore((state) => state.addOpenedFile)
   const setActiveId = useEditorStore((state) => state.setActiveId)
   const folderData = useEditorStore((state) => state.folderData)
-  const editorCtxMap = useEditorStore((state) => state.editorCtxMap)
   const activeId = useEditorStore((state) => state.activeId)
-  const getCapricornSnapshot = useCallback(
-    () => (activeId ? getCapricornEditor(activeId) : undefined),
-    [activeId],
-  )
-  const capricornEditor = useSyncExternalStore(
-    subscribeCapricornEditors,
-    getCapricornSnapshot,
-    getCapricornSnapshot,
-  )
   const fileExcludePatterns = useAppSettingStore((state) =>
     resolveFileExcludePatterns(state.settingData),
   )
@@ -273,8 +258,8 @@ const SearchView = memo(() => {
   const searchRequestIdRef = useRef(0)
 
   const normalizedResultList = useMemo(
-    () => normalizeSearchResults(resultList, searchKeyword, caseSensitive),
-    [caseSensitive, resultList, searchKeyword],
+    () => normalizeSearchResults(resultList, resultQuery, resultCaseSensitive),
+    [resultCaseSensitive, resultList, resultQuery],
   )
 
   const flattenedData = useMemo(() => {
@@ -420,43 +405,7 @@ const SearchView = memo(() => {
     )
   }, [isAllExpand, resultList])
 
-  const stopActiveFind = useCallback(() => {
-    if (!activeId) return
-    editorCtxMap.get(activeId)?.commands?.stopFind?.()
-    capricornEditor?.find.close()
-  }, [activeId, capricornEditor, editorCtxMap])
-
-  useEffect(() => {
-    return stopActiveFind
-  }, [stopActiveFind])
-
-  useEffect(() => {
-    if (activeId && resultList.length > 0 && searchKeyword) {
-      const ctx = editorCtxMap.get(activeId)
-      const searchParams = {
-        query: searchKeyword,
-        caseSensitive,
-        activeIndex: activeIndex,
-      }
-
-      if (capricornEditor) {
-        capricornEditor.find.open()
-        capricornEditor.find.search(searchParams)
-      } else {
-        // findRanges twice to make sure the legacy Source editor scrolls to activeIndex.
-        ctx?.helpers.findRanges?.(searchParams)
-        ctx?.helpers.findRanges?.(searchParams)
-      }
-    }
-  }, [
-    activeIndex,
-    caseSensitive,
-    activeId,
-    capricornEditor,
-    searchKeyword,
-    editorCtxMap,
-    resultList,
-  ])
+  const stopActiveFind = useCallback(() => closeEditorSearch('global'), [])
 
   const handleSearch = useCallback(async () => {
     if (!folderData?.[0]) return
@@ -482,7 +431,7 @@ const SearchView = memo(() => {
         query: {
           dir: folderData[0].path,
           name_text: '.md',
-          contents_text: queryText,
+          contents_text: escapeRegExp(queryText),
         },
         options: {
           content_case_sensitive: caseSensitive,
@@ -493,7 +442,11 @@ const SearchView = memo(() => {
       if (searchRequestIdRef.current !== requestId) return
 
       logger.info('res', res)
-      addSearchResult(res.data)
+      setSearchState({
+        resultList: res.data,
+        resultQuery: queryText,
+        resultCaseSensitive: caseSensitive,
+      })
 
       const newExpandIdMap: Record<string, boolean> = {}
 
@@ -541,33 +494,42 @@ const SearchView = memo(() => {
   )
 
   const handleFileInfoClick = useCallback(
-    (p: string, index: number) => {
-      const curFile = getFileObjectByPath(p)
-
-      if (curFile) {
-        addOpenedFile(curFile.id)
-        setActiveId(curFile.id)
-        const searchParams = {
-          query: searchKeyword,
-          caseSensitive,
-          activeIndex: index,
-        }
-
-        const targetCapricornEditor = getCapricornEditor(curFile.id)
-        if (targetCapricornEditor) {
-          targetCapricornEditor.find.open()
-          targetCapricornEditor.find.search(searchParams)
-        } else {
-          editorCtxMap.get(curFile.id)?.helpers.findRanges?.(searchParams)
-        }
-
-        setSearchState({
-          activeIndex: index,
-        })
-        if (closeCompactLeftDockAfterSelection()) scheduleActiveEditorFocus()
+    (
+      searchInfo: NormalizedSearchInfo,
+      index: number,
+      match: NormalizedSearchMatch,
+      matchIndexInLine: number,
+    ) => {
+      const { path, name, ext } = searchInfo
+      const position = match.positions[matchIndexInLine]
+      const knownFile =
+        getFileObjectByPath(path) ?? useEditorStore.getState().getFileNodeByPath(path)
+      if (!position || searchInfo.is_folder || knownFile?.kind === 'dir') {
+        setSearchError(t('find_replace.navigation_stale'))
+        return
       }
+      // Search covers directories the lazy file tree has not loaded yet. Register
+      // metadata here; TextEditor still owns loading and validating the content.
+      const curFile = knownFile
+        ? getFileObject(knownFile.id) ?? createFile(knownFile)
+        : createFile({ path, name, ext })
+      if (!getFileObjectByPath(path)) setFileObjectByPath(path, curFile)
+      addOpenedFile(curFile.id)
+      setActiveId(curFile.id)
+      requestSearchNavigation({
+        fileId: curFile.id,
+        path,
+        line: match.line,
+        startColumn: position.start,
+        endColumn: position.end,
+        lineText: match.content.replace(/\r$/, ''),
+        query: resultQuery,
+        caseSensitive: resultCaseSensitive,
+      })
+      setSearchState({ activeIndex: index })
+      if (closeCompactLeftDockAfterSelection()) scheduleActiveEditorFocus()
     },
-    [addOpenedFile, setActiveId, caseSensitive, searchKeyword, setSearchState, editorCtxMap],
+    [addOpenedFile, setActiveId, resultCaseSensitive, resultQuery, setSearchState, t],
   )
 
   const toggleSearchInfoExpand = useCallback(
@@ -817,7 +779,14 @@ const SearchView = memo(() => {
                     aria-current={item.isActive ? 'true' : undefined}
                     className={classNames('search-info', { active: item.isActive })}
                     data-search-row-index={virtualItem.index}
-                    onClick={() => handleFileInfoClick(item.searchInfo.path, item.globalIndex)}
+                    onClick={() =>
+                      handleFileInfoClick(
+                        item.searchInfo,
+                        item.globalIndex,
+                        item.match,
+                        item.matchIndexInLine,
+                      )
+                    }
                     onFocus={() => setFocusedRowIndex(virtualItem.index)}
                     onKeyDown={(event) => handleSearchRowKeyDown(event, virtualItem.index)}
                     tabIndex={virtualItem.index === tabbableRowIndex ? 0 : -1}

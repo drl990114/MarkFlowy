@@ -47,6 +47,7 @@ export const OverlayScrollbarStyles = createGlobalStyle`
     }
 
     .editor-group-toolbar,
+    [data-slot='editor-find'],
     .editor-area-tabs {
       display: none !important;
     }

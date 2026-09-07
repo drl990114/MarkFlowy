@@ -4,6 +4,9 @@
     "render_failed": "エディタを表示できません"
   },
   "find_replace": {
+    "navigation_unsupported": "このバージョンは検索結果の正確な位置への移動に対応していません。アプリを更新して再試行してください。",
+    "navigation_stale": "検索結果の内容が変更されています。もう一度検索してください。",
+    "navigation_failed": "この結果に移動できません。文書の読み込み後に再試行してください。",
     "find": "検索",
     "replace": "置換",
     "replace_with": "置換後",

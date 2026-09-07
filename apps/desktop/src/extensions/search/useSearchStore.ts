@@ -2,6 +2,8 @@ import { create } from 'zustand'
 
 const useSearchStore = create<SearchStore>((set) => ({
   searchKeyword: '',
+  resultQuery: '',
+  resultCaseSensitive: false,
   caseSensitive: false,
   activeIndex: 0,
   resultList: [],
@@ -44,9 +46,11 @@ export interface SearchInfo {
 }
 
 interface SearchStore {
-  searchKeyword: string,
-  caseSensitive: boolean,
-  activeIndex: number,
+  searchKeyword: string
+  resultQuery: string
+  resultCaseSensitive: boolean
+  caseSensitive: boolean
+  activeIndex: number
   setSearchState: (state: Partial<SearchStore>) => void
   resultList: SearchInfo[]
   addSearchResult: (result: SearchInfo[]) => void

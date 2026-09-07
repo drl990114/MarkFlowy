@@ -3,11 +3,12 @@ import type { FC } from 'react'
 import { useTranslation } from '@/i18n'
 
 export const FindInput: FC<{
+  setComposing?: (value: boolean) => void
   query: string
   setQuery: (query: string) => void
   total: number
   activeIndex?: number | null
-}> = ({ query, setQuery, total, activeIndex }) => {
+}> = ({ query, setQuery, total, activeIndex, setComposing }) => {
   const { t } = useTranslation()
   const counterLabel = t('find_replace.result_count', {
     current: total && activeIndex != null ? activeIndex + 1 : 0,
@@ -21,6 +22,8 @@ export const FindInput: FC<{
         className='h-6'
         placeholder={t('find_replace.find')}
         value={query}
+        onCompositionStart={() => setComposing?.(true)}
+        onCompositionEnd={() => setComposing?.(false)}
         onChange={(event) => setQuery(event.target.value)}
       />
       <InputGroup.Addon align='inline-end'>{counterLabel}</InputGroup.Addon>

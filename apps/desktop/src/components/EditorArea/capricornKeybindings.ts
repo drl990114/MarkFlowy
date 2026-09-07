@@ -34,7 +34,7 @@ export function createCapricornKeybindingConfiguration(
 ): CapricornKeybindingConfiguration {
   const configuration: CapricornKeybindingConfiguration = {
     inheritDefaults: true,
-    customizations: [],
+    customizations: [{ type: 'disable', targetRuleId: 'editor.find.open.default' }],
   }
   if (!loaded) return configuration
   const customizations: CapricornKeybindingConfiguration['customizations'][number][] =
@@ -43,6 +43,8 @@ export function createCapricornKeybindingConfiguration(
         ? { type: 'replace', targetRuleId, keys: toCapricornShortcut(keymap[name]) }
         : { type: 'disable', targetRuleId },
     )
+
+  customizations.push(...configuration.customizations)
 
   // Native clipboard shortcuts are reserved by Capricorn. Additional user
   // shortcuts invoke that same clipboard event path, including safe cut handling.

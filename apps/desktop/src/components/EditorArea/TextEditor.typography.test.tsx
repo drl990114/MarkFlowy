@@ -96,7 +96,9 @@ describe('TextEditor Capricorn typography settings', () => {
   it('subscribes to shortcut changes and includes them in the memoized runtime options', () => {
     const onOptions = vi.fn()
     const { rerender } = render(<Harness settings={{}} onOptions={onOptions} />)
-    expect(onOptions.mock.lastCall?.[0].keybindingConfiguration.customizations).toEqual([])
+    expect(onOptions.mock.lastCall?.[0].keybindingConfiguration.customizations).toEqual([
+      { type: 'disable', targetRuleId: 'editor.find.open.default' },
+    ])
     rerender(<Harness settings={{}} keymap={{ toggleStrong: 'mod-Alt-b' }} onOptions={onOptions} />)
     expect(onOptions.mock.lastCall?.[0].keybindingConfiguration.customizations).toContainEqual({
       type: 'replace',

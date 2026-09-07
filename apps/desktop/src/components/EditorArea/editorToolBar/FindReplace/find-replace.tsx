@@ -1,91 +1,53 @@
 import { commandRegistry } from '@/commands'
-import { useEditorStore } from '@/stores'
-import type { FC } from 'react'
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
-import styled from 'styled-components'
-import { getCapricornEditor, subscribeCapricornEditors } from '../../capricornEditorRegistry'
-import { CapricornFindReplaceComponent, FindReplaceComponent } from './find-replace-component'
+import { useEffect, useLayoutEffect, useRef } from 'react'
+import { useTranslation } from '@/i18n'
+import { openDocumentSearch, useEditorSearchStore } from '../../editorSearchStore'
+import { FindReplaceControls } from './find-replace-component'
+import { useEditorSearchController } from './use-editor-search'
 
-function useFindReplaceOpen() {
-  const [open, setOpen] = useState(false)
+export function FindReplace() {
+  const controller = useEditorSearchController()
   const ref = useRef<HTMLDivElement>(null)
-
+  const { t } = useTranslation()
   useEffect(() => {
-    const disposable = commandRegistry.registerCommand({
+    const open = commandRegistry.registerCommand({
       id: 'app_findReplaceEditor',
-      handler: () => {
-        setOpen((prev) => {
-          commandRegistry.execute('app_stopFindEditor')
-          return !prev
-        })
-      },
+      handler: openDocumentSearch,
     })
-
-    return () => disposable.dispose()
-  }, [])
-
-  const focus = useCallback(() => {
-    const input = ref.current?.querySelector('input')
-    if (input && document.activeElement !== input) {
-      input.focus()
-      return true
+    const close = commandRegistry.registerCommand({
+      id: 'app_stopFindEditor',
+      handler: controller.stopFind,
+    })
+    return () => {
+      open.dispose()
+      close.dispose()
     }
-    return false
-  }, [])
-
-  useEffect(() => {
-    if (open) {
-      focus()
+  }, [controller.stopFind])
+  useLayoutEffect(() => {
+    if (
+      controller.open &&
+      controller.available &&
+      useEditorSearchStore.getState().focusedRevision !== controller.focusRevision
+    ) {
+      const input = ref.current?.querySelector('input')
+      if (!input) return
+      // Moving the bar between panes must not steal focus from the clicked
+      // editor. Only consume an explicit open/refocus request, once ready.
+      input.focus({ preventScroll: true })
+      input.select()
+      useEditorSearchStore.setState({ focusedRevision: controller.focusRevision })
     }
-  }, [focus, open])
+  }, [controller.open, controller.available, controller.focusRevision])
 
-  const close = useCallback(() => {
-    setOpen(false)
-  }, [])
-
-  return { open, ref, close }
-}
-
-const FindReplaceWrapper = styled.div`
-  position: sticky;
-  left: 0;
-  right: 0;
-  top: 200;
-  background-color: ${({ theme }) => theme.bgColor};
-  backdrop-filter: blur(8px);
-  width: '100%';
-  padding: 8px;
-`
-
-export const FindReplace: FC = () => {
-  const { open, ref, close } = useFindReplaceOpen()
-  const activeId = useEditorStore((state) => state.activeId)
-  const editorCtx = useEditorStore((state) => state.editorCtxMap.get(activeId ?? ''))
-  const getCapricornSnapshot = useCallback(
-    () => (activeId ? getCapricornEditor(activeId) : undefined),
-    [activeId],
-  )
-  const capricornEditor = useSyncExternalStore(
-    subscribeCapricornEditors,
-    getCapricornSnapshot,
-    getCapricornSnapshot,
-  )
-
-  if (!open) return null
-
-  if (capricornEditor) {
-    return (
-      <FindReplaceWrapper ref={ref}>
-        <CapricornFindReplaceComponent editor={capricornEditor} onDismiss={close} />
-      </FindReplaceWrapper>
-    )
-  }
-
-  if (!editorCtx?.helpers.findRanges) return null
-
+  if (!controller.open && !controller.error) return null
   return (
-    <FindReplaceWrapper ref={ref}>
-      <FindReplaceComponent onDismiss={close} editorCtx={editorCtx} />
-    </FindReplaceWrapper>
+    <div ref={ref} data-slot='editor-find' className='shrink-0 bg-background p-2 text-foreground'>
+      {controller.open ? <FindReplaceControls controller={controller} /> : null}
+      {controller.error ? (
+        <div role='status' className='mt-1 text-xs text-muted-foreground'>
+          {t(`find_replace.navigation_${controller.error}`)}
+        </div>
+      ) : null}
+    </div>
   )
 }

@@ -72,6 +72,10 @@ vi.mock('./EditorGroupToolbar', () => ({
   default: () => <div data-toolbar='' />,
 }))
 
+vi.mock('./editorToolBar/FindReplace', () => ({
+  FindReplace: () => null,
+}))
+
 vi.mock('./EmptyState', () => ({
   EmptyState: () => <div data-empty-state='' />,
 }))
