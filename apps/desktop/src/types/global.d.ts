@@ -5,10 +5,4 @@ declare global {
   }
 }
 
-export enum PromiseStatus {
-  Pending = 'pending',
-  Resolved = 'resolved',
-  Rejected = 'rejected',
-}
-
 export {}

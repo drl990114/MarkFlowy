@@ -1,5 +1,4 @@
 import { DockSwitcher } from '../SideBar/DockSwitcher'
-import { TaskList } from '../TaskList/TaskList'
 import { WorkspaceActions } from '../WorkspaceActions'
 import { useGlobalOSInfo } from '@/hooks'
 import { useEditorStore } from '@/stores'
@@ -40,7 +39,6 @@ export default function StatusBar() {
         ) : null}
       </LeftContainer>
       <RightContainer>
-        <TaskList />
         {compact ? null : <EditorCount />}
         <ZenModeButton />
         <StatusBarSeparator />

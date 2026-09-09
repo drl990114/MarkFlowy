@@ -111,8 +111,6 @@
     "edit": "editar",
     "more": "más",
     "save": "guardar",
-    "translate": "traducir",
-    "summary": "resumen",
     "create_file": "Crear un archivo nuevo",
     "unsave": "Unguardar",
     "save_and_close": "Guardar y cerrar",
@@ -123,9 +121,6 @@
     "convert_simplified_to_traditional_tw": "Simplificado → Tradicional (Taiwán)",
     "convert_simplified_to_traditional_hk": "Simplificado → Tradicional (Hong Kong)",
     "convert_traditional_to_simplified": "Tradicional → Simplificado"
-  },
-  "placeholder": {
-    "translate": "Idioma destino"
   },
   "confirm": {
     "move": {
@@ -745,8 +740,6 @@
     }
   },
   "ai": {
-    "task_summarizing": "IA: generando resumen del artículo",
-    "task_translating": "IA: traduciendo artículo",
     "capabilities": "Función",
     "export_conversation": "Exportar conversación",
     "assistant": "Chat AI",

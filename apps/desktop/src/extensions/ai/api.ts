@@ -12,28 +12,6 @@ export async function aiGenerateTextRequest(params: AIGenerateTextParams) {
   return runtime.generateText(params)
 }
 
-export type GenerateAITextParams = Omit<
-  AIGenerateTextParams,
-  'sdkProvider' | 'url' | 'apiKey' | 'model' | 'headers'
-> & {
-  modelKey: AIModelKey
-  settings: Record<string, unknown>
-}
-
-/** Preferred model-key API for Ask, summary, translation and editor tools. */
-export async function generateAIText(params: GenerateAITextParams) {
-  const { modelKey, settings, ...request } = params
-  const config = resolveAIModelConfig(modelKey, settings)
-  return aiGenerateTextRequest({
-    ...request,
-    sdkProvider: config.providerId,
-    url: config.apiBase,
-    apiKey: config.apiKey,
-    model: config.modelId,
-    headers: config.headers,
-  })
-}
-
 const DEFAULT_REQUEST_HEADERS: Record<string, string> = {}
 
 function mergeHeaders(

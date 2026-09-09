@@ -1,20 +1,14 @@
 import { commandRegistry } from '@/commands'
 import { EditorViewType, type EditorViewTypeValue } from '@/constants/editorViewType'
-import {
-  getCurrentAIProviderDisplayName,
-  summarizeAIText,
-  translateAIText,
-} from '@/extensions/ai/aiTextActions'
 import useBookMarksStore from '@/extensions/bookmarks/useBookMarksStore'
 import bus from '@/helper/eventBus'
 import { getFileObject } from '@/helper/files'
 import { FileResultCode } from '@/helper/filesys'
 import { dialog } from '@/services/dialog'
-import { addNewMarkdownFileEdit, isEmptyEditor } from '@/services/editor-file'
+import { isEmptyEditor } from '@/services/editor-file'
 import { useEditorStateStore, useEditorStore } from '@/stores'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
-import useAppTasksStore from '@/stores/useTasksStore'
 import { invoke } from '@tauri-apps/api/core'
 import { debounce } from 'lodash'
 import {
@@ -48,7 +42,6 @@ export const EditorInfoBar = memo(() => {
   const getEditorContent = useEditorStore((state) => state.getEditorContent)
 
   const { editorViewTypeMap } = useEditorViewTypeStore()
-  const { addAppTask } = useAppTasksStore()
   const { t } = useTranslation()
   const ref = useRef<HTMLButtonElement>(null)
   const ref1 = useRef<HTMLButtonElement>(null)
@@ -86,50 +79,6 @@ export const EditorInfoBar = memo(() => {
     }
   }, [hasUnsavedChanges, getFileNormalInfo])
 
-  const fetchCurFileSummary = useCallback(async () => {
-    let content: string
-    try {
-      content = getEditorContent(curFile?.id || '')
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : String(error))
-      return
-    }
-    const res = await addAppTask<ReturnType<typeof summarizeAIText>>({
-      title: t('ai.task_summarizing'),
-      promise: summarizeAIText(content || ''),
-    })
-    addNewMarkdownFileEdit({
-      fileName: 'summary.md',
-      content: `
-# Summary
-
-${res}
-    `,
-    })
-  }, [addAppTask, curFile?.id, getEditorContent, t])
-
-  const fetchCurFileTranslate = useCallback(
-    async (targetLang: string) => {
-      let content: string
-      try {
-        content = getEditorContent(curFile?.id || '')
-      } catch (error) {
-        toast.error(error instanceof Error ? error.message : String(error))
-        return
-      }
-      const res = await addAppTask({
-        title: t('ai.task_translating'),
-        promise: translateAIText(content || '', targetLang),
-      })
-
-      addNewMarkdownFileEdit({
-        fileName: `translate-${targetLang}.md`,
-        content: `${res}`,
-      })
-    },
-    [addAppTask, curFile?.id, getEditorContent, t],
-  )
-
   const convertText = useCallback(
     async (variant: string) => {
       try {
@@ -159,8 +108,6 @@ ${res}
       .getState()
       .getFileTypeConfigById(curFile?.id || '')
 
-    const aiProvider = getCurrentAIProviderDisplayName()
-
     showContextMenu({
       x: rect.x,
       y: rect.y + rect.height,
@@ -176,33 +123,6 @@ ${res}
               commandRegistry.execute('open_bookmark_dialog', curFile)
             }
           },
-        },
-        {
-          label: `AI(${aiProvider})`,
-          value: 'AI',
-          children: [
-            {
-              label: t('action.summary'),
-              value: 'summary',
-              handler: fetchCurFileSummary,
-            },
-            {
-              label: t('action.translate'),
-              value: 'translate',
-              handler: async () => {
-                const val = await dialog.inputConfirm({
-                  title: t('action.translate'),
-                  inputProps: {
-                    placeholder: t('placeholder.translate'),
-                  },
-                })
-
-                if (val) {
-                  fetchCurFileTranslate(val)
-                }
-              },
-            },
-          ],
         },
         {
           type: 'divider' as const,
@@ -253,7 +173,7 @@ ${res}
         },
       ],
     })
-  }, [curFile, t, fetchCurFileSummary, fetchCurFileTranslate, convertText])
+  }, [curFile, t, convertText])
 
   const handleViewClick = useCallback(() => {
     const rect = ref.current?.getBoundingClientRect()
@@ -290,7 +210,7 @@ ${res}
         return curFileTypeConfig ? curFileTypeConfig?.supportedModes?.includes(item.value) : false
       }),
     })
-  }, [curFile, editorViewTypeMap, t, fetchCurFileSummary, fetchCurFileTranslate])
+  }, [curFile, editorViewTypeMap, t])
 
   const editorViewType = editorViewTypeMap.get(curFile?.id || '') || 'wysiwyg'
 

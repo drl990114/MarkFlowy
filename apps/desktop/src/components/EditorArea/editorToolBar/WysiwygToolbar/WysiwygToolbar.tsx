@@ -34,7 +34,6 @@ import {
   toOverflowMenuItems,
   type ToolbarAction,
 } from '../components'
-import { AIButton } from './components/AIButton'
 
 interface WysiwygToolbarProps {
   editorId?: string
@@ -278,7 +277,6 @@ export const WysiwygToolbar: FC<WysiwygToolbarProps> = (props) => {
     <ToolbarWrapper className='mf-editor-toolbar' ref={containerRef}>
       <ToolbarSection id='common' registerWidth={registerItemWidth} hidden={false}>
         <MenuList editorId={targetEditorId} prependItems={overflowMenuItems} showTypewriterScroll />
-        <AIButton editorId={targetEditorId} />
       </ToolbarSection>
 
       {TOOLBAR_GROUPS.map((group) => (

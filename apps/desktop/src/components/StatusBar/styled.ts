@@ -119,17 +119,6 @@ export const RightContainer = styled.div`
     height: 24px;
   }
 
-  @media (max-width: 399px) {
-    > [role='status'] {
-      min-width: 18px;
-      max-width: 18px;
-    }
-
-    > [role='status'] > span {
-      display: none;
-    }
-  }
-
   @media (max-width: 299px) {
     gap: 2px;
   }
@@ -137,11 +126,6 @@ export const RightContainer = styled.div`
   @media (max-width: 229px) {
     gap: 1px;
     height: 24px;
-
-    > [role='status'] {
-      min-width: 14px;
-      max-width: 14px;
-    }
   }
 `
 

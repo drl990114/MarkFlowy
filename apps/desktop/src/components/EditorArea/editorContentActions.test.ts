@@ -2,7 +2,6 @@ import { runInNewContext } from 'node:vm'
 import ts from 'typescript'
 import { describe, expect, it, vi } from 'vitest'
 import infoBarSource from './EditorInfoBar.tsx?raw'
-import aiButtonSource from './editorToolBar/WysiwygToolbar/components/AIButton.tsx?raw'
 import moreActionsSource from './editorToolBar/WysiwygToolbar/components/MoreActions.tsx?raw'
 import menuListSource from './editorToolBar/components/MenuList.tsx?raw'
 
@@ -37,28 +36,9 @@ function readAction(sourceText: string, name: string, bindings: Record<string, u
 }
 
 const actions = [
-  { label: 'info summary', source: infoBarSource, name: 'fetchCurFileSummary', kind: 'summary' },
-  {
-    label: 'info translation',
-    source: infoBarSource,
-    name: 'fetchCurFileTranslate',
-    kind: 'translation',
-  },
-  { label: 'info conversion', source: infoBarSource, name: 'convertText', kind: 'conversion' },
-  {
-    label: 'toolbar summary',
-    source: aiButtonSource,
-    name: 'fetchCurFileSummary',
-    kind: 'summary',
-  },
-  {
-    label: 'toolbar translation',
-    source: aiButtonSource,
-    name: 'fetchCurFileTranslate',
-    kind: 'translation',
-  },
-  { label: 'menu conversion', source: menuListSource, name: 'convertText', kind: 'conversion' },
-  { label: 'more conversion', source: moreActionsSource, name: 'convertText', kind: 'conversion' },
+  { label: 'info conversion', source: infoBarSource, name: 'convertText' },
+  { label: 'menu conversion', source: menuListSource, name: 'convertText' },
+  { label: 'more conversion', source: moreActionsSource, name: 'convertText' },
 ]
 
 function createActionHarness(source: string, name: string, failure: unknown) {
@@ -67,14 +47,9 @@ function createActionHarness(source: string, name: string, failure: unknown) {
   })
   const bindings = {
     getEditorContent,
-    t: vi.fn((key: string) => `translated:${key}`),
     curFile: { id: 'file' },
     targetEditorId: 'file',
     toast: { error: vi.fn() },
-    addAppTask: vi.fn(({ promise }: { promise: Promise<string> }) => promise),
-    addNewMarkdownFileEdit: vi.fn(),
-    summarizeAIText: vi.fn(async () => 'summary'),
-    translateAIText: vi.fn(async () => 'translation'),
     invoke: vi.fn(async () => ({ code: 'success', content: 'converted' })),
     bus: { emit: vi.fn() },
     FileResultCode: { Success: 'success' },
@@ -86,49 +61,23 @@ function createActionHarness(source: string, name: string, failure: unknown) {
 describe('editor actions require a readable current snapshot', () => {
   it.each(actions)(
     '$label stops before side effects and succeeds after composition commits',
-    async ({ source, name, kind }) => {
+    async ({ source, name }) => {
       const message = 'Finish composing before using this action.'
       const harness = createActionHarness(source, name, new Error(message))
       await expect(harness.action('zh-Hans')).resolves.toBeUndefined()
       expect(harness.getEditorContent).toHaveBeenCalledWith('file')
       expect(harness.toast.error).toHaveBeenCalledWith(message)
-      for (const effect of [
-        harness.addAppTask,
-        harness.addNewMarkdownFileEdit,
-        harness.summarizeAIText,
-        harness.translateAIText,
-        harness.invoke,
-        harness.bus.emit,
-      ]) {
-        expect(effect).not.toHaveBeenCalled()
-      }
+      expect(harness.invoke).not.toHaveBeenCalled()
+      expect(harness.bus.emit).not.toHaveBeenCalled()
 
       harness.getEditorContent.mockReturnValue('latest committed Markdown')
       await harness.action('zh-Hans')
       expect(harness.toast.error).toHaveBeenCalledOnce()
-      if (kind === 'summary') {
-        expect(harness.t).toHaveBeenCalledWith('ai.task_summarizing')
-        expect(harness.addAppTask).toHaveBeenCalledExactlyOnceWith({
-          title: 'translated:ai.task_summarizing',
-          promise: expect.any(Promise),
-        })
-        expect(harness.summarizeAIText).toHaveBeenCalledWith('latest committed Markdown')
-        expect(harness.addNewMarkdownFileEdit).toHaveBeenCalledOnce()
-      } else if (kind === 'translation') {
-        expect(harness.t).toHaveBeenCalledWith('ai.task_translating')
-        expect(harness.addAppTask).toHaveBeenCalledExactlyOnceWith({
-          title: 'translated:ai.task_translating',
-          promise: expect.any(Promise),
-        })
-        expect(harness.translateAIText).toHaveBeenCalledWith('latest committed Markdown', 'zh-Hans')
-        expect(harness.addNewMarkdownFileEdit).toHaveBeenCalledOnce()
-      } else {
-        expect(harness.invoke).toHaveBeenCalledWith('convert_text', {
-          text: 'latest committed Markdown',
-          variant: 'zh-Hans',
-        })
-        expect(harness.bus.emit).toHaveBeenCalledWith('editor_set_content', undefined, 'converted')
-      }
+      expect(harness.invoke).toHaveBeenCalledWith('convert_text', {
+        text: 'latest committed Markdown',
+        variant: 'zh-Hans',
+      })
+      expect(harness.bus.emit).toHaveBeenCalledWith('editor_set_content', undefined, 'converted')
     },
   )
 
@@ -138,7 +87,6 @@ describe('editor actions require a readable current snapshot', () => {
       const harness = createActionHarness(source, name, 'Snapshot unavailable')
       await expect(harness.action('zh-Hans')).resolves.toBeUndefined()
       expect(harness.toast.error).toHaveBeenCalledWith('Snapshot unavailable')
-      expect(harness.addAppTask).not.toHaveBeenCalled()
       expect(harness.invoke).not.toHaveBeenCalled()
       expect(harness.bus.emit).not.toHaveBeenCalled()
     },

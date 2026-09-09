@@ -112,8 +112,6 @@
     "more": "more",
     "save": "save",
     "unsave": "unsave",
-    "translate": "translate",
-    "summary": "summary",
     "create_file": "Create a new file",
     "save_and_close": "Save and close",
     "save_and_continue": "Save and continue",
@@ -123,9 +121,6 @@
     "convert_simplified_to_traditional_tw": "Simplified → Traditional (Taiwan)",
     "convert_simplified_to_traditional_hk": "Simplified → Traditional (Hong Kong)",
     "convert_traditional_to_simplified": "Traditional → Simplified"
-  },
-  "placeholder": {
-    "translate": "Please enter target language"
   },
   "confirm": {
     "move": {
@@ -772,8 +767,6 @@
     }
   },
   "ai": {
-    "task_summarizing": "AI: Retrieving article summary",
-    "task_translating": "AI: Translating article",
     "capabilities": "Function",
     "export_conversation": "Export conversation",
     "assistant": "Chat AI",

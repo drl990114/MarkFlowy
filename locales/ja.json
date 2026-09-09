@@ -112,8 +112,6 @@
     "more": "もっと",
     "save": "保存",
     "unsave": "未保存",
-    "translate": "翻訳",
-    "summary": "要約",
     "create_file": "新しいファイルを作成",
     "save_and_close": "保存して閉じる",
     "save_and_continue": "保存して続行",
@@ -123,9 +121,6 @@
     "convert_simplified_to_traditional_tw": "簡体字 → 繁体字（台湾）",
     "convert_simplified_to_traditional_hk": "簡体字 → 繁体字（香港）",
     "convert_traditional_to_simplified": "繁体字 → 簡体字"
-  },
-  "placeholder": {
-    "translate": "ターゲット言語を入力してください"
   },
   "confirm": {
     "move": {
@@ -745,8 +740,6 @@
     }
   },
   "ai": {
-    "task_summarizing": "AI：記事の要約を生成中",
-    "task_translating": "AI：記事を翻訳中",
     "capabilities": "機能",
     "export_conversation": "会話をエクスポート",
     "assistant": "Chat AI",

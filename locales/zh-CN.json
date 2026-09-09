@@ -115,8 +115,6 @@
     "save_and_continue": "保存并继续",
     "unsave_and_close": "直接关闭",
     "continue_without_save": "不保存并继续",
-    "translate": "翻译",
-    "summary": "摘要",
     "create_file": "新建文件",
     "unsave": "取消保存",
     "convert_text": "简繁转换",
@@ -129,9 +127,6 @@
       "label": "配置请求头",
       "desc": "添加自定义 HTTP 请求头，支持多个键值对配置。"
     }
-  },
-  "placeholder": {
-    "translate": "请输入目标语言"
   },
   "confirm": {
     "move": {
@@ -772,8 +767,6 @@
     }
   },
   "ai": {
-    "task_summarizing": "AI：正在生成文章摘要",
-    "task_translating": "AI：正在翻译文章",
     "capabilities": "功能",
     "export_conversation": "导出对话",
     "assistant": "Chat AI",

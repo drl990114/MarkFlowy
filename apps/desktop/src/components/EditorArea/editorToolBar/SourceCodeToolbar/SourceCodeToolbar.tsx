@@ -35,7 +35,6 @@ import {
   toOverflowMenuItems,
   type ToolbarAction,
 } from '../components'
-import { AIButton } from '../WysiwygToolbar/components/AIButton'
 import { sourceCodeCodemirrorViewMap } from '../../TextEditor'
 import { clipboardRead } from '@/helper/clipboard'
 import { requestImageInsert } from '../../requestImageInsert'
@@ -256,7 +255,6 @@ export const SourceCodeToolbar: FC<SourceCodeToolbarProps> = (props) => {
           editorId={targetEditorId}
           prependItems={overflowMenuItems}
         />
-        <AIButton editorId={targetEditorId} />
       </ToolbarSection>
 
       {TOOLBAR_GROUPS.map((group) => (

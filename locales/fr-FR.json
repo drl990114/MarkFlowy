@@ -111,8 +111,6 @@
     "edit": "editer",
     "more": "plus",
     "save": "enregistrer",
-    "translate": "Traduction",
-    "summary": "Résumé",
     "create_file": "Nouveau fichier",
     "unsave": "Unsave",
     "save_and_close": "Enregistrer et fermer",
@@ -678,9 +676,6 @@
     "install_failed": "Impossible d’installer la mise à jour : {{error}}",
     "check_failed": "Impossible de rechercher les mises à jour : {{error}}"
   },
-  "placeholder": {
-    "translate": "Veuillez saisir la langue cible"
-  },
   "explorer": {
     "collapse_folders": "Dossiers d'effondrement",
     "refresh_folder_data": "Actualiser les données du dossier",
@@ -745,8 +740,6 @@
     }
   },
   "ai": {
-    "task_summarizing": "IA : génération du résumé de l’article",
-    "task_translating": "IA : traduction de l’article",
     "capabilities": "Fonctions",
     "export_conversation": "Exporter la conversation",
     "assistant": "Chat AI",

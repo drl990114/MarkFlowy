@@ -17,12 +17,7 @@ function renderStatusBarStyles() {
         <ThemeProvider theme={desktopLightTheme}>
           <Container>
             <LeftContainer />
-            <RightContainer>
-              <div role='status'>
-                <svg aria-hidden='true' />
-                <span>Task</span>
-              </div>
-            </RightContainer>
+            <RightContainer />
             <StatusBarSeparator />
           </Container>
         </ThemeProvider>
@@ -66,17 +61,6 @@ describe('StatusBar responsive density', () => {
     expect(rawCss).toMatch(
       /\.[\w-]+ \[data-mf-status-bar-format='icon'\]\s*\{\s*width:\s*24px/,
     )
-
-    // 3 left Dock buttons + overflow + task icon + Zen + 2 right Dock buttons,
-    // including the declared gaps and horizontal padding at each density tier.
-    const mediumDensityWidth =
-      5 * 24 + 3 + 24 + 18 + 24 + 2 + 2 * 2 + 3 * 2 + 8 + 2
-    const narrowDensityWidth = 5 * 24 + 24 + 14 + 24 + 1 + 2 + 4 + 1
-
-    expect(mediumDensityWidth).toBe(211)
-    expect(mediumDensityWidth).toBeLessThanOrEqual(230)
-    expect(narrowDensityWidth).toBe(190)
-    expect(narrowDensityWidth).toBeLessThanOrEqual(200)
   })
 
   it('keeps Dock states subtle and reserves accent for the selected icon', () => {
@@ -90,11 +74,9 @@ describe('StatusBar responsive density', () => {
     )
   })
 
-  it('collapses task copy to its status icon and only hides separators at the narrowest tier', () => {
+  it('only hides separators at the narrowest tier', () => {
     const css = renderStatusBarStyles().replaceAll(/\s/g, '')
 
-    expect(css).toContain('@media(max-width:399px)')
-    expect(css).toContain(">[role='status']>span{display:none;}")
     expect(css).toContain('@media(max-width:229px)')
     expect(css).toMatch(/@media\(max-width:229px\)\{\.[\w-]+\{display:none;\}\}/)
   })

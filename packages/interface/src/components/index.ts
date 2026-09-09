@@ -16,8 +16,6 @@ export * from './SideBarHeader'
 
 export * from './Button'
 
-export * from './TaskList'
-
 export * from './FileTree'
 
 export * from './Toolbar'
