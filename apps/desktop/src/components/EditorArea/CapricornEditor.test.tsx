@@ -25,14 +25,14 @@ vi.mock('@/i18n', () => ({
   useTranslation: () => ({
     t: (key: string) =>
       (
-        {
+        ({
           'capricorn.editor.load_failed': 'Unable to load the Capricorn editor',
           'capricorn.editor.loading': 'Loading Capricorn editor',
           'capricorn.editor.opening': 'Opening document',
           'capricorn.editor.preparation_failed':
             'Background document preparation failed. Please retry.',
           'common.retry': 'Retry',
-        } as Record<string, string>
+        }) as Record<string, string>
       )[key] ?? key,
   }),
 }))
@@ -82,6 +82,7 @@ function createMountAdapter(markdown = '# Markdown') {
     destroy: vi.fn(),
     focus: vi.fn(),
     getMarkdown: vi.fn(() => markdown),
+    setMode: vi.fn(),
     updateSettings: vi.fn(),
   } as unknown as CapricornRuntimeAdapter
 }
@@ -194,6 +195,34 @@ describe('CapricornEditor background preparation', () => {
     onError: vi.fn(),
     onUnavailable: vi.fn(),
     options: {},
+  })
+
+  it('applies a preview switch during preparation before exposing the editor or focusing it', async () => {
+    const props = baseProps()
+    const adapter = createMountAdapter(largeMarkdown)
+    let complete!: (adapter: CapricornRuntimeAdapter) => void
+    vi.mocked(loadCapricornRuntimeAsyncFactory).mockResolvedValue(vi.fn())
+    vi.mocked(createCapricornRuntimeAdapterAsync).mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          complete = resolve
+        }),
+    )
+    const onEditorChange = vi.fn(() => {
+      expect(adapter.setMode).toHaveBeenCalledWith('preview')
+    })
+    const { rerender } = render(
+      <CapricornEditor {...props} onEditorChange={onEditorChange} options={{ mode: 'edit' }} />,
+    )
+    await waitFor(() => expect(createCapricornRuntimeAdapterAsync).toHaveBeenCalledOnce())
+    rerender(
+      <CapricornEditor {...props} onEditorChange={onEditorChange} options={{ mode: 'preview' }} />,
+    )
+    await act(async () => complete(adapter))
+    expect(onEditorChange).toHaveBeenCalledWith(adapter)
+    expect(adapter.focus).not.toHaveBeenCalled()
+    expect(adapter.destroy).not.toHaveBeenCalled()
+    expect(props.onChange).not.toHaveBeenCalled()
   })
 
   it('applies placeholder settings changed during preparation without remounting', async () => {

@@ -33,6 +33,7 @@ import {
 } from 'react'
 import { cn } from '@/lib/cn'
 import { Button } from '@/components/ui/button'
+import { useMedia } from 'react-use'
 import { ComposerAttachments, UserMessageAttachments } from './attachment'
 import { DotMatrix } from './dot-matrix'
 import { MarkdownText } from './markdown-text'
@@ -147,7 +148,7 @@ export const Thread: FC<ThreadProps> = ({
         )}
       >
         <ThreadPrimitive.Viewport
-          className='aui-thread-viewport relative flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto scroll-smooth'
+          className='aui-thread-viewport relative flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-contain'
           turnAnchor='top'
         >
           <div
@@ -193,8 +194,9 @@ function ThreadMessage() {
 
 export function ThreadScrollToBottom() {
   const { labels } = useContext(ThreadContext)
+  const reduceMotion = useMedia('(prefers-reduced-motion: reduce)', false)
   return (
-    <ThreadPrimitive.ScrollToBottom asChild>
+    <ThreadPrimitive.ScrollToBottom asChild behavior={reduceMotion ? 'instant' : 'smooth'}>
       <TooltipIconButton
         className='absolute -top-10 self-center rounded-full border border-border bg-background shadow-sm disabled:invisible'
         tooltip={labels.scrollToBottom}
@@ -344,15 +346,17 @@ export function AssistantMessage() {
 }
 
 const MESSAGE_ACTION_BUTTON_CLASS_NAME =
-  'size-[22px] rounded-md text-muted-foreground hover:text-foreground [&_svg]:size-3'
+  'size-[22px] rounded-sm text-muted-foreground hover:text-foreground active:scale-100 [&_svg]:size-3.5'
 
 function AssistantActionBar() {
   const { composerDisabled, labels } = useContext(ThreadContext)
+  const isLast = useAuiState((state) => state.message.isLast)
 
   return (
     <ActionBarPrimitive.Root
-      autohide='not-last'
-      className='flex items-center gap-px text-muted-foreground'
+      autohide='never'
+      className='aui-message-actions flex items-center gap-px text-muted-foreground'
+      data-last={isLast || undefined}
       hideWhenRunning
     >
       <ActionBarPrimitive.Copy asChild>
@@ -391,10 +395,12 @@ export function UserMessage() {
 
 function UserActionBar() {
   const { composerDisabled, labels } = useContext(ThreadContext)
+  const isLast = useAuiState((state) => state.message.isLast)
   return (
     <ActionBarPrimitive.Root
-      autohide='not-last'
-      className='flex items-center gap-px text-muted-foreground'
+      autohide='never'
+      className='aui-message-actions flex items-center gap-px text-muted-foreground'
+      data-last={isLast || undefined}
       hideWhenRunning
     >
       <ActionBarPrimitive.Copy asChild>

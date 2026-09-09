@@ -24,11 +24,12 @@ export const SettingLabel = (props: SettingLabelProps) => {
 
 const Container = styled.div`
   display: flex;
+  flex: 1;
   flex-direction: column;
   min-width: 0;
 
   .setting-item__title {
-    margin-bottom: 2px;
+    margin-bottom: 4px;
     font-size: var(--mf-ui-font-body);
     font-weight: 500;
     line-height: var(--mf-ui-line-height-body);

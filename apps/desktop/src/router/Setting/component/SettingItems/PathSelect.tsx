@@ -18,7 +18,7 @@ const PathSelectSettingItem: React.FC<SettingItemProps<Setting.PathSelectSetting
   return (
     <SettingItemContainer $settingKey={item.key}>
       <SettingLabel item={item} />
-      <div className='flex w-1/2 min-w-0 flex-col items-end gap-1 max-[720px]:w-full'>
+      <div className='setting-item__control flex min-w-0 flex-col items-end gap-1 max-[720px]:items-start'>
         <Button
           size='sm'
           variant='outline'
@@ -34,7 +34,7 @@ const PathSelectSettingItem: React.FC<SettingItemProps<Setting.PathSelectSetting
         >
           {t('settings.select_folder')}
         </Button>
-        <span className='max-w-full break-all text-right text-xs text-muted-foreground'>
+        <span className='max-w-full break-all text-right text-xs text-muted-foreground max-[720px]:text-left'>
           {curValue}
         </span>
       </div>

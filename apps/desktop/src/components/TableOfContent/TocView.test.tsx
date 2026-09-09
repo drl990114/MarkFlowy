@@ -104,42 +104,50 @@ afterEach(() => {
 })
 
 describe('Capricorn outline refresh ownership', () => {
-  it('updates the active heading on scroll and virtual mounts without rescanning the outline', async () => {
-    const pane = document.createElement('div')
-    pane.dataset.editorActive = 'true'
-    pane.dataset.editorId = 'file'
-    const content = document.createElement('div')
-    content.setAttribute('data-cap-content', '')
-    pane.append(content)
-    document.body.append(pane)
-    let activeHeading = 'first'
-    const headings = ['first', 'second'].map((id) => ({
-      id,
-      level: 1,
-      number: null,
-      text: id,
-      title: id,
-    }))
-    const getAll = vi.fn(() => headings)
-    const getActiveHeadingId = vi.fn(() => activeHeading)
-    setCapricornEditor('file', {
-      headings: { getAll, subscribe: () => () => {} },
-      getActiveHeadingId,
-    } as unknown as CapricornRuntimeAdapter)
-    const { getByTestId } = render(<TocView />)
-    await waitFor(() => expect(getByTestId('active-heading').textContent).toBe('first'))
-    activeHeading = 'second'
-    act(() => pane.dispatchEvent(new Event('scroll')))
-    await waitFor(() => expect(getByTestId('active-heading').textContent).toBe('second'))
-    activeHeading = 'first'
-    await act(async () => {
-      content.append(document.createElement('p'))
-      await Promise.resolve()
-    })
-    await waitFor(() => expect(getByTestId('active-heading').textContent).toBe('first'))
-    expect(getAll).toHaveBeenCalledOnce()
-    expect(getActiveHeadingId).toHaveBeenLastCalledWith(headings, pane)
-  })
+  it.each(['wysiwyg', 'preview'])(
+    'updates %s headings on scroll and virtual mounts without rescanning',
+    async (mode) => {
+      harness.viewState.editorViewTypeMap.set('file', mode)
+      const pane = document.createElement('div')
+      pane.dataset.editorActive = 'true'
+      pane.dataset.editorId = 'file'
+      const content = document.createElement('div')
+      content.setAttribute('data-cap-content', '')
+      pane.append(content)
+      document.body.append(pane)
+      let activeHeading = 'first'
+      const headings = ['first', 'second'].map((id) => ({
+        id,
+        level: 1,
+        number: null,
+        text: id,
+        title: id,
+      }))
+      const getAll = vi.fn(() => headings)
+      const getActiveHeadingId = vi.fn(() => activeHeading)
+      const jumpTo = vi.fn(async () => true)
+      setCapricornEditor('file', {
+        headings: { getAll, jumpTo, subscribe: () => () => {} },
+        getActiveHeadingId,
+      } as unknown as CapricornRuntimeAdapter)
+      const { getByTestId } = render(<TocView />)
+      await waitFor(() => expect(getByTestId('active-heading').textContent).toBe('first'))
+      activeHeading = 'second'
+      act(() => pane.dispatchEvent(new Event('scroll')))
+      await waitFor(() => expect(getByTestId('active-heading').textContent).toBe('second'))
+      activeHeading = 'first'
+      await act(async () => {
+        content.append(document.createElement('p'))
+        await Promise.resolve()
+      })
+      await waitFor(() => expect(getByTestId('active-heading').textContent).toBe('first'))
+      expect(getAll).toHaveBeenCalledOnce()
+      expect(getActiveHeadingId).toHaveBeenLastCalledWith(headings, pane)
+      await act(async () => harness.refresh.mock.lastCall?.[0].newHeadings[1].onClick())
+      expect(jumpTo).toHaveBeenCalledWith('second', { offset: 100 })
+      if (mode === 'preview') expect(harness.numberingMount).not.toHaveBeenCalled()
+    },
+  )
   it('ignores plain text snapshots and keeps subscribed heading changes and legacy snapshots', () => {
     vi.useFakeTimers()
     let notifyHeadings: ((headings: CapricornHeading[]) => void) | undefined

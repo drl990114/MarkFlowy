@@ -16,6 +16,7 @@ import {
   writeEditorTabDragData,
 } from './editorDragData'
 import { Dot, TabItem } from './styles'
+import { getEditorTabId } from './editorTabIds'
 
 const Container = styled.div<{ $compact: boolean }>`
   display: flex;
@@ -197,11 +198,9 @@ const EditorAreaTab = memo((props: EditorAreaTabProps) => {
 
   const tabLabel = getTabLabel(fileName, compact)
 
-  const handleMiddleClick = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
-    // 鼠标中键点击关闭标签页
-    if (e.button !== 1) return
-    e.stopPropagation()
-    e.preventDefault()
+  const requestClose = (e?: React.MouseEvent<HTMLElement, MouseEvent>) => {
+    e?.stopPropagation()
+    e?.preventDefault()
     if (
       checkUnsavedFiles({
         fileIds: [id],
@@ -220,6 +219,10 @@ const EditorAreaTab = memo((props: EditorAreaTabProps) => {
     close(e, id)
   }
 
+  const handleMiddleClick = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+    if (e.button === 1) requestClose(e)
+  }
+
   const handleContextMenu = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
     e.stopPropagation()
     e.preventDefault()
@@ -231,24 +234,7 @@ const EditorAreaTab = memo((props: EditorAreaTabProps) => {
           label: t('contextmenu.editor_tab.close'),
           value: 'close',
           commandId: EVENT.app_closeCurrentEditorTab,
-          handler: () => {
-            if (
-              checkUnsavedFiles({
-                fileIds: [id],
-                onSaveAndClose: async () => {
-                  if (await saveUnsavedFiles([id])) {
-                    close(e, id)
-                  }
-                },
-                onUnsavedAndClose: () => {
-                  close(e, id)
-                },
-              }) > 0
-            ) {
-              return
-            }
-            close(e, id)
-          },
+          handler: () => requestClose(),
         },
         {
           label: t('contextmenu.editor_tab.close_others'),
@@ -336,8 +322,10 @@ const EditorAreaTab = memo((props: EditorAreaTabProps) => {
                 : fileName
             }
             aria-selected={active}
+            aria-controls={`editor-panel-${groupId}`}
             className='tab-select'
             data-mf-editor-tab-id={id}
+            id={getEditorTabId(groupId, id)}
             onClick={() => onSelect(id)}
             role='tab'
             tabIndex={active ? 0 : -1}
@@ -357,20 +345,19 @@ const EditorAreaTab = memo((props: EditorAreaTabProps) => {
                 {t('contextmenu.editor_tab.unsaved', { defaultValue: 'Unsaved changes' })}
               </span>
             ) : null}
-
-            {hasUnsavedChanges ? <Dot /> : null}
           </button>
         </TooltipTrigger>
         <TooltipContent>{fileName}</TooltipContent>
       </Tooltip>
-      {hasUnsavedChanges ? null : (
+      <span className='mf-editor-tab-trailing'>
+        {hasUnsavedChanges ? <Dot aria-hidden='true' className='mf-editor-tab-dirty' /> : null}
         <EditorAreaActionButton
           className='mf-editor-tab-close'
           icon={XIcon}
           label={t('contextmenu.editor_tab.close')}
-          onClick={(ev: React.MouseEvent<HTMLElement, MouseEvent> | undefined) => close(ev, id)}
+          onClick={requestClose}
         />
-      )}
+      </span>
     </TabItem>
   )
 })

@@ -34,12 +34,14 @@ export const Container = styled.div`
 
   && .mf-file-tree-item:focus-visible > [data-mf-file-tree-node] {
     border-color: var(--mf-control-focus, ${(props) => props.theme.accentColor});
+    outline: 1px solid var(--mf-control-focus, ${(props) => props.theme.accentColor});
+    outline-offset: -2px;
   }
 
   && .mf-file-tree-item > [data-mf-file-tree-node][data-mf-file-tree-editing='true'],
   && .mf-file-tree-item[aria-selected='true'] > [data-mf-file-tree-node],
   && .mf-file-tree-item[aria-selected='true']:hover > [data-mf-file-tree-node] {
-    background-color: var(--mf-ui-control-hover-bg, ${(props) => props.theme.hoverColor});
+    background-color: var(--mf-control-selected, ${(props) => props.theme.fileTreeSelectedBgColor});
   }
 
   && .mf-file-tree-item > [data-mf-file-tree-node][data-mf-file-tree-drop-highlight='true'] {

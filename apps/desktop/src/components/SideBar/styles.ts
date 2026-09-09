@@ -23,16 +23,4 @@ export const DockPanelBody = styled.div`
   min-width: 0;
   min-height: 0;
   width: 100%;
-  opacity: 1;
-  animation: mf-dock-content-in 100ms var(--mf-motion-ease-out, ease-out);
-
-  @keyframes mf-dock-content-in {
-    from {
-      opacity: 0;
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    animation-duration: 1ms;
-  }
 `

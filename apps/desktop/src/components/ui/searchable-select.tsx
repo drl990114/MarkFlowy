@@ -102,7 +102,7 @@ export function SearchableSelect({
                 value={option.value}
               >
                 <CheckIcon
-                  className={cn('mr-2 size-3.5', value === option.value ? 'opacity-100' : 'opacity-0')}
+                  className={cn('size-3.5 shrink-0', value === option.value ? 'opacity-100' : 'opacity-0')}
                   aria-hidden='true'
                 />
                 <span className='truncate'>{option.label}</span>

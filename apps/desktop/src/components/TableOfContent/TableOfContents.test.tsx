@@ -31,6 +31,25 @@ afterEach(() => {
 })
 
 describe('TableOfContents virtualization', () => {
+  it.each([50, 51, 500])('preserves list semantics and current location for %i headings', (count) => {
+    vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockReturnValue(280)
+    const headings = Array.from({ length: count }, (_, index) => heading(1, index))
+    const view = render(<TableOfContents headingsData={headings} activeId='heading-1' compact={false} />)
+    const rows = Array.from(view.container.querySelectorAll('li'))
+    expect(rows.length).toBeGreaterThan(0)
+    expect(rows.length).toBeLessThanOrEqual(50)
+    rows.forEach((row) => {
+      expect(row.parentElement?.tagName).toBe('UL')
+      expect(row.getAttribute('aria-setsize')).toBe(String(count))
+      expect(Number(row.getAttribute('aria-posinset'))).toBeGreaterThan(0)
+    })
+    expect(view.container.querySelectorAll('[aria-current="location"]')).toHaveLength(1)
+    expect(view.container.querySelector('[aria-current="location"]')?.getAttribute('href')).toBe('#heading-1')
+    view.rerender(<TableOfContents headingsData={headings} activeId='heading-2' compact={false} />)
+    expect(view.container.querySelectorAll('[aria-current="location"]')).toHaveLength(1)
+    expect(view.container.querySelector('[aria-current="location"]')?.getAttribute('href')).toBe('#heading-2')
+  })
+
   it.each([
     ['source', TableOfContents],
     ['workspace artifact', BuiltTableOfContents],

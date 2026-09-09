@@ -191,10 +191,31 @@ export const TabItem = styled.div<TabItemProps>`
     opacity: 0;
   }
 
+  .mf-editor-tab-trailing {
+    position: relative;
+    display: inline-flex;
+    flex: 0 0 22px;
+    width: 22px;
+    height: 22px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mf-editor-tab-dirty {
+    position: absolute;
+    margin: 0;
+    pointer-events: none;
+    background: currentColor;
+  }
+
   &:hover,
   &:focus-within {
     .mf-editor-tab-close {
       opacity: 1;
+    }
+
+    .mf-editor-tab-dirty {
+      opacity: 0;
     }
   }
 `

@@ -1,7 +1,7 @@
 import { AsyncSurface } from '@/components/AsyncSurface'
 import { useTranslation } from '@/i18n'
 import { InlineInsertPopover } from './InlineInsertPopover'
-import type { Ref } from 'react'
+import type { KeyboardEvent, MouseEvent, Ref } from 'react'
 import {
   useCallback,
   useContext,
@@ -81,6 +81,7 @@ export function CapricornEditor({
   options,
   ref,
 }: CapricornEditorProps) {
+  const mode = options.mode ?? 'edit'
   const editorTheme = useContext(ThemeContext)
   const { t } = useTranslation()
   // The private runtime has its own React root, so bridge the host editor
@@ -225,10 +226,10 @@ export function CapricornEditor({
         'innerHeight' in viewport ? viewport.innerHeight : viewport.clientHeight
       return {
         ...optionsRef.current,
-        autoFocus: activeRef.current,
+        autoFocus: activeRef.current && optionsRef.current.mode !== 'preview',
         getScrollableContainer,
         markdown: latestMarkdownRef.current,
-        mode: 'edit',
+        mode: optionsRef.current.mode ?? 'edit',
         onError: (error) => onErrorRef.current(error),
         virtualize: optionsRef.current.virtualize
           ? {
@@ -258,6 +259,9 @@ export function CapricornEditor({
         return
       }
       if (current.asynchronous && current.options) {
+        // Preparation may finish after the host has switched edit/preview.
+        // Apply the latest mode before exposing or focusing this session.
+        const changedMode = current.options.mode !== (optionsRef.current.mode ?? 'edit')
         const changedSettings = (
           [
             'className',
@@ -271,13 +275,12 @@ export function CapricornEditor({
             'typewriter',
           ] as const
         ).some((key) => current.options?.[key] !== optionsRef.current[key])
-        if (changedSettings) {
-          try {
-            adapter.updateSettings(optionsRef.current)
-          } catch (error) {
-            adapter.destroy()
-            throw error
-          }
+        try {
+          if (changedMode) adapter.setMode(optionsRef.current.mode ?? 'edit')
+          if (changedSettings) adapter.updateSettings(optionsRef.current)
+        } catch (error) {
+          adapter.destroy()
+          throw error
         }
       }
       request = undefined
@@ -288,7 +291,7 @@ export function CapricornEditor({
         runtimeRequestSequence: current.runtimeRequestSequence,
       }
       container.dataset.mfCapricornRuntimeRequest = String(current.runtimeRequestSequence)
-      pendingAutoFocusRef.current = current.asynchronous
+      pendingAutoFocusRef.current = current.asynchronous && optionsRef.current.mode !== 'preview'
       setInlineSurface({ editor: adapter, element: container })
       onEditorChangeRef.current?.(adapter)
       setState('ready')
@@ -470,7 +473,7 @@ export function CapricornEditor({
       containerRef.current &&
       (adapter !== previous?.adapter || !previous?.visible || (active && !previous.active))
     ) {
-      if (active && pendingAutoFocusRef.current) {
+      if (active && mode === 'edit' && pendingAutoFocusRef.current) {
         pendingAutoFocusRef.current = false
         adapterRef.current?.focus()
       }
@@ -484,7 +487,24 @@ export function CapricornEditor({
         })
       }
     }
-  }, [active, visible, state])
+  }, [active, visible, state, mode])
+
+  useEffect(() => {
+    const adapter = adapterRef.current
+    if (!adapter) return
+    let canceled = false
+    // The runtime flushes its own React root. Leave the host commit before
+    // switching mode, retaining its document, selection and undo history.
+    queueMicrotask(() => {
+      if (canceled || adapterRef.current !== adapter) return
+      adapter.setMode(mode)
+      pendingAutoFocusRef.current = false
+      if (mode === 'edit' && activeRef.current && visibleRef.current) adapter.focus()
+    })
+    return () => {
+      canceled = true
+    }
+  }, [mode])
 
   useEffect(() => {
     if (!active || state !== 'error' || !loadErrorRef.current) return
@@ -533,18 +553,36 @@ export function CapricornEditor({
     setAttempt((current) => current + 1)
   }, [])
 
+  const handlePreviewLink = (event: MouseEvent<HTMLDivElement> | KeyboardEvent<HTMLDivElement>) => {
+    if (mode !== 'preview' || !options.handleLinkClick || event.defaultPrevented) return
+    if ('key' in event ? event.key !== 'Enter' : event.button !== 0) return
+    const link = event.target instanceof Element ? event.target.closest('a[href]') : null
+    const href = link?.getAttribute('href')
+    if (!href) return
+    // The runtime's button-based link UI is shared with edit mode. Reading
+    // previews retain the host's direct-click/Enter navigation, including
+    // local Markdown paths, without replacing the session's plugin options.
+    event.preventDefault()
+    event.stopPropagation()
+    void Promise.resolve()
+      .then(() => options.handleLinkClick?.(href))
+      .catch(onError)
+  }
+
   return (
     <div style={{ display: 'grid', minHeight: '100%', width: '100%' }}>
       <InlineInsertPopover
         editor={inlineSurface?.editor ?? null}
         anchorElement={inlineSurface?.element}
         editorId={editorId}
-        active={active && state === 'ready'}
+        active={active && state === 'ready' && mode === 'edit' && !options.readOnly}
       />
       <div
         data-mf-capricorn-runtime='true'
         id={editorId}
         ref={containerRef}
+        onClickCapture={handlePreviewLink}
+        onKeyDownCapture={handlePreviewLink}
         style={{
           gridColumn: 1,
           gridRow: 1,
@@ -559,9 +597,7 @@ export function CapricornEditor({
             state={{
               status: 'loading',
               label:
-                state === 'loading'
-                  ? t('capricorn.editor.loading')
-                  : t('capricorn.editor.opening'),
+                state === 'loading' ? t('capricorn.editor.loading') : t('capricorn.editor.opening'),
             }}
           >
             {() => null}

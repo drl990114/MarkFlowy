@@ -136,9 +136,22 @@
   letter-spacing: var(--mf-ui-tracking-control);
 }
 
-.aui-message,
 .aui-welcome {
   animation: aui-enter var(--mf-motion-duration-overlay) var(--mf-motion-ease-out) both;
+}
+
+/* Keep actions mounted so keyboard focus can reveal them as well as hover. */
+@media (hover: hover) and (pointer: fine) {
+  .aui-message-actions:not([data-last]) {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .aui-message:hover .aui-message-actions,
+  .aui-message:focus-within .aui-message-actions {
+    opacity: 1;
+    pointer-events: auto;
+  }
 }
 
 .aui-popover-content {
@@ -156,7 +169,7 @@
 
 .aui-popover-content[data-state='closed'] {
   transform-origin: var(--radix-popover-content-transform-origin, center);
-  animation: mf-surface-out var(--mf-motion-duration-fast) var(--mf-motion-ease-in) both;
+  animation: mf-surface-out var(--mf-motion-duration-fast) var(--mf-motion-ease-out) both;
 }
 
 .aui-tooltip-content[data-state='delayed-open'] {
@@ -201,7 +214,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .aui-message,
   .aui-welcome,
   .aui-popover-content[data-state='open'],
   .aui-tooltip-content[data-state='delayed-open'] {
@@ -209,7 +221,7 @@
   }
 
   .aui-popover-content[data-state='closed'] {
-    animation: mf-fade-out var(--mf-motion-duration-fast) var(--mf-motion-ease-in) both !important;
+    animation: mf-fade-out var(--mf-motion-duration-fast) var(--mf-motion-ease-out) both !important;
   }
 
   .aui-tooltip-content[data-state='instant-open'],

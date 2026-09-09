@@ -1,5 +1,5 @@
 import { desktopLightTheme } from '@markflowy/theme'
-import { act, cleanup, render, waitFor } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, waitFor } from '@testing-library/react'
 import { createRef, StrictMode } from 'react'
 import { ThemeProvider } from 'styled-components'
 import { afterEach, describe, expect, it, vi } from 'vitest'
@@ -11,20 +11,21 @@ import { EditorWrapper } from './EditorWrapper'
 import {
   CAPRICORN_DESKTOP_VIRTUALIZE_OPTIONS,
   loadCapricornRuntimeFactory,
+  type CapricornRuntimeAdapter,
 } from './capricornRuntimeAdapter'
 
 vi.mock('@/i18n', () => ({
   useTranslation: () => ({
     t: (key: string) =>
       (
-        {
+        ({
           'capricorn.editor.load_failed': 'Unable to load the Capricorn editor',
           'capricorn.editor.loading': 'Loading Capricorn editor',
           'capricorn.editor.opening': 'Opening document',
           'capricorn.editor.preparation_failed':
             'Background document preparation failed. Please retry.',
           'common.retry': 'Retry',
-        } as Record<string, string>
+        }) as Record<string, string>
       )[key] ?? key,
   }),
 }))
@@ -32,6 +33,97 @@ vi.mock('@/i18n', () => ({
 afterEach(cleanup)
 
 describe.skipIf(!isCapricornRuntimeAvailable)('CapricornEditor with the published runtime', () => {
+  it('switches edit and preview in place, keeping content and undo while blocking preview edits', async () => {
+    const ref = createRef<CapricornEditorHandle>()
+    const onChange = vi.fn()
+    const onError = vi.fn()
+    const onUnavailable = vi.fn()
+    const onEditorChange = vi.fn()
+    const props = {
+      ref,
+      active: true,
+      initialMarkdown: '# Heading\n\n- [ ] Task',
+      onChange,
+      onError,
+      onUnavailable,
+      onEditorChange,
+    }
+    const { container, rerender } = render(
+      <CapricornEditor {...props} options={{ mode: 'edit' }} />,
+    )
+    await waitFor(() => expect(onEditorChange).toHaveBeenCalled())
+    const adapter = onEditorChange.mock.calls[0][0] as CapricornRuntimeAdapter
+    const root = container.querySelector('[data-cap-content]')!
+    await act(async () => adapter.commands.setBlockType('heading-2'))
+    const edited = ref.current!.getMarkdown()
+    expect(edited).toContain('## Heading')
+    expect(adapter.getUiState().canUndo).toBe(true)
+    onChange.mockClear()
+
+    await act(async () => rerender(<CapricornEditor {...props} options={{ mode: 'preview' }} />))
+    await waitFor(() => expect(root.getAttribute('data-cap-mode')).toBe('preview'))
+    expect(adapter.getUiState().readOnly).toBe(true)
+    expect(container.querySelector<HTMLInputElement>('input[type="checkbox"]')?.disabled).toBe(true)
+    await act(async () => {
+      adapter.commands.setBlockType('heading-3')
+      fireEvent.click(container.querySelector('input[type="checkbox"]')!)
+    })
+    expect(ref.current!.getMarkdown()).toBe(edited)
+    expect(onChange).not.toHaveBeenCalledWith(expect.objectContaining({ documentChanged: true }))
+
+    await act(async () => rerender(<CapricornEditor {...props} options={{ mode: 'edit' }} />))
+    await waitFor(() => expect(root.getAttribute('data-cap-mode')).toBe('edit'))
+    expect(adapter.getUiState().readOnly).toBe(false)
+    expect(container.querySelector('[data-cap-content]')).toBe(root)
+    expect(onEditorChange.mock.calls.filter(([editor]) => editor !== null)).toHaveLength(1)
+    expect(ref.current!.getMarkdown()).toBe(edited)
+    await act(async () => adapter.commands.undo())
+    expect(ref.current!.getMarkdown()).toContain('# Heading')
+    expect(ref.current!.getMarkdown()).not.toContain('## Heading')
+    expect(onError).not.toHaveBeenCalled()
+    expect(onUnavailable).not.toHaveBeenCalled()
+  })
+
+  it('opens directly in preview without stealing focus and accepts external content', async () => {
+    const externalInput = document.createElement('input')
+    document.body.append(externalInput)
+    externalInput.focus()
+    const ref = createRef<CapricornEditorHandle>()
+    const onChange = vi.fn()
+    const onError = vi.fn()
+    const handleLinkClick = vi.fn()
+    const { container, unmount } = render(
+      <CapricornEditor
+        ref={ref}
+        active
+        initialMarkdown='# Preview\n\n[Link](https://example.com)'
+        onChange={onChange}
+        onError={onError}
+        onUnavailable={onError}
+        options={{ mode: 'preview', handleLinkClick }}
+      />,
+    )
+    await waitFor(() => expect(container.querySelector('[data-cap-mode="preview"]')).not.toBeNull())
+    expect(document.activeElement).toBe(externalInput)
+    await act(async () =>
+      fireEvent.click(container.querySelector('a[href="https://example.com"]')!),
+    )
+    expect(handleLinkClick).toHaveBeenCalledWith('https://example.com')
+    await act(async () =>
+      fireEvent.keyDown(container.querySelector('a[href="https://example.com"]')!, {
+        key: 'Enter',
+      }),
+    )
+    expect(handleLinkClick).toHaveBeenCalledTimes(2)
+    await act(async () => ref.current!.setMarkdown('# External update'))
+    expect(container.textContent).toContain('External update')
+    expect(ref.current!.getMarkdown()).toBe('# External update')
+    expect(onChange).not.toHaveBeenCalledWith(expect.objectContaining({ documentChanged: true }))
+    expect(onError).not.toHaveBeenCalled()
+    await act(async () => unmount())
+    externalInput.remove()
+  })
+
   it.each([false, true])(
     'applies placeholder settings to the installed package (strict=%s)',
     async (strict) => {

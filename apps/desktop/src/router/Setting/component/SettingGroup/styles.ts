@@ -8,13 +8,13 @@ export const SettingGroupContainer = styled.div.attrs<SettingGroupContainerProps
   id: props.$anchorId,
   tabIndex: props.$anchorId ? -1 : undefined,
 }))`
-  padding: 10px 16px 0;
-  margin: 0 0 16px;
+  padding: 12px 16px 0;
+  margin: 0 0 20px;
   min-width: 0;
   font-size: var(--mf-ui-font-body);
   line-height: var(--mf-ui-line-height-body);
   background-color: var(--mf-card);
-  border: 1px solid var(--mf-border);
+  border: 1px solid color-mix(in srgb, var(--mf-border) 80%, transparent);
   box-sizing: border-box;
   border-radius: var(--mf-radius);
   scroll-margin-top: 24px;

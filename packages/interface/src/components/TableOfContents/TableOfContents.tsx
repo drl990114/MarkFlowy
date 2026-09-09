@@ -287,7 +287,7 @@ const TableOfContents = forwardRef<TableOfContentsRef, TableOfContentsProps>((pr
       return null;
     }
 
-    const renderItem = (h: HeadingNode) => {
+    const renderItem = (h: HeadingNode, index: number, style?: React.CSSProperties) => {
       const isActive = isTableOfContentsHeadingActive({
         activeId,
         activeNodeKey: activeNodeState?.key,
@@ -303,8 +303,16 @@ const TableOfContents = forwardRef<TableOfContentsRef, TableOfContentsProps>((pr
       const barWidth = variant === 'editor' ? barWidthByLevel : baseBarWidth;
 
       return (
-        <TocListItem depth={h.depth} active={isActive} key={h.key}>
+        <TocListItem
+          depth={h.depth}
+          active={isActive}
+          key={h.key}
+          aria-posinset={index + 1}
+          aria-setsize={flattenedHeadings.length}
+          style={style}
+        >
           <TocLink
+            aria-current={isActive ? 'location' : undefined}
             href={`#${h.id}`}
             active={isActive}
             depth={h.depth}
@@ -345,33 +353,26 @@ const TableOfContents = forwardRef<TableOfContentsRef, TableOfContentsProps>((pr
           onWheel={handleScrollWheel}
           className={!compact || pinned ? 'show-scrollbar' : ''}
         >
-          <div style={navStyle}>
+          <ul style={navStyle}>
             {rowVirtualizer.getVirtualItems().map((virtualItem) => {
               const h = flattenedHeadings[virtualItem.index];
-              return (
-                <div
-                  key={virtualItem.key}
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: `${virtualItem.size}px`,
-                    transform: `translateY(${virtualItem.start}px)`,
-                  }}
-                >
-                  {renderItem(h)}
-                </div>
-              );
+              return renderItem(h, virtualItem.index, {
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: `${virtualItem.size}px`,
+                transform: `translateY(${virtualItem.start}px)`,
+              });
             })}
-          </div>
+          </ul>
         </nav>
       );
     }
 
     return (
       <nav ref={navRef} className={!compact || pinned ? 'show-scrollbar' : ''}>
-        <ul>{flattenedHeadings.map(renderItem)}</ul>
+        <ul>{flattenedHeadings.map((h, index) => renderItem(h, index))}</ul>
       </nav>
     );
   };

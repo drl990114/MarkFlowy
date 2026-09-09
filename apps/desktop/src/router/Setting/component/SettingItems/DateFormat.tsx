@@ -11,8 +11,9 @@ import { SettingItemContainer } from './Container'
 import { SettingLabel } from './Label'
 
 const PreviewWrap = styled.div`
-  margin-top: 8px;
-  font-size: ${(props) => props.theme.fontSm};
+  margin-top: 6px;
+  font-size: var(--mf-ui-font-caption);
+  line-height: var(--mf-ui-line-height-control);
   color: ${(props) => props.theme.labelFontColor};
 `
 
@@ -20,10 +21,6 @@ const PreviewValue = styled.code`
   margin-left: 6px;
   color: ${(props) => props.theme.primaryFontColor};
   word-break: break-all;
-`
-
-const ControlWrap = styled.div`
-  width: min(360px, 100%);
 `
 
 const DateFormatSettingItem: React.FC<SettingItemProps<Setting.DateFormatSettingItem>> = memo((
@@ -68,7 +65,7 @@ const DateFormatSettingItem: React.FC<SettingItemProps<Setting.DateFormatSetting
   return (
     <SettingItemContainer $settingKey={item.key}>
       <SettingLabel htmlFor={inputId} item={item} />
-      <ControlWrap>
+      <div className='setting-item__control'>
         <Input
           id={inputId}
           value={inputValue}
@@ -80,7 +77,7 @@ const DateFormatSettingItem: React.FC<SettingItemProps<Setting.DateFormatSetting
           {t('settings.editor.behavior.insert_date_format.preview')}
           <PreviewValue>{preview}</PreviewValue>
         </PreviewWrap>
-      </ControlWrap>
+      </div>
     </SettingItemContainer>
   )
 })

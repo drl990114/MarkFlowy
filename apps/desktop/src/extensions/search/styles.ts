@@ -265,6 +265,7 @@ export const SearchInfoBox = styled.div`
       font-size: 11px;
       font-weight: 600;
       text-align: center;
+      font-variant-numeric: tabular-nums;
     }
   }
 
@@ -315,6 +316,7 @@ export const SearchInfoBox = styled.div`
       min-width: 40px;
       text-align: right;
       font-family: monospace;
+      font-variant-numeric: tabular-nums;
       font-size: var(--mf-ui-font-caption);
       line-height: var(--mf-ui-line-height-caption);
       opacity: 0.8;

@@ -77,7 +77,7 @@ export const EditorCount = () => {
         <StatusBarButton
           aria-label={`${displayParts.join(' ')}, ${t('statusBar.displaySettings')}`}
         >
-          <span>{displayParts.join(' ')}</span>
+          <span className='tabular-nums'>{displayParts.join(' ')}</span>
         </StatusBarButton>
       </Popover.Trigger>
       <Popover.Content side='top' align='end'>

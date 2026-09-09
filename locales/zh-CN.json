@@ -18,6 +18,7 @@
     "result_count": "第 {{current}} 个，共 {{total}} 个"
   },
   "startup": {
+    "opening_workspace": "正在打开工作区…",
     "workspace_open_failed": "无法打开工作区"
   },
   "common": {

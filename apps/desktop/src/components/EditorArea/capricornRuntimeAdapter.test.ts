@@ -138,6 +138,7 @@ function createRuntimeHarness(initialMarkdown = '# Initial', supportsDocumentCha
       listener?.({ markdown, mode: 'edit', type: 'change' })
       documentListener?.({ revision: ++revision })
     }),
+    setMode: vi.fn((mode) => listener?.({ markdown, mode, type: 'mode' })),
     subscribe: vi.fn((nextListener) => {
       listener = nextListener
       return () => {

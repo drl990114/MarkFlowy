@@ -285,6 +285,7 @@ export interface CapricornRuntimeSession {
   isComposing?: () => boolean
   getUiState: () => CapricornUiState
   setMarkdown: (markdown: string) => void
+  setMode: (mode: 'edit' | 'preview') => void
   subscribe: (listener: (event: CapricornRuntimeChangeEvent) => void) => () => void
   subscribeDocumentChange?: (
     listener: (event: { composing?: boolean; pending?: boolean; revision: number }) => void,
@@ -370,6 +371,7 @@ export interface CapricornRuntimeAdapter {
   getUiState: () => CapricornUiState
   requestImageInsert: () => Promise<boolean>
   setMarkdown: (markdown: string) => void
+  setMode: (mode: 'edit' | 'preview') => void
   subscribeUiState: (listener: (state: CapricornUiState) => void) => () => void
   updateSettings: (settings: Partial<CapricornEditorSettings>) => void
   waitForResources: () => Promise<void>
@@ -564,6 +566,9 @@ export function createCapricornRuntimeAdapter({
         applyingHostMarkdown = false
         invalidateInlineEdit()
       }
+    },
+    setMode(mode) {
+      if (!destroyed) session.setMode(mode)
     },
     updateSettings(settings) {
       if (!destroyed) updateSettings(settings)

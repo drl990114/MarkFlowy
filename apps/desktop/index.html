@@ -223,9 +223,19 @@
         opacity: 0;
       }
 
+      .mf-startup-indicator {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        width: min(160px, 42vw);
+        height: 2px;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+      }
+
       .mf-boot-progress {
         position: relative;
-        width: min(160px, 42vw);
+        width: 100%;
         height: 2px;
         overflow: hidden;
         border-radius: 999px;
@@ -242,9 +252,24 @@
         border-radius: inherit;
         background: var(--mf-boot-accent);
         content: '';
-        transform: translate3d(-120%, 0, 0);
+        transform: translate3d(-100%, 0, 0);
         will-change: transform;
         animation: mf-boot-progress 1.15s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+      }
+
+      .mf-startup-label {
+        position: absolute;
+        top: 14px;
+        left: 50%;
+        width: min(280px, 80vw);
+        color: var(--mf-boot-muted-foreground);
+        font-family: var(--mf-ui-font-family, system-ui, sans-serif);
+        font-size: var(--mf-ui-font-control, 12px);
+        line-height: 1.5;
+        text-align: center;
+        transform: translateX(-50%);
+        opacity: 0;
+        animation: mf-boot-reveal 120ms linear 800ms both;
       }
 
       html.mf-pdf-print-window #mf-boot-overlay {
@@ -253,10 +278,10 @@
 
       @keyframes mf-boot-progress {
         from {
-          transform: translate3d(-120%, 0, 0);
+          transform: translate3d(-100%, 0, 0);
         }
         to {
-          transform: translate3d(340%, 0, 0);
+          transform: translate3d(240%, 0, 0);
         }
       }
 
@@ -289,7 +314,9 @@
       aria-live="polite"
       aria-label="MarkFlowy is starting"
     >
-      <div class="mf-boot-progress" aria-hidden="true"></div>
+      <div class="mf-startup-indicator" aria-hidden="true">
+        <div class="mf-boot-progress"></div>
+      </div>
     </div>
     <script>
       console.log('%cMarkFlowy Developer Console', 'color:#016ab3; font-size:40px; font-weight:bold;')

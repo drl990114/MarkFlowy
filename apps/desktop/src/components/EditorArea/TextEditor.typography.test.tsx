@@ -9,6 +9,7 @@ import {
   createCapricornKeybindingConfiguration,
 } from './capricornKeybindings'
 import textEditorSource from './TextEditor.tsx?raw'
+import { EditorViewType } from '@/constants/editorViewType'
 
 // Exercise the host's real settings selectors, options and memo dependencies
 // without mounting file watchers or native services.
@@ -58,6 +59,8 @@ const compiled = ts.transpileModule(
 const Harness = runInNewContext(compiled, {
   useMemo,
   curFile: { id: 'note' },
+  currentViewType: EditorViewType.WYSIWYG,
+  EditorViewType,
   editorColorScheme: 'light',
   editorTypewriterScroll: false,
   externalChangeResolving: false,

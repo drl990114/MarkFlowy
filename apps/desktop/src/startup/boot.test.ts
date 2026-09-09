@@ -5,7 +5,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 const renderBootOverlay = () => {
   document.body.innerHTML = `
     <div id="mf-boot-overlay" role="status" aria-live="polite">
-      <div class="mf-boot-progress"></div>
+      <div class="mf-startup-indicator">
+        <div class="mf-boot-progress"></div>
+        <span class="mf-startup-label">Starting MarkFlowy…</span>
+      </div>
     </div>
   `
 }
@@ -42,6 +45,40 @@ afterEach(() => {
 })
 
 describe('boot overlay lifecycle', () => {
+  it('carries animation progress and the label delay into the React indicator independently', async () => {
+    const { syncStartupProgress } = await import('./boot')
+    const bootIndicator = document.querySelector<HTMLElement>('.mf-startup-indicator')!
+    const reactIndicator = bootIndicator.cloneNode(true) as HTMLElement
+    document.body.append(reactIndicator)
+    const animation = (animationName: string, target: Element, currentTime: number) =>
+      ({ animationName, effect: { target }, currentTime }) as unknown as CSSAnimation
+    const sourceAnimations = [
+      animation('mf-boot-reveal', bootIndicator.children[0], 121),
+      animation('mf-boot-progress', bootIndicator.children[0], 670),
+      animation('mf-boot-reveal', bootIndicator.children[1], 670),
+    ]
+    const targetAnimations = [
+      animation('mf-boot-reveal', reactIndicator.children[1], 0),
+      animation('mf-boot-progress', reactIndicator.children[0], 0),
+      animation('mf-boot-reveal', reactIndicator.children[0], 0),
+    ]
+    Object.defineProperty(bootIndicator, 'getAnimations', { value: () => sourceAnimations })
+    Object.defineProperty(reactIndicator, 'getAnimations', { value: () => targetAnimations })
+
+    syncStartupProgress(reactIndicator)
+
+    expect(targetAnimations.map((target) => target.currentTime)).toEqual([670, 670, 121])
+    expect(sourceAnimations.map((source) => source.currentTime)).toEqual([121, 670, 670])
+  })
+
+  it('allows standalone loading and webviews without animation inspection', async () => {
+    const { syncStartupProgress } = await import('./boot')
+    const indicator = document.createElement('div')
+    expect(() => syncStartupProgress(indicator)).not.toThrow()
+    document.getElementById('mf-boot-overlay')!.remove()
+    expect(() => syncStartupProgress(indicator)).not.toThrow()
+  })
+
   it('waits for two animation frames before starting the compositor-only fade', async () => {
     const frames = installFrameQueue()
     const performanceMarkSpy = vi.spyOn(window.performance, 'mark')

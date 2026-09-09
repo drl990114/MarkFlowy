@@ -1,4 +1,5 @@
 import { runInNewContext } from 'node:vm'
+import { isCapricornView } from '@/constants/editorViewType'
 import ts from 'typescript'
 import { describe, expect, it, vi } from 'vitest'
 import textEditorSource from './TextEditor.tsx?raw'
@@ -64,9 +65,13 @@ describe('TextEditor image export ownership', () => {
       expect(element.querySelector('input')!.disabled).toBe(true)
     },
   )
-  it.each(['success', 'resources', 'render', 'write'])(
-    'uses the read snapshot and disposes the complete surface after %s',
-    async (outcome) => {
+  it.each(
+    ['wysiwyg', 'preview'].flatMap((mode) =>
+      ['success', 'resources', 'render', 'write'].map((outcome) => ({ mode, outcome })),
+    ),
+  )(
+    'exports the full $mode snapshot and disposes the surface after $outcome',
+    async ({ mode, outcome }) => {
       const dispose = vi.fn()
       const restore = vi.fn()
       const element = document.createElement('div')
@@ -82,7 +87,8 @@ describe('TextEditor image export ownership', () => {
         active: true,
         id: 'file',
         EditorViewType: { WYSIWYG: 'wysiwyg' },
-        currentViewType: 'wysiwyg',
+        currentViewType: mode,
+        isCapricornView,
         getFileObject: () => ({ name: 'note.md', path: '/notes/note.md' }),
         useEditorStore: { getState: () => ({ getEditorContent: () => markdown }) },
         capricornEditorRef: { current: { createExportSurface } },

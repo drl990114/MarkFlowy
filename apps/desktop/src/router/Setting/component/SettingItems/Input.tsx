@@ -47,7 +47,7 @@ const InputSettingItem: React.FC<SettingItemProps<Setting.InputSettingItem>> = m
     <SettingItemContainer $settingKey={item.key}>
       <SettingLabel htmlFor={inputId} item={item} />
       {item.prefix || item.suffix ? (
-        <InputGroup style={{ maxWidth: '260px' }}>
+        <InputGroup className='setting-item__control'>
           {item.prefix && (
             <InputGroupAddon align='inline-start'>{item.prefix}</InputGroupAddon>
           )}
@@ -64,7 +64,7 @@ const InputSettingItem: React.FC<SettingItemProps<Setting.InputSettingItem>> = m
       ) : (
         <Input
           id={inputId}
-          style={{ maxWidth: '260px' }}
+          className='setting-item__control'
           value={inputValue}
           onBlur={() => writeSettingData.flush()}
           onChange={handleChange}

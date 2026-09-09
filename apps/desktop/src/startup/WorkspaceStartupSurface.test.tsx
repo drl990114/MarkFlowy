@@ -5,7 +5,7 @@ import { WorkspaceStartupSurface } from './WorkspaceStartupSurface'
 vi.mock('@/i18n', () => ({
   t: (key: string) =>
     ({
-      'common.fetching': 'Loading',
+      'startup.opening_workspace': 'Opening workspace…',
       'common.retry': 'Retry',
       'file.openDir': 'Open Folder',
     })[key] ?? key,
@@ -22,6 +22,7 @@ describe('WorkspaceStartupSurface', () => {
     )
 
     expect(screen.getByRole('status')).toBeTruthy()
+    expect(screen.getByRole('status').textContent).toContain('Opening workspace…')
     expect(document.querySelector('.mf-boot-progress')).toBeTruthy()
     expect(document.querySelector('.animate-spin')).toBeNull()
     expect(screen.queryByText('Workspace welcome')).toBeNull()

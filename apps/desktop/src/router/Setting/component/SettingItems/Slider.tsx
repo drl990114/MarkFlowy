@@ -62,7 +62,7 @@ const SingleSliderControl = ({
   const displayValue = String(Number(value.toFixed(4)))
 
   return (
-    <div className='flex w-[180px] items-center gap-2'>
+    <div className='setting-item__control flex items-center gap-3'>
       <Slider
         aria-label={accessibleName}
         aria-valuetext={displayValue}
@@ -108,7 +108,7 @@ const RangeSliderControl = ({
   ]
 
   return (
-    <div className='flex w-[200px] items-center gap-2'>
+    <div className='setting-item__control flex items-center gap-3'>
       <RangeSlider
         aria-label={accessibleName}
         ariaValueText={displayValue.map(String) as [string, string]}

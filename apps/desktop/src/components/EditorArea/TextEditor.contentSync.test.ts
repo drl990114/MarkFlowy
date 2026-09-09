@@ -1,7 +1,7 @@
 import { runInNewContext } from 'node:vm'
 import ts from 'typescript'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { EditorViewType } from '@/constants/editorViewType'
+import { EditorViewType, isCapricornView } from '@/constants/editorViewType'
 import useFileCacheStore, { getFileObject, updateFileObject } from '@/helper/files'
 import { FileSaveCoordinator } from './fileSaveCoordinator'
 import { EditorSnapshotRegistry } from './editorSnapshotRegistry'
@@ -54,10 +54,12 @@ function createHarness({
   active = false,
   visible = active,
   wysiwyg = true,
+  preview = false,
 }: {
   active?: boolean
   visible?: boolean
   wysiwyg?: boolean
+  preview?: boolean
 } = {}) {
   const state = {
     dirty: true,
@@ -105,8 +107,13 @@ function createHarness({
     activeRef: { current: active },
     visible,
     visibleRef: { current: visible },
-    currentViewType: wysiwyg ? EditorViewType.WYSIWYG : EditorViewType.SOURCECODE,
+    currentViewType: preview
+      ? EditorViewType.PREVIEW
+      : wysiwyg
+        ? EditorViewType.WYSIWYG
+        : EditorViewType.SOURCECODE,
     EditorViewType,
+    isCapricornView,
     id: 'file',
     instanceIdRef: { current: 'source' },
     editorSnapshotRegistry: registry,
@@ -232,31 +239,34 @@ describe('TextEditor hidden content synchronization', () => {
     }
   })
 
-  it('coalesces hidden sibling updates into one replacement before revealing', async () => {
-    vi.useFakeTimers()
-    const harness = createHarness()
-    for (let index = 1; index <= 20; index += 1) harness.sync(`remote ${index}`)
-    vi.runAllTimers()
-    expect(harness.setMarkdown).not.toHaveBeenCalled()
-    expect(harness.state.content).toBe('remote 20')
-    expect(harness.latestContentRef.current).toBe('remote 20')
-    expect(harness.isApplyingRemoteContentRef.current).toBe(true)
+  it.each([false, true])(
+    'coalesces hidden sibling updates before revealing (preview=%s)',
+    async (preview) => {
+      vi.useFakeTimers()
+      const harness = createHarness({ preview })
+      for (let index = 1; index <= 20; index += 1) harness.sync(`remote ${index}`)
+      vi.runAllTimers()
+      expect(harness.setMarkdown).not.toHaveBeenCalled()
+      expect(harness.state.content).toBe('remote 20')
+      expect(harness.latestContentRef.current).toBe('remote 20')
+      expect(harness.isApplyingRemoteContentRef.current).toBe(true)
 
-    // An old commit/blur callback must not publish the hidden runtime's A.
-    harness.lateCommit()
-    expect(harness.getMarkdown).not.toHaveBeenCalled()
-    expect(harness.state.file.content).toBe('remote 20')
+      // An old commit/blur callback must not publish the hidden runtime's A.
+      harness.lateCommit()
+      expect(harness.getMarkdown).not.toHaveBeenCalled()
+      expect(harness.state.file.content).toBe('remote 20')
 
-    harness.reveal()
-    expect(harness.setMarkdown).not.toHaveBeenCalled()
-    await Promise.resolve()
-    expect(harness.setMarkdown).toHaveBeenCalledExactlyOnceWith('remote 20', 21)
-    expect(harness.needsMountedContentSyncRef.current).toBe(false)
-    vi.runAllTimers()
-    expect(harness.isApplyingRemoteContentRef.current).toBe(false)
-    harness.reveal()
-    expect(harness.setMarkdown).toHaveBeenCalledOnce()
-  })
+      harness.reveal()
+      expect(harness.setMarkdown).not.toHaveBeenCalled()
+      await Promise.resolve()
+      expect(harness.setMarkdown).toHaveBeenCalledExactlyOnceWith('remote 20', 21)
+      expect(harness.needsMountedContentSyncRef.current).toBe(false)
+      vi.runAllTimers()
+      expect(harness.isApplyingRemoteContentRef.current).toBe(false)
+      harness.reveal()
+      expect(harness.setMarkdown).toHaveBeenCalledOnce()
+    },
+  )
 
   it('keeps visible split panes and RME instances synchronized immediately', () => {
     vi.useFakeTimers()

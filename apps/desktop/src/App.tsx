@@ -145,7 +145,7 @@ function StartupFailureSurface({ error, retry }: { error: unknown; retry: () => 
 function StartupLoadingSurface() {
   return (
     <div className='flex h-screen w-screen'>
-      <StartupProgress label='MarkFlowy is starting' />
+      <StartupProgress label='Starting MarkFlowy…' />
     </div>
   )
 }

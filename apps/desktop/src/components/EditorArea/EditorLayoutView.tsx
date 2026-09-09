@@ -5,6 +5,7 @@ import { Group, Panel, Separator } from 'react-resizable-panels'
 import styled, { css } from 'styled-components'
 import Editor from './Editor'
 import EditorAreaTabs from './EditorAreaTabs'
+import { getEditorTabId } from './editorTabIds'
 import EditorGroupToolbar from './EditorGroupToolbar'
 import { ExternalFileChangeAlert } from './ExternalFileChangeAlert'
 import { EmptyState } from './EmptyState'
@@ -214,7 +215,11 @@ const EditorGroupPane = memo((props: EditorGroupPaneProps) => {
       />
       {isActiveGroup ? <FindReplace /> : null}
       <EditorGroupToolbar editorId={activeFileId} />
-      <EditorPanel id={`editor-panel-${groupId}`}>
+      <EditorPanel
+        aria-labelledby={activeFileId ? getEditorTabId(groupId, activeFileId) : undefined}
+        id={`editor-panel-${groupId}`}
+        role={activeFileId ? 'tabpanel' : undefined}
+      >
         {group.opened.length === 0 ? (
           <GroupEmptyState>
             <EmptyState />

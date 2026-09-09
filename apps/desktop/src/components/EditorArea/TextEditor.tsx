@@ -4,7 +4,11 @@ import { commandRegistry } from '@/commands'
 import { capricornClipboard, handleCapricornClipboardResult } from './capricornClipboard'
 import { AppEditorThemeProvider } from '@/AppThemeProvider'
 import { EVENT } from '@/constants'
-import { EditorViewType, type EditorViewTypeValue } from '@/constants/editorViewType'
+import {
+  EditorViewType,
+  isCapricornView,
+  type EditorViewTypeValue,
+} from '@/constants/editorViewType'
 import { capricornRuntimeEntrySha256, capricornRuntimeVersion } from '@/constants/capricornRuntime'
 import { clipboardRead } from '@/helper/clipboard'
 import { countNonWhitespaceCharacters } from '@/helper/editorCounter'
@@ -1099,7 +1103,7 @@ function TextEditor(props: TextEditorProps) {
           if (
             !activeRef.current ||
             !visibleRef.current ||
-            currentViewTypeRef.current !== EditorViewType.WYSIWYG
+            !isCapricornView(currentViewTypeRef.current)
           )
             return
           useEditorCounterStore.getState().addEditorCounter({ id, data: statistics })
@@ -1135,7 +1139,7 @@ function TextEditor(props: TextEditorProps) {
   )
 
   useEffect(() => {
-    if (active && currentViewType !== EditorViewType.WYSIWYG) {
+    if (active && !isCapricornView(currentViewType)) {
       if (editorContextRef.current) scheduleEditorCounter(editorContextRef.current)
       return
     }
@@ -1286,7 +1290,7 @@ function TextEditor(props: TextEditorProps) {
       // Capricorn treats content as a remount seed. Keep the shared host value
       // current without parsing every sibling edit into an invisible runtime.
       // Suppress late callbacks from its old document until it catches up.
-      if (currentViewType === EditorViewType.WYSIWYG && !activeRef.current && !visibleRef.current) {
+      if (isCapricornView(currentViewType) && !activeRef.current && !visibleRef.current) {
         needsMountedContentSyncRef.current = true
         return
       }
@@ -1864,9 +1868,9 @@ function TextEditor(props: TextEditorProps) {
                 unregisterSourceCodeViewResource(curFile.id, instanceIdRef.current!)
               }
 
-              const switchingFromWysiwyg = currentViewType === EditorViewType.WYSIWYG
+              const switchingFromCapricorn = isCapricornView(currentViewType)
 
-              if (payload === EditorViewType.WYSIWYG) {
+              if (isCapricornView(payload)) {
                 unregisterRmeEditorResources(curFile.id, instanceIdRef.current!)
                 editorContextRef.current = null
                 setDelegate(null)
@@ -1902,7 +1906,7 @@ function TextEditor(props: TextEditorProps) {
               }
               useEditorViewTypeStore.getState().setEditorViewType(curFile.id, payload)
               setCurrentViewType(payload)
-              if (!switchingFromWysiwyg && payload !== EditorViewType.WYSIWYG) {
+              if (!switchingFromCapricorn && !isCapricornView(payload)) {
                 editorRef.current?.toggleType(payload)
               }
             },
@@ -1935,8 +1939,7 @@ function TextEditor(props: TextEditorProps) {
 
       try {
         const markdown = useEditorStore.getState().getEditorContent(id)
-        const capricornEditor =
-          currentViewType === EditorViewType.WYSIWYG ? capricornEditorRef.current : null
+        const capricornEditor = isCapricornView(currentViewType) ? capricornEditorRef.current : null
         const path = await save({
           title: t('contextmenu.editor_tab.export_image'),
           defaultPath: file.name.split('.')?.[0] + '.jpg',
@@ -1949,7 +1952,7 @@ function TextEditor(props: TextEditorProps) {
 
         try {
           let exportElement: HTMLElement | null
-          if (currentViewType === EditorViewType.WYSIWYG) {
+          if (isCapricornView(currentViewType)) {
             if (!capricornEditor) throw new Error('Editor is not ready.')
             const surface = await capricornEditor.createExportSurface(markdown)
             disposeExportSurface = surface.dispose
@@ -2011,10 +2014,9 @@ function TextEditor(props: TextEditorProps) {
 
           editorSnapshotRegistry.flushForRead(id)
           const n = toast.loading(t('contextmenu.editor_tab.export_html') + '...')
-          const res =
-            currentViewType === EditorViewType.WYSIWYG
-              ? await capricornEditorRef.current?.export('html')
-              : await editorRef.current?.exportHtml()
+          const res = isCapricornView(currentViewType)
+            ? await capricornEditorRef.current?.export('html')
+            : await editorRef.current?.exportHtml()
           const scStyled = document.head.querySelectorAll('style[data-styled]')
 
           const html = `
@@ -2455,6 +2457,7 @@ function TextEditor(props: TextEditorProps) {
       imageInsertHandler: hostOptions.imageInsertHandler,
       imagePasteHandler: hostOptions.imagePasteHandler,
       localization: capricornLocalization,
+      mode: currentViewType === EditorViewType.PREVIEW ? 'preview' : 'edit',
       placeholder: { enabled: editorPlaceholder },
       readOnly: savePathReserved || externalChangeResolving,
       spellCheck: wysiwygEditorSpellcheck,
@@ -2471,6 +2474,7 @@ function TextEditor(props: TextEditorProps) {
     }
   }, [
     curFile.id,
+    currentViewType,
     editorColorScheme,
     editorKeybingMap,
     editorKeybindingsLoaded,
@@ -2495,6 +2499,7 @@ function TextEditor(props: TextEditorProps) {
 
   const handleCapricornOpenProgress = useCallback(
     (progress: CapricornRuntimeProgress, identity: CapricornRuntimeRequestIdentity) => {
+      if (currentViewTypeRef.current !== EditorViewType.WYSIWYG) return
       // The file-read, tab-switch or retry path owns measurement creation.
       // Late progress from the pane's previously visible file must not cancel
       // and replace the newer file's request.
@@ -2520,6 +2525,10 @@ function TextEditor(props: TextEditorProps) {
   const handleCapricornRuntimeReady = useCallback(
     (container: HTMLElement, identity: CapricornRuntimeRequestIdentity) => {
       if (!visibleRef.current) return
+      if (activeRef.current) {
+        capricornStatisticsScheduler.schedule(capricornRuntimeAdapterRef.current)
+      }
+      if (currentViewTypeRef.current !== EditorViewType.WYSIWYG) return
       const requestId = getEditorOpenMeasurement(id, groupId)
       recordEditorOpenContent(requestId, latestContentRef.current ?? '', { onlyIfMissing: true })
       recordEditorOpenStage(requestId, 'runtime-ready', {
@@ -2542,9 +2551,6 @@ function TextEditor(props: TextEditorProps) {
           interactionOpenRequestIdRef.current = requestId
         },
       })
-      if (activeRef.current) {
-        capricornStatisticsScheduler.schedule(capricornRuntimeAdapterRef.current)
-      }
     },
     [capricornStatisticsScheduler, groupId, id],
   )
@@ -2558,7 +2564,7 @@ function TextEditor(props: TextEditorProps) {
   }, [groupId, id])
 
   useEffect(() => {
-    if (!active || !visible || currentViewType !== EditorViewType.WYSIWYG) {
+    if (!active || !visible || !isCapricornView(currentViewType)) {
       capricornStatisticsScheduler.cancel()
     }
   }, [active, capricornStatisticsScheduler, currentViewType, visible])
@@ -2652,7 +2658,7 @@ function TextEditor(props: TextEditorProps) {
         onClick={handleWrapperClick}
       >
         <AppEditorThemeProvider>
-          {currentViewType === EditorViewType.WYSIWYG ? (
+          {isCapricornView(currentViewType) ? (
             <CapricornEditor
               active={active}
               contentRevision={fileSaveCoordinator.getRevision(id)}

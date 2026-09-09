@@ -1,4 +1,5 @@
 import { EditorViewType as RmeEditorViewType } from 'rme'
+import { isCapricornRuntimeAvailable } from './capricornRuntime'
 
 export const EditorViewType = {
   WYSIWYG: RmeEditorViewType.WYSIWYG,
@@ -8,4 +9,13 @@ export const EditorViewType = {
 
 export type EditorViewTypeValue = RmeEditorViewType
 
-export { isCapricornRuntimeAvailable } from './capricornRuntime'
+export function isCapricornView(
+  viewType: EditorViewTypeValue | undefined,
+  runtimeAvailable = isCapricornRuntimeAvailable,
+): boolean {
+  return (
+    viewType === EditorViewType.WYSIWYG || (viewType === EditorViewType.PREVIEW && runtimeAvailable)
+  )
+}
+
+export { isCapricornRuntimeAvailable }

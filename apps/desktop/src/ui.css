@@ -115,6 +115,10 @@
   background: var(--mf-primary);
 }
 
+.mf-startup-progress .mf-startup-label {
+  color: var(--mf-muted-foreground);
+}
+
 :root {
   --mf-surface-app: var(--mf-boot-surface-app, #fff);
   --mf-surface-titlebar: var(--mf-boot-surface-toolbar, #fefefe);
@@ -366,7 +370,7 @@
 }
 
 [data-slot='dialog-overlay'][data-state='closed'] {
-  animation: mf-fade-out var(--mf-motion-duration-base) var(--mf-motion-ease-in) both;
+  animation: mf-fade-out var(--mf-motion-duration-fast) var(--mf-motion-ease-out) both;
 }
 
 [data-slot='dialog-content'][data-state='open'] {
@@ -374,7 +378,7 @@
 }
 
 [data-slot='dialog-content'][data-state='closed'] {
-  animation: mf-surface-out var(--mf-motion-duration-base) var(--mf-motion-ease-in) both;
+  animation: mf-surface-out var(--mf-motion-duration-fast) var(--mf-motion-ease-out) both;
 }
 
 [data-slot='popover-content'][data-state='open'],
@@ -384,7 +388,7 @@
 
 [data-slot='popover-content'][data-state='closed'],
 [data-slot='select-content'][data-state='closed'] {
-  animation: mf-surface-out var(--mf-motion-duration-fast) var(--mf-motion-ease-in) both;
+  animation: mf-surface-out var(--mf-motion-duration-fast) var(--mf-motion-ease-out) both;
 }
 
 [data-slot='tooltip-content'][data-state='delayed-open'] {
@@ -408,6 +412,6 @@
   [data-slot='dialog-content'][data-state='closed'],
   [data-slot='popover-content'][data-state='closed'],
   [data-slot='select-content'][data-state='closed'] {
-    animation: mf-fade-out var(--mf-motion-duration-fast) var(--mf-motion-ease-in) both;
+    animation: mf-fade-out var(--mf-motion-duration-fast) var(--mf-motion-ease-out) both;
   }
 }

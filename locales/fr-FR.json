@@ -18,6 +18,7 @@
     "result_count": "{{current}} sur {{total}}"
   },
   "startup": {
+    "opening_workspace": "Ouverture de l’espace de travail…",
     "workspace_open_failed": "Impossible d’ouvrir l’espace de travail"
   },
   "common": {

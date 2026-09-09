@@ -262,6 +262,7 @@ describe('TextEditor deferred snapshots during saving', () => {
       capricornRuntimeEntrySha256: 'sha',
       capricornRuntimeVersion: 'version',
       EditorViewType,
+      currentViewTypeRef: { current: EditorViewType.WYSIWYG },
       fileSaveCoordinator: { getRevision: () => 1 },
       getEditorOpenMeasurement: () => undefined,
       groupId: 'group',

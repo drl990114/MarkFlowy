@@ -1,5 +1,5 @@
 import { commandRegistry } from '@/commands'
-import { EditorViewType } from '@/constants/editorViewType'
+import { EditorViewType, isCapricornView } from '@/constants/editorViewType'
 import { getHeadingValue } from '@/helper/string'
 import { useEditorStore } from '@/stores'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
@@ -181,7 +181,7 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
       outline &&
       (outline.id !== activeId ||
         outline.editor !== capricornEditor ||
-        activeViewType !== EditorViewType.WYSIWYG)
+        !isCapricornView(activeViewType))
     ) {
       capricornOutlineRef.current = null
       setActiveHeadingId(null)
@@ -195,7 +195,7 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
     const editorViewTypeMap = useEditorViewTypeStore.getState().editorViewTypeMap
     const viewType = editorViewTypeMap.get(currentActiveId)
 
-    if (viewType === EditorViewType.WYSIWYG) {
+    if (isCapricornView(viewType)) {
       const outline = capricornOutlineRef.current
       const scrollEl = wysiwygScrollElRef.current
       if (
@@ -268,8 +268,7 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
     (currentActiveId: string, editor: CapricornRuntimeAdapter, snapshot?: CapricornHeading[]) => {
       const isCurrentEditor = () =>
         useEditorStore.getState().activeId === currentActiveId &&
-        useEditorViewTypeStore.getState().editorViewTypeMap.get(currentActiveId) ===
-          EditorViewType.WYSIWYG &&
+        isCapricornView(useEditorViewTypeStore.getState().editorViewTypeMap.get(currentActiveId)) &&
         getCapricornEditor(currentActiveId) === editor
       // An already queued old-editor notification must not cancel the new
       // editor's valid deferred initial scan after subscription cleanup.
@@ -429,7 +428,7 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
           return
         }
 
-        if (viewType === EditorViewType.WYSIWYG) {
+        if (isCapricornView(viewType)) {
           const editor = getCapricornEditor(currentActiveId)
           if (!editor) {
             // The Capricorn registry subscription below schedules the initial
@@ -535,7 +534,7 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
       setSourceScrollEl(null)
       return
     }
-    if (activeViewType === EditorViewType.WYSIWYG) return
+    if (isCapricornView(activeViewType)) return
     const timer = setTimeout(() => {
       commandRegistry.execute('app:toc_refresh')
     }, 300)
@@ -543,7 +542,7 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
   }, [activeId, activeViewType])
 
   useEffect(() => {
-    if (!activeId || !capricornEditor || activeViewType !== EditorViewType.WYSIWYG) return
+    if (!activeId || !capricornEditor || !isCapricornView(activeViewType)) return
 
     scheduleCapricornHeadingRefresh(activeId, capricornEditor)
     const unsubscribe = capricornEditor.headings.subscribe((headings) => {

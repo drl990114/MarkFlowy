@@ -15,8 +15,8 @@ export const SettingItemContainer = styled.div.attrs<SettingItemContainerProps>(
   gap: 16px;
   min-width: 0;
   margin: 0;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--mf-border);
+  padding: 12px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--mf-border) 65%, transparent);
   scroll-margin-top: 24px;
 
   &:focus {
@@ -41,8 +41,16 @@ export const SettingItemContainer = styled.div.attrs<SettingItemContainerProps>(
       flex-direction: column;
     `}
 
+  .setting-item__control {
+    flex: 0 0 auto;
+    width: 240px;
+    max-width: 45%;
+  }
+
   .setting-item__slider {
-    width: 120px;
+    flex: 1;
+    width: auto;
+    min-width: 0;
     box-sizing: border-box;
   }
 
@@ -53,6 +61,11 @@ export const SettingItemContainer = styled.div.attrs<SettingItemContainerProps>(
 
     > :last-child {
       align-self: flex-start;
+    }
+
+    .setting-item__control {
+      width: 100%;
+      max-width: 100%;
     }
   }
 `

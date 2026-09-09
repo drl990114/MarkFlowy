@@ -18,6 +18,7 @@
     "result_count": "{{current}} / {{total}}"
   },
   "startup": {
+    "opening_workspace": "ワークスペースを開いています…",
     "workspace_open_failed": "ワークスペースを開けません"
   },
   "common": {

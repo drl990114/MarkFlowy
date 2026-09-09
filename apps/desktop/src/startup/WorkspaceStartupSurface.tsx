@@ -67,7 +67,7 @@ export function WorkspaceStartupSurface({
               {() => null}
             </AsyncSurface>
           ) : (
-            <StartupProgress label={t('common.fetching')} />
+            <StartupProgress label={t('startup.opening_workspace')} />
           )}
         </main>
         {viewportMode === 'wide' && rightDock.visible ? (

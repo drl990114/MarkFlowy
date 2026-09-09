@@ -1,19 +1,23 @@
 import { Dialog, type DialogContentProps } from '@/components/ui/dialog'
 import { useTranslation } from '@/i18n'
-import type { PropsWithChildren } from 'react'
+import { useRef, useState, type PropsWithChildren } from 'react'
 import { useNavigate } from 'react-router'
+import './SettingDialog.css'
 
 export type SettingDialogProps = PropsWithChildren<Pick<DialogContentProps, 'onEscapeKeyDown'>>
 
 export function SettingDialog({ children, onEscapeKeyDown }: SettingDialogProps) {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const [open, setOpen] = useState(true)
+  const closeRequested = useRef(false)
 
   return (
     <Dialog.Root
-      open
-      onOpenChange={(open) => {
-        if (!open) navigate('/', { replace: true })
+      open={open}
+      onOpenChange={(nextOpen) => {
+        closeRequested.current = !nextOpen
+        setOpen(nextOpen)
       }}
     >
       <Dialog.Content
@@ -23,8 +27,10 @@ export function SettingDialog({ children, onEscapeKeyDown }: SettingDialogProps)
         closeLabel={t('common.close')}
         data-mf-settings-surface=''
         onCloseAutoFocus={(event) => {
-          // The route controller restores editor focus after the workspace becomes active.
+          // Radix waits for the exit animation before releasing the focus scope.
+          // Then the route controller makes the workspace active and restores editor focus.
           event.preventDefault()
+          if (closeRequested.current) navigate('/', { replace: true })
         }}
         onEscapeKeyDown={(event) => {
           if (event.isComposing || event.repeat) {
