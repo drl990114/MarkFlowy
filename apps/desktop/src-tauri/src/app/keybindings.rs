@@ -25,6 +25,11 @@ impl Keybindings {
     pub fn new() -> Self {
         let cmds = vec![
             KeybindingInfo::new(
+                "app_quickOpen".to_string(),
+                vec!["CommandOrCtrl".to_string(), "p".to_string()],
+                "always".to_string(),
+            ),
+            KeybindingInfo::new(
                 "app_openFolder".to_string(),
                 vec![
                     "CommandOrCtrl".to_string(),
@@ -297,6 +302,35 @@ pub mod cmd {
 #[cfg(test)]
 mod tests {
     use super::{KeybindingInfo, Keybindings};
+
+    #[test]
+    fn quick_open_is_added_without_overwriting_user_keybindings() {
+        let defaults = Keybindings::default();
+        let quick_open = defaults
+            .cmds
+            .iter()
+            .find(|command| command.id == "app_quickOpen")
+            .expect("Quick Open should have an editable shortcut");
+        assert_eq!(quick_open.key_map, ["CommandOrCtrl", "p"]);
+        assert_eq!(quick_open.when, "always");
+
+        let merged = Keybindings::merge_user_keybindings(
+            defaults,
+            Keybindings {
+                cmds: vec![KeybindingInfo::new(
+                    "app_quickOpen".to_string(),
+                    vec!["Alt".to_string(), "o".to_string()],
+                    "always".to_string(),
+                )],
+            },
+        );
+        let quick_open = merged
+            .cmds
+            .iter()
+            .find(|command| command.id == "app_quickOpen")
+            .unwrap();
+        assert_eq!(quick_open.key_map, ["Alt", "o"]);
+    }
 
     #[test]
     fn zen_mode_has_an_editable_default_keybinding() {

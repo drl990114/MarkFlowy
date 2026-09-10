@@ -1,4 +1,4 @@
-import { KeyboardEventHandler } from 'react';
+import type { KeyboardEventHandler } from 'react';
 import styled from 'styled-components';
 
 export type InputSize = 'small' | 'medium' | 'large';
@@ -96,14 +96,8 @@ const InputComponent = styled.input<{ $size?: InputSize }>`
   }
 
   /* 悬停状态 */
-  &:hover:not(:disabled):not([data-disabled='true']) {
+  &:hover:not(:disabled):not([data-disabled='true']):not([data-error='true']):not([aria-invalid='true']) {
     border-color: ${(props) => props.theme.accentColor};
-  }
-
-  /* 聚焦状态 */
-  &:focus {
-    border-color: ${(props) => props.theme.accentColor};
-    box-shadow: 0 0 0 2px ${(props) => `${props.theme.accentColor}20`};
   }
 
   /* 禁用状态 */
@@ -116,12 +110,9 @@ const InputComponent = styled.input<{ $size?: InputSize }>`
   }
 
   /* 错误状态 */
-  &[data-error='true'] {
+  &[data-error='true'],
+  &[aria-invalid='true'] {
     border-color: ${(props) => props.theme.dangerColor};
-
-    &:focus {
-      box-shadow: 0 0 0 2px ${(props) => `${props.theme.dangerColor}20`};
-    }
   }
 
   /* 只读状态 */

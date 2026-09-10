@@ -63,7 +63,7 @@ describe('Explorer file tree density', () => {
       /\.mf-file-tree-item:hover>\[data-mf-file-tree-node\]\{background-color:var\(--mf-ui-control-hover-bg/,
     )
     expect(css).toMatch(
-      /\.mf-file-tree-item:focus-visible>\[data-mf-file-tree-node\]\{border-color:var\(--mf-control-focus/,
+      /\.mf-file-tree-item:focus-visible>\[data-mf-file-tree-node\]\{outline:none;text-decoration-line:underline/,
     )
     expect(css).toMatch(
       /\[data-mf-file-tree-node\]\[data-mf-file-tree-drop-highlight='true'\]\{background-color:var\(--mf-primary-soft/,

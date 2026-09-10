@@ -59,7 +59,10 @@ export const DialogWrapper = styled.div.attrs<{ width?: string, padding?: string
     }
 
     &:focus-visible {
-      box-shadow: 0 0 0 2px ${(props) => props.theme.accentColor};
+      outline: none;
+      text-decoration-line: underline;
+      text-underline-offset: 2px;
+      opacity: 0.8;
     }
   }
 
@@ -100,6 +103,11 @@ export const DialogWrapper = styled.div.attrs<{ width?: string, padding?: string
 
     input {
       margin: 0;
+
+      &:focus-visible {
+        outline: none;
+        opacity: 0.8;
+      }
     }
   }
 

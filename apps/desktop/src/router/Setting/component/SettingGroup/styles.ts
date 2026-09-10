@@ -19,9 +19,13 @@ export const SettingGroupContainer = styled.div.attrs<SettingGroupContainerProps
   border-radius: var(--mf-radius);
   scroll-margin-top: 24px;
 
-  &:focus {
-    outline: 2px solid ${(props) => props.theme.accentColor};
-    outline-offset: 2px;
+  &:focus-visible {
+    outline: none;
+
+    > .setting-group__title {
+      text-decoration-line: underline;
+      text-underline-offset: 2px;
+    }
   }
 
   .setting-group {

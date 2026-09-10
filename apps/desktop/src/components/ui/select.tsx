@@ -2,6 +2,7 @@ import { Select as SelectPrimitive } from 'radix-ui'
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from 'lucide-react'
 import type { ComponentProps } from 'react'
 import { cn } from '@/lib/cn'
+import { focusFeedback } from './focus-styles'
 
 export function SelectRoot(props: ComponentProps<typeof SelectPrimitive.Root>) {
   return <SelectPrimitive.Root {...props} />
@@ -28,7 +29,8 @@ export function SelectTrigger({
   return (
     <SelectPrimitive.Trigger
       className={cn(
-        'flex min-w-0 items-center justify-between gap-2 rounded-md border border-control-border bg-surface-app px-2.5 text-ui-control text-content-primary shadow-sm outline-none transition-[color,box-shadow,border-color] duration-[var(--mf-motion-duration-fast)] ease-[var(--mf-motion-ease-out)] focus-visible:border-control-focus focus-visible:ring-2 focus-visible:ring-control-focus/25 disabled:pointer-events-none disabled:text-content-disabled disabled:opacity-60 motion-reduce:transition-none data-[placeholder]:text-content-muted [&>span]:truncate [&_svg]:pointer-events-none [&_svg]:size-3.5 [&_svg]:shrink-0',
+        focusFeedback,
+        'flex min-w-0 items-center justify-between gap-2 rounded-md border border-control-border bg-surface-app px-2.5 text-ui-control text-content-primary shadow-sm outline-none transition-[color,box-shadow,border-color] duration-[var(--mf-motion-duration-fast)] ease-[var(--mf-motion-ease-out)] disabled:pointer-events-none disabled:text-content-disabled disabled:opacity-60 motion-reduce:transition-none data-[placeholder]:text-content-muted [&>span]:truncate [&_svg]:pointer-events-none [&_svg]:size-3.5 [&_svg]:shrink-0',
         size === 'sm' ? 'h-7' : 'h-8',
         className,
       )}

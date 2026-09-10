@@ -1,4 +1,14 @@
 {
+  "quick_open": {
+    "title": "快速打开",
+    "placeholder": "按文件名或路径搜索…",
+    "loading": "正在加载工作区文件…",
+    "load_error": "无法加载工作区文件",
+    "empty": "没有匹配的文件",
+    "no_workspace": "打开工作区后即可搜索文件",
+    "show_more": "显示更多（剩余 {{count}} 项）",
+    "keyboard_hint": "↑ ↓ 选择 · Enter 打开 · Esc 关闭"
+  },
   "app_name": "MarkFlowy",
   "editor": {
     "render_failed": "无法渲染编辑器"
@@ -736,6 +746,7 @@
   },
   "command": {
     "id_descriptions": {
+      "app_quickOpen": "快速打开",
       "app_openFolder": "打开文件夹",
       "app_openSetting": "打开设置窗口",
       "app_toggleLeftsidebarVisible": "切换左侧边栏可见",

@@ -1,7 +1,11 @@
 import { createKeybindingsHandler } from './bindkeys'
 
-/** Only the document Find command precedes nested editor keymaps. */
-export function createFindShortcutHandler(shortcut: string, open: () => boolean) {
+/** Capture host commands before a nested editor keymap consumes them. */
+export function createAppShortcutHandler(
+  shortcut: string,
+  open: () => boolean,
+  allowedDialogSelector?: string,
+) {
   const handler = createKeybindingsHandler(
     shortcut
       ? {
@@ -19,9 +23,18 @@ export function createFindShortcutHandler(shortcut: string, open: () => boolean)
     if (
       event
         .composedPath()
-        .some((target) => target instanceof Element && target.getAttribute('role') === 'dialog')
+        .some(
+          (target) =>
+            target instanceof Element &&
+            target.getAttribute('role') === 'dialog' &&
+            (!allowedDialogSelector || !target.matches(allowedDialogSelector)),
+        )
     )
       return
     handler(event)
   }
+}
+
+export function createFindShortcutHandler(shortcut: string, open: () => boolean) {
+  return createAppShortcutHandler(shortcut, open)
 }

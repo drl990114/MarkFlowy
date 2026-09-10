@@ -1,4 +1,14 @@
 {
+  "quick_open": {
+    "title": "クイックオープン",
+    "placeholder": "ファイル名またはパスで検索…",
+    "loading": "ワークスペースのファイルを読み込み中…",
+    "load_error": "ワークスペースのファイルを読み込めませんでした",
+    "empty": "一致するファイルがありません",
+    "no_workspace": "ワークスペースを開いてファイルを検索してください",
+    "show_more": "さらに表示（残り {{count}} 件）",
+    "keyboard_hint": "↑ ↓ で選択 · Enter で開く · Esc で閉じる"
+  },
   "app_name": "MarkFlowy",
   "editor": {
     "render_failed": "エディタを表示できません"
@@ -703,6 +713,7 @@
   },
   "command": {
     "id_descriptions": {
+      "app_quickOpen": "クイックオープン",
       "app_openFolder": "フォルダを開く",
       "app_openSetting": "設定ウィンドウを開く",
       "app_toggleLeftsidebarVisible": "左サイドバーを切り替えて表示",

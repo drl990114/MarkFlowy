@@ -234,7 +234,7 @@ export function Composer() {
   return (
     <ComposerPrimitive.Unstable_TriggerPopoverRoot>
       <ComposerPrimitive.Root
-        className='relative flex w-full flex-col gap-1 rounded-lg border border-border bg-card p-2 shadow-sm transition-colors focus-within:border-ring'
+        className='relative flex w-full flex-col gap-1 rounded-lg border border-border bg-card p-2 shadow-sm transition-colors'
         onSubmit={onComposerSubmit}
       >
         {composerTriggers}

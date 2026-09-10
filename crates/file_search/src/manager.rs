@@ -350,12 +350,7 @@ fn message_receiver(internal_receiver: Receiver<Message>, external_sender: Sende
     let mut final_names = vec![];
     let mut latest_number = 0;
     let mut tot_elapsed = Duration::from_secs(0);
-    loop {
-        let message = internal_receiver.recv();
-        if message.is_err() {
-            continue;
-        }
-        let message = message.unwrap();
+    while let Ok(message) = internal_receiver.recv() {
         match message {
             Message::StartSearch(id) => {
                 latest_number = id;
@@ -413,6 +408,27 @@ mod tests {
     use std::sync::mpsc::channel;
 
     use super::*;
+
+    #[test]
+    fn receiver_exits_when_the_search_manager_is_dropped() {
+        let (internal_sender, internal_receiver) = channel();
+        let (external_sender, _external_receiver) = channel();
+        let (finished_sender, finished_receiver) = channel();
+        let receiver_thread = thread::spawn(move || {
+            message_receiver(
+                internal_receiver,
+                external_sender,
+                Arc::new(Mutex::new(Options::default())),
+            );
+            finished_sender.send(()).unwrap();
+        });
+
+        drop(internal_sender);
+        finished_receiver
+            .recv_timeout(Duration::from_secs(2))
+            .expect("a completed search must not leave a spinning receiver thread");
+        receiver_thread.join().unwrap();
+    }
 
     #[test]
     fn find_names() {

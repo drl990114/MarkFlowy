@@ -512,8 +512,10 @@ const CancelLogoutButton = styled.button`
   }
 
   &:focus-visible {
-    outline: 2px solid ${(props) => props.theme.borderColorFocused};
-    outline-offset: 2px;
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
   }
 
   &:disabled {
@@ -546,8 +548,10 @@ const SignOutButton = styled.button`
   }
 
   &:focus-visible {
-    outline: 2px solid ${(props) => props.theme.dangerColor};
-    outline-offset: 2px;
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
   }
 
   &:disabled {

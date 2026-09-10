@@ -195,8 +195,10 @@ const LearnMoreLink = styled(Link)`
     transform 0.2s ease;
 
   &:focus-visible {
-    outline: 2px solid var(--seal);
-    outline-offset: 3px;
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
   }
 
   @media (hover: hover) and (pointer: fine) {

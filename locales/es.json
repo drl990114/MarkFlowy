@@ -1,4 +1,14 @@
 {
+  "quick_open": {
+    "title": "Apertura rápida",
+    "placeholder": "Buscar por nombre de archivo o ruta…",
+    "loading": "Cargando archivos del espacio de trabajo…",
+    "load_error": "No se pudieron cargar los archivos del espacio de trabajo",
+    "empty": "No hay archivos coincidentes",
+    "no_workspace": "Abre un espacio de trabajo para buscar sus archivos",
+    "show_more": "Mostrar más ({{count}} restantes)",
+    "keyboard_hint": "↑ ↓ para navegar · Intro para abrir · Esc para cerrar"
+  },
   "app_name": "MarkFlowy",
   "editor": {
     "render_failed": "No se pudo renderizar el editor"
@@ -703,6 +713,7 @@
   },
   "command": {
     "id_descriptions": {
+      "app_quickOpen": "Apertura rápida",
       "app_openFolder": "Abrir una carpeta",
       "app_openSetting": "Abrir la ventana de configuración",
       "app_toggleLeftsidebarVisible": "Alternar barra lateral izquierda visible",

@@ -179,8 +179,10 @@ export const TabItem = styled.div<TabItemProps>`
   }
 
   .tab-select:focus-visible {
-    outline: 1px solid var(--mf-control-focus, ${(props) => props.theme.accentColor});
-    outline-offset: -2px;
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
   }
 
   &:first-child {
@@ -217,6 +219,10 @@ export const TabItem = styled.div<TabItemProps>`
     .mf-editor-tab-dirty {
       opacity: 0;
     }
+  }
+
+  .mf-editor-tab-close:focus-visible {
+    opacity: 0.8;
   }
 `
 

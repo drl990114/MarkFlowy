@@ -2,6 +2,7 @@ import type { SourceMessagePartComponent } from '@assistant-ui/react'
 import { FileTextIcon, GlobeIcon } from 'lucide-react'
 import { memo, type ComponentProps } from 'react'
 import { cn } from '@/lib/cn'
+import { focusFeedback } from '@/components/ui/focus-styles'
 import { Badge, type BadgeProps } from '@/components/ui/badge'
 import { useAssistantLink } from './link-context'
 
@@ -25,7 +26,8 @@ export function Source({ className, href, onClick, onKeyDown, ...props }: Source
     <Badge
       asChild
       className={cn(
-        'cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ring',
+        focusFeedback,
+        'cursor-pointer outline-none',
         className,
       )}
     >

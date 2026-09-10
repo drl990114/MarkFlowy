@@ -143,7 +143,6 @@ const Input = styled.input`
 
   &:focus {
     outline: none;
-    border-color: ${({ theme }) => theme.accentColor};
   }
 
   &::placeholder {
@@ -176,6 +175,13 @@ const DeleteButton = styled.button`
   i {
     font-size: 14px;
   }
+
+  &:focus-visible {
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
+  }
 `
 
 const AddButton = styled.button`
@@ -204,6 +210,13 @@ const AddButton = styled.button`
 
   i {
     font-size: 14px;
+  }
+
+  &:focus-visible {
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
   }
 `
 

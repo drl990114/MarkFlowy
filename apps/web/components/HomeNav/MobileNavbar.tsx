@@ -126,9 +126,11 @@ const LogoLink = styled(Link).attrs(() => ({
   text-decoration: none;
 
   &:focus-visible {
-    outline: 2px solid var(--seal);
-    outline-offset: 2px;
+    outline: none;
     border-radius: ${rem(4)};
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
   }
 `
 
@@ -164,8 +166,10 @@ const MenuToggle = styled.button`
   }
 
   &:focus-visible {
-    outline: 2px solid var(--seal);
-    outline-offset: 2px;
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
   }
 
   @media (hover: hover) and (pointer: fine) {
@@ -255,9 +259,10 @@ const DropdownLinks = styled(NavLinks)`
     text-decoration: none;
 
     &:focus-visible {
-      color: var(--seal);
-      outline: 2px solid var(--seal);
-      outline-offset: -2px;
+      outline: none;
+      text-decoration-line: underline;
+      text-underline-offset: 2px;
+      opacity: 0.8;
     }
 
     @media (hover: hover) and (pointer: fine) {
@@ -300,8 +305,10 @@ const MobileWebAppLink = styled(NextLink)`
   }
 
   &:focus-visible {
-    outline: 2px solid var(--seal);
-    outline-offset: 2px;
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
   }
 
   &:active {
@@ -329,8 +336,10 @@ const MobileGitHubLink = styled.a`
   text-decoration: none;
 
   &:focus-visible {
-    outline: 2px solid var(--seal);
-    outline-offset: 2px;
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
   }
 
   @media (hover: hover) and (pointer: fine) {

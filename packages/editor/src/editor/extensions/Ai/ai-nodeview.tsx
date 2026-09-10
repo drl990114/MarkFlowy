@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 import { Button, Menu } from 'zens'
 import { getTransformerByView } from '../Transformer/utils'
-import { AIOptions } from './ai-types'
+import type { AIOptions } from './ai-types'
 
 enum AINodeViewStatus {
   WAITASK,
@@ -231,7 +231,7 @@ const InputAskTextarea = styled.textarea`
   color: inherit;
 
   &:focus {
-    background-color: transparent;
+    outline: none;
   }
 `
 

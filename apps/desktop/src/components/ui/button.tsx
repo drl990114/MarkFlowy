@@ -2,9 +2,13 @@ import { Slot } from 'radix-ui'
 import { cva, type VariantProps } from 'class-variance-authority'
 import type { ComponentProps } from 'react'
 import { cn } from '@/lib/cn'
+import { focusFeedback } from './focus-styles'
 
 const buttonVariants = cva(
-  'inline-flex shrink-0 items-center justify-center gap-1.5 rounded-md text-ui-control font-medium tracking-[var(--mf-ui-tracking-control)] outline-none transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-[var(--mf-motion-duration-fast)] ease-[var(--mf-motion-ease-out)] active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-control-focus focus-visible:ring-offset-1 focus-visible:ring-offset-surface-app disabled:pointer-events-none disabled:active:scale-100 disabled:text-content-disabled disabled:opacity-60 motion-reduce:transition-none motion-reduce:active:scale-100 aria-invalid:border-destructive aria-invalid:ring-destructive/30 [&_svg]:pointer-events-none [&_svg]:shrink-0',
+  [
+    focusFeedback,
+    'inline-flex shrink-0 items-center justify-center gap-1.5 rounded-md text-ui-control font-medium tracking-[var(--mf-ui-tracking-control)] outline-none transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-[var(--mf-motion-duration-fast)] ease-[var(--mf-motion-ease-out)] active:scale-[0.97] disabled:pointer-events-none disabled:active:scale-100 disabled:text-content-disabled disabled:opacity-60 motion-reduce:transition-none motion-reduce:active:scale-100 aria-invalid:border-destructive [&_svg]:pointer-events-none [&_svg]:shrink-0',
+  ],
   {
     variants: {
       variant: {
@@ -15,7 +19,7 @@ const buttonVariants = cva(
         ghost:
           'text-content-primary hover:bg-control-ghost-hover hover:text-content-primary',
         chrome:
-          'rounded-sm text-content-secondary hover:bg-control-ghost-hover hover:text-content-primary focus-visible:ring-1 focus-visible:ring-offset-0 active:scale-100 active:bg-control-ghost-pressed aria-pressed:text-primary',
+          'rounded-sm text-content-secondary hover:bg-control-ghost-hover hover:text-content-primary active:scale-100 active:bg-control-ghost-pressed aria-pressed:text-primary',
         secondary: 'bg-control-surface text-content-primary hover:bg-control-hover',
         destructive: 'bg-destructive text-destructive-foreground hover:opacity-90',
         link: 'text-primary underline-offset-4 hover:underline',

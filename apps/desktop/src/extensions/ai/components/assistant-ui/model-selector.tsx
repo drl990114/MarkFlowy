@@ -14,6 +14,7 @@ import {
   type ReactNode,
 } from 'react'
 import { cn } from '@/lib/cn'
+import { focusFeedback } from '@/components/ui/focus-styles'
 import { useTranslation } from '@/i18n'
 import {
   Command,
@@ -143,7 +144,10 @@ function ModelSelectorRoot({
 }
 
 export const modelSelectorTriggerVariants = cva(
-  'flex w-fit items-center justify-between gap-1.5 overflow-hidden rounded-md text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:text-disabled-foreground disabled:opacity-60 [&_svg]:shrink-0',
+  [
+    focusFeedback,
+    'flex w-fit items-center justify-between gap-1.5 overflow-hidden rounded-md text-xs outline-none transition-colors disabled:pointer-events-none disabled:text-disabled-foreground disabled:opacity-60 [&_svg]:shrink-0',
+  ],
   {
     variants: {
       variant: {

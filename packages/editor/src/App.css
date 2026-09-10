@@ -512,11 +512,6 @@ main {
   color: var(--text-muted);
 }
 
-.config-input:focus {
-  border-color: var(--accent-primary);
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
-}
-
 .config-find-info {
   font-family: var(--font-mono);
   font-size: 11px;

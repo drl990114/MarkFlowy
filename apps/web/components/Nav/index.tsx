@@ -84,8 +84,10 @@ const SidebarBackdrop = styled.button<{ $isVisible: boolean }>`
     transition: opacity 150ms ease;
 
     &:focus-visible {
-      outline: 2px solid var(--seal);
-      outline-offset: -2px;
+      outline: none;
+      text-decoration-line: underline;
+      text-underline-offset: 2px;
+      opacity: 0.8;
     }
 
     @media (prefers-reduced-motion: reduce) {

@@ -241,48 +241,16 @@ export const WysiwygThemeWrapper = styled.div
     background-color: ${(props) => props.theme.bgColor};
   }
 
-  & input[type='checkbox']:focus {
-    outline: max(2px, 0.15em) solid currentColor;
-    outline-offset: max(2px, 0.15em);
-  }
-
   & input[type='checkbox']:disabled {
     color: ${(props) => props.theme.labelFontColor};
     cursor: not-allowed;
   }
 
-  & a:focus,
-  & [role='button']:focus,
-  & input[type='radio']:focus,
-  & input[type='checkbox']:focus {
-    outline: 2px solid ${(props) => props.theme.accentColor};
-    outline-offset: -2px;
-    box-shadow: none;
-  }
-
-  & a:focus:not(:focus-visible),
-  & [role='button']:focus:not(:focus-visible),
-  & input[type='radio']:focus:not(:focus-visible),
-  & input[type='checkbox']:focus:not(:focus-visible) {
-    outline: solid 1px transparent;
-  }
-
-  & a:focus-visible,
-  & [role='button']:focus-visible,
-  & input[type='radio']:focus-visible,
-  & input[type='checkbox']:focus-visible {
-    outline: 2px solid ${(props) => props.theme.accentColor};
-    outline-offset: -2px;
-    box-shadow: none;
-  }
-
-  & a:not([class]):focus,
-  & a:not([class]):focus-visible,
-  & input[type='radio']:focus,
-  & input[type='radio']:focus-visible,
-  & input[type='checkbox']:focus,
-  & input[type='checkbox']:focus-visible {
-    outline-offset: 0;
+  & :where(a, button, [role='button'], input[type='radio'], input[type='checkbox']):focus-visible {
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
   }
 
   & h1,
@@ -1017,10 +985,6 @@ export const WysiwygThemeWrapper = styled.div
 
       &::placeholder {
         color: ${(props) => props.theme.labelFontColor};
-      }
-
-      &:focus {
-        border-color: ${(props) => props.theme.accentColor};
       }
     }
   }

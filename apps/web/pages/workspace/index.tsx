@@ -647,8 +647,10 @@ const BrandLink = styled(Link)`
   border-radius: ${rem(8)};
 
   &:focus-visible {
-    outline: 2px solid ${workspacePalette.accent};
-    outline-offset: 3px;
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
   }
 `
 
@@ -737,8 +739,10 @@ const HeaderActionLink = styled(Link)`
   }
 
   &:focus-visible {
-    outline: 2px solid ${workspacePalette.accent};
-    outline-offset: 2px;
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
   }
 `
 
@@ -789,8 +793,10 @@ const ImportButton = styled.button`
   }
 
   &:focus-visible {
-    outline: 2px solid ${workspacePalette.accent};
-    outline-offset: 2px;
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
   }
 
   @media (max-width: 720px) {
@@ -831,8 +837,10 @@ const GitHubSignInLink = styled(Link)`
   }
 
   &:focus-visible {
-    outline: 2px solid ${workspacePalette.accent};
-    outline-offset: 2px;
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
   }
 
 `
@@ -972,8 +980,10 @@ const GitHubLockedLink = styled(Link)`
   }
 
   &:focus-visible {
-    outline: 2px solid ${workspacePalette.accent};
-    outline-offset: 2px;
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
   }
 
   @media (max-width: 640px) {
@@ -1095,8 +1105,10 @@ const WorkspaceRow = styled(Link)`
   }
 
   &:focus-visible {
-    outline: 2px solid ${workspacePalette.accent};
-    outline-offset: -2px;
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
   }
 
   @media (max-width: 720px) {
@@ -1245,8 +1257,10 @@ const DeleteButton = styled.button`
   }
 
   &:focus-visible {
-    outline: 2px solid ${workspacePalette.danger};
-    outline-offset: 2px;
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
   }
 `
 
@@ -1316,8 +1330,10 @@ const ModalClose = styled.button`
   }
 
   &:focus-visible {
-    outline: 2px solid ${workspacePalette.accent};
-    outline-offset: 2px;
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
   }
 `
 
@@ -1360,8 +1376,11 @@ const RepoSelect = styled.select`
     border-color 0.16s ease,
     background-color 0.16s ease;
 
-  &:focus {
-    border-color: ${workspacePalette.accent};
+  &:focus-visible {
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
   }
 
   &:disabled {
@@ -1460,8 +1479,10 @@ const ImportRepoButton = styled.button`
   }
 
   &:focus-visible {
-    outline: 2px solid ${workspacePalette.accent};
-    outline-offset: 2px;
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
   }
 
   &:disabled {
@@ -1537,8 +1558,10 @@ const SetupLink = styled(Link)`
   }
 
   &:focus-visible {
-    outline: 2px solid ${workspacePalette.accent};
-    outline-offset: 2px;
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
   }
 
   @media (max-width: 640px) {

@@ -612,8 +612,10 @@ const GhostButton = styled.a`
     transform 0.18s cubic-bezier(0.23, 1, 0.32, 1);
 
   &:focus-visible {
-    outline: 2px solid var(--seal);
-    outline-offset: 2px;
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
   }
 
   &:active {
@@ -848,9 +850,11 @@ const EditorTab = styled.button.attrs(() => ({
     `}
 
   &:focus-visible {
-    outline: 2px solid var(--seal);
-    outline-offset: -2px;
+    outline: none;
     z-index: 1;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
   }
 
   @media (hover: hover) and (pointer: fine) {
@@ -1224,8 +1228,10 @@ const ContribLink = styled.a`
   }
 
   &:focus-visible {
-    outline: 2px solid var(--seal);
-    outline-offset: 3px;
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
   }
 
   &:active {
@@ -1337,8 +1343,10 @@ const CTAButton = styled.button`
   }
 
   &:focus-visible {
-    outline: 2px solid var(--paper);
-    outline-offset: 3px;
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
   }
 
   @media (hover: hover) and (pointer: fine) {
@@ -1439,8 +1447,10 @@ const FooterLink = styled.a`
   transition: color 0.2s ease;
 
   &:focus-visible {
-    outline: 2px solid var(--seal);
-    outline-offset: 2px;
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
   }
 
   @media (hover: hover) and (pointer: fine) {
@@ -1486,8 +1496,10 @@ const FooterCopyright = styled.p`
     `)}
 
     &:focus-visible {
-      outline: 2px solid var(--seal);
-      outline-offset: 2px;
+      outline: none;
+      text-decoration-line: underline;
+      text-underline-offset: 2px;
+      opacity: 0.8;
     }
 
     @media (hover: hover) and (pointer: fine) {

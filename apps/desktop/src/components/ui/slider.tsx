@@ -1,6 +1,7 @@
 import { Slider as SliderPrimitive } from 'radix-ui'
 import type { ComponentProps } from 'react'
 import { cn } from '@/lib/cn'
+import { focusFeedback } from './focus-styles'
 
 type SliderPrimitiveProps = ComponentProps<typeof SliderPrimitive.Root>
 
@@ -53,7 +54,10 @@ export function Slider({
       <SliderPrimitive.Thumb
         aria-label={ariaLabel}
         aria-valuetext={ariaValueText}
-        className='block size-4 shrink-0 rounded-full border border-primary bg-background shadow-sm outline-none transition-[color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/30 disabled:pointer-events-none disabled:opacity-50'
+        className={cn(
+          focusFeedback,
+          'block size-4 shrink-0 rounded-full border border-primary bg-background shadow-sm outline-none transition-[color,box-shadow] disabled:pointer-events-none disabled:opacity-50',
+        )}
         data-slot='slider-thumb'
       />
     </SliderPrimitive.Root>
@@ -114,13 +118,19 @@ export function RangeSlider({
       <SliderPrimitive.Thumb
         aria-label={ariaLabel ? `${ariaLabel} minimum` : undefined}
         aria-valuetext={ariaValueText?.[0]}
-        className='block size-4 shrink-0 rounded-full border border-primary bg-background shadow-sm outline-none transition-[color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/30 disabled:pointer-events-none disabled:opacity-50'
+        className={cn(
+          focusFeedback,
+          'block size-4 shrink-0 rounded-full border border-primary bg-background shadow-sm outline-none transition-[color,box-shadow] disabled:pointer-events-none disabled:opacity-50',
+        )}
         data-slot='range-slider-thumb'
       />
       <SliderPrimitive.Thumb
         aria-label={ariaLabel ? `${ariaLabel} maximum` : undefined}
         aria-valuetext={ariaValueText?.[1]}
-        className='block size-4 shrink-0 rounded-full border border-primary bg-background shadow-sm outline-none transition-[color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/30 disabled:pointer-events-none disabled:opacity-50'
+        className={cn(
+          focusFeedback,
+          'block size-4 shrink-0 rounded-full border border-primary bg-background shadow-sm outline-none transition-[color,box-shadow] disabled:pointer-events-none disabled:opacity-50',
+        )}
         data-slot='range-slider-thumb'
       />
     </SliderPrimitive.Root>

@@ -89,6 +89,13 @@ export const DropdownToolbarItem = styled.button<{ $active?: boolean }>`
       background-color: transparent;
     }
   }
+
+  &:focus-visible {
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
+  }
 `;
 
 export const DropdownToolbarDivider = styled.div`

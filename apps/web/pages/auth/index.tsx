@@ -284,8 +284,10 @@ const GitHubButton = styled.button`
   }
 
   &:focus-visible {
-    outline: 2px solid #d4564a;
-    outline-offset: 2px;
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
   }
 
   &:disabled {
@@ -344,6 +346,13 @@ const Tab = styled.button<{ $active: boolean }>`
   &:hover {
     color: #ffffff;
   }
+
+  &:focus-visible {
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
+  }
 `
 
 const FormSection = styled.div`
@@ -374,7 +383,6 @@ const Input = styled.input`
 
   &:focus {
     outline: none;
-    border-color: #d4564a;
   }
 
   &::placeholder {
@@ -411,6 +419,13 @@ const ChangeEmail = styled.button`
 
   &:hover {
     text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
   }
 `
 
@@ -454,6 +469,13 @@ const SubmitButton = styled.button`
     opacity: 0.5;
     cursor: not-allowed;
   }
+
+  &:focus-visible {
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
+  }
 `
 
 const LoadingSpinner = styled.div`
@@ -491,6 +513,13 @@ const ResendButton = styled.button`
 
   &:hover {
     text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
   }
 `
 

@@ -157,8 +157,10 @@ const BackLink = styled(Link)`
   }
 
   &:focus-visible {
-    outline: 2px solid ${(props) => props.theme.accentColor};
-    outline-offset: 3px;
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
   }
 `
 

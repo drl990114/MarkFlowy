@@ -25,9 +25,15 @@ const NavLink = styled(Link).attrs((/* props */) => ({
   letter-spacing: ${rem(0.4)};
   color: var(--ink-mute);
 
-  &:hover,
-  &:focus {
+  &:hover {
     color: var(--seal);
+  }
+
+  &:focus-visible {
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
   }
 
   &:active {

@@ -173,9 +173,11 @@ const LogoLink = styled(Link).attrs(() => ({
   text-decoration: none;
 
   &:focus-visible {
-    outline: 2px solid var(--seal);
-    outline-offset: 3px;
+    outline: none;
     border-radius: ${rem(4)};
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
   }
 `
 
@@ -196,8 +198,10 @@ const StyledNavLinks = styled(NavLinks)`
     transition: color 150ms ease;
 
     &:focus-visible {
-      outline: 2px solid var(--seal);
-      outline-offset: 3px;
+      outline: none;
+      text-decoration-line: underline;
+      text-underline-offset: 2px;
+      opacity: 0.8;
     }
 
     @media (hover: hover) and (pointer: fine) {
@@ -248,8 +252,10 @@ const WebAppLink = styled(NextLink)`
   }
 
   &:focus-visible {
-    outline: 2px solid var(--seal);
-    outline-offset: 3px;
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
   }
 
   @media (hover: hover) and (pointer: fine) {

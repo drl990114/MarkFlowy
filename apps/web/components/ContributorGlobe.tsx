@@ -309,9 +309,10 @@ const OrbitLink = styled.a`
   pointer-events: auto;
 
   &:focus-visible {
-    border-color: var(--seal);
-    outline: 2px solid var(--seal);
-    outline-offset: 3px;
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
   }
 
   &:active {

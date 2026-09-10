@@ -9,7 +9,7 @@ export function InputGroupRoot({ className, ...props }: InputGroupRootProps) {
   return (
     <div
       className={cn(
-        'group/input-group relative flex w-full min-w-0 items-center rounded-md border border-input bg-background shadow-sm transition-[color,box-shadow,border-color] focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/25 has-[[aria-invalid=true]]:border-destructive has-[[aria-invalid=true]]:ring-destructive/25',
+        'group/input-group relative flex w-full min-w-0 items-center rounded-md border border-input bg-background shadow-sm transition-[color,box-shadow,border-color] has-[[aria-invalid=true]]:border-destructive',
         className,
       )}
       data-slot='input-group'
@@ -22,7 +22,7 @@ export function InputGroupInput({ className, ...props }: InputProps) {
   return (
     <Input
       className={cn(
-        'min-w-0 flex-1 border-0 bg-transparent shadow-none focus-visible:border-transparent focus-visible:ring-0',
+        'min-w-0 flex-1 border-0 bg-transparent shadow-none',
         className,
       )}
       data-slot='input-group-input'

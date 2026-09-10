@@ -392,6 +392,13 @@ const SaveButton = styled.button`
     opacity: 0.55;
     cursor: not-allowed;
   }
+
+  &:focus-visible {
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
+  }
 `
 
 const DeleteButton = styled.button`
@@ -415,6 +422,13 @@ const DeleteButton = styled.button`
   &:disabled {
     opacity: 0.55;
     cursor: not-allowed;
+  }
+
+  &:focus-visible {
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
   }
 `
 
@@ -501,8 +515,9 @@ const RepoList = styled.div`
   scrollbar-width: thin;
 
   &:focus-visible {
-    outline: 2px solid ${(props) => props.theme.borderColorFocused};
-    outline-offset: ${rem(2)};
+    outline: none;
+    scrollbar-color: ${(props) => props.theme.primaryFontColor}
+      ${(props) => props.theme.scrollbarTrackColor};
   }
 
   @media (max-width: 640px) {
@@ -601,6 +616,13 @@ const OpenButton = styled.button`
     cursor: not-allowed;
     opacity: 0.55;
   }
+
+  &:focus-visible {
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
+  }
 `
 
 const HelpBody = styled.div`
@@ -667,7 +689,9 @@ const HelpLink = styled.a`
   }
 
   &:focus-visible {
-    outline: 2px solid ${(props) => props.theme.accentColor};
-    outline-offset: 2px;
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
   }
 `

@@ -42,10 +42,6 @@ export const SearchInput = styled.div`
     border-radius: 4px;
     background: transparent;
     box-shadow: none;
-
-    &:focus-within {
-      border-color: ${({ theme }) => theme.accentColor};
-    }
   }
 
   .search-input__progress {
@@ -228,8 +224,10 @@ export const SearchInfoBox = styled.div`
     }
 
     &:focus-visible {
-      outline: 1px solid var(--mf-control-focus, ${({ theme }) => theme.accentColor});
-      outline-offset: -2px;
+      outline: none;
+      text-decoration-line: underline;
+      text-underline-offset: 2px;
+      opacity: 0.8;
     }
 
     .search-info__icon {
@@ -301,8 +299,10 @@ export const SearchInfoBox = styled.div`
     }
 
     &:focus-visible {
-      outline: 1px solid var(--mf-control-focus, ${({ theme }) => theme.accentColor});
-      outline-offset: -2px;
+      outline: none;
+      text-decoration-line: underline;
+      text-underline-offset: 2px;
+      opacity: 0.8;
     }
 
     &.active {

@@ -292,8 +292,9 @@ const SplitSeparator = styled(Separator)<{
         cursor: row-resize !important;
       `}
 
-  &:focus {
-    outline: 1px solid ${(props) => props.theme.accentColor};
+  &:focus-visible {
+    outline: none;
+    background-color: ${(props) => props.theme.labelFontColor};
   }
 
   &[data-separator='hover'],

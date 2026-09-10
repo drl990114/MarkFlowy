@@ -7,6 +7,7 @@ import RightBar from '@/components/SideBar/RightBar'
 import StatusBar from '@/components/StatusBar'
 import { BookMarkDialog } from '@/extensions/bookmarks/BookMarkDialog'
 import useBookMarksStore from '@/extensions/bookmarks/useBookMarksStore'
+import { QuickOpenDialog } from '@/extensions/quick-open/QuickOpenDialog'
 import { useDockViewportMode } from '@/hooks/useDockViewportMode'
 import { useTranslation } from '@/i18n'
 import { useEditorStore } from '@/stores'
@@ -355,6 +356,7 @@ function Root() {
       </div>
       <ZenModeHint active={zenModeActive} />
       <BookMarkDialog />
+      <QuickOpenDialog />
     </RootPageLayout>
   )
 }

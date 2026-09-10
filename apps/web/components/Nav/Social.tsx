@@ -1,15 +1,15 @@
-import React from 'react';
-import styled from 'styled-components';
-import { Github } from '@styled-icons/fa-brands/Github/Github';
-import rem from '../../utils/rem';
-import { navbarHeight } from '../../utils/sizes';
-import Link from '../Link';
+import React from 'react'
+import styled from 'styled-components'
+import { Github } from '@styled-icons/fa-brands/Github/Github'
+import rem from '../../utils/rem'
+import { navbarHeight } from '../../utils/sizes'
+import Link from '../Link'
 
 const Wrapper = styled.nav`
   display: flex;
   align-items: center;
   flex: 1 1 auto;
-`;
+`
 
 const SocialLink = styled(Link).attrs((/* props */) => ({
   unstyled: true,
@@ -24,8 +24,14 @@ const SocialLink = styled(Link).attrs((/* props */) => ({
     margin-right: 0;
   }
 
-  &:hover,
-  &:focus {
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:focus-visible {
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
     opacity: 0.8;
   }
 
@@ -39,14 +45,14 @@ const SocialLink = styled(Link).attrs((/* props */) => ({
       fill: currentColor;
     }
   }
-`;
+`
 
 const StyledIcon = styled.div<{ $height?: number; $width?: number }>`
   && {
     width: ${p => rem(Number(p.$width))};
     height: ${p => rem(Number(p.$height))};
   }
-`;
+`
 
 const Social = (props: React.ComponentProps<typeof Wrapper>) => (
   <Wrapper {...props}>
@@ -54,6 +60,6 @@ const Social = (props: React.ComponentProps<typeof Wrapper>) => (
       <StyledIcon as={Github} $height={24} />
     </SocialLink>
   </Wrapper>
-);
+)
 
-export default Social;
+export default Social

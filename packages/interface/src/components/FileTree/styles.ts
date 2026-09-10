@@ -73,8 +73,10 @@ export const FileTreeStickyRoot = styled.div`
   }
 
   > [data-mf-file-tree-sticky-item]:focus-visible {
-    outline: 1px solid var(--mf-control-focus, ${(props) => props.theme.accentColor});
-    outline-offset: -1px;
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
   }
 `
 

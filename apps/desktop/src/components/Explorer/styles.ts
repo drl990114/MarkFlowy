@@ -33,9 +33,10 @@ export const Container = styled.div`
   }
 
   && .mf-file-tree-item:focus-visible > [data-mf-file-tree-node] {
-    border-color: var(--mf-control-focus, ${(props) => props.theme.accentColor});
-    outline: 1px solid var(--mf-control-focus, ${(props) => props.theme.accentColor});
-    outline-offset: -2px;
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
   }
 
   && .mf-file-tree-item > [data-mf-file-tree-node][data-mf-file-tree-editing='true'],
@@ -89,11 +90,6 @@ export const Container = styled.div`
     background: var(--mf-surface-panel-left, ${(props) => props.theme.sideBarBgColor});
     box-shadow: none;
     transition: none;
-  }
-
-  && .mf-file-tree-row .mf-file-tree-name-input:focus {
-    border-color: var(--mf-control-focus, ${(props) => props.theme.accentColor});
-    box-shadow: none;
   }
 
   && .mf-file-tree-row .mf-file-tree-name-input[aria-invalid='true'] {

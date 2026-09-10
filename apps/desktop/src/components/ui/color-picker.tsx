@@ -115,7 +115,7 @@ export function ColorPicker({
         />
         <HexColorInput
           aria-label={`${ariaLabel} hex value`}
-          className='h-8 w-full rounded-md border border-input bg-background px-2.5 font-mono text-xs text-foreground outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/25'
+          className='h-8 w-full rounded-md border border-input bg-background px-2.5 font-mono text-xs text-foreground outline-none'
           color={color}
           data-slot='color-picker-input'
           onBlur={commit}

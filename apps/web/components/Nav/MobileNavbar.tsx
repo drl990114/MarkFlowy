@@ -176,4 +176,11 @@ const MenuToggle = styled.button`
   svg {
     color: var(--ink);
   }
+
+  &:focus-visible {
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
+  }
 `

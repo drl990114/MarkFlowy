@@ -104,8 +104,10 @@ const TabItem = styled.button<{ $active: boolean }>`
   color: ${(props) => (props.$active ? props.theme.primaryFontColor : props.theme.labelFontColor)};
 
   &:focus-visible {
-    outline: 2px solid ${(props) => props.theme.accentColor};
-    outline-offset: 2px;
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
   }
 `
 

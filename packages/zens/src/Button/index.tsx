@@ -109,7 +109,7 @@ const getButtonTypeStyles = (props: ButtonProps & { theme: any }) => {
       background-color: ${ghostValue ? 'transparent' : theme.dangerColor};
       color: ${ghostValue ? theme.dangerColor : theme.white};
 
-      &:hover, &:focus {
+      &:hover {
         background-color: ${ghostValue ? 'rgba(220, 38, 38, 0.1)' : darken(theme.dangerColor, 0.1)};
         border-color: ${darken(theme.dangerColor, 0.1)};
       }
@@ -124,7 +124,7 @@ const getButtonTypeStyles = (props: ButtonProps & { theme: any }) => {
         background-color: ${ghost ? 'transparent' : theme.accentColor};
         color: ${ghost ? theme.accentColor : theme.white};
 
-        &:hover, &:focus {
+        &:hover {
           background-color: ${ghost ? 'rgba(0, 122, 204, 0.1)' : darken(theme.accentColor, 0.1)};
           border-color: ${darken(theme.accentColor, 0.1)};
         }
@@ -136,7 +136,7 @@ const getButtonTypeStyles = (props: ButtonProps & { theme: any }) => {
         background-color: ${ghost ? 'transparent' : theme.buttonBgColor};
         color: ${theme.primaryFontColor};
 
-        &:hover, &:focus {
+        &:hover {
           border-color: ${theme.accentColor};
           color: ${theme.accentColor};
         }
@@ -147,7 +147,7 @@ const getButtonTypeStyles = (props: ButtonProps & { theme: any }) => {
         background-color: transparent;
         color: ${theme.primaryFontColor};
 
-        &:hover, &:focus {
+        &:hover {
           background-color: rgba(0, 0, 0, 0.04);
         }
       `;
@@ -157,7 +157,7 @@ const getButtonTypeStyles = (props: ButtonProps & { theme: any }) => {
         background-color: transparent;
         color: ${theme.accentColor};
 
-        &:hover, &:focus {
+        &:hover {
           color: ${darken(theme.accentColor, 0.1)};
           text-decoration: underline;
         }
@@ -168,7 +168,7 @@ const getButtonTypeStyles = (props: ButtonProps & { theme: any }) => {
         background-color: ${ghost ? 'transparent' : theme.buttonBgColor};
         color: ${theme.primaryFontColor};
 
-        &:hover, &:focus {
+        &:hover {
           border-color: ${theme.accentColor};
           color: ${theme.accentColor};
         }
@@ -233,7 +233,10 @@ const StyledButton = styled(AkButton)
     return props.theme[sizeSpaceMap[sizeKey].paddingVertical];
   }};
   text-decoration-line: none;
-  transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+  outline: none;
+  transition-property: color, background-color, border-color, opacity, transform;
+  transition-duration: 0.3s;
+  transition-timing-function: cubic-bezier(0.645, 0.045, 0.355, 1);
   position: relative;
   border-width: 1px;
   border-style: solid;
@@ -265,17 +268,11 @@ const StyledButton = styled(AkButton)
     }};
   }
 
+  &:focus-visible,
   &[data-focus-visible] {
-    outline: none;
-    box-shadow: 0 0 0 2px ${(props) => {
-      const btnTypeValue = props.btnType as ButtonType || 'default';
-      const dangerValue = props.danger as boolean || false;
-      return btnTypeValue === 'primary'
-        ? 'rgba(0, 122, 204, 0.2)'
-        : dangerValue
-          ? 'rgba(220, 38, 38, 0.2)'
-          : 'rgba(0, 0, 0, 0.1)';
-    }};
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
   }
 
   /* Loading state */

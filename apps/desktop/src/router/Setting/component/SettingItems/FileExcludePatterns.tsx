@@ -289,8 +289,7 @@ const RowWrapper = styled.div`
   padding: 0 8px;
   color: ${({ theme }) => theme.primaryFontColor};
 
-  &:hover,
-  &:focus-within {
+  &:hover {
     background: ${({ theme }) => theme.hoverColor};
   }
 
@@ -344,6 +343,13 @@ const IconButton = styled.button`
   i {
     font-size: 14px;
   }
+
+  &:focus-visible {
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
+  }
 `
 
 const AddButton = styled.button`
@@ -372,6 +378,13 @@ const AddButton = styled.button`
 
   i {
     font-size: 14px;
+  }
+
+  &:focus-visible {
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
   }
 `
 

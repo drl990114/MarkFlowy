@@ -329,7 +329,7 @@ function Setting({ navigationRequest }: SettingProps) {
                         <Button
                           aria-current={selectedSearchEntryId === entry.id ? 'location' : undefined}
                           className={classNames(
-                            'my-px h-auto min-h-10 w-full flex-col items-start gap-0 rounded-md px-2 py-1.5 text-left font-normal text-foreground shadow-none focus-visible:ring-offset-0',
+                            'my-px h-auto min-h-10 w-full flex-col items-start gap-0 rounded-md px-2 py-1.5 text-left font-normal text-foreground shadow-none',
                             selectedSearchEntryId === entry.id
                               ? 'bg-control-selected text-content-primary hover:bg-control-selected'
                               : 'bg-transparent hover:bg-control-ghost-hover hover:text-content-primary',
@@ -362,7 +362,7 @@ function Setting({ navigationRequest }: SettingProps) {
                         <Button
                           aria-current={index === value ? 'page' : undefined}
                           className={classNames(
-                            'my-px h-7 w-full justify-start gap-2 rounded-md px-2 text-left text-ui-control font-normal text-foreground shadow-none focus-visible:ring-offset-0',
+                            'my-px h-7 w-full justify-start gap-2 rounded-md px-2 text-left text-ui-control font-normal text-foreground shadow-none',
                             index === value
                               ? 'bg-control-selected font-medium text-content-primary hover:bg-control-selected'
                               : 'bg-transparent hover:bg-control-ghost-hover hover:text-content-primary',
@@ -439,7 +439,7 @@ function Setting({ navigationRequest }: SettingProps) {
             <header className='mb-5 flex items-start justify-between gap-4 pr-8 max-[719px]:pr-0'>
               <div className='min-w-0'>
                 <h1
-                  className='m-0 text-xl font-semibold text-foreground focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary'
+                  className='m-0 text-xl font-semibold text-foreground focus-visible:outline-none focus-visible:underline focus-visible:underline-offset-2'
                   ref={categoryHeadingRef}
                   tabIndex={-1}
                 >

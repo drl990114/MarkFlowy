@@ -114,8 +114,10 @@ const DocumentLink = styled(Link)`
     color 150ms ease;
 
   &:focus-visible {
-    outline: 2px solid var(--seal);
-    outline-offset: 2px;
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
   }
 
   @media (hover: hover) and (pointer: fine) {

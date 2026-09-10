@@ -36,8 +36,9 @@ export const StyleSeparator = styled(Separator)`
     display: none;
   }
 
-  &:focus {
-    outline: 1px solid ${(props) => props.theme.accentColor};
+  &:focus-visible {
+    outline: none;
+    background-color: ${(props) => props.theme.labelFontColor};
   }
 
   &[data-separator='hover'] {

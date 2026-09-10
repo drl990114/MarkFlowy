@@ -1,4 +1,5 @@
-import { createFindShortcutHandler } from '@/helper/findShortcut'
+import { createAppShortcutHandler, createFindShortcutHandler } from '@/helper/findShortcut'
+import { EVENT } from '@/constants'
 import { openDocumentSearch } from '@/components/EditorArea/editorSearchStore'
 import { getCapricornEditor } from '@/components/EditorArea/capricornEditorRegistry'
 import useEditorStore from '@/stores/useEditorStore'
@@ -60,7 +61,7 @@ function useKeyboard() {
     const editorKeybingMap: Record<string, string> = {}
 
     keyboardInfos.forEach((keyboardInfo) => {
-      if (keyboardInfo.id === 'app_findReplaceEditor') return
+      if (keyboardInfo.id === 'app_findReplaceEditor' || keyboardInfo.id === EVENT.app_quickOpen) return
       if (keyboardInfo.key_map.length > 0) {
         if (keyboardInfo.id.startsWith('editor_')) {
           const keybind = keybindingRegistry.getKeyBindingString(keyboardInfo.key_map)
@@ -91,11 +92,30 @@ function useKeyboard() {
       if (activeId && getCapricornEditor(activeId)?.isComposing()) return false
       return openDocumentSearch()
     })
+    const quickOpenBinding = keyboardInfos.find((binding) => binding.id === EVENT.app_quickOpen)
+    const quickOpenShortcut = quickOpenBinding
+      ? keybindingRegistry.getKeyBindingString(quickOpenBinding.key_map)
+      : keyboardInfos.length
+        ? ''
+        : 'mod-p'
+    const quickOpenHandler = createAppShortcutHandler(
+      quickOpenShortcut,
+      () => {
+        const { activeId } = useEditorStore.getState()
+        if (activeId && getCapricornEditor(activeId)?.isComposing()) return false
+        if (!commandRegistry.hasCommand(EVENT.app_quickOpen)) return false
+        void commandRegistry.execute(EVENT.app_quickOpen)
+        return true
+      },
+      '[data-mf-quick-open]',
+    )
     window.addEventListener('keydown', findHandler, true)
+    window.addEventListener('keydown', quickOpenHandler, true)
     window.addEventListener('keydown', handler)
 
     return () => {
       window.removeEventListener('keydown', findHandler, true)
+      window.removeEventListener('keydown', quickOpenHandler, true)
       window.removeEventListener('keydown', handler)
     }
   }, [keyboardInfos, setEditorKeybingMap])

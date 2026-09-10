@@ -464,9 +464,11 @@ const BranchSelect = styled.select`
   color: ${(props) => props.theme.primaryFontColor};
   cursor: pointer;
 
-  &:focus {
+  &:focus-visible {
     outline: none;
-    border-color: ${(props) => props.theme.borderColorFocused};
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
   }
 `
 
@@ -506,7 +508,6 @@ const CommitInput = styled.input`
 
   &:focus {
     outline: none;
-    border-color: ${(props) => props.theme.borderColorFocused};
   }
 `
 
@@ -538,8 +539,10 @@ const SaveButton = styled.button<{ $status: 'idle' | 'saving' | 'saved' }>`
   }
 
   &:focus-visible {
-    outline: 2px solid ${(props) => props.theme.borderColorFocused};
-    outline-offset: 2px;
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
   }
 
   &:disabled,
@@ -646,8 +649,9 @@ const StyleSeparator = styled(Separator)`
     width 0.16s ease;
   flex: 0 0 auto;
 
-  &:focus {
-    outline: 1px solid ${(props) => props.theme.accentColor};
+  &:focus-visible {
+    outline: none;
+    background-color: ${(props) => props.theme.labelFontColor};
   }
 
   &[data-separator='hover'],
@@ -757,8 +761,10 @@ const StagedItemButton = styled.button<{ $active: boolean }>`
   }
 
   &:focus-visible {
-    outline: 2px solid ${(props) => props.theme.borderColorFocused};
-    outline-offset: -2px;
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
   }
 
   @media (hover: hover) and (pointer: fine) {

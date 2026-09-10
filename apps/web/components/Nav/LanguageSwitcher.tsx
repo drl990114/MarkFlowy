@@ -120,8 +120,10 @@ const TriggerButton = styled.button`
     background 0.15s ease;
 
   &:focus-visible {
-    outline: 2px solid var(--seal);
-    outline-offset: 2px;
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
   }
 
   @media (hover: hover) and (pointer: fine) {
@@ -163,8 +165,10 @@ const MenuItem = styled.button`
   transition: background 0.15s ease;
 
   &:focus-visible {
-    outline: 2px solid var(--seal);
-    outline-offset: -2px;
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
   }
 
   @media (hover: hover) and (pointer: fine) {

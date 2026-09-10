@@ -71,8 +71,10 @@ export const Container = styled.div`
       }
 
       &:focus-visible {
-        outline: 2px solid var(--mf-control-focus, ${(props) => props.theme.accentColor});
-        outline-offset: -2px;
+        outline: none;
+        text-decoration-line: underline;
+        text-underline-offset: 2px;
+        opacity: 0.8;
       }
     }
 

@@ -19,10 +19,13 @@ export const SettingItemContainer = styled.div.attrs<SettingItemContainerProps>(
   border-bottom: 1px solid color-mix(in srgb, var(--mf-border) 65%, transparent);
   scroll-margin-top: 24px;
 
-  &:focus {
-    border-radius: var(--mf-radius-sm, 4px);
-    outline: 2px solid ${(props) => props.theme.accentColor};
-    outline-offset: 2px;
+  &:focus-visible {
+    outline: none;
+
+    > :first-child {
+      text-decoration-line: underline;
+      text-underline-offset: 2px;
+    }
   }
 
   &:last-child {

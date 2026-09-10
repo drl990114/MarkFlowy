@@ -9,6 +9,7 @@ import {
   type KeyboardEvent,
 } from 'react'
 import { cn } from '@/lib/cn'
+import { focusFeedback } from './focus-styles'
 import { Popover } from '@/components/ui/popover'
 
 export type TagComboboxOption = {
@@ -165,7 +166,7 @@ export function TagCombobox({
         <Popover.Anchor asChild>
           <div
             className={cn(
-              'flex min-h-8 w-full min-w-0 flex-wrap items-center gap-1 rounded-md border border-input bg-background px-1.5 py-1 text-foreground shadow-sm outline-none transition-[color,box-shadow,border-color] focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/25 data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-60',
+              'flex min-h-8 w-full min-w-0 flex-wrap items-center gap-1 rounded-md border border-input bg-background px-1.5 py-1 text-foreground shadow-sm outline-none transition-[color,box-shadow,border-color] data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-60',
               className,
             )}
             data-disabled={disabled}
@@ -189,7 +190,7 @@ export function TagCombobox({
                   <span className='truncate'>{label}</span>
                   <button
                     aria-label={removeLabel?.(label) ?? `Remove ${label}`}
-                    className='rounded-sm text-muted-foreground outline-none hover:text-foreground focus-visible:ring-1 focus-visible:ring-ring'
+                    className={cn(focusFeedback, 'rounded-sm text-muted-foreground outline-none hover:text-foreground')}
                     data-slot='tag-combobox-remove'
                     disabled={disabled}
                     onClick={(event) => {

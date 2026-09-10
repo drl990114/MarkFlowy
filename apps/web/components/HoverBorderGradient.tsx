@@ -40,8 +40,10 @@ const Container = styled.button`
   cursor: pointer;
 
   &:focus-visible {
-    outline: 2px solid var(--seal);
-    outline-offset: 3px;
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
   }
 
   &:active {

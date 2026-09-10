@@ -1,7 +1,7 @@
-import styled from 'styled-components';
-import { resetInput } from '../../utils/form';
-import rem from '../../utils/rem';
-import { navbarHeight } from '../../utils/sizes';
+import styled from 'styled-components'
+import { resetInput } from '../../utils/form'
+import rem from '../../utils/rem'
+import { navbarHeight } from '../../utils/sizes'
 
 const NavButton = styled.button`
   ${resetInput};
@@ -25,6 +25,13 @@ const NavButton = styled.button`
   & + & {
     padding-left: 0;
   }
-`;
 
-export default NavButton;
+  &:focus-visible {
+    outline: none;
+    text-decoration-line: underline;
+    text-underline-offset: 2px;
+    opacity: 0.8;
+  }
+`
+
+export default NavButton
