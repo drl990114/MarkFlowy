@@ -1,3 +1,6 @@
+// Transform the source/package graph before UI wait deadlines. The component
+// still uses its real async loader; loader caching has separate unit coverage.
+import 'virtual:markflowy-capricorn-runtime'
 import { desktopLightTheme } from '@markflowy/theme'
 import { act, cleanup, fireEvent, render, waitFor } from '@testing-library/react'
 import { createRef, StrictMode } from 'react'

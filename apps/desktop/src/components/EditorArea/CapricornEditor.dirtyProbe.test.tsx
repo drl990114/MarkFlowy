@@ -1,3 +1,5 @@
+// Exclude module transformation from the opening/dirty-state assertions.
+import 'virtual:markflowy-capricorn-runtime'
 import { readFileSync } from 'node:fs'
 import { act, cleanup, render, waitFor } from '@testing-library/react'
 import { createRef } from 'react'
@@ -13,21 +15,21 @@ vi.mock('@/i18n', () => ({
   useTranslation: () => ({
     t: (key: string) =>
       (
-        {
+        ({
           'capricorn.editor.load_failed': 'Unable to load the Capricorn editor',
           'capricorn.editor.loading': 'Loading Capricorn editor',
           'capricorn.editor.opening': 'Opening document',
           'capricorn.editor.preparation_failed':
             'Background document preparation failed. Please retry.',
           'common.retry': 'Retry',
-        } as Record<string, string>
+        }) as Record<string, string>
       )[key] ?? key,
   }),
 }))
 
 afterEach(cleanup)
 
-// These probes use the private runtime, which is optional in public checkouts and CI.
+// The runtime is optional in public checkouts; the dedicated package suite requires it.
 it.skipIf(!isCapricornRuntimeAvailable).each([
   ['empty', ''],
   ['plain', 'Hello\n'],
@@ -53,7 +55,9 @@ it.skipIf(!isCapricornRuntimeAvailable).each([
         onChange={onChange}
         onError={onError}
         onUnavailable={onUnavailable}
-        onEditorChange={(value) => { adapter = value }}
+        onEditorChange={(value) => {
+          adapter = value
+        }}
         options={{
           virtualize: CAPRICORN_DESKTOP_VIRTUALIZE_OPTIONS,
           typewriter: { enabled: false },

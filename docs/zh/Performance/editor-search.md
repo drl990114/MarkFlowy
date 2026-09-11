@@ -53,13 +53,13 @@ CAPRICORN_SOURCE_ROOT=/absolute/path/to/capricorn yarn workspace @markflowy/desk
 
 Desktop 的 Vitest 配置还让实际 RME 包使用现有主题的 ESM 入口，防止 Node 测试混用 CommonJS/ESM 两套 CodeMirror 类。这一调整只作用于测试，不替换真实编辑器或搜索实现。
 
-`capricornSearch.publishedRuntime.test.tsx` 将同一组搜索用例接入 Desktop 常规 Vitest。独立的 `test:capricorn-published` 命令保留生产解析器，且在锁定包缺失时直接报错，避免把未执行的验证误记为通过。
+`tests/capricorn-*.integration.test.tsx` 将搜索、链接和快捷键的宿主用例接入 Desktop 常规 Vitest。`capricornIntegrationTests.ts` 定义源码与发布包配置共用的用例清单，还包括挂载、设置更新、dirty 状态和宿主兼容性测试。独立的 `test:capricorn-published` 命令保留生产解析器，且在锁定包缺失时直接报错，避免把未执行的验证误记为通过。
 
 ## 回归与证据范围
 
 宿主测试覆盖捕获快捷键、自定义与禁用绑定、IME、重复打开、StrictMode、活动分栏、跨文件快速点击、实例就绪和销毁、加载失败、所有权交接、Source Code 原生坐标、替换与撤销。全局结果测试覆盖实际查询与大小写、中文/emoji、CRLF 和同一行的重复词。
 
-源码联调直接运行邻仓 release 入口，覆盖可见文本、隐藏地址、代码及 Mermaid/HTML/公式源码、替换与撤销、10,000 块尾部定位、50,000 个密集命中的文本分窗。模型测试覆盖 2 MiB、10 MiB、100,000 块、扫描边界、取消和编辑后的过期结果；断言连续导航共享命中集合、复用块投影及路径表。
+源码联调直接运行邻仓 release 入口，覆盖跨文件可见文本与隐藏地址定位、代码及 Mermaid/HTML/公式源码定位时的宿主面板焦点，以及宿主查找状态随替换与撤销更新。10,000 块尾部定位、50,000 个密集命中的文本分窗和隐藏围栏展开已归入 Capricorn 的 `tests/runtime/find.test.mjs`，由上游对源码及发布包执行同组回归。模型测试覆盖 2 MiB、10 MiB、100,000 块、扫描边界、取消和编辑后的过期结果；断言连续导航共享命中集合、复用块投影及路径表。
 
 下面记录模型脚本的冷暖查询与导航数据。导航测试中的虚拟化流程使用替身；实际挂载范围另由 DOM 联调断言。结果不代表真实 Tauri/WebView、原生输入法或用户 P95 性能。
 
@@ -152,7 +152,7 @@ MarkFlowy 本轮改动限于版本/校验锁定、相关回归及本文。集成
 ```sh
 # MarkFlowy
 yarn workspace @markflowy/desktop build:types
-yarn workspace @markflowy/desktop exec vitest run capricornRuntimeResolver.test.ts src/components/EditorArea src/extensions/search src/helper/findShortcut.test.ts src/stores/useEditorStore.test.ts --exclude '**/capricornSearch.publishedRuntime.test.tsx' --maxWorkers 2
+yarn workspace @markflowy/desktop exec vitest run capricornRuntimeResolver.test.ts src/components/EditorArea src/extensions/search src/helper/findShortcut.test.ts src/stores/useEditorStore.test.ts --maxWorkers 2
 yarn workspace @markflowy/desktop test:capricorn-source
 yarn workspace @markflowy/desktop test:capricorn-published
 yarn translate:check

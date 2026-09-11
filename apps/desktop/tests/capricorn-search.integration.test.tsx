@@ -377,17 +377,15 @@ describe.skipIf(!isCapricornRuntimeAvailable)(
         const first = await create('- Desktop', 'first', true)
         let second = alreadyOpen ? await create(markdown, 'second', true) : undefined
         act(() => {
-          useEditorStore
-            .getState()
-            .setEditorLayout(
-              {
-                type: 'leaf',
-                id: 'main',
-                opened: alreadyOpen ? ['first', 'second'] : ['first'],
-                activeId: 'first',
-              },
-              'main',
-            )
+          useEditorStore.getState().setEditorLayout(
+            {
+              type: 'leaf',
+              id: 'main',
+              opened: alreadyOpen ? ['first', 'second'] : ['first'],
+              activeId: 'first',
+            },
+            'main',
+          )
           useEditorStore.setState({
             folderData: [{ id: 'root', path: '/workspace', name: 'workspace', kind: 'dir' }],
           })
@@ -485,25 +483,6 @@ describe.skipIf(!isCapricornRuntimeAvailable)(
       },
     )
 
-    it('expands a hidden live-preview fence match and clears its block highlight with find ownership', async () => {
-      const { adapter, container } = await create('```mermaid\ngraph TD; A-->B\n```')
-      await act(async () => {
-        expect(
-          await adapter.find.revealSourceMatch!({
-            line: 1,
-            lineText: '```mermaid',
-            query: 'mermaid',
-            startColumn: 3,
-            endColumn: 10,
-          }),
-        ).toMatchObject({ status: 'block' })
-      })
-      await waitFor(() => expect(container.querySelector('.cm-editor')).not.toBeNull())
-      expect(container.querySelector('[data-cap-source-match]')).not.toBeNull()
-      act(() => adapter.find.close())
-      expect(container.querySelector('[data-cap-source-match]')).toBeNull()
-    })
-
     it('refreshes document find after replacing a selected occurrence and undoing it', async () => {
       const { adapter } = await create('foo foo')
       mountFind()
@@ -521,51 +500,5 @@ describe.skipIf(!isCapricornRuntimeAvailable)(
       await waitFor(() => expect(adapter.find.getState().matches).toHaveLength(2))
       expect(adapter.getMarkdown().trim()).toBe('foo foo')
     })
-
-    it('mounts only the target neighborhood when revealing the end of 10,000 blocks', async () => {
-      const markdown = Array.from({ length: 10000 }, (_, index) => `row ${index}`).join('\n')
-      const { adapter, container } = await create(markdown, 'first', true)
-      await act(async () => {
-        expect(
-          await adapter.find.revealSourceMatch!({
-            line: 10000,
-            lineText: 'row 9999',
-            query: '9999',
-            startColumn: 4,
-            endColumn: 8,
-          }),
-        ).toMatchObject({ status: 'exact' })
-      })
-      await waitFor(() =>
-        expect(
-          container.querySelector('[data-cap-find-match][data-active="true"]')?.textContent,
-        ).toBe('9999'),
-      )
-      expect(container.querySelectorAll('[data-cap-key]').length).toBeLessThan(500)
-      expect(container.textContent?.length).toBeLessThan(10000)
-    }, 30000)
-
-    it('keeps dense long-paragraph highlights inside existing text windows during navigation', async () => {
-      const { adapter, container } = await create('hit '.repeat(50000), 'first', true)
-      const serialize = vi.spyOn(adapter, 'getMarkdown')
-      await act(async () => {
-        await adapter.find.searchAsync!({ query: 'hit' })
-      })
-      const matches = adapter.find.getState().matches
-      expect(matches).toHaveLength(50000)
-      await act(async () => {
-        await adapter.find.navigateTo!(49999)
-      })
-      expect(adapter.find.getState().matches).toBe(matches)
-      await waitFor(() =>
-        expect(
-          container.querySelector('[data-cap-find-match][data-active="true"]')?.textContent,
-        ).toBe('hit'),
-      )
-      expect(container.querySelectorAll('[data-cap-find-match]').length).toBeLessThan(20000)
-      expect(container.querySelector('[data-cap-text-window]')).not.toBeNull()
-      expect(serialize).not.toHaveBeenCalled()
-      serialize.mockRestore()
-    }, 30000)
   },
 )

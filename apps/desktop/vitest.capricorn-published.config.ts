@@ -1,5 +1,6 @@
 import { defineConfig } from 'vitest/config'
 import desktopConfig from './vite.config'
+import { capricornIntegrationTests } from './capricornIntegrationTests'
 
 /** Run the same integration suite through Desktop's verified package resolver. */
 export default defineConfig(async (environment) => {
@@ -13,6 +14,6 @@ export default defineConfig(async (environment) => {
   }
   return {
     ...base,
-    test: { ...base.test, include: ['tests/capricorn-search.integration.tsx'] },
+    test: { ...base.test, include: capricornIntegrationTests },
   }
 })

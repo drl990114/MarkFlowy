@@ -1,5 +1,33 @@
 # UPDATE LOG
 
+## v0.100.2
+
+Improvements and Fixes:
+
+- Fixed global search navigation and highlighting in WYSIWYG and Source Code modes, including results in newly opened files and when switching between files. WYSIWYG matches now handle escaped Markdown correctly and remain visible as the document layout settles after opening.
+
+- Fixed **Cmd/Ctrl + F** to open document search in the active editor group, including from code blocks and live previews. Custom shortcuts are respected, and pressing the shortcut again focuses the search field without clearing the query. The find and replace bar now appears directly below the editor tabs.
+
+- Improved search results inside code blocks and Mermaid, HTML, and math live previews by revealing the matching source. Matches in hidden link or image URLs reveal and highlight the containing element or block.
+
+- Improved search responsiveness in large documents by reusing query results and processing searches in cancellable chunks. Rapidly selecting different results cancels outdated navigation so earlier requests do not pull the editor back to a previous match.
+
+- Expanded localized labels and messages across find and replace, Settings, keyboard shortcuts, bookmarks, editor loading, and application updates.
+
+---
+
+改进与修复：
+
+- 修复所见即所得和源码模式下全局搜索结果的跳转与高亮，覆盖首次打开文件及跨文件切换。所见即所得模式现在能正确处理 Markdown 转义字符，并在文档打开后的布局调整中保持命中内容可见。
+
+- 修复 **Cmd/Ctrl + F** 无法唤起单文档搜索的问题，在正文、代码块和实时预览中均可打开当前编辑器分组的查找栏。支持自定义快捷键，重复按下只重新聚焦输入框并保留关键词；查找替换栏移至编辑器标签栏下方。
+
+- 改进代码块及 Mermaid、HTML、公式实时预览中的搜索定位，命中时展开对应源码；搜索到隐藏的链接或图片地址时，定位并突出显示所属元素或块。
+
+- 优化大文档搜索响应，通过复用查询结果和可取消的分段查询减少重复计算。快速切换搜索结果时会取消旧的定位请求，避免编辑器被拉回上一个命中位置。
+
+- 完善查找替换、设置、快捷键、书签、编辑器加载及应用更新等界面的多语言文案与提示。
+
 ## v0.100.1
 
 Features:

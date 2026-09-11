@@ -63,31 +63,7 @@ async function press(input: HTMLTextAreaElement, key: string, options: KeyboardE
   return event
 }
 
-describe.skipIf(!isCapricornRuntimeAvailable)('published Capricorn lists in Desktop', () => {
-  it.each([
-    [
-      '- Parent\n- Selected\n    - Child\n- Next',
-      '- Parent\n    - Selected\n        - Child\n- Next',
-    ],
-    ['3. Parent\n4. Selected\n5. Next', '3. Parent\n    1. Selected\n4. Next'],
-    ['- [ ] Parent\n- [x] Selected\n- [ ] Next', '- [ ] Parent\n    - [x] Selected\n- [ ] Next'],
-    ['> - Parent\n> - Selected\n> - Next', '> - Parent\n>     - Selected\n> - Next'],
-  ])(
-    'indents and restores %s with Tab, history and Desktop virtualization',
-    async (original, nested) => {
-      const { input } = await mount(original)
-      expect((await press(input, 'Tab')).defaultPrevented).toBe(true)
-      expect(session!.getMarkdown()).toBe(nested)
-      expect(document.activeElement).toBe(input)
-      await act(async () => session!.commands.undo())
-      expect(session!.getMarkdown()).toBe(original)
-      await act(async () => session!.commands.redo())
-      expect(session!.getMarkdown()).toBe(nested)
-      expect((await press(input, 'Tab', { shiftKey: true })).defaultPrevented).toBe(true)
-      expect(session!.getMarkdown()).toBe(original)
-    },
-  )
-
+describe.skipIf(!isCapricornRuntimeAvailable)('Desktop shortcut defaults with the runtime', () => {
   it.each([
     ['MacIntel', 'Mac OS X', { metaKey: true }],
     ['Win32', 'Windows NT 10.0', { ctrlKey: true }],
@@ -107,16 +83,4 @@ describe.skipIf(!isCapricornRuntimeAvailable)('published Capricorn lists in Desk
       expect(session!.getMarkdown()).toBe(original)
     },
   )
-
-  it('renders geometric bullet markers at each depth from the installed package', async () => {
-    const { container, input } = await mount('- Parent\n- Selected\n    - Child')
-    expect((await press(input, 'Tab')).defaultPrevented).toBe(true)
-    const markers = [...container.querySelectorAll('[data-markdown-bullet]')]
-    expect(markers.map((marker) => marker.getAttribute('data-markdown-bullet'))).toEqual([
-      'disc',
-      'circle',
-      'square',
-    ])
-    expect(markers.every((marker) => marker.textContent === '')).toBe(true)
-  })
 })

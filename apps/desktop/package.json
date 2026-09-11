@@ -13,8 +13,8 @@
     "tauri:dev": "tauri dev",
     "test": "vitest run",
     "test:dev": "vitest --ui",
-    "test:capricorn-source": "tsc --noEmit -p tsconfig.capricorn-source.json && vitest run --config vitest.capricorn-source.config.ts",
-    "test:capricorn-published": "tsc --noEmit -p tsconfig.capricorn-source.json && vitest run --config vitest.capricorn-published.config.ts",
+    "test:capricorn-source": "tsc --noEmit -p tsconfig.capricorn-integration.json && vitest run --config vitest.capricorn-source.config.ts",
+    "test:capricorn-published": "tsc --noEmit -p tsconfig.capricorn-integration.json && vitest run --config vitest.capricorn-published.config.ts",
     "delete": "rimraf node_modules"
   },
   "dependencies": {

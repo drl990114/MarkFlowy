@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 import { existsSync } from 'node:fs'
 import { defineConfig } from 'vitest/config'
 import desktopConfig from './vite.config'
+import { capricornIntegrationTests } from './capricornIntegrationTests'
 
 const require = createRequire(import.meta.url)
 const defaultRoot = fileURLToPath(new URL('../../../capricorn', import.meta.url))
@@ -58,11 +59,7 @@ export default defineConfig(async (environment) => {
     },
     test: {
       ...base.test,
-      include: [
-        'tests/capricorn-search.integration.tsx',
-        'tests/capricorn-links.integration.tsx',
-        'tests/capricorn-keybindings.integration.tsx',
-      ],
+      include: capricornIntegrationTests,
       // Externalized hook libraries resolve React through Node, bypassing Vite's
       // dedupe. Transform both dependency trees so every hook uses the host React.
       server: {

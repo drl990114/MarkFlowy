@@ -1,3 +1,4 @@
+import { isCapricornRuntimeAvailable } from '@/constants/capricornRuntime'
 import { act } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createCapricornRuntime } from 'virtual:markflowy-capricorn-runtime'
@@ -54,8 +55,8 @@ async function mounted(keys: string | readonly string[]) {
   expect(session!.keybindings!.validateConfiguration(configuration).ok).toBe(true)
   return getCapricornRuntimeInput(host)!
 }
-describe.each(['Win32', 'Linux x86_64'])(
-  'host shortcuts with the current Capricorn source on %s',
+describe.skipIf(!isCapricornRuntimeAvailable).each(['Win32', 'Linux x86_64'])(
+  'host shortcuts with the Capricorn runtime on %s',
   (name) => {
     it('dispatches either alternative binding and leaves native copy untouched', async () => {
       platform(name)
