@@ -3,8 +3,11 @@ import { invoke } from '@tauri-apps/api/core'
 import useFileCacheStore, { getFileObject, getFileObjectByPath } from '@/helper/files'
 import { createFile } from '@/helper/filesys'
 import useEditorStore from '@/stores/useEditorStore'
+import useRecentFilesStore from '@/stores/useRecentFilesStore'
 import {
+  checkRecentQuickOpenFiles,
   getOpenedQuickOpenFiles,
+  getRecentQuickOpenFiles,
   loadQuickOpenFiles,
   mergeQuickOpenFiles,
   openQuickOpenFile,
@@ -28,6 +31,7 @@ function entry(path: string): QuickOpenFile {
 beforeEach(() => {
   vi.mocked(invoke).mockReset()
   useFileCacheStore.setState({ entries: {}, pathEntries: {}, metadataRevision: 0 })
+  useRecentFilesStore.setState({ rootPath: '/workspace', entries: [], restoring: false })
   useEditorStore.setState({
     folderData: [{ id: 'root', kind: 'dir', name: 'workspace', path: '/workspace', children: [] }],
     opened: [],
@@ -101,6 +105,100 @@ describe('Quick Open file inventory', () => {
     useEditorStore.setState({ opened: [file.id] })
     expect(getOpenedQuickOpenFiles('/workspace')[0].relativePath).toBe('/workspace-other/note.md')
   })
+
+  it('builds closed history without scanning or caching file contents and reuses open identities', () => {
+    const open = createFile({ name: 'A.md', path: '/workspace/A.md', content: 'unsaved' })
+    useEditorStore.setState({ opened: [open.id], activeId: open.id })
+    useRecentFilesStore
+      .getState()
+      .replaceEntries([{ path: '/workspace/closed/B.md' }, { path: open.path! }])
+    const history = getRecentQuickOpenFiles('/workspace')
+    expect(history.map((file) => file.relativePath)).toEqual(['closed/B.md', 'A.md'])
+    expect(history[0].fileId).toBeUndefined()
+    expect(history[1].fileId).toBe(open.id)
+    expect(getFileObjectByPath('/workspace/closed/B.md')).toBeUndefined()
+    expect(invoke).not.toHaveBeenCalled()
+    expect(getRecentQuickOpenFiles('/other')).toEqual([])
+  })
+
+  it('checks at most eight closed paths concurrently without deleting unavailable history', async () => {
+    const closed = Array.from({ length: 20 }, (_, i) => entry(`/workspace/${i}.md`))
+    const opened = createFile({ path: '/workspace/open.md', content: 'unsaved' })
+    useEditorStore.setState({ opened: [opened.id], activeId: opened.id })
+    useRecentFilesStore.getState().replaceEntries(closed.map((file) => ({ path: file.path! })))
+    const history = useRecentFilesStore.getState().entries
+    const pending: ((exists: boolean) => void)[] = []
+    let concurrency = 0
+    let maximum = 0
+    vi.mocked(invoke).mockImplementation(async () => {
+      concurrency++
+      maximum = Math.max(maximum, concurrency)
+      const exists = await new Promise<boolean>((resolve) => pending.push(resolve))
+      concurrency--
+      return exists
+    })
+    const unavailable = vi.fn()
+    const check = checkRecentQuickOpenFiles(
+      [...closed, ...getOpenedQuickOpenFiles('/workspace')],
+      new AbortController().signal,
+      unavailable,
+    )
+    expect(invoke).toHaveBeenCalledTimes(8)
+    while (pending.length) {
+      pending.splice(0).forEach((resolve) => resolve(false))
+      await Promise.resolve()
+      await Promise.resolve()
+    }
+    await check
+    expect(maximum).toBe(8)
+    expect(invoke).toHaveBeenCalledTimes(20)
+    expect(unavailable).toHaveBeenCalledTimes(20)
+    expect(useRecentFilesStore.getState().entries).toBe(history)
+  })
+
+  it('ignores late checks after cancellation and retains newly opened files', async () => {
+    let resolve!: (exists: boolean) => void
+    vi.mocked(invoke).mockImplementation(
+      () =>
+        new Promise<boolean>((done) => {
+          resolve = done
+        }),
+    )
+    const controller = new AbortController()
+    const unavailable = vi.fn()
+    const check = checkRecentQuickOpenFiles(
+      [entry('/workspace/late.md')],
+      controller.signal,
+      unavailable,
+    )
+    controller.abort()
+    resolve(false)
+    await check
+    expect(unavailable).not.toHaveBeenCalled()
+
+    const reopened = checkRecentQuickOpenFiles(
+      [entry('/workspace/late.md')],
+      new AbortController().signal,
+      unavailable,
+    )
+    openQuickOpenFile(entry('/workspace/late.md'))
+    resolve(false)
+    await reopened
+    expect(unavailable).not.toHaveBeenCalled()
+  })
+
+  it('hides a failed existence check for the popup without erasing persistent history', async () => {
+    useRecentFilesStore.getState().visit({ path: '/workspace/offline.md' })
+    vi.mocked(invoke).mockRejectedValue(new Error('disconnected volume'))
+    const unavailable = vi.fn()
+    await checkRecentQuickOpenFiles(
+      getRecentQuickOpenFiles('/workspace'),
+      new AbortController().signal,
+      unavailable,
+    )
+    expect(unavailable).toHaveBeenCalledWith('path:/workspace/offline.md')
+    expect(useRecentFilesStore.getState().entries).toHaveLength(1)
+  })
 })
 
 describe('Quick Open matching', () => {
@@ -124,6 +222,25 @@ describe('Quick Open matching', () => {
     const files = [entry('/workspace/notes/计划[1].md'), entry('/workspace/notes/plan.md')]
     expect(rankQuickOpenFiles(files, '计划[1]')[0].name).toBe('计划[1].md')
     expect(rankQuickOpenFiles(files, 'notes\\plan')[0].name).toBe('plan.md')
+  })
+
+  it('uses score, recency, opened status and path in that order', () => {
+    const exact = entry('/workspace/exact/note.md')
+    const recent = entry('/workspace/recent/note.md')
+    const fuzzy = entry('/workspace/northern-temperate.md')
+    const open = { ...entry('/workspace/z/note.md'), fileId: 'open' }
+    const another = entry('/workspace/a/note.md')
+    const ranks = rankQuickOpenFiles([fuzzy, exact, another, open, recent], 'note.md', [
+      fuzzy.id,
+      recent.id,
+    ])
+    expect(ranks.map((file) => file.id)).toEqual([
+      recent.id,
+      open.id,
+      another.id,
+      exact.id,
+      fuzzy.id,
+    ])
   })
 })
 

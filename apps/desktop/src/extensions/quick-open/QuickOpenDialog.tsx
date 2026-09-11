@@ -12,7 +12,9 @@ import useEditorStore from '@/stores/useEditorStore'
 import { FileIcon, LoaderCircleIcon } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState, type RefObject } from 'react'
 import {
+  checkRecentQuickOpenFiles,
   getOpenedQuickOpenFiles,
+  getRecentQuickOpenFiles,
   loadQuickOpenFiles,
   mergeQuickOpenFiles,
   openQuickOpenFile,
@@ -37,24 +39,38 @@ function QuickOpenContent({
   onSelect,
 }: QuickOpenContentProps) {
   const { t } = useTranslation()
-  const [openedFiles] = useState(() => getOpenedQuickOpenFiles(rootPath))
+  const [historyFiles] = useState(() => getRecentQuickOpenFiles(rootPath))
+  const [openedFiles, setOpenedFiles] = useState(() => getOpenedQuickOpenFiles(rootPath))
   const [workspaceFiles, setWorkspaceFiles] = useState<QuickOpenFile[]>([])
-  const [loading, setLoading] = useState(Boolean(rootPath))
+  const [unavailableIds, setUnavailableIds] = useState<ReadonlySet<string>>(() => new Set())
+  const [scanRequested, setScanRequested] = useState(false)
+  const [loading, setLoading] = useState(false)
   const [failed, setFailed] = useState(false)
   const [retry, setRetry] = useState(0)
   const [query, setQuery] = useState('')
   const [selectedId, setSelectedId] = useState('')
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
   const listRef = useRef<HTMLDivElement>(null)
+  const manualSelection = useRef(false)
+  const searching = query.trim().length > 0
 
   useEffect(() => {
-    if (!rootPath) return
+    const controller = new AbortController()
+    void checkRecentQuickOpenFiles(historyFiles, controller.signal, (id) => {
+      setUnavailableIds((ids) => new Set([...ids, id]))
+    })
+    return () => controller.abort()
+  }, [historyFiles])
+
+  useEffect(() => {
+    if (!rootPath || !scanRequested) return
     let cancelled = false
     setLoading(true)
     setFailed(false)
     loadQuickOpenFiles(rootPath, fileExcludePatterns).then(
       (files) => {
         if (cancelled) return
+        setOpenedFiles(getOpenedQuickOpenFiles(rootPath))
         setWorkspaceFiles(files)
         setLoading(false)
       },
@@ -68,26 +84,64 @@ function QuickOpenContent({
     return () => {
       cancelled = true
     }
-  }, [rootPath, fileExcludePatterns, retry])
+  }, [rootPath, fileExcludePatterns, retry, scanRequested])
 
   const files = useMemo(
-    () => mergeQuickOpenFiles(openedFiles, workspaceFiles),
-    [openedFiles, workspaceFiles],
+    () => mergeQuickOpenFiles(openedFiles, historyFiles, workspaceFiles),
+    [openedFiles, historyFiles, workspaceFiles],
   )
-  const matches = useMemo(() => rankQuickOpenFiles(files, query), [files, query])
-  const visibleFiles = matches.slice(0, visibleCount)
-  const hasMore = matches.length > visibleCount
+  const matches = useMemo(() => {
+    const candidates = searching
+      ? rankQuickOpenFiles(
+          files,
+          query,
+          historyFiles.map((file) => file.id),
+        )
+      : historyFiles
+    const openedIds = new Set(openedFiles.map((file) => file.id))
+    return candidates.filter((file) => !unavailableIds.has(file.id) || openedIds.has(file.id))
+  }, [files, query, searching, historyFiles, openedFiles, unavailableIds])
+  const selectedIndex = matches.findIndex((file) => file.id === selectedId)
+  // A manually selected result may move past the current page after the scan.
+  const renderedCount = Math.max(
+    visibleCount,
+    Math.ceil((selectedIndex + 1) / PAGE_SIZE) * PAGE_SIZE,
+  )
+  const visibleFiles = matches.slice(0, renderedCount)
+  const hasMore = matches.length > renderedCount
   const value =
     visibleFiles.some((file) => file.id === selectedId) ||
     (hasMore && selectedId === MORE_RESULTS_ID)
       ? selectedId
       : (visibleFiles[0]?.id ?? '')
 
+  const previousMatches = useRef(matches)
+  useEffect(() => {
+    // cmdk owns ordinary keyboard/pointer scrolling. Follow the selected file
+    // here only when asynchronous results move it in the list.
+    if (previousMatches.current !== matches && selectedId) {
+      listRef.current?.querySelector('[data-selected="true"]')?.scrollIntoView({ block: 'nearest' })
+    }
+    previousMatches.current = matches
+  }, [matches, selectedId])
+
   return (
     <Command
       label={t('quick_open.title')}
       value={value}
-      onValueChange={setSelectedId}
+      onValueChange={(id) => {
+        if (manualSelection.current) setSelectedId(id)
+      }}
+      onKeyDownCapture={(event) => {
+        if (
+          !event.nativeEvent.isComposing &&
+          event.keyCode !== 229 &&
+          ['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)
+        ) {
+          manualSelection.current = true
+          setSelectedId(value)
+        }
+      }}
       shouldFilter={false}
       vimBindings={false}
     >
@@ -100,6 +154,8 @@ function QuickOpenContent({
         value={query}
         onValueChange={(nextQuery) => {
           setQuery(nextQuery)
+          if (nextQuery.trim()) setScanRequested(true)
+          manualSelection.current = false
           setSelectedId('')
           setVisibleCount(PAGE_SIZE)
           listRef.current?.scrollTo({ top: 0 })
@@ -107,11 +163,11 @@ function QuickOpenContent({
       />
       <Command.List
         label={t('quick_open.title')}
-        aria-busy={loading}
+        aria-busy={searching && loading}
         className='max-h-[min(50vh,24rem)]'
         ref={listRef}
       >
-        {loading ? (
+        {searching && loading ? (
           <div
             className='flex items-center gap-2 px-2 py-2 text-ui-caption text-muted-foreground'
             role='status'
@@ -123,7 +179,7 @@ function QuickOpenContent({
             {t('quick_open.loading')}
           </div>
         ) : null}
-        {failed ? (
+        {searching && failed ? (
           <div
             className='flex items-center justify-between gap-2 px-2 py-2 text-ui-caption'
             role='alert'
@@ -145,15 +201,23 @@ function QuickOpenContent({
             </Button>
           </div>
         ) : null}
-        {!loading && !failed && matches.length === 0 ? (
+        {!(searching && (loading || failed)) && matches.length === 0 ? (
           <Command.Empty>
-            {rootPath || openedFiles.length ? t('quick_open.empty') : t('quick_open.no_workspace')}
+            {!searching && rootPath
+              ? t('quick_open.no_recent')
+              : rootPath || openedFiles.length
+                ? t('quick_open.empty')
+                : t('quick_open.no_workspace')}
           </Command.Empty>
         ) : null}
         {visibleFiles.map((file) => (
           <Command.Item
             key={file.id}
             value={file.id}
+            onPointerMoveCapture={() => {
+              manualSelection.current = true
+              setSelectedId(file.id)
+            }}
             onSelect={() => onSelect(file)}
             title={file.path ?? file.name}
           >
@@ -172,12 +236,17 @@ function QuickOpenContent({
             disabled={!hasMore}
             hidden={!hasMore}
             value={MORE_RESULTS_ID}
+            onPointerMoveCapture={() => {
+              manualSelection.current = true
+              setSelectedId(MORE_RESULTS_ID)
+            }}
             onSelect={() => {
-              setSelectedId(matches[visibleCount].id)
-              setVisibleCount((count) => count + PAGE_SIZE)
+              manualSelection.current = true
+              setSelectedId(matches[renderedCount].id)
+              setVisibleCount(renderedCount + PAGE_SIZE)
             }}
           >
-            {t('quick_open.show_more', { count: Math.max(0, matches.length - visibleCount) })}
+            {t('quick_open.show_more', { count: Math.max(0, matches.length - renderedCount) })}
           </Command.Item>
         ) : null}
       </Command.List>

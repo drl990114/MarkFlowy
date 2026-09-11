@@ -12,6 +12,7 @@
     "loading": "Cargando archivos del espacio de trabajo…",
     "load_error": "No se pudieron cargar los archivos del espacio de trabajo",
     "empty": "No hay archivos coincidentes",
+    "no_recent": "No hay archivos abiertos recientemente. Escribe un nombre de archivo para buscar en el espacio de trabajo.",
     "no_workspace": "Abre un espacio de trabajo para buscar sus archivos",
     "show_more": "Mostrar más ({{count}} restantes)",
     "keyboard_hint": "↑ ↓ para navegar · Intro para abrir · Esc para cerrar"

@@ -5,6 +5,7 @@ import ts from 'typescript'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import useFileCacheStore, { getFileObject, setFileObject, updateFileObject } from '@/helper/files'
 import { FileResultCode, type IFile } from '@/helper/filesys'
+import useRecentFilesStore from '@/stores/useRecentFilesStore'
 import { FileSaveCoordinator } from './fileSaveCoordinator'
 import type { FileSnapshotResult } from './fileSnapshot'
 import textEditorSource from './TextEditor.tsx?raw'
@@ -54,6 +55,7 @@ function createHarness(options: { content?: string; dirty?: boolean; path?: stri
   }
   useFileCacheStore.setState({ entries: {}, metadataRevision: 0, pathEntries: {} })
   setFileObject(file.id, file)
+  useRecentFilesStore.setState({ entries: [{ path: file.path!, fileId: file.id }], restoring: false })
   const states = new Map([[file.id, { hasUnsavedChanges: options.dirty ?? false }]])
   const coordinator = new FileSaveCoordinator()
   coordinator.recordContent(file.id, file.content)
@@ -65,7 +67,7 @@ function createHarness(options: { content?: string; dirty?: boolean; path?: stri
   const registry = { hasPending: vi.fn(() => false), canRead: vi.fn(() => true) }
   const bindings = {
     createElement, useCallback, useEffect, useRef, useState,
-    getFileObject, updateFileObject, useFileCacheStore,
+    getFileObject, updateFileObject, useFileCacheStore, useRecentFilesStore,
     fileSaveCoordinator: coordinator,
     useEditorStateStore: { getState: () => ({ idStateMap: states }) },
     editorSnapshotRegistry: registry,
@@ -126,6 +128,7 @@ describe('TextEditor file loading lifecycle', () => {
     await findByText('unsaved')
     expect(snapshot).not.toHaveBeenCalled()
     expect(coordinator.getDiskRevision('file')).toBe('disk:initial')
+    expect(useRecentFilesStore.getState().entries).toHaveLength(1)
   })
 
   it('can load a file whose dirty flag has no cached or pending local content', async () => {
@@ -223,6 +226,19 @@ describe('TextEditor file loading lifecycle', () => {
     expect(coordinator.getDiskRevision('file')).toBe('disk:initial')
   })
 
+  it('retains recent history when a NotFound result arrives after local edits', async () => {
+    const { Harness, snapshot, states, coordinator } = createHarness()
+    const pending = deferred<FileSnapshotResult>()
+    snapshot.mockReturnValueOnce(pending.promise)
+    const { findByText } = render(<Harness id='file' />)
+    updateFileObject('file', { ...getFileObject('file'), content: 'local edits' })
+    coordinator.recordContent('file', 'local edits')
+    states.set('file', { hasUnsavedChanges: true })
+    await act(async () => pending.resolve({ status: 'unavailable', result: { code: FileResultCode.NotFound, content: 'missing' } }))
+    await findByText('local edits')
+    expect(useRecentFilesStore.getState().entries).toHaveLength(1)
+  })
+
   it('handles an IPC rejection with a read error instead of leaving loading pending', async () => {
     const { Harness, snapshot, toastError, loggerError } = createHarness()
     snapshot.mockRejectedValue(new Error('reader failed'))
@@ -244,6 +260,7 @@ describe('TextEditor file loading lifecycle', () => {
     const { container } = render(<Harness id='file' />)
     await act(async () => {})
     expect(container.firstChild).toHaveProperty('dataset.status', status)
+    expect(useRecentFilesStore.getState().entries).toHaveLength(status === 'missing' ? 0 : 1)
     expect(getFileObject('file').content).toBeUndefined()
     expect(coordinator.getDiskRevision('file')).toBe('disk:initial')
   })

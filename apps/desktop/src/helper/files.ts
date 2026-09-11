@@ -1,7 +1,8 @@
 import { create } from 'zustand'
 import { shallow } from 'zustand/vanilla/shallow'
 import type { IFile } from '@/helper/filesys'
-import { getPathIdentityKey } from '@/helper/pathIdentity'
+import { getPathIdentityKey, rebaseFilePath } from '@/helper/pathIdentity'
+import useRecentFilesStore from '@/stores/useRecentFilesStore'
 import {
   findPathCollisions,
   type PathRelationResolver,
@@ -23,30 +24,8 @@ const hasFileMetadataChanged = (previousFile: IFile | undefined, nextFile: IFile
   return previousFile?.name !== nextFile.name || previousFile?.path !== nextFile.path
 }
 
-const trimTrailingSeparators = (path: string) => {
-  if (path === '/' || /^[A-Za-z]:[\\/]$/.test(path)) return path
-  return path.replace(/[\\/]+$/, '')
-}
-
 const rebasePath = (path: string | undefined, oldRootPath: string, newRootPath: string) => {
-  if (!path) return undefined
-  const oldRoot = trimTrailingSeparators(oldRootPath)
-  const newRoot = trimTrailingSeparators(newRootPath)
-  const isWindowsPath =
-    /^[A-Za-z]:[\\/]/.test(path) ||
-    /^[A-Za-z]:[\\/]/.test(oldRoot) ||
-    path.startsWith('\\\\') ||
-    oldRoot.startsWith('\\\\')
-  const comparablePath = isWindowsPath ? path.toLowerCase() : path
-  const comparableRoot = isWindowsPath ? oldRoot.toLowerCase() : oldRoot
-
-  if (comparablePath === comparableRoot) return newRoot
-  if (!comparablePath.startsWith(comparableRoot)) return undefined
-
-  const separator = path.charAt(oldRoot.length)
-  if (separator !== '/' && separator !== '\\') return undefined
-
-  return `${newRoot}${path.slice(oldRoot.length)}`
+  return path ? rebaseFilePath(path, oldRootPath, newRootPath) : undefined
 }
 
 export function setFileObject(id: string, file: IFile): void {
@@ -64,7 +43,7 @@ export function setFileObject(id: string, file: IFile): void {
   })
 }
 
-export function setFileObjects(files: Array<{ id: string; file: IFile }>): void {
+export function setFileObjects(files: { id: string; file: IFile }[]): void {
   if (files.length === 0) return
   useFileCacheStore.setState((state) => {
     const entries = { ...state.entries }
@@ -98,7 +77,7 @@ export function setFileObjectByPath(path: string, file: IFile): void {
   }))
 }
 
-export function setFileObjectsByPath(files: Array<{ path: string; file: IFile }>): void {
+export function setFileObjectsByPath(files: { path: string; file: IFile }[]): void {
   if (files.length === 0) return
   useFileCacheStore.setState((state) => {
     const pathEntries = { ...state.pathEntries }
@@ -292,6 +271,8 @@ export function moveFileObjectsByPathPrefix(oldRootPath: string, newRootPath: st
       pathEntries,
     }
   })
+  // Closed history may have no cached tree node, so migrate it independently.
+  useRecentFilesStore.getState().rebasePaths(oldRootPath, newRootPath)
 }
 
 /** Remove a replaced file/folder and all cached descendants, returning their ids. */
@@ -328,6 +309,8 @@ export function deleteFileObjectsByPathPrefix(rootPath: string): string[] {
       pathEntries,
     }
   })
+
+  useRecentFilesStore.getState().removePath(rootPath)
 
   return deletedIds
 }

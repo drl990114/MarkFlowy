@@ -1,7 +1,7 @@
 import { getFileObject } from '@/helper/files'
 import { beginEditorOpenMeasurement } from '@/components/EditorArea/editorPerformanceDiagnostics'
 import { editorSnapshotRegistry } from '@/components/EditorArea/editorSnapshotRegistry'
-import { createFile, getFolderPathFromPath, isMdFile, releaseSecurityScope, type IFile } from '@/helper/filesys'
+import { createFile, FileResultCode, getFolderPathFromPath, isMdFile, releaseSecurityScope, type IFile } from '@/helper/filesys'
 import { getPathIdentityKey } from '@/helper/pathIdentity'
 import { isEmptyEditor } from '@/services/editor-file'
 import { invoke } from '@tauri-apps/api/core'
@@ -450,7 +450,7 @@ const useEditorStore = create<EditorStore>()(subscribeWithSelector((set, get) =>
     editorDelegateMap: new Map(),
     editorCtxMap: new Map(),
 
-    getRootPath: () => get().folderData?.[0].path,
+    getRootPath: () => get().folderData?.[0]?.path,
 
     addFile: async (fileNode, target) => {
       const { folderData, addOpenedFile } = get()
@@ -572,40 +572,37 @@ const useEditorStore = create<EditorStore>()(subscribeWithSelector((set, get) =>
     getFileNodeByPath: (path) => findFileNodeByPath(path, get().folderData?.[0]),
 
     deleteNode: async (fileNode) => {
-      const { folderData, activeId, delOpenedFile, opened } = get()
+      const { folderData, delOpenedFile } = get()
       const parent = findParentNode(fileNode, folderData![0])
 
       if (parent?.children) {
-        await invoke(fileNode.kind === 'dir' ? 'delete_folder' : 'delete_file', {
+        const result = await invoke<{ code: FileResultCode; content: string } | string>(fileNode.kind === 'dir' ? 'delete_folder' : 'delete_file', {
           filePath: fileNode.path,
         })
+        if (typeof result !== 'string' && result.code !== FileResultCode.Success) {
+          throw new Error(result.content)
+        }
+        // The legacy delete_file response is always "OK". Confirm removal
+        // before the tree drops its cache and persistent recent-file entry.
+        if (await invoke<boolean>('file_exists', { filePath: fileNode.path })) {
+          throw new Error(`Failed to delete ${fileNode.path}`)
+        }
 
-        delOpenedFile(fileNode!.id)
-        set((state) => {
-          return {
-            ...state,
-            activeId: activeId === fileNode!.id ? opened[opened.length - 1] : activeId,
-          }
-        })
+        delOpenedFile(fileNode.id)
       }
     },
 
     trashNode: async (fileNode) => {
-      const { folderData, activeId, delOpenedFile, opened } = get()
+      const { folderData, delOpenedFile } = get()
       const parent = findParentNode(fileNode, folderData![0])
 
       if (parent?.children) {
-        await invoke('trash_delete', {
+        const deleted = await invoke<boolean>('trash_delete', {
           path: fileNode.path,
         })
+        if (!deleted) throw new Error(`Failed to move ${fileNode.path} to trash`)
 
-        delOpenedFile(fileNode!.id)
-        set((state) => {
-          return {
-            ...state,
-            activeId: activeId === fileNode!.id ? opened[opened.length - 1] : activeId,
-          }
-        })
+        delOpenedFile(fileNode.id)
       }
     },
 

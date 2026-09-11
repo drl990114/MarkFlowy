@@ -12,6 +12,7 @@
     "loading": "Chargement des fichiers de l’espace de travail…",
     "load_error": "Impossible de charger les fichiers de l’espace de travail",
     "empty": "Aucun fichier correspondant",
+    "no_recent": "Aucun fichier récemment ouvert. Saisissez un nom de fichier pour rechercher dans l’espace de travail.",
     "no_workspace": "Ouvrez un espace de travail pour rechercher ses fichiers",
     "show_more": "Afficher plus ({{count}} restants)",
     "keyboard_hint": "↑ ↓ pour naviguer · Entrée pour ouvrir · Échap pour fermer"

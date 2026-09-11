@@ -51,6 +51,7 @@ import { normalizeClonedExportColors } from './exportColors'
 import { i18n, useTranslation } from '@/i18n'
 import { captureException } from '@/services/error-reporting'
 import { useEditorStateStore, useEditorStore } from '@/stores'
+import useRecentFilesStore from '@/stores/useRecentFilesStore'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import useEditorCounterStore from '@/stores/useEditorCounterStore'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
@@ -1496,6 +1497,7 @@ function TextEditor(props: TextEditorProps) {
         const res = snapshot.result
         finishEditorOpenMeasurement(openRequestId, 'error')
         if (res.code === FileResultCode.NotFound) {
+          useRecentFilesStore.getState().removePath(file.path)
           return setStatus(TextEditorStatus.NOTEXIST)
         }
         if (String(res.code) === 'Binary') {

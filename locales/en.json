@@ -12,6 +12,7 @@
     "loading": "Loading workspace files…",
     "load_error": "Couldn’t load workspace files",
     "empty": "No matching files",
+    "no_recent": "No recently opened files. Type a filename to search the workspace.",
     "no_workspace": "Open a workspace to search its files",
     "show_more": "Show more ({{count}} remaining)",
     "keyboard_hint": "↑ ↓ to navigate · Enter to open · Esc to close"

@@ -2,6 +2,7 @@ import { getFileObject, getFileObjectByPath, getFileIdsByPathIdentity } from '@/
 import { createFile, type IFile } from '@/helper/filesys'
 import { getPathIdentityKey } from '@/helper/pathIdentity'
 import useEditorStore from '@/stores/useEditorStore'
+import useRecentFilesStore, { getRecentFileKey } from '@/stores/useRecentFilesStore'
 import { invoke } from '@tauri-apps/api/core'
 import { defaultFilter } from 'cmdk'
 
@@ -48,6 +49,57 @@ export function getOpenedQuickOpenFiles(rootPath?: string): QuickOpenFile[] {
   })
 }
 
+export function getRecentQuickOpenFiles(rootPath?: string): QuickOpenFile[] {
+  const history = useRecentFilesStore.getState()
+  if (history.rootPath !== rootPath) return []
+  const opened = new Map(getOpenedQuickOpenFiles(rootPath).map((file) => [file.id, file]))
+  return history.entries.flatMap((entry) => {
+    const id = getRecentFileKey(entry)
+    const liveFile = opened.get(id)
+    if (liveFile) return [liveFile]
+    if (!entry.path) return []
+    const name = entry.path.replace(/\\/g, '/').split('/').pop() || entry.path
+    return [
+      {
+        id,
+        name,
+        path: entry.path,
+        relativePath: relativePath(entry.path, rootPath),
+        ext: name.includes('.') ? name.split('.').pop() : '',
+      },
+    ]
+  })
+}
+
+/** Unavailable history is hidden for this popup only; failures never erase history. */
+export async function checkRecentQuickOpenFiles(
+  files: readonly QuickOpenFile[],
+  signal: AbortSignal,
+  onUnavailable: (id: string) => void,
+): Promise<void> {
+  const closedFiles = files.filter((file) => file.path && !file.fileId)
+  let nextIndex = 0
+  const worker = async () => {
+    while (!signal.aborted && nextIndex < closedFiles.length) {
+      const file = closedFiles[nextIndex++]
+      let exists = false
+      try {
+        exists = await invoke<boolean>('file_exists', { filePath: file.path })
+      } catch {
+        // A disconnected volume or permission error is not evidence of deletion.
+      }
+      if (
+        !signal.aborted &&
+        !exists &&
+        !getOpenedQuickOpenFiles().some((open) => open.id === file.id)
+      ) {
+        onUnavailable(file.id)
+      }
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(8, closedFiles.length) }, worker))
+}
+
 export async function loadQuickOpenFiles(
   rootPath: string,
   fileExcludePatterns: string,
@@ -69,19 +121,21 @@ export async function loadQuickOpenFiles(
     }))
 }
 
-export function mergeQuickOpenFiles(
-  opened: QuickOpenFile[],
-  workspace: QuickOpenFile[],
-): QuickOpenFile[] {
+export function mergeQuickOpenFiles(...sources: readonly QuickOpenFile[][]): QuickOpenFile[] {
   const files = new Map<string, QuickOpenFile>()
-  for (const file of [...opened, ...workspace]) {
+  for (const file of sources.flat()) {
     if (!files.has(file.id)) files.set(file.id, file)
   }
   return [...files.values()]
 }
 
-export function rankQuickOpenFiles(files: QuickOpenFile[], query: string): QuickOpenFile[] {
+export function rankQuickOpenFiles(
+  files: QuickOpenFile[],
+  query: string,
+  recentIds: readonly string[] = [],
+): QuickOpenFile[] {
   const search = query.trim().replace(/\\/g, '/')
+  const recency = new Map(recentIds.map((id, index) => [id, index]))
   return files
     .map((file) => ({
       file,
@@ -96,10 +150,10 @@ export function rankQuickOpenFiles(files: QuickOpenFile[], query: string): Quick
     .sort(
       (a, b) =>
         b.score - a.score ||
+        (recency.get(a.file.id) ?? recentIds.length) -
+          (recency.get(b.file.id) ?? recentIds.length) ||
         Number(Boolean(b.file.fileId)) - Number(Boolean(a.file.fileId)) ||
-        (a.file.fileId && b.file.fileId
-          ? 0
-          : a.file.relativePath.localeCompare(b.file.relativePath)),
+        a.file.relativePath.localeCompare(b.file.relativePath),
     )
     .map(({ file }) => file)
 }

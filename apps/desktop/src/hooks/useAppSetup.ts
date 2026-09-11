@@ -6,9 +6,8 @@ import {
 import bus from '@/helper/eventBus'
 import { loadLocalThemeCss } from '@/helper/extensions'
 import { hasFileExcludePatternsChanged } from '@/helper/file-exclude'
-import useFileCacheStore, { getFileObject, getFileObjectByPath } from '@/helper/files'
+import { getFileObjectByPath } from '@/helper/files'
 import {
-  createFile,
   getFileNameFromPath,
   readDirectory,
   releaseSecurityScope,
@@ -19,6 +18,14 @@ import { i18nInit, t } from '@/i18n'
 import { appSettingStoreSetup } from '@/services/app-setting'
 import { guardUnsavedFilesAsync } from '@/services/checkUnsavedFiles'
 import { addExistingMarkdownFileEdit } from '@/services/editor-file'
+import { restoreRecentFileHistory } from '@/services/recent-files'
+import {
+  createWorkspaceCachePersistence,
+  restoreWorkspaceCache,
+  type WorkspaceCache,
+  type WorkspaceCachePersistence,
+} from '@/services/workspace-cache'
+import useRecentFilesStore from '@/stores/useRecentFilesStore'
 import {
   OPEN_WORKSPACE_EXPLORER_EVENT,
   setWorkspaceSwitchHandler,
@@ -44,13 +51,11 @@ import {
 } from '@/startup/themeExtensionScheduler'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import useLayoutStore from '@/stores/useLayoutStore'
-import type { EditorLayoutNode } from '@/stores/useEditorStore'
 import type { WorkspaceInfo } from '@/stores/useOpenedCacheStore'
 import useOpenedCacheStore from '@/stores/useOpenedCacheStore'
 import { invoke } from '@tauri-apps/api/core'
 import { getCurrentWebview } from '@tauri-apps/api/webview'
 import { LazyStore } from '@tauri-apps/plugin-store'
-import { nanoid } from 'nanoid'
 import { useCallback, useEffect, useSyncExternalStore } from 'react'
 import { flushSync } from 'react-dom'
 import { toast } from 'zens'
@@ -87,255 +92,12 @@ interface CliCommandPayload {
   id: string
 }
 
-type PersistedEditorLayoutNode =
-  | {
-      type: 'branch'
-      id?: string
-      direction: 'horizontal' | 'vertical'
-      sizes?: number[]
-      children: PersistedEditorLayoutNode[]
-    }
-  | {
-      type: 'leaf'
-      id?: string
-      openedFilePaths?: string[]
-      activeFilePath?: string
-    }
-
-interface WorkspaceCache {
-  version?: number
-  openedFilePaths?: string[]
-  activeFilePath?: string
-  editorLayout?: PersistedEditorLayoutNode
-  activeGroupId?: string
-}
-
-type EditorStoreSnapshot = ReturnType<typeof useEditorStore.getState>
-
-type WorkspaceCacheDraft = {
-  activeGroupId?: string
-  activeId?: string
-  editorLayout: EditorLayoutNode
-  openedFiles: {
-    id: string
-    name?: string
-    path?: string
-  }[]
-  rootPath?: string
-}
-
-type WorkspaceCachePersistence = {
-  dispose: () => Promise<void>
-  flush: () => Promise<void>
-  getWorkspaceCache: (path: string) => Promise<WorkspaceCache | undefined>
-}
-
-const WORKSPACE_CACHE_SAVE_DEBOUNCE_MS = 800
 let workspaceCachePersistence: WorkspaceCachePersistence | undefined
 
 const getExtFromPath = (path: string) => {
   const fileName = getFileNameFromPath(path) || ''
   const dotIndex = fileName.lastIndexOf('.')
   return dotIndex > -1 ? fileName.slice(dotIndex + 1) : ''
-}
-
-const ensureCachedFileByPath = (path: string) => {
-  const existingFile = getFileObjectByPath(path)
-  if (existingFile) {
-    return existingFile
-  }
-
-  return createFile({
-    name: getFileNameFromPath(path) || 'new-file.md',
-    ext: getExtFromPath(path),
-    path,
-  })
-}
-
-const serializeEditorLayout = (
-  node: EditorLayoutNode,
-  filePathsById: ReadonlyMap<string, string | undefined>,
-): PersistedEditorLayoutNode => {
-  if (node.type === 'leaf') {
-    return {
-      type: 'leaf',
-      id: node.id,
-      openedFilePaths: node.opened
-        .map((fileId) => filePathsById.get(fileId))
-        .filter((path): path is string => Boolean(path)),
-      activeFilePath: node.activeId ? filePathsById.get(node.activeId) : undefined,
-    }
-  }
-
-  return {
-    type: 'branch',
-    id: node.id,
-    direction: node.direction,
-    sizes: node.sizes,
-    children: node.children.map((child) => serializeEditorLayout(child, filePathsById)),
-  }
-}
-
-const selectWorkspaceCacheDraft = (state: EditorStoreSnapshot): WorkspaceCacheDraft => {
-  const openedFiles = state.opened.map((id) => {
-    const file = getFileObject(id)
-
-    return {
-      id,
-      name: file?.name,
-      path: file?.path,
-    }
-  })
-
-  return {
-    activeGroupId: state.activeGroupId,
-    activeId: state.activeId,
-    editorLayout: state.editorLayout,
-    openedFiles,
-    rootPath: state.getRootPath(),
-  }
-}
-
-const isSameOpenedFiles = (
-  prev: WorkspaceCacheDraft['openedFiles'],
-  next: WorkspaceCacheDraft['openedFiles'],
-) => {
-  if (prev === next) return true
-  if (prev.length !== next.length) return false
-
-  return prev.every((file, index) => {
-    const nextFile = next[index]
-    return file.id === nextFile.id && file.name === nextFile.name && file.path === nextFile.path
-  })
-}
-
-const isSameWorkspaceCacheDraft = (prev: WorkspaceCacheDraft, next: WorkspaceCacheDraft) => {
-  return (
-    prev.activeGroupId === next.activeGroupId &&
-    prev.activeId === next.activeId &&
-    prev.editorLayout === next.editorLayout &&
-    prev.rootPath === next.rootPath &&
-    isSameOpenedFiles(prev.openedFiles, next.openedFiles)
-  )
-}
-
-const persistWorkspaceCache = async (
-  cacheStore: LazyStore,
-  { activeGroupId, activeId, editorLayout, openedFiles, rootPath }: WorkspaceCacheDraft,
-) => {
-  if (!rootPath) return
-
-  const openedFilePaths = openedFiles
-    .map((file) => file.path)
-    .filter((path): path is string => Boolean(path))
-  const filePathsById = new Map(openedFiles.map((file) => [file.id, file.path]))
-
-  await cacheStore.set(rootPath, {
-    version: 2,
-    openedFilePaths,
-    activeFilePath: activeId ? filePathsById.get(activeId) || '' : '',
-    editorLayout: serializeEditorLayout(editorLayout, filePathsById),
-    activeGroupId,
-  })
-  await cacheStore.save()
-}
-
-const createWorkspaceCachePersistence = (cacheStore: LazyStore): WorkspaceCachePersistence => {
-  let cacheSaveTimer: number | undefined
-  let isDisposed = false
-  let latestDraft = selectWorkspaceCacheDraft(useEditorStore.getState())
-  let pendingDraft: WorkspaceCacheDraft | undefined
-  let saveQueue = Promise.resolve()
-
-  const clearSaveTimer = () => {
-    if (cacheSaveTimer === undefined) return
-
-    window.clearTimeout(cacheSaveTimer)
-    cacheSaveTimer = undefined
-  }
-
-  const enqueueSave = (cacheDraft: WorkspaceCacheDraft) => {
-    saveQueue = saveQueue
-      .then(() => persistWorkspaceCache(cacheStore, cacheDraft))
-      .catch((error) => {
-        logger.error('Failed to persist workspace cache', cacheDraft.rootPath, error)
-      })
-  }
-
-  const enqueuePendingDraft = () => {
-    clearSaveTimer()
-    if (!pendingDraft) return
-
-    const cacheDraft = pendingDraft
-    pendingDraft = undefined
-    enqueueSave(cacheDraft)
-  }
-
-  const scheduleSave = (cacheDraft: WorkspaceCacheDraft) => {
-    if (isDisposed) return
-
-    if (pendingDraft && pendingDraft.rootPath !== cacheDraft.rootPath) {
-      enqueuePendingDraft()
-    }
-
-    pendingDraft = cacheDraft
-    clearSaveTimer()
-    cacheSaveTimer = window.setTimeout(() => {
-      enqueuePendingDraft()
-    }, WORKSPACE_CACHE_SAVE_DEBOUNCE_MS)
-  }
-
-  const handleDraftChange = (cacheDraft: WorkspaceCacheDraft) => {
-    if (isSameWorkspaceCacheDraft(latestDraft, cacheDraft)) return
-
-    latestDraft = cacheDraft
-    scheduleSave(cacheDraft)
-  }
-
-  const unsubscribeEditorStore = useEditorStore.subscribe(
-    selectWorkspaceCacheDraft,
-    handleDraftChange,
-    { equalityFn: isSameWorkspaceCacheDraft },
-  )
-  const unsubscribeFileCache = useFileCacheStore.subscribe((state, previousState) => {
-    if (state.metadataRevision === previousState.metadataRevision) return
-
-    handleDraftChange(selectWorkspaceCacheDraft(useEditorStore.getState()))
-  })
-
-  const flush = async () => {
-    enqueuePendingDraft()
-    await saveQueue
-  }
-
-  const getWorkspaceCache = (path: string) => {
-    enqueuePendingDraft()
-    const result = saveQueue.then(() => cacheStore.get<WorkspaceCache>(path))
-    saveQueue = result
-      .then(() => undefined)
-      .catch((error) => {
-        logger.error('Failed to load workspace cache', path, error)
-      })
-    return result
-  }
-
-  return {
-    flush,
-    getWorkspaceCache,
-    dispose: async () => {
-      if (isDisposed) return
-
-      isDisposed = true
-      unsubscribeEditorStore()
-      unsubscribeFileCache()
-      await flush()
-      try {
-        await cacheStore.close()
-      } catch (error) {
-        logger.error('Failed to close workspace cache store', error)
-      }
-    },
-  }
 }
 
 const setupWorkspaceCachePersistence = async (cacheStore: LazyStore) => {
@@ -349,89 +111,6 @@ const disposeWorkspaceCachePersistence = async () => {
   setWorkspaceSwitchHandler()
   workspaceCachePersistence = undefined
   await persistence?.dispose()
-}
-
-const hydrateEditorLayout = (node: PersistedEditorLayoutNode): EditorLayoutNode => {
-  if (node.type === 'leaf') {
-    const opened = (node.openedFilePaths || []).map((path) => ensureCachedFileByPath(path).id)
-    const activeId = node.activeFilePath
-      ? ensureCachedFileByPath(node.activeFilePath).id
-      : opened[0]
-
-    return {
-      type: 'leaf',
-      id: node.id || nanoid(),
-      opened,
-      activeId,
-    }
-  }
-
-  const children = node.children.map(hydrateEditorLayout)
-  const sizes =
-    node.sizes?.length === children.length
-      ? node.sizes
-      : children.map(() => 100 / Math.max(children.length, 1))
-
-  return {
-    type: 'branch',
-    id: node.id || nanoid(),
-    direction: node.direction,
-    sizes,
-    children,
-  }
-}
-
-type HydratedWorkspaceCache =
-  | {
-      activeGroupId?: string
-      editorLayout: EditorLayoutNode
-      openedIds?: never
-      activeId?: never
-    }
-  | {
-      activeId?: string
-      openedIds: string[]
-      activeGroupId?: never
-      editorLayout?: never
-    }
-
-const hydrateWorkspaceCache = (
-  workspaceCache?: WorkspaceCache,
-): HydratedWorkspaceCache | undefined => {
-  if (!workspaceCache) return undefined
-
-  const { openedFilePaths, activeFilePath, editorLayout, activeGroupId } = workspaceCache
-
-  if (editorLayout) {
-    return {
-      activeGroupId,
-      editorLayout: hydrateEditorLayout(editorLayout),
-    }
-  }
-
-  if (!openedFilePaths) return undefined
-
-  const openedIds = openedFilePaths.map((path) => ensureCachedFileByPath(path).id)
-  const activeId = activeFilePath ? ensureCachedFileByPath(activeFilePath).id : undefined
-
-  return { activeId, openedIds }
-}
-
-const applyHydratedWorkspaceCache = (workspaceCache?: HydratedWorkspaceCache) => {
-  if (!workspaceCache) return
-
-  const { addOpenedFile, setActiveId, setEditorLayout } = useEditorStore.getState()
-  if (workspaceCache.editorLayout) {
-    setEditorLayout(workspaceCache.editorLayout, workspaceCache.activeGroupId)
-    return
-  }
-
-  workspaceCache.openedIds.forEach(addOpenedFile)
-
-  if (workspaceCache.activeId) {
-    addOpenedFile(workspaceCache.activeId)
-    setActiveId(workspaceCache.activeId)
-  }
 }
 
 async function performWorkspaceSwitch(path: string) {
@@ -462,6 +141,7 @@ async function performWorkspaceSwitch(path: string) {
             lease.enableOtherEditorBarrier()
           })
 
+          const previousRecentFiles = useRecentFilesStore.getState().entries
           await persistence.flush()
           await invoke<boolean>('save_security_bookmark', { path })
           await invoke<boolean>('activate_workspace_root', { rootPath: path })
@@ -471,11 +151,8 @@ async function performWorkspaceSwitch(path: string) {
               persistence.getWorkspaceCache(path),
               readDirectory(path),
             ])
-            const hydratedWorkspaceCache = hydrateWorkspaceCache(workspaceCache)
-
             await persistence.flush()
-            useEditorStore.getState().setFolderData(folderData)
-            applyHydratedWorkspaceCache(hydratedWorkspaceCache)
+            restoreWorkspaceCache(workspaceCache, folderData)
 
             await useOpenedCacheStore
               .getState()
@@ -496,10 +173,12 @@ async function performWorkspaceSwitch(path: string) {
               })
             }
 
-            useEditorStore.getState().setFolderData(previousEditorState.folderData)
-            useEditorStore
-              .getState()
-              .setEditorLayout(previousEditorState.editorLayout, previousEditorState.activeGroupId)
+            restoreRecentFileHistory(() => {
+              useEditorStore.getState().setFolderData(previousEditorState.folderData)
+              useEditorStore
+                .getState()
+                .setEditorLayout(previousEditorState.editorLayout, previousEditorState.activeGroupId)
+            }, previousRecentFiles)
             throw error
           }
         },
@@ -671,7 +350,6 @@ const throwIfStartupCancelled = (signal: AbortSignal) => {
 
 async function appWorkspaceSetup(signal: AbortSignal) {
   const { setRecentWorkspaces } = useOpenedCacheStore.getState()
-  const { setFolderData } = useEditorStore.getState()
   logger.debug('==== appWorkspaceSetup: Checking window.openedUrls ===')
   logger.debug('window.openedUrls', window.openedUrls)
 
@@ -727,11 +405,8 @@ async function appWorkspaceSetup(signal: AbortSignal) {
         ])
         throwIfStartupCancelled(signal)
         logger.debug('Cache store init result:', workspaceCache)
-        const hydratedWorkspaceCache = hydrateWorkspaceCache(workspaceCache)
-
         logger.debug('Directory read successfully, file count:', res.length)
-        setFolderData(res)
-        applyHydratedWorkspaceCache(hydratedWorkspaceCache)
+        restoreWorkspaceCache(workspaceCache, res)
       } catch (error) {
         logger.error('Failed to read directory:', targetWorkspacePath, error)
         logger.error('This might be due to sandbox restrictions or the directory no longer exists')

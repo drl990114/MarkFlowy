@@ -12,6 +12,7 @@
     "loading": "正在加载工作区文件…",
     "load_error": "无法加载工作区文件",
     "empty": "没有匹配的文件",
+    "no_recent": "暂无最近打开的文件，输入文件名搜索工作区",
     "no_workspace": "打开工作区后即可搜索文件",
     "show_more": "显示更多（剩余 {{count}} 项）",
     "keyboard_hint": "↑ ↓ 选择 · Enter 打开 · Esc 关闭"
