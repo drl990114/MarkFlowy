@@ -1,5 +1,6 @@
+import { bindEditorResume, bindSourceEditorResume } from './editorResume'
 import { setSourceCodeEditor } from './sourceCodeEditorRegistry'
-import { reportEditorSearchLoadFailure } from './editorSearchStore'
+import { reportEditorSearchLoadFailure, useEditorSearchStore } from './editorSearchStore'
 import { commandRegistry } from '@/commands'
 import { capricornClipboard, handleCapricornClipboardResult } from './capricornClipboard'
 import { AppEditorThemeProvider } from '@/AppThemeProvider'
@@ -1016,6 +1017,9 @@ function TextEditor(props: TextEditorProps) {
     textEditorInstanceSeq += 1
     instanceIdRef.current = `text-editor-${textEditorInstanceSeq}`
   }
+  const editorWrapperRef = useRef<HTMLDivElement>(null)
+  const [resumeSource, setResumeSource] = useState<MfCodemirrorView | null>(null)
+  const [resumeCapricorn, setResumeCapricorn] = useState<CapricornRuntimeAdapter | null>(null)
   const activeRef = useRef(active)
   activeRef.current = active
   const visibleRef = useRef(visible)
@@ -1039,6 +1043,7 @@ function TextEditor(props: TextEditorProps) {
         clipboardReadFunction: clipboardRead,
         currentDateFormat: getCurrentEditorInsertDateFormat,
         onCodemirrorViewLoad: (cmView) => {
+          setResumeSource(cmView)
           registerSourceCodeViewResource(id, instanceIdRef.current!, cmView, activeRef.current)
         },
         typewriterScroll: {
@@ -1921,6 +1926,7 @@ function TextEditor(props: TextEditorProps) {
                   clipboardReadFunction: clipboardRead,
                   currentDateFormat: getCurrentEditorInsertDateFormat,
                   onCodemirrorViewLoad: (cmView) => {
+                    setResumeSource(cmView)
                     registerSourceCodeViewResource(
                       curFile.id,
                       instanceIdRef.current!,
@@ -2646,6 +2652,7 @@ function TextEditor(props: TextEditorProps) {
     (editor: CapricornRuntimeAdapter | null) => {
       const instanceId = instanceIdRef.current!
       capricornRuntimeAdapterRef.current = editor
+      setResumeCapricorn(editor)
       if (editor) {
         registerCapricornEditorResource(id, instanceId, editor, activeRef.current)
       } else {
@@ -2655,6 +2662,52 @@ function TextEditor(props: TextEditorProps) {
     },
     [capricornStatisticsScheduler, id],
   )
+
+  useEffect(() => {
+    if (!filePath || !visible || status !== TextEditorStatus.SUCCESS) return
+    const options = {
+      path: filePath,
+      group: groupId ?? '',
+      isVisible: () => visibleRef.current,
+      shouldRestore: () => {
+        const navigation = useEditorSearchStore.getState().navigation
+        return navigation?.fileId !== id || navigation.groupId !== groupId
+      },
+    }
+    if (currentViewType === EditorViewType.SOURCECODE && resumeSource?.cm?.dom.isConnected) {
+      return bindSourceEditorResume(resumeSource.cm, options)
+    }
+    const resume = resumeCapricorn?.resume
+    const container = editorWrapperRef.current?.querySelector<HTMLElement>(
+      '[data-mf-capricorn-runtime]',
+    )
+    if (!isCapricornView(currentViewType)) {
+      if (currentViewType !== EditorViewType.PREVIEW || !editorWrapperRef.current) return
+      return bindEditorResume({
+        ...options,
+        container: editorWrapperRef.current,
+        mode: 'preview',
+        isComposing: () => false,
+        captureSelection: () => undefined,
+        restoreSelection: () => {},
+        subscribeSelection: () => () => {},
+      })
+    }
+    if (!resume || !container) return
+    return bindEditorResume({
+      ...options,
+      container,
+      mode: currentViewType === EditorViewType.PREVIEW ? 'preview' : 'edit',
+      isComposing: () => resumeCapricorn.isComposing(),
+      captureSelection: () =>
+        currentViewType === EditorViewType.PREVIEW ? undefined : resume.capture(),
+      restoreSelection: (selection) => {
+        if (currentViewType !== EditorViewType.PREVIEW) resume.restore(selection)
+      },
+      subscribeSelection: resume.subscribe,
+      waitForResources: () => resumeCapricorn.waitForResources(),
+    })
+  }, [currentViewType, filePath, groupId, id, resumeCapricorn, resumeSource, status, visible])
 
   const getExportContent = useCallback(() => {
     return useEditorStore.getState().getEditorContent(id)
@@ -2689,6 +2742,7 @@ function TextEditor(props: TextEditorProps) {
   return (
     <>
       <EditorWrapper
+        ref={editorWrapperRef}
         id='editorarea-wrapper'
         className={cls}
         $editorViewType={currentViewType}

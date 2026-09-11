@@ -142,9 +142,7 @@ describe('useBookMarksStore undoable removal', () => {
     vi.advanceTimersByTime(BOOKMARK_UNDO_DURATION_MS)
     await Promise.resolve()
 
-    expect(useBookMarksStore.getState().pendingRemovals[firstBookmark.id]?.phase).toBe(
-      'committing',
-    )
+    expect(useBookMarksStore.getState().pendingRemovals[firstBookmark.id]?.phase).toBe('committing')
     await useBookMarksStore.getState().getBookMarkList()
     expect(useBookMarksStore.getState().bookMarkList).toEqual([])
 
@@ -178,5 +176,19 @@ describe('useBookMarksStore undoable removal', () => {
       mutationError: null,
     })
     expect(mocks.invoke).toHaveBeenCalledTimes(2)
+  })
+})
+
+describe('bookmark view persistence', () => {
+  it('restores tag mode and expanded tags without persisting transient removal operations', async () => {
+    useBookMarksStore.getState().setViewMode('tags')
+    useBookMarksStore.getState().toggleTag('work')
+    const saved = localStorage.getItem('mf:desktop:bookmarks-view')!
+    expect(JSON.parse(saved).state).toEqual({ viewMode: 'tags', expandedTags: ['work'] })
+    useBookMarksStore.setState({ viewMode: 'list', expandedTags: [] })
+    localStorage.setItem('mf:desktop:bookmarks-view', saved)
+    await useBookMarksStore.persist.rehydrate()
+    expect(useBookMarksStore.getState().viewMode).toBe('tags')
+    expect(useBookMarksStore.getState().expandedTags).toEqual(['work'])
   })
 })

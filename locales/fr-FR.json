@@ -331,6 +331,13 @@
     "search_empty": "Aucun réglage correspondant",
     "search_results": "{{count}} résultats",
     "general": {
+      "startup": {
+        "label": "Démarrage",
+        "left": "Barre latérale gauche au démarrage",
+        "right": "Barre latérale droite au démarrage",
+        "restore": "Restaurer le dernier état",
+        "description": "Appliqué au prochain démarrage. La restauration mémorise le panneau sélectionné et son état ouvert ou fermé."
+      },
       "label": "général",
       "app": {
         "label": "application",

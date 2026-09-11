@@ -7,6 +7,9 @@ import { Dialog } from '@/components/ui/dialog'
 import { Popover } from '@/components/ui/popover'
 import { Select } from '@/components/ui/select'
 import type { OpenSettingTarget } from '@/extensions/ai/aiProvidersService'
+import { dialog as dialogService } from '@/services/dialog'
+import useLayoutStore from '@/stores/useLayoutStore'
+import { invoke } from '@tauri-apps/api/core'
 import Setting from '.'
 import FileExcludePatterns from './component/SettingItems/FileExcludePatterns'
 import { SettingRouteController, type SettingRouteState } from './component/SettingRouteController'
@@ -36,6 +39,7 @@ vi.mock('@/i18n', () => ({
 }))
 vi.mock('@/helper/updater', () => ({ installUpdate: vi.fn() }))
 vi.mock('@/services/dialog', () => ({ dialog: { confirm: vi.fn() } }))
+vi.mock('@tauri-apps/api/core', () => ({ invoke: vi.fn() }))
 vi.mock('@/services/app-setting', () => ({
   appSettingStoreSetup: vi.fn(),
   default: { writeSettingData: state.writeSettingData },
@@ -178,6 +182,30 @@ function pressEscape(target: Element = document.activeElement ?? document.body) 
 }
 
 describe('Settings dialog integration', () => {
+  it('resets startup preferences after resetting app configuration without moving the current panels', async () => {
+    useLayoutStore.setState({ leftStartup: 'search', rightStartup: 'ai' })
+    const leftBar = useLayoutStore.getState().leftBar
+    const rightBar = useLayoutStore.getState().rightBar
+    vi.mocked(dialogService.confirm).mockResolvedValue('confirm')
+    vi.mocked(invoke).mockResolvedValue(undefined)
+    render(
+      <MemoryRouter>
+        <AppProbe />
+      </MemoryRouter>,
+    )
+    const settings = await openSettings()
+    fireEvent.click(within(settings).getByRole('button', { name: 'settings.resetAppConf.label' }))
+    await waitFor(() =>
+      expect(useLayoutStore.getState()).toMatchObject({
+        leftStartup: 'restore',
+        rightStartup: 'restore',
+        leftBar,
+        rightBar,
+      }),
+    )
+    expect(invoke).toHaveBeenCalledWith('reset_app_conf')
+  })
+
   it('keeps the workspace and unsaved draft alive, then restores editor focus on close', async () => {
     const { container } = render(
       <StrictMode>

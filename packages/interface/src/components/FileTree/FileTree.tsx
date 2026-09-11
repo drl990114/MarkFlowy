@@ -3,6 +3,7 @@ import React, {
   memo,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -52,6 +53,9 @@ function FileTreeNodeRenderer(props: NodeRendererProps<IFile>) {
 
 export interface FileTreeProps {
   data: IFile[]
+  /** Persistent directory paths supplied by the host; IDs may change between sessions. */
+  expandedPaths?: readonly string[]
+  onExpandedPathsChange?: (paths: string[]) => void
   onSelect: (file: IFile) => void
   dndRootElement?: Node | null
   disableDrag?: boolean
@@ -113,6 +117,8 @@ export const fileTreeHandler: {
 const FileTree: FC<FileTreeProps> = (props) => {
   const {
     data,
+    expandedPaths,
+    onExpandedPathsChange,
     onSelect,
     dndRootElement,
     disableDrag = false,
@@ -167,8 +173,18 @@ const FileTree: FC<FileTreeProps> = (props) => {
       ),
     [],
   )
+  const rootPath = data[0]?.path
   const rootId = data[0]?.id
-  const initialOpenState = useMemo(() => (rootId ? { [rootId]: true } : {}), [rootId])
+  const openPathsRef = useRef(new Set(expandedPaths ?? (data[0]?.path ? [data[0].path] : [])))
+  const initialOpenState = useMemo(
+    () =>
+      rootId
+        ? {
+            [rootId]: expandedPaths ? expandedPaths.includes(rootPath ?? '') : true,
+          }
+        : {},
+    [rootId, rootPath, expandedPaths],
+  )
   const revealRoot = useCallback(() => setShowStickyRoot(false), [])
   const fileTreeRowState = useMemo<FileTreeRowState>(
     () => ({ revealRoot, rootId, suppressRoot: stickyRoot && showStickyRoot }),
@@ -185,8 +201,6 @@ const FileTree: FC<FileTreeProps> = (props) => {
     [stickyRoot],
   )
 
-  if (data === null || data.length === 0) return null
-
   const onToggle: TreeProps<IFile>['onToggle'] = async (id: string) => {
     if (stickyRoot && showStickyRoot && id === rootId) {
       setStickyRootRevision((current) => current + 1)
@@ -197,7 +211,13 @@ const FileTree: FC<FileTreeProps> = (props) => {
 
     const nodeData = node.data as IFile
     if (nodeData.kind !== 'dir' || !nodeData.path) return
-    if (!treeRef.current?.isOpen(id)) return
+    const isOpen = Boolean(treeRef.current?.isOpen(id))
+    if (openPathsRef.current.has(nodeData.path) !== isOpen) {
+      if (isOpen) openPathsRef.current.add(nodeData.path)
+      else openPathsRef.current.delete(nodeData.path)
+      onExpandedPathsChange?.([...openPathsRef.current])
+    }
+    if (!isOpen) return
     const workspaceRootId = data[0]?.id
     const target = captureFileMutationTarget(nodeData)
     if (!workspaceRootId || !target) return
@@ -258,6 +278,34 @@ const FileTree: FC<FileTreeProps> = (props) => {
       }
     }
   }
+
+  useEffect(
+    () => () => {
+      loadedDirsCacheVersionRef.current += 1
+      loadingDirsRef.current.clear()
+    },
+    [],
+  )
+
+  const toggleRef = useRef(onToggle)
+  toggleRef.current = onToggle
+  useEffect(() => {
+    if (!expandedPaths || !treeRef.current) return
+    const api = treeRef.current
+    const desiredPaths = new Set(expandedPaths)
+    openPathsRef.current = desiredPaths
+    const restoreChildren = (nodes: IFile[]) => {
+      for (const node of nodes) {
+        if (node.kind !== 'dir' || !node.path || !desiredPaths.has(node.path)) continue
+        if (!api.isOpen(node.id)) api.open(node.id)
+        // Initial root state doesn't fire Arborist's onToggle. Reuse its lazy
+        // loader, which also guards duplicate and stale directory responses.
+        else void toggleRef.current?.(node.id)
+        if (node.children) restoreChildren(node.children)
+      }
+    }
+    restoreChildren(data)
+  }, [data, expandedPaths])
 
   const onMove: TreeProps<IFile>['onMove'] = async (args) => {
     if (disableFileOperations) return
@@ -459,6 +507,8 @@ const FileTree: FC<FileTreeProps> = (props) => {
     }
     return renderFileNode(nodeProps, isRoot, false, isRoot && showStickyRoot)
   }
+
+  if (data.length === 0) return null
 
   return (
     <FileTreeNodeRendererContext.Provider value={renderTreeNode}>

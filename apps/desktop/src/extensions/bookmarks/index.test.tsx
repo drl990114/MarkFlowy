@@ -47,6 +47,8 @@ function resetStore() {
     clearTimeout(timeoutId)
   })
   useBookMarksStore.setState({
+    viewMode: 'list',
+    expandedTags: [],
     bookMarkList: [],
     failedRemoval: null,
     loadError: null,

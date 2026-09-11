@@ -4,7 +4,9 @@ import { StrictMode, useState, type ReactNode } from 'react'
 import { ThemeProvider } from 'styled-components'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type * as Zens from 'zens'
-import FileTree from '../../../../../packages/interface/src/components/FileTree/FileTree'
+import FileTree, {
+  fileTreeHandler,
+} from '../../../../../packages/interface/src/components/FileTree/FileTree'
 import { SimpleTree } from '../../../../../packages/interface/src/components/FileTree/types'
 import {
   FileSystemContext,
@@ -58,7 +60,16 @@ function FillFlexParent({
   return children({ width: 300, height: 260 })
 }
 
-function Harness({ initialChildren = [] }: { initialChildren?: IFile[] }) {
+function Harness({
+  initialChildren = [],
+  initialExpandedPaths,
+  onPathsChange,
+}: {
+  initialChildren?: IFile[]
+  initialExpandedPaths?: string[]
+  onPathsChange?: (paths: string[]) => void
+}) {
+  const [expandedPaths, setExpandedPaths] = useState(initialExpandedPaths)
   const [data, setData] = useState<IFile[]>([
     { id: 'root', kind: 'dir', name: 'Workspace', path: '/workspace', children: initialChildren },
   ])
@@ -83,6 +94,15 @@ function Harness({ initialChildren = [] }: { initialChildren?: IFile[] }) {
           <Container>
             <FileTree
               data={data}
+              expandedPaths={expandedPaths}
+              onExpandedPathsChange={
+                initialExpandedPaths
+                  ? (paths) => {
+                      setExpandedPaths(paths)
+                      onPathsChange?.(paths)
+                    }
+                  : undefined
+              }
               disableDrag
               fillFlexParentComponent={FillFlexParent}
               getFileObject={(id) => new SimpleTree(data).find(id)?.data}
@@ -334,5 +354,101 @@ describe('FileTree inline creation', () => {
     await waitFor(() =>
       expect(fileSystem.writeFile).toHaveBeenCalledWith('/workspace/Latest.md', ''),
     )
+  })
+})
+
+describe('FileTree saved directory restoration', () => {
+  it('loads only expanded branches, including descendants that receive new IDs on restart', async () => {
+    vi.mocked(fileSystem.readSubdirectory).mockImplementation(async (path) => {
+      if (path === '/workspace/docs')
+        return [
+          {
+            id: 'new-nested',
+            kind: 'dir',
+            name: 'Nested',
+            path: '/workspace/docs/nested',
+            children: [],
+          },
+        ]
+      if (path === '/workspace/docs/nested')
+        return [
+          {
+            id: 'new-note',
+            kind: 'file',
+            name: 'Restored.md',
+            path: '/workspace/docs/nested/note.md',
+          },
+        ]
+      return []
+    })
+    const onPathsChange = vi.fn()
+    const props = {
+      initialChildren: [
+        {
+          id: 'new-docs',
+          kind: 'dir' as const,
+          name: 'Docs',
+          path: '/workspace/docs',
+          children: [],
+        },
+        {
+          id: 'other',
+          kind: 'dir' as const,
+          name: 'Other',
+          path: '/workspace/other',
+          children: [],
+        },
+      ],
+      initialExpandedPaths: ['/workspace', '/workspace/docs', '/workspace/docs/nested'],
+      onPathsChange,
+    }
+    const first = render(<Harness {...props} />)
+    await screen.findByText('Restored.md')
+    expect(fileSystem.readSubdirectory).toHaveBeenCalledTimes(2)
+    expect(fileSystem.readSubdirectory).not.toHaveBeenCalledWith('/workspace/other')
+    act(() => fileTreeHandler.rootTree?.close('new-docs'))
+    expect(onPathsChange).toHaveBeenLastCalledWith(['/workspace', '/workspace/docs/nested'])
+    first.unmount()
+    vi.mocked(fileSystem.readSubdirectory).mockClear()
+    render(<Harness {...props} initialExpandedPaths={onPathsChange.mock.lastCall![0]} />)
+    expect(screen.queryByText('Restored.md')).toBeNull()
+    expect(fileSystem.readSubdirectory).not.toHaveBeenCalled()
+  })
+
+  it('keeps the root collapsed when the saved expansion list is empty', () => {
+    render(
+      <Harness
+        initialExpandedPaths={[]}
+        initialChildren={[
+          { id: 'doc', kind: 'file', name: 'Hidden.md', path: '/workspace/hidden.md' },
+        ]}
+      />,
+    )
+    expect(screen.getByText('Workspace')).toBeTruthy()
+    expect(screen.queryByText('Hidden.md')).toBeNull()
+    expect(fileSystem.readSubdirectory).not.toHaveBeenCalled()
+  })
+
+  it('ignores a delayed restored-directory response after unmount', async () => {
+    let resolve!: (files: IFile[]) => void
+    vi.mocked(fileSystem.readSubdirectory).mockReturnValue(
+      new Promise((done) => {
+        resolve = done
+      }),
+    )
+    const view = render(
+      <Harness
+        initialExpandedPaths={['/workspace', '/workspace/docs']}
+        initialChildren={[
+          { id: 'docs', kind: 'dir', name: 'Docs', path: '/workspace/docs', children: [] },
+        ]}
+      />,
+    )
+    await waitFor(() => expect(fileSystem.readSubdirectory).toHaveBeenCalledWith('/workspace/docs'))
+    view.unmount()
+    await act(async () =>
+      resolve([{ id: 'late', kind: 'file', name: 'Late.md', path: '/workspace/docs/late.md' }]),
+    )
+    expect(screen.queryByText('Late.md')).toBeNull()
   })
 })

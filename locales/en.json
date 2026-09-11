@@ -396,6 +396,13 @@
     "search_empty": "No matching settings",
     "search_results": "{{count}} results",
     "general": {
+      "startup": {
+        "label": "Startup",
+        "left": "Left sidebar on startup",
+        "right": "Right sidebar on startup",
+        "restore": "Restore last state",
+        "description": "Applies the next time the app starts. Restore remembers the selected panel and whether the sidebar was open."
+      },
       "label": "general",
       "app": {
         "label": "application",

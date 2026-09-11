@@ -9,6 +9,8 @@ beforeEach(() => {
   useLayoutStore.setState({
     leftBar: { activePanelId: 'explorer', size: 240, visible: true },
     rightBar: { activePanelId: 'toc', size: 280, visible: true },
+    leftStartup: 'restore',
+    rightStartup: 'restore',
     overlayDock: null,
     viewportMode: 'wide',
     zenModeActive: false,
@@ -70,7 +72,7 @@ describe('useLayoutStore Zen Mode state', () => {
 })
 
 describe('useLayoutStore Dock state', () => {
-  it('restores saved widths while starting with the file tree and table of contents open', async () => {
+  it('migrates the legacy raw cache and restores its selected panels and widths', async () => {
     localStorage.setItem(
       DOCK_PREFERENCES_STORAGE_KEY,
       JSON.stringify({
@@ -83,12 +85,12 @@ describe('useLayoutStore Dock state', () => {
     const { default: reloadedLayoutStore } = await import('./useLayoutStore')
 
     expect(reloadedLayoutStore.getState().leftBar).toEqual({
-      activePanelId: 'explorer',
+      activePanelId: 'search',
       size: 304,
       visible: true,
     })
     expect(reloadedLayoutStore.getState().rightBar).toEqual({
-      activePanelId: 'toc',
+      activePanelId: 'ai',
       size: 336,
       visible: true,
     })
@@ -159,9 +161,13 @@ describe('useLayoutStore Dock state', () => {
     useLayoutStore.getState().setDockSize('right', 999)
 
     expect(JSON.parse(localStorage.getItem(DOCK_PREFERENCES_STORAGE_KEY) ?? '{}')).toEqual({
-      version: 1,
-      left: { activePanelId: 'bookmarks', size: 240 },
-      right: { activePanelId: 'toc', size: 420 },
+      version: 2,
+      state: {
+        leftBar: { activePanelId: 'bookmarks', size: 240, visible: true },
+        rightBar: { activePanelId: 'toc', size: 420, visible: true },
+        leftStartup: 'restore',
+        rightStartup: 'restore',
+      },
     })
   })
 
@@ -177,5 +183,45 @@ describe('useLayoutStore Dock state', () => {
     useLayoutStore.getState().toggleDockPanel('right', 'toc')
     useLayoutStore.getState().setViewportMode('wide')
     expect(useLayoutStore.getState().overlayDock).toBeNull()
+  })
+})
+
+describe('Dock restart preferences', () => {
+  it('restores closed panels, but never restores Zen or responsive overlays', async () => {
+    useLayoutStore.getState().setDockPanel('left', 'bookmarks')
+    useLayoutStore.getState().setLeftBarVisible(false)
+    useLayoutStore.getState().setRightBarVisible(false)
+    useLayoutStore.getState().setZenModeActive(true)
+    useLayoutStore.getState().setOverlayDock('left')
+    vi.resetModules()
+    const restored = (await import('./useLayoutStore')).default.getState()
+    expect(restored.leftBar).toMatchObject({ activePanelId: 'bookmarks', visible: false })
+    expect(restored.rightBar.visible).toBe(false)
+    expect(restored.zenModeActive).toBe(false)
+    expect(restored.overlayDock).toBeNull()
+  })
+
+  it('applies explicit startup panels on the next load without changing this session', async () => {
+    useLayoutStore.getState().setLeftBarVisible(false)
+    useLayoutStore.getState().setStartupPanel('left', 'search')
+    useLayoutStore.getState().setStartupPanel('right', 'ai')
+    expect(useLayoutStore.getState().leftBar.activePanelId).toBe('explorer')
+    vi.resetModules()
+    const restored = (await import('./useLayoutStore')).default.getState()
+    expect(restored.leftBar).toMatchObject({ activePanelId: 'search', visible: true })
+    expect(restored.rightBar.activePanelId).toBe('ai')
+  })
+
+  it('falls back for corrupt state and tolerates denied storage writes', async () => {
+    localStorage.setItem(DOCK_PREFERENCES_STORAGE_KEY, '{bad json')
+    vi.resetModules()
+    const store = (await import('./useLayoutStore')).default
+    expect(store.getState().leftBar).toMatchObject({ activePanelId: 'explorer', visible: true })
+    const denied = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new Error('denied')
+    })
+    expect(() => store.getState().setLeftBarVisible(false)).not.toThrow()
+    expect(store.getState().leftBar.visible).toBe(false)
+    denied.mockRestore()
   })
 })

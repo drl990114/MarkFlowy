@@ -336,6 +336,13 @@
     "search_empty": "一致する設定がありません",
     "search_results": "{{count}}件の結果",
     "general": {
+      "startup": {
+        "label": "起動",
+        "left": "起動時の左サイドバー",
+        "right": "起動時の右サイドバー",
+        "restore": "前回の状態を復元",
+        "description": "次回の起動時に適用します。選択したパネルとサイドバーの開閉状態を記憶します。"
+      },
       "label": "一般",
       "app": {
         "label": "アプリケーション",

@@ -1,9 +1,10 @@
 import classNames from 'classnames'
 import { ChevronRightIcon } from 'lucide-react'
-import { memo, useState } from 'react'
+import { memo } from 'react'
 import styled from 'styled-components'
 import type { TagView } from '.'
 import { BookMarkViewItem } from './BookMarkViewItem'
+import useBookMarksStore from './useBookMarksStore'
 import type { BookMarkItem } from './useBookMarksStore'
 
 interface TagsViewItemProps {
@@ -13,10 +14,11 @@ interface TagsViewItemProps {
 
 export const TagsViewItem = memo((props: TagsViewItemProps) => {
   const { onOpen, tagView } = props
-  const [expand, setExpand] = useState(false)
+  const expand = useBookMarksStore((state) => state.expandedTags.includes(tagView.tag))
+  const toggleTag = useBookMarksStore((state) => state.toggleTag)
 
   const toggleExpand = () => {
-    setExpand((prev) => !prev)
+    toggleTag(tagView.tag)
   }
 
   const tagViewIconCls = classNames('arrow-icon', {

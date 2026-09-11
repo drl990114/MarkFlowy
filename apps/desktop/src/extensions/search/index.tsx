@@ -44,7 +44,7 @@ import {
   SearchStateBox,
 } from './styles'
 import type { SearchInfo } from './useSearchStore'
-import useSearchStore from './useSearchStore'
+import { getSearchStore } from './useSearchStore'
 
 const escapeRegExp = (string: string) => {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
@@ -232,11 +232,18 @@ const SearchMatchSnippet = memo(
 )
 
 const SearchView = memo(() => {
+  const workspace = useEditorStore((state) => state.folderData?.[0]?.path ?? '')
+  return <WorkspaceSearchView key={workspace} workspace={workspace} />
+})
+
+const WorkspaceSearchView = memo(({ workspace }: { workspace: string }) => {
+  const useSearchStore = getSearchStore(workspace)
   const resultList = useSearchStore((state) => state.resultList)
   const addSearchResult = useSearchStore((state) => state.addSearchResult)
   const searchKeyword = useSearchStore((state) => state.searchKeyword)
   const caseSensitive = useSearchStore((state) => state.caseSensitive)
   const activeIndex = useSearchStore((state) => state.activeIndex)
+  const activeMatch = useSearchStore((state) => state.activeMatch)
   const resultQuery = useSearchStore((state) => state.resultQuery)
   const resultCaseSensitive = useSearchStore((state) => state.resultCaseSensitive)
   const setSearchState = useSearchStore((state) => state.setSearchState)
@@ -247,9 +254,26 @@ const SearchView = memo(() => {
   const fileExcludePatterns = useAppSettingStore((state) =>
     resolveFileExcludePatterns(state.settingData),
   )
-  const [expandIdMap, setExpandIdMap] = useState<Record<string, boolean>>({})
+  const expandIdMap = useSearchStore((state) => state.expandedPaths)
+  const setExpandIdMap = useCallback(
+    (
+      value:
+        | Record<string, boolean>
+        | ((previous: Record<string, boolean>) => Record<string, boolean>),
+    ) => {
+      const store = useSearchStore.getState()
+      store.setSearchState({
+        expandedPaths: typeof value === 'function' ? value(store.expandedPaths) : value,
+      })
+    },
+    [useSearchStore],
+  )
   const [isSearching, setIsSearching] = useState(false)
-  const [hasSearched, setHasSearched] = useState(false)
+  const hasSearched = useSearchStore((state) => state.hasSearched)
+  const setHasSearched = useCallback(
+    (value: boolean) => setSearchState({ hasSearched: value }),
+    [setSearchState],
+  )
   const [searchError, setSearchError] = useState('')
   const [focusedRowIndex, setFocusedRowIndex] = useState(0)
   const { t } = useTranslation()
@@ -283,7 +307,7 @@ const SearchView = memo(() => {
         id: `header-${searchInfo.id}`,
       })
 
-      if (expandIdMap[searchInfo.id]) {
+      if (expandIdMap[searchInfo.path]) {
         const isCurrentFileActive = getFileObjectByPath(searchInfo.path)?.id === activeId
         let fileIndexRef = 0
         searchInfo.matches.forEach((match) => {
@@ -295,7 +319,10 @@ const SearchView = memo(() => {
               match,
               matchIndexInLine: i,
               globalIndex: currentIndex,
-              isActive: isCurrentFileActive && currentIndex === activeIndex,
+              isActive:
+                isCurrentFileActive &&
+                currentIndex === activeIndex &&
+                (!activeMatch || activeMatch.path === searchInfo.path),
               id: `match-${match.id}-${i}`,
             })
           }
@@ -305,7 +332,7 @@ const SearchView = memo(() => {
     })
 
     return data
-  }, [normalizedResultList, expandIdMap, activeId, activeIndex])
+  }, [normalizedResultList, expandIdMap, activeId, activeIndex, activeMatch])
 
   const rowVirtualizer = useVirtualizer({
     count: flattenedData.length,
@@ -384,7 +411,7 @@ const SearchView = memo(() => {
     [flattenedData.length, focusSearchRow],
   )
 
-  const isAllExpand = resultList.length > 0 && resultList.every((item) => expandIdMap[item.id])
+  const isAllExpand = resultList.length > 0 && resultList.every((item) => expandIdMap[item.path])
   const trimmedKeyword = searchKeyword.trim()
   const resultFileCount = resultList.length
   const resultMatchCount = useMemo(
@@ -397,83 +424,119 @@ const SearchView = memo(() => {
     setExpandIdMap(
       resultList.reduce(
         (acc, cur) => {
-          acc[cur.id] = nextValue
+          acc[cur.path] = nextValue
           return acc
         },
         {} as Record<string, boolean>,
       ),
     )
-  }, [isAllExpand, resultList])
+  }, [isAllExpand, resultList, setExpandIdMap])
 
   const stopActiveFind = useCallback(() => closeEditorSearch('global'), [])
 
-  const handleSearch = useCallback(async () => {
-    if (!folderData?.[0]) return
-    const queryText = searchKeyword.trim()
+  const handleSearch = useCallback(
+    async (restore = false) => {
+      if (!workspace) return
+      const queryText = searchKeyword.trim()
 
-    if (!queryText) {
-      searchRequestIdRef.current += 1
-      setHasSearched(false)
-      setIsSearching(false)
-      setSearchError('')
-      setSearchState({ resultList: [] })
-      return
-    }
-
-    const requestId = searchRequestIdRef.current + 1
-    searchRequestIdRef.current = requestId
-    setHasSearched(true)
-    setIsSearching(true)
-    setSearchError('')
-
-    try {
-      const res = await invoke<{ data: SearchInfo[] }>('search_files_async', {
-        query: {
-          dir: folderData[0].path,
-          name_text: '.md',
-          contents_text: escapeRegExp(queryText),
-        },
-        options: {
-          content_case_sensitive: caseSensitive,
-          file_exclude_patterns: fileExcludePatterns,
-        },
-      })
-
-      if (searchRequestIdRef.current !== requestId) return
-
-      logger.info('res', res)
-      setSearchState({
-        resultList: res.data,
-        resultQuery: queryText,
-        resultCaseSensitive: caseSensitive,
-      })
-
-      const newExpandIdMap: Record<string, boolean> = {}
-
-      res.data.forEach((searchInfo) => {
-        newExpandIdMap[searchInfo.id] = true
-      })
-
-      setExpandIdMap(newExpandIdMap)
-    } catch (error) {
-      if (searchRequestIdRef.current !== requestId) return
-      logger.error('search failed', error)
-      setSearchError(error instanceof Error ? error.message : String(error))
-      addSearchResult([])
-      setExpandIdMap({})
-    } finally {
-      if (searchRequestIdRef.current === requestId) {
+      if (!queryText) {
+        searchRequestIdRef.current += 1
+        setHasSearched(false)
         setIsSearching(false)
+        setSearchError('')
+        setSearchState({ resultList: [] })
+        return
       }
+
+      const requestId = searchRequestIdRef.current + 1
+      searchRequestIdRef.current = requestId
+      setHasSearched(true)
+      setIsSearching(true)
+      setSearchError('')
+
+      try {
+        const res = await invoke<{ data: SearchInfo[] }>('search_files_async', {
+          query: {
+            dir: workspace,
+            name_text: '.md',
+            contents_text: escapeRegExp(queryText),
+          },
+          options: {
+            content_case_sensitive: caseSensitive,
+            file_exclude_patterns: fileExcludePatterns,
+          },
+        })
+
+        if (searchRequestIdRef.current !== requestId) return
+
+        logger.info('res', res)
+        const previousMatch = restore ? useSearchStore.getState().activeMatch : undefined
+        const restoredFile = previousMatch
+          ? normalizeSearchResults(res.data, queryText, caseSensitive).find(
+              (item) => item.path === previousMatch.path,
+            )
+          : undefined
+        const restoredIndex = restoredFile
+          ? restoredFile.matches
+              .flatMap((match) =>
+                match.positions.map((position) => ({ line: match.line, start: position.start })),
+              )
+              .findIndex(
+                (match) =>
+                  match.line === previousMatch?.line && match.start === previousMatch.startColumn,
+              )
+          : -1
+        setSearchState({
+          resultList: res.data,
+          resultQuery: queryText,
+          resultCaseSensitive: caseSensitive,
+          activeIndex: Math.max(0, restoredIndex),
+          activeMatch: restoredIndex >= 0 ? previousMatch : undefined,
+        })
+
+        const newExpandIdMap: Record<string, boolean> = {}
+
+        res.data.forEach((searchInfo) => {
+          newExpandIdMap[searchInfo.path] = restore
+            ? (useSearchStore.getState().expandedPaths[searchInfo.path] ?? true)
+            : true
+        })
+
+        setExpandIdMap(newExpandIdMap)
+      } catch (error) {
+        if (searchRequestIdRef.current !== requestId) return
+        logger.error('search failed', error)
+        setSearchError(error instanceof Error ? error.message : String(error))
+        addSearchResult([])
+        setExpandIdMap({})
+      } finally {
+        if (searchRequestIdRef.current === requestId) {
+          setIsSearching(false)
+        }
+      }
+    },
+    [
+      workspace,
+      useSearchStore,
+      setHasSearched,
+      setExpandIdMap,
+      searchKeyword,
+      caseSensitive,
+      fileExcludePatterns,
+      setSearchState,
+      addSearchResult,
+    ],
+  )
+
+  useEffect(() => {
+    const store = useSearchStore.getState()
+    if (store.hasSearched && store.searchKeyword.trim()) void handleSearch(true)
+    return () => {
+      searchRequestIdRef.current += 1
     }
-  }, [
-    folderData,
-    searchKeyword,
-    caseSensitive,
-    fileExcludePatterns,
-    setSearchState,
-    addSearchResult,
-  ])
+    // A workspace mounts once; editing a query must still wait for Enter.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [useSearchStore])
 
   const toggleCaseSensitive = useCallback(() => {
     searchRequestIdRef.current += 1
@@ -481,10 +544,15 @@ const SearchView = memo(() => {
     setIsSearching(false)
     setSearchError('')
     setExpandIdMap({})
-    setSearchState({ caseSensitive: !caseSensitive, resultList: [], activeIndex: 0 })
+    setSearchState({
+      caseSensitive: !caseSensitive,
+      resultList: [],
+      activeIndex: 0,
+      activeMatch: undefined,
+    })
 
     stopActiveFind()
-  }, [caseSensitive, setSearchState, stopActiveFind])
+  }, [caseSensitive, setSearchState, stopActiveFind, setExpandIdMap, setHasSearched])
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -511,7 +579,7 @@ const SearchView = memo(() => {
       // Search covers directories the lazy file tree has not loaded yet. Register
       // metadata here; TextEditor still owns loading and validating the content.
       const curFile = knownFile
-        ? getFileObject(knownFile.id) ?? createFile(knownFile)
+        ? (getFileObject(knownFile.id) ?? createFile(knownFile))
         : createFile({ path, name, ext })
       if (!getFileObjectByPath(path)) setFileObjectByPath(path, curFile)
       addOpenedFile(curFile.id)
@@ -526,15 +594,18 @@ const SearchView = memo(() => {
         query: resultQuery,
         caseSensitive: resultCaseSensitive,
       })
-      setSearchState({ activeIndex: index })
+      setSearchState({
+        activeIndex: index,
+        activeMatch: { path, line: match.line, startColumn: position.start },
+      })
       if (closeCompactLeftDockAfterSelection()) scheduleActiveEditorFocus()
     },
     [addOpenedFile, setActiveId, resultCaseSensitive, resultQuery, setSearchState, t],
   )
 
   const toggleSearchInfoExpand = useCallback(
-    (id: string) => setExpandIdMap((prev) => ({ ...prev, [id]: prev[id] ? false : true })),
-    [],
+    (id: string) => setExpandIdMap((prev) => ({ ...prev, [id]: !prev[id] })),
+    [setExpandIdMap],
   )
 
   const handleSearchTextChange = useCallback(
@@ -546,11 +617,16 @@ const SearchView = memo(() => {
       setIsSearching(false)
       setSearchError('')
       setExpandIdMap({})
-      setSearchState({ searchKeyword: nextKeyword, resultList: [], activeIndex: 0 })
+      setSearchState({
+        searchKeyword: nextKeyword,
+        resultList: [],
+        activeIndex: 0,
+        activeMatch: undefined,
+      })
 
       stopActiveFind()
     },
-    [setSearchState, stopActiveFind],
+    [setSearchState, stopActiveFind, setExpandIdMap, setHasSearched],
   )
 
   const handleClearSearch = useCallback(() => {
@@ -559,9 +635,9 @@ const SearchView = memo(() => {
     setIsSearching(false)
     setSearchError('')
     setExpandIdMap({})
-    setSearchState({ searchKeyword: '', resultList: [], activeIndex: 0 })
+    setSearchState({ searchKeyword: '', resultList: [], activeIndex: 0, activeMatch: undefined })
     stopActiveFind()
-  }, [setSearchState, stopActiveFind])
+  }, [setSearchState, stopActiveFind, setExpandIdMap, setHasSearched])
 
   const renderSearchState = useCallback(() => {
     if (isSearching && resultList.length === 0) {
@@ -715,7 +791,7 @@ const SearchView = memo(() => {
               const item = flattenedData[virtualItem.index]
 
               if (item.type === 'header') {
-                const isExpand = expandIdMap[item.searchInfo.id]
+                const isExpand = expandIdMap[item.searchInfo.path]
 
                 return (
                   <SearchInfoBox
@@ -733,7 +809,7 @@ const SearchView = memo(() => {
                       aria-expanded={Boolean(isExpand)}
                       className='search-info__path'
                       data-search-row-index={virtualItem.index}
-                      onClick={() => toggleSearchInfoExpand(item.searchInfo.id)}
+                      onClick={() => toggleSearchInfoExpand(item.searchInfo.path)}
                       onFocus={() => setFocusedRowIndex(virtualItem.index)}
                       onKeyDown={(event) => handleSearchRowKeyDown(event, virtualItem.index)}
                       tabIndex={virtualItem.index === tabbableRowIndex ? 0 : -1}

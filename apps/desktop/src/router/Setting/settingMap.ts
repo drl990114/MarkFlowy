@@ -23,6 +23,34 @@ export const getSettingMap = () => {
           type: 'switch',
         },
       },
+      Startup: {
+        i18nKey: 'settings.general.startup.label',
+        leftStartup: {
+          key: 'leftStartup',
+          storage: 'layout',
+          type: 'select',
+          title: { i18nKey: 'settings.general.startup.left' },
+          desc: { i18nKey: 'settings.general.startup.description' },
+          options: [
+            { value: 'restore', title: i18n.t('settings.general.startup.restore') },
+            { value: 'explorer', title: i18n.t('sidebar.explorer') },
+            { value: 'search', title: i18n.t('sidebar.search') },
+            { value: 'bookmarks', title: i18n.t('sidebar.bookmarks') },
+          ],
+        },
+        rightStartup: {
+          key: 'rightStartup',
+          storage: 'layout',
+          type: 'select',
+          title: { i18nKey: 'settings.general.startup.right' },
+          desc: { i18nKey: 'settings.general.startup.description' },
+          options: [
+            { value: 'restore', title: i18n.t('settings.general.startup.restore') },
+            { value: 'toc', title: i18n.t('sidebar.table_of_contents') },
+            { value: 'ai', title: i18n.t('ai.assistant') },
+          ],
+        },
+      },
       'Auto Save': {
         i18nKey: 'settings.general.autosave.label',
         autosave: {

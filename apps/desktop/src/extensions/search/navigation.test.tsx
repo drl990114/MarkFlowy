@@ -16,7 +16,8 @@ import { closeEditorSearch, useEditorSearchStore } from '@/components/EditorArea
 import { FindReplace } from '@/components/EditorArea/editorToolBar/FindReplace'
 import { setSourceCodeEditor } from '@/components/EditorArea/sourceCodeEditorRegistry'
 import { Search } from '.'
-import useSearchStore from './useSearchStore'
+import { getSearchStore } from './useSearchStore'
+const useSearchStore = getSearchStore('/workspace')
 
 vi.mock('@tauri-apps/api/core', () => ({ invoke: vi.fn() }))
 vi.mock('@/i18n', () => ({
@@ -69,12 +70,15 @@ afterEach(() => {
   useEditorViewTypeStore.setState(originalViewState, true)
   useFileCacheStore.setState(originalCacheState, true)
   useSearchStore.setState({
+    hasSearched: false,
+    expandedPaths: {},
     searchKeyword: '',
     resultQuery: '',
     resultList: [],
     caseSensitive: false,
     resultCaseSensitive: false,
     activeIndex: 0,
+    activeMatch: undefined,
   })
   closeEditorSearch()
   vi.clearAllMocks()
@@ -158,7 +162,7 @@ describe('global search result coordinates', () => {
         { id: 'root', path: 'C:\\Workspace', name: 'Workspace', kind: 'dir', children: [existing] },
       ],
     })
-    useSearchStore.setState({ searchKeyword: 'foo' })
+    getSearchStore('C:\\Workspace').setState({ searchKeyword: 'foo' })
     vi.mocked(invoke).mockResolvedValue({
       data: [
         {
@@ -232,5 +236,89 @@ describe('global search result coordinates', () => {
     })
     expect(useEditorSearchStore.getState().owner).toBe('document')
     expect(useEditorSearchStore.getState().query).toBe('kept')
+  })
+})
+
+describe('search session recovery', () => {
+  it('restores the selected occurrence by coordinates when preceding results have changed', async () => {
+    const file = createFile({ name: 'note.md', path: '/workspace/note.md', ext: 'md' })
+    useEditorStore.getState().addOpenedFile(file.id)
+    useEditorStore.getState().setActiveId(file.id)
+    useSearchStore.setState({
+      searchKeyword: 'foo',
+      hasSearched: true,
+      activeIndex: 4,
+      activeMatch: { path: file.path!, line: 8, startColumn: 4 },
+    })
+    vi.mocked(invoke).mockResolvedValue({
+      data: [
+        {
+          id: 'new-file-id',
+          path: file.path,
+          name: 'note.md',
+          ext: 'md',
+          is_folder: false,
+          relative_path: 'note.md',
+          matches: [{ id: 'new-line-id', line: 8, content: 'foo foo' }],
+        },
+      ],
+    })
+    render(<TooltipProvider>{Search.components}</TooltipProvider>)
+    await waitFor(() => expect(document.querySelectorAll('button.search-info')).toHaveLength(2))
+    expect(useSearchStore.getState().activeIndex).toBe(1)
+    expect(document.querySelectorAll('button.search-info')[1].getAttribute('aria-current')).toBe(
+      'true',
+    )
+    expect(useEditorSearchStore.getState().navigation).toBeNull()
+  })
+
+  it('requeries a restored search and keeps collapsed files despite new result IDs', async () => {
+    useSearchStore.setState({
+      searchKeyword: 'foo',
+      hasSearched: true,
+      expandedPaths: { '/workspace/note.md': false },
+    })
+    vi.mocked(invoke).mockResolvedValue({
+      data: [
+        {
+          id: 'new-result-id',
+          path: '/workspace/note.md',
+          name: 'note.md',
+          ext: 'md',
+          is_folder: false,
+          relative_path: 'note.md',
+          matches: [{ id: 'new-match-id', line: 1, content: 'foo' }],
+        },
+      ],
+    })
+    render(<TooltipProvider>{Search.components}</TooltipProvider>)
+    await waitFor(() => expect(document.querySelector('.search-info__path')).toBeTruthy())
+    expect(invoke).toHaveBeenCalledWith(
+      'search_files_async',
+      expect.objectContaining({ query: expect.objectContaining({ contents_text: 'foo' }) }),
+    )
+    expect(document.querySelector('.search-info__path')?.getAttribute('aria-expanded')).toBe(
+      'false',
+    )
+    expect(document.querySelectorAll('button.search-info')).toHaveLength(0)
+  })
+
+  it('discards a pending response after leaving the workspace', async () => {
+    useSearchStore.setState({ searchKeyword: 'foo', hasSearched: true })
+    let resolve!: (value: { data: unknown[] }) => void
+    vi.mocked(invoke).mockReturnValue(
+      new Promise((done) => {
+        resolve = done
+      }),
+    )
+    render(<TooltipProvider>{Search.components}</TooltipProvider>)
+    act(() =>
+      useEditorStore.setState({
+        folderData: [{ id: 'other', kind: 'dir', path: '/other', name: 'Other' }],
+      }),
+    )
+    await act(async () => resolve({ data: [{ id: 'old' }] }))
+    expect(getSearchStore('/other').getState().resultList).toEqual([])
+    expect(useSearchStore.getState().resultList).toEqual([])
   })
 })

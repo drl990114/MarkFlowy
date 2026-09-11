@@ -7,6 +7,7 @@ import { useTranslation } from '@/i18n'
 import { appSettingStoreSetup } from '@/services/app-setting'
 import { dialog } from '@/services/dialog'
 import useAppInfoStore from '@/stores/useAppInfoStore'
+import useLayoutStore from '@/stores/useLayoutStore'
 import { invoke } from '@tauri-apps/api/core'
 import { openUrl } from '@tauri-apps/plugin-opener'
 import type { Update } from '@tauri-apps/plugin-updater'
@@ -113,6 +114,8 @@ function Setting({ navigationRequest }: SettingProps) {
     invoke('reset_app_conf')
       .then(async () => {
         await appSettingStoreSetup()
+        useLayoutStore.getState().setStartupPanel('left', 'restore')
+        useLayoutStore.getState().setStartupPanel('right', 'restore')
         toast.success(t('settings.resetAppConf.success'))
       })
       .catch((err: any) => {

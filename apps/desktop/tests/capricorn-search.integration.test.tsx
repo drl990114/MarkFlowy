@@ -25,7 +25,8 @@ import useEditorStore from '@/stores/useEditorStore'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import { EditorViewType, isCapricornRuntimeAvailable } from '@/constants/editorViewType'
 import { Search } from '@/extensions/search'
-import useSearchStore from '@/extensions/search/useSearchStore'
+import { getSearchStore } from '@/extensions/search/useSearchStore'
+const useSearchStore = getSearchStore('/workspace')
 import useFileCacheStore from '@/helper/files'
 import { createFile } from '@/helper/filesys'
 

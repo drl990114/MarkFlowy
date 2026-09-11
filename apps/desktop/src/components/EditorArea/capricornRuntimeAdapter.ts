@@ -1,4 +1,5 @@
 import { isCapricornRuntimeAvailable } from '@/constants/capricornRuntime'
+import { createCapricornResumeApi } from './capricornResume'
 import { getCapricornActiveHeadingId } from './capricornHeadingViewport'
 
 export interface CapricornFileWithProgress {
@@ -353,6 +354,7 @@ export function getCapricornFirstPaintBlockSize(viewportHeight: number): number 
 }
 
 export interface CapricornRuntimeAdapter {
+  readonly resume?: ReturnType<typeof createCapricornResumeApi>
   validateKeybindings: (configuration: CapricornKeybindingConfiguration) => {
     ok: boolean
     diagnostics: readonly { message: string }[]
@@ -507,6 +509,7 @@ export function createCapricornRuntimeAdapter({
   return {
     validateKeybindings: (configuration) =>
       session.keybindings.validateConfiguration(configuration),
+    resume: createCapricornResumeApi(session),
     selection: session.selection,
     requestInlineEdit,
     subscribeInlineEdit(listener) {

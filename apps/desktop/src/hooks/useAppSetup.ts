@@ -1,3 +1,4 @@
+import { flushEditorResumeStates } from '@/stores/editorResumeStore'
 import { commandRegistry } from '@/commands'
 import {
   FILE_MUTATION_QUEUE_KEY,
@@ -521,6 +522,7 @@ export const useAppRuntimeSetup = () => {
             fileIds: useEditorStore.getState().opened,
             onContinue: async () => {
               const rootPath = useEditorStore.getState().getRootPath()
+              flushEditorResumeStates()
               appStartupCoordinator.cancel()
               await disposeWorkspaceCachePersistence()
               await releaseSecurityScope(rootPath)

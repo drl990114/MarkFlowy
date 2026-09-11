@@ -31,6 +31,7 @@ declare namespace Setting {
   }
 
   type SelectSettingItem = {
+    storage?: 'layout'
     type: 'select'
     options: readonly T[]
   } & BaseSettingItem

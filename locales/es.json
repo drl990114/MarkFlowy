@@ -331,6 +331,13 @@
     "search_empty": "No hay preferencias coincidentes",
     "search_results": "{{count}} resultados",
     "general": {
+      "startup": {
+        "label": "Inicio",
+        "left": "Barra lateral izquierda al iniciar",
+        "right": "Barra lateral derecha al iniciar",
+        "restore": "Restaurar el último estado",
+        "description": "Se aplica al reiniciar la aplicación. Recuerda el panel seleccionado y si la barra lateral estaba abierta."
+      },
       "label": "general",
       "app": {
         "label": "Aplicación",

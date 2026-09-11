@@ -1,3 +1,4 @@
+import { getExplorerStateStore } from '@/stores/useExplorerStateStore'
 import { FileTree } from '@markflowy/interface'
 import type { ContextMenuItem } from '@markflowy/interface'
 import type { IFile } from '@/helper/filesys'
@@ -26,11 +27,7 @@ import classNames from 'classnames'
 import type { FC, MouseEventHandler } from 'react'
 import { memo, useCallback, useState } from 'react'
 import { useTranslation } from '@/i18n'
-import {
-  Container,
-  EXPLORER_FILE_TREE_INDENT_SIZE,
-  EXPLORER_FILE_TREE_ROW_HEIGHT,
-} from './styles'
+import { Container, EXPLORER_FILE_TREE_INDENT_SIZE, EXPLORER_FILE_TREE_ROW_HEIGHT } from './styles'
 import { FillFlexParent } from '../fill-flex-parent'
 import { showContextMenu } from '../ui-v2/ContextMenu'
 import type { MfIconButtonProps } from '../ui-v2/Button'
@@ -125,6 +122,11 @@ const explorerFileTreePresentation = {
 const Explorer: FC<ExplorerProps> = (props) => {
   const { t } = useTranslation()
   const { folderData, addOpenedFile, setActiveId } = useEditorStore()
+  const workspacePath = folderData?.[0]?.path ?? ''
+  const useExplorerState = getExplorerStateStore(workspacePath)
+  const expandedPaths = useExplorerState((state) => state.expandedPaths)
+  const onExpandedPathsChange = useExplorerState((state) => state.setExpandedPaths)
+  const treePersistence = { expandedPaths, onExpandedPathsChange }
   const [dndRootElement, setDndRootElement] = useState<HTMLDivElement | null>(null)
 
   const handleSelect = (item: IFile) => {
@@ -243,7 +245,9 @@ const Explorer: FC<ExplorerProps> = (props) => {
       <div className='min-h-0 w-full flex-1 overflow-hidden' ref={(ref) => setDndRootElement(ref)}>
         {hasWorkspace ? (
           <FileTree
+            key={workspacePath}
             {...explorerFileTreePresentation}
+            {...treePersistence}
             data={folderData ?? []}
             onSelect={handleSelect}
             dndRootElement={dndRootElement as unknown as Node}

@@ -55,8 +55,8 @@ function Root() {
   const leftPanelRef = useRef<PanelImperativeHandle>(null)
   const rightPanelRef = useRef<PanelImperativeHandle>(null)
   const initialDockSizesRef = useRef({
-    left: useLayoutStore.getState().leftBar.size,
-    right: useLayoutStore.getState().rightBar.size,
+    left: useLayoutStore.getState().leftBar.visible ? useLayoutStore.getState().leftBar.size : 0,
+    right: useLayoutStore.getState().rightBar.visible ? useLayoutStore.getState().rightBar.size : 0,
   })
   const lastEscapeAtRef = useRef<number | null>(null)
   const pointerStartedWithInteractiveLayerRef = useRef(false)
@@ -113,11 +113,13 @@ function Root() {
     const leftDocked = viewportMode !== 'compact'
     const rightDocked = viewportMode === 'wide'
 
-    if (leftDocked && layoutState.leftBar.visible) leftPanel.expand()
-    else leftPanel.collapse()
+    if (leftDocked && layoutState.leftBar.visible) {
+      if (leftPanel.isCollapsed()) leftPanel.resize(`${layoutState.leftBar.size}px`)
+    } else leftPanel.collapse()
 
-    if (rightDocked && layoutState.rightBar.visible) rightPanel.expand()
-    else rightPanel.collapse()
+    if (rightDocked && layoutState.rightBar.visible) {
+      if (rightPanel.isCollapsed()) rightPanel.resize(`${layoutState.rightBar.size}px`)
+    } else rightPanel.collapse()
   }, [leftBarVisible, rightBarVisible, setViewportMode, viewportMode, zenModeActive])
 
   useEffect(() => {

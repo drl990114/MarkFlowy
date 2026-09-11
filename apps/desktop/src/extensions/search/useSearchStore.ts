@@ -1,34 +1,96 @@
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
+import { isRecord, jsonStateStorage } from '@/stores/persistStorage'
+import { workspaceStorageKey } from '@/stores/workspacePersistence'
+import { getPathIdentityKey } from '@/helper/pathIdentity'
 
-const useSearchStore = create<SearchStore>((set) => ({
-  searchKeyword: '',
-  resultQuery: '',
-  resultCaseSensitive: false,
-  caseSensitive: false,
-  activeIndex: 0,
-  resultList: [],
+export function createSearchStore(workspace: string) {
+  return create<SearchStore>()(
+    persist(
+      (set) => ({
+        searchKeyword: '',
+        resultQuery: '',
+        resultCaseSensitive: false,
+        caseSensitive: false,
+        activeIndex: 0,
+        activeMatch: undefined,
+        resultList: [],
+        expandedPaths: {},
+        hasSearched: false,
+        setSearchState: (state) => set(state),
+        addSearchResult: (resultList) => set({ resultList }),
+        clearSearchResult: () => set({ resultList: [] }),
+      }),
+      {
+        name: workspaceStorageKey('search', workspace),
+        version: 1,
+        storage: jsonStateStorage(),
+        // Results contain file content and can become stale while the app is closed.
+        partialize: ({
+          searchKeyword,
+          caseSensitive,
+          expandedPaths,
+          activeIndex,
+          activeMatch,
+          hasSearched,
+        }) => ({
+          searchKeyword,
+          caseSensitive,
+          expandedPaths,
+          activeIndex,
+          activeMatch,
+          hasSearched,
+        }),
+        merge: (saved, current) => {
+          const state = isRecord(saved) ? saved : {}
+          return {
+            ...current,
+            searchKeyword: typeof state.searchKeyword === 'string' ? state.searchKeyword : '',
+            caseSensitive: state.caseSensitive === true,
+            hasSearched: state.hasSearched === true,
+            activeIndex:
+              typeof state.activeIndex === 'number' && Number.isSafeInteger(state.activeIndex)
+                ? Math.max(0, state.activeIndex)
+                : 0,
+            activeMatch:
+              isRecord(state.activeMatch) &&
+              typeof state.activeMatch.path === 'string' &&
+              typeof state.activeMatch.line === 'number' &&
+              Number.isSafeInteger(state.activeMatch.line) &&
+              state.activeMatch.line >= 1 &&
+              typeof state.activeMatch.startColumn === 'number' &&
+              Number.isSafeInteger(state.activeMatch.startColumn) &&
+              state.activeMatch.startColumn >= 0
+                ? {
+                    path: state.activeMatch.path,
+                    line: state.activeMatch.line,
+                    startColumn: state.activeMatch.startColumn,
+                  }
+                : undefined,
+            expandedPaths: isRecord(state.expandedPaths)
+              ? (Object.fromEntries(
+                  Object.entries(state.expandedPaths).filter(
+                    ([, value]) => typeof value === 'boolean',
+                  ),
+                ) as Record<string, boolean>)
+              : {},
+          }
+        },
+      },
+    ),
+  )
+}
 
-  setSearchState: (state) => {
-    set((prev) => ({
-      ...prev,
-      ...state,
-    }))
-  },
-
-  addSearchResult: (result) => {
-    set((prev) => ({
-      ...prev,
-      resultList: result,
-    }))
-  },
-
-  clearSearchResult: () => {
-    set((prev) => ({
-      ...prev,
-      resultList: [],
-    }))
-  },
-}))
+const stores = new Map<string, ReturnType<typeof createSearchStore>>()
+export function getSearchStore(workspace: string) {
+  const key = getPathIdentityKey(workspace)
+  let store = stores.get(key)
+  if (!store) {
+    store = createSearchStore(workspace)
+    stores.set(key, store)
+  }
+  return store
+}
 
 type SearchInfoMatch = {
   id: string
@@ -45,16 +107,17 @@ export interface SearchInfo {
   relative_path: string
 }
 
-interface SearchStore {
+export interface SearchStore {
+  expandedPaths: Record<string, boolean>
+  hasSearched: boolean
   searchKeyword: string
   resultQuery: string
   resultCaseSensitive: boolean
   caseSensitive: boolean
   activeIndex: number
+  activeMatch?: { path: string; line: number; startColumn: number }
   setSearchState: (state: Partial<SearchStore>) => void
   resultList: SearchInfo[]
   addSearchResult: (result: SearchInfo[]) => void
   clearSearchResult: () => void
 }
-
-export default useSearchStore

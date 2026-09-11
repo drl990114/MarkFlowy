@@ -1,5 +1,7 @@
 import { create } from 'zustand'
+import { createJSONStorage, persist } from 'zustand/middleware'
 import { immer } from 'zustand/middleware/immer'
+import { isRecord, localStateStorage } from './persistStorage'
 
 export type DockSide = 'left' | 'right'
 
@@ -16,11 +18,10 @@ export const MIN_RIGHT_DOCK_SIZE = 220
 export const MAX_RIGHT_DOCK_SIZE = 420
 export const DOCK_PREFERENCES_STORAGE_KEY = 'mf:desktop:dock-preferences:v1'
 
-type DockPreferences = {
-  version: 1
-  left: Pick<LayoutItem<LeftDockPanelId>, 'activePanelId' | 'size'>
-  right: Pick<LayoutItem<RightDockPanelId>, 'activePanelId' | 'size'>
-}
+export type LeftDockStartup = 'restore' | LeftDockPanelId
+export type RightDockStartup = 'restore' | RightDockPanelId
+
+type DockPreferences = Pick<LayoutStore, 'leftBar' | 'rightBar' | 'leftStartup' | 'rightStartup'>
 
 function isLeftDockPanelId(value: unknown): value is LeftDockPanelId {
   return value === 'explorer' || value === 'search' || value === 'bookmarks'
@@ -39,194 +40,204 @@ function clampDockSize(side: DockSide, size: unknown): number {
   return Math.min(max, Math.max(min, Math.round(size)))
 }
 
-function readDockPreferences(): DockPreferences | undefined {
-  if (typeof localStorage === 'undefined') return undefined
-
-  try {
-    const parsed = JSON.parse(localStorage.getItem(DOCK_PREFERENCES_STORAGE_KEY) ?? 'null')
-    if (
-      parsed?.version !== 1 ||
-      !isLeftDockPanelId(parsed.left?.activePanelId) ||
-      !isRightDockPanelId(parsed.right?.activePanelId)
-    ) {
-      return undefined
-    }
-
-    return {
-      version: 1,
-      left: {
-        activePanelId: parsed.left.activePanelId,
-        size: clampDockSize('left', parsed.left.size),
-      },
-      right: {
-        activePanelId: parsed.right.activePanelId,
-        size: clampDockSize('right', parsed.right.size),
-      },
-    }
-  } catch {
-    return undefined
+function normalizePreferences(value: unknown): DockPreferences {
+  const saved = isRecord(value) ? value : {}
+  const left = isRecord(saved.leftBar) ? saved.leftBar : {}
+  const right = isRecord(saved.rightBar) ? saved.rightBar : {}
+  return {
+    leftBar: {
+      visible: typeof left.visible === 'boolean' ? left.visible : true,
+      activePanelId: isLeftDockPanelId(left.activePanelId) ? left.activePanelId : 'explorer',
+      size: clampDockSize('left', left.size),
+    },
+    rightBar: {
+      visible: typeof right.visible === 'boolean' ? right.visible : true,
+      activePanelId: isRightDockPanelId(right.activePanelId) ? right.activePanelId : 'toc',
+      size: clampDockSize('right', right.size),
+    },
+    leftStartup: isLeftDockPanelId(saved.leftStartup) ? saved.leftStartup : 'restore',
+    rightStartup: isRightDockPanelId(saved.rightStartup) ? saved.rightStartup : 'restore',
   }
 }
 
-function writeDockPreferences(state: LayoutStore): void {
-  if (typeof localStorage === 'undefined') return
+// The previous implementation stored a raw object, before using Zustand's envelope.
+const dockStorage = createJSONStorage<DockPreferences>(() => ({
+  ...localStateStorage,
+  getItem: (name) => {
+    const raw = localStateStorage.getItem(name)
+    if (typeof raw !== 'string') return null
+    try {
+      const value: unknown = JSON.parse(raw)
+      if (isRecord(value) && value.version === 1 && !('state' in value)) {
+        return JSON.stringify({ state: { leftBar: value.left, rightBar: value.right }, version: 1 })
+      }
+      return raw
+    } catch {
+      return null
+    }
+  },
+}))
 
-  const preferences: DockPreferences = {
-    version: 1,
-    left: {
-      activePanelId: state.leftBar.activePanelId,
-      size: clampDockSize('left', state.leftBar.size),
-    },
-    right: {
-      activePanelId: state.rightBar.activePanelId,
-      size: clampDockSize('right', state.rightBar.size),
-    },
-  }
+const useLayoutStore = create<LayoutStore>()(
+  persist(
+    immer((set) => {
+      return {
+        ...normalizePreferences(undefined),
+        overlayDock: null,
+        viewportMode: 'wide',
+        zenModeActive: false,
 
-  try {
-    localStorage.setItem(DOCK_PREFERENCES_STORAGE_KEY, JSON.stringify(preferences))
-  } catch {
-    // A denied or full storage area should not block layout interactions.
-  }
-}
+        openExplorer: () => {
+          set((state) => {
+            state.leftBar.activePanelId = 'explorer'
+            state.leftBar.visible = true
+            if (state.viewportMode === 'compact') state.overlayDock = 'left'
+          })
+        },
 
-const useLayoutStore = create(
-  immer<LayoutStore>((set, get) => {
-    const preferences = readDockPreferences()
+        setLeftBarVisible: (visible: boolean) => {
+          set((state) => {
+            state.leftBar.visible = visible
+          })
+        },
 
-    return {
-      leftBar: {
-        visible: true,
-        activePanelId: 'explorer',
-        size: preferences?.left.size ?? DEFAULT_LEFT_DOCK_SIZE,
-      },
-      rightBar: {
-        visible: true,
-        activePanelId: 'toc',
-        size: preferences?.right.size ?? DEFAULT_RIGHT_DOCK_SIZE,
-      },
-      overlayDock: null,
-      viewportMode: 'wide',
-      zenModeActive: false,
+        setRightBarVisible: (visible: boolean) => {
+          set((state) => {
+            state.rightBar.visible = visible
+          })
+        },
 
-      openExplorer: () => {
-        set((state) => {
-          state.leftBar.activePanelId = 'explorer'
-          state.leftBar.visible = true
-          if (state.viewportMode === 'compact') state.overlayDock = 'left'
-        })
-      },
+        setDockPanel: (side: DockSide, panelId: DockPanelId) => {
+          set((state) => {
+            if (side === 'left') {
+              state.leftBar.activePanelId = panelId as LeftDockPanelId
+              return
+            }
 
-      setLeftBarVisible: (visible: boolean) => {
-        set((state) => {
-          state.leftBar.visible = visible
-        })
-      },
+            state.rightBar.activePanelId = panelId as RightDockPanelId
+          })
+        },
 
-      setRightBarVisible: (visible: boolean) => {
-        set((state) => {
-          state.rightBar.visible = visible
-        })
-      },
-
-      setDockPanel: (side: DockSide, panelId: DockPanelId) => {
-        set((state) => {
-          if (side === 'left') {
-            state.leftBar.activePanelId = panelId as LeftDockPanelId
-            return
-          }
-
-          state.rightBar.activePanelId = panelId as RightDockPanelId
-        })
-        writeDockPreferences(get())
-      },
-
-      setDockSize: (side: DockSide, size: number) => {
-        set((state) => {
-          const roundedSize = clampDockSize(side, size)
-          const dock = side === 'left' ? state.leftBar : state.rightBar
-          if (dock.size !== roundedSize) dock.size = roundedSize
-        })
-        writeDockPreferences(get())
-      },
-
-      syncDockPanelFromResize: (side: DockSide, size: number) => {
-        let shouldPersistSize = false
-
-        set((state) => {
-          // Zen Mode hides dock panels with display: none. ResizeObserver reports that
-          // temporary presentation state as 0px, which must not close the saved dock.
-          if (state.zenModeActive) return
-
-          const dock = side === 'left' ? state.leftBar : state.rightBar
-          const isVisible = size > 0
-          const isDocked =
-            side === 'left' ? state.viewportMode !== 'compact' : state.viewportMode === 'wide'
-
-          if (isDocked && dock.visible !== isVisible) dock.visible = isVisible
-
-          if (state.viewportMode === 'wide' && isVisible) {
+        setDockSize: (side: DockSide, size: number) => {
+          set((state) => {
             const roundedSize = clampDockSize(side, size)
+            const dock = side === 'left' ? state.leftBar : state.rightBar
             if (dock.size !== roundedSize) dock.size = roundedSize
-            shouldPersistSize = true
+          })
+        },
+
+        syncDockPanelFromResize: (side: DockSide, size: number) => {
+          set((state) => {
+            // Zen Mode hides dock panels with display: none. ResizeObserver reports that
+            // temporary presentation state as 0px, which must not close the saved dock.
+            if (state.zenModeActive) return
+
+            const dock = side === 'left' ? state.leftBar : state.rightBar
+            const isVisible = size > 0
+            const isDocked =
+              side === 'left' ? state.viewportMode !== 'compact' : state.viewportMode === 'wide'
+
+            if (isDocked && dock.visible !== isVisible) dock.visible = isVisible
+
+            if (state.viewportMode === 'wide' && isVisible) {
+              const roundedSize = clampDockSize(side, size)
+              if (dock.size !== roundedSize) dock.size = roundedSize
+            }
+          })
+        },
+
+        setViewportMode: (viewportMode: DockViewportMode) => {
+          set((state) => {
+            state.viewportMode = viewportMode
+            if (
+              viewportMode === 'wide' ||
+              (viewportMode === 'medium' && state.overlayDock === 'left')
+            ) {
+              state.overlayDock = null
+            }
+          })
+        },
+
+        setOverlayDock: (overlayDock: DockSide | null) => {
+          set((state) => {
+            state.overlayDock = overlayDock
+          })
+        },
+
+        toggleDockPanel: (side: DockSide, panelId: DockPanelId) => {
+          set((state) => {
+            const dock = side === 'left' ? state.leftBar : state.rightBar
+            const usesOverlay =
+              state.viewportMode === 'compact' ||
+              (state.viewportMode === 'medium' && side === 'right')
+            const isActive = dock.activePanelId === panelId
+
+            if (side === 'left') state.leftBar.activePanelId = panelId as LeftDockPanelId
+            else state.rightBar.activePanelId = panelId as RightDockPanelId
+
+            if (usesOverlay) {
+              state.overlayDock = state.overlayDock === side && isActive ? null : side
+              return
+            }
+
+            dock.visible = !(dock.visible && isActive)
+          })
+        },
+
+        setStartupPanel: (side, panel) => {
+          set((state) => {
+            if (side === 'left' && (panel === 'restore' || isLeftDockPanelId(panel))) {
+              state.leftStartup = panel
+            } else if (side === 'right' && (panel === 'restore' || isRightDockPanelId(panel))) {
+              state.rightStartup = panel
+            }
+          })
+        },
+
+        setZenModeActive: (active: boolean) => {
+          set((state) => {
+            state.zenModeActive = active
+          })
+        },
+
+        toggleZenMode: () => {
+          set((state) => {
+            state.zenModeActive = !state.zenModeActive
+          })
+        },
+      }
+    }),
+    {
+      name: DOCK_PREFERENCES_STORAGE_KEY,
+      version: 2,
+      storage: dockStorage,
+      partialize: ({ leftBar, rightBar, leftStartup, rightStartup }) => ({
+        leftBar,
+        rightBar,
+        leftStartup,
+        rightStartup,
+      }),
+      migrate: (saved) => normalizePreferences(saved),
+      merge: (saved, current) => {
+        const preferences = normalizePreferences(saved)
+        if (preferences.leftStartup !== 'restore') {
+          preferences.leftBar = {
+            ...preferences.leftBar,
+            activePanelId: preferences.leftStartup,
+            visible: true,
           }
-        })
-
-        if (shouldPersistSize) writeDockPreferences(get())
-      },
-
-      setViewportMode: (viewportMode: DockViewportMode) => {
-        set((state) => {
-          state.viewportMode = viewportMode
-          if (
-            viewportMode === 'wide' ||
-            (viewportMode === 'medium' && state.overlayDock === 'left')
-          ) {
-            state.overlayDock = null
+        }
+        if (preferences.rightStartup !== 'restore') {
+          preferences.rightBar = {
+            ...preferences.rightBar,
+            activePanelId: preferences.rightStartup,
+            visible: true,
           }
-        })
+        }
+        return { ...current, ...preferences }
       },
-
-      setOverlayDock: (overlayDock: DockSide | null) => {
-        set((state) => {
-          state.overlayDock = overlayDock
-        })
-      },
-
-      toggleDockPanel: (side: DockSide, panelId: DockPanelId) => {
-        set((state) => {
-          const dock = side === 'left' ? state.leftBar : state.rightBar
-          const usesOverlay =
-            state.viewportMode === 'compact' ||
-            (state.viewportMode === 'medium' && side === 'right')
-          const isActive = dock.activePanelId === panelId
-
-          if (side === 'left') state.leftBar.activePanelId = panelId as LeftDockPanelId
-          else state.rightBar.activePanelId = panelId as RightDockPanelId
-
-          if (usesOverlay) {
-            state.overlayDock = state.overlayDock === side && isActive ? null : side
-            return
-          }
-
-          dock.visible = !(dock.visible && isActive)
-        })
-        writeDockPreferences(get())
-      },
-
-      setZenModeActive: (active: boolean) => {
-        set((state) => {
-          state.zenModeActive = active
-        })
-      },
-
-      toggleZenMode: () => {
-        set((state) => {
-          state.zenModeActive = !state.zenModeActive
-        })
-      },
-    }
-  }),
+    },
+  ),
 )
 
 export function closeCompactLeftDockAfterSelection(): boolean {
@@ -242,7 +253,10 @@ type LayoutItem<TPanelId extends DockPanelId> = {
   activePanelId: TPanelId
   size: number
 }
-type LayoutStore = {
+export type LayoutStore = {
+  leftStartup: LeftDockStartup
+  rightStartup: RightDockStartup
+  setStartupPanel: (side: DockSide, panel: LeftDockStartup | RightDockStartup) => void
   leftBar: LayoutItem<LeftDockPanelId>
   rightBar: LayoutItem<RightDockPanelId>
   overlayDock: DockSide | null

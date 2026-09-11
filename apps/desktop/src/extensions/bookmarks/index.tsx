@@ -9,15 +9,12 @@ import { RIGHTBARITEMKEYS } from '@/constants'
 import { useTranslation } from '@/i18n'
 import { closeCompactLeftDockAfterSelection } from '@/stores/useLayoutStore'
 import { BookmarkIcon, ListIcon, TagsIcon } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import { toast } from 'zens'
 import { BookMarkViewItem } from './BookMarkViewItem'
 import { Container } from './styles'
 import { TagsViewItem } from './TagsViewItem'
-import {
-  BOOKMARK_UNDO_DURATION_MS,
-  type BookMarkItem,
-} from './useBookMarksStore'
+import { BOOKMARK_UNDO_DURATION_MS, type BookMarkItem } from './useBookMarksStore'
 import useBookMarksStore from './useBookMarksStore'
 
 type BookMarkViewMode = 'list' | 'tags'
@@ -50,7 +47,8 @@ export const BookMarksList = (props: BookMarksListProps) => {
   const mutationError = useBookMarksStore((state) => state.mutationError)
   const openBookMark = useBookMarksStore((state) => state.openBookMark)
   const retryBookMarkRemoval = useBookMarksStore((state) => state.retryBookMarkRemoval)
-  const [viewMode, setViewMode] = useState<BookMarkViewMode>('list')
+  const viewMode = useBookMarksStore((state) => state.viewMode)
+  const setViewMode = useBookMarksStore((state) => state.setViewMode)
   const tagsViewList = useMemo(() => buildTagsViewList(bookMarkList), [bookMarkList])
 
   useEffect(() => {
@@ -113,8 +111,8 @@ export const BookMarksList = (props: BookMarksListProps) => {
   )
 
   const toggleViewMode = useCallback(() => {
-    setViewMode((previousViewMode) => (previousViewMode === 'list' ? 'tags' : 'list'))
-  }, [])
+    setViewMode(viewMode === 'list' ? 'tags' : 'list')
+  }, [setViewMode, viewMode])
 
   const handleOpenBookMark = useCallback(
     (bookmark: BookMarkItem) => {
