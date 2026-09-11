@@ -28,6 +28,7 @@ if (!editor?.body) throw new Error('TextEditor implementation was not found')
 const names = new Set([
   'editorRootFontSize',
   'editorRootLineHeight',
+  'linkEditMode',
   'editorPlaceholder',
   'editorKeybingMap',
   'editorKeybindingsLoaded',
@@ -78,6 +79,7 @@ const Harness = runInNewContext(compiled, {
   settings: {
     editor_root_font_size?: number
     editor_root_line_height?: string
+    editor_link_edit_mode?: 'popover' | 'markdown'
     editor_placeholder?: boolean
   }
   keymap?: Record<string, string>
@@ -87,6 +89,18 @@ const Harness = runInNewContext(compiled, {
 afterEach(cleanup)
 
 describe('TextEditor Capricorn typography settings', () => {
+  it('forwards link editing mode changes and restores the default when unset', () => {
+    const onOptions = vi.fn()
+    const { rerender } = render(<Harness settings={{}} onOptions={onOptions} />)
+    expect(onOptions.mock.lastCall?.[0].linkEditMode).toBe('popover')
+
+    rerender(<Harness settings={{ editor_link_edit_mode: 'markdown' }} onOptions={onOptions} />)
+    expect(onOptions.mock.lastCall?.[0].linkEditMode).toBe('markdown')
+
+    rerender(<Harness settings={{}} onOptions={onOptions} />)
+    expect(onOptions.mock.lastCall?.[0].linkEditMode).toBe('popover')
+  })
+
   it('forwards the placeholder switch and reacts when it changes', () => {
     const onOptions = vi.fn()
     const { rerender } = render(

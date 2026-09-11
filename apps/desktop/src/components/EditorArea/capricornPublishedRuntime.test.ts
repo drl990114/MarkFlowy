@@ -198,6 +198,7 @@ describe.skipIf(!isCapricornRuntimeAvailable)('published Capricorn runtime', () 
           options: {
             markdown: original,
             mode: 'edit',
+            linkOpenMode: 'button',
             handleLinkClick,
             localization: {
               getLocale: () => 'zh-CN',
