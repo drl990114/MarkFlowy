@@ -160,4 +160,20 @@ describe('editor links', () => {
     expect(mocks.openUrl).not.toHaveBeenCalled()
     expect(mocks.createFile).not.toHaveBeenCalled()
   })
+  it('does not activate a stale file after a later navigation', async () => {
+    let settle: (path: string) => void = () => {}
+    mocks.resolve.mockImplementationOnce(
+      () =>
+        new Promise<string>((resolve) => {
+          settle = resolve
+        }),
+    )
+    const old = openEditorLink('./slow.md', 'source')
+    await vi.waitFor(() => expect(mocks.resolve).toHaveBeenCalled())
+    await expect(openEditorLink('https://example.com')).resolves.toBe(true)
+    settle('/workspace/notes/slow.md')
+    await expect(old).resolves.toBe(true)
+    expect(mocks.setActiveId).not.toHaveBeenCalled()
+    expect(mocks.addOpenedFile).not.toHaveBeenCalled()
+  })
 })

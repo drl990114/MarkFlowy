@@ -25,7 +25,12 @@ vi.mock('@/commands', () => ({
 vi.mock('@/hooks', () => ({
   useGlobalKeyboard: () => ({
     keyboardInfos: [
-      { id: 'app_toggleZenMode', key_map: zenModeButtonState.keyMap, when: 'always' },
+      {
+        id: 'app_toggleZenMode.default',
+        command: 'app_toggleZenMode',
+        keys: zenModeButtonState.keyMap,
+        when: 'always',
+      },
     ],
   }),
 }))
@@ -91,9 +96,7 @@ describe('ZenModeButton', () => {
     zenModeButtonState.activeId = 'document-1'
     zenModeButtonState.keyMap = ['Alt', 'k']
 
-    expect(renderZenModeButton()).toContain(
-      'aria-label="Toggle Zen Mode (⌥K)"',
-    )
+    expect(renderZenModeButton()).toContain('aria-label="Toggle Zen Mode (⌥K)"')
   })
 
   it('exposes the active Zen state and uses the shared selected foreground', () => {
@@ -126,8 +129,6 @@ describe('ZenModeIcon', () => {
   })
 
   it('exposes the rotating state for reduced-motion feedback', () => {
-    expect(renderToStaticMarkup(<ZenModeIcon rotating />)).toContain(
-      'motion-reduce:rotate-45',
-    )
+    expect(renderToStaticMarkup(<ZenModeIcon rotating />)).toContain('motion-reduce:rotate-45')
   })
 })

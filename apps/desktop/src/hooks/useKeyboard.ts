@@ -4,21 +4,28 @@ import { openDocumentSearch } from '@/components/EditorArea/editorSearchStore'
 import { getCapricornEditor } from '@/components/EditorArea/capricornEditorRegistry'
 import useEditorStore from '@/stores/useEditorStore'
 import { commandRegistry, keybindingRegistry } from '@/commands'
-import { createKeybindingsHandler } from '@/helper/bindkeys'
+import { sameKeyMap, normalizeKeyMap, validateKeyMap } from '@/commands/keybindingKeys'
+import { editorKeymap, keybindingProblem } from '@/commands/keybindingValidation'
+import type {
+  EditorShortcutMap,
+  KeyboardBinding,
+  KeybindingSnapshot,
+} from '@/commands/keybindingCatalog'
+import { createCapricornKeybindingConfiguration } from '@/components/EditorArea/capricornKeybindings'
+import { listen } from '@tauri-apps/api/event'
 import { logger } from '@/helper/logger'
 import { invoke } from '@tauri-apps/api/core'
 import { createGlobalStore } from 'hox'
 import { t } from '@/i18n'
-import { useEffect, useState } from 'react'
-import { toast } from 'zens'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { create } from 'zustand'
 
 export type KeyBindingMap = Record<string, (event: KeyboardEvent) => void>
 
 interface EditorKeybindingStore {
   editorKeybindingsLoaded: boolean
-  editorKeybingMap: Record<string, string>
-  setEditorKeybingMap: (keymap: Record<string, string>) => void
+  editorKeybingMap: EditorShortcutMap
+  setEditorKeybingMap: (keymap: EditorShortcutMap) => void
 }
 export const useEditorKeybindingStore = create<EditorKeybindingStore>((set) => {
   return {
@@ -35,140 +42,182 @@ export const useEditorKeybindingStore = create<EditorKeybindingStore>((set) => {
   }
 })
 
+function isEditorTarget(target: EventTarget | null) {
+  return (
+    target instanceof Element &&
+    Boolean(target.closest('.ProseMirror, .cm-editor, [data-cap-input], [data-cap-content]'))
+  )
+}
+
 function useKeyboard() {
   const [keyboardInfos, setKeyboardInfos] = useState<KeyboardInfo[]>([])
-  const { setEditorKeybingMap } = useEditorKeybindingStore()
-
-  useEffect(() => {
-    invoke<{ cmds: KeyboardInfo[] }>('get_keyboard_infos').then((res) => {
-      logger.debug('KeyboardInfo', res)
-      const cmds: KeyboardInfo[] = res.cmds || []
-
-      setKeyboardInfos(cmds)
-
-      keybindingRegistry.setKeybindings(
-        cmds.map((cmd) => ({
-          id: cmd.id,
-          keyMap: cmd.key_map,
-          when: cmd.when,
-        })),
-      )
-    })
+  const [loadError, setLoadError] = useState<string>()
+  const bindingsRef = useRef(keyboardInfos)
+  const savingRef = useRef(false)
+  const reloadRevision = useRef(0)
+  const appliedRevision = useRef(0)
+  const applyBindings = useCallback((snapshot: KeybindingSnapshot) => {
+    if (snapshot.revision <= appliedRevision.current) return
+    appliedRevision.current = snapshot.revision
+    const normalized = snapshot.rules.map((cmd) => ({
+      ...cmd,
+      keys: normalizeKeyMap(cmd.keys) ?? cmd.keys,
+    }))
+    bindingsRef.current = normalized
+    keybindingRegistry.setKeybindings(normalized)
+    useEditorKeybindingStore.getState().setEditorKeybingMap(editorKeymap(normalized))
+    setKeyboardInfos(normalized)
+    setLoadError(undefined)
   }, [])
+  const reload = useCallback(async () => {
+    const revision = ++reloadRevision.current
+    const previousSnapshot = appliedRevision.current
+    try {
+      const res = await invoke<KeybindingSnapshot>('get_keyboard_infos')
+      if (revision === reloadRevision.current) applyBindings(res)
+    } catch (error) {
+      if (revision !== reloadRevision.current || previousSnapshot !== appliedRevision.current)
+        return
+      logger.error('Failed to load keyboard bindings', error)
+      setLoadError(t('settings.keyboard.load_failed'))
+    }
+  }, [applyBindings])
+  useEffect(() => {
+    let disposed = false
+    let unlisten: (() => void) | undefined
+    // Register before reading so another window cannot leave this one with a stale snapshot.
+    void listen('keyboard-bindings-changed', () => {
+      if (!disposed) void reload()
+    })
+      .then((dispose) => {
+        if (disposed) dispose()
+        else unlisten = dispose
+      })
+      .catch((error) => logger.warn('Keyboard change listener unavailable', error))
+      .finally(() => {
+        if (!disposed) void reload()
+      })
+    return () => {
+      disposed = true
+      reloadRevision.current += 1
+      unlisten?.()
+    }
+  }, [reload])
 
   useEffect(() => {
-    const keybindingMap: KeyBindingMap = {}
-    const editorKeybingMap: Record<string, string> = {}
-
-    keyboardInfos.forEach((keyboardInfo) => {
-      if (keyboardInfo.id === 'app_findReplaceEditor' || keyboardInfo.id === EVENT.app_quickOpen) return
-      if (keyboardInfo.key_map.length > 0) {
-        if (keyboardInfo.id.startsWith('editor_')) {
-          const keybind = keybindingRegistry.getKeyBindingString(keyboardInfo.key_map)
-          const key = keyboardInfo.id.replace('editor_', '')
-
-          editorKeybingMap[key] = keybind
-        } else {
-          const keybind = keybindingRegistry.getKeyBindingString(keyboardInfo.key_map)
-          keybindingMap[keybind] = () => {
-            commandRegistry.execute(keyboardInfo.id)
-          }
-        }
-      }
-    })
-
-    if (keyboardInfos.length > 0) setEditorKeybingMap(editorKeybingMap)
-
-    const handler = createKeybindingsHandler(keybindingMap)
-
-    const findBinding = keyboardInfos.find((binding) => binding.id === 'app_findReplaceEditor')
-    const findShortcut = findBinding
-      ? keybindingRegistry.getKeyBindingString(findBinding.key_map)
-      : keyboardInfos.length
-        ? ''
-        : 'mod-f'
-    const findHandler = createFindShortcutHandler(findShortcut, () => {
+    const composing = () => {
       const { activeId } = useEditorStore.getState()
-      if (activeId && getCapricornEditor(activeId)?.isComposing()) return false
-      return openDocumentSearch()
-    })
-    const quickOpenBinding = keyboardInfos.find((binding) => binding.id === EVENT.app_quickOpen)
-    const quickOpenShortcut = quickOpenBinding
-      ? keybindingRegistry.getKeyBindingString(quickOpenBinding.key_map)
-      : keyboardInfos.length
-        ? ''
-        : 'mod-p'
-    const quickOpenHandler = createAppShortcutHandler(
-      quickOpenShortcut,
-      () => {
-        const { activeId } = useEditorStore.getState()
-        if (activeId && getCapricornEditor(activeId)?.isComposing()) return false
-        if (!commandRegistry.hasCommand(EVENT.app_quickOpen)) return false
-        void commandRegistry.execute(EVENT.app_quickOpen)
-        return true
-      },
-      '[data-mf-quick-open]',
+      return Boolean(activeId && getCapricornEditor(activeId)?.isComposing())
+    }
+    const ordinary = keyboardInfos
+      .filter(
+        (binding) =>
+          binding.target === 'app' &&
+          binding.command !== 'app_findReplaceEditor' &&
+          binding.command !== EVENT.app_quickOpen &&
+          !validateKeyMap(binding.keys, binding.command),
+      )
+      .map((binding) =>
+        createAppShortcutHandler(keybindingRegistry.getKeyBindingString(binding.keys), (event) => {
+          if (composing() || event.repeat || !commandRegistry.hasCommand(binding.command))
+            return false
+          if (binding.when === 'editor_focus' && !isEditorTarget(event.target)) return false
+          void commandRegistry
+            .execute(binding.command)
+            .catch((error) => logger.error('Keyboard command failed', error))
+          return true
+        }),
+      )
+    const handler = (event: KeyboardEvent) => {
+      for (const handle of ordinary) {
+        handle(event)
+        if (event.defaultPrevented) break
+      }
+    }
+    // Explicit host bindings own their keys in an editor, including keys reclaimed
+    // from its default keymap. Other inputs can still consume keys before bubbling.
+    const editorHandler = (event: KeyboardEvent) => {
+      if (isEditorTarget(event.target)) handler(event)
+    }
+    const shortcutsFor = (commandId: string, fallback: string): string[] => {
+      const bindings = keyboardInfos.filter((item) => item.command === commandId)
+      if (!bindings.length) return keyboardInfos.length ? [] : [fallback]
+      return bindings.flatMap((binding) =>
+        validateKeyMap(binding.keys, binding.command) || !binding.keys.length
+          ? []
+          : [keybindingRegistry.getKeyBindingString(binding.keys)],
+      )
+    }
+    const findHandlers = shortcutsFor('app_findReplaceEditor', 'mod-f').map((keys) =>
+      createFindShortcutHandler(keys, () => !composing() && openDocumentSearch()),
     )
-    window.addEventListener('keydown', findHandler, true)
-    window.addEventListener('keydown', quickOpenHandler, true)
+    const quickOpenHandlers = shortcutsFor(EVENT.app_quickOpen, 'mod-p').map((keys) =>
+      createAppShortcutHandler(
+        keys,
+        () => {
+          if (composing() || !commandRegistry.hasCommand(EVENT.app_quickOpen)) return false
+          void commandRegistry
+            .execute(EVENT.app_quickOpen)
+            .catch((error) => logger.error('Quick Open failed', error))
+          return true
+        },
+        '[data-mf-quick-open]',
+      ),
+    )
+    const specializedHandlers = [...findHandlers, ...quickOpenHandlers]
+    specializedHandlers.forEach((handle) => window.addEventListener('keydown', handle, true))
+    window.addEventListener('keydown', editorHandler, true)
     window.addEventListener('keydown', handler)
-
     return () => {
-      window.removeEventListener('keydown', findHandler, true)
-      window.removeEventListener('keydown', quickOpenHandler, true)
+      specializedHandlers.forEach((handle) => window.removeEventListener('keydown', handle, true))
+      window.removeEventListener('keydown', editorHandler, true)
       window.removeEventListener('keydown', handler)
     }
-  }, [keyboardInfos, setEditorKeybingMap])
+  }, [keyboardInfos])
 
-  const checkKeyConflict = (commandId: string, newKeyMap: string[]) => {
-    const curCommand = keyboardInfos.find((info) => info.id === commandId)
-    if (!curCommand) {
-      return false
-    }
-    return keyboardInfos
-      .filter((info) => info.when === curCommand.when)
-      .some((cmd) => {
-        if (cmd.key_map.length > 0) {
-          const existingKeybinding = keybindingRegistry.getKeyBindingString(cmd.key_map)
-          const newKeybinding = keybindingRegistry.getKeyBindingString(newKeyMap)
-          return existingKeybinding === newKeybinding
-        }
-        return false
+  const validateKeyBinding = (ruleId: string, keys: string[]): string | undefined => {
+    const problem = keybindingProblem(bindingsRef.current, ruleId, keys)
+    if (problem?.type === 'conflict')
+      return t('settings.keyboard.conflict_with', {
+        command: t(`command.id_descriptions.${problem.command}`),
       })
-  }
-
-  const updateKeyBinding = async (commandId: string, newKeyMap: string[]) => {
-    if (checkKeyConflict(commandId, newKeyMap)) {
-      toast.error(t('settings.keyboard.shortcut_conflict'))
-      return false
-    }
-
-    const success = await invoke('update_keybinding', {
-      id: commandId,
-      newKeyMap,
-    })
-
-    if (success) {
-      setKeyboardInfos((prev) =>
-        prev.map((cmd) => (cmd.id === commandId ? { ...cmd, key_map: [...newKeyMap] } : cmd)),
+    if (problem) return t(`settings.keyboard.${problem.type}_binding`)
+    const selected = bindingsRef.current.find((binding) => binding.id === ruleId)
+    if (selected?.target === 'editor') {
+      const { activeId } = useEditorStore.getState()
+      const editor = activeId ? getCapricornEditor(activeId) : undefined
+      const next = bindingsRef.current.map((binding) =>
+        binding.id === ruleId ? { ...binding, keys: normalizeKeyMap(keys)! } : binding,
       )
-
-      keybindingRegistry.updateKeybinding(commandId, newKeyMap)
+      const result = editor?.validateKeybindings(
+        createCapricornKeybindingConfiguration(editorKeymap(next), true),
+      )
+      if (result && !result.ok) return t('settings.keyboard.unsupported_binding')
+    }
+    return undefined
+  }
+  const updateKeyBinding = async (ruleId: string, newKeys: string[]): Promise<boolean> => {
+    if (savingRef.current) throw new Error(t('settings.keyboard.saving'))
+    const problem = validateKeyBinding(ruleId, newKeys)
+    if (problem) throw new Error(problem)
+    const keys = normalizeKeyMap(newKeys)!
+    const current = bindingsRef.current.find((binding) => binding.id === ruleId)
+    if (current && sameKeyMap(current.keys, keys)) return true
+    savingRef.current = true
+    try {
+      const snapshot = await invoke<KeybindingSnapshot>('update_keybinding', { ruleId, keys })
+      applyBindings(snapshot)
+      return true
+    } catch (error) {
+      logger.error('Failed to save keyboard binding', error)
+      throw new Error(t('settings.keyboard.save_failed'))
+    } finally {
+      savingRef.current = false
     }
   }
-
-  return {
-    keyboardInfos,
-    updateKeyBinding,
-  }
+  return { keyboardInfos, loadError, reload, validateKeyBinding, updateKeyBinding }
 }
 
 const [useGlobalKeyboard] = createGlobalStore(useKeyboard)
-
 export default useGlobalKeyboard
-
-export interface KeyboardInfo {
-  id: string
-  key_map: string[]
-  when: string
-}
+export type KeyboardInfo = KeyboardBinding

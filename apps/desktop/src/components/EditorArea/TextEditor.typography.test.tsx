@@ -106,7 +106,7 @@ describe('TextEditor Capricorn typography settings', () => {
     expect(onOptions.mock.lastCall?.[0].keybindingConfiguration.customizations).toContainEqual({
       type: 'replace',
       targetRuleId: 'editor.format.bold.default',
-      keys: 'mod+Alt+b',
+      keys: ['mod+Alt+b'],
     })
     rerender(<Harness settings={{}} keymap={{}} onOptions={onOptions} />)
     expect(onOptions.mock.lastCall?.[0].keybindingConfiguration.customizations).toContainEqual({

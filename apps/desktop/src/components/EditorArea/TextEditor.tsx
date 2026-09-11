@@ -11,6 +11,7 @@ import {
 } from '@/constants/editorViewType'
 import { capricornRuntimeEntrySha256, capricornRuntimeVersion } from '@/constants/capricornRuntime'
 import { clipboardRead } from '@/helper/clipboard'
+import { createShortcutMatcher } from '@/helper/bindkeys'
 import { countNonWhitespaceCharacters } from '@/helper/editorCounter'
 import bus from '@/helper/eventBus'
 import useFileCacheStore, {
@@ -392,12 +393,39 @@ function registerEditorDelegateResource(
   )
 }
 
+function updateRmeKeybindings(
+  context: EditorContext,
+  keymap: Record<string, string | readonly string[]>,
+) {
+  for (const extension of context.manager.extensions) {
+    if (extension.name === 'keyboardSettings') {
+      const options = { shortcuts: keymap, createShortcutMatcher }
+      extension.setOptions(options)
+    }
+    if (extension.name === 'codeMirror') {
+      const options = {
+        commandKeymapOptions: {
+          createShortcutMatcher,
+          disableAllBuildInShortcuts: true,
+          overrideShortcutMap: keymap,
+          clipboardReadFunction: clipboardRead,
+          currentDateFormat: getCurrentEditorInsertDateFormat,
+        },
+      }
+      extension.setOptions(options)
+    }
+  }
+}
+
 function registerEditorContextResource(
   fileId: string,
   instanceId: string,
   context: EditorContext,
   shouldPromote: boolean,
 ) {
+  const keyboardState = useEditorKeybindingStore.getState()
+  if (keyboardState.editorKeybindingsLoaded)
+    updateRmeKeybindings(context, keyboardState.editorKeybingMap)
   registerCompatibilityResource(
     editorContextRegistry,
     fileId,
@@ -1031,6 +1059,9 @@ function TextEditor(props: TextEditorProps) {
   const autosave = useAppSettingStore((state) => state.settingData.autosave)
   const autosaveInterval = useAppSettingStore((state) => state.settingData.autosave_interval)
   const editorFullWidth = useAppSettingStore((state) => state.settingData.editor_full_width)
+  const linkEditMode = useAppSettingStore((state) =>
+    state.settingData.editor_link_edit_mode === 'markdown' ? 'markdown' : 'popover',
+  )
   const editorPlaceholder = useAppSettingStore((state) => state.settingData.editor_placeholder)
   const editorRootFontSize = useAppSettingStore((state) => state.settingData.editor_root_font_size)
   const editorRootLineHeight = useAppSettingStore(
@@ -1844,7 +1875,13 @@ function TextEditor(props: TextEditorProps) {
 
   useEffect(() => {
     delegateOptionsCache.clear()
-  }, [editorPlaceholder, editorTypewriterScroll, livePreviewBlockBehavior])
+  }, [editorPlaceholder, editorTypewriterScroll, livePreviewBlockBehavior, editorKeybingMap])
+
+  useEffect(() => {
+    if (!editorKeybindingsLoaded) return
+    const context = editorContextRegistry.get(id, instanceIdRef.current!)
+    if (context) updateRmeKeybindings(context, editorKeybingMap)
+  }, [id, delegate, editorKeybingMap, editorKeybindingsLoaded])
 
   useEffect(() => {
     const cb = throttle(
@@ -2450,8 +2487,10 @@ function TextEditor(props: TextEditorProps) {
           }
         : false,
       density: 'compact',
+      linkEditMode,
       handleLinkClick: async (href) => {
-        await openEditorLink(href, curFile.id)
+        const opened = await openEditorLink(href, curFile.id)
+        if (!opened) toast.warning(i18n.t('link_editing.open_failed'))
       },
       handleViewImgSrcUrl: hostOptions.handleViewImgSrcUrl,
       imageInsertHandler: hostOptions.imageInsertHandler,
@@ -2473,6 +2512,7 @@ function TextEditor(props: TextEditorProps) {
       virtualize: CAPRICORN_DESKTOP_VIRTUALIZE_OPTIONS,
     }
   }, [
+    linkEditMode,
     curFile.id,
     currentViewType,
     editorColorScheme,

@@ -90,7 +90,7 @@ export type ExtensionsOptions = {
 
   customCopyFunction?: CustomCopyFunction
 
-  overrideShortcutMap?: Record<string, string>
+  overrideShortcutMap?: Record<string, string | readonly string[]>
 
   clipboardReadFunction?: ClipboardReadFunction
 
@@ -192,6 +192,12 @@ function extensions(options: ExtensionsOptions): any[] {
         ...typewriterCmExtension,
       ],
       useProsemirrorHistoryKey: true,
+      commandKeymapOptions: {
+        disableAllBuildInShortcuts: options.disableAllBuildInShortcuts,
+        overrideShortcutMap: options.overrideShortcutMap,
+        clipboardReadFunction,
+        currentDateFormat: options.currentDateFormat,
+      },
       customCopyFunction,
     }),
     new LineHorizontalRuleExtension({}),

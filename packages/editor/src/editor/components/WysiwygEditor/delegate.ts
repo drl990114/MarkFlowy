@@ -1,3 +1,7 @@
+import {
+  KeyboardSettingsExtension,
+  defaultEditorShortcuts,
+} from '../../extensions/Shortcuts/keyboard-settings-extension'
 import type { RemirrorManager } from '@rme-sdk/sdk/core'
 import { isExtension } from '@rme-sdk/sdk/core'
 import type { AnyExtension } from '@rme-sdk/sdk'
@@ -47,31 +51,9 @@ export type CreateWysiwygDelegateOptions = ExtensionsOptions
 export const createWysiwygDelegate = (
   options: CreateWysiwygDelegateOptions = {},
 ): EditorDelegate<any> => {
-  const defaultOverrideShortcutMap = {
-    copy: 'mod-c',
-    paste: 'mod-v',
-    undo: 'mod-z',
-    redo: 'mod-shift-z',
-    cut: 'mod-x',
-    toggleH1: 'mod-1',
-    toggleH2: 'mod-2',
-    toggleH3: 'mod-3',
-    toggleH4: 'mod-4',
-    toggleH5: 'mod-5',
-    toggleH6: 'mod-6',
-    toggleStrong: 'mod-b',
-    toggleEmphasis: 'mod-i',
-    toggleCodeText: 'mod-e',
-    toggleDelete: 'mod-shift-s',
-    insertCurrentDate: 'mod-;',
-  }
-
   const overrideShortcutMap = {
-    ...(options.overrideShortcutMap || {}),
-  }
-
-  if (!options.disableAllBuildInShortcuts) {
-    Object.assign(overrideShortcutMap, defaultOverrideShortcutMap)
+    ...(options.disableAllBuildInShortcuts ? {} : defaultEditorShortcuts),
+    ...options.overrideShortcutMap,
   }
 
   const customSelectAllShortcut = overrideShortcutMap.selectAll
@@ -88,11 +70,14 @@ export const createWysiwygDelegate = (
 
   const manager = createReactManager(
     () => {
-      return [...EditorExtensions(options)]
+      return [
+        new KeyboardSettingsExtension({ shortcuts: overrideShortcutMap }),
+        ...EditorExtensions(options),
+      ]
     },
     {
       builtin: {
-        overrideShortcutMap,
+        overrideShortcutMap: {},
       },
     },
   )

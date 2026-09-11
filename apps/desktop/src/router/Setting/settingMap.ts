@@ -208,6 +208,16 @@ export const getSettingMap = () => {
             i18nKey: 'settings.editor.behavior.typewriter_scroll.desc',
           },
         },
+        linkEditMode: {
+          key: 'editor_link_edit_mode',
+          type: 'select',
+          title: { i18nKey: 'link_editing.label' },
+          desc: { i18nKey: 'link_editing.description' },
+          options: [
+            { value: 'popover', title: i18n.t('link_editing.popover') },
+            { value: 'markdown', title: i18n.t('link_editing.markdown') },
+          ],
+        },
         placeholder: {
           key: 'editor_placeholder',
           type: 'switch',
@@ -254,9 +264,7 @@ export const getSettingMap = () => {
           options: [
             {
               value: 'auto',
-              title: i18n.t(
-                'settings.editor.wysiwyg.live_preview_block_behavior.options.auto',
-              ),
+              title: i18n.t('settings.editor.wysiwyg.live_preview_block_behavior.options.auto'),
             },
             {
               value: 'always-split',

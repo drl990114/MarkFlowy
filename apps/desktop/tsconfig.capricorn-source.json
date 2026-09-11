@@ -1,4 +1,9 @@
 {
   "extends": "./tsconfig.json",
-  "include": ["src", "tests/capricorn-search.integration.tsx"]
+  "include": [
+    "src",
+    "tests/capricorn-search.integration.tsx",
+    "tests/capricorn-links.integration.tsx",
+    "tests/capricorn-keybindings.integration.tsx"
+  ]
 }

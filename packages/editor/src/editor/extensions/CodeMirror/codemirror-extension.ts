@@ -1,3 +1,5 @@
+import type { MfCodemirrorView } from '../../codemirror/codemirror'
+import type { OnSetOptionsProps } from '@rme-sdk/sdk/core'
 import type Token from 'markdown-it/lib/token.mjs'
 
 import { languages } from '@codemirror/language-data'
@@ -13,7 +15,7 @@ import type {
   NodeExtensionSpec,
   NodeSpecOverride,
   NodeViewMethod,
-  ProsemirrorNode
+  ProsemirrorNode,
 } from '@rme-sdk/sdk/core'
 import {
   extension,
@@ -54,6 +56,19 @@ export const fakeIndentedLanguage = 'indent-code'
 })
 export class LineCodeMirrorExtension extends NodeExtension<CodeMirrorExtensionOptions> {
   private nodeview: CodeMirror6NodeView | undefined
+  private codeViews = new Set<MfCodemirrorView>()
+
+  protected onSetOptions({ changes }: OnSetOptionsProps<CodeMirrorExtensionOptions>) {
+    if (!changes.commandKeymapOptions.changed) return
+    for (const view of this.codeViews) {
+      if (view.isDestroyed) this.codeViews.delete(view)
+      else view.updateCommandKeymap(this.options.commandKeymapOptions ?? {})
+    }
+  }
+
+  onDestroy() {
+    this.codeViews.clear()
+  }
 
   get name() {
     return 'codeMirror' as const
@@ -124,7 +139,11 @@ export class LineCodeMirrorExtension extends NodeExtension<CodeMirrorExtensionOp
           },
           commandKeymapOptions: this.options.commandKeymapOptions,
         },
-        onCodemirrorViewLoad: this.options.onCodemirrorViewLoad,
+        onCodemirrorViewLoad: (codeView) => {
+          this.codeViews.add(codeView)
+          this.options.onCodemirrorViewLoad?.(codeView)
+        },
+        onCodemirrorViewDestroy: (codeView) => this.codeViews.delete(codeView),
       })
 
       if (node.attrs['front-matter'] === true) {

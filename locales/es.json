@@ -1,4 +1,11 @@
 {
+  "link_editing": {
+    "label": "Edición de enlaces",
+    "description": "Elige el editor predeterminado. También puedes editar cada enlace como Markdown.",
+    "popover": "Formulario emergente",
+    "markdown": "Sintaxis Markdown",
+    "open_failed": "No se pudo abrir el enlace o encontrar su encabezado."
+  },
   "quick_open": {
     "title": "Apertura rápida",
     "placeholder": "Buscar por nombre de archivo o ruta…",
@@ -430,20 +437,37 @@
       }
     },
     "keyboard": {
-      "label": "teclado",
+      "label": "Atajos de teclado",
       "shortcut_conflict": "La tecla de acceso directo está ocupada",
       "table_label": "Tabla de atajos de teclado",
       "command": "Comando",
-      "description": "Descripción",
       "keybinding": "Atajo",
-      "action": "Acción",
+      "scope": "Contexto",
       "edit": "Editar",
-      "disabled": "Este atajo está deshabilitado y no se puede editar",
       "edit_shortcut": "Editar atajo",
       "shortcut": "Atajo",
-      "record_placeholder": "Pulsa un atajo",
       "save": "Guardar",
-      "desc": "Configuración de los atajos de teclado y el comportamiento de las teclas, incluidas las configuraciones relacionadas, como la detección de conflictos de atajos."
+      "load_failed": "No se pueden cargar los atajos. Revisa el archivo de configuración y vuelve a intentarlo.",
+      "save_failed": "No se pudo guardar el atajo. Se conservó la configuración anterior. Vuelve a intentarlo.",
+      "invalid_binding": "Pulsa una combinación válida que incluya una tecla principal.",
+      "reserved_binding": "Esta combinación está reservada para escribir, navegar o usar el portapapeles. Elige otra.",
+      "unsupported_binding": "El editor actual no admite esta combinación.",
+      "conflict_with": "Ya lo usa «{{command}}». Cambia primero el atajo de ese comando.",
+      "saving": "Guardando…",
+      "unbound": "Sin asignar",
+      "record_help": "Pulsa una combinación · Enter para guardar · Esc para cancelar",
+      "remove_binding": "Quitar atajo",
+      "reset_default": "Restaurar predeterminado",
+      "clipboard_note": "El atajo del sistema para cortar sigue disponible. Aquí puedes añadir otra combinación para cortar.",
+      "search": "Buscar comandos o atajos",
+      "modified_only": "Solo modificados",
+      "retry": "Reintentar",
+      "scope_app": "Aplicación",
+      "scope_editor": "Editor",
+      "modified": "Modificado",
+      "system_binding": "Atajo del sistema",
+      "no_results": "No hay atajos coincidentes",
+      "desc": "Busca un comando y pulsa su atajo para cambiarlo."
     },
     "ai": {
       "label": "AI",
@@ -875,6 +899,12 @@
       "truncated": "Solo se muestra el inicio mientras se carga la vista completa."
     },
     "link": {
+      "title": "Título",
+      "markdown": "Editar Markdown",
+      "remove": "Quitar enlace",
+      "copy": "Copiar dirección",
+      "copyFailed": "No se pudo copiar la dirección.",
+      "sharedReference": "Los cambios de dirección y título se aplican a todos los enlaces que usan esta referencia.",
       "open": "Abrir enlace",
       "actions": "Acciones del enlace",
       "edit": "Editar enlace",

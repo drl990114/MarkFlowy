@@ -3,14 +3,17 @@ import { CountExtension } from '@rme-sdk/sdk/extensions/count'
 import type { RemirrorManager } from '@rme-sdk/sdk'
 import { DocExtension } from '@rme-sdk/sdk/extensions'
 import { createReactManager } from '@rme-sdk/sdk/react'
-import { MfCodemirrorView } from '../../codemirror/codemirror'
+import type { MfCodemirrorView } from '../../codemirror/codemirror'
 import { LineCodeMirrorExtension } from '../../extensions/CodeMirror/codemirror-extension'
-import { CommandName } from '../../extensions/CodeMirror/keymap'
+import type { CommandKeymapOptions } from '../../extensions/CodeMirror/keymap'
 import { basicSetup } from '../../extensions/CodeMirror/setup'
-import { TypewriterScrollExtension, TypewriterScrollOptions } from '../../extensions/TypewriterScroll'
+import {
+  TypewriterScrollExtension,
+  type TypewriterScrollOptions,
+} from '../../extensions/TypewriterScroll'
 import type { DocToString, EditorDelegate, StringToDoc } from '../../types'
-import { ClipboardReadFunction } from '../../utils/clipboard-read'
-import { CurrentDateFormatOption } from '../../utils/date'
+import type { ClipboardReadFunction } from '../../utils/clipboard-read'
+import type { CurrentDateFormatOption } from '../../utils/date'
 import { FindExtension } from '@/editor/extensions/Find/find-extension'
 
 type CreateSourceCodeManagerOptions = {
@@ -21,7 +24,7 @@ type CreateSourceCodeManagerOptions = {
    * @example
    * { toggleStrong: 'mod-shift-b', toggleEmphasis: 'ctrl-i' }
    */
-  overrideShortcutMap?: Partial<Record<CommandName, string>>
+  overrideShortcutMap?: CommandKeymapOptions['overrideShortcutMap']
 
   /**
    * Disable all built-in shortcuts
@@ -56,7 +59,7 @@ export function createSourceCodeManager(
         disableAllBuildInShortcuts: options?.disableAllBuildInShortcuts,
         clipboardReadFunction: options?.clipboardReadFunction,
         currentDateFormat: options?.currentDateFormat,
-      }
+      },
     }),
     typewriterScrollExtension,
   ])

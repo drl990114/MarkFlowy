@@ -3,14 +3,14 @@ import { createKeybindingsHandler } from './bindkeys'
 /** Capture host commands before a nested editor keymap consumes them. */
 export function createAppShortcutHandler(
   shortcut: string,
-  open: () => boolean,
+  open: (event: KeyboardEvent) => boolean,
   allowedDialogSelector?: string,
 ) {
   const handler = createKeybindingsHandler(
     shortcut
       ? {
           [shortcut]: (event) => {
-            if (!open()) return false
+            if (!open(event)) return false
             event.preventDefault()
             event.stopPropagation()
             return true
@@ -35,6 +35,9 @@ export function createAppShortcutHandler(
   }
 }
 
-export function createFindShortcutHandler(shortcut: string, open: () => boolean) {
+export function createFindShortcutHandler(
+  shortcut: string,
+  open: (event: KeyboardEvent) => boolean,
+) {
   return createAppShortcutHandler(shortcut, open)
 }

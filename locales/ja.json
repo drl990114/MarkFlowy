@@ -1,4 +1,11 @@
 {
+  "link_editing": {
+    "label": "リンクの編集方法",
+    "description": "既定の編集方法を選択します。各リンクを Markdown として編集することもできます。",
+    "popover": "ポップアップ",
+    "markdown": "Markdown 構文",
+    "open_failed": "リンクを開くか、見出しを見つけることができませんでした。"
+  },
   "quick_open": {
     "title": "クイックオープン",
     "placeholder": "ファイル名またはパスで検索…",
@@ -435,20 +442,37 @@
       }
     },
     "keyboard": {
-      "label": "キーボード",
+      "label": "キーボードショートカット",
       "shortcut_conflict": "このショートカットキーはすでに占有されています",
       "table_label": "キーボードショートカット表",
       "command": "コマンド",
-      "description": "説明",
       "keybinding": "ショートカット",
-      "action": "操作",
+      "scope": "適用範囲",
       "edit": "編集",
-      "disabled": "このショートカットは無効のため編集できません",
       "edit_shortcut": "ショートカットを編集",
       "shortcut": "ショートカット",
-      "record_placeholder": "ショートカットキーを押してください",
       "save": "保存",
-      "desc": "キーボードショートカットとキー動作の設定には、ショートカットキーの競合検出などの設定が含まれます。"
+      "load_failed": "ショートカットを読み込めません。設定ファイルを確認して再試行してください。",
+      "save_failed": "保存できませんでした。以前の設定は保持されています。再試行してください。",
+      "invalid_binding": "主キーを含む有効な組み合わせを押してください。",
+      "reserved_binding": "この組み合わせは入力、移動、またはクリップボード用です。別の組み合わせを選んでください。",
+      "unsupported_binding": "現在のエディターはこの組み合わせに対応していません。",
+      "conflict_with": "「{{command}}」で使用中です。先にそのショートカットを変更してください。",
+      "saving": "保存中…",
+      "unbound": "未割り当て",
+      "record_help": "キーを入力 · Enter で保存 · Esc でキャンセル",
+      "remove_binding": "割り当てを解除",
+      "reset_default": "既定に戻す",
+      "clipboard_note": "システムの切り取りショートカットは保持されます。切り取り用の別の組み合わせを追加できます。",
+      "search": "コマンドやショートカットを検索",
+      "modified_only": "変更済みのみ",
+      "retry": "再試行",
+      "scope_app": "アプリ内",
+      "scope_editor": "エディター内",
+      "modified": "変更済み",
+      "system_binding": "システム管理",
+      "no_results": "一致するショートカットはありません",
+      "desc": "コマンドを検索し、ショートカットをクリックして変更します。"
     },
     "ai": {
       "label": "AI",
@@ -875,6 +899,12 @@
       "truncated": "ソース全体の表示を読み込み中のため、冒頭のみ表示しています。"
     },
     "link": {
+      "title": "タイトル",
+      "markdown": "Markdown を編集",
+      "remove": "リンクを解除",
+      "copy": "アドレスをコピー",
+      "copyFailed": "アドレスをコピーできませんでした。",
+      "sharedReference": "アドレスとタイトルの変更は、この参照を使用するすべてのリンクに適用されます。",
       "open": "リンクを開く",
       "actions": "リンク操作",
       "edit": "リンクを編集",

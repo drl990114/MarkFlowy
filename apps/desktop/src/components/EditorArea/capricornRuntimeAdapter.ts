@@ -100,6 +100,7 @@ export interface CapricornFindApi {
 
 export interface CapricornHeading {
   id: string
+  anchor?: string
   level: number
   number: string | null
   text: string
@@ -111,6 +112,7 @@ export interface CapricornHeadingsApi {
   getAll: () => CapricornHeading[]
   getNumbering: () => { complete: boolean; hasHeadings: boolean }
   jumpTo: (id: string, options?: { offset?: number }) => Promise<boolean>
+  jumpToAnchor?: (fragment: string) => Promise<boolean>
   removeNumbering: () => { complete: boolean; hasHeadings: boolean }
   subscribe: (listener: (headings: CapricornHeading[]) => void) => () => void
 }
@@ -118,20 +120,21 @@ export interface CapricornHeadingsApi {
 export interface CapricornKeybindingRule {
   id: string
   command: string
-  keys: string
+  keys: string | readonly string[]
   when?: { context: string; op: 'truthy' | 'falsy' }
 }
 
 export interface CapricornKeybindingConfiguration {
   inheritDefaults: boolean
   customizations: readonly (
-    | { type: 'replace'; targetRuleId: string; keys: string }
+    | { type: 'replace'; targetRuleId: string; keys: string | readonly string[] }
     | { type: 'disable'; targetRuleId: string }
     | { type: 'add'; rule: CapricornKeybindingRule }
   )[]
 }
 
 export interface CapricornEditorSettings {
+  linkEditMode?: 'popover' | 'markdown'
   className?: string
   colorScheme?: 'dark' | 'light' | 'system'
   density?: 'comfortable' | 'compact'
@@ -262,7 +265,7 @@ export interface CapricornInlineEditRequest {
 
 export interface CapricornRuntimeSession {
   query?: <Result = unknown>(query: string, ...args: unknown[]) => Result
-  keybindings?: {
+  keybindings: {
     validateConfiguration: (configuration: CapricornKeybindingConfiguration) => {
       ok: boolean
       diagnostics: readonly { message: string }[]
@@ -350,6 +353,10 @@ export function getCapricornFirstPaintBlockSize(viewportHeight: number): number 
 }
 
 export interface CapricornRuntimeAdapter {
+  validateKeybindings: (configuration: CapricornKeybindingConfiguration) => {
+    ok: boolean
+    diagnostics: readonly { message: string }[]
+  }
   getActiveHeadingId?: (
     headings: readonly CapricornHeading[],
     scrollEl: HTMLElement,
@@ -405,10 +412,9 @@ export function createCapricornRuntimeAdapter({
   }
   const session = createRuntime(container, {
     ...options,
-    // Validate user settings on the mounted session so an old/unsupported
-    // shortcut cannot make the entire document fail to open.
+    // Validate user settings before applying them to the mounted document.
     keybindingConfiguration: undefined,
-    linkOpenMode: 'button',
+    linkOpenMode: options.linkOpenMode ?? 'modifier',
     onEditInline: ({ kind, key, focus }) => requestInlineEdit(kind, key, focus),
   })
   let applyingHostMarkdown = false
@@ -426,7 +432,7 @@ export function createCapricornRuntimeAdapter({
   const updateSettings = (settings: Partial<CapricornEditorSettings>) => {
     const { keybindingConfiguration, ...otherSettings } = settings
     const validation =
-      keybindingConfiguration && session.keybindings?.validateConfiguration(keybindingConfiguration)
+      keybindingConfiguration && session.keybindings.validateConfiguration(keybindingConfiguration)
     if (validation && !validation.ok) {
       options.onError?.(
         new Error(validation.diagnostics.map((diagnostic) => diagnostic.message).join('; ')),
@@ -499,6 +505,8 @@ export function createCapricornRuntimeAdapter({
   }
 
   return {
+    validateKeybindings: (configuration) =>
+      session.keybindings.validateConfiguration(configuration),
     selection: session.selection,
     requestInlineEdit,
     subscribeInlineEdit(listener) {
@@ -600,7 +608,7 @@ export async function createCapricornRuntimeAdapterAsync({
   const session = await createRuntime(container, {
     ...options,
     keybindingConfiguration: undefined,
-    linkOpenMode: 'button',
+    linkOpenMode: options.linkOpenMode ?? 'modifier',
     onEditInline: ({ kind, key, focus }) =>
       inlineEditBridge.current?.requestInlineEdit?.(kind, key, focus),
   })

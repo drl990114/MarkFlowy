@@ -11,13 +11,15 @@ describe('host keybinding translation', () => {
     ['Ctrl--', 'Ctrl+-'],
     ['mod-+', 'mod++'],
     ['-', '-'],
-    ['mod-Numpad1', 'mod+[Numpad1]'],
+    ['mod-[Numpad1]', 'mod+[Numpad1]'],
   ])('preserves the primary key in %s', (source, expected) => {
     expect(toCapricornShortcut(source)).toBe(expected)
   })
 
   it('retains startup defaults and disables cleared bindings after settings load', () => {
-    expect(createCapricornKeybindingConfiguration({}, false).customizations).toEqual([{ type: 'disable', targetRuleId: 'editor.find.open.default' }])
+    expect(createCapricornKeybindingConfiguration({}, false).customizations).toEqual([
+      { type: 'disable', targetRuleId: 'editor.find.open.default' },
+    ])
     const configuration = createCapricornKeybindingConfiguration({}, true)
     expect(configuration.inheritDefaults).toBe(true)
     expect(configuration.customizations).toContainEqual({
@@ -26,18 +28,37 @@ describe('host keybinding translation', () => {
     })
   })
 
-  it('keeps native clipboard defaults and registers a customized copy shortcut', () => {
+  it('keeps copy native-only even if an adapter caller supplies custom copy keys', () => {
     const configuration = createCapricornKeybindingConfiguration(
-      { copy: 'mod-Alt-c', cut: 'mod-x', paste: 'mod-v' },
+      { copy: ['mod-Alt-c'], cut: 'mod-x', paste: 'mod-v' },
       true,
     )
+    expect(configuration.customizations.filter((item) => item.type === 'add')).toEqual([])
+    expect(capricornClipboardCommands?.map((command) => command.id)).not.toContain(
+      'host.clipboard.copy',
+    )
+  })
+
+  it('preserves alternative bindings for formatting and custom cut', () => {
+    const configuration = createCapricornKeybindingConfiguration(
+      {
+        toggleStrong: ['mod-b', 'mod-Alt-b'],
+        cut: ['mod-x', 'mod-Alt-x'],
+      },
+      true,
+    )
+    expect(configuration.customizations).toContainEqual({
+      type: 'replace',
+      targetRuleId: 'editor.format.bold.default',
+      keys: ['mod+b', 'mod+Alt+b'],
+    })
     expect(configuration.customizations.filter((item) => item.type === 'add')).toEqual([
       {
         type: 'add',
         rule: {
-          id: 'host.clipboard.copy.custom',
-          command: 'host.clipboard.copy',
-          keys: 'mod+Alt+c',
+          id: 'host.clipboard.cut.custom',
+          command: 'host.clipboard.cut',
+          keys: ['mod+Alt+x'],
           when: { context: 'editor.focused', op: 'truthy' },
         },
       },

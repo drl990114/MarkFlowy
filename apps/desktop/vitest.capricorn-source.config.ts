@@ -58,7 +58,11 @@ export default defineConfig(async (environment) => {
     },
     test: {
       ...base.test,
-      include: ['tests/capricorn-search.integration.tsx'],
+      include: [
+        'tests/capricorn-search.integration.tsx',
+        'tests/capricorn-links.integration.tsx',
+        'tests/capricorn-keybindings.integration.tsx',
+      ],
       // Externalized hook libraries resolve React through Node, bypassing Vite's
       // dedupe. Transform both dependency trees so every hook uses the host React.
       server: {

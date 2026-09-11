@@ -4,6 +4,7 @@ import { join } from '@tauri-apps/api/path'
 import { fetch } from '@tauri-apps/plugin-http'
 import { FileResultCode, type FileSysResult } from './filesys'
 import { logger } from './logger'
+import { localResourcePath } from './localResourcePath'
 
 const convertHttpToBase64 = async (url: string): Promise<string> => {
   try {
@@ -128,19 +129,8 @@ const getLocalPathFromTauriAssetUrl = (src: string): string | null => {
   }
 }
 
-const getLocalPathFromFileUrl = (src: string): string | null => {
-  try {
-    const url = new URL(src)
-    if (url.protocol !== 'file:') {
-      return null
-    }
-
-    const path = safeDecodeURIComponent(url.pathname)
-    return path.replace(/^\/([a-zA-Z]:[\\/])/, '$1') || null
-  } catch (error) {
-    return null
-  }
-}
+const getLocalPathFromFileUrl = (src: string): string | null =>
+  /^file:/i.test(src) ? localResourcePath(src) || null : null
 
 const resolveLocalImagePath = async (
   src: string,
@@ -156,8 +146,9 @@ const resolveLocalImagePath = async (
     return fileUrlPath
   }
 
-  if (isAbsoluteLocalPath(src)) {
-    return src
+  const localPath = localResourcePath(src) || src
+  if (isAbsoluteLocalPath(localPath)) {
+    return localPath
   }
 
   if (!fileFolderPath || isHttpUrl(src) || src.startsWith('data:') || src.startsWith('blob:')) {
@@ -165,9 +156,9 @@ const resolveLocalImagePath = async (
   }
 
   try {
-    const localPath = await join(fileFolderPath, src)
-    const isExists = await invoke('file_exists', { filePath: localPath })
-    return isExists ? localPath : null
+    const resolvedPath = await join(fileFolderPath, localPath)
+    const isExists = await invoke('file_exists', { filePath: resolvedPath })
+    return isExists ? resolvedPath : null
   } catch (error) {
     return null
   }
@@ -191,15 +182,11 @@ export const readImageFileAsDataUrl = async (filePath: string): Promise<string |
 const normalizeExportImageSource = (src: string): string => {
   const trimmedSrc = (src || '').trim()
 
-  if (
-    isHttpUrl(trimmedSrc) ||
-    trimmedSrc.startsWith('data:') ||
-    trimmedSrc.startsWith('blob:')
-  ) {
+  if (isHttpUrl(trimmedSrc) || trimmedSrc.startsWith('data:') || trimmedSrc.startsWith('blob:')) {
     return trimmedSrc
   }
 
-  return safeDecodeURIComponent(trimmedSrc)
+  return trimmedSrc
 }
 
 export const getExportableImageSrc = async (
@@ -523,7 +510,7 @@ export const getImageUrlInTauri = async (url: string, fileFolderPath?: string) =
 
   // Markdown URLs encode path characters, but decoding an HTTP URL here can
   // change signed URLs and object-storage keys. Decode only local paths.
-  const localUrl = safeDecodeURIComponent(url)
+  const localUrl = localResourcePath(url) || url
   if (isAbsoluteLocalPath(localUrl)) {
     return convertFileSrc(localUrl)
   }

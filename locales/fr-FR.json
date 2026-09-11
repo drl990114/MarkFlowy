@@ -1,4 +1,11 @@
 {
+  "link_editing": {
+    "label": "Édition des liens",
+    "description": "Choisissez l’éditeur par défaut. Chaque lien peut aussi être modifié en Markdown.",
+    "popover": "Formulaire contextuel",
+    "markdown": "Syntaxe Markdown",
+    "open_failed": "Impossible d’ouvrir le lien ou de trouver son titre."
+  },
   "quick_open": {
     "title": "Ouverture rapide",
     "placeholder": "Rechercher par nom de fichier ou chemin…",
@@ -430,20 +437,37 @@
       }
     },
     "keyboard": {
-      "label": "clavier",
+      "label": "Raccourcis clavier",
       "shortcut_conflict": "Le raccourci a été occupé",
-      "desc": "Configuration des raccourcis clavier et du comportement des touches, y compris les paramètres associés tels que la détection des conflits de raccourcis.",
+      "desc": "Recherchez une commande et cliquez sur son raccourci pour le modifier.",
       "table_label": "Table des raccourcis clavier",
       "command": "Commande",
-      "description": "Description",
       "keybinding": "Raccourci",
-      "action": "Action",
+      "scope": "Contexte",
       "edit": "Modifier",
-      "disabled": "Ce raccourci est désactivé et ne peut pas être modifié",
       "edit_shortcut": "Modifier le raccourci",
       "shortcut": "Raccourci",
-      "record_placeholder": "Appuyez sur un raccourci",
-      "save": "Enregistrer"
+      "save": "Enregistrer",
+      "load_failed": "Impossible de charger les raccourcis. Vérifiez le fichier de configuration et réessayez.",
+      "save_failed": "Impossible d’enregistrer le raccourci. La configuration précédente est conservée. Réessayez.",
+      "invalid_binding": "Appuyez sur une combinaison valide comprenant une touche principale.",
+      "reserved_binding": "Cette combinaison est réservée à la saisie, à la navigation ou au presse-papiers. Choisissez-en une autre.",
+      "unsupported_binding": "L’éditeur actuel ne prend pas en charge cette combinaison.",
+      "conflict_with": "Déjà utilisé par « {{command}} ». Modifiez d’abord son raccourci.",
+      "saving": "Enregistrement…",
+      "unbound": "Non attribué",
+      "record_help": "Appuyez sur les touches · Entrée pour enregistrer · Échap pour annuler",
+      "remove_binding": "Supprimer le raccourci",
+      "reset_default": "Rétablir par défaut",
+      "clipboard_note": "Le raccourci système pour couper reste disponible. Vous pouvez ajouter une autre combinaison pour couper.",
+      "search": "Rechercher une commande ou un raccourci",
+      "modified_only": "Modifiés uniquement",
+      "retry": "Réessayer",
+      "scope_app": "Application",
+      "scope_editor": "Éditeur",
+      "modified": "Modifié",
+      "system_binding": "Raccourci système",
+      "no_results": "Aucun raccourci correspondant"
     },
     "ai": {
       "label": "AI",
@@ -875,6 +899,12 @@
       "truncated": "Seul le début est affiché pendant le chargement de la vue complète."
     },
     "link": {
+      "title": "Titre",
+      "markdown": "Modifier le Markdown",
+      "remove": "Supprimer le lien",
+      "copy": "Copier l’adresse",
+      "copyFailed": "Impossible de copier l’adresse.",
+      "sharedReference": "Les changements d’adresse et de titre s’appliquent à tous les liens utilisant cette référence.",
       "open": "Ouvrir le lien",
       "actions": "Actions du lien",
       "edit": "Modifier le lien",

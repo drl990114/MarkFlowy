@@ -14,6 +14,8 @@ import {
   type CapricornRuntimeSession,
 } from './capricornRuntimeAdapter'
 import { getCapricornRuntimeInput } from './capricornRuntimeDom'
+import { recordKey } from '@/router/Setting/KeyboardTable/record-key'
+import { shortcutString } from '@/commands/keybindingKeys'
 
 const createRuntime = createCapricornRuntime as CapricornRuntimeFactory
 const frame = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
@@ -42,6 +44,54 @@ function container() {
 }
 
 describe.skipIf(!isCapricornRuntimeAvailable)('published runtime host compatibility', () => {
+  it.each(['MacIntel', 'Win32', 'Linux x86_64'])(
+    'dispatches recorded shortcuts through the installed runtime on %s',
+    async (platform) => {
+      vi.spyOn(navigator, 'platform', 'get').mockReturnValue(platform)
+      vi.spyOn(navigator, 'userAgent', 'get').mockReturnValue(platform)
+      vi.stubGlobal('process', {
+        ...process,
+        platform: platform === 'MacIntel' ? 'darwin' : platform === 'Win32' ? 'win32' : 'linux',
+      })
+      const source = container()
+      await act(async () => {
+        session = createRuntime(source, { markdown: 'Body' })
+        session.focus()
+        await frame()
+      })
+      const runtime = session!
+      for (const keys of [
+        { key: 'k', code: 'KeyK' },
+        { key: '+', code: 'Equal', shiftKey: true },
+        { key: '1', code: 'Numpad1' },
+      ]) {
+        const init = {
+          ...keys,
+          ctrlKey: platform !== 'MacIntel',
+          metaKey: platform === 'MacIntel',
+          bubbles: true,
+          cancelable: true,
+        }
+        const recorded = recordKey(new KeyboardEvent('keydown', init))!
+        const configuration = createCapricornKeybindingConfiguration(
+          { toggleH2: shortcutString(recorded) },
+          true,
+        )
+        expect(runtime.keybindings!.validateConfiguration(configuration).ok).toBe(true)
+        await act(async () => {
+          runtime.commands.setBlockType('paragraph')
+          runtime.updateSettings({ keybindingConfiguration: configuration })
+          runtime.focus()
+          await frame()
+        })
+        await act(async () => {
+          getCapricornRuntimeInput(source)!.dispatchEvent(new KeyboardEvent('keydown', init))
+          await frame()
+        })
+        expect(runtime.getMarkdown(), JSON.stringify(recorded)).toBe('## Body')
+      }
+    },
+  )
   it('keeps the document usable and applies typography when saved shortcuts are unsupported', async () => {
     const source = container()
     const onError = vi.fn()

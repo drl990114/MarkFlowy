@@ -13,6 +13,7 @@ import type {
 import {
   EditorState as CodeMirrorEditorState,
   Compartment,
+  Prec,
   RangeSetBuilder,
   StateEffect,
   StateField,
@@ -23,7 +24,12 @@ import type {
   KeyBinding as CodeMirrorKeyBinding,
   ViewUpdate,
 } from '@codemirror/view'
-import { Decoration, EditorView as CodeMirrorEditorView, keymap, ViewPlugin } from '@codemirror/view'
+import {
+  Decoration,
+  EditorView as CodeMirrorEditorView,
+  keymap,
+  ViewPlugin,
+} from '@codemirror/view'
 import { SyntaxNodeRef, Tree } from '@lezer/common'
 import { assertGet, isPromise, replaceNodeAtPosition } from '@rme-sdk/sdk/core'
 import type { EditorSchema, EditorView, ProsemirrorNode } from '@rme-sdk/sdk/pm'
@@ -34,6 +40,10 @@ import { nanoid } from 'nanoid'
 import type { LoadLanguage } from '../extensions/CodeMirror/codemirror-node-view'
 import { CustomCopyFunction } from '../extensions/CodeMirror/codemirror-types'
 import { createCommandKeymap, type CommandKeymapOptions } from '../extensions/CodeMirror/keymap'
+import {
+  createShortcutMatcher,
+  protectAltGraphInput,
+} from '../extensions/Shortcuts/shortcut-matcher'
 import { isBrowser } from '../utils/common'
 import { lightTheme } from '../theme'
 import type { CreateThemeOptions } from './theme'
@@ -99,8 +109,7 @@ const searchHighlightPlugin = ViewPlugin.fromClass(
       if (
         update.docChanged ||
         update.viewportChanged ||
-        update.startState.field(searchHighlightField) !==
-          update.state.field(searchHighlightField)
+        update.startState.field(searchHighlightField) !== update.state.field(searchHighlightField)
       ) {
         this.decorations = this.buildDecorations(update.view)
       }
@@ -169,9 +178,7 @@ export const updateCodemirrorSearchState = (
     }
     const range = mfCmView.getProsemirrorContentRange()
     const active =
-      activeMatch &&
-      activeMatch.from >= range.from &&
-      activeMatch.to <= range.to
+      activeMatch && activeMatch.from >= range.from && activeMatch.to <= range.to
         ? { from: activeMatch.from - range.from, to: activeMatch.to - range.from }
         : null
     mfCmView.setSearchState(searchQuery, active)
@@ -260,6 +267,9 @@ export class MfCodemirrorView {
 
   private readonly schema: EditorSchema
 
+  private readonly commandKeymapConf = new Compartment()
+  private readonly releaseShortcutInput: () => void
+
   private readonly searchQueryConf: Compartment
 
   private languageName: string
@@ -269,6 +279,8 @@ export class MfCodemirrorView {
   cm: CodeMirrorEditorView
 
   content = ''
+
+  isDestroyed = false
 
   node: ProsemirrorNode
 
@@ -322,6 +334,7 @@ export class MfCodemirrorView {
     const startState = CodeMirrorEditorState.create({
       doc: this.node.textContent as string,
       extensions: [
+        this.commandKeymapConf.of(this.commandKeymapExtension()),
         keymap.of(this.codeMirrorKeymap()),
         changeFilter,
         this.searchQueryConf.of([searchHighlightField, searchHighlightPlugin]),
@@ -343,6 +356,7 @@ export class MfCodemirrorView {
     this.updateLanguage()
 
     // Create copy button if enabled
+    this.releaseShortcutInput = protectAltGraphInput(this.cm.dom)
     if (this.options.copyButton?.enabled !== false) {
       this.createCopyButton()
     }
@@ -401,6 +415,8 @@ export class MfCodemirrorView {
   }
 
   destroy() {
+    this.isDestroyed = true
+    this.releaseShortcutInput()
     this.cm.destroy()
     cmInstanceMap.delete(this.id)
   }
@@ -477,9 +493,48 @@ export class MfCodemirrorView {
     return TextSelection.between(doc.resolve(anchor + start), doc.resolve(head + start))
   }
 
+  updateCommandKeymap(options: CommandKeymapOptions) {
+    this.options = { ...this.options, commandKeymapOptions: options }
+    this.cm.dispatch({
+      effects: this.commandKeymapConf.reconfigure(this.commandKeymapExtension()),
+    })
+  }
+
+  private commandKeymapExtension(): CodeMirrorExtension {
+    const factory =
+      this.options?.commandKeymapOptions?.createShortcutMatcher ?? createShortcutMatcher
+    const historyCommands = this.options?.useProsemirrorHistoryKey
+      ? {
+          undo: () => undo(this.view.state, this.view.dispatch),
+          redo: () => redo(this.view.state, this.view.dispatch),
+        }
+      : undefined
+    const rules = createCommandKeymap(this.options?.commandKeymapOptions, historyCommands)
+      .filter((binding) => binding.key)
+      .map((binding) => ({ ...binding, matches: factory(binding.key!) }))
+    return Prec.highest(
+      CodeMirrorEditorView.domEventHandlers({
+        keydown: (event, editor) => {
+          if (
+            event.defaultPrevented ||
+            event.isComposing ||
+            event.keyCode === 229 ||
+            editor.composing ||
+            event.getModifierState?.('AltGraph')
+          )
+            return false
+          for (const rule of rules) {
+            if (rule.matches(event) && (rule.run?.(editor) || rule.preventDefault)) return true
+          }
+          return false
+        },
+      }),
+    )
+  }
+
   private codeMirrorKeymap(): CodeMirrorKeyBinding[] {
     const keymaps: CodeMirrorKeyBinding[] = [
-     indentWithTab,
+      indentWithTab,
       {
         key: 'ArrowUp',
         run: this.maybeEscape('line', -1),
@@ -545,40 +600,7 @@ export class MfCodemirrorView {
           return true
         },
       },
-      ...createCommandKeymap(this.options?.commandKeymapOptions)
     ]
-
-    if (this.options?.useProsemirrorHistoryKey) {
-      keymaps.push(
-        {
-          key: 'Mod-z',
-          run: () => {
-            undo(this.view.state, this.view.dispatch)
-            this.view.focus()
-            return false
-          },
-        },
-        {
-          key: 'Mod-y',
-          mac: 'Mod-Shift-z',
-          run: () => {
-            redo(this.view.state, this.view.dispatch)
-            this.view.focus()
-            return false
-          },
-          preventDefault: true,
-        },
-        {
-          linux: 'Ctrl-Shift-z',
-          run: () => {
-            redo(this.view.state, this.view.dispatch)
-            this.view.focus()
-            return false
-          },
-          preventDefault: true,
-        },
-      )
-    }
 
     return keymaps
   }
@@ -630,10 +652,7 @@ export class MfCodemirrorView {
     }
     let sibling: ChildNode | null = nodeDom.previousSibling
     while (sibling) {
-      if (
-        sibling instanceof HTMLElement &&
-        sibling.classList.contains('code-block__menu')
-      ) {
+      if (sibling instanceof HTMLElement && sibling.classList.contains('code-block__menu')) {
         const input = sibling.querySelector(
           '.code-block__languages__input',
         ) as HTMLInputElement | null

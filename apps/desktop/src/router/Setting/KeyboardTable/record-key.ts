@@ -1,69 +1,32 @@
-export const Escape = 'Escape'
-export const Ctrl = 'Ctrl'
-export const CtrlOrCmd = 'CommandOrCtrl'
-export const Alt = 'Alt'
-export const Shift = 'Shift'
+import { keybindingPlatform, normalizeKeyMap } from '@/commands/keybindingKeys'
 
-export const isMacOS = /macintosh|mac os x/i.test(navigator.userAgent)
-export const isWindows = /win64|win32|wow64|wow32/i.test(navigator.userAgent)
-export const isOtherOS = !isMacOS && !isWindows
-
-export function transferKey(key: string) {
-  if (isMacOS) {
-    return key.replace('CommandOrCtrl', '⌘')
-  } else {
-    return key.replace('CommandOrCtrl', 'Ctrl')
-  }
-}
-
-export function recordKey(e: KeyboardEvent) {
-  e.preventDefault()
-  e.stopPropagation()
-
-  if (e.key === 'Escape') {
-    return {
-      keys: null,
-      isExit: true,
-      isEnter: false
-    }
-  }
-
-  const modifiers: Record<string, boolean> = {
-    [CtrlOrCmd]: (isMacOS && e.metaKey) || (!isMacOS && e.ctrlKey),
-    [Alt]: e.altKey,
-    [Shift]: e.shiftKey,
-  }
-
-  const keys = Object.keys(modifiers).filter((key) => modifiers[key])
-
-  if (!['Control', 'Alt', 'Shift', 'Meta'].includes(e.key)) {
-    let val = e.code
-    if (val.startsWith('Key')) {
-      val = val.slice(3)
-    } else if (val.startsWith('Digit')) {
-      val = val.slice(5)
-    } else if (val.startsWith('Numpad')) {
-      val = e.code
-    } else if (val === 'Equal') {
-      val = '='
-    } else if ('`-=[]\\;\',./{}|:"<>?~!@#$%^&*()_'.includes(e.key)) {
-      val = e.key
-    }
-
-    keys.push(val)
-  }
-
-  if (e.key === 'Enter' && keys.length <= 1) {
-    return {
-      keys: null,
-      isExit: false,
-      isEnter: true
-    }
-  } else {
-    return {
-      keys: keys,
-      isExit: false,
-      isEnter: false
-    }
-  }
+export function recordKey(event: KeyboardEvent) {
+  if (
+    event.isComposing ||
+    event.keyCode === 229 ||
+    event.getModifierState?.('AltGraph') ||
+    ['Dead', 'Process', 'Unidentified'].includes(event.key)
+  )
+    return null
+  if (
+    ['Tab', 'Escape', 'Enter'].includes(event.key) &&
+    !event.ctrlKey &&
+    !event.metaKey &&
+    !event.altKey
+  )
+    return null
+  event.preventDefault()
+  event.stopPropagation()
+  if (['Control', 'Meta', 'Alt', 'Shift', 'AltGraph'].includes(event.key)) return null
+  const mac = keybindingPlatform() === 'mac'
+  const keys: string[] = []
+  if (event.ctrlKey) keys.push(mac ? 'Ctrl' : 'CommandOrCtrl')
+  if (event.metaKey) keys.push(mac ? 'CommandOrCtrl' : 'Meta')
+  if (event.altKey) keys.push('Alt')
+  if (event.shiftKey) keys.push('Shift')
+  // Semantic characters follow the active layout. Numpad keys retain their physical identity.
+  keys.push(
+    event.code.startsWith('Numpad') && event.code !== 'NumpadEnter' ? `[${event.code}]` : event.key,
+  )
+  return normalizeKeyMap(keys)
 }

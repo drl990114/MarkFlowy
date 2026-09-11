@@ -98,6 +98,7 @@ function createRuntimeHarness(initialMarkdown = '# Initial', supportsDocumentCha
     readOnly: false,
   }
   const session: CapricornRuntimeSession = {
+    keybindings: { validateConfiguration: vi.fn(() => ({ ok: true, diagnostics: [] })) },
     commands: {
       insertImage: vi.fn(),
       redo: vi.fn(),
@@ -259,7 +260,7 @@ describe('createCapricornRuntimeAdapter', () => {
     expect(adapter.requestInlineEdit!('link')).toBe(true)
     expect(listener).toHaveBeenLastCalledWith({ kind: 'link', bookmark, focus: true })
     const options = vi.mocked(harness.createRuntime).mock.calls[0][1]!
-    expect(options.linkOpenMode).toBe('button')
+    expect(options.linkOpenMode).toBe('modifier')
     options.onEditInline!({ kind: 'image', key: 'image-node', focus: false })
     expect(selection.capture).toHaveBeenLastCalledWith('image-node')
     expect(listener).toHaveBeenLastCalledWith({ kind: 'image', bookmark, focus: false })

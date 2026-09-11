@@ -1,6 +1,12 @@
 import { getFileObject, getFileObjectByPath } from '@/helper/files'
 import { createFile, getFileNameFromPath } from '@/helper/filesys'
 import { logger } from '@/helper/logger'
+import { localResourcePath, resourceFragment } from '@/helper/localResourcePath'
+import {
+  beginLinkNavigation,
+  isCurrentLinkNavigation,
+  navigateLinkFragment,
+} from './linkNavigation'
 import useEditorStore from '@/stores/useEditorStore'
 import { invoke } from '@tauri-apps/api/core'
 import { dirname, isAbsolute, resolve } from '@tauri-apps/api/path'
@@ -29,7 +35,7 @@ export async function resolveLocalFileLinkPath(
 ): Promise<string | undefined> {
   if (!isLocalFileLink(href)) return undefined
 
-  const linkPath = getDecodedLinkPath(href)
+  const linkPath = localResourcePath(href)
   if (!linkPath) return undefined
 
   try {
@@ -50,6 +56,12 @@ export async function resolveLocalFileLinkPath(
 export async function openEditorLink(href: string, sourceFileId?: string): Promise<boolean> {
   const target = href.trim()
   if (!target) return false
+  const navigation = beginLinkNavigation()
+  if (target.startsWith('#')) {
+    if (!sourceFileId) return false
+    const reached = await navigateLinkFragment(sourceFileId, target.slice(1), navigation)
+    return !isCurrentLinkNavigation(navigation) || reached
+  }
 
   if (!isLocalFileLink(target)) {
     if (target.startsWith('#') || target.startsWith('?')) return false
@@ -65,11 +77,8 @@ export async function openEditorLink(href: string, sourceFileId?: string): Promi
 
   const editor = useEditorStore.getState()
   const sourceFilePath = sourceFileId ? getFileObject(sourceFileId)?.path : undefined
-  const targetPath = await resolveLocalFileLinkPath(
-    target,
-    sourceFilePath,
-    editor.getRootPath(),
-  )
+  const targetPath = await resolveLocalFileLinkPath(target, sourceFilePath, editor.getRootPath())
+  if (!isCurrentLinkNavigation(navigation)) return true
   if (!targetPath) return false
 
   let targetFile = getFileObjectByPath(targetPath) ?? editor.getFileNodeByPath(targetPath)
@@ -81,6 +90,7 @@ export async function openEditorLink(href: string, sourceFileId?: string): Promi
         invoke<boolean>('file_exists', { filePath: targetPath }),
         invoke<boolean>('is_dir', { path: targetPath }),
       ])
+      if (!isCurrentLinkNavigation(navigation)) return true
       if (!exists || isDirectory) return false
     } catch (error) {
       logger.warn('Failed to inspect local file link:', { error, href, targetPath })
@@ -95,35 +105,15 @@ export async function openEditorLink(href: string, sourceFileId?: string): Promi
     })
   }
 
+  if (!isCurrentLinkNavigation(navigation)) return true
   editor.addOpenedFile(targetFile.id)
   editor.setActiveId(targetFile.id)
+  const fragment = resourceFragment(target)
+  if (fragment !== undefined) {
+    const reached = await navigateLinkFragment(targetFile.id, fragment, navigation)
+    return !isCurrentLinkNavigation(navigation) || reached
+  }
   return true
-}
-
-function getDecodedLinkPath(href: string): string | undefined {
-  const target = href.trim()
-
-  if (target.toLowerCase().startsWith('file:')) {
-    try {
-      const fileUrl = new URL(target)
-      if (fileUrl.protocol !== 'file:') return undefined
-
-      const pathname = decodeURIComponent(fileUrl.pathname)
-      if (fileUrl.hostname && fileUrl.hostname !== 'localhost') {
-        return `//${fileUrl.hostname}${pathname}`
-      }
-
-      return pathname.replace(/^\/([a-z]:\/)/i, '$1')
-    } catch {
-      return undefined
-    }
-  }
-
-  try {
-    return decodeURIComponent(target.split(/[?#]/, 1)[0])
-  } catch {
-    return undefined
-  }
 }
 
 function getFileExtension(fileName: string): string {

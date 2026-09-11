@@ -1,4 +1,11 @@
 {
+  "link_editing": {
+    "label": "链接编辑方式",
+    "description": "选择默认编辑方式，也可临时展开单个链接的 Markdown。",
+    "popover": "浮层表单",
+    "markdown": "Markdown 语法",
+    "open_failed": "无法打开链接或找到目标标题。"
+  },
   "quick_open": {
     "title": "快速打开",
     "placeholder": "按文件名或路径搜索…",
@@ -601,20 +608,37 @@
       }
     },
     "keyboard": {
-      "label": "键盘",
-      "desc": "键盘快捷键和按键行为的配置，包括快捷键冲突检测等相关设置。",
+      "label": "快捷键",
+      "desc": "搜索命令，点击快捷键修改。",
       "shortcut_conflict": "该快捷键已被占用",
       "table_label": "快捷键表格",
       "command": "命令",
-      "description": "说明",
       "keybinding": "快捷键",
-      "action": "操作",
+      "scope": "生效范围",
       "edit": "编辑",
-      "disabled": "此快捷键已禁用，无法编辑",
       "edit_shortcut": "编辑快捷键",
       "shortcut": "快捷键",
-      "record_placeholder": "请按下快捷键",
-      "save": "保存"
+      "save": "保存",
+      "load_failed": "无法加载快捷键配置，请检查配置文件后重试。",
+      "save_failed": "快捷键保存失败，原配置已保留，请重试。",
+      "invalid_binding": "请按下包含主键的有效组合键。",
+      "reserved_binding": "该组合键用于文字输入、导航或系统剪贴板，请选择其他组合。",
+      "unsupported_binding": "当前编辑器不支持此组合键，请选择其他组合。",
+      "conflict_with": "已被“{{command}}”占用，请先修改该命令的快捷键。",
+      "saving": "正在保存…",
+      "unbound": "未绑定",
+      "record_help": "按下组合键 · Enter 保存 · Esc 取消",
+      "remove_binding": "解除绑定",
+      "reset_default": "恢复默认",
+      "clipboard_note": "系统剪切快捷键始终保留；此处可添加其他剪切组合。",
+      "search": "搜索命令或快捷键",
+      "modified_only": "仅已修改",
+      "retry": "重试",
+      "scope_app": "应用内",
+      "scope_editor": "编辑器内",
+      "modified": "已修改",
+      "system_binding": "由系统管理",
+      "no_results": "没有匹配的快捷键"
     },
     "support": {
       "label": "支持",
@@ -869,6 +893,12 @@
       "truncated": "当前只显示开头片段，完整源码视图正在加载。"
     },
     "link": {
+      "title": "标题",
+      "markdown": "编辑 Markdown",
+      "remove": "取消链接",
+      "copy": "复制地址",
+      "copyFailed": "复制地址失败。",
+      "sharedReference": "地址和标题的修改会应用到使用此引用的所有链接。",
       "open": "打开链接",
       "actions": "链接操作",
       "edit": "编辑链接",

@@ -17,12 +17,17 @@ export default defineConfig(() => ({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./src/editor/test/setup-vitest.ts'],
+    server: { deps: { inline: ['@drl990114/codemirror-themes'] } },
     alias: [
       {
-        find: 'zens',
+        find: '@drl990114/codemirror-themes',
         replacement: fileURLToPath(
-          new URL('./src/editor/test/__mocks__/zens.ts', import.meta.url),
+          new URL('../../node_modules/@drl990114/codemirror-themes/esm/index.js', import.meta.url),
         ),
+      },
+      {
+        find: 'zens',
+        replacement: fileURLToPath(new URL('./src/editor/test/__mocks__/zens.ts', import.meta.url)),
       },
     ],
   },

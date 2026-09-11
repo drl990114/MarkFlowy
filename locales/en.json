@@ -1,4 +1,11 @@
 {
+  "link_editing": {
+    "label": "Link editing",
+    "description": "Choose the default link editor. Each link can also be edited as Markdown.",
+    "popover": "Popover",
+    "markdown": "Markdown syntax",
+    "open_failed": "Unable to open the link or find its heading."
+  },
   "quick_open": {
     "title": "Quick Open",
     "placeholder": "Search files by name or path…",
@@ -495,20 +502,37 @@
       "desc": "Markdown configuration options for the editor, including settings for style, behavior, and WYSIWYG mode."
     },
     "keyboard": {
-      "label": "keyboard",
+      "label": "Keyboard Shortcuts",
       "shortcut_conflict": "This shortcut is already occupied",
-      "desc": "Configuration of keyboard shortcuts and key behavior, including settings related to shortcut conflict detection.",
+      "desc": "Search commands and click a shortcut to change it.",
       "table_label": "Keyboard shortcuts table",
       "command": "Command",
-      "description": "Description",
       "keybinding": "Keybinding",
-      "action": "Action",
+      "scope": "Context",
       "edit": "Edit",
-      "disabled": "This shortcut is disabled and cannot be edited",
       "edit_shortcut": "Edit Shortcut",
       "shortcut": "Shortcut",
-      "record_placeholder": "Press a shortcut",
-      "save": "Save"
+      "save": "Save",
+      "load_failed": "Unable to load shortcuts. Check the configuration file and retry.",
+      "save_failed": "Unable to save the shortcut. Your previous configuration was kept. Please retry.",
+      "invalid_binding": "Press a valid combination that includes a primary key.",
+      "reserved_binding": "This combination is reserved for typing, navigation or the system clipboard. Choose another.",
+      "unsupported_binding": "The current editor does not support this combination. Choose another.",
+      "conflict_with": "Already used by “{{command}}”. Change that command’s shortcut first.",
+      "saving": "Saving…",
+      "unbound": "Unassigned",
+      "record_help": "Press keys · Enter to save · Esc to cancel",
+      "remove_binding": "Remove shortcut",
+      "reset_default": "Restore default",
+      "clipboard_note": "The system cut shortcut remains available. You can assign an additional cut shortcut here.",
+      "search": "Search commands or shortcuts",
+      "modified_only": "Modified only",
+      "retry": "Retry",
+      "scope_app": "Application",
+      "scope_editor": "Editor",
+      "modified": "Modified",
+      "system_binding": "System shortcut",
+      "no_results": "No matching shortcuts"
     },
     "ai": {
       "label": "AI",
@@ -869,6 +893,12 @@
       "truncated": "Only the initial excerpt is shown while the complete source view loads."
     },
     "link": {
+      "title": "Title",
+      "markdown": "Edit Markdown",
+      "remove": "Remove link",
+      "copy": "Copy address",
+      "copyFailed": "Could not copy address.",
+      "sharedReference": "Address and title changes apply to every link using this reference.",
       "open": "Open link",
       "actions": "Link actions",
       "edit": "Edit link",

@@ -1,28 +1,28 @@
-export interface KeybindingInfo {
-  id: string
-  keyMap: string[]
-  when: string
-}
+import { formatKeyMap, shortcutString } from './keybindingKeys'
+import type { KeyboardBinding } from './keybindingCatalog'
 
-class KeybindingRegistryImpl {
-  private keybindings = new Map<string, KeybindingInfo>()
+export class KeybindingRegistry {
+  private keybindings = new Map<string, KeyboardBinding>()
 
-  setKeybindings(keybindings: KeybindingInfo[]): void {
+  setKeybindings(keybindings: KeyboardBinding[]): void {
     this.keybindings.clear()
     keybindings.forEach((kb) => this.keybindings.set(kb.id, kb))
   }
 
-  getKeybinding(commandId: string): KeybindingInfo | undefined {
-    return this.keybindings.get(commandId)
+  getKeybinding(commandId: string): KeyboardBinding | undefined {
+    const bindings = this.getKeybindings(commandId)
+    return bindings.find((binding) => binding.keys.length) ?? bindings[0]
   }
 
-  getKeybindings(): KeybindingInfo[] {
-    return Array.from(this.keybindings.values())
+  getKeybindings(commandId?: string): KeyboardBinding[] {
+    return Array.from(this.keybindings.values()).filter(
+      (binding) => commandId === undefined || binding.command === commandId,
+    )
   }
 
   formatKeybinding(commandId: string): string | undefined {
-    const kb = this.keybindings.get(commandId)
-    return kb ? this.formatKeyMap(kb.keyMap) : undefined
+    const kb = this.getKeybinding(commandId)
+    return kb ? this.formatKeyMap(kb.keys) : undefined
   }
 
   formatKeyMap(keyMap: string[]): string | undefined {
@@ -30,51 +30,9 @@ class KeybindingRegistryImpl {
     return formatKeyMap(keyMap)
   }
 
-  updateKeybinding(commandId: string, newKeyMap: string[]): void {
-    const kb = this.keybindings.get(commandId)
-    if (kb) {
-      this.keybindings.set(commandId, { ...kb, keyMap: newKeyMap })
-    }
-  }
-
   getKeyBindingString(keyMap: string[]): string {
-    return getKeyBindingString(keyMap)
+    return shortcutString(keyMap)
   }
 }
 
-function getKeyBindingString(keyMap: string[]): string {
-  let keyBinding = ''
-  keyMap.forEach((key, index) => {
-    if (key === 'CommandOrCtrl') {
-      keyBinding += 'mod'
-    } else {
-      keyBinding += key
-    }
-
-    if (index < keyMap.length - 1) {
-      keyBinding += '-'
-    }
-  })
-  return keyBinding
-}
-
-function formatKeyMap(keyMap: string[]): string {
-  const isMac =
-    typeof navigator !== 'undefined' &&
-    navigator.platform.toUpperCase().indexOf('MAC') >= 0
-
-  return keyMap
-    .map((key) => {
-      if (key === 'CommandOrCtrl') {
-        return isMac ? '⌘' : 'Ctrl'
-      }
-      if (key === 'Shift') return isMac ? '⇧' : 'Shift'
-      if (key === 'Alt') return isMac ? '⌥' : 'Alt'
-      if (key === 'Meta') return '⌘'
-      if (key === 'Ctrl') return isMac ? '⌃' : 'Ctrl'
-      return key
-    })
-    .join(isMac ? '' : '+')
-}
-
-export const keybindingRegistry = new KeybindingRegistryImpl()
+export const keybindingRegistry = new KeybindingRegistry()

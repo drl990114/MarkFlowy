@@ -4,6 +4,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } 
 import { invoke } from '@tauri-apps/api/core'
 import { commandRegistry } from '@/commands'
 import { EVENT } from '@/constants'
+import { getDefaultKeybindings } from '@/commands/keybindingCatalog'
 import useGlobalKeyboard from './useKeyboard'
 
 vi.mock('hox', () => ({ createGlobalStore: (hook: () => unknown) => [hook] }))
@@ -51,7 +52,10 @@ describe('Quick Open global keybinding', () => {
 
   async function mount(keyMap: string[]) {
     vi.mocked(invoke).mockResolvedValue({
-      cmds: [{ id: EVENT.app_quickOpen, key_map: keyMap, when: 'always' }],
+      revision: 1,
+      rules: getDefaultKeybindings('linux')
+        .filter((rule) => rule.command === EVENT.app_quickOpen)
+        .map((rule) => ({ ...rule, keys: keyMap })),
     })
     await act(async () => root.render(<KeyboardHost />))
   }

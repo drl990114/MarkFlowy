@@ -19,9 +19,11 @@ export function ZenModeButton() {
   if (!activeId) return null
 
   const label = t('command.id_descriptions.app_toggleZenMode')
-  const zenModeKeybinding = keyboardInfos.find((binding) => binding.id === EVENT.app_toggleZenMode)
+  const zenModeKeybinding = keyboardInfos.find(
+    (binding) => binding.command === EVENT.app_toggleZenMode && binding.keys.length,
+  )
   const shortcut = zenModeKeybinding
-    ? keybindingRegistry.formatKeyMap(zenModeKeybinding.key_map)
+    ? keybindingRegistry.formatKeyMap(zenModeKeybinding.keys)
     : undefined
   const accessibleLabel = shortcut ? `${label} (${shortcut})` : label
 

@@ -1,0 +1,380 @@
+{
+  "commands": [
+    {
+      "id": "app_quickOpen",
+      "configurable": true,
+      "target": "app"
+    },
+    {
+      "id": "app_openFolder",
+      "configurable": true,
+      "target": "app"
+    },
+    {
+      "id": "app_toggleLeftsidebarVisible",
+      "configurable": true,
+      "target": "app"
+    },
+    {
+      "id": "app_toggleRightsidebarVisible",
+      "configurable": true,
+      "target": "app"
+    },
+    {
+      "id": "app_toggleZenMode",
+      "configurable": true,
+      "target": "app"
+    },
+    {
+      "id": "app_save",
+      "configurable": true,
+      "target": "app"
+    },
+    {
+      "id": "app_findReplaceEditor",
+      "configurable": true,
+      "target": "app"
+    },
+    {
+      "id": "app_closeCurrentEditorTab",
+      "configurable": true,
+      "target": "app"
+    },
+    {
+      "id": "app_hide",
+      "configurable": true,
+      "target": "app"
+    },
+    {
+      "id": "app_openSetting",
+      "configurable": true,
+      "target": "app"
+    },
+    {
+      "id": "app_toggleEditorType",
+      "configurable": true,
+      "target": "app"
+    },
+    {
+      "id": "editor_copy",
+      "configurable": false,
+      "target": "native"
+    },
+    {
+      "id": "editor_cut",
+      "configurable": true,
+      "target": "editor",
+      "editor": {
+        "rme": "cut"
+      }
+    },
+    {
+      "id": "editor_redo",
+      "configurable": true,
+      "target": "editor",
+      "editor": {
+        "rme": "redo",
+        "capricornRule": "editor.history.redo.default"
+      }
+    },
+    {
+      "id": "editor_undo",
+      "configurable": true,
+      "target": "editor",
+      "editor": {
+        "rme": "undo",
+        "capricornRule": "editor.history.undo.default"
+      }
+    },
+    {
+      "id": "editor_paste",
+      "configurable": false,
+      "target": "native"
+    },
+    {
+      "id": "editor_toggleStrong",
+      "configurable": true,
+      "target": "editor",
+      "editor": {
+        "rme": "toggleStrong",
+        "capricornRule": "editor.format.bold.default"
+      }
+    },
+    {
+      "id": "editor_toggleEmphasis",
+      "configurable": true,
+      "target": "editor",
+      "editor": {
+        "rme": "toggleEmphasis",
+        "capricornRule": "editor.format.italic.default"
+      }
+    },
+    {
+      "id": "editor_toggleCodeText",
+      "configurable": true,
+      "target": "editor",
+      "editor": {
+        "rme": "toggleCodeText",
+        "capricornRule": "editor.format.code.default"
+      }
+    },
+    {
+      "id": "editor_toggleDelete",
+      "configurable": true,
+      "target": "editor",
+      "editor": {
+        "rme": "toggleDelete",
+        "capricornRule": "editor.format.strike.default"
+      }
+    },
+    {
+      "id": "editor_insertCurrentDate",
+      "configurable": true,
+      "target": "editor",
+      "editor": {
+        "rme": "insertCurrentDate",
+        "capricornRule": "editor.insert.currentDate.default"
+      }
+    },
+    {
+      "id": "editor_toggleH1",
+      "configurable": true,
+      "target": "editor",
+      "editor": {
+        "rme": "toggleH1",
+        "capricornRule": "editor.block.heading.1.default"
+      }
+    },
+    {
+      "id": "editor_toggleH2",
+      "configurable": true,
+      "target": "editor",
+      "editor": {
+        "rme": "toggleH2",
+        "capricornRule": "editor.block.heading.2.default"
+      }
+    },
+    {
+      "id": "editor_toggleH3",
+      "configurable": true,
+      "target": "editor",
+      "editor": {
+        "rme": "toggleH3",
+        "capricornRule": "editor.block.heading.3.default"
+      }
+    },
+    {
+      "id": "editor_toggleH4",
+      "configurable": true,
+      "target": "editor",
+      "editor": {
+        "rme": "toggleH4",
+        "capricornRule": "editor.block.heading.4.default"
+      }
+    },
+    {
+      "id": "editor_toggleH5",
+      "configurable": true,
+      "target": "editor",
+      "editor": {
+        "rme": "toggleH5",
+        "capricornRule": "editor.block.heading.5.default"
+      }
+    },
+    {
+      "id": "editor_toggleH6",
+      "configurable": true,
+      "target": "editor",
+      "editor": {
+        "rme": "toggleH6",
+        "capricornRule": "editor.block.heading.6.default"
+      }
+    },
+    {
+      "id": "app_splitEditorRight",
+      "configurable": true,
+      "target": "app"
+    },
+    {
+      "id": "app_splitEditorDown",
+      "configurable": true,
+      "target": "app"
+    }
+  ],
+  "rules": [
+    {
+      "id": "app_quickOpen.default",
+      "command": "app_quickOpen",
+      "keys": ["CommandOrCtrl", "p"],
+      "when": "always"
+    },
+    {
+      "id": "app_openFolder.default",
+      "command": "app_openFolder",
+      "keys": ["CommandOrCtrl", "Shift", "o"],
+      "when": "always"
+    },
+    {
+      "id": "app_toggleLeftsidebarVisible.default",
+      "command": "app_toggleLeftsidebarVisible",
+      "keys": ["CommandOrCtrl", "l"],
+      "when": "always"
+    },
+    {
+      "id": "app_toggleRightsidebarVisible.default",
+      "command": "app_toggleRightsidebarVisible",
+      "keys": ["CommandOrCtrl", "r"],
+      "when": "always"
+    },
+    {
+      "id": "app_toggleZenMode.default",
+      "command": "app_toggleZenMode",
+      "keys": ["CommandOrCtrl", "Shift", "f"],
+      "when": "always"
+    },
+    {
+      "id": "app_save.default",
+      "command": "app_save",
+      "keys": ["CommandOrCtrl", "s"],
+      "when": "always"
+    },
+    {
+      "id": "app_findReplaceEditor.default",
+      "command": "app_findReplaceEditor",
+      "keys": ["CommandOrCtrl", "f"],
+      "when": "editor_focus"
+    },
+    {
+      "id": "app_closeCurrentEditorTab.default",
+      "command": "app_closeCurrentEditorTab",
+      "keys": ["CommandOrCtrl", "w"],
+      "when": "always"
+    },
+    {
+      "id": "app_hide.default",
+      "command": "app_hide",
+      "keys": ["CommandOrCtrl", "h"],
+      "when": "always"
+    },
+    {
+      "id": "app_openSetting.default",
+      "command": "app_openSetting",
+      "keys": ["CommandOrCtrl", ","],
+      "when": "always"
+    },
+    {
+      "id": "app_toggleEditorType.default",
+      "command": "app_toggleEditorType",
+      "keys": ["CommandOrCtrl", "Shift", "m"],
+      "when": "editor_focus"
+    },
+    {
+      "id": "editor_copy.default",
+      "command": "editor_copy",
+      "keys": ["CommandOrCtrl", "c"],
+      "when": "editor_focus"
+    },
+    {
+      "id": "editor_cut.default",
+      "command": "editor_cut",
+      "keys": ["CommandOrCtrl", "x"],
+      "when": "editor_focus"
+    },
+    {
+      "id": "editor_redo.default",
+      "command": "editor_redo",
+      "keys": ["CommandOrCtrl", "Shift", "z"],
+      "when": "editor_focus"
+    },
+    {
+      "id": "editor_undo.default",
+      "command": "editor_undo",
+      "keys": ["CommandOrCtrl", "z"],
+      "when": "editor_focus"
+    },
+    {
+      "id": "editor_paste.default",
+      "command": "editor_paste",
+      "keys": ["CommandOrCtrl", "v"],
+      "when": "editor_focus"
+    },
+    {
+      "id": "editor_toggleStrong.default",
+      "command": "editor_toggleStrong",
+      "keys": ["CommandOrCtrl", "b"],
+      "when": "editor_focus"
+    },
+    {
+      "id": "editor_toggleEmphasis.default",
+      "command": "editor_toggleEmphasis",
+      "keys": ["CommandOrCtrl", "i"],
+      "when": "editor_focus"
+    },
+    {
+      "id": "editor_toggleCodeText.default",
+      "command": "editor_toggleCodeText",
+      "keys": ["CommandOrCtrl", "e"],
+      "when": "editor_focus"
+    },
+    {
+      "id": "editor_toggleDelete.default",
+      "command": "editor_toggleDelete",
+      "keys": ["CommandOrCtrl", "Shift", "s"],
+      "when": "editor_focus"
+    },
+    {
+      "id": "editor_insertCurrentDate.default",
+      "command": "editor_insertCurrentDate",
+      "keys": ["CommandOrCtrl", ";"],
+      "when": "editor_focus"
+    },
+    {
+      "id": "editor_toggleH1.default",
+      "command": "editor_toggleH1",
+      "keys": ["CommandOrCtrl", "1"],
+      "when": "editor_focus"
+    },
+    {
+      "id": "editor_toggleH2.default",
+      "command": "editor_toggleH2",
+      "keys": ["CommandOrCtrl", "2"],
+      "when": "editor_focus"
+    },
+    {
+      "id": "editor_toggleH3.default",
+      "command": "editor_toggleH3",
+      "keys": ["CommandOrCtrl", "3"],
+      "when": "editor_focus"
+    },
+    {
+      "id": "editor_toggleH4.default",
+      "command": "editor_toggleH4",
+      "keys": ["CommandOrCtrl", "4"],
+      "when": "editor_focus"
+    },
+    {
+      "id": "editor_toggleH5.default",
+      "command": "editor_toggleH5",
+      "keys": ["CommandOrCtrl", "5"],
+      "when": "editor_focus"
+    },
+    {
+      "id": "editor_toggleH6.default",
+      "command": "editor_toggleH6",
+      "keys": ["CommandOrCtrl", "6"],
+      "when": "editor_focus"
+    },
+    {
+      "id": "app_splitEditorRight.default",
+      "command": "app_splitEditorRight",
+      "keys": [],
+      "when": "always"
+    },
+    {
+      "id": "app_splitEditorDown.default",
+      "command": "app_splitEditorDown",
+      "keys": [],
+      "when": "always"
+    }
+  ]
+}

@@ -15,6 +15,7 @@ export class CodeMirror6NodeView implements NodeView {
   private readonly cm: CodeMirrorEditorView
   private readonly mfCodemirrorView: MfCodemirrorView
   private languageName: string
+  private readonly onCodemirrorViewDestroy?: (view: MfCodemirrorView) => void
 
   constructor({
     node,
@@ -23,6 +24,7 @@ export class CodeMirror6NodeView implements NodeView {
     extensions,
     options,
     onCodemirrorViewLoad,
+    onCodemirrorViewDestroy,
   }: {
     node: ProsemirrorNode
     view: EditorView
@@ -31,11 +33,13 @@ export class CodeMirror6NodeView implements NodeView {
     options?: CreateCodemirrorOptions
     toggleName: string
     onCodemirrorViewLoad: (cm: MfCodemirrorView) => void
+    onCodemirrorViewDestroy?: (cm: MfCodemirrorView) => void
   }) {
     this.node = node
     this.view = view
     this.getPos = getPos
     this.languageName = ''
+    this.onCodemirrorViewDestroy = onCodemirrorViewDestroy
 
     const resolvedExtensions = extensions
 
@@ -80,6 +84,10 @@ export class CodeMirror6NodeView implements NodeView {
   }
 
   destroy(): void {
-    this.mfCodemirrorView.destroy()
+    try {
+      this.mfCodemirrorView.destroy()
+    } finally {
+      this.onCodemirrorViewDestroy?.(this.mfCodemirrorView)
+    }
   }
 }
