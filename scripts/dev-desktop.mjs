@@ -23,10 +23,8 @@ const requiredArtifacts = [
   'packages/theme/dist/index.mjs',
   'packages/zens/esm/index.js',
   'packages/zens/esm/Box/index.js',
-  'packages/zens/esm/Dialog/styles.js',
   'packages/zens/esm/Dropdown/styles.js',
   'packages/zens/esm/Popover/styles.js',
-  'packages/zens/esm/Shortcut/styles.js',
 ].map((path) => resolve(ROOT_DIR, path))
 
 const require = createRequire(import.meta.url)

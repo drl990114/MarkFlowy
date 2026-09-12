@@ -4751,7 +4751,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@floating-ui/dom@npm:^1.0.0, @floating-ui/dom@npm:^1.6.12, @floating-ui/dom@npm:^1.7.4, @floating-ui/dom@npm:^1.8.0":
+"@floating-ui/dom@npm:^1.0.0, @floating-ui/dom@npm:^1.7.4, @floating-ui/dom@npm:^1.8.0":
   version: 1.8.0
   resolution: "@floating-ui/dom@npm:1.8.0"
   dependencies:
@@ -6461,7 +6461,6 @@ __metadata:
     "@codemirror/commands": "npm:^6.3.0"
     "@codemirror/state": "npm:^6.3.0"
     "@codemirror/view": "npm:^6.22.0"
-    "@ebay/nice-modal-react": "npm:^1.2.13"
     "@markflowy/i18n": "workspace:*"
     "@markflowy/theme": "workspace:*"
     "@markflowy/types": "workspace:*"
@@ -9054,7 +9053,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rc-component/portal@npm:^1.0.0-8, @rc-component/portal@npm:^1.0.2, @rc-component/portal@npm:^1.1.0":
+"@rc-component/portal@npm:^1.1.0":
   version: 1.1.2
   resolution: "@rc-component/portal@npm:1.1.2"
   dependencies:
@@ -34485,22 +34484,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rc-dialog@npm:~9.6.0":
-  version: 9.6.0
-  resolution: "rc-dialog@npm:9.6.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.10.1"
-    "@rc-component/portal": "npm:^1.0.0-8"
-    classnames: "npm:^2.2.6"
-    rc-motion: "npm:^2.3.0"
-    rc-util: "npm:^5.21.0"
-  peerDependencies:
-    react: ">=16.9.0"
-    react-dom: ">=16.9.0"
-  checksum: 10/f6dcdb066f26f7b59fef458e18ba3c257a73b7036774d12022d548c7e343e8a51db2d1f3bae45928bcefb978fb29c4f2d6954c56fd006b0360fcc47c095c01c8
-  languageName: node
-  linkType: hard
-
 "rc-dropdown@npm:~4.1.0":
   version: 4.1.0
   resolution: "rc-dropdown@npm:4.1.0"
@@ -34513,23 +34496,6 @@ __metadata:
     react: ">=16.11.0"
     react-dom: ">=16.11.0"
   checksum: 10/b9d65a4deda9dda043c54630ca000f847ff257c1433f3cbf19c81bef1dbfb005528583078976a17ea3dfaca550a267dade39fb0f9aa4b7a17cc76dff1ba30c45
-  languageName: node
-  linkType: hard
-
-"rc-image@npm:^7.11.0":
-  version: 7.11.0
-  resolution: "rc-image@npm:7.11.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.11.2"
-    "@rc-component/portal": "npm:^1.0.2"
-    classnames: "npm:^2.2.6"
-    rc-dialog: "npm:~9.6.0"
-    rc-motion: "npm:^2.6.2"
-    rc-util: "npm:^5.34.1"
-  peerDependencies:
-    react: ">=16.9.0"
-    react-dom: ">=16.9.0"
-  checksum: 10/e66cee768853cf2acde3c8e01a019352ec378afc11ab5093ff30477f7fe746eaefcba064a6410b0bcb232d2936bae47d3079ea5c4f6c3dc0e95adc5fbaae788b
   languageName: node
   linkType: hard
 
@@ -34550,7 +34516,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rc-motion@npm:^2.0.0, rc-motion@npm:^2.0.1, rc-motion@npm:^2.3.0, rc-motion@npm:^2.4.3, rc-motion@npm:^2.6.2, rc-motion@npm:^2.7.3":
+"rc-motion@npm:^2.0.0, rc-motion@npm:^2.0.1, rc-motion@npm:^2.4.3, rc-motion@npm:^2.6.2, rc-motion@npm:^2.7.3":
   version: 2.9.5
   resolution: "rc-motion@npm:2.9.5"
   dependencies:
@@ -34643,7 +34609,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rc-util@npm:^5.16.1, rc-util@npm:^5.17.0, rc-util@npm:^5.21.0, rc-util@npm:^5.24.4, rc-util@npm:^5.27.0, rc-util@npm:^5.34.1, rc-util@npm:^5.36.0, rc-util@npm:^5.37.0, rc-util@npm:^5.38.0, rc-util@npm:^5.44.0, rc-util@npm:^5.44.1, rc-util@npm:^5.44.3":
+"rc-util@npm:^5.16.1, rc-util@npm:^5.17.0, rc-util@npm:^5.24.4, rc-util@npm:^5.27.0, rc-util@npm:^5.34.1, rc-util@npm:^5.36.0, rc-util@npm:^5.37.0, rc-util@npm:^5.38.0, rc-util@npm:^5.44.0, rc-util@npm:^5.44.1, rc-util@npm:^5.44.3":
   version: 5.44.4
   resolution: "rc-util@npm:5.44.4"
   dependencies:
@@ -42166,7 +42132,6 @@ __metadata:
     "@commitlint/cli": "npm:^19.5.0"
     "@commitlint/config-conventional": "npm:^19.5.0"
     "@emotion/is-prop-valid": "npm:^1.3.1"
-    "@floating-ui/dom": "npm:^1.6.12"
     "@testing-library/jest-dom": "npm:^6.6.3"
     "@testing-library/react": "npm:16.0.1"
     "@testing-library/user-event": "npm:^14.5.2"
@@ -42175,7 +42140,6 @@ __metadata:
     "@types/css": "npm:^0.0.38"
     "@types/css-modules": "npm:^1.0.5"
     "@types/jest": "npm:29.5.14"
-    "@types/lodash": "npm:^4.17.13"
     "@types/node": "npm:^22.8.7"
     "@types/react": "npm:^19.2.2"
     "@types/react-dom": "npm:^19.2.2"
@@ -42185,8 +42149,6 @@ __metadata:
     "@umijs/fabric": "npm:^4"
     babel-plugin-import: "npm:^1.13.8"
     babel-plugin-module-resolver: "npm:^5.0.2"
-    classnames: "npm:^2.5.1"
-    clsx: "npm:^2.1.1"
     color: "npm:^4.2.3"
     commitizen: "npm:^4.3.1"
     core-js: "npm:^3.39.0"
@@ -42217,14 +42179,12 @@ __metadata:
     jest-transform-css: "npm:6.0.1"
     less: "npm:^4.2.0"
     lint-staged: "npm:15.2.10"
-    lodash: "npm:^4.17.21"
     np: "npm:^10.0.7"
     plop: "npm:^4"
     postcss: "npm:8.4.47"
     prettier: "npm:3.3.3"
     prettier-plugin-packagejson: "npm:^2.5.3"
     process: "npm:^0.11.10"
-    rc-image: "npm:^7.11.0"
     react: "npm:^19.2.0"
     react-dom: "npm:^19.2.0"
     react-spinners: "npm:^0.14.1"
@@ -42236,7 +42196,6 @@ __metadata:
     stylelint: "npm:^16.10.0"
     stylelint-config-prettier: "npm:^9.0.5"
     stylelint-config-standard: "npm:^36.0.1"
-    stylis: "npm:^4.3.4"
     through2: "npm:^4.0.2"
     ts-jest: "npm:29.3.2"
     ts-node: "npm:^10.9.2"

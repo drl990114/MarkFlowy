@@ -1,4 +1,13 @@
-import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import {
+  act,
+  cleanup,
+  createEvent,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react'
 import { StrictMode, useEffect } from 'react'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -178,7 +187,9 @@ async function openSettings() {
 }
 
 function pressEscape(target: Element = document.activeElement ?? document.body) {
-  fireEvent.keyDown(target, { key: 'Escape' })
+  const event = createEvent.keyDown(target, { key: 'Escape', bubbles: true, cancelable: true })
+  fireEvent(target, event)
+  return event
 }
 
 describe('Settings dialog integration', () => {
@@ -249,6 +260,21 @@ describe('Settings dialog integration', () => {
     expect(category.querySelector('span')?.classList.contains('capitalize')).toBe(true)
   })
 
+  it('consumes Escape when closing settings and restores editor focus', async () => {
+    render(
+      <MemoryRouter>
+        <AppProbe />
+      </MemoryRouter>,
+    )
+    const draft = screen.getByRole('textbox', { name: 'Draft' })
+    await openSettings()
+
+    expect(pressEscape(screen.getByRole('searchbox')).defaultPrevented).toBe(true)
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+    await waitFor(() => expect(document.activeElement).toBe(draft))
+    expect(pressEscape(draft).defaultPrevented).toBe(false)
+  })
+
   it('closes a nested dialog before settings and restores focus to its trigger', async () => {
     render(
       <MemoryRouter>
@@ -261,12 +287,12 @@ describe('Settings dialog integration', () => {
     fireEvent.click(trigger)
     const nested = await screen.findByRole('dialog', { name: 'Nested dialog' })
 
-    pressEscape(nested)
+    expect(pressEscape(nested).defaultPrevented).toBe(true)
     await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Nested dialog' })).toBeNull())
     expect(screen.getByRole('dialog', { name: 'settings.label' })).toBe(settings)
     await waitFor(() => expect(document.activeElement).toBe(trigger))
 
-    pressEscape()
+    expect(pressEscape().defaultPrevented).toBe(true)
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
   })
 
@@ -279,7 +305,7 @@ describe('Settings dialog integration', () => {
     const settings = await openSettings()
     fireEvent.click(screen.getByRole('button', { name: 'Open popover' }))
     const action = await screen.findByRole('button', { name: 'Popover action' })
-    pressEscape(action)
+    expect(pressEscape(action).defaultPrevented).toBe(true)
     await waitFor(() => expect(screen.queryByRole('button', { name: 'Popover action' })).toBeNull())
     expect(screen.getByRole('dialog', { name: 'settings.label' })).toBe(settings)
   })
@@ -293,7 +319,7 @@ describe('Settings dialog integration', () => {
     const settings = await openSettings()
     fireEvent.keyDown(screen.getByRole('combobox', { name: 'Theme' }), { key: 'Enter' })
     const options = await screen.findByRole('listbox')
-    pressEscape(options)
+    expect(pressEscape(options).defaultPrevented).toBe(true)
     await waitFor(() => expect(screen.queryByRole('listbox')).toBeNull())
     expect(screen.getByRole('dialog', { name: 'settings.label' })).toBe(settings)
   })

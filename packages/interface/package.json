@@ -31,7 +31,6 @@
     "rme": ">=0.3.0"
   },
   "dependencies": {
-    "@ebay/nice-modal-react": "^1.2.13",
     "@markflowy/i18n": "workspace:*",
     "@popperjs/core": "^2.11.8",
     "@tanstack/react-virtual": "^3.13.18",
