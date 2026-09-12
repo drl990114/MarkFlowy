@@ -882,6 +882,14 @@
     "export_empty": "There is no conversation to export"
   },
   "capricorn": {
+    "selectionToolbar": {
+      "label": "Text formatting",
+      "bold": "Bold",
+      "italic": "Italic",
+      "strike": "Strikethrough",
+      "highlight": "Highlight",
+      "link": "Insert link"
+    },
     "placeholder": {
       "default": "Type '/' for commands"
     },

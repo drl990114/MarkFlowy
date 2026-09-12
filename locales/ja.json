@@ -882,6 +882,14 @@
     "shortcutFallback": "Cmd/Ctrl+Shift+F"
   },
   "capricorn": {
+    "selectionToolbar": {
+      "label": "文字の書式",
+      "bold": "太字",
+      "italic": "斜体",
+      "strike": "取り消し線",
+      "highlight": "ハイライト",
+      "link": "Insert link"
+    },
     "editor": {
       "loading": "Capricorn エディタを読み込んでいます",
       "opening": "ドキュメントを開いています",

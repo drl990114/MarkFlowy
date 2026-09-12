@@ -882,6 +882,14 @@
     "shortcutFallback": "Cmd/Ctrl+Mayús+F"
   },
   "capricorn": {
+    "selectionToolbar": {
+      "label": "Formato de texto",
+      "bold": "Negrita",
+      "italic": "Cursiva",
+      "strike": "Tachado",
+      "highlight": "Resaltar",
+      "link": "Insert link"
+    },
     "editor": {
       "loading": "Cargando el editor Capricorn",
       "opening": "Abriendo documento",
