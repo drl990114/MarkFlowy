@@ -30,6 +30,7 @@ const names = new Set([
   'editorRootLineHeight',
   'linkEditMode',
   'editorPlaceholder',
+  'codeBlockLineWrapping',
   'editorKeybingMap',
   'editorKeybindingsLoaded',
   'capricornRuntimeOptions',
@@ -81,6 +82,7 @@ const Harness = runInNewContext(compiled, {
     editor_root_line_height?: string
     editor_link_edit_mode?: 'popover' | 'markdown'
     editor_placeholder?: boolean
+    wysiwyg_editor_codemirror_line_wrap?: boolean
   }
   keymap?: Record<string, string>
   onOptions: (options: CapricornRuntimeOptions) => void
@@ -89,6 +91,22 @@ const Harness = runInNewContext(compiled, {
 afterEach(cleanup)
 
 describe('TextEditor Capricorn typography settings', () => {
+  it('forwards the existing code wrap setting and restores its default when unset', () => {
+    const onOptions = vi.fn()
+    const { rerender } = render(<Harness settings={{}} onOptions={onOptions} />)
+    expect(onOptions.mock.lastCall?.[0].codeBlockLineWrapping).toBe(true)
+    rerender(
+      <Harness settings={{ wysiwyg_editor_codemirror_line_wrap: false }} onOptions={onOptions} />,
+    )
+    expect(onOptions.mock.lastCall?.[0].codeBlockLineWrapping).toBe(false)
+    rerender(
+      <Harness settings={{ wysiwyg_editor_codemirror_line_wrap: true }} onOptions={onOptions} />,
+    )
+    expect(onOptions.mock.lastCall?.[0].codeBlockLineWrapping).toBe(true)
+    rerender(<Harness settings={{}} onOptions={onOptions} />)
+    expect(onOptions.mock.lastCall?.[0].codeBlockLineWrapping).toBe(true)
+  })
+
   it('forwards link editing mode changes and restores the default when unset', () => {
     const onOptions = vi.fn()
     const { rerender } = render(<Harness settings={{}} onOptions={onOptions} />)

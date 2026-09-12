@@ -1,4 +1,9 @@
 {
+  "drafts": {
+    "reload_failed": "Impossible de conserver les documents non enregistrés. Enregistrez vos fichiers avant de recharger.",
+    "restore_failed": "Impossible de restaurer les documents non enregistrés. Les brouillons en cache ont été conservés.",
+    "restored": "{{count}} documents non enregistrés ont été récupérés."
+  },
   "link_editing": {
     "label": "Édition des liens",
     "description": "Choisissez l’éditeur par défaut. Chaque lien peut aussi être modifié en Markdown.",

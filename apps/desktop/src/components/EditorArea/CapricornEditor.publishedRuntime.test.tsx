@@ -6,7 +6,7 @@ import { act, cleanup, fireEvent, render, waitFor } from '@testing-library/react
 import { createRef, StrictMode } from 'react'
 import { ThemeProvider } from 'styled-components'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { isCapricornRuntimeAvailable } from '@/constants/capricornRuntime'
+import { capricornRuntimeVersion, isCapricornRuntimeAvailable } from '@/constants/capricornRuntime'
 import { EditorViewType } from '@/constants/editorViewType'
 import zhCNLocale from '../../../../../locales/zh-CN.json'
 import { CapricornEditor, type CapricornEditorHandle } from './CapricornEditor'
@@ -36,6 +36,49 @@ vi.mock('@/i18n', () => ({
 afterEach(cleanup)
 
 describe.skipIf(!isCapricornRuntimeAvailable)('CapricornEditor with the published runtime', () => {
+  // The currently pinned 0.1.27 package predates this setting. Exercise the new host/runtime
+  // contract through the explicit source-integration config until the next package release.
+  it.runIf(capricornRuntimeVersion === 'source-integration')(
+    'updates code wrapping in place through the host settings bridge',
+    async () => {
+      const ref = createRef<CapricornEditorHandle>()
+      const onEditorChange = vi.fn()
+      const onChange = vi.fn()
+      const onError = vi.fn()
+      const initialMarkdown = '```js\nconst value = "' + 'long text '.repeat(50) + '";\n```'
+      const props = {
+        ref,
+        active: true,
+        initialMarkdown,
+        onChange,
+        onError,
+        onUnavailable: onError,
+        onEditorChange,
+      }
+      const { container, rerender } = render(
+        <CapricornEditor {...props} options={{ codeBlockLineWrapping: false }} />,
+      )
+      await waitFor(() => expect(container.querySelector('.cm-content')).not.toBeNull())
+      const content = container.querySelector('.cm-content')!
+      expect(content.classList.contains('cm-lineWrapping')).toBe(false)
+      const adapter = onEditorChange.mock.calls.find(
+        ([value]) => value,
+      )?.[0] as CapricornRuntimeAdapter
+      const canUndo = adapter.getUiState().canUndo
+      for (const enabled of [true, false, true]) {
+        await act(async () =>
+          rerender(<CapricornEditor {...props} options={{ codeBlockLineWrapping: enabled }} />),
+        )
+        await waitFor(() => expect(content.classList.contains('cm-lineWrapping')).toBe(enabled))
+        expect(container.querySelector('.cm-content')).toBe(content)
+        expect(ref.current!.getMarkdown()).toBe(initialMarkdown)
+        expect(adapter.getUiState().canUndo).toBe(canUndo)
+      }
+      expect(onEditorChange.mock.calls.filter(([value]) => value)).toHaveLength(1)
+      expect(onError).not.toHaveBeenCalled()
+    },
+  )
+
   it('switches edit and preview in place, keeping content and undo while blocking preview edits', async () => {
     const ref = createRef<CapricornEditorHandle>()
     const onChange = vi.fn()

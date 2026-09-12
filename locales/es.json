@@ -1,4 +1,9 @@
 {
+  "drafts": {
+    "reload_failed": "No se pudieron conservar los documentos sin guardar. Guarda los archivos antes de recargar.",
+    "restore_failed": "No se pudieron restaurar los documentos sin guardar. Se han conservado los borradores en caché.",
+    "restored": "Se recuperaron {{count}} documentos sin guardar."
+  },
   "link_editing": {
     "label": "Edición de enlaces",
     "description": "Elige el editor predeterminado. También puedes editar cada enlace como Markdown.",

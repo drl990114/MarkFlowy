@@ -1838,7 +1838,47 @@ pub fn run() {
         }
     };
 
-    app.run(|app, event| {
+    let mut pending_exit_code = None;
+    app.run(move |app, event| {
+        match &event {
+            tauri::RunEvent::ExitRequested { api, code, .. }
+                if *code != Some(tauri::RESTART_EXIT_CODE) =>
+            {
+                let editors: Vec<_> = app
+                    .webview_windows()
+                    .into_values()
+                    .filter(|window| {
+                        window.label() == "main" || window.label().starts_with("main_")
+                    })
+                    .collect();
+                if !editors.is_empty() {
+                    // Cmd+Q and the native Quit menu must await the same draft save as window close.
+                    api.prevent_exit();
+                    pending_exit_code = Some(code.unwrap_or(0));
+                    for window in editors {
+                        if let Err(error) = window.close() {
+                            eprintln!("Failed to request window close: {error}");
+                        }
+                    }
+                }
+            }
+            tauri::RunEvent::WindowEvent {
+                label,
+                event: tauri::WindowEvent::Destroyed,
+                ..
+            } if pending_exit_code.is_some() => {
+                let has_editor = app
+                    .webview_windows()
+                    .keys()
+                    .any(|key| key != label && (key == "main" || key.starts_with("main_")));
+                if !has_editor {
+                    if let Some(code) = pending_exit_code.take() {
+                        app.exit(code);
+                    }
+                }
+            }
+            _ => {}
+        }
         #[cfg(target_os = "macos")]
         match event {
             tauri::RunEvent::Opened { urls, .. } => {

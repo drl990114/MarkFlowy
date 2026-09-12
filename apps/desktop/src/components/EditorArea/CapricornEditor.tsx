@@ -526,6 +526,7 @@ export function CapricornEditor({
 
   useEffect(() => {
     const settings: CapricornEditorSettings = {
+      codeBlockLineWrapping: options.codeBlockLineWrapping,
       className: options.className,
       colorScheme: options.colorScheme,
       density: options.density,
@@ -540,6 +541,7 @@ export function CapricornEditor({
     adapterRef.current?.updateSettings(settings)
   }, [
     options.className,
+    options.codeBlockLineWrapping,
     options.colorScheme,
     options.density,
     options.linkEditMode,

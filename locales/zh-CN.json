@@ -1,4 +1,9 @@
 {
+  "drafts": {
+    "reload_failed": "未能暂存未保存文档，请先保存文件再刷新。",
+    "restore_failed": "未能恢复未保存文档，已保留缓存中的草稿。",
+    "restored": "已恢复 {{count}} 份未保存文档。"
+  },
   "link_editing": {
     "label": "链接编辑方式",
     "description": "选择默认编辑方式，也可临时展开单个链接的 Markdown。",

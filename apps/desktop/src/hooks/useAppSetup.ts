@@ -1,4 +1,10 @@
 import { flushEditorResumeStates } from '@/stores/editorResumeStore'
+import {
+  closeWithDraftRecovery,
+  listenForDraftReload,
+  restoreDraftReloadSession,
+  restoreDraftSession,
+} from '@/services/draft-recovery'
 import { commandRegistry } from '@/commands'
 import {
   FILE_MUTATION_QUEUE_KEY,
@@ -94,6 +100,18 @@ interface CliCommandPayload {
 }
 
 let workspaceCachePersistence: WorkspaceCachePersistence | undefined
+let workspaceCacheStore: LazyStore | undefined
+
+const setupDraftRecovery = async (signal?: AbortSignal, reload = false) => {
+  try {
+    let count = reload ? await restoreDraftReloadSession(signal) : 0
+    if (workspaceCacheStore) count += await restoreDraftSession(workspaceCacheStore, signal)
+    if (count) toast.success(t('drafts.restored', { count }))
+  } catch (error) {
+    logger.error('Failed to restore unsaved documents', error)
+    toast.error(t('drafts.restore_failed'))
+  }
+}
 
 const getExtFromPath = (path: string) => {
   const fileName = getFileNameFromPath(path) || ''
@@ -103,15 +121,9 @@ const getExtFromPath = (path: string) => {
 
 const setupWorkspaceCachePersistence = async (cacheStore: LazyStore) => {
   await workspaceCachePersistence?.dispose()
+  workspaceCacheStore = cacheStore
   workspaceCachePersistence = createWorkspaceCachePersistence(cacheStore)
   setWorkspaceSwitchHandler(performWorkspaceSwitch)
-}
-
-const disposeWorkspaceCachePersistence = async () => {
-  const persistence = workspaceCachePersistence
-  setWorkspaceSwitchHandler()
-  workspaceCachePersistence = undefined
-  await persistence?.dispose()
 }
 
 async function performWorkspaceSwitch(path: string) {
@@ -186,7 +198,10 @@ async function performWorkspaceSwitch(path: string) {
       ),
   })
 
-  if (didSwitch) appStartupCoordinator.recoverWorkspace(undefined)
+  if (didSwitch) {
+    await setupDraftRecovery()
+    appStartupCoordinator.recoverWorkspace(undefined)
+  }
   return didSwitch
 }
 
@@ -480,6 +495,7 @@ const appStartupCoordinator = createAppStartupCoordinator<AppShellData, void>({
   loadShell: appShellSetup,
   loadWorkspace: async (_shell, signal) => {
     await appWorkspaceSetup(signal)
+    await setupDraftRecovery(signal, true)
   },
 })
 
@@ -509,6 +525,13 @@ const startDeferredAppSetup = () => {
 
 export const useAppRuntimeSetup = () => {
   const eventInit = useCallback(() => {
+    const stopDraftReload = listenForDraftReload({
+      canSave: () => appStartupCoordinator.getSnapshot().workspace.status === 'ready',
+      onError: (error) => {
+        logger.error('Failed to preserve drafts for reload', error)
+        toast.error(t('drafts.reload_failed'))
+      },
+    })
     let closeWindowPromise: Promise<boolean> | undefined
     const closeRequest = currentWindow.listen('tauri://close-requested', async () => {
       if (closeWindowPromise) {
@@ -516,20 +539,17 @@ export const useAppRuntimeSetup = () => {
         return
       }
 
-      const closeAttempt = waitForWorkspaceSwitches()
+      const closeAttempt = appStartupCoordinator.start()
+        .then(waitForWorkspaceSwitches)
         .then(() =>
-          guardUnsavedFilesAsync({
-            fileIds: useEditorStore.getState().opened,
-            onContinue: async () => {
-              const rootPath = useEditorStore.getState().getRootPath()
-              flushEditorResumeStates()
-              appStartupCoordinator.cancel()
-              await disposeWorkspaceCachePersistence()
-              await releaseSecurityScope(rootPath)
-              const unlistenCloseRequest = await closeRequest
-              unlistenCloseRequest()
-              await currentWindow.destroy()
-            },
+          closeWithDraftRecovery(workspaceCacheStore, currentWindow.label, async () => {
+            const rootPath = useEditorStore.getState().getRootPath()
+            flushEditorResumeStates()
+            appStartupCoordinator.cancel()
+            // Keep persistence and the close listener alive if native teardown fails.
+            await workspaceCachePersistence?.flush()
+            await releaseSecurityScope(rootPath)
+            await currentWindow.destroy()
           }),
         )
         .catch((error) => {
@@ -607,6 +627,7 @@ export const useAppRuntimeSetup = () => {
     )
 
     return () => {
+      stopDraftReload()
       unListenMenu.then((fn) => fn())
       closeRequest.then((fn) => fn())
       unListenOpenedUrls.then((fn) => fn())

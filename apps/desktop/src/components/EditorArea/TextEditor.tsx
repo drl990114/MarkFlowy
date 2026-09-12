@@ -1063,6 +1063,9 @@ function TextEditor(props: TextEditorProps) {
   const insertNodeToFolderData = useEditorStore((state) => state.insertNodeToFolderData)
   const { t } = useTranslation()
   const autosave = useAppSettingStore((state) => state.settingData.autosave)
+  const codeBlockLineWrapping = useAppSettingStore(
+    (state) => state.settingData.wysiwyg_editor_codemirror_line_wrap ?? true,
+  )
   const autosaveInterval = useAppSettingStore((state) => state.settingData.autosave_interval)
   const editorFullWidth = useAppSettingStore((state) => state.settingData.editor_full_width)
   const linkEditMode = useAppSettingStore((state) =>
@@ -2495,6 +2498,7 @@ function TextEditor(props: TextEditorProps) {
           }
         : false,
       density: 'compact',
+      codeBlockLineWrapping,
       linkEditMode,
       handleLinkClick: async (href) => {
         const opened = await openEditorLink(href, curFile.id)
@@ -2521,6 +2525,7 @@ function TextEditor(props: TextEditorProps) {
     }
   }, [
     linkEditMode,
+    codeBlockLineWrapping,
     curFile.id,
     currentViewType,
     editorColorScheme,

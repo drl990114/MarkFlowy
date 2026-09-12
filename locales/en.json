@@ -1,4 +1,9 @@
 {
+  "drafts": {
+    "reload_failed": "Could not preserve unsaved documents for reload. Save your files and try again.",
+    "restore_failed": "Could not restore unsaved documents. The cached drafts have been kept.",
+    "restored": "Recovered {{count}} unsaved documents."
+  },
   "link_editing": {
     "label": "Link editing",
     "description": "Choose the default link editor. Each link can also be edited as Markdown.",

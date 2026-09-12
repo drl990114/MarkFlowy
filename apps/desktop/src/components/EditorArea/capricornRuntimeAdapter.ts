@@ -135,6 +135,7 @@ export interface CapricornKeybindingConfiguration {
 }
 
 export interface CapricornEditorSettings {
+  codeBlockLineWrapping?: boolean
   linkEditMode?: 'popover' | 'markdown'
   className?: string
   colorScheme?: 'dark' | 'light' | 'system'
