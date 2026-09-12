@@ -1,8 +1,8 @@
 import { openUrl } from '@tauri-apps/plugin-opener'
-import { CalendarDaysIcon, SparklesIcon } from 'lucide-react'
 import Markdown, { type Components } from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { logger } from '@/helper/logger'
+import { cn } from '@/lib/cn'
 
 const DISCLOSURE_TAG_PATTERN = /<\/?(?:details|summary)(?:\s[^>]*)?>/gi
 const EXTERNAL_LINK_PROTOCOLS = new Set(['http:', 'https:', 'mailto:'])
@@ -76,26 +76,40 @@ export function UpdateDialogContent({
   const releaseNotes = normalizeReleaseNotes(body)
 
   return (
-    <div className='flex flex-col gap-4 text-foreground'>
-      <div className='flex items-center gap-3 rounded-lg border border-border bg-primary-soft px-3.5 py-3'>
-        <span className='flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm'>
-          <SparklesIcon className='size-4.5' aria-hidden='true' />
-        </span>
-
-        <div className='min-w-0'>
-          <p className='truncate text-sm font-semibold'>MarkFlowy {version}</p>
-          {formattedReleaseDate ? (
-            <p className='mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground'>
-              <CalendarDaysIcon className='size-3.5 shrink-0' aria-hidden='true' />
-              <span>{releaseDateLabel}</span>
-              <time dateTime={releaseDate}>{formattedReleaseDate}</time>
-            </p>
-          ) : null}
-        </div>
+    <div className='flex min-w-0 flex-col gap-3 text-content-primary'>
+      <div
+        className={cn(
+          'flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1',
+          releaseNotes && 'border-b border-border pb-3',
+        )}
+        data-slot='update-release-meta'
+      >
+        <p className='min-w-0 break-words text-ui-control font-medium'>MarkFlowy {version}</p>
+        {formattedReleaseDate ? (
+          <p className='flex flex-wrap items-baseline gap-x-1.5 text-ui-caption text-content-muted'>
+            <span>{releaseDateLabel}</span>
+            <time dateTime={releaseDate}>{formattedReleaseDate}</time>
+          </p>
+        ) : null}
       </div>
 
       {releaseNotes ? (
-        <div className='overflow-x-auto rounded-lg border border-border bg-background px-4 py-3.5 text-sm leading-relaxed text-foreground-secondary [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_a]:outline-none [&_a]:focus-visible:underline [&_a]:focus-visible:underline-offset-2 [&_blockquote]:my-3 [&_blockquote]:border-s-2 [&_blockquote]:border-primary/50 [&_blockquote]:ps-3 [&_blockquote]:text-muted-foreground [&_code]:rounded-sm [&_code]:bg-muted [&_code]:px-1 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-[0.9em] [&_h1]:mt-5 [&_h1]:mb-2 [&_h1]:text-xl [&_h1]:font-semibold [&_h1]:text-foreground [&_h2]:mt-5 [&_h2]:mb-2 [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:text-foreground [&_h3]:mt-4 [&_h3]:mb-1.5 [&_h3]:text-base [&_h3]:font-semibold [&_h3]:text-foreground [&_h4]:mt-3 [&_h4]:mb-1 [&_h4]:font-semibold [&_h4]:text-foreground [&_hr]:my-4 [&_hr]:border-t [&_hr]:border-border [&_img]:my-3 [&_img]:max-w-full [&_img]:rounded-md [&_input]:me-2 [&_input]:align-middle [&_li]:my-1 [&_ol]:my-2.5 [&_ol]:list-decimal [&_ol]:ps-5 [&_p]:my-2.5 [&_pre]:my-3 [&_pre]:overflow-x-auto [&_pre]:rounded-md [&_pre]:border [&_pre]:border-border [&_pre]:bg-muted [&_pre]:p-3 [&_pre]:text-xs [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_strong]:font-semibold [&_strong]:text-foreground [&_table]:my-3 [&_table]:w-full [&_table]:border-separate [&_table]:border-spacing-0 [&_td]:border-b [&_td]:border-s [&_td]:border-border [&_td]:px-2.5 [&_td]:py-1.5 [&_td:last-child]:border-e [&_th]:border-b [&_th]:border-s [&_th]:border-t [&_th]:border-border [&_th]:bg-muted [&_th]:px-2.5 [&_th]:py-1.5 [&_th]:text-start [&_th]:font-semibold [&_th]:text-foreground [&_th:last-child]:border-e [&_ul]:my-2.5 [&_ul]:list-disc [&_ul]:ps-5'>
+        <div
+          className={cn(
+            'min-w-0 overflow-x-auto text-ui-control leading-relaxed text-content-primary [overflow-wrap:anywhere] [&>*:first-child]:mt-0 [&>*:last-child]:mb-0',
+            '[&_a]:outline-none [&_a]:focus-visible:underline [&_a]:focus-visible:underline-offset-2 [&_p]:my-2 [&_strong]:font-medium',
+            '[&_h1]:mt-4 [&_h1]:mb-2 [&_h1]:text-ui-title [&_h1]:font-semibold [&_h2]:mt-4 [&_h2]:mb-2 [&_h2]:text-ui-body [&_h2]:font-semibold',
+            '[&_h3]:mt-3 [&_h3]:mb-1.5 [&_h3]:text-ui-control [&_h3]:font-semibold [&_h4]:mt-3 [&_h4]:mb-1 [&_h4]:text-ui-control [&_h4]:font-medium',
+            '[&_h5]:mt-3 [&_h5]:mb-1 [&_h5]:text-ui-control [&_h5]:font-medium [&_h6]:mt-3 [&_h6]:mb-1 [&_h6]:text-ui-control [&_h6]:font-medium',
+            '[&_li]:my-1 [&_ol]:my-2 [&_ol]:list-decimal [&_ol]:ps-5 [&_ul]:my-2 [&_ul]:list-disc [&_ul]:ps-5 [&_li>p]:my-1 [&_li>ol]:my-1 [&_li>ul]:my-1 [&_input]:me-2 [&_input]:align-middle',
+            '[&_blockquote]:my-3 [&_blockquote]:border-s-2 [&_blockquote]:border-border [&_blockquote]:ps-3 [&_blockquote]:text-content-secondary [&_hr]:my-3 [&_hr]:border-t [&_hr]:border-border',
+            '[&_code]:rounded-sm [&_code]:bg-muted [&_code]:px-1 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-[0.9em]',
+            '[&_pre]:my-3 [&_pre]:overflow-x-auto [&_pre]:rounded-sm [&_pre]:bg-muted [&_pre]:p-3 [&_pre]:text-ui-caption [&_pre_code]:bg-transparent [&_pre_code]:p-0',
+            '[&_table]:my-3 [&_table]:w-full [&_table]:border-collapse [&_td]:border-b [&_td]:border-border [&_td]:px-2 [&_td]:py-1.5 [&_th]:border-b [&_th]:border-border [&_th]:px-2 [&_th]:py-1.5 [&_th]:text-start [&_th]:font-medium',
+            '[&_img]:my-3 [&_img]:max-w-full [&_img]:rounded-sm',
+          )}
+          data-slot='update-release-notes'
+        >
           <Markdown components={updateMarkdownComponents} remarkPlugins={[remarkGfm]}>
             {releaseNotes}
           </Markdown>
