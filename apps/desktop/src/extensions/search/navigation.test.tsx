@@ -28,7 +28,6 @@ vi.mock('./styles', () => {
   const Box = ({ children, ...props }: PropsWithChildren) => <div {...props}>{children}</div>
   return {
     SearchContainer: Box,
-    SearchInfoBox: Box,
     SearchInput: Box,
     SearchList: Box,
     SearchMeta: Box,

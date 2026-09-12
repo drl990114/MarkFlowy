@@ -84,7 +84,7 @@ export function WorkspaceActions({ location = 'titlebar' }: WorkspaceActionsProp
         ) : (
           <Button
             aria-expanded={isPickerOpen}
-            className='h-[22px] max-w-[180px] min-w-0 gap-1 rounded-sm px-1.5 text-ui-caption font-normal text-content-secondary max-[719px]:max-w-[112px] [&_svg]:size-3'
+            className='h-[22px] max-w-[180px] min-w-0 gap-1 rounded-sm px-1.5 text-ui-control font-medium text-content-primary max-[719px]:max-w-[112px] [&_svg]:size-3'
             data-slot='workspace-picker-trigger'
             role='combobox'
             size='sm'

@@ -6,8 +6,9 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { RIGHTBARITEMKEYS } from '@/constants'
 import { resolveFileExcludePatterns } from '@/helper/file-exclude'
 import { getFileObject, getFileObjectByPath, setFileObjectByPath } from '@/helper/files'
-import { createFile } from '@/helper/filesys'
+import { createFile, getFolderPathFromPath } from '@/helper/filesys'
 import { logger } from '@/helper/logger'
+import { cn } from '@/lib/cn'
 import { useEditorStore } from '@/stores'
 import { scheduleActiveEditorFocus } from '@/components/EditorArea/focusActiveEditor'
 import {
@@ -18,7 +19,6 @@ import { closeCompactLeftDockAfterSelection } from '@/stores/useLayoutStore'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { invoke } from '@tauri-apps/api/core'
-import classNames from 'classnames'
 import type { LucideIcon } from 'lucide-react'
 import {
   CaseSensitiveIcon,
@@ -37,7 +37,6 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from '@/i18n'
 import {
   SearchContainer,
-  SearchInfoBox,
   SearchInput,
   SearchList,
   SearchMeta,
@@ -45,6 +44,8 @@ import {
 } from './styles'
 import type { SearchInfo } from './useSearchStore'
 import { getSearchStore } from './useSearchStore'
+
+const SEARCH_ROW_HEIGHT = 26
 
 const escapeRegExp = (string: string) => {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
@@ -178,18 +179,19 @@ const normalizeSearchResults = (
 
 interface SearchMatchSnippetProps {
   content: string
+  isActive: boolean
   matchIndexInLine: number
   positions: MatchPosition[]
 }
 
 const SearchMatchSnippet = memo(
-  ({ content, matchIndexInLine, positions }: SearchMatchSnippetProps) => {
+  ({ content, isActive, matchIndexInLine, positions }: SearchMatchSnippetProps) => {
     const prefixWindow = 10 // 前置字符减少，确保在窄屏下 active 项靠左显示
     const suffixWindow = 50 // 后置字符可以多一些
 
     const currentMatch = positions[matchIndexInLine]
 
-    if (!currentMatch) return <span className='snippet-text'>{content}</span>
+    if (!currentMatch) return <span className='snippet-text block truncate'>{content}</span>
 
     const start = Math.max(0, currentMatch.start - prefixWindow)
     const end = Math.min(content.length, currentMatch.end + suffixWindow)
@@ -209,7 +211,11 @@ const SearchMatchSnippet = memo(
         result.push(
           <mark
             key={`${position.start}-${position.end}`}
-            className={isCurrentMatch ? 'active' : ''}
+            className={cn(
+              'rounded-[2px] px-px text-content-primary',
+              isCurrentMatch ? 'active bg-primary/20 font-medium' : 'bg-primary/10',
+              isCurrentMatch && isActive && 'bg-primary text-primary-foreground',
+            )}
           >
             {content.slice(position.start, position.end)}
           </mark>,
@@ -222,7 +228,7 @@ const SearchMatchSnippet = memo(
     }
 
     return (
-      <span className='snippet-text'>
+      <span className='snippet-text block truncate'>
         {start > 0 && '...'}
         {renderSnippet()}
         {end < content.length && '...'}
@@ -337,7 +343,7 @@ const WorkspaceSearchView = memo(({ workspace }: { workspace: string }) => {
   const rowVirtualizer = useVirtualizer({
     count: flattenedData.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: (index: number) => (flattenedData[index].type === 'header' ? 24 : 32),
+    estimateSize: () => SEARCH_ROW_HEIGHT,
     overscan: 10,
   })
 
@@ -792,94 +798,101 @@ const WorkspaceSearchView = memo(({ workspace }: { workspace: string }) => {
 
               if (item.type === 'header') {
                 const isExpand = expandIdMap[item.searchInfo.path]
+                const directory = getFolderPathFromPath(item.searchInfo.relative_path)
 
                 return (
-                  <SearchInfoBox
+                  <Button
+                    aria-expanded={Boolean(isExpand)}
+                    className='search-info__path absolute top-0 left-0 w-full justify-start gap-1.5 overflow-hidden rounded-none px-2 py-0 text-left text-content-primary transition-none'
+                    data-search-row-index={virtualItem.index}
+                    data-slot='search-file'
                     key={virtualItem.key}
+                    onClick={() => toggleSearchInfoExpand(item.searchInfo.path)}
+                    onFocus={() => setFocusedRowIndex(virtualItem.index)}
+                    onKeyDown={(event) => handleSearchRowKeyDown(event, virtualItem.index)}
+                    size='sm'
                     style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      width: '100%',
                       height: `${virtualItem.size}px`,
                       transform: `translateY(${virtualItem.start}px)`,
                     }}
+                    tabIndex={virtualItem.index === tabbableRowIndex ? 0 : -1}
+                    title={item.searchInfo.path}
+                    variant='chrome'
                   >
-                    <button
-                      aria-expanded={Boolean(isExpand)}
-                      className='search-info__path'
-                      data-search-row-index={virtualItem.index}
-                      onClick={() => toggleSearchInfoExpand(item.searchInfo.path)}
-                      onFocus={() => setFocusedRowIndex(virtualItem.index)}
-                      onKeyDown={(event) => handleSearchRowKeyDown(event, virtualItem.index)}
-                      tabIndex={virtualItem.index === tabbableRowIndex ? 0 : -1}
-                      title={item.searchInfo.path}
-                      type='button'
-                    >
-                      <ChevronRightIcon
-                        aria-hidden='true'
-                        className={classNames('search-info__icon', {
-                          'search-info__icon--expanded': isExpand,
-                        })}
-                        size={14}
-                        strokeWidth={1.75}
-                      />
-                      <FileTextIcon
-                        aria-hidden='true'
-                        className='search-info__file-icon'
-                        size={14}
-                        strokeWidth={1.75}
-                      />
-                      <span className='search-info__path-text'>
-                        {item.searchInfo.relative_path}
-                      </span>
-                      <span className='search-info__badge'>{item.searchInfo.matches.length}</span>
-                    </button>
-                  </SearchInfoBox>
+                    <ChevronRightIcon
+                      aria-hidden='true'
+                      className={cn('size-3.5 text-content-muted', isExpand && 'rotate-90')}
+                      strokeWidth={1.75}
+                    />
+                    <FileTextIcon
+                      aria-hidden='true'
+                      className='size-3.5 text-content-muted'
+                      strokeWidth={1.75}
+                    />
+                    <span className='flex min-w-0 flex-1 items-baseline gap-1.5'>
+                      <span className='truncate'>{item.searchInfo.name}</span>
+                      {directory &&
+                      directory !== item.searchInfo.relative_path &&
+                      directory !== '.' ? (
+                        <span className='min-w-0 flex-1 truncate text-ui-caption font-normal text-content-muted'>
+                          {directory}
+                        </span>
+                      ) : null}
+                    </span>
+                    <span className='shrink-0 text-ui-caption font-normal text-content-muted tabular-nums'>
+                      {item.searchInfo.matches.length}
+                    </span>
+                  </Button>
                 )
               }
 
               return (
-                <SearchInfoBox
+                <Button
+                  aria-current={item.isActive ? 'true' : undefined}
+                  className={cn(
+                    'search-info absolute top-0 left-0 w-full justify-start gap-2 overflow-hidden rounded-none py-0 pr-2 pl-12 text-left font-normal text-content-primary transition-none',
+                    item.isActive && 'active bg-control-selected hover:bg-control-selected',
+                  )}
+                  data-search-row-index={virtualItem.index}
+                  data-slot='search-match'
                   key={virtualItem.key}
+                  onClick={() =>
+                    handleFileInfoClick(
+                      item.searchInfo,
+                      item.globalIndex,
+                      item.match,
+                      item.matchIndexInLine,
+                    )
+                  }
+                  onFocus={() => setFocusedRowIndex(virtualItem.index)}
+                  onKeyDown={(event) => handleSearchRowKeyDown(event, virtualItem.index)}
+                  size='sm'
                   style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
                     height: `${virtualItem.size}px`,
                     transform: `translateY(${virtualItem.start}px)`,
                   }}
+                  tabIndex={virtualItem.index === tabbableRowIndex ? 0 : -1}
+                  title={item.match.content}
+                  variant='chrome'
                 >
-                  <button
-                    aria-current={item.isActive ? 'true' : undefined}
-                    className={classNames('search-info', { active: item.isActive })}
-                    data-search-row-index={virtualItem.index}
-                    onClick={() =>
-                      handleFileInfoClick(
-                        item.searchInfo,
-                        item.globalIndex,
-                        item.match,
-                        item.matchIndexInLine,
-                      )
-                    }
-                    onFocus={() => setFocusedRowIndex(virtualItem.index)}
-                    onKeyDown={(event) => handleSearchRowKeyDown(event, virtualItem.index)}
-                    tabIndex={virtualItem.index === tabbableRowIndex ? 0 : -1}
-                    type='button'
+                  <span className='search-info__content min-w-0 flex-1'>
+                    <SearchMatchSnippet
+                      content={item.match.content}
+                      isActive={item.isActive}
+                      matchIndexInLine={item.matchIndexInLine}
+                      positions={item.match.positions}
+                    />
+                  </span>
+                  <span
+                    className='search-info__linenumber shrink-0 text-ui-caption text-content-muted tabular-nums'
+                    title={t('search.line', { number: item.match.line })}
                   >
-                    <div className='search-info__linenumber'>
+                    <span className='sr-only'>
                       {t('search.line', { number: item.match.line })}
-                    </div>
-                    <div className='search-info__content'>
-                      <SearchMatchSnippet
-                        content={item.match.content}
-                        matchIndexInLine={item.matchIndexInLine}
-                        positions={item.match.positions}
-                      />
-                    </div>
-                  </button>
-                </SearchInfoBox>
+                    </span>
+                    <span aria-hidden='true'>{item.match.line}</span>
+                  </span>
+                </Button>
               )
             })}
           </div>
