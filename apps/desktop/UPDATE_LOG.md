@@ -1,8 +1,32 @@
 # UPDATE LOG
 
-## v0.100.2
+## v0.101.0
+
+Features:
+
+- Added **Quick Open** with **Cmd/Ctrl + P**. Search workspace files by filename or relative path with fuzzy matching, open recent files immediately, and use the arrow keys and Enter to navigate and open results.
+
+- Expanded shortcut customization in **Settings → Keyboard Shortcuts** with command search, key recording, conflict detection, and controls to remove a binding or restore its default. Changes apply to application and editor commands without reopening documents; copy and paste keep their native system shortcuts.
+
+- Added **Settings → General → Startup** options for the left and right sidebars. Choose a startup panel or restore the last selected panel and its open/closed state on the next launch.
+
+- Added a floating formatting toolbar for selected text in the WYSIWYG editor, with **bold**, *italic*, strikethrough, and highlight. Formatting supports selections across paragraphs, keyboard access, and undo/redo.
+
+- Added rectangular selection across table cells for copying, clearing, and formatting the selected area. Table headers now stay visible while scrolling through long tables and remain editable and selectable.
+
+- WYSIWYG links now respect the **Settings → Editor → Link editing** option: use a popover or edit the Markdown syntax inline. The link actions also let you switch to Markdown editing for an individual link.
+
+- Added support for single-line and multiline `<iframe>` blocks in HTML previews, allowing HTTP(S) embeds to load in a sandbox while preserving their Markdown source.
 
 Improvements and Fixes:
+
+- Improved workspace restoration: expanded folders and bookmark groups, global search criteria and collapsed result groups, and document scroll positions and text selections are remembered. Restored searches refresh their results while retaining the selected match when it still exists.
+
+- Improved consistency between WYSIWYG and Preview modes by sharing the same editor renderer and preserving document state when switching modes. Refined typography and contextual controls for code blocks, live previews, front matter, and images.
+
+- Added syntax highlighting for `diff` and `patch` code blocks, with distinct backgrounds for added and deleted lines and clearer hunk headers.
+
+- Improved Markdown link and image handling for paths containing spaces, Chinese characters, parentheses, and percent encoding, while preserving reference syntax and surrounding whitespace when saving. In WYSIWYG and Preview modes, links can navigate to headings in the current document or other local files.
 
 - Fixed global search navigation and highlighting in WYSIWYG and Source Code modes, including results in newly opened files and when switching between files. WYSIWYG matches now handle escaped Markdown correctly and remain visible as the document layout settles after opening.
 
@@ -14,9 +38,37 @@ Improvements and Fixes:
 
 - Expanded localized labels and messages across find and replace, Settings, keyboard shortcuts, bookmarks, editor loading, and application updates.
 
+- Improved the contrast of the workspace name in the title bar and simplified global search results with compact rows, aligned filenames and snippets, and clearer emphasis on the current match. Simplified the update dialog's version/date display and release notes layout while retaining full content and update actions.
+
+- Simplified editor controls and keyboard focus feedback. Removed the editor's inline AI text actions and background task status list; the AI assistant remains available in the sidebar.
+
 ---
 
+特性：
+
+- 新增 **快速打开**，按 **Cmd/Ctrl + P** 即可按文件名或相对路径模糊搜索工作区文件，也可直接打开最近访问的文件；支持方向键选择、Enter 打开结果。
+
+- 完善 **设置 → 快捷键** 中的自定义能力，支持搜索命令、录制按键、检测冲突、移除绑定和恢复默认。应用及编辑器快捷键修改后无需重新打开文档即可生效，复制与粘贴保留系统原生快捷键。
+
+- 新增 **设置 → 通用 → 启动** 选项，可分别指定左右侧栏的启动面板，或在下次启动时恢复上次选中的面板及其展开、关闭状态。
+
+- 所见即所得编辑器新增文本选区浮动工具栏，可快捷设置**粗体**、*斜体*、删除线和高亮。支持跨段落选区、键盘操作及撤销、重做。
+
+- 表格支持跨单元格矩形选区，可复制、清空和设置选中区域的格式。长表格滚动时，表头会保持可见，并继续支持编辑和选择。
+
+- 所见即所得模式下的链接现已支持 **设置 → 编辑器 → 链接编辑方式** 选项，可选择弹窗编辑或在正文中编辑 Markdown 语法；也可通过链接操作单独切换为 Markdown 编辑。
+
+- HTML 预览新增单行及多行 `<iframe>` 块支持，可在沙箱中加载 HTTP(S) 嵌入内容，并保留原始 Markdown 源码。
+
 改进与修复：
+
+- 改进工作区状态恢复，记住文件树和书签标签的展开状态、全局搜索条件及结果分组的折叠状态，以及文档滚动位置和文本选区。恢复搜索时会重新查询结果，并在原命中仍存在时保留选中位置。
+
+- 所见即所得与预览模式共用同一编辑器渲染，切换模式时保留文档状态，显示效果更一致。优化代码块、实时预览、Front Matter 和图片的排版及上下文操作控件。
+
+- 为 `diff` 和 `patch` 代码块新增语法高亮，通过不同背景区分新增、删除行，并更清晰地标识差异区块头。
+
+- 改进包含空格、中文、括号和百分号编码的链接及图片路径处理，保存时保留引用式语法和周围空白。在所见即所得与预览模式下，链接可跳转到当前文档或其他本地文件的标题。
 
 - 修复所见即所得和源码模式下全局搜索结果的跳转与高亮，覆盖首次打开文件及跨文件切换。所见即所得模式现在能正确处理 Markdown 转义字符，并在文档打开后的布局调整中保持命中内容可见。
 
@@ -27,6 +79,10 @@ Improvements and Fixes:
 - 优化大文档搜索响应，通过复用查询结果和可取消的分段查询减少重复计算。快速切换搜索结果时会取消旧的定位请求，避免编辑器被拉回上一个命中位置。
 
 - 完善查找替换、设置、快捷键、书签、编辑器加载及应用更新等界面的多语言文案与提示。
+
+- 提高顶部工作区名称的文字对比度；全局搜索结果采用紧凑行布局，对齐文件名与内容摘要，并突出当前命中。简化更新提醒中的版本、日期及日志排版，保留完整内容和更新操作。
+
+- 简化编辑器界面和键盘焦点反馈，移除编辑器内的 AI 文本快捷操作及后台任务状态列表；侧栏 AI 助手继续保留。
 
 ## v0.100.1
 
