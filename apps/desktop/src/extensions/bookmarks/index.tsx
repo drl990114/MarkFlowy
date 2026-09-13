@@ -1,13 +1,11 @@
 import { commandRegistry } from '@/commands'
 import { AsyncSurface, type AsyncSurfaceState } from '@/components/AsyncSurface'
-import { scheduleActiveEditorFocus } from '@/components/EditorArea/focusActiveEditor'
 import type { RightBarItem } from '@/components/SideBar'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { showContextMenu } from '@/components/ui-v2/ContextMenu/ContextMenu'
 import { RIGHTBARITEMKEYS } from '@/constants'
 import { useTranslation } from '@/i18n'
-import { closeCompactLeftDockAfterSelection } from '@/stores/useLayoutStore'
 import { BookmarkIcon, ListIcon, TagsIcon } from 'lucide-react'
 import { useCallback, useEffect, useMemo } from 'react'
 import { toast } from 'zens'
@@ -114,14 +112,6 @@ export const BookMarksList = (props: BookMarksListProps) => {
     setViewMode(viewMode === 'list' ? 'tags' : 'list')
   }, [setViewMode, viewMode])
 
-  const handleOpenBookMark = useCallback(
-    (bookmark: BookMarkItem) => {
-      openBookMark(bookmark)
-      if (closeCompactLeftDockAfterSelection()) scheduleActiveEditorFocus()
-    },
-    [openBookMark],
-  )
-
   const visibleItems = viewMode === 'list' ? bookMarkList : tagsViewList
   const surfaceState = useMemo<AsyncSurfaceState<BookMarkViewMode>>(() => {
     if (loadStatus === 'idle' || loadStatus === 'loading') {
@@ -191,11 +181,11 @@ export const BookMarksList = (props: BookMarksListProps) => {
                     <BookMarkViewItem
                       bookmark={bookmark}
                       key={bookmark.id}
-                      onClick={handleOpenBookMark}
+                      onClick={openBookMark}
                     />
                   ))
                 : tagsViewList.map((tagView) => (
-                    <TagsViewItem key={tagView.tag} onOpen={handleOpenBookMark} tagView={tagView} />
+                    <TagsViewItem key={tagView.tag} onOpen={openBookMark} tagView={tagView} />
                   ))
             }
           </AsyncSurface>

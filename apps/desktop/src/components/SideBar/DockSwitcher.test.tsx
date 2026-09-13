@@ -16,8 +16,6 @@ beforeEach(() => {
   useLayoutStore.setState({
     leftBar: { activePanelId: 'explorer', size: 240, visible: true },
     rightBar: { activePanelId: 'toc', size: 280, visible: true },
-    overlayDock: null,
-    viewportMode: 'wide',
     zenModeActive: false,
   })
 })

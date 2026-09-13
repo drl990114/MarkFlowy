@@ -5,8 +5,6 @@ import type { IFile } from '@/helper/filesys'
 import { dialog } from '@/services/dialog'
 import { getUnsavedFileIds } from '@/services/checkUnsavedFiles'
 import { useEditorStore } from '@/stores'
-import { closeCompactLeftDockAfterSelection } from '@/stores/useLayoutStore'
-import { scheduleActiveEditorFocus } from '@/components/EditorArea/focusActiveEditor'
 import {
   ChevronsUpIcon,
   EllipsisIcon,
@@ -134,7 +132,6 @@ const Explorer: FC<ExplorerProps> = (props) => {
 
     addOpenedFile(item.id)
     setActiveId(item.id)
-    if (closeCompactLeftDockAfterSelection()) scheduleActiveEditorFocus()
   }
 
   const handleContextMenu: MouseEventHandler = useCallback((e) => e.preventDefault(), [])

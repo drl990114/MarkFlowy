@@ -63,8 +63,6 @@ beforeEach(() => {
   useLayoutStore.setState({
     leftBar: { activePanelId: 'search', size: 304, visible: false },
     rightBar: { activePanelId: 'ai', size: 336, visible: false },
-    overlayDock: null,
-    viewportMode: 'wide',
     zenModeActive: false,
   })
 })

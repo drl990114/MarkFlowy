@@ -8,13 +8,13 @@ import { CenterMenu } from './SettingBtn'
 import { StatusOverflow } from './StatusOverflow'
 import { Container, LeftContainer, RightContainer, StatusBarSeparator } from './styled'
 import { ZenModeButton } from './ZenModeButton'
-import useLayoutStore from '@/stores/useLayoutStore'
+import { useMedia } from 'react-use'
 import { useTranslation } from '@/i18n'
 import { handleStatusBarKeyDown } from './keyboardNavigation'
 
 export default function StatusBar() {
   const { osType } = useGlobalOSInfo()
-  const compact = useLayoutStore((state) => state.viewportMode === 'compact')
+  const compact = useMedia('(max-width: 719px)', false)
   const activeEditorId = useEditorStore((state) => state.activeId)
   const hasEditorCount = useEditorCounterStore((state) =>
     Boolean(activeEditorId && state.editorCounterMap[activeEditorId]),

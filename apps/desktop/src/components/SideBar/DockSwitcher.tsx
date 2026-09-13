@@ -22,15 +22,11 @@ export function scheduleDockFocus(side: DockSide): void {
 export function DockSwitcher({ side }: { side: DockSide }) {
   const { t } = useTranslation()
   const dock = useLayoutStore((state) => (side === 'left' ? state.leftBar : state.rightBar))
-  const overlayDock = useLayoutStore((state) => state.overlayDock)
-  const viewportMode = useLayoutStore((state) => state.viewportMode)
   const toggleDockPanel = useLayoutStore((state) => state.toggleDockPanel)
   const panels = getDockPanels(side)
-  const usesOverlay = viewportMode === 'compact' || (viewportMode === 'medium' && side === 'right')
-  const dockVisible = usesOverlay ? overlayDock === side : dock.visible
 
   const handleSelect = (panelId: DockPanelId) => {
-    const isClosing = dockVisible && dock.activePanelId === panelId
+    const isClosing = dock.visible && dock.activePanelId === panelId
     toggleDockPanel(side, panelId)
 
     if (isClosing) {
@@ -48,7 +44,7 @@ export function DockSwitcher({ side }: { side: DockSide }) {
     >
       {panels.map((panel) => {
         const label = t(panel.labelKey, { defaultValue: panel.fallbackLabel })
-        const pressed = dockVisible && dock.activePanelId === panel.id
+        const pressed = dock.visible && dock.activePanelId === panel.id
         const tooltipLabel = pressed
           ? `${t('common.close')} · ${t(side === 'left' ? 'sidebar.leftDock' : 'sidebar.rightDock')}`
           : label
@@ -62,7 +58,6 @@ export function DockSwitcher({ side }: { side: DockSide }) {
                 aria-pressed={pressed}
                 className='mf-dock-switcher__button'
                 data-mf-dock-panel-id={panel.id}
-                data-mf-dock-trigger={side}
                 format='icon'
                 onClick={() => handleSelect(panel.id)}
               >

@@ -1,6 +1,5 @@
 import { AsyncSurface } from '@/components/AsyncSurface'
 import { Button } from '@/components/ui/button'
-import { useDockViewportMode } from '@/hooks/useDockViewportMode'
 import { t } from '@/i18n'
 import useLayoutStore from '@/stores/useLayoutStore'
 import { StartupProgress } from './StartupProgress'
@@ -26,7 +25,6 @@ export function WorkspaceStartupSurface({
   retry,
   state,
 }: WorkspaceStartupSurfaceProps) {
-  const viewportMode = useDockViewportMode()
   const leftDock = useLayoutStore((layout) => layout.leftBar)
   const rightDock = useLayoutStore((layout) => layout.rightBar)
 
@@ -53,7 +51,7 @@ export function WorkspaceStartupSurface({
       data-mf-workspace-startup={state.status === 'error' ? 'error' : 'loading'}
     >
       <div className='flex min-h-0 flex-1'>
-        {viewportMode !== 'compact' && leftDock.visible ? (
+        {leftDock.visible ? (
           <aside
             aria-hidden='true'
             className='shrink-0 border-r border-border bg-surface-panel-left'
@@ -70,7 +68,7 @@ export function WorkspaceStartupSurface({
             <StartupProgress label={t('startup.opening_workspace')} />
           )}
         </main>
-        {viewportMode === 'wide' && rightDock.visible ? (
+        {rightDock.visible ? (
           <aside
             aria-hidden='true'
             className='shrink-0 border-l border-border bg-surface-panel-right'

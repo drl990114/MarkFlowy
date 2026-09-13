@@ -7,8 +7,6 @@ describe('workspace switch service', () => {
     useLayoutStore.setState({
       leftBar: { activePanelId: 'search', size: 304, visible: false },
       rightBar: { activePanelId: 'ai', size: 336, visible: false },
-      overlayDock: null,
-      viewportMode: 'wide',
       zenModeActive: false,
     })
   })
@@ -102,14 +100,16 @@ describe('workspace switch service', () => {
     },
   )
 
-  it('reveals the left overlay when a folder opens in a compact window', async () => {
-    useLayoutStore.getState().setViewportMode('compact')
-    useLayoutStore.getState().setOverlayDock('right')
+  it('opens the Explorer without closing the right dock', async () => {
+    useLayoutStore.getState().setRightBarVisible(true)
     setWorkspaceSwitchHandler(async () => true)
 
     await switchWorkspaceInCurrentWindow('/workspace')
 
-    expect(useLayoutStore.getState().overlayDock).toBe('left')
-    expect(useLayoutStore.getState().leftBar.activePanelId).toBe('explorer')
+    expect(useLayoutStore.getState().leftBar).toMatchObject({
+      activePanelId: 'explorer',
+      visible: true,
+    })
+    expect(useLayoutStore.getState().rightBar).toMatchObject({ activePanelId: 'ai', visible: true })
   })
 })

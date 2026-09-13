@@ -10,12 +10,10 @@ import { createFile, getFolderPathFromPath } from '@/helper/filesys'
 import { logger } from '@/helper/logger'
 import { cn } from '@/lib/cn'
 import { useEditorStore } from '@/stores'
-import { scheduleActiveEditorFocus } from '@/components/EditorArea/focusActiveEditor'
 import {
   closeEditorSearch,
   requestSearchNavigation,
 } from '@/components/EditorArea/editorSearchStore'
-import { closeCompactLeftDockAfterSelection } from '@/stores/useLayoutStore'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { invoke } from '@tauri-apps/api/core'
@@ -604,7 +602,6 @@ const WorkspaceSearchView = memo(({ workspace }: { workspace: string }) => {
         activeIndex: index,
         activeMatch: { path, line: match.line, startColumn: position.start },
       })
-      if (closeCompactLeftDockAfterSelection()) scheduleActiveEditorFocus()
     },
     [addOpenedFile, setActiveId, resultCaseSensitive, resultQuery, setSearchState, t],
   )

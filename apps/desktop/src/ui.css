@@ -157,7 +157,6 @@
   --mf-motion-duration-overlay: 240ms;
   --mf-motion-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --mf-motion-ease-in: cubic-bezier(0.4, 0, 1, 1);
-  --mf-layer-dock-overlay: 20;
   --mf-layer-dialog: 900;
   --mf-layer-popover: 1000;
   --mf-layer-menu: 1000;

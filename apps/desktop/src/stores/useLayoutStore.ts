@@ -8,7 +8,6 @@ export type DockSide = 'left' | 'right'
 export type LeftDockPanelId = 'explorer' | 'search' | 'bookmarks'
 export type RightDockPanelId = 'toc' | 'ai'
 export type DockPanelId = LeftDockPanelId | RightDockPanelId
-export type DockViewportMode = 'compact' | 'medium' | 'wide'
 
 export const DEFAULT_LEFT_DOCK_SIZE = 240
 export const DEFAULT_RIGHT_DOCK_SIZE = 280
@@ -83,15 +82,12 @@ const useLayoutStore = create<LayoutStore>()(
     immer((set) => {
       return {
         ...normalizePreferences(undefined),
-        overlayDock: null,
-        viewportMode: 'wide',
         zenModeActive: false,
 
         openExplorer: () => {
           set((state) => {
             state.leftBar.activePanelId = 'explorer'
             state.leftBar.visible = true
-            if (state.viewportMode === 'compact') state.overlayDock = 'left'
           })
         },
 
@@ -128,57 +124,28 @@ const useLayoutStore = create<LayoutStore>()(
 
         syncDockPanelFromResize: (side: DockSide, size: number) => {
           set((state) => {
-            // Zen Mode hides dock panels with display: none. ResizeObserver reports that
-            // temporary presentation state as 0px, which must not close the saved dock.
-            if (state.zenModeActive) return
+            // Zen Mode's temporary 0px measurements must not close the saved dock.
+            if (state.zenModeActive || !Number.isFinite(size) || size < 0) return
 
             const dock = side === 'left' ? state.leftBar : state.rightBar
-            const isVisible = size > 0
-            const isDocked =
-              side === 'left' ? state.viewportMode !== 'compact' : state.viewportMode === 'wide'
+            if (!dock.visible) return
 
-            if (isDocked && dock.visible !== isVisible) dock.visible = isVisible
-
-            if (state.viewportMode === 'wide' && isVisible) {
+            if (size === 0) {
+              dock.visible = false
+            } else {
               const roundedSize = clampDockSize(side, size)
               if (dock.size !== roundedSize) dock.size = roundedSize
             }
           })
         },
 
-        setViewportMode: (viewportMode: DockViewportMode) => {
-          set((state) => {
-            state.viewportMode = viewportMode
-            if (
-              viewportMode === 'wide' ||
-              (viewportMode === 'medium' && state.overlayDock === 'left')
-            ) {
-              state.overlayDock = null
-            }
-          })
-        },
-
-        setOverlayDock: (overlayDock: DockSide | null) => {
-          set((state) => {
-            state.overlayDock = overlayDock
-          })
-        },
-
         toggleDockPanel: (side: DockSide, panelId: DockPanelId) => {
           set((state) => {
             const dock = side === 'left' ? state.leftBar : state.rightBar
-            const usesOverlay =
-              state.viewportMode === 'compact' ||
-              (state.viewportMode === 'medium' && side === 'right')
             const isActive = dock.activePanelId === panelId
 
             if (side === 'left') state.leftBar.activePanelId = panelId as LeftDockPanelId
             else state.rightBar.activePanelId = panelId as RightDockPanelId
-
-            if (usesOverlay) {
-              state.overlayDock = state.overlayDock === side && isActive ? null : side
-              return
-            }
 
             dock.visible = !(dock.visible && isActive)
           })
@@ -240,14 +207,6 @@ const useLayoutStore = create<LayoutStore>()(
   ),
 )
 
-export function closeCompactLeftDockAfterSelection(): boolean {
-  const state = useLayoutStore.getState()
-  if (state.viewportMode !== 'compact' || state.overlayDock !== 'left') return false
-
-  state.setOverlayDock(null)
-  return true
-}
-
 type LayoutItem<TPanelId extends DockPanelId> = {
   visible: boolean
   activePanelId: TPanelId
@@ -259,8 +218,6 @@ export type LayoutStore = {
   setStartupPanel: (side: DockSide, panel: LeftDockStartup | RightDockStartup) => void
   leftBar: LayoutItem<LeftDockPanelId>
   rightBar: LayoutItem<RightDockPanelId>
-  overlayDock: DockSide | null
-  viewportMode: DockViewportMode
   zenModeActive: boolean
   openExplorer: () => void
   setLeftBarVisible: (visible: boolean) => void
@@ -268,8 +225,6 @@ export type LayoutStore = {
   setDockPanel: (side: DockSide, panelId: DockPanelId) => void
   setDockSize: (side: DockSide, size: number) => void
   syncDockPanelFromResize: (side: DockSide, size: number) => void
-  setViewportMode: (viewportMode: DockViewportMode) => void
-  setOverlayDock: (overlayDock: DockSide | null) => void
   toggleDockPanel: (side: DockSide, panelId: DockPanelId) => void
   setZenModeActive: (active: boolean) => void
   toggleZenMode: () => void

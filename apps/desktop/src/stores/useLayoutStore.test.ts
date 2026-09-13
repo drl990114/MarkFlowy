@@ -1,8 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import useLayoutStore, {
-  closeCompactLeftDockAfterSelection,
-  DOCK_PREFERENCES_STORAGE_KEY,
-} from './useLayoutStore'
+import useLayoutStore, { DOCK_PREFERENCES_STORAGE_KEY } from './useLayoutStore'
 
 beforeEach(() => {
   localStorage.removeItem(DOCK_PREFERENCES_STORAGE_KEY)
@@ -11,8 +8,6 @@ beforeEach(() => {
     rightBar: { activePanelId: 'toc', size: 280, visible: true },
     leftStartup: 'restore',
     rightStartup: 'restore',
-    overlayDock: null,
-    viewportMode: 'wide',
     zenModeActive: false,
   })
 })
@@ -57,18 +52,6 @@ describe('useLayoutStore Zen Mode state', () => {
       visible: true,
     })
   })
-
-  it('restores a responsive overlay Dock after leaving Zen Mode', () => {
-    useLayoutStore.getState().setViewportMode('compact')
-    useLayoutStore.getState().toggleDockPanel('right', 'ai')
-
-    useLayoutStore.getState().setZenModeActive(true)
-    expect(useLayoutStore.getState().overlayDock).toBe('right')
-
-    useLayoutStore.getState().setZenModeActive(false)
-    expect(useLayoutStore.getState().overlayDock).toBe('right')
-    expect(useLayoutStore.getState().rightBar.activePanelId).toBe('ai')
-  })
 })
 
 describe('useLayoutStore Dock state', () => {
@@ -109,11 +92,8 @@ describe('useLayoutStore Dock state', () => {
     expect(useLayoutStore.getState().leftBar.visible).toBe(false)
   })
 
-  it('keeps only one overlay Dock open in compact mode', () => {
-    useLayoutStore.getState().setViewportMode('compact')
+  it('keeps both docks open when switching their active panels independently', () => {
     useLayoutStore.getState().toggleDockPanel('right', 'ai')
-
-    expect(useLayoutStore.getState().overlayDock).toBe('right')
     expect(useLayoutStore.getState().leftBar.visible).toBe(true)
     expect(useLayoutStore.getState().rightBar).toMatchObject({
       activePanelId: 'ai',
@@ -121,17 +101,11 @@ describe('useLayoutStore Dock state', () => {
     })
 
     useLayoutStore.getState().toggleDockPanel('left', 'search')
-    expect(useLayoutStore.getState().overlayDock).toBe('left')
+    expect(useLayoutStore.getState().leftBar).toMatchObject({
+      activePanelId: 'search',
+      visible: true,
+    })
     expect(useLayoutStore.getState().rightBar.visible).toBe(true)
-  })
-
-  it('closes a compact left Dock after a selection even when the selected id is unchanged', () => {
-    useLayoutStore.getState().setViewportMode('compact')
-    useLayoutStore.getState().toggleDockPanel('left', 'explorer')
-
-    expect(closeCompactLeftDockAfterSelection()).toBe(true)
-    expect(useLayoutStore.getState().overlayDock).toBeNull()
-    expect(closeCompactLeftDockAfterSelection()).toBe(false)
   })
 
   it('tracks the latest pixel size without changing panel visibility', () => {
@@ -144,16 +118,38 @@ describe('useLayoutStore Dock state', () => {
     })
   })
 
-  it('still synchronizes real dock resize and collapse events outside Zen Mode', () => {
+  it('closes a dock on drag collapse while retaining its last expanded width', () => {
     useLayoutStore.getState().syncDockPanelFromResize('left', 0)
     useLayoutStore.getState().syncDockPanelFromResize('right', 311.6)
 
-    expect(useLayoutStore.getState().leftBar.visible).toBe(false)
+    expect(useLayoutStore.getState().leftBar).toEqual({
+      activePanelId: 'explorer',
+      size: 240,
+      visible: false,
+    })
     expect(useLayoutStore.getState().rightBar).toEqual({
       activePanelId: 'toc',
       size: 312,
       visible: true,
     })
+  })
+
+  it('does not reopen closed docks or overwrite their saved widths from resize callbacks', () => {
+    useLayoutStore.getState().setLeftBarVisible(false)
+    useLayoutStore.getState().setRightBarVisible(false)
+    useLayoutStore.getState().syncDockPanelFromResize('left', 180)
+    useLayoutStore.getState().syncDockPanelFromResize('right', 0)
+
+    expect(useLayoutStore.getState().leftBar).toMatchObject({ size: 240, visible: false })
+    expect(useLayoutStore.getState().rightBar).toMatchObject({ size: 280, visible: false })
+  })
+
+  it('remembers resized widths for both dock sides', () => {
+    useLayoutStore.getState().syncDockPanelFromResize('left', 303.6)
+    useLayoutStore.getState().syncDockPanelFromResize('right', 220)
+
+    expect(useLayoutStore.getState().leftBar).toMatchObject({ size: 304, visible: true })
+    expect(useLayoutStore.getState().rightBar).toMatchObject({ size: 220, visible: true })
   })
 
   it('persists versioned active panels and clamped pixel sizes', () => {
@@ -170,35 +166,19 @@ describe('useLayoutStore Dock state', () => {
       },
     })
   })
-
-  it('closes overlays that become invalid after a breakpoint change', () => {
-    useLayoutStore.getState().setViewportMode('compact')
-    useLayoutStore.getState().toggleDockPanel('left', 'explorer')
-    expect(useLayoutStore.getState().overlayDock).toBe('left')
-
-    useLayoutStore.getState().setViewportMode('medium')
-    expect(useLayoutStore.getState().overlayDock).toBeNull()
-
-    useLayoutStore.getState().setViewportMode('compact')
-    useLayoutStore.getState().toggleDockPanel('right', 'toc')
-    useLayoutStore.getState().setViewportMode('wide')
-    expect(useLayoutStore.getState().overlayDock).toBeNull()
-  })
 })
 
 describe('Dock restart preferences', () => {
-  it('restores closed panels, but never restores Zen or responsive overlays', async () => {
+  it('restores closed panels without restoring Zen Mode', async () => {
     useLayoutStore.getState().setDockPanel('left', 'bookmarks')
     useLayoutStore.getState().setLeftBarVisible(false)
     useLayoutStore.getState().setRightBarVisible(false)
     useLayoutStore.getState().setZenModeActive(true)
-    useLayoutStore.getState().setOverlayDock('left')
     vi.resetModules()
     const restored = (await import('./useLayoutStore')).default.getState()
     expect(restored.leftBar).toMatchObject({ activePanelId: 'bookmarks', visible: false })
     expect(restored.rightBar.visible).toBe(false)
     expect(restored.zenModeActive).toBe(false)
-    expect(restored.overlayDock).toBeNull()
   })
 
   it('applies explicit startup panels on the next load without changing this session', async () => {
