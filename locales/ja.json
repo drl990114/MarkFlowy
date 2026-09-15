@@ -887,6 +887,10 @@
     "shortcutFallback": "Cmd/Ctrl+Shift+F"
   },
   "capricorn": {
+    "selection": {
+      "selectAllHint": "{{shortcut}} をもう一度押すとドキュメント全体を選択",
+      "selectAllTableHint": "{{shortcut}} をもう一度押すと表全体を選択"
+    },
     "selectionToolbar": {
       "label": "文字の書式",
       "bold": "太字",

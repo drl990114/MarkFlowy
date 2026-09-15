@@ -887,6 +887,10 @@
     "shortcutFallback": "Cmd/Ctrl+Mayús+F"
   },
   "capricorn": {
+    "selection": {
+      "selectAllHint": "Pulsa {{shortcut}} de nuevo para seleccionar todo el documento",
+      "selectAllTableHint": "Pulsa {{shortcut}} de nuevo para seleccionar toda la tabla"
+    },
     "selectionToolbar": {
       "label": "Formato de texto",
       "bold": "Negrita",

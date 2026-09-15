@@ -1,12 +1,13 @@
 // Transform the source/package graph before UI wait deadlines. The component
 // still uses its real async loader; loader caching has separate unit coverage.
 import 'virtual:markflowy-capricorn-runtime'
+import { createInstance } from '@markflowy/i18n'
 import { desktopLightTheme } from '@markflowy/theme'
 import { act, cleanup, fireEvent, render, waitFor } from '@testing-library/react'
 import { createRef, StrictMode } from 'react'
 import { ThemeProvider } from 'styled-components'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { capricornRuntimeVersion, isCapricornRuntimeAvailable } from '@/constants/capricornRuntime'
+import { isCapricornRuntimeAvailable } from '@/constants/capricornRuntime'
 import { EditorViewType } from '@/constants/editorViewType'
 import zhCNLocale from '../../../../../locales/zh-CN.json'
 import { CapricornEditor, type CapricornEditorHandle } from './CapricornEditor'
@@ -14,8 +15,11 @@ import { EditorWrapper } from './EditorWrapper'
 import {
   CAPRICORN_DESKTOP_VIRTUALIZE_OPTIONS,
   loadCapricornRuntimeFactory,
+  type CapricornLocalizationAdapter,
   type CapricornRuntimeAdapter,
 } from './capricornRuntimeAdapter'
+import { createCapricornKeybindingConfiguration } from './capricornKeybindings'
+import { getCapricornRuntimeInput } from './capricornRuntimeDom'
 
 vi.mock('@/i18n', () => ({
   useTranslation: () => ({
@@ -36,48 +40,112 @@ vi.mock('@/i18n', () => ({
 afterEach(cleanup)
 
 describe.skipIf(!isCapricornRuntimeAvailable)('CapricornEditor with the published runtime', () => {
-  // The currently pinned 0.1.27 package predates this setting. Exercise the new host/runtime
-  // contract through the explicit source-integration config until the next package release.
-  it.runIf(capricornRuntimeVersion === 'source-integration')(
-    'updates code wrapping in place through the host settings bridge',
-    async () => {
-      const ref = createRef<CapricornEditorHandle>()
-      const onEditorChange = vi.fn()
-      const onChange = vi.fn()
-      const onError = vi.fn()
-      const initialMarkdown = '```js\nconst value = "' + 'long text '.repeat(50) + '";\n```'
-      const props = {
-        ref,
-        active: true,
-        initialMarkdown,
-        onChange,
-        onError,
-        onUnavailable: onError,
-        onEditorChange,
-      }
-      const { container, rerender } = render(
-        <CapricornEditor {...props} options={{ codeBlockLineWrapping: false }} />,
+  it('updates code wrapping in place through the host settings bridge', async () => {
+    const ref = createRef<CapricornEditorHandle>()
+    const onEditorChange = vi.fn()
+    const onChange = vi.fn()
+    const onError = vi.fn()
+    const initialMarkdown = '```js\nconst value = "' + 'long text '.repeat(50) + '";\n```'
+    const props = {
+      ref,
+      active: true,
+      initialMarkdown,
+      onChange,
+      onError,
+      onUnavailable: onError,
+      onEditorChange,
+    }
+    const { container, rerender } = render(
+      <CapricornEditor {...props} options={{ codeBlockLineWrapping: false }} />,
+    )
+    await waitFor(() => expect(container.querySelector('.cm-content')).not.toBeNull())
+    const content = container.querySelector('.cm-content')!
+    expect(content.classList.contains('cm-lineWrapping')).toBe(false)
+    const adapter = onEditorChange.mock.calls.find(
+      ([value]) => value,
+    )?.[0] as CapricornRuntimeAdapter
+    const canUndo = adapter.getUiState().canUndo
+    for (const enabled of [true, false, true]) {
+      await act(async () =>
+        rerender(<CapricornEditor {...props} options={{ codeBlockLineWrapping: enabled }} />),
       )
-      await waitFor(() => expect(container.querySelector('.cm-content')).not.toBeNull())
-      const content = container.querySelector('.cm-content')!
-      expect(content.classList.contains('cm-lineWrapping')).toBe(false)
-      const adapter = onEditorChange.mock.calls.find(
-        ([value]) => value,
-      )?.[0] as CapricornRuntimeAdapter
-      const canUndo = adapter.getUiState().canUndo
-      for (const enabled of [true, false, true]) {
-        await act(async () =>
-          rerender(<CapricornEditor {...props} options={{ codeBlockLineWrapping: enabled }} />),
-        )
-        await waitFor(() => expect(content.classList.contains('cm-lineWrapping')).toBe(enabled))
-        expect(container.querySelector('.cm-content')).toBe(content)
-        expect(ref.current!.getMarkdown()).toBe(initialMarkdown)
-        expect(adapter.getUiState().canUndo).toBe(canUndo)
-      }
-      expect(onEditorChange.mock.calls.filter(([value]) => value)).toHaveLength(1)
-      expect(onError).not.toHaveBeenCalled()
-    },
-  )
+      await waitFor(() => expect(content.classList.contains('cm-lineWrapping')).toBe(enabled))
+      expect(container.querySelector('.cm-content')).toBe(content)
+      expect(ref.current!.getMarkdown()).toBe(initialMarkdown)
+      expect(adapter.getUiState().canUndo).toBe(canUndo)
+    }
+    expect(onEditorChange.mock.calls.filter(([value]) => value)).toHaveLength(1)
+    expect(onError).not.toHaveBeenCalled()
+  })
+
+  it('localizes select-all hints through host settings without dirtying or remounting the editor', async () => {
+    const translations = createInstance()
+    await translations.init({
+      lng: 'cn',
+      resources: { cn: { translation: zhCNLocale } },
+    })
+    const localization: CapricornLocalizationAdapter = {
+      getLocale: () => translations.language,
+      translate: ({ defaultValue, key, values }) =>
+        translations.t(`capricorn.${key}`, { defaultValue, ...values }),
+    }
+    const onEditorChange = vi.fn()
+    const onChange = vi.fn()
+    const onError = vi.fn()
+    const original = '| A | B |\n| --- | --- |\n| value |  |\n\nafter'
+    const { container } = render(
+      <CapricornEditor
+        active
+        initialMarkdown={original}
+        onEditorChange={onEditorChange}
+        onChange={onChange}
+        onError={onError}
+        onUnavailable={onError}
+        options={{
+          localization,
+          keybindingConfiguration: createCapricornKeybindingConfiguration({}, true),
+          virtualize: CAPRICORN_DESKTOP_VIRTUALIZE_OPTIONS,
+        }}
+      />,
+    )
+    await waitFor(() =>
+      expect(onEditorChange.mock.calls.filter(([adapter]) => adapter !== null)).toHaveLength(1),
+    )
+    const adapter = onEditorChange.mock.calls.find(
+      ([value]) => value,
+    )?.[0] as CapricornRuntimeAdapter
+    const root = container.querySelector('[data-cap-content]')
+    const input = getCapricornRuntimeInput(container)!
+    expect(input).not.toBeNull()
+    await act(async () => adapter.focus())
+    onChange.mockClear()
+    const isMac = /Mac/.test(navigator.platform)
+    const shortcut = isMac ? '⌘A' : 'Ctrl+A'
+    for (const expected of [`再按 ${shortcut} 全选表格`, `再按 ${shortcut} 全选全文`, null]) {
+      await act(async () => {
+        fireEvent.keyDown(input, {
+          key: 'a',
+          code: 'KeyA',
+          keyCode: 65,
+          metaKey: isMac,
+          ctrlKey: !isMac,
+        })
+        fireEvent.keyUp(input, { key: 'a', code: 'KeyA' })
+      })
+      await waitFor(() =>
+        expect(container.querySelector('.capricorn-select-all-hint')?.textContent ?? null).toBe(
+          expected,
+        ),
+      )
+      expect(document.activeElement).toBe(input)
+      expect(container.querySelector('[data-cap-content]')).toBe(root)
+      expect(adapter.getMarkdown()).toBe(original)
+      expect(adapter.getUiState().canUndo).toBe(false)
+    }
+    expect(onEditorChange.mock.calls.filter(([value]) => value !== null)).toHaveLength(1)
+    expect(onChange).not.toHaveBeenCalledWith(expect.objectContaining({ documentChanged: true }))
+    expect(onError).not.toHaveBeenCalled()
+  })
 
   it('switches edit and preview in place, keeping content and undo while blocking preview edits', async () => {
     const ref = createRef<CapricornEditorHandle>()

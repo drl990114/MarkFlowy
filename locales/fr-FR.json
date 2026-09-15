@@ -887,6 +887,10 @@
     "shortcutFallback": "Cmd/Ctrl+Maj+F"
   },
   "capricorn": {
+    "selection": {
+      "selectAllHint": "Appuyez à nouveau sur {{shortcut}} pour sélectionner tout le document",
+      "selectAllTableHint": "Appuyez à nouveau sur {{shortcut}} pour sélectionner tout le tableau"
+    },
     "selectionToolbar": {
       "label": "Mise en forme du texte",
       "bold": "Gras",

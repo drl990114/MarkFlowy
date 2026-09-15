@@ -887,6 +887,10 @@
     "export_empty": "There is no conversation to export"
   },
   "capricorn": {
+    "selection": {
+      "selectAllHint": "Press {{shortcut}} again to select the entire document",
+      "selectAllTableHint": "Press {{shortcut}} again to select the entire table"
+    },
     "selectionToolbar": {
       "label": "Text formatting",
       "bold": "Bold",
