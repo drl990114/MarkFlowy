@@ -13,6 +13,7 @@ enableMapSet()
 
 const harness = vi.hoisted(() => ({
   events: [] as string[],
+  onLoadingChange: undefined as undefined | ((pending: boolean) => void),
   getFileTypeConfig: vi.fn(),
   preload: vi.fn(),
   recordStage: vi.fn(),
@@ -48,7 +49,8 @@ vi.mock('./styles', () => ({
   ),
 }))
 vi.mock('./TextEditor', () => ({
-  default: () => {
+  default: ({ onLoadingChange }: { onLoadingChange?: (pending: boolean) => void }) => {
+    harness.onLoadingChange = onLoadingChange
     harness.events.push('text-editor-render')
     return <div data-testid='text-editor' />
   },
@@ -81,7 +83,10 @@ beforeEach(() => {
   useEditorViewTypeStore.setState({ editorViewTypeMap: new Map() })
 })
 
-afterEach(cleanup)
+afterEach(() => {
+  cleanup()
+  vi.useRealTimers()
+})
 
 describe('Editor initialization lifecycle', () => {
   it('does not publish type state, prewarm, or diagnostics after the tab closes', async () => {
@@ -165,6 +170,35 @@ describe('Editor initialization lifecycle', () => {
     expect(harness.events).toContain('text-editor-render')
     expect(harness.preload).toHaveBeenCalledOnce()
     await act(async () => pendingPrewarm.resolve())
+  })
+
+  it('keeps one deadline from type lookup through content preparation and stops on failure', async () => {
+    vi.useFakeTimers()
+    const pendingType = deferred<FileTypeConfig>()
+    harness.getFileTypeConfig.mockReturnValue(pendingType.promise)
+    harness.preload.mockResolvedValue(undefined)
+    setFileObject('file-a', {
+      id: 'file-a',
+      name: 'a.md',
+      kind: 'file',
+      ext: 'md',
+      path: '/workspace/a.md',
+    })
+    const view = render(<Editor id='file-a' active visible groupId='group' />)
+    act(() => vi.advanceTimersByTime(500))
+    expect(view.queryByRole('progressbar')).toBeNull()
+    await act(async () => pendingType.resolve(markdownConfig))
+    act(() => harness.onLoadingChange?.(true))
+    act(() => vi.advanceTimersByTime(300))
+    expect(view.queryByRole('progressbar')).not.toBeNull()
+    act(() => harness.onLoadingChange?.(false))
+    expect(view.queryByRole('progressbar')).toBeNull()
+    expect(view.container.querySelector('[aria-busy="true"]')).toBeNull()
+    act(() => harness.onLoadingChange?.(true))
+    act(() => vi.advanceTimersByTime(799))
+    expect(view.queryByRole('progressbar')).toBeNull()
+    act(() => vi.advanceTimersByTime(1))
+    expect(view.queryByRole('progressbar')).not.toBeNull()
   })
 
   it('keeps the mounted tab subtree across A to B to A visibility switches', async () => {

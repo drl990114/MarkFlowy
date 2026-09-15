@@ -350,7 +350,7 @@ describe('CapricornEditor background preparation', () => {
   })
 
   it.each([false, true])(
-    'distinguishes module loading from document preparation (preloaded=%s)',
+    'reports one pending state across module and document preparation (preloaded=%s)',
     async (preloaded) => {
       let finishLoading!: (factory: CapricornRuntimeAsyncFactory) => void
       let finishPreparing!: (adapter: CapricornRuntimeAdapter) => void
@@ -366,15 +366,22 @@ describe('CapricornEditor background preparation', () => {
       )
       if (preloaded) vi.mocked(getLoadedCapricornRuntimeFactory).mockReturnValue(vi.fn())
       const onRuntimeReady = vi.fn()
+      const onLoadingChange = vi.fn()
       const { queryByText, container } = render(
-        <CapricornEditor {...baseProps()} onRuntimeReady={onRuntimeReady} />,
+        <CapricornEditor
+          {...baseProps()}
+          onRuntimeReady={onRuntimeReady}
+          onLoadingChange={onLoadingChange}
+        />,
       )
 
-      expect(queryByText('Loading Capricorn editor') !== null).toBe(!preloaded)
-      expect(queryByText('Opening document') !== null).toBe(preloaded)
+      expect(queryByText('Loading Capricorn editor')).toBeNull()
+      expect(queryByText('Opening document')).toBeNull()
+      expect(onLoadingChange.mock.calls).toEqual([[true]])
       await act(async () => finishLoading(vi.fn()))
       expect(queryByText('Loading Capricorn editor')).toBeNull()
-      expect(queryByText('Opening document')).not.toBeNull()
+      expect(queryByText('Opening document')).toBeNull()
+      expect(onLoadingChange.mock.calls).toEqual([[true]])
       expect(onRuntimeReady).not.toHaveBeenCalled()
       expect(
         container.querySelector<HTMLElement>('[data-mf-capricorn-runtime]')?.style.visibility,
@@ -383,6 +390,7 @@ describe('CapricornEditor background preparation', () => {
       await act(async () => finishPreparing(createMountAdapter(largeMarkdown)))
       expect(queryByText('Opening document')).toBeNull()
       expect(onRuntimeReady).toHaveBeenCalledOnce()
+      expect(onLoadingChange.mock.calls).toEqual([[true], [false]])
       expect(
         container.querySelector<HTMLElement>('[data-mf-capricorn-runtime]')?.style.visibility,
       ).toBe('visible')
@@ -656,7 +664,7 @@ describe('CapricornEditor preloading', () => {
     expect(onEditorChange).toHaveBeenLastCalledWith(null)
   })
 
-  it('keeps the loading surface for an unfinished preload and mounts with the latest props', async () => {
+  it('keeps the runtime hidden for an unfinished preload and mounts with the latest props', async () => {
     let finishLoading!: (factory: CapricornRuntimeFactory) => void
     vi.mocked(loadCapricornRuntimeFactory).mockReturnValue(
       new Promise((resolve) => {
@@ -674,7 +682,7 @@ describe('CapricornEditor preloading', () => {
     }
     const { queryByText, rerender } = render(<CapricornEditor {...props} />)
 
-    expect(queryByText('Loading Capricorn editor')).not.toBeNull()
+    expect(queryByText('Loading Capricorn editor')).toBeNull()
     expect(createCapricornRuntimeAdapter).not.toHaveBeenCalled()
     rerender(
       <CapricornEditor

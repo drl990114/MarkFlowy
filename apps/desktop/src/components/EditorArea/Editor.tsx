@@ -20,6 +20,7 @@ import { PreviewContent } from './preview/PreviewContent'
 import { EditorScrollContainer } from './styles'
 import { editorScrollOptions } from './editorScrollOptions'
 import TextEditor from './TextEditor'
+import { EditorLoadingProgress } from './EditorLoadingProgress'
 import { UnsupportedFileType } from './UnsupportedFileType'
 
 const handleEditorPanelClick: MouseEventHandler<HTMLDivElement> = (event) => {
@@ -30,6 +31,7 @@ const handleEditorPanelClick: MouseEventHandler<HTMLDivElement> = (event) => {
 
 function Editor(props: EditorProps) {
   const { id, active, visible = active, groupId } = props
+  const [pending, setPending] = useState(true)
   const [shouldMountContent, setShouldMountContent] = useState(visible)
   const fileName = useFileCacheStore((state) => state.entries[id]?.name)
   const filePath = useFileCacheStore((state) => state.entries[id]?.path)
@@ -125,42 +127,51 @@ function Editor(props: EditorProps) {
     }
   }
 
-  if (!curFileTypeConfig) return null
+  const loading = !curFileTypeConfig || (isTextfileType(curFileTypeConfig) && pending)
 
   return (
-    <EditorScrollContainer
-      data-editor-id={id}
-      data-editor-active={active ? 'true' : 'false'}
+    <div
+      className='absolute inset-0 bg-background'
       style={visible ? undefined : { display: 'none' }}
-      tabIndex={-1}
-      onClick={handleEditorPanelClick}
+      aria-busy={loading}
     >
-      <OverlayScrollbarsComponent
-        options={editorScrollOptions}
-        style={{ height: '100%', minWidth: 0 }}
+      <EditorScrollContainer
+        data-editor-id={id}
+        data-editor-active={active ? 'true' : 'false'}
+        style={visible ? undefined : { display: 'none' }}
+        tabIndex={-1}
+        onClick={handleEditorPanelClick}
       >
-        <div className={'code-contents'}>
-          {!shouldMountContent ? null : curFileTypeConfig.type === 'unsupported' ? (
-            <UnsupportedFileType fileName={fileName || ''} />
-          ) : isTextfileType(curFileTypeConfig) ? (
-            <TextEditor
-              fileTypeConfig={curFileTypeConfig}
-              active={active}
-              id={id}
-              groupId={groupId}
-              visible={visible}
-            />
-          ) : (
-            <PreviewContent
-              type={curFileTypeConfig.type}
-              filePath={filePath}
-              active={active}
-              visible={visible}
-            />
-          )}
-        </div>
-      </OverlayScrollbarsComponent>
-    </EditorScrollContainer>
+        <OverlayScrollbarsComponent
+          options={editorScrollOptions}
+          style={{ height: '100%', minWidth: 0 }}
+        >
+          <div className={'code-contents'}>
+            {!shouldMountContent || !curFileTypeConfig ? null : curFileTypeConfig.type ===
+              'unsupported' ? (
+              <UnsupportedFileType fileName={fileName || ''} />
+            ) : isTextfileType(curFileTypeConfig) ? (
+              <TextEditor
+                onLoadingChange={setPending}
+                fileTypeConfig={curFileTypeConfig}
+                active={active}
+                id={id}
+                groupId={groupId}
+                visible={visible}
+              />
+            ) : (
+              <PreviewContent
+                type={curFileTypeConfig.type}
+                filePath={filePath}
+                active={active}
+                visible={visible}
+              />
+            )}
+          </div>
+        </OverlayScrollbarsComponent>
+      </EditorScrollContainer>
+      <EditorLoadingProgress pending={loading} visible={visible} />
+    </div>
   )
 }
 
@@ -172,4 +183,8 @@ export interface EditorProps {
   onSave?: () => void
 }
 
-export default memo(Editor)
+const MemoEditor = memo(Editor)
+
+export default function EditorInstance(props: EditorProps) {
+  return <MemoEditor key={`${props.groupId ?? ''}:${props.id}`} {...props} />
+}

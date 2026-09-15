@@ -1,0 +1,25 @@
+.mf-editor-loading-progress {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 2px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.mf-editor-loading-indicator {
+  height: 100%;
+  width: 35%;
+  animation: mf-editor-loading 1.4s ease-in-out infinite;
+}
+
+@keyframes mf-editor-loading {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(286%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mf-editor-loading-indicator {
+    animation: none;
+    width: 100%;
+  }
+}

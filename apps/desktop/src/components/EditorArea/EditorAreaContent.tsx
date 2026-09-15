@@ -1,10 +1,15 @@
+import { EditorOpeningClockContext } from './EditorLoadingProgress'
 import { useEditorStore } from '@/stores'
 import useLayoutStore from '@/stores/useLayoutStore'
-import { memo } from 'react'
+import { memo, useContext, useLayoutEffect } from 'react'
 import EditorLayoutView from './EditorLayoutView'
 import { Container, EditorPanel, OverlayScrollbarStyles } from './styles'
 
 function EditorAreaContent() {
+  const openingClock = useContext(EditorOpeningClockContext)
+  useLayoutEffect(() => {
+    if (openingClock) openingClock.startedAt = null
+  }, [openingClock])
   const editorLayout = useEditorStore((state) => state.editorLayout)
   const activeGroupId = useEditorStore((state) => state.activeGroupId)
   const zenModeActive = useLayoutStore((state) => state.zenModeActive)

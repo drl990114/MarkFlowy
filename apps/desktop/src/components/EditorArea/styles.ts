@@ -269,36 +269,3 @@ export const EditorScrollContainer = styled.div`
     min-height: 100%;
   }
 `
-
-export const EditorSkeleton = styled.div`
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  padding: 24px 32px;
-  gap: 12px;
-
-  .skeleton-line {
-    height: 16px;
-    border-radius: 4px;
-    background-color: ${(props) => props.theme.borderColor};
-    animation: skeleton-pulse 1.6s ease-in-out infinite;
-
-    &:nth-child(odd) {
-      width: 100%;
-    }
-    &:nth-child(even) {
-      width: 85%;
-    }
-
-    @keyframes skeleton-pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .skeleton-line {
-      animation: none;
-    }
-  }
-`

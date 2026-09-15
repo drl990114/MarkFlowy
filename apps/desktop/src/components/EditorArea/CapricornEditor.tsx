@@ -46,6 +46,7 @@ export interface CapricornRuntimeRequestIdentity {
 }
 
 export interface CapricornEditorProps {
+  onLoadingChange?: (pending: boolean) => void
   active: boolean
   contentRevision?: number
   visible?: boolean
@@ -66,6 +67,7 @@ export interface CapricornEditorProps {
 }
 
 export function CapricornEditor({
+  onLoadingChange,
   active,
   contentRevision = 0,
   visible = active,
@@ -133,6 +135,11 @@ export function CapricornEditor({
   const [state, setState] = useState<'loading' | 'preparing' | 'ready' | 'error'>(() =>
     getLoadedCapricornRuntimeFactory() ? 'preparing' : 'loading',
   )
+
+  const pending = state === 'loading' || state === 'preparing'
+  useLayoutEffect(() => {
+    onLoadingChange?.(pending)
+  }, [onLoadingChange, pending])
 
   // The Controller owns live edits. Host snapshots are only the seed for a
   // new runtime; external replacements use the imperative setMarkdown handle.
@@ -596,19 +603,7 @@ export function CapricornEditor({
           width: '100%',
         }}
       />
-      {state === 'loading' || state === 'preparing' ? (
-        <div style={{ gridColumn: 1, gridRow: 1 }}>
-          <AsyncSurface
-            state={{
-              status: 'loading',
-              label:
-                state === 'loading' ? t('capricorn.editor.loading') : t('capricorn.editor.opening'),
-            }}
-          >
-            {() => null}
-          </AsyncSurface>
-        </div>
-      ) : state === 'error' ? (
+      {state === 'error' ? (
         <div style={{ gridColumn: 1, gridRow: 1 }}>
           <AsyncSurface
             retryLabel={t('common.retry')}

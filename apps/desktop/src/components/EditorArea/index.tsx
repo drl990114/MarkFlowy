@@ -1,4 +1,5 @@
 import { commandRegistry } from '@/commands'
+import { EditorLoadingProgress, EditorOpeningClockContext } from './EditorLoadingProgress'
 import { AsyncSurface } from '@/components/AsyncSurface'
 import { RenderErrorBoundary } from '@/components/RenderErrorBoundary'
 import { EditorViewType } from '@/constants/editorViewType'
@@ -9,11 +10,12 @@ import { guardUnsavedFiles } from '@/services/checkUnsavedFiles'
 import { useEditorStore } from '@/stores'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
-import { lazy, memo, Suspense, useEffect } from 'react'
+import { lazy, memo, Suspense, useEffect, useState } from 'react'
 
 const EditorAreaContent = lazy(() => import('./EditorAreaContent'))
 
 function EditorArea() {
+  const [openingClock] = useState(() => ({ startedAt: performance.now() as number | null }))
   useEffect(() => {
     const toggleEditorTypeDisposable = commandRegistry.registerCommand({
       id: EVENT.app_toggleEditorType,
@@ -114,15 +116,17 @@ function EditorArea() {
         </AsyncSurface>
       )}
     >
-      <Suspense
-        fallback={
-          <AsyncSurface state={{ status: 'loading', label: t('common.fetching') }}>
-            {() => null}
-          </AsyncSurface>
-        }
-      >
-        <EditorAreaContent />
-      </Suspense>
+      <EditorOpeningClockContext value={openingClock}>
+        <Suspense
+          fallback={
+            <div className='relative h-full w-full bg-background' aria-busy='true'>
+              <EditorLoadingProgress pending />
+            </div>
+          }
+        >
+          <EditorAreaContent />
+        </Suspense>
+      </EditorOpeningClockContext>
     </RenderErrorBoundary>
   )
 }

@@ -145,7 +145,7 @@ import { savePathCoordinator } from './savePathCoordinator'
 import { useDebouncedAutosave } from './useDebouncedAutosave'
 import { PdfPrintController } from './pdf-print/PdfPrintController'
 import { PandocExportController } from './pandoc-export/PandocExportController'
-import { EditorSkeleton, WarningHeader } from './styles'
+import { WarningHeader } from './styles'
 
 const delegateOptionsCache = new Map<string, CreateWysiwygDelegateOptions>()
 const TEXT_EDITOR_CONTENT_SYNC_EVENT = 'editor_content_sync'
@@ -1004,7 +1004,7 @@ async function renderElementToImageDataUrl(element: HTMLElement) {
 }
 
 function TextEditor(props: TextEditorProps) {
-  const { id, active, visible = active, fileTypeConfig, groupId } = props
+  const { id, active, visible = active, fileTypeConfig, groupId, onLoadingChange } = props
   const cachedFile = getFileObject(id)
   const lastKnownFileRef = useRef<IFile | undefined>(cachedFile)
   if (cachedFile) {
@@ -1018,6 +1018,7 @@ function TextEditor(props: TextEditorProps) {
     instanceIdRef.current = `text-editor-${textEditorInstanceSeq}`
   }
   const editorWrapperRef = useRef<HTMLDivElement>(null)
+  const [runtimePending, setRuntimePending] = useState(true)
   const [resumeSource, setResumeSource] = useState<MfCodemirrorView | null>(null)
   const [resumeCapricorn, setResumeCapricorn] = useState<CapricornRuntimeAdapter | null>(null)
   const activeRef = useRef(active)
@@ -2714,6 +2715,16 @@ function TextEditor(props: TextEditorProps) {
     })
   }, [currentViewType, filePath, groupId, id, resumeCapricorn, resumeSource, status, visible])
 
+  const openingFailed = status !== TextEditorStatus.LOADING && status !== TextEditorStatus.SUCCESS
+  const openingPending = !openingFailed && (
+    typeof content !== 'string' ||
+    (isCapricornView(currentViewType) ? runtimePending :
+      currentViewType === EditorViewType.SOURCECODE ? !resumeSource : false)
+  )
+  useLayoutEffect(() => {
+    onLoadingChange?.(openingPending)
+  }, [onLoadingChange, openingPending])
+
   const getExportContent = useCallback(() => {
     return useEditorStore.getState().getEditorContent(id)
   }, [id])
@@ -2731,13 +2742,7 @@ function TextEditor(props: TextEditorProps) {
   }
 
   if (typeof content !== 'string' || (!delegate && currentViewType === EditorViewType.SOURCECODE)) {
-    return (
-      <EditorSkeleton>
-        {Array.from({ length: 12 }).map((_, i) => (
-          <div key={i} className='skeleton-line' />
-        ))}
-      </EditorSkeleton>
-    )
+    return null
   }
 
   const cls = classNames('markdown-body', {
@@ -2766,6 +2771,7 @@ function TextEditor(props: TextEditorProps) {
               visible={visible}
               editorId={id}
               initialMarkdown={content}
+              onLoadingChange={setRuntimePending}
               onChange={handleCapricornChange}
               onError={handleCapricornError}
               onOpenProgress={handleCapricornOpenProgress}
@@ -2801,6 +2807,7 @@ function TextEditor(props: TextEditorProps) {
 }
 
 export interface TextEditorProps {
+  onLoadingChange?: (pending: boolean) => void
   id: string
   groupId?: string
   active: boolean
