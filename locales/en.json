@@ -887,6 +887,56 @@
     "export_empty": "There is no conversation to export"
   },
   "capricorn": {
+    "blockTypeMenu": {
+      "title": "Convert to",
+      "multiple": "Convert {{count}} blocks",
+      "search": "Search block types…",
+      "noResults": "No matching block types",
+      "group": {
+        "text": "Text",
+        "list": "Lists",
+        "source": "Source"
+      },
+      "hint": "↑↓ Select · Enter Convert · Esc Cancel",
+      "reason": {
+        "readOnly": "This document cannot be edited.",
+        "unsupported": "The selection contains a block that cannot be converted.",
+        "containers": "Select consecutive blocks within the same container to combine them.",
+        "html": "The content must be a standalone HTML source block.",
+        "math": "A formula cannot preserve this source's delimiters or boundary blank lines.",
+        "stale": "The selected blocks have changed. Open the menu again."
+      }
+    },
+    "blockHandle": {
+      "convertOrMove": "Click to convert · Drag to move",
+      "convert": "Convert {{target}}",
+      "kind": {
+        "block": "block",
+        "blockquote": "quote",
+        "code": "code",
+        "footnote": "footnote",
+        "frontmatter": "front matter",
+        "heading1": "heading 1",
+        "heading2": "heading 2",
+        "heading3": "heading 3",
+        "heading4": "heading 4",
+        "heading5": "heading 5",
+        "heading6": "heading 6",
+        "horizontalRule": "separator",
+        "html": "HTML",
+        "listBullet": "bullet list item",
+        "listOrdered": "ordered list item",
+        "listTask": "task list item",
+        "math": "math",
+        "mermaid": "Mermaid diagram",
+        "paragraph": "paragraph",
+        "rawMarkdown": "raw Markdown",
+        "reference": "reference",
+        "table": "table"
+      },
+      "moveOrSelect": "Move or select {{target}}",
+      "select": "Select {{target}}"
+    },
     "selection": {
       "selectAllHint": "Press {{shortcut}} again to select the entire document",
       "selectAllTableHint": "Press {{shortcut}} again to select the entire table"

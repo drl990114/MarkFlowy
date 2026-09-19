@@ -887,6 +887,56 @@
     "shortcutFallback": "Cmd/Ctrl+Mayús+F"
   },
   "capricorn": {
+    "blockTypeMenu": {
+      "title": "Convertir en",
+      "multiple": "Convertir {{count}} bloques",
+      "search": "Buscar tipos de bloque…",
+      "noResults": "No hay tipos de bloque coincidentes",
+      "group": {
+        "text": "Texto",
+        "list": "Listas",
+        "source": "Código fuente"
+      },
+      "hint": "↑↓ Seleccionar · Intro Convertir · Esc Cancelar",
+      "reason": {
+        "readOnly": "Este documento no se puede editar.",
+        "unsupported": "La selección contiene un bloque que no se puede convertir.",
+        "containers": "Selecciona bloques consecutivos dentro del mismo contenedor para combinarlos.",
+        "html": "El contenido debe ser un bloque de código HTML independiente.",
+        "math": "Una fórmula no puede conservar los delimitadores ni las líneas en blanco al principio y al final de este código.",
+        "stale": "Los bloques seleccionados han cambiado. Vuelve a abrir el menú."
+      }
+    },
+    "blockHandle": {
+      "convertOrMove": "Haz clic para convertir · Arrastra para mover",
+      "convert": "Convertir: {{target}}",
+      "kind": {
+        "block": "bloque",
+        "blockquote": "cita",
+        "code": "código",
+        "footnote": "nota al pie",
+        "frontmatter": "metadatos",
+        "heading1": "encabezado 1",
+        "heading2": "encabezado 2",
+        "heading3": "encabezado 3",
+        "heading4": "encabezado 4",
+        "heading5": "encabezado 5",
+        "heading6": "encabezado 6",
+        "horizontalRule": "separador",
+        "html": "HTML",
+        "listBullet": "elemento de lista con viñetas",
+        "listOrdered": "elemento de lista numerada",
+        "listTask": "elemento de lista de tareas",
+        "math": "fórmula",
+        "mermaid": "diagrama Mermaid",
+        "paragraph": "párrafo",
+        "rawMarkdown": "Markdown sin procesar",
+        "reference": "referencia",
+        "table": "tabla"
+      },
+      "moveOrSelect": "Mover o seleccionar: {{target}}",
+      "select": "Seleccionar: {{target}}"
+    },
     "selection": {
       "selectAllHint": "Pulsa {{shortcut}} de nuevo para seleccionar todo el documento",
       "selectAllTableHint": "Pulsa {{shortcut}} de nuevo para seleccionar toda la tabla"

@@ -1,4 +1,4 @@
-import { act, within } from '@testing-library/react'
+import { act, fireEvent, within } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { isCapricornRuntimeAvailable } from '@/constants/editorViewType'
@@ -11,8 +11,10 @@ import {
   type CapricornRuntimeFactory,
   type CapricornRuntimeSession,
 } from './capricornRuntimeAdapter'
+import { getCapricornRuntimeInput } from './capricornRuntimeDom'
 
 let session: CapricornRuntimeSession | undefined
+const frame = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
 
 afterEach(() => {
   act(() => session?.destroy())
@@ -40,6 +42,97 @@ describe.skipIf(!isCapricornRuntimeAvailable)('published Capricorn runtime', () 
 
     expect(session.getMarkdown()).toBe('# Capricorn')
     expect(container.childElementCount).toBeGreaterThan(0)
+  })
+
+  it('shows nested HTML tags on focus and restores native ruby presentation on blur and preview', async () => {
+    const container = document.createElement('div')
+    document.body.append(container)
+    const original =
+      'H<sub>2</sub>O <mark><ruby>漢字<rp>(</rp><rt>かんじ</rt><rp>)</rp></ruby></mark>'
+    await act(async () => {
+      session = (createCapricornRuntime as CapricornRuntimeFactory)(container, {
+        markdown: original,
+        mode: 'edit',
+        autoFocus: false,
+        virtualize: CAPRICORN_DESKTOP_VIRTUALIZE_OPTIONS,
+      })
+    })
+    const runtime = session!
+    const markers = () => container.querySelectorAll('[data-markdown-mark-marker].show')
+    expect(container.querySelector('mark > ruby > rt')).not.toBeNull()
+    expect(container.querySelectorAll('ruby > rp')).toHaveLength(2)
+    expect(container.querySelector('sub')?.textContent).toBe('2')
+    expect(markers()).toHaveLength(0)
+    await act(async () => {
+      await runtime.find.searchAsync!({ query: '漢字' })
+      await runtime.find.navigateTo!(0)
+      runtime.find.close()
+      runtime.focus()
+      await frame()
+    })
+    expect(Array.from(markers(), (node) => node.textContent)).toEqual([
+      '<mark>',
+      '<ruby>',
+      '<rp>',
+      '</rp>',
+      '<rt>',
+      '</rt>',
+      '<rp>',
+      '</rp>',
+      '</ruby>',
+      '</mark>',
+    ])
+    expect(container.querySelector('ruby[data-markdown-html-source-visible]')).not.toBeNull()
+    expect(runtime.getMarkdown()).toBe(original)
+    expect(runtime.getUiState().canUndo).toBe(false)
+    await act(async () => {
+      getCapricornRuntimeInput(container)!.blur()
+      await frame()
+    })
+    expect(markers()).toHaveLength(0)
+    expect(container.querySelector('ruby[data-markdown-html-source-visible]')).toBeNull()
+    await act(async () => runtime.setMode('preview'))
+    expect(container.querySelector('mark > ruby > rt')).not.toBeNull()
+    expect(markers()).toHaveLength(0)
+    expect(runtime.getMarkdown()).toBe(original)
+  })
+
+  it('edits ruby source tags through the host input and preserves save, undo and redo', async () => {
+    const container = document.createElement('div')
+    document.body.append(container)
+    const original = '<mark><ruby>漢<rt>かん</rt></ruby></mark>'
+    await act(async () => {
+      session = (createCapricornRuntime as CapricornRuntimeFactory)(container, {
+        markdown: original,
+        mode: 'edit',
+        autoFocus: false,
+      })
+      await session.find.searchAsync!({ query: '<ruby>' })
+      await session.find.navigateTo!(0)
+      session.find.close()
+      session.focus()
+      await frame()
+    })
+    const runtime = session!
+    const input = getCapricornRuntimeInput(container)!
+    expect(document.activeElement).toBe(input)
+    for (const character of '<ruby lang="ja">') {
+      await act(async () => {
+        fireEvent.input(input, {
+          target: { value: input.value + character },
+          inputType: 'insertText',
+          data: character,
+        })
+      })
+    }
+    const edited = original.replace('<ruby>', '<ruby lang="ja">')
+    expect(container.querySelector('mark > ruby')?.getAttribute('lang')).toBe('ja')
+    expect(runtime.getMarkdown()).toBe(edited)
+    await act(async () => runtime.commands.undo())
+    expect(runtime.getMarkdown()).toBe(original)
+    await act(async () => runtime.commands.redo())
+    expect(runtime.getMarkdown()).toBe(edited)
+    expect(container.querySelector('mark > ruby')?.getAttribute('lang')).toBe('ja')
   })
 
   it('edits images through the Desktop adapter and preserves source snapshots and undo', async () => {

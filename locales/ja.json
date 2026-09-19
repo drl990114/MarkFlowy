@@ -887,6 +887,56 @@
     "shortcutFallback": "Cmd/Ctrl+Shift+F"
   },
   "capricorn": {
+    "blockTypeMenu": {
+      "title": "変換先",
+      "multiple": "{{count}} 個のブロックを変換",
+      "search": "ブロックの種類を検索…",
+      "noResults": "一致するブロックの種類がありません",
+      "group": {
+        "text": "テキスト",
+        "list": "リスト",
+        "source": "ソース"
+      },
+      "hint": "↑↓ 選択 · Enter 変換 · Esc キャンセル",
+      "reason": {
+        "readOnly": "このドキュメントは編集できません。",
+        "unsupported": "選択範囲に変換できないブロックが含まれています。",
+        "containers": "結合するには、同じコンテナ内の連続したブロックを選択してください。",
+        "html": "内容は独立した HTML ソースブロックである必要があります。",
+        "math": "数式ブロックでは、このソースの区切り文字や先頭・末尾の空行を保持できません。",
+        "stale": "選択したブロックが変更されました。メニューを開き直してください。"
+      }
+    },
+    "blockHandle": {
+      "convertOrMove": "クリックで変換 · ドラッグで移動",
+      "convert": "{{target}}を変換",
+      "kind": {
+        "block": "ブロック",
+        "blockquote": "引用",
+        "code": "コードブロック",
+        "footnote": "脚注定義",
+        "frontmatter": "フロントマター",
+        "heading1": "見出し 1",
+        "heading2": "見出し 2",
+        "heading3": "見出し 3",
+        "heading4": "見出し 4",
+        "heading5": "見出し 5",
+        "heading6": "見出し 6",
+        "horizontalRule": "区切り線",
+        "html": "HTML",
+        "listBullet": "箇条書き",
+        "listOrdered": "番号付きリスト",
+        "listTask": "タスクリスト",
+        "math": "数式",
+        "mermaid": "Mermaid 図",
+        "paragraph": "段落",
+        "rawMarkdown": "生の Markdown",
+        "reference": "参照定義",
+        "table": "表"
+      },
+      "moveOrSelect": "{{target}}を移動または選択",
+      "select": "{{target}}を選択"
+    },
     "selection": {
       "selectAllHint": "{{shortcut}} をもう一度押すとドキュメント全体を選択",
       "selectAllTableHint": "{{shortcut}} をもう一度押すと表全体を選択"

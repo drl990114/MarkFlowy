@@ -887,6 +887,56 @@
     "shortcutFallback": "Cmd/Ctrl+Maj+F"
   },
   "capricorn": {
+    "blockTypeMenu": {
+      "title": "Convertir en",
+      "multiple": "Convertir {{count}} blocs",
+      "search": "Rechercher un type de bloc…",
+      "noResults": "Aucun type de bloc correspondant",
+      "group": {
+        "text": "Texte",
+        "list": "Listes",
+        "source": "Source"
+      },
+      "hint": "↑↓ Sélectionner · Entrée Convertir · Échap Annuler",
+      "reason": {
+        "readOnly": "Ce document ne peut pas être modifié.",
+        "unsupported": "La sélection contient un bloc qui ne peut pas être converti.",
+        "containers": "Sélectionnez des blocs consécutifs dans le même conteneur pour les combiner.",
+        "html": "Le contenu doit être un bloc source HTML autonome.",
+        "math": "Une formule ne peut pas conserver les délimiteurs ou les lignes vides au début et à la fin de cette source.",
+        "stale": "Les blocs sélectionnés ont changé. Ouvrez à nouveau le menu."
+      }
+    },
+    "blockHandle": {
+      "convertOrMove": "Cliquer pour convertir · Faire glisser pour déplacer",
+      "convert": "Convertir : {{target}}",
+      "kind": {
+        "block": "bloc",
+        "blockquote": "citation",
+        "code": "code",
+        "footnote": "note de bas de page",
+        "frontmatter": "métadonnées",
+        "heading1": "titre 1",
+        "heading2": "titre 2",
+        "heading3": "titre 3",
+        "heading4": "titre 4",
+        "heading5": "titre 5",
+        "heading6": "titre 6",
+        "horizontalRule": "séparateur",
+        "html": "HTML",
+        "listBullet": "élément de liste à puces",
+        "listOrdered": "élément de liste numérotée",
+        "listTask": "élément de liste de tâches",
+        "math": "formule",
+        "mermaid": "diagramme Mermaid",
+        "paragraph": "paragraphe",
+        "rawMarkdown": "Markdown brut",
+        "reference": "référence",
+        "table": "tableau"
+      },
+      "moveOrSelect": "Déplacer ou sélectionner : {{target}}",
+      "select": "Sélectionner : {{target}}"
+    },
     "selection": {
       "selectAllHint": "Appuyez à nouveau sur {{shortcut}} pour sélectionner tout le document",
       "selectAllTableHint": "Appuyez à nouveau sur {{shortcut}} pour sélectionner tout le tableau"

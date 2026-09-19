@@ -887,6 +887,56 @@
     "export_empty": "当前没有可导出的对话"
   },
   "capricorn": {
+    "blockTypeMenu": {
+      "title": "转换为",
+      "multiple": "转换 {{count}} 个块",
+      "search": "搜索节点类型…",
+      "noResults": "没有匹配的节点类型",
+      "group": {
+        "text": "文本",
+        "list": "列表",
+        "source": "源码"
+      },
+      "hint": "↑↓ 选择 · Enter 转换 · Esc 取消",
+      "reason": {
+        "readOnly": "当前文档不可编辑。",
+        "unsupported": "选区包含不支持转换的块。",
+        "containers": "合并源码需要选择同一容器内连续的块。",
+        "html": "内容必须能稳定保存为独立的 HTML 源码块。",
+        "math": "公式块无法保留这些分隔符或首尾空行。",
+        "stale": "所选块已发生变化，请重新打开菜单。"
+      }
+    },
+    "blockHandle": {
+      "convertOrMove": "点击转换，拖动移动",
+      "convert": "转换{{target}}",
+      "kind": {
+        "block": "块",
+        "blockquote": "引用",
+        "code": "代码块",
+        "footnote": "脚注定义",
+        "frontmatter": "Front Matter",
+        "heading1": "一级标题",
+        "heading2": "二级标题",
+        "heading3": "三级标题",
+        "heading4": "四级标题",
+        "heading5": "五级标题",
+        "heading6": "六级标题",
+        "horizontalRule": "分隔线",
+        "html": "HTML",
+        "listBullet": "无序列表",
+        "listOrdered": "有序列表",
+        "listTask": "任务列表",
+        "math": "公式",
+        "mermaid": "Mermaid 图表",
+        "paragraph": "正文",
+        "rawMarkdown": "原始 Markdown",
+        "reference": "引用定义",
+        "table": "表格"
+      },
+      "moveOrSelect": "移动或选择{{target}}",
+      "select": "选择{{target}}"
+    },
     "selection": {
       "selectAllHint": "再按 {{shortcut}} 全选全文",
       "selectAllTableHint": "再按 {{shortcut}} 全选表格"

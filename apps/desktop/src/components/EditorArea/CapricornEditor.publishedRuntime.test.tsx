@@ -3,12 +3,15 @@
 import 'virtual:markflowy-capricorn-runtime'
 import { createInstance } from '@markflowy/i18n'
 import { desktopLightTheme } from '@markflowy/theme'
-import { act, cleanup, fireEvent, render, waitFor } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, waitFor, within } from '@testing-library/react'
 import { createRef, StrictMode } from 'react'
 import { ThemeProvider } from 'styled-components'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { isCapricornRuntimeAvailable } from '@/constants/capricornRuntime'
 import { EditorViewType } from '@/constants/editorViewType'
+import { getDefaultKeybindings } from '@/commands/keybindingCatalog'
+import { keybindingPlatform } from '@/commands/keybindingKeys'
+import { editorKeymap } from '@/commands/keybindingValidation'
 import zhCNLocale from '../../../../../locales/zh-CN.json'
 import { CapricornEditor, type CapricornEditorHandle } from './CapricornEditor'
 import { EditorWrapper } from './EditorWrapper'
@@ -144,6 +147,67 @@ describe.skipIf(!isCapricornRuntimeAvailable)('CapricornEditor with the publishe
     }
     expect(onEditorChange.mock.calls.filter(([value]) => value !== null)).toHaveLength(1)
     expect(onChange).not.toHaveBeenCalledWith(expect.objectContaining({ documentChanged: true }))
+    expect(onError).not.toHaveBeenCalled()
+  })
+
+  it('opens the localized block conversion menu through the host keymap and preserves undo', async () => {
+    const translations = createInstance()
+    await translations.init({
+      lng: 'cn',
+      resources: { cn: { translation: zhCNLocale } },
+    })
+    const onEditorChange = vi.fn()
+    const onError = vi.fn()
+    const { container } = render(
+      <CapricornEditor
+        active
+        initialMarkdown='正文内容'
+        onEditorChange={onEditorChange}
+        onChange={vi.fn()}
+        onError={onError}
+        onUnavailable={onError}
+        options={{
+          localization: {
+            getLocale: () => translations.language,
+            translate: ({ defaultValue, key, values }) =>
+              translations.t(`capricorn.${key}`, { defaultValue, ...values }),
+          },
+          keybindingConfiguration: createCapricornKeybindingConfiguration(
+            editorKeymap(getDefaultKeybindings(keybindingPlatform())),
+            true,
+          ),
+        }}
+      />,
+    )
+    await waitFor(() => expect(getCapricornRuntimeInput(container)).not.toBeNull())
+    const adapter = onEditorChange.mock.calls.find(
+      ([value]) => value,
+    )?.[0] as CapricornRuntimeAdapter
+    await act(async () => adapter.focus())
+    const input = getCapricornRuntimeInput(container)!
+    const isMac = /Mac/.test(navigator.platform)
+    await act(async () => {
+      fireEvent.keyDown(input, {
+        key: 'x',
+        code: 'KeyX',
+        keyCode: 88,
+        metaKey: isMac,
+        ctrlKey: !isMac,
+        shiftKey: true,
+      })
+    })
+    expect(
+      await within(document.body).findByRole('combobox', { name: '搜索节点类型…' }),
+    ).toBeTruthy()
+    expect(adapter.getMarkdown()).toBe('正文内容')
+    expect(adapter.getUiState().canUndo).toBe(false)
+    await act(async () => {
+      fireEvent.click(within(document.body).getByRole('option', { name: '二级标题' }))
+    })
+    expect(adapter.getMarkdown()).toBe('## 正文内容')
+    expect(within(document.body).queryByRole('combobox', { name: '搜索节点类型…' })).toBeNull()
+    await act(async () => adapter.commands.undo())
+    expect(adapter.getMarkdown()).toBe('正文内容')
     expect(onError).not.toHaveBeenCalled()
   })
 
