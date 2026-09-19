@@ -43,6 +43,71 @@ vi.mock('@/i18n', () => ({
 afterEach(cleanup)
 
 describe.skipIf(!isCapricornRuntimeAvailable)('CapricornEditor with the published runtime', () => {
+  it('keeps the padded host handle pinned until its block menu closes', async () => {
+    const onChange = vi.fn()
+    const onError = vi.fn()
+    const { container } = render(
+      <ThemeProvider theme={desktopLightTheme}>
+        <EditorWrapper
+          $editorViewType={EditorViewType.WYSIWYG}
+          $fileType='markdown'
+          $fullWidth={false}
+          $rootLineHeight='1.7'
+          $visible
+        >
+          <CapricornEditor
+            active
+            initialMarkdown={'first\n\nsecond\n\nthird'}
+            onChange={onChange}
+            onError={onError}
+            onUnavailable={onError}
+            options={{ virtualize: { enable: false }, getScrollableContainer: () => window }}
+          />
+        </EditorWrapper>
+      </ThemeProvider>,
+    )
+    await waitFor(() => expect(container.querySelector('[data-cap-editable]')).not.toBeNull())
+    const surface = container.querySelector<HTMLElement>('[data-cap-content]')!
+    const root = container.querySelector<HTMLElement>('[data-cap-editable]')!
+    const blocks = [...root.querySelectorAll<HTMLElement>('[data-cap-leaf-block][data-cap-key]')]
+    surface.getBoundingClientRect = () => new DOMRect(100, 80, 700, 440)
+    root.getBoundingClientRect = () => new DOMRect(150, 100, 600, 350)
+    blocks.forEach((block, index) => {
+      block.getBoundingClientRect = () => new DOMRect(200, 140 + index * 80, 500, 32)
+    })
+    onChange.mockClear()
+    fireEvent.pointerMove(surface, { clientX: 110, clientY: 150 })
+    const control = await waitFor(() => {
+      const button = container.querySelector<HTMLButtonElement>('[data-cap-block-handle]')
+      expect(button?.getAttribute('data-cap-block-handle')).toBe(blocks[0].dataset.capKey)
+      return button!
+    })
+    const openingPosition = control.getAttribute('style')
+    fireEvent.click(control)
+    const search = await within(document.body).findByRole('combobox', {
+      name: 'Search block types…',
+    })
+    await act(async () => {
+      fireEvent.pointerMove(surface, { clientX: 780, clientY: 310 })
+      fireEvent.pointerLeave(surface, { relatedTarget: search })
+      await new Promise((resolve) => setTimeout(resolve, 220))
+    })
+    expect(container.querySelector('[data-cap-block-handle]')).toBe(control)
+    expect(control.dataset.capBlockHandle).toBe(blocks[0].dataset.capKey)
+    expect(control.getAttribute('style')).toBe(openingPosition)
+    expect(control.getAttribute('aria-expanded')).toBe('true')
+    fireEvent.keyDown(search, { key: 'Escape' })
+    await waitFor(() => expect(container.querySelector('[data-cap-block-handle]')).toBeNull())
+    fireEvent.pointerMove(surface, { clientX: 110, clientY: 310 })
+    await waitFor(() => {
+      expect(
+        container.querySelector('[data-cap-block-handle]')?.getAttribute('data-cap-block-handle'),
+      ).toBe(blocks[2].dataset.capKey)
+    })
+    expect(onChange).not.toHaveBeenCalledWith(expect.objectContaining({ documentChanged: true }))
+    expect(onError).not.toHaveBeenCalled()
+  })
+
   it('updates code wrapping in place through the host settings bridge', async () => {
     const ref = createRef<CapricornEditorHandle>()
     const onEditorChange = vi.fn()
