@@ -60,14 +60,27 @@ function FillFlexParent({
   return children({ width: 300, height: 260 })
 }
 
+function DelayedFillFlexParent(props: Parameters<typeof FillFlexParent>[0]) {
+  const [measured, setMeasured] = useState(false)
+  return measured ? (
+    <FillFlexParent {...props} />
+  ) : (
+    <button onClick={() => setMeasured(true)} type='button'>
+      Measure tree
+    </button>
+  )
+}
+
 function Harness({
   initialChildren = [],
   initialExpandedPaths,
   onPathsChange,
+  deferTreeMount = false,
 }: {
   initialChildren?: IFile[]
   initialExpandedPaths?: string[]
   onPathsChange?: (paths: string[]) => void
+  deferTreeMount?: boolean
 }) {
   const [expandedPaths, setExpandedPaths] = useState(initialExpandedPaths)
   const [data, setData] = useState<IFile[]>([
@@ -104,7 +117,7 @@ function Harness({
                   : undefined
               }
               disableDrag
-              fillFlexParentComponent={FillFlexParent}
+              fillFlexParentComponent={deferTreeMount ? DelayedFillFlexParent : FillFlexParent}
               getFileObject={(id) => new SimpleTree(data).find(id)?.data}
               getFileObjectByPath={() => undefined}
               onSelect={vi.fn()}
@@ -358,6 +371,79 @@ describe('FileTree inline creation', () => {
 })
 
 describe('FileTree saved directory restoration', () => {
+  it('does not defer restoring saved folders until a different folder is clicked', async () => {
+    render(
+      <Harness
+        deferTreeMount
+        initialExpandedPaths={['/workspace', '/workspace/First', '/workspace/Second']}
+        initialChildren={['First', 'Second', 'Third'].map((name) => ({
+          id: name,
+          kind: 'dir',
+          name,
+          path: `/workspace/${name}`,
+          children: [
+            { id: `${name}-note`, kind: 'file', name: `${name}.md`, path: `/workspace/${name}/note.md` },
+          ],
+        }))}
+      />,
+    )
+    expect(screen.queryByRole('tree')).toBeNull()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Measure tree' }))
+    const initiallyOpenFolders = ['First', 'Second'].map((name) =>
+      Boolean(screen.queryByText(`${name}.md`)),
+    )
+    expect(screen.queryByText('Third.md')).toBeNull()
+
+    fireEvent.click(screen.getByText('Third'))
+    expect(['First', 'Second'].map((name) => Boolean(screen.queryByText(`${name}.md`)))).toEqual(
+      initiallyOpenFolders,
+    )
+    expect(initiallyOpenFolders).toEqual([true, true])
+    expect(screen.getByText('Third.md')).not.toBeNull()
+
+    fireEvent.click(screen.getByText('First'))
+    fireEvent.click(screen.getByText('Second'))
+    expect(screen.queryByText('First.md')).toBeNull()
+    expect(screen.queryByText('Second.md')).toBeNull()
+    expect(screen.getByText('Third.md')).not.toBeNull()
+  })
+
+  it('keeps previously collapsed siblings closed when another folder is clicked', async () => {
+    vi.mocked(fileSystem.readSubdirectory).mockImplementation(async (path) => [
+      { id: `${path}/note`, kind: 'file', name: `${path.split('/').pop()}.md`, path: `${path}/note.md` },
+    ])
+    const onPathsChange = vi.fn()
+    render(
+      <Harness
+        initialExpandedPaths={['/workspace']}
+        initialChildren={['First', 'Second', 'Third'].map((name) => ({
+          id: name,
+          kind: 'dir',
+          name,
+          path: `/workspace/${name}`,
+          children: [],
+        }))}
+        onPathsChange={onPathsChange}
+      />,
+    )
+
+    for (const name of ['First', 'Second']) {
+      fireEvent.click(screen.getByText(name))
+      await screen.findByText(`${name}.md`)
+    }
+    for (const name of ['First', 'Second']) {
+      fireEvent.click(screen.getByText(name))
+      expect(screen.queryByText(`${name}.md`)).toBeNull()
+    }
+    fireEvent.click(screen.getByText('Third'))
+    await screen.findByText('Third.md')
+
+    expect(screen.queryByText('First.md')).toBeNull()
+    expect(screen.queryByText('Second.md')).toBeNull()
+    expect(onPathsChange).toHaveBeenLastCalledWith(['/workspace', '/workspace/Third'])
+  })
+
   it('loads only expanded branches, including descendants that receive new IDs on restart', async () => {
     vi.mocked(fileSystem.readSubdirectory).mockImplementation(async (path) => {
       if (path === '/workspace/docs')

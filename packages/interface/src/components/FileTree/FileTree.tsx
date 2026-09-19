@@ -151,6 +151,7 @@ const FileTree: FC<FileTreeProps> = (props) => {
     useFileSystem()
   const tree = useMemo(() => new SimpleTree<IFile>(data), [data])
   const treeRef = useRef<TreeApi<IFile> | null>(null)
+  const [treeApi, setTreeApi] = useState<TreeApi<IFile> | null>()
   const loadedDirsRef = useRef<Set<string>>(new Set())
   const loadingDirsRef = useRef<Set<string>>(new Set())
   const loadedDirsCacheVersionRef = useRef(0)
@@ -290,8 +291,10 @@ const FileTree: FC<FileTreeProps> = (props) => {
   const toggleRef = useRef(onToggle)
   toggleRef.current = onToggle
   useEffect(() => {
-    if (!expandedPaths || !treeRef.current) return
-    const api = treeRef.current
+    // The sizing host may mount Tree after this component's first effect.
+    // Restore as soon as its API is attached, before a click changes the paths.
+    if (!expandedPaths || !treeApi) return
+    const api = treeApi
     const desiredPaths = new Set(expandedPaths)
     openPathsRef.current = desiredPaths
     const restoreChildren = (nodes: IFile[]) => {
@@ -305,7 +308,7 @@ const FileTree: FC<FileTreeProps> = (props) => {
       }
     }
     restoreChildren(data)
-  }, [data, expandedPaths])
+  }, [data, expandedPaths, treeApi])
 
   const onMove: TreeProps<IFile>['onMove'] = async (args) => {
     if (disableFileOperations) return
@@ -517,6 +520,7 @@ const FileTree: FC<FileTreeProps> = (props) => {
           const treeElement = (
             <Tree
               key={rootId}
+              ref={setTreeApi}
               {...dimens}
               data={data}
               dndRootElement={dndRootElement}
