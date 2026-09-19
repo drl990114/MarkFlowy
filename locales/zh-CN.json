@@ -11,6 +11,32 @@
     "markdown": "Markdown 语法",
     "open_failed": "无法打开链接或找到目标标题。"
   },
+  "command_palette": {
+    "title": "命令面板",
+    "placeholder": "搜索并执行命令…",
+    "empty": "没有匹配的命令",
+    "recent": "最近使用",
+    "hints": "↑↓ 选择 · Enter 执行 · Esc 关闭",
+    "failed": "无法执行“{{command}}”。",
+    "categories": {
+      "file": "文件",
+      "editor": "编辑",
+      "view": "视图",
+      "app": "应用"
+    },
+    "reasons": {
+      "no_document": "请先打开文档",
+      "unavailable": "当前上下文不支持此操作",
+      "preview": "预览模式不可编辑",
+      "read_only": "当前文档为只读",
+      "stale_target": "原编辑器已发生变化",
+      "selection_unavailable": "原选区已失效",
+      "no_undo": "没有可撤销的操作",
+      "no_redo": "没有可重做的操作",
+      "markdown_only": "仅适用于 Markdown 文档",
+      "zen_mode": "请先退出 Zen 模式"
+    }
+  },
   "quick_open": {
     "title": "快速打开",
     "placeholder": "按文件名或路径搜索…",
@@ -783,6 +809,7 @@
   },
   "command": {
     "id_descriptions": {
+      "app_commandPalette": "命令面板",
       "app_quickOpen": "快速打开",
       "app_openFolder": "打开文件夹",
       "app_openSetting": "打开设置窗口",

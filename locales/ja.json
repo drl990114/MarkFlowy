@@ -11,6 +11,32 @@
     "markdown": "Markdown 構文",
     "open_failed": "リンクを開くか、見出しを見つけることができませんでした。"
   },
+  "command_palette": {
+    "title": "コマンドパレット",
+    "placeholder": "コマンドを検索…",
+    "empty": "一致するコマンドがありません",
+    "recent": "最近使用したコマンド",
+    "hints": "↑↓ 選択 · Enter 実行 · Esc 閉じる",
+    "failed": "「{{command}}」を実行できませんでした。",
+    "categories": {
+      "file": "ファイル",
+      "editor": "編集",
+      "view": "表示",
+      "app": "アプリ"
+    },
+    "reasons": {
+      "no_document": "先にドキュメントを開いてください",
+      "unavailable": "現在の状況では使用できません",
+      "preview": "プレビューモードでは編集できません",
+      "read_only": "このドキュメントは読み取り専用です",
+      "stale_target": "元のエディタが変更されました",
+      "selection_unavailable": "元の選択範囲は無効になりました",
+      "no_undo": "元に戻す操作がありません",
+      "no_redo": "やり直す操作がありません",
+      "markdown_only": "Markdown ドキュメントで使用できます",
+      "zen_mode": "先に Zen モードを終了してください"
+    }
+  },
   "quick_open": {
     "title": "クイックオープン",
     "placeholder": "ファイル名またはパスで検索…",
@@ -750,6 +776,7 @@
   },
   "command": {
     "id_descriptions": {
+      "app_commandPalette": "コマンドパレット",
       "app_quickOpen": "クイックオープン",
       "app_openFolder": "フォルダを開く",
       "app_openSetting": "設定ウィンドウを開く",

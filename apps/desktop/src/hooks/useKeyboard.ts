@@ -115,6 +115,7 @@ function useKeyboard() {
           binding.target === 'app' &&
           binding.command !== 'app_findReplaceEditor' &&
           binding.command !== EVENT.app_quickOpen &&
+          binding.command !== EVENT.app_commandPalette &&
           !validateKeyMap(binding.keys, binding.command),
       )
       .map((binding) =>
@@ -164,7 +165,21 @@ function useKeyboard() {
         '[data-mf-quick-open]',
       ),
     )
-    const specializedHandlers = [...findHandlers, ...quickOpenHandlers]
+    const paletteHandlers = shortcutsFor(EVENT.app_commandPalette, 'mod-Shift-p').map((keys) =>
+      createAppShortcutHandler(
+        keys,
+        (event) => {
+          if (composing() || event.repeat || !commandRegistry.hasCommand(EVENT.app_commandPalette))
+            return false
+          void commandRegistry
+            .execute(EVENT.app_commandPalette)
+            .catch((error) => logger.error('Command palette failed', error))
+          return true
+        },
+        '[data-mf-command-palette]',
+      ),
+    )
+    const specializedHandlers = [...findHandlers, ...quickOpenHandlers, ...paletteHandlers]
     specializedHandlers.forEach((handle) => window.addEventListener('keydown', handle, true))
     window.addEventListener('keydown', editorHandler, true)
     window.addEventListener('keydown', handler)

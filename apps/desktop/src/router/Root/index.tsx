@@ -8,6 +8,7 @@ import StatusBar from '@/components/StatusBar'
 import { BookMarkDialog } from '@/extensions/bookmarks/BookMarkDialog'
 import useBookMarksStore from '@/extensions/bookmarks/useBookMarksStore'
 import { QuickOpenDialog } from '@/extensions/quick-open/QuickOpenDialog'
+import { CommandPaletteDialog } from '@/extensions/command-palette/CommandPaletteDialog'
 import { useTranslation } from '@/i18n'
 import { useEditorStore } from '@/stores'
 import useLayoutStore, {
@@ -275,6 +276,7 @@ function Root() {
       <ZenModeHint active={zenModeActive} />
       <BookMarkDialog />
       <QuickOpenDialog />
+      <CommandPaletteDialog />
     </RootPageLayout>
   )
 }

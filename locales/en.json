@@ -11,6 +11,32 @@
     "markdown": "Markdown syntax",
     "open_failed": "Unable to open the link or find its heading."
   },
+  "command_palette": {
+    "title": "Command Palette",
+    "placeholder": "Search commands…",
+    "empty": "No matching commands",
+    "recent": "Recently Used",
+    "hints": "↑↓ Navigate · Enter Execute · Esc Close",
+    "failed": "Could not execute “{{command}}”.",
+    "categories": {
+      "file": "File",
+      "editor": "Editor",
+      "view": "View",
+      "app": "Application"
+    },
+    "reasons": {
+      "no_document": "Open a document first",
+      "unavailable": "Unavailable in the current context",
+      "preview": "Cannot edit in preview mode",
+      "read_only": "This document is read-only",
+      "stale_target": "The original editor has changed",
+      "selection_unavailable": "The original selection is no longer available",
+      "no_undo": "Nothing to undo",
+      "no_redo": "Nothing to redo",
+      "markdown_only": "Available for Markdown documents",
+      "zen_mode": "Exit Zen Mode first"
+    }
+  },
   "quick_open": {
     "title": "Quick Open",
     "placeholder": "Search files by name or path…",
@@ -356,6 +382,7 @@
   },
   "command": {
     "id_descriptions": {
+      "app_commandPalette": "Command Palette",
       "app_quickOpen": "Quick Open",
       "app_openFolder": "Open a folder",
       "app_openSetting": "Open the Settings window",

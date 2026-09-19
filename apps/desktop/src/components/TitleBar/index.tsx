@@ -1,4 +1,5 @@
 import { APP_NAME } from '@/constants'
+import { CommandPaletteButton } from '../CommandPaletteButton'
 import { useGlobalOSInfo } from '@/hooks'
 import { useTranslation } from '@/i18n'
 import { cn } from '@/lib/cn'
@@ -46,6 +47,7 @@ export default function TitleBar() {
       </div>
       <div className='min-w-12 flex-1 self-stretch' data-tauri-drag-region />
       <div className={cn('flex h-full shrink-0 items-center', !isWindows && 'pr-1')}>
+        <CommandPaletteButton />
         <AppMenuButton />
         {isWindows ? <WindowControls /> : null}
       </div>

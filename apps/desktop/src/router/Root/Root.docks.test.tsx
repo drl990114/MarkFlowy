@@ -34,6 +34,7 @@ vi.mock('@/extensions/bookmarks/useBookMarksStore', () => ({
   default: () => ({ getBookMarkList: vi.fn() }),
 }))
 vi.mock('@/extensions/quick-open/QuickOpenDialog', () => ({ QuickOpenDialog: () => null }))
+vi.mock('@/extensions/command-palette/CommandPaletteDialog', () => ({ CommandPaletteDialog: () => null }))
 vi.mock('@/i18n', () => ({ useTranslation: () => ({ t: (key: string) => key }) }))
 vi.mock('@/stores', () => ({ useEditorStore: { getState: () => ({ activeId: 'editor' }) } }))
 vi.mock('zens', () => ({ toast: { info: vi.fn() } }))

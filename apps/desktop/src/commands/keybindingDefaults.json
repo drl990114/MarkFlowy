@@ -1,6 +1,11 @@
 {
   "commands": [
     {
+      "id": "app_commandPalette",
+      "configurable": true,
+      "target": "app"
+    },
+    {
       "id": "app_quickOpen",
       "configurable": true,
       "target": "app"
@@ -202,6 +207,12 @@
     }
   ],
   "rules": [
+    {
+      "id": "app_commandPalette.default",
+      "command": "app_commandPalette",
+      "keys": ["CommandOrCtrl", "Shift", "p"],
+      "when": "always"
+    },
     {
       "id": "app_quickOpen.default",
       "command": "app_quickOpen",

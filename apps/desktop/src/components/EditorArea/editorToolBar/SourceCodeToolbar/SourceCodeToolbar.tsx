@@ -26,7 +26,6 @@ import {
   ToolbarWrapper,
   ToolbarDivider,
   createCommandMap,
-  type ClipboardReadFunction,
 } from '@markflowy/interface'
 import {
   getOverflowToolbarActions,
@@ -35,9 +34,8 @@ import {
   toOverflowMenuItems,
   type ToolbarAction,
 } from '../components'
-import { sourceCodeCodemirrorViewMap } from '../../TextEditor'
-import { clipboardRead } from '@/helper/clipboard'
-import { requestImageInsert } from '../../requestImageInsert'
+import { sourceCodeCodemirrorViewMap } from '../../sourceCodeEditorRegistry'
+import { insertSourceImage, insertSourceLink } from '../../sourceInsertCommands'
 
 interface SourceCodeToolbarProps {
   editorId?: string
@@ -53,8 +51,7 @@ const TOOLBAR_GROUPS = [
 
 const TOOLBAR_SECTIONS = [{ id: 'common', priority: 100 }, ...TOOLBAR_GROUPS]
 
-const readClipboard: ClipboardReadFunction = () => clipboardRead()
-const sourceCommandMap = createCommandMap(readClipboard)
+const sourceCommandMap = createCommandMap()
 
 export const SourceCodeToolbar: FC<SourceCodeToolbarProps> = (props) => {
   const { editorId } = props
@@ -91,26 +88,12 @@ export const SourceCodeToolbar: FC<SourceCodeToolbarProps> = (props) => {
 
   const handleInsertImage = useCallback(async () => {
     const view = getEditorView()
-    if (!view) return
+    if (view) await insertSourceImage(view, targetEditorId)
+  }, [getEditorView, targetEditorId])
 
-    const attributes = await requestImageInsert(targetEditorId)
-    if (!attributes) {
-      view.focus()
-      return
-    }
-
-    const { from, to } = view.state.selection.main
-    const selectedText = view.state.sliceDoc(from, to)
-    const alt = (selectedText || attributes.alt || '').replace(/([\\\]])/g, '\\$1')
-    const src = /\s/.test(attributes.src)
-      ? `<${attributes.src.replace(/>/g, '%3E')}>`
-      : attributes.src.replace(/([()])/g, '\\$1')
-    const title = attributes.title
-      ? ` "${attributes.title.replace(/([\\"])/g, '\\$1')}"`
-      : ''
-
-    view.dispatch(view.state.replaceSelection(`![${alt}](${src}${title})`))
-    view.focus()
+  const handleInsertLink = useCallback(async () => {
+    const view = getEditorView()
+    if (view) await insertSourceLink(view, targetEditorId)
   }, [getEditorView, targetEditorId])
 
   const actions = useMemo<ToolbarAction[]>(
@@ -193,7 +176,7 @@ export const SourceCodeToolbar: FC<SourceCodeToolbarProps> = (props) => {
         priority: 40,
         label: t('toolbar.link') || 'Link',
         icon: LinkIcon,
-        run: () => runSourceCommand('insertLink'),
+        run: () => void handleInsertLink(),
       },
       {
         id: 'image',
@@ -236,7 +219,7 @@ export const SourceCodeToolbar: FC<SourceCodeToolbarProps> = (props) => {
         run: () => runSourceCommand('toggleTaskList'),
       },
     ],
-    [handleInsertImage, imageLabel, runSourceCommand, t],
+    [handleInsertImage, handleInsertLink, imageLabel, runSourceCommand, t],
   )
 
   const overflowMenuItems = useMemo(

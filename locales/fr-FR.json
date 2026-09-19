@@ -11,6 +11,32 @@
     "markdown": "Syntaxe Markdown",
     "open_failed": "Impossible d’ouvrir le lien ou de trouver son titre."
   },
+  "command_palette": {
+    "title": "Palette de commandes",
+    "placeholder": "Rechercher une commande…",
+    "empty": "Aucune commande correspondante",
+    "recent": "Commandes récentes",
+    "hints": "↑↓ Sélectionner · Entrée Exécuter · Échap Fermer",
+    "failed": "Impossible d’exécuter « {{command}} ».",
+    "categories": {
+      "file": "Fichier",
+      "editor": "Éditeur",
+      "view": "Affichage",
+      "app": "Application"
+    },
+    "reasons": {
+      "no_document": "Ouvrez d’abord un document",
+      "unavailable": "Indisponible dans le contexte actuel",
+      "preview": "Modification impossible en mode aperçu",
+      "read_only": "Ce document est en lecture seule",
+      "stale_target": "L’éditeur d’origine a changé",
+      "selection_unavailable": "La sélection d’origine n’est plus disponible",
+      "no_undo": "Rien à annuler",
+      "no_redo": "Rien à refaire",
+      "markdown_only": "Disponible pour les documents Markdown",
+      "zen_mode": "Quittez d’abord le mode Zen"
+    }
+  },
   "quick_open": {
     "title": "Ouverture rapide",
     "placeholder": "Rechercher par nom de fichier ou chemin…",
@@ -750,6 +776,7 @@
   },
   "command": {
     "id_descriptions": {
+      "app_commandPalette": "Palette de commandes",
       "app_quickOpen": "Ouverture rapide",
       "app_openFolder": "Ouvrir un dossier",
       "app_openSetting": "Ouvrir la fenêtre des paramètres",

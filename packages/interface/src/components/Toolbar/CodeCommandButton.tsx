@@ -1,4 +1,4 @@
-import React, { FC, useCallback } from 'react'
+import React, { useCallback } from 'react'
 import { MfIconButton } from '../Button/icon-button'
 import { redo, undo } from '@codemirror/commands'
 import type { EditorView } from '@codemirror/view'
@@ -16,7 +16,7 @@ import {
   applyTaskList,
   insertLink,
   insertImage,
-  ClipboardReadFunction,
+  type ClipboardReadFunction,
 } from './markdownCommands'
 
 type CommandFunction = (view: EditorView, attrs?: any, clipboardRead?: ClipboardReadFunction) => boolean
@@ -58,7 +58,7 @@ export const createCommandMap = (clipboardRead?: ClipboardReadFunction): Record<
   insertImage: (view) => insertImage(view, clipboardRead),
 })
 
-export const CodeCommandButton: FC<CodeCommandButtonProps> = ({
+export const CodeCommandButton: React.FC<CodeCommandButtonProps> = ({
   commandName,
   icon,
   label,

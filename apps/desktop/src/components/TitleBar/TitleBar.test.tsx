@@ -1,6 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it, vi } from 'vitest'
 import TitleBar from '.'
+import { TooltipProvider } from '../ui/tooltip'
 
 const titleBarTestState = vi.hoisted(() => ({
   osType: 'macos' as 'linux' | 'macos' | 'windows',
@@ -70,7 +71,11 @@ describe('TitleBar', () => {
   it('keeps native macOS traffic-light space and leaves the menu trigger interactive', () => {
     titleBarTestState.osType = 'macos'
     titleBarTestState.rootPath = ''
-    const markup = renderToStaticMarkup(<TitleBar />)
+    const markup = renderToStaticMarkup(
+      <TooltipProvider>
+        <TitleBar />
+      </TooltipProvider>,
+    )
 
     expect(markup).toContain('data-mf-platform="macos"')
     expect(markup).toContain('data-tauri-drag-region="true"')
@@ -89,12 +94,20 @@ describe('TitleBar', () => {
       markup.indexOf('aria-label="MarkFlowy Menu"'),
     )
     expect(markup).not.toContain('data-mf-window-controls')
+    expect(markup).toContain('data-slot="command-palette-trigger"')
+    expect(markup.indexOf('data-slot="command-palette-trigger"')).toBeLessThan(
+      markup.indexOf('aria-label="MarkFlowy Menu"'),
+    )
   })
 
   it('replaces the application name with the active workspace name', () => {
     titleBarTestState.osType = 'macos'
     titleBarTestState.rootPath = '/Users/test/notes'
-    const markup = renderToStaticMarkup(<TitleBar />)
+    const markup = renderToStaticMarkup(
+      <TooltipProvider>
+        <TitleBar />
+      </TooltipProvider>,
+    )
 
     expect(markup).not.toContain('MarkFlowy</span>')
     expect(markup).toContain('>notes</span>')
@@ -104,7 +117,11 @@ describe('TitleBar', () => {
   it('renders accessible window controls for the frameless Windows shell', () => {
     titleBarTestState.osType = 'windows'
     titleBarTestState.rootPath = ''
-    const markup = renderToStaticMarkup(<TitleBar />)
+    const markup = renderToStaticMarkup(
+      <TooltipProvider>
+        <TitleBar />
+      </TooltipProvider>,
+    )
 
     expect(markup).toContain('data-mf-platform="windows"')
     expect(markup).toContain('data-mf-window-controls=""')
@@ -117,6 +134,12 @@ describe('TitleBar', () => {
     titleBarTestState.osType = 'linux'
     titleBarTestState.rootPath = ''
 
-    expect(renderToStaticMarkup(<TitleBar />)).toBe('')
+    expect(
+      renderToStaticMarkup(
+        <TooltipProvider>
+          <TitleBar />
+        </TooltipProvider>,
+      ),
+    ).toBe('')
   })
 })

@@ -11,6 +11,32 @@
     "markdown": "Sintaxis Markdown",
     "open_failed": "No se pudo abrir el enlace o encontrar su encabezado."
   },
+  "command_palette": {
+    "title": "Paleta de comandos",
+    "placeholder": "Buscar comandos…",
+    "empty": "No hay comandos coincidentes",
+    "recent": "Usados recientemente",
+    "hints": "↑↓ Seleccionar · Intro Ejecutar · Esc Cerrar",
+    "failed": "No se pudo ejecutar «{{command}}».",
+    "categories": {
+      "file": "Archivo",
+      "editor": "Editor",
+      "view": "Vista",
+      "app": "Aplicación"
+    },
+    "reasons": {
+      "no_document": "Abre primero un documento",
+      "unavailable": "No disponible en el contexto actual",
+      "preview": "No se puede editar en modo de vista previa",
+      "read_only": "Este documento es de solo lectura",
+      "stale_target": "El editor original ha cambiado",
+      "selection_unavailable": "La selección original ya no está disponible",
+      "no_undo": "Nada que deshacer",
+      "no_redo": "Nada que rehacer",
+      "markdown_only": "Disponible para documentos Markdown",
+      "zen_mode": "Sal primero del modo Zen"
+    }
+  },
   "quick_open": {
     "title": "Apertura rápida",
     "placeholder": "Buscar por nombre de archivo o ruta…",
@@ -750,6 +776,7 @@
   },
   "command": {
     "id_descriptions": {
+      "app_commandPalette": "Paleta de comandos",
       "app_quickOpen": "Apertura rápida",
       "app_openFolder": "Abrir una carpeta",
       "app_openSetting": "Abrir la ventana de configuración",

@@ -3,10 +3,23 @@ import type { KeyboardBinding } from './keybindingCatalog'
 
 export class KeybindingRegistry {
   private keybindings = new Map<string, KeyboardBinding>()
+  private revision = 0
+  private listeners = new Set<() => void>()
+
+  getRevision = (): number => this.revision
+
+  subscribe = (listener: () => void): (() => void) => {
+    this.listeners.add(listener)
+    return () => {
+      this.listeners.delete(listener)
+    }
+  }
 
   setKeybindings(keybindings: KeyboardBinding[]): void {
     this.keybindings.clear()
     keybindings.forEach((kb) => this.keybindings.set(kb.id, kb))
+    this.revision += 1
+    this.listeners.forEach((listener) => listener())
   }
 
   getKeybinding(commandId: string): KeyboardBinding | undefined {

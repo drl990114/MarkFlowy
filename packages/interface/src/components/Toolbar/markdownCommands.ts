@@ -118,7 +118,7 @@ function applyInlineMarkup(target: EditorView, start: string, end: string): void
       return { range: EditorSelection.cursor(range.to + end.length) }
     } else {
       return {
-        changes: { from: range.to, insert: start + contents + end },
+        changes: { from: range.from, to: range.to, insert: start + contents + end },
         range: EditorSelection.range(
           range.from + start.length,
           range.from + start.length + contents.length,

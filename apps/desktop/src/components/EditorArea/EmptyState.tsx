@@ -1,4 +1,4 @@
-import { keybindingRegistry } from '@/commands'
+import { CommandShortcutKeys } from '@/components/ShortcutKeys'
 import { Button } from '@/components/ui/button'
 import EVENT from '@/constants/event'
 import { useOpen } from '@/hooks'
@@ -23,7 +23,6 @@ export const EmptyState = memo(() => {
 function CompactEmptyState({ mode }: { mode: EmptyStateMode }) {
   const { t } = useTranslation()
   const { openFile, openFolderDialog } = useOpen()
-  const openFolderShortcut = keybindingRegistry.formatKeybinding(EVENT.app_openFolder)
   const actions = useMemo<EmptyStateAction[]>(() => {
     const sharedActions: EmptyStateAction[] = [
       {
@@ -40,7 +39,7 @@ function CompactEmptyState({ mode }: { mode: EmptyStateMode }) {
         label: t('file.openDir'),
         icon: FolderOpenIcon,
         onSelect: openFolderDialog,
-        shortcut: openFolderShortcut,
+        commandId: EVENT.app_openFolder,
       })
     }
 
@@ -52,7 +51,7 @@ function CompactEmptyState({ mode }: { mode: EmptyStateMode }) {
     })
 
     return sharedActions
-  }, [mode, openFile, openFolderDialog, openFolderShortcut, t])
+  }, [mode, openFile, openFolderDialog, t])
   const statusLabel = mode === 'no-workspace' ? t('workspace.none') : t('file.emptyOpened')
 
   return (
@@ -80,7 +79,7 @@ interface EmptyStateAction {
   id: string
   label: string
   onSelect: () => void | Promise<void>
-  shortcut?: string
+  commandId?: string
 }
 
 function EmptyStateActionButton({ action }: { action: EmptyStateAction }) {
@@ -100,13 +99,12 @@ function EmptyStateActionButton({ action }: { action: EmptyStateAction }) {
         />
         <span className='truncate'>{action.label}</span>
       </span>
-      {action.shortcut ? (
-        <kbd
+      {action.commandId ? (
+        <CommandShortcutKeys
           aria-hidden='true'
-          className='ml-4 shrink-0 font-mono text-ui-caption font-normal text-content-muted'
-        >
-          {action.shortcut}
-        </kbd>
+          className='ml-4'
+          commandId={action.commandId}
+        />
       ) : null}
     </Button>
   )

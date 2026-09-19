@@ -2,15 +2,18 @@ import useContextMenuStore from '@/stores/useContextMenuStore'
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { ContextMenu, hideContextMenu, showContextMenu } from './ContextMenu'
+import { formatKeyMap } from '@/commands/keybindingKeys'
 
 const commandMocks = vi.hoisted(() => ({
   execute: vi.fn(),
-  formatKeybinding: vi.fn(() => '⌘K'),
 }))
 
 vi.mock('@/commands', () => ({
   commandRegistry: { execute: commandMocks.execute },
-  keybindingRegistry: { formatKeybinding: commandMocks.formatKeybinding },
+}))
+vi.mock('@/commands/useCommandShortcut', () => ({
+  useCommandKeybinding: (commandId: string) =>
+    commandId === 'test_command' ? { keys: ['CommandOrCtrl', 'k'] } : undefined,
 }))
 vi.mock('@/i18n', () => ({
   useTranslation: () => ({
@@ -21,7 +24,6 @@ vi.mock('@/i18n', () => ({
 afterEach(() => {
   hideContextMenu()
   commandMocks.execute.mockReset()
-  commandMocks.formatKeybinding.mockClear()
   cleanup()
 })
 
@@ -54,7 +56,11 @@ describe('imperative ContextMenu compatibility', () => {
     expect(screen.getByRole('separator')).not.toBeNull()
     const moreItem = screen.getByRole('menuitem', { name: /More/ })
     expect(moreItem).not.toBeNull()
-    expect(screen.getByText('⌘K')).not.toBeNull()
+    expect(
+      [...screen.getByRole('menuitem', { name: /Run command/ }).querySelectorAll('kbd')].map(
+        (key) => key.textContent,
+      ),
+    ).toEqual(['CommandOrCtrl', 'k'].map((key) => formatKeyMap([key])))
 
     moreItem.focus()
     fireEvent.keyDown(moreItem, { key: 'ArrowRight' })

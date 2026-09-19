@@ -1,6 +1,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { EmptyState, getEmptyStateMode } from './EmptyState'
+import { formatKeyMap } from '@/commands/keybindingKeys'
 
 const emptyStateTestState = vi.hoisted(() => ({
   addNewFile: vi.fn(),
@@ -9,10 +10,8 @@ const emptyStateTestState = vi.hoisted(() => ({
   rootPath: undefined as string | undefined,
 }))
 
-vi.mock('@/commands', () => ({
-  keybindingRegistry: {
-    formatKeybinding: () => '⌘O',
-  },
+vi.mock('@/commands/useCommandShortcut', () => ({
+  useCommandKeybinding: () => ({ keys: ['CommandOrCtrl', 'Shift', 'o'] }),
 }))
 
 vi.mock('@/hooks', () => ({
@@ -68,7 +67,11 @@ describe('EmptyState', () => {
     expect(screen.queryByText(/Welcome back/)).toBeNull()
     expect(container.querySelector('[data-testid="markflowy-logo"]')).toBeNull()
     expect(screen.queryByText('Recent Workspaces')).toBeNull()
-    expect(screen.getByText('⌘O')).toBeTruthy()
+    expect(
+      [...screen.getByRole('button', { name: 'Open Folder' }).querySelectorAll('kbd')].map(
+        (key) => key.textContent,
+      ),
+    ).toEqual(['CommandOrCtrl', 'Shift', 'o'].map((key) => formatKeyMap([key])))
 
     fireEvent.click(screen.getByRole('button', { name: 'New File' }))
     fireEvent.click(screen.getByRole('button', { name: 'Open Folder' }))
