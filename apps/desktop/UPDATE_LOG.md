@@ -1,5 +1,53 @@
 # UPDATE LOG
 
+## v0.101.1
+
+Have an issue, a feature request, or an idea? Share it in [MarkFlowy v1: Feedback & Ideas](https://github.com/drl990114/MarkFlowy/issues/1209). All feedback is welcome!
+
+Features:
+
+- Added automatic recovery of unsaved documents after a normal app exit or window reload, including unnamed documents and edits made with autosave disabled. Drafts are restored when reopening their workspace, while conflicting changes on disk are flagged for review.
+
+- Added a searchable **Convert to** menu in the WYSIWYG editor. Click the block handle on the left or press **Cmd/Ctrl + Shift + X** to convert existing content into paragraphs, headings, lists, quotes, code, math, Mermaid, or HTML blocks where supported. The menu supports keyboard navigation, multiple selected blocks, and undo/redo.
+
+- Added staged **Cmd/Ctrl + A** selection: select the current paragraph or block first, then the entire document. Inside a table, selection expands from the current cell's contents to the whole table, then the document. Code blocks and live-preview source editors also support selecting their own content before handing selection back to the document, with localized hints for the next step.
+
+- Added editable HTML ruby annotations using `<ruby>`, `<rt>`, and `<rp>`. Write or paste the markup directly into Markdown to display annotations in WYSIWYG and Preview modes; annotation text and tags remain editable, with source preservation, copy/paste, and undo/redo support.
+
+Improvements and Fixes:
+
+- Improved sidebar resizing and visibility. Drag a divider to resize or collapse either sidebar, then reopen it from the status bar or its shortcut to restore its width and content. Sidebars stay alongside the editor in narrow windows, and collapsed dividers no longer leave an invisible drag target at the window edge.
+
+- Fixed **Settings → Editor → Wysiwyg → Code block wrap** in the Capricorn editor. Changing the setting updates open code blocks immediately while preserving their content, selection, and undo history.
+
+- Improved Markdown input for Setext headings and nested lists. Underlines made of `=` or `-` can be confirmed with Enter to create headings, and their original style is preserved when editing or copying. Typing nested ordered and bullet-list prefixes now creates the correct list structure.
+
+- Added **Cmd/Ctrl + Enter** inside code blocks to move into the following paragraph, creating one when needed. The action preserves code content and supports undo/redo so writing can continue below the block.
+
+---
+
+欢迎大家到 [MarkFlowy v1：意见与想法收集](https://github.com/drl990114/MarkFlowy/issues/1209) 反馈使用中遇到的各种问题、功能需求和改进建议，任何想法都欢迎交流！
+
+特性：
+
+- 新增正常退出应用或刷新窗口后的未保存文档恢复，支持未命名文档，以及关闭自动保存时的编辑内容。重新打开对应工作区时会恢复草稿；若磁盘文件存在冲突修改，会提示处理。
+
+- 所见即所得编辑器新增可搜索的 **转换为** 菜单。点击块左侧的操作按钮，或按 **Cmd/Ctrl + Shift + X**，即可将已有内容转换为正文、标题、列表、引用、代码块、公式、Mermaid 或 HTML 块，不支持的转换会显示原因。支持键盘选择、多块批量转换及撤销、重做。
+
+- 新增分级 **Cmd/Ctrl + A** 全选：首次选中当前段落或块，再次按下选中全文。表格内依次选择当前单元格内容、整张表格和全文；代码块与实时预览的源码编辑区也支持先选内部内容，再扩展至全文，并显示本地化的下一步提示。
+
+- 新增可编辑的 HTML 注音标记，支持 `<ruby>`、`<rt>` 和 `<rp>`。直接在 Markdown 中输入或粘贴这些标记，即可在所见即所得与预览模式下显示注音；注音文字和标签均可编辑，并支持保留源码、复制粘贴及撤销、重做。
+
+改进与修复：
+
+- 改进左右侧栏的缩放与显隐行为。拖动分隔线可调整宽度或收起侧栏，再通过状态栏按钮或快捷键打开时恢复原有宽度与内容。窄窗口下侧栏保持与编辑器并排显示；收起后不再在窗口边缘留下不可见的拖拽区域。
+
+- 修复 Capricorn 编辑器中 **设置 → 编辑器 → 所见即所得 → 代码块换行** 不生效的问题。修改设置后，已打开的代码块会立即更新，并保留内容、选区和撤销记录。
+
+- 改进 Setext 标题与嵌套列表的 Markdown 输入。输入由 `=` 或 `-` 组成的标题下划线后，可按 Enter 确认转换，编辑和复制时保留原有标题写法；连续输入嵌套的有序、无序列表前缀时，会生成正确的列表层级。
+
+- 代码块内新增 **Cmd/Ctrl + Enter**，可跳转到后续段落，必要时自动创建段落，方便继续在代码块下方输入正文。操作保留代码内容，并支持撤销、重做。
+
 ## v0.101.0
 
 Features:
