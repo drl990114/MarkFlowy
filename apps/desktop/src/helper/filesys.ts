@@ -44,12 +44,19 @@ export const hydrateDirectoryEntries = (entries: DirectoryReadEntry[]): IFile[] 
 
   const visit = (items: DirectoryReadEntry[]): IFile[] => {
     return items.map((entry) => {
+      const indexedFile = getFileObjectByPath(entry.path)
+      const cachedFile = indexedFile && (getFileObject(indexedFile.id) ?? indexedFile)
       const file: IFile = {
-        id: getFileObjectByPath(entry.path)?.id || nanoid(),
+        id: indexedFile?.id || nanoid(),
         name: entry.name,
         kind: entry.kind,
         path: entry.path,
         ext: entry.ext,
+      }
+      // A directory scan only refreshes metadata, including when opening a
+      // parent/child workspace. The live editor still owns its cached content.
+      if (entry.kind === 'file' && cachedFile?.kind === 'file') {
+        file.content = cachedFile.content
       }
 
       idEntries.push({ id: file.id, file })

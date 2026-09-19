@@ -6,10 +6,6 @@ import {
   restoreDraftSession,
 } from '@/services/draft-recovery'
 import { commandRegistry } from '@/commands'
-import {
-  FILE_MUTATION_QUEUE_KEY,
-  savePathCoordinator,
-} from '@/components/EditorArea/savePathCoordinator'
 import bus from '@/helper/eventBus'
 import { loadLocalThemeCss } from '@/helper/extensions'
 import { hasFileExcludePatternsChanged } from '@/helper/file-exclude'
@@ -23,22 +19,21 @@ import { logger } from '@/helper/logger'
 import { checkUpdate } from '@/helper/updater'
 import { i18nInit, t } from '@/i18n'
 import { appSettingStoreSetup } from '@/services/app-setting'
-import { guardUnsavedFilesAsync } from '@/services/checkUnsavedFiles'
 import { addExistingMarkdownFileEdit } from '@/services/editor-file'
-import { restoreRecentFileHistory } from '@/services/recent-files'
 import {
   createWorkspaceCachePersistence,
   restoreWorkspaceCache,
   type WorkspaceCache,
   type WorkspaceCachePersistence,
 } from '@/services/workspace-cache'
-import useRecentFilesStore from '@/stores/useRecentFilesStore'
 import {
   OPEN_WORKSPACE_EXPLORER_EVENT,
   setWorkspaceSwitchHandler,
   switchWorkspaceInCurrentWindow as requestWorkspaceSwitch,
   waitForWorkspaceSwitches,
 } from '@/services/workspace-switch'
+import { switchWorkspaceSession } from '@/services/workspace-session'
+import { refreshWorkspaceDirectory } from '@/services/workspace-refresh'
 import { createNewWindow, currentWindow } from '@/services/windows'
 import { useEditorStore } from '@/stores'
 import {
@@ -64,7 +59,6 @@ import { invoke } from '@tauri-apps/api/core'
 import { getCurrentWebview } from '@tauri-apps/api/webview'
 import { LazyStore } from '@tauri-apps/plugin-store'
 import { useCallback, useEffect, useSyncExternalStore } from 'react'
-import { flushSync } from 'react-dom'
 import { toast } from 'zens'
 import __MF__ from '../context'
 import useExtensionsManagerStore from '../stores/useExtensionsManagerStore'
@@ -72,7 +66,6 @@ import useThemeStore, { isBuiltInTheme } from '../stores/useThemeStore'
 import useGlobalKeyboard from './useKeyboard'
 import useGlobalOSInfo from './useOSInfo'
 import useWorkspaceWatcher from './useWorkspaceWatcher'
-import { fileTreeHandler } from '@markflowy/interface'
 
 interface LocalTheme {
   id: string
@@ -127,77 +120,10 @@ const setupWorkspaceCachePersistence = async (cacheStore: LazyStore) => {
 }
 
 async function performWorkspaceSwitch(path: string) {
-  const previousEditorState = useEditorStore.getState()
-  const currentRootPath = previousEditorState.getRootPath()
-  if (currentRootPath === path) return true
-
   const persistence = workspaceCachePersistence
-  if (!persistence) {
-    throw new Error('Workspace persistence is not ready')
-  }
+  if (!persistence) throw new Error('Workspace persistence is not ready')
 
-  const didSwitch = await guardUnsavedFilesAsync({
-    fileIds: useEditorStore.getState().opened,
-    labels: {
-      save: t('action.save_and_continue'),
-      unsaved: t('action.continue_without_save'),
-    },
-    onContinue: () =>
-      savePathCoordinator.runExclusive(
-        FILE_MUTATION_QUEUE_KEY,
-        `workspace-switch:${path}`,
-        async (lease) => {
-          // Make the old workspace read-only before the first asynchronous switch step. The
-          // shared mutation queue also prevents stale Explorer commits from crossing roots.
-          flushSync(() => {
-            lease.activate(path)
-            lease.enableOtherEditorBarrier()
-          })
-
-          const previousRecentFiles = useRecentFilesStore.getState().entries
-          await persistence.flush()
-          await invoke<boolean>('save_security_bookmark', { path })
-          await invoke<boolean>('activate_workspace_root', { rootPath: path })
-
-          try {
-            const [workspaceCache, folderData] = await Promise.all([
-              persistence.getWorkspaceCache(path),
-              readDirectory(path),
-            ])
-            await persistence.flush()
-            restoreWorkspaceCache(workspaceCache, folderData)
-
-            await useOpenedCacheStore
-              .getState()
-              .addRecentWorkspaces({ path })
-              .catch((error) => logger.error('Failed to update recent workspaces', path, error))
-            await invoke('update_window_path', {
-              windowLabel: currentWindow.label,
-              newPath: path,
-            }).catch((error) =>
-              logger.error('Failed to update window workspace path', path, error),
-            )
-          } catch (error) {
-            if (currentRootPath) {
-              await invoke<boolean>('activate_workspace_root', {
-                rootPath: currentRootPath,
-              }).catch((restoreError) => {
-                logger.error('Failed to restore previous workspace root', restoreError)
-              })
-            }
-
-            restoreRecentFileHistory(() => {
-              useEditorStore.getState().setFolderData(previousEditorState.folderData)
-              useEditorStore
-                .getState()
-                .setEditorLayout(previousEditorState.editorLayout, previousEditorState.activeGroupId)
-            }, previousRecentFiles)
-            throw error
-          }
-        },
-      ),
-  })
-
+  const didSwitch = await switchWorkspaceSession(path, persistence)
   if (didSwitch) {
     await setupDraftRecovery()
     appStartupCoordinator.recoverWorkspace(undefined)
@@ -439,7 +365,7 @@ async function appWorkspaceSetup(signal: AbortSignal) {
 }
 
 async function refreshWorkspaceFileTree() {
-  const { getRootPath, setFolderDataPure } = useEditorStore.getState()
+  const { getRootPath } = useEditorStore.getState()
   const rootPath = getRootPath()
 
   if (!rootPath) {
@@ -447,9 +373,7 @@ async function refreshWorkspaceFileTree() {
   }
 
   try {
-    fileTreeHandler.clearLoadedDirsCache?.()
-    const folderData = await readDirectory(rootPath)
-    setFolderDataPure(folderData)
+    await refreshWorkspaceDirectory()
   } catch (error) {
     logger.error('Failed to refresh workspace after file exclude setting change', error)
   }

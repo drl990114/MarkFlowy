@@ -52,6 +52,7 @@ import {
 describe('test helper/filesys ', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    vi.mocked(getFileObject).mockReset()
     vi.mocked(getFileObjectByPath).mockReturnValue(undefined)
   })
 
@@ -177,5 +178,23 @@ describe('test helper/filesys ', () => {
       { path: '/workspace/folder', file: files[0] },
       { path: '/workspace/folder/notes.md', file: files[0].children?.[0] },
     ])
+  })
+
+  it('preserves the latest editor content when reading an overlapping workspace directory', () => {
+    const indexedFile = {
+      id: 'open-note', name: 'note.md', kind: 'file' as const,
+      path: '/workspace/nested/note.md', content: 'older indexed content',
+    }
+    vi.mocked(getFileObjectByPath).mockReturnValue(indexedFile)
+    vi.mocked(getFileObject).mockReturnValue({ ...indexedFile, content: 'unsaved editor content' })
+
+    const [file] = hydrateDirectoryEntries([
+      { name: 'note.md', kind: 'file', path: indexedFile.path, ext: 'md', children: null },
+    ])
+
+    expect(file.id).toBe(indexedFile.id)
+    expect(file.content).toBe('unsaved editor content')
+    expect(setFileObjects).toHaveBeenCalledWith([{ id: indexedFile.id, file }])
+    expect(setFileObjectsByPath).toHaveBeenCalledWith([{ path: indexedFile.path, file }])
   })
 })

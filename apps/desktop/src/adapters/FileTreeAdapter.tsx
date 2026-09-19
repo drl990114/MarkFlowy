@@ -1,7 +1,7 @@
-import { useCallback, useMemo, type FC, type ReactNode } from 'react'
-import { FileTreeContext, FileTreeContextValue, fileTreeHandler } from '@markflowy/interface'
+import { useMemo, type FC, type ReactNode } from 'react'
+import { FileTreeContext, type FileTreeContextValue } from '@markflowy/interface'
 import { useEditorStore } from '@/stores'
-import { readDirectory } from '@/helper/filesys'
+import { refreshWorkspaceDirectory } from '@/services/workspace-refresh'
 
 interface FileTreeAdapterProps {
   children: ReactNode
@@ -16,16 +16,6 @@ export const FileTreeProvider: FC<FileTreeAdapterProps> = ({ children }) => {
   const trashNode = useEditorStore((state) => state.trashNode)
   const getRootPath = useEditorStore((state) => state.getRootPath)
 
-  const refreshFolder = useCallback(async () => {
-    const rootPath = getRootPath()
-    if (!rootPath) {
-      throw new Error('No workspace found')
-    }
-    fileTreeHandler.clearLoadedDirsCache?.()
-    const res = await readDirectory(rootPath)
-    setFolderDataPure(res)
-  }, [getRootPath, setFolderDataPure])
-
   const value: FileTreeContextValue = useMemo(
     () => ({
       activeId,
@@ -35,14 +25,13 @@ export const FileTreeProvider: FC<FileTreeAdapterProps> = ({ children }) => {
       deleteNode,
       trashNode,
       getRootPath,
-      refreshFolder,
+      refreshFolder: refreshWorkspaceDirectory,
     }),
     [
       activeId,
       deleteNode,
       folderData,
       getRootPath,
-      refreshFolder,
       setFolderData,
       setFolderDataPure,
       trashNode,

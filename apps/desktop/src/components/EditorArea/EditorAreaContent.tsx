@@ -11,6 +11,7 @@ function EditorAreaContent() {
     if (openingClock) openingClock.startedAt = null
   }, [openingClock])
   const editorLayout = useEditorStore((state) => state.editorLayout)
+  const workspacePath = useEditorStore((state) => state.folderData?.[0]?.path)
   const activeGroupId = useEditorStore((state) => state.activeGroupId)
   const zenModeActive = useLayoutStore((state) => state.zenModeActive)
 
@@ -19,6 +20,7 @@ function EditorAreaContent() {
       <OverlayScrollbarStyles />
       <EditorPanel id='editor-panel'>
         <EditorLayoutView
+          key={workspacePath ?? ''}
           activeGroupId={activeGroupId}
           node={editorLayout}
           zenModeActive={zenModeActive}
