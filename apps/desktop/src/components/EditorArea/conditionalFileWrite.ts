@@ -5,9 +5,7 @@ export interface ConditionalWriteResult {
   status: 'conflict' | 'success'
 }
 
-export type GuardedConditionalWriteResult =
-  | ConditionalWriteResult
-  | { status: 'blocked' }
+export type GuardedConditionalWriteResult = ConditionalWriteResult | { status: 'blocked' }
 
 type InvokeCommand = <T>(command: string, args: Record<string, unknown>) => Promise<T>
 
@@ -26,11 +24,13 @@ export async function conditionalWriteExpected(
   content: string,
   expectedRevision: string,
   invokeCommand: InvokeCommand = invoke,
+  historyKind?: 'autosave' | 'save' | 'overwrite',
 ): Promise<ConditionalWriteResult> {
   return invokeCommand<ConditionalWriteResult>('conditional_write_file', {
     content,
     expectedRevision,
     filePath,
+    ...(historyKind ? { historyKind } : {}),
   })
 }
 
@@ -40,14 +40,10 @@ export async function conditionalWriteExpectedIfAllowed(
   expectedRevision: string,
   canWrite: () => boolean,
   invokeCommand: InvokeCommand = invoke,
+  historyKind?: 'autosave' | 'save' | 'overwrite',
 ): Promise<GuardedConditionalWriteResult> {
   if (!canWrite()) return { status: 'blocked' }
-  return conditionalWriteExpected(
-    filePath,
-    content,
-    expectedRevision,
-    invokeCommand,
-  )
+  return conditionalWriteExpected(filePath, content, expectedRevision, invokeCommand, historyKind)
 }
 
 export async function conditionalWriteWithRevision(

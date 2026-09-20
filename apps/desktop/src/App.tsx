@@ -1,3 +1,4 @@
+import { useHistoryDialog } from '@/components/LocalHistory/historyDialogStore'
 import { commandRegistry } from '@/commands'
 import { EVENT } from '@/constants'
 import { Root, Setting } from '@/router'
@@ -12,7 +13,7 @@ import {
   getStartupErrorDescription,
   WorkspaceStartupSurface,
 } from '@/startup/WorkspaceStartupSurface'
-import { useEffect, useLayoutEffect } from 'react'
+import { lazy, Suspense, useEffect, useLayoutEffect } from 'react'
 import { Route, Routes, useLocation, useMatch } from 'react-router'
 import { Notifications } from 'zens'
 import { FileTreeProvider, TauriFileSystemProvider } from './adapters'
@@ -30,6 +31,17 @@ import { TooltipProvider } from './components/ui/tooltip'
 import { ContextMenu } from './components/ui-v2/ContextMenu/ContextMenu'
 import { useAppRuntimeSetup, useAppSetup } from './hooks'
 import { useCommandInit } from './hooks/useCommandInit'
+
+const HistoryDialog = lazy(() => import('@/components/LocalHistory/HistoryDialog'))
+
+function HistorySurface() {
+  const open = useHistoryDialog((s) => s.open)
+  return open ? (
+    <Suspense fallback={null}>
+      <HistoryDialog />
+    </Suspense>
+  ) : null
+}
 
 interface AppRoutesProps {
   chooseWorkspace: () => void
@@ -106,6 +118,7 @@ function ReadyApp({ retryWorkspace, workspace }: ReadyAppProps) {
           <ContextMenu />
           <Notifications />
           <AppInfoDialog />
+          <HistorySurface />
           <Modal.InputConfirm id={MODAL_INPUT_ID} />
           <Modal.Info id={MODAL_INFO_ID} />
           <Modal.Confirm id={MODAL_CONFIRM_ID} />

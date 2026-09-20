@@ -13,17 +13,29 @@ The native CLI uses the existing Tauri single-instance transport, a per-request 
 | `file open <path> [--preview]` | Open or activate a file; wait for visible/applied content |
 | `file wait <path>` | Wait for an already open file to satisfy the visibility/content condition |
 | `file export <path> --format <format> --output <path>` | Open/activate the specified source, render, write, and verify the destination |
+| `file save <path> --sha256 <hash> --request-id <id>` | Save the matching live draft and report file/history completion |
+| `history begin <path> --request-id <id>` | Protect the baseline before external edits; return an active session ID |
+| `history commit <session-id> --sha256 <hash> --message <text>` | Commit the final disk snapshot as one grouped history version |
+| `history status <session-id>` | Inspect completion after an interrupted or timed-out request |
+| `history list <path> [--offset <n>]` | Query pages of 50 versions |
 | `open <path>` | File open, or workspace switching when the path is a directory |
 | `command list` | Discover GUI command IDs |
 | `command execute <id>` | Dispatch a GUI command; its asynchronous effects remain unconfirmed |
 
 File/control commands emit one JSON receipt by default. `--json` makes this explicit. Discovery commands retain their existing runtime object/list shapes.
 
+History and save commands require a running app and the corresponding `status.capabilities` values: `localHistoryV1` and `fileSaveV1`. Use existing `file open` to start the app if needed. An explicit history begin can also register a not-yet-created file in an existing directory. Each file has an independent session; there is no cross-file transaction.
+
+`--request-id` is the caller's stable operation ID, separate from the transport receipt's `requestId`. Reuse it only when retrying that same operation. Commit is idempotent by session ID; changed arguments fail. Settings can disable new history or delete current/all workspace history while preserving drafts. Those actions invalidate active sessions, so a stale commit must not recreate deleted history.
+
+History results include `sessionId`, `state`, and `versionId`; a committed result includes `sha256` and `message`. Save results include `path`, `sha256`, `historyCreated`, and an optional `versionId`. Only `history_committed` and `file_saved` attest the corresponding completed action. Content-identical saves can reuse an existing version ID instead of adding another version. History failures include `history_disabled`, `history_invalidated`, `history_session_busy`, `history_budget_exceeded`, `content_changed`, `content_conflict`, and `history_failed`.
+
 ## Options
 
 - `--window-id <id>` / `--window <id>`: exact target; never fall back from a missing explicit window.
 - `--wait applied|visible`: defaults to `applied`. `visible` allows the current unsaved content to differ from disk; do not claim an expected revision was applied when `applied` is false.
 - `--sha256 <digest>`: expected SHA-256 of decoded text encoded as UTF-8, without BOM and preserving line endings. Without it, the CLI reads a stable disk snapshot at invocation. For generated UTF-8 files without BOM, ordinary SHA-256 of the file bytes is equivalent.
+- `--offset <n>`: skip this many versions in `history list` (default 0, page size 50).
 - `--timeout <ms>`: 1–300000 milliseconds, default 30000; includes startup, queueing, rendering, and output.
 - `--format html|markdown|text|json|jpg`: HTML and image exports reuse the editor renderers. Text/JSON need the Markdown runtime; open the Markdown preview first when starting from Source Code. Unsupported renderers fail explicitly.
 - `--output <path>`: an exact destination in an existing directory.

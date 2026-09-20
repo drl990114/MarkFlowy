@@ -597,14 +597,14 @@
           "desc": "支持变量：${documentPath}（当前文件所在文件夹路径）、${fileName}（当前文件名，不含扩展名）。例如：${documentPath}/photo/${fileName}"
         }
       },
-    "upload_img": {
-      "label": "插入本地图片",
-      "when_upload_image": {
-        "label": "插入本地图片行为",
-        "desc": "选择从电脑选取、拖放或通过截图软件粘贴本地图片时的默认行为。",
-        "options": {
-          "insert_path": "直接插入原文件路径",
-          "save_to_local_absolute": "保存到全局绝对路径",
+      "upload_img": {
+        "label": "插入本地图片",
+        "when_upload_image": {
+          "label": "插入本地图片行为",
+          "desc": "选择从电脑选取、拖放或通过截图软件粘贴本地图片时的默认行为。",
+          "options": {
+            "insert_path": "直接插入原文件路径",
+            "save_to_local_absolute": "保存到全局绝对路径",
             "save_to_local_relative": "保存到工作区相对路径",
             "paste_as_base64": "粘贴为 Base64 编码",
             "save_to_file_relative": "保存到相对当前文件的路径"
@@ -1010,8 +1010,14 @@
       "cancel": "取消",
       "invalidAddress": "请输入有效的链接地址。"
     },
-    "image": { "unavailable": "图片无法加载", "loading": "正在加载图片…", "edit": "修改地址" },
-    "preview": { "retry": "重试" },
+    "image": {
+      "unavailable": "图片无法加载",
+      "loading": "正在加载图片…",
+      "edit": "修改地址"
+    },
+    "preview": {
+      "retry": "重试"
+    },
     "editor": {
       "loading": "正在加载 Capricorn 编辑器",
       "opening": "正在打开文档",
@@ -1046,5 +1052,57 @@
     "open_error": "无法打开此链接。",
     "copy_error": "无法复制地址。",
     "single_block": "请在同一段落或表格单元格内选择文字。"
+  },
+  "history": {
+    "title": "本地历史",
+    "description": "查看文档变化，将历史版本恢复为未保存草稿。",
+    "enabled": "开启本地历史",
+    "enabled_description": "记录在 MarkFlowy 打开过的文档版本。关闭后，未保存草稿仍会在后台受到保护。",
+    "retention": "普通历史保留 30 天，每文档最多 100 份，目标空间 1GB。未保存草稿和进行中的修改会话优先保留。",
+    "count": "{{count}} 个版本",
+    "clear_title": "管理历史数据",
+    "clear_description": "删除历史不会删除原文件或未保存草稿。功能开启时，后续修改仍会生成新历史。",
+    "clear_workspace": "删除当前工作区历史",
+    "clear_loose": "删除独立文档历史",
+    "clear_all": "删除所有工作区历史",
+    "clear_confirm": "永久删除 {{count}} 个历史版本？最多可回收 {{size}} MB 未共享的正文。原文件和未保存草稿会保留。",
+    "all_workspaces": "所有工作区和独立文档",
+    "loose": "独立文档",
+    "delete": "删除历史",
+    "empty": "暂无历史版本。",
+    "previous": "上一页",
+    "next": "下一页",
+    "before": "修改前",
+    "after": "最新结果",
+    "refresh": "有新变化 · 刷新对比",
+    "loading": "正在加载对比…",
+    "select": "选择一个历史版本，查看文档变化。",
+    "restore_before": "恢复修改前版本",
+    "restore": "恢复此版本",
+    "merging": "持续合并中",
+    "kind_save": "已保存",
+    "kind_external": "外部修改",
+    "kind_ai": "AI 修改",
+    "kind_checkpoint": "草稿检查点",
+    "kind_restore": "恢复前备份",
+    "kind_discard": "放弃前备份",
+    "kind_overwrite": "覆盖前备份",
+    "kind_autosave": "自动保存",
+    "kind_opened": "初始版本",
+    "protected": "草稿已保护",
+    "pending": "正在保护草稿…",
+    "failed": "草稿保护失败",
+    "paused": "已恢复草稿，请手动保存",
+    "large": "大文档：当前显示完整原文。",
+    "compare_current": "与当前草稿对比",
+    "compare_version": "与其他历史对比",
+    "compare_batch": "对比修改前后",
+    "retry": "重试草稿保护",
+    "coarse": "差异按计算预算简化显示，原文保持完整。",
+    "compute_large": "计算大文档差异",
+    "deleted": "已删除 {{count}} 个历史版本。",
+    "kind_write-pending": "中断的文件写入",
+    "budget_limited": "历史存储已达到容量目标，已暂停普通检查点和新的 AI 编辑会话。草稿保护与操作前备份继续保留，可清理不需要的历史以恢复。",
+    "kind_recovered-save": "已找回的保存"
   }
 }

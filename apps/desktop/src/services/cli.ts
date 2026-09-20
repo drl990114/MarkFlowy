@@ -1,3 +1,4 @@
+import { runHistoryCli } from './history-cli'
 import { commandRegistry } from '@/commands'
 import { editorAutomationRegistry } from '@/components/EditorArea/editorAutomationRegistry'
 import { handleExternalWatchEvent } from '@/components/EditorArea/externalFileChanges'
@@ -122,6 +123,10 @@ export async function runCliRequest(request: CliRequest) {
       code: 'dispatched',
       result: { windowId: currentWindow.label, commandId: request.commandId, completed: false },
     }
+  }
+  if (request.operation.startsWith('history') || request.operation === 'save') {
+    const fileId = request.path ? await findOpenFile(request.path) : undefined
+    return runHistoryCli(request, fileId)
   }
   if (!request.path) throw new CliError('invalid_arguments', 'Missing file path.')
   if (request.operation === 'workspace') {

@@ -1,3 +1,4 @@
+import { openLocalHistory } from '@/components/LocalHistory/historyDialogStore'
 import { commandRegistry } from '@/commands'
 import { focusActiveEditor } from '@/components/EditorArea/focusActiveEditor'
 import { openDocumentSearch } from '@/components/EditorArea/editorSearchStore'
@@ -97,6 +98,14 @@ function applicationUnavailable(
 }
 
 export const paletteCommands: readonly PaletteCommand[] = [
+  {
+    id: 'app_localHistory',
+    category: 'file',
+    labelKey: 'history.title',
+    keywords: ['history', 'versions', '历史', '版本'],
+    getUnavailableReason: () => undefined,
+    execute: ({ target }) => openLocalHistory(target?.fileId),
+  },
   ...APPLICATION_COMMANDS.map(
     ([id, category, aliases]): PaletteCommand => ({
       id,

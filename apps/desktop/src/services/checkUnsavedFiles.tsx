@@ -1,3 +1,6 @@
+import { logger } from '@/helper/logger'
+import { toast } from 'zens'
+import { protectDiscard } from './local-history'
 import { getFileObject, getSaveOpenedEditorEntries } from '@/helper/files'
 import { dialog } from '@/services/dialog'
 import { useEditorStateStore } from '@/stores'
@@ -88,6 +91,7 @@ const guardUnsavedFileIds = async (params: GuardUnsavedFilesParams, hasUnsavedFi
   }
 
   if (action === 'unsaved') {
+    await protectDiscard(hasUnsavedFiles)
     if (params.onUnsavedAndContinue) {
       await params.onUnsavedAndContinue(hasUnsavedFiles)
     } else {
@@ -106,7 +110,10 @@ export const guardUnsavedFilesAsync = async (params: GuardUnsavedFilesParams) =>
 export const guardUnsavedFiles = (params: GuardUnsavedFilesParams) => {
   const hasUnsavedFiles = getUnsavedFileIds(params.fileIds)
 
-  void guardUnsavedFileIds(params, hasUnsavedFiles)
+  void guardUnsavedFileIds(params, hasUnsavedFiles).catch((error) => {
+    logger.error('Discard protection failed', error)
+    toast.error(String(error))
+  })
 
   return hasUnsavedFiles.length
 }
@@ -115,14 +122,20 @@ export const checkUnsavedFiles = (params: CheckUnsavedFilesParams) => {
   const hasUnsavedFiles = getUnsavedFileIds(params.fileIds)
 
   if (hasUnsavedFiles.length > 0) {
-    void confirmUnsavedFiles(hasUnsavedFiles).then((action) => {
-      if (action === 'save') {
-        void params.onSaveAndClose?.(hasUnsavedFiles)
-      }
-      if (action === 'unsaved') {
-        void params.onUnsavedAndClose?.(hasUnsavedFiles)
-      }
-    })
+    void confirmUnsavedFiles(hasUnsavedFiles)
+      .then(async (action) => {
+        if (action === 'save') {
+          void params.onSaveAndClose?.(hasUnsavedFiles)
+        }
+        if (action === 'unsaved') {
+          await protectDiscard(hasUnsavedFiles)
+          void params.onUnsavedAndClose?.(hasUnsavedFiles)
+        }
+      })
+      .catch((error) => {
+        logger.error('Discard protection failed', error)
+        toast.error(String(error))
+      })
   }
 
   return hasUnsavedFiles.length

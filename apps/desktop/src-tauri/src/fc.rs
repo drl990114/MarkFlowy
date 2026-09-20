@@ -31,7 +31,7 @@ lazy_static::lazy_static! {
 }
 
 lazy_static::lazy_static! {
-    static ref FILE_WRITE_MUTEX: Mutex<()> = Mutex::new(());
+    pub(crate) static ref FILE_WRITE_MUTEX: Mutex<()> = Mutex::new(());
     static ref FILE_WRITE_GENERATIONS: Mutex<HashMap<String, u64>> = Mutex::new(HashMap::new());
 }
 
@@ -564,7 +564,7 @@ fn decode_utf16_bytes(bytes: &[u8], little_endian: bool) -> Result<String, Strin
         .collect()
 }
 
-fn decode_text_bytes(bytes: Vec<u8>) -> Result<String, FileResult> {
+pub(crate) fn decode_text_bytes(bytes: Vec<u8>) -> Result<String, FileResult> {
     if bytes.is_empty() {
         return Ok(String::new());
     }
@@ -1082,6 +1082,15 @@ pub fn conditional_write_file(
     content: &[u8],
     expected_revision: &str,
 ) -> AnyResult<ConditionalWriteResult> {
+    conditional_write_file_with_kind(path, content, expected_revision, "save")
+}
+
+pub fn conditional_write_file_with_kind(
+    path: &Path,
+    content: &[u8],
+    expected_revision: &str,
+    kind: &str,
+) -> AnyResult<ConditionalWriteResult> {
     let _guard = FILE_WRITE_MUTEX
         .lock()
         .map_err(|_| anyhow::anyhow!("File write lock is unavailable"))?;
@@ -1094,6 +1103,17 @@ pub fn conditional_write_file(
         });
     }
 
+    let history_write =
+        crate::local_history::prepare_write(path, content).map_err(anyhow::Error::msg)?;
+    // A backup commit can take time. External writers do not share our mutex.
+    let checked_revision = file_write_revision_unlocked(path)?;
+    if checked_revision != expected_revision {
+        crate::local_history::cancel_write(history_write).map_err(anyhow::Error::msg)?;
+        return Ok(ConditionalWriteResult {
+            status: ConditionalWriteStatus::Conflict,
+            revision: checked_revision,
+        });
+    }
     match fs::metadata(path) {
         Ok(_) => {
             // Preserve the inode, hardlinks, xattrs, and the existing `fs::write`
@@ -1113,6 +1133,7 @@ pub fn conditional_write_file(
         Err(error) => return Err(error.into()),
     }
     bump_file_write_generation(path)?;
+    crate::local_history::complete_write(history_write, kind).map_err(anyhow::Error::msg)?;
     Ok(ConditionalWriteResult {
         status: ConditionalWriteStatus::Success,
         revision: file_write_revision_unlocked(path)?,
@@ -1636,12 +1657,18 @@ pub mod cmd {
         file_path: String,
         content: String,
         expected_revision: String,
+        history_kind: Option<String>,
     ) -> Result<ConditionalWriteResult, String> {
         tokio::task::spawn_blocking(move || {
-            fc::conditional_write_file(
+            fc::conditional_write_file_with_kind(
                 Path::new(&file_path),
                 content.as_bytes(),
                 &expected_revision,
+                match history_kind.as_deref() {
+                    Some("autosave") => "autosave",
+                    Some("overwrite") => "overwrite",
+                    _ => "save",
+                },
             )
         })
         .await

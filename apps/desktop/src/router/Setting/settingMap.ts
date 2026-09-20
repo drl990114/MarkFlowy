@@ -575,6 +575,20 @@ export const getSettingMap = () => {
       },
     },
 
+    history: {
+      i18nKey: 'history.title',
+      iconName: 'ri-history-line',
+      desc: { i18nKey: 'history.description' },
+      Protection: {
+        i18nKey: 'history.title',
+        enabled: {
+          key: 'local_history_enabled',
+          type: 'switch',
+          title: { i18nKey: 'history.enabled' },
+          desc: { i18nKey: 'history.enabled_description' },
+        },
+      },
+    },
     keyboard: {
       i18nKey: 'settings.keyboard.label',
       iconName: 'ri-keyboard-fill',

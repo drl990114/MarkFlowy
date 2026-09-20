@@ -32,6 +32,14 @@ pub struct Request {
     pub format: Option<String>,
     pub overwrite: bool,
     pub deadline: u64,
+    #[serde(default)]
+    pub session_id: Option<String>,
+    #[serde(default)]
+    pub operation_id: Option<String>,
+    #[serde(default)]
+    pub message: Option<String>,
+    #[serde(default)]
+    pub offset: u32,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -146,7 +154,15 @@ fn parse(args: &[String], cwd: &Path) -> Result<Request, String> {
         };
         if !matches!(
             name,
-            "--window-id" | "--timeout" | "--wait" | "--sha256" | "--output" | "--format"
+            "--window-id"
+                | "--timeout"
+                | "--wait"
+                | "--sha256"
+                | "--output"
+                | "--format"
+                | "--request-id"
+                | "--message"
+                | "--offset"
         ) {
             return Err(format!("Unknown option: {name}"));
         }
@@ -168,7 +184,11 @@ fn parse(args: &[String], cwd: &Path) -> Result<Request, String> {
     }
     let (operation, target) = match positional.as_slice() {
         ["open", path] => ("open", *path),
-        ["file", action @ ("open" | "status" | "wait" | "export"), path] => (*action, *path),
+        ["file", action @ ("open" | "status" | "wait" | "export" | "save"), path] => (*action, *path),
+        ["history", "begin", path] => ("historyBegin", *path),
+        ["history", "commit", session] => ("historyCommit", *session),
+        ["history", "status", session] => ("historyStatus", *session),
+        ["history", "list", path] => ("historyList", *path),
         ["command", "execute", id] => ("command", *id),
         ["window", "focus", id] => ("focus", *id),
         _ => return Err("Expected open <path>, file <open|status|wait|export> <path>, command execute <id>, or window focus <id>".into()),
@@ -204,8 +224,43 @@ fn parse(args: &[String], cwd: &Path) -> Result<Request, String> {
     if flags.contains("--preview") && operation != "open" {
         return Err("--preview requires file open".into());
     }
-    let is_file = !matches!(operation, "command" | "focus");
-    if !is_file && (expected.is_some() || options.contains_key("--wait")) {
+    let is_file = !matches!(
+        operation,
+        "command" | "focus" | "historyCommit" | "historyStatus"
+    );
+    if matches!(operation, "save" | "historyCommit") && expected.is_none() {
+        return Err("This command requires --sha256".into());
+    }
+    if matches!(operation, "save" | "historyBegin") && !options.contains_key("--request-id") {
+        return Err("This command requires --request-id".into());
+    }
+    if options.contains_key("--request-id") && !matches!(operation, "save" | "historyBegin") {
+        return Err("--request-id requires file save or history begin".into());
+    }
+    if options.get("--request-id").is_some_and(|id| id.len() > 200) {
+        return Err("--request-id must be at most 200 bytes".into());
+    }
+    if options.contains_key("--message") && operation != "historyCommit" {
+        return Err("--message requires history commit".into());
+    }
+    if options
+        .get("--message")
+        .is_some_and(|message| message.len() > 2000)
+    {
+        return Err("--message must be at most 2000 bytes".into());
+    }
+    if options.contains_key("--offset") && operation != "historyList" {
+        return Err("--offset requires history list".into());
+    }
+    let offset = options
+        .get("--offset")
+        .unwrap_or(&"0")
+        .parse::<u32>()
+        .map_err(|_| "Invalid history offset")?;
+    if !is_file
+        && operation != "historyCommit"
+        && (expected.is_some() || options.contains_key("--wait"))
+    {
         return Err("Content options require a file command".into());
     }
     let path = is_file.then(|| absolute(target, cwd).to_string_lossy().into_owned());
@@ -243,11 +298,38 @@ fn parse(args: &[String], cwd: &Path) -> Result<Request, String> {
         format,
         overwrite: flags.contains("--overwrite"),
         deadline: now_ms() + timeout,
+        session_id: matches!(operation, "historyCommit" | "historyStatus").then(|| target.into()),
+        operation_id: options.get("--request-id").map(|s| s.to_string()),
+        message: options.get("--message").map(|s| s.to_string()),
+        offset,
     })
 }
 
 fn prepare(request: &mut Request) -> Result<(), Receipt> {
     if let Some(path) = &request.path {
+        if matches!(request.operation.as_str(), "historyBegin" | "historyList")
+            && !Path::new(path).exists()
+        {
+            let parent = Path::new(path)
+                .parent()
+                .and_then(|p| fs::canonicalize(p).ok())
+                .ok_or_else(|| {
+                    Receipt::error(
+                        &request.request_id,
+                        "file_unavailable",
+                        "Parent directory unavailable",
+                    )
+                })?;
+            request.path = Some(
+                parent
+                    .join(Path::new(path).file_name().ok_or_else(|| {
+                        Receipt::error(&request.request_id, "invalid_arguments", "Missing filename")
+                    })?)
+                    .to_string_lossy()
+                    .into_owned(),
+            );
+            return Ok(());
+        }
         let path = fs::canonicalize(path)
             .map_err(|error| Receipt::error(&request.request_id, "file_unavailable", error))?;
         if path.is_dir() {
@@ -265,7 +347,7 @@ fn prepare(request: &mut Request) -> Result<(), Receipt> {
                 "unsupported_file",
                 "Expected a regular file",
             ));
-        } else if request.expected_sha256.is_none() {
+        } else if request.expected_sha256.is_none() && request.operation != "historyList" {
             // Match the editor's decoding (including BOM/UTF-16), not raw disk bytes.
             match super::fc::read_file_snapshot(&path) {
                 super::fc::FileSnapshotResult::Success { content, .. } => {
@@ -323,7 +405,7 @@ pub fn run_client_if_requested() {
     }
     if !matches!(
         args.first().map(String::as_str),
-        Some("open" | "file" | "command" | "window")
+        Some("open" | "file" | "command" | "window" | "history")
     ) {
         return;
     }
@@ -677,6 +759,36 @@ mod tests {
         )
         .unwrap()
     }
+    #[test]
+    fn history_and_save_parser_separate_session_and_transport_identity() {
+        let r = request(&["history", "begin", "a.md", "--request-id", "edit-1"]);
+        assert_eq!(r.operation, "historyBegin");
+        assert_eq!(r.operation_id.as_deref(), Some("edit-1"));
+        assert!(r.request_id.is_empty());
+        let hash = "a".repeat(64);
+        let r = request(&[
+            "history",
+            "commit",
+            "session-1",
+            "--sha256",
+            &hash,
+            "--message",
+            "One task",
+        ]);
+        assert_eq!(r.session_id.as_deref(), Some("session-1"));
+        assert!(r.path.is_none());
+        assert!(parse(
+            &["file".into(), "save".into(), "a.md".into()],
+            Path::new("/tmp")
+        )
+        .is_err());
+        assert!(parse(
+            &["history".into(), "begin".into(), "a.md".into()],
+            Path::new("/tmp")
+        )
+        .is_err());
+    }
+
     #[test]
     fn parser_preserves_targets_and_rejects_invalid_options() {
         let parsed = request(&[

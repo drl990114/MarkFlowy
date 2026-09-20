@@ -1,3 +1,4 @@
+import { HistorySetting } from './HistorySetting'
 import Logo from '@/assets/logo.svg?react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -227,6 +228,7 @@ function Setting({ navigationRequest }: SettingProps) {
   }
 
   const renderCurrentSettingData = () => {
+    if (curGroupKey === 'history') return <HistorySetting />
     if (curGroupKey === 'keyboard') return <KeyboardTable />
     if (curGroupKey === 'themeStore') return <ThemeStore />
     if (curGroupKey === 'image') return <ImageSetting />

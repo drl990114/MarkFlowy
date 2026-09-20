@@ -1,6 +1,6 @@
 ---
 name: markflowy
-description: Open local Markdown files in MarkFlowy, confirm that requested content is displayed, and export a specific file to a chosen destination using verified CLI receipts. Use when the user wants an AI-created or edited document shown or exported in MarkFlowy.
+description: Protect and group AI document edits into local history, save editor drafts, open and verify local Markdown files, and export documents with verified MarkFlowy CLI receipts. Use when the user wants documents edited, versioned, shown, saved, or exported in MarkFlowy.
 ---
 
 # MarkFlowy
@@ -11,7 +11,23 @@ Run `markflowy status` to check `cliProtocolVersion: 1`. If the command is missi
 
 Use `markflowy window list` to identify the user's target workspace/window. Preserve an explicitly requested window ID; a missing window is an error. With no running app, `file open` can launch it and return the selected `windowId`. Use that ID for follow-up commands.
 
-Create or edit the user's local file with the available file tools. Prefer UTF-8 without BOM for generated Markdown. Then hand it off:
+Before editing a document, check that `status.capabilities` includes `localHistoryV1`. Protect the original and obtain a session ID:
+
+```sh
+markflowy history begin "/absolute/path/report.md" --request-id "<unique-edit-operation-id>" --window-id main --json
+```
+
+Only edit after `history_started` confirms an active session. Keep using the available file editing tools for all patches in the task. After validating the final content, commit **once for the whole edit**, using the SHA-256 of the final decoded text:
+
+```sh
+markflowy history commit "<sessionId>" --sha256 "<final-text-sha256>" --message "Restructure the introduction" --window-id main --json
+```
+
+Do not create a version for each patch. The watcher groups intermediate writes into this session. `history_committed` confirms one durable version; `no_changes` means no new version was necessary. Preserve the returned version ID as evidence. On timeout, query `history status <sessionId>`; retry begin with the same request ID and commit with the same session ID and arguments. A disabled history feature, a cleared/interrupted session, or conflicting unsaved drafts is an explicit failure. Stop editing and report it; do not silently enable history, clear history, or bypass protection.
+
+For an existing editor draft, `file save <path> --sha256 <draft-text-sha256> --request-id <unique-save-operation-id>` saves the draft and, when enabled, records history. Check `file_saved`, the SHA-256 and `historyCreated`; history can be disabled while file saving succeeds. History commit captures disk content and does not save the editor draft.
+
+Prefer UTF-8 without BOM for generated Markdown. Then hand it off:
 
 ```sh
 markflowy file open "/absolute/path/report.md" --preview --wait applied --window-id main --json

@@ -83,6 +83,28 @@ describe('external file changes', () => {
     vi.useRealTimers()
   })
 
+  it('coalesces a thousand notifications while a read is in flight', async () => {
+    let finishRead!: (value: unknown) => void
+    let reads = 0
+    invoke.mockImplementation(async (command: string) => {
+      if (command !== 'get_file_snapshot') throw new Error(command)
+      reads++
+      if (reads === 1)
+        return new Promise((resolve) => {
+          finishRead = resolve
+        })
+      return { status: 'success', content: 'final', revision: 'disk:final' }
+    })
+    const first = emitChange()
+    await vi.advanceTimersByTimeAsync(0)
+    const pending = Array.from({ length: 1000 }, () => emitChange())
+    finishRead({ status: 'success', content: 'intermediate', revision: 'disk:middle' })
+    await vi.advanceTimersByTimeAsync(1000)
+    await Promise.all([first, ...pending])
+    expect(reads).toBe(2)
+    expect(getFileObject(fileId).content).toBe('final')
+  })
+
   it('auto-loads a stable external update for a clean editor and clears its notice after 3s', async () => {
     useEditorStateStore.getState().setIdStateMap(fileId, { hasUnsavedChanges: false })
     mockStableDisk('external', 'disk:new')
@@ -163,7 +185,9 @@ describe('external file changes', () => {
         result: { code, content: '' },
       })
 
-      await emitChange()
+      const inspection = emitChange()
+      await vi.advanceTimersByTimeAsync(3000)
+      await inspection
 
       expect(getFileObject(fileId).content).toBe('local')
       expect(fileSaveCoordinator.getDiskRevision(fileId)).toBe('disk:old')
@@ -196,6 +220,7 @@ describe('external file changes', () => {
         expect(args).toMatchObject({
           content: 'local',
           expectedRevision: 'disk:newest',
+          historyKind: 'overwrite',
           filePath,
         })
         return { revision: 'disk:written', status: 'success' }

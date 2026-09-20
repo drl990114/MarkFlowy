@@ -7,6 +7,7 @@ mod app;
 mod fc;
 mod file_copy;
 mod font;
+mod local_history;
 mod menu;
 mod pandoc;
 mod reliable_cli;
@@ -84,6 +85,8 @@ pub struct CliRuntimeState {
     pub pid: Option<u32>,
     pub windows: Vec<CliWindowState>,
     pub commands: Vec<CliCommandState>,
+    #[serde(default)]
+    pub capabilities: Vec<String>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -295,6 +298,11 @@ Commands:
   file open <path> [--window-id <id>]  Open a file
   file status <path>                   Query live file/content state
   file wait <path>                     Wait until requested content is visible
+  history begin <path> --request-id <id>
+  history commit <session> --sha256 <hash> --message <text>
+  history status <session>
+  history list <path> [--offset <n>]
+  file save <path> --sha256 <hash> --request-id <id>
   file export <path> --format <format> --output <path>
                                       Export the specified file and verify output
   window list                          Print windows with workspace paths
@@ -496,10 +504,13 @@ fn write_cli_runtime_state(state: &CliRuntimeState) -> Result<(), String> {
         fs::create_dir_all(parent).map_err(|e| e.to_string())?;
     }
 
-    let mut temp = tempfile::NamedTempFile::new_in(path.parent().ok_or("Missing runtime directory")?)
-        .map_err(|error| error.to_string())?;
+    let mut temp =
+        tempfile::NamedTempFile::new_in(path.parent().ok_or("Missing runtime directory")?)
+            .map_err(|error| error.to_string())?;
     serde_json::to_writer(&mut temp, state).map_err(|error| error.to_string())?;
-    temp.as_file().sync_all().map_err(|error| error.to_string())?;
+    temp.as_file()
+        .sync_all()
+        .map_err(|error| error.to_string())?;
     temp.persist(path).map_err(|error| error.to_string())?;
     Ok(())
 }
@@ -541,6 +552,7 @@ fn collect_cli_runtime_windows(app: &tauri::AppHandle) -> Vec<CliWindowState> {
 fn apply_cli_runtime_patch(state: &mut CliRuntimeState, patch: CliRuntimePatch) {
     state.version = env!("CARGO_PKG_VERSION").to_string();
     state.pid = Some(std::process::id());
+    state.capabilities = vec!["localHistoryV1".into(), "fileSaveV1".into()];
 
     match patch {
         CliRuntimePatch::Windows(windows) => state.windows = windows,
@@ -1703,6 +1715,7 @@ pub fn run() {
             reliable_cli::cli_complete,
             reliable_cli::cli_write_export,
             reliable_cli::cli_hash_content,
+            local_history::local_history,
         ])
         .setup(|app: &mut tauri::App| {
             cli_debug!("========================================");
@@ -1805,6 +1818,7 @@ pub fn run() {
                 APP_DIR.lock().unwrap().insert(0, home_dir_path);
             }
 
+            local_history::configure(app.handle());
             let opened_urls: State<OpenedUrls> = app.state();
             let file_urls = opened_urls.inner().to_owned();
 

@@ -7,7 +7,19 @@ import { invoke } from '@tauri-apps/api/core'
 export interface CliRequest {
   protocolVersion: number
   requestId: string
-  operation: 'open' | 'workspace' | 'status' | 'wait' | 'export' | 'command' | 'focus'
+  operation:
+    | 'open'
+    | 'workspace'
+    | 'status'
+    | 'wait'
+    | 'export'
+    | 'command'
+    | 'focus'
+    | 'save'
+    | 'historyBegin'
+    | 'historyCommit'
+    | 'historyStatus'
+    | 'historyList'
   path: string | null
   windowId: string | null
   commandId: string | null
@@ -17,6 +29,10 @@ export interface CliRequest {
   output: string | null
   format: CliExportFormat | null
   overwrite: boolean
+  sessionId?: string
+  operationId?: string
+  message?: string
+  offset?: number
   deadline: number
 }
 

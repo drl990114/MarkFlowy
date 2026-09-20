@@ -120,6 +120,9 @@ path = "../../../crates/utils"
 [dependencies.mf_file_search]
 path = "../../../crates/file_search"
 
+[dependencies.mf_local_history]
+path = "../../../crates/local_history"
+
 [dependencies.download_npm]
 path = "../../../crates/download_npm"
 

@@ -73,6 +73,9 @@ function createHarness(initialContent = 'A', visibleSibling = false) {
   const capricornStatisticsScheduler = { cancel: vi.fn(), schedule: vi.fn() }
   const capricornRuntimeAdapter = {}
   const bindings: Record<string, unknown> = {
+    protectLocalEdit: vi.fn(),
+    historyFileSaved: vi.fn(),
+    endHistoryBatch: vi.fn().mockResolvedValue(undefined),
     groupId: 'group',
     id: 'file',
     EditorViewType,

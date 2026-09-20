@@ -1,3 +1,10 @@
+import {
+  observeHistoryFile,
+  endHistoryBatch,
+  protectLocalEdit,
+  historyFileSaved,
+  isHistoryAutosavePaused,
+} from '@/services/local-history'
 import { bindEditorResume, bindSourceEditorResume } from './editorResume'
 import { editorAutomationRegistry, type EditorAutomationHandle } from './editorAutomationRegistry'
 import { exportHtmlDocument } from './exportHtmlDocument'
@@ -341,6 +348,8 @@ type SaveHandlerParams = {
    * when active is false, saveHandler will save when editor is active.
    */
   active?: boolean
+  autosave?: boolean
+  expectedContent?: string
   onSuccess?: () => void
   onFinally?: () => void
 }
@@ -1068,6 +1077,9 @@ function TextEditor(props: TextEditorProps) {
   const insertNodeToFolderData = useEditorStore((state) => state.insertNodeToFolderData)
   const { t } = useTranslation()
   const autosave = useAppSettingStore((state) => state.settingData.autosave)
+  const dirtyForAutosave = useEditorStateStore(
+    (state) => state.idStateMap.get(id)?.hasUnsavedChanges,
+  )
   const codeBlockLineWrapping = useAppSettingStore(
     (state) => state.settingData.wysiwyg_editor_codemirror_line_wrap ?? true,
   )
@@ -1499,6 +1511,9 @@ function TextEditor(props: TextEditorProps) {
         if (snapshot.status === 'success') {
           recordEditorOpenContent(openRequestId, snapshot.content)
           fileSaveCoordinator.setDiskRevision(id, snapshot.revision)
+          void observeHistoryFile(id, snapshot.content).catch((error) =>
+            logger.error('History baseline failed', error),
+          )
           setContent(snapshot.content)
           updateCachedFileContent(snapshot.content)
           recordEditorOpenStage(openRequestId, 'host-content-ready', {
@@ -1565,6 +1580,13 @@ function TextEditor(props: TextEditorProps) {
     async (params: SaveHandlerParams = {}) => {
       return runSaveOperation(async () => {
         if (!active && !params.active) return false
+        if (
+          params.autosave &&
+          (!useAppSettingStore.getState().settingData.autosave ||
+            isHistoryAutosavePaused(id) ||
+            !getFileObject(id)?.path)
+        )
+          return false
 
         const fileBeforeFlush = getFileObject(id) ?? curFile
         if (!fileBeforeFlush) return false
@@ -1572,10 +1594,22 @@ function TextEditor(props: TextEditorProps) {
         const curEditorState = useEditorStateStore.getState().idStateMap.get(fileBeforeFlush.id)
 
         if (!editorSnapshotRegistry.canRead(id)) return false
-        if (!curEditorState?.hasUnsavedChanges) return true
+        if (!curEditorState?.hasUnsavedChanges) {
+          if (!params.autosave) await endHistoryBatch(id)
+          // Editing can resume while the native batch boundary is being committed.
+          if (!useEditorStateStore.getState().idStateMap.get(id)?.hasUnsavedChanges) {
+            historyFileSaved(id)
+            return true
+          }
+        }
         if (isExternalFileSaveBlocked(id)) return false
 
         if (!editorSnapshotRegistry.flush(id)) return false
+        if (
+          params.expectedContent !== undefined &&
+          useEditorStore.getState().getEditorContent(id) !== params.expectedContent
+        )
+          return false
         const initialFile = getFileObject(id) ?? fileBeforeFlush
         const sharedContent =
           typeof initialFile.content === 'string'
@@ -1687,7 +1721,16 @@ function TextEditor(props: TextEditorProps) {
                       targetPath,
                       fileContent,
                       expectedRevision,
-                      () => !isExternalFileSaveBlocked(id),
+                      () =>
+                        !isExternalFileSaveBlocked(id) &&
+                        (!params.autosave ||
+                          (useAppSettingStore.getState().settingData.autosave &&
+                            !isHistoryAutosavePaused(id))) &&
+                        (params.expectedContent === undefined ||
+                          useEditorStore.getState().getEditorContent(id) ===
+                            params.expectedContent),
+                      undefined,
+                      params.autosave ? 'autosave' : 'save',
                     )
                     if (writeResult.status === 'blocked') return false
                     if (writeResult.status === 'conflict') {
@@ -1729,7 +1772,16 @@ function TextEditor(props: TextEditorProps) {
                       currentPath,
                       fileContent,
                       expectedRevision,
-                      () => !isExternalFileSaveBlocked(id),
+                      () =>
+                        !isExternalFileSaveBlocked(id) &&
+                        (!params.autosave ||
+                          (useAppSettingStore.getState().settingData.autosave &&
+                            !isHistoryAutosavePaused(id))) &&
+                        (params.expectedContent === undefined ||
+                          useEditorStore.getState().getEditorContent(id) ===
+                            params.expectedContent),
+                      undefined,
+                      params.autosave ? 'autosave' : 'save',
                     ),
                 })
                 if (queuedWrite.status === 'missing-path') return false
@@ -1767,9 +1819,15 @@ function TextEditor(props: TextEditorProps) {
             useEditorStateStore.getState().setIdStateMap(id, {
               hasUnsavedChanges: false,
             })
+            historyFileSaved(id)
           },
           {
             canAttempt: () =>
+              (params.expectedContent === undefined ||
+                useEditorStore.getState().getEditorContent(id) === params.expectedContent) &&
+              (!params.autosave ||
+                (useAppSettingStore.getState().settingData.autosave &&
+                  !isHistoryAutosavePaused(id))) &&
               !isExternalFileSaveBlocked(id) &&
               editorSnapshotRegistry.canRead(id) &&
               !editorSnapshotRegistry.hasPending(id),
@@ -1780,9 +1838,11 @@ function TextEditor(props: TextEditorProps) {
     [active, id, delegate, t, insertNodeToFolderData, snapshotPublisher],
   )
 
-  const debounceSave = useDebouncedAutosave(() => saveHandler({ active: true }), {
+  const debounceSave = useDebouncedAutosave(() => saveHandler({ active: true, autosave: true }), {
     active,
     flushOnDeactivate: autosave && Boolean(getFileObject(id)?.path),
+    enabled: autosave,
+    dirty: dirtyForAutosave,
     wait: autosaveInterval,
   })
 
@@ -1819,8 +1879,6 @@ function TextEditor(props: TextEditorProps) {
 
   const debounceSaveHandler = useCallback(() => {
     if (debounceSave && !isExternalFileSaveBlocked(id)) {
-      debounceSaveHandlerCacheRef.current?.cancel()
-
       debounceSaveHandlerCacheRef.current = debounceSave
       debounceSave()
     }
@@ -1850,6 +1908,7 @@ function TextEditor(props: TextEditorProps) {
         hasUnsavedChanges: true,
       })
       emitContentSync(newContent)
+      protectLocalEdit(id)
     },
     [
       active,
@@ -2292,6 +2351,7 @@ function TextEditor(props: TextEditorProps) {
           undoDepth: helpers.undoDepth(),
         })
         editorSnapshotRegistry.changed(id, instanceIdRef.current!)
+        protectLocalEdit(id)
 
         const coalesce = delegate.view === 'Wysiwyg' && shouldCoalesceEditorSnapshots()
         const snapshot: PendingEditorSnapshot = {
@@ -2397,8 +2457,10 @@ function TextEditor(props: TextEditorProps) {
           hasUnsavedChanges: true,
         })
       }
-      if (event?.documentChanged !== false)
+      if (event?.documentChanged !== false) {
         editorSnapshotRegistry.changed(id, instanceIdRef.current!)
+        protectLocalEdit(id)
+      }
       if (event?.documentChanged !== false && activeRef.current) {
         capricornStatisticsScheduler.schedule(capricornRuntimeAdapterRef.current)
       }
@@ -2698,31 +2760,47 @@ function TextEditor(props: TextEditorProps) {
   }, [currentViewType, filePath, groupId, id, resumeCapricorn, resumeSource, status, visible])
 
   const openingFailed = status !== TextEditorStatus.LOADING && status !== TextEditorStatus.SUCCESS
-  const openingPending = !openingFailed && (
-    typeof content !== 'string' ||
-    (isCapricornView(currentViewType) ? runtimePending :
-      currentViewType === EditorViewType.SOURCECODE ? !resumeSource : false)
-  )
+  const openingPending =
+    !openingFailed &&
+    (typeof content !== 'string' ||
+      (isCapricornView(currentViewType)
+        ? runtimePending
+        : currentViewType === EditorViewType.SOURCECODE
+          ? !resumeSource
+          : false))
   useLayoutEffect(() => {
     onLoadingChange?.(openingPending)
   }, [onLoadingChange, openingPending])
 
   useLayoutEffect(() => {
     automationHandleRef.current = {
+      save: (expectedContent) => saveHandler({ active: true, expectedContent }),
       inspect: () => ({
         active: activeRef.current,
-        visible: visibleRef.current && !!editorWrapperRef.current?.isConnected && document.visibilityState !== 'hidden',
-        ready: !openingPending && !openingFailed && !needsMountedContentSyncRef.current &&
-          (isCapricornView(currentViewType) ? !!capricornRuntimeAdapterRef.current :
-            currentViewType === EditorViewType.SOURCECODE ? !!resumeSource &&
-              sourceCodeViewRegistry.get(id, instanceIdRef.current!) === resumeSource &&
-              resumeSource.cm.dom.isConnected : !!editorRef.current &&
-              !!editorWrapperRef.current?.querySelector('.mf-preview-content') &&
-              !editorWrapperRef.current?.querySelector('.mf-preview-loading')),
+        visible:
+          visibleRef.current &&
+          !!editorWrapperRef.current?.isConnected &&
+          document.visibilityState !== 'hidden',
+        ready:
+          !openingPending &&
+          !openingFailed &&
+          !needsMountedContentSyncRef.current &&
+          (isCapricornView(currentViewType)
+            ? !!capricornRuntimeAdapterRef.current
+            : currentViewType === EditorViewType.SOURCECODE
+              ? !!resumeSource &&
+                sourceCodeViewRegistry.get(id, instanceIdRef.current!) === resumeSource &&
+                resumeSource.cm.dom.isConnected
+              : !!editorRef.current &&
+                !!editorWrapperRef.current?.querySelector('.mf-preview-content') &&
+                !editorWrapperRef.current?.querySelector('.mf-preview-loading')),
         mode: currentViewType,
-        error: openingFailed ? `File loading failed (${TextEditorStatus[status]}).` :
-          isCapricornView(currentViewType) ? cliRuntimeErrorRef.current :
-            editorWrapperRef.current?.querySelector('.mf-preview-error')?.textContent || undefined,
+        error: openingFailed
+          ? `File loading failed (${TextEditorStatus[status]}).`
+          : isCapricornView(currentViewType)
+            ? cliRuntimeErrorRef.current
+            : editorWrapperRef.current?.querySelector('.mf-preview-error')?.textContent ||
+              undefined,
       }),
       readContent: () => {
         editorSnapshotRegistry.flushForRead(id)
@@ -2739,7 +2817,8 @@ function TextEditor(props: TextEditorProps) {
       },
       preview: () => {
         if (currentViewType === EditorViewType.PREVIEW) return
-        if (!fileTypeConfig.supportedModes.includes(EditorViewType.PREVIEW)) throw new Error('Preview is unavailable for this file type.')
+        if (!fileTypeConfig.supportedModes.includes(EditorViewType.PREVIEW))
+          throw new Error('Preview is unavailable for this file type.')
         editorSnapshotRegistry.flushForRead(id)
         const markdown = automationHandleRef.current!.readContent()
         clearSwitchingEditorContextResource(id, instanceIdRef.current!)
@@ -2760,15 +2839,20 @@ function TextEditor(props: TextEditorProps) {
         if (format === 'markdown') return new TextEncoder().encode(markdown)
         const capricorn = isCapricornView(currentViewType) ? capricornEditorRef.current : null
         if (format === 'text' || format === 'json') {
-          if (!capricorn) throw new Error('This export format requires the Markdown preview or editor.')
+          if (!capricorn)
+            throw new Error('This export format requires the Markdown preview or editor.')
           return new TextEncoder().encode(await capricorn.export(format))
         }
         if (format === 'html') {
           if (capricorn) await capricorn.waitForResources()
           else await waitForEditorResourcesForExport(editorRef.current)
-          const html = capricorn ? await capricorn.export('html') : await editorRef.current?.exportHtml()
+          const html = capricorn
+            ? await capricorn.export('html')
+            : await editorRef.current?.exportHtml()
           if (typeof html !== 'string') throw new Error('HTML renderer is unavailable.')
-          return new TextEncoder().encode(exportHtmlDocument(html, editorWrapperRef.current, curFile.name))
+          return new TextEncoder().encode(
+            exportHtmlDocument(html, editorWrapperRef.current, curFile.name),
+          )
         }
         let dispose: (() => void) | undefined
         let restore: (() => void) | undefined
@@ -2783,21 +2867,35 @@ function TextEditor(props: TextEditorProps) {
             element = editorWrapperRef.current
           }
           if (!element) throw new Error('Image renderer is unavailable.')
-          restore = await prepareResourcesForExport(element, getFolderPathFromPath(getFileObject(id)?.path))
-          return new Uint8Array(canvasDataToBinary(await renderElementToImageDataUrl(element, true)))
+          restore = await prepareResourcesForExport(
+            element,
+            getFolderPathFromPath(getFileObject(id)?.path),
+          )
+          return new Uint8Array(
+            canvasDataToBinary(await renderElementToImageDataUrl(element, true)),
+          )
         } finally {
-          try { restore?.() } finally { dispose?.() }
+          try {
+            restore?.()
+          } finally {
+            dispose?.()
+          }
         }
       },
     }
   })
 
-  useEffect(() => editorAutomationRegistry.register(id, instanceIdRef.current!, {
-    inspect: () => automationHandleRef.current!.inspect(),
-    readContent: () => automationHandleRef.current!.readContent(),
-    preview: () => automationHandleRef.current!.preview(),
-    render: (format) => automationHandleRef.current!.render(format),
-  }), [id])
+  useEffect(
+    () =>
+      editorAutomationRegistry.register(id, instanceIdRef.current!, {
+        save: (expectedContent) => automationHandleRef.current!.save!(expectedContent),
+        inspect: () => automationHandleRef.current!.inspect(),
+        readContent: () => automationHandleRef.current!.readContent(),
+        preview: () => automationHandleRef.current!.preview(),
+        render: (format) => automationHandleRef.current!.render(format),
+      }),
+    [id],
+  )
 
   const getExportContent = useCallback(() => {
     return useEditorStore.getState().getEditorContent(id)

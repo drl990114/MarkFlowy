@@ -64,6 +64,7 @@ pub_struct!(AppConf {
     extensions_google_apikey: Option<String>,
     extensions_google_request_headers: Option<HashMap<String, String>>,
     autosave: Option<bool>,
+    local_history_enabled: Option<bool>,
     autosave_interval: Option<u32>,
     editor_root_font_family: Option<String>,
     editor_code_font_family: Option<String>,
@@ -646,6 +647,7 @@ impl AppConf {
             editor_root_line_height: Some("1.65".to_string()),
             md_editor_default_mode: Some("wysiwyg".to_string()),
             autosave: Some(false),
+            local_history_enabled: Some(true),
             autosave_interval: Some(2000),
             editor_root_font_family: Some("System Default".to_string()),
             editor_code_font_family: Some("Default Monospace".to_string()),
@@ -758,6 +760,7 @@ impl AppConf {
             dark_theme,
             language,
             autosave,
+            local_history_enabled,
             auto_update,
             webview_zoom,
             copilot_provider,
@@ -1003,7 +1006,7 @@ pub mod cmd {
         STARTUP_APPEARANCE_COMMAND_WRITE_QUEUE, STARTUP_APPEARANCE_WRITE_LOCK,
     };
     use crate::app::startup_io;
-    use tauri::{command, AppHandle, WebviewUrl, WebviewWindowBuilder};
+    use tauri::{command, AppHandle, Emitter, WebviewUrl, WebviewWindowBuilder};
 
     #[command]
     pub async fn get_app_conf(app: AppHandle) -> Result<AppConf, String> {
@@ -1030,7 +1033,22 @@ pub mod cmd {
             // Invalidate first: a crash before the config commit will fall back
             // to the still-valid old config instead of a mismatched palette.
             invalidate_startup_appearance_snapshot()?;
-            AppConf::default().try_reset_with_app(&app)
+            let current = AppConf::read_with_app(&app);
+            crate::local_history::init(&app)?;
+            let _file_guard = crate::fc::FILE_WRITE_MUTEX
+                .lock()
+                .map_err(|_| "File write lock unavailable".to_string())?;
+            crate::local_history::run(|s| s.set_enabled(true))?;
+            let result = AppConf::default().try_reset_with_app(&app);
+            if result.is_err() {
+                let enabled = current.local_history_enabled.unwrap_or(true);
+                crate::local_history::run(move |s| s.set_enabled(enabled))?;
+            }
+            let _ = app.emit(
+                "local-history-changed",
+                serde_json::json!({"operation":"enabled"}),
+            );
+            result
         })
         .await
         .map_err(|error| format!("Failed to join config reset: {error}"))?
@@ -1046,18 +1064,43 @@ pub mod cmd {
             let current = AppConf::read_with_app(&app);
             let candidate = current.clone().amend(data);
 
-            if startup_theme_identity_changed(&current, &candidate) {
+            let history_changed = current.local_history_enabled != candidate.local_history_enabled;
+            if history_changed {
+                crate::local_history::init(&app)?;
+            }
+            let _file_guard = if history_changed {
+                Some(
+                    crate::fc::FILE_WRITE_MUTEX
+                        .lock()
+                        .map_err(|_| "File write lock unavailable".to_string())?,
+                )
+            } else {
+                None
+            };
+            if history_changed {
+                let enabled = candidate.local_history_enabled.unwrap_or(true);
+                crate::local_history::run(move |s| s.set_enabled(enabled))?;
+            }
+            let result = if startup_theme_identity_changed(&current, &candidate) {
                 let _appearance_guard = STARTUP_APPEARANCE_WRITE_LOCK
                     .lock()
                     .map_err(|_| "Failed to lock startup appearance writer".to_string())?;
-                // Deleting before committing config makes every interruption
-                // safe: startup either reads the old config or the new config,
-                // never a stale appearance identity.
-                invalidate_startup_appearance_snapshot()?;
-                candidate.try_write_with_app(&app)
+                invalidate_startup_appearance_snapshot()
+                    .and_then(|_| candidate.try_write_with_app(&app))
             } else {
                 candidate.try_write_with_app(&app)
+            };
+            if result.is_err() && history_changed {
+                let enabled = current.local_history_enabled.unwrap_or(true);
+                crate::local_history::run(move |s| s.set_enabled(enabled))?;
             }
+            if history_changed {
+                let _ = app.emit(
+                    "local-history-changed",
+                    serde_json::json!({"operation":"enabled"}),
+                );
+            }
+            result
         })
         .await
         .map_err(|error| format!("Failed to join config writer: {error}"))?

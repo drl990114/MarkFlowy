@@ -670,14 +670,14 @@
           "desc": "Supported variables: ${documentPath} (parent folder path of current file), ${fileName} (current file name without extension). Example: ${documentPath}/photo/${fileName}"
         }
       },
-    "upload_img": {
-      "label": "Insert local image",
-      "when_upload_image": {
-        "label": "Local image insertion behavior",
-        "desc": "Choose the default behavior for local images selected from your computer, dropped into the editor, or pasted by screenshot software.",
-        "options": {
-          "insert_path": "Insert the original file path",
-          "save_to_local_absolute": "Save to Global Absolute Path",
+      "upload_img": {
+        "label": "Insert local image",
+        "when_upload_image": {
+          "label": "Local image insertion behavior",
+          "desc": "Choose the default behavior for local images selected from your computer, dropped into the editor, or pasted by screenshot software.",
+          "options": {
+            "insert_path": "Insert the original file path",
+            "save_to_local_absolute": "Save to Global Absolute Path",
             "save_to_local_relative": "Save to workspace relative path",
             "paste_as_base64": "Paste as Base64 encoding",
             "save_to_file_relative": "Save to a path relative to the current file"
@@ -1015,7 +1015,9 @@
       "loading": "Loading image…",
       "edit": "Edit address"
     },
-    "preview": { "retry": "Retry" },
+    "preview": {
+      "retry": "Retry"
+    },
     "editor": {
       "loading": "Loading Capricorn editor",
       "opening": "Opening document",
@@ -1050,5 +1052,57 @@
     "open_error": "Unable to open this link.",
     "copy_error": "Unable to copy this address.",
     "single_block": "Select text within one paragraph or table cell."
+  },
+  "history": {
+    "title": "Local history",
+    "description": "Review changes and restore a version as an unsaved draft.",
+    "enabled": "Enable local history",
+    "enabled_description": "Keep versions of documents opened in MarkFlowy. Unsaved draft protection continues when this is off.",
+    "retention": "Ordinary history: 30 days, up to 100 versions per document, with a 1 GB target budget. Unsaved drafts and active editing sessions are protected.",
+    "count": "{{count}} versions",
+    "clear_title": "Manage stored history",
+    "clear_description": "Delete history without deleting your files or unsaved drafts. New changes can create new history while the feature is enabled.",
+    "clear_workspace": "Delete current workspace history",
+    "clear_loose": "Delete independent document history",
+    "clear_all": "Delete all workspace history",
+    "clear_confirm": "Permanently delete {{count}} versions? Up to {{size}} MB of unshared content can be reclaimed. Files and unsaved drafts are kept.",
+    "all_workspaces": "All workspaces and independent documents",
+    "loose": "Independent documents",
+    "delete": "Delete history",
+    "empty": "No history yet.",
+    "previous": "Previous",
+    "next": "Next",
+    "before": "Before changes",
+    "after": "Latest result",
+    "refresh": "New changes available · refresh comparison",
+    "loading": "Loading comparison…",
+    "select": "Select a version to inspect its changes.",
+    "restore_before": "Restore before changes",
+    "restore": "Restore this version",
+    "merging": "Changes being grouped",
+    "kind_save": "Saved",
+    "kind_external": "External changes",
+    "kind_ai": "AI edit",
+    "kind_checkpoint": "Draft checkpoint",
+    "kind_restore": "Before restore",
+    "kind_discard": "Before discard",
+    "kind_overwrite": "Before overwrite",
+    "kind_autosave": "Auto saved",
+    "kind_opened": "Initial version",
+    "protected": "Draft protected",
+    "pending": "Protecting draft…",
+    "failed": "Draft protection failed",
+    "paused": "Restored draft · save manually",
+    "large": "Large document: showing original text.",
+    "compare_current": "Compare with current draft",
+    "compare_version": "Compare with another version",
+    "compare_batch": "Compare before / after",
+    "retry": "Retry protection",
+    "coarse": "Differences are simplified within the computation budget; full text is preserved.",
+    "compute_large": "Compute large-document differences",
+    "deleted": "Deleted {{count}} history versions.",
+    "kind_write-pending": "Interrupted file write",
+    "budget_limited": "History storage has reached its target budget. Automatic checkpoints and new AI sessions are paused; draft protection and safety copies continue. Delete unneeded history to resume.",
+    "kind_recovered-save": "Recovered save"
   }
 }

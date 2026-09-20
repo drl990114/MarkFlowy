@@ -14,6 +14,18 @@ import { createFile, updateFile } from '@/helper/filesys'
 import { logger } from '@/helper/logger'
 import useEditorStateStore from '@/stores/useEditorStateStore'
 import useEditorStore from '@/stores/useEditorStore'
+import { isTauri } from '@tauri-apps/api/core'
+import { getCurrentWindow } from '@tauri-apps/api/window'
+import {
+  bindRecoveredDraft,
+  draftProtectionStarted,
+  flushDraftProtection,
+  historyCall,
+  historyWorkspace,
+  isUntouchedRecoveredDraft,
+  startDraftProtection,
+  type PersistedDraft,
+} from './local-history'
 
 const documentSchema = z.object({
   id: z.string(),
@@ -94,6 +106,7 @@ export async function restoreDraftDocuments(
   documents: DraftDocument[],
   activeId?: string,
   signal?: AbortSignal,
+  preferExitSnapshot = false,
 ) {
   const restoredIds = new Map<string, string>()
   const previousActiveId = useEditorStore.getState().activeId
@@ -108,7 +121,12 @@ export async function restoreDraftDocuments(
     let path = disk?.status === 'success' ? doc.path : undefined
     const existing = path ? getFileObjectByPath(path) : undefined
     // Keep both versions if the user has already edited this file during startup.
-    if (existing && useEditorStateStore.getState().idStateMap.get(existing.id)?.hasUnsavedChanges)
+    if (
+      existing &&
+      useEditorStateStore.getState().idStateMap.get(existing.id)?.hasUnsavedChanges &&
+      useEditorStore.getState().getEditorContent(existing.id) !== doc.content &&
+      !(preferExitSnapshot && isUntouchedRecoveredDraft(existing.id))
+    )
       path = undefined
     const file =
       path && existing
@@ -132,6 +150,50 @@ export async function restoreDraftDocuments(
     (activeId && restoredIds.get(activeId)) || previousActiveId || restoredIds.values().next().value
   if (active && active !== useEditorStore.getState().activeId)
     useEditorStore.getState().setActiveId(active)
+  return restoredIds
+}
+
+export async function restoreBackgroundDrafts(signal?: AbortSignal) {
+  if (!isTauri()) return 0
+  try {
+    const drafts = await historyCall<PersistedDraft[]>('recoveryDrafts', {
+      workspace: historyWorkspace(),
+      ownerPrefix: `${getCurrentWindow().label}:`,
+    })
+    if (historyWorkspace())
+      drafts.push(
+        ...(await historyCall<PersistedDraft[]>('recoveryDrafts', {
+          workspace: '',
+          ownerPrefix: `${getCurrentWindow().label}:`,
+        })),
+      )
+    let count = 0
+    for (const draft of drafts) {
+      if (signal?.aborted) break
+      const ids = await restoreDraftDocuments(
+        [
+          {
+            id: draft.document.id,
+            name: draft.document.name,
+            path: draft.document.path ?? undefined,
+            ext: draft.document.name.match(/\.([^./\\]+)$/)?.[1].toLowerCase() ?? 'md',
+            content: draft.content,
+            diskRevision: draft.diskRevision,
+          },
+        ],
+        undefined,
+        signal,
+      )
+      const fileId = ids?.get(draft.document.id)
+      if (fileId) {
+        await bindRecoveredDraft(fileId, draft)
+        count++
+      }
+    }
+    return count
+  } finally {
+    await startDraftProtection()
+  }
 }
 
 /** Only call during startup, not a workspace switch after a cancelled reload. */
@@ -140,9 +202,11 @@ export async function restoreDraftReloadSession(signal?: AbortSignal) {
     const raw = window.sessionStorage.getItem(RELOAD_SESSION_KEY)
     if (raw) {
       const session = sessionSchema.parse(JSON.parse(raw))
-      await restoreDraftDocuments(session.documents, session.activeId, signal)
+      await restoreDraftDocuments(session.documents, session.activeId, signal, true)
       if (signal?.aborted) return 0
-      window.sessionStorage.removeItem(RELOAD_SESSION_KEY)
+      await flushDraftProtection()
+      if (!('__TAURI_INTERNALS__' in window) || draftProtectionStarted())
+        window.sessionStorage.removeItem(RELOAD_SESSION_KEY)
       return session.documents.length
     }
   } catch (error) {
@@ -166,10 +230,13 @@ export async function restoreDraftSession(cacheStore: DraftSessionStore, signal?
     }
     const session = parsed.data
     if (session.rootPath && session.rootPath !== rootPath) continue
-    await restoreDraftDocuments(session.documents, session.activeId, signal)
+    await restoreDraftDocuments(session.documents, session.activeId, signal, true)
     if (signal?.aborted) return count
-    await cacheStore.delete(key)
-    consumed = true
+    await flushDraftProtection()
+    if (!('__TAURI_INTERNALS__' in window) || draftProtectionStarted()) {
+      await cacheStore.delete(key)
+      consumed = true
+    }
     count += session.documents.length
   }
   if (consumed) await cacheStore.save()
@@ -187,6 +254,7 @@ export function closeWithDraftRecovery(
     'window-close',
     async (lease) => {
       const session = captureDraftSession()
+      await flushDraftProtection()
       if (!cacheStore && session.documents.length) throw new Error('Workspace cache is not ready.')
       // Publish before the read-only barrier discards deferred editor projections.
       flushSync(() => {

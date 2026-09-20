@@ -12,6 +12,7 @@ export interface EditorAutomationHandle {
   inspect: () => EditorAutomationState
   readContent: () => string
   preview: () => void
+  save?: (expectedContent: string) => Promise<boolean>
   render: (format: CliExportFormat) => Promise<Uint8Array>
 }
 

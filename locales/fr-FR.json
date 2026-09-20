@@ -604,14 +604,14 @@
           "desc": "Variables supportées: ${documentPath} (chemin du dossier parent du fichier actuel), ${fileName} (nom du fichier actuel sans extension). Exemple: ${documentPath}/photo/${fileName}"
         }
       },
-    "upload_img": {
-      "label": "Insérer une image locale",
-      "when_upload_image": {
-        "label": "Comportement d’insertion des images locales",
-        "desc": "Choisissez le comportement par défaut des images locales sélectionnées, déposées dans l’éditeur ou collées depuis un logiciel de capture.",
-        "options": {
-          "insert_path": "Insérer le chemin du fichier d’origine",
-          "save_to_local_absolute": "Enregistrer le chemin absolu global",
+      "upload_img": {
+        "label": "Insérer une image locale",
+        "when_upload_image": {
+          "label": "Comportement d’insertion des images locales",
+          "desc": "Choisissez le comportement par défaut des images locales sélectionnées, déposées dans l’éditeur ou collées depuis un logiciel de capture.",
+          "options": {
+            "insert_path": "Insérer le chemin du fichier d’origine",
+            "save_to_local_absolute": "Enregistrer le chemin absolu global",
             "save_to_local_relative": "Enregistrer le chemin relatif de la zone de travail",
             "paste_as_base64": "Collez pour l'encodage Base64",
             "save_to_file_relative": "Enregistrer le chemin d'accès au fichier actuel relatif"
@@ -1021,7 +1021,9 @@
       "loading": "Loading image…",
       "edit": "Edit address"
     },
-    "preview": { "retry": "Retry" }
+    "preview": {
+      "retry": "Retry"
+    }
   },
   "inline_insert": {
     "insert_link": "Insert link",
@@ -1050,5 +1052,57 @@
     "open_error": "Unable to open this link.",
     "copy_error": "Unable to copy this address.",
     "single_block": "Select text within one paragraph or table cell."
+  },
+  "history": {
+    "title": "Historique local",
+    "description": "Consultez les modifications et restaurez une version sous forme de brouillon non enregistré.",
+    "enabled": "Activer l’historique local",
+    "enabled_description": "Conserve les versions des documents ouverts dans MarkFlowy. La protection des brouillons reste active lorsque cette option est désactivée.",
+    "retention": "Historique ordinaire : 30 jours, jusqu’à 100 versions par document et un objectif de 1 Go. Les brouillons non enregistrés et les sessions actives sont protégés.",
+    "count": "{{count}} versions",
+    "clear_title": "Gérer l’historique",
+    "clear_description": "Supprime l’historique sans effacer vos fichiers ni vos brouillons. Les modifications suivantes peuvent créer de nouvelles versions si la fonction est activée.",
+    "clear_workspace": "Supprimer l’historique de l’espace actuel",
+    "clear_loose": "Supprimer l’historique des documents indépendants",
+    "clear_all": "Supprimer l’historique de tous les espaces",
+    "clear_confirm": "Supprimer définitivement {{count}} versions ? Jusqu’à {{size}} Mo de contenu non partagé peuvent être libérés. Les fichiers et brouillons sont conservés.",
+    "all_workspaces": "Tous les espaces et documents indépendants",
+    "loose": "Documents indépendants",
+    "delete": "Supprimer l’historique",
+    "empty": "Aucun historique pour le moment.",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "before": "Avant les modifications",
+    "after": "Dernier résultat",
+    "refresh": "Nouvelles modifications · actualiser la comparaison",
+    "loading": "Chargement de la comparaison…",
+    "select": "Sélectionnez une version pour consulter ses modifications.",
+    "restore_before": "Restaurer avant les modifications",
+    "restore": "Restaurer cette version",
+    "merging": "Regroupement des modifications",
+    "kind_save": "Enregistré",
+    "kind_external": "Modifications externes",
+    "kind_ai": "Modification par IA",
+    "kind_checkpoint": "Point de contrôle du brouillon",
+    "kind_restore": "Avant restauration",
+    "kind_discard": "Avant abandon",
+    "kind_overwrite": "Avant remplacement",
+    "kind_autosave": "Enregistrement automatique",
+    "kind_opened": "Version initiale",
+    "protected": "Brouillon protégé",
+    "pending": "Protection du brouillon…",
+    "failed": "Échec de la protection du brouillon",
+    "paused": "Brouillon restauré · enregistrer manuellement",
+    "large": "Document volumineux : affichage du texte original.",
+    "compare_current": "Comparer au brouillon actuel",
+    "compare_version": "Comparer à une autre version",
+    "compare_batch": "Comparer avant et après",
+    "retry": "Réessayer la protection",
+    "coarse": "Les différences sont simplifiées dans le temps de calcul imparti ; le texte complet est conservé.",
+    "compute_large": "Calculer les différences du document volumineux",
+    "deleted": "{{count}} versions supprimées.",
+    "kind_write-pending": "Écriture de fichier interrompue",
+    "kind_recovered-save": "Enregistrement récupéré",
+    "budget_limited": "L’historique a atteint sa capacité cible. Les points de contrôle automatiques et les nouvelles sessions IA sont suspendus ; les brouillons et copies de sécurité restent protégés. Supprimez l’historique inutile pour reprendre."
   }
 }

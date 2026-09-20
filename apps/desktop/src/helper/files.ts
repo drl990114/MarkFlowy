@@ -1,12 +1,10 @@
+import { invoke } from '@tauri-apps/api/core'
 import { create } from 'zustand'
 import { shallow } from 'zustand/vanilla/shallow'
 import type { IFile } from '@/helper/filesys'
 import { getPathIdentityKey, rebaseFilePath } from '@/helper/pathIdentity'
 import useRecentFilesStore from '@/stores/useRecentFilesStore'
-import {
-  findPathCollisions,
-  type PathRelationResolver,
-} from '@/helper/physicalPathIdentity'
+import { findPathCollisions, type PathRelationResolver } from '@/helper/physicalPathIdentity'
 
 interface FileCacheState {
   entries: Record<string, IFile>
@@ -184,7 +182,10 @@ export function deleteFileObjectsByIds(fileIds: string[]): string[] {
       if (requestedIds.has(file.id)) delete pathEntries[path]
     })
 
-    if (deletedIds.length === 0 && Object.keys(pathEntries).length === Object.keys(state.pathEntries).length) {
+    if (
+      deletedIds.length === 0 &&
+      Object.keys(pathEntries).length === Object.keys(state.pathEntries).length
+    ) {
       return state
     }
 
@@ -273,6 +274,12 @@ export function moveFileObjectsByPathPrefix(oldRootPath: string, newRootPath: st
   })
   // Closed history may have no cached tree node, so migrate it independently.
   useRecentFilesStore.getState().rebasePaths(oldRootPath, newRootPath)
+  if (typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window) {
+    void invoke('local_history', {
+      operation: 'rebase',
+      payload: { oldPath: oldRootPath, newPath: newRootPath },
+    }).catch((error) => console.error('History path update failed', error))
+  }
 }
 
 /** Remove a replaced file/folder and all cached descendants, returning their ids. */

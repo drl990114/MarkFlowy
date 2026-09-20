@@ -30,7 +30,11 @@ function visit(node: ts.Node) {
   if (ts.isCallExpression(node) && node.arguments[0]) {
     const hook = node.expression.getText(source)
     const body = node.arguments[0].getText(source)
-    if (hook === 'useLayoutEffect' && body.includes('needsMountedContentSyncRef') && body.includes('queueMicrotask')) {
+    if (
+      hook === 'useLayoutEffect' &&
+      body.includes('needsMountedContentSyncRef') &&
+      body.includes('queueMicrotask')
+    ) {
       expressions.set('reveal', node.arguments[0])
     }
     if (hook === 'useEffect' && body.includes('isUnmountingRef.current = true')) {
@@ -146,6 +150,8 @@ function createHarness({
       state.file = file
     },
     fileSaveCoordinator: coordinator,
+    historyFileSaved: vi.fn(),
+    endHistoryBatch: vi.fn().mockResolvedValue(undefined),
     useEditorStateStore: {
       getState: () => ({
         idStateMap: new Map([['file', { hasUnsavedChanges: state.dirty }]]),

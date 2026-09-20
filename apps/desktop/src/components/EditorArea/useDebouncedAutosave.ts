@@ -7,6 +7,8 @@ interface UseDebouncedAutosaveOptions {
   active: boolean
   flushOnDeactivate: boolean
   wait: number
+  enabled?: boolean
+  dirty?: boolean
 }
 
 /**
@@ -26,11 +28,20 @@ export function useDebouncedAutosave(
   }, [save])
 
   const debouncedSave = useMemo(
-    () => debounce(() => saveRef.current(), options.wait),
+    () =>
+      debounce(() => saveRef.current(), options.wait, { maxWait: Math.max(10000, options.wait) }),
     [options.wait],
   )
 
   useEffect(() => () => debouncedSave.cancel(), [debouncedSave])
+
+  useEffect(() => {
+    if (options.enabled === false) debouncedSave.cancel()
+  }, [debouncedSave, options.enabled])
+
+  useEffect(() => {
+    if (options.enabled && options.dirty) debouncedSave()
+  }, [debouncedSave, options.enabled, options.dirty])
 
   useEffect(() => {
     const wasActive = wasActiveRef.current

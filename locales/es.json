@@ -604,14 +604,14 @@
           "desc": "Variables soportadas: ${documentPath} (ruta de la carpeta padre del archivo actual), ${fileName} (nombre del archivo actual sin extensión). Ejemplo: ${documentPath}/photo/${fileName}"
         }
       },
-    "upload_img": {
-      "label": "Insertar imagen local",
-      "when_upload_image": {
-        "label": "Comportamiento de inserción de imágenes locales",
-        "desc": "Elige el comportamiento predeterminado para las imágenes locales seleccionadas, arrastradas al editor o pegadas desde un programa de captura.",
-        "options": {
-          "insert_path": "Insertar la ruta del archivo original",
-          "save_to_local_absolute": "Guardar en la ruta absoluta global",
+      "upload_img": {
+        "label": "Insertar imagen local",
+        "when_upload_image": {
+          "label": "Comportamiento de inserción de imágenes locales",
+          "desc": "Elige el comportamiento predeterminado para las imágenes locales seleccionadas, arrastradas al editor o pegadas desde un programa de captura.",
+          "options": {
+            "insert_path": "Insertar la ruta del archivo original",
+            "save_to_local_absolute": "Guardar en la ruta absoluta global",
             "save_to_local_relative": "Ruta relativa guardada en el área de trabajo",
             "paste_as_base64": "Pegar como código Base64",
             "save_to_file_relative": "Ruta guardada en el archivo actual relativo"
@@ -1021,7 +1021,9 @@
       "loading": "Loading image…",
       "edit": "Edit address"
     },
-    "preview": { "retry": "Retry" }
+    "preview": {
+      "retry": "Retry"
+    }
   },
   "inline_insert": {
     "insert_link": "Insert link",
@@ -1050,5 +1052,57 @@
     "open_error": "Unable to open this link.",
     "copy_error": "Unable to copy this address.",
     "single_block": "Select text within one paragraph or table cell."
+  },
+  "history": {
+    "title": "Historial local",
+    "description": "Revisa los cambios y restaura una versión como borrador sin guardar.",
+    "enabled": "Activar el historial local",
+    "enabled_description": "Conserva versiones de los documentos abiertos en MarkFlowy. La protección de borradores continúa al desactivarlo.",
+    "retention": "Historial ordinario: 30 días, hasta 100 versiones por documento y un objetivo de 1 GB. Se protegen los borradores sin guardar y las sesiones activas.",
+    "count": "{{count}} versiones",
+    "clear_title": "Gestionar el historial",
+    "clear_description": "Elimina el historial sin borrar archivos ni borradores. Los cambios posteriores pueden crear nuevas versiones si la función está activada.",
+    "clear_workspace": "Eliminar el historial del espacio actual",
+    "clear_loose": "Eliminar el historial de documentos independientes",
+    "clear_all": "Eliminar el historial de todos los espacios",
+    "clear_confirm": "¿Eliminar permanentemente {{count}} versiones? Se pueden recuperar hasta {{size}} MB de contenido no compartido. Se conservan los archivos y borradores.",
+    "all_workspaces": "Todos los espacios y documentos independientes",
+    "loose": "Documentos independientes",
+    "delete": "Eliminar historial",
+    "empty": "Aún no hay historial.",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "before": "Antes de los cambios",
+    "after": "Último resultado",
+    "refresh": "Hay cambios nuevos · actualizar comparación",
+    "loading": "Cargando comparación…",
+    "select": "Selecciona una versión para ver sus cambios.",
+    "restore_before": "Restaurar antes de los cambios",
+    "restore": "Restaurar esta versión",
+    "merging": "Agrupando cambios",
+    "kind_save": "Guardado",
+    "kind_external": "Cambios externos",
+    "kind_ai": "Edición con IA",
+    "kind_checkpoint": "Punto de control del borrador",
+    "kind_restore": "Antes de restaurar",
+    "kind_discard": "Antes de descartar",
+    "kind_overwrite": "Antes de sobrescribir",
+    "kind_autosave": "Guardado automático",
+    "kind_opened": "Versión inicial",
+    "protected": "Borrador protegido",
+    "pending": "Protegiendo borrador…",
+    "failed": "Error al proteger el borrador",
+    "paused": "Borrador restaurado · guardar manualmente",
+    "large": "Documento grande: se muestra el texto original.",
+    "compare_current": "Comparar con el borrador actual",
+    "compare_version": "Comparar con otra versión",
+    "compare_batch": "Comparar antes y después",
+    "retry": "Reintentar protección",
+    "coarse": "Las diferencias se simplifican dentro del tiempo de cálculo; el texto completo se conserva.",
+    "compute_large": "Calcular diferencias del documento grande",
+    "deleted": "Se eliminaron {{count}} versiones.",
+    "kind_write-pending": "Escritura de archivo interrumpida",
+    "kind_recovered-save": "Guardado recuperado",
+    "budget_limited": "El historial alcanzó su capacidad objetivo. Se pausan los puntos de control automáticos y las nuevas sesiones de IA; los borradores y las copias de seguridad siguen protegidos. Elimina historial innecesario para continuar."
   }
 }

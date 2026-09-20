@@ -3,6 +3,9 @@ import {
   resetExternalFileChanges,
 } from '@/components/EditorArea/externalFileChanges'
 import { logger } from '@/helper/logger'
+import useFileCacheStore, { getFileObject } from '@/helper/files'
+import { rebaseFilePath } from '@/helper/pathIdentity'
+import { dirname } from '@tauri-apps/api/path'
 import { currentWindow } from '@/services/windows'
 import { getWorkspace, type WorkSpace } from '@/services/workspace'
 import { useEditorStore } from '@/stores'
@@ -32,9 +35,53 @@ interface WorkSpaceStore {
 
 export const useWorkspaceWatcher = () => {
   const folderData = useEditorStore((state) => state.folderData)
+  const opened = useEditorStore((state) => state.opened)
+  useFileCacheStore((state) => state.metadataRevision)
   const setWorkspace = useWorkspaceStore((state) => state.setWorkspace)
 
   const rootPath = folderData?.[0]?.path
+  const loosePaths = JSON.stringify(
+    opened
+      .flatMap((id) => {
+        const path = getFileObject(id)?.path
+        return path && (!rootPath || rebaseFilePath(path, rootPath, rootPath) === undefined)
+          ? [path]
+          : []
+      })
+      .sort(),
+  )
+
+  useEffect(() => {
+    let stopped = false
+    const unwatchers: UnwatchFn[] = []
+    void (async () => {
+      const paths: string[] = JSON.parse(loosePaths)
+      const parents = new Set(await Promise.all(paths.map((path) => dirname(path))))
+      if (stopped) return
+      await Promise.all(
+        [...parents].map(async (parent) => {
+          try {
+            // Watch the parent so an atomic file replacement keeps being observed.
+            const unwatch = await watch(
+              parent,
+              (event) => {
+                void handleExternalWatchEvent(event)
+              },
+              { delayMs: 1000, recursive: false },
+            )
+            if (stopped) unwatch()
+            else unwatchers.push(unwatch)
+          } catch (error) {
+            logger.error('Failed to watch an independent document', error)
+          }
+        }),
+      )
+    })().catch((error) => logger.error('Failed to resolve document directories', error))
+    return () => {
+      stopped = true
+      unwatchers.forEach((unwatch) => unwatch())
+    }
+  }, [loosePaths])
 
   useEffect(() => {
     let stopped = false

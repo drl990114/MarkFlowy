@@ -62,7 +62,9 @@ function createHostChangeHandler(bindings: Record<string, unknown>) {
   const compiled = ts.transpileModule(`(${callback!.getText(source)})`, {
     compilerOptions: { target: ts.ScriptTarget.ES2022 },
   }).outputText
-  return runInNewContext(compiled, bindings) as (event?: CapricornEditorChangeEvent) => void
+  return runInNewContext(compiled, { protectLocalEdit: vi.fn(), ...bindings }) as (
+    event?: CapricornEditorChangeEvent,
+  ) => void
 }
 
 vi.mock('./capricornRuntimeAdapter', async (importOriginal) => ({

@@ -609,14 +609,14 @@
           "desc": "サポートされる変数：${documentPath}（現在のファイルの親フォルダパス）、${fileName}（拡張子なしの現在のファイル名）。例：${documentPath}/photo/${fileName}"
         }
       },
-    "upload_img": {
-      "label": "ローカル画像を挿入",
-      "when_upload_image": {
-        "label": "ローカル画像の挿入動作",
-        "desc": "コンピューターから選択、エディターへドロップ、またはスクリーンショットソフトから貼り付けたローカル画像の既定の動作を選択します。",
-        "options": {
-          "insert_path": "元のファイルパスを直接挿入",
-          "save_to_local_absolute": "グローバル絶対パスに保存",
+      "upload_img": {
+        "label": "ローカル画像を挿入",
+        "when_upload_image": {
+          "label": "ローカル画像の挿入動作",
+          "desc": "コンピューターから選択、エディターへドロップ、またはスクリーンショットソフトから貼り付けたローカル画像の既定の動作を選択します。",
+          "options": {
+            "insert_path": "元のファイルパスを直接挿入",
+            "save_to_local_absolute": "グローバル絶対パスに保存",
             "save_to_local_relative": "作業エリアへの相対パスを保存します",
             "paste_as_base64": "Base64エンコードに貼り付けます",
             "save_to_file_relative": "相対的な現在のファイルへのパスを保存します"
@@ -1021,7 +1021,9 @@
       "loading": "Loading image…",
       "edit": "Edit address"
     },
-    "preview": { "retry": "Retry" }
+    "preview": {
+      "retry": "Retry"
+    }
   },
   "inline_insert": {
     "insert_link": "Insert link",
@@ -1050,5 +1052,57 @@
     "open_error": "Unable to open this link.",
     "copy_error": "Unable to copy this address.",
     "single_block": "Select text within one paragraph or table cell."
+  },
+  "history": {
+    "title": "ローカル履歴",
+    "description": "変更を確認し、過去のバージョンを未保存の下書きとして復元します。",
+    "enabled": "ローカル履歴を有効にする",
+    "enabled_description": "MarkFlowy で開いた文書のバージョンを保存します。無効にしても下書きの保護は継続します。",
+    "retention": "通常の履歴は30日間、文書ごとに100バージョンまで、容量の目安は1 GBです。未保存の下書きと進行中の編集は保護されます。",
+    "count": "{{count}} バージョン",
+    "clear_title": "保存した履歴の管理",
+    "clear_description": "ファイルと未保存の下書きを残して履歴を削除します。有効な間は、その後の変更で新しい履歴が作成されます。",
+    "clear_workspace": "現在のワークスペースの履歴を削除",
+    "clear_loose": "独立した文書の履歴を削除",
+    "clear_all": "すべてのワークスペースの履歴を削除",
+    "clear_confirm": "{{count}} 件の履歴を完全に削除しますか？共有されていないデータを最大 {{size}} MB 解放できます。ファイルと未保存の下書きは保持されます。",
+    "all_workspaces": "すべてのワークスペースと独立した文書",
+    "loose": "独立した文書",
+    "delete": "履歴を削除",
+    "empty": "履歴はまだありません。",
+    "previous": "前へ",
+    "next": "次へ",
+    "before": "変更前",
+    "after": "最新の結果",
+    "refresh": "新しい変更あり · 比較を更新",
+    "loading": "比較を読み込み中…",
+    "select": "バージョンを選択して変更を確認してください。",
+    "restore_before": "変更前の内容を復元",
+    "restore": "このバージョンを復元",
+    "merging": "変更をまとめています",
+    "kind_save": "保存済み",
+    "kind_external": "外部での変更",
+    "kind_ai": "AI による編集",
+    "kind_checkpoint": "下書きのチェックポイント",
+    "kind_restore": "復元前",
+    "kind_discard": "破棄前",
+    "kind_overwrite": "上書き前",
+    "kind_autosave": "自動保存",
+    "kind_opened": "初期バージョン",
+    "protected": "下書きを保護済み",
+    "pending": "下書きを保護中…",
+    "failed": "下書きの保護に失敗",
+    "paused": "復元した下書き · 手動で保存してください",
+    "large": "大きな文書：元のテキストを表示しています。",
+    "compare_current": "現在の下書きと比較",
+    "compare_version": "別のバージョンと比較",
+    "compare_batch": "変更前と変更後を比較",
+    "retry": "保護を再試行",
+    "coarse": "計算時間内に差分を簡略化して表示しています。全文は保持されます。",
+    "compute_large": "大きな文書の差分を計算",
+    "deleted": "{{count}} 件の履歴を削除しました。",
+    "kind_write-pending": "中断されたファイル書き込み",
+    "kind_recovered-save": "回復した保存",
+    "budget_limited": "履歴が容量の目安に達しました。自動チェックポイントと新しい AI 編集は一時停止しますが、下書きと安全用コピーは保護されます。不要な履歴を削除すると再開できます。"
   }
 }

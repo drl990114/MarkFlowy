@@ -4,6 +4,7 @@ import {
   listenForDraftReload,
   restoreDraftReloadSession,
   restoreDraftSession,
+  restoreBackgroundDrafts,
 } from '@/services/draft-recovery'
 import { commandRegistry } from '@/commands'
 import { listenForCliRequests } from '@/services/cli'
@@ -11,11 +12,7 @@ import bus from '@/helper/eventBus'
 import { loadLocalThemeCss } from '@/helper/extensions'
 import { hasFileExcludePatternsChanged } from '@/helper/file-exclude'
 import { getFileObjectByPath } from '@/helper/files'
-import {
-  getFileNameFromPath,
-  readDirectory,
-  releaseSecurityScope,
-} from '@/helper/filesys'
+import { getFileNameFromPath, readDirectory, releaseSecurityScope } from '@/helper/filesys'
 import { logger } from '@/helper/logger'
 import { checkUpdate } from '@/helper/updater'
 import { i18nInit, t } from '@/i18n'
@@ -37,11 +34,7 @@ import { switchWorkspaceSession } from '@/services/workspace-session'
 import { refreshWorkspaceDirectory } from '@/services/workspace-refresh'
 import { createNewWindow, currentWindow } from '@/services/windows'
 import { useEditorStore } from '@/stores'
-import {
-  consumeOpenedUrls,
-  normalizeOpenedUrls,
-  restoreOpenedUrls,
-} from '@/startup/appearance'
+import { consumeOpenedUrls, normalizeOpenedUrls, restoreOpenedUrls } from '@/startup/appearance'
 import { createAppStartupCoordinator } from '@/startup/appStartupCoordinator'
 import { createOpenedUrlQueue } from '@/startup/openedUrlQueue'
 import {
@@ -98,7 +91,14 @@ let workspaceCacheStore: LazyStore | undefined
 
 const setupDraftRecovery = async (signal?: AbortSignal, reload = false) => {
   try {
-    let count = reload ? await restoreDraftReloadSession(signal) : 0
+    let count = 0
+    try {
+      count = await restoreBackgroundDrafts(signal)
+    } catch (error) {
+      logger.error('Background draft recovery failed', error)
+      toast.error(t('history.failed'))
+    }
+    if (reload) count += await restoreDraftReloadSession(signal)
     if (workspaceCacheStore) count += await restoreDraftSession(workspaceCacheStore, signal)
     if (count) toast.success(t('drafts.restored', { count }))
   } catch (error) {
@@ -243,9 +243,7 @@ async function handleOpenedPaths(openedPaths: string[]) {
 }
 
 const openedUrlQueue = createOpenedUrlQueue(async (openedUrls) => {
-  const openedPaths = openedUrls.map((path) =>
-    path.startsWith('file://') ? path.slice(7) : path,
-  )
+  const openedPaths = openedUrls.map((path) => (path.startsWith('file://') ? path.slice(7) : path))
   try {
     await handleOpenedPaths(openedPaths)
     // Also consume after success in case native eval completed just after the
@@ -430,10 +428,7 @@ let deferredAppSetupPromise: Promise<void> | undefined
 
 type DeferredSetupWindow = Window & {
   cancelIdleCallback?: (handle: number) => void
-  requestIdleCallback?: (
-    callback: IdleRequestCallback,
-    options?: IdleRequestOptions,
-  ) => number
+  requestIdleCallback?: (callback: IdleRequestCallback, options?: IdleRequestOptions) => number
 }
 
 const startDeferredAppSetup = () => {
@@ -453,12 +448,17 @@ export const useAppRuntimeSetup = () => {
     let disposed = false
     let stop: (() => void) | undefined
     // Wait for restored workspace/drafts before accepting mutations from a cold CLI launch.
-    void startAppSetup().then(async () => {
-      if (disposed) return
-      stop = await listenForCliRequests()
-      if (disposed) stop()
-    }).catch((error) => logger.error('Failed to initialize CLI requests', error))
-    return () => { disposed = true; stop?.() }
+    void startAppSetup()
+      .then(async () => {
+        if (disposed) return
+        stop = await listenForCliRequests()
+        if (disposed) stop()
+      })
+      .catch((error) => logger.error('Failed to initialize CLI requests', error))
+    return () => {
+      disposed = true
+      stop?.()
+    }
   }, [])
   const eventInit = useCallback(() => {
     const stopDraftReload = listenForDraftReload({
@@ -475,7 +475,8 @@ export const useAppRuntimeSetup = () => {
         return
       }
 
-      const closeAttempt = appStartupCoordinator.start()
+      const closeAttempt = appStartupCoordinator
+        .start()
         .then(waitForWorkspaceSwitches)
         .then(() =>
           closeWithDraftRecovery(workspaceCacheStore, currentWindow.label, async () => {

@@ -9,38 +9,59 @@ import useRecentFilesStore from '@/stores/useRecentFilesStore'
 import { FileSaveCoordinator } from './fileSaveCoordinator'
 import type { FileSnapshotResult } from './fileSnapshot'
 import textEditorSource from './TextEditor.tsx?raw'
-import { beginEditorOpenMeasurement, finishEditorOpenMeasurement, getEditorOpenMeasurement, recordEditorOpenContent, recordEditorOpenStage } from './editorPerformanceDiagnostics'
+import {
+  beginEditorOpenMeasurement,
+  finishEditorOpenMeasurement,
+  getEditorOpenMeasurement,
+  recordEditorOpenContent,
+  recordEditorOpenStage,
+} from './editorPerformanceDiagnostics'
 
 const source = ts.createSourceFile(
-  'TextEditor.tsx', textEditorSource, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX,
+  'TextEditor.tsx',
+  textEditorSource,
+  ts.ScriptTarget.Latest,
+  true,
+  ts.ScriptKind.TSX,
 )
-const editor = source.statements.find((node): node is ts.FunctionDeclaration =>
-  ts.isFunctionDeclaration(node) && node.name?.text === 'TextEditor',
+const editor = source.statements.find(
+  (node): node is ts.FunctionDeclaration =>
+    ts.isFunctionDeclaration(node) && node.name?.text === 'TextEditor',
 )
 if (!editor?.body) throw new Error('TextEditor implementation was not found')
 
 // Run the production effect and dependency array through real React commits.
 // Native services and the editor runtime are not needed to exercise loading.
 const declarations = new Set([
-  'cachedFile', 'lastKnownFileRef', 'curFile', 'filePath',
-  '[status, setStatus]', '[content, setContent]', 'updateCachedFileContent',
+  'cachedFile',
+  'lastKnownFileRef',
+  'curFile',
+  'filePath',
+  '[status, setStatus]',
+  '[content, setContent]',
+  'updateCachedFileContent',
 ])
 let loadingEffectCount = 0
-const statements = editor.body.statements.filter((node) => {
-  if (ts.isVariableStatement(node)) {
-    return declarations.has(node.declarationList.declarations[0].name.getText(source))
-  }
-  if (ts.isIfStatement(node)) return node.expression.getText(source) === 'cachedFile'
-  if (
-    ts.isExpressionStatement(node) && ts.isCallExpression(node.expression) &&
-    node.expression.expression.getText(source) === 'useEffect' &&
-    node.expression.arguments[0]?.getText(source).includes('await readStableFileSnapshot(file.path,')
-  ) {
-    loadingEffectCount += 1
-    return true
-  }
-  return false
-}).map((node) => node.getText(source))
+const statements = editor.body.statements
+  .filter((node) => {
+    if (ts.isVariableStatement(node)) {
+      return declarations.has(node.declarationList.declarations[0].name.getText(source))
+    }
+    if (ts.isIfStatement(node)) return node.expression.getText(source) === 'cachedFile'
+    if (
+      ts.isExpressionStatement(node) &&
+      ts.isCallExpression(node.expression) &&
+      node.expression.expression.getText(source) === 'useEffect' &&
+      node.expression.arguments[0]
+        ?.getText(source)
+        .includes('await readStableFileSnapshot(file.path,')
+    ) {
+      loadingEffectCount += 1
+      return true
+    }
+    return false
+  })
+  .map((node) => node.getText(source))
 if (loadingEffectCount !== 1) throw new Error('Expected exactly one file-loading effect')
 
 interface HarnessProps {
@@ -50,48 +71,75 @@ interface HarnessProps {
 
 function createHarness(options: { content?: string; dirty?: boolean; path?: string } = {}) {
   const file: IFile = {
-    id: 'file', name: 'note.md', kind: 'file', ext: 'md',
-    path: options.path ?? '/workspace/note.md', content: options.content,
+    id: 'file',
+    name: 'note.md',
+    kind: 'file',
+    ext: 'md',
+    path: options.path ?? '/workspace/note.md',
+    content: options.content,
   }
   useFileCacheStore.setState({ entries: {}, metadataRevision: 0, pathEntries: {} })
   setFileObject(file.id, file)
-  useRecentFilesStore.setState({ entries: [{ path: file.path!, fileId: file.id }], restoring: false })
+  useRecentFilesStore.setState({
+    entries: [{ path: file.path!, fileId: file.id }],
+    restoring: false,
+  })
   const states = new Map([[file.id, { hasUnsavedChanges: options.dirty ?? false }]])
   const coordinator = new FileSaveCoordinator()
   coordinator.recordContent(file.id, file.content)
   coordinator.setDiskRevision(file.id, 'disk:initial')
-  const snapshot = vi.fn<(path: string) => Promise<FileSnapshotResult>>()
+  const snapshot = vi
+    .fn<(path: string) => Promise<FileSnapshotResult>>()
     .mockResolvedValue({ status: 'success', content: 'disk content', revision: 'disk:loaded' })
   const toastError = vi.fn()
   const loggerError = vi.fn()
   const registry = { hasPending: vi.fn(() => false), canRead: vi.fn(() => true) }
   const bindings = {
-    createElement, useCallback, useEffect, useRef, useState,
-    getFileObject, updateFileObject, useFileCacheStore, useRecentFilesStore,
+    observeHistoryFile: vi.fn().mockResolvedValue(undefined),
+    createElement,
+    useCallback,
+    useEffect,
+    useRef,
+    useState,
+    getFileObject,
+    updateFileObject,
+    useFileCacheStore,
+    useRecentFilesStore,
     fileSaveCoordinator: coordinator,
     useEditorStateStore: { getState: () => ({ idStateMap: states }) },
     editorSnapshotRegistry: registry,
     readStableFileSnapshot: snapshot,
-    beginEditorOpenMeasurement, finishEditorOpenMeasurement, getEditorOpenMeasurement,
-    recordEditorOpenContent, recordEditorOpenStage, groupId: undefined,
+    beginEditorOpenMeasurement,
+    finishEditorOpenMeasurement,
+    getEditorOpenMeasurement,
+    recordEditorOpenContent,
+    recordEditorOpenStage,
+    groupId: undefined,
     fileTypeConfig: { defaultMode: 'Wysiwyg' },
     FileResultCode,
     TextEditorStatus: {
-      LOADING: 'loading', SUCCESS: 'success', READERROR: 'error', NOTEXIST: 'missing', BINARY: 'binary',
+      LOADING: 'loading',
+      SUCCESS: 'success',
+      READERROR: 'error',
+      NOTEXIST: 'missing',
+      BINARY: 'binary',
     },
     i18n: { t: (key: string) => key },
     translations: { en: (key: string) => key, zh: (key: string) => `zh:${key}` },
     toast: { error: toastError },
     logger: { error: loggerError },
   }
-  const compiled = ts.transpileModule(`
+  const compiled = ts.transpileModule(
+    `
     function Harness({ id, language = 'en' }) {
       const t = translations[language];
       ${statements.join('\n')}
       return createElement('div', { 'data-status': status }, content);
     }
     Harness;
-  `, { compilerOptions: { target: ts.ScriptTarget.ES2022 } }).outputText
+  `,
+    { compilerOptions: { target: ts.ScriptTarget.ES2022 } },
+  ).outputText
   const Harness = runInNewContext(compiled, bindings) as ComponentType<HarnessProps>
   return { Harness, snapshot, states, coordinator, registry, toastError, loggerError }
 }
@@ -158,7 +206,9 @@ describe('TextEditor file loading lifecycle', () => {
     })
     await findByText('disk content')
 
-    await act(async () => oldRead.resolve({ status: 'success', content: 'obsolete', revision: 'old' }))
+    await act(async () =>
+      oldRead.resolve({ status: 'success', content: 'obsolete', revision: 'old' }),
+    )
 
     expect(snapshot).toHaveBeenCalledTimes(2)
     expect(snapshot).toHaveBeenLastCalledWith('/workspace/moved.md', { reuseInFlight: true })
@@ -177,39 +227,50 @@ describe('TextEditor file loading lifecycle', () => {
     expect(snapshot).toHaveBeenLastCalledWith('/workspace/other.md', { reuseInFlight: true })
   })
 
-  it.each(['resolve', 'reject'] as const)('does not publish after unmount when the read will %s', async (settle) => {
-    const { Harness, snapshot, coordinator, toastError } = createHarness()
-    const pending = deferred<FileSnapshotResult>()
-    snapshot.mockReturnValueOnce(pending.promise)
-    const { unmount } = render(<Harness id='file' />)
-    unmount()
+  it.each(['resolve', 'reject'] as const)(
+    'does not publish after unmount when the read will %s',
+    async (settle) => {
+      const { Harness, snapshot, coordinator, toastError } = createHarness()
+      const pending = deferred<FileSnapshotResult>()
+      snapshot.mockReturnValueOnce(pending.promise)
+      const { unmount } = render(<Harness id='file' />)
+      unmount()
 
-    await act(async () => {
-      if (settle === 'resolve') pending.resolve({ status: 'success', content: 'late', revision: 'late' })
-      else pending.reject(new Error('late error'))
-    })
+      await act(async () => {
+        if (settle === 'resolve')
+          pending.resolve({ status: 'success', content: 'late', revision: 'late' })
+        else pending.reject(new Error('late error'))
+      })
 
-    expect(getFileObject('file').content).toBeUndefined()
-    expect(coordinator.getDiskRevision('file')).toBe('disk:initial')
-    expect(toastError).not.toHaveBeenCalled()
-  })
+      expect(getFileObject('file').content).toBeUndefined()
+      expect(coordinator.getDiskRevision('file')).toBe('disk:initial')
+      expect(toastError).not.toHaveBeenCalled()
+    },
+  )
 
-  it.each(['dirty', 'saved', 'watcher'] as const)('preserves a newer %s publication during the read', async (change) => {
-    const { Harness, snapshot, states, coordinator } = createHarness()
-    const pending = deferred<FileSnapshotResult>()
-    snapshot.mockReturnValueOnce(pending.promise)
-    const { findByText } = render(<Harness id='file' />)
-    updateFileObject('file', { ...getFileObject('file'), content: 'newer content' })
-    coordinator.recordContent('file', 'newer content')
-    if (change === 'dirty') states.set('file', { hasUnsavedChanges: true })
-    else coordinator.setDiskRevision('file', 'disk:newer')
+  it.each(['dirty', 'saved', 'watcher'] as const)(
+    'preserves a newer %s publication during the read',
+    async (change) => {
+      const { Harness, snapshot, states, coordinator } = createHarness()
+      const pending = deferred<FileSnapshotResult>()
+      snapshot.mockReturnValueOnce(pending.promise)
+      const { findByText } = render(<Harness id='file' />)
+      updateFileObject('file', { ...getFileObject('file'), content: 'newer content' })
+      coordinator.recordContent('file', 'newer content')
+      if (change === 'dirty') states.set('file', { hasUnsavedChanges: true })
+      else coordinator.setDiskRevision('file', 'disk:newer')
 
-    await act(async () => pending.resolve({ status: 'success', content: 'stale disk', revision: 'stale' }))
+      await act(async () =>
+        pending.resolve({ status: 'success', content: 'stale disk', revision: 'stale' }),
+      )
 
-    await findByText('newer content')
-    expect(getFileObject('file').content).toBe('newer content')
-    expect(coordinator.getDiskRevision('file')).toBe(change === 'dirty' ? 'disk:initial' : 'disk:newer')
-  })
+      await findByText('newer content')
+      expect(getFileObject('file').content).toBe('newer content')
+      expect(coordinator.getDiskRevision('file')).toBe(
+        change === 'dirty' ? 'disk:initial' : 'disk:newer',
+      )
+    },
+  )
 
   it('protects unpublished composing content even before the dirty cache is updated', async () => {
     const { Harness, snapshot, registry, coordinator } = createHarness({ content: 'cached' })
@@ -219,7 +280,9 @@ describe('TextEditor file loading lifecycle', () => {
     registry.canRead.mockReturnValue(false)
     registry.hasPending.mockReturnValue(true)
 
-    await act(async () => pending.resolve({ status: 'success', content: 'stale disk', revision: 'stale' }))
+    await act(async () =>
+      pending.resolve({ status: 'success', content: 'stale disk', revision: 'stale' }),
+    )
 
     await findByText('cached')
     expect(getFileObject('file').content).toBe('cached')
@@ -234,7 +297,12 @@ describe('TextEditor file loading lifecycle', () => {
     updateFileObject('file', { ...getFileObject('file'), content: 'local edits' })
     coordinator.recordContent('file', 'local edits')
     states.set('file', { hasUnsavedChanges: true })
-    await act(async () => pending.resolve({ status: 'unavailable', result: { code: FileResultCode.NotFound, content: 'missing' } }))
+    await act(async () =>
+      pending.resolve({
+        status: 'unavailable',
+        result: { code: FileResultCode.NotFound, content: 'missing' },
+      }),
+    )
     await findByText('local edits')
     expect(useRecentFilesStore.getState().entries).toHaveLength(1)
   })
@@ -251,17 +319,32 @@ describe('TextEditor file loading lifecycle', () => {
 
   it.each([
     [{ status: 'unstable' }, 'error'],
-    [{ status: 'unavailable', result: { code: FileResultCode.NotFound, content: 'missing' } }, 'missing'],
-    [{ status: 'unavailable', result: { code: FileResultCode.Binary, content: 'binary' } }, 'binary'],
-    [{ status: 'unavailable', result: { code: FileResultCode.PermissionDenied, content: 'denied' } }, 'error'],
-  ] satisfies [FileSnapshotResult, string][])('preserves the native failure state: %j', async (result, status) => {
-    const { Harness, snapshot, coordinator } = createHarness()
-    snapshot.mockResolvedValue(result)
-    const { container } = render(<Harness id='file' />)
-    await act(async () => {})
-    expect(container.firstChild).toHaveProperty('dataset.status', status)
-    expect(useRecentFilesStore.getState().entries).toHaveLength(status === 'missing' ? 0 : 1)
-    expect(getFileObject('file').content).toBeUndefined()
-    expect(coordinator.getDiskRevision('file')).toBe('disk:initial')
-  })
+    [
+      { status: 'unavailable', result: { code: FileResultCode.NotFound, content: 'missing' } },
+      'missing',
+    ],
+    [
+      { status: 'unavailable', result: { code: FileResultCode.Binary, content: 'binary' } },
+      'binary',
+    ],
+    [
+      {
+        status: 'unavailable',
+        result: { code: FileResultCode.PermissionDenied, content: 'denied' },
+      },
+      'error',
+    ],
+  ] satisfies [FileSnapshotResult, string][])(
+    'preserves the native failure state: %j',
+    async (result, status) => {
+      const { Harness, snapshot, coordinator } = createHarness()
+      snapshot.mockResolvedValue(result)
+      const { container } = render(<Harness id='file' />)
+      await act(async () => {})
+      expect(container.firstChild).toHaveProperty('dataset.status', status)
+      expect(useRecentFilesStore.getState().entries).toHaveLength(status === 'missing' ? 0 : 1)
+      expect(getFileObject('file').content).toBeUndefined()
+      expect(coordinator.getDiskRevision('file')).toBe('disk:initial')
+    },
+  )
 })
