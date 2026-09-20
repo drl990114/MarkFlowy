@@ -1104,5 +1104,27 @@
     "kind_write-pending": "Interrupted file write",
     "budget_limited": "History storage has reached its target budget. Automatic checkpoints and new AI sessions are paused; draft protection and safety copies continue. Delete unneeded history to resume.",
     "kind_recovered-save": "Recovered save"
+  },
+  "document_preview": {
+    "html_title": "HTML preview",
+    "pdf_title": "PDF reader",
+    "refresh": "Refresh",
+    "loading": "Loading…",
+    "load_failed": "Unable to load this file.",
+    "retry": "Retry",
+    "resources_blocked": "Some resources are missing, unsupported, or outside this document’s folder.",
+    "previous_page": "Previous page",
+    "next_page": "Next page",
+    "page": "Page number",
+    "zoom_out": "Zoom out",
+    "zoom_in": "Zoom in",
+    "fit_width": "Fit width",
+    "search": "Search PDF",
+    "previous_match": "Previous match",
+    "next_match": "Next match",
+    "password_required": "Enter the PDF password",
+    "password_incorrect": "Incorrect password. Try again.",
+    "unlock": "Unlock",
+    "cancel": "Cancel"
   }
 }

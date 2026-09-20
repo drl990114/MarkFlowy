@@ -4,11 +4,12 @@ import {
   recordEditorOpenStage,
 } from './editorPerformanceDiagnostics'
 import { preloadCapricornRuntimeFactory } from './capricornRuntimeAdapter'
-import { EditorViewType } from '@/constants/editorViewType'
+import { EditorViewType, isCapricornView } from '@/constants/editorViewType'
 import useFileCacheStore, { getFileObject } from '@/helper/files'
-import { getFileTypeConfig, isTextfileType } from '@/helper/fileTypeHandler'
+import { getFileTypeConfig, isSupportedMode, isTextfileType } from '@/helper/fileTypeHandler'
 import { logger } from '@/helper/logger'
 import { isEmptyEditor } from '@/services/editor-file'
+import { isDraftRecoveryPending, waitForDraftRecovery } from '@/services/draftRecoveryState'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-react'
@@ -22,6 +23,7 @@ import { editorScrollOptions } from './editorScrollOptions'
 import TextEditor from './TextEditor'
 import { EditorLoadingProgress } from './EditorLoadingProgress'
 import { UnsupportedFileType } from './UnsupportedFileType'
+import { completeDeferredEditorSave, registerDeferredEditorSave } from './deferredEditorSave'
 
 const handleEditorPanelClick: MouseEventHandler<HTMLDivElement> = (event) => {
   if (!isEditorPanelBlankTarget(event.target, event.currentTarget)) return
@@ -32,7 +34,9 @@ const handleEditorPanelClick: MouseEventHandler<HTMLDivElement> = (event) => {
 function Editor(props: EditorProps) {
   const { id, active, visible = active, groupId } = props
   const [pending, setPending] = useState(true)
+  const [draftReady, setDraftReady] = useState(() => !isDraftRecoveryPending(id))
   const [shouldMountContent, setShouldMountContent] = useState(visible)
+  const hasBeenVisible = visible || shouldMountContent
   const fileName = useFileCacheStore((state) => state.entries[id]?.name)
   const filePath = useFileCacheStore((state) => state.entries[id]?.path)
   const curFileTypeConfig = useFileTypeConfigStore(
@@ -40,10 +44,23 @@ function Editor(props: EditorProps) {
   )
   const setFileTypeConfig = useFileTypeConfigStore((state) => state.setFileTypeConfig)
 
+  useEffect(() => registerDeferredEditorSave(id, () => setShouldMountContent(true)), [id])
+
   useEffect(() => {
+    if (visible && isDraftRecoveryPending(id))
+      void waitForDraftRecovery(id, active ? 'foreground' : 'visible')
+  }, [active, id, visible])
+
+  useEffect(() => {
+    // Restored, unvisited tabs only need their label. Avoid type lookup,
+    // runtime preparation and scroll containers until they are first shown.
+    if (!hasBeenVisible) return
     let disposed = false
 
     const initialize = async () => {
+      if (isDraftRecoveryPending(id)) await waitForDraftRecovery(id, 'visible')
+      if (disposed) return
+      setDraftReady(true)
       const curFile = getFileObject(id)
       if (!curFile) return
 
@@ -85,24 +102,31 @@ function Editor(props: EditorProps) {
           defaultMode: fileTypeConfig.defaultMode,
         },
       )
-      useEditorViewTypeStore.getState().setEditorViewType(curFile.id, fileTypeConfig.defaultMode)
+      const existingMode = useEditorViewTypeStore.getState().editorViewTypeMap.get(curFile.id)
+      const openingMode =
+        existingMode &&
+        isSupportedMode(fileTypeConfig, existingMode)
+          ? existingMode
+          : fileTypeConfig.defaultMode
+      useEditorViewTypeStore.getState().setEditorViewType(curFile.id, openingMode)
       recordEditorOpenStage(getEditorOpenMeasurement(id, groupId), 'type-ready', {
-        mode: fileTypeConfig.defaultMode,
+        mode: openingMode,
       })
-      if (fileTypeConfig.type === 'markdown') {
+      if (fileTypeConfig.type === 'markdown' && isCapricornView(openingMode)) {
         // Start the existing module and Worker warm-up before publishing the
         // config that mounts TextEditor and begins its independent disk read.
         // Do not await: both operations deliberately overlap.
         void preloadCapricornRuntimeFactory()
       }
       setFileTypeConfig(curFile.id, fileTypeConfig)
+      if (!isTextfileType(fileTypeConfig)) completeDeferredEditorSave(id)
     }
 
     void initialize()
     return () => {
       disposed = true
     }
-  }, [groupId, id, setFileTypeConfig])
+  }, [groupId, hasBeenVisible, id, setFileTypeConfig])
 
   useEffect(() => {
     if (visible) {
@@ -119,6 +143,8 @@ function Editor(props: EditorProps) {
     }
   }, [active, curFileTypeConfig, groupId, id, visible])
 
+  if (!hasBeenVisible) return null
+
   if (isEmptyEditor(id)) {
     if (visible) {
       return <EmptyState />
@@ -127,7 +153,7 @@ function Editor(props: EditorProps) {
     }
   }
 
-  const loading = !curFileTypeConfig || (isTextfileType(curFileTypeConfig) && pending)
+  const loading = !draftReady || !curFileTypeConfig || (isTextfileType(curFileTypeConfig) && pending)
 
   return (
     <div
@@ -147,7 +173,7 @@ function Editor(props: EditorProps) {
           style={{ height: '100%', minWidth: 0 }}
         >
           <div className={'code-contents'}>
-            {!shouldMountContent || !curFileTypeConfig ? null : curFileTypeConfig.type ===
+            {!shouldMountContent || !draftReady || !curFileTypeConfig ? null : curFileTypeConfig.type ===
               'unsupported' ? (
               <UnsupportedFileType fileName={fileName || ''} />
             ) : isTextfileType(curFileTypeConfig) ? (
@@ -161,6 +187,8 @@ function Editor(props: EditorProps) {
               />
             ) : (
               <PreviewContent
+                fileId={id}
+                groupId={groupId}
                 type={curFileTypeConfig.type}
                 filePath={filePath}
                 active={active}

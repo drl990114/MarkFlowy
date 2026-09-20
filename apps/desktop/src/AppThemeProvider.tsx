@@ -3,14 +3,10 @@ import isPropValid from '@emotion/is-prop-valid'
 import { desktopDarkTheme, desktopLightTheme } from '@markflowy/theme'
 import { releaseStartupPalette } from '@/startup/appearance'
 import { createContext, useContext, useLayoutEffect, useMemo } from 'react'
-import {
-  darkTheme as defaultEditorDarkTheme,
-  lightTheme as defaultEditorLightTheme,
-  ThemeProvider as EditorProvider,
-} from 'rme'
 import { type IStyleSheetContext, StyleSheetManager, ThemeProvider } from 'styled-components'
 import { ThemeProvider as ZensThemeProvider } from 'zens'
-import { alignCodeMirrorTheme, resolveAppThemeTokens, resolveUIFontFamily } from './appThemeTokens'
+import { resolveAppThemeTokens, resolveUIFontFamily } from './appThemeTokens'
+import { EditorThemeContext } from './editorThemeContext'
 import { GlobalStyles, DesktopSpecificStyles } from './globalStyles'
 import {
   getReadableForeground,
@@ -21,10 +17,7 @@ import {
 import useGlobalOSInfo from './hooks/useOSInfo'
 import { InjectFonts } from './injectFonts'
 import useAppSettingStore from './stores/useAppSettingStore'
-import useThemeStore, {
-  FALLBACK_DARK_THEME,
-  FALLBACK_LIGHT_THEME,
-} from './stores/useThemeStore'
+import useThemeStore from './stores/useThemeStore'
 
 type EditorThemeToken = typeof desktopLightTheme
 
@@ -77,37 +70,17 @@ const AppThemeProvider: React.FC<BaseComponentProps> = function ({ children }) {
   )
 
   const themeProp = useMemo(
-    () => {
-      const isDefaultMarkflowyTheme =
-        curTheme.name === FALLBACK_LIGHT_THEME || curTheme.name === FALLBACK_DARK_THEME
-      const baseCodeMirrorTheme =
-        curTheme.mode === 'dark'
-          ? defaultEditorDarkTheme.codemirrorTheme
-          : defaultEditorLightTheme.codemirrorTheme
-      const codemirrorTheme =
-        curTheme.codemirrorTheme ??
-        (isDefaultMarkflowyTheme
-          ? alignCodeMirrorTheme({
-              baseTheme: baseCodeMirrorTheme,
-              mode: curTheme.mode,
-              theme: uiTheme,
-            })
-          : undefined)
-
-      return {
-        codemirrorTheme,
-        mode: curTheme.mode,
-        token: uiTheme,
-      }
-    },
-    [curTheme.codemirrorTheme, curTheme.mode, curTheme.name, uiTheme],
+    () => ({ mode: curTheme.mode, token: uiTheme }),
+    [curTheme.mode, uiTheme],
   )
-
-  const i18nProp = useMemo(
+  const editorThemeConfig = useMemo(
     () => ({
+      ...themeProp,
+      name: curTheme.name,
+      codemirrorTheme: curTheme.codemirrorTheme,
       language: settingData.language,
     }),
-    [settingData.language],
+    [themeProp, curTheme.name, curTheme.codemirrorTheme, settingData.language],
   )
 
   const primaryForeground = useMemo(
@@ -127,7 +100,7 @@ const AppThemeProvider: React.FC<BaseComponentProps> = function ({ children }) {
     <StyleSheetManager shouldForwardProp={shouldForwardProp}>
       <ThemeProvider theme={uiTheme}>
         <ZensThemeProvider theme={themeProp}>
-          <EditorProvider theme={themeProp} i18n={i18nProp}>
+          <EditorThemeContext.Provider value={editorThemeConfig}>
             <AppEditorThemeContext.Provider value={editorTheme}>
               <InjectFonts />
               <GlobalStyles />
@@ -137,7 +110,7 @@ const AppThemeProvider: React.FC<BaseComponentProps> = function ({ children }) {
               />
               <NiceModal.Provider>{children}</NiceModal.Provider>
             </AppEditorThemeContext.Provider>
-          </EditorProvider>
+          </EditorThemeContext.Provider>
         </ZensThemeProvider>
       </ThemeProvider>
     </StyleSheetManager>

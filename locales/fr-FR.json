@@ -1104,5 +1104,27 @@
     "kind_write-pending": "Écriture de fichier interrompue",
     "kind_recovered-save": "Enregistrement récupéré",
     "budget_limited": "L’historique a atteint sa capacité cible. Les points de contrôle automatiques et les nouvelles sessions IA sont suspendus ; les brouillons et copies de sécurité restent protégés. Supprimez l’historique inutile pour reprendre."
+  },
+  "document_preview": {
+    "html_title": "Aperçu HTML",
+    "pdf_title": "Lecteur PDF",
+    "refresh": "Actualiser",
+    "loading": "Chargement…",
+    "load_failed": "Impossible de charger ce fichier.",
+    "retry": "Réessayer",
+    "resources_blocked": "Certaines ressources sont absentes, non prises en charge ou hors du dossier du document.",
+    "previous_page": "Page précédente",
+    "next_page": "Page suivante",
+    "page": "Numéro de page",
+    "zoom_out": "Réduire",
+    "zoom_in": "Agrandir",
+    "fit_width": "Ajuster à la largeur",
+    "search": "Rechercher dans le PDF",
+    "previous_match": "Résultat précédent",
+    "next_match": "Résultat suivant",
+    "password_required": "Saisissez le mot de passe du PDF",
+    "password_incorrect": "Mot de passe incorrect. Réessayez.",
+    "unlock": "Déverrouiller",
+    "cancel": "Annuler"
   }
 }

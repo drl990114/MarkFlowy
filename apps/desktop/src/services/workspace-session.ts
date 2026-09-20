@@ -16,6 +16,7 @@ import { getUnsavedFileIds, guardUnsavedFilesAsync } from './checkUnsavedFiles'
 import { restoreRecentFileHistory } from './recent-files'
 import { restoreWorkspaceCache, type WorkspaceCachePersistence } from './workspace-cache'
 import { currentWindow } from './windows'
+import { waitForAllDraftRecovery } from './draftRecoveryState'
 
 function captureUnsavedDocuments() {
   const editor = useEditorStore.getState()
@@ -31,6 +32,7 @@ function captureUnsavedDocuments() {
 }
 
 export async function switchWorkspaceSession(path: string, persistence: WorkspaceCachePersistence) {
+  await waitForAllDraftRecovery()
   for (;;) {
     const currentRootPath = useEditorStore.getState().getRootPath()
     if (currentRootPath === path) return true

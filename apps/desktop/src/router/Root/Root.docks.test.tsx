@@ -16,7 +16,7 @@ vi.mock('@/commands', () => ({
     },
   },
 }))
-vi.mock('@/components', () => ({ SideBar: () => <input aria-label='Explorer state' /> }))
+vi.mock('@/components/SideBar', () => ({ default: () => <input aria-label='Explorer state' /> }))
 vi.mock('@/components/SideBar/RightBar', () => ({
   default: () => <input aria-label='TOC state' />,
 }))

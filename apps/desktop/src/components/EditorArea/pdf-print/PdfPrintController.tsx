@@ -7,7 +7,8 @@ import { editorLightTheme } from '@markflowy/theme'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { CreateWysiwygDelegateOptions, EditorProps, PreviewImageHydration } from 'rme'
-import { Preview } from 'rme'
+import { loadRmeRuntime, type RmeRuntime } from '../rmeRuntime'
+import { RmeThemeProvider } from '../RmeThemeProvider'
 import { ThemeProvider } from 'styled-components'
 import { toast } from 'zens'
 import { PDF_PRINT_EVENT } from './pdfPrintMenuItem'
@@ -24,6 +25,7 @@ interface PdfPrintJob {
   content: string
   fileName: string
   windowJobId: string
+  runtime: RmeRuntime
 }
 
 function getPreparedPreviewHtml(root: HTMLElement): string {
@@ -91,16 +93,19 @@ export function PdfPrintController({
   }, [])
 
   useEffect(() => {
-    const handlePrintRequest = () => {
+    const handlePrintRequest = async () => {
       if (!active || !enabled) return
 
       const releaseTask = acquirePrintTask()
       if (!releaseTask) return
 
       releaseTaskRef.current = releaseTask
+      const abortController = new AbortController()
+      taskAbortControllerRef.current = abortController
       try {
         const content = getContent()
-        taskAbortControllerRef.current = new AbortController()
+        const runtime = await loadRmeRuntime()
+        if (abortController.signal.aborted || !mountedRef.current) return
         rendererErrorRef.current = null
         jobSequenceRef.current += 1
         setJob({
@@ -108,8 +113,10 @@ export function PdfPrintController({
           content,
           fileName,
           windowJobId: `${Date.now().toString(36)}-${jobSequenceRef.current}`,
+          runtime,
         })
       } catch (error) {
+        if (abortController.signal.aborted) return
         finishTask()
         logger.error('Failed to read PDF print content:', error)
         toast.error(error instanceof Error ? error.message : String(error))
@@ -193,27 +200,30 @@ export function PdfPrintController({
   }, [editorCodeFontFamily, editorRootFontFamily, finishTask, hydration, job, styleToken, t])
 
   if (!job) return null
+  const Preview = job.runtime.Preview
 
   return createPortal(
-    <ThemeProvider theme={printTheme}>
-      <div
-        ref={rootRef}
-        className='mf-pdf-print-root'
-        data-mf-pdf-print-root=''
-        aria-hidden='true'
-      >
-        <Preview
-          doc={job.content}
-          delegateOptions={delegateOptions}
-          styleToken={styleToken}
-          handleLinkClick={() => true}
-          onError={(error) => {
-            rendererErrorRef.current = error
-          }}
-          onImageHydrationChange={setHydration}
-        />
-      </div>
-    </ThemeProvider>,
+    <RmeThemeProvider runtime={job.runtime}>
+      <ThemeProvider theme={printTheme}>
+        <div
+          ref={rootRef}
+          className='mf-pdf-print-root'
+          data-mf-pdf-print-root=''
+          aria-hidden='true'
+        >
+          <Preview
+            doc={job.content}
+            delegateOptions={delegateOptions}
+            styleToken={styleToken}
+            handleLinkClick={() => true}
+            onError={(error) => {
+              rendererErrorRef.current = error
+            }}
+            onImageHydrationChange={setHydration}
+          />
+        </div>
+      </ThemeProvider>
+    </RmeThemeProvider>,
     document.body,
   )
 }

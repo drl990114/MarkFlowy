@@ -3,6 +3,7 @@ import useEditorStore from '@/stores/useEditorStore'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import { EditorViewType, type EditorViewTypeValue } from '@/constants/editorViewType'
 import type { EditorSourceMatchRequest } from './capricornRuntimeAdapter'
+import { openPreviewSearch } from './preview/previewSearch'
 
 export interface SearchNavigationRequest extends EditorSourceMatchRequest {
   fileId: string
@@ -39,7 +40,11 @@ export const useEditorSearchStore = create<EditorSearchState>(() => ({
 }))
 
 export function openDocumentSearch(): boolean {
-  const { activeId } = useEditorStore.getState()
+  const { activeId, activeGroupId } = useEditorStore.getState()
+  if (activeId && openPreviewSearch(activeId, activeGroupId)) {
+    closeEditorSearch()
+    return true
+  }
   if (
     !activeId ||
     useEditorViewTypeStore.getState().editorViewTypeMap.get(activeId) === EditorViewType.PREVIEW

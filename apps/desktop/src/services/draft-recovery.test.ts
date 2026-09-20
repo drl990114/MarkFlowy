@@ -13,20 +13,19 @@ import { markExternalFileConflict } from '@/components/EditorArea/externalFileCh
 import {
   closeWithDraftRecovery,
   listenForDraftReload,
-  restoreDraftDocuments,
-  restoreDraftReloadSession,
-  restoreDraftSession,
+  type DraftDocument,
   type DraftSession,
   type DraftSessionStore,
 } from './draft-recovery'
+import { stageDraftRecovery } from './staged-draft-recovery'
 
-vi.mock('@tauri-apps/api/core', () => ({ invoke: vi.fn().mockResolvedValue(undefined) }))
+vi.mock('@tauri-apps/api/core', () => ({ invoke: vi.fn().mockResolvedValue(undefined), isTauri: () => false }))
 vi.mock('zens', () => ({ toast: { error: vi.fn(), success: vi.fn() } }))
 vi.mock('@/helper/logger', () => ({ logger: { error: vi.fn() } }))
 vi.mock('@/components/EditorArea/externalFileChanges', () => ({
   markExternalFileConflict: vi.fn(),
 }))
-vi.mock('@/components/EditorArea/fileSnapshot', () => ({ readStableFileSnapshot: vi.fn() }))
+vi.mock('@/components/EditorArea/fileSnapshot', () => ({ readStableFileSnapshot: vi.fn(), promoteOpeningRead: vi.fn() }))
 
 enableMapSet()
 const cleanups: (() => void)[] = []
@@ -64,6 +63,17 @@ const createCache = () => {
       .filter(([key]) => key.startsWith('draft-session:'))
       .map(([, value]) => value as DraftSession)
   return { cache, data, save, sessions }
+}
+
+// Exercise the production staged coordinator through both persistence sources.
+const restoreDraftSession = async (cache: DraftSessionStore, signal?: AbortSignal) =>
+  (await stageDraftRecovery({ cache, signal, onError: vi.fn() })).finished
+const restoreDraftReloadSession = async (signal?: AbortSignal) =>
+  (await stageDraftRecovery({ reload: true, signal, onError: vi.fn() })).finished
+const restoreDraftDocuments = async (documents: DraftDocument[]) => {
+  const { cache, data } = createCache()
+  data.set('draft-session:test', { version: 1, documents })
+  return restoreDraftSession(cache)
 }
 
 beforeEach(() => {
@@ -481,9 +491,10 @@ describe('restoring unsaved file content', () => {
 
   it('keeps deleted paths and competing dirty versions as separate saveable drafts', async () => {
     const existing = open('live edit', '/w/a.md')
-    vi.mocked(readStableFileSnapshot)
-      .mockResolvedValueOnce({ status: 'success', content: 'disk', revision: 'r1' })
-      .mockRejectedValueOnce(new Error('missing file'))
+    vi.mocked(readStableFileSnapshot).mockImplementation(async (path) => {
+      if (path === '/w/missing.md') throw new Error('missing file')
+      return { status: 'success', content: 'disk', revision: 'r1' }
+    })
     await restoreDraftDocuments([
       { id: 'other', name: 'a.md', path: '/w/a.md', content: 'other edit' },
       { id: 'missing', name: 'missing.md', path: '/w/missing.md', content: 'rescued' },

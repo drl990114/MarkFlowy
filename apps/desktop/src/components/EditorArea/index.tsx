@@ -28,14 +28,17 @@ function EditorArea() {
 
         const supportsToggle =
           fileTypeConfig.supportedModes.includes(EditorViewType.SOURCECODE) &&
-          fileTypeConfig.supportedModes.includes(EditorViewType.WYSIWYG)
+          (fileTypeConfig.supportedModes.includes(EditorViewType.WYSIWYG) ||
+            fileTypeConfig.type === 'html')
 
         if (!supportsToggle) return
 
         const currentViewType = useEditorViewTypeStore.getState().getEditorViewType(activeId)
         const targetViewType =
           currentViewType === EditorViewType.SOURCECODE
-            ? EditorViewType.WYSIWYG
+            ? fileTypeConfig.type === 'html'
+              ? EditorViewType.PREVIEW
+              : EditorViewType.WYSIWYG
             : EditorViewType.SOURCECODE
 
         bus.emit('editor_toggle_type', undefined, targetViewType)

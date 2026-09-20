@@ -1,9 +1,11 @@
 import bus from '@/helper/eventBus'
 import { act } from 'react'
+import { waitFor } from '@testing-library/react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { PDF_PRINT_EVENT } from './pdfPrintMenuItem'
 import { PdfPrintController } from './PdfPrintController'
+import * as rmeRuntime from '../rmeRuntime'
 
 const previewState = vi.hoisted(() => ({
   docs: [] as string[],
@@ -120,6 +122,7 @@ describe('PdfPrintController', () => {
   afterEach(() => {
     act(() => root.unmount())
     container.remove()
+    vi.restoreAllMocks()
   })
 
   async function renderController(getContent = () => '# Current unsaved Markdown') {
@@ -138,11 +141,40 @@ describe('PdfPrintController', () => {
   }
 
   async function requestPrint() {
-    act(() => bus.emit(PDF_PRINT_EVENT))
-    await act(async () => {
-      await vi.waitFor(() => expect(printMocks.openPdfPrintWindow).toHaveBeenCalled())
-    })
+    await act(async () => bus.emit(PDF_PRINT_EVENT))
+    await waitFor(() => expect(printMocks.openPdfPrintWindow).toHaveBeenCalled())
   }
+
+  it('loads the renderer only on demand and releases the print lock after an import failure', async () => {
+    const load = vi
+      .spyOn(rmeRuntime, 'loadRmeRuntime')
+      .mockRejectedValueOnce(new Error('Renderer unavailable'))
+    await renderController()
+    expect(load).not.toHaveBeenCalled()
+    await act(async () => bus.emit(PDF_PRINT_EVENT))
+    await waitFor(() => expect(toastMocks.error).toHaveBeenCalledWith('Renderer unavailable'))
+    expect(printMocks.openPdfPrintWindow).not.toHaveBeenCalled()
+    await requestPrint()
+    expect(load).toHaveBeenCalledTimes(2)
+  })
+
+  it('does not mount a renderer after its editor closes while the import is pending', async () => {
+    const runtime = await rmeRuntime.loadRmeRuntime()
+    let resolve!: (value: typeof runtime) => void
+    vi.spyOn(rmeRuntime, 'loadRmeRuntime').mockReturnValueOnce(
+      new Promise((yes) => {
+        resolve = yes
+      }),
+    )
+    await renderController()
+    await act(async () => bus.emit(PDF_PRINT_EVENT))
+    await act(async () => root.render(null))
+    await act(async () => resolve(runtime))
+    expect(previewState.docs).toEqual([])
+    expect(printMocks.openPdfPrintWindow).not.toHaveBeenCalled()
+    await renderController()
+    await requestPrint()
+  })
 
   it.each(['source', 'wysiwyg', 'preview'])(
     'renders the current unsaved Markdown when requested from %s mode',
@@ -218,41 +250,41 @@ describe('PdfPrintController', () => {
     previewState.error = new Error('Mermaid failed')
     await renderController()
 
-    act(() => bus.emit(PDF_PRINT_EVENT))
-    await act(async () => {
-      await vi.waitFor(() => expect(toastMocks.error).toHaveBeenCalled())
-    })
+    await act(async () => bus.emit(PDF_PRINT_EVENT))
+    await waitFor(() => expect(toastMocks.error).toHaveBeenCalled())
 
     expect(printMocks.openPdfPrintWindow).not.toHaveBeenCalled()
     expect(document.title).toBe('MarkFlowy')
     expect(document.querySelector('.mf-pdf-print-root')).toBeNull()
   })
 
-  it.each([
-    new Error('Finish composing before using this action.'),
-    'Snapshot unavailable',
-  ])('releases the print task when content cannot be read: %s', async (error) => {
-    const getContent = vi.fn((): string => {
-      // External editor implementations can throw non-Error values.
-      // eslint-disable-next-line @typescript-eslint/no-throw-literal
-      throw error
-    })
-    await renderController(getContent)
+  it.each([new Error('Finish composing before using this action.'), 'Snapshot unavailable'])(
+    'releases the print task when content cannot be read: %s',
+    async (error) => {
+      const getContent = vi.fn((): string => {
+        // External editor implementations can throw non-Error values.
+        // eslint-disable-next-line @typescript-eslint/no-throw-literal
+        throw error
+      })
+      await renderController(getContent)
 
-    act(() => {
-      expect(() => bus.emit(PDF_PRINT_EVENT)).not.toThrow()
-    })
-    expect(toastMocks.error).toHaveBeenCalledWith(error instanceof Error ? error.message : error)
-    expect(previewState.docs).toEqual([])
-    expect(printMocks.preparePrintDocument).not.toHaveBeenCalled()
-    expect(printMocks.openPdfPrintWindow).not.toHaveBeenCalled()
-    expect(document.querySelector('.mf-pdf-print-root')).toBeNull()
+      act(() => {
+        expect(() => bus.emit(PDF_PRINT_EVENT)).not.toThrow()
+      })
+      expect(toastMocks.error).toHaveBeenCalledWith(error instanceof Error ? error.message : error)
+      expect(previewState.docs).toEqual([])
+      expect(printMocks.preparePrintDocument).not.toHaveBeenCalled()
+      expect(printMocks.openPdfPrintWindow).not.toHaveBeenCalled()
+      expect(document.querySelector('.mf-pdf-print-root')).toBeNull()
 
-    getContent.mockReturnValue('# Committed after retry')
-    await requestPrint()
-    expect(getContent).toHaveBeenCalledTimes(2)
-    expect(printMocks.openPdfPrintWindow.mock.calls[0]?.[0].html).toContain('Committed after retry')
-  })
+      getContent.mockReturnValue('# Committed after retry')
+      await requestPrint()
+      expect(getContent).toHaveBeenCalledTimes(2)
+      expect(printMocks.openPdfPrintWindow.mock.calls[0]?.[0].html).toContain(
+        'Committed after retry',
+      )
+    },
+  )
 
   it('rejects duplicate print requests while one task is preparing', async () => {
     let finishPreparation!: (value: { failedImageCount: number }) => void

@@ -1,7 +1,8 @@
 import { useHistoryDialog } from '@/components/LocalHistory/historyDialogStore'
 import { commandRegistry } from '@/commands'
 import { EVENT } from '@/constants'
-import { Root, Setting } from '@/router'
+import { t } from '@/i18n'
+import Root from '@/router/Root'
 import { SettingRouteController } from '@/router/Setting/component/SettingRouteController'
 import type { SettingRouteState } from '@/router/Setting/component/SettingRouteController'
 import { WorkspaceRouteSurface } from '@/router/Setting/component/WorkspaceRouteSurface'
@@ -17,7 +18,8 @@ import { lazy, Suspense, useEffect, useLayoutEffect } from 'react'
 import { Route, Routes, useLocation, useMatch } from 'react-router'
 import { Notifications } from 'zens'
 import { FileTreeProvider, TauriFileSystemProvider } from './adapters'
-import { AppInfoDialog, Modal } from './components'
+import AppInfoDialog from './components/AppInfoDialog'
+import Modal from './components/Modal'
 import { AsyncSurface } from './components/AsyncSurface'
 import { RenderErrorBoundary } from './components/RenderErrorBoundary'
 import {
@@ -29,10 +31,11 @@ import {
 import TitleBar from './components/TitleBar'
 import { TooltipProvider } from './components/ui/tooltip'
 import { ContextMenu } from './components/ui-v2/ContextMenu/ContextMenu'
-import { useAppRuntimeSetup, useAppSetup } from './hooks'
+import useAppSetup, { useAppRuntimeSetup } from './hooks/useAppSetup'
 import { useCommandInit } from './hooks/useCommandInit'
 
 const HistoryDialog = lazy(() => import('@/components/LocalHistory/HistoryDialog'))
+const Setting = lazy(() => import('@/router/Setting'))
 
 function HistorySurface() {
   const open = useHistoryDialog((s) => s.open)
@@ -86,7 +89,11 @@ function AppRoutes({ chooseWorkspace, retryWorkspace, workspace }: AppRoutesProp
         </WorkspaceRouteSurface>
         <Routes>
           <Route path='/' element={null} />
-          <Route path='/settings' element={<Setting navigationRequest={navigationRequest} />} />
+          <Route path='/settings' element={
+            <Suspense fallback={<StartupProgress label={t('common.fetching')} />}>
+              <Setting navigationRequest={navigationRequest} />
+            </Suspense>
+          } />
         </Routes>
       </div>
     </div>

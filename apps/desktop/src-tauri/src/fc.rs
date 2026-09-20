@@ -1678,6 +1678,7 @@ pub mod cmd {
 
     #[tauri::command]
     pub fn read_u8_array_from_file(file_path: &str) -> FileResult {
+        fc::acquire_security_scope(Path::new(file_path));
         match fs::read(file_path) {
             Ok(content) => FileResult {
                 code: FileResultCode::Success,

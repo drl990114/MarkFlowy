@@ -70,6 +70,22 @@ beforeEach(() => {
 afterEach(cleanup)
 
 describe('useOpen', () => {
+  it.each(['report.pdf', 'index.html'])('allows %s through the file picker', async (file) => {
+    useOpenTestState.openDialog.mockResolvedValue(`/documents/${file}`)
+    const { result } = renderHook(() => useOpen())
+    await act(async () => result.current.openFile())
+    expect(useOpenTestState.openDialog).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filters: [
+          { name: 'Markdown / HTML / PDF', extensions: ['md', 'markdown', 'html', 'htm', 'pdf'] },
+        ],
+        fileAccessMode: 'scoped',
+      }),
+    )
+    expect(useOpenTestState.invoke).toHaveBeenCalledWith('save_security_bookmark', {
+      path: `/documents/${file}`,
+    })
+  })
   it('focuses an existing workspace window instead of switching the current window', async () => {
     useOpenTestState.invoke.mockImplementation(async (command: string) => {
       if (command === 'check_window_by_path') return 'notes-window'

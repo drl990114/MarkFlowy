@@ -124,7 +124,9 @@ const useOpen = () => {
   const openFile = useCallback(async () => {
     const file = await open({
       multiple: false,
-      filters: [{ name: 'Markdown', extensions: ['md'] }],
+      filters: [
+        { name: 'Markdown / HTML / PDF', extensions: ['md', 'markdown', 'html', 'htm', 'pdf'] },
+      ],
       fileAccessMode: 'scoped',
     })
 

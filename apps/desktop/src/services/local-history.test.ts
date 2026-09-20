@@ -70,6 +70,21 @@ afterEach(() => {
 })
 
 describe('background draft protection', () => {
+  it('retains the original recovery writer until a hidden draft has been validated', async () => {
+    const { registerDraftRecovery } = await import('./draftRecoveryState')
+    const ready = registerDraftRecovery('file', vi.fn())
+    try {
+      history.protectLocalEdit('file')
+      await history.flushDraftProtection('file')
+      expect(calls('register')).toEqual([])
+      expect(calls('draft')).toEqual([])
+      ready()
+      history.protectLocalEdit('file')
+      await history.flushDraftProtection('file')
+      expect(calls('draft')).toHaveLength(1)
+    } finally { ready() }
+  })
+
   it('coalesces a thousand edits without serializing on each keystroke', async () => {
     for (let n = 0; n < 1000; n++) {
       mocks.content = `edit ${n}`

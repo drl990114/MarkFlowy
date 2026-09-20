@@ -9,8 +9,7 @@ import { t } from '@/i18n'
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { ListIcon } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
-import * as Rme from 'rme'
-import { extractMatches } from 'rme'
+import { getLoadedRmeRuntime, type RmeRuntime } from '../EditorArea/rmeRuntime'
 import {
   getCapricornEditor,
   subscribeCapricornEditors,
@@ -19,7 +18,7 @@ import type {
   CapricornHeading,
   CapricornRuntimeAdapter,
 } from '../EditorArea/capricornRuntimeAdapter'
-import { sourceCodeCodemirrorViewMap } from '../EditorArea/TextEditor'
+import { sourceCodeCodemirrorViewMap } from '../EditorArea/sourceCodeEditorRegistry'
 import SideBarHeader from '../SideBar/SideBarHeader'
 import { CapricornHeadingNumberingButton } from './HeadingNumberingButton'
 import { TocViewContainer } from './styles'
@@ -47,8 +46,9 @@ type PendingCapricornOutline = {
 
 const getHeadingChapterData = (
   headings: readonly { depth: number; value: string }[],
+  runtime: RmeRuntime,
 ): { chapter?: string; value: string }[] => {
-  const { analyzeHeadingNumbering } = Rme as typeof Rme & {
+  const { analyzeHeadingNumbering } = runtime as RmeRuntime & {
     analyzeHeadingNumbering: (inputs: readonly { level: number; text: string }[]) => {
       complete: boolean
       entries: { prefix: string | null; title: string }[]
@@ -380,7 +380,11 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
             ) {
               return
             }
-            const matches = extractMatches(codemirrorView.cm)
+            // A registered source view has already loaded the engine. The
+            // Capricorn outline never needs to import or initialize RME.
+            const runtime = getLoadedRmeRuntime()
+            if (!runtime) return
+            const matches = runtime.extractMatches(codemirrorView.cm)
             const sourceHeadings: SourceHeadingInfo[] = matches.map((match) => {
               const depth = Number(match.type.split('ATXHeading')?.[1]) || 1
               const value = getHeadingValue(match.value)
@@ -395,7 +399,7 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
             })
 
             sourceHeadingsRef.current = sourceHeadings
-            const chapterData = getHeadingChapterData(sourceHeadings)
+            const chapterData = getHeadingChapterData(sourceHeadings, runtime)
             const nextScrollEl = resolveSourceScrollEl(currentActiveId, codemirrorView.cm.scrollDOM)
             sourceScrollElRef.current = nextScrollEl
             setSourceScrollEl(nextScrollEl)

@@ -1,12 +1,12 @@
 import useLayoutStore from '@/stores/useLayoutStore'
 import { desktopLightTheme } from '@markflowy/theme'
-import { cleanup, render, screen } from '@testing-library/react'
+import { act, cleanup, render, screen } from '@testing-library/react'
 import { ThemeProvider } from 'styled-components'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import SideBar from '.'
 
-vi.mock('@/components', () => ({
-  Explorer: () => <div data-testid='explorer-panel' />,
+vi.mock('@/components/Explorer', () => ({
+  default: () => <div data-testid='explorer-panel' />,
 }))
 
 vi.mock('@/extensions/search', () => ({
@@ -38,6 +38,16 @@ function renderSideBar() {
 }
 
 describe('left Dock composition', () => {
+  it('delays a hidden panel until first opening, then retains its mounted state', async () => {
+    useLayoutStore.setState((state) => ({ leftBar: { ...state.leftBar, visible: false } }))
+    renderSideBar()
+    expect(screen.queryByTestId('explorer-panel')).toBeNull()
+    act(() => useLayoutStore.setState((state) => ({ leftBar: { ...state.leftBar, visible: true } })))
+    const panel = await screen.findByTestId('explorer-panel')
+    act(() => useLayoutStore.setState((state) => ({ leftBar: { ...state.leftBar, visible: false } })))
+    expect(screen.getByTestId('explorer-panel')).toBe(panel)
+  })
+
   it('renders Explorer content without a visible panel header', () => {
     renderSideBar()
 

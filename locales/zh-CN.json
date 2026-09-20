@@ -1104,5 +1104,27 @@
     "kind_write-pending": "中断的文件写入",
     "budget_limited": "历史存储已达到容量目标，已暂停普通检查点和新的 AI 编辑会话。草稿保护与操作前备份继续保留，可清理不需要的历史以恢复。",
     "kind_recovered-save": "已找回的保存"
+  },
+  "document_preview": {
+    "html_title": "HTML 预览",
+    "pdf_title": "PDF 阅读器",
+    "refresh": "刷新",
+    "loading": "正在加载…",
+    "load_failed": "无法加载此文件。",
+    "retry": "重试",
+    "resources_blocked": "部分资源缺失、不受支持或超出此文档所在目录。",
+    "previous_page": "上一页",
+    "next_page": "下一页",
+    "page": "页码",
+    "zoom_out": "缩小",
+    "zoom_in": "放大",
+    "fit_width": "适合宽度",
+    "search": "搜索 PDF",
+    "previous_match": "上一个结果",
+    "next_match": "下一个结果",
+    "password_required": "输入 PDF 密码",
+    "password_incorrect": "密码不正确，请重试。",
+    "unlock": "解锁",
+    "cancel": "取消"
   }
 }

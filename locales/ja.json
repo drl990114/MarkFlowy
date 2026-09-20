@@ -1104,5 +1104,27 @@
     "kind_write-pending": "中断されたファイル書き込み",
     "kind_recovered-save": "回復した保存",
     "budget_limited": "履歴が容量の目安に達しました。自動チェックポイントと新しい AI 編集は一時停止しますが、下書きと安全用コピーは保護されます。不要な履歴を削除すると再開できます。"
+  },
+  "document_preview": {
+    "html_title": "HTML プレビュー",
+    "pdf_title": "PDF リーダー",
+    "refresh": "更新",
+    "loading": "読み込み中…",
+    "load_failed": "ファイルを読み込めません。",
+    "retry": "再試行",
+    "resources_blocked": "一部のリソースが見つからないか、未対応か、文書のフォルダー外にあります。",
+    "previous_page": "前のページ",
+    "next_page": "次のページ",
+    "page": "ページ番号",
+    "zoom_out": "縮小",
+    "zoom_in": "拡大",
+    "fit_width": "幅に合わせる",
+    "search": "PDF を検索",
+    "previous_match": "前の結果",
+    "next_match": "次の結果",
+    "password_required": "PDF のパスワードを入力",
+    "password_incorrect": "パスワードが違います。再試行してください。",
+    "unlock": "ロック解除",
+    "cancel": "キャンセル"
   }
 }

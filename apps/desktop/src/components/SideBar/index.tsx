@@ -1,5 +1,6 @@
-import { Explorer } from '@/components'
+import Explorer from '@/components/Explorer'
 import { AsyncSurface } from '@/components/AsyncSurface'
+import { DeferredMount } from '@/components/DeferredMount'
 import type { RIGHTBARITEMKEYS } from '@/constants'
 import { useTranslation } from '@/i18n'
 import useLayoutStore from '@/stores/useLayoutStore'
@@ -19,6 +20,7 @@ const BookMarksExtension = lazy(async () => {
 function SideBar() {
   const { t } = useTranslation()
   const activePanelId = useLayoutStore((state) => state.leftBar.activePanelId)
+  const visible = useLayoutStore((state) => state.leftBar.visible && !state.zenModeActive)
 
   const lazyFallback = (
     <AsyncSurface
@@ -47,7 +49,9 @@ function SideBar() {
 
   return (
     <SideBarContainer $side='left' data-mf-dock-panel={activePanelId}>
-      <DockPanelBody key={activePanelId}>{content}</DockPanelBody>
+      <DockPanelBody key={activePanelId}>
+        <DeferredMount visible={visible}>{content}</DeferredMount>
+      </DockPanelBody>
     </SideBarContainer>
   )
 }

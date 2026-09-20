@@ -10,6 +10,7 @@ import type {
 } from '../EditorArea/capricornRuntimeAdapter'
 import { TocView } from './TocView'
 import textEditorSource from '../EditorArea/TextEditor.tsx?raw'
+import { EditorViewType } from '@/constants/editorViewType'
 
 const harness = vi.hoisted(() => ({
   commands: new Map<string, () => void>(),
@@ -18,7 +19,9 @@ const harness = vi.hoisted(() => ({
   editorState: { activeId: 'file' as string | undefined },
   viewState: { editorViewTypeMap: new Map([['file', 'wysiwyg']]) },
   sourceViews: new Map<string, unknown>(),
+  rme: vi.fn(),
 }))
+vi.mock('../EditorArea/rmeRuntime', () => ({ getLoadedRmeRuntime: harness.rme }))
 
 vi.mock('@/commands', () => ({
   commandRegistry: {
@@ -43,7 +46,9 @@ vi.mock('@/stores/useEditorViewTypeStore', () => {
     }),
   }
 })
-vi.mock('../EditorArea/TextEditor', () => ({ sourceCodeCodemirrorViewMap: harness.sourceViews }))
+vi.mock('../EditorArea/sourceCodeEditorRegistry', () => ({
+  sourceCodeCodemirrorViewMap: harness.sourceViews,
+}))
 vi.mock('../SideBar/SideBarHeader', () => ({
   default: ({ actions }: { actions?: React.ReactNode }) => <>{actions}</>,
 }))
@@ -99,6 +104,7 @@ afterEach(() => {
   harness.editorState.activeId = 'file'
   harness.viewState.editorViewTypeMap.set('file', 'wysiwyg')
   harness.sourceViews.clear()
+  harness.rme.mockReset()
   vi.useRealTimers()
   document.body.replaceChildren()
 })
@@ -354,9 +360,37 @@ describe('Capricorn outline snapshot work', () => {
   })
 })
 
+it('reuses the source engine for outline extraction, numbering and navigation', () => {
+  vi.useFakeTimers()
+  harness.viewState.editorViewTypeMap.set('file', EditorViewType.SOURCECODE)
+  const cm = { scrollDOM: document.createElement('div'), dispatch: vi.fn(), focus: vi.fn() }
+  harness.sourceViews.set('file', { cm })
+  const extractMatches = vi.fn(() => [{ type: 'ATXHeading1', value: '# 1 Introduction', from: 0 }])
+  const analyzeHeadingNumbering = vi.fn(() => ({
+    complete: true,
+    entries: [{ prefix: '1', title: 'Introduction' }],
+  }))
+  harness.rme.mockReturnValue({ extractMatches, analyzeHeadingNumbering })
+  render(<TocView />)
+  act(() => {
+    harness.commands.get('app:toc_refresh')?.()
+    vi.runAllTimers()
+  })
+  expect(extractMatches).toHaveBeenCalledWith(cm)
+  expect(analyzeHeadingNumbering).toHaveBeenCalledWith([{ level: 1, text: '1 Introduction' }])
+  const heading = harness.refresh.mock.lastCall![0].newHeadings[0]
+  expect(heading).toMatchObject({ depth: 1, chapter: '1', value: 'Introduction' })
+  act(() => heading.onClick())
+  expect(cm.dispatch).toHaveBeenCalledWith({
+    selection: { anchor: 0, head: 0 },
+    scrollIntoView: true,
+  })
+  expect(cm.focus).toHaveBeenCalledOnce()
+})
+
 it('cancels a queued Source Code scan after the active mode changes', () => {
   vi.useFakeTimers()
-  harness.viewState.editorViewTypeMap.set('file', 'sourcecode')
+  harness.viewState.editorViewTypeMap.set('file', EditorViewType.SOURCECODE)
   const readStaleView = vi.fn(() => ({}))
   // The stale callback must return before touching this deliberately minimal
   // view, which represents a CodeMirror instance being replaced by a switch.
@@ -371,7 +405,8 @@ it('cancels a queued Source Code scan after the active mode changes', () => {
   harness.viewState.editorViewTypeMap.set('file', 'wysiwyg')
   act(() => vi.runAllTimers())
   expect(readStaleView).not.toHaveBeenCalled()
-  expect(harness.refresh).toHaveBeenCalledExactlyOnceWith({ newHeadings: [] })
+  expect(harness.rme).not.toHaveBeenCalled()
+  expect(harness.refresh).not.toHaveBeenCalled()
 })
 
 it('cancels old-editor snapshots and initializes the replacement editor once', () => {

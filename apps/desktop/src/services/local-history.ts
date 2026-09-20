@@ -9,6 +9,7 @@ import { logger } from '@/helper/logger'
 import useEditorStore from '@/stores/useEditorStore'
 import useEditorStateStore from '@/stores/useEditorStateStore'
 import { getCurrentWindow } from '@tauri-apps/api/window'
+import { isDraftRecoveryPending, waitForDraftRecovery } from './draftRecoveryState'
 
 export interface HistoryDocument {
   id: string
@@ -107,6 +108,8 @@ export function historyChanged() {
 }
 
 export function historyDocument(fileId: string): Promise<HistoryDocument> {
+  if (isDraftRecoveryPending(fileId))
+    return waitForDraftRecovery(fileId).then(() => historyDocument(fileId))
   const file = getFileObject(fileId)
   if (!file) return Promise.reject(new Error('Document is no longer open.'))
   const existing = bindings.get(fileId)
@@ -170,6 +173,9 @@ function queue(fileId: string, run: () => Promise<void>): Promise<void> {
 }
 
 async function capture(fileId: string) {
+  // The original recovery source still protects this content. Do not register
+  // an unvalidated path or retire its writer before recovery has bound it.
+  if (isDraftRecoveryPending(fileId)) return
   const seq = ++sequence
   const edit = edits.get(fileId)
   const file = getFileObject(fileId)
@@ -230,7 +236,7 @@ function captureLatest(fileId: string): Promise<void> {
 
 /** Called by the host editor's actual input path, never by external synchronization. */
 export function protectLocalEdit(fileId: string) {
-  if (!started) return
+  if (!started || isDraftRecoveryPending(fileId)) return
   edits.set(fileId, (edits.get(fileId) ?? 0) + 1)
   status(fileId, 'pending')
   void historyDocument(fileId)

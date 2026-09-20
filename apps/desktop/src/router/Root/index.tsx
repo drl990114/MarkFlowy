@@ -1,5 +1,5 @@
 import { commandRegistry } from '@/commands'
-import { SideBar } from '@/components'
+import SideBar from '@/components/SideBar'
 import { scheduleActiveEditorFocus } from '@/components/EditorArea/focusActiveEditor'
 import EditorArea from '@/components/EditorArea'
 import { scheduleDockFocus } from '@/components/SideBar/DockSwitcher'

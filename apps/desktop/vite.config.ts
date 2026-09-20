@@ -9,6 +9,7 @@ import { defineConfig, type Plugin } from 'vite'
 import svgr from 'vite-plugin-svgr'
 
 import { CAPRICORN_VERSION, resolvePrivateCapricornRuntime } from './capricornRuntimeResolver'
+import { pdfPreviewAssets } from './pdfPreviewAssets'
 
 const workspaceRoot = fileURLToPath(new URL('../..', import.meta.url))
 const capricornRuntimeId = 'virtual:markflowy-capricorn-runtime'
@@ -69,6 +70,7 @@ export default defineConfig(async ({ mode }) => {
       include: ['react-dom/server', 'zens'],
     },
     plugins: [
+      pdfPreviewAssets(),
       optionalCapricornRuntimePlugin(capricornRuntimeEntry),
       // Tailwind is only activated by the AI extension's lazy-loaded stylesheet.
       // That stylesheet imports theme + utilities explicitly and intentionally

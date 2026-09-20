@@ -5,6 +5,7 @@ import type { IFile } from '@/helper/filesys'
 import { getPathIdentityKey, rebaseFilePath } from '@/helper/pathIdentity'
 import useRecentFilesStore from '@/stores/useRecentFilesStore'
 import { findPathCollisions, type PathRelationResolver } from '@/helper/physicalPathIdentity'
+import { completeDeferredEditorSave, getDeferredEditorSave } from '@/components/EditorArea/deferredEditorSave'
 
 interface FileCacheState {
   entries: Record<string, IFile>
@@ -326,10 +327,11 @@ export const saveOpenedEditorEntries: Record<string, () => Promise<boolean>> = {
 
 export function setSaveOpenedEditorEntries(id: string, saveHandler: () => Promise<boolean>): void {
   saveOpenedEditorEntries[id] = saveHandler
+  completeDeferredEditorSave(id, saveHandler)
 }
 
 export function getSaveOpenedEditorEntries(id: string): (() => Promise<boolean>) | undefined {
-  return saveOpenedEditorEntries[id]
+  return saveOpenedEditorEntries[id] ?? getDeferredEditorSave(id)
 }
 
 export function delSaveOpenedEditorEntries(id: string): void {

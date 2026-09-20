@@ -3,7 +3,8 @@ import { enableMapSet } from 'immer'
 import type { ReactNode } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { EditorViewType } from '@/constants/editorViewType'
-import useFileCacheStore, { setFileObject } from '@/helper/files'
+import useFileCacheStore, { delSaveOpenedEditorEntries, getSaveOpenedEditorEntries, setFileObject, setSaveOpenedEditorEntries } from '@/helper/files'
+import { registerDraftRecovery } from '@/services/draftRecoveryState'
 import type { FileTypeConfig } from '@/helper/fileTypeHandler'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
@@ -23,6 +24,7 @@ vi.mock('@/helper/fileTypeHandler', () => ({
   getFileTypeConfig: harness.getFileTypeConfig,
   isTextfileType: (config: FileTypeConfig) =>
     config.type === 'markdown' || config.type === 'json' || config.type === 'text',
+  isSupportedMode: (config: FileTypeConfig, mode: string) => config.supportedModes.includes(mode as typeof config.defaultMode),
 }))
 vi.mock('@/helper/logger', () => ({
   logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn() },
@@ -89,6 +91,67 @@ afterEach(() => {
 })
 
 describe('Editor initialization lifecycle', () => {
+  it('opens a restored source-only Markdown view without preparing Capricorn', async () => {
+    setFileObject('source', { id: 'source', name: 'source.md', kind: 'file', content: '# Source' })
+    useEditorViewTypeStore.getState().setEditorViewType('source', EditorViewType.SOURCECODE)
+    harness.getFileTypeConfig.mockResolvedValue(markdownConfig)
+    const view = render(<Editor id='source' active visible />)
+    await view.findByTestId('text-editor')
+    expect(harness.preload).not.toHaveBeenCalled()
+    expect(useEditorViewTypeStore.getState().getEditorViewType('source')).toBe(EditorViewType.SOURCECODE)
+  })
+  it('gates an already-known file type on draft validation and promotes a newly visible tab', async () => {
+    setFileObject('recovering', { id: 'recovering', name: 'draft.md', kind: 'file', content: 'draft' })
+    useFileTypeConfigStore.getState().setFileTypeConfig('recovering', markdownConfig)
+    harness.getFileTypeConfig.mockResolvedValue(markdownConfig)
+    const promote = vi.fn()
+    const ready = registerDraftRecovery('recovering', promote)
+    try {
+      const view = render(<Editor id='recovering' active visible />)
+      expect(view.queryByTestId('text-editor')).toBeNull()
+      expect(promote).toHaveBeenCalledWith('foreground')
+      expect(harness.getFileTypeConfig).not.toHaveBeenCalled()
+      await act(async () => ready())
+      await view.findByTestId('text-editor')
+    } finally {
+      ready()
+    }
+  })
+
+  it('mounts an unvisited hidden tab for an explicit save without displaying or activating it', async () => {
+    setFileObject('save-hidden', { id: 'save-hidden', name: 'draft.md', kind: 'file', content: 'draft' })
+    harness.getFileTypeConfig.mockResolvedValue(markdownConfig)
+    const view = render(<Editor id='save-hidden' active={false} visible={false} />)
+    expect(harness.getFileTypeConfig).not.toHaveBeenCalled()
+    let saved!: Promise<boolean>
+    await act(async () => { saved = getSaveOpenedEditorEntries('save-hidden')!() })
+    await view.findByTestId('text-editor')
+    expect(view.container.querySelector<HTMLElement>('[data-editor-active="false"]')?.style.display).toBe('none')
+    const save = vi.fn(async () => true)
+    setSaveOpenedEditorEntries('save-hidden', save)
+    await expect(saved).resolves.toBe(true)
+    expect(save).toHaveBeenCalledOnce()
+    delSaveOpenedEditorEntries('save-hidden')
+  })
+
+  it('does no content work for an unvisited restored tab and keeps its selected mode', async () => {
+    harness.getFileTypeConfig.mockResolvedValue(markdownConfig)
+    harness.preload.mockResolvedValue(undefined)
+    setFileObject('file-a', {
+      id: 'file-a', name: 'a.md', kind: 'file', ext: 'md', path: '/workspace/a.md',
+    })
+    useEditorViewTypeStore.getState().setEditorViewType('file-a', EditorViewType.SOURCECODE)
+    const view = render(<Editor id='file-a' active={false} visible={false} groupId='group' />)
+    expect(view.container.childElementCount).toBe(0)
+    expect(harness.getFileTypeConfig).not.toHaveBeenCalled()
+    expect(harness.preload).not.toHaveBeenCalled()
+
+    view.rerender(<Editor id='file-a' active visible groupId='group' />)
+    await view.findByTestId('text-editor')
+    expect(harness.getFileTypeConfig).toHaveBeenCalledOnce()
+    expect(useEditorViewTypeStore.getState().editorViewTypeMap.get('file-a')).toBe(EditorViewType.SOURCECODE)
+  })
+
   it('does not publish type state, prewarm, or diagnostics after the tab closes', async () => {
     const pending = deferred<FileTypeConfig>()
     harness.getFileTypeConfig.mockReturnValueOnce(pending.promise)

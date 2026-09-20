@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { HoxRoot } from 'hox'
 import { enableMapSet } from 'immer'
-import { StrictMode, useLayoutEffect } from 'react'
+import { lazy, StrictMode, Suspense, useLayoutEffect } from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router'
 import 'remixicon/fonts/remixicon.css'
@@ -9,21 +9,24 @@ import App from './App'
 import AppThemeProvider from './AppThemeProvider'
 import { AsyncSurface } from './components/AsyncSurface'
 import { RenderErrorBoundary } from './components/RenderErrorBoundary'
-import { PdfPrintWindowApp } from './components/EditorArea/pdf-print/PdfPrintWindowApp'
 import { getPdfPrintWindowRequest } from './components/EditorArea/pdf-print/pdfPrintWindow'
-import { startAppSetup } from './hooks'
+import { startAppSetup } from './hooks/useAppSetup'
 import { applyStartupAppearance, readWindowBootstrap } from './startup/appearance'
 import { markBootShellReady } from './startup/boot'
 import { initSentryAfterShell } from './startup/sentry'
+import { initStartupPerformance } from './startup/performance'
 import './atom.css'
 import './normalize.css'
 import './ui.css'
 
+initStartupPerformance()
 applyStartupAppearance(readWindowBootstrap())
 
 enableMapSet()
 
 const queryClient = new QueryClient()
+const PdfPrintWindowApp = lazy(() => import('./components/EditorArea/pdf-print/PdfPrintWindowApp')
+  .then((module) => ({ default: module.PdfPrintWindowApp })))
 
 const Main = () => {
   return (
@@ -67,7 +70,11 @@ if (pdfPrintWindowRequest) {
   document.documentElement.classList.add('mf-pdf-print-window')
   document.body.classList.add('mf-pdf-print-window')
   markBootShellReady()
-  ReactDOM.createRoot(rootElement).render(<PdfPrintWindowApp request={pdfPrintWindowRequest} />)
+  ReactDOM.createRoot(rootElement).render(
+    <Suspense fallback={null}>
+      <PdfPrintWindowApp request={pdfPrintWindowRequest} />
+    </Suspense>,
+  )
 } else {
   initSentryAfterShell()
   void startAppSetup()

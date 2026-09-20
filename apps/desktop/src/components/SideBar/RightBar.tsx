@@ -1,4 +1,5 @@
 import { AsyncSurface } from '@/components/AsyncSurface'
+import { DeferredMount } from '@/components/DeferredMount'
 import { useTranslation } from '@/i18n'
 import useLayoutStore from '@/stores/useLayoutStore'
 import { lazy, memo, Suspense } from 'react'
@@ -17,6 +18,7 @@ const AIExtension = lazy(async () => {
 function RightBar() {
   const { t } = useTranslation()
   const activePanelId = useLayoutStore((state) => state.rightBar.activePanelId)
+  const visible = useLayoutStore((state) => state.rightBar.visible && !state.zenModeActive)
   const lazyFallback = (
     <AsyncSurface
       state={{ status: 'loading', label: t('common.fetching') }}
@@ -28,6 +30,7 @@ function RightBar() {
   return (
     <SideBarContainer $side='right' data-mf-dock-panel={activePanelId}>
       <DockPanelBody key={activePanelId}>
+        <DeferredMount visible={visible}>
         {activePanelId === 'ai' ? (
           <Suspense fallback={lazyFallback}>
             <AIExtension />
@@ -37,6 +40,7 @@ function RightBar() {
             <TableOfContentExtension />
           </Suspense>
         )}
+        </DeferredMount>
       </DockPanelBody>
     </SideBarContainer>
   )

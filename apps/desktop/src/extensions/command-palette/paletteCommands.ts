@@ -79,14 +79,20 @@ function applicationUnavailable(
     if (target && !isCurrentCommandTarget(target)) return 'stale_target'
   }
   if (target && id === 'app_findReplaceEditor') {
-    if (target.mode === EditorViewType.PREVIEW) return 'preview'
+    if (
+      target.mode === EditorViewType.PREVIEW &&
+      useFileTypeConfigStore.getState().getFileTypeConfigById(target.fileId)?.type !== 'pdf'
+    )
+      return 'preview'
     return undefined
   }
   if (target && id === 'app_toggleEditorType') {
-    const modes = useFileTypeConfigStore
-      .getState()
-      .getFileTypeConfigById(target.fileId)?.supportedModes
-    if (!modes?.includes(EditorViewType.WYSIWYG) || !modes.includes(EditorViewType.SOURCECODE))
+    const config = useFileTypeConfigStore.getState().getFileTypeConfigById(target.fileId)
+    const modes = config?.supportedModes
+    if (
+      !modes?.includes(EditorViewType.SOURCECODE) ||
+      (!modes.includes(EditorViewType.WYSIWYG) && config?.type !== 'html')
+    )
       return 'unavailable'
   }
   if (

@@ -95,6 +95,9 @@ function createHarness(options: { content?: string; dirty?: boolean; path?: stri
   const loggerError = vi.fn()
   const registry = { hasPending: vi.fn(() => false), canRead: vi.fn(() => true) }
   const bindings = {
+    AbortController,
+    activeRef: { current: true },
+    useEditorStore: { getState: () => ({ folderData: undefined }) },
     observeHistoryFile: vi.fn().mockResolvedValue(undefined),
     createElement,
     useCallback,
@@ -167,7 +170,7 @@ describe('TextEditor file loading lifecycle', () => {
     rerender(<Harness id='file' language='zh' />)
     await act(async () => {})
 
-    expect(snapshot).toHaveBeenCalledExactlyOnceWith('/workspace/note.md', { reuseInFlight: true })
+    expect(snapshot).toHaveBeenCalledExactlyOnceWith('/workspace/note.md', expect.objectContaining({ reuseInFlight: true, priority: 'foreground', signal: expect.any(AbortSignal) }))
   })
 
   it('uses unsaved cached content without reading disk', async () => {
@@ -211,7 +214,7 @@ describe('TextEditor file loading lifecycle', () => {
     )
 
     expect(snapshot).toHaveBeenCalledTimes(2)
-    expect(snapshot).toHaveBeenLastCalledWith('/workspace/moved.md', { reuseInFlight: true })
+    expect(snapshot).toHaveBeenLastCalledWith('/workspace/moved.md', expect.objectContaining({ reuseInFlight: true }))
     expect(getFileObject('file').content).toBe('disk content')
     expect(coordinator.getDiskRevision('file')).toBe('disk:loaded')
   })
@@ -224,7 +227,7 @@ describe('TextEditor file loading lifecycle', () => {
     rerender(<Harness id='other' />)
     await act(async () => {})
     expect(snapshot).toHaveBeenCalledTimes(2)
-    expect(snapshot).toHaveBeenLastCalledWith('/workspace/other.md', { reuseInFlight: true })
+    expect(snapshot).toHaveBeenLastCalledWith('/workspace/other.md', expect.objectContaining({ reuseInFlight: true }))
   })
 
   it.each(['resolve', 'reject'] as const)(

@@ -2,17 +2,16 @@ import { flushEditorResumeStates } from '@/stores/editorResumeStore'
 import {
   closeWithDraftRecovery,
   listenForDraftReload,
-  restoreDraftReloadSession,
-  restoreDraftSession,
-  restoreBackgroundDrafts,
 } from '@/services/draft-recovery'
+import { stageDraftRecovery } from '@/services/staged-draft-recovery'
+import { waitForAllDraftRecovery } from '@/services/draftRecoveryState'
 import { commandRegistry } from '@/commands'
 import { listenForCliRequests } from '@/services/cli'
 import bus from '@/helper/eventBus'
 import { loadLocalThemeCss } from '@/helper/extensions'
 import { hasFileExcludePatternsChanged } from '@/helper/file-exclude'
 import { getFileObjectByPath } from '@/helper/files'
-import { getFileNameFromPath, readDirectory, releaseSecurityScope } from '@/helper/filesys'
+import { getFileNameFromPath, releaseSecurityScope } from '@/helper/filesys'
 import { logger } from '@/helper/logger'
 import { checkUpdate } from '@/helper/updater'
 import { i18nInit, t } from '@/i18n'
@@ -20,7 +19,6 @@ import { appSettingStoreSetup } from '@/services/app-setting'
 import { addExistingMarkdownFileEdit } from '@/services/editor-file'
 import {
   createWorkspaceCachePersistence,
-  restoreWorkspaceCache,
   type WorkspaceCache,
   type WorkspaceCachePersistence,
 } from '@/services/workspace-cache'
@@ -36,6 +34,8 @@ import { createNewWindow, currentWindow } from '@/services/windows'
 import { useEditorStore } from '@/stores'
 import { consumeOpenedUrls, normalizeOpenedUrls, restoreOpenedUrls } from '@/startup/appearance'
 import { createAppStartupCoordinator } from '@/startup/appStartupCoordinator'
+import { restoreStartupWorkspace } from '@/startup/restoreStartupWorkspace'
+import { markStartupStage } from '@/startup/performance'
 import { createOpenedUrlQueue } from '@/startup/openedUrlQueue'
 import {
   scheduleStaleStartupThemeFallback,
@@ -91,16 +91,23 @@ let workspaceCacheStore: LazyStore | undefined
 
 const setupDraftRecovery = async (signal?: AbortSignal, reload = false) => {
   try {
-    let count = 0
-    try {
-      count = await restoreBackgroundDrafts(signal)
-    } catch (error) {
-      logger.error('Background draft recovery failed', error)
-      toast.error(t('history.failed'))
-    }
-    if (reload) count += await restoreDraftReloadSession(signal)
-    if (workspaceCacheStore) count += await restoreDraftSession(workspaceCacheStore, signal)
-    if (count) toast.success(t('drafts.restored', { count }))
+    let reported = false
+    const recovery = await stageDraftRecovery({
+      cache: workspaceCacheStore,
+      reload,
+      signal,
+      onError: (error) => {
+        logger.error('Failed to restore unsaved documents', error)
+        if (!reported) toast.error(t('drafts.restore_failed'))
+        reported = true
+      },
+    })
+    void recovery.finished.then((count) => {
+      markStartupStage('drafts-ready')
+      if (count && !signal?.aborted) toast.success(t('drafts.restored', { count }))
+    })
+    await recovery.visibleReady
+    markStartupStage('visible-drafts-ready')
   } catch (error) {
     logger.error('Failed to restore unsaved documents', error)
     toast.error(t('drafts.restore_failed'))
@@ -340,14 +347,12 @@ async function appWorkspaceSetup(signal: AbortSignal) {
 
       logger.debug('Reading directory:', targetWorkspacePath)
       try {
-        const [workspaceCache, res] = await Promise.all([
+        await restoreStartupWorkspace(
+          targetWorkspacePath,
           cacheStore.get<WorkspaceCache>(targetWorkspacePath),
-          readDirectory(targetWorkspacePath),
-        ])
+          signal,
+        )
         throwIfStartupCancelled(signal)
-        logger.debug('Cache store init result:', workspaceCache)
-        logger.debug('Directory read successfully, file count:', res.length)
-        restoreWorkspaceCache(workspaceCache, res)
       } catch (error) {
         logger.error('Failed to read directory:', targetWorkspacePath, error)
         logger.error('This might be due to sandbox restrictions or the directory no longer exists')
@@ -395,7 +400,9 @@ const listener = (event: MessageEvent) => {
 type AppShellData = Record<string, any>
 
 const appShellSetup = async (signal: AbortSignal): Promise<AppShellData> => {
+  markStartupStage('settings-start')
   const settingData = await appSettingStoreSetup()
+  markStartupStage('settings-ready')
   throwIfStartupCancelled(signal)
 
   window.removeEventListener('message', listener)
@@ -418,6 +425,8 @@ const appStartupCoordinator = createAppStartupCoordinator<AppShellData, void>({
   loadShell: appShellSetup,
   loadWorkspace: async (_shell, signal) => {
     await appWorkspaceSetup(signal)
+    markStartupStage('session-ready')
+    markStartupStage('drafts-start')
     await setupDraftRecovery(signal, true)
   },
 })
@@ -449,6 +458,7 @@ export const useAppRuntimeSetup = () => {
     let stop: (() => void) | undefined
     // Wait for restored workspace/drafts before accepting mutations from a cold CLI launch.
     void startAppSetup()
+      .then(waitForAllDraftRecovery)
       .then(async () => {
         if (disposed) return
         stop = await listenForCliRequests()

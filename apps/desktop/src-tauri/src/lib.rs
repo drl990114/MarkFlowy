@@ -5,6 +5,7 @@
 
 mod app;
 mod fc;
+mod document_preview;
 mod file_copy;
 mod font;
 mod local_history;
@@ -1547,6 +1548,7 @@ fn install_cli_in_background(app: &tauri::App) {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    app::startup_timing::record_native_entry();
     // 在 Linux 上禁用 DMA-BUF 渲染器
     // 否则无法在 Linux 上运行
     // 相同的bug: https://github.com/tauri-apps/tauri/issues/10702
@@ -1640,6 +1642,7 @@ pub fn run() {
             },
         ))
         .invoke_handler(tauri::generate_handler![
+            document_preview::read_html_preview_resource,
             fc::cmd::open_folder_async,
             fc::cmd::get_file_content,
             fc::cmd::get_file_snapshot,
@@ -1670,6 +1673,7 @@ pub fn run() {
             fc::cmd::get_file_normal_info,
             fc::cmd::copy_file,
             conf::cmd::get_app_conf,
+            app::startup_timing::get_startup_timing,
             conf::cmd::reset_app_conf,
             conf::cmd::save_app_conf,
             conf::cmd::save_startup_appearance,

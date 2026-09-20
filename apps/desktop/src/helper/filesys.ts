@@ -142,13 +142,19 @@ const readDirectoryEntries = async (
   return unwrapDirectoryReadResult(result)
 }
 
-export const readDirectory = async (folderPath: string): Promise<IFile[]> => {
+export const readDirectory = async (
+  folderPath: string,
+  options: { isCurrent?: () => boolean } = {},
+): Promise<IFile[]> => {
   try {
-    const entries = hydrateDirectoryEntries(await readDirectoryEntries(folderPath))
-
-    const folderName = await invoke<string>('get_path_name', {
-      path: folderPath,
-    })
+    const [snapshot, folderName] = await Promise.all([
+      readDirectoryEntries(folderPath),
+      invoke<string>('get_path_name', { path: folderPath }),
+    ])
+    // Directory hydration updates shared file metadata. Reject obsolete reads
+    // before that publication, not just before updating the visible tree.
+    if (options.isCurrent && !options.isCurrent()) return []
+    const entries = hydrateDirectoryEntries(snapshot)
 
     const root: IFile = {
       id: getFileObjectByPath(folderPath)?.id || nanoid(),

@@ -5,6 +5,7 @@ import { getFileObject, getSaveOpenedEditorEntries } from '@/helper/files'
 import { dialog } from '@/services/dialog'
 import { useEditorStateStore } from '@/stores'
 import { t } from '@/i18n'
+import { isDraftRecoveryPending, waitForDraftRecovery } from './draftRecoveryState'
 
 interface CheckUnsavedFilesParams {
   fileIds: string[]
@@ -34,6 +35,8 @@ export const getUnsavedFileIds = (fileIds: string[]) => {
 }
 
 export const saveUnsavedFiles = async (fileIds: string[]) => {
+  if (fileIds.some(isDraftRecoveryPending))
+    await Promise.all(fileIds.map((id) => waitForDraftRecovery(id)))
   const saves = unique(fileIds).map((id) => getSaveOpenedEditorEntries(id))
   if (saves.some((saveHandler) => !saveHandler)) return false
 
@@ -104,13 +107,15 @@ const guardUnsavedFileIds = async (params: GuardUnsavedFilesParams, hasUnsavedFi
 }
 
 export const guardUnsavedFilesAsync = async (params: GuardUnsavedFilesParams) => {
+  if (params.fileIds.some(isDraftRecoveryPending))
+    await Promise.all(params.fileIds.map((id) => waitForDraftRecovery(id)))
   return guardUnsavedFileIds(params, getUnsavedFileIds(params.fileIds))
 }
 
 export const guardUnsavedFiles = (params: GuardUnsavedFilesParams) => {
   const hasUnsavedFiles = getUnsavedFileIds(params.fileIds)
 
-  void guardUnsavedFileIds(params, hasUnsavedFiles).catch((error) => {
+  void guardUnsavedFilesAsync(params).catch((error) => {
     logger.error('Discard protection failed', error)
     toast.error(String(error))
   })
@@ -122,16 +127,21 @@ export const checkUnsavedFiles = (params: CheckUnsavedFilesParams) => {
   const hasUnsavedFiles = getUnsavedFileIds(params.fileIds)
 
   if (hasUnsavedFiles.length > 0) {
-    void confirmUnsavedFiles(hasUnsavedFiles)
-      .then(async (action) => {
-        if (action === 'save') {
-          void params.onSaveAndClose?.(hasUnsavedFiles)
-        }
-        if (action === 'unsaved') {
-          await protectDiscard(hasUnsavedFiles)
-          void params.onUnsavedAndClose?.(hasUnsavedFiles)
-        }
-      })
+    void (async () => {
+      if (params.fileIds.some(isDraftRecoveryPending))
+        await Promise.all(params.fileIds.map((id) => waitForDraftRecovery(id)))
+      const remaining = getUnsavedFileIds(params.fileIds)
+      if (!remaining.length) {
+        await params.onUnsavedAndClose?.([])
+        return
+      }
+      const action = await confirmUnsavedFiles(remaining)
+      if (action === 'save') await params.onSaveAndClose?.(remaining)
+      if (action === 'unsaved') {
+        await protectDiscard(remaining)
+        await params.onUnsavedAndClose?.(remaining)
+      }
+    })()
       .catch((error) => {
         logger.error('Discard protection failed', error)
         toast.error(String(error))
