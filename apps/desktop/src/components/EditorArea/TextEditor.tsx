@@ -1,4 +1,6 @@
 import { bindEditorResume, bindSourceEditorResume } from './editorResume'
+import { editorAutomationRegistry, type EditorAutomationHandle } from './editorAutomationRegistry'
+import { exportHtmlDocument } from './exportHtmlDocument'
 import { setSourceCodeEditor } from './sourceCodeEditorRegistry'
 import { reportEditorSearchLoadFailure, useEditorSearchStore } from './editorSearchStore'
 import { commandRegistry } from '@/commands'
@@ -959,7 +961,7 @@ function renderTextFallbackImageDataUrl(element: HTMLElement) {
   return canvasToExportDataUrl(canvas)
 }
 
-async function renderElementToImageDataUrl(element: HTMLElement) {
+async function renderElementToImageDataUrl(element: HTMLElement, strict = false) {
   const html2canvas = await loadHtml2Canvas()
   const html2canvasOptions: Parameters<Html2Canvas>[1] = {
     allowTaint: false,
@@ -975,7 +977,7 @@ async function renderElementToImageDataUrl(element: HTMLElement) {
     const canvas = await html2canvas(element, html2canvasOptions)
     return canvasToExportDataUrl(canvas)
   } catch (error) {
-    if (!isSecurityError(error)) {
+    if (strict || !isSecurityError(error)) {
       throw error
     }
   }
@@ -1018,6 +1020,8 @@ function TextEditor(props: TextEditorProps) {
     instanceIdRef.current = `text-editor-${textEditorInstanceSeq}`
   }
   const editorWrapperRef = useRef<HTMLDivElement>(null)
+  const automationHandleRef = useRef<EditorAutomationHandle | null>(null)
+  const cliRuntimeErrorRef = useRef<string | undefined>(undefined)
   const [runtimePending, setRuntimePending] = useState(true)
   const [resumeSource, setResumeSource] = useState<MfCodemirrorView | null>(null)
   const [resumeCapricorn, setResumeCapricorn] = useState<CapricornRuntimeAdapter | null>(null)
@@ -2047,55 +2051,30 @@ function TextEditor(props: TextEditorProps) {
     }
 
     const exportHtmlHandler = async () => {
-      if (!active) {
-        return
-      }
-
+      if (!active) return
       const file = getFileObject(id)
       if (!file) return
-
-      save({
-        title: t('contextmenu.editor_tab.export_html'),
-        defaultPath: file.name.split('.')?.[0] + '.html',
-      })
-        .then(async (path) => {
-          if (!path) return
-
-          editorSnapshotRegistry.flushForRead(id)
-          const n = toast.loading(t('contextmenu.editor_tab.export_html') + '...')
-          const res = isCapricornView(currentViewType)
-            ? await capricornEditorRef.current?.export('html')
-            : await editorRef.current?.exportHtml()
-          const scStyled = document.head.querySelectorAll('style[data-styled]')
-
-          const html = `
-  <!DOCTYPE html>
-  <html lang="en">
-  <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
-  <style>
-  ${scStyled[0].innerHTML}
-  </style>
-  </head>
-  <body style="height: 100vh; overflow: auto;">
-  <div class="${document.getElementById(id)?.className}">
-  ${res}
-  </div>
-  </body>
-  </html>
-          `
-
-          invoke('export_html_to_path', { str: html, path }).then(() => {
-            toast.dismiss(n)
-            toast.success('Exported to ' + path)
-          })
+      let loading: ReturnType<typeof toast.loading> | undefined
+      try {
+        const path = await save({
+          title: t('contextmenu.editor_tab.export_html'),
+          defaultPath: file.name.split('.')?.[0] + '.html',
         })
-        .catch((error) => {
-          toast.error(String(error))
-        })
+        if (!path) return
+        editorSnapshotRegistry.flushForRead(id)
+        loading = toast.loading(t('contextmenu.editor_tab.export_html') + '...')
+        const res = isCapricornView(currentViewType)
+          ? await capricornEditorRef.current?.export('html')
+          : await editorRef.current?.exportHtml()
+        if (typeof res !== 'string') throw new Error('Editor is not ready.')
+        const html = exportHtmlDocument(res, editorWrapperRef.current, file.name)
+        await invoke('export_html_to_path', { str: html, path })
+        toast.success('Exported to ' + path)
+      } catch (error) {
+        toast.error(String(error))
+      } finally {
+        if (loading !== undefined) toast.dismiss(loading)
+      }
     }
 
     bus.on('editor_export_html', exportHtmlHandler)
@@ -2543,6 +2522,7 @@ function TextEditor(props: TextEditorProps) {
 
   const handleCapricornError = useCallback(
     (error: unknown) => {
+      cliRuntimeErrorRef.current = String(error)
       if (activeRef.current) reportEditorSearchLoadFailure(id, groupId)
       finishEditorOpenMeasurement(getEditorOpenMeasurement(id, groupId), 'error')
       captureException(error)
@@ -2578,6 +2558,7 @@ function TextEditor(props: TextEditorProps) {
 
   const handleCapricornRuntimeReady = useCallback(
     (container: HTMLElement, identity: CapricornRuntimeRequestIdentity) => {
+      cliRuntimeErrorRef.current = undefined
       if (!visibleRef.current) return
       if (activeRef.current) {
         capricornStatisticsScheduler.schedule(capricornRuntimeAdapterRef.current)
@@ -2610,6 +2591,7 @@ function TextEditor(props: TextEditorProps) {
   )
 
   const handleCapricornRetry = useCallback(() => {
+    cliRuntimeErrorRef.current = undefined
     beginEditorOpenMeasurement(id, {
       viewId: groupId,
       origin: 'command',
@@ -2724,6 +2706,98 @@ function TextEditor(props: TextEditorProps) {
   useLayoutEffect(() => {
     onLoadingChange?.(openingPending)
   }, [onLoadingChange, openingPending])
+
+  useLayoutEffect(() => {
+    automationHandleRef.current = {
+      inspect: () => ({
+        active: activeRef.current,
+        visible: visibleRef.current && !!editorWrapperRef.current?.isConnected && document.visibilityState !== 'hidden',
+        ready: !openingPending && !openingFailed && !needsMountedContentSyncRef.current &&
+          (isCapricornView(currentViewType) ? !!capricornRuntimeAdapterRef.current :
+            currentViewType === EditorViewType.SOURCECODE ? !!resumeSource &&
+              sourceCodeViewRegistry.get(id, instanceIdRef.current!) === resumeSource &&
+              resumeSource.cm.dom.isConnected : !!editorRef.current &&
+              !!editorWrapperRef.current?.querySelector('.mf-preview-content') &&
+              !editorWrapperRef.current?.querySelector('.mf-preview-loading')),
+        mode: currentViewType,
+        error: openingFailed ? `File loading failed (${TextEditorStatus[status]}).` :
+          isCapricornView(currentViewType) ? cliRuntimeErrorRef.current :
+            editorWrapperRef.current?.querySelector('.mf-preview-error')?.textContent || undefined,
+      }),
+      readContent: () => {
+        editorSnapshotRegistry.flushForRead(id)
+        if (isCapricornView(currentViewType)) {
+          if (!capricornRuntimeAdapterRef.current) throw new Error('Editor is not ready.')
+          return capricornRuntimeAdapterRef.current.getMarkdown()
+        }
+        if (currentViewType === EditorViewType.SOURCECODE) {
+          if (!resumeSource) throw new Error('Source editor is not ready.')
+          return resumeSource.cm.state.doc.toString()
+        }
+        if (typeof content !== 'string') throw new Error('Preview is not ready.')
+        return content
+      },
+      preview: () => {
+        if (currentViewType === EditorViewType.PREVIEW) return
+        if (!fileTypeConfig.supportedModes.includes(EditorViewType.PREVIEW)) throw new Error('Preview is unavailable for this file type.')
+        editorSnapshotRegistry.flushForRead(id)
+        const markdown = automationHandleRef.current!.readContent()
+        clearSwitchingEditorContextResource(id, instanceIdRef.current!)
+        unregisterSourceCodeViewResource(id, instanceIdRef.current!)
+        if (isCapricornView(EditorViewType.PREVIEW)) {
+          unregisterRmeEditorResources(id, instanceIdRef.current!)
+          editorContextRef.current = null
+          setDelegate(null)
+        } else {
+          editorRef.current?.toggleType(EditorViewType.PREVIEW)
+        }
+        setContent(markdown)
+        useEditorViewTypeStore.getState().setEditorViewType(id, EditorViewType.PREVIEW)
+        setCurrentViewType(EditorViewType.PREVIEW)
+      },
+      render: async (format) => {
+        const markdown = automationHandleRef.current!.readContent()
+        if (format === 'markdown') return new TextEncoder().encode(markdown)
+        const capricorn = isCapricornView(currentViewType) ? capricornEditorRef.current : null
+        if (format === 'text' || format === 'json') {
+          if (!capricorn) throw new Error('This export format requires the Markdown preview or editor.')
+          return new TextEncoder().encode(await capricorn.export(format))
+        }
+        if (format === 'html') {
+          if (capricorn) await capricorn.waitForResources()
+          else await waitForEditorResourcesForExport(editorRef.current)
+          const html = capricorn ? await capricorn.export('html') : await editorRef.current?.exportHtml()
+          if (typeof html !== 'string') throw new Error('HTML renderer is unavailable.')
+          return new TextEncoder().encode(exportHtmlDocument(html, editorWrapperRef.current, curFile.name))
+        }
+        let dispose: (() => void) | undefined
+        let restore: (() => void) | undefined
+        try {
+          let element: HTMLElement | null
+          if (capricorn) {
+            const surface = await capricorn.createExportSurface(markdown)
+            element = surface.element
+            dispose = surface.dispose
+          } else {
+            await waitForEditorResourcesForExport(editorRef.current)
+            element = editorWrapperRef.current
+          }
+          if (!element) throw new Error('Image renderer is unavailable.')
+          restore = await prepareResourcesForExport(element, getFolderPathFromPath(getFileObject(id)?.path))
+          return new Uint8Array(canvasDataToBinary(await renderElementToImageDataUrl(element, true)))
+        } finally {
+          try { restore?.() } finally { dispose?.() }
+        }
+      },
+    }
+  })
+
+  useEffect(() => editorAutomationRegistry.register(id, instanceIdRef.current!, {
+    inspect: () => automationHandleRef.current!.inspect(),
+    readContent: () => automationHandleRef.current!.readContent(),
+    preview: () => automationHandleRef.current!.preview(),
+    render: (format) => automationHandleRef.current!.render(format),
+  }), [id])
 
   const getExportContent = useCallback(() => {
     return useEditorStore.getState().getEditorContent(id)

@@ -9,6 +9,7 @@ mod file_copy;
 mod font;
 mod menu;
 mod pandoc;
+mod reliable_cli;
 mod search;
 mod setup;
 mod task_system;
@@ -292,6 +293,10 @@ Usage: markflowy [COMMAND] [OPTIONS]
 Commands:
   open <path> [--window-id <id>]       Open a file or folder
   file open <path> [--window-id <id>]  Open a file
+  file status <path>                   Query live file/content state
+  file wait <path>                     Wait until requested content is visible
+  file export <path> --format <format> --output <path>
+                                      Export the specified file and verify output
   window list                          Print windows with workspace paths
   window focus <id>                    Focus a window
   command list                         Print registered GUI commands
@@ -305,17 +310,32 @@ Options:
   -h, --help                          Print help
   -V, --version                       Print version
   --window-id, --window <id>           Target window id
+  --preview                           Open in preview mode
+  --wait <applied|visible>             Completion condition (default: applied)
+  --sha256 <digest>                    Expected decoded UTF-8 content SHA-256
+  --timeout <milliseconds>            Deadline (default: 30000, maximum: 300000)
+  --format <html|markdown|text|json|jpg> Export format
+  --output <path>                     Export destination (existing directory)
+  --overwrite                         Allow replacing an existing export
+  --json                              Explicit JSON output (already the default)
 
 Examples:
   markflowy open /path/to/file.md
   markflowy open /path/to/folder --window-id main
   markflowy file open /path/to/file.md --window-id main
+  markflowy file open /path/to/file.md --preview --wait applied
+  markflowy file wait /path/to/file.md --sha256 <digest>
+  markflowy file export /path/to/file.md --format html --output /path/to/file.html
   markflowy window list
   markflowy command execute app_save --window-id main
   markflowy help
   markflowy version
 
-Note: Create a symlink or alias 'mf' -> 'markflowy' for shorter invocation."#
+Control commands return a request-scoped JSON receipt; exit 0 means ok, 1 means
+operation failure/unknown completion, and 2 means invalid arguments. A GUI command
+receipt reports dispatched, not completion of an asynchronous save/export.
+PDF uses the interactive print dialog and cannot confirm a CLI destination.
+Create a symlink or alias 'mf' -> 'markflowy' for shorter invocation."#
     );
 }
 
@@ -476,8 +496,12 @@ fn write_cli_runtime_state(state: &CliRuntimeState) -> Result<(), String> {
         fs::create_dir_all(parent).map_err(|e| e.to_string())?;
     }
 
-    let content = serde_json::to_string_pretty(state).map_err(|e| e.to_string())?;
-    fs::write(path, content).map_err(|e| e.to_string())
+    let mut temp = tempfile::NamedTempFile::new_in(path.parent().ok_or("Missing runtime directory")?)
+        .map_err(|error| error.to_string())?;
+    serde_json::to_writer(&mut temp, state).map_err(|error| error.to_string())?;
+    temp.as_file().sync_all().map_err(|error| error.to_string())?;
+    temp.persist(path).map_err(|error| error.to_string())?;
+    Ok(())
 }
 
 fn collect_cli_runtime_windows(app: &tauri::AppHandle) -> Vec<CliWindowState> {
@@ -659,9 +683,10 @@ fn target_window<'a>(
     app: &'a tauri::AppHandle,
     window_id: Option<&str>,
 ) -> Option<tauri::WebviewWindow> {
-    window_id
-        .and_then(|id| app.get_webview_window(id))
-        .or_else(|| window_manager::get_focused_window(app))
+    match window_id {
+        Some(id) => app.get_webview_window(id),
+        None => window_manager::get_focused_window(app),
+    }
 }
 
 fn emit_open_to_window(
@@ -777,6 +802,9 @@ fn spawn_cli_gui_child_and_exit(args: &[String]) {
 
 fn handle_read_only_cli_command() {
     let args: Vec<String> = env::args().collect();
+    if args.get(1).map(String::as_str) == Some("--cli-request") {
+        return;
+    }
     let positional = strip_cli_options(&args);
 
     if args.iter().any(|a| a == "-V" || a == "--version") {
@@ -794,7 +822,10 @@ fn handle_read_only_cli_command() {
     match positional.get(1).map(String::as_str) {
         Some("status") => {
             let state = read_cli_runtime_state();
-            print_json(&state);
+            let mut status = serde_json::to_value(&state).expect("serialize runtime state");
+            status["cliProtocolVersion"] = serde_json::json!(1);
+            status["running"] = serde_json::json!(state.pid.is_some());
+            print_json(&status);
             std::process::exit(0);
         }
         Some("window") if positional.get(2).map(String::as_str) == Some("list") => {
@@ -1514,6 +1545,7 @@ pub fn run() {
     tracing_subscriber::fmt::init();
     dotenv::dotenv().ok();
     attach_parent_console();
+    reliable_cli::run_client_if_requested();
     handle_read_only_cli_command();
 
     let context = tauri::generate_context!();
@@ -1551,6 +1583,9 @@ pub fn run() {
         .plugin(tauri_plugin_cli::init())
         .plugin(tauri_plugin_single_instance::init(
             |app_handle: &tauri::AppHandle, args: Vec<String>, cwd: String| {
+                if reliable_cli::dispatch_args(app_handle, &args) {
+                    return;
+                }
                 handle_running_cli_command(app_handle, &args, Some(&cwd));
                 let positional = strip_cli_options(&args);
                 if matches!(
@@ -1664,6 +1699,10 @@ pub fn run() {
             fc::cmd::activate_workspace_root,
             update_cli_window_state,
             update_cli_command_state,
+            reliable_cli::cli_ready,
+            reliable_cli::cli_complete,
+            reliable_cli::cli_write_export,
+            reliable_cli::cli_hash_content,
         ])
         .setup(|app: &mut tauri::App| {
             cli_debug!("========================================");
@@ -1696,56 +1735,58 @@ pub fn run() {
                 std::process::exit(0);
             }
 
-            match app.cli().matches() {
-                Ok(matches) => {
-                    if let Some(subcommand) = matches.subcommand {
-                        match subcommand.name.as_str() {
-                            "open" => {
-                                if let Some(arg_data) = subcommand.matches.args.get("path") {
-                                    if let Some(raw_path) = arg_data.value.as_str() {
-                                        let url = path_to_file_url(raw_path, None);
-                                        cli_debug!("open: {} -> {}", raw_path, url);
+            if !reliable_cli::dispatch_args(app.handle(), &args) {
+                match app.cli().matches() {
+                    Ok(matches) => {
+                        if let Some(subcommand) = matches.subcommand {
+                            match subcommand.name.as_str() {
+                                "open" => {
+                                    if let Some(arg_data) = subcommand.matches.args.get("path") {
+                                        if let Some(raw_path) = arg_data.value.as_str() {
+                                            let url = path_to_file_url(raw_path, None);
+                                            cli_debug!("open: {} -> {}", raw_path, url);
 
-                                        let mut file_urls =
-                                            app.state::<OpenedUrls>().inner().0.lock().unwrap();
-                                        if let Ok(parsed) = url::Url::parse(&url) {
-                                            *file_urls = Some(vec![parsed]);
-                                        } else {
-                                            cli_debug!("failed to parse URL: {}", url);
+                                            let mut file_urls =
+                                                app.state::<OpenedUrls>().inner().0.lock().unwrap();
+                                            if let Ok(parsed) = url::Url::parse(&url) {
+                                                *file_urls = Some(vec![parsed]);
+                                            } else {
+                                                cli_debug!("failed to parse URL: {}", url);
+                                            }
                                         }
                                     }
                                 }
-                            }
-                            "file" => {
-                                let args: Vec<String> = env::args().collect();
-                                let positional = strip_cli_options(&args);
-                                if positional.get(2).map(String::as_str) == Some("open") {
-                                    if let Some(raw_path) = positional.get(3) {
-                                        let url = path_to_file_url(raw_path, None);
-                                        cli_debug!("file open: {} -> {}", raw_path, url);
+                                "file" => {
+                                    let args: Vec<String> = env::args().collect();
+                                    let positional = strip_cli_options(&args);
+                                    if positional.get(2).map(String::as_str) == Some("open") {
+                                        if let Some(raw_path) = positional.get(3) {
+                                            let url = path_to_file_url(raw_path, None);
+                                            cli_debug!("file open: {} -> {}", raw_path, url);
 
-                                        let mut file_urls =
-                                            app.state::<OpenedUrls>().inner().0.lock().unwrap();
-                                        if let Ok(parsed) = url::Url::parse(&url) {
-                                            *file_urls = Some(vec![parsed]);
-                                        } else {
-                                            cli_debug!("failed to parse URL: {}", url);
+                                            let mut file_urls =
+                                                app.state::<OpenedUrls>().inner().0.lock().unwrap();
+                                            if let Ok(parsed) = url::Url::parse(&url) {
+                                                *file_urls = Some(vec![parsed]);
+                                            } else {
+                                                cli_debug!("failed to parse URL: {}", url);
+                                            }
                                         }
                                     }
                                 }
+                                "version" => {
+                                    print_version();
+                                    std::process::exit(0);
+                                }
+                                _ => {}
                             }
-                            "version" => {
-                                print_version();
-                                std::process::exit(0);
-                            }
-                            _ => {}
+                        } else {
+                            cli_debug!("GUI launch -> normal startup");
                         }
-                    } else {
-                        cli_debug!("GUI launch -> normal startup");
                     }
-                }
-                Err(e) => {
-                    cli_debug!("cli matches error: {:?}", e);
+                    Err(e) => {
+                        cli_debug!("cli matches error: {:?}", e);
+                    }
                 }
             }
 
@@ -1811,6 +1852,7 @@ pub fn run() {
                 }
                 tauri::WindowEvent::Destroyed => {
                     let window_label = window.label();
+                    reliable_cli::window_destroyed(window_label);
                     window_manager::forget_window_recency(window_label);
                     if let Ok(mut instances) = WINDOW_INSTANCES.lock() {
                         instances.remove(window_label);

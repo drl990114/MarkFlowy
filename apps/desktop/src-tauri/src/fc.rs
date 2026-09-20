@@ -1889,17 +1889,8 @@ pub mod cmd {
     }
 
     #[tauri::command]
-    pub fn export_html_to_path(str: &str, path: &str) -> String {
-        let re = Regex::new(r#"\\\""#).unwrap();
-
-        let result = re.replace_all(str, "\"");
-
-        let file_path = Path::new(path);
-
-        match fs::write(file_path, result.to_string()) {
-            Ok(_) => String::from("OK"),
-            Err(e) => format!("ERROR: {}", e),
-        }
+    pub fn export_html_to_path(str: &str, path: &str) -> Result<(), String> {
+        fs::write(Path::new(path), str).map_err(|error| error.to_string())
     }
 
     #[tauri::command]

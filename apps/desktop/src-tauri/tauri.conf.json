@@ -18,7 +18,7 @@
           "args": [
             {
               "name": "path",
-              "description": "Path to the file or folder to open",
+              "description": "Target file path",
               "index": 1,
               "takesValue": true,
               "required": true
@@ -26,14 +26,35 @@
             {
               "name": "window-id",
               "description": "Target window id",
-              "takesValue": true,
-              "required": false
+              "takesValue": true
             },
             {
               "name": "window",
               "description": "Target window id",
-              "takesValue": true,
-              "required": false
+              "takesValue": true
+            },
+            {
+              "name": "json",
+              "description": "Print JSON receipt"
+            },
+            {
+              "name": "timeout",
+              "description": "Deadline in milliseconds (default 30000)",
+              "takesValue": true
+            },
+            {
+              "name": "wait",
+              "description": "Wait for applied or visible content",
+              "takesValue": true
+            },
+            {
+              "name": "sha256",
+              "description": "Expected decoded UTF-8 content SHA-256",
+              "takesValue": true
+            },
+            {
+              "name": "preview",
+              "description": "Open in preview mode"
             }
           ]
         },
@@ -45,7 +66,7 @@
               "args": [
                 {
                   "name": "path",
-                  "description": "Path to the file to open",
+                  "description": "Target file path",
                   "index": 1,
                   "takesValue": true,
                   "required": true
@@ -53,14 +74,174 @@
                 {
                   "name": "window-id",
                   "description": "Target window id",
-                  "takesValue": true,
-                  "required": false
+                  "takesValue": true
                 },
                 {
                   "name": "window",
                   "description": "Target window id",
+                  "takesValue": true
+                },
+                {
+                  "name": "json",
+                  "description": "Print JSON receipt"
+                },
+                {
+                  "name": "timeout",
+                  "description": "Deadline in milliseconds (default 30000)",
+                  "takesValue": true
+                },
+                {
+                  "name": "wait",
+                  "description": "Wait for applied or visible content",
+                  "takesValue": true
+                },
+                {
+                  "name": "sha256",
+                  "description": "Expected decoded UTF-8 content SHA-256",
+                  "takesValue": true
+                },
+                {
+                  "name": "preview",
+                  "description": "Open in preview mode"
+                }
+              ]
+            },
+            "status": {
+              "description": "Query live file state",
+              "args": [
+                {
+                  "name": "path",
+                  "description": "Target file path",
+                  "index": 1,
                   "takesValue": true,
-                  "required": false
+                  "required": true
+                },
+                {
+                  "name": "window-id",
+                  "description": "Target window id",
+                  "takesValue": true
+                },
+                {
+                  "name": "window",
+                  "description": "Target window id",
+                  "takesValue": true
+                },
+                {
+                  "name": "json",
+                  "description": "Print JSON receipt"
+                },
+                {
+                  "name": "timeout",
+                  "description": "Deadline in milliseconds (default 30000)",
+                  "takesValue": true
+                },
+                {
+                  "name": "wait",
+                  "description": "Wait for applied or visible content",
+                  "takesValue": true
+                },
+                {
+                  "name": "sha256",
+                  "description": "Expected decoded UTF-8 content SHA-256",
+                  "takesValue": true
+                }
+              ]
+            },
+            "wait": {
+              "description": "Wait for target content to be applied and visible",
+              "args": [
+                {
+                  "name": "path",
+                  "description": "Target file path",
+                  "index": 1,
+                  "takesValue": true,
+                  "required": true
+                },
+                {
+                  "name": "window-id",
+                  "description": "Target window id",
+                  "takesValue": true
+                },
+                {
+                  "name": "window",
+                  "description": "Target window id",
+                  "takesValue": true
+                },
+                {
+                  "name": "json",
+                  "description": "Print JSON receipt"
+                },
+                {
+                  "name": "timeout",
+                  "description": "Deadline in milliseconds (default 30000)",
+                  "takesValue": true
+                },
+                {
+                  "name": "wait",
+                  "description": "Wait for applied or visible content",
+                  "takesValue": true
+                },
+                {
+                  "name": "sha256",
+                  "description": "Expected decoded UTF-8 content SHA-256",
+                  "takesValue": true
+                }
+              ]
+            },
+            "export": {
+              "description": "Export a specific file and verify output",
+              "args": [
+                {
+                  "name": "path",
+                  "description": "Target file path",
+                  "index": 1,
+                  "takesValue": true,
+                  "required": true
+                },
+                {
+                  "name": "window-id",
+                  "description": "Target window id",
+                  "takesValue": true
+                },
+                {
+                  "name": "window",
+                  "description": "Target window id",
+                  "takesValue": true
+                },
+                {
+                  "name": "json",
+                  "description": "Print JSON receipt"
+                },
+                {
+                  "name": "timeout",
+                  "description": "Deadline in milliseconds (default 30000)",
+                  "takesValue": true
+                },
+                {
+                  "name": "wait",
+                  "description": "Wait for applied or visible content",
+                  "takesValue": true
+                },
+                {
+                  "name": "sha256",
+                  "description": "Expected decoded UTF-8 content SHA-256",
+                  "takesValue": true
+                },
+                {
+                  "name": "format",
+                  "description": "html, markdown, text, json, or jpg",
+                  "takesValue": true,
+                  "required": true
+                },
+                {
+                  "name": "output",
+                  "description": "Destination file path",
+                  "takesValue": true,
+                  "required": true
+                },
+                {
+                  "name": "overwrite",
+                  "description": "Allow replacing an existing export"
                 }
               ]
             }
@@ -105,14 +286,21 @@
                 {
                   "name": "window-id",
                   "description": "Target window id",
-                  "takesValue": true,
-                  "required": false
+                  "takesValue": true
                 },
                 {
                   "name": "window",
                   "description": "Target window id",
-                  "takesValue": true,
-                  "required": false
+                  "takesValue": true
+                },
+                {
+                  "name": "json",
+                  "description": "Print JSON receipt"
+                },
+                {
+                  "name": "timeout",
+                  "description": "Deadline in milliseconds (default 30000)",
+                  "takesValue": true
                 }
               ]
             }

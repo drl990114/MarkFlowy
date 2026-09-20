@@ -1,0 +1,4 @@
+interface:
+  display_name: "MarkFlowy"
+  short_description: "Open and export documents with verified CLI receipts"
+  default_prompt: "Use $markflowy to open my document in preview and confirm the requested content is displayed."

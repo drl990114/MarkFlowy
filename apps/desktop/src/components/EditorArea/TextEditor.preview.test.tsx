@@ -8,6 +8,7 @@ import { getFileObject, setFileObject } from '@/helper/files'
 import useEditorStateStore from '@/stores/useEditorStateStore'
 import TextEditor from './TextEditor'
 import { getCapricornEditor } from './capricornEditorRegistry'
+import { editorAutomationRegistry } from './editorAutomationRegistry'
 
 const mocks = vi.hoisted(() => ({
   t: (key: string) => key,
@@ -143,6 +144,7 @@ describe.skipIf(!isCapricornRuntimeAvailable)('TextEditor preview integration', 
     seedFile(id)
     const { container } = render(<TextEditor active id={id} fileTypeConfig={previewConfig} />)
     await waitFor(() => expect(getCapricornEditor(id)).toBeDefined())
+    expect(editorAutomationRegistry.get(id)?.inspect()).toMatchObject({ ready: true, mode: 'preview' })
     expect(container.querySelector('[data-cap-mode="preview"]')).not.toBeNull()
     expect(getCapricornEditor(id)!.getUiState().readOnly).toBe(true)
     expect(mocks.rmeEditor).not.toHaveBeenCalled()
@@ -155,6 +157,7 @@ describe.skipIf(!isCapricornRuntimeAvailable)('TextEditor preview integration', 
     expect(container.textContent).toContain('Changed externally')
     expect(getCapricornEditor(id)!.getMarkdown()).toBe('# Changed externally\n\nNew body')
     expect(getFileObject(id)?.content).toBe('# Changed externally\n\nNew body')
+    expect(editorAutomationRegistry.get(id)?.readContent()).toBe('# Changed externally\n\nNew body')
     expect(useEditorStateStore.getState().idStateMap.get(id)?.hasUnsavedChanges).toBe(false)
     expect(mocks.error).not.toHaveBeenCalled()
   })
@@ -177,7 +180,7 @@ describe.skipIf(!isCapricornRuntimeAvailable)('TextEditor preview integration', 
     await act(async () => editor.commands.setBlockType('heading-2'))
     const edited = editor.getMarkdown()
     expect(edited).toContain('## Opened file')
-    await switchTo(EditorViewType.PREVIEW)
+    await act(async () => editorAutomationRegistry.get(id)!.preview())
     await waitFor(() => expect(editor.getUiState().readOnly).toBe(true))
     expect(getCapricornEditor(id)).toBe(editor)
     expect(container.querySelector('[data-cap-content]')).toBe(root)

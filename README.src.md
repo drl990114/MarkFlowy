@@ -101,6 +101,9 @@
 
 ## ${en:'Download', zh:'下载', ja:'ダウンロード'}
 
+[CLI and official AI Skill](./skills/markflowy/SKILL.md): open previews, verify applied content, and export to an explicit destination with completion receipts.<!--en-->
+[可靠 CLI 与官方 Skill](./docs/CLI.md)：打开预览、确认内容已应用，并导出到指定路径后获取完成回执。<!--zh-->
+
 Available for Windows, macOS and Linux, from the [latest release](https://github.com/drl990114/MarkFlowy/releases/latest).<!--en-->
 <!--en-->
 ### Windows<!--en-->

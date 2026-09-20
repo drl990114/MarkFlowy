@@ -6,6 +6,7 @@ import {
   restoreDraftSession,
 } from '@/services/draft-recovery'
 import { commandRegistry } from '@/commands'
+import { listenForCliRequests } from '@/services/cli'
 import bus from '@/helper/eventBus'
 import { loadLocalThemeCss } from '@/helper/extensions'
 import { hasFileExcludePatternsChanged } from '@/helper/file-exclude'
@@ -448,6 +449,17 @@ const startDeferredAppSetup = () => {
 }
 
 export const useAppRuntimeSetup = () => {
+  useEffect(() => {
+    let disposed = false
+    let stop: (() => void) | undefined
+    // Wait for restored workspace/drafts before accepting mutations from a cold CLI launch.
+    void startAppSetup().then(async () => {
+      if (disposed) return
+      stop = await listenForCliRequests()
+      if (disposed) stop()
+    }).catch((error) => logger.error('Failed to initialize CLI requests', error))
+    return () => { disposed = true; stop?.() }
+  }, [])
   const eventInit = useCallback(() => {
     const stopDraftReload = listenForDraftReload({
       canSave: () => appStartupCoordinator.getSnapshot().workspace.status === 'ready',
