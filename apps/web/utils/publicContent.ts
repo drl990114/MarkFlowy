@@ -11,7 +11,6 @@ export const PUBLIC_PAGES = [
   { path: '/', locales: SITE_LOCALES },
   { path: '/docs', locales: SITE_LOCALES },
   { path: '/releases', locales: SITE_LOCALES },
-  { path: '/playground', locales: SITE_LOCALES },
   { path: '/privacy', locales: ['en'] as const },
 ]
 
@@ -147,7 +146,7 @@ export function renderLlmsIndex(documents: readonly PublicDocument[]): string {
     '',
     `> ${SITE_DESCRIPTION.en}`,
     '',
-    'These links describe the desktop application unless a page explicitly says Web App or Playground. AI is optional; local inference requires a local model and endpoint. Performance observations are qualified on the performance page.',
+    'These links describe the desktop application unless a page explicitly says Web App. AI is optional; local inference requires a local model and endpoint. Performance observations are qualified on the performance page.',
     '',
     '## Product',
     '',

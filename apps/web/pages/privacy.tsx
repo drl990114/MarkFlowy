@@ -77,10 +77,22 @@ const privacySections: PrivacySection[] = [
       {
         type: 'list',
         items: [
-          { text: '<strong>OpenAI Integration:</strong> If you choose to use OpenAI features, your API key and requests are sent directly to OpenAI\'s servers. We do not intercept or store your API keys or AI requests.', isHtml: true },
-          { text: '<strong>DeepSeek Integration:</strong> Similar to OpenAI, your DeepSeek API key and requests are sent directly to DeepSeek\'s servers.', isHtml: true },
-          { text: '<strong>Ollama Integration:</strong> For local Ollama deployments, all AI processing happens on your local machine.', isHtml: true },
-          { text: '<strong>Google Gemini Integration:</strong> Your Gemini API key and requests are sent directly to Google\'s servers.', isHtml: true },
+          {
+            text: "<strong>OpenAI Integration:</strong> If you choose to use OpenAI features, your API key and requests are sent directly to OpenAI's servers. We do not intercept or store your API keys or AI requests.",
+            isHtml: true,
+          },
+          {
+            text: "<strong>DeepSeek Integration:</strong> Similar to OpenAI, your DeepSeek API key and requests are sent directly to DeepSeek's servers.",
+            isHtml: true,
+          },
+          {
+            text: '<strong>Ollama Integration:</strong> For local Ollama deployments, all AI processing happens on your local machine.',
+            isHtml: true,
+          },
+          {
+            text: "<strong>Google Gemini Integration:</strong> Your Gemini API key and requests are sent directly to Google's servers.",
+            isHtml: true,
+          },
         ],
       },
       {
@@ -90,9 +102,18 @@ const privacySections: PrivacySection[] = [
       {
         type: 'list',
         items: [
-          { text: '<a href="https://openai.com/privacy" target="_blank" rel="noopener noreferrer">OpenAI Privacy Policy</a>', isHtml: true },
-          { text: '<a href="https://www.deepseek.com/privacy" target="_blank" rel="noopener noreferrer">DeepSeek Privacy Policy</a>', isHtml: true },
-          { text: '<a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Google Privacy Policy</a>', isHtml: true },
+          {
+            text: '<a href="https://openai.com/privacy" target="_blank" rel="noopener noreferrer">OpenAI Privacy Policy</a>',
+            isHtml: true,
+          },
+          {
+            text: '<a href="https://www.deepseek.com/privacy" target="_blank" rel="noopener noreferrer">DeepSeek Privacy Policy</a>',
+            isHtml: true,
+          },
+          {
+            text: '<a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Google Privacy Policy</a>',
+            isHtml: true,
+          },
         ],
       },
     ],
@@ -107,7 +128,10 @@ const privacySections: PrivacySection[] = [
       {
         type: 'list',
         items: [
-          { text: 'Source code is available on <a href="https://github.com/drl990114/MarkFlowy" target="_blank" rel="noopener noreferrer">GitHub</a>', isHtml: true },
+          {
+            text: 'Source code is available on <a href="https://github.com/drl990114/MarkFlowy" target="_blank" rel="noopener noreferrer">GitHub</a>',
+            isHtml: true,
+          },
           'All data handling is transparent and auditable',
           'Community contributions are welcome and reviewed',
         ],
@@ -171,7 +195,10 @@ const privacySections: PrivacySection[] = [
       {
         type: 'list',
         items: [
-          { text: 'By visiting our GitHub repository: <a href="https://github.com/drl990114/MarkFlowy" target="_blank" rel="noopener noreferrer">https://github.com/drl990114/MarkFlowy</a>', isHtml: true },
+          {
+            text: 'By visiting our GitHub repository: <a href="https://github.com/drl990114/MarkFlowy" target="_blank" rel="noopener noreferrer">https://github.com/drl990114/MarkFlowy</a>',
+            isHtml: true,
+          },
           'By creating an issue on our GitHub issues page',
         ],
       },
@@ -191,12 +218,7 @@ function renderContentItem(item: PrivacySection['content'][number], index: numbe
           if (typeof listItem === 'string') {
             return <ListItem key={idx}>{listItem}</ListItem>
           }
-          return (
-            <ListItem
-              key={idx}
-              dangerouslySetInnerHTML={{ __html: listItem.text }}
-            />
-          )
+          return <ListItem key={idx} dangerouslySetInnerHTML={{ __html: listItem.text }} />
         })}
       </List>
     )
@@ -225,7 +247,7 @@ export default function PrivacyPage() {
           />
         </HeaderWrapper>
 
-        <MainContent>
+        <MainContent id='main-content'>
           <ContentContainer>
             <PageTitle>Privacy Policy</PageTitle>
             <LastUpdated>Last Updated: March 28, 2026</LastUpdated>
@@ -236,16 +258,14 @@ export default function PrivacyPage() {
                   {sectionIndex + 1}. {section.title}
                 </SectionTitle>
                 {section.content.map((contentItem, contentIndex) =>
-                  renderContentItem(contentItem, contentIndex)
+                  renderContentItem(contentItem, contentIndex),
                 )}
               </Section>
             ))}
           </ContentContainer>
         </MainContent>
 
-        <FooterWrapper>
-          <HomeFooter />
-        </FooterWrapper>
+        <HomeFooter />
       </PageLayout>
     </>
   )
@@ -280,11 +300,11 @@ const HeaderWrapper = styled.header`
 
 const MainContent = styled.main`
   flex: 1;
-  padding-top: ${rem(80)};
+  padding-top: ${rem(112)};
 `
 
 const ContentContainer = styled.div`
-  max-width: ${rem(900)};
+  max-width: ${rem(800)};
   margin: 0 auto;
   padding: ${rem(40)} ${rem(20)};
 
@@ -351,8 +371,4 @@ const ListItem = styled.li`
       opacity: 0.8;
     }
   }
-`
-
-const FooterWrapper = styled.footer`
-  border-top: 1px solid ${(props) => props.theme.borderColor};
 `

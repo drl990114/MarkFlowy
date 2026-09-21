@@ -1,14 +1,14 @@
 ---
 seoTitle: "在 MarkFlowy 中使用 Ollama 与 Copilot"
 description: "为 MarkFlowy 桌面版配置本地 Ollama 对话与 Copilot，了解文档上下文，并排查连接和模型问题。"
-updatedAt: "2026-09-06"
+updatedAt: "2026-09-21"
 ---
 
 # 在 MarkFlowy 中使用 Ollama 与 Copilot
 
 MarkFlowy 桌面版可以连接 Ollama，进行 AI 对话和 Copilot 补全。本地推理需要同时使用本地服务地址和已下载的本地模型；选择云端模型或远程地址时，请求会由对应服务处理。
 
-本文面向 v0.100.1 桌面版的配置方式，于 2026 年 9 月 6 日根据应用源码与 Ollama 文档核对，不代表新增了一次覆盖三个操作系统的端到端实测。浏览器 Playground 是独立的编辑器演示。
+本文面向 v0.100.1 桌面版的配置方式，于 2026 年 9 月 6 日根据应用源码与 Ollama 文档核对，不代表新增了一次覆盖三个操作系统的端到端实测。
 
 ## 1. 启动 Ollama 并检查模型
 

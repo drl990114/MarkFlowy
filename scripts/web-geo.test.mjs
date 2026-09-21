@@ -76,7 +76,7 @@ test('sitemap publishes HTML destinations and only genuine update dates', () => 
   assert.ok(!locations.includes(`${SITE_ORIGIN}/zh/privacy`))
   assert.ok(
     locations.every(
-      (url) => !/\/(auth|workspace|settings|api)(\/|$)|\.md$/.test(new URL(url).pathname),
+      (url) => !/\/(auth|workspace|settings|api|playground)(\/|$)|\.md$/.test(new URL(url).pathname),
     ),
   )
   assert.equal(
@@ -101,7 +101,7 @@ test('llms index links to the same Markdown documents without embedding a second
     assert.ok(index.includes(document.description))
   }
   assert.ok(index.includes('/releases/latest'))
-  assert.doesNotMatch(index, /\/workspace|\/auth|\/settings/)
+  assert.doesNotMatch(index, /\/workspace|\/auth|\/settings|playground/i)
   assert.ok(index.length < 15000)
 })
 

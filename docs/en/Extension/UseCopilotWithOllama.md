@@ -1,14 +1,14 @@
 ---
 seoTitle: "Use Ollama and Copilot in MarkFlowy"
 description: "Configure local Ollama models for MarkFlowy Desktop chat and Copilot, understand document context, and troubleshoot connection or model issues."
-updatedAt: "2026-09-06"
+updatedAt: "2026-09-21"
 ---
 
 # Use Ollama and Copilot in MarkFlowy
 
 MarkFlowy Desktop can connect to Ollama for AI chat and Copilot completion. Local inference requires both a local endpoint and a downloaded local model. A cloud model or remote endpoint changes where requests are processed.
 
-This guide describes the desktop configuration in v0.100.1. It was checked against the application source and Ollama documentation on September 6, 2026; it is not a new end-to-end test on all three operating systems. The browser Playground is a separate editor demonstration.
+This guide describes the desktop configuration in v0.100.1. It was checked against the application source and Ollama documentation on September 6, 2026; it is not a new end-to-end test on all three operating systems.
 
 ## 1. Start Ollama and check a model
 

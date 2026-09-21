@@ -4,12 +4,17 @@ import { getRemoteWorkspaceErrorMessage } from 'features/workspace/services/remo
 import { useAuth } from 'hooks/useAuth'
 import type { GitHubConnectionStatus } from '@markflowy/types'
 import Link from 'next/link'
+import type { GetStaticProps } from 'next'
+import { useTranslation } from 'next-i18next'
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
+import SeoHead from '../../components/SeoHead'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { apiClient } from 'utils/apiClient'
 import { redirectToGitHub } from 'utils/githubAuthorization'
 import rem from 'utils/rem'
+import { applicationTheme } from '../../utils/websiteTheme'
 
 interface WorkspaceMember {
   id: string
@@ -54,6 +59,7 @@ const formatWorkspaceDate = (value?: string) => {
 const getRepoKey = (repo: GitHubRepo) => `${repo.installationId}:${repo.id}`
 
 export default function WorkspaceListPage() {
+  const { t } = useTranslation()
   const router = useRouter()
   const { loading: authLoading, isAuthenticated } = useAuth(false)
 
@@ -185,11 +191,11 @@ export default function WorkspaceListPage() {
       case 'GITHUB':
         return 'GitHub'
       case 'LOCAL':
-        return 'Local'
+        return t('workspace.local')
       case 'SYNCED':
-        return 'Synced'
+        return t('workspace.synced')
       case 'SHARED':
-        return 'Shared'
+        return t('workspace.shared')
       default:
         return type
     }
@@ -216,6 +222,7 @@ export default function WorkspaceListPage() {
 
   return (
     <Container>
+      <SeoHead title={`${t('workspace.title')} | MarkFlowy`} />
       <Header>
         <HeaderInner>
           <HeaderNavigation aria-label='Workspace navigation'>
@@ -226,7 +233,7 @@ export default function WorkspaceListPage() {
             <NavigationDivider aria-hidden='true' />
             <CurrentLocation aria-current='page'>
               <i className='ri-folder-3-line' aria-hidden='true' />
-              Workspaces
+              {t('workspace.title')}
             </CurrentLocation>
           </HeaderNavigation>
           <HeaderRight>
@@ -234,17 +241,17 @@ export default function WorkspaceListPage() {
               <>
                 <SettingsLink href='/settings'>
                   <i className='ri-user-settings-line' aria-hidden='true' />
-                  <span>Settings</span>
+                  <span>{t('workspace.settings')}</span>
                 </SettingsLink>
                 <ImportButton type='button' onClick={handleOpenImportModal}>
                   <i className='ri-add-line' aria-hidden='true' />
-                  Import Workspace
+                  {t('workspace.import')}
                 </ImportButton>
               </>
             ) : (
               <GitHubSignInLink href='/auth'>
                 <i className='ri-github-fill' aria-hidden='true' />
-                Sign in
+                {t('auth.signIn')}
               </GitHubSignInLink>
             )}
           </HeaderRight>
@@ -254,17 +261,15 @@ export default function WorkspaceListPage() {
       <Content>
         <PageIntro>
           <PageIntroCopy>
-            <PageEyebrow>Workspace hub</PageEyebrow>
-            <Title>Workspaces</Title>
-            <Subtitle>
-              Open the local demo or connect GitHub repositories for focused Markdown editing.
-            </Subtitle>
+            <PageEyebrow>{t('workspace.eyebrow')}</PageEyebrow>
+            <Title>{t('workspace.title')}</Title>
+            <Subtitle>{t('workspace.description')}</Subtitle>
           </PageIntroCopy>
           <PageStatus>
             <StatusDot aria-hidden='true' />
             {isAuthenticated
-              ? `${workspaces.length} synced workspace${workspaces.length === 1 ? '' : 's'}`
-              : 'Demo workspace ready'}
+              ? t('workspace.syncedCount', { count: workspaces.length })
+              : t('workspace.ready')}
           </PageStatus>
         </PageIntro>
         <WorkspaceShell>
@@ -280,9 +285,9 @@ export default function WorkspaceListPage() {
                 <SectionHeader>
                   <SectionHeading>
                     <SectionIcon className='ri-history-line' aria-hidden='true' />
-                    <SectionTitle>Recent</SectionTitle>
+                    <SectionTitle>{t('workspace.recent')}</SectionTitle>
                   </SectionHeading>
-                  <SectionMeta>Pinned preview</SectionMeta>
+                  <SectionMeta>{t('workspace.pinned')}</SectionMeta>
                 </SectionHeader>
                 <WorkspaceList>
                   <WorkspaceRow href='/workspace/demo-workspace'>
@@ -290,12 +295,12 @@ export default function WorkspaceListPage() {
                       <i className='ri-folder-3-line' />
                     </WorkspaceIcon>
                     <WorkspaceMain>
-                      <WorkspaceName>Demo Workspace</WorkspaceName>
-                      <WorkspacePath>/workspace/demo-workspace</WorkspacePath>
+                      <WorkspaceName>{t('workspace.demo')}</WorkspaceName>
+                      <WorkspacePath>{t('workspace.demoDescription')}</WorkspacePath>
                     </WorkspaceMain>
                     <WorkspaceTags>
                       <WorkspaceTag>Demo</WorkspaceTag>
-                      <WorkspaceTag>Local</WorkspaceTag>
+                      <WorkspaceTag>{t('workspace.local')}</WorkspaceTag>
                     </WorkspaceTags>
                     <OpenIndicator className='ri-arrow-right-s-line' />
                   </WorkspaceRow>
@@ -310,20 +315,17 @@ export default function WorkspaceListPage() {
                     <SectionIcon className='ri-github-fill' aria-hidden='true' />
                     <SectionTitle id='github-workspaces-heading'>GitHub</SectionTitle>
                   </SectionHeading>
-                  <SectionMeta>Sign-in required</SectionMeta>
+                  <SectionMeta>{t('workspace.signInRequired')}</SectionMeta>
                 </SectionHeader>
                 <GitHubLockedState>
                   <WorkspaceIcon $variant='github'>
                     <i className='ri-github-fill' aria-hidden='true' />
                   </WorkspaceIcon>
                   <GitHubLockedCopy>
-                    <WorkspaceName>Open a GitHub repository as a workspace</WorkspaceName>
-                    <EmptyTextLine>
-                      Sign in first, then connect GitHub and choose the repositories MarkFlowy may
-                      access.
-                    </EmptyTextLine>
+                    <WorkspaceName>{t('workspace.connectTitle')}</WorkspaceName>
+                    <EmptyTextLine>{t('workspace.connectDescription')}</EmptyTextLine>
                   </GitHubLockedCopy>
-                  <GitHubLockedLink href='/auth'>Sign in</GitHubLockedLink>
+                  <GitHubLockedLink href='/auth'>{t('auth.signIn')}</GitHubLockedLink>
                 </GitHubLockedState>
               </Section>
             )}
@@ -333,11 +335,9 @@ export default function WorkspaceListPage() {
                 <SectionHeader>
                   <SectionHeading>
                     <SectionIcon className='ri-folder-shared-line' aria-hidden='true' />
-                    <SectionTitle>Local & Shared</SectionTitle>
+                    <SectionTitle>{t('workspace.localShared')}</SectionTitle>
                   </SectionHeading>
-                  <SectionMeta>
-                    {myWorkspaces.length} workspace{myWorkspaces.length === 1 ? '' : 's'}
-                  </SectionMeta>
+                  <SectionMeta>{t('workspace.count', { count: myWorkspaces.length })}</SectionMeta>
                 </SectionHeader>
                 <WorkspaceList>
                   {myWorkspaces.map((workspace) => (
@@ -378,8 +378,7 @@ export default function WorkspaceListPage() {
                     <SectionTitle>GitHub</SectionTitle>
                   </SectionHeading>
                   <SectionMeta>
-                    {githubWorkspaces.length} repository workspace
-                    {githubWorkspaces.length === 1 ? '' : 's'}
+                    {t('workspace.repositories', { count: githubWorkspaces.length })}
                   </SectionMeta>
                 </SectionHeader>
                 <WorkspaceList>
@@ -413,14 +412,14 @@ export default function WorkspaceListPage() {
               </Section>
             )}
 
-            {loadingWorkspaces && <LoadingText>Loading workspaces...</LoadingText>}
+            {loadingWorkspaces && <LoadingText>{t('workspace.loading')}</LoadingText>}
 
             {isAuthenticated && !loadingWorkspaces && workspaces.length === 0 && (
               <EmptyPanel>
                 <i className='ri-inbox-2-line' />
                 <EmptyCopy>
-                  <EmptyTitle>No synced workspaces yet.</EmptyTitle>
-                  <EmptyTextLine>Import a GitHub repository when you are ready.</EmptyTextLine>
+                  <EmptyTitle>{t('workspace.emptyTitle')}</EmptyTitle>
+                  <EmptyTextLine>{t('workspace.emptyDescription')}</EmptyTextLine>
                 </EmptyCopy>
               </EmptyPanel>
             )}
@@ -470,103 +469,101 @@ export default function WorkspaceListPage() {
                 </SetupPanel>
               )}
 
-              {!loadingGitHubConnection &&
-                !githubConnectionError &&
-                githubConnection?.linked && (
-                  <ImportForm>
-                    <ImportField>
-                      <FieldLabel htmlFor='github-repo-select'>GitHub repository</FieldLabel>
-                      <RepoSelect
-                        id='github-repo-select'
-                        value={selectedRepoKey}
-                        onChange={(e) => setSelectedRepoKey(e.target.value)}
-                        disabled={loadingRepos || authorizingRepositories || !!importingRepo}
-                      >
-                        <option value=''>
-                          {loadingRepos ? 'Loading repositories...' : 'Select a repository'}
+              {!loadingGitHubConnection && !githubConnectionError && githubConnection?.linked && (
+                <ImportForm>
+                  <ImportField>
+                    <FieldLabel htmlFor='github-repo-select'>GitHub repository</FieldLabel>
+                    <RepoSelect
+                      id='github-repo-select'
+                      value={selectedRepoKey}
+                      onChange={(e) => setSelectedRepoKey(e.target.value)}
+                      disabled={loadingRepos || authorizingRepositories || !!importingRepo}
+                    >
+                      <option value=''>
+                        {loadingRepos ? 'Loading repositories...' : 'Select a repository'}
+                      </option>
+                      {repos.map((repo) => (
+                        <option key={getRepoKey(repo)} value={getRepoKey(repo)}>
+                          {repo.full_name}
                         </option>
-                        {repos.map((repo) => (
-                          <option key={getRepoKey(repo)} value={getRepoKey(repo)}>
-                            {repo.full_name}
-                          </option>
-                        ))}
-                      </RepoSelect>
-                    </ImportField>
+                      ))}
+                    </RepoSelect>
+                  </ImportField>
 
-                    {(repoError || importError) && (
-                      <ErrorPanel>
-                        <i className='ri-error-warning-line' />
-                        <span>{repoError || importError}</span>
-                      </ErrorPanel>
-                    )}
+                  {(repoError || importError) && (
+                    <ErrorPanel>
+                      <i className='ri-error-warning-line' />
+                      <span>{repoError || importError}</span>
+                    </ErrorPanel>
+                  )}
 
-                    {!loadingRepos && repos.length === 0 && !repoError && (
-                      <SetupPanel>
-                        <SetupIcon>
-                          <i className='ri-github-fill' />
-                        </SetupIcon>
-                        <SetupCopy>
-                          <SetupTitle>No authorized repositories found</SetupTitle>
-                          <SetupText>
-                            Choose the GitHub repositories that MarkFlowy can import and edit.
-                          </SetupText>
-                        </SetupCopy>
-                        <ImportRepoButton
-                          type='button'
-                          onClick={handleAuthorizeRepositories}
-                          disabled={authorizingRepositories}
-                        >
-                          {authorizingRepositories ? 'Opening GitHub...' : 'Choose Repositories'}
-                        </ImportRepoButton>
-                      </SetupPanel>
-                    )}
-
-                    {selectedRepo && (
-                      <SelectedRepoPanel>
-                        <RepoInfo>
-                          <RepoName>{selectedRepo.full_name}</RepoName>
-                          {selectedRepo.description && (
-                            <RepoDesc>{selectedRepo.description}</RepoDesc>
-                          )}
-                          <RepoMeta>
-                            <RepoTag $private={selectedRepo.private}>
-                              {selectedRepo.private ? 'Private' : 'Public'}
-                            </RepoTag>
-                            <RepoUpdated>
-                              Updated {new Date(selectedRepo.updated_at).toLocaleDateString()}
-                            </RepoUpdated>
-                          </RepoMeta>
-                        </RepoInfo>
-                      </SelectedRepoPanel>
-                    )}
-
-                    {selectedImportedWorkspace && (
-                      <NoticePanel>
-                        <i className='ri-checkbox-circle-line' />
-                        <span>This repository is already imported.</span>
-                        <ExistingWorkspaceLink href={getWorkspaceHref(selectedImportedWorkspace)}>
-                          Open
-                        </ExistingWorkspaceLink>
-                      </NoticePanel>
-                    )}
-
-                    <ModalActions>
+                  {!loadingRepos && repos.length === 0 && !repoError && (
+                    <SetupPanel>
+                      <SetupIcon>
+                        <i className='ri-github-fill' />
+                      </SetupIcon>
+                      <SetupCopy>
+                        <SetupTitle>No authorized repositories found</SetupTitle>
+                        <SetupText>
+                          Choose the GitHub repositories that MarkFlowy can import and edit.
+                        </SetupText>
+                      </SetupCopy>
                       <ImportRepoButton
-                        onClick={() => selectedRepo && handleImportRepo(selectedRepo)}
-                        disabled={
-                          !selectedRepo ||
-                          !!selectedImportedWorkspace ||
-                          authorizingRepositories ||
-                          !!importingRepo
-                        }
+                        type='button'
+                        onClick={handleAuthorizeRepositories}
+                        disabled={authorizingRepositories}
                       >
-                        {importingRepo === selectedRepo?.full_name
-                          ? 'Importing...'
-                          : 'Import Repository'}
+                        {authorizingRepositories ? 'Opening GitHub...' : 'Choose Repositories'}
                       </ImportRepoButton>
-                    </ModalActions>
-                  </ImportForm>
-                )}
+                    </SetupPanel>
+                  )}
+
+                  {selectedRepo && (
+                    <SelectedRepoPanel>
+                      <RepoInfo>
+                        <RepoName>{selectedRepo.full_name}</RepoName>
+                        {selectedRepo.description && (
+                          <RepoDesc>{selectedRepo.description}</RepoDesc>
+                        )}
+                        <RepoMeta>
+                          <RepoTag $private={selectedRepo.private}>
+                            {selectedRepo.private ? 'Private' : 'Public'}
+                          </RepoTag>
+                          <RepoUpdated>
+                            Updated {new Date(selectedRepo.updated_at).toLocaleDateString()}
+                          </RepoUpdated>
+                        </RepoMeta>
+                      </RepoInfo>
+                    </SelectedRepoPanel>
+                  )}
+
+                  {selectedImportedWorkspace && (
+                    <NoticePanel>
+                      <i className='ri-checkbox-circle-line' />
+                      <span>This repository is already imported.</span>
+                      <ExistingWorkspaceLink href={getWorkspaceHref(selectedImportedWorkspace)}>
+                        Open
+                      </ExistingWorkspaceLink>
+                    </NoticePanel>
+                  )}
+
+                  <ModalActions>
+                    <ImportRepoButton
+                      onClick={() => selectedRepo && handleImportRepo(selectedRepo)}
+                      disabled={
+                        !selectedRepo ||
+                        !!selectedImportedWorkspace ||
+                        authorizingRepositories ||
+                        !!importingRepo
+                      }
+                    >
+                      {importingRepo === selectedRepo?.full_name
+                        ? 'Importing...'
+                        : 'Import Repository'}
+                    </ImportRepoButton>
+                  </ModalActions>
+                </ImportForm>
+              )}
             </ModalBody>
           </ModalContent>
         </ModalOverlay>
@@ -576,27 +573,26 @@ export default function WorkspaceListPage() {
 }
 
 const workspacePalette = {
-  page: '#0d0d0f',
-  header: 'rgba(13, 13, 15, 0.86)',
-  surface: '#141416',
-  surfaceRaised: '#1b1b1f',
-  surfaceMuted: '#111113',
-  line: 'rgba(232, 230, 227, 0.09)',
-  lineStrong: 'rgba(232, 230, 227, 0.15)',
-  text: '#ececea',
-  textMuted: '#a0a09c',
-  textFaint: '#777873',
-  accent: '#d4564a',
-  accentHover: '#e06357',
-  accentSoft: 'rgba(212, 86, 74, 0.14)',
-  danger: '#ff6b64',
-  success: '#73c991',
+  page: applicationTheme.webPaperWarm,
+  header: applicationTheme.navBackground,
+  surface: applicationTheme.webPaper,
+  surfaceRaised: applicationTheme.hoverColor,
+  surfaceMuted: applicationTheme.webPaperWarm,
+  line: applicationTheme.webLineSoft,
+  lineStrong: applicationTheme.borderColor,
+  text: applicationTheme.primaryFontColor,
+  textMuted: applicationTheme.webInkSoft,
+  textFaint: applicationTheme.webInkFaint,
+  accent: applicationTheme.accentColor,
+  accentHover: 'color-mix(in srgb, var(--seal) 85%, var(--ink))',
+  accentSoft: applicationTheme.accentColorFocused,
+  danger: applicationTheme.dangerColor,
+  success: applicationTheme.successColor,
 }
 
 const Container = styled.div`
   min-height: 100vh;
-  background:
-    radial-gradient(circle at 50% ${rem(-260)}, rgba(212, 86, 74, 0.13), transparent ${rem(520)}),
+  background: linear-gradient(155deg, ${workspacePalette.surface} 10%, transparent 60%),
     ${workspacePalette.page};
   color: ${workspacePalette.text};
   font-family: ${(props) => props.theme.fontFamily};
@@ -661,7 +657,7 @@ const BrandLogo = styled.img`
 `
 
 const BrandName = styled.strong`
-  font-size: ${rem(15)};
+  font-size: ${rem(20)};
   font-weight: 700;
   letter-spacing: -0.01em;
 
@@ -728,9 +724,9 @@ const HeaderActionLink = styled(Link)`
 
   @media (hover: hover) and (pointer: fine) {
     &:hover {
-      background: #202127;
-      border-color: rgba(232, 230, 227, 0.22);
-      color: #ffffff;
+      background: ${workspacePalette.surfaceRaised};
+      border-color: ${workspacePalette.accent};
+      color: ${workspacePalette.accent};
     }
   }
 
@@ -842,7 +838,6 @@ const GitHubSignInLink = styled(Link)`
     text-underline-offset: 2px;
     opacity: 0.8;
   }
-
 `
 
 const PageIntro = styled.div`
@@ -879,7 +874,7 @@ const PageEyebrow = styled.div`
 const Title = styled.h1`
   margin: 0;
   color: ${workspacePalette.text};
-  font-size: clamp(${rem(30)}, 4vw, ${rem(36)});
+  font-size: clamp(${rem(30)}, 4vw, ${rem(42)});
   font-weight: 720;
   letter-spacing: -0.035em;
   line-height: 1.08;
@@ -901,7 +896,7 @@ const PageStatus = styled.div`
   padding: 0 ${rem(11)};
   border: 1px solid ${workspacePalette.line};
   border-radius: ${rem(999)};
-  background: rgba(20, 20, 22, 0.72);
+  background: ${workspacePalette.surface};
   color: ${workspacePalette.textMuted};
   font-size: ${rem(12)};
   font-weight: 600;
@@ -920,7 +915,7 @@ const Content = styled.main`
   width: 100%;
   max-width: ${rem(1180)};
   margin: 0 auto;
-  padding: ${rem(38)} ${rem(28)} ${rem(52)};
+  padding: ${rem(64)} ${rem(28)} ${rem(72)};
 
   @media (max-width: 720px) {
     padding: ${rem(24)} ${rem(14)} ${rem(32)};
@@ -934,7 +929,7 @@ const WorkspaceShell = styled.div`
 const SectionStack = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${rem(16)};
+  gap: ${rem(24)};
 `
 
 const GitHubLockedState = styled.div`
@@ -1002,7 +997,7 @@ const LoadingContainer = styled.div`
 const LoadingSpinner = styled.div`
   width: ${rem(40)};
   height: ${rem(40)};
-  border: 3px solid rgba(255, 255, 255, 0.1);
+  border: 3px solid ${workspacePalette.line};
   border-top-color: ${workspacePalette.accent};
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
@@ -1016,10 +1011,10 @@ const LoadingSpinner = styled.div`
 
 const Section = styled.section`
   border: 1px solid ${workspacePalette.lineStrong};
-  background: rgba(20, 20, 22, 0.92);
+  background: ${workspacePalette.surface};
   border-radius: ${rem(12)};
   overflow: hidden;
-  box-shadow: 0 ${rem(12)} ${rem(36)} rgba(0, 0, 0, 0.12);
+  box-shadow: 0 3px 6px -2px color-mix(in srgb, var(--ink) 7%, transparent);
 `
 
 const SectionHeader = styled.div`
@@ -1029,7 +1024,7 @@ const SectionHeader = styled.div`
   min-height: ${rem(52)};
   padding: 0 ${rem(18)};
   border-bottom: 1px solid ${workspacePalette.line};
-  background: rgba(17, 17, 19, 0.78);
+  background: ${workspacePalette.surface};
   gap: ${rem(12)};
 `
 
@@ -1046,7 +1041,7 @@ const SectionIcon = styled.i`
   justify-content: center;
   width: ${rem(26)};
   height: ${rem(26)};
-  border: 1px solid rgba(212, 86, 74, 0.2);
+  border: 1px solid ${workspacePalette.accentSoft};
   border-radius: ${rem(7)};
   background: ${workspacePalette.accentSoft};
   color: ${workspacePalette.accent};
@@ -1069,7 +1064,7 @@ const SectionMeta = styled.span`
   padding: 0 ${rem(8)};
   border: 1px solid ${workspacePalette.line};
   border-radius: ${rem(999)};
-  background: rgba(27, 27, 31, 0.64);
+  background: ${workspacePalette.surfaceMuted};
   font-size: ${rem(11)};
   color: ${workspacePalette.textFaint};
   white-space: nowrap;
@@ -1085,8 +1080,8 @@ const WorkspaceRow = styled(Link)`
   grid-template-columns: ${rem(38)} minmax(0, 1fr) auto ${rem(32)};
   align-items: center;
   gap: ${rem(14)};
-  min-height: ${rem(72)};
-  padding: ${rem(14)} ${rem(18)};
+  min-height: ${rem(92)};
+  padding: ${rem(20)} ${rem(24)};
   color: inherit;
   text-decoration: none;
   border-bottom: 1px solid ${workspacePalette.line};
@@ -1100,7 +1095,7 @@ const WorkspaceRow = styled(Link)`
 
   @media (hover: hover) and (pointer: fine) {
     &:hover {
-      background: rgba(27, 27, 31, 0.9);
+      background: ${workspacePalette.surfaceRaised};
     }
   }
 
@@ -1124,10 +1119,11 @@ const WorkspaceIcon = styled.div<{ $variant: 'demo' | 'local' | 'github' }>`
   display: flex;
   align-items: center;
   justify-content: center;
-  background: ${(props) => (props.$variant === 'github' ? '#0f1012' : workspacePalette.accentSoft)};
+  background: ${(props) =>
+    props.$variant === 'github' ? workspacePalette.surfaceMuted : workspacePalette.accentSoft};
   border: 1px solid
     ${(props) =>
-      props.$variant === 'github' ? 'rgba(232, 230, 227, 0.14)' : 'rgba(212, 86, 74, 0.28)'};
+      props.$variant === 'github' ? workspacePalette.line : workspacePalette.accentSoft};
   border-radius: ${rem(10)};
   color: ${(props) =>
     props.$variant === 'github' ? workspacePalette.text : workspacePalette.accent};
@@ -1175,7 +1171,7 @@ const WorkspaceTag = styled.span`
   align-items: center;
   min-height: ${rem(24)};
   padding: 0 ${rem(8)};
-  background: rgba(13, 13, 15, 0.72);
+  background: ${workspacePalette.surfaceMuted};
   border: 1px solid ${workspacePalette.line};
   color: ${workspacePalette.textMuted};
   font-size: ${rem(12)};
@@ -1267,7 +1263,7 @@ const DeleteButton = styled.button`
 const ModalOverlay = styled.div`
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.68);
+  background: ${applicationTheme.dialogBackdropColor};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1286,7 +1282,7 @@ const ModalContent = styled.div`
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: 0 ${rem(24)} ${rem(70)} rgba(0, 0, 0, 0.42);
+  box-shadow: ${applicationTheme.webShadow};
 `
 
 const ModalHeader = styled.div`
@@ -1512,7 +1508,7 @@ const SetupIcon = styled.div`
   justify-content: center;
   width: ${rem(38)};
   height: ${rem(38)};
-  background: #0f1012;
+  background: ${workspacePalette.surfaceMuted};
   border: 1px solid ${workspacePalette.lineStrong};
   border-radius: ${rem(8)};
   color: ${workspacePalette.text};
@@ -1612,3 +1608,7 @@ const LoadingText = styled.div`
   text-align: center;
   padding: ${rem(18)} 0;
 `
+
+export const getStaticProps: GetStaticProps = async ({ locale }) => ({
+  props: { ...(await serverSideTranslations(locale || 'en', ['common'])) },
+})

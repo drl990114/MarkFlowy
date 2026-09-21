@@ -7,10 +7,14 @@ import type { GetServerSideProps } from 'next'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { useRef } from 'react'
-import { Group, Panel, Separator } from 'react-resizable-panels'
+import { useTranslation } from 'next-i18next'
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
+import { useEffect, useRef, useState } from 'react'
+import { Group, Panel, Separator, useGroupCallbackRef } from 'react-resizable-panels'
 import styled from 'styled-components'
 import rem from 'utils/rem'
+import NavButton from '../../components/Nav/NavButton'
+import SeoHead from '../../components/SeoHead'
 
 const Editor = dynamic(() => import('components/Editor').then((mod) => mod.default), {
   ssr: false,
@@ -34,13 +38,16 @@ const WorkspaceDetailCSRPage = dynamic(() => Promise.resolve(WorkspaceDetailPage
 
 const ignoreFileTreeContextMenu = () => {}
 
-export const getServerSideProps: GetServerSideProps = async () => ({ props: {} })
+export const getServerSideProps: GetServerSideProps = async ({ locale }) => ({
+  props: { ...(await serverSideTranslations(locale || 'en', ['common'])) },
+})
 
 export default function WorkspaceDetailPage() {
   return <WorkspaceDetailCSRPage />
 }
 
 function WorkspaceDetailPageContent() {
+  const { t } = useTranslation()
   const router = useRouter()
   const id = normalizeWorkspaceIdParam(router.query.id)
 
@@ -83,6 +90,39 @@ function WorkspaceDetailPageContent() {
 
   const tocRef = useRef<HTMLDivElement>(null)
   const fileTreeRef = useRef<HTMLDivElement>(null)
+  const [mobileView, setMobileView] = useState<'files' | 'editor' | 'outline'>('editor')
+  const [compact, setCompact] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(max-width: 900px)').matches,
+  )
+  const [panelGroup, setPanelGroup] = useGroupCallbackRef()
+  const wasCompact = useRef(compact)
+  const desktopLayout = useRef<Record<string, number>>({
+    'workspace-left': 19,
+    'workspace-center': 64,
+    'workspace-right': 17,
+  })
+
+  useEffect(() => {
+    const query = window.matchMedia('(max-width: 900px)')
+    const update = () => setCompact(query.matches)
+    query.addEventListener('change', update)
+    return () => query.removeEventListener('change', update)
+  }, [])
+
+  useEffect(() => {
+    if (!panelGroup) return
+    if (compact) {
+      if (!wasCompact.current) desktopLayout.current = panelGroup.getLayout()
+      panelGroup.setLayout({
+        'workspace-left': mobileView === 'files' ? 100 : 0,
+        'workspace-center': mobileView === 'editor' ? 100 : 0,
+        'workspace-right': mobileView === 'outline' ? 100 : 0,
+      })
+    } else if (wasCompact.current) {
+      panelGroup.setLayout(desktopLayout.current)
+    }
+    wasCompact.current = compact
+  }, [compact, mobileView, panelGroup])
 
   if (authLoading) {
     return (
@@ -111,7 +151,7 @@ function WorkspaceDetailPageContent() {
   const workspaceTitle = adapter?.title || id || 'Workspace'
   let workspaceIconClass = 'ri-folder-3-line'
   let statusIconClass = 'ri-hard-drive-2-line'
-  let statusText = 'Local'
+  let statusText = t('workspace.local')
 
   if (isRemoteWorkspace) {
     workspaceIconClass = isGitHubProvider ? 'ri-github-fill' : 'ri-cloud-line'
@@ -129,12 +169,13 @@ function WorkspaceDetailPageContent() {
         onFolderDataChange={setFolderData}
         onActiveIdChange={setActiveId}
       >
-        <Container>
+        <Container data-mobile-view={mobileView}>
+          <SeoHead title={`${workspaceTitle} | MarkFlowy`} />
           <TopToolbar>
             <ToolbarLeft>
               <BackLink href='/workspace'>
                 <i className='ri-arrow-left-line' />
-                Workspaces
+                {t('workspace.title')}
               </BackLink>
             </ToolbarLeft>
             <ToolbarCenter>
@@ -172,7 +213,12 @@ function WorkspaceDetailPageContent() {
                     <CommitInput
                       value={commitMessage}
                       onChange={(e) => setCommitMessage(e.target.value)}
-                      placeholder={isGitHubProvider ? 'Commit message' : 'Save message'}
+                      aria-label={t(
+                        isGitHubProvider ? 'workspace.commitMessage' : 'workspace.saveMessage',
+                      )}
+                      placeholder={t(
+                        isGitHubProvider ? 'workspace.commitMessage' : 'workspace.saveMessage',
+                      )}
                     />
                     <SaveButton
                       type='button'
@@ -192,15 +238,16 @@ function WorkspaceDetailPageContent() {
                     >
                       <SaveButtonViewport aria-hidden='true'>
                         <SaveButtonState $visible={saveStatus === 'idle'}>
-                          Save{stagedFiles.length > 1 ? ` ${stagedFiles.length}` : ''}
+                          {t('workspace.save')}
+                          {stagedFiles.length > 1 ? ` ${stagedFiles.length}` : ''}
                         </SaveButtonState>
                         <SaveButtonState $visible={saveStatus === 'saving'}>
                           <SaveSpinner className='ri-loader-4-line' />
-                          Saving
+                          {t('workspace.saving')}
                         </SaveButtonState>
                         <SaveButtonState $visible={saveStatus === 'saved'}>
                           <i className='ri-check-line' />
-                          Saved
+                          {t('workspace.saved')}
                         </SaveButtonState>
                       </SaveButtonViewport>
                     </SaveButton>
@@ -219,13 +266,34 @@ function WorkspaceDetailPageContent() {
 
           {error && <ErrorBanner>{error}</ErrorBanner>}
 
-          <MainContent>
-            <Panel id='workspace-left' defaultSize={240} minSize={200} maxSize={320}>
+          <MobilePanelNavigation aria-label={t('workspace.panels')}>
+            {(['files', 'editor', 'outline'] as const).map((view) => (
+              <MobilePanelButton
+                type='button'
+                key={view}
+                aria-pressed={mobileView === view}
+                onClick={() => setMobileView(view)}
+              >
+                {t(`workspace.${view}`)}
+              </MobilePanelButton>
+            ))}
+          </MobilePanelNavigation>
+          <MainContent groupRef={setPanelGroup} disabled={compact}>
+            <Panel
+              className='mf-editor-panel'
+              data-section='files'
+              id='workspace-left'
+              defaultSize={compact ? '0%' : 240}
+              minSize={compact ? 0 : 200}
+              maxSize={compact ? '100%' : 320}
+              collapsible={compact}
+              inert={compact && mobileView !== 'files'}
+            >
               <LeftSidebar>
-                <SideBarHeader name='Explorer' />
+                <SideBarHeader name={t('workspace.files')} />
                 <FileTreeWrapper ref={fileTreeRef}>
                   {loadingTree ? (
-                    <LoadingText>Loading files...</LoadingText>
+                    <LoadingText>{t('workspace.loadingFiles')}</LoadingText>
                   ) : (
                     fileTreeRef.current && (
                       <FileTree
@@ -245,24 +313,27 @@ function WorkspaceDetailPageContent() {
                     )
                   )}
                 </FileTreeWrapper>
-                <StagedPanel aria-label='Staged changes'>
+                <StagedPanel aria-label={t('workspace.staged')}>
                   <StagedHeader>
                     <StagedTitle>
                       <i className='ri-git-commit-line' aria-hidden='true' />
-                      Staged Changes
+                      {t('workspace.staged')}
                     </StagedTitle>
                     <StagedCount>{stagedFiles.length}</StagedCount>
                   </StagedHeader>
                   <StagedList>
                     {stagedFiles.length === 0 ? (
-                      <StagedEmpty>Edited files will appear here</StagedEmpty>
+                      <StagedEmpty>{t('workspace.stagedEmpty')}</StagedEmpty>
                     ) : (
                       stagedFiles.map(({ file, fileId }) => (
                         <StagedItemButton
                           key={fileId}
                           type='button'
                           $active={activeId === fileId}
-                          onClick={() => handleSelect(file)}
+                          onClick={() => {
+                            handleSelect(file)
+                            setMobileView('editor')
+                          }}
                           aria-current={activeId === fileId ? 'page' : undefined}
                           title={file.path}
                         >
@@ -282,21 +353,30 @@ function WorkspaceDetailPageContent() {
               </LeftSidebar>
             </Panel>
 
-            <StyleSeparator />
+            <StyleSeparator className='mf-editor-separator' />
 
-            <Panel id='workspace-center' minSize={420} groupResizeBehavior='preserve-relative-size'>
+            <Panel
+              className='mf-editor-panel'
+              data-section='editor'
+              id='workspace-center'
+              minSize={compact ? 0 : 320}
+              defaultSize={compact ? '100%' : undefined}
+              collapsible={compact}
+              inert={compact && mobileView !== 'editor'}
+              groupResizeBehavior='preserve-relative-size'
+            >
               <CenterArea>
                 <EditorToolbar viewType={viewType} onViewTypeChange={setViewType} />
                 <EditorContent ref={tocRef}>
                   {loadingFile && (
                     <EditorLoading>
-                      <LoadingText>Loading file...</LoadingText>
+                      <LoadingText>{t('workspace.loadingFile')}</LoadingText>
                     </EditorLoading>
                   )}
                   {!loadingFile && opened.length === 0 && (
                     <EditorEmpty>
                       <EmptyIcon className='ri-file-list-3-line' />
-                      <EmptyText>No file selected</EmptyText>
+                      <EmptyText>{t('workspace.noFile')}</EmptyText>
                     </EditorEmpty>
                   )}
                   {opened.map((fileId) => {
@@ -319,11 +399,20 @@ function WorkspaceDetailPageContent() {
               </CenterArea>
             </Panel>
 
-            <StyleSeparator />
+            <StyleSeparator className='mf-editor-separator' />
 
-            <Panel id='workspace-right' defaultSize={260} minSize={220} maxSize={340}>
+            <Panel
+              className='mf-editor-panel'
+              data-section='outline'
+              id='workspace-right'
+              defaultSize={compact ? '0%' : 220}
+              minSize={compact ? 0 : 180}
+              maxSize={compact ? '100%' : 340}
+              collapsible={compact}
+              inert={compact && mobileView !== 'outline'}
+            >
               <RightSidebar>
-                <SideBarHeader name='Outline' />
+                <SideBarHeader name={t('workspace.outline')} />
                 <TocContainer>
                   <TableOfContents
                     headingsData={currentHeadings}
@@ -348,8 +437,14 @@ function WorkspaceDetailPageContent() {
               )}
             </StatusLeft>
             <StatusRight>
-              <StatusItem>{viewType}</StatusItem>
-              <StatusItem>{currentHeadings.length} headings</StatusItem>
+              <StatusItem>
+                {t(
+                  `workspace.${viewType === 'wysiwyg' ? 'editor' : viewType === 'preview' ? 'previewMode' : 'source'}`,
+                )}
+              </StatusItem>
+              <StatusItem>
+                {t('workspace.headingCount', { count: currentHeadings.length })}
+              </StatusItem>
             </StatusRight>
           </StatusBar>
           <ContextMenu />
@@ -362,29 +457,75 @@ function WorkspaceDetailPageContent() {
 const Container = styled.div`
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  width: 100vw;
+  height: 100dvh;
+  width: 100%;
   overflow: hidden;
-  background: ${(props) => props.theme.bgColor};
-  color: ${(props) => props.theme.primaryFontColor};
-  border-top: 1px solid ${(props) => props.theme.borderColor};
-  font-family: ${(props) => props.theme.fontFamily};
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+
+  @media (max-width: 900px) {
+    .mf-editor-separator {
+      display: none;
+    }
+  }
 `
 
-const TopToolbar = styled.div`
+const TopToolbar = styled.header`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: ${rem(8)};
-  padding: 0 ${rem(8)};
-  border-bottom: 1px solid ${(props) => props.theme.borderColor};
-  background: ${(props) => props.theme.titleBarBgColor};
+  gap: 16px;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--line-soft);
+  background: var(--paper);
   flex-shrink: 0;
-  height: ${rem(36)};
+  min-height: 64px;
+
+  @media (max-width: 1100px) {
+    gap: 10px;
+    padding: 0 12px;
+  }
+  @media (max-width: 900px) {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 10px 16px;
+    padding: 12px 16px;
+  }
+`
+
+const MobilePanelNavigation = styled.nav`
+  display: none;
+  @media (max-width: 900px) {
+    display: flex;
+    gap: 6px;
+    padding: 6px 16px;
+    background: var(--paper-warm);
+    border-bottom: 1px solid var(--line-soft);
+  }
+`
+
+const MobilePanelButton = styled(NavButton)`
+  && {
+    height: 32px;
+    flex: 1;
+    padding: 0 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    color: var(--ink-mute);
+    transition:
+      color 160ms ease,
+      background-color 160ms ease;
+  }
+  &[aria-pressed='true'] {
+    background: var(--paper);
+    color: var(--seal);
+    box-shadow: 0 1px 3px color-mix(in srgb, var(--ink) 10%, transparent);
+  }
 `
 
 const ToolbarLeft = styled.div`
-  flex: 1;
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
 `
@@ -393,12 +534,16 @@ const ToolbarCenter = styled.div`
   flex: 1;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   min-width: 0;
 `
 
 const ToolbarRight = styled.div`
-  flex: 1;
+  flex: 0 1 auto;
+  min-width: 0;
+  @media (max-width: 900px) {
+    grid-column: 1 / -1;
+  }
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -408,7 +553,7 @@ const BackLink = styled(Link)`
   display: inline-flex;
   align-items: center;
   gap: ${rem(4)};
-  height: ${rem(26)};
+  height: 34px;
   padding: 0 ${rem(8)};
   border-radius: ${(props) => props.theme.smallBorderRadius};
   font-size: ${(props) => props.theme.fontSm};
@@ -433,8 +578,8 @@ const WorkspaceInfo = styled.div`
 `
 
 const WorkspaceIcon = styled.div`
-  width: ${rem(24)};
-  height: ${rem(24)};
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -447,7 +592,7 @@ const WorkspaceIcon = styled.div`
 `
 
 const WorkspaceTitle = styled.div`
-  font-size: ${(props) => props.theme.fontSm};
+  font-size: 14px;
   font-weight: 600;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -455,7 +600,7 @@ const WorkspaceTitle = styled.div`
 `
 
 const BranchSelect = styled.select`
-  height: ${rem(26)};
+  height: 34px;
   padding: 0 ${rem(8)};
   font-size: ${(props) => props.theme.fontXs};
   background: ${(props) => props.theme.bgColor};
@@ -473,6 +618,7 @@ const BranchSelect = styled.select`
 `
 
 const Actions = styled.div`
+  width: 100%;
   display: flex;
   align-items: center;
   gap: ${rem(6)};
@@ -484,7 +630,7 @@ const FileChip = styled.div`
   align-items: center;
   gap: ${rem(5)};
   max-width: ${rem(180)};
-  height: ${rem(26)};
+  height: 34px;
   padding: 0 ${rem(8)};
   font-size: ${(props) => props.theme.fontXs};
   color: ${(props) => props.theme.disabledFontColor};
@@ -497,14 +643,18 @@ const FileChip = styled.div`
 `
 
 const CommitInput = styled.input`
-  height: ${rem(26)};
+  height: 34px;
   padding: 0 ${rem(8)};
   font-size: ${(props) => props.theme.fontXs};
   background: ${(props) => props.theme.bgColor};
   border: 1px solid ${(props) => props.theme.borderColor};
   border-radius: ${(props) => props.theme.smallBorderRadius};
   color: ${(props) => props.theme.primaryFontColor};
-  width: ${rem(190)};
+  width: clamp(100px, 14vw, 180px);
+  min-width: 0;
+  @media (max-width: 900px) {
+    flex: 1;
+  }
 
   &:focus {
     outline: none;
@@ -516,7 +666,7 @@ const SaveButton = styled.button<{ $status: 'idle' | 'saving' | 'saved' }>`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: ${rem(26)};
+  height: 34px;
   padding: 0 ${rem(10)};
   font-size: ${(props) => props.theme.fontXs};
   font-weight: 500;
@@ -628,9 +778,9 @@ const SaveAnnouncement = styled.span`
 
 const ErrorBanner = styled.div`
   padding: ${rem(8)} ${rem(12)};
-  background: rgba(220, 38, 38, 0.12);
-  border-bottom: 1px solid rgba(220, 38, 38, 0.28);
-  color: #ff7b72;
+  background: ${(props) => `color-mix(in srgb, ${props.theme.dangerColor} 7%, var(--paper))`};
+  border-bottom: 1px solid ${(props) => props.theme.dangerColor};
+  color: ${(props) => props.theme.dangerColor};
   font-size: ${(props) => props.theme.fontSm};
 `
 
@@ -908,7 +1058,7 @@ const StatusBar = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: ${(props) => props.theme.statusBarHeight};
+  height: 30px;
   padding: 0 ${rem(8)};
   background: ${(props) => props.theme.statusBarBgColor};
   border-top: 1px solid ${(props) => props.theme.borderColor};
@@ -952,8 +1102,8 @@ const LoadingContainer = styled.div`
 const LoadingSpinner = styled.div`
   width: ${rem(40)};
   height: ${rem(40)};
-  border: 3px solid rgba(255, 255, 255, 0.1);
-  border-top-color: #d4564a;
+  border: 3px solid var(--line-soft);
+  border-top-color: var(--seal);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 

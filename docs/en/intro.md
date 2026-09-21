@@ -1,7 +1,7 @@
 ---
 seoTitle: "MarkFlowy: Markdown editing with optional AI"
 description: "A local-first Markdown editor for macOS, Windows, and Linux. Learn about large documents, optional AI, and desktop versus web workflows."
-updatedAt: "2026-09-06"
+updatedAt: "2026-09-21"
 ---
 
 # MarkFlowy: Markdown editing with optional AI
@@ -26,15 +26,14 @@ AI features include chat, summaries, translation, and Copilot completion. Provid
 
 For local inference, choose a locally running Ollama model and a local endpoint. A remote endpoint or cloud-hosted model sends requests to that service, even if you access it through Ollama. See [setting up Ollama and Copilot](./Extension/UseCopilotWithOllama).
 
-## Desktop, Web App, and Playground
+## Desktop and Web App
 
 | Entry | What to expect |
 | --- | --- |
 | Desktop release | Local file and folder workflows and configurable AI. |
 | Web App Beta | A separate browser workspace; connected or remote workspaces have their own storage and authentication behavior. |
-| Playground | A browser demonstration of the RME editor. It does not establish desktop editor performance or desktop AI support. |
 
-For the large-document and local AI workflows described here, use the desktop release. The [Playground](https://www.markflowy.cc/playground) is useful for a quick basic editing trial.
+For the large-document and local AI workflows described here, use the desktop release.
 
 ## Download
 

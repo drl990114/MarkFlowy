@@ -1,4 +1,3 @@
-import ThemeProvider from 'components/ThemeProvider'
 import Document, { Head, Html, Main, NextScript } from 'next/document'
 import type { DocumentContext } from 'next/document'
 import { ServerStyleSheet } from 'styled-components'
@@ -26,7 +25,7 @@ export default class MyDocument extends Document {
 
   render() {
     return (
-      <Html data-theme='dark' lang={this.props.__NEXT_DATA__.locale || 'en'}>
+      <Html data-theme='light' lang={this.props.__NEXT_DATA__.locale || 'en'}>
         <Head>
           <link rel='stylesheet' type='text/css' href='/dmvendor.css' />
           <link rel='preconnect' href='https://fonts.googleapis.com' />
@@ -38,11 +37,9 @@ export default class MyDocument extends Document {
         </Head>
 
         <body>
-          <ThemeProvider>
-            <div className='root'>
-              <Main />
-            </div>
-          </ThemeProvider>
+          <div className='root'>
+            <Main />
+          </div>
           <NextScript />
         </body>
       </Html>

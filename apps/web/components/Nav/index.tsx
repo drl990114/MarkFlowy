@@ -1,6 +1,5 @@
 import { useTranslation } from 'next-i18next'
 import styled from 'styled-components'
-import rem from '../../utils/rem'
 import { navbarHeight } from '../../utils/sizes'
 import Navbar from './Navbar'
 import Sidebar from './Sidebar'
@@ -32,7 +31,7 @@ const Nav = (props: NavProps) => {
   return (
     <div>
       <Navbar
-        showSideNav={showSideNav}
+        showSideNav={showSideNav !== false}
         isSideFolded={isSideFolded}
         isMobileNavFolded={isMobileNavFolded}
         onSideToggle={onSideToggle}
@@ -73,13 +72,14 @@ const SidebarBackdrop = styled.button<{ $isVisible: boolean }>`
 
   @media (max-width: ${1000 / 16}em) {
     position: fixed;
-    inset: ${rem(navbarHeight)} 0 0;
+    inset: ${navbarHeight}px 0 0;
     z-index: 1;
     display: block;
     padding: 0;
     border: 0;
     background: color-mix(in srgb, var(--paper-deep) 62%, transparent);
     opacity: ${({ $isVisible }) => ($isVisible ? 1 : 0)};
+    visibility: ${({ $isVisible }) => ($isVisible ? 'visible' : 'hidden')};
     pointer-events: ${({ $isVisible }) => ($isVisible ? 'auto' : 'none')};
     transition: opacity 150ms ease;
 

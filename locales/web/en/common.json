@@ -2,10 +2,6 @@
   "common": {
     "docs": "Documentation"
   },
-  "playground": {
-    "title": "Try Playground",
-    "description": "Try basic Markdown editing in the browser. This RME playground does not represent the desktop editor’s performance or AI features."
-  },
   "docs": {
     "tableOfContents": "On this page",
     "content": {
@@ -163,6 +159,178 @@
     "githubCallbackFailed": "GitHub sign in failed",
     "githubCallbackError": "The GitHub sign-in link is invalid or has expired. Please try again.",
     "githubAccountLinkRequired": "An account with this email already exists. Sign in with email, then link GitHub in Settings.",
-    "backToSignIn": "Back to sign in"
+    "backToSignIn": "Back to sign in",
+    "welcomeBack": "Welcome back",
+    "welcomeDescription": "Sign in to your workspace and pick up where you left off."
+  },
+  "site": {
+    "nav": {
+      "features": "Features",
+      "main": "Main navigation",
+      "skip": "Skip to content",
+      "writing": "Write and edit",
+      "editor": "Markdown editor",
+      "editorDescription": "Visual editing with source mode",
+      "demoDescription": "Start writing without installing",
+      "workspace": "Your workspace",
+      "files": "Local files and large documents",
+      "filesDescription": "Open formats, fluid organization",
+      "assistant": "Optional AI assistance",
+      "assistantDescription": "Cloud services or local Ollama models",
+      "themes": "Themes and personalization",
+      "themesDescription": "Make the editor feel like your own",
+      "start": "Get started",
+      "downloadDescription": "For macOS, Windows, and Linux",
+      "webDescription": "Your workspace in the browser · Beta",
+      "featuresDescription": "Discover what MarkFlowy can do",
+      "quickstart": "Quick start",
+      "explore": "Explore more",
+      "support": "Help and support",
+      "openSource": "Open source",
+      "buildTogether": "Build together",
+      "githubDescription": "Browse the source and follow development",
+      "contributeDescription": "Start with an issue or an improvement",
+      "feedbackDescription": "Report issues and share ideas",
+      "contributors": "Contributors",
+      "contributorsDescription": "Meet the people building MarkFlowy",
+      "back": "Back"
+    },
+    "hero": {
+      "eyebrow": "LOCAL FIRST. IDEAS FORWARD.",
+      "title": "Your ideas, in full flow.",
+      "lead": "A local-first Markdown editor for everything you want to write.",
+      "description": "Bring your notes, long-form writing, and optional AI together. Your files stay yours.",
+      "try": "Try online",
+      "platforms": "Made for the way you work"
+    },
+    "preview": {
+      "eyebrow": "A SPACE FOR YOUR WORDS",
+      "title": "Less between you and your next idea.",
+      "description": "Your files, editor, and document outline in one window. From quick notes to longer drafts, give your ideas room to grow.",
+      "note": "MarkFlowy desktop screenshot · Light mode",
+      "screenshotAlt": "MarkFlowy desktop in light mode, showing the file list, Markdown source editor, and document outline"
+    },
+    "features": {
+      "eyebrow": "THOUGHTFULLY CONNECTED",
+      "title": "Everything your writing needs. Nothing in its way.",
+      "description": "From a quick note to a long document, build a writing flow that feels like your own.",
+      "write": {
+        "title": "Markdown, the way you think.",
+        "body": "Write visually or get closer to the source. Work with Markdown, JSON, and plain text in one familiar space.",
+        "link": "Explore the editor",
+        "alt": "MarkFlowy desktop editor displaying a writing sample"
+      },
+      "local": {
+        "title": "Your words. Your files.",
+        "body": "Work directly with local files in open formats. Organize your workspace and keep large documents within reach."
+      },
+      "ai": {
+        "title": "A little help, when you need it.",
+        "body": "Bring your own AI service for conversations, summaries, and translation, or connect a local model with Ollama.",
+        "alt": "MarkFlowy desktop editor with its optional AI assistant panel"
+      },
+      "personal": {
+        "title": "Make yourself at home.",
+        "body": "Choose your theme, set your shortcuts, and settle into a distraction-free space that works for you.",
+        "link": "Explore customization"
+      },
+      "shortcuts": {
+        "write": "Bold text",
+        "focus": "Focus on writing",
+        "command": "Find a command"
+      }
+    },
+    "workflow": {
+      "eyebrow": "FROM THOUGHT TO FINISHED",
+      "title": "One space. Your whole writing flow.",
+      "capture": {
+        "title": "Catch the thought.",
+        "body": "Open a local folder and start a note. Ordinary files, ready whenever inspiration arrives.",
+        "visual": "Capture an idea"
+      },
+      "refine": {
+        "title": "Find the right words.",
+        "body": "Shape the structure, edit visually, or work in source mode. Bring in AI only when it helps.",
+        "visual": "Refine your draft"
+      },
+      "share": {
+        "title": "Take it with you.",
+        "body": "Keep the Markdown source or export your work. Your writing belongs wherever you need it.",
+        "visual": "Ready to share"
+      }
+    },
+    "community": {
+      "eyebrow": "BUILT IN THE OPEN",
+      "title": "Better, together.",
+      "body": "MarkFlowy grows with the people who use it. Read the code, share an idea, report a bug, or help shape what comes next.",
+      "thanks": "Made possible by our contributors"
+    },
+    "cta": {
+      "title": "Your next idea starts here.",
+      "body": "A little more focus. A lot more flow.",
+      "docs": "Read the docs"
+    },
+    "footer": {
+      "product": "Product",
+      "resources": "Resources",
+      "community": "Community",
+      "tagline": "A local-first space for ideas to become words.",
+      "contribute": "Contribute",
+      "feedback": "Feedback & issues",
+      "privacy": "Privacy policy",
+      "license": "License",
+      "made": "Made for the love of writing."
+    },
+    "releases": {
+      "eyebrow": "ALWAYS MOVING FORWARD",
+      "latest": "Latest release",
+      "empty": "Release notes are temporarily unavailable. You can find all releases on GitHub."
+    },
+    "motion": {
+      "pause": "Pause animations",
+      "resume": "Play animations"
+    }
+  },
+  "workspace": {
+    "title": "Workspaces",
+    "eyebrow": "YOUR WRITING SPACE",
+    "description": "Pick up where you left off, or connect a GitHub repository to start something new.",
+    "ready": "Ready to write",
+    "syncedCount": "{{count}} synced workspaces",
+    "settings": "Settings",
+    "import": "Import workspace",
+    "recent": "Start writing",
+    "pinned": "No account needed",
+    "demo": "Demo workspace",
+    "demoDescription": "A space to try writing. Saved in this browser.",
+    "local": "Local",
+    "shared": "Shared",
+    "synced": "Synced",
+    "signInRequired": "Sign in to connect",
+    "connectTitle": "Bring your repositories into MarkFlowy",
+    "connectDescription": "Connect GitHub, choose a repository, and keep your documents together.",
+    "localShared": "Local & shared",
+    "count": "{{count}} workspaces",
+    "repositories": "{{count}} repositories",
+    "loading": "Loading workspaces…",
+    "emptyTitle": "Your next project starts here.",
+    "emptyDescription": "Import a GitHub repository to create your first workspace.",
+    "files": "Files",
+    "editor": "Write",
+    "outline": "Outline",
+    "panels": "Workspace panels",
+    "staged": "Changes",
+    "stagedEmpty": "Your edits will appear here.",
+    "source": "Source",
+    "previewMode": "Preview",
+    "save": "Save",
+    "saving": "Saving",
+    "saved": "Saved",
+    "saveMessage": "Save message",
+    "commitMessage": "Commit message",
+    "noFile": "Choose a document to start writing.",
+    "loadingFiles": "Loading files…",
+    "loadingFile": "Loading document…",
+    "headingCount": "{{count}} headings"
   }
 }

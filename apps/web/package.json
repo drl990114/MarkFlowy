@@ -11,7 +11,7 @@
     "build:vercel": "NODE_ENV=production yarn build",
     "start": "NODE_ENV=production next start",
     "build:types": "tsc --noEmit",
-    "test": "node --experimental-strip-types --test ../../scripts/web-geo.test.mjs",
+    "test": "node --experimental-strip-types --test ../../scripts/web-geo.test.mjs ../../scripts/web-site.test.mjs ../../scripts/web-releases.test.mjs",
     "test:geo:http": "node --test ../../scripts/web-geo-http.test.mjs",
     "prettier": "prettier --write \"**/*.*\""
   },

@@ -2,10 +2,6 @@
   "common": {
     "docs": "ドキュメント"
   },
-  "playground": {
-    "title": "Playground を試す",
-    "description": "ブラウザーで基本的な Markdown 編集を試せます。この RME デモはデスクトップ版の性能や AI 機能を示すものではありません。"
-  },
   "docs": {
     "tableOfContents": "このページの目次",
     "content": {
@@ -163,6 +159,178 @@
     "githubCallbackFailed": "GitHub ログインに失敗しました",
     "githubCallbackError": "GitHub ログインリンクが無効か期限切れです。もう一度お試しください。",
     "githubAccountLinkRequired": "このメールアドレスのアカウントは既に存在します。メールでログインしてから、設定で GitHub を連携してください。",
-    "backToSignIn": "ログインに戻る"
+    "backToSignIn": "ログインに戻る",
+    "welcomeBack": "おかえりなさい",
+    "welcomeDescription": "ログインして、前回の続きを書きましょう。"
+  },
+  "site": {
+    "nav": {
+      "features": "機能",
+      "main": "メインナビゲーション",
+      "skip": "本文へ移動",
+      "writing": "執筆と編集",
+      "editor": "Markdown エディター",
+      "editorDescription": "ビジュアル編集とソースモード",
+      "demoDescription": "インストールせずに書き始める",
+      "workspace": "ワークスペース",
+      "files": "ローカルファイルと大きな文書",
+      "filesDescription": "オープンな形式で快適に整理・編集",
+      "assistant": "オプションの AI アシスタント",
+      "assistantDescription": "クラウドやローカルの Ollama に接続",
+      "themes": "テーマとカスタマイズ",
+      "themesDescription": "自分の書き方に合わせた環境へ",
+      "start": "利用を始める",
+      "downloadDescription": "macOS、Windows、Linux に対応",
+      "webDescription": "ブラウザーでワークスペースを開く · Beta",
+      "featuresDescription": "MarkFlowy の編集機能を知る",
+      "quickstart": "クイックスタート",
+      "explore": "さらに詳しく",
+      "support": "ヘルプとサポート",
+      "openSource": "オープンソース",
+      "buildTogether": "一緒につくる",
+      "githubDescription": "ソースコードと開発状況を見る",
+      "contributeDescription": "問題の報告や改善から始める",
+      "feedbackDescription": "不具合の報告やアイデアの共有",
+      "contributors": "貢献者",
+      "contributorsDescription": "MarkFlowy を育てる人々",
+      "back": "戻る"
+    },
+    "hero": {
+      "eyebrow": "ローカル優先。自由なアイデア。",
+      "title": "アイデアが、自然に流れ出す。",
+      "lead": "ひらめきから完成まで。ローカル優先の Markdown エディター。",
+      "description": "メモも長文も、必要なときだけ AI も。ファイルはいつでもあなたのもの。",
+      "try": "オンラインで試す",
+      "platforms": "いつもの環境で、書き始めよう"
+    },
+    "preview": {
+      "eyebrow": "言葉のための場所",
+      "title": "次のアイデアを、すぐに書き出そう。",
+      "description": "ファイル、編集エリア、文書の目次をひとつのウィンドウに。短いメモから長い文章まで、思考を自然に広げられます。",
+      "note": "MarkFlowy デスクトップ版のスクリーンショット · ライトモード",
+      "screenshotAlt": "ファイル一覧、Markdown ソースエディター、文書の目次を表示した MarkFlowy デスクトップ版のライトモード"
+    },
+    "features": {
+      "eyebrow": "書くことを中心に",
+      "title": "書くために必要なものを、ちょうどよく。",
+      "description": "短いメモから長い文書まで、自分らしい執筆環境を。",
+      "write": {
+        "title": "思い通りに Markdown を。",
+        "body": "ビジュアルとソースを切り替え、Markdown、JSON、テキストをひとつの場所で編集。",
+        "link": "エディターを見る",
+        "alt": "MarkFlowy デスクトップエディターの文書"
+      },
+      "local": {
+        "title": "あなたの言葉、あなたのファイル。",
+        "body": "ローカルファイルを開かれた形式で編集。ワークスペースも大きな文書も手元に。"
+      },
+      "ai": {
+        "title": "必要なときだけ、少しの助け。",
+        "body": "自分の AI サービスで対話、要約、翻訳を。Ollama のローカルモデルも利用できます。",
+        "alt": "MarkFlowy デスクトップの AI アシスタント"
+      },
+      "personal": {
+        "title": "自分らしい執筆空間へ。",
+        "body": "テーマやショートカットを選び、集中モードで自分のペースを見つけましょう。",
+        "link": "テーマをカスタマイズ"
+      },
+      "shortcuts": {
+        "write": "太字",
+        "focus": "集中モード",
+        "command": "コマンド検索"
+      }
+    },
+    "workflow": {
+      "eyebrow": "ひらめきから完成まで",
+      "title": "書く流れを、ひとつの場所に。",
+      "capture": {
+        "title": "アイデアを残す。",
+        "body": "ローカルフォルダーを開いてメモを開始。いつでも続けられる普通のファイル。",
+        "visual": "アイデアを残す"
+      },
+      "refine": {
+        "title": "言葉を磨く。",
+        "body": "構成を整え、直感的に編集し、必要に応じてソースや AI を使う。",
+        "visual": "文章を磨く"
+      },
+      "share": {
+        "title": "必要な場所へ。",
+        "body": "Markdown を保存するか作品をエクスポート。書いたものを自由に持ち出そう。",
+        "visual": "共有の準備"
+      }
+    },
+    "community": {
+      "eyebrow": "オープンに育つ",
+      "title": "一緒に、もっとよく。",
+      "body": "MarkFlowy は利用者とともに成長します。ソースを読み、アイデアや問題を共有し、開発に参加しましょう。",
+      "thanks": "すべての貢献者に感謝を"
+    },
+    "cta": {
+      "title": "次のアイデアは、ここから。",
+      "body": "少しの集中で、言葉が自然に流れ出す。",
+      "docs": "ドキュメントを読む"
+    },
+    "footer": {
+      "product": "製品",
+      "resources": "リソース",
+      "community": "コミュニティ",
+      "tagline": "考えが言葉になる、ローカル優先の空間。",
+      "contribute": "貢献する",
+      "feedback": "フィードバック",
+      "privacy": "プライバシー",
+      "license": "ライセンス",
+      "made": "書くことを愛する人へ。"
+    },
+    "releases": {
+      "eyebrow": "一歩ずつ前へ",
+      "latest": "最新バージョン",
+      "empty": "リリース情報を取得できません。GitHub で全バージョンをご覧ください。"
+    },
+    "motion": {
+      "pause": "アニメーションを停止",
+      "resume": "アニメーションを再生"
+    }
+  },
+  "workspace": {
+    "title": "ワークスペース",
+    "eyebrow": "あなたの執筆スペース",
+    "description": "前回の執筆を続けるか、GitHub リポジトリを接続して新しいプロジェクトを始めましょう。",
+    "ready": "いつでも書き始められます",
+    "syncedCount": "同期済み {{count}} 件",
+    "settings": "設定",
+    "import": "ワークスペースを追加",
+    "recent": "書き始める",
+    "pinned": "ログイン不要",
+    "demo": "デモワークスペース",
+    "demoDescription": "気軽に書いてみましょう。内容はこのブラウザーに保存されます。",
+    "local": "ローカル",
+    "shared": "共有",
+    "synced": "同期済み",
+    "signInRequired": "ログインして接続",
+    "connectTitle": "GitHub リポジトリを MarkFlowy に",
+    "connectDescription": "GitHub を接続し、リポジトリを選んで、文書をまとめて管理できます。",
+    "localShared": "ローカルと共有",
+    "count": "{{count}} 件のワークスペース",
+    "repositories": "{{count}} 件のリポジトリ",
+    "loading": "ワークスペースを読み込み中…",
+    "emptyTitle": "次のプロジェクトをここから。",
+    "emptyDescription": "GitHub リポジトリを追加して最初のワークスペースを作成しましょう。",
+    "files": "ファイル",
+    "editor": "編集",
+    "outline": "目次",
+    "panels": "ワークスペースのパネル",
+    "staged": "変更",
+    "stagedEmpty": "編集したファイルがここに表示されます。",
+    "source": "ソース",
+    "previewMode": "プレビュー",
+    "save": "保存",
+    "saving": "保存中",
+    "saved": "保存済み",
+    "saveMessage": "保存メモ",
+    "commitMessage": "コミットメッセージ",
+    "noFile": "文書を選んで書き始めましょう。",
+    "loadingFiles": "ファイルを読み込み中…",
+    "loadingFile": "文書を開いています…",
+    "headingCount": "見出し {{count}} 件"
   }
 }

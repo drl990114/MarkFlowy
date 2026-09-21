@@ -43,6 +43,18 @@ export default function DocsLayout({
     setIsSideFolded(true)
   }, [router.asPath])
 
+  React.useEffect(() => {
+    if (isSideFolded) return
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsSideFolded(true)
+        document.querySelector<HTMLButtonElement>('[aria-controls="docs-sidebar"]')?.focus()
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [isSideFolded])
+
   return (
     <Container>
       <Head title={`MarkFlowy${title ? `: ${title}` : ''}`} description={description} {...seo} />
@@ -58,7 +70,7 @@ export default function DocsLayout({
 
       <Content
         as='main'
-        id='docs-content'
+        id='main-content'
         $hasTableOfContents={hasTableOfContents}
         $moveRight={!isSideFolded}
         data-e2e-id='content'

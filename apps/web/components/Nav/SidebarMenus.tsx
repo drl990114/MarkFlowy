@@ -198,7 +198,7 @@ const MenuLink = styled(Link)<{ $isActive?: boolean }>`
   @media (hover: hover) and (pointer: fine) {
     &:hover {
       background: color-mix(in srgb, var(--ink) 5%, transparent);
-      color: var(--ink);
+      color: var(--seal);
     }
   }
 

@@ -1,476 +1,107 @@
-import { motion, useReducedMotion } from 'motion/react'
 import { useTranslation } from 'next-i18next'
 import Image from 'next/image'
 import Link from 'next/link'
-import styled, { css } from 'styled-components'
-import { mobile } from '../utils/media'
-import rem from '../utils/rem'
-
-export type FeatureItemProps = {
-  title: string
-  descs: string[]
-  img: string
-  imagePosition?: 'left' | 'right'
-  link?: {
-    text: string
-    href: string
-  }
-}
-
-const Section = styled.section`
-  width: 100%;
-  padding: ${rem(80)} 0;
-  display: flex;
-  flex-direction: column;
-  gap: ${rem(80)};
-
-  ${mobile(css`
-    padding: ${rem(40)} 0;
-    gap: ${rem(48)};
-  `)}
-`
-
-const SectionRule = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-top: 1px solid var(--line-soft);
-  padding-top: ${rem(16)};
-
-  ${mobile(css`
-    padding-top: ${rem(12)};
-  `)}
-`
-
-const RomanNumeral = styled.span`
-  font-family: var(--serif);
-  font-style: italic;
-  color: var(--seal);
-  font-size: ${rem(18)};
-  letter-spacing: 0.02em;
-
-  ${mobile(css`
-    font-size: ${rem(15)};
-  `)}
-`
-
-const RuleMeta = styled.span`
-  font-family: var(--sans);
-  font-size: ${rem(11)};
-  font-weight: 500;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--ink-mute);
-
-  ${mobile(css`
-    font-size: ${rem(10)};
-  `)}
-`
-
-const SectionHeader = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${rem(20)};
-  max-width: ${rem(800)};
-
-  ${mobile(css`
-    gap: ${rem(14)};
-  `)}
-`
-
-const SectionLabel = styled.span`
-  display: flex;
-  align-items: center;
-  gap: ${rem(10)};
-  font-family: var(--sans);
-  font-size: ${rem(12)};
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink-mute);
-
-  &::before {
-    content: '';
-    display: inline-block;
-    width: ${rem(24)};
-    height: 2px;
-    background: var(--seal);
-  }
-`
-
-const DisplayTitle = styled.h2`
-  font-family: var(--sans);
-  font-size: clamp(${rem(40)}, 4.6vw, ${rem(66)});
-  font-weight: 800;
-  line-height: 1.05;
-  letter-spacing: -0.03em;
-  color: var(--ink);
-  margin: 0;
-
-  ${mobile(css`
-    font-size: clamp(${rem(28)}, 8vw, ${rem(40)});
-  `)}
-`
-
-const ItalicEmphasis = styled.span`
-  font-family: var(--serif);
-  font-style: italic;
-  font-weight: 400;
-`
-
-const SealDot = styled.span`
-  color: var(--seal);
-`
-
-const LeadParagraph = styled.p`
-  font-family: var(--body);
-  font-size: ${rem(18)};
-  line-height: 1.65;
-  color: var(--ink-soft);
-  margin: 0;
-  max-width: ${rem(580)};
-
-  ${mobile(css`
-    font-size: ${rem(15)};
-  `)}
-`
-
-const FeatureRowWrapper = styled(motion.div)`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: ${rem(60)};
-  align-items: center;
-  padding: ${rem(48)} 0;
-
-  ${mobile(css`
-    grid-template-columns: 1fr;
-    gap: ${rem(28)};
-    padding: ${rem(28)} 0;
-  `)}
-`
-
-const TextColumn = styled(motion.div)`
-  display: flex;
-  flex-direction: column;
-  gap: ${rem(16)};
-`
-
-const FeatureTitle = styled.h3`
-  font-family: var(--sans);
-  font-size: ${rem(24)};
-  font-weight: 600;
-  line-height: 1.15;
-  letter-spacing: -0.02em;
-  color: var(--ink);
-  margin: 0;
-
-  ${mobile(css`
-    font-size: ${rem(20)};
-  `)}
-`
-
-const FeatureDesc = styled.p`
-  font-family: var(--body);
-  font-size: ${rem(16)};
-  line-height: 1.65;
-  color: var(--ink-soft);
-  margin: 0;
-
-  ${mobile(css`
-    font-size: ${rem(14)};
-  `)}
-`
-
-const LearnMoreLink = styled(Link)`
-  font-family: var(--sans);
-  font-size: ${rem(14)};
-  font-weight: 500;
-  color: var(--seal);
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  gap: ${rem(6)};
-  transition:
-    opacity 0.2s ease,
-    transform 0.2s ease;
-
-  &:focus-visible {
-    outline: none;
-    text-decoration-line: underline;
-    text-underline-offset: 2px;
-    opacity: 0.8;
-  }
-
-  @media (hover: hover) and (pointer: fine) {
-    &:hover {
-      opacity: 0.85;
-      transform: translateX(4px);
-    }
-  }
-
-  &::after {
-    content: '→';
-  }
-`
-
-const ImageColumn = styled(motion.div)`
-  position: relative;
-  min-width: 0;
-`
-
-const ImageFrame = styled.div`
-  position: relative;
-  width: 100%;
-  aspect-ratio: 16 / 10;
-  background: var(--paper-warm);
-  border-radius: ${rem(10)};
-  overflow: hidden;
-  box-shadow: var(--shadow);
-
-  ${mobile(css`
-    border-radius: ${rem(8)};
-  `)}
-`
-
-const CapabilityGrid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: ${rem(20)};
-
-  ${mobile(css`
-    grid-template-columns: 1fr;
-    gap: ${rem(14)};
-  `)}
-`
-
-const CapabilityCard = styled(motion.div)`
-  border: 1px solid var(--line-soft);
-  border-radius: ${rem(8)};
-  padding: ${rem(28)};
-  display: flex;
-  flex-direction: column;
-  gap: ${rem(12)};
-  transition:
-    border-color 0.25s ease,
-    transform 0.25s ease,
-    box-shadow 0.25s ease;
-  cursor: default;
-
-  @media (hover: hover) and (pointer: fine) {
-    &:hover {
-      border-color: var(--seal);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-    }
-  }
-
-  ${mobile(css`
-    padding: ${rem(20)};
-    gap: ${rem(8)};
-  `)}
-`
-
-const CapabilityNumber = styled.span`
-  font-family: var(--serif);
-  font-style: italic;
-  font-size: ${rem(20)};
-  color: var(--seal);
-  line-height: 1;
-
-  ${mobile(css`
-    font-size: ${rem(17)};
-  `)}
-`
-
-const CapabilityTag = styled.span`
-  font-family: var(--sans);
-  font-size: ${rem(10)};
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--ink-mute);
-`
-
-const CapabilityTitle = styled.h4`
-  font-family: var(--sans);
-  font-size: ${rem(18)};
-  font-weight: 600;
-  line-height: 1.2;
-  letter-spacing: -0.01em;
-  color: var(--ink);
-  margin: 0;
-
-  ${mobile(css`
-    font-size: ${rem(16)};
-  `)}
-`
-
-const CapabilityBody = styled.p`
-  font-family: var(--body);
-  font-size: ${rem(14)};
-  line-height: 1.6;
-  color: var(--ink-soft);
-  margin: 0;
-
-  ${mobile(css`
-    font-size: ${rem(13)};
-  `)}
-`
-
-const FeatureRow = ({ title, descs, img, imagePosition = 'right', link }: FeatureItemProps) => {
-  const shouldReduceMotion = useReducedMotion()
-  const textElement = (
-    <TextColumn
-      initial={shouldReduceMotion ? false : { opacity: 0, x: imagePosition === 'right' ? -30 : 30 }}
-      whileInView={{ opacity: 1, x: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: shouldReduceMotion ? 0 : 0.6 }}
-    >
-      <FeatureTitle>{title}</FeatureTitle>
-      {descs.map((desc) => (
-        <FeatureDesc key={`${title}-${desc}`}>{desc}</FeatureDesc>
-      ))}
-      {link && <LearnMoreLink href={link.href}>{link.text}</LearnMoreLink>}
-    </TextColumn>
-  )
-
-  const imageElement = (
-    <ImageColumn
-      initial={shouldReduceMotion ? false : { opacity: 0, x: imagePosition === 'right' ? 30 : -30 }}
-      whileInView={{ opacity: 1, x: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: shouldReduceMotion ? 0 : 0.6, delay: shouldReduceMotion ? 0 : 0.15 }}
-    >
-      <ImageFrame>
-        <Image
-          src={img}
-          alt={title}
-          fill
-          sizes='(max-width: 1000px) calc(100vw - 40px), (max-width: 1200px) 46vw, 548px'
-          style={{ objectFit: 'cover' }}
-        />
-      </ImageFrame>
-    </ImageColumn>
-  )
-
-  return (
-    <FeatureRowWrapper>
-      {imagePosition === 'right' ? (
-        <>
-          {textElement}
-          {imageElement}
-        </>
-      ) : (
-        <>
-          {imageElement}
-          {textElement}
-        </>
-      )}
-    </FeatureRowWrapper>
-  )
-}
+import Reveal from './site/Reveal'
+import { MotionScene } from './site/HomeMotion'
 
 export default function FeatureList() {
   const { t } = useTranslation()
-  const shouldReduceMotion = useReducedMotion()
-
-  const features: FeatureItemProps[] = [
-    {
-      title: t('home.features.feature2.title'),
-      descs: [t('home.features.feature2.description')],
-      img: '/screenshots/ai.png',
-      imagePosition: 'right',
-    },
-    {
-      title: t('home.features.feature1.title'),
-      descs: [t('home.features.feature1.description')],
-      img: '/screenshots/sourcecode.png',
-      imagePosition: 'left',
-    },
-    {
-      title: t('home.features.feature3.title'),
-      descs: [t('home.features.feature3.description')],
-      img: '/screenshots/darkmode.png',
-      imagePosition: 'right',
-    },
-  ]
-
-  const capabilities = [
-    {
-      number: '01',
-      tag: t('home.features.capability1.tag'),
-      title: t('home.features.capability1.title'),
-      body: t('home.features.capability1.body'),
-      link: { href: '/docs/intro', text: t('home.guides.introLink') },
-    },
-    {
-      number: '02',
-      tag: t('home.features.capability2.tag'),
-      title: t('home.features.capability2.title'),
-      body: t('home.features.capability2.body'),
-      link: { href: '/docs/Extension/UseCopilotWithOllama', text: t('home.guides.ollamaLink') },
-    },
-    {
-      number: '03',
-      tag: t('home.features.capability3.tag'),
-      title: t('home.features.capability3.title'),
-      body: t('home.features.capability3.body'),
-      link: { href: '/docs/Performance/large-markdown-files', text: t('home.guides.performanceLink') },
-    },
-    {
-      number: '04',
-      tag: t('home.features.capability4.tag'),
-      title: t('home.features.capability4.title'),
-      body: t('home.features.capability4.body'),
-    },
-  ]
-
   return (
-    <Section id='features-list'>
-      <SectionRule>
-        <RomanNumeral>II</RomanNumeral>
-        <RuleMeta>Features · 03</RuleMeta>
-      </SectionRule>
-
-      <SectionHeader>
-        <SectionLabel>Features</SectionLabel>
-        <DisplayTitle>
-          Built for <ItalicEmphasis>writers</ItalicEmphasis>,<br />
-          designed for <ItalicEmphasis>flow</ItalicEmphasis>
-          <SealDot>.</SealDot>
-        </DisplayTitle>
-        <LeadParagraph>{t('home.features.lead')}</LeadParagraph>
-      </SectionHeader>
-
-      {features.map((feature) => (
-        <FeatureRow key={feature.title} {...feature} />
-      ))}
-
-      <SectionRule>
-        <RomanNumeral>III</RomanNumeral>
-        <RuleMeta>Capabilities · 04</RuleMeta>
-      </SectionRule>
-
-      <CapabilityGrid>
-        {capabilities.map((cap, index) => (
-          <CapabilityCard
-            key={cap.number}
-            initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{
-              duration: shouldReduceMotion ? 0 : 0.45,
-              delay: shouldReduceMotion ? 0 : index * 0.08,
-            }}
-          >
-            <CapabilityNumber>{cap.number}</CapabilityNumber>
-            <CapabilityTag>{cap.tag}</CapabilityTag>
-            <CapabilityTitle>{cap.title}</CapabilityTitle>
-            <CapabilityBody>{cap.body}</CapabilityBody>
-            {cap.link && <LearnMoreLink href={cap.link.href}>{cap.link.text}</LearnMoreLink>}
-          </CapabilityCard>
-        ))}
-      </CapabilityGrid>
-    </Section>
+    <section className='mf-features' id='features'>
+      <div className='mf-container'>
+        <Reveal>
+          <p className='mf-eyebrow'>{t('site.features.eyebrow')}</p>
+          <h2 className='mf-section-title'>{t('site.features.title')}</h2>
+          <p className='mf-section-copy'>{t('site.features.description')}</p>
+        </Reveal>
+        <div className='mf-feature-grid'>
+          <Reveal className='mf-feature-card mf-feature-write'>
+            <div className='mf-feature-card-copy'>
+              <i className='ri-quill-pen-line mf-feature-icon' aria-hidden='true' />
+              <h3>{t('site.features.write.title')}</h3>
+              <p>{t('site.features.write.body')}</p>
+              <Link className='mf-text-link' href='/docs/intro'>
+                {t('site.features.write.link')}
+                <i className='ri-arrow-right-line' aria-hidden='true' />
+              </Link>
+            </div>
+            <div className='mf-feature-visual'>
+              <Image
+                src='/screenshots/sourcecode.png'
+                alt={t('site.features.write.alt')}
+                width={2454}
+                height={1514}
+                sizes='(max-width: 650px) 90vw, 520px'
+              />
+            </div>
+          </Reveal>
+          <Reveal className='mf-feature-card' delay={80}>
+            <div className='mf-feature-card-copy'>
+              <i className='ri-folder-open-line mf-feature-icon' aria-hidden='true' />
+              <h3>{t('site.features.local.title')}</h3>
+              <p>{t('site.features.local.body')}</p>
+              <Link className='mf-text-link' href='/docs/Performance/large-markdown-files'>
+                {t('home.guides.performanceLink')}
+                <i className='ri-arrow-right-line' aria-hidden='true' />
+              </Link>
+            </div>
+            <MotionScene className='mf-feature-visual mf-file-stack'>
+              {[
+                ['ri-markdown-line', 'ideas.md'],
+                ['ri-file-code-line', 'config.json'],
+                ['ri-file-text-line', 'notes.txt'],
+              ].map(([icon, name]) => (
+                <div className='mf-file-tile' key={name} aria-hidden='true'>
+                  <i className={icon} />
+                  <span>{name}</span>
+                </div>
+              ))}
+            </MotionScene>
+          </Reveal>
+          <Reveal className='mf-feature-card mf-feature-ai'>
+            <div className='mf-feature-card-copy'>
+              <i className='ri-sparkling-line mf-feature-icon' aria-hidden='true' />
+              <h3>{t('site.features.ai.title')}</h3>
+              <p>{t('site.features.ai.body')}</p>
+              <Link className='mf-text-link' href='/docs/Extension/UseCopilotWithOllama'>
+                {t('home.guides.ollamaLink')}
+                <i className='ri-arrow-right-line' aria-hidden='true' />
+              </Link>
+            </div>
+            <div className='mf-feature-visual mf-feature-visual-pink'>
+              <Image
+                src='/screenshots/ai.png'
+                alt={t('site.features.ai.alt')}
+                width={2454}
+                height={1514}
+                sizes='(max-width: 650px) 90vw, 520px'
+              />
+            </div>
+          </Reveal>
+          <Reveal className='mf-feature-card' delay={80}>
+            <div className='mf-feature-card-copy'>
+              <i className='ri-command-line mf-feature-icon' aria-hidden='true' />
+              <h3>{t('site.features.personal.title')}</h3>
+              <p>{t('site.features.personal.body')}</p>
+              <Link className='mf-text-link' href='/docs/Extension/CustomTheme'>
+                {t('site.features.personal.link')}
+                <i className='ri-arrow-right-line' aria-hidden='true' />
+              </Link>
+            </div>
+            <MotionScene className='mf-feature-visual mf-shortcut-visual'>
+              <div className='mf-shortcut-panel'>
+                {['write', 'focus', 'command'].map((key, i) => (
+                  <div className='mf-shortcut-row' key={key}>
+                    <span className='mf-shortcut-highlight' aria-hidden='true' />
+                    <span>{t(`site.features.shortcuts.${key}`)}</span>
+                    <kbd>{['⌘ B', '⌘ ⇧ F', '⌘ ⇧ P'][i]}</kbd>
+                  </div>
+                ))}
+              </div>
+            </MotionScene>
+          </Reveal>
+        </div>
+      </div>
+    </section>
   )
 }

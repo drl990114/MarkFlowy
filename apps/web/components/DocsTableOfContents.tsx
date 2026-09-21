@@ -36,10 +36,10 @@ export default DocsTableOfContents
 
 const TableOfContents = styled.aside`
   position: fixed;
-  top: 4rem;
+  top: 8rem;
   right: 1.5rem;
   width: 13rem;
-  max-height: calc(100vh - 5.5rem);
+  max-height: calc(100vh - 9rem);
   padding: 0.25rem 0 1.5rem;
   box-sizing: border-box;
   overflow-y: auto;

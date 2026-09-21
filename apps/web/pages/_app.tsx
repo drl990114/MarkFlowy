@@ -1,54 +1,62 @@
 import { Analytics } from '@vercel/analytics/react'
-import { RmePreload } from 'components/RmeProvider'
 import ThemeProvider from 'components/ThemeProvider'
 import { appWithTranslation } from 'next-i18next'
-import App from 'next/app'
+import type { AppProps } from 'next/app'
 import Head from 'next/head'
 import React from 'react'
 import 'remixicon/fonts/remixicon.css'
 import { createGlobalStyle } from 'styled-components'
 import './normalize.css'
 import { GlobalStyles as InterfaceGlobalStyles } from '@markflowy/interface'
+import { isWebsitePage } from '../utils/website'
+import '../components/site/site.css'
+import '../components/site/home-motion.css'
+import '../components/workspace/app.css'
 
+function MyApp({ Component, pageProps, router }: AppProps) {
+  const website = isWebsitePage(router.pathname)
+  React.useEffect(() => {
+    document.documentElement.dataset.theme = 'light'
+  }, [])
 
-class MyApp extends App {
-  render() {
-    const { Component, pageProps } = this.props
+  return (
+    <>
+      <Head>
+        <link rel='icon' type='image/png' href='/favicon.png' />
+        <link rel='manifest' href='/manifest.json' />
+        <meta httpEquiv='X-UA-Compatible' content='IE=edge,chrome=1' />
+        <meta name='viewport' content='width=device-width, initial-scale=1.0, user-scalable=yes' />
 
-    return (
-      <>
-        <Head>
-          <link rel='icon' type='image/png' href='/favicon.png' />
-          <link rel='manifest' href='/manifest.json' />
-          <meta httpEquiv='X-UA-Compatible' content='IE=edge,chrome=1' />
-          <meta
-            name='viewport'
-            content='width=device-width, initial-scale=1.0, user-scalable=yes'
-          />
+        <meta name='theme-color' content='#ffffff' />
+        {/^\/(auth|workspace|settings)(\/|$)/.test(router.pathname) && (
+          <meta name='robots' content='noindex, nofollow' key='robots' />
+        )}
+      </Head>
 
-          <meta name='theme-color' content='#141416' />
-          {/^\/(auth|workspace|settings)(\/|$)/.test(this.props.router.pathname) && (
-            <meta name='robots' content='noindex, nofollow' key='robots' />
-          )}
-        </Head>
-
-        <ThemeProvider data-theme='dark'>
-          <ResetStyles />
-          <InkWashCSSVariables />
-          <InterfaceGlobalStyles />
-          <Component {...pageProps} />
-          <Analytics />
-          <RmePreload />
-        </ThemeProvider>
-      </>
-    )
-  }
+      <ThemeProvider website={website}>
+        <ResetStyles />
+        <WebCSSVariables />
+        <InterfaceGlobalStyles />
+        {website ? (
+          <div className='mf-site'>
+            <Component {...pageProps} />
+          </div>
+        ) : (
+          <div className='mf-webapp'>
+            <Component {...pageProps} />
+          </div>
+        )}
+        <Analytics />
+      </ThemeProvider>
+    </>
+  )
 }
 
 export default appWithTranslation(MyApp)
 
-const InkWashCSSVariables = createGlobalStyle`
+const WebCSSVariables = createGlobalStyle`
   :root {
+    color-scheme: light;
     --paper: ${(props) => props.theme.webPaper};
     --paper-warm: ${(props) => props.theme.webPaperWarm};
     --paper-dark: ${(props) => props.theme.webPaperDark};
@@ -67,7 +75,7 @@ const InkWashCSSVariables = createGlobalStyle`
     --sans: ${(props) => props.theme.webFontSans};
     --body: ${(props) => props.theme.webFontBody};
     --mono: ${(props) => props.theme.webFontMono};
-    --paper-deep: #0e0e10;
+    --paper-deep: ${(props) => props.theme.webPaperWarm};
     --on-paper-light: #1a1a1a;
     --on-paper-light-soft: #383838;
     --on-paper-light-muted: #5a5854;
@@ -112,7 +120,7 @@ const ResetStyles = createGlobalStyle`
   }
 
   ::selection {
-    background: rgba(212, 86, 74, 0.25);
-    color: #e8e6e3;
+    background: ${(props) => props.theme.accentColorFocused};
+    color: ${(props) => props.theme.primaryFontColor};
   }
 `

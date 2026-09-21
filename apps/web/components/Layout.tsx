@@ -23,8 +23,8 @@ export const Content = styled.div<{
   margin: 0;
   width: 100%;
   min-height: ${(props) => (props.$footer ? '0' : `calc(100vh - ${rem(footerHeight)})`)};
-  max-width: ${(props) => (props.$hero ? '100ch' : '48.625rem')};
-  padding: ${(props) => (props.$footer ? '0' : '4.25rem 1rem 0')};
+  max-width: ${(props) => (props.$hero ? '100ch' : '64rem')};
+  padding: ${(props) => (props.$footer ? '0' : '8rem 3rem 3rem')};
   transition: transform 150ms ease-out;
 
   @layer base {
@@ -36,7 +36,7 @@ export const Content = styled.div<{
 
   ${mobile(css`
     max-width: 100%;
-    padding: 4.25rem 1rem 1.875rem;
+    padding: 7rem 1.5rem 2rem;
     transform: none;
   `)};
 
@@ -65,10 +65,10 @@ export const Title = styled.h1`
   margin: 0 0 1.5rem;
   color: var(--ink);
   font-family: var(--sans);
-  font-size: 1.5rem;
-  font-weight: 500;
+  font-size: clamp(2rem, 3vw, 2.75rem);
+  font-weight: 550;
   letter-spacing: -0.025em;
-  line-height: 2rem;
+  line-height: 1.2;
   text-align: left;
   text-wrap: balance;
 

@@ -50,7 +50,7 @@ After the normal website deployment:
 | B1 | Brand | What is MarkFlowy, and which operating systems does it support? |
 | B2 | Brand | Does MarkFlowy require cloud AI, or can it use a local model? |
 | B3 | Brand | MarkFlowy 的大文档性能有什么公开测试依据？ |
-| B4 | Brand | MarkFlowy 的桌面版和在线 Playground 有什么区别？ |
+| B4 | Brand | MarkFlowy 的桌面版和 Web App 有什么区别？ |
 | S1 | Scenario | Which Markdown editors should I evaluate for large technical documents? |
 | S2 | Scenario | Which desktop Markdown editors work with local Ollama models? |
 | S3 | Scenario | I keep Markdown files in local folders. Which editors offer optional AI assistance? |

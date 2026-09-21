@@ -9,6 +9,27 @@ const request = (path, options = {}) =>
     signal: AbortSignal.timeout(30000),
   })
 
+test('homepage text and both primary actions are available before JavaScript runs', async () => {
+  for (const prefix of ['', '/zh']) {
+    const response = await request(prefix || '/')
+    assert.equal(response.status, 200)
+    const html = await response.text()
+    assert.match(html, /<html[^>]*data-theme="light"/)
+    const heading = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/)?.[1]
+    assert.ok(heading?.includes(prefix ? '让想法流动' : 'Your ideas'))
+    assert.ok(html.includes(`href="${prefix}/workspace/demo-workspace"`))
+    assert.ok(html.includes('href="https://github.com/drl990114/MarkFlowy/releases"'))
+    assert.doesNotMatch(html, /playground/i)
+  }
+})
+
+test('removed playground routes return 404', async () => {
+  for (const prefix of ['', '/en', '/zh']) {
+    const path = `${prefix}/playground`
+    assert.equal((await request(path)).status, 404, path)
+  }
+})
+
 test('live HTML contains document-specific metadata and text without JavaScript', async () => {
   for (const prefix of ['', '/zh']) {
     for (const slug of [
@@ -28,6 +49,7 @@ test('live HTML contains document-specific metadata and text without JavaScript'
       assert.match(html, /<table>/)
       assert.match(html, /<th>/)
       assert.doesNotMatch(html, /name="robots" content="noindex/)
+      assert.doesNotMatch(html, /playground/i)
     }
   }
 })
@@ -37,6 +59,7 @@ test('every llms document link returns Markdown through the public rewrite', asy
   assert.equal(response.status, 200)
   assert.match(response.headers.get('content-type'), /^text\/plain/)
   const index = await response.text()
+  assert.doesNotMatch(index, /playground/i)
   const urls = [...index.matchAll(/\]\((https:\/\/www\.markflowy\.cc\/[^)]+\.md)\)/g)].map(
     (match) => match[1],
   )
@@ -78,15 +101,21 @@ test('live sitemap contains canonical public HTML pages and bilingual alternates
   assert.ok(xml.includes(`<loc>${origin}/docs/intro</loc>`))
   assert.ok(xml.includes(`<loc>${origin}/zh/docs/intro</loc>`))
   assert.match(xml, /hreflang="zh-CN"/)
-  assert.doesNotMatch(xml, /<loc>[^<]*(?:\/workspace|\/auth|\/settings|\.md<)/)
+  assert.doesNotMatch(xml, /<loc>[^<]*(?:\/workspace|\/auth|\/settings|\/playground|\.md<)/)
   const robots = await request('/robots.txt')
   assert.equal(robots.status, 200)
   assert.ok((await robots.text()).includes(`Sitemap: ${origin}/sitemap.xml`))
 })
 
-test('application screens stay out of indexing and untranslated privacy URLs redirect', async () => {
-  const workspace = await request('/workspace')
-  assert.match(await workspace.text(), /name="robots" content="noindex, nofollow"/)
+test('application screens render the light theme, stay out of indexing, and privacy URLs redirect', async () => {
+  for (const path of ['/workspace', '/auth', '/workspace/demo-workspace', '/zh/workspace', '/zh/auth']) {
+    const response = await request(path)
+    assert.equal(response.status, 200, path)
+    const html = await response.text()
+    assert.match(html, /name="robots" content="noindex, nofollow"/, path)
+    assert.match(html, /<html[^>]*data-theme="light"/, path)
+    assert.match(html, /class="mf-webapp"/, path)
+  }
   const privacy = await request('/zh/privacy', { redirect: 'manual' })
   assert.equal(privacy.status, 308)
   assert.equal(new URL(privacy.headers.get('location'), baseUrl).pathname, '/privacy')

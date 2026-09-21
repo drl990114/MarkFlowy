@@ -7,7 +7,6 @@ import { useRedirectIfAuthenticated } from '../../hooks/useAuth'
 import { AuthMode, Step, useAuthForm } from '../../hooks/useAuthForm'
 import { useGitHubLogin } from '../../hooks/useGitHubLogin'
 import { mobile } from '../../utils/media'
-import rem from '../../utils/rem'
 
 export default function AuthPage() {
   const checkingAuth = useRedirectIfAuthenticated()
@@ -69,6 +68,10 @@ function AuthForm() {
           </LogoSection>
 
           <AuthCard>
+            <AuthHeading>
+              <h1>{isRegister ? t('auth.createAccount') : t('auth.welcomeBack')}</h1>
+              <p>{t('auth.welcomeDescription')}</p>
+            </AuthHeading>
             <SocialAuthSection>
               <GitHubButton type='button' onClick={startGitHubLogin} disabled={githubLoading}>
                 <i className='ri-github-fill' aria-hidden='true' />
@@ -97,8 +100,11 @@ function AuthForm() {
                 <>
                   {isRegister && (
                     <InputGroup>
+                      <FieldLabel htmlFor='auth-name'>{t('auth.displayName')}</FieldLabel>
                       <Input
+                        id='auth-name'
                         type='text'
+                        autoComplete='name'
                         value={displayName}
                         onChange={(e) => setDisplayName(e.target.value)}
                         placeholder={t('auth.displayNamePlaceholder') || t('auth.displayName')}
@@ -107,8 +113,11 @@ function AuthForm() {
                   )}
 
                   <InputGroup>
+                    <FieldLabel htmlFor='auth-email'>{t('auth.email')}</FieldLabel>
                     <Input
+                      id='auth-email'
                       type='email'
+                      autoComplete='email'
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder={t('auth.emailPlaceholder') || t('auth.email')}
@@ -145,8 +154,11 @@ function AuthForm() {
                   </EmailDisplay>
 
                   <InputGroup>
+                    <FieldLabel htmlFor='auth-code'>{t('auth.verificationCode')}</FieldLabel>
                     <CodeInput
+                      id='auth-code'
                       type='text'
+                      autoComplete='one-time-code'
                       value={code}
                       onChange={(e) => setCode(e.target.value)}
                       placeholder={t('auth.codePlaceholder') || t('auth.verificationCode')}
@@ -195,101 +207,145 @@ function AuthForm() {
   )
 }
 
-const AuthLayout = styled.div`
-  min-height: 100vh;
-  background: ${(props) => props.theme.bgColor};
+const AuthLayout = styled.main`
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: 100dvh;
+  background: var(--paper-warm);
+  color: var(--ink);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: ${rem(24)};
+  padding: 64px 24px;
 
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    pointer-events: none;
+    width: 150%;
+    left: -25%;
+    transform: skewY(-12deg);
+  }
+  &::before {
+    height: 360px;
+    top: -155px;
+    background: linear-gradient(
+      100deg,
+      color-mix(in srgb, var(--seal) 12%, var(--paper)),
+      color-mix(in srgb, var(--seal) 75%, var(--paper))
+    );
+  }
+  &::after {
+    top: 183px;
+    height: 16px;
+    background: linear-gradient(90deg, transparent 18%, var(--seal) 65%, transparent 95%);
+    opacity: 0.5;
+  }
   ${mobile(css`
-    padding: ${rem(16)};
+    align-items: flex-start;
+    padding: 40px 20px;
   `)}
 `
 
 const AuthContainer = styled.div`
   width: 100%;
-  max-width: ${rem(360)};
+  max-width: 460px;
   display: flex;
   flex-direction: column;
-  gap: ${rem(24)};
+  gap: 28px;
 `
 
 const LogoSection = styled.div`
   display: flex;
-  justify-content: center;
+  padding-left: 6px;
 `
 
 const LogoLink = styled.a`
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: ${rem(8)};
+  gap: 10px;
+  color: var(--ink);
   text-decoration: none;
 `
 
 const LogoImage = styled.img`
-  width: ${rem(28)};
-  height: ${rem(28)};
+  width: 32px;
+  height: 32px;
 `
 
 const LogoText = styled.span`
-  font-size: ${rem(18)};
-  font-weight: 600;
-  color: #ffffff;
-  letter-spacing: -0.02em;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
 `
 
 const AuthCard = styled.div`
-  background: ${(props) => props.theme.bgColorSecondary};
-  border: 1px solid ${(props) => props.theme.borderColor};
-  border-radius: ${rem(8)};
-  overflow: hidden;
+  padding: 36px 40px;
+  background: var(--paper);
+  border: 1px solid var(--line-soft);
+  border-radius: 12px;
+  box-shadow:
+    0 20px 60px -24px color-mix(in srgb, var(--ink) 30%, transparent),
+    0 3px 12px color-mix(in srgb, var(--ink) 4%, transparent);
+
+  ${mobile(css`
+    padding: 28px 24px;
+  `)}
+`
+
+const AuthHeading = styled.div`
+  margin-bottom: 28px;
+  h1 {
+    margin: 0 0 10px;
+    font-size: 26px;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: -0.035em;
+  }
+  p {
+    margin: 0;
+    color: var(--ink-mute);
+    font-size: 14px;
+    line-height: 1.6;
+  }
 `
 
 const SocialAuthSection = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${rem(12)};
-  padding: ${rem(20)} ${rem(20)} 0;
-
-  ${mobile(css`
-    padding: ${rem(16)} ${rem(16)} 0;
-  `)}
+  gap: 22px;
 `
 
-const GitHubButton = styled.button`
+const GitHubButton = styled.button.attrs({ type: 'button' })`
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: ${rem(8)};
+  gap: 10px;
   width: 100%;
-  min-height: ${rem(40)};
-  padding: 0 ${rem(16)};
-  background: ${(props) => props.theme.primaryFontColor};
-  border: 1px solid ${(props) => props.theme.primaryFontColor};
-  border-radius: ${rem(6)};
-  color: ${(props) => props.theme.bgColor};
-  font-size: ${rem(14)};
+  min-height: 44px;
+  padding: 8px 16px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: opacity 0.15s ease;
-
+  box-shadow: 0 2px 4px color-mix(in srgb, var(--ink) 4%, transparent);
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease;
   i {
-    font-size: ${rem(18)};
+    font-size: 20px;
   }
-
   &:hover:not(:disabled) {
-    opacity: 0.9;
+    background: var(--paper-warm);
+    border-color: var(--ink-faint);
   }
-
-  &:focus-visible {
-    outline: none;
-    text-decoration-line: underline;
-    text-underline-offset: 2px;
-    opacity: 0.8;
-  }
-
   &:disabled {
     cursor: not-allowed;
     opacity: 0.55;
@@ -299,100 +355,90 @@ const GitHubButton = styled.button`
 const AuthDivider = styled.div`
   display: flex;
   align-items: center;
-  gap: ${rem(10)};
-  color: ${(props) => props.theme.disabledFontColor};
-  font-size: ${rem(12)};
-
+  gap: 12px;
+  color: var(--ink-faint);
+  font-size: 12px;
   &::before,
   &::after {
     content: '';
     height: 1px;
     flex: 1;
-    background: ${(props) => props.theme.borderColor};
+    background: var(--line-soft);
   }
 `
 
 const TabContainer = styled.div`
   display: flex;
-  border-bottom: 1px solid ${(props) => props.theme.borderColor};
+  gap: 24px;
+  margin-top: 14px;
+  border-bottom: 1px solid var(--line-soft);
 `
 
-const Tab = styled.button<{ $active: boolean }>`
-  flex: 1;
-  padding: ${rem(12)} ${rem(16)};
+const Tab = styled.button.attrs({ type: 'button' })<{ $active: boolean }>`
+  padding: 12px 0;
   background: transparent;
-  border: none;
-  font-size: ${rem(14)};
-  font-weight: 500;
-  color: ${(props) => (props.$active ? '#ffffff' : props.theme.unselectedFontColor)};
+  border: 0;
+  border-bottom: 2px solid ${(props) => (props.$active ? 'var(--seal)' : 'transparent')};
+  margin-bottom: -1px;
+  font-size: 14px;
+  font-weight: 600;
+  color: ${(props) => (props.$active ? 'var(--seal)' : 'var(--ink-mute)')};
   cursor: pointer;
-  transition: color 0.15s ease;
-  position: relative;
-
-  ${(props) =>
-    props.$active &&
-    css`
-      &::after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: 1.5px;
-        background: #d4564a;
-      }
-    `}
-
+  transition:
+    color 160ms ease,
+    border-color 160ms ease;
   &:hover {
-    color: #ffffff;
-  }
-
-  &:focus-visible {
-    outline: none;
-    text-decoration-line: underline;
-    text-underline-offset: 2px;
-    opacity: 0.8;
+    color: var(--seal);
   }
 `
 
 const FormSection = styled.div`
-  padding: ${rem(20)};
+  padding-top: 24px;
   display: flex;
   flex-direction: column;
-  gap: ${rem(12)};
-
-  ${mobile(css`
-    padding: ${rem(16)};
-  `)}
+  gap: 16px;
 `
 
 const InputGroup = styled.div`
   display: flex;
   flex-direction: column;
+  gap: 8px;
+`
+
+const FieldLabel = styled.label`
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
 `
 
 const Input = styled.input`
   width: 100%;
-  padding: ${rem(10)} ${rem(14)};
-  background: ${(props) => props.theme.bgColor};
-  border: 1px solid ${(props) => props.theme.borderColor};
-  border-radius: ${rem(6)};
-  font-size: ${rem(14)};
-  color: ${(props) => props.theme.primaryFontColor};
-  transition: border-color 0.15s ease;
-
+  min-height: 44px;
+  padding: 10px 13px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-size: 15px;
+  color: var(--ink);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--ink) 4%, transparent);
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
   &:focus {
-    outline: none;
+    border-color: var(--seal);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--seal) 12%, transparent);
   }
-
   &::placeholder {
-    color: ${(props) => props.theme.disabledFontColor};
+    color: var(--ink-faint);
   }
+  ${mobile(css`
+    font-size: 16px;
+  `)}
 `
 
 const CodeInput = styled(Input)`
-  font-size: ${rem(16)};
-  letter-spacing: ${rem(4)};
+  font-size: 18px;
+  letter-spacing: 4px;
   text-align: center;
 `
 
@@ -400,93 +446,82 @@ const EmailDisplay = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: ${rem(10)} ${rem(14)};
-  background: ${(props) => props.theme.bgColor};
-  border: 1px solid ${(props) => props.theme.borderColor};
-  border-radius: ${rem(6)};
-  font-size: ${rem(14)};
-  color: ${(props) => props.theme.primaryFontColor};
+  gap: 12px;
+  padding: 12px;
+  overflow-wrap: anywhere;
+  background: var(--paper-warm);
+  border-radius: 6px;
+  font-size: 14px;
+  color: var(--ink);
 `
 
-const ChangeEmail = styled.button`
+const ChangeEmail = styled.button.attrs({ type: 'button' })`
+  flex-shrink: 0;
   background: transparent;
-  border: none;
-  font-size: ${rem(12)};
-  color: #d4564a;
+  border: 0;
+  padding: 2px;
+  font-size: 12px;
+  color: var(--seal);
   cursor: pointer;
-  padding: 0;
-  margin-left: ${rem(8)};
-
   &:hover {
     text-decoration: underline;
-  }
-
-  &:focus-visible {
-    outline: none;
-    text-decoration-line: underline;
-    text-underline-offset: 2px;
-    opacity: 0.8;
   }
 `
 
 const HintMessage = styled.div`
-  font-size: ${rem(12)};
-  color: ${(props) => props.theme.disabledFontColor};
+  font-size: 12px;
+  color: var(--ink-mute);
   line-height: 1.5;
 `
 
-const ErrorMessage = styled.div`
-  padding: ${rem(10)} ${rem(12)};
-  background: rgba(220, 38, 38, 0.08);
-  border: 1px solid rgba(220, 38, 38, 0.2);
-  border-radius: ${rem(6)};
-  font-size: ${rem(13)};
-  color: #dc2626;
+const ErrorMessage = styled.div.attrs({ role: 'alert' })`
+  padding: 10px 12px;
+  background: ${(props) => `color-mix(in srgb, ${props.theme.dangerColor} 7%, var(--paper))`};
+  border: 1px solid ${(props) => `color-mix(in srgb, ${props.theme.dangerColor} 25%, transparent)`};
+  border-radius: 6px;
+  font-size: 13px;
+  color: ${(props) => props.theme.dangerColor};
 `
 
-const SubmitButton = styled.button`
+const SubmitButton = styled.button.attrs({ type: 'button' })`
   width: 100%;
-  padding: ${rem(10)} ${rem(16)};
-  background: #d4564a;
-  border: none;
-  border-radius: ${rem(6)};
-  font-size: ${rem(14)};
-  font-weight: 500;
-  color: #ffffff;
+  min-height: 44px;
+  padding: 10px 16px;
+  background: var(--seal);
+  border: 1px solid transparent;
+  border-radius: 7px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--paper);
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition:
+    background-color 160ms ease,
+    transform 160ms ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: ${rem(8)};
-  margin-top: ${rem(4)};
-
+  gap: 8px;
+  margin-top: 4px;
   &:hover:not(:disabled) {
-    background: #c9845b;
+    background: color-mix(in srgb, var(--seal) 85%, var(--ink));
   }
-
+  &:active:not(:disabled) {
+    transform: translateY(1px);
+  }
   &:disabled {
-    opacity: 0.5;
+    opacity: 0.45;
     cursor: not-allowed;
-  }
-
-  &:focus-visible {
-    outline: none;
-    text-decoration-line: underline;
-    text-underline-offset: 2px;
-    opacity: 0.8;
   }
 `
 
 const LoadingSpinner = styled.div`
-  width: ${rem(16)};
-  height: ${rem(16)};
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: #ffffff;
+  width: 18px;
+  height: 18px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
   border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-
-  @keyframes spin {
+  animation: mf-auth-spin 800ms linear infinite;
+  @keyframes mf-auth-spin {
     to {
       transform: rotate(360deg);
     }
@@ -495,46 +530,33 @@ const LoadingSpinner = styled.div`
 
 const ResendSection = styled.div`
   text-align: center;
-  margin-top: ${rem(4)};
+  margin-top: 4px;
 `
-
 const ResendText = styled.span`
-  font-size: ${rem(13)};
-  color: ${(props) => props.theme.disabledFontColor};
+  font-size: 13px;
+  color: var(--ink-faint);
 `
-
-const ResendButton = styled.button`
+const ResendButton = styled.button.attrs({ type: 'button' })`
   background: transparent;
-  border: none;
-  font-size: ${rem(13)};
-  color: #d4564a;
+  border: 0;
+  font-size: 13px;
+  color: var(--seal);
   cursor: pointer;
   padding: 0;
-
   &:hover {
     text-decoration: underline;
   }
-
-  &:focus-visible {
-    outline: none;
-    text-decoration-line: underline;
-    text-underline-offset: 2px;
-    opacity: 0.8;
-  }
 `
-
 const BackLink = styled.div`
-  text-align: center;
+  padding-left: 6px;
 `
-
 const StyledLink = styled.a`
-  font-size: ${rem(13)};
-  color: ${(props) => props.theme.unselectedFontColor};
+  font-size: 13px;
+  color: var(--ink-mute);
   text-decoration: none;
-  transition: color 0.15s ease;
-
+  transition: color 160ms ease;
   &:hover {
-    color: #ffffff;
+    color: var(--seal);
   }
 `
 

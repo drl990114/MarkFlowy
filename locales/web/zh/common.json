@@ -2,10 +2,6 @@
   "common": {
     "docs": "文档"
   },
-  "playground": {
-    "title": "试试 Playground",
-    "description": "在浏览器中体验基础 Markdown 编辑。此 RME 演示不代表桌面版编辑器的性能或 AI 功能。"
-  },
   "docs": {
     "tableOfContents": "本页目录",
     "content": {
@@ -163,6 +159,178 @@
     "githubCallbackFailed": "GitHub 登录失败",
     "githubCallbackError": "GitHub 登录链接无效或已过期，请重试。",
     "githubAccountLinkRequired": "该邮箱已注册，请先使用邮箱登录，再到设置中绑定 GitHub。",
-    "backToSignIn": "返回登录"
+    "backToSignIn": "返回登录",
+    "welcomeBack": "欢迎回来",
+    "welcomeDescription": "登录你的工作空间，让想法继续流动。"
+  },
+  "site": {
+    "nav": {
+      "features": "功能",
+      "main": "主导航",
+      "skip": "跳转到正文",
+      "writing": "编辑与写作",
+      "editor": "Markdown 编辑器",
+      "editorDescription": "所见即所得，自由切换源码",
+      "demoDescription": "无需安装，打开即可试写",
+      "workspace": "你的工作空间",
+      "files": "本地文件与大文档",
+      "filesDescription": "开放格式，流畅整理与编辑",
+      "assistant": "可选的 AI 助手",
+      "assistantDescription": "连接云端服务或本地 Ollama",
+      "themes": "主题与个性化",
+      "themesDescription": "让工具配合你的写作习惯",
+      "start": "开始使用",
+      "downloadDescription": "适用于 macOS、Windows 和 Linux",
+      "webDescription": "在浏览器中打开工作空间 · Beta",
+      "featuresDescription": "了解 MarkFlowy 的编辑能力",
+      "quickstart": "快速开始",
+      "explore": "探索更多",
+      "support": "帮助与支持",
+      "openSource": "开源",
+      "buildTogether": "一起构建",
+      "githubDescription": "查看源码，关注项目进展",
+      "contributeDescription": "从一个问题、一次改进开始",
+      "feedbackDescription": "报告问题，分享使用建议",
+      "contributors": "贡献者",
+      "contributorsDescription": "认识一起完善 MarkFlowy 的人",
+      "back": "返回"
+    },
+    "hero": {
+      "eyebrow": "本地优先，让灵感自由生长",
+      "title": "让想法流动，专注每一次写作。",
+      "lead": "一个本地优先的 Markdown 编辑器，陪你从灵感写到成稿。",
+      "description": "随手记下想法，安心打磨长文，按需接入 AI。文件始终由你掌握。",
+      "try": "在线体验",
+      "platforms": "在熟悉的平台上，进入写作状态"
+    },
+    "preview": {
+      "eyebrow": "为你的文字留出空间",
+      "title": "打开就能写，让思路不断线。",
+      "description": "文件、编辑区与文档大纲，在同一个窗口里。从随手记录到长篇写作，让思路自然展开。",
+      "note": "MarkFlowy 桌面版截图 · 浅色模式",
+      "screenshotAlt": "MarkFlowy 桌面版浅色界面，包含文件列表、Markdown 源码编辑区和文档大纲"
+    },
+    "features": {
+      "eyebrow": "每个细节，都为内容让路",
+      "title": "写作需要的，恰到好处。",
+      "description": "从随手记录到认真创作，让工具配合你的节奏。",
+      "write": {
+        "title": "用你习惯的方式，写 Markdown。",
+        "body": "在所见即所得与源码模式间切换。在同一个工作空间里，处理 Markdown、JSON 和纯文本。",
+        "link": "了解编辑体验",
+        "alt": "MarkFlowy 桌面编辑器中的写作示例"
+      },
+      "local": {
+        "title": "你的文字，你的文件。",
+        "body": "直接编辑本地文件，使用开放格式保存。整理工作空间，让笔记和大文档都触手可及。"
+      },
+      "ai": {
+        "title": "需要时，给灵感一点助力。",
+        "body": "按需接入 AI，辅助对话、摘要与翻译。使用自己的云端服务，也可以连接本地 Ollama 模型。",
+        "alt": "MarkFlowy 桌面编辑器与可选的 AI 助手面板"
+      },
+      "personal": {
+        "title": "把这里，变成你的写作空间。",
+        "body": "选择主题，调整快捷键，进入专注模式。用熟悉的操作，找到自己的写作节奏。",
+        "link": "探索自定义主题"
+      },
+      "shortcuts": {
+        "write": "加粗文字",
+        "focus": "进入专注模式",
+        "command": "查找命令"
+      }
+    },
+    "workflow": {
+      "eyebrow": "从一闪而过，到认真完成",
+      "title": "一个空间，贯穿你的写作过程。",
+      "capture": {
+        "title": "先把想法留下。",
+        "body": "打开本地文件夹，开始一篇笔记。用普通文件承接灵感，随时继续。",
+        "visual": "留下灵感"
+      },
+      "refine": {
+        "title": "再把表达打磨好。",
+        "body": "调整结构，直观编辑，或回到源码。需要帮助时，再让 AI 加入。",
+        "visual": "打磨表达"
+      },
+      "share": {
+        "title": "让内容走得更远。",
+        "body": "保留 Markdown 源文件，或导出作品。把写好的内容，带到需要它的地方。",
+        "visual": "准备分享"
+      }
+    },
+    "community": {
+      "eyebrow": "开放构建，一起向前",
+      "title": "好的工具，和使用它的人一起成长。",
+      "body": "MarkFlowy 因每一次参与而变得更好。阅读源码、分享想法、反馈问题，或亲手完善你的写作工具。",
+      "thanks": "感谢每一位贡献者"
+    },
+    "cta": {
+      "title": "下一段好内容，从这里开始。",
+      "body": "多一点专注，让文字自然流动。",
+      "docs": "阅读文档"
+    },
+    "footer": {
+      "product": "产品",
+      "resources": "资源",
+      "community": "社区",
+      "tagline": "本地优先，让想法自然成为文字。",
+      "contribute": "参与贡献",
+      "feedback": "反馈与问题",
+      "privacy": "隐私政策",
+      "license": "开源许可",
+      "made": "为热爱写作而造。"
+    },
+    "releases": {
+      "eyebrow": "每一次更新，都向前一步",
+      "latest": "最新版本",
+      "empty": "暂时无法获取版本说明，你可以前往 GitHub 查看全部版本。"
+    },
+    "motion": {
+      "pause": "暂停动效",
+      "resume": "播放动效"
+    }
+  },
+  "workspace": {
+    "title": "工作空间",
+    "eyebrow": "在这里，继续创作",
+    "description": "继续上次的写作，或连接 GitHub 仓库，开始一个新项目。",
+    "ready": "随时开始写作",
+    "syncedCount": "{{count}} 个已同步工作空间",
+    "settings": "设置",
+    "import": "导入工作空间",
+    "recent": "开始写作",
+    "pinned": "无需登录",
+    "demo": "体验工作空间",
+    "demoDescription": "试着写点什么，内容保存在当前浏览器。",
+    "local": "本地",
+    "shared": "共享",
+    "synced": "已同步",
+    "signInRequired": "登录后连接",
+    "connectTitle": "把你的 GitHub 仓库带进来",
+    "connectDescription": "连接 GitHub，选择仓库，在同一个空间里整理文档、继续写作。",
+    "localShared": "本地与共享",
+    "count": "{{count}} 个工作空间",
+    "repositories": "{{count}} 个仓库",
+    "loading": "正在加载工作空间…",
+    "emptyTitle": "下一篇好内容，从这里开始。",
+    "emptyDescription": "导入 GitHub 仓库，创建你的第一个工作空间。",
+    "files": "文件",
+    "editor": "写作",
+    "outline": "大纲",
+    "panels": "工作区面板",
+    "staged": "待保存的更改",
+    "stagedEmpty": "编辑过的文件会显示在这里。",
+    "source": "源码",
+    "previewMode": "预览",
+    "save": "保存",
+    "saving": "保存中",
+    "saved": "已保存",
+    "saveMessage": "保存说明",
+    "commitMessage": "提交说明",
+    "noFile": "选择一篇文档，开始写作。",
+    "loadingFiles": "正在加载文件…",
+    "loadingFile": "正在打开文档…",
+    "headingCount": "{{count}} 个标题"
   }
 }

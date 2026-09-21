@@ -1,7 +1,7 @@
 ---
 seoTitle: "MarkFlowy：Markdown 编辑与可选 AI"
 description: "了解 MarkFlowy 的本地文件工作流、大文档性能、可选 AI，以及桌面版与 Web 版的区别。"
-updatedAt: "2026-09-06"
+updatedAt: "2026-09-21"
 ---
 
 # MarkFlowy：Markdown 编辑与可选的 AI 辅助
@@ -26,15 +26,14 @@ AI 功能包括对话、摘要、翻译与 Copilot 补全。凭据、模型可�
 
 本地推理需要选择本机运行的 Ollama 模型和本地服务地址。远程地址或云端模型会将请求发送到对应服务，即使通过 Ollama 接入也一样。具体步骤见 [Ollama 与 Copilot 配置](./Extension/UseCopilotWithOllama)。
 
-## 桌面版、Web App 与 Playground
+## 桌面版与 Web App
 
 | 入口 | 适用范围 |
 | --- | --- |
 | 桌面发行版 | 本地文件与文件夹工作流，以及可配置的 AI。 |
 | Web App Beta | 独立的浏览器工作区；连接的远程工作区具有各自的存储和登录行为。 |
-| Playground | RME 编辑器的浏览器演示，不能证明桌面版编辑器的性能或 AI 支持。 |
 
-本文介绍的大文档与本地 AI 工作流以桌面发行版为准。[Playground](https://www.markflowy.cc/zh/playground)适合快速体验基础编辑。
+本文介绍的大文档与本地 AI 工作流以桌面发行版为准。
 
 ## 下载
 

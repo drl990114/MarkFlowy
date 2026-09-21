@@ -2,6 +2,8 @@ import { MfIconButton, ToolbarDivider, ToolbarWrapper } from '@markflowy/interfa
 import type { ViewType } from 'hooks/useWorkspaceState'
 import rem from 'utils/rem'
 import styled from 'styled-components'
+import { useTranslation } from 'next-i18next'
+import NavButton from '../Nav/NavButton'
 
 function MenuList({
   viewType,
@@ -10,33 +12,26 @@ function MenuList({
   viewType: ViewType
   onViewTypeChange: (type: ViewType) => void
 }) {
+  const { t } = useTranslation()
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: rem(4) }}>
-      <MfIconButton
-        icon='ri-eye-line'
-        onClick={() => onViewTypeChange('wysiwyg')}
-        tooltipProps={{ title: 'WYSIWYG' }}
-        size='small'
-        rounded='smooth'
-        active={viewType === 'wysiwyg'}
-      />
-      <MfIconButton
-        icon='ri-code-line'
-        onClick={() => onViewTypeChange('source')}
-        tooltipProps={{ title: 'Source' }}
-        size='small'
-        rounded='smooth'
-        active={viewType === 'source'}
-      />
-      <MfIconButton
-        icon='ri-file-list-line'
-        onClick={() => onViewTypeChange('preview')}
-        tooltipProps={{ title: 'Preview' }}
-        size='small'
-        rounded='smooth'
-        active={viewType === 'preview'}
-      />
-    </div>
+    <ModeGroup aria-label={t('workspace.editor')}>
+      {(
+        [
+          ['wysiwyg', 'workspace.editor'],
+          ['source', 'workspace.source'],
+          ['preview', 'workspace.previewMode'],
+        ] as const
+      ).map(([mode, label]) => (
+        <ModeButton
+          key={mode}
+          type='button'
+          aria-pressed={viewType === mode}
+          onClick={() => onViewTypeChange(mode)}
+        >
+          {t(label)}
+        </ModeButton>
+      ))}
+    </ModeGroup>
   )
 }
 
@@ -48,7 +43,9 @@ export function EditorToolbar({
   onViewTypeChange: (type: ViewType) => void
 }) {
   return (
-    <ToolbarWrapper>
+    <EditorToolbarWrapper>
+      <MenuList viewType={viewType} onViewTypeChange={onViewTypeChange} />
+      <ToolbarDivider />
       <ToolbarSection>
         <MfIconButton
           icon='ri-arrow-go-back-line'
@@ -168,11 +165,7 @@ export function EditorToolbar({
           rounded='smooth'
         />
       </ToolbarSection>
-      <ToolbarDivider />
-      <ToolbarSection>
-        <MenuList viewType={viewType} onViewTypeChange={onViewTypeChange} />
-      </ToolbarSection>
-    </ToolbarWrapper>
+    </EditorToolbarWrapper>
   )
 }
 
@@ -180,4 +173,45 @@ const ToolbarSection = styled.div`
   display: flex;
   align-items: center;
   gap: ${rem(2)};
+`
+
+const EditorToolbarWrapper = styled(ToolbarWrapper)`
+  min-height: 48px;
+  flex-shrink: 0;
+  padding: 6px 16px;
+  gap: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  border-bottom: 1px solid var(--line-soft);
+  background: var(--paper);
+  > * {
+    flex-shrink: 0;
+  }
+`
+
+const ModeGroup = styled.div`
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 8px;
+  background: var(--paper-warm);
+`
+
+const ModeButton = styled(NavButton)`
+  && {
+    height: 28px;
+    padding: 0 10px;
+    border-radius: 5px;
+    color: var(--ink-mute);
+    font-size: 12px;
+    font-weight: 500;
+    transition:
+      color 160ms ease,
+      background-color 160ms ease;
+  }
+  &[aria-pressed='true'] {
+    color: var(--seal);
+    background: var(--paper);
+    box-shadow: 0 1px 3px color-mix(in srgb, var(--ink) 12%, transparent);
+  }
 `
