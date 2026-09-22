@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { runInNewContext } from 'node:vm'
+import { homeScrollResetScript } from '../apps/web/utils/homeScroll.ts'
 import { isWebsitePage } from '../apps/web/utils/website.ts'
 import { createWaveGeometry } from '../apps/web/components/site/waveGeometry.ts'
 import { loadProjectStats, projectStatsSnapshot } from '../apps/web/utils/projectStats.ts'
@@ -13,6 +15,66 @@ import {
 const release = (assets) => ({ draft: false, prerelease: false, assets })
 const repositoryStats = { stargazers_count: 2400, forks_count: 100 }
 const asset = (name, download_count) => ({ name, download_count })
+
+function initializeHomeScroll(type, hash = '#features') {
+  const events = new EventTarget()
+  const frames = []
+  const scrolls = []
+  const location = new URL(`https://markflowy.cc/zh?ref=homepage${hash}`)
+  const state = { key: 'existing-history-entry' }
+  const history = {
+    state,
+    scrollRestoration: 'auto',
+    replaceState(nextState, _title, url) {
+      this.state = nextState
+      location.href = new URL(url, location).href
+    },
+  }
+  runInNewContext(homeScrollResetScript, {
+    performance: { getEntriesByType: () => (type ? [{ type }] : []) },
+    history,
+    location,
+    window: {
+      addEventListener: events.addEventListener.bind(events),
+      scrollTo: (options) => scrolls.push({ ...options }),
+    },
+    requestAnimationFrame: (callback) => frames.push(callback),
+  })
+  return { events, frames, history, location, scrolls, state }
+}
+
+test('homepage reload starts at the top and removes only the stale fragment', () => {
+  const page = initializeHomeScroll('reload')
+  assert.equal(page.location.href, 'https://markflowy.cc/zh?ref=homepage')
+  assert.equal(page.history.state, page.state)
+  assert.equal(page.history.scrollRestoration, 'manual')
+  assert.deepEqual(page.scrolls, [{ top: 0, left: 0, behavior: 'instant' }])
+
+  page.events.dispatchEvent(new Event('pageshow'))
+  assert.equal(page.history.scrollRestoration, 'manual')
+  page.frames.shift()()
+  assert.equal(page.history.scrollRestoration, 'auto')
+  page.events.dispatchEvent(new Event('pageshow'))
+  assert.equal(page.frames.length, 0)
+  assert.equal(page.scrolls.length, 1)
+})
+
+test('homepage reload also resets a saved scroll position without a fragment', () => {
+  const page = initializeHomeScroll('reload', '')
+  assert.equal(page.history.scrollRestoration, 'manual')
+  assert.deepEqual(page.scrolls, [{ top: 0, left: 0, behavior: 'instant' }])
+})
+
+test('fresh deep links and back/forward visits retain native scrolling', () => {
+  for (const type of ['navigate', 'back_forward', undefined]) {
+    const page = initializeHomeScroll(type)
+    assert.equal(page.location.hash, '#features')
+    assert.equal(page.history.scrollRestoration, 'auto')
+    assert.deepEqual(page.scrolls, [])
+    page.events.dispatchEvent(new Event('pageshow'))
+    assert.equal(page.frames.length, 0)
+  }
+})
 
 test('homepage counts use compact lower-bound milestones across locales', () => {
   assert.equal(formatProjectCount(2393, 'zh'), '2.3k+')

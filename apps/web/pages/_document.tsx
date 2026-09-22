@@ -1,6 +1,8 @@
 import Document, { Head, Html, Main, NextScript } from 'next/document'
 import type { DocumentContext } from 'next/document'
+import Script from 'next/script'
 import { ServerStyleSheet } from 'styled-components'
+import { homeScrollResetScript } from '../utils/homeScroll'
 
 export default class MyDocument extends Document {
   static async getInitialProps(ctx: DocumentContext) {
@@ -27,6 +29,13 @@ export default class MyDocument extends Document {
     return (
       <Html data-theme='light' lang={this.props.__NEXT_DATA__.locale || 'en'}>
         <Head>
+          {this.props.__NEXT_DATA__.page === '/' && (
+            <Script
+              id='mf-home-scroll-reset'
+              strategy='beforeInteractive'
+              dangerouslySetInnerHTML={{ __html: homeScrollResetScript }}
+            />
+          )}
           <link rel='stylesheet' type='text/css' href='/dmvendor.css' />
           <link rel='preconnect' href='https://fonts.googleapis.com' />
           <link rel='preconnect' href='https://fonts.gstatic.com' crossOrigin='anonymous' />
