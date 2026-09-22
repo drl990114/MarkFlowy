@@ -1,28 +1,6 @@
-/* Homepage illustrations share the site's palette and global motion control. */
+/* Homepage illustrations share the site's palette and motion preferences. */
 .mf-site .mf-home .mf-reveal[data-visible='true'] {
   animation: mf-section-in 650ms var(--mf-site-ease) backwards;
-}
-.mf-site .mf-motion-control {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 36px;
-  padding: 4px 8px;
-  border: 0;
-  border-radius: 5px;
-  background: transparent;
-  color: var(--ink-mute);
-  font: 12px var(--sans);
-  cursor: pointer;
-}
-.mf-site .mf-motion-control i {
-  font-size: 18px;
-}
-.mf-site .mf-hero-content > .mf-motion-control {
-  margin-top: 20px;
-}
-.mf-site .mf-motion-control[aria-pressed='true'] {
-  color: var(--seal);
 }
 .mf-site .mf-preview-entrance {
   perspective: 1400px;
@@ -435,10 +413,6 @@
   }
 }
 @media (hover: hover) and (pointer: fine) {
-  .mf-site .mf-motion-control:hover {
-    color: var(--seal);
-    background: var(--mf-site-lilac);
-  }
   .mf-site .mf-feature-card:hover .mf-feature-visual img {
     transform: translateY(-12px) scale(1.025);
   }
@@ -516,9 +490,6 @@
   animation: none;
 }
 @media (prefers-reduced-motion: reduce) {
-  .mf-site .mf-motion-control {
-    display: none;
-  }
   .mf-site
     :is(
       .mf-reveal,

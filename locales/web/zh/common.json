@@ -259,6 +259,17 @@
         "visual": "准备分享"
       }
     },
+    "stats": {
+      "eyebrow": "用开放，连接每一次创作",
+      "title": "一点点积累，让好工具走得更远。",
+      "body": "从一次关注，到一次下载，再到一次参与。MarkFlowy 和热爱写作与开源的人一起成长。",
+      "stars": "GitHub Stars",
+      "forks": "开源分支 Forks",
+      "downloads": "发行包下载次数",
+      "source": "GitHub 公开数据",
+      "updated": "更新于",
+      "downloadNote": "下载统计包含正式版安装包与更新包。"
+    },
     "community": {
       "eyebrow": "开放构建，一起向前",
       "title": "好的工具，和使用它的人一起成长。",
@@ -285,10 +296,6 @@
       "eyebrow": "每一次更新，都向前一步",
       "latest": "最新版本",
       "empty": "暂时无法获取版本说明，你可以前往 GitHub 查看全部版本。"
-    },
-    "motion": {
-      "pause": "暂停动效",
-      "resume": "播放动效"
     }
   },
   "workspace": {

@@ -8,17 +8,25 @@ import Nav from '../components/HomeNav'
 import SeoHead from '../components/SeoHead'
 import Contributors from '../components/site/Contributors'
 import SiteFooter from '../components/site/Footer'
-import HomeMotion, { MotionControl } from '../components/site/HomeMotion'
+import HomeMotion from '../components/site/HomeMotion'
 import PlatformMarquee from '../components/site/PlatformMarquee'
 import Preview from '../components/site/Preview'
+import ProjectStats from '../components/site/ProjectStats'
 import Reveal from '../components/site/Reveal'
 import Ribbon from '../components/site/Ribbon'
 import Workflow from '../components/site/Workflow'
 import { useSystemType } from '../hooks/useSystemType'
 import { loadContributors, type Contributor } from '../utils/contributors'
+import { loadProjectStats, type ProjectStats as ProjectStatsData } from '../utils/projectStats'
 import { DEMO_URL, DOWNLOAD_URL } from '../utils/website'
 
-export default function Index({ contributors = [] }: { contributors?: Contributor[] }) {
+export default function Index({
+  contributors = [],
+  projectStats,
+}: {
+  contributors?: Contributor[]
+  projectStats: ProjectStatsData
+}) {
   const { t } = useTranslation()
   const [folded, setFolded] = useState(true)
   const toggle = useCallback(() => setFolded((value) => !value), [])
@@ -43,9 +51,8 @@ export default function Index({ contributors = [] }: { contributors?: Contributo
               <span aria-hidden='true' />
               {t('site.hero.eyebrow')}
             </p>
-            <h1>
-              {t('site.hero.title')} <span>{t('site.hero.lead')}</span>
-            </h1>
+            <h1>{t('site.hero.title')}</h1>
+            <p className='mf-hero-lead'>{t('site.hero.lead')}</p>
             <p className='mf-hero-description'>{t('site.hero.description')}</p>
             <div className='mf-actions'>
               <Link className='mf-button' href={DOWNLOAD_URL}>
@@ -58,7 +65,6 @@ export default function Index({ contributors = [] }: { contributors?: Contributo
                 <i className='ri-arrow-right-line' aria-hidden='true' />
               </Link>
             </div>
-            <MotionControl />
           </div>
           <PlatformMarquee />
         </section>
@@ -79,6 +85,7 @@ export default function Index({ contributors = [] }: { contributors?: Contributo
         </section>
         <FeatureList />
         <Workflow />
+        <ProjectStats stats={projectStats} />
         <Contributors contributors={contributors} />
         <section className='mf-final-cta'>
           <div className='mf-container mf-final-cta-inner'>
@@ -105,14 +112,16 @@ export default function Index({ contributors = [] }: { contributors?: Contributo
 }
 
 export const getStaticProps: GetStaticProps = async ({ locale }) => {
-  const [translations, contributors] = await Promise.all([
+  const [translations, contributors, projectStats] = await Promise.all([
     serverSideTranslations(locale || 'en', ['common']),
     loadContributors(),
+    loadProjectStats(),
   ])
   return {
     props: {
       ...translations,
       contributors,
+      projectStats,
     },
     revalidate: 3600,
   }

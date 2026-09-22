@@ -1,0 +1,182 @@
+.mf-site .mf-project-stats {
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+  padding: 72px 0 56px;
+  background: linear-gradient(180deg, var(--paper), var(--mf-site-lilac) 56%, var(--paper));
+}
+.mf-site .mf-stats-heading {
+  position: relative;
+  z-index: 1;
+  max-width: 720px;
+}
+.mf-site .mf-stats-heading .mf-section-title {
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+.mf-site .mf-stats-heading .mf-section-copy {
+  max-width: 620px;
+  margin-bottom: 0;
+  text-wrap: balance;
+}
+.mf-site .mf-stats-wave {
+  position: relative;
+  height: 250px;
+  margin-top: -20px;
+  pointer-events: none;
+}
+.mf-site .mf-stats-wave::before {
+  content: '';
+  position: absolute;
+  inset: 22% 18%;
+  background: radial-gradient(
+    ellipse,
+    color-mix(in srgb, var(--mf-site-blue) 24%, transparent),
+    transparent 68%
+  );
+}
+.mf-site .mf-stats-wave svg {
+  position: absolute;
+  width: max(100%, 1080px);
+  max-width: 1760px;
+  height: 400px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  overflow: visible;
+}
+.mf-site .mf-stats-strands {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: mf-stats-rise 12s ease-in-out infinite;
+  animation-play-state: paused;
+}
+.mf-site .mf-stats-strands-falling {
+  animation-name: mf-stats-fall;
+  animation-duration: 15s;
+  animation-delay: -5s;
+}
+.mf-site .mf-stats-wave[data-running='true'] .mf-stats-strands {
+  animation-play-state: running;
+}
+@keyframes mf-stats-rise {
+  0%,
+  100% {
+    transform: translateY(10px) rotate(-2deg) scaleY(0.9);
+  }
+  50% {
+    transform: translateY(-12px) rotate(2deg) scaleY(1.08);
+  }
+}
+@keyframes mf-stats-fall {
+  0%,
+  100% {
+    transform: translateY(-8px) rotate(1.5deg) scaleY(1.04);
+  }
+  50% {
+    transform: translateY(14px) rotate(-2deg) scaleY(0.85);
+  }
+}
+.mf-site .mf-stats-details {
+  position: relative;
+  z-index: 1;
+}
+.mf-site .mf-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 48px;
+  margin: 0;
+}
+.mf-site .mf-stat {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: flex-start;
+}
+.mf-site .mf-stat dd {
+  margin: 0 0 8px;
+  background: linear-gradient(
+    110deg,
+    var(--mf-site-accent),
+    color-mix(in srgb, var(--mf-site-purple) 72%, var(--mf-site-accent))
+  );
+  background-clip: text;
+  color: transparent;
+  font-size: clamp(48px, 5.5vw, 76px);
+  font-weight: 450;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.055em;
+  line-height: 1.12;
+}
+.mf-site .mf-stat dt a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  color: var(--ink);
+  font-size: 16px;
+  text-decoration: none;
+}
+.mf-site .mf-stat dt i {
+  color: var(--mf-site-accent);
+  transition: transform 180ms var(--mf-site-ease);
+}
+.mf-site .mf-stat dt a:hover i {
+  transform: translate(2px, -2px);
+}
+.mf-site .mf-stats-source {
+  margin: 28px 0 0;
+  color: var(--ink-mute);
+  font-size: 12px;
+  line-height: 1.7;
+}
+.mf-site .mf-stats-source span {
+  display: block;
+  margin-top: 2px;
+}
+@media (max-width: 650px) {
+  .mf-site .mf-project-stats {
+    padding: 64px 0 48px;
+  }
+  .mf-site .mf-stats-wave {
+    height: 230px;
+    margin-top: 0;
+  }
+  .mf-site .mf-stats-wave svg {
+    width: 920px;
+    height: 330px;
+  }
+  .mf-site .mf-stats-grid {
+    gap: 28px 20px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .mf-site .mf-stat:last-child {
+    grid-column: 1 / -1;
+  }
+  .mf-site .mf-stat dd {
+    font-size: 48px;
+  }
+  .mf-site .mf-stat dt a {
+    font-size: 15px;
+    min-height: 36px;
+  }
+  .mf-site .mf-stats-source {
+    margin-top: 28px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mf-site .mf-stats-strands {
+    animation: none;
+  }
+  .mf-site .mf-stat dt i {
+    transition: none;
+  }
+}
+@media (forced-colors: active) {
+  .mf-site .mf-stat dd {
+    background: none;
+    color: CanvasText;
+  }
+  .mf-site .mf-stats-wave {
+    visibility: hidden;
+  }
+}

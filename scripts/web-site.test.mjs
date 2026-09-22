@@ -2,11 +2,93 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { isWebsitePage } from '../apps/web/utils/website.ts'
 import { createWaveGeometry } from '../apps/web/components/site/waveGeometry.ts'
+import { loadProjectStats, projectStatsSnapshot } from '../apps/web/utils/projectStats.ts'
+import { formatProjectCount } from '../apps/web/utils/formatProjectCount.ts'
 import {
   contributorSnapshot,
   loadContributors,
   normalizeContributors,
 } from '../apps/web/utils/contributors.ts'
+
+const release = (assets) => ({ draft: false, prerelease: false, assets })
+const repositoryStats = { stargazers_count: 2400, forks_count: 100 }
+const asset = (name, download_count) => ({ name, download_count })
+
+test('homepage counts use compact lower-bound milestones across locales', () => {
+  assert.equal(formatProjectCount(2393, 'zh'), '2.3k+')
+  assert.equal(formatProjectCount(93, 'zh'), '90+')
+  assert.equal(formatProjectCount(28848, 'zh'), '2.8万+')
+  assert.equal(formatProjectCount(28848, 'en'), '28k+')
+  assert.equal(formatProjectCount(28848, 'ja'), '2.8万+')
+  assert.equal(formatProjectCount(9999, 'en'), '9.9k+')
+  assert.equal(formatProjectCount(10000, 'zh'), '1万+')
+  assert.equal(formatProjectCount(0, 'en'), '0')
+  assert.equal(formatProjectCount(7, 'zh'), '7')
+})
+
+test('project statistics count stable packages, excluding signatures and update metadata', async () => {
+  const releases = [
+    release([
+      asset('MarkFlowy.dmg', 10),
+      asset('MarkFlowy.AppImage', 20),
+      asset('MarkFlowy.app.tar.gz', 30),
+      asset('MarkFlowy.msi', 40),
+      asset('MarkFlowy.exe', 50),
+      asset('MarkFlowy.deb', 60),
+      asset('MarkFlowy.rpm', 70),
+      asset('MarkFlowy_portable.zip', 80),
+      asset('MarkFlowy.exe.sig', 1000),
+      asset('install.json', 2000),
+      asset('checksums.txt', 3000),
+    ]),
+    { ...release([asset('preview.dmg', 500)]), prerelease: true },
+    { ...release([asset('draft.dmg', 600)]), draft: true },
+  ]
+  const result = await loadProjectStats(async (url) =>
+    Response.json(url.includes('/releases?') ? releases : repositoryStats),
+  )
+  assert.equal(result.downloads, 360)
+  assert.equal(result.stars, 2400)
+  assert.equal(result.forks, 100)
+  assert.ok(Number.isFinite(Date.parse(result.checkedAt)))
+})
+
+test('project download totals include every release page, including a full final page', async () => {
+  const pages = []
+  const result = await loadProjectStats(async (url) => {
+    if (!url.includes('/releases?')) return Response.json(repositoryStats)
+    const page = new URL(url).searchParams.get('page')
+    pages.push(page)
+    return Response.json(
+      page === '3' ? [] : Array.from({ length: 100 }, () => release([asset('app.dmg', 2)])),
+    )
+  })
+  assert.deepEqual(pages, ['1', '2', '3'])
+  assert.equal(result.downloads, 400)
+})
+
+test('unavailable or malformed project data uses the dated snapshot instead of partial totals', async () => {
+  for (const fetcher of [
+    async () => {
+      throw new TypeError('Network unavailable')
+    },
+    async () => new Response('{}', { status: 403 }),
+    async () => Response.json({ message: 'Unexpected response' }),
+    async (url) =>
+      Response.json(
+        url.includes('/releases?') ? [release([asset('app.dmg', -1)])] : repositoryStats,
+      ),
+    async (url) =>
+      Response.json(url.includes('/releases?') ? [] : { ...repositoryStats, forks_count: '100' }),
+    async (url) => {
+      if (!url.includes('/releases?')) return Response.json(repositoryStats)
+      if (url.includes('page=2')) return new Response('{}', { status: 503 })
+      return Response.json(Array.from({ length: 100 }, () => release([asset('app.dmg', 2)])))
+    },
+  ]) {
+    assert.deepEqual(await loadProjectStats(fetcher), projectStatsSnapshot)
+  }
+})
 
 test('contributor profiles exclude bots and malformed or duplicate identities', () => {
   const people = normalizeContributors([

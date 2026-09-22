@@ -3,7 +3,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import type { Contributor } from '../../utils/contributors'
 import { PRODUCT_URL } from '../../utils/website'
-import { MotionControl, useSceneMotion } from './HomeMotion'
+import { useSceneMotion } from './HomeMotion'
 import Reveal from './Reveal'
 
 export default function Contributors({ contributors }: { contributors: Contributor[] }) {
@@ -29,7 +29,6 @@ export default function Contributors({ contributors }: { contributors: Contribut
               <span>
                 <i className='ri-github-fill' aria-hidden='true' /> {t('site.community.thanks')}
               </span>
-              <MotionControl />
             </div>
           </Reveal>
           <div

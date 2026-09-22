@@ -11,6 +11,7 @@ import { GlobalStyles as InterfaceGlobalStyles } from '@markflowy/interface'
 import { isWebsitePage } from '../utils/website'
 import '../components/site/site.css'
 import '../components/site/home-motion.css'
+import '../components/site/project-stats.css'
 import '../components/workspace/app.css'
 
 function MyApp({ Component, pageProps, router }: AppProps) {

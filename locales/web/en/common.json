@@ -259,6 +259,17 @@
         "visual": "Ready to share"
       }
     },
+    "stats": {
+      "eyebrow": "Built in the open, growing together",
+      "title": "Small contributions. Lasting progress.",
+      "body": "A star, a download, a contribution. MarkFlowy grows with people who care about writing and open source.",
+      "stars": "GitHub Stars",
+      "forks": "Open-source forks",
+      "downloads": "Release package downloads",
+      "source": "Public GitHub data",
+      "updated": "Updated",
+      "downloadNote": "Downloads include stable installers and update packages."
+    },
     "community": {
       "eyebrow": "BUILT IN THE OPEN",
       "title": "Better, together.",
@@ -285,10 +296,6 @@
       "eyebrow": "ALWAYS MOVING FORWARD",
       "latest": "Latest release",
       "empty": "Release notes are temporarily unavailable. You can find all releases on GitHub."
-    },
-    "motion": {
-      "pause": "Pause animations",
-      "resume": "Play animations"
     }
   },
   "workspace": {
