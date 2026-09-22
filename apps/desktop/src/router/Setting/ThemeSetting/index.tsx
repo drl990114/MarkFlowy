@@ -18,7 +18,7 @@ import {
   scheduleThemeAccentColorPreview,
   THEME_ACCENT_COLOR_SETTING_KEY,
 } from '@/helper/theme'
-import { memo, useCallback, useEffect, useMemo, useRef } from 'react'
+import { type ComponentProps, memo, useCallback, useEffect, useMemo, useRef } from 'react'
 import { useTranslation } from '@/i18n'
 import styled, { useTheme } from 'styled-components'
 import { SettingGroupContainer } from '../component/SettingGroup/styles'
@@ -91,16 +91,21 @@ export const ThemeSetting = memo(({ revealedSettingKey }: ThemeSettingProps) => 
   const latestCommitRef = useRef<{ generation: number; value: string } | undefined>(undefined)
   const themePreviewGenerationRef = useRef(0)
   const themePreviewSessionRef = useRef<{
+    canPreview: boolean
     committed: boolean
     generation: number
     kind: ThemePreviewKind
+    previewedValue?: string
   } | undefined>(undefined)
 
   const handleThemePreviewOpenChange = useCallback(
     (kind: ThemePreviewKind, open: boolean) => {
       if (open) {
+        const previousSession = themePreviewSessionRef.current
+        if (previousSession?.previewedValue && !previousSession.committed) restoreThemePreview()
         themePreviewGenerationRef.current += 1
         themePreviewSessionRef.current = {
+          canPreview: false,
           committed: false,
           generation: themePreviewGenerationRef.current,
           kind,
@@ -114,19 +119,44 @@ export const ThemeSetting = memo(({ revealedSettingKey }: ThemeSettingProps) => 
       queueMicrotask(() => {
         const currentSession = themePreviewSessionRef.current
         if (!currentSession || currentSession.generation !== session.generation) return
-        if (!currentSession.committed) restoreThemePreview()
+        if (currentSession.previewedValue && !currentSession.committed) restoreThemePreview()
         themePreviewSessionRef.current = undefined
       })
     },
     [restoreThemePreview],
   )
 
+  const enableThemePreview = useCallback((kind: ThemePreviewKind) => {
+    const session = themePreviewSessionRef.current
+    if (session?.kind === kind) session.canPreview = true
+  }, [])
+
   const previewThemeSelection = useCallback(
     (kind: ThemePreviewKind, selection: ThemePreviewSelection) => {
-      if (themePreviewSessionRef.current?.kind === kind) previewTheme(selection)
+      const session = themePreviewSessionRef.current
+      // Radix focuses the selected item on open. Only explicit navigation should preview it.
+      if (!session || session.kind !== kind || !session.canPreview || session.committed) return
+
+      const value = selection.lightThemeName ?? selection.darkThemeName ?? selection.themeMode
+      if (!value || session.previewedValue === value) return
+      session.previewedValue = value
+      previewTheme(selection)
     },
     [previewTheme],
   )
+
+  const getThemePreviewItemProps = (
+    kind: ThemePreviewKind,
+    selection: ThemePreviewSelection,
+  ): Pick<ComponentProps<typeof SelectItem>, 'onFocus' | 'onPointerMove'> => ({
+    onFocus: () => previewThemeSelection(kind, selection),
+    onPointerMove: (event) => {
+      if (event.pointerType !== 'mouse') return
+      enableThemePreview(kind)
+      // The initially focused item must also preview when the pointer moves onto it.
+      previewThemeSelection(kind, selection)
+    },
+  })
 
   const commitThemeSelection = useCallback((kind: ThemePreviewKind, commit: () => void) => {
     const session = themePreviewSessionRef.current
@@ -196,7 +226,7 @@ export const ThemeSetting = memo(({ revealedSettingKey }: ThemeSettingProps) => 
           previewGenerationRef.current,
         )
       }
-      if (themePreviewSessionRef.current && !themePreviewSessionRef.current.committed) {
+      if (themePreviewSessionRef.current?.previewedValue && !themePreviewSessionRef.current.committed) {
         restoreThemePreview()
       }
       themePreviewSessionRef.current = undefined
@@ -262,21 +292,21 @@ export const ThemeSetting = memo(({ revealedSettingKey }: ThemeSettingProps) => 
           >
             <SelectValue />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent onKeyDownCapture={() => enableThemePreview('mode')}>
             <SelectItem
-              onFocus={() => previewThemeSelection('mode', { themeMode: 'system' })}
+              {...getThemePreviewItemProps('mode', { themeMode: 'system' })}
               value='system'
             >
               {t('settings.display.theme.mode.system')}
             </SelectItem>
             <SelectItem
-              onFocus={() => previewThemeSelection('mode', { themeMode: 'light' })}
+              {...getThemePreviewItemProps('mode', { themeMode: 'light' })}
               value='light'
             >
               {t('settings.display.theme.mode.light')}
             </SelectItem>
             <SelectItem
-              onFocus={() => previewThemeSelection('mode', { themeMode: 'dark' })}
+              {...getThemePreviewItemProps('mode', { themeMode: 'dark' })}
               value='dark'
             >
               {t('settings.display.theme.mode.dark')}
@@ -309,16 +339,14 @@ export const ThemeSetting = memo(({ revealedSettingKey }: ThemeSettingProps) => 
             >
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent onKeyDownCapture={() => enableThemePreview('light')}>
               {lightThemes.map((themeItem) => (
                 <SelectItem
                   key={themeItem.name}
-                  onFocus={() =>
-                    previewThemeSelection('light', {
-                      lightThemeName: themeItem.name,
-                      themeMode: 'light',
-                    })
-                  }
+                  {...getThemePreviewItemProps('light', {
+                    lightThemeName: themeItem.name,
+                    themeMode: 'light',
+                  })}
                   value={themeItem.name}
                 >
                   {themeItem.name}
@@ -353,16 +381,14 @@ export const ThemeSetting = memo(({ revealedSettingKey }: ThemeSettingProps) => 
             >
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent onKeyDownCapture={() => enableThemePreview('dark')}>
               {darkThemes.map((themeItem) => (
                 <SelectItem
                   key={themeItem.name}
-                  onFocus={() =>
-                    previewThemeSelection('dark', {
-                      darkThemeName: themeItem.name,
-                      themeMode: 'dark',
-                    })
-                  }
+                  {...getThemePreviewItemProps('dark', {
+                    darkThemeName: themeItem.name,
+                    themeMode: 'dark',
+                  })}
                   value={themeItem.name}
                 >
                   {themeItem.name}
