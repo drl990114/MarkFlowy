@@ -1,3 +1,4 @@
+import { createKeyboardEvent } from '../../../../tests/helpers/keyboard'
 import { act, createRef } from 'react'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -80,14 +81,17 @@ describe('shortcut editing', () => {
     const input = screen.getByRole('textbox') as HTMLInputElement
     fireEvent.keyDown(input, { key: 'Control', ctrlKey: true })
     expect(input.value).toContain('S')
-    fireEvent.keyDown(input, { key: '1', code: 'Digit1', altKey: true })
+    fireEvent(input, createKeyboardEvent('keydown', { key: '1', code: 'Digit1', altKey: true }))
     await act(async () => fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' }))
     expect(mocks.save).toHaveBeenCalledWith('app_save.default', ['Alt', '1'])
   })
   it('shows conflicts inline and prevents saving them', async () => {
     await open()
     mocks.validate.mockReturnValue('Already used by Save')
-    fireEvent.keyDown(screen.getByRole('textbox'), { key: '2', code: 'Digit2', altKey: true })
+    fireEvent(
+      screen.getByRole('textbox'),
+      createKeyboardEvent('keydown', { key: '2', code: 'Digit2', altKey: true }),
+    )
     expect(screen.getByRole('status').textContent).toBe('Already used by Save')
     expect(
       (screen.getByRole('button', { name: 'settings.keyboard.save' }) as HTMLButtonElement)
@@ -103,7 +107,7 @@ describe('shortcut editing', () => {
       name: 'settings.keyboard.reset_default',
     }) as HTMLButtonElement
     expect(reset.disabled).toBe(true)
-    fireEvent.keyDown(input, { key: '1', code: 'Digit1', altKey: true })
+    fireEvent(input, createKeyboardEvent('keydown', { key: '1', code: 'Digit1', altKey: true }))
     expect(reset.disabled).toBe(false)
     await user.click(reset)
     expect(document.activeElement).toBe(input)

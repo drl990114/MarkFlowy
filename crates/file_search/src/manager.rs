@@ -9,7 +9,7 @@ use std::thread;
 use std::time::{Duration, Instant};
 use serde::{Deserialize, Serialize};
 
-use clipboard::{ClipboardContext, ClipboardProvider};
+use arboard::Clipboard;
 use ignore::WalkBuilder;
 
 use crate::exclude::{build_exclude_matcher, is_excluded_path};
@@ -99,9 +99,7 @@ impl Manager {
     }
 
     pub fn export(&self, paths: Vec<String>) {
-        let mut ctx: ClipboardContext = ClipboardProvider::new().unwrap();
-
-        let r = ctx.set_contents(paths.join("\n"));
+        let r = Clipboard::new().and_then(|mut ctx| ctx.set_text(paths.join("\n")));
         if let Err(err) = r {
             eprintln!("Clip error: {}", err);
         }

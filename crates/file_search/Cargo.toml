@@ -11,7 +11,7 @@ num_cpus = "1.15.0" # for parallel search
 grep = "0.3.1" #ripgrep
 ignore = "0.4.22" #parallel walker from ripgrep
 walkdir = "2.5.0" #walker from ripgrep
-clipboard = "0.5.0" #for clipboard
+arboard = { version = "3.6.1", default-features = false } #for clipboard
 dirs = "5.0.1" #for getting config file
 serde = { version="1.0.206", features=["derive"]}  #save config
 toml = "0.8.23" #config format

@@ -1,3 +1,4 @@
+import { createKeyboardEvent } from '../../tests/helpers/keyboard'
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -61,7 +62,7 @@ describe('Command Palette global keybinding', () => {
   }
 
   function press(options: KeyboardEventInit) {
-    const event = new KeyboardEvent('keydown', { bubbles: true, cancelable: true, ...options })
+    const event = createKeyboardEvent('keydown', { bubbles: true, cancelable: true, ...options })
     target.dispatchEvent(event)
     return event
   }

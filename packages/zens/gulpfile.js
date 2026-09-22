@@ -1,7 +1,8 @@
 const gulp = require('gulp');
 const babel = require('gulp-babel');
 const less = require('gulp-less');
-const cssnano = require('gulp-cssnano');
+const postcss = require('gulp-postcss');
+const cssnano = require('cssnano');
 const through2 = require('through2');
 
 const paths = {
@@ -101,7 +102,7 @@ function less2css() {
   return gulp
     .src(paths.styles)
     .pipe(less()) // 处理less文件
-    .pipe(cssnano({ zindex: false, reduceIdents: false })) // 压缩
+    .pipe(postcss([cssnano({ preset: ['default', { zindex: false, reduceIdents: false }] })])) // 压缩
     .pipe(gulp.dest(paths.dest.lib))
     .pipe(gulp.dest(paths.dest.esm));
 }
