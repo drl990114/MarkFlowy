@@ -110,6 +110,11 @@
     "description_after_link": "から行えます。",
     "see_details": "詳細を見る"
   },
+  "theme": {
+    "system": "システム設定に従う",
+    "light": "ライトモード",
+    "dark": "ダークモード"
+  },
   "navigation": {
     "home": "ホーム",
     "docs": "ドキュメント",

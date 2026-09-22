@@ -4,6 +4,7 @@ import {
   protectLocalEdit,
   historyFileSaved,
   isHistoryAutosavePaused,
+  releaseClosedFileContent,
 } from '@/services/local-history'
 import { bindEditorResume, bindSourceEditorResume } from './editorResume'
 import { editorAutomationRegistry, type EditorAutomationHandle } from './editorAutomationRegistry'
@@ -1310,18 +1311,24 @@ function TextEditor(props: TextEditorProps) {
     return () => {
       unregisterEditorInstanceResources(id, instanceId)
       editorInstanceLifecycle.unmount(id, () => {
-        void fileSaveCoordinator.releaseWhenIdle(
-          id,
-          () => !editorInstanceLifecycle.hasInstances(id),
-          () => {
-            useEditorCounterStore.getState().deleteEditorCounter({ id })
-            useEditorStateStore.getState().delIdStateMap(id)
-            useEditorStore.getState().clearEditorResources(id)
-            setSourceCodeEditor(id, undefined)
-            delegateOptionsCache.delete(id)
-            releaseExternalFileChange(id)
-          },
-        )
+        void releaseClosedFileContent(id)
+          .then((released) => {
+            // Retain an unacknowledged closed draft, including its encoding state.
+            if (!released && !useEditorStore.getState().opened.includes(id)) return
+            return fileSaveCoordinator.releaseWhenIdle(
+              id,
+              () => !editorInstanceLifecycle.hasInstances(id),
+              () => {
+                useEditorCounterStore.getState().deleteEditorCounter({ id })
+                useEditorStateStore.getState().delIdStateMap(id)
+                useEditorStore.getState().clearEditorResources(id)
+                setSourceCodeEditor(id, undefined)
+                delegateOptionsCache.delete(id)
+                releaseExternalFileChange(id)
+              },
+            )
+          })
+          .catch((error) => logger.error('Failed to release closed document', error))
       })
     }
   }, [id])

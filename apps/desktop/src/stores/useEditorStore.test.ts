@@ -352,8 +352,8 @@ describe('useEditorStore.insertNodeToFolderData', () => {
 
     expect(useEditorStore.getState().getFileNodeByPath('/workspace/target.md')).toMatchObject({
       id: 'source',
-      content: 'new',
     })
+    expect(useEditorStore.getState().getFileNodeByPath('/workspace/target.md')?.content).toBeUndefined()
     expect(useEditorStore.getState().opened).toEqual(['source', 'other'])
     expect(useEditorStore.getState().activeGroupId).toBe('source-group')
     expect(useEditorStore.getState().activeId).toBe('source')

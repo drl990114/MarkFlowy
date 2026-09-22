@@ -84,8 +84,17 @@ export default function Ribbon() {
       renderer?.draw(time)
     })
     const navigation = new MutationObserver(update)
+    const theme = new MutationObserver(() => {
+      renderer?.updateColors()
+      // Redraw even when reduced motion or a hidden tab has paused the loop.
+      renderer?.draw(time)
+    })
     observer.observe(root)
     resize.observe(canvas)
+    theme.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-mf-theme'],
+    })
     if (header) navigation.observe(header, { attributes: true, attributeFilter: ['data-open'] })
     if (home)
       navigation.observe(home, { attributes: true, attributeFilter: ['data-motion-running'] })
@@ -111,6 +120,7 @@ export default function Ribbon() {
       observer.disconnect()
       resize.disconnect()
       navigation.disconnect()
+      theme.disconnect()
       media.removeEventListener('change', update)
       document.removeEventListener('visibilitychange', update)
       canvas.removeEventListener('webglcontextlost', onContextLost)
@@ -124,7 +134,7 @@ export default function Ribbon() {
         <defs>
           <linearGradient id={`${id}-silk`} x1='0' y1='0' x2='1' y2='.6'>
             <stop stopColor='var(--mf-wave-light)' />
-            <stop offset='.4' stopColor='var(--seal)' />
+            <stop offset='.4' stopColor='var(--mf-wave-primary)' />
             <stop offset='.75' stopColor='var(--mf-wave-accent)' />
             <stop offset='1' stopColor='var(--mf-wave-light)' />
           </linearGradient>

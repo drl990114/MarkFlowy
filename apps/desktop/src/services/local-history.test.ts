@@ -9,13 +9,21 @@ const mocks = vi.hoisted(() => ({
   dirty: true,
   content: 'draft',
   path: '/workspace/note.md' as string | undefined,
+  file: undefined as { id: string; name: string; kind: string; path?: string; content: string } | undefined,
+  release: vi.fn(),
+  waitForIdle: vi.fn(),
+  hasSources: vi.fn(),
 }))
 vi.mock('@tauri-apps/api/core', () => ({ invoke: mocks.invoke, isTauri: () => true }))
 vi.mock('@tauri-apps/api/window', () => ({ getCurrentWindow: () => ({ label: 'main' }) }))
 vi.mock('@tauri-apps/api/event', () => ({ listen: mocks.listen }))
 vi.mock('@/helper/logger', () => ({ logger: { error: vi.fn() } }))
 vi.mock('@/helper/files', () => ({
-  getFileObject: () => ({ id: 'file', name: 'note.md', path: mocks.path, kind: 'file' }),
+  getFileObject: () => mocks.file ?? { id: 'file', name: 'note.md', path: mocks.path, kind: 'file' },
+  releaseFileContent: mocks.release,
+}))
+vi.mock('@/components/EditorArea/editorSnapshotRegistry', () => ({
+  editorSnapshotRegistry: { hasSources: mocks.hasSources },
 }))
 vi.mock('@/stores/useEditorStore', () => ({
   default: {
@@ -29,7 +37,10 @@ vi.mock('@/stores/useEditorStore', () => ({
 }))
 vi.mock('@/stores/useEditorStateStore', () => ({
   default: {
-    getState: () => ({ idStateMap: new Map([['file', { hasUnsavedChanges: mocks.dirty }]]) }),
+    getState: () => ({
+      idStateMap: new Map([['file', { hasUnsavedChanges: mocks.dirty }]]),
+      delIdStateMap: () => { mocks.dirty = false },
+    }),
   },
 }))
 vi.mock('@/components/EditorArea/fileSaveCoordinator', () => ({
@@ -38,6 +49,13 @@ vi.mock('@/components/EditorArea/fileSaveCoordinator', () => ({
     getPersistedFormat: () => ({ encoding: 'gbk', bom: 'none' }),
     getTextMetadata: () => ({ format: { encoding: 'gbk', bom: 'none' } }),
     recordFormat: vi.fn(),
+    waitForIdle: mocks.waitForIdle,
+    releaseWhenIdle: async (_id: string, guard: () => boolean, cleanup: () => void) => {
+      await mocks.waitForIdle()
+      if (!guard()) return false
+      cleanup()
+      return true
+    },
   },
 }))
 
@@ -59,6 +77,10 @@ beforeEach(async () => {
   mocks.path = doc.path
   mocks.dirty = true
   mocks.content = 'draft'
+  mocks.file = undefined
+  mocks.release.mockReset()
+  mocks.waitForIdle.mockReset().mockResolvedValue(undefined)
+  mocks.hasSources.mockReset().mockReturnValue(false)
   mocks.read.mockReset().mockImplementation(() => mocks.content)
   mocks.listen.mockReset().mockResolvedValue(() => {})
   mocks.invoke
@@ -166,5 +188,63 @@ describe('background draft protection', () => {
     expect(history.historyWorkspaceForPath('/workspace/a.md')).toBe('/workspace')
     expect(history.historyWorkspaceForPath('/workspace-two/a.md')).toBe('')
     expect(history.historyWorkspaceForPath()).toBe('/workspace')
+  })
+})
+
+describe('closed document content lifetime', () => {
+  beforeEach(() => {
+    mocks.file = { id: 'file', name: 'note.md', path: mocks.path, kind: 'file', content: 'draft' }
+  })
+
+  it('waits for pending saves and rechecks whether the document reopened', async () => {
+    mocks.opened = []
+    mocks.dirty = false
+    let finish!: () => void
+    mocks.waitForIdle.mockReturnValue(new Promise<void>((resolve) => { finish = resolve }))
+    const release = history.releaseClosedFileContent('file')
+    expect(mocks.release).not.toHaveBeenCalled()
+    mocks.opened = ['file']
+    finish()
+    expect(await release).toBe(false)
+    expect(mocks.release).not.toHaveBeenCalled()
+    mocks.opened = []
+    expect(await history.releaseClosedFileContent('file')).toBe(true)
+    expect(mocks.release).toHaveBeenCalledExactlyOnceWith('file')
+  })
+
+  it('retains dirty text until the exact discarded content is acknowledged', async () => {
+    mocks.opened = []
+    expect(await history.releaseClosedFileContent('file')).toBe(false)
+    await history.protectDiscard(['file'])
+    mocks.file = { ...mocks.file!, content: 'edited during checkpoint' }
+    expect(await history.releaseClosedFileContent('file')).toBe(false)
+    expect(mocks.release).not.toHaveBeenCalled()
+    mocks.content = mocks.file.content
+    await history.protectDiscard(['file'])
+    expect(await history.releaseClosedFileContent('file')).toBe(true)
+    expect(mocks.release).toHaveBeenCalledExactlyOnceWith('file')
+  })
+
+  it('retains bodies after a failed save or discard checkpoint', async () => {
+    mocks.opened = []
+    mocks.waitForIdle.mockRejectedValueOnce(new Error('write failed'))
+    await expect(history.releaseClosedFileContent('file')).rejects.toThrow('write failed')
+    mocks.invoke.mockRejectedValueOnce(new Error('history failed'))
+    await expect(history.protectDiscard(['file'])).rejects.toThrow('history failed')
+    expect(await history.releaseClosedFileContent('file')).toBe(false)
+    expect(mocks.release).not.toHaveBeenCalled()
+  })
+
+  it('keeps live editor sources and unvalidated recovery drafts resident', async () => {
+    mocks.opened = []
+    mocks.dirty = false
+    mocks.hasSources.mockReturnValue(true)
+    expect(await history.releaseClosedFileContent('file')).toBe(false)
+    mocks.hasSources.mockReturnValue(false)
+    const { registerDraftRecovery } = await import('./draftRecoveryState')
+    const ready = registerDraftRecovery('file', vi.fn())
+    expect(await history.releaseClosedFileContent('file')).toBe(false)
+    ready()
+    expect(await history.releaseClosedFileContent('file')).toBe(true)
   })
 })

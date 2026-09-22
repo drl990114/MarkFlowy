@@ -348,7 +348,7 @@
   border: 1px solid var(--line-soft);
   border-radius: 12px;
   background: var(--paper);
-  box-shadow: 0 5px 12px -8px color-mix(in srgb, var(--ink) 30%, transparent);
+  box-shadow: 0 5px 12px -8px color-mix(in srgb, var(--shadow-color) 30%, transparent);
   color: var(--ink);
   text-decoration: none;
   scroll-margin-inline: 24px;

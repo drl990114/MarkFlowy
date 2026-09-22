@@ -1,3 +1,4 @@
+pub mod cancellation;
 pub mod exclude;
 pub mod fileinfo;
 pub mod manager;

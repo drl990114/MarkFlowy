@@ -15,6 +15,7 @@ import { apiClient } from 'utils/apiClient'
 import { redirectToGitHub } from 'utils/githubAuthorization'
 import rem from 'utils/rem'
 import { applicationTheme } from '../../utils/websiteTheme'
+import ThemeSwitcher from '../../components/ThemeSwitcher'
 
 interface WorkspaceMember {
   id: string
@@ -237,6 +238,7 @@ export default function WorkspaceListPage() {
             </CurrentLocation>
           </HeaderNavigation>
           <HeaderRight>
+            <ThemeSwitcher />
             {isAuthenticated ? (
               <>
                 <SettingsLink href='/settings'>
@@ -769,7 +771,7 @@ const ImportButton = styled.button`
   border-radius: ${rem(8)};
   font-size: ${rem(13)};
   font-weight: 700;
-  color: #ffffff;
+  color: var(--on-accent);
   cursor: pointer;
   transition:
     background-color 160ms ease,
@@ -811,7 +813,7 @@ const GitHubSignInLink = styled(Link)`
   background: ${workspacePalette.accent};
   border: 1px solid ${workspacePalette.accent};
   border-radius: ${rem(8)};
-  color: #ffffff;
+  color: var(--on-accent);
   font-size: ${rem(13)};
   font-weight: 700;
   text-decoration: none;
@@ -1014,7 +1016,7 @@ const Section = styled.section`
   background: ${workspacePalette.surface};
   border-radius: ${rem(12)};
   overflow: hidden;
-  box-shadow: 0 3px 6px -2px color-mix(in srgb, var(--ink) 7%, transparent);
+  box-shadow: 0 3px 6px -2px color-mix(in srgb, var(--shadow-color) 7%, transparent);
 `
 
 const SectionHeader = styled.div`
@@ -1462,7 +1464,7 @@ const ImportRepoButton = styled.button`
   border-radius: ${rem(7)};
   font-size: ${rem(14)};
   font-weight: 700;
-  color: #ffffff;
+  color: var(--on-accent);
   cursor: pointer;
   transition:
     background-color 0.16s ease,
@@ -1542,7 +1544,7 @@ const SetupLink = styled(Link)`
   background: ${workspacePalette.accent};
   border: 1px solid ${workspacePalette.accent};
   border-radius: ${rem(7)};
-  color: #ffffff;
+  color: var(--on-accent);
   font-size: ${rem(14)};
   font-weight: 700;
   text-decoration: none;

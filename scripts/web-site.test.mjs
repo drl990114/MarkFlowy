@@ -188,7 +188,7 @@ test('the community survives network failures, rate limits, and invalid GitHub p
   assert.equal(live.length, 1)
 })
 
-test('public presentation pages use the light website shell, including dynamic docs', () => {
+test('public presentation pages use the website shell, including dynamic docs', () => {
   for (const path of [
     '/',
     '/docs',

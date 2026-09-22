@@ -3,6 +3,7 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import Link from 'next/link'
 import styled, { css } from 'styled-components'
 import SeoHead from '../../components/SeoHead'
+import ThemeSwitcher from '../../components/ThemeSwitcher'
 import { useRedirectIfAuthenticated } from '../../hooks/useAuth'
 import { AuthMode, Step, useAuthForm } from '../../hooks/useAuthForm'
 import { useGitHubLogin } from '../../hooks/useGitHubLogin'
@@ -65,6 +66,7 @@ function AuthForm() {
                 <LogoText>MarkFlowy</LogoText>
               </LogoLink>
             </Link>
+            <ThemeSwitcher />
           </LogoSection>
 
           <AuthCard>
@@ -244,6 +246,15 @@ const AuthLayout = styled.main`
     background: linear-gradient(90deg, transparent 18%, var(--seal) 65%, transparent 95%);
     opacity: 0.5;
   }
+  :root[data-mf-theme='dark'] & {
+    background: var(--paper);
+    &::before {
+      background: linear-gradient(100deg, var(--paper-warm), var(--mf-web-accentColorFocused));
+    }
+    &::after {
+      opacity: 0.18;
+    }
+  }
   ${mobile(css`
     align-items: flex-start;
     padding: 40px 20px;
@@ -260,6 +271,8 @@ const AuthContainer = styled.div`
 
 const LogoSection = styled.div`
   display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding-left: 6px;
 `
 
@@ -284,12 +297,10 @@ const LogoText = styled.span`
 
 const AuthCard = styled.div`
   padding: 36px 40px;
-  background: var(--paper);
+  background: var(--surface-raised);
   border: 1px solid var(--line-soft);
   border-radius: 12px;
-  box-shadow:
-    0 20px 60px -24px color-mix(in srgb, var(--ink) 30%, transparent),
-    0 3px 12px color-mix(in srgb, var(--ink) 4%, transparent);
+  box-shadow: var(--shadow);
 
   ${mobile(css`
     padding: 28px 24px;
@@ -335,7 +346,7 @@ const GitHubButton = styled.button.attrs({ type: 'button' })`
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 2px 4px color-mix(in srgb, var(--ink) 4%, transparent);
+  box-shadow: 0 2px 4px color-mix(in srgb, var(--shadow-color) 4%, transparent);
   transition:
     background-color 160ms ease,
     border-color 160ms ease;
@@ -420,7 +431,7 @@ const Input = styled.input`
   border-radius: 6px;
   font-size: 15px;
   color: var(--ink);
-  box-shadow: 0 1px 2px color-mix(in srgb, var(--ink) 4%, transparent);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--shadow-color) 4%, transparent);
   transition:
     border-color 160ms ease,
     box-shadow 160ms ease;
@@ -492,7 +503,7 @@ const SubmitButton = styled.button.attrs({ type: 'button' })`
   border-radius: 7px;
   font-size: 14px;
   font-weight: 600;
-  color: var(--paper);
+  color: var(--on-accent);
   cursor: pointer;
   transition:
     background-color 160ms ease,

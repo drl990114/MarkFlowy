@@ -7,6 +7,7 @@ import { DOWNLOAD_URL } from '../../utils/website'
 import LanguageSwitcher from '../Nav/LanguageSwitcher'
 import { Logo } from '../Nav/Logo'
 import NavButton from '../Nav/NavButton'
+import ThemeSwitcher from '../ThemeSwitcher'
 import SiteArrow from './Arrow'
 import { siteMenus, type SiteMenu } from './navigation'
 
@@ -292,6 +293,7 @@ export default function SiteHeader({
             }}
           >
             <LanguageSwitcher />
+            <ThemeSwitcher />
             <Link className='mf-button mf-button-secondary mf-site-web-link' href='/workspace'>
               {t('navigation.webApp')}
               <span className='mf-beta'>Beta</span>

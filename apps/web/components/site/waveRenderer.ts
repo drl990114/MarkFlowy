@@ -58,6 +58,7 @@ uniform vec3 u_primary;
 uniform vec3 u_light;
 uniform vec3 u_accent;
 uniform vec3 u_depth;
+uniform float u_sheen;
 uniform vec2 u_size;
 out vec4 outColor;
 float grain(vec2 p) { return fract(sin(dot(p,vec2(12.9898,78.233))) * 43758.5453); }
@@ -68,13 +69,13 @@ void main() {
   vec3 color = mix(light,depth,smoothstep(0.06,0.48,v_uv.x));
   color = mix(color,u_accent,smoothstep(0.48,0.85,v_uv.x));
   color = mix(color,light,smoothstep(0.84,1.0,v_uv.x));
-  color = mix(color,vec3(1.0),0.12 + smoothstep(0.25,0.96,v_uv.y) * 0.25);
+  color = mix(color,vec3(1.0),(0.12 + smoothstep(0.25,0.96,v_uv.y) * 0.25) * u_sheen);
   float slope = clamp(0.5 + dFdy(v_uv.y) * u_size.y * 0.99,0.0,1.0);
   float glow = smoothstep(0.0,0.834,pow(slope,0.806));
   float fibers = sin(v_uv.x * 3400.0 + sin(v_uv.y * 19.0) * 2.0) * 0.5 + 0.5;
   float fineFibers = grain(vec2(floor(v_uv.x * 2200.0),floor(v_uv.y * 16.0)));
-  color += (1.0 - glow) * 0.25;
-  color += (fibers * 0.025 + fineFibers * 0.028) * glow;
+  color += (1.0 - glow) * 0.25 * u_sheen;
+  color += (fibers * 0.025 + fineFibers * 0.028) * glow * u_sheen;
   color += (grain(gl_FragCoord.xy) - 0.5) * 0.012;
   outColor = vec4(clamp(color,0.0,1.0),1.0);
 }`
@@ -82,6 +83,7 @@ void main() {
 export interface WaveRenderer {
   draw: (time: number) => void
   resize: () => void
+  updateColors: () => void
   dispose: () => void
 }
 
@@ -159,21 +161,29 @@ export function createWaveRenderer(canvas: HTMLCanvasElement): WaveRenderer | nu
       'u_light',
       'u_accent',
       'u_depth',
+      'u_sheen',
       'u_rotation',
       'u_position',
     ].map((key) => [key, gl.getUniformLocation(program, key)]),
   )
-  const styles = getComputedStyle(canvas)
-  for (const [uniform, token] of [
-    ['u_primary', '--seal'],
-    ['u_light', '--mf-wave-light'],
-    ['u_accent', '--mf-wave-accent'],
-    ['u_depth', '--mf-wave-depth'],
-  ]) {
-    const hex = styles.getPropertyValue(token).trim().replace('#', '')
-    const rgb = [0, 2, 4].map((offset) => parseInt(hex.slice(offset, offset + 2), 16) / 255)
-    gl.uniform3f(uniforms[uniform], rgb[0], rgb[1], rgb[2])
+  const updateColors = () => {
+    const styles = getComputedStyle(canvas)
+    for (const [uniform, token] of [
+      ['u_primary', '--mf-wave-primary'],
+      ['u_light', '--mf-wave-light'],
+      ['u_accent', '--mf-wave-accent'],
+      ['u_depth', '--mf-wave-depth'],
+    ]) {
+      const hex = styles.getPropertyValue(token).trim().replace('#', '')
+      const rgb = [0, 2, 4].map((offset) => parseInt(hex.slice(offset, offset + 2), 16) / 255)
+      gl.uniform3f(uniforms[uniform], rgb[0], rgb[1], rgb[2])
+    }
+    // Dark material needs a softer specular response, not a white-lit surface
+    // hidden behind low opacity. A value of 1 preserves the light appearance.
+    const sheen = Number.parseFloat(styles.getPropertyValue('--mf-wave-sheen'))
+    gl.uniform1f(uniforms.u_sheen, Number.isFinite(sheen) ? Math.min(1, Math.max(0, sheen)) : 1)
   }
+  updateColors()
   gl.enable(gl.DEPTH_TEST)
   gl.clearColor(0, 0, 0, 0)
   const resize = () => {
@@ -197,6 +207,7 @@ export function createWaveRenderer(canvas: HTMLCanvasElement): WaveRenderer | nu
   resize()
   return {
     resize,
+    updateColors,
     draw(time) {
       gl.uniform1f(uniforms.u_time, time)
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)

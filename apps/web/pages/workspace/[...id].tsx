@@ -15,6 +15,7 @@ import styled from 'styled-components'
 import rem from 'utils/rem'
 import NavButton from '../../components/Nav/NavButton'
 import SeoHead from '../../components/SeoHead'
+import ThemeSwitcher from '../../components/ThemeSwitcher'
 
 const Editor = dynamic(() => import('components/Editor').then((mod) => mod.default), {
   ssr: false,
@@ -202,6 +203,7 @@ function WorkspaceDetailPageContent() {
               </WorkspaceInfo>
             </ToolbarCenter>
             <ToolbarRight>
+              <ThemeSwitcher />
               <Actions>
                 <FileChip>
                   <i className='ri-file-text-line' />
@@ -520,7 +522,7 @@ const MobilePanelButton = styled(NavButton)`
   &[aria-pressed='true'] {
     background: var(--paper);
     color: var(--seal);
-    box-shadow: 0 1px 3px color-mix(in srgb, var(--ink) 10%, transparent);
+    box-shadow: 0 1px 3px color-mix(in srgb, var(--shadow-color) 10%, transparent);
   }
 `
 
@@ -672,7 +674,7 @@ const SaveButton = styled.button<{ $status: 'idle' | 'saving' | 'saved' }>`
   font-weight: 500;
   background: ${(props) =>
     props.$status === 'saved' ? props.theme.successColor : props.theme.accentColor};
-  color: white;
+  color: var(--on-accent);
   border: 1px solid
     ${(props) => (props.$status === 'saved' ? props.theme.successColor : props.theme.accentColor)};
   border-radius: ${(props) => props.theme.smallBorderRadius};

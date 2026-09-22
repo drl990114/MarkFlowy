@@ -18,9 +18,9 @@ import {
   loadQuickOpenFiles,
   mergeQuickOpenFiles,
   openQuickOpenFile,
-  rankQuickOpenFiles,
   type QuickOpenFile,
 } from './quickOpenFiles'
+import { useQuickOpenRanking } from './useQuickOpenRanking'
 
 const PAGE_SIZE = 100
 const MORE_RESULTS_ID = 'quick-open:more'
@@ -64,25 +64,25 @@ function QuickOpenContent({
 
   useEffect(() => {
     if (!rootPath || !scanRequested) return
-    let cancelled = false
+    const controller = new AbortController()
     setLoading(true)
     setFailed(false)
-    loadQuickOpenFiles(rootPath, fileExcludePatterns).then(
+    loadQuickOpenFiles(rootPath, fileExcludePatterns, controller.signal).then(
       (files) => {
-        if (cancelled) return
+        if (controller.signal.aborted) return
         setOpenedFiles(getOpenedQuickOpenFiles(rootPath))
         setWorkspaceFiles(files)
         setLoading(false)
       },
       (error: unknown) => {
-        if (cancelled) return
+        if (controller.signal.aborted) return
         logger.error('Failed to load Quick Open files', error)
         setFailed(true)
         setLoading(false)
       },
     )
     return () => {
-      cancelled = true
+      controller.abort()
     }
   }, [rootPath, fileExcludePatterns, retry, scanRequested])
 
@@ -90,17 +90,13 @@ function QuickOpenContent({
     () => mergeQuickOpenFiles(openedFiles, historyFiles, workspaceFiles),
     [openedFiles, historyFiles, workspaceFiles],
   )
+  const recentIds = useMemo(() => historyFiles.map((file) => file.id), [historyFiles])
+  const ranking = useQuickOpenRanking(files, query, recentIds)
   const matches = useMemo(() => {
-    const candidates = searching
-      ? rankQuickOpenFiles(
-          files,
-          query,
-          historyFiles.map((file) => file.id),
-        )
-      : historyFiles
+    const candidates = searching ? ranking.matches : historyFiles
     const openedIds = new Set(openedFiles.map((file) => file.id))
     return candidates.filter((file) => !unavailableIds.has(file.id) || openedIds.has(file.id))
-  }, [files, query, searching, historyFiles, openedFiles, unavailableIds])
+  }, [ranking.matches, searching, historyFiles, openedFiles, unavailableIds])
   const selectedIndex = matches.findIndex((file) => file.id === selectedId)
   // A manually selected result may move past the current page after the scan.
   const renderedCount = Math.max(
@@ -163,11 +159,11 @@ function QuickOpenContent({
       />
       <Command.List
         label={t('quick_open.title')}
-        aria-busy={searching && loading}
+        aria-busy={searching && (loading || ranking.pending)}
         className='max-h-[min(50vh,24rem)]'
         ref={listRef}
       >
-        {searching && loading ? (
+        {searching && (loading || ranking.pending) ? (
           <div
             className='flex items-center gap-2 px-2 py-2 text-ui-caption text-muted-foreground'
             role='status'
@@ -179,7 +175,7 @@ function QuickOpenContent({
             {t('quick_open.loading')}
           </div>
         ) : null}
-        {searching && failed ? (
+        {searching && (failed || ranking.failed) ? (
           <div
             className='flex items-center justify-between gap-2 px-2 py-2 text-ui-caption'
             role='alert'
@@ -201,7 +197,7 @@ function QuickOpenContent({
             </Button>
           </div>
         ) : null}
-        {!(searching && (loading || failed)) && matches.length === 0 ? (
+        {!(searching && (loading || ranking.pending || failed || ranking.failed)) && matches.length === 0 ? (
           <Command.Empty>
             {!searching && rootPath
               ? t('quick_open.no_recent')

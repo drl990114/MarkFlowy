@@ -1,12 +1,11 @@
 import { useTranslation } from 'next-i18next'
 import { useRouter } from 'next/router'
-import React from 'react'
-import styled from 'styled-components'
-import rem from '../../utils/rem'
+import type { CSSProperties } from 'react'
+import PreferenceMenu from '../PreferenceMenu'
 
 interface LanguageSwitcherProps {
   className?: string
-  style?: React.CSSProperties
+  style?: CSSProperties
 }
 
 const TransIcon = () => {
@@ -38,148 +37,19 @@ export default function LanguageSwitcher({ className, style }: LanguageSwitcherP
     void router.push({ pathname, query }, asPath, { locale })
   }
 
-  const [isOpen, setIsOpen] = React.useState(false)
-  const containerRef = React.useRef<HTMLDivElement>(null)
-  const triggerRef = React.useRef<HTMLButtonElement>(null)
-
-  React.useEffect(() => {
-    const onClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setIsOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', onClickOutside)
-    return () => document.removeEventListener('mousedown', onClickOutside)
-  }, [])
-
-  React.useEffect(() => {
-    if (!isOpen) return
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        event.stopPropagation()
-        setIsOpen(false)
-        triggerRef.current?.focus()
-      }
-    }
-
-    window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
-  }, [isOpen])
-
   return (
-    <Container ref={containerRef} className={className} style={style}>
-      <TriggerButton
-        ref={triggerRef}
-        type='button'
-        aria-label={t('navigation.language')}
-        aria-expanded={isOpen}
-        onClick={() => setIsOpen((v) => !v)}
-      >
-        <TransIcon />
-      </TriggerButton>
-
-      {isOpen && (
-        <Menu aria-label={t('navigation.language')}>
-          {languages.map((language) => (
-            <MenuItem
-              type='button'
-              aria-pressed={language.code === currentLocale}
-              key={language.code}
-              onClick={() => {
-                setIsOpen(false)
-                handleLanguageChange(language.code)
-              }}
-            >
-              <span style={{ marginRight: 8 }}>{language.flag}</span>
-              <span>{language.name}</span>
-            </MenuItem>
-          ))}
-        </Menu>
-      )}
-    </Container>
+    <PreferenceMenu
+      className={className}
+      style={style}
+      label={t('navigation.language')}
+      icon={<TransIcon />}
+      value={currentLocale}
+      onValueChange={handleLanguageChange}
+      options={languages.map((language) => ({
+        value: language.code,
+        label: language.name,
+        icon: language.flag,
+      }))}
+    />
   )
 }
-
-const Container = styled.div`
-  position: relative;
-  display: flex;
-  align-items: center;
-`
-
-const TriggerButton = styled.button`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  background: transparent;
-  color: var(--ink-soft);
-  font-size: ${rem(14)};
-  padding: 0;
-  border: 0;
-  cursor: pointer;
-  outline: none;
-  border-radius: ${rem(6)};
-  transition:
-    color 0.15s ease,
-    background 0.15s ease;
-
-  &:focus-visible {
-    outline: none;
-    text-decoration-line: underline;
-    text-underline-offset: 2px;
-    opacity: 0.8;
-  }
-
-  @media (hover: hover) and (pointer: fine) {
-    &:hover {
-      color: var(--ink);
-      background: rgba(232, 230, 227, 0.06);
-    }
-  }
-`
-
-const Menu = styled.div`
-  position: absolute;
-  top: calc(100% + ${rem(6)});
-  right: 0;
-  min-width: ${rem(160)};
-  background: var(--paper-warm);
-  color: var(--ink);
-  border: 1px solid var(--line);
-  border-radius: ${rem(8)};
-  padding: ${rem(6)} 0;
-  margin: 0;
-  box-shadow: var(--shadow);
-  z-index: 1000;
-`
-
-const MenuItem = styled.button`
-  display: flex;
-  align-items: center;
-  width: 100%;
-  min-height: 44px;
-  padding: ${rem(8)} ${rem(12)};
-  border: 0;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-  user-select: none;
-  transition: background 0.15s ease;
-
-  &:focus-visible {
-    outline: none;
-    text-decoration-line: underline;
-    text-underline-offset: 2px;
-    opacity: 0.8;
-  }
-
-  @media (hover: hover) and (pointer: fine) {
-    &:hover {
-      background: rgba(232, 230, 227, 0.06);
-    }
-  }
-`

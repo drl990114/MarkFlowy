@@ -5826,6 +5826,7 @@ __metadata:
     next: "npm:^16.3.5"
     next-contentlayer2: "npm:0.5.8"
     next-i18next: "npm:^15.3.0"
+    next-themes: "npm:^0.4.6"
     polished: "npm:^4.3.1"
     prettier: "npm:^3.3.3"
     react: "npm:^19.2.4"
@@ -28488,6 +28489,16 @@ __metadata:
     react: ">= 17.0.2"
     react-i18next: ">= 13.5.0"
   checksum: 10/fc9a48cedf0e6bb9ba51f7256230c07bcbe8abfb137f9c1b8723464c572586c6d8e28963c08df9eacf09b98fcaf8156a756301ba0318ca4ee67a71da94abee7e
+  languageName: node
+  linkType: hard
+
+"next-themes@npm:^0.4.6":
+  version: 0.4.6
+  resolution: "next-themes@npm:0.4.6"
+  peerDependencies:
+    react: ^16.8 || ^17 || ^18 || ^19 || ^19.0.0-rc
+    react-dom: ^16.8 || ^17 || ^18 || ^19 || ^19.0.0-rc
+  checksum: 10/48540e77a8f1967fa27338e91037df296f84d8979ba3003f71eed8d9a2f4f29b3cc6797d27b501547fd39cf33611a2accb432eec92ad8a457abe1a142cc5a02e
   languageName: node
   linkType: hard
 

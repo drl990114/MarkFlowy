@@ -114,6 +114,7 @@ vi.mock('./preview/HtmlPreview', () => ({
   ),
 }))
 vi.mock('@/services/local-history', () => ({
+  releaseClosedFileContent: vi.fn(async () => true),
   observeHistoryFile: vi.fn(async () => {}),
   endHistoryBatch: vi.fn(),
   protectLocalEdit: vi.fn(async () => {}),

@@ -1,5 +1,5 @@
 import bus from '@/helper/eventBus'
-import { getFileIdsByPathIdentity, getFileObject, updateFileObject } from '@/helper/files'
+import { getFileObject, updateFileObject } from '@/helper/files'
 import { logger } from '@/helper/logger'
 import { getPathIdentityKey } from '@/helper/pathIdentity'
 import { t } from '@/i18n'
@@ -239,12 +239,22 @@ function enqueueExternalInspection(fileId: string, filePath: string, generation:
 
 export async function handleExternalWatchEvent(event: WatchEvent): Promise<void> {
   const generation = workspaceGeneration
-  const openedIds = new Set(useEditorStore.getState().opened)
+  // Index only live documents once per event batch. Directory caches can hold
+  // tens of thousands of entries; unrelated changes must never scan them.
+  const openedByPath = new Map<string, string[]>()
+  for (const fileId of useEditorStore.getState().opened) {
+    const path = getFileObject(fileId)?.path
+    if (!path) continue
+    const key = getPathIdentityKey(path)
+    const ids = openedByPath.get(key)
+    if (ids) ids.push(fileId)
+    else openedByPath.set(key, [fileId])
+  }
   const inspections = new Map<string, Promise<void>>()
 
   for (const filePath of event.paths) {
-    for (const fileId of getFileIdsByPathIdentity(filePath)) {
-      if (!openedIds.has(fileId) || inspections.has(fileId)) continue
+    for (const fileId of openedByPath.get(getPathIdentityKey(filePath)) ?? []) {
+      if (inspections.has(fileId)) continue
       inspections.set(fileId, enqueueExternalInspection(fileId, filePath, generation))
     }
   }

@@ -85,6 +85,7 @@ vi.mock('rme', async (importOriginal) => {
 vi.mock('@tauri-apps/api/core', () => ({ invoke: mocks.invoke }))
 vi.mock('@tauri-apps/plugin-dialog', () => ({ save: vi.fn() }))
 vi.mock('@/services/local-history', () => ({
+  releaseClosedFileContent: vi.fn(async () => true),
   observeHistoryFile: vi.fn(async () => {}),
   endHistoryBatch: vi.fn(),
   protectLocalEdit: vi.fn(async () => {}),

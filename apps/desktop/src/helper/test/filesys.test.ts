@@ -207,8 +207,10 @@ describe('test helper/filesys ', () => {
     ])
 
     expect(file.id).toBe(indexedFile.id)
-    expect(file.content).toBe('unsaved editor content')
-    expect(setFileObjects).toHaveBeenCalledWith([{ id: indexedFile.id, file }])
+    expect(file.content).toBeUndefined()
+    expect(setFileObjects).toHaveBeenCalledWith([{
+      id: indexedFile.id, file: { ...file, content: 'unsaved editor content' },
+    }])
     expect(setFileObjectsByPath).toHaveBeenCalledWith([{ path: indexedFile.path, file }])
   })
 })

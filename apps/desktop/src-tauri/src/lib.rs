@@ -1695,6 +1695,7 @@ pub fn run() {
             bookmarks::cmd::remove_bookmark,
             bookmarks::cmd::rename_bookmark_item,
             search::cmd::search_files_async,
+            search::cmd::cancel_file_search,
             extensions::cmd::extensions_init,
             process::app_exit,
             process::app_restart,
@@ -1871,6 +1872,7 @@ pub fn run() {
                 tauri::WindowEvent::Destroyed => {
                     let window_label = window.label();
                     reliable_cli::window_destroyed(window_label);
+                    search::window_destroyed(window_label);
                     window_manager::forget_window_recency(window_label);
                     if let Ok(mut instances) = WINDOW_INSTANCES.lock() {
                         instances.remove(window_label);

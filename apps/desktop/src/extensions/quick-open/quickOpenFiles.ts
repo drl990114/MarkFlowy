@@ -4,16 +4,9 @@ import { getPathIdentityKey } from '@/helper/pathIdentity'
 import useEditorStore from '@/stores/useEditorStore'
 import useRecentFilesStore, { getRecentFileKey } from '@/stores/useRecentFilesStore'
 import { invoke } from '@tauri-apps/api/core'
-import { defaultFilter } from 'cmdk'
-
-export interface QuickOpenFile {
-  id: string
-  name: string
-  path?: string
-  relativePath: string
-  ext?: string
-  fileId?: string
-}
+import { searchFiles } from '@/services/file-search'
+import type { QuickOpenFile } from './quickOpenRanking'
+export { rankQuickOpenFiles, type QuickOpenFile } from './quickOpenRanking'
 
 interface SearchFile {
   name: string
@@ -103,13 +96,14 @@ export async function checkRecentQuickOpenFiles(
 export async function loadQuickOpenFiles(
   rootPath: string,
   fileExcludePatterns: string,
+  signal?: AbortSignal,
 ): Promise<QuickOpenFile[]> {
   // A name-only scan reaches unopened directories without reading any content.
   // Keep traversal, gitignore and user exclusions in the existing search backend.
-  const result = await invoke<{ data: SearchFile[] }>('search_files_async', {
+  const result = await searchFiles<{ data: SearchFile[] }>({
     query: { dir: rootPath, name_text: '.*', contents_text: '' },
     options: { file_exclude_patterns: fileExcludePatterns },
-  })
+  }, 'quick_open', signal)
   return result.data
     .filter((file) => !file.is_folder)
     .map((file) => ({
@@ -127,35 +121,6 @@ export function mergeQuickOpenFiles(...sources: readonly QuickOpenFile[][]): Qui
     if (!files.has(file.id)) files.set(file.id, file)
   }
   return [...files.values()]
-}
-
-export function rankQuickOpenFiles(
-  files: QuickOpenFile[],
-  query: string,
-  recentIds: readonly string[] = [],
-): QuickOpenFile[] {
-  const search = query.trim().replace(/\\/g, '/')
-  const recency = new Map(recentIds.map((id, index) => [id, index]))
-  return files
-    .map((file) => ({
-      file,
-      score: search
-        ? Math.max(
-            defaultFilter(file.name, search),
-            defaultFilter(file.relativePath.replace(/\\/g, '/'), search) * 0.9,
-          )
-        : 1,
-    }))
-    .filter(({ score }) => score > 0)
-    .sort(
-      (a, b) =>
-        b.score - a.score ||
-        (recency.get(a.file.id) ?? recentIds.length) -
-          (recency.get(b.file.id) ?? recentIds.length) ||
-        Number(Boolean(b.file.fileId)) - Number(Boolean(a.file.fileId)) ||
-        a.file.relativePath.localeCompare(b.file.relativePath),
-    )
-    .map(({ file }) => file)
 }
 
 export function openQuickOpenFile(entry: QuickOpenFile): IFile | undefined {

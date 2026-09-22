@@ -110,6 +110,11 @@
     "description_after_link": ".",
     "see_details": "See details"
   },
+  "theme": {
+    "system": "System",
+    "light": "Light mode",
+    "dark": "Dark mode"
+  },
   "navigation": {
     "home": "Home",
     "docs": "Documentation",

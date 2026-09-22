@@ -1,6 +1,6 @@
 import { DEFAULT_TEXT_METADATA } from './textFileFormat'
 import bus from '@/helper/eventBus'
-import { deleteFileObject, getFileObject, setFileObject } from '@/helper/files'
+import useFileCacheStore, { deleteFileObject, getFileObject, setFileObject } from '@/helper/files'
 import { FileResultCode, type IFile } from '@/helper/filesys'
 import { useEditorStateStore, useEditorStore } from '@/stores'
 import useExternalFileChangeStore, {
@@ -82,6 +82,26 @@ describe('external file changes', () => {
   afterEach(() => {
     resetExternalFileChanges()
     vi.useRealTimers()
+  })
+
+  it('ignores unrelated cached paths and coalesces duplicate events for an open document', async () => {
+    const previous = useFileCacheStore.getState()
+    const readClosedPath = vi.fn(() => '/workspace/closed.md')
+    const closed = { ...createFile('closed'), id: 'closed' }
+    Object.defineProperty(closed, 'path', { get: readClosedPath })
+    useFileCacheStore.setState({ entries: { ...previous.entries, closed } })
+    mockStableDisk('local', 'disk:old')
+    try {
+      await handleExternalWatchEvent({
+        attrs: {},
+        paths: ['/workspace/closed.md', '/workspace/unrelated.md', filePath, filePath],
+        type: 'any',
+      })
+      expect(readClosedPath).not.toHaveBeenCalled()
+      expect(invoke).toHaveBeenCalledExactlyOnceWith('get_file_snapshot', { filePath })
+    } finally {
+      useFileCacheStore.setState(previous)
+    }
   })
 
   it('keeps a format-only local edit dirty when external text is identical', async () => {

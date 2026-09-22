@@ -4,7 +4,9 @@ import { listen } from '@tauri-apps/api/event'
 import { debounce } from 'lodash'
 import { create } from 'zustand'
 import { fileSaveCoordinator } from '@/components/EditorArea/fileSaveCoordinator'
-import { getFileObject } from '@/helper/files'
+import { getFileObject, releaseFileContent } from '@/helper/files'
+import type { IFile } from '@/helper/filesys'
+import { editorSnapshotRegistry } from '@/components/EditorArea/editorSnapshotRegistry'
 import { getPathIdentityKey, rebaseFilePath } from '@/helper/pathIdentity'
 import { logger } from '@/helper/logger'
 import useEditorStore from '@/stores/useEditorStore'
@@ -97,6 +99,7 @@ const tasks = new Map<string, ReturnType<typeof debounce>>()
 const tails = new Map<string, Promise<void>>()
 const captures = new Map<string, { pending: boolean; promise: Promise<void> }>()
 const edits = new Map<string, number>()
+const protectedDiscards = new WeakMap<IFile, TextFileFormat>()
 let sequence = Date.now() * 1000
 let started = false
 export const draftProtectionStarted = () => started
@@ -455,7 +458,12 @@ export async function startDraftProtection() {
       tasks.get(id)?.cancel()
       tasks.delete(id)
       const binding = bindings.get(id)
-      if (!binding) continue
+      if (!binding) {
+        void releaseClosedFileContent(id).catch((error) =>
+          logger.error('Failed to release closed document', error),
+        )
+        continue
+      }
       const seq = ++sequence
       const pending = captures.get(id)
       if (pending) pending.pending = false
@@ -475,7 +483,9 @@ export async function startDraftProtection() {
           bindings.delete(id)
           edits.delete(id)
         }
-      }).catch((error) => logger.error('Failed to close draft', error))
+      })
+        .then(() => releaseClosedFileContent(id))
+        .catch((error) => logger.error('Failed to close draft', error))
     }
   })
   for (const id of useEditorStore.getState().opened) {
@@ -508,7 +518,56 @@ export async function protectDiscard(fileIds: string[]) {
   for (const fileId of fileIds) {
     const content = useEditorStore.getState().getEditorContent(fileId)
     const format = fileSaveCoordinator.getPersistedFormat(fileId)
+    const discardedFormat = fileSaveCoordinator.getTextMetadata(fileId).format
     const document = await historyDocument(fileId)
     await historyCall('checkpoint', { document, content, format, kind: 'discard' })
+    const file = getFileObject(fileId)
+    if (file?.content === content) protectedDiscards.set(file, discardedFormat)
+  }
+}
+
+/** Release bodies only after close, final editor publication and durable work. */
+export async function releaseClosedFileContent(fileId: string): Promise<boolean> {
+  const closed = () =>
+    !useEditorStore.getState().opened.includes(fileId) &&
+    !isDraftRecoveryPending(fileId) &&
+    !editorSnapshotRegistry.hasSources(fileId)
+  if (!closed()) return false
+  for (;;) {
+    await fileSaveCoordinator.waitForIdle(fileId)
+    const tail = tails.get(fileId)
+    if (tail) {
+      await tail
+      continue
+    }
+    let pendingDraft = false
+    const released = await fileSaveCoordinator.releaseWhenIdle(
+      fileId,
+      () => {
+        if (!closed()) return false
+        if (tails.has(fileId)) {
+          pendingDraft = true
+          return false
+        }
+        const file = getFileObject(fileId)
+        if (
+          typeof file?.content !== 'string' ||
+          !useEditorStateStore.getState().idStateMap.get(fileId)?.hasUnsavedChanges
+        ) return true
+        const discardedFormat = protectedDiscards.get(file)
+        return !!discardedFormat && sameTextFormat(
+          discardedFormat,
+          fileSaveCoordinator.getTextMetadata(fileId).format,
+        )
+      },
+      () => {
+        const file = getFileObject(fileId)
+        releaseFileContent(fileId)
+        // Restored tabs may close without ever mounting TextEditor.
+        useEditorStateStore.getState().delIdStateMap(fileId)
+        if (file) protectedDiscards.delete(file)
+      },
+    )
+    if (!pendingDraft) return released
   }
 }

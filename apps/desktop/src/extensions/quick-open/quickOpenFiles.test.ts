@@ -72,6 +72,7 @@ describe('Quick Open file inventory', () => {
     const files = await loadQuickOpenFiles('/workspace', 'node_modules/\n*.tmp')
 
     expect(invoke).toHaveBeenCalledExactlyOnceWith('search_files_async', {
+      requestId: expect.any(Number), scope: 'quick_open',
       query: { dir: '/workspace', name_text: '.*', contents_text: '' },
       options: { file_exclude_patterns: 'node_modules/\n*.tmp' },
     })

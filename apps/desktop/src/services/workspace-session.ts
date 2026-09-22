@@ -4,7 +4,7 @@ import {
   FILE_MUTATION_QUEUE_KEY,
   savePathCoordinator,
 } from '@/components/EditorArea/savePathCoordinator'
-import { getFileObject } from '@/helper/files'
+import { getFileObject, pruneFileMetadata } from '@/helper/files'
 import { readDirectory } from '@/helper/filesys'
 import { logger } from '@/helper/logger'
 import { t } from '@/i18n'
@@ -142,7 +142,11 @@ export async function switchWorkspaceSession(path: string, persistence: Workspac
     })
 
     if (!allowed) return false
-    if (didSwitch) return true
+    if (didSwitch) {
+      const editor = useEditorStore.getState()
+      pruneFileMetadata(editor.getRootPath(), editor.opened)
+      return true
+    }
     // Release the mutation queue before prompting/saving again: Save As uses it too.
   }
 }

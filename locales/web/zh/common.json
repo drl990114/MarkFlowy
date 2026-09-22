@@ -110,6 +110,11 @@
     "description_after_link": "下载。",
     "see_details": "查看详情"
   },
+  "theme": {
+    "system": "跟随系统",
+    "light": "浅色模式",
+    "dark": "暗色模式"
+  },
   "navigation": {
     "home": "首页",
     "docs": "文档",

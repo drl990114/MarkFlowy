@@ -55,11 +55,12 @@ export const hydrateDirectoryEntries = (entries: DirectoryReadEntry[]): IFile[] 
       }
       // A directory scan only refreshes metadata, including when opening a
       // parent/child workspace. The live editor still owns its cached content.
-      if (entry.kind === 'file' && cachedFile?.kind === 'file') {
-        file.content = cachedFile.content
-      }
-
-      idEntries.push({ id: file.id, file })
+      idEntries.push({
+        id: file.id,
+        file: entry.kind === 'file' && cachedFile?.kind === 'file'
+          ? { ...file, content: cachedFile.content }
+          : file,
+      })
       pathEntries.push({ path: entry.path, file })
 
       if (entry.children) {

@@ -295,7 +295,7 @@ describe('Quick Open dialog', () => {
     expect(document.querySelector('[data-selected="true"]')?.textContent).toBe('C.md')
     await type('beta')
     expect(names()).toEqual(['beta.mddocs/beta.md'])
-    expect(loadQuickOpenFiles).toHaveBeenCalledExactlyOnceWith('/workspace', '*.tmp')
+    expect(loadQuickOpenFiles).toHaveBeenCalledExactlyOnceWith('/workspace', '*.tmp', expect.any(AbortSignal))
   })
 
   it('explains empty history without starting a scan', async () => {
@@ -403,7 +403,35 @@ describe('Quick Open dialog', () => {
     await act(async () => scan.resolve([file('stale.md')]))
     expect(names().join()).not.toContain('stale.md')
     await type('md')
-    expect(loadQuickOpenFiles).toHaveBeenLastCalledWith('/workspace', 'docs/')
+    expect(loadQuickOpenFiles).toHaveBeenLastCalledWith('/workspace', 'docs/', expect.any(AbortSignal))
+  })
+
+  it('never opens stale results while a large query is being ranked', async () => {
+    const messages: { type: string; requestId?: number; query?: string }[] = []
+    const worker = { postMessage: (message: typeof messages[number]) => messages.push(message), terminate: vi.fn(),
+      onmessage: undefined as ((event: { data: { requestId: number; indices: Uint32Array } }) => void) | undefined }
+    vi.stubGlobal('Worker', class { constructor() { return worker } })
+    try {
+      vi.mocked(loadQuickOpenFiles).mockResolvedValue(Array.from({ length: 1200 }, (_, n) => file(`docs/note-${n}.md`)))
+      await open()
+      await type('note')
+      expect(names()).toEqual([])
+      await key('Enter')
+      expect(openQuickOpenFile).not.toHaveBeenCalled()
+      const previous = messages.findLast((message) => message.type === 'rank')!
+      await type('note-10')
+      const current = messages.findLast((message) => message.type === 'rank')!
+      await act(async () => worker.onmessage?.({ data: { requestId: previous.requestId!, indices: new Uint32Array([2]) } }))
+      expect(names()).toEqual([])
+      await act(async () => worker.onmessage?.({ data: { requestId: current.requestId!, indices: new Uint32Array([12]) } }))
+      expect(names().join()).toContain('note-10.md')
+      await key('Enter')
+      expect(openQuickOpenFile).toHaveBeenCalledWith(expect.objectContaining({ name: 'note-10.md' }))
+      expect(worker.terminate).toHaveBeenCalledOnce()
+      expect(vi.mocked(loadQuickOpenFiles).mock.calls[0][2]?.aborted).toBe(true)
+    } finally {
+      vi.unstubAllGlobals()
+    }
   })
 
   it('explains the empty state when no workspace or document is open', async () => {

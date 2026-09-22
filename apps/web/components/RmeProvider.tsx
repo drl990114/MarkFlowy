@@ -1,18 +1,14 @@
 import { createInstance, editorResources, I18nextProvider, initReactI18next } from '@markflowy/i18n'
 import { useRouter } from 'next/router'
 import React, { useEffect, useMemo } from 'react'
-import { applicationTheme } from '../utils/websiteTheme'
+import { applicationTheme, applicationThemes } from '../utils/websiteTheme'
+import { useTheme } from '../hooks/useTheme'
 import { useRmeThemeProvider } from '../hooks/useRme'
 import Loading from './Loading'
 
 type RmeProviderProps = {
   themeTokens?: Record<string, string>
   children?: React.ReactNode
-}
-
-const THEME_CONFIG = {
-  mode: 'light' as const,
-  token: applicationTheme,
 }
 
 function normalizeEditorLang(lng?: string) {
@@ -27,6 +23,7 @@ function normalizeEditorLang(lng?: string) {
 const RmeProvider: React.FC<RmeProviderProps> = ({ themeTokens, children }) => {
   const { ThemeProvider, loading, error, reload } = useRmeThemeProvider()
   const router = useRouter()
+  const { resolvedTheme } = useTheme()
 
   const editorI18nInstance = useMemo(() => createInstance(), [])
 
@@ -40,13 +37,13 @@ const RmeProvider: React.FC<RmeProviderProps> = ({ themeTokens, children }) => {
 
   const theme = useMemo(
     () => ({
-      ...THEME_CONFIG,
+      mode: resolvedTheme,
       token: {
-        ...THEME_CONFIG.token,
+        ...applicationThemes[resolvedTheme],
         ...(themeTokens || {}),
       },
     }),
-    [themeTokens],
+    [resolvedTheme, themeTokens],
   )
 
   useEffect(() => {
@@ -92,7 +89,7 @@ const RmeProvider: React.FC<RmeProviderProps> = ({ themeTokens, children }) => {
             marginTop: '1rem',
             padding: '0.5rem 1rem',
             backgroundColor: applicationTheme.accentColor,
-            color: '#fff',
+            color: 'var(--on-accent)',
             border: 'none',
             borderRadius: '999px',
             cursor: 'pointer',

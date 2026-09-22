@@ -1,4 +1,5 @@
 import { getFileObject } from '@/helper/files'
+import { toFileMetadata } from '@/helper/fileMetadata'
 import { beginEditorOpenMeasurement } from '@/components/EditorArea/editorPerformanceDiagnostics'
 import { editorSnapshotRegistry } from '@/components/EditorArea/editorSnapshotRegistry'
 import { createFile, FileResultCode, getFolderPathFromPath, isMdFile, releaseSecurityScope, type IFile } from '@/helper/filesys'
@@ -469,7 +470,7 @@ const useEditorStore = create<EditorStore>()(subscribeWithSelector((set, get) =>
           ...target,
         })
 
-        parent.children!.push(targetFile)
+        parent.children!.push(toFileMetadata(targetFile))
         addOpenedFile(targetFile.id)
         await invoke('write_file', {
           filePath: targetFile.path,
@@ -489,6 +490,7 @@ const useEditorStore = create<EditorStore>()(subscribeWithSelector((set, get) =>
     },
 
     insertNodeToFolderData: (fileNode, replacedIds = []) => {
+      if (fileNode) fileNode = toFileMetadata(fileNode)
       set((state) => {
         const root = state.folderData?.[0]
         if (!fileNode || !root) return state
@@ -515,10 +517,11 @@ const useEditorStore = create<EditorStore>()(subscribeWithSelector((set, get) =>
         if (replacement) {
           const { index, parent, previousFile } = replacement
           parent.children ??= []
-          parent.children.splice(Math.min(index, parent.children.length), 0, {
-            ...previousFile,
-            ...fileNode,
-          })
+          parent.children.splice(
+            Math.min(index, parent.children.length),
+            0,
+            toFileMetadata({ ...previousFile, ...fileNode }),
+          )
           replacementIds.forEach((id) => removeFileFromAllGroups(state.editorLayout, id))
           const synced = commitEditorLayoutState(state.editorLayout, state.activeGroupId)
 
@@ -548,10 +551,10 @@ const useEditorStore = create<EditorStore>()(subscribeWithSelector((set, get) =>
         }
 
         const previousFile = parent.children[sameFileIndex]
-        parent.children[sameFileIndex] = {
+        parent.children[sameFileIndex] = toFileMetadata({
           ...previousFile,
           ...fileNode,
-        }
+        })
 
         const synced =
           previousFile.id === fileNode.id
@@ -903,7 +906,7 @@ const useEditorStore = create<EditorStore>()(subscribeWithSelector((set, get) =>
 
       set((state) => ({
         ...state,
-        folderData,
+        folderData: folderData?.map(toFileMetadata) ?? null,
         editorLayout,
         activeGroupId: editorLayout.id,
         opened: [],
@@ -914,7 +917,7 @@ const useEditorStore = create<EditorStore>()(subscribeWithSelector((set, get) =>
     setFolderDataPure: (folderData) =>
       set((state) => ({
         ...state,
-        folderData,
+        folderData: folderData.map(toFileMetadata),
       })),
 
     setEditorCtx: (id, ctx) =>

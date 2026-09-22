@@ -27,7 +27,7 @@ export default class MyDocument extends Document {
 
   render() {
     return (
-      <Html data-theme='light' lang={this.props.__NEXT_DATA__.locale || 'en'}>
+      <Html lang={this.props.__NEXT_DATA__.locale || 'en'} suppressHydrationWarning>
         <Head>
           {this.props.__NEXT_DATA__.page === '/' && (
             <Script

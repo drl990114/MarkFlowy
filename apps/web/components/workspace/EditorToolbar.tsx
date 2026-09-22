@@ -212,6 +212,6 @@ const ModeButton = styled(NavButton)`
   &[aria-pressed='true'] {
     color: var(--seal);
     background: var(--paper);
-    box-shadow: 0 1px 3px color-mix(in srgb, var(--ink) 12%, transparent);
+    box-shadow: 0 1px 3px color-mix(in srgb, var(--shadow-color) 12%, transparent);
   }
 `

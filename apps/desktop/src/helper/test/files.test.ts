@@ -2,6 +2,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import useFileCacheStore, {
   deleteFileObject,
   deleteFileObjectsByPathPrefix,
+  getFileObject,
+  getFileObjectByPath,
+  releaseFileContent,
+  pruneFileMetadata,
   getFileIdsByPathIdentity,
   getFileIdsByPathPrefix,
   moveFileObjectsByPathPrefix,
@@ -22,6 +26,7 @@ describe('file cache metadata revision', () => {
   beforeEach(() => {
     useFileCacheStore.setState({
       entries: {},
+      contentEntries: {},
       metadataRevision: 0,
       pathEntries: {},
     })
@@ -48,7 +53,8 @@ describe('file cache metadata revision', () => {
 
       const withExtension = { ...FILE, ext: 'md' }
       setFileObject(FILE.id, withExtension)
-      expect(useFileCacheStore.getState().entries[FILE.id]).toBe(withExtension)
+      expect(getFileObject(FILE.id)).toBe(withExtension)
+      expect(useFileCacheStore.getState().entries[FILE.id].content).toBeUndefined()
 
       const pending = { ...withExtension, kind: 'pending_edit_file' as const }
       setFileObject(FILE.id, pending)
@@ -57,11 +63,50 @@ describe('file cache metadata revision', () => {
       const replacedChildren = { ...withChildren, children: [{ ...FILE, id: 'other-child' }] }
       setFileObject(FILE.id, replacedChildren)
       expect(listener).toHaveBeenCalledTimes(4)
-      expect(useFileCacheStore.getState().entries[FILE.id]).toBe(replacedChildren)
+      expect(useFileCacheStore.getState().entries[FILE.id].children?.[0]).toMatchObject({ id: 'other-child' })
+      expect(useFileCacheStore.getState().entries[FILE.id].children?.[0].content).toBeUndefined()
       expect(useFileCacheStore.getState().metadataRevision).toBe(original.metadataRevision)
     } finally {
       unsubscribe()
     }
+  })
+
+  it('updates and releases a body without copying the directory index or retaining it in tree nodes', () => {
+    setFileObjects(Array.from({ length: 10000 }, (_, index) => ({
+      id: `entry-${index}`,
+      file: { id: `entry-${index}`, name: `${index}.md`, kind: 'file' as const },
+    })))
+    setFileObject(FILE.id, FILE)
+    setFileObjectByPath(FILE.path, FILE)
+    setFileObject('root', { id: 'root', name: 'workspace', kind: 'dir', children: [FILE] })
+    const { entries, pathEntries } = useFileCacheStore.getState()
+    setFileObject(FILE.id, { ...FILE, content: 'updated' })
+    expect(useFileCacheStore.getState().entries).toBe(entries)
+    expect(useFileCacheStore.getState().pathEntries).toBe(pathEntries)
+    expect(getFileObjectByPath(FILE.path)?.content).toBe('updated')
+    releaseFileContent(FILE.id)
+    expect(getFileObject(FILE.id).name).toBe(FILE.name)
+    expect(getFileObject(FILE.id).content).toBeUndefined()
+    expect(getFileObjectByPath(FILE.path)?.content).toBeUndefined()
+    expect(entries.root.children?.[0].content).toBeUndefined()
+    expect(Object.keys(useFileCacheStore.getState().contentEntries)).toEqual([])
+  })
+
+  it('prunes previous workspace metadata while retaining active files and pending document bodies', () => {
+    setFileObjects([
+      { id: FILE.id, file: FILE },
+      { id: 'closed', file: { id: 'closed', name: 'closed.md', kind: 'file', path: '/old/closed.md' } },
+      { id: 'opened', file: { id: 'opened', name: 'opened.md', kind: 'file', path: '/old/opened.md' } },
+      { id: 'current', file: { id: 'current', name: 'current.md', kind: 'file', path: '/new/current.md' } },
+    ])
+    setFileObjectByPath('/old/closed.md', getFileObject('closed'))
+    pruneFileMetadata('/new', ['opened'])
+    expect(Object.keys(useFileCacheStore.getState().entries).sort()).toEqual(['current', FILE.id, 'opened'].sort())
+    expect(useFileCacheStore.getState().pathEntries['/old/closed.md']).toBeUndefined()
+    expect(getFileObject(FILE.id).content).toBe(FILE.content)
+    releaseFileContent(FILE.id)
+    pruneFileMetadata('/new', ['opened'])
+    expect(getFileObject(FILE.id)).toBeUndefined()
   })
 
   it('changes when an opened-file name or path can change', () => {
@@ -119,12 +164,13 @@ describe('file cache metadata revision', () => {
     moveFileObjectsByPathPrefix('/workspace/folder', '/workspace/renamed')
 
     const state = useFileCacheStore.getState()
-    expect(state.entries[nestedFile.id]).toMatchObject({
+    expect(getFileObject(nestedFile.id)).toMatchObject({
       content: 'unsaved content',
       path: '/workspace/renamed/nested/note.md',
     })
     expect(state.pathEntries[nestedFile.path]).toBeUndefined()
-    expect(state.pathEntries['/workspace/renamed/nested/note.md']).toMatchObject({
+    expect(state.pathEntries['/workspace/renamed/nested/note.md'].content).toBeUndefined()
+    expect(getFileObjectByPath('/workspace/renamed/nested/note.md')).toMatchObject({
       content: 'unsaved content',
     })
     expect(state.entries[workspaceRoot.id].children?.[0]).toMatchObject({
