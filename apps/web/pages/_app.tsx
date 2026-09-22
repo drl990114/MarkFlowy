@@ -29,6 +29,15 @@ function MyApp({ Component, pageProps, router }: AppProps) {
         <meta name='viewport' content='width=device-width, initial-scale=1.0, user-scalable=yes' />
 
         <meta name='theme-color' content='#ffffff' />
+        {website && (
+          <link
+            rel='preload'
+            href='/fonts/InterVariable.woff2'
+            as='font'
+            type='font/woff2'
+            crossOrigin='anonymous'
+          />
+        )}
         {/^\/(auth|workspace|settings)(\/|$)/.test(router.pathname) && (
           <meta name='robots' content='noindex, nofollow' key='robots' />
         )}

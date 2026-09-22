@@ -11,8 +11,10 @@ import useExternalFileChangeStore, {
 import type { WatchEvent } from '@tauri-apps/plugin-fs'
 import { toast } from 'zens'
 import { conditionalWriteExpected } from './conditionalFileWrite'
+import { editorSnapshotRegistry } from './editorSnapshotRegistry'
 import { fileSaveCoordinator } from './fileSaveCoordinator'
 import { readStableFileSnapshot, type StableFileSnapshot } from './fileSnapshot'
+import { sameTextFormat } from './textFileFormat'
 import { historyFileSaved, protectExternalContent } from '@/services/local-history'
 
 export const EXTERNAL_FILE_CONTENT_SYNC_EVENT = 'external_file_content_sync'
@@ -73,7 +75,7 @@ function markResolutionFailed(fileId: string, fallbackRevision: string) {
   )
 }
 
-function applyExternalSnapshot(
+export function applyExternalSnapshot(
   fileId: string,
   snapshot: StableFileSnapshot,
   status: ExternalFileChangeStatus,
@@ -86,8 +88,7 @@ function applyExternalSnapshot(
     })
   }
 
-  fileSaveCoordinator.recordContent(fileId, snapshot.content)
-  fileSaveCoordinator.setDiskRevision(fileId, snapshot.revision)
+  fileSaveCoordinator.loadSnapshot(fileId, snapshot)
   useEditorStateStore.getState().setIdStateMap(fileId, {
     hasUnsavedChanges: false,
   })
@@ -102,7 +103,10 @@ async function inspectExternalPath(
   fileId: string,
   generation: number,
   snapshot: StableFileSnapshot,
+  observedPath: string,
 ) {
+  if (getPathIdentityKey(getFileObject(fileId)?.path ?? '') !== getPathIdentityKey(observedPath))
+    return
   if (generation !== workspaceGeneration || !useEditorStore.getState().opened.includes(fileId)) {
     return
   }
@@ -123,7 +127,30 @@ async function inspectExternalPath(
   }
   const isDirty = useEditorStateStore.getState().idStateMap.get(fileId)?.hasUnsavedChanges ?? false
 
-  if (localContent === snapshot.content) {
+  const localRevision = fileSaveCoordinator.getRevision(fileId)
+  const afterFormat = snapshot.text?.decoding.needsConfirmation ? undefined : snapshot.text?.format
+  if (
+    localContent === snapshot.content &&
+    (!isDirty ||
+      (!fileSaveCoordinator.hasFormatChanges(fileId) &&
+        sameTextFormat(
+          fileSaveCoordinator.getTextMetadata(fileId).format,
+          snapshot.text?.format ?? fileSaveCoordinator.getTextMetadata(fileId).format,
+        )))
+  ) {
+    await protectExternalContent(fileId, localContent, snapshot.content, afterFormat)
+    if (
+      generation !== workspaceGeneration ||
+      !useEditorStore.getState().opened.includes(fileId) ||
+      getPathIdentityKey(getFileObject(fileId)?.path ?? '') !== getPathIdentityKey(observedPath) ||
+      fileSaveCoordinator.getRevision(fileId) !== localRevision ||
+      !editorSnapshotRegistry.canRead(fileId) ||
+      editorSnapshotRegistry.hasPending(fileId) ||
+      useEditorStore.getState().getEditorContent(fileId) !== localContent
+    ) {
+      markExternalFileConflict(fileId, snapshot.revision)
+      return
+    }
     const file = getFileObject(fileId)
     if (file) {
       updateFileObject(fileId, {
@@ -131,8 +158,7 @@ async function inspectExternalPath(
         content: snapshot.content,
       })
     }
-    fileSaveCoordinator.recordContent(fileId, snapshot.content)
-    fileSaveCoordinator.setDiskRevision(fileId, snapshot.revision)
+    fileSaveCoordinator.loadSnapshot(fileId, snapshot)
     useEditorStateStore.getState().setIdStateMap(fileId, {
       hasUnsavedChanges: false,
     })
@@ -141,7 +167,7 @@ async function inspectExternalPath(
   }
 
   if (isDirty) {
-    await protectExternalContent(fileId, localContent, snapshot.content)
+    await protectExternalContent(fileId, localContent, snapshot.content, afterFormat)
     markExternalFileConflict(fileId, snapshot.revision)
     return
   }
@@ -154,10 +180,11 @@ async function inspectExternalPath(
     return
   }
 
-  await protectExternalContent(fileId, localContent, snapshot.content)
+  await protectExternalContent(fileId, localContent, snapshot.content, afterFormat)
   if (
     generation !== workspaceGeneration ||
     !useEditorStore.getState().opened.includes(fileId) ||
+    getPathIdentityKey(getFileObject(fileId)?.path ?? '') !== getPathIdentityKey(observedPath) ||
     useEditorStateStore.getState().idStateMap.get(fileId)?.hasUnsavedChanges ||
     useEditorStore.getState().getEditorContent(fileId) !== localContent
   ) {
@@ -189,7 +216,7 @@ function enqueueExternalInspection(fileId: string, filePath: string, generation:
         } else {
           for (const id of state.fileIds) {
             try {
-              await inspectExternalPath(id, generation, snapshot)
+              await inspectExternalPath(id, generation, snapshot, filePath)
             } catch (error) {
               if (generation !== workspaceGeneration) return
               markExternalFileConflict(id, snapshot.revision)
@@ -249,8 +276,16 @@ export async function resolveExternalFileChange(
 
     if (action === 'reload') {
       const before = useEditorStore.getState().getEditorContent(fileId)
-      await protectExternalContent(fileId, before, diskSnapshot.content)
-      if (useEditorStore.getState().getEditorContent(fileId) !== before) {
+      const revision = fileSaveCoordinator.getRevision(fileId)
+      const afterFormat = diskSnapshot.text?.decoding.needsConfirmation
+        ? undefined
+        : diskSnapshot.text?.format
+      await protectExternalContent(fileId, before, diskSnapshot.content, afterFormat)
+      if (
+        useEditorStore.getState().getEditorContent(fileId) !== before ||
+        fileSaveCoordinator.getRevision(fileId) !== revision ||
+        getFileObject(fileId)?.path !== file.path
+      ) {
         markResolutionFailed(fileId, diskSnapshot.revision)
         return
       }
@@ -259,30 +294,53 @@ export async function resolveExternalFileChange(
       return
     }
 
-    const localContent = useEditorStore.getState().getEditorContent(fileId)
-    fileSaveCoordinator.recordContent(fileId, localContent)
-    const result = await conditionalWriteExpected(
-      file.path,
-      localContent,
-      diskSnapshot.revision,
-      undefined,
-      'overwrite',
-    )
-    if (result.status === 'conflict') {
-      markExternalFileConflict(fileId, result.revision)
-      return
-    }
-
-    applyExternalSnapshot(
+    fileSaveCoordinator.recordContent(fileId, useEditorStore.getState().getEditorContent(fileId))
+    let expectedRevision = diskSnapshot.revision
+    let originalFormat = diskSnapshot.text?.format
+    const saved = await fileSaveCoordinator.saveLatest(
       fileId,
-      {
-        content: localContent,
-        revision: result.revision,
-        status: 'success',
+      async (snapshot) => {
+        if (typeof snapshot.content !== 'string' || getFileObject(fileId)?.path !== file.path)
+          return false
+        const result = await conditionalWriteExpected(
+          file.path!,
+          snapshot.content,
+          expectedRevision,
+          undefined,
+          'overwrite',
+          { ...snapshot.textOptions, originalFormat },
+        )
+        if (result.status === 'conflict') {
+          markExternalFileConflict(fileId, result.revision)
+          return false
+        }
+        expectedRevision = result.revision
+        originalFormat = snapshot.textOptions.format
+        fileSaveCoordinator.acknowledgeSaved(fileId, snapshot, result.revision)
+        return true
       },
-      'overwritten',
+      (snapshot) => {
+        applyExternalSnapshot(
+          fileId,
+          {
+            content: snapshot.content!,
+            revision: expectedRevision,
+            status: 'success',
+            text: fileSaveCoordinator.getTextMetadata(fileId),
+          },
+          'overwritten',
+        )
+        historyFileSaved(fileId)
+      },
+      {
+        canAttempt: () =>
+          getFileObject(fileId)?.path === file.path &&
+          useEditorStore.getState().opened.includes(fileId) &&
+          editorSnapshotRegistry.canRead(fileId) &&
+          !editorSnapshotRegistry.hasPending(fileId),
+      },
     )
-    historyFileSaved(fileId)
+    if (!saved) markResolutionFailed(fileId, expectedRevision)
   } catch (error) {
     logger.error('Failed to resolve an external file change', error)
     markResolutionFailed(fileId, notice.diskRevision)

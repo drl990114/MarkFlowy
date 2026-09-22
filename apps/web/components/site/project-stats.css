@@ -1,21 +1,44 @@
 .mf-site .mf-project-stats {
+  --ink: #f3f7ff;
+  --ink-soft: #c1d1e7;
+  --ink-mute: #aabdd5;
+  --mf-site-accent: var(--mf-site-mist);
   position: relative;
   isolation: isolate;
   overflow: clip;
-  padding: 72px 0 56px;
-  background: linear-gradient(180deg, var(--paper), var(--mf-site-lilac) 56%, var(--paper));
+  padding: 92px 0 64px;
+  color: var(--ink);
+  background: radial-gradient(
+      ellipse at 72% 15%,
+      color-mix(in srgb, var(--mf-site-depth) 22%, transparent),
+      transparent 65%
+    ),
+    var(--mf-site-night, #102b4d);
+}
+.mf-site .mf-project-stats .mf-eyebrow {
+  color: var(--mf-site-mist);
 }
 .mf-site .mf-stats-heading {
   position: relative;
   z-index: 1;
-  max-width: 720px;
+  max-width: 856px;
+  margin-inline: auto;
+  text-align: center;
+}
+.mf-site .mf-stats-heading .mf-eyebrow {
+  justify-content: center;
 }
 .mf-site .mf-stats-heading .mf-section-title {
+  max-width: 16ch;
+  margin-inline: auto;
+  font-size: var(--mf-site-stats-title-size);
+  line-height: 1.03;
   word-break: keep-all;
   overflow-wrap: anywhere;
 }
 .mf-site .mf-stats-heading .mf-section-copy {
-  max-width: 620px;
+  max-width: 608px;
+  margin-inline: auto;
   margin-bottom: 0;
   text-wrap: balance;
 }
@@ -31,7 +54,7 @@
   inset: 22% 18%;
   background: radial-gradient(
     ellipse,
-    color-mix(in srgb, var(--mf-site-blue) 24%, transparent),
+    color-mix(in srgb, var(--mf-site-depth) 24%, transparent),
     transparent 68%
   );
 }
@@ -81,6 +104,10 @@
   position: relative;
   z-index: 1;
 }
+.mf-site .mf-stat {
+  border-top: 1px solid color-mix(in srgb, var(--mf-site-mist) 24%, transparent);
+  padding-top: 24px;
+}
 .mf-site .mf-stats-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -97,7 +124,7 @@
   background: linear-gradient(
     110deg,
     var(--mf-site-accent),
-    color-mix(in srgb, var(--mf-site-purple) 72%, var(--mf-site-accent))
+    color-mix(in srgb, var(--mf-site-highlight) 72%, var(--mf-site-accent))
   );
   background-clip: text;
   color: transparent;
@@ -156,7 +183,6 @@
     font-size: 48px;
   }
   .mf-site .mf-stat dt a {
-    font-size: 15px;
     min-height: 36px;
   }
   .mf-site .mf-stats-source {

@@ -33,7 +33,12 @@ vi.mock('@/stores/useEditorStateStore', () => ({
   },
 }))
 vi.mock('@/components/EditorArea/fileSaveCoordinator', () => ({
-  fileSaveCoordinator: { getDiskRevision: () => 'disk:old' },
+  fileSaveCoordinator: {
+    getDiskRevision: () => 'disk:old',
+    getPersistedFormat: () => ({ encoding: 'gbk', bom: 'none' }),
+    getTextMetadata: () => ({ format: { encoding: 'gbk', bom: 'none' } }),
+    recordFormat: vi.fn(),
+  },
 }))
 
 const doc = {
@@ -82,7 +87,9 @@ describe('background draft protection', () => {
       history.protectLocalEdit('file')
       await history.flushDraftProtection('file')
       expect(calls('draft')).toHaveLength(1)
-    } finally { ready() }
+    } finally {
+      ready()
+    }
   })
 
   it('coalesces a thousand edits without serializing on each keystroke', async () => {

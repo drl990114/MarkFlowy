@@ -1,5 +1,9 @@
 //! Transactional local history. All access is serialized by the host's bounded worker.
 use anyhow::{bail, Context, Result};
+use mf_text_encoding::TextFileFormat;
+#[cfg(test)]
+mod encoding_tests;
+mod text_snapshot;
 use rusqlite::{params, Connection, OptionalExtension, Transaction};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
@@ -8,6 +12,7 @@ use std::{
     path::Path,
     time::{SystemTime, UNIX_EPOCH},
 };
+use text_snapshot as snapshots;
 
 const DAY: i64 = 86_400_000;
 const BUDGET: i64 = 1024 * 1024 * 1024;
@@ -60,6 +65,8 @@ pub struct Draft {
     pub content: String,
     pub disk_revision: Option<String>,
     pub paused: bool,
+    #[serde(default)]
+    pub format: Option<TextFileFormat>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -88,7 +95,7 @@ impl Store {
         let conn = Connection::open(path)?;
         conn.busy_timeout(std::time::Duration::from_secs(5))?;
         let version: i64 = conn.pragma_query_value(None, "user_version", |r| r.get(0))?;
-        if version > 1 {
+        if version > 2 {
             bail!("unsupported_history_schema");
         }
         if version == 0 {
@@ -112,7 +119,11 @@ impl Store {
             INSERT OR IGNORE INTO config SELECT 'bytes',COALESCE(SUM(length(body)),0) FROM objects;
             CREATE TRIGGER IF NOT EXISTS object_added AFTER INSERT ON objects BEGIN UPDATE config SET value=value+length(NEW.body) WHERE key='bytes'; END;
             CREATE TRIGGER IF NOT EXISTS object_removed AFTER DELETE ON objects BEGIN UPDATE config SET value=value-length(OLD.body) WHERE key='bytes'; END;
-            PRAGMA user_version=1;")?;
+")?;
+        // An additive migration keeps the old byte hashes and reference tables intact.
+        conn.execute_batch("BEGIN IMMEDIATE;
+            CREATE TABLE IF NOT EXISTS text_snapshots(owner TEXT NOT NULL, slot TEXT NOT NULL, hash TEXT NOT NULL REFERENCES objects(hash) ON DELETE CASCADE, disk INTEGER NOT NULL, format TEXT, PRIMARY KEY(owner,slot));
+            PRAGMA user_version=2; COMMIT;")?;
         Ok(Self {
             conn,
             decode: |bytes| Ok(String::from_utf8(bytes)?),
@@ -181,17 +192,28 @@ impl Store {
     }
 
     pub fn observe(&mut self, doc: &Document, content: &str) -> Result<()> {
+        self.observe_with_format(doc, content, None)
+    }
+
+    pub fn observe_with_format(
+        &mut self,
+        doc: &Document,
+        content: &str,
+        format: Option<TextFileFormat>,
+    ) -> Result<()> {
         self.check(doc)?;
-        let old: Option<Vec<u8>> = self.conn.query_row("SELECT body FROM baselines JOIN objects ON baselines.hash=objects.hash WHERE document=?", [&doc.id], |r| r.get(0)).optional()?;
-        if let Some(old) = old {
-            let old = (self.decode)(old)?;
-            self.external(doc, &old, content)?;
+        let old: Option<(String,Vec<u8>)> = self.conn.query_row("SELECT objects.hash,body FROM baselines JOIN objects ON baselines.hash=objects.hash WHERE document=?", [&doc.id], |r| Ok((r.get(0)?,r.get(1)?))).optional()?;
+        if let Some((hash, old)) = old {
+            let (old, old_format) =
+                snapshots::read(&self.conn, &doc.id, "baseline", &hash, old, self.decode)?;
+            self.external_with_formats(doc, &old, content, old_format, format)?;
         } else if doc.generation == 0 {
-            self.checkpoint(doc, None, content.as_bytes(), "opened", "")?;
+            self.checkpoint_with_format(doc, None, content.as_bytes(), "opened", "", format)?;
         }
         let tx = self.conn.transaction()?;
         let hash = put_object(&tx, content.as_bytes())?;
         tx.execute("INSERT INTO baselines VALUES(?,?) ON CONFLICT(document) DO UPDATE SET hash=excluded.hash",params![doc.id,hash])?;
+        snapshots::put(&tx, &doc.id, "baseline", &hash, false, format)?;
         tx.commit()?;
         Ok(())
     }
@@ -274,8 +296,10 @@ impl Store {
         mut draft: Draft,
         previous: &str,
     ) -> Result<Draft> {
-        let (_, content) = self.read_entry(entry, before)?;
+        let (_, content, format) = self.read_text_snapshot(entry, before)?;
         self.check(&draft.document)?;
+        let previous_format = draft.format;
+        draft.format = format;
         draft.content = content;
         draft.paused = true;
         let enabled = self.enabled()?;
@@ -283,7 +307,7 @@ impl Store {
         let previous_hash = put_object(&tx, previous.as_bytes())?;
         let hash = put_object(&tx, draft.content.as_bytes())?;
         if enabled {
-            insert_entry(
+            let displaced = insert_entry(
                 &tx,
                 &draft.document.id,
                 "restore",
@@ -291,6 +315,14 @@ impl Store {
                 None,
                 &previous_hash,
                 false,
+            )?;
+            snapshots::put(
+                &tx,
+                &displaced,
+                "after",
+                &previous_hash,
+                false,
+                previous_format,
             )?;
         }
         // Even with history disabled, the displaced draft remains recoverable.
@@ -320,6 +352,27 @@ impl Store {
                 now()
             ],
         )?;
+        snapshots::put(
+            &tx,
+            &snapshots::draft_owner(&draft.document.id, &draft.writer),
+            "draft",
+            &hash,
+            false,
+            draft.format,
+        )?;
+        if !enabled {
+            snapshots::put(
+                &tx,
+                &snapshots::draft_owner(
+                    &draft.document.id,
+                    &format!("before-restore:{}:{}", draft.writer, draft.sequence),
+                ),
+                "draft",
+                &previous_hash,
+                false,
+                previous_format,
+            )?;
+        }
         tx.execute(
             "UPDATE entries SET active=0 WHERE document=?",
             [&draft.document.id],
@@ -397,6 +450,16 @@ impl Store {
         let tx = self.conn.transaction()?;
         let hash = put_object(&tx, draft.content.as_bytes())?;
         let changed = tx.execute("INSERT INTO drafts VALUES(?,?,?,?,?,?,?) ON CONFLICT(document,writer) DO UPDATE SET sequence=excluded.sequence,hash=excluded.hash,disk_revision=excluded.disk_revision,paused=excluded.paused,updated=excluded.updated WHERE excluded.sequence>drafts.sequence", params![draft.document.id, draft.writer, draft.sequence, hash, draft.disk_revision, draft.paused, now()])?;
+        if changed != 0 {
+            snapshots::put(
+                &tx,
+                &snapshots::draft_owner(&draft.document.id, &draft.writer),
+                "draft",
+                &hash,
+                false,
+                draft.format,
+            )?;
+        }
         tx.commit()?;
         Ok(changed != 0)
     }
@@ -427,6 +490,13 @@ impl Store {
             }
             Ok(Draft {
                 document: self.document(&doc)?,
+                format: snapshots::get(
+                    &self.conn,
+                    &snapshots::draft_owner(&doc, &writer),
+                    "draft",
+                    &hash,
+                )?
+                .and_then(|(_, format)| format),
                 writer,
                 sequence,
                 content: String::from_utf8(bytes)?,
@@ -465,6 +535,14 @@ impl Store {
             draft.writer = format!("{owner_prefix}{}", id());
             draft.sequence = now() * 1000;
             let hash = put_object(&tx, draft.content.as_bytes())?;
+            snapshots::put(
+                &tx,
+                &snapshots::draft_owner(&draft.document.id, &draft.writer),
+                "draft",
+                &hash,
+                false,
+                draft.format,
+            )?;
             tx.execute(
                 "UPDATE drafts SET hash=NULL,sequence=? WHERE document=? AND writer=?",
                 params![i64::MAX, draft.document.id, old_writer],
@@ -512,8 +590,19 @@ impl Store {
         before: &str,
         after: &str,
     ) -> Result<Option<String>> {
+        self.external_with_formats(doc, before, after, None, None)
+    }
+
+    pub fn external_with_formats(
+        &mut self,
+        doc: &Document,
+        before: &str,
+        after: &str,
+        before_format: Option<TextFileFormat>,
+        after_format: Option<TextFileFormat>,
+    ) -> Result<Option<String>> {
         self.check(doc)?;
-        if !self.enabled()? || before == after {
+        if !self.enabled()? || (before == after && before_format == after_format) {
             return Ok(None);
         }
         // A delayed watcher event after CLI commit must not start a second version.
@@ -522,7 +611,10 @@ impl Store {
             params![doc.id, digest(after.as_bytes())],
             |r| r.get(0),
         )?;
-        if already_observed {
+        if already_observed
+            && snapshots::get(&self.conn, &doc.id, "baseline", &digest(after.as_bytes()))?
+                .is_some_and(|(_, f)| f == after_format)
+        {
             return Ok(None);
         }
         let tx = self.conn.transaction()?;
@@ -552,7 +644,20 @@ impl Store {
                 true,
             )?
         };
+        snapshots::put(&tx, &entry, "after", &after_hash, false, after_format)?;
+        // Only a newly created external batch takes a new before snapshot.
+        let before_hash: Option<String> = tx.query_row(
+            "SELECT before_hash FROM entries WHERE id=?",
+            [&entry],
+            |r| r.get(0),
+        )?;
+        if let Some(hash) = before_hash {
+            if hash == digest(before.as_bytes()) {
+                snapshots::put(&tx, &entry, "before", &hash, false, before_format)?;
+            }
+        }
         tx.execute("INSERT INTO baselines VALUES(?,?) ON CONFLICT(document) DO UPDATE SET hash=excluded.hash",params![doc.id,after_hash])?;
+        snapshots::put(&tx, &doc.id, "baseline", &after_hash, false, after_format)?;
         tx.commit()?;
         Ok(Some(entry))
     }
@@ -564,6 +669,18 @@ impl Store {
         after: &[u8],
         kind: &str,
         message: &str,
+    ) -> Result<Option<String>> {
+        self.checkpoint_with_format(doc, before, after, kind, message, None)
+    }
+
+    pub fn checkpoint_with_format(
+        &mut self,
+        doc: &Document,
+        before: Option<&[u8]>,
+        after: &[u8],
+        kind: &str,
+        message: &str,
+        format: Option<TextFileFormat>,
     ) -> Result<Option<String>> {
         self.check(doc)?;
         if !self.enabled()? {
@@ -577,7 +694,10 @@ impl Store {
         let baseline = before.map(|body| put_object(&tx, body)).transpose()?;
         let previous: Option<(String,String,i64,String)> = tx.query_row("SELECT id,after_hash,updated,kind FROM entries WHERE document=? ORDER BY updated DESC LIMIT 1", [&doc.id], |r| Ok((r.get(0)?,r.get(1)?,r.get(2)?,r.get(3)?))).optional()?;
         if let Some((entry, old, time, old_kind)) = previous {
-            if old == hash && !matches!(kind, "restore" | "discard" | "overwrite") {
+            if old == hash
+                && !matches!(kind, "restore" | "discard" | "overwrite")
+                && snapshots::get(&tx, &entry, "after", &hash)?.is_some_and(|(_, f)| f == format)
+            {
                 tx.commit()?;
                 return Ok(Some(entry));
             }
@@ -589,6 +709,7 @@ impl Store {
                     "UPDATE entries SET after_hash=?,updated=? WHERE id=?",
                     params![hash, now(), entry],
                 )?;
+                snapshots::put(&tx, &entry, "after", &hash, false, format)?;
                 tx.commit()?;
                 return Ok(Some(entry));
             }
@@ -602,6 +723,10 @@ impl Store {
             &hash,
             false,
         )?;
+        snapshots::put(&tx, &entry, "after", &hash, false, format)?;
+        if let Some(hash) = &baseline {
+            snapshots::put(&tx, &entry, "before", hash, false, format)?;
+        }
         tx.commit()?;
         Ok(Some(entry))
     }
@@ -714,6 +839,8 @@ impl Store {
             "UPDATE entries SET active=0,after_hash=?,message=?,updated=? WHERE id=?",
             params![hash, message, now(), entry],
         )?;
+        snapshots::put(&tx, entry, "after", &hash, false, None)?;
+        snapshots::put(&tx, &doc.id, "baseline", &hash, false, None)?;
         if unchanged {
             tx.execute("DELETE FROM entries WHERE id=?", [entry])?;
         }
@@ -762,11 +889,25 @@ impl Store {
     }
 
     pub fn read_entry(&self, entry: &str, before: bool) -> Result<(Document, String)> {
+        let (doc, content, _) = self.read_text_snapshot(entry, before)?;
+        Ok((doc, content))
+    }
+
+    pub fn read_text_snapshot(
+        &self,
+        entry: &str,
+        before: bool,
+    ) -> Result<(Document, String, Option<TextFileFormat>)> {
         let (doc,hash,bytes):(String,String,Vec<u8>)=self.conn.query_row("SELECT document,objects.hash,body FROM entries JOIN objects ON objects.hash=CASE WHEN ?2 THEN before_hash ELSE after_hash END WHERE entries.id=?1",params![entry,before],|r|Ok((r.get(0)?,r.get(1)?,r.get(2)?)))?;
-        if digest(&bytes) != hash {
-            bail!("history_corrupt");
-        }
-        Ok((self.document(&doc)?, (self.decode)(bytes)?))
+        let (content, format) = snapshots::read(
+            &self.conn,
+            entry,
+            if before { "before" } else { "after" },
+            &hash,
+            bytes,
+            self.decode,
+        )?;
+        Ok((self.document(&doc)?, content, format))
     }
 
     pub fn stats(&self, workspace: Option<&str>) -> Result<Value> {
@@ -803,7 +944,29 @@ impl Store {
         before: Option<&[u8]>,
         after: &[u8],
     ) -> Result<String> {
+        self.prepare_write_with_formats(doc, before, after, None)
+    }
+
+    pub fn prepare_write_with_formats(
+        &mut self,
+        doc: &Document,
+        before: Option<&[u8]>,
+        after: &[u8],
+        formats: Option<(Option<TextFileFormat>, TextFileFormat)>,
+    ) -> Result<String> {
         self.check(doc)?;
+        let before_format = formats.and_then(|f| f.0).or_else(|| {
+            before.and_then(|b| {
+                mf_text_encoding::decode(b, None)
+                    .ok()
+                    .map(|d| d.metadata.format)
+            })
+        });
+        let after_format = formats.map(|f| f.1).or_else(|| {
+            mf_text_encoding::decode(after, None)
+                .ok()
+                .map(|d| d.metadata.format)
+        });
         let enabled = self.enabled()?;
         let tx = self.conn.transaction()?;
         let baseline = before.map(|b| put_object(&tx, b)).transpose()?;
@@ -818,6 +981,10 @@ impl Store {
                 "INSERT INTO entries VALUES(?,?, 'write-pending','',?,?,0,?,?)",
                 params![operation, doc.id, now(), now(), baseline, hash],
             )?;
+        }
+        snapshots::put(&tx, &operation, "after", &hash, true, after_format)?;
+        if let Some(hash) = &baseline {
+            snapshots::put(&tx, &operation, "before", hash, true, before_format)?;
         }
         tx.commit()?;
         Ok(operation)
@@ -864,37 +1031,61 @@ impl Store {
         } else {
             None
         };
+        if let Some(entry) = &entry {
+            snapshots::copy(&tx, operation, "after", entry, "after", &hash)?;
+            let entry_before: Option<String> =
+                tx.query_row("SELECT before_hash FROM entries WHERE id=?", [entry], |r| {
+                    r.get(0)
+                })?;
+            if entry_before == baseline {
+                if let Some(hash) = &baseline {
+                    snapshots::copy(&tx, operation, "before", entry, "before", hash)?;
+                }
+            }
+        }
         tx.execute("INSERT INTO baselines VALUES(?,?) ON CONFLICT(document) DO UPDATE SET hash=excluded.hash",params![doc,hash])?;
+        snapshots::copy(&tx, operation, "after", &doc, "baseline", &hash)?;
         tx.execute("DELETE FROM writes WHERE id=?", [operation])?;
         tx.commit()?;
         Ok(entry)
     }
 
     pub fn recover_write(&mut self, operation: &str) -> Result<()> {
-        let (doc, hash, before): (String, String, Option<Vec<u8>>) = self.conn.query_row(
-            "SELECT document,after_hash,body FROM writes LEFT JOIN objects ON before_hash=objects.hash WHERE id=?",
+        let (doc, after, before): (String, String, Option<String>) = self.conn.query_row(
+            "SELECT document,after_hash,before_hash FROM writes WHERE id=?",
             [operation],
             |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?)),
         )?;
-        let before = before.map(self.decode).transpose()?;
+        let mut recovered = Vec::new();
+        for (slot, hash) in [("before", before), ("after", Some(after))] {
+            if let Some(hash) = hash {
+                let bytes =
+                    self.conn
+                        .query_row("SELECT body FROM objects WHERE hash=?", [&hash], |r| {
+                            r.get(0)
+                        })?;
+                let (content, format) =
+                    snapshots::read(&self.conn, operation, slot, &hash, bytes, self.decode)?;
+                recovered.push((slot, content, format));
+            }
+        }
         let tx = self.conn.transaction()?;
-        if let Some(before) = before {
-            let backup = put_object(&tx, before.as_bytes())?;
+        for (slot, content, format) in recovered {
+            let hash = put_object(&tx, content.as_bytes())?;
+            let writer = format!("interrupted-{slot}:{operation}");
             tx.execute(
                 "INSERT OR IGNORE INTO drafts VALUES(?,?,0,?,NULL,1,?)",
-                params![
-                    doc,
-                    format!("interrupted-before:{operation}"),
-                    backup,
-                    now()
-                ],
+                params![doc, writer, hash, now()],
+            )?;
+            snapshots::put(
+                &tx,
+                &snapshots::draft_owner(&doc, &writer),
+                "draft",
+                &hash,
+                false,
+                format,
             )?;
         }
-        tx.execute(
-            "INSERT OR IGNORE INTO drafts VALUES(?,?,0,?,NULL,1,?)",
-            params![doc, format!("interrupted:{operation}"), hash, now()],
-        )?;
-        // Consume the journal only after both recovery drafts are durable.
         tx.execute("DELETE FROM writes WHERE id=?", [operation])?;
         tx.commit()?;
         Ok(())
@@ -934,6 +1125,7 @@ impl Store {
     }
 
     fn collect_objects(&mut self) -> Result<()> {
+        self.conn.execute("DELETE FROM text_snapshots WHERE owner NOT IN (SELECT id FROM entries UNION SELECT id FROM writes UNION SELECT document FROM baselines UNION SELECT json_array(document,writer) FROM drafts WHERE hash IS NOT NULL)", [])?;
         self.conn.execute("DELETE FROM objects WHERE hash NOT IN (SELECT before_hash FROM entries WHERE before_hash IS NOT NULL UNION SELECT after_hash FROM entries UNION SELECT hash FROM drafts WHERE hash IS NOT NULL UNION SELECT before_hash FROM writes WHERE before_hash IS NOT NULL UNION SELECT after_hash FROM writes UNION SELECT hash FROM baselines)",[])?;
         Ok(())
     }
@@ -980,6 +1172,10 @@ fn insert_entry(
             after
         ],
     )?;
+    snapshots::put(tx, &entry, "after", after, false, None)?;
+    if let Some(hash) = before {
+        snapshots::put(tx, &entry, "before", hash, false, None)?;
+    }
     Ok(entry)
 }
 
@@ -1016,6 +1212,7 @@ mod tests {
             content: "unsaved".into(),
             disk_revision: None,
             paused: true,
+            format: None,
         })
         .unwrap();
         s.clear(Some("/w")).unwrap();
@@ -1060,7 +1257,8 @@ mod tests {
                 sequence: 2,
                 content: "old".into(),
                 disk_revision: None,
-                paused: false
+                paused: false,
+                format: None,
             })
             .unwrap());
         assert!(s.drafts("/w").unwrap().is_empty());
@@ -1143,6 +1341,7 @@ mod tests {
             content: "".into(),
             disk_revision: Some("rev".into()),
             paused: false,
+            format: None,
         };
         let restored = s.restore(&entry, true, draft.clone(), "working").unwrap();
         assert_eq!(restored.content, "first");
@@ -1283,6 +1482,7 @@ mod tests {
             content: "working".into(),
             disk_revision: None,
             paused: false,
+            format: None,
         })
         .unwrap();
         s.presence(&d.id, "other:file", true).unwrap();
@@ -1321,6 +1521,7 @@ mod tests {
             content: "working".into(),
             disk_revision: None,
             paused: false,
+            format: None,
         })
         .unwrap();
         assert_eq!(s.drafts("/w").unwrap()[0].content, "working");
@@ -1337,6 +1538,7 @@ mod tests {
             content: "working".into(),
             disk_revision: None,
             paused: true,
+            format: None,
         };
         s.put_draft(&draft).unwrap();
         let claimed = s.claim_recovery_drafts("/w", "first:").unwrap();
@@ -1386,6 +1588,7 @@ mod tests {
             content: "working".into(),
             disk_revision: None,
             paused: true,
+            format: None,
         })
         .unwrap();
         assert!(s

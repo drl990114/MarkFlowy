@@ -57,11 +57,11 @@ export default function ProjectStats({ stats }: { stats: ProjectStatsData }) {
               y2='0'
               gradientUnits='userSpaceOnUse'
             >
-              <stop stopColor='var(--mf-site-cyan)' stopOpacity='0' />
-              <stop offset='.3' stopColor='var(--mf-site-blue)' />
+              <stop stopColor='var(--mf-site-mist)' stopOpacity='0' />
+              <stop offset='.3' stopColor='var(--mf-site-depth)' />
               <stop offset='.58' stopColor='var(--mf-site-accent)' />
-              <stop offset='.85' stopColor='var(--mf-site-purple)' />
-              <stop offset='1' stopColor='var(--mf-site-purple)' stopOpacity='0' />
+              <stop offset='.85' stopColor='var(--mf-site-highlight)' />
+              <stop offset='1' stopColor='var(--mf-site-highlight)' stopOpacity='0' />
             </linearGradient>
             <linearGradient
               id={`${gradientId}-fall`}
@@ -71,11 +71,11 @@ export default function ProjectStats({ stats }: { stats: ProjectStatsData }) {
               y2='440'
               gradientUnits='userSpaceOnUse'
             >
-              <stop stopColor='var(--mf-site-blue)' stopOpacity='0' />
+              <stop stopColor='var(--mf-site-depth)' stopOpacity='0' />
               <stop offset='.2' stopColor='var(--mf-site-accent)' />
-              <stop offset='.52' stopColor='var(--mf-site-purple)' />
-              <stop offset='.8' stopColor='var(--mf-site-blue)' />
-              <stop offset='1' stopColor='var(--mf-site-cyan)' stopOpacity='0' />
+              <stop offset='.52' stopColor='var(--mf-site-highlight)' />
+              <stop offset='.8' stopColor='var(--mf-site-depth)' />
+              <stop offset='1' stopColor='var(--mf-site-mist)' stopOpacity='0' />
             </linearGradient>
           </defs>
           <g

@@ -6,6 +6,7 @@ import { createFile, updateFile } from '@/helper/filesys'
 import useEditorStore from '@/stores/useEditorStore'
 import useEditorStateStore from '@/stores/useEditorStateStore'
 import { fileSaveCoordinator } from '@/components/EditorArea/fileSaveCoordinator'
+import { DEFAULT_TEXT_METADATA } from '@/components/EditorArea/textFileFormat'
 import { markExternalFileConflict } from '@/components/EditorArea/externalFileChanges'
 import type { FileSnapshotResult } from '@/components/EditorArea/fileSnapshot'
 import {
@@ -282,6 +283,19 @@ describe('staged draft recovery', () => {
     expect(useEditorStateStore.getState().idStateMap.get('one')?.hasUnsavedChanges).toBe(false)
     expect(markExternalFileConflict).not.toHaveBeenCalled()
     expect(data.has('draft-session:old')).toBe(true)
+  })
+
+  it('retains a newer format-only edit while matching recovered text against disk', async () => {
+    open('format')
+    const { cache } = cacheFor([{ ...draft('format', 'same'), format: { encoding: 'utf-8', bom: 'none' } }])
+    const recovery = await start({ cache, onError: vi.fn() })
+    fileSaveCoordinator.recordFormat('format', { encoding: 'utf-16be', bom: 'utf16be' })
+    settle('format', { status: 'success', content: 'same', revision: 'r1', text: DEFAULT_TEXT_METADATA })
+    await recovery.finished
+    expect(fileSaveCoordinator.getPersistedFormat('format')).toEqual({ encoding: 'utf-16be', bom: 'utf16be' })
+    expect(useEditorStateStore.getState().idStateMap.get('format')?.hasUnsavedChanges).toBe(true)
+    expect(fileSaveCoordinator.hasFormatChanges('format')).toBe(true)
+    expect(markExternalFileConflict).not.toHaveBeenCalled()
   })
 
   it('recovers a missing file as the same untitled draft, retaining its tab and content', async () => {

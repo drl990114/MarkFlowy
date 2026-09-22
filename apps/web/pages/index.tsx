@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { useCallback, useState } from 'react'
 import Nav from '../components/HomeNav'
 import SeoHead from '../components/SeoHead'
+import SiteArrow from '../components/site/Arrow'
 import Contributors from '../components/site/Contributors'
 import SiteFooter from '../components/site/Footer'
 import HomeMotion from '../components/site/HomeMotion'
@@ -58,11 +59,11 @@ export default function Index({
               <Link className='mf-button' href={DOWNLOAD_URL}>
                 <i className={icon} aria-hidden='true' />
                 {t('home.hero.download')}
-                <i className='ri-arrow-right-line' aria-hidden='true' />
+                <SiteArrow />
               </Link>
               <Link className='mf-button mf-button-secondary' href={DEMO_URL}>
                 {t('site.hero.try')}
-                <i className='ri-arrow-right-line' aria-hidden='true' />
+                <SiteArrow />
               </Link>
             </div>
           </div>
@@ -96,11 +97,11 @@ export default function Index({
             <div className='mf-actions'>
               <Link className='mf-button' href={DOWNLOAD_URL}>
                 {t('home.hero.download')}
-                <i className='ri-arrow-right-line' aria-hidden='true' />
+                <SiteArrow />
               </Link>
               <Link className='mf-button mf-button-secondary' href='/docs'>
                 {t('site.cta.docs')}
-                <i className='ri-arrow-right-line' aria-hidden='true' />
+                <SiteArrow />
               </Link>
             </div>
           </div>

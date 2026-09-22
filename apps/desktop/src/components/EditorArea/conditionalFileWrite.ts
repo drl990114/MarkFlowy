@@ -1,4 +1,5 @@
 import { invoke } from '@tauri-apps/api/core'
+import { assertValidUnicode, type TextWriteOptions } from './textFileFormat'
 
 export interface ConditionalWriteResult {
   revision: string
@@ -25,12 +26,15 @@ export async function conditionalWriteExpected(
   expectedRevision: string,
   invokeCommand: InvokeCommand = invoke,
   historyKind?: 'autosave' | 'save' | 'overwrite',
+  textOptions?: TextWriteOptions,
 ): Promise<ConditionalWriteResult> {
+  assertValidUnicode(content)
   return invokeCommand<ConditionalWriteResult>('conditional_write_file', {
     content,
     expectedRevision,
     filePath,
     ...(historyKind ? { historyKind } : {}),
+    ...(textOptions ? { textOptions } : {}),
   })
 }
 
@@ -41,9 +45,17 @@ export async function conditionalWriteExpectedIfAllowed(
   canWrite: () => boolean,
   invokeCommand: InvokeCommand = invoke,
   historyKind?: 'autosave' | 'save' | 'overwrite',
+  textOptions?: TextWriteOptions,
 ): Promise<GuardedConditionalWriteResult> {
   if (!canWrite()) return { status: 'blocked' }
-  return conditionalWriteExpected(filePath, content, expectedRevision, invokeCommand, historyKind)
+  return conditionalWriteExpected(
+    filePath,
+    content,
+    expectedRevision,
+    invokeCommand,
+    historyKind,
+    textOptions,
+  )
 }
 
 export async function conditionalWriteWithRevision(

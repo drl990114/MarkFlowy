@@ -7,6 +7,7 @@ import { DOWNLOAD_URL } from '../../utils/website'
 import LanguageSwitcher from '../Nav/LanguageSwitcher'
 import { Logo } from '../Nav/Logo'
 import NavButton from '../Nav/NavButton'
+import SiteArrow from './Arrow'
 import { siteMenus, type SiteMenu } from './navigation'
 
 export interface SiteHeaderProps {
@@ -31,7 +32,7 @@ function MenuColumns({ menu, onNavigate }: { menu: SiteMenu; onNavigate: () => v
                 <Link href={link.href} onClick={onNavigate} className='mf-menu-link'>
                   <span className='mf-menu-link-title'>
                     {t(link.title)}
-                    <i className='ri-arrow-right-line' aria-hidden='true' />
+                    <SiteArrow />
                   </span>
                   {link.description && (
                     <span className='mf-menu-link-description'>{t(link.description)}</span>
@@ -76,7 +77,21 @@ export default function SiteHeader({
   const open = mobileOpen || activeMenu !== null
   const currentMenu = siteMenus.find((menu) => menu.id === activeMenu)
   const currentMobileMenu = siteMenus.find((menu) => menu.id === mobileMenu)
-  const transition = { duration: reduceMotion ? 0 : 0.3, ease: [0.45, 0.05, 0.55, 0.95] as const }
+  const instantMenu = reduceMotion || keyboardMenu.current
+  const transition = { duration: instantMenu ? 0 : 0.24, ease: [0.22, 1, 0.36, 1] as const }
+  const contentTransition = {
+    opacity: { duration: instantMenu ? 0 : 0.16 },
+    transform: { duration: instantMenu ? 0 : 0.24, ease: [0.22, 1, 0.36, 1] as const },
+  }
+  const attachContent = useCallback((element: HTMLDivElement | null) => {
+    if (!element) return
+    contentRef.current = element
+    // Presence keeps the previous panel mounted during its exit. Its cleanup
+    // must not erase the ref to the newly selected panel.
+    return () => {
+      if (contentRef.current === element) contentRef.current = null
+    }
+  }, [])
 
   const cancelHover = useCallback(() => {
     if (hoverTimer.current) clearTimeout(hoverTimer.current)
@@ -128,6 +143,7 @@ export default function SiteHeader({
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key !== 'Escape') return
       event.preventDefault()
+      keyboardMenu.current = true
       close()
       if (mobileOpen) toggleRef.current?.focus()
       else triggers.current[previousIndex.current]?.focus()
@@ -145,12 +161,18 @@ export default function SiteHeader({
 
   return (
     <>
-      <div className='mf-navigation-scrim' data-open={open} aria-hidden='true' />
+      <div
+        className='mf-navigation-scrim'
+        data-open={open}
+        data-instant={instantMenu}
+        aria-hidden='true'
+      />
       <header
         ref={headerRef}
         className='mf-site-header'
         data-home={router.pathname === '/'}
         data-open={open}
+        data-keyboard={keyboardMenu.current}
         onPointerEnter={cancelHover}
         onPointerLeave={(event) => {
           if (event.pointerType !== 'mouse' || keyboardMenu.current) return
@@ -205,8 +227,9 @@ export default function SiteHeader({
                   if (event.pointerType !== 'mouse') return
                   keyboardMenu.current = false
                   cancelHover()
-                  hoverTimer.current = setTimeout(() => selectMenu(index), activeMenu ? 0 : 80)
+                  hoverTimer.current = setTimeout(() => selectMenu(index), activeMenu ? 0 : 100)
                 }}
+                onPointerLeave={cancelHover}
                 onClick={(event) => {
                   keyboardMenu.current = event.detail === 0
                   if (event.detail === 0 && activeMenu === menu.id) close()
@@ -234,7 +257,20 @@ export default function SiteHeader({
                 }}
               >
                 {t(menu.title)}
-                <i className='ri-arrow-down-s-line' aria-hidden='true' />
+                <svg
+                  className='mf-nav-chevron'
+                  viewBox='0 0 12 12'
+                  fill='none'
+                  stroke='currentColor'
+                  strokeWidth='1.5'
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  aria-hidden='true'
+                  focusable='false'
+                >
+                  <path className='mf-nav-chevron-left' d='m3 4 3 3' />
+                  <path className='mf-nav-chevron-right' d='m6 7 3-3' />
+                </svg>
               </NavButton>
             ))}
             <Link
@@ -262,7 +298,7 @@ export default function SiteHeader({
             </Link>
             <Link className='mf-button mf-header-download' href={DOWNLOAD_URL}>
               {t('navigation.download')}
-              <i className='ri-arrow-right-s-line' aria-hidden='true' />
+              <SiteArrow />
             </Link>
           </div>
           <NavButton
@@ -272,38 +308,58 @@ export default function SiteHeader({
             aria-expanded={mobileOpen}
             aria-controls='mf-site-mobile-menu'
             aria-label={t(mobileOpen ? 'navigation.closeMenu' : 'navigation.openMenu')}
-            onClick={onMobileNavToggle}
+            onClick={(event) => {
+              keyboardMenu.current = event.detail === 0
+              onMobileNavToggle?.()
+            }}
           >
             <span className='mf-menu-toggle-lines' aria-hidden='true' />
           </NavButton>
         </div>
-        <AnimatePresence>
+        <AnimatePresence custom={instantMenu}>
           {currentMenu && (
             <motion.div
               key='desktop-menu'
               id='mf-site-mega-menu'
               className='mf-site-mega-menu'
               aria-labelledby={`mf-nav-${currentMenu.id}`}
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: panelHeight, opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
+              initial={{ clipPath: 'inset(0 -60px 100% -60px)', opacity: 0 }}
+              animate={{
+                height: panelHeight || 'auto',
+                clipPath: 'inset(0 -60px -60px -60px)',
+                opacity: 1,
+              }}
+              variants={{
+                exit: (instant: boolean) => ({
+                  clipPath: 'inset(0 -60px 100% -60px)',
+                  opacity: 0,
+                  transition: { ...transition, duration: instant ? 0 : 0.2 },
+                }),
+              }}
+              exit='exit'
               transition={transition}
               onPointerEnter={cancelHover}
             >
               <AnimatePresence initial={false} mode='popLayout' custom={direction}>
                 <motion.div
                   key={currentMenu.id}
-                  ref={contentRef}
+                  ref={attachContent}
                   custom={direction}
                   variants={{
-                    enter: (value: number) => ({ x: reduceMotion ? 0 : value * 24, opacity: 0 }),
-                    visible: { x: 0, opacity: 1 },
-                    exit: (value: number) => ({ x: reduceMotion ? 0 : value * -24, opacity: 0 }),
+                    enter: (value: number) => ({
+                      transform: `translateX(${instantMenu ? 0 : value * 18}px)`,
+                      opacity: 0,
+                    }),
+                    visible: { transform: 'translateX(0%)', opacity: 1 },
+                    exit: (value: number) => ({
+                      transform: `translateX(${instantMenu ? 0 : value * -18}px)`,
+                      opacity: 0,
+                    }),
                   }}
                   initial='enter'
                   animate='visible'
                   exit='exit'
-                  transition={transition}
+                  transition={contentTransition}
                 >
                   <MenuColumns menu={currentMenu} onNavigate={close} />
                 </motion.div>
@@ -311,24 +367,37 @@ export default function SiteHeader({
             </motion.div>
           )}
         </AnimatePresence>
-        <AnimatePresence>
+        <AnimatePresence custom={instantMenu}>
           {mobileOpen && (
             <motion.div
               id='mf-site-mobile-menu'
               className='mf-site-mobile-menu'
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
+              variants={{
+                exit: (instant: boolean) => ({
+                  height: 0,
+                  opacity: 0,
+                  transition: { ...transition, duration: instant ? 0 : 0.2 },
+                }),
+              }}
+              exit='exit'
               transition={transition}
             >
               <AnimatePresence initial={false} mode='wait'>
                 <motion.div
                   key={mobileMenu || 'root'}
                   ref={mobileContentRef}
-                  initial={{ opacity: 0, x: reduceMotion ? 0 : mobileMenu ? 20 : -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: reduceMotion ? 0 : mobileMenu ? 20 : -20 }}
-                  transition={{ ...transition, duration: reduceMotion ? 0 : 0.16 }}
+                  initial={{
+                    opacity: 0,
+                    transform: `translateX(${instantMenu ? 0 : mobileMenu ? 20 : -20}px)`,
+                  }}
+                  animate={{ opacity: 1, transform: 'translateX(0px)' }}
+                  exit={{
+                    opacity: 0,
+                    transform: `translateX(${instantMenu ? 0 : mobileMenu ? 20 : -20}px)`,
+                  }}
+                  transition={{ ...transition, duration: instantMenu ? 0 : 0.16 }}
                   onAnimationComplete={() => {
                     if (!mobileOpenRef.current) return
                     if (mobileMenu)
@@ -344,7 +413,8 @@ export default function SiteHeader({
                       <NavButton
                         className='mf-mobile-back'
                         type='button'
-                        onClick={() => {
+                        onClick={(event) => {
+                          keyboardMenu.current = event.detail === 0
                           previousIndex.current = siteMenus.findIndex(
                             (menu) => menu.id === mobileMenu,
                           )
@@ -366,7 +436,10 @@ export default function SiteHeader({
                           ref={(element) => {
                             mobileTriggers.current[index] = element
                           }}
-                          onClick={() => setMobileMenu(menu.id)}
+                          onClick={(event) => {
+                            keyboardMenu.current = event.detail === 0
+                            setMobileMenu(menu.id)
+                          }}
                         >
                           {t(menu.title)}
                           <i className='ri-arrow-right-s-line' aria-hidden='true' />
@@ -386,7 +459,7 @@ export default function SiteHeader({
               <div className='mf-mobile-cta'>
                 <Link className='mf-button' href={DOWNLOAD_URL} onClick={close}>
                   {t('home.hero.download')}
-                  <i className='ri-arrow-right-line' aria-hidden='true' />
+                  <SiteArrow />
                 </Link>
               </div>
             </motion.div>

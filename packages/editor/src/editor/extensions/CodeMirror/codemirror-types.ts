@@ -4,6 +4,7 @@ import { MfCodemirrorView } from '../../codemirror/codemirror'
 import type { CommandKeymapOptions } from './keymap'
 
 export interface CodeMirrorExtensionOptions {
+  preserveLineEndings?: boolean
   /**
    * Whether to hide the decoration.
    *

@@ -1,6 +1,17 @@
+import type { StableFileSnapshot } from './fileSnapshot'
+import {
+  DEFAULT_TEXT_METADATA,
+  sameTextFormat,
+  textLineEndings,
+  type TextFileFormat,
+  type TextFileMetadata,
+  type TextWriteOptions,
+} from './textFileFormat'
+
 export interface FileSaveSnapshot {
   content: string | undefined
   revision: number
+  textOptions: TextWriteOptions
 }
 
 interface FileSaveState {
@@ -9,6 +20,9 @@ interface FileSaveState {
   hasContent: boolean
   revision: number
   tail: Promise<void>
+  text: TextFileMetadata
+  savedContent?: string
+  savedFormat?: TextFileFormat
 }
 
 type SaveAttempt = (snapshot: FileSaveSnapshot) => Promise<boolean>
@@ -23,6 +37,117 @@ interface FileSaveOptions {
  */
 export class FileSaveCoordinator {
   private readonly states = new Map<string, FileSaveState>()
+  private readonly listeners = new Set<() => void>()
+
+  subscribe = (listener: () => void) => {
+    this.listeners.add(listener)
+    return () => {
+      this.listeners.delete(listener)
+    }
+  }
+
+  private notify() {
+    this.listeners.forEach((listener) => listener())
+  }
+
+  getTextMetadata(fileId: string): TextFileMetadata {
+    return this.states.get(fileId)?.text ?? DEFAULT_TEXT_METADATA
+  }
+
+  recordSaveError(fileId: string, message: string): boolean {
+    const state = this.getOrCreateState(fileId)
+    if (state.text.saveError === message) return false
+    state.text = { ...state.text, saveError: message }
+    this.notify()
+    return true
+  }
+
+  getWriteOptions(fileId: string): TextWriteOptions {
+    const state = this.getOrCreateState(fileId)
+    return {
+      format: state.text.format,
+      originalFormat: state.savedFormat,
+      encodingConfirmed: !state.text.decoding.needsConfirmation,
+    }
+  }
+
+  getPersistedFormat(fileId: string): TextFileFormat | undefined {
+    const text = this.getTextMetadata(fileId)
+    return text.decoding.needsConfirmation ? undefined : text.format
+  }
+
+  setSavedBaseline(fileId: string, snapshot: StableFileSnapshot): void {
+    const state = this.getOrCreateState(fileId)
+    state.savedContent = snapshot.content
+    state.savedFormat = snapshot.text?.format ?? DEFAULT_TEXT_METADATA.format
+  }
+
+  loadSnapshot(fileId: string, snapshot: StableFileSnapshot): void {
+    const state = this.getOrCreateState(fileId)
+    this.recordContent(fileId, snapshot.content)
+    state.diskRevision = snapshot.revision
+    state.text = snapshot.text ?? DEFAULT_TEXT_METADATA
+    state.savedContent = snapshot.content
+    state.savedFormat = state.text.format
+    state.revision += 1
+    this.notify()
+  }
+
+  recordFormat(fileId: string, format: TextFileFormat, confirmed = true): void {
+    const state = this.getOrCreateState(fileId)
+    if (
+      sameTextFormat(state.text.format, format) &&
+      state.text.decoding.needsConfirmation === !confirmed
+    )
+      return
+    state.text = {
+      ...state.text,
+      format: { ...format },
+      decoding: {
+        ...state.text.decoding,
+        source: confirmed ? 'user' : 'unknown',
+        needsConfirmation: !confirmed,
+      },
+    }
+    state.revision += 1
+    this.notify()
+  }
+
+  hasFormatChanges(fileId: string): boolean {
+    const state = this.states.get(fileId)
+    return (
+      !!state &&
+      !sameTextFormat(state.text.format, state.savedFormat ?? DEFAULT_TEXT_METADATA.format)
+    )
+  }
+
+  isAtSavedSnapshot(fileId: string): boolean {
+    const state = this.states.get(fileId)
+    return (
+      !!state &&
+      state.savedContent !== undefined &&
+      state.content === state.savedContent &&
+      sameTextFormat(state.text.format, state.savedFormat)
+    )
+  }
+
+  acknowledgeSaved(fileId: string, snapshot: FileSaveSnapshot, diskRevision: string): void {
+    const state = this.getOrCreateState(fileId)
+    const converted = !sameTextFormat(state.savedFormat, snapshot.textOptions.format)
+    state.diskRevision = diskRevision
+    state.savedContent = snapshot.content
+    state.savedFormat = snapshot.textOptions.format
+    state.text = {
+      ...state.text,
+      saveError: undefined,
+      lineEndings: textLineEndings(state.content ?? ''),
+      decoding: {
+        ...state.text.decoding,
+        byteRoundTrip: converted || state.text.decoding.byteRoundTrip,
+      },
+    }
+    this.notify()
+  }
 
   private getOrCreateState(fileId: string): FileSaveState {
     let state = this.states.get(fileId)
@@ -33,6 +158,7 @@ export class FileSaveCoordinator {
         hasContent: false,
         revision: 0,
         tail: Promise.resolve(),
+        text: DEFAULT_TEXT_METADATA,
       }
       this.states.set(fileId, state)
     }
@@ -73,6 +199,16 @@ export class FileSaveCoordinator {
     }
   }
 
+  runExclusive<T>(fileId: string, run: () => Promise<T>): Promise<T> {
+    const state = this.getOrCreateState(fileId)
+    const task = state.tail.then(run)
+    state.tail = task.then(
+      () => undefined,
+      () => undefined,
+    )
+    return task
+  }
+
   async releaseWhenIdle(
     fileId: string,
     canRelease: () => boolean,
@@ -93,6 +229,7 @@ export class FileSaveCoordinator {
       if (!canRelease()) return false
 
       this.states.delete(fileId)
+      this.notify()
       cleanup()
       return true
     }
@@ -113,6 +250,7 @@ export class FileSaveCoordinator {
         const snapshot = {
           content: state.content,
           revision: state.revision,
+          textOptions: this.getWriteOptions(fileId),
         }
         const saved = await attempt(snapshot)
 

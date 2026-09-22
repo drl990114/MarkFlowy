@@ -12,8 +12,19 @@ export default function Reveal({
 }) {
   const ref = useRef<HTMLDivElement>(null)
   const [visible, setVisible] = useState(false)
+  const [animate, setAnimate] = useState(false)
   useEffect(() => {
     if (!ref.current || !('IntersectionObserver' in window)) return
+    // Already-visible content must not flash back to the start of an entrance
+    // after hydration, anchor navigation, or a slow JavaScript load.
+    if (
+      ref.current.getBoundingClientRect().top < window.innerHeight ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) {
+      setVisible(true)
+      return
+    }
+    setAnimate(true)
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -21,7 +32,7 @@ export default function Reveal({
           observer.disconnect()
         }
       },
-      { threshold: 0.08 },
+      { rootMargin: '0px 0px 64px 0px', threshold: 0 },
     )
     observer.observe(ref.current)
     return () => observer.disconnect()
@@ -31,6 +42,7 @@ export default function Reveal({
       ref={ref}
       className={`mf-reveal ${className}`}
       data-visible={visible}
+      data-animate={animate}
       style={{ animationDelay: `${delay}ms` }}
     >
       {children}

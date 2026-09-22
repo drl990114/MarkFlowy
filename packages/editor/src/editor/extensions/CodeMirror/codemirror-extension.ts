@@ -42,6 +42,7 @@ export const fakeIndentedLanguage = 'indent-code'
 @extension<CodeMirrorExtensionOptions>({
   defaultOptions: {
     hideDecoration: false,
+    preserveLineEndings: false,
     extensions: null,
     toggleName: 'paragraph',
     useProsemirrorHistoryKey: false,
@@ -133,6 +134,7 @@ export class LineCodeMirrorExtension extends NodeExtension<CodeMirrorExtensionOp
         toggleName: this.options.toggleName,
         options: {
           useProsemirrorHistoryKey: this.options.useProsemirrorHistoryKey,
+          preserveLineEndings: this.options.preserveLineEndings,
           copyButton: {
             enabled: this.options.showCopyButton,
             customCopyFunction: this.options.customCopyFunction,

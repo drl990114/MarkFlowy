@@ -1,3 +1,4 @@
+import { sameTextFormat, type TextFileFormat } from '@/components/EditorArea/textFileFormat'
 import { invoke, isTauri } from '@tauri-apps/api/core'
 import { listen } from '@tauri-apps/api/event'
 import { debounce } from 'lodash'
@@ -38,6 +39,7 @@ export interface PersistedDraft {
   content: string
   diskRevision?: string
   paused: boolean
+  format?: TextFileFormat | null
 }
 export interface HistoryStats {
   count: number
@@ -133,6 +135,7 @@ export function historyDocument(fileId: string): Promise<HistoryDocument> {
             sequence: seq,
             content,
             diskRevision: fileSaveCoordinator.getDiskRevision(fileId),
+            format: fileSaveCoordinator.getPersistedFormat(fileId),
             paused: isHistoryAutosavePaused(fileId),
           })
         }
@@ -181,6 +184,8 @@ async function capture(fileId: string) {
   const file = getFileObject(fileId)
   if (!file || file.kind === 'new_tab') return
   const content = useEditorStore.getState().getEditorContent(fileId)
+  const format = fileSaveCoordinator.getPersistedFormat(fileId)
+  const diskRevision = fileSaveCoordinator.getDiskRevision(fileId)
   const dirty =
     !file.path || useEditorStateStore.getState().idStateMap.get(fileId)?.hasUnsavedChanges
   const document = await historyDocument(fileId)
@@ -201,7 +206,8 @@ async function capture(fileId: string) {
     writer: binding.writer,
     sequence: seq,
     content,
-    diskRevision: fileSaveCoordinator.getDiskRevision(fileId),
+    diskRevision,
+    format,
     paused,
   })
   if (!result.persisted)
@@ -209,8 +215,8 @@ async function capture(fileId: string) {
   if (binding.sequence === seq && edits.get(fileId) === edit) status(fileId, 'protected')
   if (Date.now() - binding.checkpoint > 60_000 && binding.editing) {
     binding.checkpoint = Date.now()
-    await historyCall('checkpoint', { document, content, kind: 'checkpoint' }).catch((error) =>
-      logger.error('History checkpoint failed', error),
+    await historyCall('checkpoint', { document, content, format, kind: 'checkpoint' }).catch(
+      (error) => logger.error('History checkpoint failed', error),
     )
   }
 }
@@ -288,10 +294,17 @@ export async function flushDraftProtection(fileId?: string) {
   }
 }
 
-export async function protectExternalContent(fileId: string, before: string, after: string) {
-  if (!started || before === after) return
+export async function protectExternalContent(
+  fileId: string,
+  before: string,
+  after: string,
+  afterFormat?: TextFileFormat,
+) {
+  const beforeFormat = fileSaveCoordinator.getPersistedFormat(fileId)
+  if (!started || (before === after && (!afterFormat || sameTextFormat(beforeFormat, afterFormat))))
+    return
   const document = await historyDocument(fileId)
-  await historyCall('external', { document, before, after })
+  await historyCall('external', { document, before, after, beforeFormat, afterFormat })
   const binding = bindings.get(fileId)
   if (binding) binding.editing = false
   historyChanged()
@@ -485,15 +498,17 @@ export async function startDraftProtection() {
 
 export async function observeHistoryFile(fileId: string, content: string) {
   if (!started) return
+  const format = fileSaveCoordinator.getPersistedFormat(fileId)
   const document = await historyDocument(fileId)
-  await historyCall('observe', { document, content })
+  await historyCall('observe', { document, content, format })
 }
 
 export async function protectDiscard(fileIds: string[]) {
   if (!started) return
   for (const fileId of fileIds) {
     const content = useEditorStore.getState().getEditorContent(fileId)
+    const format = fileSaveCoordinator.getPersistedFormat(fileId)
     const document = await historyDocument(fileId)
-    await historyCall('checkpoint', { document, content, kind: 'discard' })
+    await historyCall('checkpoint', { document, content, format, kind: 'discard' })
   }
 }

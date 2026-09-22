@@ -1,3 +1,4 @@
+import { sameTextFormat } from '@/components/EditorArea/textFileFormat'
 import { isTauri } from '@tauri-apps/api/core'
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import { markExternalFileConflict } from '@/components/EditorArea/externalFileChanges'
@@ -94,6 +95,7 @@ async function readSources(cache: DraftSessionStore | undefined, reload: boolean
             ext: draft.document.name.match(/\.([^./\\]+)$/)?.[1].toLowerCase() ?? 'md',
             content: draft.content,
             diskRevision: draft.diskRevision,
+            format: draft.format ?? undefined,
           }],
         },
       }))
@@ -225,6 +227,7 @@ export async function stageDraftRecovery({
         if (source.nativeDraft) job.nativeDrafts.push(source.nativeDraft)
         members.push(job)
         fileSaveCoordinator.recordContent(file.id, doc.content)
+        fileSaveCoordinator.recordFormat(file.id, doc.format ?? fileSaveCoordinator.getTextMetadata(file.id).format, !!doc.format)
         if (doc.diskRevision) fileSaveCoordinator.setDiskRevision(file.id, doc.diskRevision)
         // Until validation finishes, conservatively protect the exact draft as dirty.
         useEditorStateStore.getState().setIdStateMap(file.id, { hasUnsavedChanges: true })
@@ -270,15 +273,19 @@ export async function stageDraftRecovery({
       // Never write the original content back after an asynchronous read.
       const content = editor.getEditorContent(fileId)
       if (doc.path && disk?.status !== 'success') updateFile({ id: fileId, path: undefined })
-      const dirty = !doc.path || disk?.status !== 'success' || disk.content !== content
+      const format = fileSaveCoordinator.getPersistedFormat(fileId)
+      const dirty = !doc.path || disk?.status !== 'success' || disk.content !== content ||
+        (!!format && !sameTextFormat(format, disk.text?.format ?? format))
       useEditorStateStore.getState().setIdStateMap(fileId, { hasUnsavedChanges: dirty })
       if (doc.path && disk?.status === 'success') {
-        if (!dirty) fileSaveCoordinator.setDiskRevision(fileId, disk.revision)
+        fileSaveCoordinator.setSavedBaseline(fileId, disk)
+        if (!dirty) fileSaveCoordinator.loadSnapshot(fileId, disk)
+        else if (!format && disk.text) fileSaveCoordinator.recordFormat(fileId, disk.text.format, false)
         if (dirty && disk.revision !== doc.diskRevision)
           markExternalFileConflict(fileId, disk.revision)
       }
       for (const draft of job.nativeDrafts)
-        await bindRecoveredDraft(fileId, { ...draft, content, diskRevision: doc.diskRevision })
+        await bindRecoveredDraft(fileId, { ...draft, content, format, diskRevision: doc.diskRevision })
       return true
     } catch (error) {
       onError(error)

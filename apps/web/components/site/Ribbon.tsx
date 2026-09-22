@@ -18,6 +18,7 @@ export default function Ribbon() {
     let previous = 0
     let lastDraw = 0
     const media = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const coarsePointer = window.matchMedia('(pointer: coarse)')
     const header = root.closest('.mf-site')?.querySelector('.mf-site-header')
     const home = root.closest('.mf-home')
     const canRun = () =>
@@ -33,10 +34,13 @@ export default function Ribbon() {
       }
       if (previous) time += Math.min(now - previous, 64)
       previous = now
-      // Cap decorative rendering at 30 fps; the slow displacement remains smooth.
-      if (now - lastDraw >= 1000 / 30) {
+      // Follow the display on desktop. Keep the remainder on touch devices so
+      // throttling cannot accumulate a long frame every few draws.
+      const interval = 1000 / 30
+      const elapsed = now - lastDraw
+      if (!coarsePointer.matches || elapsed >= interval) {
         renderer.draw(time)
-        lastDraw = now
+        lastDraw = coarsePointer.matches ? now - (elapsed % interval) : now
       }
       frame = requestAnimationFrame(draw)
     }
@@ -119,10 +123,10 @@ export default function Ribbon() {
       <svg viewBox='0 0 1400 800' preserveAspectRatio='xMidYMid slice' focusable='false'>
         <defs>
           <linearGradient id={`${id}-silk`} x1='0' y1='0' x2='1' y2='.6'>
-            <stop stopColor='var(--mf-site-cyan)' />
+            <stop stopColor='var(--mf-wave-light)' />
             <stop offset='.4' stopColor='var(--seal)' />
-            <stop offset='.75' stopColor='var(--mf-site-purple)' />
-            <stop offset='1' stopColor='var(--mf-site-cyan)' />
+            <stop offset='.75' stopColor='var(--mf-wave-accent)' />
+            <stop offset='1' stopColor='var(--mf-wave-light)' />
           </linearGradient>
         </defs>
         <path

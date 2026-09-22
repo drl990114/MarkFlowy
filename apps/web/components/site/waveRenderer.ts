@@ -55,18 +55,19 @@ const fragmentSource = `#version 300 es
 precision highp float;
 in vec2 v_uv;
 uniform vec3 u_primary;
+uniform vec3 u_light;
+uniform vec3 u_accent;
+uniform vec3 u_depth;
 uniform vec2 u_size;
 out vec4 outColor;
 float grain(vec2 p) { return fract(sin(dot(p,vec2(12.9898,78.233))) * 43758.5453); }
 void main() {
-  // A two-dimensional blue palette lets the front and reverse of the fold
-  // catch different colours, rather than painting a flat gradient on screen.
-  vec3 ice = mix(u_primary, vec3(0.80,0.96,1.0), 0.83);
-  vec3 blue = mix(u_primary, vec3(0.42,0.71,1.0), 0.38);
-  vec3 violet = mix(u_primary, vec3(0.67,0.57,0.96), 0.76);
-  vec3 color = mix(ice,blue,smoothstep(0.06,0.48,v_uv.x));
-  color = mix(color,violet,smoothstep(0.48,0.85,v_uv.x));
-  color = mix(color,ice,smoothstep(0.84,1.0,v_uv.x));
+  // The two sides of the fold share the homepage's ink, mist and warm highlight.
+  vec3 light = mix(u_primary, u_light, 0.9);
+  vec3 depth = mix(u_primary, u_depth, 0.65);
+  vec3 color = mix(light,depth,smoothstep(0.06,0.48,v_uv.x));
+  color = mix(color,u_accent,smoothstep(0.48,0.85,v_uv.x));
+  color = mix(color,light,smoothstep(0.84,1.0,v_uv.x));
   color = mix(color,vec3(1.0),0.12 + smoothstep(0.25,0.96,v_uv.y) * 0.25);
   float slope = clamp(0.5 + dFdy(v_uv.y) * u_size.y * 0.99,0.0,1.0);
   float glow = smoothstep(0.0,0.834,pow(slope,0.806));
@@ -151,19 +152,34 @@ export function createWaveRenderer(canvas: HTMLCanvasElement): WaveRenderer | nu
   gl.enableVertexAttribArray(uv)
   gl.vertexAttribPointer(uv, 2, gl.FLOAT, false, 20, 12)
   const uniforms = Object.fromEntries(
-    ['u_time', 'u_size', 'u_primary', 'u_rotation', 'u_position'].map((key) => [
-      key,
-      gl.getUniformLocation(program, key),
-    ]),
+    [
+      'u_time',
+      'u_size',
+      'u_primary',
+      'u_light',
+      'u_accent',
+      'u_depth',
+      'u_rotation',
+      'u_position',
+    ].map((key) => [key, gl.getUniformLocation(program, key)]),
   )
-  const primary = getComputedStyle(canvas).getPropertyValue('--seal').trim().replace('#', '')
-  const rgb = [0, 2, 4].map((offset) => parseInt(primary.slice(offset, offset + 2), 16) / 255)
-  gl.uniform3f(uniforms.u_primary, rgb[0], rgb[1], rgb[2])
+  const styles = getComputedStyle(canvas)
+  for (const [uniform, token] of [
+    ['u_primary', '--seal'],
+    ['u_light', '--mf-wave-light'],
+    ['u_accent', '--mf-wave-accent'],
+    ['u_depth', '--mf-wave-depth'],
+  ]) {
+    const hex = styles.getPropertyValue(token).trim().replace('#', '')
+    const rgb = [0, 2, 4].map((offset) => parseInt(hex.slice(offset, offset + 2), 16) / 255)
+    gl.uniform3f(uniforms[uniform], rgb[0], rgb[1], rgb[2])
+  }
   gl.enable(gl.DEPTH_TEST)
   gl.clearColor(0, 0, 0, 0)
   const resize = () => {
     const { width, height } = canvas.getBoundingClientRect()
-    const dpr = Math.min(window.devicePixelRatio || 1, 1.5)
+    // Bound fill cost as well as resolution on very wide displays.
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5, Math.sqrt(2400000 / (width * height)))
     canvas.width = Math.max(1, Math.round(width * dpr))
     canvas.height = Math.max(1, Math.round(height * dpr))
     gl.viewport(0, 0, canvas.width, canvas.height)

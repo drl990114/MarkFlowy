@@ -3,6 +3,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import type { Contributor } from '../../utils/contributors'
 import { PRODUCT_URL } from '../../utils/website'
+import SiteArrow from './Arrow'
 import { useSceneMotion } from './HomeMotion'
 import Reveal from './Reveal'
 
@@ -23,7 +24,7 @@ export default function Contributors({ contributors }: { contributors: Contribut
             <p className='mf-section-copy'>{t('site.community.body')}</p>
             <Link className='mf-text-link' href={`${PRODUCT_URL}/graphs/contributors`}>
               {t('home.contributors.viewAll')}
-              <i className='ri-arrow-right-line' aria-hidden='true' />
+              <SiteArrow />
             </Link>
             <div className='mf-community-controls'>
               <span>

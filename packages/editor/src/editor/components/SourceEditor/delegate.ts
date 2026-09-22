@@ -51,6 +51,7 @@ export function createSourceCodeManager(
     new FindExtension({}),
     new LineCodeMirrorExtension({
       hideDecoration: true,
+      preserveLineEndings: true,
       showCopyButton: false,
       extensions: [basicSetup, markdown(), ...typewriterCmExtension],
       onCodemirrorViewLoad: options?.onCodemirrorViewLoad,

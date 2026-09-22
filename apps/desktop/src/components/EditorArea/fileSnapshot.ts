@@ -1,12 +1,18 @@
 import type { FileSysResult } from '@/helper/filesys'
 import { invoke } from '@tauri-apps/api/core'
 import { getPathIdentityKey } from '@/helper/pathIdentity'
-import { OpeningReadQueue, type OpeningReadOptions, type OpeningReadPriority } from './openingReadQueue'
+import {
+  OpeningReadQueue,
+  type OpeningReadOptions,
+  type OpeningReadPriority,
+} from './openingReadQueue'
+import type { TextEncoding, TextFileMetadata } from './textFileFormat'
 
 export interface StableFileSnapshot {
   content: string
   revision: string
   status: 'success'
+  text?: TextFileMetadata
 }
 
 export type FileSnapshotResult =
@@ -16,11 +22,8 @@ export type FileSnapshotResult =
 
 const openingSnapshots = new OpeningReadQueue<FileSnapshotResult>()
 
-export const promoteOpeningRead = (
-  path: string,
-  scope: object,
-  priority: OpeningReadPriority,
-) => openingSnapshots.promote(getPathIdentityKey(path), scope, priority)
+export const promoteOpeningRead = (path: string, scope: object, priority: OpeningReadPriority) =>
+  openingSnapshots.promote(getPathIdentityKey(path), scope, priority)
 
 /**
  * Rust validates the raw bytes and captures the matching write revision in one command.
@@ -29,10 +32,13 @@ export const promoteOpeningRead = (
  */
 export function readStableFileSnapshot(
   filePath: string,
-  options: OpeningReadOptions & { reuseInFlight?: boolean } = {},
+  options: OpeningReadOptions & { reuseInFlight?: boolean; encoding?: TextEncoding } = {},
 ): Promise<FileSnapshotResult> {
-  if (!options.reuseInFlight) {
-    return invoke<FileSnapshotResult>('get_file_snapshot', { filePath })
+  if (!options.reuseInFlight || options.encoding) {
+    return invoke<FileSnapshotResult>('get_file_snapshot', {
+      filePath,
+      ...(options.encoding ? { encoding: options.encoding } : {}),
+    })
   }
   return openingSnapshots.read(
     getPathIdentityKey(filePath),

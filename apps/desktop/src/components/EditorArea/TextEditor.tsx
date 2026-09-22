@@ -1466,6 +1466,7 @@ function TextEditor(props: TextEditorProps) {
     const handleExternalContentSync = (payload: ExternalFileContentSyncPayload) => {
       if (payload.fileId !== id) return
       applySyncedContent(payload.content, true)
+      setStatus(TextEditorStatus.SUCCESS)
     }
 
     bus.on(EXTERNAL_FILE_CONTENT_SYNC_EVENT, handleExternalContentSync)
@@ -1553,7 +1554,7 @@ function TextEditor(props: TextEditorProps) {
         }
         if (snapshot.status === 'success') {
           recordEditorOpenContent(openRequestId, snapshot.content)
-          fileSaveCoordinator.setDiskRevision(id, snapshot.revision)
+          fileSaveCoordinator.loadSnapshot(id, snapshot)
           void observeHistoryFile(id, snapshot.content).catch((error) =>
             logger.error('History baseline failed', error),
           )
@@ -1632,6 +1633,7 @@ function TextEditor(props: TextEditorProps) {
           params.autosave &&
           (!useAppSettingStore.getState().settingData.autosave ||
             isHistoryAutosavePaused(id) ||
+            fileSaveCoordinator.getTextMetadata(id).decoding.needsConfirmation ||
             !getFileObject(id)?.path)
         )
           return false
@@ -1672,7 +1674,8 @@ function TextEditor(props: TextEditorProps) {
 
         return fileSaveCoordinator.saveLatest(
           id,
-          async ({ content: fileContent }) => {
+          async (saveSnapshot) => {
+            const { content: fileContent, textOptions } = saveSnapshot
             if (isExternalFileSaveBlocked(id)) return false
 
             const fileToSave = getFileObject(id) ?? initialFile
@@ -1779,6 +1782,7 @@ function TextEditor(props: TextEditorProps) {
                             params.expectedContent),
                       undefined,
                       params.autosave ? 'autosave' : 'save',
+                      { ...textOptions, originalFormat: undefined },
                     )
                     if (writeResult.status === 'blocked') return false
                     if (writeResult.status === 'conflict') {
@@ -1791,7 +1795,7 @@ function TextEditor(props: TextEditorProps) {
                 })
 
                 if (saved && writtenRevision) {
-                  fileSaveCoordinator.setDiskRevision(id, writtenRevision)
+                  fileSaveCoordinator.acknowledgeSaved(id, saveSnapshot, writtenRevision)
                 }
 
                 if (!saved && blockedByDirtyTarget) {
@@ -1830,6 +1834,7 @@ function TextEditor(props: TextEditorProps) {
                             params.expectedContent),
                       undefined,
                       params.autosave ? 'autosave' : 'save',
+                      textOptions,
                     ),
                 })
                 if (queuedWrite.status === 'missing-path') return false
@@ -1838,12 +1843,14 @@ function TextEditor(props: TextEditorProps) {
                   markExternalFileConflict(id, queuedWrite.value.revision)
                   return false
                 }
-                fileSaveCoordinator.setDiskRevision(id, queuedWrite.value.revision)
+                fileSaveCoordinator.acknowledgeSaved(id, saveSnapshot, queuedWrite.value.revision)
               }
 
               return true
             } catch (error) {
-              toast.error(String(error))
+              const message = String(error)
+              const notify = !message.includes('text_') || fileSaveCoordinator.recordSaveError(id, message)
+              if (!params.autosave || notify) toast.error(message)
               return false
             }
           },
@@ -2011,7 +2018,7 @@ function TextEditor(props: TextEditorProps) {
       if (!editorSnapshotRegistry.flush(id)) return
       if (currentViewType === EditorViewType.SOURCECODE && resumeSource) {
         if (resumeSource.cm.composing) return
-        setContent(resumeSource.cm.state.doc.toString())
+        setContent(resumeSource.content)
       }
       if (mode === EditorViewType.SOURCECODE) {
         if (delegate && resumeSource) {
@@ -2907,7 +2914,7 @@ function TextEditor(props: TextEditorProps) {
         }
         if (currentViewType === EditorViewType.SOURCECODE) {
           if (!resumeSource) throw new Error('Source editor is not ready.')
-          return resumeSource.cm.state.doc.toString()
+          return resumeSource.content
         }
         if (typeof content !== 'string') throw new Error('Preview is not ready.')
         return content

@@ -17,6 +17,7 @@ import {
   FileResultCode,
   hydrateDirectoryEntries,
   unwrapDirectoryReadResult,
+  type FileSysResult,
   type DirectoryReadEntry,
   type DirectoryReadResult,
   type IFile,
@@ -80,7 +81,8 @@ export const TauriFileSystemProvider: FC<FileSystemAdapterProps> = ({ children }
     },
 
     writeFile: async (filePath: string, content: string): Promise<void> => {
-      await invoke('write_file', { filePath, content })
+      const result = await invoke<FileSysResult>('write_file', { filePath, content })
+      if (result.code !== FileResultCode.Success) throw new Error(result.content)
     },
 
     deleteFile: async (filePath: string): Promise<void> => {

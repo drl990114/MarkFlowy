@@ -21,6 +21,12 @@ const documentSchema = z.object({
   path: z.string().optional(),
   ext: z.string().optional(),
   diskRevision: z.string().optional(),
+  format: z
+    .object({
+      encoding: z.enum(['utf-8', 'utf-16le', 'utf-16be', 'gbk', 'gb18030']),
+      bom: z.enum(['none', 'utf8', 'utf16le', 'utf16be']),
+    })
+    .optional(),
 })
 export const draftSessionSchema = z.object({
   version: z.literal(1),
@@ -52,6 +58,7 @@ function captureDraftSession(): DraftSession {
         ext: file.ext,
         content,
         diskRevision: fileSaveCoordinator.getDiskRevision(id),
+        format: fileSaveCoordinator.getPersistedFormat(id),
       },
     ]
   })

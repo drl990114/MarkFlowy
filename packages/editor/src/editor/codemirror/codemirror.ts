@@ -1,3 +1,4 @@
+import { rawTextExtension, resetRawText, type RawTextProjection } from './raw-text'
 import { indentWithTab } from '@codemirror/commands'
 import {
   ensureSyntaxTree,
@@ -17,6 +18,7 @@ import {
   RangeSetBuilder,
   StateEffect,
   StateField,
+  Transaction,
 } from '@codemirror/state'
 import type {
   Command as CodeMirrorCommand,
@@ -223,6 +225,7 @@ export const extractMatches = (view: CodeMirrorEditorView) => {
 }
 
 export type CreateCodemirrorOptions = {
+  preserveLineEndings?: boolean
   /**
    * when it is true, undo and redo will use prosemirror view.
    */
@@ -292,6 +295,8 @@ export class MfCodemirrorView {
 
   options?: CreateCodemirrorOptions
 
+  private rawField?: StateField<RawTextProjection>
+
   private searchActive = false
 
   private copyButton: HTMLDivElement | null = null
@@ -324,16 +329,19 @@ export class MfCodemirrorView {
     this.options = options
     this.content = this.node.textContent
     const changeFilter = CodeMirrorEditorState.changeFilter.of((tr: CodeMirrorTransaction) => {
-      if (!tr.docChanged) {
+      if (!tr.docChanged && !options.preserveLineEndings) {
         this.forwardSelection()
       }
 
       return true
     })
 
+    const raw = options.preserveLineEndings ? rawTextExtension(this.node.textContent) : undefined
+    this.rawField = raw?.field
     const startState = CodeMirrorEditorState.create({
       doc: this.node.textContent as string,
       extensions: [
+        ...(raw ? [raw.extension] : []),
         this.commandKeymapConf.of(this.commandKeymapExtension()),
         keymap.of(this.codeMirrorKeymap()),
         changeFilter,
@@ -370,12 +378,16 @@ export class MfCodemirrorView {
     this.node = node
     this.content = node.textContent
     this.updateLanguage()
-    const change = computeChange(this.cm.state.doc.toString(), node.textContent)
+    const normalized = this.rawField ? node.textContent.replace(/\r\n?/g, '\n') : node.textContent
+    const change = computeChange(this.cm.state.doc.toString(), normalized)
+    const rawChanged = this.rawField && this.cm.state.field(this.rawField).raw !== node.textContent
 
-    if (change) {
+    if (change || rawChanged) {
       this.updating = true
       this.cm.dispatch({
-        changes: { from: change.from, to: change.to, insert: change.text },
+        changes: change ? { from: change.from, to: change.to, insert: change.text } : undefined,
+        effects: this.rawField ? resetRawText.of(node.textContent) : undefined,
+        annotations: Transaction.addToHistory.of(false),
       })
       this.updating = false
     }
@@ -385,8 +397,9 @@ export class MfCodemirrorView {
 
   setSelection(anchor: number, head: number): void {
     this.cm.focus()
+    if (this.rawField && this.cm.state.selection.main.anchor === this.toCodeMirrorPosition(anchor) && this.cm.state.selection.main.head === this.toCodeMirrorPosition(head)) return
     this.updating = true
-    this.cm.dispatch({ selection: { anchor, head } })
+    this.cm.dispatch({ selection: { anchor: this.toCodeMirrorPosition(anchor), head: this.toCodeMirrorPosition(head) } })
     this.updating = false
   }
 
@@ -421,8 +434,13 @@ export class MfCodemirrorView {
     cmInstanceMap.delete(this.id)
   }
 
+  toCodeMirrorPosition(position: number): number {
+    return this.rawField ? this.cm.state.field(this.rawField).toNormalized(position) : position
+  }
+
   setSearchState(query: SearchQuery, active: { from: number; to: number } | null): void {
-    this.cm.dispatch({ effects: setSearchHighlight.of({ query, active }) })
+    const mapped = active ? { from: this.toCodeMirrorPosition(active.from), to: this.toCodeMirrorPosition(active.to) } : null
+    this.cm.dispatch({ effects: setSearchHighlight.of({ query, active: mapped }) })
     const searchActive = active !== null
     if (searchActive !== this.searchActive) {
       this.searchActive = searchActive
@@ -431,7 +449,7 @@ export class MfCodemirrorView {
   }
 
   scrollToPosition(pos: number): void {
-    const safePos = Math.max(0, Math.min(pos, this.cm.state.doc.length))
+    const safePos = Math.max(0, Math.min(this.toCodeMirrorPosition(pos), this.cm.state.doc.length))
     this.cm.dispatch({ effects: CodeMirrorEditorView.scrollIntoView(safePos, { y: 'center' }) })
   }
 
@@ -468,11 +486,14 @@ export class MfCodemirrorView {
 
     this.cm.update([tr])
 
-    if (!tr.docChanged || this.updating) {
+    if (this.updating) return
+    if (!tr.docChanged) {
+      if (this.rawField) this.forwardSelection()
       return
     }
 
-    const change = computeChange(this.node.textContent, tr.state.doc.toString())
+    const rawContent = this.rawField ? tr.state.field(this.rawField).raw : tr.state.doc.toString()
+    const change = computeChange(this.node.textContent, rawContent)
 
     if (change) {
       const start = this.getPos() + 1
@@ -481,16 +502,22 @@ export class MfCodemirrorView {
         start + change.to,
         change.text ? this.schema.text(change.text) : [],
       )
+      if (this.rawField) {
+        const raw = tr.state.field(this.rawField)
+        const { anchor, head } = tr.state.selection.main
+        transaction.setSelection(TextSelection.between(transaction.doc.resolve(start + raw.toRaw(anchor)), transaction.doc.resolve(start + raw.toRaw(head))))
+      }
       this.view.dispatch(transaction)
 
-      this.options?.onValueChange?.(tr.state.doc.toString())
+      this.options?.onValueChange?.(rawContent)
     }
   }
 
   private asProseMirrorSelection(doc: ProsemirrorNode) {
     const start = this.getPos() + 1
     const { anchor, head } = this.cm.state.selection.main
-    return TextSelection.between(doc.resolve(anchor + start), doc.resolve(head + start))
+    const raw = this.rawField ? this.cm.state.field(this.rawField) : undefined
+    return TextSelection.between(doc.resolve((raw?.toRaw(anchor) ?? anchor) + start), doc.resolve((raw?.toRaw(head) ?? head) + start))
   }
 
   updateCommandKeymap(options: CommandKeymapOptions) {

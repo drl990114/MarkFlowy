@@ -1,3 +1,4 @@
+import { DEFAULT_TEXT_METADATA } from './textFileFormat'
 import bus from '@/helper/eventBus'
 import { deleteFileObject, getFileObject, setFileObject } from '@/helper/files'
 import { FileResultCode, type IFile } from '@/helper/filesys'
@@ -81,6 +82,47 @@ describe('external file changes', () => {
   afterEach(() => {
     resetExternalFileChanges()
     vi.useRealTimers()
+  })
+
+  it('keeps a format-only local edit dirty when external text is identical', async () => {
+    fileSaveCoordinator.loadSnapshot(fileId, {
+      content: 'local',
+      revision: 'disk:old',
+      status: 'success',
+      text: DEFAULT_TEXT_METADATA,
+    })
+    fileSaveCoordinator.recordFormat(fileId, { encoding: 'utf-16le', bom: 'utf16le' })
+    useEditorStateStore.getState().setIdStateMap(fileId, { hasUnsavedChanges: true })
+    invoke.mockResolvedValue({
+      content: 'local',
+      revision: 'disk:new',
+      status: 'success',
+      text: DEFAULT_TEXT_METADATA,
+    })
+    await emitChange()
+    expect(useEditorStateStore.getState().idStateMap.get(fileId)?.hasUnsavedChanges).toBe(true)
+    expect(fileSaveCoordinator.getTextMetadata(fileId).format.encoding).toBe('utf-16le')
+    expect(isExternalFileSaveBlocked(fileId)).toBe(true)
+  })
+
+  it('adopts an external BOM-only change when the document is clean', async () => {
+    fileSaveCoordinator.loadSnapshot(fileId, {
+      content: 'local',
+      revision: 'disk:old',
+      status: 'success',
+      text: DEFAULT_TEXT_METADATA,
+    })
+    useEditorStateStore.getState().setIdStateMap(fileId, { hasUnsavedChanges: false })
+    invoke.mockResolvedValue({
+      content: 'local',
+      revision: 'disk:new',
+      status: 'success',
+      text: { ...DEFAULT_TEXT_METADATA, format: { encoding: 'utf-8', bom: 'utf8' } },
+    })
+    await emitChange()
+    expect(fileSaveCoordinator.getTextMetadata(fileId).format.bom).toBe('utf8')
+    expect(fileSaveCoordinator.getDiskRevision(fileId)).toBe('disk:new')
+    expect(isExternalFileSaveBlocked(fileId)).toBe(false)
   })
 
   it('coalesces a thousand notifications while a read is in flight', async () => {

@@ -71,6 +71,7 @@ export async function restoreHistory(entryId: string, before = false) {
         content: snapshot.content,
         diskRevision: disk?.status === 'success' ? disk.revision : undefined,
         paused: true,
+        format: fileSaveCoordinator.getTextMetadata(file.id).format,
       }
       const protectedDraft = await historyCall<typeof draft>('restore', {
         entryId,
@@ -86,7 +87,13 @@ export async function restoreHistory(entryId: string, before = false) {
         throw new Error('content_changed')
       updateFile({ id: file.id, content: snapshot.content })
       fileSaveCoordinator.recordContent(file.id, snapshot.content)
+      fileSaveCoordinator.recordFormat(
+        file.id,
+        protectedDraft.format ?? fileSaveCoordinator.getTextMetadata(file.id).format,
+        !!protectedDraft.format,
+      )
       if (disk?.status === 'success') {
+        fileSaveCoordinator.setSavedBaseline(file.id, disk)
         const previousRevision = fileSaveCoordinator.getDiskRevision(file.id)
         if (previousRevision && previousRevision !== disk.revision && content !== disk.content)
           markExternalFileConflict(file.id, disk.revision)

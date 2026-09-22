@@ -173,7 +173,11 @@ fn dispatch(store: &mut Store, operation: &str, p: Value) -> anyhow::Result<Valu
             string(&p, "name")?,
         )?)?,
         "observe" => {
-            store.observe(&document(&p)?, string(&p, "content")?)?;
+            store.observe_with_format(
+                &document(&p)?,
+                string(&p, "content")?,
+                serde_json::from_value(p["format"].clone())?,
+            )?;
             json!(true)
         }
         "presence" => {
@@ -221,10 +225,10 @@ fn dispatch(store: &mut Store, operation: &str, p: Value) -> anyhow::Result<Valu
             if let Some(path) = &doc.path {
                 verify_current_text(path, string(&p, "after")?)?;
             }
-            json!({"versionId":store.external(&doc,string(&p,"before")?,string(&p,"after")?)?})
+            json!({"versionId":store.external_with_formats(&doc,string(&p,"before")?,string(&p,"after")?,serde_json::from_value(p["beforeFormat"].clone())?,serde_json::from_value(p["afterFormat"].clone())?)?})
         }
         "checkpoint" => {
-            json!({"versionId":store.checkpoint(&document(&p)?,p["before"].as_str().map(str::as_bytes),string(&p,"content")?.as_bytes(),string(&p,"kind")?,p["message"].as_str().unwrap_or(""))?})
+            json!({"versionId":store.checkpoint_with_format(&document(&p)?,p["before"].as_str().map(str::as_bytes),string(&p,"content")?.as_bytes(),string(&p,"kind")?,p["message"].as_str().unwrap_or(""),serde_json::from_value(p["format"].clone())?)?})
         }
         "begin" => {
             let doc = document(&p)?;
@@ -267,11 +271,11 @@ fn dispatch(store: &mut Store, operation: &str, p: Value) -> anyhow::Result<Valu
         )?)?,
         "exists" => json!(store.entry_exists(string(&p, "entryId")?)?),
         "read" => {
-            let (doc, content) = store.read_entry(
+            let (doc, content, format) = store.read_text_snapshot(
                 string(&p, "entryId")?,
                 p["before"].as_bool().unwrap_or(false),
             )?;
-            json!({"document":doc,"content":content})
+            json!({"document":doc,"content":content,"format":format})
         }
         "stats" => store.stats(p["workspace"].as_str())?,
         "clear" => store.clear(p["workspace"].as_str())?,
@@ -300,6 +304,17 @@ fn verify_current_text(path: &str, content: &str) -> anyhow::Result<()> {
 
 /// Called while the filesystem mutex is held, before any truncation.
 pub fn prepare_write(path: &Path, content: &[u8]) -> Result<Option<String>, String> {
+    prepare_write_with_formats(path, content, None)
+}
+
+pub fn prepare_write_with_formats(
+    path: &Path,
+    content: &[u8],
+    formats: Option<(
+        Option<mf_text_encoding::TextFileFormat>,
+        mf_text_encoding::TextFileFormat,
+    )>,
+) -> Result<Option<String>, String> {
     if let Some(app) = APP.get() {
         init(app)?;
     } else {
@@ -326,10 +341,11 @@ pub fn prepare_write(path: &Path, content: &[u8]) -> Result<Option<String>, Stri
                     .unwrap_or("document"),
             )?
         };
-        Ok(Some(store.prepare_write(
+        Ok(Some(store.prepare_write_with_formats(
             &doc,
             before.as_deref(),
             &content,
+            formats,
         )?))
     })
 }

@@ -4,7 +4,9 @@ mod snapshot_tests {
 
     fn successful_snapshot(result: FileSnapshotResult) -> (String, String) {
         match result {
-            FileSnapshotResult::Success { content, revision } => (content, revision),
+            FileSnapshotResult::Success {
+                content, revision, ..
+            } => (content, revision),
             FileSnapshotResult::Unavailable { result } => {
                 panic!("snapshot was unavailable: {result:?}")
             }
@@ -34,6 +36,9 @@ mod snapshot_tests {
         let success = serde_json::to_value(FileSnapshotResult::Success {
             content: "# Heading".to_string(),
             revision: "revision".to_string(),
+            text: mf_text_encoding::decode(b"# Heading", None)
+                .unwrap()
+                .metadata,
         })
         .unwrap();
         assert_eq!(
@@ -41,7 +46,8 @@ mod snapshot_tests {
             serde_json::json!({
                 "status": "success",
                 "content": "# Heading",
-                "revision": "revision"
+                "revision": "revision",
+                "text": { "format": { "encoding": "utf-8", "bom": "none" }, "lineEndings": { "lf": 0, "crlf": 0, "cr": 0 }, "decoding": { "source": "utf8", "needsConfirmation": false, "byteRoundTrip": true } }
             })
         );
         let unavailable = serde_json::to_value(FileSnapshotResult::Unavailable {
@@ -475,8 +481,14 @@ mod snapshot_tests {
                 let mut sample = read_file_sample(path)?.unwrap();
                 if calls == 1 {
                     assert_eq!(
-                        write_file(alias.to_str().unwrap(), "same").code,
-                        FileResultCode::Success
+                        conditional_write_file(
+                            &alias,
+                            b"same",
+                            &get_file_write_revision(&alias).unwrap()
+                        )
+                        .unwrap()
+                        .status,
+                        ConditionalWriteStatus::Success
                     );
                     restore_modified(path, modified);
                     sample.metadata = fs::metadata(path).unwrap();
@@ -614,5 +626,107 @@ mod snapshot_tests {
                 (new_median / old_median - 1.0) * 100.0
             );
         }
+    }
+    #[test]
+    fn encoded_save_preserves_format_and_refuses_unmappable_or_stale_content() {
+        use mf_text_encoding::{encode, Bom, TextEncoding, TextFileFormat, TextWriteOptions};
+        let directory = tempfile::tempdir().unwrap();
+        let path = directory.path().join("encoded.md");
+        for format in [
+            TextFileFormat {
+                encoding: TextEncoding::Utf8,
+                bom: Bom::Utf8,
+            },
+            TextFileFormat {
+                encoding: TextEncoding::Utf16le,
+                bom: Bom::Utf16le,
+            },
+            TextFileFormat {
+                encoding: TextEncoding::Utf16be,
+                bom: Bom::None,
+            },
+            TextFileFormat {
+                encoding: TextEncoding::Gbk,
+                bom: Bom::None,
+            },
+            TextFileFormat {
+                encoding: TextEncoding::Gb18030,
+                bom: Bom::None,
+            },
+        ] {
+            let original = encode("原文\r\n中\n尾\r", format).unwrap();
+            fs::write(&path, &original).unwrap();
+            let revision = get_file_write_revision(&path).unwrap();
+            let options = TextWriteOptions {
+                format,
+                original_format: Some(format),
+                encoding_confirmed: true,
+            };
+            let noop = conditional_write_text_file(
+                &path,
+                "原文\r\n中\n尾\r",
+                &revision,
+                "save",
+                Some(&options),
+            )
+            .unwrap();
+            assert_eq!(noop.revision, revision);
+            assert_eq!(fs::read(&path).unwrap(), original);
+            let saved = conditional_write_text_file(
+                &path,
+                "改文\r\n中\n尾\r",
+                &revision,
+                "save",
+                Some(&options),
+            )
+            .unwrap();
+            assert_eq!(saved.status, ConditionalWriteStatus::Success);
+            assert_eq!(
+                fs::read(&path).unwrap(),
+                encode("改文\r\n中\n尾\r", format).unwrap()
+            );
+            let stale =
+                conditional_write_text_file(&path, "旧内容", &revision, "save", Some(&options))
+                    .unwrap();
+            assert_eq!(stale.status, ConditionalWriteStatus::Conflict);
+            if format.encoding == TextEncoding::Gbk {
+                let before = fs::read(&path).unwrap();
+                assert!(conditional_write_text_file(
+                    &path,
+                    "😀",
+                    &saved.revision,
+                    "save",
+                    Some(&options)
+                )
+                .unwrap_err()
+                .to_string()
+                .contains("text_unmappable"));
+                assert_eq!(fs::read(&path).unwrap(), before);
+                assert_eq!(get_file_write_revision(&path).unwrap(), saved.revision);
+            }
+        }
+    }
+
+    #[test]
+    fn legacy_write_entry_preserves_utf16_and_does_not_rewrite_unchanged_files() {
+        use mf_text_encoding::{encode, Bom, TextEncoding, TextFileFormat};
+        let directory = tempfile::tempdir().unwrap();
+        let path = directory.path().join("utf16.md");
+        let format = TextFileFormat {
+            encoding: TextEncoding::Utf16le,
+            bom: Bom::Utf16le,
+        };
+        fs::write(&path, encode("old\r\n", format).unwrap()).unwrap();
+        let revision = get_file_write_revision(&path).unwrap();
+        assert_eq!(
+            write_file(path.to_str().unwrap(), "old\r\n").code,
+            FileResultCode::Success
+        );
+        assert_eq!(get_file_write_revision(&path).unwrap(), revision);
+        assert_eq!(
+            write_file(path.to_str().unwrap(), "new\r\n").code,
+            FileResultCode::Success
+        );
+        assert_eq!(fs::read(&path).unwrap(), encode("new\r\n", format).unwrap());
     }
 }
