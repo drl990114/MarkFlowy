@@ -6,7 +6,7 @@
     "build": "yarn clear && yarn build-esbuild && yarn types",
     "dev": "node ./esbuild.config.dev.mjs",
     "build-esbuild": "node esbuild.config.prod.mjs",
-    "types": "node ./node_modules/rollup/dist/bin/rollup -c rollup.config.types.js",
+    "types": "rollup -c rollup.config.types.js",
     "prettier": "prettier --config ./.prettierrc.json --write \"src/**/*{.js,.jsx,.ts,.tsx,.css}\"",
     "clear": "rimraf dist",
     "test": "vitest run",
