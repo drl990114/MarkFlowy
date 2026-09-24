@@ -6,10 +6,8 @@ export function DraftProtectionStatus({ fileId }: { fileId?: string }) {
   const state = useHistoryProtection((s) => (fileId ? s.status[fileId] : undefined))
   const paused = useHistoryProtection((s) => (fileId ? s.paused[fileId] : false))
   const { t } = useTranslation()
-  if (!state && !paused) return null
-  const label = t(
-    `history.${state === 'failed' ? 'failed' : paused ? 'paused' : (state ?? 'protected')}`,
-  )
+  if (state !== 'failed' && !paused) return null
+  const label = t(state === 'failed' ? 'history.failed' : 'history.paused')
   return (
     <span
       className='mx-2 flex items-center gap-1 truncate text-xs text-muted-foreground'

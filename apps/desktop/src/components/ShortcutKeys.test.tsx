@@ -36,7 +36,7 @@ describe('ShortcutKeys', () => {
       caps: ['⌃', '⌥', '[NumpadSubtract]'],
       label: '⌃⌥[NumpadSubtract]',
     },
-  ])('renders separate $platform keycaps for $label with one accessible label', ({
+  ])('renders a readable $platform shortcut for $label with one accessible label', ({
     platform,
     keys,
     caps,
@@ -47,6 +47,11 @@ describe('ShortcutKeys', () => {
 
     expect(keycaps.map((key) => key.textContent)).toEqual(caps)
     expect(keycaps.every((key) => key.getAttribute('aria-hidden') === 'true')).toBe(true)
+    expect(
+      [...container.querySelectorAll('[aria-hidden="true"]')]
+        .map((element) => element.textContent)
+        .join(''),
+    ).toBe(label)
     expect(container.querySelector('.sr-only')?.textContent).toBe(label)
   })
 

@@ -1,7 +1,7 @@
 import { Select } from '@/components/ui/select'
 import { getFileObjectByPath } from '@/helper/files'
 import useEditorStore from '@/stores/useEditorStore'
-import { lazy, Suspense, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Dialog } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { useTranslation } from '@/i18n'
@@ -15,8 +15,7 @@ import {
 } from '@/services/local-history'
 import { restoreHistory } from '@/services/restore-history'
 import { useHistoryDialog } from './historyDialogStore'
-
-const HistoryDiff = lazy(() => import('./HistoryDiff'))
+import { HistoryDiffPreview, HistorySnapshotTexts } from './HistoryDiffPreview'
 
 export default function HistoryDialog() {
   const { open, fileId } = useHistoryDialog()
@@ -230,25 +229,10 @@ export default function HistoryDialog() {
                   <Button variant='outline' onClick={() => setLargeDiff(true)}>
                     {t('history.compute_large')}
                   </Button>
-                  <div className='grid min-h-0 flex-1 grid-cols-2 gap-3 overflow-auto'>
-                    <textarea
-                      readOnly
-                      aria-label={t('history.before')}
-                      value={pair.before}
-                      className='min-h-0 w-full bg-transparent'
-                    />
-                    <textarea
-                      readOnly
-                      aria-label={t('history.after')}
-                      value={pair.after}
-                      className='min-h-0 w-full bg-transparent'
-                    />
-                  </div>
+                  <HistorySnapshotTexts {...pair} />
                 </>
               ) : (
-                <Suspense fallback={<p>{t('history.loading')}</p>}>
-                  <HistoryDiff {...pair} />
-                </Suspense>
+                <HistoryDiffPreview key={`${selected?.id}:${comparison}`} {...pair} />
               )
             ) : (
               <p className='text-muted-foreground'>{t('history.select')}</p>

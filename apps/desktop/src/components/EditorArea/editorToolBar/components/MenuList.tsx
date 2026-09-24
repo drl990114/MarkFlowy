@@ -1,4 +1,5 @@
 import { commandRegistry } from '@/commands'
+import { openLocalHistory } from '@/components/LocalHistory/historyDialogStore'
 import { EditorViewType } from '@/constants/editorViewType'
 import { showContextMenu } from '@/components/ui-v2/ContextMenu'
 import useBookMarksStore from '@/extensions/bookmarks/useBookMarksStore'
@@ -256,6 +257,13 @@ export const MenuList = memo((props: MenuListProps) => {
       })
       items.push({ type: 'divider' })
     }
+
+    items.push({
+      label: t('history.title'),
+      value: 'history',
+      handler: () => openLocalHistory(targetEditorId),
+    })
+    items.push({ type: 'divider' })
 
     // 书签
     if (showBookmark) {

@@ -1,5 +1,7 @@
+import { Fragment } from 'react'
 import {
   formatKeyMap,
+  keybindingPlatform,
   normalizeKeyMap,
   type KeybindingPlatform,
 } from '@/commands/keybindingKeys'
@@ -11,23 +13,20 @@ export type ShortcutKeysProps = Omit<KbdGroupProps, 'children'> & {
   platform?: KeybindingPlatform
 }
 
-export function ShortcutKeys({ keys, platform, ...props }: ShortcutKeysProps) {
+export function ShortcutKeys({ keys, platform = keybindingPlatform(), ...props }: ShortcutKeysProps) {
   if (!keys.length) return null
 
   return (
     <KbdGroup {...props}>
       <span className='sr-only'>{formatKeyMap(keys, platform)}</span>
-      {(normalizeKeyMap(keys) ?? keys).map((key) => {
-        // Format each stored key directly so a literal + keeps its own keycap.
+      {(normalizeKeyMap(keys) ?? keys).map((key, index) => {
+        // Format stored keys directly so a literal + is distinct from a separator.
         const label = formatKeyMap([key], platform)
         return (
-          <Kbd
-            key={key}
-            aria-hidden='true'
-            className={label.length === 1 ? 'w-5 px-0' : undefined}
-          >
-            {label}
-          </Kbd>
+          <Fragment key={key}>
+            {index > 0 && platform !== 'mac' ? <span aria-hidden='true'>+</span> : null}
+            <Kbd aria-hidden='true'>{label}</Kbd>
+          </Fragment>
         )
       })}
     </KbdGroup>

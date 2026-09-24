@@ -1083,6 +1083,7 @@
     "after": "Último resultado",
     "refresh": "Hay cambios nuevos · actualizar comparación",
     "loading": "Cargando comparación…",
+    "compare_failed": "No se pudo cargar la comparación. Se muestra el texto original; aún puedes restaurar esta versión.",
     "select": "Selecciona una versión para ver sus cambios.",
     "restore_before": "Restaurar antes de los cambios",
     "restore": "Restaurar esta versión",

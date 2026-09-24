@@ -1083,6 +1083,7 @@
     "after": "Latest result",
     "refresh": "New changes available · refresh comparison",
     "loading": "Loading comparison…",
+    "compare_failed": "Unable to load the comparison. Showing the original text; you can still restore this version.",
     "select": "Select a version to inspect its changes.",
     "restore_before": "Restore before changes",
     "restore": "Restore this version",

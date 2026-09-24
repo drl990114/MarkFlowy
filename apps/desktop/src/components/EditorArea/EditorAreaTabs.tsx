@@ -1,4 +1,3 @@
-import { openLocalHistory } from '@/components/LocalHistory/historyDialogStore'
 import { EVENT } from '@/constants'
 import useFileCacheStore from '@/helper/files'
 import { checkUnsavedFiles, saveUnsavedFiles } from '@/services/checkUnsavedFiles'
@@ -231,7 +230,6 @@ const EditorAreaTab = memo((props: EditorAreaTabProps) => {
       x: e.clientX,
       y: e.clientY,
       items: [
-        { label: t('history.title'), value: 'history', handler: () => openLocalHistory(id) },
         {
           label: t('contextmenu.editor_tab.close'),
           value: 'close',

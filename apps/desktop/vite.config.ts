@@ -67,7 +67,9 @@ export default defineConfig(async ({ mode }) => {
     clearScreen: false,
     optimizeDeps: {
       exclude: ['rme'],
-      include: ['react-dom/server', 'zens'],
+      // Discover the lazy history viewer before its first open, so loading a
+      // version does not trigger dependency re-optimization mid-session.
+      include: ['react-dom/server', 'zens', '@codemirror/merge'],
     },
     plugins: [
       pdfPreviewAssets(),
