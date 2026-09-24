@@ -4,9 +4,11 @@ import { useRef, useState, type PropsWithChildren } from 'react'
 import { useNavigate } from 'react-router'
 import './SettingDialog.css'
 
-export type SettingDialogProps = PropsWithChildren<Pick<DialogContentProps, 'onEscapeKeyDown'>>
+export type SettingDialogProps = PropsWithChildren<
+  Pick<DialogContentProps, 'onEscapeKeyDown'> & { beforeClose?: () => Promise<boolean> }
+>
 
-export function SettingDialog({ children, onEscapeKeyDown }: SettingDialogProps) {
+export function SettingDialog({ children, onEscapeKeyDown, beforeClose }: SettingDialogProps) {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [open, setOpen] = useState(true)
@@ -15,7 +17,8 @@ export function SettingDialog({ children, onEscapeKeyDown }: SettingDialogProps)
   return (
     <Dialog.Root
       open={open}
-      onOpenChange={(nextOpen) => {
+      onOpenChange={async (nextOpen) => {
+        if (!nextOpen && beforeClose && !(await beforeClose())) return
         closeRequested.current = !nextOpen
         setOpen(nextOpen)
       }}

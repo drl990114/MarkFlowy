@@ -1023,6 +1023,13 @@
       "opening": "正在打开文档",
       "load_failed": "无法加载 Capricorn 编辑器",
       "preparation_failed": "后台文档准备失败，请重试。"
+    },
+    "snippets": {
+      "title": "插入片段",
+      "search": "搜索片段…",
+      "manage": "管理片段…",
+      "blank": "新建空白块",
+      "stale": "插入位置已变化，请重新选择。"
     }
   },
   "inline_insert": {
@@ -1126,5 +1133,60 @@
     "password_incorrect": "密码不正确，请重试。",
     "unlock": "解锁",
     "cancel": "取消"
+  },
+  "snippets": {
+    "library": "片段库",
+    "description": "在本机所有工作区复用公式、图表和代码。",
+    "kind": "类型",
+    "kinds": {
+      "math": "Math（公式）",
+      "mermaid": "Mermaid（图表）",
+      "code": "Code（代码）"
+    },
+    "search": "搜索片段…",
+    "new": "新建片段",
+    "copy": "复制",
+    "copyCustom": "复制为自定义",
+    "copySuffix": "（副本）",
+    "show": "显示",
+    "hide": "隐藏",
+    "hidden": "已隐藏",
+    "delete": "删除",
+    "deleteTitle": "删除“{{title}}”？",
+    "builtin": "内置",
+    "custom": "自定义",
+    "unsaved": "有未保存修改",
+    "name": "名称",
+    "language": "代码语言",
+    "languagePlaceholder": "例如 typescript；留空为纯文本",
+    "source": "源码",
+    "sourceHelp": "只填写源码，不加外层的 ``` 或 $$。文字、缩进与换行按原样插入，不展开变量。",
+    "save": "保存",
+    "discard": "放弃修改",
+    "unsavedTitle": "保存片段修改？",
+    "unsavedDescription": "离开此片段前，请保存或放弃修改。",
+    "loadError": "无法加载片段库",
+    "saveError": "保存失败",
+    "retry": "重试",
+    "noResults": "没有匹配的片段",
+    "conflict": "片段库已在其他窗口更新。草稿已保留；可复制为新片段，或放弃草稿后重新选择原片段。",
+    "preview": "预览",
+    "previewAgain": "重新预览",
+    "previewStale": "源码已修改，请重新预览。",
+    "previewError": "预览不可用，仍可保存源码。",
+    "builtins": {
+      "math-fraction": "分式",
+      "math-root": "根式",
+      "math-sum": "求和",
+      "math-matrix": "矩阵",
+      "mermaid-flow": "流程图",
+      "mermaid-sequence": "时序图",
+      "mermaid-class": "类图",
+      "mermaid-state": "状态图",
+      "code-json": "JSON 对象",
+      "code-typescript": "TypeScript 函数",
+      "code-python": "Python 函数",
+      "code-bash": "Bash 脚本"
+    }
   }
 }

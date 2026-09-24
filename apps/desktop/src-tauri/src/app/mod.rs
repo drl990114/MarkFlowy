@@ -10,3 +10,4 @@ pub(crate) mod startup_timing;
 pub mod themes;
 pub mod window_manager;
 pub mod workspace;
+pub mod snippets;

@@ -1023,6 +1023,13 @@
     },
     "preview": {
       "retry": "Retry"
+    },
+    "snippets": {
+      "title": "Insérer un extrait",
+      "search": "Rechercher un extrait…",
+      "manage": "Gérer les extraits…",
+      "blank": "Nouveau bloc vide",
+      "stale": "Le point d’insertion a changé. Rouvrez le sélecteur."
     }
   },
   "inline_insert": {
@@ -1126,5 +1133,60 @@
     "password_incorrect": "Mot de passe incorrect. Réessayez.",
     "unlock": "Déverrouiller",
     "cancel": "Annuler"
+  },
+  "snippets": {
+    "library": "Bibliothèque d’extraits",
+    "description": "Réutilisez des formules, des diagrammes et du code dans vos espaces locaux.",
+    "kind": "Type",
+    "kinds": {
+      "math": "Math",
+      "mermaid": "Mermaid",
+      "code": "Code"
+    },
+    "search": "Rechercher un extrait…",
+    "new": "Nouvel extrait",
+    "copy": "Dupliquer",
+    "copyCustom": "Créer une copie personnalisée",
+    "copySuffix": "(copie)",
+    "show": "Afficher",
+    "hide": "Masquer",
+    "hidden": "Masqué",
+    "delete": "Supprimer",
+    "deleteTitle": "Supprimer « {{title}} » ?",
+    "builtin": "Intégré",
+    "custom": "Personnalisé",
+    "unsaved": "Modifications non enregistrées",
+    "name": "Nom",
+    "language": "Langage du code",
+    "languagePlaceholder": "Ex. typescript ; vide pour du texte brut",
+    "source": "Source",
+    "sourceHelp": "Saisissez uniquement la source, sans délimiteurs ``` ou $$ externes. Le texte et les espaces sont insérés tels quels ; les variables ne sont pas développées.",
+    "save": "Enregistrer",
+    "discard": "Abandonner",
+    "unsavedTitle": "Enregistrer les modifications ?",
+    "unsavedDescription": "Enregistrez ou abandonnez vos modifications avant de quitter cet extrait.",
+    "loadError": "Impossible de charger les extraits",
+    "saveError": "Échec de l’enregistrement",
+    "retry": "Réessayer",
+    "noResults": "Aucun extrait correspondant",
+    "conflict": "La bibliothèque a changé dans une autre fenêtre. Votre brouillon est conservé. Dupliquez-le ou abandonnez les modifications et sélectionnez à nouveau l’original.",
+    "preview": "Aperçu",
+    "previewAgain": "Actualiser l’aperçu",
+    "previewStale": "La source a changé. Actualisez l’aperçu.",
+    "previewError": "Aperçu indisponible. Vous pouvez enregistrer la source.",
+    "builtins": {
+      "math-fraction": "Fraction",
+      "math-root": "Racine carrée",
+      "math-sum": "Somme",
+      "math-matrix": "Matrice",
+      "mermaid-flow": "Organigramme",
+      "mermaid-sequence": "Diagramme de séquence",
+      "mermaid-class": "Diagramme de classes",
+      "mermaid-state": "Diagramme d’états",
+      "code-json": "Objet JSON",
+      "code-typescript": "Fonction TypeScript",
+      "code-python": "Fonction Python",
+      "code-bash": "Script Bash"
+    }
   }
 }

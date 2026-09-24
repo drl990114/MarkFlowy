@@ -1,3 +1,6 @@
+import { useSnippetLibrary } from '@/features/snippets/store'
+import { getVisibleSnippets } from '@/features/snippets/builtins'
+import type { CapricornSnippetKind } from '@/features/snippets/types'
 import {
   observeHistoryFile,
   endHistoryBatch,
@@ -2607,6 +2610,20 @@ function TextEditor(props: TextEditorProps) {
     ],
   )
 
+  const { library: snippetLibrary } = useSnippetLibrary()
+  const snippetOptions = useMemo(
+    () => ({
+      items: getVisibleSnippets(snippetLibrary, (key) => t(key)),
+      onManage: (kind: CapricornSnippetKind) => {
+        void commandRegistry.execute(EVENT.app_openSetting, {
+          category: 'snippets',
+          snippetKind: kind,
+        })
+      },
+    }),
+    [snippetLibrary, t],
+  )
+
   const capricornRuntimeOptions = useMemo<
     Omit<CapricornRuntimeOptions, 'autoFocus' | 'markdown' | 'onError'>
   >(() => {
@@ -2614,6 +2631,7 @@ function TextEditor(props: TextEditorProps) {
     const generateCopilotText = hostOptions.ai?.copilot?.generateText
 
     return {
+      snippets: snippetOptions,
       clipboard: capricornClipboard,
       commands: capricornClipboardCommands,
       keybindingConfiguration: createCapricornKeybindingConfiguration(
@@ -2663,6 +2681,7 @@ function TextEditor(props: TextEditorProps) {
       virtualize: CAPRICORN_DESKTOP_VIRTUALIZE_OPTIONS,
     }
   }, [
+    snippetOptions,
     linkEditMode,
     codeBlockLineWrapping,
     curFile.id,

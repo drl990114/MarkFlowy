@@ -1023,6 +1023,13 @@
     },
     "preview": {
       "retry": "Retry"
+    },
+    "snippets": {
+      "title": "Insertar fragmento",
+      "search": "Buscar fragmentos…",
+      "manage": "Gestionar fragmentos…",
+      "blank": "Nuevo bloque vacío",
+      "stale": "El punto de inserción cambió. Vuelve a abrir el selector."
     }
   },
   "inline_insert": {
@@ -1126,5 +1133,60 @@
     "password_incorrect": "Contraseña incorrecta. Inténtalo de nuevo.",
     "unlock": "Desbloquear",
     "cancel": "Cancelar"
+  },
+  "snippets": {
+    "library": "Biblioteca de fragmentos",
+    "description": "Reutiliza fórmulas, diagramas y código en tus espacios locales.",
+    "kind": "Tipo",
+    "kinds": {
+      "math": "Math",
+      "mermaid": "Mermaid",
+      "code": "Code"
+    },
+    "search": "Buscar fragmentos…",
+    "new": "Nuevo fragmento",
+    "copy": "Duplicar",
+    "copyCustom": "Crear copia personalizada",
+    "copySuffix": "(copia)",
+    "show": "Mostrar",
+    "hide": "Ocultar",
+    "hidden": "Oculto",
+    "delete": "Eliminar",
+    "deleteTitle": "¿Eliminar «{{title}}»?",
+    "builtin": "Integrado",
+    "custom": "Personalizado",
+    "unsaved": "Cambios sin guardar",
+    "name": "Nombre",
+    "language": "Lenguaje del código",
+    "languagePlaceholder": "Ej.: typescript; vacío para texto plano",
+    "source": "Código fuente",
+    "sourceHelp": "Introduce solo el contenido, sin delimitadores externos ``` o $$. El texto y los espacios se insertan literalmente; las variables no se expanden.",
+    "save": "Guardar",
+    "discard": "Descartar",
+    "unsavedTitle": "¿Guardar los cambios?",
+    "unsavedDescription": "Guarda o descarta los cambios antes de salir de este fragmento.",
+    "loadError": "No se pudieron cargar los fragmentos",
+    "saveError": "No se pudieron guardar los cambios",
+    "retry": "Reintentar",
+    "noResults": "No hay fragmentos coincidentes",
+    "conflict": "La biblioteca cambió en otra ventana. Tu borrador se conserva. Duplícalo como un fragmento nuevo o descarta los cambios y vuelve a seleccionar el original.",
+    "preview": "Vista previa",
+    "previewAgain": "Actualizar vista previa",
+    "previewStale": "El contenido cambió. Actualiza la vista previa.",
+    "previewError": "Vista previa no disponible. Puedes guardar el contenido.",
+    "builtins": {
+      "math-fraction": "Fracción",
+      "math-root": "Raíz cuadrada",
+      "math-sum": "Sumatoria",
+      "math-matrix": "Matriz",
+      "mermaid-flow": "Diagrama de flujo",
+      "mermaid-sequence": "Diagrama de secuencia",
+      "mermaid-class": "Diagrama de clases",
+      "mermaid-state": "Diagrama de estados",
+      "code-json": "Objeto JSON",
+      "code-typescript": "Función TypeScript",
+      "code-python": "Función Python",
+      "code-bash": "Script Bash"
+    }
   }
 }

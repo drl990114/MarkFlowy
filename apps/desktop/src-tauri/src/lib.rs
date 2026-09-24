@@ -1689,6 +1689,8 @@ pub fn run() {
             opened_cache::cmd::get_opened_cache,
             opened_cache::cmd::add_recent_workspace,
             opened_cache::cmd::clear_recent_workspaces,
+            app::snippets::cmd::get_snippets,
+            app::snippets::cmd::mutate_snippets,
             bookmarks::cmd::get_bookmarks,
             bookmarks::cmd::add_bookmark,
             bookmarks::cmd::edit_bookmark,

@@ -71,6 +71,7 @@ const Harness = runInNewContext(compiled, {
   getOrCreateDelegateOptions: () => ({}),
   capricornLocalization: {},
   capricornClipboard: {},
+  snippetOptions: { items: [] },
   handleCapricornClipboardResult: vi.fn(),
   capricornClipboardCommands,
   createCapricornKeybindingConfiguration,

@@ -1,3 +1,9 @@
+import type { CapricornSnippetsOptions } from '@/features/snippets/types'
+export type {
+  CapricornSnippet,
+  CapricornSnippetKind,
+  CapricornSnippetsOptions,
+} from '@/features/snippets/types'
 import { isCapricornRuntimeAvailable } from '@/constants/capricornRuntime'
 import { createCapricornResumeApi } from './capricornResume'
 import { getCapricornActiveHeadingId } from './capricornHeadingViewport'
@@ -31,6 +37,9 @@ export type CapricornBlockType =
 export type CapricornMarkType = 'bold' | 'code' | 'italic'
 
 export interface CapricornCommandApi {
+  insertCodeBlock?: (source: string, options?: { language?: string }) => void
+  insertMathBlock?: (source: string) => void
+  insertMermaidBlock?: (source: string) => void
   insertLink?: (link: { href: string; text?: string; title?: string }) => void
   updateLink?: (update: { href?: string; title?: string | null }) => void
   removeLink?: () => void
@@ -135,6 +144,7 @@ export interface CapricornKeybindingConfiguration {
 }
 
 export interface CapricornEditorSettings {
+  snippets?: false | CapricornSnippetsOptions
   codeBlockLineWrapping?: boolean
   linkEditMode?: 'popover' | 'markdown'
   className?: string

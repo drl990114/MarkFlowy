@@ -139,6 +139,11 @@ export const getSettingMap = () => {
         },
       },
     },
+    snippets: {
+      i18nKey: 'snippets.library',
+      iconName: 'ri-code-box-line',
+      desc: { i18nKey: 'snippets.description' },
+    },
     themeStore: {
       i18nKey: 'settings.themeStore.label',
       iconName: 'ri-palette-line',

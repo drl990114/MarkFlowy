@@ -30,6 +30,7 @@ const state = vi.hoisted(() => ({
   writeSettingData: vi.fn(),
   mounted: vi.fn(),
   cleanedUp: vi.fn(),
+  leaveSnippets: vi.fn().mockResolvedValue(true),
 }))
 
 vi.mock('@/commands', () => ({
@@ -68,11 +69,24 @@ vi.mock('./KeyboardTable', () => ({ KeyboardTable: () => null }))
 vi.mock('./Support', () => ({ Support: () => null }))
 vi.mock('./ThemeSetting', () => ({ ThemeSetting: () => null }))
 vi.mock('./ThemeStore', () => ({ ThemeStore: () => null }))
+vi.mock('./SnippetSetting', () => ({
+  SnippetSetting: ({
+    initialKind,
+    registerLeaveGuard,
+  }: {
+    initialKind?: string
+    registerLeaveGuard: (guard: () => Promise<boolean>) => () => void
+  }) => {
+    useEffect(() => registerLeaveGuard(state.leaveSnippets), [registerLeaveGuard])
+    return <output aria-label='Snippet category'>{initialKind ?? 'math'}</output>
+  },
+}))
 vi.mock('./settingMap', () => ({
   getSettingMap: () => ({
     general: { i18nKey: 'General', desc: { i18nKey: 'General settings' }, misc: {} },
     editor: { i18nKey: 'Editor', desc: { i18nKey: 'Editor settings' }, behavior: {} },
     ai: { i18nKey: 'AI', desc: { i18nKey: 'AI settings' }, model: {} },
+    snippets: { i18nKey: 'Snippets', desc: { i18nKey: 'Snippet library' } },
   }),
 }))
 vi.mock('./component/SettingGroup', () => ({
@@ -163,6 +177,7 @@ let narrowViewport = false
 
 beforeEach(() => {
   vi.clearAllMocks()
+  state.leaveSnippets.mockResolvedValue(true)
   narrowViewport = false
   vi.spyOn(window, 'matchMedia').mockImplementation((query) => ({
     matches: narrowViewport,
@@ -193,6 +208,30 @@ function pressEscape(target: Element = document.activeElement ?? document.body) 
 }
 
 describe('Settings dialog integration', () => {
+  it('guards closing, switching settings and targeted snippet navigation', async () => {
+    render(
+      <MemoryRouter>
+        <AppProbe />
+      </MemoryRouter>,
+    )
+    const settings = await openSettings()
+    fireEvent.click(within(settings).getByRole('button', { name: 'Snippets' }))
+    await screen.findByLabelText('Snippet category')
+    state.leaveSnippets.mockResolvedValue(false)
+    fireEvent.click(within(settings).getByRole('button', { name: 'Editor' }))
+    await waitFor(() => expect(state.leaveSnippets).toHaveBeenCalledTimes(1))
+    expect(screen.getByLabelText('Snippet category').textContent).toBe('math')
+    fireEvent.click(within(settings).getByRole('button', { name: 'common.close' }))
+    await waitFor(() => expect(state.leaveSnippets).toHaveBeenCalledTimes(2))
+    expect(screen.getByRole('dialog')).toBe(settings)
+    await act(async () => state.handler?.({ category: 'snippets', snippetKind: 'code' }))
+    expect(screen.getByLabelText('Snippet category').textContent).toBe('math')
+    state.leaveSnippets.mockResolvedValue(true)
+    await act(async () => state.handler?.({ category: 'snippets', snippetKind: 'mermaid' }))
+    expect(screen.getByLabelText('Snippet category').textContent).toBe('mermaid')
+    pressEscape(settings)
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+  })
   it('resets startup preferences after resetting app configuration without moving the current panels', async () => {
     useLayoutStore.setState({ leftStartup: 'search', rightStartup: 'ai' })
     const leftBar = useLayoutStore.getState().leftBar

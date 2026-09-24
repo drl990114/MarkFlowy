@@ -20,7 +20,11 @@ const mocks = vi.hoisted(() => ({
   t: (key: string) => key,
   error: vi.fn(),
   rmeLoaded: vi.fn(),
-  invoke: vi.fn(async () => ({ status: 'success', revision: 'disk:saved' })),
+  invoke: vi.fn(async (command: string) =>
+    command === 'get_snippets'
+      ? { version: 1, revision: 0, items: [], hiddenBuiltinIds: [] }
+      : { status: 'success', revision: 'disk:saved' },
+  ),
   editorStore: {
     clearEditorResources: vi.fn(),
     clearEditorDelegate: vi.fn(),

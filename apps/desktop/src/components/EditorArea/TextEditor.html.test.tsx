@@ -11,7 +11,11 @@ import type * as Zens from 'zens'
 const mocks = vi.hoisted(() => ({
   t: (key: string) => key,
   error: vi.fn(),
-  invoke: vi.fn(async () => ({ status: 'success', revision: 'disk:saved' })),
+  invoke: vi.fn(async (command: string) =>
+    command === 'get_snippets'
+      ? { version: 1, revision: 0, items: [], hiddenBuiltinIds: [] }
+      : { status: 'success', revision: 'disk:saved' },
+  ),
   runtimeAvailable: true,
   editorStore: {
     clearEditorResources: vi.fn(),

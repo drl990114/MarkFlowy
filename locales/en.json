@@ -1023,6 +1023,13 @@
       "opening": "Opening document",
       "load_failed": "Unable to load the Capricorn editor",
       "preparation_failed": "Background document preparation failed. Please retry."
+    },
+    "snippets": {
+      "title": "Insert snippet",
+      "search": "Search snippets…",
+      "manage": "Manage snippets…",
+      "blank": "New empty block",
+      "stale": "The insertion point changed. Please reopen the picker."
     }
   },
   "inline_insert": {
@@ -1126,5 +1133,60 @@
     "password_incorrect": "Incorrect password. Try again.",
     "unlock": "Unlock",
     "cancel": "Cancel"
+  },
+  "snippets": {
+    "library": "Snippet library",
+    "description": "Reuse formulas, diagrams and code across local workspaces.",
+    "kind": "Type",
+    "kinds": {
+      "math": "Math",
+      "mermaid": "Mermaid",
+      "code": "Code"
+    },
+    "search": "Search snippets…",
+    "new": "New snippet",
+    "copy": "Duplicate",
+    "copyCustom": "Copy as custom",
+    "copySuffix": "(copy)",
+    "show": "Show",
+    "hide": "Hide",
+    "hidden": "Hidden",
+    "delete": "Delete",
+    "deleteTitle": "Delete “{{title}}”?",
+    "builtin": "Built-in",
+    "custom": "Custom",
+    "unsaved": "Unsaved changes",
+    "name": "Name",
+    "language": "Code language",
+    "languagePlaceholder": "e.g. typescript; leave empty for plain text",
+    "source": "Source",
+    "sourceHelp": "Enter only the source, without outer ``` or $$ delimiters. Text and whitespace are inserted literally; variables are not expanded.",
+    "save": "Save",
+    "discard": "Discard",
+    "unsavedTitle": "Save snippet changes?",
+    "unsavedDescription": "Save or discard your changes before leaving this snippet.",
+    "loadError": "Could not load snippets",
+    "saveError": "Could not save changes",
+    "retry": "Retry",
+    "noResults": "No matching snippets",
+    "conflict": "The library changed in another window. Your draft is preserved. Duplicate it as a new snippet, or discard the draft and select the original again.",
+    "preview": "Preview",
+    "previewAgain": "Refresh preview",
+    "previewStale": "Source changed. Refresh the preview.",
+    "previewError": "Preview unavailable. You can still save the source.",
+    "builtins": {
+      "math-fraction": "Fraction",
+      "math-root": "Square root",
+      "math-sum": "Summation",
+      "math-matrix": "Matrix",
+      "mermaid-flow": "Flowchart",
+      "mermaid-sequence": "Sequence diagram",
+      "mermaid-class": "Class diagram",
+      "mermaid-state": "State diagram",
+      "code-json": "JSON object",
+      "code-typescript": "TypeScript function",
+      "code-python": "Python function",
+      "code-bash": "Bash script"
+    }
   }
 }

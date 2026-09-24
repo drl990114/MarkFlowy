@@ -278,6 +278,7 @@ export function CapricornEditor({
             'linkEditMode',
             'placeholder',
             'readOnly',
+            'snippets',
             'spellCheck',
             'style',
             'typewriter',
@@ -533,6 +534,7 @@ export function CapricornEditor({
 
   useEffect(() => {
     const settings: CapricornEditorSettings = {
+      snippets: options.snippets,
       codeBlockLineWrapping: options.codeBlockLineWrapping,
       className: options.className,
       colorScheme: options.colorScheme,
@@ -547,6 +549,7 @@ export function CapricornEditor({
     }
     adapterRef.current?.updateSettings(settings)
   }, [
+    options.snippets,
     options.className,
     options.codeBlockLineWrapping,
     options.colorScheme,

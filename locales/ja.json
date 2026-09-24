@@ -1023,6 +1023,13 @@
     },
     "preview": {
       "retry": "Retry"
+    },
+    "snippets": {
+      "title": "スニペットを挿入",
+      "search": "スニペットを検索…",
+      "manage": "スニペットを管理…",
+      "blank": "空のブロックを作成",
+      "stale": "挿入位置が変わりました。選び直してください。"
     }
   },
   "inline_insert": {
@@ -1126,5 +1133,60 @@
     "password_incorrect": "パスワードが違います。再試行してください。",
     "unlock": "ロック解除",
     "cancel": "キャンセル"
+  },
+  "snippets": {
+    "library": "スニペット",
+    "description": "数式、図、コードをローカルの各ワークスペースで再利用します。",
+    "kind": "種類",
+    "kinds": {
+      "math": "Math（数式）",
+      "mermaid": "Mermaid（図）",
+      "code": "Code（コード）"
+    },
+    "search": "スニペットを検索…",
+    "new": "新規スニペット",
+    "copy": "複製",
+    "copyCustom": "カスタムとして複製",
+    "copySuffix": "（コピー）",
+    "show": "表示",
+    "hide": "非表示",
+    "hidden": "非表示",
+    "delete": "削除",
+    "deleteTitle": "「{{title}}」を削除しますか？",
+    "builtin": "組み込み",
+    "custom": "カスタム",
+    "unsaved": "未保存の変更",
+    "name": "名前",
+    "language": "コードの言語",
+    "languagePlaceholder": "例: typescript。空欄はプレーンテキスト",
+    "source": "ソース",
+    "sourceHelp": "外側の ``` や $$ を付けずにソースだけを入力してください。文字、空白、改行はそのまま挿入され、変数は展開されません。",
+    "save": "保存",
+    "discard": "変更を破棄",
+    "unsavedTitle": "スニペットの変更を保存しますか？",
+    "unsavedDescription": "移動する前に変更を保存または破棄してください。",
+    "loadError": "スニペットを読み込めません",
+    "saveError": "保存できません",
+    "retry": "再試行",
+    "noResults": "一致するスニペットはありません",
+    "conflict": "別のウィンドウでライブラリが更新されました。下書きは保持されています。新規スニペットとして複製するか、下書きを破棄して元の項目を選び直してください。",
+    "preview": "プレビュー",
+    "previewAgain": "プレビューを更新",
+    "previewStale": "ソースが変更されました。プレビューを更新してください。",
+    "previewError": "プレビューを表示できません。ソースは保存できます。",
+    "builtins": {
+      "math-fraction": "分数",
+      "math-root": "平方根",
+      "math-sum": "総和",
+      "math-matrix": "行列",
+      "mermaid-flow": "フローチャート",
+      "mermaid-sequence": "シーケンス図",
+      "mermaid-class": "クラス図",
+      "mermaid-state": "状態遷移図",
+      "code-json": "JSON オブジェクト",
+      "code-typescript": "TypeScript 関数",
+      "code-python": "Python 関数",
+      "code-bash": "Bash スクリプト"
+    }
   }
 }

@@ -1,3 +1,5 @@
+import { SnippetSetting } from './SnippetSetting'
+import type { SettingLeaveGuard } from './types'
 import { HistorySetting } from './HistorySetting'
 import Logo from '@/assets/logo.svg?react'
 import { Button } from '@/components/ui/button'
@@ -84,6 +86,15 @@ function Setting({ navigationRequest }: SettingProps) {
   const [mobileReturnFocusId, setMobileReturnFocusId] = useState<string>()
   const [pendingFocusTarget, setPendingFocusTarget] = useState<SettingFocusTarget>()
   const [selectedSearchEntryId, setSelectedSearchEntryId] = useState<string>()
+  const leaveGuardRef = useRef<SettingLeaveGuard | null>(null)
+  const registerLeaveGuard = useCallback((guard: SettingLeaveGuard) => {
+    leaveGuardRef.current = guard
+    return () => {
+      if (leaveGuardRef.current === guard) leaveGuardRef.current = null
+    }
+  }, [])
+  const requestLeave = useCallback(() => leaveGuardRef.current?.() ?? Promise.resolve(true), [])
+  const [acceptedNavigation, setAcceptedNavigation] = useState(navigationRequest)
   const categoryHeadingRef = useRef<HTMLHeadingElement>(null)
   const deferredSearchQuery = useDeferredValue(searchQuery)
   const normalizedSearchQuery = deferredSearchQuery.trim()
@@ -134,17 +145,25 @@ function Setting({ navigationRequest }: SettingProps) {
     const target = navigationRequest?.target
     if (!target) return
 
-    setSearchQuery('')
-    setSelectedSearchEntryId(undefined)
-    setCurGroupKey(target.category)
-    setActiveChildId(target.providerId)
-    setMobileDetailOpen(true)
-    setPendingFocusTarget({
-      categoryKey: target.category,
-      groupKey: target.providerId ? 'model' : undefined,
-      childId: target.providerId,
+    let canceled = false
+    void requestLeave().then((allowed) => {
+      if (!allowed || canceled) return
+      setAcceptedNavigation(navigationRequest)
+      setSearchQuery('')
+      setSelectedSearchEntryId(undefined)
+      setCurGroupKey(target.category)
+      setActiveChildId(target.providerId)
+      setMobileDetailOpen(true)
+      setPendingFocusTarget({
+        categoryKey: target.category,
+        groupKey: target.providerId ? 'model' : undefined,
+        childId: target.providerId,
+      })
     })
-  }, [navigationRequest])
+    return () => {
+      canceled = true
+    }
+  }, [navigationRequest, requestLeave])
 
   useEffect(() => {
     if (!pendingFocusTarget || pendingFocusTarget.categoryKey !== curGroupKey) return
@@ -201,7 +220,8 @@ function Setting({ navigationRequest }: SettingProps) {
     }
   }
 
-  const handleCategorySelect = (groupKey: SettingCategoryKey, navigationItemId: string) => {
+  const handleCategorySelect = async (groupKey: SettingCategoryKey, navigationItemId: string) => {
+    if (groupKey !== curGroupKey && leaveGuardRef.current && !(await requestLeave())) return
     setCurGroupKey(groupKey)
     setActiveChildId(undefined)
     setSelectedSearchEntryId(undefined)
@@ -213,7 +233,9 @@ function Setting({ navigationRequest }: SettingProps) {
     }
   }
 
-  const handleSearchResultSelect = (entry: SettingSearchEntry, navigationItemId: string) => {
+  const handleSearchResultSelect = async (entry: SettingSearchEntry, navigationItemId: string) => {
+    if (entry.categoryKey !== curGroupKey && leaveGuardRef.current && !(await requestLeave()))
+      return
     setCurGroupKey(entry.categoryKey)
     setActiveChildId(entry.childId)
     setSelectedSearchEntryId(entry.id)
@@ -228,6 +250,14 @@ function Setting({ navigationRequest }: SettingProps) {
   }
 
   const renderCurrentSettingData = () => {
+    if (curGroupKey === 'snippets')
+      return (
+        <SnippetSetting
+          initialKind={acceptedNavigation?.target?.snippetKind}
+          navigationId={acceptedNavigation?.id}
+          registerLeaveGuard={registerLeaveGuard}
+        />
+      )
     if (curGroupKey === 'history') return <HistorySetting />
     if (curGroupKey === 'keyboard') return <KeyboardTable />
     if (curGroupKey === 'themeStore') return <ThemeStore />
@@ -280,7 +310,7 @@ function Setting({ navigationRequest }: SettingProps) {
   }
 
   return (
-    <SettingDialog onEscapeKeyDown={handleEscapeKeyDown}>
+    <SettingDialog beforeClose={requestLeave} onEscapeKeyDown={handleEscapeKeyDown}>
       <div className='box-border flex h-full w-full min-w-0 overflow-hidden bg-background text-foreground'>
         <aside
           className={classNames(

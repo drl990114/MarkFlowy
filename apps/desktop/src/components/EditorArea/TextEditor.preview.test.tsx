@@ -13,7 +13,11 @@ import { editorAutomationRegistry } from './editorAutomationRegistry'
 const mocks = vi.hoisted(() => ({
   t: (key: string) => key,
   error: vi.fn(),
-  invoke: vi.fn(async () => ({ status: 'success', revision: 'disk:saved' })),
+  invoke: vi.fn(async (command: string) =>
+    command === 'get_snippets'
+      ? { version: 1, revision: 0, items: [], hiddenBuiltinIds: [] }
+      : { status: 'success', revision: 'disk:saved' },
+  ),
   runtimeAvailable: true,
   rmeEditor: vi.fn(() => null),
   editorStore: {
