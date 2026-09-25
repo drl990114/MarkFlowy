@@ -89,6 +89,107 @@ function createMountAdapter(markdown = '# Markdown') {
   } as unknown as CapricornRuntimeAdapter
 }
 
+describe('CapricornEditor native link navigation', () => {
+  async function mountLink(
+    options: CapricornRuntimeModule.CapricornRuntimeOptions,
+    href = 'https://github.com/drl990114/MarkFlowy',
+  ) {
+    const link = document.createElement('a')
+    link.setAttribute('href', href)
+    const image = document.createElement('img')
+    image.alt = 'GitHub Repo stars'
+    link.append(image)
+    vi.mocked(loadCapricornRuntimeFactory).mockResolvedValue(vi.fn())
+    vi.mocked(createCapricornRuntimeAdapter).mockImplementation(({ container }) => {
+      // Model a rendered fragment with no per-anchor React event handler.
+      container.append(link)
+      return createMountAdapter()
+    })
+    const onError = vi.fn()
+    render(
+      <CapricornEditor
+        active
+        initialMarkdown='# Markdown'
+        onChange={vi.fn()}
+        onError={onError}
+        onUnavailable={onError}
+        options={options}
+      />,
+    )
+    await waitFor(() => expect(createCapricornRuntimeAdapter).toHaveBeenCalledOnce())
+    return { image, link, onError }
+  }
+
+  it.each(['edit', 'preview'] as const)(
+    'routes unhandled badge clicks, Enter and middle clicks through the host in %s mode',
+    async (mode) => {
+      const handleLinkClick = vi.fn()
+      const { image, link } = await mountLink({ mode, handleLinkClick })
+      for (const href of [
+        'https://github.com/drl990114/MarkFlowy?tab=readme-ov-file#download',
+        './my%20notes/中文.md#下载',
+        '#heading',
+      ]) {
+        link.setAttribute('href', href)
+        for (const event of [
+          new MouseEvent('click', { bubbles: true, cancelable: true }),
+          new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }),
+          new MouseEvent('auxclick', { button: 1, bubbles: true, cancelable: true }),
+        ]) {
+          handleLinkClick.mockClear()
+          await act(async () => {
+            fireEvent(image, event)
+            expect(event.defaultPrevented).toBe(true)
+          })
+          expect(handleLinkClick).toHaveBeenCalledExactlyOnceWith(href)
+        }
+      }
+    },
+  )
+
+  it.each(['edit', 'preview'] as const)(
+    'blocks native navigation without an opener, including empty hrefs, in %s mode',
+    async (mode) => {
+      const { image, link } = await mountLink({ mode })
+      for (const href of ['https://github.com/drl990114/MarkFlowy', '']) {
+        link.setAttribute('href', href)
+        const event = new MouseEvent('click', { bubbles: true, cancelable: true })
+        fireEvent(image, event)
+        expect(event.defaultPrevented).toBe(true)
+      }
+    },
+  )
+
+  it('keeps navigation cancelled when the host opener rejects', async () => {
+    const error = new Error('Unable to open link')
+    const handleLinkClick = vi.fn().mockRejectedValue(error)
+    const { image, onError } = await mountLink({ handleLinkClick })
+    const event = new MouseEvent('click', { bubbles: true, cancelable: true })
+    await act(async () => fireEvent(image, event))
+    expect(event.defaultPrevented).toBe(true)
+    expect(onError).toHaveBeenCalledExactlyOnceWith(error)
+  })
+
+  it('leaves context-menu and non-activation keys alone', async () => {
+    const handleLinkClick = vi.fn()
+    const { image } = await mountLink({ handleLinkClick })
+    for (const event of [
+      new MouseEvent('auxclick', { button: 2, bubbles: true, cancelable: true }),
+      new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }),
+      new KeyboardEvent('keydown', {
+        key: 'Enter',
+        isComposing: true,
+        bubbles: true,
+        cancelable: true,
+      }),
+    ]) {
+      fireEvent(image, event)
+      expect(event.defaultPrevented).toBe(false)
+    }
+    expect(handleLinkClick).not.toHaveBeenCalled()
+  })
+})
+
 describe('CapricornEditor typography', () => {
   it('associates synchronous stage timings with the current open request and ignores late callbacks', async () => {
     const adapter = createMountAdapter('short document')

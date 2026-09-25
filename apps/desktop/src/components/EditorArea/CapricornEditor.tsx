@@ -574,19 +574,34 @@ export function CapricornEditor({
     setAttempt((current) => current + 1)
   }, [])
 
-  const handlePreviewLink = (event: MouseEvent<HTMLDivElement> | KeyboardEvent<HTMLDivElement>) => {
-    if (mode !== 'preview' || !options.handleLinkClick || event.defaultPrevented) return
-    if ('key' in event ? event.key !== 'Enter' : event.button !== 0) return
+  const handleLinkNavigation = (
+    event: MouseEvent<HTMLDivElement> | KeyboardEvent<HTMLDivElement>,
+  ) => {
+    if (event.defaultPrevented) return
+    const auxiliary = event.type === 'auxclick'
+    if (
+      'key' in event
+        ? event.key !== 'Enter' || event.nativeEvent.isComposing
+        : event.button !== (auxiliary ? 1 : 0)
+    ) {
+      return
+    }
     const link = event.target instanceof Element ? event.target.closest('a[href]') : null
-    const href = link?.getAttribute('href')
-    if (!href) return
-    // The runtime's button-based link UI is shared with edit mode. Reading
-    // previews retain the host's direct-click/Enter navigation, including
-    // local Markdown paths, without replacing the session's plugin options.
+    if (!link || !event.currentTarget.contains(link)) return
+
+    // Document links must never replace the Desktop WebView, even when a
+    // rendered HTML fragment has no handler or the host opener is unavailable.
     event.preventDefault()
+    // Preserve Capricorn's editing UI and modifier-click policy for its own
+    // links. Capture still cancels navigation if a child stops propagation.
+    if (mode === 'edit' && link.hasAttribute('data-cap-link-open') && !auxiliary) return
+
     event.stopPropagation()
+    const href = link.getAttribute('href')
+    const openLink = options.handleLinkClick
+    if (!href?.trim() || !openLink) return
     void Promise.resolve()
-      .then(() => options.handleLinkClick?.(href))
+      .then(() => openLink(href))
       .catch(onError)
   }
 
@@ -602,8 +617,9 @@ export function CapricornEditor({
         data-mf-capricorn-runtime='true'
         id={editorId}
         ref={containerRef}
-        onClickCapture={handlePreviewLink}
-        onKeyDownCapture={handlePreviewLink}
+        onAuxClickCapture={handleLinkNavigation}
+        onClickCapture={handleLinkNavigation}
+        onKeyDownCapture={handleLinkNavigation}
         style={{
           gridColumn: 1,
           gridRow: 1,
