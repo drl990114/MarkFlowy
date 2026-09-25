@@ -1,5 +1,5 @@
 import { LanguageDescription } from '@codemirror/language'
-import { languages } from '@codemirror/language-data'
+import { languages } from '../codemirror/languages'
 import { prosemirrorNodeToHtml } from '@rme-sdk/sdk'
 import { DOMSerializer } from '@rme-sdk/sdk/pm/model'
 import type { Node as ProsemirrorNode } from '@rme-sdk/sdk/pm/model'

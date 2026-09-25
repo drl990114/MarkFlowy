@@ -5,7 +5,7 @@ import {
   type LanguageDescription,
   type LanguageSupport,
 } from '@codemirror/language'
-import { languages } from '@codemirror/language-data'
+import { languages } from './languages'
 import { SearchQuery } from '@codemirror/search'
 import type {
   Extension as CodeMirrorExtension,

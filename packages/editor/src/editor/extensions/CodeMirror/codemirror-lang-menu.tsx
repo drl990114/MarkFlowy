@@ -1,4 +1,4 @@
-import { languages } from '@codemirror/language-data'
+import { languages } from '../../codemirror/languages'
 import { computePosition } from '@floating-ui/dom'
 import type { EditorView, FindProsemirrorNodeResult } from '@rme-sdk/sdk/core'
 import { Selection } from '@rme-sdk/sdk/pm/state'

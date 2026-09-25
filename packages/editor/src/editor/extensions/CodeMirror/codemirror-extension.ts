@@ -2,7 +2,7 @@ import type { MfCodemirrorView } from '../../codemirror/codemirror'
 import type { OnSetOptionsProps } from '@rme-sdk/sdk/core'
 import type Token from 'markdown-it/lib/token.mjs'
 
-import { languages } from '@codemirror/language-data'
+import { languages } from '../../codemirror/languages'
 import { placeholder } from '@codemirror/view'
 import type {
   ApplySchemaAttributes,
