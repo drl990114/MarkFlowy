@@ -138,6 +138,7 @@ interface LoadThemeExtensionsIncrementallyOptions {
   loadExtension: (extension: ThemeExtension) => void
   onError: (extension: ThemeExtension, error: unknown) => void
   scheduleChunk?: ScheduleThemeExtensionChunk
+  beforeBackground?: () => Promise<void>
 }
 
 /**
@@ -150,6 +151,7 @@ export const loadThemeExtensionsIncrementally = async ({
   loadExtension,
   onError,
   scheduleChunk = scheduleThemeExtensionChunk,
+  beforeBackground,
 }: LoadThemeExtensionsIncrementallyOptions): Promise<void> => {
   const currentIndex = currentTheme
     ? extensions.findIndex((extension) => extensionMatchesTheme(extension, currentTheme))
@@ -169,6 +171,7 @@ export const loadThemeExtensionsIncrementally = async ({
 
   if (currentExtension) loadSafely(currentExtension)
 
+  if (backgroundExtensions.length && beforeBackground) await beforeBackground()
   for (const extension of backgroundExtensions) {
     await scheduleChunk(() => loadSafely(extension))
   }

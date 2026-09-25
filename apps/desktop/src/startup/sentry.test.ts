@@ -9,17 +9,20 @@ vi.mock('@sentry/react', () => ({ captureException: sentryCaptureException, init
 
 describe('deferred Sentry initialization', () => {
   beforeEach(() => {
+    vi.useFakeTimers()
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => window.setTimeout(() => callback(performance.now()), 16))
     vi.resetModules()
     sentryCaptureException.mockReset()
     sentryInit.mockReset()
   })
 
   afterEach(() => {
+    vi.useRealTimers()
     Reflect.deleteProperty(window, 'requestIdleCallback')
     vi.restoreAllMocks()
   })
 
-  it('loads Sentry only after the shell-ready event reaches an idle slot', async () => {
+  it('loads Sentry only after editor readiness reaches an idle slot', async () => {
     let idleCallback: IdleRequestCallback | undefined
     const requestIdleCallback = vi.fn((callback: IdleRequestCallback) => {
       idleCallback = callback
@@ -29,17 +32,19 @@ describe('deferred Sentry initialization', () => {
       configurable: true,
       value: requestIdleCallback,
     })
-    const { BOOT_SHELL_READY_EVENT } = await import('./boot')
-    const { initSentryAfterShell } = await import('./sentry')
+    const { markStartupInteractive } = await import('./interactive')
+    const { initSentryAfterInteractive } = await import('./sentry')
 
-    initSentryAfterShell('https://public@example.invalid/1', window)
+    initSentryAfterInteractive('https://public@example.invalid/1', window)
     expect(requestIdleCallback).not.toHaveBeenCalled()
     expect(sentryInit).not.toHaveBeenCalled()
 
-    window.dispatchEvent(new Event(BOOT_SHELL_READY_EVENT))
+    markStartupInteractive('editable')
+    await vi.advanceTimersByTimeAsync(32)
     expect(requestIdleCallback).toHaveBeenCalledWith(expect.any(Function), { timeout: 2_000 })
     expect(sentryInit).not.toHaveBeenCalled()
 
+    vi.useRealTimers()
     idleCallback?.({ didTimeout: false, timeRemaining: () => 16 })
     await vi.waitFor(() => {
       expect(sentryInit).toHaveBeenCalledWith({
@@ -58,15 +63,17 @@ describe('deferred Sentry initialization', () => {
         return 1
       },
     })
-    const earlyError = new Error('before shell idle')
+    const earlyError = new Error('before editor ready')
     const { captureException } = await import('@/services/error-reporting')
-    const { BOOT_SHELL_READY_EVENT } = await import('./boot')
-    const { initSentryAfterShell } = await import('./sentry')
+    const { markStartupInteractive } = await import('./interactive')
+    const { initSentryAfterInteractive } = await import('./sentry')
 
     captureException(earlyError)
     expect(sentryCaptureException).not.toHaveBeenCalled()
-    initSentryAfterShell('https://public@example.invalid/1', window)
-    window.dispatchEvent(new Event(BOOT_SHELL_READY_EVENT))
+    initSentryAfterInteractive('https://public@example.invalid/1', window)
+    markStartupInteractive('editable')
+    await vi.advanceTimersByTimeAsync(32)
+    vi.useRealTimers()
     idleCallback?.({ didTimeout: false, timeRemaining: () => 16 })
 
     await vi.waitFor(() => {

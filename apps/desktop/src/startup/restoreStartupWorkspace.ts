@@ -4,6 +4,9 @@ import { logger } from '@/helper/logger'
 import { restoreWorkspaceCache, type WorkspaceCache } from '@/services/workspace-cache'
 import { refreshWorkspaceDirectory } from '@/services/workspace-refresh'
 import { markStartupStage } from './performance'
+import { afterStartupInteractive } from './interactive'
+import useEditorStore from '@/stores/useEditorStore'
+import { useWorkspaceDirectoryState } from '@/services/workspace-refresh'
 
 /** Restore tabs directly by path; enumerating the directory is independent. */
 export async function restoreStartupWorkspace(
@@ -26,8 +29,13 @@ export async function restoreStartupWorkspace(
   })
   restoreWorkspaceCache(workspaceCache, [root])
   markStartupStage('layout-restored')
-  void refreshWorkspaceDirectory({ signal }).catch((error) => {
-    // Explorer owns the retry surface. Open documents remain usable.
-    logger.error('Failed to load startup workspace directory', error)
-  })
+  const restoredRoot = useEditorStore.getState().folderData?.[0]
+  useWorkspaceDirectoryState.setState({ root: restoredRoot, status: 'loading', error: undefined })
+  afterStartupInteractive(() => {
+    if (useEditorStore.getState().folderData?.[0] !== restoredRoot) return
+    void refreshWorkspaceDirectory({ signal }).catch((error) => {
+      // Explorer owns the retry surface. Open documents remain usable.
+      logger.error('Failed to load startup workspace directory', error)
+    })
+  }, { signal })
 }

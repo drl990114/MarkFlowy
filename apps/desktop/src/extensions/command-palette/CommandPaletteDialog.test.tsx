@@ -7,7 +7,7 @@ import { EVENT } from '@/constants'
 import { Dialog } from '@/components/ui/dialog'
 import { CommandPaletteDialog } from './CommandPaletteDialog'
 import { useCommandHistoryStore } from './useCommandHistoryStore'
-import { releaseEditorCommandTarget } from './editorCommands'
+import { releaseEditorCommandTarget } from './editorCommandTarget'
 import { toast } from 'zens'
 
 const controls = vi.hoisted(() => ({
@@ -19,7 +19,7 @@ vi.mock('@/helper/logger', () => ({ logger: { warn: vi.fn(), error: vi.fn() } })
 vi.mock('zens', () => ({ toast: { error: vi.fn() } }))
 vi.mock('@/i18n', () => ({ useTranslation: () => ({ t: (key: string) => key }) }))
 vi.mock('./usePaletteUpdates', () => ({ usePaletteUpdates: () => {} }))
-vi.mock('./editorCommands', () => ({
+vi.mock('./editorCommandTarget', () => ({
   captureEditorCommandTarget: () => null,
   releaseEditorCommandTarget: vi.fn(),
 }))
@@ -100,6 +100,7 @@ describe('command palette interaction', () => {
     await act(async () => {
       await commandRegistry.execute(EVENT.app_commandPalette)
     })
+    await act(async () => vi.dynamicImportSettled())
   }
   function input() {
     return document.querySelector<HTMLInputElement>('[cmdk-input]')!

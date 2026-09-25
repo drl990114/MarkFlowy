@@ -1,13 +1,14 @@
 import { useHistoryDialog } from '@/components/LocalHistory/historyDialogStore'
 import { commandRegistry } from '@/commands'
 import { EVENT } from '@/constants'
-import { t } from '@/i18n'
 import Root from '@/router/Root'
+import Setting from '@/router/Setting'
 import { SettingRouteController } from '@/router/Setting/component/SettingRouteController'
 import type { SettingRouteState } from '@/router/Setting/component/SettingRouteController'
 import { WorkspaceRouteSurface } from '@/router/Setting/component/WorkspaceRouteSurface'
 import { appInfoStoreSetup } from '@/services/app-info'
 import { markBootShellReady } from '@/startup/boot'
+import { markStartupInteractive } from '@/startup/interactive'
 import { StartupProgress } from '@/startup/StartupProgress'
 import type { StartupPhaseState } from '@/startup/startupCoordinator'
 import {
@@ -35,7 +36,6 @@ import useAppSetup, { useAppRuntimeSetup } from './hooks/useAppSetup'
 import { useCommandInit } from './hooks/useCommandInit'
 
 const HistoryDialog = lazy(() => import('@/components/LocalHistory/HistoryDialog'))
-const Setting = lazy(() => import('@/router/Setting'))
 
 function HistorySurface() {
   const open = useHistoryDialog((s) => s.open)
@@ -89,11 +89,10 @@ function AppRoutes({ chooseWorkspace, retryWorkspace, workspace }: AppRoutesProp
         </WorkspaceRouteSurface>
         <Routes>
           <Route path='/' element={null} />
-          <Route path='/settings' element={
-            <Suspense fallback={<StartupProgress label={t('common.fetching')} />}>
-              <Setting navigationRequest={navigationRequest} />
-            </Suspense>
-          } />
+          <Route
+            path='/settings'
+            element={<Setting navigationRequest={navigationRequest} />}
+          />
         </Routes>
       </div>
     </div>
@@ -144,6 +143,7 @@ function ReadyApp({ retryWorkspace, workspace }: ReadyAppProps) {
 function StartupFailureSurface({ error, retry }: { error: unknown; retry: () => void }) {
   useLayoutEffect(() => {
     markBootShellReady()
+    markStartupInteractive('error')
   }, [])
 
   return (

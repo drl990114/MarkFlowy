@@ -1,12 +1,13 @@
 import type { MfCodemirrorView } from 'rme'
 import { SourceFind } from './sourceCodeFind'
+import { sourceCodeCodemirrorViewMap } from './sourceCodeEditorInstances'
+export { sourceCodeCodemirrorViewMap } from './sourceCodeEditorInstances'
 
 const findApis = new WeakMap<MfCodemirrorView, SourceFind>()
 export function getSourceCodeFind(editor: MfCodemirrorView) {
   return findApis.get(editor)
 }
 
-export const sourceCodeCodemirrorViewMap = new Map<string, MfCodemirrorView>()
 const listeners = new Set<() => void>()
 
 export function setSourceCodeEditor(id: string, editor: MfCodemirrorView | undefined) {

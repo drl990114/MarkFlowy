@@ -1,4 +1,4 @@
-import { act, cleanup, render, waitFor } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, waitFor } from '@testing-library/react'
 import { enableMapSet } from 'immer'
 import type { ReactNode } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -30,6 +30,7 @@ vi.mock('@/helper/logger', () => ({
   logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn() },
 }))
 vi.mock('@/services/editor-file', () => ({ isEmptyEditor: () => false }))
+vi.mock('@/i18n', () => ({ t: (key: string) => key }))
 vi.mock('./capricornRuntimeAdapter', () => ({
   preloadCapricornRuntimeFactory: harness.preload,
 }))
@@ -91,6 +92,27 @@ afterEach(() => {
 })
 
 describe('Editor initialization lifecycle', () => {
+  it('keeps a failed draft gated and allows retry without mounting an empty editor', async () => {
+    setFileObject('retry-draft', { id: 'retry-draft', name: 'draft.md', kind: 'file' })
+    useFileTypeConfigStore.getState().setFileTypeConfig('retry-draft', markdownConfig)
+    harness.getFileTypeConfig.mockResolvedValue(markdownConfig)
+    let failing = true
+    const release = registerDraftRecovery('retry-draft', async () => {
+      if (failing) throw new Error('body unavailable')
+      setFileObject('retry-draft', { id: 'retry-draft', name: 'draft.md', kind: 'file', content: 'protected' })
+      release()
+    })
+    try {
+      const view = render(<Editor id='retry-draft' active visible />)
+      await view.findByRole('alert')
+      expect(view.queryByTestId('text-editor')).toBeNull()
+      expect(harness.getFileTypeConfig).not.toHaveBeenCalled()
+      failing = false
+      fireEvent.click(view.getByRole('button', { name: 'common.retry' }))
+      await view.findByTestId('text-editor')
+      expect(view.queryByRole('alert')).toBeNull()
+    } finally { release() }
+  })
   it('opens a restored source-only Markdown view without preparing Capricorn', async () => {
     setFileObject('source', { id: 'source', name: 'source.md', kind: 'file', content: '# Source' })
     useEditorViewTypeStore.getState().setEditorViewType('source', EditorViewType.SOURCECODE)

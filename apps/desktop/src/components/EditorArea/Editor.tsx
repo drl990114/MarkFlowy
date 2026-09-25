@@ -5,6 +5,9 @@ import {
 } from './editorPerformanceDiagnostics'
 import { preloadCapricornRuntimeFactory } from './capricornRuntimeAdapter'
 import { EditorViewType, isCapricornView } from '@/constants/editorViewType'
+import { markStartupInteractive } from '@/startup/interactive'
+import { AsyncSurface } from '@/components/AsyncSurface'
+import { t } from '@/i18n'
 import useFileCacheStore, { getFileObject } from '@/helper/files'
 import { getFileTypeConfig, isSupportedMode, isTextfileType } from '@/helper/fileTypeHandler'
 import { logger } from '@/helper/logger'
@@ -35,6 +38,8 @@ function Editor(props: EditorProps) {
   const { id, active, visible = active, groupId } = props
   const [pending, setPending] = useState(true)
   const [draftReady, setDraftReady] = useState(() => !isDraftRecoveryPending(id))
+  const [draftError, setDraftError] = useState(false)
+  const [draftAttempt, setDraftAttempt] = useState(0)
   const [shouldMountContent, setShouldMountContent] = useState(visible)
   const hasBeenVisible = visible || shouldMountContent
   const fileName = useFileCacheStore((state) => state.entries[id]?.name)
@@ -49,6 +54,7 @@ function Editor(props: EditorProps) {
   useEffect(() => {
     if (visible && isDraftRecoveryPending(id))
       void waitForDraftRecovery(id, active ? 'foreground' : 'visible')
+        .catch(() => undefined) // The initialization effect owns the retry surface.
   }, [active, id, visible])
 
   useEffect(() => {
@@ -58,7 +64,12 @@ function Editor(props: EditorProps) {
     let disposed = false
 
     const initialize = async () => {
-      if (isDraftRecoveryPending(id)) await waitForDraftRecovery(id, 'visible')
+      if (isDraftRecoveryPending(id)) {
+        try { await waitForDraftRecovery(id, 'visible') } catch {
+          if (!disposed) setDraftError(true)
+          return
+        }
+      }
       if (disposed) return
       setDraftReady(true)
       const curFile = getFileObject(id)
@@ -126,7 +137,11 @@ function Editor(props: EditorProps) {
     return () => {
       disposed = true
     }
-  }, [groupId, hasBeenVisible, id, setFileTypeConfig])
+  }, [draftAttempt, groupId, hasBeenVisible, id, setFileTypeConfig])
+
+  useEffect(() => {
+    if (active && visible && draftError) markStartupInteractive('error')
+  }, [active, draftError, visible])
 
   useEffect(() => {
     if (visible) {
@@ -135,6 +150,10 @@ function Editor(props: EditorProps) {
   }, [visible])
 
   useEffect(() => {
+    if (active && visible) {
+      if (isEmptyEditor(id)) markStartupInteractive('empty')
+      else if (curFileTypeConfig && !isTextfileType(curFileTypeConfig)) markStartupInteractive('preview')
+    }
     if (
       visible &&
       (isEmptyEditor(id) || (curFileTypeConfig && !isTextfileType(curFileTypeConfig)))
@@ -144,6 +163,15 @@ function Editor(props: EditorProps) {
   }, [active, curFileTypeConfig, groupId, id, visible])
 
   if (!hasBeenVisible) return null
+
+  if (draftError) return (
+    <div className='absolute inset-0 flex bg-background' style={visible ? undefined : { display: 'none' }}>
+      <AsyncSurface retryLabel={t('common.retry')} state={{
+        status: 'error', title: t('drafts.restore_failed'),
+        retry: () => { setDraftError(false); setDraftAttempt((attempt) => attempt + 1) },
+      }}>{() => null}</AsyncSurface>
+    </div>
+  )
 
   if (isEmptyEditor(id)) {
     if (visible) {

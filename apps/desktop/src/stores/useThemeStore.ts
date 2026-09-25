@@ -220,6 +220,8 @@ const initialThemes = hasSyntheticStartupTheme
   : [...builtInThemes]
 
 const useThemeStore = create<ThemeStore>((set, get) => {
+  let systemThemeRevision = 0
+  let systemThemeRead: Promise<SystemTheme> | undefined
   const persistSettingThenAppearance = (
     key: 'dark_theme' | 'light_theme' | 'theme_mode',
     value: string,
@@ -436,6 +438,7 @@ const useThemeStore = create<ThemeStore>((set, get) => {
     },
 
     setSystemTheme: (theme) => {
+      systemThemeRevision += 1
       const { curTheme, systemTheme, themeMode } = get()
       if (systemTheme === theme && (themeMode !== 'system' || curTheme.mode === theme)) {
         return
@@ -447,14 +450,19 @@ const useThemeStore = create<ThemeStore>((set, get) => {
       }
     },
 
-    syncSystemTheme: async () => {
-      const windowTheme = get().themeMode === 'system' ? await getWindowSystemTheme() : undefined
-      const nativeTheme = windowTheme || await getNativeSystemTheme()
-      const nextTheme = nativeTheme || getBrowserSystemTheme()
-
-      get().setSystemTheme(nextTheme)
-
-      return nextTheme
+    syncSystemTheme: () => {
+      if (!systemThemeRead) {
+        const revision = systemThemeRevision
+        systemThemeRead = (async () => {
+          const windowTheme = get().themeMode === 'system' ? await getWindowSystemTheme() : undefined
+          const nativeTheme = windowTheme || await getNativeSystemTheme()
+          const nextTheme = nativeTheme || getBrowserSystemTheme()
+          // A theme-change event arriving during IPC is newer than this read.
+          if (systemThemeRevision === revision) get().setSystemTheme(nextTheme)
+          return get().systemTheme
+        })().finally(() => { systemThemeRead = undefined })
+      }
+      return systemThemeRead
     },
 
     initFromSettings: async (settingData) => {
@@ -469,7 +477,7 @@ const useThemeStore = create<ThemeStore>((set, get) => {
         darkThemeName,
       }))
 
-      if (themeMode === 'system') {
+      if (themeMode === 'system' && startupAppearance.preference !== 'system') {
         await get().syncSystemTheme()
       }
       get().applyTheme()
@@ -502,8 +510,6 @@ const setupSystemThemeSync = () => {
     return
   }
   themeWindow.__markflowyThemeSyncSetup = true
-
-  syncSystemThemeIfNeeded()
 
   const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
   mediaQuery.addEventListener('change', (event) => {

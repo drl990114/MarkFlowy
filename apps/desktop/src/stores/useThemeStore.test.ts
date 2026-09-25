@@ -5,6 +5,7 @@ const mocks = vi.hoisted(() => ({
   loadThemeCss: vi.fn(),
   removeInsertedTheme: vi.fn(),
   setTheme: vi.fn(),
+  theme: vi.fn(async () => 'light'),
   writeSettingData: vi.fn(),
 }))
 
@@ -22,7 +23,7 @@ vi.mock('@tauri-apps/api/window', () => ({
   getCurrentWindow: () => ({
     onThemeChanged: vi.fn(async () => () => undefined),
     setTheme: mocks.setTheme,
-    theme: vi.fn(async () => 'light'),
+    theme: mocks.theme,
   }),
 }))
 
@@ -41,6 +42,7 @@ describe('theme selection preview', () => {
     mocks.loadThemeCss.mockClear()
     mocks.removeInsertedTheme.mockClear()
     mocks.setTheme.mockClear()
+    mocks.theme.mockReset().mockResolvedValue('light')
     mocks.writeSettingData.mockReset()
     mocks.writeSettingData.mockResolvedValue(undefined)
     window.sessionStorage.clear()
@@ -62,6 +64,29 @@ describe('theme selection preview', () => {
     useThemeStore.getState().restoreThemePreview()
     expect(useThemeStore.getState().curTheme.mode).toBe('light')
     expect(mocks.writeSettingData).not.toHaveBeenCalled()
+  })
+
+  it('uses the bootstrap system appearance during settings initialization without another theme query', async () => {
+    await useThemeStore.getState().initFromSettings({ theme_mode: 'system' })
+    expect(mocks.theme).not.toHaveBeenCalled()
+    expect(mocks.invoke).not.toHaveBeenCalledWith('get_system_theme')
+  })
+
+  it('coalesces concurrent theme reads and does not overwrite a newer system event', async () => {
+    useThemeStore.setState({ themeMode: 'system', systemTheme: 'light' })
+    let resolve!: (theme: string) => void
+    mocks.theme.mockReturnValueOnce(new Promise((done) => { resolve = done }))
+    const first = useThemeStore.getState().syncSystemTheme()
+    const second = useThemeStore.getState().syncSystemTheme()
+    expect(first).toBe(second)
+    expect(mocks.theme).toHaveBeenCalledOnce()
+    useThemeStore.getState().setSystemTheme('dark')
+    resolve('light')
+    await expect(first).resolves.toBe('dark')
+    expect(useThemeStore.getState().systemTheme).toBe('dark')
+    await useThemeStore.getState().syncSystemTheme()
+    expect(mocks.theme).toHaveBeenCalledTimes(2)
+    expect(useThemeStore.getState().systemTheme).toBe('light')
   })
 
   it('persists an accent snapshot only after its config commit without reapplying the theme', async () => {

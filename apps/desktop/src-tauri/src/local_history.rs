@@ -150,7 +150,20 @@ pub async fn local_history(
         } else {
             None
         };
-        run(move |store| dispatch(store, &operation, payload))
+        run(move |store| {
+            if matches!(
+                operation.as_str(),
+                "recoveryDraftIndex" | "claimRecoveryDraft" | "recoveryDrafts"
+            ) {
+                let owners = handle
+                    .webview_windows()
+                    .keys()
+                    .map(|label| format!("{label}:"))
+                    .collect::<Vec<_>>();
+                store.retain_window_presence(&owners)?;
+            }
+            dispatch(store, &operation, payload)
+        })
     })
     .await
     .map_err(|e| e.to_string())??;
@@ -213,6 +226,17 @@ fn dispatch(store: &mut Store, operation: &str, p: Value) -> anyhow::Result<Valu
             json!(true)
         }
         "drafts" => serde_json::to_value(store.drafts(string(&p, "workspace")?)?)?,
+        "recoveryDraftIndex" => serde_json::to_value(
+            store.recovery_draft_index(string(&p, "workspace")?, string(&p, "ownerPrefix")?)?,
+        )?,
+        "draftDescriptor" => {
+            serde_json::to_value(store.draft_descriptor(&document(&p)?, string(&p, "writer")?)?)?
+        }
+        "claimRecoveryDraft" => serde_json::to_value(store.claim_recovery_draft(
+            &serde_json::from_value(p["draft"].clone())?,
+            string(&p, "ownerPrefix")?,
+            string(&p, "claimId")?,
+        )?)?,
         "recoveryDrafts" => serde_json::to_value(
             store.claim_recovery_drafts(string(&p, "workspace")?, string(&p, "ownerPrefix")?)?,
         )?,
@@ -371,6 +395,62 @@ pub fn cancel_write(operation: Option<String>) -> Result<(), String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn recovery_protocol_transfers_metadata_then_one_claimed_body() {
+        let root = tempfile::tempdir().unwrap();
+        let mut store = Store::open(&root.path().join("history.db")).unwrap();
+        let document = dispatch(
+            &mut store,
+            "register",
+            json!({
+                "identity": "untitled:old", "workspace": "", "name": "Untitled.md"
+            }),
+        )
+        .unwrap();
+        dispatch(
+            &mut store,
+            "draft",
+            json!({
+                "document": document, "writer": "old:file", "sequence": 1,
+                "content": "中文 draft", "diskRevision": null, "paused": true,
+                "format": { "encoding": "gb18030", "bom": "none" }
+            }),
+        )
+        .unwrap();
+        let index = dispatch(
+            &mut store,
+            "recoveryDraftIndex",
+            json!({
+                "workspace": "", "ownerPrefix": "main:"
+            }),
+        )
+        .unwrap();
+        assert_eq!(index.as_array().unwrap().len(), 1);
+        assert!(index[0].get("content").is_none());
+        let claimed = dispatch(
+            &mut store,
+            "claimRecoveryDraft",
+            json!({
+                "draft": index[0], "ownerPrefix": "main:", "claimId": "first"
+            }),
+        )
+        .unwrap();
+        assert_eq!(claimed["content"], "中文 draft");
+        assert_eq!(claimed["writer"], "main:first");
+        let saved = dispatch(
+            &mut store,
+            "draftDescriptor",
+            json!({
+                "document": claimed["document"], "writer": claimed["writer"]
+            }),
+        )
+        .unwrap();
+        assert_eq!(saved["hash"], index[0]["hash"]);
+        assert_eq!(saved["format"]["encoding"], "gb18030");
+        assert_eq!(saved["diskRevision"], Value::Null);
+        assert!(saved.get("content").is_none());
+    }
+
     #[test]
     fn stale_external_content_is_rejected_before_history_mutation() {
         let root = tempfile::tempdir().unwrap();

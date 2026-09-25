@@ -1,6 +1,7 @@
+import { EditorViewType } from '@/constants/editorViewType'
+import { DEFAULT_CURRENT_DATE_FORMAT } from '@/helper/date'
 import { changeLng, i18n, locales, type Langs } from '@/i18n'
 import { currentWebview } from '@/services/windows'
-import { DEFAULT_CURRENT_DATE_FORMAT, EditorViewType } from 'rme'
 
 export const getSettingMap = () => {
   return {

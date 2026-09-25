@@ -53,3 +53,19 @@ test('rejects unknown fixtures and missing output directories', async () => {
     /explicit output directory/,
   )
 })
+
+test('exports a 200 KiB CJK startup fixture without splitting UTF-8 characters', async () => {
+  const outputDir = await mkdtemp(join(tmpdir(), 'markflowy-startup-fixtures-'))
+  try {
+    const [result] = await exportEditorOpeningFixtures({ outputDir, selected: 'cjk', byteLength: 200 * 1024 })
+    const content = await readFile(result.path)
+    assert.equal(content.byteLength, 200 * 1024)
+    assert.equal(new TextDecoder('utf-8', { fatal: true }).decode(content), createEditorOpeningFixture('cjk', 200 * 1024))
+    assert.equal(result.sha256, createHash('sha256').update(content).digest('hex'))
+    for (const byteLength of [-1, 1.5, Number.NaN, 65 * 1024 * 1024]) {
+      await assert.rejects(() => exportEditorOpeningFixtures({ outputDir, byteLength }), /byte count/)
+    }
+  } finally {
+    await rm(outputDir, { recursive: true, force: true })
+  }
+})

@@ -417,7 +417,13 @@ export function CapricornEditor({
             container,
             createRuntime,
             onChange: (event) => onChangeRef.current(event),
-            options: getOptions(),
+            options: {
+              ...getOptions(),
+              onProgress: (progress) => {
+                if (!disposed && request === current && !current.abort.signal.aborted)
+                  reportProgress(current, progress)
+              },
+            },
           }),
           current,
         )

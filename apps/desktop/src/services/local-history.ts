@@ -13,6 +13,7 @@ import useEditorStore from '@/stores/useEditorStore'
 import useEditorStateStore from '@/stores/useEditorStateStore'
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import { isDraftRecoveryPending, waitForDraftRecovery } from './draftRecoveryState'
+import type { DraftDescriptor } from './draftSessionFormat'
 
 export interface HistoryDocument {
   id: string
@@ -411,6 +412,19 @@ export function historyDraftIdentity(fileId: string) {
   const binding = bindings.get(fileId)
   if (!binding) throw new Error('History document is not registered.')
   return { writer: binding.writer, sequence: ++sequence }
+}
+
+/** Call after flushing protection while the close barrier prevents further edits. */
+export async function protectedDraftDescriptor(fileId: string): Promise<DraftDescriptor> {
+  if (!started) throw new Error('Draft protection is not ready.')
+  const document = await historyDocument(fileId)
+  const binding = bindings.get(fileId)!
+  const draft = await historyCall<DraftDescriptor | null>('draftDescriptor', {
+    document, writer: binding.writer,
+  })
+  if (!draft || draft.sequence !== binding.sequence)
+    throw new Error('The current draft has not been durably protected.')
+  return draft
 }
 
 export async function startDraftProtection() {

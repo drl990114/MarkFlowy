@@ -106,6 +106,9 @@ export default defineConfig(async ({ mode }) => {
       },
     },
     define: {
+      __MARKFLOWY_HOST_VERSION__: JSON.stringify(
+        JSON.parse(readFileSync(new URL('./src-tauri/tauri.conf.json', import.meta.url), 'utf8')).version,
+      ),
       __MARKFLOWY_CAPRICORN_RUNTIME_AVAILABLE__: JSON.stringify(capricornRuntimeEntry !== null),
       __MARKFLOWY_CAPRICORN_RUNTIME_VERSION__: JSON.stringify(
         capricornRuntimeEntry ? CAPRICORN_VERSION : null,
@@ -120,8 +123,8 @@ export default defineConfig(async ({ mode }) => {
       alias: [
         { find: '@', replacement: fileURLToPath(new URL('./src', import.meta.url)) },
         {
-          find: '@markflowy/i18n',
-          replacement: fileURLToPath(new URL('../../packages/i18n/src/index.ts', import.meta.url)),
+          find: /^@markflowy\/i18n(?:\/desktop)?$/,
+          replacement: fileURLToPath(new URL('../../packages/i18n/src/desktop.ts', import.meta.url)),
         },
       ],
       dedupe: ['react', 'react-dom'],

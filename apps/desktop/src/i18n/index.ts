@@ -10,10 +10,7 @@ export {
   t,
   createInstance,
   locales,
-  resources,
-  editorResources,
-  desktopResources,
   type Langs,
   type LocaleKey,
   type I18nResources,
-} from '@markflowy/i18n'
+} from '@markflowy/i18n/desktop'

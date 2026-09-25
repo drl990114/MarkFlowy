@@ -10,7 +10,8 @@
     "emitDeclarationOnly": false,
     "noEmit": true,
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@markflowy/i18n/desktop": ["../../packages/i18n/src/desktop.ts"]
     },
     "skipLibCheck": true
   },

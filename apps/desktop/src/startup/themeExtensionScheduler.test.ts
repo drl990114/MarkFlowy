@@ -22,6 +22,24 @@ const flushMicrotasks = async () => {
 }
 
 describe('theme extension startup scheduling', () => {
+  it('restores the selected theme while holding other extensions until editor readiness', async () => {
+    let release!: () => void
+    const ready = new Promise<void>((resolve) => { release = resolve })
+    const loaded: string[] = []
+    const loading = loadThemeExtensionsIncrementally({
+      extensions: [extension('other'), extension('current')],
+      currentTheme: { name: 'current', mode: 'dark' },
+      beforeBackground: () => ready,
+      loadExtension: (item) => loaded.push(item.id),
+      onError: vi.fn(),
+      scheduleChunk: async (task) => task(),
+    })
+    await flushMicrotasks()
+    expect(loaded).toEqual(['current'])
+    release()
+    await loading
+    expect(loaded).toEqual(['current', 'other'])
+  })
   it('loads the current cached custom theme first even when it is last in the catalog', async () => {
     const extensions = [
       extension('one'),

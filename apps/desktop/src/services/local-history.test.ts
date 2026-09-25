@@ -97,6 +97,18 @@ afterEach(() => {
 })
 
 describe('background draft protection', () => {
+  it('returns only the descriptor of the acknowledged writer and refuses stale exit references', async () => {
+    await history.flushDraftProtection('file')
+    const persisted = calls('draft').at(-1)
+    const original = mocks.invoke.getMockImplementation()!
+    let descriptor = { document: doc, writer: persisted.writer, sequence: persisted.sequence, hash: 'sha256', paused: false }
+    mocks.invoke.mockImplementation((command, args) => args.operation === 'draftDescriptor'
+      ? Promise.resolve(descriptor) : original(command, args))
+    expect(await history.protectedDraftDescriptor('file')).toEqual(descriptor)
+    expect(calls('draftDescriptor')).toEqual([{ document: doc, writer: persisted.writer }])
+    descriptor = { ...descriptor, sequence: persisted.sequence - 1 }
+    await expect(history.protectedDraftDescriptor('file')).rejects.toThrow('not been durably protected')
+  })
   it('retains the original recovery writer until a hidden draft has been validated', async () => {
     const { registerDraftRecovery } = await import('./draftRecoveryState')
     const ready = registerDraftRecovery('file', vi.fn())

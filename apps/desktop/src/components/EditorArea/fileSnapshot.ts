@@ -21,6 +21,19 @@ export type FileSnapshotResult =
   | { status: 'unstable' }
 
 const openingSnapshots = new OpeningReadQueue<FileSnapshotResult>()
+const invalidationListeners = new Set<(path: string) => void>()
+
+/** Startup handoffs become stale on a watcher event or a request for fresh bytes. */
+export function onFileSnapshotInvalidated(listener: (path: string) => void) {
+  invalidationListeners.add(listener)
+  return () => { invalidationListeners.delete(listener) }
+}
+
+export function invalidateFileSnapshotHandoffs(filePath: string) {
+  if (!invalidationListeners.size) return
+  const path = getPathIdentityKey(filePath)
+  for (const listener of invalidationListeners) listener(path)
+}
 
 export const promoteOpeningRead = (path: string, scope: object, priority: OpeningReadPriority) =>
   openingSnapshots.promote(getPathIdentityKey(path), scope, priority)
@@ -35,6 +48,7 @@ export function readStableFileSnapshot(
   options: OpeningReadOptions & { reuseInFlight?: boolean; encoding?: TextEncoding } = {},
 ): Promise<FileSnapshotResult> {
   if (!options.reuseInFlight || options.encoding) {
+    invalidateFileSnapshotHandoffs(filePath)
     return invoke<FileSnapshotResult>('get_file_snapshot', {
       filePath,
       ...(options.encoding ? { encoding: options.encoding } : {}),

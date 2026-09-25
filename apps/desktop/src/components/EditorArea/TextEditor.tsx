@@ -1,6 +1,10 @@
 import { useSnippetLibrary } from '@/features/snippets/store'
 import { getVisibleSnippets } from '@/features/snippets/builtins'
 import type { CapricornSnippetKind } from '@/features/snippets/types'
+import { markStartupInteractive } from '@/startup/interactive'
+import { observeStartupEditable } from '@/startup/observeEditable'
+import { takeStartupDocumentRead } from '@/startup/prepareEditor'
+import { recordStartupEditor } from '@/startup/performance'
 import {
   observeHistoryFile,
   endHistoryBatch,
@@ -1549,7 +1553,10 @@ function TextEditor(props: TextEditorProps) {
 
       if (file.path) {
         recordEditorOpenStage(openRequestId, 'read-start')
-        const snapshot = await readStableFileSnapshot(file.path, {
+        const startupRead = activeRef.current ? takeStartupDocumentRead(id, file.path) : undefined
+        const preparedSnapshot = startupRead ? await startupRead : undefined
+        if (canceled) return
+        const snapshot = preparedSnapshot ?? await readStableFileSnapshot(file.path, {
           reuseInFlight: true,
           signal: readController.signal,
           scope: useEditorStore.getState().folderData?.[0],
@@ -2700,6 +2707,7 @@ function TextEditor(props: TextEditorProps) {
 
   const handleCapricornError = useCallback(
     (error: unknown) => {
+      if (activeRef.current && visibleRef.current) markStartupInteractive('error')
       cliRuntimeErrorRef.current = String(error)
       if (activeRef.current) reportEditorSearchLoadFailure(id, groupId)
       finishEditorOpenMeasurement(getEditorOpenMeasurement(id, groupId), 'error')
@@ -2900,6 +2908,29 @@ function TextEditor(props: TextEditorProps) {
   useLayoutEffect(() => {
     onLoadingChange?.(openingPending)
   }, [onLoadingChange, openingPending])
+
+  useEffect(() => {
+    if (!active || !visible || openingPending) return
+    if (openingFailed) {
+      markStartupInteractive('error')
+      return
+    }
+    if (currentViewType === EditorViewType.PREVIEW) {
+      markStartupInteractive('preview')
+      return
+    }
+    const container = editorWrapperRef.current
+    if (!container) return
+    return observeStartupEditable(
+      container,
+      () => activeRef.current && visibleRef.current && currentViewTypeRef.current === currentViewType,
+      () => recordStartupEditor({
+        fileId: id, viewId: groupId, mode: currentViewType,
+        openRequestId: getEditorOpenMeasurement(id, groupId),
+      }),
+      !latestContentRef.current?.trim(),
+    )
+  }, [active, currentViewType, groupId, id, openingFailed, openingPending, visible])
 
   useLayoutEffect(() => {
     automationHandleRef.current = {

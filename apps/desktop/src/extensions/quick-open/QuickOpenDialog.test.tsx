@@ -112,6 +112,7 @@ describe('Quick Open dialog', () => {
     await act(async () => {
       await commandRegistry.execute(EVENT.app_quickOpen)
     })
+    await act(async () => vi.dynamicImportSettled())
   }
   function input() {
     return document.querySelector<HTMLInputElement>('[cmdk-input]')!

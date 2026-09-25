@@ -1,6 +1,5 @@
 import type { InitOptions } from 'i18next'
-import i18next from 'i18next'
-import { initReactI18next } from 'react-i18next'
+import i18next, { deepMerge, initialize } from './core'
 
 import enDesktop from '../../../locales/en.json'
 import zhDesktop from '../../../locales/zh-CN.json'
@@ -16,25 +15,7 @@ import jaEditor from '../../../locales/editor/ja.json'
 
 import type { Langs } from './types'
 
-export { useTranslation, I18nextProvider, getI18n, initReactI18next } from 'react-i18next'
-export { t, createInstance } from 'i18next'
-
-export * from './types'
-
-function deepMerge(target: Record<string, unknown>, source: Record<string, unknown>): Record<string, unknown> {
-  const result = { ...target }
-  for (const key of Object.keys(source)) {
-    if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
-      result[key] = deepMerge(
-        (result[key] as Record<string, unknown>) || {},
-        source[key] as Record<string, unknown>,
-      )
-    } else {
-      result[key] = source[key]
-    }
-  }
-  return result
-}
+export * from './core'
 
 const langMap = {
   en: { desktop: enDesktop, editor: enEditor },
@@ -59,34 +40,12 @@ export const resources = Object.fromEntries(
   ]),
 )
 
-let initialized = false
-
 export async function i18nInit(options?: InitOptions) {
-  if (initialized) {
-    if (options?.lng) {
-      await i18next.changeLanguage(options.lng)
-    }
-    return
-  }
-
-  await i18next.use(initReactI18next).init({
-    resources,
-    interpolation: {
-      escapeValue: false,
-    },
-    fallbackLng: 'en',
-    ...options,
-  })
-
-  initialized = true
+  await initialize({ resources, ...options })
 }
 
 export function changeLng(lng: Langs) {
   return i18next.changeLanguage(lng)
-}
-
-export function isInitialized() {
-  return initialized
 }
 
 export default i18next

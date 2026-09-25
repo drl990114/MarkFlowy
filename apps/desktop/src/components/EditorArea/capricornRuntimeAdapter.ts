@@ -196,6 +196,7 @@ export interface CapricornCopilotOptions {
 }
 
 export interface CapricornRuntimeOptions extends CapricornEditorSettings {
+  onProgress?: (progress: CapricornRuntimeProgress) => void
   commands?: readonly {
     id: `host.${string}`
     label: string
@@ -328,8 +329,10 @@ export interface CapricornRuntimeProgress {
     | 'parse'
     | 'transfer'
     | 'hydrate'
+    | 'plugins'
     | 'model'
     | 'index'
+    | 'controller'
     | 'mount'
     | 'ready'
   elapsedMs: number
@@ -342,7 +345,6 @@ export interface CapricornRuntimeProgress {
 
 export interface CapricornRuntimeAsyncOptions extends CapricornRuntimeOptions {
   signal?: AbortSignal
-  onProgress?: (progress: CapricornRuntimeProgress) => void
 }
 
 export type CapricornRuntimeAsyncFactory = (

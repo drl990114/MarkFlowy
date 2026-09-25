@@ -1,6 +1,7 @@
 import { commandRegistry } from '@/commands'
 import { EditorLoadingProgress, EditorOpeningClockContext } from './EditorLoadingProgress'
 import { AsyncSurface } from '@/components/AsyncSurface'
+import { markStartupInteractive } from '@/startup/interactive'
 import { RenderErrorBoundary } from '@/components/RenderErrorBoundary'
 import { EditorViewType } from '@/constants/editorViewType'
 import { EVENT } from '@/constants'
@@ -10,9 +11,10 @@ import { guardUnsavedFiles } from '@/services/checkUnsavedFiles'
 import { useEditorStore } from '@/stores'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
+import { loadEditorAreaContent } from './editorAreaLoader'
 import { lazy, memo, Suspense, useEffect, useState } from 'react'
 
-const EditorAreaContent = lazy(() => import('./EditorAreaContent'))
+const EditorAreaContent = lazy(loadEditorAreaContent)
 
 function EditorArea() {
   const [openingClock] = useState(() => ({ startedAt: performance.now() as number | null }))
@@ -105,6 +107,7 @@ function EditorArea() {
 
   return (
     <RenderErrorBoundary
+      onError={() => markStartupInteractive('error')}
       fallback={({ error, reset }) => (
         <AsyncSurface
           retryLabel={t('common.retry')}

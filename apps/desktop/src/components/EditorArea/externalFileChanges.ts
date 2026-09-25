@@ -13,7 +13,7 @@ import { toast } from 'zens'
 import { conditionalWriteExpected } from './conditionalFileWrite'
 import { editorSnapshotRegistry } from './editorSnapshotRegistry'
 import { fileSaveCoordinator } from './fileSaveCoordinator'
-import { readStableFileSnapshot, type StableFileSnapshot } from './fileSnapshot'
+import { invalidateFileSnapshotHandoffs, readStableFileSnapshot, type StableFileSnapshot } from './fileSnapshot'
 import { sameTextFormat } from './textFileFormat'
 import { historyFileSaved, protectExternalContent } from '@/services/local-history'
 
@@ -195,6 +195,7 @@ async function inspectExternalPath(
 }
 
 function enqueueExternalInspection(fileId: string, filePath: string, generation: number) {
+  invalidateFileSnapshotHandoffs(filePath)
   const key = getPathIdentityKey(filePath)
   const previous = observationTails.get(key)
   if (previous) {

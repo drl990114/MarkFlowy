@@ -92,6 +92,7 @@ function createHarness(options: { content?: string; dirty?: boolean; path?: stri
     .fn<(path: string) => Promise<FileSnapshotResult>>()
     .mockResolvedValue({ status: 'success', content: 'disk content', revision: 'disk:loaded' })
   const toastError = vi.fn()
+  const handoff = vi.fn<() => Promise<FileSnapshotResult | undefined> | undefined>()
   const loggerError = vi.fn()
   const registry = { hasPending: vi.fn(() => false), canRead: vi.fn(() => true) }
   const bindings = {
@@ -112,6 +113,7 @@ function createHarness(options: { content?: string; dirty?: boolean; path?: stri
     useEditorStateStore: { getState: () => ({ idStateMap: states }) },
     editorSnapshotRegistry: registry,
     readStableFileSnapshot: snapshot,
+    takeStartupDocumentRead: handoff,
     beginEditorOpenMeasurement,
     finishEditorOpenMeasurement,
     getEditorOpenMeasurement,
@@ -144,7 +146,7 @@ function createHarness(options: { content?: string; dirty?: boolean; path?: stri
     { compilerOptions: { target: ts.ScriptTarget.ES2022 } },
   ).outputText
   const Harness = runInNewContext(compiled, bindings) as ComponentType<HarnessProps>
-  return { Harness, snapshot, states, coordinator, registry, toastError, loggerError }
+  return { Harness, snapshot, handoff, states, coordinator, registry, toastError, loggerError }
 }
 
 function deferred<T>() {
@@ -160,6 +162,22 @@ function deferred<T>() {
 afterEach(cleanup)
 
 describe('TextEditor file loading lifecycle', () => {
+  it('consumes the startup snapshot once without repeating disk I/O', async () => {
+    const { Harness, snapshot, handoff } = createHarness()
+    handoff.mockResolvedValueOnce({ status: 'success', content: 'startup content', revision: 'startup' })
+    const { findByText } = render(<Harness id='file' />)
+    await findByText('startup content')
+    expect(snapshot).not.toHaveBeenCalled()
+    expect(handoff).toHaveBeenCalledExactlyOnceWith('file', '/workspace/note.md')
+  })
+
+  it('reads fresh bytes when the startup handoff was invalidated', async () => {
+    const { Harness, snapshot, handoff } = createHarness()
+    handoff.mockResolvedValueOnce(undefined)
+    const { findByText } = render(<Harness id='file' />)
+    await findByText('disk content')
+    expect(snapshot).toHaveBeenCalledOnce()
+  })
   it('loads once despite publishing the cache and changing language or file metadata', async () => {
     const { Harness, snapshot } = createHarness()
     const { container, findByText, rerender } = render(<Harness id='file' />)

@@ -4,7 +4,8 @@ import { t } from '@/i18n'
 import useLayoutStore from '@/stores/useLayoutStore'
 import { StartupProgress } from './StartupProgress'
 import type { StartupPhaseState } from './startupCoordinator'
-import type { ReactNode } from 'react'
+import { useEffect, type ReactNode } from 'react'
+import { markStartupInteractive } from './interactive'
 
 interface WorkspaceStartupSurfaceProps {
   children: ReactNode
@@ -27,6 +28,9 @@ export function WorkspaceStartupSurface({
 }: WorkspaceStartupSurfaceProps) {
   const leftDock = useLayoutStore((layout) => layout.leftBar)
   const rightDock = useLayoutStore((layout) => layout.rightBar)
+  useEffect(() => {
+    if (state.status === 'error') markStartupInteractive('error')
+  }, [state.status])
 
   if (state.status === 'ready') return children
 

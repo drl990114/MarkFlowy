@@ -6,11 +6,34 @@ vi.mock('@tauri-apps/api/core', () => native)
 
 afterEach(() => {
   vi.restoreAllMocks()
+  native.invoke.mockReset()
   vi.resetModules()
   delete window.__MF_STARTUP_PERFORMANCE__
+  delete window.__MF_EDITOR_PERFORMANCE__
 })
 
 describe('startup timing across native and WebView clocks', () => {
+  it('joins startup to the exact editor request and keeps input feedback separate from model commits', async () => {
+    const { recordStartupEditor, getStartupPerformanceReport } = await import('./performance')
+    window.__MF_EDITOR_PERFORMANCE__ = {
+      interactions: [], longTasks: [], snapshots: [],
+      opens: ['startup', 'later'].map((openRequestId, index) => ({
+        openRequestId, fileId: 'file', viewId: 'left', origin: 'mount', kind: 'open',
+        startedAt: 100, status: 'ready', stages: [],
+        firstInputDuration: index ? 900 : 12,
+        firstInputCommitDuration: index ? 950 : 48,
+      })),
+    }
+    recordStartupEditor({ fileId: 'file', viewId: 'left', mode: 'wysiwyg', openRequestId: 'startup' })
+    recordStartupEditor({ fileId: 'other', mode: 'wysiwyg', openRequestId: 'later' })
+    expect(getStartupPerformanceReport().editor).toMatchObject({
+      detailedDiagnosticsEnabled: true,
+      open: { openRequestId: 'startup' },
+      firstInputFeedbackMs: 12,
+      firstInputCommitMs: 48,
+    })
+    expect(getStartupPerformanceReport().hostVersion).toBeTruthy()
+  })
   it('keeps IPC uncertainty and navigation duration separate', () => {
     expect(projectStartupStage('shell-ready', 150, {
       nativeElapsedMs: 400,
@@ -56,5 +79,38 @@ describe('startup timing across native and WebView clocks', () => {
     await Promise.resolve()
     await Promise.resolve()
     expect(getStartupPerformanceReport().nativeClockAvailable).toBe(false)
+  })
+
+  it('refreshes native stages once after readiness and rejects stale or other-window samples', async () => {
+    let resolveFirst!: (value: unknown) => void
+    native.invoke.mockReturnValueOnce(new Promise((resolve) => { resolveFirst = resolve }))
+    native.invoke.mockResolvedValueOnce({
+      nativeElapsedMs: 500, windowLabel: 'main', hostVersion: '0.7.0', buildKind: 'release',
+      processSessionId: 'native-process-session',
+      stages: [
+        { name: 'setup-start', elapsedMs: 40 },
+        { name: 'window-built', elapsedMs: 300, windowLabel: 'main' },
+        { name: 'window-built', elapsedMs: 100, windowLabel: 'other' },
+        { name: 'invalid', elapsedMs: Number.NaN },
+        { name: 'future', elapsedMs: 900 },
+      ],
+    })
+    const { initStartupPerformance, markStartupStage, getStartupPerformanceReport } = await import('./performance')
+    initStartupPerformance()
+    markStartupStage('interactive-editable')
+    markStartupStage('interactive-editable')
+    expect(native.invoke).toHaveBeenCalledTimes(2)
+    await Promise.resolve()
+    resolveFirst({ nativeElapsedMs: 200, windowLabel: 'main', stages: [] })
+    await Promise.resolve()
+    expect(getStartupPerformanceReport().native).toEqual({
+      processSessionId: 'native-process-session',
+      sampledAtElapsedMs: 500, hostVersion: '0.7.0', buildKind: 'release',
+      stages: [
+        { name: 'setup-start', elapsedMs: 40 },
+        { name: 'window-built', elapsedMs: 300, windowLabel: 'main' },
+      ],
+    })
+    expect(getStartupPerformanceReport().schemaVersion).toBe(1)
   })
 })

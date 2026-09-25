@@ -1,6 +1,8 @@
 //! Transactional local history. All access is serialized by the host's bounded worker.
 use anyhow::{bail, Context, Result};
 use mf_text_encoding::TextFileFormat;
+mod draft_recovery;
+pub use draft_recovery::DraftDescriptor;
 #[cfg(test)]
 mod encoding_tests;
 mod text_snapshot;

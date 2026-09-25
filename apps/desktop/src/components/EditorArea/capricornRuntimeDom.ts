@@ -59,3 +59,42 @@ export function subscribeCapricornBeforeInput(
   ownerDocument.addEventListener('beforeinput', onBeforeInput, true)
   return () => ownerDocument.removeEventListener('beforeinput', onBeforeInput, true)
 }
+
+export function hasVisiblePendingSourceEditor(container: HTMLElement): boolean {
+  return hasVisibleSourceState(container, '[data-cap-source-editor-pending="true"]')
+}
+
+export function hasVisibleFailedSourceEditor(container: HTMLElement): boolean {
+  return hasVisibleSourceState(container, '[data-cap-source-editor-error="true"]')
+}
+
+function hasVisibleSourceState(container: HTMLElement, selector: string): boolean {
+  let left = 0
+  let top = 0
+  let right = window.innerWidth
+  let bottom = window.innerHeight
+  // Intersect the actual host/panel viewport, not the full document's height.
+  for (const element of [container, container.closest<HTMLElement>('[data-editor-id]')]) {
+    const rect = element?.getBoundingClientRect()
+    if (!rect || rect.width <= 0 || rect.height <= 0) continue
+    left = Math.max(left, rect.left)
+    top = Math.max(top, rect.top)
+    right = Math.min(right, rect.right)
+    bottom = Math.min(bottom, rect.bottom)
+  }
+  return Array.from(
+    container.querySelectorAll<HTMLElement>(selector),
+  ).some((element) => {
+    const style = getComputedStyle(element)
+    if (style.display === 'none' || style.visibility === 'hidden') return false
+    const rect = element.getBoundingClientRect()
+    return (
+      rect.width > 0 &&
+      rect.height > 0 &&
+      rect.right > left &&
+      rect.left < right &&
+      rect.bottom > top &&
+      rect.top < bottom
+    )
+  })
+}

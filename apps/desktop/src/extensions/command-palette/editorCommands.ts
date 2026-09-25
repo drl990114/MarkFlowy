@@ -1,18 +1,19 @@
+import { isCurrentCommandTarget, type EditorCommandTarget } from './editorCommandTarget'
 import { getCapricornEditor } from '@/components/EditorArea/capricornEditorRegistry'
-import type {
-  CapricornRuntimeAdapter,
-  CapricornSelectionBookmark,
-} from '@/components/EditorArea/capricornRuntimeAdapter'
 import { sourceCodeCodemirrorViewMap } from '@/components/EditorArea/sourceCodeEditorRegistry'
 import { insertSourceImage, insertSourceLink } from '@/components/EditorArea/sourceInsertCommands'
-import { EditorViewType, type EditorViewTypeValue } from '@/constants/editorViewType'
-import useEditorStore from '@/stores/useEditorStore'
-import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
+import { EditorViewType } from '@/constants/editorViewType'
 import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
 import { redoDepth, undoDepth } from '@codemirror/commands'
-import { Transaction, type EditorState } from '@codemirror/state'
-import type { EditorView } from '@codemirror/view'
+import { Transaction } from '@codemirror/state'
 import { createCommandMap } from '@markflowy/interface'
+
+export {
+  captureEditorCommandTarget,
+  releaseEditorCommandTarget,
+  isCurrentCommandTarget,
+  type EditorCommandTarget,
+} from './editorCommandTarget'
 
 export type CommandUnavailableReason =
   | 'no_document'
@@ -25,16 +26,6 @@ export type CommandUnavailableReason =
   | 'no_redo'
   | 'markdown_only'
   | 'zen_mode'
-
-export interface EditorCommandTarget {
-  fileId: string
-  groupId?: string
-  mode: EditorViewTypeValue
-  rich?: CapricornRuntimeAdapter
-  bookmark?: CapricornSelectionBookmark | null
-  source?: EditorView
-  sourceState?: EditorState
-}
 
 export const EDITOR_COMMANDS = [
   ['editor_undo', 'undo'],
@@ -56,37 +47,6 @@ export const EDITOR_COMMANDS = [
 export type EditorPaletteCommand = (typeof EDITOR_COMMANDS)[number][0]
 
 const sourceCommands = createCommandMap()
-
-export function captureEditorCommandTarget(): EditorCommandTarget | null {
-  const { activeId: fileId, activeGroupId: groupId } = useEditorStore.getState()
-  if (!fileId) return null
-  const mode = useEditorViewTypeStore.getState().getEditorViewType(fileId)
-  const rich = mode === EditorViewType.WYSIWYG ? getCapricornEditor(fileId) : undefined
-  const source =
-    mode === EditorViewType.SOURCECODE ? sourceCodeCodemirrorViewMap.get(fileId)?.cm : undefined
-  return {
-    fileId,
-    groupId,
-    mode,
-    rich,
-    source,
-    sourceState: source?.state,
-    bookmark: rich?.selection?.capture(),
-  }
-}
-
-export function releaseEditorCommandTarget(target: EditorCommandTarget | null) {
-  if (target?.bookmark) target.rich?.selection?.release(target.bookmark.id)
-}
-
-export function isCurrentCommandTarget(target: EditorCommandTarget): boolean {
-  const { activeId, activeGroupId } = useEditorStore.getState()
-  return (
-    activeId === target.fileId &&
-    activeGroupId === target.groupId &&
-    useEditorViewTypeStore.getState().getEditorViewType(target.fileId) === target.mode
-  )
-}
 
 export function editorCommandUnavailable(
   target: EditorCommandTarget | null,

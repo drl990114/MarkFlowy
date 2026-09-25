@@ -90,6 +90,38 @@ function createMountAdapter(markdown = '# Markdown') {
 }
 
 describe('CapricornEditor typography', () => {
+  it('associates synchronous stage timings with the current open request and ignores late callbacks', async () => {
+    const adapter = createMountAdapter('short document')
+    const onOpenProgress = vi.fn()
+    let report: CapricornRuntimeModule.CapricornRuntimeOptions['onProgress']
+    vi.mocked(loadCapricornRuntimeFactory).mockResolvedValue(vi.fn())
+    vi.mocked(createCapricornRuntimeAdapter).mockImplementationOnce(({ options }) => {
+      report = options?.onProgress
+      report?.({ stage: 'parse', elapsedMs: 2, durationMs: 2 })
+      report?.({ stage: 'controller', elapsedMs: 5, durationMs: 3 })
+      return adapter
+    })
+    const view = render(
+      <CapricornEditor
+        active
+        initialMarkdown='short document'
+        options={{}}
+        onChange={vi.fn()}
+        onError={vi.fn()}
+        onUnavailable={vi.fn()}
+        onOpenProgress={onOpenProgress}
+      />,
+    )
+    await waitFor(() => expect(createCapricornRuntimeAdapter).toHaveBeenCalledOnce())
+    expect(onOpenProgress).toHaveBeenCalledWith(
+      { stage: 'controller', elapsedMs: 5, durationMs: 3 },
+      { contentRevision: 0, runtimeRequestSequence: 1 },
+    )
+    view.unmount()
+    const calls = onOpenProgress.mock.calls.length
+    report?.({ stage: 'ready', elapsedMs: 9 })
+    expect(onOpenProgress).toHaveBeenCalledTimes(calls)
+  })
   it('updates placeholder settings on the mounted editor without publishing content', async () => {
     const adapter = createMountAdapter('Unsaved text')
     vi.mocked(loadCapricornRuntimeFactory).mockResolvedValue(vi.fn())

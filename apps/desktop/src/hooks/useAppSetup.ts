@@ -35,7 +35,10 @@ import { useEditorStore } from '@/stores'
 import { consumeOpenedUrls, normalizeOpenedUrls, restoreOpenedUrls } from '@/startup/appearance'
 import { createAppStartupCoordinator } from '@/startup/appStartupCoordinator'
 import { restoreStartupWorkspace } from '@/startup/restoreStartupWorkspace'
+import { createWorkspaceInputReader } from '@/startup/workspaceInputs'
 import { markStartupStage } from '@/startup/performance'
+import { afterStartupInteractive, waitForStartupInteractive } from '@/startup/interactive'
+import { prepareStartupDocumentRead, prepareStartupEditorModules } from '@/startup/prepareEditor'
 import { createOpenedUrlQueue } from '@/startup/openedUrlQueue'
 import {
   scheduleStaleStartupThemeFallback,
@@ -190,6 +193,7 @@ async function appThemeExtensionsSetup() {
 
     logger.debug('Theme catalog loaded:', themes.length)
     await loadThemeExtensionsIncrementally({
+      beforeBackground: waitForStartupInteractive,
       extensions: themes,
       currentTheme: startupCustomTheme,
       loadExtension: (extension) => {
@@ -296,6 +300,15 @@ const throwIfStartupCancelled = (signal: AbortSignal) => {
   throw signal.reason instanceof Error ? signal.reason : new Error('Startup cancelled')
 }
 
+const readWorkspaceInputs = createWorkspaceInputReader(async () => {
+  const cacheStore = new LazyStore('.markflowy_workspaces.dat', { defaults: {}, autoSave: false })
+  const [openedCache] = await Promise.all([
+    invoke<OpenedCacheReadResult>('get_opened_cache'),
+    cacheStore.init(),
+  ])
+  return { cacheStore, openedCache }
+})
+
 async function appWorkspaceSetup(signal: AbortSignal) {
   const { setRecentWorkspaces } = useOpenedCacheStore.getState()
   logger.debug('==== appWorkspaceSetup: Checking window.openedUrls ===')
@@ -304,10 +317,7 @@ async function appWorkspaceSetup(signal: AbortSignal) {
   try {
     logger.debug('Creating LazyStore for workspace cache...')
     logger.debug('Invoking get_opened_cache...')
-    const [cacheStore, getOpenedCacheRes] = await Promise.all([
-      new LazyStore('.markflowy_workspaces.dat', { defaults: {}, autoSave: false }),
-      invoke<OpenedCacheReadResult>('get_opened_cache'),
-    ])
+    const { cacheStore, openedCache: getOpenedCacheRes } = await readWorkspaceInputs(signal)
     throwIfStartupCancelled(signal)
     logger.debug('LazyStore created successfully')
     logger.debug('get_opened_cache result:', getOpenedCacheRes)
@@ -400,6 +410,7 @@ const listener = (event: MessageEvent) => {
 type AppShellData = Record<string, any>
 
 const appShellSetup = async (signal: AbortSignal): Promise<AppShellData> => {
+  void readWorkspaceInputs(signal)
   markStartupStage('settings-start')
   const settingData = await appSettingStoreSetup()
   markStartupStage('settings-ready')
@@ -425,26 +436,25 @@ const appStartupCoordinator = createAppStartupCoordinator<AppShellData, void>({
   loadShell: appShellSetup,
   loadWorkspace: async (_shell, signal) => {
     await appWorkspaceSetup(signal)
+    void prepareStartupEditorModules(signal).catch(() => undefined)
     markStartupStage('session-ready')
     markStartupStage('drafts-start')
     await setupDraftRecovery(signal, true)
+    void prepareStartupEditorModules(signal).catch(() => undefined)
+    await prepareStartupDocumentRead(signal)
   },
 })
 
 export const startAppSetup = () => appStartupCoordinator.start()
 
 let deferredAppSetupPromise: Promise<void> | undefined
-
-type DeferredSetupWindow = Window & {
-  cancelIdleCallback?: (handle: number) => void
-  requestIdleCallback?: (callback: IdleRequestCallback, options?: IdleRequestOptions) => number
-}
+let themeExtensionsSetupPromise: Promise<void> | undefined
 
 const startDeferredAppSetup = () => {
   if (!deferredAppSetupPromise) {
     const { settingData } = useAppSettingStore.getState()
     deferredAppSetupPromise = Promise.all([
-      appThemeExtensionsSetup(),
+      useThemeStore.getState().syncSystemTheme(),
       checkUpdate({ install: settingData.auto_update }),
     ]).then(() => undefined)
   }
@@ -458,6 +468,7 @@ export const useAppRuntimeSetup = () => {
     let stop: (() => void) | undefined
     // Wait for restored workspace/drafts before accepting mutations from a cold CLI launch.
     void startAppSetup()
+      .then(waitForStartupInteractive)
       .then(waitForAllDraftRecovery)
       .then(async () => {
         if (disposed) return
@@ -595,35 +606,13 @@ export const useAppRuntimeSetup = () => {
   }, [eventInit])
 
   useEffect(() => {
-    const targetWindow = window as DeferredSetupWindow
-    let secondFrameId: number | undefined
-    let idleCallbackId: number | undefined
-    let fallbackTimeoutId: number | undefined
-    const startDeferredWork = () => {
-      try {
-        performance.mark('mf:startup:deferred-start')
-      } catch {
-        // Startup diagnostics must never become a startup dependency.
-      }
-      void startDeferredAppSetup()
-    }
-    const firstFrameId = targetWindow.requestAnimationFrame(() => {
-      secondFrameId = targetWindow.requestAnimationFrame(() => {
-        if (typeof targetWindow.requestIdleCallback === 'function') {
-          idleCallbackId = targetWindow.requestIdleCallback(startDeferredWork, { timeout: 500 })
-          return
-        }
-
-        fallbackTimeoutId = targetWindow.setTimeout(startDeferredWork, 120)
-      })
+    // Restore the selected custom theme promptly; the scheduler holds all other
+    // extensions until the active document is interactive.
+    if (!themeExtensionsSetupPromise) themeExtensionsSetupPromise = appThemeExtensionsSetup()
+    return afterStartupInteractive(() => {
+      markStartupStage('deferred-start')
+      void startDeferredAppSetup().catch((error) => logger.error('Deferred startup failed', error))
     })
-
-    return () => {
-      targetWindow.cancelAnimationFrame(firstFrameId)
-      if (secondFrameId !== undefined) targetWindow.cancelAnimationFrame(secondFrameId)
-      if (idleCallbackId !== undefined) targetWindow.cancelIdleCallback?.(idleCallbackId)
-      if (fallbackTimeoutId !== undefined) targetWindow.clearTimeout(fallbackTimeoutId)
-    }
   }, [])
 
   useEffect(() => {

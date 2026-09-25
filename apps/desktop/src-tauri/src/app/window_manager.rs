@@ -28,7 +28,7 @@ struct WindowBootstrap {
     appearance: StartupAppearance,
 }
 
-fn app_session_id() -> &'static str {
+pub(crate) fn app_session_id() -> &'static str {
     APP_SESSION_ID
         .get_or_init(|| uuid::Uuid::new_v4().to_string())
         .as_str()
@@ -99,12 +99,14 @@ pub(crate) fn build_main_window(
     opened_urls: Vec<String>,
 ) -> Result<WebviewWindow, String> {
     let started_at = Instant::now();
+    super::startup_timing::record_stage("window-start", Some(&window_label));
     let (initialization_script, appearance) =
         window_initialization_script(app, opened_urls).map_err(|error| error.to_string())?;
+    super::startup_timing::record_stage("window-bootstrap-ready", Some(&window_label));
     let native_theme = appearance.preference.native_window_theme();
     let background_color = appearance.palette.surface_color();
 
-    let mut window_builder = WebviewWindowBuilder::new(app, window_label, url)
+    let mut window_builder = WebviewWindowBuilder::new(app, window_label.clone(), url)
         .initialization_script(&initialization_script)
         .title("MarkFlowy")
         .resizable(true)
@@ -127,7 +129,9 @@ pub(crate) fn build_main_window(
         window_builder = window_builder.decorations(false);
     }
 
+    super::startup_timing::record_stage("webview-build-start", Some(&window_label));
     let window = window_builder.build().map_err(|error| error.to_string())?;
+    super::startup_timing::record_stage("window-built", Some(window.label()));
     mark_window_recent(window.label());
     tracing::info!(
         marker = "window-built",

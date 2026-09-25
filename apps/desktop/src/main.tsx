@@ -13,8 +13,9 @@ import { getPdfPrintWindowRequest } from './components/EditorArea/pdf-print/pdfP
 import { startAppSetup } from './hooks/useAppSetup'
 import { applyStartupAppearance, readWindowBootstrap } from './startup/appearance'
 import { markBootShellReady } from './startup/boot'
-import { initSentryAfterShell } from './startup/sentry'
+import { initSentryAfterInteractive } from './startup/sentry'
 import { initStartupPerformance } from './startup/performance'
+import { markStartupInteractive } from './startup/interactive'
 import './atom.css'
 import './normalize.css'
 import './ui.css'
@@ -39,6 +40,7 @@ const Main = () => {
 const AppRenderFailure = ({ error, reset }: { error: unknown; reset: () => void }) => {
   useLayoutEffect(() => {
     markBootShellReady()
+    markStartupInteractive('error')
   }, [])
 
   return (
@@ -76,7 +78,7 @@ if (pdfPrintWindowRequest) {
     </Suspense>,
   )
 } else {
-  initSentryAfterShell()
+  initSentryAfterInteractive()
   void startAppSetup()
   ReactDOM.createRoot(rootElement).render(
     <StrictMode>

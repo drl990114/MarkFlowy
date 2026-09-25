@@ -8,10 +8,6 @@ vi.mock('@/i18n', () => ({
   i18n: { t: (key: string) => key },
   locales: { en: 'English', 'zh-CN': '简体中文' },
 }))
-vi.mock('rme', () => ({
-  DEFAULT_CURRENT_DATE_FORMAT: 'yyyy-MM-dd',
-  EditorViewType: { WYSIWYG: 'wysiwyg', SOURCECODE: 'sourceCode', PREVIEW: 'preview' },
-}))
 
 import { getSettingMap } from './settingMap'
 

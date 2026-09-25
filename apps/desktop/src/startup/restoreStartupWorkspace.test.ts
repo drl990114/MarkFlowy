@@ -22,11 +22,18 @@ vi.mock('@/helper/logger', () => ({ logger: { error: vi.fn() } }))
 vi.mock('zens', () => ({ toast: { error: vi.fn() } }))
 
 enableMapSet()
+const deferred = vi.hoisted(() => ({ tasks: [] as (() => void)[] }))
+vi.mock('./interactive', () => ({
+  afterStartupInteractive: (task: () => void) => { deferred.tasks.push(task) },
+}))
+const releaseBackground = () => { deferred.tasks.splice(0).forEach((task) => task()) }
+
 const folder = (path: string): IFile[] => [{ id: path, path, name: path, kind: 'dir', children: [] }]
 const cache = { openedFilePaths: ['/w/a.md', '/w/b.md'], activeFilePath: '/w/a.md' }
 
 beforeEach(() => {
   vi.clearAllMocks()
+  deferred.tasks = []
   useFileCacheStore.setState({ entries: {}, pathEntries: {}, metadataRevision: 0 })
   useEditorStore.getState().setFolderData([])
   useWorkspaceDirectoryState.setState({ root: undefined, status: 'idle', error: undefined })
@@ -37,6 +44,8 @@ describe('startup workspace restoration', () => {
     let finish!: (value: IFile[]) => void
     vi.mocked(readDirectory).mockReturnValueOnce(new Promise((resolve) => { finish = resolve }))
     await restoreStartupWorkspace('/w', Promise.resolve(cache), new AbortController().signal)
+    expect(readDirectory).not.toHaveBeenCalled()
+    releaseBackground()
     const state = useEditorStore.getState()
     expect(getFileObject(state.activeId!).path).toBe('/w/a.md')
     expect(state.opened).toHaveLength(2)
@@ -52,6 +61,8 @@ describe('startup workspace restoration', () => {
   it('isolates a directory failure and retries without resetting open documents', async () => {
     vi.mocked(readDirectory).mockRejectedValueOnce(new Error('Permission denied'))
     await restoreStartupWorkspace('/w', Promise.resolve(cache), new AbortController().signal)
+    expect(readDirectory).not.toHaveBeenCalled()
+    releaseBackground()
     await vi.waitFor(() => expect(useWorkspaceDirectoryState.getState().status).toBe('error'))
     const state = useEditorStore.getState()
     expect(state.opened).toHaveLength(2)
@@ -59,6 +70,14 @@ describe('startup workspace restoration', () => {
     await refreshWorkspaceDirectory()
     expect(useWorkspaceDirectoryState.getState().status).toBe('ready')
     expect(useEditorStore.getState().editorLayout).toBe(state.editorLayout)
+  })
+
+
+  it('does not scan a replaced workspace when the editor finally releases background work', async () => {
+    await restoreStartupWorkspace('/w', Promise.resolve(cache), new AbortController().signal)
+    useEditorStore.getState().setFolderData(folder('/other'))
+    releaseBackground()
+    expect(readDirectory).not.toHaveBeenCalled()
   })
 
   it('does not restore a canceled session', async () => {
@@ -73,6 +92,8 @@ describe('startup workspace restoration', () => {
     let finish!: (value: IFile[]) => void
     vi.mocked(readDirectory).mockReturnValueOnce(new Promise((resolve) => { finish = resolve }))
     await restoreStartupWorkspace('/w', Promise.resolve(cache), new AbortController().signal)
+    expect(readDirectory).not.toHaveBeenCalled()
+    releaseBackground()
     const isCurrent = vi.mocked(readDirectory).mock.calls[0][1]?.isCurrent
     expect(isCurrent?.()).toBe(true)
     useEditorStore.getState().setFolderData(folder('/other'))
@@ -86,6 +107,8 @@ describe('startup workspace restoration', () => {
     let finish!: (value: IFile[]) => void
     vi.mocked(readDirectory).mockReturnValueOnce(new Promise((resolve) => { finish = resolve }))
     await restoreStartupWorkspace('/w', Promise.resolve(cache), new AbortController().signal)
+    expect(readDirectory).not.toHaveBeenCalled()
+    releaseBackground()
     const isCurrent = vi.mocked(readDirectory).mock.calls[0][1]?.isCurrent
     vi.mocked(readDirectory).mockResolvedValueOnce(folder('/w'))
     await refreshWorkspaceDirectory()

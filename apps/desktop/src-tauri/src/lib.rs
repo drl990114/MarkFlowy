@@ -1563,6 +1563,7 @@ pub fn run() {
     handle_read_only_cli_command();
 
     let context = tauri::generate_context!();
+    app::startup_timing::record_stage("context-ready", None);
 
     let app = tauri::Builder::default()
         .manage(OpenedUrls(Default::default()))
@@ -1725,6 +1726,7 @@ pub fn run() {
             local_history::local_history,
         ])
         .setup(|app: &mut tauri::App| {
+            app::startup_timing::record_stage("setup-start", None);
             cli_debug!("========================================");
             cli_debug!(
                 "cfg!(debug_assertions)={}, tauri::is_dev()={}",
@@ -1826,6 +1828,7 @@ pub fn run() {
             }
 
             local_history::configure(app.handle());
+            app::startup_timing::record_stage("configuration-ready", None);
             let opened_urls: State<OpenedUrls> = app.state();
             let file_urls = opened_urls.inner().to_owned();
 
@@ -1862,7 +1865,18 @@ pub fn run() {
             #[cfg(target_os = "macos")]
             menu::generate_menu(app).expect("failed to generate menu");
 
+            app::startup_timing::record_stage("setup-end", None);
             Ok(())
+        })
+        .on_page_load(|webview, payload| {
+            if webview.label() != "main" && !webview.label().starts_with("main_") {
+                return;
+            }
+            let stage = match payload.event() {
+                tauri::webview::PageLoadEvent::Started => "page-load-start",
+                tauri::webview::PageLoadEvent::Finished => "page-load-finished",
+            };
+            app::startup_timing::record_stage(stage, Some(webview.label()));
         })
         .on_window_event(|window, event| {
             let app = window.app_handle();
@@ -1873,6 +1887,7 @@ pub fn run() {
                 }
                 tauri::WindowEvent::Destroyed => {
                     let window_label = window.label();
+                    app::startup_timing::forget_window(window_label);
                     reliable_cli::window_destroyed(window_label);
                     search::window_destroyed(window_label);
                     window_manager::forget_window_recency(window_label);

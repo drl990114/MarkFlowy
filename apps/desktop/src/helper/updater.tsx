@@ -1,5 +1,4 @@
 import { dialog } from '@/services/dialog'
-import { UpdateDialogContent } from '@/components/UpdateDialogContent'
 import { invoke } from '@tauri-apps/api/core'
 import type { Update } from '@tauri-apps/plugin-updater'
 import { check } from '@tauri-apps/plugin-updater'
@@ -53,6 +52,7 @@ export const checkUpdate = async (opt: { install: boolean } = { install: false }
       if (opt.install) {
         installUpdate(update)
       } else {
+        const { UpdateDialogContent } = await import('@/components/UpdateDialogContent')
         const action = await dialog.confirm({
           title: i18n.t('about.newVersion'),
           content: (

@@ -24,12 +24,12 @@ function resolveLocalImport(importer: string, specifier: string) {
 
 /** Source-level boundary guard, not evidence of production chunk size or timing. */
 it.each([
-  'main.tsx',
-  'components/EditorArea/EditorAreaContent.tsx',
-  'components/TableOfContent/TocView.tsx',
-])('%s cannot reach RME through the application static import graph', (entry) => {
+  ['main.tsx', /^(rme(?:\/|$)|@codemirror\/|react-markdown$|remark-gfm$)/],
+  ['components/EditorArea/EditorAreaContent.tsx', /^rme(?:\/|$)/],
+  ['components/TableOfContent/TocView.tsx', /^rme(?:\/|$)/],
+] as const)('%s keeps optional editor/rendering engines outside its static import graph', (entry, forbidden) => {
   const visited = new Set<string>()
-  const pathsToRme: string[][] = []
+  const forbiddenPaths: string[][] = []
   const visit = (path: string, chain: string[]) => {
     if (visited.has(path)) return
     visited.add(path)
@@ -44,12 +44,12 @@ it.each([
       if (!ts.isImportDeclaration(node) && !ts.isExportDeclaration(node)) continue
       if (!node.moduleSpecifier || !ts.isStringLiteral(node.moduleSpecifier)) continue
       const specifier = node.moduleSpecifier.text
-      if (specifier === 'rme' || specifier.startsWith('rme/'))
-        pathsToRme.push([...chain, path, specifier])
+      if (forbidden.test(specifier))
+        forbiddenPaths.push([...chain, path, specifier])
       const imported = resolveLocalImport(path, specifier)
       if (imported) visit(imported, [...chain, path])
     }
   }
   visit(resolve(sourceRoot, entry), [])
-  expect(pathsToRme).toEqual([])
+  expect(forbiddenPaths).toEqual([])
 })

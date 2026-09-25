@@ -19,6 +19,7 @@ import {
 } from './externalFileChanges'
 import { fileSaveCoordinator } from './fileSaveCoordinator'
 import { editorSnapshotRegistry } from './editorSnapshotRegistry'
+import { onFileSnapshotInvalidated } from './fileSnapshot'
 
 enableMapSet()
 
@@ -62,6 +63,19 @@ async function emitChange() {
 }
 
 describe('external file changes', () => {
+  it('invalidates a startup handoff as soon as the watcher event arrives, before disk inspection', async () => {
+    mockStableDisk('local', 'disk:new')
+    const invalidated = vi.fn()
+    const dispose = onFileSnapshotInvalidated(invalidated)
+    try {
+      const inspected = emitChange()
+      expect(invalidated).toHaveBeenCalledExactlyOnceWith(filePath)
+      expect(invoke).not.toHaveBeenCalledWith('get_file_snapshot', expect.anything())
+      await inspected
+    } finally {
+      dispose()
+    }
+  })
   beforeEach(async () => {
     vi.useFakeTimers()
     invoke.mockReset()
