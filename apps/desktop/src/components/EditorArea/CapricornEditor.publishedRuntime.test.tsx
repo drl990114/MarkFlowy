@@ -1,7 +1,8 @@
 // Transform the source/package graph before UI wait deadlines. The component
 // still uses its real async loader; loader caching has separate unit coverage.
 import 'virtual:markflowy-capricorn-runtime'
-import { createInstance } from '@markflowy/i18n'
+import { createInstance } from '@/i18n'
+import type * as I18nModule from '@/i18n'
 import { desktopLightTheme } from '@markflowy/theme'
 import { act, cleanup, fireEvent, render, waitFor, within } from '@testing-library/react'
 import { createRef, StrictMode } from 'react'
@@ -24,7 +25,8 @@ import {
 import { createCapricornKeybindingConfiguration } from './capricornKeybindings'
 import { getCapricornRuntimeInput } from './capricornRuntimeDom'
 
-vi.mock('@/i18n', () => ({
+vi.mock('@/i18n', async (importOriginal) => ({
+  ...(await importOriginal<typeof I18nModule>()),
   useTranslation: () => ({
     t: (key: string) =>
       (
@@ -425,7 +427,9 @@ describe.skipIf(!isCapricornRuntimeAvailable)('CapricornEditor with the publishe
       handleLinkClick.mockClear()
       await act(async () => fireEvent(badge, event))
       expect(event.defaultPrevented).toBe(true)
-      expect(handleLinkClick).toHaveBeenCalledExactlyOnceWith('https://github.com/drl990114/MarkFlowy')
+      expect(handleLinkClick).toHaveBeenCalledExactlyOnceWith(
+        'https://github.com/drl990114/MarkFlowy',
+      )
     }
     expect(ref.current!.getMarkdown()).toBe(markdown)
     expect(onChange).not.toHaveBeenCalledWith(expect.objectContaining({ documentChanged: true }))

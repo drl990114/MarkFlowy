@@ -28,6 +28,7 @@
   "scripts": {
     "build": "yarn clear && tsc -p tsconfig.json --emitDeclarationOnly --declaration --noEmit false --outDir dist --declarationDir dist && rollup -c",
     "dev": "node esbuild.dev.mjs --watch",
+    "test": "node --test test/*.test.mjs",
     "delete": "rimraf node_modules",
     "clear": "rimraf dist && rimraf tsconfig.tsbuildinfo",
     "prepublish": "yarn build"
