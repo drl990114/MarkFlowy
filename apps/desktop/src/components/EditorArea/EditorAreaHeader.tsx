@@ -2,18 +2,17 @@ import { DraftProtectionStatus } from '@/components/LocalHistory/DraftProtection
 import { guardUnsavedFiles } from '@/services/checkUnsavedFiles'
 import { addEmptyEditorTab, addNewMarkdownFileEdit } from '@/services/editor-file'
 import { useEditorStore } from '@/stores'
-import { Columns2Icon, PlusIcon, XIcon } from 'lucide-react'
+import { Columns2Icon, PlusIcon } from 'lucide-react'
 import { memo, useCallback } from 'react'
 import { useTranslation } from '@/i18n'
 import { EditorAreaActionButton } from './EditorAreaAction'
 
 interface EditorAreaHeaderProps {
   groupId: string
-  compact?: boolean
 }
 
 export const EditorAreaHeader = memo((props: EditorAreaHeaderProps) => {
-  const { groupId, compact } = props
+  const { groupId } = props
   const activeId = useEditorStore((state) => state.getGroup(groupId)?.activeId)
   const setActiveGroupId = useEditorStore((state) => state.setActiveGroupId)
   const splitGroup = useEditorStore((state) => state.splitGroup)
@@ -55,18 +54,6 @@ export const EditorAreaHeader = memo((props: EditorAreaHeaderProps) => {
         label={splitLabel}
         onClick={(event) => handleSplit(event.altKey ? 'vertical' : 'horizontal')}
       />
-      {compact && activeId ? (
-        <EditorAreaActionButton
-          icon={XIcon}
-          label={t('common.close')}
-          onClick={() => {
-            guardUnsavedFiles({
-              fileIds: [activeId],
-              onContinue: () => useEditorStore.getState().closeFileInGroup(groupId, activeId),
-            })
-          }}
-        />
-      ) : null}
     </div>
   )
 })

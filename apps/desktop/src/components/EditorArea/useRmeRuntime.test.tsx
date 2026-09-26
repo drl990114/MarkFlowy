@@ -63,3 +63,16 @@ it('retries a failed engine import and clears the error', async () => {
   expect(view.result.current.error).toBeUndefined()
   expect(mocks.load).toHaveBeenCalledTimes(2)
 })
+
+
+it('prepares an optional engine on demand without activating the initial-open error surface', async () => {
+  mocks.load.mockRejectedValueOnce(new Error('Offline')).mockResolvedValue(runtime)
+  const view = renderHook(() => useRmeRuntime(false))
+  expect(mocks.load).not.toHaveBeenCalled()
+  await act(async () => {
+    await expect(view.result.current.prepare()).rejects.toThrow('Offline')
+  })
+  expect(view.result.current.error).toBeUndefined()
+  await act(async () => { await view.result.current.prepare() })
+  expect(view.result.current.runtime).toBe(runtime)
+})

@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import styles from 'virtual:mf-pdf-preview-style'
+import { useEditorLoading } from '../EditorLoadingBoundary'
 import { openPdfPreview, type PdfPreviewHandle, type PdfViewState } from './pdfPreviewRuntime'
 import { registerPreviewSearch } from './previewSearch'
 
@@ -82,6 +83,7 @@ export default function PdfPreview({
     submit: (value: string) => void
     incorrect: boolean
   } | null>(null)
+  useEditorLoading(visible && Boolean(filePath) && !ready && !failed && !passwordRequest)
 
   useEffect(() => {
     if (!visible || !filePath || !container.current || !pagesElement.current) return
@@ -156,7 +158,6 @@ export default function PdfPreview({
       className='mf-pdf-preview absolute inset-0 flex min-h-0 flex-col bg-muted'
       data-slot='pdf-preview'
       aria-label={t('document_preview.pdf_title')}
-      aria-busy={!ready && !failed && !passwordRequest}
     >
       <style>{styles}</style>
       <div
@@ -306,13 +307,6 @@ export default function PdfPreview({
             <Button variant='outline' onClick={() => setRetry((value) => value + 1)}>
               {t('document_preview.retry')}
             </Button>
-          </div>
-        ) : !ready ? (
-          <div
-            role='status'
-            className='pointer-events-none absolute inset-0 flex items-center justify-center text-sm text-muted-foreground'
-          >
-            {t('document_preview.loading')}
           </div>
         ) : null}
       </div>

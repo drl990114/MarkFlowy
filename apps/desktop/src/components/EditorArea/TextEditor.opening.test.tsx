@@ -15,6 +15,8 @@ import { getCapricornEditor } from './capricornEditorRegistry'
 import { EXTERNAL_FILE_CONTENT_SYNC_EVENT } from './externalFileChanges'
 import { sourceCodeCodemirrorViewMap } from './sourceCodeEditorRegistry'
 import * as rmeRuntime from './rmeRuntime'
+import * as capricornRuntime from './capricornRuntimeAdapter'
+import { endHistoryBatch } from '@/services/local-history'
 
 const mocks = vi.hoisted(() => ({
   t: (key: string) => key,
@@ -147,18 +149,30 @@ describe.skipIf(!isCapricornRuntimeAvailable)('TextEditor opening', () => {
     const save = vi.fn()
     bus.on(EVENT.app_save, save)
     try {
-      render(<TextEditor active id={id} fileTypeConfig={{
+      const loading = vi.fn()
+      const { container } = render(<TextEditor onLoadingChange={loading} active id={id} fileTypeConfig={{
         type: 'markdown', defaultMode: EditorViewType.WYSIWYG,
         supportedModes: [EditorViewType.WYSIWYG, EditorViewType.SOURCECODE, EditorViewType.PREVIEW],
       }} />)
       await waitFor(() => expect(getCapricornEditor(id)).toBeDefined())
+      const originalEditor = getCapricornEditor(id)
+      const originalBody = container.querySelector('[data-cap-content]')
       await act(async () => bus.emit('editor_toggle_type', undefined, EditorViewType.SOURCECODE))
-      await waitFor(() => expect(useEditorViewTypeStore.getState().getEditorViewType(id)).toBe(EditorViewType.SOURCECODE))
+      expect(useEditorViewTypeStore.getState().getEditorViewType(id)).toBe(EditorViewType.WYSIWYG)
+      expect(getCapricornEditor(id)).toBe(originalEditor)
+      expect(container.querySelector('[data-cap-content]')).toBe(originalBody)
+      expect(container.textContent).not.toContain('document_preview.loading')
+      expect(loading).toHaveBeenLastCalledWith(true)
+      expect(save).not.toHaveBeenCalled()
       expect(sourceCodeCodemirrorViewMap.get(id)).toBeUndefined()
       const latest = '# Latest content\n\nArrived during loading.\n'
       await act(async () => bus.emit(EXTERNAL_FILE_CONTENT_SYNC_EVENT, undefined, { fileId: id, content: latest }))
+      await act(async () => originalEditor?.commands.insertLink?.({ href: 'https://example.com', text: 'Typed while loading' }))
+      const latestEdited = originalEditor!.getMarkdown()
+      expect(latestEdited).toContain('Typed while loading')
       await act(async () => resolve(runtime))
-      await waitFor(() => expect(sourceCodeCodemirrorViewMap.get(id)?.cm.state.doc.toString()).toBe(latest))
+      await waitFor(() => expect(sourceCodeCodemirrorViewMap.get(id)?.cm.state.doc.toString()).toBe(latestEdited))
+      expect(loading).toHaveBeenLastCalledWith(false)
       const source = sourceCodeCodemirrorViewMap.get(id)!
       const edited = '# Edited in source\n\nSaved before switching.\n'
       await act(async () => source.cm.dispatch({ changes: { from: 0, to: source.cm.state.doc.length, insert: edited } }))
@@ -173,4 +187,55 @@ describe.skipIf(!isCapricornRuntimeAvailable)('TextEditor opening', () => {
       bus.detach(EVENT.app_save, save)
     }
   })
+
+  it('cancels the switch when the current mode is selected during its save', async () => {
+    await rmeRuntime.loadRmeRuntime()
+    const id = 'opening-canceled-save'
+    setFileObject(id, { id, name: 'cancel.md', path: '/synthetic/cancel.md', kind: 'file' })
+    useEditorStateStore.getState().setIdStateMap(id, { hasUnsavedChanges: false })
+    const { container } = render(<TextEditor active id={id} fileTypeConfig={{
+      type: 'markdown', defaultMode: EditorViewType.WYSIWYG,
+      supportedModes: [EditorViewType.WYSIWYG, EditorViewType.SOURCECODE],
+    }} />)
+    await waitFor(() => expect(getCapricornEditor(id)).toBeDefined())
+    const originalEditor = getCapricornEditor(id)
+    const body = container.querySelector('[data-cap-content]')
+    let finishSave!: () => void
+    const save = new Promise<void>((resolve) => { finishSave = resolve })
+    vi.mocked(endHistoryBatch).mockReturnValueOnce(save)
+    await act(async () => bus.emit('editor_toggle_type', undefined, EditorViewType.SOURCECODE))
+    await act(async () => bus.emit('editor_toggle_type', undefined, EditorViewType.WYSIWYG))
+    await act(async () => finishSave())
+    expect(getCapricornEditor(id)).toBe(originalEditor)
+    expect(container.querySelector('[data-cap-content]')).toBe(body)
+    expect(sourceCodeCodemirrorViewMap.get(id)).toBeUndefined()
+    expect(useEditorViewTypeStore.getState().getEditorViewType(id)).toBe(EditorViewType.WYSIWYG)
+  })
+
+
+  it('keeps the source editor mounted while preparing the first visual mode', async () => {
+    const factory = await capricornRuntime.loadCapricornRuntimeFactory()
+    let resolve!: (value: typeof factory) => void
+    vi.spyOn(capricornRuntime, 'getLoadedCapricornRuntimeFactory').mockReturnValue(undefined)
+    vi.spyOn(capricornRuntime, 'loadCapricornRuntimeFactory').mockReturnValue(new Promise((done) => { resolve = done }))
+    const id = 'opening-deferred-visual'
+    setFileObject(id, { id, name: 'visual.md', path: '/synthetic/visual.md', kind: 'file' })
+    useEditorStateStore.getState().setIdStateMap(id, { hasUnsavedChanges: false })
+    render(<TextEditor active id={id} fileTypeConfig={{
+      type: 'markdown', defaultMode: EditorViewType.SOURCECODE,
+      supportedModes: [EditorViewType.WYSIWYG, EditorViewType.SOURCECODE],
+    }} />)
+    await waitFor(() => expect(sourceCodeCodemirrorViewMap.get(id)).toBeDefined())
+    const source = sourceCodeCodemirrorViewMap.get(id)!
+    await act(async () => bus.emit('editor_toggle_type', undefined, EditorViewType.WYSIWYG))
+    expect(sourceCodeCodemirrorViewMap.get(id)).toBe(source)
+    expect(source.cm.dom.isConnected).toBe(true)
+    expect(getCapricornEditor(id)).toBeUndefined()
+    const edited = '# Edited while preparing visual mode'
+    await act(async () => source.cm.dispatch({ changes: { from: 0, to: source.cm.state.doc.length, insert: edited } }))
+    await act(async () => resolve(factory))
+    await waitFor(() => expect(getCapricornEditor(id)?.getMarkdown()).toBe(edited))
+    expect(sourceCodeCodemirrorViewMap.get(id)).toBeUndefined()
+  })
+
 })

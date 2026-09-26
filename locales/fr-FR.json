@@ -235,6 +235,12 @@
     "openDir": "ouvrir le dossier",
     "openFolderInNewWindow": "Ouvrir le dossier dans une nouvelle fenêtre",
     "closeFolder": "Fermer le dossier",
+    "closeDocument": "Fermer le document",
+    "renameErrors": {
+      "empty": "Saisissez un nom de fichier.",
+      "invalid": "Utilisez un nom de fichier valide sans séparateurs de chemin ni caractères réservés.",
+      "exists": "Un fichier portant ce nom existe déjà."
+    },
     "recentDir": "Dossiers récemment ouverts",
     "emptyOpened": "Aucun fichier ouvert",
     "emptyFolder": "Dossier vide",

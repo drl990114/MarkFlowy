@@ -267,6 +267,12 @@
     "openDir": "Open Folder",
     "openFolderInNewWindow": "Open Folder in New Window",
     "closeFolder": "Close Folder",
+    "closeDocument": "Close document",
+    "renameErrors": {
+      "empty": "Enter a file name.",
+      "invalid": "Use a valid file name without path separators or reserved characters.",
+      "exists": "A file with this name already exists."
+    },
     "openFile": "Open a File",
     "recentDir": "Recently opened folders",
     "emptyOpened": "No files opened",

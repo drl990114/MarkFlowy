@@ -26,7 +26,7 @@ function EditorGroupToolbar(props: EditorGroupToolbarProps) {
   const { t } = useTranslation()
 
   if (!editorId) return null
-  const actions = compactGroupId ? <EditorAreaHeader groupId={compactGroupId} compact /> : null
+  const actions = compactGroupId ? <EditorAreaHeader groupId={compactGroupId} /> : null
   const title = compactGroupId && osType === 'linux' ? <DocumentTitle /> : null
   if (type === 'pdf')
     return actions ? (

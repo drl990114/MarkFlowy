@@ -240,6 +240,12 @@
     "openDir": "フォルダーを開く",
     "openFolderInNewWindow": "新しいウィンドウでフォルダーを開く",
     "closeFolder": "フォルダーを閉じる",
+    "closeDocument": "ドキュメントを閉じる",
+    "renameErrors": {
+      "empty": "ファイル名を入力してください。",
+      "invalid": "パス区切り文字や予約文字を含まない有効なファイル名を使用してください。",
+      "exists": "同じ名前のファイルが既に存在します。"
+    },
     "openFile": "ファイルを開く",
     "recentDir": "最近開いたフォルダー",
     "emptyOpened": "開いているファイルはありません",

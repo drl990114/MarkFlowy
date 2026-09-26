@@ -268,6 +268,12 @@
     "openDir": "打开文件夹",
     "openFolderInNewWindow": "在新窗口打开文件夹",
     "closeFolder": "关闭文件夹",
+    "closeDocument": "关闭文档",
+    "renameErrors": {
+      "empty": "请输入文件名。",
+      "invalid": "文件名不能包含路径分隔符或保留字符。",
+      "exists": "已存在同名文件。"
+    },
     "openFile": "打开文件",
     "recentDir": "最近打开的文件夹",
     "emptyOpened": "没有打开的文件",

@@ -24,7 +24,7 @@ import { PreviewContent } from './preview/PreviewContent'
 import { EditorScrollContainer } from './styles'
 import { editorScrollOptions } from './editorScrollOptions'
 import TextEditor from './TextEditor'
-import { EditorLoadingProgress } from './EditorLoadingProgress'
+import { EditorLoadingBoundary } from './EditorLoadingBoundary'
 import { UnsupportedFileType } from './UnsupportedFileType'
 import { completeDeferredEditorSave, registerDeferredEditorSave } from './deferredEditorSave'
 
@@ -184,10 +184,11 @@ function Editor(props: EditorProps) {
   const loading = !draftReady || !curFileTypeConfig || (isTextfileType(curFileTypeConfig) && pending)
 
   return (
-    <div
+    <EditorLoadingBoundary
       className='absolute inset-0 bg-background'
       style={visible ? undefined : { display: 'none' }}
-      aria-busy={loading}
+      pending={loading}
+      visible={visible}
     >
       <EditorScrollContainer
         data-editor-id={id}
@@ -226,8 +227,7 @@ function Editor(props: EditorProps) {
           </div>
         </OverlayScrollbarsComponent>
       </EditorScrollContainer>
-      <EditorLoadingProgress pending={loading} visible={visible} />
-    </div>
+    </EditorLoadingBoundary>
   )
 }
 

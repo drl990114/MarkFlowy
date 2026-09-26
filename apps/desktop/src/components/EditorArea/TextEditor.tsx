@@ -81,7 +81,7 @@ import useThemeStore from '@/stores/useThemeStore'
 import { invoke } from '@tauri-apps/api/core'
 import { save } from '@tauri-apps/plugin-dialog'
 import classNames from 'classnames'
-import { debounce, DebouncedFunc, throttle } from 'lodash'
+import { debounce, DebouncedFunc } from 'lodash'
 import {
   memo,
   lazy,
@@ -141,6 +141,8 @@ import {
 } from './CapricornEditor'
 import {
   CAPRICORN_DESKTOP_VIRTUALIZE_OPTIONS,
+  getLoadedCapricornRuntimeFactory,
+  loadCapricornRuntimeFactory,
   type CapricornEditorChangeEvent,
   type CapricornLocalizationAdapter,
   type CapricornRuntimeAdapter,
@@ -1164,8 +1166,15 @@ function TextEditor(props: TextEditorProps) {
     runtime: rmeRuntime,
     error: rmeLoadError,
     retry: retryRmeRuntime,
+    prepare: prepareRmeRuntime,
   } = useRmeRuntime(needsRmeRuntime)
   const MfEditor = rmeRuntime?.Editor
+  const [preparingMode, setPreparingMode] = useState<EditorViewTypeValue | null>(null)
+  const modeRequestRef = useRef(0)
+  useEffect(() => {
+    if (!active || !visible) setPreparingMode(null)
+    return () => { modeRequestRef.current += 1 }
+  }, [active, visible])
   const [content, setContent] = useState<string | undefined>()
   const [delegate, setDelegate] = useState<ReturnType<typeof createDelegate> | null>(null)
 
@@ -2064,101 +2073,124 @@ function TextEditor(props: TextEditorProps) {
     [currentViewType, delegate, id, isHtml, resumeSource],
   )
 
+  const requestViewType = useCallback(
+    async (payload: EditorViewTypeValue) => {
+      if (!fileTypeConfig.supportedModes.includes(payload)) return
+      // Selecting the current view also cancels a switch waiting on a save.
+      if (currentViewType === payload) {
+        modeRequestRef.current += 1
+        setPreparingMode(null)
+        return
+      }
+      if (editorTypeSwitchingRef.current) return
+      const request = ++modeRequestRef.current
+      const wasActive = activeRef.current
+      const wasVisible = visibleRef.current
+      const isCurrentRequest = () =>
+        request === modeRequestRef.current &&
+        wasActive === activeRef.current && wasVisible === visibleRef.current
+      setPreparingMode(null)
+
+      let preparedRuntime = rmeRuntime
+      const needsRuntime =
+        !isCapricornView(payload) && (!isHtml || payload === EditorViewType.SOURCECODE)
+      const needsCapricornRuntime = isCapricornView(payload) && !getLoadedCapricornRuntimeFactory()
+      if ((needsRuntime && !preparedRuntime) || needsCapricornRuntime) {
+        setPreparingMode(payload)
+        try {
+          if (needsCapricornRuntime) await loadCapricornRuntimeFactory()
+          else preparedRuntime = await prepareRmeRuntime()
+        } catch (error) {
+          if (isCurrentRequest()) {
+            setPreparingMode(null)
+            logger.error('Unable to prepare editor mode', error)
+            toast.error(t('document_preview.load_failed'))
+          }
+          return
+        }
+        // Another mode, tab or document may have been selected during the import.
+        if (!isCurrentRequest()) return
+      }
+
+      if (isHtml) {
+        switchHtmlView(payload)
+        setPreparingMode(null)
+        return
+      }
+
+      editorTypeSwitchingRef.current = true
+      // Save only after preparation: the current editor remains usable while
+      // loading, and any edits made during that time must reach the new mode.
+      bus.emit(EVENT.app_save, undefined, {
+        onSuccess: () => {
+          if (!isCurrentRequest()) return
+          let sourceCodeDelegate: ReturnType<typeof createDelegate> | undefined
+          try {
+            if (payload === EditorViewType.SOURCECODE && preparedRuntime) {
+              sourceCodeDelegate = createDelegate(preparedRuntime, fileTypeConfig.type)
+            }
+          } catch (error) {
+            logger.error('Unable to prepare source editor', error)
+            toast.error(t('document_preview.load_failed'))
+            return
+          }
+          clearSwitchingEditorContextResource(curFile.id, instanceIdRef.current!)
+          if (payload !== EditorViewType.SOURCECODE) {
+            unregisterSourceCodeViewResource(curFile.id, instanceIdRef.current!)
+          }
+          const switchingFromCapricorn = isCapricornView(currentViewType)
+          if (isCapricornView(payload)) {
+            unregisterRmeEditorResources(curFile.id, instanceIdRef.current!)
+            editorContextRef.current = null
+            setDelegate(null)
+          } else if (sourceCodeDelegate) {
+            registerEditorDelegateResource(
+              curFile.id,
+              instanceIdRef.current!,
+              sourceCodeDelegate,
+              activeRef.current,
+            )
+            setResumeSource(null)
+            setDelegate(sourceCodeDelegate)
+          } else if (payload === EditorViewType.PREVIEW) {
+            debounceRefreshToc()
+          }
+          useEditorViewTypeStore.getState().setEditorViewType(curFile.id, payload)
+          setCurrentViewType(payload)
+          if (!switchingFromCapricorn && !isCapricornView(payload)) {
+            editorRef.current?.toggleType(payload)
+          }
+        },
+        onFinally: () => {
+          editorTypeSwitchingRef.current = false
+          if (request === modeRequestRef.current) setPreparingMode(null)
+        },
+      })
+    },
+    [
+      createDelegate, curFile.id, currentViewType, debounceRefreshToc,
+      fileTypeConfig.supportedModes, fileTypeConfig.type, isCapricornView,
+      isHtml, prepareRmeRuntime, rmeRuntime, switchHtmlView, t,
+    ],
+  )
+
   useEffect(() => {
     if (
       status === TextEditorStatus.SUCCESS &&
       sharedHtmlViewType &&
       sharedHtmlViewType !== currentViewType
     ) {
-      switchHtmlView(sharedHtmlViewType)
+      void requestViewType(sharedHtmlViewType)
     }
-  }, [currentViewType, sharedHtmlViewType, status, switchHtmlView])
+  }, [currentViewType, sharedHtmlViewType, status, requestViewType])
 
   useEffect(() => {
-    const cb = throttle(
-      (payload: EditorViewTypeValue) => {
-        if (active) {
-          if (editorTypeSwitchingRef.current) {
-            return
-          }
-
-          if (currentViewType === payload) return
-          if (!fileTypeConfig.supportedModes.includes(payload)) return
-
-          if (isHtml) {
-            switchHtmlView(payload)
-            return
-          }
-
-          editorTypeSwitchingRef.current = true
-          bus.emit(EVENT.app_save, undefined, {
-            onSuccess: () => {
-              // A new Remirror manager mounts asynchronously. Do not expose the
-              // previous mode's extension-specific helpers during that gap.
-              clearSwitchingEditorContextResource(curFile.id, instanceIdRef.current!)
-
-              if (payload !== EditorViewType.SOURCECODE) {
-                unregisterSourceCodeViewResource(curFile.id, instanceIdRef.current!)
-              }
-
-              const switchingFromCapricorn = isCapricornView(currentViewType)
-
-              if (isCapricornView(payload)) {
-                unregisterRmeEditorResources(curFile.id, instanceIdRef.current!)
-                editorContextRef.current = null
-                setDelegate(null)
-              } else if (payload === EditorViewType.SOURCECODE) {
-                const sourceCodeDelegate = rmeRuntime
-                  ? createDelegate(rmeRuntime, fileTypeConfig.type)
-                  : null
-                if (sourceCodeDelegate) {
-                  registerEditorDelegateResource(
-                    curFile.id,
-                    instanceIdRef.current!,
-                    sourceCodeDelegate,
-                    activeRef.current,
-                  )
-                }
-                setResumeSource(null)
-                setDelegate(sourceCodeDelegate)
-              } else if (payload === EditorViewType.PREVIEW) {
-                debounceRefreshToc()
-              }
-              useEditorViewTypeStore.getState().setEditorViewType(curFile.id, payload)
-              setCurrentViewType(payload)
-              if (!switchingFromCapricorn && !isCapricornView(payload)) {
-                editorRef.current?.toggleType(payload)
-              }
-            },
-            onFinally: () => {
-              editorTypeSwitchingRef.current = false
-            },
-          })
-        }
-      },
-      300,
-      { leading: true, trailing: false },
-    )
-
-    bus.on('editor_toggle_type', cb)
-
-    return () => {
-      cb.cancel()
-      bus.detach('editor_toggle_type', cb)
+    const cb = (payload: EditorViewTypeValue) => {
+      if (active) void requestViewType(payload)
     }
-  }, [
-    active,
-    curFile,
-    currentViewType,
-    debounceRefreshToc,
-    fileTypeConfig.supportedModes,
-    fileTypeConfig.type,
-    createDelegate,
-    rmeRuntime,
-    isHtml,
-    switchHtmlView,
-    isCapricornView,
-  ])
+    bus.on('editor_toggle_type', cb)
+    return () => { bus.detach('editor_toggle_type', cb) }
+  }, [active, requestViewType])
 
   useEffect(() => {
     const exportImageHandler = async () => {
@@ -2925,7 +2957,8 @@ function TextEditor(props: TextEditorProps) {
     (status !== TextEditorStatus.LOADING && status !== TextEditorStatus.SUCCESS)
   const openingPending =
     !openingFailed &&
-    (typeof content !== 'string' ||
+    (preparingMode !== null ||
+      typeof content !== 'string' ||
       (needsRmeRuntime && !rmeRuntime) ||
       (isCapricornView(currentViewType)
         ? runtimePending
@@ -2980,7 +3013,8 @@ function TextEditor(props: TextEditorProps) {
                 resumeSource.cm.dom.isConnected
               : (isHtml || !!editorRef.current) &&
                 !!editorWrapperRef.current?.querySelector('.mf-preview-content') &&
-                !editorWrapperRef.current?.querySelector('.mf-preview-loading')),
+                !editorWrapperRef.current?.querySelector('.mf-preview-loading') &&
+                (!isHtml || !!editorWrapperRef.current?.querySelector('[data-slot="html-preview"][aria-busy="false"]'))),
         mode: currentViewType,
         error: rmeLoadError
           ? rmeLoadError.message
@@ -3128,11 +3162,8 @@ function TextEditor(props: TextEditorProps) {
     (needsRmeRuntime && !rmeRuntime) ||
     (!delegate && currentViewType === EditorViewType.SOURCECODE)
   ) {
-    return (
-      <AsyncSurface state={{ status: 'loading', label: t('document_preview.loading') }}>
-        {() => null}
-      </AsyncSurface>
-    )
+    // The editor-level loading owner covers module and delegate preparation.
+    return null
   }
 
   const cls = classNames('markdown-body', {

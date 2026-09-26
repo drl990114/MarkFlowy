@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button'
 import { useTranslation } from '@/i18n'
 import { RefreshCwIcon } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import { useEditorLoading } from '../EditorLoadingBoundary'
 import {
   HTML_PREVIEW_SANDBOX,
   prepareHtmlPreview,
@@ -21,6 +22,7 @@ export default function HtmlPreview({ content, filePath }: HtmlPreviewProps) {
     null,
   )
   const [error, setError] = useState(false)
+  useEditorLoading(!preview && !error)
   useEffect(() => {
     const controller = new AbortController()
     let prepared: PreparedHtmlPreview | undefined
@@ -45,6 +47,7 @@ export default function HtmlPreview({ content, filePath }: HtmlPreviewProps) {
     <div
       className='absolute inset-0 flex flex-col overflow-hidden bg-background'
       data-slot='html-preview'
+      aria-busy={!preview && !error}
     >
       <div className='box-border flex min-h-8 shrink-0 items-center justify-end gap-2 border-b border-border px-2'>
         {preview?.blockedResources ? (
@@ -75,11 +78,7 @@ export default function HtmlPreview({ content, filePath }: HtmlPreviewProps) {
           referrerPolicy='no-referrer'
           srcDoc={preview.html}
         />
-      ) : (
-        <div role='status' className='mf-preview-loading p-4 text-sm text-muted-foreground'>
-          {t('document_preview.loading')}
-        </div>
-      )}
+      ) : null}
     </div>
   )
 }

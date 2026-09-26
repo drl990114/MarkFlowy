@@ -158,7 +158,11 @@ it.each([false, true])('keeps the latest content when source loading finishes af
   seed(id)
   const { container } = render(<TextEditor active id={id} fileTypeConfig={htmlConfig} />)
   await waitFor(() => expect(container.querySelector('[data-html-preview]')).not.toBeNull())
-  await switchTo(id, EditorViewType.SOURCECODE)
+  const preview = container.querySelector('[data-html-preview]')
+  await act(async () => bus.emit('editor_toggle_type', undefined, EditorViewType.SOURCECODE))
+  expect(useEditorViewTypeStore.getState().getEditorViewType(id)).toBe(EditorViewType.PREVIEW)
+  expect(container.querySelector('[data-html-preview]')).toBe(preview)
+  expect(container.textContent).not.toContain('document_preview.loading')
   expect(sourceCodeCodemirrorViewMap.get(id)).toBeUndefined()
   await act(async () => bus.emit(EXTERNAL_FILE_CONTENT_SYNC_EVENT, undefined, {
     fileId: id, content: '<h1>Arrived during loading</h1>',
@@ -299,4 +303,47 @@ it('synchronizes HTML source and view changes across two visible panes', async (
       expect(element.getAttribute('data-html-preview')).toBe('<p>Shared source</p>'),
     )
   })
+})
+
+
+it('keeps the preview on a failed mode preparation and retries on the next selection', async () => {
+  const runtime = await rmeRuntime.loadRmeRuntime()
+  vi.spyOn(rmeRuntime, 'getLoadedRmeRuntime').mockReturnValue(undefined)
+  const load = vi.spyOn(rmeRuntime, 'loadRmeRuntime')
+    .mockRejectedValueOnce(new Error('Preparation failed'))
+    .mockResolvedValue(runtime)
+  const id = 'html-mode-preparation-retry'
+  seed(id)
+  const { container } = render(<TextEditor active id={id} fileTypeConfig={htmlConfig} />)
+  await waitFor(() => expect(container.querySelector('[data-html-preview]')).not.toBeNull())
+  const preview = container.querySelector('[data-html-preview]')
+  await act(async () => bus.emit('editor_toggle_type', undefined, EditorViewType.SOURCECODE))
+  expect(container.querySelector('[data-html-preview]')).toBe(preview)
+  expect(useEditorViewTypeStore.getState().getEditorViewType(id)).toBe(EditorViewType.PREVIEW)
+  expect(sourceCodeCodemirrorViewMap.get(id)).toBeUndefined()
+  expect(mocks.error).toHaveBeenCalledWith('document_preview.load_failed')
+  await switchTo(id, EditorViewType.SOURCECODE)
+  await waitFor(() => expect(sourceCodeCodemirrorViewMap.get(id)).toBeDefined())
+  expect(load).toHaveBeenCalledTimes(2)
+})
+
+it.each(['hide', 'unmount'] as const)('cancels a prepared mode switch after %s', async (action) => {
+  const runtime = await rmeRuntime.loadRmeRuntime()
+  let resolve!: (value: typeof runtime) => void
+  vi.spyOn(rmeRuntime, 'getLoadedRmeRuntime').mockReturnValue(undefined)
+  vi.spyOn(rmeRuntime, 'loadRmeRuntime').mockReturnValue(new Promise((yes) => { resolve = yes }))
+  const id = `html-canceled-mode-${action}`
+  seed(id)
+  const loading = vi.fn()
+  const view = render(<TextEditor onLoadingChange={loading} active id={id} fileTypeConfig={htmlConfig} />)
+  await waitFor(() => expect(view.container.querySelector('[data-html-preview]')).not.toBeNull())
+  await act(async () => bus.emit('editor_toggle_type', undefined, EditorViewType.SOURCECODE))
+  expect(loading).toHaveBeenLastCalledWith(true)
+  if (action === 'hide') {
+    view.rerender(<TextEditor onLoadingChange={loading} active={false} visible={false} id={id} fileTypeConfig={htmlConfig} />)
+    expect(loading).toHaveBeenLastCalledWith(false)
+  } else view.unmount()
+  await act(async () => resolve(runtime))
+  expect(useEditorViewTypeStore.getState().getEditorViewType(id)).toBe(EditorViewType.PREVIEW)
+  expect(sourceCodeCodemirrorViewMap.get(id)).toBeUndefined()
 })

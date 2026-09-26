@@ -101,7 +101,9 @@ it('keeps the live editor, selection and scroll when its folder is attached and 
 it('keeps named actions when tabs are hidden and reveals tabs for the second document', async () => {
   renderDocument()
   expect(screen.getByRole('button', { name: 'Draft protection retry' })).toBeTruthy()
-  expect(screen.getByRole('button', { name: 'common.close' })).toBeTruthy()
+  const title = screen.getByTitle('/notes/My note.md')
+  expect(within(title).getByRole('button', { name: 'file.closeDocument' })).toBeTruthy()
+  expect(screen.getAllByRole('button', { name: 'file.closeDocument' })).toHaveLength(1)
   const newDocument = screen.getByRole('button', { name: 'file.newTab' })
   newDocument.focus()
   expect(document.activeElement).toBe(newDocument)

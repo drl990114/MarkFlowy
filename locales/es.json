@@ -235,6 +235,12 @@
     "openDir": "Abrir Carpeta",
     "openFolderInNewWindow": "Abrir carpeta en una ventana nueva",
     "closeFolder": "Cerrar carpeta",
+    "closeDocument": "Cerrar documento",
+    "renameErrors": {
+      "empty": "Introduce un nombre de archivo.",
+      "invalid": "Usa un nombre de archivo válido sin separadores de ruta ni caracteres reservados.",
+      "exists": "Ya existe un archivo con este nombre."
+    },
     "recentDir": "Carpetas abiertas recientemente",
     "emptyOpened": "No hay archivos abiertos",
     "emptyFolder": "Carpeta vacía",

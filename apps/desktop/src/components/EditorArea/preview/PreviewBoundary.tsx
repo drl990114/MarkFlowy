@@ -1,7 +1,8 @@
 import { RenderErrorBoundary } from '@/components/RenderErrorBoundary'
 import { Button } from '@/components/ui/button'
 import { useTranslation } from '@/i18n'
-import { Suspense, type ReactNode } from 'react'
+import type { ReactNode } from 'react'
+import { EditorLoadingSuspense } from '../EditorLoadingBoundary'
 
 export function PreviewBoundary({ children }: { children: ReactNode }) {
   const { t } = useTranslation()
@@ -16,15 +17,7 @@ export function PreviewBoundary({ children }: { children: ReactNode }) {
         </div>
       )}
     >
-      <Suspense
-        fallback={
-          <div className='p-4 text-sm text-muted-foreground' role='status'>
-            {t('document_preview.loading')}
-          </div>
-        }
-      >
-        {children}
-      </Suspense>
+      <EditorLoadingSuspense>{children}</EditorLoadingSuspense>
     </RenderErrorBoundary>
   )
 }
