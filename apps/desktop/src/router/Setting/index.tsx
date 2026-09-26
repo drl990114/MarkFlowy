@@ -21,6 +21,7 @@ import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useSta
 import { toast } from 'zens'
 import { SettingDialog } from './component/SettingDialog'
 import SettingGroup from './component/SettingGroup'
+import { SettingNavigation } from './component/SettingNavigation'
 import { CopilotSetting } from './CopilotSetting'
 import { ExportSetting } from './ExportSetting'
 import { ImageSetting } from './ImageSetting'
@@ -106,7 +107,6 @@ function Setting({ navigationRequest }: SettingProps) {
     ? filterSettingSearchEntries(searchEntries, normalizedSearchQuery, t)
     : []
 
-  const value = settingDataGroupsKeys.indexOf(curGroupKey)
   const curGroup = settingMap[curGroupKey] as Setting.SettingGroup
   const curGroupKeys = Object.keys(curGroup).filter(
     (key) => key !== 'i18nKey' && key !== 'iconName' && key !== 'desc',
@@ -353,71 +353,57 @@ function Setting({ navigationRequest }: SettingProps) {
                 {t('settings.search_results', { count: searchResults.length })}
               </div>
             ) : null}
-            <ul className='m-0 list-none p-0'>
-              {normalizedSearchQuery
-                ? searchResults.map((entry) => {
-                    const navigationItemId = getNavigationItemId('setting-search-result', entry.id)
-                    const path = [t('settings.label'), ...getSettingSearchPath(entry, t)]
+            {normalizedSearchQuery ? (
+              <ul className='m-0 list-none p-0'>
+                {searchResults.map((entry) => {
+                  const navigationItemId = getNavigationItemId('setting-search-result', entry.id)
+                  const path = [t('settings.label'), ...getSettingSearchPath(entry, t)]
 
-                    return (
-                      <li key={entry.id}>
-                        <Button
-                          aria-current={selectedSearchEntryId === entry.id ? 'location' : undefined}
-                          className={classNames(
-                            'my-px h-auto min-h-10 w-full flex-col items-start gap-0 rounded-sm px-2 py-1.5 text-left font-normal text-foreground shadow-none',
-                            selectedSearchEntryId === entry.id
-                              ? 'bg-control-selected text-content-primary hover:bg-control-selected'
-                              : 'bg-transparent hover:bg-control-ghost-hover hover:text-content-primary',
-                          )}
-                          id={navigationItemId}
-                          variant='ghost'
-                          onClick={() => handleSearchResultSelect(entry, navigationItemId)}
-                        >
-                          <span className='block w-full truncate text-ui-control font-medium'>
-                            {t(entry.titleI18nKey)}
-                          </span>
-                          {entry.descI18nKey ? (
-                            <span className='mt-0.5 block w-full truncate text-ui-caption text-muted-foreground'>
-                              {t(entry.descI18nKey)}
-                            </span>
-                          ) : null}
+                  return (
+                    <li key={entry.id}>
+                      <Button
+                        aria-current={selectedSearchEntryId === entry.id ? 'location' : undefined}
+                        className={classNames(
+                          'my-px h-auto min-h-10 w-full flex-col items-start gap-0 rounded-sm px-2 py-1.5 text-left font-normal text-foreground shadow-none',
+                          selectedSearchEntryId === entry.id
+                            ? 'bg-control-selected text-content-primary hover:bg-control-selected'
+                            : 'bg-transparent hover:bg-control-ghost-hover hover:text-content-primary',
+                        )}
+                        id={navigationItemId}
+                        variant='ghost'
+                        onClick={() => handleSearchResultSelect(entry, navigationItemId)}
+                      >
+                        <span className='block w-full truncate text-ui-control font-medium'>
+                          {t(entry.titleI18nKey)}
+                        </span>
+                        {entry.descI18nKey ? (
                           <span className='mt-0.5 block w-full truncate text-ui-caption text-muted-foreground'>
-                            {path.join(' › ')}
+                            {t(entry.descI18nKey)}
                           </span>
-                        </Button>
-                      </li>
-                    )
-                  })
-                : settingDataGroupsKeys.map((groupKey) => {
-                    const group = settingMap[groupKey] as Setting.SettingGroup
-                    const index = settingDataGroupsKeys.indexOf(groupKey)
-                    const navigationItemId = getNavigationItemId('setting-category', groupKey)
-                    return (
-                      <li key={groupKey}>
-                        <Button
-                          aria-current={index === value ? 'page' : undefined}
-                          className={classNames(
-                            'my-px h-7 w-full justify-start gap-2 rounded-sm px-2 text-left text-ui-control font-normal text-foreground shadow-none',
-                            index === value
-                              ? 'bg-control-selected font-medium text-content-primary hover:bg-control-selected'
-                              : 'bg-transparent hover:bg-control-ghost-hover hover:text-content-primary',
-                          )}
-                          id={navigationItemId}
-                          variant='ghost'
-                          onClick={() => handleCategorySelect(groupKey, navigationItemId)}
-                        >
-                          <i aria-hidden className={classNames(group.iconName, 'text-sm')} />
-                          <span className='min-w-0 truncate capitalize'>{t(group.i18nKey)}</span>
-                        </Button>
-                      </li>
-                    )
-                  })}
-              {normalizedSearchQuery && searchResults.length === 0 ? (
-                <li className='px-2 py-6 text-center text-ui-control text-muted-foreground' role='status'>
-                  {t('settings.search_empty')}
-                </li>
-              ) : null}
-            </ul>
+                        ) : null}
+                        <span className='mt-0.5 block w-full truncate text-ui-caption text-muted-foreground'>
+                          {path.join(' › ')}
+                        </span>
+                      </Button>
+                    </li>
+                  )
+                })}
+                {searchResults.length === 0 ? (
+                  <li
+                    className='px-2 py-6 text-center text-ui-control text-muted-foreground'
+                    role='status'
+                  >
+                    {t('settings.search_empty')}
+                  </li>
+                ) : null}
+              </ul>
+            ) : (
+              <SettingNavigation
+                activeCategory={curGroupKey}
+                settingMap={settingMap}
+                onSelect={handleCategorySelect}
+              />
+            )}
           </nav>
           <footer className='shrink-0 border-t border-border/80 px-3 py-2'>
             <div className='flex min-w-0 items-center gap-2'>

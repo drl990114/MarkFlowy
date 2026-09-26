@@ -13,7 +13,7 @@ export default function Preview() {
           alt={t('site.preview.screenshotAlt')}
           width={2454}
           height={1514}
-          sizes='(max-width: 639px) calc(100vw - 40px), (max-width: 1184px) calc(100vw - 64px), 1120px'
+          sizes='(max-width: 639px) calc(100vw - 40px), (max-width: 939px) calc(100vw - 64px), (max-width: 1184px) calc((100vw - 64px) * 0.667 - 11px), 736px'
         />
       </div>
     </Reveal>

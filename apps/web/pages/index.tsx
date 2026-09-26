@@ -70,18 +70,20 @@ export default function Index({
           <PlatformMarquee />
         </section>
         <section className='mf-preview-section' id='preview'>
-          <div className='mf-container'>
-            <Reveal className='mf-section-heading'>
-              <div>
-                <p className='mf-eyebrow'>{t('site.preview.eyebrow')}</p>
-                <h2 className='mf-section-title'>{t('site.preview.title')}</h2>
-              </div>
+          <div className='mf-container mf-preview-layout'>
+            <Reveal className='mf-preview-copy'>
+              <p className='mf-eyebrow'>{t('site.preview.eyebrow')}</p>
+              <h2 className='mf-section-title'>{t('site.preview.title')}</h2>
               <p className='mf-section-copy'>{t('site.preview.description')}</p>
+              <Link className='mf-text-link' href={DEMO_URL}>
+                {t('site.hero.try')}
+                <SiteArrow />
+              </Link>
             </Reveal>
-            <Preview />
-            <div className='mf-preview-caption'>
-              <p>{t('site.preview.note')}</p>
-            </div>
+            <figure className='mf-preview-product'>
+              <Preview />
+              <figcaption className='mf-preview-caption'>{t('site.preview.note')}</figcaption>
+            </figure>
           </div>
         </section>
         <FeatureList />

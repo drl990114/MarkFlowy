@@ -23,7 +23,6 @@ import { Group, Panel } from 'react-resizable-panels'
 import { toast } from 'zens'
 import { RootPageLayout, StyleSeparator } from './styles'
 import { ZenModeHint } from './ZenModeHint'
-import { ensureDocument } from '@/services/editor-file'
 import { WorkspaceOpenError } from '@/components/WorkspaceOpenError'
 import {
   queueDoubleEscapeResolution,
@@ -46,13 +45,6 @@ function Root() {
   useLayoutEffect(() => {
     useLayoutStore.getState().setWorkspaceContext(Boolean(rootPath))
   }, [rootPath])
-  useEffect(() => {
-    let disposed = false
-    const ensure = () => queueMicrotask(() => { if (!disposed) ensureDocument() })
-    const unsubscribe = useEditorStore.subscribe((state) => { if (!state.opened.length) ensure() })
-    ensure()
-    return () => { disposed = true; unsubscribe() }
-  }, [])
   const { t } = useTranslation()
   const syncDockPanelFromResize = useLayoutStore((state) => state.syncDockPanelFromResize)
   const leftActivePanelId = useLayoutStore((state) => state.leftBar.activePanelId)

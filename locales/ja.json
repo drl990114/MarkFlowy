@@ -374,6 +374,12 @@
     "search_placeholder": "設定を検索...",
     "search_empty": "一致する設定がありません",
     "search_results": "{{count}}件の結果",
+    "navigation": {
+      "preferences": "環境設定",
+      "writing": "執筆とファイル",
+      "ai": "AI",
+      "help": "ヘルプ"
+    },
     "general": {
       "startup": {
         "label": "起動",

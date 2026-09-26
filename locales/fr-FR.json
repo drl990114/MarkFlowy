@@ -369,6 +369,12 @@
     "search_placeholder": "Rechercher dans les réglages...",
     "search_empty": "Aucun réglage correspondant",
     "search_results": "{{count}} résultats",
+    "navigation": {
+      "preferences": "Préférences",
+      "writing": "Rédaction et fichiers",
+      "ai": "IA",
+      "help": "Aide"
+    },
     "general": {
       "startup": {
         "label": "Démarrage",

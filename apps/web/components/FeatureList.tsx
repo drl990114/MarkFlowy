@@ -10,9 +10,11 @@ export default function FeatureList() {
   return (
     <section className='mf-features' id='features'>
       <div className='mf-container'>
-        <Reveal>
-          <p className='mf-eyebrow'>{t('site.features.eyebrow')}</p>
-          <h2 className='mf-section-title'>{t('site.features.title')}</h2>
+        <Reveal className='mf-section-heading'>
+          <div>
+            <p className='mf-eyebrow'>{t('site.features.eyebrow')}</p>
+            <h2 className='mf-section-title'>{t('site.features.title')}</h2>
+          </div>
           <p className='mf-section-copy'>{t('site.features.description')}</p>
         </Reveal>
         <div className='mf-feature-grid'>
