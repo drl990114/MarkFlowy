@@ -41,9 +41,10 @@ function DocumentTitleActions({ file, dirty }: { file: IFile; dirty: boolean }) 
     setRenaming(false)
   }
 
+  // Balance the dirty indicator (8px), close button (22px), and two gaps (8px).
   return (
     <div
-      className='group/document-title flex min-w-0 items-center gap-1 text-ui-control font-medium text-content-primary'
+      className='group/document-title flex min-w-0 items-center gap-1 pl-[38px] text-ui-control font-medium text-content-primary'
       data-slot='document-title'
       title={file.path}
     >

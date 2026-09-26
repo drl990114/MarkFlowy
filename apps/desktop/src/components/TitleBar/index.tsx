@@ -7,6 +7,7 @@ import { useEditorStore } from '@/stores'
 import { WorkspaceActions } from '../WorkspaceActions'
 import { AppMenuButton } from './AppMenuButton'
 import { WindowControls } from './WindowControls'
+import useResizeObserver from 'use-resize-observer'
 
 export default function TitleBar() {
   const { osType } = useGlobalOSInfo()
@@ -14,6 +15,18 @@ export default function TitleBar() {
   const singleDocument = useEditorStore((state) => isSingleDocumentLayout(state.folderData?.[0]?.path, state.editorLayout))
   const isMacOS = osType === 'macos'
   const isWindows = osType === 'windows'
+  const { ref: leadingRef, width: leadingWidth } = useResizeObserver<HTMLDivElement>({
+    box: 'border-box',
+    round: Math.ceil,
+  })
+  const { ref: trailingRef, width: trailingWidth } = useResizeObserver<HTMLDivElement>({
+    box: 'border-box',
+    round: Math.ceil,
+  })
+  const titleInset =
+    leadingWidth === undefined || trailingWidth === undefined
+      ? undefined
+      : Math.max(leadingWidth, trailingWidth) + 8
 
   // Linux keeps its native window decorations until frameless resizing and
   // window controls can be validated across the supported window managers.
@@ -30,13 +43,25 @@ export default function TitleBar() {
       <div
         className={cn('flex h-full shrink-0 items-center', isMacOS ? 'pl-[76px]' : 'pl-2')}
         data-tauri-drag-region
+        ref={leadingRef}
       >
         <WorkspaceActions />
       </div>
-      <div className='flex min-w-12 flex-1 items-center justify-center overflow-hidden px-4' data-tauri-drag-region>
+      <div
+        className='absolute inset-y-0 left-1/2 flex w-max min-w-0 -translate-x-1/2 items-center justify-center overflow-hidden'
+        data-slot='title-bar-document'
+        data-tauri-drag-region
+        style={{
+          maxWidth:
+            titleInset === undefined ? 0 : `max(0px, calc(100% - ${titleInset * 2}px))`,
+        }}
+      >
         {singleDocument ? <DocumentTitle /> : null}
       </div>
-      <div className={cn('flex h-full shrink-0 items-center', !isWindows && 'pr-1')}>
+      <div
+        className={cn('ml-auto flex h-full shrink-0 items-center', !isWindows && 'pr-1')}
+        ref={trailingRef}
+      >
         <AppMenuButton />
         {isWindows ? <WindowControls /> : null}
       </div>
