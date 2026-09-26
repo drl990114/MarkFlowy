@@ -125,6 +125,14 @@ const useOpen = () => {
     } else await openFolder(dir)
   }, [openFolder, openFolderInNewWindow])
 
+  const openFilePath = useCallback(async (path: string) => {
+    await addExistingMarkdownFileEdit({
+      fileName: getFileNameFromPath(path) || 'new-file.md',
+      ext: getExtFromPath(path),
+      path,
+    })
+  }, [])
+
   const openFile = useCallback(async () => {
     const file = await open({
       multiple: false,
@@ -138,14 +146,8 @@ const useOpen = () => {
 
     await invoke<boolean>('save_security_bookmark', { path: file })
 
-    const fileName = getFileNameFromPath(file) || 'new-file.md'
-
-    await addExistingMarkdownFileEdit({
-      fileName,
-      ext: getExtFromPath(file),
-      path: file,
-    })
-  }, [])
+    await openFilePath(file)
+  }, [openFilePath])
 
   return {
     openFolderDialog,
@@ -153,6 +155,7 @@ const useOpen = () => {
     openFolderInCurrentWindow,
     closeFolder: () => switchWorkspaceInCurrentWindow(),
     openFile,
+    openFilePath,
   }
 }
 

@@ -36,10 +36,12 @@ describe('Capricorn opening policy', () => {
     expect(requiresAsyncCapricornOpen('😀'.repeat(65_536))).toBe(true)
   })
 
-  it('sizes the initial viewport without changing the scroll buffer', () => {
+  it('sizes the initial paint for tall viewports while keeping a bounded block count', () => {
     expect(getCapricornFirstPaintBlockSize(240)).toBe(12)
     expect(getCapricornFirstPaintBlockSize(900)).toBe(40)
-    expect(getCapricornFirstPaintBlockSize(2000)).toBe(40)
+    expect(getCapricornFirstPaintBlockSize(2000)).toBe(86)
+    expect(getCapricornFirstPaintBlockSize(2160)).toBe(92)
+    expect(getCapricornFirstPaintBlockSize(4000)).toBe(96)
   })
 
   it('adapts async sessions with the existing change and snapshot ownership', async () => {

@@ -232,13 +232,13 @@ export interface CapricornRuntimeOptions extends CapricornEditorSettings {
   }
 }
 
-// Keep enough content rendered ahead of Desktop's throttled scroll events to
-// avoid exposing placeholders during ordinary trackpad and wheel scrolling.
+// Give tall Desktop viewports more content ahead of throttled scroll events.
+// First paint is still sized to the viewport rather than this entire buffer.
 export const CAPRICORN_DESKTOP_VIRTUALIZE_OPTIONS = {
-  bufferRange: 900,
+  bufferRange: 1800,
   enable: true,
   enableScrollAnchoring: true,
-  firstPaintBlockSize: 40,
+  firstPaintBlockSize: 96,
 } as const satisfies NonNullable<CapricornRuntimeOptions['virtualize']>
 
 interface CapricornRuntimeChangeEvent {
@@ -363,7 +363,13 @@ export function requiresAsyncCapricornOpen(markdown: string): boolean {
 }
 
 export function getCapricornFirstPaintBlockSize(viewportHeight: number): number {
-  return Math.max(1, Math.min(40, Math.ceil((viewportHeight || 640) / 24) + 2))
+  return Math.max(
+    1,
+    Math.min(
+      CAPRICORN_DESKTOP_VIRTUALIZE_OPTIONS.firstPaintBlockSize,
+      Math.ceil((viewportHeight || 640) / 24) + 2,
+    ),
+  )
 }
 
 export interface CapricornRuntimeAdapter {

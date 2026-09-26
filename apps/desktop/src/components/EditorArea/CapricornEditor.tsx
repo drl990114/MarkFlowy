@@ -17,6 +17,7 @@ import {
 import { ThemeContext } from 'styled-components'
 import { createCapricornExportSurface, type CapricornExportSurface } from './capricornExportSurface'
 import {
+  CAPRICORN_DESKTOP_VIRTUALIZE_OPTIONS,
   createCapricornRuntimeAdapter,
   createCapricornRuntimeAdapterAsync,
   getCapricornFirstPaintBlockSize,
@@ -246,7 +247,8 @@ export function CapricornEditor({
           ? {
               ...optionsRef.current.virtualize,
               firstPaintBlockSize: Math.min(
-                optionsRef.current.virtualize.firstPaintBlockSize ?? 40,
+                optionsRef.current.virtualize.firstPaintBlockSize ??
+                  CAPRICORN_DESKTOP_VIRTUALIZE_OPTIONS.firstPaintBlockSize,
                 getCapricornFirstPaintBlockSize(viewportHeight),
               ),
             }

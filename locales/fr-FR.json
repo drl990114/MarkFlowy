@@ -870,7 +870,9 @@
   "workspace": {
     "info": "Informations sur la zone de travail",
     "none": "Espace de travail non ouvert",
-    "searchPlaceholder": "Rechercher des espaces de travail…",
+    "searchPlaceholder": "Rechercher des espaces de travail et fichiers récents…",
+    "openFileOrFolder": "Ouvrir un fichier ou un dossier",
+    "recentFiles": "Fichiers récents",
     "sync_mode": {
       "git_local": {
         "name": "Git local",

@@ -29,6 +29,7 @@ vi.mock('@/i18n', () => ({
         'titleBar.restore': 'Restore window',
         'welcome.recentWorkspaces': 'Recent Workspaces',
         'workspace.searchPlaceholder': 'Search workspaces…',
+        'workspace.openFileOrFolder': 'Open File or Folder',
       })[key] ?? key,
   }),
 }))
@@ -85,8 +86,8 @@ describe('TitleBar', () => {
     expect(markup).toContain('size-3.5 text-content-primary')
     expect(markup).toContain('MarkFlowy')
     expect(markup).toContain('data-slot="workspace-picker-trigger"')
-    expect(markup).toContain('role="combobox"')
-    expect(markup).toContain('>Open Folder</span>')
+    expect(markup).toContain('aria-label="Open File or Folder"')
+    expect(markup).not.toContain('>Open Folder</span>')
     expect(markup.match(/data-slot="workspace-picker-trigger"/g)).toHaveLength(1)
     expect(markup).not.toContain('MarkFlowy</span>')
     expect(markup).not.toContain('data-mf-window-controls')
@@ -94,7 +95,7 @@ describe('TitleBar', () => {
     expect(markup).toContain('aria-label="MarkFlowy Menu"')
   })
 
-  it('replaces the application name with the active workspace name', () => {
+  it('keeps the workspace path in the icon tooltip', () => {
     titleBarTestState.osType = 'macos'
     titleBarTestState.rootPath = '/Users/test/notes'
     const markup = renderToStaticMarkup(
@@ -104,7 +105,8 @@ describe('TitleBar', () => {
     )
 
     expect(markup).not.toContain('MarkFlowy</span>')
-    expect(markup).toContain('>notes</span>')
+    expect(markup).toContain('Open File or Folder\n/Users/test/notes')
+    expect(markup).not.toContain('>notes</span>')
     expect(markup).not.toContain('h-3.5 w-px')
   })
 

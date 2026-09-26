@@ -6,6 +6,7 @@ import useOpen from './useOpen'
 
 const useOpenTestState = vi.hoisted(() => ({
   addRecentWorkspace: vi.fn(),
+  addExistingFile: vi.fn(),
   confirm: vi.fn(),
   emitTo: vi.fn(),
   invoke: vi.fn(),
@@ -38,7 +39,7 @@ vi.mock('@/services/dialog', () => ({
 }))
 
 vi.mock('@/services/editor-file', () => ({
-  addExistingMarkdownFileEdit: vi.fn(),
+  addExistingMarkdownFileEdit: useOpenTestState.addExistingFile,
 }))
 
 vi.mock('@/services/windows', () => ({
@@ -57,6 +58,7 @@ vi.mock('@/stores/useOpenedCacheStore', () => ({
 beforeEach(() => {
   useEditorStore.setState({ folderData: [{ id: 'workspace', name: 'Workspace', path: '/current', kind: 'dir' }] })
   useOpenTestState.addRecentWorkspace.mockReset().mockResolvedValue(undefined)
+  useOpenTestState.addExistingFile.mockReset().mockResolvedValue(undefined)
   useOpenTestState.confirm.mockReset()
   useOpenTestState.emitTo.mockReset().mockResolvedValue(undefined)
   useOpenTestState.invoke.mockReset()
@@ -72,6 +74,32 @@ beforeEach(() => {
 afterEach(cleanup)
 
 describe('useOpen', () => {
+  it('reopens a recent file through the existing document flow without a folder or file dialog', async () => {
+    useEditorStore.setState({ folderData: null })
+    const { result } = renderHook(() => useOpen())
+
+    await act(async () => result.current.openFilePath('/documents/notes.md'))
+
+    expect(useOpenTestState.addExistingFile).toHaveBeenCalledWith({
+      fileName: 'notes.md',
+      ext: 'md',
+      path: '/documents/notes.md',
+    })
+    expect(useOpenTestState.openDialog).not.toHaveBeenCalled()
+    expect(useOpenTestState.confirm).not.toHaveBeenCalled()
+    expect(useOpenTestState.switchWorkspace).not.toHaveBeenCalled()
+  })
+
+  it('leaves documents alone when the file picker is cancelled', async () => {
+    useOpenTestState.openDialog.mockResolvedValue(null)
+    const { result } = renderHook(() => useOpen())
+
+    await act(async () => result.current.openFile())
+
+    expect(useOpenTestState.addExistingFile).not.toHaveBeenCalled()
+    expect(useOpenTestState.invoke).not.toHaveBeenCalled()
+  })
+
   it('opens the first folder in the current document window without prompting', async () => {
     useEditorStore.setState({ folderData: null })
     useOpenTestState.invoke.mockResolvedValue(null)
@@ -102,6 +130,11 @@ describe('useOpen', () => {
       }),
     )
     expect(useOpenTestState.invoke).toHaveBeenCalledWith('save_security_bookmark', {
+      path: `/documents/${file}`,
+    })
+    expect(useOpenTestState.addExistingFile).toHaveBeenCalledWith({
+      fileName: file,
+      ext: file.split('.').at(-1),
       path: `/documents/${file}`,
     })
   })
