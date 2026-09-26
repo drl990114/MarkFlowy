@@ -232,10 +232,10 @@ export interface CapricornRuntimeOptions extends CapricornEditorSettings {
   }
 }
 
-// Give tall Desktop viewports more content ahead of throttled scroll events.
+// Keep a few screens ready ahead of fast scrolling on tall Desktop viewports.
 // First paint is still sized to the viewport rather than this entire buffer.
 export const CAPRICORN_DESKTOP_VIRTUALIZE_OPTIONS = {
-  bufferRange: 1800,
+  bufferRange: 3600,
   enable: true,
   enableScrollAnchoring: true,
   firstPaintBlockSize: 96,

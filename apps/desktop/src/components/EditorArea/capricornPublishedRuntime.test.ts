@@ -28,7 +28,7 @@ describe.skipIf(!isCapricornRuntimeAvailable)('published Capricorn runtime', () 
     document.body.append(container)
 
     expect(CAPRICORN_DESKTOP_VIRTUALIZE_OPTIONS).toEqual({
-      bufferRange: 1800,
+      bufferRange: 3600,
       enable: true,
       enableScrollAnchoring: true,
       firstPaintBlockSize: 96,
