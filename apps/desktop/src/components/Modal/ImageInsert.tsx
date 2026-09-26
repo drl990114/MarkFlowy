@@ -130,7 +130,7 @@ export function ImageInsertModal() {
           <Dialog.Description>{t('image_insert.description')}</Dialog.Description>
         </Dialog.Header>
 
-        <Dialog.Body className='flex flex-col gap-4'>
+        <Dialog.Body className='flex flex-col gap-3'>
           <div className='flex flex-col gap-2'>
             <label className='font-medium text-foreground' htmlFor={inputId}>
               {t('image_insert.url_label')}
@@ -139,6 +139,7 @@ export function ImageInsertModal() {
               <Input
                 aria-invalid={urlError}
                 id={inputId}
+                inputSize='sm'
                 onChange={(event) => {
                   setUrl(event.target.value)
                   if (urlError) setUrlError(false)
@@ -154,13 +155,13 @@ export function ImageInsertModal() {
                 type='url'
                 value={url}
               />
-              <Button disabled={!url.trim()} onClick={handleInsertUrl}>
-                <LinkIcon className='size-4' aria-hidden='true' />
+              <Button disabled={!url.trim()} onClick={handleInsertUrl} size='sm'>
+                <LinkIcon className='size-3.5' aria-hidden='true' />
                 {t('image_insert.insert_url')}
               </Button>
             </div>
             {urlError ? (
-              <p className='text-xs text-destructive' role='alert'>
+              <p className='text-ui-caption text-destructive' role='alert'>
                 {t('image_insert.invalid_url')}
               </p>
             ) : null}
@@ -168,7 +169,7 @@ export function ImageInsertModal() {
 
           <div className='flex items-center gap-3' aria-hidden='true'>
             <span className='h-px flex-1 bg-border' />
-            <span className='text-xs text-muted-foreground'>{t('common.or')}</span>
+            <span className='text-ui-caption text-muted-foreground'>{t('common.or')}</span>
             <span className='h-px flex-1 bg-border' />
           </div>
 
@@ -176,18 +177,19 @@ export function ImageInsertModal() {
             className='w-full'
             disabled={isSelecting}
             onClick={() => void handleSelectLocalImage()}
+            size='sm'
             variant='outline'
           >
-            <FolderOpenIcon className='size-4' aria-hidden='true' />
+            <FolderOpenIcon className='size-3.5' aria-hidden='true' />
             {isSelecting
               ? t('image_insert.selecting_local')
               : t('image_insert.select_local')}
           </Button>
-          <p className='text-xs text-muted-foreground'>
+          <p className='text-ui-caption text-muted-foreground'>
             {t('image_insert.local_behavior_hint')}
           </p>
           {localError ? (
-            <p className='text-xs text-destructive' role='alert'>
+            <p className='text-ui-caption text-destructive' role='alert'>
               {t('image_insert.local_error')}
             </p>
           ) : null}

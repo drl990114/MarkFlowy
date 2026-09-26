@@ -166,7 +166,7 @@ export function TagCombobox({
         <Popover.Anchor asChild>
           <div
             className={cn(
-              'flex min-h-8 w-full min-w-0 flex-wrap items-center gap-1 rounded-md border border-input bg-background px-1.5 py-1 text-foreground shadow-sm outline-none transition-[color,box-shadow,border-color] data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-60',
+              'flex min-h-8 w-full min-w-0 flex-wrap items-center gap-1 rounded-sm border border-input bg-background px-1.5 py-1 text-foreground outline-none transition-[color,box-shadow,border-color] data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-60',
               className,
             )}
             data-disabled={disabled}
@@ -206,7 +206,7 @@ export function TagCombobox({
               )
             })}
             <CommandPrimitive.Input
-              className='h-5 min-w-20 flex-1 bg-transparent px-1 text-xs outline-none placeholder:text-muted-foreground'
+              className='h-5 min-w-20 flex-1 bg-transparent px-1 text-ui-control outline-none placeholder:text-muted-foreground'
               data-slot='tag-combobox-input'
               disabled={disabled}
               id={id}
@@ -239,7 +239,7 @@ export function TagCombobox({
           >
             {canCreate ? (
               <CommandPrimitive.Item
-                className='flex min-h-7 cursor-default select-none items-center gap-2 rounded-md px-2 py-1.5 text-xs outline-none data-[selected=true]:bg-primary-soft'
+                className='flex min-h-7 cursor-default select-none items-center gap-2 rounded-sm px-2 py-1 text-ui-control outline-none data-[selected=true]:bg-primary-soft'
                 data-slot='tag-combobox-create'
                 onSelect={() => selectTag(query.trim())}
                 value={`create:${query.trim()}`}
@@ -250,7 +250,7 @@ export function TagCombobox({
             ) : null}
             {filteredOptions.map((option) => (
               <CommandPrimitive.Item
-                className='flex min-h-7 cursor-default select-none items-center gap-2 rounded-md px-2 py-1.5 text-xs outline-none data-[disabled=true]:pointer-events-none data-[disabled=true]:text-disabled-foreground data-[selected=true]:bg-primary-soft'
+                className='flex min-h-7 cursor-default select-none items-center gap-2 rounded-sm px-2 py-1 text-ui-control outline-none data-[disabled=true]:pointer-events-none data-[disabled=true]:text-disabled-foreground data-[selected=true]:bg-primary-soft'
                 data-slot='tag-combobox-item'
                 disabled={option.disabled}
                 key={option.value}

@@ -1115,6 +1115,10 @@ function TextEditor(props: TextEditorProps) {
   )
   const editorPlaceholder = useAppSettingStore((state) => state.settingData.editor_placeholder)
   const semanticTheme = useContext(SemanticThemeContext)
+  const editorSourceFontSize = useAppSettingStore((state) => state.settingData.editor_source_font_size)
+  const editorSourceLineHeight = useAppSettingStore(
+    (state) => state.settingData.editor_source_line_height,
+  )
   const editorRootFontSize = useAppSettingStore((state) => state.settingData.editor_root_font_size)
   const editorRootLineHeight = useAppSettingStore(
     (state) => state.settingData.editor_root_line_height,
@@ -2328,10 +2332,18 @@ function TextEditor(props: TextEditorProps) {
   )
 
   const themeFontSize = semanticTheme?.['font.editor.size'] ?? `${editorRootFontSize ?? 16}px`
+  const sourceFontSize = semanticTheme?.['font.source.size'] ?? `${editorSourceFontSize ?? 15}px`
+  const sourceLineHeight =
+    semanticTheme?.['font.source.lineHeight'] ?? (editorSourceLineHeight || '1.6')
   const rootLineHeight =
-    semanticTheme?.['font.editor.lineHeight'] ?? (editorRootLineHeight || '1.65')
+    semanticTheme?.['font.editor.lineHeight'] ?? (editorRootLineHeight || '1.7')
   const wysiwygRootLineHeight =
     semanticTheme?.['font.editor.lineHeight'] ?? (editorRootLineHeight || '1.7')
+
+  const printStyleToken = useMemo(
+    () => ({ id, rootFontSize: themeFontSize, rootLineHeight }),
+    [id, themeFontSize, rootLineHeight],
+  )
 
   const editorProps: MfEditorProps = useMemo(
     () => ({
@@ -2351,8 +2363,10 @@ function TextEditor(props: TextEditorProps) {
       offset: { top: 10, left: 16 },
       styleToken: {
         id,
-        rootFontSize: themeFontSize,
-        rootLineHeight,
+        rootFontSize:
+          isHtml || currentViewType === EditorViewType.SOURCECODE ? sourceFontSize : themeFontSize,
+        rootLineHeight:
+          isHtml || currentViewType === EditorViewType.SOURCECODE ? sourceLineHeight : rootLineHeight,
       },
       onContextMounted: (context: EditorContext) => {
         registerEditorContextResource(id, instanceIdRef.current!, context, activeRef.current)
@@ -2379,6 +2393,8 @@ function TextEditor(props: TextEditorProps) {
       currentViewType,
       themeFontSize,
       rootLineHeight,
+      sourceFontSize,
+      sourceLineHeight,
       savePathReserved,
       externalChangeResolving,
       isHtml,
@@ -3128,6 +3144,7 @@ function TextEditor(props: TextEditorProps) {
       <EditorWrapper
         ref={editorWrapperRef}
         id='editorarea-wrapper'
+        data-mf-editor-mode={currentViewType}
         className={cls}
         $editorViewType={currentViewType}
         $fileType={fileTypeConfig.type}
@@ -3192,7 +3209,7 @@ function TextEditor(props: TextEditorProps) {
         fileName={curFile.name}
         getContent={getExportContent}
         delegateOptions={editorProps.delegateOptions!}
-        styleToken={editorProps.styleToken}
+        styleToken={printStyleToken}
       />
       <PandocExportController
         active={active}

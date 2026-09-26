@@ -2,7 +2,7 @@ import { RadioGroup as RadioGroupPrimitive } from 'radix-ui'
 import { CircleIcon } from 'lucide-react'
 import type { ComponentProps } from 'react'
 import { cn } from '@/lib/cn'
-import { focusFeedback } from './focus-styles'
+import { compactControlFocus } from './focus-styles'
 
 export function RadioGroupRoot({
   className,
@@ -24,8 +24,8 @@ export function RadioGroupItem({
   return (
     <RadioGroupPrimitive.Item
       className={cn(
-        focusFeedback,
-        'aspect-square size-4 shrink-0 rounded-full border border-input bg-background text-primary shadow-sm outline-none transition-[color,box-shadow,border-color] disabled:cursor-not-allowed disabled:opacity-50',
+        compactControlFocus,
+        'aspect-square size-4 shrink-0 cursor-default rounded-full border border-input bg-background text-primary transition-colors duration-[var(--mf-motion-duration-fast)] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none data-[state=checked]:border-primary',
         className,
       )}
       data-slot='radio-group-item'

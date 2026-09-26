@@ -83,14 +83,14 @@ export function HistorySetting() {
     }
   }
   return (
-    <div className='flex max-w-3xl flex-col gap-6 p-4' data-slot='history-settings'>
+    <div className='flex min-w-0 flex-col gap-4 text-ui-control' data-slot='history-settings'>
       <div
-        className='flex items-start justify-between gap-6'
+        className='flex items-start justify-between gap-4 py-2'
         data-setting-key='local_history_enabled'
       >
         <div>
-          <h3 className='text-base font-medium'>{t('history.enabled')}</h3>
-          <p className='mt-1 text-sm text-muted-foreground'>{t('history.enabled_description')}</p>
+          <h3 className='m-0 text-ui-control font-medium'>{t('history.enabled')}</h3>
+          <p className='mt-1 text-ui-caption text-muted-foreground'>{t('history.enabled_description')}</p>
         </div>
         <Switch
           checked={enabled}
@@ -99,34 +99,34 @@ export function HistorySetting() {
           aria-label={t('history.enabled')}
         />
       </div>
-      <p className='text-sm text-muted-foreground'>{t('history.retention')}</p>
+      <p className='text-ui-caption text-muted-foreground'>{t('history.retention')}</p>
       {stats?.budgetLimited ? (
-        <p role='alert' className='text-sm text-destructive'>
+        <p role='alert' className='text-ui-control text-destructive'>
           {t('history.budget_limited')}
         </p>
       ) : null}
-      <div className='flex flex-wrap items-center gap-3'>
-        <Button variant='outline' onClick={() => openLocalHistory()}>
+      <div className='flex flex-wrap items-center gap-2'>
+        <Button size='sm' variant='outline' onClick={() => openLocalHistory()}>
           {t('history.title')}
         </Button>
-        <span className='text-sm text-muted-foreground'>
+        <span className='text-ui-caption text-muted-foreground'>
           {t('history.count', { count: stats?.count ?? 0 })}
         </span>
       </div>
       <div className='border-t border-border pt-4'>
-        <h3 className='mb-2 font-medium'>{t('history.clear_title')}</h3>
-        <p className='mb-3 text-sm text-muted-foreground'>{t('history.clear_description')}</p>
-        <div className='flex flex-wrap gap-3'>
-          <Button variant='destructive' disabled={busy} onClick={() => void confirm('workspace')}>
+        <h3 className='m-0 mb-1 font-medium'>{t('history.clear_title')}</h3>
+        <p className='mt-0 mb-3 text-ui-caption text-muted-foreground'>{t('history.clear_description')}</p>
+        <div className='flex flex-wrap gap-2'>
+          <Button size='sm' variant='destructive' disabled={busy} onClick={() => void confirm('workspace')}>
             {workspace ? t('history.clear_workspace') : t('history.clear_loose')}
           </Button>
-          <Button variant='destructive' disabled={busy} onClick={() => void confirm('all')}>
+          <Button size='sm' variant='destructive' disabled={busy} onClick={() => void confirm('all')}>
             {t('history.clear_all')}
           </Button>
         </div>
       </div>
       {deleted !== undefined ? (
-        <p role='status' className='text-sm text-muted-foreground'>
+        <p role='status' className='text-ui-caption text-muted-foreground'>
           {t('history.deleted', { count: deleted })}
         </p>
       ) : null}
@@ -153,7 +153,7 @@ export function HistorySetting() {
               })}
             </Dialog.Description>
           </Dialog.Header>
-          <p className='break-all text-sm'>
+          <p className='break-all text-ui-control'>
             {scope === 'all' ? t('history.all_workspaces') : workspace || t('history.loose')}
           </p>
           {error ? (
@@ -162,10 +162,10 @@ export function HistorySetting() {
             </p>
           ) : null}
           <Dialog.Footer>
-            <Button variant='outline' disabled={busy} onClick={() => setScope(undefined)}>
+            <Button size='sm' variant='outline' disabled={busy} onClick={() => setScope(undefined)}>
               {t('common.cancel')}
             </Button>
-            <Button variant='destructive' disabled={busy} onClick={() => void clear()}>
+            <Button size='sm' variant='destructive' disabled={busy} onClick={() => void clear()}>
               {t('history.delete')}
             </Button>
           </Dialog.Footer>

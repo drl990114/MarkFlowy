@@ -134,7 +134,7 @@ export function ThemeStore() {
     )
   const catalog = themeData as ThemeItem[]
   return (
-    <div className='space-y-6'>
+    <div className='space-y-5 text-ui-control'>
       <label className='flex items-center gap-2'>
         <Checkbox
           checked={personalTypography}
@@ -151,7 +151,7 @@ export function ThemeStore() {
         {labels.personalTypography}
       </label>
       <div className='flex flex-wrap gap-2'>
-        <Button
+        <Button size='sm'
           disabled={pending}
           onClick={() =>
             openEditor(
@@ -162,7 +162,7 @@ export function ThemeStore() {
         >
           {labels.create}
         </Button>
-        <Button
+        <Button size='sm'
           variant='outline'
           disabled={pending}
           onClick={() =>
@@ -176,7 +176,7 @@ export function ThemeStore() {
         >
           {labels.import}
         </Button>
-        <Button
+        <Button size='sm'
           variant='ghost'
           onClick={() =>
             void run(() => exportJson(themeDocumentSchema, 'markflowy-theme.schema.json'))
@@ -188,7 +188,7 @@ export function ThemeStore() {
       {(error || library.error) && (
         <div role='alert' className='text-destructive'>
           {error || library.error}
-          <Button variant='outline' onClick={() => void run(library.reload)}>
+          <Button size='sm' variant='outline' onClick={() => void run(library.reload)}>
             {labels.retry}
           </Button>
         </div>
@@ -196,15 +196,15 @@ export function ThemeStore() {
       {drafts.map((draft) => (
         <div
           key={draft.key}
-          className='flex flex-wrap items-center gap-2 rounded-md border border-border p-3'
+          className='flex min-h-9 flex-wrap items-center gap-2 border-b border-border py-1 last:border-b-0'
         >
           <span className='min-w-0 flex-1 truncate'>
             {labels.draft} · {draft.session.document.name}
           </span>
-          <Button variant='outline' disabled={pending} onClick={() => setEditing(draft)}>
+          <Button size='sm' variant='outline' disabled={pending} onClick={() => setEditing(draft)}>
             {labels.resume}
           </Button>
-          <Button
+          <Button size='sm'
             variant='ghost'
             disabled={pending}
             onClick={() => {
@@ -220,12 +220,12 @@ export function ThemeStore() {
           </Button>
         </div>
       ))}
-      <section aria-label={labels.title} className='space-y-2'>
-        <h3>{labels.title}</h3>
+      <section aria-label={labels.title} className='space-y-0'>
+        <h3 className='m-0 flex min-h-8 items-center text-ui-control font-semibold'>{labels.title}</h3>
         {themes.map((theme) => (
           <div
             key={theme.name}
-            className='flex flex-wrap items-center gap-2 rounded-md border border-border p-3'
+            className='flex min-h-9 flex-wrap items-center gap-2 border-b border-border py-1 last:border-b-0'
           >
             <span className='min-w-0 flex-1 truncate'>
               {themeLabel(theme)} <span className='text-muted-foreground'>· {theme.mode}</span>
@@ -294,7 +294,7 @@ export function ThemeStore() {
       </section>
       <section className='space-y-2' aria-label={labels.snippets}>
         <div className='flex flex-wrap items-center gap-2'>
-          <h3 className='flex-1'>{labels.snippets}</h3>
+          <h3 className='m-0 flex-1 text-ui-control font-semibold'>{labels.snippets}</h3>
           <Button
             size='sm'
             variant='outline'
@@ -345,7 +345,7 @@ export function ThemeStore() {
         {library.snippets.map((item, index) => (
           <div
             key={item.id}
-            className='flex flex-wrap items-center gap-2 rounded-md border border-border p-2'
+            className='flex min-h-9 flex-wrap items-center gap-2 border-b border-border py-1 last:border-b-0'
           >
             <Checkbox
               aria-label={`${labels.enabled}: ${item.name}`}
@@ -403,20 +403,20 @@ export function ThemeStore() {
           <fieldset
             disabled={pending}
             inert={pending}
-            className='m-0 min-w-0 space-y-2 rounded-md border border-border p-3'
+            className='m-0 min-w-0 space-y-2 border-0 border-t border-solid border-border pt-3 pr-0 pb-0 pl-0'
           >
-            <Input
+            <Input inputSize='sm'
               aria-label={labels.name}
               value={snippet.name}
               onChange={(event) => setSnippet({ ...snippet, name: event.target.value })}
             />
             <Textarea
               aria-label={labels.css}
-              className='h-64 font-mono'
+              className='h-64 font-mono text-ui-control'
               value={snippet.css}
               onChange={(event) => setSnippet({ ...snippet, css: event.target.value })}
             />
-            <Button
+            <Button size='sm'
               disabled={pending}
               onClick={() =>
                 void run(async () => {
@@ -427,14 +427,14 @@ export function ThemeStore() {
             >
               {labels.saveCss}
             </Button>
-            <Button variant='ghost' onClick={() => setSnippet(undefined)}>
+            <Button size='sm' variant='ghost' onClick={() => setSnippet(undefined)}>
               {labels.cancel}
             </Button>
           </fieldset>
         )}
       </section>
-      <section aria-label={labels.catalog} className='space-y-2'>
-        <h3>{labels.catalog}</h3>
+      <section aria-label={labels.catalog} className='space-y-0'>
+        <h3 className='m-0 flex min-h-8 items-center text-ui-control font-semibold'>{labels.catalog}</h3>
         <label className='flex items-center gap-2'>
           <Checkbox
             checked={installedOnly}
@@ -449,11 +449,11 @@ export function ThemeStore() {
               !installedOnly || library.documents.some((document) => document.id === item.id),
           )
           .map((item) => (
-            <div key={item.id} className='flex items-center gap-2'>
+            <div key={item.id} className='flex min-h-9 flex-wrap items-center gap-2 border-b border-border py-1 last:border-b-0'>
               <span className='flex-1'>
                 {item.name} · {item.author} · {item.version}
               </span>
-              <Button
+              <Button size='sm'
                 variant='outline'
                 disabled={pending}
                 onClick={() =>

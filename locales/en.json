@@ -479,12 +479,20 @@
           "desc": "Set the editor to full width."
         },
         "font_size": {
-          "label": "Font size",
-          "desc": "Set the root font size of the editor."
+          "label": "Document font size",
+          "desc": "Font size for writing and reading."
         },
         "line_height": {
-          "label": "Line height",
-          "desc": "Set the root line height of the editor."
+          "label": "Document line height",
+          "desc": "Line height for writing and reading."
+        },
+        "source_font_size": {
+          "label": "Source font size",
+          "desc": "Font size in source mode. Separate from document text."
+        },
+        "source_line_height": {
+          "label": "Source line height",
+          "desc": "Line height in source mode."
         },
         "font_family": {
           "label": "Font family",

@@ -314,11 +314,11 @@ function Setting({ navigationRequest }: SettingProps) {
       <div className='box-border flex h-full w-full min-w-0 overflow-hidden bg-background text-foreground'>
         <aside
           className={classNames(
-            'box-border flex w-full shrink-0 flex-col border-border bg-muted/50 min-[720px]:w-[15.5rem] min-[720px]:border-r max-lg:min-[720px]:w-56',
+            'box-border flex w-full shrink-0 flex-col border-border bg-muted/50 min-[720px]:w-[13.5rem] min-[720px]:border-r max-lg:min-[720px]:w-52',
             mobileDetailOpen && 'max-[719px]:hidden',
           )}
         >
-          <div className='shrink-0 px-3 pt-5 pb-2'>
+          <div className='shrink-0 px-3 pt-4 pb-2'>
             <h2 className='m-0 px-2 pr-8 text-ui-body font-semibold'>{t('settings.label')}</h2>
             <label className='sr-only' htmlFor='setting-search'>
               {t('settings.search_placeholder')}
@@ -330,7 +330,7 @@ function Setting({ navigationRequest }: SettingProps) {
               />
               <Input
                 autoComplete='off'
-                className='h-7 rounded-md bg-background/80 pl-8 text-ui-control leading-[var(--mf-ui-line-height-control)] shadow-none'
+                className='h-7 rounded-sm bg-background pl-8 text-ui-control leading-[var(--mf-ui-line-height-control)] shadow-none'
                 id='setting-search'
                 name='settings-search'
                 placeholder={t('settings.search_placeholder')}
@@ -364,7 +364,7 @@ function Setting({ navigationRequest }: SettingProps) {
                         <Button
                           aria-current={selectedSearchEntryId === entry.id ? 'location' : undefined}
                           className={classNames(
-                            'my-px h-auto min-h-10 w-full flex-col items-start gap-0 rounded-md px-2 py-1.5 text-left font-normal text-foreground shadow-none',
+                            'my-px h-auto min-h-10 w-full flex-col items-start gap-0 rounded-sm px-2 py-1.5 text-left font-normal text-foreground shadow-none',
                             selectedSearchEntryId === entry.id
                               ? 'bg-control-selected text-content-primary hover:bg-control-selected'
                               : 'bg-transparent hover:bg-control-ghost-hover hover:text-content-primary',
@@ -397,7 +397,7 @@ function Setting({ navigationRequest }: SettingProps) {
                         <Button
                           aria-current={index === value ? 'page' : undefined}
                           className={classNames(
-                            'my-px h-7 w-full justify-start gap-2 rounded-md px-2 text-left text-ui-control font-normal text-foreground shadow-none',
+                            'my-px h-7 w-full justify-start gap-2 rounded-sm px-2 text-left text-ui-control font-normal text-foreground shadow-none',
                             index === value
                               ? 'bg-control-selected font-medium text-content-primary hover:bg-control-selected'
                               : 'bg-transparent hover:bg-control-ghost-hover hover:text-content-primary',
@@ -413,13 +413,13 @@ function Setting({ navigationRequest }: SettingProps) {
                     )
                   })}
               {normalizedSearchQuery && searchResults.length === 0 ? (
-                <li className='px-2 py-6 text-center text-sm text-muted-foreground' role='status'>
+                <li className='px-2 py-6 text-center text-ui-control text-muted-foreground' role='status'>
                   {t('settings.search_empty')}
                 </li>
               ) : null}
             </ul>
           </nav>
-          <footer className='shrink-0 border-t border-border/80 px-3 py-3'>
+          <footer className='shrink-0 border-t border-border/80 px-3 py-2'>
             <div className='flex min-w-0 items-center gap-2'>
               <Logo aria-hidden='true' className='size-6 shrink-0' focusable='false' />
               <div aria-live='polite' className='min-w-0 flex-1'>
@@ -461,7 +461,7 @@ function Setting({ navigationRequest }: SettingProps) {
             !mobileDetailOpen && 'max-[719px]:hidden',
           )}
         >
-          <div className='box-border mx-auto w-full max-w-[58rem] shrink-0 px-8 pt-7 max-lg:px-6 max-[719px]:px-4 max-[719px]:pt-3'>
+          <div className='box-border mx-auto w-full max-w-[58rem] shrink-0 px-6 pt-5 max-lg:px-5 max-[719px]:px-4 max-[719px]:pt-3'>
             <Button
               className='mb-3 px-2 text-muted-foreground min-[720px]:hidden'
               size='sm'
@@ -471,16 +471,16 @@ function Setting({ navigationRequest }: SettingProps) {
               <ArrowLeft aria-hidden className='size-4' />
               {t('settings.back_to_settings')}
             </Button>
-            <header className='mb-5 flex items-start justify-between gap-4 pr-8 max-[719px]:pr-0'>
+            <header className='mb-4 flex items-start justify-between gap-4 pr-8 max-[719px]:pr-0'>
               <div className='min-w-0'>
                 <h1
-                  className='m-0 text-xl font-semibold text-foreground focus-visible:outline-none focus-visible:underline focus-visible:underline-offset-2'
+                  className='m-0 text-lg font-semibold text-foreground focus-visible:outline-none focus-visible:underline focus-visible:underline-offset-2'
                   ref={categoryHeadingRef}
                   tabIndex={-1}
                 >
                   {t(curGroup.i18nKey)}
                 </h1>
-                <p className='mt-1 mb-0 text-ui-body leading-relaxed text-muted-foreground'>
+                <p className='mt-1 mb-0 text-ui-control text-muted-foreground'>
                   {t(curGroup.desc?.i18nKey)}
                 </p>
               </div>
@@ -488,7 +488,7 @@ function Setting({ navigationRequest }: SettingProps) {
             </header>
           </div>
           <div className='min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain'>
-            <div className='box-border mx-auto w-full max-w-[58rem] px-8 pb-12 max-lg:px-6 max-[719px]:px-4'>
+            <div className='box-border mx-auto w-full max-w-[58rem] px-6 pb-8 max-lg:px-5 max-[719px]:px-4'>
               {renderCurrentSettingData()}
             </div>
           </div>

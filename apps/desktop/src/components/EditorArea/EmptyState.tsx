@@ -87,7 +87,7 @@ function EmptyStateActionButton({ action }: { action: EmptyStateAction }) {
 
   return (
     <Button
-      className='h-8 w-full justify-between rounded-sm px-2 text-ui-control font-normal text-content-primary'
+      className='h-7 w-full justify-between rounded-sm px-2 text-ui-control font-normal text-content-primary'
       onClick={() => void action.onSelect()}
       variant='ghost'
     >

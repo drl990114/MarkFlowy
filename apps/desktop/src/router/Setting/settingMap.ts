@@ -194,6 +194,22 @@ export const getSettingMap = () => {
           saveToString: true,
           scope: [1, 2],
         },
+        sourceFontSize: {
+          key: 'editor_source_font_size',
+          type: 'slider',
+          title: { i18nKey: 'settings.editor.style.source_font_size.label' },
+          desc: { i18nKey: 'settings.editor.style.source_font_size.desc' },
+          scope: [12, 40],
+        },
+        sourceLineHeight: {
+          key: 'editor_source_line_height',
+          type: 'slider',
+          title: { i18nKey: 'settings.editor.style.source_line_height.label' },
+          desc: { i18nKey: 'settings.editor.style.source_line_height.desc' },
+          step: 0.1,
+          saveToString: true,
+          scope: [1, 2],
+        },
         normalFontFamily: {
           key: 'editor_root_font_family',
           type: 'fontListSelect',

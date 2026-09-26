@@ -33,16 +33,18 @@ export const CopilotSetting = () => {
 
   return (
     <SettingGroupContainer>
-      <SwitchSettingItem item={copilotConfig.enable} />
+      <div className='setting-group__items'>
+        <SwitchSettingItem item={copilotConfig.enable} />
 
-      <SelectSettingItem item={copilotConfig.provider} />
+        <SelectSettingItem item={copilotConfig.provider} />
 
-      <SelectSettingItem
-        item={{
-          ...copilotConfig.model,
-          options: currentProviderModels,
-        }}
-      />
+        <SelectSettingItem
+          item={{
+            ...copilotConfig.model,
+            options: currentProviderModels,
+          }}
+        />
+      </div>
     </SettingGroupContainer>
   )
 }

@@ -413,12 +413,20 @@
           "desc": "Mettre l'éditeur en plein largeur."
         },
         "font_size": {
-          "label": "Taille de la police",
-          "desc": "Définit la taille de la police racine de l'éditeur."
+          "label": "Taille du texte du document",
+          "desc": "Taille du texte pour la rédaction et la lecture."
         },
         "line_height": {
-          "label": "Ligne haute",
-          "desc": "Définit la hauteur de la ligne racine de l'éditeur."
+          "label": "Hauteur de ligne du document",
+          "desc": "Hauteur de ligne pour la rédaction et la lecture."
+        },
+        "source_font_size": {
+          "label": "Taille du texte source",
+          "desc": "Taille du texte en mode source, indépendante du document."
+        },
+        "source_line_height": {
+          "label": "Hauteur de ligne du source",
+          "desc": "Hauteur de ligne en mode source."
         },
         "font_family": {
           "label": "Famille de polices",

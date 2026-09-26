@@ -7,7 +7,7 @@ import { focusFeedback } from './focus-styles'
 const toggleVariants = cva(
   [
     focusFeedback,
-    'inline-flex shrink-0 items-center justify-center gap-1.5 rounded-md text-sm font-medium outline-none transition-[color,background-color,border-color,box-shadow] hover:text-content-primary disabled:pointer-events-none disabled:opacity-50 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0',
+    'inline-flex shrink-0 items-center justify-center gap-1.5 rounded-sm text-ui-control font-medium outline-none transition-[color,background-color,border-color,box-shadow] duration-[var(--mf-motion-duration-fast)] motion-reduce:transition-none hover:text-content-primary disabled:pointer-events-none disabled:opacity-50 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0',
   ],
   {
     variants: {
@@ -15,11 +15,11 @@ const toggleVariants = cva(
         default:
           'bg-transparent hover:bg-control-ghost-hover active:bg-control-ghost-pressed',
         outline:
-          'border border-input bg-background shadow-sm hover:bg-control-hover active:bg-control-pressed',
+          'border border-input bg-background hover:bg-control-hover active:bg-control-pressed',
       },
       size: {
         default: 'h-8 min-w-8 px-2.5',
-        sm: 'h-7 min-w-7 px-2 text-xs',
+        sm: 'h-7 min-w-7 px-2',
         lg: 'h-9 min-w-9 px-3',
       },
     },

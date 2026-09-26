@@ -134,7 +134,11 @@ export default defineConfig(async ({ mode }) => {
         },
         { find: '@', replacement: fileURLToPath(new URL('./src', import.meta.url)) },
         {
-          find: /^@markflowy\/i18n(?:\/desktop)?$/,
+          find: /^@markflowy\/i18n$/,
+          replacement: fileURLToPath(new URL('./src/i18n/index.ts', import.meta.url)),
+        },
+        {
+          find: '@markflowy/i18n/desktop',
           replacement: fileURLToPath(
             new URL('../../packages/i18n/src/desktop.ts', import.meta.url),
           ),

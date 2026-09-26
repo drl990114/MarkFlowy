@@ -189,6 +189,11 @@ export function capricornStyle(
   return {
     ...Object.fromEntries(Object.entries(capMap).map(([key, name]) => [key, value(name)])),
     fontFamily: value('font.editor.family'),
+    '--cap-ui-font-size': '13px',
+    '--cap-ui-font-size-small': '12px',
+    '--cap-ui-line-height': '18px',
+    '--cap-ui-line-height-small': '16px',
+    '--cap-menu-item-size': '28px',
   }
 }
 /** Facade aliases are implementation details, not additional public theme tokens. */

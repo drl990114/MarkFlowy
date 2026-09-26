@@ -413,12 +413,20 @@
           "desc": "Establecer el editor a anchura completa."
         },
         "font_size": {
-          "label": "Tamaño de letra",
-          "desc": "Establecer el tamaño de letra base del editor."
+          "label": "Tamaño de fuente del documento",
+          "desc": "Tamaño de fuente para escritura y lectura."
         },
         "line_height": {
-          "label": "Altura de línea",
-          "desc": "Establecer la altura de línea base del editor."
+          "label": "Interlineado del documento",
+          "desc": "Altura de línea para escritura y lectura."
+        },
+        "source_font_size": {
+          "label": "Tamaño de fuente del código fuente",
+          "desc": "Tamaño de fuente en modo de código fuente, independiente del documento."
+        },
+        "source_line_height": {
+          "label": "Interlineado del código fuente",
+          "desc": "Altura de línea en modo de código fuente."
         },
         "font_family": {
           "label": "Familia de fuentes",

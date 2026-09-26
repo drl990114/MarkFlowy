@@ -24,7 +24,7 @@ function CommandRow({
       value={command.id}
       disabled={Boolean(reason)}
       onSelect={() => onSelect(command)}
-      className='min-h-8 gap-3'
+      className='min-h-7 gap-2'
     >
       <span className='min-w-0 flex-1'>
         <span className='block truncate'>{t(command.labelKey)}</span>

@@ -310,6 +310,7 @@ export function InlineInsertPopover({
                 </div>
               ) : (
                 <Input
+                  inputSize='sm'
                   id={`${id}-address`}
                   ref={inputRef}
                   value={address}
@@ -341,6 +342,7 @@ export function InlineInsertPopover({
                   {t(image ? 'inline_insert.alt' : 'inline_insert.text')}
                 </label>
                 <Input
+                  inputSize='sm'
                   id={`${id}-text`}
                   value={text}
                   disabled={busy}

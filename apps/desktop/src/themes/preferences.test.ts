@@ -26,4 +26,19 @@ describe('personal typography precedence', () => {
       ],
     ).toBe('15px')
   })
+  it('keeps source preferences independent from document typography', () => {
+    const source = { editor_source_font_size: 15, editor_source_line_height: '1.6' }
+    expect(typographyOverrides({ ...preferences, ...source })).toMatchObject({
+      'font.editor.size': '15px',
+      'font.source.size': '15px',
+      'font.source.lineHeight': '1.6',
+    })
+    expect(
+      typographyOverrides({ ...preferences, ...source, editor_root_font_size: 20 }),
+    ).toMatchObject({
+      'font.editor.size': '20px',
+      'font.source.size': '15px',
+    })
+    expect(typographyOverrides({ ...source, theme_use_personal_typography: false })).toEqual({})
+  })
 })

@@ -1,4 +1,4 @@
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { desktopLightTheme } from '@markflowy/theme'
 import { enableMapSet } from 'immer'
 import type { PropsWithChildren } from 'react'
@@ -75,8 +75,12 @@ it('keeps the live editor, selection and scroll when its folder is attached and 
   editor.focus()
   editor.setSelectionRange(3, 8)
   editor.scrollTop = 120
+  const title = screen.getByTitle('/notes/My note.md')
+  expect(within(title).getByText('My note.md')).toBeTruthy()
+  expect(within(title).queryByText('•')).toBeNull()
   act(() => useEditorStateStore.getState().setIdStateMap('document', { hasUnsavedChanges: true }))
-  expect(screen.getByText('My note.md •')).toBeTruthy()
+  expect(within(title).getByText('My note.md')).toBeTruthy()
+  expect(within(title).getByText('•')).toBeTruthy()
 
   act(() =>
     useEditorStore

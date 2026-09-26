@@ -4,7 +4,9 @@ import { debounce } from 'lodash'
 import { nanoid } from 'nanoid'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from '@/i18n'
-import styled from 'styled-components'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Plus, X } from 'lucide-react'
 import type { SettingItemProps } from '.'
 import { SettingItemContainer } from './Container'
 import { SettingLabel } from './Label'
@@ -82,142 +84,38 @@ const StringMapJsonSettingItem: React.FC<SettingItemProps<Setting.StringMapJsonS
 
   return (
     <SettingItemContainer $direction='column' $settingKey={item.key}>
-      <SettingLabel item={item} style={{ marginBottom: '8px' }} />
-      <ContentContainer>
-        <PairsContainer>
-          {pairs.map((pair) => (
-            <PairRow key={pair.id}>
+      <SettingLabel item={item} />
+      <div className='flex w-full min-w-0 max-w-[32rem] flex-col gap-2'>
+        <div className='flex flex-col gap-1.5'>
+          {pairs.map((pair, index) => (
+            <div className='grid min-w-0 grid-cols-[minmax(0,1fr)_minmax(0,1fr)_1.75rem] items-center gap-2' key={pair.id}>
               <Input
+                inputSize='sm'
+                aria-label={`${t('common.key')} ${index + 1}`}
                 placeholder={t('common.key')}
                 value={pair.key}
                 onChange={(e) => handleKeyChange(pair.id, e.target.value)}
               />
               <Input
+                inputSize='sm'
+                aria-label={`${t('common.value')} ${index + 1}`}
                 placeholder={t('common.value')}
                 value={pair.value}
                 onChange={(e) => handleValueChange(pair.id, e.target.value)}
               />
-              <DeleteButton onClick={() => handleDeletePair(pair.id)}>
-                <i className='ri-delete-bin-line'></i>
-              </DeleteButton>
-            </PairRow>
+              <Button variant='ghost' size='icon-sm' aria-label={`${t('settings.delete_item')} ${pair.key || index + 1}`} onClick={() => handleDeletePair(pair.id)}>
+                <X aria-hidden className='size-3.5' />
+              </Button>
+            </div>
           ))}
-        </PairsContainer>
-        <AddButton onClick={handleAddPair}>
-          <i className='ri-add-line'></i>
+        </div>
+        <Button className='self-start' variant='outline' size='sm' onClick={handleAddPair}>
+          <Plus aria-hidden className='size-3.5' />
           {t(item.i18nProps.add)}
-        </AddButton>
-      </ContentContainer>
+        </Button>
+      </div>
     </SettingItemContainer>
   )
 }
-
-const ContentContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  min-width: 300px;
-`
-
-const PairsContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-`
-
-const PairRow = styled.div`
-  display: flex;
-  gap: 8px;
-  align-items: center;
-`
-
-const Input = styled.input`
-  flex: 1;
-  padding: 6px 10px;
-  border: 1px solid ${({ theme }) => theme.borderColor};
-  border-radius: 4px;
-  background-color: ${({ theme }) => theme.bgColor};
-  color: ${({ theme }) => theme.primaryFontColor};
-  font-size: var(--mf-ui-font-control);
-  line-height: var(--mf-ui-line-height-control);
-
-  &:focus {
-    outline: none;
-  }
-
-  &::placeholder {
-    color: ${({ theme }) => theme.labelFontColor};
-  }
-`
-
-const DeleteButton = styled.button`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border: 1px solid ${({ theme }) => theme.borderColor};
-  border-radius: 4px;
-  background-color: transparent;
-  color: ${({ theme }) => theme.primaryFontColor};
-  cursor: pointer;
-  transition:
-    color 100ms ease,
-    background-color 100ms ease,
-    border-color 100ms ease;
-
-  &:hover {
-    background-color: ${({ theme }) => theme.hoverColor};
-    border-color: ${({ theme }) => theme.accentColor};
-    color: ${({ theme }) => theme.accentColor};
-  }
-
-  i {
-    font-size: 14px;
-  }
-
-  &:focus-visible {
-    outline: none;
-    text-decoration-line: underline;
-    text-underline-offset: 2px;
-    opacity: 0.8;
-  }
-`
-
-const AddButton = styled.button`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
-  border: 1px dashed ${({ theme }) => theme.borderColor};
-  border-radius: 4px;
-  background-color: transparent;
-  color: ${({ theme }) => theme.primaryFontColor};
-  cursor: pointer;
-  transition:
-    color 100ms ease,
-    background-color 100ms ease,
-    border-color 100ms ease;
-  font-size: var(--mf-ui-font-control);
-  line-height: var(--mf-ui-line-height-control);
-
-  &:hover {
-    background-color: ${({ theme }) => theme.hoverColor};
-    border-color: ${({ theme }) => theme.accentColor};
-    color: ${({ theme }) => theme.accentColor};
-  }
-
-  i {
-    font-size: 14px;
-  }
-
-  &:focus-visible {
-    outline: none;
-    text-decoration-line: underline;
-    text-underline-offset: 2px;
-    opacity: 0.8;
-  }
-`
 
 export default StringMapJsonSettingItem

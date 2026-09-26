@@ -8,15 +8,12 @@ export const SettingGroupContainer = styled.div.attrs<SettingGroupContainerProps
   id: props.$anchorId,
   tabIndex: props.$anchorId ? -1 : undefined,
 }))`
-  padding: 12px 16px 0;
-  margin: 0 0 20px;
+  padding: 0;
+  margin: 0 0 24px;
   min-width: 0;
-  font-size: var(--mf-ui-font-body);
-  line-height: var(--mf-ui-line-height-body);
-  background-color: var(--mf-card);
-  border: 1px solid color-mix(in srgb, var(--mf-border) 80%, transparent);
+  font-size: var(--mf-ui-font-control);
+  line-height: var(--mf-ui-line-height-control);
   box-sizing: border-box;
-  border-radius: var(--mf-radius);
   scroll-margin-top: 24px;
 
   &:focus-visible {
@@ -30,12 +27,19 @@ export const SettingGroupContainer = styled.div.attrs<SettingGroupContainerProps
 
   .setting-group {
     &__title {
-      margin: 0;
-      padding: 2px 0 7px;
+      margin: 0 0 8px;
+      padding: 0 12px;
       font-size: var(--mf-ui-font-body);
       line-height: var(--mf-ui-line-height-body);
       font-weight: 600;
       color: ${(props) => props.theme.primaryFontColor};
+    }
+
+    &__items {
+      min-width: 0;
+      padding: 0 12px;
+      border-radius: var(--mf-radius);
+      background-color: color-mix(in srgb, var(--mf-surface-panel) 75%, var(--mf-background));
     }
   }
 `

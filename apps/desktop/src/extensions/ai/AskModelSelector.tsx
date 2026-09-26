@@ -99,7 +99,7 @@ export function AskModelSelector({
         </ModelSelector.List>
         <ModelSelector.Footer>
           <Button
-            className='h-7 w-full justify-between px-2 text-xs font-normal'
+            className='h-7 w-full justify-between px-2 text-ui-control font-normal'
             disabled={disabled}
             onClick={() => {
               setOpen(false)

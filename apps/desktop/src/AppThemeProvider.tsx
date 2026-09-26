@@ -52,6 +52,8 @@ const AppThemeProvider: React.FC<BaseComponentProps> = function ({ children }) {
         editor_code_font_family: settingData.editor_code_font_family,
         editor_root_font_size: settingData.editor_root_font_size,
         editor_root_line_height: settingData.editor_root_line_height,
+        editor_source_font_size: settingData.editor_source_font_size,
+        editor_source_line_height: settingData.editor_source_line_height,
       }),
     })
   }, [
@@ -63,6 +65,8 @@ const AppThemeProvider: React.FC<BaseComponentProps> = function ({ children }) {
     settingData.editor_code_font_family,
     settingData.editor_root_font_size,
     settingData.editor_root_line_height,
+    settingData.editor_source_font_size,
+    settingData.editor_source_line_height,
   ])
   const uiTheme = useMemo(
     () => legacyTokens(semanticTokens, curTheme.mode),

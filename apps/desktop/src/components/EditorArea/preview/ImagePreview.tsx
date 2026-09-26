@@ -68,7 +68,7 @@ function ImagePreviewToolButton({
       aria-disabled={disabled}
       aria-label={label}
       aria-pressed={pressed}
-      className='size-7 rounded-sm aria-disabled:cursor-default aria-disabled:text-disabled-foreground aria-disabled:opacity-60 aria-disabled:hover:bg-transparent aria-disabled:hover:text-disabled-foreground'
+      className='size-6 rounded-sm aria-disabled:cursor-default aria-disabled:text-disabled-foreground aria-disabled:opacity-60 aria-disabled:hover:bg-transparent aria-disabled:hover:text-disabled-foreground'
       onClick={disabled ? undefined : onClick}
       size='icon-sm'
       variant={pressed ? 'secondary' : 'ghost'}
@@ -143,7 +143,7 @@ function ImageViewer({ src, fileName }: { src: string; fileName: string }) {
 
   return (
     <div
-      className='grid h-full min-h-0 min-w-0 grid-rows-[minmax(0,1fr)_36px] overflow-hidden bg-muted/20'
+      className='grid h-full min-h-0 min-w-0 grid-rows-[minmax(0,1fr)_32px] overflow-hidden bg-muted/20'
       data-slot='image-preview'
     >
       <div
@@ -199,7 +199,7 @@ function ImageViewer({ src, fileName }: { src: string; fileName: string }) {
             label={zoomOutLabel}
             onClick={() => updateZoomBy('out')}
           >
-            <ZoomOutIcon aria-hidden='true' className='size-4' />
+            <ZoomOutIcon aria-hidden='true' className='size-3.5' />
           </ImagePreviewToolButton>
 
           <Tooltip>
@@ -207,7 +207,7 @@ function ImageViewer({ src, fileName }: { src: string; fileName: string }) {
               <Button
                 aria-label={actualSizeLabel}
                 aria-pressed={zoom === 1}
-                className='h-7 min-w-12 rounded-sm px-2 tabular-nums'
+                className='h-6 min-w-12 rounded-sm px-2 tabular-nums'
                 onClick={() => updateZoom(1)}
                 size='sm'
                 variant={zoom === 1 ? 'secondary' : 'ghost'}
@@ -223,7 +223,7 @@ function ImageViewer({ src, fileName }: { src: string; fileName: string }) {
             label={zoomInLabel}
             onClick={() => updateZoomBy('in')}
           >
-            <ZoomInIcon aria-hidden='true' className='size-4' />
+            <ZoomInIcon aria-hidden='true' className='size-3.5' />
           </ImagePreviewToolButton>
 
           <div aria-hidden='true' className='mx-0.5 h-4 w-px bg-border' />
@@ -233,7 +233,7 @@ function ImageViewer({ src, fileName }: { src: string; fileName: string }) {
             onClick={() => updateZoom('fit')}
             pressed={zoom === 'fit'}
           >
-            <Maximize2Icon aria-hidden='true' className='size-4' />
+            <Maximize2Icon aria-hidden='true' className='size-3.5' />
           </ImagePreviewToolButton>
         </div>
       </div>

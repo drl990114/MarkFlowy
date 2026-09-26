@@ -103,7 +103,7 @@ function FileEncodingControl({ fileId }: { fileId: string }) {
               }}
               disabled={busy}
             >
-              <Select.Trigger aria-label='文本编码'>
+              <Select.Trigger aria-label='文本编码' size='sm'>
                 <Select.Value />
               </Select.Trigger>
               <Select.Content>
@@ -117,7 +117,7 @@ function FileEncodingControl({ fileId }: { fileId: string }) {
             {preview ? (
               <>
                 <p>预览（前 4,000 个字符）。应用前会保留当前内容的恢复草稿。</p>
-                <pre className='max-h-64 overflow-auto whitespace-pre-wrap rounded border border-border bg-background p-3 text-foreground'>
+                <pre className='max-h-64 overflow-auto whitespace-pre-wrap rounded-sm border border-border bg-background p-2 font-mono text-[length:var(--mf-theme-font-source-size,15px)] leading-[var(--mf-theme-font-source-line-height,1.6)] text-foreground'>
                   {preview.snapshot.content.slice(0, 4000)}
                 </pre>
               </>

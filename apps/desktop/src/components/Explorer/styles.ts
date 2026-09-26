@@ -34,9 +34,7 @@ export const Container = styled.div`
 
   && .mf-file-tree-item:focus-visible > [data-mf-file-tree-node] {
     outline: none;
-    text-decoration-line: underline;
-    text-underline-offset: 2px;
-    opacity: 0.8;
+    box-shadow: inset 0 0 0 2px var(--mf-control-focus, ${(props) => props.theme.accentColor});
   }
 
   && .mf-file-tree-item > [data-mf-file-tree-node][data-mf-file-tree-editing='true'],
@@ -55,10 +53,10 @@ export const Container = styled.div`
     margin: 0;
     padding: 0 6px;
     border-radius: 0;
-    font-size: var(--mf-ui-font-body);
+    font-size: var(--mf-ui-font-control);
     font-weight: 400;
-    line-height: var(--mf-line-height);
-    letter-spacing: var(--mf-ui-tracking-body);
+    line-height: var(--mf-ui-line-height-control);
+    letter-spacing: var(--mf-ui-tracking-control);
   }
 
   && .mf-file-tree-row .file-icon {
@@ -82,8 +80,8 @@ export const Container = styled.div`
   && .mf-file-tree-row .mf-file-tree-name-input {
     height: 22px;
     padding: 0 4px;
-    font-size: var(--mf-ui-font-body);
-    line-height: var(--mf-ui-line-height-body);
+    font-size: var(--mf-ui-font-control);
+    line-height: var(--mf-ui-line-height-control);
     letter-spacing: inherit;
     border-radius: var(--mf-radius-sm, ${(props) => props.theme.smallBorderRadius});
     border-color: var(--mf-ui-border-subtle, ${(props) => props.theme.borderColor});

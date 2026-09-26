@@ -11,10 +11,10 @@ export const ReplaceController: FC<{
 
   return (
     <ButtonGroup.Root>
-      <Button className='h-6' type='button' variant='outline' size='sm' onClick={replace}>
+      <Button type='button' variant='outline' size='sm' onClick={replace}>
         {t('find_replace.replace')}
       </Button>
-      <Button className='h-6' type='button' variant='outline' size='sm' onClick={replaceAll}>
+      <Button type='button' variant='outline' size='sm' onClick={replaceAll}>
         {t('find_replace.replace_all')}
       </Button>
     </ButtonGroup.Root>

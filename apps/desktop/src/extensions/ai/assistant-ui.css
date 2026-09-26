@@ -77,17 +77,6 @@
   }
 }
 
-@keyframes aui-enter {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 /* Minimal reset for raw assistant-ui primitives that do not use data-slot. */
 @layer components {
   .aui-theme,
@@ -136,10 +125,6 @@
   letter-spacing: var(--mf-ui-tracking-control);
 }
 
-.aui-welcome {
-  animation: aui-enter var(--mf-motion-duration-overlay) var(--mf-motion-ease-out) both;
-}
-
 /* Keep actions mounted so keyboard focus can reveal them as well as hover. */
 @media (hover: hover) and (pointer: fine) {
   .aui-message-actions:not([data-last]) {
@@ -162,22 +147,9 @@
   z-index: var(--mf-layer-tooltip);
 }
 
-.aui-popover-content[data-state='open'] {
-  transform-origin: var(--radix-popover-content-transform-origin, center);
-  animation: mf-surface-in var(--mf-motion-duration-base) var(--mf-motion-ease-out) both;
-}
-
-.aui-popover-content[data-state='closed'] {
-  transform-origin: var(--radix-popover-content-transform-origin, center);
-  animation: mf-surface-out var(--mf-motion-duration-fast) var(--mf-motion-ease-out) both;
-}
-
-.aui-tooltip-content[data-state='delayed-open'] {
-  transform-origin: var(--radix-tooltip-content-transform-origin, center);
-  animation: mf-surface-in var(--mf-motion-duration-fast) var(--mf-motion-ease-out) both;
-}
-
-.aui-tooltip-content[data-state='instant-open'] {
+/* Match Desktop's immediate menus and tooltips. */
+.aui-popover-content,
+.aui-tooltip-content {
   animation: none;
 }
 
@@ -214,17 +186,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .aui-welcome,
-  .aui-popover-content[data-state='open'],
-  .aui-tooltip-content[data-state='delayed-open'] {
-    animation: mf-fade-in var(--mf-motion-duration-fast) var(--mf-motion-ease-out) both !important;
-  }
-
-  .aui-popover-content[data-state='closed'] {
-    animation: mf-fade-out var(--mf-motion-duration-fast) var(--mf-motion-ease-out) both !important;
-  }
-
-  .aui-tooltip-content[data-state='instant-open'],
+  .aui-popover-content,
+  .aui-tooltip-content,
   .aui-dot-matrix-dot {
     animation: none !important;
   }

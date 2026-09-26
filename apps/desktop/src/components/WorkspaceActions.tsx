@@ -62,7 +62,7 @@ export function WorkspaceActions({ location = 'titlebar' }: WorkspaceActionsProp
       <span className='truncate'>{workspaceLabel}</span>
       <ChevronDownIcon
         aria-hidden='true'
-        className='size-3 shrink-0 opacity-60'
+        className='size-3 shrink-0 text-content-secondary'
         strokeWidth={1.75}
       />
     </>
@@ -165,7 +165,7 @@ export function WorkspaceActions({ location = 'titlebar' }: WorkspaceActionsProp
             </Button> : null}
             {visibleRecentWorkspaces.length > 0 ? (
               <Button
-                className='h-7 w-full justify-start rounded-sm px-2 text-ui-caption font-normal text-content-secondary'
+                className='h-7 w-full justify-start rounded-sm px-2 text-ui-control font-normal text-content-secondary'
                 onClick={handleClearRecent}
                 size='sm'
                 variant='ghost'

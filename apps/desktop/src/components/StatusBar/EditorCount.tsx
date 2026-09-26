@@ -26,6 +26,9 @@ const RadioOption = styled.label`
   display: flex;
   align-items: center;
   gap: 8px;
+  min-height: 28px;
+  font-size: var(--mf-ui-font-control);
+  line-height: var(--mf-ui-line-height-control);
   cursor: pointer;
 `
 
@@ -50,20 +53,18 @@ export const EditorCount = () => {
 
   const { wordCount, characterCount, nonWhitespaceCharacterCount } = counter
 
-  const displayParts: string[] = []
-  if (displayMode === 'words') {
-    displayParts.push(`${wordCount} ${t('statusBar.words')}`)
-  }
-  if (displayMode === 'chars') {
-    displayParts.push(`${characterCount} ${t('statusBar.chars')}`)
-  }
-  if (displayMode === 'pureChars') {
-    displayParts.push(`${nonWhitespaceCharacterCount} ${t('statusBar.pureChars')}`)
-  }
-
-  if (displayParts.length === 0) {
-    return null
-  }
+  const displayCount = {
+    words: wordCount,
+    chars: characterCount,
+    pureChars: nonWhitespaceCharacterCount,
+  }[displayMode]
+  const displayLabel = t(
+    {
+      words: 'statusBar.words',
+      chars: 'statusBar.chars',
+      pureChars: 'statusBar.pureChars',
+    }[displayMode],
+  )
 
   const handleDisplayModeChange = (value: string) => {
     if (value === 'words' || value === 'chars' || value === 'pureChars') {
@@ -75,9 +76,12 @@ export const EditorCount = () => {
     <Popover.Root open={popoverVisible} onOpenChange={setPopoverVisible}>
       <Popover.Trigger asChild>
         <StatusBarButton
-          aria-label={`${displayParts.join(' ')}, ${t('statusBar.displaySettings')}`}
+          aria-label={`${displayCount} ${displayLabel}, ${t('statusBar.displaySettings')}`}
         >
-          <span className='tabular-nums'>{displayParts.join(' ')}</span>
+          <span className='whitespace-nowrap'>
+            <span className='inline-block min-w-[6ch] text-right tabular-nums'>{displayCount}</span>{' '}
+            {displayLabel}
+          </span>
         </StatusBarButton>
       </Popover.Trigger>
       <Popover.Content side='top' align='end'>

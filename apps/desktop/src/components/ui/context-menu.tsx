@@ -16,7 +16,7 @@ export function ContextMenuPortal(props: ComponentProps<typeof ContextMenuPrimit
 }
 
 const contentClassName =
-  'z-[var(--mf-layer-menu)] max-h-[var(--radix-context-menu-content-available-height)] min-w-36 origin-[var(--radix-context-menu-content-transform-origin)] overflow-x-hidden overflow-y-auto rounded-md border border-control-border bg-surface-overlay p-1 text-content-primary shadow-lg outline-none data-[state=open]:animate-[mf-surface-in_var(--mf-motion-duration-base)_var(--mf-motion-ease-out)_both] data-[state=closed]:animate-[mf-surface-out_var(--mf-motion-duration-fast)_var(--mf-motion-ease-in)_both] motion-reduce:data-[state=open]:animate-[mf-fade-in_var(--mf-motion-duration-fast)_var(--mf-motion-ease-out)_both] motion-reduce:data-[state=closed]:animate-[mf-fade-out_var(--mf-motion-duration-fast)_var(--mf-motion-ease-in)_both]'
+  'z-[var(--mf-layer-menu)] max-h-[var(--radix-context-menu-content-available-height)] min-w-36 overflow-x-hidden overflow-y-auto rounded-lg border border-control-border bg-surface-overlay p-1 text-content-primary shadow-lg outline-none'
 
 export type ContextMenuContentProps = ComponentProps<typeof ContextMenuPrimitive.Content> & {
   container?: ComponentProps<typeof ContextMenuPrimitive.Portal>['container']

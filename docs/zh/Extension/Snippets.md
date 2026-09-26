@@ -12,4 +12,4 @@ Math、Mermaid、Code 每种类型各内置 1 个基础片段（分式、流程�
 
 此功能仅接入 Capricorn，已集成 runtime `0.3.1`。安装器和 runtime resolver 固定精确版本，安装脚本已校验正式包的 SHA-256 和包身份。沿用 `0.3.0` 引入的主题契约，通过显式 `--cap-*` 实例样式提供颜色与排版，不再读取 MarkFlowy/RME 的内部回退变量；主题迁移见[自定义主题](./CustomTheme.md#capricorn-030-主题契约)。片段库仍使用原有 `snippets.json` 格式，升级主题契约不需要转换已保存的片段。
 
-源码联调用 `yarn workspace @markflowy/desktop test:capricorn-source` 验证，正式包集成用 `yarn workspace @markflowy/desktop test:capricorn-published` 验证。本次发布来源和验证结果见[启动性能记录](../../STARTUP_PERFORMANCE.md#capricorn-031-release-integration-2026-09-26)；复查时应按该记录限制为单 worker 和 4 GB Node 堆，串行执行。单测使用模拟的 Tauri 命令和 DOM 环境；Tauri 实机与系统中文输入法仍需单独验收。
+源码联调用 `yarn workspace @markflowy/desktop test:capricorn-source` 验证，正式包集成用 `yarn workspace @markflowy/desktop test:capricorn-published` 验证。复查时限制为单 worker 和 4 GB Node 堆，串行执行。单测使用模拟的 Tauri 命令和 DOM 环境；Tauri 实机与系统中文输入法仍需单独验收。

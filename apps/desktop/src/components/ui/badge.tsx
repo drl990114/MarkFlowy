@@ -4,7 +4,7 @@ import type { ComponentProps } from 'react'
 import { cn } from '@/lib/cn'
 
 const badgeVariants = cva(
-  'inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-md border text-xs font-medium whitespace-nowrap transition-colors [&_svg]:pointer-events-none [&_svg]:size-3 [&_svg]:shrink-0',
+  'inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-sm border text-ui-caption font-normal whitespace-nowrap [&_svg]:pointer-events-none [&_svg]:size-3 [&_svg]:shrink-0',
   {
     variants: {
       variant: {
@@ -14,8 +14,8 @@ const badgeVariants = cva(
         destructive: 'border-transparent bg-destructive text-destructive-foreground',
       },
       size: {
-        sm: 'px-1.5 py-0.5',
-        default: 'px-2 py-1',
+        sm: 'min-h-5 px-1.5',
+        default: 'min-h-6 px-2',
       },
     },
     defaultVariants: {

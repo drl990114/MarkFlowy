@@ -149,10 +149,10 @@ export function ThemeEditor({
   const groups = [...new Set(names.map((name) => name.split('.')[0]))]
   const currentValue = variant.tokens[selected] ?? themeTokens[selected][variant.mode]
   return (
-    <section className='space-y-3' aria-label={labels.edit}>
+    <section className='@container/theme-editor space-y-3 text-ui-control' aria-label={labels.edit}>
       <fieldset disabled={pending} inert={pending} className='m-0 min-w-0 space-y-3 border-0 p-0'>
         <div className='flex flex-wrap items-center gap-2'>
-          <Button
+          <Button size='sm'
             variant='ghost'
             onClick={() => {
               try {
@@ -165,7 +165,7 @@ export function ThemeEditor({
           >
             {labels.close}
           </Button>
-          <Button
+          <Button size='sm'
             variant='outline'
             disabled={jsonDirty || !history.past.length}
             onClick={() => {
@@ -176,7 +176,7 @@ export function ThemeEditor({
           >
             {labels.undo}
           </Button>
-          <Button
+          <Button size='sm'
             variant='outline'
             disabled={jsonDirty || !history.future.length}
             onClick={() => {
@@ -187,7 +187,7 @@ export function ThemeEditor({
           >
             {labels.redo}
           </Button>
-          <Button
+          <Button size='sm'
             variant='outline'
             disabled={jsonDirty}
             onClick={() => {
@@ -196,14 +196,14 @@ export function ThemeEditor({
           >
             {labels.advanced}
           </Button>
-          <Button
+          <Button size='sm'
             variant='outline'
             disabled={jsonDirty || invalidTokenInput}
             onClick={() => void onExport(document).catch((cause) => setError(String(cause)))}
           >
             {labels.export}
           </Button>
-          <Button disabled={pending || jsonDirty || invalidTokenInput} onClick={() => void save()}>
+          <Button size='sm' disabled={pending || jsonDirty || invalidTokenInput} onClick={() => void save()}>
             {labels.save}
           </Button>
         </div>
@@ -212,17 +212,17 @@ export function ThemeEditor({
           inert={jsonDirty}
           className='m-0 min-w-0 space-y-3 border-0 p-0'
         >
-          <div className='grid grid-cols-2 gap-2'>
-            <label>
+          <div className='grid gap-2 @min-[28rem]/theme-editor:grid-cols-2'>
+            <label className='flex min-w-0 flex-col gap-1'>
               {labels.name}
-              <Input
+              <Input inputSize='sm'
                 value={document.name}
                 onChange={(event) => change({ ...document, name: event.target.value })}
               />
             </label>
-            <label>
+            <label className='flex min-w-0 flex-col gap-1'>
               {labels.author}
-              <Input
+              <Input inputSize='sm'
                 value={document.author ?? ''}
                 onChange={(event) => change({ ...document, author: event.target.value })}
               />
@@ -237,7 +237,7 @@ export function ThemeEditor({
                 setVariantId(id)
               }}
             >
-              <SelectTrigger aria-label={labels.variant}>
+              <SelectTrigger size='sm' aria-label={labels.variant}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -248,7 +248,7 @@ export function ThemeEditor({
                 ))}
               </SelectContent>
             </SelectRoot>
-            <Input
+            <Input inputSize='sm'
               className='max-w-52'
               aria-label={labels.variant}
               value={variant.name}
@@ -296,12 +296,12 @@ export function ThemeEditor({
         )}
         <p className='text-ui-caption text-muted-foreground'>{labels.preferences}</p>
         {advanced ? (
-          <div className='grid gap-3 md:grid-cols-2'>
+          <div className='grid gap-3 @min-[36rem]/theme-editor:grid-cols-2'>
             <div>
-              <label>
+              <label className='flex min-w-0 flex-col gap-1'>
                 {labels.json}
                 <Textarea
-                  className='h-96 font-mono'
+                  className='h-96 font-mono text-ui-control'
                   aria-label={labels.json}
                   value={json}
                   onChange={(event) => {
@@ -310,7 +310,7 @@ export function ThemeEditor({
                   }}
                 />
               </label>
-              <Button
+              <Button size='sm'
                 variant='outline'
                 onClick={() => {
                   try {
@@ -325,7 +325,7 @@ export function ThemeEditor({
               </Button>
               {jsonDirty && (
                 <>
-                  <Button
+                  <Button size='sm'
                     variant='ghost'
                     onClick={() => {
                       setJsonDirty(false)
@@ -339,11 +339,11 @@ export function ThemeEditor({
                 </>
               )}
             </div>
-            <label>
+            <label className='flex min-w-0 flex-col gap-1'>
               {labels.css}
               <Textarea
                 disabled={jsonDirty}
-                className='h-96 font-mono'
+                className='h-96 font-mono text-ui-control'
                 value={variant.css ?? ''}
                 onChange={(event) => changeVariant({ ...variant, css: event.target.value })}
               />
@@ -363,7 +363,7 @@ export function ThemeEditor({
             {labels.includeCss}
           </label>
         </div>
-        <div className='grid min-h-[600px] gap-4 xl:grid-cols-[minmax(0,1fr)_320px]'>
+        <div className='grid min-h-[480px] gap-3 @min-[44rem]/theme-editor:grid-cols-[minmax(0,1fr)_17.5rem]'>
           <ThemePreview
             theme={resolved}
             snippets={
@@ -385,7 +385,7 @@ export function ThemeEditor({
             inert={jsonDirty}
             className='m-0 min-w-0 space-y-3 border-0 p-0'
           >
-            <Input
+            <Input inputSize='sm'
               aria-label={labels.search}
               placeholder={labels.search}
               value={search}
@@ -398,15 +398,15 @@ export function ThemeEditor({
               />
               {labels.modified}
             </label>
-            <div className='max-h-52 overflow-auto rounded-md border border-border p-2'>
+            <div className='max-h-52 overflow-auto rounded-sm border border-border p-1'>
               {groups.map((group) => (
                 <details key={group} open={group === selected.split('.')[0] || Boolean(search)}>
-                  <summary className='cursor-pointer p-1 font-medium'>{group}</summary>
+                  <summary className='cursor-default px-1 py-1 text-ui-caption font-medium text-muted-foreground'>{group}</summary>
                   {names
                     .filter((name) => name.startsWith(`${group}.`))
                     .map((name) => (
                       <Button
-                        className='w-full justify-start truncate'
+                        className='w-full justify-start truncate font-normal'
                         key={name}
                         size='sm'
                         variant={selected === name ? 'secondary' : 'ghost'}
@@ -470,7 +470,7 @@ export function ThemeEditor({
                 token(selected, name === '__value' ? resolved.tokens[selected] : { ref: name })
               }
             >
-              <SelectTrigger aria-label={labels.link}>
+              <SelectTrigger size='sm' aria-label={labels.link}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -523,7 +523,7 @@ function TokenInput({
     onValidationChange(!valid)
   }
   return (
-    <Input
+    <Input inputSize='sm'
       aria-label={label}
       aria-invalid={invalid || undefined}
       value={text}

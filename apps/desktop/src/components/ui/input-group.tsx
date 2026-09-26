@@ -9,7 +9,7 @@ export function InputGroupRoot({ className, ...props }: InputGroupRootProps) {
   return (
     <div
       className={cn(
-        'group/input-group relative flex w-full min-w-0 items-center rounded-md border border-input bg-background shadow-sm transition-[color,box-shadow,border-color] has-[[aria-invalid=true]]:border-destructive',
+        'group/input-group relative flex w-full min-w-0 items-center rounded-sm border border-input bg-background transition-[color,box-shadow,border-color] has-[[aria-invalid=true]]:border-destructive',
         className,
       )}
       data-slot='input-group'

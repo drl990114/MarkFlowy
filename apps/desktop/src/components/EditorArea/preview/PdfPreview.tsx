@@ -41,7 +41,7 @@ function ToolButton({
         <Button
           variant='ghost'
           size='icon'
-          className='size-7 shrink-0'
+          className='size-6 shrink-0'
           aria-label={label}
           onClick={onClick}
           disabled={disabled}
@@ -160,7 +160,7 @@ export default function PdfPreview({
     >
       <style>{styles}</style>
       <div
-        className='flex shrink-0 flex-wrap items-center gap-1 border-b border-border bg-background p-1 text-foreground'
+        className='box-border flex min-h-8 shrink-0 flex-wrap items-center gap-1 border-b border-border bg-background px-2 py-px text-foreground'
         role='group'
         aria-label={t('document_preview.pdf_title')}
       >
@@ -169,7 +169,7 @@ export default function PdfPreview({
           disabled={disabled || page <= 1}
           onClick={() => handle.current?.goToPage(page - 1)}
         >
-          <ChevronLeftIcon aria-hidden='true' className='size-4' />
+          <ChevronLeftIcon aria-hidden='true' className='size-3.5' />
         </ToolButton>
         <Input
           aria-label={t('document_preview.page')}
@@ -190,7 +190,7 @@ export default function PdfPreview({
           disabled={disabled || page >= pages}
           onClick={() => handle.current?.goToPage(page + 1)}
         >
-          <ChevronRightIcon aria-hidden='true' className='size-4' />
+          <ChevronRightIcon aria-hidden='true' className='size-3.5' />
         </ToolButton>
         <div aria-hidden='true' className='mx-1 h-4 w-px bg-border' />
         <ToolButton
@@ -198,7 +198,7 @@ export default function PdfPreview({
           disabled={disabled || scale <= 0.25}
           onClick={() => handle.current?.zoomBy(1 / 1.25)}
         >
-          <ZoomOutIcon aria-hidden='true' className='size-4' />
+          <ZoomOutIcon aria-hidden='true' className='size-3.5' />
         </ToolButton>
         <span className='min-w-10 text-center text-xs tabular-nums'>
           {Math.round(scale * 100)}%
@@ -208,14 +208,14 @@ export default function PdfPreview({
           disabled={disabled || scale >= 5}
           onClick={() => handle.current?.zoomBy(1.25)}
         >
-          <ZoomInIcon aria-hidden='true' className='size-4' />
+          <ZoomInIcon aria-hidden='true' className='size-3.5' />
         </ToolButton>
         <ToolButton
           label={t('document_preview.fit_width')}
           disabled={disabled}
           onClick={() => handle.current?.fitWidth()}
         >
-          <Maximize2Icon aria-hidden='true' className='size-4' />
+          <Maximize2Icon aria-hidden='true' className='size-3.5' />
         </ToolButton>
         <Input
           ref={searchInput}
@@ -244,14 +244,14 @@ export default function PdfPreview({
           disabled={disabled || !query}
           onClick={() => handle.current?.search(query, true, true)}
         >
-          <ArrowUpIcon aria-hidden='true' className='size-4' />
+          <ArrowUpIcon aria-hidden='true' className='size-3.5' />
         </ToolButton>
         <ToolButton
           label={t('document_preview.next_match')}
           disabled={disabled || !query}
           onClick={() => handle.current?.search(query, true)}
         >
-          <ArrowDownIcon aria-hidden='true' className='size-4' />
+          <ArrowDownIcon aria-hidden='true' className='size-3.5' />
         </ToolButton>
       </div>
       <div className='relative min-h-0 flex-1'>

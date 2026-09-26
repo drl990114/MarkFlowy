@@ -38,7 +38,7 @@ function EditorGroupToolbar(props: EditorGroupToolbarProps) {
   if (type === 'html')
     return (
       <div
-        className='editor-group-toolbar flex shrink-0 items-center gap-1 border-b border-border px-2 py-1'
+        className='editor-group-toolbar box-border flex min-h-8 shrink-0 items-center gap-1 border-b border-border px-2 py-px'
         role='group'
         aria-label={t('document_preview.html_title')}
       >

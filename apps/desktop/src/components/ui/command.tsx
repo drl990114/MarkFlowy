@@ -23,7 +23,7 @@ export function CommandInput({
 }: ComponentProps<typeof CommandPrimitive.Input> & { wrapperClassName?: string }) {
   return (
     <div
-      className={cn('flex items-center gap-2 border-b border-border px-2.5', wrapperClassName)}
+      className={cn('flex items-center gap-2 border-b border-border px-2.5 has-[:focus-visible]:border-control-focus', wrapperClassName)}
       data-slot='command-input-wrapper'
     >
       <SearchIcon className='size-3.5 shrink-0 text-muted-foreground' aria-hidden='true' />
@@ -69,7 +69,7 @@ export function CommandGroup({
   return (
     <CommandPrimitive.Group
       className={cn(
-        'overflow-hidden p-0.5 text-foreground [&_[cmdk-group-heading]]:flex [&_[cmdk-group-heading]]:items-center [&_[cmdk-group-heading]]:px-1.5 [&_[cmdk-group-heading]]:py-1 [&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:font-normal [&_[cmdk-group-heading]]:text-muted-foreground',
+        'overflow-hidden p-0.5 text-foreground [&_[cmdk-group-heading]]:flex [&_[cmdk-group-heading]]:items-center [&_[cmdk-group-heading]]:px-1.5 [&_[cmdk-group-heading]]:py-1 [&_[cmdk-group-heading]]:text-ui-caption [&_[cmdk-group-heading]]:font-normal [&_[cmdk-group-heading]]:text-muted-foreground',
         className,
       )}
       data-slot='command-group'

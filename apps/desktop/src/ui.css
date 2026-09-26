@@ -148,9 +148,9 @@
   --mf-control-selected: #e4e0e0;
   --mf-control-border: var(--mf-boot-border, #d2d2d2);
   --mf-control-focus: var(--mf-boot-accent, #1f6ae2);
-  --mf-motion-duration-fast: 120ms;
+  --mf-motion-duration-fast: 100ms;
   --mf-motion-duration-base: 180ms;
-  --mf-motion-duration-overlay: 240ms;
+  --mf-motion-duration-overlay: 120ms;
   --mf-motion-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --mf-motion-ease-in: cubic-bezier(0.4, 0, 1, 1);
   --mf-layer-dialog: 900;
@@ -209,11 +209,11 @@
   --mf-ui-line-height-body: 20px;
   --mf-ui-line-height-title: 22px;
   --mf-ui-line-height-heading: 24px;
-  --mf-ui-tracking-caption: 0.01em;
+  --mf-ui-tracking-caption: 0;
   --mf-ui-tracking-control: 0;
   --mf-ui-tracking-body: 0;
-  --mf-ui-tracking-title: -0.01em;
-  --mf-ui-tracking-heading: -0.015em;
+  --mf-ui-tracking-title: 0;
+  --mf-ui-tracking-heading: 0;
   --mf-ui-border-subtle: color-mix(in srgb, var(--mf-border) 72%, transparent);
   --mf-ui-border-muted: color-mix(in srgb, var(--mf-border) 56%, transparent);
   --mf-ui-control-hover-bg: var(--mf-control-ghost-hover);
@@ -339,76 +339,32 @@
   }
 }
 
-@keyframes mf-surface-in {
-  from {
-    opacity: 0;
-    scale: 0.97;
-  }
-  to {
-    opacity: 1;
-    scale: 1;
-  }
-}
-
-@keyframes mf-surface-out {
-  from {
-    opacity: 1;
-    scale: 1;
-  }
-  to {
-    opacity: 0;
-    scale: 0.98;
-  }
-}
-
-[data-slot='dialog-overlay'][data-state='open'] {
+/* Desktop surfaces keep their position and scale while opening. */
+[data-slot='dialog-overlay'][data-state='open'],
+[data-slot='dialog-content'][data-state='open'] {
   animation: mf-fade-in var(--mf-motion-duration-overlay) var(--mf-motion-ease-out) both;
 }
 
-[data-slot='dialog-overlay'][data-state='closed'] {
+[data-slot='dialog-overlay'][data-state='closed'],
+[data-slot='dialog-content'][data-state='closed'] {
   animation: mf-fade-out var(--mf-motion-duration-fast) var(--mf-motion-ease-out) both;
 }
 
-[data-slot='dialog-content'][data-state='open'] {
-  animation: mf-surface-in var(--mf-motion-duration-overlay) var(--mf-motion-ease-out) both;
-}
-
-[data-slot='dialog-content'][data-state='closed'] {
-  animation: mf-surface-out var(--mf-motion-duration-fast) var(--mf-motion-ease-out) both;
-}
-
-[data-slot='popover-content'][data-state='open'],
-[data-slot='select-content'][data-state='open'] {
-  animation: mf-surface-in var(--mf-motion-duration-base) var(--mf-motion-ease-out) both;
-}
-
-[data-slot='popover-content'][data-state='closed'],
-[data-slot='select-content'][data-state='closed'] {
-  animation: mf-surface-out var(--mf-motion-duration-fast) var(--mf-motion-ease-out) both;
-}
-
-[data-slot='tooltip-content'][data-state='delayed-open'] {
-  animation: mf-surface-in var(--mf-motion-duration-fast) var(--mf-motion-ease-out) both;
-}
-
-[data-slot='tooltip-content'][data-state='instant-open'] {
+/* Frequently used keyboard surfaces appear immediately. */
+[data-slot='dialog-content']:has([data-slot='command']),
+[data-slot='dialog-content'][data-mf-quick-open],
+[data-slot='dialog-overlay']:has(+ [data-mf-quick-open]),
+[data-slot='dialog-overlay']:has(+ [data-slot='dialog-content'] [data-slot='command']),
+[data-slot='popover-content'],
+[data-slot='select-content'],
+[data-slot='tooltip-content'] {
   animation: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  [data-slot='dialog-overlay'][data-state='open'],
-  [data-slot='dialog-content'][data-state='open'],
-  [data-slot='popover-content'][data-state='open'],
-  [data-slot='select-content'][data-state='open'],
-  [data-slot='tooltip-content'][data-state='delayed-open'] {
-    animation: mf-fade-in var(--mf-motion-duration-fast) var(--mf-motion-ease-out) both;
-  }
-
-  [data-slot='dialog-overlay'][data-state='closed'],
-  [data-slot='dialog-content'][data-state='closed'],
-  [data-slot='popover-content'][data-state='closed'],
-  [data-slot='select-content'][data-state='closed'] {
-    animation: mf-fade-out var(--mf-motion-duration-fast) var(--mf-motion-ease-out) both;
+  [data-slot='dialog-overlay'][data-state],
+  [data-slot='dialog-content'][data-state] {
+    animation: none;
   }
 }
 
@@ -464,8 +420,10 @@
   --mf-theme-font-ui-family: var(--mf-ui-font-family);
   --mf-theme-font-editor-family: var(--mf-font-sans);
   --mf-theme-font-code-family: var(--mf-font-mono);
-  --mf-theme-font-editor-size: 15px;
-  --mf-theme-font-editor-line-height: 1.6;
+  --mf-theme-font-editor-size: 16px;
+  --mf-theme-font-editor-line-height: 1.7;
+  --mf-theme-font-source-size: 15px;
+  --mf-theme-font-source-line-height: 1.6;
   --mf-theme-radius-control: var(--mf-radius-sm);
   --mf-theme-radius-overlay: var(--mf-radius);
   --mf-theme-syntax-comment: var(--mf-text-secondary);

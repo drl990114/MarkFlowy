@@ -49,6 +49,8 @@ pub_struct!(AppConf {
     editor_insert_date_format: Option<String>,
     editor_root_font_size: Option<u32>,
     editor_root_line_height: Option<String>,
+    editor_source_font_size: Option<u32>,
+    editor_source_line_height: Option<String>,
     extensions_chatgpt_apibase: Option<String>,
     extensions_chatgpt_apikey: Option<String>,
     extensions_chatgpt_models: Option<String>,
@@ -646,7 +648,9 @@ impl AppConf {
             editor_link_edit_mode: Some("popover".to_string()),
             editor_insert_date_format: Some("YYYY-MM-DD".to_string()),
             editor_root_font_size: Some(16),
-            editor_root_line_height: Some("1.65".to_string()),
+            editor_root_line_height: Some("1.7".to_string()),
+            editor_source_font_size: Some(15),
+            editor_source_line_height: Some("1.6".to_string()),
             md_editor_default_mode: Some("wysiwyg".to_string()),
             autosave: Some(false),
             local_history_enabled: Some(true),
@@ -751,7 +755,15 @@ impl AppConf {
      *
      * Generally used to be compatible with the original config when versions are different.
      */
-    pub fn merge_conf(mut self, oldconf: AppConf) -> Self {
+    pub fn merge_conf(mut self, mut oldconf: AppConf) -> Self {
+        // Source typography used to share the body settings. Preserve that
+        // appearance on upgrade; later writes keep the two modes independent.
+        oldconf.editor_source_font_size = oldconf
+            .editor_source_font_size
+            .or(oldconf.editor_root_font_size);
+        oldconf.editor_source_line_height = oldconf
+            .editor_source_line_height
+            .or_else(|| oldconf.editor_root_line_height.clone());
         merge_options!(
             self,
             oldconf,
@@ -776,6 +788,8 @@ impl AppConf {
             editor_insert_date_format,
             editor_root_font_size,
             editor_root_line_height,
+            editor_source_font_size,
+            editor_source_line_height,
             md_editor_default_mode,
             editor_root_font_family,
             editor_code_font_family,
@@ -1171,6 +1185,58 @@ mod tests {
 
     fn empty_conf() -> AppConf {
         serde_json::from_value(serde_json::json!({})).expect("empty config")
+    }
+
+    fn typography_default_conf() -> AppConf {
+        // Unit tests do not execute Tauri setup. new() only uses this path to
+        // construct the default image directory; it does not write to disk.
+        crate::APP_DIR
+            .lock()
+            .unwrap()
+            .entry(0)
+            .or_insert_with(std::env::temp_dir);
+        AppConf::new()
+    }
+
+    #[test]
+    fn typography_defaults_separate_document_and_source() {
+        let conf = typography_default_conf().merge_conf(empty_conf());
+        assert_eq!(conf.editor_root_font_size, Some(16));
+        assert_eq!(conf.editor_root_line_height.as_deref(), Some("1.7"));
+        assert_eq!(conf.editor_source_font_size, Some(15));
+        assert_eq!(conf.editor_source_line_height.as_deref(), Some("1.6"));
+    }
+
+    #[test]
+    fn typography_upgrade_preserves_legacy_values_in_both_modes() {
+        let legacy = serde_json::from_value(serde_json::json!({
+            "editor_root_font_size": 18,
+            "editor_root_line_height": "1.8"
+        }))
+        .expect("legacy config");
+        let conf = typography_default_conf().merge_conf(legacy);
+        assert_eq!(conf.editor_root_font_size, Some(18));
+        assert_eq!(conf.editor_source_font_size, Some(18));
+        assert_eq!(conf.editor_source_line_height.as_deref(), Some("1.8"));
+        let changed = conf.amend(serde_json::json!({ "editor_root_font_size": 20 }));
+        let roundtrip = serde_json::from_value(serde_json::to_value(changed).unwrap()).unwrap();
+        let restored = typography_default_conf().merge_conf(roundtrip);
+        assert_eq!(restored.editor_root_font_size, Some(20));
+        assert_eq!(restored.editor_source_font_size, Some(18));
+    }
+
+    #[test]
+    fn typography_upgrade_keeps_explicit_source_preferences() {
+        let saved = serde_json::from_value(serde_json::json!({
+            "editor_root_font_size": 20,
+            "editor_root_line_height": "1.9",
+            "editor_source_font_size": 15,
+            "editor_source_line_height": "1.6"
+        }))
+        .expect("saved config");
+        let conf = typography_default_conf().merge_conf(saved);
+        assert_eq!(conf.editor_source_font_size, Some(15));
+        assert_eq!(conf.editor_source_line_height.as_deref(), Some("1.6"));
     }
 
     #[test]

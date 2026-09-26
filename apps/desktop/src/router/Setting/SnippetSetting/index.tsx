@@ -283,7 +283,7 @@ export function SnippetSetting({
                   disabled={busy}
                   aria-current={draft.item.id === item.id ? 'true' : undefined}
                   className={cn(
-                    'h-auto min-h-7 w-full justify-start gap-1.5 whitespace-normal px-2 py-1 text-left font-normal active:scale-100',
+                    'h-auto min-h-7 w-full justify-start gap-1.5 whitespace-normal px-2 py-1 text-left font-normal',
                     draft.item.id === item.id && 'bg-control-selected font-medium',
                   )}
                   onClick={async () => {

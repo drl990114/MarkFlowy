@@ -3,6 +3,7 @@ import { useEffect, useRef, useState, type ComponentProps } from 'react'
 import { cn } from '@/lib/cn'
 import { Button } from '@/components/ui/button'
 import { Popover } from '@/components/ui/popover'
+import { focusFeedback } from './focus-styles'
 
 const HEX_COLOR_PATTERN = /^#?([\da-f]{3}|[\da-f]{6})$/i
 
@@ -94,10 +95,11 @@ export function ColorPicker({
           data-slot='color-picker-trigger'
           disabled={disabled}
           id={id}
+          size='sm'
           variant='outline'
         >
           <span
-            className='size-4 shrink-0 rounded-sm border border-border shadow-sm'
+            className='size-4 shrink-0 rounded-sm border border-border'
             data-slot='color-picker-swatch'
             style={{ backgroundColor: color }}
           />
@@ -112,7 +114,7 @@ export function ColorPicker({
         />
         <HexColorInput
           aria-label={`${ariaLabel} hex value`}
-          className='h-8 w-full rounded-md border border-input bg-background px-2.5 font-mono text-xs text-foreground outline-none'
+          className={cn(focusFeedback, 'h-7 w-full rounded-sm border border-input bg-background px-2 font-mono text-ui-control text-foreground')}
           color={color}
           data-slot='color-picker-input'
           onBlur={commit}

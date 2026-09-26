@@ -182,10 +182,7 @@ export const ThemeSetting = memo(({ revealedSettingKey }: ThemeSettingProps) => 
         return
       }
 
-      if (
-        pendingPersistCountRef.current > 0 &&
-        latestCommitRef.current?.value === value
-      ) {
+      if (pendingPersistCountRef.current > 0 && latestCommitRef.current?.value === value) {
         latestCommitRef.current = { generation, value }
         return
       }
@@ -227,7 +224,10 @@ export const ThemeSetting = memo(({ revealedSettingKey }: ThemeSettingProps) => 
       if (previewActiveRef.current) {
         persistAccentColor(draftAccentColorRef.current, previewGenerationRef.current)
       }
-      if (themePreviewSessionRef.current?.previewedValue && !themePreviewSessionRef.current.committed) {
+      if (
+        themePreviewSessionRef.current?.previewedValue &&
+        !themePreviewSessionRef.current.committed
+      ) {
         restoreThemePreview()
       }
       themePreviewSessionRef.current = undefined
@@ -270,174 +270,177 @@ export const ThemeSetting = memo(({ revealedSettingKey }: ThemeSettingProps) => 
 
   return (
     <SettingGroupContainer $anchorId={getSettingGroupAnchorId('display', 'Theme')}>
-      <div className='setting-group__title'>{t('settings.display.theme.label')}</div>
+      <h2 className='setting-group__title'>{t('settings.display.theme.label')}</h2>
 
-      <SettingItemContainer $settingKey='theme_mode'>
-        <SettingLabel
-          item={{
-            key: 'theme_mode',
-            title: { i18nKey: 'settings.display.theme.mode.label' },
-            desc: { i18nKey: 'settings.display.theme.mode.desc' },
-          }}
-        />
-        <Select
-          onOpenChange={(open) => handleThemePreviewOpenChange('mode', open)}
-          value={currentThemeMode}
-          onValueChange={(value) => {
-            commitThemeSelection('mode', () => setThemeMode(value as ThemeMode))
-          }}
-        >
-          <SelectTrigger
-            aria-label={t('settings.display.theme.mode.label')}
-            style={{ width: SELECT_WIDTH }}
-          >
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent onKeyDownCapture={() => enableThemePreview('mode')}>
-            <SelectItem
-              {...getThemePreviewItemProps('mode', { themeMode: 'system' })}
-              value='system'
-            >
-              {t('settings.display.theme.mode.system')}
-            </SelectItem>
-            <SelectItem
-              {...getThemePreviewItemProps('mode', { themeMode: 'light' })}
-              value='light'
-            >
-              {t('settings.display.theme.mode.light')}
-            </SelectItem>
-            <SelectItem
-              {...getThemePreviewItemProps('mode', { themeMode: 'dark' })}
-              value='dark'
-            >
-              {t('settings.display.theme.mode.dark')}
-            </SelectItem>
-          </SelectContent>
-        </Select>
-      </SettingItemContainer>
-
-      {(currentThemeMode === 'light' ||
-        currentThemeMode === 'system' ||
-        revealedSettingKey === 'light_theme') && (
-        <SettingItemContainer $settingKey='light_theme'>
+      <div className='setting-group__items'>
+        <SettingItemContainer $settingKey='theme_mode'>
           <SettingLabel
             item={{
-              key: 'light_theme',
-              title: { i18nKey: 'settings.display.theme.light_theme.label' },
-              desc: { i18nKey: 'settings.display.theme.light_theme.desc' },
+              key: 'theme_mode',
+              title: { i18nKey: 'settings.display.theme.mode.label' },
+              desc: { i18nKey: 'settings.display.theme.mode.desc' },
             }}
           />
           <Select
-            onOpenChange={(open) => handleThemePreviewOpenChange('light', open)}
-            value={String(settingData.light_theme || lightThemeName)}
+            onOpenChange={(open) => handleThemePreviewOpenChange('mode', open)}
+            value={currentThemeMode}
             onValueChange={(value) => {
-              commitThemeSelection('light', () => setLightTheme(value))
+              commitThemeSelection('mode', () => setThemeMode(value as ThemeMode))
             }}
           >
             <SelectTrigger
-              aria-label={t('settings.display.theme.light_theme.label')}
+              size='sm'
+              aria-label={t('settings.display.theme.mode.label')}
               style={{ width: SELECT_WIDTH }}
             >
               <SelectValue />
             </SelectTrigger>
-            <SelectContent onKeyDownCapture={() => enableThemePreview('light')}>
-              {lightThemes.map((themeItem) => (
-                <SelectItem
-                  key={themeItem.name}
-                  {...getThemePreviewItemProps('light', {
-                    lightThemeName: themeItem.name,
-                    themeMode: 'light',
-                  })}
-                  value={themeItem.name}
-                >
-                  {themeLabel(themeItem)}
-                </SelectItem>
-              ))}
+            <SelectContent onKeyDownCapture={() => enableThemePreview('mode')}>
+              <SelectItem
+                {...getThemePreviewItemProps('mode', { themeMode: 'system' })}
+                value='system'
+              >
+                {t('settings.display.theme.mode.system')}
+              </SelectItem>
+              <SelectItem
+                {...getThemePreviewItemProps('mode', { themeMode: 'light' })}
+                value='light'
+              >
+                {t('settings.display.theme.mode.light')}
+              </SelectItem>
+              <SelectItem {...getThemePreviewItemProps('mode', { themeMode: 'dark' })} value='dark'>
+                {t('settings.display.theme.mode.dark')}
+              </SelectItem>
             </SelectContent>
           </Select>
         </SettingItemContainer>
-      )}
 
-      {(currentThemeMode === 'dark' ||
-        currentThemeMode === 'system' ||
-        revealedSettingKey === 'dark_theme') && (
-        <SettingItemContainer $settingKey='dark_theme'>
+        {(currentThemeMode === 'light' ||
+          currentThemeMode === 'system' ||
+          revealedSettingKey === 'light_theme') && (
+          <SettingItemContainer $settingKey='light_theme'>
+            <SettingLabel
+              item={{
+                key: 'light_theme',
+                title: { i18nKey: 'settings.display.theme.light_theme.label' },
+                desc: { i18nKey: 'settings.display.theme.light_theme.desc' },
+              }}
+            />
+            <Select
+              onOpenChange={(open) => handleThemePreviewOpenChange('light', open)}
+              value={String(settingData.light_theme || lightThemeName)}
+              onValueChange={(value) => {
+                commitThemeSelection('light', () => setLightTheme(value))
+              }}
+            >
+              <SelectTrigger
+                size='sm'
+                aria-label={t('settings.display.theme.light_theme.label')}
+                style={{ width: SELECT_WIDTH }}
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent onKeyDownCapture={() => enableThemePreview('light')}>
+                {lightThemes.map((themeItem) => (
+                  <SelectItem
+                    key={themeItem.name}
+                    {...getThemePreviewItemProps('light', {
+                      lightThemeName: themeItem.name,
+                      themeMode: 'light',
+                    })}
+                    value={themeItem.name}
+                  >
+                    {themeLabel(themeItem)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </SettingItemContainer>
+        )}
+
+        {(currentThemeMode === 'dark' ||
+          currentThemeMode === 'system' ||
+          revealedSettingKey === 'dark_theme') && (
+          <SettingItemContainer $settingKey='dark_theme'>
+            <SettingLabel
+              item={{
+                key: 'dark_theme',
+                title: { i18nKey: 'settings.display.theme.dark_theme.label' },
+                desc: { i18nKey: 'settings.display.theme.dark_theme.desc' },
+              }}
+            />
+            <Select
+              onOpenChange={(open) => handleThemePreviewOpenChange('dark', open)}
+              value={String(settingData.dark_theme || darkThemeName)}
+              onValueChange={(value) => {
+                commitThemeSelection('dark', () => setDarkTheme(value))
+              }}
+            >
+              <SelectTrigger
+                size='sm'
+                aria-label={t('settings.display.theme.dark_theme.label')}
+                style={{ width: SELECT_WIDTH }}
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent onKeyDownCapture={() => enableThemePreview('dark')}>
+                {darkThemes.map((themeItem) => (
+                  <SelectItem
+                    key={themeItem.name}
+                    {...getThemePreviewItemProps('dark', {
+                      darkThemeName: themeItem.name,
+                      themeMode: 'dark',
+                    })}
+                    value={themeItem.name}
+                  >
+                    {themeLabel(themeItem)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </SettingItemContainer>
+        )}
+
+        <SettingItemContainer $settingKey={THEME_ACCENT_COLOR_SETTING_KEY}>
           <SettingLabel
             item={{
-              key: 'dark_theme',
-              title: { i18nKey: 'settings.display.theme.dark_theme.label' },
-              desc: { i18nKey: 'settings.display.theme.dark_theme.desc' },
+              key: THEME_ACCENT_COLOR_SETTING_KEY,
+              title: { i18nKey: 'settings.display.theme.accent_color.label' },
+              desc: { i18nKey: 'settings.display.theme.accent_color.desc' },
             }}
           />
-          <Select
-            onOpenChange={(open) => handleThemePreviewOpenChange('dark', open)}
-            value={String(settingData.dark_theme || darkThemeName)}
-            onValueChange={(value) => {
-              commitThemeSelection('dark', () => setDarkTheme(value))
-            }}
-          >
-            <SelectTrigger
-              aria-label={t('settings.display.theme.dark_theme.label')}
-              style={{ width: SELECT_WIDTH }}
+          <AccentColorControls>
+            <Select
+              value={accentColorMode}
+              onValueChange={(value) => handleAccentColorModeChange(value as AccentColorMode)}
             >
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent onKeyDownCapture={() => enableThemePreview('dark')}>
-              {darkThemes.map((themeItem) => (
-                <SelectItem
-                  key={themeItem.name}
-                  {...getThemePreviewItemProps('dark', {
-                    darkThemeName: themeItem.name,
-                    themeMode: 'dark',
-                  })}
-                  value={themeItem.name}
-                >
-                  {themeLabel(themeItem)}
+              <SelectTrigger
+                size='sm'
+                aria-label={t('settings.display.theme.accent_color.label')}
+                style={{ width: 128 }}
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value='system'>
+                  {t('settings.display.theme.accent_color.follow_theme')}
                 </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </SettingItemContainer>
-      )}
-
-      <SettingItemContainer $settingKey={THEME_ACCENT_COLOR_SETTING_KEY}>
-        <SettingLabel
-          item={{
-            key: THEME_ACCENT_COLOR_SETTING_KEY,
-            title: { i18nKey: 'settings.display.theme.accent_color.label' },
-            desc: { i18nKey: 'settings.display.theme.accent_color.desc' },
-          }}
-        />
-        <AccentColorControls>
-          <Select
-            value={accentColorMode}
-            onValueChange={(value) => handleAccentColorModeChange(value as AccentColorMode)}
-          >
-            <SelectTrigger
+                <SelectItem value='custom'>
+                  {t('settings.display.theme.accent_color.custom')}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            <ColorPicker
               aria-label={t('settings.display.theme.accent_color.label')}
-              style={{ width: 128 }}
-            >
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value='system'>
-                {t('settings.display.theme.accent_color.follow_theme')}
-              </SelectItem>
-              <SelectItem value='custom'>
-                {t('settings.display.theme.accent_color.custom')}
-              </SelectItem>
-            </SelectContent>
-          </Select>
-          <ColorPicker
-            aria-label={t('settings.display.theme.accent_color.label')}
-            key={accentColorMode}
-            value={accentColor}
-            disabled={!isCustomAccentColor}
-            onValueChange={handleAccentColorChange}
-            onValueCommit={handleAccentColorCommit}
-          />
-        </AccentColorControls>
-      </SettingItemContainer>
+              key={accentColorMode}
+              value={accentColor}
+              disabled={!isCustomAccentColor}
+              onValueChange={handleAccentColorChange}
+              onValueCommit={handleAccentColorCommit}
+            />
+          </AccentColorControls>
+        </SettingItemContainer>
+      </div>
     </SettingGroupContainer>
   )
 })

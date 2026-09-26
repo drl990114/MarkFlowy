@@ -23,10 +23,10 @@ export function WorkspaceOpenError() {
   }
   return (
     <div
-      className='flex shrink-0 items-center gap-2 border-b border-border bg-background px-3 py-1 text-ui-caption'
+      className='flex shrink-0 flex-wrap items-center gap-x-2 gap-y-1 border-b border-border bg-background px-3 py-1 text-ui-control'
       role='alert'
     >
-      <span className='min-w-0 flex-1 truncate' title={path}>
+      <span className='min-w-0 flex-1 basis-48 truncate' title={path}>
         {t('startup.workspace_open_failed')} · {path}
       </span>
       <Button size='sm' variant='ghost' disabled={retrying} onClick={() => void retry()}>

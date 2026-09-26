@@ -143,12 +143,12 @@ export default function HistoryDialog() {
           <Dialog.Description>{t('history.description')}</Dialog.Description>
         </Dialog.Header>
         {error ? (
-          <p role='alert' className='text-destructive'>
+          <p role='alert' className='text-ui-control text-destructive'>
             {error}
           </p>
         ) : null}
-        <div className='flex min-h-0 flex-1 gap-4'>
-          <div className='flex w-64 shrink-0 flex-col gap-2 overflow-auto border-r border-border pr-3'>
+        <div className='flex min-h-0 flex-1 gap-3 text-ui-control'>
+          <div className='flex w-56 min-w-0 max-w-[40%] shrink-0 flex-col gap-1 overflow-auto border-r border-border pr-2'>
             {entries.length === 0 ? (
               <p className='text-muted-foreground'>{t('history.empty')}</p>
             ) : (
@@ -156,13 +156,14 @@ export default function HistoryDialog() {
                 <Button
                   key={entry.id}
                   variant={selected?.id === entry.id ? 'secondary' : 'ghost'}
-                  className='h-auto justify-start whitespace-normal p-2 text-left'
+                  aria-pressed={selected?.id === entry.id}
+                  className='h-auto min-h-10 justify-start whitespace-normal rounded-sm px-2 py-1.5 text-left'
                   disabled={busy}
                   onClick={() => void select(entry, fileId ? 'current' : 'batch')}
                 >
-                  <span>
-                    <strong className='block truncate'>{entry.message || entry.name}</strong>
-                    <span className='block text-xs text-muted-foreground'>
+                  <span className='min-w-0'>
+                    <strong className='block truncate font-medium'>{entry.message || entry.name}</strong>
+                    <span className='block text-ui-caption text-muted-foreground tabular-nums'>
                       {new Date(entry.updatedAt).toLocaleString()} ·{' '}
                       {entry.active
                         ? t('history.merging')
@@ -172,9 +173,10 @@ export default function HistoryDialog() {
                 </Button>
               ))
             )}
-            <div className='flex gap-2'>
+            <div className='mt-1 flex flex-wrap gap-1'>
               <Button
                 variant='ghost'
+                size='sm'
                 disabled={!offset || busy}
                 onClick={() => setOffset(Math.max(0, offset - 50))}
               >
@@ -182,6 +184,7 @@ export default function HistoryDialog() {
               </Button>
               <Button
                 variant='ghost'
+                size='sm'
                 disabled={entries.length < 50 || busy}
                 onClick={() => setOffset(offset + 50)}
               >
@@ -196,7 +199,7 @@ export default function HistoryDialog() {
                 onValueChange={(value) => void select(selected, value)}
                 disabled={busy}
               >
-                <Select.Trigger aria-label={t('history.compare_version')}>
+                <Select.Trigger aria-label={t('history.compare_version')} size='sm'>
                   <Select.Value />
                 </Select.Trigger>
                 <Select.Content>
@@ -214,19 +217,19 @@ export default function HistoryDialog() {
                 </Select.Content>
               </Select>
             ) : null}
-            <div className='flex justify-between text-sm text-muted-foreground'>
+            <div className='flex justify-between text-ui-caption text-muted-foreground'>
               <span>{t('history.before')}</span>
               <span>{t('history.after')}</span>
             </div>
             {selected && revision !== loadedRevision ? (
-              <Button variant='outline' onClick={() => void select(selected)}>
+              <Button variant='outline' size='sm' onClick={() => void select(selected)}>
                 {t('history.refresh')}
               </Button>
             ) : null}
             {pair ? (
               Math.max(pair.before.length, pair.after.length) > 2 * 1024 * 1024 && !largeDiff ? (
                 <>
-                  <Button variant='outline' onClick={() => setLargeDiff(true)}>
+                  <Button variant='outline' size='sm' onClick={() => setLargeDiff(true)}>
                     {t('history.compute_large')}
                   </Button>
                   <HistorySnapshotTexts {...pair} />

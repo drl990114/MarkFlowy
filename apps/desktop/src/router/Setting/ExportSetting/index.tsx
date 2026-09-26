@@ -77,36 +77,38 @@ export function ExportSetting() {
 
   return (
     <SettingGroupContainer $anchorId={getSettingGroupAnchorId('export', 'pandoc')}>
-      <div className='setting-group__title'>{t('settings.export.pandoc.label')}</div>
-      <SettingItemContainer $settingKey={PANDOC_EXECUTABLE_PATH_SETTING}>
-        <SettingLabel item={pandocSettingItem} />
-        <div className='flex w-1/2 min-w-0 flex-col items-end gap-2 max-[720px]:w-full max-[720px]:items-start'>
-          <span aria-live='polite' className='text-ui-control text-foreground'>
-            {status}
-          </span>
-          {info?.executablePath ? (
-            <span className='max-w-full break-all text-right text-ui-caption text-muted-foreground max-[720px]:text-left'>
-              {info.executablePath}
+      <h2 className='setting-group__title'>{t('settings.export.pandoc.label')}</h2>
+      <div className='setting-group__items'>
+        <SettingItemContainer $settingKey={PANDOC_EXECUTABLE_PATH_SETTING}>
+          <SettingLabel item={pandocSettingItem} />
+          <div className='flex w-1/2 min-w-0 flex-col items-end gap-2 max-[720px]:w-full max-[720px]:items-start'>
+            <span aria-live='polite' className='text-ui-control text-foreground'>
+              {status}
             </span>
-          ) : null}
-          <div className='flex flex-wrap justify-end gap-2 max-[720px]:justify-start'>
-            <Button size='sm' variant='outline' onClick={selectExecutable}>
-              {t('settings.export.pandoc.select')}
-            </Button>
-            {configuredPath ? (
-              <Button size='sm' variant='ghost' onClick={resetToAutomatic}>
-                {t('settings.export.pandoc.automatic')}
-              </Button>
+            {info?.executablePath ? (
+              <span className='max-w-full break-all text-right text-ui-caption text-muted-foreground max-[720px]:text-left'>
+                {info.executablePath}
+              </span>
             ) : null}
-            <Button disabled={checking} size='sm' variant='ghost' onClick={checkPandoc}>
-              {t('settings.export.pandoc.check_again')}
-            </Button>
-            <Button size='sm' variant='ghost' onClick={() => openUrl(PANDOC_INSTALL_URL)}>
-              {t('settings.export.pandoc.install_guide')}
-            </Button>
+            <div className='flex flex-wrap justify-end gap-2 max-[720px]:justify-start'>
+              <Button size='sm' variant='outline' onClick={selectExecutable}>
+                {t('settings.export.pandoc.select')}
+              </Button>
+              {configuredPath ? (
+                <Button size='sm' variant='ghost' onClick={resetToAutomatic}>
+                  {t('settings.export.pandoc.automatic')}
+                </Button>
+              ) : null}
+              <Button disabled={checking} size='sm' variant='ghost' onClick={checkPandoc}>
+                {t('settings.export.pandoc.check_again')}
+              </Button>
+              <Button size='sm' variant='ghost' onClick={() => openUrl(PANDOC_INSTALL_URL)}>
+                {t('settings.export.pandoc.install_guide')}
+              </Button>
+            </div>
           </div>
-        </div>
-      </SettingItemContainer>
+        </SettingItemContainer>
+      </div>
     </SettingGroupContainer>
   )
 }

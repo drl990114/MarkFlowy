@@ -34,7 +34,7 @@ export function ZenModeHint(props: ZenModeHintProps) {
     <div
       aria-atomic='true'
       aria-live='polite'
-      className='pointer-events-none absolute left-1/2 top-3 z-10 -translate-x-1/2 rounded-md border border-border bg-background px-3 py-1.5 text-xs text-muted-foreground shadow-sm'
+      className='pointer-events-none absolute left-1/2 top-3 z-10 w-max max-w-[90%] -translate-x-1/2 rounded-lg border border-border bg-surface-overlay px-3 py-1.5 text-center text-ui-caption text-muted-foreground shadow-sm'
       data-mf-zen-mode-hint=''
       role='status'
     >

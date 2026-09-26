@@ -46,7 +46,7 @@ const updateMarkdownComponents: Components = {
 
     return (
       <a
-        className='font-medium text-primary underline decoration-primary/40 underline-offset-2 hover:decoration-primary'
+        className='rounded-sm font-medium text-primary underline decoration-primary/40 underline-offset-2 hover:decoration-primary focus-visible:ring-2 focus-visible:ring-control-focus'
         href={href}
         onClick={(event) => {
           event.preventDefault()

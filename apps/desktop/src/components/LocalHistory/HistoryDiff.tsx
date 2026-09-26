@@ -15,9 +15,20 @@ export default function HistoryDiff({ before, after }: { before: string; after: 
       EditorView.editable.of(false),
       EditorView.lineWrapping,
       EditorView.theme({
-        '&': { height: '100%', backgroundColor: 'transparent', color: 'var(--mf-foreground)' },
-        '.cm-scroller': { overflow: 'auto' },
-        '.cm-gutters': { backgroundColor: 'transparent', color: 'inherit' },
+        '&': {
+          height: '100%',
+          backgroundColor: 'transparent',
+          color: 'var(--mf-foreground)',
+          fontSize: 'var(--mf-theme-font-source-size, 15px)',
+        },
+        '.cm-scroller': {
+          overflow: 'auto',
+          fontFamily: 'var(--mf-theme-font-code-family, monospace)',
+          lineHeight: 'var(--mf-theme-font-source-line-height, 1.6)',
+        },
+        '.cm-content': { padding: '8px 0' },
+        '.cm-line': { padding: '0 8px' },
+        '.cm-gutters': { backgroundColor: 'transparent', color: 'var(--mf-muted-foreground)' },
         '.cm-deletedText, .cm-deletedLine': {
           backgroundColor: 'color-mix(in srgb, var(--mf-destructive) 15%, transparent)',
         },
@@ -73,7 +84,7 @@ export default function HistoryDiff({ before, after }: { before: string; after: 
   }, [before, after])
   return (
     <>
-      {imprecise ? <p className='text-xs text-muted-foreground'>{t('history.coarse')}</p> : null}
+      {imprecise ? <p className='text-ui-caption text-muted-foreground'>{t('history.coarse')}</p> : null}
       <div ref={container} className='min-h-0 flex-1 overflow-auto [&_.cm-mergeView]:h-full' />
     </>
   )

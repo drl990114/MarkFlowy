@@ -234,7 +234,7 @@ export function Composer() {
   return (
     <ComposerPrimitive.Unstable_TriggerPopoverRoot>
       <ComposerPrimitive.Root
-        className='relative flex w-full flex-col gap-1 rounded-lg border border-border bg-card p-2 shadow-sm transition-colors'
+        className='relative flex w-full flex-col gap-1 rounded-lg border border-border bg-card p-2 has-[textarea:focus-visible]:border-control-focus'
         onSubmit={onComposerSubmit}
       >
         {composerTriggers}
@@ -268,7 +268,7 @@ export function Composer() {
 }
 
 const COMPOSER_SEND_BUTTON_CLASS_NAME =
-  'size-7 rounded-lg bg-primary text-primary-foreground enabled:hover:opacity-90 disabled:bg-secondary disabled:text-disabled-foreground disabled:opacity-100'
+  'size-7 rounded-sm bg-primary text-primary-foreground focus-visible:ring-primary-foreground enabled:hover:opacity-90 disabled:bg-secondary disabled:text-disabled-foreground disabled:opacity-100'
 
 function ComposerAction() {
   const { labels, composerDisabled, onComposerSubmit } = useContext(ThreadContext)
@@ -301,7 +301,7 @@ function ComposerAction() {
       <AuiIf condition={(state) => state.thread.isRunning}>
         <ComposerPrimitive.Cancel asChild>
           <TooltipIconButton
-            className='size-7 rounded-lg bg-primary text-primary-foreground hover:opacity-90'
+            className='size-7 rounded-sm bg-primary text-primary-foreground focus-visible:ring-primary-foreground hover:opacity-90'
             tooltip={labels.stop}
           >
             <SquareIcon className='size-3 fill-current' />
@@ -346,7 +346,7 @@ export function AssistantMessage() {
 }
 
 const MESSAGE_ACTION_BUTTON_CLASS_NAME =
-  'size-[22px] rounded-sm text-muted-foreground hover:text-foreground active:scale-100 [&_svg]:size-3.5'
+  'size-[22px] rounded-sm text-muted-foreground hover:text-foreground [&_svg]:size-3.5'
 
 function AssistantActionBar() {
   const { composerDisabled, labels } = useContext(ThreadContext)
@@ -450,7 +450,7 @@ function DeleteTurnButton({ className }: { className?: string } = {}) {
 function MessageError() {
   return (
     <MessagePrimitive.Error>
-      <ErrorPrimitive.Root className='mt-2 rounded-md border border-destructive bg-muted p-2 text-xs text-destructive'>
+      <ErrorPrimitive.Root className='mt-2 rounded-sm border border-destructive/40 bg-destructive/5 p-2 text-ui-caption text-destructive'>
         <ErrorPrimitive.Message />
       </ErrorPrimitive.Root>
     </MessagePrimitive.Error>
@@ -462,7 +462,7 @@ export function EditComposer() {
 
   return (
     <MessagePrimitive.Root className='px-0.5'>
-      <ComposerPrimitive.Root className='ms-auto flex max-w-[90%] flex-col rounded-lg border border-border bg-card p-2 shadow-sm'>
+      <ComposerPrimitive.Root className='ms-auto flex max-w-[90%] flex-col rounded-lg border border-border bg-card p-2 has-[textarea:focus-visible]:border-control-focus'>
         <ComposerPrimitive.Input
           addAttachmentOnPaste={false}
           autoFocus
@@ -510,7 +510,7 @@ export function BranchPicker({
           <ChevronLeftIcon />
         </TooltipIconButton>
       </BranchPickerPrimitive.Previous>
-      <span className='shrink-0 whitespace-nowrap px-0.5 font-medium'>
+      <span className='shrink-0 whitespace-nowrap px-0.5 tabular-nums'>
         <BranchPickerPrimitive.Number /> / <BranchPickerPrimitive.Count />
       </span>
       <BranchPickerPrimitive.Next asChild>

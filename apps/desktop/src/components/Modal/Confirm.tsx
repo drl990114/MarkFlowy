@@ -160,7 +160,7 @@ export function ConfirmModal({
         <Dialog.Footer className={remember?.enabled !== false && remember ? 'justify-between' : ''}>
           {remember?.enabled !== false && remember ? (
             <label
-              className='flex min-w-0 cursor-pointer items-center gap-2 text-xs text-foreground-secondary select-none'
+              className='flex min-h-7 min-w-0 cursor-pointer items-center gap-2 text-ui-caption text-foreground-secondary select-none'
               htmlFor={rememberId}
             >
               <Checkbox

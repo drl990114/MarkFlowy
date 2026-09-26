@@ -46,7 +46,7 @@ export default function HtmlPreview({ content, filePath }: HtmlPreviewProps) {
       className='absolute inset-0 flex flex-col overflow-hidden bg-background'
       data-slot='html-preview'
     >
-      <div className='flex min-h-8 shrink-0 items-center justify-end gap-2 border-b border-border px-2'>
+      <div className='box-border flex min-h-8 shrink-0 items-center justify-end gap-2 border-b border-border px-2'>
         {preview?.blockedResources ? (
           <span className='truncate text-xs text-muted-foreground' role='status'>
             {t('document_preview.resources_blocked')}
@@ -58,7 +58,7 @@ export default function HtmlPreview({ content, filePath }: HtmlPreviewProps) {
           onClick={() => setRevision((value) => value + 1)}
           aria-label={t('document_preview.refresh')}
         >
-          <RefreshCwIcon aria-hidden='true' className='size-4' />
+          <RefreshCwIcon aria-hidden='true' className='size-3.5' />
           {t('document_preview.refresh')}
         </Button>
       </div>

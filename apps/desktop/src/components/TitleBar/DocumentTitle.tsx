@@ -12,14 +12,18 @@ export function DocumentTitle() {
   const { t } = useTranslation()
   return (
     <span
-      className='truncate text-ui-control text-content-primary'
+      className='flex min-w-0 items-center gap-1 text-ui-control font-medium text-content-primary'
       data-tauri-drag-region
       title={file?.path}
     >
-      {!file?.path && file?.name === `${t('file.untitled')}.md`
-        ? t('file.untitled')
-        : (file?.name ?? t('file.untitled'))}
-      {dirty ? ' •' : ''}
+      <span className='truncate' data-tauri-drag-region>
+        {!file?.path && file?.name === `${t('file.untitled')}.md`
+          ? t('file.untitled')
+          : (file?.name ?? t('file.untitled'))}
+      </span>
+      <span className='w-2 shrink-0 text-ui-caption' data-tauri-drag-region>
+        {dirty ? '•' : null}
+      </span>
     </span>
   )
 }

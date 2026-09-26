@@ -10,7 +10,7 @@ export function DraftProtectionStatus({ fileId }: { fileId?: string }) {
   const label = t(state === 'failed' ? 'history.failed' : 'history.paused')
   return (
     <span
-      className='mx-2 flex items-center gap-1 truncate text-xs text-muted-foreground'
+      className='mx-2 flex items-center gap-1 truncate text-ui-caption text-muted-foreground'
       title={label}
       role={state === 'failed' ? 'alert' : undefined}
     >

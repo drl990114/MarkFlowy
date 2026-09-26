@@ -94,19 +94,19 @@ export const BookMarkDialog: React.FC = () => {
         </Dialog.Header>
 
         <Dialog.Body>
-          <div className='grid grid-cols-[4.5rem_minmax(0,1fr)] items-center gap-x-3 gap-y-4'>
-            <span className='text-right text-xs font-medium text-foreground-secondary'>
+          <div className='grid grid-cols-[4.5rem_minmax(0,1fr)] items-center gap-x-3 gap-y-3'>
+            <span className='text-right text-ui-control text-foreground-secondary'>
               {t('bookmarks.path')}
             </span>
             <span
-              className='min-w-0 break-all rounded-md border border-border bg-muted px-2.5 py-1.5 text-xs text-foreground'
+              className='min-w-0 break-all py-1 text-ui-caption text-foreground-secondary'
               title={path}
             >
               {path}
             </span>
 
             <label
-              className='text-right text-xs font-medium text-foreground-secondary'
+              className='text-right text-ui-control text-foreground-secondary'
               htmlFor='bookmark-name'
             >
               {t('bookmarks.name')}
@@ -115,12 +115,13 @@ export const BookMarkDialog: React.FC = () => {
               aria-invalid={saveError ? true : undefined}
               disabled={saving}
               id='bookmark-name'
+              inputSize='sm'
               value={name}
               onChange={handleNameChange}
             />
 
             <span
-              className='text-right text-xs font-medium text-foreground-secondary'
+              className='text-right text-ui-control text-foreground-secondary'
               id='bookmark-tags-label'
             >
               {t('bookmarks.tags')}
@@ -141,7 +142,7 @@ export const BookMarkDialog: React.FC = () => {
             </div>
             {saveError ? (
               <div
-                className='col-span-2 rounded-md border border-destructive/45 bg-destructive/10 px-2.5 py-2 text-xs text-destructive'
+                className='col-span-2 rounded-sm border border-destructive/45 bg-destructive/10 px-2 py-1.5 text-ui-caption text-destructive'
                 role='alert'
               >
                 <span className='font-medium'>{t('bookmarks.saveError')}</span>

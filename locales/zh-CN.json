@@ -507,12 +507,20 @@
           "desc": "编辑器是否占满整个窗口。"
         },
         "font_size": {
-          "label": "字体大小",
-          "desc": "设置编辑器的根字体大小。"
+          "label": "正文字号",
+          "desc": "写作与阅读模式的字体大小。"
         },
         "line_height": {
-          "label": "行高",
-          "desc": "设置编辑器的根行高。"
+          "label": "正文行高",
+          "desc": "写作与阅读模式的文字行高。"
+        },
+        "source_font_size": {
+          "label": "源码字号",
+          "desc": "源码模式的字体大小，与正文分别设置。"
+        },
+        "source_line_height": {
+          "label": "源码行高",
+          "desc": "源码模式的文字行高。"
         },
         "font_family": {
           "label": "字体",

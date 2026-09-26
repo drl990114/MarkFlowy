@@ -138,7 +138,7 @@ export function QuickOpenContent({
       <Command.Input
         autoFocus
         aria-label={t('quick_open.title')}
-        className='h-11'
+        className='h-10'
         wrapperClassName='pr-11'
         placeholder={t('quick_open.placeholder')}
         ref={inputRef}
@@ -241,10 +241,9 @@ export function QuickOpenContent({
           </Command.Item>
         ) : null}
       </Command.List>
-      <div className='border-t border-border px-3 py-2 text-ui-caption text-muted-foreground'>
+      <div className='border-t border-border px-3 py-1.5 text-ui-caption text-muted-foreground'>
         {t('quick_open.keyboard_hint')}
       </div>
     </Command>
   )
 }
-

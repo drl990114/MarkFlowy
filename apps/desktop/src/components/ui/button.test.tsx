@@ -14,13 +14,14 @@ describe('Button', () => {
     expect(button?.className).toContain('disabled:opacity-100')
   })
 
-  it('adds restrained press feedback and removes it for reduced motion', () => {
+  it('responds to presses without scaling the control or its text', () => {
     const container = document.createElement('div')
     container.innerHTML = renderToStaticMarkup(<Button>Insert</Button>)
 
     const className = container.querySelector('button')?.className
-    expect(className).toContain('active:scale-[0.97]')
-    expect(className).toContain('motion-reduce:active:scale-100')
+    expect(className).toContain('enabled:active:bg-primary/80')
+    expect(className).toContain('motion-reduce:transition-none')
+    expect(className).not.toContain('scale-')
     expect(className).not.toContain('transition-all')
   })
 
@@ -48,8 +49,8 @@ describe('Button', () => {
     expect(className).toContain('hover:bg-control-ghost-hover')
     expect(className).toContain('hover:text-content-primary')
     expect(className).toContain('focus-visible:outline-none')
-    expect(className).toContain('focus-visible:opacity-80')
-    expect(className).toContain('active:scale-100')
+    expect(className).toContain('focus-visible:ring-control-focus')
+    expect(className).not.toContain('scale-')
     expect(className).toContain('active:bg-control-ghost-pressed')
     expect(className).toContain('aria-pressed:text-primary')
   })

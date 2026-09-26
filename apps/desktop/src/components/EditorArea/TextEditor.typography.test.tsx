@@ -28,6 +28,13 @@ if (!editor?.body) throw new Error('TextEditor implementation was not found')
 const names = new Set([
   'editorRootFontSize',
   'editorRootLineHeight',
+  'editorSourceFontSize',
+  'editorSourceLineHeight',
+  'sourceFontSize',
+  'sourceLineHeight',
+  'rootLineHeight',
+  'editorProps',
+  'printStyleToken',
   'themeFontSize',
   'wysiwygRootLineHeight',
   'linkEditMode',
@@ -46,14 +53,15 @@ if (statements.length !== names.size)
   throw new Error('Editor typography declarations were not found')
 const compiled = ts.transpileModule(
   `
-  function Harness({ settings, keymap, semanticTheme, onOptions }) {
+  function Harness({ settings, keymap, semanticTheme, onOptions, viewType = EditorViewType.WYSIWYG, isHtml = false }) {
+    const currentViewType = viewType;
     const useAppSettingStore = (selector) => selector({ settingData: settings });
     const useEditorKeybindingStore = (selector) => selector({
       editorKeybingMap: keymap ?? emptyKeymap,
       editorKeybindingsLoaded: keymap !== undefined,
     });
     ${statements.map((node) => node.getText(source)).join('\n')}
-    onOptions(capricornRuntimeOptions);
+    onOptions(capricornRuntimeOptions, editorProps, printStyleToken);
     return null;
   }
   Harness;
@@ -63,7 +71,11 @@ const compiled = ts.transpileModule(
 const Harness = runInNewContext(compiled, {
   useMemo,
   curFile: { id: 'note' },
-  currentViewType: EditorViewType.WYSIWYG,
+  content: 'Example',
+  delegate: undefined,
+  id: 'typography-test',
+  fileTypeConfig: {},
+  sourceCodeEditorSpellcheck: false,
   EditorViewType,
   editorColorScheme: 'light',
   editorTypewriterScroll: false,
@@ -83,12 +95,21 @@ const Harness = runInNewContext(compiled, {
   settings: {
     editor_root_font_size?: number
     editor_root_line_height?: string
+    editor_source_font_size?: number
+    editor_source_line_height?: string
     editor_link_edit_mode?: 'popover' | 'markdown'
     editor_placeholder?: boolean
     wysiwyg_editor_codemirror_line_wrap?: boolean
   }
   keymap?: Record<string, string>
-  semanticTheme?: { 'font.editor.size': string; 'font.editor.lineHeight': string }
+  viewType?: (typeof EditorViewType)[keyof typeof EditorViewType]
+  isHtml?: boolean
+  semanticTheme?: {
+    'font.editor.size': string
+    'font.editor.lineHeight': string
+    'font.source.size'?: string
+    'font.source.lineHeight'?: string
+  }
   onOptions: (options: CapricornRuntimeOptions) => void
 }>
 
@@ -201,6 +222,67 @@ describe('TextEditor Capricorn typography settings', () => {
     expect(onOptions.mock.lastCall?.[0].style).toMatchObject({
       fontSize: '18px',
       lineHeight: '1.6',
+    })
+  })
+  it('updates source typography without changing document typography across modes', () => {
+    const onOptions = vi.fn()
+    const { rerender } = render(
+      <Harness settings={{}} viewType={EditorViewType.SOURCECODE} onOptions={onOptions} />,
+    )
+    expect(onOptions.mock.lastCall?.[1].styleToken).toMatchObject({
+      rootFontSize: '15px',
+      rootLineHeight: '1.6',
+    })
+    const settings = {
+      editor_root_font_size: 18,
+      editor_root_line_height: '1.8',
+      editor_source_font_size: 14,
+      editor_source_line_height: '1.5',
+    }
+    rerender(
+      <Harness settings={settings} viewType={EditorViewType.SOURCECODE} onOptions={onOptions} />,
+    )
+    expect(onOptions.mock.lastCall?.[1].styleToken).toMatchObject({
+      rootFontSize: '14px',
+      rootLineHeight: '1.5',
+    })
+    expect(onOptions.mock.lastCall?.[0].style).toMatchObject({
+      fontSize: '18px',
+      lineHeight: '1.8',
+    })
+    expect(onOptions.mock.lastCall?.[2]).toMatchObject({
+      rootFontSize: '18px',
+      rootLineHeight: '1.8',
+    })
+    rerender(
+      <Harness settings={settings} viewType={EditorViewType.PREVIEW} onOptions={onOptions} />,
+    )
+    expect(onOptions.mock.lastCall?.[1].styleToken).toMatchObject({
+      rootFontSize: '18px',
+      rootLineHeight: '1.8',
+    })
+    rerender(<Harness settings={settings} isHtml onOptions={onOptions} />)
+    expect(onOptions.mock.lastCall?.[1].styleToken.rootFontSize).toBe('14px')
+  })
+
+  it('uses source theme typography independently of document theme typography', () => {
+    const onOptions = vi.fn()
+    render(
+      <Harness
+        settings={{ editor_source_font_size: 14 }}
+        viewType={EditorViewType.SOURCECODE}
+        semanticTheme={{
+          'font.editor.size': '20px',
+          'font.editor.lineHeight': '1.8',
+          'font.source.size': '1rem',
+          'font.source.lineHeight': '1.5',
+        }}
+        onOptions={onOptions}
+      />,
+    )
+    expect(onOptions.mock.lastCall?.[1].styleToken).toMatchObject({
+      rootFontSize: '1rem',
+      rootLineHeight: '1.5',
     })
   })
 })

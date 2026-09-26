@@ -67,6 +67,7 @@ const DateFormatSettingItem: React.FC<SettingItemProps<Setting.DateFormatSetting
       <SettingLabel htmlFor={inputId} item={item} />
       <div className='setting-item__control'>
         <Input
+          inputSize='sm'
           id={inputId}
           value={inputValue}
           onBlur={() => writeSettingData.flush()}

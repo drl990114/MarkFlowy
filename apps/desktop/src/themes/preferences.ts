@@ -7,6 +7,8 @@ interface TypographyPreferences {
   editor_code_font_family?: string
   editor_root_font_size?: number
   editor_root_line_height?: string
+  editor_source_font_size?: number
+  editor_source_line_height?: string
 }
 
 export function typographyOverrides(settings: TypographyPreferences): ThemeOverrides {
@@ -22,6 +24,12 @@ export function typographyOverrides(settings: TypographyPreferences): ThemeOverr
       : {}),
     ...(settings.editor_root_font_size
       ? { 'font.editor.size': `${settings.editor_root_font_size}px` }
+      : {}),
+    ...(settings.editor_source_font_size
+      ? { 'font.source.size': `${settings.editor_source_font_size}px` }
+      : {}),
+    ...(settings.editor_source_line_height
+      ? { 'font.source.lineHeight': String(settings.editor_source_line_height) }
       : {}),
     ...(settings.editor_root_line_height
       ? { 'font.editor.lineHeight': String(settings.editor_root_line_height) }
