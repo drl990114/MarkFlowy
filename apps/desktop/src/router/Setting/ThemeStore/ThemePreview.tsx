@@ -100,7 +100,7 @@ export function ThemePreview({
     <iframe
       ref={frame}
       title={labels.preview}
-      className='h-full min-h-[480px] w-full rounded-md border border-border bg-background'
+      className='block h-[clamp(30rem,calc(100dvh-20rem),44rem)] w-full rounded-md border border-border bg-background'
       src={src}
       sandbox='allow-scripts allow-same-origin'
       onLoad={() => {

@@ -60,12 +60,13 @@ describe('preview document surface', () => {
         theme={theme('#eeeeee')}
         snippets={[]}
         inspect={false}
-        labels={{ ...labels, previewNewNote: '新建笔记', previewSearch: '搜索预览' }}
+        labels={{ ...labels, previewWelcome: '欢迎', previewSearch: '搜索预览' }}
         onInspect={inspect}
       />,
     )
     expect(mocks.create).toHaveBeenCalledTimes(1)
-    expect(screen.getByRole('button', { name: '新建笔记' })).toBeTruthy()
+    expect(view.container.querySelector('[aria-current="page"]')?.textContent).toBe('欢迎.md')
+    fireEvent.click(screen.getByRole('button', { name: '搜索预览' }))
     expect(screen.getByRole('textbox', { name: '搜索预览' })).toBeTruthy()
     expect(mocks.update).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -91,8 +92,18 @@ describe('preview document surface', () => {
         onInspect={inspect}
       />,
     )
-    fireEvent.click(screen.getByRole('button', { name: 'New note' }))
-    expect(inspect).toHaveBeenCalledWith('accent.background')
+    fireEvent.click(view.container.querySelector('[aria-current="page"]')!)
+    expect(inspect).toHaveBeenCalledWith('interaction.selected')
+    for (const token of [
+      'chrome.titlebar.background',
+      'chrome.sidebar.background',
+      'chrome.tab.background',
+      'chrome.tab.activeBackground',
+      'chrome.statusbar.background',
+    ]) {
+      fireEvent.contextMenu(view.container.querySelector(`[data-theme-token="${token}"]`)!)
+      expect(inspect).toHaveBeenLastCalledWith(token)
+    }
     expect(
       [...view.container.querySelectorAll('[data-mf-css-snippet]')].map(
         (style) => style.textContent,

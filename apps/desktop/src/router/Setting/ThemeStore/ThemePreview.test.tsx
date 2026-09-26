@@ -1,3 +1,4 @@
+// @vitest-environment-options {"settings":{"navigation":{"disableChildFrameNavigation":true}}}
 import { cleanup, fireEvent, render } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { resolveThemeTokens, type ResolvedTheme } from '@markflowy/theme/semantic'
@@ -54,7 +55,7 @@ function mount() {
   const url = new URL(frame.src)
   const session = url.searchParams.get('session')!
   // Model a window proxy independently from its current document URL. This
-  // lets the test exercise navigation without asking jsdom to load a page.
+  // lets the test exercise navigation without asking happy-dom to load a page.
   const previewWindow = { location: { href: frame.src }, postMessage: vi.fn() }
   Object.defineProperty(frame, 'contentWindow', { value: previewWindow, configurable: true })
   const message = (type: string, extra: Record<string, unknown> = {}) => ({

@@ -35,7 +35,44 @@ function mount() {
     <ThemeEditor initial={initial()} onSave={save} onClose={vi.fn()} onExport={vi.fn()} />,
   )
 }
+function openOptions() {
+  if (!screen.queryByRole('dialog', { name: 'Theme options' })) {
+    fireEvent.click(screen.getByRole('button', { name: 'Theme options' }))
+  }
+}
+function openAdvanced() {
+  openOptions()
+  fireEvent.click(screen.getByRole('button', { name: 'Advanced JSON / CSS' }))
+}
+function exportButton() {
+  openOptions()
+  return screen.getByRole('button', { name: 'Export JSON' }) as HTMLButtonElement
+}
 describe('theme editor draft workflow', () => {
+  it('keeps secondary fields out of the toolbar and preserves edits after closing options', async () => {
+    mount()
+    expect(screen.queryByRole('textbox', { name: 'Author' })).toBeNull()
+    expect(screen.queryByRole('textbox', { name: 'Variant' })).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Export JSON' })).toBeNull()
+    openOptions()
+    fireEvent.change(screen.getByRole('textbox', { name: 'Author' }), { target: { value: 'Alex' } })
+    fireEvent.change(screen.getByRole('textbox', { name: 'Variant' }), {
+      target: { value: 'Morning' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Theme options' }))
+    expect(screen.queryByRole('textbox', { name: 'Author' })).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Save and apply' }))
+    await waitFor(() =>
+      expect(save).toHaveBeenCalledWith(
+        expect.objectContaining({
+          author: 'Alex',
+          variants: [expect.objectContaining({ name: 'Morning' })],
+        }),
+        'light',
+      ),
+    )
+  })
+
   it('translates the open editor without resetting the theme draft', async () => {
     mount()
     fireEvent.change(screen.getByRole('textbox', { name: 'Name' }), {
@@ -51,6 +88,7 @@ describe('theme editor draft workflow', () => {
     )
     expect(screen.getByRole('button', { name: '保存并应用' })).toBeTruthy()
     expect(screen.getByRole('textbox', { name: '查找 token…' })).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: '主题选项' }))
     fireEvent.click(screen.getByRole('button', { name: '添加深色变体' }))
     expect((screen.getByRole('textbox', { name: '变体' }) as HTMLInputElement).value).toBe(
       'Paper draft 深色',
@@ -75,7 +113,7 @@ describe('theme editor draft workflow', () => {
   })
   it('keeps invalid JSON visible and prevents silently saving the last valid draft', () => {
     mount()
-    fireEvent.click(screen.getByRole('button', { name: 'Advanced JSON / CSS' }))
+    openAdvanced()
     const input = screen.getByRole('textbox', { name: 'Theme JSON' })
     fireEvent.change(input, { target: { value: '{invalid' } })
     fireEvent.click(screen.getByRole('button', { name: 'Update from JSON' }))
@@ -107,7 +145,7 @@ describe('theme editor draft workflow', () => {
 describe('theme authoring sessions', () => {
   it('preserves raw invalid JSON across close and recovery', () => {
     const view = mount()
-    fireEvent.click(screen.getByRole('button', { name: 'Advanced JSON / CSS' }))
+    openAdvanced()
     fireEvent.change(screen.getByRole('textbox', { name: 'Theme JSON' }), {
       target: { value: '{"name": "unfinished' },
     })
@@ -155,19 +193,15 @@ describe('theme authoring sessions', () => {
   })
   it('blocks competing visual changes and export until JSON is applied or discarded', () => {
     mount()
-    fireEvent.click(screen.getByRole('button', { name: 'Advanced JSON / CSS' }))
+    openAdvanced()
     fireEvent.change(screen.getByRole('textbox', { name: 'Theme JSON' }), {
       target: { value: '{' },
     })
     expect(screen.getByRole('textbox', { name: 'Name' }).closest('fieldset')?.disabled).toBe(true)
-    expect(
-      (screen.getByRole('button', { name: 'Export JSON' }) as HTMLButtonElement).disabled,
-    ).toBe(true)
+    expect(exportButton().disabled).toBe(true)
     fireEvent.click(screen.getByRole('button', { name: 'Discard JSON edits' }))
     expect(screen.getByRole('textbox', { name: 'Name' }).closest('fieldset')?.disabled).toBe(false)
-    expect(
-      (screen.getByRole('button', { name: 'Export JSON' }) as HTMLButtonElement).disabled,
-    ).toBe(false)
+    expect(exportButton().disabled).toBe(false)
     expect(
       JSON.parse((screen.getByRole('textbox', { name: 'Theme JSON' }) as HTMLTextAreaElement).value)
         .id,
@@ -185,6 +219,7 @@ describe('theme authoring sessions', () => {
         onExport={vi.fn()}
       />,
     )
+    openOptions()
     expect((screen.getByRole('textbox', { name: 'Variant' }) as HTMLInputElement).value).toBe(
       'Night',
     )
@@ -261,9 +296,7 @@ describe('invalid token drafts', () => {
     expect(
       (screen.getByRole('button', { name: 'Save and apply' }) as HTMLButtonElement).disabled,
     ).toBe(true)
-    expect(
-      (screen.getByRole('button', { name: 'Export JSON' }) as HTMLButtonElement).disabled,
-    ).toBe(true)
+    expect(exportButton().disabled).toBe(true)
     fireEvent.click(screen.getByRole('button', { name: 'Save and apply' }))
     expect(save).not.toHaveBeenCalled()
     fireEvent.change(input, { target: { value: '#123456' } })
@@ -292,9 +325,7 @@ describe('invalid token drafts', () => {
       expect(
         (screen.getByRole('button', { name: 'Save and apply' }) as HTMLButtonElement).disabled,
       ).toBe(false)
-      expect(
-        (screen.getByRole('button', { name: 'Export JSON' }) as HTMLButtonElement).disabled,
-      ).toBe(false)
+      expect(exportButton().disabled).toBe(false)
       expect(screen.queryByRole('alert')).toBeNull()
     },
   )
