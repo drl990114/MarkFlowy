@@ -59,7 +59,7 @@ Semantic CSS variables use `--mf-theme-` followed by the token name in kebab cas
 
 ## Capricorn 0.3.0 theme contract
 
-MarkFlowy integrates `@drl990114/capricorn-runtime@0.3.0`, pinned by exact version in `scripts/install-capricorn-runtime.mjs` and `apps/desktop/capricornRuntimeResolver.ts`. The installer verifies the published tarball's SHA-256 and package identity. Release provenance and validation are recorded in [Startup performance](../../STARTUP_PERFORMANCE.md#capricorn-030-release-integration-2026-09-26).
+MarkFlowy integrates `@drl990114/capricorn-runtime@0.3.1`, retaining the theme contract introduced in 0.3.0. The exact version is pinned in `scripts/install-capricorn-runtime.mjs` and `apps/desktop/capricornRuntimeResolver.ts`. The installer verifies the published tarball's SHA-256 and package identity. Release provenance and validation are recorded in [Startup performance](../../STARTUP_PERFORMANCE.md#capricorn-031-release-integration-2026-09-26).
 
 Capricorn owns its `--cap-*` defaults. It no longer reads `--mf-*` or `--rme-*` fallback variables. MarkFlowy supplies an explicit map from resolved semantic tokens to each editor instance, including its popup surfaces. Theme authors normally edit the JSON tokens; hosts embedding Capricorn directly must supply the corresponding Capricorn variables themselves.
 

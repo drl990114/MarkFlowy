@@ -380,3 +380,76 @@ NODE_OPTIONS=--max-old-space-size=4096 fnm exec --using=24 yarn workspace @markf
 
 `build:types` runs `tsc --noEmit`; it does not build application assets. Use the
 repository's ESLint 8 runner only for changed TypeScript files, without `--fix`.
+
+## Capricorn 0.3.1 release integration, 2026-09-26
+
+MarkFlowy now installs and pins `@drl990114/capricorn-runtime@0.3.1`. This
+supersedes the installation status above while preserving the 0.3.0 theme
+contract and historical timing records.
+
+| Artifact | Identity |
+| --- | --- |
+| Release tag | `capricorn-v0.3.1` |
+| Capricorn source commit | `28fce171be84262e316df7c3fb7da7ba9163c8e5` |
+| Published tarball SHA-256 | `c1999e566d1bb43030bfb5758e3eea2a3e291c1914e3f9baebc8aac40a0b6b18` |
+| Release source fingerprint | `772cdf1f39edc90eaea1d6f64c002413e43efe5f39b87f073a74f8ae07942be7` |
+| Installed `dist/index.js` SHA-256 | `043781ae4d34e04fa08260483ab540a0791c20087d77c3721c5c9a3ef2d358af` |
+| Audited installed files | 259, exact file list and bytes match the published tarball |
+
+The [publish workflow](https://github.com/drl990114/capricorn/actions/runs/36226514245)
+and [Check workflow](https://github.com/drl990114/capricorn/actions/runs/36226514216)
+both succeeded at the source commit above. The release passed 144 runtime and
+contract scripts, 16 TypeScript test files, type checks, lint and architecture
+checks. CI built the runtime, passed 203 isolated tarball tests and published to
+GitHub Packages. The downloaded registry tarball matches both registry integrity
+metadata and the release workflow's verification manifest. MarkFlowy's installer
+verified the pinned hash; a separate audit compared every installed file with the
+verified tarball.
+
+The release was prepared in a clean, updated main worktree. It includes the
+23-file editor presentation refinement, one existing asynchronous test correction
+and one default-font assertion update. The original sibling checkout's unrelated
+uncommitted bidi and source-navigation work was excluded and preserved. Source
+integration used the clean release checkout's real path, not the dirty sibling.
+
+| Consumer validation | Result |
+| --- | --- |
+| Clean release source integration | 11 files / 76 tests passed, 39.99 seconds |
+| Installed published runtime integration | 11 files / 76 tests passed, 27.07 seconds |
+| Full Desktop unit tests (`--maxWorkers=4`) | 253 files / 1551 tests passed, 41.82 seconds |
+| Desktop `build:types` and integration `tsc --noEmit` | Passed |
+| Changed-file ESLint and installer syntax check | Passed |
+| Translation key consistency | Passed |
+
+The added host integration case uses real Mermaid rendering and sanitization.
+It checks different simultaneous light/dark instances, theme-change redraws,
+cache isolation and unchanged Markdown, selection and undo/redo availability.
+Only geometry missing from jsdom is supplied; SVG stylesheet rules are evaluated
+through an HTML style element because jsdom does not register SVG stylesheets.
+These tests retain existing React `flushSync` and synchronous unmount warnings.
+
+Host resources now include the missing table and live-preview labels in English,
+Chinese, Spanish, French and Japanese. All 36 runtime keys in those namespaces
+are covered, interpolation placeholders match and existing translations are
+preserved. Translation consistency and representative i18next interpolation
+checks passed.
+
+A Chrome fixture loaded the installed runtime through the real host editor and
+theme providers with mocked Tauri services. Using the actual Desktop
+virtualization options, light/dark and English/Chinese switches kept the editor
+instance and edited Markdown unchanged. Mermaid remained readable; menus used
+13px text and 28px rows, while compact snippet/link fields and preview actions
+used 24px hit areas. The nonvirtualized fixture also exposed an existing code
+continuation fallback issue shared with 0.3.0; it does not occur with the Desktop
+virtualization configuration. This release does not fix that separate path.
+
+After the locale update, the same fixture displayed Chinese table actions and
+Mermaid source controls with the expected geometry and unchanged document and
+editor root. Other existing fallback labels in the separate code/preview
+namespaces are outside this translation update.
+
+Use the serial 4 GB / single-worker integration commands above with a clean
+`capricorn-v0.3.1` checkout. No MarkFlowy application or RME package build was
+run, following the requested validation scope. Capricorn's authorized release
+build and Chrome fixture checks are separate from Tauri/WebView, native IME,
+startup timing and P95 acceptance; none of those measurements is claimed here.

@@ -989,7 +989,22 @@
     },
     "livePreview": {
       "largeDeferred": "大型预览已暂停，仍可浏览、编辑和复制完整源码。",
-      "renderLarge": "渲染大型预览（可能需要较长时间）"
+      "renderLarge": "渲染大型预览（可能需要较长时间）",
+      "actions": "{{kind}} 块操作",
+      "copied": "已复制源码",
+      "copy": "复制源码",
+      "copying": "正在复制源码…",
+      "editSource": "编辑源码",
+      "editSourceForKind": "编辑 {{kind}} 源码",
+      "hideSource": "隐藏源码",
+      "kind": {
+        "html": "HTML",
+        "math": "公式",
+        "mermaid": "Mermaid"
+      },
+      "preview": "{{kind}} 预览",
+      "retryCopy": "重试复制源码",
+      "sourceEditor": "{{kind}} 源码编辑器"
     },
     "sourceFallback": {
       "longLine": "超长行采用横向滚动，以保持源码编辑流畅。",
@@ -1032,6 +1047,31 @@
       "manage": "管理片段…",
       "blank": "新建空白块",
       "stale": "插入位置已变化，请重新选择。"
+    },
+    "table": {
+      "actions": "表格操作",
+      "alignment": "列对齐方式",
+      "copy": "复制",
+      "cut": "剪切",
+      "paste": "粘贴",
+      "selectAll": "全选",
+      "action": {
+        "column": "列操作",
+        "columnAt": "第 {{index}} 列操作",
+        "row": "行操作",
+        "rowAt": "第 {{index}} 行操作"
+      },
+      "addColumnAfter": "在右侧插入列",
+      "addColumnBefore": "在左侧插入列",
+      "addRowAfter": "在下方插入行",
+      "addRowBefore": "在上方插入行",
+      "alignCenter": "列居中对齐",
+      "alignLeft": "列左对齐",
+      "alignNone": "清除列对齐方式",
+      "alignRight": "列右对齐",
+      "deleteColumn": "删除当前列",
+      "deleteRow": "删除当前行",
+      "deleteTable": "删除表格"
     }
   },
   "inline_insert": {

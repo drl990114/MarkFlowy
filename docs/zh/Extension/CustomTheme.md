@@ -72,7 +72,7 @@ description: '使用可视化编辑器和 JSON 创建、编辑、分享 MarkFlow
 
 ## Capricorn 0.3.0 主题契约
 
-MarkFlowy 已集成 `@drl990114/capricorn-runtime@0.3.0`，由 `scripts/install-capricorn-runtime.mjs` 和 `apps/desktop/capricornRuntimeResolver.ts` 固定精确版本。安装器校验正式 tarball 的 SHA-256 和包身份。发布来源与验证记录见[启动性能文档](../../STARTUP_PERFORMANCE.md#capricorn-030-release-integration-2026-09-26)。
+MarkFlowy 已集成 `@drl990114/capricorn-runtime@0.3.1`，沿用 0.3.0 引入的主题契约，由 `scripts/install-capricorn-runtime.mjs` 和 `apps/desktop/capricornRuntimeResolver.ts` 固定精确版本。安装器校验正式 tarball 的 SHA-256 和包身份。发布来源与验证记录见[启动性能文档](../../STARTUP_PERFORMANCE.md#capricorn-031-release-integration-2026-09-26)。
 
 Capricorn 自己提供 `--cap-*` 默认值，不再读取 `--mf-*` 或 `--rme-*` 回退变量。MarkFlowy 将解析后的语义 token 显式映射到每个编辑器实例及其弹层。主题作者通常只需修改 JSON token；单独嵌入 Capricorn 的宿主需要自行传入对应的 Capricorn 变量。
 

@@ -995,7 +995,22 @@
     },
     "livePreview": {
       "largeDeferred": "大きなプレビューは一時停止中です。ソース全体は引き続き利用できます。",
-      "renderLarge": "大きなプレビューを描画（時間がかかる場合があります）"
+      "renderLarge": "大きなプレビューを描画（時間がかかる場合があります）",
+      "actions": "{{kind}} ブロックの操作",
+      "copied": "ソースをコピーしました",
+      "copy": "ソースをコピー",
+      "copying": "ソースをコピー中…",
+      "editSource": "ソースを編集",
+      "editSourceForKind": "{{kind}} のソースを編集",
+      "hideSource": "ソースを隠す",
+      "kind": {
+        "html": "HTML",
+        "math": "数式",
+        "mermaid": "Mermaid"
+      },
+      "preview": "{{kind}} のプレビュー",
+      "retryCopy": "ソースのコピーを再試行",
+      "sourceEditor": "{{kind}} のソースエディター"
     },
     "sourceFallback": {
       "longLine": "非常に長い行は横スクロール表示にして、ソース編集の応答性を保ちます。",
@@ -1032,6 +1047,31 @@
       "manage": "スニペットを管理…",
       "blank": "空のブロックを作成",
       "stale": "挿入位置が変わりました。選び直してください。"
+    },
+    "table": {
+      "actions": "表の操作",
+      "alignment": "列の配置",
+      "copy": "コピー",
+      "cut": "切り取り",
+      "paste": "貼り付け",
+      "selectAll": "すべて選択",
+      "action": {
+        "column": "列の操作",
+        "columnAt": "{{index}} 列目の操作",
+        "row": "行の操作",
+        "rowAt": "{{index}} 行目の操作"
+      },
+      "addColumnAfter": "右に列を挿入",
+      "addColumnBefore": "左に列を挿入",
+      "addRowAfter": "下に行を挿入",
+      "addRowBefore": "上に行を挿入",
+      "alignCenter": "列を中央揃え",
+      "alignLeft": "列を左揃え",
+      "alignNone": "列の配置をクリア",
+      "alignRight": "列を右揃え",
+      "deleteColumn": "現在の列を削除",
+      "deleteRow": "現在の行を削除",
+      "deleteTable": "表を削除"
     }
   },
   "inline_insert": {

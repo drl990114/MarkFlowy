@@ -995,7 +995,22 @@
     },
     "livePreview": {
       "largeDeferred": "La vista previa grande está en pausa. El código fuente completo sigue disponible.",
-      "renderLarge": "Renderizar vista previa grande (puede tardar)"
+      "renderLarge": "Renderizar vista previa grande (puede tardar)",
+      "actions": "Acciones del bloque {{kind}}",
+      "copied": "Código fuente copiado",
+      "copy": "Copiar código fuente",
+      "copying": "Copiando código fuente…",
+      "editSource": "Editar código fuente",
+      "editSourceForKind": "Editar código fuente de {{kind}}",
+      "hideSource": "Ocultar código fuente",
+      "kind": {
+        "html": "HTML",
+        "math": "Matemáticas",
+        "mermaid": "Mermaid"
+      },
+      "preview": "Vista previa de {{kind}}",
+      "retryCopy": "Reintentar copiar el código fuente",
+      "sourceEditor": "Editor de código fuente de {{kind}}"
     },
     "sourceFallback": {
       "longLine": "Las líneas muy largas se desplazan horizontalmente para mantener la edición fluida.",
@@ -1032,6 +1047,31 @@
       "manage": "Gestionar fragmentos…",
       "blank": "Nuevo bloque vacío",
       "stale": "El punto de inserción cambió. Vuelve a abrir el selector."
+    },
+    "table": {
+      "actions": "Acciones de la tabla",
+      "alignment": "Alineación de columna",
+      "copy": "Copiar",
+      "cut": "Cortar",
+      "paste": "Pegar",
+      "selectAll": "Seleccionar todo",
+      "action": {
+        "column": "Acciones de columna",
+        "columnAt": "Acciones de la columna {{index}}",
+        "row": "Acciones de fila",
+        "rowAt": "Acciones de la fila {{index}}"
+      },
+      "addColumnAfter": "Insertar columna a la derecha",
+      "addColumnBefore": "Insertar columna a la izquierda",
+      "addRowAfter": "Insertar fila debajo",
+      "addRowBefore": "Insertar fila encima",
+      "alignCenter": "Centrar columna",
+      "alignLeft": "Alinear columna a la izquierda",
+      "alignNone": "Quitar alineación de columna",
+      "alignRight": "Alinear columna a la derecha",
+      "deleteColumn": "Eliminar columna actual",
+      "deleteRow": "Eliminar fila actual",
+      "deleteTable": "Eliminar tabla"
     }
   },
   "inline_insert": {

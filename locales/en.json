@@ -989,7 +989,22 @@
     },
     "livePreview": {
       "largeDeferred": "Large preview is paused. Full source remains available.",
-      "renderLarge": "Render large preview (may take a while)"
+      "renderLarge": "Render large preview (may take a while)",
+      "actions": "{{kind}} block actions",
+      "copied": "Copied source",
+      "copy": "Copy source",
+      "copying": "Copying source…",
+      "editSource": "Edit source",
+      "editSourceForKind": "Edit {{kind}} source",
+      "hideSource": "Hide source",
+      "kind": {
+        "html": "HTML",
+        "math": "Math",
+        "mermaid": "Mermaid"
+      },
+      "preview": "{{kind}} preview",
+      "retryCopy": "Retry copying source",
+      "sourceEditor": "{{kind}} source editor"
     },
     "sourceFallback": {
       "longLine": "Very long lines scroll horizontally to keep the source responsive.",
@@ -1032,6 +1047,31 @@
       "manage": "Manage snippets…",
       "blank": "New empty block",
       "stale": "The insertion point changed. Please reopen the picker."
+    },
+    "table": {
+      "actions": "Table actions",
+      "alignment": "Column alignment",
+      "copy": "Copy",
+      "cut": "Cut",
+      "paste": "Paste",
+      "selectAll": "Select all",
+      "action": {
+        "column": "Column actions",
+        "columnAt": "Actions for column {{index}}",
+        "row": "Row actions",
+        "rowAt": "Actions for row {{index}}"
+      },
+      "addColumnAfter": "Insert column to the right",
+      "addColumnBefore": "Insert column to the left",
+      "addRowAfter": "Insert row below",
+      "addRowBefore": "Insert row above",
+      "alignCenter": "Center-align column",
+      "alignLeft": "Left-align column",
+      "alignNone": "Clear column alignment",
+      "alignRight": "Right-align column",
+      "deleteColumn": "Delete current column",
+      "deleteRow": "Delete current row",
+      "deleteTable": "Delete table"
     }
   },
   "inline_insert": {

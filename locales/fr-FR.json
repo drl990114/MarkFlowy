@@ -995,7 +995,22 @@
     },
     "livePreview": {
       "largeDeferred": "L’aperçu volumineux est en pause. Le code source complet reste disponible.",
-      "renderLarge": "Afficher l’aperçu volumineux (peut prendre du temps)"
+      "renderLarge": "Afficher l’aperçu volumineux (peut prendre du temps)",
+      "actions": "Actions du bloc {{kind}}",
+      "copied": "Code source copié",
+      "copy": "Copier le code source",
+      "copying": "Copie du code source…",
+      "editSource": "Modifier le code source",
+      "editSourceForKind": "Modifier le code source de {{kind}}",
+      "hideSource": "Masquer le code source",
+      "kind": {
+        "html": "HTML",
+        "math": "Mathématiques",
+        "mermaid": "Mermaid"
+      },
+      "preview": "Aperçu de {{kind}}",
+      "retryCopy": "Réessayer de copier le code source",
+      "sourceEditor": "Éditeur de code source de {{kind}}"
     },
     "sourceFallback": {
       "longLine": "Les lignes très longues défilent horizontalement pour préserver la fluidité de l’édition.",
@@ -1032,6 +1047,31 @@
       "manage": "Gérer les extraits…",
       "blank": "Nouveau bloc vide",
       "stale": "Le point d’insertion a changé. Rouvrez le sélecteur."
+    },
+    "table": {
+      "actions": "Actions du tableau",
+      "alignment": "Alignement de la colonne",
+      "copy": "Copier",
+      "cut": "Couper",
+      "paste": "Coller",
+      "selectAll": "Tout sélectionner",
+      "action": {
+        "column": "Actions de colonne",
+        "columnAt": "Actions de la colonne {{index}}",
+        "row": "Actions de ligne",
+        "rowAt": "Actions de la ligne {{index}}"
+      },
+      "addColumnAfter": "Insérer une colonne à droite",
+      "addColumnBefore": "Insérer une colonne à gauche",
+      "addRowAfter": "Insérer une ligne en dessous",
+      "addRowBefore": "Insérer une ligne au-dessus",
+      "alignCenter": "Centrer la colonne",
+      "alignLeft": "Aligner la colonne à gauche",
+      "alignNone": "Réinitialiser l’alignement de la colonne",
+      "alignRight": "Aligner la colonne à droite",
+      "deleteColumn": "Supprimer la colonne actuelle",
+      "deleteRow": "Supprimer la ligne actuelle",
+      "deleteTable": "Supprimer le tableau"
     }
   },
   "inline_insert": {
