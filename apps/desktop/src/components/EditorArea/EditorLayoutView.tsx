@@ -213,10 +213,9 @@ const EditorGroupPane = memo((props: EditorGroupPaneProps) => {
       onFocusCapture={handleActivateGroup}
       onMouseDownCapture={handleActivateGroup}
     >
-      {singleDocument ? null : <EditorAreaTabs
-        compact={isSplitMode}
-        groupId={groupId}
-      />}
+      {singleDocument || group.opened.length === 0 ? null : (
+        <EditorAreaTabs compact={isSplitMode} groupId={groupId} />
+      )}
       {isActiveGroup ? <FindReplace /> : null}
       <EditorGroupToolbar editorId={activeFileId} compactGroupId={singleDocument ? groupId : undefined} />
       <EditorPanel
