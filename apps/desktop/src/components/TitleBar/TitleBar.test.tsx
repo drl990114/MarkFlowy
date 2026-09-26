@@ -90,10 +90,8 @@ describe('TitleBar', () => {
     expect(markup.match(/data-slot="workspace-picker-trigger"/g)).toHaveLength(1)
     expect(markup).not.toContain('MarkFlowy</span>')
     expect(markup).not.toContain('data-mf-window-controls')
-    expect(markup).toContain('data-slot="command-palette-trigger"')
-    expect(markup.indexOf('data-slot="command-palette-trigger"')).toBeLessThan(
-      markup.indexOf('aria-label="MarkFlowy Menu"'),
-    )
+    expect(markup).not.toContain('data-slot="command-palette-trigger"')
+    expect(markup).toContain('aria-label="MarkFlowy Menu"')
   })
 
   it('replaces the application name with the active workspace name', () => {

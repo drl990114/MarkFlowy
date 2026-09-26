@@ -1,4 +1,4 @@
-import { PencilIcon, XIcon } from 'lucide-react'
+import { XIcon } from 'lucide-react'
 import { useLayoutEffect, useRef, useState } from 'react'
 import { useFileSystem, type IFile } from '@markflowy/interface'
 import { Button } from '@/components/ui/button'
@@ -43,7 +43,7 @@ function DocumentTitleActions({ file, dirty }: { file: IFile; dirty: boolean }) 
 
   return (
     <div
-      className='flex min-w-0 items-center gap-1 text-ui-control font-medium text-content-primary'
+      className='group/document-title flex min-w-0 items-center gap-1 text-ui-control font-medium text-content-primary'
       data-slot='document-title'
       title={file.path}
     >
@@ -55,14 +55,13 @@ function DocumentTitleActions({ file, dirty }: { file: IFile; dirty: boolean }) 
             <Button
               ref={triggerRef}
               aria-label={`${t('contextmenu.explorer.rename')}: ${name}`}
-              className='h-6 min-w-0 shrink gap-1 px-1.5'
+              className='h-6 min-w-0 shrink px-1.5'
               data-slot='document-rename-trigger'
               size='sm'
               variant='ghost'
               onClick={() => setRenaming(true)}
             >
               <span className='truncate'>{name}</span>
-              <PencilIcon aria-hidden='true' className='size-3 text-content-secondary' />
             </Button>
           </TooltipTrigger>
           <TooltipContent>{t('contextmenu.explorer.rename')}</TooltipContent>
@@ -85,7 +84,12 @@ function DocumentTitleActions({ file, dirty }: { file: IFile; dirty: boolean }) 
               })
             }}
           >
-            <XIcon aria-hidden='true' size={14} strokeWidth={1.75} />
+            <XIcon
+              aria-hidden='true'
+              className='opacity-0 group-hover/document-title:opacity-100 group-focus-within/document-title:opacity-100 [@media(hover:none)]:opacity-100'
+              size={14}
+              strokeWidth={1.75}
+            />
           </Button>
         </TooltipTrigger>
         <TooltipContent>{t('file.closeDocument')}</TooltipContent>

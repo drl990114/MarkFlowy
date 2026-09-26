@@ -1,6 +1,5 @@
 import { DocumentTitle } from './DocumentTitle'
 import { isSingleDocumentLayout } from '../EditorArea/documentLayout'
-import { CommandPaletteButton } from '../CommandPaletteButton'
 import { useGlobalOSInfo } from '@/hooks'
 import { useTranslation } from '@/i18n'
 import { cn } from '@/lib/cn'
@@ -38,7 +37,6 @@ export default function TitleBar() {
         {singleDocument ? <DocumentTitle /> : null}
       </div>
       <div className={cn('flex h-full shrink-0 items-center', !isWindows && 'pr-1')}>
-        <CommandPaletteButton />
         <AppMenuButton />
         {isWindows ? <WindowControls /> : null}
       </div>

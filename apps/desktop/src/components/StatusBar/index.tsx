@@ -1,5 +1,4 @@
 import { DockSwitcher } from '../SideBar/DockSwitcher'
-import { CommandPaletteButton } from '../CommandPaletteButton'
 import { WorkspaceActions } from '../WorkspaceActions'
 import { useGlobalOSInfo } from '@/hooks'
 import { useEditorStore } from '@/stores'
@@ -28,7 +27,6 @@ export default function StatusBar() {
         {osType === 'linux' ? (
           <>
             <CenterMenu />
-            <CommandPaletteButton location='statusbar' />
             <WorkspaceActions location='statusbar' />
           </>
         ) : null}
