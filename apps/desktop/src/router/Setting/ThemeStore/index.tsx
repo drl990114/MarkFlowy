@@ -228,7 +228,8 @@ export function ThemeStore() {
             className='flex min-h-9 flex-wrap items-center gap-2 border-b border-border py-1 last:border-b-0'
           >
             <span className='min-w-0 flex-1 truncate'>
-              {themeLabel(theme)} <span className='text-muted-foreground'>· {theme.mode}</span>
+              {themeLabel(theme)}{' '}
+              <span className='text-muted-foreground'>· {labels[theme.mode]}</span>
             </span>
             <Button
               size='sm'
@@ -461,7 +462,7 @@ export function ThemeStore() {
                     const response = await nativeFetch(item.url)
                     if (!response.ok) throw new Error(`HTTP ${response.status}`)
                     const document = parseThemeDocument(await response.json())
-                    if (document.id !== item.id) throw new Error('Theme id differs from catalog')
+                    if (document.id !== item.id) throw new Error(labels.catalogMismatch)
                     await persist(document)
                   })
                 }

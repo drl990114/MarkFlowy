@@ -57,6 +57,8 @@ export const EditorWrapper = styled.div<EditorWrapperProps>`
   /* Keep the runtime's inner reading column in sync with the host layout. */
   [data-cap-content] {
     --cap-editor-content-width: var(--rme-editor-content-width);
+    /* Fit the 36px block handle, 6px content gap and 4px outer hit area in narrow panes. */
+    --cap-editor-inline-padding: 48px;
   }
 
   > * {

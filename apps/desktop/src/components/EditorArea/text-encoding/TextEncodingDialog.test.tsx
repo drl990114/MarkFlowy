@@ -2,9 +2,11 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { fileSaveCoordinator } from '@/components/EditorArea/fileSaveCoordinator'
 import { DEFAULT_TEXT_METADATA } from '@/components/EditorArea/textFileFormat'
-import { TextEncodingButton } from './TextEncodingButton'
+import { TextEncodingDialog } from './TextEncodingDialog'
+import { i18nInit } from '../../../../../../packages/i18n/src/desktop'
 
 const actions = vi.hoisted(() => ({ preview: vi.fn(), apply: vi.fn(), save: vi.fn() }))
+vi.mock('@/i18n', async () => import('../../../../../../packages/i18n/src/desktop'))
 vi.mock('@/helper/files', () => ({
   getFileObject: () => ({
     id: 'encoding-ui',
@@ -14,17 +16,14 @@ vi.mock('@/helper/files', () => ({
     ext: 'md',
   }),
 }))
-vi.mock('@/stores/useEditorStore', () => ({
-  default: (selector: (state: { activeId: string }) => unknown) =>
-    selector({ activeId: 'encoding-ui' }),
-}))
 vi.mock('@/services/text-file-format', () => ({
   previewFileEncoding: actions.preview,
   applyEncodingPreview: actions.apply,
   saveFileWithFormat: actions.save,
 }))
 
-beforeEach(() => {
+beforeEach(async () => {
+  await i18nInit({ lng: 'cn' })
   vi.clearAllMocks()
   fileSaveCoordinator.loadSnapshot('encoding-ui', {
     content: '中文\r\n',
@@ -42,11 +41,10 @@ beforeEach(() => {
 })
 afterEach(cleanup)
 
-describe('encoding status control', () => {
+describe('text encoding dialog', () => {
   it('separates reopening from saving and keeps a failed conversion visible', async () => {
-    render(<TextEncodingButton />)
-    expect(screen.getByText('GB18030 · CRLF · 待确认')).toBeTruthy()
-    fireEvent.click(screen.getByRole('button', { name: '文本编码与换行' }))
+    render(<TextEncodingDialog fileId='encoding-ui' onClose={vi.fn()} />)
+    expect(screen.getByText('note.md · GB18030 · CRLF · 待确认')).toBeTruthy()
     expect(screen.getByRole('dialog')).toBeTruthy()
     expect(screen.getByRole('button', { name: '预览重新打开' })).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: '以此编码保存' }))
@@ -61,8 +59,7 @@ describe('encoding status control', () => {
   })
 
   it('shows a strict decode error without applying or saving', async () => {
-    render(<TextEncodingButton />)
-    fireEvent.click(screen.getByRole('button', { name: '文本编码与换行' }))
+    render(<TextEncodingDialog fileId='encoding-ui' onClose={vi.fn()} />)
     fireEvent.click(screen.getByRole('button', { name: '预览重新打开' }))
     await waitFor(() =>
       expect(screen.getByRole('alert').textContent).toContain('text_invalid_encoding'),

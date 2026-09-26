@@ -102,22 +102,25 @@ export function PreviewSurface({
             className='w-32 shrink-0 space-y-3 border-r border-border p-3'
             style={{ background: 'var(--mf-theme-chrome-sidebar-background)' }}
           >
-            <strong>Notes</strong>
+            <strong>{labels.previewNotes}</strong>
             <p
               data-theme-token='text.secondary'
               style={{ color: 'var(--mf-theme-text-secondary)' }}
             >
-              Ideas
+              {labels.previewIdeas}
             </p>
             <p
               data-theme-token='interaction.selected'
               style={{ background: 'var(--mf-theme-interaction-selected)' }}
             >
-              Welcome
+              {labels.previewWelcome}
             </p>
-            <Input aria-label='Search preview' placeholder='Search…' />
+            <Input
+              aria-label={labels.previewSearch}
+              placeholder={labels.previewSearchPlaceholder}
+            />
             <Button data-theme-token='accent.background' size='sm'>
-              New note
+              {labels.previewNewNote}
             </Button>
           </aside>
           <PreviewEditor theme={theme} labels={labels} />

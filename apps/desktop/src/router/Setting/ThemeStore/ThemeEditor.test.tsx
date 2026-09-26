@@ -1,7 +1,8 @@
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { parseThemeDocument } from '@markflowy/theme/semantic'
-vi.mock('@/i18n', () => ({ useTranslation: () => ({ i18n: { language: 'en' } }) }))
+import { changeLng, i18nInit } from '../../../../../../packages/i18n/src/desktop'
+vi.mock('@/i18n', async () => import('../../../../../../packages/i18n/src/desktop'))
 vi.mock('@/themes/library', () => ({
   useThemeLibrary: (selector: (state: { snippets: [] }) => unknown) => selector({ snippets: [] }),
 }))
@@ -23,7 +24,8 @@ const initial = () =>
     variants: [{ id: 'light', name: 'Light', mode: 'light', tokens: {} }],
   })
 const save = vi.fn(async () => true)
-beforeEach(() => {
+beforeEach(async () => {
+  await i18nInit({ lng: 'en' })
   vi.clearAllMocks()
   sessionStorage.clear()
 })
@@ -34,6 +36,28 @@ function mount() {
   )
 }
 describe('theme editor draft workflow', () => {
+  it('translates the open editor without resetting the theme draft', async () => {
+    mount()
+    fireEvent.change(screen.getByRole('textbox', { name: 'Name' }), {
+      target: { value: 'Paper draft' },
+    })
+
+    await act(async () => {
+      await changeLng('cn')
+    })
+
+    expect((screen.getByRole('textbox', { name: '名称' }) as HTMLInputElement).value).toBe(
+      'Paper draft',
+    )
+    expect(screen.getByRole('button', { name: '保存并应用' })).toBeTruthy()
+    expect(screen.getByRole('textbox', { name: '查找 token…' })).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: '添加深色变体' }))
+    expect((screen.getByRole('textbox', { name: '变体' }) as HTMLInputElement).value).toBe(
+      'Paper draft 深色',
+    )
+    expect(save).not.toHaveBeenCalled()
+  })
+
   it('locates an inspected role and lets a value be changed and undone', () => {
     mount()
     fireEvent.click(screen.getByRole('button', { name: 'Inspect caret' }))

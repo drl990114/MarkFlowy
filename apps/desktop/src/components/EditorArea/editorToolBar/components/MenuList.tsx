@@ -5,6 +5,7 @@ import { showContextMenu } from '@/components/ui-v2/ContextMenu'
 import useBookMarksStore from '@/extensions/bookmarks/useBookMarksStore'
 import bus from '@/helper/eventBus'
 import useFileCacheStore, { getFileObject } from '@/helper/files'
+import { isTextfileType } from '@/helper/fileTypeHandler'
 import { FileResultCode } from '@/helper/filesys'
 import { writeSettingData } from '@/services/app-setting'
 import { dialog } from '@/services/dialog'
@@ -21,6 +22,8 @@ import { isDivider, Space, toast, type MenuItemData } from 'zens'
 import { EditorAreaActionButton } from '../../EditorAreaAction'
 import { createPdfPrintMenuItem } from '../../pdf-print/pdfPrintMenuItem'
 import { createPandocExportMenuItem } from '../../pandoc-export/pandocExportMenuItem'
+import { fileSaveCoordinator } from '../../fileSaveCoordinator'
+import { TextEncodingDialog } from '../../text-encoding/TextEncodingDialog'
 
 type FileNormalInfo = {
   size: string
@@ -89,6 +92,7 @@ export const MenuList = memo((props: MenuListProps) => {
   const ref = useRef<HTMLButtonElement>(null)
 
   const [fileNormalInfo, setFileNormalInfo] = useState<FileNormalInfo>(EMPTY_FILE_NORMAL_INFO)
+  const [encodingFileId, setEncodingFileId] = useState<string>()
 
   const hasUnsavedChanges = useEditorStateStore((state) =>
     targetEditorId ? state.idStateMap.get(targetEditorId)?.hasUnsavedChanges : undefined,
@@ -258,6 +262,26 @@ export const MenuList = memo((props: MenuListProps) => {
       items.push({ type: 'divider' })
     }
 
+    if (
+      targetEditorId &&
+      latestFile &&
+      latestFile.kind !== 'new_tab' &&
+      curFileTypeConfig &&
+      isTextfileType(curFileTypeConfig)
+    ) {
+      const { format } = fileSaveCoordinator.getTextMetadata(targetEditorId)
+      const encoding =
+        latestFile.path && !fileSaveCoordinator.getDiskRevision(targetEditorId)
+          ? ''
+          : ` · ${format.encoding.toUpperCase()}${format.bom !== 'none' ? ' BOM' : ''}`
+      items.push({
+        label: `${t('text_encoding.label')}${encoding}`,
+        value: 'text_encoding',
+        handler: () => setEncodingFileId(targetEditorId),
+      })
+      items.push({ type: 'divider' })
+    }
+
     items.push({
       label: t('history.title'),
       value: 'history',
@@ -387,13 +411,22 @@ export const MenuList = memo((props: MenuListProps) => {
   if (!targetEditorId || !fileName) return null
 
   return (
-    <EditorAreaActionButton
-      aria-haspopup='menu'
-      icon={MenuIcon}
-      label={t('action.more')}
-      onClick={handleMenuClick}
-      ref={ref}
-    />
+    <>
+      <EditorAreaActionButton
+        aria-haspopup='menu'
+        icon={MenuIcon}
+        label={t('action.more')}
+        onClick={handleMenuClick}
+        ref={ref}
+      />
+      {encodingFileId ? (
+        <TextEncodingDialog
+          fileId={encodingFileId}
+          key={encodingFileId}
+          onClose={() => setEncodingFileId(undefined)}
+        />
+      ) : null}
+    </>
   )
 })
 

@@ -4,7 +4,18 @@ import { resolveThemeTokens, type ResolvedTheme } from '@markflowy/theme/semanti
 import { PREVIEW_CHANNEL } from '@/themes/preview/protocol'
 import { ThemePreview } from './ThemePreview'
 
-const labels = { preview: 'Preview', loadError: 'Failed', error: 'Error', retry: 'Retry' }
+const labels = {
+  preview: 'Preview',
+  loadError: 'Failed',
+  error: 'Error',
+  retry: 'Retry',
+  previewNotes: 'Notes',
+  previewIdeas: 'Ideas',
+  previewWelcome: 'Welcome',
+  previewSearch: 'Search preview',
+  previewSearchPlaceholder: 'Search…',
+  previewNewNote: 'New note',
+}
 vi.mock('./labels', () => ({ useThemeLabels: () => labels }))
 
 class StubPort {

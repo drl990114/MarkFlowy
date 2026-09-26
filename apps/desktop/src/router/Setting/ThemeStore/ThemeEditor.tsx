@@ -265,7 +265,7 @@ export function ThemeEditor({
                     ...document,
                     variants: [
                       ...document.variants,
-                      { id, name: `${document.name} ${mode}`, mode, tokens: {} },
+                      { id, name: `${document.name} ${labels[mode]}`, mode, tokens: {} },
                     ],
                   })
                   setVariantId(id)

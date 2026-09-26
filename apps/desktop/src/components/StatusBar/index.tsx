@@ -12,7 +12,6 @@ import { ZenModeButton } from './ZenModeButton'
 import { useMedia } from 'react-use'
 import { useTranslation } from '@/i18n'
 import { handleStatusBarKeyDown } from './keyboardNavigation'
-import { TextEncodingButton } from './TextEncodingButton'
 
 export default function StatusBar() {
   const { osType } = useGlobalOSInfo()
@@ -42,7 +41,6 @@ export default function StatusBar() {
         ) : null}
       </LeftContainer>
       <RightContainer>
-        <TextEncodingButton />
         {compact ? null : <EditorCount />}
         <ZenModeButton />
         <StatusBarSeparator />

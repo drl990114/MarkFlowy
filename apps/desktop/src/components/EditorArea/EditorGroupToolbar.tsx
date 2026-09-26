@@ -3,6 +3,7 @@ import styled from 'styled-components'
 import { PreviewToolbar } from './editorToolBar/PreviewToolbar/PreviewToolbar'
 import { SourceCodeToolbar } from './editorToolBar/SourceCodeToolbar/SourceCodeToolbar'
 import { WysiwygToolbar } from './editorToolBar/WysiwygToolbar'
+import { MenuList } from './editorToolBar/components/MenuList'
 import { Button } from '@/components/ui/button'
 import { EditorViewType } from '@/constants/editorViewType'
 import bus from '@/helper/eventBus'
@@ -43,6 +44,12 @@ function EditorGroupToolbar(props: EditorGroupToolbarProps) {
         aria-label={t('document_preview.html_title')}
       >
         {title}
+        <MenuList
+          editorId={editorId}
+          showViewSwitcher={false}
+          showExport={false}
+          showConvertText={false}
+        />
         {[EditorViewType.PREVIEW, EditorViewType.SOURCECODE].map((value) => (
           <Button
             key={value}

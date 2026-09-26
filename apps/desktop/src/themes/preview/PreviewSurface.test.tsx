@@ -12,7 +12,18 @@ vi.mock('@/components/EditorArea/capricornRuntimeAdapter', () => ({
   createCapricornRuntimeAdapter: mocks.create,
 }))
 import { PreviewSurface } from './PreviewSurface'
-const labels = { preview: 'Preview', loadError: 'Failed', error: 'Error', retry: 'Retry' }
+const labels = {
+  preview: 'Preview',
+  loadError: 'Failed',
+  error: 'Error',
+  retry: 'Retry',
+  previewNotes: 'Notes',
+  previewIdeas: 'Ideas',
+  previewWelcome: 'Welcome',
+  previewSearch: 'Search preview',
+  previewSearchPlaceholder: 'Search…',
+  previewNewNote: 'New note',
+}
 function theme(color: string) {
   const document = parseThemeDocument({
     version: 1,
@@ -49,11 +60,13 @@ describe('preview document surface', () => {
         theme={theme('#eeeeee')}
         snippets={[]}
         inspect={false}
-        labels={labels}
+        labels={{ ...labels, previewNewNote: '新建笔记', previewSearch: '搜索预览' }}
         onInspect={inspect}
       />,
     )
     expect(mocks.create).toHaveBeenCalledTimes(1)
+    expect(screen.getByRole('button', { name: '新建笔记' })).toBeTruthy()
+    expect(screen.getByRole('textbox', { name: '搜索预览' })).toBeTruthy()
     expect(mocks.update).toHaveBeenCalledWith(
       expect.objectContaining({
         style: expect.objectContaining({

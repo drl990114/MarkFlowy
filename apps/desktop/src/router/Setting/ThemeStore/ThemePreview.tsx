@@ -43,6 +43,12 @@ export function ThemePreview({
         loadError: current.labels.loadError,
         error: current.labels.error,
         retry: current.labels.retry,
+        previewNotes: current.labels.previewNotes,
+        previewIdeas: current.labels.previewIdeas,
+        previewWelcome: current.labels.previewWelcome,
+        previewSearch: current.labels.previewSearch,
+        previewSearchPlaceholder: current.labels.previewSearchPlaceholder,
+        previewNewNote: current.labels.previewNewNote,
       },
     }
     port.current?.postMessage({ channel: PREVIEW_CHANNEL, session, type: 'update', state })

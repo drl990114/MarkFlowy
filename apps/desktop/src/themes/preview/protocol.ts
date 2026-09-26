@@ -6,6 +6,12 @@ export interface ThemePreviewLabels {
   loadError: string
   error: string
   retry: string
+  previewNotes: string
+  previewIdeas: string
+  previewWelcome: string
+  previewSearch: string
+  previewSearchPlaceholder: string
+  previewNewNote: string
 }
 export interface ThemePreviewState {
   theme: ResolvedTheme
