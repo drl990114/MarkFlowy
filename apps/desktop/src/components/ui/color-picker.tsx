@@ -1,5 +1,5 @@
-import { HexColorInput, HexColorPicker } from 'react-colorful'
-import { useEffect, useRef, useState } from 'react'
+import { HexAlphaColorPicker, HexColorInput, HexColorPicker } from 'react-colorful'
+import { useEffect, useRef, useState, type ComponentProps } from 'react'
 import { cn } from '@/lib/cn'
 import { Button } from '@/components/ui/button'
 import { Popover } from '@/components/ui/popover'
@@ -104,10 +104,7 @@ export function ColorPicker({
           <span>{color}</span>
         </Button>
       </Popover.Trigger>
-      <Popover.Content
-        align='start'
-        className={cn('w-auto space-y-2 p-3', contentClassName)}
-      >
+      <Popover.Content align='start' className={cn('w-auto space-y-2 p-3', contentClassName)}>
         <HexColorPicker
           color={color}
           onChange={handleValueChange}
@@ -124,5 +121,28 @@ export function ColorPicker({
         />
       </Popover.Content>
     </Popover.Root>
+  )
+}
+
+/** Inline picker for composed editors; the popover control above remains the compact field. */
+export type ColorPickerPanelProps = Omit<ComponentProps<'div'>, 'onChange'> & {
+  value: string
+  alpha?: boolean
+  onValueChange: (value: string) => void
+  onValueCommit?: (value: string) => void
+}
+export function ColorPickerPanel({
+  value,
+  alpha = false,
+  onValueChange,
+  onValueCommit,
+  className,
+  ...props
+}: ColorPickerPanelProps) {
+  const Picker = alpha ? HexAlphaColorPicker : HexColorPicker
+  return (
+    <div data-slot='color-picker-panel' className={cn('w-fit', className)} {...props}>
+      <Picker color={value} onChange={onValueChange} onChangeEnd={onValueCommit} />
+    </div>
   )
 }

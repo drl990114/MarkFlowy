@@ -1,3 +1,4 @@
+import { themeLabel } from '@/themes/runtime'
 import { ColorPicker } from '@/components/ui/color-picker'
 import {
   Select,
@@ -90,13 +91,16 @@ export const ThemeSetting = memo(({ revealedSettingKey }: ThemeSettingProps) => 
   const pendingPersistCountRef = useRef(0)
   const latestCommitRef = useRef<{ generation: number; value: string } | undefined>(undefined)
   const themePreviewGenerationRef = useRef(0)
-  const themePreviewSessionRef = useRef<{
-    canPreview: boolean
-    committed: boolean
-    generation: number
-    kind: ThemePreviewKind
-    previewedValue?: string
-  } | undefined>(undefined)
+  const themePreviewSessionRef = useRef<
+    | {
+        canPreview: boolean
+        committed: boolean
+        generation: number
+        kind: ThemePreviewKind
+        previewedValue?: string
+      }
+    | undefined
+  >(undefined)
 
   const handleThemePreviewOpenChange = useCallback(
     (kind: ThemePreviewKind, open: boolean) => {
@@ -221,10 +225,7 @@ export const ThemeSetting = memo(({ revealedSettingKey }: ThemeSettingProps) => 
   useEffect(() => {
     return () => {
       if (previewActiveRef.current) {
-        persistAccentColor(
-          draftAccentColorRef.current,
-          previewGenerationRef.current,
-        )
+        persistAccentColor(draftAccentColorRef.current, previewGenerationRef.current)
       }
       if (themePreviewSessionRef.current?.previewedValue && !themePreviewSessionRef.current.committed) {
         restoreThemePreview()
@@ -349,7 +350,7 @@ export const ThemeSetting = memo(({ revealedSettingKey }: ThemeSettingProps) => 
                   })}
                   value={themeItem.name}
                 >
-                  {themeItem.name}
+                  {themeLabel(themeItem)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -391,7 +392,7 @@ export const ThemeSetting = memo(({ revealedSettingKey }: ThemeSettingProps) => 
                   })}
                   value={themeItem.name}
                 >
-                  {themeItem.name}
+                  {themeLabel(themeItem)}
                 </SelectItem>
               ))}
             </SelectContent>

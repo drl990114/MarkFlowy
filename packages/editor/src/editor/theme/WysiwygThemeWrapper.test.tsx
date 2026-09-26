@@ -23,6 +23,13 @@ function renderWrapperStyles() {
 }
 
 describe('WysiwygThemeWrapper visual overrides', () => {
+  it('applies the host selection foreground as well as its background', () => {
+    const css = renderWrapperStyles()
+
+    expect(css).toMatch(/::selection[^}]*background-color:var\(--rme-editor-selection-bg,/)
+    expect(css).toContain('color:var(--rme-editor-selection-foreground,')
+  })
+
   it('keeps the existing editor values as fallbacks when host variables are absent', () => {
     const css = renderWrapperStyles()
 

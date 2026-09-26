@@ -9,10 +9,7 @@ import {
   type StartupAppearancePersistence,
 } from '@/startup/appearance'
 import { mergeRegisteredTheme, resolveStartupTheme } from '@/startup/appearanceTheme'
-import {
-  discardStaleStartupTheme,
-  runWithoutThemeTransitions,
-} from '@/startup/staleThemeFallback'
+import { discardStaleStartupTheme, runWithoutThemeTransitions } from '@/startup/staleThemeFallback'
 import { builtInThemes, darkTheme, lightTheme, type MfTheme } from '@markflowy/theme'
 import { invoke } from '@tauri-apps/api/core'
 import { getCurrentWindow } from '@tauri-apps/api/window'
@@ -199,14 +196,13 @@ type ThemeStore = {
   setThemeMode: (mode: ThemeMode) => void
   setLightTheme: (themeName: string) => void
   setDarkTheme: (themeName: string) => void
+  applyThemeSelection: (selection: ThemePreviewSelection) => Promise<void>
   previewTheme: (selection: ThemePreviewSelection) => void
   restoreThemePreview: () => void
   setSystemTheme: (theme: SystemTheme) => void
   syncSystemTheme: () => Promise<SystemTheme>
   applyTheme: (persistAppearance?: boolean) => void
-  persistCurrentAppearance: (
-    accentColorSetting?: unknown,
-  ) => Promise<StartupAppearancePersistence>
+  persistCurrentAppearance: (accentColorSetting?: unknown) => Promise<StartupAppearancePersistence>
   commitAccentColor: (value: string) => Promise<StartupAppearancePersistence>
   fallbackStaleStartupTheme: () => MfTheme | undefined
   initFromSettings: (settingData: Record<string, any>) => Promise<void>
@@ -222,6 +218,7 @@ const initialThemes = hasSyntheticStartupTheme
 const useThemeStore = create<ThemeStore>((set, get) => {
   let systemThemeRevision = 0
   let systemThemeRead: Promise<SystemTheme> | undefined
+  let themeSelectionQueue: Promise<void> = Promise.resolve()
   const persistSettingThenAppearance = (
     key: 'dark_theme' | 'light_theme' | 'theme_mode',
     value: string,
@@ -246,13 +243,9 @@ const useThemeStore = create<ThemeStore>((set, get) => {
     themeMode: startupAppearance.preference,
     systemTheme: startupAppearance.resolvedMode,
     lightThemeName:
-      startupAppearance.resolvedMode === 'light'
-        ? startupAppearance.themeId
-        : FALLBACK_LIGHT_THEME,
+      startupAppearance.resolvedMode === 'light' ? startupAppearance.themeId : FALLBACK_LIGHT_THEME,
     darkThemeName:
-      startupAppearance.resolvedMode === 'dark'
-        ? startupAppearance.themeId
-        : FALLBACK_DARK_THEME,
+      startupAppearance.resolvedMode === 'dark' ? startupAppearance.themeId : FALLBACK_DARK_THEME,
 
     applyTheme: (persistAppearance = true) => {
       const { targetTheme, themeMode } = resolveSelectedTheme(get())
@@ -332,9 +325,7 @@ const useThemeStore = create<ThemeStore>((set, get) => {
 
     getCurTheme: () => {
       const { themes, curTheme } = get()
-      return themes.find(
-        (theme) => theme.name === curTheme.name && theme.mode === curTheme.mode,
-      )
+      return themes.find((theme) => theme.name === curTheme.name && theme.mode === curTheme.mode)
     },
 
     insertTheme: (targetTheme) => {
@@ -355,10 +346,7 @@ const useThemeStore = create<ThemeStore>((set, get) => {
           get().applyTheme()
         }
 
-        if (
-          selectedTheme.name === targetTheme.name &&
-          selectedTheme.mode === targetTheme.mode
-        ) {
+        if (selectedTheme.name === targetTheme.name && selectedTheme.mode === targetTheme.mode) {
           runWithoutThemeTransitions(commitThemeRegistration)
         } else {
           set((prev) => ({ ...prev, themes: nextThemes }))
@@ -379,10 +367,7 @@ const useThemeStore = create<ThemeStore>((set, get) => {
       if (delThemeName === lightThemeName) {
         newLight = FALLBACK_LIGHT_THEME
         configWrites.push(
-          appSettingService.writeSettingData(
-            { key: 'light_theme' },
-            FALLBACK_LIGHT_THEME,
-          ),
+          appSettingService.writeSettingData({ key: 'light_theme' }, FALLBACK_LIGHT_THEME),
         )
       }
 
@@ -390,10 +375,7 @@ const useThemeStore = create<ThemeStore>((set, get) => {
       if (delThemeName === darkThemeName) {
         newDark = FALLBACK_DARK_THEME
         configWrites.push(
-          appSettingService.writeSettingData(
-            { key: 'dark_theme' },
-            FALLBACK_DARK_THEME,
-          ),
+          appSettingService.writeSettingData({ key: 'dark_theme' }, FALLBACK_DARK_THEME),
         )
       }
 
@@ -437,6 +419,49 @@ const useThemeStore = create<ThemeStore>((set, get) => {
       persistSettingThenAppearance('dark_theme', themeName)
     },
 
+    applyThemeSelection: (selection) => {
+      const commit = themeSelectionQueue.then(async () => {
+        const previous = get()
+        const next = {
+          themeMode: selection.themeMode ?? previous.themeMode,
+          lightThemeName: selection.lightThemeName ?? previous.lightThemeName,
+          darkThemeName: selection.darkThemeName ?? previous.darkThemeName,
+        }
+        const patch = {
+          ...(selection.themeMode !== undefined && { theme_mode: next.themeMode }),
+          ...(selection.lightThemeName !== undefined && { light_theme: next.lightThemeName }),
+          ...(selection.darkThemeName !== undefined && { dark_theme: next.darkThemeName }),
+        }
+        set(next)
+        get().applyTheme(false)
+        cacheAppliedTheme(get().curTheme, next.themeMode)
+        try {
+          await appSettingService.writeSettingPatch(patch)
+        } catch (error) {
+          const current = get()
+          // A later selection owns the UI; failure of an older request must not undo it.
+          if (
+            Object.entries(next).every(
+              ([key, value]) => current[key as keyof typeof next] === value,
+            )
+          ) {
+            set({
+              themeMode: previous.themeMode,
+              lightThemeName: previous.lightThemeName,
+              darkThemeName: previous.darkThemeName,
+            })
+            get().applyTheme(false)
+            cacheAppliedTheme(get().curTheme, previous.themeMode)
+          }
+          throw error
+        }
+        if (next.themeMode === 'system') await get().syncSystemTheme()
+        await get().persistCurrentAppearance()
+      })
+      themeSelectionQueue = commit.catch(() => undefined)
+      return commit
+    },
+
     setSystemTheme: (theme) => {
       systemThemeRevision += 1
       const { curTheme, systemTheme, themeMode } = get()
@@ -454,13 +479,16 @@ const useThemeStore = create<ThemeStore>((set, get) => {
       if (!systemThemeRead) {
         const revision = systemThemeRevision
         systemThemeRead = (async () => {
-          const windowTheme = get().themeMode === 'system' ? await getWindowSystemTheme() : undefined
-          const nativeTheme = windowTheme || await getNativeSystemTheme()
+          const windowTheme =
+            get().themeMode === 'system' ? await getWindowSystemTheme() : undefined
+          const nativeTheme = windowTheme || (await getNativeSystemTheme())
           const nextTheme = nativeTheme || getBrowserSystemTheme()
           // A theme-change event arriving during IPC is newer than this read.
           if (systemThemeRevision === revision) get().setSystemTheme(nextTheme)
           return get().systemTheme
-        })().finally(() => { systemThemeRead = undefined })
+        })().finally(() => {
+          systemThemeRead = undefined
+        })
       }
       return systemThemeRead
     },

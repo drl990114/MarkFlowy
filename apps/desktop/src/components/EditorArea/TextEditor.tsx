@@ -1,3 +1,4 @@
+import { SemanticThemeContext } from '@/themes/context'
 import { useSnippetLibrary } from '@/features/snippets/store'
 import { getVisibleSnippets } from '@/features/snippets/builtins'
 import type { CapricornSnippetKind } from '@/features/snippets/types'
@@ -90,6 +91,7 @@ import {
   useMemo,
   useRef,
   useState,
+  useContext,
   useSyncExternalStore,
 } from 'react'
 import { flushSync } from 'react-dom'
@@ -1112,6 +1114,7 @@ function TextEditor(props: TextEditorProps) {
     state.settingData.editor_link_edit_mode === 'markdown' ? 'markdown' : 'popover',
   )
   const editorPlaceholder = useAppSettingStore((state) => state.settingData.editor_placeholder)
+  const semanticTheme = useContext(SemanticThemeContext)
   const editorRootFontSize = useAppSettingStore((state) => state.settingData.editor_root_font_size)
   const editorRootLineHeight = useAppSettingStore(
     (state) => state.settingData.editor_root_line_height,
@@ -1556,12 +1559,14 @@ function TextEditor(props: TextEditorProps) {
         const startupRead = activeRef.current ? takeStartupDocumentRead(id, file.path) : undefined
         const preparedSnapshot = startupRead ? await startupRead : undefined
         if (canceled) return
-        const snapshot = preparedSnapshot ?? await readStableFileSnapshot(file.path, {
-          reuseInFlight: true,
-          signal: readController.signal,
-          scope: useEditorStore.getState().folderData?.[0],
-          priority: activeRef.current ? 'foreground' : 'visible',
-        })
+        const snapshot =
+          preparedSnapshot ??
+          (await readStableFileSnapshot(file.path, {
+            reuseInFlight: true,
+            signal: readController.signal,
+            scope: useEditorStore.getState().folderData?.[0],
+            priority: activeRef.current ? 'foreground' : 'visible',
+          }))
         recordEditorOpenStage(openRequestId, 'read-end')
         if (keepNewerContent()) return
         if (snapshot.status === 'unstable') {
@@ -2039,7 +2044,12 @@ function TextEditor(props: TextEditorProps) {
       }
       if (mode === EditorViewType.SOURCECODE) {
         if (delegate && resumeSource) {
-          registerSourceCodeViewResource(id, instanceIdRef.current!, resumeSource, activeRef.current)
+          registerSourceCodeViewResource(
+            id,
+            instanceIdRef.current!,
+            resumeSource,
+            activeRef.current,
+          )
         }
       } else {
         unregisterSourceCodeViewResource(id, instanceIdRef.current!)
@@ -2317,11 +2327,11 @@ function TextEditor(props: TextEditorProps) {
     [currentViewType, delegate],
   )
 
-  const rootFontSize = !editorRootFontSize || editorRootFontSize === 15 ? 16 : editorRootFontSize
+  const themeFontSize = semanticTheme?.['font.editor.size'] ?? `${editorRootFontSize ?? 16}px`
   const rootLineHeight =
-    !editorRootLineHeight || editorRootLineHeight === '1.6' ? '1.65' : editorRootLineHeight
+    semanticTheme?.['font.editor.lineHeight'] ?? (editorRootLineHeight || '1.65')
   const wysiwygRootLineHeight =
-    !editorRootLineHeight || editorRootLineHeight === '1.6' ? '1.7' : editorRootLineHeight
+    semanticTheme?.['font.editor.lineHeight'] ?? (editorRootLineHeight || '1.7')
 
   const editorProps: MfEditorProps = useMemo(
     () => ({
@@ -2341,7 +2351,7 @@ function TextEditor(props: TextEditorProps) {
       offset: { top: 10, left: 16 },
       styleToken: {
         id,
-        rootFontSize: `${rootFontSize}px`,
+        rootFontSize: themeFontSize,
         rootLineHeight,
       },
       onContextMounted: (context: EditorContext) => {
@@ -2367,7 +2377,7 @@ function TextEditor(props: TextEditorProps) {
       wysiwygEditorSpellcheck,
       fileTypeConfig,
       currentViewType,
-      rootFontSize,
+      themeFontSize,
       rootLineHeight,
       savePathReserved,
       externalChangeResolving,
@@ -2677,10 +2687,11 @@ function TextEditor(props: TextEditorProps) {
       readOnly: savePathReserved || externalChangeResolving,
       spellCheck: wysiwygEditorSpellcheck,
       style: {
-        fontSize: editorRootFontSize || 16,
-        lineHeight: editorRootLineHeight || '1.7',
+        '--cap-editor-content-width': 'var(--mf-reader-content-width)',
+        fontSize: themeFontSize,
+        lineHeight: wysiwygRootLineHeight,
         // Preserve the runtime's 14px code / 16px body ratio as text scales.
-        '--cap-code-font-size': `${(editorRootFontSize || 16) * 0.875}px`,
+        '--cap-code-font-size': `calc(${themeFontSize} * 0.875)`,
       },
       typewriter: { enabled: editorTypewriterScroll },
       uploadImageHandler:
@@ -2697,8 +2708,8 @@ function TextEditor(props: TextEditorProps) {
     editorKeybingMap,
     editorKeybindingsLoaded,
     editorPlaceholder,
-    editorRootFontSize,
-    editorRootLineHeight,
+    themeFontSize,
+    wysiwygRootLineHeight,
     editorTypewriterScroll,
     externalChangeResolving,
     savePathReserved,
@@ -3131,7 +3142,9 @@ function TextEditor(props: TextEditorProps) {
             <>
               {delegate && MfEditor && rmeRuntime ? (
                 <div
-                  style={{ display: currentViewType === EditorViewType.SOURCECODE ? undefined : 'none' }}
+                  style={{
+                    display: currentViewType === EditorViewType.SOURCECODE ? undefined : 'none',
+                  }}
                 >
                   <RmeThemeProvider runtime={rmeRuntime}>
                     <AppEditorThemeProvider>

@@ -2,6 +2,12 @@ export * from './theme'
 export { common } from './theme-token'
 export { markflowyLightTheme, markflowyDarkTheme } from './theme-token/markflowy'
 export { webSpecificTokens, webDarkTheme } from './theme-token/markflowy/web'
-export { editorSpecificTokens, editorLightTheme, editorDarkTheme } from './theme-token/markflowy/editor'
+export {
+  editorSpecificTokens,
+  editorLightTheme,
+  editorDarkTheme,
+} from './theme-token/markflowy/editor'
 export { desktopLightTheme, desktopDarkTheme } from './theme-token/markflowy/desktop'
 export type { ThemeToken } from './theme-token'
+
+export * from './semantic'

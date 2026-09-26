@@ -98,6 +98,10 @@ export default defineConfig(async ({ mode }) => {
       minify: 'esbuild',
       sourcemap: false,
       rolldownOptions: {
+        input: {
+          app: fileURLToPath(new URL('./index.html', import.meta.url)),
+          themePreview: fileURLToPath(new URL('./theme-preview.html', import.meta.url)),
+        },
         output: {
           // Preserve dynamic-import subgraphs instead of pulling every dependency
           // into a single eagerly preloaded vendor chunk.
@@ -121,10 +125,19 @@ export default defineConfig(async ({ mode }) => {
     },
     resolve: {
       alias: [
+        // Source alias keeps the authoring model available without rebuilding workspace packages.
+        {
+          find: '@markflowy/theme/semantic',
+          replacement: fileURLToPath(
+            new URL('../../packages/theme/src/semantic/index.ts', import.meta.url),
+          ),
+        },
         { find: '@', replacement: fileURLToPath(new URL('./src', import.meta.url)) },
         {
           find: /^@markflowy\/i18n(?:\/desktop)?$/,
-          replacement: fileURLToPath(new URL('../../packages/i18n/src/desktop.ts', import.meta.url)),
+          replacement: fileURLToPath(
+            new URL('../../packages/i18n/src/desktop.ts', import.meta.url),
+          ),
         },
       ],
       dedupe: ['react', 'react-dom'],

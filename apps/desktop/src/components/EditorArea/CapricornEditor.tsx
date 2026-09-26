@@ -1,3 +1,5 @@
+import { SemanticThemeContext } from '@/themes/context'
+import { capricornStyle } from '@/themes/runtime'
 import { AsyncSurface } from '@/components/AsyncSurface'
 import { useTranslation } from '@/i18n'
 import { InlineInsertPopover } from './InlineInsertPopover'
@@ -85,6 +87,7 @@ export function CapricornEditor({
 }: CapricornEditorProps) {
   const mode = options.mode ?? 'edit'
   const editorTheme = useContext(ThemeContext)
+  const semanticTokens = useContext(SemanticThemeContext)
   const { t } = useTranslation()
   // The private runtime has its own React root, so bridge the host editor
   // theme through its style API (including inline code and CodeMirror blocks).
@@ -93,9 +96,10 @@ export function CapricornEditor({
       fontFamily: editorTheme?.fontFamily,
       '--cap-font-mono': editorTheme?.codemirrorFontFamily,
       '--cap-code-font-family': editorTheme?.codemirrorFontFamily,
+      ...(semanticTokens ? capricornStyle(semanticTokens, 'document') : {}),
       ...options.style,
     }),
-    [editorTheme?.fontFamily, editorTheme?.codemirrorFontFamily, options.style],
+    [editorTheme?.fontFamily, editorTheme?.codemirrorFontFamily, semanticTokens, options.style],
   )
   const containerRef = useRef<HTMLDivElement>(null)
   const adapterRef = useRef<CapricornRuntimeAdapter | null>(null)

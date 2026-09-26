@@ -1,11 +1,14 @@
+import { SemanticThemeContext, useThemeAccentPreview } from '@/themes/context'
+import { desktopVariables, getThemeTokens, isSemanticTheme, legacyTokens } from '@/themes/runtime'
+import { typographyOverrides } from '@/themes/preferences'
 import NiceModal from '@ebay/nice-modal-react'
 import isPropValid from '@emotion/is-prop-valid'
-import { desktopDarkTheme, desktopLightTheme } from '@markflowy/theme'
+import { type desktopLightTheme } from '@markflowy/theme'
 import { releaseStartupPalette } from '@/startup/appearance'
 import { createContext, useContext, useLayoutEffect, useMemo } from 'react'
 import { type IStyleSheetContext, StyleSheetManager, ThemeProvider } from 'styled-components'
 import { ThemeProvider as ZensThemeProvider } from 'zens'
-import { resolveAppThemeTokens, resolveUIFontFamily } from './appThemeTokens'
+import { resolveUIFontFamily } from './appThemeTokens'
 import { EditorThemeContext } from './editorThemeContext'
 import { GlobalStyles, DesktopSpecificStyles } from './globalStyles'
 import {
@@ -35,39 +38,59 @@ const AppThemeProvider: React.FC<BaseComponentProps> = function ({ children }) {
   const settingData = useAppSettingStore((state) => state.settingData)
   const { osType } = useGlobalOSInfo()
 
-  const themeWithDefaults = useMemo(
+  const previewAccent = useThemeAccentPreview((state) => state.color)
+  const accentSetting = previewAccent ?? settingData[THEME_ACCENT_COLOR_SETTING_KEY]
+  const semanticTokens = useMemo(() => {
+    return getThemeTokens(curTheme, {
+      ...(!isSemanticTheme(curTheme) ? { 'font.ui.family': resolveUIFontFamily(osType) } : {}),
+      ...(isThemeAccentColorOverride(accentSetting)
+        ? { 'accent.background': resolveThemeAccentColor(undefined, accentSetting) }
+        : {}),
+      ...typographyOverrides({
+        theme_use_personal_typography: settingData.theme_use_personal_typography,
+        editor_root_font_family: settingData.editor_root_font_family,
+        editor_code_font_family: settingData.editor_code_font_family,
+        editor_root_font_size: settingData.editor_root_font_size,
+        editor_root_line_height: settingData.editor_root_line_height,
+      }),
+    })
+  }, [
+    curTheme,
+    osType,
+    accentSetting,
+    settingData.theme_use_personal_typography,
+    settingData.editor_root_font_family,
+    settingData.editor_code_font_family,
+    settingData.editor_root_font_size,
+    settingData.editor_root_line_height,
+  ])
+  const uiTheme = useMemo(
+    () => legacyTokens(semanticTokens, curTheme.mode),
+    [semanticTokens, curTheme.mode],
+  )
+  const editorTheme = useMemo(
     () => ({
-      ...(curTheme.mode === 'dark' ? desktopDarkTheme : desktopLightTheme),
-      ...curTheme.styledConstants,
-      fontFamily: resolveUIFontFamily(osType),
+      ...uiTheme,
+      fontFamily: semanticTokens['font.editor.family'],
+      bgColor: semanticTokens['editor.background'],
+      primaryFontColor: semanticTokens['editor.foreground'],
     }),
-    [curTheme.mode, curTheme.styledConstants, osType],
+    [uiTheme, semanticTokens],
   )
 
-  const accentColorSetting = settingData[THEME_ACCENT_COLOR_SETTING_KEY]
-  const hasAccentColorOverride = isThemeAccentColorOverride(accentColorSetting)
-  const accentColor = resolveThemeAccentColor(themeWithDefaults.accentColor, accentColorSetting)
-  const { editorTheme, uiTheme } = useMemo(
-    () =>
-      resolveAppThemeTokens({
-        accentColor,
-        fontSettings: {
-          editorCodeFontFamily: settingData.editor_code_font_family,
-          editorRootFontFamily: settingData.editor_root_font_family,
-        },
-        hasAccentColorOverride,
-        mode: curTheme.mode,
-        theme: themeWithDefaults,
-      }),
-    [
-      accentColor,
-      hasAccentColorOverride,
-      curTheme.mode,
-      settingData.editor_code_font_family,
-      settingData.editor_root_font_family,
-      themeWithDefaults,
-    ],
-  )
+  useLayoutEffect(() => {
+    const variables = desktopVariables(semanticTokens)
+    const sheet = document.createElement('style')
+    sheet.dataset.mfSemanticTheme = ''
+    sheet.textContent = `:root {${Object.entries(variables)
+      .map(([name, value]) => `${name}:${value};`)
+      .join('')}}`
+    document.head.insertBefore(
+      sheet,
+      document.getElementById('mf-markdown-theme') ?? document.getElementById('mf-local-themes'),
+    )
+    return () => sheet.remove()
+  }, [semanticTokens])
 
   const themeProp = useMemo(
     () => ({ mode: curTheme.mode, token: uiTheme }),
@@ -108,7 +131,9 @@ const AppThemeProvider: React.FC<BaseComponentProps> = function ({ children }) {
                 $destructiveForeground={destructiveForeground}
                 $primaryForeground={primaryForeground}
               />
-              <NiceModal.Provider>{children}</NiceModal.Provider>
+              <SemanticThemeContext.Provider value={semanticTokens}>
+                <NiceModal.Provider>{children}</NiceModal.Provider>
+              </SemanticThemeContext.Provider>
             </AppEditorThemeContext.Provider>
           </EditorThemeContext.Provider>
         </ZensThemeProvider>

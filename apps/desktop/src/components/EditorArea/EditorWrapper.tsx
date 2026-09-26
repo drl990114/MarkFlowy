@@ -19,7 +19,9 @@ export const EditorWrapper = styled.div<EditorWrapperProps>`
   position: relative;
   display: grid;
   grid-template-columns: 1fr;
-  --rme-editor-content-width: ${(props) => (props.$fullWidth ? '100%' : '760px')};
+  --mf-reader-content-width: ${(props) =>
+    props.$fullWidth ? '100%' : 'var(--mf-theme-editor-content-width, 760px)'};
+  --rme-editor-content-width: var(--mf-reader-content-width);
   --rme-editor-inline-padding: clamp(20px, 5vw, 48px);
   --rme-editor-line-height: ${(props) => props.$rootLineHeight};
   /* .code-contents keeps an 8px-compatible top inset for source and non-Markdown views. */
@@ -35,9 +37,9 @@ export const EditorWrapper = styled.div<EditorWrapperProps>`
   --rme-editor-heading-6-size: 1em;
   --rme-editor-blockquote-border-width: 2px;
   --rme-editor-blockquote-border-color: var(--mf-border);
-  --rme-editor-blockquote-color: var(--mf-foreground-secondary);
-  --rme-editor-inline-code-bg: var(--mf-muted);
-  --rme-editor-code-block-bg: var(--mf-muted);
+  --rme-editor-blockquote-color: var(--mf-theme-editor-muted);
+  --rme-editor-inline-code-bg: var(--mf-theme-editor-code-background);
+  --rme-editor-code-block-bg: var(--mf-theme-editor-code-background);
   --rme-editor-code-block-border-width: 1px;
   --rme-editor-code-block-border-color: var(--mf-border);
   --rme-editor-code-block-radius: 8px;
@@ -45,7 +47,10 @@ export const EditorWrapper = styled.div<EditorWrapperProps>`
   --rme-editor-table-header-bg: var(--mf-muted);
   --rme-editor-table-cell-padding-block: 8px;
   --rme-editor-table-cell-padding-inline: 12px;
-  --rme-editor-selection-bg: var(--mf-primary-soft);
+  --rme-editor-link-color: var(--mf-theme-editor-link);
+  --rme-editor-caret-color: var(--mf-theme-editor-caret);
+  --rme-editor-selection-bg: var(--mf-theme-editor-selection-background);
+  --rme-editor-selection-foreground: var(--mf-theme-editor-selection-foreground);
   --rme-editor-cell-selection-bg: var(--mf-primary-soft);
   --rme-editor-cell-selection-border: var(--mf-ring);
 

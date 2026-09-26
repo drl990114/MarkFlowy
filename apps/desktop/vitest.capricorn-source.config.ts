@@ -60,6 +60,9 @@ export default defineConfig(async (environment) => {
     test: {
       ...base.test,
       include: capricornIntegrationTests,
+      // The source runtime imports its core stylesheet with ?inline. Vitest's
+      // default CSS stub would hide its theme bindings from integration tests.
+      css: { include: [/capricorn\.css/] },
       // Externalized hook libraries resolve React through Node, bypassing Vite's
       // dedupe. Transform both dependency trees so every hook uses the host React.
       server: {

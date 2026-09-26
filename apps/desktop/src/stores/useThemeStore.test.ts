@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
   setTheme: vi.fn(),
   theme: vi.fn(async () => 'light'),
   writeSettingData: vi.fn(),
+  writeSettingPatch: vi.fn(),
 }))
 
 vi.mock('@/helper/extensions', () => ({
@@ -15,7 +16,7 @@ vi.mock('@/helper/extensions', () => ({
 }))
 
 vi.mock('@/services/app-setting', () => ({
-  default: { writeSettingData: mocks.writeSettingData },
+  default: { writeSettingData: mocks.writeSettingData, writeSettingPatch: mocks.writeSettingPatch },
 }))
 
 vi.mock('@tauri-apps/api/core', () => ({ invoke: mocks.invoke }))
@@ -27,10 +28,7 @@ vi.mock('@tauri-apps/api/window', () => ({
   }),
 }))
 
-import useThemeStore, {
-  FALLBACK_DARK_THEME,
-  FALLBACK_LIGHT_THEME,
-} from './useThemeStore'
+import useThemeStore, { FALLBACK_DARK_THEME, FALLBACK_LIGHT_THEME } from './useThemeStore'
 import { STARTUP_APPEARANCE_SESSION_STORAGE_KEY } from '@/startup/appearance'
 
 describe('theme selection preview', () => {
@@ -45,6 +43,7 @@ describe('theme selection preview', () => {
     mocks.theme.mockReset().mockResolvedValue('light')
     mocks.writeSettingData.mockReset()
     mocks.writeSettingData.mockResolvedValue(undefined)
+    mocks.writeSettingPatch.mockReset().mockResolvedValue(undefined)
     window.sessionStorage.clear()
     useThemeStore.setState({
       darkThemeName: FALLBACK_DARK_THEME,
@@ -66,6 +65,58 @@ describe('theme selection preview', () => {
     expect(mocks.writeSettingData).not.toHaveBeenCalled()
   })
 
+  it('commits the selected theme and mode together before persisting appearance', async () => {
+    let release!: () => void
+    mocks.writeSettingPatch.mockImplementationOnce(
+      () =>
+        new Promise<void>((resolve) => {
+          release = resolve
+        }),
+    )
+    const result = useThemeStore
+      .getState()
+      .applyThemeSelection({ darkThemeName: FALLBACK_DARK_THEME, themeMode: 'dark' })
+    await Promise.resolve()
+    expect(useThemeStore.getState().curTheme.mode).toBe('dark')
+    expect(mocks.writeSettingPatch).toHaveBeenCalledOnce()
+    expect(mocks.writeSettingPatch).toHaveBeenCalledWith({
+      dark_theme: FALLBACK_DARK_THEME,
+      theme_mode: 'dark',
+    })
+    expect(mocks.invoke).not.toHaveBeenCalledWith('save_startup_appearance', expect.anything())
+    release()
+    await result
+    expect(mocks.invoke).toHaveBeenCalledWith('save_startup_appearance', {
+      appearance: expect.objectContaining({ preference: 'dark', themeId: FALLBACK_DARK_THEME }),
+    })
+  })
+
+  it('restores the previous selection and cached appearance when the config commit fails', async () => {
+    mocks.writeSettingPatch.mockRejectedValueOnce(new Error('disk full'))
+    await expect(
+      useThemeStore.getState().applyThemeSelection({ themeMode: 'dark' }),
+    ).rejects.toThrow('disk full')
+    expect(useThemeStore.getState().themeMode).toBe('light')
+    expect(useThemeStore.getState().curTheme.mode).toBe('light')
+    expect(
+      JSON.parse(window.sessionStorage.getItem(STARTUP_APPEARANCE_SESSION_STORAGE_KEY) ?? '{}'),
+    ).toMatchObject({ preference: 'light', resolvedMode: 'light' })
+    expect(mocks.invoke).not.toHaveBeenCalledWith('save_startup_appearance', expect.anything())
+  })
+
+  it('does not restore another failed optimistic selection when queued actions both fail', async () => {
+    mocks.writeSettingPatch.mockRejectedValue(new Error('disk full'))
+    const first = useThemeStore.getState().applyThemeSelection({ themeMode: 'dark' })
+    const second = useThemeStore
+      .getState()
+      .applyThemeSelection({ darkThemeName: 'missing/dark', themeMode: 'dark' })
+    const results = await Promise.allSettled([first, second])
+    expect(results.map((result) => result.status)).toEqual(['rejected', 'rejected'])
+    expect(useThemeStore.getState().themeMode).toBe('light')
+    expect(useThemeStore.getState().darkThemeName).toBe(FALLBACK_DARK_THEME)
+    expect(useThemeStore.getState().curTheme.mode).toBe('light')
+  })
+
   it('uses the bootstrap system appearance during settings initialization without another theme query', async () => {
     await useThemeStore.getState().initFromSettings({ theme_mode: 'system' })
     expect(mocks.theme).not.toHaveBeenCalled()
@@ -75,7 +126,11 @@ describe('theme selection preview', () => {
   it('coalesces concurrent theme reads and does not overwrite a newer system event', async () => {
     useThemeStore.setState({ themeMode: 'system', systemTheme: 'light' })
     let resolve!: (theme: string) => void
-    mocks.theme.mockReturnValueOnce(new Promise((done) => { resolve = done }))
+    mocks.theme.mockReturnValueOnce(
+      new Promise((done) => {
+        resolve = done
+      }),
+    )
     const first = useThemeStore.getState().syncSystemTheme()
     const second = useThemeStore.getState().syncSystemTheme()
     expect(first).toBe(second)
@@ -108,10 +163,7 @@ describe('theme selection preview', () => {
     const commit = useThemeStore.getState().commitAccentColor('#AbC')
 
     expect(order).toEqual(['config:start'])
-    expect(mocks.invoke).not.toHaveBeenCalledWith(
-      'save_startup_appearance',
-      expect.anything(),
-    )
+    expect(mocks.invoke).not.toHaveBeenCalledWith('save_startup_appearance', expect.anything())
 
     releaseConfig()
     await expect(commit).resolves.toBe('native')
@@ -137,10 +189,7 @@ describe('theme selection preview', () => {
       'config write failed',
     )
 
-    expect(mocks.invoke).not.toHaveBeenCalledWith(
-      'save_startup_appearance',
-      expect.anything(),
-    )
+    expect(mocks.invoke).not.toHaveBeenCalledWith('save_startup_appearance', expect.anything())
     expect(mocks.loadThemeCss).not.toHaveBeenCalled()
     expect(mocks.removeInsertedTheme).not.toHaveBeenCalled()
     expect(mocks.setTheme).not.toHaveBeenCalled()

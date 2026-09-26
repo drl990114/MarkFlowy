@@ -327,3 +327,56 @@ or inspect pixels. It returns `environmentVerifiedByTool: false`; matching
 artifact provenance, visual readiness, native Chinese IME, split-pane correctness
 and forced-quit recovery still require their own evidence. Source-mode and empty
 workbench behavior are also outside this WYSIWYG numeric gate.
+
+## Capricorn 0.3.0 release integration, 2026-09-26
+
+The published runtime is now installed and pinned in MarkFlowy. This supersedes
+the `0.2.9` installation status recorded above; previous timing reports remain
+historical evidence.
+
+| Artifact | Identity |
+| --- | --- |
+| Package | `@drl990114/capricorn-runtime@0.3.0` |
+| Release tag | `capricorn-v0.3.0` |
+| Capricorn source commit | `99e95beb5fb81e70902f5759175f0ceccd9e6c8d` |
+| Published tarball SHA-256 | `d2b47b330546c09b61deca83372066c950ea2970fc087f224b1011ab5dcde542` |
+| Installed `dist/index.js` SHA-256 | `980a85471b2d2182900f4477dae4d988fb16a8789e4c9cdf0d9ba355e9a5c6a7` |
+
+The [tag release workflow](https://github.com/drl990114/capricorn/actions/runs/36220348380)
+succeeded, including 144 runtime/contract scripts and 16 TypeScript test files.
+The release combines the committed editor-module, selection-foreground and
+Copilot work with the theme contract changes; the unrelated uncommitted bidi
+work is excluded. MarkFlowy's installer verified the downloaded tarball hash
+before installation, then confirmed the installed package name and exact version.
+The entry hash above identifies the installed JavaScript entry and is distinct
+from the tarball hash.
+
+Source and installed-package integration each passed 75/75 tests across 11
+files; the installed-package run completed in 26.13 seconds. Resolver tests
+passed 44/44. Desktop and integration TypeScript checks and changed-file lint
+passed. Both integration suites retain existing React `flushSync` and synchronous
+unmount warnings; these were successful test runs, not warning-free runs.
+
+These are source, package, type and DOM-test results. No MarkFlowy build was
+run for this integration, and there are no new Tauri/WebView visual, native IME,
+startup timing or P95 measurements. The runtime release build in its tag CI is
+separate from a MarkFlowy application build.
+
+Run checks serially from the MarkFlowy root, with a 4 GB Node heap and one test
+worker. For the source command, explicitly point `CAPRICORN_SOURCE_ROOT` to a
+clean `capricorn-v0.3.0` checkout at the source commit listed above. The sibling
+working tree contains additional unpublished bidi changes and is not the release
+source used for this validation. Resolve the checkout's real path as shown below;
+on macOS, `/var` and `/private/var` aliases must not resolve the same source tree
+under different importer paths:
+
+```sh
+NODE_OPTIONS=--max-old-space-size=4096 fnm exec --using=24 yarn workspace @markflowy/desktop build:types
+NODE_OPTIONS=--max-old-space-size=4096 fnm exec --using=24 yarn workspace @markflowy/desktop exec tsc --noEmit -p tsconfig.capricorn-integration.json
+NODE_OPTIONS=--max-old-space-size=4096 fnm exec --using=24 yarn workspace @markflowy/desktop exec vitest run capricornRuntimeResolver.test.ts --maxWorkers=1 --no-file-parallelism
+NODE_OPTIONS=--max-old-space-size=4096 CAPRICORN_SOURCE_ROOT="$(realpath /absolute/path/to/capricorn-v0.3.0)" fnm exec --using=24 yarn workspace @markflowy/desktop exec vitest run --config vitest.capricorn-source.config.ts --maxWorkers=1 --no-file-parallelism
+NODE_OPTIONS=--max-old-space-size=4096 fnm exec --using=24 yarn workspace @markflowy/desktop exec vitest run --config vitest.capricorn-published.config.ts --maxWorkers=1 --no-file-parallelism
+```
+
+`build:types` runs `tsc --noEmit`; it does not build application assets. Use the
+repository's ESLint 8 runner only for changed TypeScript files, without `--fix`.

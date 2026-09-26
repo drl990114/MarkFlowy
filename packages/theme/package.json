@@ -13,9 +13,16 @@
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "exports": {
-    "import": "./dist/index.mjs",
-    "types": "./dist/index.d.ts",
-    "browser": "./dist/index.min.js"
+    ".": {
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.ts",
+      "browser": "./dist/index.min.js"
+    },
+    "./semantic": {
+      "types": "./dist/semantic/index.d.ts",
+      "import": "./dist/index.mjs",
+      "browser": "./dist/index.min.js"
+    }
   },
   "files": [
     "dist",

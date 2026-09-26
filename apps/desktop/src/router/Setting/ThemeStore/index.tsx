@@ -1,552 +1,476 @@
+import { useEffect, useRef, useState } from 'react'
+import { open, save } from '@tauri-apps/plugin-dialog'
+import { readTextFile, writeTextFile } from '@tauri-apps/plugin-fs'
+import { fetch as nativeFetch } from '@tauri-apps/plugin-http'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
-import { AsyncSurface, type AsyncSurfaceState } from '@/components/AsyncSurface'
-import { loadLocalThemeCss } from '@/helper/extensions'
-import { logger } from '@/helper/logger'
-import { useTranslation } from '@/i18n'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { dialog } from '@/services/dialog'
-import useExtensionsManagerStore from '@/stores/useExtensionsManagerStore'
 import useThemeStore from '@/stores/useThemeStore'
-import { invoke } from '@tauri-apps/api/core'
-import { open } from '@tauri-apps/plugin-dialog'
-import { Fragment, type ReactNode, useCallback, useEffect, useRef, useState } from 'react'
-import { AlertCircleIcon, LoaderCircleIcon } from 'lucide-react'
-import styled from 'styled-components'
+import useAppSettingStore from '@/stores/useAppSettingStore'
+import appSettingService from '@/services/app-setting'
+import { useThemeLibrary, type CssSnippet } from '@/themes/library'
+import { copyTheme, isSemanticTheme, themeLabel } from '@/themes/runtime'
+import {
+  parseThemeDocument,
+  themeDocumentSchema,
+  type ThemeDocument,
+} from '@markflowy/theme/semantic'
 import themeData from '../../../../../../community-themes.json'
-import { useThemeOperations } from './useThemeOperations'
-
-const SectionTitle = styled.h3`
-  font-size: var(--mf-ui-font-body);
-  font-weight: 600;
-  line-height: var(--mf-ui-line-height-body);
-  margin: 16px 0 8px;
-  color: var(--mf-muted-foreground);
-
-  &:first-child {
-    margin-top: 0;
-  }
-`
-
-const ThemeStoreContent = styled.div`
-  min-width: 0;
-  max-width: 100%;
-`
-
-const LocalThemeContainer = styled.div`
-  width: 100%;
-  max-width: 100%;
-  margin-bottom: 16px;
-  overflow: hidden;
-  background-color: var(--mf-card);
-  border: 1px solid var(--mf-border);
-  border-radius: var(--mf-radius);
-  box-sizing: border-box;
-`
-
-const LocalThemeRow = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  min-width: 0;
-  padding: 8px 12px;
-  border-bottom: 1px solid var(--mf-border);
-
-  &:last-child {
-    border-bottom: none;
-  }
-
-  &:hover {
-    background-color: var(--mf-muted);
-  }
-`
-
-const LocalThemeInfo = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-`
-
-const LocalThemeName = styled.span`
-  font-size: var(--mf-ui-font-control);
-  line-height: var(--mf-ui-line-height-control);
-  font-weight: 500;
-  color: var(--mf-foreground);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-`
-
-const LocalThemeActions = styled.div`
-  display: flex;
-  flex-shrink: 0;
-  gap: 8px;
-`
-
-const TableContainer = styled.div`
-  width: 100%;
-  max-width: 100%;
-  margin-bottom: 16px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  background-color: var(--mf-card);
-  border: 1px solid var(--mf-border);
-  border-radius: var(--mf-radius);
-  box-sizing: border-box;
-
-  &::-webkit-scrollbar {
-    height: 8px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: var(--mf-scrollbar-track);
-    border-radius: 4px;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: var(--mf-scrollbar-thumb);
-    border-radius: 4px;
-  }
-`
-
-const Table = styled.table`
-  width: 100%;
-  min-width: 620px;
-  border-collapse: collapse;
-  font-size: var(--mf-font-sm);
-  table-layout: fixed;
-`
-
-const TableHead = styled.thead`
-  background-color: var(--mf-muted);
-`
-
-const TableRow = styled.tr`
-  border-bottom: 1px solid var(--mf-border);
-
-  &:last-child {
-    border-bottom: 0;
-  }
-
-  &:hover {
-    background-color: var(--mf-muted);
-  }
-`
-
-const TableCell = styled.th<{ width?: string }>`
-  width: ${(props) => props.width || 'auto'};
-  padding: 7px 10px;
-  text-align: left;
-  font-weight: 600;
-  white-space: nowrap;
-  font-size: var(--mf-ui-font-control);
-  line-height: var(--mf-ui-line-height-control);
-  color: var(--mf-foreground);
-  box-sizing: border-box;
-`
-
-const TableDataCell = styled.td`
-  padding: 7px 10px;
-  text-align: left;
-  font-size: var(--mf-ui-font-control);
-  line-height: var(--mf-ui-line-height-control);
-  color: var(--mf-foreground);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  vertical-align: top;
-  overflow-wrap: anywhere;
-
-  &:first-child {
-    font-weight: 500;
-  }
-
-  &:nth-child(4) {
-    color: var(--mf-text-secondary);
-  }
-`
-
-const Toolbar = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  min-height: 36px;
-  padding: 4px 8px;
-  border-bottom: 1px solid var(--mf-border);
-  box-sizing: border-box;
-`
-
-const InstalledOnlyControl = styled.label`
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--mf-foreground);
-  cursor: pointer;
-  font-size: var(--mf-ui-font-control);
-  line-height: var(--mf-ui-line-height-control);
-`
-
-const EmptyState = styled.div`
-  padding: 14px 12px;
-  color: var(--mf-muted-foreground);
-  font-size: var(--mf-ui-font-control);
-  line-height: var(--mf-ui-line-height-control);
-  text-align: center;
-`
-
+import { ThemeEditor } from './ThemeEditor'
+import { readThemeDrafts, themeDraftKey, type ThemeDraft } from './drafts'
+import { useThemeLabels } from './labels'
 export interface ThemeItem {
-  name: string
-  mode: ('dark' | 'light')[]
-  description: string
-  packageName: string
-  author: string
-  repository: string
-}
-
-export interface LocalTheme {
   id: string
   name: string
-  path: string
-  css_content: string
+  author: string
+  url: string
+  version: string
 }
-
 export function ThemeStore() {
-  const storeThemes = (themeData || []) as unknown as ThemeItem[]
-  const { themes: installedThemes, deleteTheme } = useThemeStore()
-  const [onlyInstalled, setOnlyInstalled] = useState(false)
-  const [localThemes, setLocalThemes] = useState<LocalTheme[]>([])
-  const localThemesRef = useRef(localThemes)
-  const loadRequest = useRef(0)
-  const [localState, setLocalState] = useState<AsyncSurfaceState<true>>({ status: 'loading' })
-  const { operations, run } = useThemeOperations()
-  const { t } = useTranslation()
-
-  const loadLocalThemes = useCallback(async () => {
-    const request = ++loadRequest.current
-    setLocalState({ status: 'loading' })
-    try {
-      const loadedThemes = await invoke<LocalTheme[]>('load_local_themes')
-      if (request !== loadRequest.current) return
-      localThemesRef.current = loadedThemes
-      setLocalThemes(loadedThemes)
-      setLocalState({ status: 'ready', data: true })
-    } catch (error) {
-      if (request !== loadRequest.current) return
-      logger.error('Failed to load local themes:', error)
-      setLocalState({
-        status: 'error',
-        title: t('common.error'),
-        description: error instanceof Error ? error.message : String(error),
-        retry: () => void loadLocalThemes(),
-      })
-    }
-  }, [t])
-
+  const labels = useThemeLabels()
+  const library = useThemeLibrary()
+  const personalTypography = useAppSettingStore(
+    (state) => state.settingData.theme_use_personal_typography !== false,
+  )
+  const themes = useThemeStore((state) => state.themes)
+  const current = useThemeStore((state) => state.curTheme)
+  const [editing, setEditing] = useState<ThemeDraft>()
+  const [snippet, setSnippet] = useState<CssSnippet>()
+  const [drafts, setDrafts] = useState(readThemeDrafts)
+  const openEditor = (document: ThemeDocument, variantId?: string) => {
+    // Opening an existing theme resumes its unsaved session instead of replacing it.
+    const existing = readThemeDrafts().find((draft) => draft.key === themeDraftKey(document.id))
+    setEditing(
+      existing ?? {
+        key: themeDraftKey(document.id),
+        session: { version: 1, document, variantId: variantId ?? document.variants[0].id },
+      },
+    )
+  }
+  const [error, setError] = useState('')
+  const lock = useRef(false)
+  const [pending, setPending] = useState(false)
+  const [installedOnly, setInstalledOnly] = useState(false)
+  const { loaded, reload } = library
   useEffect(() => {
-    void loadLocalThemes()
-    return () => {
-      loadRequest.current += 1
+    if (!loaded) void reload().catch((cause) => setError(String(cause)))
+  }, [loaded, reload])
+  const run = async (operation: () => Promise<void>) => {
+    if (lock.current) return
+    lock.current = true
+    setPending(true)
+    setError('')
+    try {
+      await operation()
+    } catch (cause) {
+      setError(String(cause))
+    } finally {
+      lock.current = false
+      setPending(false)
     }
-  }, [loadLocalThemes])
-
-  const updateLocalThemes = (update: (previous: LocalTheme[]) => LocalTheme[]) => {
-    const nextThemes = update(localThemesRef.current)
-    localThemesRef.current = nextThemes
-    setLocalThemes(nextThemes)
-    loadLocalThemeCss(nextThemes.map((themeItem) => themeItem.css_content))
   }
-
-  const handleImportLocalTheme = () =>
-    run('import', async () => {
-      const selected = await open({
-        filters: [
-          {
-            name: 'CSS',
-            extensions: ['css'],
-          },
+  const persist = async (document: ThemeDocument, variantId?: string) => {
+    const existing = useThemeLibrary.getState().documents.some((item) => item.id === document.id)
+    if (existing && editing?.session.document.id !== document.id) {
+      const choice = await dialog.confirm({
+        title: labels.title,
+        content: labels.replace,
+        actions: [
+          { id: 'cancel', label: labels.cancel },
+          { id: 'copy', label: labels.saveCopy },
+          { id: 'replace', label: labels.replaceAction, primary: true },
         ],
-        fileAccessMode: 'scoped',
       })
-
-      if (selected) {
-        const newTheme = await invoke<LocalTheme>('import_local_theme', {
-          filePath: selected,
-        })
-        updateLocalThemes((previous) => [...previous, newTheme])
-      }
-    })
-
-  const handleRemoveLocalTheme = (localTheme: LocalTheme) =>
-    run(
-      `local:${localTheme.id}`,
-      async () => {
-        await invoke('remove_local_theme', { id: localTheme.id })
-        updateLocalThemes((previous) =>
-          previous.filter((themeItem) => themeItem.id !== localTheme.id),
-        )
-      },
-      async () =>
-        (await dialog.confirm({
-          title: t('common.delete'),
-          content: t('settings.themeStore.remove_local_theme', { name: localTheme.name }),
-          actions: [
-            { id: 'cancel', label: t('common.cancel') },
-            { id: 'confirm', label: t('common.delete'), primary: true, danger: true },
-          ],
-        })) === 'confirm',
-    )
-
-  const isInstalled = (packageName: string) => {
-    // Check if theme exists in installed themes by checking if any installed theme matches the name
-    // Note: Ideally we should match by package name but current theme store only has name
-    return installedThemes.some(
-      (installedTheme) =>
-        installedTheme.name === packageName ||
-        installedTheme.name ===
-          storeThemes.find((storeTheme) => storeTheme.packageName === packageName)?.name,
-    )
-  }
-
-  const handleInstall = (theme: ThemeItem) =>
-    run(
-      `online:${theme.packageName}`,
-      async () => {
-        await invoke('download_theme', { name: theme.packageName })
-        const res = await invoke<Record<string, unknown>[]>('load_themes')
-        if (Array.isArray(res)) {
-          res.forEach((extension) => {
-            useExtensionsManagerStore.getState().loadExtension(extension)
-          })
-        }
-      },
-      async () =>
-        (await dialog.confirm({
-          title: t('settings.themeStore.install_theme'),
-          content: t('settings.themeStore.install_theme_confirm', { name: theme.name }),
-          actions: [
-            { id: 'cancel', label: t('common.cancel') },
-            { id: 'confirm', label: t('common.confirm'), primary: true },
-          ],
-        })) === 'confirm',
-    )
-
-  const handleUninstall = (theme: ThemeItem) =>
-    run(
-      `online:${theme.packageName}`,
-      async () => {
-        await invoke('remove_theme', { name: theme.packageName })
-
-        const installedTheme = installedThemes.find(
-          (candidateTheme) =>
-            candidateTheme.name === theme.packageName || candidateTheme.name === theme.name,
-        )
-
-        if (installedTheme) {
-          deleteTheme(installedTheme.name)
-        } else {
-          deleteTheme(theme.name)
-          deleteTheme(theme.packageName)
-        }
-      },
-      async () =>
-        (await dialog.confirm({
-          title: t('settings.themeStore.uninstall_theme'),
-          content: t('settings.themeStore.uninstall_theme_confirm', { name: theme.name }),
-          actions: [
-            { id: 'cancel', label: t('common.cancel') },
-            { id: 'confirm', label: t('common.confirm'), primary: true, danger: true },
-          ],
-        })) === 'confirm',
-    )
-
-  const filteredThemes = storeThemes.filter((theme) => {
-    if (onlyInstalled) {
-      return isInstalled(theme.packageName)
+      if (choice === 'cancel' || !choice) return false
+      if (choice === 'copy') document = { ...document, id: `personal-${crypto.randomUUID()}` }
+    }
+    await library.mutate({ type: 'save', document, replace: existing })
+    if (variantId) {
+      const variant =
+        document.variants.find((item) => item.id === variantId) ?? document.variants[0]
+      const store = useThemeStore.getState()
+      await store.applyThemeSelection({
+        [variant.mode === 'light' ? 'lightThemeName' : 'darkThemeName']:
+          `${document.id}/${variant.id}`,
+        themeMode: variant.mode,
+      })
     }
     return true
-  })
-
+  }
+  const exportJson = async (value: unknown, name = 'theme.json') => {
+    const path = await save({
+      defaultPath: name,
+      filters: [{ name: 'JSON', extensions: ['json'] }],
+    })
+    if (path) await writeTextFile(path, JSON.stringify(value, null, 2))
+  }
+  const readImport = async (extension: 'json' | 'css') => {
+    const path = await open({
+      multiple: false,
+      filters: [{ name: extension.toUpperCase(), extensions: [extension] }],
+      fileAccessMode: 'scoped',
+    })
+    return typeof path === 'string'
+      ? { name: path.split(/[\\/]/).pop() ?? extension, text: await readTextFile(path) }
+      : undefined
+  }
+  if (editing)
+    return (
+      <ThemeEditor
+        key={editing.key}
+        initial={editing.session.document}
+        initialVariantId={editing.session.variantId}
+        initialJson={editing.session.json}
+        draftKey={editing.key}
+        onClose={() => {
+          setEditing(undefined)
+          setDrafts(readThemeDrafts())
+        }}
+        onSave={persist}
+        onExport={(document) => exportJson(document, `${document.id}.json`)}
+      />
+    )
+  const catalog = themeData as ThemeItem[]
   return (
-    <ThemeStoreContent>
-      <SectionTitle>{t('settings.themeStore.local_css_files')}</SectionTitle>
-      <LocalThemeContainer>
-        <Toolbar>
-          <Button
-            aria-busy={operations.import?.pending || undefined}
-            disabled={localState.status !== 'ready' || operations.import?.pending}
-            type='button'
-            size='sm'
-            variant='outline'
-            onClick={handleImportLocalTheme}
-          >
-            <OperationLabel pending={operations.import?.pending}>
-              {t('common.import')} CSS
-            </OperationLabel>
-          </Button>
-        </Toolbar>
-        <OperationError error={operations.import?.error} onRetry={handleImportLocalTheme} />
-        <AsyncSurface
-          retryLabel={t('common.retry')}
-          state={
-            localState.status === 'loading'
-              ? { status: 'loading', label: t('common.fetching') }
-              : localState
-          }
-        >
-          {() =>
-            localThemes.length === 0 ? (
-              <EmptyState role='status'>{t('settings.themeStore.no_local_themes')}</EmptyState>
-            ) : (
-              localThemes.map((localTheme) => (
-                <Fragment key={localTheme.id}>
-                  <LocalThemeRow
-                    aria-busy={operations[`local:${localTheme.id}`]?.pending || undefined}
-                  >
-                    <LocalThemeInfo>
-                      <LocalThemeName>{localTheme.name}</LocalThemeName>
-                    </LocalThemeInfo>
-                    <LocalThemeActions>
-                      <Button
-                        type='button'
-                        size='sm'
-                        variant='destructive'
-                        disabled={operations[`local:${localTheme.id}`]?.pending}
-                        onClick={() => handleRemoveLocalTheme(localTheme)}
-                      >
-                        <OperationLabel pending={operations[`local:${localTheme.id}`]?.pending}>
-                          {t('common.delete')}
-                        </OperationLabel>
-                      </Button>
-                    </LocalThemeActions>
-                  </LocalThemeRow>
-                  <OperationError
-                    error={operations[`local:${localTheme.id}`]?.error}
-                    onRetry={() => handleRemoveLocalTheme(localTheme)}
-                  />
-                </Fragment>
-              ))
+    <div className='space-y-6'>
+      <label className='flex items-center gap-2'>
+        <Checkbox
+          checked={personalTypography}
+          disabled={pending}
+          onCheckedChange={(value) =>
+            void run(() =>
+              appSettingService.writeSettingData(
+                { key: 'theme_use_personal_typography' },
+                value === true,
+              ),
             )
           }
-        </AsyncSurface>
-      </LocalThemeContainer>
-
-      <SectionTitle>{t('settings.themeStore.online_themes')}</SectionTitle>
-      <TableContainer>
-        <Toolbar>
-          <InstalledOnlyControl htmlFor='theme-store-only-installed'>
-            <Checkbox
-              id='theme-store-only-installed'
-              checked={onlyInstalled}
-              onCheckedChange={(checked) => setOnlyInstalled(checked === true)}
-            />
-            <span>{t('settings.themeStore.only_installed')}</span>
-          </InstalledOnlyControl>
-        </Toolbar>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell width='19%'>{t('settings.themeStore.name')}</TableCell>
-              <TableCell width='13%'>{t('settings.themeStore.mode')}</TableCell>
-              <TableCell width='15%'>{t('settings.themeStore.author')}</TableCell>
-              <TableCell width='37%'>{t('settings.themeStore.description')}</TableCell>
-              <TableCell width='16%'>{t('settings.themeStore.action')}</TableCell>
-            </TableRow>
-          </TableHead>
-          <tbody>
-            {filteredThemes.map((theme) => {
-              const installed = isInstalled(theme.packageName)
-              const operation = operations[`online:${theme.packageName}`]
-              return (
-                <Fragment key={theme.packageName}>
-                  <TableRow aria-busy={operation?.pending || undefined}>
-                    <TableDataCell>{theme.name}</TableDataCell>
-                    <TableDataCell>{theme.mode.join(', ')}</TableDataCell>
-                    <TableDataCell>{theme.author}</TableDataCell>
-                    <TableDataCell>{theme.description}</TableDataCell>
-                    <TableDataCell>
-                      {installed ? (
-                        <Button
-                          type='button'
-                          size='sm'
-                          variant='destructive'
-                          disabled={operation?.pending}
-                          onClick={() => handleUninstall(theme)}
-                        >
-                          <OperationLabel pending={operation?.pending}>
-                            {t('settings.themeStore.uninstall')}
-                          </OperationLabel>
-                        </Button>
-                      ) : (
-                        <Button
-                          type='button'
-                          size='sm'
-                          variant='outline'
-                          disabled={operation?.pending}
-                          onClick={() => handleInstall(theme)}
-                        >
-                          <OperationLabel pending={operation?.pending}>
-                            {t('settings.themeStore.download')}
-                          </OperationLabel>
-                        </Button>
-                      )}
-                    </TableDataCell>
-                  </TableRow>
-                  {operation?.error ? (
-                    <tr>
-                      <td colSpan={5}>
-                        <OperationError
-                          error={operation.error}
-                          onRetry={() =>
-                            installed ? handleUninstall(theme) : handleInstall(theme)
-                          }
-                        />
-                      </td>
-                    </tr>
-                  ) : null}
-                </Fragment>
-              )
-            })}
-            {filteredThemes.length === 0 ? (
-              <tr>
-                <td colSpan={5}>
-                  <EmptyState role='status'>{t('search.search_empty')}</EmptyState>
-                </td>
-              </tr>
-            ) : null}
-          </tbody>
-        </Table>
-      </TableContainer>
-    </ThemeStoreContent>
-  )
-}
-
-function OperationLabel({ pending, children }: { pending?: boolean; children: ReactNode }) {
-  return (
-    <span className='relative inline-flex items-center justify-center'>
-      <span className={pending ? 'opacity-0' : undefined}>{children}</span>
-      {pending ? (
-        <LoaderCircleIcon
-          aria-hidden='true'
-          className='absolute size-3.5 animate-spin motion-reduce:animate-none'
         />
-      ) : null}
-    </span>
-  )
-}
-
-function OperationError({ error, onRetry }: { error?: string; onRetry: () => void }) {
-  const { t } = useTranslation()
-  if (!error) return null
-  return (
-    <div
-      className='flex min-w-0 items-start gap-2 border-t border-border bg-destructive/5 px-3 py-2 text-ui-caption'
-      role='alert'
-    >
-      <AlertCircleIcon aria-hidden='true' className='mt-px size-3.5 shrink-0 text-destructive' />
-      <span className='min-w-0 flex-1 break-words text-content-secondary'>{error}</span>
-      <Button className='shrink-0' onClick={onRetry} size='sm' variant='outline'>
-        {t('common.retry')}
-      </Button>
+        {labels.personalTypography}
+      </label>
+      <div className='flex flex-wrap gap-2'>
+        <Button
+          disabled={pending}
+          onClick={() =>
+            openEditor(
+              copyTheme(current),
+              isSemanticTheme(current) ? current.variant.id : undefined,
+            )
+          }
+        >
+          {labels.create}
+        </Button>
+        <Button
+          variant='outline'
+          disabled={pending}
+          onClick={() =>
+            void run(async () => {
+              const file = await readImport('json')
+              if (file) {
+                await persist(parseThemeDocument(JSON.parse(file.text)))
+              }
+            })
+          }
+        >
+          {labels.import}
+        </Button>
+        <Button
+          variant='ghost'
+          onClick={() =>
+            void run(() => exportJson(themeDocumentSchema, 'markflowy-theme.schema.json'))
+          }
+        >
+          {labels.schema}
+        </Button>
+      </div>
+      {(error || library.error) && (
+        <div role='alert' className='text-destructive'>
+          {error || library.error}
+          <Button variant='outline' onClick={() => void run(library.reload)}>
+            {labels.retry}
+          </Button>
+        </div>
+      )}
+      {drafts.map((draft) => (
+        <div
+          key={draft.key}
+          className='flex flex-wrap items-center gap-2 rounded-md border border-border p-3'
+        >
+          <span className='min-w-0 flex-1 truncate'>
+            {labels.draft} · {draft.session.document.name}
+          </span>
+          <Button variant='outline' disabled={pending} onClick={() => setEditing(draft)}>
+            {labels.resume}
+          </Button>
+          <Button
+            variant='ghost'
+            disabled={pending}
+            onClick={() => {
+              try {
+                sessionStorage.removeItem(draft.key)
+                setDrafts(readThemeDrafts())
+              } catch (cause) {
+                setError(String(cause))
+              }
+            }}
+          >
+            {labels.discard}
+          </Button>
+        </div>
+      ))}
+      <section aria-label={labels.title} className='space-y-2'>
+        <h3>{labels.title}</h3>
+        {themes.map((theme) => (
+          <div
+            key={theme.name}
+            className='flex flex-wrap items-center gap-2 rounded-md border border-border p-3'
+          >
+            <span className='min-w-0 flex-1 truncate'>
+              {themeLabel(theme)} <span className='text-muted-foreground'>· {theme.mode}</span>
+            </span>
+            <Button
+              size='sm'
+              variant='outline'
+              disabled={pending}
+              onClick={() =>
+                void run(() =>
+                  useThemeStore.getState().applyThemeSelection({
+                    [theme.mode === 'light' ? 'lightThemeName' : 'darkThemeName']: theme.name,
+                    themeMode: theme.mode,
+                  }),
+                )
+              }
+            >
+              {labels.apply}
+            </Button>
+            <Button
+              size='sm'
+              variant='outline'
+              disabled={pending}
+              onClick={() =>
+                openEditor(copyTheme(theme), isSemanticTheme(theme) ? theme.variant.id : undefined)
+              }
+            >
+              {labels.copy}
+            </Button>
+            {isSemanticTheme(theme) && (
+              <>
+                <Button
+                  size='sm'
+                  variant='ghost'
+                  disabled={pending}
+                  onClick={() => openEditor(structuredClone(theme.document), theme.variant.id)}
+                >
+                  {labels.edit}
+                </Button>
+                <Button
+                  size='sm'
+                  variant='destructive'
+                  disabled={pending}
+                  onClick={() =>
+                    void run(async () => {
+                      if (
+                        (await dialog.confirm({
+                          title: labels.remove,
+                          content: labels.deleteConfirm,
+                          actions: [
+                            { id: 'cancel', label: labels.cancel },
+                            { id: 'remove', label: labels.remove, primary: true, danger: true },
+                          ],
+                        })) === 'remove'
+                      )
+                        await library.mutate({ type: 'remove', id: theme.document.id })
+                    })
+                  }
+                >
+                  {labels.remove}
+                </Button>
+              </>
+            )}
+          </div>
+        ))}
+      </section>
+      <section className='space-y-2' aria-label={labels.snippets}>
+        <div className='flex flex-wrap items-center gap-2'>
+          <h3 className='flex-1'>{labels.snippets}</h3>
+          <Button
+            size='sm'
+            variant='outline'
+            disabled={pending}
+            onClick={() =>
+              setSnippet({
+                id: crypto.randomUUID(),
+                name: labels.untitledCss,
+                css: '',
+                enabled: false,
+              })
+            }
+          >
+            {labels.createCss}
+          </Button>
+          <Button
+            size='sm'
+            variant='outline'
+            disabled={pending}
+            onClick={() =>
+              void run(async () => {
+                const file = await readImport('css')
+                if (file)
+                  await library.mutate({
+                    type: 'saveSnippet',
+                    snippet: {
+                      id: crypto.randomUUID(),
+                      name: file.name,
+                      css: file.text,
+                      enabled: false,
+                    },
+                  })
+              })
+            }
+          >
+            {labels.addCss}
+          </Button>
+          <Button
+            size='sm'
+            variant='outline'
+            disabled={pending}
+            onClick={() => void run(() => library.mutate({ type: 'disableSnippets' }))}
+          >
+            {labels.disableAll}
+          </Button>
+        </div>
+        {!library.snippets.length && <p className='text-muted-foreground'>{labels.noSnippets}</p>}
+        {library.snippets.map((item, index) => (
+          <div
+            key={item.id}
+            className='flex flex-wrap items-center gap-2 rounded-md border border-border p-2'
+          >
+            <Checkbox
+              aria-label={`${labels.enabled}: ${item.name}`}
+              checked={item.enabled}
+              disabled={pending}
+              onCheckedChange={(enabled) =>
+                void run(() =>
+                  library.mutate({
+                    type: 'saveSnippet',
+                    snippet: { ...item, enabled: enabled === true },
+                  }),
+                )
+              }
+            />
+            <span className='min-w-0 flex-1 truncate'>{item.name}</span>
+            <Button
+              size='sm'
+              variant='ghost'
+              disabled={index === 0 || pending}
+              onClick={() =>
+                void run(() => library.mutate({ type: 'moveSnippet', id: item.id, offset: -1 }))
+              }
+            >
+              {labels.up}
+            </Button>
+            <Button
+              size='sm'
+              variant='ghost'
+              disabled={index === library.snippets.length - 1 || pending}
+              onClick={() =>
+                void run(() => library.mutate({ type: 'moveSnippet', id: item.id, offset: 1 }))
+              }
+            >
+              {labels.down}
+            </Button>
+            <Button
+              size='sm'
+              variant='outline'
+              disabled={pending}
+              onClick={() => setSnippet({ ...item })}
+            >
+              {labels.editCss}
+            </Button>
+            <Button
+              size='sm'
+              variant='destructive'
+              disabled={pending}
+              onClick={() => void run(() => library.mutate({ type: 'removeSnippet', id: item.id }))}
+            >
+              {labels.remove}
+            </Button>
+          </div>
+        ))}
+        {snippet && (
+          <fieldset
+            disabled={pending}
+            inert={pending}
+            className='m-0 min-w-0 space-y-2 rounded-md border border-border p-3'
+          >
+            <Input
+              aria-label={labels.name}
+              value={snippet.name}
+              onChange={(event) => setSnippet({ ...snippet, name: event.target.value })}
+            />
+            <Textarea
+              aria-label={labels.css}
+              className='h-64 font-mono'
+              value={snippet.css}
+              onChange={(event) => setSnippet({ ...snippet, css: event.target.value })}
+            />
+            <Button
+              disabled={pending}
+              onClick={() =>
+                void run(async () => {
+                  await library.mutate({ type: 'saveSnippet', snippet })
+                  setSnippet(undefined)
+                })
+              }
+            >
+              {labels.saveCss}
+            </Button>
+            <Button variant='ghost' onClick={() => setSnippet(undefined)}>
+              {labels.cancel}
+            </Button>
+          </fieldset>
+        )}
+      </section>
+      <section aria-label={labels.catalog} className='space-y-2'>
+        <h3>{labels.catalog}</h3>
+        <label className='flex items-center gap-2'>
+          <Checkbox
+            checked={installedOnly}
+            onCheckedChange={(value) => setInstalledOnly(value === true)}
+          />
+          {labels.installedOnly}
+        </label>
+        {!catalog.length && <p className='text-muted-foreground'>{labels.emptyCatalog}</p>}
+        {catalog
+          .filter(
+            (item) =>
+              !installedOnly || library.documents.some((document) => document.id === item.id),
+          )
+          .map((item) => (
+            <div key={item.id} className='flex items-center gap-2'>
+              <span className='flex-1'>
+                {item.name} · {item.author} · {item.version}
+              </span>
+              <Button
+                variant='outline'
+                disabled={pending}
+                onClick={() =>
+                  void run(async () => {
+                    const response = await nativeFetch(item.url)
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`)
+                    const document = parseThemeDocument(await response.json())
+                    if (document.id !== item.id) throw new Error('Theme id differs from catalog')
+                    await persist(document)
+                  })
+                }
+              >
+                {labels.install}
+              </Button>
+            </div>
+          ))}
+      </section>
     </div>
   )
 }

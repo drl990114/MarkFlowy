@@ -1,14 +1,11 @@
+import { startThemeLibrary } from '@/themes/library'
 import { flushEditorResumeStates } from '@/stores/editorResumeStore'
-import {
-  closeWithDraftRecovery,
-  listenForDraftReload,
-} from '@/services/draft-recovery'
+import { closeWithDraftRecovery, listenForDraftReload } from '@/services/draft-recovery'
 import { stageDraftRecovery } from '@/services/staged-draft-recovery'
 import { waitForAllDraftRecovery } from '@/services/draftRecoveryState'
 import { commandRegistry } from '@/commands'
 import { listenForCliRequests } from '@/services/cli'
 import bus from '@/helper/eventBus'
-import { loadLocalThemeCss } from '@/helper/extensions'
 import { hasFileExcludePatternsChanged } from '@/helper/file-exclude'
 import { getFileObjectByPath } from '@/helper/files'
 import { getFileNameFromPath, releaseSecurityScope } from '@/helper/filesys'
@@ -16,8 +13,17 @@ import { logger } from '@/helper/logger'
 import { checkUpdate } from '@/helper/updater'
 import { i18nInit, t } from '@/i18n'
 import { appSettingStoreSetup } from '@/services/app-setting'
-import { addExistingMarkdownFileEdit, ensureDocument, removePristineDocuments } from '@/services/editor-file'
-import { createWindowSessionPersistence, readWindowSession, restoreWindowDocuments, type WindowSession } from '@/services/window-session'
+import {
+  addExistingMarkdownFileEdit,
+  ensureDocument,
+  removePristineDocuments,
+} from '@/services/editor-file'
+import {
+  createWindowSessionPersistence,
+  readWindowSession,
+  restoreWindowDocuments,
+  type WindowSession,
+} from '@/services/window-session'
 import { clearWorkspaceOpenError, useWorkspaceOpenError } from '@/services/workspace-open-error'
 import {
   createWorkspaceCachePersistence,
@@ -30,7 +36,11 @@ import {
   switchWorkspaceInCurrentWindow as requestWorkspaceSwitch,
   waitForWorkspaceSwitches,
 } from '@/services/workspace-switch'
-import { attachWorkspaceSession, releaseDetachedWorkspaceScopes, switchWorkspaceSession } from '@/services/workspace-session'
+import {
+  attachWorkspaceSession,
+  releaseDetachedWorkspaceScopes,
+  switchWorkspaceSession,
+} from '@/services/workspace-session'
 import { refreshWorkspaceDirectory } from '@/services/workspace-refresh'
 import { createNewWindow, currentWindow } from '@/services/windows'
 import { useEditorStore } from '@/stores'
@@ -42,14 +52,6 @@ import { markStartupStage } from '@/startup/performance'
 import { afterStartupInteractive, waitForStartupInteractive } from '@/startup/interactive'
 import { prepareStartupDocumentRead, prepareStartupEditorModules } from '@/startup/prepareEditor'
 import { createOpenedUrlQueue } from '@/startup/openedUrlQueue'
-import {
-  scheduleStaleStartupThemeFallback,
-  STALE_STARTUP_THEME_TIMEOUT_MS,
-} from '@/startup/staleThemeFallback'
-import {
-  loadThemeExtensionsIncrementally,
-  type ThemeExtension,
-} from '@/startup/themeExtensionScheduler'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import useLayoutStore from '@/stores/useLayoutStore'
 import type { WorkspaceInfo } from '@/stores/useOpenedCacheStore'
@@ -59,24 +61,10 @@ import { getCurrentWebview } from '@tauri-apps/api/webview'
 import { LazyStore } from '@tauri-apps/plugin-store'
 import { useCallback, useEffect, useSyncExternalStore } from 'react'
 import { toast } from 'zens'
-import __MF__ from '../context'
-import useExtensionsManagerStore from '../stores/useExtensionsManagerStore'
-import useThemeStore, { isBuiltInTheme } from '../stores/useThemeStore'
+import useThemeStore from '../stores/useThemeStore'
 import useGlobalKeyboard from './useKeyboard'
 import useGlobalOSInfo from './useOSInfo'
 import useWorkspaceWatcher from './useWorkspaceWatcher'
-
-interface LocalTheme {
-  id: string
-  name: string
-  path: string
-  css_content: string
-}
-
-interface ThemeCatalog {
-  localThemes: LocalTheme[]
-  themes: ThemeExtension[]
-}
 
 interface OpenedCacheReadResult {
   recent_workspaces: WorkspaceInfo[]
@@ -98,7 +86,11 @@ let startupSession: WindowSession | undefined
 let isolateStartupDrafts = false
 let preserveStartupDocuments = false
 
-const setupDraftRecovery = async (signal?: AbortSignal, reload = false, preserveOpenDocuments = false) => {
+const setupDraftRecovery = async (
+  signal?: AbortSignal,
+  reload = false,
+  preserveOpenDocuments = false,
+) => {
   try {
     let reported = false
     const recovery = await stageDraftRecovery({
@@ -190,51 +182,13 @@ const initThemeFromSettings = async (settingData: Record<string, any>) => {
   await useThemeStore.getState().initFromSettings(settingData)
 }
 
-async function appThemeExtensionsSetup() {
-  // Capture before starting the timeout or catalog I/O. If either takes over a
-  // second, the synthetic theme may already have fallen back by the time the
-  // catalog arrives, but its real extension must still be registered first.
-  const startupTheme = useThemeStore.getState().curTheme
-  const startupCustomTheme = isBuiltInTheme(startupTheme.name)
-    ? undefined
-    : { name: startupTheme.name, mode: startupTheme.mode }
-
-  scheduleStaleStartupThemeFallback({
-    fallback: () => useThemeStore.getState().fallbackStaleStartupTheme(),
-    onFallback: (staleTheme) => {
-      logger.warn(
-        `Startup theme "${staleTheme.name}" did not register within ${STALE_STARTUP_THEME_TIMEOUT_MS}ms; using the built-in ${staleTheme.mode} theme.`,
-      )
-    },
-  })
-
+async function appThemeLibrarySetup() {
   try {
-    logger.debug('Loading theme catalog...')
-    const { localThemes, themes } = await invoke<ThemeCatalog>('load_theme_catalog')
-    logger.debug('Local themes loaded:', localThemes.length)
-
-    if (localThemes.length > 0) {
-      const cssContents = localThemes.map((localTheme) => localTheme.css_content)
-      loadLocalThemeCss(cssContents)
-    }
-
-    logger.debug('Theme catalog loaded:', themes.length)
-    await loadThemeExtensionsIncrementally({
-      beforeBackground: waitForStartupInteractive,
-      extensions: themes,
-      currentTheme: startupCustomTheme,
-      loadExtension: (extension) => {
-        useExtensionsManagerStore.getState().loadExtension(extension)
-      },
-      onError: (extension, error) => {
-        logger.error(`Failed to load theme extension "${extension.id}"`, error)
-      },
-    })
+    await startThemeLibrary()
   } catch (error) {
-    logger.error('Failed to load theme catalog:', error)
-    logger.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace')
+    logger.error('Failed to load theme library:', error)
   } finally {
-    useThemeStore.getState().applyTheme()
+    useThemeStore.getState().fallbackStaleStartupTheme()
   }
 }
 
@@ -443,20 +397,6 @@ async function refreshWorkspaceFileTree() {
   }
 }
 
-const listener = (event: MessageEvent) => {
-  if (event.origin !== window.location.origin) {
-    return
-  }
-
-  const { key, payload } = event.data
-
-  switch (key) {
-    case 'registerTheme':
-      __MF__.theme.registerTheme(payload)
-      break
-  }
-}
-
 type AppShellData = Record<string, any>
 
 const appShellSetup = async (signal: AbortSignal): Promise<AppShellData> => {
@@ -465,9 +405,6 @@ const appShellSetup = async (signal: AbortSignal): Promise<AppShellData> => {
   const settingData = await appSettingStoreSetup()
   markStartupStage('settings-ready')
   throwIfStartupCancelled(signal)
-
-  window.removeEventListener('message', listener)
-  window.addEventListener('message', listener)
 
   const zoomSetup = settingData.webview_zoom
     ? getCurrentWebview().setZoom(Number(settingData.webview_zoom))
@@ -493,7 +430,11 @@ const appStartupCoordinator = createAppStartupCoordinator<AppShellData, void>({
     await setupDraftRecovery(signal, true, preserveStartupDocuments)
     ensureDocument()
     await windowSessionPersistence?.dispose()
-    if (workspaceCacheStore) windowSessionPersistence = createWindowSessionPersistence(workspaceCacheStore, currentWindow.label)
+    if (workspaceCacheStore)
+      windowSessionPersistence = createWindowSessionPersistence(
+        workspaceCacheStore,
+        currentWindow.label,
+      )
     void prepareStartupEditorModules(signal).catch(() => undefined)
     await prepareStartupDocumentRead(signal)
   },
@@ -502,7 +443,7 @@ const appStartupCoordinator = createAppStartupCoordinator<AppShellData, void>({
 export const startAppSetup = () => appStartupCoordinator.start()
 
 let deferredAppSetupPromise: Promise<void> | undefined
-let themeExtensionsSetupPromise: Promise<void> | undefined
+let themeLibrarySetupPromise: Promise<void> | undefined
 
 const startDeferredAppSetup = () => {
   if (!deferredAppSetupPromise) {
@@ -662,9 +603,8 @@ export const useAppRuntimeSetup = () => {
   }, [eventInit])
 
   useEffect(() => {
-    // Restore the selected custom theme promptly; the scheduler holds all other
-    // extensions until the active document is interactive.
-    if (!themeExtensionsSetupPromise) themeExtensionsSetupPromise = appThemeExtensionsSetup()
+    // Load declarative themes after the application shell is available.
+    if (!themeLibrarySetupPromise) themeLibrarySetupPromise = appThemeLibrarySetup()
     return afterStartupInteractive(() => {
       markStartupStage('deferred-start')
       void startDeferredAppSetup().catch((error) => logger.error('Deferred startup failed', error))

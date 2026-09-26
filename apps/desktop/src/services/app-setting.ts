@@ -27,34 +27,46 @@ export const appSettingStoreSetup = async () => {
   }
 }
 
-export const writeSettingData = async (item: Pick<Setting.SettingItem, 'key' | 'afterWrite'>, value: any) => {
-  const { settingData, setSettingData } = useAppSettingStore.getState()
+let settingWriteQueue: Promise<void> = Promise.resolve()
 
-  const newSettingData = {
-    ...settingData,
-    [item.key]: value,
-  }
+/** Commit related settings together and serialize whole-config writes. */
+export const writeSettingPatch = (patch: Record<string, unknown>): Promise<void> => {
+  const write = settingWriteQueue.then(async () => {
+    const { settingData, setSettingData } = useAppSettingStore.getState()
 
-  setSettingData(newSettingData)
-
-  try {
-    await invoke('save_app_conf', { data: newSettingData, label: 'markflowy' })
-
-    emit('app_conf_change')
-
-    if (item.afterWrite) {
-      item.afterWrite(value)
+    const newSettingData = {
+      ...settingData,
+      ...patch,
     }
-  } catch (error) {
-    logger.error('Failed to write app setting:', error)
-    setSettingData(settingData)
-    throw error
-  }
+
+    setSettingData(newSettingData)
+
+    try {
+      await invoke('save_app_conf', { data: newSettingData, label: 'markflowy' })
+
+      emit('app_conf_change')
+    } catch (error) {
+      logger.error('Failed to write app setting:', error)
+      setSettingData(settingData)
+      throw error
+    }
+  })
+  settingWriteQueue = write.catch(() => undefined)
+  return write
+}
+
+export const writeSettingData = async (
+  item: Pick<Setting.SettingItem, 'key' | 'afterWrite'>,
+  value: any,
+) => {
+  await writeSettingPatch({ [item.key]: value })
+  item.afterWrite?.(value)
 }
 
 const appSettingService = {
   appSettingStoreSetup,
   writeSettingData,
+  writeSettingPatch,
 }
 
 export default appSettingService

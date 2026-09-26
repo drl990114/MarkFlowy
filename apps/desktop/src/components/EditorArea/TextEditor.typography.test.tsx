@@ -28,6 +28,8 @@ if (!editor?.body) throw new Error('TextEditor implementation was not found')
 const names = new Set([
   'editorRootFontSize',
   'editorRootLineHeight',
+  'themeFontSize',
+  'wysiwygRootLineHeight',
   'linkEditMode',
   'editorPlaceholder',
   'codeBlockLineWrapping',
@@ -44,7 +46,7 @@ if (statements.length !== names.size)
   throw new Error('Editor typography declarations were not found')
 const compiled = ts.transpileModule(
   `
-  function Harness({ settings, keymap, onOptions }) {
+  function Harness({ settings, keymap, semanticTheme, onOptions }) {
     const useAppSettingStore = (selector) => selector({ settingData: settings });
     const useEditorKeybindingStore = (selector) => selector({
       editorKeybingMap: keymap ?? emptyKeymap,
@@ -86,6 +88,7 @@ const Harness = runInNewContext(compiled, {
     wysiwyg_editor_codemirror_line_wrap?: boolean
   }
   keymap?: Record<string, string>
+  semanticTheme?: { 'font.editor.size': string; 'font.editor.lineHeight': string }
   onOptions: (options: CapricornRuntimeOptions) => void
 }>
 
@@ -150,7 +153,10 @@ describe('TextEditor Capricorn typography settings', () => {
   it('updates size and line height independently and honors values formerly treated as defaults', () => {
     const onOptions = vi.fn()
     const { rerender } = render(<Harness settings={{}} onOptions={onOptions} />)
-    expect(onOptions.mock.lastCall?.[0].style).toMatchObject({ fontSize: 16, lineHeight: '1.7' })
+    expect(onOptions.mock.lastCall?.[0].style).toMatchObject({
+      fontSize: '16px',
+      lineHeight: '1.7',
+    })
 
     for (const [fontSize, lineHeight] of [
       [24, '1.8'],
@@ -164,10 +170,37 @@ describe('TextEditor Capricorn typography settings', () => {
         />,
       )
       expect(onOptions.mock.lastCall?.[0].style).toEqual({
-        fontSize,
+        fontSize: `${fontSize}px`,
         lineHeight,
-        '--cap-code-font-size': `${fontSize * 0.875}px`,
+        '--cap-code-font-size': `calc(${fontSize}px * 0.875)`,
+        '--cap-editor-content-width': 'var(--mf-reader-content-width)',
       })
     }
+  })
+  it('uses resolved theme typography, including relative CSS lengths', () => {
+    const onOptions = vi.fn()
+    const { rerender } = render(
+      <Harness
+        settings={{}}
+        semanticTheme={{ 'font.editor.size': '1.2rem', 'font.editor.lineHeight': '1.9' }}
+        onOptions={onOptions}
+      />,
+    )
+    expect(onOptions.mock.lastCall?.[0].style).toMatchObject({
+      fontSize: '1.2rem',
+      lineHeight: '1.9',
+      '--cap-code-font-size': 'calc(1.2rem * 0.875)',
+    })
+    rerender(
+      <Harness
+        settings={{}}
+        semanticTheme={{ 'font.editor.size': '18px', 'font.editor.lineHeight': '1.6' }}
+        onOptions={onOptions}
+      />,
+    )
+    expect(onOptions.mock.lastCall?.[0].style).toMatchObject({
+      fontSize: '18px',
+      lineHeight: '1.6',
+    })
   })
 })

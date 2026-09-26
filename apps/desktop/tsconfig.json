@@ -11,7 +11,8 @@
     "noEmit": true,
     "paths": {
       "@/*": ["./src/*"],
-      "@markflowy/i18n/desktop": ["../../packages/i18n/src/desktop.ts"]
+      "@markflowy/i18n/desktop": ["../../packages/i18n/src/desktop.ts"],
+      "@markflowy/theme/semantic": ["../../packages/theme/src/semantic/index.ts"]
     },
     "skipLibCheck": true
   },
@@ -34,6 +35,8 @@
     "**/.cache"
   ],
   "references": [
-    { "path": "./tsconfig.node.json" }
+    {
+      "path": "./tsconfig.node.json"
+    }
   ]
 }

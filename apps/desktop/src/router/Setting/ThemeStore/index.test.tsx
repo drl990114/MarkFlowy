@@ -1,142 +1,81 @@
-import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
-import { desktopLightTheme } from '@markflowy/theme'
-import { ThemeProvider } from 'styled-components'
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { ThemeStore } from './index'
-
 const mocks = vi.hoisted(() => ({
-  invoke: vi.fn(),
+  mutate: vi.fn(),
+  reload: vi.fn(),
   open: vi.fn(),
+  read: vi.fn(),
   confirm: vi.fn(),
-  loadCss: vi.fn(),
-  loadExtension: vi.fn(),
-  deleteTheme: vi.fn(),
-  t: (key: string) => key,
 }))
-vi.mock('@/i18n', () => ({ useTranslation: () => ({ t: mocks.t }) }))
-vi.mock('@tauri-apps/api/core', () => ({ invoke: mocks.invoke }))
-vi.mock('@tauri-apps/plugin-dialog', () => ({ open: mocks.open }))
+vi.mock('@/i18n', () => ({ useTranslation: () => ({ i18n: { language: 'en' } }) }))
+vi.mock('@tauri-apps/plugin-dialog', () => ({ open: mocks.open, save: vi.fn() }))
+vi.mock('@tauri-apps/plugin-fs', () => ({ readTextFile: mocks.read, writeTextFile: vi.fn() }))
+vi.mock('@tauri-apps/plugin-http', () => ({ fetch: vi.fn() }))
 vi.mock('@/services/dialog', () => ({ dialog: { confirm: mocks.confirm } }))
-vi.mock('@/helper/extensions', () => ({ loadLocalThemeCss: mocks.loadCss }))
-vi.mock('@/helper/logger', () => ({ logger: { error: vi.fn() } }))
-vi.mock('@/stores/useThemeStore', () => ({
-  default: () => ({ themes: [], deleteTheme: mocks.deleteTheme }),
-}))
-vi.mock('@/stores/useExtensionsManagerStore', () => ({
-  default: { getState: () => ({ loadExtension: mocks.loadExtension }) },
-}))
-
-const localTheme = { id: 'local-1', name: 'Paper', css_content: '.paper {}', path: '/paper.css' }
-
-function mount() {
-  return render(
-    <ThemeProvider theme={desktopLightTheme}>
-      <ThemeStore />
-    </ThemeProvider>,
-  )
-}
-
+vi.mock('./ThemePreview', () => ({ ThemePreview: () => <div>Preview</div> }))
+vi.mock('@/themes/library', async () => {
+  const { create } = await import('zustand')
+  return {
+    useThemeLibrary: create(() => ({
+      revision: 1,
+      loaded: true,
+      documents: [],
+      snippets: [{ id: 'paper', name: 'Paper CSS', css: 'body{}', enabled: true }],
+      mutate: mocks.mutate,
+      reload: mocks.reload,
+    })),
+  }
+})
+vi.mock('@/stores/useThemeStore', async () => {
+  const { create } = await import('zustand')
+  const { lightTheme } = await import('@markflowy/theme')
+  return { default: create(() => ({ themes: [lightTheme], curTheme: lightTheme })) }
+})
+import { ThemeStore } from './index'
 beforeEach(() => {
   vi.clearAllMocks()
-  mocks.invoke.mockImplementation(async (command: string) =>
-    command === 'load_local_themes' ? [localTheme] : [],
-  )
-  mocks.confirm.mockResolvedValue('confirm')
-  mocks.open.mockResolvedValue(null)
+  sessionStorage.clear()
+  mocks.mutate.mockResolvedValue(undefined)
 })
 afterEach(cleanup)
-
-describe('ThemeStore feedback', () => {
-  it('distinguishes a failed load from an empty list and retries in place', async () => {
-    mocks.invoke.mockRejectedValueOnce(new Error('Themes are unavailable'))
-    mount()
-    expect(screen.queryByText('settings.themeStore.no_local_themes')).toBeNull()
-    expect(
-      (screen.getByRole('button', { name: 'common.import CSS' }) as HTMLButtonElement).disabled,
-    ).toBe(true)
-    expect((await screen.findByRole('alert')).textContent).toContain('Themes are unavailable')
-    mocks.invoke.mockResolvedValueOnce([])
-    fireEvent.click(screen.getByRole('button', { name: 'common.retry' }))
-    await screen.findByText('settings.themeStore.no_local_themes')
-    expect(screen.queryByRole('alert')).toBeNull()
-  })
-
-  it('retains a local theme after failed removal and supports a successful retry', async () => {
-    mount()
-    await screen.findByText('Paper')
-    mocks.invoke.mockRejectedValueOnce(new Error('Permission denied'))
-    fireEvent.click(screen.getByRole('button', { name: 'common.delete' }))
-    expect((await screen.findByRole('alert')).textContent).toContain('Permission denied')
-    expect(screen.getByText('Paper')).toBeTruthy()
-    expect(mocks.loadCss).not.toHaveBeenCalled()
-    fireEvent.click(screen.getByRole('button', { name: 'common.retry' }))
-    await waitFor(() => expect(screen.queryByText('Paper')).toBeNull())
-    expect(mocks.loadCss).toHaveBeenCalledWith([])
-    expect(screen.queryByRole('alert')).toBeNull()
-  })
-
-  it('locks a pending action without changing installed state before success', async () => {
-    let finish!: () => void
-    mount()
-    await screen.findByText('Paper')
-    mocks.invoke.mockImplementation((command: string) =>
-      command === 'remove_local_theme'
-        ? new Promise<void>((resolve) => {
-            finish = resolve
-          })
-        : Promise.resolve([]),
+describe('declarative theme manager', () => {
+  it('imports disabled CSS without executing any theme script', async () => {
+    mocks.open.mockResolvedValue('/paper.css')
+    mocks.read.mockResolvedValue('body{font-size:15px}')
+    render(<ThemeStore />)
+    fireEvent.click(screen.getByRole('button', { name: 'Import CSS' }))
+    await waitFor(() =>
+      expect(mocks.mutate).toHaveBeenCalledWith({
+        type: 'saveSnippet',
+        snippet: expect.objectContaining({ css: 'body{font-size:15px}', enabled: false }),
+      }),
     )
-    const remove = screen.getByRole('button', { name: 'common.delete' }) as HTMLButtonElement
-    fireEvent.click(remove)
-    fireEvent.click(remove)
-    await waitFor(() => expect(finish).toBeTypeOf('function'))
-    expect(remove.disabled).toBe(true)
-    expect(mocks.confirm).toHaveBeenCalledTimes(1)
-    expect(screen.getByText('Paper')).toBeTruthy()
-    await act(async () => finish())
-    expect(screen.queryByText('Paper')).toBeNull()
   })
-
-  it('treats a cancelled import as a normal return, leaving existing CSS untouched', async () => {
-    mount()
-    await screen.findByText('Paper')
-    fireEvent.click(screen.getByRole('button', { name: 'common.import CSS' }))
-    await waitFor(() => expect(mocks.open).toHaveBeenCalledTimes(1))
-    expect(screen.queryByRole('alert')).toBeNull()
-    expect(screen.getByText('Paper')).toBeTruthy()
-    expect(mocks.loadCss).not.toHaveBeenCalled()
-    expect(mocks.invoke).toHaveBeenCalledTimes(1)
+  it('disables all snippets in one native mutation', async () => {
+    render(<ThemeStore />)
+    fireEvent.click(screen.getByRole('button', { name: 'Disable all' }))
+    await waitFor(() => expect(mocks.mutate).toHaveBeenCalledWith({ type: 'disableSnippets' }))
   })
-
-  it('keeps the trigger focusable during confirmation and does not remove on cancellation', async () => {
-    let cancel!: (value: string) => void
-    mocks.confirm.mockImplementation(() => new Promise<string>((resolve) => { cancel = resolve }))
-    mount()
-    await screen.findByText('Paper')
-    const remove = screen.getByRole('button', { name: 'common.delete' }) as HTMLButtonElement
-    remove.focus()
-    fireEvent.click(remove)
-    fireEvent.click(remove)
-    expect(mocks.confirm).toHaveBeenCalledTimes(1)
-    expect(remove.disabled).toBe(false)
-    expect(document.activeElement).toBe(remove)
-    await act(async () => cancel('cancel'))
-    expect(mocks.invoke).toHaveBeenCalledTimes(1)
-    expect(screen.getByText('Paper')).toBeTruthy()
-    expect(screen.queryByRole('alert')).toBeNull()
+  it('retains snippet and surfaces failed persistence', async () => {
+    mocks.mutate.mockRejectedValue(new Error('disk full'))
+    render(<ThemeStore />)
+    fireEvent.click(screen.getByRole('button', { name: 'Remove' }))
+    expect((await screen.findByRole('alert')).textContent).toContain('disk full')
+    expect(screen.getByText('Paper CSS')).toBeTruthy()
   })
-
-  it('shows a failed download beside the online theme and refreshes extensions after retry', async () => {
-    mount()
-    await screen.findByText('Paper')
-    mocks.invoke.mockRejectedValueOnce(new Error('Download interrupted'))
-    fireEvent.click(screen.getAllByRole('button', { name: 'settings.themeStore.download' })[0])
-    expect((await screen.findByRole('alert')).textContent).toContain('Download interrupted')
-    expect(mocks.loadExtension).not.toHaveBeenCalled()
-    const extension = { id: 'downloaded-theme', script_text: '/* theme fixture */' }
-    mocks.invoke.mockResolvedValueOnce(undefined).mockResolvedValueOnce([extension])
-    fireEvent.click(screen.getByRole('button', { name: 'common.retry' }))
-    await waitFor(() => expect(mocks.loadExtension).toHaveBeenCalledWith(extension))
-    expect(screen.queryByRole('alert')).toBeNull()
+  it('rejects malformed JSON before saving', async () => {
+    mocks.open.mockResolvedValue('/theme.json')
+    mocks.read.mockResolvedValue('{"version":0}')
+    render(<ThemeStore />)
+    fireEvent.click(screen.getByRole('button', { name: 'Import JSON' }))
+    await screen.findByRole('alert')
+    expect(mocks.mutate).not.toHaveBeenCalled()
+  })
+  it('creates an isolated editable copy and can close without applying it', async () => {
+    render(<ThemeStore />)
+    fireEvent.click(screen.getByRole('button', { name: 'Create theme' }))
+    expect(screen.getByText('Preview')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }))
+    expect(mocks.mutate).not.toHaveBeenCalled()
   })
 })

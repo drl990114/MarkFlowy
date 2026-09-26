@@ -143,11 +143,7 @@
   --mf-control-hover: #d0d0d0;
   --mf-control-ghost-hover: #d7d5d577;
   --mf-control-titlebar-hover: #d7d5d577;
-  --mf-control-pressed: color-mix(
-    in srgb,
-    var(--mf-control-hover) 92%,
-    var(--mf-text-primary) 8%
-  );
+  --mf-control-pressed: color-mix(in srgb, var(--mf-control-hover) 92%, var(--mf-text-primary) 8%);
   --mf-control-ghost-pressed: #e4e0e0;
   --mf-control-selected: #e4e0e0;
   --mf-control-border: var(--mf-boot-border, #d2d2d2);
@@ -225,7 +221,8 @@
   --mf-space-unit: 4px;
   --mf-ui-title-bar-height: 34px;
   --mf-ui-status-bar-height: 32px;
-  --mf-font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', 'Noto Sans CJK SC', 'Microsoft YaHei UI', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+  --mf-font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', 'Noto Sans CJK SC',
+    'Microsoft YaHei UI', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
   --mf-font-mono: 'SFMono-Regular', Consolas, monospace;
   --mf-ui-font-family: var(--mf-font-sans);
   --mf-ui-font-mono: var(--mf-font-mono);
@@ -413,4 +410,72 @@
   [data-slot='select-content'][data-state='closed'] {
     animation: mf-fade-out var(--mf-motion-duration-fast) var(--mf-motion-ease-out) both;
   }
+}
+
+/* Semantic authoring tokens before the resolved theme sheet is mounted.
+ * Existing facade tokens stay private aliases for Desktop components. */
+:root {
+  --mf-theme-surface-canvas: var(--mf-surface-app);
+  --mf-theme-surface-subtle: var(--mf-surface-muted);
+  --mf-theme-surface-backdrop: var(--mf-dialog-overlay);
+  --mf-theme-surface-panel: var(--mf-surface-panel);
+  --mf-theme-surface-overlay: var(--mf-surface-overlay);
+  --mf-theme-text-primary: var(--mf-text-primary);
+  --mf-theme-text-secondary: var(--mf-text-secondary);
+  --mf-theme-text-disabled: var(--mf-text-disabled);
+  --mf-theme-scrollbar-thumb: var(--mf-scrollbar-thumb);
+  --mf-theme-scrollbar-track: var(--mf-scrollbar-track);
+  --mf-theme-border-default: var(--mf-border);
+  --mf-theme-border-subtle: var(--mf-ui-border-subtle);
+  --mf-theme-focus-ring: var(--mf-ring);
+  --mf-theme-accent-background: var(--mf-primary);
+  --mf-theme-accent-foreground: var(--mf-primary-foreground);
+  --mf-theme-accent-subtle: var(--mf-primary-soft);
+  --mf-theme-interaction-hover: var(--mf-control-hover);
+  --mf-theme-interaction-pressed: var(--mf-control-pressed);
+  --mf-theme-interaction-selected: var(--mf-control-selected);
+  --mf-theme-status-danger-foreground: var(--mf-destructive);
+  --mf-theme-status-danger-background: color-mix(in srgb, var(--mf-destructive) 10%, transparent);
+  --mf-theme-status-success-foreground: var(--mf-success);
+  --mf-theme-status-success-background: color-mix(in srgb, var(--mf-success) 10%, transparent);
+  --mf-theme-status-warning-foreground: var(--mf-warning);
+  --mf-theme-status-warning-background: color-mix(in srgb, var(--mf-warning) 10%, transparent);
+  --mf-theme-chrome-titlebar-background: var(--mf-surface-titlebar);
+  --mf-theme-chrome-statusbar-background: var(--mf-surface-statusbar);
+  --mf-theme-chrome-sidebar-background: var(--mf-surface-panel);
+  --mf-theme-chrome-tab-background: var(--mf-surface-panel);
+  --mf-theme-chrome-tab-active-background: var(--mf-surface-app);
+  --mf-theme-editor-background: var(--mf-surface-app);
+  --mf-theme-editor-foreground: var(--mf-text-primary);
+  --mf-theme-editor-muted: var(--mf-text-secondary);
+  --mf-theme-editor-caret: var(--mf-text-primary);
+  --mf-theme-editor-selection-background: var(--mf-primary-soft);
+  --mf-theme-editor-selection-foreground: var(--mf-text-primary);
+  --mf-theme-editor-selection-inactive-background: color-mix(
+    in srgb,
+    var(--mf-text-secondary) 30%,
+    transparent
+  );
+  --mf-theme-editor-link: var(--mf-primary);
+  --mf-theme-editor-code-background: var(--mf-surface-muted);
+  --mf-theme-editor-code-foreground: var(--mf-text-primary);
+  --mf-theme-editor-code-active-line: color-mix(in srgb, var(--mf-text-primary) 5%, transparent);
+  --mf-theme-editor-content-width: 760px;
+  --mf-theme-font-ui-family: var(--mf-ui-font-family);
+  --mf-theme-font-editor-family: var(--mf-font-sans);
+  --mf-theme-font-code-family: var(--mf-font-mono);
+  --mf-theme-font-editor-size: 15px;
+  --mf-theme-font-editor-line-height: 1.6;
+  --mf-theme-radius-control: var(--mf-radius-sm);
+  --mf-theme-radius-overlay: var(--mf-radius);
+  --mf-theme-syntax-comment: var(--mf-text-secondary);
+  --mf-theme-syntax-keyword: var(--mf-primary);
+  --mf-theme-syntax-string: var(--mf-success);
+  --mf-theme-syntax-number: var(--mf-warning);
+  --mf-theme-syntax-function: var(--mf-primary);
+  --mf-theme-syntax-variable: var(--mf-text-primary);
+  --mf-theme-syntax-attribute: var(--mf-text-secondary);
+  --mf-theme-syntax-tag: var(--mf-primary);
+  --mf-theme-syntax-punctuation: var(--mf-text-secondary);
+  --mf-theme-syntax-meta: var(--mf-warning);
 }
