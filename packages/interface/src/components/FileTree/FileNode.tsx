@@ -23,6 +23,7 @@ export interface FileNodeComponentProps extends NodeRendererProps<IFile> {
   getCurrentFolderData: () => IFile[]
   canInsertIntoDirectory?: (directory: IFile) => boolean
   setFolderData: (data: IFile[]) => void
+  onFocusActiveFile?: (id: string) => Promise<void> | void
   isRoot?: boolean
   onShowConfirm: (params: { title: string; onConfirm: () => void }) => void
   onShowInputConfirm?: (params: {
@@ -137,6 +138,7 @@ function FileNode({
   getCurrentFolderData,
   canInsertIntoDirectory = (directory) => Boolean(directory.children?.length),
   setFolderData,
+  onFocusActiveFile,
   isRoot = false,
   onShowConfirm,
   onShowInputConfirm,
@@ -162,7 +164,7 @@ function FileNode({
 }: FileNodeComponentProps) {
   const { t } = useTranslation()
   const appContext = React.useContext(AppContext)
-  const { deleteNode, trashNode, activeId, refreshFolder, scrollTo, getRootPath } = useFileTree()
+  const { deleteNode, trashNode, activeId, refreshFolder, getRootPath } = useFileTree()
   const {
     runFileMutation,
     renameFile,
@@ -789,8 +791,9 @@ function FileNode({
                   onClick={(e?: React.MouseEvent) => {
                     e?.stopPropagation()
                     e?.preventDefault()
-                    if (activeId && scrollTo) {
-                      scrollTo(activeId)
+                    if (activeId) {
+                      if (onFocusActiveFile) void onFocusActiveFile(activeId)
+                      else tree.select(activeId, { align: 'center' })
                     }
                   }}
                   tooltipProps={{ title: 'Focus Active File' }}
