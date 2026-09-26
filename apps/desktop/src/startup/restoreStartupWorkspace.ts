@@ -14,11 +14,12 @@ export async function restoreStartupWorkspace(
   cache: Promise<WorkspaceCache | undefined>,
   signal: AbortSignal,
 ) {
-  const [workspaceCache] = await Promise.all([
+  const [workspaceCache, activated] = await Promise.all([
     cache,
     invoke<boolean>('activate_workspace_root', { rootPath: path }),
   ])
   if (signal.aborted) return
+  if (activated === false) throw new Error('Could not access the workspace folder.')
   const root = createFile({
     path,
     name: getFileNameFromPath(path.replace(/[\\/]+$/, '')) || path,

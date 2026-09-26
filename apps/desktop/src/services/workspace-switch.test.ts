@@ -31,8 +31,8 @@ describe('workspace switch service', () => {
 
   it('serializes concurrent workspace switches in request order', async () => {
     let finishFirst: (() => void) | undefined
-    const calls: string[] = []
-    const handler = vi.fn(async (path: string) => {
+    const calls: (string | undefined)[] = []
+    const handler = vi.fn(async (path: string | undefined) => {
       calls.push(path)
       if (path === '/first') {
         await new Promise<void>((resolve) => {

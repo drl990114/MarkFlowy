@@ -233,6 +233,8 @@
     "untitled": "sans titre",
     "not_found": "Fichier introuvable",
     "openDir": "ouvrir le dossier",
+    "openFolderInNewWindow": "Ouvrir le dossier dans une nouvelle fenêtre",
+    "closeFolder": "Fermer le dossier",
     "recentDir": "Dossiers récemment ouverts",
     "emptyOpened": "Aucun fichier ouvert",
     "emptyFolder": "Dossier vide",

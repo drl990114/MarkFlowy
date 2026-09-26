@@ -4,6 +4,7 @@ import type { IFile } from '@markflowy/interface'
 import { FileResultCode } from '@markflowy/interface'
 import { invoke } from '@tauri-apps/api/core'
 import { nanoid } from 'nanoid'
+import { touchDocument } from '@/services/pristine-document'
 import { resolveFileExcludePatterns } from './file-exclude'
 import {
   deletePathEntry,
@@ -108,6 +109,7 @@ export const createFile = (opt?: Partial<IFile>): IFile => {
 }
 
 export const updateFile = (changes: Partial<IFile> & Pick<IFile, 'id'>): IFile => {
+  if (changes.path || changes.content) touchDocument(changes.id)
   const currentFile = getFileObject(changes.id)
   const nextFile = { ...currentFile, ...changes } as IFile
 

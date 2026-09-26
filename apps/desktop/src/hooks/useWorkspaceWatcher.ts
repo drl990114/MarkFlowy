@@ -35,11 +35,13 @@ interface WorkSpaceStore {
 
 export const useWorkspaceWatcher = () => {
   const folderData = useEditorStore((state) => state.folderData)
+  const sessionRevision = useEditorStore((state) => state.editorSessionRevision)
   const opened = useEditorStore((state) => state.opened)
   useFileCacheStore((state) => state.metadataRevision)
   const setWorkspace = useWorkspaceStore((state) => state.setWorkspace)
 
   const rootPath = folderData?.[0]?.path
+  useEffect(() => { resetExternalFileChanges() }, [sessionRevision])
   const loosePaths = JSON.stringify(
     opened
       .flatMap((id) => {
@@ -86,7 +88,6 @@ export const useWorkspaceWatcher = () => {
   useEffect(() => {
     let stopped = false
     let unwatch: UnwatchFn | undefined
-    resetExternalFileChanges()
 
     const updateWorkspaceAndWatcher = async () => {
       const ws = await getWorkspace()

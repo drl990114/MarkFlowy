@@ -21,16 +21,18 @@ import {
   type DraftDescriptor, type RecoveryDocument,
 } from './draftSessionFormat'
 import { registerDraftRecovery, isDraftRecoveryPending } from './draftRecoveryState'
+import type { WindowSession } from './window-session'
 import {
   bindRecoveredDraft, draftProtectionStarted, flushDraftProtection, historyCall,
   historyWorkspace, observeHistoryFile, protectLocalEdit, startDraftProtection,
-  type HistoryDocument, type PersistedDraft,
+  ownsHistoryDraft, type HistoryDocument, type PersistedDraft,
 } from './local-history'
 
 interface RecoverySource {
   documents: RecoveryDocument[]
   activeId?: string
   native?: boolean
+  restoreIds?: boolean
   consume?: () => Promise<void> | void
 }
 interface Candidate { document: RecoveryDocument; claimed?: PersistedDraft }
@@ -60,7 +62,7 @@ function visibleIds(layout: EditorLayoutNode): string[] {
   return layout.type === 'leaf' ? layout.activeId ? [layout.activeId] : [] : layout.children.flatMap(visibleIds)
 }
 
-async function readSources(cache: DraftSessionStore | undefined, reload: boolean) {
+async function readSources(cache: DraftSessionStore | undefined, reload: boolean, session?: WindowSession, isolatedWindow?: string) {
   const rootPath = useEditorStore.getState().getRootPath()
   const workspace = historyWorkspace()
   const readSource = async (name: string, read: () => Promise<RecoverySource[]>) => {
@@ -71,48 +73,75 @@ async function readSources(cache: DraftSessionStore | undefined, reload: boolean
     readSource('native', async () => {
       if (!isTauri()) return []
       const ownerPrefix = `${getCurrentWindow().label}:`
-      const groups = await Promise.all([
-        historyCall<DraftDescriptor[]>('recoveryDraftIndex', { workspace, ownerPrefix }),
-        workspace ? historyCall<DraftDescriptor[]>('recoveryDraftIndex', { workspace: '', ownerPrefix }) : [],
-      ])
-      return groups.flat().map((draft) => ({ native: true, documents: [nativeRecoveryDocument(draft)] }))
+      const workspaces = new Set([workspace, ''])
+      const savedDocumentIds = new Set<string>()
+      for (const doc of session ? recoveryDocuments(session.drafts) : []) {
+        if (doc.source.kind === 'native') {
+          workspaces.add(doc.source.draft.document.workspace)
+          savedDocumentIds.add(doc.source.draft.document.id)
+        }
+      }
+      const groups = await Promise.all([...workspaces].map((scope) =>
+        historyCall<DraftDescriptor[]>('recoveryDraftIndex', { workspace: scope, ownerPrefix })))
+      const owner = session?.windowLabel ?? isolatedWindow
+      return groups.flat().filter((draft) => !owner || draft.writer.startsWith(`${owner}:`) ||
+        (savedDocumentIds.has(draft.document.id) && draft.writer.startsWith(ownerPrefix)))
+        .map((draft) => ({ native: true, documents: [nativeRecoveryDocument(draft)] }))
     }),
     readSource('reload', async () => {
       const raw = reload ? window.sessionStorage.getItem(RELOAD_SESSION_KEY) : null
       if (!raw) return []
-      const session = recoverySessionSchema.parse(JSON.parse(raw))
-      if (session.rootPath && session.rootPath !== rootPath) return []
-      return [{ documents: recoveryDocuments(session), activeId: session.activeId, consume: () => removeReloadSnapshot(raw) }]
+      const reloadSession = recoverySessionSchema.parse(JSON.parse(raw))
+      if (reloadSession.rootPath && reloadSession.rootPath !== rootPath) return []
+      return [{ documents: recoveryDocuments(reloadSession), activeId: reloadSession.activeId, consume: () => removeReloadSnapshot(raw) }]
     }),
     readSource('exit', async () => {
       if (!cache) return []
       const sources: RecoverySource[] = []
       for (const [key, value] of await cache.entries<unknown>()) {
         if (!key.startsWith(SESSION_KEY_PREFIX)) continue
+        const owner = session?.windowLabel ?? isolatedWindow
+        if (owner && !key.startsWith(`${SESSION_KEY_PREFIX}${owner}:`)) continue
         const parsed = recoverySessionSchema.safeParse(value)
         if (!parsed.success) { logger.error('Unrecognized draft session retained', key); continue }
-        const session = parsed.data
-        if (session.rootPath && session.rootPath !== rootPath) continue
+        const exitSession = parsed.data
+        if (exitSession.rootPath && exitSession.rootPath !== rootPath) continue
         sources.push({
-          documents: recoveryDocuments(session), activeId: session.activeId,
+          documents: recoveryDocuments(exitSession), activeId: exitSession.activeId,
           consume: async () => { await cache.delete(key); await cache.save() },
         })
       }
       return sources
     }),
   ])
-  const sources: RecoverySource[] = []
+  const sources: RecoverySource[] = session ? [{
+    documents: recoveryDocuments(session.drafts), activeId: session.drafts.activeId, restoreIds: true,
+  }] : []
   const errors: unknown[] = []
   for (const result of results)
     if (result.status === 'fulfilled') sources.push(...result.value)
     else errors.push(result.reason)
+  // A recovery claim changes the writer. If the app exits before its next session
+  // save, retain the saved tab identity while following that one current draft.
+  const indexed = sources.filter((source) => source.native).flatMap((source) => source.documents)
+  for (const source of sources.filter((entry) => entry.restoreIds)) {
+    source.documents = source.documents.map((doc) => {
+      if (doc.source.kind !== 'native') return doc
+      const previous = doc.source.draft
+      const candidates = indexed.filter((candidate) => candidate.source.kind === 'native' &&
+        candidate.source.draft.document.id === previous.document.id)
+      if (candidates.length !== 1 || candidates[0].source.kind !== 'native') return doc
+      return { ...doc, source: candidates[0].source }
+    })
+  }
   return { sources, errors }
 }
 
 /** Publish metadata first, then load/claim only the selected and visible documents.
  * Hidden work starts after first paint, or earlier when explicitly requested. */
-export async function stageDraftRecovery({ cache, reload = false, signal, onError }: {
+export async function stageDraftRecovery({ cache, reload = false, signal, onError, session, isolatedWindow, preserveOpenDocuments = false }: {
   cache?: DraftSessionStore; reload?: boolean; signal?: AbortSignal; onError: (error: unknown) => void
+  session?: WindowSession; isolatedWindow?: string; preserveOpenDocuments?: boolean
 }): Promise<StagedDraftRecovery> {
   const initial = useEditorStore.getState()
   const rootPath = initial.getRootPath()
@@ -142,14 +171,14 @@ export async function stageDraftRecovery({ cache, reload = false, signal, onErro
     for (const job of jobs.values()) { job.release(); job.settle() }
     cleanup()
   }, { once: true })
-  const { sources, errors } = await readSources(cache, reload)
+  const { sources, errors } = await readSources(cache, reload, session, isolatedWindow)
   errors.forEach(onError)
   if (controller.signal.aborted) {
     cleanup()
     return { visibleReady: Promise.resolve(), finished: Promise.resolve(0) }
   }
 
-  const canRestoreFocus = useEditorStore.getState().activeId === initial.activeId
+  const canRestoreFocus = !preserveOpenDocuments && useEditorStore.getState().activeId === initial.activeId
   let preferredActiveId: string | undefined
   const snapshot = (job: RecoveryJob): RecoveryDocument => {
     const file = getFileObject(job.fileId)
@@ -334,9 +363,11 @@ export async function stageDraftRecovery({ cache, reload = false, signal, onErro
       const members = new Set<RecoveryJob>()
       sourceJobs.set(source, members)
       for (const doc of source.documents) {
+        if (preserveOpenDocuments && doc.source.kind === 'native' &&
+          initial.opened.some((id) => ownsHistoryDraft(id, doc.source.kind === 'native' ? doc.source.draft : undefined))) continue
         let path = doc.path
         const nativeKey = doc.source.kind === 'native' ? `${doc.source.draft.document.id}:${doc.source.draft.writer}` : undefined
-        const existing = path ? getFileObjectByPath(path) : undefined
+        const existing = path ? getFileObjectByPath(path) : source.restoreIds ? getFileObject(doc.id) : undefined
         const prior = nativeKey && nativeJobs.get(nativeKey) || existing && jobs.get(existing.id)
         const inline = doc.source.kind === 'inline' ? doc.source.content : undefined
         if (existing && useEditorStateStore.getState().idStateMap.get(existing.id)?.hasUnsavedChanges &&
@@ -345,7 +376,7 @@ export async function stageDraftRecovery({ cache, reload = false, signal, onErro
         if (source.native && prior && nativeKey && !nativeJobs.has(nativeKey)) path = undefined
         const file = nativeKey && nativeJobs.has(nativeKey)
           ? getFileObject(nativeJobs.get(nativeKey)!.fileId)!
-          : path && existing ? existing : createFile({ name: doc.name, content: undefined, path, ext: doc.ext ?? 'md' })
+          : existing && (path || source.restoreIds) ? existing : createFile({ name: doc.name, content: undefined, path, ext: doc.ext ?? 'md' })
         let job = jobs.get(file.id)
         if (!job) {
           let settle!: () => void
@@ -353,7 +384,7 @@ export async function stageDraftRecovery({ cache, reload = false, signal, onErro
             fileId: file.id, document: { ...doc, path: file.path }, candidates: [],
             priority: 'background', published: false, release: () => {},
             firstAttempt: new Promise<void>((done) => { settle = done }), settle: () => settle(), succeeded: false,
-            unavailable: false, original: file === existing ? { ...file } : undefined,
+            unavailable: false, original: file === existing && (!source.restoreIds || file.path) ? { ...file } : undefined,
           }
           const registered = job
           job.release = registerDraftRecovery(file.id, (priority) => start(registered, priority), () => snapshot(registered))

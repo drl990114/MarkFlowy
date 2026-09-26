@@ -265,6 +265,8 @@
     "untitled": "untitled",
     "not_found": "File not found",
     "openDir": "Open Folder",
+    "openFolderInNewWindow": "Open Folder in New Window",
+    "closeFolder": "Close Folder",
     "openFile": "Open a File",
     "recentDir": "Recently opened folders",
     "emptyOpened": "No files opened",

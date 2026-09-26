@@ -38,9 +38,10 @@ vi.mock('@/hooks/useOpen', () => ({
 }))
 
 vi.mock('@/stores', () => ({
-  useEditorStore: (selector: (state: { folderData: { path: string }[] }) => unknown) =>
+  useEditorStore: (selector: (state: unknown) => unknown) =>
     selector({
       folderData: titleBarTestState.rootPath ? [{ path: titleBarTestState.rootPath }] : [],
+      editorLayout: { type: 'leaf', id: 'group', opened: [] },
     }),
 }))
 
@@ -87,12 +88,7 @@ describe('TitleBar', () => {
     expect(markup).toContain('role="combobox"')
     expect(markup).toContain('>Open Folder</span>')
     expect(markup.match(/data-slot="workspace-picker-trigger"/g)).toHaveLength(1)
-    expect(markup.indexOf('MarkFlowy</span>')).toBeLessThan(
-      markup.indexOf('data-slot="workspace-picker-trigger"'),
-    )
-    expect(markup.indexOf('MarkFlowy</span>')).toBeLessThan(
-      markup.indexOf('aria-label="MarkFlowy Menu"'),
-    )
+    expect(markup).not.toContain('MarkFlowy</span>')
     expect(markup).not.toContain('data-mf-window-controls')
     expect(markup).toContain('data-slot="command-palette-trigger"')
     expect(markup.indexOf('data-slot="command-palette-trigger"')).toBeLessThan(

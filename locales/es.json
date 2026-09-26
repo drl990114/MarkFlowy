@@ -233,6 +233,8 @@
     "untitled": "sin título",
     "not_found": "Archivo no encontrado",
     "openDir": "Abrir Carpeta",
+    "openFolderInNewWindow": "Abrir carpeta en una ventana nueva",
+    "closeFolder": "Cerrar carpeta",
     "recentDir": "Carpetas abiertas recientemente",
     "emptyOpened": "No hay archivos abiertos",
     "emptyFolder": "Carpeta vacía",

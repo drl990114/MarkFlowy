@@ -1,7 +1,7 @@
-import { spawn, spawnSync } from 'node:child_process'
+import { execFile, spawn, spawnSync } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { createRequire } from 'node:module'
-import { homedir } from 'node:os'
+import { constants, homedir } from 'node:os'
 import { delimiter, dirname, join, resolve } from 'node:path'
 import process from 'node:process'
 import { fileURLToPath, pathToFileURL } from 'node:url'
@@ -73,9 +73,20 @@ export const withCargoOnPath = (
   }
 }
 
-export const assertRustToolchainAvailable = (
+export const runToolchainCommand = (command, args, options) =>
+  new Promise((resolveResult) => {
+    let result
+    const child = execFile(command, args, options, (error, stdout, stderr) => {
+      result = { status: error ? error.code : 0, error, stdout, stderr }
+    })
+    // An aborted execFile invokes its callback before the process has closed.
+    // Keep the runner's signal handlers installed until that child is gone.
+    child.once('close', () => resolveResult(result))
+  })
+
+export const assertRustToolchainAvailable = async (
   env,
-  { runCommand = spawnSync, platform = process.platform } = {},
+  { runCommand = runToolchainCommand, platform = process.platform, signal } = {},
 ) => {
   const executableSuffix = platform === 'win32' ? '.exe' : ''
   const checks = [
@@ -84,15 +95,17 @@ export const assertRustToolchainAvailable = (
   ]
 
   for (const { command, args, label } of checks) {
-    const result = runCommand(command, args, {
+    if (signal?.aborted) return
+    const result = await runCommand(command, args, {
       cwd: ROOT_DIR,
       encoding: 'utf8',
       env,
       shell: false,
-      stdio: ['ignore', 'pipe', 'pipe'],
+      signal,
       timeout: 30_000,
       windowsHide: true,
     })
+    if (signal?.aborted) return
     const hasRustHost = command.startsWith('rustc')
       ? result.stdout?.split('\n').some((line) => line.startsWith('host:'))
       : true
@@ -117,15 +130,16 @@ const isProcessRunning = (pid) => {
   }
 }
 
-const listProcessTree = (rootPid) => {
-  if (isWindows) return [rootPid]
+const listProcessTree = (roots) => {
+  const rootPids = Array.isArray(roots) ? roots : [roots]
+  if (isWindows) return rootPids
 
   const result = spawnSync('ps', ['-A', '-o', 'ppid=,pid='], {
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'ignore'],
   })
 
-  if (result.status !== 0 || !result.stdout) return [rootPid]
+  if (result.status !== 0 || !result.stdout) return rootPids
 
   const childrenByParent = new Map()
 
@@ -141,11 +155,16 @@ const listProcessTree = (rootPid) => {
     childrenByParent.set(parentPid, children)
   }
 
-  const processTree = [rootPid]
+  const seen = new Set(rootPids)
+  const processTree = [...seen]
 
   for (let index = 0; index < processTree.length; index += 1) {
     const children = childrenByParent.get(processTree[index]) ?? []
-    processTree.push(...children)
+    for (const pid of children) {
+      if (seen.has(pid)) continue
+      seen.add(pid)
+      processTree.push(pid)
+    }
   }
 
   return processTree
@@ -159,13 +178,15 @@ const signalProcess = (pid, signal) => {
   }
 }
 
-const waitForProcessesToExit = async (pids, timeoutMs) => {
+const waitForProcessesToExit = async (pids, timeoutMs, trackDescendants = false) => {
   const deadline = Date.now() + timeoutMs
   let remaining = pids.filter(isProcessRunning)
 
   while (remaining.length > 0 && Date.now() < deadline) {
     await delay(50)
-    remaining = remaining.filter(isProcessRunning)
+    // Startup may still spawn children while a coordinator handles its signal.
+    // Retain known descendants even if their parent exits and they are reparented.
+    remaining = (trackDescendants ? listProcessTree(remaining) : remaining).filter(isProcessRunning)
   }
 
   return remaining
@@ -230,31 +251,39 @@ export const terminateProcessTree = async (
     return
   }
 
-  // Turbo starts each persistent task in its own process group. Snapshot the
-  // full descendant tree before signaling the root so re-parenting cannot
-  // leave TypeScript/esbuild watchers behind.
+  // The Turbo Node wrapper forwards SIGTERM to the native coordinator. Sending
+  // it to both at once looks like a second interrupt and forces Turbo to kill
+  // its tasks. Let the coordinator stop them before falling back to the tree.
   const processTree = listProcessTree(rootPid)
-  const descendants = processTree.slice(1).reverse()
-
   signalProcess(rootPid, 'SIGTERM')
-  for (const pid of descendants) signalProcess(pid, 'SIGTERM')
 
-  const remaining = await waitForProcessesToExit(processTree, gracePeriodMs)
+  let remaining = await waitForProcessesToExit(processTree, gracePeriodMs, true)
+  if (remaining.length === 0) return
+
+  for (const pid of [...remaining].reverse()) signalProcess(pid, 'SIGTERM')
+  remaining = await waitForProcessesToExit(remaining, gracePeriodMs, true)
   for (const pid of remaining.reverse()) signalProcess(pid, 'SIGKILL')
   await waitForProcessesToExit(remaining, forceKillWaitMs)
 }
 
 const exitCodeFor = (code, signal) => {
   if (typeof code === 'number') return code
-  if (signal === 'SIGINT') return 130
-  if (signal === 'SIGHUP') return 129
-  if (signal === 'SIGTERM') return 143
+  if (signal && constants.signals[signal]) return 128 + constants.signals[signal]
   return 1
 }
 
-export const runDevDesktop = async () => {
+const processExitReason = (label, code, signal) =>
+  signal ? `${label} exited on ${signal}` : `${label} exited with code ${code ?? 'unknown'}`
+
+export const runDevDesktop = async ({
+  spawnProcess = spawn,
+  checkRustToolchain = assertRustToolchainAvailable,
+  waitForArtifacts = waitForRequiredArtifacts,
+  logger = console,
+} = {}) => {
   const devEnvironment = withCargoOnPath()
   const children = new Map()
+  const startupController = new AbortController()
   let shuttingDown = false
   let resolveShutdownStarted
   let shutdownPromise
@@ -264,7 +293,7 @@ export const runDevDesktop = async () => {
   })
 
   const spawnManaged = (label, cli, args, cwd) => {
-    const child = spawn(process.execPath, [cli, ...args], {
+    const child = spawnProcess(process.execPath, [cli, ...args], {
       cwd,
       detached: !isWindows,
       env: devEnvironment,
@@ -281,26 +310,30 @@ export const runDevDesktop = async () => {
     return child
   }
 
-  const requestShutdown = (exitCode, reason) => {
+  const requestShutdown = (exitCode, reason, hint) => {
     if (shutdownPromise) return shutdownPromise
 
     shuttingDown = true
+    startupController.abort()
     resolveShutdownStarted()
-    console.log(`\n[dev:desktop] Stopping (${reason})...`)
+    logger.log(`\n[dev:desktop] Stopping (${reason})...`)
 
     const activeChildren = [...children.entries()]
     shutdownPromise = Promise.allSettled(
       activeChildren.map(async ([pid, { label }]) => {
         await terminateProcessTree(pid)
-        console.log(`[dev:desktop] Stopped ${label}`)
+        logger.log(`[dev:desktop] Stopped ${label}`)
       }),
     ).then((results) => {
       results.forEach((result, index) => {
         if (result.status === 'rejected') {
           const label = activeChildren[index][1].label
-          console.error(`[dev:desktop] Failed to stop ${label}:`, result.reason)
+          logger.error(`[dev:desktop] Failed to stop ${label}:`, result.reason)
         }
       })
+      // Keep the initiating exit visible after Turbo's watcher-shutdown output.
+      logger.log(`[dev:desktop] Finished: ${reason} (exit code ${exitCode}).`)
+      if (hint) logger.log(`[dev:desktop] ${hint}`)
       return exitCode
     })
 
@@ -308,7 +341,7 @@ export const runDevDesktop = async () => {
   }
 
   const signalHandlers = new Map([
-    ['SIGINT', () => void requestShutdown(130, 'SIGINT')],
+    ['SIGINT', () => void requestShutdown(130, 'cancelled by Ctrl+C (SIGINT)')],
     ['SIGTERM', () => void requestShutdown(143, 'SIGTERM')],
   ])
 
@@ -319,8 +352,9 @@ export const runDevDesktop = async () => {
   for (const [signal, handler] of signalHandlers) process.on(signal, handler)
 
   try {
-    assertRustToolchainAvailable(devEnvironment)
-    console.log('[dev:desktop] Starting dependency watchers...')
+    await checkRustToolchain(devEnvironment, { signal: startupController.signal })
+    if (shuttingDown) return await shutdownPromise
+    logger.log('[dev:desktop] Starting dependency watchers...')
     const turboProcess = spawnManaged(
       'dependency watchers',
       turboCli,
@@ -337,32 +371,46 @@ export const runDevDesktop = async () => {
     )
 
     turboProcess.once('error', (error) => {
-      console.error(`[dev:desktop] Failed to start dependency watchers: ${error.message}`)
+      void requestShutdown(1, `dependency watchers failed to start: ${error.message}`)
     })
     turboProcess.once('exit', (code, signal) => {
       if (!shuttingDown) {
-        void requestShutdown(exitCodeFor(code, signal), 'dependency watchers exited')
+        void requestShutdown(
+          exitCodeFor(code, signal),
+          processExitReason('dependency watchers', code, signal),
+        )
       }
     })
 
-    await waitForRequiredArtifacts(() => shuttingDown)
+    await waitForArtifacts(() => shuttingDown)
     if (shuttingDown) return await shutdownPromise
 
-    console.log('[dev:desktop] Starting Tauri...')
+    logger.log('[dev:desktop] Starting Tauri...')
     const tauriProcess = spawnManaged('Tauri', tauriCli, ['dev'], DESKTOP_DIR)
 
     tauriProcess.once('error', (error) => {
-      console.error(`[dev:desktop] Failed to start Tauri: ${error.message}`)
+      void requestShutdown(1, `Tauri failed to start: ${error.message}`)
     })
     tauriProcess.once('exit', (code, signal) => {
-      if (!shuttingDown) void requestShutdown(exitCodeFor(code, signal), 'Tauri exited')
+      if (!shuttingDown) {
+        void requestShutdown(
+          exitCodeFor(code, signal),
+          processExitReason('Tauri', code, signal),
+          code === 0
+            ? 'If no development window opened, quit any already running MarkFlowy instance ' +
+                'and retry. The single-instance plugin exits normally when another instance is running.'
+            : undefined,
+        )
+      }
     })
 
     await shutdownStarted
     return await shutdownPromise
   } catch (error) {
-    console.error('[dev:desktop] Unexpected failure:', error)
-    return await requestShutdown(1, 'unexpected failure')
+    if (shuttingDown) return await shutdownPromise
+    logger.error('[dev:desktop] Unexpected failure:', error)
+    const message = error instanceof Error ? error.message : String(error)
+    return await requestShutdown(1, `startup failed: ${message}`)
   } finally {
     for (const [signal, handler] of signalHandlers) process.off(signal, handler)
   }

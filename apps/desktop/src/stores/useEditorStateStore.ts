@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
+import { touchDocument } from '@/services/pristine-document'
 
 type EditorState = {
   hasUnsavedChanges: boolean
@@ -20,6 +21,7 @@ const useEditorStateStore = create(
     idStateMap: new Map(),
 
     setIdStateMap: (id, editorState) => {
+      if (editorState.hasUnsavedChanges || editorState.undoDepth) touchDocument(id)
       const previous = get().idStateMap.get(id)
       if (
         previous?.hasUnsavedChanges === editorState.hasUnsavedChanges &&

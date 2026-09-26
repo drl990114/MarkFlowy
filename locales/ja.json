@@ -238,6 +238,8 @@
     "untitled": "無題",
     "not_found": "ファイルが見つかりません",
     "openDir": "フォルダーを開く",
+    "openFolderInNewWindow": "新しいウィンドウでフォルダーを開く",
+    "closeFolder": "フォルダーを閉じる",
     "openFile": "ファイルを開く",
     "recentDir": "最近開いたフォルダー",
     "emptyOpened": "開いているファイルはありません",

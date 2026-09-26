@@ -7,6 +7,7 @@ import useLayoutStore, { DOCK_PREFERENCES_STORAGE_KEY } from '@/stores/useLayout
 import Root from '.'
 
 const commands = vi.hoisted(() => new Map<string, () => void>())
+const context = vi.hoisted(() => ({ rootPath: '/workspace' as string | undefined }))
 
 vi.mock('@/commands', () => ({
   commandRegistry: {
@@ -36,7 +37,11 @@ vi.mock('@/extensions/bookmarks/useBookMarksStore', () => ({
 vi.mock('@/extensions/quick-open/QuickOpenDialog', () => ({ QuickOpenDialog: () => null }))
 vi.mock('@/extensions/command-palette/CommandPaletteDialog', () => ({ CommandPaletteDialog: () => null }))
 vi.mock('@/i18n', () => ({ useTranslation: () => ({ t: (key: string) => key }) }))
-vi.mock('@/stores', () => ({ useEditorStore: { getState: () => ({ activeId: 'editor' }) } }))
+vi.mock('@/services/editor-file', () => ({ ensureDocument: vi.fn() }))
+vi.mock('@/stores', () => ({ useEditorStore: Object.assign(
+  (selector: (state: unknown) => unknown) => selector({ folderData: context.rootPath ? [{ path: context.rootPath }] : null }),
+  { getState: () => ({ activeId: 'editor' }), subscribe: () => () => {} },
+) }))
 vi.mock('zens', () => ({ toast: { info: vi.fn() } }))
 vi.mock('./ZenModeHint', () => ({ ZenModeHint: () => null }))
 
@@ -142,8 +147,11 @@ async function renderLayout() {
 
 beforeEach(() => {
   windowWidth = 1200
+  context.rootPath = '/workspace'
   localStorage.removeItem(DOCK_PREFERENCES_STORAGE_KEY)
   useLayoutStore.setState({
+    hasWorkspace: true,
+    workspaceDocks: undefined,
     leftBar: { activePanelId: 'explorer', size: 240, visible: true },
     rightBar: { activePanelId: 'toc', size: 280, visible: true },
     zenModeActive: false,
@@ -205,6 +213,28 @@ afterEach(() => {
 })
 
 describe('Root dock resizing', () => {
+  it('restores separate document and workspace widths even when both docks stay visible', async () => {
+    useLayoutStore.setState({ documentDocks: {
+      leftBar: { activePanelId: 'bookmarks', size: 210, visible: true },
+      rightBar: { activePanelId: 'ai', size: 320, visible: true },
+    } })
+    await renderLayout()
+    act(() => {
+      context.rootPath = undefined
+      useLayoutStore.getState().setWorkspaceContext(false)
+    })
+    notifyResize()
+    expect(panel('left').offsetWidth).toBeCloseTo(210, 0)
+    expect(panel('right').offsetWidth).toBeCloseTo(320, 0)
+    act(() => {
+      context.rootPath = '/workspace'
+      useLayoutStore.getState().setWorkspaceContext(true)
+    })
+    notifyResize()
+    expect(panel('left').offsetWidth).toBeCloseTo(240, 0)
+    expect(panel('right').offsetWidth).toBeCloseTo(280, 0)
+  })
+
   it('leaves no separator or resize target at either window edge when docks start closed', async () => {
     useLayoutStore.getState().setLeftBarVisible(false)
     useLayoutStore.getState().setRightBarVisible(false)

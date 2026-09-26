@@ -8,6 +8,7 @@ import { useTranslation } from '@/i18n'
 import { useEditorStore } from '@/stores'
 import useOpenedCacheStore from '@/stores/useOpenedCacheStore'
 import { CheckIcon, ChevronDownIcon } from 'lucide-react'
+import { toast } from 'zens'
 import { useMemo, useState } from 'react'
 import { StatusBarButton } from './StatusBar/StatusBarButton'
 
@@ -21,7 +22,7 @@ type WorkspaceActionsProps = {
 
 export function WorkspaceActions({ location = 'titlebar' }: WorkspaceActionsProps) {
   const { t } = useTranslation()
-  const { openFolder, openFolderDialog } = useOpen()
+  const { openFolder, openFolderDialog, closeFolder } = useOpen()
   const rootPath = useEditorStore((state) => state.folderData?.[0]?.path)
   const recentWorkspaces = useOpenedCacheStore((state) => state.recentWorkspaces)
   const clearRecentWorkspaces = useOpenedCacheStore((state) => state.clearRecentWorkspaces)
@@ -154,6 +155,14 @@ export function WorkspaceActions({ location = 'titlebar' }: WorkspaceActionsProp
             >
               {t('file.openDir')}
             </Button>
+            <Button className='h-7 w-full justify-start rounded-sm px-2 text-ui-control font-normal' size='sm' variant='ghost'
+              onClick={() => { setIsPickerOpen(false); void openFolderDialog('new') }}>
+              {t('file.openFolderInNewWindow')}
+            </Button>
+            {rootPath ? <Button className='h-7 w-full justify-start rounded-sm px-2 text-ui-control font-normal' size='sm' variant='ghost'
+              onClick={() => { setIsPickerOpen(false); void closeFolder().catch((error) => toast.error(String(error))) }}>
+              {t('file.closeFolder')}
+            </Button> : null}
             {visibleRecentWorkspaces.length > 0 ? (
               <Button
                 className='h-7 w-full justify-start rounded-sm px-2 text-ui-caption font-normal text-content-secondary'

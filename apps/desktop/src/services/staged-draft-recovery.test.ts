@@ -21,6 +21,7 @@ import { isDraftRecoveryPending, waitForDraftRecovery, waitForAllDraftRecovery }
 import { bindRecoveredDraft, flushDraftProtection, historyCall, protectLocalEdit } from './local-history'
 import { stageDraftRecovery } from './staged-draft-recovery'
 import { nativeRecoveryDocument, type DraftDescriptor, type DraftManifest } from './draftSessionFormat'
+import { restoreWindowDocuments, type WindowSession } from './window-session'
 
 const background = vi.hoisted(() => ({ deferred: false, tasks: [] as (() => void)[] }))
 vi.mock('@/startup/interactive', () => ({ afterStartupInteractive: (run: () => void) => {
@@ -48,6 +49,7 @@ vi.mock('./local-history', () => ({
     writer: `main:${id}`, sequence: 1, hash: id, paused: false,
   })),
   isUntouchedRecoveredDraft: () => true,
+  ownsHistoryDraft: () => false,
 }))
 
 enableMapSet()
@@ -129,6 +131,34 @@ const installNative = (drafts: DraftDescriptor[]) => {
 }
 
 describe('indexed draft recovery', () => {
+  it('restores the latest owned draft after closing its folder, retaining its tab id and excluding other windows', async () => {
+    const previous = descriptor('untitled')
+    previous.document.path = undefined
+    const latest = { ...previous, writer: 'main:reclaimed', sequence: 13, hash: 'latest' }
+    const other = { ...descriptor('other'), writer: 'another-window:other' }
+    const previousMain = { ...descriptor('previous-main'), writer: 'main:previous-main' }
+    const session: WindowSession = {
+      version: 1, windowLabel: 'old', files: [{ id: 'buffer', name: 'untitled.md' }],
+      editorLayout: { type: 'leaf', id: 'group', opened: ['buffer'], activeId: 'buffer' }, activeGroupId: 'group',
+      drafts: { version: 2, activeId: 'buffer', documents: [{ id: 'buffer', name: 'untitled.md', source: { kind: 'native', draft: previous } }] },
+    }
+    restoreWindowDocuments(session)
+    const claimed: DraftDescriptor[] = []
+    vi.mocked(historyCall).mockImplementation(async (operation, payload) => {
+      if (operation === 'recoveryDraftIndex') return (payload as { workspace: string }).workspace === '/w' ? [latest, other, previousMain] : []
+      const requested = (payload as { draft: DraftDescriptor }).draft
+      claimed.push(requested)
+      return requested.writer === latest.writer ? { ...requested, content: 'latest protected text' } : null
+    })
+    const onError = vi.fn()
+    const recovery = await start({ session, onError })
+    await recovery.finished
+    expect(onError).not.toHaveBeenCalled()
+    expect(useEditorStore.getState().opened).toEqual(['buffer'])
+    expect(useEditorStore.getState().activeId).toBe('buffer')
+    expect(getFileObject('buffer').content).toBe('latest protected text')
+    expect(claimed).toEqual([latest])
+  })
   it('refreshes a history generation without weakening the exact draft reference', async () => {
     const item = descriptor('active')
     open('active')

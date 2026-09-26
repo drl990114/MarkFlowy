@@ -1,6 +1,7 @@
 import { act, cleanup, renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import useLayoutStore from '@/stores/useLayoutStore'
+import useEditorStore from '@/stores/useEditorStore'
 import useOpen from './useOpen'
 
 const useOpenTestState = vi.hoisted(() => ({
@@ -54,6 +55,7 @@ vi.mock('@/stores/useOpenedCacheStore', () => ({
 }))
 
 beforeEach(() => {
+  useEditorStore.setState({ folderData: [{ id: 'workspace', name: 'Workspace', path: '/current', kind: 'dir' }] })
   useOpenTestState.addRecentWorkspace.mockReset().mockResolvedValue(undefined)
   useOpenTestState.confirm.mockReset()
   useOpenTestState.emitTo.mockReset().mockResolvedValue(undefined)
@@ -70,6 +72,23 @@ beforeEach(() => {
 afterEach(cleanup)
 
 describe('useOpen', () => {
+  it('opens the first folder in the current document window without prompting', async () => {
+    useEditorStore.setState({ folderData: null })
+    useOpenTestState.invoke.mockResolvedValue(null)
+    const { result } = renderHook(() => useOpen())
+    await act(async () => result.current.openFolder('/notes'))
+    expect(useOpenTestState.confirm).not.toHaveBeenCalled()
+    expect(useOpenTestState.switchWorkspace).toHaveBeenCalledWith('/notes')
+  })
+
+  it('leaves the session alone when the folder picker is cancelled', async () => {
+    useEditorStore.setState({ folderData: null })
+    useOpenTestState.openDialog.mockResolvedValue(null)
+    const { result } = renderHook(() => useOpen())
+    await act(async () => result.current.openFolderDialog())
+    expect(useOpenTestState.switchWorkspace).not.toHaveBeenCalled()
+    expect(useOpenTestState.confirm).not.toHaveBeenCalled()
+  })
   it.each(['report.pdf', 'index.html'])('allows %s through the file picker', async (file) => {
     useOpenTestState.openDialog.mockResolvedValue(`/documents/${file}`)
     const { result } = renderHook(() => useOpen())

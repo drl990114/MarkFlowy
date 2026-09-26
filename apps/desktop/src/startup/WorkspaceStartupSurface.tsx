@@ -6,6 +6,7 @@ import { StartupProgress } from './StartupProgress'
 import type { StartupPhaseState } from './startupCoordinator'
 import { useEffect, type ReactNode } from 'react'
 import { markStartupInteractive } from './interactive'
+import useEditorStore from '@/stores/useEditorStore'
 
 interface WorkspaceStartupSurfaceProps {
   children: ReactNode
@@ -28,6 +29,7 @@ export function WorkspaceStartupSurface({
 }: WorkspaceStartupSurfaceProps) {
   const leftDock = useLayoutStore((layout) => layout.leftBar)
   const rightDock = useLayoutStore((layout) => layout.rightBar)
+  const hasWorkspace = useEditorStore((editor) => Boolean(editor.folderData?.[0]?.path))
   useEffect(() => {
     if (state.status === 'error') markStartupInteractive('error')
   }, [state.status])
@@ -55,7 +57,7 @@ export function WorkspaceStartupSurface({
       data-mf-workspace-startup={state.status === 'error' ? 'error' : 'loading'}
     >
       <div className='flex min-h-0 flex-1'>
-        {leftDock.visible ? (
+        {hasWorkspace && leftDock.visible ? (
           <aside
             aria-hidden='true'
             className='shrink-0 border-r border-border bg-surface-panel-left'
@@ -72,7 +74,7 @@ export function WorkspaceStartupSurface({
             <StartupProgress label={t('startup.opening_workspace')} />
           )}
         </main>
-        {rightDock.visible ? (
+        {hasWorkspace && rightDock.visible ? (
           <aside
             aria-hidden='true'
             className='shrink-0 border-l border-border bg-surface-panel-right'

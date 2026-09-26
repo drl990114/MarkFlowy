@@ -9,6 +9,8 @@ import {
 import { currentWindow } from '@/services/windows'
 import useLayoutStore from '@/stores/useLayoutStore'
 import useOpenedCacheStore from '@/stores/useOpenedCacheStore'
+import useEditorStore from '@/stores/useEditorStore'
+import { useWorkspaceOpenError, clearWorkspaceOpenError } from '@/services/workspace-open-error'
 import { invoke } from '@tauri-apps/api/core'
 import { open } from '@tauri-apps/plugin-dialog'
 import { useCallback } from 'react'
@@ -32,6 +34,13 @@ const openExplorerInWindow = async (windowLabel: string) => {
 const useOpen = () => {
   const { addRecentWorkspaces } = useOpenedCacheStore()
   const { t } = useTranslation()
+
+  const openFolderInNewWindow = useCallback(async (dir: string) => {
+    await invoke<boolean>('save_security_bookmark', { path: dir })
+    const windowLabel = await invoke<string>('create_new_window', { path: dir })
+    await openExplorerInWindow(windowLabel)
+    await addRecentWorkspaces({ path: dir })
+  }, [addRecentWorkspaces])
 
   const openFolderInCurrentWindow = useCallback(
     async (dir: string) => {
@@ -69,6 +78,10 @@ const useOpen = () => {
   const openFolder = useCallback(
     async (dir: string) => {
       try {
+        if (!useEditorStore.getState().getRootPath()) {
+          if (await openFolderInCurrentWindow(dir)) clearWorkspaceOpenError()
+          return
+        }
         const action = await dialog.confirm({
           title: t('file.openFolderModal.title'),
           actions: [
@@ -82,34 +95,22 @@ const useOpen = () => {
         })
 
         if (action === 'newWindow') {
-          try {
-            await invoke<boolean>('save_security_bookmark', { path: dir })
-            const windowLabel = await invoke<string>('create_new_window', {
-              path: dir,
-            })
-            await openExplorerInWindow(windowLabel)
-            addRecentWorkspaces({ path: dir })
-          } catch (error) {
-            logger.error('Error creating new window:', error)
-          }
+          await openFolderInNewWindow(dir)
           return
         }
 
         if (action === 'currentWindow') {
-          try {
-            await openFolderInCurrentWindow(dir)
-          } catch (error) {
-            logger.error('Error opening folder in current window:', error)
-          }
+          await openFolderInCurrentWindow(dir)
         }
       } catch (error) {
         logger.error('Error showing folder open modal:', error)
+        useWorkspaceOpenError.setState({ path: dir, error })
       }
     },
-    [addRecentWorkspaces, openFolderInCurrentWindow, t],
+    [openFolderInNewWindow, openFolderInCurrentWindow, t],
   )
 
-  const openFolderDialog = useCallback(async () => {
+  const openFolderDialog = useCallback(async (target?: 'new') => {
     const dir = await open({
       directory: true,
       recursive: true,
@@ -118,8 +119,11 @@ const useOpen = () => {
 
     if (typeof dir !== 'string') return
 
-    await openFolder(dir)
-  }, [openFolder])
+    if (target === 'new') {
+      try { await openFolderInNewWindow(dir) }
+      catch (error) { useWorkspaceOpenError.setState({ path: dir, error }) }
+    } else await openFolder(dir)
+  }, [openFolder, openFolderInNewWindow])
 
   const openFile = useCallback(async () => {
     const file = await open({
@@ -147,6 +151,7 @@ const useOpen = () => {
     openFolderDialog,
     openFolder,
     openFolderInCurrentWindow,
+    closeFolder: () => switchWorkspaceInCurrentWindow(),
     openFile,
   }
 }

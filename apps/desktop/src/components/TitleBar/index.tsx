@@ -1,4 +1,5 @@
-import { APP_NAME } from '@/constants'
+import { DocumentTitle } from './DocumentTitle'
+import { isSingleDocumentLayout } from '../EditorArea/documentLayout'
 import { CommandPaletteButton } from '../CommandPaletteButton'
 import { useGlobalOSInfo } from '@/hooks'
 import { useTranslation } from '@/i18n'
@@ -11,7 +12,7 @@ import { WindowControls } from './WindowControls'
 export default function TitleBar() {
   const { osType } = useGlobalOSInfo()
   const { t } = useTranslation()
-  const hasWorkspace = useEditorStore((state) => Boolean(state.folderData?.[0]?.path))
+  const singleDocument = useEditorStore((state) => isSingleDocumentLayout(state.folderData?.[0]?.path, state.editorLayout))
   const isMacOS = osType === 'macos'
   const isWindows = osType === 'windows'
 
@@ -31,21 +32,11 @@ export default function TitleBar() {
         className={cn('flex h-full shrink-0 items-center', isMacOS ? 'pl-[76px]' : 'pl-2')}
         data-tauri-drag-region
       >
-        {hasWorkspace ? null : (
-          <>
-            <span className='px-2 text-ui-control font-medium' data-tauri-drag-region>
-              {APP_NAME}
-            </span>
-            <span
-              aria-hidden='true'
-              className='mx-1 h-3.5 w-px shrink-0 bg-border'
-              data-tauri-drag-region
-            />
-          </>
-        )}
         <WorkspaceActions />
       </div>
-      <div className='min-w-12 flex-1 self-stretch' data-tauri-drag-region />
+      <div className='flex min-w-12 flex-1 items-center justify-center overflow-hidden px-4' data-tauri-drag-region>
+        {singleDocument ? <DocumentTitle /> : null}
+      </div>
       <div className={cn('flex h-full shrink-0 items-center', !isWindows && 'pr-1')}>
         <CommandPaletteButton />
         <AppMenuButton />

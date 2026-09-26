@@ -448,6 +448,7 @@ const useEditorStore = create<EditorStore>()(subscribeWithSelector((set, get) =>
     activeGroupId: initialEditorLayout.id,
     editorLayout: initialEditorLayout,
     folderData: null,
+    editorSessionRevision: 0,
     editorDelegateMap: new Map(),
     editorCtxMap: new Map(),
 
@@ -907,6 +908,7 @@ const useEditorStore = create<EditorStore>()(subscribeWithSelector((set, get) =>
       set((state) => ({
         ...state,
         folderData: folderData?.map(toFileMetadata) ?? null,
+        editorSessionRevision: state.editorSessionRevision + 1,
         editorLayout,
         activeGroupId: editorLayout.id,
         opened: [],
@@ -917,7 +919,7 @@ const useEditorStore = create<EditorStore>()(subscribeWithSelector((set, get) =>
     setFolderDataPure: (folderData) =>
       set((state) => ({
         ...state,
-        folderData: folderData.map(toFileMetadata),
+        folderData: folderData?.map(toFileMetadata) ?? null,
       })),
 
     setEditorCtx: (id, ctx) =>
@@ -1008,13 +1010,14 @@ type EditorStore = {
   closeGroup: (groupId: string) => void
   setBranchSizes: (branchId: string, sizes: number[]) => void
   setEditorLayout: (editorLayout: EditorLayoutNode, activeGroupId?: string) => void
+  editorSessionRevision: number
   setFolderData: (folderData: IFile[] | null) => void
   /**
    * dont change opened and activeId
    * @param folderData
    * @returns
    */
-  setFolderDataPure: (folderData: IFile[]) => void
+  setFolderDataPure: (folderData: IFile[] | null) => void
   setEditorDelegate: (id: string, delegate: EditorDelegate<any>) => void
   clearEditorDelegate: (id: string) => void
   getEditorContent: (id: string) => string

@@ -16,7 +16,9 @@ import { logger } from '@/helper/logger'
 import { checkUpdate } from '@/helper/updater'
 import { i18nInit, t } from '@/i18n'
 import { appSettingStoreSetup } from '@/services/app-setting'
-import { addExistingMarkdownFileEdit } from '@/services/editor-file'
+import { addExistingMarkdownFileEdit, ensureDocument, removePristineDocuments } from '@/services/editor-file'
+import { createWindowSessionPersistence, readWindowSession, restoreWindowDocuments, type WindowSession } from '@/services/window-session'
+import { clearWorkspaceOpenError, useWorkspaceOpenError } from '@/services/workspace-open-error'
 import {
   createWorkspaceCachePersistence,
   type WorkspaceCache,
@@ -28,7 +30,7 @@ import {
   switchWorkspaceInCurrentWindow as requestWorkspaceSwitch,
   waitForWorkspaceSwitches,
 } from '@/services/workspace-switch'
-import { switchWorkspaceSession } from '@/services/workspace-session'
+import { attachWorkspaceSession, releaseDetachedWorkspaceScopes, switchWorkspaceSession } from '@/services/workspace-session'
 import { refreshWorkspaceDirectory } from '@/services/workspace-refresh'
 import { createNewWindow, currentWindow } from '@/services/windows'
 import { useEditorStore } from '@/stores'
@@ -91,14 +93,21 @@ interface CliCommandPayload {
 
 let workspaceCachePersistence: WorkspaceCachePersistence | undefined
 let workspaceCacheStore: LazyStore | undefined
+let windowSessionPersistence: ReturnType<typeof createWindowSessionPersistence> | undefined
+let startupSession: WindowSession | undefined
+let isolateStartupDrafts = false
+let preserveStartupDocuments = false
 
-const setupDraftRecovery = async (signal?: AbortSignal, reload = false) => {
+const setupDraftRecovery = async (signal?: AbortSignal, reload = false, preserveOpenDocuments = false) => {
   try {
     let reported = false
     const recovery = await stageDraftRecovery({
       cache: workspaceCacheStore,
       reload,
       signal,
+      session: reload ? startupSession : undefined,
+      isolatedWindow: reload && isolateStartupDrafts ? currentWindow.label : undefined,
+      preserveOpenDocuments,
       onError: (error) => {
         logger.error('Failed to restore unsaved documents', error)
         if (!reported) toast.error(t('drafts.restore_failed'))
@@ -124,19 +133,37 @@ const getExtFromPath = (path: string) => {
 }
 
 const setupWorkspaceCachePersistence = async (cacheStore: LazyStore) => {
+  await windowSessionPersistence?.dispose()
+  windowSessionPersistence = undefined
   await workspaceCachePersistence?.dispose()
   workspaceCacheStore = cacheStore
   workspaceCachePersistence = createWorkspaceCachePersistence(cacheStore)
   setWorkspaceSwitchHandler(performWorkspaceSwitch)
 }
 
-async function performWorkspaceSwitch(path: string) {
+async function performWorkspaceSwitch(path: string | undefined) {
   const persistence = workspaceCachePersistence
   if (!persistence) throw new Error('Workspace persistence is not ready')
 
-  const didSwitch = await switchWorkspaceSession(path, persistence)
+  if (path) {
+    const owner = await invoke<string | null>('check_window_by_path', { path })
+    if (owner && owner !== currentWindow.label) {
+      await invoke('focus_window_by_label', { windowLabel: owner })
+      await currentWindow.emitTo(owner, OPEN_WORKSPACE_EXPLORER_EVENT)
+      return false
+    }
+  }
+  const preservingDocuments = !path || !useEditorStore.getState().getRootPath()
+  await windowSessionPersistence?.flush()
+  const didSwitch = path ? await switchWorkspaceSession(path, persistence) : await attachWorkspaceSession(undefined, persistence)
   if (didSwitch) {
-    await setupDraftRecovery()
+    useLayoutStore.getState().setWorkspaceContext(Boolean(path))
+    // Startup restores drafts once after all explicit paths have been opened.
+    if (path && appStartupCoordinator.getSnapshot().workspace.status !== 'loading') {
+      await setupDraftRecovery(undefined, false, preservingDocuments)
+    }
+    ensureDocument()
+    clearWorkspaceOpenError()
     appStartupCoordinator.recoverWorkspace(undefined)
   }
   return didSwitch
@@ -212,6 +239,7 @@ async function appThemeExtensionsSetup() {
 }
 
 async function handleOpenedPaths(openedPaths: string[]) {
+  removePristineDocuments()
   const { addOpenedFile, setActiveId } = useEditorStore.getState()
 
   logger.debug('handleOpenedPaths', openedPaths)
@@ -310,6 +338,9 @@ const readWorkspaceInputs = createWorkspaceInputReader(async () => {
 })
 
 async function appWorkspaceSetup(signal: AbortSignal) {
+  startupSession = undefined
+  isolateStartupDrafts = currentWindow.label !== 'main'
+  preserveStartupDocuments = false
   const { setRecentWorkspaces } = useOpenedCacheStore.getState()
   logger.debug('==== appWorkspaceSetup: Checking window.openedUrls ===')
   logger.debug('window.openedUrls', window.openedUrls)
@@ -347,10 +378,27 @@ async function appWorkspaceSetup(signal: AbortSignal) {
       if (normalizeOpenedUrls(window.openedUrls).length === 0) break
     }
     if (handledOpenedPaths) {
+      isolateStartupDrafts = !useEditorStore.getState().getRootPath()
+      preserveStartupDocuments = true
       return
     }
 
-    if (recentWorkspaces.length > 0) {
+    startupSession = await readWindowSession(cacheStore, currentWindow.label)
+    if (startupSession) {
+      if (startupSession.rootPath) {
+        try {
+          await restoreStartupWorkspace(startupSession.rootPath, Promise.resolve(undefined), signal)
+        } catch (error) {
+          throwIfStartupCancelled(signal)
+          useEditorStore.getState().setFolderDataPure(null)
+          useWorkspaceOpenError.setState({ path: startupSession.rootPath, error })
+        }
+      }
+      restoreWindowDocuments(startupSession)
+      return
+    }
+
+    if (currentWindow.label === 'main' && recentWorkspaces.length > 0) {
       logger.debug('Found recent workspaces:', recentWorkspaces)
       const targetWorkspacePath = recentWorkspaces[0].path
       logger.debug('Target workspace path:', targetWorkspacePath)
@@ -366,7 +414,9 @@ async function appWorkspaceSetup(signal: AbortSignal) {
       } catch (error) {
         logger.error('Failed to read directory:', targetWorkspacePath, error)
         logger.error('This might be due to sandbox restrictions or the directory no longer exists')
-        throw error
+        throwIfStartupCancelled(signal)
+        useEditorStore.getState().setFolderDataPure(null)
+        useWorkspaceOpenError.setState({ path: targetWorkspacePath, error })
       }
     } else {
       logger.debug('No recent workspaces found')
@@ -436,10 +486,14 @@ const appStartupCoordinator = createAppStartupCoordinator<AppShellData, void>({
   loadShell: appShellSetup,
   loadWorkspace: async (_shell, signal) => {
     await appWorkspaceSetup(signal)
+    useLayoutStore.getState().setWorkspaceContext(Boolean(useEditorStore.getState().getRootPath()))
     void prepareStartupEditorModules(signal).catch(() => undefined)
     markStartupStage('session-ready')
     markStartupStage('drafts-start')
-    await setupDraftRecovery(signal, true)
+    await setupDraftRecovery(signal, true, preserveStartupDocuments)
+    ensureDocument()
+    await windowSessionPersistence?.dispose()
+    if (workspaceCacheStore) windowSessionPersistence = createWindowSessionPersistence(workspaceCacheStore, currentWindow.label)
     void prepareStartupEditorModules(signal).catch(() => undefined)
     await prepareStartupDocumentRead(signal)
   },
@@ -506,6 +560,8 @@ export const useAppRuntimeSetup = () => {
             appStartupCoordinator.cancel()
             // Keep persistence and the close listener alive if native teardown fails.
             await workspaceCachePersistence?.flush()
+            await windowSessionPersistence?.flush()
+            await releaseDetachedWorkspaceScopes()
             await releaseSecurityScope(rootPath)
             await currentWindow.destroy()
           }),

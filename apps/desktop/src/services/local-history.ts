@@ -1,4 +1,5 @@
 import { sameTextFormat, type TextFileFormat } from '@/components/EditorArea/textFileFormat'
+import { isPristineDocument } from './pristine-document'
 import { invoke, isTauri } from '@tauri-apps/api/core'
 import { listen } from '@tauri-apps/api/event'
 import { debounce } from 'lodash'
@@ -104,6 +105,8 @@ const protectedDiscards = new WeakMap<IFile, TextFileFormat>()
 let sequence = Date.now() * 1000
 let started = false
 export const draftProtectionStarted = () => started
+export const ownsHistoryDraft = (fileId: string, draft?: { writer: string }) =>
+  Boolean(draft && bindings.get(fileId)?.writer === draft.writer)
 
 function status(id: string, value: ProtectionState['status'][string]) {
   useHistoryProtection.setState((s) => ({ status: { ...s.status, [id]: value } }))
@@ -188,6 +191,7 @@ async function capture(fileId: string) {
   const file = getFileObject(fileId)
   if (!file || file.kind === 'new_tab') return
   const content = useEditorStore.getState().getEditorContent(fileId)
+  if (isPristineDocument(fileId) && !file.path) return
   const format = fileSaveCoordinator.getPersistedFormat(fileId)
   const diskRevision = fileSaveCoordinator.getDiskRevision(fileId)
   const dirty =
@@ -246,6 +250,7 @@ function captureLatest(fileId: string): Promise<void> {
 
 /** Called by the host editor's actual input path, never by external synchronization. */
 export function protectLocalEdit(fileId: string) {
+  if (isPristineDocument(fileId)) return
   if (!started || isDraftRecoveryPending(fileId)) return
   edits.set(fileId, (edits.get(fileId) ?? 0) + 1)
   status(fileId, 'pending')

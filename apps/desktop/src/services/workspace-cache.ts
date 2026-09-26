@@ -60,7 +60,7 @@ const getExtFromPath = (path: string) => {
   return dotIndex > -1 ? fileName.slice(dotIndex + 1) : ''
 }
 
-const ensureCachedFileByPath = (path: string) => {
+export const ensureCachedFileByPath = (path: string) => {
   const existingFile = getFileObjectByPath(path)
   if (existingFile) {
     return existingFile
@@ -71,6 +71,17 @@ const ensureCachedFileByPath = (path: string) => {
     ext: getExtFromPath(path),
     path,
   })
+}
+
+export function workspaceCachedPaths(cache?: WorkspaceCache): string[] {
+  const visit = (node: PersistedEditorLayoutNode): string[] => node.type === 'leaf'
+    ? [...(node.openedFilePaths ?? []), ...(node.activeFilePath ? [node.activeFilePath] : [])]
+    : node.children.flatMap(visit)
+  return [...new Set([
+    ...(cache?.openedFilePaths ?? []),
+    ...(cache?.activeFilePath ? [cache.activeFilePath] : []),
+    ...(cache?.editorLayout ? visit(cache.editorLayout) : []),
+  ])]
 }
 
 const serializeEditorLayout = (

@@ -13,6 +13,7 @@ import useEditorStateStore from '@/stores/useEditorStateStore'
 import useEditorStore from '@/stores/useEditorStore'
 import { pendingDraftSnapshot, waitForAllDraftRecovery } from './draftRecoveryState'
 import { flushDraftProtection, protectedDraftDescriptor } from './local-history'
+import { isPristineDocument } from './pristine-document'
 import {
   draftManifestSchema, recoverySessionSchema, RELOAD_DOCUMENT_PREFIX,
   RELOAD_SESSION_KEY, SESSION_KEY_PREFIX,
@@ -31,6 +32,7 @@ function captureDraftSession(): DraftSession {
     if (!file) throw new Error('Could not read an open document.')
     // Flush deferred input before checking dirtiness, including source mode and RME.
     const content = editor.getEditorContent(id)
+    if (isPristineDocument(id) && !file.path) return []
     if (file.path && !useEditorStateStore.getState().idStateMap.get(id)?.hasUnsavedChanges)
       return []
     return [
@@ -58,6 +60,7 @@ function captureReloadDocuments(): RecoveryDocument[] {
     if (file?.kind === 'new_tab') return []
     if (!file) throw new Error('Could not read an open document.')
     const content = editor.getEditorContent(id)
+    if (isPristineDocument(id) && !file.path) return []
     if (file.path && !useEditorStateStore.getState().idStateMap.get(id)?.hasUnsavedChanges) return []
     return [{
       id, name: file.name, path: file.path, ext: file.ext,
@@ -139,6 +142,20 @@ export function listenForDraftReload({
   return () => {
     window.removeEventListener('beforeunload', save)
     window.removeEventListener('pagehide', save)
+  }
+}
+
+/** A durable head for a window session; native bodies stay in the draft database. */
+export async function captureProtectedDraftSession(): Promise<DraftSession | DraftManifest> {
+  await waitForAllDraftRecovery()
+  const captured = captureDraftSession()
+  await flushDraftProtection()
+  if (!isTauri()) return captured
+  return {
+    ...captured, version: 2,
+    documents: await Promise.all(captured.documents.map(async ({ content: _content, ...doc }) => ({
+      ...doc, source: { kind: 'native' as const, draft: await protectedDraftDescriptor(doc.id) },
+    }))),
   }
 }
 

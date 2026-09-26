@@ -9,19 +9,32 @@ import bus from '@/helper/eventBus'
 import { useTranslation } from '@/i18n'
 import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
+import { EditorAreaHeader } from './EditorAreaHeader'
+import { DocumentTitle } from '../TitleBar/DocumentTitle'
+import { useGlobalOSInfo } from '@/hooks'
 
 interface EditorGroupToolbarProps {
   editorId?: string
+  compactGroupId?: string
 }
 
 function EditorGroupToolbar(props: EditorGroupToolbarProps) {
-  const { editorId } = props
+  const { editorId, compactGroupId } = props
+  const { osType } = useGlobalOSInfo()
   const type = useFileTypeConfigStore((state) => state.fileTypeConfigMap.get(editorId ?? '')?.type)
   const mode = useEditorViewTypeStore((state) => state.editorViewTypeMap.get(editorId ?? ''))
   const { t } = useTranslation()
 
   if (!editorId) return null
-  if (type === 'pdf') return null
+  const actions = compactGroupId ? <EditorAreaHeader groupId={compactGroupId} compact /> : null
+  const title = compactGroupId && osType === 'linux' ? <DocumentTitle /> : null
+  if (type === 'pdf')
+    return actions ? (
+      <div className='editor-group-toolbar flex items-center gap-2 border-b border-border px-2'>
+        {title}
+        <div className='ml-auto'>{actions}</div>
+      </div>
+    ) : null
   if (type === 'html')
     return (
       <div
@@ -29,6 +42,7 @@ function EditorGroupToolbar(props: EditorGroupToolbarProps) {
         role='group'
         aria-label={t('document_preview.html_title')}
       >
+        {title}
         {[EditorViewType.PREVIEW, EditorViewType.SOURCECODE].map((value) => (
           <Button
             key={value}
@@ -40,14 +54,19 @@ function EditorGroupToolbar(props: EditorGroupToolbarProps) {
             {t(value === EditorViewType.PREVIEW ? 'view.preview' : 'view.source_code')}
           </Button>
         ))}
+        <div className='ml-auto'>{actions}</div>
       </div>
     )
 
   return (
-    <ToolbarHost className='editor-group-toolbar'>
-      <WysiwygToolbar editorId={editorId} />
-      <SourceCodeToolbar editorId={editorId} />
-      <PreviewToolbar editorId={editorId} />
+    <ToolbarHost className='editor-group-toolbar flex items-center'>
+      {title}
+      <div className='min-w-0 flex-1'>
+        <WysiwygToolbar editorId={editorId} />
+        <SourceCodeToolbar editorId={editorId} />
+        <PreviewToolbar editorId={editorId} />
+      </div>
+      {actions}
     </ToolbarHost>
   )
 }

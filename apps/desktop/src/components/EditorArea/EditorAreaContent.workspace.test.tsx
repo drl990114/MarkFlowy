@@ -24,6 +24,16 @@ vi.mock('./styles', () => ({
 
 afterEach(cleanup)
 
+it('keeps the same editor instance when attaching and closing a folder', () => {
+  useEditorStore.getState().setFolderData(null)
+  render(<EditorAreaContent />)
+  const original = screen.getByTestId('editor-session').textContent
+  act(() => useEditorStore.getState().setFolderDataPure([{ id: 'w', name: 'w', path: '/w', kind: 'dir' }]))
+  expect(screen.getByTestId('editor-session').textContent).toBe(original)
+  act(() => useEditorStore.getState().setFolderDataPure(null))
+  expect(screen.getByTestId('editor-session').textContent).toBe(original)
+})
+
 it('keeps the editor mounted within a workspace and replaces it on a workspace change', () => {
   const setWorkspace = (path: string) =>
     useEditorStore
