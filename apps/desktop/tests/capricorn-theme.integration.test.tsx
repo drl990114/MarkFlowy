@@ -112,6 +112,8 @@ describe('Capricorn instance themes', () => {
     const adapter = first.mock.calls.find((call) => call[0])![0] as CapricornRuntimeAdapter
     const markdown = adapter.getMarkdown()
     const instance = view.container.querySelector<HTMLElement>('[data-cap-content]')!
+    // WebKit suppresses custom selection highlights under user-select: none.
+    expect(getComputedStyle(instance).userSelect).toBe('text')
     await waitFor(
       () => {
         for (const [role, text] of [
