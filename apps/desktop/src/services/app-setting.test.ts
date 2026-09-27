@@ -7,16 +7,29 @@ vi.mock('@/startup/sentry', () => ({ syncErrorReportingPreference: mocks.consent
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import { writeSettingData, writeSettingPatch } from './app-setting'
 
+let backend: Record<string, unknown>
+const commit = (data: Record<string, unknown>) => {
+  backend = { ...backend, ...data }
+  return { ...backend }
+}
+
 beforeEach(() => {
   vi.clearAllMocks()
-  mocks.invoke.mockResolvedValue(undefined)
-  useAppSettingStore.setState({ settingData: { language: 'en', theme_mode: 'light' } })
+  backend = { language: 'en', theme_mode: 'light' }
+  mocks.invoke.mockReset().mockImplementation(async (_command, { data }) => commit(data))
+  mocks.emit.mockReset().mockResolvedValue(undefined)
+  useAppSettingStore.setState({ settingData: { ...backend } })
 })
 
 describe('settings transactions', () => {
   it('enables reports only after consent is saved, and a later revocation wins over queued writes', async () => {
     let release!: () => void
-    mocks.invoke.mockImplementationOnce(() => new Promise<void>((resolve) => { release = resolve }))
+    mocks.invoke.mockImplementationOnce(
+      (_command, { data }) =>
+        new Promise((resolve) => {
+          release = () => resolve(commit(data))
+        }),
+    )
     const enable = writeSettingPatch({ error_reporting_enabled: true })
     await vi.waitFor(() => expect(mocks.invoke).toHaveBeenCalledOnce())
     expect(mocks.consent).not.toHaveBeenCalled()
@@ -40,17 +53,16 @@ describe('settings transactions', () => {
     await writeSettingPatch({ light_theme: 'paper/light', theme_mode: 'light' })
     expect(mocks.invoke).toHaveBeenCalledOnce()
     expect(mocks.invoke).toHaveBeenCalledWith('save_app_conf', {
-      data: { language: 'en', light_theme: 'paper/light', theme_mode: 'light' },
-      label: 'markflowy',
+      data: { light_theme: 'paper/light', theme_mode: 'light' },
     })
   })
 
   it('serializes overlapping writes and merges each patch with the last committed settings', async () => {
     let release!: () => void
     mocks.invoke.mockImplementationOnce(
-      () =>
-        new Promise<void>((resolve) => {
-          release = resolve
+      (_command, { data }) =>
+        new Promise((resolve) => {
+          release = () => resolve(commit(data))
         }),
     )
     const theme = writeSettingPatch({ dark_theme: 'paper/dark', theme_mode: 'dark' })
@@ -59,7 +71,8 @@ describe('settings transactions', () => {
     expect(mocks.invoke).toHaveBeenCalledOnce()
     release()
     await Promise.all([theme, language])
-    expect(mocks.invoke.mock.calls[1][1].data).toEqual({
+    expect(mocks.invoke.mock.calls[1][1].data).toEqual({ language: 'zh' })
+    expect(useAppSettingStore.getState().settingData).toEqual({
       language: 'zh',
       dark_theme: 'paper/dark',
       theme_mode: 'dark',
@@ -76,6 +89,49 @@ describe('settings transactions', () => {
       language: 'zh',
       theme_mode: 'light',
     })
-    expect(mocks.invoke.mock.calls[1][1].data).toEqual({ language: 'zh', theme_mode: 'light' })
+    expect(mocks.invoke.mock.calls[1][1].data).toEqual({ language: 'zh' })
+  })
+
+  it("preserves another window's saved values even when this renderer has stale settings", async () => {
+    backend = {
+      ...backend,
+      theme_mode: 'dark',
+      error_reporting_enabled: false,
+      extensions_chatgpt_apikey: 'updated-key',
+    }
+    useAppSettingStore.setState({
+      settingData: {
+        language: 'en',
+        theme_mode: 'light',
+        error_reporting_enabled: true,
+        extensions_chatgpt_apikey: 'old-key',
+      },
+    })
+    await writeSettingPatch({ language: 'zh' })
+    expect(backend).toEqual({
+      language: 'zh',
+      theme_mode: 'dark',
+      error_reporting_enabled: false,
+      extensions_chatgpt_apikey: 'updated-key',
+    })
+    expect(useAppSettingStore.getState().settingData).toEqual(backend)
+    expect(mocks.consent).toHaveBeenLastCalledWith(false)
+  })
+
+  it('keeps a committed setting when notifying other windows fails', async () => {
+    mocks.emit.mockRejectedValueOnce(new Error('window closed'))
+    await writeSettingPatch({ language: 'zh' })
+    expect(useAppSettingStore.getState().settingData.language).toBe('zh')
+    expect(backend.language).toBe('zh')
+  })
+
+  it('does not activate a remembered dialog choice when persistence fails', async () => {
+    const original = { ...backend, dialog_preferences: { close: 'save' } }
+    useAppSettingStore.setState({ settingData: original })
+    mocks.invoke.mockRejectedValueOnce(new Error('disk full'))
+    await expect(writeSettingPatch({ dialog_preferences: { close: 'discard' } })).rejects.toThrow(
+      'disk full',
+    )
+    expect(useAppSettingStore.getState().settingData).toEqual(original)
   })
 })

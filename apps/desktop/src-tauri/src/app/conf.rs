@@ -897,7 +897,25 @@ impl AppConf {
         let mut config: BTreeMap<String, Value> = serde_json::from_value(val).unwrap();
         let new_json: BTreeMap<String, Value> = serde_json::from_value(json).unwrap();
 
-        for (k, v) in new_json {
+        for (k, mut v) in new_json {
+            // Each window sends only the remembered choice it changed. Merge
+            // entries here, under the shared config writer lock, so another
+            // window's choices survive. Null removes one remembered choice.
+            if k == "dialog_preferences" && v.is_object() {
+                let mut preferences = config
+                    .get(&k)
+                    .and_then(Value::as_object)
+                    .cloned()
+                    .unwrap_or_default();
+                for (key, action) in v.as_object().unwrap() {
+                    if action.is_null() {
+                        preferences.remove(key);
+                    } else {
+                        preferences.insert(key.clone(), action.clone());
+                    }
+                }
+                v = Value::Object(preferences);
+            }
             config.insert(k, v);
         }
 
@@ -1216,6 +1234,37 @@ mod tests {
             let restored = typography_default_conf().merge_conf(saved);
             assert_eq!(restored.error_reporting_enabled, Some(enabled));
         }
+    }
+
+    #[test]
+    fn settings_patches_preserve_other_windows_values_and_dialog_choices() {
+        let current = empty_conf().amend(serde_json::json!({
+            "language": "en",
+            "theme_mode": "dark",
+            "error_reporting_enabled": false,
+            "extensions_chatgpt_apikey": "new-key",
+            "dialog_preferences": { "close": "save", "export": "replace" }
+        }));
+        let updated = current.amend(serde_json::json!({
+            "language": "zh",
+            "dialog_preferences": { "delete": "trash" }
+        }));
+        assert_eq!(updated.language.as_deref(), Some("zh"));
+        assert_eq!(updated.theme_mode.as_deref(), Some("dark"));
+        assert_eq!(updated.error_reporting_enabled, Some(false));
+        assert_eq!(
+            updated.extensions_chatgpt_apikey.as_deref(),
+            Some("new-key")
+        );
+        let cleared = updated.amend(serde_json::json!({
+            "dialog_preferences": { "close": null, "missing": null }
+        }));
+        assert_eq!(
+            serde_json::to_value(cleared.dialog_preferences).unwrap(),
+            serde_json::json!({
+                "export": "replace", "delete": "trash"
+            })
+        );
     }
 
     #[test]

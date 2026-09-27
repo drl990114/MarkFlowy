@@ -15,7 +15,9 @@ export const appSettingStoreSetup = async () => {
     const settingData = await invoke<Record<string, any>>('get_app_conf')
     logger.info('Loaded app settings')
     setSettingData(settingData)
-    syncErrorReportingPreference(settingData.error_reporting_enabled === true && !errorReportingRevoked)
+    syncErrorReportingPreference(
+      settingData.error_reporting_enabled === true && !errorReportingRevoked,
+    )
     return settingData
   } catch (error) {
     logger.error('Failed to load app setting:', error)
@@ -35,7 +37,7 @@ export const appSettingStoreSetup = async () => {
 
 let settingWriteQueue: Promise<void> = Promise.resolve()
 
-/** Commit related settings together and serialize whole-config writes. */
+/** Commit only changed fields; Rust merges them with the latest shared config. */
 export const writeSettingPatch = (patch: Record<string, unknown>): Promise<void> => {
   const changesErrorReporting = Object.hasOwn(patch, 'error_reporting_enabled')
   const preferenceRevision = changesErrorReporting ? ++errorReportingPreferenceRevision : undefined
@@ -46,23 +48,29 @@ export const writeSettingPatch = (patch: Record<string, unknown>): Promise<void>
   }
   const write = settingWriteQueue.then(async () => {
     const { settingData, setSettingData } = useAppSettingStore.getState()
-
+    // Remembered dialog choices become active only after they are persisted.
+    const { dialog_preferences: _preferences, ...optimisticPatch } = patch
     const newSettingData = {
       ...settingData,
-      ...patch,
+      ...optimisticPatch,
     }
 
     setSettingData(newSettingData)
 
     try {
-      await invoke('save_app_conf', { data: newSettingData, label: 'markflowy' })
+      const committed = await invoke<Record<string, unknown>>('save_app_conf', { data: patch })
+      setSettingData(committed)
 
       if (changesErrorReporting && preferenceRevision === errorReportingPreferenceRevision) {
         errorReportingRevoked = false
-        syncErrorReportingPreference(newSettingData.error_reporting_enabled === true)
       }
+      syncErrorReportingPreference(
+        committed.error_reporting_enabled === true && !errorReportingRevoked,
+      )
 
-      emit('app_conf_change')
+      void emit('app_conf_change').catch((error: unknown) => {
+        logger.error('Failed to notify other windows about saved settings:', error)
+      })
     } catch (error) {
       logger.error('Failed to write app setting:', error)
       setSettingData(settingData)
