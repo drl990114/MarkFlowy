@@ -81,16 +81,16 @@ export function ExportSetting() {
       <div className='setting-group__items'>
         <SettingItemContainer $settingKey={PANDOC_EXECUTABLE_PATH_SETTING}>
           <SettingLabel item={pandocSettingItem} />
-          <div className='flex w-1/2 min-w-0 flex-col items-end gap-2 max-[720px]:w-full max-[720px]:items-start'>
+          <div className='flex w-1/2 min-w-0 flex-col items-end gap-2'>
             <span aria-live='polite' className='text-ui-control text-foreground'>
               {status}
             </span>
             {info?.executablePath ? (
-              <span className='max-w-full break-all text-right text-ui-caption text-muted-foreground max-[720px]:text-left'>
+              <span className='max-w-full break-all text-right text-ui-caption text-muted-foreground'>
                 {info.executablePath}
               </span>
             ) : null}
-            <div className='flex flex-wrap justify-end gap-2 max-[720px]:justify-start'>
+            <div className='flex flex-wrap justify-end gap-2'>
               <Button size='sm' variant='outline' onClick={selectExecutable}>
                 {t('settings.export.pandoc.select')}
               </Button>

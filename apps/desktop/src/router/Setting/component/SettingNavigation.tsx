@@ -50,7 +50,7 @@ const navigationKeys = Object.keys(navigationItems) as SettingCategoryKey[]
 export interface SettingNavigationProps {
   settingMap: SettingData
   activeCategory: SettingCategoryKey
-  onSelect: (category: SettingCategoryKey, navigationItemId: string) => void
+  onSelect: (category: SettingCategoryKey) => void
 }
 
 export function SettingNavigation({
@@ -96,7 +96,7 @@ export function SettingNavigation({
                       )}
                       id={navigationItemId}
                       variant='ghost'
-                      onClick={() => onSelect(category, navigationItemId)}
+                      onClick={() => onSelect(category)}
                     >
                       <Icon aria-hidden className='size-4' strokeWidth={1.75} />
                       <span className='min-w-0 truncate capitalize'>

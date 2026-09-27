@@ -386,26 +386,32 @@ describe('Settings dialog integration', () => {
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
   })
 
-  it('returns to category navigation on narrow screens before dismissing settings', async () => {
-    narrowViewport = true
-    render(
-      <MemoryRouter>
-        <AppProbe />
-      </MemoryRouter>,
-    )
-    const settings = await openSettings()
-    const category = screen.getByRole('button', { name: 'Editor' })
-    fireEvent.click(category)
-    const heading = screen.getByRole('heading', { name: 'Editor' })
-    await waitFor(() => expect(document.activeElement).toBe(heading))
+  it.each([false, true])(
+    'closes with one Escape after selecting a category (narrow: %s)',
+    async (narrow) => {
+      narrowViewport = narrow
+      render(
+        <MemoryRouter>
+          <AppProbe />
+        </MemoryRouter>,
+      )
+      const draft = screen.getByRole('textbox', { name: 'Draft' })
+      const settings = await openSettings()
+      const category = screen.getByRole('button', { name: 'Editor' })
+      act(() => category.focus())
+      fireEvent.click(category)
 
-    pressEscape(heading)
-    await waitFor(() => expect(document.activeElement).toBe(category))
-    expect(screen.getByRole('dialog', { name: 'settings.label' })).toBe(settings)
+      expect(within(settings).getByRole('heading', { name: 'Editor' })).not.toBeNull()
+      expect(within(settings).getByRole('navigation')).not.toBeNull()
+      expect(
+        within(settings).queryByRole('button', { name: 'settings.back_to_settings' }),
+      ).toBeNull()
 
-    pressEscape(category)
-    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
-  })
+      pressEscape(category)
+      await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+      await waitFor(() => expect(document.activeElement).toBe(draft))
+    },
+  )
 
   it('updates targeted navigation without remounting the dialog or repeating the update check', async () => {
     render(

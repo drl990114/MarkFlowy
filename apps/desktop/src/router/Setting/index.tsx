@@ -16,7 +16,7 @@ import { openUrl } from '@tauri-apps/plugin-opener'
 import type { Update } from '@tauri-apps/plugin-updater'
 import { check } from '@tauri-apps/plugin-updater'
 import classNames from 'classnames'
-import { ArrowLeft, Search } from 'lucide-react'
+import { Search } from 'lucide-react'
 import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'zens'
 import { SettingDialog } from './component/SettingDialog'
@@ -39,16 +39,11 @@ import { Support } from './Support'
 import { ThemeSetting } from './ThemeSetting'
 import { ThemeStore } from './ThemeStore'
 
-const NARROW_SETTINGS_QUERY = '(max-width: 719px)'
-
 function isSettingGroup(
   group: Setting.SettingGroup | Setting.SettingItem,
 ): group is Setting.SettingGroup {
   return typeof group === 'object'
 }
-
-const isNarrowSettingsViewport = () =>
-  typeof window !== 'undefined' && window.matchMedia?.(NARROW_SETTINGS_QUERY).matches
 
 const getNavigationItemId = (prefix: string, value: string) =>
   `${prefix}-${value.replace(/[^a-zA-Z0-9_-]+/g, '-')}`
@@ -83,8 +78,6 @@ function Setting({ navigationRequest }: SettingProps) {
   const [activeChildId, setActiveChildId] = useState<string | undefined>(
     navigationRequest?.target?.providerId,
   )
-  const [mobileDetailOpen, setMobileDetailOpen] = useState(Boolean(navigationRequest?.target))
-  const [mobileReturnFocusId, setMobileReturnFocusId] = useState<string>()
   const [pendingFocusTarget, setPendingFocusTarget] = useState<SettingFocusTarget>()
   const [selectedSearchEntryId, setSelectedSearchEntryId] = useState<string>()
   const leaveGuardRef = useRef<SettingLeaveGuard | null>(null)
@@ -153,7 +146,6 @@ function Setting({ navigationRequest }: SettingProps) {
       setSelectedSearchEntryId(undefined)
       setCurGroupKey(target.category)
       setActiveChildId(target.providerId)
-      setMobileDetailOpen(true)
       setPendingFocusTarget({
         categoryKey: target.category,
         groupKey: target.providerId ? 'model' : undefined,
@@ -197,13 +189,6 @@ function Setting({ navigationRequest }: SettingProps) {
     return () => cancelAnimationFrame(frame)
   }, [activeChildId, curGroupKey, pendingFocusTarget])
 
-  const closeMobileDetail = useCallback(() => {
-    setMobileDetailOpen(false)
-    requestAnimationFrame(() => {
-      if (mobileReturnFocusId) document.getElementById(mobileReturnFocusId)?.focus()
-    })
-  }, [mobileReturnFocusId])
-
   const handleEscapeKeyDown = (event: KeyboardEvent) => {
     // Radix handles Escape during capture, before an inline input can cancel its edit.
     if (
@@ -211,36 +196,22 @@ function Setting({ navigationRequest }: SettingProps) {
       event.target.closest('[data-mf-settings-escape-cancel]')
     ) {
       event.preventDefault()
-      return
-    }
-
-    if (mobileDetailOpen && isNarrowSettingsViewport()) {
-      event.preventDefault()
-      closeMobileDetail()
     }
   }
 
-  const handleCategorySelect = async (groupKey: SettingCategoryKey, navigationItemId: string) => {
+  const handleCategorySelect = async (groupKey: SettingCategoryKey) => {
     if (groupKey !== curGroupKey && leaveGuardRef.current && !(await requestLeave())) return
     setCurGroupKey(groupKey)
     setActiveChildId(undefined)
     setSelectedSearchEntryId(undefined)
-    setMobileReturnFocusId(navigationItemId)
-
-    if (isNarrowSettingsViewport()) {
-      setMobileDetailOpen(true)
-      setPendingFocusTarget({ categoryKey: groupKey })
-    }
   }
 
-  const handleSearchResultSelect = async (entry: SettingSearchEntry, navigationItemId: string) => {
+  const handleSearchResultSelect = async (entry: SettingSearchEntry) => {
     if (entry.categoryKey !== curGroupKey && leaveGuardRef.current && !(await requestLeave()))
       return
     setCurGroupKey(entry.categoryKey)
     setActiveChildId(entry.childId)
     setSelectedSearchEntryId(entry.id)
-    setMobileReturnFocusId(navigationItemId)
-    setMobileDetailOpen(true)
     setPendingFocusTarget({
       categoryKey: entry.categoryKey,
       groupKey: entry.groupKey,
@@ -312,12 +283,7 @@ function Setting({ navigationRequest }: SettingProps) {
   return (
     <SettingDialog beforeClose={requestLeave} onEscapeKeyDown={handleEscapeKeyDown}>
       <div className='box-border flex h-full w-full min-w-0 overflow-hidden bg-background text-foreground'>
-        <aside
-          className={classNames(
-            'box-border flex w-full shrink-0 flex-col border-border bg-muted/50 min-[720px]:w-[13.5rem] min-[720px]:border-r max-lg:min-[720px]:w-52',
-            mobileDetailOpen && 'max-[719px]:hidden',
-          )}
-        >
+        <aside className='box-border flex w-[13.5rem] shrink-0 flex-col border-r border-border bg-muted/50'>
           <div className='shrink-0 px-3 pt-4 pb-2'>
             <h2 className='m-0 px-2 pr-8 text-ui-body font-semibold'>{t('settings.label')}</h2>
             <label className='sr-only' htmlFor='setting-search'>
@@ -371,7 +337,7 @@ function Setting({ navigationRequest }: SettingProps) {
                         )}
                         id={navigationItemId}
                         variant='ghost'
-                        onClick={() => handleSearchResultSelect(entry, navigationItemId)}
+                        onClick={() => handleSearchResultSelect(entry)}
                       >
                         <span className='block w-full truncate text-ui-control font-medium'>
                           {t(entry.titleI18nKey)}
@@ -441,23 +407,9 @@ function Setting({ navigationRequest }: SettingProps) {
             </div>
           </footer>
         </aside>
-        <main
-          className={classNames(
-            'box-border flex min-h-0 min-w-0 flex-1 flex-col bg-background',
-            !mobileDetailOpen && 'max-[719px]:hidden',
-          )}
-        >
-          <div className='box-border mx-auto w-full max-w-[58rem] shrink-0 px-6 pt-5 max-lg:px-5 max-[719px]:px-4 max-[719px]:pt-3'>
-            <Button
-              className='mb-3 px-2 text-muted-foreground min-[720px]:hidden'
-              size='sm'
-              variant='ghost'
-              onClick={closeMobileDetail}
-            >
-              <ArrowLeft aria-hidden className='size-4' />
-              {t('settings.back_to_settings')}
-            </Button>
-            <header className='mb-4 flex items-start justify-between gap-4 pr-8 max-[719px]:pr-0'>
+        <main className='box-border flex min-h-0 min-w-0 flex-1 flex-col bg-background'>
+          <div className='box-border mx-auto w-full max-w-[58rem] shrink-0 px-6 pt-5'>
+            <header className='mb-4 flex items-start justify-between gap-4 pr-8'>
               <div className='min-w-0'>
                 <h1
                   className='m-0 text-lg font-semibold text-foreground focus-visible:outline-none focus-visible:underline focus-visible:underline-offset-2'
@@ -474,7 +426,7 @@ function Setting({ navigationRequest }: SettingProps) {
             </header>
           </div>
           <div className='min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain'>
-            <div className='box-border mx-auto w-full max-w-[58rem] px-6 pb-8 max-lg:px-5 max-[719px]:px-4'>
+            <div className='box-border mx-auto w-full max-w-[58rem] px-6 pb-8'>
               {renderCurrentSettingData()}
             </div>
           </div>

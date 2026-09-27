@@ -56,19 +56,4 @@ export const SettingItemContainer = styled.div.attrs<SettingItemContainerProps>(
     min-width: 0;
     box-sizing: border-box;
   }
-
-  @media (max-width: 720px) {
-    align-items: stretch;
-    flex-direction: column;
-    gap: 8px;
-
-    > :last-child {
-      align-self: flex-start;
-    }
-
-    .setting-item__control {
-      width: 100%;
-      max-width: 100%;
-    }
-  }
 `
