@@ -470,6 +470,10 @@
         "automatic_updates": {
           "label": "Automatic update",
           "desc": "Automatically check for updates and install them when the application starts."
+        },
+        "error_reporting": {
+          "label": "Share error reports",
+          "desc": "Off by default. Send error types and app code locations to Sentry. Document content, file paths, credentials and browsing activity are excluded. You can turn this off at any time."
         }
       },
       "autosave": {

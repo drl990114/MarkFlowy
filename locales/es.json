@@ -404,6 +404,10 @@
         "automatic_updates": {
           "label": "Actualización automática",
           "desc": "Comprobar automáticamente si hay actualizaciones e instalarlas cuando inicia la aplicación."
+        },
+        "error_reporting": {
+          "label": "Compartir informes de errores",
+          "desc": "Desactivado por defecto. Envía tipos de error y ubicaciones del código de la aplicación a Sentry. Excluye el contenido de documentos, rutas de archivos, credenciales y actividad de navegación. Puedes desactivarlo en cualquier momento."
         }
       },
       "autosave": {

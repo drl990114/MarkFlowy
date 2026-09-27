@@ -465,6 +465,10 @@
         "automatic_updates": {
           "label": "自动更新",
           "desc": "自动检查更新并在应用程序启动时安装。"
+        },
+        "error_reporting": {
+          "label": "发送错误报告",
+          "desc": "默认关闭。向 Sentry 发送错误类型和应用代码位置，不包含文档内容、文件路径、凭据和浏览活动。你可以随时关闭。"
         }
       },
       "autosave": {

@@ -38,6 +38,7 @@ pub_struct!(AppConf {
     dark_theme: Option<String>,
     language: Option<String>,
     auto_update: Option<bool>,
+    error_reporting_enabled: Option<bool>,
     webview_zoom: Option<String>,
     copilot_provider: Option<String>,
     copilot_model: Option<String>,
@@ -639,6 +640,7 @@ impl AppConf {
             dark_theme: Some("MarkFlowy Dark".to_string()),
             language: Some("en".to_string()),
             auto_update: Some(false),
+            error_reporting_enabled: Some(false),
             webview_zoom: Some("1.0".to_string()),
             copilot_provider: Some("".to_string()),
             copilot_model: Some("".to_string()),
@@ -779,6 +781,7 @@ impl AppConf {
             autosave,
             local_history_enabled,
             auto_update,
+            error_reporting_enabled,
             webview_zoom,
             copilot_provider,
             copilot_model,
@@ -1199,6 +1202,20 @@ mod tests {
             .entry(0)
             .or_insert_with(std::env::temp_dir);
         AppConf::new()
+    }
+
+    #[test]
+    fn error_reporting_is_opt_in_and_preserves_explicit_consent() {
+        let defaults = typography_default_conf().merge_conf(empty_conf());
+        assert_eq!(defaults.error_reporting_enabled, Some(false));
+        for enabled in [true, false] {
+            let changed = defaults.clone().amend(serde_json::json!({
+                "error_reporting_enabled": enabled
+            }));
+            let saved = serde_json::from_value(serde_json::to_value(changed).unwrap()).unwrap();
+            let restored = typography_default_conf().merge_conf(saved);
+            assert_eq!(restored.error_reporting_enabled, Some(enabled));
+        }
     }
 
     #[test]

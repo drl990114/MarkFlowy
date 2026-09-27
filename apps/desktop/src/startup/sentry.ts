@@ -1,15 +1,19 @@
-import { initializeErrorReporter } from '@/services/error-reporting'
+import { initializeErrorReporter, setErrorReportingEnabled } from '@/services/error-reporting'
 import { afterStartupInteractive } from './interactive'
 
-let sentryInitializationScheduled = false
+let cancelScheduledInitialization: (() => void) | undefined
 
-export const initSentryAfterInteractive = (
+export const syncErrorReportingPreference = (
+  enabled: boolean,
   dsn: string | undefined = import.meta.env.VITE_SENTRY_DSN,
   targetWindow: Window | undefined = typeof window === 'undefined' ? undefined : window,
 ) => {
-  if (!dsn || !targetWindow || sentryInitializationScheduled) return
-  sentryInitializationScheduled = true
-  afterStartupInteractive(() => {
+  cancelScheduledInitialization?.()
+  cancelScheduledInitialization = undefined
+  setErrorReportingEnabled(enabled && Boolean(dsn) && Boolean(targetWindow))
+  if (!enabled || !dsn || !targetWindow) return
+  cancelScheduledInitialization = afterStartupInteractive(() => {
+    cancelScheduledInitialization = undefined
     void initializeErrorReporter({ dsn, integrations: [] }).catch(() => undefined)
   }, { targetWindow })
 }

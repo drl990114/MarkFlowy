@@ -1,7 +1,11 @@
 import { logger } from '@/helper/logger'
 import useAppSettingStore from '@/stores/useAppSettingStore'
+import { syncErrorReportingPreference } from '@/startup/sentry'
 import { invoke } from '@tauri-apps/api/core'
 import { emit } from '@tauri-apps/api/event'
+
+let errorReportingPreferenceRevision = 0
+let errorReportingRevoked = false
 
 export const appSettingStoreSetup = async () => {
   const { setSettingData } = useAppSettingStore.getState()
@@ -11,6 +15,7 @@ export const appSettingStoreSetup = async () => {
     const settingData = await invoke<Record<string, any>>('get_app_conf')
     logger.info('Loaded app settings')
     setSettingData(settingData)
+    syncErrorReportingPreference(settingData.error_reporting_enabled === true && !errorReportingRevoked)
     return settingData
   } catch (error) {
     logger.error('Failed to load app setting:', error)
@@ -23,6 +28,7 @@ export const appSettingStoreSetup = async () => {
       auto_update: false,
     }
     setSettingData(defaultSetting)
+    syncErrorReportingPreference(false)
     return defaultSetting
   }
 }
@@ -31,6 +37,13 @@ let settingWriteQueue: Promise<void> = Promise.resolve()
 
 /** Commit related settings together and serialize whole-config writes. */
 export const writeSettingPatch = (patch: Record<string, unknown>): Promise<void> => {
+  const changesErrorReporting = Object.hasOwn(patch, 'error_reporting_enabled')
+  const preferenceRevision = changesErrorReporting ? ++errorReportingPreferenceRevision : undefined
+  // Revocation takes effect even while an earlier settings write is pending.
+  if (patch.error_reporting_enabled === false) {
+    errorReportingRevoked = true
+    syncErrorReportingPreference(false)
+  }
   const write = settingWriteQueue.then(async () => {
     const { settingData, setSettingData } = useAppSettingStore.getState()
 
@@ -43,6 +56,11 @@ export const writeSettingPatch = (patch: Record<string, unknown>): Promise<void>
 
     try {
       await invoke('save_app_conf', { data: newSettingData, label: 'markflowy' })
+
+      if (changesErrorReporting && preferenceRevision === errorReportingPreferenceRevision) {
+        errorReportingRevoked = false
+        syncErrorReportingPreference(newSettingData.error_reporting_enabled === true)
+      }
 
       emit('app_conf_change')
     } catch (error) {

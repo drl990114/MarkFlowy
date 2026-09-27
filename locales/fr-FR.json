@@ -404,6 +404,10 @@
         "automatic_updates": {
           "label": "Mise à jour automatique",
           "desc": "Vérifier automatiquement les mises à jour et les installer au lancement de l'application."
+        },
+        "error_reporting": {
+          "label": "Partager les rapports d’erreur",
+          "desc": "Désactivé par défaut. Envoie à Sentry les types d’erreur et les emplacements du code de l’application, sans contenu des documents, chemins de fichiers, identifiants ni activité de navigation. Vous pouvez le désactiver à tout moment."
         }
       },
       "autosave": {

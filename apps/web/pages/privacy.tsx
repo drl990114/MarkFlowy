@@ -60,9 +60,9 @@ const privacySections: PrivacySection[] = [
         type: 'list',
         items: [
           'Your documents and files remain on your local file system',
-          "Application settings and preferences are stored locally using Tauri's secure storage",
+          'Application settings and configured provider credentials are stored in local application data files; these files are not an encrypted credential vault',
           'Workspace information and bookmarks are stored locally on your device',
-          'AI chat history (if enabled) is stored locally and never sent to our servers',
+          'AI chat history is stored locally; using an AI provider sends the selected conversation context to that provider',
         ],
       },
     ],
@@ -78,7 +78,7 @@ const privacySections: PrivacySection[] = [
         type: 'list',
         items: [
           {
-            text: "<strong>OpenAI Integration:</strong> If you choose to use OpenAI features, your API key and requests are sent directly to OpenAI's servers. We do not intercept or store your API keys or AI requests.",
+            text: "<strong>OpenAI Integration:</strong> If you choose to use OpenAI features, your API key and requests are sent to the configured OpenAI-compatible endpoint. Your key is stored locally by the application, not on MarkFlowy servers.",
             isHtml: true,
           },
           {
@@ -119,6 +119,23 @@ const privacySections: PrivacySection[] = [
     ],
   },
   {
+    title: 'Optional Error Reports',
+    content: [
+      {
+        type: 'paragraph',
+        text: 'Desktop error reporting is off by default, including after upgrading from a version without this setting. You can enable Share error reports in Settings → General → Application and turn it off at any time. Builds without an error-reporting endpoint do not send reports.',
+      },
+      {
+        type: 'paragraph',
+        text: 'When enabled, reports go to Sentry and contain error types and locations in bundled application code. The application removes error messages, document content, local file paths, request details, credentials, user context and browsing breadcrumbs. Automatic session tracking, session replay and performance tracing are disabled. Sentry still receives the network connection, including its source IP address.',
+      },
+      {
+        type: 'paragraph',
+        text: 'Turning reporting off stops new reports and discards pending application errors. It cannot recall a report already sent. See <a href="https://sentry.io/privacy/" target="_blank" rel="noopener noreferrer">Sentry’s Privacy Policy</a> for its processing practices.',
+      },
+    ],
+  },
+  {
     title: 'Open Source and Transparency',
     content: [
       {
@@ -148,9 +165,9 @@ const privacySections: PrivacySection[] = [
       {
         type: 'list',
         items: [
-          'All data remains on your local device',
-          'No cloud synchronization of your documents',
-          'Application settings are stored securely using platform-specific secure storage',
+          'Local workspaces and recovery history are stored on your device',
+          'Remote workspaces, AI services and error reporting communicate with their respective providers when you use or enable them',
+          'Protect your device account and application data backups; local configuration files may contain credentials',
         ],
       },
     ],
@@ -167,7 +184,7 @@ const privacySections: PrivacySection[] = [
         items: [
           'You can access all your data directly on your file system',
           'You can delete application settings by clearing the application data',
-          'You can uninstall the application at any time, which removes all local data',
+          'Uninstalling the application may leave documents and application data behind; remove those separately if you want to delete them',
         ],
       },
     ],
@@ -250,7 +267,7 @@ export default function PrivacyPage() {
         <MainContent id='main-content'>
           <ContentContainer>
             <PageTitle>Privacy Policy</PageTitle>
-            <LastUpdated>Last Updated: March 28, 2026</LastUpdated>
+            <LastUpdated>Last Updated: September 27, 2026</LastUpdated>
 
             {privacySections.map((section, sectionIndex) => (
               <Section key={sectionIndex}>

@@ -13,7 +13,6 @@ import { getPdfPrintWindowRequest } from './components/EditorArea/pdf-print/pdfP
 import { startAppSetup } from './hooks/useAppSetup'
 import { applyStartupAppearance, readWindowBootstrap } from './startup/appearance'
 import { markBootShellReady } from './startup/boot'
-import { initSentryAfterInteractive } from './startup/sentry'
 import { initStartupPerformance } from './startup/performance'
 import { markStartupInteractive } from './startup/interactive'
 import './atom.css'
@@ -78,7 +77,6 @@ if (pdfPrintWindowRequest) {
     </Suspense>,
   )
 } else {
-  initSentryAfterInteractive()
   void startAppSetup()
   ReactDOM.createRoot(rootElement).render(
     <StrictMode>

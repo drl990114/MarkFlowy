@@ -23,6 +23,12 @@ export const getSettingMap = () => {
           },
           type: 'switch',
         },
+        error_reporting_enabled: {
+          key: 'error_reporting_enabled',
+          title: { i18nKey: 'settings.general.app.error_reporting.label' },
+          desc: { i18nKey: 'settings.general.app.error_reporting.desc' },
+          type: 'switch',
+        },
       },
       Startup: {
         i18nKey: 'settings.general.startup.label',
