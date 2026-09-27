@@ -42,10 +42,10 @@
 
 ## 功能特性
 
-- **超高性能**：全新重构的编辑器大幅提升大文件打开速度，**实测 2 MB 的 Markdown 文件可在 1 秒左右打开**。
+- **本地文档**：直接编辑自己目录中的文件，支持本地历史和草稿恢复。早期测试的背景与适用范围见[大文件性能说明](./docs/zh/Performance/large-markdown-files.md)。
 - **内置 AI**：当前支持Copilot、一键导出对话、翻译文章到任何语言以及获取文章摘要，支持`DeepSeek`、`Chatgpt`等大模型让他们成为你的智能助手。
-- **超轻量**：MarkFlowy 基于 tauri, 拥有小于 20MB 的体积和更好的性能。
-- **多编辑模式**：MarkFlowy 使用 prosemirror 作为编辑器核心, 不仅扩展性高，编辑体验也很好。并支持多种编辑模式，如`source code`, `wysiwyg`。
+- **桌面应用**：基于 Tauri 和系统 WebView。下载体积取决于平台与安装包类型，Windows 离线安装包还包含 WebView2，请以所下载版本的发布附件为准。
+- **多编辑模式**：Markdown 支持源码、实时编辑和阅读模式。维护者版本使用 Capricorn 运行时提供实时编辑与阅读，源码编辑沿用 RME/CodeMirror 集成。未安装 Capricorn 的公开检出支持源码和阅读模式，详见[开发环境说明](./docs/zh/Community/CONTRIBUTING.md)。
 - **编辑多种文件**：除了 Markdown，还支持编辑 `json`、`txt` 等文件类型。
 - **自定义主题**：支持自定义主题，并且你也可以与他人分享你的主题。
 - **自定义快捷键**：支持自定义快捷键，满足个性化需求。
@@ -110,15 +110,15 @@ MarkFlowy 是一个产品，也是一段人生旅程的见证。并在一路的�
 
 ## 参与
 
-目前 MarkFlowy 仍处于初级阶段，可能会有一些不好的体验或bug。欢迎所有感兴趣或遇到使用问题的合作伙伴提交[issue](https://github.com/drl990114/MarkFlowy/issues/new)或[PR](https://github.com/drl990114/MarkFlowy/compare)参与这个项目。
+MarkFlowy 正在准备 V1.0。欢迎通过 [issue](https://github.com/drl990114/MarkFlowy/issues/new) 提交问题与复现步骤，或通过 [PR](https://github.com/drl990114/MarkFlowy/compare) 参与改进。已可下载的版本以发布页面为准。
 
 ### 如何贡献
 
-您可以阅读 [CONTRIBUTING](./docs/en/Community/CONTRIBUTING.md) 来了解如何启动项目和修改代码，欢迎参与代码贡献。
+您可以阅读[贡献指南](./docs/zh/Community/CONTRIBUTING.md)来了解如何启动项目和修改代码，欢迎参与代码贡献。
 
 ## 支持
 
-MarkFlowy 是完全永久开源的，如果你想支持 MarkFlowy，你可以`star`这个项目。特殊赞助可以通过 [邮箱](mailto:drl990114@gmail.com) 联系我。
+公开仓库包含 [AGPL-3.0 许可证](./LICENSE)，各子包和依赖保留自己的许可文件。维护者版本还使用未包含在公开检出中的私有 Capricorn 运行时，其包清单标记为 `UNLICENSED`，并非公开源码的一部分。[贡献指南](./docs/zh/Community/CONTRIBUTING.md)说明了有无此运行时的开发方式。你可以通过 `star` 支持项目，或通过[邮箱](mailto:drl990114@gmail.com)联系我。
 <!-- 
 另外你还可以通过微信或支付宝对我进行赞助，这会给我极大地鼓励。并且也会用于项目后续的发展，如服务器、域名等支出。
 

@@ -41,13 +41,13 @@
 
 ## Features
 
-- **High Performance:** The rebuilt editor dramatically improves opening speed for large documents. **A 2 MB Markdown file opened in around 1 second in testing.**
+- **Local Documents:** Edit files in your own folders, with local history and draft recovery. See the [large-file performance notes](./docs/en/Performance/large-markdown-files.md) for the context and limits of earlier measurements.
 
 - **Built-in AI:** Currently supports Copilot, one-click export of dialogues, translation of articles to any language, and article summaries. It supports large models like `DeepSeek` and `Chatgpt`, making them your intelligent assistant.
 
-- **lightweight:** MarkFlowy is based on Tauri, boasting a size of less than 20MB and improved performance.
+- **Desktop App:** Built with Tauri and the system WebView. Download size depends on the platform and package; the Windows offline installer also includes WebView2. Check the assets for the release you download.
 
-- **Multiple Editing Modes:** MarkFlowy uses Prosemirror as its core editor, offering high extensibility and a superior editing experience. It supports multiple editing modes, such as source code and wysiwyg.
+- **Multiple Editing Modes:** Markdown supports source, live editing and reading modes. Maintainer builds use the Capricorn runtime for live editing and reading, alongside the RME/CodeMirror integration for source editing. A public checkout without Capricorn supports source and reading modes; see [contributor setup](./docs/en/Community/CONTRIBUTING.md).
 
 - **Editing Multiple File Types:** In addition to Markdown, it supports editing `JSON`, `TXT`, and other file types.
 
@@ -118,7 +118,7 @@ MarkFlowy is a product, and also a testament to a life journey. Through continuo
 
 ## Contribute
 
-The current MarkFlowy is still in its infancy, and there may be some bad experiences or bugs, for which I am sorry. All partners who are interested or encounter usage problems are welcome to submit [issues](https://github.com/drl990114/MarkFlowy/issues/new) or [PR](https://github.com/drl990114/MarkFlowy/compare) to participate in this project.
+MarkFlowy is preparing for V1.0. Bug reports, reproducible cases and contributions are welcome through [issues](https://github.com/drl990114/MarkFlowy/issues/new) and [pull requests](https://github.com/drl990114/MarkFlowy/compare). The release downloads identify the versions currently available.
 
 ### How to Contribute
 
@@ -126,7 +126,7 @@ You can read [CONTRIBUTING](./docs/en/Community/CONTRIBUTING.md) to know how to 
 
 ## Support
 
-MarkFlowy is completely and permanently open source, if you want to support MarkFlowy, you can `star` this project. For special support, please contact me via [email](mailto:drl990114@gmail.com).
+The public repository includes its [AGPL-3.0 license](./LICENSE); individual packages and dependencies include their own license files. Maintainer builds also consume a private Capricorn runtime that is not included in this checkout. Its manifest is marked `UNLICENSED`; it is not part of the publicly available source. The [contributor guide](./docs/en/Community/CONTRIBUTING.md) explains development with and without that runtime. You can support MarkFlowy by starring this project or contacting me by [email](mailto:drl990114@gmail.com).
 <!-- 
 In addition, you can sponsor me through WeChat or Alipay, which will greatly encourage me. And it will also be used for the subsequent development of the project, such as expenses for servers, domains, etc
 
