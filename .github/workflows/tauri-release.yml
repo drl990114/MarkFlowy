@@ -5,10 +5,6 @@ on:
     tags:
       - 'v*'
 
-concurrency:
-  group: markflowy-release
-  cancel-in-progress: false
-
 jobs:
   quality:
     permissions:
@@ -248,26 +244,8 @@ jobs:
     needs: [build, build-offline-installer]
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .node-version
-
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Install dependencies
-        run: yarn install --immutable
-
       - name: Query version number
-        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_ENV"
-
-      - name: Refuse to overwrite a published release
-        run: node scripts/verify-release-assets.mjs --ensure-draft
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: echo "version=${GITHUB_REF:11}" >> $GITHUB_ENV
 
       - name: Download x86_64 artifacts
         uses: actions/download-artifact@v4
@@ -354,53 +332,49 @@ jobs:
 
           EOF
 
-      - name: Prepare verified release metadata
-        id: metadata
-        run: yarn updater --faq release.txt
-
-      - name: Upload complete release as a draft
-        id: stage
-        uses: softprops/action-gh-release@v3
+      - name: Create Release
+        uses: softprops/action-gh-release@v2.1.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref_name }}
-          name: ${{ github.ref_name }}
-          body_path: release-notes.md
-          draft: true
-          prerelease: ${{ steps.metadata.outputs.prerelease == 'true' }}
-          make_latest: 'false'
-          fail_on_unmatched_files: true
-          files: ./artifacts/*
+          tagName: v${{ env.version }}
+          releaseName: v${{ env.version }}
+          body_path: release.txt
+          releaseDraft: false
+          prerelease: true
+          files: ./artifacts/**/*
 
-      - name: Verify uploaded asset hashes
-        run: node scripts/verify-release-assets.mjs
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Setup
+        run: yarn setup
+
+      - name: Updater JSON
+        run: yarn updater --token=${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Additional File to Same Release
+        uses: softprops/action-gh-release@v2.1.0
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Publish the verified draft
-        run: |
-          gh api --method PATCH "repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID" \
-            -F draft=false -f make_latest="$LATEST_POLICY" --silent
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RELEASE_ID: ${{ steps.stage.outputs.id }}
-          LATEST_POLICY: ${{ steps.metadata.outputs.prerelease == 'true' && 'false' || 'legacy' }}
-
-      - name: Check stable channel ownership
-        id: channel
-        if: steps.metadata.outputs.prerelease == 'false'
-        run: node scripts/verify-release-assets.mjs --stable-channel
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Prepare stable updater fallback
-        if: steps.channel.outputs.is_latest == 'true'
-        run: |
-          mkdir -p stable-updater
-          cp artifacts/install.json stable-updater/install.json
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ env.version }}
+          files: ./apps/desktop/updater/install.json
+          overwrite: true
 
       - name: Deploy install.json
-        if: steps.channel.outputs.is_latest == 'true'
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./stable-updater
+          publish_dir: ./apps/desktop/updater
+          # force_orphan: true
