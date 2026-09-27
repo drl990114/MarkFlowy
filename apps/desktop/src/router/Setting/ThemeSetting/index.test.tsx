@@ -2,19 +2,27 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-libra
 import { ThemeProvider } from 'styled-components'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import useAppSettingStore from '@/stores/useAppSettingStore'
-import useThemeStore, {
-  FALLBACK_DARK_THEME,
-  FALLBACK_LIGHT_THEME,
-} from '@/stores/useThemeStore'
+import { useThemeLibrary } from '@/themes/library'
+import useThemeStore, { FALLBACK_DARK_THEME, FALLBACK_LIGHT_THEME } from '@/stores/useThemeStore'
 import { ThemeSetting } from './index'
 
 const mocks = vi.hoisted(() => ({
   invoke: vi.fn(),
   setTheme: vi.fn(),
   writeSettingData: vi.fn(),
+  openUrl: vi.fn(),
 }))
 
-vi.mock('@/i18n', () => ({ useTranslation: () => ({ t: (key: string) => key }) }))
+vi.mock('@/i18n', () => ({
+  useTranslation: () => ({
+    t: (key: string, values?: { name?: string; names?: string }) => {
+      if (key === 'settings.display.theme.unavailable') return `${values?.name} (unavailable)`
+      if (key === 'settings.display.theme.unavailable_help') return `Unavailable: ${values?.names}`
+      return key
+    },
+  }),
+}))
+vi.mock('@tauri-apps/plugin-opener', () => ({ openUrl: mocks.openUrl }))
 vi.mock('@/helper/extensions', () => ({
   loadThemeCss: vi.fn(),
   removeInsertedTheme: vi.fn(),
@@ -33,6 +41,7 @@ vi.mock('@tauri-apps/api/window', () => ({
 
 const initialThemeState = useThemeStore.getState()
 const initialSettingState = useAppSettingStore.getState()
+const initialLibraryState = useThemeLibrary.getState()
 
 function ThemeSettingHarness({ revealedSettingKey }: { revealedSettingKey?: string }) {
   const theme = useThemeStore((state) => state.curTheme)
@@ -66,6 +75,8 @@ beforeEach(() => {
     command === 'get_system_theme' ? 'light' : undefined,
   )
   mocks.setTheme.mockResolvedValue(undefined)
+  mocks.openUrl.mockResolvedValue(undefined)
+  useThemeLibrary.setState({ loaded: false })
   mocks.writeSettingData.mockImplementation(async ({ key }: { key: string }, value: string) => {
     const { settingData, setSettingData } = useAppSettingStore.getState()
     setSettingData({ ...settingData, [key]: value })
@@ -87,25 +98,63 @@ afterEach(async () => {
   await act(async () => {})
   useThemeStore.setState(initialThemeState, true)
   useAppSettingStore.setState(initialSettingState, true)
+  useThemeLibrary.setState(initialLibraryState, true)
   window.sessionStorage.clear()
 })
 
 describe('theme selection preview interactions', () => {
-  it.each(['mouse', 'keyboard'])('keeps the light appearance when opening dark themes with %s', async (method) => {
+  it('explains a missing selection after loading and restores it when the theme returns', async () => {
+    useAppSettingStore.setState({ settingData: { language: 'zh-CN', light_theme: 'legacy-paper' } })
+    useThemeStore.setState({ lightThemeName: 'legacy-paper' })
+    useThemeStore.getState().applyTheme(false)
     render(<ThemeSettingHarness />)
+    expect(screen.queryByRole('status')).toBeNull()
+    expect(useThemeStore.getState().curTheme.name).toBe(FALLBACK_LIGHT_THEME)
 
-    const content = await openSelect('dark', method)
+    act(() => useThemeLibrary.setState({ loaded: true }))
+    expect(screen.getByRole('status').textContent).toContain('legacy-paper')
+    expect(
+      screen.getByRole('combobox', { name: 'settings.display.theme.light_theme.label' })
+        .textContent,
+    ).toContain('legacy-paper (unavailable)')
+    expect(useAppSettingStore.getState().settingData.light_theme).toBe('legacy-paper')
+    fireEvent.click(screen.getByRole('button', { name: 'settings.display.theme.migration_guide' }))
+    expect(mocks.openUrl).toHaveBeenCalledWith(
+      'https://www.markflowy.cc/zh/docs/Extension/CustomTheme',
+    )
 
-    expect(document.activeElement?.textContent).toBe(FALLBACK_DARK_THEME)
-    expect(useThemeStore.getState().curTheme.mode).toBe('light')
-    expect(mocks.setTheme).not.toHaveBeenCalled()
+    act(() => {
+      const state = useThemeStore.getState()
+      const restored = {
+        ...state.themes.find((theme) => theme.name === FALLBACK_LIGHT_THEME)!,
+        name: 'legacy-paper',
+      }
+      useThemeStore.setState({ themes: [...state.themes, restored] })
+      useThemeStore.getState().applyTheme(false)
+    })
+    expect(screen.queryByRole('status')).toBeNull()
+    expect(useThemeStore.getState().curTheme.name).toBe('legacy-paper')
     expect(mocks.writeSettingData).not.toHaveBeenCalled()
-
-    fireEvent.keyDown(content, { key: 'Escape' })
-    await waitFor(() => expect(screen.queryByRole('listbox')).toBeNull())
-    expect(useThemeStore.getState().curTheme.mode).toBe('light')
-    expect(mocks.setTheme).not.toHaveBeenCalled()
   })
+
+  it.each(['mouse', 'keyboard'])(
+    'keeps the light appearance when opening dark themes with %s',
+    async (method) => {
+      render(<ThemeSettingHarness />)
+
+      const content = await openSelect('dark', method)
+
+      expect(document.activeElement?.textContent).toBe(FALLBACK_DARK_THEME)
+      expect(useThemeStore.getState().curTheme.mode).toBe('light')
+      expect(mocks.setTheme).not.toHaveBeenCalled()
+      expect(mocks.writeSettingData).not.toHaveBeenCalled()
+
+      fireEvent.keyDown(content, { key: 'Escape' })
+      await waitFor(() => expect(screen.queryByRole('listbox')).toBeNull())
+      expect(useThemeStore.getState().curTheme.mode).toBe('light')
+      expect(mocks.setTheme).not.toHaveBeenCalled()
+    },
+  )
 
   it('keeps the dark appearance when opening light themes', async () => {
     useThemeStore.setState({ systemTheme: 'dark' })
@@ -231,24 +280,27 @@ describe('theme selection preview interactions', () => {
     expect(mocks.setTheme).not.toHaveBeenCalled()
   })
 
-  it.each(['outside click', 'unmount'])('restores an uncommitted preview on %s', async (dismissal) => {
-    const view = render(<ThemeSettingHarness />)
-    await openSelect('dark')
-    fireEvent.pointerMove(screen.getByRole('option', { name: 'Nord' }), {
-      pointerType: 'mouse',
-    })
-    expect(useThemeStore.getState().curTheme.name).toBe('Nord')
+  it.each(['outside click', 'unmount'])(
+    'restores an uncommitted preview on %s',
+    async (dismissal) => {
+      const view = render(<ThemeSettingHarness />)
+      await openSelect('dark')
+      fireEvent.pointerMove(screen.getByRole('option', { name: 'Nord' }), {
+        pointerType: 'mouse',
+      })
+      expect(useThemeStore.getState().curTheme.name).toBe('Nord')
 
-    if (dismissal === 'unmount') {
-      view.unmount()
-    } else {
-      fireEvent.pointerDown(document.body, { button: 0, pointerType: 'mouse' })
-    }
+      if (dismissal === 'unmount') {
+        view.unmount()
+      } else {
+        fireEvent.pointerDown(document.body, { button: 0, pointerType: 'mouse' })
+      }
 
-    await waitFor(() => expect(screen.queryByRole('listbox')).toBeNull())
-    expect(useThemeStore.getState().curTheme.name).toBe(FALLBACK_LIGHT_THEME)
-    expect(mocks.writeSettingData).not.toHaveBeenCalled()
-  })
+      await waitFor(() => expect(screen.queryByRole('listbox')).toBeNull())
+      expect(useThemeStore.getState().curTheme.name).toBe(FALLBACK_LIGHT_THEME)
+      expect(mocks.writeSettingData).not.toHaveBeenCalled()
+    },
+  )
 
   it('does not start a preview for touch scrolling', async () => {
     render(<ThemeSettingHarness />)

@@ -499,6 +499,9 @@
       "label": "外观",
       "desc": "应用程序的外观和显示设置，包括界面缩放、主题等视觉相关配置。",
       "theme": {
+        "unavailable": "{{name}}（不可用）",
+        "unavailable_help": "找不到已选主题：{{names}}。暂时使用内置主题，原选择已保留。可重新导入 JSON 主题或选择其他主题；旧版 JS 主题和自动加载的 CSS 需手动迁移。",
+        "migration_guide": "查看主题迁移指南",
         "label": "主题",
         "mode": {
           "label": "主题模式",

@@ -1,4 +1,8 @@
 import { themeLabel } from '@/themes/runtime'
+import { useThemeLibrary } from '@/themes/library'
+import { Button } from '@/components/ui/button'
+import { openUrl } from '@tauri-apps/plugin-opener'
+import { logger } from '@/helper/logger'
 import { ColorPicker } from '@/components/ui/color-picker'
 import {
   Select,
@@ -54,6 +58,7 @@ interface ThemeSettingProps {
 
 export const ThemeSetting = memo(({ revealedSettingKey }: ThemeSettingProps) => {
   const { settingData } = useAppSettingStore()
+  const libraryLoaded = useThemeLibrary((state) => state.loaded)
   const {
     themes,
     themeMode,
@@ -79,6 +84,16 @@ export const ThemeSetting = memo(({ revealedSettingKey }: ThemeSettingProps) => 
   )
 
   const currentThemeMode = (settingData.theme_mode as ThemeMode) || themeMode
+  const selectedLightTheme = String(settingData.light_theme || lightThemeName)
+  const selectedDarkTheme = String(settingData.dark_theme || darkThemeName)
+  const missingLightTheme =
+    libraryLoaded && !lightThemes.some((theme) => theme.name === selectedLightTheme)
+  const missingDarkTheme =
+    libraryLoaded && !darkThemes.some((theme) => theme.name === selectedDarkTheme)
+  const unavailableThemes = [
+    ...(missingLightTheme ? [selectedLightTheme] : []),
+    ...(missingDarkTheme ? [selectedDarkTheme] : []),
+  ]
   const accentColorSetting = settingData[THEME_ACCENT_COLOR_SETTING_KEY]
   const isCustomAccentColor = isThemeAccentColorOverride(accentColorSetting)
   const accentColorMode: AccentColorMode = isCustomAccentColor ? 'custom' : 'system'
@@ -272,6 +287,29 @@ export const ThemeSetting = memo(({ revealedSettingKey }: ThemeSettingProps) => 
     <SettingGroupContainer $anchorId={getSettingGroupAnchorId('display', 'Theme')}>
       <h2 className='setting-group__title'>{t('settings.display.theme.label')}</h2>
 
+      {unavailableThemes.length > 0 && (
+        <div role='status' className='mb-2 text-sm text-muted-foreground'>
+          <p className='m-0'>
+            {t('settings.display.theme.unavailable_help', { names: unavailableThemes.join(', ') })}
+          </p>
+          <Button
+            variant='link'
+            size='sm'
+            className='px-0'
+            onClick={() => {
+              const locale = String(settingData.language).startsWith('zh') ? '/zh' : ''
+              void openUrl(`https://www.markflowy.cc${locale}/docs/Extension/CustomTheme`).catch(
+                (error: unknown) => {
+                  logger.error('Failed to open theme migration guide:', error)
+                },
+              )
+            }}
+          >
+            {t('settings.display.theme.migration_guide')}
+          </Button>
+        </div>
+      )}
+
       <div className='setting-group__items'>
         <SettingItemContainer $settingKey='theme_mode'>
           <SettingLabel
@@ -328,7 +366,7 @@ export const ThemeSetting = memo(({ revealedSettingKey }: ThemeSettingProps) => 
             />
             <Select
               onOpenChange={(open) => handleThemePreviewOpenChange('light', open)}
-              value={String(settingData.light_theme || lightThemeName)}
+              value={selectedLightTheme}
               onValueChange={(value) => {
                 commitThemeSelection('light', () => setLightTheme(value))
               }}
@@ -338,7 +376,11 @@ export const ThemeSetting = memo(({ revealedSettingKey }: ThemeSettingProps) => 
                 aria-label={t('settings.display.theme.light_theme.label')}
                 style={{ width: SELECT_WIDTH }}
               >
-                <SelectValue />
+                <SelectValue>
+                  {missingLightTheme
+                    ? t('settings.display.theme.unavailable', { name: selectedLightTheme })
+                    : undefined}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent onKeyDownCapture={() => enableThemePreview('light')}>
                 {lightThemes.map((themeItem) => (
@@ -371,7 +413,7 @@ export const ThemeSetting = memo(({ revealedSettingKey }: ThemeSettingProps) => 
             />
             <Select
               onOpenChange={(open) => handleThemePreviewOpenChange('dark', open)}
-              value={String(settingData.dark_theme || darkThemeName)}
+              value={selectedDarkTheme}
               onValueChange={(value) => {
                 commitThemeSelection('dark', () => setDarkTheme(value))
               }}
@@ -381,7 +423,11 @@ export const ThemeSetting = memo(({ revealedSettingKey }: ThemeSettingProps) => 
                 aria-label={t('settings.display.theme.dark_theme.label')}
                 style={{ width: SELECT_WIDTH }}
               >
-                <SelectValue />
+                <SelectValue>
+                  {missingDarkTheme
+                    ? t('settings.display.theme.unavailable', { name: selectedDarkTheme })
+                    : undefined}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent onKeyDownCapture={() => enableThemePreview('dark')}>
                 {darkThemes.map((themeItem) => (

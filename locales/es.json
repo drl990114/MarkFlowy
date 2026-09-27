@@ -706,6 +706,9 @@
     "display": {
       "label": "Apariencia",
       "theme": {
+        "unavailable": "{{name}} (no disponible)",
+        "unavailable_help": "Los temas seleccionados no están disponibles: {{names}}. Se usan temporalmente temas integrados y se conservan tus selecciones. Vuelve a importar los temas como JSON o elige otro tema. Los temas JS antiguos y el CSS cargado automáticamente requieren una migración manual.",
+        "migration_guide": "Guía de migración de temas",
         "label": "Tema",
         "mode": {
           "label": "Modo de tema",

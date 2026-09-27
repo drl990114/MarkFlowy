@@ -711,6 +711,9 @@
     "display": {
       "label": "外観",
       "theme": {
+        "unavailable": "{{name}}（利用不可）",
+        "unavailable_help": "選択したテーマが見つかりません：{{names}}。一時的に内蔵テーマを使用し、元の選択は保持します。JSON テーマを再インポートするか、別のテーマを選択してください。旧 JS テーマと自動読み込みの CSS は手動で移行する必要があります。",
+        "migration_guide": "テーマ移行ガイド",
         "label": "テーマ",
         "mode": {
           "label": "テーマモード",

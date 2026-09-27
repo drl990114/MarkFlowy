@@ -772,6 +772,9 @@
     "display": {
       "label": "Appearance",
       "theme": {
+        "unavailable": "{{name}} (unavailable)",
+        "unavailable_help": "Selected themes are unavailable: {{names}}. Built-in themes are used temporarily and your selections are retained. Reimport the themes as JSON or choose another theme. Older JS themes and automatically loaded CSS need manual migration.",
+        "migration_guide": "Theme migration guide",
         "label": "Theme",
         "mode": {
           "label": "Theme Mode",
