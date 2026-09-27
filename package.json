@@ -15,6 +15,7 @@
     "dev:desktop": "node scripts/dev-desktop.mjs",
     "test:dev-desktop": "node --test scripts/dev-desktop.test.mjs",
     "test:security-dependencies": "node --test scripts/security-dependencies.test.mjs",
+    "test:release-workflows": "node --test scripts/release-workflows.test.mjs",
     "install:capricorn-runtime": "node --env-file-if-exists=.env scripts/install-capricorn-runtime.mjs",
     "build": "turbo build --concurrency=2",
     "build:web": "yarn turbo build --filter=!@markflowy/desktop",
