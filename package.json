@@ -81,6 +81,7 @@
     "@utoo/pack/send": "0.19.2",
     "@xmldom/xmldom@npm:0.9.10": "0.9.12",
     "cross-spawn@npm:7.0.3": "7.0.6",
+    "decode-uri-component@npm:^0.2.0": "0.5.0",
     "external-editor/tmp": "0.2.7",
     "html2sketch/uuid": "11.1.1",
     "less@npm:4.1.3": "4.9.1",

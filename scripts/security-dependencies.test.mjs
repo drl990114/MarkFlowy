@@ -239,3 +239,64 @@ test('Contentlayer tracing retains the SDK contract with the fixed Jaeger propag
   )
   assert.equal(stdout, 'compatible')
 })
+
+test('documentation queries preserve Unicode, spaces, arrays and literal plus signs', () => {
+  const historyRequire = createRequire(zensRequire.resolve('@umijs/history'))
+  const query = historyRequire('query-string')
+  const value = { q: '中文 + text', tags: ['first', '第二项'], empty: '' }
+  assert.deepEqual({ ...query.parse(query.stringify(value)) }, value)
+  assert.equal(query.parse('q=hello+world%2B').q, 'hello world+')
+  assert.equal(query.parse('q=%E4%B8%AD%80').q, '中%80')
+  assert.equal(query.parse('q=%2525').q, '%25')
+  assert.equal(query.parse('q=a+b', { decode: false }).q, 'a+b')
+})
+
+test('CSS source maps retain synchronous and asynchronous encoded-path loading', async () => {
+  const cssRequire = createRequire(rootRequire.resolve('css'))
+  const resolver = cssRequire('source-map-resolve')
+  const map = { version: 3, sources: ['源%20文件+1.css'], names: [], mappings: '' }
+  const code = '/*# sourceMappingURL=theme%20%2B.css.map */'
+  const readPaths = []
+  const read = (name) => {
+    readPaths.push(name)
+    return name.endsWith('.map') ? JSON.stringify(map) : 'body { color: red }'
+  }
+  const resolved = resolver.resolveSourceMapSync(code, '/fixtures/style.css', read)
+  assert.deepEqual(resolved.map, map)
+  const sources = resolver.resolveSourcesSync(map, resolved.sourcesRelativeTo, read)
+  assert.deepEqual(sources.sourcesContent, ['body { color: red }'])
+  assert.deepEqual(readPaths, ['/fixtures/theme +.css.map', '/fixtures/源 文件+1.css'])
+  const asyncMap = await new Promise((resolve, reject) => {
+    resolver.resolveSourceMap(
+      code,
+      '/fixtures/style.css',
+      (name, callback) => callback(null, read(name)),
+      (error, result) => (error ? reject(error) : resolve(result)),
+    )
+  })
+  assert.deepEqual(asyncMap, resolved)
+})
+
+test('URL consumers tolerate long malformed encoding within a bounded child process', async () => {
+  const { stdout } = await execFileAsync(
+    process.execPath,
+    [
+      '-e',
+      `
+    const assert = require('node:assert/strict')
+    const query = require('query-string')
+    const resolver = require('source-map-resolve')
+    const input = '%80'.repeat(10000)
+    assert.equal(query.parse('q=' + input).q, input)
+    const result = resolver.resolveSourceMapSync('//# sourceMappingURL=' + input + '.map', '/app.js', name => {
+      assert.equal(name, '/' + input + '.map')
+      return '{"version":3,"sources":[],"names":[],"mappings":""}'
+    })
+    assert.equal(result.map.version, 3)
+    process.stdout.write('bounded')
+  `,
+    ],
+    { timeout: 3_000 },
+  )
+  assert.equal(stdout, 'bounded')
+})

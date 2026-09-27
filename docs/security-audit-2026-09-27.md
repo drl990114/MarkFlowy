@@ -28,3 +28,17 @@ Validation:
 - The refreshed npm audit reports five advisories: four moderate and one low. Neither Jaeger nor nth-check remains in the advisory list. The command still exits nonzero for the remaining advisories.
 
 This fixes [GHSA-45rx-2jwx-cxfr](https://github.com/advisories/GHSA-45rx-2jwx-cxfr), including the opt-in Jaeger path. It does not assert that the default W3C propagator was exposed to the Jaeger-specific crash. No build was run.
+
+## URL decoding denial of service
+
+Both consumers of `decode-uri-component` now resolve the fixed `0.5.0`: Umi's `query-string` and CSS's `source-map-resolve`. Minimal patches to their authored JavaScript entry points read the new ESM default export. Node 24 and the repository's minimum Node 22.12 support this synchronous ESM import. The existing query, source map and SVG conversion APIs remain available.
+
+Validation:
+
+- `yarn postinstall`: all three dependency source patches apply.
+- `yarn test:security-dependencies`: 16 tests pass, including query round trips with Chinese text, arrays, spaces and literal plus signs; synchronous and asynchronous source map loading; and both callers decoding 10,000 malformed bytes in a child process limited to three seconds.
+- Web `build:types`, formatting and `git diff --check`: pass.
+- `yarn why decode-uri-component`: both consumers resolve `0.5.0`.
+- The npm audit now reports four advisories: three moderate and one low. These are Core 1 baggage propagation, two React Router 6 advisories and elliptic. They remain open; the audit still exits nonzero.
+
+The fix follows [GHSA-vcc3-ghjq-m6fr](https://github.com/advisories/GHSA-vcc3-ghjq-m6fr) and the [upstream decoder](https://github.com/SamVerschueren/decode-uri-component/tree/v0.5.0). No build or native UI validation was run.
