@@ -32,7 +32,8 @@ describe('semantic themes', () => {
     expect(Object.keys(tokens)).toHaveLength(themeTokenNames.length)
     expect(tokens['editor.background']).toBe('#fffffeff')
     expect(tokens['accent.subtle']).toBe('#ff00003d')
-    expect(tokens['editor.selection.background']).toBe(tokens['accent.subtle'])
+    expect(tokens['editor.selection.background']).toBe(tokens['accent.background'])
+    expect(tokens['editor.selection.foreground']).toBe(tokens['accent.foreground'])
     expect(tokens['focus.ring']).toBe(tokens['accent.background'])
   })
   it('keeps hover, pressed, selection and focus independent', () => {
@@ -151,10 +152,11 @@ describe('semantic themes', () => {
       expect(updated.tokens['editor.background']).toBe('#123456ff')
     }
   })
-  it('derives built-in soft selection from a personal accent override', () => {
+  it('derives built-in contrasting selection from a personal accent override', () => {
     const tokens = getThemeTokens(builtInThemes[0], { 'accent.background': '#ff0000' })
     expect(tokens['accent.subtle']).toBe('#ff00003d')
-    expect(tokens['editor.selection.background']).toBe(tokens['accent.subtle'])
+    expect(tokens['editor.selection.background']).toBe(tokens['accent.background'])
+    expect(tokens['editor.selection.foreground']).toBe('#111111ff')
   })
   it('rejects missing references, wrong types, cycles and invalid input', () => {
     expect(() => resolveThemeTokens('light', { 'text.primary': { ref: 'missing' } })).toThrow(

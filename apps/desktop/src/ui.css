@@ -405,8 +405,8 @@
   --mf-theme-editor-foreground: var(--mf-text-primary);
   --mf-theme-editor-muted: var(--mf-text-secondary);
   --mf-theme-editor-caret: var(--mf-text-primary);
-  --mf-theme-editor-selection-background: var(--mf-primary-soft);
-  --mf-theme-editor-selection-foreground: var(--mf-text-primary);
+  --mf-theme-editor-selection-background: var(--mf-primary);
+  --mf-theme-editor-selection-foreground: var(--mf-primary-foreground);
   --mf-theme-editor-selection-inactive-background: color-mix(
     in srgb,
     var(--mf-text-secondary) 30%,
