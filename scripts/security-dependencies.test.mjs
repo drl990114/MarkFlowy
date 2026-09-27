@@ -183,3 +183,59 @@ test('the SVG dependency rejects a pathological nth expression within a bounded 
   )
   assert.equal(stdout, 'rejected')
 })
+
+test('Contentlayer tracing retains the SDK contract with the fixed Jaeger propagator', async () => {
+  const contentlayerRequire = createRequire(import.meta.resolve('@contentlayer2/utils'))
+  const providerEntry = contentlayerRequire.resolve('@opentelemetry/sdk-trace-node')
+  const { stdout } = await execFileAsync(
+    process.execPath,
+    [
+      '-e',
+      `
+    const assert = require('node:assert/strict')
+    const { createRequire } = require('node:module')
+    const providerRequire = createRequire(process.argv[1])
+    const { NodeTracerProvider } = require(process.argv[1])
+    const api = providerRequire('@opentelemetry/api')
+    const { suppressTracing } = providerRequire('@opentelemetry/core')
+    const propagator = new (providerRequire('@opentelemetry/propagator-jaeger').JaegerPropagator)()
+    const provider = new NodeTracerProvider()
+    provider.register({ contextManager: null })
+    const carrier = {
+      'uber-trace-id': '1234567890abcdef1234567890abcdef:1234567890abcdef:0:1',
+      'uberctx-user': 'Alice%20Wang',
+    }
+    const context = api.propagation.extract(api.ROOT_CONTEXT, carrier)
+    assert.equal(api.trace.getSpanContext(context).traceId, '1234567890abcdef1234567890abcdef')
+    assert.equal(api.propagation.getBaggage(context).getEntry('user').value, 'Alice Wang')
+    const outgoing = {}
+    api.propagation.inject(context, outgoing)
+    assert.equal(outgoing['uber-trace-id'], '1234567890abcdef1234567890abcdef:1234567890abcdef:0:01')
+    assert.deepEqual(api.trace.getSpanContext(api.propagation.extract(api.ROOT_CONTEXT, outgoing)), api.trace.getSpanContext(context))
+    assert.equal(outgoing['uberctx-user'], carrier['uberctx-user'])
+    for (const bad of [
+      { 'uber-trace-id': '%' },
+      { ...carrier, 'uberctx-user': '%' },
+      { ...carrier, 'uberctx-user': '%E0%A4%A' },
+    ]) {
+      assert.doesNotThrow(() => propagator.extract(api.ROOT_CONTEXT, bad, api.defaultTextMapGetter))
+      assert.doesNotThrow(() => api.propagation.extract(api.ROOT_CONTEXT, bad))
+    }
+    const suppressed = {}
+    api.propagation.inject(suppressTracing(context), suppressed)
+    assert.equal(suppressed['uber-trace-id'], undefined)
+    assert.equal(suppressed['uberctx-user'], carrier['uberctx-user'])
+    const span = provider.getTracer('contentlayer-compatibility').startSpan('document', {}, context)
+    assert.equal(span.spanContext().traceId, api.trace.getSpanContext(context).traceId)
+    span.end()
+    provider.shutdown().then(() => process.stdout.write('compatible'))
+  `,
+      providerEntry,
+    ],
+    {
+      timeout: 10_000,
+      env: { ...process.env, OTEL_PROPAGATORS: 'jaeger', OTEL_TRACES_EXPORTER: 'none' },
+    },
+  )
+  assert.equal(stdout, 'compatible')
+})

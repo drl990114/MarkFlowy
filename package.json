@@ -76,6 +76,7 @@
   },
   "resolutions": {
     "@babel/runtime@npm:7.23.6": "7.29.7",
+    "@opentelemetry/sdk-trace-node/@opentelemetry/propagator-jaeger": "2.11.0",
     "@umijs/plugin-run/tsx": "4.23.15",
     "@utoo/pack/send": "0.19.2",
     "@xmldom/xmldom@npm:0.9.10": "0.9.12",
