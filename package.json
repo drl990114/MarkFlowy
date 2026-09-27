@@ -15,7 +15,7 @@
     "dev:desktop": "node scripts/dev-desktop.mjs",
     "test:dev-desktop": "node --test scripts/dev-desktop.test.mjs",
     "test:security-dependencies": "node --test scripts/security-dependencies.test.mjs",
-    "test:release-workflows": "node --test scripts/release-workflows.test.mjs",
+    "test:release-workflows": "node --test scripts/release-workflows.test.mjs scripts/release-artifacts.test.mjs",
     "install:capricorn-runtime": "node --env-file-if-exists=.env scripts/install-capricorn-runtime.mjs",
     "build": "turbo build --concurrency=2",
     "build:web": "yarn turbo build --filter=!@markflowy/desktop",
@@ -27,7 +27,7 @@
     "release:minor": "yarn release --minor",
     "release:major": "yarn release --major",
     "test": "turbo test",
-    "updater": "yarn workspace @markflowy/desktop updater",
+    "updater": "node scripts/release-artifacts.mjs",
     "lint": "eslint --fix --ext .tsx ./",
     "translate:locals": "node --env-file=.env scripts/translate-locals.js",
     "translate:check": "node scripts/translate-check.js"
@@ -62,6 +62,8 @@
     "rimraf": "^6.0.1",
     "rollup": "4.63.4",
     "rollup-plugin-postcss": "^4.0.2",
+    "semver": "7.8.1",
+    "toml": "4.3.0",
     "typescript": "^5.7.3",
     "yaml": "2.9.0"
   },
@@ -74,7 +76,6 @@
   },
   "resolutions": {
     "@babel/runtime@npm:7.23.6": "7.29.7",
-    "@tauri-release/cli/@actions/github": "6.0.1",
     "@umijs/plugin-run/tsx": "4.23.15",
     "@utoo/pack/send": "0.19.2",
     "@xmldom/xmldom@npm:0.9.10": "0.9.12",

@@ -55,3 +55,36 @@ test('the shared gate requires real runtime, type, Rust and content validation',
   )
   assert.ok(generation >= 0 && verification > generation)
 })
+
+test('publication follows exact-tag metadata and uploaded hash verification', () => {
+  const steps = release.jobs.release.steps
+  const order = [
+    'Refuse to overwrite a published release',
+    'Prepare verified release metadata',
+    'Upload complete release as a draft',
+    'Verify uploaded asset hashes',
+    'Publish the verified draft',
+    'Check stable channel ownership',
+    'Deploy install.json',
+  ].map((name) => steps.findIndex((step) => step.name === name))
+  assert.ok(
+    order.every((index, position) => index >= 0 && (position === 0 || index > order[position - 1])),
+  )
+  const upload = steps.find((step) => step.id === 'stage')
+  assert.equal(upload.with.tag_name, '${{ github.ref_name }}')
+  assert.equal(upload.with.draft, true)
+  assert.equal(upload.with.prerelease, "${{ steps.metadata.outputs.prerelease == 'true' }}")
+  assert.equal(upload.with.fail_on_unmatched_files, true)
+  for (const unsupported of ['tagName', 'releaseName', 'releaseDraft', 'overwrite']) {
+    assert.equal(Object.hasOwn(upload.with, unsupported), false)
+  }
+  assert.equal(
+    steps.find((step) => step.id === 'channel').if,
+    "steps.metadata.outputs.prerelease == 'false'",
+  )
+  assert.equal(
+    steps.find((step) => step.name === 'Deploy install.json').if,
+    "steps.channel.outputs.is_latest == 'true'",
+  )
+  assert.equal(release.concurrency['cancel-in-progress'], false)
+})
