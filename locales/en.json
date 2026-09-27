@@ -536,6 +536,14 @@
           "label": "Markdown Default Mode",
           "desc": "Sets the default editing mode when creating a new Markdown file."
         },
+        "text_direction": {
+          "follow_global": "Follow global setting",
+          "label": "Text direction",
+          "desc": "Body text direction in WYSIWYG and Preview. Auto detects the direction of each paragraph.",
+          "auto": "Auto",
+          "ltr": "Left to right (LTR)",
+          "rtl": "Right to left (RTL)"
+        },
         "typewriter_scroll": {
           "label": "Typewriter Scroll",
           "desc": "When enabled, the caret will be centered in the viewport during editing."

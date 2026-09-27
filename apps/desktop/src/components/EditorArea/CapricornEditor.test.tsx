@@ -382,6 +382,105 @@ describe('CapricornEditor background preparation', () => {
     expect(props.onChange).not.toHaveBeenCalled()
   })
 
+  it('applies the latest body direction before exposing a prepared editor and updates it in place', async () => {
+    const adapter = createMountAdapter(largeMarkdown)
+    let complete!: (adapter: CapricornRuntimeAdapter) => void
+    vi.mocked(loadCapricornRuntimeAsyncFactory).mockResolvedValue(vi.fn())
+    vi.mocked(createCapricornRuntimeAdapterAsync).mockReturnValue(
+      new Promise((resolve) => {
+        complete = resolve
+      }),
+    )
+    const props = baseProps()
+    const onEditorChange = vi.fn((editor: CapricornRuntimeAdapter | null) => {
+      if (editor)
+        expect(adapter.updateSettings).toHaveBeenLastCalledWith(
+          expect.objectContaining({ textDirection: 'rtl' }),
+        )
+    })
+    const { rerender } = render(
+      <CapricornEditor
+        {...props}
+        onEditorChange={onEditorChange}
+        options={{ textDirection: 'auto' }}
+      />,
+    )
+    await waitFor(() => expect(createCapricornRuntimeAdapterAsync).toHaveBeenCalledOnce())
+    expect(createCapricornRuntimeAdapterAsync).toHaveBeenCalledWith(
+      expect.objectContaining({ options: expect.objectContaining({ textDirection: 'auto' }) }),
+    )
+    rerender(
+      <CapricornEditor
+        {...props}
+        onEditorChange={onEditorChange}
+        options={{ textDirection: 'rtl' }}
+      />,
+    )
+    await act(async () => complete(adapter))
+    expect(onEditorChange).toHaveBeenCalledWith(adapter)
+    for (const textDirection of ['ltr', 'auto'] as const) {
+      rerender(
+        <CapricornEditor {...props} onEditorChange={onEditorChange} options={{ textDirection }} />,
+      )
+      expect(adapter.updateSettings).toHaveBeenLastCalledWith(
+        expect.objectContaining({ textDirection }),
+      )
+    }
+    expect(createCapricornRuntimeAdapterAsync).toHaveBeenCalledOnce()
+    expect(adapter.destroy).not.toHaveBeenCalled()
+    expect(props.onChange).not.toHaveBeenCalled()
+  })
+
+  it.each([false, true])(
+    'reconciles caret animation changed from %s during preparation and resets omitted settings in place',
+    async (initialCaretAnimation) => {
+      const adapter = createMountAdapter(largeMarkdown)
+      let complete!: (adapter: CapricornRuntimeAdapter) => void
+      vi.mocked(loadCapricornRuntimeAsyncFactory).mockResolvedValue(vi.fn())
+      vi.mocked(createCapricornRuntimeAdapterAsync).mockReturnValue(
+        new Promise((resolve) => {
+          complete = resolve
+        }),
+      )
+      const props = baseProps()
+      const nextCaretAnimation = initialCaretAnimation ? undefined : true
+      const onEditorChange = vi.fn((editor: CapricornRuntimeAdapter | null) => {
+        if (editor)
+          expect(adapter.updateSettings).toHaveBeenLastCalledWith(
+            expect.objectContaining({ caretAnimation: nextCaretAnimation ?? false }),
+          )
+      })
+      const { rerender } = render(
+        <CapricornEditor
+          {...props}
+          onEditorChange={onEditorChange}
+          options={{ caretAnimation: initialCaretAnimation }}
+        />,
+      )
+      await waitFor(() => expect(createCapricornRuntimeAdapterAsync).toHaveBeenCalledOnce())
+      rerender(
+        <CapricornEditor
+          {...props}
+          onEditorChange={onEditorChange}
+          options={{ caretAnimation: nextCaretAnimation }}
+        />,
+      )
+      await act(async () => complete(adapter))
+      expect(onEditorChange).toHaveBeenCalledWith(adapter)
+      for (const caretAnimation of [false, true, undefined]) {
+        rerender(
+          <CapricornEditor {...props} onEditorChange={onEditorChange} options={{ caretAnimation }} />,
+        )
+        expect(adapter.updateSettings).toHaveBeenLastCalledWith(
+          expect.objectContaining({ caretAnimation: caretAnimation ?? false }),
+        )
+      }
+      expect(createCapricornRuntimeAdapterAsync).toHaveBeenCalledOnce()
+      expect(adapter.destroy).not.toHaveBeenCalled()
+      expect(props.onChange).not.toHaveBeenCalled()
+    },
+  )
+
   it('applies shortcut settings changed during preparation and after attachment without remounting', async () => {
     const adapter = createMountAdapter(largeMarkdown)
     let complete!: (adapter: CapricornRuntimeAdapter) => void

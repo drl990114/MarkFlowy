@@ -144,6 +144,10 @@ export interface CapricornKeybindingConfiguration {
 }
 
 export interface CapricornEditorSettings {
+  /** Opt-in body caret animation. Respects reduced motion and defaults to false. */
+  caretAnimation?: boolean
+  /** Paragraph direction, independent of interface localization and Markdown. */
+  textDirection?: 'auto' | 'ltr' | 'rtl'
   snippets?: false | CapricornSnippetsOptions
   codeBlockLineWrapping?: boolean
   linkEditMode?: 'popover' | 'markdown'

@@ -470,6 +470,14 @@
           "label": "Mode par défaut de Markdown",
           "desc": "Définit le mode d'édition par défaut lorsque vous créez un nouveau fichier Markdown."
         },
+        "text_direction": {
+          "follow_global": "Suivre le réglage global",
+          "label": "Sens du texte",
+          "desc": "Sens du texte en mode WYSIWYG et Aperçu. Le mode automatique détecte le sens de chaque paragraphe.",
+          "auto": "Automatique",
+          "ltr": "De gauche à droite (LTR)",
+          "rtl": "De droite à gauche (RTL)"
+        },
         "typewriter_scroll": {
           "label": "Défilement de la machine à écrire",
           "desc": "Une fois activé, le curseur s'affiche au center de la vue lors de l'édition."

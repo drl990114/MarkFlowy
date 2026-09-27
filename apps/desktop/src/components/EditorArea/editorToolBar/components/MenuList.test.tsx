@@ -6,6 +6,8 @@ import type { IShowContextMenuParams } from '@/stores/useContextMenuStore'
 import { fileSaveCoordinator } from '../../fileSaveCoordinator'
 import { DEFAULT_TEXT_METADATA } from '../../textFileFormat'
 import { MenuList } from './MenuList'
+import useFileTextDirectionStore, { getFileTextDirectionKey } from '@/stores/useFileTextDirectionStore'
+import { writeSettingData } from '@/services/app-setting'
 
 const mocks = vi.hoisted(() => ({
   showMenu: vi.fn<(params: IShowContextMenuParams) => void>(),
@@ -15,6 +17,7 @@ const mocks = vi.hoisted(() => ({
     other: { id: 'other', name: 'other.md', path: '/other.md', kind: 'file', ext: 'md' },
     image: { id: 'image', name: 'photo.png', path: '/photo.png', kind: 'file', ext: 'png' },
     start: { id: 'start', name: 'New tab', kind: 'new_tab' },
+    draft: { id: 'draft', name: 'Untitled.md', kind: 'file', ext: 'md' },
   } as Record<string, Partial<IFile>>,
 }))
 
@@ -69,6 +72,7 @@ vi.mock('@tauri-apps/api/core', () => ({
 
 beforeEach(() => {
   vi.clearAllMocks()
+  useFileTextDirectionStore.setState({ directions: {} })
   mocks.save.mockResolvedValue(true)
   fileSaveCoordinator.loadSnapshot('pane', {
     content: 'text',
@@ -79,7 +83,7 @@ beforeEach(() => {
 })
 afterEach(cleanup)
 
-function openMenu(editorId: string) {
+function openMenu(editorId: string, value = 'text_encoding') {
   render(
     <TooltipProvider>
       <MenuList editorId={editorId} />
@@ -87,7 +91,7 @@ function openMenu(editorId: string) {
   )
   fireEvent.click(screen.getByRole('button', { name: 'action.more' }))
   return mocks.showMenu.mock.calls.at(-1)![0].items.find(
-    (item) => 'value' in item && item.value === 'text_encoding',
+    (item) => 'value' in item && item.value === value,
   )
 }
 
@@ -114,5 +118,46 @@ describe('toolbar file encoding', () => {
 
   it.each(['image', 'start'])('omits encoding actions for a non-text tab: %s', (editorId) => {
     expect(openMenu(editorId)).toBeUndefined()
+  })
+})
+
+describe('toolbar file text direction', () => {
+  function choices() {
+    const item = mocks.showMenu.mock.calls.at(-1)![0].items.find(
+      (entry) => 'value' in entry && entry.value === 'text_direction',
+    )
+    if (!item || !('children' in item) || !item.children) throw new Error('Direction submenu missing')
+    return item.children.filter((entry) => 'value' in entry)
+  }
+  function select(value: string) {
+    const choice = choices().find((entry) => entry.value === value)
+    expect(choice).toBeDefined()
+    act(() => choice?.handler?.())
+    fireEvent.click(screen.getByRole('button', { name: 'action.more' }))
+    expect(choices().filter((entry) => entry.checked).map((entry) => entry.value)).toEqual([value])
+  }
+
+  it('sets only the toolbar file, marks one choice and restores inheritance without writing global settings', () => {
+    expect(openMenu('pane', 'text_direction')).toBeDefined()
+    expect(choices().map((entry) => entry.value)).toEqual(['inherit', 'auto', 'ltr', 'rtl'])
+    expect(choices().find((entry) => entry.value === 'inherit')?.checked).toBe(true)
+    for (const direction of ['rtl', 'ltr', 'auto']) {
+      select(direction)
+      expect(useFileTextDirectionStore.getState().directions).toEqual({ 'path:/pane.md': direction })
+    }
+    select('inherit')
+    expect(useFileTextDirectionStore.getState().directions).toEqual({})
+    expect(writeSettingData).not.toHaveBeenCalled()
+  })
+
+  it('supports an unsaved Markdown file', () => {
+    expect(openMenu('draft', 'text_direction')).toBeDefined()
+    select('rtl')
+    expect(useFileTextDirectionStore.getState().directions[getFileTextDirectionKey('draft')]).toBe('rtl')
+    expect(useFileTextDirectionStore.getState().directions['path:/other.md']).toBeUndefined()
+  })
+
+  it.each(['image', 'start'])('omits body direction for non-Markdown content: %s', (editorId) => {
+    expect(openMenu(editorId, 'text_direction')).toBeUndefined()
   })
 })

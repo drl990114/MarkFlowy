@@ -5,6 +5,7 @@ import type { IFile } from '@/helper/filesys'
 import { toFileMetadata } from './fileMetadata'
 import { getPathIdentityKey, rebaseFilePath } from '@/helper/pathIdentity'
 import useRecentFilesStore from '@/stores/useRecentFilesStore'
+import useFileTextDirectionStore from '@/stores/useFileTextDirectionStore'
 import { findPathCollisions, type PathRelationResolver } from '@/helper/physicalPathIdentity'
 import { completeDeferredEditorSave, getDeferredEditorSave } from '@/components/EditorArea/deferredEditorSave'
 
@@ -43,6 +44,13 @@ export function setFileObject(id: string, file: IFile): void {
 
 export function setFileObjects(files: { id: string; file: IFile }[]): void {
   if (!files.length) return
+  const previousEntries = useFileCacheStore.getState().entries
+  for (const { id, file } of files) {
+    const previous = previousEntries[id]
+    if (previous && previous.path !== file.path) {
+      useFileTextDirectionStore.getState().moveFile(previous, file)
+    }
+  }
   useFileCacheStore.setState((state) => {
     let entries = state.entries
     let contentEntries = state.contentEntries
@@ -259,6 +267,7 @@ export function deleteFileObjectsByIds(fileIds: string[]): string[] {
  * This also covers opened files whose lazy-loaded tree node is no longer mounted.
  */
 export function moveFileObjectsByPathPrefix(oldRootPath: string, newRootPath: string): void {
+  useFileTextDirectionStore.getState().rebasePaths(oldRootPath, newRootPath)
   useFileCacheStore.setState((state) => {
     const entries = { ...state.entries }
     const pathEntries = { ...state.pathEntries }

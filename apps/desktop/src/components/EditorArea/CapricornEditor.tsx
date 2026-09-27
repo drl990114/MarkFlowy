@@ -165,7 +165,11 @@ export function CapricornEditor({
   onRetryRef.current = onRetry
   onRuntimeReadyRef.current = onRuntimeReady
   onUnavailableRef.current = onUnavailable
-  optionsRef.current = { ...options, style: runtimeStyle }
+  optionsRef.current = {
+    ...options,
+    caretAnimation: options.caretAnimation ?? false,
+    style: runtimeStyle,
+  }
 
   const reportUnavailable = useCallback((error: unknown) => {
     if (unavailableReportedRef.current) return
@@ -277,6 +281,7 @@ export function CapricornEditor({
         const changedMode = current.options.mode !== (optionsRef.current.mode ?? 'edit')
         const changedSettings = (
           [
+            'caretAnimation',
             'className',
             'colorScheme',
             'density',
@@ -287,6 +292,7 @@ export function CapricornEditor({
             'snippets',
             'spellCheck',
             'style',
+            'textDirection',
             'typewriter',
           ] as const
         ).some((key) => current.options?.[key] !== optionsRef.current[key])
@@ -546,6 +552,7 @@ export function CapricornEditor({
 
   useEffect(() => {
     const settings: CapricornEditorSettings = {
+      caretAnimation: options.caretAnimation ?? false,
       snippets: options.snippets,
       codeBlockLineWrapping: options.codeBlockLineWrapping,
       className: options.className,
@@ -557,10 +564,12 @@ export function CapricornEditor({
       readOnly: options.readOnly,
       spellCheck: options.spellCheck,
       style: runtimeStyle,
+      textDirection: options.textDirection,
       typewriter: options.typewriter,
     }
     adapterRef.current?.updateSettings(settings)
   }, [
+    options.caretAnimation,
     options.snippets,
     options.className,
     options.codeBlockLineWrapping,
@@ -571,6 +580,7 @@ export function CapricornEditor({
     options.placeholder,
     options.readOnly,
     options.spellCheck,
+    options.textDirection,
     options.typewriter,
     runtimeStyle,
   ])

@@ -268,6 +268,17 @@ export const getSettingMap = () => {
             { value: 'markdown', title: i18n.t('link_editing.markdown') },
           ],
         },
+        textDirection: {
+          key: 'editor_text_direction',
+          type: 'select',
+          title: { i18nKey: 'settings.editor.behavior.text_direction.label' },
+          desc: { i18nKey: 'settings.editor.behavior.text_direction.desc' },
+          options: [
+            { value: 'auto', title: i18n.t('settings.editor.behavior.text_direction.auto') },
+            { value: 'ltr', title: i18n.t('settings.editor.behavior.text_direction.ltr') },
+            { value: 'rtl', title: i18n.t('settings.editor.behavior.text_direction.rtl') },
+          ],
+        },
         placeholder: {
           key: 'editor_placeholder',
           type: 'switch',

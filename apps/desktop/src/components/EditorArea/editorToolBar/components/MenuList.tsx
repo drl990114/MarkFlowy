@@ -13,6 +13,10 @@ import { useEditorStateStore, useEditorStore } from '@/stores'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
+import useFileTextDirectionStore, {
+  getFileTextDirectionKey,
+  type EditorTextDirection,
+} from '@/stores/useFileTextDirectionStore'
 import { invoke } from '@tauri-apps/api/core'
 import { debounce } from 'lodash'
 import { memo, useCallback, useEffect, useRef, useState } from 'react'
@@ -163,12 +167,11 @@ export const MenuList = memo((props: MenuListProps) => {
       items.push({ type: 'divider' })
     }
 
-    // 视图切换
+    // 视图切换和显示选项收在同一个子菜单中。
+    const viewItems: MenuItemData[] = []
     if (showViewSwitcher) {
-      items.push({
-        label: t('view.label'),
-        value: 'view_switcher',
-        children: [
+      viewItems.push(
+        ...[
           {
             label: t('view.source_code'),
             value: EditorViewType.SOURCECODE,
@@ -192,13 +195,15 @@ export const MenuList = memo((props: MenuListProps) => {
         ].filter((item) => {
           return curFileTypeConfig ? curFileTypeConfig?.supportedModes?.includes(item.value) : false
         }),
-      })
-      items.push({ type: 'divider' })
+      )
     }
 
-    // 打字机滚动
+    if (viewItems.length > 0) {
+      viewItems.push({ type: 'divider' })
+    }
+
     if (showTypewriterScroll) {
-      items.push({
+      viewItems.push({
         label: t('settings.editor.behavior.typewriter_scroll.label'),
         value: 'typewriter_scroll',
         checked: editorTypewriterScroll,
@@ -206,11 +211,9 @@ export const MenuList = memo((props: MenuListProps) => {
           writeSettingData({ key: 'editor_typewriter_scroll' }, !editorTypewriterScroll)
         },
       })
-      items.push({ type: 'divider' })
     }
 
-    // 占位符提示
-    items.push({
+    viewItems.push({
       label: t('settings.editor.behavior.placeholder.label'),
       value: 'placeholder',
       checked: editorPlaceholder,
@@ -218,9 +221,48 @@ export const MenuList = memo((props: MenuListProps) => {
         writeSettingData({ key: 'editor_placeholder' }, !editorPlaceholder)
       },
     })
+
+    if (showViewSwitcher) {
+      items.push({
+        label: t('view.label'),
+        value: 'view_switcher',
+        children: viewItems,
+      })
+    } else {
+      items.push(...viewItems)
+    }
+
+    if (latestFile && latestFile.kind !== 'new_tab' && curFileTypeConfig?.type === 'markdown') {
+      const key = getFileTextDirectionKey(latestFile.id, latestFile.path)
+      const direction = useFileTextDirectionStore.getState().directions[key]
+      const selectDirection = (value: EditorTextDirection | undefined) => {
+        const file = targetEditorId ? getFileObject(targetEditorId) : undefined
+        if (file) useFileTextDirectionStore.getState().setDirection(file, value)
+      }
+      items.push({
+        label: t('settings.editor.behavior.text_direction.label'),
+        value: 'text_direction',
+        children: [
+          {
+            label: t('settings.editor.behavior.text_direction.follow_global'),
+            value: 'inherit',
+            checked: direction === undefined,
+            handler: () => selectDirection(undefined),
+          },
+          { type: 'divider' },
+          ...(['auto', 'ltr', 'rtl'] as const).map((value) => ({
+            label: t(`settings.editor.behavior.text_direction.${value}`),
+            value,
+            checked: direction === value,
+            handler: () => selectDirection(value),
+          })),
+        ],
+      })
+    }
+
     items.push({ type: 'divider' })
 
-    // 文件信息
+    // 当前文件：信息、编码、历史和收藏保持直接可达。
     if (showFileInfo) {
       items.push({
         label: t('file.info'),
@@ -259,7 +301,6 @@ export const MenuList = memo((props: MenuListProps) => {
           })
         },
       })
-      items.push({ type: 'divider' })
     }
 
     if (
@@ -279,7 +320,6 @@ export const MenuList = memo((props: MenuListProps) => {
         value: 'text_encoding',
         handler: () => setEncodingFileId(targetEditorId),
       })
-      items.push({ type: 'divider' })
     }
 
     items.push({
@@ -287,7 +327,6 @@ export const MenuList = memo((props: MenuListProps) => {
       value: 'history',
       handler: () => openLocalHistory(targetEditorId),
     })
-    items.push({ type: 'divider' })
 
     // 书签
     if (showBookmark) {
@@ -311,30 +350,41 @@ export const MenuList = memo((props: MenuListProps) => {
           }
         },
       })
+    }
+
+    // 导出与转换
+    if (showExport || showConvertText) {
       items.push({ type: 'divider' })
     }
 
-    // 导出
     if (showExport) {
-      items.push({
-        value: 'export_html',
-        label: t('contextmenu.editor_tab.export_html'),
-        handler: () => {
-          bus.emit('editor_export_html')
+      const exportItems: MenuItemData[] = [
+        {
+          value: 'export_html',
+          label: t('contextmenu.editor_tab.export_html'),
+          handler: () => {
+            bus.emit('editor_export_html')
+          },
         },
-      })
+      ]
       if (curFileTypeConfig?.type === 'markdown') {
-        items.push(createPdfPrintMenuItem(t('contextmenu.editor_tab.export_pdf')))
-        items.push(createPandocExportMenuItem(t))
+        exportItems.push(createPdfPrintMenuItem(t('contextmenu.editor_tab.export_pdf')))
       }
-      items.push({
+      exportItems.push({
         value: 'export_image',
         label: t('contextmenu.editor_tab.export_image'),
         handler: () => {
           bus.emit('editor_export_image')
         },
       })
-      items.push({ type: 'divider' })
+      if (curFileTypeConfig?.type === 'markdown') {
+        exportItems.push({ type: 'divider' }, createPandocExportMenuItem(t))
+      }
+      items.push({
+        value: 'export',
+        label: t('settings.export.label'),
+        children: exportItems,
+      })
     }
 
     // 文本转换

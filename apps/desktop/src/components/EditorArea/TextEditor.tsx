@@ -43,6 +43,10 @@ import useFileCacheStore, {
   setSaveOpenedEditorEntries,
   updateFileObject,
 } from '@/helper/files'
+import useFileTextDirectionStore, {
+  getFileTextDirectionKey,
+  normalizeEditorTextDirection,
+} from '@/stores/useFileTextDirectionStore'
 import {
   canvasDataToBinary,
   FileResultCode,
@@ -1114,6 +1118,13 @@ function TextEditor(props: TextEditorProps) {
   const editorFullWidth = useAppSettingStore((state) => state.settingData.editor_full_width)
   const linkEditMode = useAppSettingStore((state) =>
     state.settingData.editor_link_edit_mode === 'markdown' ? 'markdown' : 'popover',
+  )
+  const globalTextDirection = useAppSettingStore((state) =>
+    normalizeEditorTextDirection(state.settingData.editor_text_direction),
+  )
+  const textDirectionKey = getFileTextDirectionKey(id, filePath)
+  const textDirection = useFileTextDirectionStore(
+    (state) => state.directions[textDirectionKey] ?? globalTextDirection,
   )
   const editorPlaceholder = useAppSettingStore((state) => state.settingData.editor_placeholder)
   const semanticTheme = useContext(SemanticThemeContext)
@@ -2722,6 +2733,7 @@ function TextEditor(props: TextEditorProps) {
       density: 'compact',
       codeBlockLineWrapping,
       linkEditMode,
+      textDirection,
       handleLinkClick: async (href) => {
         const opened = await openEditorLink(href, curFile.id)
         if (!opened) toast.warning(i18n.t('link_editing.open_failed'))
@@ -2749,6 +2761,7 @@ function TextEditor(props: TextEditorProps) {
   }, [
     snippetOptions,
     linkEditMode,
+    textDirection,
     codeBlockLineWrapping,
     curFile.id,
     currentViewType,

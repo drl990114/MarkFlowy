@@ -46,6 +46,7 @@ pub_struct!(AppConf {
     editor_typewriter_scroll: Option<bool>,
     editor_placeholder: Option<bool>,
     editor_link_edit_mode: Option<String>,
+    editor_text_direction: Option<String>,
     editor_insert_date_format: Option<String>,
     editor_root_font_size: Option<u32>,
     editor_root_line_height: Option<String>,
@@ -646,6 +647,7 @@ impl AppConf {
             editor_typewriter_scroll: Some(false),
             editor_placeholder: Some(true),
             editor_link_edit_mode: Some("popover".to_string()),
+            editor_text_direction: Some("auto".to_string()),
             editor_insert_date_format: Some("YYYY-MM-DD".to_string()),
             editor_root_font_size: Some(16),
             editor_root_line_height: Some("1.7".to_string()),
@@ -785,6 +787,7 @@ impl AppConf {
             editor_typewriter_scroll,
             editor_placeholder,
             editor_link_edit_mode,
+            editor_text_direction,
             editor_insert_date_format,
             editor_root_font_size,
             editor_root_line_height,
@@ -1196,6 +1199,20 @@ mod tests {
             .entry(0)
             .or_insert_with(std::env::temp_dir);
         AppConf::new()
+    }
+
+    #[test]
+    fn text_direction_defaults_to_auto_and_survives_config_roundtrip() {
+        let defaults = typography_default_conf().merge_conf(empty_conf());
+        assert_eq!(defaults.editor_text_direction.as_deref(), Some("auto"));
+        for direction in ["rtl", "ltr", "auto"] {
+            let changed = defaults.clone().amend(serde_json::json!({
+                "editor_text_direction": direction
+            }));
+            let saved = serde_json::from_value(serde_json::to_value(changed).unwrap()).unwrap();
+            let restored = typography_default_conf().merge_conf(saved);
+            assert_eq!(restored.editor_text_direction.as_deref(), Some(direction));
+        }
     }
 
     #[test]

@@ -2,7 +2,7 @@ import { readFileSync, statSync } from 'node:fs'
 import { dirname, resolve, sep } from 'node:path'
 
 const CAPRICORN_PACKAGE = '@drl990114/capricorn-runtime'
-export const CAPRICORN_VERSION = '0.3.1'
+export const CAPRICORN_VERSION = '0.4.0'
 
 interface CapricornPackageManifest {
   exports?: {

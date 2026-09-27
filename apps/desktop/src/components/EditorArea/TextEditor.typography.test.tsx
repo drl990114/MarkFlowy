@@ -1,5 +1,5 @@
 import { runInNewContext } from 'node:vm'
-import { cleanup, render } from '@testing-library/react'
+import { act, cleanup, render } from '@testing-library/react'
 import { useMemo, type ComponentType } from 'react'
 import ts from 'typescript'
 import { afterEach, describe, expect, it, vi } from 'vitest'
@@ -10,6 +10,10 @@ import {
 } from './capricornKeybindings'
 import textEditorSource from './TextEditor.tsx?raw'
 import { EditorViewType } from '@/constants/editorViewType'
+import useFileTextDirectionStore, {
+  getFileTextDirectionKey,
+  normalizeEditorTextDirection,
+} from '@/stores/useFileTextDirectionStore'
 
 // Exercise the host's real settings selectors, options and memo dependencies
 // without mounting file watchers or native services.
@@ -38,6 +42,9 @@ const names = new Set([
   'themeFontSize',
   'wysiwygRootLineHeight',
   'linkEditMode',
+  'globalTextDirection',
+  'textDirectionKey',
+  'textDirection',
   'editorPlaceholder',
   'codeBlockLineWrapping',
   'editorKeybingMap',
@@ -53,7 +60,12 @@ if (statements.length !== names.size)
   throw new Error('Editor typography declarations were not found')
 const compiled = ts.transpileModule(
   `
-  function Harness({ settings, keymap, semanticTheme, onOptions, viewType = EditorViewType.WYSIWYG, isHtml = false }) {
+  function Harness({
+    settings, keymap, semanticTheme, onOptions,
+    viewType = EditorViewType.WYSIWYG, isHtml = false,
+    fileId = 'typography-test', filePath,
+  }) {
+    const id = fileId;
     const currentViewType = viewType;
     const useAppSettingStore = (selector) => selector({ settingData: settings });
     const useEditorKeybindingStore = (selector) => selector({
@@ -70,6 +82,9 @@ const compiled = ts.transpileModule(
 ).outputText
 const Harness = runInNewContext(compiled, {
   useMemo,
+  useFileTextDirectionStore,
+  getFileTextDirectionKey,
+  normalizeEditorTextDirection,
   curFile: { id: 'note' },
   content: 'Example',
   delegate: undefined,
@@ -98,10 +113,13 @@ const Harness = runInNewContext(compiled, {
     editor_source_font_size?: number
     editor_source_line_height?: string
     editor_link_edit_mode?: 'popover' | 'markdown'
+    editor_text_direction?: unknown
     editor_placeholder?: boolean
     wysiwyg_editor_codemirror_line_wrap?: boolean
   }
   keymap?: Record<string, string>
+  fileId?: string
+  filePath?: string
   viewType?: (typeof EditorViewType)[keyof typeof EditorViewType]
   isHtml?: boolean
   semanticTheme?: {
@@ -113,9 +131,86 @@ const Harness = runInNewContext(compiled, {
   onOptions: (options: CapricornRuntimeOptions) => void
 }>
 
-afterEach(cleanup)
+afterEach(() => {
+  cleanup()
+  useFileTextDirectionStore.setState({ directions: {} })
+})
 
 describe('TextEditor Capricorn typography settings', () => {
+  it('shares overrides between panes of one file while other files keep following the global direction', () => {
+    const first = vi.fn()
+    const second = vi.fn()
+    const other = vi.fn()
+    const file = { id: 'note', path: '/notes/mixed.md' }
+    const content = (globalDirection: string) => (
+      <>
+        <Harness
+          fileId={file.id}
+          filePath={file.path}
+          settings={{ editor_text_direction: globalDirection }}
+          onOptions={first}
+        />
+        <Harness
+          fileId={file.id}
+          filePath={file.path}
+          viewType={EditorViewType.PREVIEW}
+          settings={{ editor_text_direction: globalDirection }}
+          onOptions={second}
+        />
+        <Harness
+          fileId='other'
+          filePath='/notes/other.md'
+          settings={{ editor_text_direction: globalDirection }}
+          onOptions={other}
+        />
+      </>
+    )
+    const { rerender } = render(content('ltr'))
+    act(() => useFileTextDirectionStore.getState().setDirection(file, 'rtl'))
+    expect(first.mock.lastCall?.[0].textDirection).toBe('rtl')
+    expect(second.mock.lastCall?.[0].textDirection).toBe('rtl')
+    expect(other.mock.lastCall?.[0].textDirection).toBe('ltr')
+    act(() => useFileTextDirectionStore.getState().setDirection(file, 'auto'))
+    rerender(content('rtl'))
+    expect(first.mock.lastCall?.[0].textDirection).toBe('auto')
+    expect(second.mock.lastCall?.[0].textDirection).toBe('auto')
+    expect(other.mock.lastCall?.[0].textDirection).toBe('rtl')
+    act(() => useFileTextDirectionStore.getState().setDirection(file, undefined))
+    expect(first.mock.lastCall?.[0].textDirection).toBe('rtl')
+    expect(second.mock.lastCall?.[0].textDirection).toBe('rtl')
+    rerender(content('ltr'))
+    expect(first.mock.lastCall?.[0].textDirection).toBe('ltr')
+  })
+
+  it.each([EditorViewType.WYSIWYG, EditorViewType.PREVIEW])(
+    'updates body direction and defaults missing or invalid preferences to auto in %s',
+    (viewType) => {
+      const onOptions = vi.fn()
+      const { rerender } = render(
+        <Harness settings={{}} viewType={viewType} onOptions={onOptions} />,
+      )
+      expect(onOptions.mock.lastCall?.[0].textDirection).toBe('auto')
+      for (const [saved, expected] of [
+        ['rtl', 'rtl'],
+        ['ltr', 'ltr'],
+        ['auto', 'auto'],
+        ['rtl', 'rtl'],
+        [undefined, 'auto'],
+        [null, 'auto'],
+        ['invalid', 'auto'],
+      ]) {
+        rerender(
+          <Harness
+            settings={{ editor_text_direction: saved }}
+            viewType={viewType}
+            onOptions={onOptions}
+          />,
+        )
+        expect(onOptions.mock.lastCall?.[0].textDirection).toBe(expected)
+      }
+    },
+  )
+
   it('forwards the existing code wrap setting and restores its default when unset', () => {
     const onOptions = vi.fn()
     const { rerender } = render(<Harness settings={{}} onOptions={onOptions} />)

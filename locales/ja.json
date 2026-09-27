@@ -475,6 +475,14 @@
           "label": "Markdownデフォルトモード",
           "desc": "Markdownファイルを新規作成するときのデフォルト編集モードを設定します。"
         },
+        "text_direction": {
+          "follow_global": "全体設定に従う",
+          "label": "本文の方向",
+          "desc": "WYSIWYG とプレビューの本文方向を設定します。自動では段落ごとに方向を判定します。",
+          "auto": "自動",
+          "ltr": "左から右（LTR）",
+          "rtl": "右から左（RTL）"
+        },
         "typewriter_scroll": {
           "label": "タイプライターのスクロール",
           "desc": "オンにすると、カーソルは編集時にビューポートに中央表示されます。"

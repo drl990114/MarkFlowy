@@ -470,6 +470,14 @@
           "label": "Modo predeterminado de Markdown",
           "desc": "Establece el modo de edición predeterminado al crear un nuevo archivo de Markdown."
         },
+        "text_direction": {
+          "follow_global": "Seguir el ajuste global",
+          "label": "Dirección del texto",
+          "desc": "Dirección del texto en WYSIWYG y Vista previa. El modo automático detecta la dirección de cada párrafo.",
+          "auto": "Automática",
+          "ltr": "De izquierda a derecha (LTR)",
+          "rtl": "De derecha a izquierda (RTL)"
+        },
         "typewriter_scroll": {
           "label": "Desplazamiento de la máquina de escribir",
           "desc": "Una vez habilitado, el cursor se mostrará en la ventana de visualización en el momento de la edición."
