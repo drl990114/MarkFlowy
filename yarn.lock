@@ -21347,7 +21347,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"gray-matter@npm:^4.0.3":
+"gray-matter@npm:4.0.3, gray-matter@npm:^4.0.3":
   version: 4.0.3
   resolution: "gray-matter@npm:4.0.3"
   dependencies:
@@ -26201,6 +26201,7 @@ __metadata:
     child_process: "npm:^1.0.2"
     eslint: "npm:9.39.5"
     fast-glob: "npm:^3.3.2"
+    gray-matter: "npm:4.0.3"
     patch-package: "npm:^8.0.1"
     postcss: "npm:^8.5.28"
     postcss-import: "npm:^16.1.1"
@@ -26211,6 +26212,7 @@ __metadata:
     rollup-plugin-postcss: "npm:^4.0.2"
     turbo: "npm:^2.9.14"
     typescript: "npm:^5.7.3"
+    yaml: "npm:2.9.0"
   languageName: unknown
   linkType: soft
 

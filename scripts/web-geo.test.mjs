@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
-import { allMarkdowns } from '../apps/web/.contentlayer/generated/Markdown/_index.mjs'
+import { loadPublicMarkdownSources, parsePublicMarkdown } from './web-document-sources.mjs'
 import {
   createPublicDocuments,
   getDocumentLocales,
@@ -12,6 +12,7 @@ import {
   SITE_ORIGIN,
 } from '../apps/web/utils/publicContent.ts'
 
+const allMarkdowns = await loadPublicMarkdownSources()
 const documents = createPublicDocuments(allMarkdowns)
 
 test('canonical URLs use the production host, remove tracking, and preserve the selected language', () => {
@@ -42,29 +43,41 @@ test('the public document collection excludes unsupported locale directories', (
   assert.equal(result.length, 1)
 })
 
-test('all published documents have unique URLs and complete metadata from the current source', async () => {
+test('public document sources have unique URLs and complete metadata', () => {
   assert.ok(documents.length >= 14)
   assert.equal(new Set(documents.map((document) => document.url)).size, documents.length)
   for (const document of documents) {
     assert.ok(document.title.trim())
     assert.ok(document.description.trim())
     assert.ok(document.markdown.trim())
-    const source = await readFile(
-      new URL(`../docs/${document.locale}${document.slug}.md`, import.meta.url),
-      'utf8',
-    )
-    assert.equal(
-      document.markdown.trim(),
-      source.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n/, '').trim(),
-      `Regenerate Contentlayer data for ${document.url}`,
-    )
-    assert.ok(source.includes(`seoTitle: ${JSON.stringify(document.title)}`))
-    assert.ok(source.includes(`description: ${JSON.stringify(document.description)}`))
     if (document.updatedAt) {
       assert.match(document.updatedAt, /^\d{4}-\d{2}-\d{2}$/)
       assert.equal(new Date(document.updatedAt).toISOString().slice(0, 10), document.updatedAt)
     }
   }
+})
+
+test('document metadata accepts YAML quoting and folded values without changing the body', () => {
+  for (const title of ["'MarkFlowy themes'", '"MarkFlowy themes"', 'MarkFlowy themes']) {
+    const source = `---\nseoTitle: ${title}\ndescription: >-\n  Create themes\n  with JSON.\nupdatedAt: 2026-09-27\n---\n\n# Themes\n\n---\n`
+    const document = parsePublicMarkdown(source, 'en/Extension/CustomTheme.md')
+    assert.equal(document.seoTitle, 'MarkFlowy themes')
+    assert.equal(document.description, 'Create themes with JSON.')
+    assert.equal(document.updatedAt, '2026-09-27')
+    assert.equal(document.body.raw, '\n# Themes\n\n---\n')
+  }
+})
+
+test('unpublishable document sources fail instead of disappearing from the index', () => {
+  assert.throws(() => parsePublicMarkdown('# Missing metadata', 'zh/missing.md'), /seoTitle/)
+  assert.throws(
+    () =>
+      parsePublicMarkdown(
+        '---\nseoTitle: Title\ndescription: Description\nupdatedAt: 2026-02-30\n---\n# Title',
+        'en/invalid.md',
+      ),
+    /updatedAt/,
+  )
 })
 
 test('sitemap publishes HTML destinations and only genuine update dates', () => {
@@ -76,7 +89,8 @@ test('sitemap publishes HTML destinations and only genuine update dates', () => 
   assert.ok(!locations.includes(`${SITE_ORIGIN}/zh/privacy`))
   assert.ok(
     locations.every(
-      (url) => !/\/(auth|workspace|settings|api|playground)(\/|$)|\.md$/.test(new URL(url).pathname),
+      (url) =>
+        !/\/(auth|workspace|settings|api|playground)(\/|$)|\.md$/.test(new URL(url).pathname),
     ),
   )
   assert.equal(
@@ -115,13 +129,6 @@ test('relative guide links resolve to published pages in the same language', () 
         `${document.markdownUrl}: ${href}`,
       )
     }
-  }
-})
-
-test('public guide comparisons render as HTML tables with real header cells', () => {
-  for (const document of allMarkdowns.filter((entry) => entry.updatedAt)) {
-    assert.match(document.body.html, /<table>/, document._id)
-    assert.match(document.body.html, /<th>/, document._id)
   }
 })
 

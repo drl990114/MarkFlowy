@@ -1,3 +1,8 @@
+---
+seoTitle: 'MarkFlowy 片段库'
+description: '管理本机全局的公式、Mermaid 和代码片段，并在编辑器中插入和复用。'
+---
+
 # 片段库
 
 设置 → 片段库用于管理本机全局的 Math、Mermaid、Code 源码片段。编辑器菜单中的“管理片段”可以直接打开对应分类。
