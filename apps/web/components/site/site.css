@@ -811,10 +811,8 @@ html:has(.mf-site-header[data-open='true']) {
 }
 .mf-site .mf-preview-frame {
   overflow: hidden;
-  border: 1px solid var(--line);
   border-radius: 12px;
-  background: var(--paper);
-  box-shadow: var(--mf-site-shadow);
+  background: var(--mf-site-surface-tint);
 }
 .mf-site .mf-preview-entrance::before {
   content: '';
@@ -945,14 +943,9 @@ html:has(.mf-site-header[data-open='true']) {
 }
 .mf-site .mf-feature-visual img {
   display: block;
-  width: calc(100% - 40px);
+  width: 100%;
   height: auto;
-  margin: 16px 0 0 40px;
-  border-radius: 9px 0 0;
-  box-shadow: var(--mf-site-shadow);
-}
-.mf-site .mf-feature-visual-pink {
-  background: linear-gradient(135deg, var(--paper), var(--mf-site-rose));
+  margin: 0;
 }
 .mf-site .mf-file-stack {
   container-type: inline-size;
@@ -1178,7 +1171,6 @@ html:has(.mf-site-header[data-open='true']) {
   }
   .mf-site .mf-feature-write .mf-feature-visual {
     min-height: 280px;
-    max-height: 300px;
   }
   .mf-site .mf-feature-personal .mf-shortcut-panel {
     max-width: 420px;
@@ -1469,10 +1461,6 @@ html:has(.mf-site-header[data-open='true']) {
   }
   .mf-site .mf-feature-card {
     min-height: 425px;
-  }
-  .mf-site .mf-feature-visual img {
-    width: calc(100% - 24px);
-    margin-left: 24px;
   }
   .mf-site .mf-workflow-grid {
     grid-template-columns: 1fr;

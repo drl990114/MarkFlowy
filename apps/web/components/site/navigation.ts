@@ -30,7 +30,7 @@ export const siteMenus: SiteMenu[] = [
           {
             title: 'site.nav.files',
             description: 'site.nav.filesDescription',
-            href: '/docs/Performance/large-markdown-files',
+            href: '/docs/intro',
           },
           {
             title: 'site.nav.assistant',
@@ -74,7 +74,7 @@ export const siteMenus: SiteMenu[] = [
         title: 'navigation.docs',
         links: [
           { title: 'site.nav.quickstart', href: '/docs/intro' },
-          { title: 'site.nav.files', href: '/docs/Performance/large-markdown-files' },
+          { title: 'fileTitle.Snippets', href: '/docs/Extension/Snippets' },
           { title: 'site.nav.assistant', href: '/docs/Extension/UseCopilotWithOllama' },
           { title: 'site.nav.themes', href: '/docs/Extension/CustomTheme' },
         ],

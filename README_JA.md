@@ -2,13 +2,13 @@
 <!-- Visit https://github.com/nanolaba/readme-generator for details -->
 
 <div align="center">
-  <img align="center" src="./public/logo.png" width="120" height="120" />
+  <img align="center" alt="MarkFlowy" src="./public/logo.png" width="120" height="120" />
 </div>
 
-<h2 align="center"/>MarkFlowy <sup><em>beta</em></sup></h2>
+<h1 align="center">MarkFlowy</h1>
 <div align='center'>
 <br>
-<em>Modern and intelligent Markdown editor.</em>
+<em>軽快に書く。思考に集中する。</em>
 <br>
 <br>
 </div>
@@ -35,31 +35,40 @@
 <br/>
 </div>
 
-<h4 align="center"><strong>English</strong> | <a href="./README_CN.md">简体中文</a> | <a href="./README_JA.md">日本語</a></h4>
+<h4 align="center"><a href="./README.md">English</a> | <a href="./README_CN.md">简体中文</a> | <strong>日本語</strong></h4>
 
-<img src="./public/home.png" alt="screenshot" />
+MarkFlowy は **macOS、Windows、Linux** 向けのローカル優先 Markdown エディターです。ビジュアル編集とソース編集を切り替え、自分のフォルダーで文書を管理し、必要なときに AI を使えます。ローカル編集にアカウントや AI の設定は不要です。
+
+[ダウンロード](https://github.com/drl990114/MarkFlowy/releases/latest) · [公式サイト](https://www.markflowy.cc) · [使い方（英語）](./docs/en/intro.md) · [更新履歴](./apps/desktop/UPDATE_LOG.md)
+
+![MarkFlowy Desktop のファイルツリー、ビジュアルエディター、アウトライン](./public/home.png)
 
 ## 機能
 
-- **ローカル文書:** 自分のフォルダー内のファイルを直接編集でき、ローカル履歴と下書きの復元に対応しています。過去の測定の条件と制限は[大きなファイルの性能に関する説明](./docs/en/Performance/large-markdown-files.md)をご覧ください。
+- **好きな方法で書く。** ビジュアル編集、Markdown ソース、閲覧を切り替えられます。表、タスクリスト、コード、数式、Mermaid、スニペットに対応。集中したいときは Zen モードを使えます。
+- **高性能な編集。** 大きな Markdown 文書の読み込みと描画を最適化し、開く・スクロールする・編集する操作をスムーズに。
+- **自分のファイルを使う。** ファイルやフォルダーを開き、タブ、分割表示、ブックマーク、アウトラインで整理。クイックオープンとワークスペース検索で文書を探せます。
+- **変更を振り返る。** ローカル履歴を比較し、通常の終了や再読み込み前に保存された下書きを復元できます。他のアプリによる変更も確認できます。履歴は日常のバックアップを補う機能です。
+- **使い心地を調整する。** ライト／ダークテーマ、ビジュアルテーマエディター、ショートカット、文字組みをカスタマイズ。本文方向は自動、左から右、右から左を選べます。
+- **必要なときに AI を使う。** チャット、要約、翻訳、Copilot 補完に対応。OpenAI 互換サービス、DeepSeek、Google、Ollama を設定できます。チャットと Copilot のモデル設定は独立しています。[Ollama ガイド（英語）](./docs/en/Extension/UseCopilotWithOllama.md)をご覧ください。
+- **文書を共有する。** HTML や画像に書き出し、印刷から PDF に保存できます。別途 Pandoc をインストールすれば DOCX、ODT、EPUB も利用可能。[CLI（中国語）](./docs/CLI.md) はローカル自動化にも使えます。
 
-- **AI搭載:** 現在はCopilot、ワンタッチで会話をエクスポートし、文章を任意の言語に翻訳し、記事の要約を取得することをサポートしており、「DeepSeek `」、「Chatgpt」などの大きなモデルをサポートして、彼らをスマートアシスタントにしています。
+クラウド AI とリモート接続先には選択したコンテキストが送信されます。ローカル推論には**ローカルの Ollama 接続先とローカルモデル**が必要です。
 
-- **デスクトップアプリ:** Tauri とシステムの WebView を使用します。ダウンロードサイズは OS とパッケージ形式によって異なり、Windows のオフラインインストーラーには WebView2 も含まれます。対象リリースの添付ファイルをご確認ください。
+## 画面を見る
 
-- **複数の編集モード:** Markdown のソース、ライブ編集、閲覧に対応します。メンテナー版ではライブ編集と閲覧に Capricorn ランタイムを使用し、ソース編集には RME/CodeMirror の統合を使用します。Capricorn を含まない公開チェックアウトではソースと閲覧モードが利用できます。[開発ガイド](./docs/en/Community/CONTRIBUTING.md)をご覧ください。
+![MarkFlowy Desktop の Markdown ソース編集](./apps/web/public/screenshots/sourcecode.png)
 
-- **複数ファイル形式の編集:** Markdownに加えて、`JSON`、`TXT`などのファイル形式の編集もサポートしています。
+![同じワークスペースをダークテーマで表示](./apps/web/public/screenshots/darkmode.png)
 
-- **カスタムテーマ:** カスタムテーマをサポートし、作成したテーマを他のユーザーと共有できます。
+## はじめに
 
-- **カスタムキーボードショートカット:** 個々のニーズに合わせてカスタムキーボードショートカットを設定できます。
+1. [GitHub Releases](https://github.com/drl990114/MarkFlowy/releases/latest) から環境に合うパッケージをインストールします。
+2. Markdown ファイル、またはワークスペースにするフォルダーを開きます。
+3. エディターのメニューでモードを切り替えます。**Cmd/Ctrl + P** でファイル、**Cmd/Ctrl + Shift + P** でコマンドを検索できます。
+4. 設定で外観とショートカットを調整します。AI は必要に応じて設定してください。
 
-- **画像処理:** MarkFlowyに画像を貼り付ける際、指定したパスに貼り付けるか、`base64`に変換するかを選択できます。
-
-- **ファイル管理**: ドラッグアンドドロップによる移動、グローバル検索、その他の一般的な機能をサポートする強力なファイルツリー。
-
-- **多言語サポート：** 中国語、英語、スペイン語、日本語、フランス語を含む複数の言語をサポートします。
+[使い方（英語）](./docs/en/intro.md)では編集、検索、履歴、書き出しを説明しています。独立した Web App Beta は保存やワークスペースの仕組みが異なります。このページの画面と説明は Desktop 向けです。
 
 ## ダウンロード
 
@@ -77,12 +86,7 @@ x64 ビルドのいずれかをダウンロードして実行します。
 
 `MarkFlowy_v<version>_aarch64.dmg`（Apple silicon）または `MarkFlowy_v<version>_x64.dmg`（Intel）をダウンロードします。
 
-> [!NOTE]
-> Appleのセキュリティポリシーにより、開発者認証のないソフトウェアは**macOS aarch64**版を直接ダウンロードして使用できません。以下の手順で制限を回避できます。
-> - terminal を開く
-> - `Applications` ディレクトリに移動します。例: `/Applications`。
-> - `xattr -cr MarkFlowy.app` を実行し、再度アプリを開きます。
-> - `github releases` からダウンロードしてください。
+> macOS では MarkFlowy を「アプリケーション」に移動します。公式 Release から入手したアプリがブロックされた場合は、Apple の[「このまま開く」の手順](https://support.apple.com/ja-jp/102445)に従って「システム設定 → プライバシーとセキュリティ」を確認してください。
 
 ### Linux
 
@@ -118,7 +122,7 @@ MarkFlowyは製品であると同時に、私の人生の証でもあります�
 
 ## Contribute
 
-MarkFlowy は V1.0 に向けて準備中です。[issues](https://github.com/drl990114/MarkFlowy/issues/new) での不具合報告と再現手順、[PR](https://github.com/drl990114/MarkFlowy/compare) での改善を歓迎します。ダウンロード可能なバージョンはリリースページをご確認ください。
+[issues](https://github.com/drl990114/MarkFlowy/issues/new) での不具合報告と再現手順、[PR](https://github.com/drl990114/MarkFlowy/compare) での改善を歓迎します。
 
 ### How to Contribute
 
@@ -149,7 +153,7 @@ MarkFlowy は V1.0 に向けて準備中です。[issues](https://github.com/drl
 **MarkFlowy** の開発は、これらの貢献者なしには成し得ませんでした。彼らは **MarkFlowy** に多くの能力を提供してくれました。ぜひ彼らをフォローしてください！ ❤️
 
 
-<!-- badges -->
+<!-- Badge references -->
 [build-badge]: https://img.shields.io/github/actions/workflow/status/drl990114/MarkFlowy/nodejs.yml.svg?style=flat-square&labelColor=black
 [build]: https://github.com/drl990114/MarkFlowy/actions/workflows/nodejs.yml?labelColor=black
 [downloads-badge]:  https://img.shields.io/github/downloads/drl990114/MarkFlowy/total?label=downloads&style=flat-square&labelColor=black
@@ -157,9 +161,9 @@ MarkFlowy は V1.0 に向けて準備中です。[issues](https://github.com/drl
 [license]: https://opensource.org/licenses/AGPL-3.0?labelColor=black
 [release]: https://github.com/drl990114/MarkFlowy/releases?labelColor=black
 [prs-welcome-badge]: https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square&labelColor=black&color=%23dd5c13
-[prs-welcome]: https://github.com/drl990114/MarkFlowy/blob/main/CONTRIBUTING.md?labelColor=black
+[prs-welcome]: ./docs/en/Community/CONTRIBUTING.md
 [coc-badge]: https://img.shields.io/badge/code%20of-conduct-ff69b4.svg?style=flat-square&labelColor=black
-[coc]: https://github.com/drl990114/MarkFlowy/blob/main/CODE_OF_CONDUCT.md?labelColor=black
+[coc]: ./docs/en/Community/CODE_OF_CONDUCT.md
 [commit-badge]: https://img.shields.io/github/commit-activity/m/drl990114/MarkFlowy?color=%23ff9900&style=flat-square&labelColor=black
 [commit]: https://github.com/drl990114/MarkFlowy?labelColor=black
 [version-badge]: https://img.shields.io/github/v/release/drl990114/MarkFlowy?color=%239accfe&label=version&style=flat-square&labelColor=black

@@ -78,7 +78,7 @@
       "capability3": {
         "tag": "パフォーマンス",
         "title": "大きな文書の編集",
-        "body": "v0.100.0 のリリースノートには、2 MB の Markdown ファイルがテストで約 1 秒で開いたと記録されています。比較の前に測定の背景と制限をご確認ください。"
+        "body": "大きな Markdown 文書の読み込みと描画を最適化し、開く・スクロールする・編集する操作をスムーズに。"
       },
       "capability4": {
         "tag": "カスタマイズ",
@@ -97,7 +97,6 @@
       "orbitLabel": "地球を周回する貢献者プロフィールへのリンク"
     },
     "guides": {
-      "performanceLink": "性能について",
       "ollamaLink": "ローカル AI の設定",
       "introLink": "製品紹介を読む"
     }
@@ -128,6 +127,7 @@
     "releases": "リリース"
   },
   "fileTitle": {
+    "Snippets": "スニペットライブラリ",
     "intro": "紹介",
     "CustomTheme": "カスタムテーマ",
     "CODE_OF_CONDUCT": "行動規範",
@@ -135,9 +135,7 @@
     "Community": "コミュニティガイドライン",
     "Extension": "拡張ガイド",
     "License": "ライセンス",
-    "UseCopilotWithOllama": "Ollama で Copilot を使用",
-    "Performance": "性能",
-    "large-markdown-files": "大きな Markdown 文書"
+    "UseCopilotWithOllama": "Ollama で Copilot を使用"
   },
   "auth": {
     "login": "ログイン",
@@ -204,7 +202,7 @@
       "eyebrow": "ローカル優先。自由なアイデア。",
       "title": "アイデアが、自然に流れ出す。",
       "lead": "ひらめきから完成まで。ローカル優先の Markdown エディター。",
-      "description": "メモも長文も、必要なときだけ AI も。ファイルはいつでもあなたのもの。",
+      "description": "短いメモから長文まで、ビジュアルとソースを自由に切り替えて執筆。必要なときには AI も使えます。",
       "try": "オンラインで試す",
       "platforms": "いつもの環境で、書き始めよう"
     },
@@ -213,7 +211,7 @@
       "title": "次のアイデアを、すぐに書き出そう。",
       "description": "ファイル、編集エリア、文書の目次をひとつのウィンドウに。短いメモから長い文章まで、思考を自然に広げられます。",
       "note": "MarkFlowy デスクトップ版のスクリーンショット · ライトモード",
-      "screenshotAlt": "ファイル一覧、Markdown ソースエディター、文書の目次を表示した MarkFlowy デスクトップ版のライトモード"
+      "screenshotAlt": "ローカルファイル、ビジュアルエディター、文書の目次を表示した MarkFlowy デスクトップ版のライトモード"
     },
     "features": {
       "eyebrow": "書くことを中心に",
@@ -226,8 +224,8 @@
         "alt": "MarkFlowy デスクトップエディターの文書"
       },
       "local": {
-        "title": "あなたの言葉、あなたのファイル。",
-        "body": "ローカルファイルを開かれた形式で編集。ワークスペースも大きな文書も手元に。"
+        "title": "高性能で、長文も軽快に。",
+        "body": "大きな文書の読み込みと描画を最適化し、開く・スクロールする・編集する操作をスムーズに。ローカルフォルダーでメモや長文を整理できます。"
       },
       "ai": {
         "title": "必要なときだけ、少しの助け。",

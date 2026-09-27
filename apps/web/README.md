@@ -12,7 +12,7 @@ Examples:
 
 - `/docs/intro` and `/docs/intro.md`
 - `/zh/docs/Extension/UseCopilotWithOllama` and `/zh/docs/Extension/UseCopilotWithOllama.md`
-- `/docs/Performance/large-markdown-files` and `/docs/Performance/large-markdown-files.md`
+- `/docs/Extension/Snippets` and `/docs/Extension/Snippets.md`
 
 Markdown responses are served through a server-side page rewrite, with the HTML URL in an HTTP canonical link. This follows the same response pattern as the sitemap and avoids localized API routing restrictions. Invalid documents return 404; methods other than GET and HEAD return 405. Sitemap entries contain only public HTML destinations. Auth, settings, and workspace screens have a `noindex` directive; their authorization remains the responsibility of the application.
 
@@ -34,7 +34,11 @@ yarn translate:check
 
 With the development server running, `yarn workspace @markflowy/web test:geo:http` checks actual HTML metadata, all Markdown links advertised by `llms.txt`, HEAD/405/404 behavior, and indexing controls. Set `GEO_BASE_URL` when using a port other than 3100. These checks caught the need to run Markdown rewrites in `beforeFiles`, before the static documentation catch-all.
 
-README changes belong in `README.src.md`; regenerate all three language outputs with NRG 1.1 and run its drift check. Keep performance observations qualified and reference their source; the new performance page does not establish a new benchmark.
+README changes belong in `README.src.md`; regenerate all three language outputs with NRG 1.1 and run its drift check.
+
+## Product screenshots
+
+README and website screenshots use the same public sample workspace. See [capture notes](../../docs/SCREENSHOTS.md) for image paths, dimensions, and the reproduction steps. Keep `next/image` dimensions in `Preview.tsx` and `FeatureList.tsx` aligned with the captured files.
 
 ## Deployment and measurement
 

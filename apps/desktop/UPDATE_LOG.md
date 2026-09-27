@@ -1,5 +1,47 @@
 # UPDATE LOG
 
+## v1.0.0 (Unreleased)
+
+Release notes in preparation. This section describes the current V1 work; it does not announce a published download.
+
+Highlights:
+
+- **A workspace for local Markdown.** Work with individual files or folders, recent files and workspaces, tabs, split editors, bookmarks, an outline, Quick Open, and workspace search. Use the title-bar folder button to open files or folders, including a folder in another window.
+- **Visual, source, and reading modes.** Write with tables, task lists, code, math, Mermaid, block conversion, and reusable snippets. The rebuilt editor supports large documents, improved selection, and mixed-direction text. Configure automatic, left-to-right, or right-to-left body text globally or per document; source and code stay left to right.
+- **Commands and focus.** Open the command palette with **Cmd/Ctrl + Shift + P**, search files with **Cmd/Ctrl + P**, or enter Zen mode with **Cmd/Ctrl + Shift + F**. Search and customize bindings in Settings.
+- **Your appearance, your theme.** Use the visual theme editor to create, inspect, preview, and export declarative JSON themes. Light and dark variants, semantic colors, typography, and personal CSS snippets can be managed from Settings.
+- **Local history and recovery.** Review and compare previous versions, configure history retention, restore saved drafts after a normal exit or reload, and review conflicts when files change outside the app.
+- **Optional AI and flexible export.** Configure chat and Copilot independently with your preferred provider, including local Ollama. Export HTML and images, print to PDF, or use an installed Pandoc for DOCX, ODT, and EPUB.
+- **Refined desktop controls.** More compact title, tab, status, and settings areas; a file-tree action to reveal the active file; clearer encoding and line-ending controls; and improved localization. Error reporting is now opt-in and disabled by default.
+
+Before upgrading:
+
+- The editor rewrite and new theme system change behavior compared with older releases. Keep backups and check representative documents before moving an existing collection.
+- Legacy JS/npm themes and automatically loaded CSS are no longer executed. Convert themes to JSON and import personal CSS snippets explicitly; see the [theme migration guide](../../docs/en/Extension/CustomTheme.md#migrating-older-themes). Original legacy files remain on disk.
+- Cloud AI and remote endpoints receive the context you send. Local inference requires both a local endpoint and a local model. Local history is not a replacement for backups.
+- These notes do not establish a new performance benchmark or completion of platform release testing. Download availability follows the published GitHub Release assets.
+
+---
+
+发布说明准备中。本节记录当前 V1 工作，不代表安装包已正式发布。
+
+主要更新：
+
+- **围绕本地 Markdown 的工作区。** 支持单文件与文件夹、最近文件与工作区、标签页、分屏、书签、目录、快速打开及工作区搜索。通过标题栏的文件夹按钮打开文件或文件夹，也可在新窗口打开文件夹。
+- **所见即所得、源码与阅读模式。** 支持表格、任务列表、代码、公式、Mermaid、块类型转换和可复用片段。重构后的编辑器支持大文档、改进的选区及混合方向正文；可全局或按文档设置自动、从左到右、从右到左，源码与代码保持从左到右。
+- **命令与专注写作。** 按 **Cmd/Ctrl + Shift + P** 打开命令面板，按 **Cmd/Ctrl + P** 快速打开文件，按 **Cmd/Ctrl + Shift + F** 开关 Zen 模式，并在设置中搜索和自定义快捷键。
+- **自己的外观与主题。** 通过可视化主题编辑器创建、检查、预览和导出声明式 JSON 主题；在设置中管理浅色与深色变体、语义颜色、字体排版和个人 CSS 片段。
+- **本地历史与恢复。** 查看并比较早期版本、配置保留策略、恢复正常退出或刷新前保存的草稿，并在外部文件修改与编辑内容冲突时进行确认。
+- **可选 AI 与多种导出。** 对话和 Copilot 分别配置服务商与模型，支持本地 Ollama；导出 HTML、图片，通过打印保存 PDF，安装 Pandoc 后导出 DOCX、ODT 和 EPUB。
+- **更紧凑的桌面交互。** 改进标题栏、标签栏、状态栏和设置布局，新增文件树定位当前文件入口，完善编码、换行符控制与多语言文案。错误报告改为主动选择开启，默认关闭。
+
+升级前须知：
+
+- 编辑器重构与主题系统调整会影响部分旧版行为。迁移已有文档前，请备份并检查有代表性的文件。
+- 旧 JS/npm 主题与自动加载的 CSS 不再执行。请将主题转为 JSON，手动导入个人 CSS 片段；详见[主题迁移指南](../../docs/zh/Extension/CustomTheme.md)。原有旧版文件会保留。
+- 云端 AI 与远程地址会收到发送的上下文；本地推理需要同时使用本地服务地址与本地模型。本地历史不能替代备份。
+- 本说明不代表新增性能基准或已完成各平台发布验收，安装包以正式 GitHub Release 附件为准。
+
 ## v0.101.1
 
 Have an issue, a feature request, or an idea? Share it in [MarkFlowy v1: Feedback & Ideas](https://github.com/drl990114/MarkFlowy/issues/1209). All feedback is welcome!

@@ -78,7 +78,7 @@
       "capability3": {
         "tag": "性能",
         "title": "大文档编辑",
-        "body": "v0.100.0 更新说明记录了一份 2 MB Markdown 文件在测试中约 1 秒打开的结果。比较性能前，请先查看测试背景和适用范围。"
+        "body": "针对大文档优化加载与渲染，让长篇 Markdown 的打开、滚动和编辑更流畅。"
       },
       "capability4": {
         "tag": "定制",
@@ -97,7 +97,6 @@
       "orbitLabel": "环绕地球的贡献者资料链接"
     },
     "guides": {
-      "performanceLink": "查看性能说明",
       "ollamaLink": "配置本地 AI",
       "introLink": "阅读产品介绍"
     }
@@ -128,6 +127,7 @@
     "releases": "版本发布"
   },
   "fileTitle": {
+    "Snippets": "片段库",
     "intro": "简介",
     "CustomTheme": "自定义主题",
     "CODE_OF_CONDUCT": "行为准则",
@@ -135,9 +135,7 @@
     "Community": "社区准则",
     "Extension": "扩展指南",
     "License": "许可证",
-    "UseCopilotWithOllama": "使用 Ollama 的 Copilot",
-    "Performance": "性能",
-    "large-markdown-files": "大 Markdown 文档"
+    "UseCopilotWithOllama": "使用 Ollama 的 Copilot"
   },
   "auth": {
     "login": "登录",
@@ -204,7 +202,7 @@
       "eyebrow": "本地优先，让灵感自由生长",
       "title": "让想法流动，专注每一次写作。",
       "lead": "一个本地优先的 Markdown 编辑器，陪你从灵感写到成稿。",
-      "description": "随手记下想法，安心打磨长文，按需接入 AI。文件始终由你掌握。",
+      "description": "从随手记录到长篇写作，自由切换所见即所得与源码模式，按需接入 AI。",
       "try": "在线体验",
       "platforms": "在熟悉的平台上，进入写作状态"
     },
@@ -213,7 +211,7 @@
       "title": "打开就能写，让思路不断线。",
       "description": "文件、编辑区与文档大纲，在同一个窗口里。从随手记录到长篇写作，让思路自然展开。",
       "note": "MarkFlowy 桌面版截图 · 浅色模式",
-      "screenshotAlt": "MarkFlowy 桌面版浅色界面，包含文件列表、Markdown 源码编辑区和文档大纲"
+      "screenshotAlt": "MarkFlowy 桌面版浅色界面，包含本地文件、所见即所得编辑器和文档目录"
     },
     "features": {
       "eyebrow": "每个细节，都为内容让路",
@@ -226,8 +224,8 @@
         "alt": "MarkFlowy 桌面编辑器中的写作示例"
       },
       "local": {
-        "title": "你的文字，你的文件。",
-        "body": "直接编辑本地文件，使用开放格式保存。整理工作空间，让笔记和大文档都触手可及。"
+        "title": "高性能，让长文写作更轻快。",
+        "body": "针对大文档优化加载与渲染，让打开、滚动和编辑更流畅。直接打开本地文件夹，整理笔记与长文。"
       },
       "ai": {
         "title": "需要时，给灵感一点助力。",

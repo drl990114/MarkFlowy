@@ -78,7 +78,7 @@
       "capability3": {
         "tag": "Performance",
         "title": "Large-document editing",
-        "body": "The v0.100.0 release notes report a 2 MB Markdown file opening in around 1 second in testing. See the test context and limits before comparing results."
+        "body": "Optimized loading and rendering make large Markdown documents smoother to open, scroll through, and edit."
       },
       "capability4": {
         "tag": "Customization",
@@ -97,7 +97,6 @@
       "orbitLabel": "Contributor profile links orbiting the globe"
     },
     "guides": {
-      "performanceLink": "Performance notes",
       "ollamaLink": "Set up local AI",
       "introLink": "Read the introduction"
     }
@@ -128,6 +127,7 @@
     "releases": "Releases"
   },
   "fileTitle": {
+    "Snippets": "Snippet Library",
     "intro": "Introduction",
     "CustomTheme": "Custom Theme",
     "CODE_OF_CONDUCT": "CODE_OF_CONDUCT",
@@ -135,9 +135,7 @@
     "Community": "Community Guidelines",
     "Extension": "Extensions Guide",
     "License": "License",
-    "UseCopilotWithOllama": "Using Copilot with Ollama",
-    "Performance": "Performance",
-    "large-markdown-files": "Large Markdown documents"
+    "UseCopilotWithOllama": "Using Copilot with Ollama"
   },
   "auth": {
     "login": "Sign In",
@@ -204,7 +202,7 @@
       "eyebrow": "LOCAL FIRST. IDEAS FORWARD.",
       "title": "Your ideas, in full flow.",
       "lead": "A local-first Markdown editor for everything you want to write.",
-      "description": "Bring your notes, long-form writing, and optional AI together. Your files stay yours.",
+      "description": "Move from quick notes to longer drafts with visual and source editing, and bring in AI when it helps.",
       "try": "Try online",
       "platforms": "Made for the way you work"
     },
@@ -213,7 +211,7 @@
       "title": "Less between you and your next idea.",
       "description": "Your files, editor, and document outline in one window. From quick notes to longer drafts, give your ideas room to grow.",
       "note": "MarkFlowy desktop screenshot · Light mode",
-      "screenshotAlt": "MarkFlowy desktop in light mode, showing the file list, Markdown source editor, and document outline"
+      "screenshotAlt": "MarkFlowy desktop in light mode, showing local files, the visual editor, and document outline"
     },
     "features": {
       "eyebrow": "THOUGHTFULLY CONNECTED",
@@ -226,8 +224,8 @@
         "alt": "MarkFlowy desktop editor displaying a writing sample"
       },
       "local": {
-        "title": "Your words. Your files.",
-        "body": "Work directly with local files in open formats. Organize your workspace and keep large documents within reach."
+        "title": "High performance for longer drafts.",
+        "body": "Optimized loading and rendering make large documents smoother to open, scroll through, and edit. Work directly with files in your own folders."
       },
       "ai": {
         "title": "A little help, when you need it.",

@@ -35,7 +35,7 @@ test('live HTML contains document-specific metadata and text without JavaScript'
     for (const slug of [
       'intro',
       'Extension/UseCopilotWithOllama',
-      'Performance/large-markdown-files',
+      'Extension/Snippets',
     ]) {
       const path = `${prefix}/docs/${slug}`
       const response = await request(path)

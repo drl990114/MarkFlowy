@@ -27,7 +27,9 @@ test('generated document metadata and Markdown match the parsed source', () => {
 })
 
 test('public guide comparisons render as HTML tables with real header cells', () => {
-  for (const document of generated.filter((entry) => entry.updatedAt)) {
+  const tableDocuments = generated.filter((entry) => /^\|[ \t]*:?-{3,}/m.test(entry.body.raw))
+  assert.ok(tableDocuments.length > 0, 'The public guides must include comparison tables')
+  for (const document of tableDocuments) {
     assert.match(document.body.html, /<table>/, document._id)
     assert.match(document.body.html, /<th>/, document._id)
   }

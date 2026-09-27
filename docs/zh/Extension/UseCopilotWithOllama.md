@@ -1,14 +1,12 @@
 ---
 seoTitle: "在 MarkFlowy 中使用 Ollama 与 Copilot"
 description: "为 MarkFlowy 桌面版配置本地 Ollama 对话与 Copilot，了解文档上下文，并排查连接和模型问题。"
-updatedAt: "2026-09-21"
+updatedAt: "2026-09-27"
 ---
 
 # 在 MarkFlowy 中使用 Ollama 与 Copilot
 
 MarkFlowy 桌面版可以连接 Ollama，进行 AI 对话和 Copilot 补全。本地推理需要同时使用本地服务地址和已下载的本地模型；选择云端模型或远程地址时，请求会由对应服务处理。
-
-本文面向 v0.100.1 桌面版的配置方式，于 2026 年 9 月 6 日根据应用源码与 Ollama 文档核对，不代表新增了一次覆盖三个操作系统的端到端实测。
 
 ## 1. 启动 Ollama 并检查模型
 
@@ -28,7 +26,7 @@ curl http://localhost:11434/api/tags
 
 ## 2. 配置 AI 对话
 
-1. 打开 MarkFlowy 桌面版设置，在 AI 部分找到 Ollama 配置。
+1. 打开 **设置 → AI**，找到 Ollama 配置。
 2. 使用默认本地地址，或填写自己的服务地址。普通本地 Ollama 不需要云端服务商的 API Key；有鉴权的远程网关可能需要请求头。
 3. 打开 AI 对话，选择 Ollama 和文本生成模型。MarkFlowy 会发现 Ollama 中的模型；发现不可用时，也可显式配置模型名称。
 4. 先发送一条不带文档上下文的短问题，再加入一份小文档，尝试生成摘要。
@@ -61,4 +59,4 @@ curl http://localhost:11434/api/tags
 
 当前桌面版的 AI 请求和模型发现使用 Tauri 原生 HTTP 客户端，无需先将 `OLLAMA_ORIGINS` 设为 `*` 或将 Ollama 暴露到所有网络接口。如果使用旧版浏览器客户端，且日志明确显示跨域错误，再按 Ollama 的[来源配置说明](https://docs.ollama.com/faq#how-can-i-allow-additional-web-origins-to-access-ollama)为该客户端配置。连接另一台机器上的 Ollama 属于独立网络配置，不是本地使用的前置步骤。
 
-继续阅读[产品介绍](../intro)、[性能说明](../Performance/large-markdown-files)，或下载[当前桌面发行版](https://github.com/drl990114/MarkFlowy/releases/latest)。
+继续阅读[产品介绍](../intro)，或下载[当前桌面发行版](https://github.com/drl990114/MarkFlowy/releases/latest)。

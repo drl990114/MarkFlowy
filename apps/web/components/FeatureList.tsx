@@ -35,8 +35,8 @@ export default function FeatureList() {
               <Image
                 src='/screenshots/sourcecode.png'
                 alt={t('site.features.write.alt')}
-                width={2454}
-                height={1514}
+                width={3456}
+                height={2304}
                 sizes='(max-width: 639px) calc(100vw - 64px), (max-width: 650px) calc(100vw - 88px), (max-width: 1000px) calc(50vw - 80px), (max-width: 1184px) 58vw, 620px'
               />
             </div>
@@ -49,8 +49,8 @@ export default function FeatureList() {
               <i className='ri-folder-open-line mf-feature-icon' aria-hidden='true' />
               <h3>{t('site.features.local.title')}</h3>
               <p>{t('site.features.local.body')}</p>
-              <Link className='mf-text-link' href='/docs/Performance/large-markdown-files'>
-                {t('home.guides.performanceLink')}
+              <Link className='mf-text-link' href='/docs/intro'>
+                {t('home.guides.introLink')}
                 <SiteArrow />
               </Link>
             </div>
@@ -80,12 +80,12 @@ export default function FeatureList() {
                 <SiteArrow />
               </Link>
             </div>
-            <div className='mf-feature-visual mf-feature-visual-pink'>
+            <div className='mf-feature-visual'>
               <Image
                 src='/screenshots/ai.png'
                 alt={t('site.features.ai.alt')}
-                width={2454}
-                height={1514}
+                width={3456}
+                height={2304}
                 sizes='(max-width: 639px) calc(100vw - 64px), (max-width: 650px) calc(100vw - 88px), (max-width: 1000px) calc(50vw - 80px), (max-width: 1184px) 42vw, 440px'
               />
             </div>

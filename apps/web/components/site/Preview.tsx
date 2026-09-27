@@ -9,10 +9,10 @@ export default function Preview() {
       <div className='mf-preview-frame'>
         <Image
           className='mf-preview-screenshot'
-          src='/screenshots/sourcecode.png'
+          src='/screenshots/home.png'
           alt={t('site.preview.screenshotAlt')}
-          width={2454}
-          height={1514}
+          width={3456}
+          height={2304}
           sizes='(max-width: 639px) calc(100vw - 40px), (max-width: 939px) calc(100vw - 64px), (max-width: 1184px) calc((100vw - 64px) * 0.667 - 11px), 736px'
         />
       </div>
