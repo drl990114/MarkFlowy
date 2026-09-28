@@ -102,7 +102,6 @@ import { flushSync } from 'react-dom'
 import { PreviewBoundary } from './preview/PreviewBoundary'
 import { useUnmount } from 'react-use'
 import type {
-  CreateWysiwygDelegateOptions,
   EditorDelegate,
   EditorChangeEventParams,
   EditorChangeHandler,
@@ -173,11 +172,11 @@ import { runSaveOperation } from './runSaveOperation'
 import { getSaveAsCollisionIds } from './saveAsCollision'
 import { savePathCoordinator } from './savePathCoordinator'
 import { useDebouncedAutosave } from './useDebouncedAutosave'
+import { useRemoteImageResources } from './useRemoteImageResources'
 import { PdfPrintController } from './pdf-print/PdfPrintController'
 import { PandocExportController } from './pandoc-export/PandocExportController'
 import { WarningHeader } from './styles'
 
-const delegateOptionsCache = new Map<string, CreateWysiwygDelegateOptions>()
 const TEXT_EDITOR_CONTENT_SYNC_EVENT = 'editor_content_sync'
 const EXPORT_RESOURCE_TIMEOUT_MS = 15_000
 const editorInstanceLifecycle = new EditorInstanceLifecycle()
@@ -351,16 +350,6 @@ const cancelIdle = (handle: number) => {
     return
   }
   clearTimeout(handle)
-}
-
-function getOrCreateDelegateOptions(fileId?: string): CreateWysiwygDelegateOptions {
-  const key = fileId || '__no_id__'
-  let cached = delegateOptionsCache.get(key)
-  if (!cached) {
-    cached = createWysiwygDelegateOptions(fileId)
-    delegateOptionsCache.set(key, cached)
-  }
-  return cached
 }
 
 type SaveHandlerParams = {
@@ -1151,6 +1140,16 @@ function TextEditor(props: TextEditorProps) {
   const editorColorScheme = useThemeStore((state) => state.curTheme.mode)
   const editorKeybingMap = useEditorKeybindingStore((state) => state.editorKeybingMap)
   const editorKeybindingsLoaded = useEditorKeybindingStore((state) => state.editorKeybindingsLoaded)
+  const remoteImages = useRemoteImageResources(id)
+  const delegateOptions = useMemo(
+    () => createWysiwygDelegateOptions(id, remoteImages),
+    // The factory reads stores directly; subscriptions invalidate its settings.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      id, remoteImages, editorPlaceholder, editorTypewriterScroll,
+      livePreviewBlockBehavior, editorKeybingMap,
+    ],
+  )
   const externalChangeState = useExternalFileChangeStore((state) => {
     const notice = state.notices[id]
     if (notice?.kind !== 'conflict') return 'none'
@@ -1357,7 +1356,6 @@ function TextEditor(props: TextEditorProps) {
                 useEditorStateStore.getState().delIdStateMap(id)
                 useEditorStore.getState().clearEditorResources(id)
                 setSourceCodeEditor(id, undefined)
-                delegateOptionsCache.delete(id)
                 releaseExternalFileChange(id)
               },
             )
@@ -2049,10 +2047,6 @@ function TextEditor(props: TextEditorProps) {
   }, [delegate, id, livePreviewBlockBehavior])
 
   useEffect(() => {
-    delegateOptionsCache.clear()
-  }, [editorPlaceholder, editorTypewriterScroll, livePreviewBlockBehavior, editorKeybingMap])
-
-  useEffect(() => {
     if (!editorKeybindingsLoaded) return
     const context = editorContextRegistry.get(id, instanceIdRef.current!)
     if (context) updateRmeKeybindings(context, editorKeybingMap)
@@ -2212,6 +2206,7 @@ function TextEditor(props: TextEditorProps) {
       const file = getFileObject(id)
       if (!file) return
 
+      const releaseImages = remoteImages.retain()
       try {
         const markdown = useEditorStore.getState().getEditorContent(id)
         const capricornEditor = isCapricornView(currentViewType) ? capricornEditorRef.current : null
@@ -2269,6 +2264,8 @@ function TextEditor(props: TextEditorProps) {
         }
       } catch (error) {
         toast.error(String(error))
+      } finally {
+        releaseImages()
       }
     }
 
@@ -2308,7 +2305,7 @@ function TextEditor(props: TextEditorProps) {
       bus.detach('editor_export_image', exportImageHandler)
       bus.detach('editor_set_content', setContentHandler)
     }
-  }, [active, currentViewType, id, setContentHandler, t, isCapricornView])
+  }, [active, currentViewType, id, remoteImages, setContentHandler, t, isCapricornView])
 
   useEffect(() => {
     if (active) {
@@ -2414,7 +2411,7 @@ function TextEditor(props: TextEditorProps) {
       onContextMounted: (context: EditorContext) => {
         registerEditorContextResource(id, instanceIdRef.current!, context, activeRef.current)
       },
-      delegateOptions: getOrCreateDelegateOptions(curFile.id),
+      delegateOptions,
       wysiwygToolBarOptions: {
         enable: false,
       },
@@ -2429,6 +2426,7 @@ function TextEditor(props: TextEditorProps) {
     [
       content,
       delegate,
+      delegateOptions,
       id,
       sourceCodeEditorSpellcheck,
       wysiwygEditorSpellcheck,
@@ -2703,7 +2701,7 @@ function TextEditor(props: TextEditorProps) {
   const capricornRuntimeOptions = useMemo<
     Omit<CapricornRuntimeOptions, 'autoFocus' | 'markdown' | 'onError'>
   >(() => {
-    const hostOptions = getOrCreateDelegateOptions(curFile.id)
+    const hostOptions = delegateOptions
     const generateCopilotText = hostOptions.ai?.copilot?.generateText
 
     return {
@@ -2760,6 +2758,7 @@ function TextEditor(props: TextEditorProps) {
     }
   }, [
     snippetOptions,
+    delegateOptions,
     linkEditMode,
     textDirection,
     codeBlockLineWrapping,
@@ -3095,6 +3094,7 @@ function TextEditor(props: TextEditorProps) {
         }
         let dispose: (() => void) | undefined
         let restore: (() => void) | undefined
+        const releaseImages = remoteImages.retain()
         try {
           let element: HTMLElement | null
           if (capricorn) {
@@ -3117,7 +3117,11 @@ function TextEditor(props: TextEditorProps) {
           try {
             restore?.()
           } finally {
-            dispose?.()
+            try {
+              dispose?.()
+            } finally {
+              releaseImages()
+            }
           }
         }
       },

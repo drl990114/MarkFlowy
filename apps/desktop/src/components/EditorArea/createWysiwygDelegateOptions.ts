@@ -17,6 +17,7 @@ import { getFileObject } from '@/helper/files'
 import { getFolderPathFromPath } from '@/helper/filesys'
 import { getImageUrlInTauri } from '@/helper/image'
 import { logger } from '@/helper/logger'
+import type { RemoteImageResources } from '@/helper/remoteImageResources'
 import { useEditorKeybindingStore } from '@/hooks/useKeyboard'
 import { locales } from '@/i18n'
 import useAppSettingStore from '@/stores/useAppSettingStore'
@@ -45,7 +46,10 @@ export const getCurrentEditorInsertDateFormat = () => {
   return useAppSettingStore.getState().settingData.editor_insert_date_format as string | undefined
 }
 
-export const createWysiwygDelegateOptions = (fileId?: string): WysiwygDelegateOptions => {
+export const createWysiwygDelegateOptions = (
+  fileId?: string,
+  remoteImages?: RemoteImageResources,
+): WysiwygDelegateOptions => {
   const settingData = useAppSettingStore.getState().settingData
   const supportProviderInfosMap: AIOptions['supportProviderInfosMap'] = {}
 
@@ -95,7 +99,7 @@ export const createWysiwygDelegateOptions = (fileId?: string): WysiwygDelegateOp
         const file = fileId ? getFileObject(fileId) : null
         const fileFolderPath = getFolderPathFromPath(file?.path)
 
-        const src = await getImageUrlInTauri(url, fileFolderPath)
+        const src = await getImageUrlInTauri(url, fileFolderPath, remoteImages)
         return src
       } catch (error) {
         logger.error('Failed to get image URL:', error)

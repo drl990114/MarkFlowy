@@ -32,6 +32,31 @@ const compiledRenderer = ts.transpileModule(`(${renderer.getText(source)})`, {
 }).outputText
 
 describe('TextEditor image export ownership', () => {
+  it.each(['cancel', 'failure'])(
+    'releases image ownership when the save dialog ends with %s',
+    async (outcome) => {
+      const releaseImages = vi.fn()
+      const exportImage = runInNewContext(compiled, {
+        active: true,
+        id: 'file',
+        currentViewType: 'preview',
+        isCapricornView,
+        getFileObject: () => ({ name: 'note.md' }),
+        remoteImages: { retain: () => releaseImages },
+        useEditorStore: { getState: () => ({ getEditorContent: () => 'snapshot' }) },
+        capricornEditorRef: { current: null },
+        save: async () => {
+          if (outcome === 'failure') throw new Error('Dialog failed')
+          return null
+        },
+        t: (key: string) => key,
+        toast: { error: vi.fn() },
+      }) as () => Promise<void>
+      await exportImage()
+      expect(releaseImages).toHaveBeenCalledOnce()
+    },
+  )
+
   it.each([false, true])(
     'normalizes clone colors on the main render and security retry (retry=%s)',
     async (retry) => {
@@ -78,6 +103,8 @@ describe('TextEditor image export ownership', () => {
       const createExportSurface = vi.fn(async () => ({ element, dispose }))
       let markdown = 'Snapshot before dialog'
       const toast = { loading: vi.fn(), dismiss: vi.fn(), success: vi.fn(), error: vi.fn() }
+      const releaseImages = vi.fn()
+      const remoteImages = { retain: vi.fn(() => releaseImages) }
       const renderImage = vi.fn(async (target) => {
         expect(target).toBe(element)
         if (outcome === 'render') throw new Error('Render failed')
@@ -85,6 +112,7 @@ describe('TextEditor image export ownership', () => {
       })
       const exportImage = runInNewContext(compiled, {
         active: true,
+        remoteImages,
         id: 'file',
         EditorViewType: { WYSIWYG: 'wysiwyg' },
         currentViewType: mode,
@@ -115,6 +143,8 @@ describe('TextEditor image export ownership', () => {
       expect(restore).toHaveBeenCalledTimes(outcome === 'resources' ? 0 : 1)
       expect(toast.error).toHaveBeenCalledTimes(outcome === 'success' ? 0 : 1)
       expect(toast.dismiss).toHaveBeenCalledOnce()
+      expect(remoteImages.retain).toHaveBeenCalledOnce()
+      expect(releaseImages).toHaveBeenCalledOnce()
     },
   )
 })
