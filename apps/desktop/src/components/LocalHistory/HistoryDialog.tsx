@@ -155,6 +155,7 @@ export default function HistoryDialog() {
               entries.map((entry) => (
                 <Button
                   key={entry.id}
+                  data-mf-history-entry-id={entry.id}
                   variant={selected?.id === entry.id ? 'secondary' : 'ghost'}
                   aria-pressed={selected?.id === entry.id}
                   className='h-auto min-h-10 justify-start whitespace-normal rounded-sm px-2 py-1.5 text-left'

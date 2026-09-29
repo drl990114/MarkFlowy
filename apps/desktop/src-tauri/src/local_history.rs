@@ -25,6 +25,9 @@ pub fn init(app: &tauri::AppHandle) -> Result<(), String> {
     }
     // Cache only a successfully started worker so a transient disk failure can be retried.
     let sender = (|| -> Result<mpsc::SyncSender<Job>, String> {
+        #[cfg(feature = "e2e")]
+        let root = crate::e2e::root().join("local-history");
+        #[cfg(not(feature = "e2e"))]
         let root = app
             .path()
             .app_local_data_dir()

@@ -117,6 +117,15 @@ pub(crate) fn build_main_window(
         .inner_size(1200.0, 800.0)
         .min_inner_size(400.0, 400.0);
 
+    #[cfg(feature = "e2e")]
+    {
+        window_builder = window_builder.initialization_script(crate::e2e::INITIALIZATION_SCRIPT);
+    }
+    #[cfg(all(feature = "e2e", target_os = "macos"))]
+    {
+        window_builder = window_builder.data_store_identifier(crate::e2e::data_store_identifier());
+    }
+
     #[cfg(target_os = "macos")]
     {
         window_builder = window_builder

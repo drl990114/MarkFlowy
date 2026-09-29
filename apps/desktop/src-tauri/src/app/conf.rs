@@ -535,6 +535,16 @@ fn startup_appearance_changed(
 }
 
 pub fn app_root() -> PathBuf {
+    #[cfg(feature = "e2e")]
+    {
+        return crate::e2e::root().join("config");
+    }
+    #[cfg(not(feature = "e2e"))]
+    app_root_default()
+}
+
+#[cfg(not(feature = "e2e"))]
+fn app_root_default() -> PathBuf {
     let app_dir = APP_DIR.lock().unwrap();
     let base_dir = app_dir.get(&0).unwrap().clone();
 
@@ -633,7 +643,9 @@ impl AppConf {
     pub fn new() -> Self {
         Self {
             theme: Some("light".to_string()),
-            theme_mode: Some("system".to_string()),
+            theme_mode: Some(
+                if cfg!(feature = "e2e") { "light" } else { "system" }.to_string(),
+            ),
             theme_accent_color: Some("system".to_string()),
             theme_use_personal_typography: Some(true),
             light_theme: Some("MarkFlowy Light".to_string()),

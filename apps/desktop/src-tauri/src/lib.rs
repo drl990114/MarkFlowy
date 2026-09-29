@@ -4,6 +4,8 @@
 )]
 
 mod app;
+#[cfg(feature = "e2e")]
+mod e2e;
 mod fc;
 mod document_preview;
 mod file_copy;
@@ -395,7 +397,11 @@ fn absolute_path_string(path: &str, cwd: Option<&str>) -> String {
 }
 
 fn runtime_dir() -> Option<PathBuf> {
-    #[cfg(windows)]
+    #[cfg(feature = "e2e")]
+    {
+        Some(e2e::root().join("runtime"))
+    }
+    #[cfg(all(windows, not(feature = "e2e")))]
     {
         env::var_os("LOCALAPPDATA")
             .map(PathBuf::from)
@@ -406,7 +412,7 @@ fn runtime_dir() -> Option<PathBuf> {
             .map(|dir| dir.join("MarkFlowy"))
     }
 
-    #[cfg(not(windows))]
+    #[cfg(all(not(windows), not(feature = "e2e")))]
     {
         env::var_os("HOME")
             .map(PathBuf::from)
@@ -1434,7 +1440,7 @@ fn ensure_user_path_contains_dir(_dir: &std::path::Path) -> Result<(), Box<dyn s
 }
 
 fn install_cli_in_background(app: &tauri::App) {
-    if cfg!(debug_assertions) || tauri::is_dev() {
+    if cfg!(feature = "e2e") || cfg!(debug_assertions) || tauri::is_dev() {
         return;
     }
 
@@ -1558,14 +1564,26 @@ pub fn run() {
 
     tracing_subscriber::fmt::init();
     dotenv::dotenv().ok();
+    #[cfg(feature = "e2e")]
+    e2e::initialize();
     attach_parent_console();
     reliable_cli::run_client_if_requested();
     handle_read_only_cli_command();
 
     let context = tauri::generate_context!();
+    #[cfg(feature = "e2e")]
+    let context = {
+        let mut context = context;
+        context.config_mut().identifier = e2e::identifier();
+        context
+    };
     app::startup_timing::record_stage("context-ready", None);
 
-    let app = tauri::Builder::default()
+    let builder = tauri::Builder::default();
+    #[cfg(feature = "e2e")]
+    let builder = builder.plugin(tauri_plugin_wdio_webdriver::init());
+
+    let app = builder
         .manage(OpenedUrls(Default::default()))
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
@@ -1822,6 +1840,8 @@ pub fn run() {
                 APP_DIR.lock().unwrap().insert(0, home_dir_path);
             }
 
+            #[cfg(feature = "e2e")]
+            e2e::record_profile(app.handle())?;
             local_history::configure(app.handle());
             app::startup_timing::record_stage("configuration-ready", None);
             let opened_urls: State<OpenedUrls> = app.state();

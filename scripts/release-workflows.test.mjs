@@ -36,6 +36,10 @@ test('the shared gate requires real runtime, type, Rust and content validation',
   for (const command of [
     'yarn install:capricorn-runtime',
     'yarn workspace @markflowy/desktop build:types',
+    'yarn workspace @markflowy/desktop test:e2e:types',
+    'yarn workspace @markflowy/desktop test:e2e:runner',
+    'yarn workspace @markflowy/desktop tauri:build:e2e',
+    'yarn workspace @markflowy/desktop test:e2e',
     'yarn workspace @markflowy/web build:types',
     'yarn test',
     'yarn workspace @markflowy/desktop test:capricorn-published',
@@ -54,4 +58,23 @@ test('the shared gate requires real runtime, type, Rust and content validation',
     (step) => step.run === 'yarn workspace @markflowy/web test:content',
   )
   assert.ok(generation >= 0 && verification > generation)
+})
+
+test('native E2E is a required macOS gate and always retains diagnostics', () => {
+  assert.equal(quality.jobs.test['runs-on'], 'macos-latest')
+  const steps = quality.jobs.test.steps
+  const frontend = steps.findIndex((step) => step.run === 'yarn build')
+  const native = steps.findIndex((step) => step.run === 'yarn workspace @markflowy/desktop tauri:build:e2e')
+  const execution = steps.findIndex((step) => step.run === 'yarn workspace @markflowy/desktop test:e2e')
+  assert.ok(frontend >= 0 && native > frontend && execution > native)
+  for (const step of [steps[native], steps[execution]]) {
+    assert.equal(step.if, undefined, 'Native E2E must not be optional on a passing CI run')
+    assert.equal(step['continue-on-error'], undefined)
+  }
+  assert.equal(steps[execution]['timeout-minutes'], 20)
+  const artifact = steps.find((step) => step.uses === 'actions/upload-artifact@v4')
+  assert.equal(artifact.if, 'always()')
+  assert.equal(artifact.with.path, 'apps/desktop/e2e/reports/')
+  assert.equal(artifact.with['retention-days'], 7)
+  assert.ok(steps.indexOf(artifact) > execution)
 })

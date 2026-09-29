@@ -450,7 +450,7 @@ const startDeferredAppSetup = () => {
     const { settingData } = useAppSettingStore.getState()
     deferredAppSetupPromise = Promise.all([
       useThemeStore.getState().syncSystemTheme(),
-      checkUpdate({ install: settingData.auto_update }),
+      window.__MARKFLOWY_E2E__ ? undefined : checkUpdate({ install: settingData.auto_update }),
     ]).then(() => undefined)
   }
 

@@ -35,3 +35,6 @@ html
 .private-runtime/
 
 .product-loop
+
+# Native E2E diagnostics (may include document contents).
+apps/desktop/e2e/reports/
