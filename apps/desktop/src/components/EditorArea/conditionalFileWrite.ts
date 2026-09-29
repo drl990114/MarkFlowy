@@ -27,6 +27,7 @@ export async function conditionalWriteExpected(
   invokeCommand: InvokeCommand = invoke,
   historyKind?: 'autosave' | 'save' | 'overwrite',
   textOptions?: TextWriteOptions,
+  historyWorkspace?: string,
 ): Promise<ConditionalWriteResult> {
   assertValidUnicode(content)
   return invokeCommand<ConditionalWriteResult>('conditional_write_file', {
@@ -35,6 +36,7 @@ export async function conditionalWriteExpected(
     filePath,
     ...(historyKind ? { historyKind } : {}),
     ...(textOptions ? { textOptions } : {}),
+    ...(historyWorkspace !== undefined ? { historyWorkspace } : {}),
   })
 }
 
@@ -46,6 +48,7 @@ export async function conditionalWriteExpectedIfAllowed(
   invokeCommand: InvokeCommand = invoke,
   historyKind?: 'autosave' | 'save' | 'overwrite',
   textOptions?: TextWriteOptions,
+  historyWorkspace?: string,
 ): Promise<GuardedConditionalWriteResult> {
   if (!canWrite()) return { status: 'blocked' }
   return conditionalWriteExpected(
@@ -55,6 +58,7 @@ export async function conditionalWriteExpectedIfAllowed(
     invokeCommand,
     historyKind,
     textOptions,
+    historyWorkspace,
   )
 }
 

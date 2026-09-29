@@ -663,8 +663,9 @@ pub fn is_text_file(path: &str) -> bool {
 // the same encoding preflight, revision check and history protection as editor saves.
 pub fn write_file(path: &str, content: &str) -> FileResult {
     let path = Path::new(path);
-    let result = get_file_write_revision(path)
-        .and_then(|revision| conditional_write_text_file(path, content, &revision, "save", None));
+    let result = get_file_write_revision(path).and_then(|revision| {
+        conditional_write_text_file(path, content, &revision, "save", None, None)
+    });
     match result {
         Ok(result) if result.status == ConditionalWriteStatus::Success => FileResult {
             code: FileResultCode::Success,
@@ -850,6 +851,10 @@ fn read_file_sample_once(path: &Path) -> std::io::Result<Option<FileSample>> {
     let _guard = FILE_WRITE_MUTEX
         .lock()
         .map_err(|_| std::io::Error::other("File write lock is unavailable"))?;
+    read_file_sample_unlocked(path)
+}
+
+fn read_file_sample_unlocked(path: &Path) -> std::io::Result<Option<FileSample>> {
     let mut identity = same_file::Handle::from_file(fs::File::open(path)?)?;
     let before = identity.as_file().metadata()?;
     let mut bytes = Vec::new();
@@ -885,12 +890,19 @@ fn read_file_sample_once(path: &Path) -> std::io::Result<Option<FileSample>> {
 }
 
 fn read_file_sample(path: &Path) -> Result<Option<FileSample>, FileResult> {
-    match read_file_sample_once(path) {
+    read_file_sample_with_retry(path, read_file_sample_once)
+}
+
+fn read_file_sample_with_retry(
+    path: &Path,
+    reader: impl Fn(&Path) -> std::io::Result<Option<FileSample>>,
+) -> Result<Option<FileSample>, FileResult> {
+    match reader(path) {
         Err(error) if error.kind() == std::io::ErrorKind::PermissionDenied => {
             acquire_security_scope(path);
             // Preserve the existing read command's one retry and original
             // permission error if restoring access does not fix the read.
-            read_file_sample_once(path).map_err(|_| file_read_error(error))
+            reader(path).map_err(|_| file_read_error(error))
         }
         result => result.map_err(file_read_error),
     }
@@ -951,6 +963,18 @@ where
 pub fn read_file_snapshot(path: &Path) -> FileSnapshotResult {
     ensure_workspace_scope_active(path);
     read_file_snapshot_with_reader(path, read_file_sample)
+}
+
+/// The caller must hold FILE_WRITE_MUTEX until this read and its history job finish.
+/// The history worker must never wait for a lock held by a caller awaiting that worker.
+pub(crate) fn read_file_snapshot_while_write_locked(
+    path: &Path,
+    encoding: Option<TextEncoding>,
+) -> FileSnapshotResult {
+    ensure_workspace_scope_active(path);
+    read_file_snapshot_with_encoding_and_reader(path, encoding, |path| {
+        read_file_sample_with_retry(path, read_file_sample_unlocked)
+    })
 }
 
 fn bump_file_write_generation(path: &Path) -> AnyResult<()> {
@@ -1021,7 +1045,7 @@ pub fn conditional_write_file_with_kind(
     expected_revision: &str,
     kind: &str,
 ) -> AnyResult<ConditionalWriteResult> {
-    conditional_write_file_inner(path, content, expected_revision, kind, None)
+    conditional_write_file_inner(path, content, expected_revision, kind, None, None)
 }
 
 pub fn conditional_write_text_file(
@@ -1030,6 +1054,7 @@ pub fn conditional_write_text_file(
     expected_revision: &str,
     kind: &str,
     options: Option<&TextWriteOptions>,
+    history_workspace: Option<&str>,
 ) -> AnyResult<ConditionalWriteResult> {
     conditional_write_file_inner(
         path,
@@ -1037,6 +1062,7 @@ pub fn conditional_write_text_file(
         expected_revision,
         kind,
         Some(options),
+        history_workspace,
     )
 }
 
@@ -1046,6 +1072,7 @@ fn conditional_write_file_inner(
     expected_revision: &str,
     kind: &str,
     text_options: Option<Option<&TextWriteOptions>>,
+    history_workspace: Option<&str>,
 ) -> AnyResult<ConditionalWriteResult> {
     let _guard = FILE_WRITE_MUTEX
         .lock()
@@ -1099,8 +1126,9 @@ fn conditional_write_file_inner(
     } else {
         content
     };
-    let history_write = crate::local_history::prepare_write_with_formats(path, content, formats)
-        .map_err(anyhow::Error::msg)?;
+    let history_write =
+        crate::local_history::prepare_write_with_formats(path, content, formats, history_workspace)
+            .map_err(anyhow::Error::msg)?;
     // A backup commit can take time. External writers do not share our mutex.
     let checked_revision = file_write_revision_unlocked(path)?;
     if checked_revision != expected_revision {
@@ -1662,6 +1690,7 @@ pub mod cmd {
         expected_revision: String,
         history_kind: Option<String>,
         text_options: Option<mf_text_encoding::TextWriteOptions>,
+        history_workspace: Option<String>,
     ) -> Result<ConditionalWriteResult, String> {
         tokio::task::spawn_blocking(move || {
             fc::conditional_write_text_file(
@@ -1674,6 +1703,7 @@ pub mod cmd {
                     _ => "save",
                 },
                 text_options.as_ref(),
+                history_workspace.as_deref(),
             )
         })
         .await

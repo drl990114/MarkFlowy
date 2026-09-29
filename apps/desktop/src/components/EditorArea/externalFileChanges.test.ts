@@ -35,6 +35,31 @@ vi.mock('zens', () => ({
 
 const fileId = 'file'
 const filePath = '/workspace/note.md'
+const gbkMetadata = {
+  ...DEFAULT_TEXT_METADATA,
+  format: { encoding: 'gbk', bom: 'none' } as const,
+  decoding: { source: 'user', needsConfirmation: false, byteRoundTrip: true } as const,
+}
+
+function loadSelectedGbk() {
+  setFileObject(fileId, createFile('漏'))
+  fileSaveCoordinator.loadSnapshot(fileId, {
+    content: '漏', revision: 'disk:old', status: 'success', text: gbkMetadata,
+  })
+}
+
+function mockAmbiguousBytes() {
+  invoke.mockImplementation(async (command: string, args: { encoding?: string }) => {
+    if (command !== 'get_file_snapshot') throw new Error(command)
+    const encoding = args.encoding ?? 'utf-8'
+    return {
+      content: new TextDecoder(encoding).decode(new Uint8Array([0xc2, 0xa9, 0x21])),
+      revision: 'disk:new',
+      status: 'success',
+      text: encoding === 'gbk' ? gbkMetadata : DEFAULT_TEXT_METADATA,
+    }
+  })
+}
 
 const createFile = (content: string): IFile => ({
   content,
@@ -179,6 +204,72 @@ describe('external file changes', () => {
     await Promise.all([first, ...pending])
     expect(reads).toBe(2)
     expect(getFileObject(fileId).content).toBe('final')
+  })
+
+  it.each(['watch', 'reload'] as const)('preserves explicitly selected GBK during %s', async (action) => {
+    loadSelectedGbk()
+    mockAmbiguousBytes()
+    if (action === 'reload') {
+      markExternalFileConflict(fileId, 'disk:new')
+      await resolveExternalFileChange(fileId, 'reload')
+    } else await emitChange()
+    expect(invoke).toHaveBeenCalledWith('get_file_snapshot', { filePath, encoding: 'gbk' })
+    expect(getFileObject(fileId).content).toBe('漏!')
+    expect(fileSaveCoordinator.getTextMetadata(fileId).format.encoding).toBe('gbk')
+  })
+
+  it('reads the saved encoding while an unsaved conversion is pending', async () => {
+    loadSelectedGbk()
+    fileSaveCoordinator.recordFormat(fileId, { encoding: 'utf-16le', bom: 'utf16le' })
+    useEditorStateStore.getState().setIdStateMap(fileId, { hasUnsavedChanges: true })
+    mockAmbiguousBytes()
+    await emitChange()
+    expect(invoke).toHaveBeenCalledWith('get_file_snapshot', { filePath, encoding: 'gbk' })
+    expect(getFileObject(fileId).content).toBe('漏')
+    expect(fileSaveCoordinator.getTextMetadata(fileId).format.encoding).toBe('utf-16le')
+    expect(isExternalFileSaveBlocked(fileId)).toBe(true)
+    await resolveExternalFileChange(fileId, 'reload')
+    expect(getFileObject(fileId).content).toBe('漏!')
+    expect(fileSaveCoordinator.getTextMetadata(fileId).format.encoding).toBe('gbk')
+  })
+
+  it('keeps separate decoding choices for aliases of the same path', async () => {
+    loadSelectedGbk()
+    const alias = 'utf8-alias'
+    setFileObject(alias, { ...createFile('©'), id: alias })
+    fileSaveCoordinator.loadSnapshot(alias, {
+      content: '©', revision: 'disk:old', status: 'success', text: DEFAULT_TEXT_METADATA,
+    })
+    useEditorStore.setState({ opened: [fileId, alias] })
+    mockAmbiguousBytes()
+    try {
+      await emitChange()
+      expect(invoke).toHaveBeenCalledTimes(2)
+      expect(getFileObject(fileId).content).toBe('漏!')
+      expect(getFileObject(alias).content).toBe('©!')
+    } finally {
+      deleteFileObject(alias)
+      useEditorStateStore.getState().delIdStateMap(alias)
+      await fileSaveCoordinator.releaseWhenIdle(alias, () => true, () => undefined)
+    }
+  })
+
+  it('retries when the selected decoder changes during a pending read', async () => {
+    loadSelectedGbk()
+    let finishRead!: (value: unknown) => void
+    mockAmbiguousBytes()
+    invoke.mockImplementationOnce(() => new Promise((resolve) => { finishRead = resolve }))
+    const inspection = emitChange()
+    await vi.advanceTimersByTimeAsync(0)
+    fileSaveCoordinator.loadSnapshot(fileId, {
+      content: '©', revision: 'disk:old', status: 'success', text: DEFAULT_TEXT_METADATA,
+    })
+    finishRead({ content: '漏!', revision: 'disk:new', status: 'success', text: gbkMetadata })
+    await vi.advanceTimersByTimeAsync(1000)
+    await inspection
+    expect(invoke).toHaveBeenCalledTimes(2)
+    expect(getFileObject(fileId).content).toBe('©!')
+    expect(fileSaveCoordinator.getReadEncoding(fileId)).toBeUndefined()
   })
 
   it('auto-loads a stable external update for a clean editor and clears its notice after 3s', async () => {

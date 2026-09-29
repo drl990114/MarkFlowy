@@ -11,6 +11,7 @@ import {
   endHistoryBatch,
   protectLocalEdit,
   historyFileSaved,
+  historyWorkspaceForPath,
   isHistoryAutosavePaused,
   releaseClosedFileContent,
 } from '@/services/local-history'
@@ -1844,6 +1845,7 @@ function TextEditor(props: TextEditorProps) {
                     undefined,
                     params.autosave ? 'autosave' : 'save',
                     { ...textOptions, originalFormat: undefined },
+                    historyWorkspaceForPath(targetPath),
                   )
                   if (writeResult.status === 'blocked') return false
                   if (writeResult.status === 'conflict') {

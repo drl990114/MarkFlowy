@@ -3,6 +3,7 @@ import {
   DEFAULT_TEXT_METADATA,
   sameTextFormat,
   textLineEndings,
+  type TextEncoding,
   type TextFileFormat,
   type TextFileMetadata,
   type TextWriteOptions,
@@ -23,6 +24,7 @@ interface FileSaveState {
   text: TextFileMetadata
   savedContent?: string
   savedFormat?: TextFileFormat
+  readEncoding?: TextEncoding
 }
 
 type SaveAttempt = (snapshot: FileSaveSnapshot) => Promise<boolean>
@@ -54,6 +56,11 @@ export class FileSaveCoordinator {
     return this.states.get(fileId)?.text ?? DEFAULT_TEXT_METADATA
   }
 
+  /** The decoder for the saved bytes, independent of an unsaved format conversion. */
+  getReadEncoding(fileId: string): TextEncoding | undefined {
+    return this.states.get(fileId)?.readEncoding
+  }
+
   recordSaveError(fileId: string, message: string): boolean {
     const state = this.getOrCreateState(fileId)
     if (state.text.saveError === message) return false
@@ -80,6 +87,8 @@ export class FileSaveCoordinator {
     const state = this.getOrCreateState(fileId)
     state.savedContent = snapshot.content
     state.savedFormat = snapshot.text?.format ?? DEFAULT_TEXT_METADATA.format
+    state.readEncoding =
+      snapshot.text?.decoding.source === 'user' ? state.savedFormat.encoding : undefined
   }
 
   loadSnapshot(fileId: string, snapshot: StableFileSnapshot): void {
@@ -89,12 +98,17 @@ export class FileSaveCoordinator {
     state.text = snapshot.text ?? DEFAULT_TEXT_METADATA
     state.savedContent = snapshot.content
     state.savedFormat = state.text.format
+    state.readEncoding =
+      state.text.decoding.source === 'user' ? state.savedFormat.encoding : undefined
     state.revision += 1
     this.notify()
   }
 
   recordFormat(fileId: string, format: TextFileFormat, confirmed = true): void {
     const state = this.getOrCreateState(fileId)
+    if (confirmed && format.encoding === state.savedFormat?.encoding) {
+      state.readEncoding = format.encoding
+    }
     if (
       sameTextFormat(state.text.format, format) &&
       state.text.decoding.needsConfirmation === !confirmed
@@ -137,6 +151,7 @@ export class FileSaveCoordinator {
     state.diskRevision = diskRevision
     state.savedContent = snapshot.content
     state.savedFormat = snapshot.textOptions.format
+    if (converted) state.readEncoding = snapshot.textOptions.format.encoding
     state.text = {
       ...state.text,
       saveError: undefined,

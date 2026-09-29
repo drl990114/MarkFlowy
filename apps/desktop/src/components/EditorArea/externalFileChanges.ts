@@ -18,7 +18,7 @@ import {
   readStableFileSnapshot,
   type StableFileSnapshot,
 } from './fileSnapshot'
-import { sameTextFormat } from './textFileFormat'
+import { sameTextFormat, type TextEncoding } from './textFileFormat'
 import { historyFileSaved, protectExternalContent } from '@/services/local-history'
 
 export const EXTERNAL_FILE_CONTENT_SYNC_EVENT = 'external_file_content_sync'
@@ -204,6 +204,7 @@ async function inspectExternalPath(
   if (
     !isCurrentExternalTarget(fileId, generation, observedPath) ||
     useEditorStateStore.getState().idStateMap.get(fileId)?.hasUnsavedChanges ||
+    fileSaveCoordinator.getRevision(fileId) !== localRevision ||
     useEditorStore.getState().getEditorContent(fileId) !== localContent
   ) {
     markExternalFileConflict(fileId, snapshot.revision)
@@ -229,11 +230,26 @@ function enqueueExternalInspection(fileId: string, filePath: string, generation:
         state.pending = false
         await Promise.all([...state.fileIds].map((id) => fileSaveCoordinator.waitForIdle(id)))
         if (generation !== workspaceGeneration) return
-        const snapshot = await readStableFileSnapshot(filePath)
-        if (snapshot.status !== 'success') {
-          state.pending ||= retries++ < 2
-        } else {
-          for (const id of state.fileIds) {
+        const groups = new Map<TextEncoding | undefined, string[]>()
+        for (const id of state.fileIds) {
+          if (!isCurrentExternalTarget(id, generation, filePath)) continue
+          const encoding = fileSaveCoordinator.getReadEncoding(id)
+          const ids = groups.get(encoding) ?? []
+          ids.push(id)
+          groups.set(encoding, ids)
+        }
+        for (const [encoding, ids] of groups) {
+          const snapshot = await readStableFileSnapshot(filePath, { encoding })
+          if (snapshot.status !== 'success') {
+            state.pending ||= retries++ < 2
+            continue
+          }
+          for (const id of ids) {
+            // An encoding preview may have been applied while the read was pending.
+            if (fileSaveCoordinator.getReadEncoding(id) !== encoding) {
+              state.pending = true
+              continue
+            }
             try {
               await inspectExternalPath(id, generation, snapshot, filePath)
             } catch (error) {
@@ -296,8 +312,12 @@ export async function resolveExternalFileChange(
 
   try {
     await fileSaveCoordinator.waitForIdle(fileId)
-    const diskSnapshot = await readStableFileSnapshot(file.path)
-    if (diskSnapshot.status !== 'success') {
+    const encoding = fileSaveCoordinator.getReadEncoding(fileId)
+    const diskSnapshot = await readStableFileSnapshot(file.path, { encoding })
+    if (
+      diskSnapshot.status !== 'success' ||
+      fileSaveCoordinator.getReadEncoding(fileId) !== encoding
+    ) {
       markResolutionFailed(fileId, notice.diskRevision)
       toast.error(t('external_file_change.read_failed'))
       return

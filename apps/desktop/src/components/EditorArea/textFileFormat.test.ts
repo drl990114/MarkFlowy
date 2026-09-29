@@ -11,6 +11,24 @@ const gbk: TextFileFormat = { encoding: 'gbk', bom: 'none' }
 const utf16: TextFileFormat = { encoding: 'utf-16le', bom: 'utf16le' }
 
 describe('file content and format snapshots', () => {
+  it('changes the disk decoder only after a conversion is saved', async () => {
+    const coordinator = new FileSaveCoordinator()
+    coordinator.loadSnapshot('f', {
+      content: '漏', revision: 'disk:0', status: 'success',
+      text: { ...DEFAULT_TEXT_METADATA, format: gbk,
+        decoding: { source: 'user', needsConfirmation: false, byteRoundTrip: true } },
+    })
+    coordinator.recordFormat('f', utf16)
+    expect(coordinator.getReadEncoding('f')).toBe('gbk')
+    expect(await coordinator.saveLatest('f', async () => false)).toBe(false)
+    expect(coordinator.getReadEncoding('f')).toBe('gbk')
+    await coordinator.saveLatest('f', async (snapshot) => {
+      coordinator.acknowledgeSaved('f', snapshot, 'disk:1')
+      return true
+    })
+    expect(coordinator.getReadEncoding('f')).toBe('utf-16le')
+  })
+
   it('captures format with content and retries a format change during an in-flight write', async () => {
     const coordinator = new FileSaveCoordinator()
     coordinator.loadSnapshot('f', {
@@ -72,9 +90,11 @@ describe('file content and format snapshots', () => {
     })
     expect(coordinator.getWriteOptions('f').encodingConfirmed).toBe(false)
     expect(coordinator.getPersistedFormat('f')).toBeUndefined()
+    expect(coordinator.getReadEncoding('f')).toBeUndefined()
     coordinator.recordFormat('f', gbk)
     expect(coordinator.getPersistedFormat('f')).toEqual(gbk)
     expect(coordinator.getWriteOptions('f').encodingConfirmed).toBe(true)
+    expect(coordinator.getReadEncoding('f')).toBe('gbk')
   })
 
   it('rejects isolated surrogates before IPC and counts CRLF only once', () => {

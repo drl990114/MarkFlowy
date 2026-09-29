@@ -668,6 +668,7 @@ mod snapshot_tests {
                 &revision,
                 "save",
                 Some(&options),
+                None,
             )
             .unwrap();
             assert_eq!(noop.revision, revision);
@@ -678,6 +679,7 @@ mod snapshot_tests {
                 &revision,
                 "save",
                 Some(&options),
+                None,
             )
             .unwrap();
             assert_eq!(saved.status, ConditionalWriteStatus::Success);
@@ -685,9 +687,15 @@ mod snapshot_tests {
                 fs::read(&path).unwrap(),
                 encode("改文\r\n中\n尾\r", format).unwrap()
             );
-            let stale =
-                conditional_write_text_file(&path, "旧内容", &revision, "save", Some(&options))
-                    .unwrap();
+            let stale = conditional_write_text_file(
+                &path,
+                "旧内容",
+                &revision,
+                "save",
+                Some(&options),
+                None,
+            )
+            .unwrap();
             assert_eq!(stale.status, ConditionalWriteStatus::Conflict);
             if format.encoding == TextEncoding::Gbk {
                 let before = fs::read(&path).unwrap();
@@ -696,7 +704,8 @@ mod snapshot_tests {
                     "😀",
                     &saved.revision,
                     "save",
-                    Some(&options)
+                    Some(&options),
+                    None
                 )
                 .unwrap_err()
                 .to_string()

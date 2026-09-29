@@ -129,6 +129,27 @@ fn document(value: &Value) -> anyhow::Result<Document> {
     Ok(serde_json::from_value(value["document"].clone())?)
 }
 
+fn with_operation_file_lock<T>(
+    operation: &str,
+    run: impl FnOnce() -> Result<T, String>,
+) -> Result<T, String> {
+    // Always acquire the filesystem lock before entering the history queue.
+    // These jobs read disk through the unlocked snapshot reader while this guard is held.
+    let _guard = if matches!(
+        operation,
+        "clear" | "enabled" | "external" | "begin" | "commit"
+    ) {
+        Some(
+            crate::fc::FILE_WRITE_MUTEX
+                .lock()
+                .map_err(|_| "File write lock unavailable")?,
+        )
+    } else {
+        None
+    };
+    run()
+}
+
 #[tauri::command]
 pub async fn local_history(
     app: tauri::AppHandle,
@@ -143,29 +164,21 @@ pub async fn local_history(
     );
     let result = tauri::async_runtime::spawn_blocking(move || {
         init(&handle)?;
-        // Same lock order as writes: filesystem mutation, then history worker.
-        let _guard = if matches!(operation.as_str(), "clear" | "enabled") {
-            Some(
-                crate::fc::FILE_WRITE_MUTEX
-                    .lock()
-                    .map_err(|_| "File write lock unavailable")?,
-            )
-        } else {
-            None
-        };
-        run(move |store| {
-            if matches!(
-                operation.as_str(),
-                "recoveryDraftIndex" | "claimRecoveryDraft" | "recoveryDrafts"
-            ) {
-                let owners = handle
-                    .webview_windows()
-                    .keys()
-                    .map(|label| format!("{label}:"))
-                    .collect::<Vec<_>>();
-                store.retain_window_presence(&owners)?;
-            }
-            dispatch(store, &operation, payload)
+        with_operation_file_lock(&operation.clone(), || {
+            run(move |store| {
+                if matches!(
+                    operation.as_str(),
+                    "recoveryDraftIndex" | "claimRecoveryDraft" | "recoveryDrafts"
+                ) {
+                    let owners = handle
+                        .webview_windows()
+                        .keys()
+                        .map(|label| format!("{label}:"))
+                        .collect::<Vec<_>>();
+                    store.retain_window_presence(&owners)?;
+                }
+                dispatch(store, &operation, payload)
+            })
         })
     })
     .await
@@ -249,8 +262,14 @@ fn dispatch(store: &mut Store, operation: &str, p: Value) -> anyhow::Result<Valu
         }
         "external" => {
             let doc = document(&p)?;
+            let after_format: Option<mf_text_encoding::TextFileFormat> =
+                serde_json::from_value(p["afterFormat"].clone())?;
             if let Some(path) = &doc.path {
-                verify_current_text(path, string(&p, "after")?)?;
+                verify_current_text(
+                    path,
+                    string(&p, "after")?,
+                    after_format.map(|format| format.encoding),
+                )?;
             }
             json!({"versionId":store.external_with_formats(&doc,string(&p,"before")?,string(&p,"after")?,serde_json::from_value(p["beforeFormat"].clone())?,serde_json::from_value(p["afterFormat"].clone())?)?})
         }
@@ -261,7 +280,7 @@ fn dispatch(store: &mut Store, operation: &str, p: Value) -> anyhow::Result<Valu
             let doc = document(&p)?;
             if let Some(path) = &doc.path {
                 if let Some(content) = p["content"].as_str() {
-                    verify_current_text(path, content)?;
+                    verify_current_text(path, content, None)?;
                 } else {
                     match std::fs::symlink_metadata(path) {
                         Err(e) if e.kind() == std::io::ErrorKind::NotFound => {}
@@ -282,6 +301,7 @@ fn dispatch(store: &mut Store, operation: &str, p: Value) -> anyhow::Result<Valu
                         .as_deref()
                         .ok_or_else(|| anyhow::anyhow!("file_unavailable"))?,
                     string(&p, "content")?,
+                    None,
                 )?;
             }
             store.commit(
@@ -319,8 +339,12 @@ fn dispatch(store: &mut Store, operation: &str, p: Value) -> anyhow::Result<Valu
     })
 }
 
-fn verify_current_text(path: &str, content: &str) -> anyhow::Result<()> {
-    match crate::fc::read_file_snapshot(Path::new(path)) {
+fn verify_current_text(
+    path: &str,
+    content: &str,
+    encoding: Option<mf_text_encoding::TextEncoding>,
+) -> anyhow::Result<()> {
+    match crate::fc::read_file_snapshot_while_write_locked(Path::new(path), encoding) {
         crate::fc::FileSnapshotResult::Success {
             content: current, ..
         } if current == content => Ok(()),
@@ -331,7 +355,22 @@ fn verify_current_text(path: &str, content: &str) -> anyhow::Result<()> {
 
 /// Called while the filesystem mutex is held, before any truncation.
 pub fn prepare_write(path: &Path, content: &[u8]) -> Result<Option<String>, String> {
-    prepare_write_with_formats(path, content, None)
+    prepare_write_with_formats(path, content, None, None)
+}
+
+fn write_document(store: &mut Store, path: &str, workspace: &str) -> anyhow::Result<Document> {
+    if let Some(doc) = store.find_path(path)? {
+        return Ok(doc);
+    }
+    store.register(
+        path,
+        workspace,
+        Some(path),
+        Path::new(path)
+            .file_name()
+            .and_then(|s| s.to_str())
+            .unwrap_or("document"),
+    )
 }
 
 pub fn prepare_write_with_formats(
@@ -341,6 +380,7 @@ pub fn prepare_write_with_formats(
         Option<mf_text_encoding::TextFileFormat>,
         mf_text_encoding::TextFileFormat,
     )>,
+    workspace: Option<&str>,
 ) -> Result<Option<String>, String> {
     if let Some(app) = APP.get() {
         init(app)?;
@@ -354,20 +394,9 @@ pub fn prepare_write_with_formats(
         Err(e) => return Err(e.to_string()),
     };
     let content = content.to_vec();
+    let workspace = workspace.unwrap_or_default().to_owned();
     run(move |store| {
-        let doc = if let Some(doc) = store.find_path(&path)? {
-            doc
-        } else {
-            store.register(
-                &path,
-                "",
-                Some(&path),
-                Path::new(&path)
-                    .file_name()
-                    .and_then(|s| s.to_str())
-                    .unwrap_or("document"),
-            )?
-        };
+        let doc = write_document(store, &path, &workspace)?;
         Ok(Some(store.prepare_write_with_formats(
             &doc,
             before.as_deref(),
@@ -459,8 +488,9 @@ mod tests {
         let root = tempfile::tempdir().unwrap();
         let path = root.path().join("document.md");
         std::fs::write(&path, b"newest").unwrap();
-        assert!(verify_current_text(path.to_str().unwrap(), "older").is_err());
-        assert!(verify_current_text(path.to_str().unwrap(), "newest").is_ok());
+        let _guard = crate::fc::FILE_WRITE_MUTEX.lock().unwrap();
+        assert!(verify_current_text(path.to_str().unwrap(), "older", None).is_err());
+        assert!(verify_current_text(path.to_str().unwrap(), "newest", None).is_ok());
     }
     #[test]
     fn raw_utf16_backup_uses_the_editors_decoder_for_history_preview() {
@@ -484,4 +514,6 @@ mod tests {
         assert!(drafts.iter().any(|d| d.content == "原文"));
         assert!(drafts.iter().any(|d| d.content == "修改后"));
     }
+
+    include!("local_history_regression_tests.rs");
 }
