@@ -41,7 +41,7 @@ cannot satisfy the native test marker/server checks.
 | Scenario | Required outcome |
 | --- | --- |
 | `save-reopen` | UI typing → Cmd+S → exact disk bytes → close → reopen |
-| `switch-modes` | Unsaved content survives source, preview and WYSIWYG switching |
+| `switch-modes` | Edited content is saved before switching to source, preview and WYSIWYG; each view and the disk retain the exact bytes |
 | `external-write` | A real in-place external write updates the clean editor |
 | `atomic-replace` | Rename replacement reloads and subsequent writes remain watched |
 | `dirty-conflict` | Local draft, external disk version and visible conflict all survive |

@@ -136,6 +136,9 @@ export async function persistedDraft(path: string, content: string) {
 
 export function installChecks() {
   before(async () => {
+    // Match the CLI target and avoid rediscovering the active native window before
+    // every element command. The embedded driver uses Tauri labels as handles.
+    await browser.switchToWindow('main')
     await browser.waitUntil(() => browser.execute(() => !!window.__MARKFLOWY_E2E__ && !!window.__TAURI__),
       { timeout: 60_000, timeoutMsg: 'Expected the isolated native E2E binary' })
     await browser.waitUntil(async () => {
