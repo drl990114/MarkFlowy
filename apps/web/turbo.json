@@ -12,12 +12,14 @@
     },
     "build": {
       "outputs": ["$TURBO_EXTENDS$", ".contentlayer/generated/**"],
-      "env": ["MARKFLOWY_CLOUD_API_URL"],
+      "env": ["MARKFLOWY_CLOUD_API_URL", "NEXT_PUBLIC_API_URL"],
       "inputs": [
         "$TURBO_DEFAULT$",
         "$TURBO_ROOT$/docs/**",
         "!$TURBO_ROOT$/docs/**/.DS_Store",
-        "!.contentlayer/**"
+        "!.contentlayer/**",
+        "$TURBO_ROOT$/yarn.lock",
+        "$TURBO_ROOT$/.yarnrc.yml"
       ]
     }
   }
