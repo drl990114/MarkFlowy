@@ -14,6 +14,8 @@ The JavaScript mocking plugin is not used.
 Requires Node 24, macOS 14+, Rust/Tauri prerequisites, and the verified private
 Capricorn runtime (`yarn install:capricorn-runtime`). Missing prerequisites fail
 the run; there is no skipped-test or editor fallback path.
+Both the runner and the native binary reject older or unknown macOS versions,
+where WebKit would otherwise fall back to the default data store.
 
 ```sh
 # Check the suite and runner without compiling or launching the app:
@@ -62,7 +64,9 @@ refuses to start without the matching ownership marker. Automatic update checks
 and CLI installation are disabled in this test environment. Default settings
 are English, light theme, 1200 × 800 and autosave off.
 
-Scenarios use fresh processes with no retries. Before cleanup the runner saves
+Scenarios use fresh processes with no retries. Pending (`skip`), exclusive (`only`)
+and zero-test runs fail the gate. Each phase requires both a successful process
+exit and exactly one completed passing test record. Before cleanup the runner saves
 fixture files, SQLite/WAL, CLI receipts and profile state to `reports/`, alongside
 screenshots, page source, unhandled frontend errors and native/runner logs.
 Cleanup only targets the runner's marked root and exact UUID profile paths;

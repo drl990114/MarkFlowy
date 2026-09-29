@@ -10,6 +10,14 @@ struct Environment {
 static ENVIRONMENT: OnceLock<Environment> = OnceLock::new();
 
 pub fn initialize() {
+    #[cfg(not(target_os = "macos"))]
+    panic!("The native E2E suite currently requires macOS 14+");
+    #[cfg(target_os = "macos")]
+    assert!(
+        matches!(tauri_plugin_os::version(), tauri_plugin_os::Version::Semantic(major, _, _) if major >= 14),
+        "E2E requires macOS 14+; older WebKit would use the default data store"
+    );
+
     let raw = std::env::var_os("MARKFLOWY_E2E_ROOT")
         .expect("E2E binary requires a runner-owned MARKFLOWY_E2E_ROOT");
     let root = PathBuf::from(raw);

@@ -23,6 +23,13 @@ export function selectScenarios(requested) {
   return requested.length ? requested : scenarios
 }
 
+export function assertSupportedPlatform(platform, version) {
+  assert.equal(platform, 'darwin', 'The native E2E suite requires macOS 14+')
+  assert.match(version.trim(), /^\d+\.\d+(?:\.\d+)?$/, 'Cannot verify the macOS version')
+  assert.ok(Number(version.trim().split('.')[0]) >= 14,
+    'macOS 14+ is required to isolate WKWebView storage; refusing the default data store')
+}
+
 export async function assertBinary(binary) {
   await access(binary, constants.X_OK)
   return realpath(binary)

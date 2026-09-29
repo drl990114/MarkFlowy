@@ -2,10 +2,12 @@ import assert from 'node:assert/strict'
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { createRequire } from 'node:module'
 import test from 'node:test'
 import { parseReceipt } from './protocol.ts'
+import { assertPhasePassed } from './results.mjs'
 import {
-  assertBinary, assertOwner, availablePort, createEnvironment, preserveEnvironment,
+  assertBinary, assertOwner, assertSupportedPlatform, availablePort, createEnvironment, preserveEnvironment,
   profilePaths, removeEnvironment, scenarios, selectScenarios,
 } from './environment.mjs'
 
@@ -23,6 +25,76 @@ test('the runner fails for a missing binary instead of silently skipping native 
     await assert.rejects(assertBinary(join(parent, 'not-built')), /ENOENT/)
   } finally {
     await rm(parent, { recursive: true })
+  }
+})
+
+test('unsupported or unknown macOS versions cannot fall back to the user WebView store', () => {
+  for (const version of ['14.0', '15.7.1', '26.5.2\n']) assertSupportedPlatform('darwin', version)
+  for (const version of ['13.7.4', '10.15.7', '', 'unknown', '14beta']) {
+    assert.throws(() => assertSupportedPlatform('darwin', version))
+  }
+  assert.throws(() => assertSupportedPlatform('linux', '26.0'))
+})
+
+test('the configured Mocha engine rejects pending, exclusive and empty test runs', async () => {
+  const require = createRequire(import.meta.resolve('@wdio/mocha-framework'))
+  const Mocha = require('mocha')
+  const output = await mkdtemp(join(tmpdir(), 'mf-e2e-mocha-'))
+  const names = ['MARKFLOWY_E2E_BINARY', 'MARKFLOWY_E2E_PORT', 'MARKFLOWY_E2E_REPORT']
+  const previous = names.map((name) => process.env[name])
+  try {
+    process.env.MARKFLOWY_E2E_BINARY = join(output, 'unused-binary')
+    process.env.MARKFLOWY_E2E_PORT = '4445'
+    process.env.MARKFLOWY_E2E_REPORT = output
+    const { config } = await import('./wdio.conf.ts')
+    for (const [name, source, failure] of [
+      ['passing', "it('runs', () => {})", false],
+      ['pending', "it.skip('skipped', () => {})", true],
+      ['empty', '', true],
+      ['exclusive', "it.only('only', () => {})", true],
+    ]) {
+      const path = join(output, `${name}.cjs`)
+      await writeFile(path, source)
+      // Exercise the actual installed Mocha implementation, without creating a WebDriver session.
+      const mocha = new Mocha({ ...config.mochaOpts, reporter: class {} })
+      mocha.addFile(path)
+      let failed = false
+      try {
+        await mocha.loadFilesAsync()
+        failed = await new Promise((resolveRun) => mocha.run((failures) => resolveRun(failures > 0)))
+      } catch (error) {
+        assert.equal(name, 'exclusive', String(error))
+        assert.equal(error.code, 'ERR_MOCHA_FORBIDDEN_EXCLUSIVITY')
+        failed = true
+      } finally {
+        mocha.dispose()
+      }
+      assert.equal(failed, failure, name)
+    }
+  } finally {
+    for (const [index, name] of names.entries()) {
+      if (previous[index] === undefined) delete process.env[name]
+      else process.env[name] = previous[index]
+    }
+    await rm(output, { recursive: true })
+  }
+})
+
+test('an exit-zero WDIO phase still needs a completed passing test record', async () => {
+  const output = await mkdtemp(join(tmpdir(), 'mf-e2e-results-'))
+  try {
+    await assert.rejects(assertPhasePassed(output), /exactly one test/)
+    const report = join(output, 'scenario.result.json')
+    for (const result of [{}, { passed: false }, { passed: 'true' }]) {
+      await writeFile(report, JSON.stringify(result))
+      await assert.rejects(assertPhasePassed(output), /passing test/)
+    }
+    await writeFile(report, JSON.stringify({ passed: true }))
+    await assertPhasePassed(output)
+    await writeFile(join(output, 'extra.result.json'), JSON.stringify({ passed: true }))
+    await assert.rejects(assertPhasePassed(output), /exactly one test/)
+  } finally {
+    await rm(output, { recursive: true })
   }
 })
 

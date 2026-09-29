@@ -8,15 +8,18 @@ import { promisify } from 'node:util'
 import { setTimeout as delay } from 'node:timers/promises'
 import { CAPRICORN_VERSION, resolvePrivateCapricornRuntime } from '../capricornRuntimeResolver.ts'
 import {
-  assertBinary, assertOwner, availablePort, createEnvironment, preserveEnvironment,
+  assertBinary, assertOwner, assertSupportedPlatform, availablePort, createEnvironment, preserveEnvironment,
   removeEnvironment, selectScenarios,
 } from './environment.mjs'
+import { assertPhasePassed } from './results.mjs'
 
 const directory = dirname(fileURLToPath(import.meta.url))
 const desktop = resolve(directory, '..')
 const repository = resolve(desktop, '../..')
 const selected = selectScenarios(process.argv.slice(2))
 assert.equal(process.platform, 'darwin', 'The first native E2E suite supports macOS 14+ only')
+const { stdout: macosVersion } = await promisify(execFile)('/usr/bin/sw_vers', ['-productVersion'])
+assertSupportedPlatform(process.platform, macosVersion)
 assert.ok(resolvePrivateCapricornRuntime(join(repository,
   '.private-runtime/node_modules/@drl990114/capricorn-runtime/package.json')),
 `Install the verified Capricorn ${CAPRICORN_VERSION} runtime before E2E; no fallback is allowed`)
@@ -81,10 +84,12 @@ async function runPhase(environment, name, phase, report) {
   const watchdog = setTimeout(() => child.kill('SIGTERM'), 180_000)
   const hardStop = setTimeout(() => child.kill('SIGKILL'), 190_000)
   try {
-    return await new Promise((resolveExit, reject) => {
+    const code = await new Promise((resolveExit, reject) => {
       child.once('error', reject)
       child.once('exit', (code) => resolveExit(code ?? 1))
     })
+    if (code === 0) await assertPhasePassed(phaseOutput)
+    return code
   } finally {
     clearTimeout(watchdog)
     clearTimeout(hardStop)

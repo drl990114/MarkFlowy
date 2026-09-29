@@ -20,6 +20,15 @@ const serviceOptions: TauriServiceOptions = {
   captureFrontendLogs: false,
 }
 
+// failZero is supported by Mocha but absent from WDIO's narrower MochaOpts declaration.
+const mochaOpts = {
+  timeout: 90_000,
+  retries: 0,
+  failZero: true,
+  forbidOnly: true,
+  forbidPending: true,
+}
+
 export const config: WebdriverIO.Config = {
   runner: 'local',
   specs: ['./specs/*.e2e.ts'],
@@ -36,7 +45,7 @@ export const config: WebdriverIO.Config = {
   connectionRetryTimeout: 20_000,
   connectionRetryCount: 0,
   specFileRetries: 0,
-  mochaOpts: { timeout: 90_000, retries: 0 },
+  mochaOpts,
   async afterTest(test, _context, result) {
     const name = test.title.replace(/[^a-zA-Z0-9-]/g, '_')
     const captures = await Promise.allSettled([
