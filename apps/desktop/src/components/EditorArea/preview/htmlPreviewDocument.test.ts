@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   HTML_PREVIEW_CSP,
   HTML_PREVIEW_SANDBOX,
+  HTML_PREVIEW_TRUSTED_SANDBOX,
   prepareHtmlPreview,
   previewFileUrl,
 } from './htmlPreviewDocument'
@@ -36,7 +37,8 @@ describe('isolated HTML preview documents', () => {
       controller().signal,
       reader,
     )
-    expect(HTML_PREVIEW_SANDBOX).toBe('allow-scripts')
+    expect(HTML_PREVIEW_SANDBOX).toBe('')
+    expect(HTML_PREVIEW_TRUSTED_SANDBOX).toBe('allow-scripts')
     expect(HTML_PREVIEW_CSP).toContain("connect-src 'none'")
     expect(HTML_PREVIEW_CSP).not.toMatch(/(?:script|style|img|font|media)-src[^;]*https:/)
     expect(preview.html).toContain('window.answer=42')

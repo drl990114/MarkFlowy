@@ -1291,6 +1291,7 @@
     "html_title": "HTML preview",
     "pdf_title": "PDF reader",
     "refresh": "Refresh",
+    "run_scripts": "Run scripts",
     "loading": "Loading…",
     "load_failed": "Unable to load this file.",
     "retry": "Retry",

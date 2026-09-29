@@ -1291,6 +1291,7 @@
     "html_title": "HTML 预览",
     "pdf_title": "PDF 阅读器",
     "refresh": "刷新",
+    "run_scripts": "运行脚本",
     "loading": "正在加载…",
     "load_failed": "无法加载此文件。",
     "retry": "重试",

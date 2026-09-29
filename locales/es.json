@@ -1291,6 +1291,7 @@
     "html_title": "Vista previa HTML",
     "pdf_title": "Lector PDF",
     "refresh": "Actualizar",
+    "run_scripts": "Ejecutar scripts",
     "loading": "Cargando…",
     "load_failed": "No se puede cargar este archivo.",
     "retry": "Reintentar",

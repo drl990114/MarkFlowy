@@ -10,7 +10,8 @@ import {
   type DefaultTreeAdapterTypes,
 } from 'parse5'
 
-export const HTML_PREVIEW_SANDBOX = 'allow-scripts'
+export const HTML_PREVIEW_SANDBOX = ''
+export const HTML_PREVIEW_TRUSTED_SANDBOX = 'allow-scripts'
 export const HTML_PREVIEW_CSP = [
   "default-src 'none'",
   "script-src 'unsafe-inline' blob:",

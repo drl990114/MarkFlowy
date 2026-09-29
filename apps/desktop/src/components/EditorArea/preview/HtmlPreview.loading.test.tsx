@@ -5,7 +5,7 @@ import HtmlPreview from './HtmlPreview'
 import type { PreparedHtmlPreview } from './htmlPreviewDocument'
 
 const prepare = vi.hoisted(() => vi.fn())
-vi.mock('./htmlPreviewDocument', () => ({ HTML_PREVIEW_SANDBOX: 'allow-scripts', prepareHtmlPreview: prepare }))
+vi.mock('./htmlPreviewDocument', () => ({ HTML_PREVIEW_SANDBOX: '', HTML_PREVIEW_TRUSTED_SANDBOX: 'allow-scripts', prepareHtmlPreview: prepare }))
 vi.mock('@/i18n', () => ({ t: (key: string) => key, useTranslation: () => ({ t: (key: string) => key }) }))
 
 beforeEach(() => { vi.useFakeTimers(); prepare.mockReset() })
