@@ -97,7 +97,7 @@ const Harness = runInNewContext(compiled, {
   externalChangeResolving: false,
   savePathReserved: false,
   wysiwygEditorSpellcheck: true,
-  getOrCreateDelegateOptions: () => ({}),
+  delegateOptions: {},
   capricornLocalization: {},
   capricornClipboard: {},
   snippetOptions: { items: [] },
