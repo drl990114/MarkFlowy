@@ -13,12 +13,12 @@ import {
 export const HTML_PREVIEW_SANDBOX = 'allow-scripts'
 export const HTML_PREVIEW_CSP = [
   "default-src 'none'",
-  "script-src 'unsafe-inline' blob: https:",
-  "style-src 'unsafe-inline' blob: https:",
-  'img-src blob: data: https:',
-  'font-src blob: data: https:',
-  'media-src blob: data: https:',
-  'connect-src https:',
+  "script-src 'unsafe-inline' blob:",
+  "style-src 'unsafe-inline' blob:",
+  'img-src blob: data:',
+  'font-src blob: data:',
+  'media-src blob: data:',
+  "connect-src 'none'",
   "frame-src 'none'",
   "object-src 'none'",
   "base-uri 'none'",
@@ -118,10 +118,12 @@ export async function prepareHtmlPreview(
     checkCanceled()
     const raw = value.trim()
     if (!raw || raw.startsWith('#')) return raw
-    // Remote resources retain their URL semantics. HTTP, file access outside the
-    // declared dependency tree, and pre-existing blob URLs are not accepted.
-    if (/^https:\/\//i.test(raw)) return raw
-    if (/^\/\//.test(raw)) return `https:${raw}`
+    // Keep every preview dependency local. Allowing any remote resource would let
+    // an otherwise useful inline script exfiltrate document contents through it.
+    if (/^https:\/\//i.test(raw) || /^\/\//.test(raw)) {
+      blockedResources++
+      return EMPTY_RESOURCE
+    }
     if (/^data:/i.test(raw) && !stylesheet) return raw
     let url: URL
     try {
@@ -130,12 +132,6 @@ export async function prepareHtmlPreview(
       blockedResources++
       return EMPTY_RESOURCE
     }
-    if (
-      url.protocol === 'https:' &&
-      base.protocol === 'https:' &&
-      base.hostname !== 'preview.invalid'
-    )
-      return url.href
     if (
       !documentPath ||
       url.protocol !== 'file:' ||

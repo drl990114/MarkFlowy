@@ -37,6 +37,8 @@ describe('isolated HTML preview documents', () => {
       reader,
     )
     expect(HTML_PREVIEW_SANDBOX).toBe('allow-scripts')
+    expect(HTML_PREVIEW_CSP).toContain("connect-src 'none'")
+    expect(HTML_PREVIEW_CSP).not.toMatch(/(?:script|style|img|font|media)-src[^;]*https:/)
     expect(preview.html).toContain('window.answer=42')
     expect(preview.html).toContain('onclick="this.textContent=1"')
     expect(preview.html).toContain('Content-Security-Policy')
@@ -100,7 +102,7 @@ describe('isolated HTML preview documents', () => {
     preview.dispose()
   })
 
-  it('retains HTTPS URLs and inline data images without native reads', async () => {
+  it('blocks remote resources while retaining inline data images without native reads', async () => {
     const reader = vi.fn()
     const preview = await prepareHtmlPreview(
       '<img src="https://example.com/a%20b?key=a%2Fb"><img src="data:image/png;base64,YQ==">',
@@ -108,7 +110,10 @@ describe('isolated HTML preview documents', () => {
       controller().signal,
       reader,
     )
-    expect(preview.html).toContain('https://example.com/a%20b?key=a%2Fb')
+    expect(preview.html).not.toContain('https://example.com/a%20b?key=a%2Fb')
+    expect(preview.html).toContain('src="data:,"')
+    expect(preview.html).toContain('src="data:image/png;base64,YQ=="')
+    expect(preview.blockedResources).toBe(1)
     expect(reader).not.toHaveBeenCalled()
     preview.dispose()
   })
