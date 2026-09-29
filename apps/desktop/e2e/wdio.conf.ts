@@ -2,6 +2,7 @@ import { browser } from '@wdio/globals'
 import type { TauriServiceOptions } from '@wdio/tauri-service'
 import { writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
+import { scenarioTimeout, startupTimeout } from './timeouts.ts'
 
 function required(name: string): string {
   const value = process.env[name]
@@ -14,7 +15,7 @@ const serviceOptions: TauriServiceOptions = {
   appBinaryPath: required('MARKFLOWY_E2E_BINARY'),
   driverProvider: 'embedded',
   embeddedPort: Number(required('MARKFLOWY_E2E_PORT')),
-  startTimeout: 60_000,
+  startTimeout: startupTimeout,
   commandTimeout: 15_000,
   captureBackendLogs: true,
   captureFrontendLogs: false,
@@ -24,7 +25,7 @@ const serviceOptions: TauriServiceOptions = {
 const mochaOpts = {
   // Native WebView round trips accumulate across typing, tab switches and dialogs.
   // Keep individual waits bounded at 20s while allowing the full scenario to finish.
-  timeout: 240_000,
+  timeout: scenarioTimeout,
   retries: 0,
   failZero: true,
   forbidOnly: true,

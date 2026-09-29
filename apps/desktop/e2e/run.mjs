@@ -12,6 +12,7 @@ import {
   removeEnvironment, selectScenarios,
 } from './environment.mjs'
 import { assertPhasePassed } from './results.mjs'
+import { hardStopTimeout, phaseTimeout } from './timeouts.ts'
 
 const directory = dirname(fileURLToPath(import.meta.url))
 const desktop = resolve(directory, '..')
@@ -81,8 +82,11 @@ async function runPhase(environment, name, phase, report) {
     log.write(chunk)
   })
   // Also bound launcher/service failures outside Mocha's own timeout.
-  const watchdog = setTimeout(() => child.kill('SIGTERM'), 180_000)
-  const hardStop = setTimeout(() => child.kill('SIGKILL'), 190_000)
+  const watchdog = setTimeout(() => {
+    console.error(`Native E2E phase ${name}/${phase} exceeded ${phaseTimeout}ms`)
+    child.kill('SIGTERM')
+  }, phaseTimeout)
+  const hardStop = setTimeout(() => child.kill('SIGKILL'), hardStopTimeout)
   try {
     const code = await new Promise((resolveExit, reject) => {
       child.once('error', reject)

@@ -115,7 +115,7 @@ export async function save(path: string, content: string) {
 
 export async function switchMode(mode: 'wysiwyg' | 'sourceCode' | 'preview', path: string) {
   const labels = { wysiwyg: 'Wysiwyg', sourceCode: 'Source Code', preview: 'Preview' }
-  await $('button[aria-label="MarkFlowy Menu"]').click()
+  await $('button[aria-label="more"][aria-haspopup="menu"]').click()
   await $("//*[@role='menuitem'][normalize-space(.)='View']").click()
   await $(`//*[@role='menuitemcheckbox'][contains(., '${labels[mode]}')]`).click()
   await waitState(path, { mode, ready: true, active: true })

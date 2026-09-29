@@ -6,6 +6,7 @@ import { createRequire } from 'node:module'
 import test from 'node:test'
 import { parseReceipt } from './protocol.ts'
 import { assertPhasePassed } from './results.mjs'
+import { hardStopTimeout, phaseTimeout } from './timeouts.ts'
 import {
   assertBinary, assertOwner, assertSupportedPlatform, availablePort, createEnvironment, preserveEnvironment,
   profilePaths, removeEnvironment, scenarios, selectScenarios,
@@ -47,6 +48,9 @@ test('the configured Mocha engine rejects pending, exclusive and empty test runs
     process.env.MARKFLOWY_E2E_PORT = '4445'
     process.env.MARKFLOWY_E2E_REPORT = output
     const { config } = await import('./wdio.conf.ts')
+    // The outer watchdog must let Mocha finish and retain failure diagnostics.
+    assert.ok(phaseTimeout >= config.mochaOpts.timeout + 60_000 + 30_000)
+    assert.ok(hardStopTimeout > phaseTimeout)
     for (const [name, source, failure] of [
       ['passing', "it('runs', () => {})", false],
       ['pending', "it.skip('skipped', () => {})", true],
