@@ -13,7 +13,11 @@ import { toast } from 'zens'
 import { conditionalWriteExpected } from './conditionalFileWrite'
 import { editorSnapshotRegistry } from './editorSnapshotRegistry'
 import { fileSaveCoordinator } from './fileSaveCoordinator'
-import { invalidateFileSnapshotHandoffs, readStableFileSnapshot, type StableFileSnapshot } from './fileSnapshot'
+import {
+  invalidateFileSnapshotHandoffs,
+  readStableFileSnapshot,
+  type StableFileSnapshot,
+} from './fileSnapshot'
 import { sameTextFormat } from './textFileFormat'
 import { historyFileSaved, protectExternalContent } from '@/services/local-history'
 
@@ -99,17 +103,45 @@ export function applyExternalSnapshot(
   showTransientNotice(fileId, status)
 }
 
+function isCurrentExternalTarget(fileId: string, generation: number, path: string) {
+  return (
+    generation === workspaceGeneration &&
+    useEditorStore.getState().opened.includes(fileId) &&
+    getPathIdentityKey(getFileObject(fileId)?.path ?? '') === getPathIdentityKey(path)
+  )
+}
+
+function matchesExternalSnapshot(
+  fileId: string,
+  content: string,
+  dirty: boolean,
+  snapshot: StableFileSnapshot,
+) {
+  if (content !== snapshot.content) return false
+  if (!dirty) return true
+  const format = fileSaveCoordinator.getTextMetadata(fileId).format
+  return (
+    !fileSaveCoordinator.hasFormatChanges(fileId) &&
+    sameTextFormat(format, snapshot.text?.format ?? format)
+  )
+}
+
+function canConfirmExternalSnapshot(fileId: string, revision: number, content: string) {
+  return (
+    fileSaveCoordinator.getRevision(fileId) === revision &&
+    editorSnapshotRegistry.canRead(fileId) &&
+    !editorSnapshotRegistry.hasPending(fileId) &&
+    useEditorStore.getState().getEditorContent(fileId) === content
+  )
+}
+
 async function inspectExternalPath(
   fileId: string,
   generation: number,
   snapshot: StableFileSnapshot,
   observedPath: string,
 ) {
-  if (getPathIdentityKey(getFileObject(fileId)?.path ?? '') !== getPathIdentityKey(observedPath))
-    return
-  if (generation !== workspaceGeneration || !useEditorStore.getState().opened.includes(fileId)) {
-    return
-  }
+  if (!isCurrentExternalTarget(fileId, generation, observedPath)) return
 
   const knownDiskRevision = fileSaveCoordinator.getDiskRevision(fileId)
   if (knownDiskRevision === snapshot.revision) return
@@ -125,28 +157,15 @@ async function inspectExternalPath(
     markExternalFileConflict(fileId, snapshot.revision)
     return
   }
-  const isDirty = useEditorStateStore.getState().idStateMap.get(fileId)?.hasUnsavedChanges ?? false
+  const isDirty = Boolean(useEditorStateStore.getState().idStateMap.get(fileId)?.hasUnsavedChanges)
 
   const localRevision = fileSaveCoordinator.getRevision(fileId)
   const afterFormat = snapshot.text?.decoding.needsConfirmation ? undefined : snapshot.text?.format
-  if (
-    localContent === snapshot.content &&
-    (!isDirty ||
-      (!fileSaveCoordinator.hasFormatChanges(fileId) &&
-        sameTextFormat(
-          fileSaveCoordinator.getTextMetadata(fileId).format,
-          snapshot.text?.format ?? fileSaveCoordinator.getTextMetadata(fileId).format,
-        )))
-  ) {
+  if (matchesExternalSnapshot(fileId, localContent, isDirty, snapshot)) {
     await protectExternalContent(fileId, localContent, snapshot.content, afterFormat)
     if (
-      generation !== workspaceGeneration ||
-      !useEditorStore.getState().opened.includes(fileId) ||
-      getPathIdentityKey(getFileObject(fileId)?.path ?? '') !== getPathIdentityKey(observedPath) ||
-      fileSaveCoordinator.getRevision(fileId) !== localRevision ||
-      !editorSnapshotRegistry.canRead(fileId) ||
-      editorSnapshotRegistry.hasPending(fileId) ||
-      useEditorStore.getState().getEditorContent(fileId) !== localContent
+      !isCurrentExternalTarget(fileId, generation, observedPath) ||
+      !canConfirmExternalSnapshot(fileId, localRevision, localContent)
     ) {
       markExternalFileConflict(fileId, snapshot.revision)
       return
@@ -173,8 +192,9 @@ async function inspectExternalPath(
   }
 
   const latestContent = useEditorStore.getState().getEditorContent(fileId)
-  const becameDirty =
-    useEditorStateStore.getState().idStateMap.get(fileId)?.hasUnsavedChanges ?? false
+  const becameDirty = Boolean(
+    useEditorStateStore.getState().idStateMap.get(fileId)?.hasUnsavedChanges,
+  )
   if (becameDirty || latestContent !== localContent) {
     markExternalFileConflict(fileId, snapshot.revision)
     return
@@ -182,9 +202,7 @@ async function inspectExternalPath(
 
   await protectExternalContent(fileId, localContent, snapshot.content, afterFormat)
   if (
-    generation !== workspaceGeneration ||
-    !useEditorStore.getState().opened.includes(fileId) ||
-    getPathIdentityKey(getFileObject(fileId)?.path ?? '') !== getPathIdentityKey(observedPath) ||
+    !isCurrentExternalTarget(fileId, generation, observedPath) ||
     useEditorStateStore.getState().idStateMap.get(fileId)?.hasUnsavedChanges ||
     useEditorStore.getState().getEditorContent(fileId) !== localContent
   ) {

@@ -48,6 +48,42 @@ export type EditorPaletteCommand = (typeof EDITOR_COMMANDS)[number][0]
 
 const sourceCommands = createCommandMap()
 
+function richCommandUnavailable(
+  target: EditorCommandTarget,
+  command: EditorPaletteCommand,
+): CommandUnavailableReason | undefined {
+  const { rich, bookmark, fileId } = target
+  if (!rich) return 'unavailable'
+  if (getCapricornEditor(fileId) !== rich) return 'stale_target'
+  const state = rich.getUiState()
+  if (state.readOnly) return 'read_only'
+  if (!bookmark || !rich.selection?.isValid(bookmark.id)) return 'selection_unavailable'
+  if (command === 'editor_toggleDelete') return 'unavailable'
+  if (command === 'editor_undo' && !state.canUndo) return 'no_undo'
+  if (command === 'editor_redo' && !state.canRedo) return 'no_redo'
+  if (
+    (command === 'editor_insertLink' || command === 'editor_insertImage') &&
+    (!bookmark.canInsertInline || !rich.requestInlineEdit)
+  )
+    return 'unavailable'
+}
+
+function sourceCommandUnavailable(
+  target: EditorCommandTarget,
+  command: EditorPaletteCommand,
+): CommandUnavailableReason | undefined {
+  const { source, sourceState, fileId } = target
+  if (!source || !sourceState) return 'unavailable'
+  if (
+    sourceCodeCodemirrorViewMap.get(fileId)?.cm !== source ||
+    source.state.doc !== sourceState.doc
+  )
+    return 'stale_target'
+  if (source.state.readOnly) return 'read_only'
+  if (command === 'editor_undo' && !undoDepth(source.state)) return 'no_undo'
+  if (command === 'editor_redo' && !redoDepth(source.state)) return 'no_redo'
+}
+
 export function editorCommandUnavailable(
   target: EditorCommandTarget | null,
   command: EditorPaletteCommand,
@@ -55,30 +91,11 @@ export function editorCommandUnavailable(
   if (!target) return 'no_document'
   if (!isCurrentCommandTarget(target)) return 'stale_target'
   if (target.mode === EditorViewType.PREVIEW) return 'preview'
-  const { rich, source, sourceState, bookmark, fileId } = target
-  if (rich) {
-    if (getCapricornEditor(fileId) !== rich) return 'stale_target'
-    const state = rich.getUiState()
-    if (state.readOnly) return 'read_only'
-    if (!bookmark || !rich.selection?.isValid(bookmark.id)) return 'selection_unavailable'
-    if (command === 'editor_toggleDelete') return 'unavailable'
-    if (command === 'editor_undo' && !state.canUndo) return 'no_undo'
-    if (command === 'editor_redo' && !state.canRedo) return 'no_redo'
-    if (
-      (command === 'editor_insertLink' || command === 'editor_insertImage') &&
-      (!bookmark.canInsertInline || !rich.requestInlineEdit)
-    )
-      return 'unavailable'
-  } else if (source && sourceState) {
-    if (
-      sourceCodeCodemirrorViewMap.get(fileId)?.cm !== source ||
-      source.state.doc !== sourceState.doc
-    )
-      return 'stale_target'
-    if (source.state.readOnly) return 'read_only'
-    if (command === 'editor_undo' && !undoDepth(source.state)) return 'no_undo'
-    if (command === 'editor_redo' && !redoDepth(source.state)) return 'no_redo'
-  } else return 'unavailable'
+  const { fileId } = target
+  const reason = target.rich
+    ? richCommandUnavailable(target, command)
+    : sourceCommandUnavailable(target, command)
+  if (reason) return reason
   if (
     !['editor_undo', 'editor_redo'].includes(command) &&
     useFileTypeConfigStore.getState().getFileTypeConfigById(fileId)?.type !== 'markdown'

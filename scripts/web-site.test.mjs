@@ -228,7 +228,7 @@ test('the folded wave is a finite indexed surface without broken references', ()
   assert.ok(vertexCount > 10000 && vertexCount <= 65535)
   assert.ok([...vertices].every(Number.isFinite))
   for (let i = 0; i < indices.length; i += 3) {
-    const triangle = [...indices.slice(i, i + 3)]
+    const triangle = indices.slice(i, i + 3)
     assert.equal(new Set(triangle).size, 3)
     assert.ok(triangle.every((index) => index < vertexCount))
   }

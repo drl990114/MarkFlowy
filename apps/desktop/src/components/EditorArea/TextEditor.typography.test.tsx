@@ -34,6 +34,7 @@ const names = new Set([
   'editorRootLineHeight',
   'editorSourceFontSize',
   'editorSourceLineHeight',
+  'resolveTypography',
   'sourceFontSize',
   'sourceLineHeight',
   'rootLineHeight',
@@ -51,12 +52,23 @@ const names = new Set([
   'editorKeybindingsLoaded',
   'capricornRuntimeOptions',
 ])
-const statements = editor.body.statements.filter(
-  (node) =>
-    ts.isVariableStatement(node) &&
-    names.has(node.declarationList.declarations[0].name.getText(source)),
-)
-if (statements.length !== names.size)
+function bindingNames(name: ts.BindingName): string[] {
+  if (ts.isIdentifier(name)) return [name.text]
+  return name.elements.flatMap((element) =>
+    ts.isBindingElement(element) ? bindingNames(element.name) : [],
+  )
+}
+const found = new Set<string>()
+const statements = editor.body.statements.filter((node) => {
+  if (!ts.isVariableStatement(node)) return false
+  const declared = node.declarationList.declarations.flatMap((declaration) =>
+    bindingNames(declaration.name),
+  )
+  const selected = declared.filter((name) => names.has(name))
+  selected.forEach((name) => found.add(name))
+  return selected.length > 0
+})
+if (found.size !== names.size)
   throw new Error('Editor typography declarations were not found')
 const compiled = ts.transpileModule(
   `

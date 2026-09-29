@@ -221,355 +221,363 @@ export default function WorkspaceListPage() {
   const selectedRepo = repos.find((repo) => getRepoKey(repo) === selectedRepoKey)
   const selectedImportedWorkspace = selectedRepo ? getImportedWorkspace(selectedRepo) : undefined
 
-  return (
-    <Container>
-      <SeoHead title={`${t('workspace.title')} | MarkFlowy`} />
-      <Header>
-        <HeaderInner>
-          <HeaderNavigation aria-label='Workspace navigation'>
-            <BrandLink href='/' aria-label='Go to MarkFlowy home'>
-              <BrandLogo src='/logo.svg' alt='' />
-              <BrandName>MarkFlowy</BrandName>
-            </BrandLink>
-            <NavigationDivider aria-hidden='true' />
-            <CurrentLocation aria-current='page'>
-              <i className='ri-folder-3-line' aria-hidden='true' />
-              {t('workspace.title')}
-            </CurrentLocation>
-          </HeaderNavigation>
-          <HeaderRight>
-            <ThemeSwitcher />
-            {isAuthenticated ? (
-              <>
-                <SettingsLink href='/settings'>
-                  <i className='ri-user-settings-line' aria-hidden='true' />
-                  <span>{t('workspace.settings')}</span>
-                </SettingsLink>
-                <ImportButton type='button' onClick={handleOpenImportModal}>
-                  <i className='ri-add-line' aria-hidden='true' />
-                  {t('workspace.import')}
-                </ImportButton>
-              </>
-            ) : (
-              <GitHubSignInLink href='/auth'>
-                <i className='ri-github-fill' aria-hidden='true' />
-                {t('auth.signIn')}
-              </GitHubSignInLink>
-            )}
-          </HeaderRight>
-        </HeaderInner>
-      </Header>
-
-      <Content>
-        <PageIntro>
-          <PageIntroCopy>
-            <PageEyebrow>{t('workspace.eyebrow')}</PageEyebrow>
-            <Title>{t('workspace.title')}</Title>
-            <Subtitle>{t('workspace.description')}</Subtitle>
-          </PageIntroCopy>
-          <PageStatus>
-            <StatusDot aria-hidden='true' />
-            {isAuthenticated
-              ? t('workspace.syncedCount', { count: workspaces.length })
-              : t('workspace.ready')}
-          </PageStatus>
-        </PageIntro>
-        <WorkspaceShell>
-          {workspaceError && (
-            <ErrorPanel>
-              <i className='ri-error-warning-line' />
-              <span>{workspaceError}</span>
-            </ErrorPanel>
+  const renderHeader = () => (
+    <Header>
+      <HeaderInner>
+        <HeaderNavigation aria-label='Workspace navigation'>
+          <BrandLink href='/' aria-label='Go to MarkFlowy home'>
+            <BrandLogo src='/logo.svg' alt='' />
+            <BrandName>MarkFlowy</BrandName>
+          </BrandLink>
+          <NavigationDivider aria-hidden='true' />
+          <CurrentLocation aria-current='page'>
+            <i className='ri-folder-3-line' aria-hidden='true' />
+            {t('workspace.title')}
+          </CurrentLocation>
+        </HeaderNavigation>
+        <HeaderRight>
+          <ThemeSwitcher />
+          {isAuthenticated ? (
+            <>
+              <SettingsLink href='/settings'>
+                <i className='ri-user-settings-line' aria-hidden='true' />
+                <span>{t('workspace.settings')}</span>
+              </SettingsLink>
+              <ImportButton type='button' onClick={handleOpenImportModal}>
+                <i className='ri-add-line' aria-hidden='true' />
+                {t('workspace.import')}
+              </ImportButton>
+            </>
+          ) : (
+            <GitHubSignInLink href='/auth'>
+              <i className='ri-github-fill' aria-hidden='true' />
+              {t('auth.signIn')}
+            </GitHubSignInLink>
           )}
-          <SectionStack>
-            {!isAuthenticated && (
-              <Section>
-                <SectionHeader>
-                  <SectionHeading>
-                    <SectionIcon className='ri-history-line' aria-hidden='true' />
-                    <SectionTitle>{t('workspace.recent')}</SectionTitle>
-                  </SectionHeading>
-                  <SectionMeta>{t('workspace.pinned')}</SectionMeta>
-                </SectionHeader>
-                <WorkspaceList>
-                  <WorkspaceRow href='/workspace/demo-workspace'>
-                    <WorkspaceIcon $variant='demo'>
+        </HeaderRight>
+      </HeaderInner>
+    </Header>
+  )
+
+  const renderWorkspaces = () => (
+    <Content>
+      <PageIntro>
+        <PageIntroCopy>
+          <PageEyebrow>{t('workspace.eyebrow')}</PageEyebrow>
+          <Title>{t('workspace.title')}</Title>
+          <Subtitle>{t('workspace.description')}</Subtitle>
+        </PageIntroCopy>
+        <PageStatus>
+          <StatusDot aria-hidden='true' />
+          {isAuthenticated
+            ? t('workspace.syncedCount', { count: workspaces.length })
+            : t('workspace.ready')}
+        </PageStatus>
+      </PageIntro>
+      <WorkspaceShell>
+        {workspaceError && (
+          <ErrorPanel>
+            <i className='ri-error-warning-line' />
+            <span>{workspaceError}</span>
+          </ErrorPanel>
+        )}
+        <SectionStack>
+          {!isAuthenticated && (
+            <Section>
+              <SectionHeader>
+                <SectionHeading>
+                  <SectionIcon className='ri-history-line' aria-hidden='true' />
+                  <SectionTitle>{t('workspace.recent')}</SectionTitle>
+                </SectionHeading>
+                <SectionMeta>{t('workspace.pinned')}</SectionMeta>
+              </SectionHeader>
+              <WorkspaceList>
+                <WorkspaceRow href='/workspace/demo-workspace'>
+                  <WorkspaceIcon $variant='demo'>
+                    <i className='ri-folder-3-line' />
+                  </WorkspaceIcon>
+                  <WorkspaceMain>
+                    <WorkspaceName>{t('workspace.demo')}</WorkspaceName>
+                    <WorkspacePath>{t('workspace.demoDescription')}</WorkspacePath>
+                  </WorkspaceMain>
+                  <WorkspaceTags>
+                    <WorkspaceTag>Demo</WorkspaceTag>
+                    <WorkspaceTag>{t('workspace.local')}</WorkspaceTag>
+                  </WorkspaceTags>
+                  <OpenIndicator className='ri-arrow-right-s-line' />
+                </WorkspaceRow>
+              </WorkspaceList>
+            </Section>
+          )}
+
+          {!isAuthenticated && (
+            <Section aria-labelledby='github-workspaces-heading'>
+              <SectionHeader>
+                <SectionHeading>
+                  <SectionIcon className='ri-github-fill' aria-hidden='true' />
+                  <SectionTitle id='github-workspaces-heading'>GitHub</SectionTitle>
+                </SectionHeading>
+                <SectionMeta>{t('workspace.signInRequired')}</SectionMeta>
+              </SectionHeader>
+              <GitHubLockedState>
+                <WorkspaceIcon $variant='github'>
+                  <i className='ri-github-fill' aria-hidden='true' />
+                </WorkspaceIcon>
+                <GitHubLockedCopy>
+                  <WorkspaceName>{t('workspace.connectTitle')}</WorkspaceName>
+                  <EmptyTextLine>{t('workspace.connectDescription')}</EmptyTextLine>
+                </GitHubLockedCopy>
+                <GitHubLockedLink href='/auth'>{t('auth.signIn')}</GitHubLockedLink>
+              </GitHubLockedState>
+            </Section>
+          )}
+
+          {isAuthenticated && myWorkspaces.length > 0 && (
+            <Section>
+              <SectionHeader>
+                <SectionHeading>
+                  <SectionIcon className='ri-folder-shared-line' aria-hidden='true' />
+                  <SectionTitle>{t('workspace.localShared')}</SectionTitle>
+                </SectionHeading>
+                <SectionMeta>{t('workspace.count', { count: myWorkspaces.length })}</SectionMeta>
+              </SectionHeader>
+              <WorkspaceList>
+                {myWorkspaces.map((workspace) => (
+                  <WorkspaceRow key={workspace.id} href={getWorkspaceHref(workspace)}>
+                    <WorkspaceIcon $variant='local'>
                       <i className='ri-folder-3-line' />
                     </WorkspaceIcon>
                     <WorkspaceMain>
-                      <WorkspaceName>{t('workspace.demo')}</WorkspaceName>
-                      <WorkspacePath>{t('workspace.demoDescription')}</WorkspacePath>
+                      <WorkspaceName>{workspace.name}</WorkspaceName>
+                      <WorkspacePath>{workspace.sourceUrl || workspace.slug}</WorkspacePath>
                     </WorkspaceMain>
                     <WorkspaceTags>
-                      <WorkspaceTag>Demo</WorkspaceTag>
-                      <WorkspaceTag>{t('workspace.local')}</WorkspaceTag>
+                      <WorkspaceTag>{getWorkspaceTypeLabel(workspace.type)}</WorkspaceTag>
+                      <WorkspaceTag>{formatWorkspaceDate(workspace.updatedAt)}</WorkspaceTag>
                     </WorkspaceTags>
-                    <OpenIndicator className='ri-arrow-right-s-line' />
+                    <DeleteButton
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        handleDeleteWorkspace(workspace.id)
+                      }}
+                      aria-label={`Delete ${workspace.name}`}
+                      title={`Delete ${workspace.name}`}
+                    >
+                      <i className='ri-delete-bin-line' />
+                    </DeleteButton>
                   </WorkspaceRow>
-                </WorkspaceList>
-              </Section>
-            )}
+                ))}
+              </WorkspaceList>
+            </Section>
+          )}
 
-            {!isAuthenticated && (
-              <Section aria-labelledby='github-workspaces-heading'>
-                <SectionHeader>
-                  <SectionHeading>
-                    <SectionIcon className='ri-github-fill' aria-hidden='true' />
-                    <SectionTitle id='github-workspaces-heading'>GitHub</SectionTitle>
-                  </SectionHeading>
-                  <SectionMeta>{t('workspace.signInRequired')}</SectionMeta>
-                </SectionHeader>
-                <GitHubLockedState>
-                  <WorkspaceIcon $variant='github'>
-                    <i className='ri-github-fill' aria-hidden='true' />
-                  </WorkspaceIcon>
-                  <GitHubLockedCopy>
-                    <WorkspaceName>{t('workspace.connectTitle')}</WorkspaceName>
-                    <EmptyTextLine>{t('workspace.connectDescription')}</EmptyTextLine>
-                  </GitHubLockedCopy>
-                  <GitHubLockedLink href='/auth'>{t('auth.signIn')}</GitHubLockedLink>
-                </GitHubLockedState>
-              </Section>
-            )}
-
-            {isAuthenticated && myWorkspaces.length > 0 && (
-              <Section>
-                <SectionHeader>
-                  <SectionHeading>
-                    <SectionIcon className='ri-folder-shared-line' aria-hidden='true' />
-                    <SectionTitle>{t('workspace.localShared')}</SectionTitle>
-                  </SectionHeading>
-                  <SectionMeta>{t('workspace.count', { count: myWorkspaces.length })}</SectionMeta>
-                </SectionHeader>
-                <WorkspaceList>
-                  {myWorkspaces.map((workspace) => (
-                    <WorkspaceRow key={workspace.id} href={getWorkspaceHref(workspace)}>
-                      <WorkspaceIcon $variant='local'>
-                        <i className='ri-folder-3-line' />
-                      </WorkspaceIcon>
-                      <WorkspaceMain>
-                        <WorkspaceName>{workspace.name}</WorkspaceName>
-                        <WorkspacePath>{workspace.sourceUrl || workspace.slug}</WorkspacePath>
-                      </WorkspaceMain>
-                      <WorkspaceTags>
-                        <WorkspaceTag>{getWorkspaceTypeLabel(workspace.type)}</WorkspaceTag>
-                        <WorkspaceTag>{formatWorkspaceDate(workspace.updatedAt)}</WorkspaceTag>
-                      </WorkspaceTags>
-                      <DeleteButton
-                        onClick={(e) => {
-                          e.preventDefault()
-                          e.stopPropagation()
-                          handleDeleteWorkspace(workspace.id)
-                        }}
-                        aria-label={`Delete ${workspace.name}`}
-                        title={`Delete ${workspace.name}`}
-                      >
-                        <i className='ri-delete-bin-line' />
-                      </DeleteButton>
-                    </WorkspaceRow>
-                  ))}
-                </WorkspaceList>
-              </Section>
-            )}
-
-            {isAuthenticated && githubWorkspaces.length > 0 && (
-              <Section>
-                <SectionHeader>
-                  <SectionHeading>
-                    <SectionIcon className='ri-github-fill' aria-hidden='true' />
-                    <SectionTitle>GitHub</SectionTitle>
-                  </SectionHeading>
-                  <SectionMeta>
-                    {t('workspace.repositories', { count: githubWorkspaces.length })}
-                  </SectionMeta>
-                </SectionHeader>
-                <WorkspaceList>
-                  {githubWorkspaces.map((workspace) => (
-                    <WorkspaceRow key={workspace.id} href={getWorkspaceHref(workspace)}>
-                      <WorkspaceIcon $variant='github'>
-                        <i className='ri-github-fill' />
-                      </WorkspaceIcon>
-                      <WorkspaceMain>
-                        <WorkspaceName>{workspace.name}</WorkspaceName>
-                        <WorkspacePath>{workspace.sourceUrl || workspace.slug}</WorkspacePath>
-                      </WorkspaceMain>
-                      <WorkspaceTags>
-                        <WorkspaceTag>GitHub</WorkspaceTag>
-                        <WorkspaceTag>{formatWorkspaceDate(workspace.updatedAt)}</WorkspaceTag>
-                      </WorkspaceTags>
-                      <DeleteButton
-                        onClick={(e) => {
-                          e.preventDefault()
-                          e.stopPropagation()
-                          handleDeleteWorkspace(workspace.id)
-                        }}
-                        aria-label={`Delete ${workspace.name}`}
-                        title={`Delete ${workspace.name}`}
-                      >
-                        <i className='ri-delete-bin-line' />
-                      </DeleteButton>
-                    </WorkspaceRow>
-                  ))}
-                </WorkspaceList>
-              </Section>
-            )}
-
-            {loadingWorkspaces && <LoadingText>{t('workspace.loading')}</LoadingText>}
-
-            {isAuthenticated && !loadingWorkspaces && workspaces.length === 0 && (
-              <EmptyPanel>
-                <i className='ri-inbox-2-line' />
-                <EmptyCopy>
-                  <EmptyTitle>{t('workspace.emptyTitle')}</EmptyTitle>
-                  <EmptyTextLine>{t('workspace.emptyDescription')}</EmptyTextLine>
-                </EmptyCopy>
-              </EmptyPanel>
-            )}
-          </SectionStack>
-        </WorkspaceShell>
-      </Content>
-
-      {showImportModal && (
-        <ModalOverlay onClick={() => setShowImportModal(false)}>
-          <ModalContent onClick={(e) => e.stopPropagation()}>
-            <ModalHeader>
-              <ModalTitle>Import Workspace</ModalTitle>
-              <ModalClose
-                onClick={() => setShowImportModal(false)}
-                aria-label='Close'
-                title='Close'
-              >
-                <i className='ri-close-line' />
-              </ModalClose>
-            </ModalHeader>
-            <ModalBody>
-              {loadingGitHubConnection && <LoadingText>Checking GitHub connection...</LoadingText>}
-
-              {!loadingGitHubConnection && githubConnectionError && (
-                <ErrorPanel>
-                  <i className='ri-error-warning-line' />
-                  <span>{githubConnectionError}</span>
-                </ErrorPanel>
-              )}
-
-              {!loadingGitHubConnection && !githubConnectionError && !githubConnection?.linked && (
-                <SetupPanel>
-                  <SetupIcon>
-                    <i className='ri-github-fill' />
-                  </SetupIcon>
-                  <SetupCopy>
-                    <SetupTitle>Connect GitHub first</SetupTitle>
-                    <SetupText>
-                      Link your GitHub account in personal settings before importing a repository
-                      workspace.
-                    </SetupText>
-                  </SetupCopy>
-                  <SetupLink href='/settings#github'>
-                    Link GitHub
-                    <i className='ri-arrow-right-line' />
-                  </SetupLink>
-                </SetupPanel>
-              )}
-
-              {!loadingGitHubConnection && !githubConnectionError && githubConnection?.linked && (
-                <ImportForm>
-                  <ImportField>
-                    <FieldLabel htmlFor='github-repo-select'>GitHub repository</FieldLabel>
-                    <RepoSelect
-                      id='github-repo-select'
-                      value={selectedRepoKey}
-                      onChange={(e) => setSelectedRepoKey(e.target.value)}
-                      disabled={loadingRepos || authorizingRepositories || !!importingRepo}
+          {isAuthenticated && githubWorkspaces.length > 0 && (
+            <Section>
+              <SectionHeader>
+                <SectionHeading>
+                  <SectionIcon className='ri-github-fill' aria-hidden='true' />
+                  <SectionTitle>GitHub</SectionTitle>
+                </SectionHeading>
+                <SectionMeta>
+                  {t('workspace.repositories', { count: githubWorkspaces.length })}
+                </SectionMeta>
+              </SectionHeader>
+              <WorkspaceList>
+                {githubWorkspaces.map((workspace) => (
+                  <WorkspaceRow key={workspace.id} href={getWorkspaceHref(workspace)}>
+                    <WorkspaceIcon $variant='github'>
+                      <i className='ri-github-fill' />
+                    </WorkspaceIcon>
+                    <WorkspaceMain>
+                      <WorkspaceName>{workspace.name}</WorkspaceName>
+                      <WorkspacePath>{workspace.sourceUrl || workspace.slug}</WorkspacePath>
+                    </WorkspaceMain>
+                    <WorkspaceTags>
+                      <WorkspaceTag>GitHub</WorkspaceTag>
+                      <WorkspaceTag>{formatWorkspaceDate(workspace.updatedAt)}</WorkspaceTag>
+                    </WorkspaceTags>
+                    <DeleteButton
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        handleDeleteWorkspace(workspace.id)
+                      }}
+                      aria-label={`Delete ${workspace.name}`}
+                      title={`Delete ${workspace.name}`}
                     >
-                      <option value=''>
-                        {loadingRepos ? 'Loading repositories...' : 'Select a repository'}
-                      </option>
-                      {repos.map((repo) => (
-                        <option key={getRepoKey(repo)} value={getRepoKey(repo)}>
-                          {repo.full_name}
-                        </option>
-                      ))}
-                    </RepoSelect>
-                  </ImportField>
+                      <i className='ri-delete-bin-line' />
+                    </DeleteButton>
+                  </WorkspaceRow>
+                ))}
+              </WorkspaceList>
+            </Section>
+          )}
 
-                  {(repoError || importError) && (
-                    <ErrorPanel>
-                      <i className='ri-error-warning-line' />
-                      <span>{repoError || importError}</span>
-                    </ErrorPanel>
-                  )}
+          {loadingWorkspaces && <LoadingText>{t('workspace.loading')}</LoadingText>}
 
-                  {!loadingRepos && repos.length === 0 && !repoError && (
-                    <SetupPanel>
-                      <SetupIcon>
-                        <i className='ri-github-fill' />
-                      </SetupIcon>
-                      <SetupCopy>
-                        <SetupTitle>No authorized repositories found</SetupTitle>
-                        <SetupText>
-                          Choose the GitHub repositories that MarkFlowy can import and edit.
-                        </SetupText>
-                      </SetupCopy>
-                      <ImportRepoButton
-                        type='button'
-                        onClick={handleAuthorizeRepositories}
-                        disabled={authorizingRepositories}
-                      >
-                        {authorizingRepositories ? 'Opening GitHub...' : 'Choose Repositories'}
-                      </ImportRepoButton>
-                    </SetupPanel>
-                  )}
+          {isAuthenticated && !loadingWorkspaces && workspaces.length === 0 && (
+            <EmptyPanel>
+              <i className='ri-inbox-2-line' />
+              <EmptyCopy>
+                <EmptyTitle>{t('workspace.emptyTitle')}</EmptyTitle>
+                <EmptyTextLine>{t('workspace.emptyDescription')}</EmptyTextLine>
+              </EmptyCopy>
+            </EmptyPanel>
+          )}
+        </SectionStack>
+      </WorkspaceShell>
+    </Content>
+  )
 
-                  {selectedRepo && (
-                    <SelectedRepoPanel>
-                      <RepoInfo>
-                        <RepoName>{selectedRepo.full_name}</RepoName>
-                        {selectedRepo.description && (
-                          <RepoDesc>{selectedRepo.description}</RepoDesc>
-                        )}
-                        <RepoMeta>
-                          <RepoTag $private={selectedRepo.private}>
-                            {selectedRepo.private ? 'Private' : 'Public'}
-                          </RepoTag>
-                          <RepoUpdated>
-                            Updated {new Date(selectedRepo.updated_at).toLocaleDateString()}
-                          </RepoUpdated>
-                        </RepoMeta>
-                      </RepoInfo>
-                    </SelectedRepoPanel>
-                  )}
+  const renderImportDialog = () => (
+    <ModalOverlay onClick={() => setShowImportModal(false)}>
+      <ModalContent onClick={(e) => e.stopPropagation()}>
+        <ModalHeader>
+          <ModalTitle>Import Workspace</ModalTitle>
+          <ModalClose onClick={() => setShowImportModal(false)} aria-label='Close' title='Close'>
+            <i className='ri-close-line' />
+          </ModalClose>
+        </ModalHeader>
+        <ModalBody>
+          {loadingGitHubConnection && <LoadingText>Checking GitHub connection...</LoadingText>}
 
-                  {selectedImportedWorkspace && (
-                    <NoticePanel>
-                      <i className='ri-checkbox-circle-line' />
-                      <span>This repository is already imported.</span>
-                      <ExistingWorkspaceLink href={getWorkspaceHref(selectedImportedWorkspace)}>
-                        Open
-                      </ExistingWorkspaceLink>
-                    </NoticePanel>
-                  )}
+          {!loadingGitHubConnection && githubConnectionError && (
+            <ErrorPanel>
+              <i className='ri-error-warning-line' />
+              <span>{githubConnectionError}</span>
+            </ErrorPanel>
+          )}
 
-                  <ModalActions>
-                    <ImportRepoButton
-                      onClick={() => selectedRepo && handleImportRepo(selectedRepo)}
-                      disabled={
-                        !selectedRepo ||
-                        !!selectedImportedWorkspace ||
-                        authorizingRepositories ||
-                        !!importingRepo
-                      }
-                    >
-                      {importingRepo === selectedRepo?.full_name
-                        ? 'Importing...'
-                        : 'Import Repository'}
-                    </ImportRepoButton>
-                  </ModalActions>
-                </ImportForm>
-              )}
-            </ModalBody>
-          </ModalContent>
-        </ModalOverlay>
+          {!loadingGitHubConnection && !githubConnectionError && !githubConnection?.linked && (
+            <SetupPanel>
+              <SetupIcon>
+                <i className='ri-github-fill' />
+              </SetupIcon>
+              <SetupCopy>
+                <SetupTitle>Connect GitHub first</SetupTitle>
+                <SetupText>
+                  Link your GitHub account in personal settings before importing a repository
+                  workspace.
+                </SetupText>
+              </SetupCopy>
+              <SetupLink href='/settings#github'>
+                Link GitHub
+                <i className='ri-arrow-right-line' />
+              </SetupLink>
+            </SetupPanel>
+          )}
+
+          {!loadingGitHubConnection &&
+            !githubConnectionError &&
+            githubConnection?.linked &&
+            renderImportForm()}
+        </ModalBody>
+      </ModalContent>
+    </ModalOverlay>
+  )
+
+  const renderImportActions = () => (
+    <ModalActions>
+      <ImportRepoButton
+        onClick={() => selectedRepo && handleImportRepo(selectedRepo)}
+        disabled={
+          !selectedRepo || !!selectedImportedWorkspace || authorizingRepositories || !!importingRepo
+        }
+      >
+        {importingRepo === selectedRepo?.full_name ? 'Importing...' : 'Import Repository'}
+      </ImportRepoButton>
+    </ModalActions>
+  )
+
+  const renderImportForm = () => (
+    <ImportForm>
+      <ImportField>
+        <FieldLabel htmlFor='github-repo-select'>GitHub repository</FieldLabel>
+        <RepoSelect
+          id='github-repo-select'
+          value={selectedRepoKey}
+          onChange={(e) => setSelectedRepoKey(e.target.value)}
+          disabled={loadingRepos || authorizingRepositories || !!importingRepo}
+        >
+          <option value=''>
+            {loadingRepos ? 'Loading repositories...' : 'Select a repository'}
+          </option>
+          {repos.map((repo) => (
+            <option key={getRepoKey(repo)} value={getRepoKey(repo)}>
+              {repo.full_name}
+            </option>
+          ))}
+        </RepoSelect>
+      </ImportField>
+
+      {(repoError || importError) && (
+        <ErrorPanel>
+          <i className='ri-error-warning-line' />
+          <span>{repoError || importError}</span>
+        </ErrorPanel>
       )}
+
+      {!loadingRepos && repos.length === 0 && !repoError && (
+        <SetupPanel>
+          <SetupIcon>
+            <i className='ri-github-fill' />
+          </SetupIcon>
+          <SetupCopy>
+            <SetupTitle>No authorized repositories found</SetupTitle>
+            <SetupText>
+              Choose the GitHub repositories that MarkFlowy can import and edit.
+            </SetupText>
+          </SetupCopy>
+          <ImportRepoButton
+            type='button'
+            onClick={handleAuthorizeRepositories}
+            disabled={authorizingRepositories}
+          >
+            {authorizingRepositories ? 'Opening GitHub...' : 'Choose Repositories'}
+          </ImportRepoButton>
+        </SetupPanel>
+      )}
+
+      {selectedRepo && (
+        <SelectedRepoPanel>
+          <RepoInfo>
+            <RepoName>{selectedRepo.full_name}</RepoName>
+            {selectedRepo.description && <RepoDesc>{selectedRepo.description}</RepoDesc>}
+            <RepoMeta>
+              <RepoTag $private={selectedRepo.private}>
+                {selectedRepo.private ? 'Private' : 'Public'}
+              </RepoTag>
+              <RepoUpdated>
+                Updated {new Date(selectedRepo.updated_at).toLocaleDateString()}
+              </RepoUpdated>
+            </RepoMeta>
+          </RepoInfo>
+        </SelectedRepoPanel>
+      )}
+
+      {selectedImportedWorkspace && (
+        <NoticePanel>
+          <i className='ri-checkbox-circle-line' />
+          <span>This repository is already imported.</span>
+          <ExistingWorkspaceLink href={getWorkspaceHref(selectedImportedWorkspace)}>
+            Open
+          </ExistingWorkspaceLink>
+        </NoticePanel>
+      )}
+
+      {renderImportActions()}
+    </ImportForm>
+  )
+
+  return (
+    <Container>
+      <SeoHead title={`${t('workspace.title')} | MarkFlowy`} />
+      {renderHeader()}
+
+      {renderWorkspaces()}
+
+      {showImportModal && renderImportDialog()}
     </Container>
   )
 }

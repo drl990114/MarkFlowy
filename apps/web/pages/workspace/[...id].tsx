@@ -162,6 +162,285 @@ function WorkspaceDetailPageContent() {
       : adapter.provider || 'Remote'
   }
 
+  const renderToolbar = () => (
+    <TopToolbar>
+      <ToolbarLeft>
+        <BackLink href='/workspace'>
+          <i className='ri-arrow-left-line' />
+          {t('workspace.title')}
+        </BackLink>
+      </ToolbarLeft>
+      <ToolbarCenter>
+        <WorkspaceInfo>
+          <WorkspaceIcon>
+            <i className={workspaceIconClass} />
+          </WorkspaceIcon>
+          <WorkspaceTitle>{workspaceTitle}</WorkspaceTitle>
+          {supportsRefs && refs.length > 0 && (
+            <BranchSelect
+              aria-label={`${refLabel} selector`}
+              title={refLabel}
+              value={currentRef || refs[0]?.name || ''}
+              disabled={loadingTree || saving}
+              onChange={(e) => handleRefChange(e.target.value)}
+            >
+              {refs.map((ref) => (
+                <option key={ref.name} value={ref.name}>
+                  {ref.name}
+                </option>
+              ))}
+            </BranchSelect>
+          )}
+        </WorkspaceInfo>
+      </ToolbarCenter>
+      {renderToolbarActions()}
+    </TopToolbar>
+  )
+
+  const renderPanels = () => (
+    <MainContent groupRef={setPanelGroup} disabled={compact}>
+      <Panel
+        className='mf-editor-panel'
+        data-section='files'
+        id='workspace-left'
+        defaultSize={compact ? '0%' : 240}
+        minSize={compact ? 0 : 200}
+        maxSize={compact ? '100%' : 320}
+        collapsible={compact}
+        inert={compact && mobileView !== 'files'}
+      >
+        {renderFileSidebar()}
+      </Panel>
+
+      <StyleSeparator className='mf-editor-separator' />
+
+      <Panel
+        className='mf-editor-panel'
+        data-section='editor'
+        id='workspace-center'
+        minSize={compact ? 0 : 320}
+        defaultSize={compact ? '100%' : undefined}
+        collapsible={compact}
+        inert={compact && mobileView !== 'editor'}
+        groupResizeBehavior='preserve-relative-size'
+      >
+        {renderEditorArea()}
+      </Panel>
+
+      <StyleSeparator className='mf-editor-separator' />
+
+      <Panel
+        className='mf-editor-panel'
+        data-section='outline'
+        id='workspace-right'
+        defaultSize={compact ? '0%' : 220}
+        minSize={compact ? 0 : 180}
+        maxSize={compact ? '100%' : 340}
+        collapsible={compact}
+        inert={compact && mobileView !== 'outline'}
+      >
+        <RightSidebar>
+          <SideBarHeader name={t('workspace.outline')} />
+          <TocContainer>
+            <TableOfContents
+              headingsData={currentHeadings}
+              variant='sidebar'
+              compact={false}
+              pinned
+            />
+          </TocContainer>
+        </RightSidebar>
+      </Panel>
+    </MainContent>
+  )
+
+  const renderStatusBar = () => (
+    <StatusBar>
+      <StatusLeft>
+        <StatusItem>
+          <i className={statusIconClass} />
+          {statusText}
+        </StatusItem>
+        {stagedFiles.length > 0 && (
+          <StatusItem $accent>
+            {stagedFiles.length} staged {stagedFiles.length === 1 ? 'file' : 'files'}
+          </StatusItem>
+        )}
+      </StatusLeft>
+      <StatusRight>
+        <StatusItem>
+          {t(
+            `workspace.${viewType === 'wysiwyg' ? 'editor' : viewType === 'preview' ? 'previewMode' : 'source'}`,
+          )}
+        </StatusItem>
+        <StatusItem>{t('workspace.headingCount', { count: currentHeadings.length })}</StatusItem>
+      </StatusRight>
+    </StatusBar>
+  )
+
+  const renderToolbarActions = () => (
+    <ToolbarRight>
+      <ThemeSwitcher />
+      <Actions>
+        <FileChip>
+          <i className='ri-file-text-line' />
+          {currentFileName}
+          {currentFileState?.isDirty && ' *'}
+        </FileChip>
+        {canWrite && activeId && currentFileState && (
+          <>
+            <CommitInput
+              value={commitMessage}
+              onChange={(e) => setCommitMessage(e.target.value)}
+              aria-label={t(isGitHubProvider ? 'workspace.commitMessage' : 'workspace.saveMessage')}
+              placeholder={t(
+                isGitHubProvider ? 'workspace.commitMessage' : 'workspace.saveMessage',
+              )}
+            />
+            <SaveButton
+              type='button'
+              onClick={handleSave}
+              disabled={saving}
+              aria-disabled={saving || stagedFiles.length === 0}
+              $status={saveStatus}
+              aria-label={
+                saveStatus === 'saving'
+                  ? `Saving ${stagedFiles.length} staged files`
+                  : saveStatus === 'saved'
+                    ? 'All staged files saved'
+                    : stagedFiles.length === 0
+                      ? 'No staged files to save'
+                      : `Save ${stagedFiles.length} staged files`
+              }
+            >
+              <SaveButtonViewport aria-hidden='true'>
+                <SaveButtonState $visible={saveStatus === 'idle'}>
+                  {t('workspace.save')}
+                  {stagedFiles.length > 1 ? ` ${stagedFiles.length}` : ''}
+                </SaveButtonState>
+                <SaveButtonState $visible={saveStatus === 'saving'}>
+                  <SaveSpinner className='ri-loader-4-line' />
+                  {t('workspace.saving')}
+                </SaveButtonState>
+                <SaveButtonState $visible={saveStatus === 'saved'}>
+                  <i className='ri-check-line' />
+                  {t('workspace.saved')}
+                </SaveButtonState>
+              </SaveButtonViewport>
+            </SaveButton>
+            <SaveAnnouncement role='status' aria-live='polite'>
+              {saveStatus === 'saving'
+                ? 'Saving staged files'
+                : saveStatus === 'saved'
+                  ? 'All staged files saved'
+                  : ''}
+            </SaveAnnouncement>
+          </>
+        )}
+      </Actions>
+    </ToolbarRight>
+  )
+
+  const renderFileSidebar = () => (
+    <LeftSidebar>
+      <SideBarHeader name={t('workspace.files')} />
+      <FileTreeWrapper ref={fileTreeRef}>
+        {loadingTree ? (
+          <LoadingText>{t('workspace.loadingFiles')}</LoadingText>
+        ) : (
+          fileTreeRef.current && (
+            <FileTree
+              data={folderData}
+              onSelect={handleSelect}
+              dndRootElement={fileTreeRef.current}
+              disableDrag={true}
+              disableFileOperations={isRemoteWorkspace}
+              fillFlexParentComponent={FillFlexParent}
+              onShowConfirm={handleShowConfirm}
+              onShowContextMenu={
+                isRemoteWorkspace ? ignoreFileTreeContextMenu : handleShowContextMenu
+              }
+              getFileObject={getFileObject}
+              getFileObjectByPath={getFileObjectByPath}
+            />
+          )
+        )}
+      </FileTreeWrapper>
+      <StagedPanel aria-label={t('workspace.staged')}>
+        <StagedHeader>
+          <StagedTitle>
+            <i className='ri-git-commit-line' aria-hidden='true' />
+            {t('workspace.staged')}
+          </StagedTitle>
+          <StagedCount>{stagedFiles.length}</StagedCount>
+        </StagedHeader>
+        <StagedList>
+          {stagedFiles.length === 0 ? (
+            <StagedEmpty>{t('workspace.stagedEmpty')}</StagedEmpty>
+          ) : (
+            stagedFiles.map(({ file, fileId }) => (
+              <StagedItemButton
+                key={fileId}
+                type='button'
+                $active={activeId === fileId}
+                onClick={() => {
+                  handleSelect(file)
+                  setMobileView('editor')
+                }}
+                aria-current={activeId === fileId ? 'page' : undefined}
+                title={file.path}
+              >
+                <StagedFileIcon className='ri-file-text-line' aria-hidden='true' />
+                <StagedFileText>
+                  <StagedFileName>{file.name}</StagedFileName>
+                  {file.path && file.path !== file.name && (
+                    <StagedFilePath>{file.path}</StagedFilePath>
+                  )}
+                </StagedFileText>
+                <StagedDot aria-hidden='true' />
+              </StagedItemButton>
+            ))
+          )}
+        </StagedList>
+      </StagedPanel>
+    </LeftSidebar>
+  )
+
+  const renderEditorArea = () => (
+    <CenterArea>
+      <EditorToolbar viewType={viewType} onViewTypeChange={setViewType} />
+      <EditorContent ref={tocRef}>
+        {loadingFile && (
+          <EditorLoading>
+            <LoadingText>{t('workspace.loadingFile')}</LoadingText>
+          </EditorLoading>
+        )}
+        {!loadingFile && opened.length === 0 && (
+          <EditorEmpty>
+            <EmptyIcon className='ri-file-list-3-line' />
+            <EmptyText>{t('workspace.noFile')}</EmptyText>
+          </EditorEmpty>
+        )}
+        {opened.map((fileId) => {
+          const fileState = fileStateMap[fileId]
+          if (!fileState) return null
+          return (
+            <EditorWrapper key={fileId} $active={activeId === fileId}>
+              <Editor
+                fileId={fileId}
+                initialContent={fileState.content}
+                onChange={(content) => handleChange(fileId, content)}
+                viewType={viewType}
+                active={activeId === fileId}
+                editable={!isRemoteWorkspace || canWrite}
+              />
+            </EditorWrapper>
+          )
+        })}
+      </EditorContent>
+    </CenterArea>
+  )
+
   return (
     <WebFileSystemProvider readSubdirectory={handleReadSubdirectory}>
       <FileTreeProvider
@@ -172,99 +451,7 @@ function WorkspaceDetailPageContent() {
       >
         <Container data-mobile-view={mobileView}>
           <SeoHead title={`${workspaceTitle} | MarkFlowy`} />
-          <TopToolbar>
-            <ToolbarLeft>
-              <BackLink href='/workspace'>
-                <i className='ri-arrow-left-line' />
-                {t('workspace.title')}
-              </BackLink>
-            </ToolbarLeft>
-            <ToolbarCenter>
-              <WorkspaceInfo>
-                <WorkspaceIcon>
-                  <i className={workspaceIconClass} />
-                </WorkspaceIcon>
-                <WorkspaceTitle>{workspaceTitle}</WorkspaceTitle>
-                {supportsRefs && refs.length > 0 && (
-                  <BranchSelect
-                    aria-label={`${refLabel} selector`}
-                    title={refLabel}
-                    value={currentRef || refs[0]?.name || ''}
-                    disabled={loadingTree || saving}
-                    onChange={(e) => handleRefChange(e.target.value)}
-                  >
-                    {refs.map((ref) => (
-                      <option key={ref.name} value={ref.name}>
-                        {ref.name}
-                      </option>
-                    ))}
-                  </BranchSelect>
-                )}
-              </WorkspaceInfo>
-            </ToolbarCenter>
-            <ToolbarRight>
-              <ThemeSwitcher />
-              <Actions>
-                <FileChip>
-                  <i className='ri-file-text-line' />
-                  {currentFileName}
-                  {currentFileState?.isDirty && ' *'}
-                </FileChip>
-                {canWrite && activeId && currentFileState && (
-                  <>
-                    <CommitInput
-                      value={commitMessage}
-                      onChange={(e) => setCommitMessage(e.target.value)}
-                      aria-label={t(
-                        isGitHubProvider ? 'workspace.commitMessage' : 'workspace.saveMessage',
-                      )}
-                      placeholder={t(
-                        isGitHubProvider ? 'workspace.commitMessage' : 'workspace.saveMessage',
-                      )}
-                    />
-                    <SaveButton
-                      type='button'
-                      onClick={handleSave}
-                      disabled={saving}
-                      aria-disabled={saving || stagedFiles.length === 0}
-                      $status={saveStatus}
-                      aria-label={
-                        saveStatus === 'saving'
-                          ? `Saving ${stagedFiles.length} staged files`
-                          : saveStatus === 'saved'
-                            ? 'All staged files saved'
-                            : stagedFiles.length === 0
-                              ? 'No staged files to save'
-                              : `Save ${stagedFiles.length} staged files`
-                      }
-                    >
-                      <SaveButtonViewport aria-hidden='true'>
-                        <SaveButtonState $visible={saveStatus === 'idle'}>
-                          {t('workspace.save')}
-                          {stagedFiles.length > 1 ? ` ${stagedFiles.length}` : ''}
-                        </SaveButtonState>
-                        <SaveButtonState $visible={saveStatus === 'saving'}>
-                          <SaveSpinner className='ri-loader-4-line' />
-                          {t('workspace.saving')}
-                        </SaveButtonState>
-                        <SaveButtonState $visible={saveStatus === 'saved'}>
-                          <i className='ri-check-line' />
-                          {t('workspace.saved')}
-                        </SaveButtonState>
-                      </SaveButtonViewport>
-                    </SaveButton>
-                    <SaveAnnouncement role='status' aria-live='polite'>
-                      {saveStatus === 'saving'
-                        ? 'Saving staged files'
-                        : saveStatus === 'saved'
-                          ? 'All staged files saved'
-                          : ''}
-                    </SaveAnnouncement>
-                  </>
-                )}
-              </Actions>
-            </ToolbarRight>
-          </TopToolbar>
+          {renderToolbar()}
 
           {error && <ErrorBanner>{error}</ErrorBanner>}
 
@@ -280,175 +467,8 @@ function WorkspaceDetailPageContent() {
               </MobilePanelButton>
             ))}
           </MobilePanelNavigation>
-          <MainContent groupRef={setPanelGroup} disabled={compact}>
-            <Panel
-              className='mf-editor-panel'
-              data-section='files'
-              id='workspace-left'
-              defaultSize={compact ? '0%' : 240}
-              minSize={compact ? 0 : 200}
-              maxSize={compact ? '100%' : 320}
-              collapsible={compact}
-              inert={compact && mobileView !== 'files'}
-            >
-              <LeftSidebar>
-                <SideBarHeader name={t('workspace.files')} />
-                <FileTreeWrapper ref={fileTreeRef}>
-                  {loadingTree ? (
-                    <LoadingText>{t('workspace.loadingFiles')}</LoadingText>
-                  ) : (
-                    fileTreeRef.current && (
-                      <FileTree
-                        data={folderData}
-                        onSelect={handleSelect}
-                        dndRootElement={fileTreeRef.current}
-                        disableDrag={true}
-                        disableFileOperations={isRemoteWorkspace}
-                        fillFlexParentComponent={FillFlexParent}
-                        onShowConfirm={handleShowConfirm}
-                        onShowContextMenu={
-                          isRemoteWorkspace ? ignoreFileTreeContextMenu : handleShowContextMenu
-                        }
-                        getFileObject={getFileObject}
-                        getFileObjectByPath={getFileObjectByPath}
-                      />
-                    )
-                  )}
-                </FileTreeWrapper>
-                <StagedPanel aria-label={t('workspace.staged')}>
-                  <StagedHeader>
-                    <StagedTitle>
-                      <i className='ri-git-commit-line' aria-hidden='true' />
-                      {t('workspace.staged')}
-                    </StagedTitle>
-                    <StagedCount>{stagedFiles.length}</StagedCount>
-                  </StagedHeader>
-                  <StagedList>
-                    {stagedFiles.length === 0 ? (
-                      <StagedEmpty>{t('workspace.stagedEmpty')}</StagedEmpty>
-                    ) : (
-                      stagedFiles.map(({ file, fileId }) => (
-                        <StagedItemButton
-                          key={fileId}
-                          type='button'
-                          $active={activeId === fileId}
-                          onClick={() => {
-                            handleSelect(file)
-                            setMobileView('editor')
-                          }}
-                          aria-current={activeId === fileId ? 'page' : undefined}
-                          title={file.path}
-                        >
-                          <StagedFileIcon className='ri-file-text-line' aria-hidden='true' />
-                          <StagedFileText>
-                            <StagedFileName>{file.name}</StagedFileName>
-                            {file.path && file.path !== file.name && (
-                              <StagedFilePath>{file.path}</StagedFilePath>
-                            )}
-                          </StagedFileText>
-                          <StagedDot aria-hidden='true' />
-                        </StagedItemButton>
-                      ))
-                    )}
-                  </StagedList>
-                </StagedPanel>
-              </LeftSidebar>
-            </Panel>
-
-            <StyleSeparator className='mf-editor-separator' />
-
-            <Panel
-              className='mf-editor-panel'
-              data-section='editor'
-              id='workspace-center'
-              minSize={compact ? 0 : 320}
-              defaultSize={compact ? '100%' : undefined}
-              collapsible={compact}
-              inert={compact && mobileView !== 'editor'}
-              groupResizeBehavior='preserve-relative-size'
-            >
-              <CenterArea>
-                <EditorToolbar viewType={viewType} onViewTypeChange={setViewType} />
-                <EditorContent ref={tocRef}>
-                  {loadingFile && (
-                    <EditorLoading>
-                      <LoadingText>{t('workspace.loadingFile')}</LoadingText>
-                    </EditorLoading>
-                  )}
-                  {!loadingFile && opened.length === 0 && (
-                    <EditorEmpty>
-                      <EmptyIcon className='ri-file-list-3-line' />
-                      <EmptyText>{t('workspace.noFile')}</EmptyText>
-                    </EditorEmpty>
-                  )}
-                  {opened.map((fileId) => {
-                    const fileState = fileStateMap[fileId]
-                    if (!fileState) return null
-                    return (
-                      <EditorWrapper key={fileId} $active={activeId === fileId}>
-                        <Editor
-                          fileId={fileId}
-                          initialContent={fileState.content}
-                          onChange={(content) => handleChange(fileId, content)}
-                          viewType={viewType}
-                          active={activeId === fileId}
-                          editable={!isRemoteWorkspace || canWrite}
-                        />
-                      </EditorWrapper>
-                    )
-                  })}
-                </EditorContent>
-              </CenterArea>
-            </Panel>
-
-            <StyleSeparator className='mf-editor-separator' />
-
-            <Panel
-              className='mf-editor-panel'
-              data-section='outline'
-              id='workspace-right'
-              defaultSize={compact ? '0%' : 220}
-              minSize={compact ? 0 : 180}
-              maxSize={compact ? '100%' : 340}
-              collapsible={compact}
-              inert={compact && mobileView !== 'outline'}
-            >
-              <RightSidebar>
-                <SideBarHeader name={t('workspace.outline')} />
-                <TocContainer>
-                  <TableOfContents
-                    headingsData={currentHeadings}
-                    variant='sidebar'
-                    compact={false}
-                    pinned
-                  />
-                </TocContainer>
-              </RightSidebar>
-            </Panel>
-          </MainContent>
-          <StatusBar>
-            <StatusLeft>
-              <StatusItem>
-                <i className={statusIconClass} />
-                {statusText}
-              </StatusItem>
-              {stagedFiles.length > 0 && (
-                <StatusItem $accent>
-                  {stagedFiles.length} staged {stagedFiles.length === 1 ? 'file' : 'files'}
-                </StatusItem>
-              )}
-            </StatusLeft>
-            <StatusRight>
-              <StatusItem>
-                {t(
-                  `workspace.${viewType === 'wysiwyg' ? 'editor' : viewType === 'preview' ? 'previewMode' : 'source'}`,
-                )}
-              </StatusItem>
-              <StatusItem>
-                {t('workspace.headingCount', { count: currentHeadings.length })}
-              </StatusItem>
-            </StatusRight>
-          </StatusBar>
+          {renderPanels()}
+          {renderStatusBar()}
           <ContextMenu />
         </Container>
       </FileTreeProvider>

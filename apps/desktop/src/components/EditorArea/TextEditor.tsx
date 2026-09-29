@@ -1030,7 +1030,8 @@ function TextEditor(props: TextEditorProps) {
   const { id, active, visible = active, fileTypeConfig, groupId, onLoadingChange } = props
   const isHtml = fileTypeConfig.type === 'html'
   const isCapricornView = useCallback(
-    (mode: EditorViewTypeValue) => fileTypeConfig.type === 'markdown' && isCapricornEditorView(mode),
+    (mode: EditorViewTypeValue) =>
+      fileTypeConfig.type === 'markdown' && isCapricornEditorView(mode),
     [fileTypeConfig.type],
   )
   const cachedFile = getFileObject(id)
@@ -1117,7 +1118,9 @@ function TextEditor(props: TextEditorProps) {
   )
   const editorPlaceholder = useAppSettingStore((state) => state.settingData.editor_placeholder)
   const semanticTheme = useContext(SemanticThemeContext)
-  const editorSourceFontSize = useAppSettingStore((state) => state.settingData.editor_source_font_size)
+  const editorSourceFontSize = useAppSettingStore(
+    (state) => state.settingData.editor_source_font_size,
+  )
   const editorSourceLineHeight = useAppSettingStore(
     (state) => state.settingData.editor_source_line_height,
   )
@@ -1146,8 +1149,12 @@ function TextEditor(props: TextEditorProps) {
     // The factory reads stores directly; subscriptions invalidate its settings.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
-      id, remoteImages, editorPlaceholder, editorTypewriterScroll,
-      livePreviewBlockBehavior, editorKeybingMap,
+      id,
+      remoteImages,
+      editorPlaceholder,
+      editorTypewriterScroll,
+      livePreviewBlockBehavior,
+      editorKeybingMap,
     ],
   )
   const externalChangeState = useExternalFileChangeStore((state) => {
@@ -1170,8 +1177,7 @@ function TextEditor(props: TextEditorProps) {
   const currentViewTypeRef = useRef(currentViewType)
   currentViewTypeRef.current = currentViewType
   const needsRmeRuntime =
-    !isCapricornView(currentViewType) &&
-    (!isHtml || currentViewType === EditorViewType.SOURCECODE)
+    !isCapricornView(currentViewType) && (!isHtml || currentViewType === EditorViewType.SOURCECODE)
   const {
     runtime: rmeRuntime,
     error: rmeLoadError,
@@ -1183,7 +1189,9 @@ function TextEditor(props: TextEditorProps) {
   const modeRequestRef = useRef(0)
   useEffect(() => {
     if (!active || !visible) setPreparingMode(null)
-    return () => { modeRequestRef.current += 1 }
+    return () => {
+      modeRequestRef.current += 1
+    }
   }, [active, visible])
   const [content, setContent] = useState<string | undefined>()
   const [delegate, setDelegate] = useState<ReturnType<typeof createDelegate> | null>(null)
@@ -1557,6 +1565,56 @@ function TextEditor(props: TextEditorProps) {
       return false
     }
 
+    const loadFilePath = async (path: string) => {
+      recordEditorOpenStage(openRequestId, 'read-start')
+      const startupRead = activeRef.current ? takeStartupDocumentRead(id, path) : undefined
+      const preparedSnapshot = startupRead ? await startupRead : undefined
+      if (canceled) return
+      const snapshot =
+        preparedSnapshot ??
+        (await readStableFileSnapshot(path, {
+          reuseInFlight: true,
+          signal: readController.signal,
+          scope: useEditorStore.getState().folderData?.[0],
+          priority: activeRef.current ? 'foreground' : 'visible',
+        }))
+      recordEditorOpenStage(openRequestId, 'read-end')
+      if (keepNewerContent()) return
+      if (snapshot.status === 'unstable') {
+        finishEditorOpenMeasurement(openRequestId, 'error')
+        toast.error(i18n.t('external_file_change.read_failed'))
+        return setStatus(TextEditorStatus.READERROR)
+      }
+      if (snapshot.status === 'success') {
+        recordEditorOpenContent(openRequestId, snapshot.content)
+        fileSaveCoordinator.loadSnapshot(id, snapshot)
+        void observeHistoryFile(id, snapshot.content).catch((error) =>
+          logger.error('History baseline failed', error),
+        )
+        setContent(snapshot.content)
+        updateCachedFileContent(snapshot.content)
+        recordEditorOpenStage(openRequestId, 'host-content-ready', {
+          contentRevision: fileSaveCoordinator.getRevision(id),
+        })
+        return setStatus(TextEditorStatus.SUCCESS)
+      }
+
+      const res = snapshot.result
+      finishEditorOpenMeasurement(openRequestId, 'error')
+      if (res.code === FileResultCode.NotFound) {
+        useRecentFilesStore.getState().removePath(path)
+        return setStatus(TextEditorStatus.NOTEXIST)
+      }
+      if (String(res.code) === 'Binary') {
+        return setStatus(TextEditorStatus.BINARY)
+      }
+      if (res.code !== FileResultCode.Success) {
+        toast.error(res.content)
+        return setStatus(TextEditorStatus.READERROR)
+      }
+      return setStatus(TextEditorStatus.SUCCESS)
+    }
+
     const init = async () => {
       const editorState = useEditorStateStore.getState().idStateMap.get(file.id)
 
@@ -1576,54 +1634,8 @@ function TextEditor(props: TextEditorProps) {
         return setStatus(TextEditorStatus.SUCCESS)
       }
 
-      if (file.path) {
-        recordEditorOpenStage(openRequestId, 'read-start')
-        const startupRead = activeRef.current ? takeStartupDocumentRead(id, file.path) : undefined
-        const preparedSnapshot = startupRead ? await startupRead : undefined
-        if (canceled) return
-        const snapshot =
-          preparedSnapshot ??
-          (await readStableFileSnapshot(file.path, {
-            reuseInFlight: true,
-            signal: readController.signal,
-            scope: useEditorStore.getState().folderData?.[0],
-            priority: activeRef.current ? 'foreground' : 'visible',
-          }))
-        recordEditorOpenStage(openRequestId, 'read-end')
-        if (keepNewerContent()) return
-        if (snapshot.status === 'unstable') {
-          finishEditorOpenMeasurement(openRequestId, 'error')
-          toast.error(i18n.t('external_file_change.read_failed'))
-          return setStatus(TextEditorStatus.READERROR)
-        }
-        if (snapshot.status === 'success') {
-          recordEditorOpenContent(openRequestId, snapshot.content)
-          fileSaveCoordinator.loadSnapshot(id, snapshot)
-          void observeHistoryFile(id, snapshot.content).catch((error) =>
-            logger.error('History baseline failed', error),
-          )
-          setContent(snapshot.content)
-          updateCachedFileContent(snapshot.content)
-          recordEditorOpenStage(openRequestId, 'host-content-ready', {
-            contentRevision: fileSaveCoordinator.getRevision(id),
-          })
-          return setStatus(TextEditorStatus.SUCCESS)
-        }
-
-        const res = snapshot.result
-        finishEditorOpenMeasurement(openRequestId, 'error')
-        if (res.code === FileResultCode.NotFound) {
-          useRecentFilesStore.getState().removePath(file.path)
-          return setStatus(TextEditorStatus.NOTEXIST)
-        }
-        if (String(res.code) === 'Binary') {
-          return setStatus(TextEditorStatus.BINARY)
-        }
-        if (res.code !== FileResultCode.Success) {
-          toast.error(res.content)
-          return setStatus(TextEditorStatus.READERROR)
-        }
-      } else if (file.content !== undefined) {
+      if (file.path) return loadFilePath(file.path)
+      if (file.content !== undefined) {
         if (canceled) return
         fileSaveCoordinator.recordContent(id, file.content)
         recordEditorOpenStage(openRequestId, 'cache-ready')
@@ -1663,7 +1675,8 @@ function TextEditor(props: TextEditorProps) {
       currentViewType !== EditorViewType.SOURCECODE ||
       delegate ||
       !rmeRuntime
-    ) return
+    )
+      return
     const newDelegate = createDelegate(rmeRuntime, fileTypeConfig.type)
     setDelegate(newDelegate)
     registerEditorDelegateResource(id, instanceIdRef.current!, newDelegate, activeRef.current)
@@ -1672,15 +1685,19 @@ function TextEditor(props: TextEditorProps) {
   const saveHandler = useCallback(
     async (params: SaveHandlerParams = {}) => {
       return runSaveOperation(async () => {
-        if (!active && !params.active) return false
-        if (
-          params.autosave &&
-          (!useAppSettingStore.getState().settingData.autosave ||
-            isHistoryAutosavePaused(id) ||
-            fileSaveCoordinator.getTextMetadata(id).decoding.needsConfirmation ||
-            !getFileObject(id)?.path)
-        )
-          return false
+        const canBeginSave = () => {
+          if (!active && !params.active) return false
+          if (
+            params.autosave &&
+            (!useAppSettingStore.getState().settingData.autosave ||
+              isHistoryAutosavePaused(id) ||
+              fileSaveCoordinator.getTextMetadata(id).decoding.needsConfirmation ||
+              !getFileObject(id)?.path)
+          )
+            return false
+          return true
+        }
+        if (!canBeginSave()) return false
 
         const fileBeforeFlush = getFileObject(id) ?? curFile
         if (!fileBeforeFlush) return false
@@ -1705,12 +1722,14 @@ function TextEditor(props: TextEditorProps) {
         )
           return false
         const initialFile = getFileObject(id) ?? fileBeforeFlush
-        const sharedContent =
-          typeof initialFile.content === 'string'
+        const readSharedContent = () => {
+          return typeof initialFile.content === 'string'
             ? initialFile.content
             : editorContextRef.current?.state.doc && delegate
               ? delegate.docToString(editorContextRef.current.state.doc)
               : undefined
+        }
+        const sharedContent = readSharedContent()
         if (typeof sharedContent !== 'string') return false
 
         fileSaveCoordinator.recordContent(id, sharedContent)
@@ -1729,171 +1748,173 @@ function TextEditor(props: TextEditorProps) {
               return true
             }
 
-            try {
-              if (!fileToSave.path) {
-                if (!selectedSaveAsPath) {
-                  if (noFileSaveingRef.current) return false
+            const saveNewFile = async () => {
+              if (!selectedSaveAsPath) {
+                if (noFileSaveingRef.current) return false
 
-                  noFileSaveingRef.current = true
-                  let selectedPath: string | null
-                  try {
-                    selectedPath = await save({
-                      title: t('file.save_dialog_title'),
-                      defaultPath: fileToSave.name ?? `${t('file.untitled')}.md`,
-                    })
-                  } finally {
-                    noFileSaveingRef.current = false
-                  }
-
-                  if (!selectedPath) return false
-                  selectedSaveAsPath = selectedPath
+                noFileSaveingRef.current = true
+                let selectedPath: string | null
+                try {
+                  selectedPath = await save({
+                    title: t('file.save_dialog_title'),
+                    defaultPath: fileToSave.name ?? `${t('file.untitled')}.md`,
+                  })
+                } finally {
+                  noFileSaveingRef.current = false
                 }
 
-                const targetPath = selectedSaveAsPath
-                const comparePaths = memoizePathRelationResolver(comparePathRelation)
-                let blockedByDirtyTarget = false
-                let expectedRevision: string | undefined
-                let writeConflict = false
-                let writtenRevision: string | undefined
-                const saved = await runReservedSaveAs({
-                  applyReservationUpdate: (update) => flushSync(update),
-                  collectCollisions: () => collectSaveAsCollisions(targetPath, id, comparePaths),
-                  collectPostWriteReplaceIds: () => collectSaveAsReplaceIds(targetPath, id),
-                  coordinator: savePathCoordinator,
-                  isDirty: (fileId) => {
-                    const dirty = !!useEditorStateStore.getState().idStateMap.get(fileId)
-                      ?.hasUnsavedChanges
-                    blockedByDirtyTarget ||= dirty
-                    return dirty
-                  },
-                  ownerFileId: id,
-                  onUnexpectedDirty: () => {
-                    toast.error('The target changed during saving and was kept open.')
-                  },
-                  path: targetPath,
-                  prepareWrite: async () => {
-                    expectedRevision = await getFileWriteRevision(targetPath)
-                  },
-                  replaceCollisions: (collisionIds) => {
-                    const editorStore = useEditorStore.getState()
-                    const editorStateStore = useEditorStateStore.getState()
-                    collisionIds.forEach((collisionId) => {
-                      editorStore.delOpenedFile(collisionId)
-                      editorStateStore.delIdStateMap(collisionId)
-                      deleteFileObject(collisionId)
-                    })
-
-                    const filename = getFileNameFromPath(targetPath)
-                    const savedFile = getFileObject(fileToSave.id)
-                      ? updateFile({
-                          id: fileToSave.id,
-                          path: targetPath,
-                          name: filename,
-                        })
-                      : updateFile({
-                          ...fileToSave,
-                          content: fileContent,
-                          path: targetPath,
-                          name: filename,
-                        })
-                    insertNodeToFolderData(savedFile, collisionIds)
-                  },
-                  syncProtectedAliases: (aliasIds) => {
-                    const editorStore = useEditorStore.getState()
-                    closeCleanPhysicalAliases({
-                      aliasIds: aliasIds.filter((aliasId) => editorStore.opened.includes(aliasId)),
-                      closeTab: editorStore.delOpenedFile,
-                      content: fileContent,
-                      getFile: getFileObject,
-                      updateFile: (file) => {
-                        updateFile(file)
-                      },
-                    })
-                  },
-                  write: async () => {
-                    if (!expectedRevision) return false
-                    const writeResult = await conditionalWriteExpectedIfAllowed(
-                      targetPath,
-                      fileContent,
-                      expectedRevision,
-                      () =>
-                        !isExternalFileSaveBlocked(id) &&
-                        (!params.autosave ||
-                          (useAppSettingStore.getState().settingData.autosave &&
-                            !isHistoryAutosavePaused(id))) &&
-                        (params.expectedContent === undefined ||
-                          useEditorStore.getState().getEditorContent(id) ===
-                            params.expectedContent),
-                      undefined,
-                      params.autosave ? 'autosave' : 'save',
-                      { ...textOptions, originalFormat: undefined },
-                    )
-                    if (writeResult.status === 'blocked') return false
-                    if (writeResult.status === 'conflict') {
-                      writeConflict = true
-                      return false
-                    }
-                    writtenRevision = writeResult.revision
-                    return true
-                  },
-                })
-
-                if (saved && writtenRevision) {
-                  fileSaveCoordinator.acknowledgeSaved(id, saveSnapshot, writtenRevision)
-                }
-
-                if (!saved && blockedByDirtyTarget) {
-                  toast.error('Save the target file before overwriting it.')
-                } else if (!saved && writeConflict) {
-                  toast.error('The target changed in another window. Save again to retry.')
-                }
-                return saved
-              } else {
-                const expectedRevision = fileSaveCoordinator.getDiskRevision(id)
-                if (!expectedRevision) {
-                  const diskSnapshot = await readStableFileSnapshot(fileToSave.path)
-                  if (diskSnapshot.status === 'success') {
-                    markExternalFileConflict(id, diskSnapshot.revision)
-                  } else {
-                    toast.error(t('external_file_change.read_failed'))
-                  }
-                  return false
-                }
-
-                const queuedWrite = await runQueuedFileWrite({
-                  coordinator: savePathCoordinator,
-                  getCurrentPath: () => getFileObject(id)?.path,
-                  write: (currentPath) =>
-                    conditionalWriteExpectedIfAllowed(
-                      currentPath,
-                      fileContent,
-                      expectedRevision,
-                      () =>
-                        !isExternalFileSaveBlocked(id) &&
-                        (!params.autosave ||
-                          (useAppSettingStore.getState().settingData.autosave &&
-                            !isHistoryAutosavePaused(id))) &&
-                        (params.expectedContent === undefined ||
-                          useEditorStore.getState().getEditorContent(id) ===
-                            params.expectedContent),
-                      undefined,
-                      params.autosave ? 'autosave' : 'save',
-                      textOptions,
-                    ),
-                })
-                if (queuedWrite.status === 'missing-path') return false
-                if (queuedWrite.value.status === 'blocked') return false
-                if (queuedWrite.value.status === 'conflict') {
-                  markExternalFileConflict(id, queuedWrite.value.revision)
-                  return false
-                }
-                fileSaveCoordinator.acknowledgeSaved(id, saveSnapshot, queuedWrite.value.revision)
+                if (!selectedPath) return false
+                selectedSaveAsPath = selectedPath
               }
 
+              const targetPath = selectedSaveAsPath
+              const comparePaths = memoizePathRelationResolver(comparePathRelation)
+              let blockedByDirtyTarget = false
+              let expectedRevision: string | undefined
+              let writeConflict = false
+              let writtenRevision: string | undefined
+              const saved = await runReservedSaveAs({
+                applyReservationUpdate: (update) => flushSync(update),
+                collectCollisions: () => collectSaveAsCollisions(targetPath, id, comparePaths),
+                collectPostWriteReplaceIds: () => collectSaveAsReplaceIds(targetPath, id),
+                coordinator: savePathCoordinator,
+                isDirty: (fileId) => {
+                  const dirty = !!useEditorStateStore.getState().idStateMap.get(fileId)
+                    ?.hasUnsavedChanges
+                  blockedByDirtyTarget ||= dirty
+                  return dirty
+                },
+                ownerFileId: id,
+                onUnexpectedDirty: () => {
+                  toast.error('The target changed during saving and was kept open.')
+                },
+                path: targetPath,
+                prepareWrite: async () => {
+                  expectedRevision = await getFileWriteRevision(targetPath)
+                },
+                replaceCollisions: (collisionIds) => {
+                  const editorStore = useEditorStore.getState()
+                  const editorStateStore = useEditorStateStore.getState()
+                  collisionIds.forEach((collisionId) => {
+                    editorStore.delOpenedFile(collisionId)
+                    editorStateStore.delIdStateMap(collisionId)
+                    deleteFileObject(collisionId)
+                  })
+
+                  const filename = getFileNameFromPath(targetPath)
+                  const savedFile = getFileObject(fileToSave.id)
+                    ? updateFile({
+                        id: fileToSave.id,
+                        path: targetPath,
+                        name: filename,
+                      })
+                    : updateFile({
+                        ...fileToSave,
+                        content: fileContent,
+                        path: targetPath,
+                        name: filename,
+                      })
+                  insertNodeToFolderData(savedFile, collisionIds)
+                },
+                syncProtectedAliases: (aliasIds) => {
+                  const editorStore = useEditorStore.getState()
+                  closeCleanPhysicalAliases({
+                    aliasIds: aliasIds.filter((aliasId) => editorStore.opened.includes(aliasId)),
+                    closeTab: editorStore.delOpenedFile,
+                    content: fileContent,
+                    getFile: getFileObject,
+                    updateFile: (file) => {
+                      updateFile(file)
+                    },
+                  })
+                },
+                write: async () => {
+                  if (!expectedRevision) return false
+                  const writeResult = await conditionalWriteExpectedIfAllowed(
+                    targetPath,
+                    fileContent,
+                    expectedRevision,
+                    () =>
+                      !isExternalFileSaveBlocked(id) &&
+                      (!params.autosave ||
+                        (useAppSettingStore.getState().settingData.autosave &&
+                          !isHistoryAutosavePaused(id))) &&
+                      (params.expectedContent === undefined ||
+                        useEditorStore.getState().getEditorContent(id) === params.expectedContent),
+                    undefined,
+                    params.autosave ? 'autosave' : 'save',
+                    { ...textOptions, originalFormat: undefined },
+                  )
+                  if (writeResult.status === 'blocked') return false
+                  if (writeResult.status === 'conflict') {
+                    writeConflict = true
+                    return false
+                  }
+                  writtenRevision = writeResult.revision
+                  return true
+                },
+              })
+
+              if (saved && writtenRevision) {
+                fileSaveCoordinator.acknowledgeSaved(id, saveSnapshot, writtenRevision)
+              }
+
+              if (!saved && blockedByDirtyTarget) {
+                toast.error('Save the target file before overwriting it.')
+              } else if (!saved && writeConflict) {
+                toast.error('The target changed in another window. Save again to retry.')
+              }
+              return saved
+            }
+            const saveExistingFile = async (path: string) => {
+              const expectedRevision = fileSaveCoordinator.getDiskRevision(id)
+              if (!expectedRevision) {
+                const diskSnapshot = await readStableFileSnapshot(path)
+                if (diskSnapshot.status === 'success') {
+                  markExternalFileConflict(id, diskSnapshot.revision)
+                } else {
+                  toast.error(t('external_file_change.read_failed'))
+                }
+                return false
+              }
+
+              const queuedWrite = await runQueuedFileWrite({
+                coordinator: savePathCoordinator,
+                getCurrentPath: () => getFileObject(id)?.path,
+                write: (currentPath) =>
+                  conditionalWriteExpectedIfAllowed(
+                    currentPath,
+                    fileContent,
+                    expectedRevision,
+                    () =>
+                      !isExternalFileSaveBlocked(id) &&
+                      (!params.autosave ||
+                        (useAppSettingStore.getState().settingData.autosave &&
+                          !isHistoryAutosavePaused(id))) &&
+                      (params.expectedContent === undefined ||
+                        useEditorStore.getState().getEditorContent(id) === params.expectedContent),
+                    undefined,
+                    params.autosave ? 'autosave' : 'save',
+                    textOptions,
+                  ),
+              })
+              if (queuedWrite.status === 'missing-path') return false
+              if (queuedWrite.value.status === 'blocked') return false
+              if (queuedWrite.value.status === 'conflict') {
+                markExternalFileConflict(id, queuedWrite.value.revision)
+                return false
+              }
+              fileSaveCoordinator.acknowledgeSaved(id, saveSnapshot, queuedWrite.value.revision)
               return true
+            }
+
+            try {
+              if (!fileToSave.path) return await saveNewFile()
+              return await saveExistingFile(fileToSave.path)
             } catch (error) {
               const message = String(error)
-              const notify = !message.includes('text_') || fileSaveCoordinator.recordSaveError(id, message)
+              const notify =
+                !message.includes('text_') || fileSaveCoordinator.recordSaveError(id, message)
               if (!params.autosave || notify) toast.error(message)
               return false
             }
@@ -2093,7 +2114,8 @@ function TextEditor(props: TextEditorProps) {
       const wasVisible = visibleRef.current
       const isCurrentRequest = () =>
         request === modeRequestRef.current &&
-        wasActive === activeRef.current && wasVisible === visibleRef.current
+        wasActive === activeRef.current &&
+        wasVisible === visibleRef.current
       setPreparingMode(null)
 
       let preparedRuntime = rmeRuntime
@@ -2173,9 +2195,18 @@ function TextEditor(props: TextEditorProps) {
       })
     },
     [
-      createDelegate, curFile.id, currentViewType, debounceRefreshToc,
-      fileTypeConfig.supportedModes, fileTypeConfig.type, isCapricornView,
-      isHtml, prepareRmeRuntime, rmeRuntime, switchHtmlView, t,
+      createDelegate,
+      curFile.id,
+      currentViewType,
+      debounceRefreshToc,
+      fileTypeConfig.supportedModes,
+      fileTypeConfig.type,
+      isCapricornView,
+      isHtml,
+      prepareRmeRuntime,
+      rmeRuntime,
+      switchHtmlView,
+      t,
     ],
   )
 
@@ -2194,7 +2225,9 @@ function TextEditor(props: TextEditorProps) {
       if (active) void requestViewType(payload)
     }
     bus.on('editor_toggle_type', cb)
-    return () => { bus.detach('editor_toggle_type', cb) }
+    return () => {
+      bus.detach('editor_toggle_type', cb)
+    }
   }, [active, requestViewType])
 
   useEffect(() => {
@@ -2371,14 +2404,26 @@ function TextEditor(props: TextEditorProps) {
     [currentViewType, delegate],
   )
 
-  const themeFontSize = semanticTheme?.['font.editor.size'] ?? `${editorRootFontSize ?? 16}px`
-  const sourceFontSize = semanticTheme?.['font.source.size'] ?? `${editorSourceFontSize ?? 15}px`
-  const sourceLineHeight =
-    semanticTheme?.['font.source.lineHeight'] ?? (editorSourceLineHeight || '1.6')
-  const rootLineHeight =
-    semanticTheme?.['font.editor.lineHeight'] ?? (editorRootLineHeight || '1.7')
-  const wysiwygRootLineHeight =
-    semanticTheme?.['font.editor.lineHeight'] ?? (editorRootLineHeight || '1.7')
+  const resolveTypography = () => {
+    const themeFontSize = semanticTheme?.['font.editor.size'] ?? `${editorRootFontSize ?? 16}px`
+    const sourceFontSize = semanticTheme?.['font.source.size'] ?? `${editorSourceFontSize ?? 15}px`
+    const sourceLineHeight =
+      semanticTheme?.['font.source.lineHeight'] ?? (editorSourceLineHeight || '1.6')
+    const rootLineHeight =
+      semanticTheme?.['font.editor.lineHeight'] ?? (editorRootLineHeight || '1.7')
+    const wysiwygRootLineHeight =
+      semanticTheme?.['font.editor.lineHeight'] ?? (editorRootLineHeight || '1.7')
+
+    return {
+      themeFontSize,
+      sourceFontSize,
+      sourceLineHeight,
+      rootLineHeight,
+      wysiwygRootLineHeight,
+    }
+  }
+  const { themeFontSize, sourceFontSize, sourceLineHeight, rootLineHeight, wysiwygRootLineHeight } =
+    resolveTypography()
 
   const printStyleToken = useMemo(
     () => ({ id, rootFontSize: themeFontSize, rootLineHeight }),
@@ -2406,7 +2451,9 @@ function TextEditor(props: TextEditorProps) {
         rootFontSize:
           isHtml || currentViewType === EditorViewType.SOURCECODE ? sourceFontSize : themeFontSize,
         rootLineHeight:
-          isHtml || currentViewType === EditorViewType.SOURCECODE ? sourceLineHeight : rootLineHeight,
+          isHtml || currentViewType === EditorViewType.SOURCECODE
+            ? sourceLineHeight
+            : rootLineHeight,
       },
       onContextMounted: (context: EditorContext) => {
         registerEditorContextResource(id, instanceIdRef.current!, context, activeRef.current)
@@ -2584,41 +2631,51 @@ function TextEditor(props: TextEditorProps) {
         return
       }
 
-      if (event?.composing && !compositionDirtyRef.current) {
-        compositionDirtyRef.current = {
-          wasDirty: useEditorStateStore.getState().idStateMap.get(id)?.hasUnsavedChanges ?? false,
-          documentChanged: false,
-          hadPending: snapshotPublisher.hasPending(),
-          contentRevision: fileSaveCoordinator.getRevision(id),
+      const finishUnchangedComposition = (
+        composition: NonNullable<typeof compositionDirtyRef.current>,
+      ) => {
+        snapshotPublisher.cancel()
+        if (
+          !composition.wasDirty &&
+          !editorSnapshotRegistry.hasPending(id) &&
+          composition.contentRevision === fileSaveCoordinator.getRevision(id)
+        ) {
+          useEditorStateStore.getState().setIdStateMap(id, { hasUnsavedChanges: false })
         }
+        editorSnapshotRegistry.updateVisibility(id)
+        if (
+          autosave &&
+          getFileObject(id)?.path &&
+          useEditorStateStore.getState().idStateMap.get(id)?.hasUnsavedChanges
+        )
+          debounceSaveHandler()
+        interactionStartedAtRef.current = undefined
+        interactionOpenRequestIdRef.current = undefined
       }
-      if (event?.documentChanged !== false && compositionDirtyRef.current) {
-        compositionDirtyRef.current.documentChanged = true
-      }
-      if (event?.composing === false && compositionDirtyRef.current) {
-        const composition = compositionDirtyRef.current
-        compositionDirtyRef.current = null
-        if (!composition.documentChanged && !composition.hadPending) {
-          snapshotPublisher.cancel()
-          if (
-            !composition.wasDirty &&
-            !editorSnapshotRegistry.hasPending(id) &&
-            composition.contentRevision === fileSaveCoordinator.getRevision(id)
-          ) {
-            useEditorStateStore.getState().setIdStateMap(id, { hasUnsavedChanges: false })
+
+      const handleComposition = () => {
+        if (event?.composing && !compositionDirtyRef.current) {
+          compositionDirtyRef.current = {
+            wasDirty: useEditorStateStore.getState().idStateMap.get(id)?.hasUnsavedChanges ?? false,
+            documentChanged: false,
+            hadPending: snapshotPublisher.hasPending(),
+            contentRevision: fileSaveCoordinator.getRevision(id),
           }
-          editorSnapshotRegistry.updateVisibility(id)
-          if (
-            autosave &&
-            getFileObject(id)?.path &&
-            useEditorStateStore.getState().idStateMap.get(id)?.hasUnsavedChanges
-          )
-            debounceSaveHandler()
-          interactionStartedAtRef.current = undefined
-          interactionOpenRequestIdRef.current = undefined
-          return
         }
+        if (event?.documentChanged !== false && compositionDirtyRef.current) {
+          compositionDirtyRef.current.documentChanged = true
+        }
+        if (event?.composing === false && compositionDirtyRef.current) {
+          const composition = compositionDirtyRef.current
+          compositionDirtyRef.current = null
+          if (!composition.documentChanged && !composition.hadPending) {
+            finishUnchangedComposition(composition)
+            return true
+          }
+        }
+        return false
       }
+      if (handleComposition()) return
 
       if (event?.documentChanged === false && !event.composing && !snapshotPublisher.hasPending()) {
         interactionStartedAtRef.current = undefined
@@ -2626,36 +2683,42 @@ function TextEditor(props: TextEditorProps) {
         return
       }
 
-      if (event?.documentChanged !== false || event?.composing) {
-        useEditorStateStore.getState().setIdStateMap(id, {
-          hasUnsavedChanges: true,
-        })
+      const recordDocumentChange = () => {
+        if (event?.documentChanged !== false || event?.composing) {
+          useEditorStateStore.getState().setIdStateMap(id, {
+            hasUnsavedChanges: true,
+          })
+        }
+        if (event?.documentChanged !== false) {
+          editorSnapshotRegistry.changed(id, instanceIdRef.current!)
+          protectLocalEdit(id)
+        }
+        if (event?.documentChanged !== false && activeRef.current) {
+          capricornStatisticsScheduler.schedule(capricornRuntimeAdapterRef.current)
+        }
       }
-      if (event?.documentChanged !== false) {
-        editorSnapshotRegistry.changed(id, instanceIdRef.current!)
-        protectLocalEdit(id)
+      recordDocumentChange()
+      const publishSnapshot = () => {
+        // React detaches imperative refs before the parent's final snapshot flush.
+        const editor = capricornEditorRef.current
+        const snapshot: PendingEditorSnapshot = {
+          documentSize: latestContentRef.current?.length ?? 0,
+          getMarkdown: () => {
+            if (editor?.isComposing()) throw new Error('Finish composing before using this action.')
+            return editor?.getMarkdown() ?? latestContentRef.current ?? ''
+          },
+          kind: 'capricorn',
+          mode: 'coalesced',
+        }
+        snapshotPublisher.stage(snapshot)
+        if (event?.composing || editor?.isComposing()) {
+          debounceSave.cancel()
+        } else {
+          if (!event?.pending && hasVisibleSiblingRef.current) snapshotPublisher.resume()
+          if (autosave && getFileObject(id)?.path) debounceSaveHandler()
+        }
       }
-      if (event?.documentChanged !== false && activeRef.current) {
-        capricornStatisticsScheduler.schedule(capricornRuntimeAdapterRef.current)
-      }
-      // React detaches imperative refs before the parent's final snapshot flush.
-      const editor = capricornEditorRef.current
-      const snapshot: PendingEditorSnapshot = {
-        documentSize: latestContentRef.current?.length ?? 0,
-        getMarkdown: () => {
-          if (editor?.isComposing()) throw new Error('Finish composing before using this action.')
-          return editor?.getMarkdown() ?? latestContentRef.current ?? ''
-        },
-        kind: 'capricorn',
-        mode: 'coalesced',
-      }
-      snapshotPublisher.stage(snapshot)
-      if (event?.composing || editor?.isComposing()) {
-        debounceSave.cancel()
-      } else {
-        if (!event?.pending && hasVisibleSiblingRef.current) snapshotPublisher.resume()
-        if (autosave && getFileObject(id)?.path) debounceSaveHandler()
-      }
+      publishSnapshot()
       if (event?.composing !== undefined) editorSnapshotRegistry.updateVisibility(id)
       // Visible feedback is measured from the editor DOM mutation. Retain the
       // same start separately until the intentionally debounced model commit.
@@ -2964,19 +3027,22 @@ function TextEditor(props: TextEditorProps) {
     isCapricornView,
   ])
 
-  const openingFailed =
-    !!rmeLoadError ||
-    (status !== TextEditorStatus.LOADING && status !== TextEditorStatus.SUCCESS)
-  const openingPending =
-    !openingFailed &&
-    (preparingMode !== null ||
-      typeof content !== 'string' ||
-      (needsRmeRuntime && !rmeRuntime) ||
-      (isCapricornView(currentViewType)
-        ? runtimePending
-        : currentViewType === EditorViewType.SOURCECODE
-          ? !resumeSource
-          : false))
+  const getOpeningState = () => {
+    const openingFailed =
+      !!rmeLoadError || (status !== TextEditorStatus.LOADING && status !== TextEditorStatus.SUCCESS)
+    const openingPending =
+      !openingFailed &&
+      (preparingMode !== null ||
+        typeof content !== 'string' ||
+        (needsRmeRuntime && !rmeRuntime) ||
+        (isCapricornView(currentViewType)
+          ? runtimePending
+          : currentViewType === EditorViewType.SOURCECODE
+            ? !resumeSource
+            : false))
+    return { openingFailed, openingPending }
+  }
+  const { openingFailed, openingPending } = getOpeningState()
   useLayoutEffect(() => {
     onLoadingChange?.(openingPending)
   }, [onLoadingChange, openingPending])
@@ -2995,16 +3061,34 @@ function TextEditor(props: TextEditorProps) {
     if (!container) return
     return observeStartupEditable(
       container,
-      () => activeRef.current && visibleRef.current && currentViewTypeRef.current === currentViewType,
-      () => recordStartupEditor({
-        fileId: id, viewId: groupId, mode: currentViewType,
-        openRequestId: getEditorOpenMeasurement(id, groupId),
-      }),
+      () =>
+        activeRef.current && visibleRef.current && currentViewTypeRef.current === currentViewType,
+      () =>
+        recordStartupEditor({
+          fileId: id,
+          viewId: groupId,
+          mode: currentViewType,
+          openRequestId: getEditorOpenMeasurement(id, groupId),
+        }),
       !latestContentRef.current?.trim(),
     )
   }, [active, currentViewType, groupId, id, openingFailed, openingPending, visible])
 
   useLayoutEffect(() => {
+    const isRuntimeReady = () =>
+      isCapricornView(currentViewType)
+        ? !!capricornRuntimeAdapterRef.current
+        : currentViewType === EditorViewType.SOURCECODE
+          ? !!resumeSource &&
+            sourceCodeViewRegistry.get(id, instanceIdRef.current!) === resumeSource &&
+            resumeSource.cm.dom.isConnected
+          : (isHtml || !!editorRef.current) &&
+            !!editorWrapperRef.current?.querySelector('.mf-preview-content') &&
+            !editorWrapperRef.current?.querySelector('.mf-preview-loading') &&
+            (!isHtml ||
+              !!editorWrapperRef.current?.querySelector(
+                '[data-slot="html-preview"][aria-busy="false"]',
+              ))
     automationHandleRef.current = {
       save: (expectedContent) => saveHandler({ active: true, expectedContent }),
       inspect: () => ({
@@ -3017,16 +3101,7 @@ function TextEditor(props: TextEditorProps) {
           !openingPending &&
           !openingFailed &&
           !needsMountedContentSyncRef.current &&
-          (isCapricornView(currentViewType)
-            ? !!capricornRuntimeAdapterRef.current
-            : currentViewType === EditorViewType.SOURCECODE
-              ? !!resumeSource &&
-                sourceCodeViewRegistry.get(id, instanceIdRef.current!) === resumeSource &&
-                resumeSource.cm.dom.isConnected
-              : (isHtml || !!editorRef.current) &&
-                !!editorWrapperRef.current?.querySelector('.mf-preview-content') &&
-                !editorWrapperRef.current?.querySelector('.mf-preview-loading') &&
-                (!isHtml || !!editorWrapperRef.current?.querySelector('[data-slot="html-preview"][aria-busy="false"]'))),
+          isRuntimeReady(),
         mode: currentViewType,
         error: rmeLoadError
           ? rmeLoadError.message
@@ -3034,7 +3109,8 @@ function TextEditor(props: TextEditorProps) {
             ? `File loading failed (${TextEditorStatus[status]}).`
             : isCapricornView(currentViewType)
               ? cliRuntimeErrorRef.current
-              : editorWrapperRef.current?.querySelector('.mf-preview-error')?.textContent || undefined,
+              : editorWrapperRef.current?.querySelector('.mf-preview-error')?.textContent ||
+                undefined,
       }),
       readContent: () => {
         editorSnapshotRegistry.flushForRead(id)
@@ -3144,130 +3220,137 @@ function TextEditor(props: TextEditorProps) {
     return useEditorStore.getState().getEditorContent(id)
   }, [id])
 
-  if (status === TextEditorStatus.NOTEXIST) {
-    return <WarningHeader>{t('file.not_found')}</WarningHeader>
-  }
+  const renderContent = () => {
+    if (status === TextEditorStatus.NOTEXIST) {
+      return <WarningHeader>{t('file.not_found')}</WarningHeader>
+    }
 
-  if (status === TextEditorStatus.READERROR) {
-    return <WarningHeader>{t('file.read_failed')}</WarningHeader>
-  }
+    if (status === TextEditorStatus.READERROR) {
+      return <WarningHeader>{t('file.read_failed')}</WarningHeader>
+    }
 
-  if (status === TextEditorStatus.BINARY) {
-    return <WarningHeader>{t('file.binary_not_openable')}</WarningHeader>
-  }
+    if (status === TextEditorStatus.BINARY) {
+      return <WarningHeader>{t('file.binary_not_openable')}</WarningHeader>
+    }
 
-  if (rmeLoadError) {
+    if (rmeLoadError) {
+      return (
+        <AsyncSurface
+          retryLabel={t('common.retry')}
+          state={{
+            status: 'error',
+            title: t('document_preview.load_failed'),
+            description: rmeLoadError.message,
+            retry: retryRmeRuntime,
+          }}
+        >
+          {() => null}
+        </AsyncSurface>
+      )
+    }
+
+    if (typeof content !== 'string') {
+      return null
+    }
+    if (
+      (needsRmeRuntime && !rmeRuntime) ||
+      (!delegate && currentViewType === EditorViewType.SOURCECODE)
+    ) {
+      // The editor-level loading owner covers module and delegate preparation.
+      return null
+    }
+
+    const cls = classNames('markdown-body', {
+      'editor-active': active,
+    })
+
+    const renderEditorSurface = () => (
+      <AppEditorThemeProvider>
+        {isHtml ? (
+          <>
+            {delegate && MfEditor && rmeRuntime ? (
+              <div
+                style={{
+                  display: currentViewType === EditorViewType.SOURCECODE ? undefined : 'none',
+                }}
+              >
+                <RmeThemeProvider runtime={rmeRuntime}>
+                  <AppEditorThemeProvider>
+                    <MfEditor ref={editorRef} onChange={handleChange} {...editorProps} />
+                  </AppEditorThemeProvider>
+                </RmeThemeProvider>
+              </div>
+            ) : null}
+            {currentViewType === EditorViewType.PREVIEW && visible ? (
+              <PreviewBoundary>
+                <HtmlPreview content={content} filePath={filePath} />
+              </PreviewBoundary>
+            ) : null}
+          </>
+        ) : isCapricornView(currentViewType) ? (
+          <CapricornEditor
+            active={active}
+            contentRevision={fileSaveCoordinator.getRevision(id)}
+            visible={visible}
+            editorId={id}
+            initialMarkdown={content}
+            onLoadingChange={setRuntimePending}
+            onChange={handleCapricornChange}
+            onError={handleCapricornError}
+            onOpenProgress={handleCapricornOpenProgress}
+            onRetry={handleCapricornRetry}
+            onRuntimeReady={handleCapricornRuntimeReady}
+            onEditorChange={handleCapricornEditorChange}
+            onUnavailable={handleCapricornUnavailable}
+            options={capricornRuntimeOptions}
+            ref={capricornEditorRef}
+          />
+        ) : MfEditor && rmeRuntime ? (
+          <RmeThemeProvider runtime={rmeRuntime}>
+            <AppEditorThemeProvider>
+              <MfEditor ref={editorRef} onChange={handleChange} {...editorProps} />
+            </AppEditorThemeProvider>
+          </RmeThemeProvider>
+        ) : null}
+      </AppEditorThemeProvider>
+    )
+
     return (
-      <AsyncSurface
-        retryLabel={t('common.retry')}
-        state={{
-          status: 'error',
-          title: t('document_preview.load_failed'),
-          description: rmeLoadError.message,
-          retry: retryRmeRuntime,
-        }}
-      >
-        {() => null}
-      </AsyncSurface>
+      <>
+        <EditorWrapper
+          ref={editorWrapperRef}
+          id='editorarea-wrapper'
+          data-mf-editor-mode={currentViewType}
+          className={cls}
+          $editorViewType={currentViewType}
+          $fileType={fileTypeConfig.type}
+          $fullWidth={editorFullWidth}
+          $rootLineHeight={wysiwygRootLineHeight}
+          $visible={visible}
+          onBeforeInputCapture={handleBeforeInputCapture}
+          onClick={handleWrapperClick}
+        >
+          {renderEditorSurface()}
+        </EditorWrapper>
+        <PdfPrintController
+          active={active}
+          enabled={fileTypeConfig.type === 'markdown'}
+          fileName={curFile.name}
+          getContent={getExportContent}
+          delegateOptions={editorProps.delegateOptions!}
+          styleToken={printStyleToken}
+        />
+        <PandocExportController
+          active={active}
+          enabled={fileTypeConfig.type === 'markdown'}
+          fileName={curFile.name}
+          filePath={curFile.path}
+          getContent={getExportContent}
+        />
+      </>
     )
   }
-
-  if (typeof content !== 'string') {
-    return null
-  }
-  if (
-    (needsRmeRuntime && !rmeRuntime) ||
-    (!delegate && currentViewType === EditorViewType.SOURCECODE)
-  ) {
-    // The editor-level loading owner covers module and delegate preparation.
-    return null
-  }
-
-  const cls = classNames('markdown-body', {
-    'editor-active': active,
-  })
-
-  return (
-    <>
-      <EditorWrapper
-        ref={editorWrapperRef}
-        id='editorarea-wrapper'
-        data-mf-editor-mode={currentViewType}
-        className={cls}
-        $editorViewType={currentViewType}
-        $fileType={fileTypeConfig.type}
-        $fullWidth={editorFullWidth}
-        $rootLineHeight={wysiwygRootLineHeight}
-        $visible={visible}
-        onBeforeInputCapture={handleBeforeInputCapture}
-        onClick={handleWrapperClick}
-      >
-        <AppEditorThemeProvider>
-          {isHtml ? (
-            <>
-              {delegate && MfEditor && rmeRuntime ? (
-                <div
-                  style={{
-                    display: currentViewType === EditorViewType.SOURCECODE ? undefined : 'none',
-                  }}
-                >
-                  <RmeThemeProvider runtime={rmeRuntime}>
-                    <AppEditorThemeProvider>
-                      <MfEditor ref={editorRef} onChange={handleChange} {...editorProps} />
-                    </AppEditorThemeProvider>
-                  </RmeThemeProvider>
-                </div>
-              ) : null}
-              {currentViewType === EditorViewType.PREVIEW && visible ? (
-                <PreviewBoundary>
-                  <HtmlPreview content={content} filePath={filePath} />
-                </PreviewBoundary>
-              ) : null}
-            </>
-          ) : isCapricornView(currentViewType) ? (
-            <CapricornEditor
-              active={active}
-              contentRevision={fileSaveCoordinator.getRevision(id)}
-              visible={visible}
-              editorId={id}
-              initialMarkdown={content}
-              onLoadingChange={setRuntimePending}
-              onChange={handleCapricornChange}
-              onError={handleCapricornError}
-              onOpenProgress={handleCapricornOpenProgress}
-              onRetry={handleCapricornRetry}
-              onRuntimeReady={handleCapricornRuntimeReady}
-              onEditorChange={handleCapricornEditorChange}
-              onUnavailable={handleCapricornUnavailable}
-              options={capricornRuntimeOptions}
-              ref={capricornEditorRef}
-            />
-          ) : MfEditor && rmeRuntime ? (
-            <RmeThemeProvider runtime={rmeRuntime}>
-              <AppEditorThemeProvider>
-                <MfEditor ref={editorRef} onChange={handleChange} {...editorProps} />
-              </AppEditorThemeProvider>
-            </RmeThemeProvider>
-          ) : null}
-        </AppEditorThemeProvider>
-      </EditorWrapper>
-      <PdfPrintController
-        active={active}
-        enabled={fileTypeConfig.type === 'markdown'}
-        fileName={curFile.name}
-        getContent={getExportContent}
-        delegateOptions={editorProps.delegateOptions!}
-        styleToken={printStyleToken}
-      />
-      <PandocExportController
-        active={active}
-        enabled={fileTypeConfig.type === 'markdown'}
-        fileName={curFile.name}
-        filePath={curFile.path}
-        getContent={getExportContent}
-      />
-    </>
-  )
+  return renderContent()
 }
 
 export interface TextEditorProps {

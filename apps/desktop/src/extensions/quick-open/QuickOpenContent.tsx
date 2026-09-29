@@ -115,6 +115,103 @@ export function QuickOpenContent({
     previousMatches.current = matches
   }, [matches, selectedId])
 
+  const renderEmptyResults = () => (
+    <Command.Empty>
+      {!searching && rootPath
+        ? t('quick_open.no_recent')
+        : rootPath || openedFiles.length
+          ? t('quick_open.empty')
+          : t('quick_open.no_workspace')}
+    </Command.Empty>
+  )
+
+  const waitingForResults = searching && (loading || ranking.pending)
+  const searchFailed = searching && (failed || ranking.failed)
+
+  const renderResults = () => (
+    <Command.List
+      label={t('quick_open.title')}
+      aria-busy={waitingForResults}
+      className='max-h-[min(50vh,24rem)]'
+      ref={listRef}
+    >
+      {waitingForResults ? (
+        <div
+          className='flex items-center gap-2 px-2 py-2 text-ui-caption text-muted-foreground'
+          role='status'
+        >
+          <LoaderCircleIcon
+            aria-hidden='true'
+            className='size-3.5 animate-spin motion-reduce:animate-none'
+          />
+          {t('quick_open.loading')}
+        </div>
+      ) : null}
+      {searchFailed ? (
+        <div
+          className='flex items-center justify-between gap-2 px-2 py-2 text-ui-caption'
+          role='alert'
+        >
+          <span>{t('quick_open.load_error')}</span>
+          <Button
+            variant='ghost'
+            size='sm'
+            onKeyDown={(event) => {
+              // Let the button activate without cmdk opening the selected file.
+              if (event.key === 'Enter' || event.key === ' ') event.stopPropagation()
+            }}
+            onClick={() => {
+              setRetry((attempt) => attempt + 1)
+              inputRef.current?.focus()
+            }}
+          >
+            {t('bookmarks.retry')}
+          </Button>
+        </div>
+      ) : null}
+      {!waitingForResults && !searchFailed && matches.length === 0 ? renderEmptyResults() : null}
+      {visibleFiles.map((file) => (
+        <Command.Item
+          key={file.id}
+          value={file.id}
+          onPointerMoveCapture={() => {
+            manualSelection.current = true
+            setSelectedId(file.id)
+          }}
+          onSelect={() => onSelect(file)}
+          title={file.path ?? file.name}
+        >
+          <FileIcon aria-hidden='true' className='size-3.5 shrink-0 text-muted-foreground' />
+          <span className='min-w-0 shrink truncate'>{file.name}</span>
+          <span className='ml-auto min-w-0 max-w-[60%] truncate text-ui-caption text-muted-foreground'>
+            {file.relativePath === file.name ? '' : file.relativePath}
+          </span>
+        </Command.Item>
+      ))}
+      {matches.length > PAGE_SIZE ? (
+        // Keep the paging item mounted so cmdk does not reset selection to
+        // the first file when the final page replaces the selected action.
+        <Command.Item
+          className={hasMore ? undefined : 'hidden'}
+          disabled={!hasMore}
+          hidden={!hasMore}
+          value={MORE_RESULTS_ID}
+          onPointerMoveCapture={() => {
+            manualSelection.current = true
+            setSelectedId(MORE_RESULTS_ID)
+          }}
+          onSelect={() => {
+            manualSelection.current = true
+            setSelectedId(matches[renderedCount].id)
+            setVisibleCount(renderedCount + PAGE_SIZE)
+          }}
+        >
+          {t('quick_open.show_more', { count: Math.max(0, matches.length - renderedCount) })}
+        </Command.Item>
+      ) : null}
+    </Command.List>
+  )
+
   return (
     <Command
       label={t('quick_open.title')}
@@ -152,95 +249,7 @@ export function QuickOpenContent({
           listRef.current?.scrollTo({ top: 0 })
         }}
       />
-      <Command.List
-        label={t('quick_open.title')}
-        aria-busy={searching && (loading || ranking.pending)}
-        className='max-h-[min(50vh,24rem)]'
-        ref={listRef}
-      >
-        {searching && (loading || ranking.pending) ? (
-          <div
-            className='flex items-center gap-2 px-2 py-2 text-ui-caption text-muted-foreground'
-            role='status'
-          >
-            <LoaderCircleIcon
-              aria-hidden='true'
-              className='size-3.5 animate-spin motion-reduce:animate-none'
-            />
-            {t('quick_open.loading')}
-          </div>
-        ) : null}
-        {searching && (failed || ranking.failed) ? (
-          <div
-            className='flex items-center justify-between gap-2 px-2 py-2 text-ui-caption'
-            role='alert'
-          >
-            <span>{t('quick_open.load_error')}</span>
-            <Button
-              variant='ghost'
-              size='sm'
-              onKeyDown={(event) => {
-                // Let the button activate without cmdk opening the selected file.
-                if (event.key === 'Enter' || event.key === ' ') event.stopPropagation()
-              }}
-              onClick={() => {
-                setRetry((attempt) => attempt + 1)
-                inputRef.current?.focus()
-              }}
-            >
-              {t('bookmarks.retry')}
-            </Button>
-          </div>
-        ) : null}
-        {!(searching && (loading || ranking.pending || failed || ranking.failed)) && matches.length === 0 ? (
-          <Command.Empty>
-            {!searching && rootPath
-              ? t('quick_open.no_recent')
-              : rootPath || openedFiles.length
-                ? t('quick_open.empty')
-                : t('quick_open.no_workspace')}
-          </Command.Empty>
-        ) : null}
-        {visibleFiles.map((file) => (
-          <Command.Item
-            key={file.id}
-            value={file.id}
-            onPointerMoveCapture={() => {
-              manualSelection.current = true
-              setSelectedId(file.id)
-            }}
-            onSelect={() => onSelect(file)}
-            title={file.path ?? file.name}
-          >
-            <FileIcon aria-hidden='true' className='size-3.5 shrink-0 text-muted-foreground' />
-            <span className='min-w-0 shrink truncate'>{file.name}</span>
-            <span className='ml-auto min-w-0 max-w-[60%] truncate text-ui-caption text-muted-foreground'>
-              {file.relativePath === file.name ? '' : file.relativePath}
-            </span>
-          </Command.Item>
-        ))}
-        {matches.length > PAGE_SIZE ? (
-          // Keep the paging item mounted so cmdk does not reset selection to
-          // the first file when the final page replaces the selected action.
-          <Command.Item
-            className={hasMore ? undefined : 'hidden'}
-            disabled={!hasMore}
-            hidden={!hasMore}
-            value={MORE_RESULTS_ID}
-            onPointerMoveCapture={() => {
-              manualSelection.current = true
-              setSelectedId(MORE_RESULTS_ID)
-            }}
-            onSelect={() => {
-              manualSelection.current = true
-              setSelectedId(matches[renderedCount].id)
-              setVisibleCount(renderedCount + PAGE_SIZE)
-            }}
-          >
-            {t('quick_open.show_more', { count: Math.max(0, matches.length - renderedCount) })}
-          </Command.Item>
-        ) : null}
-      </Command.List>
+      {renderResults()}
       <div className='border-t border-border px-3 py-1.5 text-ui-caption text-muted-foreground'>
         {t('quick_open.keyboard_hint')}
       </div>

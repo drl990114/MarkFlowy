@@ -64,13 +64,31 @@ const EDITOR_ALIASES: Readonly<Record<string, readonly string[]>> = {
   editor_toggleDelete: ['strikethrough', 'strike'],
 }
 
-function applicationUnavailable(
+function searchUnavailable(target: EditorCommandTarget): CommandUnavailableReason | undefined {
+  if (
+    target.mode === EditorViewType.PREVIEW &&
+    useFileTypeConfigStore.getState().getFileTypeConfigById(target.fileId)?.type !== 'pdf'
+  )
+    return 'preview'
+  return undefined
+}
+
+function modeSwitchUnavailable(target: EditorCommandTarget): CommandUnavailableReason | undefined {
+  const config = useFileTypeConfigStore.getState().getFileTypeConfigById(target.fileId)
+  const modes = config?.supportedModes
+  if (
+    !modes?.includes(EditorViewType.SOURCECODE) ||
+    (!modes.includes(EditorViewType.WYSIWYG) && config?.type !== 'html')
+  )
+    return 'unavailable'
+}
+
+function applicationTargetUnavailable(
   id: string,
-  { target, platform }: CommandPaletteContext,
+  target: EditorCommandTarget | null,
+  zenModeActive: boolean,
 ): CommandUnavailableReason | undefined {
-  const layout = useLayoutStore.getState()
-  if (id === 'app_hide' && platform !== 'mac') return 'unavailable'
-  if (DOCUMENT_COMMANDS.has(id) || (id === 'app_toggleZenMode' && !layout.zenModeActive)) {
+  if (DOCUMENT_COMMANDS.has(id) || (id === 'app_toggleZenMode' && !zenModeActive)) {
     if (!target) return 'no_document'
     if (!isCurrentCommandTarget(target)) return 'stale_target'
   }
@@ -78,22 +96,20 @@ function applicationUnavailable(
     if (!useEditorStore.getState().activeGroupId) return 'unavailable'
     if (target && !isCurrentCommandTarget(target)) return 'stale_target'
   }
-  if (target && id === 'app_findReplaceEditor') {
-    if (
-      target.mode === EditorViewType.PREVIEW &&
-      useFileTypeConfigStore.getState().getFileTypeConfigById(target.fileId)?.type !== 'pdf'
-    )
-      return 'preview'
-    return undefined
-  }
+}
+
+function applicationUnavailable(
+  id: string,
+  { target, platform }: CommandPaletteContext,
+): CommandUnavailableReason | undefined {
+  const layout = useLayoutStore.getState()
+  if (id === 'app_hide' && platform !== 'mac') return 'unavailable'
+  const targetReason = applicationTargetUnavailable(id, target, layout.zenModeActive)
+  if (targetReason) return targetReason
+  if (target && id === 'app_findReplaceEditor') return searchUnavailable(target)
   if (target && id === 'app_toggleEditorType') {
-    const config = useFileTypeConfigStore.getState().getFileTypeConfigById(target.fileId)
-    const modes = config?.supportedModes
-    if (
-      !modes?.includes(EditorViewType.SOURCECODE) ||
-      (!modes.includes(EditorViewType.WYSIWYG) && config?.type !== 'html')
-    )
-      return 'unavailable'
+    const reason = modeSwitchUnavailable(target)
+    if (reason) return reason
   }
   if (
     layout.zenModeActive &&

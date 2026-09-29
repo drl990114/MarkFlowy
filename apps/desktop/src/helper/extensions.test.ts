@@ -20,7 +20,9 @@ describe('theme CSS cascade', () => {
       '.second { color: blue }',
     ])
     expect(snippets[0].sheet).not.toBe(snippets[1].sheet)
-    expect((snippets[1].sheet?.cssRules[0] as CSSStyleRule).style.color).toBe('blue')
+    const sheet = snippets[1].sheet
+    expect(sheet).not.toBeNull()
+    expect((sheet!.cssRules[0] as CSSStyleRule).style.color).toBe('blue')
   })
 
   it('keeps later imports at the beginning of their own stylesheet', () => {

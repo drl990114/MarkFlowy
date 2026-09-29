@@ -53,8 +53,7 @@ function Editor(props: EditorProps) {
 
   useEffect(() => {
     if (visible && isDraftRecoveryPending(id))
-      void waitForDraftRecovery(id, active ? 'foreground' : 'visible')
-        .catch(() => undefined) // The initialization effect owns the retry surface.
+      void waitForDraftRecovery(id, active ? 'foreground' : 'visible').catch(() => undefined) // The initialization effect owns the retry surface.
   }, [active, id, visible])
 
   useEffect(() => {
@@ -65,7 +64,9 @@ function Editor(props: EditorProps) {
 
     const initialize = async () => {
       if (isDraftRecoveryPending(id)) {
-        try { await waitForDraftRecovery(id, 'visible') } catch {
+        try {
+          await waitForDraftRecovery(id, 'visible')
+        } catch {
           if (!disposed) setDraftError(true)
           return
         }
@@ -115,8 +116,7 @@ function Editor(props: EditorProps) {
       )
       const existingMode = useEditorViewTypeStore.getState().editorViewTypeMap.get(curFile.id)
       const openingMode =
-        existingMode &&
-        isSupportedMode(fileTypeConfig, existingMode)
+        existingMode && isSupportedMode(fileTypeConfig, existingMode)
           ? existingMode
           : fileTypeConfig.defaultMode
       useEditorViewTypeStore.getState().setEditorViewType(curFile.id, openingMode)
@@ -152,7 +152,8 @@ function Editor(props: EditorProps) {
   useEffect(() => {
     if (active && visible) {
       if (isEmptyEditor(id)) markStartupInteractive('empty')
-      else if (curFileTypeConfig && !isTextfileType(curFileTypeConfig)) markStartupInteractive('preview')
+      else if (curFileTypeConfig && !isTextfileType(curFileTypeConfig))
+        markStartupInteractive('preview')
     }
     if (
       visible &&
@@ -164,14 +165,27 @@ function Editor(props: EditorProps) {
 
   if (!hasBeenVisible) return null
 
-  if (draftError) return (
-    <div className='absolute inset-0 flex bg-background' style={visible ? undefined : { display: 'none' }}>
-      <AsyncSurface retryLabel={t('common.retry')} state={{
-        status: 'error', title: t('drafts.restore_failed'),
-        retry: () => { setDraftError(false); setDraftAttempt((attempt) => attempt + 1) },
-      }}>{() => null}</AsyncSurface>
-    </div>
-  )
+  if (draftError)
+    return (
+      <div
+        className='absolute inset-0 flex bg-background'
+        style={visible ? undefined : { display: 'none' }}
+      >
+        <AsyncSurface
+          retryLabel={t('common.retry')}
+          state={{
+            status: 'error',
+            title: t('drafts.restore_failed'),
+            retry: () => {
+              setDraftError(false)
+              setDraftAttempt((attempt) => attempt + 1)
+            },
+          }}
+        >
+          {() => null}
+        </AsyncSurface>
+      </div>
+    )
 
   if (isEmptyEditor(id)) {
     if (visible) {
@@ -181,7 +195,35 @@ function Editor(props: EditorProps) {
     }
   }
 
-  const loading = !draftReady || !curFileTypeConfig || (isTextfileType(curFileTypeConfig) && pending)
+  const loading =
+    !draftReady || !curFileTypeConfig || (isTextfileType(curFileTypeConfig) && pending)
+
+  const renderEditorContent = () => (
+    <div className={'code-contents'}>
+      {!shouldMountContent || !draftReady || !curFileTypeConfig ? null : curFileTypeConfig.type ===
+        'unsupported' ? (
+        <UnsupportedFileType fileName={fileName || ''} />
+      ) : isTextfileType(curFileTypeConfig) ? (
+        <TextEditor
+          onLoadingChange={setPending}
+          fileTypeConfig={curFileTypeConfig}
+          active={active}
+          id={id}
+          groupId={groupId}
+          visible={visible}
+        />
+      ) : (
+        <PreviewContent
+          fileId={id}
+          groupId={groupId}
+          type={curFileTypeConfig.type}
+          filePath={filePath}
+          active={active}
+          visible={visible}
+        />
+      )}
+    </div>
+  )
 
   return (
     <EditorLoadingBoundary
@@ -201,30 +243,7 @@ function Editor(props: EditorProps) {
           options={editorScrollOptions}
           style={{ height: '100%', minWidth: 0 }}
         >
-          <div className={'code-contents'}>
-            {!shouldMountContent || !draftReady || !curFileTypeConfig ? null : curFileTypeConfig.type ===
-              'unsupported' ? (
-              <UnsupportedFileType fileName={fileName || ''} />
-            ) : isTextfileType(curFileTypeConfig) ? (
-              <TextEditor
-                onLoadingChange={setPending}
-                fileTypeConfig={curFileTypeConfig}
-                active={active}
-                id={id}
-                groupId={groupId}
-                visible={visible}
-              />
-            ) : (
-              <PreviewContent
-                fileId={id}
-                groupId={groupId}
-                type={curFileTypeConfig.type}
-                filePath={filePath}
-                active={active}
-                visible={visible}
-              />
-            )}
-          </div>
+          {renderEditorContent()}
         </OverlayScrollbarsComponent>
       </EditorScrollContainer>
     </EditorLoadingBoundary>

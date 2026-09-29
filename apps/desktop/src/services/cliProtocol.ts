@@ -93,6 +93,30 @@ export interface CliFileOperations {
   frame: () => Promise<void>
 }
 
+function assertReadableFile(state: CliFileState) {
+  if (!state.open)
+    throw new CliError('file_not_open', 'The target file is not open in this window.', state)
+  if (state.error) throw new CliError('editor_failed', state.error, state)
+  if (state.conflict && !state.applied)
+    throw new CliError(
+      'content_conflict',
+      'Local edits conflict with the requested disk content.',
+      state,
+    )
+}
+
+function isFileReady(request: CliRequest, state: CliFileState) {
+  return state.ready && state.visible && (request.waitFor === 'visible' || state.applied)
+}
+
+function isFileConfirmed(request: CliRequest, state: CliFileState, confirmed: CliFileState) {
+  return (
+    isFileReady(request, confirmed) &&
+    (!request.preview || confirmed.mode === 'preview') &&
+    confirmed.contentSha256 === state.contentSha256
+  )
+}
+
 /** Confirm the live document again after paint; a cached hash alone is insufficient. */
 export async function waitForCliFile(
   request: CliRequest,
@@ -102,28 +126,14 @@ export async function waitForCliFile(
   for (;;) {
     checkCliDeadline(request)
     const state = await ops.inspect()
-    if (!state.open)
-      throw new CliError('file_not_open', 'The target file is not open in this window.', state)
-    if (state.error) throw new CliError('editor_failed', state.error, state)
-    if (state.conflict && !state.applied)
-      throw new CliError(
-        'content_conflict',
-        'Local edits conflict with the requested disk content.',
-        state,
-      )
+    assertReadableFile(state)
     if (request.preview && state.ready && state.mode !== 'preview') {
       ops.handle()?.preview()
-    } else if (state.ready && state.visible && (request.waitFor === 'visible' || state.applied)) {
+    } else if (isFileReady(request, state)) {
       await ops.frame()
       checkCliDeadline(request)
       const confirmed = await ops.inspect()
-      if (
-        confirmed.ready &&
-        confirmed.visible &&
-        (!request.preview || confirmed.mode === 'preview') &&
-        (request.waitFor === 'visible' || confirmed.applied) &&
-        confirmed.contentSha256 === state.contentSha256
-      ) {
+      if (isFileConfirmed(request, state, confirmed)) {
         return confirmed
       }
     } else if (state.ready && !state.applied && request.waitFor === 'applied' && !refreshed) {

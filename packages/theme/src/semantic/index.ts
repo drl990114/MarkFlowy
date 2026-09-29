@@ -45,6 +45,30 @@ function compositeColor(foreground: Color, background: Color): Color {
     foreground.blue() * alpha + background.blue() * (1 - alpha),
   )
 }
+function resolveLiteralToken(name: ThemeTokenName, value: unknown): string {
+  const definition = themeTokens[name]
+  if (typeof value !== 'string' || !value.trim() || /[;{}<>\n\r]/.test(value))
+    throw new Error(`${name}: invalid value`)
+  let resolved = value.trim()
+  if (definition.kind === 'color') {
+    try {
+      resolved = Color(resolved).hexa().toLowerCase()
+    } catch {
+      throw new Error(`${name}: invalid color`)
+    }
+  } else if (definition.kind === 'length' && !cssLength.test(resolved)) {
+    throw new Error(`${name}: expected a non-negative CSS length`)
+  } else if (
+    definition.kind === 'number' &&
+    (!cssNumber.test(resolved) || !Number.isFinite(Number(resolved)) || Number(resolved) <= 0)
+  ) {
+    throw new Error(`${name}: expected a positive number`)
+  } else if (definition.kind === 'font' && !fontFamilies.test(resolved)) {
+    throw new Error(`${name}: expected a CSS font-family list`)
+  }
+  return resolved
+}
+
 export function resolveThemeTokens(
   mode: ThemeVariant['mode'],
   overrides: ThemeOverrides = {},
@@ -56,21 +80,15 @@ export function resolveThemeTokens(
   for (const name of Object.keys(overrides)) {
     if (!Object.hasOwn(themeTokens, name)) throw new Error(`Unknown theme token: ${name}`)
   }
-  const resolve = (name: ThemeTokenName): string => {
-    if (Object.hasOwn(result, name)) return result[name]
-    if (visiting.has(name))
-      throw new Error(`Circular theme reference: ${[...visiting, name].join(' → ')}`)
-    visiting.add(name)
-    const definition = themeTokens[name]
-    const overridden = Object.hasOwn(overrides, name)
-    let value = overridden ? overrides[name] : definition[mode]
+  const defaultValue = (name: ThemeTokenName) => {
+    let value = themeTokens[name][mode]
     // Derived defaults participate in the same graph as explicit references.
     // This keeps links live and also detects cycles through implicit defaults.
-    if (!overridden && name === 'accent.subtle')
+    if (name === 'accent.subtle')
       value = Color(resolve('accent.background'))
         .alpha(mode === 'dark' ? 0.18 : 0.24)
         .hexa()
-    if (!overridden && name === 'accent.foreground') {
+    if (name === 'accent.foreground') {
       let background = Color(resolve('accent.background'))
       if (background.alpha() < 1) {
         const canvas = compositeColor(
@@ -81,6 +99,16 @@ export function resolveThemeTokens(
       }
       value = background.contrast(Color('#fff')) >= 4.5 ? '#ffffff' : '#111111'
     }
+    return value
+  }
+  const resolve = (name: ThemeTokenName): string => {
+    if (Object.hasOwn(result, name)) return result[name]
+    if (visiting.has(name))
+      throw new Error(`Circular theme reference: ${[...visiting, name].join(' → ')}`)
+    visiting.add(name)
+    const definition = themeTokens[name]
+    const overridden = Object.hasOwn(overrides, name)
+    const value = overridden ? overrides[name] : defaultValue(name)
     let resolved: string
     if (object(value)) {
       if (Object.keys(value).length !== 1 || typeof value.ref !== 'string')
@@ -92,25 +120,7 @@ export function resolveThemeTokens(
         throw new Error(`${name}: incompatible reference ${target}`)
       resolved = resolve(target)
     } else {
-      if (typeof value !== 'string' || !value.trim() || /[;{}<>\n\r]/.test(value))
-        throw new Error(`${name}: invalid value`)
-      resolved = value.trim()
-      if (definition.kind === 'color') {
-        try {
-          resolved = Color(resolved).hexa().toLowerCase()
-        } catch {
-          throw new Error(`${name}: invalid color`)
-        }
-      } else if (definition.kind === 'length' && !cssLength.test(resolved)) {
-        throw new Error(`${name}: expected a non-negative CSS length`)
-      } else if (
-        definition.kind === 'number' &&
-        (!cssNumber.test(resolved) || !Number.isFinite(Number(resolved)) || Number(resolved) <= 0)
-      ) {
-        throw new Error(`${name}: expected a positive number`)
-      } else if (definition.kind === 'font' && !fontFamilies.test(resolved)) {
-        throw new Error(`${name}: expected a CSS font-family list`)
-      }
+      resolved = resolveLiteralToken(name, value)
     }
     visiting.delete(name)
     result[name] = resolved

@@ -114,17 +114,15 @@
 .mf-site .mf-stat {
   border-top: 1px solid color-mix(in srgb, var(--mf-site-mist) 24%, transparent);
   padding-top: 24px;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: flex-start;
 }
 .mf-site .mf-stats-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 48px;
   margin: 0;
-}
-.mf-site .mf-stat {
-  display: flex;
-  flex-direction: column-reverse;
-  align-items: flex-start;
 }
 .mf-site .mf-stat dd {
   margin: 0 0 8px;

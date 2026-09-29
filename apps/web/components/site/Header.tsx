@@ -160,6 +160,235 @@ export default function SiteHeader({
     }
   }, [close, mobileOpen, open])
 
+  const renderDesktopNavigation = () => (
+    <nav className='mf-site-desktop-nav' aria-label={t('site.nav.main')}>
+      {siteMenus.map((menu, index) => (
+        <NavButton
+          key={menu.id}
+          ref={(element) => {
+            triggers.current[index] = element
+          }}
+          className='mf-nav-trigger'
+          id={`mf-nav-${menu.id}`}
+          type='button'
+          aria-expanded={activeMenu === menu.id}
+          aria-controls={activeMenu === menu.id ? 'mf-site-mega-menu' : undefined}
+          onPointerEnter={(event) => {
+            if (event.pointerType !== 'mouse') return
+            keyboardMenu.current = false
+            cancelHover()
+            hoverTimer.current = setTimeout(() => selectMenu(index), activeMenu ? 0 : 100)
+          }}
+          onPointerLeave={cancelHover}
+          onClick={(event) => {
+            keyboardMenu.current = event.detail === 0
+            if (event.detail === 0 && activeMenu === menu.id) close()
+            else selectMenu(index)
+          }}
+          onKeyDown={(event) => {
+            keyboardMenu.current = true
+            if (event.key === 'ArrowDown') {
+              event.preventDefault()
+              if (activeMenu === menu.id)
+                contentRef.current?.querySelector<HTMLAnchorElement>('a')?.focus()
+              else {
+                focusMenu.current = true
+                selectMenu(index)
+              }
+            }
+            if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
+              event.preventDefault()
+              const next =
+                (index + (event.key === 'ArrowRight' ? 1 : -1) + siteMenus.length) %
+                siteMenus.length
+              triggers.current[next]?.focus()
+              if (activeMenu) selectMenu(next)
+            }
+          }}
+        >
+          {t(menu.title)}
+          <svg
+            className='mf-nav-chevron'
+            viewBox='0 0 12 12'
+            fill='none'
+            stroke='currentColor'
+            strokeWidth='1.5'
+            strokeLinecap='round'
+            strokeLinejoin='round'
+            aria-hidden='true'
+            focusable='false'
+          >
+            <path className='mf-nav-chevron-left' d='m3 4 3 3' />
+            <path className='mf-nav-chevron-right' d='m6 7 3-3' />
+          </svg>
+        </NavButton>
+      ))}
+      <Link
+        href='/releases'
+        onPointerEnter={() => {
+          cancelHover()
+          setActiveMenu(null)
+        }}
+        aria-current={router.pathname === '/releases' ? 'page' : undefined}
+      >
+        {t('navigation.releases')}
+      </Link>
+    </nav>
+  )
+
+  const renderDropdown = () => (
+    <AnimatePresence custom={instantMenu}>
+      {currentMenu && (
+        <motion.div
+          key='desktop-menu'
+          id='mf-site-mega-menu'
+          className='mf-site-mega-menu'
+          aria-labelledby={`mf-nav-${currentMenu.id}`}
+          initial={{ clipPath: 'inset(0 -60px 100% -60px)', opacity: 0 }}
+          animate={{
+            height: panelHeight || 'auto',
+            clipPath: 'inset(0 -60px -60px -60px)',
+            opacity: 1,
+          }}
+          variants={{
+            exit: (instant: boolean) => ({
+              clipPath: 'inset(0 -60px 100% -60px)',
+              opacity: 0,
+              transition: { ...transition, duration: instant ? 0 : 0.2 },
+            }),
+          }}
+          exit='exit'
+          transition={transition}
+          onPointerEnter={cancelHover}
+        >
+          <AnimatePresence initial={false} mode='popLayout' custom={direction}>
+            <motion.div
+              key={currentMenu.id}
+              ref={attachContent}
+              custom={direction}
+              variants={{
+                enter: (value: number) => ({
+                  transform: `translateX(${instantMenu ? 0 : value * 18}px)`,
+                  opacity: 0,
+                }),
+                visible: { transform: 'translateX(0%)', opacity: 1 },
+                exit: (value: number) => ({
+                  transform: `translateX(${instantMenu ? 0 : value * -18}px)`,
+                  opacity: 0,
+                }),
+              }}
+              initial='enter'
+              animate='visible'
+              exit='exit'
+              transition={contentTransition}
+            >
+              <MenuColumns menu={currentMenu} onNavigate={close} />
+            </motion.div>
+          </AnimatePresence>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  )
+
+  const renderMobileNavigation = () => (
+    <AnimatePresence custom={instantMenu}>
+      {mobileOpen && (
+        <motion.div
+          id='mf-site-mobile-menu'
+          className='mf-site-mobile-menu'
+          initial={{ height: 0, opacity: 0 }}
+          animate={{ height: 'auto', opacity: 1 }}
+          variants={{
+            exit: (instant: boolean) => ({
+              height: 0,
+              opacity: 0,
+              transition: { ...transition, duration: instant ? 0 : 0.2 },
+            }),
+          }}
+          exit='exit'
+          transition={transition}
+        >
+          <AnimatePresence initial={false} mode='wait'>
+            <motion.div
+              key={mobileMenu || 'root'}
+              ref={mobileContentRef}
+              initial={{
+                opacity: 0,
+                transform: `translateX(${instantMenu ? 0 : mobileMenu ? 20 : -20}px)`,
+              }}
+              animate={{ opacity: 1, transform: 'translateX(0px)' }}
+              exit={{
+                opacity: 0,
+                transform: `translateX(${instantMenu ? 0 : mobileMenu ? 20 : -20}px)`,
+              }}
+              transition={{ ...transition, duration: instantMenu ? 0 : 0.16 }}
+              onAnimationComplete={() => {
+                if (!mobileOpenRef.current) return
+                if (mobileMenu)
+                  mobileContentRef.current?.querySelector<HTMLButtonElement>('button')?.focus()
+                else if (returnToMobileTrigger.current) {
+                  mobileTriggers.current[previousIndex.current]?.focus()
+                  returnToMobileTrigger.current = false
+                }
+              }}
+            >
+              {currentMobileMenu ? (
+                <>
+                  <NavButton
+                    className='mf-mobile-back'
+                    type='button'
+                    onClick={(event) => {
+                      keyboardMenu.current = event.detail === 0
+                      previousIndex.current = siteMenus.findIndex((menu) => menu.id === mobileMenu)
+                      returnToMobileTrigger.current = true
+                      setMobileMenu(null)
+                    }}
+                  >
+                    <i className='ri-arrow-left-line' aria-hidden='true' />
+                    {t('site.nav.back')}
+                  </NavButton>
+                  <MenuColumns menu={currentMobileMenu} onNavigate={close} />
+                </>
+              ) : (
+                <nav className='mf-mobile-root' aria-label={t('site.nav.main')}>
+                  {siteMenus.map((menu, index) => (
+                    <NavButton
+                      type='button'
+                      key={menu.id}
+                      ref={(element) => {
+                        mobileTriggers.current[index] = element
+                      }}
+                      onClick={(event) => {
+                        keyboardMenu.current = event.detail === 0
+                        setMobileMenu(menu.id)
+                      }}
+                    >
+                      {t(menu.title)}
+                      <i className='ri-arrow-right-s-line' aria-hidden='true' />
+                    </NavButton>
+                  ))}
+                  <Link href='/releases' onClick={close}>
+                    {t('navigation.releases')}
+                  </Link>
+                  <Link href='/workspace' onClick={close}>
+                    {t('navigation.webApp')}
+                    <span className='mf-beta'>Beta</span>
+                  </Link>
+                </nav>
+              )}
+            </motion.div>
+          </AnimatePresence>
+          <div className='mf-mobile-cta'>
+            <Link className='mf-button' href={DOWNLOAD_URL} onClick={close}>
+              {t('home.hero.download')}
+              <SiteArrow />
+            </Link>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  )
+
   return (
     <>
       <div
@@ -212,79 +441,7 @@ export default function SiteHeader({
             <Logo size={28} />
             <span>MarkFlowy</span>
           </Link>
-          <nav className='mf-site-desktop-nav' aria-label={t('site.nav.main')}>
-            {siteMenus.map((menu, index) => (
-              <NavButton
-                key={menu.id}
-                ref={(element) => {
-                  triggers.current[index] = element
-                }}
-                className='mf-nav-trigger'
-                id={`mf-nav-${menu.id}`}
-                type='button'
-                aria-expanded={activeMenu === menu.id}
-                aria-controls={activeMenu === menu.id ? 'mf-site-mega-menu' : undefined}
-                onPointerEnter={(event) => {
-                  if (event.pointerType !== 'mouse') return
-                  keyboardMenu.current = false
-                  cancelHover()
-                  hoverTimer.current = setTimeout(() => selectMenu(index), activeMenu ? 0 : 100)
-                }}
-                onPointerLeave={cancelHover}
-                onClick={(event) => {
-                  keyboardMenu.current = event.detail === 0
-                  if (event.detail === 0 && activeMenu === menu.id) close()
-                  else selectMenu(index)
-                }}
-                onKeyDown={(event) => {
-                  keyboardMenu.current = true
-                  if (event.key === 'ArrowDown') {
-                    event.preventDefault()
-                    if (activeMenu === menu.id)
-                      contentRef.current?.querySelector<HTMLAnchorElement>('a')?.focus()
-                    else {
-                      focusMenu.current = true
-                      selectMenu(index)
-                    }
-                  }
-                  if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
-                    event.preventDefault()
-                    const next =
-                      (index + (event.key === 'ArrowRight' ? 1 : -1) + siteMenus.length) %
-                      siteMenus.length
-                    triggers.current[next]?.focus()
-                    if (activeMenu) selectMenu(next)
-                  }
-                }}
-              >
-                {t(menu.title)}
-                <svg
-                  className='mf-nav-chevron'
-                  viewBox='0 0 12 12'
-                  fill='none'
-                  stroke='currentColor'
-                  strokeWidth='1.5'
-                  strokeLinecap='round'
-                  strokeLinejoin='round'
-                  aria-hidden='true'
-                  focusable='false'
-                >
-                  <path className='mf-nav-chevron-left' d='m3 4 3 3' />
-                  <path className='mf-nav-chevron-right' d='m6 7 3-3' />
-                </svg>
-              </NavButton>
-            ))}
-            <Link
-              href='/releases'
-              onPointerEnter={() => {
-                cancelHover()
-                setActiveMenu(null)
-              }}
-              aria-current={router.pathname === '/releases' ? 'page' : undefined}
-            >
-              {t('navigation.releases')}
-            </Link>
-          </nav>
+          {renderDesktopNavigation()}
           <div
             className='mf-site-header-actions'
             onPointerEnter={() => {
@@ -318,155 +475,8 @@ export default function SiteHeader({
             <span className='mf-menu-toggle-lines' aria-hidden='true' />
           </NavButton>
         </div>
-        <AnimatePresence custom={instantMenu}>
-          {currentMenu && (
-            <motion.div
-              key='desktop-menu'
-              id='mf-site-mega-menu'
-              className='mf-site-mega-menu'
-              aria-labelledby={`mf-nav-${currentMenu.id}`}
-              initial={{ clipPath: 'inset(0 -60px 100% -60px)', opacity: 0 }}
-              animate={{
-                height: panelHeight || 'auto',
-                clipPath: 'inset(0 -60px -60px -60px)',
-                opacity: 1,
-              }}
-              variants={{
-                exit: (instant: boolean) => ({
-                  clipPath: 'inset(0 -60px 100% -60px)',
-                  opacity: 0,
-                  transition: { ...transition, duration: instant ? 0 : 0.2 },
-                }),
-              }}
-              exit='exit'
-              transition={transition}
-              onPointerEnter={cancelHover}
-            >
-              <AnimatePresence initial={false} mode='popLayout' custom={direction}>
-                <motion.div
-                  key={currentMenu.id}
-                  ref={attachContent}
-                  custom={direction}
-                  variants={{
-                    enter: (value: number) => ({
-                      transform: `translateX(${instantMenu ? 0 : value * 18}px)`,
-                      opacity: 0,
-                    }),
-                    visible: { transform: 'translateX(0%)', opacity: 1 },
-                    exit: (value: number) => ({
-                      transform: `translateX(${instantMenu ? 0 : value * -18}px)`,
-                      opacity: 0,
-                    }),
-                  }}
-                  initial='enter'
-                  animate='visible'
-                  exit='exit'
-                  transition={contentTransition}
-                >
-                  <MenuColumns menu={currentMenu} onNavigate={close} />
-                </motion.div>
-              </AnimatePresence>
-            </motion.div>
-          )}
-        </AnimatePresence>
-        <AnimatePresence custom={instantMenu}>
-          {mobileOpen && (
-            <motion.div
-              id='mf-site-mobile-menu'
-              className='mf-site-mobile-menu'
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              variants={{
-                exit: (instant: boolean) => ({
-                  height: 0,
-                  opacity: 0,
-                  transition: { ...transition, duration: instant ? 0 : 0.2 },
-                }),
-              }}
-              exit='exit'
-              transition={transition}
-            >
-              <AnimatePresence initial={false} mode='wait'>
-                <motion.div
-                  key={mobileMenu || 'root'}
-                  ref={mobileContentRef}
-                  initial={{
-                    opacity: 0,
-                    transform: `translateX(${instantMenu ? 0 : mobileMenu ? 20 : -20}px)`,
-                  }}
-                  animate={{ opacity: 1, transform: 'translateX(0px)' }}
-                  exit={{
-                    opacity: 0,
-                    transform: `translateX(${instantMenu ? 0 : mobileMenu ? 20 : -20}px)`,
-                  }}
-                  transition={{ ...transition, duration: instantMenu ? 0 : 0.16 }}
-                  onAnimationComplete={() => {
-                    if (!mobileOpenRef.current) return
-                    if (mobileMenu)
-                      mobileContentRef.current?.querySelector<HTMLButtonElement>('button')?.focus()
-                    else if (returnToMobileTrigger.current) {
-                      mobileTriggers.current[previousIndex.current]?.focus()
-                      returnToMobileTrigger.current = false
-                    }
-                  }}
-                >
-                  {currentMobileMenu ? (
-                    <>
-                      <NavButton
-                        className='mf-mobile-back'
-                        type='button'
-                        onClick={(event) => {
-                          keyboardMenu.current = event.detail === 0
-                          previousIndex.current = siteMenus.findIndex(
-                            (menu) => menu.id === mobileMenu,
-                          )
-                          returnToMobileTrigger.current = true
-                          setMobileMenu(null)
-                        }}
-                      >
-                        <i className='ri-arrow-left-line' aria-hidden='true' />
-                        {t('site.nav.back')}
-                      </NavButton>
-                      <MenuColumns menu={currentMobileMenu} onNavigate={close} />
-                    </>
-                  ) : (
-                    <nav className='mf-mobile-root' aria-label={t('site.nav.main')}>
-                      {siteMenus.map((menu, index) => (
-                        <NavButton
-                          type='button'
-                          key={menu.id}
-                          ref={(element) => {
-                            mobileTriggers.current[index] = element
-                          }}
-                          onClick={(event) => {
-                            keyboardMenu.current = event.detail === 0
-                            setMobileMenu(menu.id)
-                          }}
-                        >
-                          {t(menu.title)}
-                          <i className='ri-arrow-right-s-line' aria-hidden='true' />
-                        </NavButton>
-                      ))}
-                      <Link href='/releases' onClick={close}>
-                        {t('navigation.releases')}
-                      </Link>
-                      <Link href='/workspace' onClick={close}>
-                        {t('navigation.webApp')}
-                        <span className='mf-beta'>Beta</span>
-                      </Link>
-                    </nav>
-                  )}
-                </motion.div>
-              </AnimatePresence>
-              <div className='mf-mobile-cta'>
-                <Link className='mf-button' href={DOWNLOAD_URL} onClick={close}>
-                  {t('home.hero.download')}
-                  <SiteArrow />
-                </Link>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {renderDropdown()}
+        {renderMobileNavigation()}
       </header>
     </>
   )

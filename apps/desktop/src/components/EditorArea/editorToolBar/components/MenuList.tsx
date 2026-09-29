@@ -167,250 +167,266 @@ export const MenuList = memo((props: MenuListProps) => {
       items.push({ type: 'divider' })
     }
 
-    // 视图切换和显示选项收在同一个子菜单中。
-    const viewItems: MenuItemData[] = []
-    if (showViewSwitcher) {
-      viewItems.push(
-        ...[
-          {
-            label: t('view.source_code'),
-            value: EditorViewType.SOURCECODE,
-            checked: editorViewType === EditorViewType.SOURCECODE,
-            commandId: 'app_toggleEditorType',
-            handler: () => bus.emit('editor_toggle_type', undefined, EditorViewType.SOURCECODE),
-          },
-          {
-            label: t('view.wysiwyg'),
-            value: EditorViewType.WYSIWYG,
-            checked: editorViewType === EditorViewType.WYSIWYG,
-            commandId: 'app_toggleEditorType',
-            handler: () => bus.emit('editor_toggle_type', undefined, EditorViewType.WYSIWYG),
-          },
-          {
-            label: t('view.preview'),
-            value: EditorViewType.PREVIEW,
-            checked: editorViewType === EditorViewType.PREVIEW,
-            handler: () => bus.emit('editor_toggle_type', undefined, EditorViewType.PREVIEW),
-          },
-        ].filter((item) => {
-          return curFileTypeConfig ? curFileTypeConfig?.supportedModes?.includes(item.value) : false
-        }),
-      )
-    }
+    const appendViewItems = () => {
+      // 视图切换和显示选项收在同一个子菜单中。
+      const viewItems: MenuItemData[] = []
+      if (showViewSwitcher) {
+        viewItems.push(
+          ...[
+            {
+              label: t('view.source_code'),
+              value: EditorViewType.SOURCECODE,
+              checked: editorViewType === EditorViewType.SOURCECODE,
+              commandId: 'app_toggleEditorType',
+              handler: () => bus.emit('editor_toggle_type', undefined, EditorViewType.SOURCECODE),
+            },
+            {
+              label: t('view.wysiwyg'),
+              value: EditorViewType.WYSIWYG,
+              checked: editorViewType === EditorViewType.WYSIWYG,
+              commandId: 'app_toggleEditorType',
+              handler: () => bus.emit('editor_toggle_type', undefined, EditorViewType.WYSIWYG),
+            },
+            {
+              label: t('view.preview'),
+              value: EditorViewType.PREVIEW,
+              checked: editorViewType === EditorViewType.PREVIEW,
+              handler: () => bus.emit('editor_toggle_type', undefined, EditorViewType.PREVIEW),
+            },
+          ].filter((item) => {
+            return curFileTypeConfig
+              ? curFileTypeConfig?.supportedModes?.includes(item.value)
+              : false
+          }),
+        )
+      }
 
-    if (viewItems.length > 0) {
-      viewItems.push({ type: 'divider' })
-    }
+      if (viewItems.length > 0) {
+        viewItems.push({ type: 'divider' })
+      }
 
-    if (showTypewriterScroll) {
+      if (showTypewriterScroll) {
+        viewItems.push({
+          label: t('settings.editor.behavior.typewriter_scroll.label'),
+          value: 'typewriter_scroll',
+          checked: editorTypewriterScroll,
+          handler: () => {
+            writeSettingData({ key: 'editor_typewriter_scroll' }, !editorTypewriterScroll)
+          },
+        })
+      }
+
       viewItems.push({
-        label: t('settings.editor.behavior.typewriter_scroll.label'),
-        value: 'typewriter_scroll',
-        checked: editorTypewriterScroll,
+        label: t('settings.editor.behavior.placeholder.label'),
+        value: 'placeholder',
+        checked: editorPlaceholder,
         handler: () => {
-          writeSettingData({ key: 'editor_typewriter_scroll' }, !editorTypewriterScroll)
+          writeSettingData({ key: 'editor_placeholder' }, !editorPlaceholder)
         },
       })
-    }
 
-    viewItems.push({
-      label: t('settings.editor.behavior.placeholder.label'),
-      value: 'placeholder',
-      checked: editorPlaceholder,
-      handler: () => {
-        writeSettingData({ key: 'editor_placeholder' }, !editorPlaceholder)
-      },
-    })
-
-    if (showViewSwitcher) {
-      items.push({
-        label: t('view.label'),
-        value: 'view_switcher',
-        children: viewItems,
-      })
-    } else {
-      items.push(...viewItems)
-    }
-
-    if (latestFile && latestFile.kind !== 'new_tab' && curFileTypeConfig?.type === 'markdown') {
-      const key = getFileTextDirectionKey(latestFile.id, latestFile.path)
-      const direction = useFileTextDirectionStore.getState().directions[key]
-      const selectDirection = (value: EditorTextDirection | undefined) => {
-        const file = targetEditorId ? getFileObject(targetEditorId) : undefined
-        if (file) useFileTextDirectionStore.getState().setDirection(file, value)
+      if (showViewSwitcher) {
+        items.push({
+          label: t('view.label'),
+          value: 'view_switcher',
+          children: viewItems,
+        })
+      } else {
+        items.push(...viewItems)
       }
-      items.push({
-        label: t('settings.editor.behavior.text_direction.label'),
-        value: 'text_direction',
-        children: [
-          {
-            label: t('settings.editor.behavior.text_direction.follow_global'),
-            value: 'inherit',
-            checked: direction === undefined,
-            handler: () => selectDirection(undefined),
-          },
-          { type: 'divider' },
-          ...(['auto', 'ltr', 'rtl'] as const).map((value) => ({
-            label: t(`settings.editor.behavior.text_direction.${value}`),
-            value,
-            checked: direction === value,
-            handler: () => selectDirection(value),
-          })),
-        ],
-      })
     }
+    appendViewItems()
+
+    const appendDirectionItem = () => {
+      if (latestFile && latestFile.kind !== 'new_tab' && curFileTypeConfig?.type === 'markdown') {
+        const key = getFileTextDirectionKey(latestFile.id, latestFile.path)
+        const direction = useFileTextDirectionStore.getState().directions[key]
+        const selectDirection = (value: EditorTextDirection | undefined) => {
+          const file = targetEditorId ? getFileObject(targetEditorId) : undefined
+          if (file) useFileTextDirectionStore.getState().setDirection(file, value)
+        }
+        items.push({
+          label: t('settings.editor.behavior.text_direction.label'),
+          value: 'text_direction',
+          children: [
+            {
+              label: t('settings.editor.behavior.text_direction.follow_global'),
+              value: 'inherit',
+              checked: direction === undefined,
+              handler: () => selectDirection(undefined),
+            },
+            { type: 'divider' },
+            ...(['auto', 'ltr', 'rtl'] as const).map((value) => ({
+              label: t(`settings.editor.behavior.text_direction.${value}`),
+              value,
+              checked: direction === value,
+              handler: () => selectDirection(value),
+            })),
+          ],
+        })
+      }
+    }
+    appendDirectionItem()
 
     items.push({ type: 'divider' })
 
-    // 当前文件：信息、编码、历史和收藏保持直接可达。
-    if (showFileInfo) {
-      items.push({
-        label: t('file.info'),
-        value: 'file_info',
-        handler: async () => {
-          let latestFileNormalInfo = fileNormalInfo
-          const infoFilePath = targetEditorId ? getFileObject(targetEditorId)?.path : latestFilePath
+    const appendFileItems = () => {
+      // 当前文件：信息、编码、历史和收藏保持直接可达。
+      if (showFileInfo) {
+        items.push({
+          label: t('file.info'),
+          value: 'file_info',
+          handler: async () => {
+            let latestFileNormalInfo = fileNormalInfo
+            const infoFilePath = targetEditorId
+              ? getFileObject(targetEditorId)?.path
+              : latestFilePath
 
-          if (infoFilePath) {
-            try {
-              latestFileNormalInfo = await invoke<FileNormalInfo>('get_file_normal_info', {
-                path: infoFilePath,
-              })
-              setFileNormalInfo(latestFileNormalInfo)
-            } catch (error: unknown) {
-              toast.error((error as Error).message)
+            if (infoFilePath) {
+              try {
+                latestFileNormalInfo = await invoke<FileNormalInfo>('get_file_normal_info', {
+                  path: infoFilePath,
+                })
+                setFileNormalInfo(latestFileNormalInfo)
+              } catch (error: unknown) {
+                toast.error((error as Error).message)
+              }
             }
-          }
 
-          dialog.info({
-            title: t('file.info'),
-            width: '600px',
-            content: (
-              <Space direction='vertical'>
-                <span>
-                  {t('file.lastModified')}: {latestFileNormalInfo.last_modified}
-                </span>
-                <span>
-                  {t('file.size')}: {latestFileNormalInfo.size}
-                </span>
-                <span>
-                  {t('file.path')}: {infoFilePath}
-                </span>
-              </Space>
-            ),
-          })
-        },
-      })
-    }
+            dialog.info({
+              title: t('file.info'),
+              width: '600px',
+              content: (
+                <Space direction='vertical'>
+                  <span>
+                    {t('file.lastModified')}: {latestFileNormalInfo.last_modified}
+                  </span>
+                  <span>
+                    {t('file.size')}: {latestFileNormalInfo.size}
+                  </span>
+                  <span>
+                    {t('file.path')}: {infoFilePath}
+                  </span>
+                </Space>
+              ),
+            })
+          },
+        })
+      }
 
-    if (
-      targetEditorId &&
-      latestFile &&
-      latestFile.kind !== 'new_tab' &&
-      curFileTypeConfig &&
-      isTextfileType(curFileTypeConfig)
-    ) {
-      const { format } = fileSaveCoordinator.getTextMetadata(targetEditorId)
-      const encoding =
-        latestFile.path && !fileSaveCoordinator.getDiskRevision(targetEditorId)
-          ? ''
-          : ` · ${format.encoding.toUpperCase()}${format.bom !== 'none' ? ' BOM' : ''}`
+      if (
+        targetEditorId &&
+        latestFile &&
+        latestFile.kind !== 'new_tab' &&
+        curFileTypeConfig &&
+        isTextfileType(curFileTypeConfig)
+      ) {
+        const { format } = fileSaveCoordinator.getTextMetadata(targetEditorId)
+        const encoding =
+          latestFile.path && !fileSaveCoordinator.getDiskRevision(targetEditorId)
+            ? ''
+            : ` · ${format.encoding.toUpperCase()}${format.bom !== 'none' ? ' BOM' : ''}`
+        items.push({
+          label: `${t('text_encoding.label')}${encoding}`,
+          value: 'text_encoding',
+          handler: () => setEncodingFileId(targetEditorId),
+        })
+      }
+
       items.push({
-        label: `${t('text_encoding.label')}${encoding}`,
-        value: 'text_encoding',
-        handler: () => setEncodingFileId(targetEditorId),
+        label: t('history.title'),
+        value: 'history',
+        handler: () => openLocalHistory(targetEditorId),
       })
-    }
 
-    items.push({
-      label: t('history.title'),
-      value: 'history',
-      handler: () => openLocalHistory(targetEditorId),
-    })
-
-    // 书签
-    if (showBookmark) {
-      items.push({
-        label: t('action.bookmark'),
-        value: 'BookMark',
-        checked: curBookMark !== undefined,
-        handler: () => {
-          if (curBookMark) {
-            commandRegistry.execute('edit_bookmark_dialog', curBookMark)
-          } else {
-            const bookmarkFile = targetEditorId ? getFileObject(targetEditorId) : undefined
-            commandRegistry.execute(
-              'open_bookmark_dialog',
-              bookmarkFile || {
-                id: targetEditorId,
-                name: latestFileName,
-                path: latestFilePath,
-              },
-            )
-          }
-        },
-      })
-    }
-
-    // 导出与转换
-    if (showExport || showConvertText) {
-      items.push({ type: 'divider' })
-    }
-
-    if (showExport) {
-      const exportItems: MenuItemData[] = [
-        {
-          value: 'export_html',
-          label: t('contextmenu.editor_tab.export_html'),
+      // 书签
+      if (showBookmark) {
+        items.push({
+          label: t('action.bookmark'),
+          value: 'BookMark',
+          checked: curBookMark !== undefined,
           handler: () => {
-            bus.emit('editor_export_html')
+            if (curBookMark) {
+              commandRegistry.execute('edit_bookmark_dialog', curBookMark)
+            } else {
+              const bookmarkFile = targetEditorId ? getFileObject(targetEditorId) : undefined
+              commandRegistry.execute(
+                'open_bookmark_dialog',
+                bookmarkFile || {
+                  id: targetEditorId,
+                  name: latestFileName,
+                  path: latestFilePath,
+                },
+              )
+            }
           },
-        },
-      ]
-      if (curFileTypeConfig?.type === 'markdown') {
-        exportItems.push(createPdfPrintMenuItem(t('contextmenu.editor_tab.export_pdf')))
+        })
       }
-      exportItems.push({
-        value: 'export_image',
-        label: t('contextmenu.editor_tab.export_image'),
-        handler: () => {
-          bus.emit('editor_export_image')
-        },
-      })
-      if (curFileTypeConfig?.type === 'markdown') {
-        exportItems.push({ type: 'divider' }, createPandocExportMenuItem(t))
-      }
-      items.push({
-        value: 'export',
-        label: t('settings.export.label'),
-        children: exportItems,
-      })
     }
+    appendFileItems()
 
-    // 文本转换
-    if (showConvertText) {
-      items.push({
-        label: t('action.convert_text'),
-        value: 'convert_text',
-        children: [
+    const appendExportItems = () => {
+      // 导出与转换
+      if (showExport || showConvertText) {
+        items.push({ type: 'divider' })
+      }
+
+      if (showExport) {
+        const exportItems: MenuItemData[] = [
           {
-            label: t('action.convert_simplified_to_traditional_tw'),
-            value: 'zh-TW',
-            handler: () => convertText('zh-TW'),
+            value: 'export_html',
+            label: t('contextmenu.editor_tab.export_html'),
+            handler: () => {
+              bus.emit('editor_export_html')
+            },
           },
-          {
-            label: t('action.convert_simplified_to_traditional_hk'),
-            value: 'zh-HK',
-            handler: () => convertText('zh-HK'),
+        ]
+        if (curFileTypeConfig?.type === 'markdown') {
+          exportItems.push(createPdfPrintMenuItem(t('contextmenu.editor_tab.export_pdf')))
+        }
+        exportItems.push({
+          value: 'export_image',
+          label: t('contextmenu.editor_tab.export_image'),
+          handler: () => {
+            bus.emit('editor_export_image')
           },
-          {
-            label: t('action.convert_traditional_to_simplified'),
-            value: 'zh-Hans',
-            handler: () => convertText('zh-Hans'),
-          },
-        ],
-      })
+        })
+        if (curFileTypeConfig?.type === 'markdown') {
+          exportItems.push({ type: 'divider' }, createPandocExportMenuItem(t))
+        }
+        items.push({
+          value: 'export',
+          label: t('settings.export.label'),
+          children: exportItems,
+        })
+      }
+
+      // 文本转换
+      if (showConvertText) {
+        items.push({
+          label: t('action.convert_text'),
+          value: 'convert_text',
+          children: [
+            {
+              label: t('action.convert_simplified_to_traditional_tw'),
+              value: 'zh-TW',
+              handler: () => convertText('zh-TW'),
+            },
+            {
+              label: t('action.convert_simplified_to_traditional_hk'),
+              value: 'zh-HK',
+              handler: () => convertText('zh-HK'),
+            },
+            {
+              label: t('action.convert_traditional_to_simplified'),
+              value: 'zh-Hans',
+              handler: () => convertText('zh-Hans'),
+            },
+          ],
+        })
+      }
     }
+    appendExportItems()
 
     // 后置自定义项
     if (appendItems?.length) {

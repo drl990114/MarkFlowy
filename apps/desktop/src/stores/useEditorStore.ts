@@ -206,6 +206,11 @@ const removeFileFromAllGroups = (node: EditorLayoutNode, id: string) => {
   getAllGroups(node).forEach((group) => closeFileInGroup(group, id))
 }
 
+const copyActiveEditorGroup = (node: EditorLayoutLeaf) => {
+  const activeId = node.activeId || node.opened[0]
+  return createEditorLeaf(activeId ? [activeId] : [], activeId)
+}
+
 const splitGroupInLayout = (
   node: EditorLayoutNode,
   groupId: string,
@@ -215,8 +220,7 @@ const splitGroupInLayout = (
   if (isEditorLeaf(node)) {
     if (node.id !== groupId) return { node }
 
-    const copiedActiveId = node.activeId || node.opened[0]
-    const newGroup = createEditorLeaf(copiedActiveId ? [copiedActiveId] : [], copiedActiveId)
+    const newGroup = copyActiveEditorGroup(node)
     const children = insertion === 'before' ? [newGroup, node] : [node, newGroup]
 
     return {
@@ -236,8 +240,7 @@ const splitGroupInLayout = (
 
   for (const child of node.children) {
     if (isEditorLeaf(child) && child.id === groupId) {
-      const copiedActiveId = child.activeId || child.opened[0]
-      newGroup = createEditorLeaf(copiedActiveId ? [copiedActiveId] : [], copiedActiveId)
+      newGroup = copyActiveEditorGroup(child)
 
       if (node.direction === direction) {
         if (insertion === 'before') {

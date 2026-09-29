@@ -63,23 +63,7 @@ async function inspectFile(request: CliRequest, fileId: string | undefined): Pro
     })
     if (!same) return { ...state, open: false, ready: false, visible: false }
   }
-  if (handle && state.ready) {
-    try {
-      const content = handle.readContent()
-      state.contentSha256 = await contentSha256(content)
-      // Hashing is asynchronous: recheck identity and live content before confirming it.
-      if (editorAutomationRegistry.get(fileId!) !== handle || handle.readContent() !== content) {
-        return { ...state, ready: false }
-      }
-      Object.assign(state, handle.inspect())
-      state.open = useEditorStore.getState().opened.includes(fileId!)
-      state.dirty = !!useEditorStateStore.getState().idStateMap.get(fileId!)?.hasUnsavedChanges
-      state.conflict = useExternalFileChangeStore.getState().notices[fileId!]?.kind === 'conflict'
-      state.applied = state.open && state.ready && state.contentSha256 === request.expectedSha256
-    } catch {
-      state.ready = false
-    }
-  }
+  if (handle && state.ready) return inspectLiveContent(request, fileId!, handle, state)
   return state
 }
 
@@ -102,85 +86,39 @@ function paint(request: CliRequest): Promise<void> {
   })
 }
 
-export async function runCliRequest(request: CliRequest) {
+async function dispatchCliCommand(request: CliRequest) {
+  if (!request.commandId || !commandRegistry.hasCommand(request.commandId))
+    throw new CliError('command_not_found', 'Unknown GUI command.')
+  const result = await commandRegistry.execute(request.commandId)
+  if (result === false) throw new CliError('command_failed', 'GUI command declined the action.')
+  // Many GUI handlers dispatch asynchronous bus events. Their return cannot attest a save/export.
+  return {
+    code: 'dispatched',
+    result: { windowId: currentWindow.label, commandId: request.commandId, completed: false },
+  }
+}
+
+async function openCliWorkspace(request: CliRequest) {
+  await switchWorkspaceInCurrentWindow(request.path!)
   checkCliDeadline(request)
-  if (request.windowId && request.windowId !== currentWindow.label)
-    throw new CliError('wrong_window', 'Request belongs to another window.')
-  if (request.operation === 'focus') {
-    while (!(await currentWindow.isFocused())) {
-      checkCliDeadline(request)
-      await new Promise((resolve) => setTimeout(resolve, 20))
-    }
-    return { code: 'focused', result: { windowId: currentWindow.label } }
+  const rootPath = useEditorStore.getState().getRootPath()
+  if (
+    !rootPath ||
+    !(await invoke<boolean>('paths_refer_to_same_file', { path1: rootPath, path2: request.path }))
+  ) {
+    throw new CliError(
+      'workspace_not_opened',
+      'The workspace switch was cancelled or did not complete.',
+      { path: rootPath },
+    )
   }
-  if (request.operation === 'command') {
-    if (!request.commandId || !commandRegistry.hasCommand(request.commandId))
-      throw new CliError('command_not_found', 'Unknown GUI command.')
-    const result = await commandRegistry.execute(request.commandId)
-    if (result === false) throw new CliError('command_failed', 'GUI command declined the action.')
-    // Many GUI handlers dispatch asynchronous bus events. Their return cannot attest a save/export.
-    return {
-      code: 'dispatched',
-      result: { windowId: currentWindow.label, commandId: request.commandId, completed: false },
-    }
+  return {
+    code: 'workspace_opened',
+    result: { windowId: currentWindow.label, path: rootPath },
   }
-  if (request.operation.startsWith('history') || request.operation === 'save') {
-    const fileId = request.path ? await findOpenFile(request.path) : undefined
-    return runHistoryCli(request, fileId)
-  }
-  if (!request.path) throw new CliError('invalid_arguments', 'Missing file path.')
-  if (request.operation === 'workspace') {
-    await switchWorkspaceInCurrentWindow(request.path)
-    checkCliDeadline(request)
-    const rootPath = useEditorStore.getState().getRootPath()
-    if (
-      !rootPath ||
-      !(await invoke<boolean>('paths_refer_to_same_file', { path1: rootPath, path2: request.path }))
-    ) {
-      throw new CliError(
-        'workspace_not_opened',
-        'The workspace switch was cancelled or did not complete.',
-        { path: rootPath },
-      )
-    }
-    return {
-      code: 'workspace_opened',
-      result: { windowId: currentWindow.label, path: rootPath },
-    }
-  }
-  let fileId = await findOpenFile(request.path)
-  checkCliDeadline(request)
-  if (request.operation === 'open' || request.operation === 'export') {
-    if (fileId) {
-      useEditorStore.getState().setActiveId(fileId)
-    } else {
-      await invoke('save_security_bookmark', { path: request.path })
-      checkCliDeadline(request)
-      const fileName = getFileNameFromPath(request.path) || 'document.md'
-      const dotIndex = fileName.lastIndexOf('.')
-      await addExistingMarkdownFileEdit({
-        path: request.path,
-        fileName,
-        ext: dotIndex < 0 ? '' : fileName.slice(dotIndex + 1),
-      })
-      fileId = await findOpenFile(request.path)
-    }
-  }
-  if (request.operation === 'status')
-    return { code: 'file_status', result: await inspectFile(request, fileId) }
-  const state = await waitForCliFile(request, {
-    inspect: () => inspectFile(request, fileId),
-    handle: () => (fileId ? editorAutomationRegistry.get(fileId) : undefined),
-    refresh: () =>
-      handleExternalWatchEvent({
-        type: { modify: { kind: 'data', mode: 'any' } },
-        paths: [getFileObject(fileId!)?.path ?? request.path!],
-        attrs: {},
-      }),
-    frame: () => paint(request),
-  })
-  if (request.operation !== 'export')
-    return { code: state.applied ? 'content_applied' : 'file_visible', result: state }
+}
+
+async function exportCliFile(request: CliRequest, fileId: string | undefined, state: CliFileState) {
   const handle = fileId ? editorAutomationRegistry.get(fileId) : undefined
   if (!handle || !request.format)
     throw new CliError('editor_unavailable', 'Export renderer is unavailable.')
@@ -207,6 +145,93 @@ export async function runCliRequest(request: CliRequest) {
   } catch (error) {
     throw new CliError('export_failed', String(error), current)
   }
+}
+
+async function inspectLiveContent(
+  request: CliRequest,
+  fileId: string,
+  handle: NonNullable<ReturnType<typeof editorAutomationRegistry.get>>,
+  state: CliFileState,
+): Promise<CliFileState> {
+  try {
+    const content = handle.readContent()
+    state.contentSha256 = await contentSha256(content)
+    // Hashing is asynchronous: recheck identity and live content before confirming it.
+    if (editorAutomationRegistry.get(fileId!) !== handle || handle.readContent() !== content) {
+      return { ...state, ready: false }
+    }
+    Object.assign(state, handle.inspect())
+    state.open = useEditorStore.getState().opened.includes(fileId!)
+    state.dirty = !!useEditorStateStore.getState().idStateMap.get(fileId!)?.hasUnsavedChanges
+    state.conflict = useExternalFileChangeStore.getState().notices[fileId!]?.kind === 'conflict'
+    state.applied = state.open && state.ready && state.contentSha256 === request.expectedSha256
+  } catch {
+    state.ready = false
+  }
+
+  return state
+}
+
+async function openCliFile(request: CliRequest, fileId: string | undefined) {
+  if (fileId) {
+    useEditorStore.getState().setActiveId(fileId)
+  } else {
+    await invoke('save_security_bookmark', { path: request.path })
+    checkCliDeadline(request)
+    const fileName = getFileNameFromPath(request.path!) || 'document.md'
+    const dotIndex = fileName.lastIndexOf('.')
+    await addExistingMarkdownFileEdit({
+      path: request.path!,
+      fileName,
+      ext: dotIndex < 0 ? '' : fileName.slice(dotIndex + 1),
+    })
+    fileId = await findOpenFile(request.path!)
+  }
+
+  return fileId
+}
+
+async function waitForCliFocus(request: CliRequest) {
+  while (!(await currentWindow.isFocused())) {
+    checkCliDeadline(request)
+    await new Promise((resolve) => setTimeout(resolve, 20))
+  }
+  return { code: 'focused', result: { windowId: currentWindow.label } }
+}
+
+export async function runCliRequest(request: CliRequest) {
+  checkCliDeadline(request)
+  if (request.windowId && request.windowId !== currentWindow.label)
+    throw new CliError('wrong_window', 'Request belongs to another window.')
+  if (request.operation === 'focus') return waitForCliFocus(request)
+  if (request.operation === 'command') return dispatchCliCommand(request)
+  if (request.operation.startsWith('history') || request.operation === 'save') {
+    const fileId = request.path ? await findOpenFile(request.path) : undefined
+    return runHistoryCli(request, fileId)
+  }
+  if (!request.path) throw new CliError('invalid_arguments', 'Missing file path.')
+  if (request.operation === 'workspace') return openCliWorkspace(request)
+  let fileId = await findOpenFile(request.path)
+  checkCliDeadline(request)
+  if (request.operation === 'open' || request.operation === 'export') {
+    fileId = await openCliFile(request, fileId)
+  }
+  if (request.operation === 'status')
+    return { code: 'file_status', result: await inspectFile(request, fileId) }
+  const state = await waitForCliFile(request, {
+    inspect: () => inspectFile(request, fileId),
+    handle: () => (fileId ? editorAutomationRegistry.get(fileId) : undefined),
+    refresh: () =>
+      handleExternalWatchEvent({
+        type: { modify: { kind: 'data', mode: 'any' } },
+        paths: [getFileObject(fileId!)?.path ?? request.path!],
+        attrs: {},
+      }),
+    frame: () => paint(request),
+  })
+  if (request.operation !== 'export')
+    return { code: state.applied ? 'content_applied' : 'file_visible', result: state }
+  return exportCliFile(request, fileId, state)
 }
 
 /** Register before announcing readiness so cold-start requests cannot be lost. */

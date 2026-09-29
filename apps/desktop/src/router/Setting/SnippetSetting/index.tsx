@@ -224,6 +224,215 @@ export function SnippetSetting({
   }
   const update = (item: CapricornSnippet) => setDraft((current) => ({ ...current, item }))
 
+  const renderSnippetList = () => (
+    <aside className='flex min-w-0 flex-col gap-1.5'>
+      <Input
+        inputSize='sm'
+        className='shadow-none'
+        type='search'
+        autoComplete='off'
+        spellCheck={false}
+        aria-label={t('snippets.search')}
+        placeholder={t('snippets.search')}
+        value={query}
+        onChange={(event) => setQuery(event.target.value)}
+      />
+      <div
+        className='flex max-h-40 flex-col gap-0.5 overflow-y-auto @min-[40rem]/snippets:max-h-80'
+        role='list'
+        aria-label={t('snippets.library')}
+      >
+        {visibleItems.map((item) => (
+          <div key={item.id} role='listitem'>
+            <Button
+              variant='ghost'
+              size='sm'
+              disabled={busy}
+              aria-current={draft.item.id === item.id ? 'true' : undefined}
+              className={cn(
+                'h-auto min-h-7 w-full justify-start gap-1.5 whitespace-normal px-2 py-1 text-left font-normal',
+                draft.item.id === item.id && 'bg-control-selected font-medium',
+              )}
+              onClick={async () => {
+                if (draft.item.id !== item.id && (await guard())) select(item)
+              }}
+            >
+              <span className='min-w-0 flex-1 break-words'>{item.title}</span>
+              {library.hiddenBuiltinIds.includes(item.id) ? (
+                <EyeOff
+                  aria-label={t('snippets.hidden')}
+                  className='size-3.5 shrink-0 text-muted-foreground'
+                />
+              ) : null}
+            </Button>
+          </div>
+        ))}
+        {!visibleItems.length ? (
+          <p className='px-2 py-2 text-ui-control text-muted-foreground'>
+            {t('snippets.noResults')}
+          </p>
+        ) : null}
+      </div>
+    </aside>
+  )
+
+  const renderSnippetActions = () => (
+    <div className='flex flex-wrap items-center gap-2'>
+      <Badge variant='outline' size='sm' className='text-ui-caption'>
+        {t(builtin ? 'snippets.builtin' : 'snippets.custom')}
+      </Badge>
+      {dirty ? (
+        <span className='text-ui-caption text-muted-foreground'>{t('snippets.unsaved')}</span>
+      ) : null}
+      <div className='ml-auto flex flex-wrap justify-end gap-1'>
+        <Button
+          size='sm'
+          variant='ghost'
+          disabled={!loaded || busy}
+          onClick={() => void create(draft.item)}
+        >
+          <Copy aria-hidden className='size-3.5' />
+          {t(builtin ? 'snippets.copyCustom' : 'snippets.copy')}
+        </Button>
+        {builtin ? (
+          <Button
+            size='sm'
+            variant='ghost'
+            disabled={!loaded || busy}
+            onClick={() => void toggleHidden()}
+          >
+            {hidden ? (
+              <Eye aria-hidden className='size-3.5' />
+            ) : (
+              <EyeOff aria-hidden className='size-3.5' />
+            )}
+            {t(hidden ? 'snippets.show' : 'snippets.hide')}
+          </Button>
+        ) : library.items.some((item) => item.id === draft.item.id) ? (
+          <Button size='sm' variant='destructive' disabled={busy} onClick={() => void remove()}>
+            <Trash2 aria-hidden className='size-3.5' />
+            {t('snippets.delete')}
+          </Button>
+        ) : null}
+      </div>
+    </div>
+  )
+
+  const renderSnippetMetadata = () => (
+    <div className='grid min-w-0 gap-2 @min-[24rem]/snippet-form:grid-cols-[minmax(0,1fr)_10rem]'>
+      <label className='flex min-w-0 flex-col gap-1 text-ui-control' htmlFor={`${fieldsId}-title`}>
+        {t('snippets.name')}
+        <Input
+          id={`${fieldsId}-title`}
+          inputSize='sm'
+          className='shadow-none'
+          value={draft.item.title}
+          readOnly={builtin}
+          disabled={busy}
+          onChange={(event) => update({ ...draft.item, title: event.target.value })}
+        />
+      </label>
+      <div className='flex min-w-0 flex-col gap-1 text-ui-control'>
+        <label htmlFor={`${fieldsId}-kind`}>{t('snippets.kind')}</label>
+        <Select.Root
+          value={draft.item.kind}
+          disabled={builtin || busy}
+          onValueChange={(value: CapricornSnippetKind) => {
+            const { id, title, source } = draft.item
+            update(
+              value === 'code'
+                ? { id, title, source, kind: value, language: '' }
+                : { id, title, source, kind: value },
+            )
+          }}
+        >
+          <Select.Trigger id={`${fieldsId}-kind`} size='sm' className='shadow-none'>
+            <Select.Value />
+          </Select.Trigger>
+          <Select.Content>
+            {kinds.map((value) => (
+              <Select.Item key={value} value={value}>
+                {t(`snippets.kinds.${value}`)}
+              </Select.Item>
+            ))}
+          </Select.Content>
+        </Select.Root>
+      </div>
+    </div>
+  )
+
+  const renderSnippetLanguage = () =>
+    draft.item.kind === 'code' ? (
+      <label
+        className='flex w-full max-w-80 flex-col gap-1 text-ui-control'
+        htmlFor={`${fieldsId}-language`}
+      >
+        {t('snippets.language')}
+        <Input
+          id={`${fieldsId}-language`}
+          inputSize='sm'
+          className='shadow-none'
+          value={draft.item.language ?? ''}
+          placeholder={t('snippets.languagePlaceholder')}
+          list={`${fieldsId}-languages`}
+          readOnly={builtin}
+          disabled={busy}
+          onChange={(event) => {
+            if (draft.item.kind === 'code') update({ ...draft.item, language: event.target.value })
+          }}
+        />
+        <datalist id={`${fieldsId}-languages`}>
+          {[
+            'bash',
+            'css',
+            'go',
+            'html',
+            'java',
+            'javascript',
+            'json',
+            'markdown',
+            'python',
+            'rust',
+            'sql',
+            'typescript',
+            'yaml',
+          ].map((language) => (
+            <option key={language} value={language} />
+          ))}
+        </datalist>
+      </label>
+    ) : null
+
+  const renderSaveAndPreviewActions = () => (
+    <div className='flex flex-wrap items-center gap-1.5'>
+      {!builtin ? (
+        <Button
+          size='sm'
+          disabled={!loaded || busy || !dirty || !validSnippet(draft.item)}
+          onClick={() => void save()}
+        >
+          {t('snippets.save')}
+        </Button>
+      ) : null}
+      <Button
+        variant='outline'
+        size='sm'
+        disabled={busy || !draft.item.source.trim()}
+        onClick={() =>
+          setPreview((previous) => ({ item: { ...draft.item }, id: (previous?.id ?? 0) + 1 }))
+        }
+      >
+        <Eye aria-hidden className='size-3.5' />
+        {t(preview ? 'snippets.previewAgain' : 'snippets.preview')}
+      </Button>
+      {preview && fingerprint(preview.item) !== fingerprint(draft.item) ? (
+        <span role='status' className='text-ui-caption text-muted-foreground'>
+          {t('snippets.previewStale')}
+        </span>
+      ) : null}
+    </div>
+  )
+
   return (
     <div
       className='@container/snippets flex flex-col gap-3 text-ui-control'
@@ -258,184 +467,11 @@ export function SnippetSetting({
         </div>
       ) : null}
       <div className='grid min-w-0 gap-3 @min-[40rem]/snippets:grid-cols-[10.5rem_minmax(0,1fr)]'>
-        <aside className='flex min-w-0 flex-col gap-1.5'>
-          <Input
-            inputSize='sm'
-            className='shadow-none'
-            type='search'
-            autoComplete='off'
-            spellCheck={false}
-            aria-label={t('snippets.search')}
-            placeholder={t('snippets.search')}
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-          />
-          <div
-            className='flex max-h-40 flex-col gap-0.5 overflow-y-auto @min-[40rem]/snippets:max-h-80'
-            role='list'
-            aria-label={t('snippets.library')}
-          >
-            {visibleItems.map((item) => (
-              <div key={item.id} role='listitem'>
-                <Button
-                  variant='ghost'
-                  size='sm'
-                  disabled={busy}
-                  aria-current={draft.item.id === item.id ? 'true' : undefined}
-                  className={cn(
-                    'h-auto min-h-7 w-full justify-start gap-1.5 whitespace-normal px-2 py-1 text-left font-normal',
-                    draft.item.id === item.id && 'bg-control-selected font-medium',
-                  )}
-                  onClick={async () => {
-                    if (draft.item.id !== item.id && (await guard())) select(item)
-                  }}
-                >
-                  <span className='min-w-0 flex-1 break-words'>{item.title}</span>
-                  {library.hiddenBuiltinIds.includes(item.id) ? (
-                    <EyeOff
-                      aria-label={t('snippets.hidden')}
-                      className='size-3.5 shrink-0 text-muted-foreground'
-                    />
-                  ) : null}
-                </Button>
-              </div>
-            ))}
-            {!visibleItems.length ? (
-              <p className='px-2 py-2 text-ui-control text-muted-foreground'>
-                {t('snippets.noResults')}
-              </p>
-            ) : null}
-          </div>
-        </aside>
+        {renderSnippetList()}
         <div className='@container/snippet-form flex min-w-0 flex-col gap-3'>
-          <div className='flex flex-wrap items-center gap-2'>
-            <Badge variant='outline' size='sm' className='text-ui-caption'>
-              {t(builtin ? 'snippets.builtin' : 'snippets.custom')}
-            </Badge>
-            {dirty ? (
-              <span className='text-ui-caption text-muted-foreground'>{t('snippets.unsaved')}</span>
-            ) : null}
-            <div className='ml-auto flex flex-wrap justify-end gap-1'>
-              <Button
-                size='sm'
-                variant='ghost'
-                disabled={!loaded || busy}
-                onClick={() => void create(draft.item)}
-              >
-                <Copy aria-hidden className='size-3.5' />
-                {t(builtin ? 'snippets.copyCustom' : 'snippets.copy')}
-              </Button>
-              {builtin ? (
-                <Button
-                  size='sm'
-                  variant='ghost'
-                  disabled={!loaded || busy}
-                  onClick={() => void toggleHidden()}
-                >
-                  {hidden ? (
-                    <Eye aria-hidden className='size-3.5' />
-                  ) : (
-                    <EyeOff aria-hidden className='size-3.5' />
-                  )}
-                  {t(hidden ? 'snippets.show' : 'snippets.hide')}
-                </Button>
-              ) : library.items.some((item) => item.id === draft.item.id) ? (
-                <Button
-                  size='sm'
-                  variant='destructive'
-                  disabled={busy}
-                  onClick={() => void remove()}
-                >
-                  <Trash2 aria-hidden className='size-3.5' />
-                  {t('snippets.delete')}
-                </Button>
-              ) : null}
-            </div>
-          </div>
-          <div className='grid min-w-0 gap-2 @min-[24rem]/snippet-form:grid-cols-[minmax(0,1fr)_10rem]'>
-            <label
-              className='flex min-w-0 flex-col gap-1 text-ui-control'
-              htmlFor={`${fieldsId}-title`}
-            >
-              {t('snippets.name')}
-              <Input
-                id={`${fieldsId}-title`}
-                inputSize='sm'
-                className='shadow-none'
-                value={draft.item.title}
-                readOnly={builtin}
-                disabled={busy}
-                onChange={(event) => update({ ...draft.item, title: event.target.value })}
-              />
-            </label>
-            <div className='flex min-w-0 flex-col gap-1 text-ui-control'>
-              <label htmlFor={`${fieldsId}-kind`}>{t('snippets.kind')}</label>
-              <Select.Root
-                value={draft.item.kind}
-                disabled={builtin || busy}
-                onValueChange={(value: CapricornSnippetKind) => {
-                  const { id, title, source } = draft.item
-                  update(
-                    value === 'code'
-                      ? { id, title, source, kind: value, language: '' }
-                      : { id, title, source, kind: value },
-                  )
-                }}
-              >
-                <Select.Trigger id={`${fieldsId}-kind`} size='sm' className='shadow-none'>
-                  <Select.Value />
-                </Select.Trigger>
-                <Select.Content>
-                  {kinds.map((value) => (
-                    <Select.Item key={value} value={value}>
-                      {t(`snippets.kinds.${value}`)}
-                    </Select.Item>
-                  ))}
-                </Select.Content>
-              </Select.Root>
-            </div>
-          </div>
-          {draft.item.kind === 'code' ? (
-            <label
-              className='flex w-full max-w-80 flex-col gap-1 text-ui-control'
-              htmlFor={`${fieldsId}-language`}
-            >
-              {t('snippets.language')}
-              <Input
-                id={`${fieldsId}-language`}
-                inputSize='sm'
-                className='shadow-none'
-                value={draft.item.language ?? ''}
-                placeholder={t('snippets.languagePlaceholder')}
-                list={`${fieldsId}-languages`}
-                readOnly={builtin}
-                disabled={busy}
-                onChange={(event) => {
-                  if (draft.item.kind === 'code')
-                    update({ ...draft.item, language: event.target.value })
-                }}
-              />
-              <datalist id={`${fieldsId}-languages`}>
-                {[
-                  'bash',
-                  'css',
-                  'go',
-                  'html',
-                  'java',
-                  'javascript',
-                  'json',
-                  'markdown',
-                  'python',
-                  'rust',
-                  'sql',
-                  'typescript',
-                  'yaml',
-                ].map((language) => (
-                  <option key={language} value={language} />
-                ))}
-              </datalist>
-            </label>
-          ) : null}
+          {renderSnippetActions()}
+          {renderSnippetMetadata()}
+          {renderSnippetLanguage()}
           <div className='flex flex-col gap-1 text-ui-control'>
             <label htmlFor={`${fieldsId}-source`}>{t('snippets.source')}</label>
             <Textarea
@@ -458,33 +494,7 @@ export function SnippetSetting({
               {error}
             </p>
           ) : null}
-          <div className='flex flex-wrap items-center gap-1.5'>
-            {!builtin ? (
-              <Button
-                size='sm'
-                disabled={!loaded || busy || !dirty || !validSnippet(draft.item)}
-                onClick={() => void save()}
-              >
-                {t('snippets.save')}
-              </Button>
-            ) : null}
-            <Button
-              variant='outline'
-              size='sm'
-              disabled={busy || !draft.item.source.trim()}
-              onClick={() =>
-                setPreview((previous) => ({ item: { ...draft.item }, id: (previous?.id ?? 0) + 1 }))
-              }
-            >
-              <Eye aria-hidden className='size-3.5' />
-              {t(preview ? 'snippets.previewAgain' : 'snippets.preview')}
-            </Button>
-            {preview && fingerprint(preview.item) !== fingerprint(draft.item) ? (
-              <span role='status' className='text-ui-caption text-muted-foreground'>
-                {t('snippets.previewStale')}
-              </span>
-            ) : null}
-          </div>
+          {renderSaveAndPreviewActions()}
           {preview ? (
             <Suspense
               fallback={

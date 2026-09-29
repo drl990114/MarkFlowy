@@ -41,6 +41,12 @@ const declarations = new Set([
   '[content, setContent]',
   'updateCachedFileContent',
 ])
+function containsSnapshotRead(node: ts.Node): boolean {
+  if (ts.isCallExpression(node) && node.expression.getText(source) === 'readStableFileSnapshot')
+    return true
+  return ts.forEachChild(node, containsSnapshotRead) ?? false
+}
+
 let loadingEffectCount = 0
 const statements = editor.body.statements
   .filter((node) => {
@@ -52,9 +58,8 @@ const statements = editor.body.statements
       ts.isExpressionStatement(node) &&
       ts.isCallExpression(node.expression) &&
       node.expression.expression.getText(source) === 'useEffect' &&
-      node.expression.arguments[0]
-        ?.getText(source)
-        .includes('await readStableFileSnapshot(file.path,')
+      node.expression.arguments[0] &&
+      containsSnapshotRead(node.expression.arguments[0])
     ) {
       loadingEffectCount += 1
       return true

@@ -35,6 +35,22 @@ const documentId = (value: unknown) =>
   value && typeof value === 'object' && 'id' in value && typeof value.id === 'string'
     ? value.id
     : undefined
+const applySelectedTheme = (themes: MfTheme[], previousTheme: MfTheme | undefined) => {
+  const store = useThemeStore.getState()
+  const selectedMode = store.themeMode === 'system' ? store.systemTheme : store.themeMode
+  const selected = selectedMode === 'dark' ? store.darkThemeName : store.lightThemeName
+  const active = themes.find((theme) => theme.name === selected && theme.mode === selectedMode)
+  // Persist real changes to the selected palette, including updates from another window.
+  // Temporary fallbacks must leave the last known custom-theme appearance intact.
+  const persistAppearance = Boolean(
+    active &&
+      (active.name !== previousTheme?.name ||
+        active.mode !== previousTheme?.mode ||
+        JSON.stringify(active.styledConstants) !== JSON.stringify(previousTheme?.styledConstants)),
+  )
+  store.applyTheme(persistAppearance)
+}
+
 export const useThemeLibrary = create<LibraryState>((set, get) => {
   let loadSequence = 0
   let acceptanceSequence = 0
@@ -116,20 +132,7 @@ export const useThemeLibrary = create<LibraryState>((set, get) => {
     useThemeStore.setState({ themes })
     documentErrors = errors
     // A corrupt or temporarily unavailable document must not erase the user's chosen identity.
-    const store = useThemeStore.getState()
-    const selectedMode = store.themeMode === 'system' ? store.systemTheme : store.themeMode
-    const selected = selectedMode === 'dark' ? store.darkThemeName : store.lightThemeName
-    const active = themes.find((theme) => theme.name === selected && theme.mode === selectedMode)
-    // Persist real changes to the selected palette, including updates from another window.
-    // Temporary fallbacks must leave the last known custom-theme appearance intact.
-    const persistAppearance = Boolean(
-      active &&
-        (active.name !== selection.curTheme?.name ||
-          active.mode !== selection.curTheme?.mode ||
-          JSON.stringify(active.styledConstants) !==
-            JSON.stringify(selection.curTheme?.styledConstants)),
-    )
-    store.applyTheme(persistAppearance)
+    applySelectedTheme(themes, selection.curTheme)
     loadLocalThemeCss(
       data.snippets.filter((snippet) => snippet.enabled).map((snippet) => snippet.css),
     )

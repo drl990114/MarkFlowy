@@ -110,6 +110,12 @@ export async function prepareHtmlPreview(
     return url
   }
 
+  const isLocalResource = (url: URL) =>
+    !!documentPath &&
+    url.protocol === 'file:' &&
+    url.host === rootUrl.host &&
+    url.pathname.startsWith(rootUrl.pathname)
+
   const resolveResource = async (
     value: string,
     base: URL,
@@ -133,12 +139,7 @@ export async function prepareHtmlPreview(
       blockedResources++
       return EMPTY_RESOURCE
     }
-    if (
-      !documentPath ||
-      url.protocol !== 'file:' ||
-      url.host !== rootUrl.host ||
-      !url.pathname.startsWith(rootUrl.pathname)
-    ) {
+    if (!isLocalResource(url)) {
       blockedResources++
       return EMPTY_RESOURCE
     }
@@ -160,7 +161,7 @@ export async function prepareHtmlPreview(
         try {
           const path = localResourcePath(url.href)
           if (!path) throw new Error('Invalid resource path')
-          const bytes = await readResource(documentPath, path)
+          const bytes = await readResource(documentPath!, path)
           checkCanceled()
           totalBytes += bytes.byteLength
           if (totalBytes > MAX_TOTAL_BYTES) throw new Error('Preview resources exceed 64 MiB')
@@ -259,7 +260,8 @@ export async function prepareHtmlPreview(
       node.attrs = node.attrs.filter((attr) => attr.name !== name)
     }
     const visit = (parent: DefaultTreeAdapterTypes.ParentNode) => {
-      for (const node of [...parent.childNodes]) {
+      // detachNode mutates this array; visit a snapshot so adjacent blocked nodes are not skipped.
+      for (const node of parent.childNodes.slice()) {
         if (!tree.isElementNode(node)) continue
         if (
           ['base', 'iframe', 'object', 'embed'].includes(node.tagName) ||
@@ -285,11 +287,44 @@ export async function prepareHtmlPreview(
       }
     }
     visit(doc)
-    for (const node of elements) {
+    const rewriteSrcset = async (node: Element) => {
+      const srcset = get(node, 'srcset')
+      if (srcset !== undefined) {
+        // Data URLs contain commas; the URL token ends at whitespace in that case.
+        const candidates = srcset.match(/(?:data:[^\s]+|[^\s,]+)(?:\s+[^,]+)?(?:,|$)/g) ?? []
+        const converted: string[] = []
+        for (const candidate of candidates) {
+          const [url, ...descriptor] = candidate.replace(/,$/, '').trim().split(/\s+/)
+          converted.push([await resolveResource(url, baseUrl, []), ...descriptor].join(' '))
+        }
+        set(node, 'srcset', converted.join(', '))
+      }
+    }
+
+    const rewriteElementStyles = async (node: Element) => {
+      try {
+        if (node.tagName === 'style') {
+          const css = node.childNodes
+            .filter(tree.isTextNode)
+            .map((child) => child.value)
+            .join('')
+          const rewritten = await rewriteCss(css, baseUrl, [])
+          node.childNodes = []
+          tree.insertText(node, rewritten)
+        }
+        const style = get(node, 'style')
+        if (style !== undefined) set(node, 'style', await rewriteCss(style, baseUrl, []))
+      } catch {
+        checkCanceled()
+        blockedResources++
+      }
+    }
+
+    const rewriteElement = async (node: Element) => {
       if (node.tagName === 'link') {
         if (get(node, 'rel')?.toLowerCase() !== 'stylesheet') {
           tree.detachNode(node)
-          continue
+          return
         }
         const href = await resolveResource(get(node, 'href') ?? '', baseUrl, [], true)
         set(node, 'href', href)
@@ -308,38 +343,14 @@ export async function prepareHtmlPreview(
           remove(node, 'crossorigin')
         }
       }
-      const srcset = get(node, 'srcset')
-      if (srcset !== undefined) {
-        // Data URLs contain commas; the URL token ends at whitespace in that case.
-        const candidates = srcset.match(/(?:data:[^\s]+|[^\s,]+)(?:\s+[^,]+)?(?:,|$)/g) ?? []
-        const converted: string[] = []
-        for (const candidate of candidates) {
-          const [url, ...descriptor] = candidate.replace(/,$/, '').trim().split(/\s+/)
-          converted.push([await resolveResource(url, baseUrl, []), ...descriptor].join(' '))
-        }
-        set(node, 'srcset', converted.join(', '))
-      }
-      try {
-        if (node.tagName === 'style') {
-          const css = node.childNodes
-            .filter(tree.isTextNode)
-            .map((child) => child.value)
-            .join('')
-          const rewritten = await rewriteCss(css, baseUrl, [])
-          node.childNodes = []
-          tree.insertText(node, rewritten)
-        }
-        const style = get(node, 'style')
-        if (style !== undefined) set(node, 'style', await rewriteCss(style, baseUrl, []))
-      } catch {
-        checkCanceled()
-        blockedResources++
-      }
+      await rewriteSrcset(node)
+      await rewriteElementStyles(node)
       if (['a', 'area'].includes(node.tagName) && !get(node, 'href')?.startsWith('#')) {
         remove(node, 'href')
         remove(node, 'ping')
       }
     }
+    for (const node of elements) await rewriteElement(node)
     const head = elements.find((node) => node.tagName === 'head')!
     const policy = tree.createElement('meta', html.NS.HTML, [
       { name: 'http-equiv', value: 'Content-Security-Policy' },
