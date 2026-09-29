@@ -79,21 +79,30 @@ export async function visibleContent(content: string) {
 }
 
 export async function shortcut(key: string) {
-  await browser.keys([Key.Command, key])
+  await browser.action('key').down(Key.Command).down(key).up(key).up(Key.Command).perform()
 }
 
 export async function replaceDocument(path: string, content: string) {
   await writeFile(join(report, `${basename(path)}.expected-draft.md`), content)
   // Actions include mouse down/up and real coordinates, which the editor uses for its caret.
   await $(`${editor} [data-cap-leaf]`).click({ x: 1, y: 1 })
-  await browser.waitUntil(() => browser.execute(() => {
-    const key = document.querySelector('[data-editor-active="true"] [data-cap-editable][data-cap-key]')
-      ?.getAttribute('data-cap-key')
-    return !!key && document.activeElement?.getAttribute('data-cap-dockey') === key
-  }), { timeoutMsg: 'The active Capricorn document did not receive keyboard focus' })
+  await browser.waitUntil(
+    () =>
+      browser.execute(() => {
+        const key = document
+          .querySelector('[data-editor-active="true"] [data-cap-editable][data-cap-key]')
+          ?.getAttribute('data-cap-key')
+        return !!key && document.activeElement?.getAttribute('data-cap-dockey') === key
+      }),
+    { timeoutMsg: 'The active Capricorn document did not receive keyboard focus' },
+  )
   await shortcut('a')
   await browser.keys(Key.Backspace)
-  await browser.keys(content)
+  // keys(string) holds every character down before releasing them. Send complete
+  // keystrokes so repeated letters and the editor's keyup/render cycle stay ordered.
+  const typing = browser.action('key')
+  for (const character of content) typing.down(character).up(character)
+  await typing.perform()
   await waitState(path, { dirty: true, contentSha256: sha256(content) })
   await visibleContent(content)
 }
@@ -106,9 +115,9 @@ export async function save(path: string, content: string) {
 
 export async function switchMode(mode: 'wysiwyg' | 'sourceCode' | 'preview', path: string) {
   const labels = { wysiwyg: 'Wysiwyg', sourceCode: 'Source Code', preview: 'Preview' }
-  const current = await $(editor).getAttribute('data-mf-editor-mode') as keyof typeof labels
-  await $(`button[aria-label="${labels[current]}"][aria-haspopup="menu"]`).click()
-  await $(`//*[starts-with(@role, 'menuitem')][contains(., '${labels[mode]}')]`).click()
+  await $('button[aria-label="MarkFlowy Menu"]').click()
+  await $("//*[@role='menuitem'][normalize-space(.)='View']").click()
+  await $(`//*[@role='menuitemcheckbox'][contains(., '${labels[mode]}')]`).click()
   await waitState(path, { mode, ready: true, active: true })
 }
 

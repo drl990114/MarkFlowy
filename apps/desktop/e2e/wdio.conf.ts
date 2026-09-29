@@ -22,7 +22,9 @@ const serviceOptions: TauriServiceOptions = {
 
 // failZero is supported by Mocha but absent from WDIO's narrower MochaOpts declaration.
 const mochaOpts = {
-  timeout: 90_000,
+  // Native WebView round trips accumulate across typing, tab switches and dialogs.
+  // Keep individual waits bounded at 20s while allowing the full scenario to finish.
+  timeout: 240_000,
   retries: 0,
   failZero: true,
   forbidOnly: true,

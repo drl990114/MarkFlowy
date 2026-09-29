@@ -24,7 +24,7 @@ describe('local history restoration', () => {
     await $("//*[starts-with(@role, 'menuitem')][contains(., 'Local history')]").click()
     await $('[role="dialog"]').waitForDisplayed()
     await $(`[data-mf-history-entry-id="${versionId}"]`).click()
-    const restore = $('[role="dialog"] button=Restore this version')
+    const restore = $('[role="dialog"]').$('button=Restore this version')
     await restore.waitForEnabled()
     await restore.click()
     await $('[role="dialog"]').waitForExist({ reverse: true })
