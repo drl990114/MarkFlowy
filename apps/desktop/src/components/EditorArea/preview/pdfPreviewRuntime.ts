@@ -3,6 +3,7 @@ import { FileResultCode, type FileSysResult } from '@/helper/filesys'
 import type { PDFDocumentLoadingTask, PDFDocumentProxy } from 'pdfjs-dist/types/src/display/api'
 import type { PDFViewer } from 'pdfjs-dist/types/web/pdf_viewer'
 import workerUrl from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?url'
+import { enablePdfTextStreamIteration } from './pdfTextStreamCompatibility'
 
 export interface PdfViewState {
   page: number
@@ -163,6 +164,7 @@ export async function openPdfPreview(
     }
     const document = await loadingTask.promise
     guard()
+    enablePdfTextStreamIteration(document)
     pdfViewer.setDocument(document)
     linkService.setDocument(document)
     return {

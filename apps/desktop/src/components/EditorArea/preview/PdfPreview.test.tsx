@@ -57,3 +57,30 @@ it('does not show progress for an invisible PDF pane', () => {
   expect(open).not.toHaveBeenCalled()
   expect(view.queryByRole('progressbar')).toBeNull()
 })
+
+it('searches text entered while loading once ready and displays counts with result navigation', async () => {
+  const search = vi.fn()
+  open.mockResolvedValue({
+    search,
+    capture: () => ({ page: 1, scale: 'page-width', scrollTop: 0, scrollLeft: 0 }),
+    dispose: vi.fn(),
+  })
+  const view = render(content())
+  const input = view.getByRole('textbox', { name: 'document_preview.search' })
+  fireEvent.change(input, { target: { value: 'Print930' } })
+  act(() => { vi.advanceTimersByTime(200) })
+  expect(search).not.toHaveBeenCalled()
+
+  await act(async () => { callbacks().onReady(3) })
+  act(() => { vi.advanceTimersByTime(200) })
+  expect(search).toHaveBeenCalledWith('Print930')
+  await act(async () => { callbacks().onMatches(1, 2) })
+  expect(view.getByRole('status').textContent).toBe('1/2')
+
+  fireEvent.keyDown(input, { key: 'Enter' })
+  expect(search).toHaveBeenLastCalledWith('Print930', true, false)
+  fireEvent.click(view.getByRole('button', { name: 'document_preview.previous_match' }))
+  expect(search).toHaveBeenLastCalledWith('Print930', true, true)
+  fireEvent.click(view.getByRole('button', { name: 'document_preview.next_match' }))
+  expect(search).toHaveBeenLastCalledWith('Print930', true)
+})

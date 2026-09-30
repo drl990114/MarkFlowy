@@ -30,6 +30,14 @@ export function scopePdfViewerCss(css: string): string {
   root.walkDecls((decl) => {
     decl.value = decl.value.replace(/url\((['"]?)images\//g, `url($1${assetPrefix}images/`)
   })
+  // PDF.js sizes the page and text layer to the same viewport. Its canvas
+  // fills the page's content box, so Desktop's border-box reset must not
+  // subtract the page borders from the canvas dimensions.
+  root.append(
+    postcss
+      .rule({ selector: '.mf-pdf-preview .pdfViewer .page' })
+      .append({ prop: 'box-sizing', value: 'content-box' }),
+  )
   return root.toString()
 }
 
