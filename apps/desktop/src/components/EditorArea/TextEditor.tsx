@@ -23,6 +23,9 @@ import { reportEditorSearchLoadFailure, useEditorSearchStore } from './editorSea
 import { commandRegistry } from '@/commands'
 import { capricornClipboard, handleCapricornClipboardResult } from './capricornClipboard'
 import { AppEditorThemeProvider } from '@/AppThemeProvider'
+import { EditorThemeContext } from '@/editorThemeContext'
+import { ThemeContext } from 'styled-components'
+import { createImageExportSurface } from './imageExportSurface'
 import { EVENT } from '@/constants'
 import {
   EditorViewType,
@@ -636,18 +639,6 @@ async function waitForImageLoad(img: HTMLImageElement, src: string) {
 
 const CSS_IMAGE_URL_REG = /url\(\s*(['"]?)(.*?)\1\s*\)/g
 const XLINK_NS = 'http://www.w3.org/1999/xlink'
-const RISKY_EXPORT_TAG_NAMES = new Set([
-  'canvas',
-  'embed',
-  'iframe',
-  'img',
-  'object',
-  'picture',
-  'source',
-  'svg',
-  'video',
-])
-
 const getTransparentImageSrc = (element?: Element): string => {
   const rect = element?.getBoundingClientRect()
   const width = Math.max(1, Math.round(rect?.width || 1))
@@ -875,47 +866,6 @@ async function prepareResourcesForExport(root: HTMLElement, fileFolderPath?: str
   }
 }
 
-function isSecurityError(error: unknown) {
-  const errorText = String(error)
-  return errorText.includes('SecurityError') || errorText.includes('operation is insecure')
-}
-
-function ignoreRiskyExportElement(element: Element) {
-  return RISKY_EXPORT_TAG_NAMES.has(element.tagName.toLowerCase())
-}
-
-function sanitizeClonedExportDocument(clonedDocument: Document) {
-  const style = clonedDocument.createElement('style')
-  style.textContent = `
-    *, *::before, *::after {
-      background-image: none !important;
-      border-image-source: none !important;
-      list-style-image: none !important;
-      mask-image: none !important;
-      -webkit-mask-image: none !important;
-    }
-
-    canvas, embed, iframe, img, object, picture, source, svg, video {
-      visibility: hidden !important;
-    }
-  `
-  clonedDocument.head.appendChild(style)
-
-  clonedDocument
-    .querySelectorAll('canvas, embed, iframe, img, object, picture, source, svg, video')
-    .forEach((element) => {
-      element.setAttribute('data-html2canvas-ignore', 'true')
-    })
-
-  clonedDocument.querySelectorAll<HTMLElement>('*').forEach((element) => {
-    element.style.backgroundImage = 'none'
-    element.style.borderImageSource = 'none'
-    element.style.listStyleImage = 'none'
-    element.style.maskImage = 'none'
-    element.style.setProperty('-webkit-mask-image', 'none')
-  })
-}
-
 function canvasToExportDataUrl(canvas: HTMLCanvasElement) {
   return canvas.toDataURL('image/jpeg', 0.95)
 }
@@ -931,59 +881,9 @@ async function loadHtml2Canvas() {
   return html2canvasPromise
 }
 
-function renderTextFallbackImageDataUrl(element: HTMLElement) {
-  const rect = element.getBoundingClientRect()
-  const width = Math.max(320, Math.min(4096, Math.ceil(rect.width || element.scrollWidth || 800)))
-  const height = Math.max(
-    240,
-    Math.min(12000, Math.ceil(element.scrollHeight || rect.height || 600)),
-  )
-  const canvas = document.createElement('canvas')
-  canvas.width = width
-  canvas.height = height
-
-  const ctx = canvas.getContext('2d')
-  if (!ctx) {
-    throw new Error('Failed to get canvas context')
-  }
-
-  const backgroundColor = window.getComputedStyle(element).backgroundColor || '#ffffff'
-  ctx.fillStyle = backgroundColor === 'rgba(0, 0, 0, 0)' ? '#ffffff' : backgroundColor
-  ctx.fillRect(0, 0, width, height)
-  ctx.fillStyle = window.getComputedStyle(element).color || '#111111'
-  ctx.font = '14px sans-serif'
-  ctx.textBaseline = 'top'
-
-  const maxLineWidth = width - 48
-  const words = (element.innerText || element.textContent || '')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .split(' ')
-  let line = ''
-  let y = 24
-
-  for (const word of words) {
-    const nextLine = line ? `${line} ${word}` : word
-    if (ctx.measureText(nextLine).width > maxLineWidth && line) {
-      ctx.fillText(line, 24, y)
-      y += 22
-      line = word
-      if (y > height - 24) break
-    } else {
-      line = nextLine
-    }
-  }
-
-  if (line && y <= height - 24) {
-    ctx.fillText(line, 24, y)
-  }
-
-  return canvasToExportDataUrl(canvas)
-}
-
-async function renderElementToImageDataUrl(element: HTMLElement, strict = false) {
+async function renderElementToImageDataUrl(element: HTMLElement) {
   const html2canvas = await loadHtml2Canvas()
-  const html2canvasOptions: Parameters<Html2Canvas>[1] = {
+  const canvas = await html2canvas(element, {
     allowTaint: false,
     foreignObjectRendering: false,
     imageTimeout: EXPORT_RESOURCE_TIMEOUT_MS,
@@ -991,38 +891,8 @@ async function renderElementToImageDataUrl(element: HTMLElement, strict = false)
     useCORS: true,
     ignoreElements: (candidate: Element) => candidate.tagName.toLowerCase() === 'iframe',
     onclone: normalizeClonedExportColors,
-  }
-
-  try {
-    const canvas = await html2canvas(element, html2canvasOptions)
-    return canvasToExportDataUrl(canvas)
-  } catch (error) {
-    if (strict || !isSecurityError(error)) {
-      throw error
-    }
-  }
-
-  logger.warn('Canvas was tainted during image export, retrying without media resources.')
-
-  try {
-    const fallbackCanvas = await html2canvas(element, {
-      ...html2canvasOptions,
-      ignoreElements: ignoreRiskyExportElement,
-      onclone: (clonedDocument, clonedElement) => {
-        sanitizeClonedExportDocument(clonedDocument)
-        normalizeClonedExportColors(clonedDocument, clonedElement)
-      },
-    })
-
-    return canvasToExportDataUrl(fallbackCanvas)
-  } catch (error) {
-    if (!isSecurityError(error)) {
-      throw error
-    }
-  }
-
-  logger.warn('Canvas stayed tainted after media-free retry, falling back to text-only export.')
-  return renderTextFallbackImageDataUrl(element)
+  })
+  return canvasToExportDataUrl(canvas)
 }
 
 const HtmlPreview = lazy(() => import('./preview/HtmlPreview'))
@@ -1119,6 +989,8 @@ function TextEditor(props: TextEditorProps) {
   )
   const editorPlaceholder = useAppSettingStore((state) => state.settingData.editor_placeholder)
   const semanticTheme = useContext(SemanticThemeContext)
+  const editorThemeConfig = useContext(EditorThemeContext)
+  const theme = useContext(ThemeContext) ?? editorThemeConfig?.token
   const editorSourceFontSize = useAppSettingStore(
     (state) => state.settingData.editor_source_font_size,
   )
@@ -1158,6 +1030,54 @@ function TextEditor(props: TextEditorProps) {
       editorKeybingMap,
     ],
   )
+  const resolveTypography = () => {
+    const themeFontSize = semanticTheme?.['font.editor.size'] ?? `${editorRootFontSize ?? 16}px`
+    const sourceFontSize = semanticTheme?.['font.source.size'] ?? `${editorSourceFontSize ?? 15}px`
+    const sourceLineHeight =
+      semanticTheme?.['font.source.lineHeight'] ?? (editorSourceLineHeight || '1.6')
+    const rootLineHeight =
+      semanticTheme?.['font.editor.lineHeight'] ?? (editorRootLineHeight || '1.7')
+    const wysiwygRootLineHeight =
+      semanticTheme?.['font.editor.lineHeight'] ?? (editorRootLineHeight || '1.7')
+
+    return {
+      themeFontSize,
+      sourceFontSize,
+      sourceLineHeight,
+      rootLineHeight,
+      wysiwygRootLineHeight,
+    }
+  }
+  const { themeFontSize, sourceFontSize, sourceLineHeight, rootLineHeight, wysiwygRootLineHeight } =
+    resolveTypography()
+
+  const printStyleToken = useMemo(
+    () => ({ id, rootFontSize: themeFontSize, rootLineHeight }),
+    [id, themeFontSize, rootLineHeight],
+  )
+
+  const createMarkdownImageSurface = useCallback(
+    (markdown: string) => {
+      const source = editorWrapperRef.current
+      if (!source) return Promise.reject(new Error('Editor is not ready.'))
+      return createImageExportSurface({
+        source,
+        markdown,
+        delegateOptions,
+        styleToken: printStyleToken,
+        theme: {
+          ...theme,
+          fontFamily: semanticTheme?.['font.editor.family'] ?? theme?.fontFamily,
+          bgColor: semanticTheme?.['editor.background'] ?? theme?.bgColor,
+          primaryFontColor: semanticTheme?.['editor.foreground'] ?? theme?.primaryFontColor,
+        },
+        semanticTheme,
+        editorThemeConfig,
+      })
+    },
+    [delegateOptions, printStyleToken, theme, semanticTheme, editorThemeConfig],
+  )
+
   const externalChangeState = useExternalFileChangeStore((state) => {
     const notice = state.notices[id]
     if (notice?.kind !== 'conflict') return 'none'
@@ -2244,7 +2164,6 @@ function TextEditor(props: TextEditorProps) {
       const releaseImages = remoteImages.retain()
       try {
         const markdown = useEditorStore.getState().getEditorContent(id)
-        const capricornEditor = isCapricornView(currentViewType) ? capricornEditorRef.current : null
         const path = await save({
           title: t('contextmenu.editor_tab.export_image'),
           defaultPath: file.name.split('.')?.[0] + '.jpg',
@@ -2257,9 +2176,8 @@ function TextEditor(props: TextEditorProps) {
 
         try {
           let exportElement: HTMLElement | null
-          if (isCapricornView(currentViewType)) {
-            if (!capricornEditor) throw new Error('Editor is not ready.')
-            const surface = await capricornEditor.createExportSurface(markdown)
+          if (fileTypeConfig.type === 'markdown') {
+            const surface = await createMarkdownImageSurface(markdown)
             disposeExportSurface = surface.dispose
             exportElement = surface.element
           } else {
@@ -2340,7 +2258,17 @@ function TextEditor(props: TextEditorProps) {
       bus.detach('editor_export_image', exportImageHandler)
       bus.detach('editor_set_content', setContentHandler)
     }
-  }, [active, currentViewType, id, remoteImages, setContentHandler, t, isCapricornView])
+  }, [
+    active,
+    currentViewType,
+    id,
+    remoteImages,
+    setContentHandler,
+    t,
+    isCapricornView,
+    fileTypeConfig.type,
+    createMarkdownImageSurface,
+  ])
 
   useEffect(() => {
     if (active) {
@@ -2404,32 +2332,6 @@ function TextEditor(props: TextEditorProps) {
       }
     },
     [currentViewType, delegate],
-  )
-
-  const resolveTypography = () => {
-    const themeFontSize = semanticTheme?.['font.editor.size'] ?? `${editorRootFontSize ?? 16}px`
-    const sourceFontSize = semanticTheme?.['font.source.size'] ?? `${editorSourceFontSize ?? 15}px`
-    const sourceLineHeight =
-      semanticTheme?.['font.source.lineHeight'] ?? (editorSourceLineHeight || '1.6')
-    const rootLineHeight =
-      semanticTheme?.['font.editor.lineHeight'] ?? (editorRootLineHeight || '1.7')
-    const wysiwygRootLineHeight =
-      semanticTheme?.['font.editor.lineHeight'] ?? (editorRootLineHeight || '1.7')
-
-    return {
-      themeFontSize,
-      sourceFontSize,
-      sourceLineHeight,
-      rootLineHeight,
-      wysiwygRootLineHeight,
-    }
-  }
-  const { themeFontSize, sourceFontSize, sourceLineHeight, rootLineHeight, wysiwygRootLineHeight } =
-    resolveTypography()
-
-  const printStyleToken = useMemo(
-    () => ({ id, rootFontSize: themeFontSize, rootLineHeight }),
-    [id, themeFontSize, rootLineHeight],
   )
 
   const editorProps: MfEditorProps = useMemo(
@@ -3175,8 +3077,8 @@ function TextEditor(props: TextEditorProps) {
         const releaseImages = remoteImages.retain()
         try {
           let element: HTMLElement | null
-          if (capricorn) {
-            const surface = await capricorn.createExportSurface(markdown)
+          if (fileTypeConfig.type === 'markdown') {
+            const surface = await createMarkdownImageSurface(markdown)
             element = surface.element
             dispose = surface.dispose
           } else {
@@ -3188,9 +3090,7 @@ function TextEditor(props: TextEditorProps) {
             element,
             getFolderPathFromPath(getFileObject(id)?.path),
           )
-          return new Uint8Array(
-            canvasDataToBinary(await renderElementToImageDataUrl(element, true)),
-          )
+          return new Uint8Array(canvasDataToBinary(await renderElementToImageDataUrl(element)))
         } finally {
           try {
             restore?.()
