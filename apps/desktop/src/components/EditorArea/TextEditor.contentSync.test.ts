@@ -2,7 +2,12 @@ import { runInNewContext } from 'node:vm'
 import ts from 'typescript'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { EditorViewType, isCapricornView } from '@/constants/editorViewType'
+import bus from '@/helper/eventBus'
 import useFileCacheStore, { getFileObject, updateFileObject } from '@/helper/files'
+import useEditorCounterStore from '@/stores/useEditorCounterStore'
+import type { CapricornDocumentStatistics } from './capricornRuntimeAdapter'
+import { createCapricornStatisticsScheduler } from './capricornStatisticsScheduler'
+import { EXTERNAL_FILE_CONTENT_SYNC_EVENT } from './externalFileChanges'
 import { FileSaveCoordinator } from './fileSaveCoordinator'
 import { EditorSnapshotRegistry } from './editorSnapshotRegistry'
 import { runSaveOperation } from './runSaveOperation'
@@ -40,10 +45,18 @@ function visit(node: ts.Node) {
     if (hook === 'useEffect' && body.includes('isUnmountingRef.current = true')) {
       expressions.set('lifecycle', node.arguments[0])
     }
+    if (hook === 'useEffect' && body.includes('bus.on(EXTERNAL_FILE_CONTENT_SYNC_EVENT')) {
+      expressions.set('externalContentSync', node.arguments[0])
+    }
+    if (hook === 'createCapricornStatisticsScheduler') {
+      expressions.set('publishStatistics', node.arguments[0])
+    }
   }
   ts.forEachChild(node, visit)
 }
 visit(source)
+
+const externalListenerCleanups: (() => void)[] = []
 
 function callback<T>(name: string, bindings: Record<string, unknown>): T {
   const expression = expressions.get(name)
@@ -79,6 +92,16 @@ function createHarness({
     content: 'A',
   }
   const latestContentRef = { current: 'A' }
+  const currentViewType = preview
+    ? EditorViewType.PREVIEW
+    : wysiwyg
+      ? EditorViewType.WYSIWYG
+      : EditorViewType.SOURCECODE
+  useEditorCounterStore.setState({
+    editorCounterMap: {
+      file: { characterCount: 1, nonWhitespaceCharacterCount: 1, wordCount: 1 },
+    },
+  })
   useFileCacheStore.setState({
     entries: { file: state.file },
     metadataRevision: 0,
@@ -93,6 +116,17 @@ function createHarness({
   const setMarkdown = vi.fn((content: string) => {
     state.runtimeContent = content
   })
+  const getStatistics = vi.fn(async (options?: { signal?: AbortSignal }) => {
+    void options
+    return {
+      characterCount: state.runtimeContent.length,
+      nonWhitespaceCharacterCount: state.runtimeContent.replace(/\s/g, '').length,
+      wordCount: state.runtimeContent.trim().split(/\s+/).filter(Boolean).length,
+    }
+  })
+  let nextHandle = 0
+  const frames = new Map<number, FrameRequestCallback>()
+  const idles = new Map<number, () => void>()
   const written: string[] = []
   const publisher = {
     hasPending: () => state.pending,
@@ -111,11 +145,8 @@ function createHarness({
     activeRef: { current: active },
     visible,
     visibleRef: { current: visible },
-    currentViewType: preview
-      ? EditorViewType.PREVIEW
-      : wysiwyg
-        ? EditorViewType.WYSIWYG
-        : EditorViewType.SOURCECODE,
+    currentViewType,
+    currentViewTypeRef: { current: currentViewType },
     EditorViewType,
     isCapricornView,
     id: 'file',
@@ -128,8 +159,7 @@ function createHarness({
     editorRef: { current: null },
     editorContextRef: { current: null },
     capricornEditorRef: { current: { getMarkdown, setMarkdown, isComposing: () => false } },
-    capricornRuntimeAdapterRef: { current: {} },
-    capricornStatisticsScheduler: { cancel: vi.fn(), schedule: vi.fn() },
+    capricornRuntimeAdapterRef: { current: { getStatistics } },
     latestContentRef,
     needsMountedContentSyncRef,
     isApplyingRemoteContentRef,
@@ -168,6 +198,11 @@ function createHarness({
         },
       }),
     },
+    useEditorCounterStore,
+    bus,
+    EXTERNAL_FILE_CONTENT_SYNC_EVENT,
+    setStatus: vi.fn(),
+    TextEditorStatus: { SUCCESS: 1 },
     window,
     queueMicrotask,
     runSaveOperation,
@@ -190,22 +225,59 @@ function createHarness({
       },
     },
   }
+  bindings.capricornStatisticsScheduler = createCapricornStatisticsScheduler(
+    callback('publishStatistics', bindings),
+    {
+      requestAnimationFrame: (frame) => {
+        const handle = ++nextHandle
+        frames.set(handle, frame)
+        return handle
+      },
+      cancelAnimationFrame: (handle) => {
+        frames.delete(handle)
+      },
+      requestIdle: (idle) => {
+        const handle = ++nextHandle
+        idles.set(handle, idle)
+        return handle
+      },
+      cancelIdle: (handle) => {
+        idles.delete(handle)
+      },
+    },
+  )
   bindings.setMountedEditorContent = callback('setMountedEditorContent', bindings)
   bindings.updateCachedFileContent = callback('updateCachedFileContent', bindings)
   const sync = callback<(content: string, force?: boolean) => void>('applySyncedContent', bindings)
   bindings.applySyncedContent = sync
+  externalListenerCleanups.push(callback<() => () => void>('externalContentSync', bindings)())
   const unmount = callback<() => () => void>('lifecycle', bindings)()
   return {
     state,
     sync,
     setMarkdown,
     getMarkdown,
+    getStatistics,
     publisher,
     latestContentRef,
     needsMountedContentSyncRef,
     isApplyingRemoteContentRef,
     written,
     unmount,
+    externalSync(content: string) {
+      bus.emit(EXTERNAL_FILE_CONTENT_SYNC_EVENT, undefined, { fileId: 'file', content })
+    },
+    runStatistics() {
+      for (const [handle, frame] of frames) {
+        frames.delete(handle)
+        frame(performance.now())
+      }
+      for (const [handle, idle] of idles) {
+        idles.delete(handle)
+        idle()
+      }
+    },
+    counter: () => useEditorCounterStore.getState().editorCounterMap.file,
     exportContent: callback<() => string>('getExportContent', bindings),
     publishToCache: callback<(content: string) => void>('updateCachedFileContent', bindings),
     getSaveRevision: () => coordinator.getRevision('file'),
@@ -221,7 +293,118 @@ function createHarness({
   }
 }
 
-afterEach(() => vi.useRealTimers())
+afterEach(() => {
+  externalListenerCleanups.splice(0).forEach((cleanup) => cleanup())
+  vi.useRealTimers()
+})
+
+describe('TextEditor statistics after restored or externally loaded content', () => {
+  it('updates all counts through the shared external-content listener, including empty content', async () => {
+    const harness = createHarness({ active: true })
+    harness.state.pending = true
+    harness.state.runtimeContent = 'unpublished local edit'
+
+    harness.externalSync('two words\n中')
+    expect(harness.setMarkdown).toHaveBeenCalledExactlyOnceWith('two words\n中', 2)
+    expect(harness.state.pending).toBe(false)
+    harness.runStatistics()
+    await vi.waitFor(() =>
+      expect(harness.counter()).toEqual({
+        characterCount: 11,
+        nonWhitespaceCharacterCount: 9,
+        wordCount: 3,
+      }),
+    )
+    expect(harness.getStatistics).toHaveBeenCalledOnce()
+
+    harness.externalSync('')
+    expect(harness.setMarkdown).toHaveBeenLastCalledWith('', 3)
+    harness.runStatistics()
+    await vi.waitFor(() =>
+      expect(harness.counter()).toEqual({
+        characterCount: 0,
+        nonWhitespaceCharacterCount: 0,
+        wordCount: 0,
+      }),
+    )
+    expect(harness.getStatistics).toHaveBeenCalledTimes(2)
+    expect(harness.getMarkdown).not.toHaveBeenCalled()
+  })
+
+  it('aborts an in-flight count and ignores its late result after a replacement', async () => {
+    const harness = createHarness({ active: true })
+    let resolveObsolete!: (statistics: CapricornDocumentStatistics) => void
+    const obsolete = new Promise<CapricornDocumentStatistics>((resolve) => {
+      resolveObsolete = resolve
+    })
+    harness.getStatistics.mockReturnValueOnce(obsolete)
+    harness.externalSync('A')
+    harness.runStatistics()
+    await Promise.resolve()
+    expect(harness.getStatistics).toHaveBeenCalledOnce()
+    const oldSignal = harness.getStatistics.mock.calls[0][0]?.signal
+    expect(oldSignal?.aborted).toBe(false)
+
+    harness.externalSync('new content')
+    expect(oldSignal?.aborted).toBe(true)
+    harness.runStatistics()
+    const expected = { characterCount: 11, nonWhitespaceCharacterCount: 10, wordCount: 2 }
+    await vi.waitFor(() => expect(harness.counter()).toEqual(expected))
+    resolveObsolete({ characterCount: 100, nonWhitespaceCharacterCount: 99, wordCount: 20 })
+    await obsolete
+    await Promise.resolve()
+    expect(harness.counter()).toEqual(expected)
+    expect(harness.getMarkdown).not.toHaveBeenCalled()
+  })
+
+  it.each([false, true])(
+    'counts only the latest hidden replacement on active reveal (preview=%s)',
+    async (preview) => {
+      const harness = createHarness({ preview })
+      harness.externalSync('obsolete')
+      harness.externalSync('latest 内容')
+      harness.runStatistics()
+      expect(harness.setMarkdown).not.toHaveBeenCalled()
+      expect(harness.getStatistics).not.toHaveBeenCalled()
+      expect(harness.counter()).toEqual({
+        characterCount: 1,
+        nonWhitespaceCharacterCount: 1,
+        wordCount: 1,
+      })
+
+      harness.reveal()
+      await Promise.resolve()
+      harness.runStatistics()
+      await vi.waitFor(() =>
+        expect(harness.counter()).toEqual({
+          characterCount: 9,
+          nonWhitespaceCharacterCount: 8,
+          wordCount: 2,
+        }),
+      )
+      expect(harness.getStatistics).toHaveBeenCalledOnce()
+      expect(harness.getMarkdown).not.toHaveBeenCalled()
+    },
+  )
+
+  it.each([
+    ['non-active sibling', { active: false, visible: true }],
+    ['hidden active pane', { active: true, visible: false }],
+    ['SourceCode', { active: true, wysiwyg: false }],
+  ])('does not request Capricorn statistics for %s', async (_name, options) => {
+    const harness = createHarness(options)
+    harness.externalSync('replacement')
+    harness.runStatistics()
+    await Promise.resolve()
+    expect(harness.setMarkdown).toHaveBeenCalledOnce()
+    expect(harness.getStatistics).not.toHaveBeenCalled()
+    expect(harness.counter()).toEqual({
+      characterCount: 1,
+      nonWhitespaceCharacterCount: 1,
+      wordCount: 1,
+    })
+  })
+})
 
 describe('TextEditor hidden content synchronization', () => {
   it('publishes each shared snapshot once across source and sibling cache writes', () => {

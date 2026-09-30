@@ -1203,10 +1203,20 @@ function TextEditor(props: TextEditorProps) {
 
   const setMountedEditorContent = useCallback(
     (nextContent: string) => {
+      capricornStatisticsScheduler.cancel()
       editorRef.current?.setContent(nextContent)
       capricornEditorRef.current?.setMarkdown(nextContent, fileSaveCoordinator.getRevision(id))
+      // Host replacements suppress local change callbacks, so refresh counts
+      // explicitly after the runtime has replaced its document.
+      if (
+        activeRef.current &&
+        visibleRef.current &&
+        isCapricornView(currentViewTypeRef.current)
+      ) {
+        capricornStatisticsScheduler.schedule(capricornRuntimeAdapterRef.current)
+      }
     },
-    [id],
+    [capricornStatisticsScheduler, id, isCapricornView],
   )
   const snapshotPublisher = useMemo(
     () =>
