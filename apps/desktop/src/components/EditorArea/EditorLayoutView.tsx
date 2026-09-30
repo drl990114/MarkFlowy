@@ -106,9 +106,8 @@ function PanelWithSeparator(props: PanelWithSeparatorProps) {
 
   return (
     <>
-      <SplitPanel
-        $hiddenInZen={hiddenInZen}
-        $zenPath={zenPath}
+      <Panel
+        data-mf-hidden-in-zen={hiddenInZen ? '' : undefined}
         data-mf-zen-path={zenPath ? '' : undefined}
         id={getPanelId(child)}
         defaultSize={`${defaultSize}%`}
@@ -120,7 +119,7 @@ function PanelWithSeparator(props: PanelWithSeparatorProps) {
           node={child}
           zenModeActive={zenModeActive}
         />
-      </SplitPanel>
+      </Panel>
       {showSeparator ? (
         <SplitSeparator $orientation={node.direction} $zenMode={zenModeActive} />
       ) : null}
@@ -254,21 +253,16 @@ const SplitGroup = styled(Group)`
   height: 100%;
   min-width: 0;
   min-height: 0;
-`
 
-const SplitPanel = styled(Panel)<{ $hiddenInZen: boolean; $zenPath: boolean }>`
-  ${(props) =>
-    props.$hiddenInZen &&
-    css`
-      display: none !important;
-    `}
+  /* Panel's className targets its inner content; Zen must resize the outer flex item. */
+  > [data-panel][data-mf-hidden-in-zen] {
+    display: none !important;
+  }
 
-  ${(props) =>
-    props.$zenPath &&
-    css`
-      flex: 1 1 100% !important;
-      width: 100%;
-    `}
+  > [data-panel][data-mf-zen-path] {
+    flex: 1 1 100% !important;
+    width: 100% !important;
+  }
 `
 
 const SplitSeparator = styled(Separator)<{
