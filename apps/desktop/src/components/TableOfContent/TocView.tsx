@@ -3,6 +3,7 @@ import { EditorViewType, isCapricornView } from '@/constants/editorViewType'
 import { getHeadingValue } from '@/helper/string'
 import { useEditorStore } from '@/stores'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
+import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
 import { TableOfContents } from '@markflowy/interface'
 import type { IHeadingData, TableOfContentsRef } from '@markflowy/interface'
 import { t } from '@/i18n'
@@ -43,6 +44,9 @@ type PendingCapricornOutline = {
   snapshot?: CapricornHeading[]
   cancel: () => void
 }
+
+const isMarkdownFile = (id: string) =>
+  useFileTypeConfigStore.getState().fileTypeConfigMap.get(id)?.type === 'markdown'
 
 const getHeadingChapterData = (
   headings: readonly { depth: number; value: string }[],
@@ -162,18 +166,43 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
   const capricornRefreshRef = useRef<PendingCapricornOutline | null>(null)
   const scheduleActiveHeadingUpdateRef = useRef<() => void>(() => {})
   const activeId = useEditorStore((state) => state.activeId)
+  const activeIsMarkdown = useFileTypeConfigStore(
+    (state) => state.fileTypeConfigMap.get(activeId ?? '')?.type === 'markdown',
+  )
   const activeViewType = useEditorViewTypeStore((state) =>
     activeId ? state.editorViewTypeMap.get(activeId) : undefined,
   )
   const getCapricornSnapshot = useCallback(
-    () => (activeId ? getCapricornEditor(activeId) : undefined),
-    [activeId],
+    () => (activeId && activeIsMarkdown ? getCapricornEditor(activeId) : undefined),
+    [activeId, activeIsMarkdown],
   )
   const capricornEditor = useSyncExternalStore(
     subscribeCapricornEditors,
     getCapricornSnapshot,
     getCapricornSnapshot,
   )
+
+  const clearOutline = useCallback(() => {
+    if (sourceRefreshTimerRef.current !== null) {
+      clearTimeout(sourceRefreshTimerRef.current)
+      sourceRefreshTimerRef.current = null
+    }
+    capricornRefreshRef.current?.cancel()
+    capricornRefreshRef.current = null
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current)
+      rafRef.current = null
+    }
+    tocRef.current?.refreshByHeadings({ newHeadings: [] })
+    setActiveHeadingId(null)
+    capricornOutlineRef.current = null
+    setOutlineSource(null)
+    wysiwygScrollElRef.current = null
+    setWysiwygScrollEl(null)
+    sourceHeadingsRef.current = []
+    sourceScrollElRef.current = null
+    setSourceScrollEl(null)
+  }, [])
 
   useEffect(() => {
     const outline = capricornOutlineRef.current
@@ -190,7 +219,7 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
 
   const calculateActiveHeadingId = useCallback(() => {
     const currentActiveId = useEditorStore.getState().activeId
-    if (!currentActiveId) return null
+    if (!currentActiveId || !isMarkdownFile(currentActiveId)) return null
 
     const editorViewTypeMap = useEditorViewTypeStore.getState().editorViewTypeMap
     const viewType = editorViewTypeMap.get(currentActiveId)
@@ -268,6 +297,7 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
     (currentActiveId: string, editor: CapricornRuntimeAdapter, snapshot?: CapricornHeading[]) => {
       const isCurrentEditor = () =>
         useEditorStore.getState().activeId === currentActiveId &&
+        isMarkdownFile(currentActiveId) &&
         isCapricornView(useEditorViewTypeStore.getState().editorViewTypeMap.get(currentActiveId)) &&
         getCapricornEditor(currentActiveId) === editor
       // An already queued old-editor notification must not cancel the new
@@ -353,9 +383,10 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
         const currentActiveId = useEditorStore.getState().activeId
         const editorViewTypeMap = useEditorViewTypeStore.getState().editorViewTypeMap
 
-        if (!currentActiveId) {
-          tocRef.current?.refreshByHeadings({ newHeadings: [] })
-          setActiveHeadingId(null)
+        // Preview and Source Code modes are also used by non-Markdown files.
+        // Only the active file's classification grants outline ownership.
+        if (!currentActiveId || !isMarkdownFile(currentActiveId)) {
+          clearOutline()
           return
         }
 
@@ -374,6 +405,7 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
             sourceRefreshTimerRef.current = null
             if (
               useEditorStore.getState().activeId !== currentActiveId ||
+              !isMarkdownFile(currentActiveId) ||
               useEditorViewTypeStore.getState().editorViewTypeMap.get(currentActiveId) !==
                 EditorViewType.SOURCECODE ||
               sourceCodeCodemirrorViewMap.get(currentActiveId) !== codemirrorView
@@ -444,22 +476,16 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
           return
         }
 
-        tocRef.current?.refreshByHeadings({ newHeadings: [] })
-        setActiveHeadingId(null)
-        wysiwygScrollElRef.current = null
-        setWysiwygScrollEl(null)
-        sourceHeadingsRef.current = []
-        sourceScrollElRef.current = null
-        setSourceScrollEl(null)
+        clearOutline()
       },
     })
 
     return () => disposable.dispose()
-  }, [scheduleCapricornHeadingRefresh])
+  }, [clearOutline, scheduleCapricornHeadingRefresh])
 
   useEffect(() => {
     const currentEditorPanelEl = document.querySelector('#editor-panel') as HTMLElement | null
-    const scrollEl = activeId ? getActiveEditorScrollEl(activeId) : null
+    const scrollEl = activeId && activeIsMarkdown ? getActiveEditorScrollEl(activeId) : null
     setEditorPanelEl(currentEditorPanelEl)
     if (!scrollEl) {
       wysiwygScrollElRef.current = null
@@ -469,7 +495,7 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
 
     wysiwygScrollElRef.current = scrollEl
     setWysiwygScrollEl(scrollEl)
-  }, [activeId])
+  }, [activeId, activeIsMarkdown])
 
   useEffect(() => {
     if (!wysiwygScrollEl) return
@@ -528,14 +554,8 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
   }, [])
 
   useEffect(() => {
-    if (!activeId) {
-      tocRef.current?.refreshByHeadings({ newHeadings: [] })
-      setActiveHeadingId(null)
-      wysiwygScrollElRef.current = null
-      setWysiwygScrollEl(null)
-      sourceHeadingsRef.current = []
-      sourceScrollElRef.current = null
-      setSourceScrollEl(null)
+    if (!activeId || !activeIsMarkdown) {
+      clearOutline()
       return
     }
     if (isCapricornView(activeViewType)) return
@@ -543,10 +563,10 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
       commandRegistry.execute('app:toc_refresh')
     }, 300)
     return () => clearTimeout(timer)
-  }, [activeId, activeViewType])
+  }, [activeId, activeViewType, activeIsMarkdown, clearOutline])
 
   useEffect(() => {
-    if (!activeId || !capricornEditor || !isCapricornView(activeViewType)) return
+    if (!activeId || !activeIsMarkdown || !capricornEditor || !isCapricornView(activeViewType)) return
 
     scheduleCapricornHeadingRefresh(activeId, capricornEditor)
     const unsubscribe = capricornEditor.headings.subscribe((headings) => {
@@ -557,9 +577,10 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
       capricornRefreshRef.current?.cancel()
       capricornRefreshRef.current = null
     }
-  }, [activeId, activeViewType, capricornEditor, scheduleCapricornHeadingRefresh])
+  }, [activeId, activeViewType, activeIsMarkdown, capricornEditor, scheduleCapricornHeadingRefresh])
 
   const headingNumberingAction =
+    activeIsMarkdown &&
     capricornEditor &&
     activeViewType === EditorViewType.WYSIWYG &&
     outlineSource?.id === activeId &&

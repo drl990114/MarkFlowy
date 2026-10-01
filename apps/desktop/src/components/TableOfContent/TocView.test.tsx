@@ -1,6 +1,6 @@
 import { runInNewContext } from 'node:vm'
 import { act, cleanup, render, waitFor } from '@testing-library/react'
-import { useImperativeHandle } from 'react'
+import { useImperativeHandle, useState } from 'react'
 import ts from 'typescript'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { setCapricornEditor } from '../EditorArea/capricornEditorRegistry'
@@ -11,6 +11,7 @@ import type {
 import { TocView } from './TocView'
 import textEditorSource from '../EditorArea/TextEditor.tsx?raw'
 import { EditorViewType } from '@/constants/editorViewType'
+import type { FileType } from '@/helper/fileTypeHandler'
 
 const harness = vi.hoisted(() => ({
   commands: new Map<string, () => void>(),
@@ -18,6 +19,9 @@ const harness = vi.hoisted(() => ({
   numberingMount: vi.fn(),
   editorState: { activeId: 'file' as string | undefined },
   viewState: { editorViewTypeMap: new Map([['file', 'wysiwyg']]) },
+  fileState: {
+    fileTypeConfigMap: new Map<string, { type: FileType }>([['file', { type: 'markdown' }]]),
+  },
   sourceViews: new Map<string, unknown>(),
   rme: vi.fn(),
 }))
@@ -46,6 +50,12 @@ vi.mock('@/stores/useEditorViewTypeStore', () => {
     }),
   }
 })
+vi.mock('@/stores/useFileTypeConfigStore', () => ({
+  default: Object.assign(
+    (selector: (state: typeof harness.fileState) => unknown) => selector(harness.fileState),
+    { getState: () => harness.fileState },
+  ),
+}))
 vi.mock('../EditorArea/sourceCodeEditorRegistry', () => ({
   sourceCodeCodemirrorViewMap: harness.sourceViews,
 }))
@@ -61,8 +71,19 @@ vi.mock('./HeadingNumberingButton', () => ({
 vi.mock('@/i18n', () => ({ t: (key: string) => key }))
 vi.mock('@markflowy/interface', () => ({
   TableOfContents: ({ ref, activeId }: { ref: React.Ref<unknown>; activeId?: string }) => {
-    useImperativeHandle(ref, () => ({ refreshByHeadings: harness.refresh }))
-    return <span data-testid='active-heading'>{activeId}</span>
+    const [headings, setHeadings] = useState<{ value: string }[]>([])
+    useImperativeHandle(ref, () => ({
+      refreshByHeadings: (args: { newHeadings: { value: string }[] }) => {
+        harness.refresh(args)
+        setHeadings(args.newHeadings)
+      },
+    }))
+    return (
+      <>
+        <span data-testid='active-heading'>{activeId}</span>
+        <span data-testid='outline-heading'>{headings[0]?.value}</span>
+      </>
+    )
   },
 }))
 
@@ -102,11 +123,120 @@ afterEach(() => {
   harness.refresh.mockClear()
   harness.numberingMount.mockClear()
   harness.editorState.activeId = 'file'
+  harness.viewState.editorViewTypeMap.clear()
   harness.viewState.editorViewTypeMap.set('file', 'wysiwyg')
+  harness.fileState.fileTypeConfigMap.clear()
+  harness.fileState.fileTypeConfigMap.set('file', { type: 'markdown' })
   harness.sourceViews.clear()
   harness.rme.mockReset()
   vi.useRealTimers()
   document.body.replaceChildren()
+})
+
+describe('outline file type ownership', () => {
+  it.each([
+    ['pdf', EditorViewType.PREVIEW],
+    ['image', EditorViewType.PREVIEW],
+    ['html', EditorViewType.PREVIEW],
+    ['html', EditorViewType.SOURCECODE],
+    ['text', EditorViewType.SOURCECODE],
+    ['json', EditorViewType.SOURCECODE],
+    ['unsupported', undefined],
+    [undefined, undefined],
+  ] as const)('clears Markdown headings immediately for %s in %s mode', (type, mode) => {
+    vi.useFakeTimers()
+    let notifyHeadings: ((headings: CapricornHeading[]) => void) | undefined
+    const heading = { id: 'old', level: 1, number: null, text: 'Old', title: 'Old' }
+    const unsubscribe = vi.fn()
+    const getAll = vi.fn(() => [heading])
+    setCapricornEditor('file', {
+      headings: {
+        getAll,
+        subscribe: (listener: typeof notifyHeadings) => {
+          notifyHeadings = listener
+          return unsubscribe
+        },
+      },
+    } as unknown as CapricornRuntimeAdapter)
+    const { getByTestId, rerender } = render(<TocView />)
+    act(() => vi.runAllTimers())
+    expect(getByTestId('outline-heading').textContent).toBe('Old')
+    harness.refresh.mockClear()
+
+    // Queue an old heading notification before switching to the next file.
+    act(() => notifyHeadings!([{ ...heading, title: 'Stale' }]))
+    harness.editorState.activeId = 'other-file'
+    if (type) harness.fileState.fileTypeConfigMap.set('other-file', { type })
+    if (mode) harness.viewState.editorViewTypeMap.set('other-file', mode)
+    rerender(<TocView />)
+    expect(getByTestId('outline-heading').textContent).toBe('')
+    expect(getByTestId('active-heading').textContent).toBe('')
+    expect(harness.refresh).toHaveBeenLastCalledWith({ newHeadings: [] })
+    expect(unsubscribe).toHaveBeenCalledOnce()
+
+    act(() => {
+      notifyHeadings!([{ ...heading, title: 'Late stale notification' }])
+      harness.commands.get('app:toc_refresh')?.()
+      vi.runAllTimers()
+    })
+    expect(getByTestId('outline-heading').textContent).toBe('')
+    expect(harness.rme).not.toHaveBeenCalled()
+
+    harness.editorState.activeId = 'file'
+    rerender(<TocView />)
+    act(() => vi.runAllTimers())
+    expect(getByTestId('outline-heading').textContent).toBe('Old')
+    expect(getAll).toHaveBeenCalledTimes(2)
+  })
+
+  it('clears headings when the active file is reclassified without changing its preview mode', () => {
+    vi.useFakeTimers()
+    harness.viewState.editorViewTypeMap.set('file', EditorViewType.PREVIEW)
+    const getAll = vi.fn(() => [
+      { id: 'old', level: 1, number: null, text: 'Old', title: 'Old' },
+    ])
+    setCapricornEditor('file', {
+      headings: { getAll, subscribe: () => () => {} },
+    } as unknown as CapricornRuntimeAdapter)
+    const { getByTestId, rerender } = render(<TocView />)
+    act(() => vi.runAllTimers())
+    expect(getByTestId('outline-heading').textContent).toBe('Old')
+
+    harness.fileState.fileTypeConfigMap.set('file', { type: 'pdf' })
+    rerender(<TocView />)
+    expect(getByTestId('outline-heading').textContent).toBe('')
+    act(() => {
+      harness.commands.get('app:toc_refresh')?.()
+      vi.runAllTimers()
+    })
+    expect(getAll).toHaveBeenCalledOnce()
+    expect(getByTestId('outline-heading').textContent).toBe('')
+  })
+
+  it.each(['capricorn', 'source'])('rejects a queued %s scan after file reclassification', (engine) => {
+    vi.useFakeTimers()
+    const readHeadings = vi.fn(() => [])
+    if (engine === 'capricorn') {
+      setCapricornEditor('file', {
+        headings: { getAll: readHeadings, subscribe: () => () => {} },
+      } as unknown as CapricornRuntimeAdapter)
+    } else {
+      harness.viewState.editorViewTypeMap.set('file', EditorViewType.SOURCECODE)
+      harness.sourceViews.set('file', {
+        get cm() {
+          return readHeadings()
+        },
+      })
+    }
+    render(<TocView />)
+    act(() => harness.commands.get('app:toc_refresh')?.())
+    // Execution-time checks must catch changes before React rerenders.
+    harness.fileState.fileTypeConfigMap.set('file', { type: 'text' })
+    act(() => vi.runAllTimers())
+    expect(readHeadings).not.toHaveBeenCalled()
+    expect(harness.rme).not.toHaveBeenCalled()
+    expect(harness.refresh.mock.calls.every(([args]) => args.newHeadings.length === 0)).toBe(true)
+  })
 })
 
 describe('Capricorn outline refresh ownership', () => {
