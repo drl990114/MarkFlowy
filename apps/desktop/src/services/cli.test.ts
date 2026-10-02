@@ -1,6 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { cliReceipt, contentSha256, type CliRequest } from './cliProtocol'
 import { listenForCliRequests, runCliRequest } from './cli'
+import { fileSaveCoordinator } from '@/components/EditorArea/fileSaveCoordinator'
+import { DEFAULT_TEXT_METADATA } from '@/components/EditorArea/textFileFormat'
 
 const mocks = vi.hoisted(() => ({
   invoke: vi.fn(),
@@ -14,6 +16,8 @@ const mocks = vi.hoisted(() => ({
   hasCommand: vi.fn(),
   execute: vi.fn(),
   listen: vi.fn(),
+  ready: true,
+  snapshotBytes: new Uint8Array(),
 }))
 const files: Record<string, { id: string; name: string; path: string }> = {
   target: { id: 'target', name: 'target.md', path: '/target.md' },
@@ -57,7 +61,7 @@ vi.mock('./workspace-switch', () => ({ switchWorkspaceInCurrentWindow: vi.fn() }
 vi.mock('@/components/EditorArea/editorAutomationRegistry', () => {
   const handle = {
     inspect: () => ({
-      ready: true,
+      ready: mocks.ready,
       visible: true,
       active: mocks.activeId === 'target',
       mode: 'preview',
@@ -88,9 +92,16 @@ const request = async (patch: Partial<CliRequest> = {}): Promise<CliRequest> => 
   ...patch,
 })
 
-beforeEach(() => {
+beforeEach(async () => {
   vi.clearAllMocks()
+  await fileSaveCoordinator.releaseWhenIdle(
+    'target',
+    () => true,
+    () => undefined,
+  )
   mocks.content = '# target'
+  mocks.ready = true
+  mocks.snapshotBytes = new TextEncoder().encode('# target')
   mocks.activeId = 'other'
   mocks.opened = ['target', 'other']
   mocks.activate.mockImplementation((id) => {
@@ -100,6 +111,9 @@ beforeEach(() => {
   mocks.render.mockResolvedValue(new TextEncoder().encode('<p>target</p>'))
   mocks.invoke.mockImplementation(async (command, args) => {
     if (command === 'paths_refer_to_same_file') return args.path1 === args.path2
+    if (command === 'cli_hash_snapshot') {
+      return contentSha256(new TextDecoder(args.encoding ?? 'utf-8').decode(mocks.snapshotBytes))
+    }
     if (command === 'cli_write_export')
       return { path: '/out/target.html', bytes: 13, sha256: 'output-hash' }
     throw new Error(`Unexpected command: ${command}`)
@@ -115,6 +129,168 @@ afterEach(() => {
 })
 
 describe('targeted CLI operations', () => {
+  function loadGbk() {
+    mocks.snapshotBytes = new Uint8Array([0xc2, 0xa9, 0x21])
+    mocks.content = '漏!'
+    fileSaveCoordinator.loadSnapshot('target', {
+      status: 'success',
+      content: mocks.content,
+      revision: 'disk:gbk',
+      text: {
+        ...DEFAULT_TEXT_METADATA,
+        format: { encoding: 'gbk', bom: 'none' },
+        decoding: { source: 'user', needsConfirmation: false, byteRoundTrip: true },
+      },
+    })
+  }
+
+  it.each(['status', 'wait', 'open', 'export'] as const)(
+    'uses the selected GBK decoder for the default %s digest',
+    async (operation) => {
+      loadGbk()
+      expect(new TextDecoder().decode(mocks.snapshotBytes)).toBe('©!')
+      const req = await request({ operation, expectedSha256: null })
+      const receipt = await cliReceipt(req, () => runCliRequest(req))
+      expect(receipt.ok).toBe(true)
+      const state =
+        operation === 'export' ? (receipt.result as { file: unknown }).file : receipt.result
+      expect(state).toMatchObject({
+        applied: true,
+        contentSha256: await contentSha256('漏!'),
+        expectedSha256: await contentSha256('漏!'),
+      })
+      expect(mocks.invoke).toHaveBeenCalledWith('cli_hash_snapshot', {
+        requestId: req.requestId,
+        encoding: 'gbk',
+      })
+      expect(
+        mocks.invoke.mock.calls.filter(([command]) => command === 'cli_hash_snapshot'),
+      ).toHaveLength(1)
+      expect(mocks.refresh).not.toHaveBeenCalled()
+    },
+  )
+
+  it('uses the saved GBK decoder during an unsaved UTF-8 conversion', async () => {
+    loadGbk()
+    fileSaveCoordinator.recordFormat('target', { encoding: 'utf-8', bom: 'none' })
+    expect(
+      await runCliRequest(await request({ operation: 'status', expectedSha256: null })),
+    ).toMatchObject({ result: { applied: true, expectedSha256: await contentSha256('漏!') } })
+  })
+
+  it('keeps an explicit digest authoritative for a GBK document', async () => {
+    loadGbk()
+    const explicit = await contentSha256('©!')
+    expect(
+      await runCliRequest(await request({ operation: 'status', expectedSha256: explicit })),
+    ).toMatchObject({ result: { applied: false, expectedSha256: explicit } })
+    expect(mocks.invoke.mock.calls.some(([command]) => command === 'cli_hash_snapshot')).toBe(false)
+  })
+
+  it('waits for the document decoder to load before resolving its default digest', async () => {
+    mocks.ready = false
+    const pending = runCliRequest(await request({ operation: 'wait', expectedSha256: null }))
+    await vi.waitFor(() =>
+      expect(mocks.invoke).toHaveBeenCalledWith('paths_refer_to_same_file', {
+        path1: '/target.md',
+        path2: '/target.md',
+      }),
+    )
+    expect(mocks.invoke.mock.calls.some(([command]) => command === 'cli_hash_snapshot')).toBe(false)
+    loadGbk()
+    mocks.ready = true
+    expect(await pending).toMatchObject({ code: 'content_applied', result: { applied: true } })
+    expect(mocks.invoke).toHaveBeenCalledWith('cli_hash_snapshot', {
+      requestId: 'cli-export',
+      encoding: 'gbk',
+    })
+  })
+
+  it('rechecks the decoder when it changes while resolving the snapshot digest', async () => {
+    loadGbk()
+    let completeHash!: (hash: string) => void
+    const hashing = new Promise<string>((resolve) => {
+      completeHash = resolve
+    })
+    const invoke = mocks.invoke.getMockImplementation()!
+    mocks.invoke.mockImplementation((command, args) => {
+      if (command === 'cli_hash_snapshot' && args.encoding === 'gbk') return hashing
+      return invoke(command, args)
+    })
+    const pending = runCliRequest(await request({ operation: 'wait', expectedSha256: null }))
+    await vi.waitFor(() =>
+      expect(mocks.invoke).toHaveBeenCalledWith('cli_hash_snapshot', {
+        requestId: 'cli-export',
+        encoding: 'gbk',
+      }),
+    )
+    mocks.content = '©!'
+    fileSaveCoordinator.loadSnapshot('target', {
+      content: mocks.content,
+      revision: 'disk:utf8',
+      status: 'success',
+      text: DEFAULT_TEXT_METADATA,
+    })
+    completeHash(await contentSha256('漏!'))
+    expect(await pending).toMatchObject({
+      code: 'content_applied',
+      result: { applied: true, expectedSha256: await contentSha256('©!') },
+    })
+    expect(mocks.invoke).toHaveBeenCalledWith('cli_hash_snapshot', {
+      requestId: 'cli-export',
+      encoding: undefined,
+    })
+    expect(mocks.refresh).not.toHaveBeenCalled()
+  })
+
+  it('does not export when the decoder changes during rendering', async () => {
+    loadGbk()
+    mocks.render.mockImplementation(async () => {
+      fileSaveCoordinator.loadSnapshot('target', {
+        content: '©!',
+        revision: 'disk:utf8',
+        status: 'success',
+        text: DEFAULT_TEXT_METADATA,
+      })
+      return new Uint8Array([1])
+    })
+    const req = await request({ expectedSha256: null })
+    expect(await cliReceipt(req, () => runCliRequest(req))).toMatchObject({
+      ok: false,
+      code: 'content_changed',
+    })
+    expect(mocks.invoke.mock.calls.some(([command]) => command === 'cli_write_export')).toBe(false)
+  })
+
+  it('does not substitute a different live draft for the default disk digest', async () => {
+    loadGbk()
+    mocks.content = 'unsaved draft'
+    expect(
+      await runCliRequest(
+        await request({ operation: 'wait', waitFor: 'visible', expectedSha256: null }),
+      ),
+    ).toMatchObject({
+      code: 'file_visible',
+      result: { applied: false, expectedSha256: await contentSha256('漏!') },
+    })
+    expect(mocks.refresh).not.toHaveBeenCalled()
+  })
+
+  it('reports a snapshot decoding failure instead of waiting until timeout', async () => {
+    loadGbk()
+    const invoke = mocks.invoke.getMockImplementation()!
+    mocks.invoke.mockImplementation((command, args) => {
+      if (command === 'cli_hash_snapshot') throw new Error('Invalid GBK data')
+      return invoke(command, args)
+    })
+    const req = await request({ operation: 'wait', expectedSha256: null })
+    expect(await cliReceipt(req, () => runCliRequest(req))).toMatchObject({
+      ok: false,
+      code: 'file_unavailable',
+      message: 'Error: Invalid GBK data',
+    })
+  })
+
   it('announces readiness only after the event listener exists and scopes cleanup to that listener', async () => {
     let register!: (stop: () => void) => void
     const unlisten = vi.fn()

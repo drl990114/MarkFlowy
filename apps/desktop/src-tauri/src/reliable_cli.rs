@@ -1,4 +1,5 @@
 //! Request-scoped CLI receipts. Single-instance delivery is not completion.
+use mf_text_encoding::TextEncoding;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use sha2::{Digest, Sha256};
@@ -14,6 +15,7 @@ use tauri::{Emitter, Manager};
 
 const INTERNAL_ARG: &str = "--cli-request";
 const PROTOCOL_VERSION: u32 = 1;
+const SNAPSHOT_FILE: &str = "source.bin";
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -110,6 +112,28 @@ pub async fn cli_hash_content(content: String) -> Result<String, String> {
     tauri::async_runtime::spawn_blocking(move || digest(content.as_bytes()))
         .await
         .map_err(|error| error.to_string())
+}
+
+fn hash_snapshot(path: &Path, encoding: Option<TextEncoding>) -> Result<String, String> {
+    let bytes = fs::read(path).map_err(|error| error.to_string())?;
+    let decoded = mf_text_encoding::decode(&bytes, encoding).map_err(|error| error.to_string())?;
+    Ok(digest(decoded.content.as_bytes()))
+}
+
+#[tauri::command]
+pub async fn cli_hash_snapshot(
+    window: tauri::WebviewWindow,
+    request_id: String,
+    encoding: Option<TextEncoding>,
+) -> Result<String, String> {
+    let pending = pending_for(&request_id, window.label())?;
+    if let Some(expected) = pending.request.expected_sha256 {
+        return Ok(expected);
+    }
+    let path = request_dir(&request_id)?.join(SNAPSHOT_FILE);
+    tauri::async_runtime::spawn_blocking(move || hash_snapshot(&path, encoding))
+        .await
+        .map_err(|error| error.to_string())?
 }
 
 fn absolute(path: &str, cwd: &Path) -> PathBuf {
@@ -305,7 +329,8 @@ fn parse(args: &[String], cwd: &Path) -> Result<Request, String> {
     })
 }
 
-fn prepare(request: &mut Request) -> Result<(), Receipt> {
+fn prepare(request: &mut Request) -> Result<Option<Vec<u8>>, Receipt> {
+    let mut snapshot = None;
     if let Some(path) = &request.path {
         if matches!(request.operation.as_str(), "historyBegin" | "historyList")
             && !Path::new(path).exists()
@@ -328,7 +353,7 @@ fn prepare(request: &mut Request) -> Result<(), Receipt> {
                     .to_string_lossy()
                     .into_owned(),
             );
-            return Ok(());
+            return Ok(None);
         }
         let path = fs::canonicalize(path)
             .map_err(|error| Receipt::error(&request.request_id, "file_unavailable", error))?;
@@ -347,6 +372,26 @@ fn prepare(request: &mut Request) -> Result<(), Receipt> {
                 "unsupported_file",
                 "Expected a regular file",
             ));
+        } else if request.expected_sha256.is_none()
+            && matches!(
+                request.operation.as_str(),
+                "open" | "status" | "wait" | "export"
+            )
+        {
+            // The target window owns the decoder. Keep the invocation's bytes fixed
+            // so resolving it later cannot accidentally confirm a newer disk version.
+            snapshot = Some(
+                super::fc::read_file_bytes_snapshot(&path).map_err(|result| match result {
+                    super::fc::FileSnapshotResult::Unavailable { result } => {
+                        Receipt::error(&request.request_id, "file_unavailable", result.content)
+                    }
+                    _ => Receipt::error(
+                        &request.request_id,
+                        "file_unstable",
+                        "File changed while reading",
+                    ),
+                })?,
+            );
         } else if request.expected_sha256.is_none() && request.operation != "historyList" {
             // Match the editor's decoding (including BOM/UTF-16), not raw disk bytes.
             match super::fc::read_file_snapshot(&path) {
@@ -378,7 +423,7 @@ fn prepare(request: &mut Request) -> Result<(), Receipt> {
             .unwrap_or(path);
         request.path = Some(path);
     }
-    Ok(())
+    Ok(snapshot)
 }
 
 /// Runs before Tauri initialization, leaving stdout owned by the waiting client.
@@ -437,7 +482,10 @@ pub fn run_client_if_requested() {
             .unwrap()
             .to_string_lossy()
             .into_owned();
-        prepare(&mut request)?;
+        if let Some(bytes) = prepare(&mut request)? {
+            fs::write(directory.path().join(SNAPSHOT_FILE), bytes)
+                .map_err(|error| Receipt::error(&request.request_id, "io_error", error))?;
+        }
         let state = super::read_cli_runtime_state();
         if state.pid.is_none() && !matches!(request.operation.as_str(), "open" | "workspace") {
             return Err(Receipt::error(
@@ -878,13 +926,19 @@ mod tests {
     }
 
     #[test]
-    fn prepares_the_same_decoded_text_as_the_editor_and_rejects_directories() {
+    fn freezes_bom_input_for_the_editor_decoder_and_rejects_directories() {
         let dir = tempfile::tempdir().unwrap();
         let path = dir.path().join("bom.md");
         fs::write(&path, b"\xef\xbb\xbf# Notes\r\n").unwrap();
         let mut open = request(&["file", "open", path.to_str().unwrap()]);
-        prepare(&mut open).unwrap();
-        assert_eq!(open.expected_sha256, Some(digest(b"# Notes\r\n")));
+        let bytes = prepare(&mut open).unwrap().unwrap();
+        let snapshot = dir.path().join(SNAPSHOT_FILE);
+        fs::write(&snapshot, bytes).unwrap();
+        assert!(open.expected_sha256.is_none());
+        assert_eq!(
+            hash_snapshot(&snapshot, None).unwrap(),
+            digest(b"# Notes\r\n")
+        );
         let mut directory = request(&["file", "open", dir.path().to_str().unwrap()]);
         assert_eq!(
             prepare(&mut directory).unwrap_err().code,
@@ -893,6 +947,52 @@ mod tests {
         let mut workspace = request(&["open", dir.path().to_str().unwrap()]);
         prepare(&mut workspace).unwrap();
         assert_eq!(workspace.operation, "workspace");
+    }
+
+    #[test]
+    fn default_file_digests_use_the_selected_decoder_and_frozen_invocation_bytes() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("gbk.md");
+        let snapshot = dir.path().join(SNAPSHOT_FILE);
+        let original = b"\xc2\xa9!\r\n";
+        for operation in ["open", "status", "wait", "export"] {
+            fs::write(&path, original).unwrap();
+            let mut args = vec!["file", operation, path.to_str().unwrap()];
+            if operation == "export" {
+                args.extend(["--format", "html", "--output", "out.html"]);
+            }
+            let mut request = request(&args);
+            let bytes = prepare(&mut request).unwrap().unwrap();
+            assert_eq!(bytes, original);
+            assert!(request.expected_sha256.is_none());
+            fs::write(&snapshot, bytes).unwrap();
+            fs::write(&path, b"newer disk content").unwrap();
+            assert_eq!(
+                hash_snapshot(&snapshot, None).unwrap(),
+                digest("©!\r\n".as_bytes())
+            );
+            assert_eq!(
+                hash_snapshot(&snapshot, Some(TextEncoding::Gbk)).unwrap(),
+                digest("漏!\r\n".as_bytes())
+            );
+        }
+    }
+
+    #[test]
+    fn explicit_content_digest_does_not_create_or_replace_a_default_snapshot() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("gbk.md");
+        fs::write(&path, b"\xc2\xa9").unwrap();
+        let expected = digest("caller-selected revision".as_bytes());
+        let mut request = request(&[
+            "file",
+            "wait",
+            path.to_str().unwrap(),
+            "--sha256",
+            &expected,
+        ]);
+        assert!(prepare(&mut request).unwrap().is_none());
+        assert_eq!(request.expected_sha256.as_deref(), Some(expected.as_str()));
     }
 
     #[test]

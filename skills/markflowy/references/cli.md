@@ -34,7 +34,7 @@ History results include `sessionId`, `state`, and `versionId`; a committed resul
 
 - `--window-id <id>` / `--window <id>`: exact target; never fall back from a missing explicit window.
 - `--wait applied|visible`: defaults to `applied`. `visible` allows the current unsaved content to differ from disk; do not claim an expected revision was applied when `applied` is false.
-- `--sha256 <digest>`: expected SHA-256 of decoded text encoded as UTF-8, without BOM and preserving line endings. Without it, the CLI reads a stable disk snapshot at invocation. For generated UTF-8 files without BOM, ordinary SHA-256 of the file bytes is equivalent.
+- `--sha256 <digest>`: expected SHA-256 of decoded text encoded as UTF-8, without BOM and preserving line endings. Without it, the CLI freezes a stable disk snapshot at invocation and decodes it using the target document's saved-disk encoding choice (or automatic detection when no choice exists). An unsaved encoding conversion does not change that decoder. An explicit digest is always used as supplied. For generated UTF-8 files without BOM, ordinary SHA-256 of the file bytes is equivalent.
 - `--offset <n>`: skip this many versions in `history list` (default 0, page size 50).
 - `--timeout <ms>`: 1–300000 milliseconds, default 30000; includes startup, queueing, rendering, and output.
 - `--format html|markdown|text|json|jpg`: HTML and image exports reuse the editor renderers. Text/JSON need the Markdown runtime; open the Markdown preview first when starting from Source Code. Unsupported renderers fail explicitly.

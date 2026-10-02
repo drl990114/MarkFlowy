@@ -918,8 +918,32 @@ where
 fn read_file_snapshot_with_encoding_and_reader<F>(
     path: &Path,
     encoding: Option<TextEncoding>,
-    mut reader: F,
+    reader: F,
 ) -> FileSnapshotResult
+where
+    F: FnMut(&Path) -> Result<Option<FileSample>, FileResult>,
+{
+    let sample = match read_stable_file_sample_with_reader(path, reader) {
+        Ok(sample) => sample,
+        Err(result) => return result,
+    };
+    let revision = format_file_write_revision(&sample.metadata, &sample.bytes, &sample.generations);
+    match mf_text_encoding::decode(&sample.bytes, encoding) {
+        Ok(decoded) => FileSnapshotResult::Success {
+            content: decoded.content,
+            revision,
+            text: decoded.metadata,
+        },
+        Err(error) => FileSnapshotResult::Unavailable {
+            result: text_read_error(error),
+        },
+    }
+}
+
+fn read_stable_file_sample_with_reader<F>(
+    path: &Path,
+    mut reader: F,
+) -> Result<FileSample, FileSnapshotResult>
 where
     F: FnMut(&Path) -> Result<Option<FileSample>, FileResult>,
 {
@@ -927,12 +951,12 @@ where
         let first = match reader(path) {
             Ok(Some(sample)) => sample,
             Ok(None) => continue,
-            Err(result) => return FileSnapshotResult::Unavailable { result },
+            Err(result) => return Err(FileSnapshotResult::Unavailable { result }),
         };
         let second = match reader(path) {
             Ok(Some(sample)) => sample,
             Ok(None) => continue,
-            Err(result) => return FileSnapshotResult::Unavailable { result },
+            Err(result) => return Err(FileSnapshotResult::Unavailable { result }),
         };
         if first.identity != second.identity
             || first.generations != second.generations
@@ -944,20 +968,15 @@ where
         // Two content observations are still required. Exact comparison lets
         // us avoid hashing both copies, and only one buffer survives decoding.
         drop(second);
-        let revision =
-            format_file_write_revision(&first.metadata, &first.bytes, &first.generations);
-        return match mf_text_encoding::decode(&first.bytes, encoding) {
-            Ok(decoded) => FileSnapshotResult::Success {
-                content: decoded.content,
-                revision,
-                text: decoded.metadata,
-            },
-            Err(error) => FileSnapshotResult::Unavailable {
-                result: text_read_error(error),
-            },
-        };
+        return Ok(first);
     }
-    FileSnapshotResult::Unstable
+    Err(FileSnapshotResult::Unstable)
+}
+
+/// Freeze CLI input before the target window supplies its saved-disk decoder.
+pub(crate) fn read_file_bytes_snapshot(path: &Path) -> Result<Vec<u8>, FileSnapshotResult> {
+    ensure_workspace_scope_active(path);
+    read_stable_file_sample_with_reader(path, read_file_sample).map(|sample| sample.bytes)
 }
 
 pub fn read_file_snapshot(path: &Path) -> FileSnapshotResult {

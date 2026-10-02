@@ -2,6 +2,8 @@ import { runHistoryCli } from './history-cli'
 import { commandRegistry } from '@/commands'
 import { editorAutomationRegistry } from '@/components/EditorArea/editorAutomationRegistry'
 import { handleExternalWatchEvent } from '@/components/EditorArea/externalFileChanges'
+import { fileSaveCoordinator } from '@/components/EditorArea/fileSaveCoordinator'
+import type { TextEncoding } from '@/components/EditorArea/textFileFormat'
 import { getFileIdsByPathIdentity, getFileObject } from '@/helper/files'
 import { getFileNameFromPath } from '@/helper/filesys'
 import { logger } from '@/helper/logger'
@@ -35,8 +37,36 @@ async function findOpenFile(path: string): Promise<string | undefined> {
   }
 }
 
-async function inspectFile(request: CliRequest, fileId: string | undefined): Promise<CliFileState> {
+type ResolveExpectedSha256 = (encoding: TextEncoding | undefined) => Promise<string>
+
+function createExpectedSha256Resolver(request: CliRequest): ResolveExpectedSha256 {
+  const hashes = new Map<TextEncoding | undefined, Promise<string>>()
+  return async (encoding) => {
+    if (request.expectedSha256 !== null) return request.expectedSha256
+    try {
+      let pending = hashes.get(encoding)
+      if (!pending) {
+        // Decode the invocation's frozen bytes, never a newer disk version or the live draft.
+        pending = invoke<string>('cli_hash_snapshot', { requestId: request.requestId, encoding })
+        hashes.set(encoding, pending)
+      }
+      const hash = await pending
+      checkCliDeadline(request)
+      return hash
+    } catch (error) {
+      checkCliDeadline(request)
+      throw new CliError('file_unavailable', String(error))
+    }
+  }
+}
+
+async function inspectFile(
+  request: CliRequest,
+  fileId: string | undefined,
+  resolveExpectedSha256: ResolveExpectedSha256,
+): Promise<CliFileState> {
   const open = !!fileId && useEditorStore.getState().opened.includes(fileId)
+  const filePath = fileId ? getFileObject(fileId)?.path : undefined
   const handle = open ? editorAutomationRegistry.get(fileId!) : undefined
   const live = handle?.inspect()
   const state: CliFileState = {
@@ -55,15 +85,28 @@ async function inspectFile(request: CliRequest, fileId: string | undefined): Pro
     expectedSha256: request.expectedSha256,
     applied: false,
   }
-  if (fileId && getFileObject(fileId)?.path && open) {
+  if (filePath && open) {
     // A renamed/replaced tab must not satisfy a request for its previous path.
     const same = await invoke<boolean>('paths_refer_to_same_file', {
       path1: request.path,
-      path2: getFileObject(fileId).path,
+      path2: filePath,
     })
     if (!same) return { ...state, open: false, ready: false, visible: false }
   }
-  if (handle && state.ready) return inspectLiveContent(request, fileId!, handle, state)
+  if (handle && state.ready) {
+    const encoding = fileSaveCoordinator.getReadEncoding(fileId!)
+    state.expectedSha256 = await resolveExpectedSha256(encoding)
+    const inspected = await inspectLiveContent(request, fileId!, handle, state, encoding)
+    if (getFileObject(fileId!)?.path !== filePath) {
+      return { ...inspected, open: false, ready: false, visible: false, applied: false }
+    }
+    return inspected
+  }
+  if (request.operation === 'status') {
+    state.expectedSha256 = await resolveExpectedSha256(
+      open ? fileSaveCoordinator.getReadEncoding(fileId!) : undefined,
+    )
+  }
   return state
 }
 
@@ -118,16 +161,22 @@ async function openCliWorkspace(request: CliRequest) {
   }
 }
 
-async function exportCliFile(request: CliRequest, fileId: string | undefined, state: CliFileState) {
+async function exportCliFile(
+  request: CliRequest,
+  fileId: string | undefined,
+  state: CliFileState,
+  inspect: () => Promise<CliFileState>,
+) {
   const handle = fileId ? editorAutomationRegistry.get(fileId) : undefined
   if (!handle || !request.format)
     throw new CliError('editor_unavailable', 'Export renderer is unavailable.')
   const bytes = await handle.render(request.format)
   checkCliDeadline(request)
-  const current = await inspectFile(request, fileId)
+  const current = await inspect()
   if (
     !current.ready ||
     current.contentSha256 !== state.contentSha256 ||
+    current.expectedSha256 !== state.expectedSha256 ||
     editorAutomationRegistry.get(fileId!) !== handle
   ) {
     throw new CliError(
@@ -152,19 +201,24 @@ async function inspectLiveContent(
   fileId: string,
   handle: NonNullable<ReturnType<typeof editorAutomationRegistry.get>>,
   state: CliFileState,
+  encoding: TextEncoding | undefined,
 ): Promise<CliFileState> {
   try {
     const content = handle.readContent()
     state.contentSha256 = await contentSha256(content)
     // Hashing is asynchronous: recheck identity and live content before confirming it.
-    if (editorAutomationRegistry.get(fileId!) !== handle || handle.readContent() !== content) {
+    if (
+      editorAutomationRegistry.get(fileId!) !== handle ||
+      handle.readContent() !== content ||
+      (request.expectedSha256 === null && fileSaveCoordinator.getReadEncoding(fileId) !== encoding)
+    ) {
       return { ...state, ready: false }
     }
     Object.assign(state, handle.inspect())
     state.open = useEditorStore.getState().opened.includes(fileId!)
     state.dirty = !!useEditorStateStore.getState().idStateMap.get(fileId!)?.hasUnsavedChanges
     state.conflict = useExternalFileChangeStore.getState().notices[fileId!]?.kind === 'conflict'
-    state.applied = state.open && state.ready && state.contentSha256 === request.expectedSha256
+    state.applied = state.open && state.ready && state.contentSha256 === state.expectedSha256
   } catch {
     state.ready = false
   }
@@ -216,10 +270,11 @@ export async function runCliRequest(request: CliRequest) {
   if (request.operation === 'open' || request.operation === 'export') {
     fileId = await openCliFile(request, fileId)
   }
-  if (request.operation === 'status')
-    return { code: 'file_status', result: await inspectFile(request, fileId) }
+  const resolveExpectedSha256 = createExpectedSha256Resolver(request)
+  const inspect = () => inspectFile(request, fileId, resolveExpectedSha256)
+  if (request.operation === 'status') return { code: 'file_status', result: await inspect() }
   const state = await waitForCliFile(request, {
-    inspect: () => inspectFile(request, fileId),
+    inspect,
     handle: () => (fileId ? editorAutomationRegistry.get(fileId) : undefined),
     refresh: () =>
       handleExternalWatchEvent({
@@ -231,7 +286,7 @@ export async function runCliRequest(request: CliRequest) {
   })
   if (request.operation !== 'export')
     return { code: state.applied ? 'content_applied' : 'file_visible', result: state }
-  return exportCliFile(request, fileId, state)
+  return exportCliFile(request, fileId, state, inspect)
 }
 
 /** Register before announcing readiness so cold-start requests cannot be lost. */

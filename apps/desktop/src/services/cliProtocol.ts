@@ -25,6 +25,7 @@ export interface CliRequest {
   commandId: string | null
   preview: boolean
   waitFor: 'applied' | 'visible'
+  /** null resolves the invocation's frozen disk snapshot with the target file's decoder. */
   expectedSha256: string | null
   output: string | null
   format: CliExportFormat | null

@@ -1736,6 +1736,7 @@ pub fn run() {
             reliable_cli::cli_complete,
             reliable_cli::cli_write_export,
             reliable_cli::cli_hash_content,
+            reliable_cli::cli_hash_snapshot,
             local_history::local_history,
         ])
         .setup(|app: &mut tauri::App| {
