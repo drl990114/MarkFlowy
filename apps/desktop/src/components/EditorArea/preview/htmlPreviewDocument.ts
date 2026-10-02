@@ -1,4 +1,5 @@
 import { localResourcePath } from '@/helper/localResourcePath'
+import { rebaseFilePath } from '@/helper/pathIdentity'
 import { invoke } from '@tauri-apps/api/core'
 import postcss from 'postcss'
 import valueParser from 'postcss-value-parser'
@@ -14,8 +15,8 @@ export const HTML_PREVIEW_SANDBOX = ''
 export const HTML_PREVIEW_TRUSTED_SANDBOX = 'allow-scripts'
 export const HTML_PREVIEW_CSP = [
   "default-src 'none'",
-  "script-src 'unsafe-inline' blob:",
-  "style-src 'unsafe-inline' blob:",
+  "script-src 'unsafe-inline' blob: data:",
+  "style-src 'unsafe-inline' blob: data:",
   'img-src blob: data:',
   'font-src blob: data:',
   'media-src blob: data:',
@@ -33,7 +34,45 @@ export interface HtmlPreviewResourceReader {
 export interface PreparedHtmlPreview {
   html: string
   blockedResources: number
+  resourceIssues: HtmlPreviewResourceIssue[]
   dispose: () => void
+}
+
+const RESOURCE_ISSUE_REASONS = [
+  'not_found',
+  'permission_denied',
+  'outside_root',
+  'too_large',
+  'unsupported',
+  'invalid_css',
+  'resource_limit',
+  'read_failed',
+] as const
+
+export type HtmlPreviewResourceIssueReason = (typeof RESOURCE_ISSUE_REASONS)[number]
+
+export interface HtmlPreviewResourceIssue {
+  reference: string
+  reason: HtmlPreviewResourceIssueReason
+}
+
+export interface HtmlPreviewOptions {
+  workspacePath?: string
+  /** Hosts may impose a smaller expansion budget, never raise the built-in limit. */
+  maxExpandedBytes?: number
+}
+
+class PreviewResourceError extends Error {
+  constructor(readonly code: HtmlPreviewResourceIssueReason) {
+    super(code)
+  }
+}
+
+const resourceErrorReason = (error: unknown): HtmlPreviewResourceIssueReason => {
+  if (typeof error === 'object' && error !== null && 'code' in error) {
+    return RESOURCE_ISSUE_REASONS.find((reason) => reason === error.code) ?? 'read_failed'
+  }
+  return 'read_failed'
 }
 
 const MIME_TYPES: Record<string, string> = {
@@ -59,6 +98,8 @@ const MIME_TYPES: Record<string, string> = {
 }
 const EMPTY_RESOURCE = 'data:,'
 const MAX_TOTAL_BYTES = 64 * 1024 * 1024
+const MAX_RESOURCE_BYTES = 16 * 1024 * 1024
+const MAX_EXPANDED_BYTES = 96 * 1024 * 1024
 const MAX_RESOURCES = 256
 const MAX_DEPTH = 8
 
@@ -90,31 +131,73 @@ export async function prepareHtmlPreview(
   documentPath: string | undefined,
   signal: AbortSignal,
   readResource: HtmlPreviewResourceReader = readNativeResource,
+  options: HtmlPreviewOptions = {},
 ): Promise<PreparedHtmlPreview> {
-  const objectUrls: string[] = []
   const resources = new Map<string, Promise<string>>()
+  const resourceIssues: HtmlPreviewResourceIssue[] = []
+  const issueKeys = new Set<string>()
   let blockedResources = 0
   let totalBytes = 0
+  let expandedBytes = new TextEncoder().encode(source).byteLength
+  let disposed = false
+  const requestedLimit = options.maxExpandedBytes
+  const maxExpandedBytes =
+    requestedLimit !== undefined && Number.isFinite(requestedLimit)
+      ? Math.max(0, Math.min(requestedLimit, MAX_EXPANDED_BYTES))
+      : MAX_EXPANDED_BYTES
   const dispose = () => {
-    objectUrls.splice(0).forEach((url) => URL.revokeObjectURL(url))
+    disposed = true
+    resources.clear()
     signal.removeEventListener('abort', dispose)
   }
   signal.addEventListener('abort', dispose, { once: true })
-  const checkCanceled = () => signal.throwIfAborted()
+  const checkCanceled = () => {
+    signal.throwIfAborted()
+    if (disposed) throw new DOMException('Preview disposed', 'AbortError')
+  }
   const baseUrl = documentPath ? previewFileUrl(documentPath) : new URL('https://preview.invalid/')
-  const rootUrl = new URL('.', baseUrl)
-  const makeBlob = (data: BlobPart, type: string) => {
+  const directory = localResourcePath(new URL('.', baseUrl).href)
+  const workspace = options.workspacePath
+  const rootPath =
+    documentPath && workspace && rebaseFilePath(documentPath, workspace, workspace)
+      ? workspace
+      : directory
+  const reserveExpansion = (bytes: number) => {
+    if (expandedBytes + bytes > maxExpandedBytes) throw new PreviewResourceError('too_large')
+    expandedBytes += bytes
+  }
+  const blockResource = (reference: string, reason: HtmlPreviewResourceIssueReason) => {
+    blockedResources++
+    const key = `${reason}:${reference}`
+    if (!issueKeys.has(key)) {
+      issueKeys.add(key)
+      resourceIssues.push({ reference, reason })
+    }
+    return EMPTY_RESOURCE
+  }
+  const makeDataUrl = (bytes: Uint8Array<ArrayBuffer>, type: string) => {
     checkCanceled()
-    const url = URL.createObjectURL(new Blob([data], { type }))
-    objectUrls.push(url)
-    return url
+    const prefix = `data:${type};base64,`
+    reserveExpansion(prefix.length + Math.ceil(bytes.byteLength / 3) * 4)
+    // Multiples of three keep padding at the end; bounded chunks avoid argument limits.
+    const chunks: string[] = []
+    for (let offset = 0; offset < bytes.length; offset += 3 * 8192) {
+      chunks.push(btoa(String.fromCharCode(...bytes.subarray(offset, offset + 3 * 8192))))
+    }
+    return prefix + chunks.join('')
   }
 
-  const isLocalResource = (url: URL) =>
-    !!documentPath &&
-    url.protocol === 'file:' &&
-    url.host === rootUrl.host &&
-    url.pathname.startsWith(rootUrl.pathname)
+  const isLocalResource = (url: URL) => {
+    const path = localResourcePath(url.href)
+    return (
+      !!documentPath &&
+      !!rootPath &&
+      !!path &&
+      url.protocol === 'file:' &&
+      url.host === baseUrl.host &&
+      rebaseFilePath(path, rootPath, rootPath) !== undefined
+    )
+  }
 
   const resolveResource = async (
     value: string,
@@ -128,60 +211,67 @@ export async function prepareHtmlPreview(
     // Keep every preview dependency local. Allowing any remote resource would let
     // an otherwise useful inline script exfiltrate document contents through it.
     if (/^https:\/\//i.test(raw) || /^\/\//.test(raw)) {
-      blockedResources++
-      return EMPTY_RESOURCE
+      return blockResource(raw, 'unsupported')
     }
     if (/^data:/i.test(raw) && !stylesheet) return raw
     let url: URL
     try {
       url = new URL(raw, base)
     } catch {
-      blockedResources++
-      return EMPTY_RESOURCE
+      return blockResource(raw, 'unsupported')
     }
     if (!isLocalResource(url)) {
-      blockedResources++
-      return EMPTY_RESOURCE
+      return blockResource(raw, url.protocol === 'file:' ? 'outside_root' : 'unsupported')
     }
     const fragment = url.hash
     url.hash = ''
     url.search = ''
     const key = `${stylesheet ? 'css:' : ''}${url.href}`
     if (stack.includes(key) || stack.length >= MAX_DEPTH) {
-      blockedResources++
-      return EMPTY_RESOURCE
+      return blockResource(raw, 'resource_limit')
     }
     let pending = resources.get(key)
     if (!pending) {
       if (resources.size >= MAX_RESOURCES) {
-        blockedResources++
-        return EMPTY_RESOURCE
+        return blockResource(raw, 'resource_limit')
       }
       pending = (async () => {
         try {
           const path = localResourcePath(url.href)
-          if (!path) throw new Error('Invalid resource path')
+          if (!path) throw new PreviewResourceError('unsupported')
           const bytes = await readResource(documentPath!, path)
           checkCanceled()
           totalBytes += bytes.byteLength
-          if (totalBytes > MAX_TOTAL_BYTES) throw new Error('Preview resources exceed 64 MiB')
+          if (bytes.byteLength > MAX_RESOURCE_BYTES || totalBytes > MAX_TOTAL_BYTES) {
+            throw new PreviewResourceError('too_large')
+          }
           const extension = path.split('.').pop()?.toLowerCase() ?? ''
           if (stylesheet) {
-            return makeBlob(
-              await rewriteCss(new TextDecoder().decode(bytes), url, [...stack, key]),
-              'text/css',
+            return makeDataUrl(
+              new TextEncoder().encode(
+                await rewriteCss(new TextDecoder().decode(bytes), url, [...stack, key]),
+              ),
+              'text/css;charset=utf-8',
             )
           }
-          return makeBlob(bytes, MIME_TYPES[extension] ?? 'application/octet-stream')
+          return makeDataUrl(bytes, MIME_TYPES[extension] ?? 'application/octet-stream')
         } catch (error) {
           checkCanceled()
-          blockedResources++
-          return EMPTY_RESOURCE
+          return blockResource(raw, resourceErrorReason(error))
         }
       })()
       resources.set(key, pending)
     }
-    return (await pending) + fragment
+    const resource = await pending
+    checkCanceled()
+    if (resource === EMPTY_RESOURCE) return resource
+    try {
+      // Count every insertion, including cached references and nested CSS expansion.
+      reserveExpansion(resource.length + fragment.length)
+      return resource + fragment
+    } catch (error) {
+      return blockResource(raw, resourceErrorReason(error))
+    }
   }
 
   const rewriteCssValue = async (value: string, base: URL, stack: string[], isImport = false) => {
@@ -216,7 +306,12 @@ export async function prepareHtmlPreview(
   }
 
   const rewriteCss = async (css: string, base: URL, stack: string[]) => {
-    const sheet = postcss.parse(css)
+    let sheet: postcss.Root
+    try {
+      sheet = postcss.parse(css)
+    } catch {
+      throw new PreviewResourceError('invalid_css')
+    }
     // Resolve sequentially: an import cycle must never wait on its own cached promise.
     const nodes: { value: string; set: (value: string) => void; isImport: boolean }[] = []
     sheet.walkDecls((decl) => {
@@ -244,6 +339,7 @@ export async function prepareHtmlPreview(
 
   try {
     checkCanceled()
+    reserveExpansion(0)
     // Parse data, never a live DOM: no script execution, custom element upgrade,
     // or resource request is possible before the sandbox receives the document.
     const doc = parse(source)
@@ -275,7 +371,7 @@ export async function prepareHtmlPreview(
           ['module', 'importmap'].includes(get(node, 'type')?.trim().toLowerCase() ?? '')
         ) {
           tree.detachNode(node)
-          blockedResources++
+          blockResource(get(node, 'src') ?? node.tagName, 'unsupported')
           continue
         }
         elements.push(node)
@@ -314,9 +410,9 @@ export async function prepareHtmlPreview(
         }
         const style = get(node, 'style')
         if (style !== undefined) set(node, 'style', await rewriteCss(style, baseUrl, []))
-      } catch {
+      } catch (error) {
         checkCanceled()
-        blockedResources++
+        blockResource(node.tagName === 'style' ? '<style>' : 'style', resourceErrorReason(error))
       }
     }
 
@@ -328,7 +424,7 @@ export async function prepareHtmlPreview(
         }
         const href = await resolveResource(get(node, 'href') ?? '', baseUrl, [], true)
         set(node, 'href', href)
-        if (href.startsWith('blob:') || href === EMPTY_RESOURCE) {
+        if (href.startsWith('data:')) {
           remove(node, 'integrity')
           remove(node, 'crossorigin')
         }
@@ -338,7 +434,7 @@ export async function prepareHtmlPreview(
           const value = get(node, attribute)
           if (value !== undefined) set(node, attribute, await resolveResource(value, baseUrl, []))
         }
-        if (get(node, 'src')?.startsWith('blob:') || get(node, 'src') === EMPTY_RESOURCE) {
+        if (get(node, 'src')?.startsWith('data:')) {
           remove(node, 'integrity')
           remove(node, 'crossorigin')
         }
@@ -359,7 +455,12 @@ export async function prepareHtmlPreview(
     if (head.childNodes.length) tree.insertBefore(head, policy, head.childNodes[0])
     else tree.appendChild(head, policy)
     checkCanceled()
-    return { html: serialize(doc), blockedResources, dispose }
+    const serialized = serialize(doc)
+    if (new TextEncoder().encode(serialized).byteLength > maxExpandedBytes) {
+      throw new PreviewResourceError('too_large')
+    }
+    resources.clear()
+    return { html: serialized, blockedResources, resourceIssues, dispose }
   } catch (error) {
     dispose()
     throw error

@@ -1,8 +1,11 @@
 import { cleanup, fireEvent, render, waitFor } from '@testing-library/react'
-import { afterEach, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import HtmlPreview from './HtmlPreview'
 
+const invoke = vi.hoisted(() => vi.fn())
+vi.mock('@tauri-apps/api/core', () => ({ invoke }))
 vi.mock('@/i18n', () => ({ useTranslation: () => ({ t: (key: string) => key }) }))
+beforeEach(() => invoke.mockReset())
 afterEach(cleanup)
 
 it('runs scripts only after explicit approval and resets trust when content changes', async () => {
@@ -37,4 +40,26 @@ it('refreshes identical HTML by replacing the sandbox frame without changing the
     expect(container.querySelector('iframe')).not.toBe(original)
   })
   expect(original.isConnected).toBe(false)
+})
+
+it('shows individual resource failures and a folder hint without hiding the preview', async () => {
+  invoke.mockRejectedValueOnce({ code: 'not_found' })
+  const view = render(
+    <HtmlPreview
+      content='<img src="missing.jpg"><img src="../assets/photo.jpg">'
+      filePath='/site/pages/index.html'
+    />,
+  )
+  await waitFor(() => expect(view.container.querySelector('iframe')).not.toBeNull())
+  fireEvent.click(view.getByRole('button', { name: 'document_preview.resources_blocked (2)' }))
+  expect(view.getByRole('dialog').textContent).toContain('missing.jpg')
+  expect(view.getByRole('dialog').textContent).toContain(
+    'document_preview.resource_errors.not_found',
+  )
+  expect(view.getByRole('dialog').textContent).toContain('../assets/photo.jpg')
+  expect(view.getByRole('dialog').textContent).toContain(
+    'document_preview.resource_errors.outside_root',
+  )
+  expect(view.getByRole('dialog').textContent).toContain('document_preview.resource_folder_hint')
+  expect(view.container.querySelector('iframe')?.getAttribute('sandbox')).toBe('')
 })

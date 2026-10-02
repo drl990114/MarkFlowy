@@ -912,6 +912,7 @@ function TextEditor(props: TextEditorProps) {
   }
   const curFile = cachedFile ?? lastKnownFileRef.current!
   const filePath = useFileCacheStore((state) => state.entries[id]?.path)
+  const workspacePath = useEditorStore((state) => state.folderData?.[0]?.path)
   const instanceIdRef = useRef<string | undefined>(undefined)
   if (!instanceIdRef.current) {
     textEditorInstanceSeq += 1
@@ -3195,7 +3196,7 @@ function TextEditor(props: TextEditorProps) {
             ) : null}
             {currentViewType === EditorViewType.PREVIEW && visible ? (
               <PreviewBoundary>
-                <HtmlPreview content={content} filePath={filePath} />
+                <HtmlPreview content={content} filePath={filePath} workspacePath={workspacePath} />
               </PreviewBoundary>
             ) : null}
           </>
