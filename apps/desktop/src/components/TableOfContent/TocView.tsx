@@ -590,12 +590,14 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
 
   return (
     <TocViewContainer variant={variant}>
-      {headingNumberingAction ? (
-        <SideBarHeader actions={headingNumberingAction} name={t('sidebar.table_of_contents')} />
-      ) : null}
+      <SideBarHeader
+        actions={headingNumberingAction}
+        name={t('sidebar.table_of_contents')}
+        title={t('sidebar.table_of_contents')}
+      />
       <div
         style={{
-          height: headingNumberingAction ? 'calc(100% - 32px)' : '100%',
+          height: 'calc(100% - 32px)',
           boxSizing: 'border-box',
         }}
       >
