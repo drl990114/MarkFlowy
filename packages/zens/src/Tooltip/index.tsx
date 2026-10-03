@@ -1,77 +1,90 @@
-import React from 'react';
+import { Tooltip as TooltipPrimitive } from 'radix-ui';
+import { isValidElement, type ComponentProps, type ReactNode } from 'react';
 import styled from 'styled-components';
-import * as Ariakit from '@ariakit/react';
-import * as S from './styles';
-import { Box } from '../Box';
+
+type TooltipSide = NonNullable<ComponentProps<typeof TooltipPrimitive.Content>['side']>;
 
 export type TooltipOptions = {
-  children: React.ReactNode;
-  title: BaseComponentProps['children'];
+  children: ReactNode;
+  title: ReactNode;
   fixed?: boolean;
-} & Pick<Ariakit.TooltipStoreProps, 'placement'>;
+  placement?: TooltipSide | `${TooltipSide}-start` | `${TooltipSide}-end`;
+};
 
-export interface TooltipProps
-  extends BaseComponentProps,
-    TooltipOptions,
-    Ariakit.TooltipProviderProps {
-  title: string;
-  children: BaseComponentProps['children'];
-}
+export type TooltipProps = TooltipOptions &
+  Omit<ComponentProps<typeof TooltipPrimitive.Content>, 'children' | 'title'> &
+  Pick<ComponentProps<typeof TooltipPrimitive.Root>, 'open' | 'defaultOpen' | 'onOpenChange'> & {
+    container?: ComponentProps<typeof TooltipPrimitive.Portal>['container'];
+    showTimeout?: number;
+    skipTimeout?: number;
+  };
 
-const TooltipWrapper = styled.div`
+const TooltipContent = styled(TooltipPrimitive.Content)`
+  z-index: var(--mf-layer-tooltip, 1001);
   border-radius: 0.375rem;
-  border-width: 1px;
-  border-color: ${(props) => props.theme.borderColor};
-  background-color: ${(props) => props.theme.tooltipBgColor};
-  padding-top: 0.25rem;
-  padding-bottom: 0.25rem;
-  padding-left: 0.5rem;
-  padding-right: 0.5rem;
-  font-size: ${(props) => props.theme.fontXs};
-  line-height: 1.25rem;
-  color: ${(props) => props.theme.primaryFontColor};
+  border: 1px solid var(--mf-control-border, ${(props) => props.theme.borderColor});
+  background-color: var(--mf-surface-tooltip, ${(props) => props.theme.tooltipBgColor});
+  padding: 0.25rem 0.5rem;
+  font-size: var(--mf-ui-font-caption, ${(props) => props.theme.fontXs});
+  line-height: var(--mf-ui-line-height-caption, 1.25rem);
+  letter-spacing: var(--mf-ui-tracking-caption, normal);
+  color: var(--mf-text-primary, ${(props) => props.theme.primaryFontColor});
   box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
 `;
 
+const DisabledTrigger = styled.span`
+  display: inline-flex;
+
+  &:focus-visible {
+    outline: 2px solid ${(props) => props.theme.accentColor};
+    outline-offset: 2px;
+  }
+`;
+
+/** Compatibility API for shared components; all tooltip behavior is owned by Radix. */
 const Tooltip = ({
   children,
   title,
   fixed = false,
   placement = fixed ? 'top' : 'bottom',
   open,
-  popover: _popover,
-  hideTimeout = 0,
-  showTimeout = 0,
+  defaultOpen,
+  onOpenChange,
+  container,
+  showTimeout = 100,
   skipTimeout = 0,
-  timeout = 0,
-  ...rest
+  sideOffset = 5,
+  ...contentProps
 }: TooltipProps) => {
-  const child = (children as JSX.Element)?.props?.disabled
-    ? React.Children.only(<S.ChildItem>{children}</S.ChildItem>)
-    : children;
+  if (!title) return children;
 
-  // If no content, simply return the children
-  if (!title) {
-    return children as React.ReactElement;
-  }
+  const [side, alignment] = placement.split('-') as [TooltipSide, 'start' | 'end' | undefined];
+  const child = isValidElement<{ disabled?: boolean }>(children) && children.props.disabled ? (
+    <DisabledTrigger tabIndex={0} aria-label={typeof title === 'string' ? title : undefined}>
+      {children}
+    </DisabledTrigger>
+  ) : children;
 
   return (
-    <Ariakit.TooltipProvider
-      hideTimeout={hideTimeout}
-      open={open}
-      placement={placement}
-      showTimeout={showTimeout}
-      skipTimeout={skipTimeout}
-      timeout={timeout}
-    >
-      <Ariakit.TooltipAnchor render={child} />
-      <Ariakit.Tooltip render={p => {
-        const { popover: __, ...boxProps } = p;
-        return <Box style={{ zIndex: 99 }} {...boxProps as React.HTMLAttributes<HTMLDivElement>} {...rest} />;
-      }}>
-        <TooltipWrapper>{title}</TooltipWrapper>
-      </Ariakit.Tooltip>
-    </Ariakit.TooltipProvider>
+    <TooltipPrimitive.Provider delayDuration={showTimeout} skipDelayDuration={skipTimeout}>
+      <TooltipPrimitive.Root open={open} defaultOpen={defaultOpen} onOpenChange={onOpenChange}>
+        <TooltipPrimitive.Trigger asChild tabIndex={0} type={undefined}>
+          {child}
+        </TooltipPrimitive.Trigger>
+        <TooltipPrimitive.Portal container={container}>
+          <TooltipContent
+            data-slot='tooltip-content'
+            data-mf-portal=''
+            side={side}
+            align={alignment ?? 'center'}
+            sideOffset={sideOffset}
+            {...contentProps}
+          >
+            {title}
+          </TooltipContent>
+        </TooltipPrimitive.Portal>
+      </TooltipPrimitive.Root>
+    </TooltipPrimitive.Provider>
   );
 };
 

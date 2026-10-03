@@ -41642,6 +41642,7 @@ __metadata:
     prettier: "npm:3.3.3"
     prettier-plugin-packagejson: "npm:^2.5.3"
     process: "npm:^0.11.10"
+    radix-ui: "npm:^1.6.0"
     react: "npm:^19.2.0"
     react-dom: "npm:^19.2.0"
     react-spinners: "npm:^0.14.1"

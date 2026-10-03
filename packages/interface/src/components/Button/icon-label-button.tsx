@@ -54,7 +54,7 @@ export const MfIconLabelButton = (props: MfIconLabelButtonProps) => {
 
   if (tooltipProps) {
     return (
-      <Tooltip style={{ zIndex: 11 }} {...tooltipProps}>
+      <Tooltip {...tooltipProps}>
         {content}
       </Tooltip>
     )

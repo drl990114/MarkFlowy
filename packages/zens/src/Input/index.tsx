@@ -1,9 +1,11 @@
 import type { KeyboardEventHandler } from 'react';
+import { Slot } from 'radix-ui';
 import styled from 'styled-components';
 
 export type InputSize = 'small' | 'medium' | 'large';
 
 export interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
+  ref?: React.Ref<HTMLInputElement>;
   inputRef?: React.Ref<HTMLInputElement>;
   onPressEnter?: (e: KeyboardEvent) => void;
   /**
@@ -122,8 +124,10 @@ const InputComponent = styled.input<{ $size?: InputSize }>`
   }
 `;
 
+const InputRefSlot = Slot.createSlot<HTMLInputElement>('Input');
+
 const Input: React.FC<InputProps> = (props) => {
-  const { inputRef, onPressEnter, size = 'medium', ...rest } = props;
+  const { ref, inputRef, onPressEnter, size = 'medium', ...rest } = props;
 
   const handleKeyDown: KeyboardEventHandler<HTMLInputElement> = (e) => {
     if (e.key === 'Enter') {
@@ -133,12 +137,14 @@ const Input: React.FC<InputProps> = (props) => {
   };
 
   return (
-    <InputComponent
-      $size={size}
-      {...rest}
-      ref={inputRef}
-      onKeyDown={handleKeyDown}
-    />
+    <InputRefSlot ref={ref}>
+      <InputComponent
+        $size={size}
+        {...rest}
+        ref={inputRef}
+        onKeyDown={handleKeyDown}
+      />
+    </InputRefSlot>
   );
 };
 

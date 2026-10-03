@@ -26,9 +26,10 @@ vi.mock('@markflowy/i18n', () => ({ useTranslation: () => ({ t: (key: string) =>
 
 vi.mock('zens', async (importOriginal) => {
   const original = await importOriginal<typeof Zens>()
-  // Exercise the input source, without depending on stale generated CommonJS output.
+  // Exercise input and tooltip sources without depending on generated package output.
   const { default: Input } = await import('../../../../../packages/zens/src/Input')
-  return { ...original, Input }
+  const { default: Tooltip } = await import('../../../../../packages/zens/src/Tooltip')
+  return { ...original, Input, Tooltip }
 })
 
 const fileSystem: FileSystemContextValue = {
@@ -336,7 +337,7 @@ describe('FileTree inline creation', () => {
     vi.mocked(fileSystem.writeFile).mockRejectedValueOnce(new Error('Write failed'))
     fireEvent.change(input, { target: { value: 'Retry' } })
     fireEvent.keyDown(input, { key: 'Enter' })
-    await waitFor(() => expect(screen.getByText('Write failed')).not.toBeNull())
+    await waitFor(() => expect(screen.getByRole('tooltip').textContent).toBe('Write failed'))
     expect(screen.getByRole('textbox')).toBe(input)
     expect(input.value).toBe('Retry')
 

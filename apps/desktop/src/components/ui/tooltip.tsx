@@ -3,8 +3,8 @@ import type { ComponentProps } from 'react'
 import { cn } from '@/lib/cn'
 
 export function TooltipProvider({
-  delayDuration = 350,
-  skipDelayDuration = 300,
+  delayDuration = 100,
+  skipDelayDuration = 0,
   ...props
 }: ComponentProps<typeof TooltipPrimitive.Provider>) {
   return (
