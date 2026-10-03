@@ -5,11 +5,13 @@ import { fetch } from '@tauri-apps/plugin-http'
 import { FileResultCode, type FileSysResult } from './filesys'
 import { logger } from './logger'
 import { localResourcePath } from './localResourcePath'
+import type { RemoteImageResources } from './remoteImageResources'
 
 const convertHttpToBase64 = async (url: string): Promise<string> => {
   try {
     // Method 1: Try direct fetch first (works for same-origin or CORS-enabled images)
     const response = await fetch(url, {
+      maxRedirections: 5,
       method: 'GET',
       mode: 'cors',
     })
@@ -40,53 +42,6 @@ const convertHttpToBase64 = async (url: string): Promise<string> => {
 }
 
 const isHttpUrl = (src: string) => /^https?:\/\//i.test(src)
-
-// Renderers cache the returned blob URL, so keep it valid for the app session.
-const remoteImageObjectUrlCache = new Map<string, Promise<string>>()
-
-const getRemoteImageObjectUrl = async (url: string): Promise<string> => {
-  const cachedObjectUrl = remoteImageObjectUrlCache.get(url)
-  if (cachedObjectUrl) {
-    return await cachedObjectUrl
-  }
-
-  const objectUrlPromise = (async () => {
-    const response = await fetch(url, {
-      maxRedirections: 5,
-      method: 'GET',
-      mode: 'cors',
-    })
-    if (!response.ok) {
-      throw new Error(`Failed to fetch remote image: ${response.status}`)
-    }
-
-    // plugin-http exposes native response headers separately from the browser
-    // Response internals, so WebKit can receive an untyped Blob for remote SVGs.
-    const responseBlob = await response.blob()
-    const declaredContentType = response.headers
-      .get('content-type')
-      ?.split(';', 1)[0]
-      .trim()
-      .toLowerCase()
-    const imageBlob =
-      responseBlob.type || !declaredContentType?.startsWith('image/')
-        ? responseBlob
-        : new Blob([responseBlob], { type: declaredContentType })
-
-    return URL.createObjectURL(imageBlob)
-  })()
-
-  remoteImageObjectUrlCache.set(url, objectUrlPromise)
-
-  try {
-    return await objectUrlPromise
-  } catch (error) {
-    if (remoteImageObjectUrlCache.get(url) === objectUrlPromise) {
-      remoteImageObjectUrlCache.delete(url)
-    }
-    throw error
-  }
-}
 
 const getRemoteHttpUrl = (src: string): string | null => {
   if (isHttpUrl(src)) {
@@ -226,8 +181,9 @@ export const convertImageToBase64 = async (src: string): Promise<string> => {
   }
 
   try {
-    if (isHttpUrl(src)) {
-      const base64 = await convertHttpToBase64(src)
+    const remoteUrl = getRemoteHttpUrl(src)
+    if (remoteUrl) {
+      const base64 = await convertHttpToBase64(remoteUrl)
       return base64
     }
   } catch (error) {
@@ -482,13 +438,21 @@ const base64ToBlob = (base64: string, mimeType: string): Blob => {
   return new Blob([byteArray], { type: mimeType })
 }
 
-export const getImageUrlInTauri = async (url: string, fileFolderPath?: string) => {
+export const getImageUrlInTauri = async (
+  url: string,
+  fileFolderPath?: string,
+  remoteImages?: RemoteImageResources,
+) => {
   if (!url) return url
 
   const remoteUrl = getRemoteHttpUrl(url)
   if (remoteUrl) {
     try {
-      return await getRemoteImageObjectUrl(remoteUrl)
+      // Object URLs need an explicit owner. One-off consumers receive a data
+      // URL instead, whose memory follows the caller's ordinary JS references.
+      return await (remoteImages
+        ? remoteImages.resolve(remoteUrl)
+        : convertHttpToBase64(remoteUrl))
     } catch (error) {
       logger.warn('Failed to load remote image through Tauri HTTP:', error)
       return remoteUrl

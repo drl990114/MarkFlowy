@@ -29,16 +29,16 @@ const Container = styled.div`
   min-width: 0;
 
   .setting-item__title {
-    margin-bottom: 4px;
-    font-size: var(--mf-ui-font-body);
+    margin-bottom: 2px;
+    font-size: var(--mf-ui-font-control);
     font-weight: 500;
-    line-height: var(--mf-ui-line-height-body);
+    line-height: var(--mf-ui-line-height-control);
     color: ${({ theme }) => theme.primaryFontColor};
   }
 
   .setting-item__label {
     white-space: pre-wrap;
-    font-size: var(--mf-ui-font-control);
+    font-size: var(--mf-ui-font-caption);
     line-height: var(--mf-ui-line-height-control);
     letter-spacing: var(--mf-ui-tracking-control);
     color: ${({ theme }) => theme.labelFontColor};

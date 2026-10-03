@@ -11,6 +11,32 @@
     "markdown": "Sintaxis Markdown",
     "open_failed": "No se pudo abrir el enlace o encontrar su encabezado."
   },
+  "command_palette": {
+    "title": "Paleta de comandos",
+    "placeholder": "Buscar comandos…",
+    "empty": "No hay comandos coincidentes",
+    "recent": "Usados recientemente",
+    "hints": "↑↓ Seleccionar · Intro Ejecutar · Esc Cerrar",
+    "failed": "No se pudo ejecutar «{{command}}».",
+    "categories": {
+      "file": "Archivo",
+      "editor": "Editor",
+      "view": "Vista",
+      "app": "Aplicación"
+    },
+    "reasons": {
+      "no_document": "Abre primero un documento",
+      "unavailable": "No disponible en el contexto actual",
+      "preview": "No se puede editar en modo de vista previa",
+      "read_only": "Este documento es de solo lectura",
+      "stale_target": "El editor original ha cambiado",
+      "selection_unavailable": "La selección original ya no está disponible",
+      "no_undo": "Nada que deshacer",
+      "no_redo": "Nada que rehacer",
+      "markdown_only": "Disponible para documentos Markdown",
+      "zen_mode": "Sal primero del modo Zen"
+    }
+  },
   "quick_open": {
     "title": "Apertura rápida",
     "placeholder": "Buscar por nombre de archivo o ruta…",
@@ -207,6 +233,14 @@
     "untitled": "sin título",
     "not_found": "Archivo no encontrado",
     "openDir": "Abrir Carpeta",
+    "openFolderInNewWindow": "Abrir carpeta en una ventana nueva",
+    "closeFolder": "Cerrar carpeta",
+    "closeDocument": "Cerrar documento",
+    "renameErrors": {
+      "empty": "Introduce un nombre de archivo.",
+      "invalid": "Usa un nombre de archivo válido sin separadores de ruta ni caracteres reservados.",
+      "exists": "Ya existe un archivo con este nombre."
+    },
     "recentDir": "Carpetas abiertas recientemente",
     "emptyOpened": "No hay archivos abiertos",
     "emptyFolder": "Carpeta vacía",
@@ -322,6 +356,21 @@
     "emptyDesc": "Prueba otra palabra clave o desactiva mayúsculas/minúsculas",
     "search_failed": "La búsqueda falló"
   },
+  "text_encoding": {
+    "label": "Codificación y finales de línea",
+    "encoding": "Codificación del texto",
+    "description": "Al volver a abrir, se lee este archivo del disco con la codificación seleccionada. Al guardar, se convierte el texto actual. Se conservan los finales de línea.",
+    "mixed_endings": "Finales de línea mixtos",
+    "no_endings": "Sin finales de línea",
+    "unconfirmed": "Sin confirmar",
+    "confirm_hint": "La codificación se dedujo del contenido o se recuperó de un borrador anterior. Compruebe que el texto es correcto antes de guardarlo con la codificación seleccionada.",
+    "roundtrip_hint": "Este archivo contiene asignaciones de bytes no estándar. Después de editarlo, conviértalo explícitamente a otra codificación.",
+    "preview_hint": "Vista previa de los primeros 4000 caracteres. Se conservará un borrador de recuperación del contenido actual antes de aplicar los cambios.",
+    "preview_reopen": "Vista previa al reabrir",
+    "apply_reopen": "Aplicar reapertura",
+    "save_with_encoding": "Guardar con esta codificación",
+    "save_failed": "Aún no se ha guardado. El contenido y la codificación seleccionada se han conservado. Revise el mensaje de guardado e inténtelo de nuevo."
+  },
   "settings": {
     "select_placeholder": "Selecciona una opción",
     "font_placeholder": "Selecciona una fuente",
@@ -335,6 +384,12 @@
     "search_placeholder": "Buscar preferencias...",
     "search_empty": "No hay preferencias coincidentes",
     "search_results": "{{count}} resultados",
+    "navigation": {
+      "preferences": "Preferencias",
+      "writing": "Escritura y archivos",
+      "ai": "IA",
+      "help": "Ayuda"
+    },
     "general": {
       "startup": {
         "label": "Inicio",
@@ -349,6 +404,10 @@
         "automatic_updates": {
           "label": "Actualización automática",
           "desc": "Comprobar automáticamente si hay actualizaciones e instalarlas cuando inicia la aplicación."
+        },
+        "error_reporting": {
+          "label": "Compartir informes de errores",
+          "desc": "Desactivado por defecto. Envía tipos de error y ubicaciones del código de la aplicación a Sentry. Excluye el contenido de documentos, rutas de archivos, credenciales y actividad de navegación. Puedes desactivarlo en cualquier momento."
         }
       },
       "autosave": {
@@ -385,12 +444,20 @@
           "desc": "Establecer el editor a anchura completa."
         },
         "font_size": {
-          "label": "Tamaño de letra",
-          "desc": "Establecer el tamaño de letra base del editor."
+          "label": "Tamaño de fuente del documento",
+          "desc": "Tamaño de fuente para escritura y lectura."
         },
         "line_height": {
-          "label": "Altura de línea",
-          "desc": "Establecer la altura de línea base del editor."
+          "label": "Interlineado del documento",
+          "desc": "Altura de línea para escritura y lectura."
+        },
+        "source_font_size": {
+          "label": "Tamaño de fuente del código fuente",
+          "desc": "Tamaño de fuente en modo de código fuente, independiente del documento."
+        },
+        "source_line_height": {
+          "label": "Interlineado del código fuente",
+          "desc": "Altura de línea en modo de código fuente."
         },
         "font_family": {
           "label": "Familia de fuentes",
@@ -406,6 +473,14 @@
         "md_default_mode": {
           "label": "Modo predeterminado de Markdown",
           "desc": "Establece el modo de edición predeterminado al crear un nuevo archivo de Markdown."
+        },
+        "text_direction": {
+          "follow_global": "Seguir el ajuste global",
+          "label": "Dirección del texto",
+          "desc": "Dirección del texto en WYSIWYG y Vista previa. El modo automático detecta la dirección de cada párrafo.",
+          "auto": "Automática",
+          "ltr": "De izquierda a derecha (LTR)",
+          "rtl": "De derecha a izquierda (RTL)"
         },
         "typewriter_scroll": {
           "label": "Desplazamiento de la máquina de escribir",
@@ -447,6 +522,66 @@
           "label": "Comprobación ortografía",
           "desc": "Si se habilita la revisión ortografía en el modo Código fuente."
         }
+      },
+      "code_editing": {
+        "label": "Edición de código",
+        "embedded_label": "Código integrado",
+        "default": "Predeterminado",
+        "custom": "Personalizado",
+        "on": "Activado",
+        "off": "Desactivado",
+        "indent_style": {
+          "label": "Sangría",
+          "desc": "Se comparte entre el modo fuente y el código integrado. El editor de metadatos iniciales siempre usa espacios.",
+          "spaces": "Espacios",
+          "tabs": "Tabulaciones"
+        },
+        "indent_size": {
+          "label": "Ancho de sangría",
+          "desc": "La sangría con espacios usa 2 columnas por defecto. Las tabulaciones ocupan 4 columnas en modo fuente y 2 en el código integrado. Al elegir un ancho, se aplica a ambos.",
+          "default": "2 columnas (tabulaciones según el modo)"
+        },
+        "auto_close": {
+          "label": "Cerrar automáticamente paréntesis y comillas",
+          "desc": "Completa los paréntesis y las comillas al escribir en modo fuente y en el código integrado."
+        },
+        "whitespace": {
+          "label": "Mostrar espacios en blanco",
+          "desc": "Muestra espacios y tabulaciones sin modificar el documento.",
+          "trailing": "Solo al final de línea",
+          "all": "Todos los espacios y tabulaciones"
+        },
+        "line_wrap": {
+          "label": "Ajustar líneas largas",
+          "desc": "Ajusta las líneas largas al borde del editor sin insertar saltos de línea. Las líneas extremadamente largas pueden conservar el desplazamiento horizontal.",
+          "mixed_default": "Por área (predeterminado)",
+          "mixed_desc": "Por defecto, los bloques de código normales no se ajustan; el código de las vistas previas y los metadatos iniciales sí. Elige Activado o Desactivado para unificar el ajuste. Las líneas extremadamente largas pueden conservar el desplazamiento horizontal."
+        },
+        "line_numbers": {
+          "label": "Números de línea",
+          "desc": "La vista espaciada muestra la primera línea y cada décima línea.",
+          "all": "Todas las líneas",
+          "sparse": "Espaciados"
+        },
+        "active_line": {
+          "label": "Resaltar la línea actual",
+          "desc": "Resalta la línea del cursor para encontrar más fácilmente la posición de edición."
+        },
+        "font_size": {
+          "label": "Tamaño de letra del código",
+          "desc": "Por defecto, usa el 87,5 % del tamaño de letra del documento y cambia con él. Elige Personalizado para fijar un tamaño.",
+          "default": "Seguir el documento ({{value}} px)",
+          "relative_default": "Seguir el documento (87,5 %)",
+          "unit": "{{value}} px"
+        },
+        "line_height": {
+          "label": "Altura de línea del código",
+          "desc": "La altura de línea es un múltiplo del tamaño de letra. El valor predeterminado es 1,6×; elige Personalizado para ajustar el interlineado.",
+          "default": "1,6× (predeterminado)",
+          "unit": "{{value}}×"
+        },
+        "default_value": "{{value}} (predeterminado)",
+        "typography_disabled": "«Usar fuentes, tamaño e interlineado personales» está desactivado. El tamaño de letra y la altura de línea personalizados no se aplican actualmente."
       }
     },
     "keyboard": {
@@ -578,14 +713,14 @@
           "desc": "Variables soportadas: ${documentPath} (ruta de la carpeta padre del archivo actual), ${fileName} (nombre del archivo actual sin extensión). Ejemplo: ${documentPath}/photo/${fileName}"
         }
       },
-    "upload_img": {
-      "label": "Insertar imagen local",
-      "when_upload_image": {
-        "label": "Comportamiento de inserción de imágenes locales",
-        "desc": "Elige el comportamiento predeterminado para las imágenes locales seleccionadas, arrastradas al editor o pegadas desde un programa de captura.",
-        "options": {
-          "insert_path": "Insertar la ruta del archivo original",
-          "save_to_local_absolute": "Guardar en la ruta absoluta global",
+      "upload_img": {
+        "label": "Insertar imagen local",
+        "when_upload_image": {
+          "label": "Comportamiento de inserción de imágenes locales",
+          "desc": "Elige el comportamiento predeterminado para las imágenes locales seleccionadas, arrastradas al editor o pegadas desde un programa de captura.",
+          "options": {
+            "insert_path": "Insertar la ruta del archivo original",
+            "save_to_local_absolute": "Guardar en la ruta absoluta global",
             "save_to_local_relative": "Ruta relativa guardada en el área de trabajo",
             "paste_as_base64": "Pegar como código Base64",
             "save_to_file_relative": "Ruta guardada en el archivo actual relativo"
@@ -631,6 +766,9 @@
     "display": {
       "label": "Apariencia",
       "theme": {
+        "unavailable": "{{name}} (no disponible)",
+        "unavailable_help": "Los temas seleccionados no están disponibles: {{names}}. Se usan temporalmente temas integrados y se conservan tus selecciones. Vuelve a importar los temas como JSON o elige otro tema. Los temas JS antiguos y el CSS cargado automáticamente requieren una migración manual.",
+        "migration_guide": "Guía de migración de temas",
         "label": "Tema",
         "mode": {
           "label": "Modo de tema",
@@ -688,6 +826,86 @@
       }
     },
     "themeStore": {
+      "controls": {
+        "installedOnly": "Solo instalados",
+        "title": "Temas",
+        "create": "Crear tema",
+        "import": "Importar JSON",
+        "export": "Exportar JSON",
+        "edit": "Editar",
+        "copy": "Copiar y editar",
+        "remove": "Eliminar",
+        "apply": "Aplicar",
+        "save": "Guardar y aplicar",
+        "close": "Cerrar",
+        "undo": "Deshacer",
+        "redo": "Rehacer",
+        "search": "Buscar un token…",
+        "modified": "Solo modificados",
+        "reset": "Restablecer",
+        "link": "Vincular a un token",
+        "value": "Valor",
+        "inspect": "Inspeccionar la vista previa",
+        "snippets": "Fragmentos CSS personales",
+        "addCss": "Importar CSS",
+        "createCss": "Nuevo fragmento",
+        "untitledCss": "Fragmento sin título",
+        "disableAll": "Desactivar todos",
+        "includeCss": "Incluir CSS personal",
+        "up": "Subir",
+        "down": "Bajar",
+        "name": "Nombre",
+        "author": "Autor",
+        "variant": "Variante",
+        "addLight": "Añadir variante clara",
+        "addDark": "Añadir variante oscura",
+        "advanced": "JSON / CSS avanzado",
+        "options": "Opciones del tema",
+        "previewOptions": "Opciones de vista previa",
+        "closeAdvanced": "Cerrar el editor avanzado",
+        "noTokens": "No hay tokens coincidentes",
+        "css": "CSS del tema",
+        "json": "JSON del tema",
+        "applyJson": "Actualizar desde JSON",
+        "revertJson": "Descartar cambios de JSON",
+        "pendingJson": "Aplique o descarte los cambios de JSON para continuar con la edición visual y la exportación.",
+        "catalog": "Temas de la comunidad",
+        "install": "Instalar",
+        "emptyCatalog": "Los nuevos temas de la comunidad aparecerán aquí cuando estén disponibles en formato JSON.",
+        "replace": "Ya existe un tema con este ID. ¿Desea reemplazarlo?",
+        "replaceAction": "Reemplazar",
+        "cancel": "Cancelar",
+        "saveCopy": "Guardar una copia",
+        "draft": "Hay un borrador local disponible.",
+        "resume": "Retomar borrador",
+        "discard": "Descartar borrador",
+        "preview": "Vista previa del tema",
+        "loadError": "No se pudo cargar la vista previa del editor.",
+        "retry": "Reintentar",
+        "linked": "Vinculado",
+        "inherited": "Predeterminado",
+        "customCss": "El CSS personalizado puede sobrescribir el token inspeccionado.",
+        "preferences": "La vista previa solo muestra el tema. Sus preferencias personales también se aplican al usarlo.",
+        "personalTypography": "Usar fuentes, tamaño e interlineado personales",
+        "saved": "Guardado",
+        "error": "Error",
+        "enabled": "Activado",
+        "editCss": "Editar CSS",
+        "saveCss": "Guardar fragmento",
+        "noSnippets": "No hay fragmentos CSS personales.",
+        "deleteConfirm": "¿Eliminar este tema?",
+        "removeVariant": "Eliminar variante",
+        "schema": "Exportar esquema JSON",
+        "light": "Claro",
+        "dark": "Oscuro",
+        "catalogMismatch": "El ID del tema no coincide con el catálogo de la comunidad.",
+        "previewNotes": "Notas",
+        "previewIdeas": "Ideas",
+        "previewWelcome": "Bienvenida",
+        "previewSearch": "Buscar en la vista previa",
+        "previewSearchPlaceholder": "Buscar…",
+        "previewNewNote": "Nueva nota"
+      },
       "label": "Tienda de temas",
       "desc": "Explorar y descargar los temas creados por la comunidad para enriquecer la apariencia de su editor.",
       "submit_theme": "Enviar un tema",
@@ -731,7 +949,9 @@
   "workspace": {
     "info": "Información del área de trabajo",
     "none": "El área de trabajo no está abierta",
-    "searchPlaceholder": "Buscar espacios de trabajo…",
+    "searchPlaceholder": "Buscar espacios de trabajo y archivos recientes…",
+    "openFileOrFolder": "Abrir archivo o carpeta",
+    "recentFiles": "Archivos recientes",
     "sync_mode": {
       "git_local": {
         "name": "Local de Git",
@@ -750,6 +970,7 @@
   },
   "command": {
     "id_descriptions": {
+      "app_commandPalette": "Paleta de comandos",
       "app_quickOpen": "Apertura rápida",
       "app_openFolder": "Abrir una carpeta",
       "app_openSetting": "Abrir la ventana de configuración",
@@ -966,7 +1187,22 @@
     },
     "livePreview": {
       "largeDeferred": "La vista previa grande está en pausa. El código fuente completo sigue disponible.",
-      "renderLarge": "Renderizar vista previa grande (puede tardar)"
+      "renderLarge": "Renderizar vista previa grande (puede tardar)",
+      "actions": "Acciones del bloque {{kind}}",
+      "copied": "Código fuente copiado",
+      "copy": "Copiar código fuente",
+      "copying": "Copiando código fuente…",
+      "editSource": "Editar código fuente",
+      "editSourceForKind": "Editar código fuente de {{kind}}",
+      "hideSource": "Ocultar código fuente",
+      "kind": {
+        "html": "HTML",
+        "math": "Matemáticas",
+        "mermaid": "Mermaid"
+      },
+      "preview": "Vista previa de {{kind}}",
+      "retryCopy": "Reintentar copiar el código fuente",
+      "sourceEditor": "Editor de código fuente de {{kind}}"
     },
     "sourceFallback": {
       "longLine": "Las líneas muy largas se desplazan horizontalmente para mantener la edición fluida.",
@@ -994,7 +1230,41 @@
       "loading": "Loading image…",
       "edit": "Edit address"
     },
-    "preview": { "retry": "Retry" }
+    "preview": {
+      "retry": "Retry"
+    },
+    "snippets": {
+      "title": "Insertar fragmento",
+      "search": "Buscar fragmentos…",
+      "manage": "Gestionar fragmentos…",
+      "blank": "Nuevo bloque vacío",
+      "stale": "El punto de inserción cambió. Vuelve a abrir el selector."
+    },
+    "table": {
+      "actions": "Acciones de la tabla",
+      "alignment": "Alineación de columna",
+      "copy": "Copiar",
+      "cut": "Cortar",
+      "paste": "Pegar",
+      "selectAll": "Seleccionar todo",
+      "action": {
+        "column": "Acciones de columna",
+        "columnAt": "Acciones de la columna {{index}}",
+        "row": "Acciones de fila",
+        "rowAt": "Acciones de la fila {{index}}"
+      },
+      "addColumnAfter": "Insertar columna a la derecha",
+      "addColumnBefore": "Insertar columna a la izquierda",
+      "addRowAfter": "Insertar fila debajo",
+      "addRowBefore": "Insertar fila encima",
+      "alignCenter": "Centrar columna",
+      "alignLeft": "Alinear columna a la izquierda",
+      "alignNone": "Quitar alineación de columna",
+      "alignRight": "Alinear columna a la derecha",
+      "deleteColumn": "Eliminar columna actual",
+      "deleteRow": "Eliminar fila actual",
+      "deleteTable": "Eliminar tabla"
+    }
   },
   "inline_insert": {
     "insert_link": "Insert link",
@@ -1023,5 +1293,160 @@
     "open_error": "Unable to open this link.",
     "copy_error": "Unable to copy this address.",
     "single_block": "Select text within one paragraph or table cell."
+  },
+  "history": {
+    "title": "Historial local",
+    "description": "Revisa los cambios y restaura una versión como borrador sin guardar.",
+    "enabled": "Activar el historial local",
+    "enabled_description": "Conserva versiones de los documentos abiertos en MarkFlowy. La protección de borradores continúa al desactivarlo.",
+    "retention": "Historial ordinario: 30 días, hasta 100 versiones por documento y un objetivo de 1 GB. Se protegen los borradores sin guardar y las sesiones activas.",
+    "count": "{{count}} versiones",
+    "clear_title": "Gestionar el historial",
+    "clear_description": "Elimina el historial sin borrar archivos ni borradores. Los cambios posteriores pueden crear nuevas versiones si la función está activada.",
+    "clear_workspace": "Eliminar el historial del espacio actual",
+    "clear_loose": "Eliminar el historial de documentos independientes",
+    "clear_all": "Eliminar el historial de todos los espacios",
+    "clear_confirm": "¿Eliminar permanentemente {{count}} versiones? Se pueden recuperar hasta {{size}} MB de contenido no compartido. Se conservan los archivos y borradores.",
+    "all_workspaces": "Todos los espacios y documentos independientes",
+    "loose": "Documentos independientes",
+    "delete": "Eliminar historial",
+    "empty": "Aún no hay historial.",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "before": "Antes de los cambios",
+    "after": "Último resultado",
+    "refresh": "Hay cambios nuevos · actualizar comparación",
+    "loading": "Cargando comparación…",
+    "compare_failed": "No se pudo cargar la comparación. Se muestra el texto original; aún puedes restaurar esta versión.",
+    "select": "Selecciona una versión para ver sus cambios.",
+    "restore_before": "Restaurar antes de los cambios",
+    "restore": "Restaurar esta versión",
+    "merging": "Agrupando cambios",
+    "kind_save": "Guardado",
+    "kind_external": "Cambios externos",
+    "kind_ai": "Edición con IA",
+    "kind_checkpoint": "Punto de control del borrador",
+    "kind_restore": "Antes de restaurar",
+    "kind_discard": "Antes de descartar",
+    "kind_overwrite": "Antes de sobrescribir",
+    "kind_autosave": "Guardado automático",
+    "kind_opened": "Versión inicial",
+    "protected": "Borrador protegido",
+    "pending": "Protegiendo borrador…",
+    "failed": "Error al proteger el borrador",
+    "paused": "Borrador restaurado · guardar manualmente",
+    "large": "Documento grande: se muestra el texto original.",
+    "compare_current": "Comparar con el borrador actual",
+    "compare_version": "Comparar con otra versión",
+    "compare_batch": "Comparar antes y después",
+    "snapshot": "Versión seleccionada",
+    "current": "Borrador actual",
+    "versions": "Versiones",
+    "split": "Vista en paralelo",
+    "unified": "Vista unificada",
+    "full_context": "Mostrar todo el contexto",
+    "previous_change": "Cambio anterior",
+    "next_change": "Cambio siguiente",
+    "no_changes": "Sin diferencias",
+    "change_position": "Cambio {{current}} / {{total}}",
+    "added_lines": "Líneas añadidas: {{count}}",
+    "removed_lines": "Líneas eliminadas: {{count}}",
+    "unchanged_lines": "$ líneas sin cambios · haz clic para expandir",
+    "retry": "Reintentar protección",
+    "coarse": "Las diferencias se simplifican dentro del tiempo de cálculo; el texto completo se conserva.",
+    "compute_large": "Calcular diferencias del documento grande",
+    "deleted": "Se eliminaron {{count}} versiones.",
+    "kind_write-pending": "Escritura de archivo interrumpida",
+    "kind_recovered-save": "Guardado recuperado",
+    "budget_limited": "El historial alcanzó su capacidad objetivo. Se pausan los puntos de control automáticos y las nuevas sesiones de IA; los borradores y las copias de seguridad siguen protegidos. Elimina historial innecesario para continuar."
+  },
+  "document_preview": {
+    "html_title": "Vista previa HTML",
+    "pdf_title": "Lector PDF",
+    "refresh": "Actualizar",
+    "run_scripts": "Ejecutar scripts",
+    "loading": "Cargando…",
+    "load_failed": "No se puede cargar este archivo.",
+    "retry": "Reintentar",
+    "resources_blocked": "Recursos no cargados",
+    "resource_folder_hint": "Abre la carpeta que contiene este documento y sus recursos como espacio de trabajo y actualiza la vista previa.",
+    "resource_errors": {
+      "not_found": "Archivo no encontrado.",
+      "permission_denied": "No tienes permiso para leer este archivo.",
+      "outside_root": "Fuera de la carpeta del documento o del espacio de trabajo.",
+      "too_large": "El recurso o la vista previa expandida supera el límite de tamaño.",
+      "unsupported": "Tipo de recurso o URL no compatible.",
+      "invalid_css": "No se puede analizar esta hoja de estilos.",
+      "resource_limit": "Importación circular o límite de cantidad o profundidad de recursos alcanzado.",
+      "read_failed": "No se puede leer este recurso."
+    },
+    "previous_page": "Página anterior",
+    "next_page": "Página siguiente",
+    "page": "Número de página",
+    "zoom_out": "Alejar",
+    "zoom_in": "Acercar",
+    "fit_width": "Ajustar al ancho",
+    "search": "Buscar en PDF",
+    "previous_match": "Resultado anterior",
+    "next_match": "Resultado siguiente",
+    "password_required": "Introduce la contraseña del PDF",
+    "password_incorrect": "Contraseña incorrecta. Inténtalo de nuevo.",
+    "unlock": "Desbloquear",
+    "cancel": "Cancelar"
+  },
+  "snippets": {
+    "library": "Biblioteca de fragmentos",
+    "description": "Reutiliza fórmulas, diagramas y código en tus espacios locales.",
+    "kind": "Tipo",
+    "kinds": {
+      "math": "Math",
+      "mermaid": "Mermaid",
+      "code": "Code"
+    },
+    "search": "Buscar fragmentos…",
+    "new": "Nuevo fragmento",
+    "copy": "Duplicar",
+    "copyCustom": "Crear copia personalizada",
+    "copySuffix": "(copia)",
+    "show": "Mostrar",
+    "hide": "Ocultar",
+    "hidden": "Oculto",
+    "delete": "Eliminar",
+    "deleteTitle": "¿Eliminar «{{title}}»?",
+    "builtin": "Integrado",
+    "custom": "Personalizado",
+    "unsaved": "Cambios sin guardar",
+    "name": "Nombre",
+    "language": "Lenguaje del código",
+    "languagePlaceholder": "Ej.: typescript; vacío para texto plano",
+    "source": "Código fuente",
+    "sourceHelp": "Introduce solo el contenido, sin delimitadores externos ``` o $$. El texto y los espacios se insertan literalmente; las variables no se expanden.",
+    "save": "Guardar",
+    "discard": "Descartar",
+    "unsavedTitle": "¿Guardar los cambios?",
+    "unsavedDescription": "Guarda o descarta los cambios antes de salir de este fragmento.",
+    "loadError": "No se pudieron cargar los fragmentos",
+    "saveError": "No se pudieron guardar los cambios",
+    "retry": "Reintentar",
+    "noResults": "No hay fragmentos coincidentes",
+    "conflict": "La biblioteca cambió en otra ventana. Tu borrador se conserva. Duplícalo como un fragmento nuevo o descarta los cambios y vuelve a seleccionar el original.",
+    "preview": "Vista previa",
+    "previewAgain": "Actualizar vista previa",
+    "previewStale": "El contenido cambió. Actualiza la vista previa.",
+    "previewError": "Vista previa no disponible. Puedes guardar el contenido.",
+    "builtins": {
+      "math-fraction": "Fracción",
+      "math-root": "Raíz cuadrada",
+      "math-sum": "Sumatoria",
+      "math-matrix": "Matriz",
+      "mermaid-flow": "Diagrama de flujo",
+      "mermaid-sequence": "Diagrama de secuencia",
+      "mermaid-class": "Diagrama de clases",
+      "mermaid-state": "Diagrama de estados",
+      "code-json": "Objeto JSON",
+      "code-typescript": "Función TypeScript",
+      "code-python": "Función Python",
+      "code-bash": "Script Bash"
+    }
   }
 }

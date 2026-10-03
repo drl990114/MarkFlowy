@@ -1,4 +1,4 @@
-import { resolveAccentSoftColor } from '@/appThemeTokens'
+import { useThemeAccentPreview } from '@/themes/context'
 import useThemeStore from '@/stores/useThemeStore'
 import { darken, lighten } from '@markflowy/theme'
 import Color from 'color'
@@ -8,12 +8,10 @@ export const FOLLOW_THEME_ACCENT_COLOR = 'system'
 export const DEFAULT_THEME_ACCENT_COLOR = '#1F6AE2'
 
 const HEX_COLOR_RE = /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i
-const ACCENT_PREVIEW_STYLE_ID = 'mf-accent-color-preview'
 
 let accentPreviewColor: string | undefined
 let accentPreviewFrame: number | undefined
 let accentPreviewOwner: symbol | undefined
-let accentPreviewRule: CSSStyleRule | undefined
 
 export const getReadableForeground = (background: string, light: string, dark: string) => {
   try {
@@ -24,47 +22,9 @@ export const getReadableForeground = (background: string, light: string, dark: s
   }
 }
 
-const getAccentPreviewRule = () => {
-  if (accentPreviewRule?.parentStyleSheet) return accentPreviewRule
-  if (typeof document === 'undefined') return undefined
-
-  let styleElement = document.getElementById(ACCENT_PREVIEW_STYLE_ID) as HTMLStyleElement | null
-  if (!styleElement) {
-    styleElement = document.createElement('style')
-    styleElement.id = ACCENT_PREVIEW_STYLE_ID
-    styleElement.textContent = ':root {}'
-    document.head.appendChild(styleElement)
-  }
-
-  const rule = styleElement.sheet?.cssRules.item(0)
-  accentPreviewRule =
-    typeof CSSStyleRule !== 'undefined' && rule instanceof CSSStyleRule ? rule : undefined
-  return accentPreviewRule
-}
-
 const applyAccentColorPreview = () => {
   accentPreviewFrame = undefined
-  if (!accentPreviewColor) return
-
-  const rule = getAccentPreviewRule()
-  if (!rule) return
-
-  const { curTheme } = useThemeStore.getState()
-
-  rule.style.setProperty('--mf-primary', accentPreviewColor)
-  rule.style.setProperty(
-    '--mf-primary-foreground',
-    getReadableForeground(accentPreviewColor, '#ffffff', '#111111'),
-  )
-  rule.style.setProperty(
-    '--mf-primary-soft',
-    resolveAccentSoftColor({
-      accentColor: accentPreviewColor,
-      mode: curTheme.mode,
-      themeAccentColor: curTheme.styledConstants.accentColor,
-      themeAccentColorFocused: curTheme.styledConstants.accentColorFocused,
-    }),
-  )
+  if (accentPreviewColor) useThemeAccentPreview.setState({ color: accentPreviewColor })
 }
 
 export const scheduleThemeAccentColorPreview = (value: string, owner: symbol) => {
@@ -96,11 +56,7 @@ export const clearThemeAccentColorPreview = (owner: symbol) => {
     window.cancelAnimationFrame(accentPreviewFrame)
   }
   accentPreviewFrame = undefined
-  accentPreviewRule = undefined
-
-  if (typeof document !== 'undefined') {
-    document.getElementById(ACCENT_PREVIEW_STYLE_ID)?.remove()
-  }
+  useThemeAccentPreview.setState({ color: undefined })
 }
 
 export const normalizeThemeAccentColor = (value: unknown) => {
@@ -126,7 +82,10 @@ export const isThemeAccentColorOverride = (value: unknown) => {
   return normalizeThemeAccentColor(value) !== FOLLOW_THEME_ACCENT_COLOR
 }
 
-export const resolveThemeAccentColor = (themeAccentColor: string | undefined, settingValue: unknown) => {
+export const resolveThemeAccentColor = (
+  themeAccentColor: string | undefined,
+  settingValue: unknown,
+) => {
   const normalizedColor = normalizeThemeAccentColor(settingValue)
 
   if (normalizedColor === FOLLOW_THEME_ACCENT_COLOR) {

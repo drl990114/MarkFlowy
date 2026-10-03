@@ -25,12 +25,18 @@ import {
   getCurrentFileMutationNodeInRoot,
   getCurrentFileMutationNodes,
 } from './file-mutation'
-import { moveFileNode } from './file-operator'
+import { mergeDirectoryChildren, moveFileNode } from './file-operator'
 import { FileTreeStickyRoot, FileTreeStickyViewport } from './styles'
 import { SimpleTree } from './types'
 
 const DEFAULT_FILE_TREE_INDENT_SIZE = 16
 const DEFAULT_FILE_TREE_ROW_HEIGHT = 24
+
+function fileTreePathKey(path: string) {
+  const windows = /^[a-z]:[\\/]/i.test(path) || path.startsWith('\\\\')
+  const normalized = windows ? path.replace(/\\/g, '/').toLowerCase() : path
+  return normalized.replace(/\/+$/, '')
+}
 
 type FileTreeRowState = {
   revealRoot?: () => void
@@ -153,8 +159,10 @@ const FileTree: FC<FileTreeProps> = (props) => {
   const treeRef = useRef<TreeApi<IFile> | null>(null)
   const [treeApi, setTreeApi] = useState<TreeApi<IFile> | null>()
   const loadedDirsRef = useRef<Set<string>>(new Set())
-  const loadingDirsRef = useRef<Set<string>>(new Set())
+  const loadingDirsRef = useRef(new Map<string, Promise<void>>())
+  const refreshDirsRef = useRef(new Set<string>())
   const loadedDirsCacheVersionRef = useRef(0)
+  const focusRequestRef = useRef(0)
   const [loadingDirIds, setLoadingDirIds] = useState<ReadonlySet<string>>(() => new Set())
   const [loadedDirPaths, setLoadedDirPaths] = useState<ReadonlySet<string>>(() => new Set())
   const [showStickyRoot, setShowStickyRoot] = useState(false)
@@ -202,82 +210,148 @@ const FileTree: FC<FileTreeProps> = (props) => {
     [stickyRoot],
   )
 
+  const loadDirectory = async (nodeData: IFile) => {
+    if (nodeData.kind !== 'dir' || !nodeData.path) return
+    const workspaceRootId = data[0]?.id
+    const target = captureFileMutationTarget(nodeData)
+    if (!workspaceRootId || !target) return
+
+    if (loadedDirsRef.current.has(target.path)) return
+    const pending = loadingDirsRef.current.get(target.path)
+    if (pending) return pending
+
+    const refresh = refreshDirsRef.current.has(target.path)
+    if (refresh || !nodeData.children || nodeData.children.length === 0) {
+      const cacheVersion = loadedDirsCacheVersionRef.current
+      setLoadingDirIds((current) => new Set(current).add(target.id))
+
+      // Register before starting I/O so toggles and explicit reveal requests
+      // share the same read and can both wait for its merged children.
+      const loading = Promise.resolve().then(async () => {
+        const isCurrent = () =>
+          cacheVersion === loadedDirsCacheVersionRef.current &&
+          loadingDirsRef.current.get(target.path) === loading
+        try {
+          const children = await readSubdirectory(target.path)
+          if (!isCurrent()) return
+
+          const currentTree = new SimpleTree(currentDataRef.current)
+          const currentNode = getCurrentFileMutationNodeInRoot(
+            currentTree,
+            getFileObject,
+            target,
+            workspaceRootId,
+          )
+          if (!currentNode || currentNode.data.kind !== 'dir') return
+          if (loadedDirsRef.current.has(target.path)) return
+
+          loadedDirsRef.current.add(target.path)
+          refreshDirsRef.current.delete(target.path)
+          setLoadedDirPaths((current) => new Set(current).add(target.path))
+          if (children.length > 0) {
+            // Creating a node also opens its parent. Preserve drafts (and any
+            // completed creations) inserted while this directory read was pending.
+            const currentChildren = currentNode.data.children ?? []
+            if (refresh) {
+              const merged = mergeDirectoryChildren(currentChildren, children)
+              if (merged === currentChildren) return
+              currentNode.data.children = merged
+            } else {
+              const currentIds = new Set(currentChildren.map((child) => child.id))
+              const currentPaths = new Set(currentChildren.map((child) => child.path).filter(Boolean))
+              currentNode.data.children = [
+                ...currentChildren,
+                ...children.filter(
+                  (child) =>
+                    !currentIds.has(child.id) && (!child.path || !currentPaths.has(child.path)),
+                ),
+              ]
+            }
+            setFolderDataPure([...currentTree.data])
+          }
+        } catch (error) {
+          console.error('Failed to load subdirectory:', error)
+        } finally {
+          if (isCurrent()) {
+            loadingDirsRef.current.delete(target.path)
+            setLoadingDirIds((current) => {
+              if (!current.has(target.id)) return current
+
+              const next = new Set(current)
+              next.delete(target.id)
+              return next
+            })
+          }
+        }
+      })
+      loadingDirsRef.current.set(target.path, loading)
+      await loading
+    }
+  }
+
   const onToggle: TreeProps<IFile>['onToggle'] = async (id: string) => {
     if (stickyRoot && showStickyRoot && id === rootId) {
       setStickyRootRevision((current) => current + 1)
     }
 
-    const node = tree.find(id)
-    if (!node) return
-
-    const nodeData = node.data as IFile
-    if (nodeData.kind !== 'dir' || !nodeData.path) return
+    const node = new SimpleTree(currentDataRef.current).find(id)
+    const nodeData = node?.data
+    if (nodeData?.kind !== 'dir' || !nodeData.path) return
     const isOpen = Boolean(treeRef.current?.isOpen(id))
     if (openPathsRef.current.has(nodeData.path) !== isOpen) {
       if (isOpen) openPathsRef.current.add(nodeData.path)
       else openPathsRef.current.delete(nodeData.path)
       onExpandedPathsChange?.([...openPathsRef.current])
     }
-    if (!isOpen) return
-    const workspaceRootId = data[0]?.id
-    const target = captureFileMutationTarget(nodeData)
-    if (!workspaceRootId || !target) return
+    if (isOpen) await loadDirectory(nodeData)
+  }
 
-    if (loadedDirsRef.current.has(nodeData.path) || loadingDirsRef.current.has(nodeData.path)) {
-      return
+  useEffect(
+    () => () => {
+      focusRequestRef.current += 1
+    },
+    [activeId, rootId, rootPath],
+  )
+
+  const focusActiveFile = async (id: string) => {
+    const api = treeRef.current
+    if (!api) return
+    const request = ++focusRequestRef.current
+    const cacheVersion = loadedDirsCacheVersionRef.current
+    const isCurrent = () =>
+      request === focusRequestRef.current &&
+      cacheVersion === loadedDirsCacheVersionRef.current &&
+      currentDataRef.current[0]?.id === rootId &&
+      currentDataRef.current[0]?.path === rootPath &&
+      treeRef.current === api
+
+    let target = new SimpleTree(currentDataRef.current).find(id)?.data
+    const path = (target ?? getFileObject(id))?.path
+    const pathKey = path ? fileTreePathKey(path) : undefined
+    let children = currentDataRef.current
+    while (!target && pathKey && isCurrent()) {
+      const directory = children.find(
+        (file) => file.kind === 'dir' && file.path && pathKey.startsWith(`${fileTreePathKey(file.path)}/`),
+      )
+      if (!directory) return
+      api.open(directory.id)
+      await loadDirectory(directory)
+      if (!isCurrent()) return
+
+      const currentDirectory = new SimpleTree(currentDataRef.current).find(directory.id)?.data
+      if (!currentDirectory || currentDirectory.path !== directory.path) return
+      children = currentDirectory.children ?? []
+      target = children.find(
+        (file) => file.id === id || (file.path && fileTreePathKey(file.path) === pathKey),
+      )
     }
+    if (!target || target.kind !== 'file' || !isCurrent()) return
 
-    if (!nodeData.children || nodeData.children.length === 0) {
-      const cacheVersion = loadedDirsCacheVersionRef.current
-      loadingDirsRef.current.add(target.path)
-      setLoadingDirIds((current) => new Set(current).add(target.id))
-
-      try {
-        const children = await readSubdirectory(nodeData.path)
-        if (cacheVersion !== loadedDirsCacheVersionRef.current) return
-
-        const currentTree = new SimpleTree(currentDataRef.current)
-        const currentNode = getCurrentFileMutationNodeInRoot(
-          currentTree,
-          getFileObject,
-          target,
-          workspaceRootId,
-        )
-        if (!currentNode || currentNode.data.kind !== 'dir') return
-        if (loadedDirsRef.current.has(target.path)) return
-
-        loadedDirsRef.current.add(target.path)
-        setLoadedDirPaths((current) => new Set(current).add(target.path))
-        if (children.length > 0) {
-          // Creating a node also opens its parent. Preserve drafts (and any
-          // completed creations) inserted while this directory read was pending.
-          const currentChildren = currentNode.data.children ?? []
-          const currentIds = new Set(currentChildren.map((child) => child.id))
-          const currentPaths = new Set(currentChildren.map((child) => child.path).filter(Boolean))
-          currentNode.data.children = [
-            ...currentChildren,
-            ...children.filter(
-              (child) =>
-                !currentIds.has(child.id) && (!child.path || !currentPaths.has(child.path)),
-            ),
-          ]
-          setFolderDataPure([...currentTree.data])
-        }
-      } catch (error) {
-        console.error('Failed to load subdirectory:', error)
-      } finally {
-        if (cacheVersion === loadedDirsCacheVersionRef.current) {
-          loadingDirsRef.current.delete(target.path)
-          setLoadingDirIds((current) => {
-            if (!current.has(target.id)) return current
-
-            const next = new Set(current)
-            next.delete(target.id)
-            return next
-          })
-        }
-      }
-    }
+    // Arborist opens loaded ancestors and waits until the virtual row exists.
+    // Select afterwards so the host receives the current node, including files
+    // that were absent from the tree when this command started.
+    await api.scrollTo(target.id, 'center')
+    if (isCurrent() && api.get(target.id)) api.select(target.id, { align: 'center' })
   }
 
   useEffect(
@@ -336,7 +410,9 @@ const FileTree: FC<FileTreeProps> = (props) => {
 
     const move = async (replace = false) => {
       await runFileMutation(async (lease) => {
-        const mutationTree = new SimpleTree(getCurrentFolderData())
+        const initialData = getCurrentFolderData()
+        const workspaceRootId = initialData[0]?.id
+        let mutationTree = new SimpleTree(initialData)
         const currentParent = getCurrentFileMutationNode(mutationTree, getFileObject, parentTarget)
         const verifiedDragNodes = getCurrentFileMutationNodes(
           mutationTree,
@@ -395,7 +471,14 @@ const FileTree: FC<FileTreeProps> = (props) => {
           replaceExist: replace,
         })
 
-        if (Array.isArray(res)) {
+        if (Array.isArray(res) && res.length > 0) {
+          // Lazy reads and inline drafts can update the tree while the backend
+          // move is pending, even though filesystem mutations are serialized.
+          const latestData = getCurrentFolderData()
+          if (latestData[0]?.id !== workspaceRootId) return
+          if (latestData !== initialData) mutationTree = new SimpleTree(latestData)
+          const destination = getCurrentFileMutationNode(mutationTree, getFileObject, parentTarget)
+          if (!destination) return
           const successfulSourcePaths = new Set(
             res.filter((moveFileInfo) => !moveFileInfo.is_replaced).map(({ old_path }) => old_path),
           )
@@ -422,11 +505,54 @@ const FileTree: FC<FileTreeProps> = (props) => {
           })
 
           for (const id of dragIds) {
-            mutationTree.move({ id, parentId: parentTarget.id, index: args.index })
+            mutationTree.move({
+              id,
+              parentId: parentTarget.id,
+              index: destination.children?.length ?? 0,
+            })
           }
-          loadedDirsRef.current.clear()
-          setLoadedDirPaths((current) => (current.size === 0 ? current : new Set()))
-          setFolderDataPure(mutationTree.data)
+
+          // Retire pre-move reads only for affected directories. Unrelated empty
+          // folders must keep their loaded status and should not be read again.
+          const invalidPaths = new Set([parentTarget.path])
+          const sourceParentPaths = new Set<string>()
+          for (const node of verifiedDragNodes) {
+            const sourceParent = node.parent?.data
+            if (sourceParent?.path && loadingDirsRef.current.has(sourceParent.path)) {
+              invalidPaths.add(sourceParent.path)
+              sourceParentPaths.add(sourceParent.path)
+            }
+          }
+          const movedFolders = res.filter((entry) => entry.is_folder).map((entry) => entry.old_path)
+          if (movedFolders.length > 0) {
+            for (const path of new Set([
+              ...loadedDirsRef.current,
+              ...loadingDirsRef.current.keys(),
+              ...refreshDirsRef.current,
+            ])) {
+              if (movedFolders.some((oldPath) =>
+                path === oldPath || path.startsWith(`${oldPath}/`) || path.startsWith(`${oldPath}\\`),
+              )) invalidPaths.add(path)
+            }
+          }
+          for (const path of invalidPaths) {
+            loadedDirsRef.current.delete(path)
+            loadingDirsRef.current.delete(path)
+            refreshDirsRef.current.delete(path)
+          }
+          sourceParentPaths.forEach((path) => refreshDirsRef.current.add(path))
+          refreshDirsRef.current.add(parentTarget.path)
+          setLoadedDirPaths((current) => new Set([...current].filter((path) => !invalidPaths.has(path))))
+          const movedIds = new Set(sourceProtection.fileIds)
+          setLoadingDirIds((current) => new Set([...current].filter((id) => {
+            const path = getFileObject(id)?.path
+            return !movedIds.has(id) && (!path || !invalidPaths.has(path))
+          })))
+          const nextData = mutationTree.data
+          currentDataRef.current = nextData
+          setFolderDataPure(nextData)
+
+          if (dragIds.length > 0) await loadDirectory(destination.data)
         }
       })
     }
@@ -461,6 +587,7 @@ const FileTree: FC<FileTreeProps> = (props) => {
       getCurrentFolderData={getCurrentFolderData}
       canInsertIntoDirectory={canInsertIntoDirectory}
       setFolderData={setFolderDataPure}
+      onFocusActiveFile={focusActiveFile}
       isRoot={isRoot}
       onShowConfirm={onShowConfirm}
       onShowInputConfirm={onShowInputConfirm}
@@ -504,6 +631,7 @@ const FileTree: FC<FileTreeProps> = (props) => {
         loadedDirsCacheVersionRef.current += 1
         loadedDirsRef.current.clear()
         loadingDirsRef.current.clear()
+        refreshDirsRef.current.clear()
         setLoadingDirIds((current) => (current.size === 0 ? current : new Set()))
         setLoadedDirPaths((current) => (current.size === 0 ? current : new Set()))
       }

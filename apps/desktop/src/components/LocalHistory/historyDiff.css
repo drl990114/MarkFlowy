@@ -1,0 +1,125 @@
+.mf-history-diff .cm-editor {
+  background: transparent;
+  color: var(--mf-foreground);
+  font-size: var(--mf-theme-font-source-size, 15px);
+}
+
+.mf-history-diff-editor > .cm-editor,
+.mf-history-diff .cm-mergeView {
+  height: 100%;
+}
+
+.mf-history-diff .cm-mergeView {
+  overflow: auto;
+}
+
+.mf-history-diff .cm-mergeViewEditors {
+  min-height: 100%;
+}
+
+.mf-history-diff .cm-mergeViewEditor + .cm-mergeViewEditor {
+  border-left: 1px solid var(--mf-border);
+}
+
+.mf-history-diff .cm-scroller {
+  overflow: auto;
+  font-family: var(--mf-theme-font-code-family, monospace);
+  line-height: var(--mf-theme-font-source-line-height, 1.6);
+}
+
+.mf-history-diff .cm-content {
+  padding: 10px 0;
+}
+
+.mf-history-diff .cm-line {
+  padding: 0 12px;
+}
+
+.mf-history-diff .cm-gutters {
+  border: 0;
+  background: var(--mf-background);
+  color: var(--mf-muted-foreground);
+}
+
+.mf-history-diff .cm-lineNumbers .cm-gutterElement {
+  min-width: 3ch;
+  padding: 0 8px;
+  font-size: 0.85em;
+}
+
+.mf-history-diff .cm-changeGutter {
+  width: 12px;
+  padding: 0;
+}
+
+.mf-history-diff .cm-editor.cm-merge-a .cm-changedLine,
+.mf-history-diff .cm-editor .cm-deletedChunk {
+  background: color-mix(in srgb, var(--mf-destructive) 9%, transparent);
+}
+
+.mf-history-diff .cm-editor.cm-merge-b .cm-changedLine {
+  background: color-mix(in srgb, var(--mf-success) 9%, transparent);
+}
+
+.mf-history-diff .cm-editor.cm-merge-a .cm-changedText,
+.mf-history-diff .cm-editor .cm-deletedChunk .cm-deletedText {
+  background: color-mix(in srgb, var(--mf-destructive) 22%, transparent);
+  border-radius: 2px;
+}
+
+.mf-history-diff .cm-editor.cm-merge-b .cm-changedText {
+  background: color-mix(in srgb, var(--mf-success) 22%, transparent);
+  border-radius: 2px;
+}
+
+.mf-history-diff .cm-editor.cm-merge-a .cm-changedLineGutter,
+.mf-history-diff .cm-editor .cm-deletedLineGutter {
+  color: var(--mf-destructive);
+  background: color-mix(in srgb, var(--mf-destructive) 9%, transparent);
+}
+
+.mf-history-diff .cm-editor.cm-merge-b .cm-changedLineGutter {
+  color: var(--mf-success);
+  background: color-mix(in srgb, var(--mf-success) 9%, transparent);
+}
+
+.mf-history-diff .cm-merge-a .cm-changedLineGutter::before,
+.mf-history-diff .cm-deletedLineGutter::before {
+  content: '−';
+}
+
+.mf-history-diff .cm-merge-b .cm-changedLineGutter::before {
+  content: '+';
+}
+
+.mf-history-diff .cm-editor .cm-collapsedLines {
+  padding: 3px 12px;
+  border-block: 1px solid var(--mf-border);
+  background: var(--mf-muted);
+  color: var(--mf-muted-foreground);
+  font-family: var(--mf-font-sans);
+  font-size: 12px;
+}
+
+.mf-history-diff .cm-collapsedLines:hover {
+  color: var(--mf-foreground);
+}
+
+.mf-history-diff .cm-mergeSpacer {
+  background: repeating-linear-gradient(
+    135deg,
+    transparent,
+    transparent 3px,
+    color-mix(in srgb, var(--mf-muted-foreground) 5%, transparent) 3px,
+    color-mix(in srgb, var(--mf-muted-foreground) 5%, transparent) 4px
+  );
+}
+
+.mf-history-diff .cm-editor.cm-focused {
+  outline: none;
+}
+
+.mf-history-diff .cm-content:focus-visible {
+  outline: 1px solid var(--mf-ring);
+  outline-offset: -1px;
+}

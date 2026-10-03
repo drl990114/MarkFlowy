@@ -1,6 +1,4 @@
 import NiceModal from '@ebay/nice-modal-react'
-import { emit } from '@tauri-apps/api/event'
-import { invoke } from '@tauri-apps/api/core'
 import type React from 'react'
 import type {
   DialogAction,
@@ -17,6 +15,7 @@ import {
   MODAL_INPUT_ID,
 } from '@/components/Modal'
 import useAppSettingStore from '@/stores/useAppSettingStore'
+import { writeSettingPatch } from './app-setting'
 
 type DialogPreferences = Record<string, string>
 
@@ -63,39 +62,20 @@ const getDialogPreferences = () => {
 }
 
 const saveDialogPreference = async (key: string, actionId: string) => {
-  const { settingData, setSettingData } = useAppSettingStore.getState()
-  const nextSettingData = {
-    ...settingData,
-    dialog_preferences: {
-      ...getDialogPreferences(),
-      [key]: actionId,
-    },
-  }
-
-  setSettingData(nextSettingData)
-  await invoke('save_app_conf', { data: nextSettingData, label: 'markflowy' })
-  emit('app_conf_change')
+  await writeSettingPatch({ dialog_preferences: { [key]: actionId } })
 }
 
 export const clearDialogPreference = async (key: string) => {
-  const { settingData, setSettingData } = useAppSettingStore.getState()
-  const { [key]: _removed, ...nextPreferences } = getDialogPreferences()
-  const nextSettingData = {
-    ...settingData,
-    dialog_preferences: nextPreferences,
-  }
-
-  setSettingData(nextSettingData)
-  await invoke('save_app_conf', { data: nextSettingData, label: 'markflowy' })
-  emit('app_conf_change')
+  await writeSettingPatch({ dialog_preferences: { [key]: null } })
 }
 
 const confirm = async (options: ConfirmOptions) => {
-  const rememberedAction = options.remember?.enabled === false
-    ? undefined
-    : options.remember?.key
-      ? getDialogPreferences()[options.remember.key]
-      : undefined
+  const rememberedAction =
+    options.remember?.enabled === false
+      ? undefined
+      : options.remember?.key
+        ? getDialogPreferences()[options.remember.key]
+        : undefined
 
   if (rememberedAction) {
     return rememberedAction
@@ -117,9 +97,7 @@ const confirm = async (options: ConfirmOptions) => {
 
 const info = async (options: InfoOptions) => {
   const props: InfoModalProps = { ...options }
-  return enqueueModal(() =>
-    NiceModal.show<void, InfoModalProps>(MODAL_INFO_ID, props),
-  )
+  return enqueueModal(() => NiceModal.show<void, InfoModalProps>(MODAL_INFO_ID, props))
 }
 
 const inputConfirm = async (options: InputConfirmOptions) => {
@@ -130,9 +108,7 @@ const inputConfirm = async (options: InputConfirmOptions) => {
 }
 
 const imageInsert = async () =>
-  enqueueModal(() =>
-    NiceModal.show<ImageInsertSelection | null>(MODAL_IMAGE_INSERT_ID),
-  )
+  enqueueModal(() => NiceModal.show<ImageInsertSelection | null>(MODAL_IMAGE_INSERT_ID))
 
 export const dialog = {
   confirm,

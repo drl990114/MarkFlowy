@@ -45,20 +45,20 @@ TauriVersion: ${appInfo.tauriVersion}
       }}
     >
       <Dialog.Content
-        className='min-h-[22rem] max-w-[24rem] justify-center gap-0 px-8 py-7'
+        className='max-w-[22rem] justify-center gap-0 px-6 py-6'
         closeLabel={t('common.close')}
         size='sm'
       >
-        <Dialog.Header className='items-center gap-4 pr-0 text-center'>
-          <div className='rounded-[1.25rem] shadow-md ring-1 ring-border'>
-            <Logo className='size-[4.5rem]' aria-hidden='true' focusable='false' />
+        <Dialog.Header className='items-center gap-3 pr-0 text-center'>
+          <div className='rounded-xl'>
+            <Logo className='size-14' aria-hidden='true' focusable='false' />
           </div>
-          <Dialog.Title className='text-xl'>{appInfo.name}</Dialog.Title>
+          <Dialog.Title className='text-ui-title'>{appInfo.name}</Dialog.Title>
         </Dialog.Header>
 
-        <Dialog.Body className='mt-6 flex-none overflow-visible text-center'>
+        <Dialog.Body className='mt-4 mb-5 flex-none overflow-visible text-center'>
           <Dialog.Description asChild>
-            <div className='flex flex-col items-center gap-4 text-sm text-foreground-secondary'>
+            <div className='flex flex-col items-center gap-3 text-ui-control text-foreground-secondary'>
               <div className='flex flex-col items-center gap-0.5'>
                 <span className='font-medium text-foreground'>{t('about.description')}</span>
                 <span>
@@ -66,7 +66,7 @@ TauriVersion: ${appInfo.tauriVersion}
                 </span>
               </div>
               <span>{t('about.powered_by_tauri', { version: appInfo.tauriVersion })}</span>
-              <span className='text-xs'>© 2023–present drl990114</span>
+              <span className='text-ui-caption'>© 2023–present drl990114</span>
             </div>
           </Dialog.Description>
         </Dialog.Body>

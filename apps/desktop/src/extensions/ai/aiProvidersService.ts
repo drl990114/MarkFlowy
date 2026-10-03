@@ -21,10 +21,7 @@ export type AIModelDescriptor = {
   status: 'ready' | 'unavailable' | 'unknown'
 }
 
-export type OpenSettingTarget = {
-  category: 'ai'
-  providerId?: AIProviderId
-}
+export type { OpenSettingTarget } from '@/router/Setting/types'
 
 export type AIProviderSettingKeys = {
   apibase: string

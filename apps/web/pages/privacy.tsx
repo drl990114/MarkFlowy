@@ -60,9 +60,9 @@ const privacySections: PrivacySection[] = [
         type: 'list',
         items: [
           'Your documents and files remain on your local file system',
-          "Application settings and preferences are stored locally using Tauri's secure storage",
+          'Application settings and configured provider credentials are stored in local application data files; these files are not an encrypted credential vault',
           'Workspace information and bookmarks are stored locally on your device',
-          'AI chat history (if enabled) is stored locally and never sent to our servers',
+          'AI chat history is stored locally; using an AI provider sends the selected conversation context to that provider',
         ],
       },
     ],
@@ -77,10 +77,22 @@ const privacySections: PrivacySection[] = [
       {
         type: 'list',
         items: [
-          { text: '<strong>OpenAI Integration:</strong> If you choose to use OpenAI features, your API key and requests are sent directly to OpenAI\'s servers. We do not intercept or store your API keys or AI requests.', isHtml: true },
-          { text: '<strong>DeepSeek Integration:</strong> Similar to OpenAI, your DeepSeek API key and requests are sent directly to DeepSeek\'s servers.', isHtml: true },
-          { text: '<strong>Ollama Integration:</strong> For local Ollama deployments, all AI processing happens on your local machine.', isHtml: true },
-          { text: '<strong>Google Gemini Integration:</strong> Your Gemini API key and requests are sent directly to Google\'s servers.', isHtml: true },
+          {
+            text: "<strong>OpenAI Integration:</strong> If you choose to use OpenAI features, your API key and requests are sent to the configured OpenAI-compatible endpoint. Your key is stored locally by the application, not on MarkFlowy servers.",
+            isHtml: true,
+          },
+          {
+            text: "<strong>DeepSeek Integration:</strong> Similar to OpenAI, your DeepSeek API key and requests are sent directly to DeepSeek's servers.",
+            isHtml: true,
+          },
+          {
+            text: '<strong>Ollama Integration:</strong> For local Ollama deployments, all AI processing happens on your local machine.',
+            isHtml: true,
+          },
+          {
+            text: "<strong>Google Gemini Integration:</strong> Your Gemini API key and requests are sent directly to Google's servers.",
+            isHtml: true,
+          },
         ],
       },
       {
@@ -90,10 +102,36 @@ const privacySections: PrivacySection[] = [
       {
         type: 'list',
         items: [
-          { text: '<a href="https://openai.com/privacy" target="_blank" rel="noopener noreferrer">OpenAI Privacy Policy</a>', isHtml: true },
-          { text: '<a href="https://www.deepseek.com/privacy" target="_blank" rel="noopener noreferrer">DeepSeek Privacy Policy</a>', isHtml: true },
-          { text: '<a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Google Privacy Policy</a>', isHtml: true },
+          {
+            text: '<a href="https://openai.com/privacy" target="_blank" rel="noopener noreferrer">OpenAI Privacy Policy</a>',
+            isHtml: true,
+          },
+          {
+            text: '<a href="https://www.deepseek.com/privacy" target="_blank" rel="noopener noreferrer">DeepSeek Privacy Policy</a>',
+            isHtml: true,
+          },
+          {
+            text: '<a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Google Privacy Policy</a>',
+            isHtml: true,
+          },
         ],
+      },
+    ],
+  },
+  {
+    title: 'Optional Error Reports',
+    content: [
+      {
+        type: 'paragraph',
+        text: 'Desktop error reporting is off by default, including after upgrading from a version without this setting. You can enable Share error reports in Settings → General → Application and turn it off at any time. Builds without an error-reporting endpoint do not send reports.',
+      },
+      {
+        type: 'paragraph',
+        text: 'When enabled, reports go to Sentry and contain error types and locations in bundled application code. The application removes error messages, document content, local file paths, request details, credentials, user context and browsing breadcrumbs. Automatic session tracking, session replay and performance tracing are disabled. Sentry still receives the network connection, including its source IP address.',
+      },
+      {
+        type: 'paragraph',
+        text: 'Turning reporting off stops new reports and discards pending application errors. It cannot recall a report already sent. See <a href="https://sentry.io/privacy/" target="_blank" rel="noopener noreferrer">Sentry’s Privacy Policy</a> for its processing practices.',
       },
     ],
   },
@@ -107,7 +145,10 @@ const privacySections: PrivacySection[] = [
       {
         type: 'list',
         items: [
-          { text: 'Source code is available on <a href="https://github.com/drl990114/MarkFlowy" target="_blank" rel="noopener noreferrer">GitHub</a>', isHtml: true },
+          {
+            text: 'Source code is available on <a href="https://github.com/drl990114/MarkFlowy" target="_blank" rel="noopener noreferrer">GitHub</a>',
+            isHtml: true,
+          },
           'All data handling is transparent and auditable',
           'Community contributions are welcome and reviewed',
         ],
@@ -124,9 +165,9 @@ const privacySections: PrivacySection[] = [
       {
         type: 'list',
         items: [
-          'All data remains on your local device',
-          'No cloud synchronization of your documents',
-          'Application settings are stored securely using platform-specific secure storage',
+          'Local workspaces and recovery history are stored on your device',
+          'Remote workspaces, AI services and error reporting communicate with their respective providers when you use or enable them',
+          'Protect your device account and application data backups; local configuration files may contain credentials',
         ],
       },
     ],
@@ -143,7 +184,7 @@ const privacySections: PrivacySection[] = [
         items: [
           'You can access all your data directly on your file system',
           'You can delete application settings by clearing the application data',
-          'You can uninstall the application at any time, which removes all local data',
+          'Uninstalling the application may leave documents and application data behind; remove those separately if you want to delete them',
         ],
       },
     ],
@@ -171,7 +212,10 @@ const privacySections: PrivacySection[] = [
       {
         type: 'list',
         items: [
-          { text: 'By visiting our GitHub repository: <a href="https://github.com/drl990114/MarkFlowy" target="_blank" rel="noopener noreferrer">https://github.com/drl990114/MarkFlowy</a>', isHtml: true },
+          {
+            text: 'By visiting our GitHub repository: <a href="https://github.com/drl990114/MarkFlowy" target="_blank" rel="noopener noreferrer">https://github.com/drl990114/MarkFlowy</a>',
+            isHtml: true,
+          },
           'By creating an issue on our GitHub issues page',
         ],
       },
@@ -191,12 +235,7 @@ function renderContentItem(item: PrivacySection['content'][number], index: numbe
           if (typeof listItem === 'string') {
             return <ListItem key={idx}>{listItem}</ListItem>
           }
-          return (
-            <ListItem
-              key={idx}
-              dangerouslySetInnerHTML={{ __html: listItem.text }}
-            />
-          )
+          return <ListItem key={idx} dangerouslySetInnerHTML={{ __html: listItem.text }} />
         })}
       </List>
     )
@@ -225,10 +264,10 @@ export default function PrivacyPage() {
           />
         </HeaderWrapper>
 
-        <MainContent>
+        <MainContent id='main-content'>
           <ContentContainer>
             <PageTitle>Privacy Policy</PageTitle>
-            <LastUpdated>Last Updated: March 28, 2026</LastUpdated>
+            <LastUpdated>Last Updated: September 27, 2026</LastUpdated>
 
             {privacySections.map((section, sectionIndex) => (
               <Section key={sectionIndex}>
@@ -236,16 +275,14 @@ export default function PrivacyPage() {
                   {sectionIndex + 1}. {section.title}
                 </SectionTitle>
                 {section.content.map((contentItem, contentIndex) =>
-                  renderContentItem(contentItem, contentIndex)
+                  renderContentItem(contentItem, contentIndex),
                 )}
               </Section>
             ))}
           </ContentContainer>
         </MainContent>
 
-        <FooterWrapper>
-          <HomeFooter />
-        </FooterWrapper>
+        <HomeFooter />
       </PageLayout>
     </>
   )
@@ -280,11 +317,11 @@ const HeaderWrapper = styled.header`
 
 const MainContent = styled.main`
   flex: 1;
-  padding-top: ${rem(80)};
+  padding-top: ${rem(112)};
 `
 
 const ContentContainer = styled.div`
-  max-width: ${rem(900)};
+  max-width: ${rem(800)};
   margin: 0 auto;
   padding: ${rem(40)} ${rem(20)};
 
@@ -351,8 +388,4 @@ const ListItem = styled.li`
       opacity: 0.8;
     }
   }
-`
-
-const FooterWrapper = styled.footer`
-  border-top: 1px solid ${(props) => props.theme.borderColor};
 `

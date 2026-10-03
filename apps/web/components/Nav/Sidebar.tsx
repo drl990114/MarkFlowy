@@ -16,7 +16,7 @@ const Sidebar = styled.nav<SidebarProps>`
   font-family: var(--body);
 
   left: 0;
-  top: ${rem(navbarHeight)};
+  top: ${navbarHeight}px;
   bottom: 0;
   right: auto;
   width: ${sidebarWidth / 16}rem;
@@ -49,6 +49,7 @@ const Sidebar = styled.nav<SidebarProps>`
   ${mobile(css<SidebarProps>`
     width: min(24rem, calc(100vw - 0.375rem));
     box-shadow: var(--shadow);
+    visibility: ${({ $isFolded }) => ($isFolded ? 'hidden' : 'visible')};
 
     ${(p) =>
       p.$isFolded

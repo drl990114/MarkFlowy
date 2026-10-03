@@ -1,13 +1,12 @@
 import { invoke } from '@tauri-apps/api/core'
+import { assertValidUnicode, type TextWriteOptions } from './textFileFormat'
 
 export interface ConditionalWriteResult {
   revision: string
   status: 'conflict' | 'success'
 }
 
-export type GuardedConditionalWriteResult =
-  | ConditionalWriteResult
-  | { status: 'blocked' }
+export type GuardedConditionalWriteResult = ConditionalWriteResult | { status: 'blocked' }
 
 type InvokeCommand = <T>(command: string, args: Record<string, unknown>) => Promise<T>
 
@@ -26,11 +25,18 @@ export async function conditionalWriteExpected(
   content: string,
   expectedRevision: string,
   invokeCommand: InvokeCommand = invoke,
+  historyKind?: 'autosave' | 'save' | 'overwrite',
+  textOptions?: TextWriteOptions,
+  historyWorkspace?: string,
 ): Promise<ConditionalWriteResult> {
+  assertValidUnicode(content)
   return invokeCommand<ConditionalWriteResult>('conditional_write_file', {
     content,
     expectedRevision,
     filePath,
+    ...(historyKind ? { historyKind } : {}),
+    ...(textOptions ? { textOptions } : {}),
+    ...(historyWorkspace !== undefined ? { historyWorkspace } : {}),
   })
 }
 
@@ -40,6 +46,9 @@ export async function conditionalWriteExpectedIfAllowed(
   expectedRevision: string,
   canWrite: () => boolean,
   invokeCommand: InvokeCommand = invoke,
+  historyKind?: 'autosave' | 'save' | 'overwrite',
+  textOptions?: TextWriteOptions,
+  historyWorkspace?: string,
 ): Promise<GuardedConditionalWriteResult> {
   if (!canWrite()) return { status: 'blocked' }
   return conditionalWriteExpected(
@@ -47,6 +56,9 @@ export async function conditionalWriteExpectedIfAllowed(
     content,
     expectedRevision,
     invokeCommand,
+    historyKind,
+    textOptions,
+    historyWorkspace,
   )
 }
 

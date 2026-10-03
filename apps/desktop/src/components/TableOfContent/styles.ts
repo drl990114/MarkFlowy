@@ -398,8 +398,18 @@ export const TocViewContainer = styled.div<ContainerProps>`
       }
 
       .toc-list a {
-        min-height: 28px;
+        min-height: 26px;
         border-radius: 0;
+      }
+
+      .toc-list a[aria-current='location'] {
+        color: var(--mf-text-primary);
+        background: var(--mf-control-selected);
+      }
+
+      .toc-list a:focus-visible {
+        outline: none;
+        box-shadow: inset 0 0 0 2px var(--mf-control-focus);
       }
 
       .toc-list a:active {
@@ -421,6 +431,12 @@ export const TocViewContainer = styled.div<ContainerProps>`
 
       .toc-link__title {
         font-weight: 400;
+      }
+
+      .toc-link__chapter,
+      .toc-link__title {
+        opacity: 1;
+        transition: none;
       }
     `}
 

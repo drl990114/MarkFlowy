@@ -1,57 +1,75 @@
 import { Analytics } from '@vercel/analytics/react'
-import { RmePreload } from 'components/RmeProvider'
 import ThemeProvider from 'components/ThemeProvider'
 import { appWithTranslation } from 'next-i18next'
-import App from 'next/app'
+import type { AppProps } from 'next/app'
 import Head from 'next/head'
-import React from 'react'
 import 'remixicon/fonts/remixicon.css'
 import { createGlobalStyle } from 'styled-components'
 import './normalize.css'
 import { GlobalStyles as InterfaceGlobalStyles } from '@markflowy/interface'
+import { isWebsitePage } from '../utils/website'
+import { applicationThemeCSS, websiteThemeCSS } from '../utils/websiteTheme'
+import '../components/theme.css'
+import '../components/site/site.css'
+import '../components/site/home-motion.css'
+import '../components/site/project-stats.css'
+import '../components/workspace/app.css'
 
+function MyApp({ Component, pageProps, router }: AppProps) {
+  const website = isWebsitePage(router.pathname)
 
-class MyApp extends App {
-  render() {
-    const { Component, pageProps } = this.props
+  return (
+    <>
+      <Head>
+        <link rel='icon' type='image/png' href='/favicon.png' />
+        <link rel='manifest' href='/manifest.json' />
+        <meta httpEquiv='X-UA-Compatible' content='IE=edge,chrome=1' />
+        <meta name='viewport' content='width=device-width, initial-scale=1.0, user-scalable=yes' />
 
-    return (
-      <>
-        <Head>
-          <link rel='icon' type='image/png' href='/favicon.png' />
-          <link rel='manifest' href='/manifest.json' />
-          <meta httpEquiv='X-UA-Compatible' content='IE=edge,chrome=1' />
-          <meta
-            name='viewport'
-            content='width=device-width, initial-scale=1.0, user-scalable=yes'
+        {website && (
+          <link
+            rel='preload'
+            href='/fonts/InterVariable.woff2'
+            as='font'
+            type='font/woff2'
+            crossOrigin='anonymous'
           />
+        )}
+        {/^\/(auth|workspace|settings)(\/|$)/.test(router.pathname) && (
+          <meta name='robots' content='noindex, nofollow' key='robots' />
+        )}
+      </Head>
 
-          <meta name='theme-color' content='#141416' />
-          {/^\/(auth|workspace|settings)(\/|$)/.test(this.props.router.pathname) && (
-            <meta name='robots' content='noindex, nofollow' key='robots' />
-          )}
-        </Head>
-
-        <ThemeProvider data-theme='dark'>
-          <ResetStyles />
-          <InkWashCSSVariables />
-          <InterfaceGlobalStyles />
-          <Component {...pageProps} />
-          <Analytics />
-          <RmePreload />
-        </ThemeProvider>
-      </>
-    )
-  }
+      <ThemeProvider website={website}>
+        <ResetStyles />
+        <WebCSSVariables $website={website} />
+        <InterfaceGlobalStyles />
+        {website ? (
+          <div className='mf-site'>
+            <Component {...pageProps} />
+          </div>
+        ) : (
+          <div className='mf-webapp'>
+            <Component {...pageProps} />
+          </div>
+        )}
+        <Analytics />
+      </ThemeProvider>
+    </>
+  )
 }
 
 export default appWithTranslation(MyApp)
 
-const InkWashCSSVariables = createGlobalStyle`
+const WebCSSVariables = createGlobalStyle<{ $website: boolean }>`
+  ${({ $website }) => ($website ? websiteThemeCSS : applicationThemeCSS)}
   :root {
     --paper: ${(props) => props.theme.webPaper};
     --paper-warm: ${(props) => props.theme.webPaperWarm};
     --paper-dark: ${(props) => props.theme.webPaperDark};
+    --surface-raised: var(--mf-web-webSurfaceRaised);
+    --surface-hover: var(--mf-web-webSurfaceHover);
+    --surface-active: var(--mf-web-webSurfaceActive);
     --ink: ${(props) => props.theme.webInk};
     --ink-soft: ${(props) => props.theme.webInkSoft};
     --ink-mute: ${(props) => props.theme.webInkMute};
@@ -63,11 +81,13 @@ const InkWashCSSVariables = createGlobalStyle`
     --line-soft: ${(props) => props.theme.webLineSoft};
     --line-faint: ${(props) => props.theme.webLineFaint};
     --shadow: ${(props) => props.theme.webShadow};
+    --shadow-color: var(--mf-web-webShadowColor);
     --serif: ${(props) => props.theme.webFontSerif};
     --sans: ${(props) => props.theme.webFontSans};
     --body: ${(props) => props.theme.webFontBody};
     --mono: ${(props) => props.theme.webFontMono};
-    --paper-deep: #0e0e10;
+    --on-accent: var(--mf-web-webOnAccent);
+    --paper-deep: ${(props) => props.theme.webPaperWarm};
     --on-paper-light: #1a1a1a;
     --on-paper-light-soft: #383838;
     --on-paper-light-muted: #5a5854;
@@ -112,7 +132,7 @@ const ResetStyles = createGlobalStyle`
   }
 
   ::selection {
-    background: rgba(212, 86, 74, 0.25);
-    color: #e8e6e3;
+    background: ${(props) => props.theme.accentColorFocused};
+    color: ${(props) => props.theme.primaryFontColor};
   }
 `

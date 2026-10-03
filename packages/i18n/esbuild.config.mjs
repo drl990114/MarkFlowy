@@ -3,10 +3,11 @@ import * as esbuild from 'esbuild'
 const isWatch = process.argv.includes('--watch')
 
 const buildOptions = {
-  entryPoints: ['src/index.ts'],
+  entryPoints: ['src/index.ts', 'src/desktop.ts'],
   bundle: true,
   format: 'esm',
-  outfile: 'dist/index.js',
+  outdir: 'dist',
+  splitting: true,
   external: ['i18next', 'react-i18next'],
   platform: 'neutral',
   target: 'es2020',

@@ -16,17 +16,20 @@ export const FindInput: FC<{
   })
 
   return (
-    <InputGroup.Root>
+    <InputGroup.Root className='h-7'>
       <InputGroup.Input
         aria-label={t('find_replace.find')}
-        className='h-6'
+        className='h-full'
+        inputSize='sm'
         placeholder={t('find_replace.find')}
         value={query}
         onCompositionStart={() => setComposing?.(true)}
         onCompositionEnd={() => setComposing?.(false)}
         onChange={(event) => setQuery(event.target.value)}
       />
-      <InputGroup.Addon align='inline-end'>{counterLabel}</InputGroup.Addon>
+      <InputGroup.Addon align='inline-end' className='min-w-12 justify-center border-l-0 tabular-nums'>
+        {counterLabel}
+      </InputGroup.Addon>
     </InputGroup.Root>
   )
 }

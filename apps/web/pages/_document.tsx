@@ -1,7 +1,8 @@
-import ThemeProvider from 'components/ThemeProvider'
 import Document, { Head, Html, Main, NextScript } from 'next/document'
 import type { DocumentContext } from 'next/document'
+import Script from 'next/script'
 import { ServerStyleSheet } from 'styled-components'
+import { homeScrollResetScript } from '../utils/homeScroll'
 
 export default class MyDocument extends Document {
   static async getInitialProps(ctx: DocumentContext) {
@@ -26,8 +27,15 @@ export default class MyDocument extends Document {
 
   render() {
     return (
-      <Html data-theme='dark' lang={this.props.__NEXT_DATA__.locale || 'en'}>
+      <Html lang={this.props.__NEXT_DATA__.locale || 'en'} suppressHydrationWarning>
         <Head>
+          {this.props.__NEXT_DATA__.page === '/' && (
+            <Script
+              id='mf-home-scroll-reset'
+              strategy='beforeInteractive'
+              dangerouslySetInnerHTML={{ __html: homeScrollResetScript }}
+            />
+          )}
           <link rel='stylesheet' type='text/css' href='/dmvendor.css' />
           <link rel='preconnect' href='https://fonts.googleapis.com' />
           <link rel='preconnect' href='https://fonts.gstatic.com' crossOrigin='anonymous' />
@@ -38,11 +46,9 @@ export default class MyDocument extends Document {
         </Head>
 
         <body>
-          <ThemeProvider>
-            <div className='root'>
-              <Main />
-            </div>
-          </ThemeProvider>
+          <div className='root'>
+            <Main />
+          </div>
           <NextScript />
         </body>
       </Html>

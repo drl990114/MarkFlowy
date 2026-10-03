@@ -27,7 +27,7 @@ export function Source({ className, href, onClick, onKeyDown, ...props }: Source
       asChild
       className={cn(
         focusFeedback,
-        'cursor-pointer outline-none',
+        'cursor-pointer outline-none hover:bg-control-ghost-hover hover:text-content-primary',
         className,
       )}
     >

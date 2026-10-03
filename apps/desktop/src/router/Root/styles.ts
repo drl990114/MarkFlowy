@@ -37,7 +37,8 @@ export const StyleSeparator = styled(Separator)`
 
   &:focus-visible {
     outline: none;
-    background-color: ${(props) => props.theme.labelFontColor};
+    background-color: var(--mf-control-focus);
+    box-shadow: 0 0 0 1px var(--mf-control-focus);
   }
 
   &[data-separator='hover'] {
@@ -46,5 +47,9 @@ export const StyleSeparator = styled(Separator)`
 
   &[data-separator='active'] {
     background-color: ${(props) => props.theme.accentColor};
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
   }
 `

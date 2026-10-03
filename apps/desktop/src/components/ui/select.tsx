@@ -30,7 +30,7 @@ export function SelectTrigger({
     <SelectPrimitive.Trigger
       className={cn(
         focusFeedback,
-        'flex min-w-0 items-center justify-between gap-2 rounded-md border border-control-border bg-surface-app px-2.5 text-ui-control text-content-primary shadow-sm outline-none transition-[color,box-shadow,border-color] duration-[var(--mf-motion-duration-fast)] ease-[var(--mf-motion-ease-out)] disabled:pointer-events-none disabled:text-content-disabled disabled:opacity-60 motion-reduce:transition-none data-[placeholder]:text-content-muted [&>span]:truncate [&_svg]:pointer-events-none [&_svg]:size-3.5 [&_svg]:shrink-0',
+        'flex min-w-0 items-center justify-between gap-2 rounded-sm border border-control-border bg-surface-app px-2.5 text-ui-control text-content-primary outline-none transition-[color,background-color,box-shadow,border-color] duration-[var(--mf-motion-duration-fast)] ease-[var(--mf-motion-ease-out)] hover:bg-control-hover active:bg-control-pressed disabled:pointer-events-none disabled:text-content-disabled disabled:opacity-60 motion-reduce:transition-none data-[placeholder]:text-content-muted [&>span]:truncate [&_svg]:pointer-events-none [&_svg]:size-3.5 [&_svg]:shrink-0',
         size === 'sm' ? 'h-7' : 'h-8',
         className,
       )}
@@ -62,9 +62,9 @@ export function SelectContent({
     <SelectPrimitive.Portal container={container}>
       <SelectPrimitive.Content
         className={cn(
-          'relative z-[var(--mf-layer-select)] max-h-[var(--radix-select-content-available-height)] min-w-[8rem] overflow-hidden rounded-md border border-control-border bg-surface-overlay text-content-primary shadow-lg outline-none',
+          'relative z-[var(--mf-layer-select)] max-h-[var(--radix-select-content-available-height)] min-w-[8rem] overflow-hidden rounded-lg border border-control-border bg-surface-overlay text-content-primary shadow-lg outline-none',
           position === 'popper' &&
-            'min-w-[var(--radix-select-trigger-width)] data-[side=bottom]:translate-y-1 data-[side=top]:-translate-y-1',
+            'min-w-[var(--radix-select-trigger-width)]',
           className,
         )}
         data-mf-portal=''
@@ -104,7 +104,7 @@ export function SelectItem({
   return (
     <SelectPrimitive.Item
       className={cn(
-        'relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pr-8 pl-2 text-ui-control outline-none data-[disabled]:pointer-events-none data-[disabled]:text-content-disabled data-[highlighted]:bg-control-hover data-[highlighted]:text-content-primary',
+        'relative flex min-h-7 w-full cursor-default select-none items-center rounded-sm py-1 pr-8 pl-2 text-ui-control outline-none data-[disabled]:pointer-events-none data-[disabled]:text-content-disabled data-[highlighted]:bg-control-hover data-[highlighted]:text-content-primary',
         className,
       )}
       data-slot='select-item'

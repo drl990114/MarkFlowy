@@ -56,6 +56,11 @@ export const AppMenuButton = memo(({ location = 'titlebar' }: AppMenuButtonProps
     showContextMenu({
       items: [
         {
+          label: t('command_palette.title'),
+          value: 'command-palette',
+          commandId: EVENT.app_commandPalette,
+        },
+        {
           label: t('about.label'),
           value: 'about',
           handler: () => {

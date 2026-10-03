@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const mocks = vi.hoisted(() => ({
   convertFileSrc: vi.fn((path: string) => `asset://localhost/${path}`),
@@ -10,6 +10,7 @@ const mocks = vi.hoisted(() => ({
   invoke: vi.fn(),
   join: vi.fn(),
   loggerWarn: vi.fn(),
+  revokeObjectURL: vi.fn(),
 }))
 
 vi.mock('@/stores', () => ({
@@ -43,27 +44,44 @@ vi.mock('../logger', () => ({
   },
 }))
 
-import { getImageUrlInTauri } from '../image'
+import { convertImageToBase64, getImageUrlInTauri as resolveImageUrl } from '../image'
+import { createRemoteImageResources, type RemoteImageResources } from '../remoteImageResources'
 
 describe('getImageUrlInTauri', () => {
   const originalCreateObjectURL = Object.getOwnPropertyDescriptor(URL, 'createObjectURL')
+  const originalRevokeObjectURL = Object.getOwnPropertyDescriptor(URL, 'revokeObjectURL')
+  let resources: RemoteImageResources
+  const getImageUrlInTauri = (source: string, folder?: string) =>
+    resolveImageUrl(source, folder, resources)
 
   beforeAll(() => {
     Object.defineProperty(URL, 'createObjectURL', {
       configurable: true,
       value: mocks.createObjectURL,
     })
+    Object.defineProperty(URL, 'revokeObjectURL', {
+      configurable: true,
+      value: mocks.revokeObjectURL,
+    })
   })
 
   beforeEach(() => {
     vi.clearAllMocks()
+    resources = createRemoteImageResources()
   })
+
+  afterEach(() => resources.dispose())
 
   afterAll(() => {
     if (originalCreateObjectURL) {
       Object.defineProperty(URL, 'createObjectURL', originalCreateObjectURL)
     } else {
       delete (URL as unknown as { createObjectURL?: typeof URL.createObjectURL }).createObjectURL
+    }
+    if (originalRevokeObjectURL) {
+      Object.defineProperty(URL, 'revokeObjectURL', originalRevokeObjectURL)
+    } else {
+      delete (URL as unknown as { revokeObjectURL?: typeof URL.revokeObjectURL }).revokeObjectURL
     }
   })
 
@@ -81,6 +99,7 @@ describe('getImageUrlInTauri', () => {
       maxRedirections: 5,
       method: 'GET',
       mode: 'cors',
+      signal: expect.any(AbortSignal),
     })
     expect(mocks.createObjectURL).toHaveBeenCalledWith(blob)
   })
@@ -126,6 +145,7 @@ describe('getImageUrlInTauri', () => {
       maxRedirections: 5,
       method: 'GET',
       mode: 'cors',
+      signal: expect.any(AbortSignal),
     })
     expect(mocks.createObjectURL).toHaveBeenCalledWith(blob)
 
@@ -163,6 +183,7 @@ describe('getImageUrlInTauri', () => {
       maxRedirections: 5,
       method: 'GET',
       mode: 'cors',
+      signal: expect.any(AbortSignal),
     })
   })
 
@@ -172,5 +193,23 @@ describe('getImageUrlInTauri', () => {
 
     await expect(getImageUrlInTauri(source)).resolves.toBe(source)
     expect(mocks.loggerWarn).toHaveBeenCalledOnce()
+  })
+
+  it('does not create an unowned Blob URL for a one-off caller', async () => {
+    mocks.fetch.mockResolvedValue(new Response(new Blob(['image'], { type: 'image/png' })))
+
+    await expect(resolveImageUrl('https://example.com/one-off.png')).resolves.toBe(
+      'data:image/png;base64,aW1hZ2U=',
+    )
+    expect(mocks.createObjectURL).not.toHaveBeenCalled()
+  })
+
+  it('converts protocol-relative images without creating persistent object URLs', async () => {
+    mocks.fetch.mockResolvedValue(new Response(new Blob(['image'], { type: 'image/png' })))
+
+    await expect(convertImageToBase64('//example.com/convert.png')).resolves.toBe(
+      'data:image/png;base64,aW1hZ2U=',
+    )
+    expect(mocks.createObjectURL).not.toHaveBeenCalled()
   })
 })

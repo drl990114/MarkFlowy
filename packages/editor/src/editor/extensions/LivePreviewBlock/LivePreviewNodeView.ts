@@ -51,9 +51,11 @@ export class LivePreviewNodeView
   private waitingForWindowFocus = false
   private renderVersion = 0
   private destroying = false
+  private readonly codemirrorOptions?: LivePreviewNodeViewOptions['codemirrorOptions']
   private readonly customCopyFunction?: LivePreviewNodeViewOptions['customCopyFunction']
 
   constructor(options: LivePreviewNodeViewOptions) {
+    this.codemirrorOptions = options.codemirrorOptions
     this.node = options.node
     this.view = options.view
     this.getPos = options.getPos
@@ -227,6 +229,7 @@ export class LivePreviewNodeView
       languageName: this.renderer.languageName,
       extensions: this.renderer.getCodeMirrorExtensions(),
       options: {
+        codemirrorOptions: this.codemirrorOptions,
         useProsemirrorHistoryKey: true,
         codemirrorEditorViewConfig: {
           parent: this.editorElt,

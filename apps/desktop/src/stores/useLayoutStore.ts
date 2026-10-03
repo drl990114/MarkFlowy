@@ -20,7 +20,8 @@ export const DOCK_PREFERENCES_STORAGE_KEY = 'mf:desktop:dock-preferences:v1'
 export type LeftDockStartup = 'restore' | LeftDockPanelId
 export type RightDockStartup = 'restore' | RightDockPanelId
 
-type DockPreferences = Pick<LayoutStore, 'leftBar' | 'rightBar' | 'leftStartup' | 'rightStartup'>
+type DockProfile = Pick<LayoutStore, 'leftBar' | 'rightBar'>
+type DockPreferences = Pick<LayoutStore, 'leftBar' | 'rightBar' | 'leftStartup' | 'rightStartup' | 'documentDocks'>
 
 function isLeftDockPanelId(value: unknown): value is LeftDockPanelId {
   return value === 'explorer' || value === 'search' || value === 'bookmarks'
@@ -43,7 +44,14 @@ function normalizePreferences(value: unknown): DockPreferences {
   const saved = isRecord(value) ? value : {}
   const left = isRecord(saved.leftBar) ? saved.leftBar : {}
   const right = isRecord(saved.rightBar) ? saved.rightBar : {}
+  const documents = isRecord(saved.documentDocks) ? saved.documentDocks : {}
+  const documentLeft = isRecord(documents.leftBar) ? documents.leftBar : {}
+  const documentRight = isRecord(documents.rightBar) ? documents.rightBar : {}
   return {
+    documentDocks: {
+      leftBar: { visible: documentLeft.visible === true, activePanelId: 'bookmarks', size: clampDockSize('left', documentLeft.size) },
+      rightBar: { visible: documentRight.visible === true, activePanelId: isRightDockPanelId(documentRight.activePanelId) ? documentRight.activePanelId : 'toc', size: clampDockSize('right', documentRight.size) },
+    },
     leftBar: {
       visible: typeof left.visible === 'boolean' ? left.visible : true,
       activePanelId: isLeftDockPanelId(left.activePanelId) ? left.activePanelId : 'explorer',
@@ -83,9 +91,21 @@ const useLayoutStore = create<LayoutStore>()(
       return {
         ...normalizePreferences(undefined),
         zenModeActive: false,
+        hasWorkspace: true,
+        workspaceDocks: undefined,
+        setWorkspaceContext: (hasWorkspace) => set((state) => {
+          if (state.hasWorkspace === hasWorkspace) return
+          const previous = { leftBar: { ...state.leftBar }, rightBar: { ...state.rightBar } }
+          const next = hasWorkspace ? state.workspaceDocks : state.documentDocks
+          if (hasWorkspace) state.documentDocks = previous
+          else state.workspaceDocks = previous
+          if (next) { state.leftBar = { ...next.leftBar }; state.rightBar = { ...next.rightBar } }
+          state.hasWorkspace = hasWorkspace
+        }),
 
         openExplorer: () => {
           set((state) => {
+            if (!state.hasWorkspace) return
             state.leftBar.activePanelId = 'explorer'
             state.leftBar.visible = true
           })
@@ -105,6 +125,7 @@ const useLayoutStore = create<LayoutStore>()(
 
         setDockPanel: (side: DockSide, panelId: DockPanelId) => {
           set((state) => {
+            if (!state.hasWorkspace && (panelId === 'explorer' || panelId === 'search')) return
             if (side === 'left') {
               state.leftBar.activePanelId = panelId as LeftDockPanelId
               return
@@ -141,6 +162,7 @@ const useLayoutStore = create<LayoutStore>()(
 
         toggleDockPanel: (side: DockSide, panelId: DockPanelId) => {
           set((state) => {
+            if (!state.hasWorkspace && (panelId === 'explorer' || panelId === 'search')) return
             const dock = side === 'left' ? state.leftBar : state.rightBar
             const isActive = dock.activePanelId === panelId
 
@@ -178,9 +200,10 @@ const useLayoutStore = create<LayoutStore>()(
       name: DOCK_PREFERENCES_STORAGE_KEY,
       version: 2,
       storage: dockStorage,
-      partialize: ({ leftBar, rightBar, leftStartup, rightStartup }) => ({
-        leftBar,
-        rightBar,
+      partialize: ({ leftBar, rightBar, leftStartup, rightStartup, hasWorkspace, workspaceDocks, documentDocks }) => ({
+        leftBar: !hasWorkspace && workspaceDocks ? workspaceDocks.leftBar : leftBar,
+        rightBar: !hasWorkspace && workspaceDocks ? workspaceDocks.rightBar : rightBar,
+        documentDocks: hasWorkspace ? documentDocks : { leftBar, rightBar },
         leftStartup,
         rightStartup,
       }),
@@ -213,6 +236,10 @@ type LayoutItem<TPanelId extends DockPanelId> = {
   size: number
 }
 export type LayoutStore = {
+  hasWorkspace: boolean
+  documentDocks: DockProfile
+  workspaceDocks?: DockProfile
+  setWorkspaceContext: (hasWorkspace: boolean) => void
   leftStartup: LeftDockStartup
   rightStartup: RightDockStartup
   setStartupPanel: (side: DockSide, panel: LeftDockStartup | RightDockStartup) => void

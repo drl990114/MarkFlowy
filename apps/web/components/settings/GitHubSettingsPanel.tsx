@@ -376,7 +376,7 @@ const SaveButton = styled.button`
   min-height: ${rem(32)};
   padding: 0 ${rem(14)};
   background: ${(props) => props.theme.accentColor};
-  color: #ffffff;
+  color: var(--on-accent);
   border: 1px solid ${(props) => props.theme.accentColor};
   border-radius: ${(props) => props.theme.smallBorderRadius};
   font-size: ${(props) => props.theme.fontSm};
@@ -662,7 +662,7 @@ const HelpNumber = styled.span`
   height: ${rem(24)};
   background: ${(props) => props.theme.accentColor};
   border-radius: 50%;
-  color: #ffffff;
+  color: var(--on-accent);
   font-size: ${(props) => props.theme.fontXs};
   font-weight: 700;
 `

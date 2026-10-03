@@ -1,0 +1,20 @@
+.mf-webapp {
+  min-height: 100dvh;
+  color: var(--ink);
+  background: var(--paper-warm);
+  font-family: var(--sans);
+  letter-spacing: -0.01em;
+}
+.mf-webapp :is(button, a, input, select, textarea):focus-visible {
+  outline: 2px solid var(--seal);
+  outline-offset: 3px;
+}
+.mf-webapp :is(input, select, textarea):focus-visible {
+  outline-offset: 1px;
+}
+.mf-webapp button {
+  -webkit-tap-highlight-color: transparent;
+}
+.mf-webapp :is(button, a, input, select) {
+  touch-action: manipulation;
+}

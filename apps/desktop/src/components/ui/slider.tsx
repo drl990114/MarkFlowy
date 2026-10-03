@@ -1,7 +1,7 @@
 import { Slider as SliderPrimitive } from 'radix-ui'
 import type { ComponentProps } from 'react'
 import { cn } from '@/lib/cn'
-import { focusFeedback } from './focus-styles'
+import { compactControlFocus } from './focus-styles'
 
 type SliderPrimitiveProps = ComponentProps<typeof SliderPrimitive.Root>
 
@@ -30,7 +30,7 @@ export function Slider({
   return (
     <SliderPrimitive.Root
       className={cn(
-        'relative flex w-full touch-none items-center select-none data-[disabled]:opacity-50 data-[orientation=vertical]:h-full data-[orientation=vertical]:min-h-24 data-[orientation=vertical]:w-auto data-[orientation=vertical]:flex-col',
+        'relative flex min-h-7 w-full touch-none items-center select-none data-[disabled]:opacity-50 data-[orientation=vertical]:h-full data-[orientation=vertical]:min-h-24 data-[orientation=vertical]:min-w-7 data-[orientation=vertical]:w-auto data-[orientation=vertical]:flex-col',
         className,
       )}
       data-slot='slider'
@@ -43,7 +43,7 @@ export function Slider({
       {...props}
     >
       <SliderPrimitive.Track
-        className='relative h-1.5 w-full grow overflow-hidden rounded-full bg-muted data-[orientation=vertical]:h-full data-[orientation=vertical]:w-1.5'
+        className='relative h-1 w-full grow overflow-hidden rounded-full bg-muted data-[orientation=vertical]:h-full data-[orientation=vertical]:w-1'
         data-slot='slider-track'
       >
         <SliderPrimitive.Range
@@ -55,8 +55,8 @@ export function Slider({
         aria-label={ariaLabel}
         aria-valuetext={ariaValueText}
         className={cn(
-          focusFeedback,
-          'block size-4 shrink-0 rounded-full border border-primary bg-background shadow-sm outline-none transition-[color,box-shadow] disabled:pointer-events-none disabled:opacity-50',
+          compactControlFocus,
+          'block size-4 shrink-0 rounded-full border border-control-border bg-surface-elevated shadow-sm dark:bg-content-primary disabled:pointer-events-none disabled:opacity-50',
         )}
         data-slot='slider-thumb'
       />
@@ -94,7 +94,7 @@ export function RangeSlider({
   return (
     <SliderPrimitive.Root
       className={cn(
-        'relative flex w-full touch-none items-center select-none data-[disabled]:opacity-50 data-[orientation=vertical]:h-full data-[orientation=vertical]:min-h-24 data-[orientation=vertical]:w-auto data-[orientation=vertical]:flex-col',
+        'relative flex min-h-7 w-full touch-none items-center select-none data-[disabled]:opacity-50 data-[orientation=vertical]:h-full data-[orientation=vertical]:min-h-24 data-[orientation=vertical]:min-w-7 data-[orientation=vertical]:w-auto data-[orientation=vertical]:flex-col',
         className,
       )}
       data-slot='range-slider'
@@ -107,7 +107,7 @@ export function RangeSlider({
       {...props}
     >
       <SliderPrimitive.Track
-        className='relative h-1.5 w-full grow overflow-hidden rounded-full bg-muted data-[orientation=vertical]:h-full data-[orientation=vertical]:w-1.5'
+        className='relative h-1 w-full grow overflow-hidden rounded-full bg-muted data-[orientation=vertical]:h-full data-[orientation=vertical]:w-1'
         data-slot='range-slider-track'
       >
         <SliderPrimitive.Range
@@ -119,8 +119,8 @@ export function RangeSlider({
         aria-label={ariaLabel ? `${ariaLabel} minimum` : undefined}
         aria-valuetext={ariaValueText?.[0]}
         className={cn(
-          focusFeedback,
-          'block size-4 shrink-0 rounded-full border border-primary bg-background shadow-sm outline-none transition-[color,box-shadow] disabled:pointer-events-none disabled:opacity-50',
+          compactControlFocus,
+          'block size-4 shrink-0 rounded-full border border-control-border bg-surface-elevated shadow-sm dark:bg-content-primary disabled:pointer-events-none disabled:opacity-50',
         )}
         data-slot='range-slider-thumb'
       />
@@ -128,8 +128,8 @@ export function RangeSlider({
         aria-label={ariaLabel ? `${ariaLabel} maximum` : undefined}
         aria-valuetext={ariaValueText?.[1]}
         className={cn(
-          focusFeedback,
-          'block size-4 shrink-0 rounded-full border border-primary bg-background shadow-sm outline-none transition-[color,box-shadow] disabled:pointer-events-none disabled:opacity-50',
+          compactControlFocus,
+          'block size-4 shrink-0 rounded-full border border-control-border bg-surface-elevated shadow-sm dark:bg-content-primary disabled:pointer-events-none disabled:opacity-50',
         )}
         data-slot='range-slider-thumb'
       />

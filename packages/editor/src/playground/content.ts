@@ -406,7 +406,7 @@ export const contentMap: { [key: string]: string } = {
   long: longContent,
   table: tableContent,
   html: htmlContent,
-  'test-md-default': testMdContent.raw,
-  'test-md-readme': readmeContent.raw,
-  'test-md-math': mathContent.raw,
+  'test-md-default': testMdContent,
+  'test-md-readme': readmeContent,
+  'test-md-math': mathContent,
 }

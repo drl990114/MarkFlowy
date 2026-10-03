@@ -77,17 +77,17 @@ export function KeyboardTable() {
         >
           <thead className='border-b border-border text-ui-caption text-muted-foreground'>
             <tr>
-              <th className='px-2 py-2 text-left font-normal' scope='col'>
+              <th className='px-2 py-1.5 text-left font-normal' scope='col'>
                 {t('settings.keyboard.command')}
               </th>
               <th
-                className='w-[45%] px-2 py-2 text-left font-normal @min-[36rem]/shortcuts:w-[38%]'
+                className='w-[45%] px-2 py-1.5 text-left font-normal @min-[36rem]/shortcuts:w-[38%]'
                 scope='col'
               >
                 {t('settings.keyboard.keybinding')}
               </th>
               <th
-                className='hidden w-24 px-2 py-2 text-left font-normal @min-[36rem]/shortcuts:table-cell'
+                className='hidden w-24 px-2 py-1.5 text-left font-normal @min-[36rem]/shortcuts:table-cell'
                 scope='col'
               >
                 {t('settings.keyboard.scope')}
@@ -116,7 +116,7 @@ export function KeyboardTable() {
                     recordKeysModalRef.current?.open(row)
                   }}
                 >
-                  <td className='px-2 py-1.5'>
+                  <td className='px-2 py-1'>
                     <div className='flex items-center gap-2'>
                       <span className='min-w-0 break-words' title={`${command} · ${scope}`}>
                         {command}
@@ -137,7 +137,7 @@ export function KeyboardTable() {
                       <Button
                         variant='ghost'
                         size='sm'
-                        className='h-auto min-h-7 max-w-full justify-start gap-2 rounded-sm px-1.5 py-1 font-normal active:scale-100'
+                        className='h-auto min-h-7 max-w-full justify-start gap-2 rounded-sm px-1.5 py-1 font-normal'
                         aria-label={`${t('settings.keyboard.edit')} ${command}: ${formatKeyMap(row.keys) || t('settings.keyboard.unbound')}`}
                         onClick={(event) => {
                           editTriggerRef.current = event.currentTarget
@@ -165,7 +165,7 @@ export function KeyboardTable() {
                       </span>
                     )}
                   </td>
-                  <td className='hidden px-2 py-1.5 text-ui-caption text-muted-foreground @min-[36rem]/shortcuts:table-cell'>
+                  <td className='hidden px-2 py-1 text-ui-caption text-muted-foreground @min-[36rem]/shortcuts:table-cell'>
                     {scope}
                   </td>
                 </tr>

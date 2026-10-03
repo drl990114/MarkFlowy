@@ -1,36 +1,19 @@
-import { initializeErrorReporter } from '@/services/error-reporting'
-import { BOOT_SHELL_READY_EVENT } from './boot'
+import { initializeErrorReporter, setErrorReportingEnabled } from '@/services/error-reporting'
+import { afterStartupInteractive } from './interactive'
 
-type WindowWithIdleCallback = Window & {
-  requestIdleCallback?: (
-    callback: IdleRequestCallback,
-    options?: IdleRequestOptions,
-  ) => number
-}
+let cancelScheduledInitialization: (() => void) | undefined
 
-let sentryInitializationScheduled = false
-
-export const initSentryAfterShell = (
+export const syncErrorReportingPreference = (
+  enabled: boolean,
   dsn: string | undefined = import.meta.env.VITE_SENTRY_DSN,
   targetWindow: Window | undefined = typeof window === 'undefined' ? undefined : window,
 ) => {
-  if (!dsn || !targetWindow || sentryInitializationScheduled) return
-
-  const scheduleInitialization = () => {
-    if (sentryInitializationScheduled) return
-    sentryInitializationScheduled = true
-
-    const initialize = () => {
-      void initializeErrorReporter({ dsn, integrations: [] }).catch(() => undefined)
-    }
-    const idleWindow = targetWindow as WindowWithIdleCallback
-
-    if (typeof idleWindow.requestIdleCallback === 'function') {
-      idleWindow.requestIdleCallback(initialize, { timeout: 2_000 })
-    } else {
-      targetWindow.setTimeout(initialize, 2_000)
-    }
-  }
-
-  targetWindow.addEventListener(BOOT_SHELL_READY_EVENT, scheduleInitialization, { once: true })
+  cancelScheduledInitialization?.()
+  cancelScheduledInitialization = undefined
+  setErrorReportingEnabled(enabled && Boolean(dsn) && Boolean(targetWindow))
+  if (!enabled || !dsn || !targetWindow) return
+  cancelScheduledInitialization = afterStartupInteractive(() => {
+    cancelScheduledInitialization = undefined
+    void initializeErrorReporter({ dsn, integrations: [] }).catch(() => undefined)
+  }, { targetWindow })
 }

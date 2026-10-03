@@ -9,7 +9,10 @@ import { SettingRouteController } from './SettingRouteController'
 const command = vi.hoisted(() => ({
   handler: undefined as ((target?: OpenSettingTarget) => void) | undefined,
 }))
-const focus = vi.hoisted(() => ({ scheduleActiveEditorFocus: vi.fn() }))
+const focus = vi.hoisted(() => ({
+  captureActiveEditorFocus: vi.fn(),
+  scheduleActiveEditorFocus: vi.fn(),
+}))
 
 vi.mock('@/commands', () => ({
   commandRegistry: {
@@ -62,6 +65,7 @@ describe('SettingRouteController navigation command', () => {
   beforeEach(() => {
     command.handler = undefined
     focus.scheduleActiveEditorFocus.mockReset()
+    focus.captureActiveEditorFocus.mockReset()
     container = document.createElement('div')
     root = createRoot(container)
     act(() => {
@@ -94,15 +98,19 @@ describe('SettingRouteController navigation command', () => {
     expect(container.querySelector('[data-request-id]')?.getAttribute('data-request-id')).not.toBe(
       firstRequestId,
     )
+    expect(focus.captureActiveEditorFocus).toHaveBeenCalledOnce()
   })
 
   it('restores editor focus after leaving settings', () => {
+    const snapshot = { restore: vi.fn(), release: vi.fn() }
+    focus.captureActiveEditorFocus.mockReturnValue(snapshot)
     act(() => command.handler?.())
     expect(container.querySelector('[data-pathname="/settings"]')).not.toBeNull()
 
     act(() => container.querySelector<HTMLButtonElement>('button')?.click())
     expect(container.querySelector('[data-pathname="/"]')).not.toBeNull()
     expect(focus.scheduleActiveEditorFocus).toHaveBeenCalledOnce()
+    expect(focus.scheduleActiveEditorFocus).toHaveBeenCalledWith(snapshot)
   })
 
   it('keeps repeated settings requests in the same history entry', () => {

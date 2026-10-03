@@ -94,6 +94,12 @@ export const Container = styled.div`
     min-width: 0;
     width: 100%;
     padding-top: ${(props) => props.theme.spaceSm};
+
+    /* These editors own their top inset, including in split panes. */
+    &:has(> [data-mf-editor-mode='sourceCode']),
+    &:has(> [data-mf-editor-mode] [data-mf-capricorn-runtime]) {
+      padding-top: 0;
+    }
   }
 `
 
@@ -107,6 +113,7 @@ export const TabItem = styled.div<TabItemProps>`
   height: 100%;
   padding-right: ${(props) => props.theme.spaceXs};
   font-size: var(--mf-ui-font-control);
+  font-weight: 500;
   color: ${(props) =>
     props.$active
       ? 'var(--mf-text-primary, var(--mf-foreground))'
@@ -180,9 +187,7 @@ export const TabItem = styled.div<TabItemProps>`
 
   .tab-select:focus-visible {
     outline: none;
-    text-decoration-line: underline;
-    text-underline-offset: 2px;
-    opacity: 0.8;
+    box-shadow: inset 0 0 0 2px var(--mf-control-focus);
   }
 
   &:first-child {
@@ -196,9 +201,9 @@ export const TabItem = styled.div<TabItemProps>`
   .mf-editor-tab-trailing {
     position: relative;
     display: inline-flex;
-    flex: 0 0 22px;
-    width: 22px;
-    height: 22px;
+    flex: 0 0 24px;
+    width: 24px;
+    height: 24px;
     align-items: center;
     justify-content: center;
   }
@@ -222,7 +227,7 @@ export const TabItem = styled.div<TabItemProps>`
   }
 
   .mf-editor-tab-close:focus-visible {
-    opacity: 0.8;
+    opacity: 1;
   }
 `
 

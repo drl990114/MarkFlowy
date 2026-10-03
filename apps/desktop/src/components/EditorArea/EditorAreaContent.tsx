@@ -1,4 +1,5 @@
 import { EditorOpeningClockContext } from './EditorLoadingProgress'
+import { markStartupInteractive } from '@/startup/interactive'
 import { useEditorStore } from '@/stores'
 import useLayoutStore from '@/stores/useLayoutStore'
 import { memo, useContext, useLayoutEffect } from 'react'
@@ -11,8 +12,12 @@ function EditorAreaContent() {
     if (openingClock) openingClock.startedAt = null
   }, [openingClock])
   const editorLayout = useEditorStore((state) => state.editorLayout)
-  const workspacePath = useEditorStore((state) => state.folderData?.[0]?.path)
+  const sessionRevision = useEditorStore((state) => state.editorSessionRevision)
   const activeGroupId = useEditorStore((state) => state.activeGroupId)
+  const activeId = useEditorStore((state) => state.activeId)
+  useLayoutEffect(() => {
+    if (!activeId) markStartupInteractive('empty')
+  }, [activeId])
   const zenModeActive = useLayoutStore((state) => state.zenModeActive)
 
   return (
@@ -20,7 +25,7 @@ function EditorAreaContent() {
       <OverlayScrollbarStyles />
       <EditorPanel id='editor-panel'>
         <EditorLayoutView
-          key={workspacePath ?? ''}
+          key={sessionRevision}
           activeGroupId={activeGroupId}
           node={editorLayout}
           zenModeActive={zenModeActive}

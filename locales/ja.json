@@ -11,6 +11,32 @@
     "markdown": "Markdown 構文",
     "open_failed": "リンクを開くか、見出しを見つけることができませんでした。"
   },
+  "command_palette": {
+    "title": "コマンドパレット",
+    "placeholder": "コマンドを検索…",
+    "empty": "一致するコマンドがありません",
+    "recent": "最近使用したコマンド",
+    "hints": "↑↓ 選択 · Enter 実行 · Esc 閉じる",
+    "failed": "「{{command}}」を実行できませんでした。",
+    "categories": {
+      "file": "ファイル",
+      "editor": "編集",
+      "view": "表示",
+      "app": "アプリ"
+    },
+    "reasons": {
+      "no_document": "先にドキュメントを開いてください",
+      "unavailable": "現在の状況では使用できません",
+      "preview": "プレビューモードでは編集できません",
+      "read_only": "このドキュメントは読み取り専用です",
+      "stale_target": "元のエディタが変更されました",
+      "selection_unavailable": "元の選択範囲は無効になりました",
+      "no_undo": "元に戻す操作がありません",
+      "no_redo": "やり直す操作がありません",
+      "markdown_only": "Markdown ドキュメントで使用できます",
+      "zen_mode": "先に Zen モードを終了してください"
+    }
+  },
   "quick_open": {
     "title": "クイックオープン",
     "placeholder": "ファイル名またはパスで検索…",
@@ -212,6 +238,14 @@
     "untitled": "無題",
     "not_found": "ファイルが見つかりません",
     "openDir": "フォルダーを開く",
+    "openFolderInNewWindow": "新しいウィンドウでフォルダーを開く",
+    "closeFolder": "フォルダーを閉じる",
+    "closeDocument": "ドキュメントを閉じる",
+    "renameErrors": {
+      "empty": "ファイル名を入力してください。",
+      "invalid": "パス区切り文字や予約文字を含まない有効なファイル名を使用してください。",
+      "exists": "同じ名前のファイルが既に存在します。"
+    },
     "openFile": "ファイルを開く",
     "recentDir": "最近開いたフォルダー",
     "emptyOpened": "開いているファイルはありません",
@@ -327,6 +361,21 @@
     "emptyDesc": "別のキーワードを試すか、大文字小文字の区別をオフにしてください",
     "search_failed": "検索に失敗しました"
   },
+  "text_encoding": {
+    "label": "文字コードと改行",
+    "encoding": "文字コード",
+    "description": "開き直すと、選択した文字コードで現在のファイルをディスクから読み込みます。保存すると現在のテキストを変換します。元の改行は保持されます。",
+    "mixed_endings": "改行形式が混在",
+    "no_endings": "改行なし",
+    "unconfirmed": "未確認",
+    "confirm_hint": "文字コードは内容から推測されたか、以前の下書きから復元されました。文字が正しく表示されていることを確認してから、文字コードを選んで保存してください。",
+    "roundtrip_hint": "このファイルには非標準のバイト対応が含まれています。編集後は別の文字コードへ明示的に変換してください。",
+    "preview_hint": "先頭 4,000 文字のプレビューです。適用前に、現在の内容を復元用の下書きとして保持します。",
+    "preview_reopen": "開き直す前にプレビュー",
+    "apply_reopen": "開き直しを適用",
+    "save_with_encoding": "この文字コードで保存",
+    "save_failed": "まだ保存されていません。内容と選択した文字コードは保持されています。保存時のメッセージを確認し、再試行してください。"
+  },
   "settings": {
     "select_placeholder": "項目を選択",
     "font_placeholder": "フォントを選択",
@@ -340,6 +389,12 @@
     "search_placeholder": "設定を検索...",
     "search_empty": "一致する設定がありません",
     "search_results": "{{count}}件の結果",
+    "navigation": {
+      "preferences": "環境設定",
+      "writing": "執筆とファイル",
+      "ai": "AI",
+      "help": "ヘルプ"
+    },
     "general": {
       "startup": {
         "label": "起動",
@@ -354,6 +409,10 @@
         "automatic_updates": {
           "label": "自動更新",
           "desc": "アプリケーション起動時に自動的に更新を確認し、インストールします。"
+        },
+        "error_reporting": {
+          "label": "エラーレポートを送信",
+          "desc": "初期設定ではオフです。エラーの種類とアプリ内のコード位置を Sentry に送信します。文書の内容、ファイルパス、認証情報、閲覧履歴は含みません。いつでもオフにできます。"
         }
       },
       "autosave": {
@@ -390,12 +449,20 @@
           "desc": "エディターをフルサイズに設定します。"
         },
         "font_size": {
-          "label": "フォントサイズ",
-          "desc": "エディターのルートフォントサイズを設定します。"
+          "label": "本文の文字サイズ",
+          "desc": "執筆・閲覧時の文字サイズ。"
         },
         "line_height": {
-          "label": "行の高さ",
-          "desc": "エディターのルート行の高さを設定します。"
+          "label": "本文の行の高さ",
+          "desc": "執筆・閲覧時の行の高さ。"
+        },
+        "source_font_size": {
+          "label": "ソースの文字サイズ",
+          "desc": "ソースモードの文字サイズ。本文とは別に設定します。"
+        },
+        "source_line_height": {
+          "label": "ソースの行の高さ",
+          "desc": "ソースモードの行の高さ。"
         },
         "font_family": {
           "label": "フォントファミリー",
@@ -411,6 +478,14 @@
         "md_default_mode": {
           "label": "Markdownデフォルトモード",
           "desc": "Markdownファイルを新規作成するときのデフォルト編集モードを設定します。"
+        },
+        "text_direction": {
+          "follow_global": "全体設定に従う",
+          "label": "本文の方向",
+          "desc": "WYSIWYG とプレビューの本文方向を設定します。自動では段落ごとに方向を判定します。",
+          "auto": "自動",
+          "ltr": "左から右（LTR）",
+          "rtl": "右から左（RTL）"
         },
         "typewriter_scroll": {
           "label": "タイプライターのスクロール",
@@ -452,6 +527,66 @@
           "label": "スペルチェック",
           "desc": "ソースコードモードでスペルチェックを有効にするかどうか。"
         }
+      },
+      "code_editing": {
+        "label": "コード編集",
+        "embedded_label": "埋め込みコード",
+        "default": "既定値",
+        "custom": "カスタム",
+        "on": "オン",
+        "off": "オフ",
+        "indent_style": {
+          "label": "インデント方法",
+          "desc": "ソースモードと埋め込みコードで共通です。フロントマターのソース編集欄では常にスペースを使用します。",
+          "spaces": "スペース",
+          "tabs": "タブ"
+        },
+        "indent_size": {
+          "label": "インデント幅",
+          "desc": "スペースのインデントは既定で 2 桁です。タブはソースモードでは 4 桁、埋め込みコードでは 2 桁で表示されます。幅を指定すると両方に適用されます。",
+          "default": "2 桁（タブ幅はモードによる）"
+        },
+        "auto_close": {
+          "label": "括弧と引用符を自動で閉じる",
+          "desc": "ソースモードと埋め込みコードで、対応する括弧と引用符を入力時に補完します。"
+        },
+        "whitespace": {
+          "label": "空白文字の表示",
+          "desc": "文書を変更せずにスペースとタブを表示します。",
+          "trailing": "行末の空白のみ",
+          "all": "すべてのスペースとタブ"
+        },
+        "line_wrap": {
+          "label": "長い行を折り返す",
+          "desc": "改行文字を挿入せず、編集領域の端で長い行を折り返します。極端に長い行では横スクロールが維持される場合があります。",
+          "mixed_default": "領域ごと（既定値）",
+          "mixed_desc": "既定では通常のコードブロックは折り返さず、プレビューブロックのソースとフロントマターは折り返します。オンまたはオフを選ぶと統一できます。極端に長い行は横スクロールのままになる場合があります。"
+        },
+        "line_numbers": {
+          "label": "行番号",
+          "desc": "間引き表示では最初の行と 10 行ごとに番号を表示します。",
+          "all": "すべての行",
+          "sparse": "間引き表示"
+        },
+        "active_line": {
+          "label": "現在行を強調表示",
+          "desc": "カーソルのある行を強調し、編集位置を見つけやすくします。"
+        },
+        "font_size": {
+          "label": "コードの文字サイズ",
+          "desc": "既定では本文の文字サイズの 87.5% で、本文に合わせて変わります。カスタムを選ぶとサイズを固定できます。",
+          "default": "本文に合わせる（{{value}} px）",
+          "relative_default": "本文に合わせる（87.5%）",
+          "unit": "{{value}} px"
+        },
+        "line_height": {
+          "label": "コードの行の高さ",
+          "desc": "行の高さは文字サイズに対する倍率です。既定は 1.6 倍で、カスタムを選ぶと行間を調整できます。",
+          "default": "1.6 倍（既定値）",
+          "unit": "{{value}} 倍"
+        },
+        "default_value": "{{value}}（既定値）",
+        "typography_disabled": "「個人設定のフォント、文字サイズ、行間を使用」がオフのため、カスタムの文字サイズと行の高さは現在適用されません。"
       }
     },
     "keyboard": {
@@ -583,14 +718,14 @@
           "desc": "サポートされる変数：${documentPath}（現在のファイルの親フォルダパス）、${fileName}（拡張子なしの現在のファイル名）。例：${documentPath}/photo/${fileName}"
         }
       },
-    "upload_img": {
-      "label": "ローカル画像を挿入",
-      "when_upload_image": {
-        "label": "ローカル画像の挿入動作",
-        "desc": "コンピューターから選択、エディターへドロップ、またはスクリーンショットソフトから貼り付けたローカル画像の既定の動作を選択します。",
-        "options": {
-          "insert_path": "元のファイルパスを直接挿入",
-          "save_to_local_absolute": "グローバル絶対パスに保存",
+      "upload_img": {
+        "label": "ローカル画像を挿入",
+        "when_upload_image": {
+          "label": "ローカル画像の挿入動作",
+          "desc": "コンピューターから選択、エディターへドロップ、またはスクリーンショットソフトから貼り付けたローカル画像の既定の動作を選択します。",
+          "options": {
+            "insert_path": "元のファイルパスを直接挿入",
+            "save_to_local_absolute": "グローバル絶対パスに保存",
             "save_to_local_relative": "作業エリアへの相対パスを保存します",
             "paste_as_base64": "Base64エンコードに貼り付けます",
             "save_to_file_relative": "相対的な現在のファイルへのパスを保存します"
@@ -636,6 +771,9 @@
     "display": {
       "label": "外観",
       "theme": {
+        "unavailable": "{{name}}（利用不可）",
+        "unavailable_help": "選択したテーマが見つかりません：{{names}}。一時的に内蔵テーマを使用し、元の選択は保持します。JSON テーマを再インポートするか、別のテーマを選択してください。旧 JS テーマと自動読み込みの CSS は手動で移行する必要があります。",
+        "migration_guide": "テーマ移行ガイド",
         "label": "テーマ",
         "mode": {
           "label": "テーマモード",
@@ -693,6 +831,86 @@
       }
     },
     "themeStore": {
+      "controls": {
+        "installedOnly": "インストール済みのみ",
+        "title": "テーマ",
+        "create": "テーマを作成",
+        "import": "JSON をインポート",
+        "export": "JSON をエクスポート",
+        "edit": "編集",
+        "copy": "コピーして編集",
+        "remove": "削除",
+        "apply": "適用",
+        "save": "保存して適用",
+        "close": "閉じる",
+        "undo": "元に戻す",
+        "redo": "やり直す",
+        "search": "トークンを検索…",
+        "modified": "変更済みのみ",
+        "reset": "リセット",
+        "link": "トークンにリンク",
+        "value": "値",
+        "inspect": "プレビューを調べる",
+        "snippets": "個人用 CSS スニペット",
+        "addCss": "CSS をインポート",
+        "createCss": "新規スニペット",
+        "untitledCss": "無題のスニペット",
+        "disableAll": "すべて無効にする",
+        "includeCss": "個人用 CSS を含める",
+        "up": "上へ",
+        "down": "下へ",
+        "name": "名前",
+        "author": "作者",
+        "variant": "バリエーション",
+        "addLight": "ライトのバリエーションを追加",
+        "addDark": "ダークのバリエーションを追加",
+        "advanced": "詳細設定 JSON / CSS",
+        "options": "テーマのオプション",
+        "previewOptions": "プレビューのオプション",
+        "closeAdvanced": "詳細エディターを閉じる",
+        "noTokens": "一致するトークンはありません",
+        "css": "テーマの CSS",
+        "json": "テーマの JSON",
+        "applyJson": "JSON から更新",
+        "revertJson": "JSON の変更を破棄",
+        "pendingJson": "ビジュアル編集やエクスポートを続けるには、JSON の変更を適用するか破棄してください。",
+        "catalog": "コミュニティテーマ",
+        "install": "インストール",
+        "emptyCatalog": "JSON 形式のコミュニティテーマが公開されると、ここに表示されます。",
+        "replace": "同じ ID のテーマが既に存在します。置き換えますか？",
+        "replaceAction": "置き換える",
+        "cancel": "キャンセル",
+        "saveCopy": "コピーを保存",
+        "draft": "復元できるローカル下書きがあります。",
+        "resume": "下書きを再開",
+        "discard": "下書きを破棄",
+        "preview": "テーマのプレビュー",
+        "loadError": "エディターのプレビューを読み込めませんでした。",
+        "retry": "再試行",
+        "linked": "リンク済み",
+        "inherited": "既定値",
+        "customCss": "カスタム CSS が、調べているトークンを上書きする場合があります。",
+        "preferences": "ここにはテーマのみが表示されます。実際の適用時には個人設定も反映されます。",
+        "personalTypography": "個人設定のフォント、文字サイズ、行間を使用",
+        "saved": "保存済み",
+        "error": "エラー",
+        "enabled": "有効",
+        "editCss": "CSS を編集",
+        "saveCss": "スニペットを保存",
+        "noSnippets": "個人用 CSS スニペットはありません。",
+        "deleteConfirm": "このテーマを削除しますか？",
+        "removeVariant": "バリエーションを削除",
+        "schema": "JSON スキーマをエクスポート",
+        "light": "ライト",
+        "dark": "ダーク",
+        "catalogMismatch": "テーマの ID がコミュニティカタログと一致しません。",
+        "previewNotes": "ノート",
+        "previewIdeas": "アイデア",
+        "previewWelcome": "ようこそ",
+        "previewSearch": "プレビューを検索",
+        "previewSearchPlaceholder": "検索…",
+        "previewNewNote": "新規ノート"
+      },
       "label": "テーマショップ",
       "desc": "コミュニティが作成したテーマを閲覧してダウンロードし、エディタの外観を豊かにします。",
       "submit_theme": "トピックの送信",
@@ -731,7 +949,9 @@
   "workspace": {
     "info": "ワークスペース情報",
     "none": "ワークスペースは開いていません",
-    "searchPlaceholder": "ワークスペースを検索…",
+    "searchPlaceholder": "最近のワークスペースとファイルを検索…",
+    "openFileOrFolder": "ファイルまたはフォルダーを開く",
+    "recentFiles": "最近開いたファイル",
     "sync_mode": {
       "git_local": {
         "name": "Git Local",
@@ -750,6 +970,7 @@
   },
   "command": {
     "id_descriptions": {
+      "app_commandPalette": "コマンドパレット",
       "app_quickOpen": "クイックオープン",
       "app_openFolder": "フォルダを開く",
       "app_openSetting": "設定ウィンドウを開く",
@@ -966,7 +1187,22 @@
     },
     "livePreview": {
       "largeDeferred": "大きなプレビューは一時停止中です。ソース全体は引き続き利用できます。",
-      "renderLarge": "大きなプレビューを描画（時間がかかる場合があります）"
+      "renderLarge": "大きなプレビューを描画（時間がかかる場合があります）",
+      "actions": "{{kind}} ブロックの操作",
+      "copied": "ソースをコピーしました",
+      "copy": "ソースをコピー",
+      "copying": "ソースをコピー中…",
+      "editSource": "ソースを編集",
+      "editSourceForKind": "{{kind}} のソースを編集",
+      "hideSource": "ソースを隠す",
+      "kind": {
+        "html": "HTML",
+        "math": "数式",
+        "mermaid": "Mermaid"
+      },
+      "preview": "{{kind}} のプレビュー",
+      "retryCopy": "ソースのコピーを再試行",
+      "sourceEditor": "{{kind}} のソースエディター"
     },
     "sourceFallback": {
       "longLine": "非常に長い行は横スクロール表示にして、ソース編集の応答性を保ちます。",
@@ -994,7 +1230,41 @@
       "loading": "Loading image…",
       "edit": "Edit address"
     },
-    "preview": { "retry": "Retry" }
+    "preview": {
+      "retry": "Retry"
+    },
+    "snippets": {
+      "title": "スニペットを挿入",
+      "search": "スニペットを検索…",
+      "manage": "スニペットを管理…",
+      "blank": "空のブロックを作成",
+      "stale": "挿入位置が変わりました。選び直してください。"
+    },
+    "table": {
+      "actions": "表の操作",
+      "alignment": "列の配置",
+      "copy": "コピー",
+      "cut": "切り取り",
+      "paste": "貼り付け",
+      "selectAll": "すべて選択",
+      "action": {
+        "column": "列の操作",
+        "columnAt": "{{index}} 列目の操作",
+        "row": "行の操作",
+        "rowAt": "{{index}} 行目の操作"
+      },
+      "addColumnAfter": "右に列を挿入",
+      "addColumnBefore": "左に列を挿入",
+      "addRowAfter": "下に行を挿入",
+      "addRowBefore": "上に行を挿入",
+      "alignCenter": "列を中央揃え",
+      "alignLeft": "列を左揃え",
+      "alignNone": "列の配置をクリア",
+      "alignRight": "列を右揃え",
+      "deleteColumn": "現在の列を削除",
+      "deleteRow": "現在の行を削除",
+      "deleteTable": "表を削除"
+    }
   },
   "inline_insert": {
     "insert_link": "Insert link",
@@ -1023,5 +1293,160 @@
     "open_error": "Unable to open this link.",
     "copy_error": "Unable to copy this address.",
     "single_block": "Select text within one paragraph or table cell."
+  },
+  "history": {
+    "title": "ローカル履歴",
+    "description": "変更を確認し、過去のバージョンを未保存の下書きとして復元します。",
+    "enabled": "ローカル履歴を有効にする",
+    "enabled_description": "MarkFlowy で開いた文書のバージョンを保存します。無効にしても下書きの保護は継続します。",
+    "retention": "通常の履歴は30日間、文書ごとに100バージョンまで、容量の目安は1 GBです。未保存の下書きと進行中の編集は保護されます。",
+    "count": "{{count}} バージョン",
+    "clear_title": "保存した履歴の管理",
+    "clear_description": "ファイルと未保存の下書きを残して履歴を削除します。有効な間は、その後の変更で新しい履歴が作成されます。",
+    "clear_workspace": "現在のワークスペースの履歴を削除",
+    "clear_loose": "独立した文書の履歴を削除",
+    "clear_all": "すべてのワークスペースの履歴を削除",
+    "clear_confirm": "{{count}} 件の履歴を完全に削除しますか？共有されていないデータを最大 {{size}} MB 解放できます。ファイルと未保存の下書きは保持されます。",
+    "all_workspaces": "すべてのワークスペースと独立した文書",
+    "loose": "独立した文書",
+    "delete": "履歴を削除",
+    "empty": "履歴はまだありません。",
+    "previous": "前へ",
+    "next": "次へ",
+    "before": "変更前",
+    "after": "最新の結果",
+    "refresh": "新しい変更あり · 比較を更新",
+    "loading": "比較を読み込み中…",
+    "compare_failed": "差分比較を読み込めませんでした。元のテキストを表示しています。このバージョンは引き続き復元できます。",
+    "select": "バージョンを選択して変更を確認してください。",
+    "restore_before": "変更前の内容を復元",
+    "restore": "このバージョンを復元",
+    "merging": "変更をまとめています",
+    "kind_save": "保存済み",
+    "kind_external": "外部での変更",
+    "kind_ai": "AI による編集",
+    "kind_checkpoint": "下書きのチェックポイント",
+    "kind_restore": "復元前",
+    "kind_discard": "破棄前",
+    "kind_overwrite": "上書き前",
+    "kind_autosave": "自動保存",
+    "kind_opened": "初期バージョン",
+    "protected": "下書きを保護済み",
+    "pending": "下書きを保護中…",
+    "failed": "下書きの保護に失敗",
+    "paused": "復元した下書き · 手動で保存してください",
+    "large": "大きな文書：元のテキストを表示しています。",
+    "compare_current": "現在の下書きと比較",
+    "compare_version": "別のバージョンと比較",
+    "compare_batch": "変更前と変更後を比較",
+    "snapshot": "選択したバージョン",
+    "current": "現在の下書き",
+    "versions": "バージョン",
+    "split": "左右に比較",
+    "unified": "統合表示",
+    "full_context": "すべての行を表示",
+    "previous_change": "前の変更",
+    "next_change": "次の変更",
+    "no_changes": "変更はありません",
+    "change_position": "変更 {{current}} / {{total}}",
+    "added_lines": "追加行数: {{count}}",
+    "removed_lines": "削除行数: {{count}}",
+    "unchanged_lines": "変更のない $ 行 · クリックして展開",
+    "retry": "保護を再試行",
+    "coarse": "計算時間内に差分を簡略化して表示しています。全文は保持されます。",
+    "compute_large": "大きな文書の差分を計算",
+    "deleted": "{{count}} 件の履歴を削除しました。",
+    "kind_write-pending": "中断されたファイル書き込み",
+    "kind_recovered-save": "回復した保存",
+    "budget_limited": "履歴が容量の目安に達しました。自動チェックポイントと新しい AI 編集は一時停止しますが、下書きと安全用コピーは保護されます。不要な履歴を削除すると再開できます。"
+  },
+  "document_preview": {
+    "html_title": "HTML プレビュー",
+    "pdf_title": "PDF リーダー",
+    "refresh": "更新",
+    "run_scripts": "スクリプトを実行",
+    "loading": "読み込み中…",
+    "load_failed": "ファイルを読み込めません。",
+    "retry": "再試行",
+    "resources_blocked": "読み込めなかったリソース",
+    "resource_folder_hint": "この文書とリソースを含むフォルダーをワークスペースとして開き、プレビューを更新してください。",
+    "resource_errors": {
+      "not_found": "ファイルが見つかりません。",
+      "permission_denied": "このファイルを読み取る権限がありません。",
+      "outside_root": "文書のフォルダーまたはワークスペースの範囲外です。",
+      "too_large": "リソースまたは展開後のプレビューがサイズ制限を超えています。",
+      "unsupported": "対応していないリソース形式または URL です。",
+      "invalid_css": "このスタイルシートを解析できません。",
+      "resource_limit": "循環参照があるか、リソース数または階層の制限に達しました。",
+      "read_failed": "このリソースを読み取れません。"
+    },
+    "previous_page": "前のページ",
+    "next_page": "次のページ",
+    "page": "ページ番号",
+    "zoom_out": "縮小",
+    "zoom_in": "拡大",
+    "fit_width": "幅に合わせる",
+    "search": "PDF を検索",
+    "previous_match": "前の結果",
+    "next_match": "次の結果",
+    "password_required": "PDF のパスワードを入力",
+    "password_incorrect": "パスワードが違います。再試行してください。",
+    "unlock": "ロック解除",
+    "cancel": "キャンセル"
+  },
+  "snippets": {
+    "library": "スニペット",
+    "description": "数式、図、コードをローカルの各ワークスペースで再利用します。",
+    "kind": "種類",
+    "kinds": {
+      "math": "Math（数式）",
+      "mermaid": "Mermaid（図）",
+      "code": "Code（コード）"
+    },
+    "search": "スニペットを検索…",
+    "new": "新規スニペット",
+    "copy": "複製",
+    "copyCustom": "カスタムとして複製",
+    "copySuffix": "（コピー）",
+    "show": "表示",
+    "hide": "非表示",
+    "hidden": "非表示",
+    "delete": "削除",
+    "deleteTitle": "「{{title}}」を削除しますか？",
+    "builtin": "組み込み",
+    "custom": "カスタム",
+    "unsaved": "未保存の変更",
+    "name": "名前",
+    "language": "コードの言語",
+    "languagePlaceholder": "例: typescript。空欄はプレーンテキスト",
+    "source": "ソース",
+    "sourceHelp": "外側の ``` や $$ を付けずにソースだけを入力してください。文字、空白、改行はそのまま挿入され、変数は展開されません。",
+    "save": "保存",
+    "discard": "変更を破棄",
+    "unsavedTitle": "スニペットの変更を保存しますか？",
+    "unsavedDescription": "移動する前に変更を保存または破棄してください。",
+    "loadError": "スニペットを読み込めません",
+    "saveError": "保存できません",
+    "retry": "再試行",
+    "noResults": "一致するスニペットはありません",
+    "conflict": "別のウィンドウでライブラリが更新されました。下書きは保持されています。新規スニペットとして複製するか、下書きを破棄して元の項目を選び直してください。",
+    "preview": "プレビュー",
+    "previewAgain": "プレビューを更新",
+    "previewStale": "ソースが変更されました。プレビューを更新してください。",
+    "previewError": "プレビューを表示できません。ソースは保存できます。",
+    "builtins": {
+      "math-fraction": "分数",
+      "math-root": "平方根",
+      "math-sum": "総和",
+      "math-matrix": "行列",
+      "mermaid-flow": "フローチャート",
+      "mermaid-sequence": "シーケンス図",
+      "mermaid-class": "クラス図",
+      "mermaid-state": "状態遷移図",
+      "code-json": "JSON オブジェクト",
+      "code-typescript": "TypeScript 関数",
+      "code-python": "Python 関数",
+      "code-bash": "Bash スクリプト"
+    }
   }
 }

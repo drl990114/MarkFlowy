@@ -1,3 +1,4 @@
+import { createKeyboardEvent } from './helpers/keyboard'
 import { isCapricornRuntimeAvailable } from '@/constants/capricornRuntime'
 import { act } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
@@ -62,7 +63,7 @@ describe.skipIf(!isCapricornRuntimeAvailable).each(['Win32', 'Linux x86_64'])(
       platform(name)
       const input = await mounted(['Ctrl-2', 'Ctrl-3'])
       const press = async (key: string) => {
-        const event = new KeyboardEvent('keydown', {
+        const event = createKeyboardEvent('keydown', {
           key,
           ctrlKey: true,
           bubbles: true,
@@ -100,11 +101,11 @@ describe.skipIf(!isCapricornRuntimeAvailable).each(['Win32', 'Linux x86_64'])(
         bubbles: true,
         cancelable: true,
       }
-      const recorded = recordKey(new KeyboardEvent('keydown', init))!
+      const recorded = recordKey(createKeyboardEvent('keydown', init))!
       const shortcut = shortcutString(recorded)
       const input = await mounted(shortcut)
       await act(async () => {
-        input.dispatchEvent(new KeyboardEvent('keydown', init))
+        input.dispatchEvent(createKeyboardEvent('keydown', init))
         await frame()
       })
       expect(
@@ -122,7 +123,7 @@ describe.skipIf(!isCapricornRuntimeAvailable).each(['Win32', 'Linux x86_64'])(
         }))
       const save = vi.fn()
       createKeybindingsHandler({ 'mod-1': save })(
-        new KeyboardEvent('keydown', { key: '1', code: 'Numpad1', ctrlKey: true }),
+        createKeyboardEvent('keydown', { key: '1', code: 'Numpad1', ctrlKey: true }),
       )
       expect(save).toHaveBeenCalledOnce()
       expect(
@@ -135,7 +136,7 @@ describe.skipIf(!isCapricornRuntimeAvailable).each(['Win32', 'Linux x86_64'])(
       const input = await mounted('mod-Ctrl-Shift-1')
       await act(async () => {
         input.dispatchEvent(
-          new KeyboardEvent('keydown', {
+          createKeyboardEvent('keydown', {
             key: '1',
             code: 'Digit1',
             ctrlKey: true,
@@ -151,7 +152,7 @@ describe.skipIf(!isCapricornRuntimeAvailable).each(['Win32', 'Linux x86_64'])(
     it('leaves AltGraph to native input without cancelling native input', async () => {
       platform(name)
       const input = await mounted('Ctrl-Alt-[Numpad1]')
-      const event = new KeyboardEvent('keydown', {
+      const event = createKeyboardEvent('keydown', {
         key: '1',
         code: 'Numpad1',
         ctrlKey: true,
@@ -186,7 +187,7 @@ describe.skipIf(!isCapricornRuntimeAvailable).each(['Win32', 'Linux x86_64'])(
       document.body.append(outside)
       const outsideKey = vi.fn()
       outside.addEventListener('keydown', outsideKey)
-      const outsideEvent = new KeyboardEvent('keydown', {
+      const outsideEvent = createKeyboardEvent('keydown', {
         key: '@',
         ctrlKey: true,
         altKey: true,
@@ -200,7 +201,7 @@ describe.skipIf(!isCapricornRuntimeAvailable).each(['Win32', 'Linux x86_64'])(
       expect(outsideKey).toHaveBeenCalledOnce()
       await act(async () => {
         input.dispatchEvent(
-          new KeyboardEvent('keydown', {
+          createKeyboardEvent('keydown', {
             key: '1',
             code: 'Numpad1',
             ctrlKey: true,

@@ -1,21 +1,25 @@
+import { invoke } from '@tauri-apps/api/core'
 import { create } from 'zustand'
 import { shallow } from 'zustand/vanilla/shallow'
 import type { IFile } from '@/helper/filesys'
+import { toFileMetadata } from './fileMetadata'
 import { getPathIdentityKey, rebaseFilePath } from '@/helper/pathIdentity'
 import useRecentFilesStore from '@/stores/useRecentFilesStore'
-import {
-  findPathCollisions,
-  type PathRelationResolver,
-} from '@/helper/physicalPathIdentity'
+import useFileTextDirectionStore from '@/stores/useFileTextDirectionStore'
+import { findPathCollisions, type PathRelationResolver } from '@/helper/physicalPathIdentity'
+import { completeDeferredEditorSave, getDeferredEditorSave } from '@/components/EditorArea/deferredEditorSave'
 
 interface FileCacheState {
+  /** Metadata only; content updates leave this potentially large index intact. */
   entries: Record<string, IFile>
+  contentEntries: Record<string, { metadata: IFile; file: IFile }>
   metadataRevision: number
   pathEntries: Record<string, IFile>
 }
 
 const useFileCacheStore = create<FileCacheState>(() => ({
   entries: {},
+  contentEntries: {},
   metadataRevision: 0,
   pathEntries: {},
 }))
@@ -28,43 +32,92 @@ const rebasePath = (path: string | undefined, oldRootPath: string, newRootPath: 
   return path ? rebaseFilePath(path, oldRootPath, newRootPath) : undefined
 }
 
-export function setFileObject(id: string, file: IFile): void {
-  useFileCacheStore.setState((state) => {
-    const previousFile = state.entries[id]
-    // Sibling editors can publish the same snapshot. Compare every file field
-    // so metadata and children updates still propagate with unchanged content.
-    if (shallow(previousFile, file)) return state
+function resolveCachedFile(state: FileCacheState, id: string): IFile {
+  const metadata = state.entries[id]
+  const body = state.contentEntries[id]
+  return body && body.metadata === metadata ? body.file : metadata
+}
 
-    return {
-      entries: { ...state.entries, [id]: file },
-      metadataRevision:
-        state.metadataRevision + (hasFileMetadataChanged(previousFile, file) ? 1 : 0),
-    }
-  })
+export function setFileObject(id: string, file: IFile): void {
+  setFileObjects([{ id, file }])
 }
 
 export function setFileObjects(files: { id: string; file: IFile }[]): void {
-  if (files.length === 0) return
+  if (!files.length) return
+  const previousEntries = useFileCacheStore.getState().entries
+  for (const { id, file } of files) {
+    const previous = previousEntries[id]
+    if (previous && previous.path !== file.path) {
+      useFileTextDirectionStore.getState().moveFile(previous, file)
+    }
+  }
   useFileCacheStore.setState((state) => {
-    const entries = { ...state.entries }
+    let entries = state.entries
+    let contentEntries = state.contentEntries
     let hasMetadataChange = false
     for (const { id, file } of files) {
+      const candidate = toFileMetadata(file)
+      const metadata = shallow(entries[id], candidate) ? entries[id] : candidate
       hasMetadataChange ||= hasFileMetadataChanged(entries[id], file)
-      entries[id] = file
+      if (entries[id] !== metadata) {
+        if (entries === state.entries) entries = { ...entries }
+        entries[id] = metadata
+      }
+      const body = contentEntries[id]
+      if (typeof file.content === 'string') {
+        if (body?.metadata === metadata && body.file.content === file.content) continue
+        if (contentEntries === state.contentEntries) contentEntries = { ...contentEntries }
+        contentEntries[id] = {
+          metadata,
+          file: file.children === metadata.children ? file : { ...metadata, content: file.content },
+        }
+      } else if (body) {
+        if (contentEntries === state.contentEntries) contentEntries = { ...contentEntries }
+        delete contentEntries[id]
+      }
     }
+    if (entries === state.entries && contentEntries === state.contentEntries) return state
     return {
       entries,
+      contentEntries,
       metadataRevision: state.metadataRevision + (hasMetadataChange ? 1 : 0),
     }
   })
 }
 
 export function getFileObject(id: string): IFile {
-  return useFileCacheStore.getState().entries[id]
+  return resolveCachedFile(useFileCacheStore.getState(), id)
 }
 
 export function getFileObjects(): IFile[] {
-  return Object.values(useFileCacheStore.getState().entries)
+  const state = useFileCacheStore.getState()
+  return Object.keys(state.entries).map((id) => resolveCachedFile(state, id))
+}
+
+/** Call only after the last editor, save and draft-protection operation settles. */
+export function releaseFileContent(id: string): void {
+  useFileCacheStore.setState((state) => {
+    if (!state.contentEntries[id]) return state
+    const { [id]: _body, ...contentEntries } = state.contentEntries
+    return { contentEntries }
+  })
+}
+
+/** Run only after a workspace switch commits. Pending bodies outlive the old tree. */
+export function pruneFileMetadata(rootPath: string | undefined, openedIds: readonly string[]): void {
+  useFileCacheStore.setState((state) => {
+    const retained = new Set([...openedIds, ...Object.keys(state.contentEntries)])
+    const keep = (file: IFile) =>
+      retained.has(file.id) ||
+      !!(rootPath && rebasePath(file.path, rootPath, rootPath) !== undefined)
+    const entries = Object.fromEntries(Object.entries(state.entries).filter(([, file]) => keep(file)))
+    const pathEntries = Object.fromEntries(Object.entries(state.pathEntries).filter(([, file]) => keep(file)))
+    if (
+      Object.keys(entries).length === Object.keys(state.entries).length &&
+      Object.keys(pathEntries).length === Object.keys(state.pathEntries).length
+    ) return state
+    return { entries, pathEntries, metadataRevision: state.metadataRevision + 1 }
+  })
 }
 
 export function updateFileObject(id: string, file: IFile): void {
@@ -73,7 +126,7 @@ export function updateFileObject(id: string, file: IFile): void {
 
 export function setFileObjectByPath(path: string, file: IFile): void {
   useFileCacheStore.setState((state) => ({
-    pathEntries: { ...state.pathEntries, [path]: file },
+    pathEntries: { ...state.pathEntries, [path]: toFileMetadata(file) },
   }))
 }
 
@@ -82,7 +135,7 @@ export function setFileObjectsByPath(files: { path: string; file: IFile }[]): vo
   useFileCacheStore.setState((state) => {
     const pathEntries = { ...state.pathEntries }
     for (const { path, file } of files) {
-      pathEntries[path] = file
+      pathEntries[path] = toFileMetadata(file)
     }
     return { pathEntries }
   })
@@ -90,7 +143,9 @@ export function setFileObjectsByPath(files: { path: string; file: IFile }[]): vo
 
 export function getFileObjectByPath(path?: string): undefined | IFile {
   if (!path) return undefined
-  return useFileCacheStore.getState().pathEntries[path]
+  const state = useFileCacheStore.getState()
+  const metadata = state.pathEntries[path]
+  return metadata ? resolveCachedFile(state, metadata.id) ?? metadata : undefined
 }
 
 export function getFileIdsByPathPrefix(rootPath: string): string[] {
@@ -137,10 +192,11 @@ export function deleteFileObject(id: string): IFile | undefined {
   let deletedFile: IFile | undefined
 
   useFileCacheStore.setState((state) => {
-    deletedFile = state.entries[id]
+    deletedFile = resolveCachedFile(state, id)
     const entries = { ...state.entries }
     const pathEntries = { ...state.pathEntries }
-    let changed = false
+    const { [id]: _body, ...contentEntries } = state.contentEntries
+    let changed = !!state.contentEntries[id]
 
     if (entries[id]) {
       delete entries[id]
@@ -157,6 +213,7 @@ export function deleteFileObject(id: string): IFile | undefined {
 
     return {
       entries,
+      contentEntries,
       metadataRevision: state.metadataRevision + (deletedFile ? 1 : 0),
       pathEntries,
     }
@@ -174,8 +231,10 @@ export function deleteFileObjectsByIds(fileIds: string[]): string[] {
   useFileCacheStore.setState((state) => {
     const entries = { ...state.entries }
     const pathEntries = { ...state.pathEntries }
+    const contentEntries = { ...state.contentEntries }
 
     requestedIds.forEach((id) => {
+      delete contentEntries[id]
       if (!entries[id]) return
       delete entries[id]
       deletedIds.push(id)
@@ -184,12 +243,17 @@ export function deleteFileObjectsByIds(fileIds: string[]): string[] {
       if (requestedIds.has(file.id)) delete pathEntries[path]
     })
 
-    if (deletedIds.length === 0 && Object.keys(pathEntries).length === Object.keys(state.pathEntries).length) {
+    if (
+      deletedIds.length === 0 &&
+      Object.keys(contentEntries).length === Object.keys(state.contentEntries).length &&
+      Object.keys(pathEntries).length === Object.keys(state.pathEntries).length
+    ) {
       return state
     }
 
     return {
       entries,
+      contentEntries,
       metadataRevision: state.metadataRevision + (deletedIds.length > 0 ? 1 : 0),
       pathEntries,
     }
@@ -203,6 +267,7 @@ export function deleteFileObjectsByIds(fileIds: string[]): string[] {
  * This also covers opened files whose lazy-loaded tree node is no longer mounted.
  */
 export function moveFileObjectsByPathPrefix(oldRootPath: string, newRootPath: string): void {
+  useFileTextDirectionStore.getState().rebasePaths(oldRootPath, newRootPath)
   useFileCacheStore.setState((state) => {
     const entries = { ...state.entries }
     const pathEntries = { ...state.pathEntries }
@@ -265,14 +330,35 @@ export function moveFileObjectsByPathPrefix(oldRootPath: string, newRootPath: st
       if (file.path) pathEntries[file.path] = file
     })
 
+    const contentEntries = { ...state.contentEntries }
+    for (const [id, body] of Object.entries(contentEntries)) {
+      if (body.metadata !== state.entries[id]) {
+        delete contentEntries[id]
+        continue
+      }
+      if (entries[id] !== body.metadata) {
+        contentEntries[id] = {
+          metadata: entries[id],
+          file: { ...entries[id], content: body.file.content },
+        }
+      }
+    }
+
     return {
       entries,
+      contentEntries,
       metadataRevision: state.metadataRevision + 1,
       pathEntries,
     }
   })
   // Closed history may have no cached tree node, so migrate it independently.
   useRecentFilesStore.getState().rebasePaths(oldRootPath, newRootPath)
+  if (typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window) {
+    void invoke('local_history', {
+      operation: 'rebase',
+      payload: { oldPath: oldRootPath, newPath: newRootPath },
+    }).catch((error) => console.error('History path update failed', error))
+  }
 }
 
 /** Remove a replaced file/folder and all cached descendants, returning their ids. */
@@ -282,12 +368,14 @@ export function deleteFileObjectsByPathPrefix(rootPath: string): string[] {
   useFileCacheStore.setState((state) => {
     const entries = { ...state.entries }
     const pathEntries = { ...state.pathEntries }
+    const contentEntries = { ...state.contentEntries }
 
     for (const [id, file] of Object.entries(state.entries)) {
       if (rebasePath(file.path, rootPath, rootPath) === undefined) continue
 
       deletedIds.push(id)
       delete entries[id]
+      delete contentEntries[id]
     }
 
     for (const path of Object.keys(state.pathEntries)) {
@@ -305,6 +393,7 @@ export function deleteFileObjectsByPathPrefix(rootPath: string): string[] {
 
     return {
       entries,
+      contentEntries,
       metadataRevision: state.metadataRevision + (deletedIds.length > 0 ? 1 : 0),
       pathEntries,
     }
@@ -319,10 +408,11 @@ export const saveOpenedEditorEntries: Record<string, () => Promise<boolean>> = {
 
 export function setSaveOpenedEditorEntries(id: string, saveHandler: () => Promise<boolean>): void {
   saveOpenedEditorEntries[id] = saveHandler
+  completeDeferredEditorSave(id, saveHandler)
 }
 
 export function getSaveOpenedEditorEntries(id: string): (() => Promise<boolean>) | undefined {
-  return saveOpenedEditorEntries[id]
+  return saveOpenedEditorEntries[id] ?? getDeferredEditorSave(id)
 }
 
 export function delSaveOpenedEditorEntries(id: string): void {

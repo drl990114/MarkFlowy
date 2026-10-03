@@ -13,6 +13,7 @@ vi.mock('@/i18n', () => ({
     t: (key: string) =>
       ({
         'about.label': 'About',
+        'command_palette.title': 'Command Palette',
         'common.menu': 'Menu',
         'settings.label': 'Settings',
         'settings.display.theme.mode.system': 'System',
@@ -60,6 +61,11 @@ describe('application menu', () => {
     expect(settingMenuTestState.showContextMenu).toHaveBeenCalledWith(
       expect.objectContaining({
         items: [
+          expect.objectContaining({
+            commandId: 'app_commandPalette',
+            label: 'Command Palette',
+            value: 'command-palette',
+          }),
           expect.objectContaining({ label: 'About', value: 'about' }),
           expect.objectContaining({ label: 'Theme', value: 'theme' }),
           expect.objectContaining({
@@ -90,7 +96,17 @@ describe('application menu', () => {
     fireEvent.click(trigger)
 
     expect(settingMenuTestState.showContextMenu).toHaveBeenCalledWith(
-      expect.objectContaining({ x: 12, y: 98 }),
+      expect.objectContaining({
+        items: expect.arrayContaining([
+          expect.objectContaining({
+            commandId: 'app_commandPalette',
+            label: 'Command Palette',
+            value: 'command-palette',
+          }),
+        ]),
+        x: 12,
+        y: 98,
+      }),
     )
   })
 })

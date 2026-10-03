@@ -1,9 +1,2 @@
-import type { MfTheme } from '@markflowy/theme'
-import communicate from './communicate'
-
-export function registerTheme(theme: MfTheme) {
-  communicate.sendMessage({
-    key: 'registerTheme',
-    payload: theme
-  })
-}
+/** Theme registration via executable extensions was removed. Import a ThemeDocument JSON instead. */
+export {}

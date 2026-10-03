@@ -1,9 +1,13 @@
 import type { Extension as CodeMirrorExtension } from '@codemirror/state'
 import type { ProsemirrorAttributes } from '@rme-sdk/sdk/core'
-import { MfCodemirrorView } from '../../codemirror/codemirror'
+import type { MfCodemirrorView } from '../../codemirror/codemirror'
+import type { CodemirrorOptions, CodemirrorSettingsProfile } from './setup'
 import type { CommandKeymapOptions } from './keymap'
 
 export interface CodeMirrorExtensionOptions {
+  codemirrorOptions?: CodemirrorOptions
+  settingsProfile?: CodemirrorSettingsProfile
+  preserveLineEndings?: boolean
   /**
    * Whether to hide the decoration.
    *

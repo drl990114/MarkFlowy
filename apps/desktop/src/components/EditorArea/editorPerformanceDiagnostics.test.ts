@@ -92,6 +92,30 @@ describe('editor open diagnostics', () => {
     expect(window.__MF_EDITOR_PERFORMANCE__!.opens![0].byteLength).toBeUndefined()
   })
 
+  it('fingerprints initial UTF-8 bytes after ready and keeps hashing failures out of the editor path', async () => {
+    let finish!: (hash: ArrayBuffer) => void
+    const digest = vi.fn(() => new Promise<ArrayBuffer>((resolve) => { finish = resolve }))
+    vi.stubGlobal('crypto', { subtle: { digest } })
+    const id = diagnostics.beginEditorOpenMeasurement('file')
+    diagnostics.recordEditorOpenContent(id, '中文😀')
+    diagnostics.finishEditorOpenMeasurement(id, 'ready')
+    expect(digest).not.toHaveBeenCalled()
+    await vi.runOnlyPendingTimersAsync()
+    expect(digest).toHaveBeenCalledExactlyOnceWith('SHA-256', new TextEncoder().encode('中文😀'))
+    expect(window.__MF_EDITOR_PERFORMANCE__!.opens![0].contentSha256).toBeUndefined()
+    finish(new Uint8Array(32).fill(10).buffer)
+    await Promise.resolve()
+    expect(window.__MF_EDITOR_PERFORMANCE__!.opens![0].contentSha256).toBe('0a'.repeat(32))
+
+    digest.mockRejectedValueOnce(new Error('unavailable'))
+    const next = diagnostics.beginEditorOpenMeasurement('next')
+    diagnostics.recordEditorOpenContent(next, 'unchanged')
+    diagnostics.finishEditorOpenMeasurement(next, 'ready')
+    await vi.runOnlyPendingTimersAsync()
+    expect(window.__MF_EDITOR_PERFORMANCE__!.opens![1]).toMatchObject({ status: 'ready', byteLength: 9 })
+    expect(window.__MF_EDITOR_PERFORMANCE__!.opens![1].contentSha256).toBeUndefined()
+  })
+
   it('correlates commands, cancels superseded views, and records each stage once', () => {
     const first = diagnostics.beginEditorOpenMeasurement('a', { viewId: 'left' })
     clock = 20
@@ -499,6 +523,7 @@ describe('editor open diagnostics', () => {
       recordedAt: 56,
     })
     expect(window.__MF_EDITOR_PERFORMANCE__!.opens![0].firstInputDuration).toBe(24)
+    expect(window.__MF_EDITOR_PERFORMANCE__!.opens![0].firstInputTrusted).toBe(false)
     expect(window.__MF_EDITOR_PERFORMANCE__!.opens![0].firstInputCommitDuration).toBeUndefined()
 
     clock = 532
@@ -511,6 +536,30 @@ describe('editor open diagnostics', () => {
     })
     expect(window.__MF_EDITOR_PERFORMANCE__!.opens![0].firstInputCommitDuration).toBe(500)
     expect(window.__MF_EDITOR_PERFORMANCE__!.interactions).toHaveLength(1)
+    cancel()
+  })
+
+  it('keeps the first unpainted input start when several input events arrive before feedback', async () => {
+    const requestId = diagnostics.beginEditorOpenMeasurement('file')
+    const { container } = surface()
+    const cancel = diagnostics.observeEditorFirstPaint({ requestId, fileId: 'file', container, isCurrent: () => true })
+    advanceFrame()
+    advanceFrame()
+    const input = getCapricornRuntimeInput(container)!
+    input.dispatchEvent(new InputEvent('beforeinput', { bubbles: true }))
+    clock += 40
+    input.dispatchEvent(new InputEvent('beforeinput', { bubbles: true }))
+    const leaf = container.querySelector('[data-cap-leaf]')!
+    const delivered = new Promise<void>((resolve) => {
+      const observer = new MutationObserver(() => { observer.disconnect(); resolve() })
+      observer.observe(leaf, { childList: true })
+    })
+    leaf.textContent = 'Actual textxy'
+    await delivered
+    advanceFrame()
+    expect(window.__MF_EDITOR_PERFORMANCE__!.opens![0]).toMatchObject({
+      firstInputDuration: 56, firstInputTrusted: false,
+    })
     cancel()
   })
 

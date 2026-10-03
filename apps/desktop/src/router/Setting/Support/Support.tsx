@@ -7,10 +7,6 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   width: 100%;
-  padding: 0 16px;
-  background-color: var(--mf-card);
-  border: 1px solid var(--mf-border);
-  border-radius: var(--mf-radius);
   box-sizing: border-box;
 `
 
@@ -18,7 +14,7 @@ const SupportItem = styled.div`
   display: flex;
   flex-direction: column;
   gap: 4px;
-  padding: 12px 0;
+  padding: 10px 0;
   border-bottom: 1px solid var(--mf-border);
 
   &:last-child {
@@ -27,14 +23,14 @@ const SupportItem = styled.div`
 `
 
 const Title = styled.div`
-  font-size: var(--mf-ui-font-body);
+  font-size: var(--mf-ui-font-control);
   font-weight: 600;
-  line-height: var(--mf-ui-line-height-body);
+  line-height: var(--mf-ui-line-height-control);
   color: ${(props) => props.theme.primaryFontColor};
 `
 
 const Description = styled.div`
-  font-size: var(--mf-ui-font-control);
+  font-size: var(--mf-ui-font-caption);
   color: ${(props) => props.theme.labelFontColor};
   line-height: var(--mf-ui-line-height-control);
 `

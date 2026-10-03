@@ -1,3 +1,10 @@
+import type { CapricornSnippetsOptions } from '@/features/snippets/types'
+import type { CodeEditorSettings } from './codeEditorSettings'
+export type {
+  CapricornSnippet,
+  CapricornSnippetKind,
+  CapricornSnippetsOptions,
+} from '@/features/snippets/types'
 import { isCapricornRuntimeAvailable } from '@/constants/capricornRuntime'
 import { createCapricornResumeApi } from './capricornResume'
 import { getCapricornActiveHeadingId } from './capricornHeadingViewport'
@@ -31,6 +38,9 @@ export type CapricornBlockType =
 export type CapricornMarkType = 'bold' | 'code' | 'italic'
 
 export interface CapricornCommandApi {
+  insertCodeBlock?: (source: string, options?: { language?: string }) => void
+  insertMathBlock?: (source: string) => void
+  insertMermaidBlock?: (source: string) => void
   insertLink?: (link: { href: string; text?: string; title?: string }) => void
   updateLink?: (update: { href?: string; title?: string | null }) => void
   removeLink?: () => void
@@ -134,8 +144,19 @@ export interface CapricornKeybindingConfiguration {
   )[]
 }
 
+/** Accept existing CSSProperties values as well as runtime theme variables. */
+export type CapricornThemeStyle =
+  | React.CSSProperties
+  | (React.CSSProperties & Partial<Record<`--cap-${string}`, string | number>>)
+
 export interface CapricornEditorSettings {
+  /** Opt-in body caret animation. Respects reduced motion and defaults to false. */
+  caretAnimation?: boolean
+  /** Paragraph direction, independent of interface localization and Markdown. */
+  textDirection?: 'auto' | 'ltr' | 'rtl'
+  snippets?: false | CapricornSnippetsOptions
   codeBlockLineWrapping?: boolean
+  codeEditor?: CodeEditorSettings
   linkEditMode?: 'popover' | 'markdown'
   className?: string
   colorScheme?: 'dark' | 'light' | 'system'
@@ -144,7 +165,7 @@ export interface CapricornEditorSettings {
   placeholder?: boolean | string | CapricornPlaceholderOptions
   readOnly?: boolean
   spellCheck?: boolean
-  style?: React.CSSProperties
+  style?: CapricornThemeStyle
   typewriter?: boolean | { enabled?: boolean }
 }
 
@@ -186,6 +207,7 @@ export interface CapricornCopilotOptions {
 }
 
 export interface CapricornRuntimeOptions extends CapricornEditorSettings {
+  onProgress?: (progress: CapricornRuntimeProgress) => void
   commands?: readonly {
     id: `host.${string}`
     label: string
@@ -221,13 +243,13 @@ export interface CapricornRuntimeOptions extends CapricornEditorSettings {
   }
 }
 
-// Keep enough content rendered ahead of Desktop's throttled scroll events to
-// avoid exposing placeholders during ordinary trackpad and wheel scrolling.
+// Keep a few screens ready ahead of fast scrolling on tall Desktop viewports.
+// First paint is still sized to the viewport rather than this entire buffer.
 export const CAPRICORN_DESKTOP_VIRTUALIZE_OPTIONS = {
-  bufferRange: 900,
+  bufferRange: 3600,
   enable: true,
   enableScrollAnchoring: true,
-  firstPaintBlockSize: 40,
+  firstPaintBlockSize: 96,
 } as const satisfies NonNullable<CapricornRuntimeOptions['virtualize']>
 
 interface CapricornRuntimeChangeEvent {
@@ -318,8 +340,10 @@ export interface CapricornRuntimeProgress {
     | 'parse'
     | 'transfer'
     | 'hydrate'
+    | 'plugins'
     | 'model'
     | 'index'
+    | 'controller'
     | 'mount'
     | 'ready'
   elapsedMs: number
@@ -332,7 +356,6 @@ export interface CapricornRuntimeProgress {
 
 export interface CapricornRuntimeAsyncOptions extends CapricornRuntimeOptions {
   signal?: AbortSignal
-  onProgress?: (progress: CapricornRuntimeProgress) => void
 }
 
 export type CapricornRuntimeAsyncFactory = (
@@ -351,7 +374,13 @@ export function requiresAsyncCapricornOpen(markdown: string): boolean {
 }
 
 export function getCapricornFirstPaintBlockSize(viewportHeight: number): number {
-  return Math.max(1, Math.min(40, Math.ceil((viewportHeight || 640) / 24) + 2))
+  return Math.max(
+    1,
+    Math.min(
+      CAPRICORN_DESKTOP_VIRTUALIZE_OPTIONS.firstPaintBlockSize,
+      Math.ceil((viewportHeight || 640) / 24) + 2,
+    ),
+  )
 }
 
 export interface CapricornRuntimeAdapter {

@@ -20,14 +20,14 @@ const DocsContent = ({ html, tableOfContents = [] }: DocsContentProps) => {
 
 export default DocsContent
 
-const DocsArticle = styled.article`
+export const DocsArticle = styled.article`
   width: 100%;
   margin: 0;
   padding-bottom: ${rem(72)};
   color: var(--ink-soft);
   font-family: var(--body);
   font-size: 1rem;
-  line-height: 1.5rem;
+  line-height: 1.8;
   overflow-wrap: anywhere;
 
   > :first-child {
@@ -46,27 +46,27 @@ const DocsArticle = styled.article`
   h6 {
     color: var(--ink);
     font-family: var(--sans);
-    font-weight: 500;
+    font-weight: 550;
     text-wrap: balance;
   }
 
   h1 {
-    margin: 0 0 0.5rem;
-    font-size: 1.5rem;
+    margin: 0 0 1.5rem;
+    font-size: clamp(2rem, 3vw, 2.75rem);
     letter-spacing: -0.025em;
-    line-height: 2rem;
+    line-height: 1.25;
   }
 
   h2 {
     margin: 2.5rem 0 1rem;
-    font-size: 1.25rem;
+    font-size: 1.5rem;
     letter-spacing: -0.02em;
-    line-height: 1.75rem;
+    line-height: 1.4;
   }
 
   h3 {
     margin: 2rem 0 0.75rem;
-    font-size: 1rem;
+    font-size: 1.125rem;
     line-height: 1.5rem;
   }
 
@@ -79,7 +79,7 @@ const DocsArticle = styled.article`
   }
 
   :is(h1, h2, h3, h4, h5, h6)[id] {
-    scroll-margin-top: calc(${rem(navbarHeight)} + ${rem(24)});
+    scroll-margin-top: ${navbarHeight + 24}px;
   }
 
   p,

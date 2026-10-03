@@ -2,13 +2,13 @@
 <!-- Visit https://github.com/nanolaba/readme-generator for details -->
 
 <div align="center">
-  <img align="center" src="./public/logo.png" width="120" height="120" />
+  <img align="center" alt="MarkFlowy" src="./public/logo.png" width="120" height="120" />
 </div>
 
-<h2 align="center"/>MarkFlowy <sup><em>beta</em></sup></h2>
+<h1 align="center">MarkFlowy</h1>
 <div align='center'>
 <br>
-<em>Modern and intelligent Markdown editor.</em>
+<em>Write with ease. Stay in flow.</em>
 <br>
 <br>
 </div>
@@ -37,29 +37,38 @@
 
 <h4 align="center"><strong>English</strong> | <a href="./README_CN.md">简体中文</a> | <a href="./README_JA.md">日本語</a></h4>
 
-<img src="./public/home.png" alt="screenshot" />
+MarkFlowy is a local-first Markdown editor for **macOS, Windows, and Linux**. Write visually or in source, organize your own folders, and bring in AI when it helps. Local editing works without an account or an AI provider.
+
+[Download](https://github.com/drl990114/MarkFlowy/releases/latest) · [Website](https://www.markflowy.cc) · [User guide](./docs/en/intro.md) · [Release notes](./apps/desktop/UPDATE_LOG.md)
+
+![MarkFlowy Desktop with a local workspace, visual editor, and document outline](./public/home.png)
 
 ## Features
 
-- **High Performance:** The rebuilt editor dramatically improves opening speed for large documents. **A 2 MB Markdown file opened in around 1 second in testing.**
+- **Write your way.** Switch between visual editing, Markdown source, and reading mode. Work with tables, task lists, code, math, Mermaid diagrams, and reusable snippets. Use Zen mode when you want to focus.
+- **High-performance editing.** Optimized loading and rendering make large Markdown documents easier to open, scroll through, and edit.
+- **Stay in your own folders.** Open individual files or a workspace, organize the file tree, use tabs and split editors, and navigate with bookmarks and an outline. Quick Open and workspace search help you return to an idea.
+- **Revisit your work.** Compare local history, recover saved drafts after a normal exit or reload, and handle changes made by other applications. Local history complements your own backups.
+- **Make it feel right.** Choose light or dark themes, create themes with the visual editor, customize shortcuts and typography, and set automatic, left-to-right, or right-to-left document text direction.
+- **Use AI on your terms.** Chat, summarize, translate, or enable Copilot with your configured provider: OpenAI-compatible services, DeepSeek, Google, or Ollama. Chat and Copilot have separate model settings. See the [Ollama guide](./docs/en/Extension/UseCopilotWithOllama.md).
+- **Share your writing.** Export HTML or images, print to PDF, or install Pandoc for DOCX, ODT, and EPUB. The [CLI](./docs/CLI.md) supports local file and export automation.
 
-- **Built-in AI:** Currently supports Copilot, one-click export of dialogues, translation of articles to any language, and article summaries. It supports large models like `DeepSeek` and `Chatgpt`, making them your intelligent assistant.
+Cloud AI and remote endpoints receive the context sent to them. Local inference requires a local Ollama endpoint **and** a local model.
 
-- **lightweight:** MarkFlowy is based on Tauri, boasting a size of less than 20MB and improved performance.
+## A closer look
 
-- **Multiple Editing Modes:** MarkFlowy uses Prosemirror as its core editor, offering high extensibility and a superior editing experience. It supports multiple editing modes, such as source code and wysiwyg.
+![Markdown source editing in MarkFlowy Desktop](./apps/web/public/screenshots/sourcecode.png)
 
-- **Editing Multiple File Types:** In addition to Markdown, it supports editing `JSON`, `TXT`, and other file types.
+![The same writing workspace in a dark theme](./apps/web/public/screenshots/darkmode.png)
 
-- **Custom Themes:** Supports custom themes, and you can share your themes with others.
+## Get started
 
-- **Custom Keyboard Shortcuts:** Supports custom keyboard shortcuts to meet individual needs.
+1. Install a package for your platform from [GitHub Releases](https://github.com/drl990114/MarkFlowy/releases/latest).
+2. Open a Markdown file, or open a folder as a workspace.
+3. Choose an editing mode from the editor's **More** menu. Use **Cmd/Ctrl + P** for Quick Open and **Cmd/Ctrl + Shift + P** for commands.
+4. Adjust appearance and shortcuts in **Settings**. Configure AI only if you want to use it.
 
-- **Image Processing:** When pasting images into MarkFlowy, you can choose to paste them to a specified path or convert them to `base64`.
-
-- **File Management**: A powerful file tree that supports drag-and-drop movement, global search, and other common functions.
-
-- **Multi-language support:** Supports multiple languages ​​including Chinese, English, Spanish, Japanese, and French.
+The [user guide](./docs/en/intro.md) covers editing, search, history, export, and common shortcuts. The separate Web App Beta has its own storage and workspace behavior; these screenshots and instructions describe Desktop.
 
 ## Download
 
@@ -77,12 +86,7 @@ Download and run one of the x64 builds:
 
 Download `MarkFlowy_v<version>_aarch64.dmg` (Apple silicon) or `MarkFlowy_v<version>_x64.dmg` (Intel).
 
-> [!NOTE]
-> Because of Apple’s security policy restrictions on software without developer certification, the **macOS aarch64** version cannot be downloaded and used directly. You can ignore the limit by doing the following:
-> - Open your terminal
-> - Go to the `Applications` directory. .e.g `/Applications`.
-> - Run `xattr -cr MarkFlowy.app` and open the app again
-> - Please make sure you download from `github releases`.
+> On macOS, drag MarkFlowy into Applications. If a download from the official release page is blocked, follow Apple’s [Open Anyway instructions](https://support.apple.com/en-us/102445) in **System Settings → Privacy & Security**.
 
 ### Linux
 
@@ -118,7 +122,7 @@ MarkFlowy is a product, and also a testament to a life journey. Through continuo
 
 ## Contribute
 
-The current MarkFlowy is still in its infancy, and there may be some bad experiences or bugs, for which I am sorry. All partners who are interested or encounter usage problems are welcome to submit [issues](https://github.com/drl990114/MarkFlowy/issues/new) or [PR](https://github.com/drl990114/MarkFlowy/compare) to participate in this project.
+Bug reports, reproducible cases and contributions are welcome through [issues](https://github.com/drl990114/MarkFlowy/issues/new) and [pull requests](https://github.com/drl990114/MarkFlowy/compare).
 
 ### How to Contribute
 
@@ -126,7 +130,7 @@ You can read [CONTRIBUTING](./docs/en/Community/CONTRIBUTING.md) to know how to 
 
 ## Support
 
-MarkFlowy is completely and permanently open source, if you want to support MarkFlowy, you can `star` this project. For special support, please contact me via [email](mailto:drl990114@gmail.com).
+The public repository includes its [AGPL-3.0 license](./LICENSE); individual packages and dependencies include their own license files. Maintainer builds also consume a private Capricorn runtime that is not included in this checkout. Its manifest is marked `UNLICENSED`; it is not part of the publicly available source. The [contributor guide](./docs/en/Community/CONTRIBUTING.md) explains development with and without that runtime. You can support MarkFlowy by starring this project or contacting me by [email](mailto:drl990114@gmail.com).
 <!-- 
 In addition, you can sponsor me through WeChat or Alipay, which will greatly encourage me. And it will also be used for the subsequent development of the project, such as expenses for servers, domains, etc
 
@@ -262,7 +266,7 @@ The development of **MarkFlowy** cannot be separated from these contributors. Th
 <!-- readme: contributors -end -->
 <!--/nrg.freeze-->
 
-<!-- badges -->
+<!-- Badge references -->
 [build-badge]: https://img.shields.io/github/actions/workflow/status/drl990114/MarkFlowy/nodejs.yml.svg?style=flat-square&labelColor=black
 [build]: https://github.com/drl990114/MarkFlowy/actions/workflows/nodejs.yml?labelColor=black
 [downloads-badge]:  https://img.shields.io/github/downloads/drl990114/MarkFlowy/total?label=downloads&style=flat-square&labelColor=black
@@ -270,9 +274,9 @@ The development of **MarkFlowy** cannot be separated from these contributors. Th
 [license]: https://opensource.org/licenses/AGPL-3.0?labelColor=black
 [release]: https://github.com/drl990114/MarkFlowy/releases?labelColor=black
 [prs-welcome-badge]: https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square&labelColor=black&color=%23dd5c13
-[prs-welcome]: https://github.com/drl990114/MarkFlowy/blob/main/CONTRIBUTING.md?labelColor=black
+[prs-welcome]: ./docs/en/Community/CONTRIBUTING.md
 [coc-badge]: https://img.shields.io/badge/code%20of-conduct-ff69b4.svg?style=flat-square&labelColor=black
-[coc]: https://github.com/drl990114/MarkFlowy/blob/main/CODE_OF_CONDUCT.md?labelColor=black
+[coc]: ./docs/en/Community/CODE_OF_CONDUCT.md
 [commit-badge]: https://img.shields.io/github/commit-activity/m/drl990114/MarkFlowy?color=%23ff9900&style=flat-square&labelColor=black
 [commit]: https://github.com/drl990114/MarkFlowy?labelColor=black
 [version-badge]: https://img.shields.io/github/v/release/drl990114/MarkFlowy?color=%239accfe&label=version&style=flat-square&labelColor=black

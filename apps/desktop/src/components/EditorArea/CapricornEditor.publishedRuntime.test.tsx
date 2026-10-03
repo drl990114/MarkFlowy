@@ -1,7 +1,8 @@
 // Transform the source/package graph before UI wait deadlines. The component
 // still uses its real async loader; loader caching has separate unit coverage.
 import 'virtual:markflowy-capricorn-runtime'
-import { createInstance } from '@markflowy/i18n'
+import { createInstance } from '@/i18n'
+import type * as I18nModule from '@/i18n'
 import { desktopLightTheme } from '@markflowy/theme'
 import { act, cleanup, fireEvent, render, waitFor, within } from '@testing-library/react'
 import { createRef, StrictMode } from 'react'
@@ -24,7 +25,8 @@ import {
 import { createCapricornKeybindingConfiguration } from './capricornKeybindings'
 import { getCapricornRuntimeInput } from './capricornRuntimeDom'
 
-vi.mock('@/i18n', () => ({
+vi.mock('@/i18n', async (importOriginal) => ({
+  ...(await importOriginal<typeof I18nModule>()),
   useTranslation: () => ({
     t: (key: string) =>
       (
@@ -365,6 +367,103 @@ describe.skipIf(!isCapricornRuntimeAvailable)('CapricornEditor with the publishe
     expect(onError).not.toHaveBeenCalled()
     await act(async () => unmount())
     externalInput.remove()
+  })
+
+  it.each([
+    {
+      name: 'inline badge',
+      markdown:
+        '[![GitHub Repo stars](https://img.shields.io/github/stars/drl990114/MarkFlowy)](https://github.com/drl990114/MarkFlowy)',
+      direct: false,
+    },
+    {
+      name: 'reference badge',
+      markdown:
+        '[![App Version][VERSION-BADGE]][RELEASE]\n\n[VERSION-BADGE]: https://img.shields.io/github/v/release/drl990114/MarkFlowy\n[RELEASE]: https://github.com/drl990114/MarkFlowy',
+      direct: false,
+    },
+    {
+      name: 'badge in HTML wrapper',
+      markdown:
+        '<div align="center">\n\n<u>[![GitHub Repo stars](https://img.shields.io/github/stars/drl990114/MarkFlowy)](https://github.com/drl990114/MarkFlowy)</u>\n<br/>\n</div>',
+      direct: false,
+    },
+    {
+      name: 'badge in HTML live preview',
+      markdown:
+        '<details open>\n<summary>Badges</summary>\n\n[![GitHub Repo stars](https://img.shields.io/github/stars/drl990114/MarkFlowy)](https://github.com/drl990114/MarkFlowy)\n\n</details>',
+      direct: true,
+    },
+  ])('prevents WebView navigation for $name in edit mode', async ({ markdown, direct }) => {
+    const handleLinkClick = vi.fn()
+    const onError = vi.fn()
+    const onChange = vi.fn()
+    const ref = createRef<CapricornEditorHandle>()
+    const { container } = render(
+      <CapricornEditor
+        ref={ref}
+        active
+        initialMarkdown={markdown}
+        onChange={onChange}
+        onError={onError}
+        onUnavailable={onError}
+        options={{ mode: 'edit', handleLinkClick, virtualize: { enable: false } }}
+      />,
+    )
+    const badge = await waitFor(() => {
+      const image = container.querySelector('a[href="https://github.com/drl990114/MarkFlowy"] img')
+      expect(image).not.toBeNull()
+      return image!
+    })
+    const plainClick = new MouseEvent('click', { bubbles: true, cancelable: true })
+    await act(async () => fireEvent(badge, plainClick))
+    expect(plainClick.defaultPrevented).toBe(true)
+    expect(handleLinkClick).toHaveBeenCalledTimes(direct ? 1 : 0)
+    for (const event of [
+      new MouseEvent('click', { bubbles: true, cancelable: true, ctrlKey: true }),
+      new MouseEvent('click', { bubbles: true, cancelable: true, metaKey: true }),
+      new MouseEvent('auxclick', { bubbles: true, cancelable: true, button: 1 }),
+    ]) {
+      handleLinkClick.mockClear()
+      await act(async () => fireEvent(badge, event))
+      expect(event.defaultPrevented).toBe(true)
+      expect(handleLinkClick).toHaveBeenCalledExactlyOnceWith(
+        'https://github.com/drl990114/MarkFlowy',
+      )
+    }
+    expect(ref.current!.getMarkdown()).toBe(markdown)
+    expect(onChange).not.toHaveBeenCalledWith(expect.objectContaining({ documentChanged: true }))
+    expect(onError).not.toHaveBeenCalled()
+  })
+
+  it('keeps ordinary links editable through the navigation guard', async () => {
+    const markdown = '[Documentation](./my notes/中文.md)'
+    const handleLinkClick = vi.fn()
+    const onError = vi.fn()
+    const ref = createRef<CapricornEditorHandle>()
+    const { container } = render(
+      <CapricornEditor
+        ref={ref}
+        active
+        initialMarkdown={markdown}
+        onChange={vi.fn()}
+        onError={onError}
+        onUnavailable={onError}
+        options={{ handleLinkClick, linkEditMode: 'markdown', virtualize: { enable: false } }}
+      />,
+    )
+    const link = await waitFor(() => {
+      const anchor = container.querySelector('a')
+      expect(anchor).not.toBeNull()
+      return anchor!
+    })
+    await act(async () => fireEvent.click(link))
+    await waitFor(() =>
+      expect(container.querySelector('[data-cap-inline-source] .cm-content')).not.toBeNull(),
+    )
+    expect(handleLinkClick).not.toHaveBeenCalled()
+    expect(ref.current!.getMarkdown()).toBe(markdown)
+    expect(onError).not.toHaveBeenCalled()
   })
 
   it.each([false, true])(

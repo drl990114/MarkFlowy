@@ -1,14 +1,12 @@
 ---
 seoTitle: "Use Ollama and Copilot in MarkFlowy"
 description: "Configure local Ollama models for MarkFlowy Desktop chat and Copilot, understand document context, and troubleshoot connection or model issues."
-updatedAt: "2026-09-06"
+updatedAt: "2026-09-27"
 ---
 
 # Use Ollama and Copilot in MarkFlowy
 
 MarkFlowy Desktop can connect to Ollama for AI chat and Copilot completion. Local inference requires both a local endpoint and a downloaded local model. A cloud model or remote endpoint changes where requests are processed.
-
-This guide describes the desktop configuration in v0.100.1. It was checked against the application source and Ollama documentation on September 6, 2026; it is not a new end-to-end test on all three operating systems. The browser Playground is a separate editor demonstration.
 
 ## 1. Start Ollama and check a model
 
@@ -28,7 +26,7 @@ curl http://localhost:11434/api/tags
 
 ## 2. Configure AI chat
 
-1. Open MarkFlowy Desktop settings and find the Ollama configuration in the AI section.
+1. Open **Settings → AI** and find the Ollama configuration.
 2. Use the default local address, or enter your own Ollama endpoint. Standard local Ollama does not require a cloud provider API key; an authenticated remote gateway may require custom request headers.
 3. Open AI chat and select Ollama and a text-generation model. MarkFlowy discovers models from Ollama; you can also explicitly configure model names if discovery is unavailable.
 4. Send a short prompt without document context first, then add a small document as context and try a summary.
@@ -61,4 +59,4 @@ Local processing requires both a local model and a local endpoint. Ollama also s
 
 Current desktop AI requests and model discovery use Tauri's native HTTP client. Do not begin troubleshooting by setting `OLLAMA_ORIGINS=*` or exposing Ollama on all network interfaces. If an older browser-based client reports a cross-origin error, follow Ollama's [origin configuration guidance](https://docs.ollama.com/faq#how-can-i-allow-additional-web-origins-to-access-ollama) for that client. Connecting to another machine is a separate network configuration, not a requirement for local use.
 
-See the [product introduction](../intro), [performance notes](../Performance/large-markdown-files), and [current desktop release](https://github.com/drl990114/MarkFlowy/releases/latest).
+See the [product introduction](../intro) or download the [current desktop release](https://github.com/drl990114/MarkFlowy/releases/latest).

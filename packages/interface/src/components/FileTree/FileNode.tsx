@@ -23,6 +23,7 @@ export interface FileNodeComponentProps extends NodeRendererProps<IFile> {
   getCurrentFolderData: () => IFile[]
   canInsertIntoDirectory?: (directory: IFile) => boolean
   setFolderData: (data: IFile[]) => void
+  onFocusActiveFile?: (id: string) => Promise<void> | void
   isRoot?: boolean
   onShowConfirm: (params: { title: string; onConfirm: () => void }) => void
   onShowInputConfirm?: (params: {
@@ -137,6 +138,7 @@ function FileNode({
   getCurrentFolderData,
   canInsertIntoDirectory = (directory) => Boolean(directory.children?.length),
   setFolderData,
+  onFocusActiveFile,
   isRoot = false,
   onShowConfirm,
   onShowInputConfirm,
@@ -162,7 +164,7 @@ function FileNode({
 }: FileNodeComponentProps) {
   const { t } = useTranslation()
   const appContext = React.useContext(AppContext)
-  const { deleteNode, trashNode, activeId, refreshFolder, scrollTo, getRootPath } = useFileTree()
+  const { deleteNode, trashNode, activeId, refreshFolder, getRootPath } = useFileTree()
   const {
     runFileMutation,
     renameFile,
@@ -203,11 +205,12 @@ function FileNode({
     })
   }
 
-  const isPending =
-    node.data.kind === 'pending_new_file' ||
-    node.data.kind === 'pending_new_folder' ||
-    node.data.kind === 'pending_edit_folder' ||
-    node.data.kind === 'pending_edit_file'
+  const isPending = [
+    'pending_new_file',
+    'pending_new_folder',
+    'pending_edit_folder',
+    'pending_edit_file',
+  ].includes(node.data.kind)
 
   const inputType =
     node.data.kind === 'pending_new_folder' || node.data.kind === 'pending_edit_folder'
@@ -588,6 +591,188 @@ function FileNode({
   )
   const isSelected = activeId === node.id
 
+  const renderPendingEntry = () => (
+    <>
+      <span aria-hidden='true' className='file-icon mf-file-tree-icon'>
+        {renderNodeIcon ? (
+          renderNodeIcon(
+            {
+              ...node.data,
+              kind: inputType,
+              ext: node.data.ext ?? (inputType === 'file' ? 'md' : undefined),
+            },
+            { isLoading: false, isOpen: false },
+          )
+        ) : (
+          <i className={inputType === 'dir' ? 'ri-folder-3-fill' : getFileIconClass(node.data)} />
+        )}
+      </span>
+      <NewFileInput
+        key={node.id}
+        aria-label={t(
+          isUpdate
+            ? 'contextmenu.explorer.rename'
+            : inputType === 'dir'
+              ? 'contextmenu.explorer.add_folder'
+              : 'contextmenu.explorer.add_file',
+        )}
+        className='mf-file-tree-name-input'
+        fileNode={node.data}
+        inputType={inputType}
+        parentNode={node.parent?.data}
+        onCreate={async (file) => {
+          if (isUpdate) {
+            await renameFileHandler(file)
+          } else {
+            await createFileHandler(file)
+          }
+        }}
+        onCancel={(fileInfo) => {
+          const cancelInput = () => {
+            const mutationTree = new SimpleTree(getCurrentFolderData())
+            const pendingNode = mutationTree.find(node.id)
+            if (!pendingNode) return
+
+            if (isUpdate) {
+              mutationTree.update({
+                id: node.id,
+                changes: {
+                  kind: pendingNode.data.kind === 'pending_edit_folder' ? 'dir' : 'file',
+                },
+              })
+            } else {
+              mutationTree.drop({ id: node.id })
+            }
+
+            setFolderData(mutationTree.data)
+          }
+
+          if (!fileInfo) {
+            cancelInput()
+            return
+          }
+
+          if (onShowInputConfirm) {
+            onShowInputConfirm({
+              title: 'Save changes?',
+              confirmText: 'Save',
+              cancelText: 'Discard',
+              onConfirm: async () => {
+                if (isUpdate) {
+                  await renameFileHandler(fileInfo)
+                } else {
+                  await createFileHandler(fileInfo)
+                }
+              },
+              onClose: () => {
+                cancelInput()
+              },
+            })
+          } else {
+            cancelInput()
+          }
+        }}
+      />
+    </>
+  )
+
+  const renderEntryContent = () => (
+    <div
+      style={{
+        display: 'flex',
+        width: '100%',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+      }}
+    >
+      <div
+        aria-hidden={isStickyRoot || undefined}
+        style={{
+          flex: 1,
+          display: 'flex',
+          alignItems: 'center',
+          overflow: 'hidden',
+          minWidth: 0,
+        }}
+      >
+        {renderNodeIcon ? (
+          <span
+            aria-label={isLoading ? `${t('common.fetching')} ${node.data.name}` : undefined}
+            className='file-icon mf-file-tree-icon'
+            role={isLoading ? 'status' : undefined}
+          >
+            {renderNodeIcon(node.data, { isLoading, isOpen: node.isOpen })}
+          </span>
+        ) : node.data?.kind === 'dir' ? (
+          isLoading ? (
+            <LoadingIcon
+              className='ri-loader-4-line file-icon'
+              role='status'
+              aria-label={`${t('common.fetching')} ${node.data.name}`}
+            />
+          ) : (
+            <i className={`${node.isOpen ? 'ri-folder-5-fill' : 'ri-folder-3-fill'} file-icon`} />
+          )
+        ) : (
+          <i className={`${getFileIconClass(node.data)} file-icon`} />
+        )}
+        <span
+          style={{
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}
+        >
+          {node.data.name}
+        </span>
+        {isEmpty ? (
+          <EmptyFolderStatus role='status'>{t('file.emptyFolder')}</EmptyFolderStatus>
+        ) : null}
+      </div>
+
+      {isRoot && IconButton ? (
+        <div style={{ display: 'flex', gap: '2px' }}>
+          <IconButton
+            size='small'
+            rounded='smooth'
+            icon={'ri-refresh-line'}
+            onClick={async (e?: React.MouseEvent) => {
+              e?.stopPropagation()
+              e?.preventDefault()
+              await refreshFolder()
+            }}
+            tooltipProps={{ title: 'Refresh' }}
+          />
+          <IconButton
+            size='small'
+            rounded='smooth'
+            icon={'ri-focus-3-line'}
+            onClick={(e?: React.MouseEvent) => {
+              e?.stopPropagation()
+              e?.preventDefault()
+              if (activeId) {
+                if (onFocusActiveFile) void onFocusActiveFile(activeId)
+                else tree.select(activeId, { align: 'center' })
+              }
+            }}
+            tooltipProps={{ title: 'Focus Active File' }}
+          />
+          <IconButton
+            size='small'
+            rounded='smooth'
+            icon={'ri-collapse-vertical-fill'}
+            onClick={(e?: React.MouseEvent) => {
+              e?.stopPropagation()
+              e?.preventDefault()
+              collapseAllFileTreeFolders(tree, node)
+            }}
+            tooltipProps={{ title: 'Collapse All' }}
+          />
+        </div>
+      ) : null}
+    </div>
+  )
+
   return (
     <NodeContainer
       style={style}
@@ -628,188 +813,7 @@ function FileNode({
             return <div key={key}></div>
           })}
         </div>
-        {isPending ? (
-          <>
-            <span aria-hidden='true' className='file-icon mf-file-tree-icon'>
-              {renderNodeIcon ? (
-                renderNodeIcon(
-                  {
-                    ...node.data,
-                    kind: inputType,
-                    ext: node.data.ext ?? (inputType === 'file' ? 'md' : undefined),
-                  },
-                  { isLoading: false, isOpen: false },
-                )
-              ) : (
-                <i
-                  className={inputType === 'dir' ? 'ri-folder-3-fill' : getFileIconClass(node.data)}
-                />
-              )}
-            </span>
-            <NewFileInput
-              key={node.id}
-              aria-label={t(
-                isUpdate
-                  ? 'contextmenu.explorer.rename'
-                  : inputType === 'dir'
-                    ? 'contextmenu.explorer.add_folder'
-                    : 'contextmenu.explorer.add_file',
-              )}
-              className='mf-file-tree-name-input'
-              fileNode={node.data}
-              inputType={inputType}
-              parentNode={node.parent?.data}
-              onCreate={async (file) => {
-                if (isUpdate) {
-                  await renameFileHandler(file)
-                } else {
-                  await createFileHandler(file)
-                }
-              }}
-              onCancel={(fileInfo) => {
-                const cancelInput = () => {
-                  const mutationTree = new SimpleTree(getCurrentFolderData())
-                  const pendingNode = mutationTree.find(node.id)
-                  if (!pendingNode) return
-
-                  if (isUpdate) {
-                    mutationTree.update({
-                      id: node.id,
-                      changes: {
-                        kind: pendingNode.data.kind === 'pending_edit_folder' ? 'dir' : 'file',
-                      },
-                    })
-                  } else {
-                    mutationTree.drop({ id: node.id })
-                  }
-
-                  setFolderData(mutationTree.data)
-                }
-
-                if (!fileInfo) {
-                  cancelInput()
-                  return
-                }
-
-                if (onShowInputConfirm) {
-                  onShowInputConfirm({
-                    title: 'Save changes?',
-                    confirmText: 'Save',
-                    cancelText: 'Discard',
-                    onConfirm: async () => {
-                      if (isUpdate) {
-                        await renameFileHandler(fileInfo)
-                      } else {
-                        await createFileHandler(fileInfo)
-                      }
-                    },
-                    onClose: () => {
-                      cancelInput()
-                    },
-                  })
-                } else {
-                  cancelInput()
-                }
-              }}
-            />
-          </>
-        ) : (
-          <div
-            style={{
-              display: 'flex',
-              width: '100%',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}
-          >
-            <div
-              aria-hidden={isStickyRoot || undefined}
-              style={{
-                flex: 1,
-                display: 'flex',
-                alignItems: 'center',
-                overflow: 'hidden',
-                minWidth: 0,
-              }}
-            >
-              {renderNodeIcon ? (
-                <span
-                  aria-label={isLoading ? `${t('common.fetching')} ${node.data.name}` : undefined}
-                  className='file-icon mf-file-tree-icon'
-                  role={isLoading ? 'status' : undefined}
-                >
-                  {renderNodeIcon(node.data, { isLoading, isOpen: node.isOpen })}
-                </span>
-              ) : node.data?.kind === 'dir' ? (
-                isLoading ? (
-                  <LoadingIcon
-                    className='ri-loader-4-line file-icon'
-                    role='status'
-                    aria-label={`${t('common.fetching')} ${node.data.name}`}
-                  />
-                ) : (
-                  <i
-                    className={`${node.isOpen ? 'ri-folder-5-fill' : 'ri-folder-3-fill'} file-icon`}
-                  />
-                )
-              ) : (
-                <i className={`${getFileIconClass(node.data)} file-icon`} />
-              )}
-              <span
-                style={{
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                }}
-              >
-                {node.data.name}
-              </span>
-              {isEmpty ? (
-                <EmptyFolderStatus role='status'>{t('file.emptyFolder')}</EmptyFolderStatus>
-              ) : null}
-            </div>
-
-            {isRoot && IconButton ? (
-              <div style={{ display: 'flex', gap: '2px' }}>
-                <IconButton
-                  size='small'
-                  rounded='smooth'
-                  icon={'ri-refresh-line'}
-                  onClick={async (e?: React.MouseEvent) => {
-                    e?.stopPropagation()
-                    e?.preventDefault()
-                    await refreshFolder()
-                  }}
-                  tooltipProps={{ title: 'Refresh' }}
-                />
-                <IconButton
-                  size='small'
-                  rounded='smooth'
-                  icon={'ri-focus-3-line'}
-                  onClick={(e?: React.MouseEvent) => {
-                    e?.stopPropagation()
-                    e?.preventDefault()
-                    if (activeId && scrollTo) {
-                      scrollTo(activeId)
-                    }
-                  }}
-                  tooltipProps={{ title: 'Focus Active File' }}
-                />
-                <IconButton
-                  size='small'
-                  rounded='smooth'
-                  icon={'ri-collapse-vertical-fill'}
-                  onClick={(e?: React.MouseEvent) => {
-                    e?.stopPropagation()
-                    e?.preventDefault()
-                    collapseAllFileTreeFolders(tree, node)
-                  }}
-                  tooltipProps={{ title: 'Collapse All' }}
-                />
-              </div>
-            ) : null}
-          </div>
-        )}
+        {isPending ? renderPendingEntry() : renderEntryContent()}
       </div>
     </NodeContainer>
   )

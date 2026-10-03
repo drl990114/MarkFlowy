@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "id": "paper",
+  "name": "Paper",
+  "author": "MarkFlowy",
+  "variants": [
+    {
+      "id": "light",
+      "name": "Paper Light",
+      "mode": "light",
+      "tokens": {
+        "surface.canvas": "#fffdf6",
+        "surface.panel": "#f2eee3",
+        "text.primary": "#34312a",
+        "text.secondary": "#746e62",
+        "border.default": "#d9d2c3",
+        "accent.background": "#526f52",
+        "editor.link": { "ref": "accent.background" }
+      }
+    },
+    {
+      "id": "dark",
+      "name": "Paper Dark",
+      "mode": "dark",
+      "tokens": {
+        "surface.canvas": "#24231f",
+        "surface.panel": "#2d2b26",
+        "text.primary": "#e1dccc",
+        "text.secondary": "#b0a996",
+        "border.default": "#4a463c",
+        "accent.background": "#a5c28d"
+      }
+    }
+  ]
+}

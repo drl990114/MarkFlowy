@@ -1,3 +1,5 @@
+import { SemanticThemeContext } from '@/themes/context'
+import { capricornStyle } from '@/themes/runtime'
 import { AsyncSurface } from '@/components/AsyncSurface'
 import { useTranslation } from '@/i18n'
 import { InlineInsertPopover } from './InlineInsertPopover'
@@ -15,6 +17,7 @@ import {
 import { ThemeContext } from 'styled-components'
 import { createCapricornExportSurface, type CapricornExportSurface } from './capricornExportSurface'
 import {
+  CAPRICORN_DESKTOP_VIRTUALIZE_OPTIONS,
   createCapricornRuntimeAdapter,
   createCapricornRuntimeAdapterAsync,
   getCapricornFirstPaintBlockSize,
@@ -85,6 +88,7 @@ export function CapricornEditor({
 }: CapricornEditorProps) {
   const mode = options.mode ?? 'edit'
   const editorTheme = useContext(ThemeContext)
+  const semanticTokens = useContext(SemanticThemeContext)
   const { t } = useTranslation()
   // The private runtime has its own React root, so bridge the host editor
   // theme through its style API (including inline code and CodeMirror blocks).
@@ -93,9 +97,10 @@ export function CapricornEditor({
       fontFamily: editorTheme?.fontFamily,
       '--cap-font-mono': editorTheme?.codemirrorFontFamily,
       '--cap-code-font-family': editorTheme?.codemirrorFontFamily,
+      ...(semanticTokens ? capricornStyle(semanticTokens, 'document') : {}),
       ...options.style,
     }),
-    [editorTheme?.fontFamily, editorTheme?.codemirrorFontFamily, options.style],
+    [editorTheme?.fontFamily, editorTheme?.codemirrorFontFamily, semanticTokens, options.style],
   )
   const containerRef = useRef<HTMLDivElement>(null)
   const adapterRef = useRef<CapricornRuntimeAdapter | null>(null)
@@ -160,7 +165,11 @@ export function CapricornEditor({
   onRetryRef.current = onRetry
   onRuntimeReadyRef.current = onRuntimeReady
   onUnavailableRef.current = onUnavailable
-  optionsRef.current = { ...options, style: runtimeStyle }
+  optionsRef.current = {
+    ...options,
+    caretAnimation: options.caretAnimation ?? false,
+    style: runtimeStyle,
+  }
 
   const reportUnavailable = useCallback((error: unknown) => {
     if (unavailableReportedRef.current) return
@@ -242,7 +251,8 @@ export function CapricornEditor({
           ? {
               ...optionsRef.current.virtualize,
               firstPaintBlockSize: Math.min(
-                optionsRef.current.virtualize.firstPaintBlockSize ?? 40,
+                optionsRef.current.virtualize.firstPaintBlockSize ??
+                  CAPRICORN_DESKTOP_VIRTUALIZE_OPTIONS.firstPaintBlockSize,
                 getCapricornFirstPaintBlockSize(viewportHeight),
               ),
             }
@@ -271,15 +281,20 @@ export function CapricornEditor({
         const changedMode = current.options.mode !== (optionsRef.current.mode ?? 'edit')
         const changedSettings = (
           [
+            'caretAnimation',
             'className',
+            'codeEditor',
+            'codeBlockLineWrapping',
             'colorScheme',
             'density',
             'keybindingConfiguration',
             'linkEditMode',
             'placeholder',
             'readOnly',
+            'snippets',
             'spellCheck',
             'style',
+            'textDirection',
             'typewriter',
           ] as const
         ).some((key) => current.options?.[key] !== optionsRef.current[key])
@@ -416,7 +431,13 @@ export function CapricornEditor({
             container,
             createRuntime,
             onChange: (event) => onChangeRef.current(event),
-            options: getOptions(),
+            options: {
+              ...getOptions(),
+              onProgress: (progress) => {
+                if (!disposed && request === current && !current.abort.signal.aborted)
+                  reportProgress(current, progress)
+              },
+            },
           }),
           current,
         )
@@ -533,7 +554,10 @@ export function CapricornEditor({
 
   useEffect(() => {
     const settings: CapricornEditorSettings = {
+      caretAnimation: options.caretAnimation ?? false,
+      snippets: options.snippets,
       codeBlockLineWrapping: options.codeBlockLineWrapping,
+      codeEditor: options.codeEditor,
       className: options.className,
       colorScheme: options.colorScheme,
       density: options.density,
@@ -543,12 +567,16 @@ export function CapricornEditor({
       readOnly: options.readOnly,
       spellCheck: options.spellCheck,
       style: runtimeStyle,
+      textDirection: options.textDirection,
       typewriter: options.typewriter,
     }
     adapterRef.current?.updateSettings(settings)
   }, [
+    options.caretAnimation,
+    options.snippets,
     options.className,
     options.codeBlockLineWrapping,
+    options.codeEditor,
     options.colorScheme,
     options.density,
     options.linkEditMode,
@@ -556,6 +584,7 @@ export function CapricornEditor({
     options.placeholder,
     options.readOnly,
     options.spellCheck,
+    options.textDirection,
     options.typewriter,
     runtimeStyle,
   ])
@@ -565,19 +594,34 @@ export function CapricornEditor({
     setAttempt((current) => current + 1)
   }, [])
 
-  const handlePreviewLink = (event: MouseEvent<HTMLDivElement> | KeyboardEvent<HTMLDivElement>) => {
-    if (mode !== 'preview' || !options.handleLinkClick || event.defaultPrevented) return
-    if ('key' in event ? event.key !== 'Enter' : event.button !== 0) return
+  const handleLinkNavigation = (
+    event: MouseEvent<HTMLDivElement> | KeyboardEvent<HTMLDivElement>,
+  ) => {
+    if (event.defaultPrevented) return
+    const auxiliary = event.type === 'auxclick'
+    if (
+      'key' in event
+        ? event.key !== 'Enter' || event.nativeEvent.isComposing
+        : event.button !== (auxiliary ? 1 : 0)
+    ) {
+      return
+    }
     const link = event.target instanceof Element ? event.target.closest('a[href]') : null
-    const href = link?.getAttribute('href')
-    if (!href) return
-    // The runtime's button-based link UI is shared with edit mode. Reading
-    // previews retain the host's direct-click/Enter navigation, including
-    // local Markdown paths, without replacing the session's plugin options.
+    if (!link || !event.currentTarget.contains(link)) return
+
+    // Document links must never replace the Desktop WebView, even when a
+    // rendered HTML fragment has no handler or the host opener is unavailable.
     event.preventDefault()
+    // Preserve Capricorn's editing UI and modifier-click policy for its own
+    // links. Capture still cancels navigation if a child stops propagation.
+    if (mode === 'edit' && link.hasAttribute('data-cap-link-open') && !auxiliary) return
+
     event.stopPropagation()
+    const href = link.getAttribute('href')
+    const openLink = options.handleLinkClick
+    if (!href?.trim() || !openLink) return
     void Promise.resolve()
-      .then(() => options.handleLinkClick?.(href))
+      .then(() => openLink(href))
       .catch(onError)
   }
 
@@ -593,8 +637,9 @@ export function CapricornEditor({
         data-mf-capricorn-runtime='true'
         id={editorId}
         ref={containerRef}
-        onClickCapture={handlePreviewLink}
-        onKeyDownCapture={handlePreviewLink}
+        onAuxClickCapture={handleLinkNavigation}
+        onClickCapture={handleLinkNavigation}
+        onKeyDownCapture={handleLinkNavigation}
         style={{
           gridColumn: 1,
           gridRow: 1,

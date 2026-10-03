@@ -33,10 +33,12 @@ pub_struct!(AppConf {
     theme: Option<String>,
     theme_mode: Option<String>,
     theme_accent_color: Option<String>,
+    theme_use_personal_typography: Option<bool>,
     light_theme: Option<String>,
     dark_theme: Option<String>,
     language: Option<String>,
     auto_update: Option<bool>,
+    error_reporting_enabled: Option<bool>,
     webview_zoom: Option<String>,
     copilot_provider: Option<String>,
     copilot_model: Option<String>,
@@ -45,9 +47,24 @@ pub_struct!(AppConf {
     editor_typewriter_scroll: Option<bool>,
     editor_placeholder: Option<bool>,
     editor_link_edit_mode: Option<String>,
+    editor_text_direction: Option<String>,
     editor_insert_date_format: Option<String>,
     editor_root_font_size: Option<u32>,
     editor_root_line_height: Option<String>,
+    editor_source_font_size: Option<u32>,
+    editor_source_line_height: Option<String>,
+    editor_code_font_size: Option<u32>,
+    editor_code_line_height: Option<String>,
+    editor_code_indent_style: Option<String>,
+    editor_code_indent_size: Option<String>,
+    editor_code_auto_close_brackets: Option<bool>,
+    editor_code_whitespace: Option<String>,
+    source_code_editor_line_wrap: Option<String>,
+    source_code_editor_line_numbers: Option<String>,
+    source_code_editor_highlight_active_line: Option<String>,
+    embedded_code_editor_line_wrap: Option<String>,
+    embedded_code_editor_line_numbers: Option<String>,
+    embedded_code_editor_highlight_active_line: Option<String>,
     extensions_chatgpt_apibase: Option<String>,
     extensions_chatgpt_apikey: Option<String>,
     extensions_chatgpt_models: Option<String>,
@@ -64,6 +81,7 @@ pub_struct!(AppConf {
     extensions_google_apikey: Option<String>,
     extensions_google_request_headers: Option<HashMap<String, String>>,
     autosave: Option<bool>,
+    local_history_enabled: Option<bool>,
     autosave_interval: Option<u32>,
     editor_root_font_family: Option<String>,
     editor_code_font_family: Option<String>,
@@ -529,6 +547,16 @@ fn startup_appearance_changed(
 }
 
 pub fn app_root() -> PathBuf {
+    #[cfg(feature = "e2e")]
+    {
+        return crate::e2e::root().join("config");
+    }
+    #[cfg(not(feature = "e2e"))]
+    app_root_default()
+}
+
+#[cfg(not(feature = "e2e"))]
+fn app_root_default() -> PathBuf {
     let app_dir = APP_DIR.lock().unwrap();
     let base_dir = app_dir.get(&0).unwrap().clone();
 
@@ -627,12 +655,16 @@ impl AppConf {
     pub fn new() -> Self {
         Self {
             theme: Some("light".to_string()),
-            theme_mode: Some("system".to_string()),
+            theme_mode: Some(
+                if cfg!(feature = "e2e") { "light" } else { "system" }.to_string(),
+            ),
             theme_accent_color: Some("system".to_string()),
+            theme_use_personal_typography: Some(true),
             light_theme: Some("MarkFlowy Light".to_string()),
             dark_theme: Some("MarkFlowy Dark".to_string()),
             language: Some("en".to_string()),
             auto_update: Some(false),
+            error_reporting_enabled: Some(false),
             webview_zoom: Some("1.0".to_string()),
             copilot_provider: Some("".to_string()),
             copilot_model: Some("".to_string()),
@@ -641,11 +673,27 @@ impl AppConf {
             editor_typewriter_scroll: Some(false),
             editor_placeholder: Some(true),
             editor_link_edit_mode: Some("popover".to_string()),
+            editor_text_direction: Some("auto".to_string()),
             editor_insert_date_format: Some("YYYY-MM-DD".to_string()),
             editor_root_font_size: Some(16),
-            editor_root_line_height: Some("1.65".to_string()),
+            editor_root_line_height: Some("1.7".to_string()),
+            editor_source_font_size: Some(15),
+            editor_source_line_height: Some("1.6".to_string()),
+            editor_code_font_size: None,
+            editor_code_line_height: None,
+            editor_code_indent_style: Some("spaces".to_string()),
+            editor_code_indent_size: Some("default".to_string()),
+            editor_code_auto_close_brackets: Some(true),
+            editor_code_whitespace: Some("off".to_string()),
+            source_code_editor_line_wrap: Some("default".to_string()),
+            source_code_editor_line_numbers: Some("default".to_string()),
+            source_code_editor_highlight_active_line: Some("default".to_string()),
+            embedded_code_editor_line_wrap: Some("default".to_string()),
+            embedded_code_editor_line_numbers: Some("default".to_string()),
+            embedded_code_editor_highlight_active_line: Some("default".to_string()),
             md_editor_default_mode: Some("wysiwyg".to_string()),
             autosave: Some(false),
+            local_history_enabled: Some(true),
             autosave_interval: Some(2000),
             editor_root_font_family: Some("System Default".to_string()),
             editor_code_font_family: Some("Default Monospace".to_string()),
@@ -747,18 +795,29 @@ impl AppConf {
      *
      * Generally used to be compatible with the original config when versions are different.
      */
-    pub fn merge_conf(mut self, oldconf: AppConf) -> Self {
+    pub fn merge_conf(mut self, mut oldconf: AppConf) -> Self {
+        // Source typography used to share the body settings. Preserve that
+        // appearance on upgrade; later writes keep the two modes independent.
+        oldconf.editor_source_font_size = oldconf
+            .editor_source_font_size
+            .or(oldconf.editor_root_font_size);
+        oldconf.editor_source_line_height = oldconf
+            .editor_source_line_height
+            .or_else(|| oldconf.editor_root_line_height.clone());
         merge_options!(
             self,
             oldconf,
             theme,
             theme_mode,
             theme_accent_color,
+            theme_use_personal_typography,
             light_theme,
             dark_theme,
             language,
             autosave,
+            local_history_enabled,
             auto_update,
+            error_reporting_enabled,
             webview_zoom,
             copilot_provider,
             copilot_model,
@@ -767,9 +826,24 @@ impl AppConf {
             editor_typewriter_scroll,
             editor_placeholder,
             editor_link_edit_mode,
+            editor_text_direction,
             editor_insert_date_format,
             editor_root_font_size,
             editor_root_line_height,
+            editor_source_font_size,
+            editor_source_line_height,
+            editor_code_font_size,
+            editor_code_line_height,
+            editor_code_indent_style,
+            editor_code_indent_size,
+            editor_code_auto_close_brackets,
+            editor_code_whitespace,
+            source_code_editor_line_wrap,
+            source_code_editor_line_numbers,
+            source_code_editor_highlight_active_line,
+            embedded_code_editor_line_wrap,
+            embedded_code_editor_line_numbers,
+            embedded_code_editor_highlight_active_line,
             md_editor_default_mode,
             editor_root_font_family,
             editor_code_font_family,
@@ -871,7 +945,25 @@ impl AppConf {
         let mut config: BTreeMap<String, Value> = serde_json::from_value(val).unwrap();
         let new_json: BTreeMap<String, Value> = serde_json::from_value(json).unwrap();
 
-        for (k, v) in new_json {
+        for (k, mut v) in new_json {
+            // Each window sends only the remembered choice it changed. Merge
+            // entries here, under the shared config writer lock, so another
+            // window's choices survive. Null removes one remembered choice.
+            if k == "dialog_preferences" && v.is_object() {
+                let mut preferences = config
+                    .get(&k)
+                    .and_then(Value::as_object)
+                    .cloned()
+                    .unwrap_or_default();
+                for (key, action) in v.as_object().unwrap() {
+                    if action.is_null() {
+                        preferences.remove(key);
+                    } else {
+                        preferences.insert(key.clone(), action.clone());
+                    }
+                }
+                v = Value::Object(preferences);
+            }
             config.insert(k, v);
         }
 
@@ -1003,7 +1095,7 @@ pub mod cmd {
         STARTUP_APPEARANCE_COMMAND_WRITE_QUEUE, STARTUP_APPEARANCE_WRITE_LOCK,
     };
     use crate::app::startup_io;
-    use tauri::{command, AppHandle, WebviewUrl, WebviewWindowBuilder};
+    use tauri::{command, AppHandle, Emitter, WebviewUrl, WebviewWindowBuilder};
 
     #[command]
     pub async fn get_app_conf(app: AppHandle) -> Result<AppConf, String> {
@@ -1030,7 +1122,22 @@ pub mod cmd {
             // Invalidate first: a crash before the config commit will fall back
             // to the still-valid old config instead of a mismatched palette.
             invalidate_startup_appearance_snapshot()?;
-            AppConf::default().try_reset_with_app(&app)
+            let current = AppConf::read_with_app(&app);
+            crate::local_history::init(&app)?;
+            let _file_guard = crate::fc::FILE_WRITE_MUTEX
+                .lock()
+                .map_err(|_| "File write lock unavailable".to_string())?;
+            crate::local_history::run(|s| s.set_enabled(true))?;
+            let result = AppConf::default().try_reset_with_app(&app);
+            if result.is_err() {
+                let enabled = current.local_history_enabled.unwrap_or(true);
+                crate::local_history::run(move |s| s.set_enabled(enabled))?;
+            }
+            let _ = app.emit(
+                "local-history-changed",
+                serde_json::json!({"operation":"enabled"}),
+            );
+            result
         })
         .await
         .map_err(|error| format!("Failed to join config reset: {error}"))?
@@ -1046,18 +1153,43 @@ pub mod cmd {
             let current = AppConf::read_with_app(&app);
             let candidate = current.clone().amend(data);
 
-            if startup_theme_identity_changed(&current, &candidate) {
+            let history_changed = current.local_history_enabled != candidate.local_history_enabled;
+            if history_changed {
+                crate::local_history::init(&app)?;
+            }
+            let _file_guard = if history_changed {
+                Some(
+                    crate::fc::FILE_WRITE_MUTEX
+                        .lock()
+                        .map_err(|_| "File write lock unavailable".to_string())?,
+                )
+            } else {
+                None
+            };
+            if history_changed {
+                let enabled = candidate.local_history_enabled.unwrap_or(true);
+                crate::local_history::run(move |s| s.set_enabled(enabled))?;
+            }
+            let result = if startup_theme_identity_changed(&current, &candidate) {
                 let _appearance_guard = STARTUP_APPEARANCE_WRITE_LOCK
                     .lock()
                     .map_err(|_| "Failed to lock startup appearance writer".to_string())?;
-                // Deleting before committing config makes every interruption
-                // safe: startup either reads the old config or the new config,
-                // never a stale appearance identity.
-                invalidate_startup_appearance_snapshot()?;
-                candidate.try_write_with_app(&app)
+                invalidate_startup_appearance_snapshot()
+                    .and_then(|_| candidate.try_write_with_app(&app))
             } else {
                 candidate.try_write_with_app(&app)
+            };
+            if result.is_err() && history_changed {
+                let enabled = current.local_history_enabled.unwrap_or(true);
+                crate::local_history::run(move |s| s.set_enabled(enabled))?;
             }
+            if history_changed {
+                let _ = app.emit(
+                    "local-history-changed",
+                    serde_json::json!({"operation":"enabled"}),
+                );
+            }
+            result
         })
         .await
         .map_err(|error| format!("Failed to join config writer: {error}"))?
@@ -1125,6 +1257,181 @@ mod tests {
 
     fn empty_conf() -> AppConf {
         serde_json::from_value(serde_json::json!({})).expect("empty config")
+    }
+
+    fn typography_default_conf() -> AppConf {
+        // Unit tests do not execute Tauri setup. new() only uses this path to
+        // construct the default image directory; it does not write to disk.
+        crate::APP_DIR
+            .lock()
+            .unwrap()
+            .entry(0)
+            .or_insert_with(std::env::temp_dir);
+        AppConf::new()
+    }
+
+    #[test]
+    fn error_reporting_is_opt_in_and_preserves_explicit_consent() {
+        let defaults = typography_default_conf().merge_conf(empty_conf());
+        assert_eq!(defaults.error_reporting_enabled, Some(false));
+        for enabled in [true, false] {
+            let changed = defaults.clone().amend(serde_json::json!({
+                "error_reporting_enabled": enabled
+            }));
+            let saved = serde_json::from_value(serde_json::to_value(changed).unwrap()).unwrap();
+            let restored = typography_default_conf().merge_conf(saved);
+            assert_eq!(restored.error_reporting_enabled, Some(enabled));
+        }
+    }
+
+    #[test]
+    fn settings_patches_preserve_other_windows_values_and_dialog_choices() {
+        let current = empty_conf().amend(serde_json::json!({
+            "language": "en",
+            "theme_mode": "dark",
+            "error_reporting_enabled": false,
+            "extensions_chatgpt_apikey": "new-key",
+            "dialog_preferences": { "close": "save", "export": "replace" }
+        }));
+        let updated = current.amend(serde_json::json!({
+            "language": "zh",
+            "dialog_preferences": { "delete": "trash" }
+        }));
+        assert_eq!(updated.language.as_deref(), Some("zh"));
+        assert_eq!(updated.theme_mode.as_deref(), Some("dark"));
+        assert_eq!(updated.error_reporting_enabled, Some(false));
+        assert_eq!(
+            updated.extensions_chatgpt_apikey.as_deref(),
+            Some("new-key")
+        );
+        let cleared = updated.amend(serde_json::json!({
+            "dialog_preferences": { "close": null, "missing": null }
+        }));
+        assert_eq!(
+            serde_json::to_value(cleared.dialog_preferences).unwrap(),
+            serde_json::json!({
+                "export": "replace", "delete": "trash"
+            })
+        );
+    }
+
+    #[test]
+    fn text_direction_defaults_to_auto_and_survives_config_roundtrip() {
+        let defaults = typography_default_conf().merge_conf(empty_conf());
+        assert_eq!(defaults.editor_text_direction.as_deref(), Some("auto"));
+        for direction in ["rtl", "ltr", "auto"] {
+            let changed = defaults.clone().amend(serde_json::json!({
+                "editor_text_direction": direction
+            }));
+            let saved = serde_json::from_value(serde_json::to_value(changed).unwrap()).unwrap();
+            let restored = typography_default_conf().merge_conf(saved);
+            assert_eq!(restored.editor_text_direction.as_deref(), Some(direction));
+        }
+    }
+
+    #[test]
+    fn typography_defaults_separate_document_and_source() {
+        let conf = typography_default_conf().merge_conf(empty_conf());
+        assert_eq!(conf.editor_root_font_size, Some(16));
+        assert_eq!(conf.editor_root_line_height.as_deref(), Some("1.7"));
+        assert_eq!(conf.editor_source_font_size, Some(15));
+        assert_eq!(conf.editor_source_line_height.as_deref(), Some("1.6"));
+    }
+
+    #[test]
+    fn code_editor_defaults_preserve_legacy_display_and_optional_typography() {
+        let legacy = empty_conf().amend(serde_json::json!({
+            "wysiwyg_editor_codemirror_line_wrap": false
+        }));
+        let conf = typography_default_conf().merge_conf(legacy);
+        assert_eq!(conf.wysiwyg_editor_codemirror_line_wrap, Some(false));
+        assert_eq!(conf.editor_code_indent_style.as_deref(), Some("spaces"));
+        assert_eq!(conf.editor_code_indent_size.as_deref(), Some("default"));
+        assert_eq!(conf.editor_code_auto_close_brackets, Some(true));
+        assert_eq!(conf.editor_code_whitespace.as_deref(), Some("off"));
+        assert_eq!(conf.editor_code_font_size, None);
+        assert_eq!(conf.editor_code_line_height, None);
+        let value = serde_json::to_value(conf).unwrap();
+        for scope in ["source", "embedded"] {
+            for field in ["line_wrap", "line_numbers", "highlight_active_line"] {
+                assert_eq!(value[format!("{scope}_code_editor_{field}")], "default");
+            }
+        }
+    }
+
+    #[test]
+    fn code_editor_preferences_roundtrip_and_clear_typography_overrides() {
+        let patch = serde_json::json!({
+            "editor_code_indent_style": "tabs",
+            "editor_code_indent_size": "4",
+            "editor_code_auto_close_brackets": false,
+            "editor_code_whitespace": "trailing",
+            "source_code_editor_line_wrap": "off",
+            "source_code_editor_line_numbers": "all",
+            "source_code_editor_highlight_active_line": "off",
+            "embedded_code_editor_line_wrap": "on",
+            "embedded_code_editor_line_numbers": "sparse",
+            "embedded_code_editor_highlight_active_line": "on",
+            "editor_code_font_size": 18,
+            "editor_code_line_height": "1.8"
+        });
+        let changed = typography_default_conf().amend(patch.clone());
+        let saved = serde_json::from_value(serde_json::to_value(changed).unwrap()).unwrap();
+        let restored = typography_default_conf().merge_conf(saved);
+        let value = serde_json::to_value(&restored).unwrap();
+        for (key, expected) in patch.as_object().unwrap() {
+            assert_eq!(&value[key], expected, "setting {key} must survive reload");
+        }
+        let cleared = restored.amend(serde_json::json!({
+            "editor_code_font_size": null,
+            "editor_code_line_height": null,
+            "embedded_code_editor_line_wrap": "default"
+        }));
+        let saved = serde_json::from_value(serde_json::to_value(cleared).unwrap()).unwrap();
+        let restored = typography_default_conf().merge_conf(saved);
+        assert_eq!(restored.editor_code_font_size, None);
+        assert_eq!(restored.editor_code_line_height, None);
+        assert_eq!(
+            restored.embedded_code_editor_line_wrap.as_deref(),
+            Some("default")
+        );
+        assert_eq!(restored.source_code_editor_line_wrap.as_deref(), Some("off"));
+        let reset = typography_default_conf();
+        assert_eq!(reset.editor_code_font_size, None);
+        assert_eq!(reset.editor_code_line_height, None);
+        assert_eq!(reset.editor_code_auto_close_brackets, Some(true));
+    }
+
+    #[test]
+    fn typography_upgrade_preserves_legacy_values_in_both_modes() {
+        let legacy = serde_json::from_value(serde_json::json!({
+            "editor_root_font_size": 18,
+            "editor_root_line_height": "1.8"
+        }))
+        .expect("legacy config");
+        let conf = typography_default_conf().merge_conf(legacy);
+        assert_eq!(conf.editor_root_font_size, Some(18));
+        assert_eq!(conf.editor_source_font_size, Some(18));
+        assert_eq!(conf.editor_source_line_height.as_deref(), Some("1.8"));
+        let changed = conf.amend(serde_json::json!({ "editor_root_font_size": 20 }));
+        let roundtrip = serde_json::from_value(serde_json::to_value(changed).unwrap()).unwrap();
+        let restored = typography_default_conf().merge_conf(roundtrip);
+        assert_eq!(restored.editor_root_font_size, Some(20));
+        assert_eq!(restored.editor_source_font_size, Some(18));
+    }
+
+    #[test]
+    fn typography_upgrade_keeps_explicit_source_preferences() {
+        let saved = serde_json::from_value(serde_json::json!({
+            "editor_root_font_size": 20,
+            "editor_root_line_height": "1.9",
+            "editor_source_font_size": 15,
+            "editor_source_line_height": "1.6"
+        }))
+        .expect("saved config");
+        let conf = typography_default_conf().merge_conf(saved);
+        assert_eq!(conf.editor_source_font_size, Some(15));
+        assert_eq!(conf.editor_source_line_height.as_deref(), Some("1.6"));
     }
 
     #[test]

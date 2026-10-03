@@ -38,9 +38,9 @@ export const DesktopSpecificStyles = createGlobalStyle<{
     --mf-control-selected: ${(props) => props.theme.fileTreeSelectedBgColor};
     --mf-control-border: ${(props) => props.theme.borderColor};
     --mf-control-focus: ${(props) => props.theme.accentColor};
-    --mf-motion-duration-fast: 120ms;
+    --mf-motion-duration-fast: 100ms;
     --mf-motion-duration-base: 180ms;
-    --mf-motion-duration-overlay: 240ms;
+    --mf-motion-duration-overlay: 120ms;
     --mf-motion-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
     --mf-motion-ease-in: cubic-bezier(0.4, 0, 1, 1);
     --mf-layer-dialog: 900;

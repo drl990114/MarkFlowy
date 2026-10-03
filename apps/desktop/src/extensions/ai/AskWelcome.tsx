@@ -16,7 +16,7 @@ export function AskWelcome() {
 
   return (
     <div className='aui-welcome flex flex-col items-center px-3 text-center'>
-      <h2 className='text-lg font-semibold'>{t('ai.welcome_title')}</h2>
+      <h2 className='text-ui-title font-medium'>{t('ai.welcome_title')}</h2>
     </div>
   )
 }
@@ -89,7 +89,7 @@ function WelcomePrompt({
 }) {
   return (
     <Button
-      className='h-7 shrink-0 gap-1.5 whitespace-nowrap rounded-md border border-border px-2.5 text-xs font-normal'
+      className='h-7 shrink-0 gap-1.5 whitespace-nowrap rounded-sm px-2 text-ui-control font-normal'
       disabled={disabled}
       onClick={onClick}
       type='button'

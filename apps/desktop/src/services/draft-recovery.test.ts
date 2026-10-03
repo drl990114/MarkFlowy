@@ -13,20 +13,21 @@ import { markExternalFileConflict } from '@/components/EditorArea/externalFileCh
 import {
   closeWithDraftRecovery,
   listenForDraftReload,
-  restoreDraftDocuments,
-  restoreDraftReloadSession,
-  restoreDraftSession,
+  type DraftDocument,
   type DraftSession,
   type DraftSessionStore,
 } from './draft-recovery'
+import { stageDraftRecovery } from './staged-draft-recovery'
+import { RELOAD_DOCUMENT_PREFIX, RELOAD_SESSION_KEY, type DraftManifest } from './draftSessionFormat'
 
-vi.mock('@tauri-apps/api/core', () => ({ invoke: vi.fn().mockResolvedValue(undefined) }))
+vi.mock('@tauri-apps/api/core', () => ({ invoke: vi.fn().mockResolvedValue(undefined), isTauri: () => false }))
 vi.mock('zens', () => ({ toast: { error: vi.fn(), success: vi.fn() } }))
 vi.mock('@/helper/logger', () => ({ logger: { error: vi.fn() } }))
 vi.mock('@/components/EditorArea/externalFileChanges', () => ({
   markExternalFileConflict: vi.fn(),
 }))
-vi.mock('@/components/EditorArea/fileSnapshot', () => ({ readStableFileSnapshot: vi.fn() }))
+vi.mock('@/components/EditorArea/fileSnapshot', () => ({ readStableFileSnapshot: vi.fn(), promoteOpeningRead: vi.fn() }))
+vi.mock('@/startup/interactive', () => ({ afterStartupInteractive: (run: () => void) => { run(); return () => {} } }))
 
 enableMapSet()
 const cleanups: (() => void)[] = []
@@ -64,6 +65,17 @@ const createCache = () => {
       .filter(([key]) => key.startsWith('draft-session:'))
       .map(([, value]) => value as DraftSession)
   return { cache, data, save, sessions }
+}
+
+// Exercise the production staged coordinator through both persistence sources.
+const restoreDraftSession = async (cache: DraftSessionStore, signal?: AbortSignal) =>
+  (await stageDraftRecovery({ cache, signal, onError: vi.fn() })).finished
+const restoreDraftReloadSession = async (signal?: AbortSignal) =>
+  (await stageDraftRecovery({ reload: true, signal, onError: vi.fn() })).finished
+const restoreDraftDocuments = async (documents: DraftDocument[]) => {
+  const { cache, data } = createCache()
+  data.set('draft-session:test', { version: 1, documents })
+  return restoreDraftSession(cache)
 }
 
 beforeEach(() => {
@@ -254,7 +266,7 @@ describe('normal exit draft session', () => {
 
   it('retains unknown sessions and does not consume a cancelled recovery', async () => {
     const { cache, data, sessions } = createCache()
-    data.set('draft-session:future', { version: 2, documents: [] })
+    data.set('draft-session:future', { version: 3, documents: [] })
     open('draft')
     await closeWithDraftRecovery(cache, 'main', async () => {})
     resetEditors()
@@ -276,6 +288,57 @@ describe('WebView reload draft session', () => {
   }
   const reload = (type = 'beforeunload') =>
     window.dispatchEvent(new Event(type, { cancelable: type === 'beforeunload' }))
+
+  it.each(['second body', 'head'])('retains every previous body if writing the new %s fails', async (failure) => {
+    const first = open('first previous')
+    const second = open('second previous')
+    const onError = listen()
+    reload()
+    const previous = window.sessionStorage.getItem(RELOAD_SESSION_KEY)
+    const originalLength = window.sessionStorage.length
+    setFileObject(first.id, { ...first, content: 'first newer' })
+    setFileObject(second.id, { ...second, content: 'second newer' })
+    const setItem = window.sessionStorage.setItem.bind(window.sessionStorage)
+    let bodies = 0
+    const denied = vi.spyOn(window.sessionStorage, 'setItem').mockImplementation((key, value) => {
+      if (key.startsWith(RELOAD_DOCUMENT_PREFIX)) bodies++
+      if (failure === 'head' ? key === RELOAD_SESSION_KEY : bodies === 2) throw new Error('quota')
+      setItem(key, value)
+    })
+    expect(reload()).toBe(false)
+    denied.mockRestore()
+    expect(window.sessionStorage.getItem(RELOAD_SESSION_KEY)).toBe(previous)
+    expect(window.sessionStorage.length).toBe(originalLength)
+    expect(onError).toHaveBeenCalledOnce()
+    resetEditors()
+    expect(await restoreDraftReloadSession()).toBe(2)
+    expect(useEditorStore.getState().opened.map((id) => getFileObject(id).content)).toEqual(['first previous', 'second previous'])
+  })
+
+  it('loads and validates only the selected reload body, retaining another corrupt body and the head', async () => {
+    const first = open('good')
+    open('bad')
+    useEditorStore.getState().setActiveId(first.id)
+    listen()
+    reload()
+    const raw = window.sessionStorage.getItem(RELOAD_SESSION_KEY)!
+    const manifest = JSON.parse(raw) as DraftManifest
+    const source = manifest.documents[1].source
+    expect(source.kind).toBe('reload')
+    if (source.kind !== 'reload') throw new Error('Expected reload body')
+    window.sessionStorage.setItem(source.key, 'corrupt JSON')
+    resetEditors()
+    const controller = new AbortController()
+    cleanups.push(() => controller.abort())
+    const errors = vi.fn()
+    const recovery = await stageDraftRecovery({ reload: true, signal: controller.signal, onError: errors })
+    await recovery.visibleReady
+    expect(getFileObject(useEditorStore.getState().activeId!).content).toBe('good')
+    await recovery.finished
+    expect(window.sessionStorage.getItem(RELOAD_SESSION_KEY)).toBe(raw)
+    expect(window.sessionStorage.getItem(source.key)).toBe('corrupt JSON')
+    expect(errors).toHaveBeenCalled()
+  })
 
   it.each(['beforeunload', 'pagehide'])(
     'restores new unsaved documents after %s without waiting for native I/O',
@@ -481,9 +544,10 @@ describe('restoring unsaved file content', () => {
 
   it('keeps deleted paths and competing dirty versions as separate saveable drafts', async () => {
     const existing = open('live edit', '/w/a.md')
-    vi.mocked(readStableFileSnapshot)
-      .mockResolvedValueOnce({ status: 'success', content: 'disk', revision: 'r1' })
-      .mockRejectedValueOnce(new Error('missing file'))
+    vi.mocked(readStableFileSnapshot).mockImplementation(async (path) => {
+      if (path === '/w/missing.md') throw new Error('missing file')
+      return { status: 'success', content: 'disk', revision: 'r1' }
+    })
     await restoreDraftDocuments([
       { id: 'other', name: 'a.md', path: '/w/a.md', content: 'other edit' },
       { id: 'missing', name: 'missing.md', path: '/w/missing.md', content: 'rescued' },

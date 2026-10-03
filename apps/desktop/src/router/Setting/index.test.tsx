@@ -30,6 +30,7 @@ const state = vi.hoisted(() => ({
   writeSettingData: vi.fn(),
   mounted: vi.fn(),
   cleanedUp: vi.fn(),
+  leaveSnippets: vi.fn().mockResolvedValue(true),
 }))
 
 vi.mock('@/commands', () => ({
@@ -68,11 +69,24 @@ vi.mock('./KeyboardTable', () => ({ KeyboardTable: () => null }))
 vi.mock('./Support', () => ({ Support: () => null }))
 vi.mock('./ThemeSetting', () => ({ ThemeSetting: () => null }))
 vi.mock('./ThemeStore', () => ({ ThemeStore: () => null }))
+vi.mock('./SnippetSetting', () => ({
+  SnippetSetting: ({
+    initialKind,
+    registerLeaveGuard,
+  }: {
+    initialKind?: string
+    registerLeaveGuard: (guard: () => Promise<boolean>) => () => void
+  }) => {
+    useEffect(() => registerLeaveGuard(state.leaveSnippets), [registerLeaveGuard])
+    return <output aria-label='Snippet category'>{initialKind ?? 'math'}</output>
+  },
+}))
 vi.mock('./settingMap', () => ({
   getSettingMap: () => ({
     general: { i18nKey: 'General', desc: { i18nKey: 'General settings' }, misc: {} },
     editor: { i18nKey: 'Editor', desc: { i18nKey: 'Editor settings' }, behavior: {} },
     ai: { i18nKey: 'AI', desc: { i18nKey: 'AI settings' }, model: {} },
+    snippets: { i18nKey: 'Snippets', desc: { i18nKey: 'Snippet library' } },
   }),
 }))
 vi.mock('./component/SettingGroup', () => ({
@@ -163,6 +177,7 @@ let narrowViewport = false
 
 beforeEach(() => {
   vi.clearAllMocks()
+  state.leaveSnippets.mockResolvedValue(true)
   narrowViewport = false
   vi.spyOn(window, 'matchMedia').mockImplementation((query) => ({
     matches: narrowViewport,
@@ -193,6 +208,30 @@ function pressEscape(target: Element = document.activeElement ?? document.body) 
 }
 
 describe('Settings dialog integration', () => {
+  it('guards closing, switching settings and targeted snippet navigation', async () => {
+    render(
+      <MemoryRouter>
+        <AppProbe />
+      </MemoryRouter>,
+    )
+    const settings = await openSettings()
+    fireEvent.click(within(settings).getByRole('button', { name: 'Snippets' }))
+    await screen.findByLabelText('Snippet category')
+    state.leaveSnippets.mockResolvedValue(false)
+    fireEvent.click(within(settings).getByRole('button', { name: 'Editor' }))
+    await waitFor(() => expect(state.leaveSnippets).toHaveBeenCalledTimes(1))
+    expect(screen.getByLabelText('Snippet category').textContent).toBe('math')
+    fireEvent.click(within(settings).getByRole('button', { name: 'common.close' }))
+    await waitFor(() => expect(state.leaveSnippets).toHaveBeenCalledTimes(2))
+    expect(screen.getByRole('dialog')).toBe(settings)
+    await act(async () => state.handler?.({ category: 'snippets', snippetKind: 'code' }))
+    expect(screen.getByLabelText('Snippet category').textContent).toBe('math')
+    state.leaveSnippets.mockResolvedValue(true)
+    await act(async () => state.handler?.({ category: 'snippets', snippetKind: 'mermaid' }))
+    expect(screen.getByLabelText('Snippet category').textContent).toBe('mermaid')
+    pressEscape(settings)
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+  })
   it('resets startup preferences after resetting app configuration without moving the current panels', async () => {
     useLayoutStore.setState({ leftStartup: 'search', rightStartup: 'ai' })
     const leftBar = useLayoutStore.getState().leftBar
@@ -227,6 +266,10 @@ describe('Settings dialog integration', () => {
     )
     const draft = screen.getByRole('textbox', { name: 'Draft' }) as HTMLTextAreaElement
     fireEvent.change(draft, { target: { value: 'Keep this unsaved edit' } })
+    act(() => {
+      draft.focus()
+      draft.setSelectionRange(5, 14, 'backward')
+    })
     const mountsBefore = state.mounted.mock.calls.length
     const cleanupsBefore = state.cleanedUp.mock.calls.length
     const dialog = await openSettings()
@@ -242,6 +285,11 @@ describe('Settings dialog integration', () => {
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
     await waitFor(() => expect(document.activeElement).toBe(draft))
     expect(draft.value).toBe('Keep this unsaved edit')
+    expect([draft.selectionStart, draft.selectionEnd, draft.selectionDirection]).toEqual([
+      5,
+      14,
+      'backward',
+    ])
     expect(state.cleanedUp).toHaveBeenCalledTimes(cleanupsBefore)
     expect(container.querySelector('[data-mf-workspace-surface]')?.hasAttribute('inert')).toBe(
       false,
@@ -347,26 +395,32 @@ describe('Settings dialog integration', () => {
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
   })
 
-  it('returns to category navigation on narrow screens before dismissing settings', async () => {
-    narrowViewport = true
-    render(
-      <MemoryRouter>
-        <AppProbe />
-      </MemoryRouter>,
-    )
-    const settings = await openSettings()
-    const category = screen.getByRole('button', { name: 'Editor' })
-    fireEvent.click(category)
-    const heading = screen.getByRole('heading', { name: 'Editor' })
-    await waitFor(() => expect(document.activeElement).toBe(heading))
+  it.each([false, true])(
+    'closes with one Escape after selecting a category (narrow: %s)',
+    async (narrow) => {
+      narrowViewport = narrow
+      render(
+        <MemoryRouter>
+          <AppProbe />
+        </MemoryRouter>,
+      )
+      const draft = screen.getByRole('textbox', { name: 'Draft' })
+      const settings = await openSettings()
+      const category = screen.getByRole('button', { name: 'Editor' })
+      act(() => category.focus())
+      fireEvent.click(category)
 
-    pressEscape(heading)
-    await waitFor(() => expect(document.activeElement).toBe(category))
-    expect(screen.getByRole('dialog', { name: 'settings.label' })).toBe(settings)
+      expect(within(settings).getByRole('heading', { name: 'Editor' })).not.toBeNull()
+      expect(within(settings).getByRole('navigation')).not.toBeNull()
+      expect(
+        within(settings).queryByRole('button', { name: 'settings.back_to_settings' }),
+      ).toBeNull()
 
-    pressEscape(category)
-    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
-  })
+      pressEscape(category)
+      await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+      await waitFor(() => expect(document.activeElement).toBe(draft))
+    },
+  )
 
   it('updates targeted navigation without remounting the dialog or repeating the update check', async () => {
     render(

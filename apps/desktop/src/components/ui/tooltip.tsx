@@ -4,7 +4,7 @@ import { cn } from '@/lib/cn'
 
 export function TooltipProvider({
   delayDuration = 350,
-  skipDelayDuration = 80,
+  skipDelayDuration = 300,
   ...props
 }: ComponentProps<typeof TooltipPrimitive.Provider>) {
   return (

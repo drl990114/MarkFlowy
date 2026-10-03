@@ -1,5 +1,6 @@
 import { TooltipProvider } from '@/components/ui/tooltip'
 import useLayoutStore from '@/stores/useLayoutStore'
+import useEditorStore from '@/stores/useEditorStore'
 import { desktopDarkTheme } from '@markflowy/theme'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { ThemeProvider } from 'styled-components'
@@ -13,6 +14,7 @@ vi.mock('@/i18n', () => ({
 }))
 
 beforeEach(() => {
+  useEditorStore.setState({ folderData: [{ id: 'workspace', kind: 'dir', name: 'Workspace', path: '/workspace' }] })
   useLayoutStore.setState({
     leftBar: { activePanelId: 'explorer', size: 240, visible: true },
     rightBar: { activePanelId: 'toc', size: 280, visible: true },
@@ -33,6 +35,13 @@ function renderSwitcher() {
 }
 
 describe('DockSwitcher', () => {
+  it('keeps bookmarks available without showing workspace tools for independent documents', () => {
+    useEditorStore.setState({ folderData: null })
+    renderSwitcher()
+    expect(screen.queryByRole('button', { name: /files|explorer/i })).toBeNull()
+    expect(screen.queryByRole('button', { name: /search/i })).toBeNull()
+    expect(screen.getByRole('button', { name: /bookmarks/i })).toBeTruthy()
+  })
   it('uses the theme accent only on the active icon', () => {
     renderSwitcher()
 

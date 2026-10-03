@@ -9,6 +9,7 @@ import { defineConfig, type Plugin } from 'vite'
 import svgr from 'vite-plugin-svgr'
 
 import { CAPRICORN_VERSION, resolvePrivateCapricornRuntime } from './capricornRuntimeResolver'
+import { pdfPreviewAssets } from './pdfPreviewAssets'
 
 const workspaceRoot = fileURLToPath(new URL('../..', import.meta.url))
 const capricornRuntimeId = 'virtual:markflowy-capricorn-runtime'
@@ -66,9 +67,12 @@ export default defineConfig(async ({ mode }) => {
     clearScreen: false,
     optimizeDeps: {
       exclude: ['rme'],
-      include: ['react-dom/server', 'zens'],
+      // Discover the lazy history viewer before its first open, so loading a
+      // version does not trigger dependency re-optimization mid-session.
+      include: ['react-dom/server', 'zens', '@codemirror/merge'],
     },
     plugins: [
+      pdfPreviewAssets(),
       optionalCapricornRuntimePlugin(capricornRuntimeEntry),
       // Tailwind is only activated by the AI extension's lazy-loaded stylesheet.
       // That stylesheet imports theme + utilities explicitly and intentionally
@@ -94,6 +98,10 @@ export default defineConfig(async ({ mode }) => {
       minify: 'esbuild',
       sourcemap: false,
       rolldownOptions: {
+        input: {
+          app: fileURLToPath(new URL('./index.html', import.meta.url)),
+          themePreview: fileURLToPath(new URL('./theme-preview.html', import.meta.url)),
+        },
         output: {
           // Preserve dynamic-import subgraphs instead of pulling every dependency
           // into a single eagerly preloaded vendor chunk.
@@ -102,6 +110,9 @@ export default defineConfig(async ({ mode }) => {
       },
     },
     define: {
+      __MARKFLOWY_HOST_VERSION__: JSON.stringify(
+        JSON.parse(readFileSync(new URL('./src-tauri/tauri.conf.json', import.meta.url), 'utf8')).version,
+      ),
       __MARKFLOWY_CAPRICORN_RUNTIME_AVAILABLE__: JSON.stringify(capricornRuntimeEntry !== null),
       __MARKFLOWY_CAPRICORN_RUNTIME_VERSION__: JSON.stringify(
         capricornRuntimeEntry ? CAPRICORN_VERSION : null,
@@ -114,10 +125,23 @@ export default defineConfig(async ({ mode }) => {
     },
     resolve: {
       alias: [
+        // Source alias keeps the authoring model available without rebuilding workspace packages.
+        {
+          find: '@markflowy/theme/semantic',
+          replacement: fileURLToPath(
+            new URL('../../packages/theme/src/semantic/index.ts', import.meta.url),
+          ),
+        },
         { find: '@', replacement: fileURLToPath(new URL('./src', import.meta.url)) },
         {
-          find: '@markflowy/i18n',
-          replacement: fileURLToPath(new URL('../../packages/i18n/src/index.ts', import.meta.url)),
+          find: /^@markflowy\/i18n$/,
+          replacement: fileURLToPath(new URL('./src/i18n/index.ts', import.meta.url)),
+        },
+        {
+          find: '@markflowy/i18n/desktop',
+          replacement: fileURLToPath(
+            new URL('../../packages/i18n/src/desktop.ts', import.meta.url),
+          ),
         },
       ],
       dedupe: ['react', 'react-dom'],

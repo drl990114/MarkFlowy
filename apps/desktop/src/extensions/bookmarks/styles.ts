@@ -47,8 +47,8 @@ export const Container = styled.div`
       align-items: flex-start;
       position: relative;
       width: 100%;
-      min-height: 24px;
-      padding: 3px 6px;
+      min-height: 26px;
+      padding: 4px 6px;
       cursor: pointer;
       border: 0;
       border-radius: 0;
@@ -72,9 +72,11 @@ export const Container = styled.div`
 
       &:focus-visible {
         outline: none;
-        text-decoration-line: underline;
-        text-underline-offset: 2px;
-        opacity: 0.8;
+        box-shadow: inset 0 0 0 2px var(--mf-control-focus, ${(props) => props.theme.accentColor});
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        transition: none;
       }
     }
 

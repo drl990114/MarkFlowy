@@ -1,10 +1,7 @@
 import bus from '@/helper/eventBus'
-import {
-  getFileIdsByPathIdentity,
-  getFileObject,
-  updateFileObject,
-} from '@/helper/files'
+import { getFileObject, updateFileObject } from '@/helper/files'
 import { logger } from '@/helper/logger'
+import { getPathIdentityKey } from '@/helper/pathIdentity'
 import { t } from '@/i18n'
 import { useEditorStateStore, useEditorStore } from '@/stores'
 import useExternalFileChangeStore, {
@@ -14,8 +11,15 @@ import useExternalFileChangeStore, {
 import type { WatchEvent } from '@tauri-apps/plugin-fs'
 import { toast } from 'zens'
 import { conditionalWriteExpected } from './conditionalFileWrite'
+import { editorSnapshotRegistry } from './editorSnapshotRegistry'
 import { fileSaveCoordinator } from './fileSaveCoordinator'
-import { readStableFileSnapshot, type StableFileSnapshot } from './fileSnapshot'
+import {
+  invalidateFileSnapshotHandoffs,
+  readStableFileSnapshot,
+  type StableFileSnapshot,
+} from './fileSnapshot'
+import { sameTextFormat, type TextEncoding } from './textFileFormat'
+import { historyFileSaved, protectExternalContent } from '@/services/local-history'
 
 export const EXTERNAL_FILE_CONTENT_SYNC_EVENT = 'external_file_content_sync'
 export const EXTERNAL_FILE_NOTICE_DURATION_MS = 3000
@@ -25,7 +29,10 @@ export interface ExternalFileContentSyncPayload {
   fileId: string
 }
 
-const observationTails = new Map<string, Promise<void>>()
+const observationTails = new Map<
+  string,
+  { pending: boolean; fileIds: Set<string>; promise: Promise<void> }
+>()
 const noticeTimers = new Map<string, ReturnType<typeof setTimeout>>()
 let noticeToken = 0
 let workspaceGeneration = 0
@@ -72,7 +79,7 @@ function markResolutionFailed(fileId: string, fallbackRevision: string) {
   )
 }
 
-function applyExternalSnapshot(
+export function applyExternalSnapshot(
   fileId: string,
   snapshot: StableFileSnapshot,
   status: ExternalFileChangeStatus,
@@ -85,8 +92,7 @@ function applyExternalSnapshot(
     })
   }
 
-  fileSaveCoordinator.recordContent(fileId, snapshot.content)
-  fileSaveCoordinator.setDiskRevision(fileId, snapshot.revision)
+  fileSaveCoordinator.loadSnapshot(fileId, snapshot)
   useEditorStateStore.getState().setIdStateMap(fileId, {
     hasUnsavedChanges: false,
   })
@@ -97,15 +103,45 @@ function applyExternalSnapshot(
   showTransientNotice(fileId, status)
 }
 
-async function inspectExternalPath(fileId: string, filePath: string, generation: number) {
-  await fileSaveCoordinator.waitForIdle(fileId)
-  if (generation !== workspaceGeneration) return
+function isCurrentExternalTarget(fileId: string, generation: number, path: string) {
+  return (
+    generation === workspaceGeneration &&
+    useEditorStore.getState().opened.includes(fileId) &&
+    getPathIdentityKey(getFileObject(fileId)?.path ?? '') === getPathIdentityKey(path)
+  )
+}
 
-  const snapshot = await readStableFileSnapshot(filePath)
-  if (snapshot.status !== 'success') return
-  if (generation !== workspaceGeneration || !useEditorStore.getState().opened.includes(fileId)) {
-    return
-  }
+function matchesExternalSnapshot(
+  fileId: string,
+  content: string,
+  dirty: boolean,
+  snapshot: StableFileSnapshot,
+) {
+  if (content !== snapshot.content) return false
+  if (!dirty) return true
+  const format = fileSaveCoordinator.getTextMetadata(fileId).format
+  return (
+    !fileSaveCoordinator.hasFormatChanges(fileId) &&
+    sameTextFormat(format, snapshot.text?.format ?? format)
+  )
+}
+
+function canConfirmExternalSnapshot(fileId: string, revision: number, content: string) {
+  return (
+    fileSaveCoordinator.getRevision(fileId) === revision &&
+    editorSnapshotRegistry.canRead(fileId) &&
+    !editorSnapshotRegistry.hasPending(fileId) &&
+    useEditorStore.getState().getEditorContent(fileId) === content
+  )
+}
+
+async function inspectExternalPath(
+  fileId: string,
+  generation: number,
+  snapshot: StableFileSnapshot,
+  observedPath: string,
+) {
+  if (!isCurrentExternalTarget(fileId, generation, observedPath)) return
 
   const knownDiskRevision = fileSaveCoordinator.getDiskRevision(fileId)
   if (knownDiskRevision === snapshot.revision) return
@@ -121,10 +157,19 @@ async function inspectExternalPath(fileId: string, filePath: string, generation:
     markExternalFileConflict(fileId, snapshot.revision)
     return
   }
-  const isDirty =
-    useEditorStateStore.getState().idStateMap.get(fileId)?.hasUnsavedChanges ?? false
+  const isDirty = Boolean(useEditorStateStore.getState().idStateMap.get(fileId)?.hasUnsavedChanges)
 
-  if (localContent === snapshot.content) {
+  const localRevision = fileSaveCoordinator.getRevision(fileId)
+  const afterFormat = snapshot.text?.decoding.needsConfirmation ? undefined : snapshot.text?.format
+  if (matchesExternalSnapshot(fileId, localContent, isDirty, snapshot)) {
+    await protectExternalContent(fileId, localContent, snapshot.content, afterFormat)
+    if (
+      !isCurrentExternalTarget(fileId, generation, observedPath) ||
+      !canConfirmExternalSnapshot(fileId, localRevision, localContent)
+    ) {
+      markExternalFileConflict(fileId, snapshot.revision)
+      return
+    }
     const file = getFileObject(fileId)
     if (file) {
       updateFileObject(fileId, {
@@ -132,8 +177,7 @@ async function inspectExternalPath(fileId: string, filePath: string, generation:
         content: snapshot.content,
       })
     }
-    fileSaveCoordinator.recordContent(fileId, snapshot.content)
-    fileSaveCoordinator.setDiskRevision(fileId, snapshot.revision)
+    fileSaveCoordinator.loadSnapshot(fileId, snapshot)
     useEditorStateStore.getState().setIdStateMap(fileId, {
       hasUnsavedChanges: false,
     })
@@ -142,42 +186,110 @@ async function inspectExternalPath(fileId: string, filePath: string, generation:
   }
 
   if (isDirty) {
+    await protectExternalContent(fileId, localContent, snapshot.content, afterFormat)
     markExternalFileConflict(fileId, snapshot.revision)
     return
   }
 
   const latestContent = useEditorStore.getState().getEditorContent(fileId)
-  const becameDirty =
-    useEditorStateStore.getState().idStateMap.get(fileId)?.hasUnsavedChanges ?? false
+  const becameDirty = Boolean(
+    useEditorStateStore.getState().idStateMap.get(fileId)?.hasUnsavedChanges,
+  )
   if (becameDirty || latestContent !== localContent) {
     markExternalFileConflict(fileId, snapshot.revision)
     return
   }
 
+  await protectExternalContent(fileId, localContent, snapshot.content, afterFormat)
+  if (
+    !isCurrentExternalTarget(fileId, generation, observedPath) ||
+    useEditorStateStore.getState().idStateMap.get(fileId)?.hasUnsavedChanges ||
+    fileSaveCoordinator.getRevision(fileId) !== localRevision ||
+    useEditorStore.getState().getEditorContent(fileId) !== localContent
+  ) {
+    markExternalFileConflict(fileId, snapshot.revision)
+    return
+  }
   applyExternalSnapshot(fileId, snapshot, 'reloaded')
 }
 
 function enqueueExternalInspection(fileId: string, filePath: string, generation: number) {
-  const previous = observationTails.get(fileId) ?? Promise.resolve()
-  const next = previous
-    .then(() => inspectExternalPath(fileId, filePath, generation))
+  invalidateFileSnapshotHandoffs(filePath)
+  const key = getPathIdentityKey(filePath)
+  const previous = observationTails.get(key)
+  if (previous) {
+    previous.pending = true
+    previous.fileIds.add(fileId)
+    return previous.promise
+  }
+  const state = { pending: true, fileIds: new Set([fileId]), promise: Promise.resolve() }
+  state.promise = Promise.resolve()
+    .then(async () => {
+      let retries = 0
+      while (state.pending && generation === workspaceGeneration) {
+        state.pending = false
+        await Promise.all([...state.fileIds].map((id) => fileSaveCoordinator.waitForIdle(id)))
+        if (generation !== workspaceGeneration) return
+        const groups = new Map<TextEncoding | undefined, string[]>()
+        for (const id of state.fileIds) {
+          if (!isCurrentExternalTarget(id, generation, filePath)) continue
+          const encoding = fileSaveCoordinator.getReadEncoding(id)
+          const ids = groups.get(encoding) ?? []
+          ids.push(id)
+          groups.set(encoding, ids)
+        }
+        for (const [encoding, ids] of groups) {
+          const snapshot = await readStableFileSnapshot(filePath, { encoding })
+          if (snapshot.status !== 'success') {
+            state.pending ||= retries++ < 2
+            continue
+          }
+          for (const id of ids) {
+            // An encoding preview may have been applied while the read was pending.
+            if (fileSaveCoordinator.getReadEncoding(id) !== encoding) {
+              state.pending = true
+              continue
+            }
+            try {
+              await inspectExternalPath(id, generation, snapshot, filePath)
+            } catch (error) {
+              if (generation !== workspaceGeneration) return
+              markExternalFileConflict(id, snapshot.revision)
+              logger.error('Failed to protect an external file change', error)
+              if (/content_changed|file_unstable/.test(String(error)))
+                state.pending ||= retries++ < 2
+            }
+          }
+        }
+        if (state.pending) await new Promise((resolve) => setTimeout(resolve, 1000))
+      }
+    })
     .catch((error) => logger.error('Failed to inspect an external file change', error))
-
-  observationTails.set(fileId, next)
-  void next.finally(() => {
-    if (observationTails.get(fileId) === next) observationTails.delete(fileId)
-  })
-  return next
+    .finally(() => {
+      if (observationTails.get(key) === state) observationTails.delete(key)
+    })
+  observationTails.set(key, state)
+  return state.promise
 }
 
 export async function handleExternalWatchEvent(event: WatchEvent): Promise<void> {
   const generation = workspaceGeneration
-  const openedIds = new Set(useEditorStore.getState().opened)
+  // Index only live documents once per event batch. Directory caches can hold
+  // tens of thousands of entries; unrelated changes must never scan them.
+  const openedByPath = new Map<string, string[]>()
+  for (const fileId of useEditorStore.getState().opened) {
+    const path = getFileObject(fileId)?.path
+    if (!path) continue
+    const key = getPathIdentityKey(path)
+    const ids = openedByPath.get(key)
+    if (ids) ids.push(fileId)
+    else openedByPath.set(key, [fileId])
+  }
   const inspections = new Map<string, Promise<void>>()
 
   for (const filePath of event.paths) {
-    for (const fileId of getFileIdsByPathIdentity(filePath)) {
-      if (!openedIds.has(fileId) || inspections.has(fileId)) continue
+    for (const fileId of openedByPath.get(getPathIdentityKey(filePath)) ?? []) {
+      if (inspections.has(fileId)) continue
       inspections.set(fileId, enqueueExternalInspection(fileId, filePath, generation))
     }
   }
@@ -200,39 +312,84 @@ export async function resolveExternalFileChange(
 
   try {
     await fileSaveCoordinator.waitForIdle(fileId)
-    const diskSnapshot = await readStableFileSnapshot(file.path)
-    if (diskSnapshot.status !== 'success') {
+    const encoding = fileSaveCoordinator.getReadEncoding(fileId)
+    const diskSnapshot = await readStableFileSnapshot(file.path, { encoding })
+    if (
+      diskSnapshot.status !== 'success' ||
+      fileSaveCoordinator.getReadEncoding(fileId) !== encoding
+    ) {
       markResolutionFailed(fileId, notice.diskRevision)
       toast.error(t('external_file_change.read_failed'))
       return
     }
 
     if (action === 'reload') {
+      const before = useEditorStore.getState().getEditorContent(fileId)
+      const revision = fileSaveCoordinator.getRevision(fileId)
+      const afterFormat = diskSnapshot.text?.decoding.needsConfirmation
+        ? undefined
+        : diskSnapshot.text?.format
+      await protectExternalContent(fileId, before, diskSnapshot.content, afterFormat)
+      if (
+        useEditorStore.getState().getEditorContent(fileId) !== before ||
+        fileSaveCoordinator.getRevision(fileId) !== revision ||
+        getFileObject(fileId)?.path !== file.path
+      ) {
+        markResolutionFailed(fileId, diskSnapshot.revision)
+        return
+      }
       applyExternalSnapshot(fileId, diskSnapshot, 'reloaded')
+      historyFileSaved(fileId)
       return
     }
 
-    const localContent = useEditorStore.getState().getEditorContent(fileId)
-    fileSaveCoordinator.recordContent(fileId, localContent)
-    const result = await conditionalWriteExpected(
-      file.path,
-      localContent,
-      diskSnapshot.revision,
-    )
-    if (result.status === 'conflict') {
-      markExternalFileConflict(fileId, result.revision)
-      return
-    }
-
-    applyExternalSnapshot(
+    fileSaveCoordinator.recordContent(fileId, useEditorStore.getState().getEditorContent(fileId))
+    let expectedRevision = diskSnapshot.revision
+    let originalFormat = diskSnapshot.text?.format
+    const saved = await fileSaveCoordinator.saveLatest(
       fileId,
-      {
-        content: localContent,
-        revision: result.revision,
-        status: 'success',
+      async (snapshot) => {
+        if (typeof snapshot.content !== 'string' || getFileObject(fileId)?.path !== file.path)
+          return false
+        const result = await conditionalWriteExpected(
+          file.path!,
+          snapshot.content,
+          expectedRevision,
+          undefined,
+          'overwrite',
+          { ...snapshot.textOptions, originalFormat },
+        )
+        if (result.status === 'conflict') {
+          markExternalFileConflict(fileId, result.revision)
+          return false
+        }
+        expectedRevision = result.revision
+        originalFormat = snapshot.textOptions.format
+        fileSaveCoordinator.acknowledgeSaved(fileId, snapshot, result.revision)
+        return true
       },
-      'overwritten',
+      (snapshot) => {
+        applyExternalSnapshot(
+          fileId,
+          {
+            content: snapshot.content!,
+            revision: expectedRevision,
+            status: 'success',
+            text: fileSaveCoordinator.getTextMetadata(fileId),
+          },
+          'overwritten',
+        )
+        historyFileSaved(fileId)
+      },
+      {
+        canAttempt: () =>
+          getFileObject(fileId)?.path === file.path &&
+          useEditorStore.getState().opened.includes(fileId) &&
+          editorSnapshotRegistry.canRead(fileId) &&
+          !editorSnapshotRegistry.hasPending(fileId),
+      },
     )
+    if (!saved) markResolutionFailed(fileId, expectedRevision)
   } catch (error) {
     logger.error('Failed to resolve an external file change', error)
     markResolutionFailed(fileId, notice.diskRevision)

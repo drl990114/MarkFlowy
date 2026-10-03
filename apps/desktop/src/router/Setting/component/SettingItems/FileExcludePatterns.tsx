@@ -1,3 +1,5 @@
+import { Button } from '@/components/ui/button'
+import { Pencil, Plus, X } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import appSettingService from '@/services/app-setting'
 import useAppSettingStore from '@/stores/useAppSettingStore'
@@ -79,18 +81,18 @@ const FileExcludeRowItem = memo<FileExcludeRowItemProps>(
           <>
             <RowText>{value}</RowText>
             <RowActions className='row-actions'>
-              <IconButton
+              <Button variant='chrome' size='icon-sm' className='size-6'
                 aria-label={t('settings.edit_item')}
                 onClick={() => {
                   setEditingValue(value)
                   setIsEditing(true)
                 }}
               >
-                <i className='ri-pencil-line' />
-              </IconButton>
-              <IconButton aria-label={t('settings.delete_item')} onClick={onDelete}>
-                <i className='ri-close-line' />
-              </IconButton>
+                <Pencil aria-hidden className='size-3.5' />
+              </Button>
+              <Button variant='chrome' size='icon-sm' className='size-6' aria-label={t('settings.delete_item')} onClick={onDelete}>
+                <X aria-hidden className='size-3.5' />
+              </Button>
             </RowActions>
           </>
         )}
@@ -225,7 +227,7 @@ const FileExcludePatternsSettingItem: React.FC<
 
   return (
     <SettingItemContainer $direction='column' $settingKey={item.key}>
-      <SettingLabel item={item} style={{ marginBottom: '8px' }} />
+      <SettingLabel item={item} />
       <ContainerWrapper>
         <ListWrapper>
           {items.length === 0 && !adding && <EmptyHint>{t('common.none')}</EmptyHint>}
@@ -250,10 +252,10 @@ const FileExcludePatternsSettingItem: React.FC<
         </ListWrapper>
 
         {!adding && (
-          <AddButton onClick={() => setAdding(true)}>
-            <i className='ri-add-line' />
+          <Button variant='outline' size='sm' onClick={() => setAdding(true)}>
+            <Plus aria-hidden className='size-3.5' />
             {t(item.i18nProps?.add || 'common.addPattern')}
-          </AddButton>
+          </Button>
         )}
       </ContainerWrapper>
     </SettingItemContainer>
@@ -267,11 +269,11 @@ const ContainerWrapper = styled.div`
 
 const ListWrapper = styled.div`
   width: 100%;
-  min-height: 48px;
+  min-height: 28px;
   margin-bottom: 8px;
   border: 1px solid ${({ theme }) => theme.borderColor};
-  border-radius: 6px;
-  background: ${({ theme }) => theme.bgColorSecondary};
+  border-radius: 4px;
+  background: transparent;
 `
 
 const RowActions = styled.div`
@@ -279,14 +281,22 @@ const RowActions = styled.div`
   align-items: center;
   gap: 4px;
   opacity: 0;
-  transition: opacity 0.15s ease;
+  transition: opacity var(--mf-motion-duration-fast) var(--mf-motion-ease-out);
+
+  @media (hover: none) {
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
 `
 
 const RowWrapper = styled.div`
   display: flex;
   align-items: center;
-  min-height: 32px;
-  padding: 0 8px;
+  min-height: 28px;
+  padding: 0 4px;
   color: ${({ theme }) => theme.primaryFontColor};
 
   &:hover {
@@ -313,79 +323,10 @@ const EmptyHint = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 40px;
+  height: 28px;
   color: ${({ theme }) => theme.labelFontColor};
   font-size: var(--mf-ui-font-control);
   line-height: var(--mf-ui-line-height-control);
-`
-
-const IconButton = styled.button`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  padding: 0;
-  border: none;
-  border-radius: 4px;
-  background: transparent;
-  color: ${({ theme }) => theme.labelFontColor};
-  cursor: pointer;
-  transition:
-    color 100ms ease,
-    background-color 100ms ease;
-
-  &:hover {
-    background: ${({ theme }) => theme.bgColor};
-    color: ${({ theme }) => theme.accentColor};
-  }
-
-  i {
-    font-size: 14px;
-  }
-
-  &:focus-visible {
-    outline: none;
-    text-decoration-line: underline;
-    text-underline-offset: 2px;
-    opacity: 0.8;
-  }
-`
-
-const AddButton = styled.button`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
-  border: 1px dashed ${({ theme }) => theme.borderColor};
-  border-radius: 4px;
-  background-color: transparent;
-  color: ${({ theme }) => theme.primaryFontColor};
-  cursor: pointer;
-  transition:
-    color 100ms ease,
-    background-color 100ms ease,
-    border-color 100ms ease;
-  font-size: var(--mf-ui-font-control);
-  line-height: var(--mf-ui-line-height-control);
-
-  &:hover {
-    background-color: ${({ theme }) => theme.hoverColor};
-    border-color: ${({ theme }) => theme.accentColor};
-    color: ${({ theme }) => theme.accentColor};
-  }
-
-  i {
-    font-size: 14px;
-  }
-
-  &:focus-visible {
-    outline: none;
-    text-decoration-line: underline;
-    text-underline-offset: 2px;
-    opacity: 0.8;
-  }
 `
 
 export default FileExcludePatternsSettingItem

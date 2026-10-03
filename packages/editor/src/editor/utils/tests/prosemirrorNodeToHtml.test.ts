@@ -81,6 +81,27 @@ describe('enhanceProsemirrorHtml', () => {
     expect(blocks[2].querySelector('[class^="tok-"]')).toBeNull()
   })
 
+  test.each(['matlab', 'MATLAB', 'octave'])(
+    'highlights %s code blocks in HTML preview without changing their source',
+    async (language) => {
+      const source = '% MATLAB example\nif x > 0\n    disp("positive");\nend'
+      const code = document.createElement('code')
+      code.textContent = source
+      const container = parseHtml(
+        await enhanceProsemirrorHtml(
+          `<pre data-type="code-block" data-language="${language}">${code.outerHTML}</pre>`,
+        ),
+      )
+
+      expect(container.querySelector('.tok-comment')?.textContent).toBe('% MATLAB example')
+      expect(container.querySelector('.tok-keyword')?.textContent).toBe('if')
+      expect(container.querySelector('.tok-number')?.textContent).toBe('0')
+      expect(container.querySelector('.tok-string')?.textContent).toBe('"positive"')
+      expect(container.querySelector('code')?.textContent).toBe(source)
+      expect(container.querySelector('pre')?.getAttribute('data-language')).toBe(language)
+    },
+  )
+
   test('renders and sanitizes block and inline HTML', async () => {
     const blockSource = [
       '<details onclick="evil()">',

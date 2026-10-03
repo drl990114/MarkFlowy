@@ -46,6 +46,11 @@ export const SearchInput = styled.div`
     box-shadow: none;
   }
 
+  .search-input:focus-visible {
+    border-color: var(--mf-control-focus, ${({ theme }) => theme.accentColor});
+    box-shadow: inset 0 0 0 1px var(--mf-control-focus, ${({ theme }) => theme.accentColor});
+  }
+
   .search-input__progress {
     position: absolute;
     left: 0;
@@ -133,16 +138,16 @@ export const SearchStateBox = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
   height: 100%;
-  min-height: 180px;
-  padding: 24px 18px;
+  min-height: 144px;
+  padding: 20px 16px;
   box-sizing: border-box;
   text-align: center;
   color: var(--mf-text-muted, ${({ theme }) => theme.unselectedFontColor});
-  font-size: var(--mf-ui-font-body);
-  line-height: var(--mf-ui-line-height-body);
-  letter-spacing: var(--mf-ui-tracking-body);
+  font-size: var(--mf-ui-font-control);
+  line-height: var(--mf-ui-line-height-control);
+  letter-spacing: var(--mf-ui-tracking-control);
 
   .search-state__icon {
     display: inline-flex;
@@ -172,10 +177,12 @@ export const SearchStateBox = styled.div`
 
   .search-state__title {
     color: ${({ theme }) => theme.primaryFontColor};
-    font-weight: 600;
+    font-weight: 500;
   }
 
   .search-state__desc {
     max-width: 220px;
+    font-size: var(--mf-ui-font-caption);
+    line-height: var(--mf-ui-line-height-caption);
   }
 `

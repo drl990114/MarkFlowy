@@ -1,8 +1,8 @@
-import type { MfCodemirrorView } from '../../codemirror/codemirror'
+import { updateCodemirrorSettings, type MfCodemirrorView } from '../../codemirror/codemirror'
 import type { OnSetOptionsProps } from '@rme-sdk/sdk/core'
 import type Token from 'markdown-it/lib/token.mjs'
 
-import { languages } from '@codemirror/language-data'
+import { languages } from '../../codemirror/languages'
 import { placeholder } from '@codemirror/view'
 import type {
   ApplySchemaAttributes,
@@ -41,7 +41,10 @@ export const fakeIndentedLanguage = 'indent-code'
 
 @extension<CodeMirrorExtensionOptions>({
   defaultOptions: {
+    codemirrorOptions: undefined,
+    settingsProfile: undefined,
     hideDecoration: false,
+    preserveLineEndings: false,
     extensions: null,
     toggleName: 'paragraph',
     useProsemirrorHistoryKey: false,
@@ -57,8 +60,19 @@ export const fakeIndentedLanguage = 'indent-code'
 export class LineCodeMirrorExtension extends NodeExtension<CodeMirrorExtensionOptions> {
   private nodeview: CodeMirror6NodeView | undefined
   private codeViews = new Set<MfCodemirrorView>()
+  private ownerView?: EditorView
+
+  onView(view: EditorView) {
+    this.ownerView = view
+    return () => {
+      if (this.ownerView === view) this.ownerView = undefined
+    }
+  }
 
   protected onSetOptions({ changes }: OnSetOptionsProps<CodeMirrorExtensionOptions>) {
+    if (changes.codemirrorOptions.changed && this.ownerView) {
+      updateCodemirrorSettings(this.ownerView, this.options.codemirrorOptions ?? {})
+    }
     if (!changes.commandKeymapOptions.changed) return
     for (const view of this.codeViews) {
       if (view.isDestroyed) this.codeViews.delete(view)
@@ -121,7 +135,7 @@ export class LineCodeMirrorExtension extends NodeExtension<CodeMirrorExtensionOp
 
   createNodeViews(): NodeViewMethod {
     return (node: ProsemirrorNode, view: EditorView, getPos: () => number | undefined) => {
-      const baseExtensions = this.options.extensions ?? []
+      const baseExtensions = [...(this.options.extensions ?? [])]
       if (node.attrs['front-matter'] === true) {
         baseExtensions.push(placeholder(t('codemirror.frontMatterPlaceholder')))
       }
@@ -132,7 +146,10 @@ export class LineCodeMirrorExtension extends NodeExtension<CodeMirrorExtensionOp
         extensions: baseExtensions,
         toggleName: this.options.toggleName,
         options: {
+          codemirrorOptions: this.options.codemirrorOptions,
+          settingsProfile: this.options.settingsProfile,
           useProsemirrorHistoryKey: this.options.useProsemirrorHistoryKey,
+          preserveLineEndings: this.options.preserveLineEndings,
           copyButton: {
             enabled: this.options.showCopyButton,
             customCopyFunction: this.options.customCopyFunction,
