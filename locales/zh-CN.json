@@ -620,6 +620,66 @@
           "label": "拼写检查",
           "desc": "是否在源代码模式下启用拼写检查。"
         }
+      },
+      "code_editing": {
+        "label": "代码编辑",
+        "embedded_label": "内嵌代码",
+        "default": "默认",
+        "custom": "自定义",
+        "on": "开启",
+        "off": "关闭",
+        "indent_style": {
+          "label": "缩进方式",
+          "desc": "全文源码和内嵌代码共用。前置信息的源码编辑框始终使用空格缩进。",
+          "spaces": "空格",
+          "tabs": "Tab"
+        },
+        "indent_size": {
+          "label": "缩进宽度",
+          "desc": "空格缩进默认 2 格；Tab 在全文源码中显示为 4 格，在内嵌代码中显示为 2 格。选择具体宽度后统一应用。",
+          "default": "2 格（Tab 随模式）"
+        },
+        "auto_close": {
+          "label": "自动闭合括号与引号",
+          "desc": "在全文源码和内嵌代码中输入时，自动补全匹配的括号与引号。"
+        },
+        "whitespace": {
+          "label": "显示空白字符",
+          "desc": "显示空格和 Tab，不修改文档内容。",
+          "trailing": "仅尾随空白",
+          "all": "所有空格和 Tab"
+        },
+        "line_wrap": {
+          "label": "自动换行",
+          "desc": "长行在编辑区边缘折行，不插入换行符。超长行可能保持横向滚动。",
+          "mixed_default": "按区域（默认）",
+          "mixed_desc": "默认普通代码块不换行，预览块源码和前置信息换行。选择开启或关闭可统一设置；超长行可能保持横向滚动。"
+        },
+        "line_numbers": {
+          "label": "行号",
+          "desc": "稀疏模式显示第 1 行和每 10 行的行号。",
+          "all": "每行",
+          "sparse": "稀疏"
+        },
+        "active_line": {
+          "label": "高亮当前行",
+          "desc": "突出显示光标所在的行，方便定位编辑位置。"
+        },
+        "font_size": {
+          "label": "代码字号",
+          "desc": "默认为正文字号的 87.5%，随正文调整。选择自定义可固定字号。",
+          "default": "随正文（{{value}} px）",
+          "relative_default": "随正文（87.5%）",
+          "unit": "{{value}} px"
+        },
+        "line_height": {
+          "label": "代码行高",
+          "desc": "行高是字号的倍数。默认 1.6 倍，选择自定义可调整行间距。",
+          "default": "1.6 倍（默认）",
+          "unit": "{{value}} 倍"
+        },
+        "default_value": "{{value}}（默认）",
+        "typography_disabled": "“使用个人字体、字号与行高”已关闭，自定义字号和行高暂不生效。"
       }
     },
     "image": {

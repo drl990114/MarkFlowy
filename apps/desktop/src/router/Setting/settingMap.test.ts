@@ -45,6 +45,36 @@ describe('Editor setting map', () => {
     expect(setting.key).toBe('wysiwyg_editor_live_preview_block_behavior')
     expect(setting.options.map((option) => option.value)).toEqual(['auto', 'always-split'])
   })
+
+  it('separates source and embedded presentation while sharing editing behavior', () => {
+    const { CodeEditing, SourceCode, EmbeddedCode, Style, Wysiwyg } = getSettingMap().editor
+    expect(CodeEditing.indentSize.options.map((option) => option.value)).toEqual([
+      'default', '2', '4', '8',
+    ])
+    expect(CodeEditing.whitespace.options.map((option) => option.value)).toEqual([
+      'off', 'trailing', 'all',
+    ])
+    for (const [scope, group] of [['source', SourceCode], ['embedded', EmbeddedCode]] as const) {
+      expect(group.lineWrap.key).toBe(`${scope}_code_editor_line_wrap`)
+      expect(group.lineWrap.defaultValue).toBe('default')
+      expect(group.lineNumbers.options.map((option) => option.value)).toEqual([
+        'default', 'off', 'all', 'sparse',
+      ])
+      expect(group.highlightActiveLine.options.map((option) => option.value)).toEqual([
+        'default', 'on', 'off',
+      ])
+    }
+    expect(SourceCode.sourceFontSize.key).toBe('editor_source_font_size')
+    expect(Style).not.toHaveProperty('sourceFontSize')
+    expect(Wysiwyg).not.toHaveProperty('mdDefaultMode')
+    expect(EmbeddedCode.fontSize).toMatchObject({
+      key: 'editor_code_font_size', optionalValue: { initial: 14 }, scope: [12, 40],
+    })
+    expect(EmbeddedCode.lineHeight).toMatchObject({
+      key: 'editor_code_line_height', optionalValue: { initial: 1.6 },
+      saveToString: true, step: 0.1, scope: [1, 2],
+    })
+  })
 })
 
 describe('General setting map', () => {

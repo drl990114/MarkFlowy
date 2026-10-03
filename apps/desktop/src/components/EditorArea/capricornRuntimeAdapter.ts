@@ -1,4 +1,5 @@
 import type { CapricornSnippetsOptions } from '@/features/snippets/types'
+import type { CodeEditorSettings } from './codeEditorSettings'
 export type {
   CapricornSnippet,
   CapricornSnippetKind,
@@ -143,6 +144,11 @@ export interface CapricornKeybindingConfiguration {
   )[]
 }
 
+/** Accept existing CSSProperties values as well as runtime theme variables. */
+export type CapricornThemeStyle =
+  | React.CSSProperties
+  | (React.CSSProperties & Partial<Record<`--cap-${string}`, string | number>>)
+
 export interface CapricornEditorSettings {
   /** Opt-in body caret animation. Respects reduced motion and defaults to false. */
   caretAnimation?: boolean
@@ -150,6 +156,7 @@ export interface CapricornEditorSettings {
   textDirection?: 'auto' | 'ltr' | 'rtl'
   snippets?: false | CapricornSnippetsOptions
   codeBlockLineWrapping?: boolean
+  codeEditor?: CodeEditorSettings
   linkEditMode?: 'popover' | 'markdown'
   className?: string
   colorScheme?: 'dark' | 'light' | 'system'
@@ -158,7 +165,7 @@ export interface CapricornEditorSettings {
   placeholder?: boolean | string | CapricornPlaceholderOptions
   readOnly?: boolean
   spellCheck?: boolean
-  style?: React.CSSProperties
+  style?: CapricornThemeStyle
   typewriter?: boolean | { enabled?: boolean }
 }
 

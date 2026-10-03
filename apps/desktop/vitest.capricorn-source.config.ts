@@ -59,7 +59,7 @@ export default defineConfig(async (environment) => {
     },
     test: {
       ...base.test,
-      include: capricornIntegrationTests,
+      include: [...capricornIntegrationTests, 'tests/capricorn-code-settings.source.test.tsx'],
       // The source runtime imports its core stylesheet with ?inline. Vitest's
       // default CSS stub would hide its theme bindings from integration tests.
       css: { include: [/capricorn\.css/] },

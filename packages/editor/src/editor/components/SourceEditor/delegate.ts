@@ -6,7 +6,7 @@ import { createReactManager } from '@rme-sdk/sdk/react'
 import type { MfCodemirrorView } from '../../codemirror/codemirror'
 import { LineCodeMirrorExtension } from '../../extensions/CodeMirror/codemirror-extension'
 import type { CommandKeymapOptions } from '../../extensions/CodeMirror/keymap'
-import { basicSetup } from '../../extensions/CodeMirror/setup'
+import { sourceSetup, type CodemirrorOptions } from '../../extensions/CodeMirror/setup'
 import {
   TypewriterScrollExtension,
   type TypewriterScrollOptions,
@@ -16,7 +16,8 @@ import type { ClipboardReadFunction } from '../../utils/clipboard-read'
 import type { CurrentDateFormatOption } from '../../utils/date'
 import { FindExtension } from '@/editor/extensions/Find/find-extension'
 
-type CreateSourceCodeManagerOptions = {
+export type CreateSourceCodeManagerOptions = {
+  codemirrorOptions?: CodemirrorOptions
   language?: string
   onCodemirrorViewLoad: (cm: MfCodemirrorView) => void
   /**
@@ -50,10 +51,12 @@ export function createSourceCodeManager(
     new DocExtension({ content: 'codeMirror' }),
     new FindExtension({}),
     new LineCodeMirrorExtension({
+      codemirrorOptions: options?.codemirrorOptions,
+      settingsProfile: 'source',
       hideDecoration: true,
       preserveLineEndings: true,
       showCopyButton: false,
-      extensions: [basicSetup, markdown(), ...typewriterCmExtension],
+      extensions: [sourceSetup, markdown(), ...typewriterCmExtension],
       onCodemirrorViewLoad: options?.onCodemirrorViewLoad,
       commandKeymapOptions: {
         overrideShortcutMap: options?.overrideShortcutMap,

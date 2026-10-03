@@ -1229,8 +1229,11 @@ export const WysiwygThemeWrapper = styled.div
     max-width: 100%;
     padding: 12px 0;
     margin-bottom: 1em;
-    line-height: var(--rme-editor-line-height, ${(props) => props.rootLineHeight});
-    font-size: ${(props) => props.rootFontSize};
+    line-height: var(
+      --rme-code-line-height,
+      var(--rme-editor-line-height, ${(props) => props.rootLineHeight})
+    );
+    font-size: var(--rme-code-font-size, ${(props) => props.rootFontSize});
     font-family: ${(props) => props.theme.codemirrorFontFamily} !important;
     border: var(--rme-editor-code-block-border-width, 0) solid
       var(--rme-editor-code-block-border-color, transparent);
@@ -1242,18 +1245,16 @@ export const WysiwygThemeWrapper = styled.div
     overflow: auto;
     box-sizing: border-box;
 
-    &[data-front-matter='true'] {
-      .cm-lineNumbers {
-        display: none !important;
-      }
-    }
     .cm-line {
       padding: 2px 2px 2px 6px;
       font-size: 1em;
       font-family: ${(props) => props.theme.codemirrorFontFamily};
 
       span {
-        line-height: var(--rme-editor-line-height, ${(props) => props.rootLineHeight});
+        line-height: var(
+          --rme-code-line-height,
+          var(--rme-editor-line-height, ${(props) => props.rootLineHeight})
+        );
       }
     }
 

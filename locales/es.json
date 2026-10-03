@@ -522,6 +522,66 @@
           "label": "Comprobación ortografía",
           "desc": "Si se habilita la revisión ortografía en el modo Código fuente."
         }
+      },
+      "code_editing": {
+        "label": "Edición de código",
+        "embedded_label": "Código integrado",
+        "default": "Predeterminado",
+        "custom": "Personalizado",
+        "on": "Activado",
+        "off": "Desactivado",
+        "indent_style": {
+          "label": "Sangría",
+          "desc": "Se comparte entre el modo fuente y el código integrado. El editor de metadatos iniciales siempre usa espacios.",
+          "spaces": "Espacios",
+          "tabs": "Tabulaciones"
+        },
+        "indent_size": {
+          "label": "Ancho de sangría",
+          "desc": "La sangría con espacios usa 2 columnas por defecto. Las tabulaciones ocupan 4 columnas en modo fuente y 2 en el código integrado. Al elegir un ancho, se aplica a ambos.",
+          "default": "2 columnas (tabulaciones según el modo)"
+        },
+        "auto_close": {
+          "label": "Cerrar automáticamente paréntesis y comillas",
+          "desc": "Completa los paréntesis y las comillas al escribir en modo fuente y en el código integrado."
+        },
+        "whitespace": {
+          "label": "Mostrar espacios en blanco",
+          "desc": "Muestra espacios y tabulaciones sin modificar el documento.",
+          "trailing": "Solo al final de línea",
+          "all": "Todos los espacios y tabulaciones"
+        },
+        "line_wrap": {
+          "label": "Ajustar líneas largas",
+          "desc": "Ajusta las líneas largas al borde del editor sin insertar saltos de línea. Las líneas extremadamente largas pueden conservar el desplazamiento horizontal.",
+          "mixed_default": "Por área (predeterminado)",
+          "mixed_desc": "Por defecto, los bloques de código normales no se ajustan; el código de las vistas previas y los metadatos iniciales sí. Elige Activado o Desactivado para unificar el ajuste. Las líneas extremadamente largas pueden conservar el desplazamiento horizontal."
+        },
+        "line_numbers": {
+          "label": "Números de línea",
+          "desc": "La vista espaciada muestra la primera línea y cada décima línea.",
+          "all": "Todas las líneas",
+          "sparse": "Espaciados"
+        },
+        "active_line": {
+          "label": "Resaltar la línea actual",
+          "desc": "Resalta la línea del cursor para encontrar más fácilmente la posición de edición."
+        },
+        "font_size": {
+          "label": "Tamaño de letra del código",
+          "desc": "Por defecto, usa el 87,5 % del tamaño de letra del documento y cambia con él. Elige Personalizado para fijar un tamaño.",
+          "default": "Seguir el documento ({{value}} px)",
+          "relative_default": "Seguir el documento (87,5 %)",
+          "unit": "{{value}} px"
+        },
+        "line_height": {
+          "label": "Altura de línea del código",
+          "desc": "La altura de línea es un múltiplo del tamaño de letra. El valor predeterminado es 1,6×; elige Personalizado para ajustar el interlineado.",
+          "default": "1,6× (predeterminado)",
+          "unit": "{{value}}×"
+        },
+        "default_value": "{{value}} (predeterminado)",
+        "typography_disabled": "«Usar fuentes, tamaño e interlineado personales» está desactivado. El tamaño de letra y la altura de línea personalizados no se aplican actualmente."
       }
     },
     "keyboard": {

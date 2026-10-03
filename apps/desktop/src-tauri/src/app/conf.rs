@@ -53,6 +53,18 @@ pub_struct!(AppConf {
     editor_root_line_height: Option<String>,
     editor_source_font_size: Option<u32>,
     editor_source_line_height: Option<String>,
+    editor_code_font_size: Option<u32>,
+    editor_code_line_height: Option<String>,
+    editor_code_indent_style: Option<String>,
+    editor_code_indent_size: Option<String>,
+    editor_code_auto_close_brackets: Option<bool>,
+    editor_code_whitespace: Option<String>,
+    source_code_editor_line_wrap: Option<String>,
+    source_code_editor_line_numbers: Option<String>,
+    source_code_editor_highlight_active_line: Option<String>,
+    embedded_code_editor_line_wrap: Option<String>,
+    embedded_code_editor_line_numbers: Option<String>,
+    embedded_code_editor_highlight_active_line: Option<String>,
     extensions_chatgpt_apibase: Option<String>,
     extensions_chatgpt_apikey: Option<String>,
     extensions_chatgpt_models: Option<String>,
@@ -667,6 +679,18 @@ impl AppConf {
             editor_root_line_height: Some("1.7".to_string()),
             editor_source_font_size: Some(15),
             editor_source_line_height: Some("1.6".to_string()),
+            editor_code_font_size: None,
+            editor_code_line_height: None,
+            editor_code_indent_style: Some("spaces".to_string()),
+            editor_code_indent_size: Some("default".to_string()),
+            editor_code_auto_close_brackets: Some(true),
+            editor_code_whitespace: Some("off".to_string()),
+            source_code_editor_line_wrap: Some("default".to_string()),
+            source_code_editor_line_numbers: Some("default".to_string()),
+            source_code_editor_highlight_active_line: Some("default".to_string()),
+            embedded_code_editor_line_wrap: Some("default".to_string()),
+            embedded_code_editor_line_numbers: Some("default".to_string()),
+            embedded_code_editor_highlight_active_line: Some("default".to_string()),
             md_editor_default_mode: Some("wysiwyg".to_string()),
             autosave: Some(false),
             local_history_enabled: Some(true),
@@ -808,6 +832,18 @@ impl AppConf {
             editor_root_line_height,
             editor_source_font_size,
             editor_source_line_height,
+            editor_code_font_size,
+            editor_code_line_height,
+            editor_code_indent_style,
+            editor_code_indent_size,
+            editor_code_auto_close_brackets,
+            editor_code_whitespace,
+            source_code_editor_line_wrap,
+            source_code_editor_line_numbers,
+            source_code_editor_highlight_active_line,
+            embedded_code_editor_line_wrap,
+            embedded_code_editor_line_numbers,
+            embedded_code_editor_highlight_active_line,
             md_editor_default_mode,
             editor_root_font_family,
             editor_code_font_family,
@@ -1300,6 +1336,70 @@ mod tests {
         assert_eq!(conf.editor_root_line_height.as_deref(), Some("1.7"));
         assert_eq!(conf.editor_source_font_size, Some(15));
         assert_eq!(conf.editor_source_line_height.as_deref(), Some("1.6"));
+    }
+
+    #[test]
+    fn code_editor_defaults_preserve_legacy_display_and_optional_typography() {
+        let legacy = empty_conf().amend(serde_json::json!({
+            "wysiwyg_editor_codemirror_line_wrap": false
+        }));
+        let conf = typography_default_conf().merge_conf(legacy);
+        assert_eq!(conf.wysiwyg_editor_codemirror_line_wrap, Some(false));
+        assert_eq!(conf.editor_code_indent_style.as_deref(), Some("spaces"));
+        assert_eq!(conf.editor_code_indent_size.as_deref(), Some("default"));
+        assert_eq!(conf.editor_code_auto_close_brackets, Some(true));
+        assert_eq!(conf.editor_code_whitespace.as_deref(), Some("off"));
+        assert_eq!(conf.editor_code_font_size, None);
+        assert_eq!(conf.editor_code_line_height, None);
+        let value = serde_json::to_value(conf).unwrap();
+        for scope in ["source", "embedded"] {
+            for field in ["line_wrap", "line_numbers", "highlight_active_line"] {
+                assert_eq!(value[format!("{scope}_code_editor_{field}")], "default");
+            }
+        }
+    }
+
+    #[test]
+    fn code_editor_preferences_roundtrip_and_clear_typography_overrides() {
+        let patch = serde_json::json!({
+            "editor_code_indent_style": "tabs",
+            "editor_code_indent_size": "4",
+            "editor_code_auto_close_brackets": false,
+            "editor_code_whitespace": "trailing",
+            "source_code_editor_line_wrap": "off",
+            "source_code_editor_line_numbers": "all",
+            "source_code_editor_highlight_active_line": "off",
+            "embedded_code_editor_line_wrap": "on",
+            "embedded_code_editor_line_numbers": "sparse",
+            "embedded_code_editor_highlight_active_line": "on",
+            "editor_code_font_size": 18,
+            "editor_code_line_height": "1.8"
+        });
+        let changed = typography_default_conf().amend(patch.clone());
+        let saved = serde_json::from_value(serde_json::to_value(changed).unwrap()).unwrap();
+        let restored = typography_default_conf().merge_conf(saved);
+        let value = serde_json::to_value(&restored).unwrap();
+        for (key, expected) in patch.as_object().unwrap() {
+            assert_eq!(&value[key], expected, "setting {key} must survive reload");
+        }
+        let cleared = restored.amend(serde_json::json!({
+            "editor_code_font_size": null,
+            "editor_code_line_height": null,
+            "embedded_code_editor_line_wrap": "default"
+        }));
+        let saved = serde_json::from_value(serde_json::to_value(cleared).unwrap()).unwrap();
+        let restored = typography_default_conf().merge_conf(saved);
+        assert_eq!(restored.editor_code_font_size, None);
+        assert_eq!(restored.editor_code_line_height, None);
+        assert_eq!(
+            restored.embedded_code_editor_line_wrap.as_deref(),
+            Some("default")
+        );
+        assert_eq!(restored.source_code_editor_line_wrap.as_deref(), Some("off"));
+        let reset = typography_default_conf();
+        assert_eq!(reset.editor_code_font_size, None);
+        assert_eq!(reset.editor_code_line_height, None);
+        assert_eq!(reset.editor_code_auto_close_brackets, Some(true));
     }
 
     #[test]

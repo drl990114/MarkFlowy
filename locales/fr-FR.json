@@ -522,6 +522,66 @@
           "label": "Spellcheck",
           "desc": "Indique si l'orthographe doit être activé en mode Code source."
         }
+      },
+      "code_editing": {
+        "label": "Édition du code",
+        "embedded_label": "Code intégré",
+        "default": "Par défaut",
+        "custom": "Personnalisé",
+        "on": "Activé",
+        "off": "Désactivé",
+        "indent_style": {
+          "label": "Indentation",
+          "desc": "Commune au mode source et au code intégré. L’éditeur des métadonnées initiales utilise toujours des espaces.",
+          "spaces": "Espaces",
+          "tabs": "Tabulations"
+        },
+        "indent_size": {
+          "label": "Largeur d’indentation",
+          "desc": "L’indentation par espaces utilise 2 colonnes par défaut. Les tabulations occupent 4 colonnes en mode source et 2 dans le code intégré. Une largeur précise s’applique aux deux.",
+          "default": "2 colonnes (tabulations selon le mode)"
+        },
+        "auto_close": {
+          "label": "Fermer automatiquement parenthèses et guillemets",
+          "desc": "Complète les parenthèses et les guillemets pendant la saisie en mode source et dans le code intégré."
+        },
+        "whitespace": {
+          "label": "Afficher les espaces",
+          "desc": "Affiche les espaces et les tabulations sans modifier le document.",
+          "trailing": "En fin de ligne uniquement",
+          "all": "Tous les espaces et tabulations"
+        },
+        "line_wrap": {
+          "label": "Retour à la ligne automatique",
+          "desc": "Replie les lignes longues au bord de l’éditeur sans insérer de saut de ligne. Les lignes extrêmement longues peuvent conserver le défilement horizontal.",
+          "mixed_default": "Selon la zone (par défaut)",
+          "mixed_desc": "Par défaut, les blocs de code ordinaires ne sont pas repliés ; le code des aperçus et les métadonnées initiales le sont. Choisissez Activé ou Désactivé pour uniformiser ce réglage. Les lignes extrêmement longues peuvent conserver le défilement horizontal."
+        },
+        "line_numbers": {
+          "label": "Numéros de ligne",
+          "desc": "L’affichage espacé indique la première ligne puis une ligne sur dix.",
+          "all": "Toutes les lignes",
+          "sparse": "Espacés"
+        },
+        "active_line": {
+          "label": "Surligner la ligne actuelle",
+          "desc": "Surligne la ligne du curseur pour repérer plus facilement la position de saisie."
+        },
+        "font_size": {
+          "label": "Taille du texte du code",
+          "desc": "Par défaut, utilise 87,5 % de la taille du texte du document et évolue avec elle. Choisissez Personnalisé pour fixer une taille.",
+          "default": "Suivre le document ({{value}} px)",
+          "relative_default": "Suivre le document (87,5 %)",
+          "unit": "{{value}} px"
+        },
+        "line_height": {
+          "label": "Hauteur de ligne du code",
+          "desc": "La hauteur de ligne est un multiple de la taille du texte. La valeur par défaut est 1,6× ; choisissez Personnalisé pour régler l’interligne.",
+          "default": "1,6× (par défaut)",
+          "unit": "{{value}}×"
+        },
+        "default_value": "{{value}} (par défaut)",
+        "typography_disabled": "« Utiliser mes polices, tailles et interlignes » est désactivé. La taille du texte et la hauteur de ligne personnalisées ne sont donc pas appliquées."
       }
     },
     "keyboard": {

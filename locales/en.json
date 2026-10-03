@@ -588,7 +588,67 @@
           "desc": "Whether to enable spellcheck in Source Code mode."
         }
       },
-      "desc": "Markdown configuration options for the editor, including settings for style, behavior, and WYSIWYG mode."
+      "desc": "Markdown configuration options for the editor, including settings for style, behavior, and WYSIWYG mode.",
+      "code_editing": {
+        "label": "Code editing",
+        "embedded_label": "Embedded code",
+        "default": "Default",
+        "custom": "Custom",
+        "on": "On",
+        "off": "Off",
+        "indent_style": {
+          "label": "Indentation",
+          "desc": "Shared by source mode and embedded code. The frontmatter source editor always uses spaces.",
+          "spaces": "Spaces",
+          "tabs": "Tabs"
+        },
+        "indent_size": {
+          "label": "Indent width",
+          "desc": "Space indentation defaults to 2 columns. Tabs display as 4 columns in source mode and 2 in embedded code. Choosing a width applies it to both.",
+          "default": "2 columns (tabs vary by mode)"
+        },
+        "auto_close": {
+          "label": "Auto-close brackets and quotes",
+          "desc": "Insert matching brackets and quotes while typing in source mode and embedded code."
+        },
+        "whitespace": {
+          "label": "Show whitespace",
+          "desc": "Display spaces and tabs without changing document content.",
+          "trailing": "Trailing whitespace",
+          "all": "All spaces and tabs"
+        },
+        "line_wrap": {
+          "label": "Wrap long lines",
+          "desc": "Wrap long lines at the edge of the editor without inserting line breaks. Extremely long lines may keep horizontal scrolling.",
+          "mixed_default": "By area (default)",
+          "mixed_desc": "By default, regular code blocks do not wrap; preview source and frontmatter do. Choose On or Off to apply one setting to all areas. Extremely long lines may keep horizontal scrolling."
+        },
+        "line_numbers": {
+          "label": "Line numbers",
+          "desc": "Sparse shows the first line and every tenth line.",
+          "all": "Every line",
+          "sparse": "Sparse"
+        },
+        "active_line": {
+          "label": "Highlight current line",
+          "desc": "Highlight the line containing the caret to make your editing position easier to find."
+        },
+        "font_size": {
+          "label": "Code font size",
+          "desc": "Defaults to 87.5% of the document font size and scales with it. Choose Custom to set a fixed size.",
+          "default": "Follow document ({{value}} px)",
+          "relative_default": "Follow document (87.5%)",
+          "unit": "{{value}} px"
+        },
+        "line_height": {
+          "label": "Code line height",
+          "desc": "Line height is a multiple of the font size. The default is 1.6×; choose Custom to adjust line spacing.",
+          "default": "1.6× (default)",
+          "unit": "{{value}}×"
+        },
+        "default_value": "{{value}} (default)",
+        "typography_disabled": "“Use personal fonts, size and line height” is off. Custom font size and line height are not currently applied."
+      }
     },
     "keyboard": {
       "label": "Keyboard Shortcuts",

@@ -431,6 +431,26 @@ describe('CapricornEditor background preparation', () => {
     expect(props.onChange).not.toHaveBeenCalled()
   })
 
+  it('applies code settings changed during preparation before attachment and resets them in place', async () => {
+    const adapter = createMountAdapter(largeMarkdown)
+    let complete!: (adapter: CapricornRuntimeAdapter) => void
+    vi.mocked(loadCapricornRuntimeAsyncFactory).mockResolvedValue(vi.fn())
+    vi.mocked(createCapricornRuntimeAdapterAsync).mockReturnValue(new Promise((resolve) => { complete = resolve }))
+    const props = baseProps()
+    const { rerender } = render(<CapricornEditor {...props} options={{ codeEditor: {} }} />)
+    await waitFor(() => expect(createCapricornRuntimeAdapterAsync).toHaveBeenCalledOnce())
+    rerender(<CapricornEditor {...props} options={{ codeEditor: { lineNumbers: 'off', indentSize: 8 } }} />)
+    await act(async () => complete(adapter))
+    expect(adapter.updateSettings).toHaveBeenLastCalledWith(expect.objectContaining({
+      codeEditor: { lineNumbers: 'off', indentSize: 8 },
+    }))
+    rerender(<CapricornEditor {...props} options={{ codeEditor: {} }} />)
+    expect(adapter.updateSettings).toHaveBeenLastCalledWith(expect.objectContaining({ codeEditor: {} }))
+    expect(createCapricornRuntimeAdapterAsync).toHaveBeenCalledOnce()
+    expect(adapter.destroy).not.toHaveBeenCalled()
+    expect(props.onChange).not.toHaveBeenCalled()
+  })
+
   it.each([false, true])(
     'reconciles caret animation changed from %s during preparation and resets omitted settings in place',
     async (initialCaretAnimation) => {

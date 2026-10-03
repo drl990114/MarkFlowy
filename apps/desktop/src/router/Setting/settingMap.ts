@@ -3,7 +3,86 @@ import { DEFAULT_CURRENT_DATE_FORMAT } from '@/helper/date'
 import { changeLng, i18n, locales, type Langs } from '@/i18n'
 import { currentWebview } from '@/services/windows'
 
-export const getSettingMap = () => {
+/** Defaults shown by Desktop: Markdown uses Capricorn, full source uses RME. */
+export interface CodeEditorSettingDefaults {
+  bodyFontSize?: string
+  codeBlockLineWrapping?: boolean
+  personalTypography?: boolean
+}
+
+const defaultCodeValue = (value: string, translate: typeof i18n.t) =>
+  translate('settings.editor.code_editing.default_value', { value })
+
+const getCodeDisplaySettings = (
+  scope: 'source' | 'embedded',
+  translate: typeof i18n.t,
+  mixedWrapping = false,
+) => ({
+  lineWrap: {
+    key: `${scope}_code_editor_line_wrap`,
+    type: 'select' as const,
+    defaultValue: 'default',
+    title: { i18nKey: 'settings.editor.code_editing.line_wrap.label' },
+    desc: { i18nKey: mixedWrapping
+      ? 'settings.editor.code_editing.line_wrap.mixed_desc'
+      : 'settings.editor.code_editing.line_wrap.desc' },
+    options: ['default', 'on', 'off'].map((value) => ({
+      value,
+      title: value === 'default'
+        ? mixedWrapping
+          ? translate('settings.editor.code_editing.line_wrap.mixed_default')
+          : defaultCodeValue(translate('settings.editor.code_editing.on'), translate)
+        : translate(`settings.editor.code_editing.${value}`),
+    })),
+  },
+  lineNumbers: {
+    key: `${scope}_code_editor_line_numbers`,
+    type: 'select' as const,
+    defaultValue: 'default',
+    title: { i18nKey: 'settings.editor.code_editing.line_numbers.label' },
+    desc: { i18nKey: 'settings.editor.code_editing.line_numbers.desc' },
+    options: ['default', 'off', 'all', 'sparse'].map((value) => ({
+      value,
+      title: value === 'default'
+        ? defaultCodeValue(translate(
+          `settings.editor.code_editing.line_numbers.${scope === 'source' ? 'sparse' : 'all'}`,
+        ), translate)
+        : translate(value === 'off'
+          ? 'settings.editor.code_editing.off'
+          : `settings.editor.code_editing.line_numbers.${value}`),
+    })),
+  },
+  highlightActiveLine: {
+    key: `${scope}_code_editor_highlight_active_line`,
+    type: 'select' as const,
+    defaultValue: 'default',
+    title: { i18nKey: 'settings.editor.code_editing.active_line.label' },
+    desc: { i18nKey: 'settings.editor.code_editing.active_line.desc' },
+    options: ['default', 'on', 'off'].map((value) => ({
+      value,
+      title: value === 'default'
+        ? defaultCodeValue(translate('settings.editor.code_editing.on'), translate)
+        : translate(`settings.editor.code_editing.${value}`),
+    })),
+  },
+})
+
+export const getSettingMap = (
+  defaults: CodeEditorSettingDefaults = {},
+  translate: typeof i18n.t = i18n.t,
+) => {
+  const bodyFontSize = defaults.bodyFontSize ?? '16px'
+  const pixels = /^\s*(\d+(?:\.\d+)?)px\s*$/.exec(bodyFontSize)
+  const codeFontSize = pixels ? Number(pixels[1]) * 0.875 : undefined
+  const codeFontSizeLabel = codeFontSize && Number.isFinite(codeFontSize)
+    ? translate('settings.editor.code_editing.font_size.default', {
+      value: Number(codeFontSize.toFixed(3)),
+    })
+    : translate('settings.editor.code_editing.font_size.relative_default')
+  const typographyNote = defaults.personalTypography === false
+    ? translate('settings.editor.code_editing.typography_disabled')
+    : undefined
+
   return {
     general: {
       i18nKey: 'settings.general.label',
@@ -39,10 +118,10 @@ export const getSettingMap = () => {
           title: { i18nKey: 'settings.general.startup.left' },
           desc: { i18nKey: 'settings.general.startup.description' },
           options: [
-            { value: 'restore', title: i18n.t('settings.general.startup.restore') },
-            { value: 'explorer', title: i18n.t('sidebar.explorer') },
-            { value: 'search', title: i18n.t('sidebar.search') },
-            { value: 'bookmarks', title: i18n.t('sidebar.bookmarks') },
+            { value: 'restore', title: translate('settings.general.startup.restore') },
+            { value: 'explorer', title: translate('sidebar.explorer') },
+            { value: 'search', title: translate('sidebar.search') },
+            { value: 'bookmarks', title: translate('sidebar.bookmarks') },
           ],
         },
         rightStartup: {
@@ -52,9 +131,9 @@ export const getSettingMap = () => {
           title: { i18nKey: 'settings.general.startup.right' },
           desc: { i18nKey: 'settings.general.startup.description' },
           options: [
-            { value: 'restore', title: i18n.t('settings.general.startup.restore') },
-            { value: 'toc', title: i18n.t('sidebar.table_of_contents') },
-            { value: 'ai', title: i18n.t('ai.assistant') },
+            { value: 'restore', title: translate('settings.general.startup.restore') },
+            { value: 'toc', title: translate('sidebar.table_of_contents') },
+            { value: 'ai', title: translate('ai.assistant') },
           ],
         },
       },
@@ -200,22 +279,6 @@ export const getSettingMap = () => {
           saveToString: true,
           scope: [1, 2],
         },
-        sourceFontSize: {
-          key: 'editor_source_font_size',
-          type: 'slider',
-          title: { i18nKey: 'settings.editor.style.source_font_size.label' },
-          desc: { i18nKey: 'settings.editor.style.source_font_size.desc' },
-          scope: [12, 40],
-        },
-        sourceLineHeight: {
-          key: 'editor_source_line_height',
-          type: 'slider',
-          title: { i18nKey: 'settings.editor.style.source_line_height.label' },
-          desc: { i18nKey: 'settings.editor.style.source_line_height.desc' },
-          step: 0.1,
-          saveToString: true,
-          scope: [1, 2],
-        },
         normalFontFamily: {
           key: 'editor_root_font_family',
           type: 'fontListSelect',
@@ -249,9 +312,9 @@ export const getSettingMap = () => {
             i18nKey: 'settings.editor.behavior.md_default_mode.desc',
           },
           options: [
-            { value: EditorViewType.WYSIWYG, title: i18n.t('view.wysiwyg') },
-            { value: EditorViewType.SOURCECODE, title: i18n.t('view.source_code') },
-            { value: EditorViewType.PREVIEW, title: i18n.t('view.preview') },
+            { value: EditorViewType.WYSIWYG, title: translate('view.wysiwyg') },
+            { value: EditorViewType.SOURCECODE, title: translate('view.source_code') },
+            { value: EditorViewType.PREVIEW, title: translate('view.preview') },
           ],
         },
         typewriterScroll: {
@@ -270,8 +333,8 @@ export const getSettingMap = () => {
           title: { i18nKey: 'link_editing.label' },
           desc: { i18nKey: 'link_editing.description' },
           options: [
-            { value: 'popover', title: i18n.t('link_editing.popover') },
-            { value: 'markdown', title: i18n.t('link_editing.markdown') },
+            { value: 'popover', title: translate('link_editing.popover') },
+            { value: 'markdown', title: translate('link_editing.markdown') },
           ],
         },
         textDirection: {
@@ -280,9 +343,9 @@ export const getSettingMap = () => {
           title: { i18nKey: 'settings.editor.behavior.text_direction.label' },
           desc: { i18nKey: 'settings.editor.behavior.text_direction.desc' },
           options: [
-            { value: 'auto', title: i18n.t('settings.editor.behavior.text_direction.auto') },
-            { value: 'ltr', title: i18n.t('settings.editor.behavior.text_direction.ltr') },
-            { value: 'rtl', title: i18n.t('settings.editor.behavior.text_direction.rtl') },
+            { value: 'auto', title: translate('settings.editor.behavior.text_direction.auto') },
+            { value: 'ltr', title: translate('settings.editor.behavior.text_direction.ltr') },
+            { value: 'rtl', title: translate('settings.editor.behavior.text_direction.rtl') },
           ],
         },
         placeholder: {
@@ -307,18 +370,54 @@ export const getSettingMap = () => {
           },
         },
       },
+      CodeEditing: {
+        i18nKey: 'settings.editor.code_editing.label',
+        indentStyle: {
+          key: 'editor_code_indent_style',
+          type: 'select',
+          defaultValue: 'spaces',
+          title: { i18nKey: 'settings.editor.code_editing.indent_style.label' },
+          desc: { i18nKey: 'settings.editor.code_editing.indent_style.desc' },
+          options: ['spaces', 'tabs'].map((value) => ({
+            value,
+            title: translate(`settings.editor.code_editing.indent_style.${value}`),
+          })),
+        },
+        indentSize: {
+          key: 'editor_code_indent_size',
+          type: 'select',
+          defaultValue: 'default',
+          title: { i18nKey: 'settings.editor.code_editing.indent_size.label' },
+          desc: { i18nKey: 'settings.editor.code_editing.indent_size.desc' },
+          options: ['default', '2', '4', '8'].map((value) => ({
+            value,
+            title: value === 'default'
+              ? translate('settings.editor.code_editing.indent_size.default')
+              : value,
+          })),
+        },
+        autoCloseBrackets: {
+          key: 'editor_code_auto_close_brackets',
+          type: 'switch',
+          title: { i18nKey: 'settings.editor.code_editing.auto_close.label' },
+          desc: { i18nKey: 'settings.editor.code_editing.auto_close.desc' },
+        },
+        whitespace: {
+          key: 'editor_code_whitespace',
+          type: 'select',
+          defaultValue: 'off',
+          title: { i18nKey: 'settings.editor.code_editing.whitespace.label' },
+          desc: { i18nKey: 'settings.editor.code_editing.whitespace.desc' },
+          options: ['off', 'trailing', 'all'].map((value) => ({
+            value,
+            title: translate(value === 'off'
+              ? 'settings.editor.code_editing.off'
+              : `settings.editor.code_editing.whitespace.${value}`),
+          })),
+        },
+      },
       Wysiwyg: {
         i18nKey: 'settings.editor.wysiwyg.label',
-        mdDefaultMode: {
-          key: 'wysiwyg_editor_codemirror_line_wrap',
-          type: 'switch',
-          title: {
-            i18nKey: 'settings.editor.wysiwyg.codemirror_linewrap.label',
-          },
-          desc: {
-            i18nKey: 'settings.editor.wysiwyg.codemirror_linewrap.desc',
-          },
-        },
         livePreviewBlockBehavior: {
           key: 'wysiwyg_editor_live_preview_block_behavior',
           type: 'select',
@@ -331,11 +430,11 @@ export const getSettingMap = () => {
           options: [
             {
               value: 'auto',
-              title: i18n.t('settings.editor.wysiwyg.live_preview_block_behavior.options.auto'),
+              title: translate('settings.editor.wysiwyg.live_preview_block_behavior.options.auto'),
             },
             {
               value: 'always-split',
-              title: i18n.t(
+              title: translate(
                 'settings.editor.wysiwyg.live_preview_block_behavior.options.always_split',
               ),
             },
@@ -352,8 +451,59 @@ export const getSettingMap = () => {
           },
         },
       },
+      EmbeddedCode: {
+        i18nKey: 'settings.editor.code_editing.embedded_label',
+        ...getCodeDisplaySettings('embedded', translate, defaults.codeBlockLineWrapping === false),
+        fontSize: {
+          key: 'editor_code_font_size',
+          type: 'slider',
+          title: { i18nKey: 'settings.editor.code_editing.font_size.label' },
+          desc: { i18nKey: 'settings.editor.code_editing.font_size.desc' },
+          optionalValue: {
+            initial: codeFontSize && Number.isFinite(codeFontSize)
+              ? Math.min(40, Math.max(12, Math.round(codeFontSize)))
+              : 14,
+            defaultLabel: codeFontSizeLabel,
+            note: typographyNote,
+          },
+          valueLabelI18nKey: 'settings.editor.code_editing.font_size.unit',
+          scope: [12, 40],
+        } satisfies Setting.SliderSettingItem,
+        lineHeight: {
+          key: 'editor_code_line_height',
+          type: 'slider',
+          title: { i18nKey: 'settings.editor.code_editing.line_height.label' },
+          desc: { i18nKey: 'settings.editor.code_editing.line_height.desc' },
+          optionalValue: {
+            initial: 1.6,
+            defaultLabel: translate('settings.editor.code_editing.line_height.default'),
+            note: typographyNote,
+          },
+          valueLabelI18nKey: 'settings.editor.code_editing.line_height.unit',
+          step: 0.1,
+          saveToString: true,
+          scope: [1, 2],
+        } satisfies Setting.SliderSettingItem,
+      },
       SourceCode: {
         i18nKey: 'settings.editor.sourcecode.label',
+        ...getCodeDisplaySettings('source', translate),
+        sourceFontSize: {
+          key: 'editor_source_font_size',
+          type: 'slider',
+          title: { i18nKey: 'settings.editor.style.source_font_size.label' },
+          desc: { i18nKey: 'settings.editor.style.source_font_size.desc' },
+          scope: [12, 40],
+        },
+        sourceLineHeight: {
+          key: 'editor_source_line_height',
+          type: 'slider',
+          title: { i18nKey: 'settings.editor.style.source_line_height.label' },
+          desc: { i18nKey: 'settings.editor.style.source_line_height.desc' },
+          step: 0.1,
+          saveToString: true,
+          scope: [1, 2],
+        },
         spellcheck: {
           key: 'source_code_editor_spellcheck',
           type: 'switch',

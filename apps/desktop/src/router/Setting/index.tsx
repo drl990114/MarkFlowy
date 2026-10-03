@@ -26,7 +26,7 @@ import { CopilotSetting } from './CopilotSetting'
 import { ExportSetting } from './ExportSetting'
 import { ImageSetting } from './ImageSetting'
 import { KeyboardTable } from './KeyboardTable'
-import { getSettingMap } from './settingMap'
+import { useSettingMap } from './useSettingMap'
 import {
   createSettingSearchIndex,
   filterSettingSearchEntries,
@@ -67,7 +67,7 @@ interface SettingProps {
 function Setting({ navigationRequest }: SettingProps) {
   const { appInfo } = useAppInfoStore()
   const { t } = useTranslation()
-  const settingMap = useMemo(() => getSettingMap(), [])
+  const settingMap = useSettingMap()
   const settingDataGroupsKeys = Object.keys(settingMap) as SettingCategoryKey[]
   const initialCategory =
     navigationRequest?.target?.category ?? (settingDataGroupsKeys[0] as SettingCategoryKey)

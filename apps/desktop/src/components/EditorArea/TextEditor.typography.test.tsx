@@ -4,6 +4,7 @@ import { useMemo, type ComponentType } from 'react'
 import ts from 'typescript'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { CapricornRuntimeOptions } from './capricornRuntimeAdapter'
+import { resolveCodeEditorPreferences } from './codeEditorSettings'
 import {
   capricornClipboardCommands,
   createCapricornKeybindingConfiguration,
@@ -48,6 +49,7 @@ const names = new Set([
   'textDirection',
   'editorPlaceholder',
   'codeBlockLineWrapping',
+  'codeEditorPreferences',
   'editorKeybingMap',
   'editorKeybindingsLoaded',
   'capricornRuntimeOptions',
@@ -80,6 +82,7 @@ const compiled = ts.transpileModule(
     const id = fileId;
     const currentViewType = viewType;
     const useAppSettingStore = (selector) => selector({ settingData: settings });
+    const useCodeEditorPreferences = () => resolveCodeEditorPreferences(settings);
     const useEditorKeybindingStore = (selector) => selector({
       editorKeybingMap: keymap ?? emptyKeymap,
       editorKeybindingsLoaded: keymap !== undefined,
@@ -94,6 +97,8 @@ const compiled = ts.transpileModule(
 ).outputText
 const Harness = runInNewContext(compiled, {
   useMemo,
+  resolveCodeEditorPreferences,
+  rmeRuntime: undefined,
   useFileTextDirectionStore,
   getFileTextDirectionKey,
   normalizeEditorTextDirection,
@@ -128,6 +133,11 @@ const Harness = runInNewContext(compiled, {
     editor_text_direction?: unknown
     editor_placeholder?: boolean
     wysiwyg_editor_codemirror_line_wrap?: boolean
+    editor_code_font_size?: number | null
+    editor_code_line_height?: string | null
+    theme_use_personal_typography?: boolean
+    embedded_code_editor_line_numbers?: string
+    source_code_editor_line_numbers?: string
   }
   keymap?: Record<string, string>
   fileId?: string
@@ -149,6 +159,25 @@ afterEach(() => {
 })
 
 describe('TextEditor Capricorn typography settings', () => {
+  it('forwards embedded display and typography while keeping source typography independent', () => {
+    const onOptions = vi.fn()
+    const settings = {
+      editor_root_font_size: 16, editor_source_font_size: 24,
+      editor_code_font_size: 20, editor_code_line_height: '1.8',
+      embedded_code_editor_line_numbers: 'off', source_code_editor_line_numbers: 'sparse',
+    }
+    const { rerender } = render(<Harness settings={settings} onOptions={onOptions} />)
+    expect(onOptions.mock.lastCall?.[0].codeEditor.lineNumbers).toBe('off')
+    expect(onOptions.mock.lastCall?.[0].style).toMatchObject({
+      fontSize: '16px', '--cap-code-font-size': '20px', '--cap-code-line-height': '1.8',
+    })
+    rerender(<Harness settings={{ ...settings, theme_use_personal_typography: false }} onOptions={onOptions} />)
+    expect(onOptions.mock.lastCall?.[0].style).toMatchObject({
+      '--cap-code-font-size': 'calc(16px * 0.875)', '--cap-code-line-height': undefined,
+    })
+    rerender(<Harness settings={{}} onOptions={onOptions} />)
+    expect(onOptions.mock.lastCall?.[0].codeEditor.lineNumbers).toBeUndefined()
+  })
   it('shares overrides between panes of one file while other files keep following the global direction', () => {
     const first = vi.fn()
     const second = vi.fn()

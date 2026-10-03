@@ -1,4 +1,4 @@
 {
   "extends": "./tsconfig.json",
-  "include": ["src", "tests/capricorn-*.integration.test.tsx"]
+  "include": ["src", "tests/capricorn-*.integration.test.tsx", "tests/capricorn-code-settings.source.test.tsx"]
 }

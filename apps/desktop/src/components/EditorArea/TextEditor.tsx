@@ -118,6 +118,9 @@ import { AsyncSurface } from '@/components/AsyncSurface'
 import { RmeThemeProvider } from './RmeThemeProvider'
 import { useRmeRuntime } from './useRmeRuntime'
 import type { RmeRuntime } from './rmeRuntime'
+import { resolveCodeEditorPreferences } from './codeEditorSettings'
+import { useCodeEditorPreferences } from './useCodeEditorPreferences'
+import { updateEmbeddedCodeSettings, updateSourceCodeSettings } from './rmeCodeEditorSettings'
 import { toast } from 'zens'
 import {
   createWysiwygDelegateOptions,
@@ -941,12 +944,17 @@ function TextEditor(props: TextEditorProps) {
     (runtime: RmeRuntime, sourceCodeLanguage?: string) => {
       const currentSettingData = useAppSettingStore.getState().settingData
       return runtime.createSourceCodeDelegate({
+        ...{ codemirrorOptions: resolveCodeEditorPreferences(currentSettingData).source },
         language: sourceCodeLanguage,
         disableAllBuildInShortcuts: true,
         overrideShortcutMap: useEditorKeybindingStore.getState().editorKeybingMap,
         clipboardReadFunction: clipboardRead,
         currentDateFormat: getCurrentEditorInsertDateFormat,
         onCodemirrorViewLoad: (cmView) => {
+          updateSourceCodeSettings(
+            cmView,
+            resolveCodeEditorPreferences(useAppSettingStore.getState().settingData).source,
+          )
           setResumeSource(cmView)
           registerSourceCodeViewResource(id, instanceIdRef.current!, cmView, activeRef.current)
           if (activeRef.current && fileTypeConfig.type === 'markdown') {
@@ -976,6 +984,7 @@ function TextEditor(props: TextEditorProps) {
   const codeBlockLineWrapping = useAppSettingStore(
     (state) => state.settingData.wysiwyg_editor_codemirror_line_wrap ?? true,
   )
+  const codeEditorPreferences = useCodeEditorPreferences()
   const autosaveInterval = useAppSettingStore((state) => state.settingData.autosave_interval)
   const editorFullWidth = useAppSettingStore((state) => state.settingData.editor_full_width)
   const linkEditMode = useAppSettingStore((state) =>
@@ -1029,6 +1038,7 @@ function TextEditor(props: TextEditorProps) {
       editorTypewriterScroll,
       livePreviewBlockBehavior,
       editorKeybingMap,
+      codeEditorPreferences.rmeEmbedded,
     ],
   )
   const resolveTypography = () => {
@@ -2006,6 +2016,15 @@ function TextEditor(props: TextEditorProps) {
     if (context) updateRmeKeybindings(context, editorKeybingMap)
   }, [id, delegate, editorKeybingMap, editorKeybindingsLoaded])
 
+  useEffect(() => {
+    if (resumeSource && !resumeSource.isDestroyed) {
+      updateSourceCodeSettings(resumeSource, codeEditorPreferences.source)
+    }
+    if (isHtml || currentViewType === EditorViewType.SOURCECODE || !rmeRuntime) return
+    const context = editorContextRegistry.get(id, instanceIdRef.current!)
+    if (context) updateEmbeddedCodeSettings(rmeRuntime, context, codeEditorPreferences.rmeEmbedded)
+  }, [id, delegate, resumeSource, rmeRuntime, currentViewType, isHtml, codeEditorPreferences])
+
   const switchHtmlView = useCallback(
     (mode: EditorViewTypeValue) => {
       if (!isHtml || (mode !== EditorViewType.PREVIEW && mode !== EditorViewType.SOURCECODE)) return
@@ -2372,6 +2391,13 @@ function TextEditor(props: TextEditorProps) {
       },
       onContextMounted: (context: EditorContext) => {
         registerEditorContextResource(id, instanceIdRef.current!, context, activeRef.current)
+        if (rmeRuntime && !isHtml && currentViewType !== EditorViewType.SOURCECODE) {
+          updateEmbeddedCodeSettings(
+            rmeRuntime,
+            context,
+            resolveCodeEditorPreferences(useAppSettingStore.getState().settingData).rmeEmbedded,
+          )
+        }
       },
       delegateOptions,
       wysiwygToolBarOptions: {
@@ -2401,6 +2427,7 @@ function TextEditor(props: TextEditorProps) {
       savePathReserved,
       externalChangeResolving,
       isHtml,
+      rmeRuntime,
     ],
   )
   publishEditorSnapshotRef.current = (snapshot) =>
@@ -2708,6 +2735,7 @@ function TextEditor(props: TextEditorProps) {
         : false,
       density: 'compact',
       codeBlockLineWrapping,
+      codeEditor: codeEditorPreferences.embedded,
       linkEditMode,
       textDirection,
       handleLinkClick: async (href) => {
@@ -2727,7 +2755,8 @@ function TextEditor(props: TextEditorProps) {
         fontSize: themeFontSize,
         lineHeight: wysiwygRootLineHeight,
         // Preserve the runtime's 14px code / 16px body ratio as text scales.
-        '--cap-code-font-size': `calc(${themeFontSize} * 0.875)`,
+        '--cap-code-font-size': codeEditorPreferences.fontSize ?? `calc(${themeFontSize} * 0.875)`,
+        '--cap-code-line-height': codeEditorPreferences.lineHeight,
       },
       typewriter: { enabled: editorTypewriterScroll },
       uploadImageHandler:
@@ -2740,6 +2769,7 @@ function TextEditor(props: TextEditorProps) {
     linkEditMode,
     textDirection,
     codeBlockLineWrapping,
+    codeEditorPreferences,
     curFile.id,
     currentViewType,
     editorColorScheme,
@@ -3240,6 +3270,8 @@ function TextEditor(props: TextEditorProps) {
           $fullWidth={editorFullWidth}
           $rootLineHeight={wysiwygRootLineHeight}
           $visible={visible}
+          $codeFontSize={codeEditorPreferences.fontSize}
+          $codeLineHeight={codeEditorPreferences.lineHeight}
           onBeforeInputCapture={handleBeforeInputCapture}
           onClick={handleWrapperClick}
         >

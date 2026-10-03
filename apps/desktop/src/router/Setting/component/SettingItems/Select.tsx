@@ -27,7 +27,7 @@ const SelectSettingItem: React.FC<SettingItemProps<Setting.SelectSettingItem>> =
       : undefined,
   )
   const { t } = useTranslation()
-  const currentValue = String(layoutValue ?? settingValue ?? '')
+  const currentValue = String(layoutValue ?? settingValue ?? item.defaultValue ?? '')
 
   return (
     <SettingItemContainer $settingKey={item.key}>

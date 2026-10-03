@@ -1,3 +1,8 @@
+import {
+  getCodemirrorSettingsExtensions,
+  type CodemirrorOptions,
+  type CodemirrorSettingsProfile,
+} from '../extensions/CodeMirror/setup'
 import { rawTextExtension, resetRawText, type RawTextProjection } from './raw-text'
 import { indentWithTab } from '@codemirror/commands'
 import {
@@ -32,7 +37,7 @@ import {
   keymap,
   ViewPlugin,
 } from '@codemirror/view'
-import { SyntaxNodeRef, Tree } from '@lezer/common'
+import type { SyntaxNodeRef, Tree } from '@lezer/common'
 import { assertGet, isPromise, replaceNodeAtPosition } from '@rme-sdk/sdk/core'
 import type { EditorSchema, EditorView, ProsemirrorNode } from '@rme-sdk/sdk/pm'
 import { exitCode } from '@rme-sdk/sdk/pm/commands'
@@ -40,7 +45,7 @@ import { redo, undo } from '@rme-sdk/sdk/pm/history'
 import { Selection, TextSelection } from '@rme-sdk/sdk/pm/state'
 import { nanoid } from 'nanoid'
 import type { LoadLanguage } from '../extensions/CodeMirror/codemirror-node-view'
-import { CustomCopyFunction } from '../extensions/CodeMirror/codemirror-types'
+import type { CustomCopyFunction } from '../extensions/CodeMirror/codemirror-types'
 import { createCommandKeymap, type CommandKeymapOptions } from '../extensions/CodeMirror/keymap'
 import {
   createShortcutMatcher,
@@ -50,6 +55,19 @@ import { isBrowser } from '../utils/common'
 import { lightTheme } from '../theme'
 import type { CreateThemeOptions } from './theme'
 import { createTheme } from './theme'
+
+const settingsByOwner = new WeakMap<EditorView, CodemirrorOptions>()
+
+/** Replaces the configuration for this editor, including future preview instances. */
+export const updateCodemirrorSettings = (ownerView: EditorView, options: CodemirrorOptions): void => {
+  const snapshot = { ...options }
+  settingsByOwner.set(ownerView, snapshot)
+  cmInstanceMap.forEach((view) => {
+    if (view.isOwnedBy(ownerView)) view.updateSettings(snapshot)
+  })
+}
+
+export type { CodemirrorOptions, CodemirrorSettingsProfile } from '../extensions/CodeMirror/setup'
 
 const cmInstanceMap = new Map<string, MfCodemirrorView>()
 const themeRef = { current: createTheme(lightTheme.codemirrorTheme as CreateThemeOptions) }
@@ -225,6 +243,8 @@ export const extractMatches = (view: CodeMirrorEditorView) => {
 }
 
 export type CreateCodemirrorOptions = {
+  codemirrorOptions?: CodemirrorOptions
+  settingsProfile?: CodemirrorSettingsProfile
   preserveLineEndings?: boolean
   /**
    * when it is true, undo and redo will use prosemirror view.
@@ -269,6 +289,12 @@ export class MfCodemirrorView {
   private readonly toggleName = 'paragraph'
 
   private readonly schema: EditorSchema
+
+  private readonly settingsConf = new Compartment()
+  private readonly settingsProfile: CodemirrorSettingsProfile
+  private pendingSettings?: CodemirrorOptions
+  private settingsTimer?: ReturnType<typeof setTimeout>
+  private applyingSettings = false
 
   private readonly commandKeymapConf = new Compartment()
   private readonly releaseShortcutInput: () => void
@@ -327,9 +353,12 @@ export class MfCodemirrorView {
     this.languageName = languageName
     this.loadLanguage = loadLanguage
     this.options = options
+    this.settingsProfile =
+      options.settingsProfile ?? (node.attrs['front-matter'] === true ? 'frontmatter' : 'embedded')
+    const settings = settingsByOwner.get(view) ?? options.codemirrorOptions ?? {}
     this.content = this.node.textContent
     const changeFilter = CodeMirrorEditorState.changeFilter.of((tr: CodeMirrorTransaction) => {
-      if (!tr.docChanged && !options.preserveLineEndings) {
+      if (!tr.docChanged && !options.preserveLineEndings && !this.applyingSettings) {
         this.forwardSelection()
       }
 
@@ -342,6 +371,7 @@ export class MfCodemirrorView {
       doc: this.node.textContent as string,
       extensions: [
         ...(raw ? [raw.extension] : []),
+        this.settingsConf.of(getCodemirrorSettingsExtensions(settings, this.settingsProfile)),
         this.commandKeymapConf.of(this.commandKeymapExtension()),
         keymap.of(this.codeMirrorKeymap()),
         changeFilter,
@@ -359,6 +389,7 @@ export class MfCodemirrorView {
       ...this.options.codemirrorEditorViewConfig,
     })
 
+    this.cm.dom.addEventListener('compositionend', this.flushPendingSettings)
     cmInstanceMap.set(this.id, this)
 
     this.updateLanguage()
@@ -368,6 +399,42 @@ export class MfCodemirrorView {
     if (this.options.copyButton?.enabled !== false) {
       this.createCopyButton()
     }
+  }
+
+  /** Replaces the complete override snapshot; an empty object restores profile defaults. */
+  updateSettings(options: CodemirrorOptions): void {
+    if (this.isDestroyed) return
+    this.pendingSettings = { ...options }
+    if (!this.cm.compositionStarted && !this.cm.composing) this.flushPendingSettings()
+  }
+
+  private flushPendingSettings = (): void => {
+    if (this.isDestroyed || !this.pendingSettings) return
+    if (this.settingsTimer !== undefined) clearTimeout(this.settingsTimer)
+    // compositionend can precede CodeMirror's final DOM change and its composing
+    // flag reset. Wait for both before dispatching a configuration transaction.
+    this.settingsTimer = setTimeout(() => {
+      this.settingsTimer = undefined
+      if (this.isDestroyed || !this.pendingSettings) return
+      if (this.cm.compositionStarted || this.cm.composing) {
+        this.flushPendingSettings()
+        return
+      }
+      const settings = this.pendingSettings
+      this.pendingSettings = undefined
+      this.applyingSettings = true
+      try {
+        this.cm.dispatch({
+          effects: this.settingsConf.reconfigure(
+            getCodemirrorSettingsExtensions(settings, this.settingsProfile),
+          ),
+          annotations: Transaction.addToHistory.of(false),
+        })
+      } finally {
+        this.applyingSettings = false
+      }
+      this.cm.requestMeasure()
+    }, this.cm.compositionStarted || this.cm.composing ? 20 : 0)
   }
 
   update(node: ProsemirrorNode): boolean {
@@ -429,6 +496,9 @@ export class MfCodemirrorView {
 
   destroy() {
     this.isDestroyed = true
+    this.pendingSettings = undefined
+    if (this.settingsTimer !== undefined) clearTimeout(this.settingsTimer)
+    this.cm.dom.removeEventListener('compositionend', this.flushPendingSettings)
     this.releaseShortcutInput()
     this.cm.destroy()
     cmInstanceMap.delete(this.id)
@@ -486,7 +556,7 @@ export class MfCodemirrorView {
 
     this.cm.update([tr])
 
-    if (this.updating) return
+    if (this.updating || this.applyingSettings) return
     if (!tr.docChanged) {
       if (this.rawField) this.forwardSelection()
       return

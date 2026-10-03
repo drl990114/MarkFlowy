@@ -26,6 +26,7 @@ import type { CreateWysiwygDelegateOptions } from 'rme'
 import { handleImagePaste, handleUploadImage } from './imageHandlers'
 import { openEditorLink } from './openEditorLink'
 import { requestImageInsert } from './requestImageInsert'
+import { resolveCodeEditorPreferences } from './codeEditorSettings'
 
 type AIOptions = NonNullable<CreateWysiwygDelegateOptions['ai']>
 type LivePreviewBlockBehavior = 'auto' | 'always-split'
@@ -73,9 +74,10 @@ export const createWysiwygDelegateOptions = (
   return {
     disableAllBuildInShortcuts: true,
     overrideShortcutMap: useEditorKeybindingStore.getState().editorKeybingMap,
-    codemirrorOptions: {
-      lineWrapping: settingData.wysiwyg_editor_codemirror_line_wrap,
-    },
+    // The package declarations are generated separately; source integration tests
+    // verify the expanded options without rebuilding rme/dist in this task.
+    codemirrorOptions: resolveCodeEditorPreferences(settingData).rmeEmbedded as
+      CreateWysiwygDelegateOptions['codemirrorOptions'],
     livePreviewBlock: {
       behavior: normalizeLivePreviewBlockBehavior(
         settingData.wysiwyg_editor_live_preview_block_behavior,

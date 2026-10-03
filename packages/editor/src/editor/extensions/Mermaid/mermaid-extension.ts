@@ -23,6 +23,7 @@ export type MermaidExtensionOptions = LivePreviewBlockCommonOptions
   defaultOptions: {
     customCopyFunction: undefined,
     codemirrorExtensions: undefined,
+    codemirrorOptions: undefined,
     behavior: undefined,
   },
   staticKeys: [],
@@ -69,6 +70,7 @@ export class MermaidBlockExtension extends NodeExtension<MermaidExtensionOptions
         renderer: createMermaidRenderer({
           codemirrorExtensions: this.options.codemirrorExtensions,
         }),
+        codemirrorOptions: this.options.codemirrorOptions,
         customCopyFunction: this.options.customCopyFunction,
         behavior: this.options.behavior,
       })

@@ -8,6 +8,8 @@ interface EditorWrapperProps {
   $fullWidth: boolean
   $rootLineHeight: string
   $visible: boolean
+  $codeFontSize?: string
+  $codeLineHeight?: string
 }
 
 export const EditorWrapper = styled.div<EditorWrapperProps>`
@@ -24,6 +26,8 @@ export const EditorWrapper = styled.div<EditorWrapperProps>`
   --rme-editor-content-width: var(--mf-reader-content-width);
   --rme-editor-inline-padding: clamp(20px, 5vw, 48px);
   --rme-editor-line-height: ${(props) => props.$rootLineHeight};
+  ${(props) => props.$codeFontSize && css`--rme-code-font-size: ${props.$codeFontSize};`}
+  ${(props) => props.$codeLineHeight && css`--rme-code-line-height: ${props.$codeLineHeight};`}
   /* .code-contents keeps an 8px-compatible top inset for source and non-Markdown views. */
   --rme-editor-block-padding-start: calc(36px - ${(props) => props.theme.spaceSm});
   --rme-editor-block-padding-end: 64px;
