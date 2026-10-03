@@ -71,7 +71,7 @@ export const TauriFileSystemProvider: FC<FileSystemAdapterProps> = ({ children }
         entries = unwrapDirectoryReadResult(result)
       } catch (error) {
         logger.error(`Failed to read subdirectory at ${folderPath}`, error)
-        return []
+        throw error
       }
 
       if ((useEditorStore.getState().getRootPath() || folderPath) !== rootPath) {
