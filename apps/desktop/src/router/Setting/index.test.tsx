@@ -266,6 +266,10 @@ describe('Settings dialog integration', () => {
     )
     const draft = screen.getByRole('textbox', { name: 'Draft' }) as HTMLTextAreaElement
     fireEvent.change(draft, { target: { value: 'Keep this unsaved edit' } })
+    act(() => {
+      draft.focus()
+      draft.setSelectionRange(5, 14, 'backward')
+    })
     const mountsBefore = state.mounted.mock.calls.length
     const cleanupsBefore = state.cleanedUp.mock.calls.length
     const dialog = await openSettings()
@@ -281,6 +285,11 @@ describe('Settings dialog integration', () => {
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
     await waitFor(() => expect(document.activeElement).toBe(draft))
     expect(draft.value).toBe('Keep this unsaved edit')
+    expect([draft.selectionStart, draft.selectionEnd, draft.selectionDirection]).toEqual([
+      5,
+      14,
+      'backward',
+    ])
     expect(state.cleanedUp).toHaveBeenCalledTimes(cleanupsBefore)
     expect(container.querySelector('[data-mf-workspace-surface]')?.hasAttribute('inert')).toBe(
       false,
