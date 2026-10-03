@@ -5,17 +5,21 @@ import { createRoot, type Root } from 'react-dom/client'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { PDF_PRINT_EVENT } from './pdfPrintMenuItem'
 import { PdfPrintController } from './PdfPrintController'
+import type { preparePrintDocument } from './printDocument'
 import * as rmeRuntime from '../rmeRuntime'
 
 const previewState = vi.hoisted(() => ({
   docs: [] as string[],
   error: null as Error | null,
   hydration: { settled: Promise.resolve() },
+  onHydrationChange: undefined as
+    | ((hydration: { settled: Promise<void> } | null) => void)
+    | undefined,
 }))
 
 const printMocks = vi.hoisted(() => ({
   openPdfPrintWindow: vi.fn(),
-  preparePrintDocument: vi.fn<() => Promise<{ failedImageCount: number }>>(),
+  preparePrintDocument: vi.fn<typeof preparePrintDocument>(),
 }))
 
 const toastMocks = vi.hoisted(() => ({
@@ -61,12 +65,16 @@ vi.mock('rme', async () => {
       onImageHydrationChange?: (hydration: { settled: Promise<void> } | null) => void
     }) => {
       const { doc, onError, onImageHydrationChange } = props
+      const callbacks = React.useRef({ onError, onImageHydrationChange })
+      callbacks.current = { onError, onImageHydrationChange }
+      const hydration = previewState.hydration
       previewState.docs.push(doc)
+      previewState.onHydrationChange = onImageHydrationChange
       React.useLayoutEffect(() => {
-        if (previewState.error) onError?.(previewState.error)
-        onImageHydrationChange?.(previewState.hydration)
-        return () => onImageHydrationChange?.(null)
-      }, [doc, onError, onImageHydrationChange])
+        if (previewState.error) callbacks.current.onError?.(previewState.error)
+        callbacks.current.onImageHydrationChange?.(hydration)
+        return () => callbacks.current.onImageHydrationChange?.(null)
+      }, [doc, hydration])
       return React.createElement(
         'div',
         { className: 'mf-preview-content' },
@@ -107,6 +115,7 @@ describe('PdfPrintController', () => {
     previewState.docs = []
     previewState.error = null
     previewState.hydration = { settled: Promise.resolve() }
+    previewState.onHydrationChange = undefined
     printMocks.preparePrintDocument.mockReset().mockResolvedValue({ failedImageCount: 0 })
     printMocks.openPdfPrintWindow.mockReset().mockResolvedValue({
       failedImageCount: 0,
@@ -211,6 +220,86 @@ describe('PdfPrintController', () => {
       finishPreparation({ failedImageCount: 0 })
       await vi.waitFor(() => expect(printMocks.openPdfPrintWindow).toHaveBeenCalledOnce())
     })
+  })
+
+  it('restarts preparation when a theme rerender settles an obsolete hydration', async () => {
+    let settleFirst!: () => void
+    let settleCurrent!: () => void
+    previewState.hydration = {
+      settled: new Promise<void>((resolve) => {
+        settleFirst = resolve
+      }),
+    }
+    const currentHydration = {
+      settled: new Promise<void>((resolve) => {
+        settleCurrent = resolve
+      }),
+    }
+    printMocks.preparePrintDocument.mockImplementation(
+      ({ hydration, signal }) =>
+        new Promise((resolve, reject) => {
+          signal?.addEventListener(
+            'abort',
+            () => reject(new DOMException('Preparation replaced', 'AbortError')),
+            { once: true },
+          )
+          void hydration.settled.then(() => resolve({ failedImageCount: 0 }))
+        }),
+    )
+    const getContent = vi.fn(() => '# Cold Mermaid render')
+    await renderController(getContent)
+    await act(async () => bus.emit(PDF_PRINT_EVENT))
+    expect(printMocks.preparePrintDocument).toHaveBeenCalledOnce()
+    const firstSignal = printMocks.preparePrintDocument.mock.calls[0]![0].signal!
+
+    await act(async () => {
+      // Preview settles the old promise during layout cleanup before publishing
+      // the replacement that is still rendering its cold Mermaid dependency.
+      settleFirst()
+      previewState.onHydrationChange?.(null)
+      previewState.hydration = currentHydration
+      previewState.onHydrationChange?.(currentHydration)
+    })
+
+    expect(firstSignal.aborted).toBe(true)
+    expect(printMocks.preparePrintDocument).toHaveBeenCalledTimes(2)
+    expect(printMocks.openPdfPrintWindow).not.toHaveBeenCalled()
+    expect(toastMocks.error).not.toHaveBeenCalled()
+    await act(async () => bus.emit(PDF_PRINT_EVENT))
+    expect(getContent).toHaveBeenCalledOnce()
+
+    await act(async () => settleCurrent())
+    await waitFor(() => expect(printMocks.openPdfPrintWindow).toHaveBeenCalledOnce())
+    expect(printMocks.openPdfPrintWindow.mock.calls[0]?.[0].html).toContain(
+      'Cold Mermaid render',
+    )
+  })
+
+  it('keeps an opened print window alive when Preview hydration changes', async () => {
+    let closeWindow!: () => void
+    printMocks.openPdfPrintWindow.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          closeWindow = () => resolve(null)
+        }),
+    )
+    const getContent = vi.fn(() => '# Snapshot already transferred')
+    await renderController(getContent)
+    await requestPrint()
+    const printSignal = printMocks.openPdfPrintWindow.mock.calls[0]![1] as AbortSignal
+
+    await act(async () => {
+      previewState.onHydrationChange?.(null)
+      previewState.hydration = { settled: Promise.resolve() }
+      previewState.onHydrationChange?.(previewState.hydration)
+    })
+    await act(async () => bus.emit(PDF_PRINT_EVENT))
+
+    expect(printSignal.aborted).toBe(false)
+    expect(printMocks.openPdfPrintWindow).toHaveBeenCalledOnce()
+    expect(getContent).toHaveBeenCalledOnce()
+    await act(async () => closeWindow())
+    expect(document.querySelector('.mf-pdf-print-root')).toBeNull()
   })
 
   it('keeps the main window unchanged and cleans up after the print window closes', async () => {

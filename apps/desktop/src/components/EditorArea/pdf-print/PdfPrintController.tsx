@@ -74,10 +74,21 @@ export function PdfPrintController({
   const rootRef = useRef<HTMLDivElement>(null)
   const releaseTaskRef = useRef<(() => void) | null>(null)
   const taskAbortControllerRef = useRef<AbortController | null>(null)
+  const preparationAbortControllerRef = useRef<AbortController | null>(null)
+  const hydrationRef = useRef<PreviewImageHydration | null>(null)
   const mountedRef = useRef(true)
   const rendererErrorRef = useRef<Error | null>(null)
   const startedJobRef = useRef<number | null>(null)
   const jobSequenceRef = useRef(0)
+
+  const handleHydrationChange = useCallback((nextHydration: PreviewImageHydration | null) => {
+    if (hydrationRef.current === nextHydration) return
+    // Preview also settles a hydration when a theme change replaces it. That
+    // settlement cannot authorize printing the replacement's loading surface.
+    hydrationRef.current = nextHydration
+    preparationAbortControllerRef.current?.abort()
+    setHydration(nextHydration)
+  }, [])
 
   const finishTask = useCallback(() => {
     taskAbortControllerRef.current?.abort()
@@ -86,6 +97,7 @@ export function PdfPrintController({
     releaseTaskRef.current = null
     startedJobRef.current = null
     rendererErrorRef.current = null
+    hydrationRef.current = null
     if (mountedRef.current) {
       setHydration(null)
       setJob(null)
@@ -141,14 +153,26 @@ export function PdfPrintController({
   }, [])
 
   useEffect(() => {
-    if (!hydration || !job || startedJobRef.current === job.id) return
+    if (
+      !hydration ||
+      hydrationRef.current !== hydration ||
+      !job ||
+      startedJobRef.current === job.id
+    ) {
+      return
+    }
 
     const root = rootRef.current
     if (!root) return
     const taskAbortController = taskAbortControllerRef.current
     if (!taskAbortController) return
 
-    startedJobRef.current = job.id
+    const preparationAbortController = new AbortController()
+    preparationAbortControllerRef.current = preparationAbortController
+    const cancelPreparation = () => preparationAbortController.abort()
+    taskAbortController.signal.addEventListener('abort', cancelPreparation, { once: true })
+    if (taskAbortController.signal.aborted) cancelPreparation()
+    let printWindowOpened = false
     const loadingToast = toast.loading(t('contextmenu.editor_tab.export_pdf') + '...')
 
     void (async () => {
@@ -158,20 +182,26 @@ export function PdfPrintController({
           root,
           hydration,
           interactiveMediaLabel,
-          signal: taskAbortController.signal,
+          signal: preparationAbortController.signal,
         })
 
-        if (taskAbortController.signal.aborted) throw new DOMException('', 'AbortError')
+        if (preparationAbortController.signal.aborted) throw new DOMException('', 'AbortError')
         if (rendererErrorRef.current) throw rendererErrorRef.current
-        await makePrintDocumentTransferable(root, taskAbortController.signal)
+        await makePrintDocumentTransferable(root, preparationAbortController.signal)
+        if (preparationAbortController.signal.aborted) throw new DOMException('', 'AbortError')
+        const html = getPreparedPreviewHtml(root)
 
+        // The window owns this immutable snapshot from here on. Later Preview
+        // rerenders must neither open another window nor cancel the print dialog.
+        startedJobRef.current = job.id
+        printWindowOpened = true
         const result = await openPdfPrintWindow(
           {
             editorCodeFontFamily,
             editorRootFontFamily,
             failedImageCount,
             fileName: job.fileName,
-            html: getPreparedPreviewHtml(root),
+            html,
             interactiveMediaLabel,
             jobId: job.windowJobId,
             rootFontSize: styleToken?.rootFontSize,
@@ -188,15 +218,25 @@ export function PdfPrintController({
           )
         }
       } catch (error) {
-        if (!taskAbortController.signal.aborted) {
+        if (
+          !taskAbortController.signal.aborted &&
+          (printWindowOpened || !preparationAbortController.signal.aborted)
+        ) {
           logger.error('Failed to prepare PDF print document:', error)
           toast.error(t('contextmenu.editor_tab.export_pdf_failed'))
         }
       } finally {
         toast.dismiss(loadingToast)
-        finishTask()
+        taskAbortController.signal.removeEventListener('abort', cancelPreparation)
+        if (preparationAbortControllerRef.current === preparationAbortController) {
+          preparationAbortControllerRef.current = null
+        }
+        // A replaced preparation must leave the job and lock to its successor.
+        if (printWindowOpened || !preparationAbortController.signal.aborted) finishTask()
       }
     })()
+
+    return cancelPreparation
   }, [editorCodeFontFamily, editorRootFontFamily, finishTask, hydration, job, styleToken, t])
 
   if (!job) return null
@@ -219,7 +259,7 @@ export function PdfPrintController({
             onError={(error) => {
               rendererErrorRef.current = error
             }}
-            onImageHydrationChange={setHydration}
+            onImageHydrationChange={handleHydrationChange}
           />
         </div>
       </ThemeProvider>
