@@ -950,6 +950,7 @@
     "info": "ワークスペース情報",
     "none": "ワークスペースは開いていません",
     "searchPlaceholder": "最近のワークスペースとファイルを検索…",
+    "open": "開く",
     "openFileOrFolder": "ファイルまたはフォルダーを開く",
     "recentFiles": "最近開いたファイル",
     "sync_mode": {

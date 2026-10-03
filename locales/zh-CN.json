@@ -379,6 +379,7 @@
     "info": "工作区信息",
     "none": "未打开工作区",
     "searchPlaceholder": "搜索最近工作区和文件…",
+    "open": "打开",
     "openFileOrFolder": "打开文件或文件夹",
     "recentFiles": "最近打开的文件",
     "sync_mode": {

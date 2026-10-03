@@ -72,10 +72,6 @@ export function WorkspaceActions({ location = 'titlebar' }: WorkspaceActionsProp
     void clearRecentWorkspaces().catch((error) => toast.error(String(error)))
   }
 
-  const triggerContent = (
-    <FolderOpenIcon aria-hidden='true' className='size-3.5' strokeWidth={1.75} />
-  )
-
   return (
     <Popover.Root open={isPickerOpen} onOpenChange={setIsPickerOpen}>
       <Popover.Trigger asChild>
@@ -87,18 +83,19 @@ export function WorkspaceActions({ location = 'titlebar' }: WorkspaceActionsProp
             format='icon'
             title={rootPath ? `${pickerLabel}\n${rootPath}` : pickerLabel}
           >
-            {triggerContent}
+            <FolderOpenIcon aria-hidden='true' className='size-3.5' strokeWidth={1.75} />
           </StatusBarButton>
         ) : (
           <Button
             aria-expanded={isPickerOpen}
             aria-label={pickerLabel}
+            className='h-[22px] px-2'
             data-slot='workspace-picker-trigger'
-            size='icon-chrome'
+            size='sm'
             title={rootPath ? `${pickerLabel}\n${rootPath}` : pickerLabel}
             variant='chrome'
           >
-            {triggerContent}
+            {t('workspace.open')}
           </Button>
         )}
       </Popover.Trigger>

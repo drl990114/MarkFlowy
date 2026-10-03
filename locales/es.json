@@ -950,6 +950,7 @@
     "info": "Información del área de trabajo",
     "none": "El área de trabajo no está abierta",
     "searchPlaceholder": "Buscar espacios de trabajo y archivos recientes…",
+    "open": "Abrir",
     "openFileOrFolder": "Abrir archivo o carpeta",
     "recentFiles": "Archivos recientes",
     "sync_mode": {

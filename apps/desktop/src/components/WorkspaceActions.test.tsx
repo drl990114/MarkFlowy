@@ -40,6 +40,7 @@ vi.mock('@/i18n', () => ({
         'file.recentDir': 'Recently opened folders',
         'search.search_empty': 'No matches',
         'welcome.recentWorkspaces': 'Recent Workspaces',
+        'workspace.open': 'Open',
         'workspace.openFileOrFolder': 'Open File or Folder',
         'workspace.recentFiles': 'Recent Files',
         'workspace.searchPlaceholder': 'Search recent workspaces and files…',
@@ -94,13 +95,13 @@ describe('WorkspaceActions', () => {
 
   afterEach(cleanup)
 
-  it('uses a single named icon button and shows the current workspace inside the picker', () => {
+  it('uses a single text button and shows the current workspace inside the picker', () => {
     const { container } = render(<WorkspaceActions />)
 
     const trigger = screen.getByRole('button', { name: 'Open File or Folder' })
     expect(trigger.getAttribute('title')).toBe('Open File or Folder\n/Users/test/current')
-    expect(trigger.textContent).toBe('')
-    expect(trigger.querySelector('svg[aria-hidden="true"]')).toBeTruthy()
+    expect(trigger.textContent).toBe('Open')
+    expect(trigger.querySelector('svg')).toBeNull()
     expect(container.querySelectorAll('[data-slot="workspace-picker-trigger"]')).toHaveLength(1)
 
     fireEvent.click(trigger)

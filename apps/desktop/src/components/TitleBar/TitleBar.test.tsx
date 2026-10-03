@@ -29,6 +29,7 @@ vi.mock('@/i18n', () => ({
         'titleBar.restore': 'Restore window',
         'welcome.recentWorkspaces': 'Recent Workspaces',
         'workspace.searchPlaceholder': 'Search workspaces…',
+        'workspace.open': 'Open',
         'workspace.openFileOrFolder': 'Open File or Folder',
       })[key] ?? key,
   }),
@@ -95,7 +96,7 @@ describe('TitleBar', () => {
     expect(markup).toContain('aria-label="MarkFlowy Menu"')
   })
 
-  it('keeps the workspace path in the icon tooltip', () => {
+  it('keeps the workspace path in the open button tooltip', () => {
     titleBarTestState.osType = 'macos'
     titleBarTestState.rootPath = '/Users/test/notes'
     const markup = renderToStaticMarkup(

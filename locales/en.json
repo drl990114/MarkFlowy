@@ -1011,6 +1011,7 @@
     "info": "Workspace Information",
     "none": "Workspace is not open",
     "searchPlaceholder": "Search recent workspaces and files…",
+    "open": "Open",
     "openFileOrFolder": "Open File or Folder",
     "recentFiles": "Recent Files",
     "sync_mode": {
