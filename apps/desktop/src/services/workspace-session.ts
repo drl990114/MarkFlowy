@@ -4,7 +4,7 @@ import {
   FILE_MUTATION_QUEUE_KEY,
   savePathCoordinator,
 } from '@/components/EditorArea/savePathCoordinator'
-import { getFileObject, pruneFileMetadata } from '@/helper/files'
+import { getFileObject, getFileObjectByPath, pruneFileMetadata } from '@/helper/files'
 import { readDirectory, releaseSecurityScope } from '@/helper/filesys'
 import { logger } from '@/helper/logger'
 import { t } from '@/i18n'
@@ -60,7 +60,13 @@ export async function attachWorkspaceSession(path: string | undefined, persisten
         const file = ensureCachedFileByPath(filePath)
         if (!useEditorStore.getState().opened.includes(file.id)) editor.addOpenedFile(file.id)
       }
-      if (active && useEditorStore.getState().activeId !== active) editor.setActiveId(active)
+      const restored = useEditorStore.getState()
+      // Adding tabs alone does not make a document visible. Keep a live document
+      // selected, or restore the cached selection after removing placeholders.
+      const activeId = active && restored.opened.includes(active)
+        ? active
+        : getFileObjectByPath(cache?.activeFilePath)?.id ?? restored.opened[0]
+      if (activeId && restored.activeId !== activeId) editor.setActiveId(activeId)
     }, [...recent, ...(cache?.recentFilePaths ?? []).map((filePath) => ({ path: filePath }))]))
     if (!path && previousRoot) detachedScopes.add(previousRoot)
     if (path) await useOpenedCacheStore.getState().addRecentWorkspaces({ path })

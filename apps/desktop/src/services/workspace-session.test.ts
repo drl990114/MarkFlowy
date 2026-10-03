@@ -22,6 +22,7 @@ import {
 } from './workspace-cache'
 import { attachWorkspaceSession, switchWorkspaceSession } from './workspace-session'
 import { refreshWorkspaceDirectory } from './workspace-refresh'
+import { markPristineDocument } from './pristine-document'
 
 vi.mock('@tauri-apps/api/core', () => ({ invoke: vi.fn().mockResolvedValue(true) }))
 vi.mock('zens', () => ({ toast: { error: vi.fn() } }))
@@ -111,6 +112,45 @@ describe('workspace editor sessions', () => {
     expect(openedPaths()).toEqual([undefined, '/two/existing.md', '/two/other.md'])
     expect(getFileObject(draft.id).content).toBe('unsaved content')
     expect(useEditorStateStore.getState().idStateMap.get(draft.id)?.hasUnsavedChanges).toBe(true)
+  })
+
+  it.each(['empty', 'pristine', 'new-tab', 'stale-active'] as const)(
+    'activates the cached document when attaching a workspace to a %s window',
+    async (initialState) => {
+      useEditorStore.getState().setFolderData(null)
+      if (initialState === 'pristine') markPristineDocument(openDocument().id)
+      if (initialState === 'new-tab') {
+        const placeholder = createFile({ name: 'New tab', kind: 'new_tab', content: '' })
+        useEditorStore.getState().addOpenedFile(placeholder.id)
+        useEditorStore.getState().setActiveId(placeholder.id)
+      }
+      if (initialState === 'stale-active') useEditorStore.setState({ activeId: 'closed-file' })
+      const revision = useEditorStore.getState().editorSessionRevision
+      data.set('/two', {
+        openedFilePaths: ['/two/first.md', '/two/selected.md'],
+        activeFilePath: '/two/selected.md',
+      })
+
+      expect(await switchWorkspaceSession('/two', persistence)).toBe(true)
+
+      const editor = useEditorStore.getState()
+      expect(openedPaths()).toEqual(['/two/first.md', '/two/selected.md'])
+      expect(getFileObject(editor.activeId!)?.path).toBe('/two/selected.md')
+      expect(editor.getActiveGroup()?.activeId).toBe(editor.activeId)
+      expect(editor.editorSessionRevision).toBe(revision)
+      expect(dialog.confirm).not.toHaveBeenCalled()
+    },
+  )
+
+  it('activates the first restored tab when an attached workspace has no cached active document', async () => {
+    useEditorStore.getState().setFolderData(null)
+    data.set('/two', { openedFilePaths: ['/two/first.md', '/two/second.md'] })
+
+    expect(await switchWorkspaceSession('/two', persistence)).toBe(true)
+
+    const editor = useEditorStore.getState()
+    expect(getFileObject(editor.activeId!)?.path).toBe('/two/first.md')
+    expect(editor.getActiveGroup()?.activeId).toBe(editor.activeId)
   })
 
   it('closes only the folder and keeps the split layout and dirty document identities', async () => {

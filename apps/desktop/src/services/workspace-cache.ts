@@ -360,7 +360,7 @@ const hydrateWorkspaceCache = (
   if (!openedFilePaths) return undefined
 
   const openedIds = openedFilePaths.map((path) => ensureCachedFileByPath(path).id)
-  const activeId = activeFilePath ? ensureCachedFileByPath(activeFilePath).id : undefined
+  const activeId = activeFilePath ? ensureCachedFileByPath(activeFilePath).id : openedIds[0]
 
   return { activeId, openedIds }
 }

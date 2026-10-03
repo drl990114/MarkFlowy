@@ -94,6 +94,14 @@ describe('workspace cache and recent files', () => {
     expect(openedPaths()).toEqual(['/w/A.md', '/w/B.md'])
   })
 
+  it('activates the first restored tab when a legacy cache has no selected file', () => {
+    restoreWorkspaceCache({ openedFilePaths: ['/w/A.md', '/w/B.md'] }, folder('/w'))
+
+    const editor = useEditorStore.getState()
+    expect(getFileObject(editor.activeId!)?.path).toBe('/w/A.md')
+    expect(editor.getActiveGroup()?.activeId).toBe(editor.activeId)
+  })
+
   it('restores history-only caches and filters malformed entries independently from editor layout', () => {
     restoreWorkspaceCache({ recentFilePaths: ['/w/closed.md'] }, folder('/w'))
     expect(paths()).toEqual(['/w/closed.md'])
