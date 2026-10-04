@@ -91,6 +91,26 @@ afterEach(() => {
 })
 
 describe('normal exit draft session', () => {
+  it('persists only the stable disk baseline and rebases a recovered dirty draft for its next save', async () => {
+    const fingerprint = `existing:1:2:136:1791132580162384580:sha256:${'a'.repeat(64)}`
+    const revision = `${fingerprint}:path-generation:3:file-generation:3`
+    const restarted = `${fingerprint}:path-generation:0:file-generation:0`
+    const file = open('saved then edited', '/w/a.md')
+    fileSaveCoordinator.setDiskRevision(file.id, revision)
+    const { cache, sessions } = createCache()
+    await closeWithDraftRecovery(cache, 'main', async () => {})
+    expect(sessions()[0].documents[0].diskRevision).toBe(fingerprint)
+    expect(fileSaveCoordinator.getDiskRevision(file.id)).toBe(revision)
+    resetEditors()
+    vi.mocked(readStableFileSnapshot).mockResolvedValue({ status: 'success', content: 'saved', revision: restarted })
+    expect(await restoreDraftSession(cache)).toBe(1)
+    const id = useEditorStore.getState().activeId!
+    expect(getFileObject(id).content).toBe('saved then edited')
+    expect(useEditorStateStore.getState().idStateMap.get(id)?.hasUnsavedChanges).toBe(true)
+    expect(markExternalFileConflict).not.toHaveBeenCalled()
+    expect(fileSaveCoordinator.getDiskRevision(id)).toBe(restarted)
+  })
+
   it.each([false, true])(
     'restores unnamed documents without a workspace with autosave=%s',
     async (autosave) => {
@@ -381,9 +401,11 @@ describe('WebView reload draft session', () => {
     expect(restored.path).toBeUndefined()
   })
 
-  it('flushes deferred input synchronously and preserves revisions for existing files', async () => {
+  it('flushes deferred input and rebases the persisted disk signature after a WebView reload', async () => {
+    const fingerprint = `existing:1:2:136:1791132580162384580:sha256:${'a'.repeat(64)}`
+    const revision = `${fingerprint}:path-generation:3:file-generation:3`
     const file = open('cached', '/w/a.md')
-    fileSaveCoordinator.setDiskRevision(file.id, 'r1')
+    fileSaveCoordinator.setDiskRevision(file.id, revision)
     let pending = true
     const unregister = editorSnapshotRegistry.register(file.id, 'editor', {
       canRead: () => true,
@@ -399,18 +421,20 @@ describe('WebView reload draft session', () => {
     cleanups.push(unregister)
     listen()
     reload()
+    expect(JSON.parse(window.sessionStorage.getItem(RELOAD_SESSION_KEY)!).documents[0].diskRevision).toBe(fingerprint)
     expect(pending).toBe(false)
     unregister()
     resetEditors()
     vi.mocked(readStableFileSnapshot).mockResolvedValue({
       status: 'success',
       content: 'disk',
-      revision: 'r1',
+      revision,
     })
     expect(await restoreDraftReloadSession()).toBe(1)
     const id = useEditorStore.getState().activeId!
     expect(getFileObject(id).content).toBe('last keystroke')
-    expect(fileSaveCoordinator.getDiskRevision(id)).toBe('r1')
+    expect(fileSaveCoordinator.getDiskRevision(id)).toBe(revision)
+    expect(markExternalFileConflict).not.toHaveBeenCalled()
   })
 
   it('retains the previous snapshot when reloading again before startup completes', async () => {

@@ -28,6 +28,7 @@ import {
   type RecoveryDocument,
 } from './draftSessionFormat'
 import { registerDraftRecovery, isDraftRecoveryPending } from './draftRecoveryState'
+import { persistentDiskRevision } from './draftDiskRevision'
 import type { WindowSession } from './window-session'
 import {
   bindRecoveredDraft,
@@ -279,7 +280,7 @@ export async function stageDraftRecovery({
       id: file.id,
       name: file.name,
       path: file.path,
-      diskRevision: fileSaveCoordinator.getDiskRevision(file.id),
+      diskRevision: persistentDiskRevision(fileSaveCoordinator.getDiskRevision(file.id)),
       format: fileSaveCoordinator.getPersistedFormat(file.id),
       source: { kind: 'inline', content: useEditorStore.getState().getEditorContent(file.id) },
     }
@@ -446,8 +447,12 @@ export async function stageDraftRecovery({
       if (!dirty) fileSaveCoordinator.loadSnapshot(fileId, disk)
       else if (!format && disk.text)
         fileSaveCoordinator.recordFormat(fileId, disk.text.format, false)
-      if (dirty && disk.revision !== job.document.diskRevision)
+      if (dirty && persistentDiskRevision(disk.revision) !== persistentDiskRevision(job.document.diskRevision))
         markExternalFileConflict(fileId, disk.revision)
+      else
+        // The persisted signature validates recovery, not live saves. Rebase to
+        // this process's full token so subsequent CAS still checks generations.
+        fileSaveCoordinator.setDiskRevision(fileId, disk.revision)
     }
     return dirty
   }

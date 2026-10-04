@@ -17,6 +17,7 @@ import {
   readStableFileSnapshot,
   type StableFileSnapshot,
 } from '@/components/EditorArea/fileSnapshot'
+import { persistentDiskRevision } from './draftDiskRevision'
 import {
   bindRecoveredDraft,
   flushDraftProtection,
@@ -124,7 +125,7 @@ export async function restoreHistory(entryId: string, before = false) {
         document,
         ...historyDraftIdentity(file.id),
         content: snapshot.content,
-        diskRevision: disk?.status === 'success' ? disk.revision : undefined,
+        diskRevision: persistentDiskRevision(disk?.status === 'success' ? disk.revision : undefined),
         paused: true,
         format: fileSaveCoordinator.getTextMetadata(file.id).format,
       }

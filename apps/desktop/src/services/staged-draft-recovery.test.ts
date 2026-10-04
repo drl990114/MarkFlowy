@@ -59,6 +59,9 @@ const reads = new Map<string, (snapshot: FileSnapshotResult) => void>()
 const calls: string[] = []
 const snapshot = (content = 'disk', revision = 'r1'): FileSnapshotResult => ({ status: 'success', content, revision })
 const draft = (id: string, content = `${id} draft`): DraftDocument => ({ id, name: `${id}.md`, path: `/w/${id}.md`, content, diskRevision: 'r1' })
+const diskFingerprint = `existing:1:2:136:1791132580162384580:sha256:${'a'.repeat(64)}`
+const savedDiskRevision = `${diskFingerprint}:path-generation:3:file-generation:3`
+const restartedDiskRevision = `${diskFingerprint}:path-generation:0:file-generation:0`
 const cacheFor = (documents: DraftDocument[], activeId?: string) => {
   const original: DraftSession = { version: 1, documents, activeId }
   const data = new Map<string, unknown>([['draft-session:old', original]])
@@ -131,6 +134,46 @@ const installNative = (drafts: DraftDescriptor[]) => {
 }
 
 describe('indexed draft recovery', () => {
+  it.each([savedDiskRevision, diskFingerprint])('recovers a saved-then-edited native draft after write counters reset (%s)', async (diskRevision) => {
+    const item = { ...descriptor('active'), diskRevision }
+    open('active')
+    useEditorStore.getState().setActiveId('active')
+    installNative([item])
+    const onError = vi.fn()
+    const recovery = await start({ onError })
+    settle('active', snapshot('disk saved before the last edits', restartedDiskRevision))
+    await recovery.finished
+    expect(onError).not.toHaveBeenCalled()
+    // Old descriptors must reach the native claim unchanged; their exact fields
+    // protect the ownership transfer even though recovery compares stable fields.
+    expect(historyCall).toHaveBeenCalledWith('claimRecoveryDraft', expect.objectContaining({ draft: item }))
+    expect(getFileObject('active').content).toBe('active.md recovered')
+    expect(useEditorStateStore.getState().idStateMap.get('active')?.hasUnsavedChanges).toBe(true)
+    expect(markExternalFileConflict).not.toHaveBeenCalled()
+    expect(fileSaveCoordinator.getDiskRevision('active')).toBe(restartedDiskRevision)
+  })
+
+  it.each([
+    ['device', diskFingerprint.replace('existing:1:', 'existing:9:')],
+    ['inode', diskFingerprint.replace('existing:1:2:', 'existing:1:9:')],
+    ['length', diskFingerprint.replace(':136:', ':137:')],
+    ['mtime', diskFingerprint.replace(':1791132580162384580:', ':1791132580162384581:')],
+    ['bytes', diskFingerprint.replace('a'.repeat(64), 'b'.repeat(64))],
+    ['unknown format', 'future-revision:1'],
+  ])('retains a recovery conflict when %s changed across restart', async (_field, fingerprint) => {
+    const item = { ...descriptor('active'), diskRevision: savedDiskRevision }
+    open('active')
+    useEditorStore.getState().setActiveId('active')
+    installNative([item])
+    const recovery = await start({ onError: vi.fn() })
+    const revision = `${fingerprint}:path-generation:0:file-generation:0`
+    settle('active', snapshot('disk', revision))
+    await recovery.finished
+    expect(getFileObject('active').content).toBe('active.md recovered')
+    expect(markExternalFileConflict).toHaveBeenCalledWith('active', revision)
+    expect(fileSaveCoordinator.getDiskRevision('active')).toBe(savedDiskRevision)
+  })
+
   it('restores the latest owned draft after closing its folder, retaining its tab id and excluding other windows', async () => {
     const previous = descriptor('untitled')
     previous.document.path = undefined

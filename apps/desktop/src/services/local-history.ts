@@ -15,6 +15,7 @@ import useEditorStateStore from '@/stores/useEditorStateStore'
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import { isDraftRecoveryPending, waitForDraftRecovery } from './draftRecoveryState'
 import type { DraftDescriptor } from './draftSessionFormat'
+import { persistentDiskRevision } from './draftDiskRevision'
 
 export interface HistoryDocument {
   id: string
@@ -141,7 +142,7 @@ export function historyDocument(fileId: string): Promise<HistoryDocument> {
             writer: existing.writer,
             sequence: seq,
             content,
-            diskRevision: fileSaveCoordinator.getDiskRevision(fileId),
+            diskRevision: persistentDiskRevision(fileSaveCoordinator.getDiskRevision(fileId)),
             format: fileSaveCoordinator.getPersistedFormat(fileId),
             paused: isHistoryAutosavePaused(fileId),
           })
@@ -193,7 +194,7 @@ async function capture(fileId: string) {
   const content = useEditorStore.getState().getEditorContent(fileId)
   if (isPristineDocument(fileId) && !file.path) return
   const format = fileSaveCoordinator.getPersistedFormat(fileId)
-  const diskRevision = fileSaveCoordinator.getDiskRevision(fileId)
+  const diskRevision = persistentDiskRevision(fileSaveCoordinator.getDiskRevision(fileId))
   const dirty =
     !file.path || useEditorStateStore.getState().idStateMap.get(fileId)?.hasUnsavedChanges
   const document = await historyDocument(fileId)

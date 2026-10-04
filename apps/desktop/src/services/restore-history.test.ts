@@ -4,6 +4,7 @@ import useFileCacheStore, { getFileObject } from '@/helper/files'
 import { createFile } from '@/helper/filesys'
 import useEditorStore from '@/stores/useEditorStore'
 import useEditorStateStore from '@/stores/useEditorStateStore'
+import { fileSaveCoordinator } from '@/components/EditorArea/fileSaveCoordinator'
 import { restoreHistory } from './restore-history'
 
 const mocks = vi.hoisted(() => ({
@@ -67,18 +68,22 @@ const open = () => {
 }
 describe('restore history into a protected draft', () => {
   it('protects displaced local text before applying a restored draft and pausing autosave', async () => {
+    const fingerprint = `existing:1:2:136:1791132580162384580:sha256:${'a'.repeat(64)}`
+    const revision = `${fingerprint}:path-generation:3:file-generation:3`
+    mocks.snapshot.mockResolvedValue({ status: 'success', content: 'disk original', revision })
     const file = open()
     await restoreHistory('version')
     expect(mocks.call).toHaveBeenCalledWith(
       'restore',
       expect.objectContaining({
         previous: 'working draft',
-        draft: expect.objectContaining({ paused: true, writer: 'main:file' }),
+        draft: expect.objectContaining({ paused: true, writer: 'main:file', diskRevision: fingerprint }),
       }),
     )
     expect(getFileObject(file.id).content).toBe('historical')
     expect(useEditorStateStore.getState().idStateMap.get(file.id)?.hasUnsavedChanges).toBe(true)
     expect(mocks.pause).toHaveBeenCalledWith(file.id, true)
+    expect(fileSaveCoordinator.getDiskRevision(file.id)).toBe(revision)
   })
   it('keeps the current draft unchanged if the selected version was cleared', async () => {
     const file = open()

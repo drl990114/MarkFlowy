@@ -14,6 +14,7 @@ import useEditorStore from '@/stores/useEditorStore'
 import { pendingDraftSnapshot, waitForAllDraftRecovery } from './draftRecoveryState'
 import { flushDraftProtection, protectedDraftDescriptor } from './local-history'
 import { isPristineDocument } from './pristine-document'
+import { persistentDiskRevision } from './draftDiskRevision'
 import {
   draftManifestSchema, recoverySessionSchema, RELOAD_DOCUMENT_PREFIX,
   RELOAD_SESSION_KEY, SESSION_KEY_PREFIX,
@@ -42,7 +43,7 @@ function captureDraftSession(): DraftSession {
         path: file.path,
         ext: file.ext,
         content,
-        diskRevision: fileSaveCoordinator.getDiskRevision(id),
+        diskRevision: persistentDiskRevision(fileSaveCoordinator.getDiskRevision(id)),
         format: fileSaveCoordinator.getPersistedFormat(id),
       },
     ]
@@ -64,7 +65,7 @@ function captureReloadDocuments(): RecoveryDocument[] {
     if (file.path && !useEditorStateStore.getState().idStateMap.get(id)?.hasUnsavedChanges) return []
     return [{
       id, name: file.name, path: file.path, ext: file.ext,
-      diskRevision: fileSaveCoordinator.getDiskRevision(id),
+      diskRevision: persistentDiskRevision(fileSaveCoordinator.getDiskRevision(id)),
       format: fileSaveCoordinator.getPersistedFormat(id), source: { kind: 'inline', content },
     }]
   })

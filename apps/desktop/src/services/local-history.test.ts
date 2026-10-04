@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => ({
   opened: [] as string[],
   dirty: true,
   content: 'draft',
+  diskRevision: 'disk:old',
   path: '/workspace/note.md' as string | undefined,
   file: undefined as { id: string; name: string; kind: string; path?: string; content: string } | undefined,
   release: vi.fn(),
@@ -45,7 +46,7 @@ vi.mock('@/stores/useEditorStateStore', () => ({
 }))
 vi.mock('@/components/EditorArea/fileSaveCoordinator', () => ({
   fileSaveCoordinator: {
-    getDiskRevision: () => 'disk:old',
+    getDiskRevision: () => mocks.diskRevision,
     getPersistedFormat: () => ({ encoding: 'gbk', bom: 'none' }),
     getTextMetadata: () => ({ format: { encoding: 'gbk', bom: 'none' } }),
     recordFormat: vi.fn(),
@@ -77,6 +78,7 @@ beforeEach(async () => {
   mocks.path = doc.path
   mocks.dirty = true
   mocks.content = 'draft'
+  mocks.diskRevision = 'disk:old'
   mocks.file = undefined
   mocks.release.mockReset()
   mocks.waitForIdle.mockReset().mockResolvedValue(undefined)
@@ -97,6 +99,15 @@ afterEach(() => {
 })
 
 describe('background draft protection', () => {
+  it('persists a stable disk baseline without changing the live CAS revision', async () => {
+    const fingerprint = `existing:1:2:136:1791132580162384580:sha256:${'a'.repeat(64)}`
+    const revision = `${fingerprint}:path-generation:3:file-generation:3`
+    mocks.diskRevision = revision
+    await history.flushDraftProtection('file')
+    expect(calls('draft')[0].diskRevision).toBe(fingerprint)
+    expect(mocks.diskRevision).toBe(revision)
+  })
+
   it('returns only the descriptor of the acknowledged writer and refuses stale exit references', async () => {
     await history.flushDraftProtection('file')
     const persisted = calls('draft').at(-1)
