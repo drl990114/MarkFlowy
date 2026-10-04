@@ -5,16 +5,15 @@ import Logo from '@/assets/logo.svg?react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import type { OpenSettingTarget } from '@/extensions/ai/aiProvidersService'
-import { installUpdate } from '@/helper/updater'
+import { fetchUpdate, installUpdate } from '@/helper/updater'
 import { useTranslation } from '@/i18n'
 import { appSettingStoreSetup } from '@/services/app-setting'
 import { dialog } from '@/services/dialog'
 import useAppInfoStore from '@/stores/useAppInfoStore'
 import useLayoutStore from '@/stores/useLayoutStore'
+import useUpdaterStore from '@/stores/useUpdaterStore'
 import { invoke } from '@tauri-apps/api/core'
 import { openUrl } from '@tauri-apps/plugin-opener'
-import type { Update } from '@tauri-apps/plugin-updater'
-import { check } from '@tauri-apps/plugin-updater'
 import classNames from 'classnames'
 import { Search } from 'lucide-react'
 import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
@@ -72,7 +71,8 @@ function Setting({ navigationRequest }: SettingProps) {
   const initialCategory =
     navigationRequest?.target?.category ?? (settingDataGroupsKeys[0] as SettingCategoryKey)
 
-  const [update, setUpdate] = useState<Update | null>(null)
+  const update = useUpdaterStore((state) => state.update)
+  const isInstalling = useUpdaterStore((state) => state.isInstalling)
   const [searchQuery, setSearchQuery] = useState('')
   const [curGroupKey, setCurGroupKey] = useState<SettingCategoryKey>(initialCategory)
   const [activeChildId, setActiveChildId] = useState<string | undefined>(
@@ -129,9 +129,7 @@ function Setting({ navigationRequest }: SettingProps) {
   }
 
   useEffect(() => {
-    check().then((nextUpdate) => {
-      setUpdate(nextUpdate)
-    })
+    void fetchUpdate()
   }, [])
 
   useEffect(() => {
@@ -394,11 +392,12 @@ function Setting({ navigationRequest }: SettingProps) {
               {update ? (
                 <Button
                   className='shrink-0 px-2 text-primary shadow-none hover:text-primary'
+                  aria-busy={isInstalling}
+                  disabled={isInstalling}
                   size='sm'
                   variant='ghost'
                   onClick={() => {
-                    installUpdate(update)
-                    setUpdate(null)
+                    void installUpdate(update)
                   }}
                 >
                   {t('about.install')}

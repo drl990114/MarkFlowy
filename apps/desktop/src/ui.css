@@ -81,6 +81,8 @@
   --color-primary: var(--mf-primary);
   --color-primary-foreground: var(--mf-primary-foreground);
   --color-primary-soft: var(--mf-primary-soft);
+  --color-update-action: var(--mf-update-action);
+  --color-update-action-foreground: var(--mf-update-action-foreground);
   --color-secondary: var(--mf-secondary);
   --color-secondary-foreground: var(--mf-secondary-foreground);
   --color-muted: var(--mf-muted);
@@ -172,6 +174,8 @@
   --mf-primary: var(--mf-boot-accent, #1f6ae2);
   --mf-primary-foreground: #fff;
   --mf-primary-soft: #c7deff;
+  --mf-update-action: #0359d0;
+  --mf-update-action-foreground: #fff;
   --mf-secondary: var(--mf-control-surface);
   --mf-secondary-foreground: var(--mf-text-primary);
   --mf-muted: var(--mf-surface-muted);

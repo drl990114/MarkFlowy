@@ -19,6 +19,7 @@ vi.mock('@/stores', () => ({
 }))
 vi.mock('../WorkspaceActions', () => ({ WorkspaceActions: () => <button>Workspace</button> }))
 vi.mock('./AppMenuButton', () => ({ AppMenuButton: () => null }))
+vi.mock('./UpdateButton', () => ({ UpdateButton: () => null }))
 vi.mock('./DocumentTitle', () => ({ DocumentTitle: () => null }))
 vi.mock('./WindowControls', () => ({ WindowControls: () => null }))
 

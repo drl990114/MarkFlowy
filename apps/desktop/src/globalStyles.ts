@@ -62,6 +62,8 @@ export const DesktopSpecificStyles = createGlobalStyle<{
     --mf-primary: ${(props) => props.theme.accentColor};
     --mf-primary-foreground: ${(props) => props.$primaryForeground};
     --mf-primary-soft: ${(props) => props.theme.accentColorFocused};
+    --mf-update-action: ${(props) => props.theme.blue};
+    --mf-update-action-foreground: ${(props) => props.theme.white};
     --mf-secondary: var(--mf-control-surface);
     --mf-secondary-foreground: var(--mf-text-primary);
     --mf-muted: var(--mf-surface-muted);

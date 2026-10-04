@@ -6,6 +6,7 @@ import { cn } from '@/lib/cn'
 import { useEditorStore } from '@/stores'
 import { WorkspaceActions } from '../WorkspaceActions'
 import { AppMenuButton } from './AppMenuButton'
+import { UpdateButton } from './UpdateButton'
 import { WindowControls } from './WindowControls'
 import { useWindowFullscreen } from './useWindowFullscreen'
 import useResizeObserver from 'use-resize-observer'
@@ -67,6 +68,7 @@ export default function TitleBar() {
         className={cn('ml-auto flex h-full shrink-0 items-center', !isWindows && 'pr-1')}
         ref={trailingRef}
       >
+        <UpdateButton />
         <AppMenuButton />
         {isWindows ? <WindowControls /> : null}
       </div>

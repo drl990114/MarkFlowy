@@ -16,9 +16,12 @@ import { Dialog } from '@/components/ui/dialog'
 import { Popover } from '@/components/ui/popover'
 import { Select } from '@/components/ui/select'
 import type { OpenSettingTarget } from '@/extensions/ai/aiProvidersService'
+import { installUpdate } from '@/helper/updater'
 import { dialog as dialogService } from '@/services/dialog'
 import useLayoutStore from '@/stores/useLayoutStore'
+import useUpdaterStore from '@/stores/useUpdaterStore'
 import { invoke } from '@tauri-apps/api/core'
+import type { Update } from '@tauri-apps/plugin-updater'
 import Setting from '.'
 import FileExcludePatterns from './component/SettingItems/FileExcludePatterns'
 import { SettingRouteController, type SettingRouteState } from './component/SettingRouteController'
@@ -47,7 +50,10 @@ vi.mock('@/i18n', () => ({
       ({ 'settings.delete_item': 'Delete item', 'settings.edit_item': 'Edit item' })[key] ?? key,
   }),
 }))
-vi.mock('@/helper/updater', () => ({ installUpdate: vi.fn() }))
+vi.mock('@/helper/updater', () => ({
+  fetchUpdate: state.checkUpdate,
+  installUpdate: vi.fn(),
+}))
 vi.mock('@/services/dialog', () => ({ dialog: { confirm: vi.fn() } }))
 vi.mock('@tauri-apps/api/core', () => ({ invoke: vi.fn() }))
 vi.mock('@/services/app-setting', () => ({
@@ -60,7 +66,6 @@ vi.mock('@/stores/useAppInfoStore', () => ({
 vi.mock('@/stores/useAppSettingStore', () => ({
   default: () => ({ settingData: { file_exclude_patterns: '**/node_modules/**' } }),
 }))
-vi.mock('@tauri-apps/plugin-updater', () => ({ check: state.checkUpdate }))
 vi.mock('zens', () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 vi.mock('./CopilotSetting', () => ({ CopilotSetting: () => null }))
 vi.mock('./ExportSetting', () => ({ ExportSetting: () => null }))
@@ -177,6 +182,7 @@ let narrowViewport = false
 
 beforeEach(() => {
   vi.clearAllMocks()
+  useUpdaterStore.setState({ update: null, isInstalling: false, installedVersion: null })
   state.leaveSnippets.mockResolvedValue(true)
   narrowViewport = false
   vi.spyOn(window, 'matchMedia').mockImplementation((query) => ({
@@ -208,6 +214,29 @@ function pressEscape(target: Element = document.activeElement ?? document.body) 
 }
 
 describe('Settings dialog integration', () => {
+  it('shares update availability and installation state with the title bar', async () => {
+    const update = { version: '1.2.3' } as Update
+    useUpdaterStore.setState({ update })
+    render(
+      <MemoryRouter>
+        <AppProbe />
+      </MemoryRouter>,
+    )
+    const settings = await openSettings()
+    const button = within(settings).getByRole('button', { name: 'about.install' })
+    fireEvent.click(button)
+    expect(installUpdate).toHaveBeenCalledExactlyOnceWith(update)
+    expect(useUpdaterStore.getState().update).toBe(update)
+
+    act(() => useUpdaterStore.setState({ isInstalling: true }))
+    expect(button.hasAttribute('disabled')).toBe(true)
+    act(() => useUpdaterStore.setState({ isInstalling: false }))
+    expect(button.hasAttribute('disabled')).toBe(false)
+
+    act(() => useUpdaterStore.setState({ update: null, installedVersion: '1.2.3' }))
+    expect(within(settings).queryByRole('button', { name: 'about.install' })).toBeNull()
+  })
+
   it('guards closing, switching settings and targeted snippet navigation', async () => {
     render(
       <MemoryRouter>

@@ -68,6 +68,7 @@ vi.mock('@/stores/useThemeStore', () => ({
 }))
 
 vi.mock('@tauri-apps/api/event', () => ({ emitTo: vi.fn() }))
+vi.mock('@/helper/updater', () => ({ installUpdate: vi.fn() }))
 vi.mock('../ui-v2/ContextMenu/ContextMenu', () => ({ showContextMenu: vi.fn() }))
 
 describe('TitleBar', () => {
