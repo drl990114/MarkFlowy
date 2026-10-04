@@ -2000,26 +2000,47 @@ function TextEditor(props: TextEditorProps) {
       if (!active) return
       const file = getFileObject(id)
       if (!file) return
+      const releaseImages = remoteImages.retain()
+      let dispose: (() => void) | undefined
       let loading: ReturnType<typeof toast.loading> | undefined
       try {
+        editorSnapshotRegistry.flushForRead(id)
+        const markdown = useEditorStore.getState().getEditorContent(id) ?? ''
         const path = await save({
           title: t('contextmenu.editor_tab.export_html'),
           defaultPath: file.name.split('.')?.[0] + '.html',
         })
         if (!path) return
-        editorSnapshotRegistry.flushForRead(id)
         loading = toast.loading(t('contextmenu.editor_tab.export_html') + '...')
-        const res = isCapricornView(currentViewType)
-          ? await capricornEditorRef.current?.export('html')
-          : await editorRef.current?.exportHtml()
-        if (typeof res !== 'string') throw new Error('Editor is not ready.')
-        const html = exportHtmlDocument(res, editorWrapperRef.current, file.name)
+        let element: HTMLElement | null = editorWrapperRef.current
+        let rendered: string | undefined
+        if (fileTypeConfig.type === 'markdown') {
+          const surface = await createMarkdownImageSurface(markdown)
+          dispose = surface.dispose
+          element = surface.element
+          rendered = surface.element.innerHTML
+        } else {
+          await waitForEditorResourcesForExport(editorRef.current)
+          rendered = await editorRef.current?.exportHtml()
+        }
+        if (typeof rendered !== 'string') throw new Error('Editor is not ready.')
+        const html = await exportHtmlDocument(
+          rendered,
+          element,
+          file.name,
+          getFolderPathFromPath(file.path),
+        )
         await invoke('export_html_to_path', { str: html, path })
         toast.success('Exported to ' + path)
       } catch (error) {
         toast.error(String(error))
       } finally {
-        if (loading !== undefined) toast.dismiss(loading)
+        try {
+          dispose?.()
+        } finally {
+          releaseImages()
+          if (loading !== undefined) toast.dismiss(loading)
+        }
       }
     }
 
@@ -2847,15 +2868,39 @@ function TextEditor(props: TextEditorProps) {
           return new TextEncoder().encode(await capricorn.export(format))
         }
         if (format === 'html') {
-          if (capricorn) await capricorn.waitForResources()
-          else await waitForEditorResourcesForExport(editorRef.current)
-          const html = capricorn
-            ? await capricorn.export('html')
-            : await editorRef.current?.exportHtml()
-          if (typeof html !== 'string') throw new Error('HTML renderer is unavailable.')
-          return new TextEncoder().encode(
-            exportHtmlDocument(html, editorWrapperRef.current, curFile.name),
-          )
+          const releaseImages = remoteImages.retain()
+          let dispose: (() => void) | undefined
+          try {
+            let element: HTMLElement | null = editorWrapperRef.current
+            let html: string | undefined
+            if (fileTypeConfig.type === 'markdown') {
+              const surface = await createMarkdownImageSurface(markdown)
+              dispose = surface.dispose
+              element = surface.element
+              html = surface.element.innerHTML
+            } else {
+              if (capricorn) await capricorn.waitForResources()
+              else await waitForEditorResourcesForExport(editorRef.current)
+              html = capricorn
+                ? await capricorn.export('html')
+                : await editorRef.current?.exportHtml()
+            }
+            if (typeof html !== 'string') throw new Error('HTML renderer is unavailable.')
+            return new TextEncoder().encode(
+              await exportHtmlDocument(
+                html,
+                element,
+                curFile.name,
+                getFolderPathFromPath(curFile.path),
+              ),
+            )
+          } finally {
+            try {
+              dispose?.()
+            } finally {
+              releaseImages()
+            }
+          }
         }
         let dispose: (() => void) | undefined
         let restore: (() => void) | undefined

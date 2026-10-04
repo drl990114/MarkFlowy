@@ -3,6 +3,7 @@ import { act, cleanup, render, waitFor } from '@testing-library/react'
 import { desktopLightTheme } from '@markflowy/theme'
 import * as rmeRuntime from 'rme'
 import { createImageExportSurface, type ImageExportSurface } from './imageExportSurface'
+import { exportHtmlDocument } from './exportHtmlDocument'
 import { i18nInit } from '@markflowy/i18n'
 import { Preview, ThemeProvider, type PreviewImageHydration } from 'rme'
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -164,7 +165,7 @@ describe('workspace RME static preview for JPG export', () => {
         result = createImageExportSurface({
           source,
           markdown:
-            'Inline $x^2$\n\n$$\n\\frac{a}{b}\n$$\n\n```mermaid\nflowchart LR\n A-->B\n```\n\nFinal paragraph',
+            '## 表格 Table\n\n[Anchor](#表格-table)\n\nInline $x^2$\n\n$$\n\\frac{a}{b}\n$$\n\n```mermaid\nflowchart LR\n A-->B\n```\n\n<script>alert(1)</script>\n\n<div onclick="alert(1)" style="background:url(https://bad.invalid)">Safe text</div>\n\nFinal paragraph',
           delegateOptions: {},
           styleToken: { rootFontSize: '16px', rootLineHeight: '1.7' },
           theme: desktopLightTheme,
@@ -182,6 +183,26 @@ describe('workspace RME static preview for JPG export', () => {
       expect(surface!.element.textContent).not.toContain('flowchart LR')
       expect(surface!.element.textContent).not.toContain('x^2')
       expect(surface!.element.querySelector('.mf-preview-loading')).toBeNull()
+      const html = await exportHtmlDocument(
+        surface!.element.innerHTML,
+        surface!.element,
+        'Portable',
+      )
+      const exported = new DOMParser().parseFromString(html, 'text/html')
+      expect(exported.querySelectorAll('svg')).toHaveLength(3)
+      expect(exported.querySelector('.mf-preview-math-inline svg path')).not.toBeNull()
+      expect(exported.querySelector('.mf-preview-mermaid svg path')).not.toBeNull()
+      expect(exported.getElementById('表格-table')?.textContent).toBe('表格 Table')
+      expect(exported.querySelector('a')?.getAttribute('href')).toBe('#表格-table')
+      expect(exported.body.textContent).toContain('Safe text')
+      expect(exported.body.textContent).toContain('Final paragraph')
+      expect(
+        exported.querySelector(
+          'script,[onclick],[inert],[aria-hidden="true"],[data-mf-image-export]',
+        ),
+      ).toBeNull()
+      expect(html).not.toContain('bad.invalid')
+      expect(exported.head.querySelector('style')?.textContent?.length).toBeGreaterThan(500)
     } finally {
       await act(async () => surface?.dispose())
       expect(document.querySelector('[data-mf-image-export]')).toBeNull()
