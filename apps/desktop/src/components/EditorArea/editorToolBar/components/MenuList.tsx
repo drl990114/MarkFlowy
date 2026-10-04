@@ -21,7 +21,7 @@ import { invoke } from '@tauri-apps/api/core'
 import { debounce } from 'lodash'
 import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from '@/i18n'
-import { MenuIcon } from 'lucide-react'
+import { SlidersHorizontalIcon } from 'lucide-react'
 import { isDivider, Space, toast, type MenuItemData } from 'zens'
 import { EditorAreaActionButton } from '../../EditorAreaAction'
 import { createPdfPrintMenuItem } from '../../pdf-print/pdfPrintMenuItem'
@@ -480,7 +480,7 @@ export const MenuList = memo((props: MenuListProps) => {
     <>
       <EditorAreaActionButton
         aria-haspopup='menu'
-        icon={MenuIcon}
+        icon={SlidersHorizontalIcon}
         label={t('action.more')}
         onClick={handleMenuClick}
         ref={ref}

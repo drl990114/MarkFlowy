@@ -107,7 +107,7 @@ describe('TitleBar', () => {
 
     expect(markup).not.toContain('MarkFlowy</span>')
     expect(markup).toContain('Open File or Folder\n/Users/test/notes')
-    expect(markup).not.toContain('>notes</span>')
+    expect(markup).toContain('>notes</span>')
     expect(markup).not.toContain('h-3.5 w-px')
   })
 

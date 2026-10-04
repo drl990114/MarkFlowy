@@ -65,7 +65,7 @@ vi.mock('zens', () => ({ toast: { error: mocks.toastError } }))
 
 import { WorkspaceActions } from './WorkspaceActions'
 
-const openPicker = () => fireEvent.click(screen.getByRole('button', { name: 'Open File or Folder' }))
+const openPicker = () => fireEvent.click(screen.getByRole('button', { name: /Open File or Folder$/ }))
 const searchInput = () => screen.getByPlaceholderText('Search recent workspaces and files…')
 
 describe('WorkspaceActions', () => {
@@ -95,12 +95,12 @@ describe('WorkspaceActions', () => {
 
   afterEach(cleanup)
 
-  it('uses a single text button and shows the current workspace inside the picker', () => {
+  it('shows the current workspace in the text button and inside the picker', () => {
     const { container } = render(<WorkspaceActions />)
 
-    const trigger = screen.getByRole('button', { name: 'Open File or Folder' })
+    const trigger = screen.getByRole('button', { name: 'current: Open File or Folder' })
     expect(trigger.getAttribute('title')).toBe('Open File or Folder\n/Users/test/current')
-    expect(trigger.textContent).toBe('Open')
+    expect(trigger.textContent).toBe('current')
     expect(trigger.querySelector('svg')).toBeNull()
     expect(container.querySelectorAll('[data-slot="workspace-picker-trigger"]')).toHaveLength(1)
 
@@ -112,7 +112,7 @@ describe('WorkspaceActions', () => {
     expect(screen.getByText('Current Window')).toBeTruthy()
     expect(screen.getByText('Recent Workspaces')).toBeTruthy()
     expect(screen.getByText('Recent Files')).toBeTruthy()
-    expect(screen.getAllByText('current')).toHaveLength(1)
+    expect(screen.getAllByText('current')).toHaveLength(2)
     expect(screen.getAllByRole('option').map((option) => option.getAttribute('data-value'))).toEqual([
       'current:/Users/test/current',
       'recent:/Users/test/notes',
@@ -238,7 +238,7 @@ describe('WorkspaceActions', () => {
 
     mocks.recentWorkspaces = []
     rerender(<WorkspaceActions />)
-    const trigger = screen.getByRole('button', { name: 'Open File or Folder' }) as HTMLButtonElement
+    const trigger = screen.getByRole('button', { name: 'current: Open File or Folder' }) as HTMLButtonElement
     expect(trigger.disabled).toBe(false)
   })
 

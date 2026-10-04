@@ -5,8 +5,7 @@ const HOVER_ROTATION_DURATION_MS = 2200
 const HOVER_START_PLAYBACK_RATE = 0.35
 export const HOVER_PLAYBACK_RATE = 1
 const ACCELERATION_DURATION_MS = 180
-const ZEN_TRIAD_ARM_PATH =
-  'M10 2.45C12.72 2.45 15.12 3.83 16.45 6.1C16.78 6.66 16.6 7.37 16.04 7.7C14.8 8.42 13.6 8.97 12.45 9.73C12.1 9.96 11.66 9.75 11.62 9.34'
+const ZEN_LOTUS_PETAL_PATH = 'M10 2.5C6.6 4.5 6.6 6.6 10 8C13.4 6.6 13.4 4.5 10 2.5Z'
 
 export function interpolateRotationRate(from: number, to: number, progress: number): number {
   const clampedProgress = Math.min(Math.max(progress, 0), 1)
@@ -133,7 +132,7 @@ export function ZenModeIcon(props: ZenModeIconProps) {
           'origin-center motion-reduce:transition-transform motion-reduce:duration-200',
           rotating && 'motion-reduce:rotate-45',
         )}
-        data-mf-zen-mode-triad=''
+        data-mf-zen-mode-lotus=''
         data-mf-zen-mode-icon-rotor=''
         fill='none'
         ref={rotorRef}
@@ -143,9 +142,10 @@ export function ZenModeIcon(props: ZenModeIconProps) {
         strokeWidth='1.35'
         style={{ transformBox: 'view-box', transformOrigin: 'center' }}
       >
-        <path d={ZEN_TRIAD_ARM_PATH} />
-        <path d={ZEN_TRIAD_ARM_PATH} transform='rotate(120 10 10)' />
-        <path d={ZEN_TRIAD_ARM_PATH} transform='rotate(240 10 10)' />
+        <path d={ZEN_LOTUS_PETAL_PATH} />
+        <path d={ZEN_LOTUS_PETAL_PATH} transform='rotate(90 10 10)' />
+        <path d={ZEN_LOTUS_PETAL_PATH} transform='rotate(180 10 10)' />
+        <path d={ZEN_LOTUS_PETAL_PATH} transform='rotate(270 10 10)' />
       </g>
       <circle
         cx='10'

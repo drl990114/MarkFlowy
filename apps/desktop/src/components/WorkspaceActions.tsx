@@ -8,7 +8,7 @@ import { useTranslation } from '@/i18n'
 import { useEditorStore } from '@/stores'
 import useOpenedCacheStore from '@/stores/useOpenedCacheStore'
 import useRecentFilesStore from '@/stores/useRecentFilesStore'
-import { CheckIcon, FileIcon, FolderIcon, FolderOpenIcon } from 'lucide-react'
+import { CheckIcon, FileIcon, FolderIcon, FolderOpenIcon, MenuIcon } from 'lucide-react'
 import { toast } from 'zens'
 import { useMemo, useState } from 'react'
 import { StatusBarButton } from './StatusBar/StatusBarButton'
@@ -32,7 +32,7 @@ export function WorkspaceActions({ location = 'titlebar' }: WorkspaceActionsProp
   const replaceRecentFiles = useRecentFilesStore((state) => state.replaceEntries)
   const [isPickerOpen, setIsPickerOpen] = useState(false)
   const pickerLabel = t('workspace.openFileOrFolder')
-  const workspaceLabel = (rootPath && getFileNameFromPath(rootPath)) || t('file.openDir')
+  const workspaceLabel = (rootPath && (getFileNameFromPath(rootPath) || rootPath)) || t('file.openDir')
   const visibleRecentFiles = useMemo(
     () => recentFiles.flatMap(({ path }) => (path ? [path] : [])).slice(0, MAX_VISIBLE_RECENT_FILES),
     [recentFiles],
@@ -88,14 +88,18 @@ export function WorkspaceActions({ location = 'titlebar' }: WorkspaceActionsProp
         ) : (
           <Button
             aria-expanded={isPickerOpen}
-            aria-label={pickerLabel}
-            className='h-[22px] px-2'
+            aria-label={rootPath ? `${workspaceLabel}: ${pickerLabel}` : pickerLabel}
+            className={rootPath ? 'h-[22px] max-w-48 px-2' : undefined}
             data-slot='workspace-picker-trigger'
-            size='sm'
+            size={rootPath ? 'sm' : 'icon-chrome'}
             title={rootPath ? `${pickerLabel}\n${rootPath}` : pickerLabel}
             variant='chrome'
           >
-            {t('workspace.open')}
+            {rootPath ? (
+              <span className='truncate'>{workspaceLabel}</span>
+            ) : (
+              <MenuIcon aria-hidden='true' className='size-3.5' strokeWidth={1.75} />
+            )}
           </Button>
         )}
       </Popover.Trigger>

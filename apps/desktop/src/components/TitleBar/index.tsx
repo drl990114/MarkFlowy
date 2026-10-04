@@ -7,6 +7,7 @@ import { useEditorStore } from '@/stores'
 import { WorkspaceActions } from '../WorkspaceActions'
 import { AppMenuButton } from './AppMenuButton'
 import { WindowControls } from './WindowControls'
+import { useWindowFullscreen } from './useWindowFullscreen'
 import useResizeObserver from 'use-resize-observer'
 
 export default function TitleBar() {
@@ -15,6 +16,7 @@ export default function TitleBar() {
   const singleDocument = useEditorStore((state) => isSingleDocumentLayout(state.folderData?.[0]?.path, state.editorLayout))
   const isMacOS = osType === 'macos'
   const isWindows = osType === 'windows'
+  const fullscreen = useWindowFullscreen(isMacOS)
   const { ref: leadingRef, width: leadingWidth } = useResizeObserver<HTMLDivElement>({
     box: 'border-box',
     round: Math.ceil,
@@ -41,7 +43,10 @@ export default function TitleBar() {
       data-tauri-drag-region
     >
       <div
-        className={cn('flex h-full shrink-0 items-center', isMacOS ? 'pl-[76px]' : 'pl-2')}
+        className={cn(
+          'flex h-full shrink-0 items-center',
+          isMacOS && !fullscreen ? 'pl-[76px]' : 'pl-2',
+        )}
         data-tauri-drag-region
         ref={leadingRef}
       >
