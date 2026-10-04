@@ -208,6 +208,7 @@ export function PdfPrintController({
             rootLineHeight: styleToken?.rootLineHeight,
           },
           taskAbortController.signal,
+          { onPrepared: () => toast.dismiss(loadingToast) },
         )
 
         if (result && result.failedImageCount > 0) {

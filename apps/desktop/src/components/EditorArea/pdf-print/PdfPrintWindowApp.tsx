@@ -11,6 +11,7 @@ import {
 } from './printDialogCompletion'
 import {
   PDF_PRINT_WINDOW_DATA_EVENT,
+  PDF_PRINT_WINDOW_PREPARED_EVENT,
   PDF_PRINT_WINDOW_READY_EVENT,
   PDF_PRINT_WINDOW_RESULT_EVENT,
   type PdfPrintWindowPayload,
@@ -106,6 +107,14 @@ export function PdfPrintWindowApp({ request }: PdfPrintWindowAppProps) {
           signal: abortController.signal,
         })
         printDialogObserver = await createPrintDialogCompletionObserver(abortController.signal)
+        // Native macOS printing does not reliably dispatch afterprint. Report
+        // preparation separately; it must not imply that a PDF was saved.
+        await emitTo(payload.sourceLabel, PDF_PRINT_WINDOW_PREPARED_EVENT, {
+          jobId: payload.jobId,
+          sourceLabel: payload.sourceLabel,
+          windowLabel: currentWindow.label,
+        })
+        if (abortController.signal.aborted) return
         await invokeSystemPrint(window, {
           nativeCompletion: printDialogObserver.settled,
         })

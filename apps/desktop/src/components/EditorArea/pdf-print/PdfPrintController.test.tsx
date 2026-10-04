@@ -335,6 +335,30 @@ describe('PdfPrintController', () => {
     expect(toastMocks.dismiss).toHaveBeenCalledWith('loading-toast')
   })
 
+  it('dismisses progress when prepared even if native completion never arrives', async () => {
+    let closeWindow!: () => void
+    printMocks.openPdfPrintWindow.mockImplementation(
+      () => new Promise((resolve) => {
+        closeWindow = () => resolve(null)
+      }),
+    )
+    await renderController()
+    await requestPrint()
+    expect(toastMocks.dismiss).not.toHaveBeenCalled()
+
+    const [, printSignal, options] = printMocks.openPdfPrintWindow.mock.calls[0]!
+    await act(async () => options.onPrepared())
+
+    expect(toastMocks.dismiss).toHaveBeenCalledWith('loading-toast')
+    expect(toastMocks.success).not.toHaveBeenCalled()
+    expect(printSignal.aborted).toBe(false)
+    expect(document.querySelector('.mf-pdf-print-root')).not.toBeNull()
+    await act(async () => bus.emit(PDF_PRINT_EVENT))
+    expect(printMocks.openPdfPrintWindow).toHaveBeenCalledOnce()
+    await act(async () => closeWindow())
+    expect(document.querySelector('.mf-pdf-print-root')).toBeNull()
+  })
+
   it('cancels printing on renderer errors and performs cleanup', async () => {
     previewState.error = new Error('Mermaid failed')
     await renderController()

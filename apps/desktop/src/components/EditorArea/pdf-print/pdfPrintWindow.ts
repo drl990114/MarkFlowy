@@ -3,6 +3,7 @@ import { getCurrentWebviewWindow, WebviewWindow } from '@tauri-apps/api/webviewW
 
 export const PDF_PRINT_WINDOW_DATA_EVENT = 'mf-pdf-print-window-data'
 export const PDF_PRINT_WINDOW_READY_EVENT = 'mf-pdf-print-window-ready'
+export const PDF_PRINT_WINDOW_PREPARED_EVENT = 'mf-pdf-print-window-prepared'
 export const PDF_PRINT_WINDOW_RESULT_EVENT = 'mf-pdf-print-window-result'
 
 const PDF_PRINT_JOB_PARAM = 'mf-pdf-print-job'
@@ -41,6 +42,11 @@ export interface PdfPrintWindowResult {
   status: 'complete' | 'error'
 }
 
+export interface PdfPrintWindowOptions {
+  onPrepared?: () => void
+  readyTimeoutMs?: number
+}
+
 function createAbortError(): DOMException {
   return new DOMException('Print task was cancelled', 'AbortError')
 }
@@ -71,7 +77,10 @@ function getPrintWindowLabel(sourceLabel: string, jobId: string): string {
 export async function openPdfPrintWindow(
   document: PdfPrintWindowDocument,
   signal: AbortSignal,
-  readyTimeoutMs = PRINT_WINDOW_READY_TIMEOUT_MS,
+  {
+    onPrepared,
+    readyTimeoutMs = PRINT_WINDOW_READY_TIMEOUT_MS,
+  }: PdfPrintWindowOptions = {},
 ): Promise<PdfPrintWindowResult | null> {
   if (signal.aborted) throw createAbortError()
 
@@ -85,6 +94,8 @@ export async function openPdfPrintWindow(
   let readyTimeout: number | undefined
   let unlistenReady: (() => void) | undefined
   let unlistenResult: (() => void) | undefined
+  let unlistenPrepared: (() => void) | undefined
+  let prepared = false
   let settled = false
 
   return new Promise<PdfPrintWindowResult | null>((resolve, reject) => {
@@ -94,8 +105,10 @@ export async function openPdfPrintWindow(
       signal.removeEventListener('abort', handleAbort)
       unlistenReady?.()
       unlistenResult?.()
+      unlistenPrepared?.()
       unlistenReady = undefined
       unlistenResult = undefined
+      unlistenPrepared = undefined
     }
     const settle = (
       result: PdfPrintWindowResult | null,
@@ -151,6 +164,27 @@ export async function openPdfPrintWindow(
       )
       if (settled) {
         unlistenResult()
+        return
+      }
+
+      unlistenPrepared = await sourceWindow.listen<PdfPrintWindowReadyMessage>(
+        PDF_PRINT_WINDOW_PREPARED_EVENT,
+        ({ payload: message }) => {
+          if (
+            prepared ||
+            settled ||
+            message.jobId !== document.jobId ||
+            message.sourceLabel !== sourceWindow.label ||
+            message.windowLabel !== windowLabel
+          ) {
+            return
+          }
+          prepared = true
+          onPrepared?.()
+        },
+      )
+      if (settled) {
+        unlistenPrepared()
         return
       }
 
