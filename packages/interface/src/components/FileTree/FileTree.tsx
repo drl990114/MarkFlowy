@@ -172,6 +172,10 @@ const FileTree: FC<FileTreeProps> = (props) => {
   const currentDataRef = useRef(data)
   currentDataRef.current = data
   const getCurrentFolderData = useCallback(() => currentDataRef.current, [])
+  const commitFolderData = useCallback((nextData: IFile[]) => {
+    currentDataRef.current = nextData
+    setFolderDataPure(nextData)
+  }, [setFolderDataPure])
   const canInsertIntoDirectory = useCallback(
     (directory: IFile) =>
       Boolean(
@@ -287,6 +291,38 @@ const FileTree: FC<FileTreeProps> = (props) => {
       loadingDirsRef.current.set(target.path, loading)
       await loading
     }
+  }
+
+  const refreshDirectory = async (directory: IFile, previousDirectoryPath?: string) => {
+    if (!directory.path) return
+    const invalidPaths = new Set([directory.path])
+    if (previousDirectoryPath) {
+      for (const path of new Set([
+        ...loadedDirsRef.current,
+        ...loadingDirsRef.current.keys(),
+        ...refreshDirsRef.current,
+      ])) {
+        if (
+          path === previousDirectoryPath ||
+          path.startsWith(`${previousDirectoryPath}/`) ||
+          path.startsWith(`${previousDirectoryPath}\\`)
+        ) invalidPaths.add(path)
+      }
+    }
+    // Retire reads started before the mutation. The loader checks the request
+    // identity and workspace before merging, so late results cannot undo it.
+    for (const path of invalidPaths) {
+      loadedDirsRef.current.delete(path)
+      loadingDirsRef.current.delete(path)
+      refreshDirsRef.current.delete(path)
+    }
+    refreshDirsRef.current.add(directory.path)
+    setLoadedDirPaths((current) => new Set([...current].filter((path) => !invalidPaths.has(path))))
+    setLoadingDirIds((current) => new Set([...current].filter((id) => {
+      const path = getFileObject(id)?.path
+      return !path || !invalidPaths.has(path)
+    })))
+    await loadDirectory(directory)
   }
 
   const onToggle: TreeProps<IFile>['onToggle'] = async (id: string) => {
@@ -586,7 +622,8 @@ const FileTree: FC<FileTreeProps> = (props) => {
       {...nodeProps}
       getCurrentFolderData={getCurrentFolderData}
       canInsertIntoDirectory={canInsertIntoDirectory}
-      setFolderData={setFolderDataPure}
+      setFolderData={commitFolderData}
+      refreshDirectory={refreshDirectory}
       onFocusActiveFile={focusActiveFile}
       isRoot={isRoot}
       onShowConfirm={onShowConfirm}

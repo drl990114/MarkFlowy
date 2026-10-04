@@ -23,6 +23,7 @@ export interface FileNodeComponentProps extends NodeRendererProps<IFile> {
   getCurrentFolderData: () => IFile[]
   canInsertIntoDirectory?: (directory: IFile) => boolean
   setFolderData: (data: IFile[]) => void
+  refreshDirectory?: (directory: IFile, previousDirectoryPath?: string) => Promise<void>
   onFocusActiveFile?: (id: string) => Promise<void> | void
   isRoot?: boolean
   onShowConfirm: (params: { title: string; onConfirm: () => void }) => void
@@ -138,6 +139,7 @@ function FileNode({
   getCurrentFolderData,
   canInsertIntoDirectory = (directory) => Boolean(directory.children?.length),
   setFolderData,
+  refreshDirectory,
   onFocusActiveFile,
   isRoot = false,
   onShowConfirm,
@@ -257,6 +259,7 @@ function FileNode({
         changes: { ...pendingNode.data, ...targetFile },
       })
       setFolderData(mutationTree.data)
+      await refreshDirectory?.(currentParent.data)
     })
   }
 
@@ -303,7 +306,7 @@ function FileNode({
         moveFileObjectsByPathPrefix,
         deleteFileObjectsByPathPrefix,
       )
-      fileTreeHandler?.clearLoadedDirsCache?.()
+      if (!refreshDirectory) fileTreeHandler?.clearLoadedDirsCache?.()
 
       if (updateFile) {
         updateFile({
@@ -319,6 +322,12 @@ function FileNode({
         changes: { kind: file.kind, name: file.name },
       })
       setFolderData(mutationTree.data)
+      if (currentNode.parent) {
+        await refreshDirectory?.(
+          currentNode.parent.data,
+          file.kind === 'dir' ? target.path : undefined,
+        )
+      }
     })
   }
 
@@ -447,6 +456,7 @@ function FileNode({
             getFileIdsByPathPrefix,
             createFile,
             canInsertIntoDirectory,
+            refreshDirectory,
           })
           if (copiedPath) {
             toast.success(

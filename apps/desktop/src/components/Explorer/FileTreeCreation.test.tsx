@@ -169,6 +169,94 @@ afterEach(async () => {
 })
 
 describe('FileTree inline creation', () => {
+  it('orders a created file using the parent directory read and preserves loaded nodes', async () => {
+    const subfolder: IFile = {
+      id: 'subfolder', kind: 'dir', name: 'Subfolder', path: '/workspace/Subfolder', children: [
+        { id: 'nested', kind: 'file', name: 'Nested.md', path: '/workspace/Subfolder/Nested.md' },
+      ],
+    }
+    const existing: IFile = {
+      id: 'existing', kind: 'file', name: 'Notes10.md', path: '/workspace/Notes10.md',
+      content: 'Unsaved content',
+    }
+    vi.mocked(fileSystem.readSubdirectory).mockResolvedValue([
+      { ...subfolder, id: 'disk-folder', children: [] },
+      { id: 'disk-new', kind: 'file', name: 'Notes2.md', path: '/workspace/Notes2.md' },
+      { ...existing, id: 'disk-existing', content: 'Saved content' },
+    ])
+    render(<Harness initialChildren={[subfolder, existing]} />)
+    const input = await startCreation('file')
+    fireEvent.change(input, { target: { value: 'Notes2' } })
+    fireEvent.keyDown(input, { key: 'Enter' })
+
+    await waitFor(() => expect(fileTreeHandler.rootTree?.get('root')?.data.children?.map(
+      (file) => file.name,
+    )).toEqual(['Subfolder', 'Notes2.md', 'Notes10.md']))
+    expect(fileSystem.readSubdirectory).toHaveBeenCalledExactlyOnceWith('/workspace')
+    expect(fileTreeHandler.rootTree?.get('subfolder')?.data).toBe(subfolder)
+    expect(fileTreeHandler.rootTree?.get('existing')?.data).toBe(existing)
+    expect(existing.content).toBe('Unsaved content')
+    expect(subfolder.children?.[0].id).toBe('nested')
+  })
+
+  it('reorders a renamed file without replacing its identity or unsaved content', async () => {
+    const existing: IFile = {
+      id: 'existing', kind: 'file', name: 'Z.md', ext: 'md', path: '/workspace/Z.md',
+      content: 'Unsaved content',
+    }
+    const sibling: IFile = {
+      id: 'sibling', kind: 'file', name: 'B.md', path: '/workspace/B.md',
+    }
+    vi.mocked(fileSystem.renameFile).mockResolvedValue({
+      old_path: existing.path!, new_path: '/workspace/A.md', is_folder: false, is_replaced: false,
+      children: null,
+    })
+    vi.mocked(fileSystem.readSubdirectory).mockResolvedValue([
+      { ...existing, id: 'disk-renamed', name: 'A.md', path: '/workspace/A.md', content: '' },
+      { ...sibling, id: 'disk-sibling' },
+    ])
+    render(<Harness initialChildren={[sibling, existing]} />)
+    fireEvent.contextMenu(screen.getByText('Z.md'), { clientX: 80, clientY: 40 })
+    fireEvent.click(await screen.findByRole('menuitem', { name: 'contextmenu.explorer.rename' }))
+    await settleFocus()
+    const input = screen.getByRole('textbox')
+    fireEvent.change(input, { target: { value: 'A.md' } })
+    fireEvent.keyDown(input, { key: 'Enter' })
+
+    await waitFor(() => expect(fileTreeHandler.rootTree?.get('root')?.data.children?.map(
+      (file) => file.name,
+    )).toEqual(['A.md', 'B.md']))
+    expect(fileSystem.readSubdirectory).toHaveBeenCalledExactlyOnceWith('/workspace')
+    expect(fileTreeHandler.rootTree?.get('existing')?.data.content).toBe('Unsaved content')
+    expect(fileTreeHandler.rootTree?.get('sibling')?.data).toBe(sibling)
+  })
+
+  it('retires a pre-creation directory read before reconciling the completed file', async () => {
+    let resolveOldRead!: (files: IFile[]) => void
+    vi.mocked(fileSystem.readSubdirectory)
+      .mockImplementationOnce(() => new Promise((resolve) => { resolveOldRead = resolve }))
+      .mockResolvedValue([
+        { id: 'subfolder', kind: 'dir', name: 'Subfolder', path: '/workspace/Folder/Subfolder', children: [] },
+        { id: 'disk-new', kind: 'file', name: 'Notes.md', path: '/workspace/Folder/Notes.md' },
+      ])
+    render(<Harness initialChildren={[
+      { id: 'folder', kind: 'dir', name: 'Folder', path: '/workspace/Folder', children: [] },
+    ]} />)
+    const input = await startCreation('file', 'Folder')
+    fireEvent.change(input, { target: { value: 'Notes' } })
+    fireEvent.keyDown(input, { key: 'Enter' })
+    await waitFor(() => expect(fileTreeHandler.rootTree?.get('folder')?.data.children?.map(
+      (file) => file.name,
+    )).toEqual(['Subfolder', 'Notes.md']))
+    await act(async () => resolveOldRead([
+      { id: 'stale', kind: 'file', name: 'Stale.md', path: '/workspace/Folder/Stale.md' },
+    ]))
+    expect(fileSystem.readSubdirectory).toHaveBeenCalledTimes(2)
+    expect(fileTreeHandler.rootTree?.get('folder')?.data.children?.map(
+      (file) => file.name,
+    )).toEqual(['Subfolder', 'Notes.md'])
+  })
+
   it.each(['file', 'folder'] as const)(
     'keeps a new %s focused after the real submenu closes and creates it on Enter',
     async (kind) => {
