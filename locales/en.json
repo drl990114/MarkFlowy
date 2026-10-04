@@ -1264,7 +1264,8 @@
       "alignRight": "Right-align column",
       "deleteColumn": "Delete current column",
       "deleteRow": "Delete current row",
-      "deleteTable": "Delete table"
+      "deleteTable": "Delete table",
+      "duplicateRow": "Duplicate row"
     }
   },
   "inline_insert": {

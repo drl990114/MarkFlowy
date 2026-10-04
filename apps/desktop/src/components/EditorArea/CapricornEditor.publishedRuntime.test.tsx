@@ -19,6 +19,7 @@ import { EditorWrapper } from './EditorWrapper'
 import {
   CAPRICORN_DESKTOP_VIRTUALIZE_OPTIONS,
   loadCapricornRuntimeFactory,
+  type CapricornEditorChangeEvent,
   type CapricornLocalizationAdapter,
   type CapricornRuntimeAdapter,
 } from './capricornRuntimeAdapter'
@@ -214,6 +215,86 @@ describe.skipIf(!isCapricornRuntimeAvailable)('CapricornEditor with the publishe
     }
     expect(onEditorChange.mock.calls.filter(([value]) => value !== null)).toHaveLength(1)
     expect(onChange).not.toHaveBeenCalledWith(expect.objectContaining({ documentChanged: true }))
+    expect(onError).not.toHaveBeenCalled()
+  })
+
+  it('publishes a row duplication from the localized table menu through the host change callback', async () => {
+    const translations = createInstance()
+    await translations.init({
+      lng: 'cn',
+      resources: { cn: { translation: zhCNLocale } },
+    })
+    const localization: CapricornLocalizationAdapter = {
+      getDirection: () => (translations.dir() === 'rtl' ? 'rtl' : 'ltr'),
+      getLocale: () => translations.resolvedLanguage || translations.language || 'en',
+      subscribe(listener) {
+        translations.on('languageChanged', listener)
+        return () => translations.off('languageChanged', listener)
+      },
+      translate: ({ defaultValue, key, values }) =>
+        translations.t(`capricorn.${key}`, { defaultValue, ...values }),
+    }
+    const ref = createRef<CapricornEditorHandle>()
+    const onEditorChange = vi.fn()
+    const snapshots: string[] = []
+    const onChange = vi.fn((event?: CapricornEditorChangeEvent) => {
+      if (event?.documentChanged) snapshots.push(ref.current!.getMarkdown())
+    })
+    const onError = vi.fn()
+    const original = 'Before\n\n| A | B |\n| --- | --- |\n| One | Two |\n\nAfter'
+    const expected = original.replace('| One | Two |', '| One | Two |\n| One | Two |')
+    const { container } = render(
+      <CapricornEditor
+        ref={ref}
+        active
+        initialMarkdown={original}
+        onEditorChange={onEditorChange}
+        onChange={onChange}
+        onError={onError}
+        onUnavailable={onError}
+        options={{
+          localization,
+          virtualize: { enable: false },
+          getScrollableContainer: () => window,
+        }}
+      />,
+    )
+    await waitFor(() =>
+      expect(container.querySelectorAll('[role="row"][data-markdown-table]')).toHaveLength(2),
+    )
+    const surface = container.querySelector<HTMLElement>('[data-cap-content]')!
+    const root = container.querySelector<HTMLElement>('[data-cap-editable]')!
+    const rows = [...root.querySelectorAll<HTMLElement>('[role="row"][data-markdown-table]')]
+    // Supply the layout missing from the DOM runner; the menu and command use
+    // the installed runtime through CapricornEditor's production loader.
+    surface.getBoundingClientRect = () => new DOMRect(60, 40, 700, 550)
+    root.getBoundingClientRect = () => new DOMRect(80, 60, 640, 500)
+    rows.forEach((row, index) => {
+      row.getBoundingClientRect = () => new DOMRect(100, 140 + index * 36, 400, 36)
+      const cells = [...row.querySelectorAll<HTMLElement>('[role="cell"], [role="columnheader"]')]
+      cells.forEach((cell, column) => {
+        cell.getBoundingClientRect = () =>
+          new DOMRect(100 + column * 200, 140 + index * 36, 200, 36)
+      })
+    })
+    snapshots.splice(0)
+    onChange.mockClear()
+    await act(async () => {
+      fireEvent.contextMenu(rows[1].querySelector('[role="cell"]')!, {
+        clientX: 180,
+        clientY: 180,
+      })
+    })
+    const menu = await within(container).findByRole('menu', { name: '表格操作' })
+    const duplicate = within(menu).getByRole('menuitem', { name: '复制当前行' })
+    expect(onChange).not.toHaveBeenCalledWith(expect.objectContaining({ documentChanged: true }))
+    await act(async () => fireEvent.click(duplicate))
+    await waitFor(() => expect(snapshots).toContain(expected))
+    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ documentChanged: true }))
+    expect(ref.current!.getMarkdown()).toBe(expected)
+    expect(container.querySelectorAll('[role="row"][data-markdown-table]')).toHaveLength(3)
+    expect(container.querySelector('[data-cap-content]')).toBe(surface)
+    expect(onEditorChange.mock.calls.filter(([value]) => value !== null)).toHaveLength(1)
     expect(onError).not.toHaveBeenCalled()
   })
 

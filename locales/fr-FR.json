@@ -1264,7 +1264,8 @@
       "alignRight": "Aligner la colonne à droite",
       "deleteColumn": "Supprimer la colonne actuelle",
       "deleteRow": "Supprimer la ligne actuelle",
-      "deleteTable": "Supprimer le tableau"
+      "deleteTable": "Supprimer le tableau",
+      "duplicateRow": "Dupliquer la ligne"
     }
   },
   "inline_insert": {

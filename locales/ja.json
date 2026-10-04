@@ -1264,7 +1264,8 @@
       "alignRight": "列を右揃え",
       "deleteColumn": "現在の列を削除",
       "deleteRow": "現在の行を削除",
-      "deleteTable": "表を削除"
+      "deleteTable": "表を削除",
+      "duplicateRow": "行を複製"
     }
   },
   "inline_insert": {

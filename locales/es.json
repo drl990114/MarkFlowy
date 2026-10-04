@@ -1264,7 +1264,8 @@
       "alignRight": "Alinear columna a la derecha",
       "deleteColumn": "Eliminar columna actual",
       "deleteRow": "Eliminar fila actual",
-      "deleteTable": "Eliminar tabla"
+      "deleteTable": "Eliminar tabla",
+      "duplicateRow": "Duplicar fila"
     }
   },
   "inline_insert": {

@@ -1264,7 +1264,8 @@
       "alignRight": "列右对齐",
       "deleteColumn": "删除当前列",
       "deleteRow": "删除当前行",
-      "deleteTable": "删除表格"
+      "deleteTable": "删除表格",
+      "duplicateRow": "复制当前行"
     }
   },
   "inline_insert": {
