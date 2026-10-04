@@ -157,21 +157,17 @@ export const getExportableImageSrc = async (
     return source
   }
 
-  if (isHttpUrl(source)) {
-    return await convertHttpToBase64(source)
-  }
-
   const localPath =
     (await resolveLocalImagePath(source, fileFolderPath)) ||
     (normalizedRenderedSrc
       ? await resolveLocalImagePath(normalizedRenderedSrc, fileFolderPath)
       : null)
 
-  if (!localPath) {
-    return source
-  }
+  if (localPath) return (await readImageFileAsDataUrl(localPath)) || source
 
-  return (await readImageFileAsDataUrl(localPath)) || source
+  // Tauri uses http(s)://asset.localhost on some platforms. Resolve those
+  // native file URLs before sending ordinary remote images through HTTP.
+  return isHttpUrl(source) ? await convertHttpToBase64(source) : source
 }
 
 export const convertImageToBase64 = async (src: string): Promise<string> => {
