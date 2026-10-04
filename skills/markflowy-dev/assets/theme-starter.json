@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "id": "quiet-paper",
+  "name": "Quiet Paper",
+  "variants": [
+    {
+      "id": "light",
+      "name": "Quiet Paper Light",
+      "mode": "light",
+      "tokens": {
+        "surface.canvas": "#fffdf6",
+        "surface.panel": "#f2eee3",
+        "surface.overlay": { "ref": "surface.panel" },
+        "text.primary": "#34312a",
+        "text.secondary": "#696255",
+        "text.disabled": "#81796c",
+        "border.default": "#d9d2c3",
+        "accent.background": "#526f52",
+        "interaction.hover": "#e8e2d5",
+        "interaction.pressed": "#ddd5c5",
+        "editor.selection.background": { "ref": "accent.background" },
+        "editor.selection.foreground": { "ref": "accent.foreground" },
+        "editor.link": { "ref": "accent.background" },
+        "font.editor.size": "16px",
+        "font.editor.lineHeight": "1.7",
+        "font.source.size": "15px",
+        "font.source.lineHeight": "1.6"
+      }
+    },
+    {
+      "id": "dark",
+      "name": "Quiet Paper Dark",
+      "mode": "dark",
+      "tokens": {
+        "surface.canvas": "#20231f",
+        "surface.panel": "#282d27",
+        "surface.overlay": { "ref": "surface.panel" },
+        "text.primary": "#e8e4d8",
+        "text.secondary": "#b6b6a8",
+        "text.disabled": "#8b9084",
+        "border.default": "#454d42",
+        "accent.background": "#accb9c",
+        "interaction.hover": "#353d32",
+        "interaction.pressed": "#424d3e",
+        "editor.selection.background": { "ref": "accent.background" },
+        "editor.selection.foreground": { "ref": "accent.foreground" },
+        "editor.link": { "ref": "accent.background" },
+        "font.editor.size": "16px",
+        "font.editor.lineHeight": "1.7",
+        "font.source.size": "15px",
+        "font.source.lineHeight": "1.6"
+      }
+    }
+  ]
+}

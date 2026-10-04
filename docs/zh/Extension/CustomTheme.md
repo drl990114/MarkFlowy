@@ -1,12 +1,18 @@
 ---
 seoTitle: '自定义 MarkFlowy 主题'
 description: '使用可视化编辑器和 JSON 创建、编辑、分享 MarkFlowy 主题。'
-updatedAt: "2026-09-27"
+updatedAt: '2026-10-05'
 ---
 
 # 自定义主题
 
 主题由 JSON 数据组成，不需要 Node、npm 包或 JavaScript 构建。打开 **设置 → 主题商店**，选择“创建主题”或“复制并编辑”。
+
+## 使用 AI Agent 辅助开发
+
+仓库提供 [MarkFlowy Dev](https://github.com/drl990114/MarkFlowy/tree/main/skills/markflowy-dev) 开发辅助 Skill，目前覆盖自定义主题与 CSS，附带浅色/深色模板，以及校验、导入和分享指南。将 `skills/markflowy-dev` 整个目录复制到所用 Agent 的 Skill 目录即可安装，例如 Codex 的 `~/.agents/skills/markflowy-dev`。
+
+可以这样提问：`使用 $markflowy-dev 创建一个暖纸色的 MarkFlowy 主题，包含浅色和深色变体，并说明如何导入和校验。` 没有源码仓库也可以通过应用主题编辑器完成开发。
 
 ## 可视化编辑
 

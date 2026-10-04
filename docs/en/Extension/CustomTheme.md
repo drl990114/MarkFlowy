@@ -1,12 +1,18 @@
 ---
 seoTitle: 'Custom MarkFlowy themes'
 description: 'Create, edit and share declarative JSON themes with the visual theme editor.'
-updatedAt: "2026-09-27"
+updatedAt: '2026-10-05'
 ---
 
 # Custom themes
 
 Themes are JSON data. Creating one requires no Node installation, npm package, or JavaScript build. Open **Settings → Theme Store** and choose **Create theme** or **Copy and edit**.
+
+## Develop with an AI agent
+
+The repository provides [MarkFlowy Dev](https://github.com/drl990114/MarkFlowy/tree/main/skills/markflowy-dev), a developer Skill currently covering custom themes and CSS, with a light/dark starter and guidance for validation, import, and sharing. Copy the entire `skills/markflowy-dev` directory into your agent's skills directory (for example, `~/.agents/skills/markflowy-dev` for Codex).
+
+Example prompt: `Use $markflowy-dev to create a warm paper-style MarkFlowy theme with light and dark variants, and explain how to import and validate it.` The Skill also works without a source checkout through the app's theme editor.
 
 ## Visual editor
 
