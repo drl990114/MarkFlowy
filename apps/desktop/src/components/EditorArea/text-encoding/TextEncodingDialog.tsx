@@ -4,6 +4,7 @@ import { Dialog } from '@/components/ui/dialog'
 import { Select } from '@/components/ui/select'
 import { getFileObject } from '@/helper/files'
 import { useTranslation } from '@/i18n'
+import { logger } from '@/helper/logger'
 import { fileSaveCoordinator } from '@/components/EditorArea/fileSaveCoordinator'
 import type { TextFileFormat } from '@/components/EditorArea/textFileFormat'
 import {
@@ -17,6 +18,7 @@ import {
   saveFileWithFormat,
   type EncodingPreview,
 } from '@/services/text-file-format'
+import { formatTextFileError, type TextFileErrorOperation } from './textFileError'
 
 const formats: { label: string; value: TextFileFormat }[] = [
   { label: 'UTF-8', value: { encoding: 'utf-8', bom: 'none' } },
@@ -43,7 +45,7 @@ export function TextEncodingDialog({ fileId, onClose }: TextEncodingDialogProps)
   )
   const [selected, setSelected] = useState(formatKey(text.format))
   const [busy, setBusy] = useState(false)
-  const [error, setError] = useState('')
+  const [error, setError] = useState<{ failure: unknown; operation: TextFileErrorOperation }>()
   const [preview, setPreview] = useState<EncodingPreview>()
   const file = getFileObject(fileId)
   const format = formats.find((item) => formatKey(item.value) === selected)!.value
@@ -56,13 +58,14 @@ export function TextEncodingDialog({ fileId, onClose }: TextEncodingDialogProps)
     file?.path && !fileSaveCoordinator.getDiskRevision(fileId)
       ? t('text_encoding.encoding')
       : `${text.format.encoding.toUpperCase()}${text.format.bom !== 'none' ? ' BOM' : ''} · ${endingLabel}${text.decoding.needsConfirmation ? ` · ${t('text_encoding.unconfirmed')}` : ''}`
-  const run = async (action: () => Promise<void>) => {
+  const run = async (operation: TextFileErrorOperation, action: () => Promise<void>) => {
     setBusy(true)
-    setError('')
+    setError(undefined)
     try {
       await action()
     } catch (failure) {
-      setError(String(failure))
+      logger.error('Text encoding operation failed', failure)
+      setError({ failure, operation })
     } finally {
       setBusy(false)
     }
@@ -99,7 +102,7 @@ export function TextEncodingDialog({ fileId, onClose }: TextEncodingDialogProps)
           {!text.decoding.byteRoundTrip ? <p>{t('text_encoding.roundtrip_hint')}</p> : null}
           {text.saveError ? (
             <p role='alert' className='whitespace-pre-wrap text-destructive'>
-              {text.saveError}
+              {formatTextFileError(text.saveError, t, 'save')}
             </p>
           ) : null}
           <Select
@@ -131,7 +134,7 @@ export function TextEncodingDialog({ fileId, onClose }: TextEncodingDialogProps)
           ) : null}
           {error ? (
             <p role='alert' className='whitespace-pre-wrap text-destructive'>
-              {error}
+              {formatTextFileError(error.failure, t, error.operation)}
             </p>
           ) : null}
         </Dialog.Body>
@@ -140,7 +143,7 @@ export function TextEncodingDialog({ fileId, onClose }: TextEncodingDialogProps)
             variant='outline'
             disabled={busy || !file?.path}
             onClick={() =>
-              void run(async () => {
+              void run('preview', async () => {
                 setPreview(await previewFileEncoding(fileId, format.encoding))
               })
             }
@@ -152,7 +155,7 @@ export function TextEncodingDialog({ fileId, onClose }: TextEncodingDialogProps)
               variant='outline'
               disabled={busy}
               onClick={() =>
-                void run(async () => {
+                void run('preview', async () => {
                   await applyEncodingPreview(preview)
                   onClose()
                 })
@@ -164,9 +167,11 @@ export function TextEncodingDialog({ fileId, onClose }: TextEncodingDialogProps)
           <Button
             disabled={busy}
             onClick={() =>
-              void run(async () => {
+              void run('save', async () => {
                 if (await saveFileWithFormat(fileId, format)) onClose()
-                else setError(t('text_encoding.save_failed'))
+                else if (!fileSaveCoordinator.getTextMetadata(fileId).saveError) {
+                  setError({ failure: undefined, operation: 'save' })
+                }
               })
             }
           >

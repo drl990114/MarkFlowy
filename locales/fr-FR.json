@@ -369,7 +369,28 @@
     "preview_reopen": "Aperçu de la réouverture",
     "apply_reopen": "Appliquer la réouverture",
     "save_with_encoding": "Enregistrer avec cet encodage",
-    "save_failed": "Le fichier n’est pas encore enregistré. Le contenu et l’encodage choisi sont conservés. Vérifiez le message d’enregistrement et réessayez."
+    "save_failed": "Le fichier n’est pas encore enregistré. Le contenu et l’encodage choisi sont conservés. Vérifiez le message d’enregistrement et réessayez.",
+    "errors": {
+      "invalid_encoding": "This file cannot be read with the selected encoding. Preview another encoding and check the text before reopening it.",
+      "unsupported_encoding": "The file encoding could not be identified or is not supported. Open Text encoding and line endings, select an encoding, and preview it before reopening.",
+      "binary": "This file contains binary data and cannot be opened as text.",
+      "invalid_bom": "The file’s encoding marker (BOM) does not match the selected encoding. Choose the matching encoding and try again.",
+      "unmappable": "The current encoding cannot save some characters. Your content is still in the editor. Save as UTF-8, or remove the unsupported characters and try again.",
+      "unmappable_character": "{{encoding}} cannot save the character “{{character}}”. Your content is still in the editor. Save as UTF-8, or remove this character and try again.",
+      "confirm_encoding": "The detected encoding has not been confirmed. Your content is still in the editor. Open Text encoding and line endings, preview the text, then choose Save with this encoding.",
+      "noncanonical": "The original byte mapping cannot be preserved after editing. Choose a different encoding such as UTF-8, or save a copy.",
+      "not_reversible": "The selected encoding would change some characters. Choose UTF-8 or another encoding that preserves the complete text before saving.",
+      "ambiguous_bom": "The text begins with an invisible encoding marker. Choose the BOM variant of the current Unicode encoding before saving.",
+      "finish_input": "Finish the current text input before trying again.",
+      "save_first": "Save the file before previewing another encoding.",
+      "retry_read": "The file is changing. Wait for the changes to finish, then preview it again.",
+      "preview_again": "The document or its file has changed. Preview it again before applying the new encoding.",
+      "draft_pending": "The current content has not yet been protected by a recovery draft. Try again before reopening the file.",
+      "invalid_unicode": "The text contains an invalid character sequence. The original file was not written. Correct the affected text and try again.",
+      "save_failed": "Not saved yet. Your content is still in the editor. Check that the file is writable and try again, or save a copy.",
+      "read_failed": "Unable to read the file. Check that it still exists and you have permission to read it, then try again.",
+      "preview_failed": "The encoding operation could not be completed. Your current content has been kept. Please try again."
+    }
   },
   "settings": {
     "select_placeholder": "Sélectionnez une option",

@@ -9,6 +9,7 @@ import useRecentFilesStore from '@/stores/useRecentFilesStore'
 import { FileSaveCoordinator } from './fileSaveCoordinator'
 import type { FileSnapshotResult } from './fileSnapshot'
 import textEditorSource from './TextEditor.tsx?raw'
+import { formatTextFileError } from './text-encoding/textFileError'
 import {
   beginEditorOpenMeasurement,
   finishEditorOpenMeasurement,
@@ -115,6 +116,7 @@ function createHarness(options: { content?: string; dirty?: boolean; path?: stri
     useFileCacheStore,
     useRecentFilesStore,
     fileSaveCoordinator: coordinator,
+    formatTextFileError,
     useEditorStateStore: { getState: () => ({ idStateMap: states }) },
     editorSnapshotRegistry: registry,
     readStableFileSnapshot: snapshot,
@@ -341,6 +343,20 @@ describe('TextEditor file loading lifecycle', () => {
     expect(container.firstChild).toHaveProperty('dataset.status', 'error')
     expect(toastError).toHaveBeenCalledWith('external_file_change.read_failed')
     expect(loggerError).toHaveBeenCalledOnce()
+  })
+
+  it('localizes a native encoding read failure and logs the original diagnostic', async () => {
+    const { Harness, snapshot, toastError, loggerError } = createHarness()
+    const error = 'text_unsupported_encoding: Detected windows-1252; choose an encoding to reopen.'
+    snapshot.mockResolvedValue({
+      status: 'unavailable',
+      result: { code: FileResultCode.UnknownError, content: error },
+    })
+    const { container } = render(<Harness id='file' />)
+    await act(async () => {})
+    expect(container.firstChild).toHaveProperty('dataset.status', 'error')
+    expect(toastError).toHaveBeenCalledWith('text_encoding.errors.unsupported_encoding')
+    expect(loggerError).toHaveBeenCalledWith('Failed to read text file', error)
   })
 
   it.each([

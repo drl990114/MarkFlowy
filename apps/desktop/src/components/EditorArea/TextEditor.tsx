@@ -63,6 +63,7 @@ import {
 import { isSupportedMode, type FileTypeConfig } from '@/helper/fileTypeHandler'
 import { prepareResourcesForExport } from './imageExportResources'
 import { logger } from '@/helper/logger'
+import { formatTextFileError, getTextFileErrorCode } from './text-encoding/textFileError'
 import {
   comparePathRelation,
   findPathCollisions,
@@ -1290,7 +1291,8 @@ function TextEditor(props: TextEditorProps) {
         return setStatus(TextEditorStatus.BINARY)
       }
       if (res.code !== FileResultCode.Success) {
-        toast.error(res.content)
+        logger.error('Failed to read text file', res.content)
+        toast.error(formatTextFileError(res.content, i18n.t, 'read'))
         return setStatus(TextEditorStatus.READERROR)
       }
       return setStatus(TextEditorStatus.SUCCESS)
@@ -1596,8 +1598,11 @@ function TextEditor(props: TextEditorProps) {
             } catch (error) {
               const message = String(error)
               const notify =
-                !message.includes('text_') || fileSaveCoordinator.recordSaveError(id, message)
-              if (!params.autosave || notify) toast.error(message)
+                !getTextFileErrorCode(error) || fileSaveCoordinator.recordSaveError(id, message)
+              if (!params.autosave || notify) {
+                logger.error('Failed to save text file', error)
+                toast.error(formatTextFileError(error, t, 'save'))
+              }
               return false
             }
           },
