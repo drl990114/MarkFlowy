@@ -40,6 +40,7 @@ function getActiveEditor() {
 export function captureActiveEditorFocus(): EditorFocusSnapshot | null {
   const { element, rich, source, mode } = getActiveEditor()
   if (!element) return null
+  const embeddedCode = rich?.captureEmbeddedCodeFocus?.()
   const bookmark = rich?.selection?.capture()
   const sourceState = source?.state
   const focused = document.activeElement
@@ -58,6 +59,7 @@ export function captureActiveEditorFocus(): EditorFocusSnapshot | null {
       if (current.element !== element || current.mode !== mode) return false
       if (rich) {
         if (current.rich !== rich) return false
+        if (embeddedCode?.restore()) return true
         if (bookmark) rich.selection?.restore(bookmark.id)
         rich.focus()
         return true

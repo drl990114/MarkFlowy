@@ -1,4 +1,4 @@
-import { useState, useSyncExternalStore } from 'react'
+import { useRef, useState, useSyncExternalStore } from 'react'
 import { Button } from '@/components/ui/button'
 import { Dialog } from '@/components/ui/dialog'
 import { Select } from '@/components/ui/select'
@@ -6,6 +6,11 @@ import { getFileObject } from '@/helper/files'
 import { useTranslation } from '@/i18n'
 import { fileSaveCoordinator } from '@/components/EditorArea/fileSaveCoordinator'
 import type { TextFileFormat } from '@/components/EditorArea/textFileFormat'
+import {
+  captureActiveEditorFocus,
+  scheduleActiveEditorFocus,
+  type EditorFocusSnapshot,
+} from '@/components/EditorArea/focusActiveEditor'
 import {
   applyEncodingPreview,
   previewFileEncoding,
@@ -32,6 +37,7 @@ export interface TextEncodingDialogProps {
 
 export function TextEncodingDialog({ fileId, onClose }: TextEncodingDialogProps) {
   const { t } = useTranslation()
+  const editorFocusRef = useRef<EditorFocusSnapshot | null>(null)
   const text = useSyncExternalStore(fileSaveCoordinator.subscribe, () =>
     fileSaveCoordinator.getTextMetadata(fileId),
   )
@@ -68,7 +74,19 @@ export function TextEncodingDialog({ fileId, onClose }: TextEncodingDialogProps)
         if (!next && !busy) onClose()
       }}
     >
-      <Dialog.Content closeLabel={t('common.close')} size='lg'>
+      <Dialog.Content
+        closeLabel={t('common.close')}
+        size='lg'
+        onOpenAutoFocus={() => {
+          editorFocusRef.current = captureActiveEditorFocus()
+        }}
+        onCloseAutoFocus={(event) => {
+          event.preventDefault()
+          const snapshot = editorFocusRef.current
+          editorFocusRef.current = null
+          scheduleActiveEditorFocus(snapshot)
+        }}
+      >
         <Dialog.Header>
           <Dialog.Title>{t('text_encoding.label')}</Dialog.Title>
           <Dialog.Description>{t('text_encoding.description')}</Dialog.Description>

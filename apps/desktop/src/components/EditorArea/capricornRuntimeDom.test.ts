@@ -3,7 +3,11 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createCapricornRuntime } from 'virtual:markflowy-capricorn-runtime'
 import { isCapricornRuntimeAvailable } from '@/constants/capricornRuntime'
 import type { CapricornRuntimeFactory, CapricornRuntimeSession } from './capricornRuntimeAdapter'
-import { getCapricornRuntimeInput, subscribeCapricornBeforeInput } from './capricornRuntimeDom'
+import {
+  getCapricornRuntimeInput,
+  guardCapricornHistoryInput,
+  subscribeCapricornBeforeInput,
+} from './capricornRuntimeDom'
 
 const cleanups: (() => void)[] = []
 afterEach(() => {
@@ -31,6 +35,38 @@ function mountSurface(documentKey: string) {
 }
 
 describe('Capricorn runtime DOM bridge', () => {
+  it.each(['historyUndo', 'historyRedo'])(
+    'blocks native %s sent to a retained background input without blocking ordinary typing',
+    (inputType) => {
+      const previous = mountSurface('previous')
+      const current = mountSurface('current')
+      let editable = false
+      cleanups.push(guardCapricornHistoryInput(previous.container, () => editable))
+      const runtime = vi.fn()
+      previous.input.addEventListener('beforeinput', runtime)
+      current.input.focus()
+      const dispatch = (type = inputType) => {
+        const event = new InputEvent('beforeinput', {
+          inputType: type,
+          bubbles: true,
+          cancelable: true,
+        })
+        previous.input.dispatchEvent(event)
+        return event
+      }
+      expect(dispatch().defaultPrevented).toBe(true)
+      expect(runtime).not.toHaveBeenCalled()
+      editable = true
+      // A modal or another pane may still own focus even in a visible editor.
+      expect(dispatch().defaultPrevented).toBe(true)
+      previous.input.focus()
+      expect(dispatch().defaultPrevented).toBe(false)
+      expect(runtime).toHaveBeenCalledOnce()
+      editable = false
+      expect(dispatch('insertText').defaultPrevented).toBe(false)
+    },
+  )
+
   it('pairs the document node with its body-portal input without interpolating keys into selectors', () => {
     const other = mountSurface('other')
     const current = mountSurface('document"[key]#\\')

@@ -46,6 +46,67 @@ vi.mock('@/i18n', async (importOriginal) => ({
 afterEach(cleanup)
 
 describe.skipIf(!isCapricornRuntimeAvailable)('CapricornEditor with the published runtime', () => {
+  it('does not apply native undo or redo to a retained background document', async () => {
+    const first = createRef<CapricornEditorHandle>()
+    const second = createRef<CapricornEditorHandle>()
+    const onError = vi.fn()
+    const editorOptions = { virtualize: { enable: false } }
+    const surface = (firstActive: boolean) => (
+      <ThemeProvider theme={desktopLightTheme}>
+        <CapricornEditor
+          ref={first}
+          editorId='history-first'
+          active={firstActive}
+          visible={firstActive}
+          initialMarkdown='first'
+          onChange={vi.fn()}
+          onError={onError}
+          onUnavailable={onError}
+          options={editorOptions}
+        />
+        <CapricornEditor
+          ref={second}
+          editorId='history-second'
+          active={!firstActive}
+          initialMarkdown='second'
+          onChange={vi.fn()}
+          onError={onError}
+          onUnavailable={onError}
+          options={editorOptions}
+        />
+      </ThemeProvider>
+    )
+    const view = render(surface(true))
+    const firstInput = await waitFor(() => {
+      const input = getCapricornRuntimeInput(view.container.querySelector('#history-first')!)
+      expect(input).not.toBeNull()
+      return input!
+    })
+    await act(async () => {
+      first.current!.focus()
+      fireEvent.input(firstInput, { target: { value: 'X' }, inputType: 'insertText', data: 'X' })
+    })
+    const edited = first.current!.getMarkdown()
+    expect(edited).not.toBe('first')
+    view.rerender(surface(false))
+    await waitFor(() => expect(view.container.querySelector('#history-second [data-cap-editable]')).not.toBeNull())
+    await act(async () => second.current!.focus())
+    for (const inputType of ['historyUndo', 'historyRedo']) {
+      await act(async () => {
+        firstInput.dispatchEvent(new InputEvent('beforeinput', { inputType, bubbles: true, cancelable: true }))
+      })
+      expect(first.current!.getMarkdown()).toBe(edited)
+      expect(second.current!.getMarkdown()).toBe('second')
+    }
+    view.rerender(surface(true))
+    await act(async () => first.current!.focus())
+    await act(async () => {
+      firstInput.dispatchEvent(new InputEvent('beforeinput', { inputType: 'historyUndo', bubbles: true, cancelable: true }))
+    })
+    expect(first.current!.getMarkdown()).toBe('first')
+    expect(onError).not.toHaveBeenCalled()
+  })
+
   it('keeps the padded host handle pinned until its block menu closes', async () => {
     const onChange = vi.fn()
     const onError = vi.fn()

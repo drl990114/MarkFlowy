@@ -39,9 +39,38 @@ beforeEach(async () => {
   actions.save.mockResolvedValue(false)
   actions.preview.mockRejectedValue(new Error('text_invalid_encoding'))
 })
-afterEach(cleanup)
+afterEach(() => {
+  cleanup()
+  document.body.replaceChildren()
+})
 
 describe('text encoding dialog', () => {
+  it.each(['close', 'escape', 'save'])(
+    'returns focus and selection to the current editor after %s',
+    async (close) => {
+      document.body.innerHTML = `
+        <div data-editor-active="false"><textarea>background</textarea></div>
+        <div data-editor-active="true"><textarea>current selection</textarea></div>
+      `
+      const current = document.querySelector<HTMLTextAreaElement>(
+        '[data-editor-active="true"] textarea',
+      )!
+      current.focus()
+      current.setSelectionRange(2, 7, 'backward')
+      const view = render(<TextEncodingDialog fileId='encoding-ui' onClose={() => view.unmount()} />)
+      expect(document.activeElement).not.toBe(current)
+      if (close === 'escape') fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' })
+      else if (close === 'save') {
+        actions.save.mockResolvedValue(true)
+        fireEvent.click(screen.getByRole('button', { name: '以此编码保存' }))
+      } else fireEvent.click(screen.getByRole('button', { name: '关闭' }))
+      await waitFor(() => expect(document.activeElement).toBe(current))
+      expect([current.selectionStart, current.selectionEnd, current.selectionDirection]).toEqual([
+        2, 7, 'backward',
+      ])
+    },
+  )
+
   it('separates reopening from saving and keeps a failed conversion visible', async () => {
     render(<TextEncodingDialog fileId='encoding-ui' onClose={vi.fn()} />)
     expect(screen.getByText('note.md · GB18030 · CRLF · 待确认')).toBeTruthy()

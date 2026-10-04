@@ -8,6 +8,11 @@ export type {
 import { isCapricornRuntimeAvailable } from '@/constants/capricornRuntime'
 import { createCapricornResumeApi } from './capricornResume'
 import { getCapricornActiveHeadingId } from './capricornHeadingViewport'
+import {
+  setEmbeddedCodeMirrorViewResolver,
+  trackEmbeddedCodeMirrorFocus,
+} from './embeddedCodeMirrorFocus'
+import type { EmbeddedCodeFocusSnapshot } from './embeddedCodeMirrorFocus'
 
 export interface CapricornFileWithProgress {
   file: File
@@ -385,6 +390,7 @@ export function getCapricornFirstPaintBlockSize(viewportHeight: number): number 
 
 export interface CapricornRuntimeAdapter {
   readonly resume?: ReturnType<typeof createCapricornResumeApi>
+  captureEmbeddedCodeFocus?: () => EmbeddedCodeFocusSnapshot | null
   validateKeybindings: (configuration: CapricornKeybindingConfiguration) => {
     ok: boolean
     diagnostics: readonly { message: string }[]
@@ -449,6 +455,7 @@ export function createCapricornRuntimeAdapter({
     linkOpenMode: options.linkOpenMode ?? 'modifier',
     onEditInline: ({ kind, key, focus }) => requestInlineEdit(kind, key, focus),
   })
+  const embeddedCodeFocus = trackEmbeddedCodeMirrorFocus(container)
   let applyingHostMarkdown = false
   let currentMarkdown = options.markdown ?? ''
   let markdownSnapshotDirty = false
@@ -477,6 +484,7 @@ export function createCapricornRuntimeAdapter({
   const destroySession = () => {
     if (destroyed) return
     destroyed = true
+    embeddedCodeFocus.destroy()
     session.selection?.release()
     inlineEditListeners.clear()
     uiStateListeners.clear()
@@ -540,6 +548,7 @@ export function createCapricornRuntimeAdapter({
     validateKeybindings: (configuration) =>
       session.keybindings.validateConfiguration(configuration),
     resume: createCapricornResumeApi(session),
+    captureEmbeddedCodeFocus: embeddedCodeFocus.capture,
     selection: session.selection,
     requestInlineEdit,
     subscribeInlineEdit(listener) {
@@ -677,11 +686,17 @@ export function loadCapricornRuntimeFactory(): Promise<CapricornRuntimeFactory> 
   }
 
   if (!runtimeFactoryPromise) {
-    runtimeFactoryPromise = import('virtual:markflowy-capricorn-runtime')
-      .then((runtimeModule) => {
+    runtimeFactoryPromise = Promise.all([
+      import('virtual:markflowy-capricorn-runtime'),
+      // Focus restoration is optional; its chunk must not disable an otherwise usable runtime.
+      import('@codemirror/view').catch(() => undefined),
+    ])
+      .then(([runtimeModule, codeMirror]) => {
         if (typeof runtimeModule.createCapricornRuntime !== 'function') {
           throw new TypeError('The Capricorn package does not expose createCapricornRuntime.')
         }
+
+        if (codeMirror) setEmbeddedCodeMirrorViewResolver(codeMirror.EditorView.findFromDOM)
 
         loadedRuntimeFactory = runtimeModule.createCapricornRuntime as CapricornRuntimeFactory
         loadedRuntimeAsyncFactory =

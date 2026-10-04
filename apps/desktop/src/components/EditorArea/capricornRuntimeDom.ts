@@ -24,9 +24,11 @@ export function getCapricornRuntimeInput(container: HTMLElement): HTMLTextAreaEl
 export function subscribeCapricornBeforeInput(
   container: HTMLElement,
   listener: (event: InputEvent) => void,
+  inputTypes?: readonly string[],
 ): () => void {
   const ownerDocument = container.ownerDocument
   const onBeforeInput = (event: InputEvent) => {
+    if (inputTypes && !inputTypes.includes(event.inputType)) return
     const element = event.target as Element | null
     const codeMirrorInput = element?.closest?.('.cm-content[contenteditable="true"]')
     if (codeMirrorInput && container.contains(codeMirrorInput)) {
@@ -58,6 +60,24 @@ export function subscribeCapricornBeforeInput(
   // Read the document key per event: no observer, cache, or stale session key.
   ownerDocument.addEventListener('beforeinput', onBeforeInput, true)
   return () => ownerDocument.removeEventListener('beforeinput', onBeforeInput, true)
+}
+
+/** WebKit can send native undo to an old textarea retained by its undo manager. */
+export function guardCapricornHistoryInput(
+  container: HTMLElement,
+  canEdit: () => boolean,
+): () => void {
+  return subscribeCapricornBeforeInput(
+    container,
+    (event) => {
+      const target = event.target as Element
+      const focused = container.ownerDocument.activeElement
+      if (canEdit() && (target === focused || target.contains(focused))) return
+      event.preventDefault()
+      event.stopImmediatePropagation()
+    },
+    ['historyUndo', 'historyRedo'],
+  )
 }
 
 export function hasVisiblePendingSourceEditor(container: HTMLElement): boolean {

@@ -16,6 +16,7 @@ import {
 } from 'react'
 import { ThemeContext } from 'styled-components'
 import { createCapricornExportSurface, type CapricornExportSurface } from './capricornExportSurface'
+import { guardCapricornHistoryInput } from './capricornRuntimeDom'
 import {
   CAPRICORN_DESKTOP_VIRTUALIZE_OPTIONS,
   createCapricornRuntimeAdapter,
@@ -170,6 +171,19 @@ export function CapricornEditor({
     caretAnimation: options.caretAnimation ?? false,
     style: runtimeStyle,
   }
+
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container) return
+    return guardCapricornHistoryInput(
+      container,
+      () =>
+        activeRef.current &&
+        visibleRef.current &&
+        (optionsRef.current.mode ?? 'edit') === 'edit' &&
+        !optionsRef.current.readOnly,
+    )
+  }, [])
 
   const reportUnavailable = useCallback((error: unknown) => {
     if (unavailableReportedRef.current) return
