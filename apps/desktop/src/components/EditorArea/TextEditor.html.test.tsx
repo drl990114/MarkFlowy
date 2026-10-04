@@ -1,6 +1,9 @@
 import { act, cleanup, fireEvent, render, waitFor } from '@testing-library/react'
 import { enableMapSet } from 'immer'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
+// Load the real editor fixture during collection so cold module transforms do
+// not consume a behavior test's timeout. Loader spies below control each race.
+import * as runtime from 'rme'
 import { EditorViewType } from '@/constants/editorViewType'
 import { getFileObject, setFileObject } from '@/helper/files'
 import useEditorStateStore from '@/stores/useEditorStateStore'
@@ -150,7 +153,6 @@ async function switchTo(
 }
 
 it.each([false, true])('keeps the latest content when source loading finishes after returning to preview: %s', async (returnToPreview) => {
-  const runtime = await rmeRuntime.loadRmeRuntime()
   let resolve!: (value: typeof runtime) => void
   vi.spyOn(rmeRuntime, 'getLoadedRmeRuntime').mockReturnValue(undefined)
   vi.spyOn(rmeRuntime, 'loadRmeRuntime').mockReturnValue(new Promise((yes) => { resolve = yes }))
@@ -179,7 +181,6 @@ it.each([false, true])('keeps the latest content when source loading finishes af
 })
 
 it('retries a failed initial source import without rereading or replacing the document', async () => {
-  const runtime = await rmeRuntime.loadRmeRuntime()
   vi.spyOn(rmeRuntime, 'getLoadedRmeRuntime').mockReturnValue(undefined)
   const load = vi.spyOn(rmeRuntime, 'loadRmeRuntime').mockRejectedValueOnce(new Error('Unavailable')).mockResolvedValue(runtime)
   const id = 'html-source-retry'
@@ -197,7 +198,6 @@ it('retries a failed initial source import without rereading or replacing the do
 })
 
 it('does not take focus when source loading completes after its tab becomes hidden', async () => {
-  const runtime = await rmeRuntime.loadRmeRuntime()
   let resolve!: (value: typeof runtime) => void
   vi.spyOn(rmeRuntime, 'getLoadedRmeRuntime').mockReturnValue(undefined)
   vi.spyOn(rmeRuntime, 'loadRmeRuntime').mockReturnValue(new Promise((yes) => { resolve = yes }))
@@ -307,7 +307,6 @@ it('synchronizes HTML source and view changes across two visible panes', async (
 
 
 it('keeps the preview on a failed mode preparation and retries on the next selection', async () => {
-  const runtime = await rmeRuntime.loadRmeRuntime()
   vi.spyOn(rmeRuntime, 'getLoadedRmeRuntime').mockReturnValue(undefined)
   const load = vi.spyOn(rmeRuntime, 'loadRmeRuntime')
     .mockRejectedValueOnce(new Error('Preparation failed'))
@@ -328,7 +327,6 @@ it('keeps the preview on a failed mode preparation and retries on the next selec
 })
 
 it.each(['hide', 'unmount'] as const)('cancels a prepared mode switch after %s', async (action) => {
-  const runtime = await rmeRuntime.loadRmeRuntime()
   let resolve!: (value: typeof runtime) => void
   vi.spyOn(rmeRuntime, 'getLoadedRmeRuntime').mockReturnValue(undefined)
   vi.spyOn(rmeRuntime, 'loadRmeRuntime').mockReturnValue(new Promise((yes) => { resolve = yes }))
