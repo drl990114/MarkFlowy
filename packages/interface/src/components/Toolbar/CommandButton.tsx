@@ -1,4 +1,4 @@
-import React, { FC, useCallback } from 'react'
+import { FC, useCallback } from 'react'
 import type { EditorContext } from 'rme'
 import { MfIconButton } from '../Button/icon-button'
 

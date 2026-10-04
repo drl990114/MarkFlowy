@@ -23,7 +23,8 @@
   "module": "./dist/index.mjs",
   "types": "dist/index.d.ts",
   "files": [
-    "dist/*"
+    "dist/*",
+    "styles.css"
   ],
   "devDependencies": {
     "@anatine/esbuild-decorators": "^0.2.19",

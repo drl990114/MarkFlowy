@@ -17,6 +17,7 @@ import { initStartupPerformance } from './startup/performance'
 import { markStartupInteractive } from './startup/interactive'
 import './atom.css'
 import './normalize.css'
+import 'zens/esm/styles.css'
 import './ui.css'
 
 initStartupPerformance()

@@ -1,29 +1,5 @@
----
-title: Image 图片
-nav:
-  title: 组件
-  order: 2
-group:
-  title: 反馈
-  order: 1
----
+# Image
 
-# Image 图片
+Image keeps asynchronous loading, loading and error fallbacks, lazy loading, and loader-owner cache isolation. Use `alt` to describe meaningful images and an empty `alt` for decorative images.
 
-图片
-
-### 基本用法
-
-<code src="./demo/basic.tsx"></code>
-
-### 空状态
-
-<code src="./demo/empty.tsx"></code>
-
-### 加载失败
-
-<code src="./demo/error.tsx"></code>
-
-### 懒加载
-
-<code src="./demo/lazy.tsx"></code>
+A custom image loader remains responsible for its resource lifecycle. Shared presentation uses the package stylesheet; see [getting started](../../docs/getting-started.md).

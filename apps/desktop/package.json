@@ -3,7 +3,7 @@
   "version": "0.7.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --host --force",
+    "dev": "vite --host",
     "build": "vite build",
     "build:analyze": "vite build --mode analyze",
     "build:types": "tsc -p ./tsconfig.json --noEmit",

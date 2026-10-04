@@ -6,6 +6,7 @@ import {
   matchesPreviewOrigin,
   previewTargetOrigin,
 } from './protocol'
+import 'zens/esm/styles.css'
 import '@/ui.css'
 import './preview.css'
 

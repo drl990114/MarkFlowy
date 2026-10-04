@@ -1,10 +1,31 @@
 {
   "extends": "../../tsconfig.rollup.json",
   "compilerOptions": {
-    "jsx": "react",
+    "jsx": "react-jsx",
     "skipLibCheck": true,
-    "types": ["react", "react-dom"]
+    "types": [
+      "react",
+      "react-dom"
+    ],
+    "paths": {
+      "zens": [
+        "../../packages/zens/src/index.ts"
+      ],
+      "zens/esm/components/*": [
+        "../../packages/zens/src/components/*"
+      ],
+      "zens/esm/Theme/*": [
+        "../../packages/zens/src/Theme/*"
+      ]
+    }
   },
-  "include": ["./src"],
-  "exclude": ["./src/**/*.spec.ts", "./src/**/*.test.ts", "node_modules", "./src/**/*.js"]
+  "include": [
+    "./src"
+  ],
+  "exclude": [
+    "./src/**/*.spec.ts",
+    "./src/**/*.test.ts",
+    "node_modules",
+    "./src/**/*.js"
+  ]
 }

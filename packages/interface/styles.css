@@ -1,0 +1,2 @@
+/* Import once at the host's global CSS entry. No Tailwind setup is required. */
+@import 'zens/esm/styles.css';

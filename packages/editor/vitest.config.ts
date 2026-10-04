@@ -26,8 +26,12 @@ export default defineConfig(() => ({
         ),
       },
       {
-        find: 'zens',
-        replacement: fileURLToPath(new URL('./src/editor/test/__mocks__/zens.ts', import.meta.url)),
+        find: /^zens\/esm\/(.*)$/,
+        replacement: `${fileURLToPath(new URL('../zens/src', import.meta.url))}/$1`,
+      },
+      {
+        find: /^zens$/,
+        replacement: fileURLToPath(new URL('../zens/src/index.ts', import.meta.url)),
       },
     ],
   },

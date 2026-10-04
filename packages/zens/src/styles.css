@@ -1,0 +1,123 @@
+/* Standalone shared component CSS. No preflight and no host source scanning. */
+@layer theme, base, components, mf-components, utilities;
+@source './components/**/*.{ts,tsx}';
+@source './{Button,Input,Tooltip,Menu,Dropdown,Popover,Image,Loading,Toast,Space}/**/*.{ts,tsx}';
+@custom-variant dark (&:where([data-mf-theme='dark'], [data-mf-theme='dark'] *));
+
+@theme inline prefix(mfc) {
+  --spacing: var(--mf-space-unit, 4px);
+  --container-md: 28rem;
+  --container-3xl: 48rem;
+  --text-xs: var(--mf-font-xs, 12px);
+  --text-xs--line-height: 1.5;
+  --text-sm: var(--mf-font-sm, 13px);
+  --text-sm--line-height: 1.55;
+  --text-base: var(--mf-font-base, 14px);
+  --text-base--line-height: 1.6;
+  --text-lg: var(--mf-font-lg, 16px);
+  --text-lg--line-height: 1.5;
+  --text-xl: var(--mf-font-xl, 18px);
+  --text-xl--line-height: 1.45;
+  --text-2xl: var(--mf-font-2xl, 20px);
+  --text-2xl--line-height: 1.4;
+  --text-ui-caption: var(--mf-ui-font-caption, 12px);
+  --text-ui-caption--line-height: var(--mf-ui-line-height-caption, 16px);
+  --text-ui-control: var(--mf-ui-font-control, 13px);
+  --text-ui-control--line-height: var(--mf-ui-line-height-control, 18px);
+  --text-ui-body: var(--mf-ui-font-body, 14px);
+  --text-ui-body--line-height: var(--mf-ui-line-height-body, 20px);
+  --text-ui-title: var(--mf-ui-font-title, 16px);
+  --text-ui-title--line-height: var(--mf-ui-line-height-title, 22px);
+  --text-ui-heading: var(--mf-ui-font-heading, 18px);
+  --text-ui-heading--line-height: var(--mf-ui-line-height-heading, 24px);
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --leading-relaxed: var(--mf-line-height, 1.6);
+  --default-transition-duration: var(--mf-motion-duration-base, 180ms);
+  --default-transition-timing-function: var(--mf-motion-ease-out, cubic-bezier(0.23, 1, 0.32, 1));
+  --animate-spin: mf-spin 1s linear infinite;
+  --animate-pulse: mf-pulse 1.6s ease-in-out infinite;
+  --color-surface-app: var(--mf-surface-app, #fff);
+  --color-surface-panel: var(--mf-surface-panel, #f9f9f9);
+  --color-surface-elevated: var(--mf-surface-elevated, #f7f7f7);
+  --color-surface-overlay: var(--mf-surface-overlay, #f7f7f7);
+  --color-surface-tooltip: var(--mf-surface-tooltip, #f7f7f7);
+  --color-surface-muted: var(--mf-surface-muted, #f7f7f7);
+  --color-content-primary: var(--mf-text-primary, #000);
+  --color-content-secondary: var(--mf-text-secondary, #505050);
+  --color-content-muted: var(--mf-text-muted, #505050);
+  --color-content-disabled: var(--mf-text-disabled, #929292);
+  --color-control-surface: var(--mf-control-surface, #e0e0e0);
+  --color-control-hover: var(--mf-control-hover, #d0d0d0);
+  --color-control-ghost-hover: var(--mf-control-ghost-hover, #d7d5d577);
+  --color-control-pressed: var(--mf-control-pressed, color-mix(in srgb, var(--mf-control-hover, #d0d0d0) 92%, var(--mf-text-primary, #000) 8%));
+  --color-control-ghost-pressed: var(--mf-control-ghost-pressed, #e4e0e0);
+  --color-control-selected: var(--mf-control-selected, #e4e0e0);
+  --color-control-border: var(--mf-control-border, #d2d2d2);
+  --color-control-focus: var(--mf-control-focus, #1f6ae2);
+  --color-background: var(--mf-background, var(--mf-surface-app, #fff));
+  --color-foreground: var(--mf-foreground, var(--mf-text-primary, #000));
+  --color-foreground-secondary: var(--mf-foreground-secondary, var(--mf-text-secondary, #505050));
+  --color-card: var(--mf-card, var(--mf-surface-app, #fff));
+  --color-card-foreground: var(--mf-card-foreground, var(--mf-text-primary, #000));
+  --color-dialog: var(--mf-dialog, var(--mf-surface-elevated, #f7f7f7));
+  --color-dialog-overlay: var(--mf-dialog-overlay, rgb(0 0 0 / 42%));
+  --color-popover: var(--mf-popover, var(--mf-surface-overlay, #f7f7f7));
+  --color-popover-foreground: var(--mf-popover-foreground, var(--mf-text-primary, #000));
+  --color-tooltip: var(--mf-tooltip, var(--mf-surface-tooltip, #f7f7f7));
+  --color-primary: var(--mf-primary, #1f6ae2);
+  --color-primary-foreground: var(--mf-primary-foreground, #fff);
+  --color-primary-soft: var(--mf-primary-soft, #c7deff);
+  --color-secondary: var(--mf-secondary, var(--mf-control-surface, #e0e0e0));
+  --color-secondary-foreground: var(--mf-secondary-foreground, var(--mf-text-primary, #000));
+  --color-muted: var(--mf-muted, var(--mf-surface-muted, #f7f7f7));
+  --color-muted-foreground: var(--mf-muted-foreground, var(--mf-text-muted, #505050));
+  --color-disabled-foreground: var(--mf-disabled-foreground, var(--mf-text-disabled, #929292));
+  --color-accent: var(--mf-accent, #d0d0d0);
+  --color-accent-foreground: var(--mf-accent-foreground, #000);
+  --color-destructive: var(--mf-destructive, #dc2626);
+  --color-destructive-foreground: var(--mf-destructive-foreground, #fff);
+  --color-success: var(--mf-success, #00c853);
+  --color-warning: var(--mf-warning, #e2b340);
+  --color-border: var(--mf-border, var(--mf-control-border, #d2d2d2));
+  --color-input: var(--mf-input, var(--mf-control-border, #d2d2d2));
+  --color-ring: var(--mf-ring, var(--mf-control-focus, #1f6ae2));
+  --font-sans: var(--mf-font-sans, -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', 'Noto Sans CJK SC',     'Microsoft YaHei UI', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif);
+  --font-mono: var(--mf-font-mono, 'SFMono-Regular', Consolas, monospace);
+  --radius-sm: var(--mf-radius-sm, 4px);
+  --radius-md: var(--mf-radius-sm, 4px);
+  --radius-lg: var(--mf-radius, 8px);
+  --radius-xl: var(--mf-radius-lg, 12px);
+  --radius-2xl: var(--mf-radius-lg, 12px);
+  --shadow-sm: 0 1px 2px var(--mf-shadow-color, rgb(0 0 0 / 8%));
+  --shadow-md: 0 4px 12px var(--mf-shadow-color, rgb(0 0 0 / 8%));
+  --shadow-lg: 0 10px 24px var(--mf-shadow-color, rgb(0 0 0 / 8%));
+}
+
+@layer mf-components {
+  :where([data-mf-component], [data-mf-component] *, [data-mf-component]::before, [data-mf-component]::after) {
+    box-sizing: border-box;
+    border: 0 solid;
+  }
+  :where(button[data-mf-component], input[data-mf-component], select[data-mf-component], textarea[data-mf-component]) {
+    margin: 0;
+    font: inherit;
+    letter-spacing: inherit;
+    color: inherit;
+  }
+  :where(button[data-mf-component]) {
+    appearance: none;
+    background: transparent;
+  }
+  :where([data-mf-component][data-mf-portal]) {
+    font-family: var(--mf-ui-font-family, system-ui, sans-serif);
+    font-size: var(--mf-ui-font-control, 13px);
+    line-height: var(--mf-ui-line-height-control, 18px);
+    color: var(--mf-foreground, inherit);
+  }
+  @tailwind utilities source(none);
+}
+
+@keyframes mf-spin { to { transform: rotate(360deg); } }
+@keyframes mf-pulse { 50% { opacity: .45; } }

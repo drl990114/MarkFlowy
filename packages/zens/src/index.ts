@@ -1,5 +1,3 @@
-import * as Ariakit from '@ariakit/react';
-
 export { default as Button } from './Button';
 export { default as Dropdown } from './Dropdown';
 export { default as Image } from './Image';
@@ -20,4 +18,6 @@ export * from './Theme';
 export * from './Toast';
 export * from './Tooltip';
 
-export { Ariakit };
+// Import other primitives from zens/esm/components/* to keep module boundaries small.
+export * from './components/dropdown-menu';
+export * from './components/toolbar';

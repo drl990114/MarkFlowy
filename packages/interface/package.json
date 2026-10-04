@@ -14,14 +14,18 @@
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "exports": {
-    "import": "./dist/index.mjs",
-    "types": "./dist/index.d.ts",
-    "browser": "./dist/index.min.js"
+    ".": {
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.ts",
+      "browser": "./dist/index.min.js"
+    },
+    "./styles.css": "./styles.css"
   },
   "files": [
     "dist",
     "!dist/**/*.map",
-    "README.md"
+    "README.md",
+    "styles.css"
   ],
   "peerDependencies": {
     "@codemirror/commands": ">=6.0.0",

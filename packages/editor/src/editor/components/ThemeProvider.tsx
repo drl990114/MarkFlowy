@@ -1,6 +1,7 @@
 import type { Langs } from '@markflowy/i18n'
 import { changeLng, i18nInit, isInitialized, locales } from '@markflowy/i18n'
-import { memo, useEffect, useRef } from 'react'
+import { memo, useEffect, useMemo, useRef } from 'react'
+import { ComponentsThemeProvider, legacyThemeVariables } from 'zens'
 import { ThemeProvider as ScThemeProvider } from 'styled-components'
 import { type CreateThemeOptions, changeTheme } from '../codemirror'
 import { darkTheme, lightTheme } from '../theme'
@@ -27,7 +28,11 @@ export const ThemeProvider: React.FC<Props> = memo(({ theme, i18n, children }: P
 
   const defaultThemeToken = mode === 'dark' ? darkTheme.styledConstants : lightTheme.styledConstants
 
-  const themeToken = theme?.token ? { ...defaultThemeToken, ...theme.token } : defaultThemeToken
+  const themeToken = useMemo(
+    () => ({ ...defaultThemeToken, ...theme?.token }),
+    [defaultThemeToken, theme?.token],
+  )
+  const componentVariables = useMemo(() => legacyThemeVariables(themeToken), [themeToken])
 
   const prevLanguageRef = useRef<string | undefined>(undefined)
 
@@ -35,7 +40,11 @@ export const ThemeProvider: React.FC<Props> = memo(({ theme, i18n, children }: P
     const initI18n = async () => {
       if (!isInitialized()) {
         await i18nInit({ lng: i18n?.language })
-      } else if (i18n?.language && prevLanguageRef.current !== i18n.language && i18n.language in locales) {
+      } else if (
+        i18n?.language &&
+        prevLanguageRef.current !== i18n.language &&
+        i18n.language in locales
+      ) {
         await changeLng(i18n.language as Langs)
       }
       prevLanguageRef.current = i18n?.language
@@ -51,5 +60,11 @@ export const ThemeProvider: React.FC<Props> = memo(({ theme, i18n, children }: P
     eventBus.emit('change-theme')
   }, [mode, theme?.codemirrorTheme])
 
-  return <ScThemeProvider theme={themeToken}>{children}</ScThemeProvider>
+  return (
+    <ScThemeProvider theme={themeToken}>
+      <ComponentsThemeProvider variables={componentVariables} mode={mode}>
+        {children}
+      </ComponentsThemeProvider>
+    </ScThemeProvider>
+  )
 })

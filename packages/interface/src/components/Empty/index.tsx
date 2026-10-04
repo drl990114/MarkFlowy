@@ -1,4 +1,4 @@
-import React, { memo } from 'react'
+import { memo } from 'react'
 import { useTranslation } from '@markflowy/i18n'
 import styled from 'styled-components'
 

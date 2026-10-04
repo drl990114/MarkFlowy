@@ -1,9 +1,26 @@
 {
-  "include": ["./global.d.ts", "./src/**/*.ts", "./src/**/*.js", "./src/**/*.tsx", "./src/editor/types/**.d.ts", "./src/playground/markdown.d.ts"],
-  "exclude": ["src/test/**/*", "node_modules", "build", "coverage", "dist"],
+  "include": [
+    "./global.d.ts",
+    "./src/**/*.ts",
+    "./src/**/*.js",
+    "./src/**/*.tsx",
+    "./src/editor/types/**.d.ts",
+    "./src/playground/markdown.d.ts"
+  ],
+  "exclude": [
+    "src/test/**/*",
+    "node_modules",
+    "build",
+    "coverage",
+    "dist"
+  ],
   "compilerOptions": {
     "target": "ES2022",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
     "jsx": "react-jsx",
     "experimentalDecorators": true,
     "declaration": true,
@@ -12,7 +29,18 @@
     "moduleResolution": "bundler",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": [
+        "./src/*"
+      ],
+      "zens": [
+        "../../packages/zens/src/index.ts"
+      ],
+      "zens/esm/components/*": [
+        "../../packages/zens/src/components/*"
+      ],
+      "zens/esm/Theme/*": [
+        "../../packages/zens/src/Theme/*"
+      ]
     },
     "resolveJsonModule": true,
     "allowJs": true,

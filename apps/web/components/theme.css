@@ -114,7 +114,7 @@ button.mf-preference-trigger:disabled {
 :root[data-mf-theme='dark'] .mf-preference-menu-item[aria-checked='true'] {
   background: var(--mf-web-accentColorFocused);
 }
-.mf-preference-menu .mf-preference-menu-item[data-active-item] {
+.mf-preference-menu .mf-preference-menu-item[data-highlighted] {
   background: var(--surface-hover);
 }
 .mf-preference-menu .mf-preference-menu-item:active {

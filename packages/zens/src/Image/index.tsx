@@ -1,22 +1,19 @@
-import ErrorTip from './ErrorTip';
-import Img, { type ImgProps as RcImageProps } from './Img';
-import { Loading } from '../Loading';
+import type { ReactElement } from 'react'
+import ErrorTip from './ErrorTip'
+import Img, { type ImgProps as RcImageProps } from './Img'
+import { Loading } from '../Loading'
 
-interface ImageProps extends RcImageProps {
-  errorTip?: string;
-  emptyImage?: JSX.Element | null;
-  emptyTip?: string;
+export interface ImageProps extends RcImageProps {
+  errorTip?: string
+  emptyImage?: ReactElement | null
+  emptyTip?: string
 }
 
 const ImageView = (props: ImageProps) => {
-  const { errorTip = 'load error' } = props;
+  const { errorTip = 'load error' } = props
   return (
-    <Img
-      loader={<Loading size={40} />}
-      unloader={<ErrorTip errortip={errorTip} />}
-      {...props}
-    />
-  );
-};
+    <Img loader={<Loading size={40} />} unloader={<ErrorTip errortip={errorTip} />} {...props} />
+  )
+}
 
-export default ImageView;
+export default ImageView

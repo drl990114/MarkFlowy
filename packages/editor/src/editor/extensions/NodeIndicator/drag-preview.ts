@@ -10,7 +10,7 @@ import { setDragPreview } from './set-drag-preview'
 export function startViewDragging(
   view: EditorView,
   hoverState: NodeIndicatorState,
-  event: React.DragEvent<HTMLDivElement>,
+  event: React.DragEvent<HTMLElement>,
 ): void {
   const { node, pos } = hoverState
   if (!node || pos == null) {

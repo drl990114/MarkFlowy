@@ -2,7 +2,7 @@ import { deepCloneElement, injectStyle } from '../../utils/dom'
 import { isBrowser } from '../../utils/common'
 import { getClientRect } from '../../utils/get-client-rect'
 
-export function setDragPreview(event: React.DragEvent<HTMLDivElement>, element: HTMLElement): void {
+export function setDragPreview(event: React.DragEvent<HTMLElement>, element: HTMLElement): void {
   if (!isBrowser()) return
   const { top, bottom, left, right } = getClientRect(element)
   const width = right - left

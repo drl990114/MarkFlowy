@@ -3,7 +3,7 @@
  * without Tailwind preflight so legacy styled-components and editor styles
  * keep their existing element defaults.
  */
-@layer theme, base, components, utilities;
+@layer theme, base, components, mf-components, utilities;
 
 @tailwind utilities source(none);
 

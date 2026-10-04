@@ -11,7 +11,7 @@ const mermaid = vi.hoisted(() => ({
   render: vi.fn(),
 }))
 
-// Happy DOM has no SVG layout engine. Keep the installed RME Markdown parser,
+// Happy DOM has no SVG layout engine. Keep the workspace RME Markdown parser,
 // static preview renderer and MathJax real; control only Mermaid's SVG output.
 vi.mock('mermaid', () => ({
   default: {
@@ -39,7 +39,7 @@ afterEach(() => {
   cleanup()
 })
 
-describe('installed RME static preview for JPG export', () => {
+describe('workspace RME static preview for JPG export', () => {
   it('settles only after rendered math, Mermaid and the complete document are committed', async () => {
     let finishMermaid!: (value: { svg: string }) => void
     mermaid.render.mockReturnValue(
@@ -151,7 +151,7 @@ describe('installed RME static preview for JPG export', () => {
     expect(onError).not.toHaveBeenCalled()
   })
 
-  it('returns a ready static export surface using the installed renderer', async () => {
+  it('returns a ready static export surface using the workspace renderer', async () => {
     mermaid.render.mockResolvedValue({
       svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M0 0L20 20"/></svg>',
     })

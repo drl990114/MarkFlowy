@@ -1,5 +1,6 @@
 import { ThemeProvider as StyledThemeProvider } from 'styled-components'
-import React from 'react'
+import React, { useMemo } from 'react'
+import { ComponentsThemeProvider, legacyThemeVariables } from 'zens'
 import Head from 'next/head'
 import { ThemeProvider as PreferenceProvider } from 'next-themes'
 import { applicationTheme, websiteTheme, websiteThemes } from '../utils/websiteTheme'
@@ -19,6 +20,19 @@ function ThemeColor() {
   )
 }
 
+function ComponentTheme({ children, website = false }: ThemeProviderProps) {
+  const { resolvedTheme } = useTheme()
+  const token = website ? websiteTheme : applicationTheme
+  const variables = useMemo(() => legacyThemeVariables(token), [token])
+  return (
+    <StyledThemeProvider theme={token}>
+      <ComponentsThemeProvider variables={variables} mode={resolvedTheme}>
+        {children}
+      </ComponentsThemeProvider>
+    </StyledThemeProvider>
+  )
+}
+
 const ThemeProvider: React.FC<ThemeProviderProps> = ({ children, website = false }) => {
   return (
     <PreferenceProvider
@@ -29,9 +43,7 @@ const ThemeProvider: React.FC<ThemeProviderProps> = ({ children, website = false
       disableTransitionOnChange
     >
       <ThemeColor />
-      <StyledThemeProvider theme={website ? websiteTheme : applicationTheme}>
-        {children}
-      </StyledThemeProvider>
+      <ComponentTheme website={website}>{children}</ComponentTheme>
     </PreferenceProvider>
   )
 }

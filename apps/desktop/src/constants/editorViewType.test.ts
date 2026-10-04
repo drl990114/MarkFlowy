@@ -3,7 +3,7 @@ import { EditorViewType as RmeEditorViewType } from 'rme'
 import { EditorViewType } from './editorViewType'
 
 describe('persisted editor mode identifiers', () => {
-  it('keeps the lightweight host identifiers compatible with the installed editor', () => {
+  it('keeps the lightweight host identifiers compatible with the workspace editor', () => {
     expect(EditorViewType).toEqual(RmeEditorViewType)
   })
 })

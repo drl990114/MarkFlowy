@@ -86,7 +86,7 @@ export const BlockHandler = memo(({ getMenuBoundary }: BlockHandlerProps) => {
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const commands = useCommands<StandardListExtension>()
   const blockTypeOptions = useBlockTypeOptions(t, commands)
-  const triggerRef = useRef<HTMLDivElement>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
   const displayStateRef = useRef<NodeIndicatorState | undefined>(state)
 
   const handleBlockPointerDown = useCallback(() => {
@@ -94,17 +94,11 @@ export const BlockHandler = memo(({ getMenuBoundary }: BlockHandlerProps) => {
       const tr = editorView.state.tr
       tr.setSelection(NodeSelection.create(tr.doc, state.pos))
       editorView.dispatch(tr)
-
-      requestAnimationFrame(() => {
-        if (!editorView.isDestroyed) {
-          editorView.focus()
-        }
-      })
     }
   }, [editorView, nodeIndicatorExtension, state])
 
   const handleDragStart = useCallback(
-    (event: React.DragEvent<HTMLDivElement>) => {
+    (event: React.DragEvent<HTMLButtonElement>) => {
       if (editorView && state && state.pos !== null && state.node && state.node.isBlock) {
         editorView.dom.classList.add('rme-dragging')
         startViewDragging(editorView, state, event)
@@ -398,21 +392,7 @@ export const BlockHandler = memo(({ getMenuBoundary }: BlockHandlerProps) => {
   )
 
   return (
-    <Dropdown
-      menu={{
-        items: menuItems,
-        onClick: handleMenuClick,
-      }}
-      overlayClassName='rme-block-handler-menu'
-      overlayStyle={{ zIndex: editorZIndex.blockHandler + 1 }}
-      trigger={['click']}
-      placement='bottomLeft'
-      getPopupContainer={() => document.body}
-      raw
-      open={dropdownOpen}
-      onOpenChange={setDropdownOpen}
-      triggerRef={triggerRef}
-    >
+    <>
       <BlockHandlerMenuStyle />
       <HitArea
         key='rme-block-handler'
@@ -424,23 +404,42 @@ export const BlockHandler = memo(({ getMenuBoundary }: BlockHandlerProps) => {
           top: `${verticalGeometry.hitAreaTop}px`,
         }}
       >
-        <Container
-          ref={triggerRef}
-          draggable='true'
-          onPointerDown={handleBlockPointerDown}
-          onClick={() => setDropdownOpen(!dropdownOpen)}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-          style={{ top: `${verticalGeometry.controlOffsetTop}px` }}
-        >
-          <IconButton>{renderIcon()}</IconButton>
+        <Dropdown
+          menu={{ items: menuItems, onClick: handleMenuClick }}
+          overlayClassName='rme-block-handler-menu'
+          overlayStyle={{ zIndex: editorZIndex.blockHandler + 1 }}
+          trigger={['click']}
+          placement='bottomLeft'
+          getPopupContainer={() => document.body}
+          open={dropdownOpen}
+          onOpenChange={setDropdownOpen}
+          onCloseAutoFocus={(event) => {
+            event.preventDefault()
+            editorView.focus()
+          }}
+          anchorElement={triggerRef.current}
+          manualTrigger={
+            <Container
+              ref={triggerRef}
+              type='button'
+              aria-label={t('blockType.transformTo') || 'Block actions'}
+              draggable='true'
+              onPointerDown={handleBlockPointerDown}
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+              onDragStart={handleDragStart}
+              onDragEnd={handleDragEnd}
+              style={{ top: `${verticalGeometry.controlOffsetTop}px` }}
+            >
+              <IconButton>{renderIcon()}</IconButton>
 
-          <div className='rme-draggable-handler'>
-            <i className='ri-draggable' />
-          </div>
-        </Container>
+              <div className='rme-draggable-handler'>
+                <i className='ri-draggable' />
+              </div>
+            </Container>
+          }
+        />
       </HitArea>
-    </Dropdown>
+    </>
   )
 })
 
@@ -451,7 +450,13 @@ const HitArea = styled.div`
   pointer-events: auto;
 `
 
-const Container = styled.div`
+const Container = styled.button`
+  appearance: none;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
   position: absolute;
   left: 0;
   display: flex;
@@ -527,7 +532,7 @@ const BlockHandlerMenuStyle = createGlobalStyle`
     font-weight: 500;
   }
 
-  .rme-block-handler-menu [role='menuitem'][data-active-item] {
+  .rme-block-handler-menu [role='menuitem'][data-highlighted] {
     background-color: ${(props) => props.theme.contextMenuBgColorHover};
   }
 

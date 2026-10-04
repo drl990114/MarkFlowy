@@ -16,14 +16,22 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "paths": {
-      "zens": ["src/index.ts"],
-      "@@/*": [".dumi/tmp/*"],
-      "@/*": ["src/*"]
+      "zens": [
+        "src/index.ts"
+      ],
+      "@/*": [
+        "src/*"
+      ]
     }
   },
   "include": [
     "src",
     "typings.d.ts"
   ],
-  "exclude": ["node_modules", "lib", "esm", "dist", "typings", "**/__test__", "test", "tests"]
+  "exclude": [
+    "node_modules",
+    "lib",
+    "esm",
+    "**/demo/**"
+  ]
 }

@@ -1,17 +1,5 @@
----
-title: Toast 提示
-nav:
-  title: 组件
-  order: 2
-group:
-  title: 反馈
-  order: 1
----
+# Toast
 
-# Toast 提示
+Notifications continue to use Sonner. Mount the toaster once in the host, keep loading identifiers when updating a notification, and use the existing dismiss and action APIs.
 
-提示
-
-### 基本用法
-
-<code src="./demo/basic.tsx"></code>
+Notification presentation follows the shared theme. Keep action labels meaningful and avoid relying on color alone for success or failure.

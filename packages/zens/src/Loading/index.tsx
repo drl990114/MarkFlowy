@@ -1,10 +1,36 @@
-import { useContext } from 'react';
-import { BounceLoader } from 'react-spinners';
-import type { LoaderSizeProps } from 'react-spinners/helpers/props';
+import type { CSSProperties } from 'react'
+import { Spinner, type SpinnerProps } from '../components/spinner'
+import { cn } from '../lib/cn'
 
-import { ThemeContext } from '../Theme';
+export interface LoadingProps extends SpinnerProps {
+  color?: string
+  loading?: boolean
+  speedMultiplier?: number
+  cssOverride?: CSSProperties
+}
 
-export const Loading = (props: LoaderSizeProps) => {
-  const themeContext = useContext(ThemeContext);
-  return <BounceLoader color={themeContext.accentColor} {...props} />;
-};
+export function Loading({
+  color,
+  loading = true,
+  speedMultiplier = 1,
+  cssOverride,
+  style,
+  className,
+  ...props
+}: LoadingProps) {
+  if (!loading) return null
+  return (
+    <Spinner
+      aria-label='Loading'
+      role='status'
+      {...props}
+      className={cn('mfc:text-primary', className)}
+      style={{
+        color,
+        animationDuration: `${1 / Math.max(speedMultiplier, 0.01)}s`,
+        ...cssOverride,
+        ...style,
+      }}
+    />
+  )
+}

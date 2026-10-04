@@ -236,7 +236,7 @@ test(
 test('waitForRequiredArtifacts ignores stale outputs that are cleaned and rebuilt', async (t) => {
   const artifactDirectory = await mkdtemp(join(tmpdir(), 'markflowy-dev-artifacts-'))
   const entryArtifact = join(artifactDirectory, 'index.js')
-  const dependencyArtifact = join(artifactDirectory, 'styles.js')
+  const dependencyArtifact = join(artifactDirectory, 'styles.css')
 
   t.after(() => rm(artifactDirectory, { force: true, recursive: true }))
 
@@ -262,6 +262,38 @@ test('waitForRequiredArtifacts ignores stale outputs that are cleaned and rebuil
   await waitForArtifacts
   assert.equal(existsSync(entryArtifact), true)
   assert.equal(existsSync(dependencyArtifact), true)
+})
+
+test('waitForRequiredArtifacts rejects a previous watcher session until all outputs are ready', async (t) => {
+  const artifactDirectory = await mkdtemp(join(tmpdir(), 'markflowy-dev-session-'))
+  const entry = join(artifactDirectory, 'index.js')
+  const stylesheet = join(artifactDirectory, 'styles.css')
+  const ready = join(artifactDirectory, '.dev-ready')
+  t.after(() => rm(artifactDirectory, { force: true, recursive: true }))
+  await Promise.all([
+    writeFile(entry, 'previous entry'),
+    writeFile(stylesheet, 'previous stylesheet'),
+    writeFile(ready, 'previous session'),
+  ])
+
+  let resolved = false
+  const waiting = waitForRequiredArtifacts(() => false, {
+    artifacts: [entry, stylesheet, ready],
+    expectedContents: new Map([[ready, 'current session']]),
+    pollIntervalMs: 5,
+    stabilityMs: 10,
+    timeoutMs: 2_000,
+  }).then(() => { resolved = true })
+
+  await delay(40)
+  assert.equal(resolved, false, 'existing outputs from a previous watcher cannot start Tauri')
+  await writeFile(entry, 'current entry')
+  await delay(40)
+  assert.equal(resolved, false, 'an early entry write cannot stand in for complete outputs')
+  await writeFile(stylesheet, 'current stylesheet')
+  await writeFile(ready, 'current session')
+  await waiting
+  assert.equal(resolved, true)
 })
 
 test('runDevDesktop reports a preflight failure without starting watchers', async () => {
@@ -318,8 +350,13 @@ for (const scenario of [
           error: (message) => lines.push(message),
         },
         waitForArtifacts: () => watcherReady,
-        spawnProcess: (_executable, _args, options) => {
+        spawnProcess: (_executable, args, options) => {
           const isWatcher = children.length === 0
+          if (isWatcher) {
+            assert.ok(args.includes('--filter=@markflowy/desktop^...'))
+            assert.ok(args.includes('--filter=!zens'))
+            assert.equal(args.includes('--only'), false)
+          }
           const source = isWatcher
             ? `
               process.once('SIGTERM', () => {

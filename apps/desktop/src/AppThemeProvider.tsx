@@ -7,7 +7,7 @@ import { type desktopLightTheme } from '@markflowy/theme'
 import { releaseStartupPalette } from '@/startup/appearance'
 import { createContext, useContext, useLayoutEffect, useMemo } from 'react'
 import { type IStyleSheetContext, StyleSheetManager, ThemeProvider } from 'styled-components'
-import { ThemeProvider as ZensThemeProvider } from 'zens'
+import { ComponentsThemeProvider } from 'zens'
 import { resolveUIFontFamily } from './appThemeTokens'
 import { EditorThemeContext } from './editorThemeContext'
 import { GlobalStyles, DesktopSpecificStyles } from './globalStyles'
@@ -126,7 +126,7 @@ const AppThemeProvider: React.FC<BaseComponentProps> = function ({ children }) {
   return (
     <StyleSheetManager shouldForwardProp={shouldForwardProp}>
       <ThemeProvider theme={uiTheme}>
-        <ZensThemeProvider theme={themeProp}>
+        <ComponentsThemeProvider mode={curTheme.mode}>
           <EditorThemeContext.Provider value={editorThemeConfig}>
             <AppEditorThemeContext.Provider value={editorTheme}>
               <InjectFonts />
@@ -140,7 +140,7 @@ const AppThemeProvider: React.FC<BaseComponentProps> = function ({ children }) {
               </SemanticThemeContext.Provider>
             </AppEditorThemeContext.Provider>
           </EditorThemeContext.Provider>
-        </ZensThemeProvider>
+        </ComponentsThemeProvider>
       </ThemeProvider>
     </StyleSheetManager>
   )

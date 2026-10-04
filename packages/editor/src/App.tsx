@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useRef, useState } from 'react'
 import 'remixicon/fonts/remixicon.css'
-import { ThemeProvider as ZThemeProvider } from 'zens'
+import { ThemeProvider as ComponentsThemeBridge } from 'zens'
 import './App.css'
 import {
   Editor,
@@ -414,7 +414,7 @@ function App() {
 
   return (
     <main className={theme === 'dark' ? 'dark-theme' : 'light-theme'}>
-      <ZThemeProvider theme={themeData}>
+      <ComponentsThemeBridge theme={themeData}>
         <div className="playground-header">
           <div className="playground-header-left">
             <h1 className="playground-title">
@@ -484,7 +484,7 @@ function App() {
           </div>
           <BlurHelper />
         </ThemeProvider>
-      </ZThemeProvider>
+      </ComponentsThemeBridge>
     </main>
   )
 }

@@ -1,6 +1,6 @@
-import { FC } from 'react'
+import type { FC } from 'react'
 import styled from 'styled-components'
-import { Ariakit } from 'zens'
+import { Toolbar, ToolbarSeparator as ToolbarSeparatorPrimitive } from 'zens'
 import { InsertSeparatorButton } from './command-btns/insert-separator-button'
 import { RedoButton } from './command-btns/redo-button'
 import { ToggleBlockquoteButton } from './command-btns/toggle-blockquote-button'
@@ -29,7 +29,7 @@ export const WysiwygToolbar: FC<WysiwygToolbarProps> = (props) => {
       {prevActions}
       <UndoButton />
       <RedoButton />
-      <ToolbarSeparator render={<div />} />
+      <ToolbarSeparator />
       <ToggleHeadingButton />
       <ToggleBoldButton />
       <ToggleItalicButton />
@@ -37,7 +37,7 @@ export const WysiwygToolbar: FC<WysiwygToolbarProps> = (props) => {
       <ToggleCodeBlockButton />
       <ToggleCodeButton />
       <InsertSeparatorButton />
-      <ToolbarSeparator render={<div />} />
+      <ToolbarSeparator />
       <ToggleBulletListButton />
       <ToggleOrderedListButton />
       <ToggleTaskListButton />
@@ -46,7 +46,7 @@ export const WysiwygToolbar: FC<WysiwygToolbarProps> = (props) => {
   )
 }
 
-const ToolBar = styled(Ariakit.Toolbar)`
+const ToolBar = styled(Toolbar)`
   display: flex;
   flex-wrap: wrap;
   max-width: 100%;
@@ -55,10 +55,10 @@ const ToolBar = styled(Ariakit.Toolbar)`
   height: 28px;
   font-size: ${(props) => props.theme.fontSm};
   color: ${(props) => props.theme.primaryFontColor};
-  background-color: ${(props) => props.theme.editorToolbarBgColor};
+  background-color: ${(props) => props.theme.editorToolbarBgColor ?? props.theme.bgColor};
 `
 
-const ToolbarSeparator = styled(Ariakit.ToolbarSeparator)`
+const ToolbarSeparator = styled(ToolbarSeparatorPrimitive)`
   height: 0.5em;
   margin: 0 0.25em;
   border-right-width: 1px;

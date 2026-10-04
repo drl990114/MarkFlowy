@@ -1,5 +1,5 @@
 import { execFile, spawn, spawnSync } from 'node:child_process'
-import { existsSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { constants, homedir } from 'node:os'
 import { delimiter, dirname, join, resolve } from 'node:path'
@@ -21,10 +21,6 @@ const requiredArtifacts = [
   'packages/github-api/dist/index.mjs',
   'packages/interface/dist/index.mjs',
   'packages/theme/dist/index.mjs',
-  'packages/zens/esm/index.js',
-  'packages/zens/esm/Box/index.js',
-  'packages/zens/esm/Dropdown/styles.js',
-  'packages/zens/esm/Popover/styles.js',
 ].map((path) => resolve(ROOT_DIR, path))
 
 const require = createRequire(import.meta.url)
@@ -196,17 +192,27 @@ export const waitForRequiredArtifacts = async (
   isCancelled,
   {
     artifacts = requiredArtifacts,
+    expectedContents = new Map(),
     pollIntervalMs = ARTIFACT_POLL_INTERVAL_MS,
     stabilityMs = ARTIFACT_STABILITY_MS,
     timeoutMs = ARTIFACT_WAIT_TIMEOUT_MS,
   } = {},
 ) => {
+  const isReady = (path) => {
+    if (!existsSync(path)) return false
+    if (!expectedContents.has(path)) return true
+    try {
+      return readFileSync(path, 'utf8') === expectedContents.get(path)
+    } catch {
+      return false
+    }
+  }
   const deadline = Date.now() + timeoutMs
   let readySince = null
-  let missingArtifacts = artifacts.filter((path) => !existsSync(path))
+  let missingArtifacts = artifacts.filter((path) => !isReady(path))
 
   while (Date.now() < deadline && !isCancelled()) {
-    missingArtifacts = artifacts.filter((path) => !existsSync(path))
+    missingArtifacts = artifacts.filter((path) => !isReady(path))
 
     if (missingArtifacts.length === 0) {
       readySince ??= Date.now()
@@ -362,6 +368,8 @@ export const runDevDesktop = async ({
         'run',
         'dev',
         '--filter=@markflowy/desktop^...',
+        // Desktop Vite serves zens sources directly. Its dependency build still
+        // prepares other workspaces without a second watcher writing the same outputs.
         '--filter=!zens',
         '--no-update-notifier',
         '--output-logs=new-only',

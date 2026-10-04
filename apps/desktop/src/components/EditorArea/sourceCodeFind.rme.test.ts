@@ -6,7 +6,7 @@ import { MfCodemirrorView } from 'rme'
 import { expect, it } from 'vitest'
 import { SourceFind } from './sourceCodeFind'
 
-it('drives the installed RME Source Code view without changing content while navigating', async () => {
+it('drives the workspace RME Source Code view without changing content while navigating', async () => {
   const schema = new Schema({
     nodes: {
       doc: { content: 'code' },
