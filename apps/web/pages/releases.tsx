@@ -3,10 +3,11 @@ import Markdown from 'markdown-to-jsx'
 import type { GetStaticProps } from 'next'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
+import { Fragment } from 'react'
 import styled from 'styled-components'
 import DocsLayout, { type DocsLayoutProps } from '../components/DocsLayout'
 import Link from '../components/Link'
-import { DocsArticle } from '../components/DocsContent'
+import DocumentArticle from '../components/document/DocumentArticle'
 import { getReleases } from '../utils/githubApi'
 
 export interface ReleasesProps {
@@ -50,9 +51,9 @@ export default function Releases({ releases, sidebarPages }: ReleasesProps) {
               {t('releases.see_details')} ↗
             </Link>
             {release.body && (
-              <DocsArticle as='div'>
-                <Markdown>{release.body}</Markdown>
-              </DocsArticle>
+              <DocumentArticle className='mf-document-release'>
+                <Markdown options={{ wrapper: Fragment }}>{release.body}</Markdown>
+              </DocumentArticle>
             )}
           </Release>
         ))

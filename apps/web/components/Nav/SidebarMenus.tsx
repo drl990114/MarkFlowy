@@ -110,32 +110,29 @@ export const DocsSidebarMenu = () => {
 const MenuInner = styled.div`
   box-sizing: border-box;
   min-height: 100%;
-  padding: 0.75rem 0.75rem calc(1.5rem + env(safe-area-inset-bottom));
+  padding: 1.25rem 1rem calc(1.5rem + env(safe-area-inset-bottom));
 `
 
 const MenuHeader = styled.div`
   display: flex;
   align-items: center;
   width: 100%;
-  min-height: 2.375rem;
-  margin-bottom: 0.75rem;
-  padding: 0.5rem 0.625rem;
-  border: 1px solid var(--line-soft);
-  border-radius: 0.625rem;
-  background: color-mix(in srgb, var(--ink) 7%, transparent);
+  min-height: 2rem;
+  margin-bottom: 1rem;
+  padding: 0.375rem 0.5rem;
   box-sizing: border-box;
   overflow: hidden;
   color: var(--ink);
   font-family: var(--sans);
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
   line-height: 1.25rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 `
 
 const Section = styled.section`
-  margin-bottom: 0.25rem;
+  margin-bottom: 1.25rem;
 
   &:last-child {
     margin-bottom: 0;
@@ -145,19 +142,19 @@ const Section = styled.section`
 const SectionTitle = styled.div`
   display: flex;
   align-items: center;
-  min-height: 2.25rem;
-  padding: 0.5rem;
+  min-height: 2rem;
+  padding: 0.375rem 0.5rem;
   color: var(--ink);
   font-family: var(--sans);
   font-size: 0.8125rem;
-  font-weight: 500;
+  font-weight: 600;
   line-height: 1.25rem;
   text-wrap: pretty;
 `
 
 const MenuList = styled.ul`
   display: grid;
-  gap: 0.0625rem;
+  gap: 0.125rem;
   margin: 0 0 0.25rem 0.75rem;
   padding: 0 0 0 0.5rem;
   border-left: 1px solid var(--line-faint);
@@ -175,7 +172,7 @@ const MenuLink = styled(Link)<{ $isActive?: boolean }>`
   min-height: 2rem;
   margin: 0;
   padding: 0.375rem 0.5rem;
-  border-radius: 0.5rem;
+  border-radius: 0.375rem;
   box-sizing: border-box;
   color: var(--ink-mute);
   font-family: var(--body);
@@ -189,15 +186,13 @@ const MenuLink = styled(Link)<{ $isActive?: boolean }>`
     color 150ms ease;
 
   &:focus-visible {
-    outline: none;
-    text-decoration-line: underline;
-    text-underline-offset: 2px;
-    opacity: 0.8;
+    outline: 2px solid var(--seal);
+    outline-offset: 2px;
   }
 
   @media (hover: hover) and (pointer: fine) {
     &:hover {
-      background: color-mix(in srgb, var(--ink) 5%, transparent);
+      background: color-mix(in srgb, var(--seal) 5%, transparent);
       color: var(--seal);
     }
   }
@@ -205,8 +200,8 @@ const MenuLink = styled(Link)<{ $isActive?: boolean }>`
   ${({ $isActive }) =>
     $isActive &&
     css`
-      background: color-mix(in srgb, var(--ink) 9%, transparent);
-      color: var(--ink);
+      background: color-mix(in srgb, var(--seal) 9%, transparent);
+      color: var(--seal);
       font-weight: 500;
     `}
 

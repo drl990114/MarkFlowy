@@ -20,12 +20,12 @@ export const Content = styled.div<{
 }>`
   box-sizing: border-box;
   font-family: var(--body);
-  margin: 0;
+  margin: 0 auto;
+  min-width: 0;
   width: 100%;
   min-height: ${(props) => (props.$footer ? '0' : `calc(100vh - ${rem(footerHeight)})`)};
-  max-width: ${(props) => (props.$hero ? '100ch' : '64rem')};
-  padding: ${(props) => (props.$footer ? '0' : '8rem 3rem 3rem')};
-  transition: transform 150ms ease-out;
+  max-width: ${(props) => (props.$hero ? '100ch' : '54rem')};
+  padding: ${(props) => (props.$footer ? '0' : '8rem 3rem 5rem')};
 
   @layer base {
     p,
@@ -35,8 +35,7 @@ export const Content = styled.div<{
   }
 
   ${mobile(css`
-    max-width: 100%;
-    padding: 7rem 1.5rem 2rem;
+    padding: 7rem 1.5rem 3rem;
     transform: none;
   `)};
 
@@ -44,11 +43,12 @@ export const Content = styled.div<{
     p.$hasTableOfContents &&
     css`
       width: calc(100% - 15rem);
-      max-width: 72rem;
+      margin-left: max(0px, calc((100% - 69rem) / 2));
+      margin-right: 15rem;
 
       @media (max-width: 75.999rem) {
         width: 100%;
-        max-width: none;
+        margin-inline: auto;
       }
     `};
 
@@ -62,13 +62,13 @@ export const Content = styled.div<{
 
 export const Title = styled.h1`
   width: 100%;
-  margin: 0 0 1.5rem;
+  margin: 0 0 1rem;
   color: var(--ink);
   font-family: var(--sans);
-  font-size: clamp(2rem, 3vw, 2.75rem);
-  font-weight: 550;
-  letter-spacing: -0.025em;
-  line-height: 1.2;
+  font-size: clamp(2rem, 3vw, 3rem);
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 1.15;
   text-align: left;
   text-wrap: balance;
 

@@ -20,6 +20,7 @@ export default function Documentation() {
       title={t('docs.sidebar.gettingStarted')}
       description={t('docs.content.description', { defaultValue: t('common.docs') })}
     >
+      <Description>{t('docs.content.description', { defaultValue: t('common.docs') })}</Description>
       <Row>
         {keys.map((key) => {
           const section = sections[key]
@@ -33,6 +34,7 @@ export default function Documentation() {
                     <DocumentItem key={slug}>
                       <DocumentLink href={`/docs${slug}`} locale={currentLocale}>
                         <DocumentTitle>{t(`fileTitle.${title}`)}</DocumentTitle>
+                        <span aria-hidden='true'>→</span>
                       </DocumentLink>
                     </DocumentItem>
                   )
@@ -46,11 +48,20 @@ export default function Documentation() {
   )
 }
 
+const Description = styled.p`
+  max-width: 38rem;
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 1.0625rem;
+  line-height: 1.75;
+  text-wrap: pretty;
+`
+
 const Row = styled.ul`
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem;
-  margin: 2rem 0 4rem;
+  gap: 1.25rem;
+  margin: 2.5rem 0 0;
   padding: 0;
   list-style: none;
 
@@ -65,19 +76,19 @@ const Row = styled.ul`
 
 const Column = styled.li`
   min-width: 0;
-  padding: 1rem;
+  padding: 1.25rem;
   border: 1px solid var(--line-soft);
   border-radius: 0.75rem;
-  background: color-mix(in srgb, var(--ink) 4%, transparent);
+  background: var(--paper);
 `
 
 const SectionTitle = styled.h2`
-  margin: 0 0 0.625rem;
+  margin: 0 0 0.875rem;
   color: var(--ink);
   font-family: var(--sans);
-  font-size: 0.9375rem;
-  font-weight: 500;
-  line-height: 1.375rem;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.5rem;
   text-wrap: balance;
 `
 
@@ -96,15 +107,17 @@ const DocumentItem = styled.li`
 const DocumentLink = styled(Link)`
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
   width: 100%;
-  min-height: 2rem;
+  min-height: 2.5rem;
   margin: 0;
-  padding: 0.375rem 0.5rem;
-  border-radius: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 0.375rem;
   box-sizing: border-box;
   color: var(--ink-mute);
   font-family: var(--body);
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
   font-weight: 400;
   line-height: 1.25rem;
   text-decoration: none;
@@ -114,16 +127,14 @@ const DocumentLink = styled(Link)`
     color 150ms ease;
 
   &:focus-visible {
-    outline: none;
-    text-decoration-line: underline;
-    text-underline-offset: 2px;
-    opacity: 0.8;
+    outline: 2px solid var(--seal);
+    outline-offset: 2px;
   }
 
   @media (hover: hover) and (pointer: fine) {
     &:hover {
-      background: color-mix(in srgb, var(--ink) 5%, transparent);
-      color: var(--ink);
+      background: color-mix(in srgb, var(--seal) 5%, transparent);
+      color: var(--seal);
     }
   }
 
@@ -134,9 +145,7 @@ const DocumentLink = styled(Link)`
 
 const DocumentTitle = styled.span`
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 `
 
 export const getStaticProps: GetStaticProps = async ({ locale }) => {

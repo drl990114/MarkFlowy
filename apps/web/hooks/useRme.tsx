@@ -8,7 +8,6 @@ let rmeModulePromise: Promise<any> | null = null
 export interface RmeModule {
   ThemeProvider: any
   Editor: any
-  WysiwygThemeWrapper: any
   EditorViewType: {
     WYSIWYG: string
     SOURCE_CODE: string
@@ -109,18 +108,5 @@ export const useRmeEditor = () => {
       loading,
       error,
     ],
-  )
-}
-
-// Hook: 获取RME WysiwygThemeWrapper
-export const useRmeWrapper = () => {
-  const { rmeModule, loading, error } = useRme()
-  return useMemo(
-    () => ({
-      WysiwygThemeWrapper: rmeModule?.WysiwygThemeWrapper,
-      loading,
-      error,
-    }),
-    [rmeModule?.WysiwygThemeWrapper, loading, error],
   )
 }

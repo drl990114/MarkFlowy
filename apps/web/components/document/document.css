@@ -1,0 +1,327 @@
+/* Shared by Contentlayer HTML and Markdown JSX. The workspace editor owns its typography. */
+.mf-document {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding-bottom: 3rem;
+  color: var(--ink-soft);
+  font-family: var(--body);
+  font-size: 1rem;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+
+.mf-document :is(h1, h2, h3, h4, h5, h6) {
+  color: var(--ink);
+  font-family: var(--sans);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+.mf-document h1 {
+  margin: 0 0 1.25rem;
+  font-size: clamp(2rem, 3vw, 2.625rem);
+  line-height: 1.2;
+  letter-spacing: -0.04em;
+}
+
+.mf-document h2 {
+  margin: 3rem 0 1rem;
+  padding-top: 1.75rem;
+  border-top: 1px solid var(--line-soft);
+  font-size: 1.5rem;
+  line-height: 1.35;
+}
+
+.mf-document h3 {
+  margin: 2rem 0 0.75rem;
+  font-size: 1.125rem;
+  line-height: 1.5;
+  letter-spacing: -0.015em;
+}
+
+.mf-document :is(h4, h5, h6) {
+  margin: 1.75rem 0 0.5rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  letter-spacing: 0;
+}
+
+.mf-document :is(h1, h2, h3, h4, h5, h6)[id] {
+  scroll-margin-top: calc(var(--mf-site-header-height, 76px) + 28px);
+}
+
+.mf-document :is(p, ul, ol, blockquote, pre, table, figure, details) {
+  margin: 1.25rem 0;
+}
+
+.mf-document > h1 + p {
+  margin-top: 0;
+  color: var(--ink-mute);
+  font-size: 1.125rem;
+  line-height: 1.75;
+}
+
+.mf-document :is(ul, ol) {
+  padding-left: 1.5rem;
+}
+
+.mf-document li {
+  padding-left: 0.25rem;
+  margin: 0.5rem 0;
+}
+
+.mf-document li::marker {
+  color: var(--ink-faint);
+}
+
+.mf-document li :is(ul, ol, p) {
+  margin-block: 0.5rem;
+}
+
+.mf-document a {
+  color: var(--seal);
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--seal) 32%, transparent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition:
+    color 150ms ease,
+    text-decoration-color 150ms ease;
+}
+
+.mf-document :is(a, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--seal);
+  outline-offset: 4px;
+  border-radius: 3px;
+}
+
+.mf-document :is(strong, b) {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.mf-document :is(code, kbd, samp, pre) {
+  font-family: var(--mono);
+  font-variant-ligatures: none;
+}
+
+.mf-document :not(pre) > code {
+  padding: 0.125em 0.35em;
+  border: 1px solid var(--line-soft);
+  border-radius: 4px;
+  background: var(--paper-warm);
+  color: var(--ink);
+  font-size: 0.85em;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.mf-document a > code {
+  color: inherit;
+}
+
+.mf-document pre {
+  max-width: 100%;
+  padding: 1.25rem 1.5rem;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--paper-warm);
+  color: var(--ink);
+  font-size: 0.8125rem;
+  line-height: 1.75;
+  tab-size: 2;
+  overscroll-behavior-x: contain;
+}
+
+.mf-document pre code {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  overflow-wrap: normal;
+  white-space: pre;
+}
+
+.mf-document kbd {
+  display: inline-block;
+  min-width: 1.5em;
+  padding: 0.05em 0.4em;
+  border: 1px solid var(--line);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  background: var(--surface-raised);
+  color: var(--ink-soft);
+  font-size: 0.8em;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.mf-document blockquote {
+  padding: 1rem 1.25rem;
+  border-left: 3px solid var(--seal);
+  border-radius: 0 8px 8px 0;
+  background: color-mix(in srgb, var(--seal) 5%, var(--paper));
+  color: var(--ink-soft);
+  font-size: 0.9375rem;
+}
+
+.mf-document blockquote > :first-child {
+  margin-top: 0;
+}
+
+.mf-document blockquote > :last-child {
+  margin-bottom: 0;
+}
+
+.mf-document table {
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  line-height: 1.65;
+  overscroll-behavior-x: contain;
+}
+
+.mf-document :is(th, td) {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--line-soft);
+  text-align: left;
+  vertical-align: top;
+}
+
+.mf-document th {
+  background: var(--paper-warm);
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 0.8125rem;
+}
+
+.mf-document tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.mf-document tbody tr:nth-child(even) {
+  background: color-mix(in srgb, var(--paper-warm) 45%, var(--paper));
+}
+
+.mf-document :is(img, video) {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+.mf-document figure {
+  margin-inline: 0;
+}
+
+.mf-document figcaption {
+  margin-top: 0.75rem;
+  color: var(--ink-mute);
+  font-size: 0.8125rem;
+  text-align: center;
+}
+
+.mf-document hr {
+  margin: 2.5rem 0;
+  border: 0;
+  border-top: 1px solid var(--line-soft);
+}
+
+.mf-document hr + h2 {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.mf-document .task-list-item,
+.mf-document li:has(> input[type='checkbox']) {
+  list-style: none;
+}
+
+.mf-document input[type='checkbox'] {
+  width: 0.9375rem;
+  height: 0.9375rem;
+  margin: 0 0.5rem 0 -1.375rem;
+  accent-color: var(--seal);
+  vertical-align: -0.125em;
+}
+
+.mf-document details {
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.mf-document summary {
+  color: var(--ink);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.mf-document summary::marker {
+  color: var(--ink-faint);
+}
+
+.mf-document > :first-child {
+  margin-top: 0;
+}
+
+.mf-document > h2:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.mf-document > :last-child {
+  margin-bottom: 0;
+}
+
+.mf-document-release {
+  padding-block: 1.5rem 0;
+  font-size: 0.9375rem;
+}
+
+.mf-document-release h1 {
+  font-size: 1.75rem;
+}
+
+.mf-document-release h2 {
+  font-size: 1.25rem;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .mf-document a:hover {
+    color: var(--ink);
+    text-decoration-color: var(--seal);
+  }
+}
+
+@media (max-width: 40rem) {
+  .mf-document h2 {
+    margin-top: 2.5rem;
+    font-size: 1.375rem;
+  }
+
+  .mf-document pre {
+    padding: 1rem;
+  }
+
+  .mf-document :is(th, td) {
+    padding: 0.625rem 0.75rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mf-document a {
+    transition: none;
+  }
+}

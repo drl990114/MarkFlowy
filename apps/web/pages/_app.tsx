@@ -14,6 +14,7 @@ import '../components/theme.css'
 import '../components/site/site.css'
 import '../components/site/home-motion.css'
 import '../components/site/project-stats.css'
+import '../components/document/document.css'
 import '../components/workspace/app.css'
 
 function MyApp({ Component, pageProps, router }: AppProps) {
