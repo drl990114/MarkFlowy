@@ -2,6 +2,7 @@ import { commandRegistry } from '@/commands'
 import SideBar from '@/components/SideBar'
 import { scheduleActiveEditorFocus } from '@/components/EditorArea/focusActiveEditor'
 import EditorArea from '@/components/EditorArea'
+import { isSingleDocumentLayout } from '@/components/EditorArea/documentLayout'
 import { scheduleDockFocus } from '@/components/SideBar/DockSwitcher'
 import RightBar from '@/components/SideBar/RightBar'
 import StatusBar from '@/components/StatusBar'
@@ -42,6 +43,9 @@ const RIGHT_DOCK_LABEL_KEYS = {
 
 function Root() {
   const rootPath = useEditorStore((state) => state.folderData?.[0]?.path)
+  const singleDocument = useEditorStore((state) =>
+    isSingleDocumentLayout(state.folderData?.[0]?.path, state.editorLayout),
+  )
   useLayoutEffect(() => {
     useLayoutStore.getState().setWorkspaceContext(Boolean(rootPath))
   }, [rootPath])
@@ -207,7 +211,10 @@ function Root() {
   }, [])
 
   return (
-    <RootPageLayout data-mf-zen-mode={zenModeActive ? '' : undefined}>
+    <RootPageLayout
+      data-mf-single-document={singleDocument ? '' : undefined}
+      data-mf-zen-mode={zenModeActive ? '' : undefined}
+    >
       <WorkspaceOpenError />
       <Group
         disabled={zenModeActive}

@@ -1,5 +1,6 @@
-import { fireEvent, render, screen } from '@testing-library/react'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import useContextMenuStore, { type IShowContextMenuParams } from '@/stores/useContextMenuStore'
 import { AppMenuButton } from '../TitleBar/AppMenuButton'
 import { CenterMenu } from './SettingBtn'
 
@@ -41,7 +42,13 @@ describe('application menu', () => {
   beforeEach(() => {
     settingMenuTestState.setThemeMode.mockReset()
     settingMenuTestState.showContextMenu.mockReset()
+    useContextMenuStore.getState().hide()
+    settingMenuTestState.showContextMenu.mockImplementation((params: IShowContextMenuParams) => {
+      useContextMenuStore.getState().show(params)
+    })
   })
+
+  afterEach(cleanup)
 
   it('exposes the migrated application menu from the title bar', () => {
     render(<AppMenuButton />)
@@ -108,5 +115,30 @@ describe('application menu', () => {
         y: 98,
       }),
     )
+  })
+
+  it('marks only the owning menu trigger expanded until the menu closes or is replaced', () => {
+    render(<CenterMenu />)
+    const trigger = screen.getByRole('button', { name: 'Settings' })
+
+    expect(trigger.getAttribute('aria-expanded')).toBe('false')
+
+    fireEvent.click(trigger)
+    expect(trigger.getAttribute('aria-expanded')).toBe('true')
+
+    act(() => useContextMenuStore.getState().hide())
+    expect(trigger.getAttribute('aria-expanded')).toBe('false')
+
+    fireEvent.click(trigger)
+    expect(trigger.getAttribute('aria-expanded')).toBe('true')
+
+    act(() => {
+      useContextMenuStore.getState().show({
+        items: [{ label: 'Editor action', value: 'editor-action' }],
+        x: 200,
+        y: 200,
+      })
+    })
+    expect(trigger.getAttribute('aria-expanded')).toBe('false')
   })
 })

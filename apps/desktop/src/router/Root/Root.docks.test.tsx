@@ -39,7 +39,10 @@ vi.mock('@/extensions/command-palette/CommandPaletteDialog', () => ({ CommandPal
 vi.mock('@/i18n', () => ({ useTranslation: () => ({ t: (key: string) => key }) }))
 vi.mock('@/services/editor-file', () => ({ ensureDocument: vi.fn() }))
 vi.mock('@/stores', () => ({ useEditorStore: Object.assign(
-  (selector: (state: unknown) => unknown) => selector({ folderData: context.rootPath ? [{ path: context.rootPath }] : null }),
+  (selector: (state: unknown) => unknown) => selector({
+    folderData: context.rootPath ? [{ path: context.rootPath }] : null,
+    editorLayout: { type: 'leaf', opened: ['editor'] },
+  }),
   { getState: () => ({ activeId: 'editor' }), subscribe: () => () => {} },
 ) }))
 vi.mock('zens', () => ({ toast: { info: vi.fn() } }))
