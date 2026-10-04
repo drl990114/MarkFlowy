@@ -1,5 +1,6 @@
 import { useTranslation } from 'next-i18next'
 import Image from 'next/image'
+import homeScreenshot from '../../public/screenshots/home.png'
 import Reveal from './Reveal'
 
 export default function Preview() {
@@ -9,7 +10,7 @@ export default function Preview() {
       <div className='mf-preview-frame'>
         <Image
           className='mf-preview-screenshot'
-          src='/screenshots/home.png'
+          src={homeScreenshot}
           alt={t('site.preview.screenshotAlt')}
           width={3456}
           height={2304}

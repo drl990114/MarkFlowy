@@ -1,6 +1,8 @@
 import { useTranslation } from 'next-i18next'
 import Image from 'next/image'
 import Link from 'next/link'
+import aiScreenshot from '../public/screenshots/ai.png'
+import sourcecodeScreenshot from '../public/screenshots/sourcecode.png'
 import SiteArrow from './site/Arrow'
 import Reveal from './site/Reveal'
 import { MotionScene } from './site/HomeMotion'
@@ -33,7 +35,7 @@ export default function FeatureList() {
             </div>
             <div className='mf-feature-visual'>
               <Image
-                src='/screenshots/sourcecode.png'
+                src={sourcecodeScreenshot}
                 alt={t('site.features.write.alt')}
                 width={3456}
                 height={2304}
@@ -82,7 +84,7 @@ export default function FeatureList() {
             </div>
             <div className='mf-feature-visual'>
               <Image
-                src='/screenshots/ai.png'
+                src={aiScreenshot}
                 alt={t('site.features.ai.alt')}
                 width={3456}
                 height={2304}
