@@ -98,6 +98,13 @@ function MenuItems({
     }
 
     const menuItem = item as DesktopMenuGroupType
+    const Icon = menuItem.icon
+    const checkedIcon = menuItem.checked ? menuItem.checkedIcon : undefined
+    const icon = (
+      <span className='flex size-3.5 shrink-0 items-center justify-center' aria-hidden='true'>
+        {checkedIcon ?? (Icon ? <Icon aria-hidden='true' size={14} strokeWidth={1.75} /> : null)}
+      </span>
+    )
     const label = <span className='min-w-0 flex-1 truncate'>{menuItem.label}</span>
     const shortcut = <MenuShortcut commandId={menuItem.commandId} shortcut={menuItem.shortcut} />
 
@@ -105,7 +112,7 @@ function MenuItems({
       return (
         <ContextMenuSub key={`${key}-${menuItem.value}`}>
           <ContextMenuSubTrigger disabled={menuItem.disabled}>
-            <span className='size-3.5 shrink-0' aria-hidden='true' />
+            {icon}
             {label}
             {shortcut}
           </ContextMenuSubTrigger>
@@ -124,10 +131,14 @@ function MenuItems({
       return (
         <ContextMenuCheckboxItem
           checked={menuItem.checked}
+          className={checkedIcon ? '[&_[data-slot=context-menu-item-indicator]]:hidden' : undefined}
           disabled={menuItem.disabled}
           key={`${key}-${menuItem.value}`}
           onSelect={() => onAction(menuItem.handler)}
         >
+          {checkedIcon || (Icon && !menuItem.checked) ? (
+            <span className='absolute left-2'>{icon}</span>
+          ) : null}
           {label}
           {shortcut}
         </ContextMenuCheckboxItem>
@@ -140,7 +151,7 @@ function MenuItems({
         key={`${key}-${menuItem.value}`}
         onSelect={() => onAction(menuItem.handler)}
       >
-        <span className='size-3.5 shrink-0' aria-hidden='true' />
+        {icon}
         {label}
         {shortcut}
       </ContextMenuItem>

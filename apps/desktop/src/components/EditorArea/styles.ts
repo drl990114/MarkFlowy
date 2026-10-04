@@ -212,7 +212,6 @@ export const TabItem = styled.div<TabItemProps>`
     position: absolute;
     margin: 0;
     pointer-events: none;
-    background: currentColor;
   }
 
   &:hover,

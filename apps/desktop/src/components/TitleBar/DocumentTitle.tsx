@@ -68,7 +68,7 @@ function DocumentTitleActions({ file, dirty }: { file: IFile; dirty: boolean }) 
           <TooltipContent>{t('contextmenu.explorer.rename')}</TooltipContent>
         </Tooltip>
       )}
-      <span className='w-2 shrink-0 text-ui-caption'>{dirty ? '•' : null}</span>
+      <span className='w-2 shrink-0 text-ui-caption text-warning'>{dirty ? '•' : null}</span>
       <Tooltip>
         <TooltipTrigger asChild>
           <Button

@@ -11,6 +11,7 @@ import { writeSettingData } from '@/services/app-setting'
 import { dialog } from '@/services/dialog'
 import { useEditorStateStore, useEditorStore } from '@/stores'
 import useAppSettingStore from '@/stores/useAppSettingStore'
+import type { DesktopMenuItemData } from '@/stores/useContextMenuStore'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
 import useFileTextDirectionStore, {
@@ -21,8 +22,18 @@ import { invoke } from '@tauri-apps/api/core'
 import { debounce } from 'lodash'
 import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from '@/i18n'
-import { SlidersHorizontalIcon } from 'lucide-react'
-import { isDivider, Space, toast, type MenuItemData } from 'zens'
+import {
+  ArrowLeftRightIcon,
+  BinaryIcon,
+  BookmarkIcon,
+  EyeIcon,
+  FileOutputIcon,
+  HistoryIcon,
+  InfoIcon,
+  LanguagesIcon,
+  SlidersHorizontalIcon,
+} from 'lucide-react'
+import { isDivider, Space, toast } from 'zens'
 import { EditorAreaActionButton } from '../../EditorAreaAction'
 import { createPdfPrintMenuItem } from '../../pdf-print/pdfPrintMenuItem'
 import { createPandocExportMenuItem } from '../../pandoc-export/pandocExportMenuItem'
@@ -55,11 +66,11 @@ export interface MenuListProps {
   /** 是否显示文本转换 */
   showConvertText?: boolean
   /** 自定义菜单项 */
-  customItems?: MenuItemData[]
+  customItems?: DesktopMenuItemData[]
   /** 在标准菜单项之前插入的菜单项 */
-  prependItems?: MenuItemData[]
+  prependItems?: DesktopMenuItemData[]
   /** 在标准菜单项之后插入的菜单项 */
-  appendItems?: MenuItemData[]
+  appendItems?: DesktopMenuItemData[]
 }
 
 export const MenuList = memo((props: MenuListProps) => {
@@ -150,7 +161,7 @@ export const MenuList = memo((props: MenuListProps) => {
     [getEditorContent, targetEditorId],
   )
 
-  const buildMenuItems = useCallback((): MenuItemData[] => {
+  const buildMenuItems = useCallback((): DesktopMenuItemData[] => {
     const latestFile = targetEditorId ? getFileObject(targetEditorId) : undefined
     const latestFileName = latestFile?.name || fileName
     const latestFilePath = latestFile?.path || filePath
@@ -159,7 +170,7 @@ export const MenuList = memo((props: MenuListProps) => {
     const { findMark } = useBookMarksStore.getState()
     const curBookMark = findMark(latestFilePath || '')
 
-    const items: MenuItemData[] = []
+    const items: DesktopMenuItemData[] = []
 
     // 前置自定义项
     if (prependItems?.length) {
@@ -169,7 +180,7 @@ export const MenuList = memo((props: MenuListProps) => {
 
     const appendViewItems = () => {
       // 视图切换和显示选项收在同一个子菜单中。
-      const viewItems: MenuItemData[] = []
+      const viewItems: DesktopMenuItemData[] = []
       if (showViewSwitcher) {
         viewItems.push(
           ...[
@@ -229,6 +240,7 @@ export const MenuList = memo((props: MenuListProps) => {
         items.push({
           label: t('view.label'),
           value: 'view_switcher',
+          icon: EyeIcon,
           children: viewItems,
         })
       } else {
@@ -248,6 +260,7 @@ export const MenuList = memo((props: MenuListProps) => {
         items.push({
           label: t('settings.editor.behavior.text_direction.label'),
           value: 'text_direction',
+          icon: ArrowLeftRightIcon,
           children: [
             {
               label: t('settings.editor.behavior.text_direction.follow_global'),
@@ -276,6 +289,7 @@ export const MenuList = memo((props: MenuListProps) => {
         items.push({
           label: t('file.info'),
           value: 'file_info',
+          icon: InfoIcon,
           handler: async () => {
             let latestFileNormalInfo = fileNormalInfo
             const infoFilePath = targetEditorId
@@ -329,6 +343,7 @@ export const MenuList = memo((props: MenuListProps) => {
         items.push({
           label: `${t('text_encoding.label')}${encoding}`,
           value: 'text_encoding',
+          icon: BinaryIcon,
           handler: () => setEncodingFileId(targetEditorId),
         })
       }
@@ -336,6 +351,7 @@ export const MenuList = memo((props: MenuListProps) => {
       items.push({
         label: t('history.title'),
         value: 'history',
+        icon: HistoryIcon,
         handler: () => openLocalHistory(targetEditorId),
       })
 
@@ -344,6 +360,15 @@ export const MenuList = memo((props: MenuListProps) => {
         items.push({
           label: t('action.bookmark'),
           value: 'BookMark',
+          icon: BookmarkIcon,
+          checkedIcon: (
+            <BookmarkIcon
+              aria-hidden='true'
+              className='fill-current text-warning'
+              size={14}
+              strokeWidth={1.75}
+            />
+          ),
           checked: curBookMark !== undefined,
           handler: () => {
             if (curBookMark) {
@@ -372,7 +397,7 @@ export const MenuList = memo((props: MenuListProps) => {
       }
 
       if (showExport) {
-        const exportItems: MenuItemData[] = [
+        const exportItems: DesktopMenuItemData[] = [
           {
             value: 'export_html',
             label: t('contextmenu.editor_tab.export_html'),
@@ -396,6 +421,7 @@ export const MenuList = memo((props: MenuListProps) => {
         }
         items.push({
           value: 'export',
+          icon: FileOutputIcon,
           label: t('settings.export.label'),
           children: exportItems,
         })
@@ -406,6 +432,7 @@ export const MenuList = memo((props: MenuListProps) => {
         items.push({
           label: t('action.convert_text'),
           value: 'convert_text',
+          icon: LanguagesIcon,
           children: [
             {
               label: t('action.convert_simplified_to_traditional_tw'),
