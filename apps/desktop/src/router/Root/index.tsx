@@ -23,6 +23,7 @@ import type { PanelImperativeHandle } from 'react-resizable-panels'
 import { Group, Panel } from 'react-resizable-panels'
 import { toast } from 'zens'
 import { RootPageLayout, StyleSeparator } from './styles'
+import { useStatusBarReveal } from './useStatusBarReveal'
 import { ZenModeHint } from './ZenModeHint'
 import { WorkspaceOpenError } from '@/components/WorkspaceOpenError'
 import {
@@ -56,6 +57,7 @@ function Root() {
   const leftDockVisible = useLayoutStore((state) => state.leftBar.visible)
   const rightDockVisible = useLayoutStore((state) => state.rightBar.visible)
   const zenModeActive = useLayoutStore((state) => state.zenModeActive)
+  const statusBarRef = useStatusBarReveal(singleDocument && !zenModeActive)
   const leftPanelRef = useRef<PanelImperativeHandle>(null)
   const rightPanelRef = useRef<PanelImperativeHandle>(null)
   const applyingDockLayoutRef = useRef(false)
@@ -297,7 +299,7 @@ function Root() {
           <RightBar />
         </Panel>
       </Group>
-      <div className='app-status-bar'>
+      <div className='app-status-bar' ref={statusBarRef}>
         <StatusBar />
       </div>
       <ZenModeHint active={zenModeActive} />

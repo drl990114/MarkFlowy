@@ -22,35 +22,53 @@ export const RootPageLayout = styled(PageLayout)`
         }
 
         > .app-status-bar {
-          position: relative;
-          flex: 0 0 8px;
-          height: 8px;
+          position: absolute;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          height: var(--mf-ui-status-bar-height);
+          pointer-events: none;
 
-          /* Reserve a small hover strip below the editor's horizontal scrollbar.
-             Revealing the full toolbar must not resize the editor or its docks. */
+          /* Overlay the full-height editor and docks; observe pointer proximity
+             from Root so the hidden toolbar does not intercept editor input. */
           > [role='toolbar'] {
             position: absolute;
             top: auto;
             bottom: 0;
             opacity: 0;
             pointer-events: none;
-            transition: opacity var(--mf-motion-duration-fast, 120ms)
-              var(--mf-motion-ease-out, cubic-bezier(0.23, 1, 0.32, 1));
-
-            @media (prefers-reduced-motion: reduce) {
-              transition: none;
-            }
           }
 
-          &:hover > [role='toolbar'],
+          &[data-mf-status-bar-hover] > [role='toolbar'],
           &:focus-within > [role='toolbar'],
           &:has([aria-expanded='true']) > [role='toolbar'] {
             opacity: 1;
             pointer-events: auto;
           }
 
-          &:focus-within > [role='toolbar'] {
-            transition: none;
+          @media (prefers-reduced-motion: no-preference) {
+            > [role='toolbar'] {
+              transform: translateY(6px);
+              transition:
+                opacity var(--mf-motion-duration-fast, 100ms)
+                  var(--mf-motion-ease-out, cubic-bezier(0.23, 1, 0.32, 1)),
+                transform var(--mf-motion-duration-fast, 100ms)
+                  var(--mf-motion-ease-out, cubic-bezier(0.23, 1, 0.32, 1));
+            }
+
+            &[data-mf-status-bar-hover] > [role='toolbar'],
+            &:focus-within > [role='toolbar'],
+            &:has([aria-expanded='true']) > [role='toolbar'] {
+              transform: translateY(0);
+              transition-duration: var(--mf-motion-duration-overlay, 120ms),
+                var(--mf-motion-duration-base, 180ms);
+            }
+
+            /* Focus and open menus need their final position immediately. */
+            &:focus-within > [role='toolbar'],
+            &:has([aria-expanded='true']) > [role='toolbar'] {
+              transition: none;
+            }
           }
         }
       }
