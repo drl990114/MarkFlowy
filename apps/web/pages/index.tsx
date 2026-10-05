@@ -15,6 +15,7 @@ import Preview from '../components/site/Preview'
 import ProjectStats from '../components/site/ProjectStats'
 import Reveal from '../components/site/Reveal'
 import Ribbon from '../components/site/Ribbon'
+import SingleFile from '../components/site/SingleFile'
 import Workflow from '../components/site/Workflow'
 import { useSystemType } from '../hooks/useSystemType'
 import { loadContributors, type Contributor } from '../utils/contributors'
@@ -86,6 +87,7 @@ export default function Index({
             </figure>
           </div>
         </section>
+        <SingleFile />
         <FeatureList />
         <Workflow />
         <ProjectStats stats={projectStats} />

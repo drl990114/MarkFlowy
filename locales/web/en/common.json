@@ -207,11 +207,31 @@
       "platforms": "Made for the way you work"
     },
     "preview": {
-      "eyebrow": "A SPACE FOR YOUR WORDS",
-      "title": "Less between you and your next idea.",
-      "description": "Your files, editor, and document outline in one window. From quick notes to longer drafts, give your ideas room to grow.",
-      "note": "MarkFlowy desktop screenshot · Light mode",
+      "eyebrow": "YOUR LOCAL WORKSPACE",
+      "title": "A folder for everything taking shape.",
+      "description": "Open a local folder to bring notes, drafts, and project files together. Browse your files, follow the document outline, and keep writing in the same window.",
+      "note": "MarkFlowy Desktop · Local workspace",
       "screenshotAlt": "MarkFlowy desktop in light mode, showing local files, the visual editor, and document outline"
+    },
+    "singleFile": {
+      "eyebrow": "SINGLE-FILE MODE",
+      "title": "One file. Your full attention.",
+      "description": "Open a Markdown file and start writing. No workspace setup required, with the same editor tools ready when you need them.",
+      "open": {
+        "title": "Open a file and begin",
+        "body": "Work directly with a local document, or start a new note and save it where it belongs."
+      },
+      "focus": {
+        "title": "Keep the page quiet",
+        "body": "A compact title bar leaves room for your words. Click the document name to rename it."
+      },
+      "grow": {
+        "title": "Add a folder when you need one",
+        "body": "Open a local folder when one note becomes a project. Your familiar writing tools come with you."
+      },
+      "link": "Explore single-file writing",
+      "note": "MarkFlowy Desktop · Single-file mode",
+      "screenshotAlt": "MarkFlowy Desktop in single-file mode, with a Markdown document and its filename in the compact title bar"
     },
     "features": {
       "eyebrow": "THOUGHTFULLY CONNECTED",
@@ -248,17 +268,17 @@
       "title": "One space. Your whole writing flow.",
       "capture": {
         "title": "Catch the thought.",
-        "body": "Open a local folder and start a note. Ordinary files, ready whenever inspiration arrives.",
+        "body": "Open a single file for a quick thought, or a folder for a larger project. Start writing without importing your notes.",
         "visual": "Capture an idea"
       },
       "refine": {
         "title": "Find the right words.",
-        "body": "Shape the structure, edit visually, or work in source mode. Bring in AI only when it helps.",
+        "body": "Use headings and the outline to shape your draft. Switch between visual and source editing, with optional AI for summaries and translation.",
         "visual": "Refine your draft"
       },
       "share": {
         "title": "Take it with you.",
-        "body": "Keep the Markdown source or export your work. Your writing belongs wherever you need it.",
+        "body": "Keep your Markdown files, export HTML or an image, or save a PDF through the system print dialog. Take your writing wherever it needs to go.",
         "visual": "Ready to share"
       }
     },

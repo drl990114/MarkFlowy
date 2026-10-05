@@ -12,9 +12,7 @@ export default function Preview() {
           className='mf-preview-screenshot'
           src={homeScreenshot}
           alt={t('site.preview.screenshotAlt')}
-          width={3456}
-          height={2304}
-          sizes='(max-width: 639px) calc(100vw - 40px), (max-width: 939px) calc(100vw - 64px), (max-width: 1184px) calc((100vw - 64px) * 0.667 - 11px), 736px'
+          sizes='(max-width: 639px) calc(100vw - 40px), (max-width: 939px) calc(100vw - 64px), (max-width: 1184px) calc((100vw - 96px) * 2 / 3), 726px'
         />
       </div>
     </Reveal>
