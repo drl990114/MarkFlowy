@@ -1,11 +1,9 @@
 use clap::Parser;
 use serde_json::{Map, Value};
-use std::{process::Command, thread::sleep, time::Duration};
+use std::{io, path::Path, process::Command};
 use toml;
 
 use crate::utils;
-use std::fs;
-use std::time::SystemTime;
 
 #[derive(Parser)]
 #[command(about = "bump the version of the project")]
@@ -38,8 +36,22 @@ fn get_old_version() -> String {
     return package.version;
 }
 
-fn write_new_version(new_version: String) {
+fn update_cargo_lock(workspace: &Path) -> io::Result<()> {
+    let status = Command::new("cargo")
+        .args(["update", "--workspace", "--offline"])
+        .current_dir(workspace)
+        .status()?;
 
+    if !status.success() {
+        return Err(io::Error::other(format!(
+            "Cargo.lock update failed with {status}"
+        )));
+    }
+
+    Ok(())
+}
+
+fn write_new_version(new_version: String) {
     let package_str = std::fs::read_to_string(PACKAGEFILE_URL).unwrap();
     let crates_str = std::fs::read_to_string(CRATESFILE_URL).unwrap();
 
@@ -61,41 +73,14 @@ fn write_new_version(new_version: String) {
 
     std::io::stdin().read_line(&mut input).unwrap();
 
-    fn wait_for_cargo_lock_update() {
-        let cargo_lock_path = "Cargo.lock";
-        let initial_modified = fs::metadata(cargo_lock_path)
-            .unwrap()
-            .modified()
-            .unwrap();
-        
-        let max_wait = Duration::from_secs(10);
-        let start = SystemTime::now();
-        
-        loop {
-            if let Ok(metadata) = fs::metadata(cargo_lock_path) {
-                if let Ok(current_modified) = metadata.modified() {
-                    if current_modified > initial_modified {
-                        break;
-                    }
-                }
-            }
-            
-            if SystemTime::now().duration_since(start).unwrap() > max_wait {
-                println!("Warning: Cargo.lock update timeout after 10 seconds");
-                break;
-            }
-            
-            sleep(Duration::from_millis(100));
-        }
-    }
-
     if input.trim() == "y" {
         println!("Releasing version: {new_version}");
         std::fs::write(PACKAGEFILE_URL, new_package_str).unwrap();
         std::fs::write(CRATESFILE_URL, new_crates_str).unwrap();
-        
-        wait_for_cargo_lock_update();
-        
+
+        update_cargo_lock(Path::new("."))
+            .expect("failed to update Cargo.lock; aborting release before git operations");
+
         Command::new("git")
             .arg("add")
             .arg(".")
@@ -154,4 +139,88 @@ pub fn main(major: bool, minor: bool, patch: bool) {
     let new_version = utils::get_new_verion(old_version, major, minor, patch);
 
     write_new_version(new_version.clone());
+}
+
+#[cfg(test)]
+mod tests {
+    use super::update_cargo_lock;
+    use std::{
+        fs,
+        path::PathBuf,
+        process::Command,
+        time::{SystemTime, UNIX_EPOCH},
+    };
+
+    struct WorkspaceFixture(PathBuf);
+
+    impl WorkspaceFixture {
+        fn new() -> Self {
+            let nonce = SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_nanos();
+            let path =
+                std::env::temp_dir().join(format!("mfdev-release-{}-{nonce}", std::process::id()));
+            fs::create_dir(&path).unwrap();
+            let fixture = Self(path);
+            fs::create_dir_all(fixture.0.join("app/src")).unwrap();
+            fs::write(
+                fixture.0.join("Cargo.toml"),
+                "[workspace]\nresolver = \"2\"\nmembers = [\"app\"]\n",
+            )
+            .unwrap();
+            fs::write(fixture.0.join("app/src/lib.rs"), "").unwrap();
+            fs::write(
+                fixture.0.join("app/Cargo.toml"),
+                "[package]\nname = \"release-fixture\"\nversion = \"1.0.0\"\nedition = \"2021\"\n",
+            )
+            .unwrap();
+            fs::write(
+                fixture.0.join("Cargo.lock"),
+                "version = 4\n\n[[package]]\nname = \"release-fixture\"\nversion = \"0.1.0\"\n",
+            )
+            .unwrap();
+            fixture
+        }
+    }
+
+    impl Drop for WorkspaceFixture {
+        fn drop(&mut self) {
+            let _ = fs::remove_dir_all(&self.0);
+        }
+    }
+
+    #[test]
+    fn updates_lockfile_after_workspace_version_bump() {
+        let workspace = WorkspaceFixture::new();
+        update_cargo_lock(&workspace.0).unwrap();
+
+        let lockfile: toml::Value =
+            toml::from_str(&fs::read_to_string(workspace.0.join("Cargo.lock")).unwrap()).unwrap();
+        assert_eq!(lockfile["package"][0]["version"].as_str(), Some("1.0.0"));
+
+        let metadata = Command::new("cargo")
+            .args(["metadata", "--format-version", "1", "--locked", "--offline"])
+            .current_dir(&workspace.0)
+            .output()
+            .unwrap();
+        assert!(
+            metadata.status.success(),
+            "{}",
+            String::from_utf8_lossy(&metadata.stderr)
+        );
+    }
+
+    #[test]
+    fn fails_when_cargo_cannot_update_lockfile() {
+        let workspace = WorkspaceFixture::new();
+        let original_lockfile = fs::read(workspace.0.join("Cargo.lock")).unwrap();
+        fs::write(workspace.0.join("app/Cargo.toml"), "[package").unwrap();
+
+        assert!(update_cargo_lock(&workspace.0).is_err());
+        assert_eq!(
+            fs::read(workspace.0.join("Cargo.lock")).unwrap(),
+            original_lockfile
+        );
+    }
 }
