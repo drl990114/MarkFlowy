@@ -1,7 +1,7 @@
 ---
 seoTitle: "MarkFlowy Desktop: getting started and writing guide"
-description: "Get started with local Markdown files, visual and source editing, search, local history, themes, optional AI, and export in MarkFlowy Desktop."
-updatedAt: "2026-09-27"
+description: "Start with a single Markdown file or a local workspace, then explore visual and source editing, search, local history, themes, optional AI, and export in MarkFlowy Desktop."
+updatedAt: "2026-10-05"
 ---
 
 # Write with MarkFlowy
@@ -13,11 +13,21 @@ MarkFlowy is a local-first Markdown editor for macOS, Windows, and Linux. Open t
 ## Your first document
 
 1. Install the package for your operating system from [GitHub Releases](https://github.com/drl990114/MarkFlowy/releases/latest).
-2. Choose **Open File** for an individual document or **Open Folder** for a workspace. The folder button in the title bar also lists recent files and workspaces and can open a folder in a new window.
-3. Select a file in the explorer, or create a Markdown file. You can also edit text files such as TXT and JSON.
+2. Choose **Open File** for an individual document or **Open Folder** for a workspace. The open menu in the title bar also lists recent files and workspaces and can open a folder in a new window.
+3. Create a Markdown document, or select a file in the explorer if you opened a folder. You can also edit text files such as TXT and JSON.
 4. Write and press **Cmd/Ctrl + S** to save. Configure autosave and its interval under **Settings → General**.
 
 Your workspace uses ordinary files. You can choose your own backup and synchronization tools; local editing does not upload every document to a MarkFlowy cloud account.
+
+## Start with a single file
+
+For a quick note or a focused draft, open one Markdown file without opening a folder. MarkFlowy automatically uses a compact single-file layout, with no tab row taking space above your document. Click the document name to rename it, and keep using the same visual editing, source mode, local history, and export tools.
+
+![MarkFlowy Desktop in single-file mode, with a compact toolbar and the document name in the title bar](/screenshots/single-file.png)
+
+Open another document or split the editor when you need a reference beside your writing; tabs appear automatically. Choose **Open Folder** when you want a file tree and workspace search for a larger collection. There is no separate mode setting to configure.
+
+If the status bar is hidden while you write in single-file mode, move your pointer to the bottom edge of the window to reveal it and access the outline or bookmarks.
 
 ## Choose an editing mode
 

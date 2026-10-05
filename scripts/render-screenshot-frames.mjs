@@ -13,9 +13,9 @@ const screenshotWidth = 3024
 const screenshotHeight = 1898
 const left = (width - screenshotWidth) / 2
 const top = (height - screenshotHeight) / 2
-const radius = 20
+const radius = 40
 const rim = 8
-const views = ['home', 'sourcecode', 'darkmode', 'ai']
+const views = ['home', 'sourcecode', 'darkmode', 'ai', 'single-file']
 const svg = (body, w = width, h = height) =>
   Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">${body}</svg>`)
 

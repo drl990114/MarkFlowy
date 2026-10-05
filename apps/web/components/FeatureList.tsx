@@ -37,9 +37,7 @@ export default function FeatureList() {
               <Image
                 src={sourcecodeScreenshot}
                 alt={t('site.features.write.alt')}
-                width={3456}
-                height={2304}
-                sizes='(max-width: 639px) calc(100vw - 64px), (max-width: 650px) calc(100vw - 88px), (max-width: 1000px) calc(50vw - 80px), (max-width: 1184px) 58vw, 620px'
+                sizes='(max-width: 639px) calc(100vw - 42px), (max-width: 1000px) calc(50vw - 42px), (max-width: 1184px) calc((100vw - 284px) * 7 / 12 + 118px), 643px'
               />
             </div>
           </Reveal>
@@ -86,9 +84,7 @@ export default function FeatureList() {
               <Image
                 src={aiScreenshot}
                 alt={t('site.features.ai.alt')}
-                width={3456}
-                height={2304}
-                sizes='(max-width: 639px) calc(100vw - 64px), (max-width: 650px) calc(100vw - 88px), (max-width: 1000px) calc(50vw - 80px), (max-width: 1184px) 42vw, 440px'
+                sizes='(max-width: 639px) calc(100vw - 42px), (max-width: 1000px) calc(50vw - 42px), (max-width: 1184px) calc((100vw - 284px) * 5 / 12 + 78px), 453px'
               />
             </div>
           </Reveal>
