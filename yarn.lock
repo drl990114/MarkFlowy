@@ -14854,7 +14854,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dompurify@npm:^3.3.3, dompurify@npm:^3.4.15":
+"dompurify@npm:^3.3.3":
   version: 3.4.15
   resolution: "dompurify@npm:3.4.15"
   dependencies:
@@ -14863,6 +14863,18 @@ __metadata:
     "@types/trusted-types":
       optional: true
   checksum: 10/159f592307578405c5217ba40ab467d4ac35f23eb20abc7f32b85698b8c1aff92f71b00c80779f891a8e463edafab05d9a4db53052d5c67005240ac4fff7fc72
+  languageName: node
+  linkType: hard
+
+"dompurify@npm:^3.4.16":
+  version: 3.4.16
+  resolution: "dompurify@npm:3.4.16"
+  dependencies:
+    "@types/trusted-types": "npm:^2.0.7"
+  dependenciesMeta:
+    "@types/trusted-types":
+      optional: true
+  checksum: 10/a571d0e2bede4f739666afd640398a86854abd27c71ce0724910249e2fd2ca7ddb8098a9ab579d3a5b39058419af694421f8fe859a81fd6d8acda16019a8ab9d
   languageName: node
   linkType: hard
 
@@ -26532,7 +26544,7 @@ __metadata:
     css-loader: "npm:7.1.2"
     dayjs: "npm:^1.11.13"
     dedent: "npm:^1.7.0"
-    dompurify: "npm:^3.4.15"
+    dompurify: "npm:^3.4.16"
     esbuild: "npm:^0.28.2"
     esbuild-css-modules-plugin: "npm:^3.1.5"
     esbuild-decorators: "npm:^1.0.0"
