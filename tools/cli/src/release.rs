@@ -144,39 +144,33 @@ pub fn main(major: bool, minor: bool, patch: bool) {
 #[cfg(test)]
 mod tests {
     use super::update_cargo_lock;
-    use std::{
-        fs,
-        path::PathBuf,
-        process::Command,
-        time::{SystemTime, UNIX_EPOCH},
-    };
+    use std::{collections::HashSet, fs, process::Command, sync::Barrier, thread};
+    use tempfile::TempDir;
 
-    struct WorkspaceFixture(PathBuf);
+    struct WorkspaceFixture(TempDir);
 
     impl WorkspaceFixture {
         fn new() -> Self {
-            let nonce = SystemTime::now()
-                .duration_since(UNIX_EPOCH)
-                .unwrap()
-                .as_nanos();
-            let path =
-                std::env::temp_dir().join(format!("mfdev-release-{}-{nonce}", std::process::id()));
-            fs::create_dir(&path).unwrap();
-            let fixture = Self(path);
-            fs::create_dir_all(fixture.0.join("app/src")).unwrap();
+            let fixture = Self(
+                tempfile::Builder::new()
+                    .prefix("mfdev-release-")
+                    .tempdir()
+                    .unwrap(),
+            );
+            fs::create_dir_all(fixture.0.path().join("app/src")).unwrap();
             fs::write(
-                fixture.0.join("Cargo.toml"),
+                fixture.0.path().join("Cargo.toml"),
                 "[workspace]\nresolver = \"2\"\nmembers = [\"app\"]\n",
             )
             .unwrap();
-            fs::write(fixture.0.join("app/src/lib.rs"), "").unwrap();
+            fs::write(fixture.0.path().join("app/src/lib.rs"), "").unwrap();
             fs::write(
-                fixture.0.join("app/Cargo.toml"),
+                fixture.0.path().join("app/Cargo.toml"),
                 "[package]\nname = \"release-fixture\"\nversion = \"1.0.0\"\nedition = \"2021\"\n",
             )
             .unwrap();
             fs::write(
-                fixture.0.join("Cargo.lock"),
+                fixture.0.path().join("Cargo.lock"),
                 "version = 4\n\n[[package]]\nname = \"release-fixture\"\nversion = \"0.1.0\"\n",
             )
             .unwrap();
@@ -184,24 +178,56 @@ mod tests {
         }
     }
 
-    impl Drop for WorkspaceFixture {
-        fn drop(&mut self) {
-            let _ = fs::remove_dir_all(&self.0);
+    #[test]
+    fn parallel_workspaces_keep_files_and_cleanup_isolated() {
+        const WORKSPACES: usize = 16;
+        let barrier = Barrier::new(WORKSPACES);
+        let fixtures = thread::scope(|scope| {
+            let workers: Vec<_> = (0..WORKSPACES)
+                .map(|index| {
+                    let barrier = &barrier;
+                    scope.spawn(move || {
+                        barrier.wait();
+                        let fixture = WorkspaceFixture::new();
+                        fs::write(fixture.0.path().join("marker"), index.to_string()).unwrap();
+                        fixture
+                    })
+                })
+                .collect();
+            workers
+                .into_iter()
+                .map(|worker| worker.join().unwrap())
+                .collect::<Vec<_>>()
+        });
+
+        let paths: HashSet<_> = fixtures.iter().map(|fixture| fixture.0.path()).collect();
+        assert_eq!(paths.len(), WORKSPACES);
+
+        for (index, fixture) in fixtures.into_iter().enumerate() {
+            let path = fixture.0.path().to_path_buf();
+            assert_eq!(
+                fs::read_to_string(path.join("marker")).unwrap(),
+                index.to_string()
+            );
+            assert!(path.join("app/Cargo.toml").is_file());
+            drop(fixture);
+            assert!(!path.exists());
         }
     }
 
     #[test]
     fn updates_lockfile_after_workspace_version_bump() {
         let workspace = WorkspaceFixture::new();
-        update_cargo_lock(&workspace.0).unwrap();
+        update_cargo_lock(workspace.0.path()).unwrap();
 
         let lockfile: toml::Value =
-            toml::from_str(&fs::read_to_string(workspace.0.join("Cargo.lock")).unwrap()).unwrap();
+            toml::from_str(&fs::read_to_string(workspace.0.path().join("Cargo.lock")).unwrap())
+                .unwrap();
         assert_eq!(lockfile["package"][0]["version"].as_str(), Some("1.0.0"));
 
         let metadata = Command::new("cargo")
             .args(["metadata", "--format-version", "1", "--locked", "--offline"])
-            .current_dir(&workspace.0)
+            .current_dir(workspace.0.path())
             .output()
             .unwrap();
         assert!(
@@ -214,12 +240,12 @@ mod tests {
     #[test]
     fn fails_when_cargo_cannot_update_lockfile() {
         let workspace = WorkspaceFixture::new();
-        let original_lockfile = fs::read(workspace.0.join("Cargo.lock")).unwrap();
-        fs::write(workspace.0.join("app/Cargo.toml"), "[package").unwrap();
+        let original_lockfile = fs::read(workspace.0.path().join("Cargo.lock")).unwrap();
+        fs::write(workspace.0.path().join("app/Cargo.toml"), "[package").unwrap();
 
-        assert!(update_cargo_lock(&workspace.0).is_err());
+        assert!(update_cargo_lock(workspace.0.path()).is_err());
         assert_eq!(
-            fs::read(workspace.0.join("Cargo.lock")).unwrap(),
+            fs::read(workspace.0.path().join("Cargo.lock")).unwrap(),
             original_lockfile
         );
     }
